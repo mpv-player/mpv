@@ -408,27 +408,28 @@ RealVideo:
 </para>
 
 <para>
-It is recommended to download and install <application>RealPlayer8</application>
-or <application>RealONE</application>, because <application>MPlayer</application>
-can use their libraries to decode files with RealVideo 2.0 - 4.0 video. The
-<application>MPlayer</application> <filename>configure</filename> script should
-detect the <application>RealPlayer</application> libraries in the standard
-locations of a full installation. If it does not, tell <filename>configure</filename>
-where to look with the <option>--with-reallibdir</option> option.
+Download Real codecs from
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>.
+and extract them to the
+<filename class="directory">/usr/local/lib/codecs</filename> directory.
+If you want to store them in a different location, pass the
+<option>--with-reallibdir</option> option to <command>configure</command>.
 </para>
 
 <para>
-As a second chance you can download the codecs from
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>.
-After downloading the Real codecs package, extract it to the
-<filename class="directory">/usr/local/lib/codecs</filename> directory, or you can
-specify a unique path with the <option>--with-reallibdir</option> option.
+On Mac OS X you must make sure <filename>pncrt.Shlb</filename> (including it's
+resource fork!) is in the same directory as the Real codecs. Copy it using, for
+example
+<screen>ditto -rsrcFork "RealOne Player.app/Contents/MacOS/pncrt.Shlb" "RealOne Player.app/Contents/MacOS/Library/Codecs"</screen>
+Not doing so, or forgetting to copy the resource fork, will result in errors
+such as: 
+<screen>GetDiskFragment() failed with error -2804: &lt;&lt;Unknown disk fragment&gt;&gt;&lt;&lt;Unknown disk fragment&gt;&gt;&lt;pncrt.Shlb&gt;&lt;&gt;</screen>
 </para>
 
 <note><para>
 <application>RealPlayer</application> libraries currently
 <emphasis role="bold">only work with Linux, FreeBSD, NetBSD and Cygwin on the x86,
-Alpha and PowerPC (Linux/Alpha and Linux/PowerPC have been tested) platforms</emphasis>.
+Alpha and PowerPC (Linux/Alpha and Linux/PowerPC have been tested) platforms and with Mac OS X</emphasis>.
 </para></note>
 </sect3>
 
@@ -703,8 +704,8 @@ RealAudio:
 </itemizedlist>
 
 <para>
-On how to install RealPlayer libraries, see the
-<link linkend="realmedia">RealMedia file format</link> section.
+Instructions how to install the RealPlayer libraries are in the
+<link linkend="realvideo">RealVideo</link> section.
 </para>
 </sect3>
 
