@@ -52,7 +52,13 @@ NVIDIA_OBJS=nvidia_vid.o
 NVIDIA_LIBS=-L../../libdha -ldha -lm
 NVIDIA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. 
 
-all:    $(CYBERBLADE_VID) $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID)
+SIS_VID=sis_vid.so
+SIS_SRCS=sis_vid.c sis_bridge.c
+SIS_OBJS=sis_vid.o sis_bridge.o
+SIS_LIBS=-L../../libdha -ldha
+SIS_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
+
+all:    $(CYBERBLADE_VID) $(RADEON_VID) $(RAGE128_VID) $(MACH64_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID) $(PM3_VID) $(SIS_VID)
 
 
 .SUFFIXES: .c .o
@@ -112,6 +118,12 @@ $(MGA_CRTC2_OBJS):    $(MGA_CRTC2_SRCS)
 
 $(MGA_CRTC2_VID):     $(MGA_CRTC2_OBJS)
 	$(CC) -shared $(MGA_CRTC2_OBJS) $(MGA_CRTC2_LIBS) -Wl,-soname,$(MGA_CRTC2_VID) -o $(MGA_CRTC2_VID)
+
+$(SIS_OBJS):    $(SIS_SRCS)
+	$(CC) -c $(SIS_CFLAGS) -o $@ $(basename $@).c
+
+$(SIS_VID):     $(SIS_OBJS)
+	$(LD) -g $(SIS_LIBS) -shared -soname $(SIS_VID) -o $(SIS_VID) $(SIS_OBJS)
 
 clean:
 	rm -f *.o *.so *~
