@@ -14,6 +14,16 @@
 
 <P><B><A NAME=5>5. FAQ section</A></B></P>
 
+<UL>
+  <LI><A HREF="#5.1">5.1 Compilation</A></LI>
+  <LI><A HREF="#5.2">5.2 General questions</A></LI>
+  <LI><A HREF="#5.3">5.3 File playing problems</A></LI>
+  <LI><A HREF="#5.4">5.4 Video/audio driver problems (vo/ao)</A></LI>
+  <LI><A HREF="#5.5">5.5 DVD playback</A></LI>
+  <LI><A HREF="#5.6">5.6 Feature requests</A></LI>
+  <LI><A HREF="#5.7">5.7 Encoding</A></LI>
+</UL>
+
 <TABLE BORDER=0 WIDTH=100% ALIGN=left>
 
 <TR><TD COLSPAN=3><P><B><A NAME=5.1><FONT CLASS="text">5.1 Compilation</A></B></P>
@@ -223,7 +233,7 @@ Me too. :)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD COLSPAN=3><B><A NAME=5.2><FONT CLASS="text">5.2. General questions</A></B>
+<TD COLSPAN=3><B><A NAME="5.2"><FONT CLASS="text">5.2 General questions</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -389,7 +399,7 @@ Use: <CODE>mplayer &lt;options&gt; &lt;filename&gt; &lt; /dev/null &</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.3><FONT CLASS="text">5.3. File playing problems</A></B>
+<B><A NAME="5.3"><FONT CLASS="text">5.3 File playing problems</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -559,7 +569,7 @@ in <b>before</b> you power on your notebook.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.4><FONT CLASS="text">5.4. Video/audio driver problems (vo/ao)</A></B>
+<B><A NAME="5.4"><FONT CLASS="text">5.4 Video/audio driver problems (vo/ao)</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
@@ -641,8 +651,69 @@ See the difference? No?! OK, here comes the enlightenment: SDL's
 it ... Note: you can force/disable Xv via SDL using <CODE>-forcexv<CODE> and <CODE>-noxv</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD COLSPAN="3">
+<B><A NAME="5.5"><FONT CLASS="text">5.5 DVD playback</A></B>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
+<FONT CLASS="text">While playing a DVD, I encountered this error:<BR>
+<CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion nfo_length /
+sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
+<FONT CLASS="text">This is a known libdvdread 0.9.1/0.9.2 bug.
+Use libmpdvdkit.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
+<FONT CLASS="text">Can I compile libdvdread and libdvdcss on my sweet SPARC under Solaris?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
+<FONT CLASS="text">Who knows ... It's said to work, so please test it and send feedback. Refer to
+the documentation of libdvdread and its homepage as well. We're not the authors
+of libdvdread.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
+<FONT CLASS="text">What about subtitles? Can MPlayer display them?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
+<FONT CLASS="text">Yes! See the <A HREF="cd-dvd.html">DVD chapter</A> of the documentation.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
+<FONT CLASS="text">How can I set the region code of my DVD-drive? I don't have Windows!
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
+<FONT CLASS="text">Use the
+<A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset tool</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
+<FONT CLASS="text">Do I need to be (setuid) root/setuid fibmap_mplayer to be able to play a DVD?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
+<FONT CLASS="text">No, only for old-style DVD support. However you must have
+the proper rights on the DVD device entry (in <CODE>/dev/</CODE>).
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
+<FONT CLASS="text">Where can I get libdvdread and libdvdcss packages?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
+<FONT CLASS="text">From the
+<A HREF="http://www.dtek.chalmers.se/groups/dvd">Ogle site</A>.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
+<FONT CLASS="text">Is it possible to play/encode only selected chapters?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
+<FONT CLASS="text">Yes, try the <CODE>-chapter</CODE> option.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH="100%"><B>
+<FONT CLASS="text">My DVD playback is sluggish!
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD>
+<FONT CLASS="text">Use the <CODE>-cache</CODE> option (described in the manpage!) and
+try enabling DMA for the DVD drive.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3>
-<B><A NAME=5.5><FONT CLASS="text">5.5. Feature requests</A></B>
+<B><A NAME="5.6"><FONT CLASS="text">5.6 Feature requests</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -877,7 +948,7 @@ the S3 Virge too slow for them?<BR>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.6><FONT CLASS="text">5.6. Encoding</A></B>
+<B><A NAME="5.7"><FONT CLASS="text">5.7 Encoding</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
