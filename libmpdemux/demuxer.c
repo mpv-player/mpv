@@ -98,6 +98,7 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
 }
 
 void free_sh_audio(sh_audio_t* sh){
+    mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing sh_audio at %p  \n",sh);
     if(sh->a_in_buffer) free(sh->a_in_buffer);
     if(sh->a_buffer) free(sh->a_buffer);
     if(sh->wf) free(sh->wf);
@@ -133,6 +134,7 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
 }
 
 void free_sh_video(sh_video_t* sh){
+    mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing sh_video at %p  \n",sh);
 //    if(sh->our_out_buffer) free(sh->our_out_buffer);
     if(sh->bih) free(sh->bih);
     free(sh);
@@ -140,6 +142,7 @@ void free_sh_video(sh_video_t* sh){
 
 void free_demuxer(demuxer_t *demuxer){
     int i;
+    mp_msg(MSGT_DEMUXER,MSGL_V,"DEMUXER: freeing demuxer at %p  \n",demuxer);
     // free streams:
     for(i=0;i<256;i++){
 	if(demuxer->a_streams[i]) free_sh_audio(demuxer->a_streams[i]);
@@ -150,6 +153,7 @@ void free_demuxer(demuxer_t *demuxer){
     // free demuxers:
     free_demuxer_stream(demuxer->audio);
     free_demuxer_stream(demuxer->video);
+    free_demuxer_stream(demuxer->sub);
     if(demuxer->info) {
       for(i=0;demuxer->info[i] != NULL; i++)
 	free(demuxer->info[i]);
@@ -755,6 +759,7 @@ switch(file_format){
  case DEMUXER_TYPE_AVI: {
    sh_audio_t* sh_a;
    demuxer = (demuxer_t*) demux_open_avi(demuxer);
+   if(!demuxer) return NULL; // failed to open
    sh_a = (sh_audio_t*)demuxer->audio->sh;
    if(demuxer->audio->id != -2 && sh_a && sh_a->format == 0xFFFE)
      demuxer = init_avi_with_ogg(demuxer);
