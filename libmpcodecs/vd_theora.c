@@ -139,7 +139,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
    mp_image_t* mpi;
    int i;
 
-   bzero (&op, sizeof (op));
+   memset (&op, 0, sizeof (op));
    op.bytes = len;
    op.packet = data;
    op.granulepos = -1;

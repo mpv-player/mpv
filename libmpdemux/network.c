@@ -228,7 +228,7 @@ connect2Server_with_af(char *host, int port, int af,int verb) {
 	}
 	
 	
-	bzero(&server_address, sizeof(server_address));
+	memset(&server_address, 0, sizeof(server_address));
 	
 #ifndef HAVE_WINSOCK2
 #ifdef USE_ATON

@@ -460,7 +460,7 @@ static void reset()
   
   /* zero output buffer */
   for (i = 0; i < NUM_BUFS; i++)
-    bzero(ao->buffer[i], ao->buffer_len);
+    memset(ao->buffer[i], 0, ao->buffer_len);
 
   pthread_mutex_unlock(&ao->buffer_mutex);
        

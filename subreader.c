@@ -819,10 +819,10 @@ subtitle *sub_read_line_jacosub(FILE * fd, subtitle * current)
     static unsigned jacoTimeres = 30;
     static int jacoShift = 0;
 
-    bzero(current, sizeof(subtitle));
-    bzero(line1, LINE_LEN);
-    bzero(line2, LINE_LEN);
-    bzero(directive, LINE_LEN);
+    memset(current, 0, sizeof(subtitle));
+    memset(line1, 0, LINE_LEN);
+    memset(line2, 0, LINE_LEN);
+    memset(directive, 0, LINE_LEN);
     while (!current->text[0]) {
 	if (!fgets(line1, LINE_LEN, fd)) {
 	    return NULL;
