@@ -8,7 +8,7 @@
 #define __MANGLE_H
 
 /* Feel free to add more to the list, eg. a.out IMO */
-#if defined(__CYGWIN__)
+#if defined(__CYGWIN__) || defined(__OS2__)
 #define MANGLE(a) "_" #a
 #else
 #define MANGLE(a) #a
