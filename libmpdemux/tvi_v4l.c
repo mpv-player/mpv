@@ -43,6 +43,7 @@ typedef struct {
     int				fd;
     struct video_capability	capability;
     struct video_channel	*channels;
+    int				act_channel;
     struct video_tuner		tuner;
 
     /* video */
@@ -64,18 +65,22 @@ typedef struct {
 
 #include "tvi_def.h"
 
-static const char *device_cap[] = {
+static const char *device_cap2name[] = {
     "capture", "tuner", "teletext", "overlay", "chromakey", "clipping",
     "frameram", "scales", "monochrome", "subcapture", "mpeg-decoder",
     "mpeg-encoder", "mjpeg-decoder", "mjpeg-encoder", NULL
 };
 
-static const char *device_pal[] = {
+static const char *device_palette2name[] = {
     "-", "grey", "hi240", "rgb16", "rgb24", "rgb32", "rgb15", "yuv422",
     "yuyv", "uyvy", "yuv420", "yuv411", "raw", "yuv422p", "yuv411p",
     "yuv420p", "yuv410p", NULL
 };
 #define PALETTE(x) ((x < sizeof(device_pal)/sizeof(char*)) ? device_pal[x] : "UNKNOWN")
+
+static const char *audio_mode2name[] = {
+    "unknown", "mono", "stereo", "language1", "language2", NULL
+};
 
 static int palette2depth(int palette)
 {
@@ -258,9 +263,9 @@ static int init(priv_t *priv, tvi_param_t *params)
 
     mp_msg(MSGT_TV, MSGL_INFO, "Selected device: %s\n", priv->capability.name);
     mp_msg(MSGT_TV, MSGL_INFO, " Capabilites: ");
-    for (i = 0; device_cap[i] != NULL; i++)
+    for (i = 0; device_cap2name[i] != NULL; i++)
 	if (priv->capability.type & (1 << i))
-	    mp_msg(MSGT_TV, MSGL_INFO, "%s ", device_cap[i]);
+	    mp_msg(MSGT_TV, MSGL_INFO, "%s ", device_cap2name[i]);
     mp_msg(MSGT_TV, MSGL_INFO, "\n");
     mp_msg(MSGT_TV, MSGL_INFO, " Device type: %d\n", priv->capability.type);
     mp_msg(MSGT_TV, MSGL_INFO, " Supported sizes: %dx%d => %dx%d\n",
@@ -275,7 +280,11 @@ static int init(priv_t *priv, tvi_param_t *params)
     for (i = 0; i < priv->capability.channels; i++)
     {
 	priv->channels[i].channel = i;
-	ioctl(priv->fd, VIDIOCGCHAN, &priv->channels[i]);
+	if (ioctl(priv->fd, VIDIOCGCHAN, &priv->channels[i]) == -1)
+	{
+	    mp_msg(MSGT_TV, MSGL_ERR, "ioctl get channel failed: %s\n", strerror(errno));
+	    break;
+	}
 	mp_msg(MSGT_TV, MSGL_INFO, "  %d: %s: %s%s%s%s (tuner:%d, norm:%d)\n", i,
 	    priv->channels[i].name,
 	    (priv->channels[i].flags & VIDEO_VC_TUNER) ? "tuner " : "",
@@ -284,6 +293,30 @@ static int init(priv_t *priv, tvi_param_t *params)
 	    (priv->channels[i].flags & VIDEO_TYPE_CAMERA) ? "camera " : "",
 	    priv->channels[i].tuners,
 	    priv->channels[i].norm);
+    }
+
+    if (priv->capability.audios)
+    {
+	mp_msg(MSGT_TV, MSGL_INFO, " Audio devices: %d\n", priv->capability.audios);
+
+	for (i = 0; i < priv->capability.audios; i++)
+	{
+	    priv->audio.audio = i;
+	    if (ioctl(priv->fd, VIDIOCGAUDIO, &priv->audio) == -1)
+	    {
+		mp_msg(MSGT_TV, MSGL_ERR, "ioctl get audio failed: %s\n", strerror(errno));
+		break;
+	    }
+	    
+	    mp_msg(MSGT_TV, MSGL_V, "  %d: %s: ", priv->audio.audio,
+		priv->audio.name);
+	    if (priv->audio.flags & VIDEO_AUDIO_MUTABLE)
+		mp_msg(MSGT_TV, MSGL_V, "muted=%s ",
+		    (priv->audio.flags & VIDEO_AUDIO_MUTE) ? "yes" : "no");
+	    mp_msg(MSGT_TV, MSGL_V, "volume=%d bass=%d treble=%d balance=%d mode=%s\n",
+		priv->audio.volume, priv->audio.bass, priv->audio.treble,
+		priv->audio.balance, audio_mode2name[priv->audio.mode]);
+	}
     }
 
     if (!(priv->capability.type & VID_TYPE_CAPTURE))
@@ -316,6 +349,7 @@ static int init(priv_t *priv, tvi_param_t *params)
     /* video buffers */
     priv->buf = (struct video_mmap *)malloc(priv->nbuf * sizeof(struct video_mmap));
     memset(priv->buf, 0, priv->nbuf * sizeof(struct video_mmap));
+
     
     return(1);
 
@@ -410,10 +444,15 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    return(TVI_CONTROL_FALSE);
 	}
 	case TVI_CONTROL_IS_AUDIO:
-	    return(TVI_CONTROL_FALSE);	/* IMPLEMENT CHECK! */
+#if 0 /* also disable audio for as it's not working! */
+	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_AUDIO)
+		return(TVI_CONTROL_TRUE);
+#endif
+	    return(TVI_CONTROL_FALSE);
 	case TVI_CONTROL_IS_TUNER:
 	{
-	    if (priv->capability.type & VID_TYPE_TUNER)
+//	    if (priv->capability.type & VID_TYPE_TUNER)
+	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER)
 		return(TVI_CONTROL_TRUE);
 	    return(TVI_CONTROL_FALSE);
 	}
@@ -612,6 +651,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 		if (priv->channels[i].channel == req_chan)
 		    break;
 	    }
+	    
+	    priv->act_channel = i;
 
 	    if (ioctl(priv->fd, VIDIOCGCHAN, &priv->channels[i]) == -1)
 	    {
@@ -647,8 +688,11 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    }
 	    mp_msg(MSGT_TV, MSGL_INFO, "Using input '%s'\n", chan.name);
 
+	    priv->act_channel = i;
+
 	    /* update tuner state */
-	    if (priv->capability.type & VID_TYPE_TUNER)
+//	    if (priv->capability.type & VID_TYPE_TUNER)
+	    if (priv->channels[priv->act_channel].flags & VIDEO_VC_TUNER)
 		control(priv, TVI_CONTROL_TUN_GET_TUNER, 0);
 
 	    /* update local channel list */	
