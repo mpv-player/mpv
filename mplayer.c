@@ -2743,7 +2743,8 @@ if(rel_seek_secs || abs_seek_pos){
 	  int pos=(demuxer->file_format==DEMUXER_TYPE_AVI)?demuxer->filepos:d_video->pos;
 	  guiIntfStruct.Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
 	}
-	guiIntfStruct.TimeSec=d_video->pts; 
+	if ( demuxer->file_format==DEMUXER_TYPE_AUDIO ) guiIntfStruct.TimeSec=sh_audio->timer;
+	  else guiIntfStruct.TimeSec=d_video->pts; 
 	if(guiIntfStruct.Playing==0) break; // STOP
 	if(guiIntfStruct.Playing==2) osd_function=OSD_PAUSE;
 	if ( guiIntfStruct.VolumeChanged ) 
