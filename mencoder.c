@@ -1459,6 +1459,7 @@ case VCODEC_VFW: {
 	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
 	break;
     }
+    flip_upside_down(vo_image_ptr,vo_image_ptr,3*vo_w,vo_h); // dirty hack
     ret=vfw_encode_frame(mux_v->bih, mux_v->buffer, vfw_bih, vo_image_ptr, &flags, 10000);
 //    printf("vfw_encode_frame -> %d  (size=%d,flag=%X)\n",ret,mux_v->bih->biSizeImage,flags);
     aviwrite_write_chunk(muxer,mux_v,muxer_f,mux_v->bih->biSizeImage,flags);
