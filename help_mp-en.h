@@ -1,11 +1,15 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2001 Arpad Gereoffy (see DOCS/AUTHORS)\n"
+"MPlayer " VERSION "(C) 2000-2001 Arpad Gereoffy (see DOCS!)\n"
 "\n";
 
 static char help_text[]=
-"Usage:   mplayer [options] [path/]name\n"
+#ifdef HAVE_NEW_GUI
+"Usage:   mplayer [-gui] [options] [path/]filename\n"
+#else
+"Usage:   mplayer [options] [path/]filename\n"
+#endif
 "\n"
 "Options:\n"
 " -vo <drv[:dev]> select video output driver & device (see '-vo help' for list)\n"
@@ -14,10 +18,13 @@ static char help_text[]=
 #ifdef HAVE_LIBCSS
 " -dvdauth <dev>  specify DVD device for authentication (for encrypted discs)\n"
 #endif
+#ifdef USE_DVDREAD
+" -dvd <titleno>  play DVD title/track from device instead of plain file\n"
+#endif
 " -ss <timepos>   seek to given (seconds or hh:mm:ss) position\n"
 " -nosound        don't play sound\n"
 #ifdef USE_FAKE_MONO
-" -stereo         select MPEG1 stereo output (0:stereo 1:left 2:right)\n"
+" -stereo <mode>  select MPEG1 stereo output (0:stereo 1:left 2:right)\n"
 #endif
 " -fs -vm -zoom   fullscreen playing options (fullscr,vidmode chg,softw.scale)\n"
 " -x <x> -y <y>   scale image to <x> * <y> resolution [if -vo driver supports!]\n"
@@ -25,7 +32,7 @@ static char help_text[]=
 " -vid x -aid y   options to select video (x) and audio (y) stream to play\n"
 " -fps x -srate y options to change video (x fps) and audio (y Hz) rate\n"
 " -pp <quality>   enable postprocessing filter (0-4 for DivX, 0-63 for mpegs)\n"
-" -bps            use alternative A-V sync method for AVI files (may help!)\n"
+" -nobps          use alternative A-V sync method for AVI files (may help!)\n"
 " -framedrop      enable frame-dropping (for slow machines)\n"
 "\n"
 "Keys:\n"
@@ -38,7 +45,7 @@ static char help_text[]=
 " * or /          increase or decrease volume (press 'm' to select master/pcm)\n"
 " z or x          adjust subtitle delay by +/- 0.1 second\n"
 "\n"
-" * * * SEE MANPAGE FOR DETAILS, FURTHER OPTIONS AND KEYS ! * * *\n"
+" * * * SEE MANPAGE FOR DETAILS, FURTHER (ADVANCED) OPTIONS AND KEYS ! * * *\n"
 "\n";
 #endif
 
