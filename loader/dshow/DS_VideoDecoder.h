@@ -4,7 +4,7 @@
 #ifndef NOAVIFILE_HEADERS
 #include "videodecoder.h"
 #else
-#include "../libwin32.h"
+#include "libwin32.h"
 #endif
 #include "DS_Filter.h"
 
@@ -36,7 +36,7 @@ void DS_VideoDecoder_StartInternal(DS_VideoDecoder *this);
 
 void DS_VideoDecoder_StopInternal(DS_VideoDecoder *this);
 
-int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int size, int is_keyframe, CImage* pImage);
+int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int size, int is_keyframe, char* pImage);
 
 /*
  * bits == 0   - leave unchanged

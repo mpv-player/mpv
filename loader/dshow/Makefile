@@ -3,20 +3,20 @@ LIBNAME = libDS_Filter.a
 
 include ../../config.mak
 
-# DS_AudioDec.cpp 
-SRCS	= DS_AudioDec.cpp DS_AudioDecoder.cpp DS_VideoDec.cpp DS_Filter.cpp DS_VideoDecoder.cpp allocator.cpp cmediasample.cpp guids.cpp inputpin.cpp outputpin.cpp
-OBJS = $(SRCS:.cpp=.o)
+# DS_AudioDec.c 
+SRCS	= DS_AudioDecoder.c DS_Filter.c DS_VideoDecoder.c allocator.c cmediasample.c guids.c inputpin.c outputpin.c
+OBJS = $(SRCS:.c=.o)
 
 # OBJS	= DS_AudioDec.o DS_VideoDec.o DS_Filter.o allocator.o cmediasample.o guids.o inputpin.o outputpin.o
 
 INCLUDE = -I. -I.. $(EXTRA_INC) -DNOAVIFILE_HEADERS
-CFLAGS  = $(OPTFLAGS) $(INCLUDE) -fexceptions 
+CFLAGS  = $(OPTFLAGS) $(INCLUDE)
 
-.SUFFIXES: .cpp .o
+.SUFFIXES: .c .o
 
 # .PHONY: all clean
 
-.cpp.o:
+.c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 $(LIBNAME):	$(OBJS)

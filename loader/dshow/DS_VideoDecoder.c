@@ -70,6 +70,8 @@ DS_VideoDecoder * DS_VideoDecoder_Create(CodecInfo * info,  BITMAPINFOHEADER * f
     this->m_iLastQuality = -1;
     this->m_iMaxAuto = maxauto;
 
+    Setup_LDT_Keeper();
+
     //memset(&m_obh, 0, sizeof(m_obh));
     //m_obh.biSize = sizeof(m_obh);
     /*try*/
@@ -140,7 +142,7 @@ DS_VideoDecoder * DS_VideoDecoder_Create(CodecInfo * info,  BITMAPINFOHEADER * f
                               * ((this->iv.m_obh.biBitCount + 7) / 8);
 
 
-	this->m_pDS_Filter = DS_Filter_Create((const char*)info->dll, &info->guid, &this->m_sOurType, &this->m_sDestType);
+	this->m_pDS_Filter = DS_FilterCreate((const char*)info->dll, info->guid, &this->m_sOurType, &this->m_sDestType);
 
 	if (!flip)
 	{
@@ -230,7 +232,7 @@ void DS_VideoDecoder_StartInternal(DS_VideoDecoder *this)
     ALLOCATOR_PROPERTIES props, props1;
     Debug printf("DS_VideoDecoder_StartInternal\n");
     //cout << "DSSTART" << endl;
-    DS_Filter_Start(this->m_pDS_Filter);
+    this->m_pDS_Filter->Start(this->m_pDS_Filter);
     
     props.cBuffers = 1;
     props.cbBuffer = this->m_sDestType.lSampleSize;
@@ -245,17 +247,17 @@ void DS_VideoDecoder_StartInternal(DS_VideoDecoder *this)
 
 void DS_VideoDecoder_StopInternal(DS_VideoDecoder *this)
 {
-    DS_Filter_Stop(this->m_pDS_Filter);
+    this->m_pDS_Filter->Stop(this->m_pDS_Filter);
     //??? why was this here ??? m_pOurOutput->SetFramePointer(0);
 }
 
-int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int size, int is_keyframe, CImage* pImage)
+int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int size, int is_keyframe, char* pImage)
 {
     IMediaSample* sample = 0;
     char* ptr;
     int result;
     
-    Debug printf("DS_VideoDecoder_DecodeInternal(%p,%p,%d,%d,%p)\n",this,src,size,is_keyframe,pImage->ptr);
+    Debug printf("DS_VideoDecoder_DecodeInternal(%p,%p,%d,%d,%p)\n",this,src,size,is_keyframe,pImage);
             
     this->m_pDS_Filter->m_pAll->vt->GetBuffer(this->m_pDS_Filter->m_pAll, &sample, 0, 0, 0);
     
@@ -268,12 +270,7 @@ int DS_VideoDecoder_DecodeInternal(DS_VideoDecoder *this, const void* src, int s
     //cout << "DECODE " << (void*) pImage << "   d: " << (void*) pImage->Data() << endl;
     if (pImage)
     {
-	if (!(pImage->ptr))
-	{
-	    Debug printf("no m_outFrame??\n");
-	}
-	else
-	    COutputPin_SetPointer2(this->m_pDS_Filter->m_pOurOutput,(char*)pImage->ptr);
+	this->m_pDS_Filter->m_pOurOutput->SetPointer2(this->m_pDS_Filter->m_pOurOutput,pImage);
     }
 
 
@@ -390,7 +387,7 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, fourcc_t csp)
 */
     // BitmapInfo temp = m_obh;
     
-    if (bits != 0)
+    if (!csp)	// RGB
     {
 	int ok = true;
 
@@ -438,10 +435,8 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, fourcc_t csp)
             }
         }
 	//.biSizeImage=abs(temp.biWidth*temp.biHeight*((temp.biBitCount+7)/8));
-    }
-
-    if (csp != 0)
-    {
+    } else
+    {	// YUV
         int ok = true;
 	switch (csp)
 	{
@@ -466,19 +461,6 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, fourcc_t csp)
 	}
 
         if (ok) {
-          int bits=0;
-	  switch(csp){
-	  case fccYUV:
-	    bits=24;break;
-	  case fccYUY2:
-	  case fccUYVY:
-	  case fccYVYU:
-	    bits=16;break;
-	  case fccYV12:
-	  case fccIYUV:
-	  case fccI420:
-	    bits=12;break;
-	  }
 	  if (csp != 0 && csp != 3 && this->iv.m_obh.biHeight > 0)
     	    this->iv.m_obh.biHeight *= -1; // YUV formats uses should have height < 0
 	  this->iv.m_obh.biSize = sizeof(BITMAPINFOHEADER);
@@ -561,7 +543,7 @@ int DS_VideoDecoder_SetDestFmt(DS_VideoDecoder *this, int bits, fourcc_t csp)
 
     this->m_pDS_Filter->m_pInputPin->vt->Disconnect(this->m_pDS_Filter->m_pInputPin);
     this->m_pDS_Filter->m_pOutputPin->vt->Disconnect(this->m_pDS_Filter->m_pOutputPin);
-    COutputPin_SetNewFormat(this->m_pDS_Filter->m_pOurOutput,&this->m_sDestType);
+    this->m_pDS_Filter->m_pOurOutput->SetNewFormat(this->m_pDS_Filter->m_pOurOutput,&this->m_sDestType);
     result = this->m_pDS_Filter->m_pInputPin->vt->ReceiveConnection(this->m_pDS_Filter->m_pInputPin,
 							      this->m_pDS_Filter->m_pOurInput,
 							      &this->m_sOurType);
@@ -811,5 +793,64 @@ HRESULT DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int va
     return 0;
 }
 /*
-vim: tabstop=8
+vim: vi* sux.
 */
+
+int DS_SetAttr_DivX(char* attribute, int value){
+    int result, status, newkey, count;
+        if(strcmp(attribute, "Quality")==0){
+	    char* keyname="SOFTWARE\\Microsoft\\Scrunch";
+    	    result=RegCreateKeyExA(HKEY_CURRENT_USER, keyname, 0, 0, 0, 0, 0,	   		&newkey, &status);
+            if(result!=0)
+	    {
+	        printf("VideoDecoder::SetExtAttr: registry failure\n");
+	        return -1;
+	    }    
+	    result=RegSetValueExA(newkey, "Current Post Process Mode", 0, REG_DWORD, &value, 4);
+            if(result!=0)
+	    {
+	        printf("VideoDecoder::SetExtAttr: error writing value\n");
+	        return -1;
+	    }    
+	    value=-1;
+	    result=RegSetValueExA(newkey, "Force Post Process Mode", 0, REG_DWORD, &value, 4);
+            if(result!=0)
+	    {
+		printf("VideoDecoder::SetExtAttr: error writing value\n");
+	    	return -1;
+	    }    
+   	    RegCloseKey(newkey);
+   	    return 0;
+	}   	
+
+        if(
+	(strcmp(attribute, "Saturation")==0) ||
+	(strcmp(attribute, "Hue")==0) ||
+	(strcmp(attribute, "Contrast")==0) ||
+	(strcmp(attribute, "Brightness")==0)
+	)
+        {
+	    char* keyname="SOFTWARE\\Microsoft\\Scrunch\\Video";
+    	    result=RegCreateKeyExA(HKEY_CURRENT_USER, keyname, 0, 0, 0, 0, 0,	   		&newkey, &status);
+            if(result!=0)
+	    {
+	        printf("VideoDecoder::SetExtAttr: registry failure\n");
+	        return -1;
+	    }    
+	    result=RegSetValueExA(newkey, attribute, 0, REG_DWORD, &value, 4);
+            if(result!=0)
+	    {
+	        printf("VideoDecoder::SetExtAttr: error writing value\n");
+	        return -1;
+	    }    
+   	    RegCloseKey(newkey);
+   	    return 0;
+	}   	
+
+        printf("Unknown attribute!\n");
+        return -200;
+}
+
+
+
+

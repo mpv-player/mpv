@@ -75,13 +75,13 @@ DS_AudioDecoder * DS_AudioDecoder_Create(const CodecInfo * info, const WAVEFORMA
     /*try*/
     {
         ALLOCATOR_PROPERTIES props, props1;
-        this->m_pDS_Filter = DS_Filter_Create((const char*)info->dll, &info->guid, &this->m_sOurType, &this->m_sDestType);
+        this->m_pDS_Filter = DS_FilterCreate((const char*)info->dll, info->guid, &this->m_sOurType, &this->m_sDestType);
 	if( !this->m_pDS_Filter ) {
            free(this);
            return NULL;
         }
         
-        DS_Filter_Start(this->m_pDS_Filter);
+        this->m_pDS_Filter->Start(this->m_pDS_Filter);
 
 	props.cBuffers=1;
         props.cbBuffer=this->m_sOurType.lSampleSize;
@@ -130,8 +130,8 @@ int DS_AudioDecoder_Convert(DS_AudioDecoder *this, const void* in_data, uint_t i
 	int result;
 	
 //	this->m_pOurOutput->SetFramePointer(out_data+written);
-	COutputPin_SetFramePointer(this->m_pDS_Filter->m_pOurOutput,&frame_pointer);
-	COutputPin_SetFrameSizePointer(this->m_pDS_Filter->m_pOurOutput,(long*)&frame_size);
+	this->m_pDS_Filter->m_pOurOutput->SetFramePointer(this->m_pDS_Filter->m_pOurOutput,&frame_pointer);
+	this->m_pDS_Filter->m_pOurOutput->SetFrameSizePointer(this->m_pDS_Filter->m_pOurOutput,(long*)&frame_size);
 	this->m_pDS_Filter->m_pAll->vt->GetBuffer(this->m_pDS_Filter->m_pAll, &sample, 0, 0, 0);
 	if (!sample)
 	{

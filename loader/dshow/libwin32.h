@@ -1,72 +1,161 @@
 #ifndef __LIBWIN32_H
 #define __LIBWIN32_H
 
-#define VFW_E_INVALIDMEDIATYPE  	0x80040200
-#define VFW_E_INVALIDSUBTYPE    	0x80040201
-#define VFW_E_ALREADY_CONNECTED         0x80040204
-#define VFW_E_FILTER_ACTIVE             0x80040205
-#define VFW_E_NO_ACCEPTABLE_TYPES       0x80040207
-#define VFW_E_NOT_CONNECTED             0x80040209
-#define VFW_E_NO_ALLOCATOR              0x8004020A
-#define VFW_E_NOT_RUNNING               0x80040226
-#define VFW_E_TYPE_NOT_ACCEPTED         0x8004022A
-#define VFW_E_SAMPLE_REJECTED           0x8004022B
+#ifndef NOAVIFILE_HEADERS
+#error this header file should not be used without -DNOAVIFILE_HEADERS
+#endif
 
-#include <sys/types.h>
+// this file is only included when NOAVIFILE_HEADERS are defined
+// serves mainly for mplayer
+
+#define VFW_E_NOT_RUNNING               0x80040226
+
 #include <inttypes.h>
 
-#ifndef NOAVIFILE_HEADERS
-#include <audiodecoder.h>
-#include <audioencoder.h>
-#include <videodecoder.h>
-#include <videoencoder.h>
-#include <except.h>
-#include <fourcc.h>
-
-#else
-// code for mplayer team
-
 //#define FATAL(a)  // you don't need exception - if you want - just fill more code
-#define FATAL(X...) FatalError(__MODULE__,__FILE__,__LINE__,X)
-#include <wine/mmreg.h>
-#include <wine/winreg.h>
-#include <wine/vfw.h>
-#include <com.h>
-#include <stdarg.h>
-//#include <string>
-#include <stdio.h>
-#include <stdlib.h>
+#include "wine/mmreg.h"
+#include "wine/winreg.h"
+#include "wine/vfw.h"
+#include "com.h"
 
-typedef unsigned int uint_t;    // use as generic type -
+typedef uint32_t fourcc_t;
 
-typedef unsigned int fourcc_t;
-
-struct FatalError
+/*
+typedef struct _FatalError
 {
-    FatalError(const char* mod, const char* f, int l, const char* desc,...)
-    {
-	printf("FATAL: module: %s  source: %s line %d ", mod, f, l);
-	va_list va;
-	va_start(va, desc);
-	vprintf(desc, va);
-	va_end(va);
-    }
+    FatalError();
     void PrintAll() {}
-};
+}FatalError;
+*/
 
-struct CodecInfo
+typedef struct _CodecInfo
 {
-//    std::string dll;
     char* dll;
-    GUID guid;
-};
+    GUID* guid;
+}CodecInfo;
 
-struct CImage { // public  your_libvo_mem
+
+typedef struct _CImage // public  your_libvo_mem
+{
     char* ptr;
-    char* Data() { return ptr; }  // pointer to memory block
-	/* if you support such surface: */
-    static bool Supported(fourcc_t csp, int bits) { return true; }
+    
+    /*char* (*Data)();
+    {
+	return 0;
+	// pointer to memory block
+    }*/
+    /*int (*Supported)(fourcc_t csp, int bits);
+    {
+	return true;
+	// if you support such surface 
+    }*/
+}CImage;
+
+
+#if 0
+struct BitmapInfo : public BITMAPINFOHEADER
+{
+    void SetBits(int b) { return; /*fixme*/ }
+    void SetSpace(int b) { return; /*fixme*/ }
 };
+#endif
+
+typedef struct _IAudioDecoder
+{
+    WAVEFORMATEX in_fmt;
+    CodecInfo  record;
+    /*(*IAudioDecoder)( CodecInfo * r, const WAVEFORMATEX* w);
+    {
+        memcpy(&this->record,r,sizeof(CodecInfo));
+        in_fmt = *w;
+    }*/
+}IAudioDecoder;
+
+/*
+struct IAudioEncoder
+{
+    IAudioEncoder(const CodecInfo&, WAVEFORMATEX*) {}
+    // you do not need this one...
+};
+*/
+
+    enum CAPS
+    {
+	CAP_NONE = 0,
+	CAP_YUY2 = 1,
+	CAP_YV12 = 2,
+	CAP_IYUV = 4,
+	CAP_UYVY = 8,
+	CAP_YVYU = 16,
+	CAP_I420 = 32,
+    };
+    enum DecodingMode
+    {
+	DIRECT = 0,
+	REALTIME,
+	REALTIME_QUALITY_AUTO,
+    };
+    enum DecodingState
+    {
+	STOP = 0,
+	START,
+    };
+
+typedef struct _BitmapInfo
+{
+    long 	biSize;
+    long  	biWidth;
+    long  	biHeight;
+    short 	biPlanes;
+    short 	biBitCount;
+    long 	biCompression;
+    long 	biSizeImage;
+    long  	biXPelsPerMeter;
+    long  	biYPelsPerMeter;
+    long 	biClrUsed;
+    long 	biClrImportant;
+    int 	colors[3];    
+} BitmapInfo;
+
+typedef struct _IVideoDecoder
+{
+    int VBUFSIZE;
+    int QMARKHI;
+    int QMARKLO;
+    int DMARKHI;
+    int DMARKLO;
+
+    /*
+    IVideoDecoder(CodecInfo& info, const BITMAPINFOHEADER& format) : record(info)
+    {
+        // implement init part
+    }
+    virtual ~IVideoDecoder();
+    void Stop()
+    {
+    }
+    void Start()
+    {
+    }
+    */
+    const CodecInfo record;
+    int m_Mode;	// should we do precaching (or even change Quality on the fly)
+    int m_State;
+    int m_iDecpos;
+    int m_iPlaypos;
+    float m_fQuality;           // quality for the progress bar 0..1(best)
+    int m_bCapable16b;
+
+    BITMAPINFOHEADER* m_bh;	// format of input data (might be larger - e.g. huffyuv)
+    BitmapInfo m_decoder;	// format of decoder output
+    BitmapInfo m_obh;		// format of returned frames
+}IVideoDecoder;
+
+/*
+struct IRtConfig
+{
+};
+*/
 
 // might be minimalized to contain just those which are needed by DS_VideoDecoder
 
@@ -166,161 +255,5 @@ struct CImage { // public  your_libvo_mem
 #define fccIYUV mmioFOURCC('I', 'Y', 'U', 'V')/* Planar mode: Y + U + V  (3 planes) */
 #define fccUYVY mmioFOURCC('U', 'Y', 'V', 'Y')/* Packed mode: U0+Y0+V0+Y1 (1 plane) */
 #define fccYVYU mmioFOURCC('Y', 'V', 'Y', 'U')/* Packed mode: Y0+V0+Y1+U0 (1 plane) */
-
-
-struct BitmapInfo : public BITMAPINFOHEADER
-{
-    int colors[3];
-
-    void SetBitFields16(){	
-	biSize=sizeof(BITMAPINFOHEADER)+12;
-	biCompression=3;//BI_BITFIELDS
-	biBitCount=16;
-	biSizeImage=abs((int)(2*biWidth*biHeight));
-	colors[0]=0xF800;
-	colors[1]=0x07E0;
-	colors[2]=0x001F;
-    }	
-    void SetBitFields15(){	
-	biSize=sizeof(BITMAPINFOHEADER)+12;
-	biCompression=3;//BI_BITFIELDS
-	biBitCount=16;
-	biSizeImage=abs((int)(2*biWidth*biHeight));
-	colors[0]=0x7C00;
-	colors[1]=0x03E0;
-	colors[2]=0x001F;
-    }	
-    void SetRGB(){
-	biSize = sizeof(BITMAPINFOHEADER);
-	biCompression = 0;	//BI_RGB
-	//biHeight = labs(biHeight);
-	biSizeImage = labs(biWidth * biHeight) * ((biBitCount + 7) / 8);
-    }
-    void SetBits(int bits) { 
-        switch (bits){
-	    case 15: SetBitFields15();break;
-	    case 16: SetBitFields16();break;
-	    default: biBitCount = bits; SetRGB();break;
-        }
-    }
-    void SetSpace(int csp,int bits) {
-	biSize = sizeof(BITMAPINFOHEADER);
-	biCompression=csp;
-	biBitCount=bits;
-	biSizeImage=labs(biBitCount*biWidth*biHeight)>>3;
-    }
-    void SetSpace(int csp) {
-	int bits=0;
-	switch(csp){
-	case fccYUV:
-	    bits=24;break;
-	case fccYUY2:
-	case fccUYVY:
-	case fccYVYU:
-	    bits=16;break;
-	case fccYV12:
-	case fccIYUV:
-	case fccI420:
-	    bits=12;break;
-	}
-	if (csp != 0 && csp != 3 && biHeight > 0)
-    	    biHeight *= -1; // YUV formats uses should have height < 0
-	SetSpace(csp,bits);
-    }
-
-};
-
-struct IAudioDecoder
-{
-    WAVEFORMATEX in_fmt;
-    const CodecInfo& record;
-    IAudioDecoder(const CodecInfo& r, const WAVEFORMATEX* w) : record(r)
-    {
-        in_fmt = *w;
-    }
-};
-
-struct IAudioEncoder
-{
-    IAudioEncoder(const CodecInfo&, WAVEFORMATEX*) {}
-    // you do not need this one...
-};
-
-struct IVideoDecoder
-{
-    int VBUFSIZE;
-    int QMARKHI;
-    int QMARKLO;
-    int DMARKHI;
-    int DMARKLO;
-
-    enum CAPS
-    {
-	CAP_NONE = 0,
-	CAP_YUY2 = 1,
-	CAP_YV12 = 2,
-	CAP_IYUV = 4,
-	CAP_UYVY = 8,
-	CAP_YVYU = 16,
-	CAP_I420 = 32,
-    };
-    enum DecodingMode
-    {
-	DIRECT = 0,
-	REALTIME,
-	REALTIME_QUALITY_AUTO,
-    };
-    enum DecodingState
-    {
-	STOP = 0,
-	START,
-    };
-    IVideoDecoder(const CodecInfo& info, const BITMAPINFOHEADER& format) : record(info)
-    {
-        // implement init part
-     unsigned bihs = (format.biSize < (int) sizeof(BITMAPINFOHEADER)) ?
-	  sizeof(BITMAPINFOHEADER) : format.biSize;
-     m_bh = (BITMAPINFOHEADER*) new char[bihs];
-     memcpy(m_bh, &format, bihs);
-     m_State = STOP;
-     //m_pFrame = 0;
-     m_Mode = DIRECT;
-     m_iDecpos = 0;
-     m_iPlaypos = -1;
-     m_fQuality = 0.0f;
-     m_bCapable16b = true;
-
-    }
-    virtual ~IVideoDecoder(){};
-    // use this one
-    int Decode(void* src, size_t size, int is_keyframe, CImage* pImage)
-    { return DecodeInternal(src, size, is_keyframe, pImage); }
-    void Stop(){ StopInternal();  m_State = STOP;}
-    void Start(){StartInternal(); m_State = START;}
-    protected:
-    virtual int DecodeInternal(void* src, size_t size, int is_keyframe, CImage* pImage) = 0;
-    virtual void StartInternal()=0;
-    virtual void StopInternal()=0;
-
-    const CodecInfo& record;
-    DecodingMode m_Mode;	// should we do precaching (or even change Quality on the fly)
-    DecodingState m_State;
-    int m_iDecpos;
-    int m_iPlaypos;
-    float m_fQuality;           // quality for the progress bar 0..1(best)
-    bool m_bCapable16b;
-
-    BITMAPINFOHEADER* m_bh;	// format of input data (might be larger - e.g. huffyuv)
-    BitmapInfo m_decoder;	// format of decoder output
-    BitmapInfo m_obh;		// format of returned frames
-};
-
-struct IRtConfig
-{
-};
-
-
-
-#endif
 
 #endif

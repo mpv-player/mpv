@@ -5,7 +5,7 @@
 #include "audiodecoder.h"
 #include "except.h"
 #else
-#include "../libwin32.h"
+#include "libwin32.h"
 #endif
 #include "DS_Filter.h"
 
