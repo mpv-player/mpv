@@ -11,7 +11,32 @@ TODO: cleanup old (<=0.17a) versions, find the place for these:
 
 mplayer (0.90)
 
-  release:
+  pre8:
+    Docs:
+    * manpage has been rewritten, now has better indenting, and convertable to html
+    * AUTHORS, MAINTAINERS converted back to separate text files, and updated.
+    * ChangeLog file is included again (was removed after 0.18)
+    * some new tech docs on libmpcodecs, updates/fixes in others, manpage-howto
+    * more updates in translation files (help_mp-XX.h)
+
+    Cleanup:
+    * xanim interface merged & fixed, now uses mpi and supports direct rendering
+    * cleanup of libmpdemux stream layer, especially of TV and MF parts
+    * some more unused files removed: vo_fsdga, vo_odivx, vd_rle, timer.c, ttf_load
+
+    Fixes:
+    * the http:// infinite memleak bug has been fixed, WMS9 mms:// fixes
+    * various sparc/sun, hpux and netbsd/openbsd portability fixes
+    * -vop palette fixes, CRAM and QPEG colors are OK now
+    * demuxer fixed for >2GB nuppelvideo files
+    * mencoder: -ss fixed for 3-pass encoding
+    
+    Code:
+    * new demuxer for .PVA files (fileformat of TV/DVB apps on win32)
+    * -mf now supports TGA (24/32bpp uncomp/rle) images
+    * libavcodec: support for interlaced mpeg-4 _de_coding
+    * libavcodec: aspect ratio encoding support (mpeg4, mjpeg, h263?)
+    * win32 DLL loader merged/synced with avifile CVS
   
   pre7:
     Cleanup:
