@@ -673,6 +673,26 @@ switch(d_video->demuxer->file_format){
       return 0;
     }
    }
+   // fill aspect info:
+   switch(picture->aspect_ratio_information){
+     case 2:  // PAL/NTSC SVCD/DVD 4:3
+     case 8:  // PAL VCD 4:3
+     case 12: // NTSC VCD 4:3
+       sh_video->aspect=4.0/3.0;
+     break;
+     case 3:  // PAL/NTSC Widescreen SVCD/DVD 16:9
+       sh_video->aspect=16.0/9.0;
+     break;
+     default:
+       fprintf(stderr,"Detected unknown aspect_ratio_information in mpeg sequence header.\n"
+               "Please report the aspect value (%i) along with the movie type (VGA,PAL,NTSC,"
+               "SECAM) and the movie resolution (720x576,352x240,480x480,...) to the MPlayer"
+               " developers, so that we can add support for it!\nAssuming 1:1 aspect for now.\n",
+               picture->aspect_ratio_information);
+     case 1:  // VGA 1:1
+       sh_video->aspect=1.0;
+     break;
+   }
    // display info:
    sh_video->format=picture->mpeg1?0x10000001:0x10000002; // mpeg video
    sh_video->fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;

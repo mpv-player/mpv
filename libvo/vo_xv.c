@@ -158,6 +158,25 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
     {
      hint.width=vo_screenwidth;
      hint.height=vo_screenheight;
+     /* this code replaces X11_FULLSCREEN hack in mplayer.c
+      * with libvo2 this should be unified among vo plugins
+      * besides zooming should only be done with -zoom,
+      * but I leave the old -fs behaviour so users don't get
+      * irritated for now (and send lots o' mails ;) ::atmos
+      */
+
+#ifdef X11_FULLSCREEN
+     d_height=(int)((float)vo_screenwidth/(float)dwidth*(float)dheight);
+     d_height+=d_height%2; // round
+     d_width=vo_screenwidth;
+     if(dheight>vo_screenheight){
+       d_width=(int)((float)vo_screenheight/(float)dheight*(float)dwidth);
+       d_width+=d_width%2; // round
+       d_height=vo_screenheight;
+     }
+     dwidth=d_width; dheight=d_height;
+#endif
+
     }
    hint.flags = PPosition | PSize;
    XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);

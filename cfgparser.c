@@ -152,8 +152,14 @@ static int read_option(char *opt, char *param)
 				goto err_missing_param;
 
 			tmp_float = strtod(param, &endptr);
+
+			if ((*endptr == ':') || (*endptr == '/'))
+				tmp_float /= strtod(endptr+1, &endptr);
+
 			if (*endptr) {
-				printf("parameter must be a floating point number:\n");
+				printf("parameter must be a floating point number"
+				       " or a ratio (numerator[:/]denominator):\n");
+
 				ret = ERR_MISSING_PARAM;
 				goto out;
 			}

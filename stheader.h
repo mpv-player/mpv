@@ -75,6 +75,7 @@ typedef struct {
   int i_bps; // == bitrate  (compressed bytes/sec)
   int disp_w,disp_h;   // display size (filled by fileformat parser)
 //  int coded_w,coded_h; // coded size (filled by video codec)
+  float aspect;
   unsigned int outfmtidx;
 //  unsigned int bitrate;
   // buffers:

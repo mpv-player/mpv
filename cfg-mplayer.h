@@ -210,6 +210,7 @@ struct config conf[]={
 	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
 	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
 	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
+	{"aspect", &movie_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0},
         {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1},
         {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0},
 	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1},
