@@ -102,7 +102,6 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-slave ]
 .RB [ \-loop\ <num> ]
 .RB [ \-mixer\ <eszköz> ]
-.RB [ \-master\ igen/nem ]
 .RB [ \-tv\ <alopciók> ]
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
@@ -339,10 +338,9 @@ Többszörös lejátszás. A 0-ás érték végtelenített lejátszást eredményez.
 Ezzel az opcióval lehet megadni az MPlayer-nek hogy a /dev/mixer helyett
 más eszközt használjon.
 .TP
-.B \-master\ igen/nem
-Ezen opció "igen" állapotba állítása azt eredményezi hogy az MPlayer a
-hangerõszabályzást a mixer MASTER csatornáján végzi, míg a "nem" állapot
-a PCM csatorna használatát eredményezi.
+.B \-master
+Már nem használt opció, használd helyette a Szoftveres audio mixer plugint
+(lásd DOCS).
 .IP
 .B \-tv\ <alopciók>
 Ez az opció TV-nézõ üzemmódba kapcsolja az MPlayer-t. A további dokumentáció

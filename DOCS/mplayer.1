@@ -103,7 +103,6 @@ mplayer \- Movie Player for Linux
 .RB [ \-slave ]
 .RB [ \-loop\ <num> ]
 .RB [ \-mixer\ <device> ]
-.RB [ \-master\ yes/no ]
 .RB [ \-tv\ <suboptions> ]
 .RB [ \-dapsync ]
 .RB [ \-softsleep ]
@@ -334,9 +333,8 @@ loops movie playback <num> times. 0 means forever.
 this option will tell MPlayer to use a different device for mixing than
 /dev/mixer.
 .TP
-.B \-master\ yes/no
-Setting this option to "yes" will instruct MPlayer to change the MASTER
-mixer channel when setting the volume, and "no" means the PCM channel.
+.B \-master
+obsoleted option, use Software audio mixer plugin instead (see DOCS).
 .TP
 .B \-tv\ <suboptions>
 this option enables the TV grabbing feature of MPlayer. For complete
