@@ -1964,7 +1964,7 @@ echores "$_dl"
 
 echocheck "dynamic a/v plugins support"
 if test "$_dl" = no ; then
-  _dynamic_plugins = no
+  _dynamic_plugins=no
 fi
 if test "$_dynamic_plugins" = yes ; then
   _def_dynamic_plugins='#define DYNAMIC_PLUGINS 1'
