@@ -193,6 +193,13 @@ Current plugins:
     d deinterleave
     i interleave
     s swap fields (exchange even & odd lines)
+    The goal of this filter to add ability of processing interlaced images 
+    pre-field without deinterlacing it. You can filter your interlaced dvd
+    and playback on TV without breaking the interlacing. 
+    While deinterlacing (with the post processing filter) removes permamently
+    the interlacing (by smoothing averaging etc) deinterleaving splits the 
+    frame into 2 fields (so called half pictures), so you can process (filter)
+    them independently and then re-interleave them.
     MPI: TEMP, accepts stride
 
 -vop boxblur=radius:power[:radius:power]
