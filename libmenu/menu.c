@@ -172,6 +172,7 @@ void menu_dflt_read_key(menu_t* menu,int cmd) {
   case KEY_LEFT:
   case KEY_ESC:
     menu->read_cmd(menu,MENU_CMD_CANCEL);
+    if(menu->parent != NULL) menu->show = 1;
     break;
   case KEY_RIGHT:
   case KEY_ENTER:
