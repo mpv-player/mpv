@@ -377,6 +377,7 @@ static uint32_t query_format(uint32_t format) {
 
   // if (vo_dbpp) => There is NO conversion!!!
   if (vo_dbpp) {
+    if (format == IMGFMT_YV12) return (1);
     switch (vo_dbpp) {
       case 32: if ((format == IMGFMT_RGB32) || (format == IMGFMT_BGR32))
                  return ((bpp_avail & BPP_32) ? 1 : 0);
