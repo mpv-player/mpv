@@ -9,20 +9,14 @@
 #include "../input/input.h"
 
 int mp_input_win32_slave_cmd_func(int fd,char* dest,int size){
-  DWORD i,retval;
-  int x=0;
+  DWORD retval;
   HANDLE stdin = GetStdHandle(STD_INPUT_HANDLE);
-  INPUT_RECORD eventbuffer[250];
-  if(!GetNumberOfConsoleInputEvents(stdin,&retval) || !retval)return MP_INPUT_NOTHING;
-  ReadConsoleInput(stdin,eventbuffer,250,&retval);
-  for(i = 0; i < retval; i++){
-    if(eventbuffer[i].EventType==KEY_EVENT&&eventbuffer[i].Event.KeyEvent.bKeyDown== TRUE){
-      if(eventbuffer[i].Event.KeyEvent.wVirtualKeyCode==VK_RETURN)dest[x]='\n';
-      else dest[x]=eventbuffer[i].Event.KeyEvent.uChar.AsciiChar;
-      ++x;
-    }
+  if(!PeekNamedPipe(stdin, NULL, size, &retval, NULL, NULL) || !retval){
+	  return MP_INPUT_NOTHING;
   }
-  if(x)return x;
+  if(retval>size)retval=size;
+  ReadFile(stdin, dest, retval, &retval, NULL);
+  if(retval)return retval;
   return MP_INPUT_NOTHING;
 }
 
