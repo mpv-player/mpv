@@ -1098,7 +1098,7 @@ _faad=auto
 _faad_local=yes
 _xmms=no
 _flac=auto
-_external_flac=no
+_external_flac=auto
 _css=auto
 # dvdnav disabled, it does not work
 #_dvdnav=no
@@ -5246,8 +5246,16 @@ fi
 echores "$_xmms"
 
 echocheck "FLAC support"
-if test "$_flac" = auto ; then
-  if test "$_external_flac" = yes ; then
+if ! test "$_flac" = "no" ; then
+  if ! test -f libmpflac/dither.c ; then
+    _flac=no
+    echores "no (necessary files missing)"
+    break
+  fi
+  if ! test -f libmpflac/stream_decoder.c ; then
+    _external_flac=yes
+  fi
+  if test "$_external_flac" = "yes" ; then
     cat > $TMPC << EOF
 #include <FLAC/stream_decoder.h>
 #include <stdlib.h>
