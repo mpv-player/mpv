@@ -105,7 +105,7 @@ MPlayer (1.0)
     * DTS support via libdts
     * many DV fixes, seek in raw DV files
     * support AAC in MOV files
-    * RV10 fixes
+    * RV10, RV20 fixes
     * AVI demuxer cleanup, palette change support
     * iTunes metadata support
     * HuffYUV fixes (endianness, RGB32 predictor, median encoding, interlacing)
@@ -165,7 +165,7 @@ MPlayer (1.0)
     * lavc "turbo mode" to speed up 2-pass encoding
     * support for 3-pass encode for lavc and x264
     * XviD encoder and decoder modules updated to API-4.1 (XviD-1.1.x)
-    * flush remainig frames at end of encoding process
+    * flush remaining frames at end of encoding process
     * VIDIX Cyberblade TV-out fixed
     * VIDIX I420 support for Cyberblade and mga
     * VIDIX Radeon support on big-endian systems, other Radeon fixes
@@ -177,6 +177,8 @@ MPlayer (1.0)
     * compilation fixes for many files in the TOOLS directory
     * infamous "stuck mouse button" bug fixed, new -key-fifo-size option
     * reduced verbosity of MPlayer's output somewhat
+    * -identify now prints some information about available languages
+    * double buffering (-double) is now default
 
 
   pre5: "LinuxTag release" July 15, 2004
