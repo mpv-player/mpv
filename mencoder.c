@@ -670,6 +670,8 @@ sh_video->video_out=&video_out;
 sh_video->codec=NULL;
 if(out_video_codec>1){
 
+sh_video->vfilter=vf_open_filter(NULL,"vo",&video_out);
+sh_video->vfilter=append_filters(sh_video->vfilter);
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
@@ -1566,7 +1568,7 @@ case VCODEC_RAWRGB:
          raw_rgb_buffer2 = malloc(vo_w*vo_h*4);
      }
 	    
-     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+     blit_frame=decode_video(sh_video,start,in_size,0);
      if(skip_flag>0) break;
      if(!blit_frame){
          // empty.
@@ -1608,7 +1610,7 @@ case VCODEC_RAWRGB:
  }
  break;
 case VCODEC_RAW:
-    blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+    blit_frame=decode_video(sh_video,start,in_size,0);
     if(skip_flag>0) break;
     if(!blit_frame){
 	// empty.
@@ -1629,7 +1631,7 @@ case VCODEC_VFW: {
 //		     long* keyframe, int quality);
     long flags=0;
     int ret;
-    blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+    blit_frame=decode_video(sh_video,start,in_size,0);
     if(skip_flag>0) break;
     if(!blit_frame){
 	// empty.
@@ -1648,7 +1650,7 @@ case VCODEC_DIVX4:
     printf("No support for Divx4 encore compiled in\n");
     mencoder_exit(1,NULL);
 #else
-    blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+    blit_frame=decode_video(sh_video,start,in_size,0);
     draw_sub();
     if(skip_flag>0) break;
     if(!blit_frame){
@@ -1692,7 +1694,7 @@ case VCODEC_LIBAVCODEC:
 #else
 	int out_size;
 
-	blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
+	blit_frame=decode_video(sh_video,start,in_size,0);
 	if(skip_flag>0) break;
 	if(!blit_frame){
 	    // empty.

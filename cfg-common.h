@@ -96,6 +96,7 @@
 	{"tv", "MPlayer was compiled without TV Interface support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+    {"vop", &vo_plugin_args, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
 #else
 
@@ -179,4 +180,6 @@ struct config mfopts_conf[]={
         {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 						
+extern char** vo_plugin_args;
+
 #endif

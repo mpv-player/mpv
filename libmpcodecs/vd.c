@@ -20,6 +20,8 @@
 #include "stheader.h"
 
 #include "vd.h"
+#include "vf.h"
+
 //#include "vd_internal.h"
 
 extern vd_functions_t mpcodecs_vd_null;
@@ -96,7 +98,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 };
 
 #include "libvo/video_out.h"
-extern int vo_directrendering;
 
 // libvo opts:
 int fullscreen=0;
@@ -110,13 +111,6 @@ float movie_aspect=-1.0;
 int vo_flags=0;
 int vd_use_slices=1;
 
-static vo_tune_info_t vtune;
-
-static mp_image_t* static_images[2];
-static mp_image_t* temp_images[1];
-static mp_image_t* export_images[1];
-static int static_idx=0;
-
 extern vd_functions_t* mpvdec; // FIXME!
 
 int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outfmt){
@@ -124,7 +118,8 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     unsigned int out_fmt=0;
     int screen_size_x=0;//SCREEN_SIZE_X;
     int screen_size_y=0;//SCREEN_SIZE_Y;
-    vo_functions_t* video_out=sh->video_out;
+//    vo_functions_t* video_out=sh->video_out;
+    vf_instance_t* vf=sh->vfilter;
 
 #if 1
     if(!(sh->disp_w && sh->disp_h))
@@ -141,14 +136,14 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d, %s  \n",
 	w,h,vo_format_name(preferred_outfmt));
 
-    if(!video_out) return 1; // temp hack
+    if(!vf) return 1; // temp hack
 
     // check if libvo and codec has common outfmt (no conversion):
     j=-1;
     for(i=0;i<CODECS_MAX_OUTFMT;i++){
 	out_fmt=sh->codec->outfmt[i];
 	if(out_fmt==(signed int)0xFFFFFFFF) continue;
-	vo_flags=video_out->control(VOCTRL_QUERY_FORMAT, &out_fmt);
+	vo_flags=vf->query_format(vf,out_fmt);
 	mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),vo_flags,i);
 	if((vo_flags&2) || (vo_flags && j<0)){
 	    // check (query) if codec really support this outfmt...
@@ -213,6 +208,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     }
   }
 
+#if 0
   if(video_out->get_info)
   { const vo_info_t *info = video_out->get_info();
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"VO: [%s] %dx%d => %dx%d %s %s%s%s%s\n",info->short_name,
@@ -228,6 +224,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     if(info->comment && strlen(info->comment) > 0)
         mp_msg(MSGT_CPLAYER,MSGL_V,"VO: Comment: %s\n", info->comment);
   }
+#endif
 
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER,MSGL_V,"video_out->init(%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
@@ -236,21 +233,25 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       "MPlayer",out_fmt);
 
-    memset(&vtune,0,sizeof(vo_tune_info_t));
-    if(video_out->config(sh->disp_w,sh->disp_h,
+//    memset(&vtune,0,sizeof(vo_tune_info_t));
+    if(vf->config(vf,sh->disp_w,sh->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
-                      "MPlayer",out_fmt,&vtune)){
+                      out_fmt)==0){
+//                      "MPlayer",out_fmt,&vtune)){
 	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CannotInitVO);
 	return 0; // exit_player(MSGTR_Exit_error);
     }
 
+#if 0
 #define FREE_MPI(mpi) if(mpi){if(mpi->flags&MP_IMGFLAG_ALLOCATED) free(mpi->planes[0]); free(mpi); mpi=NULL;}
     FREE_MPI(static_images[0])
     FREE_MPI(static_images[1])
     FREE_MPI(temp_images[0])
     FREE_MPI(export_images[0])
 #undef FREE_MPI
+#endif
+
     return 1;
 }
 
@@ -259,89 +260,6 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 // returns NULL or allocated mp_image_t*
 // Note: buffer allocation may be moved to mpcodecs_config_vo() later...
 mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h){
-  mp_image_t* mpi=NULL;
-  int w2=w; //(mp_imgflag&MP_IMGFLAG_ACCEPT_STRIDE)?((w+15)&(~15)):w;
-  // Note: we should call libvo first to check if it supports direct rendering
-  // and if not, then fallback to software buffers:
-  switch(mp_imgtype){
-  case MP_IMGTYPE_EXPORT:
-//    mpi=new_mp_image(w,h);
-    if(!export_images[0]) export_images[0]=new_mp_image(w2,h);
-    mpi=export_images[0];
-    break;
-  case MP_IMGTYPE_STATIC:
-    if(!static_images[0]) static_images[0]=new_mp_image(w2,h);
-    mpi=static_images[0];
-    break;
-  case MP_IMGTYPE_TEMP:
-    if(!temp_images[0]) temp_images[0]=new_mp_image(w2,h);
-    mpi=temp_images[0];
-    break;
-  case MP_IMGTYPE_IPB:
-    if(!(mp_imgflag&MP_IMGFLAG_READABLE)){ // B frame:
-      if(!temp_images[0]) temp_images[0]=new_mp_image(w2,h);
-      mpi=temp_images[0];
-      break;
-    }
-  case MP_IMGTYPE_IP:
-    if(!static_images[static_idx]) static_images[static_idx]=new_mp_image(w2,h);
-    mpi=static_images[static_idx];
-    static_idx^=1;
-    break;
-  }
-  if(mpi){
-    mpi->type=mp_imgtype;
-    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_DIRECT);
-    mpi->flags|=mp_imgflag&(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH|MP_IMGFLAG_ALIGNED_STRIDE|MP_IMGFLAG_DRAW_CALLBACK);
-    if((mpi->width!=w2 || mpi->height!=h) && !(mpi->flags&MP_IMGFLAG_DIRECT)){
-	mpi->width=w2;
-	mpi->height=h;
-	if(mpi->flags&MP_IMGFLAG_ALLOCATED){
-	    // need to re-allocate buffer memory:
-	    free(mpi->planes[0]);
-	    mpi->flags&=~MP_IMGFLAG_ALLOCATED;
-	}
-    }
-    if(!mpi->bpp) mp_image_setfmt(mpi,sh->codec->outfmt[sh->outfmtidx]);
-    if(!(mpi->flags&MP_IMGFLAG_ALLOCATED) && mpi->type>MP_IMGTYPE_EXPORT){
-
-	// check libvo first!
-	vo_functions_t* vo=sh->video_out;
-	if(vo && vo_directrendering) vo->control(VOCTRL_GET_IMAGE,mpi);
-	
-        if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
-          // non-direct and not yet allocaed image. allocate it!
-	  mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*mpi->height/8);
-	  if(mpi->flags&MP_IMGFLAG_PLANAR){
-	      // YV12/I420. feel free to add other planar formats here...
-	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
-	      if(!mpi->stride[1]) mpi->stride[1]=mpi->stride[2]=mpi->width/2;
-	      if(mpi->flags&MP_IMGFLAG_SWAPPED){
-	          // I420/IYUV  (Y,U,V)
-	          mpi->planes[1]=mpi->planes[0]+mpi->width*mpi->height;
-	          mpi->planes[2]=mpi->planes[1]+(mpi->width>>1)*(mpi->height>>1);
-	      } else {
-	          // YV12,YVU9  (Y,V,U)
-	          mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
-	          mpi->planes[1]=mpi->planes[2]+(mpi->width>>1)*(mpi->height>>1);
-	      }
-	  } else {
-	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width*mpi->bpp/8;
-	  }
-	  mpi->flags|=MP_IMGFLAG_ALLOCATED;
-        }
-	if(!(mpi->flags&MP_IMGFLAG_TYPE_DISPLAYED)){
-	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,"*** %s mp_image_t, %dx%dx%dbpp %s %s, %d bytes\n",
-	          (mpi->flags&MP_IMGFLAG_DIRECT)?"Direct Rendering":"Allocating",
-	          mpi->width,mpi->height,mpi->bpp,
-		  (mpi->flags&MP_IMGFLAG_YUV)?"YUV":"RGB",
-		  (mpi->flags&MP_IMGFLAG_PLANAR)?"planar":"packed",
-	          mpi->bpp*mpi->width*mpi->height/8);
-	    mpi->flags|=MP_IMGFLAG_TYPE_DISPLAYED;
-	}
-	
-    }
-  }
-  return mpi;
+  return vf_get_image(sh->vfilter,sh->codec->outfmt[sh->outfmtidx],mp_imgtype,mp_imgflag,w,h);
 }
 

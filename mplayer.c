@@ -1163,7 +1163,7 @@ if (vo_spudec!=NULL)
 
 }
 //================== Init AUDIO (codec) ==========================
-current_module="init_audio_codec";
+current_module="find_audio_codec";
 
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
@@ -1191,6 +1191,8 @@ if(sh_audio){
   }
 }
 
+current_module="init_audio_codec";
+
 if(sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_V,"Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
@@ -1214,6 +1216,11 @@ if((video_out->preinit(vo_subdevice))!=0){
 }
 sh_video->video_out=video_out;
 inited_flags|=INITED_VO;
+
+current_module="init_video_filters";
+
+sh_video->vfilter=vf_open_filter(NULL,"vo",video_out);
+sh_video->vfilter=append_filters(sh_video->vfilter);
 
 current_module="init_video_codec";
 
@@ -1524,7 +1531,7 @@ if(1)
 	// decode:
 	current_module="decode_video";
 //	printf("Decode! %p  %d  \n",start,in_size);
-	blit_frame=decode_video(video_out,sh_video,start,in_size,drop_frame);
+	blit_frame=decode_video(sh_video,start,in_size,drop_frame);
     }
     vdecode_time=video_time_usage-vdecode_time;
     //------------------------ frame decoded. --------------------

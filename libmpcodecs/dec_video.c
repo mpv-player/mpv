@@ -26,6 +26,7 @@ extern int verbose; // defined in mplayer.c
 
 #include "stheader.h"
 #include "vd.h"
+#include "vf.h"
 
 #include "dec_video.h"
 
@@ -152,14 +153,13 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
 
 extern int vo_directrendering;
 
-int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
+int decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
+vf_instance_t* vf=sh_video->vfilter;
 mp_image_t *mpi=NULL;
 int blit_frame=0;
 unsigned int t=GetTimer();
 unsigned int t2;
 double tt;
-
-sh_video->video_out=video_out;
 
 //if(!(sh_video->ds->flags&1) || sh_video->ds->pack_no<5)
 mpi=mpvdec->decode(sh_video, start, in_size, drop_frame);
@@ -185,13 +185,8 @@ video_time_usage+=tt;
 
 if(drop_frame) return 0;
 
-if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
-    // blit frame:
-    if(mpi->flags&MP_IMGFLAG_PLANAR)
-        video_out->draw_slice(mpi->planes,mpi->stride,sh_video->disp_w,sh_video->disp_h,0,0);
-    else
-        video_out->draw_frame(mpi->planes);
-}
+//vo_draw_image(video_out,mpi);
+vf->put_image(vf,mpi);
 
     t2=GetTimer()-t2;
     tt=t2*0.000001f;
@@ -200,5 +195,3 @@ if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
 
   return blit_frame;
 }
-
-
