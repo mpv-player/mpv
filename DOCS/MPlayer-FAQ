@@ -30,7 +30,7 @@ A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
    try again... if fail, contact me
 
 Q: I have Pentium III but ./configure doesn't detect SSE
-A: Only kernel versions 2.4.x supports SSE
+A: Only kernel versions 2.4.x supports SSE (or try latest 2.2.19 or newer)
 
 Q: fullscreen option (-fs) and/or -xy doesn't work with x11 driver (-vo x11)
 A: x11 driver doesn't support scaling, and it can't change screen resolution.
@@ -68,11 +68,11 @@ A: your opengl driver doesn't support dynamic texture chanegs (glTexSubImage)
    it's known to work with Utah-GLX and Matrox G400 card.
    it will not work with 3DFX cards because the 256x256 texture size limit.
 
-Q: I have g200/g400, how to compile/use mga_vid driver?
+Q: I have G200/G400, how to compile/use mga_vid driver?
 A: read INSTALL and README...
 
 Q: What's XMMP? (it's XMMS or XMPS but mispelled?)
-A: It's a new project, see www.frozenproductions.com for details
+A: It's a new project, see http://frozenproductions.com for details
 
 Q: There are error messages about file not found /usr/lib/win32/....
 A: Download & install w32codec.zip from *our* FTP
@@ -118,3 +118,10 @@ A: Inform the MPlayer-users mailing list about your problem. *ALWAYS*
    Use the developers addresses (specified in AUTHORS) only if you want to
    flame, or want to ask for a date. ;)
 
+Q: During 'make', MPlayer complains about X11 libraries. I don't understand,
+   I DO have X installed!?
+A: ...but you don't have the X development package installed. It's called
+   XFree86-devel* under RedHat, and xlib6g-dev* under Debian.
+   Also check if the /usr/X11 symlink exists (this can be a problem on
+   Mandrake systems). It can be created with the 'ln -sf /usr/X11R6 /usr/X11'
+   command. Your distribution may differ from the Linux Filesystem Standard.

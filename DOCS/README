@@ -76,13 +76,11 @@ Supported video codecs:
 Supported video output devices:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - mga:  Matrox G200/G400 hardware YUV overlay via the mga_vid device
-	(Some people reported that G200 is broken :(  if you are a programmer
-	and you have a G200, please check it and fix if you can!)
 - xmga: Matrox G200/G400 overlay (mga_vid) in X11 window
 	(Xv emulation on X 3.3.x !)
 - x11:  X11 optionally with SHM extension
 - xv:   X11 using overlays with the Xvideo extension (hardware YUV & scaling)
-- gl:   OpenGL renderer, requires Utah-GLX or DRI or nVidia's new driver
+- gl:   OpenGL renderer, probably won't work with nVidia's drivers (check FAQ!)
 - syncfb: Matrox G400 YUV support on framebuffer (not tested, maybe broken)
 - 3dfx: Voodoo2/3 hardware YUV (/dev/3dfx) support (not yet tested, maybe broken)
 - sdl:  SDL v1.1.7 driver (slower than 'x11', but supports software scaling)
@@ -197,7 +195,7 @@ Troubleshooting:
       - config.h and all of config.mak files
    Note: many users reported that SSE was not detected while running on P3.
    Current stable 2.2.x kernels does NOT support SSE, so you can't use it
-   without patches or using the 2.4.x series.
+   without patches or using the 2.4.x series. (or try latest 2.2.19 or newer)
 
 3. If you have a problem with the player, please run it with -v option, and
    send the output of it, with a detailed description of the problem.
@@ -244,9 +242,8 @@ Troubleshooting:
      there will be a listing of the installed codecs (vids.<codecname>=DLLfile)
    - a sample file encoded with that codec.
 
-
-Download:
-~~~~~~~~~
+Contact information:
+~~~~~~~~~~~~~~~~~~~~
 Download:  ftp://thot.banki.hu/esp-team/linux/MPlayer/
       or:  http://thot.banki.hu/esp-ftp/linux/MPlayer/
 Homepage:  http://thot.banki.hu/esp-team/MPlayer.html
