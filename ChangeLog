@@ -12,9 +12,9 @@ mplayer (1.0)
     * numerous sections updated
     
     Ports:
-    * initial Amiga/MorphOS (throught GeekGadgets) support
+    * initial Amiga/MorphOS (through GeekGadgets) support
     * libmenu now works on mingw
-    * freebsd 5.x (libkse/libthr) support in win32 dll loader
+    * freebsd 5.x (libkse/libthr) support in win32 DLL loader
     * fixed mpdvdkit on mingw
     * slave mode, vobsub and mencoder support on windows
     * finally fixed the compilation on non-mvi capable alpha CPUs
@@ -26,7 +26,7 @@ mplayer (1.0)
     * disabled internal FAAD when using buggy GCC
     * --enable-externalfaad option to force using external FAAD library
     * imaadpcm bug fixed
-    * ViVD v2 codec support (dll only)
+    * ViVD v2 codec support (DLL only)
     * QuickTime codecs support inside Matroska
     * improved seeking inside Matroska
     * some bugs with DMO codecs have been fixed
@@ -47,12 +47,13 @@ mplayer (1.0)
     * Xan DPCM, DK3 & DK4 ADPCM audio decoders
     * detect old xvid with fourcc=DIVX
     * vp3 decoder fixes
-    * improved the Alpha optimiziations
+    * improved the Alpha optimizations
     * x86 optimiziations are thread-safe now
-    * settable scenechange threshold
+    * settable scene change threshold
     * better MPEG1/MPEG2 conformance encoder
     * quality improvement for high bitrate videos with trellis quantization
     * indeo3 decoder fixed
+    * Rate distorted optimal coded block pattern
     
     Drivers:
     * VIDIX driver for nVidia cards
