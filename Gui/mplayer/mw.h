@@ -241,9 +241,11 @@ void mplMsgHandle( int msg,float param )
 	
         switch ( mplShMem->StreamType )
          {
-//          case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
-//          case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
-//          case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
+          case STREAMTYPE_STREAM: 
+          case STREAMTYPE_VCD:
+          case STREAMTYPE_FILE:   
+	       dvd_title=0;
+	       break;
           case STREAMTYPE_DVD:    
 	       dvd_title=1; 
 	       dvd_chapter=1; 
