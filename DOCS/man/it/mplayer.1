@@ -1,4 +1,4 @@
-.\" synced with 1.559
+.\" synced with 1.568
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduzione in italiano di Daniele Forghieri
@@ -36,7 +36,7 @@
 .
 .TH MPlayer 1 "2004-01-16" "The MPlayer Project" "The Movie Player For Linux"
 .
-.SH NAME
+.SH NOME
 mplayer  \- Visualizzatore di film per Linux
 .br
 mencoder \- Codificatore di film per Linux
@@ -153,8 +153,8 @@ formato WMV (senza usare la libreria avifile).
 .PP
 Un altra grande caratteristica di MPlayer e' l' ampia gamma di dispositivi di
 uscita gestiti.
-Funziona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, ma puoi
-anche usare GGI, SDL (ed in questo modo tutti i loro driver), VESA (su ogni
+Funziona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, Quartz,
+ma puoi anche usare GGI, SDL (e tutti i loro driver), VESA (su ogni
 scheda compatibile VESA, anche senza X11), qualche driver a basso livello
 specifico per alcune schede video (per Matrox, 3Dfx e ATI) e qualche scheda
 di decodifica MPEG hardware come la Siemens DVB, DXR2 e DXR3/\:Hollywood+.
@@ -791,10 +791,9 @@ Digitale) di ingresso, per poter sovrascrivere i valori di default:
 Specifica il numero di scheda (1\-4) da usare (default: 1).
 .IPs file=<file>
 Dice a MPlayer di leggere la lista dei canali da <file>.
-.IPs type=<SAT|TER|CBL>
-Specifica che il tipo di scheda e' SATellite, TERrestrial o CaBLe (satellite,
-terrestre oppure cavo).
-Se non specificato il tipo viene ricavato in modo automatico.
+Il default e' ~/.mplayer/channels.conf.{sat,ter,cbl} (basato 
+sul tipo di scheda) oppure ~/.mplayer/channels.conf come 
+ultima risorsa.
 .RE
 .PD 1
 .
@@ -2287,7 +2286,7 @@ lavora manualmente alla risoluzione degli errori del codificatore:
 .br
 2 (msmpeg4v3): qualche vecchio file msmpeg4v3 generato da lavc (niente rilevamento automatico)
 .br
-4 (mpeg4): bug dell' interlacciamento di xvid (rilevato automaticamente se fourcc==XVIX)
+4 (mpeg4): bug dell' interlacciamento di XviD (rilevato automaticamente se fourcc==XVIX)
 .br
 8 (mpeg4): UMP4 (rilevato automaticamente se fourcc==UMP4)
 .br
@@ -2295,7 +2294,7 @@ lavora manualmente alla risoluzione degli errori del codificatore:
 .br
 32 (mpeg4): bug vlc illegale (rilevato automaticamente per fourcc)
 .br
-64 (mpeg4): qpel bug di XVID e DIVX (rilevato automaticamente per fourcc/ver)
+64 (mpeg4): qpel bug di XviD e DivX (rilevato automaticamente per fourcc/ver)
 .br
 128 (mpeg4): vecchio standard qpel (rilevato automaticamente per fourcc/ver)
 .br
@@ -2491,10 +2490,10 @@ Specifica dei parametri addizionali quando si decodifica con XviD.
 .PD 0
 .RSs
 .IPs deblock-chroma
-Attiva il filtro di post elaborazione interno di xvid:filtro di de-block della crominanza
+Attiva il filtro di post elaborazione interno di XviD:filtro di de-block della crominanza
 Vedi anche \-vf pp che e' piu' veloce del filtro di XviD.
 .IPs deblock-luma
-Attiva il filtro di post elaborazione interno di xvid:filtro di de-block della luminanza
+Attiva il filtro di post elaborazione interno di XviD:filtro di de-block della luminanza
 Vedi anche \-vf pp che e' piu' veloce del filtro di XviD.
 .IPs dr2\ \ 
 Attiva il metodo 2 di direct rendering.
@@ -3093,7 +3092,7 @@ fil=d).
 .TP
 .B field[=n]
 Estrae un singolo field da un immagine interlacciata utilizzando
-aritmetica delle striscie (stride) per evitare di perdere tempo
+l' aritmetica delle striscie (stride) per evitare di perdere tempo
 di CPU.
 L' argomento opzionale n specifica se estrarre il field pari o dispari
 (a seconda che n sia pari o dispari).
@@ -3253,6 +3252,58 @@ molto piu' affidabili.
 Attualmente solo libmpeg2 esporta il flag necessario.
 Se usato su materiale che non setta il flag il filtro non esegue nulla.
 .TP
+.B phase=[t|b|p|a|u|T|B|A|U][:v]
+Ritarda il video interlacciato del tempo di un field in modo da 
+cambiare l' ordine dei field stessi.
+L' utilizzo previsto e' per sistemare filmati PAL che sono stati catturati
+con l' ordine dei field opposto a quello del trasferimento da film a video.
+Le opzioni sono:
+.RSs
+.IPs t
+Cattura i field in ordine top-first (prima il field superiore), trasferisce 
+bottom-first (prima il field inferiore).
+Il filtro ritardera' il field inferiore.
+.IPs b
+Cattura i field in ordine bottom-first, trasferisce 
+top-first.
+Il filtro ritardera' il field superiore.
+.IPs p
+Cattura e trasferisce con lo stesso ordine dei field.
+Questa modalita' esiste per permettere alla documentazione delle altre opzioni
+di potervisi riferire ma se, eventualmente, la selezioni il filtro non effettuera' 
+assolutamente nulla ;-)
+.IPs a
+L' ordine di cattura dei field e' determinato automaticamente dal flag del field,
+trasferisce l' opposto.
+Il filtro seleziona tra le modalita' t e b fotogramma per fotogramma utilizzando il 
+flag del field.
+Se non e' presente nessuna informazione sul field, si comporta come l' opzione u.
+.IPs u
+Cattura sconosciuta o variabile, trasferisce l' opposto.
+Il filtro seleziona tra le modalita' t e b fotogramma per fotogramma analizzando 
+le immagini e selezionando l' alternativa che produce il miglior riscontro
+tra i field.
+.IPs T
+Cattura top-first, trasferisce sconosciuto o variabile.
+Il filtro seleziona la modalita' t o p utilizzando l' analisi dell' immagine.
+.IPs B
+Cattura bottom-first, trasferisce sconosciuto o variabile.
+Il filtro seleziona la modalita' b o p utilizzando l' analisi dell' immagine.
+.IPs A
+Cattura determinata dal flag del field, trasferisce sconosciuto o variabile.
+Il filtro seleziona tra le modalita' t, b e p utilizzando il flag
+del field e l' analisi dell' immagine.                                       
+Se non abbiamo informazioni sui field allora questa modalita' e' uguale alla U.
+Questa e' la modalita' di default.
+.IPs U
+Sia cattura che trasferimento sconosciuto o variabile.
+Il filtro seleziona tra la modalita' t, b, e p utilizzando solo l' analisi dell' immagine.
+.IPs v
+Operazioni verbose.
+Stampa il modo selezionato per ogni fotogramma e la differenza media quadratica
+tra i field per le alternative delle modalita' t, b, e p.
+.RE
+.TP
 .B telecine[=start]
 Applica il processo di 'telecine' 3:2 per incrementare il framerate
 del 20%.
@@ -3288,7 +3339,7 @@ con il colore nero, framerate non cambiato.
 .PD 1
 .TP
 .B tfields[=mode]
-Separazione temporale dei campi \- divide i field in fotogrammi,
+Separazione temporale dei field \- divide i field in fotogrammi,
 raddoppiando il framerate di uscita.
 Come il filtro telecine, tfield lavorera' correttamente solo con
 MEncoder, e solo se entrambe le opzioni \-fps e \-ofps sono
@@ -3637,6 +3688,9 @@ Prova questa opzione se hai problemi di visualizzazione.
 .RE
 .PD 1
 .TP
+.B quartz (solo Mac OS X)
+Driver di uscita per Quartz su Mac OS X.
+.TP
 .B fbdev (solo Linux)
 Utilizza il framebuffer del kernel per l' uscita video.
 .TP
@@ -3665,9 +3719,24 @@ Visualizza il video usando la libreria SVGA.
 .TP
 .B gl\ \ \ \ \ 
 Driver di uscita OpenGL.
+Versione molto semplive, non supporta OSD e la dimensione del video
+deve essere minore della dimensione massima delle texture della
+vostra implementazione OpenGL.
+Studiato per funzionare anche con l' implementazione OpenGl piu' semplice.
+.PD 0
+.RSs
+.IPs manyfmts
+Abilita il supporto per maggiori formati colore (RGB e BGR).
+Necessita di OpenGL con versione >= 1.2, NON FUNZIONA ancora correttamente.
+.IPs <numero>
+Numero di linee copiate sulla texture alla volta.
+0 per l' immagine intera.
+.RE
+.PD 1
 .TP
 .B gl2\ \ \ \ 
 Driver di uscita OpenGL, seconda generazione.
+Supporta OSD e video piu' grande della dimensione massima della texture.
 .TP
 .B null\ \ \ 
 Non produce nessuna uscita video, utile per
@@ -3911,6 +3980,11 @@ Avremo il file di uscita che conterra' 'div3' come fourcc del video.
 .PD 1
 .
 .TP
+.B \-force-avi-aspect <0.2\-3.0>
+Sovrascrive il valore del rapporto di aspetto memorizzato nei file AVI nell' intestazione
+vprp OpenDML.
+Puo' essere usato per cambiare il rapporto di aspetto con \-ovc copy.
+.TP
 .B \-info <option1:option2:...> (AVI only)
 Specifica le informazioni nell' intestazione del file
 AVI generato.
@@ -4047,8 +4121,8 @@ dove <codec> puo' essere: lavc, xvidenc, divx4, lame
 .
 .
 .SS divx4 (\-divx4opts)
-divx4 e' obsoleto ed e' supportato per completezza.
-Per dettagli riguardanti le opzioni divx4 dai un' occhiata ai sorgenti,
+DivX4 e' obsoleto ed e' supportato per completezza.
+Per dettagli riguardanti le opzioni DivX4 dai un' occhiata ai sorgenti,
 molte opzioni non sono descritte qua.
 .TP
 .B help\ \ \ 
@@ -5308,10 +5382,10 @@ crea un flusso di bit che puo' essere decodificato delay-free (default=disabilit
 .br
 .I ATTENZIONE:
 Verra' generato un flusso illegale, e NON SARA' decodificabile
-dai decodificatori IS-MPEG4 eccetto divx/libavcodec/xvid
+dai decodificatori IS-MPEG4 eccetto DivX/libavcodec/XviD
 .br
 .I ATTENZIONE:
-Viene anche memorizzata una falsa versione divx nel file e di
+Viene anche memorizzata una falsa versione DivX nel file e di
 conseguenza l' attivazione automatica dell' eliminazione dei bug di
 alcuni decodificatori puo' venir confusa
 .TP
