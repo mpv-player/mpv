@@ -121,11 +121,20 @@ static int init(int rate,int channels,int format,int flags)
 	//fill waveformatex
     ZeroMemory( &wformat, sizeof(WAVEFORMATEX));
     wformat.cbSize          = 0; /* size of _extra_ info */
-	wformat.wFormatTag      = WAVE_FORMAT_PCM;  
     wformat.nChannels       = channels;                
     wformat.nSamplesPerSec  = rate;            
-    wformat.wBitsPerSample  = audio_out_format_bits(format); 
-    wformat.nBlockAlign     = wformat.nChannels * (wformat.wBitsPerSample >> 3);
+    if(format == AFMT_AC3)
+    {
+        wformat.wFormatTag      = WAVE_FORMAT_DOLBY_AC3_SPDIF;
+        wformat.wBitsPerSample  = 16;
+        wformat.nBlockAlign     = 4;
+    }
+    else 
+    {
+        wformat.wFormatTag      = WAVE_FORMAT_PCM;
+        wformat.wBitsPerSample  = audio_out_format_bits(format); 
+        wformat.nBlockAlign     = wformat.nChannels * (wformat.wBitsPerSample >> 3);
+    }       
     wformat.nAvgBytesPerSec = wformat.nSamplesPerSec * wformat.nBlockAlign;
  	
     //open sound device
