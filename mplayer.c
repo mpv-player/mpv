@@ -2506,7 +2506,7 @@ if(auto_quality>0){
 #endif
              usec_sleep(20000);
          }
-      if (cmd->id == MP_CMD_PAUSE) {
+      if (cmd && cmd->id == MP_CMD_PAUSE) {
       cmd = mp_input_get_cmd(0,1,0);
       mp_cmd_free(cmd);
       }
