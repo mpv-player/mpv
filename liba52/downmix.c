@@ -342,18 +342,59 @@ static void mix4to1 (sample_t * samples, sample_t bias)
 {
     int i;
 
+#ifdef HAVE_SSE // FIXME untested
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps (%0, %%esi), %%xmm0	\n\t" 
+	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
+	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
+	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t"
+	"addps %%xmm1, %%xmm0		\n\t"
+	"movaps %%xmm0, (%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++)
 	samples[i] += (samples[i + 256] + samples[i + 512] +
 		       samples[i + 768] + bias);
+#endif
 }
 
 static void mix5to1 (sample_t * samples, sample_t bias)
 {
     int i;
 
+#ifdef HAVE_SSE
+	asm volatile(
+	"movlps %1, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps (%0, %%esi), %%xmm0	\n\t" 
+	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
+	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
+	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t"
+	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
+	"addps %%xmm1, %%xmm0		\n\t"
+	"movaps %%xmm0, (%0, %%esi)	\n\t"
+	"addl $16, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (samples+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++)
 	samples[i] += (samples[i + 256] + samples[i + 512] +
 		       samples[i + 768] + samples[i + 1024] + bias);
+#endif
 }
 
 static void mix3to2 (sample_t * samples, sample_t bias)
