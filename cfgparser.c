@@ -73,7 +73,8 @@ static int read_option(char *opt, char *param)
 			break;
 	}
 	if (i == nr_options) {
-		printf("invalid option:\n");
+		if (parser_mode == CONFIG_FILE)
+			printf("invalid option:\n");
 		ret = ERR_NOT_AN_OPTION;
 		goto out;
 	}
