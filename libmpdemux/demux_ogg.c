@@ -241,7 +241,7 @@ void demux_ogg_add_sub (ogg_stream_t* os,ogg_packet* pack) {
       if(pack->granulepos == -1)
         pack->granulepos = os->lastpos + os->lastsize;
       pts = (float)pack->granulepos/(float)os->samplerate;
-      clear_sub = 0.001 + pts + (float)duration/1000.0;
+      clear_sub = 1.0 + pts + (float)duration/1000.0;
     }
     while (1) {
       int c = packet[lcv++];
