@@ -1,10 +1,10 @@
 #!/bin/sh
 #
-# Version:          0.1.9
+# Version:          0.1.10
 #
 # Licence:          GPL
 #
-# 2002/04/14        Jürgen Hammelmann <juergen.hammelmann@gmx.de>
+# 2002/09/21        Jürgen Hammelmann <juergen.hammelmann@gmx.de>
 #
 # Script:           MPlayer Sources (DVD) to (S)VCD ripping and burning
 #
@@ -14,6 +14,19 @@
 #                   cdrdao
 #                   lame
 #
+
+for exe in mplayer mpeg2enc mp2enc mplex yuvscaler ; do
+	if [ -z "`which $exe`" ]; then
+		echo "ERROR: $exe must be in your path $PATH!"
+		exit 1
+	fi
+done
+for exe in vcdimager lame cdrdao yuvdenoise ; do
+        if [ -z "`which $exe`" ]; then
+                echo "WARNING: $exe is not found in your path $PATH!"
+	fi
+done
+
 ################################################################################
 #
 # 2002/04/11        v0.1.0: first version
@@ -45,6 +58,10 @@
 #                     - new option "-sync"
 # 2002/06/19        v0.1.9
 #                     - new option "-mpgonly"
+# 2002/09/21        v0.1.10
+#                     - bug fixes
+#                     - tests now, if the commands are in path and give warnings
+#                       and errors.
 #
 ################################################################################
 #
@@ -73,7 +90,7 @@ function usage() {
    echo "-asr <n>      output audio sample rate in Hz [44100]."
    echo "-blank        cleans cd-rw before burning."
    echo "-burnonly     burn only the premastered <name>*.cue/<name>*.bin images."
-   echo "-cdsize <n>   maximal size of cd images [646]."
+   echo "-cdsize <n>   maximal size of cd images [700]."
    echo "-denoise      denoises mpeg stream."
    echo "-mp3          outputs audio in mp3 instead of mp2 format."
    echo "-mpg          don't encode from source, multiplex/burn."
@@ -148,7 +165,7 @@ vbrset=0
 denoise="cat -"
 norm="VCD"
 mplexnorm="-f $VCDMODE -m 1 -V -b 46"
-max=646
+max=700
 mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
 imaget="-t vcd2"
 yuvin=""
@@ -270,7 +287,7 @@ if [ $burnonly -eq 0 ]; then
    # encode streams
    if [ $mkstream -eq 1 ]; then
       # start mplayer
-      mplayer -noframedrop -vo yuv4mpeg -ao pcm -waveheader \
+      mplayer -noframedrop -vo yuv4mpeg -ao pcm -waveheader -benchmark \
               -v -osdlevel 0 $sub $params &
 
       # mjpegtools
@@ -299,6 +316,9 @@ if [ $burnonly -eq 0 ]; then
    rm -f ${NAME}*.mpg
    mplex $mplexnorm $sync $NAME.mpv $NAME.mpa -o ${NAME}%d.mpg
 
+   # remove pipe, won't need anymore!
+   rm -f $VIDEO
+   
    # should i create only the mpeg file?
    [ $mpgonly -eq 1 ] && exit 0
 
@@ -314,9 +334,6 @@ if [ $burnonly -eq 0 ]; then
 
 # end of streaming/mastering
 fi
-
-# remove pipe, won't need anymore!
-rm -f $VIDEO
 
 # burn the (s)vcd's
 [ $burn -eq 0 ] && exit 0
