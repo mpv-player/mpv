@@ -3,6 +3,7 @@
    Copyrights 2002 Nick Kurshev. This file is based on sources from
    GATOS (gatos.sf.net) and X11 (www.xfree86.org)
    Licence: GPL
+   PPC support by Alex Beregszaszi
 */
 
 #include <errno.h>
@@ -11,6 +12,9 @@
 #include <string.h>
 #include <math.h>
 #include <inttypes.h>
+
+#include "../../config.h"
+#include "../../bswap.h"
 #include "../../libdha/pci_ids.h"
 #include "../../libdha/pci_names.h"
 #include "../vidix.h"
@@ -19,10 +23,10 @@
 #include "radeon.h"
 
 #ifdef RAGE128
-#define RADEON_MSG "Rage128_vid:"
+#define RADEON_MSG "[rage128]"
 #define X_ADJUST 0
 #else
-#define RADEON_MSG "Radeon_vid:"
+#define RADEON_MSG "[radeon]"
 #define X_ADJUST (is_shift_required ? 8 : 0)
 #ifndef RADEON
 #define RADEON
@@ -32,7 +36,7 @@
 static int __verbose = 0;
 #ifdef RADEON
 static int rage_ckey_model=0;
-static int is_shift_required;
+static int is_shift_required = 0;
 #endif
 
 typedef struct bes_registers_s
@@ -210,8 +214,13 @@ static uint32_t SAVED_OV0_KEY_CNTL = 0;
 
 #define INREG8(addr)		GETREG(uint8_t,(uint32_t)(radeon_mmio_base),addr)
 #define OUTREG8(addr,val)	SETREG(uint8_t,(uint32_t)(radeon_mmio_base),addr,val)
-#define INREG(addr)		GETREG(uint32_t,(uint32_t)(radeon_mmio_base),addr)
-#define OUTREG(addr,val)	SETREG(uint32_t,(uint32_t)(radeon_mmio_base),addr,val)
+
+static inline uint32_t INREG (uint32_t addr) {
+	uint32_t tmp = GETREG(uint32_t,(uint32_t)(radeon_mmio_base),addr);
+	return le2me_32(tmp);
+}
+//#define OUTREG(addr,val)	SETREG(uint32_t,(uint32_t)(radeon_mmio_base),addr,val)
+#define OUTREG(addr,val)	SETREG(uint32_t,(uint32_t)(radeon_mmio_base),addr,le2me_32(val))
 #define OUTREGP(addr,val,mask)  					\
 	do {								\
 		unsigned int _tmp = INREG(addr);			\
@@ -418,7 +427,8 @@ static void radeon_engine_restore( void )
 				  (pitch64 << 22));
 
     radeon_fifo_wait(1);
-#if defined(__BIG_ENDIAN)
+//#if defined(__BIG_ENDIAN)
+#if defined(WORDS_BIGENDIAN)
     OUTREGP(DP_DATATYPE,
 	    HOST_BIG_ENDIAN_EN, ~HOST_BIG_ENDIAN_EN);
 #else
@@ -839,15 +849,15 @@ static int find_chip(unsigned chip_id)
   return -1;
 }
 
-pciinfo_t pci_info;
+static pciinfo_t pci_info;
 static int probed=0;
 
 vidix_capability_t def_cap = 
 {
 #ifdef RAGE128
-    "BES driver for rage128 cards",
+    "BES driver for Rage128 cards",
 #else
-    "BES driver for radeon cards",
+    "BES driver for Radeon cards",
 #endif
     "Nick Kurshev",
     TYPE_OUTPUT | TYPE_FX,
