@@ -1,6 +1,6 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
  *		Dmitry Baryshkov <lumag@qnc.ru>
-   Was synced with help_mp-en.h: rev 1.107
+   Was synced with help_mp-en.h: rev 1.108
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
