@@ -58,11 +58,15 @@
   we will be unable to properly diagnose your problem otherwise.</P>
 
 <P>An excellent and well written guide to asking questions in public forums is
-  <A HREF="http://www.tuxedo.org/~esr/faqs/smart-questions.html">How To Ask
-  Questions The Smart Way</A> by Eric S. Raymond. If you follow these guidelines
-  you should be safe. But please understand that we all follow the mailing lists
-  voluntarily in our free time. We are very busy and cannot guarantee that you
-  will get a solution for your problem or even an answer.</P>
+  <A HREF="http://www.tuxedo.org/~esr/faqs/smart-questions.html">How To Ask Questions The Smart Way</A>
+  by <A HREF="http://www.tuxedo.org/~esr/">Eric S. Raymond</A>. There is another
+  called
+  <A HREF="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">How to Report Bugs Effectively</A>
+  by <A HREF="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</A>. If
+  you follow these guidelines you should be able to get help. But please
+  understand that we all follow the mailing lists voluntarily in our free time.
+  We are very busy and cannot guarantee that you will get a solution for your
+  problem or even an answer.</P>
 
 
 <H3>Where to report bugs?</H3>
@@ -87,7 +91,7 @@
 <H4>System Information:</H4>
 
 <UL>
-  <LI>Your Linux distribution or operating system e.g.:
+  <LI>Your Linux distribution or operating system and version e.g.:
     <UL>
       <LI>Red Hat 7.1</LI>
       <LI>Slackware 7.0 + devel packs from 7.1 ...</LI>
@@ -155,11 +159,22 @@
 Please include these files:
 
 <UL>
-  <LI>configure.log</LI>
-  <LI>config.h</LI>
-  <LI>config.mak</LI>
-  <LI>libvo/config.mak</LI>
+  <LI><CODE>config.h</CODE></LI>
+  <LI><CODE>config.mak</CODE></LI>
 </UL>
+
+Only if compilation fails below one of these directories, include these files:
+
+<UL>
+  <LI><CODE>Gui/config.mak</CODE></LI>
+  <LI><CODE>libvo/config.mak</CODE></LI>
+  <LI><CODE>libao2/config.mak</CODE></LI>
+</UL>
+
+
+<H4>For configure problems</H4>
+
+Include <CODE>configure.log</CODE>.
 
 
 <H4>For playback problems</H4>
@@ -195,21 +210,9 @@ Please include these files:
 
 <H4>For crashes</H4>
 
-<P>If you have a core dump of the crash continue reading the next paragraph,
-  otherwise skip it.</P>
-
-
-<H4>How to extract meaningful information from a core dump</H4>
-
-<P>Please create the following command file:</P>
-
-<P><CODE>disass $pc-32 $pc+32<BR>
-  info all-registers</CODE></P>
-
-<P>Then simply execute the following on your command line:</P>
-
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
-
+<P>You have to run MPlayer inside <CODE>gdb</CODE> and send us the complete
+  output or if you have a core dump of the crash you can extract useful
+  information from the <CODE>Core</CODE> file. Here's how:</P>
 
 <H4>How to conserve information about a reproducible crash</H4>
 
@@ -232,7 +235,17 @@ return you to the command line prompt where you have to enter
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;disass $pc-32 $pc+32</CODE></P>
 
-and send the complete output to us.
+
+<H4>How to extract meaningful information from a core dump</H4>
+
+<P>Please create the following command file:</P>
+
+<P><CODE>disass $pc-32 $pc+32<BR>
+  info all-registers</CODE></P>
+
+<P>Then simply execute the following on your command line:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=command_file &gt; mplayer.bug</CODE></P>
 
 
 <H3>General note</H3>
