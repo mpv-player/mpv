@@ -1473,11 +1473,12 @@ _def_dga='#undef HAVE_DGA'
 _def_dga2='#undef HAVE_DGA2'
 if test "$_dga" = 1 ; then
   _def_dga='#define HAVE_DGA 1'
-  _ld_dga='-lXxf86dga -lXxf86vm'
+  _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
   _vomodules="dga $_vomodules"
   echores "using DGA 1.0"
 elif test "$_dga" = 2 ; then
+  _def_dga='#define HAVE_DGA 1'
   _def_dga2='#define HAVE_DGA2 1'
   _ld_dga='-lXxf86dga'
   _vosrc="$_vosrc vo_dga.c"
