@@ -273,8 +273,14 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
  		p=line;	
  		// finds the body of the subtitle
  		for (i=0; i<3; i++){              
-                   p=strchr(p,':')+1;
-                 } 
+		   p=strchr(p,':');
+		   if (p==NULL) break;
+		   ++p;
+		} 
+		if (p==NULL) {
+		    printf("SUB: Skipping incorrect subtitle line!\n");
+		    continue;
+		}
  		i=0;
 
 		if (*p!='|') {
