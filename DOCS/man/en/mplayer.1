@@ -2058,10 +2058,6 @@ VESA framebuffer doesn't support mode changing.
 Override framebuffer mode configuration file (default: /etc/\:fb.modes).
 .
 .TP
-.B \-forcexv (\-vo sdl only)
-Force using XVideo through the sdl video output driver.
-.
-.TP
 .B \-fs (also see \-zoom)
 Fullscreen playback (centers movie, and paints black bands around it).
 Not supported by all video output drivers.
@@ -2199,10 +2195,6 @@ Useful for multihead setups.
 Do not keep window aspect ratio when resizing windows.
 Only works with the x11, xv, xmga, xvidix, directx video output drivers.
 Furthermore under X11 your window manager has to honor window aspect hints.
-.
-.TP
-.B \-noxv (\-vo sdl only)
-Disables using XVideo through the sdl video output driver.
 .
 .TP
 .B \-ontop\ 
@@ -2418,15 +2410,19 @@ Play video through the XFree86 Direct Graphics Access extension.
 Considered obsolete.
 .
 .TP
-.B sdl (also see \-forcexv, \-noxv) (SDL only)
+.B sdl (SDL only)
 Highly platform independent SDL (Simple Directmedia Layer) library
 video output driver.
 Since SDL uses its own X11 layer, MPlayer X11 options do not have
 any effect on SDL.
 .PD 0
 .RSs
-.IPs <driver>
-Explicitly choose the SDL driver to use.
+.IPs driver=<driver>
+Explicitly choose the SDL driver to use (default: x11).
+.IPs (no)forcexv
+Use XVideo through the sdl video output driver (default: forcexv).
+.IPs (no)hwaccel
+Use hardware accelerated scaler (default: hwaccel).
 .RE
 .PD 1
 .

@@ -121,10 +121,9 @@
 
 #include "input/input.h"
 #include "input/mouse.h"
+#include "subopt-helper.h"
 
 extern int verbose;
-int sdl_noxv;
-int sdl_forcexv;
 
 static vo_info_t info = 
 {
@@ -1594,6 +1593,21 @@ uninit(void)
 static uint32_t preinit(const char *arg)
 {
     struct sdl_priv_s *priv = &sdl_priv;
+    char * sdl_driver;
+    int sdl_hwaccel;
+    int sdl_forcexv;
+    opt_t subopts[] = {
+	    {"forcexv", OPT_ARG_BOOL,  &sdl_forcexv, NULL, 0},
+	    {"hwaccel", OPT_ARG_BOOL,  &sdl_hwaccel, NULL, 0},
+	    {"driver",  OPT_ARG_MSTRZ, &sdl_driver,  NULL, 0},
+	    {NULL, 0, NULL, NULL, 0}
+    };
+
+    sdl_forcexv = 1;
+    sdl_hwaccel = 1;
+    sdl_driver = strdup("x11");
+
+    if (subopt_parse(arg, subopts) != 0) return -1;
 
     priv->rgbsurface = NULL;
     priv->overlay = NULL;
@@ -1601,13 +1615,16 @@ static uint32_t preinit(const char *arg)
 
     if(verbose > 2) printf("SDL: Opening Plugin\n");
 
-    if(arg) setenv("SDL_VIDEODRIVER", arg, 1);
+    if(sdl_driver) setenv("SDL_VIDEODRIVER", sdl_driver, 1);
+    free(sdl_driver);
 
     /* does the user want SDL to try and force Xv */
     if(sdl_forcexv)	setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "1", 1);
+    else setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "0", 1);
 
     /* does the user want to disable Xv and use software scaling instead */
-    if(sdl_noxv) setenv("SDL_VIDEO_YUV_HWACCEL", "0", 1);
+    if(sdl_hwaccel) setenv("SDL_VIDEO_YUV_HWACCEL", "1", 1);
+    else setenv("SDL_VIDEO_YUV_HWACCEL", "0", 1);
 
     /* default to no fullscreen mode, we'll set this as soon we have the avail. modes */
     priv->fullmode = -2;

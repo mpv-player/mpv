@@ -22,12 +22,6 @@ extern char *fb_mode_name;
 extern char *dfb_params;
 #endif
 #endif
-#ifdef HAVE_SDL
-//extern char *sdl_driver;
-extern int sdl_noxv;
-extern int sdl_forcexv;
-//extern char *sdl_adriver;
-#endif
 #ifdef USE_FAKE_MONO
 extern int fakemono; // defined in dec_audio.c
 #endif
@@ -199,15 +193,13 @@ m_option_t mplayer_opts[]={
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 	// -vo sdl only:
-#ifdef HAVE_SDL
-	{"sdl", "Use -vo sdl:driver instead of -vo sdl -sdl driver.\n",
+	{"sdl", "Use -vo sdl:driver=<driver> instead of -vo sdl -sdl driver.\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"noxv", &sdl_noxv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"forcexv", &sdl_forcexv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noxv", "-noxv is deprecated. Use -vo sdl:nohwaccel instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"forcexv", "-forcexv is deprecated. Use -vo sdl:forcexv instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	// -ao sdl only:
 	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver.\n",
 	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
-#endif
 
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA) 
        {"monitor-hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
