@@ -21,6 +21,9 @@
 #include "spudec.h"
 #include "mp_msg.h"
 
+#define MIN(a, b)	((a)<(b)?(a):(b))
+#define MAX(a, b)	((a)>(b)?(a):(b))
+
 extern int vobsub_id;
 
 extern int verbose;
@@ -610,6 +613,7 @@ vobsub_parse_palette(vobsub_t *vob, const char *line)
     n = 0;
     while (1) {
 	const char *p;
+	int r, g, b, y, u, v, tmp;
 	while (isspace(*line))
 	    ++line;
 	p = line;
@@ -617,7 +621,14 @@ vobsub_parse_palette(vobsub_t *vob, const char *line)
 	    ++p;
 	if (p - line != 6)
 	    return -1;
-	vob->palette[n++] = strtoul(line, NULL, 16);
+	tmp = strtoul(line, NULL, 16);
+	r = tmp >> 16 & 0xff;
+	g = tmp >> 8 & 0xff;
+	b = tmp & 0xff;
+	y = MIN(MAX((int)(0.1494 * r + 0.6061 * g + 0.2445 * b), 0), 0xff);
+	u = MIN(MAX((int)(0.6066 * r - 0.4322 * g - 0.1744 * b) + 128, 0), 0xff);
+	v = MIN(MAX((int)(-0.08435 * r - 0.3422 * g + 0.4266 * b) + 128, 0), 0xff);
+	vob->palette[n++] = y << 16 | u << 8 | v;
 	if (n == 16)
 	    break;
 	if (*p == ',')
@@ -1032,10 +1043,15 @@ create_idx(vobsub_out_t *me, const unsigned int *palette, unsigned int orig_widt
     if (palette) {
 	fputs("palette:", me->fidx);
 	for (i = 0; i < 16; ++i) {
+	    const double y = palette[i] >> 16 & 0xff,
+		u = (palette[i] >> 8 & 0xff) - 128.0,
+		v = (palette[i] & 0xff) - 128.0;
 	    if (i)
 		putc(',', me->fidx);
-	    fprintf(me->fidx, " %02x%02x%02x", palette[i]>>16 & 0x000000ff,
-		palette[i]>>16 & 0x000000ff, palette[i]>>16 & 0x000000ff);
+	    fprintf(me->fidx, " %02x%02x%02x",
+		    MIN(MAX((int)(y + 1.4022 * u), 0), 0xff),
+		    MIN(MAX((int)(y - 0.3456 * u - 0.7145 * v), 0), 0xff),
+		    MIN(MAX((int)(y + 1.7710 * v), 0), 0xff));
 	}
 	putc('\n', me->fidx);
     }
