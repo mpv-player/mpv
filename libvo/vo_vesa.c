@@ -246,8 +246,9 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 	int rgb_stride;
 	yuv_slice=dga_buffer;
 	if(HAS_DGA()) yuv_slice += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
-	rgb_stride = PIXEL_SIZE()*(HAS_DGA()?video_mode_info.XResolution:image_width);
-	yuv_slice+=(image_width*y+x)*PIXEL_SIZE();
+	rgb_stride = HAS_DGA()?video_mode_info.XResolution:image_width;
+	yuv_slice+=(rgb_stride*y+x)*PIXEL_SIZE();
+	rgb_stride *= PIXEL_SIZE();
 	yuv2rgb(yuv_slice, image[0], image[1], image[2], w, h,
 		rgb_stride, stride[0], stride[1]);
     }
