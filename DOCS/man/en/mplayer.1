@@ -246,7 +246,7 @@ Toggle fullscreen (also see \-fs).
 .IPs T\ \ \ \ 
 Toggle stay-on-top (also see \-ontop).
 .IPs "w and e"
-Decrease/\:increase pan and scan range.
+Decrease/\:increase pan-and-scan range.
 .IPs o\ \ \ \ 
 Toggle OSD states: none / seek / seek + timer / seek + timer + total time.
 .IPs d\ \ \ \ 
@@ -1051,6 +1051,8 @@ Useful for playback from CD-ROM images or VOB files with junk at the beginning.
 .TP
 .B \-srate <Hz>
 Selects the given output sampling rate, resampling if necessary.
+The type of resampling can be controlled by the -af-adv option.
+The default is fast resampling that may cause distortion.
 MEncoder passes this value to LAME for resampling.
 .
 .TP
@@ -1931,7 +1933,7 @@ May cause OSD/\:SUB corruption!
 This option is used to control the dxr2 video output driver.
 .RSs
 .IPs ar-mode=<value>
-aspect ratio mode (0 = normal, 1 = pan and scan, 2 = letterbox (default))
+aspect ratio mode (0 = normal, 1 = pan-and-scan, 2 = letterbox (default))
 .IPs iec958-encoded
 Set iec958 output mode to encoded.
 .IPs iec958-decoded
@@ -2169,7 +2171,7 @@ as well as directx and gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
-Enables pan and scan functionality (cropping the sides of e.g.\& a 16:9
+Enables pan-and-scan functionality (cropping the sides of e.g.\& a 16:9
 movie to make it fit a 4:3 display without black bands).
 The range controls how much of the image is cropped.
 Only works with the xv, xmga, mga, gl and xvidix video output drivers.
@@ -2553,7 +2555,7 @@ When enabled behaves more like the other vos, better for fixed-size fonts.
 Disabled looks much better with freetype fonts and uses the
 borders in fullscreen mode.
 .IPs (no)aspect
-Enable or disable aspect scaling and pan and scan support (default: enabled).
+Enable or disable aspect scaling and pan-and-scan support (default: enabled).
 Disabling might increase speed.
 .RE
 .PD 1
@@ -3437,8 +3439,8 @@ Disables aspect calculations.
 Specify additional parameters when decoding with XviD.
 .br
 .I NOTE:
-As decoding with XviD tends to be a bit slower than libavcodec
-you might want to use them instead.
+As decoding with XviD tends to be slower than with libavcodec
+you might want to use libavcodec instead.
 .sp 1
 XviD's internal postprocessing filters:
 .PD 0
@@ -5054,7 +5056,7 @@ Also forces CBR mode encoding on subsequent ABR presets modes.
 .
 .TP
 .B br=<0\-1024>
-bitrate in kBit (CBR and ABR only)
+bitrate in kbps (CBR and ABR only)
 .
 .TP
 .B q=<0\-9>
@@ -5103,8 +5105,8 @@ adjust
 .
 .TP
 .B fast\ \ \ 
-Switch on faster encoding on subsequent VBR presets modes, results in
-slightly lower quality and higher bitrates.
+Switch on faster encoding on subsequent VBR presets modes.
+This results in slightly lower quality and higher bitrates.
 .
 .TP
 .B highpassfreq=<freq>
@@ -5159,7 +5161,7 @@ for people with extremely good hearing and similar equipment
 .
 .TP
 .B br=<0\-384> (CBR only)
-Specify bitrate in kBit.
+bitrate in kbps
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (default: mono for 1-channel audio, stereo otherwise)
@@ -6326,10 +6328,10 @@ Currently it doesn't work (yet).
 .SS nuv (\-nuvopts)
 .
 Nuppel video is based on RTJPEG and LZO.
-By default frames are first encoded with RTJPEG and then compressed with LZO.
-But both passes can be enabled or not.
-So you can in fact output raw i420, LZO compressed i420, RTJPEG, or the
-default LZO compressed RTJPEG.
+By default frames are first encoded with RTJPEG and then compressed with LZO,
+but it is possible to disable either or both of the two passes.
+As a result, you can in fact output raw i420, LZO compressed i420, RTJPEG,
+or the default LZO compressed RTJPEG.
 .br
 .I NOTE:
 The nuvrec documentation contains some advice and examples about the
@@ -6344,11 +6346,11 @@ chrominance threshold (default: 1)
 luminance threshold (default: 1)
 .
 .TP
-.B lzo \ 
+.B lzo\ \ \ \ 
 Enable LZO compression (default).
 .
 .TP
-.B nolzo \ 
+.B nolzo\ \ 
 Disable LZO compression.
 .
 .TP
@@ -6357,11 +6359,11 @@ quality level (default: 255)
 .
 .TP
 .B raw \ \ \ 
-Disable rtjpeg encoding (default).
+Disable RTJPEG encoding.
 .
 .TP
 .B rtjpeg\ 
-Enable rtjpeg encoding.
+Enable RTJPEG encoding (default).
 .
 .
 .SS xvidenc (\-xvidencopts)
@@ -6836,7 +6838,7 @@ precision (default: 250).
 .
 .TP
 .B idrint=<value>
-One in each <value> I-Frames are IDR-Frames (default: 2).
+Make each <value> I-Frame an IDR-Frame (default: 2).
 In H.264, I-Frames do not necessarily bound a closed GOP because it is
 allowable for a P-frame to be predicted from more frames than just the one
 frame before it (also see frameref).
