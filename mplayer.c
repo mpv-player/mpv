@@ -192,6 +192,7 @@ static char *seek_to_sec=NULL;
 static off_t seek_to_byte=0;
 static off_t step_sec=0;
 static int loop_times=-1;
+static int loop_seek=0;
 
 // A/V sync:
        int autosync=0; // 30 might be a good default value.
@@ -2869,7 +2870,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     play_n_frames=play_n_frames_mf;
     eof=0;
     abs_seek_pos=3; rel_seek_secs=0; // seek to start of movie (0%)
-
+    loop_seek = 1;
   }
 
 if(rel_seek_secs || abs_seek_pos){
@@ -2908,7 +2909,7 @@ if(rel_seek_secs || abs_seek_pos){
       }
 #ifdef USE_OSD
         // Set OSD:
-      if(osd_level){
+      if(osd_level && !loop_seek){
 #ifdef USE_EDL
 	if( !edl_decision ) {
 #else
@@ -2956,6 +2957,7 @@ if(rel_seek_secs || abs_seek_pos){
   abs_seek_pos=0;
   frame_time_remaining=0;
   current_module=NULL;
+  loop_seek=0;
 }
 
 #ifdef HAVE_NEW_GUI
