@@ -81,9 +81,9 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 
     for(qscale=1; qscale<32; qscale++){
         int i;
-	if (s->fdct == ff_jpeg_fdct_islow) {
+	if (s->dsp.fdct == ff_jpeg_fdct_islow) {
 		for (i = 0; i < 64; i++) {
-			const int j = s->idct_permutation[i];
+			const int j = s->dsp.idct_permutation[i];
 			/* 16    <= qscale * quant_matrix[i] <= 7905 
 			 * 19952 <= aanscales[i] *  \
 			 * 	        qscale * quant_matrix[i]     <= 205026 
@@ -94,9 +94,9 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
 			qmat[qscale][i] = (int)((UINT64_C(1) << (QMAT_SHIFT-3))/
 					(qscale * quant_matrix[j]));
 		}
-	} else if (s->fdct == fdct_ifast) {
+	} else if (s->dsp.fdct == fdct_ifast) {
             for(i=0;i<64;i++) {
-                const int j = s->idct_permutation[i];
+                const int j = s->dsp.idct_permutation[i];
                 /* 16 <= qscale * quant_matrix[i] <= 7905 */
                 /* 19952         <= aanscales[i] * qscale * quant_matrix[i]           <= 249205026 */
                 /* (1<<36)/19952 >= (1<<36)/(aanscales[i] * qscale * quant_matrix[i]) >= (1<<36)/249205026 */
@@ -107,7 +107,7 @@ static void convert_matrix(MpegEncContext *s, int (*qmat)[64],
             }
         } else {
             for(i=0;i<64;i++) {
-		const int j = s->idct_permutation[i];
+		const int j = s->dsp.idct_permutation[i];
                 /* We can safely suppose that 16 <= quant_matrix[i] <= 255
                    So 16           <= qscale * quant_matrix[i]             <= 7905
                    so (1<<19) / 16 >= (1<<19) / (qscale * quant_matrix[i]) >= (1<<19) / 7905
