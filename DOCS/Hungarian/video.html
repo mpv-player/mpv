@@ -6,7 +6,6 @@
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.3.1>2.3.1.  Video kimeneti eszközök</A></B></P>
 
@@ -446,19 +445,19 @@ EndSection
 <P>Néhány megjegyzés az <B>MPlayer</B>-nen található SDL meghajtóhoz:</P>
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">Van néhány parancssori opciója:</B></P></TD></TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo sdl:név</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT CLASS="text">megadható hogy melyik video SDL meghajtót használja (pl. aalib, dga, x11)</TD><TR>   
-<TD></TD><TD><FONT CLASS="text">-ao sdl:név</TD><TD></TD><TD><FONT CLASS="text">megadható hogy melyik audio SDL meghajtót használja (pl. dsp,
+<TD COLSPAN=4><P><B>Van néhány parancssori opciója:</B></P></TD></TR>
+<TD>&nbsp;&nbsp;</TD><TD>-vo sdl:név</TD><TD>&nbsp;&nbsp;</TD><TD>
+megadható hogy melyik video SDL meghajtót használja (pl. aalib, dga, x11)</TD><TR>   
+<TD></TD><TD>-ao sdl:név</TD><TD></TD><TD>megadható hogy melyik audio SDL meghajtót használja (pl. dsp,
 esd, arts)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-noxv</TD><TD></TD><TD><FONT CLASS="text">kikapcsolja az XVideo hardveres gyorsítást</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-forcexv</TD><TD></TD><TD><FONT CLASS="text">megerõsíti a hardveres gyorsítás használatát</TD><TR>
+<TD></TD><TD>-noxv</TD><TD></TD><TD>kikapcsolja az XVideo hardveres gyorsítást</TD><TR>
+<TD></TD><TD>-forcexv</TD><TD></TD><TD>megerõsíti a hardveres gyorsítás használatát</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">SDL billentyûk:</B></P></TD><TR>
+<TD COLSPAN=4><P><B>SDL billentyûk:</B></P></TD><TR>
 
-<TD></TD><TD><FONT CLASS="text">F</TD><TD></TD><TD><FONT CLASS="text">teljesképernyõs/ablakos mód között vált</TD><TR>
-<TD></TD><TD><FONT CLASS="text">C</TD><TD></TD><TD><FONT CLASS="text">a rendelkezésre álló videomódok között vált</TD><TR>
-<TD></TD><TD><FONT CLASS="text">W/S</TD><TD></TD><TD><FONT CLASS="text">a * és / alteregói (hangerõ)</TD><TR>
+<TD></TD><TD>F</TD><TD></TD><TD>teljesképernyõs/ablakos mód között vált</TD><TR>
+<TD></TD><TD>C</TD><TD></TD><TD>a rendelkezésre álló videomódok között vált</TD><TR>
+<TD></TD><TD>W/S</TD><TD></TD><TD>a * és / alteregói (hangerõ)</TD><TR>
 
 </TABLE></P>
 
@@ -496,13 +495,13 @@ esd, arts)</TD><TR>
 <P>Az FBdev meghajtónak van néhány saját opciója is :</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT CLASS="text">a framebuffer egység megadása (/dev/fb0)</TD><TR> 
-<TD></TD><TD><FONT CLASS="text">-fbmode</TD><TD></TD><TD><FONT CLASS="text">a használni kívánt videomód neve (/etc/fb.modes szerint)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fbmodeconfig</TD><TD></TD><TD><FONT CLASS="text">módkonfigurációs file (alapban /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT CLASS="text">FONTOS ! lásd example.conf</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-monitor_vfreq</TD><TD></TD><TR>           
-<TD></TD><TD><FONT CLASS="text">-monitor_dotclock</TD><TD></TD><TR>        
+<TD>&nbsp;&nbsp;</TD><TD>-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
+a framebuffer egység megadása (/dev/fb0)</TD><TR> 
+<TD></TD><TD>-fbmode</TD><TD></TD><TD>a használni kívánt videomód neve (/etc/fb.modes szerint)</TD><TR>
+<TD></TD><TD>-fbmodeconfig</TD><TD></TD><TD>módkonfigurációs file (alapban /etc/fb.modes)</TD><TR>
+<TD></TD><TD>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3>FONTOS ! lásd example.conf</TD><TR>
+<TD></TD><TD>-monitor_vfreq</TD><TD></TD><TR>           
+<TD></TD><TD>-monitor_dotclock</TD><TD></TD><TR>        
 </TABLE></P>
 
 <P>Ha egy specifikus videomódba akarsz váltani, azt így teheted :</P>
@@ -606,29 +605,29 @@ hardveres gyorsítással. tdfxfb kell a kernelbe, és a következõképp kell
   meghajtó.</P>
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">Az AA ablakban használhatsz néhány extra billentyût:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">kontraszt csökkentése</TD><TR>
-<TD></TD><TD><FONT CLASS="text">2</TD><TD></TD><TD><FONT CLASS="text">kontraszt növelése</TD><TR>
-<TD></TD><TD><FONT CLASS="text">3</TD><TD></TD><TD><FONT CLASS="text">fényerõ csökkentése</TD><TR>
-<TD></TD><TD><FONT CLASS="text">4</TD><TD></TD><TD><FONT CLASS="text">fényerõ növelése</TD><TR>
-<TD></TD><TD><FONT CLASS="text">5</TD><TD></TD><TD><FONT CLASS="text">gyors megjelenítés be/ki</TD><TR>
-<TD></TD><TD><FONT CLASS="text">6</TD><TD></TD><TD><FONT CLASS="text">ditherelési módok (nincs, error distribution, floyd steinberg)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">7</TD><TD></TD><TD><FONT CLASS="text">kép invertálása</TD><TR>
-<TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">AA és MPlayer billentyûk között vált)</TD><TR>
+<TD COLSPAN=4><P><B>Az AA ablakban használhatsz néhány extra billentyût:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>1</TD><TD>&nbsp;&nbsp;</TD><TD>kontraszt csökkentése</TD><TR>
+<TD></TD><TD>2</TD><TD></TD><TD>kontraszt növelése</TD><TR>
+<TD></TD><TD>3</TD><TD></TD><TD>fényerõ csökkentése</TD><TR>
+<TD></TD><TD>4</TD><TD></TD><TD>fényerõ növelése</TD><TR>
+<TD></TD><TD>5</TD><TD></TD><TD>gyors megjelenítés be/ki</TD><TR>
+<TD></TD><TD>6</TD><TD></TD><TD>ditherelési módok (nincs, error distribution, floyd steinberg)</TD><TR>
+<TD></TD><TD>7</TD><TD></TD><TD>kép invertálása</TD><TR>
+<TD></TD><TD>a</TD><TD></TD><TD>AA és MPlayer billentyûk között vált)</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">A következõ parancssori opciók állnak rendelkezésre:</B></P></TD></TR>
+<TD COLSPAN=4><P><B>A következõ parancssori opciók állnak rendelkezésre:</B></P></TD></TR>
 
-<TD></TD><TD><FONT CLASS="text">-aaosdcolor=V</TD><TD></TD><TD><FONT CLASS="text">OSD szín megváltoztatása</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aasubcolor=V</TD><TD></TD><TD><FONT CLASS="text">feliratok színének megváltoztatása</TD><TR>
-<TD COLSPAN=3></TD><TD><P><I><FONT CLASS="text">ahol a V lehet: (0/normál, 1/sötét, 2/bold, 3/boldfont, 4/reverz, 5/special)</P></TD></TR>
+<TD></TD><TD>-aaosdcolor=V</TD><TD></TD><TD>OSD szín megváltoztatása</TD><TR>
+<TD></TD><TD>-aasubcolor=V</TD><TD></TD><TD>feliratok színének megváltoztatása</TD><TR>
+<TD COLSPAN=3></TD><TD><P><I>ahol a V lehet: (0/normál, 1/sötét, 2/bold, 3/boldfont, 4/reverz, 5/special)</P></TD></TR>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">AAlib itselves provides a large sum of options.
+<TD COLSPAN=4><P><B>AAlib itselves provides a large sum of options.
 Here are some important:</P></B></TD><TR>
 
-<TD></TD><TD><FONT CLASS="text">-aadriver</TD><TD></TD><TD><FONT CLASS="text">aa meghajtó beállítása (X11, curses, linux)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aaextended</TD><TD></TD><TD><FONT CLASS="text">az összes 256 karakter használata</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aaeight</TD><TD></TD><TD><FONT CLASS="text">8 bites ascii használata</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aahelp</TD><TD></TD><TD><FONT CLASS="text">az összes aalib opció kiírása</TD><TR>
+<TD></TD><TD>-aadriver</TD><TD></TD><TD>aa meghajtó beállítása (X11, curses, linux)</TD><TR>
+<TD></TD><TD>-aaextended</TD><TD></TD><TD>az összes 256 karakter használata</TD><TR>
+<TD></TD><TD>-aaeight</TD><TD></TD><TD>8 bites ascii használata</TD><TR>
+<TD></TD><TD>-aahelp</TD><TD></TD><TD>az összes aalib opció kiírása</TD><TR>
 </TABLE></P>
 
 <P>Megj: a renderelés nagyon CPU igényes, különösen ha AA-on-X-et
@@ -705,23 +704,19 @@ overlay, vagy hardveres skálázás)<BR>
 
 <P>
 <TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">Jelenleg a következõ opciókat veszi figyelembe:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">
-  -vo vesa:opciók</TD><TD></TD><TD><FONT CLASS="text">
-  jelenleg a következõk: <b>dga</b> a DGA módot
+<TD COLSPAN=4><P><B>Jelenleg a következõ opciókat veszi figyelembe:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>  -vo vesa:opciók</TD><TD></TD><TD>  jelenleg a következõk: <b>dga</b> a DGA módot
   kényszeríti, a <b>nodga</b> pedig megtiltja. Megj.: a paraméterek elhagyása a
   DGA mód autodetektálását eredményezi. (A közeljövõben lehetséges lesz itt
   megadni a mód paramétereit mint például képfrissítés, váltottsor, doublescan,
   stb)</TD><TR>
-<FONT CLASS="text">hamarosan implementálva lesz (Will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43,  85,  d100)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT CLASS="text">felhasználó által megadott videomód használata</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-x, -y</TD><TD></TD><TD><FONT CLASS="text">megadott skálázás használata</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-zoom</TD><TD></TD><TD><FONT CLASS="text">skálázás bekapcsolása</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fs</TD><TD></TD><TD><FONT CLASS="text">teljesképernyõs módra nagyítás</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fs -zoom</TD><TD></TD><TD><FONT CLASS="text">megadott skálázás teljesképernyõs módra</TD><TR>
-<TD></TD><TD><FONT CLASS="text">
-  -double</TD><TD></TD><TD><FONT CLASS="text">
-  dupla bufferelés bekapcsolása. (Csak DGA módban). Lassabb
+hamarosan implementálva lesz (Will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43,  85,  d100)</TD><TR>
+<TD></TD><TD>-screenw, -screenh, -bpp</TD><TD></TD><TD>felhasználó által megadott videomód használata</TD><TR>
+<TD></TD><TD>-x, -y</TD><TD></TD><TD>megadott skálázás használata</TD><TR>
+<TD></TD><TD>-zoom</TD><TD></TD><TD>skálázás bekapcsolása</TD><TR>
+<TD></TD><TD>-fs</TD><TD></TD><TD>teljesképernyõs módra nagyítás</TD><TR>
+<TD></TD><TD>-fs -zoom</TD><TD></TD><TD>megadott skálázás teljesképernyõs módra</TD><TR>
+<TD></TD><TD>  -double</TD><TD></TD><TD>  dupla bufferelés bekapcsolása. (Csak DGA módban). Lassabb
   mint a síma bufferelés, de kizárja a villogást.</TD><TR>
 </TABLE>
 </P>

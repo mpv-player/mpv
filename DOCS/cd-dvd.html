@@ -7,7 +7,6 @@
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=4.1>4.1. CD-ROM drives</A></B></P>
 
@@ -108,47 +107,41 @@ CDROM.</P>
 
 
 <TABLE BORDER=0 WIDTH=100%>
-<TD VALIGN=top><FONT CLASS="text">-dvd &lt;title_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Enables DVD support and selects title.</TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-chapter &lt;chapter_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Selects DVD chapter(s) to play (default: play from chapter 1).
+<TD VALIGN=top>-dvd &lt;title_id&gt;&nbsp;</TD>
+<TD>Enables DVD support and selects title.</TD><TR>
+<TD VALIGN=top>-chapter &lt;chapter_id&gt;&nbsp;</TD>
+<TD>Selects DVD chapter(s) to play (default: play from chapter 1).
   Example : <CODE>-chapter 5-10</CODE> or <CODE>-chapter -9</CODE></TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdangle &lt;angle_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Selects camera angle (default: 1)</TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-alang &lt;country code&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
-  The <CODE>country code</CODE> tells <B>MPlayer</B> which audio language(s) to prefer.
+<TD VALIGN=top>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
+<TD>Selects camera angle (default: 1)</TD><TR>
+<TD VALIGN=top>-alang &lt;country code&gt;&nbsp;</TD>
+<TD>  The <CODE>country code</CODE> tells <B>MPlayer</B> which audio language(s) to prefer.
   For the list of available languages, add <CODE>-v</CODE> option after
   your DVD options, and browse the output.<BR>
   For example :<BR>
   &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - first tries to find hungarian
   audio, and if not found, decode english audio.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-slang &lt;country code&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
-  Turns on DVD subtitles. The <CODE>country code</CODE> tells <B>MPlayer</B>
+<TD VALIGN=top>-slang &lt;country code&gt;&nbsp;</TD>
+<TD>  Turns on DVD subtitles. The <CODE>country code</CODE> tells <B>MPlayer</B>
   which language(s) to prefer.
   For the list of available languages, add <CODE>-v</CODE> option after
   your DVD options, and browse the output.<BR>
   For example :<BR>
   &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - first tries to display hungarian
   subtitles, and if not found, display english subtitles.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-sid &lt;subtitle_id&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
-  Displays a subtitle channel with the given <CODE>id</CODE> (values can be
+<TD VALIGN=top>-sid &lt;subtitle_id&gt;&nbsp;</TD>
+<TD>  Displays a subtitle channel with the given <CODE>id</CODE> (values can be
   0-31). Useful for example with badly mastered DVDs where country code
   selects the wrong channel.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-csslib &lt;path/filename&gt;</TD>
-<TD><FONT CLASS="text">
-  (old-style DVD option) This option is used to override the default location
+<TD VALIGN=top>-csslib &lt;path/filename&gt;</TD>
+<TD>  (old-style DVD option) This option is used to override the default location
   of <CODE>libcss.so</CODE>
   </TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdauth &lt;DVD device&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
-  (old-style DVD option) Turns on DVD authentication using the given device.
+<TD VALIGN=top>-dvdauth &lt;DVD device&gt;&nbsp;</TD>
+<TD>  (old-style DVD option) Turns on DVD authentication using the given device.
   </TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdkey &lt;CSS key&gt;</TD>
-<TD><FONT CLASS="text">
-  (old-style DVD option) When decoding from non-DVD, this option gives the
+<TD VALIGN=top>-dvdkey &lt;CSS key&gt;</TD>
+<TD>  (old-style DVD option) When decoding from non-DVD, this option gives the
   CSS key needed to crack the DVD (the key is printed when authenticating
   with DVD).
   </TD></TR>

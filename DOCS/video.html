@@ -6,7 +6,6 @@
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.3.1>2.3.1. Video output devices</A></B></P>
 
@@ -451,19 +450,19 @@ also help. Thanks!</P>
 
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">There are several commandline switches for SDL:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT CLASS="text">specifies sdl video driver to use (ie. aalib, dga, x11)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-ao sdl:name</TD><TD></TD><TD><FONT CLASS="text">specifies sdl audio driver to use (ie. dsp,
+<TD COLSPAN=4><P><B>There are several commandline switches for SDL:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>-vo sdl:name</TD><TD>&nbsp;&nbsp;</TD><TD>
+specifies sdl video driver to use (ie. aalib, dga, x11)</TD><TR>
+<TD></TD><TD>-ao sdl:name</TD><TD></TD><TD>specifies sdl audio driver to use (ie. dsp,
 esd, arts)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-noxv</TD><TD></TD><TD><FONT CLASS="text">disables Xvideo hardware acceleration</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-forcexv</TD><TD></TD><TD><FONT CLASS="text">tries to force Xvideo acceleration</TD><TR>
+<TD></TD><TD>-noxv</TD><TD></TD><TD>disables Xvideo hardware acceleration</TD><TR>
+<TD></TD><TD>-forcexv</TD><TD></TD><TD>tries to force Xvideo acceleration</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">SDL Keys:</B></P></TD><TR>
+<TD COLSPAN=4><P><B>SDL Keys:</B></P></TD><TR>
 
-<TD></TD><TD><FONT CLASS="text">F</TD><TD></TD><TD><FONT CLASS="text">toggles fullscreen/windowed mode</TD><TR>
-<TD></TD><TD><FONT CLASS="text">C</TD><TD></TD><TD><FONT CLASS="text">cycles available fullscreen modes</TD><TR>
-<TD></TD><TD><FONT CLASS="text">W/S</TD><TD></TD><TD><FONT CLASS="text">mappings for * and / (mixer control)</TD><TR>
+<TD></TD><TD>F</TD><TD></TD><TD>toggles fullscreen/windowed mode</TD><TR>
+<TD></TD><TD>C</TD><TD></TD><TD>cycles available fullscreen modes</TD><TR>
+<TD></TD><TD>W/S</TD><TD></TD><TD>mappings for * and / (mixer control)</TD><TR>
 
 </TABLE></P>
 
@@ -498,13 +497,13 @@ whatever.  And don't forget to register your UniVBE ;))</P>
 <P>The FBdev output takes some additional parameters above the others:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
-<FONT CLASS="text">specify the framebuffer device to use (/dev/fb0)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fbmode</TD><TD></TD><TD><FONT CLASS="text">mode name to use (according to /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fbmodeconfig</TD><TD></TD><TD><FONT CLASS="text">	config file of modes (default /etc/fb.modes)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3><FONT CLASS="text">IMPORTANT values, see example.conf</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-monitor_vfreq</TD><TD></TD><TR>
-<TD></TD><TD><FONT CLASS="text">-monitor_dotclock</TD><TD></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>-fb</TD><TD>&nbsp;&nbsp;</TD><TD>
+specify the framebuffer device to use (/dev/fb0)</TD><TR>
+<TD></TD><TD>-fbmode</TD><TD></TD><TD>mode name to use (according to /etc/fb.modes)</TD><TR>
+<TD></TD><TD>-fbmodeconfig</TD><TD></TD><TD>	config file of modes (default /etc/fb.modes)</TD><TR>
+<TD></TD><TD>-monitor_hfreq</TD><TD></TD><TD ROWSPAN=3>IMPORTANT values, see example.conf</TD><TR>
+<TD></TD><TD>-monitor_vfreq</TD><TD></TD><TR>
+<TD></TD><TD>-monitor_dotclock</TD><TD></TD><TR>
 </TABLE></P>
 
 <P>If you want to change to a specific mode, then use</P>
@@ -619,29 +618,29 @@ Quake, etc. MPlayer contains a very usable driver for it.
 If ./configure detects aalib installed, the aalib libvo driver will be built.</P>
 
 <P><TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">You can use some keys in the AA Window to change rendering options:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">1</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">decrease contrast</TD><TR>
-<TD></TD><TD><FONT CLASS="text">2</TD><TD></TD><TD><FONT CLASS="text">increase contrast</TD><TR>
-<TD></TD><TD><FONT CLASS="text">3</TD><TD></TD><TD><FONT CLASS="text">decrease brightness</TD><TR>
-<TD></TD><TD><FONT CLASS="text">4</TD><TD></TD><TD><FONT CLASS="text">increase brightness</TD><TR>
-<TD></TD><TD><FONT CLASS="text">5</TD><TD></TD><TD><FONT CLASS="text">switch fast rendering on/off</TD><TR>
-<TD></TD><TD><FONT CLASS="text">6</TD><TD></TD><TD><FONT CLASS="text">set dithering mode (none, error distribution, floyd steinberg)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">7</TD><TD></TD><TD><FONT CLASS="text">invert image</TD><TR>
-<TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">toggles between aa and mplayer control)</TD><TR>
+<TD COLSPAN=4><P><B>You can use some keys in the AA Window to change rendering options:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>1</TD><TD>&nbsp;&nbsp;</TD><TD>decrease contrast</TD><TR>
+<TD></TD><TD>2</TD><TD></TD><TD>increase contrast</TD><TR>
+<TD></TD><TD>3</TD><TD></TD><TD>decrease brightness</TD><TR>
+<TD></TD><TD>4</TD><TD></TD><TD>increase brightness</TD><TR>
+<TD></TD><TD>5</TD><TD></TD><TD>switch fast rendering on/off</TD><TR>
+<TD></TD><TD>6</TD><TD></TD><TD>set dithering mode (none, error distribution, floyd steinberg)</TD><TR>
+<TD></TD><TD>7</TD><TD></TD><TD>invert image</TD><TR>
+<TD></TD><TD>a</TD><TD></TD><TD>toggles between aa and mplayer control)</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">The following command line options can be used:</B></P></TD><TR>
+<TD COLSPAN=4><P><B>The following command line options can be used:</B></P></TD><TR>
 
-<TD></TD><TD><FONT CLASS="text">-aaosdcolor=V</TD><TD></TD><TD><FONT CLASS="text">change osd color</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aasubcolor=V</TD><TD></TD><TD><FONT CLASS="text">change subtitle color</TD><TR>
-<TD COLSPAN=3></TD><TD><P><I><FONT CLASS="text">where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special)</P></TD><TR>
+<TD></TD><TD>-aaosdcolor=V</TD><TD></TD><TD>change osd color</TD><TR>
+<TD></TD><TD>-aasubcolor=V</TD><TD></TD><TD>change subtitle color</TD><TR>
+<TD COLSPAN=3></TD><TD><P><I>where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special)</P></TD><TR>
 
-<TD COLSPAN=4><P><B><FONT CLASS="text">AAlib itselves provides a large sum of options.
+<TD COLSPAN=4><P><B>AAlib itselves provides a large sum of options.
 Here are some important:</P></B></TD><TR>
 
-<TD></TD><TD><FONT CLASS="text">-aadriver</TD><TD></TD><TD><FONT CLASS="text">set recommended aa driver (X11, curses, linux)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aaextended</TD><TD></TD><TD><FONT CLASS="text">use all 256 characters</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aaeight</TD><TD></TD><TD><FONT CLASS="text">use eight bit ascii</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-aahelp</TD><TD></TD><TD><FONT CLASS="text">prints out all aalib options</TD><TR>
+<TD></TD><TD>-aadriver</TD><TD></TD><TD>set recommended aa driver (X11, curses, linux)</TD><TR>
+<TD></TD><TD>-aaextended</TD><TD></TD><TD>use all 256 characters</TD><TR>
+<TD></TD><TD>-aaeight</TD><TD></TD><TD>use eight bit ascii</TD><TR>
+<TD></TD><TD>-aahelp</TD><TD></TD><TD>prints out all aalib options</TD><TR>
 </TABLE></P>
 
 <P>NOTE: the rendering is very CPU intensive, especially when using AA-on-X
@@ -718,14 +717,14 @@ in vm86 mode).<BR>
 
 <P>
 <TABLE BORDER=0>
-<TD COLSPAN=4><P><B><FONT CLASS="text">These switches of command line currently are available for VESA:</B></P></TD><TR>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">-vo vesa:opts</TD><TD></TD><TD><FONT CLASS="text">currently recognized: <b>dga</b> to force dga mode and <b>nodga</b> to disable dga mode. Note: you may omit these parameters to enable <b>autodetect</b> of dga mode. (In the future also will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT CLASS="text">force userdefined mode</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-x, -y</TD><TD></TD><TD><FONT CLASS="text">set userdefined prescaling</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-zoom</TD><TD></TD><TD><FONT CLASS="text">enables userdefined prescaling</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fs</TD><TD></TD><TD><FONT CLASS="text">scales image to fullscreen</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-fs -zoom</TD><TD></TD><TD><FONT CLASS="text">scales userdefined prescaling to fullscreen</TD><TR>
-<TD></TD><TD><FONT CLASS="text">-double</TD><TD></TD><TD><FONT CLASS="text">enables double buffering mode. (Available only in DGA mode). Should be slower of single buffering, but has no flickering effects.</TD><TR>
+<TD COLSPAN=4><P><B>These switches of command line currently are available for VESA:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>-vo vesa:opts</TD><TD></TD><TD>currently recognized: <b>dga</b> to force dga mode and <b>nodga</b> to disable dga mode. Note: you may omit these parameters to enable <b>autodetect</b> of dga mode. (In the future also will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43, 85, d100)</TD><TR>
+<TD></TD><TD>-screenw, -screenh, -bpp</TD><TD></TD><TD>force userdefined mode</TD><TR>
+<TD></TD><TD>-x, -y</TD><TD></TD><TD>set userdefined prescaling</TD><TR>
+<TD></TD><TD>-zoom</TD><TD></TD><TD>enables userdefined prescaling</TD><TR>
+<TD></TD><TD>-fs</TD><TD></TD><TD>scales image to fullscreen</TD><TR>
+<TD></TD><TD>-fs -zoom</TD><TD></TD><TD>scales userdefined prescaling to fullscreen</TD><TR>
+<TD></TD><TD>-double</TD><TD></TD><TD>enables double buffering mode. (Available only in DGA mode). Should be slower of single buffering, but has no flickering effects.</TD><TR>
 </TABLE>
 </P>
 

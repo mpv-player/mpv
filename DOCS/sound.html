@@ -6,7 +6,6 @@
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.3.2>2.3.2. Audio output devices</A></B></P>
 
@@ -15,15 +14,15 @@ contains these drivers:</P>
 
 <TABLE BORDER=0>
 
-<TR><TD COLSPAN=4><P><B><FONT CLASS="text">General:</B></P></TD></TR>
+<TR><TD COLSPAN=4><P><B>General:</B></P></TD></TR>
 
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS (ioctl) driver (supports hardware AC3 passthrough)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sdl</TD><TD></TD><TD><FONT CLASS="text">SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">nas</TD><TD></TD><TD><FONT CLASS="text">NAS (Network Audio System) driver</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">alsa5</TD><TD></TD><TD><FONT CLASS="text">native ALSA 0.5 driver</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">alsa9</TD><TD></TD><TD><FONT CLASS="text">native ALSA 0.9 driver (works, but has problems -> use OSS) (supports hardware AC3 passthrough)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sun</TD><TD></TD><TD><FONT CLASS="text">SUN audio driver (<CODE>/dev/audio</CODE>) for BSD and Solaris8 users</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">arts</TD><TD></TD><TD><FONT CLASS="text">native ARTS driver (mostly for KDE users)</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) driver (supports hardware AC3 passthrough)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL driver (supports up/downsampling, <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) driver</TD></TR>
+<TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>native ALSA 0.5 driver</TD></TR>
+<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>native ALSA 0.9 driver (works, but has problems -> use OSS) (supports hardware AC3 passthrough)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN audio driver (<CODE>/dev/audio</CODE>) for BSD and Solaris8 users</TD></TR>
+<TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>native ARTS driver (mostly for KDE users)</TD></TR>
 
 </TABLE>
 
@@ -51,70 +50,70 @@ there are problems like lost sync and disappearing audio.</LI>
 <P><B><A NAME=2.3.2.1>2.3.2.1. Sound Card experiences, recommendations</A></B></P>
 
 <TABLE BORDER=0 WIDTH="100%">
-<TR><TD COLSPAN=3><B><FONT CLASS="text">VIA onboard chipset (via82cxxx) 48kHz only</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"> from <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">here</A></TD><TR>
+<TR><TD COLSPAN=3><B>VIA onboard chipset (via82cxxx) 48kHz only</B></TD><TR>
+<TD></TD><TD>Driver:</TD><TD> from <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">here</A></TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Aureal Vortex 2</B></TD><TR>
-<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">no driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">no driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD>48</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver2:</TD><TD><FONT CLASS="text"> from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A><BR>
+<TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>no driver</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>no driver</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
+<TD></TD><TD>Driver:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
+<TD></TD><TD>Driver2:</TD><TD> from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A><BR>
 (<I>buffer size increased to 32k</I>)</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">GUS PnP</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">no driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>GUS PnP</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>no driver</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">SB Live!</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">Analog OK, SP/DIF not working</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">Both OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">192</TD><TR>
+<TD COLSPAN=3><B>SB Live!</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>Analog OK, SP/DIF not working</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>Both OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>192</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">SB AWE 64</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">max 44kHz</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">48kHz sounds bad</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>SB AWE 64</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>max 44kHz</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>48kHz sounds bad</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">not OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">44</TD><TR>
+<TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>not OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>44</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound MAX</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">ESS 688</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>ESS 688</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">C-Media cards (which ones?)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">not OK (hissing) (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>C-Media cards (which ones?)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>not OK (hissing) (?)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Yamaha cards (*ymf*)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">not OK (?) (maybe <CODE>-ao sdl</CODE>)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK only with ALSA 0.5 with OSS emulation <B>AND</B> <CODE>-ao sdl</CODE> (!) (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>Yamaha cards (*ymf*)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>not OK (?) (maybe <CODE>-ao sdl</CODE>)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK only with ALSA 0.5 with OSS emulation <B>AND</B> <CODE>-ao sdl</CODE> (!) (?)</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Cards with envy24 chips (like Terratec EWS88MT)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">?</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">?</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>Cards with envy24 chips (like Terratec EWS88MT)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>?</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>?</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">PC Speaker or DAC</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK (Use the SDL driver: <CODE>-ao sdl</CODE>)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">no driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Max kHz:</TD><TD><FONT CLASS="text">The driver emulates 44.1, maybe more.</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD>
+<TD COLSPAN=3><B>PC Speaker or DAC</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK (Use the SDL driver: <CODE>-ao sdl</CODE>)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>no driver</TD><TR>
+<TD></TD><TD>Max kHz:</TD><TD>The driver emulates 44.1, maybe more.</TD><TR>
+<TD></TD><TD>Driver:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD>
 </TABLE>
 
 <UL>

@@ -6,7 +6,6 @@
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.4>2.4.  Enkódolás a MEncoderrel</A></B></P>
 
@@ -124,18 +123,14 @@ mutatja be. Csak két parancs szükséges :<BR>
 <P>
   <TABLE>
   <TR>   
-    <TD><FONT CLASS="text">
-      <CODE>rm frameno.avi</CODE></TD>
-    <TD><FONT CLASS="text">
-      <B>egy esetleges elõzõ 3 menetes enkódolásból származó file törlése,
+    <TD>      <CODE>rm frameno.avi</CODE></TD>
+    <TD>      <B>egy esetleges elõzõ 3 menetes enkódolásból származó file törlése,
       mely konfliktolhat a most következõvel</B></TD>
   </TR>
   <TR> 
-    <TD><FONT CLASS="text">
-      <CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
+    <TD>      <CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
         frameno.avi</CODE></TD>
-    <TD><FONT CLASS="text">
-      <B><U>Elsõ menet</U> : egy csak audiot tartalmazó AVI file jön létre,
+    <TD>      <B><U>Elsõ menet</U> : egy csak audiot tartalmazó AVI file jön létre,
       ami a kért formátumban tartalmazza az audio streamet. Ha akarod
       használhatod a <CODE>-lameopts</CODE> opciót. Ha ez egy hosszabb film,
       e menet végén a MEncoder kiírja hogy mekkora bitrate-tel tömöríts
@@ -143,20 +138,16 @@ mutatja be. Csak két parancs szükséges :<BR>
       CD-re.</B></TD>
   </TR>
   <TR> 
-    <TD><FONT CLASS="text">
-      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
+    <TD>      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
         -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT CLASS="text">
-      <B><U>Második menet</U> : alias a DivX4 video enkódolás elsõ menete.
+    <TD>      <B><U>Második menet</U> : alias a DivX4 video enkódolás elsõ menete.
       Opcionálisan megadhatod azt a bitrate-et amit a MEncoder az elõzõ
       menet végén kiírt, lásd feljebb.</B></TD>
   </TR>
   <TR> 
-    <TD><FONT CLASS="text">
-      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
+    <TD>      <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
         -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT CLASS="text">
-      <B><U>Harmadik menet</U> : alias a DivX4 video enkódolás második menete.
+    <TD>      <B><U>Harmadik menet</U> : alias a DivX4 video enkódolás második menete.
       Opcionálisan megadhatod azt a bitrate-et amit a MEncoder az elõzõ
       menet végén kiírt, lásd feljebb. Ebben a menetben a
       <CODE>frameno.avi</CODE>-ban levõ audio belekerül a célfileba..
@@ -313,42 +304,32 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
 
 <TABLE BORDER=1>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-ss</I> idõpont</TD>
-  <TD><FONT CLASS="text">
-    enkódolás indítása a megadott idõponttól (csak keyframe-tõl indulhat !)
+  <TD>    <I>-ss</I> idõpont</TD>
+  <TD>    enkódolás indítása a megadott idõponttól (csak keyframe-tõl indulhat !)
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-endpos</I> idõpont/idõtartam</TD>
-  <TD><FONT CLASS="text">
-    enkódolás megállítása a megadott idõ letelte után, vagy adott idõpont
+  <TD>    <I>-endpos</I> idõpont/idõtartam</TD>
+  <TD>    enkódolás megállítása a megadott idõ letelte után, vagy adott idõpont
     elérésekor. Lásd a manpage-t !
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-o</I> filenév</TD>
-  <TD><FONT CLASS="text">
-    kimeneti filenév megadása
+  <TD>    <I>-o</I> filenév</TD>
+  <TD>    kimeneti filenév megadása
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-sws</I> 0-2</TD>
-  <TD><FONT CLASS="text">
-    átmérezetési módszer meghatározása<BR>
+  <TD>    <I>-sws</I> 0-2</TD>
+  <TD>    átmérezetési módszer meghatározása<BR>
     &nbsp;&nbsp;0 - fast bilinear<BR>
     &nbsp;&nbsp;1 - bilinear<BR>
     &nbsp;&nbsp;2 - bicubic (legjobb minõség)<BR>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-ovc</I> codecnév</TD>
-  <TD><FONT CLASS="text">
-    Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
+  <TD>    <I>-ovc</I> codecnév</TD>
+  <TD>    Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
     &nbsp;&nbsp;<B>help</B> - codecek listája<BR>
     &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
     &nbsp;&nbsp;<B>copy</B> - nincs enkódolás, csak stream másolás (most csak AVI/ASF-bõl)<BR>
@@ -358,10 +339,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-oac</I> codecnév</TD>
-  <TD><FONT CLASS="text">
-    Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
+  <TD>    <I>-oac</I> codecnév</TD>
+  <TD>    Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
     &nbsp;&nbsp;<B>help</B> - codecek listája<BR>
     &nbsp;&nbsp;<B>copy</B> - nincs enkódolás, csak stream másolás (most csak AVI/ASF-bõl, és csak CBR audiot)<BR>
     &nbsp;&nbsp;<B>pcm</B> - tömörítetlen PCM<BR>
@@ -369,10 +348,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-divx4opts</I></TD>
-  <TD><FONT CLASS="text">
-    Ha DivX4-be enkódolsz, itt megadhatod a paramétereket, pl :<BR>
+  <TD>    <I>-divx4opts</I></TD>
+  <TD>    Ha DivX4-be enkódolsz, itt megadhatod a paramétereket, pl :<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Leghasznosabb opciók: <B>(a teljes lista a manpage-ban található !)</B><BR>
     &nbsp;&nbsp;<B>help</B> - segíccség<BR>
@@ -382,10 +359,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-lavcopts</I></TD>
-  <TD><FONT CLASS="text">
-    Ha egy libavcodec-es codec-kel enkódolsz, itt megadhatod a paramétereket, pl :<BR>
+  <TD>    <I>-lavcopts</I></TD>
+  <TD>    Ha egy libavcodec-es codec-kel enkódolsz, itt megadhatod a paramétereket, pl :<BR>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
     Leghasznosabb opciók: <B>(a teljes lista a manpage-ban található !)</B><BR>
     &nbsp;&nbsp;<B>help</B> - segíccség<BR>
@@ -396,10 +371,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
-    <I>-lameopts</I></TD>
-  <TD><FONT CLASS="text">
-    Ha MP3-ba kódolsz, itt adhatod meg a paramétereket, pl :<BR>
+  <TD>    <I>-lameopts</I></TD>
+  <TD>    Ha MP3-ba kódolsz, itt adhatod meg a paramétereket, pl :<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
     &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
     Leghasznosabb opciók: <B>(a teljes lista a manpage-ban található !)</B><BR>
