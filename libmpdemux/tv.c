@@ -104,7 +104,7 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_VIDEO, 0) != TVI_CONTROL_TRUE)
     {
 	mp_msg(MSGT_TV, MSGL_ERR, "Error: no video input present!\n");
-	return;
+	return 0;
     }
 
     if (!strcasecmp(tv_param_outfmt, "yv12"))
