@@ -465,7 +465,6 @@ preinit( const char *arg )
                is_g200 = 1;
                use_crtc2 = 0;
           }
-          bes->SetOpacity( bes, 0 );
      }
 
      if (use_crtc2) {
@@ -490,7 +489,6 @@ preinit( const char *arg )
                        DirectFBErrorString( res ) );
                return -1;
           }
-          crtc2->SetOpacity( crtc2, 0 );
      }
 
      if (use_input) {
@@ -775,7 +773,6 @@ config( uint32_t width, uint32_t height,
                        DirectFBErrorString( res ) );
                return -1;
           }
-          spic->SetOpacity( spic, 0 );
 
           dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
           dlc.pixelformat = DSPF_ALUT44;
@@ -838,14 +835,6 @@ config( uint32_t width, uint32_t height,
              sub_width, sub_height,
              pixelformat_name( subframe_format ),
              use_crtc2 ? (use_spic ? "Sub-picture layer" : "CRTC2") : "BES" );
-
-     /* Display all needed layers */
-     if (use_bes)
-          bes->SetOpacity( bes, 0xFF );
-     if (use_crtc2)
-          crtc2->SetOpacity( crtc2, 0xFF );
-     if (use_spic)
-          spic->SetOpacity( spic, 0xFF );
 
      osd_dirty = 0;
      osd_current = 1;
