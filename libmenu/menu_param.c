@@ -22,7 +22,7 @@
 #include "menu.h"
 #include "menu_list.h"
 #include "../input/input.h"
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 
 struct list_entry_s {
   struct list_entry p;

@@ -1,5 +1,5 @@
 
-// gcc cache2.c ../linux/shmem.o -o cache2
+// gcc cache2.c ../osdep/shmem.o -o cache2
 
 // Initial draft of my new cache system...
 // includes some simulation code, using usleep() to emulate limited bandwith
@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "../linux/shmem.h"
+#include "../osdep/shmem.h"
 
 typedef struct {
   // constats:

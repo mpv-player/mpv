@@ -7,7 +7,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "mp_msg.h"
-#include "../linux/timer.h"
+#include "../osdep/timer.h"
 #include "../input/input.h"
 #include "stream.h"
 #include "dvdnav_stream.h"

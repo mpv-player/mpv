@@ -13,7 +13,7 @@
 #include "menu.h"
 
 #include "../libvo/font_load.h"
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 
 struct menu_priv_s {
   char** lines;

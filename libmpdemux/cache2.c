@@ -17,7 +17,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "../linux/shmem.h"
+#include "../osdep/shmem.h"
 
 #include "mp_msg.h"
 

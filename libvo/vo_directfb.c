@@ -1411,7 +1411,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, in
 
 extern void mplayer_put_key(int code);
 
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 
 static void check_events(void)
 {

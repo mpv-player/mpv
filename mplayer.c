@@ -64,8 +64,8 @@
 #include "spudec.h"
 #include "vobsub.h"
 
-#include "linux/getch2.h"
-#include "linux/timer.h"
+#include "osdep/getch2.h"
+#include "osdep/timer.h"
 
 #include "cpudetect.h"
 

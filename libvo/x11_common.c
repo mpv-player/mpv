@@ -399,7 +399,7 @@ void vo_uninit( void )
  mDisplay=NULL;
 }
 
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 #include "wskeys.h"
 
 extern void mplayer_put_key(int code);

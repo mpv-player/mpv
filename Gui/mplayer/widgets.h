@@ -8,7 +8,7 @@
 #include <gtk/gtk.h>
 
 #include "../../config.h"
-#include "../../linux/shmem.h"
+#include "../../osdep/shmem.h"
 #include "play.h"
 #include "mplayer.h"
 #include "../interface.h"

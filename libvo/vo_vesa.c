@@ -36,7 +36,7 @@
 
 #include "fastmemcpy.h"
 #include "sub.h"
-#include "linux/vbelib.h"
+#include "osdep/vbelib.h"
 #include "bswap.h"
 #include "aspect.h"
 #include "vesa_lvo.h"

@@ -9,7 +9,7 @@
 
 #include "../libvo/osd.h"
 #include "../libvo/font_load.h"
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 #include "../asxparser.h"
 #include "../libmpdemux/stream.h"
 

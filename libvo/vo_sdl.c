@@ -1159,7 +1159,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
  *  returns : doesn't return
  **/
 
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 extern void mplayer_put_key(int code);
 
 #define shift_key (event.key.keysym.mod==(KMOD_LSHIFT||KMOD_RSHIFT)) 

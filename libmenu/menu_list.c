@@ -13,7 +13,7 @@
 #include "menu.h"
 
 #include "../libvo/font_load.h"
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 
 #define IMPL 1
 #include "menu_list.h"

@@ -40,7 +40,7 @@ LIBVD_EXTERN(xanim)
 #include "mp_msg.h"
 #include "bswap.h"
 
-#include "linux/timer.h"
+#include "osdep/timer.h"
 #include "libvo/fastmemcpy.h"
 
 #if 0

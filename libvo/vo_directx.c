@@ -28,7 +28,7 @@
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
 #include "../input/input.h"
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 #include "../mp_msg.h"
 #include "aspect.h"
 

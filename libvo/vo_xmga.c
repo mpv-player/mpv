@@ -38,7 +38,7 @@
 #include "aspect.h"
 
 #ifdef SHOW_TIME
-#include "../linux/timer.h"
+#include "../osdep/timer.h"
 static unsigned int timer=0;
 static unsigned int timerd=0;
 #endif

@@ -31,7 +31,7 @@
 #include "font_load.h"
 #include "sub.h"
 
-#include "linux/keycodes.h"
+#include "osdep/keycodes.h"
 #include <aalib.h>
 #include "cfgparser.h"
 #include "mp_msg.h"

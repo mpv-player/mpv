@@ -21,9 +21,9 @@
 #ifdef MP_DEBUG
 #include <assert.h>
 #endif
-#include "../linux/getch2.h"
-#include "../linux/keycodes.h"
-#include "../linux/timer.h"
+#include "../osdep/getch2.h"
+#include "../osdep/keycodes.h"
+#include "../osdep/timer.h"
 #include "../mp_msg.h"
 #include "../cfgparser.h"
 

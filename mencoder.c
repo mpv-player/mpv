@@ -75,7 +75,7 @@ static char* banner_text=
 
 #include "libvo/fastmemcpy.h"
 
-#include "linux/timer.h"
+#include "osdep/timer.h"
 
 int vo_doublebuffering=0;
 int vo_directrendering=0;

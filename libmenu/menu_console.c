@@ -19,9 +19,9 @@
 #include "menu.h"
 
 #include "../libvo/font_load.h"
-#include "../linux/keycodes.h"
+#include "../osdep/keycodes.h"
 #include "../input/input.h"
-#include "../linux/timer.h"
+#include "../osdep/timer.h"
 
 typedef struct history_st history_t;
 
