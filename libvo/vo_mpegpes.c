@@ -5,7 +5,7 @@
 #define QUALITY 90
 
 // #undef if you don't want mpeg1 transcoder (you'll be limited to mpeg1/2 playback only)
-#define USE_LIBFAME
+//#define USE_LIBFAME
 
 /* 
  * Based on:
