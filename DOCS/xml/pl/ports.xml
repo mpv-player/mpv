@@ -24,8 +24,8 @@ Jako superu¿ytkownik mo¿esz zainstalowaæ pakiet <filename>.deb</filename> tak, j
 </para>
 
 <para>
-Christian Marillat buduje  dla Debiana nieoficjalne paczki MPlayera, MEncodera 
-i czcionek ju¿ przez jaki¶ czas, mo¿esz je pobraæ  (apt-get) z jego
+Christian Marillat buduje dla Debiana nieoficjalne paczki MPlayera, MEncodera 
+i czcionek ju¿ przez jaki¶ czas, mo¿esz je pobraæ (apt-get) z jego
 <ulink url="http://marillat.free.fr/">strony domowej</ulink>.
 </para>
 </sect2>
@@ -141,8 +141,8 @@ make, to:
 </para>
 
 <para>
-W Solarisie przeznaczonym dla SPARC, potrzebujesz kompilatora GNU C/C++; nie ma znaczenia, czy jest
-on skonfigurowany z, czy bez GNU assemblera.
+W Solarisie przeznaczonym dla SPARC, potrzebujesz kompilatora GNU C/C++; nie ma
+znaczenia, czy jest on skonfigurowany z, czy bez GNU assemblera.
 </para>
 
 <para>
@@ -152,9 +152,9 @@ w znacz±cy sposób korzysta z instrukcji MMX, SSE i 3DNOW!,
 które nie mog± byæ skompilowane przy pomocy assemblera Sun <filename>/usr/ccs/bin/as</filename>.
 </para>
 
-<para>Skrypt <filename>configure</filename> stara siê okre¶liæ, jaki assembler wywo³ywany jest 
-przez komendê &quot;gcc&quot; (je¿eli próba zakoñczy siê fiaskiem, u¿yj opcji
-<option>--as=/gdziekolwiek/zainstalowa³e¶/gnu-as</option>, ¿eby okre¶liæ 
+<para>Skrypt <filename>configure</filename> stara siê okre¶liæ, jaki assembler
+wywo³ywany jest przez komendê &quot;gcc&quot; (je¿eli próba zakoñczy siê fiaskiem,
+u¿yj opcji <option>--as=/gdziekolwiek/zainstalowa³e¶/gnu-as</option>, ¿eby okre¶liæ 
 gdzie skrypt <filename>configure</filename> mo¿e znale¼æ GNU "as" w Twoim
 systemie).
 </para>
@@ -185,7 +185,6 @@ Typowy b³±d, jaki otrzymasz przy próbie budowy kompilatorem GNU C, który nie u¿y
 </screen>
 </para>
 
-
 <para>
 Ze wzglêdu na b³êdy wystêpuj±ce w Solarisie 8, mo¿esz nie byæ w stanie odtwarzaæ p³yt DVD 
 o pojemno¶ci wiêkszej ni¿ 4 GB:
@@ -194,16 +193,17 @@ o pojemno¶ci wiêkszej ni¿ 4 GB:
 <itemizedlist>
 <listitem><para>
 Sterownik sd(7D) dla Solarisa 8 x86 ma b³±d przy próbie dostêpu do bloku dyskowego >4GB
-urz±dzenia korzystaj±cego z logicznego rozmiaru bloku !=DEV_BSIZE (np. no¶nik CD-ROM i DVD).
-Ze wzglêdu na przepe³nienie liczb ca³kowitych 32Bitowych, odczytywany jest adres dysku modulo 4GB
+urz±dzenia korzystaj±cego z logicznego rozmiaru bloku !=DEV_BSIZE (np. no¶nik CD-ROM
+i DVD). Ze wzglêdu na przepe³nienie liczb ca³kowitych 32bitowych, odczytywany jest
+adres dysku modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
 Ten problem nie wystêpuje na Solarisie 8 przeznaczonym dla procesorów SPARC.
 </para></listitem>
 
 <listitem><para>
 Podobny b³±d wystêpuje w kodzie systemu plików hsfs(7FS) (znanym jako ISO9660),
-hsfs mo¿e nie obs³ugiwaæ partycji/dysków wiêkszych ni¿ 4GB, wszystkie dane s± odczytywane z 
-bloku modulo 4GB
+hsfs mo¿e nie obs³ugiwaæ partycji/dysków wiêkszych ni¿ 4GB, wszystkie dane s±
+odczytywane z bloku modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
 Problem mo¿e byæ rozwi±zany przy pomocy ³atki 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
@@ -347,7 +347,6 @@ wolna. U¿ywaj SDL.
 
 </sect2>
 
-
 <sect2 id="mingw">
 <title>MinGW</title>
 
@@ -375,7 +374,6 @@ wolna. U¿ywaj SDL.
 <screen>mplayer dvd://&lt;tytu³&gt; -dvd-device /d/</screen>
 
 </sect2>
-
 
 </sect1>
 <sect1 id="macos">
