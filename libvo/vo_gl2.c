@@ -107,7 +107,7 @@ static void CalcFlatPoint(int x,int y,GLfloat *px,GLfloat *py)
   if(*py>1.0) *py=1.0;
 }
 
-static void initTextures()
+static int initTextures()
 {
   unsigned char *line_1=0, *line_2=0, *mem_start=0;
   struct TexSquare *tsq=0;
@@ -164,7 +164,7 @@ static void initTextures()
       if(texture_width < 64 || texture_height < 64)
       {
       	fprintf (stderr, "GLERROR: Give up .. usable texture size not avaiable, or texture config error !\n");
-	exit(1);
+	return -1;
       }
     }
   }
@@ -281,6 +281,8 @@ static void initTextures()
 
     }	/* for all texnumx */
   }  /* for all texnumy */
+  
+  return 0;
 }
 
 static void resetTexturePointers(unsigned char *imageSource)
@@ -894,7 +896,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   texture_width=image_width;
   texture_height=image_height;
-  initTextures();
+  if (initTextures() < 0)
+    return -1;
 
   glDisable(GL_BLEND); 
   glDisable(GL_DEPTH_TEST);
