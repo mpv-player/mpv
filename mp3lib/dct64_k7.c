@@ -350,7 +350,7 @@ void __attribute__ (( __stdcall__ )) dct64_MMX_3dnowex(real *a,real *b,real *c)
 
 "	movd	"MANGLE(plus_1f)", %%mm6\n\t"
 "	punpckldq 120(%%ebx), %%mm6\n\t"      /* mm6 = 1.0 | 120(%%ebx)*/
-"	movq	x_plus_minus_3dnow, %%mm7\n\t" /* mm7 = +1 | -1 */
+"	movq	"MANGLE(x_plus_minus_3dnow)", %%mm7\n\t" /* mm7 = +1 | -1 */
 
 "	movq	32(%%ecx), %%mm0\n\t"
 "	movq	64(%%ecx), %%mm2\n\t"
