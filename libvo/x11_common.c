@@ -55,7 +55,7 @@
 #define WIN_LAYER_ABOVE_DOCK             10
  
 int fs_layer=WIN_LAYER_ABOVE_DOCK;
-int orig_layer=0;
+static int orig_layer=0;
 
 int stop_xscreensaver=0;
 
@@ -73,23 +73,23 @@ int mLocalDisplay;
 int WinID=-1;
 int vo_mouse_autohide = 0;
 int vo_wm_type = 0;
-int vo_fs_type = 0;
+static int vo_fs_type = 0;
 char** vo_fstype_list;
 
 /* if equal to 1 means that WM is a metacity (broken as hell) */
 int metacity_hack = 0;
 
-Atom XA_NET_SUPPORTED;
-Atom XA_NET_WM_STATE;
-Atom XA_NET_WM_STATE_FULLSCREEN;
-Atom XA_NET_WM_STATE_ABOVE;
-Atom XA_NET_WM_STATE_STAYS_ON_TOP;
-Atom XA_NET_WM_STATE_BELOW;
-Atom XA_NET_WM_PID;
-Atom XA_WIN_PROTOCOLS;
-Atom XA_WIN_LAYER;
-Atom XA_WIN_HINTS;
-Atom XA_BLACKBOX_PID;
+static Atom XA_NET_SUPPORTED;
+static Atom XA_NET_WM_STATE;
+static Atom XA_NET_WM_STATE_FULLSCREEN;
+static Atom XA_NET_WM_STATE_ABOVE;
+static Atom XA_NET_WM_STATE_STAYS_ON_TOP;
+static Atom XA_NET_WM_STATE_BELOW;
+static Atom XA_NET_WM_PID;
+static Atom XA_WIN_PROTOCOLS;
+static Atom XA_WIN_LAYER;
+static Atom XA_WIN_HINTS;
+static Atom XA_BLACKBOX_PID;
 
 #define XA_INIT(x) XA##x = XInternAtom(mDisplay, #x, False)
 
@@ -110,7 +110,7 @@ XF86VidModeModeInfo **vidmodes=NULL;
 XF86VidModeModeLine modeline;
 #endif
 
-int vo_x11_get_fs_type( int supported );
+static int vo_x11_get_fs_type(int supported);
 
 void vo_hidecursor ( Display *disp , Window win )
 {
@@ -165,12 +165,12 @@ void fstype_help(void)
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "layer", "use _WIN_LAYER hint with default layer");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "layer=<0..15>", "use _WIN_LAYER hint with a given layer number");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "above", "use _NETWM_STATE_ABOVE hint if available");
- mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "below", "use _NETWM_STATE_BELOW hint if vailable");
+ mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "below", "use _NETWM_STATE_BELOW hint if available");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "fullscreen", "use _NETWM_STATE_FULLSCREEN hint if availale");
  mp_msg(MSGT_VO, MSGL_INFO, "    %-15s %s\n", "stays_on_top", "use _NETWM_STATE_STAYS_ON_TOP hint if available");
 }
  
-int net_wm_support_state_test( Atom atom )
+static int net_wm_support_state_test(Atom atom)
 {
 #define NET_WM_STATE_TEST(x) { if (atom == XA_NET_WM_STATE_##x) { mp_msg( MSGT_VO,MSGL_V, "[x11] Detected wm supports " #x " state.\n" ); return vo_wm_##x; } }
  
@@ -181,7 +181,7 @@ int net_wm_support_state_test( Atom atom )
  return 0;
 }
 
-int x11_get_property(Atom type, Atom **args, unsigned long *nitems)
+static int x11_get_property(Atom type, Atom **args, unsigned long *nitems)
 {
   int             format;
   unsigned long   bytesafter;
@@ -191,7 +191,7 @@ int x11_get_property(Atom type, Atom **args, unsigned long *nitems)
                                          (unsigned char **) args ) && *nitems > 0 );
 }
 
-int vo_wm_detect( void )
+static int vo_wm_detect(void)
 {
  int             i;
  int             wm = 0;
@@ -247,7 +247,7 @@ int vo_wm_detect( void )
  return wm;
 }    
 
-void vo_init_atoms( void )
+static void init_atoms(void)
 {
  XA_INIT(_NET_SUPPORTED);
  XA_INIT(_NET_WM_STATE);
@@ -297,7 +297,7 @@ int vo_init( void )
  mScreen=DefaultScreen( mDisplay );     // Screen ID.
  mRootWin=RootWindow( mDisplay,mScreen );// Root window ID.
 
- vo_init_atoms();
+ init_atoms();
  
 #ifdef HAVE_XINERAMA
  if(XineramaIsActive(mDisplay))
@@ -763,7 +763,7 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
  XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
 }
 
-int vo_x11_get_gnome_layer (Display * mDisplay, Window win)
+static int vo_x11_get_gnome_layer(Display * mDisplay, Window win)
 {
  Atom type;
  int format;
@@ -800,7 +800,7 @@ void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
     xev.format = 32;
     xev.data.l[0] = layer?fs_layer:orig_layer; // if not fullscreen, stay on default layer
     xev.data.l[1] = CurrentTime;
-    mp_msg( MSGT_VO,MSGL_V,"[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
+    mp_msg( MSGT_VO,MSGL_V,"[x11] Layered style stay on top (layer %d).\n",xev.data.l[0] );
     XSendEvent(mDisplay, mRootWin, False, SubstructureNotifyMask, (XEvent *) &xev);
   } else
  if ( vo_fs_type & vo_wm_NETWM )
@@ -832,12 +832,12 @@ void vo_x11_setlayer( Display * mDisplay,Window vo_window,int layer )
 
    XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    state = XGetAtomName (mDisplay, xev.data.l[1]);
-   mp_msg( MSGT_VO,MSGL_V,"[x11] NET style stay on top ( layer %d ). Using state %s.\n",layer,state );
+   mp_msg( MSGT_VO,MSGL_V,"[x11] NET style stay on top (layer %d). Using state %s.\n",layer,state );
    XFree (state);
  }
 }
 
-int vo_x11_get_fs_type( int supported )
+static int vo_x11_get_fs_type(int supported)
 {
   int i;
   int type;
@@ -1110,8 +1110,8 @@ static int x11_selectinput_errorhandler(Display *display, XErrorEvent *event)
 {
 	if (event->error_code == BadAccess) {
 		selectinput_err = 1;
-		mp_msg(MSGT_VO, MSGL_ERR, "X11 error : BadAccess during XSelectInput Call\n");
-		mp_msg(MSGT_VO, MSGL_ERR, "X11 error : The 'ButtonPressMask' mask of specified window has probably already used by another appication(see man XSelectInput) \n");
+		mp_msg(MSGT_VO, MSGL_ERR, "X11 error: BadAccess during XSelectInput Call\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "X11 error: The 'ButtonPressMask' mask of specified window has probably already used by another appication (see man XSelectInput)\n");
 		/* If you think mplayer should shutdown with this error, comments out following line */
 		return 0;
 	}
@@ -1129,7 +1129,7 @@ void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask)
 	XSync(display, False);
 	XSetErrorHandler(old_handler);
 	if (selectinput_err) {
-		mp_msg(MSGT_VO, MSGL_ERR, "X11 error : Mplayer discards mouse control and retry XSelectInput...\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "X11 error: MPlayer discards mouse control (reconfiguring)\n");
 		XSelectInput(display, w, event_mask & (~(ButtonPressMask | ButtonReleaseMask | PointerMotionMask)) );
 	}
 }
@@ -1203,7 +1203,7 @@ void vo_vm_close(Display *dpy)
            for (i=0; i<modecount; i++)
              if ((vidmodes[i]->hdisplay == vo_screenwidth) && (vidmodes[i]->vdisplay == vo_screenheight)) 
                { 
-                 mp_msg(MSGT_VO,MSGL_INFO,"\nReturning to original mode %dx%d\n", vo_screenwidth, vo_screenheight);
+                 mp_msg(MSGT_VO,MSGL_INFO,"Returning to original mode %dx%d\n", vo_screenwidth, vo_screenheight);
                  break;
                }
 
