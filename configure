@@ -2164,6 +2164,19 @@ else
 fi
 echores "$_sys_sysinfo"
 
+echocheck "-Wall option"
+cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+_wall=no
+cc_check -Wall && _wall=yes
+if test "$_wall" = yes ; then
+  _ld_wall='-Wall'
+else
+  _ld_wall=''
+fi
+echores "$_wall"
+
 
 #########
 # VIDEO #
@@ -4390,9 +4403,9 @@ if test "$_profile" != "" || test "$_debug" != "" ; then
   _stripbinaries=no
 elif test -z "$CFLAGS" ; then
   if test "$host_arch" != "mips" ; then
-    CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
+    CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $_ld_wall"
   else
-    CFLAGS="-O4 $_march $_mcpu -ffast-math -fomit-frame-pointer"
+    CFLAGS="-O4 $_march $_mcpu -ffast-math -fomit-frame-pointer $_ld_wall"
   fi
   # always compile with '-g' if .developer:
   if test -f ".developer" ; then

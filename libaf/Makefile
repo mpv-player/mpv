@@ -6,7 +6,7 @@ SRCS=af.c af_mp.c af_dummy.c af_delay.c af_channels.c af_format.c af_resample.c 
 
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -Wall 
+CFLAGS  = $(OPTFLAGS) -I.
 .SUFFIXES: .c .o
 
 .c.o:
