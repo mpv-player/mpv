@@ -154,7 +154,7 @@ demuxer_t* demux_open_gif(demuxer_t* demuxer)
   demuxer->seekable = 0; // FIXME
 
   // go back to the beginning
-  stream_seek(stream,stream->start_pos);
+  stream_seek(demuxer->stream,demuxer->stream->start_pos);
 
   gif = DGifOpen(demuxer->stream, my_read_gif);
   if (!gif) {
