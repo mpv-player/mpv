@@ -2325,15 +2325,13 @@ Fixe le rapport hauteur/\:largeur de votre moniteur ou de votre TV.
 .PD 1
 .
 .TP
-.B \-double
-Désactive le double tamponnage (buffering).
+.B \-nodouble
+Désactive le double tamponnage (buffering), surtout à des fins de débogage.
 Le double tamponnage évite les phénomènes de scintillement en plaçant
 deux trames en mémoire, et en affichant l'une tandis que l'on décode
 l'autre.
 Peut affecter négativement l'OSD, mais évite les effets de scintillement
 de l'OSD.
-Cela nécessite deux fois plus de mémoire que pour un tampon unique, et donc
-cela ne marchera donc pas sur les cartes qui ont très peu de mémoire.
 .
 .TP
 .B \-nograbpointer
