@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include <inttypes.h>
+#include <unistd.h>
 
 #include "m_option.h"
 //#include "m_config.h"
