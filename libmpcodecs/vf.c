@@ -85,6 +85,7 @@ extern vf_info_t vf_info_spp;
 extern vf_info_t vf_info_yuvcsp;
 extern vf_info_t vf_info_kerndeint;
 extern vf_info_t vf_info_rgbtest;
+extern vf_info_t vf_info_qp;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -161,6 +162,7 @@ static vf_info_t* filter_list[]={
     &vf_info_yuvcsp,
     &vf_info_kerndeint,
     &vf_info_rgbtest,
+    &vf_info_qp,
     NULL
 };
 
