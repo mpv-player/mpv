@@ -136,10 +136,10 @@ enum MpegCodec {
 	MPG_CODEC_FAME
 };
 
-#if defined(USE_LIBAVCODEC)
-static int mpeg_codec = MPG_CODEC_AVCODEC;
-#elif defined(USE_LIBFAME)
+#if defined(USE_LIBFAME)
 static int mpeg_codec = MPG_CODEC_FAME;
+#elif defined(USE_LIBAVCODEC)
+static int mpeg_codec = MPG_CODEC_AVCODEC;
 #else
 static int mpeg_codec = MPG_CODEC_NONE;
 #endif
@@ -510,7 +510,7 @@ static void draw_osd(void)
 		if (!noprebuf) {
 			ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts);
 		}
-		write(fd_spu, spued->data, spued->count);
+		/*write(fd_spu, spued->data, spued->count);*/
 	}
 	disposd++;
 }
