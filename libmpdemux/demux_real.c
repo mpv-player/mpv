@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.24  2002/08/25 00:07:15  arpi
+    some files has some shit before teh audio/video headers...
+
     Revision 1.23  2002/08/24 23:07:34  arpi
     10l - fixed chunktab size calculation
 
@@ -885,9 +888,23 @@ void demux_open_real(demuxer_t* demuxer)
 		codec_pos = stream_tell(demuxer->stream);
 
 		tmp = stream_read_dword(demuxer->stream);
+		
+		mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_real: type_spec: len=%d  fpos=0x%X  first_dword=0x%X (%.4s)  \n",
+		    (int)codec_data_size,(int)codec_pos,tmp,&tmp);
+
+#if 1
+		// skip unknown shit - FIXME: find a better/cleaner way!
+		{   int len=codec_data_size;
+		    while(--len>=8){
+			if(tmp==MKTAG(0xfd, 'a', 'r', '.')) break; // audio
+			if(tmp==MKTAG('O', 'D', 'I', 'V')) break;  // video
+			tmp=(tmp<<8)|stream_read_char(demuxer->stream);
+		    }
+		}
+#endif
 
 #define stream_skip(st,siz) { int i; for(i=0;i<siz;i++) mp_msg(MSGT_DEMUX,MSGL_V," %02X",stream_read_char(st)); mp_msg(MSGT_DEMUX,MSGL_V,"\n");}
-
+		
 		if (tmp == MKTAG(0xfd, 'a', 'r', '.'))
 		{
 		    /* audio header */
@@ -1036,18 +1053,11 @@ void demux_open_real(demuxer_t* demuxer)
 		}
 		else
 //		case MKTAG('V', 'I', 'D', 'O'):
+		if(tmp == MKTAG('O', 'D', 'I', 'V'))
 		{
 		    /* video header */
 		    sh_video_t *sh = new_sh_video(demuxer, stream_id);
 
-		    tmp = stream_read_dword_le(demuxer->stream);
-		    mp_msg(MSGT_DEMUX,MSGL_V,"video: %.4s (%x)\n", (char *)&tmp, tmp);
-		    if (tmp != MKTAG('V', 'I', 'D', 'O'))
-		    {
-			mp_msg(MSGT_DEMUX, MSGL_ERR, "Not audio/video stream or unsupported!\n");
-			goto skip_this_chunk;
-		    }
-		    
 		    sh->format = stream_read_dword_le(demuxer->stream); /* fourcc */
 		    mp_msg(MSGT_DEMUX,MSGL_V,"video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
 
@@ -1126,6 +1136,9 @@ void demux_open_real(demuxer_t* demuxer)
 			priv->last_v_stream++;
 		    }
 //	    	    priv->current_vid = stream_id;
+		}
+		else {
+		    mp_msg(MSGT_DEMUX, MSGL_ERR, "Not audio/video stream or unsupported!\n");
 		}
 //		break;
 //	    default:
