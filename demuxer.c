@@ -94,15 +94,17 @@ typedef struct demuxer_st {
 //  int time_src;// time source (pts/file/bps)
   demux_stream_t *audio;
   demux_stream_t *video;
+  demux_stream_t *sub;
 } demuxer_t;
 
-demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id){
+demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
   demuxer_t *d=malloc(sizeof(demuxer_t));
   d->stream=stream;
   d->synced=0;
   d->filepos=0;
   d->audio=new_demuxer_stream(d,a_id);
   d->video=new_demuxer_stream(d,v_id);
+  d->sub=new_demuxer_stream(d,s_id);
   d->type=type;
   return d;
 }

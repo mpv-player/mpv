@@ -251,6 +251,7 @@ typedef struct {
   // streams:
   sh_audio_t* a_streams[256];
   sh_video_t* v_streams[256];
+  char s_streams[32]; // dvd subtitles
   // video:
   unsigned int bitrate;
 } avi_header_t;
@@ -462,6 +463,7 @@ int alsa=0;
 int audio_buffer_size=-1;
 int audio_id=-1;
 int video_id=-1;
+int dvdsub_id=-1;
 float default_max_pts_correction=0.01f;
 int delay_corrected=1;
 float force_fps=0;
@@ -497,7 +499,7 @@ char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 1;
-char stream_dump_name=NULL;
+char *stream_dump_name=NULL;
 int stream_dump_type=0;
 //int user_bpp=0;
 
@@ -638,7 +640,7 @@ if(!has_audio) audio_id=-2; // do NOT read audio packets...
 
 //=============== Try to open as AVI file: =================
 stream_reset(stream);
-demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id);
+demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
 stream_seek(demuxer->stream,seek_to_byte);
 { //---- RIFF header:
   int id=stream_read_dword_le(demuxer->stream); // "RIFF"
@@ -654,7 +656,7 @@ stream_seek(demuxer->stream,seek_to_byte);
 //=============== Try to open as ASF file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
   stream_reset(stream);
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id);
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
   if(asf_check_header()){
       printf("Detected ASF file format!\n");
@@ -664,7 +666,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
   stream_reset(stream);
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id);
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
   if(audio_format) demuxer->audio->type=audio_format; // override audio format
   if(ds_fill_buffer(demuxer->video)){
@@ -688,7 +690,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
 //=============== Try to open as MPEG-ES file: =================
 if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
   stream_reset(stream);
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_ES,audio_id,video_id);
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_ES,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
   if(!ds_fill_buffer(demuxer->video)){
     printf("Invalid MPEG-ES stream??? contact the author, it may be a bug :(\n");

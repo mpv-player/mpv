@@ -3,6 +3,10 @@
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
 
+static void parse_dvdsub(unsigned char *buf,int len){
+    printf("\rDVDsub packet: %d  \n",len);
+}
+
 static int mpeg_pts_error=0;
 
 static unsigned int read_mpeg_timestamp(stream_t *s,int c){
@@ -112,11 +116,36 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     
     //============== DVD Audio sub-stream ======================
     if(id==0x1BD){
-      int aid=128+(stream_read_char(demux->stream)&0x7F);--len;
+      int aid=stream_read_char(demux->stream);--len;
       if(len<3) return -1; // invalid audio packet
+      
+      // AID:
+      // 0x20..0x3F  subtitle
+      // 0x80..0x9F  AC3 audio
+      // 0xA0..0xBF  PCM audio
+      
+      if((aid & 0xE0) == 0x20){
+        // subtitle:
+        aid&=0x1F;
 
-      if(!avi_header.a_streams[aid]) new_sh_audio(aid);
-      if(demux->audio->id==-1) demux->audio->id=aid;
+        if(!avi_header.s_streams[aid]){
+            printf("==> Found subtitle: %d\n",aid);
+            avi_header.s_streams[aid]=1;
+            // new_sh_audio(aid);
+        }
+
+        //if(demux->audio->id==-1) demux->audio->id=aid; // autodetect :)
+        if(demux->sub->id==aid){
+            ds=demux->sub;
+        }
+          
+      } else if((aid & 0xC0) == 0x80) {
+
+//        aid=128+(aid&0x7F);
+        // aid=0x80..0xBF
+
+        if(!avi_header.a_streams[aid]) new_sh_audio(aid);
+        if(demux->audio->id==-1) demux->audio->id=aid;
 
       if(demux->audio->id==aid){
 //        int type;
@@ -130,7 +159,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         len-=3;
         if(ds->type==-1){
           // autodetect type
-          ds->type=((aid&0x70)==0x20)?2:3;
+          ds->type=((aid&0xE0)==0xA0)?2:3;
         }
         if(ds->type==2 && len>=2){
           // read PCM header
@@ -144,8 +173,11 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
           }
           if(!len) printf("End of packet while searching for PCM header\n");
         }
-      }
-    }
+      } //  if(demux->audio->id==aid)
+
+      } else printf("Unknown 0x1BD substream: 0x%02X  \n",aid);
+
+    } //if(id==0x1BD)
 
   } else {
     if(c!=0x0f){
@@ -194,6 +226,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     }
 #endif
     ds_read_packet(ds,demux->stream,len,pts/90000.0f,0);
+    if(ds==demux->sub) parse_dvdsub(ds->last->buffer,ds->last->len);
     return 1;
   }
   if(verbose>=2) printf("DEMUX_MPG: Skipping %d data bytes from packet %04X\n",len,id);
@@ -256,12 +289,14 @@ do{
   } // else
   if(demux->synced==2){
       ret=demux_mpg_read_packet(demux,head);
+/*
       if(!ret)
         if(--max_packs==0){
           demux->stream->eof=1;
           printf("demux: file doesn't contain the selected audio or video stream\n");
           return 0;
         }
+*/
   } else {
     if(head>=0x100 && head<0x1B0){
       if(head==0x100)

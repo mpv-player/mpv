@@ -60,8 +60,10 @@ struct config conf[]={
 	{"noalsa", &alsa, CONF_TYPE_FLAG, 0, 1, 0},
 	{"ni", &force_ni, CONF_TYPE_FLAG, 0, 0, 1},
 	{"noni", &force_ni, CONF_TYPE_FLAG, 0, 1, 0},
+
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
+	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 32},
 
 	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1},
@@ -78,7 +80,7 @@ struct config conf[]={
 	{"pp", &divx_quality, CONF_TYPE_INT, CONF_RANGE, 0, 63},
 	{"br", &encode_bitrate, CONF_TYPE_INT, CONF_RANGE, 10000, 10000000},
 #ifdef HAVE_PNG
-	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9},
+	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 10},
 #endif	
 
 	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
