@@ -232,11 +232,11 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
  mvWidth=width; mvHeight=height;
 
  wndX=0; wndY=0;
- vo_fs=fullscreen&1;
  vo_dwidth=d_width; vo_dheight=d_height;
- if ( vo_fs )
-  { vo_old_width=d_width; vo_old_height=d_height; }
  vo_mouse_autohide=1;
+// vo_fs=fullscreen&1;
+// if ( vo_fs )
+//  { vo_old_width=d_width; vo_old_height=d_height; }
 
  switch ( vo_depthonscreen )
   {
@@ -259,8 +259,8 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
   {
    if ( vo_fs )
     {
-     vo_dwidth=vo_screenwidth;
-     vo_dheight=vo_screenheight;
+//     vo_dwidth=vo_screenwidth;
+//     vo_dheight=vo_screenheight;
 #ifdef X11_FULLSCREEN
      aspect(&dwidth,&dheight,A_ZOOM);
 #endif
@@ -292,10 +292,12 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    vo_x11_classhint( mDisplay,vo_window,"xmga" );
    vo_hidecursor(mDisplay,vo_window);
 
-   if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
+//   if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
 
    XStoreName( mDisplay,vo_window,mTitle );
    XMapWindow( mDisplay,vo_window );
+
+   if ( fullscreen&1 ) vo_x11_fullscreen();
 		   
 #ifdef HAVE_XINERAMA
    vo_x11_xinerama_move(mDisplay,vo_window);

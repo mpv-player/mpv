@@ -303,11 +303,11 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
    }
     else
 #endif
-    if ( fullscreen )
-     {
-      hint.width=vo_screenwidth;
-      hint.height=vo_screenheight;
-     }
+//    if ( fullscreen )
+//     {
+//      hint.width=vo_screenwidth;
+//      hint.height=vo_screenheight;
+//     }
     hint.flags=PPosition | PSize;
 
     bg=WhitePixel( mDisplay,mScreen );
@@ -344,10 +344,10 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 
     vo_x11_classhint( mDisplay,vo_window,"x11" );
     vo_hidecursor(mDisplay,vo_window);
-    if ( fullscreen ) vo_x11_decoration( mDisplay,vo_window,0 );
     XSelectInput( mDisplay,vo_window,StructureNotifyMask );
     XSetStandardProperties( mDisplay,vo_window,title,title,None,NULL,0,&hint );
     XMapWindow( mDisplay,vo_window );
+    if ( fullscreen ) vo_x11_fullscreen();
 #ifdef HAVE_XINERAMA
    vo_x11_xinerama_move(mDisplay,vo_window);
 #endif

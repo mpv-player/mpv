@@ -338,9 +338,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  vo_mouse_autohide=1;
 
  vo_dwidth=d_width; vo_dheight=d_height;
- vo_fs=flags&1;
- if ( vo_fs )
-  { vo_old_width=d_width; vo_old_height=d_height; }
+// vo_fs=flags&1;
+// if ( vo_fs )
+//  { vo_old_width=d_width; vo_old_height=d_height; }
      
 #ifdef HAVE_XF86VM
  if( flags&0x02 ) vm = 1;
@@ -388,8 +388,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 #endif
    if ( vo_fs )
     {
-     hint.width=vo_screenwidth;
-     hint.height=vo_screenheight;
+//     hint.width=vo_screenwidth;
+//     hint.height=vo_screenheight;
 #ifdef X11_FULLSCREEN
      /* this code replaces X11_FULLSCREEN hack in mplayer.c
       * aspect() is available through aspect.h for all vos.
@@ -437,8 +437,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
    );
    XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
    XSetWMNormalHints( mDisplay,vo_window,&hint );
-   if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
+//   if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
    XMapWindow(mDisplay, vo_window);
+   if ( flags&1 ) vo_x11_fullscreen();
 #ifdef HAVE_XINERAMA
    vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
