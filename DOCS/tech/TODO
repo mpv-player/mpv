@@ -12,7 +12,6 @@ FOR THE LAST RC-RELEASE:
    - -subcp has no effect - FIXED?
 - fix vo_svga vs. -vop scale
 - remove or fix -vop lavcdeint - WHAT TO DO?
-- Nov 13: [BUG] sig11 while moving xmga window in Xinerama mode - FIXED?
 - Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
   UPDATE: Actually -fixed-vo -vo xv doesn't work at all with 'f'...
      no matter if panscan is used or not...
