@@ -237,6 +237,7 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
 int num_elementary_packets100=0;
 int num_elementary_packets101=0;
 int num_elementary_packets1B6=0;
+int num_elementary_packetsPES=0;
 
 int demux_mpg_es_fill_buffer(demuxer_t *demux){
   // Elementary video stream
@@ -278,6 +279,14 @@ do{
   if(verbose>=4) printf("*** head=0x%X\n",head);
   if(demux->synced==0){
     if(head==0x1BA) demux->synced=1;
+#if 0
+    else if(head>=0x1C0 && head<=0x1EF){
+      demux->synced=2;
+      if(verbose) printf("Mpeg PES stream synced at 0x%X (%d)!\n",demux->filepos,demux->filepos);
+      num_elementary_packets100=0; // requires for re-sync!
+      num_elementary_packets101=0; // requires for re-sync!
+    }
+#endif
   } else
   if(demux->synced==1){
     if(head==0x1BB || head==0x1BD || (head>=0x1C0 && head<=0x1EF)){
@@ -301,11 +310,15 @@ do{
       if(head==0x101) ++num_elementary_packets101;
       if(verbose>=3) printf("Opps... elementary video packet found: %03X\n",head);
     } else
+    if(head>=0x1C0 && head<0x1F0){
+      ++num_elementary_packetsPES;
+      if(verbose>=3) printf("Opps... PES packet found: %03X\n",head);
+    } else
       if(head==0x1B6) ++num_elementary_packets1B6;
 #if 1
-    if(num_elementary_packets100>50 && num_elementary_packets101>50
-       && skipped>4000000){
-        if(verbose) printf("sync_mpeg_ps: seems to be ES stream...\n");
+    if( ( (num_elementary_packets100>50 && num_elementary_packets101>50) ||
+          (num_elementary_packetsPES>50) ) && skipped>4000000){
+        if(verbose) printf("sync_mpeg_ps: seems to be ES/PES stream...\n");
         demux->stream->eof=1;
         break;
     }

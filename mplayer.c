@@ -187,6 +187,7 @@ int read_asf_header(demuxer_t *demuxer);
 
 extern int num_elementary_packets100; // for MPEG-ES fileformat detection
 extern int num_elementary_packets101;
+extern int num_elementary_packetsPES;
 
 extern picture_t *picture;	// exported from libmpeg2/decode.c
 
@@ -707,16 +708,25 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
 }
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
+ int pes=1;
+ while(pes>=0){
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
+  if(!pes) demuxer->synced=1; // hack!
   if(ds_fill_buffer(demuxer->video)){
-    printf("Detected MPEG-PS file format!\n");
+    if(!pes)
+      printf("Detected MPEG-PES file format!\n");
+    else
+      printf("Detected MPEG-PS file format!\n");
     file_format=DEMUXER_TYPE_MPEG_PS;
   } else {
     // some hack to get meaningfull error messages to our unhappy users:
     if(num_elementary_packets100>=2 && num_elementary_packets101>=2 &&
        abs(num_elementary_packets101-num_elementary_packets100)<8){
+      if(num_elementary_packetsPES>=4 && num_elementary_packetsPES>=num_elementary_packets100-4){
+        --pes;continue; // tricky...
+      }
       file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
     } else {
       if(demuxer->synced==2)
@@ -725,6 +735,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
         printf("Not MPEG System Stream format... (maybe Transport Stream?)\n");
     }
   }
+  break;
+ }
 }
 //=============== Try to open as MPEG-ES file: =================
 if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
