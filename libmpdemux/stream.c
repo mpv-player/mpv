@@ -64,6 +64,9 @@ extern stream_info_t stream_info_dvb;
 #ifdef HAVE_FTP
 extern stream_info_t stream_info_ftp;
 #endif
+#ifdef HAVE_VSTREAM
+extern stream_info_t stream_info_vstream;
+#endif
 
 extern stream_info_t stream_info_null;
 extern stream_info_t stream_info_file;
@@ -83,6 +86,9 @@ stream_info_t* auto_open_streams[] = {
 #endif
 #ifdef HAVE_FTP
   &stream_info_ftp,
+#endif
+#ifdef HAVE_VSTREAM
+  &stream_info_vstream,
 #endif
   &stream_info_null,
   &stream_info_file,

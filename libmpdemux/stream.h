@@ -19,6 +19,7 @@
 #define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
 #define STREAMTYPE_VCDBINCUE 12      // vcd directly from bin/cue files
 #define STREAMTYPE_DVB 13
+#define STREAMTYPE_VSTREAM 14
 
 #define STREAM_BUFFER_SIZE 2048
 

@@ -496,7 +496,7 @@ if(strncmp("dvd://",filename,6) == 0){
   if (strncmp("tv://", filename, 5) && strncmp("mf://", filename, 5) &&
     strncmp("vcd://", filename, 6) && strncmp("dvb://", filename, 6) &&
     strncmp("cdda://", filename, 7) && strncmp("cddb://", filename, 7) &&
-    strncmp("mpst://", filename, 7) &&
+    strncmp("mpst://", filename, 7) && strncmp("tivo://", filename, 7) &&
     strstr(filename, "://")) {
      url = url_new(filename);
     }

@@ -60,6 +60,14 @@ MPEG files come in different guises:
   MP2 and uncompressed LPCM are allowed, too. <emphasis role="bold">Read the
   <link linkend="dvd">DVD</link> section</emphasis>!
   </simpara></listitem>
+<listitem><simpara>
+  TY: This is a TiVo MPEG stream. It contains MPEG PES data for audio and
+  video streams, as well as extra information like closed captions. The
+  container is not an MPEG program stream, but a closed format created by
+  TiVo. For more information on TiVo stream format, please refer to
+  <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
+  the TyStudio page</ulink>.
+  </simpara></listitem>
 </itemizedlist>
 
 <para>

@@ -189,6 +189,7 @@ Optional features:
   --disable-gethostbyname2  gethostbyname() function is not provided by the C
                             library [autodetect]
   --disable-ftp          Disable ftp support [enabled]
+  --disable-vstream      Disable tivo vstream client support [autodetect]
 
 Codecs:
   --enable-gif		 enable gif support [autodetect]
@@ -1407,6 +1408,7 @@ _enca=auto
 _inet6=auto
 _gethostbyname2=auto
 _ftp=yes
+_vstream=auto
 for ac_option do
   case "$ac_option" in
   # Skip 1st pass
@@ -1650,6 +1652,8 @@ for ac_option do
   --disable-unrarlib)	_unrarlib=no	;;
   --enable-ftp)         _ftp=yes        ;;
   --disable-ftp)        _ftp=no         ;;
+  --enable-vstream)     _vstream=yes    ;;
+  --disable-vstream)    _vstream=no     ;;
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
@@ -6191,6 +6195,26 @@ else
 fi
 echores "$_ftp"
 
+echocheck "vstream client"
+if test "$_vstream" = auto ; then
+  _vstream=no
+  cat > $TMPC <<EOF
+#include <vstream-client.h>
+void vstream_error(const char *format, ... ) {}
+int main(void) { vstream_start(); return 0; }
+EOF
+  cc_check -lvstream-client && _vstream=yes
+fi
+if test "$_vstream" = yes ; then
+  _def_vstream='#define HAVE_VSTREAM 1'
+  _inputmodules="vstream $_inputmodules"
+  _ld_vstream='-lvstream-client'
+else
+  _noinputmodules="vstream $_noinputmodules"
+  _def_vstream='#undef HAVE_VSTREAM'
+fi
+echores "$_vstream"
+
 # endian testing
 echocheck "byte order"
 if test "$_big_endian" = auto ; then
@@ -6664,7 +6688,7 @@ $_live_libs_def
 
 MPLAYER_NETWORK = $_network
 STREAMING_LIVE_DOT_COM = $_live
-MPLAYER_NETWORK_LIB = $_ld_live $_ld_network
+MPLAYER_NETWORK_LIB = $_ld_live $_ld_vstream $_ld_network
 DVBIN = $_dvbin
 VIDIX = $_vidix
 SHARED_PP = $_shared_pp
@@ -7341,6 +7365,9 @@ $_def_network
 
 /* enable ftp support */
 $_def_ftp
+
+/* enable vstream support */
+$_def_vstream
 
 /* enable winsock2 instead of Unix functions*/
 $_def_winsock2
