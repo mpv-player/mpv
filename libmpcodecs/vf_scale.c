@@ -84,6 +84,13 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     
     vf->priv->ctx->swScale(vf->priv->ctx,mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride);
     
+    if(vf->priv->w==mpi->w && vf->priv->h==mpi->h){
+	// just conversion, no scaling -> keep postprocessing data
+	// this way we can apply pp filter to non-yv12 source using scaler
+	dmpi->qscale=mpi->qscale;
+	dmpi->qstride=mpi->qstride;
+    }
+    
     vf_next_put_image(vf,dmpi);
 }
 
