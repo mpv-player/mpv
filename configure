@@ -4760,6 +4760,16 @@ $_def_libavcodecso
 /* Use libavcodec's encoders */
 #define CONFIG_ENCODERS 1
 
+/* Use codec libs included in mplayer CVS / source dist: */
+#define USE_MP3LIB
+#define USE_LIBA52
+#define USE_LIBMPEG2
+
+/* Use the SVQ1 decoder in libmpcodecs - we don't want/need it with libavcodec */
+#ifndef USE_LIBAVCODEC
+#define USE_SVQ1
+#endif
+
 /* Use libfame encoder filter */
 $_def_fame
 
