@@ -67,7 +67,16 @@
 
 <H2><A NAME="dvd">4.2 DVD playback</A></H2>
   
-<P>For the complete list of available options, please read the man page.</P>
+<P>For the complete list of available options, please read the man page.
+  The Syntax for a standard Digital Versatile Disc (DVD) is as follows:</P>
+
+<P><CODE>mplayer -dvd &lt;track&gt; [-dvd-device &lt;device&gt;]</CODE></P>
+
+<P>Example: <CODE>mplayer -dvd 1 -dvd-device /dev/hdc</CODE></P>
+
+<P>The default DVD device is <CODE>/dev/dvd</CODE>. If your setup differs,
+  make a symlink or specify the correct device on the command line with the
+  <CODE>-dvd-device</CODE> option.</P>
 
 <H4>New-style DVD support (mpdvdkit2)</H4>
 
