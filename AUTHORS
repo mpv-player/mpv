@@ -250,6 +250,8 @@ Mike Melanson <melanson@pcisys.net>
 Tobias Diedrich <ranma@gmx.at>
     * NAS audio output driver
     * DXR2 driver
+    * softpulldown video filter
+    * ported Donald Graft's kerndeint video filter
 
 Kilian A. Foth <foth@informatik.uni-hamburg.de>
     * -slave mode
