@@ -1,20 +1,25 @@
 
+extern int verbose; // defined in mplayer.c
+
 // verbosity elevel:
+
+// stuff from level MSGL_FATAL-MSGL_HINT should be translated.
 
 #define MSGL_FATAL 0  // will exit/abort
 #define MSGL_ERR 1    // continues
 #define MSGL_WARN 2   // only warning
-#define MSGL_INFO 3   // -quiet
-#define MSGL_STATUS 4 // v=0
-#define MSGL_V 5      // v=1
-#define MSGL_DBG2 6   // v=2
-#define MSGL_DBG3 7   // v=3
-#define MSGL_DBG4 8   // v=4
+#define MSGL_HINT 3   // short help message
+#define MSGL_INFO 4   // -quiet
+#define MSGL_STATUS 5 // v=0
+#define MSGL_V 6      // v=1
+#define MSGL_DBG2 7   // v=2
+#define MSGL_DBG3 8   // v=3
+#define MSGL_DBG4 9   // v=4
 
 // code/module:
 
-#define MSGT_GLOBAL 0        // fatal errors
-#define MSGT_CPLAYER 1       // console player
+#define MSGT_GLOBAL 0        // common player stuff errors
+#define MSGT_CPLAYER 1       // console player (mplayer.c)
 #define MSGT_GPLAYER 2       // gui player
 
 #define MSGT_VO 3	       // libvo
@@ -25,11 +30,28 @@
 #define MSGT_DEMUX 7      // fileformat-specific stuff (demux_*.c)
 #define MSGT_HEADER 8     // fileformat-specific header (*header.c)
 
+#define MSGT_AVSYNC 9     // mplayer.c timer stuff
+#define MSGT_AUTOQ 10     // mplayer.c auto-quality stuff
+
+#define MSGT_CFGPARSER 11 // cfgparser.c
+
+#define MSGT_DECAUDIO 12  // av decoder
+#define MSGT_DECVIDEO 13
+
+#define MSGT_SEEK 14	// seeking code
+#define MSGT_WIN32 15	// win32 dll stuff
+#define MSGT_OPEN 16	// open.c (stream opening)
+
 #define MSGT_MAX 64
 
 void mp_msg_init(int verbose);
 void mp_msg_c( int x, const char *format, ... );
 
 #define mp_msg(mod,lev,...) mp_msg_c((mod<<8)|lev,__VA_ARGS__)
-#define mp_dbg(mod,lev,...) mp_msg_c((mod<<8)|lev,__VA_ARGS__)
 
+#ifdef MP_DEBUG
+#define mp_dbg(mod,lev,...) mp_msg_c((mod<<8)|lev,__VA_ARGS__)
+#else
+// these messages are only usefull for developers, disable them
+#define mp_dbg(mod,lev,...) 
+#endif

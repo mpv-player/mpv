@@ -21,10 +21,10 @@ void mp_msg_c( int x, const char *format, ... ){
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
     va_start(va, format);
     if((x&255)<=MSGL_ERR){
-	fprintf(stderr,"%%%%%% ");
+//	fprintf(stderr,"%%%%%% ");
 	vfprintf(stderr,format, va);
     } else {
-	printf("%%%%%% ");
+//	printf("%%%%%% ");
 	vprintf(format, va);
     }
     va_end(va);
