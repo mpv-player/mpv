@@ -50,6 +50,8 @@ Problems:
   ativcr1.dll: can't load (16-bit DLL)
 - I263:  (I263)
   i263_32.drv: segfault
+- TrueMotion 2.0:  (TM20)
+  tm20dec.ax: segfault
 
 Not tested:
 

@@ -27,6 +27,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-dsp\ device ]
 .RB [ \-pp\ quality ]
 .RB [ \-include\ configfile ]
+.RB [ \-ffactor\ number ]
 .I file
 .PP
 .SH DESCRIPTION
@@ -92,21 +93,14 @@ Maybe less/more.
 
 .I NOTE
 You can use this with OpenDivX encoding too! See ALPHA/BETA CODE section.
-.IP
-.SH KEYBOARD CONTROL
 .TP
-.I NOTE
-These keys may/may not work, depending on your video output driver.
-.TP
-	  <-  or  ->      seek backward/forward  10 seconds
+.B \-ffactor\ number
+resample alphamap of the font. Can be:
 
-up or down      seek backward/forward   1 minute
-
-p or SPACE      pause movie (press any key)
-
-q or ESC        stop playing and quit program
-
-+ or -          adjust audio delay by +/- 0.1 second
+        0    plain white fonts
+        0.75 very narrow black outline [default]
+        1    narrow black outline
+        10   bold black outline
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
@@ -168,6 +162,36 @@ Specifies the bitrate to encode OpenDivx at
 .B \-encode\ file
 used with '-vo odivx' .
 Specifies the output OpenDivX file. Won't overwrite.
+.IP
+.SH KEYBOARD CONTROL
+.TP
+.I NOTE
+These keys may/may not work, depending on your video output driver.
+.TP
+	  <-  or  ->      seek backward/forward  10 seconds
+
+up or down      seek backward/forward   1 minute
+
+p or SPACE      pause movie (press any key)
+
+q or ESC        stop playing and quit program
+
++ or -          adjust audio delay by +/- 0.1 second
+.IP
+.SH FILES AND DIRECTORIES
+.TP
+.I CONFIG FILES
+Settings are stored system-wide in the /etc/mplayer.conf file,
+and per-user in $HOME/.mplayer/config. The directory
+$HOME/.mplayer and the 'config' are created if doesn't exist.
+.TP
+.I FONTS
+Fonts are searched in $HOME/.mplayer/font. There must be a font.desc
+file, and files with .RAW extension.
+.TP
+.I SUB FILES
+Sub files are searched in $HOME/.mplayer/sub, and in the directory
+of the movie.
 .IP
 .SH "EXAMPLES"
 Just launch it! :)
