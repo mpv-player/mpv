@@ -58,9 +58,11 @@ all:    $(LIBNAME) $(LIBNAME2)
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
+	$(RANLIB) $(LIBNAME)
 
 $(LIBNAME2):     $(OBJS2)
 	$(AR) r $(LIBNAME2) $(OBJS2)
+	$(RANLIB) $(LIBNAME2)
 
 clean:
 	rm -f *.o *.a *~

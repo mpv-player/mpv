@@ -21,6 +21,7 @@ CFLAGS  = $(OPTFLAGS) -I. -I.. -I../osdep $(FREETYPE_INC) $(SDL_INC) $(X11_INC) 
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
+	$(RANLIB) $(LIBNAME)
 
 vo_mpegpes.o: vo_mpegpes.c
 	$(CC) -c $(CFLAGS) $(DVB_INC) -o $@ $<
