@@ -670,6 +670,29 @@ void vo_x11_setlayer( int layer )
   {
    XClientMessageEvent  xev;
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ).\n",layer );
+
+   memset( &xev,0,sizeof( xev ) );
+   xev.type=ClientMessage;
+   xev.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
+   xev.display=mDisplay;
+   xev.window=vo_window;
+   xev.format=32;
+   xev.data.l[0]=layer;
+   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
+   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
+   XFree( args );
+   
+   type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
+   arg1=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
+   if ( Success == XGetWindowProperty( mDisplay,vo_window,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 && format == 32) {
+       for (i = 0; i < nitems; i++) {
+	   if (((Atom)args[i] == arg1)) {
+	       XFree( args );
+	       return;
+	   }
+       }
+   }
+   
    memset( &xev,0,sizeof( xev ) );
    xev.type=ClientMessage;
    xev.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
