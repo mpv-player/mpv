@@ -254,7 +254,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
       vo_font=malloc(sizeof(font_desc_t));//if(!desc) return NULL;
       memset(vo_font,0,sizeof(font_desc_t));
       vo_font->pic_a[0]=malloc(sizeof(raw_file));
+      memset(vo_font->pic_a[0],0,sizeof(raw_file));
       vo_font->pic_b[0]=malloc(sizeof(raw_file));
+      memset(vo_font->pic_b[0],0,sizeof(raw_file));
 
 #ifdef HAVE_FREETYPE
       vo_font->dynamic = 0;
@@ -264,7 +266,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
       vo_font->charspace=0;
       vo_font->height=1;
       vo_font->pic_a[0]->bmp=malloc(255);
+      vo_font->pic_a[0]->pal=NULL;
       vo_font->pic_b[0]->bmp=malloc(255);
+      vo_font->pic_b[0]->pal=NULL;
       vo_font->pic_a[0]->w=1;
       vo_font->pic_a[0]->h=1;
       for (i=0; i<255; i++){

@@ -867,7 +867,7 @@ void free_font_desc(font_desc_t *desc)
     
     if (!desc) return;
 
-    if (!desc->dynamic) return; // some vo_aa crap, better leaking than crashing
+//    if (!desc->dynamic) return; // some vo_aa crap, better leaking than crashing
 
     if (desc->name) free(desc->name);
     if (desc->fpath) free(desc->fpath);
