@@ -136,7 +136,7 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     char *p, *next;
     int i;
 
-    bzero (current, sizeof(current));
+    bzero (current, sizeof(subtitle));
 
     do {
 	if (!fgets (line, 1000, fd)) return NULL;
@@ -161,9 +161,9 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
     char *p=NULL, *q=NULL;
     int len;
     
-    bzero (current, sizeof(current));
+    bzero (current, sizeof(subtitle));
     
-    while (!current->text[0]) {
+    while (1) {
 	if (!fgets (line, 1000, fd)) return NULL;
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4) < 8) continue;
 	current->start = a1*360000+a2*6000+a3*100+a4;
@@ -181,6 +181,7 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
 	    if (!*p || *p=='\r' || *p=='\n') break;
 	    while (*p++!=']');
 	}
+	break;
     }
     return current;
 }
@@ -191,7 +192,7 @@ subtitle *sub_read_line_third(FILE *fd,subtitle *current) {
     char *p=NULL;
     int i,len;
     
-    bzero (current, sizeof(current));
+    bzero (current, sizeof(subtitle));
     
     while (!current->text[0]) {
 	if (!fgets (line, 1000, fd)) return NULL;
@@ -224,7 +225,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	char *p=NULL, *next;
 	int i,len,len2,plen;
 
-	bzero (current, sizeof(current));
+	bzero (current, sizeof(subtitle));
 
 	while (!current->text[0]) {
 		if (!fgets (line, 1000, fd)) return NULL;
@@ -270,7 +271,7 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
     char *p=NULL,*next=NULL;
     int i,len,plen;
     
-    bzero (current, sizeof(current));
+    bzero (current, sizeof(subtitle));
     
     while (!current->text[0]) {
 	if (!fgets (line, 1000, fd)) return NULL;
@@ -327,7 +328,7 @@ subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
     char line[1001];
     char text[1001];
 
-    bzero (current, sizeof(current));
+    bzero (current, sizeof(subtitle));
 
     if (!fgets (line, 1000, fd))
 	return NULL;
