@@ -1435,6 +1435,7 @@ if (demuxer && demuxer->type==DEMUXER_TYPE_PLAYLIST)
 
 if(!demuxer) 
 {
+#if 0
   play_tree_t* entry;
   // Handle playlist
   current_module="handle_playlist";
@@ -1455,6 +1456,7 @@ if(!demuxer)
     mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   else
     eof=playtree_add_playlist(entry);
+#endif
   goto goto_next_file;
 }
 inited_flags|=INITED_DEMUXER;
