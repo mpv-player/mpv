@@ -55,6 +55,7 @@ static char help_text[]=
 // mplayer.c: 
 
 #define MSGTR_Exiting "\n正在退出... (%s)\n"
+#define MSGTR_Exit_quit "退出"
 #define MSGTR_Exit_eof "文件结束"
 #define MSGTR_Exit_error "致命错误"
 #define MSGTR_IntBySignal "\nMPlayer被 %s 模块中的 %d 信号中断\n"
@@ -73,21 +74,21 @@ static char help_text[]=
 #define MSGTR_CantOpenDumpfile "无法打开dump文件!!!\n"
 #define MSGTR_CoreDumped "core dumped :)\n"
 #define MSGTR_FPSnotspecified "FPS在文件头中没有指定(或者是无效数据)! 用-fps选项!\n"
-#define MSGTR_TryForceAudioFmtStr "尝试指定音频codec驱动族 %s ...\n"
-#define MSGTR_CantFindAfmtFallback "找不到指定驱动族的音频codec, 只能使用其他驱动.\n"
-#define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的codec!\n"
+#define MSGTR_TryForceAudioFmtStr "尝试指定音频解码器驱动族 %s ...\n"
+#define MSGTR_CantFindAfmtFallback "找不到指定驱动族的音频解码器, 只能使用其他驱动.\n"
+#define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的解码器!\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** 尝试用 etc/codecs.conf 升级 %s \n*** 如果这样还不行, 查看DOCS/codecs.html!\n"
-#define MSGTR_CouldntInitAudioCodec "无法初始化音频codec! -> nosound\n"
-#define MSGTR_TryForceVideoFmtStr "尝试指定视频codec驱动族 %s ...\n"
-#define MSGTR_CantFindVideoCodec "找不到适合所选的-vo和视频格式 0x%X 的codec!\n"
-#define MSGTR_VOincompCodec "抱歉, 所选的视频输出设备与这个codec不兼容.\n"
+#define MSGTR_CouldntInitAudioCodec "无法初始化音频解码器! -> nosound\n"
+#define MSGTR_TryForceVideoFmtStr "尝试指定视频解码器驱动族 %s ...\n"
+#define MSGTR_CantFindVideoCodec "找不到适合所选的-vo和视频格式 0x%X 的解码器!\n"
+#define MSGTR_VOincompCodec "抱歉, 所选的视频输出设备与这个解码器不兼容.\n"
 #define MSGTR_CannotInitVO "致命错误: 无法初始化视频驱动!\n"
 #define MSGTR_CannotInitAO "无法打开/初始化音频设备 -> NOSOUND\n"
 #define MSGTR_StartPlaying "开始播放...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ************************************************\n"\
-"         ****       你的系统太慢了，放不了这个！       ****\n"\
+"         ****       你的系统太慢了，放不了这个！     ****\n"\
 "         ************************************************\n"\
 "!!! 可能的原因，问题，解决办法：\n"\
 "- 最普遍的原因：被损坏的/buggy的音频驱动。解决办法：试试-ao sdl或使用\n"\
@@ -109,16 +110,17 @@ static char help_text[]=
 #define MSGTR_AvailableVideoOutputPlugins "可用的视频输出插件:\n"
 #define MSGTR_AvailableVideoOutputDrivers "可用的视频输出驱动:\n"
 #define MSGTR_AvailableAudioOutputDrivers "可用的音频输出驱动:\n"
-#define MSGTR_AvailableAudioCodecs "可用的音频codecs:\n"
-#define MSGTR_AvailableVideoCodecs "可用的视频codecs:\n"
+#define MSGTR_AvailableAudioCodecs "可用的音频解码器:\n"
+#define MSGTR_AvailableVideoCodecs "可用的视频解码器:\n"
 #define MSGTR_AvailableAudioFm "\n可用的(编译了的)音频解码器族/驱动:\n"
 #define MSGTR_AvailableVideoFm "\n可用的(编译了的)视频解码器族/驱动:\n"
 #define MSGTR_UsingRTCTiming "使用Linux的硬件RTC计时(%ldHz)\n"
 #define MSGTR_CannotReadVideoPropertiers "视频: 无法读取属性\n"
 #define MSGTR_NoStreamFound "找不到流媒体\n"
-#define MSGTR_InitializingAudioCodec "初始化音频codec...\n"
+#define MSGTR_InitializingAudioCodec "初始化音频解码器...\n"
 #define MSGTR_ErrorInitializingVODevice "打开/初始化所选的视频输出(-vo)设备是出错!\n"
-#define MSGTR_ForcedVideoCodec "指定的视频codec: %s\n"
+#define MSGTR_ForcedVideoCodec "指定的视频解码器: %s\n"
+#define MSGTR_ForcedAudioCodec "指定的音频解码器: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: 描述: %s\nAO: 作者: %s\n"
 #define MSGTR_AOComment "AO: 备注: %s\n"
 #define MSGTR_Video_NoVideo "视频: no video!!!\n"
@@ -136,7 +138,7 @@ static char help_text[]=
 #define MSGTR_CannotOpenDemuxer "无法打开demuxer\n"
 #define MSGTR_NoAudioEncoderSelected "\n没有选择音频编码器(-oac)! 选择一个或者使用-nosound. 使用-oac help !\n"
 #define MSGTR_NoVideoEncoderSelected "\nNo video encoder (-ovc) selected! Select one, use -ovc help !\n"
-#define MSGTR_InitializingAudioCodec "初始化音频codec...\n"
+#define MSGTR_InitializingAudioCodec "初始化音频解码器...\n"
 #define MSGTR_CannotOpenOutputFile "无法打开输出文件 '%s'\n"
 #define MSGTR_EncoderOpenFailed "无法打开编码器\n"
 #define MSGTR_ForcingOutputFourcc "指定输出的fourcc为 %x [%.4s]\n"
@@ -145,7 +147,7 @@ static char help_text[]=
 #define MSGTR_SkipFrame "\n跳过这一帧!!!    \n"
 #define MSGTR_ErrorWritingFile "%s: 写入文件错误.\n"
 #define MSGTR_WritingAVIIndex "\n正在写AVI索引...\n"
-#define MSGTR_FixupAVIHeader "修正AVI�募�...\n"
+#define MSGTR_FixupAVIHeader "修复AVI文件头...\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD推荐的视频比特率为: %d\n"
 #define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d bps)  大小: %d bytes  %5.3f secs  %d frames\n"
 #define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d bps)  大小: %d bytes  %5.3f secs\n"
@@ -157,6 +159,10 @@ static char help_text[]=
 #define MSGTR_UnableOpenURL "无法打开URL: %s\n"
 #define MSGTR_ConnToServer "连接到服务器: %s\n"
 #define MSGTR_FileNotFound "找不到文件: '%s'\n"
+
+#define MSGTR_SMBInitError "无法初始化libsmbclient库: %d\n"
+#define MSGTR_SMBFileNotFound "无法打开局域网内的: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer没有编译SMB读取的支持\n"
 
 #define MSGTR_CantOpenDVD "无法打开DVD 设备: %s\n"
 #define MSGTR_DVDwait "读取光盘结构, 请等待...\n"
@@ -220,12 +226,12 @@ static char help_text[]=
 #define MSGTR_ClipInfo "Clip info: \n"
 
 // dec_video.c & dec_audio.c:
-#define MSGTR_CantOpenCodec "无法打开codec\n"
-#define MSGTR_CantCloseCodec "无法关闭codec\n"
+#define MSGTR_CantOpenCodec "无法打开解码器\n"
+#define MSGTR_CantCloseCodec "无法关闭解码器\n"
 
-#define MSGTR_MissingDLLcodec "错误: 无法打开要求的DirectShow codec: %s\n"
-#define MSGTR_ACMiniterror "无法加载/初始化Win32/ACM音频codec (缺少DLL文件?)\n"
-#define MSGTR_MissingLAVCcodec "在libavcodec中找不到codec '%s'...\n"
+#define MSGTR_MissingDLLcodec "错误: 无法打开要求的DirectShow解码器: %s\n"
+#define MSGTR_ACMiniterror "无法加载/初始化Win32/ACM音频解码器(缺少DLL文件?)\n"
+#define MSGTR_MissingLAVCcodec "在libavcodec中找不到解码器 '%s'...\n"
 
 #define MSGTR_MpegNoSequHdr "MPEG: 致命错误: 搜索序列头时遇到EOF\n"
 #define MSGTR_CannotReadMpegSequHdr "致命错误: 无法读取序列头!\n"
@@ -432,6 +438,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Font "字体"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "后期处理"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "缓存"
+#define MSGTR_PREFERENCES_FRAME_Misc "其他"
 #define MSGTR_PREFERENCES_OSS_Device "设备:"
 #define MSGTR_PREFERENCES_OSS_Mixer "混音器:"
 #define MSGTR_PREFERENCES_Message "请记住, 有些功能只有重新播放后才有效果."
@@ -458,6 +466,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding18 "日语(SHIFT-JIS)"
 #define MSGTR_PREFERENCES_FontEncoding19 "韩语(CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "泰语(CP874)"
+#define MSGTR_PREFERENCES_FontEncoding21 "Windows的西里尔语(CP1251)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "不自动缩放"
 #define MSGTR_PREFERENCES_FontPropWidth "宽度成比例"
 #define MSGTR_PREFERENCES_FontPropHeight "高度成比例"
@@ -468,6 +477,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "文字缩放:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD缩放:"
 #define MSGTR_PREFERENCES_SubtitleOSD "字幕和OSD"
+#define MSGTR_PREFERENCES_Cache "打开/关闭缓存"
+#define MSGTR_PREFERENCES_LoadFullscreen "以全屏方式开始"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "致命错误 ..."
