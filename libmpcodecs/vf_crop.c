@@ -78,6 +78,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	dmpi->planes[0]=mpi->planes[0]+
 	    vf->priv->crop_y*mpi->stride[0]+
 	    vf->priv->crop_x*(mpi->bpp/8);
+	dmpi->planes[1]=mpi->planes[1]; // passthrough rgb8 palette
     }
     dmpi->stride[0]=mpi->stride[0];
     dmpi->width=mpi->width;

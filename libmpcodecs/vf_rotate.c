@@ -91,6 +91,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	rotate(dmpi->planes[0],mpi->planes[0],
 	       dmpi->stride[0],mpi->stride[0],
 	       dmpi->w,dmpi->h,dmpi->bpp>>3,vf->priv->direction);	
+	dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
     }
     
     return vf_next_put_image(vf,dmpi);

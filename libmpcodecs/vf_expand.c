@@ -228,6 +228,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
 	// we've used DR, so we're ready...
+	if(!(mpi->flags&MP_IMGFLAG_PLANAR))
+	    vf->priv->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
 	return vf_next_put_image(vf,vf->priv->dmpi);
     }
 
@@ -255,6 +257,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	        vf->priv->exp_y*vf->priv->dmpi->stride[0]+vf->priv->exp_x*(vf->priv->dmpi->bpp/8),
 		mpi->planes[0], mpi->w*(vf->priv->dmpi->bpp/8), mpi->h,
 		vf->priv->dmpi->stride[0],mpi->stride[0]);
+	vf->priv->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
     }
 #ifdef OSD_SUPPORT
     if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
