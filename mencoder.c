@@ -124,6 +124,8 @@ int audio_id=-1;
 int video_id=-1;
 int dvdsub_id=-1;
 int vobsub_id=-1;
+char* audio_lang=NULL;
+char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 
 static int has_audio=1;
@@ -605,6 +607,15 @@ divx4_param.rc_reaction_ratio  = 20;
   }
 
   printf("success: format: %d  data: 0x%X - 0x%X\n",file_format, (int)(stream->start_pos),(int)(stream->end_pos));
+
+#ifdef USE_DVDREAD
+if(stream->type==STREAMTYPE_DVD){
+  current_module="dvd lang->id";
+  if(audio_lang && audio_id==-1) audio_id=dvd_aid_from_lang(stream,audio_lang);
+  if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang);
+  current_module=NULL;
+}
+#endif
 
   if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,0,0);
 

@@ -21,6 +21,8 @@
 	{"dvd", &dvd_title, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 	{"dvdangle", &dvd_angle, CONF_TYPE_INT, CONF_RANGE, 1, 99, NULL},
 	{"chapter", dvd_parse_chapter_range, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
+	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #else
 	{"dvd", "MPlayer was compiled WITHOUT libdvdread support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif

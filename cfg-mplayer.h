@@ -281,11 +281,6 @@ static config_t mplayer_opts[]={
 	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL}, 
 #endif
 
-#ifdef USE_DVDREAD
-	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#endif
-
 	{"gui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
 	{"nogui", &use_gui, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
       
