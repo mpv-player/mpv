@@ -31,6 +31,8 @@
 #include "linux/vbelib.h"
 #include "bswap.h"
 
+#include "../postproc/swscale.h"
+
 LIBVO_EXTERN(vesa)
 extern int verbose;
 
@@ -66,6 +68,10 @@ struct win_frame
   uint32_t   high;  /* highest boundary of frame */
   uint8_t    idx;   /* indicates index of relocatable frame (A or B) */
 };
+
+static int vesa_zoom=0; /* software scaling */
+static unsigned int scale_xinc=0;
+static unsigned int scale_yinc=0;
 
 static uint32_t image_width, image_height; /* source image dimension */
 static uint32_t x_offset,y_offset; /* to center image on screen */
@@ -222,11 +228,22 @@ static void __vbeCopyData(uint8_t *image)
 /* is called for yuv only */
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
+    if(vesa_zoom)
+    {
+	 SwScale_YV12slice_brg24(image,stride,y,h,
+	                     yuv_buffer,
+			     image_width*((video_mode_info.BitsPerPixel+7)/8),
+			     image_width, video_mode_info.BitsPerPixel,
+	    		     scale_xinc, scale_yinc);
+    }
+    else
+    {
 	yuv2rgb(yuv_buffer, image[0], image[1], image[2], w, h,
 		image_width * ((video_mode_info.BitsPerPixel+7)/8),
 		stride[0], stride[1]);
-	__vbeCopyData((uint8_t *)yuv_buffer);
-	return 0;
+    }
+    __vbeCopyData((uint8_t *)yuv_buffer);
+    return 0;
 }
 
 static void draw_osd(void)
@@ -310,10 +327,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
   int err;
 	image_width = width;
 	image_height = height;
-	if(fullscreen & (0x1|0x4|0x8))
+	if(fullscreen & (0x1|0x8))
 	{
-	  printf("vo_vesa: switches: -fs, -zoom, -flip are not supported\n");
+	  printf("vo_vesa: switches: -fs, -flip are not supported\n");
 	}
+	if(fullscreen & 0x04) vesa_zoom = 1;
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
 	memcpy(vib.VESASignature,"VBE2",4);
 	if((err=vbeGetControllerInfo(&vib)) != VBE_OK)
@@ -401,7 +419,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		   }
 		if(verbose)
 		{
-		  printf("vo_vesa: Mode (%03u): mode=%04X %ux%u@%u attr=%x\n"
+		  printf("vo_vesa: Mode (%03u): mode=%04X %ux%u@%u attr=%04X\n"
 			 "vo_vesa:             #planes=%u model=%u(%s) #pages=%u\n"
 			 "vo_vesa:             winA=%X(attr=%u) winB=%X(attr=%u) winSize=%u winGran=%u\n"
 			 "vo_vesa:             direct_color=%u DGA_phys_addr=%08X\n"
@@ -434,6 +452,21 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		if(!(yuv_buffer = malloc(video_mode_info.XResolution*video_mode_info.YResolution*4)))
 		{
 		  printf("vo_vesa: Can't allocate temporary buffer\n");
+		  return -1;
+		}
+		if( vesa_zoom && format==IMGFMT_YV12 )
+		{
+		  /* software scale */
+		  image_width = video_mode_info.XResolution;
+		  image_height = video_mode_info.YResolution;
+		  scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
+		  scale_yinc=(height << 16) / image_height + 2;
+		  SwScale_Init();
+		  if(verbose) printf("vo_vesa: Using SCALE\n");
+		}
+    		else
+		{
+		  printf("vo_vesa: Can't apply zooming to non YV12 formats\n");
 		  return -1;
 		}
 		if((video_mode_info.WinAAttributes & FRAME_MODE) == FRAME_MODE)
