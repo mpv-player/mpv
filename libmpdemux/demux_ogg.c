@@ -423,6 +423,8 @@ static int demux_ogg_add_packet(demux_stream_t* ds,ogg_stream_t* os,ogg_packet* 
   if (ds == d->video && ((sh_audio_t*)ds->sh)->format == 0xFFFC)
      context = ((sh_video_t *)ds->sh)->context;
   data = demux_ogg_read_packet(os,pack,context,&pts,&flags);
+  if(d->video->id < 0)
+      ((sh_audio_t*)ds->sh)->delay = pts;
 
   /// Clear subtitles if necessary (for broken files)
   if ((clear_sub > 0) && (pts >= clear_sub)) {
