@@ -716,8 +716,9 @@ static uint32_t get_image(mp_image_t *mpi){
     if(mpi->width==image_width){
        if(mpi->flags&MP_IMGFLAG_PLANAR){
 	   mpi->planes[0]=xvimage[current_buf]->data;
-	   mpi->planes[1]=xvimage[current_buf]->data+image_width*image_height;
-	   mpi->planes[2]=xvimage[current_buf]->data+image_width*image_height*5/4;
+	   mpi->planes[2]=xvimage[current_buf]->data+image_width*image_height;
+//	   mpi->planes[1]=xvimage[current_buf]->data+image_width*image_height*5/4;
+	   mpi->planes[1]=mpi->planes[2]+(image_width>>1)*(image_height>>1);
 	   mpi->stride[0]=image_width;
 	   mpi->stride[1]=mpi->stride[2]=image_width/2;
        } else {
