@@ -211,6 +211,7 @@ int demux_audio_open(demuxer_t* demuxer) {
   demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
   sh_audio->ds = demuxer->audio;
+  sh_audio->samplerate = sh_audio->audio.dwRate;
 
   if(stream_tell(s) != demuxer->movi_start)
     stream_seek(s,demuxer->movi_start);
