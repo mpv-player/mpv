@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced to: 1.54 -->
+<!-- Synced to: 1.57 -->
 <sect1 id="install">
 <title>Instalace</title>
 
@@ -169,9 +169,9 @@ Budete potřebovat poměrně zánovní systém. Na Linuxu doporučujeme jádro řady 2.4.
   <emphasis role="bold">Win32 kodeky</emphasis>: Pokud plánujete používat
   <application>MPlayer</application> na x86 architektuře, možná je budete
   potřebovat.
-  Stáhněte si Win32 kodeky z naší
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">kodekové stránky</ulink>
-  a nainstalujte je do <filename class="directory">/usr/local/lib/codecs</filename>
+  Stáhněte si balíček s kodeky z naší
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">kodekové stránky</ulink>
+  a rozbalte je do <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">PŘED</emphasis> kompilací <application>MPlayer</application>u,
   jinak nebude zakompilována podpora pro Win32!
   <note><para>Projekt avifile má podobný balíček kodeků, ale ten se od našeho
@@ -715,7 +715,7 @@ s titulky.
 Konverzi můžete provést přímo <application>MPlayer</application>em
 (fps=snímková rychlost):
 
-<screen>mplayer <replaceable>dummy.avi</replaceable> -fps fps_titulků -subfps avi_fps [-subdelay sekund] [-sub soubor_s_titulky] <replaceable>-dumpmicrodvdsub</replaceable></screen>
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_titulků</replaceable> -subfps <replaceable>fps_filmu</replaceable> -sub <replaceable>soubor_s_titulky</replaceable> <replaceable>nějaké.avi</replaceable></screen>
 </para>
 
 <para>
@@ -762,7 +762,7 @@ sekundy z jednotlivých titulků.
 
 <para>
 Titulky jsou vykreslovány technikou zvanou <emphasis role="bold">'OSD',
-Display na obrazovce</emphasis>.OSD je používáno k zobrazení časové pozice, pruh
+Display na obrazovce</emphasis>. OSD je používáno k zobrazení časové pozice, pruh
 hlasitosti, pruh vyhledávání atd.
 </para>
 </sect2>
