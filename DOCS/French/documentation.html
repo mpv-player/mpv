@@ -271,15 +271,15 @@
   <LI><A HREF="#mailing_lists">Appendice A - Listes de diffusion</A></LI>
   <LI><A HREF="bugreports.html">Appendice B - Comment reporter un bogue</A>
     <UL>
-      <LI><A HREF="tech/patches.txt">Appendice B2 - Comment envoyer les patches</A></LI>
+      <LI><A HREF="../tech/patches.txt">Appendice B2 - Comment envoyer des patches (en anglais)</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">Appendice C - Bogues connus</A></LI>
   <LI><A HREF="skin-fr.html">Appendice D - Format de skin de MPlayer</A></LI>
-  <LI><A HREF="users_against_developers.html">Appendice E - Lamentations du Développeur (en anglais)</A>
+  <LI><A HREF="users_against_developers.html">Appendice E - Lamentations du Développeur</A>
     <UL>
       <LI><A HREF="users_against_developers.html#gcc">GCC 2.96</A></LI>
-      <LI><A HREF="users_against_developers.html#binary">Binary Distribution</A></LI>
+      <LI><A HREF="users_against_developers.html#binary">Distribution Binaire</A></LI>
       <LI><A HREF="users_against_developers.html#nvidia">nVidia</A></LI>
       <LI><A HREF="users_against_developers.html#barr">Joe Barr</A></LI>
     </UL>
@@ -415,6 +415,8 @@
     Le codec mpeg &eacute;tait libmpeg2 (mpeg2dec) par Aaron Holtzman & Michel Lespinasse.
     Il est excellent, un code C rapide et bien optimis&eacute; avec une qualit&eacute; d'image parfaite
     et 100% compatible avec les standards MPEG.</LI>
+  <LI><B>MPlayer v0.01:</B> 11 Nov 2000<BR>
+    Le premier MPlayer.</LI>
   <LI><B>MPlayer v0.3-v0.9:</B> 18 Nov-4 Dec 2000<BR>
     Un condens&eacute; de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip' 
     bas&eacute; sur le chargeur de DLL Win32 de avifile.</LI>
@@ -431,7 +433,7 @@
     les bogues fix&eacute;s, etc...</LI>
 <LI><B>MPlayer 0.18 &quot;The BugCounter&quot;</B> 9 Juillet 2001<BR>
     Deux mois apr&egrave;s la 0.17, une nouvelle parution.. Compl&eacute;t&eacute; le support ASF,
-    plus de formats pour les sous-titres, introduction de libao (similaire &agrave; libvo pour 		l'audio),
+    plus de formats pour les sous-titres, introduction de libao (similaire &agrave; libvo pour l'audio),
     encore plus stable et performant.... C'est un MUST !</LI>
 <LI><B>MPlayer 0.50 &quot;The Faszom(C)ounter&quot;</B> 8 Oct 2001<BR>
     Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalit&eacute;s, une GUI en version
@@ -732,7 +734,7 @@
 </PRE>
 
 <P>A ce point, MPlayer est prêt à fonctionner. Le répertoire
-  <CODE>$PREFIX/share/mplayer</CODE> contient le fichier <CODE>codecs.conf</CODE>, 
+  <CODE>$PREFIX/etc/mplayer</CODE> contient le fichier <CODE>codecs.conf</CODE>, 
   qui est utilisé pour donner au programme la liste des codecs et de leurs capacités.
   Ce fichier devrait toujours être tenu à jour par rapport au binaire principal.<BR>
   Vérifiez si vous avez un <CODE>codecs.conf</CODE> dans votre répertoire home
@@ -754,16 +756,8 @@
   <CODE>configure.log</CODE> vous dit généralement ce qui manque.</P>
 
 <P>Bien que n'étant pas indispensables, les polices peuvent être installées pour l'affichage de l'OSD, 
-  et le support des sous-titres. Téléchargez <CODE>mp-arial-iso-8859-*.zip</CODE>
-  et/ou (si disponibles) les langages locaux.Voir la section
-  <A HREF="#subtitles_osd">Sous-titres et OSD</A> pour plus de détails.</P>
-
-<PRE>
-    mkdir ~/.mplayer
-    cd ~/.mplayer
-    unzip mp-arial-iso-8859-1.zip
-    ln -s ~/.mplayer/iso-8859-1/arial-24 font
-</PRE>
+  et le support des sous-titres. La méthode recommandée est d'installer un fichier de police TTF et de
+  dire à MPlayer de l'utiliser. Voir la section <A HREF="#install_osd">Sous-titres et OSD</A>pour les détails</P>
 
 
 <H2><A NAME="gui">1.3 A propos de l'interface graphique ?</A></H2>
@@ -807,6 +801,7 @@
   <LI>SSA</LI>
   <LI>MPsub</LI>
   <LI>AQTitle</LI>
+  <LI>JACOsub</LI>
 </UL>
 
 <P>MPlayer peut convertir les formats précédemment listés dans dans les formats de 
@@ -816,6 +811,9 @@
   <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
   <LI>SubRip: <CODE>-dumpsrtsub</CODE></LI>
   <LI>Microdvd: <CODE>-dumpmicrodvdsub</CODE></LI>
+  <LI>JACOsub: <CODE>-dumpjacosub</CODE></LI>
+  <LI>Sami: <CODE>-dumpsami</CODE></LI>
+
 </UL>
 
 <P>Les options en ligne de commande diffèrent légérement suivant les différents formats:</P>
@@ -925,14 +923,20 @@ par moi (Gabucino). Son principal avantage est de se baser
   <LI>Utilisez le plugin générateur de polices de GIMP situé dans TOOLS/subfont-GIMP
     (note: vous devez également avoir le plugin HSI RAW, voir url plus bas)</LI>
   <LI>utiliser une fonte TrueType (TTF), selon la librairie <B>freetype</B>.
-    La version 2.0.9 ou supérieur est obligatoire! AFAIRE: compléter ça</LI>
+    La version 2.0.9 ou supérieur est obligatoire! Vous devez passer l'option
+    <CODE>--enable-freetype</CODE> à ./configure. Ensuite vous avez deux méthodes:
+    <UL>
+     <LI>utilisez l'option <CODE>-font /chemin/de/arial.ttf</CODE> pour spécifier
+      un fichier de polices TrueType pour chaque occasion</LI>
+     <LI>créez un lien symbolique: <CODE>ln -s /chemin/de/arial.ttf ~/.mplayer/subfont.ttf</CODE></LI>
+    </UL>
+  <LI>
 </UL>
 
-<P>Après quoi, dézippez le fichier vers <CODE>~/.mplayer</CODE> ou
+<P>Si vous avez choisi des polices non-TTF, dézippez le fichier vers <CODE>~/.mplayer</CODE> ou
   <CODE>$PREFIX/share/mplayer</CODE>. Ensuite renommez ou faite un lien symbolique de l'un d'eux sur
-  <CODE>font</CODE> (par ex: <CODE>ln -s ~/.mplayer/arial-24
-  ~/.mplayer/font</CODE>). Vous pouvez maintenant voir un compteur dans le coin supérieur gauche 
-  du film. (Faites les apparaitre/disparaitre avec la touche 'o').</P>
+  <CODE>font</CODE> (par ex: <CODE>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</CODE>). Vous pouvez maintenant
+  voir un compteur dans le coin supérieur gauche du film. (Faites les apparaitre/disparaitre avec la touche 'o').</P>
 
 <P>OSD possède trois états: (interchangeable avec 'o')</P>
 
