@@ -244,7 +244,7 @@ subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
     
     while (!current->text[0]) {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
-	if ((len=sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
+	if ((len=sscanf (line, "%d:%d:%d%[,.]%d --> %d:%d:%d%[,.]%d",&a1,&a2,&a3,&i,&a4,&b1,&b2,&b3,&i,&b4)) < 10)
 	    continue;
 	current->start = a1*360000+a2*6000+a3*100+a4/10;
 	current->end   = b1*360000+b2*6000+b3*100+b4/10;
@@ -854,7 +854,7 @@ int sub_autodetect (FILE *fd) {
 		{sub_uses_time=0;return SUB_MICRODVD;}
 	if (sscanf (line, "%d:%d:%d.%d,%d:%d:%d.%d",     &i, &i, &i, &i, &i, &i, &i, &i)==8)
 		{sub_uses_time=1;return SUB_SUBRIP;}
-	if (sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d", &i, &i, &i, &i, &i, &i, &i, &i)==8)
+	if (sscanf (line, "%d:%d:%d%[,.]%d --> %d:%d:%d%[,.]%d", &i, &i, &i, &i, &i, &i, &i, &i, &i, &i)==10)
 		{sub_uses_time=1;return SUB_SUBVIEWER;}
 	if (sscanf (line, "{T %d:%d:%d:%d",&i, &i, &i, &i))
 		{sub_uses_time=1;return SUB_SUBVIEWER2;}
