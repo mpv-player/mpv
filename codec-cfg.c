@@ -645,11 +645,10 @@ void parsehtml(FILE *f1,FILE *f2,codecs_t *codec,int section,int dshow){
                 continue;
             }
             d=fgetc(f1);
-            if(d=='.') return; // end of section
             
             switch(d){
             case '.':
-                return;
+                return; // end of section
             case 'n':
                 wrapline(f2,codec->name); break;
             case 'i':
