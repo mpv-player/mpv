@@ -306,6 +306,7 @@ void uninit_player(unsigned int mask){
     inited_flags&=~INITED_SPUDEC;
     current_module="uninit_spudec";
     spudec_free(vo_spudec);
+    vo_spudec=NULL;
   }
 #endif
   if(mask&INITED_VO){
@@ -1120,10 +1121,10 @@ if (vo_spudec==NULL) {
 current_module="spudec_init";
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
 			    sh_video->disp_w, sh_video->disp_h);
-if (vo_spudec!=NULL)
-  inited_flags|=INITED_SPUDEC;
 }
 #endif
+if (vo_spudec!=NULL)
+  inited_flags|=INITED_SPUDEC;
 
 #ifdef USE_SUB
 // after reading video params we should load subtitles because
@@ -2789,12 +2790,15 @@ if(use_gui || playtree_iter != NULL
 
   current_module="uninit_vcodec";
   if(sh_video) uninit_video(sh_video);
+  sh_video=NULL;
   
   current_module="free_demuxer";
   if(demuxer) free_demuxer(demuxer);
+  demuxer=NULL;
 
   current_module="free_stream";
   if(stream) free_stream(stream);
+  stream=NULL;
   
   current_module="sub_free";
   if ( subtitles ) 
