@@ -35,7 +35,13 @@ MGA_OBJS=mga_vid.o
 MGA_LIBS=-L../../libdha -ldha -lm
 MGA_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W
 
-all:    $(RADEON_VID) $(RAGE128_VID) $(NVIDIA_VID) $(GENFB_VID) #$(MGA_VID)
+MGA_CRTC2_VID=mga_crtc2_vid.so
+MGA_CRTC2_SRCS=mga_vid.c
+MGA_CRTC2_OBJS=mga_crtc2_vid.o
+MGA_CRTC2_LIBS=-L../../libdha -ldha -lm
+MGA_CRTC2_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -Wall -W -DCRTC2
+
+all:    $(RADEON_VID) $(RAGE128_VID) $(NVIDIA_VID) $(GENFB_VID) $(MGA_VID) $(MGA_CRTC2_VID)
 
 
 .SUFFIXES: .c .o
@@ -71,6 +77,12 @@ $(MGA_OBJS):    $(MGA_SRCS)
 
 $(MGA_VID):     $(MGA_OBJS)
 	$(LD) $(MGA_LIBS) -shared -soname $(MGA_VID) -o $(MGA_VID) $(MGA_OBJS)
+
+$(MGA_CRTC2_OBJS):    $(MGA_CRTC2_SRCS)
+	$(CC) -c $(MGA_CRTC2_CFLAGS) -o $@ $<
+
+$(MGA_CRTC2_VID):     $(MGA_CRTC2_OBJS)
+	$(LD) $(MGA_CRTC2_LIBS) -shared -soname $(MGA_CRTC2_VID) -o $(MGA_CRTC2_VID) $(MGA_CRTC2_OBJS)
 
 clean:
 	rm -f *.o *.so *~
