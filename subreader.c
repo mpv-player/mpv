@@ -239,9 +239,28 @@ subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
 	    len=0;
 	    for (p=line; *p!='\n' && *p!='\r' && *p; p++,len++);
 	    if (len) {
-		current->text[i]=(char *)malloc (len+1);
+                int j=0,skip=0;
+		char *curptr=current->text[i]=(char *)malloc (len+1);
 		if (!current->text[i]) return ERR;
-		strncpy (current->text[i], line, len); current->text[i][len]='\0';
+		//strncpy (current->text[i], line, len); current->text[i][len]='\0';
+                for(j; j<len; j++) {
+		    /* let's filter html tags ::atmos */
+		    if(line[j]=='>') {
+			skip=0;
+			continue;
+		    }
+		    if(line[j]=='<') {
+			skip=1;
+			continue;
+		    }
+		    if(skip) {
+			continue;
+		    }
+		    *curptr=line[j];
+		    curptr++;
+		}
+		*curptr='\0';
+
 		i++;
 	    } else {
 		break;
