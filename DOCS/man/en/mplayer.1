@@ -5358,25 +5358,31 @@ use two (or three) pass encoding.
 .PD 0
 .RSs
 .IPs 1
-first pass
+first pass (also see turbo)
 .IPs 2
 second pass
-.IPs 3 (also see turbo)
-Second and third pass of three pass encoding.
+.IPs 3
+Nth pass (second and third passes of three pass encoding)
+.RE
+.RS
 Here is how it works, and how to use it:
 .br
 The first pass (vpass=1) writes the stats file.
 You might want to deactivate some CPU-hungry options, like "turbo"
 mode does.
 .br
-The second pass (vpass=3, that is not a typo ;-) ) reads the stats file and
+In two pass mode, the second pass (vpass=2) reads the stats file and
 bases ratecontrol decisions on it.
-You can use all encoding options, except very CPU-hungry options like "qns",
 .br
-The third pass (vpass=3) does both.
-It first read the stats then overwrite them (You might want to backup
-divx2pass.log before doing this if there's any possibility that you'll
-have to cancel MEncoder).
+In three pass mode, the second pass (vpass=3, that is not a typo ;-) )
+does both: It first reads the stats, then overwrites them.
+(You might want to backup divx2pass.log before doing this if there is 
+any possibility that you'll have to cancel MEncoder).
+You can use all encoding options, except very CPU-hungry options like "qns".
+.br
+The third pass (vpass=3) is the same as the second pass, except that it has 
+the second pass's stats to work from.
+You can use all encoding options, including CPU-hungy ones.
 .RE
 .PD 1
 .sp 1
