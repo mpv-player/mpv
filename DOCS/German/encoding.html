@@ -43,6 +43,9 @@ Er verfügt auch über eine stream-copy-Funktion und kann die Grösse der Videos än
       nach dem Kompilieren von lame testen. Das Ergebnis (eine Zahl) sollte kleiner als <B>30</B> sein.
       Aber keine Panik wenn sie <B>400</B> oder ähnlich ist, du solltest keine mindere Qualität bemerken können.
       Oh, und wenn dein Compiler <CODE>make test</CODE> nicht ausführt ... dann lösche <B>GCC 2.96</B>.</LI>
+    <LI><B>OPTIONAL</B> - <CODE>libjpeg</CODE> und <CODE>libpng</CODE> -
+      wie in der <A HREF="documentation.html#1.3">Installation</A>
+      Sektion beschrieben</LI>
   </UL>
 </P>
 
@@ -236,16 +239,8 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
 
 <P><B><I>Erklärung des Prozesses</I></B></P>
 
-<P><B>MEncoder</B> <I>decodiert</I> das/die Eingangsbild(er) mit einem verfügbaren
-  MJPEG Videocodec (wenn er PNGs decodiert, verwendet er die <b>libpng</b>).
-  Standardmässig wird <CODE>ffmjpeg</CODE> verwendet, so dass man die libavcodec-Unterstützung
-  einkompilieren muss (was sowieso empfohlen ist). Der Nachteil ist, dass er gewisse JPEG-Typen
-  nicht verarbeiten kann (für diese wird ein grünes Bild encodiert). Benutze dazu ein externes
-  Werkzeug um diese Bilder in ein verträgliches Format zu konvertieren.<BR> Du kannst frei 
-  irgendeinen anderen MJPEG-Decoder wählen, wie <CODE>mcmjpg32.dll</CODE> (MainConcept Motion 
-  JPEG), wenn dieser installiert ist. Nach einer Begutachtung der <CODE>codecs.conf</CODE>
-  und einer anschliessenden Überprüfung der <CODE>videocodec</CODE> Zeile, welche auf zu dieser
-  Datei verweist, erkennt man, dass man dazu die <CODE>-vc mjpeg</CODE> Option benutzen muss.
+<P><B>MEncoder</B> <I>decodiert</I> das/die Eingangsbild(er) mit <CODE>libjpeg</CODE>
+  (wenn PNGs decodiert werden, wird die <B>libpng</B> benutzt).
 </P>
 
 <P><B>MEncoder</B> führt die decodierten Bilder danach dem gewählten Videokompressor zu

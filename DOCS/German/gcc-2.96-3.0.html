@@ -64,7 +64,7 @@ Wir haben dazu aber kein Interesse oder auch nur Zeit.
 
 <P>
 Achja und zum Pipe-In-Kommentar-Bug: Es war nicht unser Bug. Ich habe mit
-einen der gcc Helfer gesprochen und sie haben mit gesagt, dass gcc 2.96 und 3.x
+einem der gcc Helfer gesprochen und sie haben mit gesagt, dass gcc 2.96 und 3.x
 Intel ASM Syntax unterstützen und dies der Auslöser für den Pipe Bug war. Aber es war
 ein Bug, denn gcc hat den ganzen ASM-Block stillschweigend ohne irgendeine Warnung
 ignoriert. <I>Die Entwickler</I> hab das gelöst, nun gibt es Warnungen aus und
@@ -86,12 +86,12 @@ heisst das nicht, dass das für alle gilt.</I>
 </P>
 
 <P>
-<B>Answer:</B>
+<B>Antwort:</B>
 </P>
 
 <P>
 Nein. Du liegst falsch!
-Einige Projekte (hauptsächlich Projekte, die stark optimierten inline ASM-Code enthalten) 
+Einige Projekte (hauptsächlich die, welche stark optimierten inline ASM-Code enthalten) 
 haben Probleme mit gcc 2.96. Zum Beispiel: avifile, MESA / DRI, Wine, ffmpeg, 
 lame, NuppelVideo, MySQL. Aber andere Projekte habe habe bereits einen Workaround für die gcc Bugs eingebaut (Änderung
 des Quellcodec er Compiler Bugs auslöst), deshalb funktioniert es nun.
