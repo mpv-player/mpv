@@ -11,44 +11,47 @@ static char* banner_text=
 
 static char help_text[]=
 #ifdef HAVE_NEW_GUI
-"Verwendung:   mplayer [-gui] [optionen] [verzeichnis/]dateiname\n"
+"Verwendung:   mplayer [-gui] [optionen] [url|verzeichnis/]dateiname\n"
 #else
-"Verwendung:   mplayer [optionen] [verzeichnis/]dateiname\n"
+"Verwendung:   mplayer [optionen] [url|verzeichnis/]dateiname\n"
 #endif
 "\n"
-"Optionen:\n"
-" -vo <drv[:dev]> Videoausgabetreiber & -Gerät (siehe '-vo help' für eine Liste)\n"
-" -ao <drv[:dev]> Audioausgabetreiber & -Gerät (siehe '-ao help' für eine Liste)\n"
-" -vcd <tracknr>  Spiele VCD (Video CD) Titel anstelle eines Dateinames\n"
+"Grundlegende Optionen: (siehe Manpage für eine vollständige Liste ALLER Optionen!)\n"
+" -vo <drv[:dev]>  Videoausgabetreiber & -Gerät (siehe '-vo help' für eine Liste)\n"
+" -ao <drv[:dev]>  Audioausgabetreiber & -Gerät (siehe '-ao help' für eine Liste)\n"
+#ifdef HAVE_VCD
+" -vcd <tracknr>   Spiele VCD (Video CD) Titel anstelle eines Dateinames\n"
+#endif
 #ifdef HAVE_LIBCSS
-" -dvdauth <dev>  Benutze DVD Gerät für die Authentifizierung (für verschl. DVD's)\n"
+" -dvdauth <dev>   Benutze DVD Gerät für die Authentifizierung (für verschl. DVD's)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titlenr>  Spiele DVD Titel/Track von Gerät anstelle eines Dateinames\n"
+" -dvd <titelnr>   Spiele DVD Titel/Track von Gerät anstelle eines Dateinames\n"
+" -alang/-slang    Wähle DVD Audio/Untertitel Sprache (2-Zeichen Ländercode)\n"
 #endif
-" -ss <timepos>   Starte Abspielen ab Position (Sekunden oder hh:mm:ss)\n"
-" -nosound        Spiele keinen Sound\n"
-#ifdef USE_FAKE_MONO
-" -stereo <mode>  Auswahl der MPEG1-Stereoausgabe (0:stereo 1:links 2:rechts)\n"
-#endif
-" -fs -vm -zoom   Vollbild Optionen (Vollbild, Videomode, Softwareskalierung)\n"
-" -x <x> -y <y>   Skaliere Bild auf <x> * <y> [wenn vo-Treiber mitmacht]\n"
-" -sub <file>     Benutze Untertitledatei (siehe auch -subfps, -subdelay)\n"
-" -vid x -aid y   Spiele Videostream (x) und Audiostream (y)\n"
-" -fps x -srate y Benutze Videoframerate (x fps) und Audiosamplingrate (y Hz)\n"
-" -pp <quality>   Aktiviere Nachbearbeitungsfilter (0-4 bei DivX, 0-63 bei MPEG)\n"
-" -nobps          Benutze alternative A-V sync Methode für AVI's (könnte helfen!)\n"
-" -framedrop      Benutze frame-dropping (für langsame Rechner)\n"
+" -ss <zeitpos>    Starte Abspielen ab Position (Sekunden oder hh:mm:ss)\n"
+" -nosound         Spiele keinen Sound\n"
+" -fs -vm -zoom    Vollbild Optionen (Vollbild, Videomode, Softwareskalierung)\n"
+" -x <x> -y <y>    Setze Bildschirmauflösung (für Vidmode-Wechsel oder sw-Skalierung)\n"
+" -sub <datei>     Benutze Untertitle-Datei (siehe auch -subfps, -subdelay)\n"
+" -playlist <datei> Benutze Playlist-Datei\n"
+" -vid x -aid y    Spiele Videostream (x) und Audiostream (y)\n"
+" -fps x -srate y  Benutze Videoframerate (x fps) und Audiosamplingrate (y Hz)\n"
+" -pp <Qualität>   Aktiviere Nachbearbeitungsfilter (siehe Manpage für Details)\n"
+" -framedrop       Benutze frame-dropping (für langsame Rechner)\n"
 "\n"
-"Tasten:\n"
-" <- oder ->      Springe zehn Sekunden vor/zurück\n"
-" rauf / runter   Springe eine Minute vor/zurück\n"
-" p oder LEER     PAUSE (beliebige Taste zum Fortsetzen)\n"
-" q oder ESC      Abspielen stoppen und Programm beenden\n"
-" + oder -        Audioverzögerung um +/- 0.1 Sekunde verändern\n"
-" o               OSD Mode:  Aus / Suchleiste / Suchleiste + Zeit\n"
-" * oder /        Lautstärke verstellen ('m' für Auswahl Master/Wave)\n"
-" z oder x        Untertitelverzögerung um +/- 0.1 Sekunde verändern\n"
+"Grundlegende Tasten:\n"
+" <- oder ->       Springe zehn Sekunden vor/zurück\n"
+" rauf / runter    Springe eine Minute vor/zurück\n"
+" pgup / pgdown    Springe 10 Minuten vor/zurück\n"
+" < oder >         Springe in der Playliste vor/zurück\n"
+" p oder LEER      PAUSE (beliebige Taste zum Fortsetzen)\n"
+" q oder ESC       Abspielen stoppen und Programm beenden\n"
+" + oder -         Audioverzögerung um +/- 0.1 Sekunde verändern\n"
+" o                OSD Mode:  Aus / Suchleiste / Suchleiste + Zeit\n"
+" * oder /         PCM-Lautstärke verstellen\n"
+" z oder x         Untertitelverzögerung um +/- 0.1 Sekunde verändern\n"
+" r oder t         Verschiebe die Untertitel-Position, siehe auch -vop expand!\n"
 "\n"
 " * * * IN DER MANPAGE STEHEN WEITERE KEYS UND OPTIONEN ! * * *\n"
 "\n";
@@ -95,6 +98,7 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Kann Videoausgabetreiber nicht initialisieren!\n"
 #define MSGTR_CannotInitAO "Kann Audiotreiber/Soundkarte nicht initialisieren -> Kein Ton\n"
 #define MSGTR_StartPlaying "Starte Wiedergabe...\n"
+
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ***************************************************\n"\
 "         **** Dein System ist zu LANGSAM zum Abspielen! ****\n"\
@@ -193,6 +197,7 @@ static char help_text[]=
 #define MSGTR_NoACMSupport "Win32/ACM Audiocodecs ausgeschaltet oder nicht verfügbar auf nicht-x86 Plattformen -> erzwinge -nosound :(\n"
 #define MSGTR_NoDShowAudio "MPlayer wurde ohne DirectShow Unterstützung kompiliert -> erzwinge -nosound :(\n"
 #define MSGTR_NoOggVorbis "OggVorbis Audiocodec ausgeschaltet -> erzwinge -nosound :(\n"
+#define MSGTR_NoXAnimSupport "MPlayer wurde ohne XAnim Unterstützung kompiliert!\n"
 
 #define MSGTR_MpegPPhint "WARNUNG! Du hast Bild-Postprocessing erbeten für ein MPEG 1/2 Video,\n" \
 			 "         aber Du hast MPlayer ohne MPEG 1/2 Postprocessing-Support kompiliert!\n" \
