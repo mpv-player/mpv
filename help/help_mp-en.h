@@ -92,7 +92,7 @@ static char help_text[]=
 "           ************************************************\n\n"\
 "Possible reasons, problems, workarounds:\n"\
 "- Most common: broken/buggy _audio_ driver\n"\
-"  - Try -ao sdl or use ALSA 0.5 or the OSS emulation of ALSA 0.9.\n"\
+"  - Try -ao sdl or use the OSS emulation of ALSA.\n"\
 "  - Experiment with different values for -autosync, 30 is a good start.\n"\
 "- Slow video output\n"\
 "  - Try a different -vo driver (-vo help for a list) or try -framedrop!\n"\
