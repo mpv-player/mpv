@@ -347,6 +347,7 @@ static int init_vo(sh_video_t *sh){
 	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", avctx->aspect_ratio);
         ctx->last_aspect = avctx->aspect_ratio;
 //	if(ctx->last_aspect>=0.01 && ctx->last_aspect<100)
+	if(sh->aspect==0.0)
 	    sh->aspect = ctx->last_aspect;
 	sh->disp_w = avctx->width;
 	sh->disp_h = avctx->height;
