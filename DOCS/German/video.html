@@ -610,18 +610,17 @@ Hier einige wichtige:</P></B></TD><TR>
 </TABLE></P>
 
 <P>HINWEIS: Das Rendering ist sehr CPU-Intersiv, besonders bei AA-on-X (AAlib
-Verwendung unter X) und brauch am wenigsten CPU-Leistung auf einer standard,
-nicht-Framebuffer Konsole. Verwende SVGATextMode im ein großes Textmodus ein-
-zustellen und geniese es! (Zweikopf (Dual Head) Hercules Karten rock :)) (kann
-vielleicht irgendjemand bdev erweiteren, um Konversion/Farbmischung bei hgafb?
-Wäre nett :)</P>
+unter X) und benötigt am wenigsten CPU-Leistung auf einer standard,
+nicht-Framebuffer Konsole. Verwende SVGATextMode im ein großes Textmodus einzustellen
+und geniese es! (Dual Head Hercules Karten rocks :)) (kann vielleicht jemand
+bdev erweiteren für Konventierung/Farbmischung bei hgafb? Wäre nett :)</P>
 	
 <P>Verwende die -framedrop Option wenn dein Computer nicht schnell genug ist,
 um alle Frames zu Verarbeiten!</P>
 
 <P>Beim Abspielen auf einem Terminal wirst du eine bessere Geschwindigkeit und
-Qualität bekommen, wenn du den Linux-Treiber, und nicht den Curses (-aadriver
-linux) verwendest. Aber dazu brauchst du Scheibzugriff auf/dev/vcsa&lt;terminal&gt;!
+Qualität bekommen, wenn du den Linux-Treiber (-aadriver linux) und nicht den
+Curses-Teiber verwendest. Aber dazu brauchst du Scheibzugriff auf/dev/vcsa&lt;terminal&gt;!
 Dies wird nicht automatisch erkannt von aalib, aber vo_aa versucht die beste
 Möglichkeit zu finden. Siehe <A HREF="http://aa-project.sourceforge.net/tune">http://aa-project.sourceforge.net/tune/</A> für
 zusätzliche Tuning-Möglichkeiten.</P>
@@ -630,51 +629,51 @@ zusätzliche Tuning-Möglichkeiten.</P>
 
 <P><B><A NAME=2.2.1.A.1>2.2.1.A.1. Matrox Karten</A></B></P>
 
-<P><I> Ich würde gerne MPlayer mit dem selben Feature sehen, wie auf meiner
-Windows-Box. Wenn ich ein Video unter Windoes starte (als ein Fenster oder
+<P><I> Ich würde gerne bei MPlayer die selben Feature haben wie auf meiner
+Windows-Box. Wenn ich ein Video unter Windows starte (in einem Fenster oder
 in Vollbild) wird das Bild auch über TV-Out wiedergegeben und ich kann es auch
-mit Vollbild auf meinem Fernseher sehen. Ich liebe diese Feature aber wir ich
-war verwundet, wie schwer es sich einbauen ließe.</I></P>
+mit Vollbild auf meinem Fernseher sehen. Ich liebe diese Feature aber ich
+war verwundert, wie schwer es einzubauen ist.</I></P>
 
 <P>Dies ist eine Treiberbeschränkung. BES (Back-End Scaler, dies ist der
 Overlay-Erzeuger und die YUV Scaling-Engine für G200/G400/G450/G550 Karte)
-funitniert nur mit CRTC1. Normalerweise wird CRTC1 (Textmodus, jeder Farbtiefe
-und BES) auf den Kopf1 (HEAD1) geroutet, und CRTC2 (nur 16/32bpp Grafiken) wird
+funktioniert nur mit CRTC1. Normalerweise wird CRTC1 (Textmodus, jeder Farbtiefe
+und BES) auf den Kopf1 (HEAD1) geroutet und CRTC2 (nur 16/32bpp Grafiken) wird
 auf den HEAD2 (TV-out) geroutet.</P>
 
 <P>Unter Linux hast du 2 Möglichkeiten, dass der TV-Out funktioniert:</P>
 
 <P><UL>
-<LI>Verwende X 4.0.x + den HAL-Treiber von Matrox, so willst du Dual-Head-
-Unterstützung erhalten und es wird möglich sein den 2. Ausgang zum TV zu
-bringen. Unglücklichweise hat es die Macrovision Verschlüsselung aktiviert,
+<LI>Verwende X 4.0.x + den HAL-Treiber von Matrox, so wirst du Dual-Head-Unterstützung
+erhalten und es wird möglich sein den 2. Ausgang am TV zu nutzen. Unglücklichweise hat
+es eine Macrovision Verschlüsselung aktiviert,
 also wird es nur bei einem direkt verbunden TV funkioniert, nicht bei einem
 VCR. Ein anderes Problem ist, dass Xv auf dem 2 Head nicht funkioniert.
 (ich weiss nicht, wie Windows das Problem löst, möglichweise vertauscht es
-die CRTCs zwischen den Köpfen oder verwendet nut YUV Framebuffer vom 2. DAC mit
+die CRTCs zwischen den Köpfen oder verwendet den YUV Framebuffer vom 2. DAC mit
 einigen Tricks)
 <LI>Verwende matroxfb mit eingeschalteter Dual-Head Unterstützung (2.4.x 
 Kernel). So wird es möglich sein eine Framebuffer Konsole (Verwendung von CRTC2,
-also ist es langsam) und TV-Out (Verwendung von CRTC1, mit BES-Unterstützung).
+also ist es langsam) und TV-Out (Verwendung von CRTC1, mit BES-Unterstützung) anzuzeigen.
 Jedoch kannst du X vergessen, während du diese Art von TV-Out verwendest! :(
 </UL></P>
 
 <P>Folge diesen Anweisungen:</P>
 
 <P><UL>
-<LI>Kompiliere alle sich auf Matrox beziehende Treiber als Module für den Ker-
-nel. (du MUSST sie als Module kompilieren, zumindest ich konnte bisher nicht
-zum Funktionieren bringen, wenn es eingebaut war im Kernel)
-[starte mit dem neuen Kernel & install modules, aber lade sie nicht!]
+<LI>Kompiliere alle sich auf Matrox beziehenden Treiber als Module für den Kernel.
+(du MUSST sie als Module kompilieren, zumindest ich konnte bisher nicht
+zum Funktionieren bringen, wenn es im Kernel eingebaut war)
+[starte mit dem neuen Kernel & installiere die Module, aber lade sie nicht!]
 <P><CODE>
 &nbsp;&nbsp;cd TVout<BR>
 &nbsp;&nbsp;./compile.sh</CODE></P>
-<LI>Start den 'modules' Script von TV-Out Verzeichnis von MPlayer.
+<LI>Start den 'modules' Script vom TV-Out Verzeichnis von MPlayer.
 Es wird deine Konsole zum Framebuffer machen.
-Welchsle auf tty1 (ALT+F1)!
-Nun start den Script 'independent', es wird deine ttys einstellen:
-<P>tty 1,2:      fb Konsole, CRTC2, Head 1 (Monitor)<BR>
-tty 3,4,5...: Framebuffer+BES, CRTC1, Head 2 (TV-Out)</P>
+Wechsle auf tty1 (ALT+F1)!
+Nun starte den Script 'independent', es wird deine ttys einstellen:
+<P>tty 1,2: Framebuffer Konsole, CRTC2, Head 1 (Monitor)<BR>
+tty 3,4,5...: Framebuffer + BES, CRTC1, Head 2 (TV-Out)</P>
 Du solltest die TV-* und Mon-* Scripts starten um die Auflösung einzustellen:
 <P>wechsle auf tty1 (ALT+F1) und starte Mon-* (eines davon)<BR>
 wechsle auf tty3 (ALT+F3) und zurück auf tty1 (ALT+F1)</P>
@@ -686,7 +685,7 @@ wechsle auf tty3 (ALT+F3) und zurück auf tty1 (ALT+F1)</P>
 also wirst du es auf dem Fernseher oder dem 2. Monitor sehen.</P>
 </UL></P>
 
-<P>Ja, es ist zur Zeit noch ein "hack". Aber ich warte, dass das Marvel-Projekt
+<P>Ja, es ist zur Zeit noch ein "Hack". Aber ich warte, dass das Marvel-Projekt
 fertig gestellt wurde. Es wird eine richtigen TV-Out Treiber enhalten, hoffe
 ich.</P>
 
