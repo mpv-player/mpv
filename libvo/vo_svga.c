@@ -2,6 +2,8 @@
   Video driver for SVGAlib - alpha, slow
   by Zoltan Mark Vician <se7en@sch.bme.hu>
   Code started: Mon Apr  1 23:25:47 2001
+  
+  Uses HW acceleration if your card is supported by SVGAlib.
 */
 
 #include <stdio.h>
@@ -17,6 +19,8 @@
 #include "yuv2rgb.h"
 #include "mmx.h"
 
+extern void rgb15to16_mmx(char* s0,char* d0,int count);
+
 LIBVO_EXTERN(svga)
 
 static vo_info_t vo_info = {
@@ -31,7 +35,7 @@ static vo_info_t vo_info = {
 GraphicsContext *screen;
 GraphicsContext *virt;
 
-static uint8_t *scalebuf = NULL, *yuvbuf = NULL;
+static uint8_t *scalebuf = NULL, *yuvbuf = NULL, *bppbuf = NULL;
 
 static uint32_t orig_w, orig_h, maxw, maxh; // Width, height
 static float scaling = 1.0;
@@ -60,6 +64,7 @@ static uint8_t bpp;
 static uint32_t pformat;
 
 static uint8_t checked = 0;
+static uint8_t bpp_conv = 0;
 
 static void checksupportedmodes() {
   int i;
@@ -82,31 +87,41 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   if (!checked) {
     checksupportedmodes(); // Looking for available video modes
   }
+
   pformat = format;
   if (format == IMGFMT_YV12) bpp = 32;
   else bpp = format & 255;
   if (wid > 800)
     switch (bpp) {
       case 32: vid_mode = 36; break;
-      case 24: vid_mode = 25; break;
+      case 24: vid_mode = bpp_conv ? 36 : 25; bpp = 32; break;
       case 16: vid_mode = 24; break;
-      case 15: vid_mode = 23; break;
+      case 15: vid_mode = bpp_conv ? 24 : 23; bpp = 16; break;
     }
   else
     if (wid > 640)
       switch (bpp) {
         case 32: vid_mode = 35; break;
-        case 24: vid_mode = 22; break;
+        case 24: vid_mode = bpp_conv ? 35 : 22; bpp = 32; break;
         case 16: vid_mode = 21; break;
-        case 15: vid_mode = 20; break;
+        case 15: vid_mode = bpp_conv ? 21 : 20; bpp = 16; break;
       }
     else
       switch (bpp) {
         case 32: vid_mode = 34; break;
-        case 24: vid_mode = 19; break;
+        case 24: vid_mode = bpp_conv ? 34 : 19; bpp = 32; break;
         case 16: vid_mode = 18; break;
-        case 15: vid_mode = 17; break;
+        case 15: vid_mode = bpp_conv ? 18 : 17; bpp = 16; break;
       }
+  if (bpp_conv)
+    bppbuf = malloc(maxw * maxh * BYTESPERPIXEL);
+  if (!bppbuf) {
+    printf("vo_svga: Not enough memory for buffering!");
+    uninit();
+    return (1);
+  }
+
+  vga_setlinearaddressing();
   if (vga_setmode(vid_mode) == -1){
     printf("vo_svga: vga_setmode(%d) failed.\n",vid_mode);
     return(1); // error
@@ -134,23 +149,37 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
       scaling = maxh / (orig_h * 1.0);
       maxw = (uint32_t) (orig_w * scaling);
       scalebuf = malloc(maxw * maxh * BYTESPERPIXEL);
+      if (!scalebuf) {
+        printf("vo_svga: Not enough memory for buffering!");
+	uninit();
+	return (1);
+      }
     } else {
         maxw = WIDTH;
         scaling = maxw / (orig_w * 1.0);
         maxh = (uint32_t) (orig_h * scaling);
         scalebuf = malloc(maxw * maxh * BYTESPERPIXEL);
+        if (!scalebuf) {
+          printf("vo_svga: Not enough memory for buffering!");
+	  uninit();
+	  return (1);
+        }
       }
   } else {
       maxw = orig_w;
       maxh = orig_h;
     }
-  
   x_pos = (WIDTH - maxw) / 2;
   y_pos = (HEIGHT - maxh) / 2;
   
   if (pformat == IMGFMT_YV12) {
     yuv2rgb_init(bpp, MODE_RGB);
     yuvbuf = malloc(maxw * maxh * BYTESPERPIXEL);
+    if (!yuvbuf) {
+      printf("vo_svga: Not enough memory for buffering!");
+      uninit();
+      return (1);
+    }
   }
 
   printf("SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
@@ -161,27 +190,39 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 }
 
 static uint32_t query_format(uint32_t format) {
-    if (!checked)
-      checksupportedmodes(); // Looking for available video modes
-    switch (format) {
-      case IMGFMT_RGB32: 
-      case IMGFMT_BGR|32: {
-	return (vid_modes[_640x480x16M32] | vid_modes[_800x600x16M32] | vid_modes[_1024x768x16M32]);
-      }
-      case IMGFMT_RGB24: 
-      case IMGFMT_BGR|24: {
-	return (vid_modes[_640x480x16M] | vid_modes[_800x600x16M] | vid_modes[_1024x768x16M]);
-      }
-      case IMGFMT_RGB16: 
-      case IMGFMT_BGR|16: {
-	return (vid_modes[_640x480x64K] | vid_modes[_800x600x64K] | vid_modes[_1024x768x64K]);
-      }
-      case IMGFMT_RGB15: 
-      case IMGFMT_BGR|15: {
-	return (vid_modes[_640x480x32K] | vid_modes[_800x600x32K] | vid_modes[_1024x768x32K]);
-      }
-      case IMGFMT_YV12: return (1);
+  uint8_t res = 0;
+
+  if (!checked)
+    checksupportedmodes(); // Looking for available video modes
+  switch (format) {
+    case IMGFMT_RGB32: 
+    case IMGFMT_BGR|32: {
+      return (vid_modes[_640x480x16M32] | vid_modes[_800x600x16M32] | vid_modes[_1024x768x16M32]);
     }
+    case IMGFMT_RGB24: 
+    case IMGFMT_BGR|24: {
+      res = vid_modes[_640x480x16M] | vid_modes[_800x600x16M] | vid_modes[_1024x768x16M];
+      if (!res) {
+        res = vid_modes[_640x480x16M32] | vid_modes[_800x600x16M32] | vid_modes[_1024x768x16M32];
+	bpp_conv = 1;
+      }
+      return (res);
+    }
+    case IMGFMT_RGB16: 
+    case IMGFMT_BGR|16: {
+      return (vid_modes[_640x480x64K] | vid_modes[_800x600x64K] | vid_modes[_1024x768x64K]);
+    }
+    case IMGFMT_RGB15: 
+    case IMGFMT_BGR|15: {
+      res = vid_modes[_640x480x32K] | vid_modes[_800x600x32K] | vid_modes[_1024x768x32K];
+      if (!res) {
+        res = vid_modes[_640x480x64K] | vid_modes[_800x600x64K] | vid_modes[_1024x768x64K];
+        bpp_conv = 1;
+      }
+      return (res);
+    }
+    case IMGFMT_YV12: return (1);
+  }
   return (0);
 }
 
@@ -215,6 +256,36 @@ static uint32_t draw_frame(uint8_t *src[]) {
   if (scalebuf) {
     gl_scalebox(orig_w, orig_h, src[0], maxw, maxh, scalebuf);
     src[0] = scalebuf;
+  }
+  if (bpp_conv) {
+    uint16_t *src = (uint16_t *) src[0];
+    uint16_t *dest = (uint16_t *) bppbuf;
+    uint16_t *end;
+    
+    switch(bpp) {
+      case 32:
+	end = src + (maxw * maxh * 2);
+        while (src < end) {
+	  *dest++ = *src++;
+	  (uint8_t *)dest = (uint8_t *)src;
+	  *(((uint8_t *)dest)+1) = 0;
+	  dest++;
+	  src++;
+	}
+      case 16:
+#ifdef HAVE_MMX
+        rgb15to16_mmx(src[0],bppbuf,maxw * maxh * 2);
+#else
+	register uint16_t srcdata;
+	
+	end = src + (maxw * maxh);
+	while (src < end) {
+	  srcdata = *src++;
+	  *dest++ = (srcdata & 0x1f) | ((srcdata & 0x7fe0) << 1);
+	}
+#endif
+    }
+    src[0] = bppbuf;
   }
   gl_putbox(x_pos, y_pos, maxw, maxh, src[0]);
 }
@@ -254,6 +325,8 @@ static void uninit(void) {
   gl_freecontext(screen);
   gl_freecontext(virt);
   vga_setmode(TEXT);
+  if (bppbuf)
+    free(bppbuf);
   if (scalebuf)
     free(scalebuf);
   if (yuvbuf)
