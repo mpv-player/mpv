@@ -285,6 +285,21 @@ static char help_text[]=
 #define MSGTR_AC3only48k "Pouze proudy o frekvenci 48000 Hz podporovány.\n"
 #define MSGTR_UnknownAudio "Neznámý/chybìjící audio formát -> beze zvuku\n"
 
+#define MSGTR_UsingExternalPP "[PP] Pou¾ívám externí filtr pro postprocessing , max q = %d\n"
+#define MSGTR_UsingCodecPP "[PP] Pou¾ívám integrovaný postprocesing kodeku, max q = %d\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Video atribut '%s' není podporován vybraným vo & vd! \n"
+#define MSGTR_VideoCodecFamilyNotAvailable "Po¾adovaná rodina video kodeku [%s] (vfm=%d) není dostupná (aktivujte ji pøi kompilace!)\n"
+#define MSGTR_AudioCodecFamilyNotAvailable "Po¾adovaná rodina audio kodeku [%s] (afm=%d) not available (aktivujte ji pøi kompilace!)\n"
+#define MSGTR_OpeningVideoDecoder "Otevírám viedo dekodér: [%s] %s\n"
+#define MSGTR_OpeningAudioDecoder "Otevírám audio decodér: [%s] %s\n"
+#define MSGTR_UninitVideo "uninit video: %d  \n"
+#define MSGTR_UninitAudio "uninit audio: %d  \n"
+#define MSGTR_VDecoderInitFailed "VDecoder - inicializace selhala :(\n"
+#define MSGTR_ADecoderInitFailed "ADecoder - inicializace selhala :(\n"
+#define MSGTR_ADecoderPreinitFailed "ADecoder preinit selhal :(\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Alokuji %d bytù pro vstupní buffer\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Alokuji %d + %d = %d bytù pro výstupní buffer\n"
+
 // LIRC:
 #define MSGTR_SettingUpLIRC "Nastavuji podporu lirc ...\n"
 #define MSGTR_LIRCdisabled "Nebudete moci pou¾ívat dálkový ovladaè.\n"
@@ -292,6 +307,18 @@ static char help_text[]=
 #define MSGTR_LIRCsocketerr "Nìjaká chyba se soketem lirc: %s\n"
 #define MSGTR_LIRCcfgerr "Selhalo ètení konfiguraèního souboru LIRC %s !\n"
 
+// vf.c
+#define MSGTR_CouldNotFindVideoFilter "Nemohu nalézt video filtr '%s'\n"
+#define MSGTR_CouldNotOpenVideoFilter "Nemohu otevøítvideo filtr '%s'\n"
+#define MSGTR_OpeningVideoFilter "Otevírám video filtr: "
+#define MSGTR_CannotFindColorspace "Nemohu nalézt spoleèný barevný prostor, ani pøi vlo¾ení 'scale' :(\n"
+
+// vd.c
+#define MSGTR_CodecDidNotSet "VDec: kodek nenastavil sh->disp_w a sh->disp_h, pokou¹ím se to pøekonat!\n"
+#define MSGTR_VoConfigRequest "VDec: vo po¾adovaná konfigurace - %d x %d (preferovaný csp: %s)\n"
+#define MSGTR_CouldNotFindColorspace "Nemohu nalézt spoleèný barevný prostor - zkou¹ím to znovu s -vop scale...\n"
+#define MSGTR_MovieAspectIsSet "Film-pomìr stran je %.2f:1 - pøedbì¾nì zvìt¹uji na správnou velikost.\n"
+#define MSGTR_MovieAspectUndefined "Film-pomìr stran není definován - nemìním velikost.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -327,6 +354,7 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Bohu¾el, nedostatek pamìti pro vytváøení menu."
 #define MSGTR_NEMFMM "Bohu¾el, nedostatek pamìti pro masku hlavního okna."
 #define MSGTR_IDFGCVD "Bohu¾el, nebyl nalezen video ovladaè kompatibilní s GUI."
+#define MSGTR_NEEDLAVCFAME "Bohu¾el, není mo¾no pøehrávat jiné soubory ne¾ mpeg s kartou DXR3/H+ bez pøekódování.\nProsím, aktivujte lavc nebo fame v konfiguraci DXR3/H+."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[témata] chyba v konfiguraèním soubory témat %d: %s"
@@ -457,6 +485,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_OSS_Device "Zaøízení:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Message "Pozor, nìkterá nastavení potøebují pro svou funkci restartovat pøehrávání."
+#define MSGTR_PREFERENCES_DXR3_VENC "Video enkoder:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "Pou¾ít LAVC (ffmpeg)"
+#define MSGTR_PREFERENCES_DXR3_FAME "Pou¾ít FAME"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fatální chyba ..."
