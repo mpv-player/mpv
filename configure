@@ -31,7 +31,7 @@ cc_check() {
   echo >> "$TMPLOG"
   echo "$_cc $_inc_extra $_ld_static $_ld_extra $TMPC -o $TMPO $@" >> "$TMPLOG"
   rm -f "$TMPO"
-  ( "$_cc" $_inc_extra $_ld_static $_ld_extra "$TMPC" -o "$TMPO" "$@" ) >> "$TMPLOG" 2>&1
+  ( $_cc $_inc_extra $_ld_static $_ld_extra "$TMPC" -o "$TMPO" "$@" ) >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
   echo "ldd $TMPO" >> "$TMPLOG"
@@ -442,7 +442,7 @@ fi
 
 # Checking CC version...
 if test "$_skip_cc_check" != yes ; then
- for _cc in $_cc gcc-3.1 gcc3 gcc-3.0 cc ; do
+ for _cc in "$_cc" gcc-3.1 gcc3 gcc-3.0 cc ; do
   echocheck "$_cc version"
   cc_name=`( $_cc -v ) 2>&1 | tail -1 | cut -d ' ' -f 1`
   cc_version=`( $_cc -dumpversion ) 2>&1`
@@ -3819,7 +3819,7 @@ int main(void) { myclass myobject; return myobject.myreturn(); }
 EOF
   echo "------------------------------------------------"  >> "$TMPLOG"
   cat "$TMPCPP" >> "$TMPLOG"
-  if ( "$_cc" "$TMPCPP" -o "$TMPO" && "$TMPO" ) >> "$TMPLOG" 2>&1 ; then
+  if ( $_cc "$TMPCPP" -o "$TMPO" && "$TMPO" ) >> "$TMPLOG" 2>&1 ; then
     _dshow=yes
     echores "yes (C++ is ok)"
   else
