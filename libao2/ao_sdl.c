@@ -181,7 +181,7 @@ static int init(int rate,int channels,int format,int flags){
 	/* Allocate ring-buffer memory */
 	buffer = (unsigned char *) malloc(BUFFSIZE);
 
-//	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_INFO, rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
+	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_INFO, rate, (channels > 1) ? "Stereo" : "Mono", af_fmt2str_short(format));
 
 	if(ao_subdevice) {
 		setenv("SDL_AUDIODRIVER", ao_subdevice, 1);

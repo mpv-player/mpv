@@ -184,8 +184,8 @@ static int init(int rate,int channels,int format,int flags){
   char *mixer_channels [SOUND_MIXER_NRDEVICES] = SOUND_DEVICE_NAMES;
   int oss_format;
 
-//  mp_msg(MSGT_AO,MSGL_V,"ao2: %d Hz  %d chans  %s\n",rate,channels,
-//    audio_out_format_name(format));
+  mp_msg(MSGT_AO,MSGL_V,"ao2: %d Hz  %d chans  %s\n",rate,channels,
+    af_fmt2str_short(format));
 
   if (ao_subdevice)
     dsp = ao_subdevice;
@@ -275,8 +275,6 @@ ac3_retry:
 #endif
     goto ac3_retry;
   }
-//  mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
-//    audio_out_format_name(ao_data.format), audio_out_format_name(format));
 #if 0
   if(oss_format!=format2oss(format))
 	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %s sample format! Broken audio or bad playback speed are possible! Try with '-aop list=format'\n",audio_out_format_name(format));
@@ -284,6 +282,9 @@ ac3_retry:
 
   ao_data.format = oss2format(oss_format);
   if (ao_data.format == -1) return 0;
+
+  mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
+    af_fmt2str_short(ao_data.format), af_fmt2str_short(format));
   
   ao_data.channels = channels;
   if(format != AF_FORMAT_AC3) {

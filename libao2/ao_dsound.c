@@ -372,7 +372,7 @@ static int init(int rate, int channels, int format, int flags)
 		case AF_FORMAT_S8:
 			break;
 		default:
-			mp_msg(MSGT_AO, MSGL_V,"ao_dsound: format %x not supported defaulting to Signed 16-bit Little-Endian\n",format);
+			mp_msg(MSGT_AO, MSGL_V,"ao_dsound: format %s not supported defaulting to Signed 16-bit Little-Endian\n",af_fmt2str_short(format));
 			format=AF_FORMAT_S16_LE;
 	}   	
 	//fill global ao_data
@@ -381,7 +381,7 @@ static int init(int rate, int channels, int format, int flags)
 	ao_data.format = format;
 	ao_data.bps = channels * rate * (af_fmt2bits(format)>>3);
 	if(ao_data.buffersize==-1) ao_data.buffersize = ao_data.bps; // space for 1 sec
-	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Samplerate:%iHz Channels:%i Format:%x\n", rate, channels, format);
+	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Samplerate:%iHz Channels:%i Format:%s\n", rate, channels, af_fmt2str_short(format));
 	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Buffersize:%d bytes (%d msec)\n", ao_data.buffersize, ao_data.buffersize / ao_data.bps * 1000);
 
 	//fill waveformatex

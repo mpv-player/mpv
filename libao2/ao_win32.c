@@ -147,7 +147,6 @@ static int init(int rate,int channels,int format,int flags)
 	MMRESULT result;
 	unsigned char* buffer;
 	int i;
-	char buf[128];
    
 	switch(format){
 		case AF_FORMAT_AC3:
@@ -156,7 +155,7 @@ static int init(int rate,int channels,int format,int flags)
 		case AF_FORMAT_S8:
 			break;
 		default:
-			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",af_fmt2str(format, &buf, 128));
+			mp_msg(MSGT_AO, MSGL_V,"ao_win32: format %s not supported defaulting to Signed 16-bit Little-Endian\n",af_fmt2str_short(format));
 			format=AF_FORMAT_S16_LE;
 	}   
 	//fill global ao_data 
@@ -168,11 +167,11 @@ static int init(int rate,int channels,int format,int flags)
 	  ao_data.bps*=2;
 	if(ao_data.buffersize==-1)
 	{
-		ao_data.buffersize=audio_out_format_bits(format)/8;
+		ao_data.buffersize=af_fmt2bits(format)/8;
         ao_data.buffersize*= channels;
 		ao_data.buffersize*= SAMPLESIZE;
 	}
-	mp_msg(MSGT_AO, MSGL_V,"ao_win32: Samplerate:%iHz Channels:%i Format:%s\n",rate, channels, audio_out_format_name(format));
+	mp_msg(MSGT_AO, MSGL_V,"ao_win32: Samplerate:%iHz Channels:%i Format:%s\n",rate, channels, af_fmt2str_short(format));
     mp_msg(MSGT_AO, MSGL_V,"ao_win32: Buffersize:%d\n",ao_data.buffersize);
 	
 	//fill waveformatex
@@ -189,14 +188,14 @@ static int init(int rate,int channels,int format,int flags)
     else 
     {
         wformat.Format.wFormatTag      = (channels>2)?WAVE_FORMAT_EXTENSIBLE:WAVE_FORMAT_PCM;
-        wformat.Format.wBitsPerSample  = audio_out_format_bits(format); 
+        wformat.Format.wBitsPerSample  = af_fmt2bits(format); 
         wformat.Format.nBlockAlign     = wformat.Format.nChannels * (wformat.Format.wBitsPerSample >> 3);
     }
 	if(channels>2)
 	{
         wformat.dwChannelMask = channel_mask[channels-3];
         wformat.SubFormat = KSDATAFORMAT_SUBTYPE_PCM;
-	    wformat.Samples.wValidBitsPerSample=audio_out_format_bits(format);
+	    wformat.Samples.wValidBitsPerSample=af_fmt2bits(format);
     }
   
     wformat.Format.nAvgBytesPerSec = wformat.Format.nSamplesPerSec * wformat.Format.nBlockAlign;

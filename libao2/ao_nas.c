@@ -387,13 +387,12 @@ static int init(int rate,int channels,int format,int flags)
 	int bytes_per_sample = channels * AuSizeofFormat(auformat);
 	int buffer_size;
 	char *server;
-	char buf[128];
 
 	nas_data=malloc(sizeof(struct ao_nas_data));
 	memset(nas_data, 0, sizeof(struct ao_nas_data));
 
 	mp_msg(MSGT_AO, MSGL_V, "ao2: %d Hz  %d chans  %s\n",rate,channels,
-		af_fmt2str(format,buf,128));
+		af_fmt2str_short(format));
 
 	ao_data.format = format;
 	ao_data.samplerate = rate;

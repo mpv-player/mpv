@@ -334,7 +334,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	ao_data.bps *= 4;
 	break;
       case -1:
-	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: invalid format (%x) requested - output disabled\n",format);
+	mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: invalid format (%s) requested - output disabled\n",af_fmt2str_short(format));
 	return(0);
 	break;
       default:
@@ -586,7 +586,7 @@ static int init(int rate_hz, int channels, int format, int flags)
                                              alsa_format)) < 0)
       {
          mp_msg(MSGT_AO,MSGL_INFO,
-		"alsa-init: format %x are not supported by hardware, trying default\n", format);
+		"alsa-init: format %s are not supported by hardware, trying default\n", af_fmt2str_short(format));
          alsa_format = SND_PCM_FORMAT_S16_LE;
          ao_data.format = AF_FORMAT_S16_LE;
          ao_data.bps = channels * rate_hz * 2;

@@ -114,9 +114,9 @@ static int init(int rate,int channels,int format,int flags){
 	wavhdr.data_length=le2me_32(0x7ffff000);
 	wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
 
-//	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_PCM_FileInfo, ao_outputfilename, 
-//	       (ao_pcm_waveheader?"WAVE":"RAW PCM"), rate, 
-//	       (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
+	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_PCM_FileInfo, ao_outputfilename, 
+	       (ao_pcm_waveheader?"WAVE":"RAW PCM"), rate, 
+	       (channels > 1) ? "Stereo" : "Mono", af_fmt2str_short(format));
 	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_PCM_HintInfo);
 
 	fp = fopen(ao_outputfilename, "wb");
