@@ -135,6 +135,7 @@ extern void demux_close_smjpeg(demuxer_t* demuxer);
 extern void demux_close_xmms(demuxer_t* demuxer);
 extern void demux_close_gif(demuxer_t* demuxer);
 extern void demux_close_ts(demuxer_t* demuxer);
+extern void demux_close_mkv(demuxer_t* demuxer);
 
 #ifdef USE_TV
 #include "tv.h"
@@ -184,6 +185,10 @@ void free_demuxer(demuxer_t *demuxer){
 #ifdef HAVE_OGGVORBIS
     case DEMUXER_TYPE_OGG:
       demux_close_ogg(demuxer); break;
+#endif
+#ifdef HAVE_MATROSKA
+    case DEMUXER_TYPE_MATROSKA:
+      demux_close_mkv(demuxer); break;
 #endif
 #ifdef STREAMING_LIVE_DOT_COM
     case DEMUXER_TYPE_RTP:
@@ -292,6 +297,7 @@ extern int demux_ogg_fill_buffer(demuxer_t *d);
 extern int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
 extern int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
 extern int demux_smjpeg_fill_buffer(demuxer_t* demux);
+extern int demux_mkv_fill_buffer(demuxer_t *d);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -329,6 +335,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_DEMUXERS: return demux_demuxers_fill_buffer(demux,ds);
 #ifdef HAVE_OGGVORBIS
     case DEMUXER_TYPE_OGG: return demux_ogg_fill_buffer(demux);
+#endif
+#ifdef HAVE_MATROSKA
+    case DEMUXER_TYPE_MATROSKA: return demux_mkv_fill_buffer(demux);
 #endif
     case DEMUXER_TYPE_RAWAUDIO: return demux_rawaudio_fill_buffer(demux,ds);
     case DEMUXER_TYPE_RAWVIDEO: return demux_rawvideo_fill_buffer(demux,ds);
@@ -574,6 +583,7 @@ extern int demux_xmms_open(demuxer_t* demuxer);
 extern int gif_check_file(demuxer_t *demuxer);
 extern int demux_open_gif(demuxer_t* demuxer);
 extern int ts_check_file(demuxer_t * demuxer);
+extern int demux_open_mkv(demuxer_t *demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
@@ -700,6 +710,19 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_SMJPEG){
       demuxer = NULL;
   }
 }
+#ifdef HAVE_MATROSKA
+//=============== Try to open as Matroska file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MATROSKA){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_MATROSKA,audio_id,video_id,dvdsub_id);
+  if(demux_mkv_open(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"Matroska");
+      file_format=DEMUXER_TYPE_MATROSKA;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
+#endif
 
 //=============== Try based on filename EXTENSION: =================
 // Ok. We're over the stable detectable fileformats, the next ones are a bit
@@ -1277,6 +1300,7 @@ extern void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+extern void demux_mkv_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -1366,6 +1390,10 @@ switch(demuxer->file_format){
  case DEMUXER_TYPE_XMMS:
       demux_xmms_seek(demuxer,rel_seek_secs,flags); break;
 #endif
+#ifdef HAVE_MATROSKA
+ case DEMUXER_TYPE_MATROSKA:
+      demux_mkv_seek(demuxer,rel_seek_secs,flags);  break;
+#endif
  case DEMUXER_TYPE_MPEG_TS:
       demux_seek_ts(demuxer,rel_seek_secs,flags); break;
 
@@ -1428,6 +1456,7 @@ extern int demux_mpg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_asf_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_avi_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_xmms_control(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg);
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
     switch(demuxer->type) {
@@ -1444,6 +1473,10 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 #ifdef HAVE_XMMS
 	case DEMUXER_TYPE_XMMS:
 	    return demux_xmms_control(demuxer,cmd,arg);
+#endif
+#ifdef HAVE_MATROSKA
+        case DEMUXER_TYPE_MATROSKA:
+	    return demux_mkv_control(demuxer,cmd,arg);
 #endif
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;

@@ -26,7 +26,9 @@ SRCS += dvbin.c
 SRCS += dvb_tune.c
 endif
 
-
+ifeq ($(MATROSKA),yes)
+CPLUSPLUSSRCS += demux_mkv.cpp
+endif
 
 
 OBJS	= $(SRCS:.c=.o)

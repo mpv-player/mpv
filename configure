@@ -189,6 +189,7 @@ Codecs:
   --enable-libfame       enable libfame realtime encoder [autodetect]
   --enable-vorbis        build with OggVorbis support [autodetect]
   --enable-tremor        build with integer-only OggVorbis support [disabled]
+  --enable-matroska      build with Matroska support [autodetect]
   --enable-faad          build with FAAD2 (MP4/AAC) support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (mpeg audio) support [autodetect]
@@ -1025,6 +1026,7 @@ _esd=auto
 _liblzo=auto
 _mad=auto
 _vorbis=auto
+_matroska=auto
 _tremor=no
 _faad=auto
 _xmms=no
@@ -1178,6 +1180,8 @@ for ac_option do
   --disable-vorbis)	_vorbis=no	;;
   --enable-tremor)	_tremor=yes	;;
   --disable-tremor)	_tremor=no	;;
+  --enable-matroska)    _matroska=yes   ;;
+  --disable-matroska)   _matroska=no    ;;
   --enable-faad)	_faad=yes	;;
   --disable-faad)	_faad=no	;;
   --enable-xmms)	_xmms=yes	;;
@@ -4025,6 +4029,42 @@ fi
 echores "$_vorbis"
 
 
+echocheck "Matroska support"
+if test "$_matroska" = auto ; then
+  _matroska=no
+  cat > $TMPC << EOF
+#include <EbmlConfig.h>
+int main(void) { return 0; }
+EOF
+  cc_check -lmatroska -lebml && _matroska=yes
+  if test "$_matroska" = no ; then
+    _saved_inc_extra=$_inc_extra
+    _inc_extra="$_inc_extra -I/usr/include/ebml -I/usr/include/matroska"
+    cc_check -lmatroska -lebml && _matroska=yes
+    if test "$_matroska" = no ; then
+      _inc_extra="$_saved_inc_extra -I/usr/local/include/ebml -I/usr/local/include/matroska"
+      cc_check -lmatroska -lebml && _matroska=yes
+      if test "$_matroska" = no ; then
+        _inc_extra=$_saved_inc_extra
+      fi
+    fi
+  fi
+fi
+if test "$_matroska" = yes ; then
+  _def_matroska='#define HAVE_MATROSKA 1'
+  _inputmodules="matroska $_inputmodules"
+  _ld_matroska="-lmatroska -lebml -lstdc++"
+  case $cc_version in
+    2.*) _def_matroska_gcc2="#define LIBEBML_GCC2"     ;;
+    *)   _def_matroska_gcc2="/*#define LIBEBML_GCC2*/" ;;
+  esac
+else
+  _def_matroska='#undef HAVE_MATROSKA'
+  _noinputmodules="matroska $_noinputmodules"
+fi
+echores "$_matroska"
+
+
 echocheck "faad2 (AAC) support"
 if test "$_faad" = auto ; then
   _faad=no
@@ -5150,6 +5190,8 @@ CONFIG_PP = yes
 CONFIG_RISKY = yes
 LIBMENU = $_menu
 I18NLIBS = $_i18n_libs
+MATROSKA = $_matroska
+MATROSKA_LIB = $_ld_matroska
 
 OPENDIVX = $_opendivx
 
@@ -5644,6 +5686,10 @@ $_def_vorbis
 
 /* enable Tremor as vorbis decoder */
 $_def_tremor
+
+/* enable Matroska support */
+$_def_matroska
+$_def_matroska_gcc2
 
 /* enable FAAD (AAC) support */
 $_def_faad
