@@ -787,7 +787,7 @@ MPlayer (0.90)
     * some -fixed-vo and vo_preinit fixes, -vo sdl, xmga, mga should work...
     * various Solaris compatibility fixes (should work out of the box)
     * mms:// port fixes, tries 1755 if 80 failed
-    * libavcodec: various ME fixes, B frames fixes, WMV2 slice decoding fixes
+    * libavcodec: various ME fixes, B-frames fixes, WMV2 slice decoding fixes
     * -ao alsa9 audio-file playback high CPU usage fixed
     * libaf updates, 2-pass initialization to get better filter path
     * better detection of playlists, support for [Reference]-style format
@@ -913,7 +913,7 @@ MPlayer (0.90)
 
     Fixes:
     * LIRC error message (Error while reading cmd fd X : Success) fixed
-    * playback of some (streamed?) DivX files starting with non-I frames fixed
+    * playback of some (streamed?) DivX files starting with non-I-frames fixed
     * -vo png fixed (removed builtin YV12 support, removed OSD)
     * some MP3 playback/seek segfaults fixed
     * VIDIX Mach64 colorkey on PPC fixed
@@ -1190,7 +1190,7 @@ MPlayer (0.90)
 
   pre2: Apr 30, 2002
     * hwac3 fixes (try AFMT_AC3 first), big-endian fixes for PCM audio
-    * 2-pass encoding with libavcodec (-lavcopts vpass=x), B frames support
+    * 2-pass encoding with libavcodec (-lavcopts vpass=x), B-frames support
     * faster Ogg seeking (use -forceidx for slow but accurate one)
     * audio-only with GUI fixed
     * -rootwin fixed for x11, xv, xmga, xvidix
