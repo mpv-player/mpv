@@ -22,7 +22,7 @@
 typedef struct demux_packet_st {
   int len;
   float pts;
-  off_t pos;  // pozicio indexben (AVI) ill. fileban (MPG)
+  off_t pos;  // position in index (AVI) or file (MPG)
   unsigned char* buffer;
   int flags; // keyframe, etc
   struct demux_packet_st* next;
@@ -59,30 +59,19 @@ typedef struct demuxer_st {
   off_t filepos; // input stream current pos.
   int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
   int file_format;  // file format: mpeg/avi/asf
-//  int time_src;// time source (pts/file/bps)
   off_t movi_start;
   off_t movi_end;
   //
-  demux_stream_t *audio;
-  demux_stream_t *video;
-  demux_stream_t *sub;
-
-  // index:
-//  AVIINDEXENTRY* idx;
-// FIXME: off_t???
-  void* idx;
-  int idx_size;
-  int idx_pos;
-  int idx_pos_a;
-  int idx_pos_v;
-  int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
+  demux_stream_t *audio; // audio buffer/demuxer
+  demux_stream_t *video; // video buffer/demuxer
+  demux_stream_t *sub;   // dvd subtitle buffer/demuxer
 
   // stream headers:
-//  sh_audio_t* a_streams[256];
-//  sh_video_t* v_streams[256];
-  void* a_streams[256];
-  void* v_streams[256];
-  char s_streams[32]; // dvd subtitles
+  void* a_streams[256]; // audio streams (sh_audio_t)
+  void* v_streams[256]; // video sterams (sh_video_t)
+  char s_streams[32];   // dvd subtitles (flag)
+  
+  void* priv;  // fileformat-dependent data
 } demuxer_t;
 
 inline static demux_packet_t* new_demux_packet(int len){

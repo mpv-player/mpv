@@ -150,11 +150,6 @@ int encode_bitrate=0;
 
 extern int asf_packetsize; // for seeking
 
-extern float avi_audio_pts;
-extern float avi_video_pts;
-extern float avi_video_ftime;
-extern int skip_video_frames;
-
 void read_avi_header(demuxer_t *demuxer,int index_mode);
 demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id);
 
@@ -1362,7 +1357,7 @@ if(1)
       else  // VBR:
         a_pts=d_audio->pack_no*(float)sh_audio->audio.dwScale/(float)sh_audio->audio.dwRate;
       v_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-      if(verbose)printf("%5.3f|",v_pts-d_video->pts);
+//      if(verbose)printf("%5.3f|",v_pts-d_video->pts);
     } else {
       if(!delay_corrected && d_audio->pts){
 //        float x=d_audio->pts-d_video->pts-(delay);

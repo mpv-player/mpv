@@ -282,6 +282,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
     switch(sh_audio->codec->driver){
       case AFM_MPEG: // MPEG layer 2 or 3
         len=MP3_DecodeFrame(buf,-1);
+//        len=MP3_DecodeFrame(buf,3);
         break;
       case AFM_PCM: // AVI PCM
         len=demux_read_data(sh_audio->ds,buf,minlen);

@@ -16,7 +16,7 @@ extern int verbose; // defined in mplayer.c
 
 #include "codec-cfg.h"
 #include "stheader.h"
-#include "aviheader.h"
+//#include "aviheader.h"
 #include "asf.h"
 
 #ifdef ARCH_X86

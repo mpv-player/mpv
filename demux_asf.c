@@ -37,13 +37,6 @@ extern int asf_packetsize;
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
-//static float avi_pts_frametime=1.0f/25.0f;
-//static float avi_audio_pts=0;
-//static float avi_video_pts=0;
-
-//static int skip_video_frames=0;
-
-
 static void asf_descrambling(unsigned char *src,int len){
   unsigned char *dst=malloc(len);
   unsigned char *s2=src;

@@ -79,14 +79,23 @@ void print_video_header(BITMAPINFOHEADER *h){
 
 void print_index(AVIINDEXENTRY *idx,int idx_size){
   int i;
+  unsigned int pos[256];
+  unsigned int num[256];
+  for(i=0;i<256;i++) num[i]=pos[i]=0;
   for(i=0;i<idx_size;i++){
-    printf("%5d:  %.4s  %4X  %08X  %ld\n",i,
+    int id=avi_stream_id(idx[i].ckid);
+    if(id<0 || id>255) id=255;
+    printf("%5d:  %.4s  %4X  %08X  len:%6ld  pos:%7d->%7.3f %7d->%7.3f\n",i,
       (char *)&idx[i].ckid,
       (unsigned int)idx[i].dwFlags,
       (unsigned int)idx[i].dwChunkOffset,
 //      idx[i].dwChunkOffset+demuxer->movi_start,
-      idx[i].dwChunkLength
+      idx[i].dwChunkLength,
+      pos[id],(float)pos[id]/18747.0f,
+      num[id],(float)num[id]/23.976f
     );
+    pos[id]+=idx[i].dwChunkLength;
+    ++num[id];
   }
 }
 

@@ -1,8 +1,9 @@
 
-#include "config.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+#include "config.h"
 
 extern int verbose; // defined in mplayer.c
 
@@ -35,9 +36,10 @@ sh_video_t *sh_video=NULL;
 int stream_id=-1;
 int idxfix_videostream=0;
 int idxfix_divx=0;
+avi_priv_t* priv=demuxer->priv;
 
 //---- AVI header:
-demuxer->idx_size=0;
+priv->idx_size=0;
 while(1){
   int id=stream_read_dword_le(demuxer->stream);
   int chunksize,size2;
@@ -137,15 +139,15 @@ while(1){
     }
     case ckidAVINEWINDEX: if(index_mode){
       int i;
-      demuxer->idx_size=size2>>4;
+      priv->idx_size=size2>>4;
       if(verbose>=1) printf("Reading INDEX block, %d chunks for %ld frames\n",
-        demuxer->idx_size,avih.dwTotalFrames);
-      demuxer->idx=malloc(demuxer->idx_size<<4);
-      stream_read(demuxer->stream,(char*)demuxer->idx,demuxer->idx_size<<4);
-      for (i = 0; i < demuxer->idx_size; i++)	// swap index to machine endian
-	le2me_AVIINDEXENTRY((AVIINDEXENTRY*)demuxer->idx + i);
-      chunksize-=demuxer->idx_size<<4;
-      if(verbose>=2) print_index(demuxer->idx,demuxer->idx_size);
+        priv->idx_size,avih.dwTotalFrames);
+      priv->idx=malloc(priv->idx_size<<4);
+      stream_read(demuxer->stream,(char*)priv->idx,priv->idx_size<<4);
+      for (i = 0; i < priv->idx_size; i++)	// swap index to machine endian
+	le2me_AVIINDEXENTRY((AVIINDEXENTRY*)priv->idx + i);
+      chunksize-=priv->idx_size<<4;
+      if(verbose>=2) print_index(priv->idx,priv->idx_size);
       break;
     }
   }
@@ -154,14 +156,14 @@ while(1){
   
 }
 
-if(index_mode>=2 || (demuxer->idx_size==0 && index_mode==1)){
+if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
   // build index for file:
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
   
-  demuxer->idx_pos=0;
-  demuxer->idx_size=0;
-  demuxer->idx=NULL;
+  priv->idx_pos=0;
+  priv->idx_size=0;
+  priv->idx=NULL;
 
   while(1){
     int id,len,skip;
@@ -178,13 +180,13 @@ if(index_mode>=2 || (demuxer->idx_size==0 && index_mode==1)){
     if(stream_eof(demuxer->stream)) break;
     if(!id || avi_stream_id(id)==100) goto skip_chunk; // bad ID (or padding?)
 
-    if(demuxer->idx_pos<=demuxer->idx_size){
-//      demuxer->idx_size+=32;
-      demuxer->idx_size+=1024; // +16kB
-      demuxer->idx=realloc(demuxer->idx,demuxer->idx_size*sizeof(AVIINDEXENTRY));
-      if(!demuxer->idx){demuxer->idx_pos=0; break;} // error!
+    if(priv->idx_pos<=priv->idx_size){
+//      priv->idx_size+=32;
+      priv->idx_size+=1024; // +16kB
+      priv->idx=realloc(priv->idx,priv->idx_size*sizeof(AVIINDEXENTRY));
+      if(!priv->idx){priv->idx_pos=0; break;} // error!
     }
-    idx=&((AVIINDEXENTRY *)demuxer->idx)[demuxer->idx_pos++];
+    idx=&((AVIINDEXENTRY *)priv->idx)[priv->idx_pos++];
     idx->ckid=id;
     idx->dwFlags=AVIIF_KEYFRAME; // FIXME
     idx->dwChunkOffset=demuxer->filepos;
@@ -212,11 +214,12 @@ skip_chunk:
     skip=(len+1)&(~1); // total bytes in this chunk
     stream_seek(demuxer->stream,8+demuxer->filepos+skip);
   }
-  demuxer->idx_size=demuxer->idx_pos;
-  printf("AVI: Generated index table for %d chunks!\n",demuxer->idx_size);
+  priv->idx_size=priv->idx_pos;
+  printf("AVI: Generated index table for %d chunks!\n",priv->idx_size);
 }
 
 }
 
 #undef MIN
+
 

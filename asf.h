@@ -156,12 +156,36 @@ typedef enum {
     (h)->comment_size = le2me_16((h)->comment_size);			\
     (h)->rating_size = le2me_16((h)->rating_size);			\
 }
+#define le2me_BITMAPINFOHEADER(h) {					\
+    (h)->biSize = le2me_32((h)->biSize);				\
+    (h)->biWidth = le2me_32((h)->biWidth);				\
+    (h)->biHeight = le2me_32((h)->biHeight);				\
+    (h)->biPlanes = le2me_16((h)->biPlanes);				\
+    (h)->biBitCount = le2me_16((h)->biBitCount);			\
+    (h)->biCompression = le2me_32((h)->biCompression);			\
+    (h)->biSizeImage = le2me_32((h)->biSizeImage);			\
+    (h)->biXPelsPerMeter = le2me_32((h)->biXPelsPerMeter);		\
+    (h)->biYPelsPerMeter = le2me_32((h)->biYPelsPerMeter);		\
+    (h)->biClrUsed = le2me_32((h)->biClrUsed);				\
+    (h)->biClrImportant = le2me_32((h)->biClrImportant);		\
+}
+#define le2me_WAVEFORMATEX(h) {						\
+    (h)->wFormatTag = le2me_16((h)->wFormatTag);			\
+    (h)->nChannels = le2me_16((h)->nChannels);				\
+    (h)->nSamplesPerSec = le2me_32((h)->nSamplesPerSec);		\
+    (h)->nAvgBytesPerSec = le2me_32((h)->nAvgBytesPerSec);		\
+    (h)->nBlockAlign = le2me_16((h)->nBlockAlign);			\
+    (h)->wBitsPerSample = le2me_16((h)->wBitsPerSample);		\
+    (h)->cbSize = le2me_16((h)->cbSize);				\
+}
 #else
 #define	le2me_ASF_obj_header_t(h)	/**/
 #define	le2me_ASF_header_t(h)		/**/
 #define le2me_ASF_stream_header_t(h)	/**/
 #define le2me_ASF_file_header_t(h)	/**/
 #define le2me_ASF_content_description_t(h) /**/
+#define le2me_BITMAPINFOHEADER(h)   /**/
+#define le2me_WAVEFORMATEX(h)	    /**/
 #endif
 
 

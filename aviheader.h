@@ -1,7 +1,7 @@
 #ifndef _aviheader_h
 #define	_aviheader_h
 
-#include "config.h"	/* get correct definition WORDS_BIGENDIAN */
+//#include "config.h"	/* get correct definition WORDS_BIGENDIAN */
 #include "bswap.h"
 
 /*
@@ -83,3 +83,24 @@
 
 
 #endif
+
+
+typedef struct {
+  // index stuff:
+  void* idx;
+  int idx_size;
+  int idx_pos;
+  int idx_pos_a;
+  int idx_pos_v;
+  int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
+  // interleaved PTS stuff:
+  int skip_video_frames;
+  float avi_audio_pts;
+  float avi_video_pts;
+  float pts_correction;
+  unsigned int pts_corr_bytes;
+  unsigned char pts_corrected;
+  unsigned char pts_has_video;
+} avi_priv_t;
+
+#define AVI_PRIV ((avi_priv_t*)(demuxer->priv))

@@ -294,7 +294,6 @@ extern int num_elementary_packetsPES;
 
 // commandline options, flags:
 extern int seek_to_byte;
-extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
 extern int force_ni;
 extern int pts_from_bps;
 
@@ -391,8 +390,8 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     printf("Detected MPEG-ES file format!\n");
   }
 }
-#ifdef MOV
 //=============== Try to open as MOV file: =================
+#if 0
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
@@ -416,110 +415,19 @@ d_audio=demuxer->audio;
 d_video=demuxer->video;
 //d_dvdsub=demuxer->sub;
 
+demuxer->file_format=file_format;
+
 switch(file_format){
  case DEMUXER_TYPE_AVI: {
-  //---- AVI header:
-  read_avi_header(demuxer,(stream->type!=STREAMTYPE_STREAM)?index_mode:-2);
-  stream_reset(demuxer->stream);
-  stream_seek(demuxer->stream,demuxer->movi_start);
-  demuxer->idx_pos=0;
-  demuxer->idx_pos_a=0;
-  demuxer->idx_pos_v=0;
-  if(demuxer->idx_size>0){
-    // decide index format:
-    if(((AVIINDEXENTRY *)demuxer->idx)[0].dwChunkOffset<demuxer->movi_start)
-      demuxer->idx_offset=demuxer->movi_start-4;
-    else
-      demuxer->idx_offset=0;
-    if(verbose) printf("AVI index offset: %d\n",demuxer->idx_offset);
-  }
-//  demuxer->endpos=avi_header.movi_end;
-  
-  if(demuxer->idx_size>0){
-      // check that file is non-interleaved:
-      int i;
-      int a_pos=-1;
-      int v_pos=-1;
-      for(i=0;i<demuxer->idx_size;i++){
-        AVIINDEXENTRY* idx=&((AVIINDEXENTRY *)demuxer->idx)[i];
-        demux_stream_t* ds=demux_avi_select_stream(demuxer,idx->ckid);
-        int pos=idx->dwChunkOffset+demuxer->idx_offset;
-        if(a_pos==-1 && ds==demuxer->audio){
-          a_pos=pos;
-          if(v_pos!=-1) break;
-        }
-        if(v_pos==-1 && ds==demuxer->video){
-          v_pos=pos;
-          if(a_pos!=-1) break;
-        }
-      }
-      if(v_pos==-1){
-        fprintf(stderr,"AVI_NI: missing video stream!? contact the author, it may be a bug :(\n");
-	return NULL;
-//        GUI_MSG( mplErrorAVINI )
-//        exit(1);
-      }
-      if(a_pos==-1){
-        printf("AVI_NI: No audio stream found -> nosound\n");
-        sh_audio=NULL;
-      } else {
-        if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
-          printf("%s NON-INTERLEAVED AVI file-format!\n",force_ni?"Forced":"Detected");
-          demuxer->type=DEMUXER_TYPE_AVI_NI; // HACK!!!!
-	  pts_from_bps=1; // force BPS sync!
-        }
-      }
-  } else {
-      // no index
-      if(force_ni){
-          printf("Using NON-INTERLEAVED Broken AVI file-format!\n");
-          demuxer->type=DEMUXER_TYPE_AVI_NINI; // HACK!!!!
-	  demuxer->idx_pos_a=
-	  demuxer->idx_pos_v=demuxer->movi_start;
-	  pts_from_bps=1; // force BPS sync!
-      }
-  }
-  if(!ds_fill_buffer(d_video)){
-    fprintf(stderr,"AVI: missing video stream!? contact the author, it may be a bug :(\n");
-    return NULL;
-//    GUI_MSG( mplAVIErrorMissingVideoStream )
-//    exit(1);
-  }
-  sh_video=d_video->sh;sh_video->ds=d_video;
-  if(audio_id!=-2){
-    if(verbose) printf("AVI: Searching for audio stream (id:%d)\n",d_audio->id);
-    if(!ds_fill_buffer(d_audio)){
-      printf("AVI: No Audio stream found...  ->nosound\n");
-      sh_audio=NULL;
-    } else {
-      sh_audio=d_audio->sh;sh_audio->ds=d_audio;
-      sh_audio->format=sh_audio->wf->wFormatTag;
-    }
-  }
-  // calc. FPS:
-  sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
-  sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-  // calculating video bitrate:
-  sh_video->i_bps=demuxer->movi_end-demuxer->movi_start-demuxer->idx_size*8;
-  if(sh_audio) sh_video->i_bps-=sh_audio->audio.dwLength;
-  if(verbose) printf("AVI video length=%d\n",sh_video->i_bps);
-  sh_video->i_bps=((float)sh_video->i_bps/(float)sh_video->video.dwLength)*sh_video->fps;
-  printf("VIDEO:  [%.4s]  %ldx%ld  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
-    (char *)&sh_video->bih->biCompression,
-    sh_video->bih->biWidth,
-    sh_video->bih->biHeight,
-    sh_video->bih->biBitCount,
-    sh_video->fps,
-    sh_video->i_bps*0.008f,
-    sh_video->i_bps/1024.0f );
-  break;
+  return demux_open_avi(demuxer);
+//  break;
  }
  case DEMUXER_TYPE_ASF: {
   //---- ASF header:
   read_asf_header(demuxer);
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
-  demuxer->idx_pos=0;
+//  demuxer->idx_pos=0;
 //  demuxer->endpos=avi_header.movi_end;
   if(!ds_fill_buffer(d_video)){
     printf("ASF: no video stream found!\n");
@@ -575,6 +483,5 @@ switch(file_format){
  }
 } // switch(file_format)
 
-demuxer->file_format=file_format;
 return demuxer;
 }

@@ -22,11 +22,6 @@
 
 //extern int asf_packetsize; // for seeking
 
-//extern float avi_audio_pts;
-//extern float avi_video_pts;
-//extern float avi_video_ftime;
-//extern int skip_video_frames;
-//extern int seek_to_byte;
 //extern char* current_module; // for debugging
 
 // flags:
@@ -44,10 +39,10 @@ int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     sh_video_t *sh_video=d_video->sh;
 //    float skip_audio_secs=0;
 
-if(demuxer->file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
-    printf("Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
-    return 0;
-}
+//if(demuxer->file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
+//    printf("Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
+//    return 0;
+//}
 
 //    current_module="seek";
 
