@@ -644,7 +644,7 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
   }
 
 	// Palette support: free palette buffer allocated in get_buffer
-	if ((mpi->bpp == 8) && (mpi->planes[1] != NULL))
+	if ( mpi && (mpi->bpp == 8) && (mpi->planes[1] != NULL))
 		free(mpi->planes[1]);
 
 #if LIBAVCODEC_BUILD >= 4644
