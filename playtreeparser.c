@@ -321,11 +321,57 @@ parse_pls(play_tree_parser_t* p) {
 }
 
 play_tree_t*
+parse_m3u(play_tree_parser_t* p) {
+  char* line;
+  play_tree_t *list = NULL, *entry = NULL;
+
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying extended m3u playlist...\n");
+  line = play_tree_parser_get_line(p);
+  strstrip(line);
+  if(strcasecmp(line,"#EXTM3U"))
+    return NULL;
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected extended m3u playlist format\n");
+  play_tree_parser_stop_keeping(p);
+
+  while((line = play_tree_parser_get_line(p)) != NULL) {
+    strstrip(line);
+    if(line[0] == '\0')
+      continue;
+    /* EXTM3U files contain such lines:
+     * #EXTINF:<seconds>, <title>
+     * followed by a line with the filename
+     * for now we have no place to put that
+     * so we just skip that extra-info ::atmos
+     */
+    if(line[0] == '#') {
+#if 0 /* code functional */
+      if(strncasecmp(line,"#EXTINF:",8) == 0) {
+        mp_msg(MSGT_PLAYTREE,MSGL_INFO,"[M3U] Duration: %dsec  Title: %s\n",
+          strtol(line+8,&line,10), line+2);
+      }
+#endif
+      continue;
+    }
+    entry = play_tree_new();
+    play_tree_add_file(entry,line);
+    if(!list)
+      list = entry;
+    else
+      play_tree_append_entry(list,entry);
+  }
+   
+  if(!list) return NULL;
+  entry = play_tree_new();
+  play_tree_set_child(entry,list);
+  return entry;    
+}
+
+play_tree_t*
 parse_textplain(play_tree_parser_t* p) {
   char* line;
   play_tree_t *list = NULL, *entry = NULL;
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying plaintext...\n");
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying plaintext playlist...\n");
   play_tree_parser_stop_keeping(p);
 
   while((line = play_tree_parser_get_line(p)) != NULL) {
@@ -439,6 +485,10 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p) {
     play_tree_parser_reset(p);
 
     tree = parse_pls(p);
+    if(tree) break;
+    play_tree_parser_reset(p);
+
+    tree = parse_m3u(p);
     if(tree) break;
     play_tree_parser_reset(p);
 
