@@ -67,7 +67,7 @@ Table of Contents
 	     <A HREF="#2.2.1.8">2.2.1.8 3dfx YUV support</A>
 	     <A HREF="#2.2.1.9">2.2.1.9 OpenGL output</A>
 	<A HREF="#2.2.2">2.2.2 Audio output devices</A>
-		+SOUNDCARDS
+	     <A HREF="#2.2.2.1">2.2.2.1 Soundcard experiences, recommendations</A>
 </P>
 <P>
   <A HREF="#3">3. Usage</A>
@@ -95,7 +95,12 @@ Table of Contents
   <A HREF="#6">6. FAQ section</A>
 </P>
 <P>
-     <A HREF="#6.10">6.10 DVD FAQ</A>
+     <A HREF="#6.1">6.1 Compilation</A>
+     <A HREF="#6.2">6.2 General questions</A>
+     <A HREF="#6.3">6.3 File playing problems</A>
+     <A HREF="#6.4">6.4 Video/audio driver problems</A>
+     <A HREF="#6.5">6.5 Feature requests</A>
+     <A HREF="#6.6">6.6 DVD FAQ</A>
 </P>
 <P>
   <A HREF="#7">7. Misc OS'es</A>
@@ -114,9 +119,7 @@ Table of Contents
 <P>
   <A HREF="#C">C. How to report bugs</A>
 </P>
-<P>
-  License+standard disc, maintainers
-</P></PRE>
+</PRE>
 <P><HR></P>
 
 <P><PRE>
@@ -922,6 +925,64 @@ Table of Contents
   - SUN audio driver (/dev/audio) for BSD and Solaris8 users
 
 
+  <A NAME=2.2.2.1>2.2.2.1.  Soundcard experiences, recommendations
+
+  Aureal Vortex 2:
+			OSS/Free: no driver
+			OSS	: OK
+			ALSA	: no driver
+			Max kHz : 48
+			Driver	: <A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A>
+			Driver2 : from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A>
+				  (buffer size increased to 64k)
+
+  GUS PnP:
+			OSS/Free: no driver
+			OSS	: OK
+			ALSA	: OK
+			Max kHz	: 48
+
+  SB Live!:
+			OSS	: OK
+			ALSA	: (?)
+			Max kHz : 48
+
+  SB AWE 64		OSS	: max 44kHz
+			ALSA	: 48kHz sounds shit
+			Max kHz : 48
+
+  Gravis UltraSound ACE:
+			OSS     : max 44Khz. Also has problems with the
+				  new sound code.
+			ALSA    : OK
+			Max kHz : 48
+
+  Gravis UltraSound MAX:
+			OSS     : OK
+			ALSA    : OK (?)
+			Max kHz : 48
+
+  ESS 688:
+			OSS     : OK
+			ALSA    : OK (?)
+			Max kHz : 48
+
+  PC Speaker or DAC:
+			OSS     : OK (new timing code?)
+			ALSA    : no driver
+			Max kHz : 6 ;) (the driver emulates 44.1 maybe more)
+			Driver  : <A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A>
+
+   - use at least 2.4 if possible, 2.2 isn't tested
+   - if sound clicks when playing from CD-ROM, turn on IRQ unmasking !
+     for example "hdparm -u1 /dev/cdrom" (see "man hdparm" !!!)
+     This is recommended anyways... (for XMMS, etc...)
+     Read section <A HREF="#5.1">5.1</A> .
+   - don't use your soundcard by other application ( for ex. XMMS ) !
+     if you use ESD, start MPlayer with the esddsp utility !
+   - Please tell us how MPlayer and your soundcard(s) worked together!
+
+
   <A NAME=3>3.  Usage
 
   file:  mplayer [options] [path/]filename
@@ -1284,8 +1345,16 @@ Table of Contents
 
   <A NAME=6>6. FAQ section (TODO)
 
-  <B>Q: What about DVD playback?
-  </B>A: Read files 'DVD' and 'DVD-FAQ'.
+
+  <A NAME=6.1>6.1.  Compilation
+
+  <B>Q: What's the problem with gcc 2.96 ?
+  </B>A: gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat sites, or
+     RedHat distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
+     unsupported by <B>MPlayer</B>, because it simply SKIPS MMX codes, it just does not
+     compile it. Important: this is NOT an <B>MPlayer</B>-specific problem, numerous
+     other projects (DRI, avifile, etc..) have problems with this shit too.
+     ** DO NOT USE gcc 2.96 !!! **
 
   <B>Q: SDL output doesn't work or compile. Problem is ....
   </B>A: It is tested with newest SDL (probably runs on 1.1.7+).
@@ -1305,6 +1374,41 @@ Table of Contents
   </B>A: Only kernel versions 2.4.x supports SSE (or try latest 2.2.19 or newer, but
      be prepared for problems)
 
+  <B>Q: I have G200/G400, how to compile/use mga_vid driver?
+  </B>A: Read all this documentation.
+
+  <B>Q: Are there rpm/deb/... packages of <B>MPlayer</B>?
+  </B>A: You can make a .deb package for yourself, check section <A HREF="#7.1">7.1</A> .
+     It's _STRONGLY_ discouraged to use precompiled packages
+     of <B>MPlayer</B>, since it (currently) _highly_ depends on compile-time
+     options and optimizations!
+     Precompiled packages are COMPLETELY unsupported by the <B>MPlayer</B> team!
+
+  <B>Q: During 'make', <B>MPlayer</B> complains about X11 libraries. I don't understand,
+     I DO have X installed!?
+  </B>A: ...but you don't have the X development package installed. Or not
+     correctly. It's called XFree86-devel* under RedHat, and xlib6g-dev* under
+     Debian.  Also check if the /usr/X11 symlink exists (this can be a problem on
+     Mandrake systems). It can be created with the
+	$ ln -sf /usr/X11R6 /usr/X11
+     command. Also check the /usr/include/X11 link :
+	$ ln -sf /usr/X11R6/include/X11 /usr/include/X11
+     Your distribution may differ from the Linux Filesystem Standard.
+
+  <B>Q: What about DGA driver? I can't find it!!!
+  </B>A: ./configure autodetects your DGA driver. If -vo help doesn't show
+     DGA, then there's a problem with your X installation.
+     Try ./configure --enable-dga (and read VIDEOCARDS)
+     Alternatively, try SDL's DGA driver with '-vo sdl:dga' options.
+
+  <B>Q: I can't compile SVGAlib.. I'm using 2.3/2.4 kernel.
+  </B>A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
+
+  <A NAME=6.2>6.2.  General questions
+
+  <B>Q: What about DVD playback?
+  </B>A: Read files 'DVD' and 'DVD-FAQ'.
+
   <B>Q: -xy option doesn't work with x11 driver (-vo x11)
   </B>A: x11 driver doesn't support scaling, but XF86VidMode support is now
      used: you must specify the -vm and the -fs switch, and you're done.
@@ -1312,10 +1416,6 @@ Table of Contents
      try if the DGA driver (and SDL's DGA driver, see VIDEOCARDS) works for you.
      It's much faster. If SDL's DGA works too, use that, it'll be EVEN
      faster!
-
-  <B>Q: audio goes out of sync playing .avi file
-  </B>A: try with -bps or -nobps option
-     if still bad, send me (upload to ftp) that file, I'll check.
 
   <B>Q: what is the meaning of numbers in the status line?
   </B>A: see:
@@ -1336,22 +1436,55 @@ Table of Contents
      You should try to play the file using -vo null and then -vo ... and check
      the difference to see video_out speed...
 
-  <B>Q: OpenGL (-vo gl) output doesn't work (hangup/black window/X11 errors/...)
-  </B>A: your opengl driver doesn't support dynamic texture changes (glTexSubImage)
-     it's known not to work with nVidia's binary shit.
-     it's known to work with Utah-GLX/DRI and Matrox G400 card. Also with
-     DRI and Radeon card. It won't work with DRI others than these.
-     it will not work with 3DFX cards because the 256x256 texture size limit.
-
-  <B>Q: I have G200/G400, how to compile/use mga_vid driver?
-  </B>A: read VIDEOCARDS, INSTALL, README
-
   <B>Q: What's XMMP? (is it XMMS or XMPS but mispelled?)
   </B>A: It's a new project, see http://frozenproductions.com for details
 
   <B>Q: There are error messages about file not found /usr/lib/win32/....
   </B>A: Download & install w32codec.zip from *our* FTP
      (avifile's codec package has different DLL set)
+
+  <B>Q: Are there any mailing lists on <B>MPlayer</B>?
+  </B>A: Yes! See README on how to subscribe them!
+
+  <B>Q: I've found a nasty bug when I tried to play my favourite video!!
+     Who should I inform?
+  </B>A: See Appendix <A HREF="#C">C</A> .
+
+ <B>Q: I have problems playing files with ... codec. Can I use'em?
+  </B>A: Check http://mplayer.sourceforge.net/DOCS/codecs.html,
+     if it doesn't contain your codec, read
+     http://mplayer.sourceforge.net/DOCS/CODECS, and contact us.
+
+  <B>Q: Umm, what is "IdegCounter" ?
+  </B>A: A mixture of a hungarian and an english word. In english, "Ideg" means
+     "nerve", and is pronounced as something like "ydaegh" . It was first used
+     to measure the nervousness of A'rpi, after some (umm) "mystic" disappearance
+     of CVS code ;)
+
+  <B>Q: LIRC doesn't work, because ...
+  </B>A: Are you sure you use "mplayer_lirc" instead of "mplayer" ?
+
+  <B>Q: Subtitles are very nice, the most beautiful I've ever seen, but they slow
+     down the playing! I know it's unlikely...
+  </B>A: After running ./configure , edit config.h and replace #undef FAST_OSD with
+     #define FAST_OSD . Then recompile.
+
+  <B>Q: The OSD is flickering!
+  </B>A: You use a vo driver with single buffering (x11,xv). With xv you can change
+     the number of buffers in libvo/vo_xv.c :
+     Increase #define NUM_BUFFERS 1
+
+  <B>Q: What exactly is this libavcodec?
+  </B>A: It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
+     It has C language DivX ;-) and OpenDivX codec.  Some benchmarks
+     showed that its DivX seems to be even faster than DirectShow codec without
+     preprocessing, and only a few percent slower than ProjectMayo's OpenDivX
+     decoder.  It uses YV12 pixel format, so old Voodoo users can use it for YUV.
+     Also, open the possibility to play DivX on virtually every computer that
+     has a C compiler. Kinda great stuff, isn't it?
+
+
+  <A NAME=6.3>6.3.  File playing problems
 
   <B>Q: ...... works with avifile/aviplay while doesn't with <B>MPlayer</B>
   </B>A: <B>MPlayer</B> != avifile
@@ -1360,6 +1493,10 @@ Table of Contents
      different and shouldn't be compared.
      If something works with aviplay it doesn't mean that <B>MPlayer</B> should do
      it and vice versa.
+
+  <B>Q: audio goes out of sync playing .avi file
+  </B>A: try with -bps or -nobps option
+     if still bad, send me (upload to ftp) that file, I'll check.
 
   <B>Q: Indeo 3.x/4.x movies are viewed upside-down!!!?
   </B>A: It's a known bug (really it's a bug/limitation of the DLL codec)
@@ -1372,95 +1509,6 @@ Table of Contents
      decode_audio.
   </B>A: This is highly unlikely, since the mp3lib rewrite. Contact us, it may be
      a bug. Possibly it's a damaged file, try with -afm 4 .
-
-  <B>Q: Are there rpm/deb/... packages of <B>MPlayer</B>?
-  </B>A: You can make a .deb package for yourself, check DOCS/DEBIAN .
-     It's _STRONGLY_ discouraged to use precompiled packages
-     of <B>MPlayer</B>, since it (currently) _highly_ depends on compile-time
-     options and optimizations!
-     Precompiled packages are COMPLETELY unsupported by the <B>MPlayer</B> team!
-
-  <B>Q: Are there any mailing lists on <B>MPlayer</B>?
-  </B>A: Yes! See README on how to subscribe them!
-
-  <B>Q: I've found a nasty bug when I tried to play my favourite video!!
-     Who should I inform?
-  </B>A: See DOCS/BUGREPORTS
-
-  <B>Q: During 'make', <B>MPlayer</B> complains about X11 libraries. I don't understand,
-     I DO have X installed!?
-  </B>A: ...but you don't have the X development package installed. Or not
-     correctly. It's called XFree86-devel* under RedHat, and xlib6g-dev* under
-     Debian.  Also check if the /usr/X11 symlink exists (this can be a problem on
-     Mandrake systems). It can be created with the
-	$ ln -sf /usr/X11R6 /usr/X11
-     command. Also check the /usr/include/X11 link :
-	$ ln -sf /usr/X11R6/include/X11 /usr/include/X11
-     Your distribution may differ from the Linux Filesystem Standard.
-
-  <B>Q: I have problems playing files with ... codec. Can I use'em?
-  </B>A: Check http://mplayer.sourceforge.net/DOCS/codecs.html,
-     if it doesn't contain your codec, read
-     http://mplayer.sourceforge.net/DOCS/CODECS, and contact us.
-
-  <B>Q: What about DGA driver? I can't find it!!!
-  </B>A: ./configure autodetects your DGA driver. If -vo help doesn't show
-     DGA, then there's a problem with your X installation.
-     Try ./configure --enable-dga (and read VIDEOCARDS)
-     Alternatively, try SDL's DGA driver with '-vo sdl:dga' options.
-
-  <B>Q: Ok, -vo help shows DGA driver, but it is babbling about permissions!
-     Help me!
-  </B>A: It works only if running as root! It's a DGA limitation.
-     You should become to root (su -), and try again.
-
-   Another solution is making mplayer SUID root, but its NOT RECOMMENDED!
-
-	chown root /usr/local/bin/mplayer
-	chmod 750 /usr/local/bin/mplayer
-	chmod +s /usr/local/bin/mplayer
-
-                           !!!! BUT STAY TUNED !!!!
-    This is a *BIG* security risk! *NEVER* do this on a server or on a computer
-    can be accessed by more people than only you because they can gain root
-    privilegies through suid root mplayer!!!
-                       !!!! SO YOU HAVE BEEN WARNED ... !!!!
-
-  <B>Q: The fsdga driver doesn't work with my xyz.avi file. Why is that?
-  </B>A: Because it only works with MPEG. (yet)
-
-  <B>Q: When using Xvideo, my Voodoo 3/Banshee says:
-     X Error of failed request:  BadAccess (attempt to access private resource
-     denied)
-      Major opcode of failed request:  147 (MIT-SHM)
-      Minor opcode of failed request:  1 (X_ShmAttach)
-      Serial number of failed request:  26
-      Current serial number in output stream:27 
-  </B>A: Your driver is old, update it. Either download (at least) DRI version 0.6
-     from http://dri.sourceforge.net , or use the DRI cvs.
-
-  <B>Q: When using Xvideo, I can't play DivX avis with my Voodoo 3/Banshee !
-     It says:
-      ...
-      Xvideo image format: 0x32315659 (YV12) planar
-      Xvideo image format: 0x30323449 (I420) planar
-      ...
-  </B>A1: See the previous answer.
-  A2: Since 0.18pre4 we include libavcodec from the ffmpeg package. It contains
-      a C language DivX and OpenDivX decoder. The DivX decoder uses YV12 format
-      for output, thus it should work for you. Compile in libavcodec support.
-
-  <B>Q: Umm, what is "IdegCounter" ?
-  </B>A: A mixture of a hungarian and an english word. In english, "Ideg" means
-     "nerve", and is pronounced as something like "ydaegh" . It was first used
-     to measure the nervousness of A'rpi, after some (umm) "mystic" disappearance
-     of CVS code ;)
-
-  <B>Q: I can't compile SVGAlib.. I'm using 2.3/2.4 kernel.
-  </B>A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
-
-  <B>Q: LIRC doesn't work, because ...
-  </B>A: Are you sure you use "mplayer_lirc" instead of "mplayer" ?
 
   <B>Q: <B>MPlayer</B> exits with something error when using l3codeca.acm
   </B>A: Check 'ldd /usr/local/bin/mplayer' output. If it contains
@@ -1483,7 +1531,7 @@ Table of Contents
   </B>A: Try running <B>MPlayer</B> on the machine you compiled on. Or recompile. Don't
      use <B>MPlayer</B> on different CPU than it was compiled on.
 
-  <B>Q: I have problems with <your window manager> and fullscreen xv/xmga/sdl/x11
+  <B>Q: I have problems with [your window manager] and fullscreen xv/xmga/sdl/x11
      modes..
   </B>A1: Use the -fsmode switch. See example.conf or manpage.
 
@@ -1501,25 +1549,63 @@ Table of Contents
   </B>A: The KDE arts sound daemon is blocking the sound device, either wait the time
      until video starts or you disable the arts-daemon in kontrollcenter.
 
-  <B>Q: Subtitles are very nice, the most beautiful I've ever seen, but they slow
-     down the playing! I know it's unlikely...
-  </B>A: After running ./configure , edit config.h and replace #undef FAST_OSD with
-     #define FAST_OSD . Then recompile.
 
-  <B>Q: The OSD is flickering!
-  </B>A: You use a vo driver with single buffering (x11,xv). With xv you can change
-     the number of buffers in libvo/vo_xv.c :
-     Increase #define NUM_BUFFERS 1
+  <A NAME=6.4>6.4.  Video/audio driver problems (vo/ao)
 
-  <B>Q: What's the problem with gcc 2.96 ?
-  </B>A: gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat sites, or
-     RedHat distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
-     unsupported by <B>MPlayer</B>, because it simply SKIPS MMX codes, it just does not
-     compile it. Important: this is NOT an <B>MPlayer</B>-specific problem, numerous
-     other projects (DRI, avifile, etc..) have problems with this shit too.
-     ** DO NOT USE gcc 2.96 !!! **
+  <B>Q: Ok, -vo help shows DGA driver, but it is babbling about permissions!
+     Help me!
+  </B>A: It works only if running as root! It's a DGA limitation.
+     You should become to root (su -), and try again.
 
-  <B>Q: Is there a hint on how to watch QuickTime and RealMedia movies in mplayer?
+   Another solution is making mplayer SUID root, but its NOT RECOMMENDED!
+
+	chown root /usr/local/bin/mplayer
+	chmod 750 /usr/local/bin/mplayer
+	chmod +s /usr/local/bin/mplayer
+
+                           !!!! BUT STAY TUNED !!!!
+    This is a *BIG* security risk! *NEVER* do this on a server or on a computer
+    can be accessed by more people than only you because they can gain root
+    privilegies through suid root mplayer!!!
+                       !!!! SO YOU HAVE BEEN WARNED ... !!!!
+
+  <B>Q: When using Xvideo, my Voodoo 3/Banshee says:
+     X Error of failed request:  BadAccess (attempt to access private resource
+     denied)
+      Major opcode of failed request:  147 (MIT-SHM)
+      Minor opcode of failed request:  1 (X_ShmAttach)
+      Serial number of failed request:  26
+      Current serial number in output stream:27 
+  </B>A: Your driver is old, update it. Either download (at least) DRI version 0.6
+     from http://dri.sourceforge.net , or use the DRI cvs.
+
+  <B>Q: When using Xvideo, I can't play DivX avis with my Voodoo 3/Banshee !
+     It says:
+      ...
+      Xvideo image format: 0x32315659 (YV12) planar
+      Xvideo image format: 0x30323449 (I420) planar
+      ...
+  </B>A1: See the previous answer.
+  A2: Since 0.18pre4 we include libavcodec from the ffmpeg package. It contains
+      a C language DivX and OpenDivX decoder. The DivX decoder uses YV12 format
+      for output, thus it should work for you. Compile in libavcodec support.
+
+  <B>Q: OpenGL (-vo gl) output doesn't work (hangup/black window/X11 errors/...)
+  </B>A: your opengl driver doesn't support dynamic texture changes (glTexSubImage)
+     it's known not to work with nVidia's binary shit.
+     it's known to work with Utah-GLX/DRI and Matrox G400 card. Also with
+     DRI and Radeon card. It won't work with DRI others than these.
+     it will not work with 3DFX cards because the 256x256 texture size limit.
+
+  <B>Q: I have an nVidia TNT/TNT2 card, and I have a band with strange colours,
+     right under the movie! Whose fault is this?
+  </B>A: It's the nVidia X driver's. These bugs are ONLY with the TNT/TNT2 cards,
+     and we can't do anything about it, it's not our bug.
+
+
+  <A NAME=6.5>6.5.  Feature requests
+
+  <B>Q: Is there a hint on how to watch QuickTime and RealMedia movies in MPlayer?
   </B>A: There's no way to do it. Therefore these formats deserve to die in flames.
      Theoretically you can reverse engineer Real codecs built for Linux (they
      are available as .so files), but in practice that's really difficult, even
@@ -1529,22 +1615,8 @@ Table of Contents
      encoded, and that codec is built-in deep in the QT executable, there's
      no way to use it.
 
-  <B>Q: I have an nVidia TNT/TNT2 card, and I have a band with strange colours,
-     right under the movie! Whose fault is this?
-  </B>A: It's the nVidia X driver's. These bugs are ONLY with the TNT/TNT2 cards,
-     and we can't do anything about it, it's not our bug.
 
-  <B>Q: What exactly is this libavcodec?
-  </B>A: It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
-     It has C language DivX ;-) and OpenDivX codec.  Some benchmarks
-     showed that its DivX seems to be even faster than DirectShow codec without
-     preprocessing, and only a few percent slower than ProjectMayo's OpenDivX
-     decoder.  It uses YV12 pixel format, so old Voodoo users can use it for YUV.
-     Also, open the possibility to play DivX on virtually every computer that
-     has a C compiler. Kinda great stuff, isn't it?
-
-
-  <A NAME=6.10>6.10.  DVD FAQ
+  <A NAME=6.6>6.6.  DVD FAQ
 
   <B>Q: I have some problem not mentioned here ...
   </B>A: Read file 'DVD' as well.
@@ -1713,7 +1785,7 @@ Table of Contents
   <A NAME=A>Appendix A - Authors
 
 NOTE: Do *NOT* send bugreports, help & feature requests directly to the authors!
-===== Read DOCS/BUGREPORTS and subscribe to mplayer-users mailing lists.
+===== Read Appendix <A HREF="#C">C</A> and subscribe to mplayer-users mailing lists.
 
 ========================== The <B>MPlayer</B> project: ===============================
 
@@ -1724,7 +1796,7 @@ NOTE: Do *NOT* send bugreports, help & feature requests directly to the authors!
 - some changes in libmpeg2 code (progressive frames, bitrate & fps support)
 - libvo improvements: adding OpenGL support, bugfix in mga driver...
 - triple buffering & YUY2 support (for DivX/MPEG4) into mga_vid driver 
-- scripts in the TVout directory (TVout on Matrox G400DH, read DOCS/TVout-G400)
+- scripts in the TVout directory (TVout on Matrox G400DH, read documentation)
 - hacking DivX/Mpeg4 VfW codecs to get YUV output
 - opendivx decoder speed optimizations (see opendivx/ChangeLog)
 - OSD & SUB display code
@@ -1780,7 +1852,7 @@ Alex Beregszaszi (Al3x): <alex@naxine.org>
 - vo_ggi output driver in libvo (www.ggi-project.org)
 
 Andreas Ackermann (Acki):  <asackerm@stud.informatik.uni-erlangen.de>
-- LIRC support (see DOCS/LIRC)
+- LIRC support (see documentation)
 - DGA support in libvo
 
 Felix Bünemann (Atmos): <atmosfear@users.sourceforge.net>
@@ -1814,7 +1886,7 @@ German Gomez Garcia: <german@piraos.com>
 - SPDIF AC3 output for SBLive!  [not yet in the main trunk]
 
 Dariush Pietrzak (Eyck): <eyck@incubus.ar.lublin.pl>
-- debian packaging support (see debian/* and DOCS/DEBIAN)
+- debian packaging support (see debian/* and this documentation)
 - support for vplayer subtitle format
 - prelimenary support for .RT subtitle format
 
@@ -1904,9 +1976,9 @@ the following addresses:
 - <B>MPlayer</B> users list:  
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
 
-	- send bugreports here (after reading DOCS/BUGS, BUGREPORTS)
+	- send bugreports here (after reading DOCS/BUGS, Appendix <A HREF="#C">C</A>)
 	- send feature requests here (after reading DOCS/TODO)
-	- send user questions here (after reading DOCS/README, INSTALL, FAQ etc)
+	- send user questions here (after reading all this documentation)
 
 - <B>MPlayer</B> & Matrox G200/G400/G450 users:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
