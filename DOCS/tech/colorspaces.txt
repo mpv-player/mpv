@@ -16,10 +16,11 @@ There are RGB and YUV colorspaces.
 With YUV, they used to reduce the resolution of U,V planes:
 The most common YUV formats:
 fourcc:    bpp: IEEE:      plane sizes: (w=width h=height of original image)
-?          24   YUV 4:4:4  Y: w * h  U,V: w * h
-YUY2,UYVY  16   YUV 4:2:2  Y: w * h  U,V: (w/2) * h
-YV12,I420  12   YUV 4:2:0  Y: w * h  U,V: (w/2) * (h/2)
-YVU9        9   YUV 4:1:1  Y: w * h  U,V: (w/4) * (h/4)
+444P       24   YUV 4:4:4  Y: w * h  U,V: w * h
+YUY2,UYVY  16   YUV 4:2:2  Y: w * h  U,V: (w/2) * h      [MJPEG]
+YV12,I420  12   YUV 4:2:0  Y: w * h  U,V: (w/2) * (h/2)  [MPEG, h263]
+411P       12   YUV 4:1:1  Y: w * h  U,V: (w/4) * h      [DV-NTSC, CYUV]
+YVU9,IF09   9   YUV 4:1:0  Y: w * h  U,V: (w/4) * (h/4)  [Sorenson, Indeo]
 
 conversion: (some cut'n'paste from www and maillist)
 
