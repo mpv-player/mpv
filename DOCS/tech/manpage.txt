@@ -34,23 +34,29 @@ Exceptions are:
     - The same applies for spellchecks
 
 
-How do I create a html version of the man page?
------------------------------------------------
+How do I create a html, text or other versions of the man page?
+---------------------------------------------------------------
 The man pages was more or less designed for groff as it is the main tool for
 it. Therefore only groff produces acceptable results without changes.
 Additionaly, the SS variable should be set to either very low or very high
-values to produce a better groff html output (~18 looks nice for man).
-Here's an overview again:
+values to produce a better groff html output (IMHO due to a bug off gro2html).
+A setting of 4 looks readable IMHO. Here's an overview again:
 
-    - groff:     groff -Thtml -m man mplayer.1 > manpage.groff.html
+    - groff:     Groff is the "official" tool to convert man pages afaik.
+                 To get good results you really need a recent version (1.18.2)
+                 cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
+                 groff -m man -Tascii mplayer.1 | col -bx > manpage.txt
+                 Check -T for other output formats.
     - man2html:  You can view it over your cgi script:
                  http://localhost/cgi-bin/man2html?mplayer
                  The output is unuseable as the script doesn't seem to
                  support the macro definitions. Maybe a manual change of all
                  leads to acceptable results.
-    - rman:      rman -f html mplayer.1 > manpage.rman.html
-                 The output is ugly, you need to remove the .PDs to produce
-                 at least acceptable results.
+    - rman:      cat mplayer.1 | egrep -v "^\.PD" | rman -f html - > manpage.rman.html
+                 The output is ugly as rman doesn't understand many of the
+                 macros used.
+    - troffcvt:  troff2html -man mplayer.1 > manpage.tcvt.html
+                 The (good) output is similar to groff but it simplified...
 
 
 The structure
@@ -115,28 +121,17 @@ uniform man page. The best way is to read (and understand) the source.
 
 General:
     - No line should contain more than 79 characters
-    - Used commands: .TH, .SH, .TP, .IP, .[R]B, .I, .br, .RS, .RE, macro
-                     definitions, comments
-    - Don't forget the quotation marks around expressions or the backslash
-      before a '-' if it's needed.
-
-Separations:
-    - Sections (.SH)   2 newlines before (3 visible because of .SH)
-    - Options          not (it's done automatically over .TP)
-    - Sub options      not (it's done automatically over .IP)
-                       should be be separated over a comment (.) at the
-                       beginning and the end to make the man page readable ;)
-    - Examples, notes  1 newline before
-    - Big parts        better use .P (paragraph) or .br (equal to html's <BR>)
-                       instead of newlines
-    - In general       no newlines
-                       never more than 2 spaces between anything
+    - Used commands: .TH, .SH, .TP, .IP, .PP, .[R]B, .I, .br, .RS, .RE, .nf,
+                     .fi, .na, .nh, .ad, .hy, macro definitions, comments and
+                     some more
+    - Don't forget the quotation marks around expressions, the backslash
+      before a '-' if it's needed, etc...
 
 Option description:
     - Option and/or suboption parameters should be short and descriptive.
     - If the option is between a certain range, it should be specified at the
       beginning (eg. <0\-100> or <\-100 \- 100>)
-    - All optional things are but between angular paranthesis ([])
+    - All optional things are between angular paranthesis ([])
     - Obsolete options are followed by (OBSOLETE), beta options by
       (BETA CODE), etc
     - MPlayer only options in a section which isn't marked this way
@@ -217,8 +212,7 @@ Options, sub options, examples structure:
       .REss
       [...]
 
-    - Examples (like sub options, note: newline before and ':' after
-      .I EXAMPLE, .PD 0 before and .PD 1 after the examples):
+    - Examples:
 
       [...]
       
