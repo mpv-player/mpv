@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "mp_image.h"
+#include "../mp_msg.h"
 #include "vf.h"
 
 #include "../libvo/fastmemcpy.h"
@@ -25,7 +26,7 @@ config(struct vf_instance_s* vf,
 	vf->priv->y = (height - vf->priv->h) / 2;
     if (vf->priv->w + vf->priv->x > width
 	|| vf->priv->h + vf->priv->y > height) {
-	fprintf(stderr, "rectangle: bad position/width/height - rectangle area is out of the original!\n");
+	mp_msg(MSGT_VFILTER,MSGL_WARN,"rectangle: bad position/width/height - rectangle area is out of the original!\n");
 	return 0;
     }
     return vf_next_config(vf, width, height, d_width, d_height, flags, outfmt);
@@ -55,7 +56,7 @@ control(struct vf_instance_s* vf, int request, void *data)
 	    return 1;
 	    break;
 	default:
-	    fprintf(stderr, "Unknown param %d \n", tmp[0]);
+	    mp_msg(MSGT_VFILTER,MSGL_FATAL,"Unknown param %d \n", tmp[0]);
 	    return 0;
 	}
     }
@@ -77,7 +78,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 
     /* Draw the rectangle */
 
-    fprintf(stderr, "rectangle: -vop crop=%d:%d:%d:%d \n", vf->priv->w, vf->priv->h, vf->priv->x, vf->priv->y);
+    mp_msg(MSGT_VFILTER,MSGL_DBG2, "rectangle: -vop crop=%d:%d:%d:%d \n", vf->priv->w, vf->priv->h, vf->priv->x, vf->priv->y);
 
     if (vf->priv->x < 0)
 	x = 0;
