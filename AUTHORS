@@ -152,6 +152,11 @@ Bunkus, Moritz (Mosu) <moritz@bunkus.org>
     * ogm-tools author
     * Matroska demuxer
 
+Christiansen, Dan Villiom Podlaski (danchr) <danchr@daimi.au.dk>
+    * timer-darwin.c
+    * ao_macosx (unmaintained and broken)
+    * build system cleanups for Darwin
+
 Comstedt, Marcus <marcus@idonex.se>
     * initial Solaris8-x86 support
     * configure fixes
