@@ -1,7 +1,7 @@
 <HTML>
 
 <HEAD>
-<STYLE>
+<STYLE TYPE="text/css">
 	.text
 		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
 		font-size	:	14px;}
@@ -600,15 +600,20 @@ YUV acceleration. You'll need a kernel with tdfxfb support, and recompile with
 
 <P><B><A NAME=2.3.1.10>2.3.1.10. OpenGL output</A></B></P>
 
-<P><B>MPlayer</B> support displaying movies using OpenGL. Unfortunately, not all
-drivers support this ability. For example the Utah-GLX drivers
-(for XFree86 3.3.6) have it, with all cards.
-See <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>
+<P><B>MPlayer</B> supports displaying movies using OpenGL, but if your
+platform/driver supports xv as should be the case on a PC with Linux, use xv
+instead, OpenGL performance is considerably worse. If you have an X11
+implementation without xv support, OpenGL is a viable alternative.</P>
+
+<P>Unfortunately not all drivers support this feature. The Utah-GLX drivers
+(for XFree86 3.3.6) support it for all cards. See
+<A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>
 for details about how to install it.</P>
 
-<P>XFree86(DRI) >= 4.0.3 supports it only with Matrox, and Radeon cards.
-See <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> for download,
-and installation instructions.</P>
+<P>XFree86(DRI) >= 4.0.3 supports OpenGL with Matrox and Radeon cards, >= 4.2
+supports Rage128. See
+<A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>
+for download and installation instructions.</P>
 
 <P><B><A NAME=2.3.1.11>2.3.1.11. AAlib - text mode displaying</B></P>
 
