@@ -90,10 +90,10 @@ static uint32_t draw_frame(uint8_t * src[])
 static uint32_t
 query_format(uint32_t format)
 {
-    switch(format){
-    case IMGFMT_YV12:
-        return 1;
-    }
+//    switch(format){
+//    case IMGFMT_YV12:
+//        return 1;
+//    }
     return 0;
 }
 

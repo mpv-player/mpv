@@ -782,8 +782,13 @@ switch(has_video){
    break;
  }
  case 3: {  // OpenDivX
-   if(verbose) printf("OpenDivX video codec\n");
    out_fmt=IMGFMT_YV12;
+   if(!video_out->query_format(out_fmt)) {
+     printf("Sorry, selected video_out device is incompatible with this codec!\n");
+     exit(1);
+   }
+
+   if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
 	dec_param.x_dim = avi_header.bih.biWidth;
@@ -818,6 +823,11 @@ switch(has_video){
    break;
  }
  case 1: {
+   out_fmt=IMGFMT_YV12;
+   if(!video_out->query_format(out_fmt)) {
+     printf("Sorry, selected video_out device is incompatible with this codec!\n");
+     exit(1);
+   }
    // Find sequence_header first:
    if(verbose) printf("Searching for sequence header... ");fflush(stdout);
    while(1){
@@ -860,7 +870,6 @@ switch(has_video){
     picture->bitrate*0.5f,
     picture->bitrate/16.0f );
    // display info:
-   out_fmt=IMGFMT_YV12;
 //   movie_size_x=picture->coded_picture_width;
    movie_size_x=picture->display_picture_width;
    movie_size_y=picture->display_picture_height;
