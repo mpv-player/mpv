@@ -5,7 +5,9 @@ Notatki dla u¿ytkowników FreeBSD
 Rodzime BSD make nie zadzia³a w³a¶ciwie.
 
 2 . Aby uruchomiæ mplayera bêdziesz potrzebowa³ przekompilowaæ j±dro z opcj±
-" options USER_LDT " ( chyba ¿e uje¿dzasz -CURRENT, gdzie opcja ta jest domy¶ln± )
+" options USER_LDT " ( chyba ¿e uje¿dzasz -CURRENT, gdzie opcja ta jest domy¶ln± ).
+Je¶li masz procesor z SSE, pamiêtaj o dodaniu "options CPU_ENABLE_SSE", by z nich skorzystaæ.
+(Wymagane FreeBSD STABLE, albo patche na kernel)
  
 3 . Je¿eli mplayer narzeka "CD-ROM Device '/dev/cdrom/' not found!" zrób
 symboliczne dowi±zanie: ln -s /dev/<twoje urzadzenie cdrom> /dev/cdrom
