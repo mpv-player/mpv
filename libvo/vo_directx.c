@@ -30,6 +30,7 @@
 #include "fastmemcpy.h"
 #include "../input/input.h"
 #include "../osdep/keycodes.h"
+#include "../input/mouse.h"
 #include "../mp_msg.h"
 #include "aspect.h"
 #include "geometry.h"
@@ -906,6 +907,35 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         case WM_CHAR:
 		{
 			mplayer_put_key(wParam);
+			break;
+		}
+        case WM_LBUTTONDOWN:
+		{
+			if (!vo_nomouse_input)
+				mplayer_put_key(MOUSE_BTN0);
+			break;
+		}
+        case WM_MBUTTONDOWN:
+		{
+			if (!vo_nomouse_input)
+				mplayer_put_key(MOUSE_BTN1);
+			break;
+		}
+        case WM_RBUTTONDOWN:
+		{
+			if (!vo_nomouse_input)
+				mplayer_put_key(MOUSE_BTN2);
+			break;
+		}
+        case WM_MOUSEWHEEL:
+		{
+			if (vo_nomouse_input)
+				break;
+			int x = GET_WHEEL_DELTA_WPARAM(wParam);
+			if (x > 0)
+				mplayer_put_key(MOUSE_BTN3);
+			else
+				mplayer_put_key(MOUSE_BTN4);
 			break;
 		}
 		
