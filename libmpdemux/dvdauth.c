@@ -198,7 +198,7 @@ int dvd_auth ( char *dev , char *filename )
 {
     	DVDHandle dvd;  /* DVD device handle */
 
-	if (!css_so) css_so=strdup("/usr/local/lib/libcss.so");
+	if (!css_so) css_so=strdup("libcss.so");
 	printf("DVD: opening libcss.so as %s ...\n",css_so);
 	dlid=dlopen(css_so,RTLD_NOW);
 	if (!dlid) {
