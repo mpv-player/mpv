@@ -34,11 +34,12 @@ typedef struct {
   int audio_in_minsize;
   int audio_out_minsize;
   // other codecs:
+  void* context; // codec-specific stuff (usually HANDLE or struct pointer)
 //  ac3_frame_t *ac3_frame;
-  void* ac3_frame;
+  void* ac3_frame;  // TODO: use *context
   int pcm_bswap;
 #ifdef HAVE_OGGVORBIS
-  struct ov_struct_st *ov; // should be assigned on init
+  struct ov_struct_st *ov; // should be assigned on init  TODO: use *context
 #endif
 } sh_audio_t;
 
@@ -65,6 +66,7 @@ typedef struct {
   AVIStreamHeader video;
   BITMAPINFOHEADER *bih;   // in format
   BITMAPINFOHEADER o_bih; // out format
+  void* context; // codec-specific stuff (usually HANDLE or struct pointer)
   HIC hic;  // handle
 } sh_video_t;
 
