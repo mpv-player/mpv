@@ -188,7 +188,7 @@ typedef union dvd_authinfo dvd_authinfo;
 #define IOCTL_DVD_END_SESSION           CTL_CODE(FILE_DEVICE_DVD, 0x0403, METHOD_BUFFERED, FILE_READ_ACCESS)
 #define IOCTL_DVD_GET_REGION            CTL_CODE(FILE_DEVICE_DVD, 0x0405, METHOD_BUFFERED, FILE_READ_ACCESS)
 #define IOCTL_DVD_SEND_KEY2             CTL_CODE(FILE_DEVICE_DVD, 0x0406, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
-
+#define IOCTL_DVD_READ_STRUCTURE        CTL_CODE(FILE_DEVICE_DVD, 0x0450, METHOD_BUFFERED, FILE_READ_ACCESS)
 #define IOCTL_SCSI_PASS_THROUGH_DIRECT  CTL_CODE(FILE_DEVICE_CONTROLLER, 0x0405, METHOD_BUFFERED, FILE_READ_ACCESS | FILE_WRITE_ACCESS)
 
 #define DVD_CHALLENGE_KEY_LENGTH        (12 + sizeof(DVD_COPY_PROTECT_KEY))
@@ -198,10 +198,40 @@ typedef union dvd_authinfo dvd_authinfo;
 #define DVD_ASF_LENGTH                  (sizeof(DVD_ASF) + sizeof(DVD_COPY_PROTECT_KEY))
 #define DVD_REGION_LENGTH               (sizeof(DVD_REGION))
 
+#define DVD_COPYRIGHT_MASK              0x00000040
+#define DVD_NOT_COPYRIGHTED             0x00000000
+#define DVD_COPYRIGHTED                 0x00000040
+
+#define DVD_SECTOR_PROTECT_MASK         0x00000020
+#define DVD_SECTOR_NOT_PROTECTED        0x00000000
+#define DVD_SECTOR_PROTECTED            0x00000020
+
 #define SCSI_IOCTL_DATA_OUT             0
 #define SCSI_IOCTL_DATA_IN              1
 
 typedef ULONG DVD_SESSION_ID, *PDVD_SESSION_ID;
+
+typedef enum DVD_STRUCTURE_FORMAT {
+    DvdPhysicalDescriptor,
+    DvdCopyrightDescriptor,
+    DvdDiskKeyDescriptor,
+    DvdBCADescriptor,
+    DvdManufacturerDescriptor,
+    DvdMaxDescriptor
+} DVD_STRUCTURE_FORMAT, *PDVD_STRUCTURE_FORMAT;
+
+typedef struct DVD_READ_STRUCTURE {
+    LARGE_INTEGER BlockByteOffset;
+    DVD_STRUCTURE_FORMAT Format;
+    DVD_SESSION_ID SessionId;
+    UCHAR LayerNumber;
+} DVD_READ_STRUCTURE, *PDVD_READ_STRUCTURE;
+
+typedef struct _DVD_COPYRIGHT_DESCRIPTOR {
+    UCHAR CopyrightProtectionType;
+    UCHAR RegionManagementInformation;
+    USHORT Reserved;
+} DVD_COPYRIGHT_DESCRIPTOR, *PDVD_COPYRIGHT_DESCRIPTOR;
 
 typedef enum
 {
@@ -272,8 +302,10 @@ typedef struct _SCSI_PASS_THROUGH_DIRECT
 #define WIN2K               ( GetVersion() < 0x80000000 )
 #define ASPI_HAID           0
 #define ASPI_TARGET         0
+#define DTYPE_CDROM         0x05
 
 #define SENSE_LEN           0x0E
+#define SC_GET_DEV_TYPE     0x01
 #define SC_EXEC_SCSI_CMD    0x02
 #define SC_GET_DISK_INFO    0x06
 #define SS_COMP             0x01
@@ -307,6 +339,19 @@ struct SRB_GetDiskInfo
     unsigned char   SRB_Heads;
     unsigned char   SRB_Sectors;
     unsigned char   SRB_Rsvd1[22];
+};
+
+struct SRB_GDEVBlock
+{
+    unsigned char SRB_Cmd;
+    unsigned char SRB_Status;
+    unsigned char SRB_HaId;
+    unsigned char SRB_Flags;
+    unsigned long SRB_Hdr_Rsvd;
+    unsigned char SRB_Target;
+    unsigned char SRB_Lun;
+    unsigned char SRB_DeviceType;
+    unsigned char SRB_Rsvd1;
 };
 
 struct SRB_ExecSCSICmd

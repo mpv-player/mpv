@@ -273,8 +273,8 @@ extern dvdcss_t dvdcss_open ( char *psz_target )
 	char sector[DVDCSS_BLOCK_SIZE];
 	// 32768+40  -> disc title (32 uppercase chars)
 	// 32768+813 -> disc manufacturing date + serial no (16 digit number)
-	_dvdcss_seek( dvdcss, 32768/DVDCSS_BLOCK_SIZE);
-	if(_dvdcss_read( dvdcss, sector, 1) == 1){
+	dvdcss->pf_seek( dvdcss, 32768/DVDCSS_BLOCK_SIZE);
+	if(dvdcss->pf_read( dvdcss, sector, 1) == 1){
 	    // check disc title first:
 	    char* title_name=&sector[40];
 	    int i=31;
@@ -363,7 +363,7 @@ extern int dvdcss_seek ( dvdcss_t dvdcss, int i_blocks, int i_flags )
         }
     }
 
-    return _dvdcss_seek( dvdcss, i_blocks );
+    return dvdcss->pf_seek( dvdcss, i_blocks );
 }
 
 /**
@@ -395,7 +395,7 @@ extern int dvdcss_read ( dvdcss_t dvdcss, void *p_buffer,
 {
     int i_ret, i_index;
 
-    i_ret = _dvdcss_read( dvdcss, p_buffer, i_blocks );
+    i_ret = dvdcss->pf_read( dvdcss, p_buffer, i_blocks );
 
     if( i_ret <= 0
          || !dvdcss->b_scrambled
@@ -471,7 +471,7 @@ extern int dvdcss_readv ( dvdcss_t dvdcss, void *p_iovec,
     void *iov_base;
     size_t iov_len;
 
-    i_ret = _dvdcss_readv( dvdcss, _p_iovec, i_blocks );
+    i_ret = dvdcss->pf_readv( dvdcss, _p_iovec, i_blocks );
 
     if( i_ret <= 0
          || !dvdcss->b_scrambled

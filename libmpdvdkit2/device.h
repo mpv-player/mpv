@@ -46,12 +46,11 @@ struct iovec
 int _dvdcss_use_ioctls ( dvdcss_t );
 int _dvdcss_open       ( dvdcss_t );
 int _dvdcss_close      ( dvdcss_t );
-int _dvdcss_readv      ( dvdcss_t, struct iovec *, int );
 
 /*****************************************************************************
  * Device reading prototypes, raw-device specific
  *****************************************************************************/
 #ifndef WIN32
-int _dvdcss_raw_open     ( dvdcss_t, char * );
+int _dvdcss_raw_open     ( dvdcss_t, char const * );
 #endif
 

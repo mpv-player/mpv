@@ -41,6 +41,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#include <unistd.h>
 
 #include "dvdcss.h"
 
@@ -81,18 +82,27 @@ int _dvdcss_test( dvdcss_t dvdcss )
 
     i_ret = ioctl_ReadCopyright( dvdcss->i_fd, 0 /* i_layer */, &i_copyright );
 
+#ifdef WIN32
+    if( i_ret < 0 )
+    {
+        /* Maybe we didn't have enough priviledges to read the copyright
+         * (see ioctl_ReadCopyright comments).
+         * Apparently, on unencrypted DVDs _dvdcss_disckey() always fails, so
+         * we can check this as a work-around. */
+        i_ret = 0;
+        if( _dvdcss_disckey( dvdcss ) < 0 )
+            i_copyright = 0;
+        else
+            i_copyright = 1;
+    }
+#endif
+
     if( i_ret < 0 )
     {
         /* Since it's the first ioctl we try to issue, we add a notice */
         _dvdcss_error( dvdcss, "css error: ioctl_ReadCopyright failed, "
                        "make sure there is a DVD in the drive, and that "
-                       "you have used the correct device node."
-#if defined( WIN32 )
-                       "\nAlso note that if you are using Windows NT/2000/XP "
-                       "you need to have administrator priviledges to be able "
-                       "to use ioctls."
-#endif
-                     );
+                       "you have used the correct device node." );
 
         return i_ret;
     }
@@ -264,7 +274,7 @@ static void PrintKey( dvdcss_t dvdcss, char *prefix, u8 const *data )
 /*****************************************************************************
  * _dvdcss_title: crack or decrypt the current title key if needed
  *****************************************************************************
- * This function should only be called by dvdcss_seek and should eventually
+ * This function should only be called by dvdcss->pf_seek and should eventually
  * not be external if possible.
  *****************************************************************************/
 int _dvdcss_title ( dvdcss_t dvdcss, int i_block )
@@ -427,9 +437,12 @@ int _dvdcss_disckey( dvdcss_t dvdcss )
                 break;
             }
             _dvdcss_debug( dvdcss, "failed to decrypt the disc key, "
-                                   "trying to crack it instead" );
+                                   "faulty drive/kernel? "
+                                   "cracking title keys instead" );
 
-            /* Fallback */
+            /* Fallback, but not to DISC as the disc key might be faulty */
+            dvdcss->i_method = DVDCSS_METHOD_TITLE;
+            break;
 
         case DVDCSS_METHOD_DISC:
 
@@ -443,6 +456,7 @@ int _dvdcss_disckey( dvdcss_t dvdcss )
                 break;
             }
             _dvdcss_debug( dvdcss, "failed to crack the disc key" );
+            memset( p_disc_key, 0, KEY_SIZE );
             dvdcss->i_method = DVDCSS_METHOD_TITLE;
             break;
 
@@ -551,9 +565,9 @@ int _dvdcss_titlekey( dvdcss_t dvdcss, int i_pos, dvd_key_t p_title_key )
         _dvdcss_debug( dvdcss, "resetting drive and cracking title key" );
 
         /* Read an unscrambled sector and reset the drive */
-        _dvdcss_seek( dvdcss, 0 );
-        _dvdcss_read( dvdcss, p_garbage, 1 );
-        _dvdcss_seek( dvdcss, 0 );
+        dvdcss->pf_seek( dvdcss, 0 );
+        dvdcss->pf_read( dvdcss, p_garbage, 1 );
+        dvdcss->pf_seek( dvdcss, 0 );
         _dvdcss_disckey( dvdcss );
 
         /* Fallback */
@@ -978,7 +992,7 @@ static int DecryptDiscKey( u8 const *p_struct_disckey, dvd_key_t p_disc_key )
             DecryptKey( 0, p_disc_key, p_struct_disckey, p_verify );
 
             /* If the position / player key pair worked then return. */
-            if( memcmp( p_disc_key, p_verify, 5 ) == 0 )
+            if( memcmp( p_disc_key, p_verify, KEY_SIZE ) == 0 )
             {
                 return 0;
             }
@@ -988,6 +1002,7 @@ static int DecryptDiscKey( u8 const *p_struct_disckey, dvd_key_t p_disc_key )
 
     /* Have tried all combinations of positions and keys, 
      * and we still didn't succeed. */
+    memset( p_disc_key, 0, KEY_SIZE );
     return -1;
 }
 
@@ -1383,7 +1398,7 @@ static int CrackTitleKey( dvdcss_t dvdcss, int i_pos, int i_len,
 
     do
     {
-        i_ret = _dvdcss_seek( dvdcss, i_pos );
+        i_ret = dvdcss->pf_seek( dvdcss, i_pos );
 
         if( i_ret != i_pos )
         {

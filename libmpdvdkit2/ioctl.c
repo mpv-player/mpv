@@ -11,6 +11,7 @@
  *          Eugenio Jarosiewicz <ej0@cise.ufl.edu>
  *          David Siebörger <drs-videolan@rucus.ru.ac.za>
  *          Alex Strelnikov <lelik@os2.ru>
+ *          Gildas Bazin <gbazin@netcourrier.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -214,18 +215,20 @@ int ioctl_ReadCopyright( int i_fd, int i_layer, int *pi_copyright )
     *pi_copyright = dvdbs.copyrightProtectionSystemType;
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 p_buffer[ 8 ];
         SCSI_PASS_THROUGH_DIRECT sptd;
 
-        memset( &sptd, 0, sizeof( sptd ) );
-        memset( &p_buffer, 0, sizeof( p_buffer ) );
-   
         /*  When using IOCTL_DVD_READ_STRUCTURE and 
             DVD_COPYRIGHT_DESCRIPTOR, CopyrightProtectionType
-            is always 6. So we send a raw scsi command instead. */
+            seems to be always 6 ???
+            To work around this M$ bug we try to send a raw scsi command
+            instead (if we've got enough privileges to do so). */
+
+        memset( &sptd, 0, sizeof( sptd ) );
+        memset( &p_buffer, 0, sizeof( p_buffer ) );
 
         sptd.Length             = sizeof( SCSI_PASS_THROUGH_DIRECT );
         sptd.CdbLength          = 12;
@@ -245,7 +248,10 @@ int ioctl_ReadCopyright( int i_fd, int i_layer, int *pi_copyright )
                              &sptd, sizeof( SCSI_PASS_THROUGH_DIRECT ),
                              &tmp, NULL ) ? 0 : -1;
 
+        if( i_ret == 0 )
+        {
         *pi_copyright = p_buffer[ 4 ];
+    }
     }
     else
     {
@@ -387,7 +393,7 @@ int ioctl_ReadDiscKey( int i_fd, int *pi_agid, u8 *p_key )
     memcpy( p_key, dvdbs.discKeyStructures, DVD_DISCKEY_SIZE );
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 buffer[DVD_DISK_KEY_LENGTH];
@@ -555,7 +561,7 @@ int ioctl_ReadTitleKey( int i_fd, int *pi_agid, int i_pos, u8 *p_key )
     memcpy( p_key, dvdbs.titleKeyValue, DVD_KEY_SIZE );
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 buffer[DVD_BUS_KEY_LENGTH];
@@ -567,7 +573,8 @@ int ioctl_ReadTitleKey( int i_fd, int *pi_agid, int i_pos, u8 *p_key )
         key->SessionId  = *pi_agid;
         key->KeyType    = DvdTitleKey;
         key->KeyFlags   = 0;
-        key->Parameters.TitleOffset.QuadPart = (LONGLONG) i_pos;
+        key->Parameters.TitleOffset.QuadPart = (LONGLONG) i_pos *
+                                                   2048 /*DVDCSS_BLOCK_SIZE*/;
 
         i_ret = DeviceIoControl( (HANDLE) i_fd, IOCTL_DVD_READ_KEY, key, 
                 key->KeyLength, key, key->KeyLength, &tmp, NULL ) ? 0 : -1;
@@ -700,7 +707,7 @@ int ioctl_ReportAgid( int i_fd, int *pi_agid )
     *pi_agid = dvdbs.grantID;
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         ULONG id;
         DWORD tmp;
@@ -821,7 +828,7 @@ int ioctl_ReportChallenge( int i_fd, int *pi_agid, u8 *p_challenge )
     memcpy( p_challenge, dvdbs.challengeKeyValue, DVD_CHALLENGE_SIZE );
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 buffer[DVD_CHALLENGE_KEY_LENGTH];
@@ -953,7 +960,7 @@ int ioctl_ReportASF( int i_fd, int *pi_remove_me, int *pi_asf )
     *pi_asf = dvdbs.successFlag;
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 buffer[DVD_ASF_LENGTH];
@@ -1088,7 +1095,7 @@ int ioctl_ReportKey1( int i_fd, int *pi_agid, u8 *p_key )
     memcpy( p_key, dvdbs.key1Value, DVD_KEY_SIZE );
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 buffer[DVD_BUS_KEY_LENGTH];
@@ -1205,7 +1212,7 @@ int ioctl_InvalidateAgid( int i_fd, int *pi_agid )
     i_ret = ioctl( i_fd, DKIOCDVDSENDKEY, &dvd );
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
 
@@ -1333,7 +1340,7 @@ int ioctl_SendChallenge( int i_fd, int *pi_agid, u8 *p_challenge )
     i_ret = ioctl( i_fd, DKIOCDVDSENDKEY, &dvd );
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 buffer[DVD_CHALLENGE_KEY_LENGTH];
@@ -1470,7 +1477,7 @@ int ioctl_SendKey2( int i_fd, int *pi_agid, u8 *p_key )
     i_ret = ioctl( i_fd, DKIOCDVDSENDKEY, &dvd );
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 buffer[DVD_BUS_KEY_LENGTH];
@@ -1616,7 +1623,7 @@ int ioctl_ReportRPC( int i_fd, int *p_type, int *p_mask, int *p_scheme )
     *p_scheme = dvdbs.rpcScheme;
 
 #elif defined( WIN32 )
-    if( WIN2K ) /* NT/Win2000/Whistler */
+    if( WIN2K ) /* NT/2k/XP */
     {
         DWORD tmp;
         u8 buffer[ DVD_REGION_LENGTH ];
@@ -1628,19 +1635,19 @@ int ioctl_ReportRPC( int i_fd, int *p_type, int *p_mask, int *p_scheme )
                 region, DVD_REGION_LENGTH, &tmp, NULL ) ? 0 : -1;
 
         /* Someone who has the headers should correct all this. */
-	/* Use the IOCTL_SCSI_PASS_THROUGH_DIRECT so we get the real
-	 * values of theses entities?  */
+        /* Use the IOCTL_SCSI_PASS_THROUGH_DIRECT so we get the real
+         * values of theses entities?  */
         if(region->SystemRegion != 0) {
-	    *p_type = region->ResetCount > 1 ? 1 : 3 - region->ResetCount;
-	    *p_mask =  0xff ^ (1 << (region->SystemRegion - 1));
-	    *p_scheme = 1;
-	}
-	else
-	{
-	    *p_type = 0;  /* ?? */
-	    *p_mask = 0xff;
-	    *p_scheme = 1; /* ?? */
-	}
+            *p_type = region->ResetCount > 1 ? 1 : 3 - region->ResetCount;
+            *p_mask =  0xff ^ (1 << (region->SystemRegion - 1));
+            *p_scheme = 1;
+        }
+        else
+        {
+            *p_type = 0;  /* ?? */
+            *p_mask = 0xff;
+            *p_scheme = 1; /* ?? */
+        }
     }
     else
     {
@@ -1905,10 +1912,10 @@ static int WinSendSSC( int i_fd, struct SRB_ExecSCSICmd *p_ssc )
 
 #if defined( __QNXNTO__ )
 /*****************************************************************************
- * QNXInitCPT: initialize a ssc structure for the win32 aspi layer
+ * QNXInitCPT: initialize a CPT structure for QNX Neutrino
  *****************************************************************************
- * This function initializes a ssc raw device command structure for future
- * use, either a read command or a write command.
+ * This function initializes a cpt command structure for future use,
+ * either a read command or a write command.
  *****************************************************************************/
 static void QNXInitCPT( CAM_PASS_THRU * p_cpt, int i_type )
 {
@@ -1930,7 +1937,7 @@ static void QNXInitCPT( CAM_PASS_THRU * p_cpt, int i_type )
     p_cpt->cam_cdb[ 9 ] =  p_cpt->cam_dxfer_len       & 0xff;
     p_cpt->cam_cdb_len = 12;
 
-	p_cpt->cam_timeout = CAM_TIME_DEFAULT;
+    p_cpt->cam_timeout = CAM_TIME_DEFAULT;
 }
 #endif
 

@@ -22,6 +22,8 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA.
  *****************************************************************************/
 
+struct iovec;
+
 /*****************************************************************************
  * The libdvdcss structure
  *****************************************************************************/
@@ -30,7 +32,13 @@ struct dvdcss_s
     /* File descriptor */
     char * psz_device;
     int    i_fd;
+    int    i_read_fd;
     int    i_seekpos;
+
+    /* File handling */
+    int ( * pf_seek )  ( dvdcss_t, int );
+    int ( * pf_read )  ( dvdcss_t, void *, int );
+    int ( * pf_readv ) ( dvdcss_t, struct iovec *, int );
 
     /* Decryption stuff */
     int          i_method;
@@ -46,13 +54,13 @@ struct dvdcss_s
     int    b_debug;
 
 #ifdef WIN32
+    int    b_file;
     char * p_readv_buffer;
     int    i_readv_buf_size;
 #endif
 
 #ifndef WIN32
     int    i_raw_fd;
-    int    i_read_fd;
 #endif
 };
 
@@ -66,9 +74,6 @@ struct dvdcss_s
 /*****************************************************************************
  * Functions used across the library
  *****************************************************************************/
-int  _dvdcss_seek  ( dvdcss_t, int );
-int  _dvdcss_read  ( dvdcss_t, void *, int );
-
 void _dvdcss_error ( dvdcss_t, char * );
 void _dvdcss_debug ( dvdcss_t, char * );
 
