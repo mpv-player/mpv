@@ -988,7 +988,7 @@ return 0;
 EOF
 _memalign_def='/* #define memalign(a,b) malloc(b) */'
 _memalign=yes
-$_cc -o $TMPO $TMPC 2> /dev/null || _memalign = no 
+$_cc -o $TMPO $TMPC 2> /dev/null || _memalign=no 
 if [ "$_memalign" = "no" ]; then
 _memalign_def='#define memalign(a,b) malloc(b)'
 fi
