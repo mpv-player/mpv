@@ -219,9 +219,19 @@ void saver_on(Display *mDisplay) {
     {
 	if (DPMSQueryExtension(mDisplay, &nothing, &nothing))
 	{
-	    printf ("Enabling DPMS\n");
-	    DPMSEnable(mDisplay);  // restoring power saving settings
-	    DPMSQueryExtension(mDisplay, &nothing, &nothing);
+	    if (!DPMSEnable(mDisplay)) {  // restoring power saving settings
+                printf("DPMS not available?\n");
+            } else {
+                // DPMS does not seem to be enabled unless we call DPMSInfo
+	        BOOL onoff;
+        	CARD16 state;
+        	DPMSInfo(mDisplay, &state, &onoff);
+                if (onoff) {
+	            printf ("Successfully enabled DPMS\n");
+                } else {
+	            printf ("Could not enable DPMS\n");
+                }
+            }
 	}
     }
     
@@ -246,9 +256,11 @@ void saver_off(Display *mDisplay) {
 	DPMSInfo(mDisplay, &state, &onoff);
 	if (onoff)
 	{
+           Status stat;
 	    printf ("Disabling DPMS\n");
 	    dpms_disabled=1;
-		DPMSDisable(mDisplay);  // monitor powersave off
+	    stat = DPMSDisable(mDisplay);  // monitor powersave off
+            printf ("stat: %d\n", stat);
 	}
     }
     XGetScreenSaver(mDisplay, &timeout_save, &interval, &prefer_blank, &allow_exp);
