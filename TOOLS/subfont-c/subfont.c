@@ -362,37 +362,31 @@ void blur() {
 	for (x = 0; x<width; ++x) {
 	    float max = 0;
 	    for (my = -r; my<=r; ++my)
-		if (y+my>0 && y+my<height-1)
+		if (y+my>0 && y+my<height-1){
+		    int ay=(y+my)*width;
 		    for (mx = -r; mx<=r; ++mx) {
-			if (x+mx>0 && x+mx<width-1) {
-//			    int p = buffer[x+mx+(y+my)*width] * m[mx+r+(my+r)*w];
-			    int p = 0;
+			int ax=x+mx;
+			if (ax>0 && ax<width-1) {
+			    int p =
 
-			    p = ( (buffer[x+mx-1+(y+my-1)*width]) +
-			    (buffer[x+mx-1+(y+my+1)*width]) +
-			    (buffer[x+mx+1+(y+my-1)*width]) +
-			    (buffer[x+mx+1+(y+my+1)*width]) )/2 +
+			  ( (buffer[ax-1+ay-width]) +
+			    (buffer[ax-1+ay+width]) +
+			    (buffer[ax+1+ay-width]) +
+			    (buffer[ax+1+ay+width]) )/2 +
 
-			  ( (buffer[x+mx-1+(y+my)*width]) +
-			    (buffer[x+mx+1+(y+my)*width]) +
-			    (buffer[x+mx+(y+my-1)*width]) +
-			    (buffer[x+mx+(y+my+1)*width]) +
+			  ( (buffer[ax-1+ay]) +
+			    (buffer[ax+1+ay]) +
+			    (buffer[ax+ay-width]) +
+			    (buffer[ax+ay+width]) +
 
-			    (buffer[x+mx+(y+my)*width]) ) ;
+			    (buffer[ax+ay]) ) ;
 			    
-			    if(p>255) p=255;
-			    
-			//    p*=m[mx+r+(my+r)*w];
-			//    if (p>max) {
-			//	max = p;
-			//	abuffer[x+y*width] = (p + maxcolor/2) / maxcolor;
-			//    }
-			    //max+=(p + maxcolor/2) / maxcolor;
-			    max+=p*m[mx+r+(my+r)*w]/(float)sum;
+			    max+=(p>255?255:p)*m[mx+r+(my+r)*w];
 			}
 		    
 		    }
-	    max=max*alpha_factor;
+		}
+	    max*=alpha_factor/(float)sum;
 //	    printf("%5.3f ",max);
 	    if(max>255) max=255;
 	    abuffer[x+y*width] = max;
