@@ -168,7 +168,6 @@ static char help_text[]=
 #define MSGTR_AudioFilterChainPreinitError "Error at audio filter chain pre-init!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC read error: %s\n"
 #define MSGTR_SoftsleepUnderflow "Warning! Softsleep underflow!\n"
-#define MSGTR_EDLSKIPStartStopLength "\nEDL_SKIP: start [%f], stop [%f], length [%f]\n"
 #define MSGTR_AnsSubVisibility "ANS_SUB_VISIBILITY=%ld\n"
 #define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
 #define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
