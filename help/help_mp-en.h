@@ -160,6 +160,56 @@ static char help_text[]=
 #define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d frames\n"
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n"
 
+// cfg-mencoder.h:
+
+#define MSGTR_MEncoderMP3LameHelp "\n\n"\
+" vbr=<0-4>     variable bitrate method\n"\
+"                0: cbr\n"\
+"                1: mt\n"\
+"                2: rh(default)\n"\
+"                3: abr\n"\
+"                4: mtrh\n"\
+"\n"\
+" abr           average bitrate\n"\
+"\n"\
+" cbr           constant bitrate\n"\
+"               Forces also CBR mode encoding on subsequent ABR presets modes\n"\
+"\n"\
+" br=<0-1024>   specify bitrate in kBit (CBR and ABR only)\n"\
+"\n"\
+" q=<0-9>       quality (0-highest, 9-lowest) (only for VBR)\n"\
+"\n"\
+" aq=<0-9>      algorithmic quality (0-best/slowest, 9-worst/fastest)\n"\
+"\n"\
+" ratio=<1-100> compression ratio\n"\
+"\n"\
+" vol=<0-10>    set audio input gain\n"\
+"\n"\
+" mode=<0-3>    (default: auto)\n"\
+"                0: stereo\n"\
+"                1: joint-stereo\n"\
+"                2: dualchannel\n"\
+"                3: mono\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: no\n"\
+"                1: all\n"\
+"                2: adjust\n"\
+"\n"\
+" fast          switch on faster encoding on subsequent VBR presets modes,\n"\
+"               slightly lower quality and higher bitrates.\n"\
+"\n"\
+" preset=<value> provide the highest possible quality settings.\n"\
+"                 medium: VBR  encoding,  good  quality\n"\
+"                 (150-180 kbps bitrate range)\n"\
+"                 standard:  VBR encoding, high quality\n"\
+"                 (170-210 kbps bitrate range)\n"\
+"                 extreme: VBR encoding, very high quality\n"\
+"                 (200-240 kbps bitrate range)\n"\
+"                 insane:  CBR  encoding, highest preset quality\n"\
+"                 (320 kbps bitrate)\n"\
+"                 <8-320>: ABR encoding at average given kbps bitrate.\n\n"
+
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Device '%s' not found.\n"
 #define MSGTR_ErrTrackSelect "Error selecting VCD track."
