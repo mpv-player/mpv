@@ -5,7 +5,7 @@
 <title>History</title>
  
 <blockquote><para>
-This began a year ago...  I have tried lots of players under linux
+This began a year ago...  I have tried lots of players under Linux
 (<application>mtv</application>, <application>xmps</application>,
 <application>dvdview</application>, <application>livid/oms</application>,
 <application>videolan</application>, <application>xine</application>,
@@ -27,12 +27,12 @@ problems too. So I've decided to write/modify one...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87</emphasis>: Sep 28-Oct 20, 2000
-  </para><para>Mpeg codec replaced with DVDview by Dirk Farin, it was a
+  </para><para>MPEG codec replaced with DVDview by Dirk Farin, it was a
   great stuff, but it was slow and was written in C++ (A'rpi hates C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: Oct 21-Nov 2, 2000
-  </para><para>Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman and
+  </para><para>MPEG codec was libmpeg2 (mpeg2dec) by Aaron Holtzman and
   Michel Lespinasse.  It's great, optimized very fast C code with perfect
   image quality and 100% MPEG standard conformance.
   </para></listitem>
