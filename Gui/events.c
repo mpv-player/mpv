@@ -42,7 +42,8 @@ evName evNames[] =
   { evSetVolume,         "evSetVolume"         },
   { evSetBalance,        "evSetBalance"        },
   { evHelp,		 "evHelp"	       },	
-  { evLoadSubtitle,      "evLoadSubtitle"      }
+  { evLoadSubtitle,      "evLoadSubtitle"      },
+  { evPlayDVD,		 "evPlayDVD"	       }
  };
 
 int evBoxs = sizeof( evNames ) / sizeof( evName );

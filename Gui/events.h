@@ -47,6 +47,7 @@
 #define evHelp              37
 
 #define evLoadSubtitle      38
+#define evPlayDVD	    39
 
 #define evExit              1000
 
@@ -58,6 +59,7 @@
 #define evGeneralTimer    5003
 #define evGtkIsOk         5004
 #define evShowPopUpMenu   5005
+#define evHidePopUpMenu   5006
 
 #define evFName           7000
 #define evMovieTime       7001
