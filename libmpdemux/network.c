@@ -152,6 +152,7 @@ http_send_request( URL_t *url ) {
 		return -1;
 	}
 
+	if( url->port==0 ) url->port = 80;
 	fd = connect2Server( url->hostname, url->port );
 	if( fd<0 ) {
 		return -1; 
@@ -228,7 +229,7 @@ extension=NULL;
 			// Look for the extension in the extensions table
 			for( i=0 ; i<(sizeof(extensions_table)/sizeof(extensions_table[0])) ; i++ ) {
 				if( !strcasecmp(extension, extensions_table[i].extension) ) {
-					if( url->port==0 ) url->port = 80;
+					//if( url->port==0 ) url->port = 80;
 					return extensions_table[i].demuxer_type;
 				}
 			}
@@ -241,8 +242,8 @@ extension=NULL;
 		}
 
 		// Checking for ASF
-		if( !strcasecmp(url->protocol, "mms") ) {
-			if( url->port==0 ) url->port = 80;
+		if( !strncasecmp(url->protocol, "mms", 3) ) {
+			//if( url->port==0 ) url->port = 80;
 			return DEMUXER_TYPE_ASF;
 		}
 
@@ -309,6 +310,9 @@ extension=NULL;
 					http_free( http_hdr );
 					return DEMUXER_TYPE_UNKNOWN;
 			}
+		} else {
+			printf("Unknown protocol '%s'\n", url->protocol );
+			return DEMUXER_TYPE_UNKNOWN;
 		}
 	} while( redirect );
 

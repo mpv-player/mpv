@@ -34,6 +34,7 @@ typedef struct streaming_control {
 	unsigned int buffer_pos;
 	int (*streaming_read)( int fd, char *buffer, int buffer_size, struct streaming_control *stream_ctrl );
 	int (*streaming_seek)( int fd, off_t pos, struct streaming_control *stream_ctrl );
+	void *data;
 } streaming_ctrl_t;
 
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
