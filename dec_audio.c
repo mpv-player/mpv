@@ -900,6 +900,7 @@ case AFM_AAC: {
     mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: Negotiated samplerate: %dHz  channels: %d\n", faac_samplerate, faac_channels);
     sh_audio->channels = faac_channels;
     sh_audio->samplerate = faac_samplerate;
+    //sh_audio->o_bps = sh_audio->samplesize*faac_channels*faac_samplerate;
     if(!sh_audio->i_bps) {
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: compressed input bitrate missing, assuming 128kbit/s!\n");
       sh_audio->i_bps = 128*1000/8; // XXX: HACK!!! ::atmos
@@ -1079,7 +1080,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
       case AFM_AAC: {
 	int /*i,*/ k, j = 0;	      
 	void *faac_sample_buffer;
-	
+
 	len = 0;
 	while(len < minlen) {
 	  /* update buffer */
@@ -1110,9 +1111,12 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	  } else if (faac_finfo.samples == 0)
 	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Decoded zero samples!\n");
 	  else {
-	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%dBytes)!\n", faac_finfo.samples*faac_finfo.channels);
-	    memcpy(buf+len,faac_sample_buffer, faac_finfo.samples*faac_finfo.channels);
-	    len += faac_finfo.samples*faac_finfo.channels;
+	    /* XXX: samples already multiplied by channels! */
+	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%d Bytes)!\n",
+	       sh_audio->samplesize*faac_finfo.samples);
+	    memcpy(buf+len,faac_sample_buffer, sh_audio->samplesize*faac_finfo.samples);
+	    len += sh_audio->samplesize*faac_finfo.samples;
+	    //printf("FAAD: buffer: %d bytes  consumed: %d \n", k, faac_finfo.bytesconsumed);
 	  }
 	}
 
