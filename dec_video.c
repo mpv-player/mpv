@@ -748,6 +748,17 @@ if ((sh_video->codec->driver == VFM_QTRLE) && (sh_video->bih->biBitCount != 24))
 }
 
 extern int vaa_use_dr;
+
+static int use_dr=0;
+static bes_da_t bda;
+void init_video_vaa( void )
+{
+  memset(&bda,0,sizeof(bes_da_t));
+  if(vo_vaa.query_bes_da)
+    use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
+  if(!vaa_use_dr) use_dr = 0;
+}
+
 #ifdef USE_LIBVO2
 int decode_video(vo2_handle_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
 #else
@@ -758,9 +769,7 @@ mp_image_t *mpi=sh_video->image;
 unsigned int out_fmt=mpi->imgfmt; //sh_video->codec->outfmt[sh_video->outfmtidx];
 int planar=(mpi->flags&MP_IMGFLAG_PLANAR)!=0; //(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420);
 int blit_frame=0;
-bes_da_t bda;
 void *vmem;
-int use_dr;
 int painted;
 static int double_buff_num = 0;
 
@@ -772,12 +781,7 @@ static int double_buff_num = 0;
 unsigned int t=GetTimer();
 unsigned int t2;
 
-memset(&bda,0,sizeof(bes_da_t));
-painted = 0;
-  use_dr = 0;
-  if(vo_vaa.query_bes_da)
-    use_dr = vo_vaa.query_bes_da(&bda) ? 0 : 1;
-  if(!vaa_use_dr) use_dr = 0;
+  painted = 0;
 #ifdef USE_MP_IMAGE
 if(mpi->type!=MP_IMGTYPE_EXPORT)
 if( !(mpi->flags&MP_IMGFLAG_ALLOCATED) && !(mpi->flags&MP_IMGFLAG_DIRECT) ){

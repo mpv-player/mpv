@@ -3,6 +3,7 @@
 extern int video_read_properties(sh_video_t *sh_video);
 
 extern int init_video(sh_video_t *sh_video, int *pitches);
+extern void init_video_vaa( void );
 void uninit_video(sh_video_t *sh_video);
 
 #ifdef USE_LIBVO2

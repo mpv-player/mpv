@@ -1380,6 +1380,7 @@ current_module="init_libvo";
 	    */
 	}
    }
+   init_video_vaa();
    fflush(stdout);
    
 //================== MAIN: ==========================
