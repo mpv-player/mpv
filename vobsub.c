@@ -13,6 +13,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#ifdef __MINGW32__
+typedef long ssize_t;
+#endif
 
 #include "config.h"
 #include "version.h"
