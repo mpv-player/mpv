@@ -167,8 +167,14 @@ II. POLICY / RULES:
 
 9. You will have write access to DOCS/. This used to be different to avoid
    breaking docs or getting translations or the homepage desynced. If you are
-   unsure about this, send a patch to dev-eng, the documentation maintainers
-   will review and commit your stuff.
+   unsure about this, send a patch to mplayer-dev-eng or even better to
+   mplayer-docs, the documentation maintainers will review and commit your
+   stuff.
+
+10. Subscribe to the mplayer-cvslog mailing list. The diffs of all CVS commits
+    are sent there and reviewed by all the other developers. Bugs and possible
+    improvements or general questions regarding commits are discussed there. We
+    expect you to react if problems with your code are uncovered.
 
 Also read DOCS/tech/patches.txt !!!!
 
