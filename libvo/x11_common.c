@@ -135,6 +135,26 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
 }
 #endif
 
+static void x11_errorhandler(Display *display, XErrorEvent *event)
+{
+#define MSGLEN 60
+    char msg[MSGLEN];
+        
+    XGetErrorText(display, event->error_code, &msg, MSGLEN);
+    
+    printf("X11 error: %s\n", msg);
+    
+    if (verbose)
+    {
+	printf("Type: %x, display: %x, resourceid: %x, serial: %x\n",
+	    event->type, event->display, event->resourceid, event->serial);
+	printf("Error code: %x, request code: %x, minor code: %x\n",
+	    event->error_code, event->request_code, event->minor_code);
+    }
+    
+    exit_player("X11 error");
+#undef MSGLEN
+}
 
 int vo_init( void )
 {
@@ -240,6 +260,9 @@ int vo_init( void )
 	vo_screenwidth,vo_screenheight,
 	depth, vo_depthonscreen,
 	mDisplayName,mLocalDisplay?"local":"remote");
+
+ XSetErrorHandler(x11_errorhandler);
+ 
  return 1;
 }
 
@@ -387,6 +410,8 @@ void vo_x11_classhint( Display * display,Window window,char *name ){
 
 int vo_x11_uninit(Display *display, Window window)
 {
+    XSetErrorHandler(NULL);
+
 #ifdef HAVE_NEW_GUI
     /* destroy window only if it's not controlled by GUI */
     if (vo_window == None)
