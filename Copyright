@@ -16,7 +16,7 @@ License:    GNU Lesser General Public License, some parts GNU General Public
             License, GNU General Public License when combined
 
 Name:       FAAD2
-Version:    2.0 + portability patches
+Version:    2.1 beta (20040712 CVS snapshot) + portability patches
 Homepage:   http://www.audiocoding.com
 Directory:  libfaad2
 License:    GNU General Public License

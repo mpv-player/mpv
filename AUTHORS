@@ -25,6 +25,7 @@ adland <adland123@yahoo.com>
     * support for various Windows DLL codecs (LCW2, ASLC)
     * SMIL playlist parser
     * many streaming bug fixes and improvements
+    * libfaad2 update
 
 Anholt, Eric <eanholt@gladstone.uoregon.edu>
     * CPU detection code
