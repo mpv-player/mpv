@@ -35,7 +35,7 @@ OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
 VO_LIBS = $(AA_LIB) $(X_LIB) $(SDL_LIB) $(GGI_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) $(GIF_LIB) 
 AO_LIBS = $(ARTS_LIB) $(NAS_LIB) $(SGIAUDIO_LIB)
-CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(LIBLZO_LIB) $(XVID_LIB) $(DECORE_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) 
+CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(LIBLZO_LIB) $(XVID_LIB) $(DECORE_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) $(XMMS_LIB)
 COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a $(PP_LIB) postproc/libswscale.a linux/libosdep.a $(CSS_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(STREAMING_LIB) $(WIN32_LIB)
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(FREETYPE_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(SDL_INC) # -Wall

@@ -132,6 +132,7 @@ extern void demux_close_avi(demuxer_t *demuxer);
 extern void demux_close_rawdv(demuxer_t* demuxer);
 extern void demux_close_pva(demuxer_t* demuxer);
 extern void demux_close_smjpeg(demuxer_t* demuxer);
+extern void demux_close_xmms(demuxer_t* demuxer);
 
 #ifdef USE_TV
 #include "tv.h"
@@ -194,6 +195,11 @@ void free_demuxer(demuxer_t *demuxer){
     case DEMUXER_TYPE_AVI_NI:
     case DEMUXER_TYPE_AVI_NINI:
       demux_close_avi(demuxer); return;
+#ifdef HAVE_XMMS
+    case DEMUXER_TYPE_XMMS:
+      demux_close_xmms(demuxer); break;
+#endif
+
     }
     // free streams:
     for(i=0;i<256;i++){
@@ -269,6 +275,7 @@ int demux_rawdv_fill_buffer(demuxer_t *demuxer);
 int demux_y4m_fill_buffer(demuxer_t *demux);
 int demux_audio_fill_buffer(demux_stream_t *ds);
 int demux_pva_fill_buffer(demuxer_t *demux);
+int demux_xmms_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
@@ -303,6 +310,9 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 #endif
     case DEMUXER_TYPE_Y4M: return demux_y4m_fill_buffer(demux);
     case DEMUXER_TYPE_AUDIO: return demux_audio_fill_buffer(ds);
+#ifdef HAVE_XMMS
+    case DEMUXER_TYPE_XMMS: return demux_xmms_fill_buffer(demux,ds);
+#endif
     case DEMUXER_TYPE_DEMUXERS: return demux_demuxers_fill_buffer(demux,ds);
 #ifdef HAVE_OGGVORBIS
     case DEMUXER_TYPE_OGG: return demux_ogg_fill_buffer(demux);
@@ -533,6 +543,7 @@ extern int demux_rawaudio_open(demuxer_t* demuxer);
 extern int smjpeg_check_file(demuxer_t *demuxer);
 extern int demux_open_smjpeg(demuxer_t* demuxer);
 extern int bmp_check_file(demuxer_t *demuxer);
+extern int demux_xmms_open(demuxer_t* demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
@@ -850,6 +861,19 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
     demuxer = NULL;
   }
 }
+#ifdef HAVE_XMMS
+//=============== Try to open as XMMS file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_XMMS,audio_id,video_id,dvdsub_id);
+  if(demux_xmms_open(demuxer)){
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedAudiofile);
+    file_format=DEMUXER_TYPE_XMMS;
+  } else {
+    free_demuxer(demuxer);
+    demuxer = NULL;
+  }
+}
+#endif
 //=============== Try to open as a RTP stream: ===========
  if(file_format==DEMUXER_TYPE_RTP) {
    demuxer=new_demuxer(stream,DEMUXER_TYPE_RTP,audio_id,video_id,dvdsub_id);
@@ -1107,6 +1131,7 @@ extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+extern void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -1188,6 +1213,10 @@ switch(demuxer->file_format){
 #endif
  case DEMUXER_TYPE_RAWAUDIO:
       demux_rawaudio_seek(demuxer,rel_seek_secs,flags);  break;
+#ifdef HAVE_XMMS
+ case DEMUXER_TYPE_XMMS:
+      demux_xmms_seek(demuxer,rel_seek_secs,flags); break;
+#endif
 
 
 } // switch(demuxer->file_format)
@@ -1248,6 +1277,7 @@ char* demux_info_get(demuxer_t *demuxer, char *opt) {
 extern int demux_mpg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_asf_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_avi_control(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_xmms_control(demuxer_t *demuxer, int cmd, void *arg);
 
 int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
     switch(demuxer->type) {
@@ -1260,7 +1290,10 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 	case DEMUXER_TYPE_AVI_NI:
 	case DEMUXER_TYPE_AVI_NINI:
 	    return demux_avi_control(demuxer,cmd,arg);
-
+#ifdef HAVE_XMMS
+	case DEMUXER_TYPE_XMMS:
+	    return demux_xmms_control(demuxer,cmd,arg);
+#endif
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }

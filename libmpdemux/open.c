@@ -526,6 +526,7 @@ if(dvd_title){
 
        stream=new_stream(f,STREAMTYPE_FILE);
        stream->end_pos=len;
+       stream->url=filename?strdup(filename):NULL;
        return stream;
 }
 

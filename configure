@@ -175,6 +175,7 @@ Codecs:
   --enable-faad          build with FAAD2 (MP4/AAC) support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (mpeg audio) support [autodetect]
+  --enable-xmms          build with XMMS inputplugin support [disabled]
   
 Video output:
   --disable-vidix        disable VIDIX stuff [enable on x86 *nix]
@@ -268,6 +269,8 @@ Use these options if autodetection fails:
   --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
   --with-dvdnav-config=PATH  path to dvdnav-config
   --with-livelibdir=DIR    path to LIVE.COM Streaming Media libraries
+  --with-xmmsplugindir=DIR path to xmms plugins
+  --with-xmmslibdir=DIR    path to libxmms.so.1
 
 EOF
     exit 0
@@ -976,6 +979,7 @@ _mad=auto
 _vorbis=auto
 _tremor=no
 _faad=auto
+_xmms=no
 _css=auto
 _dvdnav=yes
 _dvdread=auto
@@ -1116,6 +1120,7 @@ for ac_option do
   --disable-tremor)	_tremor=no	;;
   --enable-faad)	_faad=yes	;;
   --disable-faad)	_faad=no	;;
+  --enable-xmms)	_xmms=yes	;;
   --enable-css)		_css=yes	;;
   --disable-css)	_css=no		;;
   --enable-dvdread)	_dvdread=yes	;;
@@ -1259,6 +1264,14 @@ for ac_option do
     _mlib=yes
     ;;
 
+  --with-xmmslibdir=*)
+    _xmmslibdir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+    
+  --with-xmmsplugindir=*)
+    _xmmsplugindir=`echo $ac_option | cut -d '=' -f 2`
+    ;;
+    
   --disable-profile)
     _profile=
     ;;
@@ -4346,6 +4359,33 @@ else
 fi
 echores "$_sortsub"
 
+
+echocheck "XMMS inputplugin support"
+if test "$_xmms" = yes ; then
+
+  if ( xmms-config --version ) >/dev/null 2>&1 ; then
+    if test -z "$_xmmsplugindir" ; then
+      _xmmsplugindir=`xmms-config --input-plugin-dir`
+    fi
+    if test -z "$_xmmslibdir" ; then
+      _xmmslibdir=`xmms-config --exec-prefix`/lib
+    fi
+  else
+    if test -z "$_xmmsplugindir" ; then
+      _xmmsplugindir=/usr/lib/xmms/Input
+    fi
+    if test -z "$_xmmslibdir" ; then
+      _xmmslibdir=/usr/lib
+    fi
+  fi
+
+  _def_xmms='#define HAVE_XMMS 1'
+  _xmms_lib="${_xmmslibdir}/libxmms.so.1 -export-dynamic"
+else
+  _def_xmms='#undef HAVE_XMMS'
+fi
+echores "$_xmms"
+
 # --------------- GUI specific tests begin -------------------
 echocheck "GUI"
 echo "$_gui"
@@ -4695,6 +4735,8 @@ LIBLZO_LIB= $_ld_liblzo
 MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
 FAAD_LIB = $_ld_faad
+XMMS_PLUGINS = $_xmms
+XMMS_LIB = $_xmms_lib
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -5100,6 +5142,10 @@ $_def_menu
 
 /* enables / disables subtitles sorting */
 $_def_sortsub
+
+/* XMMS input plugin support */
+$_def_xmms
+#define XMMS_INPUT_PLUGIN_DIR "$_xmmsplugindir"
 
 /* Extension defines */
 $_def_3dnow	// only define if you have 3DNOW (AMD k6-2, AMD Athlon, iDT WinChip, etc.)
