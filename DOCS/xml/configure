@@ -161,7 +161,7 @@ then
   	echo "Bailing out."
   	exit 1
       fi
-    _xsltcommand="cd \$1 && $_jade -t xml -d $_docbook_dsl $_xml_dcl \$_IN_DIR/\$3 ; mv book1.html index.html"
+    _xsltcommand="cd \$1 && $_jade -t xml -d $_docbook_dsl $_xml_dcl \$_IN_DIR/\$3"
   else
     echo "No valid XSLT processor found."
     echo "Bailing out."
