@@ -2,12 +2,13 @@
 
 #include <stdio.h>
 #include "qtxsdk/components.h"
+#include "qtxsdk/select.h"
 
-#define DEF_DISPATCHER(name) ComponentResult (*##name)(struct ComponentParameters *, void **)
+#define DEF_DISPATCHER(name) ComponentResult (*##name)(ComponentParameters *, void **)
 
 /* ilyen egy sima komponens */
 ComponentResult ComponentDummy(
-    struct ComponentParameters *params,
+    ComponentParameters *params,
     void **globals,
     DEF_DISPATCHER(ComponentDispatch))
 {
@@ -26,7 +27,8 @@ char *get_path()
 main(int argc, char *argv[])
 {
     void *handler;
-    void *dispatcher;
+    ComponentResult (*
+dispatcher)(ComponentParameters *params, void* glob);
 
     Setup_LDT_Keeper();
     
@@ -36,39 +38,36 @@ main(int argc, char *argv[])
     
     {
 	ComponentResult ret;
-	int (*dispatcher_func)(void *, void *);
-	struct ComponentParameters *params;
+	ComponentParameters *params;
 	void *globals;
-	
-	dispatcher_func = dispatcher;
 	
 	globals = malloc(sizeof(long));
 	(long)*(void **)globals = 0x2001;
 
-	params = malloc(sizeof(struct ComponentParameters));
+	params = malloc(sizeof(ComponentParameters));
 
-	params->flags = 2;
+	params->flags = 0;
 	params->paramSize = sizeof(params);
-	params->what = atoi(argv[1]);
+	params->what = kComponentVersionSelect;
+	// params->what = kComponentRegisterSelect;
+	// params->what = kComponentOpenSelect;
+	// params->what = -5; //atoi(argv[1]);
+
 	params->params[0] = 0x1984;
-	/* 0x1000100f will load QuickTime.qts */
-	/* 0x10001014 will use SendMessageA */
-	/* 0x10001019 returns 0 */
-	/* 0x1000101e will load QuickTime.qts */
-	/* 0x10001028 returns params' addr */
-	/* 0x1000102d is a dialog */
-	/* 0x10001032 returns 20001 => CDVersion */
-	/* 0x10001069 returns 8a */
-	/* 0x100010b4 probarly init ?? */
+
 	printf("params: flags: %d, paramSize: %d, what: %d\n",
 	    params->flags, params->paramSize, params->what);
 	printf("params[0] = %x\n", params->params[0]);
-	ret = dispatcher_func(params, globals);
-	printf("CDComponentDispatch(%p, %p) => %x\n",
-	    &params, globals, ret);
-	free(globals);
-	free(params);
+
+	ret = dispatcher(params, globals);
+
+	printf("!!! CDComponentDispatch() => %x\n",ret);
+
+//	printf("!!! CDComponentDispatch(%p, %p) => %x\n",
+//	    &params, globals, ret);
+//	free(globals);
+//	free(params);
     }
     
-    Restore_LDT_Keeper();
+//    Restore_LDT_Keeper();
 }
