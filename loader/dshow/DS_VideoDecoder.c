@@ -782,7 +782,7 @@ int DS_VideoDecoder_SetValue(DS_VideoDecoder *this, const char* name, int value)
 // get5=set4 19
 	// get6=set5 23
     	hidden = (IHidden*)((int)this->m_pDS_Filter->m_pFilter + 0xb8);
-	printf("DS_SetValue for DIVX, name=%s  value=%d\n",name,value);
+	//printf("DS_SetValue for DIVX, name=%s  value=%d\n",name,value);
 	if (strcasecmp(name, "Quality") == 0)
 	{
             this->m_iLastQuality = value;
