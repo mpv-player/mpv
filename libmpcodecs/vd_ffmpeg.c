@@ -396,7 +396,11 @@ static void get_buffer(struct AVCodecContext *avctx, int width, int height, int 
 
     if(init_vo(sh)<0){
         printf("init_vo failed\n");
+#if LIBAVCODEC_BUILD >= 4632
+	return -1;
+#else
         return;
+#endif
     }
 
     if(pict_type==B_TYPE)
