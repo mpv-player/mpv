@@ -315,7 +315,7 @@ Hess, Andreas <jaska@gmx.net>
 Hickey, Corey <bugfood-ml@fatooh.org>
     * telecine/interlacing HOWTO for the MEncoder documentation
 
-Hidvégi, Zoltán <mplayer@hzoli.com>
+Hidvégi, Zoltán (Zoli) <mplayer@hzoli.com>
     * filmdint video filter
 
 Hoffmann, Jens <hoffmajs@gmx.de>
@@ -630,6 +630,12 @@ Schoenbrunner, Oliver <oliver.schoenbrunner@jku.at>
     * SGI audio driver
     * MIPS support
 
+Shimon, Oded (ods15) <ods15@ods15.dyndns.org>
+    * multiple file support for MEncoder
+    * small cleanups, mostly to EDL
+    * -speed for MEncoder
+    * -edl and -hr-edl-seek for MEncoder
+
 Simon, Peter <simon.peter@linuxuser.hu>
     * TOOLS/wma2ogg.pl author
 
@@ -691,6 +697,7 @@ Tropea, Salvador Eduardo <salvador@inti.gov.ar>
 
 Vajna, Miklós (VMiklos) <mamajom@axelero.hu>
     * TOOLS/divx2svcd author
+    * TOOLS/ directory documentation
 
 Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
     * improved EDL support
