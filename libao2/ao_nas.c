@@ -108,6 +108,7 @@ struct ao_nas_data {
 	int flow_paused;
 
 	void *client_buffer;
+	void *server_buffer;
 	int client_buffer_size;
 	int client_buffer_used;
 	int server_buffer_size;
@@ -148,15 +149,29 @@ static int nas_readBuffer(struct ao_nas_data *nas_data, int num)
 	if (nas_data->client_buffer_used < num)
 		num = nas_data->client_buffer_used;
 
-	AuWriteElement(nas_data->aud, nas_data->flow, 0, num, nas_data->client_buffer, AuFalse, &as);
+	/*
+	 * It is not appropriate to call AuWriteElement() here because the
+	 * buffer is locked and delays writing to the network will cause
+	 * other threads to block waiting for buffer_mutex.  Instead the
+	 * data is copied to "server_buffer" and written it to the network
+	 * outside of the locked section of code.
+	 *
+	 * (Note: Rather than these two buffers, a single circular buffer
+	 *  could eliminate the memcpy/memmove steps.)
+	 */
+	memcpy(nas_data->server_buffer, nas_data->client_buffer, num);
+
+	nas_data->client_buffer_used -= num;
+	nas_data->server_buffer_used += num;
+	memmove(nas_data->client_buffer, nas_data->client_buffer + num, nas_data->client_buffer_used);
+	pthread_mutex_unlock(&nas_data->buffer_mutex);
+
+	/*
+	 * Now write the new buffer to the network.
+	 */
+	AuWriteElement(nas_data->aud, nas_data->flow, 0, num, nas_data->server_buffer, AuFalse, &as);
 	if (as != AuSuccess) 
 		nas_print_error(nas_data->aud, "nas_readBuffer(): AuWriteElement", as);
-	else {
-		nas_data->client_buffer_used -= num;
-		nas_data->server_buffer_used += num;
-		memmove(nas_data->client_buffer, nas_data->client_buffer + num, nas_data->client_buffer_used);
-	}
-	pthread_mutex_unlock(&nas_data->buffer_mutex);
 	
 	if (nas_data->flow_paused) {
 		AuPauseFlow(nas_data->aud, nas_data->flow, &as);
@@ -333,6 +348,7 @@ static int init(int rate,int channels,int format,int flags)
 	nas_data->client_buffer_size = NAS_BUFFER_SIZE;
 	nas_data->client_buffer = malloc(nas_data->client_buffer_size);
 	nas_data->server_buffer_size = NAS_BUFFER_SIZE;
+	nas_data->server_buffer = malloc(nas_data->server_buffer_size);
 
 	ao_data.samplerate = rate;
 	ao_data.channels = channels;
@@ -403,6 +419,7 @@ static void uninit(){
 	AuCloseServer(nas_data->aud);
 	nas_data->aud = 0;
 	free(nas_data->client_buffer);
+	free(nas_data->server_buffer);
 }
 
 // stop playing and empty buffers (for seeking/pause)
@@ -478,7 +495,12 @@ static int play(void* data,int len,int flags)
 		if (as != AuSuccess)
 			nas_print_error(nas_data->aud, "play(): AuStartFlow", as);
 		nas_data->flow_stopped = 0;
-		while (!nas_empty_event_queue(nas_data)); // wait for first buffer underrun event
+		/*
+		 * Do not continue to wait if there is nothing in the server
+		 * buffer.  (The event never happens and mplayer can freeze.)
+		 */
+		while (nas_data->server_buffer_used > 0 &&
+		       !nas_empty_event_queue(nas_data)); // wait for first buffer underrun event
 	}
 
 	pthread_mutex_lock(&nas_data->buffer_mutex);
