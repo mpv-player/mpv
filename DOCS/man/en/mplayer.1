@@ -1,5 +1,5 @@
 .\" $Revision$
-.\" MPlayer (C) 2000-2004 MPlayer Team
+.\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .
 .\" --------------------------------------------------------------------------
@@ -7076,11 +7076,11 @@ This selects the quantizer to use for P-frames.
 I- and B-frames are offset from this value by ip_factor and pb_factor, respectively.
 20\-40 is a useful range (default: 26).
 Lower values result in better fidelity, but higher bitrates.
-Note that quantization in H.264 works differently from MPEG[124].
+Note that quantization in H.264 works differently from MPEG-[124].
 H.264's quantization parameter (QP) is on a logarithmic scale.
 As an example, the bitrate difference between QP=20 and QP=40
 is about a factor of 10.
-Useful quantizers in H.264 tend to be very large compared to MPEG[124].
+Useful quantizers in H.264 tend to be very large compared to MPEG-[124].
 .
 .TP
 .B pass=<1\-3>
