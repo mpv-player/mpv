@@ -33,7 +33,7 @@ char* dvd_device=NULL;
 char* cdrom_device=NULL;
 int dvd_nav=0;
 
-#ifdef USE_DVDNAM
+#ifdef USE_DVDNAV
 #include <dvdnav.h>
 #endif
 
