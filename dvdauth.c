@@ -23,6 +23,8 @@
 char *dvd_device=NULL;
 unsigned char key_disc[2048];
 unsigned char key_title[5];
+unsigned char *dvdimportkey=NULL;
+int descrambling=0;
 
 
 #include <linux/fs.h>
@@ -58,6 +60,30 @@ static void reset_agids ( int fd )
 	}
 }
 
+
+int dvd_import_key ( unsigned char *hexkey )
+{
+	unsigned char *t=key_title;
+	int digit=4,len;
+	bzero(key_title,sizeof(key_title));
+//	printf("DVD key: %s\n",hexkey);
+	for (len=0;len<10;len++) {
+//		printf("-> %c\n",*hexkey);
+		if (!*hexkey) return 1;
+		if (*hexkey>='A'&&*hexkey<='F') *t|=(*hexkey-'A'+10)<<digit;
+			else if (*hexkey>='0'&&*hexkey<='9') *t|=(*hexkey-'0')<<digit;
+				else return 1;
+		if (digit) digit=0; else {
+			digit=4;
+			t++;
+		}
+		hexkey++;
+	}
+	if (*hexkey) return 1;
+	printf("DVD key (requested): %02X%02X%02X%02X%02X\n",key_title[0],key_title[1],key_title[2],key_title[3],key_title[4]);
+	descrambling=1;
+	return 0;
+}
 
 
 int dvd_auth ( char *dev , int fd )
@@ -99,6 +125,8 @@ int dvd_auth ( char *dev , int fd )
 	}
 
 	close(devfd);
+	printf("DVD title key is: %02X%02X%02X%02X%02X\n",key_title[0],key_title[1],key_title[2],key_title[3],key_title[4]);
+	descrambling=1;
 	return 0;
 }
 

@@ -25,6 +25,7 @@ struct config conf[]={
         {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
 #ifdef HAVE_LIBCSS
         {"dvd", &dvd_device, CONF_TYPE_STRING, 0, 0, 0},
+        {"dvdkey", &dvdimportkey, CONF_TYPE_STRING, 0, 0, 0},
 #else
         {"dvd", "DVD support was not compiled in. See file DOCS/DVD.\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},

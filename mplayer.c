@@ -613,6 +613,13 @@ if(vcd_track){
   f=open(filename,O_RDONLY);
   if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
 #ifdef HAVE_LIBCSS
+  if (dvdimportkey) {
+    if (dvd_import_key(dvdimportkey)) {
+	fprintf(stderr,"Error processing DVD KEY.\n");
+	exit(1);
+    }
+    printf("DVD command line requested key is stored for descrambling.\n");
+  }
   if (dvd_device) {
     if (dvd_auth(dvd_device,f)) exit(0);
     printf("DVD auth sequence seems to be OK.\n");

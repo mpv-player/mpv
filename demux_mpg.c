@@ -180,7 +180,10 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     if(verbose>=2) printf("DEMUX_MPG: Read %d data bytes from packet %04X\n",len,id);
 //    printf("packet start = 0x%X  \n",stream_tell(demux->stream)-packet_start_pos);
 #ifdef HAVE_LIBCSS
-    if (css) CSSDescramble(demux->stream->buffer,key_title);
+    if (css) {
+	    if (descrambling) CSSDescramble(demux->stream->buffer,key_title); else
+		    printf("Encrypted stream but authentication was not requested by you!!\n");
+    }
 #endif
     ds_read_packet(ds,demux->stream,len,pts/90000.0f,0);
     return 1;
