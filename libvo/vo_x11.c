@@ -278,7 +278,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
  if( flags&0x04 && (   format==IMGFMT_YV12 || format==IMGFMT_I420  || format==IMGFMT_IYUV 
-                    || format==IMGFMT_YUY2 || format==IMGFMT_BGR24 || format==IMGFMT_BGR32)) {
+                    || format==IMGFMT_YUY2 
+		    || format==IMGFMT_BGR15|| format==IMGFMT_BGR16 || format==IMGFMT_BGR24 || format==IMGFMT_BGR32)) {
      // software scale
      if(fullscreen){
          image_width=vo_screenwidth;
@@ -438,21 +439,23 @@ static const vo_info_t* get_info( void )
 static void Display_Image( XImage *myximage,uint8_t *ImageData )
 {
 #ifdef DISP
+  //  myximage->width is the stride and not the width if the sw scaler is used
+  int dstW= (swsContext) ? swsContext->dstW : myximage->width; 
 #ifdef HAVE_SHM
  if ( Shmem_Flag )
   {
    XShmPutImage( mDisplay,mywindow,mygc,myximage,
                  0,0,
-                 ( vo_dwidth - myximage->width ) / 2,( vo_dheight - myximage->height ) / 2,
-                 myximage->width,myximage->height,True );
+                 ( vo_dwidth - dstW ) / 2,( vo_dheight - myximage->height ) / 2,
+                 dstW,myximage->height,True );
   }
   else
 #endif
    {
     XPutImage( mDisplay,mywindow,mygc,myximage,
                0,0,
-               ( vo_dwidth - myximage->width ) / 2,( vo_dheight - myximage->height ) / 2,
-               myximage->width,myximage->height );
+               ( vo_dwidth - dstW ) / 2,( vo_dheight - myximage->height ) / 2,
+               dstW,myximage->height );
   }
 #endif
 }
@@ -475,7 +478,7 @@ if(swsContext){
     
   if(sws_flags==0) newW&= (~31); // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
   
-  if(image_width!=newW || image_height!=newH)
+  if(swsContext->dstW!=newW || image_height!=newH)
   {
     SwsContext *oldContext= swsContext;
     
@@ -483,8 +486,9 @@ if(swsContext){
     					 newW, newH, out_format);
     if(swsContext)
     {
-	image_width= newW;
+	image_width= (newW+7)&(~7);
 	image_height= newH;
+
 	freeMyXImage();
 	getMyXImage();
 	freeSwsContext(oldContext);
@@ -523,6 +527,8 @@ static uint32_t draw_frame( uint8_t *src[] ){
     {
       int stride[3]= {0,0,0};
       if     (swsContext->srcFormat==IMGFMT_YUY2)  stride[0]=swsContext->srcW*2;
+      else if(swsContext->srcFormat==IMGFMT_BGR15) stride[0]=swsContext->srcW*2;
+      else if(swsContext->srcFormat==IMGFMT_BGR16) stride[0]=swsContext->srcW*2;
       else if(swsContext->srcFormat==IMGFMT_BGR24) stride[0]=swsContext->srcW*3;
       else if(swsContext->srcFormat==IMGFMT_BGR32) stride[0]=swsContext->srcW*4;
       
@@ -593,6 +599,8 @@ static uint32_t query_format( uint32_t format )
 
  switch( format )
   {
+   case IMGFMT_BGR15:
+   case IMGFMT_BGR16:
    case IMGFMT_BGR24:
    case IMGFMT_BGR32:
    case IMGFMT_YUY2: 
