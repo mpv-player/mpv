@@ -1590,7 +1590,7 @@ if(!sh_video && !sh_audio){
 demux_info_print(demuxer);
 
 //================== Read SUBTITLES (DVD & TEXT) ==========================
-if(vo_spudec==NULL && sh_video && stream->type==STREAMTYPE_DVD){
+if(vo_spudec==NULL && sh_video && (stream->type==STREAMTYPE_DVD || demuxer->type==DEMUXER_TYPE_MATROSKA)){
 
 if (spudec_ifo) {
   unsigned int palette[16], width, height;
@@ -3176,6 +3176,35 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	    osd_show_vobsub_changed = sh_video->fps;
 	dvdsub_id = new_id;
 	d_dvdsub->id = demux_ogg_sub_id(new_id);
+    }
+#endif
+#ifdef HAVE_MATROSKA
+    if (d_dvdsub && demuxer->type == DEMUXER_TYPE_MATROSKA) {
+      int new_id = dvdsub_id + 1;
+      if (dvdsub_id < 0)
+        new_id = 0;
+      if ((unsigned int) new_id >= demux_mkv_num_subs(demuxer))
+        new_id = -1;
+      if (new_id != dvdsub_id)
+        osd_show_vobsub_changed = sh_video->fps;
+      dvdsub_id = new_id;
+      d_dvdsub->id = demux_mkv_change_subs(demuxer, new_id);
+      if (d_dvdsub->id >= 0 && ((mkv_sh_sub_t *)d_dvdsub->sh)->type == 'v') {
+        mkv_sh_sub_t *mkv_sh_sub = (mkv_sh_sub_t *)d_dvdsub->sh;
+        if (vo_spudec != NULL)
+          spudec_free(vo_spudec);
+        vo_spudec =
+          spudec_new_scaled_vobsub(mkv_sh_sub->palette, mkv_sh_sub->colors,
+                                   mkv_sh_sub->custom_colors,
+                                   mkv_sh_sub->width,
+                                   mkv_sh_sub->height);
+        if (!forced_subs_only)
+          forced_subs_only = mkv_sh_sub->forced_subs_only;
+        if (vo_spudec) {
+          spudec_set_forced_subs_only(vo_spudec, forced_subs_only);
+          inited_flags |= INITED_SPUDEC;
+        }
+      }
     }
 #endif
         break;

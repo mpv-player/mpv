@@ -1973,6 +1973,46 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
   return 0;
 }
 
+/** \brief Parse the private data for VobSub subtitle tracks.
+
+  This function tries to parse the private data for all VobSub tracks.
+  The private data contains the normal text from the original .idx file.
+  Things like the palette, subtitle dimensions and custom colors are
+  stored here.
+
+  \param demuxer The generic demuxer.
+*/
+static void
+demux_mkv_parse_vobsub_data (demuxer_t *demuxer)
+{
+  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+  mkv_track_t *track;
+  int i, m, size;
+  uint8_t *buffer;
+
+  for (i = 0; i < mkv_d->num_tracks; i++)
+    {
+      track = mkv_d->tracks[i];
+      if ((track->type != MATROSKA_TRACK_SUBTITLE) ||
+          (track->subtitle_type != MATROSKA_SUBTYPE_VOBSUB))
+        continue;
+
+      size = track->private_size;
+      m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
+      if (buffer && m)
+        {
+          free (track->private_data);
+          track->private_data = buffer;
+        }
+      if (!demux_mkv_parse_idx (track))
+        {
+          free (track->private_data);
+          track->private_data = NULL;
+          track->private_size = 0;
+        }
+    }
+}
+
 static int
 demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
 {
@@ -1980,15 +2020,7 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
     {
       if (track->subtitle_type == MATROSKA_SUBTYPE_VOBSUB)
         {
-          int m, size = track->private_size;
-          uint8_t *buffer;
-          m = demux_mkv_decode (track,track->private_data,&buffer,&size,2);
-          if (buffer && m)
-            {
-              free (track->private_data);
-              track->private_data = buffer;
-            }
-          if (demux_mkv_parse_idx (track))
+          if (track->private_data != NULL)
             {
               demuxer->sub->sh = malloc(sizeof(mkv_sh_sub_t));
               if (demuxer->sub->sh != NULL)
@@ -2206,6 +2238,7 @@ demux_mkv_open (demuxer_t *demuxer)
       demuxer->audio->id = -2;
     }
 
+  demux_mkv_parse_vobsub_data (demuxer);
   /* DO NOT automatically select a subtitle track and behave like DVD */
   /* playback: only show subtitles if the user explicitely wants them. */
   track = NULL;
@@ -3120,6 +3153,68 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
     default:
       return DEMUXER_CTRL_NOTIMPL;
     }
+}
+
+/** \brief Return the number of subtitle tracks in the file.
+
+  \param demuxer The demuxer for which the number of subtitle tracks
+  should be returned.
+*/
+int
+demux_mkv_num_subs (demuxer_t *demuxer)
+{
+  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+  int i, num;
+
+  num = 0;
+  for (i = 0; i < mkv_d->num_tracks; i++)
+    if ((mkv_d->tracks[i]->type == MATROSKA_TRACK_SUBTITLE) &&
+        (mkv_d->tracks[i]->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN))
+      num++;
+
+  return num;
+}
+
+/** \brief Change the current subtitle track and return its ID.
+
+  Changes the current subtitle track. If the new subtitle track is a
+  VobSub track then the SPU decoder will be re-initialized.
+
+  \param demuxer The demuxer whose subtitle track will be changed.
+  \param new_num The number of the new subtitle track. The number must be
+  between 0 and demux_mkv_num_subs - 1.
+
+  \returns The Matroska track number of the newly selected track.
+*/
+int
+demux_mkv_change_subs (demuxer_t *demuxer, int new_num)
+{
+  mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
+  mkv_track_t *track;
+  int i, num;
+
+  num = 0;
+  track = NULL;
+  for (i = 0; i < mkv_d->num_tracks; i++)
+    {
+      if ((mkv_d->tracks[i]->type == MATROSKA_TRACK_SUBTITLE) &&
+          (mkv_d->tracks[i]->subtitle_type != MATROSKA_SUBTYPE_UNKNOWN))
+        num++;
+      if (num == (new_num + 1))
+        {
+          track = mkv_d->tracks[i];
+          break;
+        }
+    }
+  if (track == NULL)
+    return -1;
+
+  if (demuxer->sub->sh == NULL)
+    demuxer->sub->sh = malloc(sizeof(mkv_sh_sub_t));
+  if (demuxer->sub->sh != NULL)
+    memcpy(demuxer->sub->sh, &track->sh_sub, sizeof(mkv_sh_sub_t));
+
+  return track->tnum;
 }
 
 #endif /* HAVE_MATROSKA */

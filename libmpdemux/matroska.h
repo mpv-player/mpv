@@ -7,6 +7,8 @@
 #ifndef __MATROSKA_H
 #define __MATROSKA_H
 
+#include "demuxer.h"
+
 #define MKV_A_AAC_2MAIN  "A_AAC/MPEG2/MAIN"
 #define MKV_A_AAC_2LC    "A_AAC/MPEG2/LC"
 #define MKV_A_AAC_2SBR   "A_AAC/MPEG2/LC/SBR"
@@ -60,5 +62,8 @@ typedef struct {
   unsigned int colors[4];
   int forced_subs_only;
 } mkv_sh_sub_t;
+
+int demux_mkv_num_subs(demuxer_t *);
+int demux_mkv_change_subs(demuxer_t *, int);
 
 #endif /* __MATROSKA_H */
