@@ -38,6 +38,10 @@ SHOULD	its recommanded to be done that way but its not strictly required
 			Syntax:
 
 		Type definitions:
+
+f(x)	n fixed bits in big endian order
+u(x)	unsigned number encoded in x bits in MSB first order
+
 v
 	value=0
 	do{
@@ -61,9 +65,6 @@ b (binary data or string)
 vb
 	length					v
 	value					b
-
-f(x)	n fixed bits in big endian order
-u(x)	unsigned number encoded in x bits in MSB first order
 
 
 		Bitstream syntax:
