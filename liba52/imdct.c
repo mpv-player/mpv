@@ -87,7 +87,7 @@ static float __attribute__((aligned(16))) sseW5[128];
 static float __attribute__((aligned(16))) sseW6[256];
 static float __attribute__((aligned(16))) *sseW[7]=
 	{NULL /*sseW0*/,sseW1,sseW2,sseW3,sseW4,sseW5,sseW6};
-static float __attribute__((aligned(16))) sseWindow[256];
+static float __attribute__((aligned(16))) sseWindow[512];
 #else
 static complex_t buf[128];
 #endif
@@ -515,7 +515,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	);
 	data_ptr+=128;
 	delay_ptr+=128;
-	window_ptr+=128;
+//	window_ptr+=128;
 #else
     for(i=0; i< 64; i++) { 
 	*data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
@@ -548,7 +548,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		: "%esi", "%edi"
 	);
 	data_ptr+=128;
-	window_ptr+=128;
+//	window_ptr+=128;
 #else
     for(i=0; i< 64; i++) { 
 	*data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
@@ -559,15 +559,61 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
     /* The trailing edge of the window goes into the delay line */
     delay_ptr = delay;
 
+#ifdef HAVE_SSE
+	asm volatile(
+		"xorl %%edi, %%edi			\n\t"  // 0
+		"xorl %%esi, %%esi			\n\t"  // 0
+		".balign 16				\n\t"
+		"1:					\n\t"
+		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? ? A
+		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? ? C
+		"movhps -16(%0, %%edi), %%xmm1		\n\t" // D ? ? C 
+		"movhps -8(%0, %%edi), %%xmm0		\n\t" // B ? ? A 
+		"shufps $0xCC, %%xmm1, %%xmm0		\n\t" // D C B A
+		"mulps 1024+sseWindow(%%esi), %%xmm0	\n\t"
+		"movaps %%xmm0, (%1, %%esi)		\n\t"
+		"addl $16, %%esi			\n\t"
+		"subl $16, %%edi			\n\t"
+		"cmpl $512, %%esi			\n\t" 
+		" jb 1b					\n\t"
+		:: "r" (buf+64), "r" (delay_ptr)
+		: "%esi", "%edi"
+	);
+	delay_ptr+=128;
+//	window_ptr-=128;
+#else
     for(i=0; i< 64; i++) { 
 	*delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
 	*delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
     }
+#endif
 
+#ifdef HAVE_SSE
+	asm volatile(
+		"movl $1024, %%edi			\n\t"  // 1024
+		"xorl %%esi, %%esi			\n\t"  // 0
+		".balign 16				\n\t"
+		"1:					\n\t"
+		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? A ?
+		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? C ?
+		"movhps -16(%0, %%edi), %%xmm1		\n\t" // ? D C ? 
+		"movhps -8(%0, %%edi), %%xmm0		\n\t" // ? B A ? 
+		"shufps $0x99, %%xmm1, %%xmm0		\n\t" // D C B A
+		"mulps 1536+sseWindow(%%esi), %%xmm0	\n\t"
+		"movaps %%xmm0, (%1, %%esi)		\n\t"
+		"addl $16, %%esi			\n\t"
+		"subl $16, %%edi			\n\t"
+		"cmpl $512, %%esi			\n\t" 
+		" jb 1b					\n\t"
+		:: "r" (buf), "r" (delay_ptr)
+		: "%esi", "%edi"
+	);
+#else
     for(i=0; i<64; i++) {
 	*delay_ptr++  =  buf[i].imag       * *--window_ptr; 
 	*delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
     }
+#endif
 }
 
 void
@@ -772,9 +818,16 @@ void imdct_init (uint32_t mm_accel)
 	for(i=0; i<128; i++)
 	{
 		sseWindow[2*i+0]= -imdct_window[2*i+0];
-		sseWindow[2*i+1]=  imdct_window[2*i+1];
+		sseWindow[2*i+1]=  imdct_window[2*i+1];	
 	}
-
+	
+	for(i=0; i<64; i++)
+	{
+		sseWindow[256 + 2*i+0]= -imdct_window[254 - 2*i+1];
+		sseWindow[256 + 2*i+1]=  imdct_window[254 - 2*i+0];
+		sseWindow[384 + 2*i+0]=  imdct_window[126 - 2*i+1];
+		sseWindow[384 + 2*i+1]= -imdct_window[126 - 2*i+0];
+	}
 #endif
 	
 	imdct_512 = imdct_do_512;
