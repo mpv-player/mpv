@@ -70,6 +70,7 @@ static int lavc_param_error_concealment=3;
 static int lavc_param_gray=0;
 static int lavc_param_vstats=0;
 static int lavc_param_idct_algo=0;
+static int lavc_param_debug=0;
 
 struct config lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 99, NULL},
@@ -78,6 +79,9 @@ struct config lavc_decode_opts_conf[]={
 	{"idct", &lavc_param_idct_algo, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
 	{"ec", &lavc_param_error_concealment, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
 	{"vstats", &lavc_param_vstats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#if LIBAVCODEC_BUILD >= 4642
+	{"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -164,7 +168,9 @@ static int init(sh_video_t *sh){
     avctx->fourcc= sh->format;
     avctx->idct_algo= lavc_param_idct_algo;
     avctx->error_concealment= lavc_param_error_concealment;
-    
+#if LIBAVCODEC_BUILD >= 4642
+    avctx->debug= lavc_param_debug;
+#endif    
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     /* AVRn stores huffman table in AVI header */
     /* Pegasus MJPEG stores it also in AVI header, but it uses the common

@@ -93,6 +93,7 @@ static int lavc_param_normalize_aqp= 0;
 static int lavc_param_interlaced_dct= 0;
 static int lavc_param_prediction_method= FF_PRED_LEFT;
 static char *lavc_param_format="YV12";
+static int lavc_param_debug= 0;
 
 #include "cfgparser.h"
 
@@ -148,6 +149,9 @@ struct config lavcopts_conf[]={
         {"idct", &lavc_param_idct, CONF_TYPE_INT, CONF_RANGE, 0, 20, NULL},
         {"pred", &lavc_param_prediction_method, CONF_TYPE_INT, CONF_RANGE, 0, 20, NULL},
         {"format", &lavc_param_format, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#if LIBAVCODEC_BUILD >= 4642
+        {"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 100000000, NULL},
+#endif 
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -214,6 +218,9 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->rc_buffer_size= lavc_param_rc_buffer_size*1000;
     lavc_venc_context->rc_buffer_aggressivity= lavc_param_rc_buffer_aggressivity;
     lavc_venc_context->rc_initial_cplx= lavc_param_rc_initial_cplx;
+#if LIBAVCODEC_BUILD >= 4642
+    lavc_venc_context->debug= lavc_param_debug;
+#endif    
 
     p= lavc_param_rc_override_string;
     for(i=0; p; i++){
