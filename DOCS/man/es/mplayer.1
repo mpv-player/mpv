@@ -1,4 +1,4 @@
-.\" synced with 1.455
+.\" synced with 1.460
 .\" MPlayer (C) 2000-2003 Arpad Gereoffy
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
 .\" y traducida al español por Juan Martín López <nauj27@teleline.es>
@@ -268,8 +268,8 @@ de reproducción asx)
 pausa la película (cualquier tecla para salir del modo pausa)
 .IPs "q / ESC"
 detiene la película y sale
-.IPs "+ y \-"
-ajusta el retardo de audio por +/\:\- 0.1 segundos
+.IPs "+ y -"
+ajusta el retardo de audio por +/\:- 0.1 segundos
 .IPs "/ y *"
 decrementa/\:incrementa el volumen
 .IPs "9 and 0"
@@ -293,7 +293,7 @@ cambia la visibilidad de "subtítulos forzados"
 .IPs a\ \ \ \ 
 cambia la alineación de los subtítulos: arriba/enmedio/abajo
 .IPs "z y x"
-ajusta el retardo de subtítulos por +/\:\- 0.1 segundos
+ajusta el retardo de subtítulos por +/\:- 0.1 segundos
 .IPs "r y t"
 ajusta la posición de los subtítulos
 .IPs i\ \ \ \ 
@@ -391,7 +391,7 @@ Solo soportado por los controladores de salida de video xmga, xvidix y xover.
 Habilita acciones de edición de lista de decisión (EDL)  durante la reproducción.
 El video puede ser saltado y el audio silenciado y activado de acuerdo a unas
 entradas dadas en el archivo.
-Vea DOCS/documentation.html#edl para detalles sobre como usar esta característica.
+Vea DOCS/HTML/es/edl.html para detalles sobre como usar esta característica.
 .TP
 .B \-edlout <nombredearchivo>
 Crea un nuevo archivo y escribe lista de decisión de edición (EDL) al mismo.
@@ -399,7 +399,7 @@ Durante la reproducción, cuando el usuario pulse 'i', una entrada para saltar
 los últimos dos segundos de reproducción será escrita al archivo.
 Esto proporciona un punto de partida para que el usuario pueda ajustar de 
 manera fina las entradas de EDL después.
-Vea DOCS/documentation.html#edl para detalles.
+Vea DOCS/HTML/es/edl.html para detalles.
 .TP
 .B \-enqueue (solo GUI)
 Encola los archivos dados en la línea de comandos en la lista de reproducción
@@ -1014,9 +1014,9 @@ de una.
 .IPs [volume|bass|treble|balance]=<0\-100>
 Estas opciones establecen los parámetros del mezclador en la tarjeta
 de captura de vídeo. No tiene efecto si la tarjeta no tiene mezclador.
-Para v4l1, 0-65535 es un rango válido. Para v4l2, el rango válido es
-0 a 100, y 50 mapean el valor por defecto de control, como es reportado
-por el controlador.
+Para v4l1, 0-65535 es un rango válido.
+Para v4l2, el rango válido es 0 a 100, y 50 mapean el valor por defecto
+de control, como es reportado por el controlador.
 .IPs immediatemode=<bool>
 Un valor de 0 significa captura y buffer de audio y video juntos (por
 defecto para MEncoder).
@@ -1647,7 +1647,8 @@ Pruebe esta opción si continúa teniendo problemas en pantalla completa.
 .TP
 .B \-fstype <tipo1,tipo2,...>
 Especifica una lista de prioridad de los modos de capa de pantalla completa
-para ser usados. Los tipos disponibles son:
+para ser usados.
+Los tipos disponibles son:
 
 .PD 0
 .RSs
@@ -1663,14 +1664,14 @@ Usa _WIN_LAYER con la capa por defecto
 Usa _WIN_LAYER con el número de capa indicado
 .IPs "netwm"
 Fuerza estilo NETWM
-.IPs "none"
+.IPs "none\ "
 No establece una capa de ventana de pantalla completa
 .IPs "stays_on_top"
 Usa _NETWM_STATE_STAYS_ON_TOP si está disponible
 .RE
 .PD 1
 
-Es posible negar los modos usando un "\-" como prefijo
+Puede negar los modos usando un "\-" como prefijo.
 .br
 El orden por defecto es "layer,stays_on_top,above,fullscreen".
 Se usará por defecto en caso de especificar modos incorrectos o no
@@ -1723,29 +1724,6 @@ el plugin MPlayer por ejemplo).
 Ajusta hue de la señal de video (por defecto: 0).
 Puede obtener negativos coloreados de la imagen con esta opción.
 .TP
-.B \-icelayer <0\-15> (icewm solamente)
-Establece la capa de la ventana de pantalla completa de MPlayer para icewm.
-
-.PD 0
-.RSs
-.IPs 0
-Escritorio
-.IPs 2
-Debajo
-.IPs 4
-Normal
-.IPs 6
-Encima
-.IPs 8
-Acoplado
-.IPs 10
-Por encima de acoplado
-.IPs 12
-Menú (por defecto)
-.RE
-.PD 1
-.
-.TP
 .B \-jpeg <opción1:opción2:...> (\-vo jpeg solamente)
 Especifica las opciones para la salida JPEG.
 .br
@@ -1770,7 +1748,8 @@ Directorio donde se salvarán los archivos JPEG
 .
 .TP
 .B \-monitor_dotclock <rango\ dotclock\ (o\ pixelclock)> (fbdev y vesa solamente)
-Consulte en etc/\:example.conf para más información y en DOCS/\:video.html.
+Consulte en etc/\:example.conf para más información y en
+DOCS/\:HTML/\:es/\:devices.html#video-dev.
 .TP
 .B \-monitor_hfreq <rango frecuencia horizontal> (fbdev y vesa solamente)
 .TP
@@ -2001,7 +1980,7 @@ silencia el sonido completamente y +40dB es igual a una ganancia de 1000).
 sc: activa recortado por software.
 .REss
 .IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
-Mezcla canales arbitrariamente, vea DOCS/sound.html para detalles.
+Mezcla canales arbitrariamente, vea DOCS/HTML/es/devices.html#audio-dev para detalles.
 .RSss
 n: número de canales de salida (1\-6).
 .br
@@ -2374,7 +2353,8 @@ Puede ser usado para forzar escalado con \-vf scale.
 
 .SH "FILTROS DE VIDEO"
 Los filtros de video son plugins que permiten modificar el flujo de video
-y sus propiedades. La sintaxis es:
+y sus propiedades.
+La sintaxis es:
 .TP
 .B \-vf <filtro1[=opciones],filtro2,...>
 Configura una cadena de filtros de video
@@ -4244,19 +4224,22 @@ Nota: La documentación de nuvrec contiene algunos avisos y ejemplos acerca de
 la configuración a usar en la mayoría de las codificaciones de TV.
 .TP
 .B c=<0\-20>
-umbral de crominancia
+Umbral de crominancia
 .TP
 .B l=<0\-20>
-umbral de luminancia
+Umbral de luminancia
 .TP
 .B nolzo \ 
-desactiva la compresión lzo
+Desactiva la compresión lzo
 .TP
 .B q=<3\-255>
-establece el nivel de calidad
+Establece el nivel de calidad
 .TP
 .B raw \ \ \ 
-desactiva la codificación rtjpeg
+Desactiva la codificación rtjpeg
+.TP
+.B rtjpeg\ 
+Activa codificación rtjpeg.
 
 .SS xvidenc (\-xvidencopts)
 
@@ -4314,7 +4297,7 @@ decide qué usar si cuantizadores MPEG o H.263 en una base marco-a-marco.
 .B greyscale
 codifica en blanco y negro (por defecto=desactivado)
 .TP
-.B debug
+.B debug\ \ 
 guarda estadísticas por-marco en xvid.dbg (por defecto=desactivado)
 .br
 esto *no* es el archivo de control de 2pasadas
