@@ -73,8 +73,11 @@ struct video_capability vc;
 #define MJPEG_SIZE	1024*256
 
 //should be command line options
-int norm = VIDEO_MODE_AUTO; 
-char *device = "/dev/video";
+int norm = VIDEO_MODE_AUTO;
+#ifndef VO_ZR_DEFAULT_DEVICE
+#define VO_ZR_DEFAULT_DEVICE "/dev/video"
+#endif
+char *device = NULL;
 
 
 #ifdef ZR_USES_LIBJPEG
@@ -207,12 +210,13 @@ int init_codec() {
 
 
 int zoran_getcap() {
-	vdes = open(device, O_RDWR);
+	char* dev = device ? device : VO_ZR_DEFAULT_DEVICE;
+	vdes = open(dev, O_RDWR);
 	/* before we can ask for the maximum resolution, we must set 
 	 * the correct tv norm */
 
 	if (ioctl(vdes, BUZIOC_G_PARAMS, &zp) < 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "device at %s is probably not a DC10(+)/buz/lml33\n", device);
+		mp_msg(MSGT_VO, MSGL_ERR, "device at %s is probably not a DC10(+)/buz/lml33\n", dev);
 		return 1;
 	}
 	
@@ -234,7 +238,7 @@ int zoran_getcap() {
 	
 	if (vdes < 0) {
 		mp_msg(MSGT_VO, MSGL_ERR, "error opening %s\n", 
-				device);
+				dev);
 		return 1;
 	}
 
@@ -640,4 +644,25 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 		
     }
     return ERR_NOT_AN_OPTION;
+}
+
+void vo_zr_revertoption(config_t* opt,char* param) {
+
+  if (!strcasecmp(param, "zrdev")) {
+    if(device)
+      free(device);
+    device=NULL;
+  } else if (!strcasecmp(param, "zrfi"))
+    forceinter=0;
+  else if (!strcasecmp(param, "zrcrop"))
+    g.set = g.xoff = g.yoff = 0;
+  else if (!strcasecmp(param, "zrvdec"))
+    vdec = 1;
+  else if (!strcasecmp(param, "zrquality"))
+    quality = 70;
+  else if (!strcasecmp(param, "zrdct"))
+    jpegdct = JDCT_IFAST;
+  else if (!strcasecmp(param, "zrnorm"))
+    norm = VIDEO_MODE_AUTO;
+
 }
