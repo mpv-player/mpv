@@ -29,6 +29,10 @@ o MPlayer and LIRC
  FRWND  - 60 secs back
  FWD    - skip 10 secs
  FFWD   - skip 60 secs
+ INCVOL - increase volume one percent
+ DECVOL - decrease volmue one percent
+ MASTER - use master mixer channel
+ PCM    - use pcm mixer channel
 
  Don't forget to enable the repeat flag for RWND/FWD in .lircrc. Here's an
  excerpt from my .lircrc:
