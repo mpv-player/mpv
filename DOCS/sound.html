@@ -189,38 +189,69 @@
 <P>would set the output frequency of the resample filter to 11025Hz and downmix
   the audio to 1 channel using the pan filter.</P>
 
-<P>Most filters respond to the <CODE>-v</CODE> switch, which makes the filters
-  print out status messages.</P>
-
 <P>The overall execution of the filter layer is controlled using the
   <CODE>-af-adv</CODE> switch. This switch has two suboptions:</P>
 
 <DL>
   <DT><CODE>force</CODE><DT>
-  <DD>is an integer between 0 and 3 that controls how the filters are inserted
-    and what speed/accuracy optimizations they use:
+  <DD>is a Bit field that controls how the filters are inserted and what
+    speed/accuracy optimizations they use:
     <DL>
-      <DT>0</DT>
+      <DT><CODE>0</CODE></DT>
       <DD>Use automatic insertion of filters and optimize according to CPU
         speed.</DD>
-      <DT>1</DT>
-      <DD>Use automatic insertion of filters and optimize for the highest speed.
-        If this option is set the processing of the audio data will be done
-        using fix point arithmetics. Warning: Some features in the audio filters
-        will silently fail, and the sound quality may drop.</DD>
-      <DT>2</DT>
-      <DD>Use automatic insertion of filters and optimize for quality. If this
-        option is set the processing of the audio data will be done using
-        floating point instructions and is therefore quite CPU intensive, but
-        gives a lot higher sound quality than fix point processing.</DD>
-      <DT>3</DT>
-      <DD>Use no automatic insertion of filters and no optimization. Warning: It
-        may be possible to crash MPlayer using this setting.</DD>
+      <DT><CODE>1</CODE></DT>
+      <DD>Use automatic insertion of filters and optimize for the highest
+        speed.<BR>
+        <EM>Warning:</EM> Some features in the audio filters may silently fail,
+        and the sound quality may drop.</DD>
+      <DT><CODE>2</CODE></DT>
+      <DD>Use automatic insertion of filters and optimize for quality.</DD>
+      <DT><CODE>3</CODE></DT>
+      <DD>Use no automatic insertion of filters and no optimization.<BR>
+        <I>Warning:</I> It may be possible to crash MPlayer using this
+        setting.</DD>
+      <DT><CODE>4</CODE></DT>
+      <DD>Use automatic insertion of filters according to 0 above, but use
+        floating point processing when possible.</DD>
+      <DT><CODE>5</CODE></DT>
+      <DD>Use automatic insertion of filters according to 1 above, but use
+        floating point processing when possible.</DD>
+      <DT><CODE>6</CODE></DT>
+      <DD>Use automatic insertion of filters according to 2 above, but use
+        floating point processing when possible.</DD>
+      <DT><CODE>7</CODE></DT>
+      <DD>Use no automatic insertion of filters according to 3 above, and use
+        floating point processing when possible.</DD>
     </DL>
   </DD>
-  
+
   <DT><CODE>list</CODE></DT>
   <DD>is an alias for the -af switch.</DD>
+</DL>
+
+<P>The filter layer is also affected by the following generic switches:
+
+<DL>
+  <DT><CODE>-v</CODE></DT>
+  <DD>Increases the verbosity level and makes most filters print out extra
+    status messages.</DD>
+  <DT><CODE>-channels</CODE></DT>
+  <DD>This option sets the number of output channels your sound card is using.
+    It also affects the number of channels that are being decoded from the
+    media. If the media contains less channels than requested the channels
+    filter (see below) will automatically be inserted. The routing will be the
+    default routing for the channels filter.</DD>
+  <DT><CODE>-srate</CODE></DT>
+  <DD>This option selects the sample rate of your sound card. If the sample
+    frequency of your sound card is different from that of the current media,
+    the resample filter (see below) will be inserted into the audio filter layer
+    to compensate for the difference.</DD>
+  <DT><CODE>-format</CODE><DT>
+  <DD>This option sets the sample format of the audio filter layer and the sound
+    card. If the requested sample format of your sound card is different from
+    that of the current media, a format filter (see below) will be inserted to
+    rectify the difference.</DD>
 </DL>
 
 
@@ -233,7 +264,7 @@
   has three switches:</P>
 
 <DL>
-  <DT><CODE>srate</CODE></DT>
+  <DT><CODE>srate &lt;8-192&gt;</CODE></DT>
   <DD>is an integer used for setting the output sample
     frequency in Hz. The valid range for this parameter is 8kHz to 192kHz. If
     the input and output sample frequency are the same or if this parameter is
@@ -244,12 +275,19 @@
   <DT><CODE>sloppy</CODE></DT>
   <DD>is an optional binary parameter that allows the output frequency to differ
     slightly from the frequency given by <CODE>srate</CODE>. This switch can be
-    used if the startup of the playback is extremely slow.</DD>
+    used if the startup of the playback is extremely slow. It is enabled by
+    default.</DD>
 
-  <DT><CODE>fast</CODE><DT>
-  <DD>is an optional binary parameter that enables linear interpolation as
-    resampling method. Linear interpolation is extremely fast, but suffers from
-    poor sound quality especially when used for up-sampling.</DD>
+  <DT><CODE>type &lt;0-2&gt;</CODE><DT>
+  <DD>is an optional integer between <CODE>0</CODE> and <CODE>2</CODE> that
+    selects which resampling method to use. Here <CODE>0</CODE> represents
+    linear interpolation as resampling method, <CODE>1</CODE> represents
+    resampling using a poly-phase filter-bank and integer processing and
+    <CODE>2</CODE> represents resampling using a poly-phase filter-bank and
+    floating point processing. Linear interpolation is extremely fast, but
+    suffers from poor sound quality especially when used for up-sampling. The
+    best quality is given by <CODE>2</CODE> but this method also suffers from
+    the highest CPU load.</DD>
 </DL>
 
 <P>Example:<BR>
@@ -268,19 +306,19 @@
   itself if not needed. The number of switches is dynamic:</P>
 
 <DL>
-  <DT><CODE>nch</CODE></DT>
-  <DD>is an integer between 1 and 6 that is used for setting the number of
-    output channels. This switch is required, leaving it empty results in a
-    runtime error.</DD>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>is an integer between <CODE>1</CODE> and <CODE>6</CODE> that is used for
+    setting the number of output channels. This switch is required, leaving it
+    empty results in a runtime error.</DD>
 
-  <DT><CODE>nr</CODE></DT>
-  <DD>is an integer between 1 and 6 that is used for specifying the number of
-    routes. This parameter is optional. If it is omitted the default routing is
-    used.</DD>
+  <DT><CODE>nr &lt;1-6&gt;</CODE></DT>
+  <DD>is an integer between <CODE>1</CODE> and <CODE>6</CODE> that is used for
+    specifying the number of routes. This parameter is optional. If it is
+    omitted the default routing is used.</DD>
 
   <DT><CODE>from1:to1:from2:to2:from3:to3...</CODE></DT>
-  <DD>are pairs of numbers between 0 and 5 that define where each channel should
-    be routed.</DD>
+  <DD>are pairs of numbers between <CODE>0</CODE> and <CODE>5</CODE> that define
+    where each channel should be routed.</DD>
 </DL>
 
 <P>If only <CODE>nch</CODE> is given the default routing is used, it works as
@@ -311,11 +349,12 @@
   needed by the sound card or another filter.</P>
 
 <DL>
-  <DT><CODE>bps</CODE></DT>
-  <DD>can be 1, 2 or 4 and denotes the number of bytes per sample. This switch
-    is required, leaving it empty results in a runtime error.</DD>
+  <DT><CODE>bps &lt;number&gt;</CODE></DT>
+  <DD>can be <CODE>1</CODE>, <CODE>2</CODE> or <CODE>4</CODE> and denotes the
+    number of bytes per sample. This switch is required, leaving it empty
+    results in a runtime error.</DD>
 
-  <DT><CODE>f</CODE></DT>
+  <DT><CODE>f &lt;format&gt;</CODE></DT>
   <DD>is a text string describing the sample format. The string is a
     concatenated mix of: <CODE>alaw</CODE>, <CODE>mulaw</CODE> or
     <CODE>imaadpcm</CODE>, <CODE>float</CODE> or <CODE>int</CODE>,
@@ -377,9 +416,9 @@
   background is gone. This filter has two switches:</P>
 
 <DL>
-  <DT><CODE>v</CODE></DT>
-  <DD>is a floating point number between -200 and +60 which represents the
-    volume level in dB. The default level is -10dB.</DD>
+  <DT><CODE>v &lt;-200 - +60&gt;</CODE></DT>
+  <DD>is a floating point number between <CODE>-200</CODE> and <CODE>+60</CODE>
+    which represents the volume level in dB. The default level is -10dB.</DD>
 
   <DT><CODE>c</CODE></DT>
   <DD>is a binary control that turns soft clipping on and off. Soft-clipping can
@@ -402,7 +441,7 @@
 
 <H5><A NAME="af_equalizer">2.3.2.3.6 Equalizer</A></H5>
 
-<P> This filter is a 10 octave band graphic equalizer, implemented using 10 IIR
+<P>This filter is a 10 octave band graphic equalizer, implemented using 10 IIR
   band pass filters. This means that it works regardless of what type of audio
   is being played back. The center frequencies for the 10 bands are:</P>
 
@@ -427,12 +466,12 @@
   that band. This problem can be worked around by up-sampling the sound using
   the resample filter before it reaches this filter. </P>
 
-<P> This filter has 10 parameters:</P>
+<P>This filter has 10 parameters:</P>
 
 <DL>
   <DT><CODE>g1:g2:g3...g10</CODE></DT>
-  <DD>are floating point numbers between -12 to +12dB representing the gain in
-    dB for each frequency band.</DD>
+  <DD>are floating point numbers between <CODE>-12<CODE> and <CODE>+12</CODE>
+    representing the gain in dB for each frequency band.</DD>
 </DL>
 
 <P>Example:<BR>
@@ -457,14 +496,15 @@
   the number of output channels:</P>
 
 <DL>
-  <DT><CODE>nch</CODE></DT>
-  <DD>is an integer between 1 and 6 and is used for setting the number of output
-    channels. This switch is required, leaving it empty results in a runtime
-    error.</DD>
+  <DT><CODE>nch &lt;1-6&gt;</CODE></DT>
+  <DD>is an integer between <CODE>1</CODE> and <CODE>6</CODE> and is used for
+    setting the number of output channels. This switch is required, leaving it
+    empty results in a runtime error.</DD>
 
   <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
-  <DD>are floating point values between 0 and 1. <CODE>l[i][j]</CODE> determines
-    how much of input channel j is mixed into output channel i.</DD>
+  <DD>are floating point values between <CODE>0</CODE> and <CODE>1</CODE>.
+    <CODE>l[i][j]</CODE> determines how much of input channel j is mixed into
+    output channel i.</DD>
 </DL>
 
 <P>Example 1:<BR>
@@ -478,6 +518,65 @@
 <P>would give 3 channel output leaving channels 0 and 1 intact, and mix channels
   0 and 1 into output channel 2 (which could be sent to a sub-woofer for
   example).</P>
+
+
+<H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
+
+<P>This filter adds a sub woofer channel to the audio stream. The audio data
+  used for creating the sub-woofer channel is an average of the sound in channel
+  0 and channel 1. The resulting sound is then low-pass filtered by a a 4th
+  order Butterworth filter with a default cutoff frequency of 60Hz and added to
+  a separate channel in the audio stream. Warning: Disable this filter when you
+  are playing DVDs with Dolby Digital 5.1 sound, otherwise this filter will
+  disrupt the sound to the sub-woofer. This filter has two parameters:</P>
+
+<DL>
+  <DT><CODE>fc &lt;20-300&gt;</CODE></DT>
+  <DD>is an optional floating point number used for setting the cutoff frequency
+    for the filter in Hz. The valid range is 20Hz to 300Hz. For the best result
+    try setting the cutoff frequency as low as possible. This will improve the
+    stereo or surround sound experience. The default cutoff frequency is
+    60Hz.</DD>
+
+  <DT><CODE>ch &lt;0-5&gt;</CODE></DT>
+  <DD>is an optional integer between <CODE>0</CODE> and <CODE>5</CODE> which
+    determines the channel number in which to insert the sub-channel audio.
+    The default is channel number <CODE>5</CODE>. Observe that the number of
+    channels will automatically be increased to <CODE>ch</CODE> if
+    necessary.</DD>
+</DL>
+
+<P>Example:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af sub=100:4 -channels 5 media.avi</CODE></P>
+
+<P>would add a sub-woofer channel with a cutoff frequency of 100Hz to output
+  channel 4.</P>
+
+<H5><A NAME="af_surround">2.3.2.3.9 Surround-sound decoder</A></H5>
+
+<P>This filter is a decoder for matrix encoded surround sound. Dolby Surround is
+  an example of a matrix encoded format. Many files with 2 channel audio
+  actually contain matrixed surround sound. To use this feature you need a sound
+  card supporting at least 4 channels. This filter has one parameter:</P>
+
+<DL>
+  <DT><CODE>d &lt;0-1000&gt;</CODE></DT>
+  <DD>is an optional floating point number between <CODE>0</CODE> and
+    <CODE>1000</CODE> used for setting the delay time in ms for the rear
+    speakers. This delay should be set as follows: if d1 is the distance from
+    the listening position to the front speakers and d2 is the distance from
+    the listening position to the rear speakers, then the delay <CODE>d</CODE>
+    should be set to 15ms if d1 &lt;= d2 and to 15 + 5*(d1-d2) if d1 &gt; d2.
+    The default value for <CODE>d</CODE> is 20ms.</DD>
+</DL>
+
+<P>Example:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af surround=15 -channels 4 media.avi</CODE></P>
+
+<P>would add a surround sound decoding with 15ms delay for the sound to the rear
+  speakers.</P>
+
+
 
 
 <H2><STRONG>Note: Audio plugins have been deprecated by audio filters and will be

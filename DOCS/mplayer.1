@@ -1010,7 +1010,7 @@ Activate a comma separated list of audio filters and their options.
 Available filters are:
 .
 .RSs
-.IPs resample[=srate[:sloppy][:fast]]
+.IPs resample[=srate[:sloppy][:type]]
 Changes the sample rate of the audio stream to an integer srate (Hz).
 It only supports the 16 bit little endian format.
 .IPs channels[=nch]
@@ -1034,7 +1034,7 @@ unsigned or signed
 .br
 le or be (little or big endian)
 .br
-.IPs "volume[=v:sc:pr:en]"
+.IPs "volume[=v:sc]"
 Select the output volume level.
 This filter is not reentrant and can therefore only be enabled once for every
 audio stream.
@@ -1045,15 +1045,25 @@ completely and +40dB equals a gain of 1000).
 The default gain is -20dB.
 .br
 sc: enable soft clipping.
+.REss
+.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
+Mixes channels arbitrarily, see DOCS/sound.html for details.
+.RSss
+n: number of output channels (1 - 6).
 .br
-pr: enable probing of the volume level for each audio stream.
-Both the maximum and instantaneous volume is probed.
-The instantaneous volume can only be accessed through the runtime interface,
-but the maximum volume is printed at the end of the movie.
-This value can be used when transcoding movies to maximize the utilization
-of the dynamic range.
+lij: how much of input channel j is mixed into output channel i.
+.REss
+.IPs "sub[=fc:ch]"
+Add sub-woofer channel.
+.RSss
+fc: Cutoff frequency for low-pass filter (20Hz to 300Hz) default is 60Hz.
 .br
-en: enable and disable the volume control.
+ch: channel number for the sub-channel.
+.REss
+.IPs "surround[=d]"
+Decoder for matrix encoded surround sound, works on many 2 channel files.
+.RSss
+d: delay time in ms for the rear speakers (0ms to 1000ms) default is 15ms.
 .REss
 .IPs delay[=ch1:ch2:...]
 Delays the sound output.
