@@ -51,7 +51,7 @@ void mplayer_put_key(int code){
            tv.tv_usec = 0;
 
            //retval = select(keyb_fifo_put+1, &rfds, NULL, NULL, &tv);
-           if(select(keyb_fifo_put+1, NULL, &rfds, NULL, &tv)){
+           if(select(keyb_fifo_put+1, NULL, &rfds, NULL, &tv)>0){
              write(keyb_fifo_put,&code,4);
 //             printf("*** key event %d sent ***\n",code);
            } else {
@@ -71,7 +71,7 @@ int mplayer_get_key(){
            tv.tv_usec = 0;
 
            //retval = select(keyb_fifo_put+1, &rfds, NULL, NULL, &tv);
-           if(select(keyb_fifo_put+1, &rfds, NULL, NULL, &tv)){
+           if(select(keyb_fifo_put+1, &rfds, NULL, NULL, &tv)>0){
              read(keyb_fifo_get,&code,4);
 //             printf("*** key event %d read ***\n",code);
            }

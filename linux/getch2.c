@@ -130,7 +130,7 @@ int getch2(int time){
     /* Wait up to 'time' microseconds. */
     tv.tv_sec=time/1000; tv.tv_usec = (time%1000)*1000;
     retval=select(1, &rfds, NULL, NULL, &tv);
-    if(!retval) return -1;
+    if(retval<=0) return -1;
     /* Data is available now. */
     retval=read(0,&getch2_buf[getch2_len],BUF_LEN-getch2_len);
     if(retval<1) return -1;
