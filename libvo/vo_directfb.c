@@ -321,7 +321,7 @@ static uint32_t preinit(const char *arg)
 //    printf("No YUY2 %i\n",no_yuy2);
 //  }
   preinit_done=1;
-  return 1;
+  return 0;
 
 }
 
@@ -357,7 +357,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	}
 
 
-        if (!preinit(NULL)) return 1;
+//        if (!preinit(NULL)) return 1;
 
 
   if (vm) {
@@ -598,7 +598,7 @@ static uint32_t query_format(uint32_t format)
 {
 	int ret = 0x4; /* osd/sub is supported on every bpp */
 
-        preinit(NULL);
+//        preinit(NULL);
 
 //        printf("Format query: %s\n",vo_format_name(format));
 	switch (format) {
