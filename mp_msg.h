@@ -41,6 +41,7 @@ extern int verbose; // defined in mplayer.c
 #define MSGT_SEEK 14	// seeking code
 #define MSGT_WIN32 15	// win32 dll stuff
 #define MSGT_OPEN 16	// open.c (stream opening)
+#define MSGT_DVD 17	// open.c (DVD init/read/seek)
 
 #define MSGT_MAX 64
 
