@@ -457,13 +457,32 @@ static virt_alloc* vm=0;
 LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protection)
 {
     void* answer;
-    int fd=open("/dev/zero", O_RDWR);
+    int fd;
+    long pgsz;
+
+    //printf("VirtualAlloc(0x%08X, %u, 0x%08X, 0x%08X)\n", (unsigned)address, size, type, protection);
+
+    if ((type&(MEM_RESERVE|MEM_COMMIT)) == 0) return NULL;
+
+    fd=open("/dev/zero", O_RDWR);
     if(fd<0){
         perror( "Cannot open /dev/zero for READ+WRITE. Check permissions! error: " );
 	return NULL;
     }
-    size=(size+0xffff)&(~0xffff);
-    //printf("VirtualAlloc(0x%08X, %d)\n", address, size);
+
+    if (type&MEM_RESERVE && (unsigned)address&0xffff) {
+	size += (unsigned)address&0xffff;
+	(unsigned)address &= ~0xffff;
+    }
+    pgsz = sysconf(_SC_PAGESIZE);
+    if (type&MEM_COMMIT && (unsigned)address%pgsz) {
+	size += (unsigned)address%pgsz;
+	address -= (unsigned)address%pgsz;
+    }
+
+    if (type&MEM_RESERVE && size<0x10000) size = 0x10000;
+    if (size%pgsz) size += pgsz - size%pgsz;
+
     if(address!=0)
     {
     //check whether we can allow to allocate this
@@ -475,7 +494,7 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 		str=str->prev;
 		continue;
 	    }
-	    if((unsigned)address+size<(unsigned)str->address)
+	    if((unsigned)address+size<=(unsigned)str->address)
 	    {
 		str=str->prev;
 		continue;
@@ -483,29 +502,40 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 	    if(str->state==0)
 	    {
 #warning FIXME
-		if(((unsigned)address+size<(unsigned)str->address+str->mapping_size) && (type & MEM_COMMIT))
+		if(   ((unsigned)address >= (unsigned)str->address)
+		   && ((unsigned)address+size<=(unsigned)str->address+str->mapping_size)
+		   && (type & MEM_COMMIT))
 		{
 		    close(fd);
 		    return address; //returning previously reserved memory
 		}
-		return NULL;
+		//printf(" VirtualAlloc(...) does not commit or not entirely within reserved, and\n");
 	    }
+	    /*printf(" VirtualAlloc(...) (0x%08X, %u) overlaps with (0x%08X, %u, state=%d)\n",
+	           (unsigned)address, size, (unsigned)str->address, str->mapping_size, str->state);*/
 	    close(fd);
 	    return NULL;
 	}
-	answer=mmap(address, size, PROT_READ | PROT_WRITE | PROT_EXEC,
-		    MAP_FIXED | MAP_PRIVATE, fd, 0);
     }
-    else
-	answer=mmap(address, size, PROT_READ | PROT_WRITE | PROT_EXEC,
-		    MAP_PRIVATE, fd, 0);
+
+    answer=mmap(address, size, PROT_READ | PROT_WRITE | PROT_EXEC,
+		MAP_PRIVATE, fd, 0);
 //    answer=FILE_dommap(-1, address, 0, size, 0, 0,
 //	PROT_READ | PROT_WRITE | PROT_EXEC, MAP_PRIVATE);
     close(fd);
+    if (answer != (void *)-1 && address && answer != address) {
+	/* It is dangerous to try mmap() with MAP_FIXED since it does not
+	   always detect conflicts or non-allocation and chaos ensues after
+	   a successful call but an overlapping or non-allocated region.  */
+	munmap(answer, size);
+	answer = (void *) -1;
+	errno = EINVAL;
+	//printf(" VirtualAlloc(...) cannot satisfy requested address but address=NULL would work.\n");
+    }
     if(answer==(void*)-1)
     {
-	printf("Error no %d\n", errno);
-	printf("VirtualAlloc(0x%p, %ld) failed\n", address, size);
+	printf(" VirtualAlloc(...) mmap(0x%08X, %u, ...) failed with errno=%d (\"%s\")\n",
+	       (unsigned)address, size, errno, sys_errlist[errno]);
 	return NULL;
     }
     else
@@ -524,14 +554,17 @@ LPVOID WINAPI VirtualAlloc(LPVOID address, DWORD size, DWORD type,  DWORD protec
 	vm->next=0;
 	//if(va_size!=0)
 	//    printf("Multiple VirtualAlloc!\n");
-	//printf("answer=0x%08x\n", answer);
+	//printf(" VirtualAlloc(...) provides (0x%08X, %u)\n", (unsigned)answer, size);
         return answer;
     }
 }
+
 WIN_BOOL WINAPI VirtualFree(LPVOID  address, SIZE_T dwSize, DWORD dwFreeType)//not sure
 {
     virt_alloc* str=vm;
     int answer;
+
+    //printf("VirtualFree(0x%08X, %d, 0x%08X)\n", (unsigned)address, dwSize, dwFreeType);
     while(str)
     {
 	if(address!=str->address)
@@ -539,7 +572,7 @@ WIN_BOOL WINAPI VirtualFree(LPVOID  address, SIZE_T dwSize, DWORD dwFreeType)//n
 	    str=str->prev;
 	    continue;
 	}
-	//printf("VirtualFree(0x%08X, %d - %d)\n", str->address, dwSize, str->mapping_size);
+	//printf(" VirtualFree(...) munmap(0x%08X, %d)\n", (unsigned)str->address, str->mapping_size);
 	answer=munmap(str->address, str->mapping_size);
 	if(str->next)str->next->prev=str->prev;
 	if(str->prev)str->prev->next=str->next;
