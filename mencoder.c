@@ -853,10 +853,9 @@ case ACODEC_PCM:
     // setup filter:
     if(!init_audio_filters(sh_audio, 
         sh_audio->samplerate,
-	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
+	sh_audio->channels, sh_audio->sample_format,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
 	(mux_a->wf->wBitsPerSample==8)?	AF_FORMAT_U8:AF_FORMAT_S16_LE,
-	mux_a->wf->wBitsPerSample/8,
 	16384, mux_a->wf->nAvgBytesPerSec)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
     }
@@ -886,9 +885,9 @@ case ACODEC_VBRMP3:
     // setup filter:
     if(!init_audio_filters(sh_audio, 
         sh_audio->samplerate,
-	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
+	sh_audio->channels, sh_audio->sample_format,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
-	AF_FORMAT_S16_NE, 2,
+	AF_FORMAT_S16_NE,
 	4608, mux_a->h.dwRate*mux_a->wf->nChannels*2)){
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
     }
@@ -1023,9 +1022,9 @@ case ACODEC_LAVC:
     if (!init_audio_filters(
 	sh_audio,
 	sh_audio->samplerate, sh_audio->channels,
-	sh_audio->sample_format, sh_audio->samplesize,
+	sh_audio->sample_format,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
-	AF_FORMAT_S16_NE, 2,
+	AF_FORMAT_S16_NE,
 	mux_a->h.dwSuggestedBufferSize,
 	mux_a->h.dwSuggestedBufferSize*2)) {
 	mp_msg(MSGT_CPLAYER, MSGL_ERR, MSGTR_NoMatchingFilter);
@@ -1088,9 +1087,9 @@ case ACODEC_TOOLAME:
     if (!init_audio_filters(
 	sh_audio,
 	sh_audio->samplerate, sh_audio->channels,
-	sh_audio->sample_format, sh_audio->samplesize,
+	sh_audio->sample_format,
 	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
-	AF_FORMAT_S16_NE, 2,
+	AF_FORMAT_S16_NE,
 	mux_a->h.dwSuggestedBufferSize,
 	mux_a->h.dwSuggestedBufferSize*2)) {
 	mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't find matching filter / ao format!\n");
@@ -1246,11 +1245,9 @@ else if (sh_audio) {
 	    sh_audio->samplerate,
 	    sh_audio->channels,
 	    sh_audio->sample_format,
-	    sh_audio->samplesize,
 	    mux_a->wf->nSamplesPerSec,
 	    mux_a->wf->nChannels,
 	    AF_FORMAT_S16_NE,
-	    2,
 	    4608,
 	    mux_a->h.dwRate*mux_a->wf->nChannels*2))
 	{
