@@ -1260,6 +1260,7 @@ try_livedotcom:
 			ret = asf_streaming_start( stream, demuxer_type );
 			if( ret<0 ) {
 				mp_msg(MSGT_NETWORK,MSGL_ERR,"asf_streaming_start failed\n");
+                                mp_msg(MSGT_NETWORK,MSGL_STATUS,"Check if this is a playlist which requires -playlist option\nExample: mplayer -playlist <url>\n");
 			}
 			break;
 #ifdef STREAMING_LIVE_DOT_COM
