@@ -720,7 +720,8 @@ se place à 1\ heure 10\ min
 .
 .TP
 .B \-tv <option1:option2:...>
-Cette option active les facultés de capture TV de MPlayer.
+Cette option active les facultés de capture TV de MPlayer. Pour regarder la TV
+avec MPlayer, utilisez 'tv://' ou 'tv://<numéro_canal>' comme URL de film.
 
 .I NOTE:
 .br
@@ -736,8 +737,6 @@ et utilisez ce codec.
 Les options disponibles sont:
 .
 .RSs
-.IPs on
-utilise l'entrée TV
 .IPs noaudio
 aucun son
 .IPs driver=<valeur>
@@ -979,10 +978,12 @@ Pour obtenir une liste des sous-titres disponibles, utilisez avec l'option \-v
 et regardez le résultat.
 .TP
 .B \-slang <code\ de\ pays\ à\ deux\ lettres> (voir aussi l'option \-sid)
-Ne fonctionne que pour la lecture de DVD.
-Active/\:sélectionne la langue des sous-titres DVD.
+Pour la lecture de DVD, active/\:sélectionne la langue des sous-titres.
 Pour obtenir une liste des sous-titres disponibles, utilisez avec l'option \-v
 et regardez le résultat.
+
+Sinon, définie un suffixe optionnel de sous-titres qui aura une priorité plus
+grande lors de la recherche des sous-titres.
 
 .I EXEMPLE:
 .PD 0
@@ -994,8 +995,9 @@ disponible.
 .PD 1
 .
 .TP
-.B \-sub <fichier\ de\ sous-titres>
-Utilise/\:affiche ce fichier de sous-titres.
+.B \-sub <fichier\ de\ sous\-titres1,fichier\ de\ sous\-titres2,...>
+Utilise/\:affiche ces sous-titres uniquement. Un seul fichier peut être affiché
+à la fois et les fichiers peuvent être alternés avec 'j'.
 .TP
 .B \-sub-bg-alpha <0\-255>
 Spécifie la valeur du canal alpha pour le fond des sous-titres et de l'osd.
@@ -1117,6 +1119,20 @@ Indique à MPlayer de traiter le fichier de sous-titre au un format UTF8.
 Désactive tout type de postprocessing applicable sur le texte après avoir 
 chargé les sous-titres.
 Utilisé pour déboguage.
+.TP
+.B \-sub-fuzziness
+Ajuste l'exactitude de la recherche de sous-titres:
+.PD 0
+.RSs
+.IPs 0
+correspondance exacte
+.IPs 1
+charge tous les sous-titres contenant le nom du film
+.IPs 2
+charge tous les sous-titres du répertoire courant
+.RE
+.PD 1
+.
 .TP
 .B \-vobsub <fichier\ vobsub\ sans\ extension>
 Spécifie le fichier VobSub qui sera utilisé pour les sous-titres.
@@ -3364,6 +3380,9 @@ Note: le quantizer h263 MMX ne peut pas gérer de polarisations positives
 (vfdct=1or2)
       le quantizer mpeg MMX ne peut pas gérer de polarisations negatives
 (vfdct=1or2)
+.br
+Astuce: Une polarisation plus positive (-32 - -16 au lieu de -64) semble
+améliorer le PSNR
 .RE
 .
 .TP
