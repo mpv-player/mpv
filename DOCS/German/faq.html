@@ -16,16 +16,30 @@ Was ist das Problem mit gcc 2.96 ?
 gcc 2.96 ist RedHats UNOFFIZIELLE (es kann nur auf RedHat Seiten oder bei
 RedHat Distributionen gefunden werden) und FEHLERHAFTE gcc Version. gcc 2.96
 ist ÜBERHAUPT NICHT unterstützt von <B>MPlayer</B>, denn es IRGNORIERT einfach
-MMX-Code, es kompiliert es einfach nicht. Wichtig: dies ist NICHT ein <B>MPlayer</B>-
-spezifisches Problem, einige andere Projekte (DRI, avifile, usw..) haben auch
+MMX-Code, es kompiliert es einfach nicht. Wichtig: dies ist NICHT ein <B>MPlayer</B>-spezifisches
+Problem, einige andere Projekte (DRI, avifile, usw..) haben auch
 Probleme mit dem Scheiß.<BR>** VERWENDE gcc 2.96 NICHT !!! **
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Großartig, Ich habe gcc 3.0.1 von RedHat/Mandrake, dann ist alles fein--!
+Großartig, ich habe gcc 3.0.1 von RedHat/Mandrake, dann ist alles fein!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Nein :) Deren gcc 3.0.1 wurde mit gcc 2.96 kompiliert, also sind auch fehler-
-hafter Scheiß.
+Nein :) Deren gcc 3.0.1 wurde mit gcc 2.96 kompiliert, sind also auch fehlerhafte Scheiße. :)
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Nun. Ist MPlayer bereit für gcc 3.x.x ?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Ist gcc 3.x.x bereit für MPlayer, Linux Kernel und andere?
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Ich verwende gcc 3.x.x und bekomme eigenartige Kompilierungsfehler! Es
+funktioniert mit 2.95! Warum kann ich es nicht kompilieren? Ich liebe gcc 3.x.x,
+es ist ... hmmm ... (weiss nicht was ich sagen soll) ... also ich liebe es!
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Keine Sorge, dies ist ein gcc 3.x.x Feature. Downgrade nicht auf gcc 2.95, denn
+es funktioniert möglichweise :))
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
@@ -246,7 +260,7 @@ verwende die -double Option.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was genau ist dieser libavcodec?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Es ist von Gerard Lantau's ffmpeg Paket (http://ffmpeg.sourceforge.net).
+Es ist von Gerard Lantau's ffmpeg Paket (<A HREF="http://ffmpeg.sourceforge.net">http://ffmpeg.sourceforge.net</A>).
 Es beinhaltet einen in C entwickelten DivX ;-) und OpenDivX alpha 47 Codec.
 Einige Benchmarks zeigten, dass dieser Codes in jedem Fall schneller ist als
 der DirectShow-Codec ohne Preprocessing und nur einige Prozent langsamer als
@@ -334,7 +348,7 @@ als für die es kompiliert wurde.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Ich habe Probleme mit [dein Windows-Manager] und Vollbild xv/xmga/sdl/x11..
+Ich habe Probleme mit [dein Windows-Manager] und Vollbild xv/xmga/sdl/x11.
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Verwend die -fsmode Option. Siehe example.conf oder Manpage.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -375,6 +389,20 @@ Ich habe eine AVI welche mit -vc odivx mit einem grauen Bildschirm wiedergegeben
 wird und mit einem grünen bei -vc divx4.
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es ist keine DivX-Datei, aber eine M$ MPEG4v3 . Update deine codecs.conf.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Hier ist ein Video, wenn ich es abspiele verliere ich die
+Audio-Video-Synchronisation und/oder MPlayer stützt mit dem folgenden Fehler ab:
+<CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Dies kann mehrere Gründe haben.<BR>
+  <LI>Deine CPU <B>und/oder</B> deine Grafikkarte <B>und/oder</B> dein BUS ist/sind zu LANGSAM.</LI>
+  <B>MPlayer</B> zeigt in diesem Fall eine Meldung (und der Zähler für die ausgelassenen
+  Frames steigt.</LI>
+  <LI>Wenn es eine AVI-Datei ist hat es möglichweise ein schlechtes Interleaving. Versuche die <I>-ni</I> Option.</LI>
+  <LI>Dein Soundtreiber ist scheiße, oder du verwendest ALSA 0.5 mit <I>-ao oss</I>. Siehe in der Sektion <A HREF="sound.html">Soundkarten</A>.</LI>
+  <LI>Deine AVI-Datei hat einen defekten Header, versuche die <I>-nobps</I> Option und/oder <I>-mc 0</I> .</LI>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
@@ -464,6 +492,19 @@ dir bald <B>MPlayer</B> können, aber die neuen Clips sind Sorenson-Kodiert, und
 dieser Codec ist tief in die QT-Executable eingebaut, also hier ist keine
 Möglichkeit ihm zu verwenden.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Wann wird &lt;dein gewünschtes Video-Feature&gt; (wie Untertitel-Position) implementiert werden?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Warte auf libvo2.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Kann ich/Wann wird es möglich sein audio-Dateien mit <I>-vo odivx</I> zu encodieren?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Nein, es ist zur Zeit nicht möglich. Es ist geplant, also warte nur geduldig.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 
 </TABLE>
 
