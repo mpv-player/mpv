@@ -430,7 +430,7 @@ void exit_sighandler(int x){
     // can't stop :(
     kill(getpid(),SIGKILL);
   }
-  printf("\nMPlayer interrupted by signal %d in module: %s \n",x,
+  fprintf(stderr,"\nMPlayer interrupted by signal %d in module: %s \n",x,
       current_module?current_module:"unknown"
   );
   #ifdef HAVE_GUI
@@ -588,7 +588,7 @@ if(!filename){
     }
   }
   if(!video_out){
-    printf("Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n",video_driver);
+    fprintf(stderr,"Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n",video_driver);
     return 0;
   }
   
@@ -617,7 +617,7 @@ if(!filename){
     }
   }
   if (!audio_out){
-    printf("Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n",audio_driver);
+    fprintf(stderr,"Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n",audio_driver);
     return 0;
   }
   if(dsp) audio_out->control(AOCONTROL_SET_DEVICE,(int)dsp);
@@ -632,7 +632,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 // check font
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
-       if(!vo_font) printf("Can't load font: %s\n",font_name);
+       if(!vo_font) fprintf(stderr,"Can't load font: %s\n",font_name);
   } else {
       // try default:
        vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
@@ -641,7 +641,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 // check .sub
   if(sub_name){
        subtitles=sub_read_file(sub_name);
-       if(!subtitles) printf("Can't load subtitles: %s\n",sub_name);
+       if(!subtitles) fprintf(stderr,"Can't load subtitles: %s\n",sub_name);
   } else {
     if ( sub_auto )
       {
@@ -656,12 +656,12 @@ if(vcd_track){
 //============ Open VideoCD track ==============
   int ret,ret2;
   f=open(filename,O_RDONLY);
-  if(f<0){ printf("CD-ROM Device '%s' not found!\n",filename);return 1; }
+  if(f<0){ fprintf(stderr,"CD-ROM Device '%s' not found!\n",filename);return 1; }
   vcd_read_toc(f);
   ret2=vcd_get_track_end(f,vcd_track);
-  if(ret2<0){ printf("Error selecting VCD track!\n");return 1;}
+  if(ret2<0){ fprintf(stderr,"Error selecting VCD track!\n");return 1;}
   ret=vcd_seek_to_track(f,vcd_track);
-  if(ret<0){ printf("Error selecting VCD track!\n");return 1;}
+  if(ret<0){ fprintf(stderr,"Error selecting VCD track!\n");return 1;}
   seek_to_byte+=ret;
   if(verbose) printf("VCD start byte position: 0x%X  end: 0x%X\n",seek_to_byte,ret2);
 #ifdef VCD_CACHE
@@ -690,7 +690,7 @@ if(vcd_track){
        // failed to create a new URL, so it's not an URL (or a malformed URL)
 #endif
        f=open(filename,O_RDONLY);
-       if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
+       if(f<0){ fprintf(stderr,"File not found: '%s'\n",filename);return 1; }
        len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
        stream=new_stream(f,STREAMTYPE_FILE);
        stream->end_pos=len;
@@ -698,12 +698,12 @@ if(vcd_track){
       } else {
         file_format=autodetectProtocol( url, &f );
         if( file_format==DEMUXER_TYPE_UNKNOWN ) { 
-          printf("Unable to open URL: %s\n", filename);
+          fprintf(stderr,"Unable to open URL: %s\n", filename);
           url_free(url);
           return 1; 
         } else {
           f=streaming_start( &url, f, file_format );
-          if(f<0){ printf("Unable to open URL: %s\n", url->url); return 1; }
+          if(f<0){ fprintf(stderr,"Unable to open URL: %s\n", url->url); return 1; }
           printf("Connected to server: %s\n", url->hostname );
         }
         stream=new_stream(f,STREAMTYPE_STREAM);
@@ -801,8 +801,8 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
 }
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
-  printf("============= Sorry, this file format not recognized/supported ===============\n");
-  printf("=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n");
+  fprintf(stderr,"============= Sorry, this file format not recognized/supported ===============\n");
+  fprintf(stderr,"=== If this file is an AVI, ASF or MPEG stream, please contact the author! ===\n");
   GUI_MSG( mplUnknowFileType )
   exit(1);
 }
@@ -856,7 +856,7 @@ switch(file_format){
         }
       }
       if(v_pos==-1){
-        printf("AVI_NI: missing video stream!? contact the author, it may be a bug :(\n");
+        fprintf(stderr,"AVI_NI: missing video stream!? contact the author, it may be a bug :(\n");
         GUI_MSG( mplErrorAVINI )
         exit(1);
       }
@@ -881,7 +881,7 @@ switch(file_format){
       }
   }
   if(!ds_fill_buffer(d_video)){
-    printf("AVI: missing video stream!? contact the author, it may be a bug :(\n");
+    fprintf(stderr,"AVI: missing video stream!? contact the author, it may be a bug :(\n");
     GUI_MSG( mplAVIErrorMissingVideoStream )
     exit(1);
   }
@@ -985,7 +985,7 @@ if(stream_dump_type){
   case 3: ds=d_dvdsub;break;
   }
   if(!ds){        
-      printf("dump: FATAL: selected stream missing!\n");
+      fprintf(stderr,"dump: FATAL: selected stream missing!\n");
       exit(1);
   }
   // disable other streams:
@@ -994,7 +994,7 @@ if(stream_dump_type){
   if(d_dvdsub && d_dvdsub!=ds) {ds_free_packs(d_dvdsub); d_dvdsub->id=-2; }
   // let's dump it!
   f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
-  if(!f){ printf("Can't open dump file!!!\n");exit(1); }
+  if(!f){ fprintf(stderr,"Can't open dump file!!!\n");exit(1); }
   while(!ds->eof){
     unsigned char* start;
     int in_size=ds_get_packet(ds,&start);
@@ -1027,7 +1027,7 @@ switch(file_format){
       if(i==0x1B3) break; // found it!
       if(!i || !skip_video_packet(d_video)){
         if(verbose)  printf("NONE :(\n");
-        printf("MPEG: FATAL: EOF while searching for sequence header\n");
+        fprintf(stderr,"MPEG: FATAL: EOF while searching for sequence header\n");
         GUI_MSG( mplMPEGErrorSeqHeaderSearch )
         exit(1);
       }
@@ -1039,13 +1039,13 @@ switch(file_format){
    // ========= Read & process sequence header & extension ============
    videobuffer=shmem_alloc(VIDEOBUFFER_SIZE);
    if(!videobuffer){ 
-     printf("Cannot allocate shared memory\n");
+     fprintf(stderr,"Cannot allocate shared memory\n");
      GUI_MSG( mplErrorShMemAlloc )
      exit(0);
    }
    videobuf_len=0;
    if(!read_video_packet(d_video)){ 
-     printf("FATAL: Cannot read sequence header!\n");
+     fprintf(stderr,"FATAL: Cannot read sequence header!\n");
      GUI_MSG( mplMPEGErrorCannotReadSeqHeader )
      exit(1);
    }
@@ -1057,7 +1057,7 @@ switch(file_format){
    if(sync_video_packet(d_video)==0x1B5){ // next packet is seq. ext.
     videobuf_len=0;
     if(!read_video_packet(d_video)){ 
-      printf("FATAL: Cannot read sequence header extension!\n");
+      fprintf(stderr,"FATAL: Cannot read sequence header extension!\n");
       GUI_MSG( mplMPEGErrorCannotReadSeqHeaderExt )
       exit(1);
     }
@@ -1071,7 +1071,7 @@ switch(file_format){
    sh_video->fps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
    if(!sh_video->fps){
      if(!force_fps){
-       printf("FPS not specified (or invalid) in the header! Use the -fps option!\n");
+       fprintf(stderr,"FPS not specified (or invalid) in the header! Use the -fps option!\n");
        exit(1);
      }
      sh_video->frametime=0;
@@ -1104,7 +1104,7 @@ printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
 fflush(stdout);
 
 if(!sh_video){
-    printf("Sorry, no video stream... it's unplayable yet\n");
+    fprintf(stderr,"Sorry, no video stream... it's unplayable yet\n");
     exit(1);
 }
 
@@ -1176,7 +1176,7 @@ for(i=0;i<CODECS_MAX_OUTFMT;i++){
     if(ret) break;
 }
 if(i>=CODECS_MAX_OUTFMT){
-    printf("Sorry, selected video_out device is incompatible with this codec.\n");
+    fprintf(stderr,"Sorry, selected video_out device is incompatible with this codec.\n");
     GUI_MSG( mplIncompatibleVideoOutDevice )
     exit(1);
 }
@@ -1203,7 +1203,7 @@ switch(sh_video->codec->driver){
  }
  case 4: { // Win32/DirectShow
 #ifndef USE_DIRECTSHOW
-   printf("MPlayer was compiled WITHOUT directshow support!\n");
+   fprintf(stderr,"MPlayer was compiled WITHOUT directshow support!\n");
    GUI_MSG( mplCompileWithoutDSSupport )
    exit(1);
 #else
@@ -1301,12 +1301,12 @@ if(verbose) printf("vo_debug2: out_fmt=%s\n",vo_format_name(out_fmt));
      FILE *encode_file=fopen(encode_name,"rb");
      if(encode_file){
        fclose(encode_file);
-       printf("File already exists: %s (don't overwrite your favourite AVI!)\n",encode_name);
+       fprintf(stderr,"File already exists: %s (don't overwrite your favourite AVI!)\n",encode_name);
        return 0;
      }
      encode_file=fopen(encode_name,"wb");
      if(!encode_file){
-       printf("Cannot create file for encoding\n");
+       fprintf(stderr,"Cannot create file for encoding\n");
        return 0;
      }
      write_avi_header_1(encode_file,mmioFOURCC('d', 'i', 'v', 'x'),sh_video->fps,sh_video->disp_w,sh_video->disp_h);
@@ -1387,7 +1387,7 @@ if(verbose) printf("vo_debug3: out_fmt=%s\n",vo_format_name(out_fmt));
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt)){
-     printf("FATAL: Cannot initialize video driver!\n");
+     fprintf(stderr,"FATAL: Cannot initialize video driver!\n");
      GUI_MSG( mplCantInitVideoDriver )
      exit(1);
    }
