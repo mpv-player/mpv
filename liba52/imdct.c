@@ -77,9 +77,12 @@ static uint8_t bit_reverse_256[] = {
 
 #ifdef ARCH_X86
 // NOTE: SSE needs 16byte alignment or it will segfault 
+// 
 static complex_t __attribute__((aligned(16))) buf[128];
 static float __attribute__((aligned(16))) sseSinCos1a[256];
 static float __attribute__((aligned(16))) sseSinCos1b[256];
+static float __attribute__((aligned(16))) sseSinCos1c[256];
+static float __attribute__((aligned(16))) sseSinCos1d[256];
 static float __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
 //static float __attribute__((aligned(16))) sseW0[4];
 static float __attribute__((aligned(16))) sseW1[8];
@@ -555,15 +558,23 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	);
     }
 
-    
-    /* Post IFFT complex multiply  plus IFFT complex conjugate*/
-    for( i=0; i < 128; i++) {
-	/* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
-	tmp_a_r =        buf[i].real;
-	tmp_a_i = -1.0 * buf[i].imag;
-	buf[i].real =(tmp_a_r * xcos1[i])  -  (tmp_a_i  * xsin1[i]);
-	buf[i].imag =(tmp_a_r * xsin1[i])  +  (tmp_a_i  * xcos1[i]);
-    }
+	asm volatile(
+		"movl $-1024, %%esi				\n\t"
+		".balign 16				\n\t"
+		"1:					\n\t"
+		"movaps (%0, %%esi), %%xmm0		\n\t"
+		"movaps (%0, %%esi), %%xmm1		\n\t"
+		"shufps $0xB1, %%xmm0, %%xmm0		\n\t"
+		"mulps 1024+sseSinCos1c(%%esi), %%xmm1	\n\t"
+		"mulps 1024+sseSinCos1d(%%esi), %%xmm0	\n\t"
+		"addps %%xmm1, %%xmm0			\n\t"
+		"movaps %%xmm0, (%0, %%esi)		\n\t"
+		"addl $16, %%esi			\n\t"
+		" jnz 1b				\n\t"
+		:: "r" (buf+128)
+		: "%esi"
+	);   
+
 	
     data_ptr = data;
     delay_ptr = delay;
@@ -824,6 +835,11 @@ void imdct_init (uint32_t mm_accel)
 	    sseSinCos1a[2*i+1]= -xcos1[i];
 	    sseSinCos1b[2*i+0]= xcos1[i];
 	    sseSinCos1b[2*i+1]= -xsin1[i];
+
+	    sseSinCos1c[2*i+0]= xcos1[i];
+	    sseSinCos1c[2*i+1]= -xcos1[i];
+	    sseSinCos1d[2*i+0]= xsin1[i];
+	    sseSinCos1d[2*i+1]= xsin1[i];	
 	}
 #endif
 
