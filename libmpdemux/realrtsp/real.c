@@ -691,6 +691,8 @@ int convert_timestamp(char *str, int *sec, int *msec) {
   return 1;
 }
 
+//! maximum size of the rtsp description, must be < INT_MAX
+#define MAX_DESC_BUF (20 * 1024 * 1024)
 rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidth) {
 
   char *description=NULL;
@@ -741,13 +743,21 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   else
     size=atoi(rtsp_search_answers(rtsp_session,"Content-length"));
 
+  // as size is unsigned this also catches the case (size < 0)
+  if (size > MAX_DESC_BUF) {
+    printf("real: Content-length for description too big (> %uMB)!\n",
+            MAX_DESC_BUF/(1024*1024) );
+    xbuffer_free(buf);
+    return NULL;
+  }
+
   if (!rtsp_search_answers(rtsp_session,"ETag"))
     printf("real: got no ETag!\n");
   else
     session_id=strdup(rtsp_search_answers(rtsp_session,"ETag"));
     
 #ifdef LOG
-  printf("real: Stream description size: %i\n", size);
+  printf("real: Stream description size: %u\n", size);
 #endif
 
   description=malloc(sizeof(char)*(size+1));
