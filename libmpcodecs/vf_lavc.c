@@ -26,12 +26,12 @@ extern int avcodec_inited;
 struct vf_priv_s {
     unsigned char* outbuf;
     int outbuf_size;
-    AVCodecContext context;
-    AVCodec *codec;
+    AVCodecContext* context;
+    AVCodec* codec;
     vo_mpegpes_t pes;
 };
 
-#define lavc_venc_context (vf->priv->context)
+#define lavc_venc_context (*vf->priv->context)
 
 //===========================================================================//
 
@@ -62,7 +62,6 @@ static int config(struct vf_instance_s* vf,
     if(vf->priv->outbuf) free(vf->priv->outbuf);
 
     vf->priv->outbuf_size=10000+width*height;  // must be enough!
-    if(vf->priv->outbuf) free(vf->priv->outbuf);
     vf->priv->outbuf = malloc(vf->priv->outbuf_size);
 
     if (avcodec_open(&lavc_venc_context, vf->priv->codec) != 0) {
@@ -142,6 +141,8 @@ static int open(vf_instance_t *vf, char* args){
 	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_MissingLAVCcodec, "mpeg1video");
 	return 0;
     }
+    
+    vf->priv->context=avcodec_alloc_context();
 
     // TODO: parse args ->
     if(args) sscanf(args, "%d:%f", &p_quality, &p_fps);
