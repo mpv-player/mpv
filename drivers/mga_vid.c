@@ -88,6 +88,12 @@ MODULE_AUTHOR("Aaron Holtzman <aholtzma@engr.uvic.ca>");
 MODULE_LICENSE("GPL");
 #endif
 
+// WARNING - eyck changes
+#define PARAM_BRIGHTNESS "brightness="
+#define PARAM_SATURATION "saturation="
+#define PARAM_BLACKIE "blackie="
+// end eyck
+
 typedef struct bes_registers_s
 {
 	//BES Control
@@ -151,6 +157,11 @@ typedef struct bes_registers_s
 	uint32_t besv2srclst;
 	//BES Field 2 weight start
 	uint32_t besv2wght;
+
+
+	//configurable stuff
+	int brightness;
+	int blackie;
 
 } bes_registers_t;
 
@@ -680,11 +691,16 @@ switch(config->format){
 	return -1;
 }
 
+	// setting black&white mode 
+	regs.besctl|=(regs.blackie<<20); // TODO: check g200 & g400 (maybe tomorrow)
 
-	//Disable contrast and brightness control
+	//Enable contrast and brightness control
 	regs.besglobctl |= (1<<5) + (1<<7);
-	regs.beslumactl = (0x7f << 16) + (0x80<<0);
-	regs.beslumactl = 0x80<<0;
+	
+	// brightness ; default is 0x7f;
+	regs.beslumactl = (regs.brightness << 16);
+	// contrast:
+	regs.beslumactl|= (0x80<<0);
 
 	//Setup destination window boundaries
 	besleft = x > 0 ? x : 0;
@@ -1304,7 +1320,25 @@ static ssize_t mga_vid_read(struct file *file, char *buf, size_t count, loff_t *
 
 static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, loff_t *ppos)
 {
-	return -EINVAL;
+	// WARNING: eyck changes
+	if(memcmp(buf,PARAM_BRIGHTNESS,min(count,strlen(PARAM_BRIGHTNESS))) == 0)
+	{
+		short brightness;
+		brightness=simple_strtol(&buf[strlen(PARAM_BRIGHTNESS)],NULL,10);
+		if (brightness>127 || brightness<-128) { brightness=0;} 
+//		printk(KERN_DEBUG "mga_vid: brightness modified ( %d ) \n",brightness);
+		regs.brightness=brightness;
+	} else 
+        if(memcmp(buf,PARAM_BLACKIE,min(count,strlen(PARAM_BLACKIE))) == 0)
+	{
+		short blackie;
+		blackie=simple_strtol(&buf[strlen(PARAM_BLACKIE)],NULL,10);
+//		printk(KERN_DEBUG "mga_vid: shadow mode: ( %d ) \n",blackie);
+		regs.blackie=(blackie>0)?1:0;
+	} else count = -EIO;
+	// TODO: reset settings
+	return count;
+//	return -EINVAL;
 }
 
 static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
