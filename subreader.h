@@ -1,4 +1,3 @@
-
 #ifndef __MPLAYER_SUBREADER_H
 #define __MPLAYER_SUBREADER_H
 
@@ -34,10 +33,10 @@ typedef struct {
     char *text[SUB_MAX_TEXT];
 } subtitle;
 
-subtitle* sub_read_file (char *filename);
-char * sub_filename(char *path, char * fname );
+subtitle* sub_read_file (char *filename, float pts);
+char * sub_filename(char *path, char * fname);
 void list_sub_file(subtitle* subs);
-void dump_mpsub(subtitle* subs);
+void dump_mpsub(subtitle* subs, float fps);
 void sub_free( subtitle * subs );
-
+void find_sub(subtitle* subtitles,int key);
 #endif

@@ -29,8 +29,6 @@
 
 #ifdef USE_SUB
 #include "subreader.h"
-void find_sub(subtitle* subtitles,int key);
-void adjust_subs_time(subtitle* subtitles, float subadj, float fps);
 #endif
 
 #ifdef USE_LIBVO2
@@ -730,7 +728,7 @@ play_dvd:
 
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
 
-#ifdef USE_SUB
+#ifdef USE_SUB_OLD
 // check .sub
   if(sub_name){
 #if 0
@@ -752,7 +750,7 @@ play_dvd:
   }
 
   if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
-  if(subtitles && stream_dump_type==4) dump_mpsub(subtitles);
+  if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, fps);
 #endif
 
     stream=NULL;
@@ -1030,14 +1028,40 @@ if(!sh_video){
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 
-/* display clip info */
-demux_info_print(demuxer);
 	
 #ifdef USE_SUB
+// after reading video params we should load subtitles because
 // we know fps so now we can adjust subtitles time to ~6 seconds AST
-adjust_subs_time(subtitles, 6.0, sh_video->fps);
+// check .sub
+current_module="read_subtitles_file";
+if(sub_name){
+#if 0
+       int l=strlen(sub_name);
+       if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
+		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
+	  sub_utf8=1;
+#endif  
+       subtitles=sub_read_file(sub_name, sh_video->fps);
+       if(!subtitles || sub_num == 0) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
+  }
+  if(!sub_name){
+      if(sub_auto && filename) { // auto load sub file ...
+         subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ), 
+				  sh_video->fps );
+      }
+#if 0
+      if(!subtitles) subtitles=sub_read_file(get_path("default.sub"),
+					     sh_video->fps); // try default
+#endif
+  }
+
+  if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
+  if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, sh_video->fps);
 #endif	
-	
+
+/* display clip info */
+demux_info_print(demuxer);
+
 //================== Init AUDIO (codec) ==========================
 
 current_module="init_audio_codec";

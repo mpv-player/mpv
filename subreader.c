@@ -171,8 +171,6 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     char *p, *next;
     int i;
 
-    memset(current, 0, sizeof(subtitle));
-
     do {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
     } while ((sscanf (line,
@@ -200,8 +198,6 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL, *q=NULL;
     int len;
-    
-    memset(current, 0, sizeof(subtitle));
     
     while (1) {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
@@ -232,8 +228,6 @@ subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
     char *p=NULL;
     int i,len;
     
-    memset(current, '\0', sizeof(subtitle));
-    
     while (!current->text[0]) {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
 	if ((len=sscanf (line, "%d:%d:%d,%d --> %d:%d:%d,%d",&a1,&a2,&a3,&a4,&b1,&b2,&b3,&b4)) < 8)
@@ -260,28 +254,18 @@ subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
 
 subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	char line[LINE_LEN+1];
-	char line2[LINE_LEN+1];
-	int a1,a2,a3,b1,b2,b3;
+	int a1,a2,a3;
 	char *p=NULL, *next,separator;
-	int i,len,len2,plen;
-
-	memset(current, '\0', sizeof(subtitle));
+	int i,len,plen;
 
 	while (!current->text[0]) {
 		if (!fgets (line, LINE_LEN, fd)) return NULL;
 		if ((len=sscanf (line, "%d:%d:%d%c%n",&a1,&a2,&a3,&separator,&plen)) < 4)
 			continue;
-		if (!fgets (line2, LINE_LEN, fd)) return NULL;
-		if ((len2=sscanf (line2, "%d:%d:%d%c",&b1,&b2,&b3,&separator)) < 3)
+		
+		if (!(current->start = a1*360000+a2*6000+a3*100))
 			continue;
-		// przewiñ o linijkê do ty³u:
-		fseek(fd,-strlen(line2),SEEK_CUR);
-
-		current->start = a1*360000+a2*6000+a3*100;
-		current->end   = b1*360000+b2*6000+b3*100;
-		if ((current->end - current->start) > 1000) {current->end = current->start + 1000;} // not too long though. 
-		// teraz czas na wkopiowanie stringu
- 		p=line;	
+		p=line;	
  		// finds the body of the subtitle
  		for (i=0; i<3; i++){              
 		   p=strchr(p,':');
@@ -292,8 +276,8 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 		    printf("SUB: Skipping incorrect subtitle line!\n");
 		    continue;
 		}
- 		i=0;
 
+ 		i=0;
 		if (*p!='|') {
 			//
 			next = p,i=0;
@@ -316,8 +300,6 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
     int a1,a2,a3,a4,b1,b2,b3,b4;
     char *p=NULL,*next=NULL;
     int i,len,plen;
-    
-    memset(current, '\0', sizeof(subtitle));
     
     while (!current->text[0]) {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
@@ -394,8 +376,6 @@ subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
     char line[LINE_LEN+1];
     char text[LINE_LEN+1];
 
-    memset(current, '\0', sizeof(subtitle));
-
     if (!fgets (line, LINE_LEN, fd))
 	return NULL;
     if (sscanf (line, "%ld,%ld,\"%[^\"]", &(current->start),
@@ -448,8 +428,6 @@ subtitle *previous_aqt_sub = NULL;
 
 subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     char line[LINE_LEN+1];
-
-    memset(current, '\0', sizeof(subtitle));
 
     while (1) {
     // try to locate next subtitle
@@ -599,29 +577,40 @@ subtitle* subcp_recode (subtitle *sub)
 
 #endif
 
-void adjust_subs_time(subtitle* sub, float subtime, float fps){
+static void adjust_subs_time(subtitle* sub, float subtime, float fps){
+	int n,m;
 	subtitle* nextsub;
 	int i = sub_num;
 	unsigned long subfms = (sub_uses_time ? 100 : fps) * subtime;
-
+	
+	n=m=0;
 	if (i)	for (;;){	
-		if (sub->end <= sub->start)
+		if (sub->end <= sub->start){
 			sub->end = sub->start + subfms;
-		if (!--i) return;
+			m++;
+			n++;
+		}
+		if (!--i) break;
 		nextsub = sub + 1;
 		if (sub->end >= nextsub->start){
 			sub->end = nextsub->start - 1;
 			if (sub->end - sub->start > subfms)
 				sub->end = sub->start + subfms;
+			if (!m)
+				n++;
 		}
 		sub = nextsub;
+		m = 0;
 	}
+	if (n) printf ("SUB: Adjusted %d subtitle(s).\n", n);
 }
 
-subtitle* sub_read_file (char *filename) {
+subtitle* sub_read_file (char *filename, float fps) {
     FILE *fd;
     int n_max;
     subtitle *first;
+    char *fmtname[] = { "microdvd", "subrip", "subviewer", "sami", "vplayer",
+		        "rt", "ssa", "dunnowhat", "mpsub", "aqt" };
     subtitle * (*func[])(FILE *fd,subtitle *dest)=
     {
 	    sub_read_line_microdvd,
@@ -641,7 +630,7 @@ subtitle* sub_read_file (char *filename) {
 
     sub_format=sub_autodetect (fd);
     if (sub_format==SUB_INVALID) {printf ("SUB: Could not determine file format\n");return NULL;}
-    printf ("SUB: Detected subtitle file format: %d\n",sub_format);
+    printf ("SUB: Detected subtitle file format: %s\n", fmtname[sub_format]);
     
     rewind (fd);
 
@@ -659,7 +648,9 @@ subtitle* sub_read_file (char *filename) {
             n_max+=16;
             first=realloc(first,n_max*sizeof(subtitle));
         }
-        sub=func[sub_format](fd,&first[sub_num]);
+	sub = &first[sub_num];
+	memset(sub, '\0', sizeof(subtitle));
+        sub=func[sub_format](fd,sub);
         if(!sub) break;   // EOF
 #ifdef USE_ICONV
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
@@ -683,6 +674,7 @@ subtitle* sub_read_file (char *filename) {
 	return NULL;
     }
 
+    adjust_subs_time(first, 6.0, fps); /* ~6 secs AST */
     return first;
 }
 
@@ -786,7 +778,7 @@ void list_sub_file(subtitle* subs){
 
 }
 
-void dump_mpsub(subtitle* subs){
+void dump_mpsub(subtitle* subs, float fps){
 	int i,j;
 	FILE *fd;
 	float a,b;
@@ -801,7 +793,7 @@ void dump_mpsub(subtitle* subs){
 	
 
 	if (sub_uses_time) fprintf (fd,"FORMAT=TIME\n\n");
-	else fprintf (fd, "FORMAT=25\n\n");  // FIXME: fps
+	else fprintf (fd, "FORMAT=%5.2f\n\n", fps);
 
 	for(j=0;j<sub_num;j++){
 		subtitle* egysub=&subs[j];
