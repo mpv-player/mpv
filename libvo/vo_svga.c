@@ -52,6 +52,7 @@ static uint32_t x_pos, y_pos; // Position
 #define VID_MODE_NUM	 12
 
 static uint8_t vid_modes[VID_MODE_NUM];
+static vid_mode_nums[VID_MODE_NUM] = {17,18,19,34,20,21,22,35,23,24,25,36};
 static uint8_t vid_mode;
 
 static uint32_t pformat;
@@ -65,7 +66,7 @@ static void checksupportedmodes() {
   vga_init();
   vga_disabledriverreport();
   for (i = 0; i < VID_MODE_NUM; i++) {
-    if (vga_hasmode(i) > 0)
+    if (vga_hasmode(vid_mode_nums[i]) > 0)
       vid_modes[i] = 1;
     else vid_modes[i] = 0;
   }
