@@ -1,7 +1,7 @@
 /*
   vo_ggi.c - General Graphics Interface (GGI) Renderer for MPlayer
 
-  (C) Alex Beregszaszi <alex@naxine.org>
+  (C) Alex Beregszaszi
   
   Uses libGGI - http://www.ggi-project.org/
 
@@ -45,7 +45,7 @@ static vo_info_t info =
 {
 	"General Graphics Interface (GGI) output",
 	"ggi",
-	"Alex Beregszaszi <alex@naxine.org>",
+	"Alex Beregszaszi",
 	"under developement"
 };
 

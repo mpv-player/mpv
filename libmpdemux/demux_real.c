@@ -1,7 +1,7 @@
 /*
     Real parser & demuxer
     
-    (C) Alex Beregszaszi <alex@naxine.org>
+    (C) Alex Beregszaszi
     
     Based on FFmpeg's libav/rm.c.
 

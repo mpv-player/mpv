@@ -1,7 +1,7 @@
 /*
   Video 4 Linux input
 
-  (C) Alex Beregszaszi <alex@naxine.org>
+  (C) Alex Beregszaszi
   
   Some ideas are based on xawtv/libng's grab-v4l.c written by
     Gerd Knorr <kraxel@bytesex.org>
@@ -49,7 +49,7 @@
 static tvi_info_t info = {
 	"Video 4 Linux input",
 	"v4l",
-	"Alex Beregszaszi <alex@naxine.org>",
+	"Alex Beregszaszi",
 	"under development"
 };
 

@@ -1,7 +1,7 @@
 /*
  TV Interface for MPlayer
  
- (C) Alex Beregszaszi <alex@naxine.org>
+ (C) Alex Beregszaszi
  
  API idea based on libvo2
 
