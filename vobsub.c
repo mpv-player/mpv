@@ -58,7 +58,7 @@ rar_open(const char *const filename, const char *const mode)
     stream->file = fopen(filename, mode);
     if (stream->file == NULL) {
 	char *rar_filename;
-	char *p;
+	const char *p;
 	int rc;
 	/* Guess the RAR archive filename */
 	rar_filename = NULL;
