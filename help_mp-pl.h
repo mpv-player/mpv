@@ -98,6 +98,7 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Nie mogê zainicjowaæ sterownika video!\n"
 #define MSGTR_CannotInitAO "Nie mogê otworzyæ/zainicjowaæ urz±dzenia audio -> NOSOUND\n"
 #define MSGTR_StartPlaying "Pocz±tek odtwarzania...\n"
+
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ************************************\n"\
 "         *** Twój system jest zbyt wolny! ***\n"\
@@ -118,8 +119,7 @@ static char help_text[]=
 #define MSGTR_NoSound "Audio: brak d¼wiêku!!!\n"
 #define MSGTR_FPSforced "FPS wymuszone na %5.3f  (ftime: %5.3f)\n"
 
-
-// open.c: 
+// open.c:, stream.c
 #define MSGTR_CdDevNotfound "Urz±dzenie CD-ROM '%s' nie znalezione!\n"
 #define MSGTR_ErrTrackSelect "B³±d wyboru ¶cie¿ki VCD!"
 #define MSGTR_ReadSTDIN "Odczytujê ze stdin...\n"
@@ -265,6 +265,42 @@ static char help_text[]=
 #define MSGTR_SKIN_FONT_NonExistentFontID "nie istniej±cy identyfikator fontu ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "nieznany parametr ( %s )\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] za ma³o pamiêci.\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "Skórka nie znaleziona ( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "B³ad odczytu pliku konfiguracyjnego skórki ( %s ).\n"
+#define MSGTR_SKIN_LABEL "Skórki:"
+
+// --- gtk menus
+#define MSGTR_MENU_AboutMPlayer "O MPlayerze"
+#define MSGTR_MENU_Open "Otwórz ..."
+#define MSGTR_MENU_PlayFile "Odtwarzaj plik ..."
+#define MSGTR_MENU_PlayVCD "Odtwarzaj VCD ..."
+#define MSGTR_MENU_PlayDVD "Odtwarzaj DVD ..."
+#define MSGTR_MENU_PlayURL "Odtwarzaj URL ..."
+#define MSGTR_MENU_LoadSubtitle "Za³aduj napisy ..."
+#define MSGTR_MENU_Playing "Odtwarzanie"
+#define MSGTR_MENU_Play "Odtwarzaj"
+#define MSGTR_MENU_Pause "Pauza"
+#define MSGTR_MENU_Stop "Stop"
+#define MSGTR_MENU_NextStream "Nastêpny strumieñ"
+#define MSGTR_MENU_PrevStream "Poprzedni strumieñ"
+#define MSGTR_MENU_Size "Wielko¶æ"
+#define MSGTR_MENU_NormalSize "Normalna wielko¶æ"
+#define MSGTR_MENU_DoubleSize "Podwójna wielko¶æ"
+#define MSGTR_MENU_FullScreen "Pe³en Ekran"
+#define MSGTR_MENU_DVD "DVD"
+#define MSGTR_MENU_PlayDisc "Odtwarzaj dysk ..."
+#define MSGTR_MENU_ShowDVDMenu "Poka¿ menu DVD"
+#define MSGTR_MENU_Titles "Tytu³y"
+#define MSGTR_MENU_Title "Tytu³ %2d"
+#define MSGTR_MENU_None "(puste)"
+#define MSGTR_MENU_Chapters "Rozdzia³y"
+#define MSGTR_MENU_Chapter "Rozdzia³ %2d"
+#define MSGTR_MENU_AudioLanguages "Jêzyki audio"
+#define MSGTR_MENU_SubtitleLanguages "Jêzyki napisów"
+#define MSGTR_MENU_PlayList "Playlista"
+#define MSGTR_MENU_SkinBrowser "Przegl±darka skórek"
+#define MSGTR_MENU_Preferences "Preferencje"
+#define MSGTR_MENU_Exit "Wyj¶cie ..."
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
@@ -272,4 +308,3 @@ static char help_text[]=
 #define MSGTR_MSGBOX_LABEL_Warning "ostrze¿enie ..." 
 
 #endif
-
