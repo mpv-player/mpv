@@ -126,3 +126,14 @@ Current plugins:
     and prints the optimal -vop crop= parameters to the stdout/console.
     MPI: EXPORT
     
+-vop test[=first frame number]
+    generate various test patterns
+    MPI: TEMP, accepts stride
+
+-vop noise[=lumaNoise[u][t]]:chromaNoise[u][t]]
+    add noise
+    0<= lumaNoise, chromaNoise <=100
+    u uniform noise (gaussian otherwise)
+    t temporal noise (noise pattern changes between frames)
+    MPI: TEMP, accepts stride
+
