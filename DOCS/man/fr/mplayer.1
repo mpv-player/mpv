@@ -3464,10 +3464,22 @@ Position de l'image coupée, par défaut au centre.
 .PD 1
 .
 .TP
-.B cropdetect[=0\-255]
-Calcule les paramètres nécessaires de coupe et les affiche sur stdout.
-Le seuil peut éventuellement être spécifié de rien (0) à tout (255).
-(par défaut\ : 24)
+.B cropdetect[=limite:arrondi]
+Calcule les paramètres nécessaires de découpage et les affiche sur stdout.
+.PD 0
+.RSs
+.IPs limit
+Le seuil qui peut éventuellement être défini de rien (0) à tout (255)
+(par défaut\ : 24).
+.br
+.IPs round
+Valeur dont la hauteur/\:largeur doit être multiple (par défaut\ : 16).
+L'offset est ajusté automatiquement pour que la vidéo soit au centre.
+Prenez 2 pour avoir des dimensions paires (obligatoire pour les vidéo
+4:2:2).
+16 est le meilleur pour encoder avec la plupart des codecs vidéo.
+.RE
+.PD 1
 .
 .TP
 .B rectangle[=l:h:x:y]
