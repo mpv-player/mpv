@@ -246,7 +246,7 @@ ifeq ($(GUI),yes)
 	-ln -sf $(PRG) $(BINDIR)/gmplayer
 endif
 	if test ! -d $(MANDIR)/man1 ; then mkdir -p $(MANDIR)/man1; fi
-	$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
+	$(INSTALL) -c -m 644 DOCS/$(LINGUAS)/mplayer.1 $(MANDIR)/man1/mplayer.1
 ifeq ($(MENCODER),yes)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
 	-ln -sf mplayer.1 $(MANDIR)/man1/mencoder.1
