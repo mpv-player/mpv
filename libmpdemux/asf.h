@@ -5,6 +5,7 @@
 #include <inttypes.h>
 #include "bswap.h"
 #ifdef	STREAMING
+#include "stream.h"
 #include "network.h"
 #endif
 
@@ -191,9 +192,9 @@ typedef enum {
 
 
 #ifdef	STREAMING
-int asf_http_streaming_type(char *content_type, char *features);
-int asf_http_streaming_start( streaming_ctrl_t *streaming_ctrl );
-int asf_http_streaming_read( streaming_ctrl_t *streaming_ctrl );
+//int asf_http_streaming_type(char *content_type, char *features);
+int asf_http_streaming_start( stream_t *stream );
+int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl );
 
 int asf_streaming(char *data, int length, int *drop_packet );
 #endif
