@@ -323,6 +323,7 @@ enum {
 typedef void* ImageCodecDrawBandCompleteUPP;
 typedef long long ICMProgressProcRecord;
 typedef long long ICMCompletionProcRecord;
+typedef ICMCompletionProcRecord* ICMCompletionProcRecordPtr;
 typedef long long ICMDataProcRecord;
 typedef void* ICMFrameTimePtr;
 typedef void* CDSequenceDataSourcePtr;
@@ -335,54 +336,31 @@ typedef GrafPtr                         CGrafPtr;
 
 /*  codec capabilities flags    */
 enum {
-    codecCanScale               = 1L << 0,
-	// 1
-    codecCanMask                = 1L << 1,
-	// 2
-    codecCanMatte               = 1L << 2,
-	// 4
-    codecCanTransform           = 1L << 3,
-	// 8
-    codecCanTransferMode        = 1L << 4,
-	// 10
-    codecCanCopyPrev            = 1L << 5,
-	// 20
-    codecCanSpool               = 1L << 6,
-	// 40
-    codecCanClipVertical        = 1L << 7,
-	// 80
-    codecCanClipRectangular     = 1L << 8,
-	// 100
-    codecCanRemapColor          = 1L << 9,
-	// 200
-    codecCanFastDither          = 1L << 10,
-	// 400
-    codecCanSrcExtract          = 1L << 11,
-	// 800
-    codecCanCopyPrevComp        = 1L << 12,
-	// 1000
-    codecCanAsync               = 1L << 13,
-	// 2000
-    codecCanMakeMask            = 1L << 14,
-	// 4000
-    codecCanShift               = 1L << 15,
-	// 8000
-    codecCanAsyncWhen           = 1L << 16,
-	// 10000
-    codecCanShieldCursor        = 1L << 17,
-	// 20000
-    codecCanManagePrevBuffer    = 1L << 18,
-	// 40000
+    codecCanScale               = 1L << 0,	// 1
+    codecCanMask                = 1L << 1,	// 2
+    codecCanMatte               = 1L << 2,	// 4
+    codecCanTransform           = 1L << 3,	// 8
+    codecCanTransferMode        = 1L << 4,	// 10
+    codecCanCopyPrev            = 1L << 5,	// 20
+    codecCanSpool               = 1L << 6,	// 40
+    codecCanClipVertical        = 1L << 7,	// 80
+    codecCanClipRectangular     = 1L << 8,	// 100
+    codecCanRemapColor          = 1L << 9,	// 200
+    codecCanFastDither          = 1L << 10,	// 400
+    codecCanSrcExtract          = 1L << 11,	// 800
+    codecCanCopyPrevComp        = 1L << 12,	// 1000
+    codecCanAsync               = 1L << 13,	// 2000
+    codecCanMakeMask            = 1L << 14,	// 4000
+    codecCanShift               = 1L << 15,	// 8000
+    codecCanAsyncWhen           = 1L << 16,	// 10000
+    codecCanShieldCursor        = 1L << 17,	// 20000
+    codecCanManagePrevBuffer    = 1L << 18,	// 40000
     codecHasVolatileBuffer      = 1L << 19,     // 80000                /* codec requires redraw after window movement */
-    codecWantsRegionMask        = 1L << 20,
-	// 100000
+    codecWantsRegionMask        = 1L << 20,	// 100000
     codecImageBufferIsOnScreen  = 1L << 21,     // 200000                /* old def of codec using overlay surface, = ( codecIsDirectToScreenOnly | codecUsesOverlaySurface | codecImageBufferIsOverlaySurface | codecSrcMustBeImageBuffer ) */
-    codecWantsDestinationPixels = 1L << 22,
-     // 400000
-    codecWantsSpecialScaling    = 1L << 23,
-     // 800000
-    codecHandlesInputs          = 1L << 24,
-	// 1000000
+    codecWantsDestinationPixels = 1L << 22,     // 400000
+    codecWantsSpecialScaling    = 1L << 23,     // 800000
+    codecHandlesInputs          = 1L << 24,	// 1000000
     codecCanDoIndirectSurface   = 1L << 25,                     /* codec can handle indirect surface (GDI) */
     codecIsSequenceSensitive    = 1L << 26,
     codecRequiresOffscreen      = 1L << 27,
@@ -404,42 +382,24 @@ enum {
 /*  codec condition flags   */
 // FFD =  13 = 8+4+1
 enum {
-    codecConditionFirstBand     = 1L << 0,
-	// 1
-    codecConditionLastBand      = 1L << 1,
-	// 2
-    codecConditionFirstFrame    = 1L << 2,
-	// 4
-    codecConditionNewDepth      = 1L << 3,
-	// 8
-    codecConditionNewTransform  = 1L << 4,
-	// 10
-    codecConditionNewSrcRect    = 1L << 5,
-	// 20
-    codecConditionNewMask       = 1L << 6,
-	// 40
-    codecConditionNewMatte      = 1L << 7,
-	// 80
-    codecConditionNewTransferMode = 1L << 8,
-	// 100
-    codecConditionNewClut       = 1L << 9,
-	// 200
-    codecConditionNewAccuracy   = 1L << 10,
-	// 400
-    codecConditionNewDestination = 1L << 11,
-	// 800
-    codecConditionFirstScreen   = 1L << 12,
-	// 1000
-    codecConditionDoCursor      = 1L << 13,
-	// 2000
-    codecConditionCatchUpDiff   = 1L << 14,
-	// 4000
-    codecConditionMaskMayBeChanged = 1L << 15,
-	// 8000
-    codecConditionToBuffer      = 1L << 16,
-	// 10000
-    codecConditionCodecChangedMask = 1L << 31
-	// 20000
+    codecConditionFirstBand     = 1L << 0,	// 1
+    codecConditionLastBand      = 1L << 1,	// 2
+    codecConditionFirstFrame    = 1L << 2,	// 4
+    codecConditionNewDepth      = 1L << 3,	// 8
+    codecConditionNewTransform  = 1L << 4,	// 10
+    codecConditionNewSrcRect    = 1L << 5,	// 20
+    codecConditionNewMask       = 1L << 6,	// 40
+    codecConditionNewMatte      = 1L << 7,	// 80
+    codecConditionNewTransferMode = 1L << 8,	// 100
+    codecConditionNewClut       = 1L << 9,	// 200
+    codecConditionNewAccuracy   = 1L << 10,	// 400
+    codecConditionNewDestination = 1L << 11,	// 800
+    codecConditionFirstScreen   = 1L << 12,	// 1000
+    codecConditionDoCursor      = 1L << 13,	// 2000
+    codecConditionCatchUpDiff   = 1L << 14,	// 4000
+    codecConditionMaskMayBeChanged = 1L << 15,	// 8000
+    codecConditionToBuffer      = 1L << 16,	// 10000
+    codecConditionCodecChangedMask = 1L << 31	// 20000
 };
 
 
@@ -468,8 +428,7 @@ struct __attribute__((__packed__)) CodecDecompressParams {
     long                            stopLine;
     long                            conditionFlags;
 
-    CodecFlags                      callerFlags;
- // short
+    CodecFlags                      callerFlags; // short
     CodecCapabilities *             capabilities;               /* predecompress,banddecompress */
     ICMProgressProcRecord           progressProcRecord;
     ICMCompletionProcRecord         completionProcRecord;
@@ -642,6 +601,25 @@ struct __attribute__((__packed__)) CodecInfo {
     long                            privateData;
 };
 typedef struct CodecInfo                CodecInfo;
+
+enum {
+    codecFlagUseImageBuffer     = (1L << 0),                    /* decompress*/
+    codecFlagUseScreenBuffer    = (1L << 1),                    /* decompress*/
+    codecFlagUpdatePrevious     = (1L << 2),                    /* compress*/
+    codecFlagNoScreenUpdate     = (1L << 3),                    /* decompress*/
+    codecFlagWasCompressed      = (1L << 4),                    /* compress*/
+    codecFlagDontOffscreen      = (1L << 5),                    /* decompress*/
+    codecFlagUpdatePreviousComp = (1L << 6),                    /* compress*/
+    codecFlagForceKeyFrame      = (1L << 7),                    /* compress*/
+    codecFlagOnlyScreenUpdate   = (1L << 8),                    /* decompress*/
+    codecFlagLiveGrab           = (1L << 9),                    /* compress*/
+    codecFlagDiffFrame          = (1L << 9),                    /* decompress*/
+    codecFlagDontUseNewImageBuffer = (1L << 10),                /* decompress*/
+    codecFlagInterlaceUpdate    = (1L << 11),                   /* decompress*/
+    codecFlagCatchUpDiff        = (1L << 12),                   /* decompress*/
+    codecFlagSupportDisable     = (1L << 13),                   /* decompress*/
+    codecFlagReenable           = (1L << 14)                    /* decompress*/
+};
 
 static inline void dump_ImageDescription(void* xxx){
     ImageDescription* id=(ImageDescription*)xxx;
