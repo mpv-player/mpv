@@ -78,6 +78,7 @@ static GtkAdjustment * SBAutoSyncadj;
 static GtkWidget * RBOSDNone;
 static GtkWidget * RBOSDTandP;
 static GtkWidget * RBOSDIndicator;
+static GtkWidget * RBOSDTPTT;
 
 static GtkWidget * HSAudioDelay;
 static GtkWidget * HSExtraStereoMul;
@@ -259,6 +260,7 @@ void ShowPreferences( void )
    case 0: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBOSDNone ),TRUE ); break;
    case 1: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBOSDIndicator ),TRUE ); break;
    case 2: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBOSDTandP ),TRUE ); break;
+   case 3: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( RBOSDTPTT ),TRUE ); break;
   }
 #if 0
  if ( guiIntfStruct.Subtitlename ) gtk_entry_set_text( GTK_ENTRY( ESubtitleName ),guiIntfStruct.Subtitlename );
@@ -355,6 +357,7 @@ void ShowPreferences( void )
  gtk_widget_set_sensitive( RBOSDNone,FALSE );
  gtk_widget_set_sensitive( RBOSDTandP,FALSE );
  gtk_widget_set_sensitive( RBOSDIndicator,FALSE );
+ gtk_widget_set_sensitive( RBOSDTPTT,FALSE );
 #endif
 
 #if !defined( USE_OSD ) && !defined( USE_SUB )
@@ -477,6 +480,7 @@ void prButton( GtkButton * button,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDNone ) ) ) osd_level=0;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDIndicator ) ) ) osd_level=1;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTandP ) ) ) osd_level=2;
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( RBOSDTPTT ) ) ) osd_level=3;
 
         // font ...	
 	guiSetFilename( font_name,gtk_entry_get_text( GTK_ENTRY( prEFontName ) ) );
@@ -826,6 +830,7 @@ GtkWidget * create_Preferences( void )
   RBOSDNone=AddRadioButton( MSGTR_PREFERENCES_None,&OSD_group,vbox600 );
   RBOSDTandP=AddRadioButton( MSGTR_PREFERENCES_OSDTimer,&OSD_group,vbox600 );
   RBOSDIndicator=AddRadioButton( MSGTR_PREFERENCES_OSDProgress,&OSD_group,vbox600 );
+  RBOSDTPTT=AddRadioButton( MSGTR_PREFERENCES_OSDTimerPercentageTotalTime,&OSD_group,vbox600 );
 
   vbox7=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
@@ -1096,6 +1101,7 @@ GtkWidget * create_Preferences( void )
   gtk_signal_connect( GTK_OBJECT( RBOSDNone ),"toggled",GTK_SIGNAL_FUNC( on_RBOSDNone_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( RBOSDTandP ),"toggled",GTK_SIGNAL_FUNC( on_RBOSDTandP_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( RBOSDIndicator ),"toggled",GTK_SIGNAL_FUNC( on_RBOSDIndicator_toggled ),NULL );
+  gtk_signal_connect( GTK_OBJECT( RBOSDTPTT ),"toggled",GTK_SIGNAL_FUNC( on_RBOSDIndicator_toggled ),NULL );
   gtk_signal_connect( GTK_OBJECT( CBAudioEqualizer ),"toggled",GTK_SIGNAL_FUNC( on_CBAudioEqualizer_toggled ),NULL );
 #endif
 #if 0

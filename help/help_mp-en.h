@@ -434,6 +434,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
 #define MSGTR_PREFERENCES_OSDTimer "Timer and indicators"
 #define MSGTR_PREFERENCES_OSDProgress "Progressbars only"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Timer, percentage and total time"
 #define MSGTR_PREFERENCES_Subtitle "Subtitle:"
 #define MSGTR_PREFERENCES_SUB_Delay "Delay: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"

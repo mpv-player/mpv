@@ -109,7 +109,7 @@ static config_t gui_opts[] =
  { "ao_sdl_subdriver",&gtkAOSDLDriver,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
  
- { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,2,NULL },
+ { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,3,NULL },
  { "sub_auto_load",&sub_auto,CONF_TYPE_FLAG,0,0,1,NULL },
  { "sub_unicode",&sub_unicode,CONF_TYPE_FLAG,0,0,1,NULL },
  { "sub_pos",&sub_pos,CONF_TYPE_INT,CONF_RANGE,0,200,NULL },
