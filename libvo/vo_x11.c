@@ -272,7 +272,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  XGetWindowAttributes( mDisplay,mRootWin,&attribs );
  depth=attribs.depth;
 
- if ( depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
+ if ( depth != 8 && depth != 15 && depth != 16 && depth != 24 && depth != 32 ) depth=24;
  XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
  /* set image size (which is indeed neither the input nor output size), 
@@ -306,6 +306,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 	vo_dy=(vo_screenheight-modeline_height)/2;
 	vo_dwidth=modeline_width;
 	vo_dheight=modeline_height;
+        aspect_save_screenres(modeline_width,modeline_height);
    }
 #endif
     bg=WhitePixel( mDisplay,mScreen );
@@ -395,13 +396,15 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 	 	     draw_alpha_fnc=draw_alpha_16;
 	 	     out_format= IMGFMT_BGR16;
           	  }break;
+	case  8: draw_alpha_fnc=draw_alpha_null;
+		 out_format= IMGFMT_BGR8; break;
    	default:  draw_alpha_fnc=draw_alpha_null;
   }
 
   /* always allocate swsContext as size could change between frames */
   swsContext= getSwsContextFromCmdLine(width, height, in_format, width, height, out_format );
 
-//  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
+  printf( "X11 bpp: %d  color mask:  R:%lX  G:%lX  B:%lX\n",bpp,myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
   // If we have blue in the lowest bit then obviously RGB
   mode=( ( myximage->blue_mask & 0x01 ) != 0 ) ? MODE_RGB : MODE_BGR;
@@ -415,7 +418,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 //   printf( "No support for non-native XImage byte order!\n" );
 //   return -1;
   }
-
+// hack-atmos
+mode=MODE_RGB;
 #ifdef WORDS_BIGENDIAN
   if(mode==MODE_BGR && bpp!=32){
     mp_msg(MSGT_VO,MSGL_ERR,"BGR%d not supported, please contact the developers\n", bpp);
@@ -527,6 +531,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
       int stride[3]= {0,0,0};
       
       if     (in_format==IMGFMT_YUY2)  stride[0]=srcW*2;
+      else if(in_format==IMGFMT_BGR8)  stride[0]=srcW;
       else if(in_format==IMGFMT_BGR15) stride[0]=srcW*2;
       else if(in_format==IMGFMT_BGR16) stride[0]=srcW*2;
       else if(in_format==IMGFMT_BGR24) stride[0]=srcW*3;
@@ -566,23 +571,26 @@ static uint32_t get_image(mp_image_t *mpi)
 static uint32_t query_format( uint32_t format )
 {
     mp_msg(MSGT_VO,MSGL_DBG2,"vo_x11: query_format was called: %x (%s)\n",format,vo_format_name(format));
+#if 0
     if (IMGFMT_IS_BGR(format))
     {
 	if (IMGFMT_BGR_DEPTH(format) == 8)
-	    return 0;
+	    return 3;
 	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
 	    return 3|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
 	else
 	    return 1|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
     }
+#endif
 
  switch( format )
   {
+//   case IMGFMT_BGR8:  
 //   case IMGFMT_BGR15:
 //   case IMGFMT_BGR16:
 //   case IMGFMT_BGR24:
 //   case IMGFMT_BGR32:
-//    return 0x2;
+//    return 3|VFCAP_SWSCALE|VFCAO_FLIP;
 //   case IMGFMT_YUY2: 
    case IMGFMT_I420:
    case IMGFMT_IYUV:
@@ -642,3 +650,4 @@ static uint32_t control(uint32_t request, void *data, ...)
   }
   return VO_NOTIMPL;
 }
+
