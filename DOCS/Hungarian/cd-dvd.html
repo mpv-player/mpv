@@ -54,6 +54,11 @@
 
 <P><B><A NAME=dvd>4.2.  DVD lejátszás</A></B></P>
 
+<P>A rendelkezésre álló opciók teljes listája a man page-ben tekinthetõ
+  meg.</P>
+
+<H4>Új DVD támogatás (mpdvdkit2)</H4>
+
 <P>Az <B>MPlayer</B> a <CODE>libdvdread</CODE> és <CODE>libdvdcss</CODE>
   néven ismert könyvtárakat használja a DVD dekódolásához és lejátszásához.
   Ez a két program a <CODE>libmpdvdkit2/</CODE> alkönyvtárban található, így
@@ -69,42 +74,141 @@
   hibákat eredményezhet, könyvtár-inkompatibilitást, és alacsonyabb
   sebességet.</P>
 
-<P>A <CODE>libdvdnav</CODE> támogatásának készítése folyamatban van, jelenleg
-  nem használható.</P>
+<H4>DVD navigáció (dvdnav)</H4>
+
+<P>A <CODE>libdvdnav</CODE> támogatásának készítése folyamatban volt, de
+  soha nem készült el. Jelenleg nem használható.</P>
 
 <P><B>Régi tipusú DVD támogatás - <I>OPCIONÁLIS</I></B></P>
 
-<P><I>Ez akkor hasznos ha pl merevlemezrõl akarsz kódolt VOB-ot lejátszani.
+<P><I>Ez akkor hasznos ha pl <B>merevlemezrõl</B> akarsz kódolt VOB-ot lejátszani.
   Fordítsd le és installáld a <B>libcss</B> 0.0.1-et (és ne újabbat).
   Ha az <B>MPlayer</B> nem találja, használd a <CODE>-csslib /útvonal/libcss.so</CODE>
-  opciót.</P>
+  opciót. Root jogokkal, vagy egy suid root binárissal kell rendelkezned a
+  használatához.</P>
 
-<P>Az opciók teljes listájához lásd a manpage-t.</P>
+<H4>A DVD-k struktúrája</H4>
+
+<P>A DVD lemezek 2048 b/s szektorokat használnak ecc/crc-vel. Általában
+  egy UDF filerendszert tartalmaznak egyetlen sávon, ami több file-t
+  tartalmaz (kis .IFO és .BUK, és nagy (1GB) .VOB). Ezek valódi file-ok és
+  másolhatóak/lejátszhatóak egy mountolt, nem titkosított DVD-rõl.</P>
+
+<P>Az .IFO file-ok tartalmazzák a navigációs információkat (fejezet/sáv/szög/nyelv, stb),
+  amelyek nélkülözhetetlenek a .VOB-ok értelmezéséhez. A .BUK file-ok ezek
+  másolatai. Ezek a file-ok <B>szektorokban</B> számolnak, így a DVD
+  navigáció helyes implementálásához ezt át kell számítani. Szükséges
+  továbbá a file-ok titkosításának megszüntetése.</P>
+
+<P>Az imént felsorolt okok miatt a régi tipusú DVD támogatás egy mountolt
+  DVD filerendszert igényel, és szektor szintû hozzáférést az egységhez.
+  Linux alatt ehhez sajnos root jogokkal kell rendelkezni. Ennek
+  megoldására két lehetõség van:</P>
+
+<UL>
+  <LI>Root jogok megadása, vagy egy suid root bináris használata.</LI>
+  <LI>Az UDF filerendszer implementálása userspace-ben. A libdvdread 0.9.x és
+    a libmpdvdkit ezt csinálja (Új típusú DVD támogatás). A kernel UDF
+    meghajtójára nincs szükség. A DVD-t sem kell mountolni, mivel csak a
+    szektor alapú hozzáférés lesz érvényben.</LI>
+</UL>
+
+<P>Néha a /dev/dvd felhasználók számára nem hozzáférhetõ, így a libdvdread
+  fejlesztõk készítettek egy emulációs réteget, amely a szektorcímeket
+  filenév+offset-re alakítja, ezáltal emulálva a "nyers" hozzáférést akár
+  egy mountolt filerendszeren, vagy merevlemezen.</P>
+
+<P>A libdvdread még mountolási pontot is elfogad meghajtó helyett, és a
+  <CODE>/proc/mounts</CODE> alapján szerzi meg a meghajtó nevét. Ez a
+  módszer Solaris-ra készült, ahol ezen nevek allokálása dinamikusan
+  történik.</P>
+
+<P>Az alapértelmezett DVD egység a <CODE>/dev/dvd</CODE>. Ha a te
+  rendszered ettõl eltér, hozz létre egy symlink-et, vagy add meg a
+  helyes nevet a parancssorban. Erre a <CODE>-dvd-device</CODE> opció
+  szolgál.</P>
+
+<H4>DVD authentikáció</H4>
+
+<P>Ez, és a titkosítás feltörése egy patchelt libdvdcss-sel történik (lásd
+  fent). A módszerek között a <CODE>DVDCSS_METHOD</CODE> környezeti változó
+  állításával lehet választani. A lehetséges értékek: <CODE>key</CODE>,
+  <CODE>disk</CODE>, vagy <CODE>title</CODE>.</P>
+
+<P>Ha semmi nincs megadva, a következõ módszerek közül választ (alapban:
+  key, title request):</P>
+
+<OL>
+  <LI><B>bus key:</B> ez a kulcs az authentikáció után készül el, és
+    ezzel történik a titkosítása a kulcsoknak mielõtt a buszra kerülnének
+    (a hallgatózást elkerülendõ).</LI>
+  <LI><B>cached key:</B> az MPlayer keres egy már feltört, megfelelõ
+    kulcsot az <CODE>~/.mplayer/DVDKeys</CODE> könyvtárban (gyors).</LI>
+  <LI><B>key:</B> ha nincs cache-elt kulcs, az MPlayer megpróbálja a
+    rendelkezésre álló kulcsokkal feltörni a lemezt.</LI>
+  <LI><B>disk:</B> ha a key módszer nem jár sikerrel, az MPlayer
+    megpróbálhatja egy brute force algoritmussal feltörni a lemezt.
+    Ez a folyamat erõsen igényli a CPU-t, és 64Mb memóriát is átmeneti
+    adattárolásra. Ez a metódus mindig mûködik (lassú).</LI>
+  <LI><B>title request:</B> a lemez kulccsal az MPlayer feltöri a title
+    kulcsot, amik <I>rejtett szektorokban</I> tárolódnak. Az RPC-2
+    meghajtók régióellenõrzése is ilyenkor történik, ezért az ilyen
+    meghajtókon hibát jelezhet. Ha sikerült, a title kulcs feltörése
+    következik a bus és disk kulcsokkal.</LI>
+  <LI><B>title:</B> ez a módszer lesz kipróbálva, ha a title request
+    sikertelen volt. Itt nincs szükség kulccserére a DVD meghajtóval.
+    Ismétlõdõ minták alapján megpróbálja kitalálni a title kulcsot.
+    Ritka esetekben sikertelen lehet, például ha nincs elég titkosított
+    adat, vagy a title közepén megváltozik a kulcs. Mindenesetre ez az
+    egyetlen módszer egy merevlemezen tárolt DVD feltörésére, vagy egy
+    helytelen régióval rendelkezõ RPC2 meghajtón (lassú).</LI>
+</OL>
+
+<P>Az RPC-1-es DVD meghajtók a régióbeállításokat csak a szoftveres
+  DVD lejátszókkal tudják korlátozni, az RPC-2 meghajtók hardveresen
+  vannak limitálva 5 változtatásra. Ajánlott lehet a firmware-t RPC-1-re
+  upgradelni, ha RPC-2-es meghajtód van. Ezek az upgrade-k
+  <A HREF="http://perso.club-internet.fr/farzeno/firmware/">itt</A>
+  találhatóak. Ha nincs firmware upgrade a meghajtódhoz, használd a
+  <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset</A>
+  parancsot hogy Linux alatt is át tudd állítani a meghajtód régiókódját.
+  <B>Vigyázz:</B> csak 5 lehetõséged van rá.</P>
 
 
 <P><B><A NAME="vcd">4.3.  VCD lejátszás</A></B></P>
 
-<P>Szabványos Video CD-k lejátszása a következõképpen lehetséges:</P>
+<P>A rendelkezésre álló opciók teljes listája a man page-ben tekinthetõ
+  meg.</P>
 
-<P>
-  mplayer -vcd <I>sáv száma</I> [-cdrom-device eszköz]<BR><BR>
+<H4>VCD struktúra</H4>
 
-  Néhány példa:<BR>
-  mplayer -vcd 1<BR>
-  mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
-</P>
+<P>A VCD lemezek 2 vagy több sávból állnak:</P>
 
-<P>
-  Megjegyzések:<BR>
-  - NE próbálj mountolni VCD-ket, és közvetlen lejátszani DAT fájlokat! Ez
-    windows alatt mûködik, de Linux alatt nem.<BR>
-  - A VCD lemezeken általában 2 sáv van: egy adatsáv (windowsos lejátszót,
-    karaoke adatot tartalmaz, stb) és egy mode-2 sáv (a film), így elõször
-    <CODE>-vcd 2</CODE>-t írj be!<BR>
-  - Az alapértelmezett VCD eszköz a /dev/cdrom. Ha a tied ettõl eltér,
-    szimbolikus linket kell létrehozni, vagy megadni az eszközt a
-    parancssorban!
-</P>
+<UL>
+  <LI>Az elsõ sáv egy pár MB-os 2048 byte/szektor méretû adatsáv, egy
+    iso9660 filerendszerrel. Ez általában win32-es VCD lejátszót, vagy
+    más információkat tartalmaz (jpeg, szöveg, stb).</LI>
+  <LI>
+  <LI>A második (és a többi) sáv nyers 2324 byte/szektor méretû MPEG
+    sáv, amely nem filerendszert hanem nyers MPEG-PS adatot tartalmaz,
+    egy csomagot szektoronként. Ezeket a sávokat <B>nem lehet mountolni</B>!</LI>
+  <LI>Léteznek VCD lemezek amelyeken nincs is elsõ sáv (abszolut
+    filerendszer nélkül). Ezek is lejátszhatóak, de nem mountolhatóak.</LI>
+</UL>
+
+<P>A .DAT file-okról:</P>
+
+<P>Azok a ~600Mb-os file-ok amik a mountolt VCD-k elso sávján vannak,
+  nem igazi file-ok! Ez egy úgynevezett ISO átjáró, amivel a Windows
+  programok hozzáférhetnek az ilyen file-okhoz (mivel vinnyózon a programok
+  nem tudnak hozzáférni közvetlenül az eszközhöz). Linux alatt nem tudod
+  másolni vagy lejátszani az ilyen file-okat, mert szemetet tartalmaznak.
+  Windows alatt azért lehetséges, mert az iso9660 meghajtója ezeken a
+  file-okon keresztül emulálja a közvetlen lemezhozzáférést.</P>
+
+<P>Az alapértelmezett VCD egység a <CODE>/dev/cdrom</CODE>. Ha a beállításod
+  ettõl eltér, készíts egy symlink-et, vagy add meg paraméterként
+  a <CODE>-cdrom-device</CODE> opcióval.</P>
 
 </BODY>
 
