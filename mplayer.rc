@@ -1,0 +1,39 @@
+/*Windows resource file for MPlayer 
+   compile with
+   windres -o resfile.o mplayer.rc
+   and add resfile.o to OBJS_MPLAYER in Makefile*/
+
+#include <winver.h>   
+#include "version.h"
+
+1 VERSIONINFO
+FILEVERSION 0,0,9,0
+PRODUCTVERSION 0,0,9,0
+FILEOS VOS__WINDOWS32
+FILETYPE VFT_APP
+{
+    BLOCK "StringFileInfo" 
+    {  
+	    BLOCK "000004b0" // LANG_NEUTRAL,UNICODE_CP
+        {
+		    VALUE "Comments","MPlayer is distributed under the terms of the GNU General Public License Version 2. Sourcecode is available at http://www.mplayerhq.hu\000"
+            VALUE "CompanyName", "\000"
+            VALUE "FileDescription", "MPlayer - Movie Player for Linux\000"
+            VALUE "FileVersion",VERSION
+            VALUE "InternalName", "Counter Counter\000"
+            VALUE "LegalCopyright", " (C) 2000-2003 Arpad Gereoffy (see DOCS)\000"
+            //VALUE "LegalTrademarks"," \000";
+            VALUE "OriginalFilename", "mplayer.exe\000"
+            VALUE "ProductName", "MPlayer - Movie Player for Linux\000"
+            VALUE "ProductVersion",VERSION
+            //VALUE "SpecialBuild","\000"
+        }
+    }
+    BLOCK "VarFileInfo"  
+    {
+	    VALUE "Translation",0,0x04b0
+    }
+}
+
+IDI_ICON1 ICON DISCARDABLE  "etc/mplayer.ico"
+
