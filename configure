@@ -399,7 +399,7 @@ CHELP='help_mp.h'
 # ---  Check for C compiler:
 
 if test -z "$_x11libdir" ; then
-  for I in /usr/X11R6 /usr/X11 /usr/lib32 ; do 	
+  for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib ; do 	
     if test -d "$I" ; then
       _x11libdir="-L$I"
       break;
@@ -408,13 +408,14 @@ if test -z "$_x11libdir" ; then
 fi
 
 if test -z "$_x11incdir" ; then
-   if test -d /usr/include/X11 ; then
-      _x11incdir=
-   elif test -d /usr/X11R6 ; then
-      _x11incdir=-I/usr/X11R6/include
-   elif test -d /usr/X11 ; then
-      _x11incdir=-I/usr/X11/include
-   fi
+  for I in /usr/include /usr/X11R6/include /usr/X11/include /usr/openwin/include ; do
+    if test -d "$I/X11" ; then
+      if test "$I" != /usr/include; then
+	_x11incdir="-I$I"
+      fi
+      break
+    fi
+  done
 fi
 
 # Lots of stuff are installed under /usr/local
@@ -890,8 +891,9 @@ _termcap=no
 cc_check $_extraincdir $_extralibdir -ltermcap && _termcap=yes
 
 _png=no
-if test ! irix64 ; then
-  # Don't check for -png on irix	
+if irix64 ; then
+  : Don't check for -lpng on irix	
+else
   cc_check $_extraincdir $_extralibdir -lpng -lz -lm && _png=yes
 fi
 
