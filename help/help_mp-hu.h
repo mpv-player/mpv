@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.143
+// Sync'ed with help_mp-en.h 1.144
 
 // ========================= MPlayer help ===========================
 
@@ -48,6 +48,8 @@ static char help_text[]=
 " * * * A MANPAGE TOVÁBBI RÉSZLETEKET, OPCIÓKAT, BILLENTYÛKET TARTALMAZ! * * *\n"
 "\n";
 #endif
+
+#define MSGTR_SamplesWanted "Példa fájlokra van szükségünk ilyen formátummal, hogy jobb legyen a támogatása. Ha neked van ilyened, keresd meg a fejlesztõket.\n"
 
 // ========================= MPlayer messages ===========================
 
