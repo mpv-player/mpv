@@ -66,7 +66,7 @@ while(1){
     struct shmid_ds shmemds;
     int shmemid;
     if ((shmemid = shmget(IPC_PRIVATE, size, IPC_CREAT | 0600)) == -1) break;
-    if ((int)(p = shmat(shmemid, 0, 0)) == -1){
+    if ((p = shmat(shmemid, 0, 0)) == (void *)-1){
       mp_msg(MSGT_OSDEP, MSGL_ERR, "shmem: shmat() failed: %s\n", strerror(errno));
       shmctl (shmemid, IPC_RMID, &shmemds);
       break;
