@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.28 -->
+<!-- synced with 1.29 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -329,8 +329,8 @@ wolna. Używaj SDL.
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
 
-<para>Cygwin w wersji wcześniejszej niż 1.5.0 nie zawiera <filename>inttypes.h</filename>.
-  Umieść plik
+<para><application>Cygwin</application> w wersji wcześniejszej niż 1.5.0 nie
+zawiera <filename>inttypes.h</filename>. Umieść plik
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
   w katalogu <filename class="directory">/usr/include/</filename>, żeby umożliwić kompilację
   <application>MPlayera</application>.</para>
