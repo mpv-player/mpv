@@ -1,0 +1,84 @@
+<HTML>
+
+<BODY>
+
+<PRE>
+
+  <A NAME=2.2.2>2.2.2.  Audio output devices
+
+  - OSS (ioctl) driver
+  - SDL driver (supports up/downsampling, esd, arts etc)
+  - native ALSA 0.5 driver
+  - native ALSA 0.9 driver (buggy, use OSS emulation!)
+  - ESD (through SDL)
+  - ARTS (through SDL)
+  - SUN audio driver (/dev/audio) for BSD and Solaris8 users
+
+
+  <A NAME=2.2.2.1>2.2.2.1.  Soundcard experiences, recommendations
+
+  Aureal Vortex 2:
+			OSS/Free: no driver
+			OSS	: OK
+			ALSA	: no driver
+			Max kHz : 48
+			Driver	: <A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A>
+			Driver2 : from <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">here</A>
+				  (buffer size increased to 64k)
+
+  GUS PnP:
+			OSS/Free: no driver
+			OSS	: OK
+			ALSA	: OK
+			Max kHz	: 48
+
+  SB Live!:
+			OSS	: OK
+			ALSA	: (?)
+			Max kHz : 48
+
+  SB AWE 64		OSS	: max 44kHz
+			ALSA	: 48kHz sounds shit
+			Max kHz : 48
+
+  Gravis UltraSound ACE:
+			OSS     : max 44Khz. Also has problems with the
+				  new sound code.
+			ALSA    : OK
+			Max kHz : 48
+
+  Gravis UltraSound MAX:
+			OSS     : OK
+			ALSA    : OK (?)
+			Max kHz : 48
+
+  ESS 688:
+			OSS     : OK
+			ALSA    : OK (?)
+			Max kHz : 48
+
+  C-Media cards (which ones?)
+			OSS	: not OK (hissing) (?)
+			ALSA	: OK (?)
+			Max kHz : ?
+
+  PC Speaker or DAC:
+			OSS     : OK (use the SDL driver : -ao sdl)
+			ALSA    : no driver
+			Max kHz : the driver emulates 44.1 maybe more
+			Driver  : <A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A>
+
+   - use at least 2.4 if possible, 2.2 isn't tested
+   - if sound clicks when playing from CD-ROM, turn on IRQ unmasking !
+     for example "hdparm -u1 /dev/cdrom" (see "man hdparm" !!!)
+     This is recommended anyways... (for XMMS, etc...)
+     Read section <A HREF="dvd.html#4.1">4.1</A> .
+   - don't use your soundcard by other application ( for ex. XMMS ) !
+     if you use ESD, start MPlayer with the esddsp utility !
+   - Please tell us how MPlayer and your soundcard(s) worked together!
+
+</PRE>
+
+</BODY>
+
+</HTML>
