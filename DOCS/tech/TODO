@@ -72,9 +72,6 @@ DOCS:
   - documentation.html
 - enhance the FAQ
 - man page HTML version
-- document missing lavcopts (vqmod_amp, vqmod_freq, vrc_buf_aggressivity)
-- document missing divx4opts (everything in #if ENCORE_MAJOR_VERSION >= 5200,
-  vbrdebug)
 
 
 FUTURE:
@@ -96,3 +93,5 @@ other:
 DOCS:
 - convert man page to XML
 - write a detailed encoding guide
+- document missing divx4opts (everything in #if ENCORE_MAJOR_VERSION >= 5200,
+  vbrdebug)
