@@ -29,6 +29,10 @@
  *****************************************************************************/
 #include <inttypes.h>
 
+#ifdef __CYGWIN__
+#define SYS_CYGWIN
+#endif
+
 #if defined( WIN32 )
 
 #ifndef PATH_MAX

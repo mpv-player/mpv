@@ -113,10 +113,6 @@
 #include "ioctl.h"
 #include "device.h"
 
-#ifdef __CYGWIN__
-#define SYS_CYGWIN
-#endif
-
 #ifndef HAVE_MPLAYER
  #include "get_path.c"
 #else
