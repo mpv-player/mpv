@@ -11,6 +11,10 @@
 
 #include "../../language.h"
 
+#ifdef	__SVR4
+#define	get_current_dir_name()	getcwd(NULL, PATH_MAX)
+#endif
+
 #ifndef get_current_dir_name
  extern char * get_current_dir_name( void );
 #endif

@@ -63,6 +63,8 @@ void widgetsCreate( void )
 
 static void gtkThreadProc( int argc,char * argv[] )
 {
+ struct sigaction sa;
+
  gtk_set_locale();
  gtk_init( &argc,&argv );
  gdk_set_use_xshm( TRUE );
@@ -71,7 +73,9 @@ static void gtkThreadProc( int argc,char * argv[] )
 
  gtkPID=getppid();
 
- signal( SIGTYPE,gtkSigHandler );
+ memset(&sa, 0, sizeof(sa));
+ sa.sa_handler = gtkSigHandler;
+ sigaction( SIGTYPE, &sa, NULL );
 
  gtkIsOk=True;
  gtkSendMessage( evGtkIsOk );

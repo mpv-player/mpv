@@ -97,9 +97,13 @@ void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int he
 
 void mplMPlayerInit( int argc,char* argv[], char *envp[] )
 {
+ struct sigaction sa;
+
  mplShMem=calloc( 1,sizeof( mplCommStruct ) );
  mplShMem->Balance=50.0f;
- signal( SIGTYPE,mplMainSigHandler );
+ memset(&sa, 0, sizeof(sa));
+ sa.sa_handler = mplMainSigHandler;
+ sigaction( SIGTYPE,&sa,NULL );
 }
 
 float mplGetPosition( void )

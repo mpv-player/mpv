@@ -17,8 +17,6 @@
 #include "wsconv.h"
 #include "../../config.h"
 
-#include <X11/extensions/xf86dga.h>
-#include <X11/extensions/xf86dgastr.h>
 #include <X11/extensions/XShm.h>
 #include <X11/extensions/shape.h>
 #include <sys/ipc.h>
