@@ -88,13 +88,5 @@ tv_set_hue [-100:100]
 	Set tv tuner hue.
 tv_set_saturation [-100:100]
 	Set tv tuner saturation.
-tv_set_brightness [-100:100]
-	Set tv tuner brightness.
-tv_set_contrast [-100:100]
-	Set tv tuner contrast.
-tv_set_hue [-100:100]
-	Set tv tuner hue.
-tv_set_saturation [-100:100]
-	Set tv tuner saturation.
 gui_[loadsubtitle|about|play|stop]
 	GUI actions

@@ -2793,22 +2793,6 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if (file_format == DEMUXER_TYPE_TV)
         tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_CONTRAST, cmd->args[0].v.i);
     } break;
-    case MP_CMD_TV_SET_BRIGHTNESS :  {
-      if (file_format == DEMUXER_TYPE_TV)
-        tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_BRIGHTNESS, cmd->args[0].v.i);
-    } break;
-    case MP_CMD_TV_SET_HUE :  {
-      if (file_format == DEMUXER_TYPE_TV)
-        tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_HUE, cmd->args[0].v.i);
-    } break;
-    case MP_CMD_TV_SET_SATURATION :  {
-      if (file_format == DEMUXER_TYPE_TV)
-        tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_SATURATION, cmd->args[0].v.i);
-    } break;
-    case MP_CMD_TV_SET_CONTRAST :  {
-      if (file_format == DEMUXER_TYPE_TV)
-        tv_set_color_options((tvi_handle_t*)(demuxer->priv), TV_COLOR_CONTRAST, cmd->args[0].v.i);
-    } break;
     case MP_CMD_TV_STEP_CHANNEL :  {
       if (file_format == DEMUXER_TYPE_TV) {
 	int v = cmd->args[0].v.i;
