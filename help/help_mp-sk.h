@@ -121,7 +121,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Dostupné video kodeky:\n"
 #define MSGTR_AvailableAudioFm "\nDostupné (vkompilované) audio rodiny kodekov/ovládaèe:\n"
 #define MSGTR_AvailableVideoFm "\nDostupné (vkompilované) video rodiny kodekov/ovládaèe:\n"
-#define MSGTR_AvailableFsType "Dostupné zmeny plnoobrazovkových módov:\n
+#define MSGTR_AvailableFsType "Dostupné zmeny plnoobrazovkových módov:\n"
 #define MSGTR_UsingRTCTiming "Pou¾ívam Linuxové hardvérové RTC èasovanie (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Video: nemô¾em èíta» vlastnosti\n"
 #define MSGTR_NoStreamFound "Nenájdený prúd\n"
@@ -593,7 +593,7 @@ static char help_text[]=
 #define MSGTR_ABOUT_UHU "vývoj GUI sponoroval UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer základný tým:\n"
 #define MSGTR_ABOUT_AdditionalCoders "   Ïal¹í vývojári:\n"
-#define MSGTR_ABOUT_MainTesters "   Hlavní testeri:\n
+#define MSGTR_ABOUT_MainTesters "   Hlavní testeri:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "fatálna chyba ..."
