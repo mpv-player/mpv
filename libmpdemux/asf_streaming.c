@@ -20,7 +20,7 @@ asf_http_streaming_read( streaming_ctrl_t *streaming_ctrl ) {
 	char *buffer;
 	int drop_packet;
 	int ret;
-printf("asf_streaming_read\n");
+printf("asf_http_streaming_read\n");
 	ret = asf_streaming( streaming_ctrl->buffer->buffer, streaming_ctrl->buffer->length, &drop_packet );
 printf("ret: %d\n", ret);
 	if( ret<0 ) return -1;
@@ -40,6 +40,25 @@ printf("0x%02X\n", *((unsigned int*)(buffer+sizeof(ASF_stream_chunck_t))) );
 	}
 	free( buffer );
 	return ret;
+}
+
+int
+asf_http_read( streaming_ctrl_t *streaming_ctrl ) {
+	char *buffer;
+	unsigned int length = streaming_ctrl->buffer->length;
+
+	buffer = (char*)malloc(length);
+	if( buffer==NULL ) {
+		printf("Memory allocation failed\n");
+		return -1;
+	}
+	
+	net_fifo_pop( streaming_ctrl->buffer, buffer, length );
+
+	write( streaming_ctrl->fd_pipe_in, buffer, length );
+
+	free( buffer );
+	return length;
 }
 
 int 
@@ -115,6 +134,9 @@ asf_http_streaming_type(char *content_type, char *features) {
 			(!strcasecmp(content_type, "video/x-ms-wma")) ) {
 			printf("=====> ASF Redirector\n");
 			return ASF_Redirector_e;
+		} else if( !strcasecmp(content_type, "text/plain") ) {
+			printf("=====> ASF Plain text\n");
+			return ASF_PlainText_e;
 		} else {
 			printf("=====> ASF unknown content-type: %s\n", content_type );
 			return ASF_Unknown_e;
@@ -239,11 +261,11 @@ asf_http_parse_response( HTTP_header_t *http_hdr ) {
 	}
 
 	streaming_type = asf_http_streaming_type( content_type, features );
-
+/*
 	if( http_hdr->body_size>0 ) {
 		asf_streaming( http_hdr->body, http_hdr->body_size, NULL);
 	}
-
+*/
 	return 0;
 }
 
@@ -289,7 +311,7 @@ printf("read: %d\n", i );
 				return -1;
 			}
 			http_response_append( http_hdr, buffer, i );
-		} while( !http_is_header_entired( http_hdr ) );
+		} while( !http_is_header_entire( http_hdr ) );
 //http_hdr->buffer[http_hdr->buffer_len]='\0';
 //printf("[%s]\n", http_hdr->buffer );
 		if( asf_http_parse_response(http_hdr)<0 ) {
@@ -300,8 +322,8 @@ printf("read: %d\n", i );
 		switch( streaming_type ) {
 			case ASF_Live_e:
 			case ASF_Prerecorded_e:
+			case ASF_PlainText_e:
 				if( http_hdr->body_size>0 ) {
-printf("--- 0x%02X\n", streaming_ctrl->buffer );
 					net_fifo_push( streaming_ctrl->buffer, http_hdr->body, http_hdr->body_size );
 				} else {
 					ASF_stream_chunck_t *ptr;
@@ -342,8 +364,12 @@ printf("read: %d\n", i );
 	} while(!done);
 
 	streaming_ctrl->fd_net = fd;
-	streaming_ctrl->streaming_read = asf_http_streaming_read;
-        streaming_ctrl->prebuffer_size = 10000;
+	if( streaming_type==ASF_PlainText_e ) {
+		streaming_ctrl->streaming_read = asf_http_read;
+	} else {
+		streaming_ctrl->streaming_read = asf_http_streaming_read;
+	}
+        streaming_ctrl->prebuffer_size = 20000;
 	streaming_ctrl->buffering = 1;
 	streaming_ctrl->status = streaming_playing_e;
 

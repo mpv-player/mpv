@@ -31,7 +31,7 @@ HTTP_header_t*	http_new_header();
 void		http_free( HTTP_header_t *http_hdr );
 int		http_response_append( HTTP_header_t *http_hdr, char *data, int length );
 int		http_response_parse( HTTP_header_t *http_hdr );
-int		http_is_header_entired( HTTP_header_t *http_hdr );
+int		http_is_header_entire( HTTP_header_t *http_hdr );
 char* 		http_build_request( HTTP_header_t *http_hdr );
 char* 		http_get_field( HTTP_header_t *http_hdr, const char *field_name );
 char*		http_get_next_field( HTTP_header_t *http_hdr );

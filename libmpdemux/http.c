@@ -62,7 +62,7 @@ http_response_append( HTTP_header_t *http_hdr, char *response, int length ) {
 }
 
 int
-http_is_header_entired( HTTP_header_t *http_hdr ) {
+http_is_header_entire( HTTP_header_t *http_hdr ) {
 	if( http_hdr==NULL ) return -1;
 
 	if( strstr(http_hdr->buffer, "\r\n\r\n")==NULL ) return 0;

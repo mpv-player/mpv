@@ -256,7 +256,7 @@ http_read_response( int fd ) {
 			printf("Read failed\n");
 		}
 		http_response_append( http_hdr, response, i );
-	} while( !http_is_header_entired( http_hdr ) ); 
+	} while( !http_is_header_entire( http_hdr ) ); 
 	http_response_parse( http_hdr );
 	return http_hdr;
 }
