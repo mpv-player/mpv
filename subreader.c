@@ -89,16 +89,21 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
  
 	case 3: /* get all text until '<' appears */
 	    if (*s == '\0') { break; }
-	    else if (*s == '<') { state = 4; }
-	    else if (!strncasecmp (s, "&nbsp;", 6)) { *p++ = ' '; s += 6; }
-	    else if (*s == '\r') { s++; }
-	    else if (!strncasecmp (s, "<br>", 4) || *s == '\n') {
+	    else if (!strncasecmp (s, "<br>", 4)) {
 		*p = '\0'; p = text; trail_space (text);
 		if (text[0] != '\0')
 		    current->text[current->lines++] = strdup (text);
-		if (*s == '\n') s++; else s += 4;
+		s += 4;
 	    }
+	    else if (*s == '<') { state = 4; }
+	    else if (!strncasecmp (s, "&nbsp;", 6)) { *p++ = ' '; s += 6; }
+	    else if (*s == '\t') { *p++ = ' '; s++; }
+	    else if (*s == '\r' || *s == '\n') { s++; }
 	    else *p++ = *s++;
+
+	    /* skip duplicated space */
+	    if (p > text + 2) if (*(p-1) == ' ' && *(p-2) == ' ') p--;
+	    
 	    continue;
 
 	case 4: /* get current->end or skip <TAG> */
