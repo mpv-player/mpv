@@ -7,7 +7,7 @@
     		  Modified for GATOS/win/gfxdump.
 		  
     2002	- library implementation by Nick Kurshev
-		- some changes by Alex Beregszaszi
+		- dhahelper and some changes by Alex Beregszaszi
     
     supported O/S's:	SVR4, UnixWare, SCO, Solaris,
 			FreeBSD, NetBSD, 386BSD, BSDI BSD/386,
@@ -16,6 +16,8 @@
     Licence: GPL
     Original location: www.linuxvideo.org/gatos
 */
+
+#include "config.h"
 
 #include "libdha.h"
 #include "AsmMacros.h"
@@ -60,14 +62,44 @@ void libdha_exit(const char *message, int level)
 #define DEV_MEM "/dev/mem"
 #endif
 
+#ifdef CONFIG_DHAHELPER
 static int mem=-1;
 void *map_phys_mem(unsigned base, unsigned size)
 {
+  if ( (mem = open("/dev/dhahelper",O_RDWR)) < 0)
+  {
+    if ( (mem = open(DEV_MEM,O_RDWR)) == -1) {
+	perror("libdha: open(/dev/mem) failed") ; exit(1) ;
+    }
+  }
+  else
+  {
+    dhahelper_memory_t mem_req;
+    
+    mem_req.operation = MEMORY_OP_MAP;
+    mem_req.start = base;
+    mem_req.offset = 0;
+    mem_req.size = size;
+    
+    if (ioctl(mem, DHAHELPER_MEMORY, &mem_req) < 0)
+    {
+	perror("libdha: failed mapping throught kernel helper");
+	return NULL;
+    }
+  }
+  return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem,base) ;
+}
+#else
+
+static int mem=-1;
+void *map_phys_mem(unsigned base, unsigned size)
+{    
   if ( (mem = open(DEV_MEM,O_RDWR)) == -1) {
     perror("libdha: open(/dev/mem) failed") ; exit(1) ;
   }
   return mmap(0,size,PROT_READ|PROT_WRITE,MAP_SHARED,mem,base) ;
 }
+#endif /* CONFIG_DHAHELPER */
 
 void unmap_phys_mem(void *ptr, unsigned size)
 {
