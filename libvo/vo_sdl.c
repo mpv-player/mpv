@@ -65,6 +65,8 @@
  *    - added code to comply with new fullscreen meaning
  *    - changed fullscreen-mode-cycling from '+' to 'c' (interferred with audiosync
  *       adjustment)
+ *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 13, 2001
+ *    - added keymapping to toggle OSD ('o' key) 
  */
 
 #include <stdio.h>
@@ -612,6 +614,7 @@ static void check_events (void)
 					SDL_ShowCursor(1);
 					mplayer_put_key('q');
 				break;
+                                case SDLK_o: mplayer_put_key('o');break;
                                 case SDLK_p: mplayer_put_key('p');break;
                                 case SDLK_SPACE: mplayer_put_key(' ');break;
                                 case SDLK_UP: mplayer_put_key(KEY_UP);break;
