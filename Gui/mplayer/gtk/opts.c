@@ -31,9 +31,7 @@ GtkWidget * opCancel;
 int opShift = 0;
 
 void HideOptions( void )
-{
- gtk_widget_hide( Options );
-}
+{ gtk_widget_destroy( Options ); }
 
 gboolean on_window2_key_press_event( GtkWidget * widget,GdkEventKey * event,gpointer user_data )
 {

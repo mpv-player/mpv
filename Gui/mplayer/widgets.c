@@ -60,12 +60,12 @@ void gtkInit( int argc,char* argv[], char *envp[] )
  gtk_init( &argc,&argv );
  gdk_set_use_xshm( FALSE );
  
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create about box.\n" );              AboutBox=create_About();
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create skin browser.\n" );           SkinBrowser=create_SkinBrowser();
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create playlist.\n" );               PlayList=create_PlayList();
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create file selector.\n" );          FileSelect=create_FileSelect();
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create message box.\n" );            MessageBox=create_MessageBox(0);
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create preferences dialog box.\n" ); Options=create_Options();
+// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create about box.\n" );              AboutBox=create_About();
+// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create skin browser.\n" );           SkinBrowser=create_SkinBrowser();
+// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create playlist.\n" );               PlayList=create_PlayList();
+// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create file selector.\n" );          FileSelect=create_FileSelect();
+// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create message box.\n" );            MessageBox=create_MessageBox(0);
+// mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create preferences dialog box.\n" ); Options=create_Options();
  
  gtkInited=1;
 }
@@ -106,8 +106,8 @@ void gtkEventHandling( void )
 void gtkMessageBox( int type,gchar * str )
 {
  if ( !gtkInited ) return;
+ MessageBox=create_MessageBox(0);
  gtk_label_set_text( GTK_LABEL( gtkMessageBoxText ),str );
- gtk_widget_hide( MessageBox );
  switch( type)
   {
     case GTK_MB_FATAL:
@@ -140,22 +140,22 @@ void gtkShow( int type,char * param )
  switch( type )
   {
    case evSkinBrowser:
-        gtk_widget_hide( SkinBrowser );
-        gtkClearList( SkinList );
-        if ( gtkFillSkinList( sbMPlayerPrefixDir )&&gtkFillSkinList( sbMPlayerDirInHome ) )
+	SkinBrowser=create_SkinBrowser();
+//        gtkClearList( SkinList );
+        if ( gtkFillSkinList( sbMPlayerPrefixDir ) && gtkFillSkinList( sbMPlayerDirInHome ) )
          {
           gtkSetDefaultToCList( SkinList,param );
           gtk_widget_show( SkinBrowser );
+	  gtkSetLayer( SkinBrowser );
          }
-	gtkSetLayer( SkinBrowser );
         break;
    case evPreferences:
-        gtk_widget_hide( Options );
+	Options=create_Options();
         gtk_widget_show( Options );
 	gtkSetLayer( Options );
         break;
    case evPlayList:
-        gtk_widget_hide( PlayList );
+	PlayList=create_PlayList();
         gtk_widget_show( PlayList );
 	gtkSetLayer( PlayList );
         break;
@@ -172,7 +172,7 @@ void gtkShow( int type,char * param )
 	gtkSetLayer( FileSelect );
         break;
    case evAbout:
-        gtk_widget_hide( AboutBox );
+	AboutBox=create_About();
         gtk_widget_show( AboutBox );
 	gtkSetLayer( AboutBox );
         break;

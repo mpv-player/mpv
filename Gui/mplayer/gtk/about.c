@@ -8,9 +8,7 @@
 #include "about.h"
 
 void ab_Ok_released( GtkButton * button,gpointer user_data )
-{
- gtk_widget_hide( AboutBox );
-}
+{ gtk_widget_destroy( AboutBox ); }
 
 GtkWidget * create_About( void )
 {

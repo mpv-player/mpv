@@ -181,10 +181,24 @@ void CheckDir( GtkWidget * list,char * directory )
  gtk_widget_show( list );
 }
 
+static int FirstInit = 1;
+
 void ShowFileSelect( int type )
 {
  int i;
- gtk_widget_hide( FileSelect );
+ FileSelect=create_FileSelect();
+ 
+ if ( FirstInit )
+  {
+   fsTopList_items=g_list_append( fsTopList_items,(gchar *)get_current_dir_name() );
+   if ( getenv( "HOME" ) ) fsTopList_items=g_list_append( fsTopList_items,getenv( "HOME" ) );
+   fsTopList_items=g_list_append( fsTopList_items,"/home" );
+   fsTopList_items=g_list_append( fsTopList_items,"/mnt" );
+   fsTopList_items=g_list_append( fsTopList_items,"/" );
+   FirstInit=0;
+  }
+ gtk_combo_set_popdown_strings( GTK_COMBO( fsCombo4 ),fsTopList_items );
+  
  fsType=type;
  switch ( type )
   {
@@ -221,9 +235,7 @@ void ShowFileSelect( int type )
 }
 
 void HideFileSelect( void )
-{
- gtk_widget_hide( fsFileSelect );
-}
+{ gtk_widget_destroy( fsFileSelect ); }
 
 void fs_fsFileSelect_destroy( GtkObject * object,gpointer user_data )
 { HideFileSelect(); }
@@ -369,11 +381,7 @@ void fs_Ok_released( GtkButton * button,gpointer user_data )
    if ( !strcmp( item->data,fsSelectedDirectory ) ) i=0;
    item=item->next;
   }
- if ( i )
-  {
-   fsTopList_items=g_list_prepend( fsTopList_items,(gchar *)get_current_dir_name() );
-   gtk_combo_set_popdown_strings( GTK_COMBO( user_data ),fsTopList_items );
-  }
+ if ( i ) fsTopList_items=g_list_prepend( fsTopList_items,(gchar *)get_current_dir_name() );
  if (  mplMainAutoPlay ) mplEventHandling( evPlay,0 );
 }
 
@@ -446,8 +454,7 @@ GtkWidget * create_FileSelect( void )
  FSFrame=gtk_frame_new( NULL );
  gtk_widget_set_name( FSFrame,"FSFrame" );
  gtk_widget_ref( FSFrame );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"FSFrame",FSFrame,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"FSFrame",FSFrame,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( FSFrame );
  gtk_container_add( GTK_CONTAINER( fsFileSelect ),FSFrame );
  gtk_container_set_border_width( GTK_CONTAINER( FSFrame ),1 );
@@ -456,8 +463,7 @@ GtkWidget * create_FileSelect( void )
  frame2=gtk_frame_new( NULL );
  gtk_widget_set_name( frame2,"frame2" );
  gtk_widget_ref( frame2 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"frame2",frame2,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"frame2",frame2,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( frame2 );
  gtk_container_add( GTK_CONTAINER( FSFrame ),frame2 );
  gtk_frame_set_shadow_type( GTK_FRAME( frame2 ),GTK_SHADOW_NONE );
@@ -465,8 +471,7 @@ GtkWidget * create_FileSelect( void )
  frame3=gtk_frame_new( NULL );
  gtk_widget_set_name( frame3,"frame3" );
  gtk_widget_ref( frame3 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"frame3",frame3,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"frame3",frame3,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( frame3 );
  gtk_container_add( GTK_CONTAINER( frame2 ),frame3 );
  gtk_frame_set_shadow_type( GTK_FRAME( frame3 ),GTK_SHADOW_ETCHED_OUT );
@@ -474,8 +479,7 @@ GtkWidget * create_FileSelect( void )
  frame4=gtk_frame_new( NULL );
  gtk_widget_set_name( frame4,"frame4" );
  gtk_widget_ref( frame4 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"frame4",frame4,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"frame4",frame4,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( frame4 );
  gtk_container_add( GTK_CONTAINER( frame3 ),frame4 );
  gtk_container_set_border_width( GTK_CONTAINER( frame4 ),1 );
@@ -484,47 +488,36 @@ GtkWidget * create_FileSelect( void )
  vbox4=gtk_vbox_new( FALSE,0 );
  gtk_widget_set_name( vbox4,"vbox4" );
  gtk_widget_ref( vbox4 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"vbox4",vbox4,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"vbox4",vbox4,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( vbox4 );
  gtk_container_add( GTK_CONTAINER( frame4 ),vbox4 );
 
  hbox4=gtk_hbox_new( FALSE,0 );
  gtk_widget_set_name( hbox4,"hbox4" );
  gtk_widget_ref( hbox4 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hbox4",hbox4,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hbox4",hbox4,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( hbox4 );
  gtk_box_pack_start( GTK_BOX( vbox4 ),hbox4,FALSE,FALSE,0 );
 
  fsCombo4=gtk_combo_new();
  gtk_widget_set_name( fsCombo4,"fsCombo4" );
  gtk_widget_ref( fsCombo4 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsCombo4",fsCombo4,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsCombo4",fsCombo4,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( fsCombo4 );
  gtk_box_pack_start( GTK_BOX( hbox4 ),fsCombo4,TRUE,TRUE,0 );
  gtk_widget_set_usize( fsCombo4,-2,20 );
 
- fsTopList_items=g_list_append( fsTopList_items,(gchar *)get_current_dir_name() );
- if ( getenv( "HOME" ) ) fsTopList_items=g_list_append( fsTopList_items,getenv( "HOME" ) );
- fsTopList_items=g_list_append( fsTopList_items,"/home" );
- fsTopList_items=g_list_append( fsTopList_items,"/mnt" );
- fsTopList_items=g_list_append( fsTopList_items,"/" );
- gtk_combo_set_popdown_strings( GTK_COMBO( fsCombo4 ),fsTopList_items );
-
  fsPathCombo=GTK_COMBO( fsCombo4 )->entry;
  gtk_widget_set_name( fsPathCombo,"fsPathCombo" );
  gtk_widget_ref( fsPathCombo );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsPathCombo",fsPathCombo,( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsPathCombo",fsPathCombo,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( fsPathCombo );
  gtk_widget_set_usize( fsPathCombo,-2,20 );
 
  vseparator1=gtk_vseparator_new();
  gtk_widget_set_name( vseparator1,"vseparator1" );
  gtk_widget_ref( vseparator1 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"vseparator1",vseparator1,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"vseparator1",vseparator1,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( vseparator1 );
  gtk_box_pack_start( GTK_BOX( hbox4 ),vseparator1,FALSE,TRUE,0 );
  gtk_widget_set_usize( vseparator1,7,20 );
@@ -543,8 +536,7 @@ GtkWidget * create_FileSelect( void )
  hseparator1=gtk_hseparator_new();
  gtk_widget_set_name( hseparator1,"hseparator1" );
  gtk_widget_ref( hseparator1 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hseparator1",hseparator1,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hseparator1",hseparator1,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( hseparator1 );
  gtk_box_pack_start( GTK_BOX( vbox4 ),hseparator1,FALSE,TRUE,0 );
  gtk_widget_set_usize( hseparator1,-2,8 );
@@ -552,16 +544,14 @@ GtkWidget * create_FileSelect( void )
  hbox6=gtk_hbox_new( FALSE,0 );
  gtk_widget_set_name( hbox6,"hbox6" );
  gtk_widget_ref( hbox6 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hbox6",hbox6,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hbox6",hbox6,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( hbox6 );
  gtk_box_pack_start( GTK_BOX( vbox4 ),hbox6,TRUE,TRUE,0 );
 
  fsFNameListWindow=gtk_scrolled_window_new( NULL,NULL );
  gtk_widget_set_name( fsFNameListWindow,"fsFNameListWindow" );
  gtk_widget_ref( fsFNameListWindow );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsFNameListWindow",fsFNameListWindow,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsFNameListWindow",fsFNameListWindow,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( fsFNameListWindow );
  gtk_box_pack_start( GTK_BOX( hbox6 ),fsFNameListWindow,TRUE,TRUE,0 );
  gtk_widget_set_usize( fsFNameListWindow,-2,145 );
@@ -570,8 +560,7 @@ GtkWidget * create_FileSelect( void )
  fsFNameList=gtk_clist_new( 2 );
  gtk_widget_set_name( fsFNameList,"fsFNameList" );
  gtk_widget_ref( fsFNameList );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsFNameList",fsFNameList,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsFNameList",fsFNameList,(GtkDestroyNotify)gtk_widget_unref );
  gtk_container_add( GTK_CONTAINER( fsFNameListWindow ),fsFNameList );
  gtk_clist_set_column_width( GTK_CLIST( fsFNameList ),0,80 );
  gtk_clist_set_selection_mode( GTK_CLIST( fsFNameList ),GTK_SELECTION_BROWSE );
@@ -582,16 +571,14 @@ GtkWidget * create_FileSelect( void )
  label1=gtk_label_new( "label1" );
  gtk_widget_set_name( label1,"label1" );
  gtk_widget_ref( label1 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"label1",label1,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"label1",label1,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( label1 );
  gtk_clist_set_column_widget( GTK_CLIST( fsFNameList ),0,label1 );
 
  hseparator2=gtk_hseparator_new();
  gtk_widget_set_name( hseparator2,"hseparator2" );
  gtk_widget_ref( hseparator2 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hseparator2",hseparator2,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hseparator2",hseparator2,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( hseparator2 );
  gtk_box_pack_start( GTK_BOX( vbox4 ),hseparator2,FALSE,TRUE,0 );
  gtk_widget_set_usize( hseparator2,-2,9 );
@@ -599,8 +586,7 @@ GtkWidget * create_FileSelect( void )
  List=gtk_combo_new();
  gtk_widget_set_name( List,"List" );
  gtk_widget_ref( List );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"List",List,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"List",List,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( List );
  gtk_box_pack_start( GTK_BOX( vbox4 ),List,FALSE,FALSE,0 );
  gtk_widget_set_usize( List,-2,20 );
@@ -613,8 +599,7 @@ GtkWidget * create_FileSelect( void )
  fsFilterCombo=GTK_COMBO( List )->entry;
  gtk_widget_set_name( fsFilterCombo,"fsFilterCombo" );
  gtk_widget_ref( fsFilterCombo );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsFilterCombo",fsFilterCombo,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"fsFilterCombo",fsFilterCombo,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( fsFilterCombo );
  gtk_entry_set_editable (GTK_ENTRY( fsFilterCombo ),FALSE );
  gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsVideoFilterNames[fsNumberOfVideoFilterNames - 1][0] );
@@ -622,8 +607,7 @@ GtkWidget * create_FileSelect( void )
  hseparator3=gtk_hseparator_new();
  gtk_widget_set_name( hseparator3,"hseparator3" );
  gtk_widget_ref( hseparator3 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hseparator3",hseparator3,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hseparator3",hseparator3,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( hseparator3 );
  gtk_box_pack_start( GTK_BOX( vbox4 ),hseparator3,FALSE,TRUE,0 );
  gtk_widget_set_usize( hseparator3,-2,7 );
@@ -631,8 +615,7 @@ GtkWidget * create_FileSelect( void )
  hbuttonbox3=gtk_hbutton_box_new();
  gtk_widget_set_name( hbuttonbox3,"hbuttonbox3" );
  gtk_widget_ref( hbuttonbox3 );
- gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hbuttonbox3",hbuttonbox3,
-                          ( GtkDestroyNotify ) gtk_widget_unref );
+ gtk_object_set_data_full( GTK_OBJECT( fsFileSelect ),"hbuttonbox3",hbuttonbox3,(GtkDestroyNotify)gtk_widget_unref );
  gtk_widget_show( hbuttonbox3 );
  gtk_box_pack_start( GTK_BOX( vbox4 ),hbuttonbox3,FALSE,TRUE,0 );
  gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox3 ),GTK_BUTTONBOX_END );
@@ -654,37 +637,16 @@ GtkWidget * create_FileSelect( void )
  gtk_container_add( GTK_CONTAINER( hbuttonbox3 ),fsCancel );
  gtk_widget_show( fsCancel );
 
- gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"destroy",
-                     GTK_SIGNAL_FUNC( fs_fsFileSelect_destroy ),
-                     NULL );
- gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"key_release_event",
-                     GTK_SIGNAL_FUNC( on_FileSelect_key_release_event ),
-                     NULL );
- gtk_signal_connect( GTK_OBJECT( fsFilterCombo ),"changed",
-                     GTK_SIGNAL_FUNC( fs_fsFilterCombo_changed ),
-                     fsFilterCombo );
- gtk_signal_connect( GTK_OBJECT( fsFilterCombo ),"activate",
-                     GTK_SIGNAL_FUNC( fs_fsFilterCombo_activate ),
-                     fsFilterCombo );
- gtk_signal_connect( GTK_OBJECT( fsPathCombo ),"changed",
-                     GTK_SIGNAL_FUNC( fs_fsPathCombo_changed ),
-                     fsPathCombo );
- gtk_signal_connect( GTK_OBJECT( fsPathCombo ),"activate",
-                     GTK_SIGNAL_FUNC( fs_fsPathCombo_activate ),
-                     fsPathCombo );
- gtk_signal_connect( GTK_OBJECT( fsUp ),"released",
-                     GTK_SIGNAL_FUNC( fs_Up_released ),
-                     fsFNameList );
- gtk_signal_connect( GTK_OBJECT( fsOk ),"released",
-                     GTK_SIGNAL_FUNC( fs_Ok_released ),
-                     fsCombo4 );
- gtk_signal_connect( GTK_OBJECT( fsCancel ),"released",
-                     GTK_SIGNAL_FUNC( fs_Cancel_released ),
-                     NULL );
-
- gtk_signal_connect( GTK_OBJECT( fsFNameList ),"select_row",
-                    ( GtkSignalFunc ) fs_fsFNameList_select_row,
-                     NULL );
+ gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"destroy",GTK_SIGNAL_FUNC( fs_fsFileSelect_destroy ),NULL );
+ gtk_signal_connect( GTK_OBJECT( fsFileSelect ),"key_release_event",GTK_SIGNAL_FUNC( on_FileSelect_key_release_event ),NULL );
+ gtk_signal_connect( GTK_OBJECT( fsFilterCombo ),"changed",GTK_SIGNAL_FUNC( fs_fsFilterCombo_changed ),fsFilterCombo );
+ gtk_signal_connect( GTK_OBJECT( fsFilterCombo ),"activate",GTK_SIGNAL_FUNC( fs_fsFilterCombo_activate ),fsFilterCombo );
+ gtk_signal_connect( GTK_OBJECT( fsPathCombo ),"changed",GTK_SIGNAL_FUNC( fs_fsPathCombo_changed ),fsPathCombo );
+ gtk_signal_connect( GTK_OBJECT( fsPathCombo ),"activate",GTK_SIGNAL_FUNC( fs_fsPathCombo_activate ),fsPathCombo );
+ gtk_signal_connect( GTK_OBJECT( fsUp ),"released",GTK_SIGNAL_FUNC( fs_Up_released ),fsFNameList );
+ gtk_signal_connect( GTK_OBJECT( fsOk ),"released",GTK_SIGNAL_FUNC( fs_Ok_released ),fsCombo4 );
+ gtk_signal_connect( GTK_OBJECT( fsCancel ),"released",GTK_SIGNAL_FUNC( fs_Cancel_released ),NULL );
+ gtk_signal_connect( GTK_OBJECT( fsFNameList ),"select_row",(GtkSignalFunc)fs_fsFNameList_select_row,NULL );
 
  gtk_widget_grab_focus( fsFNameList );
 

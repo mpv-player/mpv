@@ -62,12 +62,12 @@ int gtkFillSkinList( gchar * mdir )
 }
 
 void on_SkinBrowser_destroy( GtkObject * object,gpointer user_data )
-{ gtk_widget_hide( SkinBrowser ); }
+{ gtk_widget_destroy( SkinBrowser ); }
 
 void on_SkinBrowser_Cancel( GtkObject * object,gpointer user_data )
 {
  if ( strcmp( sbSelectedSkin,gtkOldSkin ) ) ChangeSkin( gtkOldSkin );
- gtk_widget_hide( SkinBrowser );
+ gtk_widget_destroy( SkinBrowser );
 }
 
 void on_SkinBrowser_Ok( GtkObject * object,gpointer user_data )
@@ -75,7 +75,7 @@ void on_SkinBrowser_Ok( GtkObject * object,gpointer user_data )
  ChangeSkin( sbSelectedSkin );
  if ( skinName ) free( skinName );
  skinName=strdup( sbSelectedSkin );
- gtk_widget_hide( SkinBrowser );
+ gtk_widget_destroy( SkinBrowser );
 }
 
 void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * bevent,gpointer user_data )
@@ -91,7 +91,7 @@ void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * be
   {
    if ( skinName ) free( skinName );
    skinName=strdup( sbSelectedSkin );
-   gtk_widget_hide( SkinBrowser );
+   gtk_widget_destroy( SkinBrowser );
   }
 }
 

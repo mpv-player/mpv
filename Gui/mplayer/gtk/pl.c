@@ -8,7 +8,7 @@
 
 void HidePlayList( void )
 {
- gtk_widget_hide( PlayList );
+ gtk_widget_destroy( PlayList );
 }
 
 void pl_PlayList_destroy( GtkObject * object,gpointer user_data )
