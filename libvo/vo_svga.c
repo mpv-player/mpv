@@ -152,7 +152,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
   }
   
   printf("SVGAlib resolution: %dx%d %dbpp - ", WIDTH, HEIGHT, bpp);
-  if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d %f.2\n",maxw,maxh,scaling);
+  if (maxw != orig_w || maxh != orig_h) printf("Video scaled to: %dx%d\n",maxw,maxh);
   else printf("No video scaling\n");
 
   return (0);
