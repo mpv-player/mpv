@@ -86,9 +86,9 @@ int bsize = VCD_SECTOR_SIZE;
 #endif
 
 #ifdef HAVE_CDDA
-if(strncmp("cdda://",filename,7) == 0)
+if(filename && strncmp("cdda://",filename,7) == 0)
   return open_cdda(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
-if(strncmp("cddb://",filename,7) == 0)
+if(filename && strncmp("cddb://",filename,7) == 0)
   return cddb_open(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
 #endif
 
