@@ -705,6 +705,7 @@ static void uninit(void)
 {
  int i;
  if ( !vo_config_count ) return;
+ free( ai );
  saver_on(mDisplay); // screen saver back on
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
 #ifdef HAVE_XF86VM

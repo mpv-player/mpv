@@ -488,6 +488,7 @@ void vo_x11_uninit()
     {
 	if(vo_gc){
 	  XSetBackground( mDisplay,vo_gc,0 );
+	  XFreeGC( mDisplay,vo_gc );
 	  vo_gc=NULL;
 	}
 	if(vo_window!=None){
