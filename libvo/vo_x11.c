@@ -589,7 +589,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 	int foo;
 	Window root;
 
-        vo_x11_decoration( mDisplay,vo_window,0 );
 #ifdef LOCAL_LOOKUP
 	XGetGeometry(mDisplay, vo_window, &root, &foo, &foo,
 		     &vo_fs_oldwidth, &vo_fs_oldheight, &foo, &foo);
@@ -609,15 +608,17 @@ static uint32_t control(uint32_t request, void *data, ...)
 	/* resize */
 	vo_dwidth = vo_screenwidth;
 	vo_dheight = vo_screenheight;
+	vo_x11_decoration( mDisplay,vo_window,0 );
 	XMoveResizeWindow(mDisplay, vo_window, 0, 0,
 	    vo_screenwidth, vo_screenheight);
 	XSync(mDisplay, False);
     }
     else
     {
+	vo_x11_decoration( mDisplay,vo_window,1 );
 	XMoveResizeWindow(mDisplay, vo_window, vo_fs_oldx, vo_fs_oldy, 
 	    vo_fs_oldwidth, vo_fs_oldheight);
-	vo_x11_decoration( mDisplay,vo_window,1 );
+	
 
 #ifdef LOCAL_LOOKUP
 	/* restore */
