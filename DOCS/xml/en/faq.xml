@@ -20,6 +20,18 @@ describing all the necessary details. Please follow the instructions.
 
 <qandaentry>
 <question><para>
+How do I translate <application>MPlayer</application> to a new language?
+</para></question>
+<answer><para>
+Read the <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
+it should explain everything. You can get further help on the
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>
+mailing list.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 How can I support <application>MPlayer</application> development?
 </para></question>
 <answer><para>
@@ -38,7 +50,10 @@ We always welcome coders and documenters. Read the
 <ulink url="../../tech/">technical documentation</ulink>
 to get a first grasp. Then you should subscribe to the
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
-mailing list and start coding.
+mailing list and start coding. If you want to help out with the documentation,
+join the
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>
+mailing list.
 </para></answer>
 </qandaentry>
 
