@@ -1024,6 +1024,15 @@ an Intel Indeo video codec.
 </LI>
 
 <LI>
+There are several ways of capturing audio. You can grab the sound
+either using your soundcard via an external cable connection between
+video card and line-in, or using the built-in ADC in the bt878
+chip. In the latter case, you have to load the <b>btaudio</b>
+driver. Read the <CODE>linux/Documentation/sound/btaudio</CODE> file
+(in the kernel tree, not MPlayer's) for some instructions on using this driver.
+</LI>
+
+<LI>
 If MEncoder cannot open the audio device, make sure that it is really
 available. There can be some trouble with the sound servers like arts
 (KDE) or esd (GNOME). If you have a full duplex soundcard (almost any
