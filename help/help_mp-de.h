@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.157
+// In synch with rev 1.158
 
 // ========================= MPlayer help ===========================
 
@@ -743,6 +743,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DoNotPlaySound "Spiele keinen Ton"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalisiere Ton"
 #define MSGTR_PREFERENCES_EnEqualizer "Equalizer verwenden"
+#define MSGTR_PREFERENCES_SoftwareMixer "Aktiviere Software-Mixer"
 #define MSGTR_PREFERENCES_ExtraStereo "Extra Stereo verwenden"
 #define MSGTR_PREFERENCES_Coefficient "Koeffizient:"
 #define MSGTR_PREFERENCES_AudioDelay "Audio-Verzögerung"
