@@ -221,10 +221,33 @@ if(dvd_title){
      * Open the disc.
      */
     if(!dvd_device) dvd_device=strdup(DEFAULT_DVD_DEVICE);
-    dvd = DVDOpen(dvd_device);
-    if( !dvd ) {
-        mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device);
-        return NULL;
+#ifdef SYS_DARWIN
+    /* Dynamic DVD drive selection on Darwin */
+    if (!strcmp(dvd_device, "/dev/rdiskN")) {
+	int i;
+	char *temp_device = malloc((strlen(dvd_device)+1)*sizeof(char));
+	
+	for (i = 1; i < 10; i++) {
+	    sprintf(temp_device, "/dev/rdisk%d", i);
+	    dvd = DVDOpen(temp_device);
+	    if (!dvd) {
+	        mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,temp_device);
+	    } else {
+	        free(temp_device);
+	        break;
+	    }
+	}
+	
+	if (!dvd)
+	    return NULL;
+    } else
+#endif /* SYS_DARWIN */
+    {
+        dvd = DVDOpen(dvd_device);
+	if( !dvd ) {
+	    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device);
+	    return NULL;
+	}
     }
 
     mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_DVDwait);
