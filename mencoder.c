@@ -10,7 +10,13 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "version.h"
 #include "help_mp.h"
+
+static char* banner_text=
+"\n\n"
+"MEncoder " VERSION "(C) 2000-2001 Arpad Gereoffy (see DOCS!)\n"
+"\n";
 
 #include "codec-cfg.h"
 
@@ -256,6 +262,7 @@ int num_filenames;
 //unsigned char* out_buffer=malloc(out_buffer_size);
 
   mp_msg_init(MSGL_STATUS);
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s",banner_text);
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
