@@ -13,6 +13,9 @@ struct config conf[]={
 	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0},
 #endif
 	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
+	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
+	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
+	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
 	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0},
 	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1},

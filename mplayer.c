@@ -37,6 +37,8 @@
 #include "cfgparser.h"
 #include "cfg-mplayer-def.h"
 
+#include "subreader.h"
+
 #include "libvo/video_out.h"
 #include "libvo/sub.h"
 
@@ -93,6 +95,40 @@ extern int errno;
 
 #define DEBUG if(0)
 static int verbose=0;
+
+//**************************************************************************//
+//             .SUB 
+//**************************************************************************//
+
+static current_sub=0;
+
+static subtitle* subtitles=NULL;
+
+void find_sub(unsigned long key){
+    int i,j;
+    if(current_sub<0 || current_sub>=sub_num) current_sub=0;
+    vo_sub=&subtitles[current_sub];
+    if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
+    // use logarithmic search:
+    i=0;j=sub_num-1;
+//    printf("Searching %d in %d..%d\n",key,subtitles[i].start,subtitles[j].end);
+    while(j>=i){
+        current_sub=(i+j+1)/2;
+        if(key<subtitles[current_sub].start)
+            j=current_sub-1;
+        else
+        if(key>subtitles[current_sub].end)
+            i=current_sub+1;
+        else break; // found!
+    }
+    vo_sub=&subtitles[current_sub];
+    if(key>=vo_sub->start && key<=vo_sub->end) return; // OK!
+    vo_sub=NULL; // no sub here
+}
+
+//**************************************************************************//
+//             Config file
+//**************************************************************************//
 
 static int cfg_inc_verbose(struct config *conf){
     ++verbose;
@@ -418,6 +454,9 @@ char *conffile;
 int conffile_fd;
 char *font_name=NULL;
 float font_factor=0.75;
+char *sub_name=NULL;
+float sub_delay=0;
+float sub_fps=0;
 #include "cfg-mplayer.h"
 
   printf("%s",banner_text);
@@ -471,6 +510,16 @@ if(video_driver && strcmp(video_driver,"help")==0){
       // try default:
        vo_font=read_font_desc(get_path("font/font.desc"),font_factor);
   }
+
+// check .sub
+  if(sub_name){
+       subtitles=sub_read_file(sub_name);
+       if(!subtitles) printf("Can't load subtitles: %s\n",font_name);
+  } else {
+      // try default:
+       subtitles=sub_read_file(get_path("default.sub"));
+  }
+
 
 // check video_out driver name:
   if(!video_driver)
@@ -2310,6 +2359,12 @@ switch(file_format){
   sprintf(osd_text_buffer,"%c %02d:%02d:%02d",osd_function,(int)v_pts/3600,((int)v_pts/60)%60,((int)v_pts)%60);
 //  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
   vo_osd_text=osd_text_buffer;
+  
+  // find sub
+  if(subtitles){
+      if(sub_fps==0) sub_fps=default_fps;
+      find_sub(sub_uses_time?(100*(v_pts+sub_delay)):((v_pts+sub_delay)*sub_fps)); // FIXME! frame counter...
+  }
 }
 
 } // while(!eof)
