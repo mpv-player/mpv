@@ -143,6 +143,12 @@ DS_VideoDecoder * DS_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHEAD
 
 
 	this->m_pDS_Filter = DS_FilterCreate(dllname, guid, &this->m_sOurType, &this->m_sDestType);
+	
+	if (!this->m_pDS_Filter)
+	{
+	    printf("Failed to create DirectShow filter\n");
+	    return 0;
+	}
 
 	if (!flip)
 	{
