@@ -529,7 +529,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	if(extra_size > 0)
 	  memcpy(sh_a->wf+sizeof(WAVEFORMATEX),pack.packet+142,extra_size);
 
-	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate * sh_a->channels;
+	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is audio (old hdr)\n",ogg_d->num_sub);
 	if(verbose) print_wave_header(sh_a->wf);
@@ -580,7 +580,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	if(extra_size)
 	  memcpy(sh_a->wf+sizeof(WAVEFORMATEX),st+1,extra_size);
 
-	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate * sh_a->channels;
+	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;
 	n_audio++;
 	mp_msg(MSGT_DEMUX,MSGL_V,"OGG stream %d is audio (new hdr)\n",ogg_d->num_sub);
 	if(verbose) print_wave_header(sh_a->wf);
