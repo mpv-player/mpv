@@ -7,6 +7,8 @@
 #ifndef __URL_H
 #define __URL_H
 
+//#define __URL_DEBUG
+
 typedef struct {
 	char *url;
 	char *protocol;
@@ -24,4 +26,8 @@ void   url_free(URL_t* url);
 void url_unescape_string(char *outbuf, char *inbuf);
 void url_escape_string(char *outbuf, char *inbuf);
 
-#endif
+#ifndef __URL_DEBUG
+void url_debug(URL_t* url);
+#endif // __URL_DEBUG
+
+#endif // __URL_H

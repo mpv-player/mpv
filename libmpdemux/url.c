@@ -192,3 +192,31 @@ url_escape_string(char *outbuf, char *inbuf) {
 	} while (c != '\0');
 }
 
+#ifdef __URL_DEBUG
+void
+url_debug(URL_t *url) {
+	if( url==NULL ) {
+		printf("URL pointer NULL\n");
+		return;
+	}
+	if( url->url!=NULL ) {
+		printf("url=%s\n", url->url );
+	}
+	if( url->protocol!=NULL ) {
+		printf("protocol=%s\n", url->protocol );
+	}
+	if( url->hostname!=NULL ) {
+		printf("hostname=%s\n", url->hostname );
+	}
+	printf("port=%d\n", url->port );
+	if( url->file!=NULL ) {
+		printf("file=%s\n", url->file );
+	}
+	if( url->username!=NULL ) {
+		printf("username=%s\n", url->username );
+	}
+	if( url->password!=NULL ) {
+		printf("password=%s\n", url->password );
+	}
+}
+#endif //__URL_DEBUG
