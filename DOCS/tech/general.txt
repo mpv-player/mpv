@@ -11,7 +11,7 @@ The main modules:
 	 reading by bytes, or blocks with any size.
 	 The stream_t structure describes the input stream, file/device.
 
-2. demuxer.c: this makes the demultiplexing of the input to audio and video
+2. demuxer.c: this does the demultiplexing of the input to audio and video
    channels, and their reading by buffered packages.
 	 The demuxer.c is basically a framework, which is the same for all the
 	 input formats, and there are parsers for each of them (mpeg-es,
