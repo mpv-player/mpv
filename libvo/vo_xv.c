@@ -618,43 +618,48 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
  uint8_t *src;
  uint8_t *dst;
  int i;
+ int srcstride;
 
- dst = xvimage[current_buf]->data + image_width * y + x;
+ dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[0] + 
+       xvimage[current_buf]->pitches[0]*y + x;
  src = image[0];
- if(w==stride[0] && w==image_width) memcpy(dst,src,w*h);
+ if(w==stride[0] && w==xvimage[current_buf]->pitches[0]) memcpy(dst,src,w*h);
    else
     for(i=0;i<h;i++)
      {
       memcpy(dst,src,w);
       src+=stride[0];
-      dst+=image_width;
+      dst+=xvimage[current_buf]->pitches[0];
      }
 
  x/=2;y/=2;w/=2;h/=2;
 
- dst = xvimage[current_buf]->data + image_width * image_height + (image_width>>1) * y + x;
- if(image_format!=IMGFMT_YV12) dst+=(image_width>>1)*(image_height>>1);
- src = image[2];
- if(w==stride[2] && w==image_width/2) memcpy(dst,src,w*h);
+ dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[1] + 
+       xvimage[current_buf]->pitches[1]*y + x;
+ src=image[2];srcstride=stride[2];
+ if(image_format!=IMGFMT_YV12){ src=image[1];srcstride=stride[1]; }
+ if(w==srcstride && w==xvimage[current_buf]->pitches[1]) memcpy(dst,src,w*h);
   else
    for(i=0;i<h;i++)
     {
      memcpy(dst,src,w);
-     src+=stride[2];
-     dst+=image_width/2;
+     src+=srcstride;
+     dst+=xvimage[current_buf]->pitches[1];
    }
 
- dst = xvimage[current_buf]->data + image_width * image_height + (image_width>>1) * y + x;
- if(image_format==IMGFMT_YV12) dst+=(image_width>>1)*(image_height>>1);
- src = image[1];
- if(w==stride[1] && w==image_width/2) memcpy(dst,src,w*h);
+ dst = xvimage[current_buf]->data + xvimage[current_buf]->offsets[2] + 
+       xvimage[current_buf]->pitches[2]*y + x;
+ src=image[2];srcstride=stride[2];
+ if(image_format==IMGFMT_YV12){ src=image[1];srcstride=stride[1]; }
+ if(w==srcstride && w==xvimage[current_buf]->pitches[2]) memcpy(dst,src,w*h);
   else
    for(i=0;i<h;i++)
     {
      memcpy(dst,src,w);
-     src+=stride[1];
-     dst+=image_width/2;
-    }
+     src+=srcstride;
+     dst+=xvimage[current_buf]->pitches[2];
+   }
+
  return 0;
 }
 
@@ -666,56 +671,44 @@ static uint32_t draw_frame(uint8_t *src[])
  case IMGFMT_UYVY:
  case IMGFMT_YVYU:
 
-     // YUY2 packed, flipped
-#if 0
-     int i;
-     unsigned short *s=(unsigned short *)src[0];
-     unsigned short *d=(unsigned short *)xvimage[current_buf]->data;
-     s+=image_width*image_height;
-     for(i=0;i<image_height;i++) {
-	 s-=image_width;
-	 memcpy(d,s,image_width*2);
-	 d+=image_width;
-     }
-#else
-     memcpy(xvimage[current_buf]->data,src[0],image_width*image_height*2);
-#endif
-     break;
+//    printf("off=0x%X  pitch=%d  width=%d  \n",xvimage[current_buf]->offsets[0],xvimage[current_buf]->pitches[0],image_width);
 
- case IMGFMT_YV12:
- case IMGFMT_I420:
- case IMGFMT_IYUV:
-
-     // YV12 planar
-     memcpy(xvimage[current_buf]->data,src[0],image_width*image_height);
-     if (xv_format == IMGFMT_YV12)
-     {
-        memcpy(xvimage[current_buf]->data+image_width*image_height,src[2],image_width*image_height/4);
-        memcpy(xvimage[current_buf]->data+image_width*image_height*5/4,src[1],image_width*image_height/4);
-     }
-     else
-     {
-        memcpy(xvimage[current_buf]->data+image_width*image_height,src[1],image_width*image_height/4);
-        memcpy(xvimage[current_buf]->data+image_width*image_height*5/4,src[2],image_width*image_height/4);
-     }
-     break;
+    // YUY2 packed
+    if(image_width*2==xvimage[current_buf]->pitches[0]){
+	memcpy(xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
+	    src[0], image_width*image_height*2);
+    } else {
+	unsigned char* s=src[0];
+	unsigned char* d=xvimage[current_buf]->data+xvimage[current_buf]->offsets[0];
+	int i;
+	for(i=0;i<image_height;i++) {
+	    memcpy(d,s,image_width*2);
+	    s+=image_width*2;
+	    d+=xvimage[current_buf]->pitches[0];
+	}
+    }
+    break;
 
  case IMGFMT_BGR24:
 
     if(flip_flag)	// tricky, using negative src stride:
      rgb24toyv12(src[0]+3*image_width*(image_height-1),
-                 xvimage[current_buf]->data,
-		 xvimage[current_buf]->data+image_width*image_height*5/4,
-		 xvimage[current_buf]->data+image_width*image_height,
+                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
+                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[2],
+                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[1],
 		 image_width,image_height,
-		 image_width,image_width/2,-3*image_width);
+		 xvimage[current_buf]->pitches[0],
+		 xvimage[current_buf]->pitches[1],
+		 -3*image_width);
     else
      rgb24toyv12(src[0],
-                 xvimage[current_buf]->data,
-		 xvimage[current_buf]->data+image_width*image_height*5/4,
-		 xvimage[current_buf]->data+image_width*image_height,
+                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
+                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[2],
+                 xvimage[current_buf]->data+xvimage[current_buf]->offsets[1],
 		 image_width,image_height,
-		 image_width,image_width/2,3*image_width);
+		 xvimage[current_buf]->pitches[0],
+		 xvimage[current_buf]->pitches[1],
+		 3*image_width);
      break;
 
  }
@@ -728,24 +721,26 @@ static uint32_t get_image(mp_image_t *mpi){
     if(mpi->type==MP_IMGTYPE_IPB && num_buffers<3 && mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // not enough
     if(mpi->imgfmt!=image_format || mpi->imgfmt==IMGFMT_BGR24) return VO_FALSE; // needs conversion :(
 //    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
-    if(mpi->width==image_width){
-       if(mpi->flags&MP_IMGFLAG_PLANAR){
-	   mpi->planes[0]=xvimage[current_buf]->data;
-	   if(mpi->flags&MP_IMGFLAG_SWAPPED){
-	       // I420
-	       mpi->planes[1]=xvimage[current_buf]->data+image_width*image_height;
-	       mpi->planes[2]=mpi->planes[1]+(image_width>>1)*(image_height>>1);
-	   } else {
+    if( (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ||
+	(mpi->width*(mpi->bpp/8)==xvimage[current_buf]->pitches[0]) ){
+	mpi->planes[0]=xvimage[current_buf]->data+xvimage[current_buf]->offsets[0];
+	mpi->stride[0]=xvimage[current_buf]->pitches[0];
+	mpi->width=mpi->stride[0]/(mpi->bpp/8);
+	if(mpi->flags&MP_IMGFLAG_PLANAR){
+	    if(mpi->flags&MP_IMGFLAG_SWAPPED){
+		// I420
+		mpi->planes[1]=xvimage[current_buf]->data+xvimage[current_buf]->offsets[1];
+		mpi->planes[2]=xvimage[current_buf]->data+xvimage[current_buf]->offsets[2];
+		mpi->stride[1]=xvimage[current_buf]->pitches[1];
+		mpi->stride[2]=xvimage[current_buf]->pitches[2];
+	    } else {
 	       // YV12
-	       mpi->planes[2]=xvimage[current_buf]->data+image_width*image_height;
-	       mpi->planes[1]=mpi->planes[2]+(image_width>>1)*(image_height>>1);
-	   }
-	   mpi->stride[0]=image_width;
-	   mpi->stride[1]=mpi->stride[2]=image_width/2;
-       } else {
-           mpi->planes[0]=xvimage[current_buf]->data;
-	   mpi->stride[0]=image_width*(mpi->bpp>>3);
-       }
+		mpi->planes[1]=xvimage[current_buf]->data+xvimage[current_buf]->offsets[2];
+		mpi->planes[2]=xvimage[current_buf]->data+xvimage[current_buf]->offsets[1];
+		mpi->stride[1]=xvimage[current_buf]->pitches[2];
+		mpi->stride[2]=xvimage[current_buf]->pitches[1];
+	    }
+	}
        mpi->flags|=MP_IMGFLAG_DIRECT;
 //	printf("mga: get_image() SUCCESS -> Direct Rendering ENABLED\n");
        return VO_TRUE;
@@ -759,46 +754,14 @@ static uint32_t query_format(uint32_t format)
    /* check image formats */
      if(format==IMGFMT_BGR24){ format=IMGFMT_YV12;flag&=~2;flag|=VFCAP_FLIP;} // conversion!
      for(i = 0; i < formats; i++){
-//       printf("Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
        if (fo[i].id == format) return flag; //xv_format = fo[i].id;
      }
      return 0;
-
-/*
-switch(format){
- case IMGFMT_YUY2:
- case IMGFMT_UYVY:
- case IMGFMT_YVYU:
-
- case IMGFMT_YV12:
- case IMGFMT_I420:
- case IMGFMT_IYUV:
-
- case IMGFMT_BGR24:
-
-// umm, this is a kludge, we need to ask the server.. (see init function above)
-    return 1;
-}
-return 0;
-*/
-
 }
 
 static void uninit(void) 
 {
  int i;
-#if 0
-
- if(!mDisplay) return;
- saver_on(mDisplay); // screen saver back on
- if(vo_config_count) for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
-#ifdef HAVE_XF86VM
- vo_vm_close(mDisplay);
-#endif
- if(vo_config_count) vo_x11_uninit();
-
-#else
-
  if ( !vo_config_count ) return;
  saver_on(mDisplay); // screen saver back on
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
@@ -806,8 +769,6 @@ static void uninit(void)
  vo_vm_close(mDisplay);
 #endif
  vo_x11_uninit();
-
-#endif
 }
 
 static uint32_t preinit(const char *arg)
