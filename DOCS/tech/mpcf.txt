@@ -262,7 +262,7 @@ shuffle_type
 	1-16 -> interleave packets by 2^n 
 
 checksum
-	crc32 checksum using the generator polynomial=0x04c11db7 (same as ogg)
+	crc32 checksum using the generator polynomial 0x104c11db7 (same as ogg)
 
 checksum_flag
 	indicates that the frame_checksum is coded
