@@ -137,7 +137,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     int screen_size_x=0;//SCREEN_SIZE_X;
     int screen_size_y=0;//SCREEN_SIZE_Y;
 //    vo_functions_t* video_out=sh->video_out;
-    vf_instance_t* vf=sh->vfilter;
+    vf_instance_t* vf=sh->vfilter,*sc=NULL;
 
 #if 1
     if(!(sh->disp_w && sh->disp_h))
@@ -182,12 +182,12 @@ csp_again:
 	// TODO: no match - we should use conversion...
 	if(strcmp(vf->info->name,"scale")){	
 	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_CouldNotFindColorspace);
-	    vf=vf_open_filter(vf,"scale",NULL);
+	    sc=vf=vf_open_filter(vf,"scale",NULL);
 	    goto csp_again;
 	} else { // sws failed, if the last filter (vf_vo) support MPEGPES try to append vf_lavc
 	     vf_instance_t* vo, *vp = NULL, *ve;
-	     // Remove the scale filter
-	     if(strcmp(vf->info->name,"scale") == 0) {
+	     // Remove the scale filter if we added it ourself
+	     if(vf == sc) {
 	       ve = vf;
 	       vf = vf->next;
 	       vf_uninit_filter(ve);
