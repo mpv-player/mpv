@@ -15,6 +15,9 @@
 #include "demuxer.h"
 #include "stheader.h"
 
+//! palettes with more than 256 colors are not supported anyway
+#define MAX_PALETTE 256
+
 typedef struct {
   int image_size;
   int image_offset;
@@ -71,7 +74,9 @@ demuxer_t* demux_open_bmp(demuxer_t* demuxer)
 
   // load the BITMAPINFOHEADER
   // allocate size and take the palette table into account
-  sh_video->bih = (BITMAPINFOHEADER *)malloc(data_offset - 12);
+  // due to security considerations, the memory for the palette
+  // is allocate after all other data is known
+  sh_video->bih = (BITMAPINFOHEADER *)malloc(sizeof(BITMAPINFOHEADER));
   sh_video->bih->biSize = stream_read_dword_le(demuxer->stream);
   sh_video->bih->biWidth = stream_read_dword_le(demuxer->stream);
   sh_video->bih->biHeight = stream_read_dword_le(demuxer->stream);
@@ -83,9 +88,18 @@ demuxer_t* demux_open_bmp(demuxer_t* demuxer)
   sh_video->bih->biYPelsPerMeter = stream_read_dword_le(demuxer->stream);
   sh_video->bih->biClrUsed = stream_read_dword_le(demuxer->stream);
   sh_video->bih->biClrImportant = stream_read_dword_le(demuxer->stream);
+
+  if (sh_video->bih->biClrUsed > MAX_PALETTE) {
+    mp_msg(MSGT_DEMUX, MSGL_WARN, "bmp palette contains more than %d colors "
+            "(%d) which is not supported\n", MAX_PALETTE,
+            sh_video->bih->biClrUsed);
+    sh_video->bih->biClrUsed = MAX_PALETTE;
+  }
+  sh_video->bih = realloc(sh_video->bih, sizeof(BITMAPINFOHEADER) +
+                           sh_video->bih->biClrUsed * 4);
   // fetch the palette
-  stream_read(demuxer->stream, (unsigned char *)(sh_video->bih) + 40,
-    sh_video->bih->biClrUsed * 4);
+  stream_read(demuxer->stream, (unsigned char *)(sh_video->bih) +
+               sizeof(BITMAPINFOHEADER), sh_video->bih->biClrUsed * 4);
 
   // load the data
   bmp_image = (bmp_image_t *)malloc(sizeof(bmp_image_t));
