@@ -96,9 +96,15 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
       // read from stdin
       mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
       f=0; // 0=stdin
+#ifdef __MINGW32__
+	  setmode(fileno(stdin),O_BINARY);
+#endif
     } else {
       mp_msg(MSGT_OPEN,MSGL_INFO,"Writing to stdout\n");
       f=1;
+#ifdef __MINGW32__
+	  setmode(fileno(stdout),O_BINARY);
+#endif
     }
   } else {
     f=open(p->filename,m);
@@ -110,7 +116,11 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   }
 
   len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
+#ifdef __MINGW32__
+  if(f==0 || len == -1) {
+#else
   if(len == -1) {
+#endif
     stream->seek = seek_forward;
     stream->type = STREAMTYPE_STREAM; // Must be move to STREAMTYPE_FILE
     stream->flags |= STREAM_SEEK_FW;
