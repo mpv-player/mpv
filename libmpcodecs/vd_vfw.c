@@ -39,6 +39,64 @@ static int vfw_set_postproc(sh_video_t* sh, int quality)
     return ICSendMessage(priv->handle, ICM_USER+80, (long)(&quality) ,NULL);
 }
 
+static void set_csp(BITMAPINFOHEADER *o_bih,unsigned int outfmt){
+    int yuv = 0;
+
+	switch (outfmt)
+	{
+	/* planar format */
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+	    o_bih->biBitCount=12;
+	    yuv=1;
+	    break;
+	case IMGFMT_YVU9:
+	case IMGFMT_IF09:
+	    o_bih->biBitCount=9;
+	    yuv=1;
+	    break;
+	/* packed format */
+	case IMGFMT_YUY2:
+        case IMGFMT_UYVY:
+        case IMGFMT_YVYU:
+    	    o_bih->biBitCount=16;
+	    yuv=1;
+	    break;
+	/* rgb/bgr format */
+	case IMGFMT_RGB8:
+	case IMGFMT_BGR8:
+	    o_bih->biBitCount=8;
+	    break;
+	case IMGFMT_RGB15:
+	case IMGFMT_RGB16:
+	case IMGFMT_BGR15:
+	case IMGFMT_BGR16:
+	    o_bih->biBitCount=16;
+	    break;
+	case IMGFMT_RGB24:
+	case IMGFMT_BGR24:
+	    o_bih->biBitCount=24;
+	    break;
+	case IMGFMT_RGB32:
+	case IMGFMT_BGR32:
+	    o_bih->biBitCount=32;
+	    break;
+	default:
+	    mp_msg(MSGT_WIN32,MSGL_ERR,"Unsupported image format: %s\n", vo_format_name(outfmt));
+	    return;
+	}
+
+	o_bih->biSizeImage = abs(o_bih->biWidth * o_bih->biHeight * (o_bih->biBitCount/8));
+
+// Note: we cannot rely on sh->outfmtidx here, it's undefined at this stage!!!
+//	if (yuv && !(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_YUVHACK))
+	if (yuv)
+	    o_bih->biCompression = outfmt;
+	else
+	    o_bih->biCompression = 0;
+}
+
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     vd_vfw_ctx *priv = sh->context;
@@ -48,73 +106,21 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     case VDCTRL_SET_PP_LEVEL:
 	vfw_set_postproc(sh,10*(*((int*)arg)));
 	return CONTROL_OK;
+#if 0
+    // FIXME: make this optional...
     case VDCTRL_QUERY_FORMAT:
       {
-	int outfmt = *((int*)arg);
-	int yuv = 0;
 	HRESULT ret;
-
-	switch (outfmt)
-	{
-	/* planar format */
-	case IMGFMT_YV12:
-	case IMGFMT_I420:
-	case IMGFMT_IYUV:
-	    priv->o_bih->biBitCount=12;
-	    yuv=1;
-	    break;
-	case IMGFMT_YVU9:
-	case IMGFMT_IF09:
-	    priv->o_bih->biBitCount=9;
-	    yuv=1;
-	    break;
-	/* packed format */
-	case IMGFMT_YUY2:
-        case IMGFMT_UYVY:
-        case IMGFMT_YVYU:
-    	    priv->o_bih->biBitCount=16;
-	    yuv=1;
-	    break;
-	/* rgb/bgr format */
-	case IMGFMT_RGB8:
-	case IMGFMT_BGR8:
-	    priv->o_bih->biBitCount=8;
-	    break;
-	case IMGFMT_RGB15:
-	case IMGFMT_RGB16:
-	case IMGFMT_BGR15:
-	case IMGFMT_BGR16:
-	    priv->o_bih->biBitCount=16;
-	    break;
-	case IMGFMT_RGB24:
-	case IMGFMT_BGR24:
-	    priv->o_bih->biBitCount=24;
-	    break;
-	case IMGFMT_RGB32:
-	case IMGFMT_BGR32:
-	    priv->o_bih->biBitCount=32;
-	    break;
-	default:
-	    mp_msg(MSGT_WIN32,MSGL_ERR,"Unsupported image format: %s\n", vo_format_name(outfmt));
-	    return 0;
-	}
-
-	priv->o_bih->biSizeImage = abs(priv->o_bih->biWidth * priv->o_bih->biHeight * (priv->o_bih->biBitCount/8));
-
-	if (yuv && !(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_YUVHACK))
-	    priv->o_bih->biCompression = outfmt;
-	else
-	     priv->o_bih->biCompression = 0;
-
+	set_csp(priv->o_bih,*((int*)arg));
 	ret = ICDecompressQuery(priv->handle, sh->bih, priv->o_bih);
 	if (ret)
 	{
 	    mp_msg(MSGT_WIN32, MSGL_DBG2, "ICDecompressQuery failed:: Error %d\n", (int)ret);
 	    return CONTROL_FALSE;
 	}
-	else
-	    return CONTROL_TRUE;
+	return CONTROL_TRUE;
       }
+#endif
     }
     return CONTROL_UNKNOWN;
 }
@@ -123,7 +129,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 static int init(sh_video_t *sh){
     HRESULT ret;
     int yuv=0;
-    unsigned int outfmt=sh->codec->outfmt[sh->outfmtidx];
+//    unsigned int outfmt=sh->codec->outfmt[sh->outfmtidx];
     int i, o_bih_len;
     vd_vfw_ctx *priv;
   
@@ -150,7 +156,7 @@ static int init(sh_video_t *sh){
     priv->o_bih = malloc(o_bih_len);
     memset(priv->o_bih, 0, o_bih_len);
 
-    printf("ICDecompressGetFormatSize ret: %d\n", o_bih_len);
+    mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetFormatSize ret: %d\n", o_bih_len);
 
     ret = ICDecompressGetFormat(priv->handle, sh->bih, priv->o_bih);
     if(ret < 0){
@@ -160,13 +166,6 @@ static int init(sh_video_t *sh){
     }
     mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetFormat OK\n");
 
-    ret = ICDecompressGetPalette(priv->handle, sh->bih, priv->o_bih);
-    if (!ret)
-    {
-	priv->palette = ((unsigned char*)priv->o_bih) + sh->bih->biSize;
-	mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetPalette OK\n");
-    }
-
 #if 0
     // workaround for pegasus MJPEG:
     if(!sh_video->o_bih.biWidth) sh_video->o_bih.biWidth=sh_video->bih->biWidth;
@@ -174,110 +173,57 @@ static int init(sh_video_t *sh){
     if(!sh_video->o_bih.biPlanes) sh_video->o_bih.biPlanes=sh_video->bih->biPlanes;
 #endif
 
-    switch (outfmt)
-    {
-    /* planar format */
-    case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
-	priv->o_bih->biBitCount=12;
-	yuv=1;
-	break;
-    case IMGFMT_YVU9:
-    case IMGFMT_IF09:
-	priv->o_bih->biBitCount=9;
-	yuv=1;
-	break;
-    /* packed format */
-    case IMGFMT_YUY2:
-    case IMGFMT_UYVY:
-    case IMGFMT_YVYU:
-	priv->o_bih->biBitCount=16;
-	yuv=1;
-	break;
-    /* rgb/bgr format */
-    case IMGFMT_RGB8:
-    case IMGFMT_BGR8:
-	priv->o_bih->biBitCount=8;
-	break;
-    case IMGFMT_RGB15:
-    case IMGFMT_RGB16:
-    case IMGFMT_BGR15:
-    case IMGFMT_BGR16:
-	priv->o_bih->biBitCount=16;
-	break;
-    case IMGFMT_RGB24:
-    case IMGFMT_BGR24:
-	priv->o_bih->biBitCount=24;
-	break;
-    case IMGFMT_RGB32:
-    case IMGFMT_BGR32:
-	priv->o_bih->biBitCount=32;
-	break;
-    default:
-	mp_msg(MSGT_WIN32,MSGL_ERR,"Unsupported image format: %s\n", vo_format_name(outfmt));
-	return 0;
-    }
+    // ok let libvo and vd core to handshake and decide the optimal csp:
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
 
-    priv->o_bih->biSizeImage = priv->o_bih->biWidth * priv->o_bih->biHeight * (priv->o_bih->biBitCount/8);
-  
     if (!(sh->codec->outflags[sh->outfmtidx]&CODECS_FLAG_FLIP)) {
 	priv->o_bih->biHeight=-sh->bih->biHeight; // flip image!
     }
 
-    if (yuv && !(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_YUVHACK))
-	priv->o_bih->biCompression = outfmt;
-    else
-	 priv->o_bih->biCompression = 0;
+    // ok, let's set the choosen colorspace:
+    set_csp(priv->o_bih,sh->codec->outfmt[sh->outfmtidx]);
 
-#if 0
+    // fake it to RGB for broken DLLs (divx3)
+    if(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_YUVHACK)
+	priv->o_bih->biCompression = 0;
+
+    // sanity check:
+#if 1
     ret = ICDecompressQuery(priv->handle, sh->bih, priv->o_bih);
     if (ret)
     {
-	mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressQuery failed: Error %d\n", (int)ret);
+	mp_msg(MSGT_WIN32,MSGL_WARN,"ICDecompressQuery failed: Error %d\n", (int)ret);
 //	return 0;
     } else
 	mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressQuery OK\n");
 #endif
 
-    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
-
     ret = ICDecompressBegin(priv->handle, sh->bih, priv->o_bih);
     if (ret)
     {
-	mp_msg(MSGT_WIN32,MSGL_ERR,"ICDecompressBegin failed: Error %d\n", (int)ret);
+	mp_msg(MSGT_WIN32,MSGL_WARN,"ICDecompressBegin failed: Error %d\n", (int)ret);
 //	return 0;
     }
 
-    if (yuv && sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_YUVHACK)
-	priv->o_bih->biCompression = outfmt;
+    // for broken codecs set it again:
+    if(sh->codec->outflags[sh->outfmtidx] & CODECS_FLAG_YUVHACK)
+	set_csp(priv->o_bih,sh->codec->outfmt[sh->outfmtidx]);
 
     mp_msg(MSGT_WIN32, MSGL_V, "Input format:\n");
-    mp_msg(MSGT_WIN32, MSGL_V, "  biSize %ld\n", sh->bih->biSize);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biWidth %ld\n", sh->bih->biWidth);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biHeight %ld\n", sh->bih->biHeight);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biPlanes %d\n", sh->bih->biPlanes);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biBitCount %d\n", sh->bih->biBitCount);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biCompression 0x%lx ('%.4s')\n", sh->bih->biCompression, (char *)&sh->bih->biCompression);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biSizeImage %ld\n", sh->bih->biSizeImage);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biXPelsPerMeter %ld\n", sh->bih->biXPelsPerMeter);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biYPelsPerMeter %ld\n", sh->bih->biYPelsPerMeter);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biClrUsed %ld\n", sh->bih->biClrUsed);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biClrImportant %ld\n", sh->bih->biClrImportant);
+    if(verbose) print_video_header(sh->bih);
     mp_msg(MSGT_WIN32, MSGL_V, "Output format:\n");
-    mp_msg(MSGT_WIN32, MSGL_V, "  biSize %ld\n", priv->o_bih->biSize);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biWidth %ld\n", priv->o_bih->biWidth);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biHeight %ld\n", priv->o_bih->biHeight);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biPlanes %d\n", priv->o_bih->biPlanes);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biBitCount %d\n", priv->o_bih->biBitCount);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biCompression 0x%lx ('%.4s')\n", priv->o_bih->biCompression, (char *)&priv->o_bih->biCompression);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biSizeImage %ld\n", priv->o_bih->biSizeImage);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biXPelsPerMeter %ld\n", priv->o_bih->biXPelsPerMeter);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biYPelsPerMeter %ld\n", priv->o_bih->biYPelsPerMeter);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biClrUsed %ld\n", priv->o_bih->biClrUsed);
-    mp_msg(MSGT_WIN32, MSGL_V, "  biClrImportant %ld\n", priv->o_bih->biClrImportant);
+    if(verbose) print_video_header(priv->o_bih);
 
+    // set postprocessing level in xvid/divx4 .dll
     ICSendMessage(priv->handle, ICM_USER+80, (long)(&divx_quality) ,NULL);
+
+    // don't do this palette mess always, it makes div3 dll crashing...
+    if((sh->codec->outflags[sh->outfmtidx]==IMGFMT_BGR8) &&
+       (!ICDecompressGetPalette(priv->handle, sh->bih, priv->o_bih)))
+    {
+	priv->palette = ((unsigned char*)priv->o_bih) + sh->bih->biSize;
+	mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetPalette OK\n");
+    }
 
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
     return 1;
