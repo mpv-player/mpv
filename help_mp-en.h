@@ -391,6 +391,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayDVD "Play DVD ..."
 #define MSGTR_MENU_PlayURL "Play URL ..."
 #define MSGTR_MENU_LoadSubtitle "Load subtitle ..."
+#define MSGTR_MENU_DropSubtitle "Drop subtitle ..."
 #define MSGTR_MENU_LoadExternAudioFile "Load external audio file ..."
 #define MSGTR_MENU_Playing "Playing"
 #define MSGTR_MENU_Play "Play"

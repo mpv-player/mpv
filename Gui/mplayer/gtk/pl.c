@@ -638,7 +638,7 @@ GtkWidget * create_PlayList( void )
   GTK_WIDGET_UNSET_FLAGS( Ok,GTK_CAN_FOCUS );
 //  gtk_widget_add_accelerator( Ok,"released",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
 
-  Cancel=gtk_button_new_with_label( "Cancel" );
+  Cancel=gtk_button_new_with_label( MSGTR_Cancel );
   gtk_widget_ref( Cancel );
   gtk_object_set_data_full( GTK_OBJECT( PlayList ),"Cancel",Cancel,(GtkDestroyNotify)gtk_widget_unref );
   gtk_widget_show( Cancel );

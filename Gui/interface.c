@@ -20,6 +20,7 @@
 #include "../libvo/x11_common.h"
 #include "../libvo/video_out.h"
 #include "../libvo/font_load.h"
+#include "../libvo/sub.h"
 #include "../input/input.h"
 #include "../libao2/audio_out.h"
 #include "../mixer.h"
@@ -239,6 +240,8 @@ void guiLoadFont( void )
 #endif
 
 #ifdef USE_SUB
+extern mp_osd_obj_t* vo_osd_list;
+
 void guiLoadSubtitle( char * name )
 {
  if ( guiIntfStruct.Playing == 0 )
@@ -248,14 +251,34 @@ void guiLoadSubtitle( char * name )
   }
  if ( subtitles )
   {
+   mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Delete subtitles.\n" );
    sub_free( subtitles );
-   if ( sub_name ) free( sub_name );
+   subtitles=NULL;
    sub_name=NULL;
    vo_sub=NULL;
-   subtitles=NULL;
+   if ( vo_osd_list )
+    {
+     int len;
+     mp_osd_obj_t * osd = vo_osd_list;
+     while ( osd )
+      {
+       if ( osd->type == OSDTYPE_SUBTITLE ) break;
+       osd=osd->next;
+      }
+     if ( osd && osd->flags&OSDFLAG_VISIBLE )
+      {
+       len=osd->stride * ( osd->bbox.y2 - osd->bbox.y1 );
+       memset( osd->bitmap_buffer,0,len );
+       memset( osd->alpha_buffer,0,len );
+      }
+    }
   }
- sub_name=gstrdup( name );
- subtitles=sub_read_file( sub_name,guiIntfStruct.FPS );
+ if ( name )
+  {
+   mp_msg( MSGT_GPLAYER,MSGL_INFO,"[gui] Delete Load subtitle: %s\n",name );
+   sub_name=gstrdup( name );
+   subtitles=sub_read_file( sub_name,guiIntfStruct.FPS );
+  }
 }
 #endif
 

@@ -47,10 +47,12 @@
 #define evHelp              37
 
 #define evLoadSubtitle      38
+#define evDropSubtitle      43
 #define evPlayDVD           39
 #define evPlayVCD	    40
 #define evPlayNetwork       41
 #define evLoadAudioFile	    42
+// 44 ...
 
 #define evExit              1000
 

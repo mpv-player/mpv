@@ -294,6 +294,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayDVD "DVD lejátszás ..."  
 #define MSGTR_MENU_PlayURL "URL lejátszás ..."  
 #define MSGTR_MENU_LoadSubtitle "Felirat betöltése ..."
+#define MSGTR_MENU_DropSubtitle "Felirat eldobása ..."
 #define MSGTR_MENU_LoadExternAudioFile "Külsõ hang betöltése ..."
 #define MSGTR_MENU_Playing "Lejátszás"
 #define MSGTR_MENU_Play "Lejátszás"

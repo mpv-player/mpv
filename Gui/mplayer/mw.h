@@ -356,6 +356,10 @@ NoPause:
         gtkShow( evLoad,NULL );
         break;
    case evLoadSubtitle:  gtkShow( evLoadSubtitle,NULL );  break;
+   case evDropSubtitle:
+	gfree( (void **)&guiIntfStruct.Subtitlename );
+	guiLoadSubtitle( NULL );
+	break;
    case evLoadAudioFile: gtkShow( evLoadAudioFile,NULL ); break;
    case evPrev: mplPrev(); break;
    case evNext: mplNext(); break;
