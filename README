@@ -1,1 +1,185 @@
-The main documentation file is DOCS/documentation.html
+
+Welcome to MPlayer, the Unix movie player. MPlayer can play most standard video
+formats out of the box and almost all others with the help of external codecs.
+MPlayer currently works best from the command line, but there is a GUI with
+skin support in the alpha development stage.
+
+This document is for getting you started in a few minutes.  It cannot answer
+all of your questions.  If you have problems, please read the documentation in
+DOCS/documentation.html.  It is extensive and should answer most of your 
+questions. Also read the manpage to learn how to use MPlayer.
+
+To compile MPlayer with X11 support, you need to have the XFree86 development
+packages installed, for the GUI you also need the GTK development packages.
+
+Before you start...
+Unless you know what are you doing, consult DOCS/video.html to see which
+driver you should get for your video card to have the best quality and video
+performance. Most cards require special drivers not included with standard X11,
+to drive the 2-D video acceleration features of your card!
+
+A quick and incomplete list of recommendations:
+- ATI cards: get the GATOS drivers for X11/Xv or use vidix
+- Matrox G200/G4x0/G550: compile and use mga_vid for Linux, use vidix for BSD
+- 3dfx Voodoo3/Banshee: get XFree86 4.2.0+ for Xv or use the tdfxfb driver
+- nVidia cards: get the X11 driver from www.nvidia.com for Xv support
+Without having accelerated video, even a 800MHz P3 may be slow to play DVD!
+
+___________________________________
+STEP1: Installing FFmpeg libavcodec
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+If you are using an official release, skip this step, since official releases
+always include libavcodec. To verify this check if the libavcodec subdirectory
+is empty or contains the sources!
+
+The FFmpeg project provides libavcodec, a very portable MPEG4/DivX codec with
+excellent speed and quality.  It is the preferred codec of MPlayer for playing
+mpeg4 and divx video.  You have to get libavcodec directly from the FFmpeg CVS
+server. Use the following commands in a suitable directory outside the MPlayer
+source directory:
+
+cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login
+cvs -z9 -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg/libavcodec
+
+When asked for a password, you can just hit enter.
+
+Now, replace the empty libavcodec directory with the FFmpeg libavcodec source
+by removing the libavcodec subdirectory in the MPlayer source tree and then
+copying (symbolic linking does not suffice!) the freshly downloaded FFmpeg
+libavcodec directory back into the MPlayer source tree.
+
+
+______________________________
+STEP2: Installing Win32 Codecs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+While MPlayer and libavcodec has built-in support for the most common audio
+and video formats, some others are playable only with the Win32 DLLs
+or the XAnim binary plugins. Few examples: WMV video, Divx/WMA audio, Indeo.
+This step is not mandatory, but recommended for getting MPlayer to play 
+play more different file types!
+
+Grab the win32 codecs package from the download page
+
+  http://www.mplayerhq.hu/homepage/dload.html
+
+unpack it and put the contents in a directory where MPlayer will find them.
+The default directory is /usr/lib/win32/ but you can change that to something
+else by using the '--with-win32libdir=DIR' option when you run './configure' .
+
+__________________________
+STEP3: Configuring MPlayer
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+MPlayer has a lot of options that get selected in this phase. Run
+
+  ./configure
+
+to configure MPlayer with the default options.  The options you installed above
+should be autodetected, except GUI support, which has to be enabled separately,
+run
+
+  ./configure --enable-gui
+
+if you want to use the GUI.
+
+If something does not work as expected, try
+
+  ./configure --help
+
+to see the available options and select what you need.
+
+The ./configure script prints a summary of enabled and disabled options.
+If you have something installed that ./configure fails to detect, check
+the file configure.log for errors and reasons for the failure. Repeat this
+step until you are satisfied with the enabled feature set.
+
+________________________
+STEP4: Compiling MPlayer
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Now you can start the compilation by typing
+
+  make
+
+You can install MPlayer with
+
+  make install
+
+provided that you have write permission in the installation directory.
+
+If all went well, you can run MPlayer by typing 'mplayer'
+You should get a summary of the most common options and keys (help screen).
+
+If you get 'unable to load shared library' or similar errors, then run
+'ldd ./mplayer' to check which libraries fail and go back to STEP 3 to fix it.
+Sometimes just running 'ldconfig' is enough.
+
+NOTE: If you run Debian you can configure, compile and build a proper deb
+package with only one command:
+
+  fakeroot debian/rules binary
+
+____________________________________________
+STEP5: Installing the onscreen display fonts
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To enable OSD (onscreen status display) and ASCII/TEXT subtitles you need some
+fonts. Get them from our homepage:
+
+http://www.mplayerhq.hu/homepage/dload.html
+
+Unpack the archive and choose one of the available font sizes.  Then copy the
+font files of the corresponding size into /usr/local/share/mplayer/font/
+(or whatever you set with './configure --datadir=DIR').
+
+____________________________
+STEP6: Installing a GUI skin
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Please remember that the GUI is still in the alpha development stage and not
+completely finished yet. Features like playlist, preferences and equalizer
+do not work at all. Expect them for the 1.0 release
+Basic stuff like file selection and seeking works, though.
+
+If you want to use the GUI you need to download a skin, since MPlayer does not
+come with a skin by default. Choose one from the download page
+
+  http://www.mplayerhq.hu/homepage/dload.html
+
+unpack it in /usr/local/share/mplayer/Skin/. MPlayer will use the skin in 
+the default/ subdirectory (/usr/local/share/mplayer/Skin/default/*) unless
+told otherwise via the '-skin' switch. You should therefore rename your
+skin subdirectory, make a suitable symbolic link or set the skin name in
+the file mplayer.conf by 'skin=skinname'.
+
+__________________
+STEP7: Let's play!
+~~~~~~~~~~~~~~~~~~
+
+That's it for the moment.  To start playing movies, open a command line and try
+
+  mplayer <moviefile>
+
+or for the GUI:
+
+  gmplayer <moviefile>
+  (just 'gmplayer' is enough to use the GUI fileselector)
+
+To play VCD track or DVD title, try:
+
+  mplayer -vcd 2 -cdrom-device /dev/hdc
+  mplayer -dvd 1 -alang en -slang hu -dvd-device /dev/hdd
+
+See 'mplayer -help' and 'man mplayer' for further options.
+
+'mplayer -vo help' will show you the available video output drivers. Experiment
+with the '-vo' switch to see which one gives you the best performance!
+If you get very jerky playback or no sound, experiment with -ao (see -ao help)
+Note that jerky playback is caused by buggy audio drivers or too slow cpu/vga.
+With a good audio and video driver combination, one can play DVDs and 720x576
+DivX files smoothly on a Celeron 366. For slower systems, you need -framedrop.
+
+Questions you may have are probably answered in the rest of the documentation.
+The place to start reading is DOCS/faq.html and DOCS/documentation.html.
