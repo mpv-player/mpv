@@ -1,22 +1,33 @@
 // Generic alpha renderers for all YUV modes and RGB depths.
-// These are "reference implementations", should be optimized later (MMX, etc)
 // Optimized by Nick and Michael
+// Code from Michael Niedermayer (michaelni@gmx.at) is under GPL
 
-//#define FAST_OSD
-//#define FAST_OSD_TABLE
+#undef PREFETCH
+#undef EMMS
+#undef PREFETCHW
+#undef PAVGB
 
-#include "config.h"
-#include "osd.h"
-#include "../mmx_defs.h"
-//#define ENABLE_PROFILE
-#include "../my_profile.h"
-#include <inttypes.h>
-
-#ifdef HAVE_MMX
-static const uint64_t bFF  __attribute__((aligned(8))) = 0xFFFFFFFFFFFFFFFFULL;
+#ifdef HAVE_3DNOW
+#define PREFETCH  "prefetch"
+#define PREFETCHW "prefetchw"
+#define PAVGB	  "pavgusb"
+#elif defined ( HAVE_MMX2 )
+#define PREFETCH "prefetchnta"
+#define PREFETCHW "prefetcht0"
+#define PAVGB	  "pavgb"
+#else
+#define PREFETCH "/nop"
+#define PREFETCHW "/nop"
 #endif
 
-void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+#ifdef HAVE_3DNOW
+/* On K6 femms is faster of emms. On K7 femms is directly mapped on emms. */
+#define EMMS     "femms"
+#else
+#define EMMS     "emms"
+#endif
+
+static inline void RENAME(vo_draw_alpha_yv12)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
 #if defined(FAST_OSD) && !defined(HAVE_MMX)
     w=w>>1;
@@ -84,7 +95,7 @@ PROFILE_END("vo_draw_alpha_yv12");
     return;
 }
 
-void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+static inline void RENAME(vo_draw_alpha_yuy2)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
 #if defined(FAST_OSD) && !defined(HAVE_MMX)
     w=w>>1;
@@ -150,11 +161,7 @@ PROFILE_END("vo_draw_alpha_yuy2");
     return;
 }
 
-#ifdef HAVE_MMX
-static const unsigned long long mask24lh  __attribute__((aligned(8))) = 0xFFFF000000000000ULL;
-static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FFFFFFFFFFFFULL;
-#endif
-void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+static inline void RENAME(vo_draw_alpha_rgb24)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
     for(y=0;y<h;y++){
         register unsigned char *dst = dstbase;
@@ -256,7 +263,7 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
     return;
 }
 
-void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
+static inline void RENAME(vo_draw_alpha_rgb32)(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
 PROFILE_START();
     for(y=0;y<h;y++){
@@ -410,82 +417,3 @@ PROFILE_START();
 PROFILE_END("vo_draw_alpha_rgb32");
     return;
 }
-
-#ifdef FAST_OSD_TABLE
-static unsigned short fast_osd_15bpp_table[256];
-static unsigned short fast_osd_16bpp_table[256];
-#endif
-
-void vo_draw_alpha_init(){
-#ifdef FAST_OSD_TABLE
-    int i;
-    for(i=0;i<256;i++){
-        fast_osd_15bpp_table[i]=((i>>3)<<10)|((i>>3)<<5)|(i>>3);
-        fast_osd_16bpp_table[i]=((i>>3)<<11)|((i>>2)<<5)|(i>>3);
-    }
-#endif
-}
-
-void vo_draw_alpha_rgb15(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
-    int y;
-    for(y=0;y<h;y++){
-        register unsigned short *dst = (unsigned short*) dstbase;
-        register int x;
-        for(x=0;x<w;x++){
-            if(srca[x]){
-#ifdef FAST_OSD
-#ifdef FAST_OSD_TABLE
-                dst[x]=fast_osd_15bpp_table[src[x]];
-#else
-		register unsigned int a=src[x]>>3;
-                dst[x]=(a<<10)|(a<<5)|a;
-#endif
-#else
-                unsigned char r=dst[x]&0x1F;
-                unsigned char g=(dst[x]>>5)&0x1F;
-                unsigned char b=(dst[x]>>10)&0x1F;
-                r=(((r*srca[x])>>5)+src[x])>>3;
-                g=(((g*srca[x])>>5)+src[x])>>3;
-                b=(((b*srca[x])>>5)+src[x])>>3;
-                dst[x]=(b<<10)|(g<<5)|r;
-#endif
-            }
-        }
-        src+=srcstride;
-        srca+=srcstride;
-        dstbase+=dststride;
-    }
-    return;
-}
-
-void vo_draw_alpha_rgb16(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
-    int y;
-    for(y=0;y<h;y++){
-        register unsigned short *dst = (unsigned short*) dstbase;
-        register int x;
-        for(x=0;x<w;x++){
-            if(srca[x]){
-#ifdef FAST_OSD
-#ifdef FAST_OSD_TABLE
-                dst[x]=fast_osd_16bpp_table[src[x]];
-#else
-                dst[x]=((src[x]>>3)<<11)|((src[x]>>2)<<5)|(src[x]>>3);
-#endif
-#else
-                unsigned char r=dst[x]&0x1F;
-                unsigned char g=(dst[x]>>5)&0x3F;
-                unsigned char b=(dst[x]>>11)&0x1F;
-                r=(((r*srca[x])>>5)+src[x])>>3;
-                g=(((g*srca[x])>>6)+src[x])>>2;
-                b=(((b*srca[x])>>5)+src[x])>>3;
-                dst[x]=(b<<11)|(g<<5)|r;
-#endif
-            }
-        }
-        src+=srcstride;
-        srca+=srcstride;
-        dstbase+=dststride;
-    }
-    return;
-}
-
