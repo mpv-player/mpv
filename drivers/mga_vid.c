@@ -2,6 +2,7 @@
 
 // YUY2 support (see config.format) added by A'rpi/ESP-team
 // double buffering added by A'rpi/ESP-team
+// brightness/contrast introduced by eyck
 
 // Set this value, if autodetection fails! (video ram size in megabytes)
 // #define MGA_MEMORY_SIZE 16
@@ -426,8 +427,10 @@ static void mga_vid_write_regs(int restore)
 	    // restore it
 	    colkey_saved=0;
 
+#ifdef MP_DEBUG
 		printk("mga_vid: Restoring colorkey (ON: %d  %02X:%02X:%02X)\n",
 			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
+#endif		
 
 		// Set color key registers:
 		writeb( XKEYOPMODE, mga_mmio_base + PALWTADD);
@@ -476,8 +479,10 @@ static void mga_vid_write_regs(int restore)
 		writeb( XCOLMSK, mga_mmio_base + PALWTADD);
 		colkey_mask[3]=(unsigned char)readb(mga_mmio_base + X_DATAREG);
 
+#ifdef MP_DEBUG
 		printk("mga_vid: Saved colorkey (ON: %d  %02X:%02X:%02X)\n",
 			colkey_on,colkey_color[0],colkey_color[1],colkey_color[2]);
+#endif		
 
 	}
 	
@@ -615,7 +620,9 @@ if(!restore){
 //	writel(cregs.c2vsync, mga_mmio_base + C2VSYNC);
 	writel(cregs.c2misc, mga_mmio_base + C2MISC);
 
+#ifdef MP_DEBUG
 	printk("c2offset = %d\n",cregs.c2offset);
+#endif	
 
 	writel(cregs.c2offset, mga_mmio_base + C2OFFSET);
 	writel(cregs.c2startadd0, mga_mmio_base + C2STARTADD0);
@@ -664,8 +671,10 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 	dw = config->dest_width;
 	dh = config->dest_height;
 
+#ifdef MP_DEBUG
 	printk(KERN_DEBUG "mga_vid: Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
 	       dw, dh, x, y, sw, sh, config->format);
+#endif	
 
 	if(sw<4 || sh<4 || dw<4 || dh<4){
 	    printk(KERN_ERR "mga_vid: Invalid src/dest dimenstions\n");
@@ -1149,11 +1158,13 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		case MGA_VID_CONFIG:
 			//FIXME remove
 //			printk(KERN_DEBUG "vcount = %d\n",readl(mga_mmio_base + VCOUNT));
+#ifdef MP_DEBUG
 			printk(KERN_DEBUG "mga_mmio_base = %p\n",mga_mmio_base);
 			printk(KERN_DEBUG "mga_mem_base = %08x\n",mga_mem_base);
 			//FIXME remove
 
 			printk(KERN_DEBUG "mga_vid: Received configuration\n");
+#endif			
 
  			if(copy_from_user(&mga_config,(mga_vid_config_t*) arg,sizeof(mga_vid_config_t)))
 			{
@@ -1181,7 +1192,9 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 				return(-EFAULT);
 			}
 			mga_src_base &= (~0xFFFF); // 64k boundary
+#ifdef MP_DEBUG
 			printk(KERN_DEBUG "mga YUV buffer base: 0x%X\n", mga_src_base);
+#endif			
 			
 			if (is_g400) 
 			  mga_config.card_type = MGA_G400;
@@ -1199,7 +1212,9 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 		case MGA_VID_ON:
+#ifdef MP_DEBUG
 			printk(KERN_DEBUG "mga_vid: Video ON\n");
+#endif			
 			vid_src_ready = 1;
 			if(vid_overlay_on)
 			{
@@ -1213,7 +1228,9 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 		case MGA_VID_OFF:
+#ifdef MP_DEBUG
 			printk(KERN_DEBUG "mga_vid: Video OFF (ioctl)\n");
+#endif			
 			vid_src_ready = 0;   
 #ifdef MGA_ALLOW_IRQ
 			if ( mga_irq != -1 ) disable_irq();
@@ -1442,7 +1459,9 @@ static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, l
 static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 {
 
+#ifdef MP_DEBUG
 	printk(KERN_DEBUG "mga_vid: mapping video memory into userspace\n");
+#endif	
 	if(remap_page_range(vma->vm_start, mga_mem_base + mga_src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
@@ -1456,7 +1475,9 @@ static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 static int mga_vid_release(struct inode *inode, struct file *file)
 {
 	//Close the window just in case
+#ifdef MP_DEBUG
 	printk(KERN_DEBUG "mga_vid: Video OFF (release)\n");
+#endif	
 
 	vid_src_ready = 0;   
 	regs.besctl &= ~1;
