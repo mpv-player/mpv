@@ -34,6 +34,7 @@ extern ad_functions_t mpcodecs_ad_msgsm;
 extern ad_functions_t mpcodecs_ad_faad;
 extern ad_functions_t mpcodecs_ad_vorbis;
 extern ad_functions_t mpcodecs_ad_libmad;
+extern ad_functions_t mpcodecs_ad_real;
 
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
@@ -66,6 +67,9 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #endif
 #ifdef USE_LIBMAD
   &mpcodecs_ad_libmad,
+#endif
+#ifdef USE_REALCODECS
+  &mpcodecs_ad_real,
 #endif
   NULL
 };
