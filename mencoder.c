@@ -43,11 +43,15 @@ static char* banner_text=
 
 #include "libvo/video_out.h"
 
+#include "libmpcodecs/mp_image.h"
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/vf.h"
 
 #include "libmpdemux/mp3_hdr.h"
+
+// for MPEGLAYER3WAVEFORMAT:
+#include "loader/wine/mmreg.h"
 
 #ifdef HAVE_MP3LAME
 #undef CDECL

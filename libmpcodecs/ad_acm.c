@@ -8,10 +8,7 @@
 
 #ifdef USE_WIN32DLL
 
-#include "loader.h"
-//#include "wine/mmreg.h"
-#include "wine/vfw.h"
-#include "wine/avifmt.h"
+#include "wineacm.h"
 
 #include "ad_internal.h"
 
@@ -144,10 +141,10 @@ static void uninit(sh_audio_t *sh)
 	    return(uninit(sh));
 	case ACMERR_UNPREPARED:
 	case ACMERR_NOTPOSSIBLE:
-	    return(0);
+	    return;
 	default:
 	    mp_msg(MSGT_WIN32, MSGL_WARN, "ACM_Decoder: unknown error occured: %d\n", ret);
-	    return(0);
+	    return;
     }
     
     MSACM_UnregisterAllDrivers();

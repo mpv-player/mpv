@@ -7,12 +7,10 @@
 
 #ifdef USE_WIN32DLL
 
-#include "loader.h"
-//#include "wine/mmreg.h"
-#include "wine/vfw.h"
-#include "wine/avifmt.h"
-
 #include "vd_internal.h"
+
+#include "wine/driver.h"
+#include "wine/vfw.h"
 
 static vd_info_t info = {
 #ifdef BUILD_VFWEX
@@ -143,7 +141,6 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     HRESULT ret;
-    int yuv=0;
 //    unsigned int outfmt=sh->codec->outfmt[sh->outfmtidx];
     int i, o_bih_len;
     vd_vfw_ctx *priv;
@@ -160,7 +157,7 @@ static int init(sh_video_t *sh){
 //    win32_codec_name = sh->codec->dll;
 //    sh->hic = ICOpen( 0x63646976, sh->bih->biCompression, ICMODE_FASTDECOMPRESS);
 //    priv->handle = ICOpen( 0x63646976, sh->bih->biCompression, ICMODE_DECOMPRESS);
-    priv->handle = ICOpen( sh->codec->dll, sh->bih->biCompression, ICMODE_DECOMPRESS);
+    priv->handle = ICOpen( (long)(sh->codec->dll), sh->bih->biCompression, ICMODE_DECOMPRESS);
     if(!priv->handle){
 	mp_msg(MSGT_WIN32,MSGL_ERR,"ICOpen failed! unknown codec / wrong parameters?\n");
 	return 0;

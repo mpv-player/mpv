@@ -1,13 +1,45 @@
 #ifndef __ST_HEADER_H
 #define __ST_HEADER_H 1
 
-// Stream headers:
-
-#include "wine/mmreg.h"
+// for AVIStreamHeader:
 #include "wine/avifmt.h"
-#include "wine/vfw.h"
 
-#include "../libmpcodecs/mp_image.h"
+#ifndef _WAVEFORMATEX_
+#define _WAVEFORMATEX_
+typedef struct __attribute__((__packed__)) _WAVEFORMATEX {
+  WORD   wFormatTag;
+  WORD   nChannels;
+  DWORD  nSamplesPerSec;
+  DWORD  nAvgBytesPerSec;
+  WORD   nBlockAlign;
+  WORD   wBitsPerSample;
+  WORD   cbSize;
+} WAVEFORMATEX, *PWAVEFORMATEX, *NPWAVEFORMATEX, *LPWAVEFORMATEX;
+#endif /* _WAVEFORMATEX_ */
+
+#ifndef _BITMAPINFOHEADER_
+#define _BITMAPINFOHEADER_
+typedef struct __attribute__((__packed__))
+{
+    int 	biSize;
+    int  	biWidth;
+    int  	biHeight;
+    short 	biPlanes;
+    short 	biBitCount;
+    int 	biCompression;
+    int 	biSizeImage;
+    int  	biXPelsPerMeter;
+    int  	biYPelsPerMeter;
+    int 	biClrUsed;
+    int 	biClrImportant;
+} BITMAPINFOHEADER, *PBITMAPINFOHEADER, *LPBITMAPINFOHEADER;
+typedef struct {
+	BITMAPINFOHEADER bmiHeader;
+	int	bmiColors[1];
+} BITMAPINFO, *LPBITMAPINFO;
+#endif
+
+// Stream headers:
 
 typedef struct {
   demux_stream_t *ds;
