@@ -284,44 +284,47 @@ unsupported). You can encode to the following codecs:</P>
   -o output.avi</CODE></P>
 
 
-<P><B><A NAME=2.4.4>2.4.4.  Syntax</A></B></P>
-
-<P>&nbsp;&nbsp;<CODE>mencoder [options] [input file] [options] ...</CODE></P>
-
-
 <P><B><A NAME=2.4.3.7>2.4.3.7.  Extracting DVD subtitles to Vobsub file</A></B></P>
 
-<P><B>MEncoder</B> is capable of extracting subtitles from DVD into
-Vobsub fomat files.  They consist of a pair of files ending in .idx
-and .sub and are usually packaged in a single .rar archive.  MPlayer
-can play these with the <I>-vobsub</I> and <I>-vobsubid</I> options.</P>
+<P><B>MEncoder</B> is capable of extracting subtitles from a DVD into
+Vobsub fomat files. They consist of a pair of files ending in <CODE>.idx</CODE>
+and <CODE>.sub</CODE> and are usually packaged in a single <CODE>.rar</CODE>
+archive. <B>MPlayer</B> can play these with the <CODE>-vobsub</CODE> and
+<CODE>-vobsubid</CODE> options.</P>
 
-<P>You specify the basename (i.e without the .idx or .sub extension)
-of the output files with <I>-vobsubout</I> and the index for this
-subtitle in the resulting files with <I>-vobsuboutindex</I>.</P>
+<P>You specify the basename (i.e without the <CODE>.idx</CODE> or
+<CODE>.sub</CODE> extension) of the output files with <CODE>-vobsubout</CODE>
+and the index for this subtitle in the resulting files with
+<CODE>-vobsuboutindex</CODE>.</P>
 
-<P>If the input is not from a DVD you should use <I>-ifo</I> to
-indicate the .ifo file needed to construct the resulting .idx file
-</P>
+<P>If the input is not from a DVD you should use <CODE>-ifo</CODE> to
+indicate the <CODE>.ifo</CODE> file needed to construct the resulting
+<CODE>.idx</CODE> file.</P>
 
-<P>If the input is not from a DVD and you don't have the .ifo file
-you'll need to use the <I>-vobsubid</I> option to let it know what
-language id to put in the .idx file.</P>
+<P>If the input is not from a DVD and you do not have the <CODE>.ifo</CODE> file
+you will need to use the <CODE>-vobsubid</CODE> option to let it know what
+language id to put in the <CODE>.idx</CODE> file.</P>
 
-<P>Each run will append the running subtitle if the .idx and .sub
-files already exist.  So you should remove any before starting.
+<P>Each run will append the running subtitle if the <CODE>.idx</CODE> and
+<CODE>.sub</CODE> files already exist. So you should remove any before starting.</P>
 
-<P><B>Example</B></P>
+<P><B>Examples</B></P>
 
 <P><I>Copying two subtitles from a DVD while doing 3-pass encoding</I><BR>
 &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
-&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno</CODE>
+&nbsp;&nbsp;<CODE>mencoder -dvd 1 -vobsubout subtitles -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno</CODE><BR>
 &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 1</CODE><BR>
 &nbsp;&nbsp;<CODE>mencoder -dvd 1 -oac copy -ovc divx4 -pass 2 -vobsubout subtitles -vobsuboutindex 1 -sid 5</CODE></P>
 
 <P><I>Copying a french subtitle from an MPEG file</I><BR>
 &nbsp;&nbsp;<CODE>rm subtitles.idx subtitles.sub</CODE><BR>
 &nbsp;&nbsp;<CODE>mencoder movie.mpg -ifo movie.ifo -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
+
+
+<P><B><A NAME=2.4.4>2.4.4.  Syntax</A></B></P>
+
+<P>&nbsp;&nbsp;<CODE>mencoder [options] [input file] [options] ...</CODE></P>
+
 
 <P><B><A NAME=2.4.5>2.4.5.  Available options</A></B></P>
 
@@ -336,22 +339,22 @@ files already exist.  So you should remove any before starting.
 
 <TABLE BORDER=1>
 <TR>
-  <TD>    <I>-ss</I> time</TD>
+  <TD>    <CODE>-ss</CODE> time</TD>
   <TD>    start encoding from the given time (can start only from keyframes!)
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-endpos</I> time</TD>
+  <TD>    <CODE>-endpos</CODE> time</TD>
   <TD>    stop encoding at the given time. See the man page for examples!
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-o</I> filename</TD>
+  <TD>    <CODE>-o</CODE> filename</TD>
   <TD>    specify output filename
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-sws</I> 0-2</TD>
+  <TD>    <CODE>-sws</CODE> 0-2</TD>
   <TD>    type of scaling method<BR>
     &nbsp;&nbsp;0 - fast bilinear<BR>
     &nbsp;&nbsp;1 - bilinear<BR>
@@ -359,7 +362,7 @@ files already exist.  So you should remove any before starting.
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-ovc</I> codecname</TD>
+  <TD>    <CODE>-ovc</CODE> codecname</TD>
   <TD>    Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
     &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
@@ -370,7 +373,7 @@ files already exist.  So you should remove any before starting.
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-oac</I> codecname</TD>
+  <TD>    <CODE>-oac</CODE> codecname</TD>
   <TD>    Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
     &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
@@ -379,7 +382,7 @@ files already exist.  So you should remove any before starting.
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-mf</I> multifile options</TD>
+  <TD>    <CODE>-mf</CODE> multifile options</TD>
   <TD>    Used when encoding from multiple JPEG files. Its sub-options are:<BR>
     &nbsp;&nbsp;<B>on</B> - turns on multifile support<BR>
     &nbsp;&nbsp;<B>w</B>=&lt;value&gt; - width of the output file<BR>
@@ -390,7 +393,7 @@ files already exist.  So you should remove any before starting.
 </TR>
 
 <TR>
-  <TD>    <I>-divx4opts</I></TD>
+  <TD>    <CODE>-divx4opts</CODE></TD>
   <TD>    If encoding to DivX4, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Common options: <B>(for full list, check the man page!)</B><BR>
@@ -401,7 +404,7 @@ files already exist.  So you should remove any before starting.
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-lavcopts</I></TD>
+  <TD>    <CODE>-lavcopts</CODE></TD>
   <TD>    If encoding with libavcodec, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
     Common options: <B>(for full list, check the man page!)</B><BR>
@@ -413,7 +416,7 @@ files already exist.  So you should remove any before starting.
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-lameopts</I></TD>
+  <TD>    <CODE>-lameopts</CODE></TD>
   <TD>    If encoding to MP3 with libmp3lame, you can specify its parameters here, like:<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
     &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>
@@ -426,16 +429,16 @@ files already exist.  So you should remove any before starting.
   </TD>
 </TR>
 <TR>
-  <TD>    <I>-vobsubout</I> basename</TD>
-  <TD>    Specify the basename for the output .idx and .sub files.  This turns off subtitle rendering on the encoded movie.</TD>
+  <TD>    <CODE>-vobsubout</CODE> basename</TD>
+  <TD>    Specify the basename for the output <CODE>.idx</CODE> and <CODE>.sub</CODE> files.  This turns off subtitle rendering on the encoded movie.</TD>
 </TR>
 <TR>
-  <TD>    <I>-vobsuboutindex</I> index</TD>
-  <TD>    Specify the index of this subtitles in the output files.  Defaults to 0</TD>
+  <TD>    <CODE>-vobsuboutindex</CODE> index</TD>
+  <TD>    Specify the index of the subtitles in the output files.  Defaults to 0.</TD>
 </TR>
 <TR>
-  <TD>    <I>-vobsuboutid</I> langid</TD>
-  <TD>    Specify the language two letter code for this subtitle.  This overrides what is read from the DVD or the .ifo file.</TD>
+  <TD>    <CODE>-vobsuboutid</CODE> langid</TD>
+  <TD>    Specify the language two letter code for the subtitles.  This overrides what is read from the DVD or the <CODE>.ifo</CODE> file.</TD>
 </TR>
 </TABLE>
 
