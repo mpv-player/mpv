@@ -3394,7 +3394,10 @@ if test "$_x11" = yes && test "$_xv" != no ; then
   cat > $TMPC <<EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/Xvlib.h>
-int main(void) { (void) XvGetPortAttribute(0, 0, 0, 0); return 0; }
+int main(void) {
+  (void) XvGetPortAttribute(0, 0, 0, 0);
+  (void) XvQueryPortAttributes(0, 0, 0);
+  return 0; }
 EOF
   _xv=no
   cc_check $_inc_x11 -lXv $_ld_x11 && _xv=yes
