@@ -26,6 +26,7 @@
 #include "libvo/img_format.h"
 #include "xacodec.h"
 
+#if 0 
 typedef char xaBYTE;
 typedef short xaSHORT;
 typedef int xaLONG;
@@ -33,6 +34,7 @@ typedef int xaLONG;
 typedef unsigned char xaUBYTE;
 typedef unsigned short xaUSHORT;
 typedef unsigned int xaULONG;
+#endif
 
 #define xaFALSE 0
 #define xaTRUE 1
@@ -46,8 +48,6 @@ typedef unsigned int xaULONG;
 #ifndef RTLD_GLOBAL
 #define RLTD_GLOBAL 256
 #endif
-
-extern int verbose;
 
 #define XA_CLOSE_FUNCS 5
 int xa_close_func = 0;
@@ -342,8 +342,9 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
     int i;
     xacodec_image_t *image=&xacodec_driver->image;
 
-    if (skip_flag > 0)
-	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "frame will be dropped..\n");
+// ugyis kiirja a vegen h dropped vagy nem.. 
+//    if (skip_flag > 0)
+//	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "frame will be dropped..\n");
 
     xacodec_driver->decinfo->skip_flag = skip_flag;
 
@@ -450,19 +451,21 @@ void XA_dummy()
     XA_Print("dummy() called");
 }
 
-int XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
+void XA_Gen_YUV_Tabs(XA_ANIM_HDR *anim_hdr)
 {
     XA_Print("XA_Gen_YUV_Tabs('anim_hdr: %08x')", anim_hdr);
 
 //    XA_Print("anim type: %d - img[x: %d, y: %d, c: %d, d: %d]",
 //	anim_hdr->anim_type, anim_hdr->imagex, anim_hdr->imagey,
 //	anim_hdr->imagec, anim_hdr->imaged);
+    return;
 }
 
 void JPG_Setup_Samp_Limit_Table(XA_ANIM_HDR *anim_hdr)
 {
     XA_Print("JPG_Setup_Samp_Limit_Table('anim_hdr: %08x')", anim_hdr);
 //    xa_byte_limit = jpg_samp_limit + (MAXJSAMPLE + 1);
+    return;
 }
 
 void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
@@ -470,6 +473,7 @@ void JPG_Alloc_MCU_Bufs(XA_ANIM_HDR *anim_hdr, unsigned int width,
 {
     XA_Print("JPG_Alloc_MCU_Bufs('anim_hdr: %08x', 'width: %d', 'height: %d', 'full_flag: %d')",
 	    anim_hdr, width, height, full_flag);
+    return;
 }
 
 
@@ -508,7 +512,7 @@ void XA_2x2_OUT_1BLK_clr8(unsigned char *image_p, unsigned int x, unsigned int y
     SET_4_YUV_PIXELS(image,x,y+2,cmap2x2)
     SET_4_YUV_PIXELS(image,x+2,y+2,cmap2x2)
 #endif
-
+    return;
 }
 
 void XA_2x2_OUT_4BLKS_clr8(unsigned char *image_p, unsigned int x, unsigned int y,
@@ -521,6 +525,7 @@ void XA_2x2_OUT_4BLKS_clr8(unsigned char *image_p, unsigned int x, unsigned int 
     SET_4_YUV_PIXELS(image,x+2,y,cm1)
     SET_4_YUV_PIXELS(image,x,y+2,cm2)
     SET_4_YUV_PIXELS(image,x+2,y+2,cm3)
+    return;
 }
 
 void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
@@ -540,11 +545,9 @@ void *YUV2x2_Blk_Func(unsigned int image_type, int blks, unsigned int dith_flag)
 
 //  Take Four Y's and UV and put them into a 2x2 Color structure.
 
-void XA_YUV_2x2_clr(cmap2x2,Y0,Y1,Y2,Y3,U,V,map_flag,map,chdr)
-XA_2x2_Color *cmap2x2;
-xaULONG Y0,Y1,Y2,Y3,U,V;
-xaULONG map_flag,*map;
-XA_CHDR *chdr;
+void XA_YUV_2x2_clr(XA_2x2_Color *cmap2x2, unsigned int Y0, unsigned int Y1,
+    unsigned int Y2, unsigned int Y3, unsigned int U, unsigned int V,
+    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
 {
 
 //  printf("XA_YUV_2x2_clr(%p [%d,%d,%d,%d][%d][%d] %d %p %p)\n",
@@ -556,7 +559,7 @@ XA_CHDR *chdr;
   cmap2x2->clr0_3=Y3;
   cmap2x2->clr1_0=U;
   cmap2x2->clr1_1=V;
-
+  return;
 }
 
 void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
@@ -647,9 +650,10 @@ void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned in
 	    }
 	}
     }
-
+    return;
 }
 
+/* used by Indeo 3,4,5 */
 void *XA_YUV1611_Func(unsigned int image_type)
 {
     void (*color_func)();
@@ -667,6 +671,7 @@ void XA_YUV411111_To_RGB(unsigned char *image, unsigned int imagex, unsigned int
 {
     XA_Print("XA_YUV411111_To_RGB('image: %d', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
 	    image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
+    return;
 }
 
 
@@ -679,11 +684,10 @@ void *XA_YUV411111_Func(unsigned int image_type)
 }
 
 
-// input frame format:  YUV 4:2:0 (YV12)
-void XA_YUV221111_To_CLR8(image_p,imagex,imagey,i_x,i_y,yuv,yuv_tabs,map_flag,map,chdr)
-xaUBYTE *image_p;		xaULONG imagex,imagey,i_x,i_y;
-YUVBufs *yuv;	YUVTabs *yuv_tabs;
-xaULONG map_flag,*map;	XA_CHDR *chdr;
+/* input frame format:  YUV 4:2:0 (YV12) */
+void XA_YUV221111_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
+    unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs, unsigned int map_flag,
+    unsigned int *map, XA_CHDR *chdr)
 {
     xacodec_image_t *image=(xacodec_image_t*)image_p;
 
@@ -713,9 +717,10 @@ if(imagex==image->width && imagey==image->height){
     printf("partial YV12 not implemented!!!!!!\n");
 
 }
-
+    return;
 }
 
+/* used by H263,3ivX */
 /* YUV 22 11 11 routines */
 void *XA_YUV221111_Func(unsigned int image_type)
 {
