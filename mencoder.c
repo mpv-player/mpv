@@ -382,6 +382,25 @@ divx4_param.rc_reaction_ratio  = 20;
 
   if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,0,0);
 
+#ifdef HAVE_LIBCSS
+//  current_module="libcss";
+  if (dvdimportkey) {
+    if (dvd_import_key(dvdimportkey)) {
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDkey);
+      exit(1);
+    }
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CmdlineDVDkey);
+  }
+  if (dvd_auth_device) {
+    //  if (dvd_auth(dvd_auth_device,f)) {
+    if (dvd_auth(dvd_auth_device,filename)) {
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error in DVD auth...\n");
+      exit(1);
+    }
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
+  }
+#endif
+
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
   if(!demuxer){
