@@ -157,13 +157,13 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    if (info->sequence->width >> 1 == info->sequence->chroma_width &&
 		info->sequence->height >> 1 == info->sequence->chroma_height) {
 		if(!mpcodecs_config_vo(sh,
-				       info->sequence->width,
-				       info->sequence->height, IMGFMT_YV12)) return 0;
+				       info->sequence->picture_width,
+				       info->sequence->picture_height, IMGFMT_YV12)) return 0;
 	    } else if (info->sequence->width >> 1 == info->sequence->chroma_width &&
 		info->sequence->height == info->sequence->chroma_height) {
 		if(!mpcodecs_config_vo(sh,
-				       info->sequence->width,
-				       info->sequence->height, IMGFMT_422P)) return 0;
+				       info->sequence->picture_width,
+				       info->sequence->picture_height, IMGFMT_422P)) return 0;
 	    } else return 0;
 	    break;
 	case STATE_PICTURE:
@@ -186,8 +186,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    mpi_new=mpcodecs_get_image(sh,MP_IMGTYPE_IPB,
 				       (type==PIC_FLAG_CODING_TYPE_B) ?
 					use_callback : (MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE),
-				       (info->sequence->picture_width+15)&(~15),
-				       (info->sequence->picture_height+15)&(~15) );
+				       info->sequence->picture_width,
+				       info->sequence->picture_height );
 
 	    if(!mpi_new) return 0; // VO ERROR!!!!!!!!
 	    mpeg2_set_buf(mpeg2dec, mpi_new->planes, mpi_new);
@@ -201,8 +201,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
 #ifdef MPEG12_POSTPROC
 	    if(!mpi_new->qscale){
-		mpi_new->qstride=(info->sequence->picture_width+15)>>4;
-		mpi_new->qscale=malloc(mpi_new->qstride*((info->sequence->picture_height+15)>>4));
+		mpi_new->qstride=info->sequence->width>>4;
+		mpi_new->qscale=malloc(mpi_new->qstride*(info->sequence->height>>4));
 	    }
 	    mpeg2dec->decoder.quant_store=mpi_new->qscale;
 	    mpeg2dec->decoder.quant_stride=mpi_new->qstride;
