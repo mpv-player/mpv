@@ -3228,6 +3228,21 @@ if test "$_largefiles" = yes || freebsd ; then
   fi
 fi
 
+echocheck "ftello()"
+# if we dont have ftello map it to ftell
+cat > $TMPC << EOF
+#include <stdio.h>
+int main (void) { ftello(stdin); return 0; }
+EOF
+_ftello=no
+cc_check && _ftello=yes
+if test "$_ftello" = yes ; then
+ _def_ftello='#define HAVE_FTELLO 1'
+else
+ _def_ftello='#undef HAVE_FTELLO'
+fi
+echores "$_ftello"
+
 # Determine OS dependent libs
 if cygwin ; then
   _confcygwin='TARGET_CYGWIN = yes'
@@ -3506,6 +3521,13 @@ $_def_rtc
 
 /* Define this if your system has the header file for the OSS sound interface */
 $_def_sys_soundcard
+
+/* Define this if your system uses ftello() for off_t seeking */
+
+$_def_ftello
+#ifndef HAVE_FTELLO
+# define ftello(a) ftell(a)
+#endif
 
 /* Define this if your system has the "malloc.h" header file */
 $_def_malloc

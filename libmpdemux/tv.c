@@ -6,7 +6,7 @@
  API idea based on libvo2
 
  Feb 19, 2002: Significant rewrites by Charles R. Henrich (henrich@msu.edu)
-	       try to fix audio support, and bktr *BSD support.
+				to add support for audio, and bktr *BSD support.
 
 */
 
@@ -37,7 +37,11 @@ int tv_param_on = 0;
 #include "frequencies.h"
 
 /* some default values */
+int tv_param_audiorate = 44100;
 int tv_param_noaudio = 0;
+#ifdef HAVE_TV_BSDBT848
+int tv_param_immediate = 0;
+#endif
 char *tv_param_freq = NULL;
 char *tv_param_channel = NULL;
 char *tv_param_norm = "pal";
@@ -58,57 +62,39 @@ float tv_param_fps = -1.0;
 */
 /* fill demux->video and demux->audio */
 
-int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
+int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds, tvi_handle_t *tvh)
 {
     demux_packet_t* dp;
 
     sh_video_t *sh_video = demux->video->sh;
     u_int len;
-    u_int cframe;
     int aframeswaiting;
 
-    len = cframe = -1;
+    len = 0;
 
     /* ================== ADD AUDIO PACKET =================== */
 
-    if (tv_param_noaudio == 0 && 
+    if (ds==demux->audio && tv_param_noaudio == 0 && 
         tvh->functions->control(tvh->priv, 
                                 TVI_CONTROL_IS_AUDIO, 0) == TVI_CONTROL_TRUE)
         {
         len = tvh->functions->get_audio_framesize(tvh->priv);
 
-        do {
-            dp=new_demux_packet(len);
-            aframeswaiting=tvh->functions->grab_audio_frame(tvh->priv,
-                                                            dp->buffer,len);
-            dp->pts=tvh->seq/sh_video->fps;
-            dp->pos=tvh->seq*len;
-            ds_add_packet(demux->audio,dp);
-
-            tvh->seq++;
-
-           } while (aframeswaiting > 0);
+        dp=new_demux_packet(len);
+        dp->pts=tvh->functions->grab_audio_frame(tvh->priv, dp->buffer,len);
+        ds_add_packet(demux->audio,dp);
         }
 
     /* ================== ADD VIDEO PACKET =================== */
 
-    if (tvh->functions->control(tvh->priv, 
+    if (ds==demux->video && tvh->functions->control(tvh->priv, 
                             TVI_CONTROL_IS_VIDEO, 0) == TVI_CONTROL_TRUE)
         {
-        len = tvh->functions->get_video_framesize(tvh->priv);
-
-        dp=new_demux_packet(len);
-
-        cframe=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, 
-                                                len);
-
-        if(tv_param_noaudio == 1) tvh->seq = cframe;
-
-        dp->pos=tvh->seq*len;
-        dp->pts=tvh->seq/sh_video->fps;
-
-        ds_add_packet(demux->video,dp);
-        }
+		len = tvh->functions->get_video_framesize(tvh->priv);
+       	dp=new_demux_packet(len);
+  		dp->pts=tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
+   		ds_add_packet(demux->video,dp);
+	 }
 
     return 1;
 }
@@ -190,7 +176,7 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
     if (funcs->control(tvh->priv, TVI_CONTROL_IS_TUNER, 0) != TVI_CONTROL_TRUE)
     {
 	mp_msg(MSGT_TV, MSGL_WARN, "Selected input hasn't got a tuner!\n");	
-	goto start_device;
+	goto done;
     }
 
     /* select channel list */
@@ -214,7 +200,7 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
     if (tv_param_freq && tv_param_channel)
     {
 	mp_msg(MSGT_TV, MSGL_WARN, "You can't set frequency and channel simultanly!\n");
-	goto start_device;
+	goto done;
     }
 
     /* we need to set frequency */
@@ -251,9 +237,9 @@ int stream_open_tv(stream_t *stream, tvi_handle_t *tvh)
 	}
     }
 
-start_device:    
+done:    
     /* also start device! */
-    return(funcs->start(tvh->priv));	
+	return 1;
 }
 
 int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
@@ -286,6 +272,15 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 
     printf("fps: %f, frametime: %f\n", sh_video->fps, sh_video->frametime);
 
+#ifdef HAVE_TV_BSDBT848
+    /* If playback only mode, go to immediate mode, fail silently */
+    if(tv_param_immediate == 1)
+        {
+        funcs->control(tvh->priv, TVI_CONTROL_IMMEDIATE, 0);
+        tv_param_noaudio = 1; 
+        }
+#endif
+
     /* set width */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_WIDTH, &sh_video->disp_w);
 
@@ -308,6 +303,10 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	int sh_audio_format;
 
 	/* yeah, audio is present */
+
+	funcs->control(tvh->priv, TVI_CONTROL_AUD_SET_SAMPLERATE, 
+				  &tv_param_audiorate);
+
 	if (funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_FORMAT, &audio_format) != TVI_CONTROL_TRUE)
 	    goto no_audio;
 
@@ -334,7 +333,6 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	}
 	
 	sh_audio = new_sh_audio(demuxer, 0);
-	sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
 
 	funcs->control(tvh->priv, TVI_CONTROL_AUD_GET_SAMPLERATE, 
                    &sh_audio->samplerate);
@@ -347,33 +345,21 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	sh_audio->sample_format = audio_format;
 
 	sh_audio->i_bps = sh_audio->o_bps =
-	    sh_audio->samplerate * sh_audio->samplesize/8 * 
+	    sh_audio->samplerate * sh_audio->samplesize * 
 	    sh_audio->channels;
 
+	// emulate WF for win32 codecs:
+	sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
 	sh_audio->wf->wFormatTag = sh_audio->format;
 	sh_audio->wf->nChannels = sh_audio->channels;
-	switch(audio_format)
-	{
-	    case AFMT_U8:
-	    case AFMT_S8:
-		sh_audio->wf->wBitsPerSample = 8;
-		break;
-	    case AFMT_U16_LE:
-	    case AFMT_U16_BE:
-	    case AFMT_S16_LE:
-	    case AFMT_S16_BE:
-		sh_audio->wf->wBitsPerSample = 16;
-		break;
-	    case AFMT_S32_LE:
-	    case AFMT_S32_BE:
-		sh_audio->wf->wBitsPerSample = 32;
-		break;
-	}
+	sh_audio->wf->wBitsPerSample = sh_audio->samplesize * 8;
 	sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
-	sh_audio->wf->nBlockAlign = sh_audio->wf->nAvgBytesPerSec;
-	sh_audio->wf->nAvgBytesPerSec = sh_audio->wf->nChannels * 
-                                    sh_audio->samplesize/8 * 
-                                    sh_audio->samplerate;
+	sh_audio->wf->nBlockAlign = sh_audio->samplesize * sh_audio->channels;
+	sh_audio->wf->nAvgBytesPerSec = sh_audio->i_bps;
+
+	mp_msg(MSGT_DECVIDEO, MSGL_V, "  TV audio: %d channels, %d bits, %d Hz\n",
+          sh_audio->wf->nChannels, sh_audio->wf->wBitsPerSample,
+          sh_audio->wf->nSamplesPerSec);
 
 	demuxer->audio->sh = sh_audio;
 	sh_audio->ds = demuxer->audio;
@@ -381,7 +367,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     }
 no_audio:
 
-    return(1);
+    return(funcs->start(tvh->priv));	
 }
 
 /* ================== STREAM_TV ===================== */

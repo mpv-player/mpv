@@ -214,7 +214,7 @@ int demux_nuv_fill_buffer(demuxer_t *demux);
 extern tvi_handle_t *tv_handler;
 extern int tv_param_on;
 
-extern int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh);
+extern int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds, tvi_handle_t *tvh);
 extern int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
 #endif
 int demux_y4m_fill_buffer(demuxer_t *demux);
@@ -242,7 +242,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_REAL: return demux_real_fill_buffer(demux);
     case DEMUXER_TYPE_NUV: return demux_nuv_fill_buffer(demux);
 #ifdef USE_TV
-    case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux, tv_handler);
+    case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux, ds, tv_handler);
 #endif
     case DEMUXER_TYPE_Y4M: return demux_y4m_fill_buffer(demux);
     case DEMUXER_TYPE_AUDIO: return demux_audio_fill_buffer(ds);

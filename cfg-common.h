@@ -107,7 +107,11 @@
 #ifdef USE_TV
 struct config tvopts_conf[]={
 	{"on", &tv_param_on, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#ifdef HAVE_TV_BSDBT848
+	{"immediatemode", &tv_param_immediate, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+#endif
 	{"noaudio", &tv_param_noaudio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"audiorate", &tv_param_audiorate, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"driver", &tv_param_driver, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"device", &tv_param_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"freq", &tv_param_freq, CONF_TYPE_STRING, 0, 0, 0, NULL},

@@ -10,7 +10,7 @@ typedef struct {
   int id;    // stream no
   unsigned int ckid; // chunk id (00dc 01wb etc)
   double timer;
-  unsigned int size;
+  off_t size;
   // buffering:
   unsigned char *buffer;
   unsigned int buffer_size;

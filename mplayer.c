@@ -546,6 +546,10 @@ int gui_no_filename=0;
 
 #endif
 
+#ifdef HAVE_TV_BSDBT848
+  tv_param_immediate = 1;
+#endif
+
   if ( argv[0] )
     if(!strcmp(argv[0],"gmplayer") ||
       (strrchr(argv[0],'/') && !strcmp(strrchr(argv[0],'/'),"/gmplayer") ) )

@@ -86,7 +86,15 @@ static int control(priv_t *priv, int cmd, void *arg)
     return(TVI_CONTROL_UNKNOWN);
 }
 
-static int grab_video_frame(priv_t *priv, char *buffer, int len)
+#ifdef HAVE_TV_BSDBT848
+static double grabimmediate_video_frame(priv_t *priv, char *buffer, int len)
+{
+    memset(buffer, 0xCC, len);
+    return(1);
+}
+#endif
+
+static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
     memset(buffer, 0x42, len);
     return(1);
@@ -98,7 +106,7 @@ static int get_video_framesize(priv_t *priv)
     return(priv->width*priv->height*12/8);
 }
 
-static int grab_audio_frame(priv_t *priv, char *buffer, int len)
+static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
     memset(buffer, 0x42, len);
     return(1);

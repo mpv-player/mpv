@@ -63,7 +63,6 @@ typedef struct {
     struct video_mmap		*buf;
     int				nbuf;
     int				queue;
-	int				currentframe;
 
     /* audio */
     int				audio_id;
@@ -807,12 +806,10 @@ static int control(priv_t *priv, int cmd, void *arg)
     return(TVI_CONTROL_UNKNOWN);
 }
 
-static int grab_video_frame(priv_t *priv, char *buffer, int len)
+static double grab_video_frame(priv_t *priv, char *buffer, int len)
 {
     int frame = priv->queue % priv->nbuf;
     int nextframe = (priv->queue+1) % priv->nbuf;
-
-	priv->currentframe++;
 
     mp_dbg(MSGT_TV, MSGL_DBG2, "grab_video_frame(priv=%p, buffer=%p, len=%d)\n",
 	priv, buffer, len);
@@ -841,7 +838,7 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
     /* copy the actual frame */
     memcpy(buffer, priv->mmap+priv->mbuf.offsets[frame], len);
 
-    return(priv->currentframe);
+    return(0);
 }
 
 static int get_video_framesize(priv_t *priv)
@@ -849,7 +846,7 @@ static int get_video_framesize(priv_t *priv)
     return(priv->bytesperline * priv->height);
 }
 
-static int grab_audio_frame(priv_t *priv, char *buffer, int len)
+static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 {
     int in_len = 0;
 //    int max_tries = 128;
@@ -874,7 +871,7 @@ static int grab_audio_frame(priv_t *priv, char *buffer, int len)
     }
 //    printf("tries: %d\n", 128-max_tries);
 
-    return(in_len);
+    return 0; //(in_len); // FIXME!
 }
 
 static int get_audio_framesize(priv_t *priv)

@@ -21,6 +21,8 @@ extern int tv_param_input;
 extern char *tv_param_outfmt;
 extern float tv_param_fps;
 extern int tv_param_noaudio;
+extern int tv_param_immediate;
+extern int tv_param_audiorate;
 
 typedef struct tvi_info_s
 {
@@ -36,9 +38,12 @@ typedef struct tvi_functions_s
     int (*uninit)();
     int (*control)();
     int (*start)();
-    int (*grab_video_frame)();
+    double (*grab_video_frame)();
+#ifdef HAVE_TV_BSDBT848
+    double (*grabimmediate_video_frame)();
+#endif
     int (*get_video_framesize)();
-    int (*grab_audio_frame)();
+    double (*grab_audio_frame)();
     int (*get_audio_framesize)();
 } tvi_functions_t;
 
@@ -67,6 +72,9 @@ typedef struct tvi_handle_s {
 #define TVI_CONTROL_IS_AUDIO		0x1
 #define TVI_CONTROL_IS_VIDEO		0x2
 #define TVI_CONTROL_IS_TUNER		0x3
+#ifdef HAVE_TV_BSDBT848
+#define TVI_CONTROL_IMMEDIATE       0x4
+#endif
 
 /* VIDEO controls */
 #define TVI_CONTROL_VID_GET_FPS		0x101
@@ -107,6 +115,7 @@ typedef struct tvi_handle_s {
 #define TVI_CONTROL_AUD_GET_SAMPLERATE	0x302
 #define TVI_CONTROL_AUD_GET_SAMPLESIZE	0x303
 #define TVI_CONTROL_AUD_GET_CHANNELS	0x304
+#define TVI_CONTROL_AUD_SET_SAMPLERATE	0x305
 
 /* SPECIFIC controls */
 #define TVI_CONTROL_SPC_GET_INPUT	0x401	/* set input channel (tv,s-video,composite..) */

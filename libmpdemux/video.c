@@ -291,6 +291,10 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
           sh_video->fps=1.0f/d;
         }
     } else
+    if(demuxer->file_format==DEMUXER_TYPE_TV && !force_fps){
+        // TV has variable video frame rate, fixed audio...
+	frame_time=d_video->pts-pts1;
+	} else
     if(demuxer->file_format==DEMUXER_TYPE_MOV && !force_fps){
         // .MOV files has no fixed FPS - just frame durations!
 	frame_time=d_video->pts-pts1;

@@ -15,6 +15,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <signal.h>
+#include <sys/time.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -212,6 +213,7 @@ void parse_cfgfiles( m_config_t* conf )
   }
 }
 
+
 //---------------------------------------------------------------------------
 
 void *vo_spudec=NULL;
@@ -278,9 +280,17 @@ sh_video_t *sh_video=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 int i;
 
+uint32_t ptimer_start;
+uint32_t audiorate=0;
+uint32_t videorate=0;
+uint32_t audiosamples=1;
+uint32_t videosamples=1;
+uint32_t skippedframes=0;
+uint32_t duplicatedframes=0;
+
 aviwrite_stream_t* mux_a=NULL;
 aviwrite_stream_t* mux_v=NULL;
-int muxer_f_size=0;
+off_t muxer_f_size=0;
 
 #ifdef HAVE_MP3LAME
 lame_global_flags *lame;
@@ -714,6 +724,13 @@ if (seek_to_sec) {
     demux_seek(demuxer, d, 1);
 }
 
+if(tv_param_on == 1) 
+	{
+	fprintf(stderr,"Forcing audio preload to 0, max pts correction to 0\n");
+	audio_preload = 0.0;
+	default_max_pts_correction = 0;
+	}
+
 while(!eof){
 
     float frame_time=0;
@@ -724,7 +741,7 @@ while(!eof){
     int in_size;
     int skip_flag=0; // 1=skip  -1=duplicate
 
-    if((end_at_type == END_AT_SIZE && end_at <= ftell(muxer_f))  ||
+    if((end_at_type == END_AT_SIZE && end_at <= ftello(muxer_f))  ||
        (end_at_type == END_AT_TIME && end_at < sh_video->timer))
         break;
 
@@ -737,6 +754,9 @@ if(sh_audio){
     // get audio:
     while(mux_a->timer-audio_preload<mux_v->timer){
 	int len=0;
+
+	ptimer_start = GetTimerMS();
+
 	if(mux_a->h.dwSampleSize){
 	    // CBR - copy 0.5 sec of audio
 	    switch(mux_a->codec){
@@ -796,14 +816,19 @@ if(sh_audio){
 	    mux_a->buffer_len-=len;
 	    memcpy(mux_a->buffer,mux_a->buffer+len,mux_a->buffer_len);
 	}
+
+
+	audiosamples++;
+	audiorate+= (GetTimerMS() - ptimer_start);
     }
 }
 
     // get video frame!
+
     in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
     if(in_size<0){ eof=1; break; }
     sh_video->timer+=frame_time; ++decoded_frameno;
-    
+
     v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
 
 if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
@@ -816,7 +841,7 @@ if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
 	    if(len==4) next_frameno=start[0];
 	}
     if(eof) break;
-	if(skip_flag) printf("!!!!!!!!!!!!\n");
+	// if(skip_flag) printf("!!!!!!!!!!!!\n");
 	skip_flag=next_frameno-decoded_frameno;
     // find next frame:
 	while(next_frameno<=decoded_frameno){
@@ -868,6 +893,8 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
  }
 #endif
 
+ptimer_start = GetTimerMS();
+
 switch(mux_v->codec){
 case VCODEC_COPY:
     mux_v->buffer=start;
@@ -884,17 +911,22 @@ default:
     if(!blit_frame) aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0); // empty.
 }
 
+videosamples++;
+videorate+=(GetTimerMS() - ptimer_start);
+
 if(skip_flag<0){
     // duplicate frame
-    printf("\nduplicate %d frame(s)!!!    \n",-skip_flag);
+	if(!tv_param_on && !verbose) printf("\nduplicate %d frame(s)!!!    \n",-skip_flag);
     while(skip_flag<0){
+	duplicatedframes++;
 	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
 	++skip_flag;
     }
 } else
 if(skip_flag>0){
     // skip frame
-    printf("\nskip frame!!!    \n");
+	if(!tv_param_on && !verbose) printf("\nskip frame!!!    \n");
+	skippedframes++;
     --skip_flag;
 }
 
@@ -961,6 +993,19 @@ if(sh_audio && !demuxer2){
 	    (int)demuxer->filepos,
 	    (int)demuxer->movi_end);
 #else
+	if(verbose) {
+		mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d] A/Vms %d/%d D/S %d/%d \r",
+	    	mux_v->timer, decoded_frameno, (int)(p*100),
+	    	(t>1) ? (int)(decoded_frameno/t) : 0,
+	    	(p>0.001) ? (int)((t/p-t)/60) : 0, 
+	    	(p>0.001) ? (int)(ftello(muxer_f)/p/1024/1024) : 0,
+	    	v_pts_corr,
+	    	(mux_v->timer>1) ? (int)(mux_v->size/mux_v->timer/125) : 0,
+	    	(mux_a && mux_a->timer>1) ? (int)(mux_a->size/mux_a->timer/125) : 0,
+			audiorate/audiosamples, videorate/videosamples,
+			duplicatedframes, skippedframes
+		);
+	} else
 	mp_msg(MSGT_AVSYNC,MSGL_STATUS,"Pos:%6.1fs %6df (%2d%%) %3dfps Trem:%4dmin %3dmb  A-V:%5.3f [%d:%d]\r",
 	    mux_v->timer, decoded_frameno, (int)(p*100),
 	    (t>1) ? (int)(decoded_frameno/t) : 0,
@@ -972,7 +1017,6 @@ if(sh_audio && !demuxer2){
 	);
 #endif
     }
-
         fflush(stdout);
 
 
@@ -992,7 +1036,7 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
 
 printf("\nWriting AVI index...\n");
 aviwrite_write_index(muxer,muxer_f);
-muxer_f_size=ftell(muxer_f);
+muxer_f_size=ftello(muxer_f);
 printf("Fixup AVI header...\n");
 fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
@@ -1005,10 +1049,10 @@ if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
 }
 
 printf("\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d frames\n",
-    (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), mux_v->size, (float)mux_v->timer, decoded_frameno);
+    (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), (int)mux_v->size, (float)mux_v->timer, decoded_frameno);
 if(sh_audio)
 printf("\nAudio stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n",
-    (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), mux_a->size, (float)mux_a->timer);
+    (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (int)mux_a->size, (float)mux_a->timer);
 
 if(stream) free_stream(stream); // kill cache thread
 
