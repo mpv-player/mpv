@@ -80,7 +80,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h, int x0,int
   w>>=1;h>>=1;
   // copy U:
   for(y=0;y<h;y++){
-      unsigned char* s=src[1]+stride[1]*(y0+y)+x0;
+      unsigned char* s=src[2]+stride[2]*(y0+y)+x0;
       unsigned char* d=vo_image+vo_w*vo_h+(vo_w>>1)*(y0+y)+x0;
       memcpy(d,s,w);
   }
@@ -146,7 +146,8 @@ void* enc_handle=NULL;
   if(argc>1)
     stream=open_stream(argv[1],0,&file_format);
   else
-    stream=open_stream("/3d/divx/405divx_sm_v2[1].avi",0,&file_format);
+    stream=open_stream("/3d/abcug/Weird AL - Amish Paradise (MUSIC VIDEO).mpeg",0,&file_format);
+//    stream=open_stream("/3d/divx/405divx_sm_v2[1].avi",0,&file_format);
 //    stream=open_stream("/dev/cdrom",2,&file_format); // VCD track 2
 
   if(!stream){
@@ -225,6 +226,8 @@ if(out_fmt==IMGFMT_YV12 || out_fmt==IMGFMT_I420 || out_fmt==IMGFMT_IYUV){
     vo_image_ptr=vo_image;
 }
 
+divx_quality=4;
+
 if(!init_video(sh_video)){
      mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_CouldntInitVideoCodec);
      exit(1);
@@ -276,7 +279,7 @@ case VCODEC_DIVX4:
     enc_param.x_dim=sh_video->disp_w;
     enc_param.y_dim=sh_video->disp_h;
     enc_param.framerate=sh_video->fps;
-    enc_param.bitrate=800;
+    enc_param.bitrate=1800000;
     enc_param.rc_period=0;
     enc_param.rc_reaction_period=0;
     enc_param.rc_reaction_ratio=0;
