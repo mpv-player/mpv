@@ -101,12 +101,28 @@ static int control(int cmd, void *arg)
 
       static char *mix_name = "PCM";
       static char *card = "default";
+      static int mix_index = 0;
 
       long pmin, pmax;
       long get_vol, set_vol;
       float f_multi;
 
-      if(mixer_channel) mix_name = mixer_channel;
+      if(mixer_channel) {
+	 char *test_mix_index;
+
+	 mix_name = strdup(mixer_channel);
+	 if (test_mix_index = strchr(mix_name, ',')){
+		*test_mix_index = 0;
+		test_mix_index++;
+		mix_index = strtol(test_mix_index, &test_mix_index, 0);
+
+		if (*test_mix_index){
+		  mp_msg(MSGT_AO,MSGL_ERR,
+		    "alsa-control: invalid mixer index. Defaulting to 0\n");
+		  mix_index = 0 ;
+		}
+	 }
+      }
       if(mixer_device) card = mixer_device;
 
       if(ao_data.format == AFMT_AC3)
@@ -116,8 +132,13 @@ static int control(int cmd, void *arg)
       snd_mixer_selem_id_alloca(&sid);
 	
       //sets simple-mixer index and name
-      snd_mixer_selem_id_set_index(sid, 0);
+      snd_mixer_selem_id_set_index(sid, mix_index);
       snd_mixer_selem_id_set_name(sid, mix_name);
+
+      if (mixer_channel) {
+	free(mix_name);
+	mix_name = NULL;
+      }
 
       if ((err = snd_mixer_open(&handle, 0)) < 0) {
 	mp_msg(MSGT_AO,MSGL_ERR,"alsa-control: mixer open error: %s\n", snd_strerror(err));

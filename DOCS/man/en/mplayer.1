@@ -1669,7 +1669,7 @@ Use a mixer device different from the default /dev/\:mixer.
 For ALSA this is the mixer name.
 .
 .TP
-.B \-mixer-channel <mixer line> (\-ao oss and \-ao alsa only)
+.B \-mixer-channel <mixer line>[,mixer index] (\-ao oss and \-ao alsa only)
 This option will tell MPlayer to use a different channel for controlling
 volume than the default PCM.
 Options for OSS include
@@ -1678,6 +1678,12 @@ For a complete list of options look for SOUND_DEVICE_NAMES in
 /usr/\:include/\:linux/\:soundcard.h.
 For ALSA you can use the names e.g.\& alsamixer displays, like
 .B Master, Line, PCM.
+.br
+.I NOTE:
+ALSA mixer channel names followed by a number must be specified in the
+<name,number> format, i.e. a channel labeled 'PCM 1' in alsamixer must
+be converted to
+.B PCM,1.
 .
 .TP
 .B \-nowaveheader (\-ao pcm only)
