@@ -140,6 +140,7 @@
 #else
         {"oldpp", "MPlayer was compiled without opendivx library\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
+	{"npp", "-npp has been removed, use -vop pp and read the fine manual\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
 	{"vop", &vo_plugin_args, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
