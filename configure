@@ -141,6 +141,8 @@ Optional features:
   --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
   --enable-i18n          GNU internationalisation [disable]
+  --enable-runtime-cpudetection
+                         enable runtime CPU detection code [disable]
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
   --enable-dga[=n]       build with DGA [n in {1, 2} ] support [autodetect]
@@ -794,6 +796,7 @@ _language=en
 _shm=auto
 _linux_devfs=no
 _i18n=no
+_runtime_cpudetection=no
 
 for ac_option do
   case "$ac_option" in
@@ -814,6 +817,8 @@ for ac_option do
   --disable-mencoder)	_mencoder=no	;;
   --enable-i18n)	_i18n=yes	;;
   --disable-i18n)	_i18n=no	;;
+  --enable-runtime-cpudetection)  _runtime_cpudetection=yes ;;
+  --disable-runtime-cpudetection) _runtime_cpudetection=no  ;;
   --enable-x11)		_x11=yes	;;
   --disable-x11)	_x11=no		;;
   --enable-xv)		_xv=yes		;;
@@ -1187,6 +1192,15 @@ else
 fi
 _mp_help="help_mp-${LINGUAS}.h"
 test -f help_mp-${LINGUAS}.h || die "help_mp-${LINGUAS}.h not found"
+
+
+echocheck "runtime cpudetection"
+if test "$_runtime_cpudetection" = yes ; then
+  _def_runtime_cpudetection='#define RUNTIME_CPUDETECT 1'
+else
+  _def_runtime_cpudetection='#undef RUNTIME_CPUDETECT'
+fi
+echores "$_runtime_cpudetection"
 
 
 echocheck "kstat"
@@ -2553,7 +2567,7 @@ if test "$_xanim" = auto ; then
   _xanim=no
   if test "$_dl" = yes ; then
     if test -z "$_xanimlibdir" ; then
-	for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim ; do
+	for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim $XANIM_MOD_DIR ; do
           if test -d "$I" ; then
             _xanimlibdir="$I"
             break;
@@ -3270,6 +3284,9 @@ cat > config.h << EOF
 
 /* use GNU internationalisation */
 $_def_i18n
+
+/* Runtime Cpudetection */
+$_def_runtime_cpudetection
 
 #define USR_PREFIX "$_prefix"
 
