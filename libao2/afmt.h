@@ -34,10 +34,24 @@
 
 /* 24 bit formats from the linux kernel */
 #ifndef AFMT_S24_LE
+
+// FreeBSD fix...
+#if AFMT_S32_LE == 0x1000
+
+#define AFMT_S24_LE		0x00010000
+#define AFMT_S24_BE		0x00020000
+#define AFMT_U24_LE		0x00040000
+#define AFMT_U24_BE		0x00080000
+
+#else
+
 #define AFMT_S24_LE		0x00000800
 #define AFMT_S24_BE		0x00001000
 #define AFMT_U24_LE		0x00002000
 #define AFMT_U24_BE		0x00004000
+
+#endif
+
 #endif
 
 /* 32 bit formats from the linux kernel */
