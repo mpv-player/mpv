@@ -576,6 +576,15 @@ if((tv_param_on == 1) &&
 }
 #endif
 
+//=============== Try to open as multi file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MF)
+  if ( mf_support ){
+     demuxer=new_demuxer(stream,DEMUXER_TYPE_MF,audio_id,video_id,dvdsub_id);
+     file_format=DEMUXER_TYPE_MF;
+     mp_msg( MSGT_DEMUXER,MSGL_INFO,"[demuxer] mf support.\n" );
+  }
+}
+
 //=============== Try to open as AVI file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
@@ -808,17 +817,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_RAWDV)
       free_demuxer(demuxer);
 }
 #endif
-//=============== Try to open as multi file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MF){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_MF,audio_id,video_id,dvdsub_id);
-  {
-   if ( mf_support )
-    {
-     file_format=DEMUXER_TYPE_MF;
-     mp_msg( MSGT_DEMUXER,MSGL_INFO,"[demuxer] mf support.\n" );
-    }
-  }
-}
 //=============== Try to open as audio file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_AUDIO,audio_id,video_id,dvdsub_id);
@@ -834,7 +832,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
  if(file_format==DEMUXER_TYPE_RTP) {
    demuxer=new_demuxer(stream,DEMUXER_TYPE_RTP,audio_id,video_id,dvdsub_id);
  }
-
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN || demuxer == NULL){
   mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
