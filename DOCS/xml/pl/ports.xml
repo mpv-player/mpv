@@ -8,9 +8,9 @@
 <para>
 G³ówn± platform± rozwojow± jest Linux x86, chocia¿ 
 <application>MPlayer</application> pracuje równie¿ na wielu innych portach
-tego systemu. Pakiety binarne s± dostêpne z kilku ¼róde³. Jednak¿e,
+tego systemu. Pakiety binarne s± dostêpne z kilku ¼róde³, jednak¿e
 <emphasis role="bold">¿aden z nich nie jest przez nas obs³ugiwany</emphasis>.
-Zg³aszaj problemy do ich autorów, a nie do nas.
+Zg³aszaj problemy do ich opiekunów, a nie do nas.
 </para>
 
 <sect2 id="debian">
@@ -40,17 +40,17 @@ Dominik Mierzejewski tworzy i opiekuje siê oficjalnymi pakietami
 
 <para>
 RPMy dla Mandrake s± dostêpne na <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
-SuSE zawiera okrojon± wersjê MPlayera w dystrybucji. Poprawne pakiety mo¿esz pobraæ 
-z <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
+SuSE zawiera okrojon± wersjê MPlayera w dystrybucji. W pe³ni funkcjonalne pakiety mo¿esz
+pobraæ z <ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>.
 </para>
 </sect2>
 
 <sect2 id="arm">
 <title>ARM</title>
 <para>
-MPlayer dzia³a równie¿ na PDA dzia³aj±cymi pod kontrol± Linuksa z 
-procesorami ARM np. Sharp Zaurus, Compaq Ipaq. Najprostsz± drog±, ¿eby uzyskaæ
-MPlayera, jest pobranie go z odpowiedniego ¼ród³a pakietów (stable, testing, unstabe)
+MPlayer dzia³a równie¿ na PDA z procesorami ARM dzia³aj±cych pod kontrol± Linuksa,
+np. Sharp Zaurus, Compaq iPAQ. Najprostszym sposobem, ¿eby uzyskaæ MPlayera, jest
+pobranie go z odpowiedniego ¼ród³a pakietów (stable, testing, unstable)
 z witryny <ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Je¿eli chcesz
 go skompilowaæ samodzielnie, powiniene¶ przyjrzeæ siê katalogom 
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">MPlayera</ulink>
@@ -67,7 +67,7 @@ Je¿eli potrzebujesz interfejsu GUI, mo¿esz u¿yæ xmms-embedded.
 <title>*BSD</title>
 <para>
 <application>MPlayer</application> dzia³a na FreeBSD, OpenBSD, NetBSD,
-BSD/OS i Darwinie. S± dostêpne wersje portów/pkgsrc/fink/itp., które
+BSD/OS i Darwinie. Dostêpne s± wersje portów/pkgsrc/fink/itp., które
 prawdopodobnie s± ³atwiejsze w instalacji, ni¿ kompilacja ze ¼róde³.
 </para>
 
@@ -98,10 +98,10 @@ Je¿eli Twój procesor ma rozszerzenie SSE, przekompiluj j±dro z opcj±
 
 <sect2 id="openbsd">
 <title>OpenBSD</title>
-<para>Ze wzglêdu na ograniczenia w ró¿nych wersjach gas (Gnu assemblera - przyp. t³umacza; relokacja
-wzglêdem MMX), bêdziesz musia³ przeprowadziæ kompilacjê w dwóch krokach: Pierwszy,
-upewnij siê, ¿e wersja nierdzenna wystêpuje w zmiennej <envar>$PATH</envar>
-i wykonaj  <command>gmake -k</command>, pó¼niej upewnij siê, ¿e u¿ywana jest wersja rdzenna
+<para>Ze wzglêdu na ograniczenia w ró¿nych wersjach gas (GNU assemblera - przyp. t³umacza)
+(dotycz±ce relokacji i MMX), bêdziesz musia³ przeprowadziæ kompilacjê w dwóch krokach:
+Po pierwsze, upewnij siê, ¿e wersja nierdzenna wystêpuje w zmiennej <envar>$PATH</envar>
+i wykonaj <command>gmake -k</command>, a nastêpnie upewnij siê, ¿e u¿ywana jest wersja rdzenna
 i wykonaj <command>gmake</command>.
 </para>
 </sect2>
@@ -205,7 +205,7 @@ Podobny b³±d wystêpuje w kodzie systemu plików hsfs(7FS) (znanym jako ISO9660),
 hsfs mo¿e nie obs³ugiwaæ partycji/dysków wiêkszych ni¿ 4GB, wszystkie dane s± odczytywane z 
 bloku modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
-Problem mo¿e byæ rozwi±zany, stosuj±c ³atki 109764-04 (sparc) / 109765-04 (x86).
+Problem mo¿e byæ rozwi±zany przy pomocy ³atki 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
 
@@ -226,15 +226,15 @@ przestrzeni kolorów w sterownikach wyj¶ciowych video.
 <sect1 id="sgi">
 <title>Silicon Graphics Irix</title>
 <para>
-Mo¿esz albo spróbowaæ zainstalowaæ program instalacyjny GNU i (je¿eli nie
+Mo¿esz albo spróbowaæ zainstalowaæ program GNU install i (je¿eli nie
 umie¶ci³e¶ go w globalnej ¶cie¿ce) wskazaæ go przez:
 <screen>./configure --install-path=PATH</screen>
 </para>
 
 <para>
 Albo u¿yæ domy¶lnego programu instalacyjnego dostarczonego z IRIX 6.5, w tym 
-wypadku bêdziesz musia³ rêcznie zmodyfikowaæ plik <filename>Makefile</filename> w 
-kilku miejscach. Zmieñ ni¿ej podane, dwie linijki:
+wypadku nale¿y rêcznie zmodyfikowaæ plik <filename>Makefile</filename> w 
+kilku miejscach. Zmieñ poni¿sze dwie linijki:
 <programlisting>
   $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 
@@ -299,19 +299,19 @@ wolna. U¿ywaj SDL.
   zapisywalne dla u¿ytkownika, który korzysta z MPlayera, ale tylko na niektórych
   systemach. Spróbuj nadaæ im atrybut zapisywalno¶ci, je¿eli napotkasz jakie¶ problemy.
   Biblioteki DLL QuickTime równie¿ dzia³aj±, ale bêdzisz musia³ je umie¶ciæ
-  w katalogu systemowym Windowsa 
+  w katalogu systemowym Windows
   (<filename class="directory">C:\Windows\system\</filename> lub podobnym).</para>
 
 <para>Konsola Cygwin/MinGW jest raczej wolna. Przekierowywanie wyj¶cia albo u¿ywanie 
-  opcji <option>-quiet</option>, zg³oszono, jako poprawiaj±ce wydajno¶æ na
+  opcji <option>-quiet</option> zg³oszono jako poprawiaj±ce wydajno¶æ na
   niektórych systemach. Bezpo¶rednie renderowanie (<option>-dr</option>) równie¿
-  mo¿e pomóc. Mo¿esz zapobiec migotaniu OSD, w³±czaj±c podwójne buforowania przez
-  opcjê <option>-double</option>. Je¿eli odtwarzanie jest nierówne, spróbuj u¿yæ
+  mo¿e pomóc. Mo¿esz zapobiec migotaniu OSD, w³±czaj±c podwójne buforowanie
+  opcj± <option>-double</option>. Je¿eli odtwarzanie jest nierówne, spróbuj u¿yæ
   <option>-autosync 100</option>. Je¿eli którakolwiek z tych opcji Ci pomog³a,
   mo¿e bêdziesz chcia³ umie¶ciæ j± w swoim pliku konfiguracyjnym.</para>
 
-<para>Dostêpne s± skompilowane wersje binarne, przygotowane przez Saschê Sommer, do ¶ci±gniêcia
-  z
+<para>Dostêpne s± skompilowane wersje binarne, przygotowane przez Saschê Sommera,
+  do ¶ci±gniêcia z
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/">naszej strony domowej</ulink>.
   Joey Parrish tworzy 
   <ulink url="http://joey.nicewarrior.org/cygmp/">nieoficjalne paczki dla Windowsa</ulink>
