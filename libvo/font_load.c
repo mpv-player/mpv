@@ -59,7 +59,7 @@ memset(desc,0,sizeof(font_desc_t));
 f=fopen(fname,"rt");if(!f){ printf("font: can't open file: %s\n",fname); return NULL;}
 
 i = strlen (fname) - 9;
-if ((dn = malloc(i+1))!=NULL){
+if ((dn = malloc(i+1))){
    strncpy (dn, fname, i);
    dn[i]='\0';
 }
