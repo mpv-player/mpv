@@ -164,6 +164,7 @@ static int init(sh_audio_t *sh)
 static void uninit(sh_audio_t *sh)
 {
   struct ov_struct_st *ov = sh->context;
+  vorbis_dsp_clear(&ov->vd);
   vorbis_block_clear(&ov->vb);
   vorbis_info_clear(&ov->vi);
   free(ov);

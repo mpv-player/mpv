@@ -56,10 +56,10 @@ int fontdb=-1;
 int version=0;
 int first=1;
 
-desc=malloc(sizeof(font_desc_t));if(!desc) return NULL;
+desc=malloc(sizeof(font_desc_t));if(!desc) goto fail_out;
 memset(desc,0,sizeof(font_desc_t));
 
-f=fopen(fname,"rt");if(!f){ printf("font: can't open file: %s\n",fname); return NULL;}
+f=fopen(fname,"rt");if(!f){ printf("font: can't open file: %s\n",fname); goto fail_out;}
 
 i = strlen (fname) - 9;
 if ((dn = malloc(i+1))){
@@ -98,10 +98,7 @@ while(fgets(sor,1020,f)){
   if (first) {
     if (!sor[0] || sor[1] == 1 || (sor[0] == 'M' && sor[1] == 'Z') || (sor[0] == 0x1f && sor[1] == 0x8b) || (sor[0] == 1 && sor[1] == 0x66)) {
       printf("%s doesn't look like a font description, ignoring\n", fname);
-      fclose(f);
-      free(desc);
-      free(dn);
-      return NULL;
+      goto fail_out;
     }
     first = 0;
   }
@@ -141,7 +138,7 @@ while(fgets(sor,1020,f)){
         if(verbose) printf("font: Reading section: %s\n",section);
         if(strcmp(section,"[files]")==0){
             ++fontdb;
-            if(fontdb>=16){ printf("font: Too many bitmaps defined!\n");return NULL;}
+            if(fontdb>=16){ printf("font: Too many bitmaps defined!\n");goto fail_out;}
         }
         continue;
       }
@@ -160,20 +157,20 @@ while(fgets(sor,1020,f)){
       char *default_dir=MPLAYER_DATADIR "/font";
       if(pdb==2 && strcmp(p[0],"alpha")==0){
     	  char *cp;
-	  if (!(cp=malloc(strlen(desc->fpath)+strlen(p[1])+2))) return NULL;
+	  if (!(cp=malloc(strlen(desc->fpath)+strlen(p[1])+2))) goto fail_out;
 
 	  snprintf(cp,strlen(desc->fpath)+strlen(p[1])+2,"%s/%s",
 		desc->fpath,p[1]);
           if(!((desc->pic_a[fontdb]=load_raw(cp,verbose)))){
 		free(cp);
 		if (!(cp=malloc(strlen(default_dir)+strlen(p[1])+2))) 
-		   return NULL;
+		   goto fail_out;
 		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s/%s",
 			 default_dir,p[1]);
 		if (!((desc->pic_a[fontdb]=load_raw(cp,verbose)))){
 		   printf("Can't load font bitmap: %s\n",p[1]);
 		   free(cp);
-		   return NULL;
+		   goto fail_out;
 		}
           }
 	  free(cp);
@@ -181,20 +178,20 @@ while(fgets(sor,1020,f)){
       }
       if(pdb==2 && strcmp(p[0],"bitmap")==0){
     	  char *cp;
-	  if (!(cp=malloc(strlen(desc->fpath)+strlen(p[1])+2))) return NULL;
+	  if (!(cp=malloc(strlen(desc->fpath)+strlen(p[1])+2))) goto fail_out;
 
 	  snprintf(cp,strlen(desc->fpath)+strlen(p[1])+2,"%s/%s",
 		desc->fpath,p[1]);
           if(!((desc->pic_b[fontdb]=load_raw(cp,verbose)))){
 		free(cp);
 		if (!(cp=malloc(strlen(default_dir)+strlen(p[1])+2))) 
-		   return NULL;
+		   goto fail_out;
 		snprintf(cp,strlen(default_dir)+strlen(p[1])+2,"%s/%s",
 			 default_dir,p[1]);
 		if (!((desc->pic_b[fontdb]=load_raw(cp,verbose)))){
 		   printf("Can't load font bitmap: %s\n",p[1]);
 		   free(cp);
-		   return NULL;
+		   goto fail_out;
 		}
           }
 	  free(cp);
@@ -245,17 +242,15 @@ while(fgets(sor,1020,f)){
       }
   }
   printf("Syntax error in font desc: %s\n",sor);
-  free(desc);
-  fclose(f);
-  return NULL;
+  goto fail_out;
 
 }
 fclose(f);
+f = NULL;
 
  if (first == 1) {
    printf("%s is empty or a directory, ignoring\n", fname);
-   free(desc);
-   return NULL;
+   goto fail_out;
  }
 
 //printf("font: pos of U = %d\n",desc->start[218]);
@@ -263,7 +258,7 @@ fclose(f);
 for(i=0;i<=fontdb;i++){
     if(!desc->pic_a[i] || !desc->pic_b[i]){
         printf("font: Missing bitmap(s) for sub-font #%d\n",i);
-        return NULL;
+        goto fail_out;
     }
     //if(factor!=1.0f)
     {
@@ -316,6 +311,17 @@ desc->width[' ']=desc->spacewidth;
 printf("Font %s loaded successfully! (%d chars)\n",fname,chardb);
 
 return desc;
+
+fail_out:
+  if (f)
+    fclose(f);
+  if (desc->fpath)
+    free(desc->fpath);
+  if (desc->name)
+    free(desc->name);
+  if (desc)
+    free(desc);
+  return NULL;
 }
 
 #if 0

@@ -1424,8 +1424,13 @@ void demux_close_ogg(demuxer_t* demuxer) {
   subcp_close();
 #endif
 
+  ogg_sync_clear(&ogg_d->sync);
   if(ogg_d->subs)
+  {
+    for (i = 0; i < ogg_d->num_sub; i++)
+      ogg_stream_clear(&ogg_d->subs[i].stream);
     free(ogg_d->subs);
+  }
   if(ogg_d->syncpoints)
     free(ogg_d->syncpoints);
   if (ogg_d->text_ids)

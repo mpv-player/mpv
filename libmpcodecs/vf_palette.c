@@ -163,9 +163,14 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return vf->next->query_format(vf->next,best);
 }
 
+static void uninit(vf_instance_t *vf) {
+  free(vf->priv);
+}
+
 static int open(vf_instance_t *vf, char* args){
     unsigned int i;
     vf->config=config;
+    vf->uninit=uninit;
     vf->put_image=put_image;
     vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
