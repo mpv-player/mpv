@@ -124,8 +124,8 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
  txSample 	 tmp2;
  char            p[512];
  va_list         ap;
- unsigned long * ibuf;
- unsigned long * obuf;
+ unsigned int * ibuf;
+ unsigned int * obuf;
  int             i,x,y;
  int             oy = 0, ox = 0, dx = 0;
 
@@ -144,8 +144,8 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
  tmp->ImageSize=tmp->Width * tmp->Height * 4;
  if ( ( tmp->Image=malloc( tmp->ImageSize ) ) ==  NULL ) return NULL;
 
- obuf=(unsigned long *)tmp->Image;
- ibuf=(unsigned long *)Fonts[id]->Bitmap.Image;
+ obuf=(unsigned int *)tmp->Image;
+ ibuf=(unsigned int *)Fonts[id]->Bitmap.Image;
  for ( i=0;i < (int)strlen( p );i++ )
   {
    char c = p[i];
@@ -163,8 +163,8 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
    tmp2.ImageSize=sx * tmp->Height * 4;
    if ( ( tmp2.Image=malloc( tmp2.ImageSize ) ) ==  NULL ) { free( tmp->Image ); return NULL; }
 
-   obuf=(unsigned long *)tmp->Image;
-   ibuf=(unsigned long *)tmp2.Image;
+   obuf=(unsigned int *)tmp->Image;
+   ibuf=(unsigned int *)tmp2.Image;
    oy=0;
 
    for ( y=0;y < tmp->Height;y++ )

@@ -185,8 +185,8 @@ void Convert32to1( txSample * in,txSample * out,int adaptivlimit )
  out->Image=(char *)calloc( 1,out->ImageSize );
  if ( out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
  {
-  int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
-  buf=(unsigned long *)in->Image;
+  int i,b,c=0; unsigned int * buf = NULL; unsigned char tmp = 0; int nothaveshape = 1;
+  buf=(unsigned int *)in->Image;
   for ( b=0,i=0;i < (int)(out->Width * out->Height);i++ )
    {
     if ( (int)buf[i] != adaptivlimit ) tmp=( tmp >> 1 )|128;
@@ -209,8 +209,8 @@ void Convert1to32( txSample * in,txSample * out )
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[c32to1] imagesize: %d\n",out->ImageSize );
  if ( (int)out->Image == NULL ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"nem van ram baze\n" );
  {
-  int i,b,c=0; unsigned long * buf = NULL; unsigned char tmp = 0;
-  buf=(unsigned long *)out->Image;
+  int i,b,c=0; unsigned int * buf = NULL; unsigned char tmp = 0;
+  buf=(unsigned int *)out->Image;
   for ( c=0,i=0;i < (int)(in->Width * in->Height / 8);i++ )
    {
     tmp=in->Image[i];

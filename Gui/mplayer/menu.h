@@ -9,8 +9,8 @@ void mplHideMenu( int mx,int my,int w );
 
 void mplMenuDraw( wsParamDisplay )
 {
- unsigned long * buf = NULL;
- unsigned long * drw = NULL;
+ unsigned int * buf = NULL;
+ unsigned int * drw = NULL;
  int             x,y,tmp;
 
  if ( !appMPlayer.menuBase.Bitmap.Image ) return;
@@ -22,8 +22,8 @@ void mplMenuDraw( wsParamDisplay )
 // ---
    if ( mplMenuItem != -1 )
     {
-     buf=(unsigned long *)mplMenuDrawBuffer;
-     drw=(unsigned long *)appMPlayer.menuSelected.Bitmap.Image;
+     buf=(unsigned int *)mplMenuDrawBuffer;
+     drw=(unsigned int *)appMPlayer.menuSelected.Bitmap.Image;
      for ( y=appMPlayer.MenuItems[ mplMenuItem ].y; y < appMPlayer.MenuItems[ mplMenuItem ].y + appMPlayer.MenuItems[ mplMenuItem ].height; y++ )
        for ( x=appMPlayer.MenuItems[ mplMenuItem ].x; x < appMPlayer.MenuItems[ mplMenuItem ].x + appMPlayer.MenuItems[ mplMenuItem ].width; x++ )
          {
