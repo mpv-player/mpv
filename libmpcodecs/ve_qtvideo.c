@@ -145,13 +145,13 @@ static int config(struct vf_instance_s* vf,
     cdesc.componentFlagsMask=0;
 
 
-    printf("Count = %d\n",CountComponents(&cdesc));
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"Count = %d\n",CountComponents(&cdesc));
     compressor=FindNextComponent(NULL,&cdesc);
     if(!compressor){
-	printf("Cannot find requested component\n");
+	mp_msg(MSGT_MENCODER,MSGL_ERR,"Cannot find requested component\n");
 	return(0);
     }
-    printf("Found it! ID = 0x%X\n",compressor);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"Found it! ID = 0x%X\n",compressor);
 
 //	cres= FindCodec (fourcc,anyCodec,&compressor,&decompressor );
 //	printf("FindCodec returned:%i compressor: 0x%X decompressor: 0x%X\n",cres&0xFFFF,compressor,decompressor);
@@ -195,7 +195,7 @@ if(!codec_inited){
         0,
         mpi->planes[0],
         stride);
-    printf("NewGWorldFromPtr returned:%i\n",cres&0xFFFF);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"NewGWorldFromPtr returned:%i\n",cres&0xFFFF);
     //dunno what todo about this
     frame_prev = malloc(stride * height);
     cres = QTNewGWorldFromPtr(
@@ -207,8 +207,8 @@ if(!codec_inited){
         0,
         frame_prev,
         stride);
-    printf("height:%i width:%i stride:%i\n",height,width,stride);
-    printf("NewGWorldFromPtr returned:%i\n",cres&0xFFFF);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"height:%i width:%i stride:%i\n",height,width,stride);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"NewGWorldFromPtr returned:%i\n",cres&0xFFFF);
     cres=  GetMaxCompressionSize (
        GetGWorldPixMap(frame_GWorld_in),
        &FrameRect,
@@ -217,7 +217,7 @@ if(!codec_inited){
        bswap_32(format),
        compressor,
        &framesizemax );
-    printf("GetMaxCompressionSize returned:%i : MaxSize:%i\n",cres&0xFFFF,framesizemax);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"GetMaxCompressionSize returned:%i : MaxSize:%i\n",cres&0xFFFF,framesizemax);
     frame_comp=malloc(framesizemax);
 
     desc = (ImageDescriptionHandle)NewHandleClear(MAX_IDSIZE); //memory where the desc will be stored
@@ -238,8 +238,8 @@ if(!codec_inited){
        0,
        0,
        desc);
-    printf("CompressSequenceBegin returned:%i\n",cres&0xFFFF);
-    printf("Sequence ID:%i\n",seq);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"CompressSequenceBegin returned:%i\n",cres&0xFFFF);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"Sequence ID:%i\n",seq);
 
     dump_ImageDescription(*desc);
     codec_inited++;
@@ -254,7 +254,7 @@ if(!codec_inited){
         &similarity,
         0);
 
-    if(cres&0xFFFF)printf("CompressSequenceFrame returned:%i\n",cres&0xFFFF);
+    if(cres&0xFFFF)mp_msg(MSGT_MENCODER,MSGL_DBG2,"CompressSequenceFrame returned:%i\n",cres&0xFFFF);
 #if 0
     printf("Size %i->%i   \n",stride*height,compressedsize);
     printf("Ratio: %i:1\n",(stride*height)/compressedsize);
@@ -262,7 +262,7 @@ if(!codec_inited){
     muxer_write_chunk(mux_v, compressedsize , similarity?0:0x10);
 
     if(((*desc)->idSize)>MAX_IDSIZE){
-	printf("FATAL! idSize=%d too big, increase MAX_IDSIZE in ve_qtvideo.c!\n",((*desc)->idSize));
+	mp_msg(MSGT_MENCODER,MSGL_ERR,"FATAL! idSize=%d too big, increase MAX_IDSIZE in ve_qtvideo.c!\n",((*desc)->idSize));
     } else {
 	// according to QT docs, imagedescription may be changed while encoding
 	// a frame (even its size may (and does!) change!)
@@ -297,6 +297,10 @@ static int vf_open(vf_instance_t *vf, char* args){
     Setup_LDT_Keeper();
 #endif
     handler = LoadLibraryA("qtmlClient.dll");
+    if(!handler){
+        mp_msg(MSGT_MENCODER,MSGL_ERR,"unable to load qtmlClient.dll\n");
+        return 0;
+    }
     InitializeQTML = (OSErr (*)(long))GetProcAddress(handler, "InitializeQTML");
     GetGWorldPixMap = (PixMapHandle (*)(GWorldPtr))GetProcAddress(handler, "GetGWorldPixMap");
     QTNewGWorldFromPtr = (OSErr(*)(GWorldPtr *,OSType,const Rect *,CTabHandle,void*,GWorldFlags,void *,long))GetProcAddress(handler, "QTNewGWorldFromPtr");
@@ -310,12 +314,12 @@ static int vf_open(vf_instance_t *vf, char* args){
     CountComponents = (long (*)(ComponentDescription*))GetProcAddress(handler, "CountComponents");
     GetComponentInfo = (OSErr (*)(Component,ComponentDescription*,Handle,Handle,Handle))GetProcAddress(handler, "GetComponentInfo");
     if(!InitializeQTML  ||!CompressSequenceBegin){
-        printf("invalid qt DLL!\n");
+        mp_msg(MSGT_MENCODER,MSGL_ERR,"invalid qt DLL!\n");
         return 0;
     }
     //printf("%i,%i,%i\n",mmioFOURCC('S','V','Q','1'),'SVQ1',bswap_32(mmioFOURCC('S','V','Q','1')));
     cres=InitializeQTML(6+16);
-    printf("InitializeQTML returned %i\n",cres);
+    mp_msg(MSGT_MENCODER,MSGL_DBG2,"InitializeQTML returned %i\n",cres);
     return 1;
 }
 
