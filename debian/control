@@ -8,4 +8,12 @@ Package: mplayer
 Architecture: any
 Depends: ${shlibs:Depends},debconf
 Description: The Ultimate Movie Player For Linux
- PoS Eso x"D
+  MPlayer is a movie player for LINUX. It plays most MPEG, AVI and ASF files,
+  supported by many native and Win32 DLL codecs. You can watch VCD, DVD and even
+  DivX movies too. The another big feature of mplayer is the wide range of
+  supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
+  but you can use SDL (and this way all drivers of SDL, for example AAlib) and
+  some lowlevel card-specific drivers (for Matrox) too! Most of them supports
+  software or hardware scaling, so you can enjoy movies in fullscreen. And what
+  about the nice big antialiased shaded subtitles (7 supported types!!!) with
+  hungarian, english, cyrillic, czech, korean fonts, and OSD?

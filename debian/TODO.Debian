@@ -1,4 +1,4 @@
-
+- fibmap_mplayer - figure out what to do with suid.
 - global configuration 
  ( /etc/mplayer/mplayer.conf
   /etc/mplayer/codecs.conf
