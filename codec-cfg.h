@@ -66,6 +66,7 @@
 #define VFM_MPNG 21
 #define VFM_IJPG 22
 #define VFM_HUFFYUV 23
+#define VFM_ZLIB 24
 
 #ifndef GUID_TYPE
 #define GUID_TYPE

@@ -256,6 +256,7 @@ static short get_driver(char *s,int audioflag)
 		"mpng",
 		"ijpg",
 		"huffyuv",
+		"zlib",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;
