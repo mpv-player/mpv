@@ -1,4 +1,4 @@
-.\" synced with 1.811
+.\" synced with 1.818
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-17" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2004-11-30" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -533,6 +533,8 @@ Prowadzi do zniekszta³ceñ obrazu!
 .TP
 .B \-identify
 Pokazuje parametry zbioru w ³atwo przegl±dalnym formacie.
+Wy¶wietla te¿ dok³adniejsze informacje o jêzykach i identyfikatorach
+napisów i ¶cie¿ek audio.
 Skrypt TOOLS/\:midentify wycina inne napisy MPlayera i (mamy nadziejê)
 zabezpiecza specjalne znaki przed interpretacj± przez pow³okê.
 .
@@ -572,6 +574,17 @@ Je¶li podany zbiór jest kolejk±, MPlayer otwiera oba koñce, wiêc mo¿na
 kilkukrotnie napisaæ "echo "seek 10" > mp_pipe" i kolejka bêdzie dzia³aæ.
 .RE
 .PD 1
+.
+.TP
+.B \-key-fifo-size <2\-65000>
+Ustala wielko¶æ kolejki buforuj±cej naci¶niêcia klawiszy (domy¶lnie: 10).
+Kolejka wielko¶ci n mo¿e zbuforowaæ (n-1) zdarzeñ.
+Je¶li jest zbyt ma³e niektóre zdarzenia mog± zagin±æ
+(co prowadzi do "zaciêtego przycisku myszy" i podobnych efektów).
+Je¶li jest zbyt du¿e mo¿e wygl±daæ ¿e MPlayer zawiesi³ siê
+gdy przetwarza zbuforowane zdarzenia.
+¯eby utrzymaæ takie samo zachowanie jak przed wprowadzeniem tej opcji,
+ustaw 2 dla Linuksa i 1024 dla Windows.
 .
 .TP
 .B \-lircconf <plik> (tylko z LIRC)
@@ -693,6 +706,9 @@ Zwalnia lub przyspiesza odtwarzanie o wspó³czynnik podany jako parametr.
 .B \-sstep <sek>
 Wy¶wietla jedn± klatkê co <sek> sekund.
 U¿yteczny w pokazie slajdów.
+Korzysta to z normalnego wyszukiwania, wiêc jest tak samo niedok³adne
+(tzn. przy wiêkszo¶ci formatów dostaniesz kolejn± klatkê pomiêdzy
+<sek> a <sek>+20 sekund).
 .
 .
 .
@@ -1178,12 +1194,12 @@ czêstotliwo¶æ przechwytywania video (ile klatek na sekundê przechwytywaæ)
 maksymalny rozmiar bufora przechwytywania w megabajtach (domy¶lnie: dynamiczny)
 .IPs norm=<warto¶æ>
 bsdbt848 i v4l dopuszczaj± PAL, SECAM i NTSC.
-Lista dostêpnych norm dla v4l2 jest wy¶wietlana na konsoli.
+Lista dostêpnych standardów dla v4l2 jest wy¶wietlana na konsoli.
 Przeczytaj te¿ poni¿sz± opcjê normid.
 .IPs "normid=<warto¶æ> (tylko v4l2)"
-Ustawia normê TV z podanym numerycznym ID.
-Norma zale¿y od karty przechwytywania.
-Lista norm TV jest wypisywana przez MPlayera na konsoli.
+Ustawia standard TV z podanym numerycznym ID.
+Zale¿y on od karty przechwytywania.
+Lista standardów TV jest wypisywana przez MPlayera na konsoli.
 .IPs channel=<warto¶æ>
 Ustawia tuner na kana³ <warto¶æ>.
 .IPs chanlist=<warto¶æ>
@@ -1983,15 +1999,6 @@ wy¶wietlaæ.
 .PD 1
 .
 .TP
-.B \-double
-W³±cz podwójne buforowanie.
-Eliminuje migotanie dziêki przechowywaniu dwóch ramek w pamiêci i wy¶wietlaniu
-jednej, podczas gdy druga jest dekodowana.
-Mo¿e mieæ negatywny wp³yw na OSD, ale czêsto usuwa jego migotanie.
-Potrzebuje dwukrotnie wiêcej pamiêci, ni¿ pojedynczy bufor, wiêc nie
-bêdzie dzia³aæ na kartach z bardzo ma³± pamiêci± video.
-.
-.TP
 .B \-dr \ \ \ 
 W³±cz bezpo¶rednie renderowanie (obs³ugiwane nie przez wszystkie kodeki i
 wyj¶cia video)
@@ -2218,6 +2225,13 @@ Ustawia proporcje Twojego monitora lub ekranu TV.
 \-monitoraspect 16:9 lub 1.7777
 .RE
 .PD 1
+.
+.TP
+.B \-nodouble
+Wy³±cza podwójne buforowanie, g³ównie do celów debugowania.
+Podwójne buforowanie eliminuje migotanie dziêki przechowywaniu dwóch ramek
+w pamiêci i wy¶wietlaniu jednej, podczas gdy druga jest dekodowana.
+Mo¿e mieæ to negatywny wp³yw na OSD, ale czêsto usuwa jego migotanie.
 .
 .TP
 .B \-nograbpointer
@@ -2921,6 +2935,8 @@ Obs³uguje formaty YV12, RGB (24 bpp) i BGR (24bpp).
 Zapisuje ramki z przeplotem, najpierw górne pole.
 .IPs interlaced_bf
 Zapisuje ramki z przeplotem, najpierw dolne pole.
+.IPs file=<nazwapliku>
+Zapisuje wyj¶cie do podanego zbioru, zamiast domy¶lnego stream.yuv.
 .REss
 .PD 1
 .RS
