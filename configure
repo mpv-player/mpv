@@ -722,8 +722,8 @@ EOF
     _mcpu=''
     cpu750=`$_cpuinfo | grep "cpu.*750"`
     if test -n "$cpu750"; then
-	_march=''
-	_mcpu='-mcpu=750'
+	_march='-mcpu=750'
+	_mcpu='-mtune=750'
     fi
     ;;
 
