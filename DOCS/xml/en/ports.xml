@@ -26,8 +26,11 @@ As root you can then install the <filename>.deb</filename> package as usual:
 <para>
 Christian Marillat has been making unofficial Debian
 <application>MPlayer</application>, <application>MEncoder</application> and
-font packages for a while, you can (apt-)get them from his
-<ulink url="http://marillat.free.fr/">homepage</ulink>.
+font packages for a while, you can (apt-)get them from a
+<ulink url="ftp://ftp.nerim.net/debian-marillat/index.html">mirror of his homepage</ulink>
+since his
+<ulink url="http://marillat.free.fr/">original homepage</ulink>
+seems to be down.
 </para>
 </sect2>
 
