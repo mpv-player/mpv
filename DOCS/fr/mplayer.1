@@ -2,9 +2,9 @@
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
 .\"
-.\" Lancez ça pour obtenir une version html de la page de man:
+.\" Lancez cette commande pour obtenir une version HTML de la page de man:
 .\"   cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
-.\" Lancez ça pour obtenir une version texte de la page de man:
+.\" Lancez cette commande pour obtenir une version texte de la page de man:
 .\"   groff -m man -Tascii8 mplayer.1 | col -bx > manpage.txt
 .\"
 .
@@ -850,7 +850,7 @@ choisis la qualité de la compression jpeg
 Indique un nom d'utilisateur pour l'identification http.
 .TP
 .B \-vcd <piste>
-Joue une piste Video CD depuis un périphérique ou un fichier image (voir 
+Joue une piste Video CD depuis un périphérique ou un fichier image (voir
 \-cuefile).
 .TP
 .B \-vid <id>
@@ -2038,35 +2038,60 @@ Active une liste de filtres vidéo séparés par des virgules.
 .br
 Les paramètres sont optionnels et si omis, certains d'entre eux s'initialiseront
 avec des valeurs par défaut.
-Utilisez -1 pour garder la valeur par défaut.
+Utilisez '-1' pour garder la valeur par défaut.
 Les paramètres w:h signifient largeur x hauteur en pixels, x:y signifient
 position x;y à partir de du coin supérieur gauche de la plus grande image.
 .br
-pour avoir une liste complète des plugins disponibles, voir \-vf help.
+pour avoir une liste complète des filtres disponibles, voir \-vf help.
 .br
 Les filtres disponibles sont:
 .
 .RSs
-.IPs crop[=w:h:x:y]
+.IPs crop[=l:h:x:y]
 Découpe la partie donnée de l'image et jette le reste.
 Utile pour enlever les bandes noires d'un film écran large.
+.RSss
+l,h: Largeur et hauteur coupées, par défaut les largeur et hauteur originales.
+.br
+x,y: Position de l'image coupée, par défaut au centre.
+.REss
 .IPs cropdetect[=0\-255]
 Calcule les paramètres nécessaires de coupe et les affiche sur stdout.
-Le seuil peut éventuellement être spécifié de rien (0) à tout
-(255).
+Le seuil peut éventuellement être spécifié de rien (0) à tout (255).
 (par défaut: 24)
-.IPs rectangle[=w:h:x:y]
+.IPs rectangle[=l:h:x:y]
 Dessine un rectangle de la largeur et auteur demandées aux coordonnées 
-spécifiées sur l'image (utilisé pour testé le découpage).
-(par défaut:  w/\:h maximum, position x/\:y supérieure gauche)
+spécifiées sur l'image (utilisé pour tester le découpage).
+.RSss
+l,h: largeur et hauteur (par défaut: -1, largeur maximum où les limites sont
+toujours visibles.
+.br
+x,y: position du coin supérieur gauche (par défaut: -1, le plus haut et le plus
+à gauche)
+.REss
+.IPs
+Ce plugin réagit à la directive 'change_rectangle' de input.conf, qui prends
+deux paramètres.
+Le premier paramètre peut être 0 pour l, 1 pour h, 2 pour x et 3 pour y.
+Le second paramètre est la quantité de pixels par laquelle changer les limites
+du rectangle.
 .IPs expand[=w:h:x:y:o]
 Étends (ne zoom pas) la résolution du film aux valeurs fournies et place
-l'original non redimensionné aux coordonnées x y. Des valeurs négatives pour
-w et h sont traitées en tant qu'offsets par rapport à la taille originale. Par
-exemple, expand=0:-50:0:0 ajoute un bord de 50 pixels en bas de l'image.
-Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires
-restantes (par défaut: w/\:h original, x/\:y centré).
-Le dernier paramètre dés)active le rendu OSD (par défaut: 0=désactivé).
+l'original non redimensionné aux coordonnées x y.
+Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires.
+.RSss
+l,h: largeur,hauteur étendues (par défaut: largeur,hauteur originales)
+.br
+x,y: position de l'image originale sur l'image étendue (par défaut: centrée)
+.br
+o:   rendu OSD/sous-titres
+    0: désactivé (par défaut)
+    1: activé
+.REss
+.IPs
+Des valeurs négatives pour l et h sont traitées en tant qu'offsets par rapport
+à la taille originale, par exemple, expand=0:-50:0:0 ajoute un bord de 50 pixels
+en bas de l'image.
 .IPs flip
 Inverse l'image de haut en bas.
 Voir également l'option \-flip.
@@ -2076,24 +2101,56 @@ Inverse l'image selon l'axe Y.
 Tourne et (éventuellement) inverse l'image de +/\:\- 90 degrés. Pour les 
 paramètres entre 4-7 la rotation n'est faite que si la géométrie du film
 est en portrait et non en paysage.
-.IPs scale[=w:h[:c[:p]]]
+.IPs scale[=l:h[:c[:p]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
-de palette YUV<\->RGB (voir l'option \-sws également).
-La valeur 0 est utilisé pour la destination (aspect) zoomé w/\:h.
-(par défaut: w/\:h original, w/\:h de destination avec \-zoom). Éventuellement des
-paramètres de saut chroma (c de 0\-3) et de zoom peuvent être spécifiés.
+de palette YUV<\->RGB (voir également l'option \-sws).
+.RSss
+l,h: nouvelles largeur/hauteur après redimensionnement (par défaut:
+largeur,hauteur originales)
+    Note: Si -zoom est utilisée, et que les filtres sous-jascents
+    (y compris libvo) ne sont pas capable de redimensionner, alors les valeurs
+    par défaut seront d_width/\:d_height!
+    -1: largeur/\:hauteur originales
+    0:  largeur/\:hauteur dimmensionnées à d_width/\:d_height
+    -2: Calcule l/\:h en utilisant l'autre dimension et l'aspect ratio
+    redimensionné.
+    -3: Calcule l/\:h en utilisant l'autre dimension et l'aspect ratio original.
+.br
+c:  saut de chroma
+    0: utilise toutes les lignes disponibles pour le chroma
+    1: n'utilise qu'une ligne sur 2 pour le chroma
+    2: n'utilise qu'une ligne sur 4 pour le chroma
+    3: n'utilise qu'une ligne sur 8 pour le chroma
+.br
+p:  paramètres de redimensionnement (dépends de la méthode de redimensionnement
+utilisée)
+    pour -sws 2 (bicubique)  est la duretée (0 (doux) - 100 (dur))
+    pour -sws 7 (gaussien) est la duretée (0 (doux) - 100 (dur))
+    pour -sws 9 (lanczos)  est la longueur du filtre (1 - 10)
+La valeur 0 est utilisé pour la destination (aspect) zoomé l/\:h.
+(par défaut:l/\:h original, l/\:h de destination avec \-zoom). Éventuellement
+des paramètres de saut chroma (c de 0\-3) et de zoom peuvent être spécifiés.
 (voir l'option \-sws pour les détails)
 .IPs yuy2
 Force la conversion logicielle YV12/\:I420 ou 422P vers YUY2
+Utile pour les cartes graphiques/\:pilotes qui ont un support lent de YV12 mais
+rapide de YUY2.
+.IPs yvu9
+Force la conversion de couleur logicielle de YVU9 en YV12.
+Utiliser de préférence le zoom logiciel à la place.
 .IPs rgb2bgr[=swap]
-conversion de palette RGB 24/\:32 <\-> BGR 24/\:32 avec échange optionnel
-R <\-> B.
+conversion de palette RGB 24/\:32 <\-> BGR 24/\:32
+.RSss
+swap: Échange en plus R <\-> B.
+.REss
 .IPs palette
 conversion de palette RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en utilisant palette.
 .IPs format[=fourcc]
-Restreints la palette pour le prochain filtre.
-Il ne fait aucune conversion
+Restreints la palette pour le prochain filtre sans faire de conversion.
 Utilisez-le avec le filtre scale pour une véritable conversion.
+.RSss
+fourcc: nom de format comme rgb15, bgr24, yv12, etc (par défaut: yuy2)
+.REss
 .IPs pp[=filtre1[:option1[:option2...]]/[-]filtre2...] (voir aussi \-pphelp)
 Cette option active le filtre interne de postprocessing, et propose une
 interface où vous pouvez passer des options au filtre nommé.
@@ -2137,26 +2194,44 @@ le déblocage vertical suivant le temps CPU disponible:
 \-vf pp=hb:y/vb:a \-autoq 6
 .REss
 .IPs lavc[=qualité:fps]
-Encodeur MPEG1 temps-réel à utiliser avec DVB/\:DXR3 (libavcodec)
+Conversion logicielle YV12 vers MPEG1 rapide avec libavcodec pour utilisation
+avec DVB/\:DXR3.
+Plus rapide et de meilleur qualitée que \-vf fame.
+.RSss
+qualité:
+    1 \- 31 qscale fixe
+    32 \-   débit fixe en kBits
+.br
+fps: force les fps de sortie (nombre à virgule) (par défaut: 0, autodétection
+basée sur la hauteur)
+.REss
 .IPs fame
-Encodeur MPEG1 temps-réel à utiliser avec DVB/\:DXR3 (libfame)
+Conversion logicielle YV12 vers MPEG1 rapide avec libfame pour utilisation avec
+DVB/\:DXR3.
 .IPs dvbscale[=aspect]
-Fixe le zoom optimum pour les cartes DVB.
-(aspect=DVB_HAUTEUR*ASPECTRATIO, par défaut: 768)
+Fixe le zoom optimum pour les cartes DVB, en redimmensionnant sur l'axe X de
+façon matérielle et en calculant le redimmensionnement sur l'axe Y de façon
+logicielle pour conserver l'aspect.
+.RSss
+aspect= contrôle l'aspect ratio, calculé comme ceci: DVB_HAUTEUR*ASPECTRATIO,
+par défaut: 576*4/3=768, fixez-le à 576*(16/9)=1024 pour une télé 16:9.
+.IPs
+Utile uniquement avec expand+scale:
+\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
-Ajoute du bruit
+Ajoute du bruit.
 .RSss
 <0\-100>: bruit luma
 .br
 <0\-100>: bruit chroma
 .br
-u: bruit uniforme
+u: bruit uniforme (gaussien sinon)
 .br
-t: bruit temporel
+t: bruit temporel (le motif de bruit change entre les trames)
 .br
-a: bruit temporel moyen
+a: bruit temporel moyen (plus lisse, mais beaucoup plus lent)
 .br
-h: haute qualité
+h: haute qualité (qualité légèrement meilleure , mais légèrement plus lent)
 .br
 p: mixe du bruit aléatoire avec un motif (semi-)régulier
 .REss
@@ -2173,21 +2248,29 @@ chroma: force spatiale du chroma (par défaut = 3)
 .br
 time:	force temporelle (par défaut = 6)
 .REss
+.IPs "hqdn3d[=luma:chroma:temps]"
+Version de haute précision\/:qualité du filtre denoise3d.
+Les paramètres et le comportement sont les mêmes.
 .IPs eq[=lumi:cont]
-Active l'égaliseur logiciel avec contrôles interactifs comme les ég. matériels.
-Les valeurs peuvent aller de -100 à 100.
+Égaliseur logiciel avec contrôles interactifs comme les ég. matériels. Pour les
+cartes/\:pilotes qui ne supportent pas les contrôles de la luminosité et du
+contraste de façon matérielle.
+Peut également être utile avec MEncoder, soit pour réparer des films mal
+encodés, soit pour réduire légèrement le contraste pour masquer les artefacts et
+s'accomoder de débits plus bas.
+Les valeurs initiales dans l'intervale -100 à 100 peuvent être fournies en ligne
+de commandes.
 .IPs eq2[=gamma:contraste:luminosité:saturation:rg:gg:bg]
 Égaliseur logiciel alternatif qui utilise des tables de lookup (très lent),
 autorisant une correction du gamma en plus d'un simple ajustement de luminosité,
 de contraste et de saturation. Notez que cela utilise le même code MMX optimisé
-que -vo eq si toutes les valeurs gamma sont 1.0!
+que -vo eq si toutes les valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres à virgule.
-Les valeurs par défaut sont gamma=1.0, contraste=1.0, et luminosité=0.0 et
-saturation=1.0.
 Les paramètres rg, gg, bg sont les valeurs gamma indépendantes pour les
-composants Rouge, Vert et Bleu, toutes égales à 1.0 par défaut.
+composants Rouge, Vert et Bleu.
+Les valeurs par défaut sont 1.0, luminosité=0.0.
 Les intervalles de valeur sont 0.1\-10 pour les gamma, -2\-2 pour le contraste
-(les valeurs négatives provoquent une image négative) et -1\-1 pour la
+(les valeurs négatives provoquent une image négative), -1\-1 pour la
 luminosité et 0\-3 pour la saturation.
 .IPs halfpack[=f]
 Convertit le planar YUV 4:2:0 en 4:2:2 demi-hauteur, en downsamplant le luma
@@ -2201,24 +2284,25 @@ downsampling.
 Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires,
 ou 1 pour n'utiliser que les lignes impaires.
 Tout autre valeur de f renvoie au comportement par défaut (moyenne).
-.IPs dint[=sense:level]
+.IPs dint[=sense:niveau]
 Détecte et saute la première des trames entrelacées du flux video.
 Les valeurs peuvent aller de 0.0 à 1.0 la première (0.15 par défaut) est la
 différence entre les pixels voisins, la seconde (0.15 par défaut) est la
 partie de l'image qui devra être détectée comme entrelacée pour sauter la trame.
-.IPs "unsharp=l|cWxH:amount[:l|cWxH:amount]"
+.IPs "unsharp=l|cLxH:montant[:l|cLxH:montant]"
 Masque unsharp / flou gaussien.
 .RSss
-l: applique l'effet sur le composant luma
+l: Applique l'effet sur le composant luma
 .br
-c: applique l'effet sur les composants chroma
+c: Applique l'effet sur les composants chroma
 .br
-WxH: largeur et hauteur de la matrice, tailles impaires dans les deux directions
+LxH: largeur et hauteur de la matrice, tailles impaires dans les deux directions
 (min = 3x3, max = 13x11 ou 11x13, généralement quelque chose entre 3x3 et 7x7)
 .br
-amount: taux relatif de sharpness / flou à ajouter à l'image
-(amount < 0 = flou, amount > 0 = sharpen, généralement quelque chose entre
-\-1.5 et 1.5)
+montant: taux relatif de dureté / flou à ajouter à l'image
+(généralement quelque chose entre \-1.5 et 1.5)
+    <0: flou
+    >0: dur
 .REss
 .IPs swapuv
 Echange les plans U & V.
@@ -2240,7 +2324,7 @@ i: entrelace
 s: échange les champs (échange les lignes paires & impaires)
 .REss
 .IPs "field[=n]"
-Extrait un seul champs de l'image entrelacée en utilisant un calcul large
+Extrait un seul champs d'une image entrelacée en utilisant un calcul large
 pour éviter de gaspiller le temps CPU. L'argument optionnel n spécifie si
 l'on doit extraire un champs pair ou impair (selon que n soit pair ou impair).
 .IPs "detc"
@@ -2284,16 +2368,16 @@ flou boite
 .RSss
 rayon: taille du filtre
 .br
-puissance: à quelle fréquence le filtre devrait être appliqué
+puissance: À quelle fréquence le filtre devrait être appliqué.
 .REss
-.IPs "sab=rad:pfilter:cDiff[:rad:pfilter:cDiff]"
+.IPs "sab=rad:pf:colorDiff[:rad:pf:colorDiff]"
 flou adapté aux formes
 .RSss
 rad: force du filtre de flou (~0.1\-4.0) (le plus bas est le plus large)
 .br
-pfilter: force du préfiltre (~0.1\-2.0)
+pf: force du préfiltre (~0.1\-2.0)
 .br
-cDiff: différence autorisée des pixels
+colorDiff: différence autorisée des pixels
 (~0.1-100.0)
 .REss
 .IPs "smartblur=rad:strength:thresh[:rad:strength:thresh]"
@@ -2321,6 +2405,14 @@ Utilise le zoom x2 et l'algorithme d'interpolation pour dimensionner et lisser
 les images.
 .IPs 1bpp
 conversion bitmap 1bpp vers YUV/BGR 8/15/16/32
+.IPs down3dright[=lignes]
+Repositionne et redimmensionne les images stéréoscopiques.
+Extrait les deux champs et les place côte à côte, ler redimmensionnant pour
+garder l'aspect du film.
+.RSss
+lignes: nombre de lignes à sélectionner à partir du milieu de l'image (par
+défault: 12)
+.REss
 .IPs "bmovl=hidden:opaque:<fifo>"
 Lit les bitmaps depuis un FIFO et les affiche dans une fenêtre.
 .

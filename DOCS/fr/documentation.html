@@ -351,17 +351,17 @@
    ces fichiers.</P>
 <P>Règle principale de cette documentation: si ce n'est pas documenté, cela
   <U>n'existe pas</U>. Si je ne dit pas que vous encodez l'audio à partir du tuner
-  TV, c'est que vous ne pouvez pas. Cependant, une bonne quantité de talents combinés 
+  TV, c'est que vous ne pouvez pas. Cependant, une bonne quantité de talents combinés
   est la bienvenue. Bonne chance. Vous en aurez besoin :) Et pour un autre
   bon conseil, laissez-moi citer Chris Phillips sur la liste de diffusion
   <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>:</P>
 
 <BLOCKQUOTE>
   J'ai dit il y a quelque temps qu'il y avait une énorme différence entre
-  être novice et être idiot. Peu importe ce que vous pensez réellement 
+  être novice et être idiot. Peu importe ce que vous pensez réellement
   maîtriser (que ce soit à propos de linux, des voitures ou des femmes :D)
   vous devriez TOUJOURS être capable de prendre du recul et d'être objectif.
-  Sinon vous êtes juste idiot, à mon humble avis. Une fille avec qui j'habite 
+  Sinon vous êtes juste idiot, à mon humble avis. Une fille avec qui j'habite
   pensait que l'aspirateur était cassé car il n'aspirait plus rien.
   Elle n'a jamais pensé à remplacer le sac car elle ne l'avait jamais fait.
   Ok, ça c'est juste bête, pas un exemple de méconnaissance...Simplement ne pas
@@ -373,7 +373,7 @@
 
 <H1><A NAME="introduction">1. Introduction</A></H1>
 
-<p>MPlayer est un lecteur de vid&eacute;os pour GNU/Linux (fonctionne sur 
+<p>MPlayer est un lecteur de vid&eacute;os pour GNU/Linux (fonctionne sur
    de nombreux autres Un*x, et processeurs <B>non-x86</B>, voir 
    <A HREF="#ports">section ports</A>). Il lit la majorit&eacute; des fichiers MPEG,
    VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg,
@@ -386,7 +386,7 @@
   mais vous pouvez également utiliser les fonctions et drivers des bibliothèques 
   GGI et SDL, plus certains drivers de bas niveau, sp&eacute;cifiques aux cartes
   (pour Matrox, 3Dfx et Radeon, Mach64, Permedia3)! La majorit&eacute; d'entre eux
-  supportent le redimensionnement mat&eacute;riel et/ou logiciel, pour que vous 
+  supportent le redimensionnement mat&eacute;riel et/ou logiciel, pour que vous
   puissiez appr&eacute;cier la vid&eacute;o plein &eacute;cran. MPlayer supporte
   la décompression matérielle fournie par certaines cartes MPEG, telles que la
   <B><A HREF="video.html#dvb">DVB</A></B> et la <B><A HREF="video.html#dxr3">DXR3/Hollywood+</A></B>.
@@ -419,14 +419,13 @@
   <LI>encodage vidéo depuis <B>les tuners TV compatibles V4L</B></LI>
   <LI>encodage/multiplexage vers fichiers AVI entrelacés avec index propre</LI>
   <LI>création de fichiers à partir de flux audio externes</LI>
-  <LI>encodage 1, 2 ou 3 passes </LI>
+  <LI>encodage 1, 2 ou 3 passes</LI>
   <LI>audio MP3 <B>VBR</B> - <B>NOTE IMPORTANTE:</B> l'audio MP3 VBR ne peut pas toujours
-    être bien lu sur les lecteurs Windows! D'un autre côté, actuellement
-    L'encodage CBR de MEncoder est complètement cassé sur les lecteurs Win32 :)</LI>
+    être bien lu sur les lecteurs Windows!</LI>
   <LI>audio PCM</LI>
   <LI>copie de flux (stream)</LI>
   <LI>synchronisation A/V de la source (basé sur PTS, peut être désactivé avec l'option -mc 0)</LI>
-  <LI>correction FPS avec l'otpion <CODE>-ofps</CODE> (utile pour l'encodage d'un VOB
+  <LI>correction FPS avec l'option <CODE>-ofps</CODE> (utile pour l'encodage d'un VOB
     29.97fps en AVI 24fps)</LI>
   <LI>utilise notre très puissant système de plugins (crop, expand, flip, postprocess,
     rotate, scale, conversion rgb/yuv)</LI>
@@ -469,7 +468,7 @@
   <LI><B>MPlayer v0.01:</B> 11 Nov 2000<BR>
     Le premier MPlayer.</LI>
   <LI><B>MPlayer v0.3-v0.9:</B> 18 Nov-4 Dec 2000<BR>
-    Un condens&eacute; de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip' 
+    Un condens&eacute; de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip'
     bas&eacute; sur le chargeur de DLL Win32 de avifile.</LI>
   <LI><B>MPlayer v0.10:</B> 1er Jan 2001<BR>
     Les lecteurs MPEG et AVI dans un seul binaire !</LI>
@@ -492,14 +491,14 @@
     sur de nombreux syst&egrave;mes, incluant les codecs DivX Open-Source, et bien plus
     encore... Essayez le !</LI>
   <LI><B>MPlayer 0.60 "The RTFMCounter"</B> 3 Jan 2002<BR>
-    Support des formats de fichier MOV/VIVO/RM/FLI/NUV, CRAM natif, Cinepak, 
+    Support des formats de fichier MOV/VIVO/RM/FLI/NUV, CRAM natif, Cinepak,
     codecs ADPCM, et support des codecs XAnim binaires; support des sous-titres DVD,
     première sortie de MEncoder, capture TV, cache, liba52, réparations innombrables.</LI>
   <LI><B>MPlayer 0.90pre10 "The BirthdayCounter"</B> 11 Nov 2002<BR>
     Bien que ce ne soit pas une version officielle, Je la mentionne parce qu'elle est sortie 2 ans
     après MPlayer v0.01. Joyeux anniversaire, MPlayer!</LI>
   <LI><B>MPlayer 0.90rc1 "The CodecCounter"</B> 7 Dec 2002<BR>
-    Là encore, pas une version officielle, mais après l'ajout du support Sorenson 3 (QuickTime) 
+    Là encore, pas une version officielle, mais après l'ajout du support Sorenson 3 (QuickTime)
     et Windows Media 9, MPlayer est le premier lecteur de film au monde qui supporte
     tous les formats vidéos connus!</LI>
   <LI><B>MPlayer 0.90 "?"</B> Date encore inconnue</LI>
@@ -510,7 +509,7 @@
 
 <P>Dans ce chapitre je vais essayer de vous guider à travers la compilation
   et la configuration de MPlayer. Ce n'est pas facile, mais pas vraiment difficile
-  non plus. Si vous rencontrez un comportement différent de celui de mes explications, 
+  non plus. Si vous rencontrez un comportement différent de celui de mes explications,
   cherchez dans la doc et vous trouverez les réponses. Si vous voyez des liens, suivez-les
   et lisez attentivement ce qu'ils contiennent. Cela prendra du temps, mais ça en vaut VRAIMENT le coup.</P>
 
@@ -519,7 +518,7 @@
 <H4>Logiciels nécessaires:</H4>
 
 <UL>
-  <LI><B>binutils</B> - version conseill&eacute;e : <B>2.11.x</B> . Ce programme g&eacute;n&egrave;re 
+  <LI><B>binutils</B> - version conseill&eacute;e : <B>2.11.x</B> . Ce programme g&eacute;n&egrave;re
   les instructions sp&eacute;cifiques MMX/3DNow!, donc tr&egrave;s important.</LI>
   <LI><B>gcc</B> - versions conseill&eacute;es : <B>2.95.3</B> (peut-être <B>2.95.4</B>) et <B>3.2+</B>.
     N'utilisez <B>JAMAIS</B> 2.96 ou 3.0.x !!! Il g&eacute;n&egrave;rent des erreurs de code.
@@ -532,7 +531,7 @@
     version, les plus anciennes avaient des bogues variés, donc assurez-vous
     d'utiliser au moins 3.1, il est testé et fonctionnel. Pour de plus amples
     informations sur les bogues de gcc 2.96 (qui ne sont toujours PAS fixés, il
-    ont été CONTOURNE dans MPlayer!), voir la section <A HREF="users_against_developers.html#gcc">gcc 2.96</A>
+    ont été CONTOURNÉS dans MPlayer!), voir la section <A HREF="users_against_developers.html#gcc">gcc 2.96</A>
     et la <A HREF="faq.html">FAQ</A>.</LI>
   <LI><B>XFree86</B> - version conseill&eacute;e : <B>toujours la plus r&eacute;cente (4.2.1)</B>.
     Normalement, tout le monde veut cela, car à partir de la version 4.0.2, XFree86
@@ -582,7 +581,7 @@
         autres MPEG4. Recommandé!</LI>
     </UL>
   </LI>
-  <LI><B>codecs Win32</B>: Si vous prévoyez d'utiliser MPlayer sur une architecture non x86,
+  <LI><B>codecs Win32</B>: MPlayer sur une architecture non x86,
     vous en aurez probablement besoin. Téléchargez et dézippez w32codecs.zip
     dans /usr/lib/win32 <B>AVANT</B> de compiler MPlayer, sinon aucun support Win32
     ne sera compilé!<BR>
@@ -605,7 +604,7 @@
 
   <LI><B>DivX4/DivX5</B>: information sur ce codec disponible dans la section
     <A HREF="codecs.html#divx">DivX4/DivX5</A>. Vous ne voudrez probablement pas de
-    ce codec car <B>libavcodec</B> (voir plus haut) est bien plus rapide et de meilleur qualité, 
+    ce codec car <B>libavcodec</B> (voir plus haut) est bien plus rapide et de meilleur qualité,
     tant pour le décodage que l'encodage.<BR>
     Fonctionnalités:
     <UL>
@@ -626,7 +625,7 @@
         une qualité similaire.</LI>
     </UL>
   </LI>
-  <LI>The <A HREF="codecs.html#xanim">Les codecs XAnim</A> sont les meilleurs (plein
+  <LI><A HREF="codecs.html#xanim">Les codecs XAnim</A> sont les meilleurs (plein
     écran, zoom YUV matériel) pour décoder les films <B>3ivx</B> et Indeo 3/4/5,
     et quelques autres vieux formats. Et ils sont multiplateforme, c'est donc la seule façon
     de lire de l'Indeo sur des plateformes non-x86 (bon, à part en utilisant XAnim:). Mais par
