@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.13 -->
 <chapter id="usage">
 <title>Sposób użycia</title>
 
@@ -7,8 +7,8 @@
 <title>Linia poleceń</title>
 
 <para>
-<application>MPlayer</application> używa skomplikowanego drzewa odtwarzania. Składa
-się on z opcji globalnych podanych na początku, na przykład:
+<application>MPlayer</application> używa skomplikowanego drzewa odtwarzania.
+Składa się on z opcji globalnych podanych na początku, na przykład:
 
 <screen>mplayer -vfm 5</screen>
 
@@ -101,7 +101,7 @@ mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi<!--
 
 <para>
 <application>MPlayer</application> posiada w pełni konfigurowalną, opartą na
-komendach warstwę sterowania, która pozwala na sterowanie 
+komendach warstwę sterowania, która pozwala na sterowanie
 <application>MPlayera</application> za pomocą klawiatury, myszki, joysticka lub
 zdalnego sterowania (za pomocą LIRC). Zajrzyj do strony man w celu przejrzenia
 pełnej listy skrótów klawiszowych.
@@ -116,7 +116,8 @@ pełnej listy skrótów klawiszowych.
 do każdej komendy za pomocą prostego pliku konfiguracyjnego. Składnia tego
 pliku to nazwa klawisza, po której znajduje się komenda. Domyślny plik
 konfiguracyjny znajduje się w <filename>$HOME/.mplayer/input.conf</filename>, ale
-można podać także inny za pomocą opcji <option>-input <replaceable>plik</replaceable></option>
+można podać także inny za pomocą opcji
+<option>-input <replaceable>plik</replaceable></option>
 (ścieżki względne są względem <filename>$HOME/.mplayer</filename>).
 </para>
 
@@ -251,8 +252,8 @@ Z powodów oczywistych nie tłumaczyłem parametrów (np. type). Poza tym dodałem
 <listitem><para><literal>pt_up_step</literal> (int) wartość [(int) force=0]</para>
   <para>
   Podobnie, jak pt_step, ale skacze do następnego/poprzedniego wpisu w liście
-  elementów nadrzędnych (parent list). Jest użyteczne do przerywania wewnętrznych
-  pętli w drzewie odtwarzania.
+  elementów nadrzędnych (parent list). Jest użyteczne do przerywania
+  wewnętrznych pętli w drzewie odtwarzania.
   </para></listitem>
 <listitem><para><literal>alt_src_step</literal> (int) wartość</para>
   <para>
@@ -429,7 +430,8 @@ odtwarzania poprzez FTP:
 </para>
 
 <note><para>
-Uwaga: zalecane jest również włączenie <option>-cache</option> przy odtwarzaniu z sieci:
+Uwaga: zalecane jest również włączenie <option>-cache</option> przy odtwarzaniu
+z sieci:
 <screen>wget ftp://micorsops.com/cokolwiek.avi -O - | mplayer -cache 8192 -</screen>
 </para></note>
 </sect1>
@@ -441,10 +443,10 @@ Uwaga: zalecane jest również włączenie <option>-cache</option> przy odtwarzaniu 
 Strumienie zdalne pozwalają na dostęp do większości strumieni obsługiwanych
 przez <application>MPlayera</application> ze zdalnego hosta. Głównym celem tej
 funkcji jest umożliwienie bezpośredniego korzystania z napędu CD lub DVD innego
-komputera w sieci (pod warunkiem posiadania odpowiedniej przepustowości). Niestety
-niektóre typy strumieni (aktualnie TV oraz MF) nie są dostępne zdalnie, gdyż są
-zaimplementowane na poziomie demultipleksera. Jest to przykre w przypadku MF, gdyż
-TV i tak by wymagało szalonej przepustowości.
+komputera w sieci (pod warunkiem posiadania odpowiedniej przepustowości).
+Niestety niektóre typy strumieni (aktualnie TV oraz MF) nie są dostępne zdalnie,
+gdyż są zaimplementowane na poziomie demultipleksera. Jest to przykre w
+przypadku MF, gdyż TV i tak by wymagało szalonej przepustowości.
 </para>
 
 <sect2 id="compile_mpst_server">

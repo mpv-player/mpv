@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.6 -->
 <appendix id="mailinglists">
 <title>Listy mailingowe</title>
 <para>
@@ -9,36 +9,37 @@ Jeśli nie jest to wyraźnie zaznaczone, językiem obowiązującym na nich jest
 innym języku, ani w formacie HTML! Limit na wielkość wiadomości wynosi 80KB.
 Większe dane należy ulokować w miejscu przeznaczonym do publicznego
 ściągania. Żeby się zapisać, należy kliknąć na poniższych odnośnikach. Na tych
-listach obowiązują te same zasady pisania i cytowania, co w Usenecie. Prosimy o ich
-przestrzeganie, ułatwia to życie tym, którzy czytają Wasze maile. Zasady pisania
-dostępne są pod adresami
+listach obowiązują te same zasady pisania i cytowania, co w Usenecie. Prosimy o
+ich przestrzeganie, ułatwia to życie tym, którzy czytają Wasze maile. Zasady
+pisania dostępne są pod adresami
 <ulink url="http://learn.to/edit_messages">HOWTO edit messages</ulink>
 lub (dla niecierpliwych)
 <ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Quoting HOWTO</ulink>.
 <itemizedlist>
 <listitem><para>
-Lista ogłoszeń MPlayera:
+Lista ogłoszeń <application>MPlayera</application>:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"/>
-Lista na ogłoszenia MPlayera. Wysyłane są na nią informacje o nowych
-możliwościach.
+Lista na ogłoszenia <application>MPlayera</application>. Wysyłane są na nią
+informacje o nowych możliwościach.
 </para></listitem>
 <listitem><para>
-Lista deweloperów MPlayera:
+Lista deweloperów <application>MPlayera</application>:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
-To lista dotycząca rozwoju MPlayera! Jest to miejsce na rozmowy o zmianach
-interfejsu/API, nowych bibliotekach, optymalizacji kodu i zmianach w
-konfiguracji. Aby utrzymać mały ruch na liście, można przysyłać tu łatki,
-ale nie zgłoszenia błędów, pytania użytkowników, prośby o nowe możliwości
+To lista dotycząca rozwoju <application>MPlayera</application>! Jest to miejsce
+na rozmowy o zmianach interfejsu/API, nowych bibliotekach, optymalizacji kodu i
+zmianach w konfiguracji. Aby utrzymać mały ruch na liście, można przysyłać tu
+łatki, ale nie zgłoszenia błędów, pytania użytkowników, prośby o nowe możliwości
 czy flame'y.
 </para></listitem>
 <listitem><para>
-Lista dokumentacji MPlayera:
+Lista dokumentacji <application>MPlayera</application>:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"/>
-To lista na dyskusje o dokumentacji MPlayera i jej tłumaczeniu.
-Przesyłane są też na nią logi CVS dotyczące dokumentacji i strony domowej.
+To lista na dyskusje o dokumentacji <application>MPlayera</application> i jej
+tłumaczeniu. Przesyłane są też na nią logi CVS dotyczące dokumentacji i strony
+domowej.
 </para></listitem>
 <listitem><para>
-Lista użytkowników MPlayera:
+Lista użytkowników <application>MPlayera</application>:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
   <itemizedlist>
   <listitem><para>
@@ -47,17 +48,17 @@ Lista użytkowników MPlayera:
   błędów</link>
   </para></listitem>
   <listitem><para>
-  Można tu przesyłać prośby o nowe możliwości (po przeczytaniu 
+  Można tu przesyłać prośby o nowe możliwości (po przeczytaniu
   <emphasis role="bold">całej dokumentacji</emphasis>).
   </para></listitem>
   <listitem><para>
-  Można tu przesyłać pytania dotyczące użytkowania (po przeczytaniu 
+  Można tu przesyłać pytania dotyczące użytkowania (po przeczytaniu
   <emphasis role="bold">całej dokumentacji</emphasis>).
   </para></listitem>
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Lista węgierskich użytkowników MPlayera:
+Lista węgierskich użytkowników <application>MPlayera</application>:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>
   <itemizedlist>
   <listitem><para>
@@ -69,7 +70,7 @@ Lista węgierskich użytkowników MPlayera:
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Lista użytkowników MPlayera i Matroxa G200/G400/G450/G550:
+Lista użytkowników <application>MPlayera</application> i Matroxa G200/G400/G450/G550:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"/>
 Pytania związane z Matroxem, takie jak
   <itemizedlist>
@@ -85,33 +86,35 @@ Pytania związane z Matroxem, takie jak
   </itemizedlist>
 </para></listitem>
 <listitem><para>
-Lista użytkowników MPlayera i kart DVB:
+Lista użytkowników <application>MPlayera</application> i kart DVB:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"/>
-Sprawy związane ze sprzętowym dekoderem zwanym DVB (nie 
+Sprawy związane ze sprzętowym dekoderem zwanym DVB (nie
 <emphasis role="bold">DXR3</emphasis>!).
 </para></listitem>
 <listitem><para>
-Log CVSu MPlayera:
+Log CVSu <application>MPlayera</application>:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"/>
-Na tę listę wysyłane są automatycznie wszystkie zmiany w kodzie MPlayera.
-Dozwolone są tu tylko pytania o te zmiany (prośby o wyjaśnienie, dlaczego
-dana zmiana jest konieczna, lepsze rozwiązania, możliwe problemy związane
-z tą zmianą).
+Na tę listę wysyłane są automatycznie wszystkie zmiany w kodzie
+<application>MPlayera</application>. Dozwolone są tu tylko pytania o te zmiany
+(prośby o wyjaśnienie, dlaczego dana zmiana jest konieczna, lepsze rozwiązania,
+możliwe problemy związane z tą zmianą).
 </para></listitem>
 <listitem><para>
-Lista przenoszenia MPlayera do środowiska Cygwin:
+Lista przenoszenia <application>MPlayera</application> do środowiska Cygwin:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
-Lista poświęcona dyskusji o przenoszeniu MPlayera do środowiska Cygwin.
+Lista poświęcona dyskusji o przenoszeniu <application>MPlayera</application> do
+środowiska Cygwin.
 </para></listitem>
 <listitem><para>
-Lista przenoszenia MPlayera do środowiska OS/2:
+Lista przenoszenia <application>MPlayera</application> do środowiska OS/2:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
-Lista poświęcona dyskusji o przenoszeniu MPlayera do środowiska OS/2.
+Lista poświęcona dyskusji o przenoszeniu <application>MPlayera</application> do
+środowiska OS/2.
 </para></listitem>
 <listitem><para>
-Lista twórców i tłumaczy MPlayer Weekly News:
+Lista twórców i tłumaczy <application>MPlayer</application> Weekly News:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"/>
-Lista poświęcona dyskusjom o MPlayer Weekly News.
+Lista poświęcona dyskusjom o <application>MPlayer</application> Weekly News.
 </para></listitem>
 </itemizedlist>
 <note><para>

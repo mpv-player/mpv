@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.5 -->
+<!-- synced with 1.6 -->
 <appendix id="skin">
-<title>Format skórki MPlayera</title>
+<title>Format skórki <application>MPlayera</application></title>
 <para>
-Celem tego dokumentu jest opisanie formatu skórki MPlayera.
+Celem tego dokumentu jest opisanie formatu skórki
+<application>MPlayera</application>.
 Informacje zawarte tutaj mogą być niedokładne ponieważ
 <orderedlist>
 <listitem><para>Nie jestem tym, który pisał GUI.</para></listitem>
 <listitem><para>GUI nie jest ukończone.</para></listitem>
 <listitem><para>Mogę się mylić.</para></listitem>
 </orderedlist>
-A więc nie bądź zaskoczony jeśli coś nie będzie działać tak, jak przedstawiono tutaj.
+A więc nie bądź zaskoczony jeśli coś nie będzie działać tak, jak przedstawiono
+tutaj.
 </para>
 
-<para>Podziękowania <emphasis>Zoltánowi Ponekkerowi</emphasis> za jego pomoc.</para>
+<para>Podziękowania <emphasis>Zoltánowi Ponekkerowi</emphasis> za jego
+pomoc.</para>
 
 <para><emphasis>András Mohari &lt;mayday@freemail.hu&gt;</emphasis></para>
 
@@ -21,9 +24,9 @@ A więc nie bądź zaskoczony jeśli coś nie będzie działać tak, jak przedstawiono t
 <title>Wstęp</title>
 <para>
 W zasadzie nie ma to żadnego związku z formatem skórki, ale powinieneś
-wiedzieć, że MPlayer  <emphasis role="bold">nie</emphasis> posiada wbudowanej skórki, w związku
-z tym <emphasis role="bold"> co najmniej jedna skórka musi być zainstalowana, aby była możliwość
-używania GUI.</emphasis>
+wiedzieć, że <application>MPlayer</application> <emphasis role="bold">nie</emphasis>
+posiada wbudowanej skórki, w związku z tym <emphasis role="bold"> co najmniej
+jedna skórka musi być zainstalowana, aby była możliwość używania GUI.</emphasis>
 </para>
 
 <sect2 id="skin-overview-directories">
@@ -44,9 +47,10 @@ Skórki są szukane w następujących katalogach (w kolejności):
 </para>
 
 <para>
-Zauważ, że pierwsza ścieżka może się różnić w zależności od sposobu w jaki MPlayer był skonfigurowany
-(zobacz argumenty <option>--prefix</option> oraz <option>--datadir</option> w skrypcie
- <command>configure</command>).
+Zauważ, że pierwsza ścieżka może się różnić w zależności od sposobu w jaki
+<application>MPlayer</application> był skonfigurowany
+(zobacz argumenty <option>--prefix</option> oraz <option>--datadir</option>
+w skrypcie <command>configure</command>).
 </para>
 
 <para>
@@ -61,9 +65,10 @@ katalogów wyżej wymienionych, na przykład:
 <para>Obrazki muszą być w formacie PNG truecolor (24 lub 32 bpp).</para>
 <para>
 W głównym oknie oraz na panelu odtwarzania (zobacz niżej) możesz użyć
-obrazków z 'przezroczystością': obszary wypełnione kolorem #FF00FF (magenta) są w pełni
-przezroczyste dla MPlayera. Oznacza to, że możesz mieć okna o różnych kształtach
-jeśli Twój X Server posiada rozszerzenie XShape.
+obrazków z 'przezroczystością': obszary wypełnione kolorem #FF00FF (magenta) są
+w pełni przezroczyste dla <application>MPlayera</application>. Oznacza to, że
+możesz mieć okna o różnych kształtach jeśli Twój X Server posiada rozszerzenie
+XShape.
 </para>
 </sect2>
 
@@ -79,70 +84,80 @@ W chwili obecnej mamy trzy okna, które można ozdobić:
 <link linkend="skin-file-main">okno główne (main window)</link>,
 <link linkend="skin-file-subwindow">okno ekranu (subwindow)</link>,
 <link linkend="skin-file-main">panel odtwarzania (playbar)</link>,
-<link linkend="skin-file-menu">menu skórki (skin menu)</link> (które może być aktywowane
-prawym przyciskiem myszy).
+<link linkend="skin-file-menu">menu skórki (skin menu)</link> (które może być
+aktywowane prawym przyciskiem myszy).
 
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Okno główne</emphasis> i/lub
-  <emphasis role="bold">panel odtwarzania</emphasis> to miejsca, gdzie można sterować programem MPlayer.
+  <emphasis role="bold">panel odtwarzania</emphasis> to miejsca, gdzie można
+  sterować programem <application>MPlayer</application>.
   Tłem tego okna jest obrazek. Różne elementy mogą (i muszą) być umieszczone
   w tym oknie: <emphasis>przyciski</emphasis>, <emphasis>potencjometry</emphasis>
-  (suwaki) i <emphasis>etykiety</emphasis>. Dla każdego elementu musisz określić ich pozycję
-  oraz rozmiar.
+  (suwaki) i <emphasis>etykiety</emphasis>. Dla każdego elementu musisz określić
+  ich pozycję oraz rozmiar.
 </para><para>
-   <emphasis role="bold">Przycisk</emphasis> ma trzy stany (wciśnięty, zwolniony, nieaktywny) ,
-    zatem jego obrazki muszą być podzielone na trzy części w pionie. Zobacz sekcję
-  <link linkend="skin-button">button</link>, by dowiedzieć się więcej.
+   <emphasis role="bold">Przycisk</emphasis> ma trzy stany (wciśnięty,
+   zwolniony, nieaktywny), zatem jego obrazki muszą być podzielone na trzy
+   części w pionie. Zobacz sekcję <link linkend="skin-button">button</link>, by
+   dowiedzieć się więcej.
 </para><para>
-  <emphasis role="bold">Potencjometr (suwak)</emphasis> (wykorzystywany głównie jako pasek
-  przewijania i kontrolka  głośności/balansu) może składać się z każdej liczby stanów poprzez podzielenie jego obrazka
-  na wiele części, z których jedna poprzedza drugą. Zobacz
+  <emphasis role="bold">Potencjometr (suwak)</emphasis> (wykorzystywany głównie
+  jako pasek przewijania i kontrolka głośności/balansu) może składać się z
+  każdej liczby stanów poprzez podzielenie jego obrazka na wiele części, z
+  których jedna poprzedza drugą. Zobacz
   <link linkend="skin-hpotmeter">hpotmeter</link> oraz
   <link linkend="skin-potmeter">potmeter</link>, by dowiedzieć się więcej.
 </para><para>
   <emphasis role="bold">Etykiety</emphasis> są nieco specyficzne: Znaki
-  potrzebne do ich narysowania są pobierane z pliku graficznego, a znaki umieszczone
-  w pliku graficznym są opisane przez <link linkend="skin-fonts">plik opisu czcionek</link>.
-  Jest to plik, który za pomocą czystego tekstu określa współrzędne x, y oraz wielkość
-  każdego znaku umieszczonego na obrazku (plik graficzny i jego plik opisu tworzą
-  <emphasis>razem</emphasis> zestaw czcionek). Zobacz <link linkend="skin-dlabel">dlabel</link>
+  potrzebne do ich narysowania są pobierane z pliku graficznego, a znaki
+  umieszczone w pliku graficznym są opisane przez
+  <link linkend="skin-fonts">plik opisu czcionek</link>. Jest to plik, który za
+  pomocą czystego tekstu określa współrzędne x, y oraz wielkość każdego znaku
+  umieszczonego na obrazku (plik graficzny i jego plik opisu tworzą
+  <emphasis>razem</emphasis> zestaw czcionek).
+  Zobacz <link linkend="skin-dlabel">dlabel</link>
   oraz <link linkend="skin-slabel">slabel</link>, by dowiedzieć się więcej.
 </para>
-<note><para>Wszystkie obrazki mogą być całkowicie przezroczyste - tak, jak to opisano
-w sekcji <link linkend="skin-overview-formats">formaty plików graficznych</link>. Jeżeli X Server
-nie obsługuje rozszerzenia XShape, to elementy oznaczone jako przezroczyste będą czarne.
-Jeśli chciałbyś wykorzystać taką możliwość, szerokość obrazka tła głównego okna musi być
-podzielna przez 8.
+<note><para>Wszystkie obrazki mogą być całkowicie przezroczyste - tak, jak to
+opisano w sekcji <link linkend="skin-overview-formats">formaty plików
+graficznych</link>. Jeżeli X Server nie obsługuje rozszerzenia XShape, to
+elementy oznaczone jako przezroczyste będą czarne. Jeśli chciałbyś wykorzystać
+taką możliwość, szerokość obrazka tła głównego okna musi być podzielna przez 8.
 </para></note>
 </listitem>
 
 <listitem><para>
-  <emphasis role="bold">Okno ekranu</emphasis> to miejsce odtwarzania filmu. Może
-  ono wyświetlać określony obrazek jeśli żaden film nie jest uruchomiony
-  (to dość nudne mieć puste okno :-)) <emphasis role="bold">Uwaga:</emphasis> przezroczystość
-  <emphasis role="bold">nie jest</emphasis> tutaj dostępna.
+  <emphasis role="bold">Okno ekranu</emphasis> to miejsce odtwarzania filmu.
+  Może ono wyświetlać określony obrazek jeśli żaden film nie jest uruchomiony
+  (to dość nudne mieć puste okno :-)) <emphasis role="bold">Uwaga:</emphasis>
+  przezroczystość <emphasis role="bold">nie jest</emphasis> tutaj dostępna.
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">Menu skórki</emphasis> to po prostu jeden ze sposobów
-  na kontrolowanie MPlayera poprzez wpisy w menu. Dwa obrazki są wymagane dla tego
-  menu: pierwszy z nich jest obrazkiem podstawowym, który pokazuje zwykły stan menu, drugi zaś
-  służy do wyświetlenia zaznaczonych obszarów. Gdy uaktywnisz menu, zostanie pokazany pierwszy obrazek.
-  Jeśli przesuniesz mysz nad któryś z jego wpisów, wówczas zaznaczony element jest kopiowany z drugiego
-  obrazka w miejsce, na które wskazuje kursor myszy (drugi obrazek nigdy nie jest wyświetlany jako całość).
+  <emphasis role="bold">Menu skórki</emphasis> to po prostu jeden ze sposobów na
+  kontrolowanie <application>MPlayera</application> poprzez wpisy w menu. Dwa
+  obrazki są wymagane dla tego menu: pierwszy z nich jest obrazkiem podstawowym,
+  który pokazuje zwykły stan menu, drugi zaś służy do wyświetlenia zaznaczonych
+  obszarów. Gdy uaktywnisz menu, zostanie pokazany pierwszy obrazek. Jeśli
+  przesuniesz mysz nad któryś z jego wpisów, wówczas zaznaczony element jest
+  kopiowany z drugiego obrazka w miejsce, na które wskazuje kursor myszy (drugi
+  obrazek nigdy nie jest wyświetlany jako całość).
 </para><para>
  Wpis w menu jest określony przez jego pozycję oraz rozmiar na obrazku (zobacz
-  sekcję <link linkend="skin-file-menu">menu skórki</link> by dowiedzieć się więcej).
+ sekcję <link linkend="skin-file-menu">menu skórki</link> by dowiedzieć się
+ więcej).
 </para></listitem>
 </itemizedlist>
 </para>
 
 <para>
-  Jedna ważna sprawa, która nie została jeszcze powiedziana: MPlayer musi wiedzieć co zrobić w momencie
-  kliknięcia na przyciski, potencjometry i wpisy w menu, aby zadziałały. Zostało to zrobione za pomocą
-  <link linkend="skin-gui">sygnałów</link> (zdarzeń).
-  Dla tych elementów musisz zdefiniować sygnały, które mają być generowane podczas ich kliknięcia.
+  Jedna ważna sprawa, która nie została jeszcze powiedziana:
+  <application>MPlayer</application> musi wiedzieć co zrobić w momencie
+  kliknięcia na przyciski, potencjometry i wpisy w menu, aby zadziałały. Zostało
+  to zrobione za pomocą <link linkend="skin-gui">sygnałów</link> (zdarzeń). Dla
+  tych elementów musisz zdefiniować sygnały, które mają być generowane podczas
+  ich kliknięcia.
 </para>
 </sect2>
 
@@ -153,8 +168,8 @@ Potrzebne są następujące pliki podczas tworzenia skórki:
 <itemizedlist>
 <listitem><para>
   Plik konfiguracyjny o nazwie <link linkend="skin-file">skin</link>, mówiący
-  programowi MPlayer jak połączyć różne części skórki razem i co zrobić, gdy
-  nastąpi kliknięcie w którymś obszarze okna.
+  programowi <application>MPlayer</application> jak połączyć różne części skórki
+  razem i co zrobić, gdy nastąpi kliknięcie w którymś obszarze okna.
 </para></listitem>
 <listitem><para>
   Plik graficzny tła w oknie głównym.
@@ -177,13 +192,14 @@ Potrzebne są następujące pliki podczas tworzenia skórki:
 </para>
 </sect2>
 </sect1>
- 
+
 <sect1 id="skin-file">
 <title>Plik skin</title>
 <para>
-Jak zostało powiedziane wcześniej, plik ten jest plikiem konfigurującym skórkę. Obsługuje różne
-rodzaje wierszy; komentarze zaczynają wiersz znakiem '<literal>;</literal>' (tylko spacje i znaki
-tabulacji są dopuszczone przed '<literal>;</literal>').
+Jak zostało powiedziane wcześniej, plik ten jest plikiem konfigurującym skórkę.
+Obsługuje różne rodzaje wierszy; komentarze zaczynają wiersz znakiem
+'<literal>;</literal>' (tylko spacje i znaki tabulacji są dopuszczone przed
+'<literal>;</literal>').
 </para>
 
 <para>
@@ -200,8 +216,8 @@ end
 </para>
 
 <para>
-Obecnie jest tylko jedna aplikacja, a więc potrzebujesz tylko jedną sekcję 'section': nazwa tej sekcji to
-<emphasis role="bold">movieplayer</emphasis>.
+Obecnie jest tylko jedna aplikacja, a więc potrzebujesz tylko jedną sekcję
+'section': nazwa tej sekcji to <emphasis role="bold">movieplayer</emphasis>.
 </para>
 
 <para>
@@ -226,15 +242,16 @@ gdzie <replaceable>nazwa okna</replaceable>może być jednym z poniższych łańcuchó
 </para>
 
 <para>
-(Bloki sub i menu są opcjonalne - nie musisz tworzyć menu czy elementów skórki dla okna ekranu)
+(Bloki sub i menu są opcjonalne - nie musisz tworzyć menu czy elementów skórki
+dla okna ekranu)
 </para>
 
 <para>
-Wewnątrz bloku 'window' możesz definiować każdy element okna wpisując linijkę tej postaci:
-<programlisting>item = parametr</programlisting>
-Gdzie <literal>item</literal> jest łańcuchem, kóry identyfikuje typ elementu GUI,
- <literal>parametr</literal> jest wartością numeryczną lub tekstową (lub listą takich
- wartości oddzielonych od siebie znakiem przecinka).
+Wewnątrz bloku 'window' możesz definiować każdy element okna wpisując linijkę
+tej postaci: <programlisting>item = parametr</programlisting>
+Gdzie <literal>item</literal> jest łańcuchem, kóry identyfikuje typ elementu
+GUI, <literal>parametr</literal> jest wartością numeryczną lub tekstową (lub
+listą takich wartości oddzielonych od siebie znakiem przecinka).
 </para>
 
 <para>
@@ -263,18 +280,20 @@ end
 <para>
 Nazwa pliku graficznego musi zostać podana bez żadnych nazw katalogów - obrazki
 są szukane w katalogu <filename class="directory">Skin</filename>.
-Możesz (ale nie musisz) określić rozszerzenia tego pliku. Jeśli plik taki nie istnieje, MPlayer
-próbuje wczytać plik <filename>&lt;nazwa pliku&gt;.&lt;rozszerzenie&gt;</filename>, gdzie <literal>png</literal>
-oraz <literal>PNG</literal> są próbowane jako <filename>&lt;rozszerzenie&gt;</filename>
-(w tej właśnie kolejności). Pierwszy pasujący plik będzie użyty.
+Możesz (ale nie musisz) określić rozszerzenia tego pliku. Jeśli plik taki nie
+istnieje, <application>MPlayer</application>
+próbuje wczytać plik <filename>&lt;nazwa pliku&gt;.&lt;rozszerzenie&gt;</filename>,
+gdzie <literal>png</literal> oraz <literal>PNG</literal> są próbowane jako
+<filename>&lt;rozszerzenie&gt;</filename> (w tej właśnie kolejności). Pierwszy
+pasujący plik będzie użyty.
 </para>
 
 <para>
 Na koniec kilka słów na temat pozycjonowania. Okno główne oraz okno ekranu może
 zostać umieszczone w różnych narożnikach ekranu poprzez ustawienie współrzędnych
- <literal>X</literal> i <literal>Y</literal>. <literal>0</literal> to góra lub lewa strona,
-<literal>-1</literal> to środek, <literal>-2</literal> to strona prawa lub dół, tak jak
-przedstawiono na poniższej ilustracji:
+<literal>X</literal> i <literal>Y</literal>. <literal>0</literal> to góra lub
+lewa strona, <literal>-1</literal> to środek, <literal>-2</literal> to strona
+prawa lub dół, tak jak przedstawiono na poniższej ilustracji:
 </para>
 <informalfigure>
 <screen>
@@ -292,7 +311,8 @@ przedstawiono na poniższej ilustracji:
 Oto przykład wyjaśniający to lepiej. Przypuśćmy, że masz obrazek nazwany
 <filename>main.png</filename>, który został użyty dla okna głównego:
 <programlisting>base = main, -1, -1</programlisting>
-MPlayer próbuje wczytać pliki <filename>main</filename>, <filename>main.png</filename>,
+<application>MPlayer</application> próbuje wczytać pliki
+<filename>main</filename>, <filename>main.png</filename>,
 <filename>main.PNG</filename>.
 </para>
 
@@ -316,8 +336,9 @@ oraz '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   będzie wielkości tego obrazka.
     </para>
     <note><para>Współrzędne te nie działają na razie dla okna ekranu.</para></note>
-    <warning><para>Obszary przezroczystości obrazka (kolor #FF00FF) będą widoczne jako czarne
-    pod X serwerami nieposiadającymi rozszerzenia XShape. Szerokość obrazka musi być podzielna przez 8.</para></warning>
+    <warning><para>Obszary przezroczystości obrazka (kolor #FF00FF) będą
+    widoczne jako czarne pod X serwerami nieposiadającymi rozszerzenia
+    XShape. Szerokość obrazka musi być podzielna przez 8.</para></warning>
     </listitem>
 </varlistentry>
 
@@ -326,10 +347,12 @@ oraz '<literal>window = playbar</literal>' ... '<literal>end</literal>'.
   <anchor id="skin-button"/>button = obrazek, X, Y, szerokość, wysokość, sygnał
   </literal></term>
   <listitem><para>
-Umieszcza przycisk o rozmiarze <literal>szerokość</literal> * <literal>wysokość</literal> w pozycji
-<literal>X</literal>, <literal>Y</literal>. Określony <literal>sygnał</literal> jest generowany podczas kliknięcia na przycisk.
-Obrazek ten opisany przez <literal>obrazek</literal> musi składać się z trzech części jedna pod drugą (stosownie
-do możliwych stanów przycisku), w ten oto sposób:
+Umieszcza przycisk o rozmiarze <literal>szerokość</literal> *
+<literal>wysokość</literal> w pozycji <literal>X</literal>,
+<literal>Y</literal>. Określony <literal>sygnał</literal> jest generowany
+podczas kliknięcia na przycisk. Obrazek ten opisany przez
+<literal>obrazek</literal> musi składać się z trzech części jedna pod drugą
+(stosownie do możliwych stanów przycisku), w ten oto sposób:
 </para>
 <informalfigure>
 <screen>
@@ -359,8 +382,7 @@ Domyślnie jest <emphasis role="bold">wyłączona</emphasis>.
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-hpotmeter"/>hpotmeter = przycisk, szer_przycisku, wys_przycisku, faza, liczba_faz, domyślny, X, Y,
-  szerokość, wysokość, sygnał
+  <anchor id="skin-hpotmeter"/>hpotmeter = przycisk, szer_przycisku, wys_przycisku, faza, liczba_faz, domyślny, X, Y, szerokość, wysokość, sygnał
   </literal></term>
   <listitem><para>
 
@@ -369,26 +391,28 @@ Domyślnie jest <emphasis role="bold">wyłączona</emphasis>.
 
 <varlistentry>
   <term><literal>
-  <anchor id="skin-vpotmeter"/>vpotmeter = przycisk, szer_przycisku, wys_przycisku, fazy, liczba_faz,
-  domyślny, X, Y, szerokość, wysokość, sygnał
+  <anchor id="skin-vpotmeter"/>vpotmeter = przycisk, szer_przycisku, wys_przycisku, fazy, liczba_faz, domyślny, X, Y, szerokość, wysokość, sygnał
   </literal></term>
   <listitem><para>
 Umieszcza poziomo (hpotmeter) lub pionowo (vpotmeter) suwak o rozmiarze
-<literal>szerokość</literal> * <literal>wysokość</literal> i pozycji <literal>X,Y</literal>.
-Obrazek może być podzielony na różne części dla różnych faz suwaka (np. możesz mieć
-suwak głośności, który w zależności od położenia zmienia kolor z zielonego (minimum) na
-czerwony (maksimum)). <literal>hpotmeter</literal> może być przyciskiem umieszczonym poziomo.
+<literal>szerokość</literal> * <literal>wysokość</literal> i pozycji
+<literal>X,Y</literal>. Obrazek może być podzielony na różne części dla różnych
+faz suwaka (np. możesz mieć suwak głośności, który w zależności od położenia
+zmienia kolor z zielonego (minimum) na czerwony (maksimum)).
+<literal>hpotmeter</literal> może być przyciskiem umieszczonym poziomo.
 Jego parametry to:
     </para>
     <itemizedlist>
-    <listitem><para><literal>przycisk</literal> - obrazek użyty do przycisku (musi posiadać trzy części jedna pod drugą tak,
-     jak w przypadku <link linkend="skin-button">przycisku</link>)
+    <listitem><para><literal>przycisk</literal> - obrazek użyty do przycisku
+    (musi posiadać trzy części jedna pod drugą tak, jak w przypadku
+    <link linkend="skin-button">przycisku</link>)
     </para></listitem>
     <listitem><para><literal>szer_przycisku</literal>, <literal>wys_przycisku</literal> - wielkość przycisku
     </para></listitem>
-   <listitem><para><literal>fazy</literal> - obrazek używany do określenie faz dla hpotmeter.
-Wartość specjalna <literal>NULL</literal> może być użyta jeśli nie chcesz żadnego obrazka.
-Obrazek musi być podzielony w pionie na <literal>fragmenty poszczególnych faz</literal> tak, jak poniżej:
+   <listitem><para><literal>fazy</literal> - obrazek używany do określenie faz
+   dla hpotmeter. Wartość specjalna <literal>NULL</literal> może być użyta
+   jeśli nie chcesz żadnego obrazka. Obrazek musi być podzielony w pionie
+   na <literal>fragmenty poszczególnych faz</literal> tak, jak poniżej:
     </para>
 <informalfigure>
 <screen>
@@ -440,10 +464,12 @@ jest to zupełnie bezużyteczne, gdyż nie widać wtedy położenia potencjometru.
   <anchor id="skin-font"/>font = plik_czcionek, id_czcionki
   </literal></term>
   <listitem><para>
-Definiuje czcionki. <literal>plik_czcionek</literal> jest nazwą pliku opisu czcionek z rozszerzeniem
-<filename>.fnt</filename> (nie podawaj rozszerzenia w tym miejscu).
-<literal>id_czcionki</literal> jest używany do wskazywania konkretnej czcionki (zobacz <link linkend="skin-dlabel">dlabel</link>
-oraz <link linkend="skin-slabel">slabel</link>). Można zdefiniować do 25 czcionek.
+Definiuje czcionki. <literal>plik_czcionek</literal> jest nazwą pliku opisu
+czcionek z rozszerzeniem <filename>.fnt</filename> (nie podawaj rozszerzenia w
+tym miejscu). <literal>id_czcionki</literal> jest używany do wskazywania
+konkretnej czcionki (zobacz <link linkend="skin-dlabel">dlabel</link>
+oraz <link linkend="skin-slabel">slabel</link>). Można zdefiniować do 25
+czcionek.
     </para></listitem>
 </varlistentry>
 
@@ -452,11 +478,13 @@ oraz <link linkend="skin-slabel">slabel</link>). Można zdefiniować do 25 czcione
   <anchor id="skin-slabel"/>slabel = X, Y, id_czcionki, &quot;tekst&quot;
   </literal></term>
   <listitem><para>
-Umieszcza statyczną etykietę w pozycji <literal>X,Y</literal>. <literal>tekst</literal>
-jest wyświetlany za pomocą czcionek wskazywanych przez <literal>id_czcionki</literal>. Tekst jest
-po prostu zwykłym łańcuchem znaków (zmienne <literal>$x</literal> nie działają), które muszą być umieszczone
-pomiędzy podwójnym cudzysłowem (a znak &quot; nie może być częścią tekstu). Etykieta
-wyświetlana jest za pomocą czcionek, na które wskazuje <literal>id_czcionki</literal>.
+Umieszcza statyczną etykietę w pozycji <literal>X,Y</literal>.
+<literal>tekst</literal> jest wyświetlany za pomocą czcionek wskazywanych przez
+<literal>id_czcionki</literal>. Tekst jest po prostu zwykłym łańcuchem znaków
+(zmienne <literal>$x</literal> nie działają), które muszą być umieszczone
+pomiędzy podwójnym cudzysłowem (a znak &quot; nie może być częścią tekstu).
+Etykieta wyświetlana jest za pomocą czcionek, na które wskazuje
+<literal>id_czcionki</literal>.
     </para></listitem>
 </varlistentry>
 
@@ -466,18 +494,21 @@ wyświetlana jest za pomocą czcionek, na które wskazuje <literal>id_czcionki</lit
   </literal></term>
   <listitem>
 <para>
-Umieszcza dynamiczną etykietę w pozycji <literal>X,Y</literal>. Etykieta jest nazywana
-dynamiczną ponieważ jej tekst jest cyklicznie odświeżany. Maksymalna długość etykiety
-określa parametr <literal>długość</literal> (jej wysokość określa wysokość czcionek).
-Jeśli tekst jest szerszy niż zdefiniowana długość, będzie on przewijany, w przeciwnym wypadku
-będzie wyrównany w miejscu określonym przez wartość parametru <literal>wyrównanie</literal>: <literal>0</literal>
-oznacza do prawej, <literal>1</literal> to wyśrodkowanie, <literal>2</literal> to wyrównanie do lewej.
+Umieszcza dynamiczną etykietę w pozycji <literal>X,Y</literal>. Etykieta jest
+nazywana dynamiczną ponieważ jej tekst jest cyklicznie odświeżany. Maksymalna
+długość etykiety określa parametr <literal>długość</literal> (jej wysokość
+określa wysokość czcionek). Jeśli tekst jest szerszy niż zdefiniowana długość,
+będzie on przewijany, w przeciwnym wypadku będzie wyrównany w miejscu określonym
+przez wartość parametru <literal>wyrównanie</literal>: <literal>0</literal>
+oznacza do prawej, <literal>1</literal> to wyśrodkowanie, <literal>2</literal>
+to wyrównanie do lewej.
 </para>
 <para>
-Wyświetlany tekst jest określony przez zmienną <literal>tekst</literal>: musi być zawarty
-pomiędzy podwójnymi cudzysłowami (a znak &quot; nie może być częścią tekstu). Etykieta
-wyświetlana jest za pomocą czcionek, na które wskazuje parametr <literal>id_czcionki</literal>. Możesz
-użyć następujących zmiennych w tekście:
+Wyświetlany tekst jest określony przez zmienną <literal>tekst</literal>: musi
+być zawarty pomiędzy podwójnymi cudzysłowami (a znak &quot; nie może być częścią
+tekstu). Etykieta wyświetlana jest za pomocą czcionek, na które wskazuje
+parametr <literal>id_czcionki</literal>. Możesz użyć następujących zmiennych w
+tekście:
 </para>
 
 <informaltable>
@@ -621,12 +652,14 @@ Poniższe wpisy mogą być użyte w bloku
   <anchor id="skin-sub-base"/>base = obrazek, X, Y, szerokość, wysokość
   </literal></term>
   <listitem><para>
-Wyświetla obrazek w oknie. Okno będzie widoczne na ekranie w miejscu oznaczonym przez współrzędne
-<literal>X</literal>, <literal>Y</literal> (<literal>0,0</literal> to lewy górny narożnik).
-Możesz użyć <literal>-1</literal> dla środka, <literal>-2</literal>
-dla prawej strony (<literal>X</literal>) i dołu (<literal>Y</literal>). Okno
-będzie mieć wielkość obrazka. <literal>szerokość</literal> oraz <literal>wysokość</literal>
-oznaczają wielkość okna; są one opcjonalne (jeśli nie są określone, okno będzie wielkości takiej, jak obrazek).</para></listitem>
+Wyświetla obrazek w oknie. Okno będzie widoczne na ekranie w miejscu oznaczonym
+przez współrzędne <literal>X</literal>, <literal>Y</literal>
+(<literal>0,0</literal> to lewy górny narożnik). Możesz użyć
+<literal>-1</literal> dla środka, <literal>-2</literal> dla prawej strony
+(<literal>X</literal>) i dołu (<literal>Y</literal>). Okno będzie mieć wielkość
+obrazka. <literal>szerokość</literal> oraz <literal>wysokość</literal> oznaczają
+wielkość okna; są one opcjonalne (jeśli nie są określone, okno będzie wielkości
+takiej, jak obrazek).</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -634,10 +667,11 @@ oznaczają wielkość okna; są one opcjonalne (jeśli nie są określone, okno będzie 
   <anchor id="skin-background"/>background = R, G, B
   </literal></term>
   <listitem><para>
-  Pozwala ustawić kolor tła. Jest to użyteczne jeśli obrazek jest mniejszy niż okno.
-  <literal>R</literal>, <literal>G</literal> oraz <literal>B</literal> określają składniki kolorów
-  czerwonego, zielonego i niebieskiego (każdy z nich jest reprezentowany przez liczbę dziesiętną w zakresie
-  od 0 do 255).</para></listitem>
+  Pozwala ustawić kolor tła. Jest to użyteczne jeśli obrazek jest mniejszy niż
+  okno. <literal>R</literal>, <literal>G</literal> oraz <literal>B</literal>
+  określają składniki kolorów czerwonego, zielonego i niebieskiego (każdy z nich
+  jest reprezentowany przez liczbę dziesiętną w zakresie od 0 do
+  255).</para></listitem>
 </varlistentry>
 </variablelist>
 </sect2>
@@ -646,9 +680,10 @@ oznaczają wielkość okna; są one opcjonalne (jeśli nie są określone, okno będzie 
 <title>Menu skórki</title>
 <para>
 Jak wspomniano wcześniej, menu jest wyświetlane przy użyciu dwóch obrazków.
-Zwykłe obszary menu są pobierane z obrazka określonego przez element <literal>base</literal>,
-podczas gdy obszary zaznaczone są pobierane z obrazka wskazywanego przez element <literal>selected</literal>.
-Musisz zdefiniować pozycję i rozmiar każdego obszaru menu poprzez element menu.
+Zwykłe obszary menu są pobierane z obrazka określonego przez element
+<literal>base</literal>, podczas gdy obszary zaznaczone są pobierane z obrazka
+wskazywanego przez element <literal>selected</literal>. Musisz zdefiniować
+pozycję i rozmiar każdego obszaru menu poprzez element menu.
 </para>
 
 <para>
@@ -680,9 +715,9 @@ Obrazek pokazujący w menu wszystkie zaznaczone obszary.
   <anchor id="skin-menu"/>menu = X, Y, szerokość, wysokość, sygnał
   </literal></term>
   <listitem><para>
-Definiuje pozycję i rozmiar obszarów menu na obrazku przy pomocy <literal>X,Y</literal>.
-<literal>sygnał</literal> to zdarzenie wygenerowane podczas zwolnienia przycisku
-myszy nad obszarem.
+Definiuje pozycję i rozmiar obszarów menu na obrazku przy pomocy
+<literal>X,Y</literal>. <literal>sygnał</literal> to zdarzenie wygenerowane
+podczas zwolnienia przycisku myszy nad obszarem.
     </para></listitem>
 </varlistentry>
 </variablelist>
@@ -692,15 +727,16 @@ myszy nad obszarem.
 <sect1 id="skin-fonts">
 <title>Czcionki</title>
 <para>
-Jak wspomniano w sekcji na temat fragmentów skórki, czcionka jest definiowana przez
-obrazek i plik opisujący. Możesz umieścić znak gdziekolwiek na obrazku, ale miej
-pewność, że jego pozycja i rozmiar jest podana właściwie w pliku opisującym.
+Jak wspomniano w sekcji na temat fragmentów skórki, czcionka jest definiowana
+przez obrazek i plik opisujący. Możesz umieścić znak gdziekolwiek na obrazku,
+ale miej pewność, że jego pozycja i rozmiar jest podana właściwie w pliku
+opisującym.
 </para>
 
 <para>
 Plik opisujący czcionki (o rozszerzeniu <filename>.fnt</filename>) może posiadać
-linie komentarzy zaczynające się znakiem '<literal>;</literal>'. Plik musi zawierać
-linie w postaci:
+linie komentarzy zaczynające się znakiem '<literal>;</literal>'. Plik musi
+zawierać linie w postaci:
 <anchor id="skin-font-image"/>
 <programlisting>image = <replaceable>obrazek</replaceable></programlisting>
 Gdzie <literal><replaceable>obrazek</replaceable></literal> jest nazwą pliku
@@ -730,11 +766,13 @@ image = font.png
 <title>Znaki specjalne (symbole)</title>
 <para>
 Niektóre znaki mają specjalne znaczenie, gdy są zwracane przez pewne zmienne
-używane w <link linkend="skin-dlabel">dlabel</link>. Znaki te mogą być wyświetlane jako symbole
-w ten sposób, że np. podczas odtwarzania strumienia DVD widoczne jest ładne logo zamiast znaku '<literal>d</literal>'.
+używane w <link linkend="skin-dlabel">dlabel</link>. Znaki te mogą być
+wyświetlane jako symbole w ten sposób, że np. podczas odtwarzania strumienia DVD
+widoczne jest ładne logo zamiast znaku '<literal>d</literal>'.
 </para>
 <para>
-Poniższa tablica zawiera znaki używane do wyświetlania symboli (wymagają one oddzielnych czcionek).
+Poniższa tablica zawiera znaki używane do wyświetlania symboli (wymagają one
+oddzielnych czcionek).
 </para>
 
 <informaltable>
@@ -801,9 +839,10 @@ Rozpoczyna odtwarzanie.
 <varlistentry>
   <term><emphasis role="bold">evPlaySwitchToPause</emphasis></term>
   <listitem><para>
-Przeciwieństwo <literal>evPauseSwitchToPlay</literal>. Ten sygnał zaczyna odtwarzanie
-oraz wyświetlenie obrazka dla przycisku <literal>evPauseSwitchToPlay</literal>
-(aby zaznaczyć, że przycisk ten może być użyty ponownie do wstrzymania odtwarzania).
+Przeciwieństwo <literal>evPauseSwitchToPlay</literal>. Ten sygnał zaczyna
+odtwarzanie oraz wyświetlenie obrazka dla przycisku
+<literal>evPauseSwitchToPlay</literal> (aby zaznaczyć, że przycisk ten może być
+użyty ponownie do wstrzymania odtwarzania).
     </para></listitem>
 </varlistentry>
 
@@ -1005,7 +1044,8 @@ Minimalizuje okno.
 <varlistentry>
   <term><emphasis role="bold">evLoad</emphasis></term>
   <listitem><para>
-Wczytuje plik (poprzez otwarcie okna przeglądarki plików, gdzie możesz wybrać plik).
+Wczytuje plik (poprzez otwarcie okna przeglądarki plików, gdzie możesz wybrać
+plik).
     </para></listitem>
 </varlistentry>
 
