@@ -141,7 +141,7 @@ if(filename && strncmp("cddb://",filename,7) == 0)
 #ifdef HAVE_VCD
 if(vcd_track){
   int ret,ret2;
-  if(!cdrom_device) cdrom_device=DEFAULT_CDROM_DEVICE;
+  if(!cdrom_device) cdrom_device=strdup(DEFAULT_CDROM_DEVICE);
   f=open(cdrom_device,O_RDONLY);
   if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CdDevNotfound,cdrom_device);return NULL; }
   vcd_read_toc(f);
@@ -197,7 +197,7 @@ if(dvd_title){
     /**
      * Open the disc.
      */
-    if(!dvd_device) dvd_device=DEFAULT_DVD_DEVICE;
+    if(!dvd_device) dvd_device=strdup(DEFAULT_DVD_DEVICE);
     dvd = DVDOpen(dvd_device);
     if( !dvd ) {
         mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,dvd_device);
