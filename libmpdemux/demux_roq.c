@@ -26,7 +26,7 @@
 #define CHUNK_TYPE_AUDIO 0
 #define CHUNK_TYPE_VIDEO 1
 
-#define RoQ_FPS 24
+#define RoQ_FPS 30
 
 typedef struct roq_chunk_t
 {
@@ -101,7 +101,6 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
   int chunk_id;
   int chunk_size;
   int chunk_arg;
-  int chunk_counter = 0;
   int last_chunk_id = 0;
   int largest_audio_chunk = 0;
 
@@ -145,8 +144,8 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
         sh_video->format = mmioFOURCC('R', 'o', 'Q', 'V');
 
         // constant frame rate
-        sh_video->fps = RoQ_FPS;
-        sh_video->frametime = 1 / RoQ_FPS;
+        sh_video->fps = 1000 / RoQ_FPS;
+        sh_video->frametime = 1 / sh_video->fps;
       }
     }
     else if ((chunk_id == RoQ_SOUND_MONO) ||
@@ -179,12 +178,12 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
 
       // index the chunk
       roq_data->chunks = (roq_chunk_t *)realloc(roq_data->chunks,
-        (chunk_counter + 1) * sizeof (roq_chunk_t));
-      roq_data->chunks[chunk_counter].chunk_type = CHUNK_TYPE_AUDIO;
-      roq_data->chunks[chunk_counter].chunk_offset = 
+        (roq_data->total_chunks + 1) * sizeof (roq_chunk_t));
+      roq_data->chunks[roq_data->total_chunks].chunk_type = CHUNK_TYPE_AUDIO;
+      roq_data->chunks[roq_data->total_chunks].chunk_offset = 
         stream_tell(demuxer->stream) - 8;
-      roq_data->chunks[chunk_counter].chunk_size = chunk_size + 8;
-      roq_data->chunks[chunk_counter].running_audio_sample_count =
+      roq_data->chunks[roq_data->total_chunks].chunk_size = chunk_size + 8;
+      roq_data->chunks[roq_data->total_chunks].running_audio_sample_count =
         roq_data->total_audio_sample_count;
 
       // audio housekeeping
@@ -194,7 +193,7 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
         (chunk_size / sh_audio->wf->nChannels);
 
       stream_skip(demuxer->stream, chunk_size);
-      chunk_counter++;
+      roq_data->total_chunks++;
     }
     else if ((chunk_id == RoQ_QUAD_CODEBOOK) ||
       ((chunk_id == RoQ_QUAD_VQ) && (last_chunk_id != RoQ_QUAD_CODEBOOK)))
@@ -202,25 +201,25 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
       // index a new chunk if it's a codebook or quad VQ not following a
       // codebook
       roq_data->chunks = (roq_chunk_t *)realloc(roq_data->chunks,
-        (chunk_counter + 1) * sizeof (roq_chunk_t));
-      roq_data->chunks[chunk_counter].chunk_type = CHUNK_TYPE_VIDEO;
-      roq_data->chunks[chunk_counter].chunk_offset = 
+        (roq_data->total_chunks + 1) * sizeof (roq_chunk_t));
+      roq_data->chunks[roq_data->total_chunks].chunk_type = CHUNK_TYPE_VIDEO;
+      roq_data->chunks[roq_data->total_chunks].chunk_offset = 
         stream_tell(demuxer->stream) - 8;
-      roq_data->chunks[chunk_counter].chunk_size = chunk_size + 8;
-      roq_data->chunks[chunk_counter].video_chunk_number = 
+      roq_data->chunks[roq_data->total_chunks].chunk_size = chunk_size + 8;
+      roq_data->chunks[roq_data->total_chunks].video_chunk_number = 
         roq_data->total_video_chunks++;
 
       stream_skip(demuxer->stream, chunk_size);
-      chunk_counter++;
+      roq_data->total_chunks++;
     }
     else if ((chunk_id == RoQ_QUAD_VQ) && (last_chunk_id == RoQ_QUAD_CODEBOOK))
     {
       // if it's a quad VQ chunk following a codebook chunk, extend the last
       // chunk
-      roq_data->chunks[chunk_counter - 1].chunk_size += (chunk_size + 8);
+      roq_data->chunks[roq_data->total_chunks - 1].chunk_size += (chunk_size + 8);
       stream_skip(demuxer->stream, chunk_size);
     }
-    else
+    else if (!stream_eof(demuxer->stream))
     {
         mp_msg(MSGT_DECVIDEO, MSGL_WARN, "Unknown RoQ chunk ID: %04X\n", chunk_id);
     }
@@ -232,14 +231,16 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
   // in the DPCM encoding effectively represents 1 16-bit sample
   // (store it in wf->nBlockAlign for the time being since init_audio() will
   // step on it anyway)
-  sh_audio->wf->nBlockAlign = largest_audio_chunk * 2;
+  if (sh_audio)
+    sh_audio->wf->nBlockAlign = largest_audio_chunk * 2;
 
-  roq_data->total_chunks = chunk_counter;
   roq_data->current_chunk = 0;
 
   demuxer->priv = roq_data;
 
   stream_reset(demuxer->stream);
+
+sh_audio = NULL;
 
   return demuxer;
 }
