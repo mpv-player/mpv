@@ -512,6 +512,8 @@ der Konfigurationsdatei den Skin <CODE>*/Skin/neuerskin</CODE> auswählen.
 können vom Subreader-Code 8 Arten von Untertitel verarbeitet werden. Um zu sehen
 welche diese Untertitelformate sind, siehe subreader.c, etwa Zeile 30.</P>
 
+<P>Für DVD Untertitel lese die <A HREF="cd-dvd.html#4.2">DVD Sektion</A>.</P>
+
 <P><B>MPlayer</B> unterstützt ein neues Untertitel-Format, genannt <B><I>MPsub</I></B>.
 Es wurde von mir (Gabucino) entwickelt. Das Haupt-Feature ist grundsätzlich <I>dynamisch</I>
 zeitabhängig (obwohl es auch einen Frame-basierende Modus besitzt). Ein Beispiel (von
@@ -615,7 +617,14 @@ TV-Tuner ermöglicht</B>.</P>
     zum Beispiel xawtv.</LI>
 </UL>
 </P>
-	    
+
+<P><B>Hinweis</B>: wenn <B>MPlayer</B> folgendes oder ändliches ausgibt: <CODE>ioctl: can't sync</CODE>
+  ist dein Tuner nicht fähig die geforderte Bildgröße zu liefern. Versuche die <CODE>width=640:height=480</CODE> Optionen.</P>
+
+  <P><B>Hinweis 2</B>: sind die Farben falsch? Dann kein dein Tuner kein YV12 darstellen. Versuche
+  YUY2, UYVY oder wenn nicht von denen funktioniert: RGB32 (dies aber mit <CODE>-vo sdl</CODE>).
+  Du kannst diese Eigenschaft mit der <CODE>outfmt=YV12</CODE> Option (siehe unten) einstellen.</P>
+
 <P><B><I>Verfügbare Optionen</I></B><BR>
 <TABLE BORDER=0>
 <TR>
@@ -744,6 +753,7 @@ Eingabe von Standard-V4L<BR>
 <TR><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  oder  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Suche zurück/vorwärts 10 Sekunden</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nach-oben und nach-unten</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche zurück/vorwärts 1 Minute</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Bild-nach-oben und Bild-nach-unten</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche zurück/vorwärts 10 Minute</TD></TR>
+<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt; oder &gt;</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>suche rück-/vorwärts in der Playliste</TD><TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p oder Leertaste</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Pause (drücke irgendeine Taste um weiterzumachen)</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q oder ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stoppe die Wiedergabe und beende Programm</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ oder -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>einstellen des Audio-Delays, +/- 0,1 Sekunden</TD></TR>
