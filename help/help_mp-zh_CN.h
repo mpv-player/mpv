@@ -379,6 +379,9 @@ static char help_text[]=
 #define MSGTR_MENU_Mute "静音"
 #define MSGTR_MENU_Original "原始的"
 #define MSGTR_MENU_AspectRatio "长宽比"
+#define MSGTR_MENU_AudioTrack "音频轨道"
+#define MSGTR_MENU_Track "轨道 %d"
+#define MSGTR_MENU_VideoTrack "视频轨道"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "音频"
