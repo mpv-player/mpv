@@ -147,7 +147,7 @@ void mplMainDraw( wsParamDisplay )
         btnModify( evPauseSwitchToPlay,btnDisabled );
 	break;
    case 1:
-        if ( strlen( mplShMem->Filename ) )
+        if ( mplShMem->Filename[0] != 0 )
 	 {
           btnModify( evPlaySwitchToPause,btnDisabled );
 	  btnModify( evPauseSwitchToPlay,btnReleased );
