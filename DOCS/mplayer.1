@@ -42,6 +42,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-vobsubid\ <vobsub\ subtitle\ id> ]
 .RB [ \-z\ <0-9> ]
 .RB [ \-idx ]
+.RB [ \-noidx ]
 .RB [ \-forceidx ]
 .RB [ \-nodshow ]
 .RB [ \-noxv ]
@@ -534,12 +535,18 @@ specifies compression level for PNG output
           9 : max compression
 .TP
 .B \-idx
-rebuilds INDEX of the AVI. Useful with broken downloads, or badly
-created AVIs.
+rebuilds INDEX of the AVI, thus allowing seeking. Useful with broken/incomplete
+downloads, or badly created AVIs.
+.TP
+.B \-noidx
+disregards INDEX of the AVI. Useful for files with broken index (desyncs, etc).
+Seeking will NOT be possible. You can fix the index permanently
+with MEncoder, see the documentation.
 .TP
 .B \-forceidx
-force rebuilding of INDEX. Useful for testing, or AVIs with bad
-indexes.
+force rebuilding of INDEX. Useful for files with broken index (desyncs, etc).
+Seeking will be possible. You can fix the index permanently with
+MEncoder, see the documentation.
 .TP
 .B \-nodshow
 disables usage of DirectShow video codecs

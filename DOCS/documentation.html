@@ -274,9 +274,11 @@ a lot of time finding the best way to parse bad damaged input files
 My player is rock solid playing damaged MPEG files (useful for some VCDs),
 and it plays bad AVI files which are unplayable with the famous
 windows media player. Even AVI files without index chunk are playable, and
-you can rebuild their indexes with the -idx option, thus enabling seeking!
+you can temporarily rebuild their indexes with the -idx option, or
+permanently with <B>MEncoder</B>, thus enabling seeking!
 As you see, stability and quality are the most important things for me,
 but the speed is also amazing.</P>
+
 
 <P><B><A NAME=1.2>1.2. History</A></B></P>
 
@@ -434,7 +436,8 @@ you get a nice and very fast fullscreen playing.</P>
 section in order to gain big speedup. It is important to do these steps
 <I>before</I> compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
 built. Also check out the <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A>
-section.</LI>
+section. <U><B>If you are non-Linux user</B></U>, read <A HREF="video.html#2.3.1.15">Vidix</A>
+documentation !</LI>
 
 <LI><B>3Dfx Voodoo3/Banshee cards</B> : please see the <A
 HREF="video.html#2.3.1.9">2.3.1.9</A> section in order to gain big speedup. It
@@ -446,7 +449,8 @@ TV out section</A>.</LI>
 section</A> of the TV-out documentation, to know what features of your card is
 supported under Linux/MPlayer. If you have a <B>Radeon</B> or <B>Rage128</B> card, we have a
 <B>XXX_vid</B> driver for you, with TV out ! Check <A
-HREF="video.html#2.3.1.14">this</A> section !</LI>
+HREF="video.html#2.3.1.14">this</A> section ! <U><B>If you are non-Linux
+user</B></U>, read <A HREF="video.html#2.3.1.15">Vidix</A> documentation !</LI>
 
 <LI><B>S3 cards</B> : the Savage chips have hardware acceleration. Use as
 new XFree86 version as possible, older drivers are buggy. Savage chips
@@ -780,7 +784,7 @@ TV tuner</B>.</P>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>in which output
   format should the tuner transport images to us (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
-  <B>uyvy</B>, <B>i420</B> (for i420 you have to pass the <CODE>-vc i420</CODE>
+  <B>uyvy</B>, <B>i420</B> (for i420 you have to pass the <CODE>-vc rawi420</CODE>
   option, because of a fourcc conflict))</TD>
 </TR>
 <TR>
@@ -1137,7 +1141,7 @@ Anyone has closer info?</P>
   options, and it should be fast.</P>
 
 <P>The <CODE>-vo x11</CODE> output will be even slower than on Linux, since
-  QNX has only X <I>emulation</I> which is VERY slow. Use SDL.
+  QNX has only X <I>emulation</I> which is VERY slow. Use SDL.</P>
 
 
 <P><B><A NAME=A>Appendix A - Authors</A></B></P>
@@ -1693,7 +1697,7 @@ This list should be kept low-traffic.</P>
 <P><UL>
 <LI>send bugreports here (after reading <A HREF="#D">Known Bugs</A> section, and Appendix <A HREF="#C">C</A>)</LI>
 <LI>send feature requests here (after reading the WHOLE documentation)</LI>
-<LI>send user questions here (after reading all this documentation)</LI>
+<LI>send user questions here (after reading the WHOLE documentation)</LI>
 </UL></P>
 
 </LI><LI>MPlayer hungarian users list:<BR>

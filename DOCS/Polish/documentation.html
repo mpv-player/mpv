@@ -45,6 +45,7 @@
 	<LI><A HREF="formats.html#2.1.1.8">2.1.1.8 Pliki NuppelVideo</A></LI>
 	<LI><A HREF="formats.html#2.1.1.9">2.1.1.9 Pliki yuv4mpeg</A></LI>
 	<LI><A HREF="formats.html#2.1.1.10">2.1.1.10 FILM files</A></LI>
+	<LI><A HREF="formats.html#2.1.1.11">2.1.1.11 Pliki RoQ</A></LI>
       </UL>
       <LI><A HREF="formats.html#2.1.2">2.1.2 D¼wiêk</A></LI>
     </UL>
@@ -119,7 +120,7 @@
 	¶ci±gaj±cych/odgrywaj±cych MJPEG)</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
 	<UL>
-	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox</A></LI>
+	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox G400</A></LI>
 	  <LI><A HREF="video.html#2.3.1.A.2">2.3.1.A.2 ATI</A></LI>
 	  <LI><A HREF="video.html#2.3.1.A.3">2.3.1.A.3 Voodoo 3/Banshee</A></LI>
 	</UL>
@@ -129,8 +130,14 @@
 	<LI><A HREF="sound.html#2.3.2.1">2.3.2.1 Do¶wiadczenia z kartami d¼wiêkowymi, rekomendacje</A></LI>
 	<LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Wtyczki d¼wiêkowe</A></LI>
 	  <UL>
-	    <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up/Downsampling</A></LI>
-	    <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Dekodowanie d¼wiêku otaczaj±cego</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Podsumowanie</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1
+	    Up/Downsampling</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Dekodowanie d¼wiêku
+	    otaczaj±cego</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.3">2.3.2.2.3 Konwerter formatu
+	    próbek</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Opó¼nienie</A></LI>
 	  </UL>  
       </UL>
     </UL>
@@ -242,7 +249,7 @@ szczê¶cia. Bêdziesz go potrzebowa³ :) </P>
 <P><B>MPlayer</B> jest odgrywark± filmów pod LINUXem (dzia³a pod wieloma innymi
 Unixami, i systemami opartymi na innych procesorach ni¿ <B>x86</B>, zobacz <A
 HREF="#6">sekcja 6</A>). Wy¶wietla wiêkszo¶æ plików MPEG, VOB, AVI, VIVO,
-ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, korzystaj±c z wielu
+ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ korzystaj±c z wielu
 w³asnych, XAnim oraz Win32 DLL kodeków. Mo¿esz równie¿ ogl±daæ <B>VideoCD</B>,
 <B>SVCD</B>, <B>DVD</B>, <B>3ivx</B>, a nawet filmy <B>DivX</B> (i nie
 potrzebujesz wcale biblioteki avifile!). Kolejn± du¿± zalet± mplayera jest
@@ -878,11 +885,21 @@ nazwami plików, które s± stosowane tylko do podanych plików/URL/czegokolwiek
 (np.: <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] [path/]filename</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [default options] [path/]filename1 [options for filename1] filename2 filename3 [options for filename3]</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] -vcd trackno /dev/cdrom</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] -dvd titleno [/dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [options] http://site.com/file.[mpg|avi] (tu równie¿ mo¿e byæ u¿yte playtree)</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mplayer [opcje] [path/]filename</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>file</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2>mplayer [default opcje] [path/]filename1 [opcje dla
+filename1] filename2 filename3 [opcje dla filename3]</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>VCD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2>mplayer [opcje] -vcd trackno /dev/cdrom</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>DVD</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2>mplayer [opcje] -dvd titleno [/dev/dvd]</CODE></TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
+size=2>net</TD><TD></TD><TD><CODE><FONT face="Verdana, Arial, Helvetica,
+sans-serif" size=2>mplayer [opcje] http://site.com/file.[mpg|avi] (tu równie¿
+mo¿e byæ u¿yte playtree)</CODE></TD><TR>
 </TABLE></P>
 
 <P><PRE>  mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
@@ -931,8 +948,8 @@ x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
 size=2>dopasuj opó¼nienie napisów o +/- 0.1 sekundy</TD></TR>
 
 <TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2> (nastêpuj±ce klawisze s± wa¿ne tylko wtedy, gdy u¿ywasz kodeka
-DirectShow DivX lub DivX4 z opcj± -vc divx4)</I></P></TD></TR>
+size=2> (nastêpuj±ce klawisze s± wa¿ne tylko wtedy, gdy u¿ywasz opcji
+<CODE>-vo xv</CODE>)</I></P></TD></TR>
 
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1
 lub 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
@@ -1127,8 +1144,8 @@ dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</P>
 
 <P><B><A NAME=6.2>6.2. FreeBSD</A></B></P>
 
-<P>Aby zbudowaæ pakiet, bêdziesz potrzebowa³ GNU make (gmake, /usr/ports/devel/gmake),
-poch±dz±cy z BSD make nie zadzia³a.</P>
+<P>Aby zbudowaæ pakiet, bêdziesz potrzebowa³ GNU make (gmake,
+/usr/ports/devel/gmake), poch±dz±cy z BSD make nie zadzia³a.</P>
 
 <P>Aby uruchomiæ <B>MPlayera</B>, bêdziesz musia³ rekompilowaæ j±dro z 
 "options USER_LDT" (o ile nie u¿ywasz -CURRENT, gdzie to jest domy¶lne).
@@ -1244,18 +1261,20 @@ Mo¿e kto¶ ma bli¿sze informacje?</P>
 
 <P><B><A NAME=6.6>6.6. QNX</A></B></P>
 
-<P>Dzia³a. Ma tylko wyj¶cie <CODE>-vo x11</CODE>, które jest nawet du¿o wolniejsze 
-ni¿ w Linuksie, odk±d QNX ma tylko <I>emulacjê</I> X, która jest BARDZO wolna .
-Jak dot±d brak bli¿szych informacji.</P>
+<P>Dzia³a. Musisz ¶ci±gn±æ i zainstalowaæ SDL dla QNX. Nastêpnie uruchom
+<B>MPlayera</B> z opcjami: <CODE>-vo sdl:photon</CODE> i <CODE>-ao
+sdl:nto</CODE>, a powinno dzia³aæ szybko.</P>
+<P>Wyj¶cie <CODE>-vo x11</CODE> jest wolniejsze nawet ni¿ w Linuksie, gdy¿ QNX
+ma tylko <I>emulacjê</I> X-ów, która jest BARDZO wolna. U¿ywaj wiêc SDL.</P>
 
 
-<P><B><A NAME=A>Dodatek A - Authorzy</A></B></P>
+<P><B><A NAME=A>Dodatek A - Autorzy</A></B></P>
 
-<P>UWAGA: *NIE* wysy³aj raportów o b³êdach, pró¶b o pomoc &amp; oczekiwañ co do
-przysz³o¶ci wprost do autorów!</P>
+<P>UWAGA: *NIE* wysy³aj raportów o b³êdach, pró¶b o pomoc i ¿yczeñ na
+przysz³o¶æ wprost do autorów!</P>
 
 <P>Przeczytaj dodatek <A HREF="#C">C</A> i zasubskrybuj listê dyskusyjn±
-u¿ytkowników mplayera</P>
+u¿ytkowników Mplayera</P>
 
 <P ALIGN=center><B><U>Projekt <B>MPlayer</B>:</U></B></P>
 
@@ -1580,7 +1599,7 @@ u¿ytkowników mplayera</P>
 <UL>
   <LI>niemieckie t³umaczenie dokumentacji</LI>
   <LI>pewne poprawki w configure, niewielkie ³aty</LI>
-  <LI>found somebody (Thilo Wunderlich) how send a DVB card</LI>
+  <LI>znalaz³ kogo¶ (Thilo Wunderlich), kto przys³a³ kartê DVB</LI>
 </UL></LI>
 <LI><B><A HREF="mailto:kmkaplan@selfoffice.com">Kim Minh Kaplan</A></B>
 <UL>
@@ -1597,9 +1616,17 @@ u¿ytkowników mplayera</P>
 </UL></LI>
 <LI><B><A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A></B>
  <UL>
-  <LI><CODE>zr</CODE>sterownik wyj¶cia wideo</LI>
+  <LI>sterownik wyj¶cia wideo <CODE>zr</CODE></LI>
  </UL>
 </LI>
+<LI><B><A HREF="mailto:ajh@atri.curtin.edu.au">Anders Johansson</A></B>
+<UL>
+  <LI> system wtyczek audio</LI>
+</UL></LI>
+<LI><B><A HREF="mailto:rtogni@freemail.it">Roberto Togni</A></B>
+<UL>
+  <LI>Dekoder open source QT RPZA</LI>
+</UL></LI>  
 </UL></P>
 
 <P>G³ówni testerzy:</P>
@@ -1675,14 +1702,15 @@ i kodekami oraz avi fmt]</LI></UL>
 
 </UL></P>
 
-<P><B><A NAME=A2>Appendix A/2 - maintainerzy kodu i dokumentacji MPlayera</A></B></P>
+<P><B><A NAME=A2>Dodatek A/2 - maintainerzy kodu i dokumentacji
+MPlayera</A></B></P>
 
-<P>Homepage
+<P>Strona domowa
 <UL>
   <LI><B>Design</B>: Chass
   <LI><B>Zawarto¶æ</B>: Gabucino
 </UL></P>
-<P>English documentation
+<P>Dokumentacja w jêzyku angielskim
 <UL>
   <LI><B>tech-hun.txt</B>: A'rpi
   <LI><B>wszystkie pozosta³e</B>: Gabucino
@@ -1698,7 +1726,7 @@ i kodekami oraz avi fmt]</LI></UL>
   <LI><B>polskie</B>: Dariusz Pietrzak (dawna wersja nieshierarchizowana, w ascii) oraz 
   <A HREF="mailto:nell@skrzynka.pl">Justyna Bia³a</A> (wersja aktualna, w html)
 </UL></P>
-<P>Platformy sprzêtowe/porty
+<P>Platformy sprzêtowe/porty:
 <UL>
   <LI><B>pakiety DEBIANa</B>: Dariusz Pietrzak
   <LI><B>wsparcie dla FreeBSD</B>: Vladimir Kushnir
@@ -1717,12 +1745,13 @@ i kodekami oraz avi fmt]</LI></UL>
   <LI><B>obs³uga LIRC</B>: Acki
   <LI><B>renderer SUB/OSD</B>: Adam Tla/lka
 </UL></P>
-<P>sterowniki libvo:
+<P>Sterowniki libvo:
 <UL>
   <LI><B>vo_3dfx.c</B> - PRZESTARZA£E, u¿yj w zamian xv lub tdfxfb
   <LI><B>vo_tdfxfb.c</B> - <A HREF="mailto:zsteva@ptt.yu">Zeljko Stevanovic</A>
   <LI><B>vo_aa.c</B> - Folke Ashberg
-  <LI><B>vo_directfb.c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A>
+  <LI><B>vo_directfb.c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri
+  Svoboda</A>
   <LI><B>vo_dga.c</B> - Acki
   <LI><B>vo_fbdev.c</B> - Szabi
   <LI><B>vo_fsdga.c</B> - PRZESTARZA£E, u¿yj w zamian dga
@@ -1745,34 +1774,38 @@ i kodekami oraz avi fmt]</LI></UL>
   <LI><B>vo_xv.c</B> - Pontscho
   <LI><B>vo_zr.c</B> - <A HREF="mailto:rsnel@cube.dyndns.org">Rik Snel</A>
 </UL></P>
-<P>sterowniki libao2:
+<P>Sterowniki libao2:
 <UL>
   <LI><B>ao_alsa5.c</B>  - al3x
-  <LI><B>ao_alsa9.c</B>  - al3x (poprawione przez <A HREF="mailto:joy@pingfm.org">joy_ping</A>)
+  <LI><B>ao_alsa9.c</B>  - al3x (poprawione przez <A
+  HREF="mailto:joy@pingfm.org">joy_ping</A>)
   <LI><B>ao_null.c</B>   - A'rpi
   <LI><B>ao_oss.c</B>    - A'rpi
   <LI><B>ao_pcm.c</B>    - Atmos
   <LI><B>ao_sdl.c</B>    - Atmos
-  <LI><B>ao_sgi.c</B>    - <A HREF="oliver.schoenbrunner@jku.at">Oliver Schoenbrunner</A>
+  <LI><B>ao_sgi.c</B>    - <A HREF="oliver.schoenbrunner@jku.at">Oliver
+  Schoenbrunner</A>
   <LI><B>ao_sun.c</B>    - Jürgen Keil
-</UL></P>
-<P>NARZÊDZIA:
-<UL>j
-  <LI><B>subfont-c</B> - Artur Zaprzala: <zybi@fanthom.irc.pl>
+</UL>
+</P>
+<P>Narzêdzia:
+<UL>
+  <LI><B>subfont-c</B> - Artur Zaprza³a: <zybi@fanthom.irc.pl>
   <LI><B>subfont-GIMP</B> - lanzz@lanzz.org
   <LI><B>*.pl</B> - Atmos
   <LI><B>x2mpsub</B> - Gabucino
   <LI><B>others</B> - A'rpi
-</UL></P>
-
+</UL>
+</P>
 <P>Pozosta³e:
 <UL>
   <LI><B>vbelib.*</B> - Nick Kurshev
-  <LI><B>lrmi.*</B> - skopiowany przez Nick Kurshev (oryginalnie przez Josh Vanderhoof)
+  <LI><B>lrmi.*</B> - skopiowany przez Nick Kurshev (oryginalnie przez Josh
+  Vanderhoof)
 </UL></P>
 
 
-<P><B><A NAME=B>Appendix B - Listy dyskusyjne</A></B></P>
+<P><B><A NAME=B>Dodatek B - Listy dyskusyjne</A></B></P>
 
 <P>Istnieje kilka publicznych list dyskusyjnych o <B>MPlayerze</B>.
 Zasubskrybowaæ je mo¿na pod podanymi adresami:</P>
@@ -1781,140 +1814,169 @@ Zasubskrybowaæ je mo¿na pod podanymi adresami:</P>
 <LI>Lista developerów MPlayera:<BR>
 <A
 HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
-<P>Jest to lista o rozwijaniu Mplayera! Mówi siê tam o zmianach w interfejsie/API,
-nowych bibliotekach, optymalizacji kodu, zmianach w ./configure. Tu te¿ s± wysy³ane ³aty.
-NIE wysy³a siê na tê listê raportów o b³êdach, pytañ u¿ytkowników, ¿±dañ na przysz³o¶æ!
-Na tej li¶cie powinien byæ zachowany ma³y ruch.</P>
+<P>Jest to lista o rozwijaniu Mplayera! Mówi siê tam o zmianach w
+interfejsie/API, nowych bibliotekach, optymalizacji kodu, zmianach w
+./configure. Tu te¿ s± wysy³ane ³aty. NIE wysy³a siê na tê listê raportów o
+b³êdach, pytañ u¿ytkowników, ¿±dañ na przysz³o¶æ! Na tej li¶cie powinien byæ
+zachowany ma³y ruch.</P>
 
-</LI><LI>Lista uzytkowników MPlayera:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
-<P><UL>
-<LI>send bugreports here (after reading <A HREF="#D">Known Bugs</A> section,
-and Appendix <A HREF="#C">C</A>)</LI>
-<LI>send feature requests here (after reading the WHOLE documentation)</LI>
-<LI>send user questions here (after reading all this documentation)</LI>
+</LI><LI>Lista u¿ytkowników MPlayera:<BR>
+<A
+HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
+
+<P>Tu mo¿esz wysy³aæ:
+<UL>
+<LI>raporty o b³êdach (ale po przeczytaniu sekcji <A HREF="#D">Znane b³êdy</A>
+i Dodatku <A HREF="#C">C</A>)</LI>
+<LI>¿±dania na przysz³o¶æ (po przeczytaniu CA£EJ tej dokumentacji)</LI>
+<LI>w³asne pytania (po przeczytaniu ca³ej tej dokumentacji)</LI>
 </UL></P>
 
-</LI><LI>MPlayer hungarian users list:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A>
+</LI><LI>Wêgierska lista u¿ytkowników MPlayera:<BR>
+<A
+HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A>
 <P>
   <UL>
-    <LI>hungarian language list</LI>
-    <LI>topic? We'll see about it...</LI>
+    <LI>jêzykiem listy jest wêgierski</LI>
+    <LI>Temat? Zobaczymy co da siê z tym zrobiæ...</LI>
   </UL>
 </P>
 
-</LI><LI>Lista u¿ytkowników MPlayera posiadaj±cych Matrox G200/G400/G450/G550:<BR>
-<A HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
-<P>Send matrox-related questions here<UL>
-<LI>things about mga_vid</LI>
-<LI>matrox's official beta drivers (for X 4.x.x)</LI>
-<LI>and about matroxfb-TVout stuff.</LI></UL></P>
-
-</LI><LI>Lista uzytkowników MPlayera posiadaj±cych karty DVB:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Things related to the hardware decoder card called DVB.<UL>
+</LI><LI>Lista u¿ytkowników MPlayera posiadaj±cych Matrox
+G200/G400/G450/G550:<BR>
+<A
+HREF="http://lists.sourceforge.net/lists/listinfo/mplayer-matrox">http://lists.sourceforge.net/lists/listinfo/mplayer-matrox</A>
+<P>Wysy³aj tu pytania zwi±zane z matrox<UL>
+<LI>sprawy dotycz±ce mga_vid</LI>
+<LI>oficjalne beta sterowniki dla matroxa (dla X 4.x.x)</LI>
+<LI>problemy zwi±zane z matroxfb-TVout.</LI>
+</UL>
 </P>
 
-</LI><LI>MPlayer CVS-log: <BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A>
-<P>Send only questions about CVS changes here.
-(if you don't understand why a change is required or you've better fix)
-Be sure in that your target developer reads this list!</P>
+</LI><LI>Lista u¿ytkowników MPlayera, posiadaj±cych karty DVB:<BR>
+<A
+HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
+<P>Sprawy zwi±zane ze sprzêtowo dekoduj±c± kart± DVB.<UL>
+</P>
 
-</LI></UL></P>
+</LI>
+<LI>MPlayer CVS-log:<BR>
+<A
+HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog">http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog</A>
+<P>Wysy³aj tu pytania zwi±zane tylko ze zmianami w CVS (je¶li np. nie
+rozumiesz, dlaczego zmiana jest wymagana, albo je¶li masz lepsz± poprawkê).
+B±d¼ pewien, ¿e developer zajmuj±cy siê zagadnieniem, o które pytasz, czyta t±
+listê!</P>
+</LI>
+</UL>
+</P>
 
-<P>NOTE: language of above lists are ENGLISH, unless explicitly stated
-otherwise.  Please do not send messages using other language!</P>
+<P>UWAGA: Jêzykiem powy¿szych list jest ANGIELSKI o ile nie zaznaczono
+wyra¼nie, ¿e jest inaczej. Nie wysy³aj, proszê, wiadomo¶ci w innych
+jêzykach!</P> 
 
-<P>NOTE: you can reach the searchable mailing list archives
-<A HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">here</A>.
+<P>UWAGA: Mo¿esz skorzystaæ z przeszukiwalnego archiwum list <A
+HREF="http://www.mplayerhq.hu/cgi-bin/htsearch">tutaj</A>.
 
 
-<P><B><A NAME=C><A HREF="bugreports.html">Appendix C</A> - How to report bugs</A></B></P>
+<P><B><A NAME=C><A HREF="bugreports.html">Dodatek C</A> - Jak zg³aszaæ
+b³êdy</A></B></P>
 
-<P><B><A NAME=D>Appendix D - Znane b³êdy</A></B></P>
+<P><B><A NAME=D>Dodatek D - Znane b³êdy</A></B></P>
 
-<P>Special system/cpu-specific bugs/problems:</P>
+<P>B³êdy/problemy zwi±zane z konkretnym systemem/procesorem:</P>
 <UL>
-<LI> SIGILL (signal 4) in draw_frame, on P3 (mostly with 2.2.x kernels):<BR>
-  Problem: movups is crashing in libvo/fastmemcpy.h<BR>
-  Workaround:  ./configure --disable-fastmemcpy<BR>
-  SOLVED: disabled SSE code in fastmemcpy.h ;(</LI>
+<LI> SIGILL (signal 4) w draw_frame, na P3 (przewa¿nie z j±drami 2.2.x):<BR>
+ ¬ród³o problemu: movups siê wykrzacza w libvo/fastmemcpy.h<BR>
+ Ominiêcie problemu: ./configure --disable-fastmemcpy<BR>
+ Rozwi±zanie problemu: wy³±czenie kodu SSE we fastmemcpy.h ;(</LI>
 
-<LI>No image (black image) in RGB 15/16bpp (x11,dga,fbdev,svga) playing
-  MPEG or OpenDivX files:<BR>
-  Problem: gcc 2.96 bug, read <A HREF="gcc-2.96-3.0.html">this</A><BR>
-  Workaround: ./configure --disable-mmx, or use gcc 2.95.x<BR>
-  SOLVED: code fixed</LI>
+<LI>Brak obrazu (czarny obraz) w czasie odtwarzania RGB 15/16bpp
+(x11,dga,fbdev,svga) plików MPEG lub OpenDivX:<BR>
+ ¬ród³o problemu: b³±d gcc 2.96, przeczytaj <A
+ HREF="gcc-2.96-3.0.html">to</A><BR>
+ Ominiêcie problemu: ./configure --disable-mmx, albo u¿yj gcc 2.95.x<BR>
+ Rozwi±zanie problemu: kod zosta³ poprawiony</LI>
 
-<LI>SIGILL (signal 4) or other fault at loading l3codeca.acm:<BR>
-  Problem: shared libs are loaded to 0x00xxxxxx instead of 0x40xxxxxx<BR>
-  Workaround: mplayer -afm 1 ...<BR>
-  SOLVED: you are using some security kernel patch, like OpenWall etc.</LI>
+<LI>SIGILL (signal 4) albo inny b³±d podczas ³adowania l3codeca.acm:<BR>
+ ¬ród³o problemu: biblioteki wspó³dzielone s± ³adowane do 0x00xxxxxx zamiast do
+ 0x40xxxxxx<BR>
+ Obej¶cie problemu: mplayer -afm 1 ...<BR>
+ Rozwi±zanie problemu: u¿ywasz pewnych ³at ochronnych na j±dro, jak OpenWall
+ itp.</LI>
 
-<LI>SIGILL (signal 4) on P3 using 2.2.x kernels:<BR>
-  Problem: kernel 2.2.x doesn't have proper (working) SSE support<BR>
-  Solution: upgrade kernel to 2.4.x<BR>
-  Workaround: ./configure --disable-sse</LI>
+<LI>SIGILL (signal 4) na P3 i j±drach 2.2.x:<BR>
+  ¬ród³o problemu: j±dra 2.2.x nie maj± w³a¶ciwej (dzia³aj±cej) obs³ugi SSE<BR>
+  Rozwi±zanie: upgrade j±dra do 2.4.x<BR>
+  Obej¶cie problemu: ./configure --disable-sse</LI>
 
 <LI>General SIGILL (signal 4):<BR>
-  Problem: you compiled and run mplayer in different machines
-  (for example compiled on P3 and running on celeron)<BR>
-  Solution: compile MPlayer on the same machine where you will use it!<BR>
-  Workaround: ./configure --disable-sse etc. options</LI>
-<LI>"Internal buffer inconsistency" during MEncoder run:<BR>
-Problem: known gcc 2.96 bug, no fix yet. If you have gcc 2.95, you
-have a libmp3lame library that was compiled with gcc 2.96 (installed from
-a deb/rpm package?). Check which lib does MEncoder found : ldd mencoder.</LI>
+ ¬ród³o problemu: skompilowa³e¶ Mplayera na innej maszynie, ni¿ uruchamiasz
+ (np. skompilowany na P3 a uruchomiony na celeronie)<BR>
+ Rozwi±zanie: skompiluj MPlayera na tej maszynie, na której chcesz go
+ u¿ywaæ!<BR>
+ Obej¶cie problemu: ./configure --disable-sse itp. opcje<LI>
+<LI>"Internal buffer inconsistency" w czasie pracy MEncodera:<BR>
+ ¬ród³o problemu: znany b³±d gcc 2.96, nie ma do tego poprawek jak dot±d.
+ Je¶li masz gcc 2.95, musisz mieæ zatem bibliotekê libmp3lame skompilowan± z
+ gcc 2.96 (czy przypadkiem nie zainstalowan± z pakietu deb/rpm?). 
+ Sprawd¼, któr± bibliotekê znalaz³ MEncoder: ldd mencoder.</LI>
 </UL>
 
-<P>Various A-V sync and other audio problems:</P>
+<P>Ró¿ne problemy z synchronizacj± A-V d¼wiêku:</P>
 
-General audio delay or jerky sound (exists with all or many files):<BR>
+Ogólnie, opó¼nienia d¼wiêku albo szarpany d¼wiêk (pojawiaj±ce siê w wielu, b±d¼
+wszystkich plikach):<BR>
 <UL>
-<LI>audio buffer problems (buffer size badly detected)<BR>
-  Workaround:  mplayer -abs option</LI>
-<LI>slow machine (cpu or vga)<BR>
-  try with -vo null, if it plays well, then you have slow VGA card/driver<BR>
-  Workaround: buy a faster card or read this documentation about how to speed up<BR>
-  SOLVED: try -framedrop</LI>
-<LI>buggy audio driver</LI>
+<LI>problemy z buforem d¼wiêku (¼le wykryty rozmiar bufora)<BR>
+  Obej¶cie problemu: opcja: mplayer -abs</LI>
+<LI>wolna maszyna (cpu albo vga)<BR>
+  wypróbuj -vo null, je¶li z tym bêdzie dzia³a³o dobrze, oznacza to, ¿e masz
+  woln± kartê/sterownik VGA<BR>
+  Obej¶cie problemu: kup szybsz± kartê, albo przeczytaj t± dokumentcjê o tym,
+  jak przy¶pieszyæ odgrywanie<BR>
+  Rozwi±zanei problemu: spróbuj -framedrop</LI>
+<LI>sterownik d¼wiêku zawieraj±cy b³êdy</LI>
 </UL><BR>
 
-Audio delay/de-sync specific to one or a few files:<BR>
+Z³a synchronizacja/opó¼nianie przy jednym lub kilku plikach:<BR>
 <UL>
-<LI>bad file (please upload the file, so we can check & fix)<BR>
-  Workaround:
+<LI>z³y plik (wy¶lij ten plik, by¶my mogli sprawdxiæ i naprawiæ)<BR>
+  Obej¶cie problemu:
   <UL>
-    <LI>-ni or -nobps option   (for non-interleaved or bad files)</LI>
-and/or
-    <LI>-mc 0   (required for files with badly interleaved VBR audio)</LI>
-and/or
-    <LI>-delay option or +/- keys at runtime to adjust delay</LI>
+    <LI>opcje: -ni albo -nobps (dla plików z³ych albo bez przeplootu)</LI>
+oraz/lub
+    <LI>-mc 0 (wymagane dla plików ze z³ym przeplotem d¼wiêku VBR)</LI>
+oraz/lub
+    <LI>opcja -delay albo klawisze +/- keys podczas dzia³ania, aby dostosowaæ
+    opó¼nienie</LI>
   </UL>
-<LI>your soundcard doesn't support 48Khz playback<BR>
-  Workaround: buy a better soundcard...  or try to decrease fps by 10% (use -fps 27 for a 30fps movie)</LI>
-<LI>slow machine<BR>
-  (if A-V is not around 0, and the last number in the status line increasing)<BR>
-  Workaround: -framedrop</LI>
+<LI>twoja karta d¼wiêkowa nie obs³uguje odgrywania w czêstotliwo¶ci 48Khz<BR>
+Obej¶cie problemu: kup lepsz± kartê d¼wiêkow±... albo spróbuj zmniejszyæ ilo¶æ
+fps do 10% (u¿yj -fps 27 dla filmu o 30fps)</LI>
+<LI>wolna maszyna<BR>
+ (je¶li A-V nie jest w okolicach 0, a ostatni numer w linii stanu zwiêksza
+ siê)<BR>
+ Obej¶cie problemu: -framedrop</LI>
 </UL><BR>
 
-No sound at all:<BR>
+Kompletny brak d¼wiêku:<BR>
 <UL>
-<LI>your file uses an unsupported codec<BR>
-  Workaround: read the documentation and help us adding support for it</LI>
+<LI>twój plik u¿ywa nieobs³ugiwanego kodeka<BR>
+  Obej¶cie problemu: przeczytaj dokumentacjê i pomó¿ nam dodaæ obs³ugê tego
+  kodeka</LI>
 </UL>
 
-<P>Video-out problems:</P>
+<P>Problemy z wyj¶ciem wideo:</P>
 
-<P>First note: options -fs -vm and -zoom are just recommendations, not (yet)
-supported by all drivers. So it isn't a bug if it doesn't work.
-Only a few driver supports scaling/zooming, don't expect this from x11 or dga.</P>
+<P>Pierwsza uwaga: opcje: -fs -vm i -zoom s± tylko zalecane, nie s± jak dot±d
+obs³ugiwane przez wszystkie sterowniki. Wiêc to nie jest b³±d, je¶li nie
+dzia³aj±. Tylko kilka sterowników wspiera skalowanie/zooming
+(zbli¿anie/oddalanie), nie oczekuj tego od z11 czy dga.</P> 
 
-<P>OSD/sub flickering:<BR>
-- x11 driver: sorry, it can't be fixed now<BR>
-- xv driver: use -double option</P>
+<P>Migotanie OSD/napisów:<BR>
+- sterownik x11: przykro mi, ale na razie nie mo¿e to zostaæ naprawione<BR>
+- sterownik xv: u¿yj opcji -double</P>
 
 </BODY>
 </HTML>

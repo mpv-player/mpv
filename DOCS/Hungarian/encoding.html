@@ -61,7 +61,7 @@ másoló, és video átméretezõ képességgel.</P>
       körülmények között lejátszhatóak windows rendszereken! Ha windows-on
       (is) lejátszandó AVI-t akarsz létrehozni, csinálj CBR-es mp3-at!</LI>
     <LI>PCM audio</LI>
-    <LI>stream másolás (csak CBR audiot)</LI>
+    <LI>stream másolás</LI>
     <LI>bemeneti file A/V szinkronizálása (PTS-alapú, az -mc 0 opcióval
       kikapcsolható)</LI>
     <LI>FPS javítás az <CODE>-ofps</CODE> opcióval (hasznos ha 29.97fps-es
@@ -73,7 +73,6 @@ másoló, és video átméretezõ képességgel.</P>
 <P><B><I>Tervezett funkciók</I></B> :
   <UL>
     <LI>audio külön file-ból vétele (AC3, MP3, OGG)</LI>
-    <LI>VBR audio stream másolás</LI>
     <LI>még szélesebb skálája a be/kimeneti formátumoknak, codec-eknek
       (VOB file-ok DivX4/Indeo5/VIVO videoval... :)</LI>
     <LI>audio enkódolása v4l-rõl</LI>
@@ -247,6 +246,14 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
 
 <P>Megj.: az összes rendelkezésre álló opcióhoz <B>olvasd el a manpage-t !</B></P>
 
+<P>
+  Tekintve hogy a <B>MEncoder</B> alapjában véve ugyanarra a kódra épül amire
+  az <B>MPlayer</B>, sok olyan <B>MPlayer</B> opció van ami enkódolásnál is
+  használható. Például a <CODE>-sid</CODE> itt arra használható hogy a DVD
+  feliratokat bekódold a keletkezõ AVI-ba. Vagy a <CODE>-noidx</CODE> opcióval
+  itt is figyelmen kívül hagyható az esetleges hibás index a bemeneti AVI-ban.
+</P>
+
 <TABLE BORDER=1>
 <TR>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
@@ -285,9 +292,13 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Enkódolás a megadott codec-kel (a codec nevek a codecs.conf-ból származnak). Példák :<BR>
     &nbsp;&nbsp;<B>help</B> - codecek listája<BR>
+    &nbsp;&nbsp;<B>null</B> - a kimeneti AVI-ban nem lesz video stream<BR>
+    &nbsp;&nbsp;<B>raw</B> - tömörítetlen video létrehozása<BR>
+    &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
     &nbsp;&nbsp;<B>copy</B> - nincs enkódolás, csak stream másolás (most csak AVI/ASF-bõl)<BR>
     &nbsp;&nbsp;<B>divx4</B> - enkódolás DivX4-be<BR>
     &nbsp;&nbsp;<B>lavc</B> - enkódolás egy libavcodec-ben lévõ codec-kel<BR>
+    &nbsp;&nbsp;<B>vfw</B> - enkódolás egy Windows-os DLL-lel<BR>
   </TD>
 </TR>
 <TR>

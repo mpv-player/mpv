@@ -58,7 +58,7 @@ stream copying and video resizing abilities.</P>
       always play nicely on windows players! If you intend to encode AVIs
       mainly for windows, encode with CBR!</LI>
     <LI>PCM audio</LI>
-    <LI>stream copying (CBR audio only)</LI>
+    <LI>stream copying</LI>
     <LI>input A/V synchronizing (PTS-based, can be disabled with -mc 0 option)</LI>
     <LI>FPS correction with <CODE>-ofps</CODE> option (useful when encoding
     29.97fps VOB to 24fps AVI)</LI>
@@ -69,7 +69,6 @@ stream copying and video resizing abilities.</P>
 <P><B><I>Planned features</I></B> :
   <UL>
     <LI>using audio from separate file (AC3, MP3, OGG)</LI>
-    <LI>VBR audio stream copy</LI>
     <LI>even wider variety of available en/decoding formats/codecs
     (creating VOB files with DivX4/Indeo5/VIVO streams :)</LI>
     <LI>audio encoding from v4l</LI>
@@ -175,6 +174,7 @@ commands are needed :<BR>
 <P>Rescaling is very simple :<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder sample-svcd.mpg -divx4opts br=1300 -x 640 -y 480 -sws 2 -o output.avi</CODE></P>
 
+
 <P><B><A NAME=2.4.3.3>2.4.3.3.  Stream copying</B></P>
 
 <P><B>MEncoder</B> can handle input streams in two ways : <B>encode</B> or
@@ -192,6 +192,7 @@ commands are needed :<BR>
   <LI><B>Audio stream</B> (option <CODE>-oac copy</CODE>) : straightforward.</LI>
 </UL>
 </P>
+
 
 <P><B><A NAME=2.4.3.4>2.4.3.4.  Fixing AVIs with broken index or interleaving</B></P>
 
@@ -227,13 +228,22 @@ unsupported). You can encode to the following codecs :</P>
 <P>An example, with MJPEG compression :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
 
+
 <P><B><A NAME=2.4.4>2.4.4.  Syntax</B></P>
 
 <P>&nbsp;&nbsp;<CODE>mencoder [options] [input file] [options] ...</P>
 
+
 <P><B><A NAME=2.4.5>2.4.5.  Available options</B></P>
 
 <P>NOTE : for all available options, <B>read the manpage !</B></P>
+
+<P>
+  As <B>MEncoder</B> is built on the same codebase as <B>MPlayer</B>, there
+  are many <B>MPlayer</B> options that have function in <B>MEncoder</B> too!
+  See, you can use <CODE>-sid</CODE> to rip a DVD with subtitles, or
+  <CODE>-noidx</CODE> to disregard buggy index of input AVI. <B>Be smart!</B>
+</P>
 
 <TABLE BORDER=1>
 <TR>
@@ -273,9 +283,13 @@ unsupported). You can encode to the following codecs :</P>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
     Encode  with  the given codec (codec names are from codecs.conf). Examples:<BR>
     &nbsp;&nbsp;<B>help</B> - get list of available codecs<BR>
+    &nbsp;&nbsp;<B>null</B> - do not create a video stream in the output AVI<BR>
+    &nbsp;&nbsp;<B>raw</B> - create uncompressed video<BR>
+    &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
     &nbsp;&nbsp;<B>copy</B> - no encoding, just copy the stream (only from AVI/ASF now)<BR>
     &nbsp;&nbsp;<B>divx4</B> - encode to DivX4<BR>
     &nbsp;&nbsp;<B>lavc</B> - encode with a codec from libavcodec<BR>
+    &nbsp;&nbsp;<B>vfw</B> - encode with a Windows DLL<BR>
   </TD>
 </TR>
 <TR>

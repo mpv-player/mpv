@@ -41,6 +41,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-vobsubid\ <vobsub\ felirat\ id> ]
 .RB [ \-z\ <0-8> ]
 .RB [ \-idx ]
+.RB [ \-noidx ]
 .RB [ \-forceidx ]
 .RB [ \-nodshow ]
 .RB [ \-noxv ]
@@ -467,12 +468,19 @@ a PNG kimenet tömörítési fokának megadása
           8 : maximális tömörítés
 .TP
 .B \-idx
-az AVI indexének újraépítése. Hibásan letöltött vagy rosszul
-létrehozott fileoknál használatos.
+az AVI indexének újraépítése, ha a file nem tartalmaz. Hibásan/részlegesen
+letöltött vagy rosszul létrehozott fileoknál használatos.
+.TP
+.B \-noidx
+az AVI indexének figyelmen kívül hagyása. Hibás index-û (jele pl a hang/kép
+deszinkronizáció) file-oknál használható. A seekelés NEM lesz lehetséges.
+A MEncoder véglegesen tudja javítani az ilyen file-okat, lásd a dokumentációt.
 .TP
 .B \-forceidx
-index ujraépítésének kényszerítése. Tesztelésre, vagy rossz indexszel
-ellátott AVI-knál használatos.
+index ujraépítésének kényszerítése. Hibás index-û (jele pl a hang/kép
+deszinkronizáció) file-oknál használható. A seekelés lehetséges.
+A MEncoder véglegesen tudja javítani az ilyen file-okat,
+lásd a dokumentációt.
 .TP
 .B \-nodshow
 DirectShow codec-ek használatának tiltása

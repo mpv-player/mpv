@@ -260,9 +260,12 @@
   AVI), valamint a tökéletes A-V szinkronra, akár seekkel is.  A lejátszó
   sziklaszilárdan játszik le hibás MPEG file-okat (hasznos néhány VCD-nél), és
   lejátszik minden olyan hibás AVI-t, amit a csodás windows media player nem.
-  Még az index chunk nélküli AVI-k is lejátszhatók, sõt az indexet fel is lehet
-  építeni a '-idx' opcióval, így tekerni is lehet bennük! Amint az látszik, a
-  stabilitás és a minõség a legfontosabbak a számomra, és a sebesség is fontos.</P>
+  Még az index chunk nélküli AVI-k is lejátszhatók, sõt az indexet ideiglenesen
+  fel is lehet építeni az -idx opcióval (vagy véglegesen a
+  <B>MEncoder</B>-rel), így tekerni is lehet bennük! Amint az látszik, a
+  stabilitás és a minõség a legfontosabbak a számomra, és a sebesség is
+  fontos.</P>
+
 
 <B><P><A NAME=1.2>1.2.  Történelem</A></B></P>
 
@@ -436,13 +439,15 @@ végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.
   <A HREF="video.html#2.3.1.7">2.3.1.7</A>-es fejezetet. Ezeket a lépéseket
   fordítás <I>elõtt</I> kell megtenni, különben nem épül be Matrox támogatás az
   <B>MPlayer</B>-be. Olvasd el továbbá a <A HREF="video.html#2.3.1.A.1">Matrox
-  TV kimenet</A> fejezetet.</LI>
+  TV kimenet</A> fejezetet. <U><B>Ha nem Linux-ot használsz</B></U>, olvasd el
+  a <A HREF="video.html#2.3.1.15">Vidix</A> fejezetet !</LI>
 
 <LI><B>ATI kártyák</B> : amennyiben valamilyen ATI kártyád van, a <A HREF="video.html#2.3.1.A.2">
   2.3.1.A.2 fejezetben</A> megtalálod a kártyád támogatottságára vonatkozó
   információkat. Ha <B>Radeon</B> vagy <B>Rage128</B> kártyád van, van neked egy <B>XXX_vid</B>
   meghajtónk, TV kimenettel ! Lásd <A HREF="video.html#2.3.1.14">ezt</A> a
-  fejezetet !</LI>
+  fejezetet ! <U><B>Ha nem Linux-ot használsz</B></U>, olvasd el a <A
+  HREF="video.html#2.3.1.15">Vidix</A> fejezetet !</LI>
 
 <LI><B>3Dfx Voodoo3/Banshee kártyák</B> : nézd meg a <A
   HREF="video.html#2.3.1.9">2.3.1.9</A>-es fejezetet.  Ezeket a lépéseket
@@ -804,7 +809,7 @@ TV tuner-rõl</B>.</P>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
   az itt megadott formátumban fogja a tuner az MPlayer-nek szállítani a képet
   (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, <B>i420</B>
-  (ezutóbbinál meg kell adni a <CODE>-vc i420</CODE> opciót is, fourcc
+  (ezutóbbinál meg kell adni a <CODE>-vc rawi420</CODE> opciót is, fourcc
   conflict miatt))</TD>
 </TR>
 <TR>
