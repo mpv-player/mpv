@@ -151,10 +151,9 @@ void CheckDir( GtkWidget * list,char * directory )
  str[0][0]=NULL;
 
  pixmap=dpixmap; mask=dmask;
- str[0][0]=NULL; str[0][1]=(gchar *)malloc( 3 );
- strcpy( str[0][1],"." );  gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),0,0,pixmap,mask );
- strcpy( str[0][1],".." ); gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),1,0,pixmap,mask );
- free( str[0][0] );
+ str[0][0]=NULL;
+ str[0][1]=".";  gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),0,0,pixmap,mask );
+ str[0][1]=".."; gtk_clist_append( GTK_CLIST( list ),str[0] ); gtk_clist_set_pixmap( GTK_CLIST( list ),1,0,pixmap,mask );
 
  glob( "*",0,NULL,&gg );
 // glob( ".*",GLOB_NOSORT | GLOB_APPEND,NULL,&gg );
@@ -163,12 +162,10 @@ void CheckDir( GtkWidget * list,char * directory )
    stat( gg.gl_pathv[i],&fs );
    if( !S_ISDIR( fs.st_mode ) ) continue;
 
-   str[0][1]=(gchar *)malloc( strlen( gg.gl_pathv[i] ) + 1 );
-   strcpy( str[0][1],gg.gl_pathv[i] );
+   str[0][1]=gg.gl_pathv[i];
    pixmap=dpixmap; mask=dmask;
    gtk_clist_append( GTK_CLIST( list ),str[0] );
    gtk_clist_set_pixmap( GTK_CLIST( list ),c++,0,pixmap,mask );
-   free( str[0][1] );
   }
  globfree( &gg );
 
@@ -213,11 +210,9 @@ void CheckDir( GtkWidget * list,char * directory )
    stat( gg.gl_pathv[i],&fs );
    if(  S_ISDIR( fs.st_mode ) ) continue;
 
-   str[0][1]=(gchar *)malloc( strlen( gg.gl_pathv[i] ) + 1 );
-   strcpy( str[0][1],gg.gl_pathv[i] );
+   str[0][1]=gg.gl_pathv[i];
    gtk_clist_append( GTK_CLIST( list ),str[0] );
    gtk_clist_set_pixmap( GTK_CLIST( list ),c++,0,pixmap,mask );
-   free( str[0][1] );
   }
  globfree( &gg );
 
