@@ -27,7 +27,6 @@
 
 #include "vosub_vidix.h"
 #include "../vidix/vidixlib.h"
-#include "../postproc/rgb2rgb.h"
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"

@@ -1,6 +1,5 @@
 
 #include "fastmemcpy.h"
-#include "../mmx_defs.h"
 #include "../cpudetect.h"
 #include "../postproc/swscale.h"
 #include "../postproc/rgb2rgb.h"

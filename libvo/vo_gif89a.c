@@ -55,7 +55,6 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-#include "../postproc/rgb2rgb.h"
 
 #define MPLAYER_VERSION 0.90
 #define VO_GIF_REVISION 6
