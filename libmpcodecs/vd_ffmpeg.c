@@ -33,7 +33,9 @@ int avcodec_inited=0;
 
 typedef struct {
     AVCodecContext *avctx;
-    int last_aspect;    
+    int last_aspect;
+    int do_slices;
+    int vo_inited;
 } vd_ffmpeg_ctx;
 
 //#ifdef FF_POSTPROCESS
@@ -67,6 +69,10 @@ static int init(sh_video_t *sh){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh->codec->dll);
 	return 0;
     }
+
+// currently buggy with B frames...    
+//    if(vd_use_slices && lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND)
+//	ctx->do_slices=1;
     
     ctx->avctx = malloc(sizeof(AVCodecContext));
     memset(ctx->avctx, 0, sizeof(AVCodecContext));
@@ -83,7 +89,8 @@ static int init(sh_video_t *sh){
         return 0;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: libavcodec init OK!\n");
-    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
+    ctx->last_aspect=-3;
+    return 1; //mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12);
 }
 
 // uninit driver
@@ -99,7 +106,20 @@ static void uninit(sh_video_t *sh){
 	free(ctx);
 }
 
-//mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
+#include "libvo/video_out.h"	// FIXME!!!
+
+static void draw_slice(struct AVCodecContext *s,
+                	UINT8 **src, int linesize,
+                	int y, int width, int height){
+    vo_functions_t * output = s->opaque;
+    int stride[3];
+
+    stride[0]=linesize;
+    stride[1]=stride[2]=stride[0]/2;
+
+    output->draw_slice (src, stride, width, height, 0, y);
+    
+}
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
@@ -108,9 +128,21 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     AVPicture lavc_picture;
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
-    mp_image_t* mpi;
+    mp_image_t* mpi=NULL;
 
     if(len<=0) return NULL; // skipped frame
+    
+    if(ctx->vo_inited){
+	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE |
+	    (ctx->do_slices?MP_IMGFLAG_DRAW_CALLBACK:0),
+	    sh->disp_w, sh->disp_h);
+	if(mpi && mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
+	    // vd core likes slices!
+	    avctx->draw_horiz_band=draw_slice;
+	    avctx->opaque=sh->video_out;
+	} else
+	    avctx->draw_horiz_band=NULL;
+    }
     
     ret = avcodec_decode_video(avctx, &lavc_picture,
 	     &got_picture, data, len);
@@ -118,7 +150,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
     if(!got_picture) return NULL;	// skipped image
 
-    if (avctx->aspect_ratio_info != ctx->last_aspect)
+    if (avctx->aspect_ratio_info != ctx->last_aspect ||
+	avctx->width != sh->disp_w ||
+	avctx->height != sh->disp_h ||
+	!ctx->vo_inited)
     {
 	ctx->last_aspect = avctx->aspect_ratio_info;
 	switch(avctx->aspect_ratio_info)
@@ -136,24 +171,14 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 		sh->aspect = 0.0;
 		break;
 	}
-	/* config only if width && height isn't changed */
-	/* else it will config twice */
-	if ((sh->aspect > 0.01) && (avctx->width == sh->disp_w) &&
-	    (avctx->height == sh->disp_h))
-    	    if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
+	sh->disp_w = avctx->width;
+	sh->disp_h = avctx->height;
+	ctx->vo_inited=1;
+    	if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
     		return NULL;
     }
     
-    if ((avctx->width != sh->disp_w) ||
-	(avctx->height != sh->disp_h))
-    {
-	/* and what about the sh->bih (BitmapInfoHeader) width/height values? */
-	sh->disp_w = avctx->width;
-	sh->disp_h = avctx->height;
-	if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
-	    return NULL;
-    }
-    
+    if(!mpi)
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE,
 	avctx->width, avctx->height);
     if(!mpi){	// temporary!
