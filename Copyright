@@ -92,3 +92,8 @@ Homepage:   ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/
 Directory:  TOOLS/TVout/matroxset
 License:    GNU General Public License
 
+Name:       unrarlib
+Version:    0.4.0 + patches
+Homepage:   http://www.unrarlib.org/
+Directory:  unrarlib.[ch]
+License:    GNU General Public License / UniquE RAR File Library License
