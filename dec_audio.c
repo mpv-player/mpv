@@ -842,42 +842,54 @@ case AFM_AAC: {
   faacDecConfigurationPtr faac_conf;
   faac_hdec = faacDecOpen();
 
-#if 1
-  /* Set the default object type and samplerate */
-  /* This is useful for RAW AAC files */
-  faac_conf = faacDecGetCurrentConfiguration(faac_hdec);
-  if(sh_audio->samplerate)
-    faac_conf->defSampleRate = sh_audio->samplerate;
-   /* XXX: FAAD support FLOAT output, how do we handle
-    * that (FAAD_FMT_FLOAT)? ::atmos
-    */
-  if(sh_audio->samplesize)
-    switch(sh_audio->samplesize){
-      case 1: // 8Bit
-	mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: 8Bit samplesize not supported by FAAD, assuming 16Bit!\n");
-      default:
-      case 2: // 16Bit
-	faac_conf->outputFormat = FAAD_FMT_16BIT;
-	break;
-      case 3: // 24Bit
-	faac_conf->outputFormat = FAAD_FMT_24BIT;
-	break;
-      case 4: // 32Bit
-	faac_conf->outputFormat = FAAD_FMT_32BIT;
-	break;
-    }
-  //faac_conf->defObjectType = LTP; // => MAIN, LC, SSR, LTP available.
-
-  faacDecSetConfiguration(faac_hdec, faac_conf);
-#endif
-
   if(faac_buffer == NULL)
-    faac_buffer = (unsigned char*)malloc(FAAD_BUFFLEN);
-  memset(faac_buffer, 0, FAAD_BUFFLEN);
+    faac_buffer = (unsigned char*)calloc(1,FAAD_BUFFLEN);
   demux_read_data(sh_audio->ds, faac_buffer, FAAD_BUFFLEN);
 
-  /* init the codec */
-  if((faac_bytesconsumed = faacDecInit(faac_hdec, faac_buffer, &faac_samplerate, &faac_channels)) < 0) {
+  // If we don't get the ES descriptor, try manual config
+  if(!sh_audio->codecdata_len) {
+#if 1
+    /* Set the default object type and samplerate */
+    /* This is useful for RAW AAC files */
+    faac_conf = faacDecGetCurrentConfiguration(faac_hdec);
+    if(sh_audio->samplerate)
+      faac_conf->defSampleRate = sh_audio->samplerate;
+    /* XXX: FAAD support FLOAT output, how do we handle
+      * that (FAAD_FMT_FLOAT)? ::atmos
+      */
+    if(sh_audio->samplesize)
+      switch(sh_audio->samplesize){
+	case 1: // 8Bit
+	  mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: 8Bit samplesize not supported by FAAD, assuming 16Bit!\n");
+	default:
+	case 2: // 16Bit
+	  faac_conf->outputFormat = FAAD_FMT_16BIT;
+	  break;
+	case 3: // 24Bit
+	  faac_conf->outputFormat = FAAD_FMT_24BIT;
+	  break;
+	case 4: // 32Bit
+	  faac_conf->outputFormat = FAAD_FMT_32BIT;
+	  break;
+      }
+    //faac_conf->defObjectType = LTP; // => MAIN, LC, SSR, LTP available.
+
+    faacDecSetConfiguration(faac_hdec, faac_conf);
+#endif
+
+    /* init the codec */
+    faac_bytesconsumed = faacDecInit(faac_hdec, faac_buffer,
+       &faac_samplerate, &faac_channels);
+
+  } else { // We have ES DS in codecdata
+    /*int i;
+    for(i = 0; i < sh_audio->codecdata_len; i++)
+      printf("codecdata_dump %d: 0x%02X\n", i, sh_audio->codecdata[i]);*/
+
+    faac_bytesconsumed = faacDecInit2(faac_hdec, sh_audio->codecdata,
+       sh_audio->codecdata_len,	&faac_samplerate, &faac_channels);
+  }
+  if(faac_bytesconsumed < 0) {
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Failed to initialize the decoder!\n"); // XXX: deal with cleanup!
     faacDecClose(faac_hdec);
     free(faac_buffer);
@@ -890,9 +902,9 @@ case AFM_AAC: {
     sh_audio->samplerate = faac_samplerate;
     if(!sh_audio->i_bps) {
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: compressed input bitrate missing, assuming 128kbit/s!\n");
-      sh_audio->i_bps = 128*1000/8; // XXX: HACK!!! There's currently no way to get bitrate from libfaad2! ::atmos
+      sh_audio->i_bps = 128*1000/8; // XXX: HACK!!! ::atmos
     } else 
-      mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: got %dkbit/s rate from MP4 header!\n",sh_audio->i_bps*8/1000);
+      mp_msg(MSGT_DECAUDIO,MSGL_V,"FAAD: got %dkbit/s bitrate from MP4 header!\n",sh_audio->i_bps*8/1000);
   }  
 	    
 } break;		
