@@ -373,10 +373,9 @@ gleichen Verzeichnis wie 'movie.avi'.
 .SH "ALLGEMEINE OPTIONEN"
 .
 .TP
-.B \-codecs-file <Dateiname>
+.B \-codecs-file <Dateiname> (siehe auch \-afm, \-ac, \-vfm, \-vc)
 Benutze die angegebene Datei anstelle der systemweit instalierten oder
 der eingebauten codecs.conf.
-Siehe auch \-afm, \-ac, \-vfm und \-vc.
 .
 .TP
 .B \-include <Konfigurationsdatei>
@@ -527,10 +526,11 @@ Die verfügbaren Kommandos lauten:
 .sp 1
 .PD 0
 .RSs
-.IPs conf=<Datei>
+.IPs conf=<Dateiname>
 Gib eine andere Konfigurationsdatei als die Standarddatei
 ~/\:.mplayer/\:input.conf an.
-Wenn kein Pfadname angegeben wird, dann wird ~/\:.mplayer/\:<Datei> angenommen.
+Wenn kein Pfadname angegeben wird, dann wird ~/\:.mplayer/\:<Dateiname>
+angenommen.
 .IPs ar\-delay
 Zeit in Millisekunden, bevor ein Tastendruck automatisch wiederholt
 wird (0 dekativiert dies).
@@ -555,8 +555,8 @@ Ordnung bleibt.
 .PD 1
 .
 .TP
-.B \-lircconf <Konfigurationsdatei> (nur bei LIRC)
-Gibt eine Konfigurationsdatei für LIRC (Standarddatei ~/\:.lircrc) an.
+.B \-lircconf <Dateiname> (nur bei LIRC)
+Gibt eine Konfigurationsdatei für LIRC an (Standard: ~/\:.lircrc).
 .
 .TP
 .B \-list-options
@@ -571,7 +571,7 @@ Wiederholt die Wiedgabe <Anzahl> mal. 0 bedeutet ständige Wiederholung.
 Aktiviert das OSD\-Menü.
 .
 .TP
-.B \-menu\-cfg <Datei> (nur bei OSD)
+.B \-menu-cfg <Dateiname> (nur bei OSD)
 Benutzt eine andere menu.conf.
 .
 .TP
@@ -608,7 +608,7 @@ Deaktiviert die Benutzung der Echtzeituhr (real-time clock, RTC, /dev/\:rtc)
 zum Timing.
 .
 .TP
-.B \-playlist <Datei>
+.B \-playlist <Dateiname>
 Spielt die in der Datei angegebenen Dateien ab (eine Datei pro Zeile,
 oder eine Datei im Winamp- oder ASX-Format).
 .br
@@ -686,11 +686,11 @@ Diese Option zeigt nur Wirkung, wenn im AC3 Stream die Range Compression
 Information vorhanden ist.
 .
 .TP
-.B \-aid <id> (siehe auch \-alang)
+.B \-aid <ID> (siehe auch \-alang)
 Gibt die zu verwendende Audiospur an (MPEG: 0\-31 AVI/\:OGM: 1\-99
 ASF/\:RM: 0\-127 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS: 17\-8190).
-MPlayer gibt alle verwendbaren IDs aus, wenn er im Verbose-Modus (-v) gestartet
-wird.
+MPlayer gibt alle verwendbaren IDs aus, wenn er im Verbose-Modus (\-v)
+gestartet wird.
 Beim Abspielen eines MPEG-TS-Streams wählt MPlayer/\:MEncoder das erste
 Programm
 (falls vorhanden) mit der gewählten Audiospur.
@@ -832,7 +832,7 @@ volles 5.1
 .B \-chapter <Kapitel\-ID>[\-<Kapitel\-ID\ des\ letzten\ Kapitels>] (nur bei DVD)
 Gibt das Kapitel an, ab dem abgespielt werden soll. Optional kann angegeben
 werden, nach welchem Kapitel mit dem Abspielen aufgehört werden soll
-(defaultmäßig 1).
+(Standard: 1).
 Unten stehen Beispiele.
 .
 .TP
@@ -879,8 +879,8 @@ die Standardeinstellungen:
 .PD 0
 .RSs
 .IPs card=<1\-4>
-Benute Karte 1\-4 (Standard: 1).
-.IPs file=<Datei>
+Benutze Karte 1\-4 (Standard: 1).
+.IPs file=<Dateiname>
 Weist MPlayer an, die Liste der Kanäle aus <Datei> zu lesen (Standard:
 ~/\:.mplayer/\:channels.conf.{sat,ter,cbl} (je nach Kartentyp)
 oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit).
@@ -892,8 +892,8 @@ oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit).
 Gibt das DVD-Gerät an (Standard: /dev/\:dvd).
 .
 .TP
-.B \-dvdangle <Winkel\-ID> (nur bei DVD)
-Einige DVDs beinhalten Szenen, die aus verschiedenen Perspektiven/Winkeln
+.B \-dvdangle <Winkel-ID> (nur bei DVD)
+Einige DVDs beinhalten Szenen, die aus verschiedenen Perspektiven/\:Winkeln
 betrachtet werden können. 
 Mit dieser Option kannst du MPlayer sagen, welche Perspektive er wiedergeben
 soll (Standard: 1).
@@ -1247,11 +1247,10 @@ Gibt den Benutzernamen für die HTTP-Authentifizierung an.
 Benutze Zeichenkette als User-Agent beim HTTP-Streaming.
 .
 .TP
-.B \-vid <id>
+.B \-vid <ID>
 Wählt die Videospur (MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190).
 Beim Abspielen von MPEG-TS-Streams benutzt MPlayer/\:MEncoder das erste
-Programm
-(falls vorhanden) mit dem gewählten Video-Stream.
+Programm (falls vorhanden) mit dem gewählten Video-Stream.
 .
 .TP
 .B \-vivo <sub\-Optionen> (DEBUG\-CODE)
@@ -2140,10 +2139,10 @@ Platziert das Fenster in der unteren rechten Ecke des Bildschirmes.
 .PD 1
 .
 .TP
-.B \-guiwid <Fenster id> (siehe auch \-wid) (nur mit GUI)
+.B \-guiwid <Fenster ID> (siehe auch \-wid) (nur mit GUI)
 Weist die GUI an, auch ein X11-Fenster zu benutzen und sich selbst an die
 Unterseite des Videos zu heften, was nützlich ist beim Einbetten einer Mini-GUI
-in einem Browser (z.B.\& mit dem MPlayer-plugin).
+in einen Browser (z.B.\& mit dem MPlayer-Plugin).
 .
 .TP
 .B \-hue <\-100\-100>
@@ -2181,7 +2180,7 @@ geschrieben.
 .IPs maxfiles=<Wert>
 Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden,
 falls Unterverzeichnisse angegeben worden sind.
-Muß größer oder gleich 1 sein (Standard: 1000).
+Muss größer oder gleich 1 sein (Standard: 1000).
 .RE
 .PD 1
 .
@@ -2233,8 +2232,8 @@ Deaktiviert die Benutzung von XVideo durch den SDL-Videoausgabetreiber.
 .TP
 .B \-ontop
 Sorgt dafür, daß das Abspielfenster nicht von anderen Fenstern verdeckt wird.
-Wird unterstützt von Treibern, die X11 benutzen, außer SDL, außerdem directx
-und gl2 unter Windows.
+Wird unterstützt von Videoausgabetreibern, die X11 benutzen, außer SDL,
+außerdem directx und gl2 unter Windows.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -2656,7 +2655,7 @@ Du mußt diese Option aktivieren, wenn es beim Schauen von
 interlaced-Filmmaterial
 zu Abreißeffekten oder unscharfen Bewegungen kommt.
 .IPs layer=N
-Wird den Layer mit der Id N für die Wiedergabe erzwingen (Standard: -1 - auto).
+Wird den Layer mit der ID N für die Wiedergabe erzwingen (Standard: -1 - auto).
 .RE
 .PD 1
 .
@@ -2889,7 +2888,7 @@ Probiere andere Codecs, ausgenommen den MP3-Decoder von FFmpeg.
 .RE
 .PD 1
 .TP
-.B \-af <Filter1[=Option1:Option2:...],Filter2,...>
+.B \-af <Filter1[=Parameter1:Parameter2:...],Filter2,...>
 Aktiviert eine kommaseparierte Liste von Audiofiltern zusammen mit ihren
 Optionen.
 .br
@@ -4669,11 +4668,10 @@ erstellt.
 .
 .SH AUTOREN
 MPlayer wurde ursprünglich von Arpad Gereöffy geschrieben.
-Siehe Datei AUTHORS für eine Liste einiger der vielen anderer Beitragenden.
-.TP
-MPlayer is (C) 2000\-2004
-.B The MPlayer Team
-.TP
+Siehe Datei AUTHORS für eine Liste einiger der vielen anderen Beitragenden.
+.PP
+MPlayer is (C) 2000\-2004 The MPlayer Team
+.PP
 Diese Manpage wurde geschrieben und wird gepflegt von
 .B Gabucino
 .br
