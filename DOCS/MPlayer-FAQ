@@ -210,7 +210,9 @@ A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
 
 Q: I have problems with WindowMaker and fullscreen xv/xmga/sdl/x11 modes..
    It was OK before the ICCCM-compliance patch.
-A: Known problem, ICCCM sucks.
+A1: Known problem, ICCCM sucks.
+A2: Turn off ICCCM compliance by editing libvo/x11_common.c line 161 and
+    replacing #if 1 with #if 0 . Then recompile.
 
 Q: But it works with avifile !
 A: So what?
