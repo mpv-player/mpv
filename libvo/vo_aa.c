@@ -743,3 +743,12 @@ vo_aa_parseoption(struct config * conf, char *opt, char *param){
     return ERR_NOT_AN_OPTION;
 		
 }
+
+void
+vo_aa_revertoption(config_t* opt,char* param) {
+  if (!strcasecmp(opt, "aaosdcolor"))
+    aaopt_osdcolor= AA_SPECIAL;
+  else if (!strcasecmp(opt, "aasubcolor"))
+    aaopt_subcolor= AA_SPECIAL;
+}
+
