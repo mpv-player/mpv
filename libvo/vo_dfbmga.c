@@ -91,6 +91,7 @@ static int use_bes;
 static int use_crtc2;
 static int use_spic;
 static int use_input;
+static int field_parity;
 
 static int osd_changed;
 static int osd_dirty;
@@ -223,6 +224,7 @@ preinit( const char *arg )
      use_crtc2 = 1;
      use_spic = 1;
      use_input = 1;
+     field_parity = -1;
 
      if (vo_subdevice) {
           int opt_no = 0;
@@ -242,6 +244,14 @@ preinit( const char *arg )
                } else if (!strncmp(vo_subdevice, "input", 5)) {
                     use_spic = !opt_no;
                     vo_subdevice += 5;
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "fieldparity=", 12)) {
+                    vo_subdevice += 12;
+                    if (*vo_subdevice == '0' ||
+                        *vo_subdevice == '1') {
+                         field_parity = *vo_subdevice - '0';
+                         vo_subdevice++;
+                    }
                     opt_no = 0;
                } else if (!strncmp(vo_subdevice, "no", 2)) {
                     vo_subdevice += 2;
@@ -410,6 +420,13 @@ config( uint32_t width, uint32_t height,
           dlc.flags      = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
           dlc.buffermode = DLBM_BACKVIDEO;
 
+#if DIRECTFBVERSION > 916
+          if (field_parity != -1) {
+               dlc.flags   |= DLCONF_OPTIONS;
+               dlc.options  = DLOP_FIELD_PARITY;
+          }
+#endif
+
           switch (dlc.pixelformat) {
           case DSPF_I420:
           case DSPF_YV12:
@@ -433,6 +450,12 @@ config( uint32_t width, uint32_t height,
                return -1;
           }
           crtc2->SetConfiguration( crtc2, &dlc );
+
+#if DIRECTFBVERSION > 916
+          if (field_parity != -1)
+               crtc2->SetFieldParity( crtc2, field_parity );
+#endif
+
           crtc2->GetSurface( crtc2, &c2frame );
 
           c2frame->GetSize( c2frame, &screen_width, &screen_height );
@@ -502,6 +525,10 @@ config( uint32_t width, uint32_t height,
           dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
           dlc.pixelformat = DSPF_LUT8;
           dlc.buffermode  = DLBM_BACKVIDEO;
+#if DIRECTFBVERSION > 916
+          dlc.flags      |= DLCONF_OPTIONS;
+          dlc.options     = DLOP_ALPHACHANNEL;
+#endif
           if (spic->TestConfiguration( spic, &dlc, &failed ) != DFB_OK) {
                mp_msg( MSGT_VO, MSGL_ERR,
                        "vo_dfbmga: Invalid sub-picture configuration!\n" );
