@@ -184,6 +184,7 @@ Video:
   --enable-aa            build with AAlib render support [autodetect]
   --enable-ggi           build with GGI render support [autodetect]
   --enable-dxr3		 build with DXR3/H+ render support [autodetect]
+  --enable-dvb		 build with support for output via DVB-Card [autodetect]
   --enable-mga           build with mga_vid support 
                          (check for /dev/mga_vid) [autodetect]
   --enable-xmga          build with mga_vid X Window support
@@ -240,6 +241,7 @@ Use these options if autodetection fails:
   --with-glib-config=PATH  path to glib*-config (e.g.: /opt/bin/glib-config)
   --with-extralibdir=DIR   extra library files (png, SDL, ...) in DIR
   --with-extraincdir=DIR   extra headers (png, SDL) are in DIR
+  --with-dvbincdir=DIR     dvb-driver files in DIR
   --with-madlibdir=DIR     'libmad.so' (libmad shared lib.) in DIR
   --with-madincdir=DIR     'mad.h' (libmad header file) in DIR
 
@@ -304,10 +306,13 @@ for ac_option do
   --with-extraincdir=*)
         _extraincdir=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
         ;;
- --with-madlibdir=*)
+  --with-dvbincdir=*)
+        _dvbincdir=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
+        ;;
+  --with-madlibdir=*)
         _madlibdir=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
         ;;
- --with-madincdir=*)
+  --with-madincdir=*)
         _madincdir=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
         ;;
  esac
@@ -574,6 +579,7 @@ _dga=no
 _dga2=no
 _svga=no
 _fbdev=no
+_dvb=no
 _dxr3=no
 linux && _fbdev=yes
 _lirc=no
@@ -673,6 +679,10 @@ cc_check $_extraincdir $_extralibdir -lffmpeg -lm && _libavcodec_so=yes
 if test -c /dev/mga_vid ; then
  _mga=yes
  _syncfb=yes
+fi
+
+if test -e /dev/ost/video ; then
+ _dvb=yes
 fi
 
 cat > $TMPC << EOF
@@ -1499,6 +1509,12 @@ for ac_option do
   --disable-dxr3)
 	_dxr3=no
 	;;
+  --enable-dvb)
+        _dvb=yes
+        ;;
+  --disable-dvb)
+        _dvb=no
+        ;;
   --disable-iconv)
   	_iconv=no
 	;;
@@ -1578,6 +1594,8 @@ for ac_option do
   --with-extralibdir=*)
         ;;
   --with-extraincdir=*)
+        ;;
+  --with-dvbincdir=*)
         ;;
   --prefix=*)
 	_prefix=`echo $ac_option | cut -d '=' -f 2`
@@ -1762,6 +1780,7 @@ echo "Checking for DGA 2.0 .. $_dga2"
 echo "Checking for Xf86VM ... $_vm"
 echo "Checking for SVGAlib ... $_svga"
 echo "Checking for FBDev ... $_fbdev"
+echo "Checking for DVB ... $_dvb"
 echo "Checking for DXR3/H+ ... $_dxr3"
 echo "Checking for OSS Audio ... $_oss_audio"
 echo "Checking for ALSA Audio ... $_alsaver"
@@ -2424,6 +2443,12 @@ else
  _fbdev='#undef HAVE_FBDEV'
 fi
 
+if test "$_dvb" = yes ; then
+ _have_dvb='#define HAVE_DVB'
+else
+ _have_dvb='#undef HAVE_MGA'
+fi
+
 if test "$_dxr3" = yes ; then
  _dxr3='#define HAVE_DXR3'
  _dxr3lib='-ldxr3'
@@ -2504,6 +2529,7 @@ MLIB_INC = $_mlibinc
 MLIB_LIB = $_mliblib
 MADLIB_INC = $_madincdir
 MADLIB_LIB = $_madlibdir
+DVB_INC = $_dvbincdir
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -2750,6 +2776,7 @@ $_xmga
 $_syncfb
 $_fbdev
 $_dxr3
+$_have_dvb
 $_svga
 $_have_xdpms
 $_aa

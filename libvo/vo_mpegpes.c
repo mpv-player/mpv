@@ -1,4 +1,3 @@
-#undef HAVE_DVB
 #define PES_MAX_SIZE 2048
 /* 
  * Based on:
@@ -21,6 +20,8 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+
+#include "config.h"
 
 #ifdef HAVE_DVB
 

@@ -13,7 +13,7 @@ SRCS += vo_vesa.c
 endif
 endif
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(MLIB_INC) -DMPG12PLAY #-Wall
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(MLIB_INC) $(DVB_INC) -DMPG12PLAY #-Wall
 # -I/usr/X11R6/include/
 
 .SUFFIXES: .c .o
