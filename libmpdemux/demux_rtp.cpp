@@ -147,6 +147,7 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
     rtpState->sdpDescription = sdpDescription;
     rtpState->rtspClient = rtspClient;
     rtpState->mediaSession = mediaSession;
+    rtpState->audioBufferQueue = rtpState->videoBufferQueue = NULL;
     rtpState->firstSyncTime.tv_sec = rtpState->firstSyncTime.tv_usec = 0;
     demuxer->priv = rtpState;
 

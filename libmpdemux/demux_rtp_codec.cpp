@@ -46,6 +46,16 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
   } else if (strcmp(subsession->codecName(), "H261") == 0) {
     bih->biCompression = sh_video->format
       = mmioFOURCC('H','2','6','1');
+  } else if (strcmp(subsession->codecName(), "JPEG") == 0) {
+    bih->biCompression = sh_video->format
+      = mmioFOURCC('M','J','P','G');
+#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1044662400)
+    fprintf(stderr, "WARNING: This video stream might not play correctly.  Please upgrade to version \"2003.02.08\" or later of the \"LIVE.COM Streaming Media\" libraries.\n");
+#endif
+  } else if (strcmp(subsession->codecName(), "MP4V-ES") == 0) {
+    bih->biCompression = sh_video->format
+      = mmioFOURCC('m','p','4','v');
+    //flags |= RTPSTATE_IS_MPEG; // MPEG hdr checking in video.c doesn't work!
   } else if (strcmp(subsession->codecName(), "X-QT") == 0 ||
 	     strcmp(subsession->codecName(), "X-QUICKTIME") == 0) {
     // QuickTime generic RTP format, as described in
@@ -130,9 +140,6 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
     wf->cbSize = 0;
   } else if (strcmp(subsession->codecName(), "MP4A-LATM") == 0) {
     wf->wFormatTag = sh_audio->format = mmioFOURCC('m','p','4','a');
-#ifndef HAVE_FAAD
-    fprintf(stderr, "WARNING: Playing MPEG-4 (AAC) Audio requires the \"faad\" library!\n");
-#endif
 #if (LIVEMEDIA_LIBRARY_VERSION_INT < 1042761600)
     fprintf(stderr, "WARNING: This audio stream might not play correctly.  Please upgrade to version \"2003.01.17\" or later of the \"LIVE.COM Streaming Media\" libraries.\n");
 #else
