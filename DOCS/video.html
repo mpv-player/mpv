@@ -501,6 +501,22 @@ also help. Thanks!</P>
 
 <P><B><A NAME=2.3.1.4>2.3.1.4. SDL</A></B></P>
 
+<P>SDL (Simple Directmedia Layer) is basically an unified video/audio
+  interface. Programs that use it know only about SDL, and not about what video
+  or audio driver does SDL actually use. For example a Doom port using SDL can
+  run on svgalib, aalib, X, fbdev, and others, you only have to specify the
+  (for example) video driver to use with the SDL_VIDEODRIVER environment
+  variable. Well, in theory.</P>
+
+<P>With <B>MPlayer</B>, we used its X11 driver's software scaler ability for
+  cards/drivers that doesn't support XVideo, until we made our own (faster,
+  nicer) software scaler. Also we used its aalib output, but now we have ours
+  which is more comfortable. Its DGA mode was better than ours, until
+  recently. Get it now? :)</P>
+
+<P>It also helps with some buggy drivers/cards if the video is jerky
+  (not slow system problem), or audio is lagging.</P>
+
 <P>Here are some notes about SDL out in <B>MPlayer</B>.</P>
 
 

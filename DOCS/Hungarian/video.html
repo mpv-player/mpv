@@ -491,6 +491,25 @@ meghajtót innen :
 
 <P><B><A NAME=2.3.1.4>2.3.1.4.  SDL</A></B></P>
 
+<P>Az SDL (Simple Directmedia Layer) alapvetõen egy egységes felületet nyújt
+  video/audio meghajtókhoz történõ hozzáféréshez. A programok amik az SDL-t
+  használják, csak az SDL-rõl tudnak, arról nem hogy maga az SDL voltaképp
+  milyen video/audio-n nyomja ki a dolgot. Például egy SDL-re épülõ Doom
+  port futhat svgalib-en, aalib-en, X-en, fbdev-en vagy másokon. Az
+  SDL_VIDEODRIVER környezeti változóval például megadható a használni kívánt
+  meghajtó. Na ennyit az elméletrõl.</P>
+
+<P>Az <B>MPlayer</B>-hez kapcsolódóan: sokáig az SDL X11 meghajtója volt
+  haszálandó a szoftveres nagyításhoz az olyan kártyákhoz/meghajtókhoz
+  amik nem tudtak XVideo-t. Manapság már a saját szoftveres nagyító
+  rutinunkat érdemes használni mert szebb és jobb. :) Volt továbbá
+  SDL-en keresztüli aalib kimenet, de már abból is sajátunk van. A DGA
+  módja kis ideig jobb volt mint a mienk.</P>
+
+<P>Jót tesz továbbá olyankor ha a bugos video kártya vagy a meghajtója
+  szaggatva jeleníti meg a képet (NEM lassú gépre gondolok), vagy ha
+  az audio meghajtó a hibás.</P>
+
 <P>Néhány megjegyzés az <B>MPlayer</B>-nen található SDL meghajtóhoz:</P>
 
 <P><TABLE BORDER=0>
