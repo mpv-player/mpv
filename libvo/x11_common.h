@@ -27,7 +27,7 @@ extern int vo_mouse_autohide;
 
 extern int vo_init( void );
 extern void vo_uninit( void );
-extern int vo_hidecursor ( Display* , Window );
+extern void vo_hidecursor ( Display* , Window );
 extern void vo_showcursor( Display *disp, Window win );
 extern void vo_x11_decoration( Display * vo_Display,Window w,int d );
 extern void vo_x11_classhint( Display * display,Window window,char *name );
