@@ -227,18 +227,20 @@ int dvb_demux_start(int fd)
 
 static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
 	fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
-	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth);
+	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
+	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier);
 
 
 int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
-		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate)
+		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
+		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier)
 {
 	int ris;
 
 	mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune Freq: %lu\n", (long unsigned int) freq);
 
-		ris = tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
+		ris = tune_it(priv->fe_fd, priv->sec_fd, freq, srate, pol, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth, LP_CodeRate, hier);
 
 	if(ris != 0)
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "dvb_tune, TUNING FAILED\n");
@@ -623,7 +625,8 @@ static int do_diseqc(int secfd, int sat_no, int polv, int hi_lo)
 
 static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int srate, char pol, int tone,
 	fe_spectral_inversion_t specInv, unsigned int diseqc, fe_modulation_t modulation, fe_code_rate_t HP_CodeRate,
-	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth)
+	fe_transmit_mode_t TransmissionMode, fe_guard_interval_t guardInterval, fe_bandwidth_t bandwidth,
+	fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier)
 {
   int res, hi_lo, dfd;
 #ifdef HAVE_DVB_HEAD
@@ -660,22 +663,22 @@ static int tune_it(int fd_frontend, int fd_sec, unsigned int freq, unsigned int 
       feparams.inversion=specInv;
       feparams.u.ofdm.bandwidth=bandwidth;
       feparams.u.ofdm.code_rate_HP=HP_CodeRate;
-      feparams.u.ofdm.code_rate_LP=LP_CODERATE_DEFAULT;
+      feparams.u.ofdm.code_rate_LP=LP_CodeRate;
       feparams.u.ofdm.constellation=modulation;
       feparams.u.ofdm.transmission_mode=TransmissionMode;
       feparams.u.ofdm.guard_interval=guardInterval;
-      feparams.u.ofdm.hierarchy_information=HIERARCHY_DEFAULT;
+      feparams.u.ofdm.hierarchy_information=hier;
 #else
       if (freq < 1000000) freq*=1000UL;
       feparams.Frequency=freq;
       feparams.Inversion=specInv;
       feparams.u.ofdm.bandWidth=bandwidth;
       feparams.u.ofdm.HP_CodeRate=HP_CodeRate;
-      feparams.u.ofdm.LP_CodeRate=LP_CODERATE_DEFAULT;
+      feparams.u.ofdm.LP_CodeRate=LP_CodeRate;
       feparams.u.ofdm.Constellation=modulation;
       feparams.u.ofdm.TransmissionMode=TransmissionMode;
       feparams.u.ofdm.guardInterval=guardInterval;
-      feparams.u.ofdm.HierarchyInformation=HIERARCHY_DEFAULT;
+      feparams.u.ofdm.HierarchyInformation=hier;
 #endif
       mp_msg(MSGT_DEMUX, MSGL_V, "tuning DVB-T (%s) to %d Hz, bandwidth: %d\n",DVB_T_LOCATION,freq, bandwidth);
       break;

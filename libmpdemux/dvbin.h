@@ -19,6 +19,7 @@
 	#define fe_transmit_mode_t TransmitMode
 	#define fe_guard_interval_t GuardInterval
 	#define fe_bandwidth_t BandWidth
+	#define fe_hierarchy_t Hierarchy
 	#define fe_sec_voltage_t SecVoltage
 	#define dmx_pes_filter_params dmxPesFilterParams
 	#define dmx_sct_filter_params dmxSctFilterParams
@@ -46,7 +47,8 @@ typedef struct {
 	fe_transmit_mode_t 		trans;
 	fe_bandwidth_t 			bw;
 	fe_guard_interval_t 		gi;
-	fe_code_rate_t 			cr;
+	fe_code_rate_t 			cr, cr_lp;
+	fe_hierarchy_t			hier;
 } dvb_channel_t;
 
 

@@ -114,7 +114,8 @@ int dvb_fix_demuxes(dvb_priv_t *priv, int cnt, int *pids);
 
 extern int dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 		fe_spectral_inversion_t specInv, fe_modulation_t modulation, fe_guard_interval_t guardInterval,
-		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate);
+		fe_transmit_mode_t TransmissionMode, fe_bandwidth_t bandWidth, fe_code_rate_t HP_CodeRate,
+		fe_code_rate_t LP_CodeRate, fe_hierarchy_t hier);
 extern char *dvb_dvrdev[4], *dvb_demuxdev[4], *dvb_frontenddev[4];
 
 static dvb_config_t *dvb_config = NULL;
@@ -301,6 +302,41 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 			else if(! strcmp(gi, "GUARD_INTERVAL_1_8"))
 				ptr->gi = GUARD_INTERVAL_1_8;
 			else ptr->gi = GUARD_INTERVAL_1_4;
+			
+			if(! strcmp(tmp_lcr, "FEC_1_2"))
+				ptr->cr_lp =FEC_1_2;
+			else if(! strcmp(tmp_lcr, "FEC_2_3"))
+				ptr->cr_lp =FEC_2_3;
+			else if(! strcmp(tmp_lcr, "FEC_3_4"))
+				ptr->cr_lp =FEC_3_4;
+#ifdef HAVE_DVB_HEAD
+			else if(! strcmp(tmp_lcr, "FEC_4_5"))
+				ptr->cr_lp =FEC_4_5;
+			else if(! strcmp(tmp_lcr, "FEC_6_7"))
+				ptr->cr_lp =FEC_6_7;
+			else if(! strcmp(tmp_lcr, "FEC_8_9"))
+				ptr->cr_lp =FEC_8_9;
+#endif
+			else if(! strcmp(tmp_lcr, "FEC_5_6"))
+				ptr->cr_lp =FEC_5_6;
+			else if(! strcmp(tmp_lcr, "FEC_7_8"))
+				ptr->cr_lp =FEC_7_8;
+			else if(! strcmp(tmp_lcr, "FEC_NONE"))
+				ptr->cr_lp =FEC_NONE;
+			else ptr->cr_lp =FEC_AUTO;
+			
+			
+			if(! strcmp(tmp_hier, "HIERARCHY_1"))
+				ptr->hier = HIERARCHY_1;
+			else if(! strcmp(tmp_hier, "HIERARCHY_2"))
+				ptr->hier = HIERARCHY_2;
+			else if(! strcmp(tmp_hier, "HIERARCHY_4"))
+				ptr->hier = HIERARCHY_4;
+#ifdef HAVE_DVB_HEAD				
+			else if(! strcmp(tmp_hier, "HIERARCHY_AUTO"))
+				ptr->hier = HIERARCHY_AUTO;
+#endif
+			else	ptr->hier = HIERARCHY_NONE;
 		}
 
 		tmp = (dvb_channel_t*)realloc(list->channels, sizeof(dvb_channel_t) * (list->NUM_CHANNELS + 1));
@@ -473,7 +509,7 @@ int dvb_set_channel(dvb_priv_t *priv, int card, int n)
 
 	if(do_tuning)
 		if (! dvb_tune(priv, channel->freq, channel->pol, channel->srate, channel->diseqc, channel->tone,
-			channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr))
+			channel->inv, channel->mod, channel->gi, channel->trans, channel->bw, channel->cr, channel->cr_lp, channel->hier))
 			return 0;
 
 
