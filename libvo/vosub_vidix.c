@@ -636,18 +636,28 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
     if((is_422_planes_eq || (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) && 
        !forced_fourcc && !(vidix_play.flags & VID_PLAY_INTERLEAVED_UV)))
     {
+	if(mpi->flags&MP_IMGFLAG_ACCEPT_WIDTH){
+	    // check if only width is enough to represent strides:
+	    if(mpi->flags&MP_IMGFLAG_PLANAR){
+		if((dstrides.y>>1)!=dstrides.v || dstrides.v!=dstrides.u) return VO_FALSE;
+	    } else {
+		if(dstrides.y % (mpi->bpp/8)) return VO_FALSE;
+	    }
+	}
 	mpi->planes[0]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.y;
-	mpi->stride[0]=dstrides.y;
+	mpi->width=mpi->stride[0]=dstrides.y;
 	if(mpi->flags&MP_IMGFLAG_PLANAR)
 	{
 	    mpi->planes[2]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.v;
 	    mpi->stride[2]=dstrides.v;
 	    mpi->planes[1]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.u;
 	    mpi->stride[1]=dstrides.u;
-	}
+	} else
+	    mpi->width/=mpi->bpp/8;
 	mpi->flags|=MP_IMGFLAG_DIRECT;
+	return VO_TRUE;
     }
-    return VO_TRUE;
+    return VO_FALSE;
 }
 
 uint32_t vidix_control(uint32_t request, void *data, ...)
