@@ -332,23 +332,23 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
  Note sseW2+48={1,-1,sqrt(2),-sqrt(2))
 */
 	asm volatile(
-		"movaps sseW2, %%xmm6		\n\t" 
+		"movaps 48+sseW2, %%xmm6	\n\t" 
 		"movaps 16+sseW2, %%xmm7	\n\t" 
 		"xorps %%xmm5, %%xmm5		\n\t"
 		"xorps %%xmm2, %%xmm2		\n\t"
 		"movl %0, %%esi			\n\t"
 		".balign 16			\n\t"
 		"1:				\n\t"
-		"movhps 40(%%esi), %%xmm2	\n\t" //r4,i4,r5,i5
+		"movaps 32(%%esi), %%xmm2	\n\t" //r4,i4,r5,i5
 		"movaps 48(%%esi), %%xmm3	\n\t" //r6,i6,r7,i7
-		"movaps 32(%%esi), %%xmm4	\n\t" //r4,i4,r5,i5
-		"movhps 56(%%esi), %%xmm5	\n\t" //r6,i6,r7,i7
+		"movaps sseW2, %%xmm4		\n\t" //r4,i4,r5,i5
+		"movaps 32+sseW2, %%xmm5	\n\t" //r6,i6,r7,i7
+		"mulps %%xmm2, %%xmm4		\n\t"
+		"mulps %%xmm3, %%xmm5		\n\t"
 		"shufps $0xB1, %%xmm2, %%xmm2	\n\t" //i4,r4,i5,r5
 		"shufps $0xB1, %%xmm3, %%xmm3	\n\t" //i6,r6,i7,r7
-		"mulps %%xmm6, %%xmm4		\n\t"
-		"mulps 32+sseW2, %%xmm5		\n\t"
+		"mulps %%xmm6, %%xmm3		\n\t"
 		"mulps %%xmm7, %%xmm2		\n\t"
-		"mulps 48+sseW2, %%xmm3		\n\t"
 		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
 		"movaps 16(%%esi), %%xmm1	\n\t" //r2,i2,r3,i3
 		"addps %%xmm4, %%xmm2		\n\t"
@@ -376,10 +376,10 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 
 	two_m_plus_one = two_m<<1;
 
-	for(k = 0; k < two_m; k++) {
-	    for(i = 0; i < 128; i += two_m_plus_one) {
-		p = k + i;
-		q = p + two_m;
+	for(i = 0; i < 128; i += two_m_plus_one) {
+	    for(k = 0; k < two_m; k++) {
+		int p = k + i;
+		int q = p + two_m;
 		tmp_a_r = buf[p].real;
 		tmp_a_i = buf[p].imag;
 		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
@@ -392,7 +392,8 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	}
     }
 #else
-    for (m=0; m < 7; m++) {
+/* unoptimized variant
+    for (m=1; m < 7; m++) {
 	if(m)
 	    two_m = (1 << m);
 	else
@@ -400,8 +401,8 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 
 	two_m_plus_one = (1 << (m+1));
 
-	for(k = 0; k < two_m; k++) {
-	    for(i = 0; i < 128; i += two_m_plus_one) {
+	for(i = 0; i < 128; i += two_m_plus_one) {
+	    for(k = 0; k < two_m; k++) {
 		p = k + i;
 		q = p + two_m;
 		tmp_a_r = buf[p].real;
@@ -415,6 +416,94 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	    }
 	}
     }
+*/
+    
+    for(i = 0; i < 128; i += 2) {
+	tmp_a_r = buf[i].real;
+	tmp_a_i = buf[i].imag;
+	tmp_b_r = buf[i+1].real;
+	tmp_b_i = buf[i+1].imag;
+	buf[i].real = tmp_a_r + tmp_b_r;
+	buf[i].imag =  tmp_a_i + tmp_b_i;
+	buf[i+1].real = tmp_a_r - tmp_b_r;
+	buf[i+1].imag =  tmp_a_i - tmp_b_i;
+    }
+	    
+    for(i = 0; i < 128; i += 4) {
+	tmp_a_r = buf[i].real;
+	tmp_a_i = buf[i].imag;
+	tmp_b_r = buf[i+2].real;
+	tmp_b_i = buf[i+2].imag;
+	buf[i].real = tmp_a_r + tmp_b_r;
+	buf[i].imag =  tmp_a_i + tmp_b_i;
+	buf[i+2].real = tmp_a_r - tmp_b_r;
+	buf[i+2].imag =  tmp_a_i - tmp_b_i;
+	tmp_a_r = buf[i+1].real;
+	tmp_a_i = buf[i+1].imag;
+	tmp_b_r = buf[i+3].imag;
+	tmp_b_i = buf[i+3].real;
+	buf[i+1].real = tmp_a_r + tmp_b_r;
+	buf[i+1].imag =  tmp_a_i - tmp_b_i;
+	buf[i+3].real = tmp_a_r - tmp_b_r;
+	buf[i+3].imag =  tmp_a_i + tmp_b_i;
+    }
+    
+    for(i = 0; i < 128; i += 8) {
+		tmp_a_r = buf[i].real;
+		tmp_a_i = buf[i].imag;
+		tmp_b_r = buf[i+4].real;
+		tmp_b_i = buf[i+4].imag;
+		buf[i].real = tmp_a_r + tmp_b_r;
+		buf[i].imag =  tmp_a_i + tmp_b_i;
+		buf[i+4].real = tmp_a_r - tmp_b_r;
+		buf[i+4].imag =  tmp_a_i - tmp_b_i;
+		tmp_a_r = buf[1+i].real;
+		tmp_a_i = buf[1+i].imag;
+		tmp_b_r = (buf[i+5].real + buf[i+5].imag) * w[2][1].real;
+		tmp_b_i = (buf[i+5].imag - buf[i+5].real) * w[2][1].real;
+		buf[1+i].real = tmp_a_r + tmp_b_r;
+		buf[1+i].imag =  tmp_a_i + tmp_b_i;
+		buf[i+5].real = tmp_a_r - tmp_b_r;
+		buf[i+5].imag =  tmp_a_i - tmp_b_i;
+		tmp_a_r = buf[i+2].real;
+		tmp_a_i = buf[i+2].imag;
+		tmp_b_r = buf[i+6].imag;
+		tmp_b_i = - buf[i+6].real;
+		buf[i+2].real = tmp_a_r + tmp_b_r;
+		buf[i+2].imag =  tmp_a_i + tmp_b_i;
+		buf[i+6].real = tmp_a_r - tmp_b_r;
+		buf[i+6].imag =  tmp_a_i - tmp_b_i;
+		tmp_a_r = buf[i+3].real;
+		tmp_a_i = buf[i+3].imag;
+		tmp_b_r = (buf[i+7].real - buf[i+7].imag) * w[2][3].imag;
+		tmp_b_i = (buf[i+7].imag + buf[i+7].real) * w[2][3].imag;
+		buf[i+3].real = tmp_a_r + tmp_b_r;
+		buf[i+3].imag =  tmp_a_i + tmp_b_i;
+		buf[i+7].real = tmp_a_r - tmp_b_r;
+		buf[i+7].imag =  tmp_a_i - tmp_b_i;
+     }
+    
+    for (m=3; m < 7; m++) {
+        two_m = (1 << m);
+
+	two_m_plus_one = two_m<<1;
+
+	for(i = 0; i < 128; i += two_m_plus_one) {
+	    for(k = 0; k < two_m; k++) {
+		int p = k + i;
+		int q = p + two_m;
+		tmp_a_r = buf[p].real;
+		tmp_a_i = buf[p].imag;
+		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
+		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
+		buf[p].real = tmp_a_r + tmp_b_r;
+		buf[p].imag =  tmp_a_i + tmp_b_i;
+		buf[q].real = tmp_a_r - tmp_b_r;
+		buf[q].imag =  tmp_a_i - tmp_b_i;
+	    }
+	}
+    }
+
 #endif
     
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
