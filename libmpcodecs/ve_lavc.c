@@ -67,6 +67,7 @@ static int lavc_param_packet_size= 0;
 static int lavc_param_strict= 0;
 static int lavc_param_data_partitioning= 0;
 static int lavc_param_gray=0;
+static int lavc_param_mpeg_quant=0;
 
 #include "cfgparser.h"
 
@@ -100,6 +101,9 @@ struct config lavcopts_conf[]={
 	{"keyint", &lavc_param_keyint, CONF_TYPE_INT, 0, 0, 0, NULL},
 #if LIBAVCODEC_BUILD >= 4614
 	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4619
+	{"mpeg_quant", &lavc_param_mpeg_quant, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -156,7 +160,10 @@ static int config(struct vf_instance_s* vf,
     if(lavc_param_packet_size )lavc_venc_context.rtp_mode=1;
     lavc_venc_context.strict_std_compliance= lavc_param_strict;
 #endif
-
+#if LIBAVCODEC_BUILD >= 4619
+    lavc_venc_context.mpeg_quant=lavc_param_mpeg_quant;
+#endif
+    
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
 	lavc_venc_context.gop_size = lavc_param_keyint;
