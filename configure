@@ -193,7 +193,7 @@ Video:
   --enable-3dfx          build with 3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb support [disable]
   --enable-directfb      build with DirectFB support [autodetect]
-  --enable-zr            build with ZR36067/ZR36060 support [disable]
+  --enable-zr            build with ZR360[56]7/ZR36060 support [autodetect]
 
 Audio:
   --disable-ossaudio     disable OSS sound support [autodetect]
@@ -954,7 +954,7 @@ _termios=auto
 _3dfx=no
 _tdfxfb=no
 _directfb=auto
-_zr=no
+_zr=auto
 _largefiles=no
 _vo2=no
 _language=en
@@ -3545,6 +3545,15 @@ fi
 echores "$_libdv"
 
 echocheck "zr"
+if test "$_zr" = auto ; then
+  #36067's seem to identify themselves as 36057PQC's, so the line 
+  #below should work for 36067's and 36057's. 
+  if grep -e "Multimedia video controller: Zoran Corporation ZR36057" /proc/pci > /dev/null 2>&1; then
+    _zr=yes 
+  else
+    _zr=no
+  fi
+fi
 if test "$_zr" = yes ; then
   if test "$_libavcodec" = yes ; then
     _def_zr='#define HAVE_ZR 1'
