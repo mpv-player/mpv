@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.23 -->
+<!-- synced with 1.24 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -228,7 +228,7 @@ przestrzeni kolorów w sterownikach wyjściowych video.
 <para>
 Możesz albo spróbować zainstalować program GNU install i (jeżeli nie
 umieściłeś go w globalnej ścieżce) wskazać go przez:
-<screen>./configure --install-path=PATH</screen>
+<screen>./configure --with-install=/ścieżka/i/nazwa/programu/instalacyjnego</screen>
 </para>
 
 <para>
