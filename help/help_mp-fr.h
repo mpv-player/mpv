@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.66
+// sync'ed with help_mp-en.h 1.70 
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original transation by Firebird <firebird@chez.com>
 
@@ -11,44 +11,44 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-"Utilisation:   mplayer [options] [url|répertoire/]fichier\n"
+"Utilisation:      mplayer [options] [url|répertoire/]fichier\n"
 "\n"
-"Options de base: (liste complète dans la page de man)\n"
-" -vo <pil[:pér]>  Sél. le pil. et le périph. vidéo ('-vo help' pour la liste)\n"
-" -ao <pil[:pér]>  Sél. le pil. et le périph. audio ('-ao help' pour la liste)\n"
+"Options de base:  (liste complète dans la page de man)\n"
+" -vo <pil[:pér]>  sél. le pil. et le périph. vidéo ('-vo help' pour la liste)\n"
+" -ao <pil[:pér]>  sél. le pil. et le périph. audio ('-ao help' pour la liste)\n"
 #ifdef HAVE_VCD
-" -vcd <n°piste>   Lit une piste VCD (Video CD) plutôt qu'un fichier\n"
+" -vcd <n°piste>   lit une piste VCD (Video CD) plutôt qu'un fichier\n"
 #endif
 #ifdef HAVE_LIBCSS
-" -dvdauth <pér>   Précise le chemin du lecteur DVD (pour les DVD cryptés)\n"
+" -dvdauth <pér>   précise le chemin du lecteur DVD (pour les DVD cryptés)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <n°titre>   Joue un titre DVD plutôt qu'un fichier\n"
-" -alang/-slang    Sélectionne la langue audio/sous-titres (code pays à 2 lettres)\n"
+" -dvd <num titre> joue un titre DVD plutôt qu'un fichier\n"
+" -alang/-slang    sélectionne la langue audio/sous-titres (code pays à 2 lettres)\n"
 #endif
-" -ss <temps>      Démarre la lecture à 'temps' (temps en secondes ou hh:mm:ss)\n"
-" -nosound         Ne joue aucun son\n"
-" -fs              Lecture plein-écran (ou -vm, -zoom, détails dans la page de man)\n"
-" -x <x> -y <y>    Résolution de l'affichage (à utiliser avec -vm ou -zoom)\n"
-" -sub <fich>      Spécifie les sous-titres à utiliser (cf. -subfps, -subdelay)\n"
-" -playlist <fich> Spécifie la liste des fichiers à jouer\n"
-" -vid x -aid y    Spécifie les flux vidéo (x) et audio (y) à jouer\n"
-" -fps x -srate y  Options pour changer les fréq. vidéo (x fps) et audio (y Hz)\n"
-" -pp <qualité>    Active le filtre de postprocessing (détails dans la page de man)\n"
+" -ss <temps>      démarre la lecture à 'temps' (temps en secondes ou hh:mm:ss)\n"
+" -nosound         ne joue aucun son\n"
+" -fs              lecture plein-écran (ou -vm, -zoom, détails dans la page de man)\n"
+" -x <x> -y <y>    résolution de l'affichage (à utiliser avec -vm ou -zoom)\n"
+" -sub <fich>      spécifie les sous-titres à utiliser (cf. -subfps, -subdelay)\n"
+" -playlist <fich> spécifie la liste des fichiers à jouer\n"
+" -vid x -aid y    spécifie les flux vidéo (x) et audio (y) à jouer\n"
+" -fps x -srate y  options pour changer les fréq. vidéo (x fps) et audio (y Hz)\n"
+" -pp <qualité>    active le filtre de postprocessing (détails dans la page de man)\n"
 " -framedrop       saut d'images (pour les machines lentes)\n"
 "\n"
 "Fonctions au clavier: (liste complète dans la page de man, voir aussi input.conf)\n"
 " <- ou ->         + / - 10 secondes\n"
 " haut ou bas      + / - 1 minute\n"
 " PgUp ou PgDown   + / - de 10 minutes\n"
-" < ou >           Fichier suivant / précédent dans la playlist\n"
-" p ou ESPACE      Pause (presser n'importe quelle touche pour continuer)\n"
-" q ou ESC         Arrète la lecture et quitte le programme\n"
-" + ou -           Synchro audio / vidéo: +/- 0.1 seconde\n"
-" o                Change l'OSD: rien / barre de recherche / barre rech. + temps\n"
-" * ou /           Augmente/diminue le volume PCM\n"
-" z ou x           Synchro des sous-titres: +/- 0.1 seconde\n"
-" r ou t           Pos. des sous-titres: plus haut/plus bas, voir aussi -vop expand\n"
+" < ou >           fichier suivant / précédent dans la playlist\n"
+" p ou ESPACE      pause (presser n'importe quelle touche pour continuer)\n"
+" q ou ESC         arrète la lecture et quitte le programme\n"
+" + ou -           synchro audio / vidéo: +/- 0.1 seconde\n"
+" o                change l'OSD: rien / barre de recherche / barre rech. + temps\n"
+" * ou /           augmente/diminue le volume PCM\n"
+" z ou x           synchro des sous-titres: +/- 0.1 seconde\n"
+" r ou t           pos. des sous-titres: plus haut/plus bas, voir aussi -vop expand\n"
 "\n"
 " * * * VOIR LA PAGE MAN POUR LES DETAILS ET LES AUTRES OPTIONS ET TOUCHES (AVANCEES) * * *\n"
 "\n";
@@ -62,7 +62,7 @@ static char help_text[]=
 #define MSGTR_Exit_quit "Fin"
 #define MSGTR_Exit_eof "Fin du fichier"
 #define MSGTR_Exit_error "Erreur fatale"
-#define MSGTR_IntBySignal "\nMPlayer interrompu par le signal %d dans le module: %s \n"
+#define MSGTR_IntBySignal "\nMPlayer interrompu par le signal %d dans le module: %s\n"
 #define MSGTR_NoHomeDir "Ne peut trouver répertoire HOME\n"
 #define MSGTR_GetpathProblem "Problème get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Création du fichier de config: %s\n"
@@ -89,11 +89,12 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Ne peut initialiser le pilote vidéo.\n"
 #define MSGTR_CannotInitAO "Ne peut ouvrir/initialiser le périphérique audio -> aucun son\n"
 #define MSGTR_StartPlaying "Démarre la lecture...\n"
+
 #define MSGTR_SystemTooSlow "\n\n"\
-"         ************************************************************"\n"\
-"         **** Votre système est trop LENT pour jouer ce fichier! ****"\n"\
 "         ************************************************************\n"\
-"!!! Raisons possibles, problèmes, solutions: \n"\
+"         **** Votre système est trop LENT pour jouer ce fichier! ****\n"\
+"         ************************************************************\n"\
+"!!! Raisons possibles, problèmes, solutions:\n"\
 "- Le plus courant: pilote _audio_ cassé/bogué: Essayez -ao sdl ou utilisez\n"\
 "  ALSA 0.5 ou l'émulation OSS d'ALSA 0.9. Lisez DOCS/sound.html pour plus d'astuces!\n"\
 "  Essayez aussi avec -autosync 30 ou d'autres valeurs.\n"\
@@ -130,8 +131,8 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Commentaire: %s\n"
 #define MSGTR_Video_NoVideo "Vidéo: Pas de vidéo!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: n'a pas pu initialiser les filtres vidéo (-vop) ou la sortie vidéo (-vo).\n"
-#define MSGTR_Paused "\n================= PAUSE =================\n"
-#define MSGTR_PlaylistLoadUnable "\nNe peut pas charger la liste de lecture %s\n"
+#define MSGTR_Paused "\n================= PAUSE =================\r"
+#define MSGTR_PlaylistLoadUnable "\nNe peut pas charger la liste de lecture %s.\n"
 
 // mencoder.c
 
@@ -185,7 +186,7 @@ static char help_text[]=
 #define MSGTR_VideoStreamRedefined "ATTENTION: Entête du flux vidéo %d redéfini.\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Trop (%d dans %d octets) de paquets audio dans le tampon!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Trop (%d dans %d octets) de paquets vidéo dans le tampon!\n"
-#define MSGTR_MaybeNI "Peut-être que vous jouez un flux/fichier mal multiplexé, ou qu le codec a échoué?\n" \
+#define MSGTR_MaybeNI "Peut-être que vous jouez un flux/fichier mal multiplexé, ou qu le codec a échoué?\n"\
                       "Pour les fichier .AVI, essayez de forcer le mode non-entrelaçé avec l'option -ni.\n"
 #define MSGTR_SwitchToNi "\nFichier .AVI non entrelaçé - passage en mode -ni...\n"
 #define MSGTR_Detected_XXX_FileFormat "Fichier de type %s détecté.\n"
@@ -193,12 +194,12 @@ static char help_text[]=
 #define MSGTR_NotSystemStream "Pas un flux de type MPEG System... (peut-être un Flux de Transport?)\n"
 #define MSGTR_InvalidMPEGES "Flux MPEG-ES invalide??? Contactez l'auteur, c'est peut-être un bug :(\n"
 #define MSGTR_FormatNotRecognized "========== Désolé, ce format de fichier n'est pas reconnu/supporté ===========\n"\
-				  "== Si ce fichier est un flux AVI, ASF ou MPEG, merci de contacter l'auteur! ==\n"
+                                  "== Si ce fichier est un flux AVI, ASF ou MPEG, merci de contacter l'auteur! ==\n"
 #define MSGTR_MissingVideoStream "Aucun flux vidéo trouvé.\n"
 #define MSGTR_MissingAudioStream "Aucun flux audio trouvé -> pas de son\n"
 #define MSGTR_MissingVideoStreamBug "Flux vidéo manquant!? Contactez l'auteur, c'est peut-être un bug :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "Demux: le fichier ne contient pas le flux audio ou vidéo sélectionné.\n"
+#define MSGTR_DoesntContainSelectedStream "demux: le fichier ne contient pas le flux audio ou vidéo sélectionné.\n"
 
 #define MSGTR_NI_Forced "Forcé"
 #define MSGTR_NI_Detected "Détecté"
@@ -385,7 +386,7 @@ static char help_text[]=
 #define MSGTR_MENU_AudioTrack "Piste audio"
 #define MSGTR_MENU_Track "Piste %d"
 #define MSGTR_MENU_VideoTrack "Piste Vidéo"
-				  
+  
 // --- equalizer
 #define MSGTR_EQU_Audio "Audio"
 #define MSGTR_EQU_Video "Vidéo"
@@ -494,10 +495,10 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_XSCREENSAVER "Stopper XScreenSaver"
 #define MSGTR_PREFERENCES_AutoSync "AutoSynchro on/off"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosynchro: "
-				  
+  
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale!"
 #define MSGTR_MSGBOX_LABEL_Error "Erreur!"
 #define MSGTR_MSGBOX_LABEL_Warning "Attention!"
-				  
+  
 #endif
