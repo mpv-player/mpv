@@ -60,12 +60,12 @@ binary-arch: build
 
 
 	dh_installdebconf	
-	dh_installdocs --exclude=CVS DOCS/*
+	dh_installdocs --exclude=CVS --exclude=mplayer.1 DOCS/*
 	dh_installexamples etc/example.conf
 	dh_installmenu
 #	dh_installmime
 	dh_installinfo
-	dh_installchangelogs
+	dh_installchangelogs ChangeLog
 	dh_link
 	dh_strip
 	dh_compress
