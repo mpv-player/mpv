@@ -108,6 +108,7 @@ static int lavc_param_debug=0;
 static int lavc_param_vismv=0;
 static int lavc_param_skip_top=0;
 static int lavc_param_skip_bottom=0;
+static int lavc_param_fast=0;
 
 m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
@@ -120,6 +121,9 @@ m_option_t lavc_decode_opts_conf[]={
 	{"vismv", &lavc_param_vismv, CONF_TYPE_INT, CONF_RANGE, 0, 9999999, NULL},
 	{"st", &lavc_param_skip_top, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
 	{"sb", &lavc_param_skip_bottom, CONF_TYPE_INT, CONF_RANGE, 0, 999, NULL},
+#ifdef CODEC_FLAG2_FAST
+        {"fast", &lavc_param_fast, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG2_FAST, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -238,6 +242,9 @@ static int init(sh_video_t *sh){
     avctx->workaround_bugs= lavc_param_workaround_bugs;
     avctx->error_resilience= lavc_param_error_resilience;
     if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
+#ifdef CODEC_FLAG2_FAST
+    avctx->flags2|= lavc_param_fast;
+#endif
     avctx->codec_tag= sh->format;
 #if LIBAVCODEC_BUILD >= 4679
     avctx->stream_codec_tag= sh->video.fccHandler;
