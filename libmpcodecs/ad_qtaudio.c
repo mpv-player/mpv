@@ -201,7 +201,7 @@ static int preinit(sh_audio_t *sh){
     printf("OutputBufferSize = %li\n",OutputBufferSize);
     printf("FramesToGet = %li\n",FramesToGet);
     
-    InFrameSize=InputBufferSize/FramesToGet;
+    InFrameSize=(InputBufferSize+FramesToGet-1)/FramesToGet;
     OutFrameSize=OutputBufferSize/FramesToGet;
 
     printf("FrameSize: %i -> %i\n",InFrameSize,OutFrameSize);
@@ -249,11 +249,11 @@ static void uninit(sh_audio_t *sh){
     printf("SoundConverterEndConversion:%i\n",error);
     error = SoundConverterClose(myConverter);
     printf("SoundConverterClose:%i\n",error);
-    error = TerminateQTML();
-    printf("TerminateQTML:%i\n",error);
-    FreeLibrary( qtml_dll );
-    qtml_dll = NULL;
-    printf("qt dll loader uninit done\n");
+//    error = TerminateQTML();
+//    printf("TerminateQTML:%i\n",error);
+//    FreeLibrary( qtml_dll );
+//    qtml_dll = NULL;
+//    printf("qt dll loader uninit done\n");
 }
 
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen){
@@ -290,7 +290,8 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 //    printf("ConvertedFrames = %li\n",ConvertedFrames);
 //    printf("ConvertedBytes = %li\n",ConvertedBytes);
     
-    InputBufferSize=(ConvertedBytes/OutFrameSize)*InFrameSize; // FIXME!!
+//    InputBufferSize=(ConvertedBytes/OutFrameSize)*InFrameSize; // FIXME!!
+    InputBufferSize=FramesToGet*InFrameSize;
     sh->a_in_buffer_len-=InputBufferSize;
     if(sh->a_in_buffer_len<0) sh->a_in_buffer_len=0; // should not happen...
     else if(sh->a_in_buffer_len>0){
