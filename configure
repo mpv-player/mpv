@@ -1808,6 +1808,8 @@ $_dshow
 
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_libavcodec
+/* use only decoders from libavcodec: */
+#define CONFIG_DECODERS
 
 /* Use 3dnow/mmxext/sse/mmx optimized fast memcpy() [maybe buggy... signal 4]*/
 $_fastmemcpy
