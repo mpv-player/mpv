@@ -46,6 +46,8 @@ static char* banner_text=
 #include "libmpcodecs/dec_video.h"
 #include "libmpcodecs/vf.h"
 
+#include "libmpdemux/mp3_hdr.h"
+
 #ifdef HAVE_MP3LAME
 #undef CDECL
 #include <lame/lame.h>
