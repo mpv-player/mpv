@@ -3710,7 +3710,7 @@ echocheck "Video 4 Linux TV interface"
 if test "$_tv_v4l" = auto ; then
  _tv_v4l=no
  if test "$_tv" = yes && linux ; then
-  if test -c /dev/video0 || test -c /dev/video ; then
+  if test -c /dev/video? || test -c /dev/video ; then
     cat > $TMPC <<EOF
 #include <stdlib.h>
 #include <linux/videodev.h>
