@@ -223,8 +223,22 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
 	    case 2: if(c==0x1B6) idx->dwFlags=0;break; // divx 4
 	}
       }
-    mp_msg(MSGT_HEADER,MSGL_STATUS,"Generating Index: %02d (byteposition)\r", (int)demuxer->filepos/((int)demuxer->movi_end/100+1));
-    fflush(stdout);
+
+    // update status line:
+    { static int lastpos;
+      int pos;
+      off_t len=demuxer->movi_end-demuxer->movi_start;
+      if(len){
+          pos=100*(demuxer->filepos-demuxer->movi_start)/len; // %
+      } else {
+          pos=(demuxer->filepos-demuxer->movi_start)>>20; // MB
+      }
+      if(pos!=lastpos){
+          lastpos=pos;
+	  mp_msg(MSGT_HEADER,MSGL_STATUS,"Generating Index: %3d %s     \r",
+	      pos, len?"%":"MB");
+      }
+    }
     mp_dbg(MSGT_HEADER,MSGL_DBG2,"%08X %08X %.4s %08X %X\n",(int)demuxer->filepos,id,(char *) &id,(int)c,(unsigned int) idx->dwFlags);
 #if 0
     { unsigned char tmp[64];
