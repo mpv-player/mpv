@@ -8,6 +8,12 @@
 #include "config.h"
 #include "mixer.h"
 
+#ifdef HAVE_DVB
+#include <ost/audio.h>
+audioMixer_t dvb_mixer={255,255};
+extern int vo_mpegpes_fd;
+extern int vo_mpegpes_fd2;
+#endif
 
 #if	defined(USE_OSS_AUDIO)
 
@@ -24,6 +30,15 @@ int    mixer_usemaster=0;
 void mixer_getvolume( float *l,float *r )
 {
  int fd,v,cmd,devs;
+
+#ifdef HAVE_DVB
+ if(vo_mpegpes_fd2>=0){
+     // DVB card
+     *l=dvb_mixer.volume_left/2.56;
+     *r=dvb_mixer.volume_right/2.56;
+     return;
+ }
+#endif 
 
  fd=open( mixer_device,O_RDONLY );
  if ( fd != -1 )
@@ -47,6 +62,22 @@ void mixer_getvolume( float *l,float *r )
 void mixer_setvolume( float l,float r )
 {
  int fd,v,cmd,devs;
+ 
+#ifdef HAVE_DVB
+ if(vo_mpegpes_fd2>=0){
+     // DVB card
+	 dvb_mixer.volume_left=l*2.56;
+	 dvb_mixer.volume_right=r*2.56;
+	 if(dvb_mixer.volume_left>255) dvb_mixer.volume_left=255;
+	 if(dvb_mixer.volume_right>255) dvb_mixer.volume_right=255;
+//	 printf("Setting DVB volume: %d ; %d  \n",dvb_mixer.volume_left,dvb_mixer.volume_right);
+	if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MIXER, &dvb_mixer) < 0)){
+		perror("DVB AUDIO SET MIXER: ");
+		return -1;
+	}
+	return;
+ }
+#endif
 
  fd=open( mixer_device,O_RDONLY );
  if ( fd != -1 )
