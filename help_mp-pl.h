@@ -33,11 +33,11 @@ static char help_text[]=
 " -fs -vm -zoom   opcje pe³noekranowe (pe³en ekran,zmiana trybu,skalowanie)\n"
 " -x <x> -y <y>   wybór rozdzielczo¶ci ekranu (dla zmian trybu video lub \n"
 "                 skalowania softwarowego)\n"
-" -sub <file>     wybór pliku z napisami (zobacz tak¿e -subfps, -subdelay)\n"
-" -playlist <file>wybór pliku z playlist±\n"
+" -sub <plik>     wybór pliku z napisami (zobacz tak¿e -subfps, -subdelay)\n"
+" -playlist <plik>wybór pliku z playlist±\n"
 " -vid x -aid y   wybór odtwarzanego strumienia video (x) i audio (y)\n"
 " -fps x -srate y wybór prêdko¶ci odtwarzania video (x fps) i audio (y Hz)\n"
-" -pp <quality>   wybór filtra wyg³adzaj±cego (zobacz manual/dokumentacjê)\n"
+" -pp <opcje>     wybór postprocesingu (zobacz manual/dokumentacjê)\n"
 " -framedrop      gubienie klatek (dla wolnych maszyn)\n"
 "\n"
 "Podstawowe klawisze: (pe³na lista w manualu, sprawd¼ tak¿e input.conf\n"
@@ -102,6 +102,7 @@ static char help_text[]=
 "         ************************************\n"\
 "         *** Twój system jest zbyt wolny! ***\n"\
 "         ************************************\n"\
+"!!! Mo¿liwe przyczyny, problemy, rozwi±zania: \n"\
 "- Najczêstsza przyczyna: uszkodzony/obarczony b³edami sterownik _audio_.\n"\
 "  Rozwi±zanie: spróbuj -ao sdl lub u¿yj ALSA 0.5 lub emulacjê OSS w ALSA 0.9\n"\
 "  Przeczytaj DOCS/sound.html!\n"\
@@ -119,7 +120,7 @@ static char help_text[]=
 #define MSGTR_NoSound "Audio: brak d¼wiêku!!!\n"
 #define MSGTR_FPSforced "FPS wymuszone na %5.3f  (ftime: %5.3f)\n"
 
-// open.c:, stream.c
+// open.c, stream.c
 #define MSGTR_CdDevNotfound "Urz±dzenie CD-ROM '%s' nie znalezione!\n"
 #define MSGTR_ErrTrackSelect "B³±d wyboru ¶cie¿ki VCD!"
 #define MSGTR_ReadSTDIN "Odczytujê ze stdin...\n"
@@ -235,11 +236,14 @@ static char help_text[]=
 #define MSGTR_SubtitleSelect "Wybór napisów ..."
 #define MSGTR_OtherSelect "Wybór ..."
 #define MSGTR_AudioFileSelect "Wybór zewnêtrznego kana³u ..."
+#define MSGTR_FontSelect "Wybór fontu ..."
 #define MSGTR_MessageBox "Komunikat"
 #define MSGTR_PlayList "Playlista"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Przegl±darka Skórek"
 #define MSGTR_Network "Strumieñ sieciowy ..."
+#define MSGTR_Preferences "Preferencje"
+#define MSGTR_OSSPreferences "Konfiguracja sterownika OSS"
 
 // --- buttons ---
 #define MSGTR_Ok "Tak"
@@ -248,11 +252,14 @@ static char help_text[]=
 #define MSGTR_Remove "Usuñ"
 #define MSGTR_Clear "Wyczy¶æ"
 #define MSGTR_Config "Konfiguracja"
+#define MSGTR_ConfigDriver "Konfiguracja sterownika"
+#define MSGTR_Browse "Przegl±daj"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Przykro mi, za ma³o pamiêci na bufor rysowania."
 #define MSGTR_NEMFMR "Przykro mi, za ma³o pamiêci na renderowanie menu."
 #define MSGTR_NEMFMM "Przykro mi, za ma³o pamiêci na maskê kszta³tu g³ównego okna."
+#define MSGTR_IDFGCVD "Przykro mi, nie znalaz³em kompatybilnego sterownika video."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] b³±d w pliku konfiguracyjnym skórki w linii %d: %s"
@@ -333,6 +340,56 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_Selected "Wybrane pliki"
 #define MSGTR_PLAYLIST_Files "Pliki"
 #define MSGTR_PLAYLIST_DirectoryTree "Drzewo katalogów"
+
+// --- preferences
+#define MSGTR_PREFERENCES_None "Puste"
+#define MSGTR_PREFERENCES_Codec1 "U¿yj kodeków VFW (Win32)"
+#define MSGTR_PREFERENCES_Codec2 "U¿yj kodeków OpenDivX/DivX4 (YV12)"
+#define MSGTR_PREFERENCES_Codec3 "U¿yj kodeków DirectShow (Win32)"
+#define MSGTR_PREFERENCES_Codec4 "U¿yj kodeków ffmpeg (libavcodec)"
+#define MSGTR_PREFERENCES_Codec5 "U¿yj kodeków DivX4 (YUY2)"
+#define MSGTR_PREFERENCES_Codec6 "U¿yj kodeków XAnim"
+#define MSGTR_PREFERENCES_AvailableDrivers "Dostêpne sterowniki:"
+#define MSGTR_PREFERENCES_DoNotPlaySound "Nie odtwarzaj d¼wiêku"
+#define MSGTR_PREFERENCES_NormalizeSound "Normalizuj d¼wiêk"
+#define MSGTR_PREFERENCES_EnEqualizer "W³±cz equalizer"
+#define MSGTR_PREFERENCES_ExtraStereo "W³±cz extra stereo"
+#define MSGTR_PREFERENCES_Coefficient "Coefficient:"
+#define MSGTR_PREFERENCES_AudioDelay "Opó¼nienie d¼wiêku"
+#define MSGTR_PREFERENCES_Audio "D¼wiêk"
+#define MSGTR_PREFERENCES_VideoEqu "W³±cz equalizer video"
+#define MSGTR_PREFERENCES_DoubleBuffer "W³±cz podwójne buforowanie"
+#define MSGTR_PREFERENCES_DirectRender "W³±cz bezpo¶rednie rysowanie"
+#define MSGTR_PREFERENCES_FrameDrop "W³±cz zrzucanie ramek"
+#define MSGTR_PREFERENCES_HFrameDrop "W³±cz gwa³towne zrzucanie ramek (niebezpieczne)"
+#define MSGTR_PREFERENCES_Flip "Odwróæ obraz góra-dó³"
+#define MSGTR_PREFERENCES_Panscan "Panscan: "
+#define MSGTR_PREFERENCES_Video "Video"
+#define MSGTR_PREFERENCES_OSDTimer "Timer i wska¼niki"
+#define MSGTR_PREFERENCES_OSDProgress "Tylko belki"
+#define MSGTR_PREFERENCES_Subtitle "Napisy:"
+#define MSGTR_PREFERENCES_SUB_Delay "Opó¼nienie napisów: "
+#define MSGTR_PREFERENCES_SUB_FPS "FPS:"
+#define MSGTR_PREFERENCES_SUB_POS "Pozycja: "
+#define MSGTR_PREFERENCES_SUB_AutoLoad "Wy³±cz automatyczne ³adowanie napisów"
+#define MSGTR_PREFERENCES_SUB_Unicode "Napisy w Unicode"
+#define MSGTR_PREFERENCES_SUB_MPSUB "Konertuj podane napisy do formatu napisów Mplayera"
+#define MSGTR_PREFERENCES_SUB_SRT "Konwertuj podane napisy do formatu SRT (time-based SubViewer)"
+#define MSGTR_PREFERENCES_Font "Font:"
+#define MSGTR_PREFERENCES_FontFactor "Font factor:"
+#define MSGTR_PREFERENCES_PostProcess "W³±cz postprocesing"
+#define MSGTR_PREFERENCES_AutoQuality "Automatyczna jako¶æ: "
+#define MSGTR_PREFERENCES_NI "U¿yj parsera dla non-interleaved AVI"
+#define MSGTR_PREFERENCES_IDX "Przebuduj tablice indeksów jesli to potrzebne"
+#define MSGTR_PREFERENCES_VideoCodecFamily "Rodzina kodeków video:"
+#define MSGTR_PREFERENCES_FRAME_OSD_Level "Poziom OSD"
+#define MSGTR_PREFERENCES_FRAME_Subtitle "Napisy"
+#define MSGTR_PREFERENCES_FRAME_Font "Font"
+#define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocesing"
+#define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodek & demuxer"
+#define MSGTR_PREFERENCES_OSS_Device "Urz±dzenie:"
+#define MSGTR_PREFERENCES_OSS_Mixer "Mikser:"
+#define MSGTR_PREFERENCES_Message "Proszê pamiêtaæ, ¿e niektóre funkcje wymagaja restartowania odtwarzania."
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
