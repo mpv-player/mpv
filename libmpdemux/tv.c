@@ -244,7 +244,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     /* get IMAGE FORMAT */
     funcs->control(tvh->priv, TVI_CONTROL_VID_GET_FORMAT, &sh_video->format);
 //    if (IMGFMT_IS_RGB(sh_video->format) || IMGFMT_IS_BGR(sh_video->format))
-	sh_video->format = 0x0;
+//	sh_video->format = 0x0;
 
     /* set FPS and FRAMETIME */
     if(!sh_video->fps)
