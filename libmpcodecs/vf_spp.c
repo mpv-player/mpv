@@ -23,6 +23,8 @@
  * (http://citeseer.nj.nec.com/nosratinia99embedded.html)
  */
 
+#ifdef USE_LIBAVCODEC
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -495,4 +497,4 @@ vf_info_t vf_info_spp = {
     NULL
 };
 
-//===========================================================================//
+#endif //USE_LIBAVCODEC
