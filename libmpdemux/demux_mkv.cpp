@@ -2357,24 +2357,29 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
     } else if (!strcmp(track->codec_id, MKV_A_FLAC) ||
                (track->a_formattag == 0xf1ac)) {
+      unsigned char *ptr;
+      int size;
       free(sh_a->wf);
       sh_a->wf = NULL;
 
-      dp = new_demux_packet(4);
-      memcpy(dp->buffer, "fLaC", 4);
-      dp->pts = 0;
-      dp->flags = 0;
-      ds_add_packet(demuxer->audio, dp);
       if (track->a_formattag == mmioFOURCC('f', 'L', 'a', 'C')) {
-        dp = new_demux_packet(track->private_size);
-        memcpy(dp->buffer, track->private_data, track->private_size);
+        ptr = (unsigned char *)track->private_data;
+        size = track->private_size;
       } else {
         sh_a->format = mmioFOURCC('f', 'L', 'a', 'C');
-        dp = new_demux_packet(track->private_size - sizeof(WAVEFORMATEX));
-        memcpy(dp->buffer, (unsigned char *)track->private_data +
-               sizeof(WAVEFORMATEX), track->private_size -
-               sizeof(WAVEFORMATEX));
+        ptr = (unsigned char *)track->private_data + sizeof(WAVEFORMATEX);
+        size = track->private_size - sizeof(WAVEFORMATEX);
       }
+      if ((size < 4) || (ptr[0] != 'f') || (ptr[1] != 'L') ||
+          (ptr[2] != 'a') || (ptr[3] != 'C')) {
+        dp = new_demux_packet(4);
+        memcpy(dp->buffer, "fLaC", 4);
+        dp->pts = 0;
+        dp->flags = 0;
+        ds_add_packet(demuxer->audio, dp);
+      }
+      dp = new_demux_packet(size);
+      memcpy(dp->buffer, ptr, size);
       dp->pts = 0;
       dp->flags = 0;
       ds_add_packet(demuxer->audio, dp);
