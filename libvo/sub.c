@@ -32,9 +32,18 @@ int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
 
+// return the real height of a char:
+static inline int get_height(int c,int h){
+    int font;
+    if ((font=vo_font->font[c])>=0)
+	if(h<vo_font->pic_a[font]->h) h=vo_font->pic_a[font]->h;
+    return h;
+}
+
 inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
 	unsigned char *cp=vo_osd_text;
 	int x=20;
+	int h=0;
 
         obj->bbox.x1=obj->x=x;
         obj->bbox.y1=obj->y=10;
@@ -42,10 +51,11 @@ inline static void vo_update_text_osd(mp_osd_obj_t* obj,int dxs,int dys){
         while (*cp){
           int c=*cp++;
           x+=vo_font->width[c]+vo_font->charspace;
+	  h=get_height(c,h);
         }
 	
-	obj->bbox.x2=x;
-	obj->bbox.y2=obj->bbox.y1+vo_font->height;
+	obj->bbox.x2=x-vo_font->charspace;
+	obj->bbox.y2=obj->bbox.y1+h;
 	obj->flags|=OSDFLAG_BBOX;
 
 }
@@ -88,7 +98,7 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
        return;
     }
     
-    {
+    {	int h=0;
         int y=(dys-vo_font->height)/2;
         int delimw=vo_font->width[OSD_PB_START]
      		  +vo_font->width[OSD_PB_END]
@@ -97,10 +107,14 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
    	int charw=vo_font->width[OSD_PB_0]+vo_font->charspace;
         int elems=width/charw;
    	int x=(dxs-elems*charw-delimw)/2;
+	h=get_height(OSD_PB_START,h);
+	h=get_height(OSD_PB_END,h);
+	h=get_height(OSD_PB_0,h);
+	h=get_height(OSD_PB_1,h);
 	obj->bbox.x1=obj->x=x;
 	obj->bbox.y1=obj->y=y;
 	obj->bbox.x2=x+width+delimw;
-	obj->bbox.y2=y+vo_font->height;
+	obj->bbox.y2=y+h; //vo_font->height;
 	obj->flags|=OSDFLAG_BBOX;
 	obj->params.progbar.elems=elems;
     }
@@ -212,7 +226,7 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
        return;
    }
    
-   obj->y=dys;
+   obj->bbox.y2=obj->y=dys;
    obj->params.subtitle.lines=0;
 
       // too long lines divide into a smaller ones
@@ -291,13 +305,17 @@ inline static void vo_update_text_sub(mp_osd_obj_t* obj,int dxs,int dys){
 	  }
       }
 
-    if (obj->y >= (dys * sub_pos / 100)) obj->y = dys * sub_pos /100;
-      
+    if (obj->y >= (dys * sub_pos / 100)){
+	int old=obj->y;
+	obj->y = dys * sub_pos /100;
+	obj->bbox.y2-=old-obj->y;
+    }
+    
     // calculate bbox:
     obj->bbox.x1=xmin;
     obj->bbox.x2=xmax;
     obj->bbox.y1=obj->y;
-    obj->bbox.y2=obj->y+obj->params.subtitle.lines*vo_font->height;
+//    obj->bbox.y2=obj->y+obj->params.subtitle.lines*vo_font->height;
     obj->flags|=OSDFLAG_BBOX;
     
 }
@@ -393,8 +411,15 @@ int vo_update_osd(int dxs,int dys){
 	    obj->bbox.x2=dxs;
 	    obj->bbox.y2=dys;
 	    obj->flags|=OSDFLAG_BBOX;
-	} else if(obj->flags&OSDFLAG_VISIBLE){
-	    mp_msg(MSGT_OSD,MSGL_V,"OSD update: %d;%d %dx%d  \n",
+	} else {
+	    // check bbox, reduce it if it's out of bounds (corners):
+	    if(obj->bbox.x1<0) obj->bbox.x1=0;
+	    if(obj->bbox.y1<0) obj->bbox.y1=0;
+	    if(obj->bbox.x2>dxs) obj->bbox.x2=dxs;
+	    if(obj->bbox.y2>dys) obj->bbox.y2=dys;
+	    if(obj->flags&OSDFLAG_VISIBLE)
+	    // debug:
+	    mp_msg(MSGT_OSD,MSGL_DBG2,"OSD update: %d;%d %dx%d  \n",
 		obj->bbox.x1,obj->bbox.y1,obj->bbox.x2-obj->bbox.x1,
 		obj->bbox.y2-obj->bbox.y1);
 	}
