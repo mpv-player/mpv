@@ -1,10 +1,10 @@
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "       (C) 2000-2001 Arpad Gereoffy <arpi@esp-team.scene.hu>\n"
+"MPlayer " VERSION "  (C) 2000-2001 Arpad Gereoffy <arpi@thot.banki.hu>\n"
 "\n";
 
 static char* help_text=
-"Usage:   mplayer [options] [path/]name\n"
+"\nUsage:   mplayer [options] [path/]name\n"
 "\n"
 "  Options:\n"
 "    -vo <driver>    select output driver (see '-vo help' for driver list)\n"
