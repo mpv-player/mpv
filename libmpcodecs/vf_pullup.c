@@ -51,11 +51,12 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 		c->stride[0] = mpi->width;
 		c->stride[1] = c->stride[2] = mpi->chroma_width;
 		c->background[1] = c->background[2] = 128;
+		c->metric_plane = 0;
 	}
 
 	c->junk_left = c->junk_right = 1;
 	c->junk_top = c->junk_bottom = 4;
-	c->verbose = 1;
+	c->verbose = 0;
 
 	if (gCpuCaps.hasMMX) c->cpu |= PULLUP_CPU_MMX;
 	if (gCpuCaps.hasMMX2) c->cpu |= PULLUP_CPU_MMX2;

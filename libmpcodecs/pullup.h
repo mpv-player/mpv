@@ -48,6 +48,7 @@ struct pullup_context
 	unsigned int cpu;
 	int junk_left, junk_right, junk_top, junk_bottom;
 	int verbose;
+	int metric_plane;
 	/* Internal data */
 	struct pullup_field *first, *last, *head;
 	struct pullup_buffer *buffers;

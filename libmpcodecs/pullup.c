@@ -257,9 +257,10 @@ static void compute_metric(struct pullup_context *c,
 {
 	unsigned char *a, *b;
 	int x, y;
-	int xstep = c->bpp[0];
-	int ystep = c->stride[0]<<3;
-	int s = c->stride[0]<<1; /* field stride */
+	int mp = c->metric_plane;
+	int xstep = c->bpp[mp];
+	int ystep = c->stride[mp]<<3;
+	int s = c->stride[mp]<<1; /* field stride */
 	int w = c->metric_w*xstep;
 
 	if (!fa->buffer || !fb->buffer) return;
@@ -270,8 +271,8 @@ static void compute_metric(struct pullup_context *c,
 		return;
 	}
 
-	a = fa->buffer->planes[0] + pa * c->stride[0] + c->metric_offset;
-	b = fb->buffer->planes[0] + pb * c->stride[0] + c->metric_offset;
+	a = fa->buffer->planes[mp] + pa * c->stride[mp] + c->metric_offset;
+	b = fb->buffer->planes[mp] + pb * c->stride[mp] + c->metric_offset;
 
 	for (y = c->metric_h; y; y--) {
 		for (x = 0; x < w; x += xstep) {
@@ -634,12 +635,13 @@ void pullup_preinit_context(struct pullup_context *c)
 
 void pullup_init_context(struct pullup_context *c)
 {
+	int mp = c->metric_plane;
 	if (c->nbuffers < 10) c->nbuffers = 10;
 	c->buffers = calloc(c->nbuffers, sizeof (struct pullup_buffer));
 
-	c->metric_w = (c->w[0] - (c->junk_left + c->junk_right << 3)) >> 3;
-	c->metric_h = (c->h[0] - (c->junk_top + c->junk_bottom << 1)) >> 3;
-	c->metric_offset = c->junk_left*c->bpp[0] + (c->junk_top<<1)*c->stride[0];
+	c->metric_w = (c->w[mp] - (c->junk_left + c->junk_right << 3)) >> 3;
+	c->metric_h = (c->h[mp] - (c->junk_top + c->junk_bottom << 1)) >> 3;
+	c->metric_offset = c->junk_left*c->bpp[mp] + (c->junk_top<<1)*c->stride[mp];
 	c->metric_len = c->metric_w * c->metric_h;
 	
 	c->head = make_field_queue(c, 8);
