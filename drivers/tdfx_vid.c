@@ -586,12 +586,12 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
   }
   // Setup the vidproc
   // H scaling
-  if(ov.src_width != ov.dst_width)
+  if(ov.src_width < ov.dst_width)
     vidcfg |= (1<<14);
   else
     vidcfg &= ~(1<<14);
   // V scaling
-  if(ov.src_height != ov.dst_height)
+  if(ov.src_height < ov.dst_height)
     vidcfg |= (1<<15);
   else
     vidcfg &= ~(1<<15);
