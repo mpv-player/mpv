@@ -44,15 +44,25 @@ static int odml_get_vstream_id(int id, unsigned char res[])
     return 0;
 }
 
-/*
+/**
  * Simple quicksort for AVIINDEXENTRYs
+ * To avoid too deep recursion, the bigger part is handled iteratively,
+ * thus limiting recursion to log2(n) levels.
+ * The pivot element is randomized to "even out" otherwise extreme cases.
  */
 static void avi_idx_quicksort(AVIINDEXENTRY *idx, int from, int to)
 {
     AVIINDEXENTRY temp;
-    int lo = to;
-    int hi = from;
-    off_t pivot_ofs = AVI_IDX_OFFSET(&idx[(from + to) / 2]);
+    int lo;
+    int hi;
+    off_t pivot_ofs;
+    int pivot_idx;
+  while (from < to) {
+    pivot_idx = from;
+    pivot_idx += rand() % (to - from + 1);
+    pivot_ofs = AVI_IDX_OFFSET(&idx[pivot_idx]);
+    lo = to;
+    hi = from;
     do {
 	while(pivot_ofs < AVI_IDX_OFFSET(&idx[lo])) lo--;
 	while(pivot_ofs > AVI_IDX_OFFSET(&idx[hi])) hi++;
@@ -65,8 +75,14 @@ static void avi_idx_quicksort(AVIINDEXENTRY *idx, int from, int to)
 	    lo--; hi++;
 	}
     } while (lo >= hi);
-    if (from < lo) avi_idx_quicksort(idx, from, lo);
-    if (to > hi) avi_idx_quicksort(idx, hi, to);
+    if ((lo - from) < (to - hi)) {
+      avi_idx_quicksort(idx, from, lo);
+      from = hi;
+    } else {
+      avi_idx_quicksort(idx, hi, to);
+      to = lo;
+    }
+  }
 }
 
 void read_avi_header(demuxer_t *demuxer,int index_mode){
