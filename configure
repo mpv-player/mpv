@@ -2115,7 +2115,7 @@ if test "$_xanim" = auto ; then
   if test "$_dl" = yes ; then
     if x86 ; then
       if test -z "$_xanimlibdir" ; then
-        for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods ; do
+        for I in /usr/local/lib/xanim/mods /usr/lib/xanim/mods /usr/lib/xanim ; do
           if test -d "$I" ; then
             _xanimlibdir="$I"
             break;
@@ -2125,7 +2125,7 @@ if test "$_xanim" = auto ; then
       test "$_xanimlibdir" && _xanim=yes
       echores "yes (found: $_xanimlibdir)"
     else
-      echores "not supported on non x86"
+      echores "not supported on non-x86"
     fi
   else
     echores "dl support needed"
@@ -2289,7 +2289,13 @@ echores "$_mencoder"
 echocheck "lirc"
 if test "$_lirc" = auto ; then
   _lirc=no
-  test -c /dev/lirc && _lirc=yes
+  if test -c /dev/lirc ; then
+      cat > $TMPC <<EOF
+#include <lirc/lirc_client.h>
+int main(void) { return 0; }
+EOF
+      cc_check -llirc_client && _lirc=yes
+  fi
 fi
 if test "$_lirc" = yes ; then
   _def_lirc='#define HAVE_LIRC 1'
