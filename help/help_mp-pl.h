@@ -363,8 +363,8 @@ static char help_text[]=
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Nie mog³em wys³aæ zdarzenia pe³nego ekranu EWMH!\n"
 
- #define MSGTR_InsertingAfVolume "[Mixer] Nie ma sprzêtowego miksowania, w³±czam filtr g³o¶no¶ci.\n"
- #define MSGTR_NoVolume "[Mixer] Regulacja g³o¶no¶ci niedostêpna.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] Nie ma sprzêtowego miksowania, w³±czam filtr g³o¶no¶ci.\n"
+#define MSGTR_NoVolume "[Mixer] Regulacja g³o¶no¶ci niedostêpna.\n"
 
 
 // ====================== GUI messages/buttons ========================
