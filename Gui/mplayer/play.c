@@ -66,6 +66,7 @@ void mplStop()
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
    wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
   }
+ guiGetEvent( guiCEvent,guiSetStop );
  mplSubRender=1;
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  wsClearWindow( appMPlayer.subWindow );
@@ -78,11 +79,11 @@ void mplPlay( void )
       ( guiIntfStruct.Filename[0] == 0 )||
       ( guiIntfStruct.Playing == 1 ) ) return;
  if ( guiIntfStruct.Playing == 2 ) { mplPause(); return; }
- guiIntfStruct.Playing=1;
+ guiGetEvent( guiCEvent,guiSetPlay );
  mplSubRender=0;
  wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
  wsClearWindow( appMPlayer.subWindow );
- wsPostRedisplay( &appMPlayer.subWindow );
+// wsPostRedisplay( &appMPlayer.subWindow );
 }
 
 void mplPause( void )
@@ -91,13 +92,9 @@ void mplPause( void )
   {
    case 1: // playing
         guiIntfStruct.Playing=2;
-//      btnModify( evPlaySwitchToPause,btnReleased );
-//      btnModify( evPauseSwitchToPlay,btnDisabled );
         break;
    case 2: // paused
         guiIntfStruct.Playing=1;
-//      btnModify( evPlaySwitchToPause,btnDisabled );
-//      btnModify( evPauseSwitchToPlay,btnReleased );
         break;
   }
  mplState();

@@ -53,6 +53,12 @@ void guiGetEvent( int type,char * arg )
         gtkEventHandling();
         break;
    case guiCEvent:
+        switch ( (int)arg )
+	 {
+          case guiSetPlay:  guiIntfStruct.Playing=1; mplState(); break;
+          case guiSetStop:  guiIntfStruct.Playing=0; mplState(); break;
+          case guiSetPause: guiIntfStruct.Playing=2; mplState(); break;
+	 }
         break;
    case guiIEvent:
         printf( "cmd: %d\n",(int)arg );
@@ -76,4 +82,5 @@ void guiEventHandling( void )
  if ( use_gui && !guiIntfStruct.Playing ) wsHandleEvents();
  gtkEventHandling();
  mplTimerHandler(); // handle GUI timer events
+ mplState();
 }

@@ -713,17 +713,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 // ========== Init keyboard FIFO (connection to libvo) ============
 make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
-  // It's time to init the GUI code: (and fork() the GTK process)
-#ifdef HAVE_NEW_GUI
-  if(use_gui){
-       guiInit( argc,argv,envp );
-       inited_flags|=INITED_GUI;
-       guiIntfStruct.Playing= (gui_no_filename) ? 0 : 1;
-       mplState();
-  }
-#endif
-
-
 // Init input system
 #ifdef HAVE_NEW_INPUT
 current_module = "init_input";
@@ -756,6 +745,14 @@ current_module = NULL;
 
 // ******************* Now, let's see the per-file stuff ********************
 
+#ifdef HAVE_NEW_GUI
+  if(use_gui){
+       guiInit( argc,argv,envp );
+       inited_flags|=INITED_GUI;
+       guiGetEvent( guiCEvent,(gui_no_filename) ? 0 : 1 );
+  }
+#endif
+
 play_next_file:
 
 // We must enable getch2 here to be able to interrupt network connection
@@ -772,14 +769,12 @@ if(!use_stdin && !slave_mode){
      if ( guiIntfStruct.DVDChanged ) 
       {
        guiIntfStruct.DVDChanged=0;
-       guiIntfStruct.Playing=1;
+       guiGetEvent( guiCEvent,guiSetPlay );
        filename="/dev/dvd";
        goto play_dvd;
       }
 #endif
 
-//      if(filename && !guiIntfStruct.FilenameChanged) guiSetFilename( guiIntfStruct.Filename,filename );
-//      guiIntfStruct.Playing= (gui_no_filename) ? 0 : 1;
       while(guiIntfStruct.Playing!=1){
         mp_cmd_t* cmd;                                                                                   
 	usleep(20000);
@@ -1243,15 +1238,9 @@ if(sh_audio){
   if(!init_audio(sh_audio)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
     sh_audio=d_audio->sh=NULL;
-#ifdef HAVE_NEW_GUI
-    if ( use_gui ) guiIntfStruct.AudioType=0;
-#endif
   } else {
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
         sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
-#ifdef HAVE_NEW_GUI
-    if ( use_gui ) guiIntfStruct.AudioType=sh_audio->channels;
-#endif
   }
 }
 
@@ -1427,7 +1416,26 @@ current_module="init_libvo";
      guiIntfStruct.MovieWidth=sh_video->disp_w;
      guiIntfStruct.MovieHeight=sh_video->disp_h;
      guiIntfStruct.StreamType=stream->type;
-//     guiSetFilename( guiIntfStruct.Filename,filename );
+     guiSetFilename( guiIntfStruct.Filename,filename );
+     if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels;
+      else guiIntfStruct.AudioType=0;
+#ifdef USE_DVDREAD
+     if ( stream->type == STREAMTYPE_DVD )
+      {
+       dvd_priv_t * dvdp = stream->priv;
+       guiIntfStruct.DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
+       guiIntfStruct.DVD.chapters=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_ptts;
+       guiIntfStruct.DVD.angles=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
+       guiIntfStruct.DVD.nr_of_audio_channels=dvdp->nr_of_channels;
+       memcpy( guiIntfStruct.DVD.audio_streams,dvdp->audio_streams,sizeof( dvdp->audio_streams ) );
+       guiIntfStruct.DVD.nr_of_subtitles=dvdp->nr_of_subtitles;
+       memcpy( guiIntfStruct.DVD.subtitles,dvdp->subtitles,sizeof( dvdp->subtitles ) );
+       guiIntfStruct.DVD.current_title=dvd_title + 1;
+       guiIntfStruct.DVD.current_chapter=dvd_chapter + 1;
+       guiIntfStruct.DVD.current_angle=dvd_angle + 1;
+       guiIntfStruct.Track=dvd_title + 1;
+      } 
+#endif
     }
 #endif
 
@@ -1820,9 +1828,7 @@ if(!dapsync){
       aq_sleep_time+=time_frame;
 
 #ifdef HAVE_NEW_GUI
-      if(use_gui){
-	guiEventHandling();
-      }
+      if(use_gui) guiEventHandling();
 #endif
 
 if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
@@ -2043,15 +2049,12 @@ read_input:
 #ifdef HAVE_NEW_INPUT    
     mp_cmd_t* cmd;
 #endif
-#ifdef HAVE_NEW_GUI
-      int gui_pause_flag=0; // gany!
-#endif
       if(!quiet) {
 	mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");
 	fflush(stdout);
       }
 #ifdef HAVE_NEW_GUI
-      if(use_gui) guiIntfStruct.Playing=2;
+      if(use_gui) guiGetEvent( guiCEvent,guiSetPause );
 #endif
       if (video_out && sh_video)
 	 video_out->control(VOCTRL_PAUSE, NULL);
@@ -2089,13 +2092,13 @@ read_input:
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		guiEventHandling();
-		if(guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos))
-		  { gui_pause_flag=1; break; } // end of pause or seek
+		if(guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos)) break;
              }
 #endif
+             usleep(20000);
 #ifdef HAVE_NEW_INPUT
          }
-      mp_cmd_free(cmd);
+      if ( cmd ) mp_cmd_free(cmd);
 #else
              if(use_stdin) usec_sleep(1000); // do not eat the CPU
          }
@@ -2108,7 +2111,7 @@ read_input:
         video_out->control(VOCTRL_RESUME, NULL);	// resume video
       (void)GetRelativeTime();	// keep TF around FT in next cycle
 #ifdef HAVE_NEW_GUI
-      if(use_gui && !gui_pause_flag) guiIntfStruct.Playing=1; // play from keyboard
+      if (use_gui) guiGetEvent( guiCEvent,guiSetPlay );
 #endif
   }
 

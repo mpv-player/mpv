@@ -97,6 +97,10 @@ extern guiInterface_t guiIntfStruct;
 #define guiCEvent 1
 #define guiIEvent 2
 
+#define guiSetStop  0
+#define guiSetPlay  1
+#define guiSetPause 2
+
 extern void guiInit( int argc,char* argv[], char *envp[] );
 extern void guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );

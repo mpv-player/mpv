@@ -222,11 +222,8 @@ play_dvd_2:
 #endif
    case evPlay:
    case evPlaySwitchToPause:
-//        btnModify( evPlaySwitchToPause,btnDisabled );
-//        btnModify( evPauseSwitchToPlay,btnReleased );
         mplMainAutoPlay=0;
         if ( ( msg == evPlaySwitchToPause )&( guiIntfStruct.Playing == 1 ) ) goto NoPause;
-        mplMainRender=1;
 
         switch ( guiIntfStruct.StreamType )
          {
@@ -242,7 +239,7 @@ play_dvd_2:
 #endif
          }
         mplPlay();
-        mplState();
+        mplMainRender=1;
         break;
 #ifdef USE_DVDREAD
    case evSetDVDSubtitle:
@@ -279,19 +276,14 @@ play_dvd_2:
 
    case evPause:
    case evPauseSwitchToPlay:
-//        btnModify( evPlaySwitchToPause,btnReleased );
-//        btnModify( evPauseSwitchToPlay,btnDisabled );
 NoPause:
-        mplMainRender=1;
         mplPause();
+        mplMainRender=1;
         break;
 
    case evStop:
-//        btnModify( evPlaySwitchToPause,btnReleased );
-//        btnModify( evPauseSwitchToPlay,btnDisabled );
-        mplMainRender=1;
         mplStop();
-        mplState();
+        mplMainRender=1;
         break;
 
    case evLoadPlay:
@@ -563,6 +555,7 @@ void mplMainKeyHandle( int State,int Type,int Key )
  if ( Type != wsKeyPressed ) return;
  switch ( Key )
   {
+   case wsEnter:     msg=evPlay; break;
 #ifndef HAVE_NEW_INPUT
    case '.':
    case '>':         msg=evNext; break;
@@ -571,7 +564,6 @@ void mplMainKeyHandle( int State,int Type,int Key )
 
    case wsEscape:    msg=evExit; break;
 
-   case wsEnter:     msg=evPlay; break;
    case wsSpace:     msg=evPause; break;
    case wsa:
    case wsA:         msg=evAbout; break;
