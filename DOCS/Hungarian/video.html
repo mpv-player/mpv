@@ -581,12 +581,15 @@ esd, arts)</TD><TR>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o mga_ram_size=16</CODE></P>
 
-<P>Hogy mindez automatikus legyen, a következõ sor kell az /etc/modules.conf
+<P>Hogy mindez automatikus legyen, elõszöris a következõ sor kell az /etc/modules.conf
   végére :</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;alias char-major-178 mga_vid</CODE></P>
 
-<P>És futtasd le a depmod-ot :</P>
+<P>Ezután másold az <CODE>mga_vid.o</CODE> file-t a megfelelõ helyre a
+  <CODE>/lib/modules/&lt;kernel verzió&gt;</CODE> könyvtárakon belül.</P>
+
+<P>Végül futtasd le a depmod-ot :</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;depmod -a</CODE></P>
 

@@ -598,10 +598,13 @@ memory size in MB:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;insmod mga_vid.o mga_ram_size=16</CODE></P>
 
-<P>To make it load/unload automatically when needed, insert the following line
+<P>To make it load/unload automatically when needed, first insert the following line
 at the end of /etc/modules.conf:</P>
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;alias char-major-178 mga_vid</CODE></P>
+
+<P>Then copy the <CODE>mga_vid.o</CODE> module to the appropriate place under
+  <CODE>/lib/modules/&lt;kernel version&gt;/somewhere</CODE>.</P>
 
 <P>Then run</P>
 
