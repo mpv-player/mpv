@@ -208,13 +208,13 @@
 #ifdef USE_SUB
 	{"sub", &sub_name, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 #ifdef USE_FRIBIDI
-	{"fribidi_charset", &fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"flip_hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noflip_hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"fribidi-charset", &fribidi_charset, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"flip-hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noflip-hebrew", &flip_hebrew, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #else 
-	{"fribidi_charset", "MPlayer wasn't compiled with FriBiDi support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"flip_hebrew", "MPlayer wasn't compiled with FriBiDi support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"noflip_hebrew", "MPlayer wasn't compiled with FriBiDi support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"fribidi-charset", "MPlayer wasn't compiled with FriBiDi support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"flip-hebrew", "MPlayer wasn't compiled with FriBiDi support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"noflip-hebrew", "MPlayer wasn't compiled with FriBiDi support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef USE_ICONV
 	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
