@@ -1,0 +1,213 @@
+Yes, this is the MPlayer FAQ.
+=============================
+
+About:
+~~~~~~
+Many people asked same questions so I decided to write this stuff.
+I know that people will never read this but at least i try to
+pull down number of these mails.
+And from now i can say that "read the fuckin' FAQ!" :-)
+
+Let's ask!
+~~~~~~~~~~
+Q: What about DVD playback?
+A: Read files 'DVD' and 'DVD-FAQ'.
+
+Q: SDL output doesn't work or compile. Problem is ....
+A: It is tested with newest SDL (probably runs on 1.1.7+).
+   It does NOT work with 1.1.6, 1.1.5 1.1.4 1.1.3 1.0.4 etc, don't ask.
+
+Q: I am still having trouble compiling with SDL support. gcc says something
+   about "undefined reference to `SDL_EnableKeyRepeat'"   What's now?
+A: Where did you install the SDL library? If you installed in /usr/local
+   (the default) then edit the top level config.mak and add
+   "-L/usr/local/lib " after "X_LIBS=" Now type make. You're done!
+
+Q: I have problem ... with the SDL driver.
+A: It's very experimental & buggy code, and it's UNSUPPORTED by us.
+   Please do NOT report bugs or ask features relating to SDL.
+   If you can improve it, send us patches!
+
+Q: It doesn't compile, and it misses uint64_t inttypes.h and similar things...
+A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
+   try again... if fail, contact me
+
+Q: I have Pentium III but ./configure doesn't detect SSE
+A: Only kernel versions 2.4.x supports SSE (or try latest 2.2.19 or newer, but
+   be prepared for problems)
+
+Q: -xy option doesn't work with x11 driver (-vo x11)
+A: x11 driver doesn't support scaling, but XF86VidMode support is now
+   used: you must specify the -vm and the -fs switch, and you're done.
+   Make sure you have the right Modelines in your XF86Config file, and
+   try if the DGA driver (and SDL's DGA driver, see VIDEOCARDS) works for you.
+   It's much faster. If SDL's DGA works too, use that, it'll be EVEN
+   faster!
+
+Q: audio goes out of sync playing .avi file
+A: try with -bps or -nobps option
+   if still bad, send me (upload to ftp) that file, I'll check.
+
+Q: what is the meaning of numbers in the status line?
+A: see:
+     A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0
+   - A: audio position in seconds
+   - V: video position in seconds
+   - A-V: audio-video difference in seconds (delay)
+   - ct: total A-V sync correction done
+   - frames played (counting from last seek)
+   - video codec cpu usage in percent (for mpeg it includes video_out too!)
+   - video_out cpu usage for avi, 0 for mpg (see above)
+   - audio codec cpu usage in percent
+   - dropped bad frames (mpg only)
+   Most of them are for debug purposes, and will be removed soon.
+
+Q: Why is video_out cpu usage zero (0%) for mpeg files?
+A: It's not zero, but it's built in into codec, so can't be measured separated.
+   You should try to play the file using -vo null and then -vo ... and check
+   the difference to see video_out speed...
+
+Q: OpenGL (-vo gl) output doesn't work (hangup/black window/X11 errors/...)
+A: your opengl driver doesn't support dynamic texture chanegs (glTexSubImage)
+   it's known not to work with X 4.0.x DRI drivers and nVidia's binary shit.
+   it's known to work with Utah-GLX and Matrox G400 card.
+   it will not work with 3DFX cards because the 256x256 texture size limit.
+
+Q: I have G200/G400, how to compile/use mga_vid driver?
+A: read VIDEOCARDS, INSTALL, README
+
+Q: What's XMMP? (it's XMMS or XMPS but mispelled?)
+A: It's a new project, see http://frozenproductions.com for details
+
+Q: There are error messages about file not found /usr/lib/win32/....
+A: Download & install w32codec.zip from *our* FTP
+   (avifile's codec package has different DLL set)
+
+Q: It wants to load l3codeca.acm, but I don't have such file.
+A: You should use w32codec.zip from MPlayer FTP instead of avifile's pack!
+
+Q: ...... works with avifile/aviplay while doesn't with MPlayer
+A: MPlayer != avifile
+   The only common thing between these players is the Win32 DLL loader.
+   The codecs (dll) sets, syncronization, demultiplexing etc is totaly
+   different and shouldn't be compared.
+   If something works with aviplay it doesn't mean that MPlayer should do
+   it and vice versa. You should contact me, I'll fix the bug!
+
+Q: Indeo 3.x/4.x movies are viewed upside-down!!!?
+A: It's a known bug (really it's a bug/limitation of the DLL codec)
+
+Q: Indeo 3.x,4.x video doesn't work at 32bpp resolutions (16,24 bpp are ok)
+A: It's a known bug (really it's a bug/limitation of the DLL codec)
+
+Q: I've got 'MPlayer interrupted by signal 11' in module audio_setup or
+   decode_audio.
+A: This is highly unlikely, since the mp3lib rewrite. Contact us, it may be
+   a bug. Possibly it's a damaged file, try with -afm 4 .
+
+Q: Are there rpm/deb/... packages of MPlayer?
+A: You can make a .deb package for yourself, check DOCS/DEBIAN .
+   It's _STRONGLY_ discouraged to use binary packages
+   of MPlayer, since it (currently) _highly_ depends on compile-time
+   options and optimizations!
+
+Q: Are there any mailing lists on MPlayer?
+A: Yes! See README on how to subscribe them!
+
+Q: I've found a nasty bug when I tried to play my favourite video!!
+   Who should I inform?
+A: Inform the MPlayer-users mailing list about your problem. *ALWAYS*
+   read the BUGREPORTS file about what information we NEED to identify your problem.
+   Use the developers addresses (specified in AUTHORS) only if you want to
+   flame, or want to ask for a date. ;)
+
+Q: During 'make', MPlayer complains about X11 libraries. I don't understand,
+   I DO have X installed!?
+A: ...but you don't have the X development package installed. Or not
+   correctly. It's called XFree86-devel* under RedHat, and xlib6g-dev* under
+   Debian.  Also check if the /usr/X11 symlink exists (this can be a problem on
+   Mandrake systems). It can be created with the
+	$ ln -sf /usr/X11R6 /usr/X11
+   command. Also check the /usr/include/X11 link :
+	$ ln -sf /usr/X11R6/include/X11 /usr/include/X11
+   Your distribution may differ from the Linux Filesystem Standard.
+
+Q: I have problems playing files with ... codec. Can I use'em?
+A: Check http://mplayer.sourceforge.net/DOCS/codecs.html,
+   if it doesn't contain your codec, read
+   http://mplayer.sourceforge.net/DOCS/CODECS, and contact us.
+
+Q: What about DGA driver? I can't find it!!!
+A: ./configure autodetects your DGA driver. If -vo help doesn't show
+   DGA, then there's a problem with your X installation.
+   Try ./configure --enable-dga (and read VIDEOCARDS)
+   Alternatively, try SDL's DGA driver with '-vo sdl -sdl dga' options.
+
+Q: Ok, -vo help shows DGA driver, but it is babbling about permissions!
+   Help me!
+A: It works only if running as root! It's a DGA limitation.
+   You should become to root (su -), and try again.
+
+   Another solution is making mplayer SUID root, but its NOT RECOMMENDED!
+       'chown root /usr/local/bin/mplayer'
+       'chmod 750 /usr/local/bin/mplayer'
+       'chmod +s /usr/local/bin/mplayer'
+   !!!! BUT STAY TUNED !!!!
+   This is a *BIG* security risk! *NEVER* do this on a server or on a computer
+   can be accessed by more people than only you because they can gain root
+   privilegies through suid root mplayer!!!
+   !!!! SO YOU HAVE BEEN WARNED ... !!!!
+
+Q: The fsdga driver doesn't work with my xyz.avi file. Why is that?
+A: Because it only works with MPEG. (yet)
+
+Q: When using Xvideo, my Voodoo 3/Banshee says:
+   X Error of failed request:  BadAccess (attempt to access private resource
+   denied)
+    Major opcode of failed request:  147 (MIT-SHM)
+    Minor opcode of failed request:  1 (X_ShmAttach)
+    Serial number of failed request:  26
+    Current serial number in output stream:27 
+A: Your driver is old, update it.
+
+Q: When using Xvideo, I can't play DivX avis with my Voodoo 3/Banshee !
+   It says:
+    ...
+    Xvideo image format: 0x32315659 (YV12) planar
+    Xvideo image format: 0x30323449 (I420) planar
+    ...
+A: Your driver is old, update it. The new driver also supports YUY2 required
+   for DivX.
+
+Q: I've downloaded an ASF with asfrecorder, but MPlayer can't play it !
+A: asfrecorder, and the ASF format itself is a big crap.
+   Do not contact us, go to hell.
+
+Q: Umm, what is "IdegCounter" ?
+A: A mixture of a hungarian and an english word. In english, "Ideg" means
+   "nerve", and is pronounced as something like "ydaegh" . It was first used
+   to measure the nervousness of A'rpi, after some (umm) "mystic" disappearance
+   of CVS code ;)
+
+Q: I can't compile SVGAlib.. I'm using 2.3/2.4 kernel.
+A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
+
+Q: LIRC doesn't work, because ...
+A: Are you sure you use "mplayer_lirc" instead of "mplayer" ?
+
+Q: MPlayer exits with something error when using l3codeca.acm
+A: Check 'ldd /usr/local/bin/mplayer' output. If it contains
+        libc.so.6 => /lib/libc.so.6 (0x4???????)
+   where "?" is any number then it's ok, the error is not here. If it is:
+	libc.so.6 => /lib/libc.so.6 (0x00??????)
+   then there is problem with your kernel/libc. Maybe you are using some
+   security patches (for example Solar Designer's OpenWall patch) which
+   forces loading libraries to very low addresses.
+   Because l3codeca.acm is a non-relocatable DLL, it must be loaded to
+   0x00400000, we can't change this. You should use non-patched kernel,
+   or use MPlayer's -afm 1 option to disable using l3codeca.acm.
+
+Q: My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
+   sound too slow. When I use -nosound switch, everything is ok (but quiet).
+A: Those files probably have 48Khz audio, and your soundcard/driver can't play
+   it correctly. Audio downsampling isn't implemented in MPlayer (yet).

@@ -1,0 +1,39 @@
+MTRR beallitasa X11 es/vagy mga_vid-hez:
+========================================
+
+1. baziscim megkeresese
+~~~~~~~~~~~~~~~~~~~~~~~
+3 modszer is van ra:
+
+- az X11 uzeneteibol, peldaul:
+(--) SVGA: PCI: Matrox MGA G400 AGP rev 4, Memory @ 0xd8000000, 0xd4000000
+(--) SVGA: Linear framebuffer at 0xD8000000
+
+- /proc/pci-bol (hasznald az 'lspci -v' parancsot):
+01:00.0 VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525
+        Memory at d8000000 (32-bit, prefetchable)
+        
+- az mga_vid uzeneteibol (pl. 'dmesg' parancs):
+mga_mem_base = d8000000
+
+2. memoria merete
+~~~~~~~~~~~~~~~~~
+Nagyon konnyu, csak at kell konvertalni a videomemoria meretet
+hexadecimalisba, vagy hasznald ezt a tablazatot:
+   1 MB    0x100000
+   2 MB    0x200000
+   4 MB    0x400000
+   8 MB    0x800000
+  16 MB   0x1000000
+  32 MB   0x2000000
+
+3. MTRR beallitasa
+~~~~~~~~~~~~~~~~~~
+Most hogy megvan a baziscim es a meret, allitsuk be a regisztereket!
+
+  Peldaul, a fenti Matrox kartyahoz (base=0xd8000000) 32Mb rammal
+  (size=0x2000000) a kovetkezot kell beirni:
+echo "base=0xd8000000 size=0x2000000 type=write-combining" >| /proc/mtrr
+
+ - Regebbi K6/2-k [a 266Mhz-koruliek, stepping 0] nem tamogatjak az MTRR-t,
+   mig a stepping 12-k ('cat /proc/cpuinfo' kiirja) igen.

@@ -1,0 +1,31 @@
+Q: Lenne nehany gondom ami nincs benne ebben a file-ban...
+A: Olvasd el a 'DVD' file-t is.
+
+Q: Hogy tudok DVD-ket nezni az MPlayer-rel?
+A: Ehh. Olvasd vegig ezt a file-t, es a 'DVD'-t is. (installalj libcss-t)
+
+Q: Szoval az MPlayer tud DVD lejatszast? Akkor biztos DeCSS-t hasznal!
+   Bunosok vagytok a kovetkezo vadpontokban : XYZ#$--
+A: Anyad. Nincs DeCSS kod az MPlayer-ben. libcss-hez linkeli magat.
+
+Q: Mukodni latszik, de nincs hang.
+A: Hasznald az '-aid 128' opciot (128,129,...)
+
+Q: Spanyol hang van angol helyett (vagy ilyesmi) !
+A: Lasd az utolso kerdest/valaszt.
+
+Q: MPlayer valami FIBMAP-rol zagyval.
+A: Futtasd root-kent.
+
+Q: Furcsa effekt (interlace-szeru valami) kulonosen gyors jeleneteknel
+A: Ismert problema, majd megoldjuk
+
+Q: A DVD tamogatas MPlayer-ben loszar!
+A: Igazad van :) Ha tudsz rajta javitani lepj velunk kapcsolatba!
+
+Q: Honnan tudom letolteni a libcss-t?
+A: Talan az OMS forrasabol (www.livid.org).
+
+Q: Hogy lehet ... (kepzeld ide azt ami leginkabb kellene neked DVD-hez)
+A: Jelenleg csak lejatszani lehet DVD-rol. Semmi tobb.
+

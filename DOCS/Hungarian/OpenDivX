@@ -1,0 +1,34 @@
+
+OpenDivX tamogatas MPlayer-ben
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Az OpenDivX codec reszleteirol a http://www.projectmayo.com cimen olvashatsz.
+Ez egy nyilt-forraskodu utodja a DivX codecnek (valojaban az MPEG-4 szabvany
+tovabbfejlesztese), tobb platformon letezik. A mi Decore-nk MMX-re
+optimalizalt. Az MPlayer jelenleg az OpenDivX 4.0alpha48 verziojat
+tamogatja.
+
+Dekoder:
+~~~~~~~~
+'dvx1' fourcc-vel ellatott AVI fileoknal hasznalt.
+A minoseget a '-pp' opcioval allithatod.
+Kombinald (add ossze) a flagokat amiket hasznalni akarsz:
+
+1   Y  horizontal deblocking
+2   Y  vertical deblocking
+4   C  horizontal deblocking
+8   C  vertical deblocking
+16  Y dering
+32  C dering
+
+Peldaul, ha horiz+vert chroma deblocking-et akarsz, hasznald ezt:
+  -pp 12    (4+8=12)
+
+Megj.: a C filterek csak n*16 pixel magassagu filmeknel hasznalhatoak
+
+Enkoder:
+~~~~~~~~
+Az OpenDivX-be konvertalas egy nagyon kezdetleges hack. A hang automatikusan
+kikapcsolodik. Valaszd az 'odivx'-et kimenetkent:
+  mplayer input.mpg -vo odivx -encode output.avi
+Igen, tudom hogy meg hasznalhatatlan, csak tesztelesi celokat szolgal.

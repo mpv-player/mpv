@@ -1,0 +1,65 @@
+
+Tamogatott codec-ek listaja:
+============================
+
+Nezd a http://mplayer.sourceforge.net/DOCS/codecs.html cimen.
+
+
+Hogyan hasznalj ismeretlen Win32 codec-et
+=========================================
+
+1. VfW
+~~~~~~
+  VfW (Video for Windows) a regi Video API Windowshoz. A codec-jei .DLL vagy
+(ritkabban) .DRV kiterjesztest kapnak.
+Ha az MPlayer ezt irja ki az AVI-dra:
+
+        UNKNOWN video codec: HFYU (0x55594648)
+
+  Ez azt jelenti, hogy az AVI-d egy olyan codeccel van tomoritve, aminek
+a fourcc-je HFYU (HFYU = HuffYUV codec, DIV3 = DivX Low Motion, stb...). Most
+hogy ezt mar tudod, azt kell kitalalni hogy a Windows melyik DLL-el jatssza
+le a filet. Esetunkben a system.ini ezt tartalmazza (tobbek kozott):
+        VIDC.HFYU=huffyuv.dll
+Azaz a huffyuv.dll file-ra lesz szukseg. Eszreveheto, hogy az audio codecek
+az MSACM elotagot hasznaljak :
+	msacm.l3acm=L3codeca.acm
+Ez az MP3 codec.
+
+Most hogy tudod az osszes szukseges infot (fourcc, codec file, minta AVI),
+kuldd el keresed levelben, es toltsd fel eme file-okat FTP-re:
+    ftp://thot.banki.hu/MPlayer/incoming/<codecname>/
+
+
+2. DirectShow
+~~~~~~~~~~~~~
+  DirectShow az ujabb Video API, ami tortenetesen sokkal rosszabb mint az
+elodje. Nehezebb dolgod lesz a DirectShow-val, mivel
+ - a system.ini nem tartalmazza a szukseges informaciot, ehelyett az egesz a
+   registryben van :(
+ - szukseg lesz a codec GUID-jara is.
+
+  Na kezdjuk atnezni azt az istenverte registry-t..
+ - Inditsd el a 'regedit'-et
+ - ctrl-f, kapcsold ki az elso ket checkbox-ot, es be a harmadikat. Ird be
+a codec fourcc-jet. (pl.: TM20)
+ - jo esetben elojon a path es filenev
+   (pl. : C:\WINDOWS\SYSTEM\TM20DEC.AX)
+ - most hogy ez megvolt, szukseg lesz a GUID-ra. Keress ujra, de most a
+codec nevere, ne a fourcc-re. A nev megnezheto pl. a Media Playerrel, a
+File/Properties/Advanced menupont alatt. Ha nem, igyjaras ;) Talald ki.
+   (itt : TrueMotion)
+ - ha megvan, lesz ott egy FriendlyName, es egy CLSID mezo. Ird le azt a
+16 byte-nyi CLSID-et, ez a GUID.
+
+MEGJ. : ha semmikepp nem talalod, probald meg ugy hogy bekapcsolod az osszes
+	checkboxot.. Lesz egy rakas hamis talalat, de talan meglesz az igazi
+	is...
+MEGJ. : dobd ki azt az M$ szart.
+
+Most hogy tudod az osszes szukseges infot (fourcc, GUID, codec file, minta
+AVI), kuldd el keresed levelben, es toltsd fel eme file-okat FTP-re:
+    ftp://thot.banki.hu/MPlayer/incoming/<codecname>/
+
+
+	Gabucino & A'rpi

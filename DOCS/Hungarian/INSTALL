@@ -1,0 +1,34 @@
+    =======================================================================
+     *     HOGYAN FORDITSD LE AZ MPLAYER-T * (C) 2000. A'rpi/ESP-team    *
+    =======================================================================
+
+Pontscho/Fresh! csinalt nehany scriptet es makefile-t, igy a forditas
+nagyon konnyu.
+
+1. A Lejatszo: (mplayer)
+~~~~~~~~~~~~~~
+  ./configure
+[* nezd at a config.h es config.mak file-okat! *]
+  make
+  make install
+[* ha DGA-t akarsz hasznalni olvasd el a VIDEOCARDS file-t! *]
+
+2. Driverek: (mga_vid.o)
+~~~~~~~~~~~~~~~~~~~~~~~
+  cd drivers
+  make
+  mknod /dev/mga_vid c 178 0
+  chmod go+rw /dev/mga_vid
+
+3. Matrox G400 DH TV-out:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  cd TVout
+  ./compile.sh
+
+4. Fontok:
+~~~~~~~~~
+  Toltsd le a neked tetszo .zip file-t
+  cd ~/.mplayer
+  mkdir font
+  cd font
+  unzip mp_font1.zip

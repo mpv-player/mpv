@@ -1,0 +1,57 @@
+
+LIRC tamogatas MPlayer-ben
+ irta : Andreas Ackermann 2/2001
+ contact: acki@acki-netz.de
+
+o Mi az a LIRC?
+
+ Linux Infrared Remote Control - hasznalj egy otthon is konnyen elkeszitheto
+ infravoros taviranyitot, hogy iranyitsd vele a geped!
+ Reszletek a www.lirc.org cimen.
+
+o MPlayer es a LIRC
+
+ Ha felinstallaltad a lirc csomagot, igy forditsd az MPlayer-t :
+	./configure --enable-lirc
+
+ Ha sikerult, az MPlayer ezt fogja kiirni indulaskor:
+   LIRC init was successful.
+ Ha hibat talal, azt is kiirja. Ha semmi LIRC-szerut nem mond, akkor
+ nincs beleforditva.
+
+ A megadando programnev - mily' csoda - mplayer_lirc.
+ A kovetkezo parancsokat erti:
+
+ PAUSE  - lejatszas megallitasa. Barmely masik billentyu ujrainditja.
+ QUIT   - kilepes
+ RWND   - 10 masodperccel vissza
+ FRWND  - 60 masodperccel vissza
+ FWD    - 10 masodperccel elore
+ FFWD   - 60 masodperccel elore
+ INCVOL - hangero novelese 1 szazalekkal
+ DECVOL - hangero csokkentese 1 szazalekkal
+ MASTER - 'master' mixer csatorna hasznalata
+ PCM    - 'pcm' mixer csatorna hasznalata
+
+ Ne felejtsd bekapcsolni a repeat flag-ot a RWND/FWD-hez a .lricrc-ben.
+ Itt egy pelda az enyembol:
+
+ begin
+  remote = CU-SX070
+  prog = mplayer_lirc
+  button = Tape_Play
+  repeat = 1
+  config = FFWD
+ end
+
+ begin
+  remote = CU-SX070
+  prog = mplayer_lirc
+  button = Tape_Stop
+  config = QUIT
+ end
+	      
+ Orvendezz,
+
+ -Andreas
+ 

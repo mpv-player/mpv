@@ -1,0 +1,43 @@
+
+CDROM tuning
+~~~~~~~~~~~~
+
+Bevezeto
+~~~~~~~~
+>A Linux dokumentaciojabol:
+
+Nehany CDROM meghajto kepes szabalyozni az olvasas sebesseget. Jonehany okunk
+lehet arra hogy ezt kihasznaljuk. Peldaul rosszul keszitett CDROMoknak elonyere
+valik a lassabb fejmozgas. A mai meghajtok nagyon magas fordulatszamon
+porognek, es ilyen nagy sebessegnel bizony elofordulnak olvasasi hibak, amik
+a sebesseg csokkentesevel kikuszobolhetok. Nem elhanyagolhato a sebesseggel
+aranyos zajszint se.
+
+Hogyan
+~~~~~~
+Ajanlott a 'setcd' nevu programot hasznalni. Eleg regi, de konnyen fellelheto
+a Neten.
+Hasznalata :
+	setcd -x <sebesseg> <meghajto>
+
+Masik modszer :
+	echo current_speed:4 >/proc/ide/<meghajto>/settings
+de ehhez rendszergazdai jogosultsag szukseges.
+
+A kovetkezo parancsot is hasznalom :
+	echo file_readahead:2000000 >/proc/ide/<meghajto>/settings
+Ez 2Mb-ot olvas elore olvasaskor (karcos CDROMoknal hasznos).
+
+Ajanlott tovabba a 'hdparm' program hasznalata :
+	hdparm -d1 -a8 -u1 <meghajto>
+Ez bekapcsolja a DMA hozzaferest, eloreolvasast, IRQ unmaskingot.
+(ha ezeket nem erted, *olvasd el a hdparm man-jat*)
+
+Vegszo
+~~~~~~
+Kiserletezz a /proc/ide/<meghajto>/settings file-al tovabbi tuning celjabol.
+
+	Nick Kurshev & Gabucino
+	  <nickols_k@mail.ru>
+
+

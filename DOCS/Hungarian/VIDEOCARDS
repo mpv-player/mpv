@@ -1,0 +1,195 @@
+
+Hardveres gyorsitas videokartyakhoz:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* olvasd el a DOCS/MTRR file-t is!
+
+  A "hardveres gyorsitas" altalaban hardverileg tamogatott YUV konverziot,
+scale-t, bilinear filtering-et jelent. Linux alatt jonehany modszerrel
+lehet ezeket elerni:
+
+I.   Az XFree86 4.0.2 Xv (XVideo) kiterjesztese
+II.  OpenGL driverek, megfelelo glTexSubImage() tamogatassal (jelenleg csak
+     az Utah-GLX driverek)
+III. Nativ kartyaspecifikus driverek amik egyes kartyak kulonleges
+     kepessegeit hasznaljak
+IV.  DGA - Direct Graphic Access. Nincs YUV, scaling, de meg mindig
+     gyorsabb mint X11
+V.   Nem igazan gyorsitas, hanem...
+
+Nos, lassuk oket reszletesen:
+
+De mielott elolvasnad ezt, olvasd el a DOCS/MTRR-t is, es nezd meg a
+/proc/mtrr-edet. Hidd el, megeri! P3-on tobb mint otszorosere gyorsit!!!
+
+I. Az XFree86 4.0.2 Xv (XVideo) kiterjesztese
+   Ezt hasznalja a '-vo xv' opcio.
+
+Ha mukodesre akarod birni, a kovetkezoket kell figyelembe venned:
+
+1. XFree86 4.0.2 szukseges (korabbi verziokban nincs XVideo)
+
+2. A kartyadnak tamogatnia kell a hardveres gyorsitast (ujabb kartyak kozul
+   mind)
+
+3. X-nek be kell toltenie az XVideo kiterjesztest, valahogy igy nez ki:
+   (II) Loading extension XVideo
+   a /var/log/XFree86.0.log file-ban
+   MEGJ : ez csak azt jelzi, hogy az _X_ betoltotte. Egy normalis rendszernel
+          ez alap, es nem jelenti, hogy a _kartyanak_ van XVideo
+          tamogatasa!
+
+4. A kartyad Linuxos drivere tamogatva az Xv-t. Ezt az 'xvinfo'-val lehet
+   megnezni, ez pedig az XFree86 disztribucio resze. Egy hosszu szoveget
+   kell hogy kiirjon, hasonlot ehhez:
+
+	X-Video Extension version 2.2
+	screen #0
+	  Adaptor #0: "Savage Streams Engine"
+	    number of ports: 1
+	    port base: 43
+	    operations supported: PutImage 
+	    supported visuals:
+	      depth 16, visualID 0x22
+	      depth 16, visualID 0x23
+	    number of attributes: 5
+	(...)
+	    Number of image formats: 7
+	      id: 0x32595559 (YUY2)
+	        guid: 59555932-0000-0010-8000-00aa00389b71
+	        bits per pixel: 16
+	        number of planes: 1
+	        type: YUV (packed)
+	      id: 0x32315659 (YV12)
+	        guid: 59563132-0000-0010-8000-00aa00389b71
+	        bits per pixel: 12
+	        number of planes: 3
+	        type: YUV (planar)
+	(...etc...)
+
+   Tamogatnia kell a YUY2 packed, YV12 planar pixelformatumokat, hogy
+   hasznalhato legyen MPlayer-rel.
+
+5. MPlayer-t 'xv' tamogatassal kell forditani. 'configure'-nak ezt kell
+   kiirnia:
+	Checking for Xv ... yes
+
+6. Ha ez mind OK, probald ki a '-vo xv' opciot. Mukodnie kell.
+   (ha nem teszi, kuldj nekunk egy bugreportot. Lasd DOCS/BUGREPORTS.)
+
+
+II.  OpenGL driverek, megfelelo glTexSubImage() tamogatassal
+
+   Jelenleg csak a regebbi Utah-GLX driver (X 3.3.6) tamogatja.
+   Lasd http://utah-glx.sourceforge.net
+
+   Az uj X 4.x.x/DRI-nek es az nVidia drivereknek nincs hasznalhato
+   glTexSubImage-juk :(
+
+
+III. Nativ kartyaspecifikus driverek
+
+3 nativ driver van Linuxra:
+1. Matrox G200/G400/G450 BES (Back-End Scaler) (mga_vid kernel driver)
+  Jobbara en (A'rpi) fejlesztem. Tamogat hardveres VSYNC-et, triple
+  buffering-el. Mukodik mind framebufferes konzolon, mind X alatt.
+
+  Forditsd le a drivers/ konyvtarban levo mga_vid.o-t (ird be: make)
+  hozd letre a /dev/mga_vid-et :
+	mknod /dev/mga_vid c 178 0
+  es toltsd be a drivert az 'insmod mga_vid.o' paranccsal. Ajanlott
+  leellenorizni, hogy a memoria meretet helyesen detektalta-e, a 'dmesg'
+  paranccsal. Ha rossz, hasznald az mga_ram_size opciot (eloszor 'rmmod
+  mga_vid'), es add meg a kartyad memoriajat Mb-ban:
+	insmod mga_vid.o mga_ram_size=16
+  Ha azt akarod hogy automatikusan toltodjon be, ird be a kovetkezo sort az
+  /etc/modules.conf vegere :
+	alias char-major-178 mga_vid
+
+  Hasznalata MPlayer-bol:  (eloszor forditsd ujra mga_vid supporttal...)
+
+  Hasznald az 'mga' kimenetet, ha framebuffer konzolod van (matroxfb): -vo mga
+  vagy az 'xmga'-t, ha X 3.3.6-od van: -vo xmga
+
+  Megj.: mukodik 4.0.2-es X alatt is, de az Xv driverrel nem szeretik egymast
+  ezert jobb kerulni mindketto hasznalatat. Altalaban az X ujrainditasa vagy
+  reboot szukseges hogy az Xv ujra mukodjon :(
+
+  Ha dual-head G400-ad van, es egy TV vagy masodik monitor van csatlakoztatva
+  a masodik head-re, akkor azt is hasznalhatod: olvasd el a DOCS/TVout-G400
+  file-t. (eleg nagy ganyolas)
+
+2. SiS 6326 YUV Framebuffer driver -> sis_vid kernel driver
+  A felulete elvileg kompatibilis az mga_vid-del, de ebbe nem kerultek
+  bele az mga_vid-es valtoztatasok, ugyhogy valoszinuleg nem mukodik.
+  Jelentkezok kellenek tesztelesre, javitasra.
+
+3. 3dfx (mely kartyak?) YUV+scaler support, a /dev/3dfx-el (tdfx.o driver?)
+  A /dev/3dfx kernel driver csak a 2.2.x kernelekhez letezik, es a Glide-dal
+  hasznalatos. Nincs letesztelve MPlayer-rel, ezert nem tamogatott.
+  Jelentkezok kellenek tesztelesre, javitasra.
+
+
+IV. Ha a kartyadnak nincs hardveres gyorsitasa, meg mindig meg tudod dobni
+az fps-t a DGA driverrel:
+
+1. Bizonyosodj meg hogy az X betolti a DGA kiterjesztest:
+	(II) Loading extension XFree86-DGA
+   (amint latod, XFree86 4.0.x vagy ujabb NAGYON AJANLOTT!)
+2. MPlayer DGA drivere automatikusan detektalodik ./configure-kor, de ha
+   kell, az --enable-dga opcioval kenyszeritheted is.
+3. Ha a driver nem tud kisebb felbontasba valtani, jatszadozz kicsit a
+   -vm (csak 3.3.x X-szel), -fs, -bpp, -zoom opciokkal es hatha talalsz egy
+   alkalmas modot. Jelenleg nincs konverter.. :(
+4. Legyel ROOT. DGA-nak root jogok kellenek hogy kozvetlen tudjon irni a
+   videomemoriaba. Ha felhasznalokent akarod futtatni, installald MPlayer-t
+   SUID root-kent:
+   'chown root /usr/local/bin/mplayer'
+   'chmod 750 /usr/local/bin/mplayer' 
+   'chmod +s /usr/local/bin/mplayer' 
+   Igy most menni fog user-kent is.
+   !!!! JOL FIGYELJ !!!!
+   Ez egy ORIASI biztonsagi lyuk! Soha ne csinald ezt egy szerveren, vagy
+   egy olyan gepen amit tobb ember is eler, mert igy root jogokat szerezhetnek
+   a suid MPlayer-en keresztul.
+   !!!! EN FIGYELMEZTETTELEK ... !!!!
+5. Use '-vo dga' option, and there you go! (hope so:)
+6. Try if the '-vo sdl -sdl dga' options work for you! It's much faster!!!
+
+Ha gyors geped van (pl. P3 800) probald ki az 'fsdga'-t, igy teljeskepernyos
+mpeg lejatszast kapsz (software-es YUV->RGB scaling hasznalataval):
+mplayer -vo fsdga ...
+
+
+V.   Nem igazan gyorsitas, hanem...
+
+a, Ha nincs X-ed...
+  ...hasznald az SVGAlib kimenetet! Bizonyosodj meg rola hogy nem hasznalod
+  az -fs kapcsolot, mert ez itt a software-es scaler-t kapcsolja be, es ez
+  LASSUUUU egyenlore, hacsak nincs egy igazan gyors procid (es/vagy MTRR?). :(
+
+  Termeszetesen fel kell installalnod az svgalib-et, es a fejlesztoi
+  kornyezetet, hogy MPlayer le tudja forditani az SVGAlib kimenetet
+  (automatikusan detektalja, de lehet kenyszeriteni is), es ne felejtsd el
+  atszerkeszteni az /etc/vga/libvga.config-ot, hogy tukrozze a kartyad es
+  a monitorod tulajdonsagait.
+
+  Erdemes tovabba kiprobalni az 'aalib' kimenetet ('-vo sdl -sdl aalib'),
+  igazan nagyszeru! :)
+
+b, Framebuffer-t akarsz hasznalni...
+  Annak eldontese hogy legyen-e framebuffer kimenet, a ./configure alatt
+  dol el. Olvasd el a kernelforrasban talalhato framebuffer dokumentaciot
+  (Documentation/fb/*), ami leirja hogy hogy kapcsold be, stb.. !
+
+  ... de a kartyad nem tamogatja a VBE 2.0 szabvanyt (regebbi ISA/PCI
+  kartyak, peldaul az S3 Trio64), csak a VBE 1.2-et (vagy regebbit?) :
+  Nos, VESAfb meg mindig hasznalhato, de a Linux bootolasa elott be kell
+  toltened a SciTech Display Doctor-t (regebben UniVBE). Hasznalj DOS
+  bootlemezt, vagy valami. Es ne felejtsd regisztralni az UniVBE-det ;))
+
+  Megj.: az FBdev kimenet videomod valtasa _nem mukodik_ a VESA
+         framebuffer-rel, es ne is kerd, mivel ez nem az MPlayer korlatja.
+
+	Gabucino & A'rpi
+

@@ -1,0 +1,114 @@
+Hogyan kuldj bugreportot?
+~~~~~~~~~~~~~~~~~~~~~~~~~
+Eloszoris olvasd el a DOCS/BUGS filet, es amit meg talalsz. Ha a
+problemad nem ismert, vagy a mi tanacsaink alapjan nem oldodik
+meg, akkor jelentsd be:
+
+Hol?
+====
+Iratkozz fel az mplayer-users levelezesi listara:
+   http://lists.sourceforge.net/lists/listinfo/mplayer-users
+es kuldd a bugreportot a
+   mplayer-users@lists.sourceforge.net
+cimre.
+Nem fogunk CC-zni, szoval legyszives felirtakozni!!!
+
+Ne kuldj bugreportot egyenesen valamelyik keszitonek!!!
+Egyutt dolgozunk a kodon, ezert mindenki erdekelt.
+Elofordulhat hogy mas felhasznalok mar tudjak a megoldast
+(konfiguracios problema, rossz driver, stb), megha mi azt hinnenk
+hogy a kod bugos.
+
+Legyszives reszletesen leirni a probelmat, peldakkal, stb, es ne
+felejtsd el ezeket se mellekelni:
+
+Mit?
+====
+
+1. Mindenkepp kuldj infot a rendszeredrol:
+- disztribucio
+  peldaul: RedHat 7.1 / Slackware 7.0 + csomagok 7.1-bol ...
+- kernel verzio
+  uname -a
+- libc version:
+  ls -l /lib/libc[.-]*
+- X verzio:
+  X -version
+- gcc es ld verzio:
+  gcc -v
+  ld -v
+- binutils verzio:
+  as --version
+
+1.1. Kuldd el a coredump tartalmat (ha volt).
+Hogyan:
+Hozd letre a kovetkezo parancs file-t:
+
+disass $eip $eip+15
+printf "eax=%08lX\n",$eax
+printf "ebx=%08lX\n",$ebx
+printf "ecx=%08lX\n",$ecx
+printf "edx=%08lX\n",$edx
+printf "esp=%08lX\n",$esp
+printf "ebp=%08lX\n",$ebp
+printf "edi=%08lX\n",$edi
+printf "esi=%08lX\n",$esi
+
+Aztan ird be a kovetkezot:
+gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug
+
+
+2. Hardware & driverek:
+- CPU info:
+  cat /proc/cpuinfo
+- video card gyarto es tipus:
+  peldaul:
+    ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
+    Matrox G400 DH 32MB SGRAM
+- video driver tipus es verzio
+  peldaul:
+    X beepitett drivere
+    nvidia 0.9.623
+    Utah-GLX CVS 2001-02-17
+    DRI a 4.0.3-as X-bol
+- hangkartya tipus es driver
+  peldaul:
+    Creative SBLive! Gold az oss.creative.com-rol valo driverrel
+    Creative SB16 a kernel OSS driverevel
+    GUS PnP az ALSA OSS emulaciojaval
+- ha nem vagy biztos a dolgodban, csatold az 'lspci -v' eredmenyet
+
+Forditasi problemakhoz/hibakhoz:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+3. configure/make kimenetet:
+     make distclean
+     ./configure &>config.log
+     ./make &>make.log
+   ezeket a file-okat:
+     config.h
+     config.mak
+     libvo/config.mak
+
+Lejatszasi problemakhoz:
+~~~~~~~~~~~~~~~~~~~~~~~~
+3. Az MPlayer kimenetet 1-es debug szinten (-v)
+  mplayer -v [options] filename &> mplayer.log
+
+4. Ha a problema csak egy vagy nehany filenal jelentkezik,
+  toltsd fel a file-t ide:
+    ftp://thot.banki.hu/MPlayer/incoming/
+  Altalaban az elso 1-5 Mb eleg, hogy reprodulkajuk a
+  problemat, de eloszor probald ki:
+    dd if=a_file of=kis_file bs=1k count=1024
+  (ez az 'a_file' elso 1 Mb-jat elment 'kis_file' neven')
+  Ekkor probald lejtaszani a keletkezo file-t, es ha a bug elojon,
+  akkor eleg lesz csak ennyit feltolteni.
+  SOHA ne kuldj file-t levelben! Toltsd fel, es csak a file nevet
+  kuldd el!
+  Ha a file a neten hozzaferheto, akkor a _pontos_ URL elkuldese
+  is eleg!
+
+Altalaban veve:
+  Ha valami nagy (log-ok, stb), akkor jobb ha FTP-re toltod (gzip-pel),
+  es csak a file nevet irod le a bugreportban!
+

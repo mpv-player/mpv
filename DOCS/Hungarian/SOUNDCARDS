@@ -1,0 +1,48 @@
+
+Ajanlott beallitasok kulonfele hangkartyakhoz
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+GUS PnP:
+			OSS	: nincs
+			ALSA	: (?)
+			Max kHz	: 48
+
+SB Live!:
+			OSS	: OK
+			ALSA	: (?)
+			Max kHz : 48
+
+Gravis UltraSound ACE:
+			OSS     : nem jo, maximum 44Khz !
+			ALSA    : ha szaggat a kep, hasznalj OSS-t
+			Max kHz : 48
+
+Gravis UltraSound MAX:
+			OSS     : OK
+			ALSA    : OK (?)
+			Max kHz : 48
+
+ESS 688:
+			OSS     : OK
+			ALSA    : OK (?)
+			Max kHz : 48
+
+PC Speaker or DAC:
+			OSS     : OK
+			ALSA    : nincs
+			Max kHz : 6 ;) (a driver 44.1Khz-t emulal, vagy tobbet)
+			Driver  : ftp://ftp.infradead.org/pub/pcsp
+
+ - MPlayer OSS-hez keszul, legalabbis amig at nem valtunk libxmm-re
+ - a 2.4-es kerneleket hasznald, 2.2 nincs tesztelve
+ - ha kattog a hang es CD-ROM-rol jatszol le, kapcsold be az IRQ
+   unmasking-ot !
+   peldaul "hdparm -u1 /dev/cdrom" (lasd "man hdparm" !!!)
+   Ez amugyis ajanlott... (for XMMS, etc...)
+   Olvasd el a DOCS/CDROM file-t .
+ - ne foglald le a hangkartyad masik programmal (pl. XMMS) !
+   Ha ESD-t hasznalsz, inditsd MPlayer-t az 'esddsp' programmal !
+ - Ird meg nekunk hogy mukodik egyutt az MPlayer es a kartyad!
+
+	Gabucino
+
