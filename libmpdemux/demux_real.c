@@ -696,7 +696,7 @@ void demux_open_real(demuxer_t* demuxer)
 	
 	if (chunk_size < 10){
 	    mp_msg(MSGT_DEMUX,MSGL_ERR,"demux_real: invalid chunksize! (%d)\n",chunk_size);
-	    return;
+	    break; //return;
 	}
 	
 	switch(chunk_id)
