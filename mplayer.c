@@ -413,6 +413,7 @@ char *dsp="/dev/dsp";
 int force_ni=0;
 char *conffile;
 int conffile_fd;
+char *font_name=NULL;
 #include "cfg-mplayer.h"
 
   printf("%s",banner_text);
@@ -457,6 +458,12 @@ if(video_driver && strcmp(video_driver,"help")==0){
   printf("\n");
   exit(0);
 }
+
+// check font
+  if(font_name){
+       vo_font=read_font_desc(font_name);
+       if(!vo_font) printf("Can't load font: %s\n",font_name);
+  }
 
 // check video_out driver name:
   if(!video_driver)
@@ -1134,6 +1141,7 @@ double video_time_usage=0;
 double vout_time_usage=0;
 double audio_time_usage=0;
 int grab_frames=0;
+char osd_text_buffer[64];
 
 #ifdef HAVE_LIRC
   lirc_mp_setup();
@@ -1911,6 +1919,11 @@ switch(has_video){
 
   } //  while(v_frame<a_frame || force_redraw)
 
+
+//================= Update OSD ====================
+
+sprintf(osd_text_buffer,"%02d:%02d:%02d",(int)v_pts/3600,((int)v_pts/60)%60,((int)v_pts)%60);
+vo_osd_text=osd_text_buffer;
 
 //================= Keyboard events, SEEKing ====================
 

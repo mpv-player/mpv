@@ -10,6 +10,7 @@ struct config conf[]={
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
 	{"dsp", &dsp, CONF_TYPE_STRING, 0, 0, 0},
 	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
+	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0},
 	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0},
