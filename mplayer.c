@@ -1860,6 +1860,8 @@ if(curr_filename+1<num_filenames || use_gui){
 //  if(encode_name) avi_fixate();
 }
 
+goto_next_file:  // don't jump here after ao/vo/getch initialization!
+
 #ifdef HAVE_NEW_GUI
       if(use_gui) 
        {
@@ -1869,7 +1871,6 @@ if(curr_filename+1<num_filenames || use_gui){
        }	
 #endif
 
-goto_next_file:  // don't jump here after ao/vo/getch initialization!
 if(use_gui || ++curr_filename<num_filenames){
 
   current_module="uninit_vcodec";
