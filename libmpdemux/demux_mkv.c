@@ -1823,7 +1823,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
           track->header_sizes[2] = track->private_size - offset
             - track->header_sizes[0] - track->header_sizes[1];
 
-          track->a_formattag = 0xFFFE;
+          track->a_formattag = mmioFOURCC('v', 'r', 'b', 's');
         }
       else if (!strcmp(track->codec_id, MKV_A_QDMC))
         track->a_formattag = mmioFOURCC('Q', 'D', 'M', 'C');
@@ -1952,7 +1952,7 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
           track->default_duration = 1024.0 / (float)sh_a->samplerate;
         }
     }
-  else if (track->a_formattag == 0xFFFE)  /* VORBIS */
+  else if (track->a_formattag == mmioFOURCC('v', 'r', 'b', 's'))  /* VORBIS */
     {
       for (i=0; i < 3; i++)
         {
