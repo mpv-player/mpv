@@ -1372,6 +1372,7 @@ if(stream->type==STREAMTYPE_DVD){
 #endif
 
 // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
+goto_enable_cache:
 if(stream_cache_size>0){
   current_module="enable_cache";
   if(!stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20))
@@ -1379,9 +1380,6 @@ if(stream_cache_size>0){
 }
 
 //============ Open DEMUXERS --- DETECT file type =======================
-#ifdef HAS_DVBIN_SUPPORT
-goto_open_demuxer:
-#endif
 current_module="demux_open";
 
 demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id,filename);
@@ -1568,7 +1566,8 @@ if(!sh_video && !sh_audio){
 		if(dvb_step_channel(priv, dir))
 		{
 	  		uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
-			goto goto_open_demuxer;
+			cache_uninit(stream);
+			goto goto_enable_cache;
 		}
 	  }
 	}
@@ -2933,8 +2932,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 		if(dvb_step_channel(priv, dir))
 		{
 	  		uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
-			printf("UNINIT COMPLETE\n");
-			goto goto_open_demuxer;
+			cache_uninit(stream);
+			goto goto_enable_cache;
 		}
 	  }
 	}
@@ -2967,7 +2966,8 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
   		if(dvb_set_channel(priv, cmd->args[0].v.i))
 		{
 	  	  uninit_player(INITED_ALL-(INITED_STREAM|INITED_INPUT));
-		  goto goto_open_demuxer;
+		  cache_uninit(stream);
+		  goto goto_enable_cache;
 		}
 	  }
 	}

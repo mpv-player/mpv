@@ -112,6 +112,8 @@ static int fill_menu(menu_t* menu)
 				elem->p.txt 	= name;
 				elem->num 	= n;
 				
+				if(n == 0)
+				    elem->p.prev = NULL;
 				
 				menu_list_add_entry(menu, elem);
 			}

@@ -127,7 +127,7 @@ static dvb_channels_list *dvb_get_channels(char *filename, int type)
 	int fields, row_count;
 	dvb_channel_t *ptr;
 	char *tmp_lcr, *tmp_hier, *inv, *bw, *cr, *mod, *transm, *gi;
-	const char *cbl_conf = "%a[^:]:%d:%c:%d:%a[^:]:%a[^:]:%d:%d\n";
+	const char *cbl_conf = "%a[^:]:%d:%a[^:]:%d:%a[^:]:%a[^:]:%d:%d\n";
 	const char *sat_conf = "%a[^:]:%d:%c:%d:%d:%d:%d:%d:%d:%d\n";
 	const char *ter_conf = "%a[^:]:%d:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%a[^:]:%d:%d\n";
 
@@ -296,10 +296,8 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "dvb_streaming_read(%d)\n", size);
 
-	if(priv->retry)
-		tries = 5;
-	else
-		tries = 1;
+	tries = priv->retry + 1;
+	
 	while(pos < size)
 	{
 		pfds[0].fd = fd;
@@ -375,10 +373,10 @@ int dvb_set_channel(dvb_priv_t *priv, int n)
 		dvb_demux_stop(priv->demux_fd[0]);
 		dvb_demux_stop(priv->demux_fd[1]);
 		priv->retry = 0;
-		while(stream_read(stream, buf, 4096));	//empty both the stream's and driver's buffer
+		while(dvb_streaming_read(stream, buf, 4096) > 0);	//empty both the stream's and driver's buffer
 	}
 
-	priv->retry = 1;
+	priv->retry = 5;
 	mp_msg(MSGT_DEMUX, MSGL_V, "DVB_SET_CHANNEL: channel %d\n", n);
 	list = priv->list;
 	if(list == NULL)
@@ -424,7 +422,7 @@ int dvb_set_channel(dvb_priv_t *priv, int n)
 	}
 	else
 	{
-		mp_msg(MSGT_DEMUX, MSGL_V, "SAME TUNING, NO TUNING\n");
+		mp_msg(MSGT_DEMUX, MSGL_V, "SAME TUNING PARAMETERS, NO TUNING\n");
 		do_tuning = 0;
 	}
 
@@ -638,7 +636,7 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 	struct stream_priv_s* p = (struct stream_priv_s*)opts;
 	char *name = NULL, *filename;
 	dvb_priv_t *priv;
-	int tuner_type;
+	int tuner_type = 0;
 
 
 
@@ -684,6 +682,13 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 		}
 	}
 
+	if(tuner_type == 0)
+	{
+		mp_msg(MSGT_DEMUX, MSGL_V, "OPEN_DVB: UNKNOWN OR UNDETECTABLE TUNER TYPE, EXIT\n");
+		return STREAM_ERROR;
+	}
+
+
 	priv->tuner_type = tuner_type;
 
 	mp_msg(MSGT_DEMUX, MSGL_V, "OPEN_DVB: prog=%s, card=%d, type=%d, vid=%d, aid=%d, file=%s\n",
@@ -696,20 +701,23 @@ static int dvb_open(stream_t *stream, int mode, void *opts, int *file_format)
 		{
 			if((dvb_list_ptr = dvb_get_channels(filename, tuner_type)) == NULL)
 				mp_msg(MSGT_DEMUX, MSGL_ERR, "EMPTY CHANNELS LIST FROM FILE %s!\n", filename);
-			else
-			{
-				priv->list = dvb_list_ptr;
-			}
+			priv->list = dvb_list_ptr;
 		}
 		else
 		{
-			dvb_list_ptr = NULL;
+			priv->list = dvb_list_ptr = NULL;
 			mp_msg(MSGT_DEMUX, MSGL_WARN, "NO CHANNELS FILE FOUND!\n");
 		}
 	}
 	else
 		priv->list = dvb_list_ptr;
 
+
+	if(priv->list == NULL)
+	{
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "NO CHANNELS AVAILABLE, EXIT!\n");
+		return STREAM_ERROR;
+	}
 
 	if(! strcmp(p->prog, ""))
 	{

@@ -65,7 +65,7 @@ int dvb_get_tuner_type(dvb_priv_t *priv)
   fe_fd = open(dvb_frontenddev[priv->card], O_RDWR);
   if(fe_fd < 0)
   {
-  	mp_msg(MSGT_DEMUX, MSGL_ERR, "get_tuner_type(%d, %s), ERROR IN OPENING FRONTEND DEVICE %s: %d\n", priv->card, dvb_frontenddev[priv->card], errno);
+  	mp_msg(MSGT_DEMUX, MSGL_ERR, "get_tuner_type(card %d), ERROR IN OPENING FRONTEND DEVICE %s: ERRNO %d\n", priv->card, dvb_frontenddev[priv->card], errno);
 	return 0;
   }
   
@@ -104,7 +104,7 @@ static int open_fe(dvb_priv_t *priv)
 	priv->fe_fd = open(dvb_frontenddev[priv->card], O_RDWR);
 	if(priv->fe_fd < 0)
 	{
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN OPENING FRONTEND DEVICE %s: %d\n", dvb_frontenddev[priv->card], errno);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN OPENING FRONTEND DEVICE %s: ERRNO %d\n", dvb_frontenddev[priv->card], errno);
 		return 0;
 	}
 #ifdef HAVE_DVB_HEAD
@@ -113,7 +113,7 @@ static int open_fe(dvb_priv_t *priv)
 	priv->sec_fd = open(dvb_secdev[priv->card], O_RDWR);
     if(priv->sec_fd < 0)
     {
-		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN OPENING SEC DEVICE %s: %d\n", dvb_secdev[priv->card], errno);
+		mp_msg(MSGT_DEMUX, MSGL_ERR, "ERROR IN OPENING SEC DEVICE %s: ERRNO %d\n", dvb_secdev[priv->card], errno);
 		close(priv->fe_fd);
       	return 0;
     }
@@ -209,7 +209,7 @@ dvb_tune(dvb_priv_t *priv, int freq, char pol, int srate, int diseqc, int tone,
 	
 	if(freq > 100000000)
 	{
-		tune_it(priv->fe_fd, 0, freq, 0, 0, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
+		tune_it(priv->fe_fd, 0, freq, srate, 0, tone, specInv, diseqc, modulation, HP_CodeRate, TransmissionMode, guardInterval, bandWidth);
 	}
 	else if(freq != 0)
 	{
