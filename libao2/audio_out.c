@@ -138,6 +138,11 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
     if(ao_list && ao_list[0])
       while(ao_list[0][0]){
         char* ao=strdup(ao_list[0]);
+        if (strncmp(ao, "alsa9", 5) == 0 || strncmp(ao, "alsa1x", 6) == 0) {
+          mp_msg(MSGT_AO, MSGL_FATAL, MSGTR_AO_ALSA9_1x_Removed);
+          free(ao);
+          exit_player(NULL);
+        }
 	ao_subdevice=strchr(ao,':');
 	if(ao_subdevice){
 	    ao_subdevice[0]=0;
