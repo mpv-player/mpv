@@ -245,6 +245,13 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer, int
 	//decode_reorder_frames ();
 	break;
 
+    case 0xb2:	/* user data */
+	if(buffer[0]=='C' && buffer[1]=='C')
+	    printf("libmpeg2: Closed Captions sample found! Contact MPlayer developers!  \n");
+	else
+	    printf("libmpeg2: Unknown user data. %02X %02X  \n",buffer[0],buffer[1]);
+	break;
+
     case 0xb3:	/* sequence_header_code */
 	if (header_process_sequence_header (picture, buffer)) {
 	    printf ("bad sequence header\n");
