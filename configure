@@ -592,9 +592,13 @@ case "$host_arch" in
 	;;
     6) iproc=686
 	if test "$pmodel" -ge 7; then
-		proc=athlon-xp # or MP, but it doesn't really matter
+		proc=athlon-4
 	elif test "$pmodel" -ge 6; then
-		if test "$pstepping" -ge 2; then
+		# only Athlon XP supports ssem MP, Duron etc not
+		# but most of them are cpuid 666, so check if sse detected
+		# btw. there is also athlon-mp opt, but we need extended
+		# cpuid to detect if cpu is SMP capable -> athlon-mp ::atmos
+		if test "$_sse" = yes && test "$pstepping" -ge 2; then
 			proc=athlon-xp
 		else
 			proc=athlon-4
