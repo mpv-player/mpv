@@ -255,7 +255,7 @@ linkend="realaudio">RealAudio</link> codecs.
 <sect3 id="nuppelvideo">
 <title>NuppelVideo files</title>
 <para>
-<ulink url="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</ulink>
+<ulink url="http://frost.htu.tuwien.ac.at/~roman/nuppelvideo/">NuppelVideo</ulink>
 is a TV grabber tool (AFAIK:). <application>MPlayer</application> can read
 its <filename>.NUV</filename> files (only NuppelVideo 5.0). Those files can
 contain uncompressed YV12, YV12+RTJpeg compressed, YV12 RTJpeg+lzo
@@ -375,7 +375,7 @@ produce uncompressed frames to avoid patent issues with LZW compression.
 <para>
 If your distribution does not come with <systemitem class="library">libungif</systemitem>,
 download a copy from the
-<ulink url="http://prtr-13.ucsc.edu/~badger/software/libungif/index.shtml">libungif
+<ulink url="http://sourceforge.net/projects/libungif">libungif
 homepage</ulink>. For detailed technical information, have a look at the
 <ulink url="http://www.w3.org/Graphics/GIF/spec-gif89a.txt">GIF89a specification</ulink>.
 </para>
