@@ -469,19 +469,6 @@ int use_stdin=0; //int f; // filedes
     parse_cfgfiles();
     num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
     if(num_filenames<0) exit(1); // error parsing cmdline
-    if(!num_filenames && !vcd_track && !dvd_title){
-	// no file/vcd/dvd -> show HELP:
-	printf("%s",help_text);
-	exit(0);
-    }
-
-    // Many users forget to include command line in bugreports...
-    if(verbose){
-      printf("CommandLine:");
-      for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
-      printf("\n");
-      printf("num_filenames: %d\n",num_filenames);
-    }
 
 #ifndef USE_LIBVO2
     if(video_driver && strcmp(video_driver,"help")==0){
@@ -504,6 +491,20 @@ int use_stdin=0; //int f; // filedes
       }
       printf("\n");
       exit(0);
+    }
+
+    if(!num_filenames && !vcd_track && !dvd_title){
+	// no file/vcd/dvd -> show HELP:
+	printf("%s",help_text);
+	exit(0);
+    }
+
+    // Many users forget to include command line in bugreports...
+    if(verbose){
+      printf("CommandLine:");
+      for(i=1;i<argc;i++)printf(" '%s'",argv[i]);
+      printf("\n");
+      printf("num_filenames: %d\n",num_filenames);
     }
 
 #ifdef HAVE_GUI
