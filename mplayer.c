@@ -1468,7 +1468,7 @@ while(!eof){
 
     if(play_n_frames>=0){
       --play_n_frames;
-      if(play_n_frames<=0) eof = PT_NEXT_ENTRY;
+      if(play_n_frames<0) eof = PT_NEXT_ENTRY;
     }
 
 /*========================== PLAY AUDIO ============================*/
