@@ -2,10 +2,15 @@
 Ajanlott beallitasok kulonfele hangkartyakhoz
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+Aureal Vortex 2:
+                        OSS     : OK
+                        ALSA    : nincs
+                        Max kHz : 48 (?)
+
 GUS PnP:
-			OSS	: nincs
-			ALSA	: (?)
-			Max kHz	: 48
+                        OSS     : nincs
+                        ALSA    : lasd Aureal Vortex2
+                        Max kHz : 48
 
 SB Live!:
 			OSS	: OK
@@ -13,8 +18,9 @@ SB Live!:
 			Max kHz : 48
 
 Gravis UltraSound ACE:
-			OSS     : nem jo, maximum 44Khz !
-			ALSA    : ha szaggat a kep, hasznalj OSS-t
+			OSS     : nem jo, maximum 44Khz ! Az uj audio koddal
+				  is bugzik...
+			ALSA    : OK
 			Max kHz : 48
 
 Gravis UltraSound MAX:
