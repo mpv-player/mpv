@@ -1,4 +1,4 @@
-		NUT Open Container Format DRAFT 20040911
+		NUT Open Container Format DRAFT 20050111
 		----------------------------------------
 
 
@@ -89,10 +89,9 @@ main header:
 	version					v
 	stream_count				v
 	max_distance				v
-	max_short_distance			v
+	max_index_distance			v
 	global_time_base_nom			v
 	global_time_base_denom			v
-	short_startcode				v
 	for(i=0; i<256; ){
 		tmp_flag			v
 		tmp_fields			v
@@ -133,11 +132,7 @@ stream_header:
 	decode_delay				v
 	fixed_fps				u(1)
 	reserved				u(6)
-	for(;;){
-		codec_specific_data_type	v
-		if(codec_specific_data_type==0) break;
-		codec_specific_data		vb
-	}
+	codec_specific_data			vb
 
 video_stream_header:
 	stream_header
@@ -176,6 +171,7 @@ frame
 Index:
 	index_startcode				f(64)
 	packet header
+	stream_id				v
 	index_length				v
 	for(i=0; i<index_length; i++){
 		index_timestamp			v
@@ -184,7 +180,7 @@ Index:
 	reserved_bytes
 	checksum				u(32)
 
-info_packet: (optional) (file global)
+info_packet: (optional)
 	info_startcode				f(64)
 	packet header
 	for(;;){
@@ -192,27 +188,6 @@ info_packet: (optional) (file global)
 		if(id==0) break
 		name= info_table[id][0]
 		type= info_table[id][1]
-		if(type==NULL)
-			type			vb
-		if(name==NULL)
-			name			vb
-		if(type=="v")
-			value			v
-		else
-			value			vb
-	}
-	reserved_bytes
-        checksum				u(32)
-
-meta_packet: (optional) (stream specific)
-	meta_startcode				f(64)
-	packet header
-	stream_id				v
-	for(;;){
-		id				v
-		if(id==0) break
-		name= meta_table[id][0]
-		type= meta_table[id][1]
 		if(type==NULL)
 			type			vb
 		if(name==NULL)
@@ -243,9 +218,7 @@ file
 			if(next_code == info_startcode)
 				info_packet
 			else{
-				if(next_code == short_startcode)
-					short_startcode    u(24)
-				else if(next_code == frame_startcode)                
+				if(next_code == frame_startcode)
 					sync_point
 				frame
 			}
@@ -277,8 +250,6 @@ index_startcode
 	0xDD672F23E64EULL + (((uint64_t)('N'<<8) + 'X')<<48)
 info_startcode
 	0xAB68B596BA78ULL + (((uint64_t)('N'<<8) + 'I')<<48)
-meta_startcode
-	FIXME
 
 version
 	2 for now
@@ -292,31 +263,24 @@ max_distance
 	reason to set it higher otherwise reasonable error recovery will be
 	impossible
 
-max_short_distance
-	max distance of short startcodes or frame_startcodes, the distance may
-	only be larger if there is only a single frame between the 2 
-	frame_startcodes/short startcodes this can be used by the demuxer to
-	detect damaged frame headers if the damage results in a too long chain
-	SHOULD be set to <=4096 or at least <=8192 unless there is a very good
-	reason to set it higher otherwise reasonable error recovery will be
-	impossible
+max_index_distance
+	max distance of keyframes which are represented in the index, the
+	distance between consecutive entries A and B may only be larger if
+	there are no keyframes within this stream between A and B
+	SHOULD be set to <=32768 or at least <=65536 unless there is a very good
+	reason to set it higher
 
-
-short_startcode
-	MUST be 3 bytes long and MUST have 'N' as first byte, the second byte
-	MUST not be a printable uppercase letter / must not be within 65..90, 
-	default is 0x4EFE79
-
-stream_id
+stream_id[FIXME]
 	Note: streams with a lower relative class MUST have a lower relative id
-	so a stream with class 0 MUST allways have a id which is lower then any
+	so a stream with class 0 MUST always have a id which is lower then any
 	stream with class > 0
 	stream_id MUST be < stream_count
 
 stream_class
 	0	video
-	32	audio
-	64	subtiles
+	1	audio
+	2	subtiles
+	3	metadata
 	Note the remaining values are reserved and MUST NOT be used
 	     a demuxer MUST ignore streams with reserved classes
 
@@ -325,13 +289,6 @@ fourcc
 	example: "H264"
 	MUST contain 2 or 4 bytes, note, this might be increased in the future
 	if needed
-      
-language_code 
-	ISO 639 and ISO 3166 for language/country code
-	something like "usen" (US english), can be 0
-	if unknown
-	see http://www.loc.gov/standards/iso639-2/englangn.html
-	and http://www.din.de/gremien/nas/nabd/iso3166ma/codlstp1/en_listp1.html
 
 time_base_nom / time_base_denom = time_base
 	the number of timer ticks per second, this MUST be equal to the fps
@@ -382,16 +339,6 @@ decode_delay
 fixed_fps
 	1 indicates that the fps is fixed
 
-codec_specific_data_type
-	0	none/end
-	1	native
-	2	bitmapinfoheader
-	3	waveformatex
-	4	imagedesc
-	5	sounddesc
-	"native", means a simple api & container independent storage form,
-	for example some mpeg4-es headers
-        
 codec_specific_data
 	private global data for a codec (could be huffman tables or ...)
 
@@ -487,11 +434,15 @@ checksum
 	adler32 checksum
 
 index_timestamp
-	value of the timetamp in a sync point relative to the last sync-point
+	value of the timetamp of a keyframe relative to the last keyframe
+	stored in this index
 
 index_position
-	position in bytes of the first byte of a sync-point, relative to the
-	last sync_point
+	position in bytes of the first byte of a keyframe, relative to the
+	last keyframe stored in this index
+	there MUST be no keyframe with the same stream_id as this index between
+	2 consecutive index entries if they are more then max_index_distance
+	appart
 
 id
 	the id of the type/name pair, so its more compact
@@ -504,6 +455,7 @@ type
 
 info packet types
 	the name of the info entry, valid names are
+	"StreamId"	the stream(s) to which the info packet applies
 
 	"Author"
 	"Description"
@@ -520,10 +472,11 @@ info packet types
 			Note: dont forget the timezone
 	"Keywords"
 	"TotalTime"	total length of the stream in msecs
-	
-meta packet types
-	"ReplayGain"
-	"Language"	the language code
+	"Language"	ISO 639 and ISO 3166 for language/country code
+			something like "eng" (US english), can be 0 if unknown
+			and "multi" if several languages
+			see http://www.loc.gov/standards/iso639-2/englangn.html
+			and http://www.din.de/gremien/nas/nabd/iso3166ma/codlstp1/en_listp1.htmlthe language code
 	"Disposition"	"original", "dub" (translated), "comment", "lyrics", "karaoke"
 	Note: if someone needs some others, please tell us about them, so we can
 	      add them to the official standard (if they are sane)
@@ -543,25 +496,17 @@ info_table[][2]={
 	{NULL			, "UTF8"},
 	{NULL			, "v"},
 	{NULL			, "s"},
+	{"StreamId"		, "v"},
 	{"Author"		, "UTF8"},
 	{"Titel"		, "UTF8"},
+	{"Language"		, "UTF8"},
 	{"Description"		, "UTF8"},
 	{"Copyright"		, "UTF8"},
 	{"Encoder"		, "UTF8"},
 	{"Keyword"		, "UTF8"},
 	{"Cover"		, "JPEG"},
 	{"Cover"		, "PNG"},
-};
-
-meta_table[][2]={
-	{NULL			,  NULL }, // end
-	{NULL			,  NULL },
-	{NULL			, "UTF8"},
-	{NULL			, "v"},
-	{NULL			, "s"},
-	{"Language"		, to be decided},
-	{"Disposition"		, to be decided},
-	{"ReplayGain"		, to be decided},
+	{"Disposition"		, "UTF8"},
 };
 
 			Structure:
@@ -596,7 +541,7 @@ Note: in case of realtime streaming there is no end, so no index there either
 
 		Info packets
 the info_packet can be repeated, it can also contain different names & values
-each time but only if allso the time is different
+each time but only if also the time is different
 Info packets can be used to describe the file or some part of it (chapters)
 
 info packets, SHOULD be placed at the begin of the file at least
