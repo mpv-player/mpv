@@ -101,6 +101,9 @@ There is 3 native drivers for Linux:
   Note: it works under X 4.0.2 too, but it conflicts with the Xv driver,
   so avoid using both. Usually X restart or reboot needs to get Xv usable
   again :(
+  
+  If you have a dual-head G400, and a TV or second monitor connected to head2,
+  then you can watch movies on it: read DOCS/TVout-G400 for details (big hack)
 
 2. SiS 6326 YUV Framebuffer driver -> sis_vid kernel driver
   Its interface should be compatible with the mga_vid, but the driver
