@@ -581,11 +581,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(device_width, device_height);
-
-	movie_aspect = (float)imgRect.right/(float)imgRect.bottom;
-	old_movie_aspect = movie_aspect; 
 	
 	aspect(&d_width,&d_height,A_NOZOOM);
+	
+	movie_aspect = (float)d_width/(float)d_height;
+	old_movie_aspect = movie_aspect;
 	
 	if(image_data)
 		free(image_data);
