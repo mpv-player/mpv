@@ -236,7 +236,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 
 	// Lock stdin if it will be used as input
 	if(strcasecmp(argv[i],"-") == 0)
-	  m_config_set_option(config,"use-stdin",NULL);
+	  m_config_set_option(config,"noconsolecontrols",NULL);
 	add_entry(&last_parent,&last_entry,entry);
 	UNSET_GLOBAL; // We start entry specific options
 

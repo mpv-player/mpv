@@ -184,7 +184,7 @@ extern void vf_list_plugins();
 
 // Common FIFO functions, and keyboard/event FIFO code
 #include "fifo.c"
-int use_stdin=0;
+int noconsolecontrols=0;
 //**************************************************************************//
 
 vo_functions_t *video_out=NULL;
@@ -1146,7 +1146,7 @@ if(slave_mode)
 #else
   mp_input_add_cmd_fd(0,0,mp_input_win32_slave_cmd_func,NULL);
 #endif
-else if(!use_stdin)
+else if(!noconsolecontrols)
 #ifndef HAVE_NO_POSIX_SELECT
   mp_input_add_key_fd(0,1,NULL,NULL);
 #else
@@ -1211,7 +1211,7 @@ play_next_file:
 
 // We must enable getch2 here to be able to interrupt network connection
 // or cache filling
-if(!use_stdin && !slave_mode){
+if(!noconsolecontrols && !slave_mode){
   if(inited_flags&INITED_GETCH2)
     mp_msg(MSGT_CPLAYER,MSGL_WARN,"WARNING: getch2_init called twice!\n");
   else

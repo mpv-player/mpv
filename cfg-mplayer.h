@@ -4,7 +4,7 @@
 
 #include "cfg-common.h"
 
-extern int use_stdin;
+extern int noconsolecontrols;
 
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA)
 extern char *monitor_hfreq_str;
@@ -417,7 +417,9 @@ m_option_t mplayer_opts[]={
 #endif
 
 	{"slave", &slave_mode, CONF_TYPE_FLAG,CONF_GLOBAL , 0, 1, NULL},
-	{"use-stdin", &use_stdin, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"use-stdin", "-use-stdin has been renamed to -noconsolecontrols, use that instead.", CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"noconsolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"consolecontrols", &noconsolecontrols, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 0, NULL},
 
 #define MAIN_CONF
 #include "cfg-common.h"

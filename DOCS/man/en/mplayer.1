@@ -523,6 +523,15 @@ Use an alternative menu.conf.
 .B \-menu-root <value> (OSD menu only)
 Specify the main menu.
 .TP
+.B \-noconsolecontrols
+Prevent MPlayer from reading key events from standard input.
+Useful when reading data from standard input.
+This is automatically enabled when \- is found on the command line.
+There are situations where you have to set it manually, e.g.
+if you open /dev/stdin (or the equivalent on your system), use stdin
+in a playlist or intend to read from stdin later on via the loadfile or
+loadlist slave commands.
+.TP
 .B \-nojoystick
 Turns off joystick support.
 .TP
@@ -586,15 +595,6 @@ Slow down or speed up playback by the factor given as parameter.
 .B \-sstep <sec>
 Display one frame every <sec> seconds.
 Useful for slideshows.
-.TP
-.B \-use-stdin
-Prevent MPlayer from reading key events from standard input.
-Useful when reading data from standard input.
-This is automatically enabled when \- is found on the command line.
-There are situations where you have to set it manually, e.g.
-if you open /dev/stdin (or the equivalent on your system), use stdin
-in a playlist or intend to read from stdin later on via the loadfile or
-loadlist slave commands.
 .
 .
 .SH "DEMUXER/STREAM OPTIONS"
