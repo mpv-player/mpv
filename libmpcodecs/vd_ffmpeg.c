@@ -338,9 +338,11 @@ static void uninit(sh_video_t *sh){
     if (avctx->extradata_size)
 	free(avctx->extradata);
     avctx->extradata=NULL;
+#if LIBAVCODEC_BUILD >= 4689
     if (avctx->palctrl)
 	    free(avctx->palctrl);
     avctx->palctrl=NULL;
+#endif
     if(avctx->slice_offset!=NULL) 
         free(avctx->slice_offset);
     avctx->slice_offset=NULL;
