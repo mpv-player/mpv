@@ -31,6 +31,7 @@
 #define TDFX_VID_MAJOR 178
 
 MODULE_AUTHOR("Albeu");
+MODULE_DESCRIPTION("A driver for Banshee targeted for video app");
 
 #ifdef MODULE_LICENSE
 MODULE_LICENSE("GPL");
@@ -55,9 +56,16 @@ static agp_kern_info agp_info;
 static agp_memory *agp_mem = NULL;
 
 static __initdata int tdfx_map_io = 1;
+static __initdata unsigned long map_start = 0; //0x7300000;
+static __initdata unsigned long map_max = (10*1024*1024);
+static unsigned long map_base = 0;
 
 MODULE_PARM(tdfx_map_io,"i");
 MODULE_PARM_DESC(tdfx_map_io, "Set to 0 to use the page fault handler (you need to patch agpgart_be.c to allow the mapping in user space)\n");
+MODULE_PARM(map_start,"l");
+MODULE_PARM_DESC(map_start,"Use a block of physical mem instead of the agp arerture.");
+MODULE_PARM(map_max,"l");
+MODULE_PARM_DESC(map_max, "Maximum amout of physical memory (in bytes) that can be used\n");
 
 static inline u32 tdfx_inl(unsigned int reg) {
   return readl(tdfx_mmio_base + reg);
@@ -224,14 +232,14 @@ static void agp_close(void) {
       
 
   drm_agp->release();
-
+  inter_module_put("drm_agp");
 }
 
 static int agp_move(tdfx_vid_agp_move_t* m) {
   u32 src = 0;
   u32 src_h,src_l;
 
-  if(!agp_mem)
+  if(!(agp_mem||map_start))
     return (-EAGAIN);
 
   if(m->move2 > 3) {
@@ -240,8 +248,10 @@ static int agp_move(tdfx_vid_agp_move_t* m) {
     return (-EAGAIN);
   }
 
-
-  src =  agp_info.aper_base +  m->src;
+  if(map_start)
+    src =  map_start + m->src;
+  else
+    src =  agp_info.aper_base +  m->src;
 
   src_l = (u32)src;
   src_h = (m->width | (m->src_stride << 14)) & 0x0FFFFFFF;
@@ -317,7 +327,7 @@ static void tdfx_vid_get_config(tdfx_vid_config_t* cfg) {
     cfg->screen_format = 0;
     break;
   }
-  cfg->screen_stride = tdfx_inl(VIDDESKSTRIDE);
+  cfg->screen_stride = tdfx_inl(VIDDESKSTRIDE) & 0x7FFF;
   cfg->screen_start = tdfx_inl(VIDDESKSTART);
 }
 
@@ -373,9 +383,9 @@ inline static u32 tdfx_vid_make_format(int src,u16 stride,u32 fmt) {
 }
 
 static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
-  u32 src_fmt,dst_fmt;
+  u32 src_fmt,dst_fmt,cmd = 2;
   u32 cmin,cmax,srcbase,srcxy,srcfmt,srcsize;
-  u32 dstbase,dstxy,dstfmt,dstsize;
+  u32 dstbase,dstxy,dstfmt,dstsize = 0;
   u32 cmd_extra = 0,src_ck[2],dst_ck[2],rop123=0;
   
   //printk(KERN_INFO "tdfx_vid: Make src fmt 0x%x\n",blit->src_format);
@@ -390,6 +400,12 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   // Be nice if user just want a simple blit
   if((!blit->colorkey) && (!blit->rop[0]))
     blit->rop[0] = TDFX_VID_ROP_COPY;
+  // No stretch : fix me the cmd should be 1 but it
+  // doesn't work. Maybe some other regs need to be set
+  // as non-stretch blit have more options
+  if(((!blit->dst_w) && (!blit->dst_h)) || 
+     ((blit->dst_w == blit->src_w) && (blit->dst_h == blit->src_h)))
+    cmd = 2;
   
   // Save the regs otherwise fb get crazy
   // we can perhaps avoid some ...
@@ -403,7 +419,8 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   dstbase = tdfx_inl(DSTBASE);
   dstxy = tdfx_inl(DSTXY);
   dstfmt = tdfx_inl(DSTFORMAT);
-  dstsize = tdfx_inl(DSTSIZE);
+  if(cmd == 2)
+    dstsize = tdfx_inl(DSTSIZE);
   if(blit->colorkey & TDFX_VID_SRC_COLORKEY) {
     src_ck[0] = tdfx_inl(SRCCOLORKEYMIN);
     src_ck[1] = tdfx_inl(SRCCOLORKEYMAX);
@@ -437,10 +454,11 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   tdfx_outl(DSTBASE,blit->dst & 0x00FFFFFF);
   tdfx_outl(DSTXY,XYREG(blit->dst_x,blit->dst_y));
   tdfx_outl(DSTFORMAT,dst_fmt);
-  tdfx_outl(DSTSIZE,XYREG(blit->dst_w,blit->dst_h));
+  if(cmd == 2)
+    tdfx_outl(DSTSIZE,XYREG(blit->dst_w,blit->dst_h));
 
   // Send the command
-  tdfx_outl(COMMAND_2D,0x102 | (blit->rop[0] << 24));
+  tdfx_outl(COMMAND_2D,cmd | 0x100 | (blit->rop[0] << 24));
   banshee_wait_idle();
 
   // Now restore the regs to make fb happy
@@ -453,7 +471,8 @@ static int tdfx_vid_blit(tdfx_vid_blit_t* blit) {
   tdfx_outl(DSTBASE, dstbase);
   tdfx_outl(DSTXY, dstxy);
   tdfx_outl(DSTFORMAT, dstfmt);
-  tdfx_outl(DSTSIZE, dstsize);
+  if(cmd == 2)
+    tdfx_outl(DSTSIZE, dstsize);
   if(blit->colorkey & TDFX_VID_SRC_COLORKEY) {
     tdfx_outl(SRCCOLORKEYMIN,src_ck[0]);
     tdfx_outl(SRCCOLORKEYMAX,src_ck[1]);
@@ -498,6 +517,170 @@ static int tdfx_vid_get_yuv(unsigned long arg) {
 
   return 0;
 }
+
+static int tdfx_vid_set_overlay(unsigned long arg) {
+  tdfx_vid_overlay_t ov;
+  uint32_t screen_w,screen_h;
+  uint32_t vidcfg,stride,vidbuf;
+  int disp_w,disp_h;
+
+  if(copy_from_user(&ov,(tdfx_vid_overlay_t*)arg,sizeof(tdfx_vid_overlay_t))) {
+    printk(KERN_DEBUG "tdfx_vid:failed copy from userspace\n");
+    return(-EFAULT); 
+  }
+
+  if(ov.dst_x < 0 || ov.dst_y < 0) {
+    printk(KERN_DEBUG "tdfx_vid: Negative x/y not yet supported\n");
+    return(-EFAULT);
+  }
+
+  vidcfg = tdfx_inl(VIDPROCCFG);
+  // clear the overlay fmt
+  vidcfg &= ~(7 << 21);
+  switch(ov.format) {
+  case TDFX_VID_FORMAT_BGR15:
+    vidcfg |= (1 << 21);
+    break;
+  case TDFX_VID_FORMAT_BGR16:
+    vidcfg |= (7 << 21);
+    break;
+  case TDFX_VID_FORMAT_YUY2:
+    vidcfg |= (5 << 21);
+    break;
+  case TDFX_VID_FORMAT_UYVY:
+    vidcfg |= (6 << 21);
+    break;
+  default:
+    printk(KERN_DEBUG "tdfx_vid: Invalid overlay fmt 0x%x\n",ov.format);
+    return (-EFAULT); 
+  }
+
+  // YUV422 need 4 bytes aligned stride and address
+  if((ov.format == TDFX_VID_FORMAT_YUY2 ||
+      ov.format == TDFX_VID_FORMAT_UYVY)) {
+    if((ov.src_stride & ~0x3) != ov.src_stride) {
+      printk(KERN_DEBUG "tdfx_vid: YUV need a 4 bytes aligned stride %d\n",ov.src_stride);
+      return(-EFAULT);
+    }
+    if((ov.src[0] & ~0x3) != ov.src[0] || (ov.src[1] & ~0x3) != ov.src[1]){
+      printk(KERN_DEBUG "tdfx_vid: YUV need a 4 bytes aligned address 0x%x 0x%x\n",ov.src[0],ov.src[1]);
+      return(-EFAULT);
+    }
+  }
+
+  // Now we have a good input format
+  // but first get the screen size to check a bit
+  // if the size/position is valid
+  screen_w = tdfx_inl(VIDSCREENSIZE);
+  screen_h = (screen_w >> 12) & 0xFFF;
+  screen_w &= 0xFFF;
+  disp_w =  ov.dst_x + ov.dst_width > screen_w ?
+    screen_w - ov.dst_x : ov.dst_width;
+  disp_h =  ov.dst_y + ov.dst_height > screen_h ?
+    screen_h - ov.dst_y : ov.dst_height;
+
+  if(ov.dst_x >= screen_w || ov.dst_y >= screen_h ||
+     disp_h <= 0 || disp_h > screen_h || disp_w <= 0 || disp_w > screen_w) {
+    printk(KERN_DEBUG "tdfx_vid: Invalid overlay dimension and/or position\n");
+    return (-EFAULT); 
+  }
+  // Setup the vidproc
+  // H scaling
+  if(ov.src_width != ov.dst_width)
+    vidcfg |= (1<<14);
+  else
+    vidcfg &= ~(1<<14);
+  // V scaling
+  if(ov.src_height != ov.dst_height)
+    vidcfg |= (1<<15);
+  else
+    vidcfg &= ~(1<<15);
+  // Filtering can only be used in 1x mode
+  if(!(vidcfg | (1<<26)))
+    vidcfg |= (3<<16);
+  else
+    vidcfg &= ~(3<<16);
+  // disable overlay stereo mode
+  vidcfg &= ~(1<<2);
+  // Colorkey on/off
+  if(ov.use_colorkey) {
+    // Colorkey inversion
+    if(ov.invert_colorkey)
+      vidcfg |= (1<<6);
+    else
+      vidcfg &= ~(1<<6);
+    vidcfg |= (1<<5);
+  } else
+    vidcfg &= ~(1<<5);
+  // Overlay isn't VidIn
+  vidcfg &= ~(1<<9);
+  // vidcfg |= (1<<8);
+  tdfx_outl(VIDPROCCFG,vidcfg);
+
+  // Start coord
+  tdfx_outl(VIDOVRSTARTCRD,(ov.dst_x & 0xFFF)|((ov.dst_y & 0xFFF)<<12));
+  // End coord
+  tdfx_outl(VIDOVRENDCRD, ((ov.dst_x + disp_w) & 0xFFF)|
+	    (((ov.dst_y + disp_h) & 0xFFF)<<12));
+  // H Scaling
+  tdfx_outl(VIDOVRDUDX,( ((u32)ov.src_width) << 20) / ov.dst_width);
+  // Src offset and width (in bytes)
+  tdfx_outl(VIDOVRDUDXOFF,((ov.src_width<<1) & 0xFFF) << 19);
+  // V Scaling
+  tdfx_outl(VIDOVRDVDY, ( ((u32)ov.src_height) << 20) / ov.dst_height);
+  //else
+  //  tdfx_outl(VIDOVRDVDY,0);
+  // V Offset
+  tdfx_outl(VIDOVRDVDYOFF,0);
+  // Overlay stride
+  stride = tdfx_inl(VIDDESKSTRIDE) & 0xFFFF;
+  tdfx_outl(VIDDESKSTRIDE,stride | (((u32)ov.src_stride) << 16));
+  // Buffers address
+  tdfx_outl(LEFTOVBUF, ov.src[0]);
+  tdfx_outl(RIGHTOVBUF, ov.src[1]);
+
+  // Send a swap buffer cmd if we are not on one of the 2 buffers
+  vidbuf = tdfx_inl(VIDCUROVRSTART);
+  if(vidbuf != ov.src[0] && vidbuf != ov.src[1]) {
+    tdfx_outl(SWAPPENDING,0);
+    tdfx_outl(SWAPBUFCMD, 1);
+  }
+  printk(KERN_DEBUG "tdfx_vid: Buf0=0x%x Buf1=0x%x Current=0x%x\n",
+	 ov.src[0],ov.src[1],tdfx_inl(VIDCUROVRSTART));
+  // Colorkey
+  if(ov.use_colorkey) {
+    tdfx_outl(VIDCHRMIN,ov.colorkey[0]);
+    tdfx_outl(VIDCHRMAX,ov.colorkey[1]);
+  }
+
+  return 0;
+}
+
+static int tdfx_vid_overlay_on(void) {
+  uint32_t vidcfg = tdfx_inl(VIDPROCCFG);
+  //return 0;
+  if(vidcfg & (1<<8)) { // Overlay is alredy on
+    printk(KERN_DEBUG "tdfx_vid: Overlay is alredy on\n");
+    return (-EFAULT); 
+  }
+  vidcfg |= (1<<8);
+  tdfx_outl(VIDPROCCFG,vidcfg);
+  return 0;
+}
+
+static int tdfx_vid_overlay_off(void) {
+  uint32_t vidcfg = tdfx_inl(VIDPROCCFG);
+
+  if(vidcfg & (1<<8)) {
+    vidcfg &= ~(1<<8);
+    tdfx_outl(VIDPROCCFG,vidcfg);
+    return 0;
+  }
+
+  printk(KERN_DEBUG "tdfx_vid: Overlay is alredy off\n");
+  return (-EFAULT); 
+}
+
 
 static int tdfx_vid_ioctl(struct inode *inode, struct file *file, unsigned int cmd, unsigned long arg)
 {
@@ -544,6 +727,12 @@ static int tdfx_vid_ioctl(struct inode *inode, struct file *file, unsigned int c
     return tdfx_vid_set_yuv(arg);
   case TDFX_VID_GET_YUV:
     return tdfx_vid_get_yuv(arg);
+  case TDFX_VID_SET_OVERLAY:
+    return tdfx_vid_set_overlay(arg);
+  case TDFX_VID_OVERLAY_ON:
+    return tdfx_vid_overlay_on();
+  case TDFX_VID_OVERLAY_OFF:
+    return tdfx_vid_overlay_off();
   default:
     printk(KERN_ERR "tdfx_vid: Invalid ioctl %d\n",cmd);
     return (-EINVAL);
@@ -642,11 +831,31 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
   printk(KERN_DEBUG "tdfx_vid: mapping agp memory into userspace\n");
 #endif
 
+  size = (vma->vm_end-vma->vm_start + PAGE_SIZE - 1) / PAGE_SIZE;
+
+  if(map_start) { // Ok we map directly in the physcal ram
+    if(size*PAGE_SIZE > map_max) {
+      printk(KERN_ERR "tdfx_vid: Not enouth mem\n");
+      return(-EAGAIN);
+    }
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2,5,3)
+    if(remap_page_range(vma, vma->vm_start,map_start,
+			vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+#else
+    if(remap_page_range(vma->vm_start, (unsigned long)map_start,
+			vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
+#endif
+      {
+	printk(KERN_ERR "tdfx_vid: error mapping video memory\n");
+	return(-EAGAIN);
+      }
+    printk(KERN_INFO "Physical mem 0x%lx mapped in userspace\n",map_start);
+    return 0;
+  }
+
   if(agp_mem)
     return(-EAGAIN);
- 
-  size = (vma->vm_end-vma->vm_start + PAGE_SIZE - 1) / PAGE_SIZE;
-  
+
   agp_mem = drm_agp->allocate_memory(size,AGP_NORMAL_MEMORY);
   if(!agp_mem) {
     printk(KERN_ERR "Failed to allocate AGP memory\n");
@@ -681,8 +890,8 @@ static int tdfx_vid_mmap(struct file *file, struct vm_area_struct *vma)
     vma->vm_flags |= VM_LOCKED | VM_IO;
     vma->vm_ops = &tdfx_vid_vm_ops;
     vma->vm_ops->open(vma);
+    printk(KERN_INFO "Page fault handler ready !!!!!\n");
   }
-  printk(KERN_INFO "Page fault handler ready !!!!!\n");
 
   return 0;
 }

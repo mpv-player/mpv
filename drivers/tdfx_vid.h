@@ -80,11 +80,27 @@ typedef struct tdfx_vid_yuv_s {
   uint16_t stride;
 } tdfx_vid_yuv_t;
 
-#define TDFX_VID_GET_CONFIG _IOR('J', 1, tdfx_vid_config_t)
-#define TDFX_VID_AGP_MOVE _IOR('J', 2, tdfx_vid_agp_move_t)
-#define TDFX_VID_BLIT _IOR('J', 3, tdfx_vid_blit_t)
-#define TDFX_VID_SET_YUV _IOR('J', 4, tdfx_vid_blit_t)
-#define TDFX_VID_GET_YUV _IOR('J', 5, tdfx_vid_blit_t)
+typedef struct tdfx_vid_overlay_s {
+  uint32_t src[2]; // left and right buffer (2 buffer may be NULL)
+  uint16_t src_width,src_height;
+  uint16_t src_stride;
+  uint32_t format;
 
-#define TDFX_VID_BUMP0 _IOR('J', 6, u16)
+  uint16_t dst_width,dst_height;
+  int16_t dst_x,dst_y;
+
+  uint8_t use_colorkey;
+  uint32_t colorkey[2]; // min/max
+  uint8_t invert_colorkey;
+} tdfx_vid_overlay_t;
+
+#define TDFX_VID_GET_CONFIG _IOR('J', 1, tdfx_vid_config_t)
+#define TDFX_VID_AGP_MOVE _IOW('J', 2, tdfx_vid_agp_move_t)
+#define TDFX_VID_BLIT _IOW('J', 3, tdfx_vid_blit_t)
+#define TDFX_VID_SET_YUV _IOW('J', 4, tdfx_vid_blit_t)
+#define TDFX_VID_GET_YUV _IOR('J', 5, tdfx_vid_blit_t)
+#define TDFX_VID_BUMP0 _IOW('J', 6, u16)
+#define TDFX_VID_SET_OVERLAY _IOW('J', 7, tdfx_vid_overlay_t)
+#define TDFX_VID_OVERLAY_ON _IO ('J', 8)
+#define TDFX_VID_OVERLAY_OFF _IO ('J', 9)
 

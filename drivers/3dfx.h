@@ -248,6 +248,12 @@ typedef struct voodoo_yuv_fb_t voodoo_yuv_fb;
 
 #define COMMAND_3D		(0x00200000 + 0x120)
 
+#define SWAPBUFCMD		(0x00200000 + 0x128)
+#define SWAPPENDING		(0x00200000 + 0x24C)
+#define LEFTOVBUF		(0x00200000 + 0x250)
+#define RIGHTOVBUF		(0x00200000 + 0x254)
+#define FBISWAPBUFHIST		(0x00200000 + 0x258)
+
 /* register bitfields (not all, only as needed) */
 
 #define BIT(x) (1UL << (x))
