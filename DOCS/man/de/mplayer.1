@@ -179,7 +179,7 @@ DXR3/\:Hollywood+ benutzen.
 Die meisten von ihnen unterstützen Software\- oder Hardwareskalierung,
 so dass die Vollbildwiedergabe kein Problem ist.
 .PP
-MPlayer verfügt über ein onscreen display (OSD) für Statusinformationen,
+MPlayer verfügt über ein On-Screen-Display (OSD) für Statusinformationen,
 schöne, große, schattierte und kantengeglättete Untertitel und visuelles
 Feedback bei Tastatureingaben.
 Europäische/\:ISO 8859\-1,2 (Ungarisch, Englisch, Tschechisch etc), Kyrillische
@@ -212,8 +212,8 @@ verfügt über die gleichen Optionen wie MPlayer.
 .
 .SH "TASTATURSTEUERUNG"
 MPlayer besitzt eine Kontrollfunktion, die befehlsgesteuert ist und sich komplett
-konfigurieren läßt. Die Steuerung geschieht mittels Tastatur, Maus, Joystick 
-oder Fernbedieung (funktionierende LIRC-Unterstützung vorausgesetzt).
+konfigurieren lässt. Die Steuerung geschieht mittels Tastatur, Maus, Joystick
+oder Fernbedienung (funktionierende LIRC-Unterstützung vorausgesetzt).
 Bei der Option \-input findest du Beschreibungen, wie man diese Funktionen
 anpassen kann.
 .
@@ -223,9 +223,9 @@ anpassen kann.
 .RSs
 .IPs "<\- und \->"
 Springe 10 Sekunden zurück/\:vor.
-.IPs "HOCH and RUNTER"
+.IPs "HOCH und RUNTER"
 Springe 1 Minute zurück/\:vor.
-.IPs "BildHoch und BildRunter (bzw. PGUP/PGDOWN)"
+.IPs "BildHoch und BildRunter (bzw.\& PGUP/\:PGDOWN)"
 Springe 10 Minuten zurück/\:vor.
 .IPs "< und >"
 zurück\:vor in der Playlist
@@ -257,7 +257,7 @@ Suche+Zeit+Gesamtzeit.
 .IPs d\ \ \ \ 
 Wechselt zwischen verschiedenen Framedropping-Einstellungen:  keine /
 überspringe
-Display / überspringe Dekodierung (siehe \-framedrop und \-hardframedrop).
+Display / überspringe Decodierung (siehe \-framedrop und \-hardframedrop).
 .IPs v\ \ \ \ 
 Ändert Sichtbarkeit der Untertitel (aus/\:ein).
 .IPs "b / j"
@@ -364,8 +364,8 @@ vf=eq2=1.0:-0.8
 .PP
 Du kannst auch dateispezifische Konfigurationsdateien schreiben. Wenn du
 für einen Film namens 'movie.avi' eine Konfigurationsdatei schreiben möchtest,
-dann nenn diese Datei 'movie.avi.conf', steck dort alle nur für diesen Film
-relevanten Optionen rein und speichere die Datei in ~/\:.mplayer oder im
+dann nenne diese Datei 'movie.avi.conf', stecke dort alle nur für diesen
+Film relevanten Optionen rein und speichere die Datei in ~/\:.mplayer oder im
 gleichen Verzeichnis wie 'movie.avi'.
 .
 .
@@ -374,7 +374,7 @@ gleichen Verzeichnis wie 'movie.avi'.
 .
 .TP
 .B \-codecs-file <Dateiname> (siehe auch \-afm, \-ac, \-vfm, \-vc)
-Benutze die angegebene Datei anstelle der systemweit instalierten oder
+Benutze die angegebene Datei anstelle der systemweit installierten oder
 der eingebauten codecs.conf.
 .
 .TP
@@ -399,9 +399,10 @@ nur einige Informationsausgaben (standard)
 .IPs 1
 einige Debug-Informationen, avi-Header, Funktionswerte (init-Debug)
 .IPs 2
-gibt avi-Indizes, Dateiblock-Inputs und weitere Debug-Informationen aus (player-Debug)
+gibt avi-Indizes, Dateiblock-Inputs und weitere Debug-Informationen aus
+(Player-Debug)
 .IPs 3
-gibt alles aus, was mit dem Input-Parser zu tun hat (parser-Debug)
+gibt alles aus, was mit dem Input-Parser zu tun hat (Parser-Debug)
 .RE
 .PD 1
 .
@@ -2432,8 +2433,10 @@ Wird als veraltet betrachtet.
 .
 .TP
 .B sdl (nur bei SDL)
-Höchst-plattformunabhängiger Videoausgabetreiber der SDL- (Simple Directmedia
-Layer) Bibliothek.
+Höchst-plattformunabhängiger Videoausgabetreiber der SDL-Bibliothek (Simple
+Directmedia Layer).
+Da SDL einen eigenen X11-Layer benutzt, haben die X11-Optionen von MPlayer
+keine Wirkung auf SDL.
 .
 .TP
 .B vidix\ \ 
@@ -3155,11 +3158,11 @@ vismv:
 .br
 0: deaktiviert
 .br
-1: mache von P-Frames vorwärts vorausberechnete Motion-Vectors sichtbar
+1: Mache von P-Frames vorwärts vorausberechnete Motion-Vectors sichtbar.
 .br
-2: mache von B-Frames vorwärts vorausberechnete Motion-Vectors sichtbar
+2: Mache von B-Frames vorwärts vorausberechnete Motion-Vectors sichtbar.
 .br
-4: mache von B-Frames rückwärts vorausberechnete Motion-Vectors sichtbar
+4: Mache von B-Frames rückwärts vorausberechnete Motion-Vectors sichtbar.
 .REss
 .IPs vstats
 Gebe Statistiken aus und speichere sie in ./vstats_*.log.
@@ -3231,7 +3234,7 @@ Vertikale Verschiebung des Farbanteils
 .
 .TP
 .B \-stereo <Modus>
-Wählt den Tpy der MP2/\:MP3-Stereoausgabe.
+Wählt den Typ der MP2/\:MP3-Stereoausgabe.
 .PD 0
 .RSs
 .IPs 0
@@ -3317,10 +3320,11 @@ dann erst andere.
 .B \-vfm <Treiber1,Treiber2,...>
 Gibt eine Prioritätsliste der zu verwendenden Videocodecfamilien an, so wie sie
 in codecs.conf definiert werden.
-Wenn keiner davon funktioniert, werden die Standardfamilien ausprobiert.
+Wenn keine davon funktioniert, werden die Standardfamilien ausprobiert.
 .br
 .I ANMERKUNG:
-Mit \-vfm help wird eine vollständige Liste der verfügbaren Treiber ausgegeben.
+Mit \-vfm help wird eine vollständige Liste der verfügbaren
+Videocodecfamilien ausgegeben.
 .sp 1
 .I BEISPIEL:
 .PD 0
@@ -3342,7 +3346,7 @@ Deaktiviert die Berechnung des Höhen-/\:Breitenverhältnisses.
 .
 .TP
 .B \-xvidopts <Option1:Option2:...>
-Gibt zusätzliche Parameter für die Decodierung mti XviD an.
+Gibt zusätzliche Parameter für die Decodierung mit XviD an.
 .PD 0
 .RSs
 .IPs deblock-chroma
@@ -3352,9 +3356,9 @@ Siehe auch \-vf pp, was schneller ist als XviDs eigener Filter.
 Aktiviert den internen Postprocessing-Filter von XviD: Luma-Deblock-Filter.
 Siehe auch \-vf pp, was schneller ist als XviDs eigener Filter.
 .IPs dr2\ \ 
-Aktiviert das direkte Rendern mit Methode 2.
+Aktiviert direktes Rendern mit Methode 2.
 .IPs nodr2
-Deaktiviert das direkte Rendern mit Methode 2.
+Deaktiviert direktes Rendern mit Methode 2.
 .IPs filmeffect
 Aktiviert den internen Film-Körnungs-Effekt von XviD.
 Dieser fügt einem Film künstlich Körnung hinzu.
@@ -3395,61 +3399,217 @@ Kann benutzt werden, um Skalierung mit \-vf scale zu erzwingen.
 .
 .SH "VIDEOFILTER"
 Videofilter erlauben dir, den Videostream und seine Eigenschaften zu ändern.
-Der Syntax ist folgender:
+Die Syntax ist folgender:
 .
 .TP
 .B \-vf <Filter1[=Parameter1:Parameter2:...],Filter2,...>
-Aktiviert eine Kette Videofiltern zusammen mit ihren Optionen.
+Aktiviert eine Kette von Videofiltern zusammen mit ihren Optionen.
 .
-.I ANMERKUNG:
-.br
+.TP
+.B \-vop <...,Filter2[=Parameter1:Parameter2:...],Filter1> (OBSOLET)
+Aktiviert eine Kette von Videofiltern zusammen mit ihren Optionen, die in
+.B umgekehrter
+Reihenfolge angewendet wird.
+Wurde ersetzt durch \-vf.
+.PP
 Parameter sind optional und werden teilweise mit Standardwerten belegt,
-wenn sie weggelassen werden. Mit -1 werden die Standardwerte beibehalten.
+wenn sie weggelassen werden.
+Mit -1 werden die Standardwerte beibehalten.
 Die Parameter w:h bedeuten Breite (width) und Höhe (height); x:y bedeutet
-die x;y-Position relativ zur linken oberen Ecke des größeren Bildes.
+die x:y-Position relativ zur linken oberen Ecke des größeren Bildes.
 .br
+.I ANMERKUNG:
 Eine vollständige Liste aller verfügbaren Plugins liefert \-vf help.
-.br
-Die folgenden Filter sind verfügbar:
+.sp 1
+Filter werden in Listen verwaltet.
+Es gibt ein paar Kommandos, um die Filterliste zu regeln.
 .
-.RSs
-.IPs crop[=w:h:x:y]
+.TP
+.B \-vf-add <Filter1[,Filter2,...]>
+Fügt die angegebenen Filter ans Ende der Filterliste hinzu.
+.
+.TP
+.B \-vf-pre <Filter1[,Filter2,...]>
+Fügt die angegebenen Filter an den Anfang der Filterliste hinzu.
+.
+.TP
+.B \-vf-del <Index1[,Index2,...]>
+Löscht die Filter an der angegebenen Indexposition.
+Indexnummern beginnen bei 0, negative Nummern adressieren das Ende der Liste
+(-1 ist der letzte).
+.
+.TP
+.B \-vf-clr
+Leert die Filterliste komplett.
+.PP
+Bei Filtern, die dies unterstützen, kannst Du auf Parameter über den Namen
+zugreifen.
+.
+.TP
+.B \-vf <filter>=help
+Gibt die Parameternamen und die gültigen Wertebereiche der Parameter für einen
+bestimmen Filter aus.
+.
+.TP
+.B \-vf <Filter=benannter_Parameter1=Wert1[:benannter_Parameter2=Wert2:...]>
+Setzt einen benannten Parameter auf den angegebenen Wert.
+Benutze 'on' und 'off' oder 'yes' und 'no', um Flag-Parameter zu setzen.
+.PP
+Die verfügbaren Filter sind folgende:
+.
+.TP
+.B crop[=b:h:x:y]
 Schneidet den angegeben Teil des Bildes aus und verwirft den Rest.
 Nützlich, um schwarze Balken bei Widescreen-Filmen zu entfernen.
-.IPs cropdetect[=0\-255]
-Berechnet die Schneideparameter für den crop-Filter und gibt diese pro
-Bild einmal auf stdout aus. Der Schwellwert kann optional angegeben werden
-und geht von 0 (nichts) bis hin zu 255 (alles) (Standard: 24).
-.IPs rectangle[=w:h:x:y]
-Zeichnet ein Rechteck mit der gewünschten Breite/\:Höhe an den angegebenen
-Koordinaten auf das Bild. Kann benutzt werden, um die Parameter für den
-crop-Filter zu testen (Standard: maximale Breite/\:Höhe, x/\:y liegen oben
-links).
-.IPs expand[=w:h:x:y:o]
-Vergrößert das Bild (KEINE Skalierung) auf die angegebene Größe und
+.PD 0
+.RSs
+.IPs b,h
+Abgeschnittene Breite und Höhe, ist voreingestellt auf die originale Breite
+und Höhe.
+.IPs x,y
+Position des abgeschittenen Bildes, ist voreingestellt auf die Mitte.
+.RE
+.PD 1
+.
+.TP
+.B cropdetect[=Limit:Rundung]
+Berechnet die Schneideparameter für den crop-Filter und gibt die empfohlenen
+Parameter auf stdout aus.
+.PD 0
+.RSs
+.IPs Limit
+Schwellwert, der optional angegeben werden kann als nichts (0) bis hin zu allem
+(255) (Standard: 24).
+.br
+.IPs Rundung
+Wert, durch den die Breite/\:Höhe teilbar sein sollte (Standard: 16).
+Der Offset wird automatisch angepasst, um das Video zu zentrieren.
+Benutze 2, um gerade Dimensionen zu bekommen (wird für 4:2:2-Video gebraucht).
+16 ist beim Encodieren zu den meisten Videocodecs die beste Wahl.
+.RE
+.PD 1
+.
+.TP
+.B rectangle[=b:h:x:y]
+Das Plugin reagiert auf die Direktive 'change_rectangle' der Datei input.conf,
+die zwei Parameter entgegennimmt.
+.PD 0
+.RSs
+.IPs b,h
+Breite und Höhe (Standard: -1, maximal mögliche Breite, wobei die Begrenzungen
+sichtbar bleiben)
+.IPs x,y
+Position der linken oberen Ecke (Standard: -1, ganz oben, ganz links)
+.RE
+.PD 1
+.
+.TP
+.B expand[=b:h:x:y:o]
+Vergrößert das Bild ohne Skalierung auf die angegebene Größe und
 platziert das unskalierte Originalbild an die Koordinaten x/\:y.
-Neegative Werte für w und h werden als Offsets bezüglich der Orignalgröße
-interpretiert. Beispielsweise fügt expand=0:-50:0:0 einen 50 Pixel hohen
-schwarzen Balken unterhalb des Bildes hinzu.
 Kann benutzt werden, um die Platzierung des OSD/\:der Untertitel auf
-schwarzen Balken zu erreichen (Standard: Originalhöhe/\:\-breite, zentriertes
-Bild).
-Der letzte Parameter (de)aktiviert das OSD (Standard: 0 = deaktiviert).
-.IPs flip
-Stellt das Bild auf den Kopf. Siehe auch \-flip.
-.IPs mirror
+schwarzen Balken zu erreichen.
+.RSs
+.IPs b,h
+Expandierte Breite,Höhe (Standard: originale Breite,Höhe).
+Negative Werte für b und h werden als Offsets zur Originalgröße behandelt.
+.sp 1
+.I BEISPIEL:
+.PD 0
+.RSs
+.IP expand=0:-50:0:0
+Fügt unterhalb des Bildes einen Rand von 50 Pixel ein.
+.RE
+.PD 1
+.IPs x,y
+Position des ursprünglichen Bildes im expandierten Bild (Standard: Mitte)
+.IPs o
+Anzeige von OSD/\:Untertiteln
+.RSss
+0: deaktiviert (Standard)
+.br
+1: aktiviert
+.REss
+.RE
+.
+.TP
+.B flip\ \ \ 
+Stellt das Bild auf den Kopf.
+Siehe auch \-flip.
+.
+.TP
+.B mirror\ 
 Spiegelt das Bild an der Y-Achse.
-.IPs rotate[=<0-7>]
-Dreht das Bild um +/\:\- 90 Grad (und stellt es optional auf den Kopf).
+.
+.TP
+.B rotate[=<0\-7>]
+Dreht das Bild um +/\:- 90 Grad (und stellt es optional auf den Kopf).
 Bei 4\-7 wird das Bild nur dann gedreht, wenn es vorher hochkant steht
 (es also höher als breit ist).
-.IPs scale[=w:h[:c[:p]]]
+.
+.TP
+.B scale[=b:h[:interlaced[:chr_drop[:param[:presize]]]]]
 Skaliert das Bild mit dem Softwareskalierer (langsam) und führt eine
 Farbraumkonvertierung zwischen YUV und RGB durch (siehe auch \-sws).
-Der Wert 0 wird für skaliertes Ziel\-Höhen-/\:Breitenverhältnis
-(Standard: Originalverhältnis, Zielverhältnis mit \-zoom). Optional
-können "chroma skipping" (c zwischen 0 und 3) und Skalierungsparameter
-angegeben werden (siehe \-sws).
+.RSs
+.IPs b,h\ \ 
+skalierte Breite/\:Höhe (Standard: originale Breite/\:Höhe)
+.br
+.I ANMERKUNG:
+Wenn \-zoom benutzt wird und die unterliegenden Filter (inklusive libvo)
+Skalierung nicht unterstützen, werden die Werte d_width/\:d_height benutzt.
+.\" FIXME: Klärung von d_width/\:d_height!
+.RSss
+ 0:   skalierte d_width/\:d_height
+.br
+-1:   originale Breite/\:Höhe
+.br
+-2:   Berechne Breite/\:Höhe anhand der jeweils anderen Größe und dem
+vorskalierten Breiten-/\Höhenverhältnis.
+.br
+-3:   Berechne Breite/\:Höhe anhand der jeweils anderen Größe und dem
+originalen Breiten-/\Höhenverhältnis.
+.REss
+.IPs interlaced
+Schalte Interlaced-Skalierung an/\:aus.
+.IPs chr_drop
+Chroma-Skipping, Auslassen von Chrominanz-Berechnungen
+.RSss
+0: Benutze alle verfügbaren Eingabelinien für Chrominanz-Berechnungen.
+.br
+1: Benutze nur jede zweite Eingabelinie für Chrominanz-Berechnungen.
+.br
+2: Benutze nur jede vierte Eingabelinie für Chrominanz-Berechnungen.
+.br
+3: Benutze nur jede achte Eingabelinie für Chrominanz-Berechnungen.
+.REss
+.IPs param
+Skalierungsparameter (hängt von der Skalierungsmethode ab)
+.RSss
+\-sws 2 (bicubic):  Schärfe (0 (weich) \- 100 (scharf))
+.br
+\-sws 7 (gaussian): Schärfe (0 (weich) \- 100 (scharf))
+.br
+\-sws 9 (lanczos):  Filterlänge (1\-10)
+.REss
+.IPs presize
+Skaliere auf eine Standardgröße.
+.RSss
+qntsc:   352x240 (NTSC Quarter-Screen)
+.br
+qpal:    352x288 (PAL Quarter-Screen)
+.br
+ntsc:    720x480 (Standard-NTSC)
+.br
+pal:     720x576 (Standard-PAL)
+.br
+sntsc:   640x480 (NTSC mit quadratischen Pixeln)
+.br
+spal:    768x576 (PAL mit quadratischen Pixeln)
+.REss
+.RE
+.
+.TP
 .IPs yuy2
 Erzwingt YV12/\:I420 oder 422P zu YUY2 Konvertierung in Software.
 .IPs rgb2bgr[=swap]
