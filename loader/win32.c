@@ -1587,9 +1587,10 @@ int WINAPI expLoadLibraryA(char* name)
 	else
 	    strcat(qq, name);
     }
-    printf("Loading DLL: %s\n", qq);
+    printf("Loading DLL: %s", qq);fflush(stdout);
 //    printf("Entering LoadLibraryA(%s)\n", name);
     result=LoadLibraryA(qq);
+    if(!result) printf("  FAILED!\n"); else printf("  OK\n");
 //    printf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
     return result;
 }      
