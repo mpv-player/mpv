@@ -22,8 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** Initially modified for use with MPlayer by Diego Biurrun on 2004/09/24
-** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+** $Id: ps_dec.h,v 1.5 2004/05/17 10:18:03 menno Exp $
 **/
 
 #ifndef __PS_DEC_H__

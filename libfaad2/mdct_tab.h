@@ -22,8 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** Initially modified for use with MPlayer by Diego Biurrun on 2004/09/24
-** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+** $Id: mdct_tab.h,v 1.1 2004/05/17 20:32:45 menno Exp $
 **/
 
 #ifndef __MDCT_TAB_H__

@@ -22,9 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: mp4.h,v 1.4 2004/06/23 13:50:51 diego Exp $
-** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+** $Id: mp4.h,v 1.19 2004/03/02 20:09:58 menno Exp $
 **/
 
 #ifndef __MP4_H__
