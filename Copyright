@@ -20,12 +20,6 @@ Homepage:   http://www.audiocoding.com
 Directory:  libfaad2
 License:    GNU General Public License
 
-Name:       FLAC
-Version:    1.1.0, updated to CVS from 20031227
-Homepage:   http://flac.sourceforge.net/
-Directory:  libmpflac
-License:    X11 style, see libmpflac/COPYING.Xiph
-
 Name:       GSM 06.10 library
 Version:    patchlevel 10
 Homepage:   http://kbs.cs.tu-berlin.de/~jutta/toast.html
@@ -66,7 +60,7 @@ Name:       LRMI - Linux Real Mode Interface
 Version:    unknown, taken from svgalib
 Homepage:   http://www.svgalib.org/
 Directory:  osdep/lrmi.[ch]
-License:    permissive, see file header 
+License:    permissive, see file header
 
 Name:       avifile DLL loader
 Version:    0.47 + patches + CVS updates
