@@ -543,13 +543,14 @@ static int config(struct vf_instance_s* vf,
 	    return 0;
 	}
     }
-    else if (lavc_param_autoaspect)
+    else if (lavc_param_autoaspect) {
 #if LIBAVCODEC_BUILD >= 4687
 	lavc_venc_context->sample_aspect_ratio = av_d2q((float)d_width/d_height*height / width, 255);
 #else
 	lavc_venc_context->aspect_ratio =
 #endif
 	mux_v->aspect = (float)d_width/d_height;
+    }
 
     /* keyframe interval */
     if (lavc_param_keyint >= 0) /* != -1 */
