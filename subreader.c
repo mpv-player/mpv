@@ -1028,8 +1028,9 @@ subtitle* subcp_recode1 (subtitle *sub)
 #endif
 
 #ifdef USE_FRIBIDI
-#define ALLOCATE(tp,ln) ((tp *) malloc (sizeof (tp) * (ln)))
+#ifndef max
 #define max(a,b)  (((a)>(b))?(a):(b))
+#endif
 subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
 {
   FriBidiChar logical[LINE_LEN+1], visual[LINE_LEN+1]; // Hopefully these two won't smash the stack
@@ -1063,6 +1064,7 @@ subtitle* sub_fribidi (subtitle *sub, int sub_utf8)
     if(log2vis) {
       len = fribidi_remove_bidi_marks (visual, len, NULL, NULL,
 				       NULL);
+      if((op = (char*)malloc(sizeof(char)*(max(2*orig_len,2*len) + 1))) == NULL) {
       if((op = ALLOCATE(char,(max(2*orig_len,2*len) + 1))) == NULL) {
 	mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: error allocating mem.\n");
 	l++;
@@ -1732,7 +1734,7 @@ char** sub_filenames(char* path, char *fname)
 		    if (prio) {
 			prio += prio;
 #ifdef USE_ICONV
-			if (i<3) // prefer UTF-8 coded
+			if (sub_cp) // prefer UTF-8 coded
 			    prio++;
 #endif
 			sprintf(tmpresult, "%s%s", j == 0 ? f_dir : path, de->d_name);
