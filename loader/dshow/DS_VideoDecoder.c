@@ -9,9 +9,9 @@
 #include "interfaces.h"
 
 #include "DS_VideoDecoder.h"
-#include <wine/winerror.h>
-#include <libwin32.h>
-//#include <cpuinfo.h>
+#include "wine/winerror.h"
+#include "ldt_keeper.h"
+//#include <wine/winerror.h>
 
 #include <unistd.h>
 #include <fcntl.h>
@@ -23,10 +23,6 @@
 #include <strstream>
 
 #define __MODULE__ "DirectShow_VideoDecoder"
-
-#include "ldt_keeper.h"
-
-extern "C" char* def_path;
 
 using namespace std;
 

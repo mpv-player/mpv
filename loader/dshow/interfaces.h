@@ -9,7 +9,7 @@ Created using freely-available DirectX 8.0 SDK
 
 */
 
-#include <com.h>
+#include "com.h"
 #include "guids.h"
 
 #ifndef STDCALL

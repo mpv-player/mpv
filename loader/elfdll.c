@@ -7,10 +7,10 @@
 
 #ifdef HAVE_LIBDL
 
-#include <string.h>
-#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #include <wine/windef.h>
 //#include <wine/global.h>

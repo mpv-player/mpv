@@ -1,7 +1,7 @@
 #include "DS_Filter.h"
 //#include "../loader/loader.h"
-#include <libwin32.h>
-#include <string>
+#include "libwin32.h"
+//#include <string>
 #include <stdio.h>
 #include <string.h>
 
@@ -213,7 +213,10 @@ void DS_Filter::Stop()
     if (m_iState == 2)
     {
 	m_pAll->vt->Release((IUnknown*)m_pAll);
-	m_pFilter->vt->Stop(m_pFilter); // causes weird crash ??? FIXME
+        if (m_pFilter)
+	    m_pFilter->vt->Stop(m_pFilter); // causes weird crash ??? FIXME
+	else
+	    printf("m_pFilter is NULL!\n");
 	m_pAll = 0;
 	m_iState = 1;
     }

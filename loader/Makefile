@@ -4,7 +4,7 @@ include ../config.mak
 DEFINES=$(WIN32_PATH) -D__WINE__ -Ddbg_printf=__vprintf \
 	-DTRACE=__vprintf # -DDETAILED_OUT
 
-LIB_OBJECTS= setup_FS.o pe_image.o module.o \
+LIB_OBJECTS= ldt_keeper.o pe_image.o module.o \
 ext.o win32.o driver.o pe_resource.o \
 resource.o registry.o elfdll.o afl.o vfl.o
 

@@ -1,6 +1,6 @@
 #include "allocator.h"
-#include <com.h>
-#include <wine/winerror.h>
+#include "com.h"
+#include "wine/winerror.h"
 #include <stdio.h>
 
 //#undef Debug

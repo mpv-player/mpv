@@ -36,6 +36,8 @@
 #include <string>
 #include <stdio.h>
 
+typedef unsigned int uint_t;    // use as generic type -
+
 typedef unsigned int fourcc_t;
 
 struct FatalError

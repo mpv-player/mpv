@@ -1,12 +1,12 @@
 #ifndef GUIDS_H
 #define GUIDS_H
 
-#include <com.h>
-#include <wine/winbase.h>
-#include <wine/windef.h>
-#include <wine/winuser.h>
-#include <wine/vfw.h>
-//#include <formats.h>
+#include "com.h"
+#include "wine/winbase.h"
+#include "wine/windef.h"
+#include "wine/winuser.h"
+#include "wine/vfw.h"
+
 extern int DSHOW_DEBUG;
 #define Debug if(DSHOW_DEBUG)
 

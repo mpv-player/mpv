@@ -33,7 +33,8 @@
  *   newer pe binaries produced by MSVC 5 and later, since they are also aligned
  *   to 4096 byte boundaries on disk.
  */
-#include <config.h>
+#include "config.h"
+//#include <wine/config.h>
 
 #include <errno.h>
 #include <assert.h>
@@ -44,9 +45,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#ifdef HAVE_ALLOCA_H
-#include <alloca.h>
-#endif
 #ifdef HAVE_SYS_MMAN_H
 #include <sys/mman.h>
 #endif
@@ -57,8 +55,7 @@
 #include <wine/pe_image.h>
 #include <wine/module.h>
 #include <wine/debugtools.h>
-#include <ext.h>
-
+#include "ext.h"
 #include "win32.h"
 
 #define RVA(x) ((void *)((char *)load_addr+(unsigned int)(x)))
@@ -179,7 +176,7 @@ FARPROC PE_FindExportedFunction(
                 ename = RVA(name[i]);
                 if (!strcmp( ename, funcName ))
                 {
-                    ERR( "%s.%s required a linear search\n", wm->modname, funcName );
+		    ERR( "%s.%s required a linear search\n", wm->modname, funcName );
                     ordinal = ordinals[i];
                     goto found;
                 }
@@ -565,6 +562,7 @@ HMODULE PE_LoadImage( int handle, LPCSTR filename, WORD *version )
         }
     }
 
+
     
     load_addr = nt->OptionalHeader.ImageBase;
     vma_size = calc_vma_size( hModule );
@@ -884,6 +882,7 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
  * due to the PROCESS_Create stuff.
  */
 
+
 /*
  * This is a dirty hack.
  * The win32 DLLs contain an alloca routine, that first probes the soon
@@ -898,10 +897,11 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
  */
 static void extend_stack_for_dll_alloca(void)
 {
+#ifndef __FreeBSD__
     void* mem=alloca(0x20000);
     *(int*)mem=0x1234;
+#endif
 }
-
 
 /* Called if the library is loaded or freed.
  * NOTE: if a thread attaches a DLL, the current thread will only do

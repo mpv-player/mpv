@@ -4,12 +4,13 @@
 	 Copyright 2001 Eugene Kuznetsov  (divx@euro.ru)
 
 *********************************************************/
-#include "DS_AudioDecoder.h"
 
-#include <cstdio>
-#include <cstring>
-#include <string>
-#include <iostream>
+#include "DS_AudioDecoder.h"
+#include <string.h>
+#include <stdio.h>
+
+// using namespace std;
+
 #define __MODULE__ "DirectShow audio decoder"
 const GUID FORMAT_WaveFormatEx = {
     0x05589f81, 0xc356, 0x11CE,
@@ -24,17 +25,16 @@ const GUID MEDIASUBTYPE_PCM = {
     { 0x80, 0x00, 0x00, 0xAA, 0x00, 0x38, 0x9B, 0x71 }
 };
 
-using namespace std;
-
 typedef long STDCALL (*GETCLASS) (GUID*, GUID*, void**);
 
 DS_AudioDecoder::DS_AudioDecoder(const CodecInfo& info, const WAVEFORMATEX* wf)
     : IAudioDecoder(info, wf), m_pDS_Filter(0), m_sVhdr(0), m_sVhdr2(0)
 {
-    m_sVhdr=new char[18 + wf->cbSize];
-    memcpy(m_sVhdr, wf, 18 + wf->cbSize);
-    m_sVhdr2=new char[18 + wf->cbSize];
-    memcpy(m_sVhdr2, m_sVhdr, 18 + wf->cbSize);
+    int sz = 18 + wf->cbSize;
+    m_sVhdr=new char[sz];
+    memcpy(m_sVhdr, wf, sz);
+    m_sVhdr2=new char[sz];
+    memcpy(m_sVhdr2, m_sVhdr, sz);
     WAVEFORMATEX* pWF=(WAVEFORMATEX*)m_sVhdr2;
     pWF->wFormatTag=1;
     pWF->wBitsPerSample=16;
@@ -51,7 +51,7 @@ DS_AudioDecoder::DS_AudioDecoder(const CodecInfo& info, const WAVEFORMATEX* wf)
     m_sOurType.bFixedSizeSamples=true;
     m_sOurType.bTemporalCompression=false;
     m_sOurType.pUnk=0;
-    m_sOurType.cbFormat=18+wf->cbSize;
+    m_sOurType.cbFormat=sz;
     m_sOurType.pbFormat=m_sVhdr;
 
     memset(&m_sDestType, 0, sizeof(m_sDestType));
@@ -62,7 +62,7 @@ DS_AudioDecoder::DS_AudioDecoder(const CodecInfo& info, const WAVEFORMATEX* wf)
     m_sDestType.bTemporalCompression=false;
     m_sDestType.lSampleSize=2*wf->nChannels;
     m_sDestType.pUnk=0;
-    m_sDestType.cbFormat=18;
+    m_sDestType.cbFormat=pWF->cbSize;
     m_sDestType.pbFormat=m_sVhdr2;
 
     try
@@ -95,19 +95,19 @@ DS_AudioDecoder::~DS_AudioDecoder()
     delete m_pDS_Filter;
 }
 
-int DS_AudioDecoder::Convert(const void* in_data, size_t in_size,
-			void* out_data, size_t out_size,
-			size_t* size_read, size_t* size_written)
+int DS_AudioDecoder::Convert(const void* in_data, uint_t in_size,
+			void* out_data, uint_t out_size,
+			uint_t* size_read, uint_t* size_written)
 {
     if (!in_data || !out_data)
 	return -1;
 
-    size_t written = 0;
-    size_t read = 0;
+    uint_t written = 0;
+    uint_t read = 0;
     in_size -= in_size%in_fmt.nBlockAlign;
     while (in_size>0)
     {
-	size_t frame_size=0;
+	uint_t frame_size=0;
 	char* frame_pointer;
 //	m_pOurOutput->SetFramePointer(out_data+written);
 	m_pDS_Filter->m_pOurOutput->SetFramePointer(&frame_pointer);
@@ -116,7 +116,7 @@ int DS_AudioDecoder::Convert(const void* in_data, size_t in_size,
 	m_pDS_Filter->m_pAll->vt->GetBuffer(m_pDS_Filter->m_pAll, &sample, 0, 0, 0);
 	if(!sample)
 	{
-	    Debug cerr<<"DS_AudioDecoder::Convert() Error: null sample"<<endl;
+	    Debug printf("DS_AudioDecoder::Convert() Error: null sample\n");
 	    break;
 	}
 	char* ptr;

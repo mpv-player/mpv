@@ -351,6 +351,8 @@ ICSendMessage(HIC hic,unsigned int msg,long lParam1,long lParam2) {
 	WINE_HIC	*whic = (WINE_HIC*)hic;
 	char qw[200];
 
+//    printf("ICSendMessage.whic=%p\n",whic);
+
 #if 0
     __asm__ __volatile__ ("fsave (%0)\n\t": :"r"(&qw));    
 #endif

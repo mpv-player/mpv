@@ -72,6 +72,8 @@ struct modify_ldt_ldt_s {
 #endif
 #define       TEB_SEL LDT_SEL(TEB_SEL_IDX)
 
+#include "ldt_keeper.h"
+
 /**
  *
  *  This should be performed before we create first thread. See remarks

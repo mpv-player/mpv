@@ -1,5 +1,5 @@
 #include "inputpin.h"
-#include <wine/winerror.h>
+#include "wine/winerror.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,24 +49,17 @@ class CEnumPins: public IEnumPins
 public:
     CEnumPins(IPin*, IPin* =0);
     ~CEnumPins(){delete vt;}
-    static long STDCALL Next (
-        IEnumPins * This,
-        /* [in] */ unsigned long cMediaTypes,
-        /* [size_is][out] */ IPin **ppMediaTypes,
-        /* [out] */ unsigned long *pcFetched);
-
-    static long STDCALL Skip (
-        IEnumPins * This,
-        /* [in] */ unsigned long cMediaTypes);
-
-    static long STDCALL Reset (
-        IEnumPins * This);
-
-    static long STDCALL Clone (
-        IEnumPins * This,
-        /* [out] */ IEnumPins **ppEnum);
-
+    static long STDCALL Next (IEnumPins * This,
+			      /* [in] */ unsigned long cMediaTypes,
+			      /* [size_is][out] */ IPin **ppMediaTypes,
+			      /* [out] */ unsigned long *pcFetched);
+    static long STDCALL Skip (IEnumPins * This,
+			      /* [in] */ unsigned long cMediaTypes);
+    static long STDCALL Reset (IEnumPins * This);
+    static long STDCALL Clone (IEnumPins * This,
+			       /* [out] */ IEnumPins **ppEnum);
 };
+
 GUID CEnumPins::interfaces[]=
 {
     IID_IUnknown,

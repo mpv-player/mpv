@@ -19,7 +19,7 @@
 
   
 ***************************************************************************/
-#include <config.h>
+#include "config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,17 +27,18 @@
 
 #include "win32.h"
 
-#include <wine/winbase.h>
-#include <wine/windef.h>
-#include <wine/winuser.h>
-#include <wine/vfw.h>
-#include <wine/winestring.h>
-#include <wine/driver.h>
-#include <wine/winerror.h>
-#include <wine/msacm.h>
-#include <wine/msacmdrv.h>
+#include "wine/winbase.h"
+#include "wine/windef.h"
+#include "wine/winuser.h"
+#include "wine/vfw.h"
+#include "wine/winestring.h"
+#include "wine/driver.h"
+#include "wine/winerror.h"
+#include "wine/msacm.h"
+#include "wine/msacmdrv.h"
 #include "wineacm.h"
 #include "ext.h"
+
 #include "driver.h"
 
 #define OpenDriverA DrvOpen
