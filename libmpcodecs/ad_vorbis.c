@@ -42,11 +42,11 @@ static int init(sh_audio_t *sh)
   ogg_packet op;
   vorbis_comment vc;
   struct ov_struct_st *ov;
-  int error(void) {
-    vorbis_comment_clear(&vc);
-    vorbis_info_clear(&ov->vi);
-    free(ov);
-    return 0;
+#define ERROR() { \
+    vorbis_comment_clear(&vc); \
+    vorbis_info_clear(&ov->vi); \
+    free(ov); \
+    return 0; \
   }
   /// Init the decoder with the 3 header packets
   ov = (struct ov_struct_st*)malloc(sizeof(struct ov_struct_st));
@@ -57,20 +57,20 @@ static int init(sh_audio_t *sh)
   /// Header
   if(vorbis_synthesis_headerin(&ov->vi,&vc,&op) <0) {
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis: initial (identification) header broken!\n");
-    return error();
+    ERROR();
   }
   op.bytes = ds_get_packet(sh->ds,&op.packet);
   op.b_o_s  = 0;
   /// Comments
   if(vorbis_synthesis_headerin(&ov->vi,&vc,&op) <0) {
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis: comment header broken!\n");
-    return error();
+    ERROR();
   }
   op.bytes = ds_get_packet(sh->ds,&op.packet);
   //// Codebook
   if(vorbis_synthesis_headerin(&ov->vi,&vc,&op)<0) {
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"OggVorbis: codebook header broken!\n");
-    return error();;
+    ERROR();
   } else { /// Print the infos
     char **ptr=vc.user_comments;
     while(*ptr){
