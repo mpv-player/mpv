@@ -580,6 +580,18 @@ Use:
 
 <qandadiv id="faq-playback">
 <title>Playback problems</title>
+
+<qandaentry>
+<question><para>
+I cannot pinpoint the cause of some strange playback problem.
+</para></question>
+<answer><para>
+Do you have a stray <filename>codecs.conf</filename> file in
+<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
+<filename>/usr/local/etc/</filename> or a similar location? Remove it.
+</para></answer>
+</qandaentry>
+
 <qandaentry>
 <question><para>
 ... works with <application>xine/avifile/...</application> but doesn't with
