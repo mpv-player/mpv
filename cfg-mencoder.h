@@ -32,6 +32,22 @@ struct config lameopts_conf[]={
 	{"padding", &lame_param_padding, CONF_TYPE_INT, CONF_RANGE, 0, PAD_MAX_INDICATOR},
 	{"br", &lame_param_br, CONF_TYPE_INT, CONF_RANGE, 0, 1024},
 	{"ratio", &lame_param_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 100},
+	{"help", "TODO: lameopts help!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+	{NULL, NULL, 0, 0, 0, 0}
+};
+
+struct config ovc_conf[]={
+	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, 0},
+	{"divx4", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_DIVX4},
+	{"help", "\nAvailable codecs:\n   copy\n   divx4\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
+	{NULL, NULL, 0, 0, 0, 0}
+};
+
+struct config oac_conf[]={
+	{"copy", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, 0},
+	{"pcm", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_PCM},
+	{"mp3lame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_VBRMP3},
+	{"help", "\nAvailable codecs:\n   copy\n   pcm\n   mp3lame\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
 
@@ -45,8 +61,10 @@ struct config conf[]={
 	{"mp3file", &mp3_filename, CONF_TYPE_STRING, 0, 0, 0},
 	{"ac3file", &ac3_filename, CONF_TYPE_STRING, 0, 0, 0},
 
-	{"oac", &out_audio_codec, CONF_TYPE_STRING, 0, 0, 0},
-	{"ovc", &out_video_codec, CONF_TYPE_STRING, 0, 0, 0},
+//	{"oac", &out_audio_codec, CONF_TYPE_STRING, 0, 0, 0},
+//	{"ovc", &out_video_codec, CONF_TYPE_STRING, 0, 0, 0},
+	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
+	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2},
 	

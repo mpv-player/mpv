@@ -50,6 +50,9 @@ char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
 int video_family=-1;     // override video codec family 
 
+int out_audio_codec=ACODEC_VBRMP3;
+int out_video_codec=VCODEC_DIVX4;
+
 // audio stream skip/resync functions requires only for seeking.
 // (they should be implemented in the audio codec layer)
 //void skip_audio_frame(sh_audio_t *sh_audio){}
@@ -83,8 +86,8 @@ static char* passtmpfile="divx2pass.log";
 
 static int play_n_frames=-1;
 
-char *out_audio_codec=NULL; // override audio codec
-char *out_video_codec=NULL; // override video codec
+//char *out_audio_codec=NULL; // override audio codec
+//char *out_video_codec=NULL; // override video codec
 
 //#include "libmpeg2/mpeg2.h"
 //#include "libmpeg2/mpeg2_internal.h"
@@ -419,7 +422,7 @@ mux_v->h.dwSampleSize=0; // VBR
 mux_v->h.dwScale=10000;
 mux_v->h.dwRate=mux_v->h.dwScale*(force_ofps?force_ofps:sh_video->fps);
 
-mux_v->codec=VCODEC_DIVX4; // 0=streamcopy
+mux_v->codec=out_video_codec;
 
 switch(mux_v->codec){
 case 0:
@@ -447,8 +450,7 @@ mux_a->buffer=malloc(mux_a->buffer_size);
 
 mux_a->source=sh_audio;
 
-//mux_a->codec=ACODEC_PCM; // 0=streamcopy
-mux_a->codec=ACODEC_VBRMP3; // 0=streamcopy
+mux_a->codec=out_audio_codec;
 
 switch(mux_a->codec){
 case 0:
