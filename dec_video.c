@@ -148,6 +148,9 @@ int uninit_video(sh_video_t *sh_video){
         if (avcodec_close(&lavc_context) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, "could not close codec\n");
 	break;
+    case VFM_DSHOW: // Win32/DirectShow
+	DS_VideoDecoder_Close();
+	break;
 
     case VFM_MPEG:
 	mpeg2_free_image_buffers (picture);
