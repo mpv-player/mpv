@@ -514,6 +514,7 @@ static int checksupportedmodes() {
   vga_modeinfo *minfo;
   
   checked = 1;
+  getch2_disable();
   vga_init();
   vga_disabledriverreport();
   max = vga_lastmodenumber();
