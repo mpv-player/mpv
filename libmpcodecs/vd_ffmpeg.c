@@ -47,8 +47,7 @@ LIBVD_EXTERN(ffmpeg)
 #define PIX_FMT_RGBA32 PIX_FMT_BGRA32
 #endif
 
-//!!TODO!! when ffmpeg is patched set correct version number
-#if LIBAVCODEC_BUILD < 4671
+#if LIBAVCODEC_BUILD < 4672
 #undef HAVE_XVMC
 #endif
 
@@ -134,7 +133,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 #ifdef HAVE_XVMC
         case IMGFMT_XVMC_IDCT_MPEG2:
         case IMGFMT_XVMC_MOCO_MPEG2:
-            if(avctx->pix_fmt==PIX_FMT_XVMC_MPEG2) return CONTROL_TRUE;
+            if(avctx->pix_fmt==PIX_FMT_XVMC_MPEG2_IDCT) return CONTROL_TRUE;
 #endif
 	}
         return CONTROL_FALSE;
@@ -193,7 +192,8 @@ static int init(sh_video_t *sh){
         avctx->flags|= CODEC_FLAG_EMU_EDGE;//do i need that??!!
         avctx->get_buffer= mc_get_buffer;
         avctx->release_buffer= mc_release_buffer;
-	avctx->draw_horiz_band = mc_render_slice;
+        avctx->draw_horiz_band = mc_render_slice;
+        avctx->slice_flags=SLICE_FLAG_CODED_ORDER|SLICE_FLAG_ALLOW_FIELD;
     }else
 #endif
     if(ctx->do_dr1){
@@ -406,7 +406,8 @@ static int init_vo(sh_video_t *sh){
 	case PIX_FMT_RGB24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
 	case PIX_FMT_RGBA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv / mjpeg
 #ifdef HAVE_XVMC
-	case PIX_FMT_XVMC_MPEG2:ctx->best_csp=IMGFMT_XVMC_IDCT_MPEG2;break;
+        case PIX_FMT_XVMC_MPEG2_MC:ctx->best_csp=IMGFMT_XVMC_MOCO_MPEG2;break;
+        case PIX_FMT_XVMC_MPEG2_IDCT:ctx->best_csp=IMGFMT_XVMC_IDCT_MPEG2;break;
 #endif
 	default:
 	    ctx->best_csp=0;
