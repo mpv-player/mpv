@@ -5362,7 +5362,7 @@ Gibt den Index der ausgegebenen VOBsub-Untertitel an (Standardwert: 0).
 .
 .
 .
-.SH "CODEC-SPEZIFISCHE ENCODING-OPTIONEN (NUR BEI MPLAYER)"
+.SH "CODEC-SPEZIFISCHE ENCODING-OPTIONEN (NUR BEI MENCODER)"
 Für die Encodierung kannst du Codec-spezifische Parameter angeben, indem du
 folgende Syntax benutzt:
 .
@@ -5449,6 +5449,144 @@ Das erstellte AVI kann nach /dev/\:null umgeleitet werden.
 .IPs 2
 Finaler (zweiter) Durchlauf im two-pass-Modus.
 .RE
+.
+.
+.SS lame (\-lameopts)
+.
+.TP
+.B help\ \ \ 
+Liefert einen Hilfstext.
+.
+.TP
+.B vbr=<0\-4>
+zu verwendender Bitratenmodus
+.PD 0
+.RSs
+.IPs 0
+CBR
+.IPs 1
+MT
+.IPs 2
+RH (Standard)
+.IPs 3
+ABR
+.IPs 4
+MTRH
+.RE
+.PD 1
+.
+.TP
+.B abr\ \ \ \ 
+durchschnittliche (average) Bitrate
+.
+.TP
+.B cbr\ \ \ \ 
+konstante Bitrate
+Dies erzwingt den CBR-Modus auch bei ABR-Presets.
+.
+.
+.TP
+.B br=<0\-1024>
+Bitrate in kBit/s an (nur bei CBR und ABR)
+.
+.TP
+.B q=<0\-9>
+Qualität (0 \- höchste, 9 \- niedrigste) (nur bei VBR)
+.
+.TP
+.B aq=<0\-9>
+Qualität des Algorithmus (0 \- am besten/langsamsten, 9 \- am
+schlechtesten/schnellsten)
+.
+.TP
+.B ratio=<1\-100>
+Kompressionsverhältnis
+.
+.TP
+.B vol=<0\-10>
+Audioeingangsverstärkung
+.
+.TP
+.B mode=<0\-3>
+(Standard: automatisch)
+.PD 0
+.RSs
+.IPs 0
+stereo
+.IPs 1
+joint-stereo
+.IPs 2
+dualchannel
+.IPs 3
+mono
+.RE
+.PD 1
+.
+.TP
+.B padding=<0\-2>
+.PD 0
+.RSs
+.IPs 0
+kein Padding
+.IPs 1
+alles
+.IPs 2
+automatische Anpassung
+.RE
+.PD 1
+.
+.TP
+.B fast\ \ \ 
+Aktiviert schnelles Encodieren bei nachfolgenden VBR-Presets.
+Etwas schlechtere Qualität und höhere Bitraten sind die Nachteile.
+.
+.TP
+.B highpassfreq=<Frequenz>
+Setzt die Frequenz für Highpass-Filterung in Hz.
+Frequenzen unterhalb der angegebenen werden abgeschnitten.
+Ein Wert von -1 deaktiviert die Filterung, ein Wert von 0 lässt LAME die Werte
+für die Frequenz automatisch wählen.
+.
+.TP
+.B lowpassfreq=<Frequenz>
+Setzt die Frequenz für Lowpass-Filterung in Hz.
+Frequenzen überhalb der angegebenen werden abgeschnitten.
+Ein Wert von -1 deaktiviert die Filterung, ein Wert von 0 lässt LAME die Werte
+für die Frequenz automatisch wählen.
+.
+.TP
+.B preset=<Wert>
+Werte für verschiedene Presets
+.RSs
+.IPs help\ 
+Gibt Informationen über die Presets und über weitere Optionen aus.
+.IPs medium
+VBR-Encodierung, gute Qualität, Bitrate im Rahmen von ca. 150\-180 kBit/s
+.IPs standard
+VBR-Encodierung, hohe Qualität, Bitrate im Rahmen von ca. 170\-210 kBit/s
+.IPs extreme
+VBR-Encodierung, sehr hohe Qualität, Bitrate im Rahmen von ca. 200\-240 kBit/s
+.IPs instane
+CBR-Encodierung, Preset mit der besten Qualität, Bitrate 320 kBit/s
+.IPs <8-320>
+ABR-Encodierung mit der gegebenen Bitrate im Mittel
+.RE
+.sp 1
+.RS
+.I BEISPIELE:
+.RE
+.PD 0
+.RSs
+.IPs fast:preset=standard
+Für die meisten Leute reicht das aus und bietet schon ziemlich gute Qualität.
+.IPs cbr:preset=192
+Encodiere mit ABR-Preset bei erzwungener konstanter Bitrate von 172 kBit/s.
+.IPs preset=172
+Encodiere mit ABR-Preset bei einer durchschnittlichen Bitrate von 172 kBit/s.
+.IPs preset=extreme
+Für Menschen mit einem sehr guten Gehör und entsprechender HiFi-Ausstattung.
+.RE
+.PD 1
 .
 .
 .\" manpage is synced from top down to this option.
