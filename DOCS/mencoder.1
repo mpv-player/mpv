@@ -213,9 +213,9 @@ Available options:
                  default = 800k
 
   vratetol=XXX   approximated *filesize* tolerance
-                 in bits/kbits.
+                 in kbits.
                  (warning: 1kbit = 1000 bits)
-                 default = 1024*8 bits.
+                 default = 1024*8 kbits = 1MByte
 
   keyint=XXX     interval between keyframes
                  (specify in frames, >300 are not
@@ -329,19 +329,21 @@ If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
 Available options:
 
     help         get help
-    br=XXX       specify bitrate in
-                 kbit <0-1024>
-                 (only for CBR)
-    q=XXX        Quality
-                 (0-highest, 9-fastest)
-                 (for VBR)
     vbr=XXX      variable bitrate method
                    0=cbr
                    1=mt
                    2=rh(default)
                    3=abr
                    4=mtrh
+    abr          average bitrate
     cbr          constant bitrate
+    br=XXX       specify bitrate in
+                 kbit <0-1024>
+                 (only for CBR and ABR)
+    q=XXX        Quality
+                 (0-highest, 9-low)
+                 (for VBR)
+    ratio=XXX    compression ratio <1-100>
     mode=XXX     0=stereo
                  1=joint-stereo
                  2=dualchannel
@@ -350,12 +352,12 @@ Available options:
     padding=XXX  0=no
                  1=all
                  2=adjust
-    ratio=XXX    compression ratio <1-100>
 
 .TP
 .B \-pass <1/2>
 With this you can encode 2pass DivX4 files. First encode with -pass 1, then
 with the same parameters, encode with -pass 2.
+NOTE: for libavcodec 2-pass use -lavcopts vpass=1/2 instead of -pass 1/2
 .TP
 .B \-passlogfile <filename>
 When encoding in 2pass mode, MEncoder dumps first pass' informations
