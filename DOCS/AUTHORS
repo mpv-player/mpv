@@ -100,6 +100,13 @@ Dariush Pietrzak: <eyck@incubus.ar.lublin.pl>
 - support for vplayer subtitle format
 - prelimenary support for .RT subtitle format
 
+Jürgen Keil and Marcus Comstedt: <jk@tools.de> <marcus@idonex.se>
+- patched MPlayer to work on Solaris 8 x86
+- configure fixes
+
+Vladimir Kushnir: <vkushnir@Alfacom.net>
+- patched MPlayer to work on FreeBSD x86
+
 Main testers:
   Tibor Balázs (Tibcu)
   Péter Sasi (SaPe)
