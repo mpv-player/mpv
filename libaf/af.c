@@ -28,6 +28,7 @@ extern af_info_t af_info_extrastereo;
 extern af_info_t af_info_lavcresample;
 extern af_info_t af_info_sweep;
 extern af_info_t af_info_hrtf;
+extern af_info_t af_info_ladspa;
 
 static af_info_t* filter_list[]={ 
    &af_info_dummy,
@@ -52,6 +53,9 @@ static af_info_t* filter_list[]={
 #endif
    &af_info_sweep,
    &af_info_hrtf,
+#ifdef HAVE_LADSPA
+   &af_info_ladspa,
+#endif
    NULL 
 };
 

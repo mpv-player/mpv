@@ -611,6 +611,7 @@ van Poorten, Ivo (ivop) <ivop@euronet.nl>
     * vo_jpeg suboptions parser
     * vo_pnm video output driver
     * vo_md5sum video output driver
+    * af_ladspa LADSPA plugin loader
 
 Ran, Lu <hephooey@fastmail.fm>
     * Chinese documentation translation

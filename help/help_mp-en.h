@@ -1024,3 +1024,25 @@ static char help_text[]=
 // ao_plugin.c
 
 #define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] invalid plugin: %s\n"
+
+// ======================= AF Audio Filters ================================
+
+// libaf 
+
+// af_ladspa.c
+
+#define MSGTR_AF_LADSPA_AvailableLabels "available labels in"
+#define MSGTR_AF_LADSPA_WarnNoInputs "WARNING! This LADSPA plugin has no audio inputs.\n  The incoming audio signal will be lost."
+#define MSGTR_AF_LADSPA_ErrMultiChannel "Multi-channel (>2) plugins are not supported (yet).\n  Use only mono and stereo plugins."
+#define MSGTR_AF_LADSPA_ErrNoOutputs "This LADSPA plugin has no audio outputs."
+#define MSGTR_AF_LADSPA_ErrInOutDiff "The number of audio inputs and audio outputs of the LADSPA plugin differ."
+#define MSGTR_AF_LADSPA_ErrFailedToLoad "failed to load"
+#define MSGTR_AF_LADSPA_ErrNoDescriptor "Couldn't find ladspa_descriptor() function in the specified library file."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "Couldn't find label in plugin library."
+#define MSGTR_AF_LADSPA_ErrNoSuboptions "No suboptions specified"
+#define MSGTR_AF_LADSPA_ErrNoLibFile "No library file specified"
+#define MSGTR_AF_LADSPA_ErrNoLabel "No filter label specified"
+#define MSGTR_AF_LADSPA_ErrNotEnoughControls "Not enough controls specified on the command line"
+#define MSGTR_AF_LADSPA_ErrControlBelow "%s: Input control #%d is below lower boundary of %0.4f.\n"
+#define MSGTR_AF_LADSPA_ErrControlAbove "%s: Input control #%d is above upper boundary of %0.4f.\n"
+

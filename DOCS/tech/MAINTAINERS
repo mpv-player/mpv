@@ -178,3 +178,6 @@ libao2 drivers:
     * ao_sgi.c - None
     * ao_sun.c - None
     * ao_win32.c - Sascha Sommer
+
+audio filters:
+    * af_ladspa.c - Ivo van Poorten
