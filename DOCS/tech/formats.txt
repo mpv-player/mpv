@@ -4,7 +4,11 @@
   - network streaming (currently plain wget-like HTTP and MMS (.asx))
   - VCD (Video CD) track, by direct CDROM device access (not requires mounting disc)
   - DVD titles using .IFO structure, by direct DVD device access (not requires mounting disc)
-  - DVD titles using menu navigation (experimental/alpha, not yet finished)
+  - DVD titles using menu navigation (experimental/alpha, not yet finished!!!)
+  - CDDA - raw audio from audio CD-ROM discs (using cdparanoia libs)
+  - RTP streaming (mpeg-ps over multicast only)
+  - Live.com streaming - support SDP/RTSP (using the live.com libs)
+  - SMB - file access over samba (experimental)
 
 2. Demuxer/parser layer, supported file/media formats:
 
@@ -31,7 +35,7 @@
     (so called Telecine or 3:2 pulldown effect)
     It means you see 30 frames per second, but there are only 24 different
     pictures and some of them are shown longer to fill 30 frame time.
-    If you encode such files with mencoder, using -ofps 24 or -ofps 23.98
+    If you encode such files with mencoder, using -ofps 24 or -ofps 23.976
     is recommended.
 
   - AVI streams.
@@ -83,6 +87,8 @@
     no compatibility at all. (it's just a legality game)
     MPlayer supports only v1.0, as nobody ever seen v2.0 files :)
     Note, that .ASF files are nowdays come with extension .WMA or .WMV.
+    UPDATE: MS recently released the ASF v1.0 specs too, but it has some
+    restrictions making it illegal to read by us :)
 
     Headers: Stream headers (codecs parameters) can be everywhere (in theory),
     but all files i've seen had it at the beginning of the file.
@@ -126,3 +132,23 @@
     Note, that microsoft licensed vivo stuff, and included in their netshow
     v2.0 program, so there are VfW/ACM codecs for vivo video and audio.
 
+  - RealMedia files:
+    A mixture of AVI and ASF features. It has mandatory headers at the
+    beginning and an optional INDEX (missing in most files).
+    The file is constructed of variable size chunks, with small header
+    telling the stream ID, timestamp, flags (keyframe...) and size.
+    But it has some features found in ASF files:
+    The video is actually double-muxed, the video chunks are really
+    appended fragments of the video frame. RV30+ supports B frames, so
+    you have to parse some bits of the first fragment to get the real PTS.
+    The audio frames are fixed size (CBR) but using the same scrambling
+    (out-of-order interleaving) as in the ASF files. 
+    
+    Codecs: Audio is either COOK(er), SIPR(o), ATRAC3 or DNET.
+    The DNET is actually a byte-swapped low-bitrate Dolby AC3 variant :)
+    Video is RV10 (h263 variant), RV20 (rp G2), RV30 (rp v8) or RV40 (rp v9).
+    
+    FPS: variable, just like in ASF.
+    
+    Note, that similarity of real and asf has some background - they worked
+    together on the (never finished/used) ASF v2 spec for some time.
