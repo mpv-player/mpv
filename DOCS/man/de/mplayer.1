@@ -1,4 +1,4 @@
-.\" MPlayer (C) 2000-2003 Arpad Gereoffy
+.\" MPlayer (C) 2000-2003 Arpad Gereöffy
 .\" Diese Man-Page wurde/wird von Gabucino, Diego Biurrun, Jonas Jermann,
 .\" Moritz Bunkus und Sebastian Krämer gepflegt.
 .\" 
@@ -841,7 +841,7 @@ unterstützt (z.B.\& nicht bei Standardeingabe, Pipe usw.)
 .TP
 .B \-frames <Anzahl>
 Nur die ersten <Anzahl> Bilder werden wiedergegeben/encodiert.
-Beedet sich danach.
+Beendet sich danach.
 .TP
 .B \-hr\-mp3\-seek (nur bei .MP3)
 Hi\-res mp3-Spulen.
@@ -966,59 +966,74 @@ Bildgröße in Bytes
 .B \-rtsp\-stream\-over\-tcp
 Kann zusammen mit 'rtsp://'\-URLs verwendet werden, um anzugeben, dass die
 daraus resultierenden eingehenden RTP\- und RTCP\-Pakete per TCP 
-übertragen werden (mit der gleichen TCP-Verbindung wie RTSP). Diese Option
-kann hilfreich sein, wenn deine Internetverbindung eingehende UDP-Pakete
-nicht durchlässt (siehe http://www.live.com/mplayer/).
+übertragen werden (mit der gleichen TCP-Verbindung wie RTSP). 
+Diese Option kann hilfreich sein, wenn deine Internetverbindung eingehende
+UDP-Pakete nicht durchlässt (siehe http://www.live.com/mplayer/).
 .TP
-.B \-skipopening
-Überspringt das Intro der DVD (nur bei dvdnav).
-.TP
-.B \-sb <Byteposition> (siehe auch bei \-ss)
-Springt an die Byteposition.
+.B \-sb <Byte-Position> (siehe auch \-ss)
+Springt an die Byte-Position.
 Nützlich beim Abspielen von CD-ROM-Abbildern / .VOB-Dateien mit Schrott
 am Anfang.
 .TP
 .B \-srate <Hz>
 Erzwingt eine Audioabspielrate, wobei die Videogeschwindigkeit angepasst
-wird, um A/V\-Sync beizubehalten. MEncoder übergibt diesen Wert an lame
-für's Resampling.
+wird, um die A/V-Synchronisation beizubehalten.
+MEncoder übergibt diesen Wert an lame für's Resampling.
 .TP
 .B \-ss <Zeit> (siehe auch bei \-sb)
-Springt an die gegebene Zeit.
-
+Springt zu der angegebenen Zeitposition.
+.
 .I BEISPIELE:
 .PD 0
 .RSs
 .IPs "\-ss 56"
-spult zu 56 Sekunden
+springt zu 56 Sekunden
 .IPs "\-ss 01:10:00"
-spult zu 1 Stunde 10 Minuten
+springt zu 1 Stunde 10 Minuten
 .RE
 .PD 1
 .
 .TP
-.B \-tv <option1:option2:...>
-Diese Option aktiviert das TV-Grabbing von MPlayer.
-
-.I ANMERKUNG:
+.B \-tskeepbroken 
+Sorgt dafür, daß Mplayer solche TS-Pakete, die als unbrauchbar markiert wurden,
+nicht ignoriert.
+Diese Option wird manchmal gebraucht, um korrupte MPEG-TS-Dateien abzuspielen.
+.
+.TP
+.B \-tsprog <1\-65534>
+Beim Abspielen eines MPEG-TS-Streams kann mit dieser Option ausgewählt werden,
+welches Programm (falls vorhanden) abgespielt werden soll.
+Kann in Verbindung mit \-vid und \-aid benutzt werden.
+.
+.TP
+.B \-tsprobe <Byte-Position>
+Beim Abspielen eines MPEG-TS-Streams kannst du mit dieser Option auswählen,
+wieviele Bytes MPlayer nach den gewünschten Program-IDs durchsuchen soll.
+.
+.TP
+.B \-tv <Option1:Option2:...> (nur bei TV)
+Diese Option steuert verschiedene Einstellungen des TV-Empfang-Moduls.
+Um mit MPlayer fernzusehen, benutze die Optionen 'tv://' oder
+'tv://<Kanalnummer>' oder sogar 'tv://Kanalname' (siehe unten für die Option
+'channels' für die Kanalnamen) als Film-URL.
 .br
-MPlayer akzeptiert keine Doppelpunkte. Benutze statt dessen also Punkte
-in der Geräte-ID (z.B.\& hw.0,0 und nicht  hw:0,0).
+.I ANMERKUNG:
+MPlayer akzeptiert keine Doppelpunkte, benutze statt dessen also Punkte
+in der Geräte-ID (z.B.\& hw.0,0 anstelle von hw:0,0).
 .br
 Sei gewarnt, dass du zwar eine beliebige Samplerate angeben kannst, wenn
 du ALSA verwendest, der LAME-Audiocodec aber nur die 'Standard'-Sampleraten
-unterstützt. Du wirst ein .AVI ohne Sound erhalten, wenn du eine
-merkwürdige Samplerate bei diesem Codec wählst.
-.br
+unterstützt.
+Du wirst ein .AVI ohne Sound erhalten, wenn du eine ungerade Samplerate
+bei diesem Codec wählst.
+.
 Verfügbare Optionen:
 .
 .RSs
-.IPs on\ \ \ 
-benutzt den TV-Eingang
 .IPs noaudio
 kein Sound
 .IPs driver=<Wert>
-mögliche Werte: dummy, v4l, bsdbt848
+mögliche Werte: dummy, v4l, v4l2, bsdbt848
 .IPs device=<Wert>
 Gibt ein anderes Videogerät als /dev/\:video0 an.
 .IPs input=<Wert>
@@ -1028,7 +1043,9 @@ an (such in der Ausgabe nach einer Liste)
 Gibt die Frequenz an, auf die der Tuner gesetzt wird (z.B.\& 511.250).
 Kann nicht zusammen mit 'channels' benutzt werden.
 .IPs outfmt=<Wert>
-Ausgabeformat des Tuners (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420)
+Gibt das Ausgabeformat des Tuners mit einer Voreinstellung des
+V4L-Treibers (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2, i420) oder ein
+frei wählbares Format als hexadezimalen Wert an.
 .IPs width=<Wert>
 Breite des Ausgabefensters
 .IPs height=<Wert>
@@ -1040,21 +1057,27 @@ second).
 Maximalgröße des Capture-Puffers in Megabytes (standardmäßig: dynamische
 Größe)
 .IPs norm=<Wert>
-Werte: PAL, SECAM, NTSC
+mögliche Werte: PAL, SECAM, NTSC.
+Siehe normid-Option unten für V4L2.
+.IPs normid=<Wert> (nur bei V4L2)
+Siehe MPlayer-Output für eine Liste der verfügbaren TV-Normen.
 .IPs channel=<Wert>
 Setzt den Tuner auf Kanal <Wert>.
 .IPs chanlist=<Wert>
 Werte: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<Kanal>\-<Name>,<Kanal>\-<Name>,...
-Setzt Namen für Kanäle. Benutze '_' anstelle von Leerzeichen bei Namen
-(oder spiel mit der Shellquotierung rum ;\-).
-Die Sendernamen werden mit dem OSD angezeigt, und die Kommandos
-tv_step_channel, tv_set_channel und tv_last_channel werden dann z.B.\& mit einer
-Fernbedienung benutzbar sein (siehe lirc).
+Setzt Namen für Kanäle. 
+Benutze '_' anstelle von Leerzeichen bei Namen (oder spiel mit der
+Shellquotierung rum ;-).
+Die Sendernamen werden dann mit dem OSD angezeigt, und die Kommandos
+tv_step_channel, tv_set_channel und tv_last_channel werden dann z.B.\& mit
+einer Fernbedienung benutzbar sein (siehe LIRC).
 Kann nicht zusammen mit dem frequency\-Parameter benutzt werden.
 Warnung: Die Sendernummer wird dann die Position des Eintrags in der
-'channels'\-Liste sein, wobei der erste Eintrag die 1 bekommt. Benutze also
-z.B.\&  tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
+'channels'-Liste sein, wobei der erste Eintrag die 1 bekommt.
+Benutze also z.B.\&  tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
+.IPs [brightness|contrast|hue|saturation]=<-100\-100>
+Setzt Werte des Farb-Equaliziers der Karte.
 .IPs audiorate=<Werte>
 Setzt die Audiobitrate für's Capturen.
 .IPs forceaudio
@@ -1075,7 +1098,7 @@ Wählt einen Audiomodus:
 .IPs forcechan=<1\-2>
 Normalerweise wird die Anzahl der aufgenommenen Audiokanäle automatisch
 durch Ermitteln des Audiomodus der TV-Karte festgelegt.
-Mit dieser Option kann Mono/\:Stereo unabhängig von dem von der TV-Karte
+Mit dieser Option kann Mono/\:Stereo unabhängig von dem von V4L
 zurückgegebenen Audiomodus erzwungen werden.
 Kann benutzt werden, wenn die TV-Karte den aktuellen Audiomodus nicht
 zurückgeben kann.
@@ -1091,37 +1114,63 @@ Wählt einen Audioausgang der TV-Karte, wenn diese mehrere hat.
 .IPs "[volume|bass|treble|balance]=<0\-65535>"
 Diese Optionen setzen Parameter des Mixers auf der Capture-Karte.
 Sie haben keinen Effekt, wenn deine Karte keinen Mixer hat.
+0\-65535 ist gültiger Bereich bei V4L1.
+Bei V4L2 geht der gültige Bereich von 0 bis 100, und 50 steht für den vom
+Treiber angegebenen Default-Wert.
 .IPs immediatemode=<Boolean>
-Ein Wert von 0 bedeutet: nimm Audio und Video zusammen in einem Puffer auf
-(Standardwert für mencoder).
-Ein Wert von 1 beduetet: nimm nur Video direkt von der Karte auf und Audio
-über ein externes Kabel von der TV\-Karte zur Soundkarte (Standardwert
-für mplayer).
+Ein Wert von 0 bedeutet: Nimm Audio und Video zusammen in einem Puffer auf
+(Standardwert für Mencoder).
+Ein Wert von 1 beduetet: Nimm nur Video direkt von der Karte und Audio
+über ein externes Kabel von der TV\-Karte zur Soundkarte auf (Standardwert
+für MPlayer).
+.IPs mjpeg
+Benutzte Hardware-mjpeg-Kompression (wenn dies die Karte unterstützt). 
+Bei dieser Option mußt du Breite und Höhe des Ausgabefensters nicht
+angeben, denn MPlayer ermittelt diese Werte automatisch vom
+Dezimierungswert (siehe unten).
+.IPs decimation=<1,2,4>
+Wählt die Bildgröße für die Hardware-mjpeg-Kompression:
+.RSss
+1: volle Größe
+    704x576    PAL
+    704x480    NTSC
+.br
+2: mittlere Größe
+    352x288    PAL
+    352x240    NTSC
+.br
+4: kleine Größe
+    176x144    PAL
+    176x120    NTSC
+.REss
+.IPs quality=<0\-100>
+Wählt die Qualität der JPEG-Kompression.
+.br
+(Qualitätseinstellung < 60 für volle Größe empfohlen)
 .RE
 .
 .TP
-.B \-user <Benutzername> (siehe auch \-passwd)
+.B \-user <Benutzername> (siehe auch \-passwd) (nur bei Netzwerk)
 Gibt den Benutzernamen für die HTTP-Authentifizierung an.
 .TP
-.B \vcd://<Titel>
-Spielt den Video\-CD\-Titel direkt von einem Gerät oder einem Diskabbild
-ab (siehe \-cuefile).
+.B \-user-agent <Zeichenkette>
+Benutze Zeichenkette als User-Agent beim HTTP-Streaming.
 .TP
 .B \-vid <id>
-Wählt die Videospur [MPG: 0\-15 ASF: 0\-255].
+Wählt die Videospur [MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190].
+Beim Abspielen von MPEG-TS-Streams benutzt MPlayer/Mencoder das erste Programm
+(falls vorhanden) mit dem gewählten Video-Stream.
 .TP
 .B \-vivo <sub\-Optionen> (DEBUG\-CODE)
-Erzwingt Audioparameter für den .vivo-Demuxer (nur für's Debugging
-gedacht).
-
-
+Erzwingt Audioparameter für den .vivo-Demuxer (nur für Debugging-Zwecke).
+.
+.
 .SH "OSD\-/UNTERTITEL\-OPTIONEN"
 .I ANMERKUNG:
-.br
 Siehe auch \-vf expand.
 .TP
 .B \-dumpmicrodvdsub (nur bei MPlayer)
-Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
+Konvertiert die mit der \-sub-Option angegebenen Untertitel in das
 MicroDVD\-Format. Erstellt eine Datei dumpsub.sub im aktuellen Verzeichnis.
 .TP
 .B \-dumpmpsub (nur bei MPlayer)
@@ -1599,10 +1648,26 @@ Signed 32-bit (Big-Endian)
 .
 .TP
 .B \-mixer <Gerät>
-Teil MPlayer das zu benutzende Mixergerät mit (Standard: /dev/\:mixer).
+Teilt MPlayer das zu benutzende Mixergerät mit (Standard: /dev/\:mixer).
+Bei ALSA gibt dies den Mixer-Namen an.
+.TP
+.B \-mixer-channel <Mixer-Anschluß> <nur bei \-ao oss und \-ao alsa)
+Bei dieser Option benutzt MPlayer zur Lautstärkeregulierung einen anderen
+Anschluß als die Standardeinstellung PCM.
+Optionen für OSS beinhalten
+.B vol, pcm, line.
+Für eine komplette Liste der Optionen suche nach SOUND_DEVICE_NAMES in der
+Datei /usr/include/linux/soundcard.h.
+Bei ALSA kannst du die Namen benutzen, die beispielsweise alsamixer anzeigt,
+wie
+.B Master, Line, PCM.
 .TP
 .B \-nowaveheader (nur bei -ao pcm)
-Schreibe keinen Wave-Header in die Datei. Wird für RAW-PCM benutzt.
+Schreibe keinen Wave-Header in die Datei.
+Wird für RAW-PCM benutzt.
+.
+.
+.SH "OPTIONEN FÜR DIE AUDIOAUSGABE (NUR BEI MPLAYER)"
 
 
 .SH "OPTIONEN FÜR DIE VIDEOAUSGABE (NUR BEI MPLAYER)"
@@ -3884,13 +3949,13 @@ erstellt.
 .
 .
 .SH AUTOREN
-MPlayer wurde ursprünglich von Arpad Gereoffy geschrieben.
+MPlayer wurde ursprünglich von Arpad Gereöffy geschrieben.
 Siehe Datei AUTHORS für eine Liste einiger der vielen anderer Beitragenden.
 .TP
 MPlayer is (C) 2000\-2004
 .B The MPlayer Team
 .TP
-Diese Manpage wurge geschrieben und wird gepflegt von
+Diese Manpage wurde geschrieben und wird gepflegt von
 .B Gabucino
 .br
 .B Diego Biurrun
@@ -3899,11 +3964,11 @@ Diese Manpage wurge geschrieben und wird gepflegt von
 .br
 .B Moritz Bunkus
 .PP
-Schicke Mails die Page betreffend bitte an die MPlayer-DOCS-Mailingliste.
+Schicke Mails die Manpage betreffend bitte an die MPlayer-DOCS-Mailingliste.
 .
 .
 .SH "STANDARD\-HAFTUNGSAUSSCHLUSS"
-Benutze das Programm auf eigene Gefahr!
+Benutzung des Programms auf eigene Gefahr!
 Es könnte Fehler und Ungenauigkeiten enthalten, die dein System oder deine
 Augen beschädigen können.
 Sei also vorsichtig.
