@@ -141,6 +141,8 @@
 	{"af-adv", audio_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"af", &af_cfg.list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 
+	{"vop*", &vo_plugin_args, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0,&vf_obj_list },
+	{"vf*", &vf_settings, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0, &vf_obj_list},
 	// select audio/video codec (by name) or codec family (by number):
 //	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 22, NULL}, // keep ranges in sync
 //	{"vfm", &video_family, CONF_TYPE_INT, CONF_MIN, 0, 29, NULL}, // with codec-cfg.c
@@ -166,9 +168,6 @@
 #ifdef USE_LIBAVCODEC
         {"pphelp", &pp_help, CONF_TYPE_PRINT_INDIRECT, CONF_NOCFG, 0, 0, NULL},
 #endif
-
-	{"vop*", &vo_plugin_args, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0,&vf_obj_list },
-	{"vf*", &vf_settings, CONF_TYPE_OBJ_SETTINGS_LIST, 0, 0, 0, &vf_obj_list},
 
 	// scaling:
 	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
