@@ -470,6 +470,30 @@ if x86 ; then
 fi
 
 
+if [ "$host_arch" = alpha ]; then
+  echocheck "CPU type"
+cat > $TMPC << EOF
+int main() {
+    unsigned long ver, mask;
+    asm ("implver %0" : "=r" (ver));
+    asm ("amask %1, %0" : "=r" (mask) : "r" (-1));
+    printf("%ld-%x\n", ver, ~mask);
+    return 0;
+}
+EOF
+  $_cc -o "$TMPO" "$TMPC"
+  case `"$TMPO"` in
+    0-0) proc="ev4" ;;
+    1-0) proc="ev5" ;;
+    1-1) proc="ev56" ;;
+    1-101) proc="pca56" ;;
+    2-303) proc="ev6" ;;
+    2-307) proc="ev67" ;;
+    2-1307) proc="ev68" ;;
+  esac
+  echores "$proc"
+fi
+
 
 case "$host_arch" in
   i[3-9]86|x86*)
@@ -599,9 +623,16 @@ EOF
     _target_arch='TARGET_ARCH_ALPHA = yes'
     _def_words_endian='#undef WORDS_BIGENDIAN'
     iproc='alpha'
-    proc=''
     _march=''
-    _mcpu='-mcpu=ev56'
+    echocheck "GCC & CPU optimization abilities"
+    if test "$proc" = "ev68" ; then
+      cc_check -mcpu=$proc || proc=ev67
+    fi
+    if test "$proc" = "ev67" ; then
+      cc_check -mcpu=$proc || proc=ev6
+    fi
+    _mcpu="-mcpu=$proc"
+    echores "$proc"
     ;;
 
   mips)
