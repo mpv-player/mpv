@@ -95,11 +95,8 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a opendivx/libdecore.a xa/libxa.a
 
-ifeq ($(OPENDIVX),yes)
-COMMON_DEPS += opendivx/libdecore.a
-endif
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
 endif
@@ -149,9 +146,6 @@ mp3lib/libMP3.a:
 	$(MAKE) -C mp3lib
 
 opendivx/libdecore.a:
-	$(MAKE) -C opendivx
-
-opendivx/postprocess.o:
 	$(MAKE) -C opendivx
 
 libdha/libdha.so:
