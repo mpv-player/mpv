@@ -89,6 +89,12 @@ extern int errno;
 
 #include "help_mp.h"
 
+#ifdef STREAMING
+#include "url.h"
+#include "network.h"
+static URL_t* url;
+#endif
+
 #define DEBUG if(0)
 #ifdef HAVE_GUI
  int nogui=1;
@@ -648,11 +654,34 @@ if(vcd_track){
       f=0; // 0=stdin
       stream=new_stream(f,STREAMTYPE_STREAM);
   } else {
-      f=open(filename,O_RDONLY);
-      if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
-      len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
-      stream=new_stream(f,STREAMTYPE_FILE);
-      stream->end_pos=len;
+#ifdef STREAMING
+      url = set_url(filename);
+      if(url==NULL) {
+#endif
+       f=open(filename,O_RDONLY);
+       if(f<0){ printf("File not found: '%s'\n",filename);return 1; }
+       len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
+       stream=new_stream(f,STREAMTYPE_FILE);
+       stream->end_pos=len;
+#ifdef STREAMING
+      } else {
+        if(url->port==0) {
+          if( (!strcasecmp(url->protocol, "mms")) || 
+              (!strcasecmp(url->protocol, "http")) ){
+            url->port=80;
+          }
+        }
+        f=connect2Server(url->hostname, url->port);
+        if( f<0 ) { 
+          printf("Unable to open URL: %s\n", filename);
+          free_url(url);
+          return 1; 
+        } else {
+          printf("Connected to server: %s\n", url->hostname );
+        }
+        stream=new_stream(f,STREAMTYPE_STREAM);
+      }
+#endif
   }
 }
 
