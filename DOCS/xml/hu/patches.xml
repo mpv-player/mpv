@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced with 1.2 -->
+<appendix id="patches">
+<title>Hogyan küldj patch-et</title>
+<para>
+Kérlek olvasd el <ulink url="../../tech/patches.txt">ezt a file-t</ulink>.
+</para>
+</appendix>
