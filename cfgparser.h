@@ -15,6 +15,7 @@
 #define CONF_TYPE_FUNC_FULL	7
 #define CONF_TYPE_SUBCONFIG	8
 #define CONF_TYPE_STRING_LIST           9
+#define CONF_TYPE_POSITION	10
 
 
 #define ERR_NOT_AN_OPTION	-1
@@ -73,6 +74,7 @@ struct config_save {
     int as_int;
     float as_float;
     void* as_pointer;
+    off_t* as_off_t;
   } param;
   char* opt_name;
 };

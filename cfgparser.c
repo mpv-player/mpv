@@ -112,6 +112,9 @@ m_config_save_option(m_config_t* config, config_t* conf,char* opt, char *param) 
   case CONF_TYPE_STRING_LIST :
     save[sl].param.as_pointer = *((char***)conf->p);
     break;
+  case CONF_TYPE_POSITION :
+    save[sl].param.as_off_t = *((off_t*)conf->p);
+    break;
   default :
     mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Should never append in m_config_save_option : conf->type=%d\n",conf->type);
   }
@@ -195,6 +198,9 @@ m_config_revert_option(m_config_t* config, config_save_t* save) {
       }
       break;
     }
+    break;
+  case CONF_TYPE_POSITION :
+    *((off_t*)save->opt->p) = save->param.as_off_t;
     break;
   default :
     mp_msg(MSGT_CFGPARSER,MSGL_WARN,"Why do we reverse this : name=%s type=%d ?\n",save->opt->name,save->opt->type);
@@ -425,7 +431,9 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 {
 	int i=0,nconf = 0;
 	long tmp_int;
+	off_t tmp_off;
 	double tmp_float;
+	int dummy;
 	int ret = -1;
 	char *endptr;
 	config_t* conf=NULL;
@@ -731,6 +739,42 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 		case CONF_TYPE_PRINT:
 			mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", (char *) conf[i].p);
 			exit(1);
+		case CONF_TYPE_POSITION:
+			if (param == NULL)
+				goto err_missing_param;
+
+			if (sscanf(param, sizeof(off_t) == sizeof(int) ?
+			"%d%c" : "%lld%c", &tmp_off, dummy) != 1) {
+				mp_msg(MSGT_CFGPARSER, MSGL_ERR, "parameter must be an integer: %s\n", param);
+				ret = ERR_OUT_OF_RANGE;
+				goto out;
+			}
+
+			if (conf[i].flags & CONF_MIN)
+				if (tmp_off < conf[i].min) {
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+					(sizeof(off_t) == sizeof(int) ?
+					"parameter must be >= %d: %s\n" :
+					"parameter must be >= %lld: %s\n"),
+					(off_t) conf[i].min, param);
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
+
+			if (conf[i].flags & CONF_MAX)
+				if (tmp_off > conf[i].max) {
+					mp_msg(MSGT_CFGPARSER, MSGL_ERR,
+					(sizeof(off_t) == sizeof(int) ?
+					"parameter must be <= %d: %s\n" :
+					"parameter must be <= %lld: %s\n"),
+					(off_t) conf[i].max, param);
+					ret = ERR_OUT_OF_RANGE;
+					goto out;
+				}
+
+			*((off_t *) conf[i].p) = tmp_off;
+			ret = 1;
+			break;
 		default:
 			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Unknown config type specified in conf-mplayer.h!\n");
 			break;
