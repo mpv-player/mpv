@@ -36,7 +36,7 @@
 
 #include "fastmemcpy.h"
 #include "../postproc/rgb2rgb.h"
-
+#include "../libmpcodecs/vf_scale.h"
 
 static vo_info_t info = 
 {
@@ -106,6 +106,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	
 	if(using_format != IMGFMT_YV12)
 	{
+		sws_rgb2rgb_init(get_sws_cpuflags());
 		rgb_buffer = malloc(image_width * image_height * 3);
 		if (!rgb_buffer)
 		{
