@@ -119,16 +119,17 @@ static uint32_t jpeg_write( uint8_t * name,uint8_t * buffer )
  jpeg_create_compress(&cinfo);
  jpeg_stdio_dest( &cinfo,o );
 
- jpeg_set_quality( &cinfo,jpeg_quality,jpeg_baseline );
 
  cinfo.image_width=image_width;
  cinfo.image_height=image_height;
  cinfo.input_components=bpp / 8;
  cinfo.in_color_space=JCS_RGB;
- cinfo.optimize_coding=jpeg_optimize;
- cinfo.smoothing_factor=jpeg_smooth;
  
  jpeg_set_defaults( &cinfo );
+ jpeg_set_quality( &cinfo,jpeg_quality,jpeg_baseline );
+ cinfo.optimize_coding=jpeg_optimize;
+ cinfo.smoothing_factor=jpeg_smooth;
+
  if ( jpeg_progressive_mode ) jpeg_simple_progression( &cinfo );                                  
  jpeg_start_compress( &cinfo,TRUE );
 
