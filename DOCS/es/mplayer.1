@@ -1960,7 +1960,7 @@ en cuyo caso el canal mono se repite en ambos canales de salida).
 Si el número de canales de salida es menor que el número de canales de entrada
 los canales excedentes son truncados.
 .IPs format[=bps,f]
-Selecciona el formato f y los bits por muestra bps usados para la salida
+Selecciona el formato f y los bytes por muestra bps usados para la salida
 de la capa de filtro.
 La opción bps es un entero y denota Bytes por muestra.
 El formato f es una cadena de texto conteniendo una mezcla concatenada de:
@@ -2564,15 +2564,20 @@ No filtrar la crominancia (solo la luminancia).
 .RE
 .PD 0
 .RSs
+.IPs "\-vf pp=hb/vb/dr/al"
+eliminación de bloques horizontal y vertical, eliminación de efecto
+de anillos y brillo/\:contraste automático
 .IPs "\-vf pp=hb/vb/dr/al/lb"
-.IPs "\-vf pp=hb/vb/dr/al/lb"
+eliminación de bloques horizontal y vertical, eliminación de efecto
+de anillos, brillo/\:contraste automático y desentrelazador de mezcla
+lineal
 .IPs "\-vf pp=de/\-al"
 filtros por defecto sin corrección de brillo/\:contraste
 .IPs "\-vf pp=de/tn:1:2:3"
-activa los filtros por defecto y el eliminador temporal de ruido
+Activa los filtros por defecto y el eliminador temporal de ruido.
 .IPs "\-vf pp=hb:y/vb:a \-autoq 6"
-elimina bloques de luminancia solo horizontal y cambia a vertical o se
-desactiva dependiendo de la disponibiblidad del tiempo de CPU
+Elimina bloques de luminancia solo horizontal y cambia a vertical o se
+desactiva dependiendo de la disponibiblidad del tiempo de CPU.
 .RE
 .PD 1
 .TP
