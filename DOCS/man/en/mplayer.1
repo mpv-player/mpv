@@ -484,11 +484,6 @@ Use an alternative menu.conf.
 .B \-menu-root <value> (BETA CODE)
 Specify the main menu.
 .TP
-.B \-nocolorkey
-Disables the colorkeying.
-Only supported by the cvidix, fbdev, svga, vesa, winvidix, xvidix and xover
-video out drivers.
-.TP
 .B \-nojoystick
 Turns off joystick support.
 Default is on, if compiled in.
@@ -832,9 +827,6 @@ demuxer selection.
 .B \-passwd <password> (see \-user option too)
 Specify password for http authentication.
 .TP
-.B \-user-agent <string>
-Use string as User-Agent for HTTP streaming.
-.TP
 .B \-prefer-ipv4
 Use IPv4 on network connections.
 Falls back to IPv6 automatically.
@@ -1046,7 +1038,7 @@ choose an audio output of the capture card, if it has more of them
 .IPs [volume|bass|treble|balance]=<0\-100>
 These options set parameters of the mixer on the video capture card.
 They will have no effect, if your card doesn't have one.
-For v4l1, 0-65535 is a valid range.
+For v4l1, 0\-65535 is a valid range.
 For v4l2, the valid range is 0 to 100, and 50 maps to the default value of the
 control, as reported by the driver.
 .IPs immediatemode=<bool>
@@ -1084,6 +1076,9 @@ choose the quality of the jpeg compression
 .TP
 .B \-user <user name> (see \-passwd option too)
 Specify user name for http authentication.
+.TP
+.B \-user-agent <string>
+Use string as User-Agent for HTTP streaming.
 .TP
 .B \-vid <id>
 Select video channel [MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190].
@@ -2593,7 +2588,7 @@ simple postprocessing filter
 .RSs
 .IPs quality
 0\-6 
-.IPs qp\ \ 
+.IPs qp\ \ \ 
 force quantization parameter
 .RE
 .TP
@@ -2779,7 +2774,7 @@ independently and then re-interleave them.
 .PD 0
 .RSs
 .IPs d
-deinterleave
+deinterleave (placing one above the other)
 .IPs i
 interleave
 .IPs s
@@ -2789,12 +2784,19 @@ swap fields (exchange even & odd lines)
 .TP
 .B "fil=[i|d]"
 (de)interleaves lines.
-fil=d deinterleaves the fields and puts then left-right
-fil=i interleave them again (reverses the effect of fil=d)
-so this filter is very similar to the il filter but much faster, the main
-dissadvantage is that it doesnt always work. especially if combined with 
-other filters it may produce randomly messed up images, so be happy if it works
-but dont complain if it doesnt for your combination of filters. 
+This filter is very similar to the il filter but much faster, the main
+disadvantage is that it doesn't always work.
+Especially if combined with other filters it may produce randomly messed
+up images, so be happy if it works but don't complain if it doesn't for
+your combination of filters. 
+.PD 0
+.RSs
+.IPs d
+Deinterleave fields, placing them side by side.
+.IPs i
+Interleave fields again (reversing the effect of fil=d).
+.RE
+.PD 1
 .TP
 .B "field[=n]"
 Extracts a single field from an interlaced image using stride arithmetic
