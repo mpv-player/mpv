@@ -221,7 +221,7 @@ void CheckDir( GtkWidget * list,char * directory )
  gtk_widget_show( list );
 }
 
-int fs_PersistantHistory( char *subject ); /* forward declaration */
+void fs_PersistantHistory( char *subject ); /* forward declaration */
 
 void ShowFileSelect( int type,int modal )
 {
@@ -332,21 +332,21 @@ void HideFileSelect( void )
  fsFileSelect=NULL;
 }
 
-int fs_PersistantHistory( char * subject )
+void fs_PersistantHistory( char * subject )
 {
  int i;
+
+ if ( fsType != fsVideoSelector ) return;
 
  for ( i=0;i < fsPersistant_MaxPos;i++ )
   if ( fsHistory[i] && !strcmp( fsHistory[i],subject ) )
    {
     char * tmp = fsHistory[i]; fsHistory[i]=fsHistory[0]; fsHistory[0]=tmp;
-    return 0;
+    return;
    }
  gfree( (void **)&fsHistory[fsPersistant_MaxPos - 1] );
  for ( i=fsPersistant_MaxPos - 1;i;i-- ) fsHistory[i]=fsHistory[i - 1];
  fsHistory[0]=gstrdup( subject );
-
- return 0;
 }
 //-----------------------------------------------
 
