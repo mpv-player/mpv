@@ -2706,7 +2706,7 @@ Produziert keine Videoausgabe.
 Nützlich für Benchmarking-Zwecke.
 .
 .TP
-.B aa\ \ \ \ \ 
+.B aa (siehe auch \-aa*)
 ASCII-Art-Videoausgabetreiber, der auf einer Textkonsole funktioniert.
 .
 .TP
@@ -2717,10 +2717,25 @@ Farbiger ASCII-Art-Videoausgabetreiber, der auf einer Textkonsole funktioniert.
 .B bl\ \ \ \ \ 
 Videowiedergabe, die das Blinkenlights-UDP-Protokoll unterstützt.
 Dieser Treiber ist höchstgradig hardwarespezifisch.
+.PD 0
+.RSs
+.IPs <Subdevice>
+Wählt den zu benutzenden Subdevice-Treiber von Blinkenlights explizit.
+Die Angabe ist der Art arcade:host=localhost:2323 oder
+hdl:file=Name1,file=Name2.
+Du musst ein Subdevice angeben.
+.RE
+.PD 1
 .
 .TP
 .B ggi\ \ \ \ 
 Videoausgabetreiber für das GGI-Grafiksystem.
+.PD 0
+.RSs
+.IPs <Treiber>
+Wählt den zu benutzenden GGI-Treiber explizit.
+.RE
+.PD 1
 .
 .TP
 .B directfb
@@ -2801,10 +2816,22 @@ die Norm wird bestimmt, indem die Framerate des Films betrachtet wird.
 Matrox-spezifischer Videoausgabetreiber, der den YUV-Backend-Scaler von
 Gxxx-Karten durch ein Kernelmodul benutzt.
 Wenn du eine Matroxkarte hast, ist dies die schnellste Option.
+.PD 0
+.RSs
+.IPs <Gerät>
+Wählt das zu benutzende Matrox-Gerät explizit (Standard: /dev/\:mga_vid).
+.RE
+.PD 1
 .
 .TP
 .B xmga (nur bei Linux, X11)
 Der mga-Videoausgabetreiber, läuft in einem X11-Fenster.
+.PD 0
+.RSs
+.IPs <Gerät>
+Wählt das zu benutzende Matrox-Gerät explizit (Standard: /dev/\:mga_vid).
+.RE
+.PD 1
 .
 .TP
 .B syncfb\ 
@@ -2816,29 +2843,41 @@ das vertikale Retrace auf dem Monitor.
 .TP
 .B 3dfx (nur bei Linux)
 3Dfx-spezifischer Videoausgabetreiber.
-FIXME: Worin liegt der Unterschied zwischen 3dfx, tdfxfb and tdfx_vid?
+Dieser Treiber benutzt die 3Dfx-Hardware direkt auf X11.
+Nur 16 bpp werden unterstützt.
+FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
 .
 .TP
 .B tdfxfb (Linux only)
 Dieser Treiber setzt den tdfx-Framebuffer-Treiber ein, um Filme mit
 YUV-Beschleunigung abzuspielen.
-FIXME: Worin liegt der Unterschied zwischen 3dfx, tdfxfb and tdfx_vid?
+FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
+.PD 0
+.RSs
+.IPs <Gerät>
+Wähle das zu benutzende fbdev-Gerät explizit (Standard: /dev/\:fb0).
+.RE
+.PD 1
 .
 .TP
 .B tdfx_vid (Linux only)
 3Dfx-spezifischer Videoausgabetreiber.
-Funktioniert in Verbindung mit einem Kernelmodul.
-FIXME: Worin liegt der Unterschied zwischen 3dfx, tdfxfb and tdfx_vid?
+Dieser Treiber benutzt das tdfx_vid-Kernelmodul direkt.
+FIXME: Unterschied zwischen 3dfx, tdfxfb and tdfx_vid ok?
+.PD 0
+.RSs
+.IPs <Gerät>
+Wähle das zu benutzende Gerät explizit (Standard:/dev/\:tdfx_vid).
+.RE
+.PD 1
 .
 .TP
 .B dxr2 (siehe auch \-dxr2) (nur bei DXR2)
 Creative DXR2-spezifischer Videoausgabetreiber.
 .PD 0
 .RSs
-.IPs x11
-Aktiviert Overlay.
-.IPs xv
-Aktiviert Overlay.
+.IPs <vo_Treiber>
+Der für das Overlay zu benutzende unterliegende Videoausgabetreiber (x11, xv)
 .RE
 .PD 1
 .
@@ -2853,7 +2892,7 @@ Siehe auch lavc-Videofilter.
 Aktiviert Overlay anstelle von TV-Ausgabe.
 .IPs prebuf
 Schaltet Prebuffering ein.
-.IPs sync
+.IPs sync\ 
 Schaltet die neue Sync-Engine ein.
 .IPs norm=<Norm>
 Gibt die TV-Norm an.
@@ -2870,19 +2909,22 @@ Gibt die TV-Norm an.
 .br
 5: NTSC
 .REss
-.IPs device=<Nummer>
+.IPs <0\-3>
 Gibt die Gerätenummer an, wenn mehr als eine em8300-Karte vorhanden ist.
 .RE
 .PD 1
 .
 .TP
 .B mpegpes (nur bei DVB)
-DVB-spezifischer Videoausgabetreiber.
+Videoausgabetreiber für DVB-Karten, der die Ausgabe in eine MPEG-PES-Datei
+schreibt, falls keine DVB-Karte installiert ist.
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Gibt die Gerätenummer an, wenn mehr als eine DVB-Karte vorhanden ist (nur bei
 V3 API, wie bei den Treibern der 1.x.y-Serie).
+.IPs <Dateiname>
+Erlaubt die genaue Angabe des Ausgabedateinamens (Standard: ./grab.mpg).
 .RE
 .PD 1
 .
@@ -2891,20 +2933,33 @@ V3 API, wie bei den Treibern der 1.x.y-Serie).
 Videoausgabetreiber für eine Anzahl von MJPEG-Capture/\:Wiedergabe-Karten.
 .
 .TP
-.B zr2\ \ \ \ 
+.B zr2 (siehe auch den zrmjpeg-Videofilter)
 Videoausgabetreiber für eine Anzahl von MJPEG-Capture/\:Wiedergabe-Karten,
 zweite Generation.
-Siehe auch den zrmjpeg-Videofilter.
+.PD 0
+.RSs
+.IPs dev=<Gerät>
+Gibt das zu benutzende Gerät an.
+.IPs pal\ \ 
+Aktiviert die Videonorm PAL.
+.IPs secam
+Aktiviert die Videonorm SECAM.
+.IPs ntsc\ 
+Aktiviert die Videonorm NTSC.
+.IPs prebuf
+Aktiviert Prebuffering, wird noch nicht unterstützt.
+.RE
+.PD 1
 .
 .TP
-.B md5\ \ \ \ 
-Generiert Bilder von jedem Frame mit Hilfe von \-vo pgm und schreibt die
-MD5-Prüfsummen in eine Datei.
+.B md5sum\ 
+Berechnet MD5-Summen von jedem Frame und schreibt sie in eine Datei.
+Unterstützt die Farbräume RGB24 und YV12.
 Nützlich für Debugging-Zwecke.
 .PD 0
 .RSs
-.IPs filename
-Erlaubt die Angabe des Ausgabe-Dateinamens (Standard: ./md5).
+.IPs outfile=<Dateiname>
+Gibt den Ausgabe-Dateinamen an (Standard: ./md5sums).
 .RE
 .PD 1
 .
@@ -2926,7 +2981,7 @@ Schreibt die Ausgabe-Frames interlaced, untere Felder zuerst.
 .REss
 .PD 1
 .RS
-.br
+.sp 1
 .I ANMERKUNG:
 Bei Weglassen dieser Optionen ist die Ausgabe 'progressive' (d.h.\& nicht
 interlaced).
@@ -2941,18 +2996,25 @@ Es unterstützt nur das RGB-Format (24 bpp), und die Ausgabe wird zu 256 Farben
 konvertiert.
 .PD 0
 .RSs
-.IPs fps\ \ \ 
+.IPs <fps>
 Fließkommawert, der die Framerate angibt (Standard: 5.0).
-.IPs filename
+.IPs <Dateiname>
 Gibt den Ausgabedateinamen an (Standard: ./out.gif).
 .REss
 .PD 1
 .RS
-.br
+.sp 1
 .I ANMERKUNG:
-Du musst die Framerate for dem Dateinamen angeben, sonst wird die Framerate
+Du musst die Framerate vor dem Dateinamen angeben, sonst wird die Framerate
 Teil des Dateinamens.
+.sp 1
+.I BEISPIEL:
 .RE
+.PD 0
+.RSs
+mplayer video.nut \-vo gif89a:15.0:test.gif
+.RE
+.PD 1
 .
 .TP
 .B jpeg\ \ \ 
@@ -2971,43 +3033,58 @@ Optimierungswert <0\-100> (Standard: 100)
 Glättungsfaktor <0\-100> (Standard: 0)
 .IPs quality=<Wert>
 Qualitätsfaktor <0\-100> (Standard: 75)
-.IPs outdir=<Wert>
-Gib das Verzeichnis an, in das die JPEG-Bilder gespeichert werden.
-Falls nicht angegeben, werden alles JPEG-Dateien in das aktuelle Verzeichnis
-geschrieben.
-.IPs subdirs=<Wert>
-Falls angegeben, erstellt MPlayer nummerierte Unterverzeichnisse mit dem
-angegebenen Prefix.
-Falls nicht angegeben, werden alle JPEG-Dateien in das gleiche Verzeichnis
-geschrieben.
-.IPs maxfiles=<Wert>
-Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden,
-falls Unterverzeichnisse angegeben worden sind.
+.IPs outdir=<Verzeichnisname>
+Gib das Verzeichnis an, in das die JPEG-Bilder gespeichert werden
+(Standard: ./).
+.IPs subdirs=<Präfix>
+Erstellt nummerierte Unterverzeichnisse mit dem angegebenen Präfix, in
+welches die Dateien gespeichert werden anstatt in das aktuelle Verzeichnis.
+.IPs maxfiles=<Wert> (nur mit subdirs)
+Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden.
 Muss größer oder gleich 1 sein (Standard: 1000).
 .RE
 .PD 1
 .
 .TP
-.B pgm\ \ \ \ 
-Gibt jeden Frame in eine PGM-Datei im aktuellen Verzeichnis aus.
+.B pnm\ \ \ \ 
+Gibt jeden Frame in eine PNM-Datei in das aktuelle Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
-Unterstützt nur das YV12-Format.
-Das resultierende Bild ist (Breite) * (Höhe * 1.5) des Originalbildes groß.
-An den Koordinaten 0,0 für Breite,Höhe ist die Y-Ebene, an den
-Koordinaten 0,Höhe bei Breite/2,Höhe/2 ist die U-Ebene und an den Koordinaten
-Breite/2,Höhe bei Breite/2,Höhe/2 ist die V-Ebene.
-Es gibt keine Suboptionen.
+Unterstützt PPM-, PGM- und PGMYUV-Dateien sowohl im raw- als auch im
+ASCII-Modus.
+Siehe auch pnm(5), ppm(5) and pgm(5).
+.PD 0
+.RSs
+.IPs ppm
+Schreibe PPM-Dateien (Standard).
+.IPs pgm
+Schreibe PGM-Dateien.
+.IPs pgmyuv
+Schreibe PGMYUV-Dateien.
+PGMYUV ist wie PGM, enthält jedoch zusätzlich eine U- und V-Ebene unten im
+Bild.
+.IPs raw
+Schreibe PNM-Dateien im raw-Modus (Standard).
+.IPs ascii
+Schreibe PNM-Dateien im ASCII-Modus.
+.IPs outdir=<Verzeichnisname>
+Gib das Verzeichnis an, in das die PNM-Dateien gespeichert werden
+(Standard: ./).
+.IPs subdirs=<Präfix>
+Erstellt nummerierte Unterverzeichnisse mit dem angegebenen Präfix, in
+welches die Dateien gespeichert werden anstatt in das aktuelle Verzeichnis.
+.IPs maxfiles=<Wert> (nur mit subdirs)
+Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden.
+Muss größer oder gleich 1 sein (Standard: 1000).
+.RE
+.PD 1
 .
 .TP
-.B png\ \ \ \ 
+.B png (siehe auch \-z)
 Gibt jeden Frame in eine PNG-Datei im aktuellen Verzeichnis aus.
 Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
 Unterstützt die RGB- und BGR-Formate mit 24 bpp.
-Es gibt zwar keine Suboptionen, du kannst die Kompressionsstufe jedoch mit
-der Option \-z angeben, die Werte von 0 (keine Kompression) bis 9 (maximale
-Kompression) entgegennimmt.
 .
 .TP
 .B tga\ \ \ \ 
@@ -3017,15 +3094,14 @@ Name.
 Der Zweck dieses Videoausgabetreibers ist das Schreiben von verlustfreien
 Bildern, die mit jeder externen Bibliothek verwendet werden können.
 Unterstützt werden BGR[A]-Farbformate mit 15, 24 und 32 bpp.
-Es gibt keine Suboptionen.
 Ein bestimmtes Format kann erzwungen werden durch Benutzung des
 format-Videofilters.
 .sp 1
 .I BEISPIEL:
+.RE
 .PD 0
 .RSs
-.IPs "\-vf format=bgr15"
-Speichert Bilder mit 2 Bytes pro Pixel.
+mplayer video.nut \-vf format=bgr15 \-vo tga
 .RE
 .PD 1
 .
