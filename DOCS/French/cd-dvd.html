@@ -19,14 +19,14 @@ Il y a plusieurs raisons possibles pour changer cette vitesse:</P>
 
 <UL>
   <LI>Il a été signalé que des lecteurs peuvent commettre des erreurs fréquentes
-  à leur pleine vitesse (surtout avec des CDs mal pressés), la diminuer peut alors
+  à haute vitesse (surtout avec des CDs mal pressés), la diminuer peut alors
    empêcher ces erreurs.</LI>
   <LI>ces lecteurs génèrent souvent un bruit assourdissant, qu'une vitesse réduite 
   peut contribuer à diminuer.</LI>
 </UL>
 
-<P>Vous pouvez réduire la vitesse du lecteur avec hdparm ou avec un programme nommé setcd.
-  Utilisation:</P>
+<P>Vous pouvez réduire la vitesse des lecteurs de CD-ROM IDE avec <CODE>hdparm</CODE> 
+  ou avec un programme nommé <CODE>setcd</CODE>. Il fonctionne comme cela:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -E [vitesse] [périph. cdrom]</CODE></P>
 
@@ -43,14 +43,20 @@ Il y a plusieurs raisons possibles pour changer cette vitesse:</P>
 <P>pour créer 2MB de cache du fichier, ce qui est utile pour les CD-Roms endommagés.
   Si vous lui donnez une valeur trop haute, le lecteur ne va pas arréter de s'arréter et de repartir,
   ce qui va dramatiquement diminuer les performances.
-  Il est également recommandé d'optimiser votre lecteur de CD-Roms avec hdparm:</P>
+  Il est également recommandé d'optimiser votre lecteur de CD-ROM avec 
+  <CODE>hdparm</CODE>:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (périph. cdrom)</CODE></P>
 
-<P>pour permettre l'accès DMA, le cache en lecture, et l'IRQ unmasking. (lisez la page de man pour plus d'explications).</P>
+<P>pour permettre l'accès DMA, le cache en lecture, et l'IRQ unmasking. (lisez la page de 
+  man de <CODE>hdparm</CODE> pour plus d'explications).</P>
 
 <P>Référez vous à "<CODE>/proc/ide/[périph. cdrom]/settings</CODE>" pour optimiser correctement votre
 lecteur CD-ROM</P>
+
+<P>Les lecteurs SCSI n'ont pas une manière uniforme de fixer ces parametres (Vous en 
+  connaissez une ? Dites-la nous!) Il y a un outil qui fonctionne pour les 
+  <A HREF="http://das.ist.org/~georg/">lecteurs SCSI Plextor</A>.</P>
 
 <P>FreeBSD:</P>
 
@@ -68,19 +74,20 @@ lecteur CD-ROM</P>
   le décryptage et la lecture des DVDs. Ces deux bibliothèques sont incluses 
   dans le sous-répertoire <CODE>libmpdvdkit2/</CODE> du répertoire source de 
   MPlayer, vous n'avez donc pas besoin de les installer séparement. Nous avons 
-  opté pour cette solution car nous devions corriger un bug de libdvdread, et 
-  appliquer un patch qui ajoute <B>un cache pour les clés CSS crackées</B> à libdvdcss. 
+  opté pour cette solution car nous devions corriger un bug de <CODE>libdvdread</CODE>, et 
+  appliquer un patch qui ajoute <B>un cache pour les clés CSS crackées</B> à <CODE>libdvdcss</CODE>. 
   Le résultat est bien plus rapide car les clés n'ont pas à être cassé à chaque lecture.</P>
 
 <P>MPlayer peut également utiliser les bibliothèques globales au système <CODE>libdvdread</CODE> et
   <CODE>libdvdcss</CODE>, mais cette solution n'est <B>pas</B> recommandée,
-  car elle peut provoquer des bugs, des incompatibilités de bibliothèques, 
+  car elle peut provoquer des bugs, des incompatibilités de librairies, 
   et une vitesse moins importante.</P>
 
 <H4>Navigation DVD (dvdnav)</H4>
 
 <P>Le support pour la navigation DVD via <CODE>dvdnav</CODE> était développé, mais
-  n'a jamais été vraiment fini et n'est donc <B>pas recommandé</B>!</P>
+  n'a jamais été vraiment fini et n'est actuellement plus maintenu. Qui sait, il 
+  pourrait même compiler.</P>
 
 <H4>Ancienne méthode de lecture DVD - OPTIONNELLE</H4>
 
@@ -92,11 +99,11 @@ lecteur CD-ROM</P>
 
 <H4>structure d'un DVD</H4>
 
-<P>Les disques DVD utilisent tous des secteurs de 2048 o/s avec ecc/crc. Ils ont généralement
-  un système de fichier UDF sur une seule piste, qui contient des fichiers variés
-  (des petits fichiers .IFO et .BUK et un gros (1Go) fichier .VOB). Ce sont de véritables
-  fichiers et ils peuvent être joués/copiés depuis le système de fichier monté d'un
-  DVD non-crypté.</P>
+<P>Les disques DVD utilisent tous des secteurs de 2048 octets par secondes avec ECC/CRC. 
+  Ils ont généralement un système de fichier UDF sur une seule piste, qui contient des 
+  fichiers variés (des petits fichiers .IFO et .BUK et un gros (1Go) fichier .VOB). 
+  Ce sont de véritables fichiers et ils peuvent être joués/copiés depuis le système de 
+  fichier monté d'un DVD non-crypté.</P>
 
 <P>Les fichiers .IFO contiennent les infos de navigation dans le film (carte des
   chapitres/titres/angles, table des langues, etc) et sont requis pour lire et
@@ -105,29 +112,29 @@ lecteur CD-ROM</P>
   d'utiliser un adressage brut des secteurs sur le disque pour implémenter la navigation
   DVD. C'est également requis pour décrypter le contenu.</P>
 
-<P>L'ensemble de l'ancienne méthode de lecture DVD avec libcss à donc besoin d'un
+<P>L'ensemble de l'ancienne méthode de lecture DVD avec <CODE>libcss</CODE> à donc besoin d'un
   système de fichier DVD monté et un accès basé sur les secteurs bruts pour accéder
   au périphérique. Malheureusement vous devez être root (sous Linux) pour obtenir l'adresse 
   du secteur d'un fichier. Vous avez alors les deux solutions suivantes:</P>
 
 <UL>
-  <LI>Forcez l'utilisateur à être root ou utilisez un binaire de mplayer suid-root.</LI>
+  <LI>Soyez root ou utilisez un binaire de mplayer suid-root.</LI>
   <LI>Laissez MPlayer appeler le wrapper fibmap_mplayer suid-root pour accéder
     au DVD (utilisé dans l'ancienne méthode de lecture DVD avec libcss).</LI>
   <LI>N'utilisez pas le pilote de système de fichier du noyau du tout et ré-implémentez
-    le dans l'espace utilisateur. libdvdread 0.9.x et libmpdvdkit le font (nouvelle
-    méthode de lecture DVD). Les pilotes du système de fichier udf ne sont pas requis
-    car ils utilisent leur propre pilote. De plus le dvd n'a pas besoin d'être
+    le dans l'espace utilisateur. <CODE>libdvdread</CODE> 0.9.x et <CODE>libmpdvdkit</CODE> 
+    le font (nouvelle méthode de lecture DVD). Les pilotes du système de fichier udf ne sont
+    pas requis car ils utilisent leur propre pilote. De plus le dvd n'a pas besoin d'être
     monté puisque l'accès basé sur les secteurs bruts est utilisé.</LI>
 </UL>
 
-<P>Parfois /dev/dvd ne peut être lu par les utilisateurs, les auteurs de libdvdread ont donc
-  implementé une couche d'émulation qui transfère les adresses des secteurs en
-  noms de fichier+offsets, pour émuler l'accès brut sur un système de fichier monté
-  ou même sur un disque dur.</P>
+<P>Parfois <CODE>/dev/dvd</CODE> ne peut être lu par les utilisateurs, les auteurs de 
+  <CODE>libdvdread</CODE> ont donc implémenté une couche d'émulation qui transforme les 
+  adresses des secteurs en noms de fichier+offsets, pour émuler l'accès brut sur un système 
+  de fichier monté ou même sur un disque dur.</P>
 
-<P>libdvdread accepte même le point de montage au lieu du nom de péripérique pour
-  l'accès brut et regarde dans <CODE>/proc/mounts</CODE> pour obtenir le nom de
+<P><CODE>libdvdread</CODE> accepte même le point de montage au lieu du nom de péripérique 
+  pour l'accès brut et regarde dans <CODE>/proc/mounts</CODE> pour obtenir le nom de
   périphérique. Il a été développé pour Solaris, où les noms de périphériques sont
   alloués dynamiquement.</P>
 
@@ -151,14 +158,14 @@ lecteur CD-ROM</P>
     le titre et les clés disque avant de les envoyer sur un bus non protégé
     (pour empêcher les écoutes). La clé bus est requise pour obtenir et décrypter
     les clés disque cryptées.</LI>
-  <LI><B>clé mise en cache:</B> MPlayer cherche une éventuelle clé déjà crackée
+  <LI><B>clé mise en cache:</B> MPlayer cherche une clé déjà crackée
     dans le répertoire <CODE>~/.mplayer/DVDKeys</CODE> (rapide;).</LI>
   <LI><B>clé:</B> Si aucune clé n'est disponible dans le cache, MPlayer essaie de
     décrypter la clé disque avec un ensemble de clés incluses.</LI>
   <LI><B>disque:</B> Si la méthode clé échoue (c-a-d. pas de clés incluses),
     MPlayer va cracker la clé disque avec un algorithme <I>brute force</I>.
     Ce processus est intensif pour le CPU et requiert 60 Mo de mémoire (table
-    de hachage 32bit de 16M) pour stocker temporairement les données. Cette
+    de hachage 32Bit de 16M) pour stocker temporairement les données. Cette
     méthode devrait toujours fonctionner (lent).</LI>
   <LI><B>demande de titre:</B> Avec les clés disque MPlayer demande les clés titre 
     cryptées, qui sont à l'intérieur de <I>secteurs cachés</I> en utilisant
@@ -168,21 +175,21 @@ lecteur CD-ROM</P>
   <LI><B>titre:</B> Cette méthode est utilisé si la demande de titre a échoué et ne
     repose sur aucun échange de clé avec le lecteur DVD. Il utilise une attaque crypto
     pour deviner la clé titre directement (en trouvant un motif répété dans le
-    contenu VOB décodé et en supposant que le texte en clair des premiers octets
-    cryptés est une continuation de ce motif).
+    contenu VOB décodé et en supposant que le texte en clair correspondant aux premiers 
+    octets cryptés est une continuation de ce motif).
     Cette méthode est également connue sous le nom de "known plaintext attack" 
     ou "DeCSSPlus". Dans de rares cas cela peut échouer car il n'y a pas assez
     de données cryptées sur le disque pour pour faire une attaque statistique
-    ou à cause des changements de clé au milieu du titre. D'un autre côté c'est
-    la seule façon de décrypter un DVD stocké sur le disque dur ou un DVD avec
-    une mauvaise zone sur un lecteur RPC2 (lent).</LI>
+    ou à cause des changements de clé au milieu du titre. C'est la seule façon de décrypter 
+    un DVD stocké sur le disque dur ou un DVD avec une mauvaise zone sur un lecteur RPC2 
+    (lent).</LI>
  </OL>
 
-<P>Les lecteurs DVD RPC-1 n'ont que des réglages de protection de zone par lecteur
-  DVD logiciel. Les lecteurs RPC-2 ont une protection matérielle qui ne permet que
+<P>Les lecteurs DVD RPC-1 ne protègent les réglages de protection de zone que de façon logicielle. 
+  Les lecteurs RPC-2 ont une protection matérielle qui ne permet que
   5 changements. Il peut être requis/recommandé d'upgrader le firmware en RPC-1
-  si vous avez un lecteur DVD RPC-2. Les upgrades firmware peuvent être trouvées
-  <A HREF="http://perso.club-internet.fr/farzeno/firmware/">ici</A>. Si il n'y a
+  si vous avez un lecteur DVD RPC-2. Les upgrades firmware peuvent être trouvées sur cette
+  <A HREF="http://www.firmware-flash.com">page de firmware</A>. Si il n'y a
   pas d'upgrade de firmware disponible pour votre périphérique, utilisez l'
   <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">outil de 
   réglage de zone</A> pour changer le code de zone de votre lecteur DVD (sous Linux).
@@ -192,26 +199,37 @@ lecteur CD-ROM</P>
 <H2><A NAME="vcd">4.3 Lecture de VCDs</A></H2>
 
 <P>Pour voir la liste complète des options disponibles, veuillez lire la page de man.
-  La syntaxe pour un Video CD standard (VCD) est la suivante:
-  <CODE>mplayer -vcd &lt;track&gt; [-cdrom-device &lt;périph.&gt;]</CODE>.<BR>
-  Exemple: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
+  La syntaxe pour un Video CD standard (VCD) est la suivante:</P>
+  
+<P><CODE>mplayer -vcd &lt;track&gt; [-cdrom-device &lt;périph.&gt;]</CODE></P>
+  
+<P>Exemple: <CODE>mplayer -vcd 2 -cdrom-device /dev/hdc</CODE></P>
+
+<P>Le périphérique VCD par défaut est <CODE>/dev/cdrom</CODE>. Si votre installation
+  diffère, faites un lien symbolique ou spécifiez le bon périphérique en ligne de
+  commande avec l'option <CODE>-cdrom-device</CODE>.</P>
+
+<P><B>Note:</B> Au moins les CD-ROM SCSI Plextor et certains Toshiba ont d'horribles
+  performances durant la lecture de VCDs. C'est parce que l'ioctl CDROMREADRAW
+  n'est pas complètement implémenté pour ces lecteurs. Si vous avez des connaissances
+  dans la programmation SCSI, merci de <A HREF="../tech/patches.txt">nous aider</A>
+  à implémenter un support SCSI générique pour les VCDs.</P>
 
 <H4>Structure d'un VCD</H4>
 
-<P>Les disques VCD consistent en 2 pistes ou plus:</P>
+<P>Les disques VCD contiennent une piste ou plus:</P>
 
 <UL>
-  <LI>La première piste est une piste de donnée à 2048 octets/secteur de quelques
-    Mo, avec un système de fichier iso9660, contenant généralement les lecteur de
-    VCD Win32 et peut-être d'autres infos(jpegs, texte, etc).</LI>
-  <LI>La seconde piste et les suivantes sont des pistes mpeg brutes à 2324
-    octets/secteur, sans aucun système de fichier ormis des données brutes mpeg ps
-    un paquet par secteur. Elles contiennent le(s) film(s)...Les pistes <B>ne
-    peuvent être montées</B>! Elles sont similaires à des pistes audio (vous
-    n'avez jamais monté un cd audio pour le lire, non ? Non).
-    Comme la plupart des films sont sur la deuxième piste, vous devriez essayer
+  <LI>La première piste est une petite piste de donnée de 2048 octets/secteur,
+    avec un système de fichier iso9660, contenant généralement les lecteur de
+    VCD Windows et peut-être d'autres infos(jpegs, texte, etc).</LI>
+  <LI>La seconde piste et les suivantes sont des pistes MPEG brutes (film) à 2324
+    octets/secteur, contenant des paquets de données MPEG PS au lieu d'un système 
+    de fichier. Similaires à des pistes audio, elles <B>ne peuvent être montées</B> 
+    (Avez-vous déjà monté un CD audio pour le lire ?).
+    Comme la plupart des films sont sur cette piste, vous devriez essayer
     <CODE>-vcd 2</CODE> en premier.</LI>
-  <LI>Il existe également certains disques VCD sans première piste (une seule
+  <LI>Il existe également certains disques VCD sans la première piste (une seule
     piste et pas de système de fichier du tout). Ils sont quand même lisibles,
     mais ne peuvent pas être montés.</LI>
 </UL>
@@ -231,13 +249,12 @@ lecteur CD-ROM</P>
   leur pilote, vous pouvez copier et même lire les fichiers .DAT avec mplayer.
   Mais cela ne <B>fonctionnera pas</B> avec le pilote iso9660 standard du noyau!
   Il est recommandé d'utiliser l'option <CODE>-vcd</CODE> à la place. D'autres
-  possibilités pour la copie de VCD sont le nouveau pilote noyau cdfs
-  (montre les <I>sessions</I> du CD en temps que fichiers image) et cdrdao
-  (une application d'enregistrement/copie bit-a-bit).</P>
+  possibilités pour la copie de VCD sont le nouveau pilote noyau 
+  <A HREF="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</A> (qui ne fait pas partie
+  du noyau officiel) qui montre les <I>sessions</I> du CD en temps que fichiers image) et 
+  <A HREF="http://cdrdao.sourceforge.net/">cdrdao</A>, une application d'enregistrement/copie
+  bit-a-bit).</P>
 
-<P>Le périphérique VCD par défaut est <CODE>/dev/cdrom</CODE>. Si votre installation
-  diffère, faites un lien symbolique ou spécifiez le bon périphérique en ligne de
-  commande avec l'option <CODE>-cdrom-device</CODE>.</P>
 
 </BODY>
 </HTML>
