@@ -317,7 +317,7 @@ static int open(vf_instance_t *vf, char* args)
 {
 	struct vf_priv_s *p;
 	struct pullup_context *c;
-	vf->get_image = get_image;
+	//vf->get_image = get_image;
 	vf->put_image = put_image;
 	vf->config = config;
 	vf->query_format = query_format;
