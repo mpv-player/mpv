@@ -581,6 +581,9 @@ Plourde, Nicolas <nicolas.plourde@sympatico.ca>
     * quartz video output driver for Mac OS X
     * Darwin VCD/SVCD support
 
+Poettering, Lennart <mzzcynlre@0pointer.de>
+    * Audio driver for the Polypaudio sound server
+
 Poirier, Guillaume <guillaume.poirier@ifsic.univ-rennes1.fr>
     * French documentation translation and synchronization
     * XviD documentation
