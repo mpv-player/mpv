@@ -11,36 +11,19 @@
 
 <P><B><A NAME=4.1>4.1. CD-ROM drives</A></B></P>
 
-<P>Playing standard Video CDs:</P>
-
-<P><CODE>mplayer -vcd &lt;track&gt; [-cdrom-device device]</CODE></P>
-
-<P>Examples:<BR>
-  <CODE>mplayer -vcd 1<BR>
-  mplayer -fs -vcd 2 -cdrom-device /dev/hdc</CODE></P>
-
-Notes:
-<UL>
-  <LI>Do <B>not</B> mount VCD disks and play DAT files directly! It may work
-    under Windows but will not under Linux. You have to play VCDs with the
-    <CODE>-vcd</CODE> option.</LI>
-  <LI>VCD disks usually have 2 tracks: a data track (containing autostart
-    Windows playback program, karaoke data etc) and a mode-2 track (the movie).
-    So try <CODE>-vcd 2</CODE> first.</LI>
-  <LI>The default VCD device is <CODE>/dev/cdrom</CODE>. If your setup differs,
-    make a symlink, or specify the correct device on the command line with the
-    <CODE>-cdrom-device</CODE> option.</LI>
-</UL>
-
 <P>Linux documentation excerpt:</P>
 
-<P>Some CD-ROM drives are capable of changing their head speed. There are
-  several reasons for changing the speed of a CD-ROM drive. Badly pressed
-  CD-ROMs may benefit from less-than-maximum head speed. Modern CD-ROM drives
-  can obtain very high head speeds. It has been reported that these drives can
-  make read errors at these high speeds, reducing the speed can prevent data
-  loss under these circumstances. Finally, some of these drives can make an
-  annoyingly loud noise, which a lower speed may reduce.</P>
+<P>Modern CD-ROM drives can attain very high head speeds, yet some CD-ROM drives
+  are capable of running at reduced speeds. There are several reasons that might
+  make you consider changing the speed of a CD-ROM drive:</P>
+
+<UL>
+  <LI>Ther have been reports of read errors at these high speeds, especially
+    with badly pressed CD-ROMs. Reducing the speed can prevent data loss under
+    these circumstances.</LI>
+  <LI>Many CD-ROM drives are annoyingly loud, a lower speed may reduce the
+    noise.</LI>
+</UL>
 
 <P>You can reduce the drive speed with hdparm or a program called setcd.
   It works like this:</P>
@@ -67,6 +50,7 @@ Notes:
 
 <P>Please refer to "<CODE>/proc/ide/[cdrom device]/settings</CODE>" for
   fine-tuning your CD-ROM.</P>
+
 
 <P><B><A NAME=4.2>4.2. DVD playback</A></B></P>
   
@@ -153,6 +137,31 @@ Notes:
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang sp -chapter 5 -dvdangle 2</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdkey C005D4A16D vts_03_1.vob</CODE></P>
+
+
+<P><B><A NAME=4.3>4.3. VCD playback</A></B></P>
+
+<P>Playing standard Video CDs:</P>
+
+<P><CODE>mplayer -vcd &lt;track&gt; [-cdrom-device device]</CODE></P>
+
+<P>Examples:<BR>
+  <CODE>mplayer -vcd 1<BR>
+  mplayer -fs -vcd 2 -cdrom-device /dev/hdc</CODE></P>
+
+Notes:
+<UL>
+  <LI>Do <B>not</B> mount VCD disks and play DAT files directly! It may work
+    under Windows but will not under Linux. You have to play VCDs with the
+    <CODE>-vcd</CODE> option.</LI>
+  <LI>VCD disks usually have 2 tracks: a data track (containing autostart
+    Windows playback program, karaoke data etc) and a mode-2 track (the movie).
+    So try <CODE>-vcd 2</CODE> first.</LI>
+  <LI>The default VCD device is <CODE>/dev/cdrom</CODE>. If your setup differs,
+    make a symlink, or specify the correct device on the command line with the
+    <CODE>-cdrom-device</CODE> option.</LI>
+</UL>
+
 
 </BODY>
 </HTML>
