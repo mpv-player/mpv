@@ -1092,12 +1092,12 @@ cat > $TMPC << EOF
 #include <pthread.h>
 int main(void) { (void) pthread_create (0, 0, 0, 0); return 0; }
 EOF
-if cc_check -lpthread ; then
+if cc_check ; then              # QNX
+  _ld_pthread=''
+elif cc_check -lpthread ; then
   _ld_pthread='-lpthread'
 elif cc_check -pthread ; then
   _ld_pthread='-pthread'
-elif cc_check ; then		# QNX
-  _ld_pthread=''
 else
   die "Lib pthread not found."
 fi
@@ -1292,7 +1292,9 @@ if test "$_x11" = yes ; then
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/dpms.h>
-int main(void) { return 0; }
+int main(void) {
+  (void) DPMSQueryExtension(0, 0, 0);
+}
 EOF
   cc_check $_inc_x11 $_ld_x11 -lXdpms && _xdpms3=yes
 fi
