@@ -18,7 +18,6 @@
 #include "zoran.h"
 
 #include "config.h"
-#define ZR_USES_LIBJPEG
 
 #include "video_out.h"
 #include "video_out_internal.h"
@@ -40,13 +39,15 @@ static vo_info_t vo_info =
 
 static int image_width;
 static int image_height;
-static int off_y, off_c, stride; /* for use by 'draw slice' */
+static int off_y, off_c, stride; /* for use by 'draw slice/frame' */
 static int framenum;
 static int fields = 1; /* currently no interlacing */
-static int forceinter = 0;
+static int zrfd = 0;
+static int bw = 0; /* if bw == 1, then display in black&white */
 static int vdec = 1;
+static int hdec = 1;
 static int size;
-static int quality = 70;
+static int quality = 1;
 
 typedef struct {
 	int width;
@@ -80,134 +81,11 @@ int norm = VIDEO_MODE_AUTO;
 char *device = NULL;
 
 
-#ifdef ZR_USES_LIBJPEG
-#include<jpeglib.h>
-int ccount;
-unsigned char *ccbuf;
-struct jpeg_compress_struct cinfo;
-struct jpeg_destination_mgr jdest;
-struct jpeg_error_mgr jerr;
-
-/* minimal destination handler to output to buffer */
-METHODDEF(void) init_destination(struct jpeg_compress_struct *cinfo) {
-//	printf("init_destination called %p %d\n", ccbuf, ccount);
-	cinfo->dest->next_output_byte = (JOCTET*)(ccbuf+ccount);
-	cinfo->dest->free_in_buffer = MJPEG_SIZE - ccount;
-}
-
-METHODDEF(boolean) empty_output_buffer(struct jpeg_compress_struct *cinfo) {
-//	printf("empty_output_buffer called\n");
-	mp_msg(MSGT_VO, MSGL_ERR, "empty_output_buffer called, may not happen because buffer must me large enough\n");
-	return(FALSE);
-}
-
-METHODDEF(void) term_destination(struct jpeg_compress_struct *cinfo) {
-//	printf("term_destination called %p %d\n", ccbuf, ccount);
-	ccount = MJPEG_SIZE - cinfo->dest->free_in_buffer;
-}
-/* end of minimal destination handler */
-
-JSAMPARRAY ***jsi;
-
-#else
-#include "../libavcodec/avcodec.h"
-AVCodec *codec;
-AVCodecContext codec_context;
-AVPicture picture;
-#endif 
-
-static int jpegdct = JDCT_IFAST; 
-
-int init_codec() {
-#ifdef ZR_USES_LIBJPEG
-	int i, j, k;
-	cinfo.err = jpeg_std_error(&jerr);
-	jpeg_create_compress(&cinfo);
-
-	cinfo.dest = &jdest;
-	cinfo.dest->init_destination = init_destination;
-	cinfo.dest->empty_output_buffer = empty_output_buffer;
-	cinfo.dest->term_destination = term_destination;
-
-	cinfo.input_components = 3;
-
-	jpeg_set_defaults(&cinfo);
-
-	cinfo.image_width = image_width;
-	cinfo.image_height = image_height/fields;
-	cinfo.input_gamma = 1.0;
-	cinfo.in_color_space = JCS_YCbCr;
-	cinfo.raw_data_in = TRUE;
-	cinfo.comp_info[0].h_samp_factor = 2;
-	cinfo.comp_info[0].v_samp_factor = 1;
-	cinfo.comp_info[1].h_samp_factor = 1;
-	cinfo.comp_info[1].v_samp_factor = 1;
-	cinfo.comp_info[2].h_samp_factor = 1;
-	cinfo.comp_info[2].v_samp_factor = 1;
-	cinfo.dct_method = jpegdct;
-	jpeg_set_quality(&cinfo, quality, FALSE);
-	jsi = malloc(sizeof(JSAMPARRAY**)*fields);
-
-	/* Just some clutter to give libjpeg the pointers,
-	 * and I don't want to recalculate everything everytime
-	 * it is needed */
-	for (k = 0; k < fields; k++) {
-	jsi[k] = malloc(sizeof(JSAMPARRAY*)*image_height/(8*fields));
-
-	for (i = 0; i < image_height/(8*fields); i++) {
-		jsi[k][i] = malloc(3*sizeof(JSAMPARRAY));
-		jsi[k][i][0] = malloc(8*sizeof(JSAMPROW));
-		jsi[k][i][1] = malloc(8*sizeof(JSAMPROW));
-		jsi[k][i][2] = malloc(8*sizeof(JSAMPROW));
-		for (j = 0; j < 8; j++) {
-			jsi[k][i][0][j] = (JSAMPROW)(image + 
-					(fields*(8*i + j) + k)*image_width);
-			jsi[k][i][1][j] = (JSAMPROW)(image + size + 
-					(fields*(8*i + j)/2)*image_width/2);
-			jsi[k][i][2][j] = (JSAMPROW)(image + 3*size/2 + 
-					(fields*(8*i + j)/2)*image_width/2);
-		}
-	}
-
-	}
-#else
-	AVCodecContext *c = &codec_context;
-	codec = avcodec_find_encoder(CODEC_ID_MJPEG);
-	if (!codec) {
-		/* maybe libavcodec was not initialized */
-		avcodec_init();
-		avcodec_register_all();
-		codec = avcodec_find_encoder(CODEC_ID_MJPEG);
-		if (!codec) {
-			mp_msg(MSGT_VO, MSGL_ERR, "MJPG codec not found in libavcodec\n");
-			return 1;
-		}
-	}
-	/* put default values */
-	memset(c, 0, sizeof(*c));
-
-	c->width = image_width;
-	c->height = image_height;
-	c->bit_rate = 4000000;
-	c->frame_rate = 25*FRAME_RATE_BASE;
-	//c->gop_size = 1;
-	c->pix_fmt = PIX_FMT_YUV422P;
-
-	if (avcodec_open(c, codec) < 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "MJPG codec could not be opened\n");
-		return 1;
-	}
-
-	picture.data[0] = image;
-	picture.data[1] = image + size;
-	picture.data[2] = image + 3*size/2;
-	picture.linesize[0] = image_width;
-	picture.linesize[1] = image_width/2;
-	picture.linesize[2] = image_width/2;
-#endif 
-	return 0;
-}
-
+extern int mjpeg_encode_frame(char *bufr, int field);
+extern void mjpeg_encoder_init(int w, int h, unsigned char *y,
+		int y_psize, int y_rsize, unsigned char *u,
+		int u_psize, int u_rsize, unsigned char *v,
+		int v_psize, int v_rsize, int f, int cu, int q, int b);
 
 int zoran_getcap() {
 	char* dev = device ? device : VO_ZR_DEFAULT_DEVICE;
@@ -252,10 +130,10 @@ int zoran_getcap() {
 	return 0;
 }
 	
-int init_zoran() {
+int init_zoran(int zrhdec, int zrvdec) {
 	/* center the image, and stretch it as far as possible (try to keep
 	 * aspect) and check if it fits */
-	if (image_width > vc.maxwidth) {
+	if (image_width/hdec > vc.maxwidth) {
 		mp_msg(MSGT_VO, MSGL_ERR, "movie to be played is too wide, max width currenty %d\n", vc.maxwidth);
 		return 1;
 	}
@@ -266,23 +144,15 @@ int init_zoran() {
 	}
 
 	zp.decimation = 0;
-	zp.HorDcm = (vc.maxwidth >= 2*(int)image_width) ? 2 : 1;
-	zp.VerDcm = 1;
-	if (zp.HorDcm == 2 && 4*image_width <= vc.maxwidth && 
-			4*image_height/fields <= vc.maxheight) {
-		zp.HorDcm = 4;
-		zp.VerDcm = 2;
-	}
-	if (((forceinter == 0 && vdec >= 2) || (forceinter == 1 && vdec == 4)) && 4*image_height/fields <= vc.maxheight) {
-		zp.VerDcm = 2;
-	}
+	zp.HorDcm = zrhdec; 
+	zp.VerDcm = zrvdec;
 	zp.TmpDcm = 1;
 	zp.field_per_buff = fields;
-	zp.img_x = (vc.maxwidth - zp.HorDcm*(int)image_width)/2;
+	zp.img_x = (vc.maxwidth - zp.HorDcm*(int)image_width/hdec)/2;
 	zp.img_y = (vc.maxheight - zp.VerDcm*(3-fields)*(int)image_height)/4;
-	zp.img_width = zp.HorDcm*image_width;
+	zp.img_width = zp.HorDcm*image_width/hdec;
 	zp.img_height = zp.VerDcm*image_height/fields;
-	mp_msg(MSGT_VO, MSGL_V, "zr: geometry (after 'scaling'): %dx%d+%d+%d fields=%d, w=%d, h=%d\n", zp.img_width, zp.img_height, zp.img_x, zp.img_y, fields, image_width, image_height);
+	mp_msg(MSGT_VO, MSGL_V, "zr: geometry (after 'scaling'): %dx%d+%d+%d fields=%d, w=%d, h=%d\n", zp.img_width, (3-fields)*zp.img_height, zp.img_x, zp.img_y, fields, image_width/hdec, image_height);
 
 	if (ioctl(vdes, BUZIOC_S_PARAMS, &zp) < 0) {
 		mp_msg(MSGT_VO, MSGL_ERR, "error setting display parameters\n");
@@ -327,11 +197,15 @@ void uninit_zoran(void) {
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, 
 	uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
-	int j;
+	int j, stretchx, stretchy;
 	/* this allows to crop parts from incoming picture,
 	 * for easy 512x240 -> 352x240 */
 	/* These values must be multples of 2 */
-
+	if (format != IMGFMT_YV12 && format != IMGFMT_YUY2) {
+		printf("vo_zr called with wrong format");
+		exit(1);
+	}
+	stride = 2*width;
 	if (g.set) {
 		if (g.width%2 != 0 || g.height%2 != 0 ||
 				g.xoff%2 != 0 || g.yoff%2 != 0) {
@@ -360,14 +234,63 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	/* we must know the maximum resolution of the device
 	 * it differs for DC10+ and buz for example */
 	zoran_getcap(); /*must be called before init_zoran */
-	if (g.height/vdec > vc.maxheight/2 || (forceinter == 1 && vdec == 1))
+	/* make the scaling decision
+	 * we are capable of stretching the image in the horizontal
+	 * direction by factors 1, 2 and 4
+	 * we can stretch the image in the vertical direction by a factor
+	 * of 1 and 2 AND we must decide about interlacing */
+	if (g.width > vc.maxwidth/2 || g.height > vc.maxheight/2) {
+		stretchx = 1;
+		stretchy = 1;
 		fields = 2;
-	printf("fields=%d\n", fields);
+		if (vdec == 2) {
+			fields = 1;
+		} else if (vdec == 4) {
+			stretchy = 2;
+		}
+		stretchx = hdec;
+	} else if (g.width > vc.maxwidth/4 || g.height > vc.maxheight/4) {
+		stretchx = 2;
+		stretchy = 1;
+		fields = 1;
+		if (vdec == 2) {
+			stretchy = 2;
+		} else if (vdec == 4) {
+			if (!zrfd) {
+				mp_msg(MSGT_VO, MSGL_WARN, "vo_zr: vertical decimation too high, changing to 2 (use -zrfd to keep vdec=4)\n");
+				vdec = 2;
+			}
+			stretchy = 2;
+		}
+		if (hdec == 2) {
+			stretchx = 4;
+		} else if (hdec == 4){
+			if (!zrfd) {
+				mp_msg(MSGT_VO, MSGL_WARN, "vo_zr: horizontal decimation too high, changing to 2 (use -zrfd to keep hdec=4)\n");
+				hdec = 2;
+			}
+			stretchx = 4;
+		}
+	} else {
+		/* output image is maximally stretched */
+		stretchx = 4;
+		stretchy = 2;
+		fields = 1;
+		if (vdec != 1 && !zrfd) {
+			mp_msg(MSGT_VO, MSGL_WARN, "vo_zr: vertical decimation too high, changing to 1 (use -zrfd to keep vdec=%d)\n", vdec);
+			vdec = 1;
+		}
+
+		if (hdec != 1 && !zrfd) {
+			mp_msg(MSGT_VO, MSGL_WARN, "vo_zr: vertical decimation too high, changing to 1 (use -zrfd to keep hdec=%d)\n", hdec);
+			hdec = 1;
+		}
+	}
 	/* the height must be a multiple of fields*8 and the width
 	 * must be a multiple of 16 */
 	/* add some black borders to make it so, and center the image*/
 	image_height = fields*8*((g.height/vdec - 1)/(fields*8) + 1);
-	image_width = 16*((g.width - 1)/16 + 1);
+	image_width = (hdec*16)*((g.width - 1)/(hdec*16) + 1);
 	off_y = (image_height - g.height/vdec)/2;
 	if (off_y%2 != 0) off_y++;
 	off_y *= image_width;
@@ -377,7 +300,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	off_c += (image_width - g.width)/4;
 	framenum = 0;
 	size = image_width*image_height;
-	mp_msg(MSGT_VO, MSGL_V, "input: %dx%d, cropped: %dx%d, output: %dx%d, off_y=%d, off_c=%d\n", width, height, g.width, g.height, image_width, image_height, off_y, off_c);
+	mp_msg(MSGT_VO, MSGL_V, "input: %dx%d, cropped: %dx%d, output: %dx%d, off_y=%d, off_c=%d\n", width/hdec, height, g.width, g.height, image_width, image_height, off_y, off_c);
 	
 	image = malloc(2*size); /* this buffer allows for YUV422 data,
 				 * so it is a bit too big for YUV420 */
@@ -386,20 +309,38 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		return 1;
 	}
 	/* and make sure that the borders are _really_ black */
-	memset(image, 0, image_width*image_height);
-	memset(image + size, 0x80, image_width*image_height/4);
-	memset(image + 3*size/2, 0x80, image_width*image_height/4);
-
-	if (init_codec()) {
-		return 1;
+	switch (format) {
+		case IMGFMT_YV12:
+			memset(image, 0, image_width*image_height);
+			memset(image + size, 0x80, image_width*image_height/4);
+			memset(image + 3*size/2, 0x80, image_width*image_height/4);
+			mjpeg_encoder_init(image_width/hdec, image_height,
+					image, hdec, image_width,
+					image + image_width*image_height, 
+					hdec, image_width/2,
+					image + 3*image_width*image_height/2, 
+					hdec, image_width/2, fields, 1, 
+					quality, bw);
+			break;
+		case IMGFMT_YUY2:
+			for (j = 0; j < 2*size; j+=4) {
+				image[j] = 0;
+				image[j+1] = 0x80;
+				image[j+2] = 0;
+				image[j+3] = 0x80;
+			}
+			mjpeg_encoder_init(image_width/hdec, image_height,
+					image, hdec*2, image_width*2,
+					image + 1, hdec*4, image_width*2,
+					image + 3, hdec*4, image_width*2,
+					fields, 0, quality, bw);
+			break;
+		default:
+			mp_msg(MSGT_VO, MSGL_FATAL, "internal inconsistency in vo_zr\n");
 	}
-	
-	if (init_zoran()) {
-#ifdef ZR_USES_LIBJPEG
-		jpeg_destroy_compress(&cinfo);
-#else
-		avcodec_close(&codec_context);
-#endif
+
+
+	if (init_zoran(stretchx, stretchy)) {
 		return 1;
 	}
 
@@ -414,12 +355,9 @@ static void draw_osd(void) {
 }
 
 static void flip_page (void) {
-#ifdef ZR_USES_LIBJPEG
 	int i, j, k;
-#else
-	AVCodecContext *c = &codec_context;
-#endif
-
+	/*FILE *fp;
+	char filename[100];*/
 	/* do we have a free buffer? */
 	if (queue-synco < zrq.count) {
 		frame = queue;
@@ -429,26 +367,20 @@ static void flip_page (void) {
 		frame = zs.frame;
 		synco++;
 	}
-
-#ifdef ZR_USES_LIBJPEG
-	ccbuf = buf + frame*zrq.size;
-	ccount = 0;
-	k = fields;
-	for (j=0; j < k; j++) {
-
-	jpeg_start_compress(&cinfo, TRUE);
-	i=0;
-	while (cinfo.next_scanline < cinfo.image_height) {
-		jpeg_write_raw_data(&cinfo, jsi[j][i], 8);
-		i++;
-	}
-	jpeg_finish_compress(&cinfo);
-
-	}
-#else
-	avcodec_encode_video(c, buf + frame*zrq.size, MJPEG_SIZE, &picture);
-#endif
-
+	k=0;
+	for (i = 0; i < fields; i++) 
+		k+=mjpeg_encode_frame(buf+frame*zrq.size+k, i);
+	/* Warning, Quantization and Huffman tables are only
+	 * written in the first frame by default (to preserver bandwidth) */
+	/*sprintf(filename, "test%04d.jpg", framenum);
+	fp = fopen(filename, "w");
+	if (!fp) exit(1);
+	fwrite(buf+frame*zrq.size, 1, k, fp);
+	fclose(fp);*/
+	/*fp = fopen("test1.jpg", "r");
+	fread(buf+frame*zrq.size, 1, 2126, fp);
+	fclose(fp);*/
+	
 	if (ioctl(vdes, BUZIOC_QBUF_PLAY, &frame) < 0) 
 		mp_msg(MSGT_VO, MSGL_ERR,
 				"error queueing buffer for playback");
@@ -459,22 +391,27 @@ static void flip_page (void) {
 }
 
 static uint32_t draw_frame(uint8_t * src[]) {
+	int i;
+	char *source, *dest;
+	//printf("draw frame called\n");
+	source = src[0] + 2*g.yoff*image_width + 2*g.xoff;
+	dest = image + 2*off_y;
+	for (i = 0; i < g.height/vdec; i++) {
+		memcpy(dest, source, image_width*2);
+		dest += 2*image_width;
+		source += vdec*stride;
+	}
 	return 0;
 }
 
 static uint32_t query_format(uint32_t format) {
 	if(format==IMGFMT_YV12) return 1;
+	if(format==IMGFMT_YUY2) return 1;
 	return 0;
 }
 
 static void uninit(void) {
 	uninit_zoran();
-
-#ifdef ZR_USES_LIBJPEG
-	jpeg_destroy_compress(&cinfo);
-#else
-	avcodec_close(&codec_context);
-#endif
 }
 
 static void check_events(void) {
@@ -528,7 +465,7 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[],
 		src+=stride[0];
 
 	}
-	{
+	if (!bw) {
     		// copy U+V:
 		uint8_t *src1=srcimg[1];
 		uint8_t *src2=srcimg[2];
@@ -565,11 +502,17 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 	strcpy(device, param);
 	mp_msg(MSGT_VO, MSGL_V, "zr: using device %s\n", device);
 	return 1;
-    } else if (!strcasecmp(opt, "zrfi")) {
+    } else if (!strcasecmp(opt, "zrbw")) {
 	    if (param != NULL) {
 		    return ERR_OUT_OF_RANGE;
 	    }
-	    forceinter = 1;
+	    bw = 1;
+	    return 1;
+    } else if (!strcasecmp(opt, "zrfd")) {
+	    if (param != NULL) {
+		    return ERR_OUT_OF_RANGE;
+	    }
+	    zrfd = 1;
 	    return 1;
     } else if (!strcasecmp(opt, "zrcrop")){
 	if (param == NULL) return ERR_MISSING_PARAM;
@@ -584,6 +527,11 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 	g.set = 1;
 	mp_msg(MSGT_VO, MSGL_V, "zr: cropping %s\n", param);
 	return 1;
+    }else if (!strcasecmp(opt, "zrhdec")) {
+        i = atoi(param);
+	if (i != 1 && i != 2 && i != 4) return ERR_OUT_OF_RANGE;
+	hdec = i;
+	return 1;
     }else if (!strcasecmp(opt, "zrvdec")) {
         i = atoi(param);
 	if (i != 1 && i != 2 && i != 4) return ERR_OUT_OF_RANGE;
@@ -591,23 +539,9 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 	return 1;
     }else if (!strcasecmp(opt, "zrquality")) {
         i = atoi(param);
-	if (i < 30 || i > 100) return ERR_OUT_OF_RANGE;
+	if (i < 1 || i > 20) return ERR_OUT_OF_RANGE;
 	quality = i;
 	return 1;
-    }else if (!strcasecmp(opt, "zrdct")) {
-	if (param == NULL) return ERR_MISSING_PARAM;
-	if (!strcasecmp(param, "IFAST")) {
-            jpegdct = JDCT_IFAST;
-	    return 1;
-	} else if (!strcasecmp(param, "ISLOW")) {
-            jpegdct = JDCT_ISLOW;
-	    return 1;
-	} else if (!strcasecmp(param, "FLOAT")) {
-            jpegdct = JDCT_FLOAT;
-	    return 1;
-	} else {
-           return ERR_OUT_OF_RANGE;
-        }
     }else if (!strcasecmp(opt, "zrnorm")) {
 	if (param == NULL) return ERR_MISSING_PARAM;
 	if (!strcasecmp(param, "NTSC")) {
@@ -631,11 +565,13 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 		    "              you want to see as an x-style geometry string\n"
 		    "              example: -zrcrop 352x288+16+0\n"
 		    "  -zrvdec     vertical decimation 1, 2 or 4\n"
-		    "  -zrfi       force interlacing ('wide screen')\n"
-		    "              (by default we only interlace if the movie\n"
-		    "              is higher than half of the screen height)\n"
-		    "  -zrquality  jpeg compression quality 30-100\n"
-                    "  -zrdct      specify DCT method: IFAST, ISLOW or FLOAT\n"
+		    "  -zrhdec     horizontal decimation 1, 2 or 4\n"
+		    "  -zrfd       decimation is only done if the primitive\n"
+		    "              hardware upscaler can correct for the decimation,\n"
+		    "              this switch allows you to see the effects\n"
+		    "              of too much decimation\n"
+		    "  -zrbw       display in black&white (speed increase)\n"
+		    "  -zrquality  jpeg compression quality [BEST] 1 - 20 [VERY BAD]\n"
 		    "  -zrdev      playback device (example -zrdev /dev/video1\n"
 		    "  -zrnorm     specify norm PAL/NTSC [dev: leave at current setting]\n"
 		    "\n"
@@ -652,16 +588,18 @@ void vo_zr_revertoption(config_t* opt,char* param) {
     if(device)
       free(device);
     device=NULL;
-  } else if (!strcasecmp(param, "zrfi"))
-    forceinter=0;
+  } else if (!strcasecmp(param, "zrbw"))
+    bw=0;
+  else if (!strcasecmp(param, "zrfd"))
+    zrfd=0;
   else if (!strcasecmp(param, "zrcrop"))
     g.set = g.xoff = g.yoff = 0;
+  else if (!strcasecmp(param, "zrhdec"))
+    hdec = 1;
   else if (!strcasecmp(param, "zrvdec"))
     vdec = 1;
   else if (!strcasecmp(param, "zrquality"))
-    quality = 70;
-  else if (!strcasecmp(param, "zrdct"))
-    jpegdct = JDCT_IFAST;
+    quality = 1;
   else if (!strcasecmp(param, "zrnorm"))
     norm = VIDEO_MODE_AUTO;
 
