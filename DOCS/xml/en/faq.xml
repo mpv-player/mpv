@@ -238,46 +238,10 @@ Now type <command>make</command>. You're done!
 
 <qandaentry>
 <question><para>
-It doesn't compile, and it misses <systemitem>uint64_t</systemitem>,
-<filename>inttypes.h</filename> and similar things ...
-</para></question>
-<answer><para>
-Copy <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">this <filename>inttypes.h</filename></ulink>
-to <filename class="directory">/usr/local/include/</filename> or an equivalent
-place and try again ...
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I have Linux running on a Pentium III but <filename>./configure</filename>
-doesn't detect SSE ...
-</para></question>
-<answer><para>
-Only kernel versions 2.4.x support SSE (or try 2.2.19 or newer, but be
-prepared for problems).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 I have a Matrox G200/G400/G450/G550, how do I compile/use the mga_vid driver?
 </para></question>
 <answer><para>
 Read the <link linkend="mga_vid">mga_vid</link> section.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Hmm, strange. When loading the <filename>mga_vid.o</filename> kernel
-module, I found this in the logs:
-<screen>Warning: loading mga_vid.o will taint the kernel: no license</screen>
-</para></question>
-<answer><para>
-The latest kernel modutils require a flag indicating the license
-(mainly to avoid kernel hackers debugging closed source drivers).
-Upgrade your kernel, modutils and <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
@@ -289,7 +253,8 @@ I don't understand, I DO have X installed!?
 <answer><para>
 ... but you don't have the X development package installed. Or not correctly.
 It's called <filename>XFree86-devel*</filename> under Red Hat, and
-<filename>xlibs-dev</filename> under Debian. Also check if the
+<filename>xlibs-dev</filename> under Debian Woody,
+<filename>libx11-dev</filename> under Debian Sarge. Also check if the
 <filename class="directory">/usr/X11</filename> and
 <filename class="directory">/usr/include/X11</filename> symlinks exist (this
 can be a problem on Mandrake systems). They can be created with these commands:
@@ -527,18 +492,6 @@ connected to the perverted minds of the <application>MPlayer</application> devel
 
 <qandaentry>
 <question><para>
-LIRC doesn't work, because ...
-</para></question>
-<answer><para>
-Are you sure you are using <command>mplayer</command> instead of
-<command>mplayer_lirc</command>? Note that it was <command>mplayer_lirc</command>
-for a long time, including the 0.60 release, but it was recently changed back to
-<command>mplayer</command>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Subtitles are very nice, the most beautiful I've ever seen, but they
 slow down playing! I know it's unlikely ...
 </para></question>
@@ -546,16 +499,6 @@ slow down playing! I know it's unlikely ...
 After running <filename>./configure</filename>, edit <filename>config.h</filename>
 and replace <systemitem>#undef FAST_OSD</systemitem> with
 <systemitem>#define FAST_OSD</systemitem>. Then recompile.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-The onscreen display (OSD) is flickering!
-</para></question>
-<answer><para>
-You use a vo driver with single buffering (x11, xv). With xv, use the
-<option>-double</option> option. Also try <option>-vf expand</option>.
 </para></answer>
 </qandaentry>
 
@@ -580,17 +523,6 @@ You need to get <systemitem class="library">libavcodec</systemitem> from
 FFmpeg's CVS. Read the instructions in the
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
 section.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Icewm's taskbar keeps covering the movie in fullscreen mode!
-</para></question>
-<answer><para>
-This shouldn't happen anymore, if it still does use the <option>-fstype</option>
-layer option and report it to the <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
-mailing list.
 </para></answer>
 </qandaentry>
 
@@ -699,7 +631,7 @@ I'm having trouble getting my subtitles to display, help!!
 Make sure you have installed fonts properly. Run through the steps in the
 <link linkend="mpsub-install">OSD and subtitle</link> part of the installation
 section again. If you are using TrueType fonts, verify that you have the
-<systemitem class="library">freetype</systemitem> library installed.
+<systemitem class="library">FreeType</systemitem> library installed.
 Other things include checking your subtitles in a text editor or with other
 players. Also try converting them to another format.
 </para></answer>
@@ -779,11 +711,11 @@ quite a while.)</para></listitem>
 
 <qandaentry>
 <question><para>
-... works with <application>xine/avifile/...</application> but doesn't with
+... works with <application>xine/vlc/...</application> but doesn't with
 <application>MPlayer</application>.
 </para></question>
 <answer><para>
-<application>MPlayer</application> is not <application>xine/avifile/...</application>.
+<application>MPlayer</application> is not <application>xine/vlc/...</application>.
 Although these players have some code in common, the codecs (DLL) set,
 synchronization, demultiplexing etc is different and should not be
 compared. If you have a file <application>MPlayer</application> fails to
@@ -799,7 +731,9 @@ Audio goes out of sync playing an AVI file.
 </para></question>
 <answer><para>
 Try the <option>-bps</option> or <option>-nobps</option> option. If it does not
-improve, read <link linkend="bugreports">this</link> and upload the file to FTP.
+improve, read the
+<link linkend="bugreports">bug reporting guidelines</link>
+and upload the file to FTP.
 </para></answer>
 </qandaentry>
 
@@ -853,6 +787,7 @@ I have problems with [your window manager] and fullscreen xv/xmga/sdl/x11 modes 
 <answer><para>
 Read the <link linkend="bugreports">bug reporting guidelines</link> and send us
 a proper bug report.
+Also try experimenting with the <option>-fstype</option> option.
 </para></answer>
 </qandaentry>
 
@@ -1051,6 +986,9 @@ I have no sound when playing a video and get error messages similar to this one:
 Are you running KDE or GNOME with the ARTS or ESD sound daemon? Try disabling
 the sound daemon or use the <option>-ao arts</option> or <option>-ao esd</option>
 option to make <application>MPlayer</application> use ARTS or ESD.
+You might also be running ALSA without OSS emulation, try loading the ALSA OSS
+kernel modules or add <option>-ao alsa</option> to your command line to
+directly use the ALSA audio output driver.
 </para></answer>
 </qandaentry>
 
@@ -1308,7 +1246,7 @@ Stepping backwards is unlikely to be implemented anytime soon.
 <qandaentry>
 <question><para>
 How can I make <application>MPlayer</application> remember the options I use
-for this particular file?
+for a particular file, e.g. <filename>movie.avi</filename>?
 </para></question>
 <answer><para>
 Create a file named <filename>movie.avi.conf</filename> with the file-specific
@@ -1365,30 +1303,10 @@ if you have two files sharing the same dimensions and codec. Try
 
 <qandaentry>
 <question><para>
-My tuner works, I can hear the sound and watch the video with <application>MPlayer</application>,
-but <application>MEncoder</application> doesn't encode audio!
-</para></question>
-<answer><para>
-TV audio encoding for Linux is currently unimplemented, we're working
-on it. At the moment it works only on BSD.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 I can't encode DVD subtitles into the AVI!
 </para></question>
 <answer><para>
 You have to specify the <option>-sid</option> option correctly!
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-<application>MEncoder</application> segfaults on startup!
-</para></question>
-<answer><para>
-Upgrade DivX4Linux.
 </para></answer>
 </qandaentry>
 
