@@ -78,7 +78,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "Megpróbálom a(z) %s audio codec-családot használni ...\n"
 #define MSGTR_CantFindAfmtFallback "A megadott audio codec-családban nem találtam idevaló meghajtót, próbálkozok más meghajtóval.\n"
 #define MSGTR_CantFindAudioCodec "Nem találok codecet a(z) 0x%X audio-formátumhoz !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Frissítsd a %s-t az etc/codecs.conf-ból\n*** Ha még mindig nem jó, olvasd el a DOCS/codecs.html-t!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Frissítsd a %s-t az etc/codecs.conf-ból\n*** Ha még mindig nem jó, olvasd el a DOCS/hu/codecs.html-t!\n"
 #define MSGTR_CouldntInitAudioCodec "Nem tudom indítani az audio codecet! -> nincshang ;)\n"
 #define MSGTR_TryForceVideoFmtStr "Megpróbálom a(z) %s video codec-családot használni ...\n"
 #define MSGTR_CantFindVideoCodec "Nem találok codec-et ami megfelel a kivalasztott vo-hoz es 0x%X video-formátumhoz !\n"
@@ -107,8 +107,8 @@ static char help_text[]=
 "  - Próbáld ki a -cache 8192 opciót.\n"\
 "- Talán egy non-interleaved AVI filet próbálsz -cache opcióval lejátszani?\n"\
 "  - Használd a -nocache opciót.\n"\
-"Tuninghoz tippeket a DOCS/video.html és DOCS/sound.html file-ok tartalmaznak.\n"\
-"Ha ezek után sem tetszik az eredmény, olvasd el a DOCS/bugreports.html file-t.\n\n"
+"Tuninghoz tippeket a DOCS/hu/video.html és DOCS/hu/sound.html file-ok tartalmaznak.\n"\
+"Ha ezek után sem tetszik az eredmény, olvasd el a DOCS/hu/bugreports.html file-t.\n\n"
 
 #define MSGTR_NoGui "Az MPlayer grafikus felület NÉLKÜL lett fordítva!\n"
 #define MSGTR_GuiNeedsX "Az MPlayer grafikus felületének X11-re van szüksége!\n"
@@ -141,7 +141,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- Az MPlayer egy 'illegális utasítást' hajtott végre.\n"\
 "  Lehet hogy a futásidejû CPU detektáló kód bugja...\n"\
-"  Olvasd el a DOCS/bugreports.html file-t.\n"
+"  Olvasd el a DOCS/hu/bugreports.html file-t.\n"
 #define MSGTR_Exit_SIGILL \
 "- Az MPlayer egy 'illegális utasítást' hajtott végre.\n"\
 "  Ez akkor történik amikor más CPU-n futtatod az MPlayer-t mint amire a\n"\
@@ -149,12 +149,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- Az MPlayer röpke félrelépése miatt hiba lépett fel a CPU/FPU/RAM-ban.\n"\
 "  Fordítsd újra az MPlayer-t az --enable-debug opcióval, és készíts egy\n"\
-"  'gdb' backtrace-t. A részletek a DOCS/bugreports.html file-ban találhatóak.\n"
+"  'gdb' backtrace-t. A részletek a DOCS/hu/bugreports.html file-ban találhatóak.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- Az MPlayer elcrashelt. Ennek nem lenne szabad megtörténnie.\n"\
 "  Az ok lehet egy hiba az MPlayer kódjában _vagy_ a Te meghajtóidban, _vagy_\n"\
 "  a gcc-ben. Ha úgy véled hogy ez egy MPlayer hiba, úgy olvasd el a\n"\
-"  DOCS/bugreports.html file-t. Amig ezt figyelmesen meg nem teszed, nem tudunk\n"\
+"  DOCS/hu/bugreports.html file-t. Amig ezt figyelmesen meg nem teszed, nem tudunk\n"\
 "  segíteni.\n"
 
 
