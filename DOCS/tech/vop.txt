@@ -96,9 +96,12 @@ Current plugins:
     MPI: DR (if possible) or TEMP
     Special: dec_video autoloads it if -pp option used but codec can't do pp.
 
--vop lavc
+-vop lavc[=quality:fps]
     Fast software YV12->MPEG1 conversion, usefull for dxr3/dvb drivers
     It uses libavcodec. Currently faster and better quality than -vop fame!
+    Param quality: fixed qscale (1<=quality<32) or bitrate (32<=quality KBits)
+    Param fps: force output fps (float value). If not give, or 0, it's
+    autodetected based on height (240,480->29.97fps, others -> 25fps)
     MPI: EXPORT special
 
 -vop fame
