@@ -30,6 +30,7 @@ MPlayer (1.0)
     * support for Real 10 cook Linux binary codec (decodes cook5.1)
     * improved NV12/NV21 support
     * support for multichannel WAV files
+    * alac (QuickTime lossless audio) support via lavc
 
     Demuxers:
     * vqf demuxer
@@ -54,6 +55,9 @@ MPlayer (1.0)
     * 32 bit RGB support in TSCC
     * multichannel MP3 decoder (MP3on4)
     * 3g2 support
+    * alac audio decoder
+    * loco video decoder
+    * shorten audio decoder and demuxer
 
     GUI:
     * half size event implemented and added to the menu
