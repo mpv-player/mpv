@@ -471,9 +471,10 @@ anstatt sie sofort abzuspielen.
 .TP
 .B \-fixed-vo (BETA\-CODE!)
 Erzwingt dasselbe Videosystem für mehrere Dateien (einmalige Initialisierung
-für alle Dateien). Dementsprechend wird für alle Dateien nur ein Fenster
-geöffnet. Momentan funktionieren die folgenden Treiber mit fixed\-vo: gl2, mga, 
-svga, x11, xmga, xv, xvidix and dfbmga.
+für alle Dateien).
+Dementsprechend wird für alle Dateien nur ein Fenster geöffnet.
+Momentan funktionieren die folgenden Treiber mit \-fixed-vo: gl2, mga, 
+svga, x11, xmga, xv, xvidix und dfbmga.
 .TP
 .B \-framedrop (siehe auch \-hardframedrop)
 Verwirft einige Frames, ohne sie anzuzeigen, um auf langsamen Systemen
@@ -518,8 +519,8 @@ Tastendrücken (0 dekativiert dies).
 Zeigt alle Tastennamen an, die mit Kommandos belegt werden können.
 .IPs cmdlist
 Zeigt alle Kommandos an, die zugewiesen werden können.
-.IPs js\-dev
-Gibt das zu benutzende Joystickgerät an (standardmäßig /dev/\:input/\:js0).
+.IPs js-dev
+Gibt das zu benutzende Joystickgerät an (Standard: /dev/\:input/\:js0).
 .IPs Datei
 Liest Kommandos aus der angegeben Datei. Ist mit einem FIFO am sinnvollsten.
 .br
@@ -612,8 +613,10 @@ Diese Option aktiviert den Slave-Modus, der dazu gedacht ist, MPlayer von
 anderen Programmen aus zu steuern.
 Anstatt selber Tastatureingaben auszuwerten, liest MPlayer einfache
 Kommandos von stdin. 
-Siehe DOCS/tech/slave.txt (englisch) und \-input cmdlist für eine Liste der
-Befehle.
+.br
+.I ANMERKUNG:
+Siehe DOCS/tech/slave.txt (englisch) und \-input cmdlist für eine
+Liste der Befehle.
 .TP
 .B \-softsleep
 Benutzt hochqualitative Softwaretimer, die genauso präzise wie die Echtzeituhr
@@ -687,7 +690,7 @@ Gibt das CD-ROM-Gerät an (Standard: /dev/\:cdrom).
 .B \-cache <kbytes>
 Diese Option gibt an, wieviel Speicher (in kBytes) MPlayer zum
 Precachen einer Datei oder URL benutzt.
-Besonders bei langsamen langsamen Medien sinnvoll.
+Besonders bei langsamen Medien sinnvoll.
 .TP
 .B \-cache-min <Prozent>
 Die Wiedergabe startet, wenn der Cache bis zu diesem Grenzwert gefüllt ist.
@@ -695,7 +698,7 @@ Die Wiedergabe startet, wenn der Cache bis zu diesem Grenzwert gefüllt ist.
 .B \-cache-prefill <Prozent> (noch nicht implementiert)
 Wenn der Cache leer ist, wird MPlayer pausieren und die Wiedergabe erst dann
 fortsetzen, wenn der Wert für die Auffüllung des Caches erreicht ist, die mit
-diesem Wert gesetzt wird.
+dieser Option gesetzt wird.
 .TP
 .B \-cdda <Option1:Option2> (nur bei CDDA)
 Diese Option kann benutzt werden, um die CD-Audio-Auslesefeatures von
@@ -832,13 +835,13 @@ Mit dieser Option kannst du MPlayer sagen, welche Perspektive er wiedergeben
 soll (Standard: 1).
 .TP
 .B \-forceidx
-Erzwingt den Neubau des Index.
-Nützlich für Dateien mit defektem Index (A/V-Desynchronisation etc.).
-Das ermöglicht das Spulen in Dateien, bei denen dies vorher nicht möglich war.
+Erzwingt Indexgenerierung.
+Nützlich für Dateien mit defektem Index (A/\:V-Desynchronisation etc.).
+Das ermöglicht das Spulen in Dateien, in denen dies vorher nicht möglich war.
 Mit MEncoder kann der Index permanent repariert werden (siehe Dokumentation).
 .br
 .I ANMERKUNG:
-Diese Option funktioniert nur, wenn das zugrunde liegende Medium das Spulen
+Diese Option funktioniert nur, wenn das zugrunde liegende Medium Spulen
 unterstützt (z.B.\& nicht bei Standardeingabe, Pipe usw.)
 .TP
 .B \-fps <Fließkommazahl>
@@ -1506,161 +1509,42 @@ Der Wert gibt die vertikale Position der Untertitel in % der Anzeigehöhe an.
 .B \-subwidth <10\-100> (nur bei OSD)
 Gibt die maximale Breite der Untertitel an.
 Nützlich für Ausgabe auf dem Fernseher.
-Der Wert ist die Breite in Prozent der Bildschirmbreite.
+Der Wert ist die Breite in %  der Bildschirmbreite.
 .TP
 .B \-unicode
-Sagt MPlayer, dass er die Untertitel als UNICODE behandeln soll.
+Sagt MPlayer, dass er die Untertitel als Unicode behandeln soll.
 .TP
 .B \-utf8 \ \ 
-Sagt MPlayer, dass er die Untertitel als UTF8 behandeln soll.
+Sagt MPlayer, dass er die Untertitel als UTF-8 behandeln soll.
 .TP
-.B \-vobsub <VOBsub\-Datei ohne Erweiterung>
+.B \-vobsub <VOBsub-Datei ohne Erweiterung>
 Gibt die VOBsub-Dateien an, die als Untertitel angezeigt werden sollen.
 Angegeben wird der volle Pfadname ohne Erweiterung, z.B.\& ohne '.idx',
 \'.ifo' oder '.sub'.
 .TP
-.B \-vobsubid <0-31>
-Gibt die ID für die VOBsubs an.
+.B \-vobsubid <0\-31>
+Gibt die ID für die VOBsub-Untertitel an.
 .
 .
 .SH "OPTIONEN FÜR DIE AUDIOAUSGABE (NUR BEI MPLAYER)"
 .TP
-.B \-abs <Wert> (VERALTET)
-Überschreibt die automatisch erkannte Puffergröße der Audiotreiber/\:\-karte;
-nur mit \-ao oss.
-.TP
-.B \-af <plugin1[=options],plugin2,...>
-Aktiviert eine kommaseparierte Liste von Audiofiltern zusammen mit ihren
-Optionen.
-.br
-Die verfügbaren Filter lauten:
-.
-.RSs
-.IPs resample[=srate[:sloppy][:type]]
-Ändert die Samplerate des Audiostreams zu der ganzzahlen srate (in Hz).
-Unterstützt nur das 16-bit Little-Endian-Format.
-.IPs channels[=nch]
-Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
-Falls die Anzahl Ausgabekanäle größer ist als die Anzahl Eingangskanäle, 
-so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo. Hier wird
-der Monokanal auf beiden Ausgabekanälen wiederholt).
-Ist die Anzahl Ausgabekanäle kleiner als die Anzahl Eingangskanäle,
-so werden die überflüssigen Kanäle verworfen.
-.IPs format[=bps,f]
-Wählt das Format "f" und die Anzahl der Bits pro Sample, bps, für die Ausgabe
-der Filterschicht. Die Option bps ist eine ganze Zahl. Das Format f ist eine
-Zeichenkette, die das Format beschreibt und folgende Optionen enthalten kann:
-.br
-alaw, mulaw oder imaadpcm
-.br
-float oder int
-.br
-unsigned oder signed
-.br
-le oder be (little oder big endian)
-.br
-.IPs "volume[=v:sc]"
-Wählt das Lautstärkelevel der Ausgabe.
-Der Filter ist nicht reentrant und kann dementsprechend nur einmal pro
-Audiostream aufgerufen werden.
-.RSss
-v: gewünschte Verstärkgun in dB für alle Kanäle in diesem Stream. Die
-Verstärkung kann zwischen -200dB und +40dB liegen, wobei -200dB den
-Sound komplett verstummen lässt und 1000dB einer 1000fachen Verstärkung
-entsprechend.
-Die Standardverstärkung ist -20dB.
-.br
-sc: Aktiviert "soft clipping".
-.REss
-.IPs "pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]"
-Mischt Kanäle beliebig. Details findest du in DOCS/sound.html.
-.RSss
-n: Anzahl der Ausgabekanäle (1 - 6).
-.br
-lij: gibt an, wieviel vom Quallkanal j in den Ausgabekanal i gemischt wird.
-.REss
-.IPs "sub[=fc:ch]"
-Fügt einen Sub-woofer-Kanal hinzu.
-.RSss
-fc: ab dieser Frequenz schneidet der Tiefpassfilter ab (20Hz bis 300Hz,
-Standardwert ist 60Hz).
-.br
-ch: Anzahl der Sub-Kanäle.
-.REss
-.IPs "surround[=d]"
-Decoder für matrix encodierten Surroundsound. Funktioniert bei vielen
-Zweikanaldateien.
-.RSss
-d: Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms,
-Standardwert ist 15ms).
-.REss
-+.IPs delay[=ch1:ch2:...]
-Verzögert die Soundausgabe.
-Gibt für jeden Kanal einzeln die Verzögerung der Soundausgabe in ms an
-(Fließkommazahl zwischen 0 und 1000).
- um d Sekunden (Fließkommazahl).
-.RE
-.
-.TP
-.B \-af-adv <force=(0\-3):list=(filters)> (siehe auch \-af)
-Gibt erweiterte Audiofilteroptionen an:
-.
-.RSs
-.IPs force=<0-3>
-Erzwingt das Einfügen von Audiofiltern nach folgenden Regeln:
-.RSss
-0: Komplett automatisches Einfügen (Standard)
-.br
-1: für Geschwindigkeit optimiert
-.br
-2: für Genauigkeit optimiert
-.br
-3: kein automatisches Einfügen
-.REss
-.IPs list=<Filter>
-Das gleiche wie \-af (siehe \-af).
-.RE
-.
-.TP
-.B \-ao <Treiber1[:Gerät],Treiber2,...[,]>
-Gibt eine Prioritätenliste für die zu benutzenden Audiotreiber (optional
-mit dem dazugehörigen Gerät) an.
-\'Gerät' ist auch mit SDL zulässig und gibt dann das Untergerät/den
-Untertreiber an.
-
-.I ANMERKUNG:
-.br
-Eine vollständige Liste der verfügbaren Audiotreiber erhälst du mit \-ao help.
-.br
-Wenn die Liste mit ',' endet, so werden notfalls auch nicht aufgeführte
-Treiber benutzt.
-
-.I BEISPIEL:
-.PD 0
-.RSs
-.IPs "\-ao oss:/\:dev/\:dsp2,oss:/\:dev/\:dsp1,"
-probiert zuerst, OSS mit den angegeben Geräten zu benutzen, und benutzt
-andere Treiber, falls diese nicht funktionieren.
-.IPs "\-ao sdl:esd"
-Gibt den SDL-Untertreiber an.
-.RE
-.PD 1
-.
+.B \-abs <Wert> (nur bei \-ao oss) (VERALTET)
+Überschreibt die automatisch erkannte Puffergröße der Audiotreiber/\:-karte.
 .TP
 .B \-aofile <Dateiname>
 Überschreibt den Standarddateinamen für \-ao pcm.
 .TP
 .B \-aop <list=Plugin1,Plugin2...:Option1=Wert1:opt2=Wert2...>
 Gibt die Audioplugins und ihre Optionen an (siehe auch in der Dokumentation).
-.br
+.sp 1
 Verfügbare Optionen sind:
 .
 .RSs
 .IPs list=[Plugins]
 Kommaseparierte Liste der Plugins (resample, surround, format, volume,
-extrastereo, volnorm)
+extrastereo, volnorm, delay)
 .IPs delay=<Sek>
-Beispiel-Plugin, benutze es nicht.
+Beispiel-Plugin, benutze es nicht (nur beim delay-Plugin).
 .IPs format=<Format>
 Ausgabeformat (nur beim format-Plugin)
 .IPs fout=<Hz>
@@ -1670,17 +1554,17 @@ Lautstärke (nur beim volume-Plugin)
 .IPs mul=<Wert>
 Stereokoeffizient (standardmäßig 2.5) (nur beim extrastereo-Plugin)
 .IPs softclip
-Compressor- / 'soft\-clipping'-Einstellungen (nur beim volume-Plugin)
+Kompressor- / 'soft-clipping'-Einstellungen (nur beim volume-Plugin)
 .RE
 .
 .TP
 .B \-delay <Sek>
-Audioverzögerung in Sekunden (Fließkommazahl, kann negativ sein).
+Audioverzögerung in Sekunden (positive oder negative Fließkommazahl).
 .TP
 .B \-format <0\-8192>
-Wählt das Ausgabeformat der Filterschicht. Die Formatnummer entspricht den
-in libao2/afmt.h definierten Werten.
-
+Wählt das Ausgabeformat der Filterschicht.
+Die Formatnummer entspricht den in libao2/afmt.h definierten Werten.
+.
 .PD 0
 .RSs
 .IPs 1
@@ -1690,17 +1574,17 @@ A-Law
 .IPs 4
 Ima-ADPCM
 .IPs 8
-Signed 8-bit
-.IPs 16
 Unsigned 8-bit
+.IPs 16
+Signed 16-bit (Little-Endian)
 .IPs 32
-Unsigned 16-bit (Little-Endian)
-.IPs 64
-Unsigned 16-bit (Big-Endian)
-.IPs 128
-Signed  16-bit (Little-Endian)
-.IPs 256
 Signed 16-bit (Big-Endian)
+.IPs 64
+Signed 8-bit
+.IPs 128
+Unsigned  16-bit (Little-Endian)
+.IPs 256
+Unsigned 16-bit (Big-Endian)
 .IPs 512
 MPEG (2) Audio
 .IPs 1024
@@ -1714,7 +1598,7 @@ Signed 32-bit (Big-Endian)
 .
 .TP
 .B \-mixer <Gerät>
-Teilt MPlayer das zu benutzende Mixergerät mit (Standard: /dev/\:mixer).
+Benutze einen anderen Mixer als den Standardmixer /dev/\:mixer.
 Bei ALSA gibt dies den Mixer-Namen an.
 .TP
 .B \-mixer-channel <Mixer-Anschluß> <nur bei \-ao oss und \-ao alsa)
@@ -1728,9 +1612,122 @@ Bei ALSA kannst du die Namen benutzen, die beispielsweise alsamixer anzeigt,
 wie
 .B Master, Line, PCM.
 .TP
-.B \-nowaveheader (nur bei -ao pcm)
+.B \-nowaveheader (nur bei \-ao pcm)
 Schreibe keinen Wave-Header in die Datei.
-Wird für RAW-PCM benutzt.
+Wird für raw-PCM benutzt.
+.
+.
+.SH "AUDIOAUSGABETREIBER (NUR BEI MPLAYER)"
+Audioausgabetreiber sind Schnittstellen zu verschiedenen Ausgabeeinrichtungen.
+Die Syntax ist folgende:
+.TP
+.B \-ao <Treiber1[:Unteroption[=Wert]:...],Treiber2,...[,]>
+Gibt eine Prioritätenliste der zu benutzenden Audiotreiber an.
+.PP
+Wenn die Liste mit ',' endet, so werden notfalls auch nicht in der
+Kommandozeile aufgeführte Treiber benutzt.
+Unteroptionen sind optional und können meistens weggelassen werden.
+.br
+.I ANMERKUNG:
+Eine Liste der eincompilierten Audiotreiber erhälst du mit \-ao help.
+.sp 1
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs "\-ao alsa,oss,"
+Probiere den ALSA-Treiber, dann den OSS-Treiber, dann andere.
+.IPS "\-ao alsa:mmap:noblock:device=hw=0.3"
+Setzt den noblock-Modus, mmap-Modus und den Gerätenamen auf erste Karte,
+viertes Gerät.
+.RE
+.PD 1
+.
+.sp 1
+FIXME: Unteroptionen für sdl, arts, esd, jack, nas, macosx, sgi, sun,
+win32, dxr2, mpegpes, null, pcm, plugin.
+.sp 1
+Verfügbare Audioausgabetreiber sind folgende:
+.
+.TP
+.B alsa\ \ \ 
+ALSA 0.9/1.x Audioausgabetreiber.
+.PD 0
+.RSs
+.IPs mmap\ \ \ 
+Setzt den experimentellen mmap-Modus (funktioniert nicht für mehr als zwei
+Kanäle).
+.IPs noblock
+Setzt den noblock-Modus.
+.IPs device=<Gerät>
+Setzt den Gerätenamen.
+Ersetze jedes ',' mit '.' und jeden ':' mit '=' im ALSA-Gerätenamen.
+.RE
+.PD 1
+.TP
+.B alsa1x (VERALTET)
+ALSA 1.x Audioausgabetreiber.
+Überholt durch den generellen ALSA-Audioausgabetreiber.
+.TP
+.B alsa9 (VERALTET)
+ALSA 0.9 Audioausgabetreiber.
+Überholt durch den generellen ALSA-Audioausgabetreiber.
+.TP
+.B alsa5\ \ 
+ALSA 0.5 Audioausgabetreiber.
+.TP
+.B oss\ \ \ \ 
+OSS Audioausgabetreiber.
+.PD 0
+.RSs
+.IPs dsp-device
+Setzt das Audioausgabegerät (Standard: /dev/dsp).
+.RE
+.PD 1
+.TP
+.B sdl\ \ \ \ 
+Audioausgabetreiber der größtenteils plattformunabhängigen SDL (Simple
+Directmedia Layer) Bibliothek.
+.TP
+.B arts\ \ \ 
+Audioausgabe über den Arts-Daemon.
+.TP
+.B esd\ \ \ \ 
+Audioausgabe über den ESD-Daemon.
+.TP
+.B jack\ \ \ \ 
+Audioausgabe über JACK (Jack Audio Connection Kit).
+.TP
+.B nas\ \ \ \ 
+Audioausgabe über NAS.
+.TP
+.B macosx (nur bei Mac OS X)
+Nativer Mac OS X-Audioausgabetreiber.
+.TP
+.B sgi (nur bei SGI)
+Nativer SGI-Audioausgabetreiber.
+.TP
+.B sun (nur bei Sun)
+Nativer Sun-Audioausgabetreiber.
+.TP
+.B win32 (nur bei Windows)
+Nativer Windows-Waveout-Audioausgabetreiber.
+.TP
+.B dxr2 (siehe auch \-dxr2) (nur bei DXR2)
+Creative DXR2-spezifischer Ausgabetreiber.
+.TP
+.B mpegpes (nur bei DVB)
+DVB-spezifischer Ausgabetreiber.
+.TP
+.B null\ \ \ 
+Produziert keine Audioausgabe, behält aber die Videoabspielgeschwindigkeit bei.
+Benutze \-nosound für Benchmarking-Zwecke.
+.TP
+.B pcm (siehe auch \-aofile)
+Filewriter-Audioausgabe im raw-PCM/\:Wave-Format.
+Schreibt den Sound nach ./audiodump.wav.
+.TP
+.B plugin\ \ 
+Plugin-Audioausgabetreiber.
 .
 .
 .SH "OPTIONEN FÜR DIE VIDEOAUSGABE (NUR BEI MPLAYER)"
@@ -1739,26 +1736,32 @@ Wird für RAW-PCM benutzt.
 Du bekommst eine Liste mit allen Optionen und ihren Erläuterungen mit
 .I mplayer \-aahelp
 .TP
+.B \-adapter <Wert>
+Bestimmt die Grafikkarte, die das Bild erhalten wird.
+Benötigt die \-vm-Option, um zu funktionieren.
+Du bekommst eine Liste aller verfügbaren Karten, wenn du diese Option mit \-v
+aufrufst.
+Funktioniert momentan nur mit \-vo directx.
+.TP
 .B \-bpp <Farbtiefe>
-Benutze eine andere als die automatisch erkannte Farbtiefe.
-Nicht alle \-vo-Treiber unstützen das (fbdev, dga2, svga, vesa).
+Überschreibt die automatisch erkannte Farbtiefe.
+Wird nur von fbdev-, dga2-, svga- und vesa-Ausgabetreibern unterstützt.
 .TP
-.B \-brightness <\-100\-100>
+.B \-brightness <-100\-100>
 Passt die Helligkeit der Videoausgabe an (Standard: 0).
-Ändert die Intensität der RGB-Komponenten des Videosignals von Schwarz zu
-Weiß.
+Wird nicht von allen Videoausgabetreibern unterstützt
 .TP
-.B \-contrast <\-100\-100>
+.B \-contrast <-100\-100>
 Passt den Kontrast der Videoausgabe an (Standard: 0).
-Funktioniert so ähnlich wie bei der Helligkeit.
+Wird nicht von allen Videoausgabetreibern unterstützt.
 .TP
-.B \-dfbopts <Wert> (nur mit \-vo directfb2)
-Gibt eine Parameterliste für den directfb-Treiber an.
+.B \-dfbopts <Wert> (nur mit \-vo directfb)
+Gibt eine Parameterliste für den directfb-Videoausgabetreiber an.
 .TP
-.B \-display <Name>
+.B \-display <Name> (nur bei X11)
 Gibt den Rechnernamen und die Anzeigenummer des X-Servers an, auf dem
 die Anzeige erscheinen soll.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
@@ -1768,209 +1771,252 @@ die Anzeige erscheinen soll.
 .
 .TP
 .B \-double
-Aktiviert die Doppelpufferung.
+Aktiviert doppelte Pufferung.
 Vermeidet Flimmern dadurch, dass zwei Bilder im Speicher gehalten werden,
 von denen das eine angezeigt wird, während das andere noch decodiert wird.
-Kann das OSD beeinflussen.
+Kann das OSD negativ beeinflussen, entfernt aber oft Flimmern des OSD.
 Braucht doppelt so viel Speicher wie Einfachpufferung und wird somit
 nicht mit Grafikkarten funktionieren, die nur über sehr wenig Speicher
 verfügen.
 .TP
 .B \-dr \ \ \ 
 Schaltet direktes Rendern an (wird nicht von allen Codecs und
-Videoausgabetreibern unterstützt) (srandardmäßig aus).
-Warnung: Kann zu Störungen beim OSD oder bei den Untertiteln führen!
+Videoausgabetreibern unterstützt).
+.br
+.I WARNUNG:
+Kann zu Störungen beim OSD oder bei den Untertiteln führen!
 .TP
 .B \-dxr2 <option1:option2:...>
-Mit dieser Option wird der dxr2-Treiber gesteuert.
-Anmerkung: Der lavc-Filter wird jetzt automatisch eingefügt, wenn ein
-Nicht-MPEG1/2-Film abgespielt wird, sodass alle von MPlayer unterstützten
-Formate sofort funktionieren sollten, wenn du genug CPU-Power hast, um
-in Echtzeit zu encodieren.
-Das Overlaychipset der dxr2 liefert eine ziemlich schlechte Qualität.
-Die Standardeinstellungen sollten andererseits bei jedem funktionieren.
-Das OSD funktioniert eventuell beim Overlay (beim TV nicht), indem es
-mit dem Colorkey angezeigt wird. Mit den Standardeinstellungen für den
-Colorkey wirst du variierende Effekte erleben. Normalerweise wirst du
-den Colorkey um die Buchstaben herum sehen könenn oder andere lustige
-Effekte sehen. Durch vernünftige Anpassung der Colorkey-Einstellungen
-solltest du aber in der Lage sein, akzeptable Ergebnisse zu erzielen.
+Mit dieser Option wird der dxr2-Videoausgabetreiber gesteuert.
 .
 .RSs
 .IPs ar-mode=<Wert>
-Modus für die Anpassung des Höhen-/Breitenverhältnisses
-(0 = normal, 1 = pan scan, 2 = letterbox (Standard))
-.IPs iec958\-encoded/\:decoded
-iec958-Ausgabemodus
-.IPs mute
+Modus für die Anpassung des Höhen-/Breitenverhältnisses (0 = normal, 1 =
+pan und scan, 2 = letterbox (Standard)
+.IPs iec958-encoded
+Setzt den iec958-Ausgabemodus auf 'encoded'.
+.IPs iec958-decoded
+Setzt den iec958-Ausgabemodus auf 'decoded' (Standard).
+.IPs macrovision=<Wert>
+Macrovision-Modus (0 = aus (Standard), 1 = agc, 2 = agc 2 colorstripe,
+3 = agc 4 colorstripe)
+.IPs mute\
 Stummschalten der Soundausgabe
+.IPs unmute
+Ausschalten der Stummschaltung der Soundausgabe
 .IPs ucode=<Wert>
 Pfad zum Microcode
 .RE
 .RS
-
+.sp 1
 .I TV-Ausgabe
 .RE
 .RSs
 .IPs 75ire
-schaltet 7.5 IRE an
+Schaltet den 7.5 IRE-Ausgabemodus an.
+.IPs no75ire
+Schaltet den 7.5 IRE-Ausgabemodus ab (Standard).
 .IPs bw\ \ \ 
-TV-Ausgabe in Schwarz/Weiß 
+TV-Ausgabe in Schwarz/\:Weiß 
 .IPs color
-TV-Ausgabe in Farbe
+TV-Ausgabe in Farbe (Standard)
 .IPs interlaced
-TV-Ausgabe ist interlaced
-.IPs macrovision=<Wert>
-Macrovision-Modus (0 = off (Standard), 1 = agc, 2 = agc 2 colorstripe,
-3 = agc 4 colorstripe)
+TV-Ausgabe ist interlaced (Standard).
+.IPs nointerlaced
+Schaltet die interlaced-TV-Ausgabe ab.
 .IPs norm=<Wert>
-TV-Standard (ntsc (Stadard), pal,pal60,palm,paln,palnc)
-.IPs square/\:ccir601\-pixel
-TV-Pixelmodus
+TV-Norm (ntsc (Standard), pal, pal60, palm, paln, palnc)
+.IPs square-pixel
+Setzt TV-Pixelmodus auf 'square'.
+.IPs ccir601-pixel
+Setzt TV-Pixelmodus auf 'ccir601'.
 .RE
 .RS
-
+.sp 1
 .I Overlay
 .RE
 .RSs
-.IPs cr-[left|right|top|bot]=<\-20\-20>
-Anpassung der Beschneidung beim Overlay
-.IPs ck-[rgb]min=<0\-255>
-Minimalwert für den color key
-.IPs ck-[rgb]max=<0\-255>
-Maximalwert für den color key
-.IPs ck-[rgb]=<0\-255>
-Werte des color keys
-.IPs ignore\-cache
-bentuze nicht den VGA-Cache
+.IPs cr-left=<0\-500>
+Setzt den Wert für das Abschneiden des Bildrandes links (Standard: 50).
+.IPs cr-right=<0\-500>
+Setzt den Wert für das Abschneiden des Bildrandes rechts (Standard: 300).
+.IPs cr-top=<0\-500>
+Setzt den Wert für das Abschneiden des Bildrandes oben (Standard: 0)
+.IPs cr-bottom=<0\-500>
+Setzt den Wert für das Abschneiden des Bildrandes unten (Standard: 0)
+.IPs ck-[r|g|b]=<0\-255>
+Setzt die verstärkung des r(oten), g(rünen) oder b(lauen) Wertes des
+Overlay-Farbschlüssels.
+.IPs ck-[r|g|b]min=<0\-255>
+Setzt den Minimalwert für den entsprechenden Farbschlüssel.
+.IPs ck-[r|g|b]max=<0\-255>
+Setzt den Maximalwert für den entsprechenden Farbschlüssel.
+.IPs ignore-cache
+Ignoriere die zwischengespeicherten Overlay-Einstellungen.
+.IPs update-cache
+Aktualisiere die zwischengespeicherten Overlay-Einstellungen.
 .IPs ol-osd
-Aktiviert den OSD-Hack mit dem Overlay
-.IPs ol[hwxy]\-cor=<Wert>
-Passt die Größe und Position des Overlays an, falls es nicht ganz den
-Fensterproportionen entspricht.
+Aktiviert Overlay-Onscreen-Anzeige.
+.IPs nool-osd
+Deaktiviert Overlay-Onscreen-Anzeige (Standard).
+.IPs ol[h|w|x|y]-cor=<Wert>
+Passt die Größe (Höhe,Breite) und Position des Overlays an, falls es nicht
+ganz den Fensterproportionen entspricht (Standard: 0).
 .IPs overlay
-Aktiviert das Overlay
+Aktiviert das Overlay (Standard).
+.IPs nooverlay
+Aktiviert die TV-Ausgabe.
 .IPs overlay-ratio=<1\-2500>
-stellt das Overlay ein (standardäßig 1000)
-.IPs update\-cache
-Erneuert den VGA-Cache
+Stellt das Overlay ein (Standard: 1000)
 .RE
 .
 .TP
-.B \-fb <Gerät> (nur bei fbdev oder DirectFB)
-Gibt das zu benutzende Framebuffer-Gerät an.
-Standardmäßig wird /dev/\:fb0 verwendet.
+.B \-fb <Gerät> (nur bei \-vo fbdev oder directfb) (VERALTET)
+Gibt das zu benutzende Framebuffer-Gerät an (Standard: /dev/\:fb0).
 .TP
-.B \-fbmode <Modusname> (nur bei fbdev)
-Wechselt in den angegebenen Videomodus, so wie er in /etc/\:fb.modes steht.
-
+.B \-fbmode <Modusname> (nur bei \-vo fbdev)
+Wechselt in den angegebenen Videomodus, der als <Modusname> in
+/etc/\:fb.modes steht.
+.br
 .I ANMERKUNG:
 .br
 Der VESA-Framebuffer unterstützt den Auflösungswechsel nicht.
 .TP
-.B \-fbmodeconfig <Dateiname> (nur bei fbdev)
-Benutze diese Konfigurationsdatei an Stelle von /etc/\:fb.modes.
-Nur zusammen mit dem fbdev-Treiber gültig.
+.B \-fbmodeconfig <Dateiname> (nur bei \-vo fbdev)
+Benutze diese Konfigurationsdatei an Stelle der Standarddatei /etc/\:fb.modes.
 .TP
 .B \-forcexv (nur bei SDL)
-Erzwingt die Benutzung von XVideo.
+Erzwingt die Benutzung von XVideo über den SDL-Videoausgabetreiber.
 .TP
-.B \-fs \ \ \ 
+.B \-fs (siehe auch \-zoom) 
 Vollbildwiedergabe (zentriert den Film und erstellt schwarze Balken rund um
-das Bild). Schalte zwischen dem Vollbild- und dem Fenstermodus mit 'f'
-hin und her (nicht jeder Videoausgabetreiber unterstützt dieses).
-Siehe auch \-zoom.
+das Bild).
+Nicht jeder Videoausgabetreiber unterstützt dies.
 .TP
-.B \-fsmode-dontuse <0-31> (VERALTET) (benutze \-fs)
+.B \-fsmode-dontuse <0\-31> (VERALTET) (benutze \-fs)
 Benutze diese Option, wenn du mit dem Vollbildmodus Probleme hast.
+.TP
+.B \-fstype <Typ1,Typ2,...> (nur bei X11)
+Gib eine Prioritätenliste von Vollbild-Layereinstellungsmodi an, die benutzt
+werden sollen.
+Du kannst die Modi durch Voransetzen von '\-' negieren.
+.br
+Falls du das Problem hast, dass das Vollbild von anderen Fenstern überdeckt
+wird, probiere eine andere Reihenfolge.
+.br
+.I ANMERKUNG:
+Siehe \-fstype help für eine vollständige Liste aller verfügbaren Modi.
+.sp 1
+Die verfügbaren Modi sind:
+.sp 1
+.PD 0
+.RSs
+.IPs above
+Benutze die _NETWM_STATE_ABOVE-Anweisung, falls verfügbar.
+.IPs below
+Benutze die _NETWM_STATE_BELOW-Anweisung, falls verfügbar.
+.IPs fullscreen
+Benutze die _NETWM_STATE_FULLSCREEN-Anweisung, falls verfügbar.
+.IPs layer
+Benutze die _WIN_LAYER-Anweisung mit dem Standard-Layer.
+.IPs layer=<0..15>
+Benutze die _WIN_LAYER-Anweisung mit der angegebenen Layernummer.
+.IPs netwm
+Erzwinge den NETWM-Stil.
+.IPs none\ 
+Richte den Vollbild-Fenster-Layer nicht ein.
+.IPs stays_on_top
+Benutze die _NETWM_STATE_STAYS_ON_TOP-Anweisung, falls verfügbar.
+.REss
+.\" This is a hack to keep EXAMPLE indented. Fix someday..
+.TP
+.B \ 
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs layer,stays_on_top,above,fullscreen
+Standardreihenfolge; wird benutzt, wenn falsche oder nichtunterstützte Modi
+angegeben werden.
+.IPs \-fullscreen
+Korrigiert den Vollbildwechsel für Benutzer von OpenBox 1.x.
+.RE
+.PD 1
 .TP
 .B \-geometry x[%][:y[%]] oder [WxH][+x+y]
 Gibt an, wo die Videoausgabe initial erscheint.
-x und y sind Angaben in Pixeln und geben den Abstand von der rechten oberen
-Ecke des Bildschirms bis zur rechten oberen Ecke des darzustellenden
-Bildes an. Wenn Prozentwerte verwendet werden, dann wird statt dessen
-die prozentuale Bildschirmbreite/-höhe verwendet. Auch das bei der
-X\-Standardoption \-geometry verwendete Format wird unterstützt.
+x und y sind Angaben in Pixeln und geben den Abstand von der linken oberen
+Ecke des Bildschirms zur linken oberen Ecke des darzustellenden
+Bildes an.
+Wenn ein Prozentzeichen nach einem Argument verwendet wird, dann wird statt
+dessen die prozentuale Bildschirmbreite/\:-höhe verwendet.
+Auch das bei der X-Standardoption \-geometry verwendete Format wird
+unterstützt.
 Die Werte müssen ganze Zahlen sein.
-
-Anmerkung: Diese Option wird nur bei wenigen \-vos unterstützt. Zu diesen
-gehören tdfxfb, bfdev und xv.
-
+.br
+.I ANMERKUNG:
+Diese Option wird nur von x11-, xmga-, xv-, xvmc-, xvidix-,
+directx- und tdfxfb-Videoausgabetreibern unterstützt.
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs 50:40
-Platziert das Fenster an x=50, y=40.
+Platziert das Fenster bei x=50, y=40.
 .IPs 50%:50%
 Platziert das Fenster in der Mitte des Bildschirms.
-.IPs 100%
-Platziert das Fenster in der linken oberen Ecke des Bildschirmes.
+.IPs 100%\
+Platziert das Fenster in der Mitte des rechten Randes des Bildschirmes.
 .IPs 100%:100%
-Platziert das Fenster in der unten linken Ecke des Bildschirmes.
+Platziert das Fenster in der unteren rechten Ecke des Bildschirmes.
 .RE
 .PD 1
 .
+.TP
+.B \-guiwid <Fenster id> (siehe auch \-wid) (nur mit GUI)
+Weist die GUI an, auch ein X11-Fenster zu benutzen und sich selbst an die
+Unterseite des Videos zu heften, was nützlich ist beim Einbetten einer Mini-GUI
+in einem Browser (z.B.\& mit dem MPlayer-plugin).
 .TP
 .B \-hue <\-100\-100>
 Passt die Farbe des Videosignals an (Standard: 0).
 Du kannst mit dieser Option negative Farben erhalten.
+Wird nicht von allen Videoausgabetreibern unterstützt.
 .TP
-.B \-icelayer <0\-15> (nur mit icewm)
-Gibt die Schicht an, die das Vollbildfenster von MPlayer bei icewm bekommt.
-
-.PD 0
-.RSs
-.IPs 0
-Desktop
-.IPs 2
-darunter
-.IPs 4
-normal
-.IPs 6
-OnTop
-.IPs 8
-Dock
-.IPs 10
-AboveDock
-.IPs 12
-Menu (Standard)
-.RE
-.PD 1
-.
-.TP
-.B \-jpeg <option1:option2:...> (nur mit \-vo jpeg)
-Gibt Optionen für die JPEG-Ausgabe an.
+.B \-jpeg <Option1:Option2:...> (nur mit \-vo jpeg)
+Gibt Optionen für den jpeg-Videoausgabetreiber an.
 .br
 Verfügbare Optionen sind:
 .PD 0
 .RSs
 .IPs [no]progressive
-Standard-JPEG oder progressives JPEG
+Gibt Standard-JPEG oder progressives JPEG an.
 .IPs [no]baseline
-Benutze eine baseline (oder auch nicht).
+Benutze eine/\:keine Baseline.
 .IPs optimize=<Wert>
-Optimierungswert [0\-100]
+Optimierungswert (0\-100)
 .IPs smooth=<Wert>
-Glättungsfaktor [0\-100]
+Glättungsfaktor (0\-100)
 .IPs quality=<Wert>
-Qualitätsfaktor [0\-100]
+Qualitätsfaktor (0\-100)
 .IPs outdir=<Wert>
 Verzeichnis, in dem die JPEG-Bilder gespeichert werden.
 .RE
 .PD 1
 .
 .TP
-.B \-monitor-dotclock <dotclock\-\ (oder\ pixelclock\-)Bereich> (nur bei fbdev und vesa)
-Lies etc/\:example.conf und DOCS/\:video.html für weitere Erklärungen.
+.B \-monitor-dotclock <Bereich[,Bereich,...]> (nur bei \-vo fbdev und vesa)
+Gib den Bereich für dotclock oder pixelclock des Monitors an.
 .TP
-.B \-monitor-hfreq <Bereich der Horizontalfrequenz> (nur bei fbdev und vesa)
+.B \-monitor-hfreq <Bereich[,Bereich,...> (nur bei \-vo fbdev und vesa)
+Gibt den Bereich für die horizontale Frequenz des Monitors an.
 .TP
-.B \-monitor-vfreq <Bereich der Vertikalfrequenz> (nue bei fbdev und vesa)
+.B \-monitor-vfreq <Bereich[,Bereich,...> (nur bei \-vo fbdev und vesa)
+Gibt den Bereich für die vertikale Frequenz des Monitors an.
 .TP
-.B \-monitoraspect <Verhältnis>
-Gibt das Höhen-/Breitenverhältnis deines Monitors oder Fernsehers an.
+.B \-monitoraspect <Verhältnis> (siehe auch \-aspect)
+Gibt das Höhen-/\:Breitenverhältnis deines Monitors oder Fernsehers an.
 Siehe auch \-aspect, das das Verhältnis des Films angibt.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
@@ -1982,81 +2028,72 @@ Siehe auch \-aspect, das das Verhältnis des Films angibt.
 .
 .TP
 .B \-nograbpointer
-Kontrolliert nach Wechsel des Videomodus (mit \-vm) den Mauszeiger nicht.
-Nützlich bei Multihead-Systemen.
-.TP
+Greift nicht nach dem Mauszeiger nach einem Wechsel des Videomodus (mit \-vm).
+Nützlich bei Multihead-Einstellungen.
 .TP
 .B \-nokeepaspect
 Erhalte beim Ändern der Fenstergröße unter X11 nicht das
-Höhen\-/\:Breitenverhältnis (funktioniert momentan nur mit \-vo x11, xv, xmga,
-und xvidix. Außerdem muss dein Windowmanager 'window aspect hints' verstehen.).
-.B \-noslices
-Deaktiviert die Darstellung mit 16 Pixel hohen Abschnitten/\:Bändern und
-baut das ganze Bild in einem Rutsch auf.
-Kann - in Abhängigkeit von der Grafikkarte/dem Cache - langsamer oder
-schneller sein. Hat nur mit libmpeg2 und den libavcodec-Codecs einen
-Effekt.
+Höhen-/\:Breitenverhältnis.
+Funktioniert nur mit den x11-, xv-, xmga-, xvidix- und
+directx-Videoausgabetreibern.
+Außerdem muss dein Windowmanager unter X11 Anweisungen zum Fenster-Aspect
+verstehen.
+.TP
+.B \-noxv (nur bei \-vo SDL)
+Deaktiviert die Benutzung von XVideo durch den SDL-Videoausgabetreiber.
+.TP
+.B \-ontop
+Sorgt dafür, daß das Abspielfenster nicht von anderen Fenstern verdeckt wird.
+Wird unterstützt von Treibern, die X11 benutzen, außer SDL, außerdem directx
+und gl2 unter Windows.
 .TP
 .B \-panscan <0.0\-1.0>
-Aktiviert Pan & Scan. Dabei werden z.B. bei einem 16:9-Film und einem
-4:3-Monitor die Seiten abgeschnitten, damit der komplette Bildbereich
-ausgefüllt wird. Dieses funktioniert nur mit den xv-, xmga-, mga- und
-xvidix-Treibern.
-.br
-Der Wert gibt an, wieviel des Bildes weggeschnitten werden soll.
+Aktiviert Pan & Scan.
+Dabei werden z.B.\& bei einem 16:9-Film und einem 4:3-Monitor die Seiten
+abgeschnitten, damit der komplette Bildbereich ausgefüllt wird.
+Der Bereich kontrolliert, wieviel vom Bild abgeschnitten wird.
+Dies funktioniert nur mit den xv-, xmga-, mga- und xvidix-Videoausgabetreibern.
+.TP
+.B \-refreshrate <Hz>
+Setzt die Bildwiederholfrequenz des Monitors in Hz.
+Momentan nur unterstützt durch \-vo directx kombiniert mit der \-vm-Option.
 .TP
 .B \-rootwin
-Zeigt den Film im Root-Fenster (dem Desktophintergrund) an, anstatt ein
-neues Fenster zu öffnen. Funktioniert nur mit den x11-, xv-, xmga- und
-xvidix-Treibern.
+Spielt den Film im Root-Fenster (dem Desktophintergrund) ab.
+Desktophintergrundbilder können den Film allerdings verdecken.
+Funktioniert nur mit den x11-, xv-, xmga- und xvidix-Videoausgabetreibern.
 .TP
 .B \-saturation <\-100\-100>
-Passt die Sättigung der Videoausgabe an (Standard: 0).
-Mit dieser Option kannst du ein Graustufenbild erhalten.
+Passt die Sättigung des Videosignals an (Standard: 0).
+Mit dieser Option kannst du ein Graustufenbild bekommen.
+Wird nicht von allen Videoausgabetreibern unterstützt.
 .TP
-.B \-screenw <Pixel> \-screenh <Pixel>
-Wenn du einen Ausgabetreiber verwendest, der nichts über die
-Bildschirmauflösung weiß (fbdev/\:x11 und/\:oder TV-Ausgang), dann kannst
-du hiermit die horizontale und vertikale Auflösung angeben.
+.B \-screenh <Pixel>
+Gib die horizontale Bildauflösung für Videoausgabetreiber an, die die
+Bildschirmauflösung nicht kennen, wie fbdev, x11 und TV-Ausgang.
 .TP
-.B \-stop-xscreensaver
+.B \-screenw <Pixel>
+Gib die vertikale Bildauflösung für Videoausgabetreiber an, die die
+Bildschirmauflösung nicht kennen, wie fbdev, x11 und TV-Ausgang.
+.TP
+.B \-stop-xscreensaver (nur bei X11)
 Deaktiviert den Bildschirmschoner beim Start von MPlayer und aktiviert ihn
 beim Beenden wieder.
 .TP
 .B \-vm \ \ \ 
-Versucht, in einen besser passenden Videomodus zu wechseln.
-dga, x11/\:xv (XF86VidMode) und sdl unterstützen \-vm.
-.TP
-.B \-vo <Treiber1[:Gerät],Treiber2,...[,]>
-Gibt eine Prioritätenliste der zu verwendenden Videoausgabetreiber
-(optional mit ihren Geräten) an.
-\'Gerät' ist auch mit SDL und GGI gültig und gibt dort den Untertreiber an.
-
-.I ANMERKUNG:
-.br
-Mit \-vo help bekommst du eine vollständige Liste aller vorhandener Treiber.
-.br
-Wenn die Liste mit ',' endet, so werden auch andere Treiber ausprobiert,
-falls die aufgelisteten nicht funktionieren.
-
-.I BEISPIEL:
-.PD 0
-.RSs
-.IPs "\-vo xmga,xv,"
-Probiert zuerst den Matrox-Kerneltreiber, dann den Xv-Treiber, dann andere.
-.br
-.IPs "\-vo sdl:aalib"
-gibt den SDL-Untertreiber an.
-.RE
-.PD 1
-.
+Versucht, in einen anderen Videomodus zu wechseln.
+Unterstützt von dga-, x11-/\:xv- (XF86VidMode) und SDL-Videoausgabetreibern.
+In Verbindung mit dem directx-Videoausgabetreiber können die Optionen
+\-screenw, \-screenh, \-bpp und \-refreshrate benutzt werden, um einen neuen
+Anzeigemodus zu setzen.
 .TP
 .B \-vsync \ \ 
-Aktiviert VBI für VESA.
+Aktiviert VBI für vesa-, dfbmga- und svga-Videoausgabetreiber.
 .TP
-.B \-wid <Fenster-ID>
-Gibt MPlayer das zu benutzende Fenster an, was z.B. nützlich ist, um MPlayer
-aus einem Browser heraus aufzurufen (z.B. mit plugger).
+.B \-wid <Fenster-ID> (siehe auch \-guiwid) (nur bei X11)
+Weist MPlayer an, sich an ein bestehendes X11-Fenster zu heften, was
+beispielsweise nützlich ist, um MPlayer in einen Browser einzubetten (z.B.\&
+mit der plugger-Erweiterung).
 .TP
 .B \-xineramascreen <0\-...>
 Bei Xinerama-Konfigurationen (z.B.\& bei einem einzigen Desktop, der sich
@@ -2064,95 +2101,234 @@ Bei Xinerama-Konfigurationen (z.B.\& bei einem einzigen Desktop, der sich
 das Video angezeigt werden soll.
 .TP
 .B \-z <0\-9>
-Gibt die Kompressionsstufe bei der PNG-Ausgabe (\-vo png) an.
-
-.PD 0
-.RSs
-.IPs 0
-keine Kompression
-.IPs 9
-maximale Kompression
-.RE
-.PD 1
-.
+Gibt die Kompressionsstufe bei des png-Videoausgabetreibers an.
+0 steht für keine, 9 für maximale Kompression
 .TP
 .B \-zrbw (nur bei \-vo zr)
-Schwarz/\:Weiß-Modus. Um die maximale Performance zu erreichen, kann diese
-Option mit der Option 'decode only in black and white' für zur FFmpeg-Familie
-gehörende Codecs kombiniert werden.
+Anzeige in schwarz/\:weiß.
+Für optimale Performance kann dies mit der Option '\-lavdopts gray'
+kombiniert werden.
 .TP
-.B \-zrcrop <[Breite]x[höhe]+[x offset]+[y offset]> (nur bei \-vo zr)
-Wählt den anzuzeigenden Teilausschnitt des Bildes. Wird diese Option mehrmals
-angegeben, so aktiviert sie den Cinerama-Modus.
+.B \-zrcrop <[Breite]x[Höhe]+[x Offset]+[y Offset]> (nur bei \-vo zr)
+Wählt den anzuzeigenden Teilausschnitt des Bildes.
+Wird diese Option mehrmals angegeben, so aktiviert sie den Cinerama-Modus.
 Im Cinerama-Modus wird der Film auf mehr als einen Fernseher (oder Beamer)
 verteilt, um insgesamt eine größere Anzeigefläche zu erhalten.
-Optionen, die nach dem n\-ten \-zrcrop erscheinen, gelten für die
-n\-te MJPEG-Karte. Für jede Karte sollte zusätzlich zu \-zrcrop ein \-zrdev
-angegeben werden.
+Optionen, die nach dem n-ten \-zrcrop erscheinen, gelten für die
+n-te MJPEG-Karte.
+Für jede Karte sollte zusätzlich zu \-zrcrop ein \-zrdev angegeben werden.
 Beispiele befinden sich in der Zr-Sektion der Dokumentation oder in der
 Ausgabe von \-zrhelp.
 .TP
 .B \-zrdev <Gerät> (nur bei \-vo zr)
-Gibt die zu deiner MJPEG-Karte gehörende Gerätedatei an. Standardmäßig
-verwendet der Treiber das erste v4l-Gerät, das er findet.
+Gibt die zu deiner MJPEG-Karte gehörende Gerätedatei an.
+Standardmäßig verwendet der zr-Videoausgabetreiber das erste v4l-Gerät, das
+er findet.
 .TP
 .B \-zrfd (nur bei \-vo zr)
-Erzwungene Dezimierung: Dezimierung, wie mit \-zrhdec und \-zrvdec angegeben,
-wird nur angewandt, wenn der Hardwareskalierer das Bild wieder auf seine
-ursprüngliche Größe ausdehnen kann. Mit dieser Option wird die Dezimierung
-erzwungen.
+Erzwungene Dezimierung: Dezimierung, wie mit \-zrhdec und \-zrvdec angegeben.
+Wird nur angewandt, wenn der Hardwareskalierer das Bild wieder auf seine
+ursprüngliche Größe ausdehnen kann.
+Mit dieser Option wird die Dezimierung erzwungen.
+.TP
+.B \-zrhdec <1,2,4> (nur bei \-vo zr)
+Horizontale Dezimierung: Weist den Treiber an, nur jede zweite
+oder vierte Zeile/\:Pixel des Bildes an die MJPEG-Karte zu schicken und
+den Hardwareskalierer der MJPEG-Karte dazu zu benutzen, das Bild wieder
+auf seine Urpsrungsgröße auszudehnen.
 .TP
 .B \-zrhelp (nur bei \-vo zr)
 Zeigt eine Liste aller \-zr*-Optionen, ihre Standardwerte und ein Beispiel
 für den Cinerama-Modus an.
 .TP
 .B \-zrnorm <norm> (nur bei \-vo zr)
-Gibt den Fernsehstandard PAL oder NTSC an. Standardwert ist 'keine Änderung'.
+Gibt die Fernsehnorm PAL oder NTSC an (Standardwert: keine Änderung).
 .TP
 .B \-zrquality <1\-20> (nur bei \-vo zr)
-Die Nummer gibt die JPEG-Codierungsqualität an. 1 entspricht bester Qualität
-und 20 der schlechtesten Qualität.
+Eine Nummer von 1 (beste) bis 20 (schlechteste), die die
+JPEG-Codierungsqualität angibt.
 .TP
-.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (nur bei \-vo zr)
-Vertikale/\:horizontale Dezimierung: Weist den Treiber an, nur jede zweite
-oder vierte Zeile bzw. Spalte des Bildes an die MJPEG-Karte zu schicken und
+.B \-zrvdec <1,2,4> (nur bei \-vo zr)
+Horizontale Dezimierung: Weist den Treiber an, nur jede zweite
+oder vierte Spalte/\:Pixel des Bildes an die MJPEG-Karte zu schicken und
 den Hardwareskalierer der MJPEG-Karte dazu zu benutzen, das Bild wieder
 auf seine Urpsrungsgröße auszudehnen.
 .TP
-.B \-zrxdoff <x display offset>, \-zrydoff <y display offset> (nur bei \-vo zr)
-Wenn das Bild kleiner als der Fernsehbildschirm ist, so wird mit diesen
-Optionen die Bildposition relativ zur oberen linken Ecke des Fernsehers
-kontrolliert. Standardmäßig erscheint das Bild zentriert.
-
-
+.B \-zrxdoff <x Anzeige-Offset> (nur bei \-vo zr)
+Wenn das Bild kleiner als der Fernsehbildschirm ist, so wird mit dieser
+Option die Bildposition relativ zur oberen linken Ecke des Fernsehers
+kontrolliert (Standard: zentriert).
+.TP
+.B \-zrydoff <y Anzeige-Offset> (nur bei \-vo zr)
+Wenn das Bild kleiner als der Fernsehbildschirm ist, so wird mit dieser
+Option die Bildposition relativ zur oberen linken Ecke des Fernsehers
+kontrolliert (Standard: zentriert).
+.
+.
+.SH "VIDEOAUSGABETREIBER (NUR BEI MPLAYER)"
+Videoausgabetreiber sind Schnittstellen zu verschiedenen Ausgabeeinrichtungen.
+Die Syntax ist folgende:
+.TP
+.B \-vo <Treiber1[:Unteroption1[=Wert]:...],Treiber2,...[,]>
+Gibt eine Prioritätenliste der zu verwendenden Videoausgabetreiber an.
+.PP
+Wenn die Liste mit ',' endet, so werden notfalls auch nicht in der
+Kommandozeile aufgeführte Treiber benutzt.
+Unteroptionen sind optional und können meistens weggelassen werden.
+.br
+.I ANMERKUNG:
+Eine Liste der eincompilierten Videotreiber erhälst du mit \-vo help.
+.sp 1
+.I BEISPIEL:
+.PD 0
+.RSs
+.IPs "\-vo xmga,xv,"
+Probiert zuerst den Matrox-X11-Treiber, dann den Xv-Treiber, dann andere.
+.IPs "\-vo directx:noaccel"
+Benutzt den directx-Treiber mit abgeschalteten Beschleunigungs-Features.
+.RE
+.PD 1
+.
+.sp 1
+FIXME: Dokumentiere die Unteroptionen für x11, xover, dga, sdl, vidix, xvidix,
+fbdev, fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx,
+tdfx_vid, tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm,
+png, tga.
+.sp 1
+Folgende Videoausgabetreiber sind verfügbar:
+FIXME: Videoausgabetreiber eintragen!
+.
+.
 .SH "OPTIONEN FÜR DIE DECODIERUNG/DAS FILTERN"
 .TP
-.B \-ac <[-]codec1,[-]codec2,...[,]>
-Gibt eine Prioritätsliste der zu verwendenden Audiocdoecs an. Die Codecnamen
-entsprechen den in codecs.conf definierten Einträgen.
+.B \-ac <[-]Codec1,[-]Codec2,...[,]>
+Gib eine Prioritätsliste der zu verwendenden Audiocdoecs an.
+Die Codecnamen entsprechen den in codecs.conf definierten Einträgen.
 Ein '-' vor einem Namen deaktiviert diesen Codec.
-
-.I ANMERKUNG:
 .br
+.I ANMERKUNG:
 Mit \-ac help erhälst du eine vollständige Liste aller verfügbaren Codecs.
 .br
 Wenn die Liste mit ',' endet, so werden notfalls auch nicht aufgeführte
 Codecs ausprobiert.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "\-ac mp3acm"
-Erzwingt dem l3codeca.acm-MP3-Codec.
+Erzwingt den l3codeca.acm-MP3-Codec.
 .IPs "\-ac mad,"
 Probiert zuerst die libmad und dann andere Codecs.
 .IPs "\-ac hwac3,a52,"
 Zuerst wird versucht, AC3 unverändert durchzureichen, dann die
 Software-AC3-Decodierung, danach andere Codecs.
 .IPs "\-ac -ffmp3,"
-Probier andere Codecs bis auf dem MP3-Decoder von FFmpeg.
+Probiere andere Codecs, ausgenommen den MP3-Decoder von FFmpeg.
 .RE
 .PD 1
+.TP
+.B \-af <Filter1[=Option1:Option2:...],Filter2,...>
+Aktiviert eine kommaseparierte Liste von Audiofiltern zusammen mit ihren
+Optionen.
+.br
+Die verfügbaren Filter lauten:
+.
+.RSs
+.IPs resample[=srate[:sloppy][:type]]
+Ändert die Samplerate des Audiostreams zu der ganzzahligen srate (in Hz).
+Unterstützt nur das 16-bit Little-Endian-Format.
+.IPs channels[=nch]
+Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
+Falls die Anzahl Ausgabekanäle größer ist als die Anzahl der Eingangskanäle, 
+so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo, dann der
+Monokanal auf beiden Ausgabekanälen wiederholt).
+Ist die Anzahl Ausgabekanäle kleiner als die Anzahl Eingangskanäle,
+so werden die überschüssigen Kanäle verworfen.
+.IPs format[=bps,f]
+Wählt das Format f und die Anzahl der Bytes pro Sample, bps, für die Ausgabe
+der Filterschicht.
+Die Option bps ist eine ganze Zahl.
+Das Format f ist eine Zeichenkette, die das Format beschreibt und folgende
+Optionen enthalten kann:
+.br
+alaw, mulaw oder imaadpcm
+.br
+float oder int
+.br
+unsigned oder signed
+.br
+le oder be (Little- oder Big-Endian)
+.br
+.IPs "volume[=v:sc]"
+Wählt das Lautstärkelevel der Ausgabe.
+Dieser Filter ist nicht reentrant (ablaufinvariant) und kann dementsprechend
+nur einmal pro
+Audiostream aufgerufen werden.
+.RSss
+v: gewünschte Verstärkung in dB für alle Kanäle in diesem Stream.
+Die Verstärkung kann zwischen -200dB und +60dB liegen, wobei -200dB den
+Sound komplett verstummen lässt und +60dB einer 1000-fachen Verstärkung
+entspricht.
+.br
+sc: Aktiviert "soft clipping".
+.REss
+.IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
+Mischt Kanäle beliebig.
+Details findest du in DOCS/HTML/en/devices.html#audio-dev.
+.RSss
+n: Anzahl der Ausgabekanäle (1\-6).
+.br
+lij: gibt an, wieviel vom Quellkanal j in den Ausgabekanal i gemischt wird.
+.REss
+.IPs sub[=fc:ch]
+Fügt einen Subwoofer-Kanal hinzu.
+.RSss
+fc: ab dieser Frequenz schneidet der Tiefpassfilter ab (20Hz bis 300Hz)
+Standard: 60Hz).
+.br
+ch: Kanalnummer für die Sub-Kanäle.
+.REss
+.IPs surround[=d]
+Decoder für Matrix-encodierten Surroundsound, funktioniert bei vielen
+Zweikanaldateien.
+.RSss
+d: Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms)
+(Standard: 15ms).
+.REss
++.IPs delay[=ch1:ch2:...]
+Verzögert die Soundausgabe.
+Gib für jeden Kanal einzeln die Verzögerung der Soundausgabe in ms an
+(Fließkommazahl zwischen 0 und 1000).
+.IPs export[=mmapped_Datei[:nsamples]]
+Exportiert das Eingangssignal an andere Prozesse mittels Memory Mapping
+(mmap()).
+.RSss
+mmapped_Datei: Datei, zur der die Daten exportiert werden sollen
+(Standard: ~/.mplayer/mplayer-af_export).
+.br
+nsamples: Anzahl der Samples pro Kanal (Standard: 512)
+.REss
+.RE
+.
+.TP
+.B \-af-adv <force=(0\-3):list=(Filter)> (siehe auch \-af)
+Gibt erweiterte Audiofilteroptionen an:
+.
+.RSs
+.IPs force=<0-3>
+Erzwingt das Einfügen von Audiofiltern nach folgenden Regeln:
+.RSss
+0: Komplett automatisches Einfügen (Standard)
+.br
+1: Optimiere auf Geschwindigkeit.
+.br
+2: Optimiere auf Genauigkeit.
+.br
+3: Schalte automatisches Einfügen ab.
+.REss
+.IPs list=<Filter>
+Das gleiche wie \-af (siehe \-af-Option).
+.RE
 .
 .TP
 .B \-afm <Treiber1,Treiber2,...>
