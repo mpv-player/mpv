@@ -1553,6 +1553,7 @@ else
 fi
 
 
+_use_aton=no
 echocheck "inet_pton()"
 cat > $TMPC << EOF
 #include <sys/types.h>
@@ -1569,10 +1570,35 @@ elif cc_check $_ld_sock -lresolv ; then
   _ld_sock="$_ld_sock -lresolv"
   echores "yes (using $_ld_sock)"
 else
-  echores "no (=> streaming support disabled)"
-  _streaming=no
+  echores "no (=> i'll try inet_aton next)"
+  
+  echocheck "inet_aton()"
+  cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+int main(void) { (void) inet_aton(0, 0); return 0; }
+EOF
+  _use_aton=yes
+  if cc_check $_ld_sock ; then
+      # NOTE: Linux has libresolv but does not need it
+    :
+    echores "yes (using $_ld_sock)"
+  elif cc_check $_ld_sock -lresolv ; then
+    # NOTE: needed for SunOS at least
+    _ld_sock="$_ld_sock -lresolv"
+    echores "yes (using $_ld_sock)"
+  else
+    _use_aton=no
+    _streaming=no
+    echores "no (=> streaming support disabled)"
+  fi
 fi
 
+_def_use_aton='#undef USE_ATON'
+if test "$_use_aton" != no; then
+  _def_use_aton='#define USE_ATON 1'
+fi
 
 echocheck "inttypes.h (required)"
 cat > $TMPC << EOF
@@ -4652,6 +4678,9 @@ $_def_faad
 
 /* enable streaming */
 $_def_streaming
+
+/* define this to use inet_aton() instead of inet_pton() */
+$_def_use_aton
 
 /* enables / disables cdparanoia support */
 $_def_cdparanoia
