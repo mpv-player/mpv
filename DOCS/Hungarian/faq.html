@@ -18,14 +18,38 @@
      használhatatlan az MPlayer-rel, mert egyszerûen ÁTUGORJA a 3DNow
      utasításokat, nem fordítja le õket. Fontos: ez NEM MPlayer-specifikus   
      probléma, számos más project (DRI, avifile, stb..) szenved ebbõl fakadó
-     problémáktól.
-     ** NE HASZNÁLD a gcc 2.96-ot !!! **
+     problémáktól.<BR>
+<B><I>NE HASZNÁLD a gcc 2.96-ot !!!</I></B><BR>
+De ha valamilyen okból kifolyólag emésztõ vágy gyötör ezirányban, mindig
+csakis a legújabbat használd.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Az jó, nekem 3.0.1-es gcc-m van a RedHat/Mandrake-tõl--
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Azzal is vannak problémák, úgyhogy inkább használd a mûködõképesebb, gyorsabb 2.95.x sorozatot.
+Ha 3.x.x nélkül nem tudsz élni, úgy bizonyosodj meg róla hogy az elérhetõ
+legfrissebb verzió van fent. Lásd a következõ kérdést.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Az MPlayer nem fordul, inkább ezt írja ki:<BR>
+<PRE>
+In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
+                 from /usr/include/g++-v3/bits/fpos.h:40,
+                 from /usr/include/g++-v3/bits/char_traits.h:40,
+                 from /usr/include/g++-v3/bits/std_string.h:41,
+                 from /usr/include/g++-v3/string:31,
+                 from libwin32.h:36,
+                 from DS_AudioDecoder.h:4,
+                 from DS_AudioDec.cpp:5:
+/usr/include/wchar.h: In function Long long int wcstoq(const wchar_t*,
+   wchar_t**, int)':
+/usr/include/wchar.h:514: cannot convert `const wchar_t* __restrict' to
+`const
+</PRE>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Frissítsd a gcc 3.x.x-edet, és/vagy a glibc-det is.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">

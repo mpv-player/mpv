@@ -15,17 +15,40 @@ What's the problem with gcc 2.96 ?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat sites, or
 RedHat distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
-unsupported by <B>MPlayer</B>, because it simply SKIPS 3DNow codes, it just does
+unsupported by <B>MPlayer</B>, because it simply SKIPS MMX/3DNow codes, it just does
 not compile it. Important: this is NOT an <B>MPlayer</B>-specific problem,
 numerous other projects (DRI, avifile, etc..) have problems with this shit
-too.<BR>** DO NOT USE gcc 2.96 !!! **
+too.<BR>
+<B><I>DO NOT USE gcc 2.96 !!!</I></B><BR>
+If you really really want to do so, be sure to use the newest.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Great, I have gcc 3.0.1 from RedHat/Mandrake, then I'm fine--!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 No. There are issues with those, either. :( Use 2.95.x series, those are reliable,
-and faster than 2.96 and 3.x.x .
+and faster than 2.96 and 3.x.x . If you really really wish to use 3.0.x , be
+sure to always use the newest. See the next question.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+I tried to compile MPlayer, but I got this output:<BR>
+<PRE>
+In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
+                 from /usr/include/g++-v3/bits/fpos.h:40,
+                 from /usr/include/g++-v3/bits/char_traits.h:40,
+                 from /usr/include/g++-v3/bits/std_string.h:41,
+                 from /usr/include/g++-v3/string:31,
+                 from libwin32.h:36,
+                 from DS_AudioDecoder.h:4,
+                 from DS_AudioDec.cpp:5:
+/usr/include/wchar.h: In function Long long int wcstoq(const wchar_t*,
+   wchar_t**, int)':
+/usr/include/wchar.h:514: cannot convert `const wchar_t* __restrict' to
+`const
+</PRE>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Upgrade your gcc 3.0.1 (and/or glibc too) to the newest.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
