@@ -120,7 +120,7 @@ main(int argc, char **argv)
 			{ 14, "mca",   "Machine Check Architecture" },
 			{ 15, "cmov",  "Conditional Move/Compare Instruction" },
 			{ 16, "pat",   "Page Attribute Table" },
-			{ 17, "pse",   "Page Size Extension" },
+			{ 17, "pse36", "Page Size Extension 36-bit" },
 			{ 18, "psn",   "Processor Serial Number" },
 			{ 19, "cflsh", "CFLUSH instruction" },
 			{ 21, "ds",    "Debug Store" },
