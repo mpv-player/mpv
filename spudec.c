@@ -3,7 +3,7 @@
    1: aproximate
    2: full (slowest, best looking)
  */
-#define ANTIALIASING_ALGORITHM 2
+#define ANTIALIASING_ALGORITHM 1
 
 /* SPUdec.c
    Skeleton of function spudec_process_controll() is from xine sources.
