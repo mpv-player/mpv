@@ -11,6 +11,7 @@ MPlayer (1.0)
 
     Decoders:
     * TWinVQ decoder via binary DLL
+    * integrated Tremor decoder for Ogg/Vorbis
 
     Demuxers:
     * vqf demuxer
