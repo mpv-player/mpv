@@ -6,6 +6,8 @@ int             SubVisible = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
+ if ( appMPlayer.subWindow.State == wsWindowClosed ) exit_player( MSGTR_Exit_quit );
+ 
  if ( appMPlayer.subWindow.State == wsWindowFocusIn ) SubVisible++;
 
  if ( !appMPlayer.subWindow.Mapped ||
@@ -37,7 +39,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
           msButton=wsPRMouseButton;
           break;
    case wsRRMouseButton:
-          mplHideMenu( RX,RY );
+          mplHideMenu( RX,RY,1 );
           msButton=0;
           break;
 // ---
@@ -67,9 +69,9 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
            }
           break;
    case wsRLMouseButton:
-//          if ( ( !mplSubMoved )&&( ( SubVisible++%2 ) ) ) wsMoveTopWindow( &appMPlayer.mainWindow );
           if ( !mplSubMoved )
            {
+#if 0
             if( SubVisible++%2 )
              {
               wsMoveTopWindow( &appMPlayer.mainWindow );
@@ -80,6 +82,18 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
                wsMoveTopWindow( &appMPlayer.subWindow );
                fprintf( stderr,"[sw] SUB TOP\n" );
               }
+#else
+	    if ( appMPlayer.subWindow.Focused == 2 )
+             {
+              wsMoveTopWindow( &appMPlayer.mainWindow );
+              fprintf( stderr,"[sw] MAIN TOP\n" );
+             }
+             else
+              {
+               wsMoveTopWindow( &appMPlayer.subWindow );
+               fprintf( stderr,"[sw] SUB TOP\n" );
+              }
+#endif
            }
           msButton=0;
           mplSubMoved=0;

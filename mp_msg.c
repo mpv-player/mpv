@@ -47,7 +47,7 @@ void mp_msg_c( int x, const char *format, ... ){
     vsnprintf(tmp, 2048, mp_gettext(format), va);
     tmp[2047] = 0;
 
-#if defined(HAVE_NEW_GUI) && !defined(HAVE_MENCODER) && 0
+#if defined(HAVE_NEW_GUI) && !defined(HAVE_MENCODER)
     if(use_gui)
     {
 	switch(x & 255)
@@ -58,9 +58,9 @@ void mp_msg_c( int x, const char *format, ... ){
 	    case MSGL_ERR:
 		gtkMessageBox(GTK_MB_ERROR|GTK_MB_SIMPLE, tmp);
 		break;
-	    case MSGL_WARN:
-		gtkMessageBox(GTK_MB_WARNING|GTK_MB_SIMPLE, tmp);
-		break;
+//	    case MSGL_WARN:
+//		gtkMessageBox(GTK_MB_WARNING|GTK_MB_SIMPLE, tmp);
+//		break;
 	}
     }
 #endif

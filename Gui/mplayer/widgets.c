@@ -40,6 +40,7 @@ GtkWidget     * ErrorPixmap;
 
 int gtkPopupMenu = 0;
 int gtkPopupMenuParam = 0;
+int gtkInited = 0;
 
 #include "gtk/sb.h"
 #include "gtk/pl.h"
@@ -49,25 +50,23 @@ int gtkPopupMenuParam = 0;
 #include "gtk/opts.h"
 #include "gtk/menu.h"
 
-void widgetsCreate( void )
-{
- AboutBox=create_About();
- SkinBrowser=create_SkinBrowser();
- PlayList=create_PlayList();
- FileSelect=create_FileSelect();
- MessageBox=create_MessageBox(0);
- Options=create_Options();
-// PopUpMenu=create_PopUpMenu();
-}
-
 // --- init & close gtk
 
 void gtkInit( int argc,char* argv[], char *envp[] )
 {
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] init gtk ...\n" );
  gtk_set_locale();
  gtk_init( &argc,&argv );
  gdk_set_use_xshm( FALSE );
- widgetsCreate();
+ 
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create about box.\n" );              AboutBox=create_About();
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create skin browser.\n" );           SkinBrowser=create_SkinBrowser();
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create playlist.\n" );               PlayList=create_PlayList();
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create file selector.\n" );          FileSelect=create_FileSelect();
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create message box.\n" );            MessageBox=create_MessageBox(0);
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] Create preferences dialog box.\n" ); Options=create_Options();
+ 
+ gtkInited=1;
 }
 
 void gtkDone( void )
@@ -105,6 +104,7 @@ void gtkEventHandling( void )
 
 void gtkMessageBox( int type,gchar * str )
 {
+ if ( !gtkInited ) return;
  gtk_label_set_text( GTK_LABEL( gtkMessageBoxText ),str );
  gtk_widget_hide( MessageBox );
  switch( type)

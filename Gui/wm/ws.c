@@ -22,6 +22,7 @@
 #include "ws.h"
 #include "wsconv.h"
 #include "../../postproc/rgb2rgb.h"
+#include "../../mp_msg.h"
 
 #include <X11/extensions/XShm.h>
 #ifdef HAVE_XSHAPE
@@ -51,6 +52,7 @@ Window               wsRootWin;
 XEvent               wsEvent;
 int                  wsWindowDepth;
 int		     wsWMType = 1;
+int		     wsIsKDE = 0;
 GC                   wsHGC;
 MotifWmHints         wsMotifWmHints;
 Atom                 wsTextProperlyAtom = None;
@@ -152,7 +154,7 @@ if(mDisplay){
  wsDisplay=XOpenDisplay( DisplayName );
  if ( !wsDisplay )
   {
-   fprintf( stderr,"[ws] couldn't open the display !\n" );
+   mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] couldn't open the display !\n" );
    exit( 0 );
   }
 }
@@ -164,19 +166,19 @@ if(mDisplay){
     localdisp=0;
     wsUseXShm=0;
  }
- fprintf(stderr,"[ws] Display name: %s => %s display.\n",dispname,localdisp?"local":"REMOTE");
- if (!localdisp) fprintf(stderr,"[ws] Remote display, disabling XMITSHM\n");
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Display name: %s => %s display.\n",dispname,localdisp?"local":"REMOTE");
+ if (!localdisp) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Remote display, disabling XMITSHM\n");
 }
 
  if ( !XShmQueryExtension( wsDisplay ) )
   {
-   fprintf( stderr,"[ws] sorry, your system is not supported X shared memory extension.\n" );
+   mp_msg( MSGT_GPLAYER,MSGL_ERR,"[ws] sorry, your system is not supported X shared memory extension.\n" );
    wsUseXShm=0;
   }
 #ifdef HAVE_XSHAPE
   if ( !XShapeQueryExtension( wsDisplay,&eventbase,&errorbase ) )
    {
-    fprintf( stderr,"[ws] sorry, your system is not supported XShape extension.\n" );
+    mp_msg( MSGT_GPLAYER,MSGL_ERR,"[ws] sorry, your system is not supported XShape extension.\n" );
     wsUseXShape=0;
    }
 #else
@@ -194,84 +196,63 @@ if(mDisplay){
 #ifdef DEBUG
   {
    int minor,major,shp;
-   fprintf( stderr,"[ws] Screen depth: %d\n",wsDepthOnScreen );
-   fprintf( stderr,"[ws]  size: %dx%d\n",wsMaxX,wsMaxY );
-   fprintf( stderr,"[ws]  red mask: 0x%x\n",wsRedMask );
-   fprintf( stderr,"[ws]  green mask: 0x%x\n",wsGreenMask );
-   fprintf( stderr,"[ws]  blue mask: 0x%x\n",wsBlueMask );
+   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Screen depth: %d\n",wsDepthOnScreen );
+   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  size: %dx%d\n",wsMaxX,wsMaxY );
+   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  red mask: 0x%x\n",wsRedMask );
+   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  green mask: 0x%x\n",wsGreenMask );
+   mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws]  blue mask: 0x%x\n",wsBlueMask );
    if ( wsUseXShm )
     {
      XShmQueryVersion( wsDisplay,&major,&minor,&shp );
-     fprintf( stderr,"[ws] XShm version is %d.%d\n",major,minor );
+     mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws] XShm version is %d.%d\n",major,minor );
     }
    #ifdef HAVE_XSHAPE
     if ( wsUseXShape )
      {
       XShapeQueryVersion( wsDisplay,&major,&minor );
-      fprintf( stderr,"[ws] XShape version is %d.%d\n",major,minor );
+      mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[ws] XShape version is %d.%d\n",major,minor );
      }
    #endif
   }
 #endif
  initConverter();
  wsOutMask=wsGetOutMask();
- #ifdef DEBUG
-  fprintf( stderr,"[ws] Initialized converter: " );
- #endif
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] Initialized converter: " );
  switch ( wsOutMask )
   {
    case wsRGB32:
-     #ifdef DEBUG
-      fprintf( stderr,"rgb32 to rgb32\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb32\n" );
      wsConvFunc=BGR8880_to_RGB8880_c;
      break;
    case wsBGR32:
-     #ifdef DEBUG
-      fprintf( stderr,"rgb32 to bgr32\n" );
-     #endif
-//     wsConvFunc=BGR8880_to_BGR8880_c;
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr32\n" );
      wsConvFunc=rgb32tobgr32;
      break;
    case wsRGB24:
-     #ifdef DEBUG
-      fprintf( stderr,"rgb32 to rgb24\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb24\n" );
      wsConvFunc=rgb32to24;
      break;
    case wsBGR24:
-     #ifdef DEBUG
-      fprintf( stderr,"rgb32 to bgr24\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr24\n" );
      wsConvFunc=BGR8880_to_BGR888_c;
      break;
    case wsRGB16:
-     #ifdef DEBUG
-      fprintf( stderr,"rgb32 to rgb16\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb16\n" );
      wsConvFunc=rgb32to16;
      break;
    case wsBGR16:
-     #ifdef DEBUG
-      fprintf( stderr,"rgb32 to bgr16\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr16\n" );
      wsConvFunc=BGR8880_to_BGR565_c;
      break;
    case wsRGB15:
-     #ifdef DEBUG
-      fprintf( stderr,"rgb32 to rgb15\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to rgb15\n" );
      wsConvFunc=rgb32to15;
      break;
    case wsBGR15:
-     #ifdef DEBUG
-      fprintf( stderr,"rgb32 to bgr15\n" );
-     #endif
+     mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"rgb32 to bgr15\n" );
      wsConvFunc=BGR8880_to_BGR555_c;
      break;
   }
-// XSetIOErrorHandler( wsIOErrorHandler );
-// XSetErrorHandler( wsErrorHandler );
 }
 
 // ----------------------------------------------------------------------------------------------
@@ -325,7 +306,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  XGetWindowAttributes( wsDisplay,wsRootWin,&win->Attribs );
  if ( win->Attribs.depth < 15 )
   {
-   fprintf( stderr,"[ws] sorry, this color depth is not enough.\n" );
+   mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] sorry, this color depth is not enough.\n" );
    exit( 0 );
   }
  XMatchVisualInfo( wsDisplay,wsScreen,win->Attribs.depth,TrueColor,&win->VisualInfo );
@@ -338,33 +319,15 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->AtomWMSizeHint=XInternAtom( wsDisplay,"WM_SIZE_HINT",False );
  win->AtomWMNormalHint=XInternAtom( wsDisplay,"WM_NORMAL_HINT",False );
  win->AtomProtocols=XInternAtom( wsDisplay,"WM_PROTOCOLS",False );
-#if 0
- {
-  char buf[32]; int i;
-  sprintf( buf,"_%s_REMOTE",label );
-  for( i=0;i < (int)strlen( buf );i++ )
-    if ( ( buf[i] >= 'a' )&&( buf[i] <= 'z' ) ) buf[i]=buf[i] - 32;
-  for( i=0;i < (int)strlen( buf );i++ )
-    if ( buf[i] == ' ' ) buf[i]='_';
-  fprintf( stderr,"[ws] atomname: %s\n",buf );
-  win->AtomRemote=XInternAtom( wsDisplay,buf,False );
- }
-#endif
  win->AtomsProtocols[0]=win->AtomDeleteWindow;
  win->AtomsProtocols[1]=win->AtomTakeFocus;
  win->AtomsProtocols[2]=win->AtomRolle;
 // ---
 
-// win->WindowAttrib.background_pixel=BlackPixel( wsDisplay,wsScreen );
-// win->WindowAttrib.border_pixel=BlackPixel( wsDisplay,wsScreen );
  win->WindowAttrib.background_pixel=BlackPixel( wsDisplay,wsScreen );
  win->WindowAttrib.border_pixel=WhitePixel( wsDisplay,wsScreen );
  win->WindowAttrib.colormap=XCreateColormap( wsDisplay,wsRootWin,win->VisualInfo.visual,AllocNone );
  win->WindowAttrib.event_mask=StructureNotifyMask | FocusChangeMask |
-                              //SubstructureRedirectMask |
-                              //SubstructureNotifyMask |
-                              //ResizeRedirectMask |
-                              //GCGraphicsExposures |
                               ExposureMask | PropertyChangeMask |
                               EnterWindowMask | LeaveWindowMask |
                               VisibilityChangeMask |
@@ -374,9 +337,6 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->WindowAttrib.cursor=win->wsCursor;
  win->WindowAttrib.override_redirect=False;
  if ( D & wsOverredirect ) win->WindowAttrib.override_redirect=True;
-
-//  win->WindowAttrib.save_under=True;
-//  win->WindowAttrib.do_not_propagate_mask = True;
 
  win->WindowMask=CWBackPixel | CWBorderPixel |
                  CWColormap | CWEventMask | CWCursor |
@@ -391,16 +351,12 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
   win->VisualInfo.visual,
   win->WindowMask,&win->WindowAttrib );
 
-#if 0
- wsClassHint.res_name=label;
-#else
  wsClassHint.res_name="MPlayer";
-#endif
 
  wsClassHint.res_class="MPlayer";
  XSetClassHint( wsDisplay,win->WindowID,&wsClassHint );
 
- win->SizeHint.flags=PPosition | PSize | PResizeInc | PWinGravity; // | PBaseSize
+ win->SizeHint.flags=PPosition | PSize | PResizeInc | PWinGravity | PBaseSize;
  win->SizeHint.x=win->X;
  win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;
@@ -419,8 +375,8 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
   }
  win->SizeHint.height_inc=1;
  win->SizeHint.width_inc=1;
-// win->SizeHint.base_width=win->Width;
-// win->SizeHint.base_height=win->Height;
+ win->SizeHint.base_width=win->Width;
+ win->SizeHint.base_height=win->Height;
  win->SizeHint.win_gravity=StaticGravity;
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
 
@@ -445,37 +401,6 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  wsTextProperty.nitems=strlen( label );
  XSetWMIconName( wsDisplay,win->WindowID,&wsTextProperty );
 
-#if 0
- XChangeProperty( wsDisplay,win->WindowID,
-                  win->AtomRemote,XA_STRING,
-                  8,PropModeReplace,
-                  "REALIZED",8 );
-#endif
-
-//  win->Font=XLoadQueryFont( wsDisplay,"-adobe-helvetica-bold-r-normal--14-140-75-75-p-77-iso8859-1" );
-//  -adobe-times-medium-r-normal--14-140-75-75-p-77-iso8859-1" );
-//  -misc-fixed-bold-r-normal--13-120-75-75-C-80-iso8859-1" );
-//  -misc-fixed-bold-r-normal--15-140-75-75-C-90-iso8859-1" );
-//  -misc-fixed-medium-r-normal--15-140-75-75-C-90-iso8859-1" );
-//  -adobe-times-medium-r-normal--24-240-75-75-p-124-iso8859-1" );
-//  -adobe-helvetica-medium-r-normal--10-100-75-75-p-56-iso8859-1" );
-//  -*-helvetica-bold-o-normal--14-*-*-*-p-*-iso8859-1" );
-//  if ( !win->Font ) win->Font=XLoadQueryFont( wsDisplay,"fixed" );
-//  if ( !win->Font )
-//   {
-//    fprintf( stderr,"[main] could not load font.\n" );
-//    exit( 0 );
-//   }
-//  win->FontHeight=win->Font->ascent + win->Font->descent;
-//
-//  #ifdef DEBUG
-//   fprintf( stderr,"[ws] font height: %d\n",win->FontHeight );
-//  #endif
-
-//  win->wGCV.font=win->Font->fid;
-//  win->wGCV.foreground=wsBlack;
-//  win->wGCV.background=wsBlack;
-
  win->wGC=XCreateGC( wsDisplay,win->WindowID,
   GCForeground | GCBackground,
   &win->wGCV );
@@ -499,9 +424,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->Idle=NULL;
  win->MouseHandler=NULL;
  win->KeyHandler=NULL;
- #ifdef DEBUG
-  fprintf( stderr,"[ws] window is created. ( %s ).\n",label );
- #endif
+ mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[ws] window is created. ( %s ).\n",label );
 }
 
 void wsDestroyWindow( wsTWindow * win )
@@ -556,16 +479,13 @@ Bool wsEvents( Display * display,XEvent * Event,XPointer arg )
         if ( Event->xclient.message_type == wsWindowList[l]->AtomProtocols )
          {
           if ( Event->xclient.data.l[0] == wsWindowList[l]->AtomDeleteWindow )
-           { wsTrue=False; break; }
+           { i=wsWindowClosed; goto expose; }
           if ( Event->xclient.data.l[0] == wsWindowList[l]->AtomTakeFocus )
            { i=wsWindowFocusIn;  wsWindowList[l]->Focused=wsFocused; goto expose; }
           if ( Event->xclient.data.l[0] == wsWindowList[l]->AtomRolle )
-           { fprintf( stderr,"[ws] rolled.\n" ); }
+           { mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] rolled.\n" ); }
          }
         break;
-
-//   case CirculateRequest:fprintf( stderr,"[ws,r] win: 0x%x\n",(int)Event->xcirculaterequest.window ); break;
-//   case CirculateNotify: fprintf( stderr,"[ws,c] win: 0x%x\n",(int)Event->xcirculate.window );        break;
 
    case MapNotify:   i=wsWindowMapped;   wsWindowList[l]->Mapped=wsMapped;   goto expose;
    case UnmapNotify: i=wsWindowUnmapped; wsWindowList[l]->Mapped=wsNone;     goto expose;
@@ -602,7 +522,6 @@ expose:
           {
            wsWindowList[l]->X=x; wsWindowList[l]->Y=y;
            wsWindowList[l]->Width=Event->xconfigure.width; wsWindowList[l]->Height=Event->xconfigure.height;
-//           fprintf( stderr,"[ws] resize: %d,%d %dx%d\n",wsWindowList[l]->X,wsWindowList[l]->Y,Event->xconfigure.width,Event->xconfigure.height );
            if ( wsWindowList[l]->ReSize ) wsWindowList[l]->ReSize( wsWindowList[l]->X,wsWindowList[l]->Y,wsWindowList[l]->Width,wsWindowList[l]->Height );
           }
 
@@ -645,12 +564,6 @@ buttonreleased:
           wsWindowList[l]->MouseHandler( i,Event->xbutton.x,Event->xbutton.y,Event->xmotion.x_root,Event->xmotion.y_root );
         break;
 
-//   case GravityNotify:
-//        #ifdef DEBUG
-//         fprintf( stderr,"[ws] window ( 0x%x ) gravity: %d,%d\n",wsWindowList[l]->WindowID,Event->xgravity.x,Event->xgravity.y );
-//      #endif
-//        break;
-
    case PropertyNotify:
 	{
 	 char * name = XGetAtomName( wsDisplay,Event->xproperty.atom );
@@ -659,47 +572,20 @@ buttonreleased:
 	 if ( !strncmp( name,"_ICEWM_TRAY",11 ) ||
 	      !strncmp( name,"_KDE_",5 ) ||
 	      !strncmp( name,"KWM_WIN_DESKTOP",15 ) ) wsWMType=0;
+	      
+	 if ( !strncmp( name,"_KDE_",5 ) ) wsIsKDE=1;
 							  
 //         fprintf(stderr,"[ws] PropertyNotify %s ( 0x%x )\n",name,Event->xproperty.atom );
 							  
 	 XFree( name );
 	 break;
 	}
-#if 0
-        if ( Event->xproperty.atom == wsWindowList[l]->AtomRemote )
-         {
-          Atom            type;
-          int             format;
-          unsigned long   nitems, bytesafter;
-          unsigned char * args = NULL;
-
-//          fprintf( stderr,"[ws] remote property notify.\n" );
-          XGetWindowProperty( wsDisplay,
-                              Event->xproperty.window,
-                              Event->xproperty.atom,
-                              0,( 65536 / sizeof( long ) ),
-                              False,XA_STRING,
-                              &type,&format,&nitems,&bytesafter,
-                              &args );
-          if ( ( nitems )&&( wsWindowList[l]->RemoteHandler ) )
-           {
-            args[strlen( args ) - 1]=0;
-            wsWindowList[l]->RemoteHandler( args );
-            #ifdef DEBUG
-             fprintf( stderr,"[ws]   args: '%s'\n",args );
-            #endif
-            args[strlen( args ) - 1]=1;
-            XFree( args );
-           }
-         }
-#endif
         break;
 
   }
  XFlush( wsDisplay );
  XSync( wsDisplay,False );
  return !wsTrue;
-// return True;
 }
 
 Bool wsDummyEvents( Display * display,XEvent * Event,XPointer arg )
@@ -719,7 +605,7 @@ extern void mplTimerHandler( void );
 void wsMainLoop( void )
 {
  int delay=20;
- fprintf( stderr,"[ws] init threads: %d\n",XInitThreads() );
+ mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[ws] init threads: %d\n",XInitThreads() );
  XSynchronize( wsDisplay,False );
  XLockDisplay( wsDisplay );
 // XIfEvent( wsDisplay,&wsEvent,wsEvents,NULL );
@@ -730,7 +616,6 @@ while(wsTrue){
  // handle pending events
  while ( XPending(wsDisplay) ){
    XNextEvent( wsDisplay,&wsEvent );
-//   printf("### X event: %d  [%d]\n",wsEvent.type,delay);
    wsEvents( wsDisplay,&wsEvent,NULL );
    delay=0;
  }
@@ -835,7 +720,6 @@ void wsPutImage( wsTWindow * win )
     0,0,
     ( win->Width - win->xImage->width ) / 2,( win->Height - win->xImage->height ) / 2,
     win->xImage->width,win->xImage->height,0 );
-//    win->Width,win->Height,0 );
   }
   else
    {
@@ -918,7 +802,8 @@ void wsIconify( wsTWindow win )
 // ----------------------------------------------------------------------------------------------
 void wsMoveTopWindow( wsTWindow * win )
 {
-// XUnmapWindow( wsDisplay,win->WindowID ); XMapWindow( wsDisplay,win->WindowID );
+ if ( wsIsKDE ) return;
+ XMapRaised( wsDisplay,win->WindowID );
  XRaiseWindow( wsDisplay,win->WindowID );
 }
 
@@ -1065,17 +950,14 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
                    win->Attribs.depth,ZPixmap,NULL,&win->Shminfo,Width,Height );
    if ( win->xImage == NULL )
     {
-     fprintf( stderr,"[ws] shared memory extension error.\n" );
+     mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] shared memory extension error.\n" );
      exit( 0 );
     }
-//   #ifdef DEBUG
-//    fprintf( stderr,"[ws] Screen depth: %d\n",win->xImage->bits_per_pixel );
-//   #endif
    win->Shminfo.shmid=shmget( IPC_PRIVATE,win->xImage->bytes_per_line * win->xImage->height,IPC_CREAT|0777 );
    if ( win->Shminfo.shmid < 0 )
     {
      XDestroyImage( win->xImage );
-     fprintf( stderr,"[ws] shared memory extension error.\n" );
+     mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] shared memory extension error.\n" );
      exit( 0 );
     }
    win->Shminfo.shmaddr=(char *)shmat( win->Shminfo.shmid,0,0 );
@@ -1084,7 +966,7 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
     {
      XDestroyImage( win->xImage );
      if ( win->Shminfo.shmaddr != ((char *) -1) ) shmdt( win->Shminfo.shmaddr );
-     fprintf( stderr,"[ws] shared memory extension error.\n" );
+     mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] shared memory extension error.\n" );
      exit( 0 );
     }
    win->xImage->data=win->Shminfo.shmaddr;
@@ -1100,7 +982,7 @@ void wsCreateImage( wsTWindow * win,int Width,int Height )
                               0 );
     if ( ( win->xImage->data=malloc( win->xImage->bytes_per_line * win->xImage->height ) ) == NULL )
      {
-      fprintf( stderr,"[ws] sorry, not enough memory for draw buffer.\n" );
+      mp_msg( MSGT_GPLAYER,MSGL_FATAL,"[ws] sorry, not enough memory for draw buffer.\n" );
       exit( 0 );
      }
    }
@@ -1142,15 +1024,15 @@ void wsScreenSaverOn( Display *mDisplay )
   {
    if ( DPMSQueryExtension( mDisplay,&nothing,&nothing ) )
     {
-     if ( !DPMSEnable( mDisplay ) ) fprintf( stderr,"DPMS not available ?\n" ); // restoring power saving settings
+     if ( !DPMSEnable( mDisplay ) ) mp_msg( MSGT_GPLAYER,MSGL_ERR,"DPMS not available ?\n" ); // restoring power saving settings
       else
        {
         // DPMS does not seem to be enabled unless we call DPMSInfo
         BOOL onoff;
         CARD16 state;
         DPMSInfo( mDisplay,&state,&onoff );
-        if ( onoff ) fprintf( stderr,"Successfully enabled DPMS.\n" );
-         else fprintf( stderr,"Could not enable DPMS.\n" );
+        if ( onoff ) mp_msg( MSGT_GPLAYER,MSGL_STATUS,"Successfully enabled DPMS.\n" );
+         else mp_msg( MSGT_GPLAYER,MSGL_STATUS,"Could not enable DPMS.\n" );
        }
     }
   }
@@ -1176,10 +1058,10 @@ void wsScreenSaverOff( Display * mDisplay )
    if ( onoff )
     {
       Status stat;
-      fprintf( stderr,"Disabling DPMS.\n" );
+      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"Disabling DPMS.\n" );
       dpms_disabled=1;
       stat=DPMSDisable( mDisplay );  // monitor powersave off
-      fprintf( stderr,"stat: %d.\n",stat );
+      mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"stat: %d.\n",stat );
    }
   }
 #endif

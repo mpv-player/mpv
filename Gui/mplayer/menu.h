@@ -5,7 +5,7 @@ int             mplMenuItem = -1;
 int             mplOldMenuItem = -1;
 int             mplMenuX,mplMenuY;
 
-void mplHideMenu( int mx,int my );
+void mplHideMenu( int mx,int my,int w );
 
 void mplMenuDraw( wsParamDisplay )
 {
@@ -85,7 +85,7 @@ void mplShowMenu( int mx,int my )
  wsPostRedisplay( &appMPlayer.menuWindow );
 }
 
-void mplHideMenu( int mx,int my )
+void mplHideMenu( int mx,int my,int w )
 {
  int x,y,i=mplMenuItem;
 
@@ -107,7 +107,7 @@ void mplHideMenu( int mx,int my )
         appMPlayer.MenuItems[i].x+appMPlayer.MenuItems[i].width,
         appMPlayer.MenuItems[i].y+appMPlayer.MenuItems[i].height ) )
    {
-    mplEventHandling( appMPlayer.MenuItems[i].msg,0 );
+    mplEventHandling( appMPlayer.MenuItems[i].msg,(float)w );
    }
 }
 

@@ -166,7 +166,7 @@ void mplMainDraw( wsParamDisplay )
             PutImage( &item->Bitmap,item->x,item->y,3,item->pressed );
             break;
        case itPotmeter:
-            PutImage( &item->Bitmap,item->x,item->y,item->phases,item->phases * ( item->value / 100.0f ) );
+            PutImage( &item->Bitmap,item->x,item->y,item->phases,( item->phases - 1 ) * ( item->value / 100.0f ) );
             break;
        case itHPotmeter:
             PutImage( &item->Bitmap,item->x,item->y,item->phases,item->phases * ( item->value / 100.0f ) );
@@ -177,11 +177,10 @@ void mplMainDraw( wsParamDisplay )
             goto drawrenderedtext;
        case itDLabel:
             image=fntRender( item->fontid,mplTimer%item->width,item->width,"%s",Translate( item->label ) );
-////            image=fntRender( item->fontid,( mplRedrawTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
 drawrenderedtext:
-            PutImage( image,item->x,item->y,1,0 );
             if ( image )
              {
+              PutImage( image,item->x,item->y,1,0 );
               if ( image->Image ) free( image->Image );
               free( image );
              }
@@ -428,7 +427,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           itemtype=itPRMButton;
           break;
    case wsRRMouseButton:
-          mplHideMenu( RX,RY );
+          mplHideMenu( RX,RY,0 );
           break;
 
    case wsPLMouseButton:

@@ -165,11 +165,12 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
 
    obuf=(unsigned long *)tmp->Image;
    ibuf=(unsigned long *)tmp2.Image;
+   oy=0;
 
    for ( y=0;y < tmp->Height;y++ )
     {
      ox=px;
-     oy=y * sx; dx=y * tmp->Width;
+     dx=y * tmp->Width;
      for ( x=0;x < sx;x++ )
       {
        ibuf[oy++]=obuf[dx + ox++];

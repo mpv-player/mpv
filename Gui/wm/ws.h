@@ -77,6 +77,7 @@
 #define wsWindowFocusOut        64
 #define wsWindowExpose         128
 #define wsWindowRolled         256
+#define wsWindowClosed         512
 
 #define wsNone       0
 #define wsMapped     1

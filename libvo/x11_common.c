@@ -498,9 +498,6 @@ int vo_x11_check_events(Display *mydisplay){
 		&vo_dx, &vo_dy, (Window *)&foo);
 	    }
 #endif
-//	   if (verbose)
-	    printf("X11 Window %dx%d-%dx%d\n", vo_dx, vo_dy, vo_dwidth, vo_dheight);
-	    printf("============================================================\n" );
            ret|=VO_EVENT_RESIZE;
            break;
       case KeyPress:
@@ -549,8 +546,7 @@ int vo_x11_check_events(Display *mydisplay){
 		 !strncmp( name,"_KDE_",5 ) ||
 	         !strncmp( name,"KWM_WIN_DESKTOP",15 ) ) vo_wm_type=0;
 		
- 	     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",
-	      vo_window,name,Event.xproperty.atom );
+// 	     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",vo_window,name,Event.xproperty.atom );
 	      
 	    XFree( name );
 	   }
@@ -578,6 +574,7 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
 void vo_x11_fullscreen( void )
 {
  if ( vo_wm_type ) XUnmapWindow( mDisplay,vo_window );
+
  if ( !vo_fs )
   {
    vo_fs=VO_TRUE;
