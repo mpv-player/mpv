@@ -55,7 +55,6 @@ static uint8_t vid_modes[VID_MODE_NUM];
 static uint8_t vid_mode;
 
 static uint32_t pformat;
-static uint8_t bpp;
 
 static uint8_t checked = 0;
 
@@ -75,10 +74,12 @@ static void checksupportedmodes() {
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
                      uint32_t d_height, uint32_t fullscreen, char *title, 
 		     uint32_t format) {
+static uint8_t bpp;
   if (!checked) {
     checksupportedmodes(); // Looking for available video modes
   }
   pformat = format;
+  if(format==IMGFMT_YV12) bpp=32; else bpp=format&255;
   if (d_width > 800)
     switch (bpp) {
       case 32: vid_mode = 36; break;
@@ -153,22 +154,18 @@ static uint32_t query_format(uint32_t format) {
     switch (format) {
       case IMGFMT_RGB32: 
       case IMGFMT_BGR|32: {
-        bpp = 32; 
 	return (vid_modes[_640x480x16M32] | vid_modes[_800x600x16M32] | vid_modes[_1024x768x16M32]);
       }
       case IMGFMT_RGB24: 
       case IMGFMT_BGR|24: {
-        bpp = 24; 
 	return (vid_modes[_640x480x16M] | vid_modes[_800x600x16M] | vid_modes[_1024x768x16M]);
       }
       case IMGFMT_RGB16: 
       case IMGFMT_BGR|16: {
-        bpp = 16;
 	return (vid_modes[_640x480x64K] | vid_modes[_800x600x64K] | vid_modes[_1024x768x64K]);
       }
       case IMGFMT_RGB15: 
       case IMGFMT_BGR|15: {
-        bpp = 15; 
 	return (vid_modes[_640x480x32K] | vid_modes[_800x600x32K] | vid_modes[_1024x768x32K]);
       }
       case IMGFMT_YV12: return (1);
