@@ -22,7 +22,7 @@ static int control(int cmd,int arg){
     return -1;
 }
 
-
+static int freq=0;
 static int freq_id=0;
 
 // open & setup audio device
@@ -31,6 +31,7 @@ static int init(int rate,int channels,int format,int flags){
 
     ao_data.outburst=2000;
     ao_data.format=format;
+freq=rate;
     
     switch(rate){
 	case 48000:	freq_id=0;break;
@@ -73,11 +74,11 @@ extern int vo_pts;
 
 // return: how many bytes can be played without blocking
 static int get_space(){
-    float x=(float)(vo_pts-ao_data.pts)/90000.0-0.5;
+    float x=(float)(vo_pts-ao_data.pts)/90000.0;
     int y;
     if(x<=0) return 0;
-    y=48000*4*x;y/=ao_data.outburst;y*=ao_data.outburst;
-//    if(y>2000) y=2000;
+    y=freq*4*x;y/=ao_data.outburst;y*=ao_data.outburst;
+    if(y>32000) y=32000;
 //    printf("diff: %5.3f -> %d  \n",x,y);
     return y;
 }
