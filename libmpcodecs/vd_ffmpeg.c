@@ -281,7 +281,7 @@ static int init(sh_video_t *sh){
     {
 	avctx->flags |= CODEC_FLAG_EXTERN_HUFF;
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
-	avctx->extradata = malloc(avctx->extradata_size);
+	avctx->extradata = av_malloc(avctx->extradata_size);
 	memcpy(avctx->extradata, sh->bih+sizeof(BITMAPINFOHEADER),
 	    avctx->extradata_size);
 
@@ -303,7 +303,7 @@ static int init(sh_video_t *sh){
        || sh->format == mmioFOURCC('R', 'V', '4', '0')
        ){
         avctx->extradata_size= 8;
-        avctx->extradata = malloc(avctx->extradata_size);
+        avctx->extradata = av_malloc(avctx->extradata_size);
         if(sh->bih->biSize!=sizeof(*sh->bih)+8){
             /* only 1 packet per frame & sub_id from fourcc */
 	    ((uint32_t*)avctx->extradata)[0] = 0;
@@ -338,7 +338,7 @@ static int init(sh_video_t *sh){
          ))
     {
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
-	avctx->extradata = malloc(avctx->extradata_size);
+	avctx->extradata = av_malloc(avctx->extradata_size);
 	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
     }
     /* Pass palette to codec */
@@ -359,7 +359,7 @@ static int init(sh_video_t *sh){
     if (sh->ImageDesc &&
 	 sh->format == mmioFOURCC('S','V','Q','3')){
 	avctx->extradata_size = (*(int*)sh->ImageDesc) - sizeof(int);
-	avctx->extradata = malloc(avctx->extradata_size);
+	avctx->extradata = av_malloc(avctx->extradata_size);
 	memcpy(avctx->extradata, ((int*)sh->ImageDesc)+1, avctx->extradata_size);
     }
     
@@ -395,22 +395,14 @@ static void uninit(sh_video_t *sh){
     if (avcodec_close(avctx) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
 
-    if (avctx->extradata_size)
-	free(avctx->extradata);
-    avctx->extradata=NULL;
+    av_freep(&avctx->extradata);
 #if LIBAVCODEC_BUILD >= 4689
-    if (avctx->palctrl)
-	    free(avctx->palctrl);
-    avctx->palctrl=NULL;
+    av_freep(&avctx->palctrl);
 #endif
-    if(avctx->slice_offset!=NULL) 
-        free(avctx->slice_offset);
-    avctx->slice_offset=NULL;
+    av_freep(&avctx->slice_offset);
 
-    if (avctx)
-	free(avctx);
-    if (ctx->pic)
-	free(ctx->pic);
+    av_freep(&avctx);
+    av_freep(&ctx->pic);
     if (ctx)
 	free(ctx);
 }
@@ -601,7 +593,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
 #if LIBAVCODEC_BUILD >= 4689
 	// Palette support: libavcodec copies palette to *data[1]
 	if (mpi->bpp == 8)
-		mpi->planes[1] = malloc(AVPALETTE_SIZE);
+		mpi->planes[1] = av_malloc(AVPALETTE_SIZE);
 #endif
 
     pic->data[0]= mpi->planes[0];
@@ -677,8 +669,8 @@ static void release_buffer(struct AVCodecContext *avctx, AVFrame *pic){
   }
 
 	// Palette support: free palette buffer allocated in get_buffer
-	if ( mpi && (mpi->bpp == 8) && (mpi->planes[1] != NULL))
-		free(mpi->planes[1]);
+	if ( mpi && (mpi->bpp == 8))
+		av_freep(&mpi->planes[1]);
 
 #if LIBAVCODEC_BUILD >= 4644
     if(pic->type!=FF_BUFFER_TYPE_USER){
@@ -751,7 +743,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         dp_hdr_t *hdr= (dp_hdr_t*)data;
 
         if(avctx->slice_offset==NULL) 
-            avctx->slice_offset= malloc(sizeof(int)*1000);
+            avctx->slice_offset= av_malloc(sizeof(int)*1000);
         
 //        for(i=0; i<25; i++) printf("%02X ", ((uint8_t*)data)[i]);
         

@@ -437,7 +437,7 @@ static int config(struct vf_instance_s* vf,
 	char *tmp;
 
 	lavc_venc_context->intra_matrix =
-	    malloc(sizeof(*lavc_venc_context->intra_matrix)*64);
+	    av_malloc(sizeof(*lavc_venc_context->intra_matrix)*64);
 
 	i = 0;
 	while ((tmp = strsep(&lavc_param_intra_matrix, ",")) && (i < 64))
@@ -448,10 +448,7 @@ static int config(struct vf_instance_s* vf,
 	}
 	
 	if (i != 64)
-	{
-	    free(lavc_venc_context->intra_matrix);
-	    lavc_venc_context->intra_matrix = NULL;
-	}
+	    av_freep(&lavc_venc_context->intra_matrix);
 	else
 	    mp_msg(MSGT_MENCODER, MSGL_V, "Using user specified intra matrix\n");
     }
@@ -460,7 +457,7 @@ static int config(struct vf_instance_s* vf,
 	char *tmp;
 
 	lavc_venc_context->inter_matrix =
-	    malloc(sizeof(*lavc_venc_context->inter_matrix)*64);
+	    av_malloc(sizeof(*lavc_venc_context->inter_matrix)*64);
 
 	i = 0;
 	while ((tmp = strsep(&lavc_param_inter_matrix, ",")) && (i < 64))
@@ -471,10 +468,7 @@ static int config(struct vf_instance_s* vf,
 	}
 	
 	if (i != 64)
-	{
-	    free(lavc_venc_context->inter_matrix);
-	    lavc_venc_context->inter_matrix = NULL;
-	}
+	    av_freep(&lavc_venc_context->inter_matrix);
 	else
 	    mp_msg(MSGT_MENCODER, MSGL_V, "Using user specified inter matrix\n");
     }
@@ -652,7 +646,7 @@ static int config(struct vf_instance_s* vf,
 	size= ftell(stats_file);
 	fseek(stats_file, 0, SEEK_SET);
 	
-	lavc_venc_context->stats_in= malloc(size + 1);
+	lavc_venc_context->stats_in= av_malloc(size + 1);
 	lavc_venc_context->stats_in[size]=0;
 
 	if(fread(lavc_venc_context->stats_in, size, 1, stats_file)<1){
@@ -728,8 +722,7 @@ static int config(struct vf_instance_s* vf,
     }
     
     /* free second pass buffer, its not needed anymore */
-    if(lavc_venc_context->stats_in) free(lavc_venc_context->stats_in);
-    lavc_venc_context->stats_in= NULL;
+    av_freep(&lavc_venc_context->stats_in);
     if(lavc_venc_context->bits_per_sample)
         mux_v->bih->biBitCount= lavc_venc_context->bits_per_sample;
     if(lavc_venc_context->extradata_size){
@@ -907,12 +900,8 @@ static void uninit(struct vf_instance_s* vf){
 #endif
 
 #if LIBAVCODEC_BUILD >= 4675
-    if (lavc_venc_context->intra_matrix)
-	free(lavc_venc_context->intra_matrix);
-    lavc_venc_context->intra_matrix = NULL;
-    if (lavc_venc_context->inter_matrix)
-	free(lavc_venc_context->inter_matrix);
-    lavc_venc_context->inter_matrix = NULL;
+    av_freep(&lavc_venc_context->intra_matrix);
+    av_freep(&lavc_venc_context->inter_matrix);
 #endif
 
     avcodec_close(lavc_venc_context);
@@ -920,11 +909,9 @@ static void uninit(struct vf_instance_s* vf){
     if(stats_file) fclose(stats_file);
     
     /* free rc_override */
-    if(lavc_venc_context->rc_override) free(lavc_venc_context->rc_override);
-    lavc_venc_context->rc_override= NULL;
+    av_freep(&lavc_venc_context->rc_override);
 
-    if(vf->priv->context) free(vf->priv->context);
-    vf->priv->context= NULL;
+    av_freep(&vf->priv->context);
 }
 
 //===========================================================================//
