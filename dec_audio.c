@@ -33,8 +33,10 @@ extern int verbose; // defined in mplayer.c
 #endif
 
 #include "liba52/a52.h"
+#include "liba52/mm_accel.h"
 static sample_t * a52_samples;
 static a52_state_t a52_state;
+static uint32_t a52_accel=0;
 
 #ifdef USE_G72X
 #include "g72x/g72x.h"
@@ -536,12 +538,11 @@ if(gCpuCaps.has3DNow){
 }
 case AFM_A52: {
   // Dolby AC3 audio:
-  int accel=0; // should contain mmx/sse/etc flags
-  if(gCpuCaps.hasSSE) accel|=MM_ACCEL_X86_SSE;
-  if(gCpuCaps.hasMMX) accel|=MM_ACCEL_X86_MMX;
-  if(gCpuCaps.hasMMX2) accel|=MM_ACCEL_X86_MMXEXT;
-  if(gCpuCaps.has3DNow) accel|=MM_ACCEL_X86_3DNOW;
-  a52_samples=a52_init (accel);
+  if(gCpuCaps.hasSSE) a52_accel|=MM_ACCEL_X86_SSE;
+  if(gCpuCaps.hasMMX) a52_accel|=MM_ACCEL_X86_MMX;
+  if(gCpuCaps.hasMMX2) a52_accel|=MM_ACCEL_X86_MMXEXT;
+  if(gCpuCaps.has3DNow) a52_accel|=MM_ACCEL_X86_3DNOW;
+  a52_samples=a52_init (a52_accel);
   if (a52_samples == NULL) {
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
 	driver=0;break;
@@ -562,8 +563,7 @@ case AFM_A52: {
 }
 case AFM_HWAC3: {
   // Dolby AC3 passthrough:
-  int accel=0; // should contain mmx/sse/etc flags
-  a52_samples=a52_init (accel);
+  a52_samples=a52_init (a52_accel);
   if (a52_samples == NULL) {
        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
        driver=0;break;
@@ -1144,7 +1144,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	// a52_dynrng (&state, NULL, NULL); // disable dynamic range compensation
 
 	// frame decoded, let's resample:
-	a52_resample_init(flags,sh_audio->channels);
+	a52_resample_init(a52_accel,flags,sh_audio->channels);
 	len=0;
 	for (i = 0; i < 6; i++) {
 	    if (a52_block (&a52_state, a52_samples)){

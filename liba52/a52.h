@@ -119,7 +119,7 @@ void a52_dynrng (a52_state_t * state,
 		 sample_t (* call) (sample_t, void *), void * data);
 int a52_block (a52_state_t * state, sample_t * samples);
 
-void a52_resample_init(int _flags,int _chans);
+void a52_resample_init(uint32_t mm_accel,int _flags,int _chans);
 extern int (* a52_resample) (float * _f, int16_t * s16);
 
 uint16_t crc16_block(uint8_t *data,uint32_t num_bytes);
