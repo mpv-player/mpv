@@ -121,6 +121,9 @@ switch(d_video->demuxer->file_format){
      case 6:  // (PAL?)/NTSC Widescreen SVCD 16:9
        sh_video->aspect=16.0/9.0;
      break;
+     case 9: // Movie Type ??? / 640x480
+       sh_video->aspect=0.0;
+     break;
      default:
        fprintf(stderr,"Detected unknown aspect_ratio_information in mpeg sequence header.\n"
                "Please report the aspect value (%i) along with the movie type (VGA,PAL,NTSC,"
