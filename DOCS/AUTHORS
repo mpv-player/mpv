@@ -52,7 +52,7 @@ TeLeNiEkO: <telenieko@telenieko.com>
 - spanish translations (see DOCS/Spanish/*)
 
 Michael Graffam: <mgraffam@idsi.net>
-- XF86VidMode support to vo_x11
+- XF86VidMode support to vo_x11 and vo_dga
 - Video mode switching code to vo_dga
 
 Main testers:
