@@ -425,6 +425,8 @@ static int demux_ogg_check_lang(char *clang, char *langlist)
   return 0;
 }
 
+static int demux_ogg_sub_reverse_id(demuxer_t *demuxer, int id);
+
 /// Try to print out comments and also check for LANGUAGE= tag
 static void demux_ogg_check_comments(demuxer_t *d, ogg_stream_t *os, int id, vorbis_comment *vc)
 {
