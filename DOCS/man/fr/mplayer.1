@@ -1,4 +1,4 @@
-.\" synced with 1.816
+.\" synced with 1.818
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "01 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "05 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -743,7 +743,7 @@ Spécifie le nombre de secondes entre chaque trame.
 Utile pour les diaporamas.
 Cela utilise le déplacement/navigation normal, donc est aussi inexact
 (i.e.\& avez la plupart des formats, vous aurez une trame toutes les <sec>
-à <sec>+120 secondes).
+à <sec>+20 secondes).
 .
 .
 .SH "OPTIONS DEMULTIPLEXEUR/\:FLUX"
@@ -3050,6 +3050,8 @@ Ne gère que les formats YV12, RGB (24 bits/pixel) et BGR (24 bits/pixel).
 Entrelace les trames de sortie, en commençant par les champs du haut.
 .IPs interlaced_bf
 Entrelace les trames de sortie, en commençant par les champs du bas.
+.IPs file=<nom_fichier>
+Définit le nom du fichier de sortie (par défaut\ : ./stream.yuv).
 .REss
 .PD 1
 .RS
