@@ -1744,10 +1744,6 @@ Gibt die ID für die VOBsub-Untertitel an.
 Überschreibt die automatisch erkannte Puffergröße der Audiotreiber/\:-karte.
 .
 .TP
-.B \-aofile <Dateiname>
-Überschreibt den Standarddateinamen für \-ao pcm.
-.
-.TP
 .B \-aop <list=Plugin1,Plugin2...:Option1=Wert1:opt2=Wert2...>
 Gibt die Audioplugins und ihre Optionen an (siehe auch Audio-Plugins in der
 (englischen) Dokumentation).
@@ -1836,11 +1832,6 @@ heißt, umbenannt werden in
 .TP
 .B \-softvol
 Erzwingt den Gebrauch des Softwaremixers anstelle des Mixers der Soundkarte.
-.
-.TP
-.B \-nowaveheader (nur bei \-ao pcm)
-Schreibe keinen Wave-Header in die Datei.
-Wird für raw-PCM benutzt.
 .
 .TP
 .B \-volstep <0\-100>
@@ -1978,9 +1969,25 @@ Produziert keine Audioausgabe, behält aber die Videoabspielgeschwindigkeit bei.
 Benutze \-nosound für Benchmarking-Zwecke.
 .
 .TP
-.B pcm (siehe auch \-aofile)
+.B pcm
 Filewriter-Audioausgabe im raw-PCM/\:Wave-Format.
-Schreibt den Sound nach ./audiodump.wav.
+.PD 0
+.RSs
+.IPs (no)waveheader
+Fügt den Wave-Header (nicht) hinzu (Standard: hinzugefügt).
+Wird er nicht hinzugefügt, erfolgt die Ausgabe als raw-PCM.
+.IPs file=<Dateiname>
+Schreibe den Sound nach <Dateiname> und nicht in die Standarddatei
+audiodump.wav.
+Wurde nowaveheader angegeben, ist der Standard audiodump.pcm.
+.REss
+.PD 1
+.RS
+.sp 1
+.I ANMERKUNG:
+Wenn du gar keine Option angibst, ist die Ausgabe progressive (d.h.\& nicht
+interlaced).
+.RE
 .
 .TP
 .B plugin\ \ 
@@ -2364,7 +2371,7 @@ Anzeigemodus zu setzen.
 Aktiviert VBI für vesa-, dfbmga- und svga-Videoausgabetreiber.
 .
 .TP
-.B \-wid <Fenster-ID> (siehe auch \-guiwid) (nur bei X11)
+.B \-wid <Fenster-ID> (siehe auch \-guiwid, \-geometry) (nur bei X11 und DirectX)
 Weist MPlayer an, sich an ein bestehendes X11-Fenster zu heften, was
 beispielsweise nützlich ist, um MPlayer in einen Browser einzubetten (z.B.\&
 mit der plugger-Erweiterung).
@@ -4672,7 +4679,7 @@ Bei größeren Werten für n wird dies den Filter auf Kosten der Genauigkeit
 beschleunigen.
 Der Standardwert ist n=3.
 Ist n ungerade, so wird ein Frame, der direkt auf einen mit dem
-REPEAT_FIRST_FIELD-MPEG-Flag markierten Frame folgt, als progressiv angesehen.
+REPEAT_FIRST_FIELD-MPEG-Flag markierten Frame folgt, als progressive angesehen.
 Daher wird sich der Filter keinen soft-telecined MPEG-2-Inhalten widmen.
 Dies ist der einzige Effekt dieses Flags, falls MMX2 oder 3DNow! verfügbar ist.
 Ohne MMX2 und 3DNow! und falls n=0 oder 1, werden dieselben Berechnungen
@@ -4704,6 +4711,7 @@ Standardwert ist 128.
 Summe des "Absolute Difference"-Schwellenwerts, Standardwert ist 64.
 .RE
 .
+.\" manpage is synced from top down to this option.
 .TP
 .B "boxblur=Radius:Stärke[:Radius:Stärke]"
 Kastenunschärfe (?)
