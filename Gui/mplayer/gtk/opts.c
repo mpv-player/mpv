@@ -1455,7 +1455,7 @@ static void audioButton(GtkButton *button, gpointer user_data) {
         gfree(&gtkAOOSSMixer);
         gtkAOOSSMixer = gstrdup(getGtkEntryText(CEAudioMixer));
         gfree(&gtkAOOSSMixerChannel);
-        gtkAOOSSMixer = gstrdup(getGtkEntryText(CEAudioMixerChannel));
+        gtkAOOSSMixerChannel = gstrdup(getGtkEntryText(CEAudioMixerChannel));
       }
 #endif
 #if defined(HAVE_ALSA9) || defined (HAVE_ALSA1X)
@@ -1465,7 +1465,7 @@ static void audioButton(GtkButton *button, gpointer user_data) {
         gfree(&gtkAOALSAMixer);
         gtkAOALSAMixer = gstrdup(getGtkEntryText(CEAudioMixer));
         gfree(&gtkAOALSAMixerChannel);
-        gtkAOALSAMixer = gstrdup(getGtkEntryText(CEAudioMixerChannel));
+        gtkAOALSAMixerChannel = gstrdup(getGtkEntryText(CEAudioMixerChannel));
       }
 #endif
 #ifdef HAVE_SDL
