@@ -22,7 +22,7 @@
 
 struct vf_priv_s {
     int pp;
-    pp_mode_t *ppMode[GET_PP_QUALITY_MAX+1];
+    pp_mode_t *ppMode[PP_QUALITY_MAX+1];
     void *context;
     mp_image_t *dmpi;
     unsigned int outfmt;
@@ -44,7 +44,7 @@ static int config(struct vf_instance_s* vf,
 
 static void uninit(struct vf_instance_s* vf){
     int i;
-    for(i=0; i<=GET_PP_QUALITY_MAX; i++){
+    for(i=0; i<=PP_QUALITY_MAX; i++){
         if(vf->priv->ppMode[i])
 	    pp_free_mode(vf->priv->ppMode[i]);
     }
@@ -64,7 +64,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 static int control(struct vf_instance_s* vf, int request, void* data){
     switch(request){
     case VFCTRL_QUERY_MAX_PP_LEVEL:
-	return GET_PP_QUALITY_MAX;
+	return PP_QUALITY_MAX;
     case VFCTRL_SET_PP_LEVEL:
 	vf->priv->pp= *((unsigned int*)data);
 	return CONTROL_TRUE;
@@ -164,14 +164,14 @@ static int open(vf_instance_t *vf, char* args){
 #ifdef EMU_OLD
     if(name){
 #endif
-	for(i=0; i<=GET_PP_QUALITY_MAX; i++){
+	for(i=0; i<=PP_QUALITY_MAX; i++){
             vf->priv->ppMode[i]= pp_get_mode_by_name_and_quality(name, i);
             if(vf->priv->ppMode[i]==NULL) return -1;
         }
 #ifdef EMU_OLD
     }else{
         /* hex mode for compatibility */
-        for(i=0; i<=GET_PP_QUALITY_MAX; i++){
+        for(i=0; i<=PP_QUALITY_MAX; i++){
 	    PPMode *ppMode;
 	    
 	    ppMode= (PPMode*)memalign(8, sizeof(PPMode));
@@ -191,7 +191,7 @@ static int open(vf_instance_t *vf, char* args){
     }
 #endif
     
-    vf->priv->pp=GET_PP_QUALITY_MAX; //divx_quality;
+    vf->priv->pp=PP_QUALITY_MAX; //divx_quality;
     return 1;
 }
 

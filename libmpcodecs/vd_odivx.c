@@ -79,7 +79,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 #ifdef NEW_DECORE
 	return 9; // for divx4linux
 #else
-	return GET_PP_QUALITY_MAX;  // for opendivx
+	return PP_QUALITY_MAX;  // for opendivx
 #endif
     case VDCTRL_SET_PP_LEVEL: {
 	DEC_SET dec_set;
@@ -88,7 +88,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	if(quality<0 || quality>9) quality=9;
 	dec_set.postproc_level=quality*10;
 #else
-	if(quality<0 || quality>GET_PP_QUALITY_MAX) quality=GET_PP_QUALITY_MAX;
+	if(quality<0 || quality>PP_QUALITY_MAX) quality=PP_QUALITY_MAX;
 	dec_set.postproc_level=getPpModeForQuality(quality);
 #endif
 	decore(0x123,DEC_OPT_SETPP,&dec_set,NULL);
