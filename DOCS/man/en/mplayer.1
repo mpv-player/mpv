@@ -706,10 +706,6 @@ As precise as the RTC without requiring special privileges.
 Comes at the price of higher CPU consumption.
 .
 .TP
-.B \-speed <0.01\-100>
-Slow down or speed up playback by the factor given as parameter.
-.
-.TP
 .B \-sstep <sec>
 Skip <sec> seconds after every frame.
 The normal framerate of the movie is kept, so playback is accelerated.
@@ -1114,6 +1110,10 @@ This option is obsolete now that MPlayer has OpenDML support.
 .B \-sb <byte\ position> (also see \-ss)
 Seek to byte position.
 Useful for playback from CD-ROM images or VOB files with junk at the beginning.
+.
+.TP
+.B \-speed <0.01\-100>
+Slow down or speed up playback by the factor given as parameter.
 .
 .TP
 .B \-srate <Hz>
