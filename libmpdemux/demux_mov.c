@@ -704,9 +704,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    int atom_len = char2int(trak->stdata,28);
 		    switch(char2int(trak->stdata,32)) { // atom type
 		      case MOV_FOURCC('e','s','d','s'): {
-			esds_t *esds; 				  
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
 			if(atom_len >= 8) {
+			  esds_t *esds = (esds_t *)malloc(sizeof(esds_t)); 				  
 			  if(!mp4_parse_esds(&trak->stdata[36], atom_len-8, esds)) {
 			    
 			    sh->i_bps = esds->avgBitrate/8; 
@@ -716,6 +716,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
 			    memcpy(sh->codecdata, esds->decoderConfig, sh->codecdata_len);
 			  }
+			  free(esds);
 #if 0
 	  		  { FILE* f=fopen("esds.dat","wb");
 			  fwrite(&trak->stdata[36],atom_len-8,1,f);
