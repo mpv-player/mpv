@@ -17,10 +17,10 @@ static int a52_resample_MONO_to_5_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-512, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
-		"movq wm1100, %%mm3		\n\t"
-		"movq wm0101, %%mm4		\n\t"
-		"movq wm1010, %%mm5		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+		"movq "MANGLE(wm1100)", %%mm3	\n\t"
+		"movq "MANGLE(wm0101)", %%mm4	\n\t"
+		"movq "MANGLE(wm1010)", %%mm5	\n\t"
 		"pxor %%mm6, %%mm6		\n\t"
 		"1:				\n\t"
 		"movq (%1, %%esi, 2), %%mm0	\n\t"
@@ -73,7 +73,7 @@ static int a52_resample_STEREO_to_2_MMX(float * _f, int16_t * s16){
 	);*/
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 		"1:				\n\t"
 		"movq (%1, %%esi), %%mm0	\n\t"
 		"movq 8(%1, %%esi), %%mm1	\n\t"
@@ -104,7 +104,7 @@ static int a52_resample_3F_to_5_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 		"pxor %%mm6, %%mm6		\n\t"
 		"movq %%mm7, %%mm5		\n\t"
 		"punpckldq %%mm6, %%mm5		\n\t"
@@ -160,7 +160,7 @@ static int a52_resample_2F_2R_to_4_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 		"1:				\n\t"
 		"movq (%1, %%esi), %%mm0	\n\t"
 		"movq 8(%1, %%esi), %%mm1	\n\t"
@@ -212,7 +212,7 @@ static int a52_resample_3F_2R_to_5_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 		"1:				\n\t"
 		"movd (%1, %%esi), %%mm0	\n\t"
 		"punpckldq 2048(%1, %%esi), %%mm0\n\t"
@@ -272,7 +272,7 @@ static int a52_resample_MONO_LFE_to_6_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 		"pxor %%mm6, %%mm6		\n\t"
 		"1:				\n\t"
 		"movq 1024(%1, %%esi), %%mm0	\n\t"
@@ -313,7 +313,7 @@ static int a52_resample_STEREO_LFE_to_6_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 		"pxor %%mm6, %%mm6		\n\t"
 		"1:				\n\t"
 		"movq 1024(%1, %%esi), %%mm0	\n\t"
@@ -352,7 +352,7 @@ static int a52_resample_3F_LFE_to_6_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 		"pxor %%mm6, %%mm6		\n\t"
 		"1:				\n\t"
 		"movq 1024(%1, %%esi), %%mm0	\n\t"
@@ -393,7 +393,7 @@ static int a52_resample_2F_2R_LFE_to_6_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 //		"pxor %%mm6, %%mm6		\n\t"
 		"1:				\n\t"
 		"movq 1024(%1, %%esi), %%mm0	\n\t"
@@ -440,7 +440,7 @@ static int a52_resample_3F_2R_LFE_to_6_MMX(float * _f, int16_t * s16){
     int32_t * f = (int32_t *) _f;
 	asm volatile(
 		"movl $-1024, %%esi		\n\t"
-		"movq magicF2W, %%mm7		\n\t"
+		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
 //		"pxor %%mm6, %%mm6		\n\t"
 		"1:				\n\t"
 		"movq 1024(%1, %%esi), %%mm0	\n\t"
