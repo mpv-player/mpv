@@ -78,7 +78,7 @@ will not work) and a recent version of binutils.
 <para>
 If MPlayer complains about not finding <filename>/dev/cdrom</filename> or
 <filename>/dev/dvd</filename>, create an appropiate symbolic link:
-<screen>ln -s /dev/(your_cdrom_device) /dev/cdrom</screen>
+<screen>ln -s /dev/<replaceable>your_cdrom_device</replaceable> /dev/cdrom</screen>
 </para>
 
 <para>
