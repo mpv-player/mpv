@@ -3641,7 +3641,7 @@ if(rel_seek_secs || abs_seek_pos){
 		snprintf(osd_text_tmp, 63, "Subtitles: (%d)", dvdsub_id);
 	  }
 #ifdef USE_DVDREAD
-	  if (vo_spudec) {
+	  if (vo_spudec && (demuxer->type != DEMUXER_TYPE_MATROSKA)) {
 	      char lang[5] = "none";
 	      int code = 0;
 	      if (dvdsub_id >= 0) code = dvd_lang_from_sid(stream, dvdsub_id);
@@ -3652,6 +3652,17 @@ if(rel_seek_secs || abs_seek_pos){
 	      }
 	      snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", dvdsub_id, lang);
 	  }
+#endif
+#ifdef HAVE_MATROSKA
+    if (demuxer->type == DEMUXER_TYPE_MATROSKA) {
+      char lang[10] = "unknown";
+      if (dvdsub_id >= 0) {
+        demux_mkv_get_sub_lang(demuxer, dvdsub_id, lang, 9);
+        lang[9] = 0;
+      } else
+        strcpy(lang, "off");
+      snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", dvdsub_id, lang);
+    }
 #endif
 	  osd_show_vobsub_changed--;
       } else

@@ -63,7 +63,9 @@ typedef struct {
   int forced_subs_only;
 } mkv_sh_sub_t;
 
-int demux_mkv_num_subs(demuxer_t *);
-int demux_mkv_change_subs(demuxer_t *, int);
+int demux_mkv_num_subs(demuxer_t *demuxer);
+int demux_mkv_change_subs(demuxer_t *demuxer, int new_num);
+void demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,
+                            int maxlen);
 
 #endif /* __MATROSKA_H */
