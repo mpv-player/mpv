@@ -145,7 +145,7 @@ static void longcount_stub(long long* z)
     }
     longcount(z);
 }
-
+#define DETAILED_OUT
 int LOADER_DEBUG=1; // active only if compiled with -DDETAILED_OUT
 static inline void dbgprintf(char* fmt, ...)
 {
@@ -702,6 +702,19 @@ void* WINAPI expWaitForSingleObject(void* object, int duration)
     // FIXME FIXME FIXME - this value is sometime unititialize !!!
     int ret = WAIT_FAILED;
     mutex_list* pp=mlist;
+    if(object == (void*)0xcfcf9898)
+    {
+/**
+From GetCurrentThread() documentation:
+A pseudo handle is a special constant that is interpreted as the current thread handle. The calling thread can use this handle to specify itself whenever a thread handle is required. Pseudo handles are not inherited by child processes. 
+
+This handle has the maximum possible access to the thread object. For systems that support security descriptors, this is the maximum access allowed by the security descriptor for the calling process. For systems that do not support security descriptors, this is THREAD_ALL_ACCESS. 
+
+The function cannot be used by one thread to create a handle that can be used by other threads to refer to the first thread. The handle is always interpreted as referring to the thread that is using it. A thread can create a "real" handle to itself that can be used by other threads, or inherited by other processes, by specifying the pseudo handle as the source handle in a call to the DuplicateHandle function. 
+**/
+	dbgprintf("WaitForSingleObject(thread_handle) called\n");
+	return WAIT_FAILED;
+    }
     dbgprintf("WaitForSingleObject(0x%x, duration %d) =>\n",object, duration);
 
     // loop below was slightly fixed - its used just for checking if
@@ -1266,6 +1279,47 @@ int WINAPI expGetCurrentProcess()
     return getpid();
 }
 
+extern void* fs_seg;
+
+#if 1
+//static int tls_count;
+static int tls_use_map[64];
+int WINAPI expTlsAlloc()
+{
+    int i;
+    for(i=0; i<64; i++)
+	if(tls_use_map[i]==0)
+	{
+	    tls_use_map[i]=1;
+	    return i;
+	}
+    return -1;
+}
+
+int WINAPI expTlsSetValue(int index, void* value)
+{
+    if((index<0) || (index>64))
+	return 0;
+    *(void**)((char*)fs_seg+0x88+4*index) = value;
+    return 1;
+}
+
+void* WINAPI expTlsGetValue(int index)
+{
+    if((index<0) || (index>64))
+	return 0;
+    return *(void**)((char*)fs_seg+0x88+index);
+}
+
+int WINAPI expTlsFree(int index)
+{
+    if((index<0) || (index>64))
+	return 0;
+    tls_use_map[index]=0;
+    return 1;
+}
+
+#else
 struct tls_s {
     void* value;
     int used;
@@ -1274,7 +1328,6 @@ struct tls_s {
 };
 
 tls_t* g_tls=NULL;
-
 void* WINAPI expTlsAlloc()
 {
     if(g_tls==NULL)
@@ -1335,6 +1388,8 @@ int WINAPI expTlsFree(tls_t* index)
     dbgprintf("TlsFree(index 0x%x) => %d\n", index, result);
     return result;
 }
+#endif
+
 void* WINAPI expLocalAlloc(int flags, int size)
 {
     void* z;
@@ -2498,7 +2553,7 @@ int WINAPI expGetProcessVersion(int pid)
 int WINAPI expGetCurrentThread(void)
 {
     dbgprintf("GetCurrentThread()\n");
-    return 1;
+    return 0xcfcf9898;
 }
 int WINAPI expGetOEMCP(void)
 {
@@ -3005,6 +3060,25 @@ HRESULT WINAPI expCoCreateFreeThreadedMarshaler(void *pUnkOuter, void **ppUnkInn
 //    return S_OK;
 }
 
+
+int WINAPI expDuplicateHandle(
+      HANDLE hSourceProcessHandle,  // handle to source process
+      HANDLE hSourceHandle,         // handle to duplicate
+      HANDLE hTargetProcessHandle,  // handle to target process
+      HANDLE* lpTargetHandle,      // duplicate handle
+ DWORD dwDesiredAccess,        // requested access
+     int bInheritHandle,          // handle inheritance option
+      DWORD dwOptions               // optional actions
+      )
+{
+    dbgprintf("DuplicateHandle(%p, %p, %p, %p, 0x%x, %d, %d) called\n",
+	hSourceProcessHandle, hSourceHandle, hTargetProcessHandle,
+	lpTargetHandle, dwDesiredAccess, bInheritHandle, dwOptions);
+    *lpTargetHandle = hSourceHandle;
+    return 1;
+}
+
+
 struct exports
 {
     char name[64];
@@ -3141,6 +3215,7 @@ FF(GetProcessVersion,-1)
 FF(GetCurrentThread,-1)
 FF(GetOEMCP,-1)
 FF(GetCPInfo,-1)
+FF(DuplicateHandle,-1)
 };
 
 struct exports exp_msvcrt[]={
