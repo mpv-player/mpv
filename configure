@@ -1962,6 +1962,57 @@ fi
 echores "$_setlocale"
 
 
+echocheck "iconv"
+if test "$_iconv" = auto ; then
+  _iconv_tmp='#include <iconv.h>'
+
+  cat > $TMPC << EOF
+#include <stdio.h>
+#include <unistd.h>
+$_iconv_tmp
+#define INBUFSIZE 1024
+#define OUTBUFSIZE 4096
+
+char inbuffer[INBUFSIZE];
+char outbuffer[OUTBUFSIZE];
+
+int main(void) {
+  size_t numread;
+  iconv_t icdsc;
+  char *tocode="UTF-8";
+  char *fromcode="cp1250";
+  if ((icdsc = iconv_open (tocode, fromcode)) != (iconv_t)(-1)) {
+    while ((numread = read (0, inbuffer, INBUFSIZE))) {
+      char *iptr=inbuffer;
+      char *optr=outbuffer;
+      size_t inleft=numread;
+      size_t outleft=OUTBUFSIZE;
+      if (iconv(icdsc, (const char **)&iptr, &inleft, &optr, &outleft)
+          != (size_t)(-1)) {
+        write (1, outbuffer, OUTBUFSIZE - outleft);
+      }
+    }
+    if (iconv_close(icdsc) == -1)
+      ;
+  }
+}
+EOF
+  _iconv=no
+  if cc_check -lm -liconv ; then
+    _iconv=yes
+    _ld_iconv='-liconv'
+  else
+    cc_check -lm && _iconv=yes
+  fi
+fi
+if test "$_iconv" = yes ; then
+  _def_iconv='#define USE_ICONV 1'
+else
+  _def_iconv='#undef USE_ICONV'
+fi
+echores "$_iconv"
+
+
 echocheck "language"
 test -z "$_language" && _language=$LINGUAS
 _language=`echo $_language | sed 's/,/ /g'`
@@ -4335,7 +4386,14 @@ else
 fi
 echores "$_cdparanoia"
 
+
 echocheck "freetype >= 2.0.9"
+
+# freetype depends on iconv
+if test "$_iconv" = no ; then
+    _freetype="no (iconv support needed)"
+fi
+
 if test "$_freetype" = auto ; then
     if ( $_freetypeconfig --version ) >/dev/null 2>&1 ; then
 	cat > $TMPC << EOF
@@ -5017,57 +5075,6 @@ else
   _def_live='#undef STREAMING_LIVE_DOT_COM'
   _noinputmodules="live.com $_noinputmodules"
 fi
-
-
-echocheck "iconv"
-if test "$_iconv" = auto ; then
-  _iconv_tmp='#include <iconv.h>'
-
-  cat > $TMPC << EOF
-#include <stdio.h>
-#include <unistd.h>
-$_iconv_tmp
-#define INBUFSIZE 1024
-#define OUTBUFSIZE 4096
-
-char inbuffer[INBUFSIZE];
-char outbuffer[OUTBUFSIZE];
-
-int main(void) {
-  size_t numread;
-  iconv_t icdsc;
-  char *tocode="UTF-8";
-  char *fromcode="cp1250";
-  if ((icdsc = iconv_open (tocode, fromcode)) != (iconv_t)(-1)) {
-    while ((numread = read (0, inbuffer, INBUFSIZE))) {
-      char *iptr=inbuffer;
-      char *optr=outbuffer;
-      size_t inleft=numread;
-      size_t outleft=OUTBUFSIZE;
-      if (iconv(icdsc, (const char **)&iptr, &inleft, &optr, &outleft)
-          != (size_t)(-1)) {
-        write (1, outbuffer, OUTBUFSIZE - outleft);
-      }
-    }
-    if (iconv_close(icdsc) == -1)
-      ;
-  }
-}
-EOF
-  _iconv=no
-  if cc_check -lm -liconv ; then
-    _iconv=yes
-    _ld_iconv='-liconv'
-  else
-    cc_check -lm && _iconv=yes
-  fi
-fi
-if test "$_iconv" = yes ; then
-  _def_iconv='#define USE_ICONV 1'
-else
-  _def_iconv='#undef USE_ICONV'
-fi
-echores "$_iconv"
 
 
 echocheck "FFmpeg libavcodec (static)"
