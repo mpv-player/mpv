@@ -1,13 +1,13 @@
 
 include ../config.mak
 
-SRCS = sr1.c d_cpu.s
-OBJS = sr1.o d_cpu.o
+SRCS = sr1.c
+OBJS = sr1.o
 # OBJS = $(SRCS:.c,.s=.o)
 CFLAGS  = $(OPTFLAGS) $(EXTRA_INC)
 ifeq ($(TARGET_ARCH_X86),yes)
-SRCS += decode_i586.s
-OBJS += decode_i586.o
+SRCS += d_cpu.s decode_i586.s
+OBJS += d_cpu.o decode_i586.o
 ifeq ($(TARGET_MMX),yes)
 SRCS += decode_MMX.s dct64_MMX.s tabinit_MMX.s
 OBJS += decode_MMX.o dct64_MMX.o tabinit_MMX.o
