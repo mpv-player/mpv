@@ -34,7 +34,7 @@ LIBVD_EXTERN(ffmpeg)
 
 int avcodec_inited=0;
 
-#ifdef FF_POSTPROCESS
+#if defined(FF_POSTPROCESS) && defined(MBR)
 int quant_store[MBR+1][MBC+1];
 #endif
 
