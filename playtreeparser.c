@@ -294,6 +294,7 @@ parse_pls(play_tree_parser_t* p) {
     if(entries[num].file == NULL)
       mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Entry %d don't have a file !!!!\n",num+1);
     else {
+      mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Adding entry %s\n",entries[num].file);
       entry = play_tree_new();
       play_tree_add_file(entry,entries[num].file);
       free(entries[num].file);
@@ -313,8 +314,10 @@ parse_pls(play_tree_parser_t* p) {
   }
 
   free(entries);
-	
-  return list;
+
+  entry = play_tree_new();
+  play_tree_set_child(entry,list);	
+  return entry;
 }
 
 play_tree_t*
