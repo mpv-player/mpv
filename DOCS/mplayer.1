@@ -696,6 +696,48 @@ Search for the OSD/SUB fonts in an alternative directory (default:
 
 .I EXAMPLE:
     \-font ~/.mplayer/arial\-14/font.desc
+
+.I NOTE:
+    With FreeType, this option determines path to the text font file,
+eg.
+
+    -font ~/.mplayer/my_cool_font.ttf
+.TP
+.I NOTE:
+The -subfont-* options are available only with FreeType support
+compiled in.
+.TP
+.B \-subfont-encoding
+Sets the font encoding.
+
+FreeType 2.1: When set to "unicode", all the glyphs from the
+font file will be rendered and unicode will be used. This is
+also the default setting.
+
+FreeType 2.0: Default is iso-8859-1. Unicode is not available.
+.TP
+.B \-subfont-text-scale
+Sets the subtitle text autoscale coefficient (percentage of the
+screen size).
+.TP
+.B \-subfont-osd-scale
+Sets the osd elements autoscale coefficient.
+.TP
+.B \-subfont-blur
+Sets the font blur radius.
+.TP
+.B \-subfont-outline
+Sets the font outline thickness.
+.TP
+.B \-subfont-autoscale <0-3>
+Sets the autoscale mode. Can be
+    0    no autoscale,
+    1    proportional to movie width,
+    2    proportional to movie height,
+    3    proportional to movie diagonal.
+
+Default is 3 (diagonal). Zero means that text-scale and osd-scale are
+font heights in points.
 .TP
 .B \-noautosub
 Turns off automatic subtitles.

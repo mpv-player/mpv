@@ -4,7 +4,7 @@ LIB	= libgui.a
 include ../config.mak
 include config.mak
 
-INCDIR  = -I. -I./event -I./wm -I./skin $(GTKINC) $(EXTRA_INC)
+INCDIR  = -I. -I./event -I./wm -I./skin $(GTKINC) $(EXTRA_INC) $(FREETYPE_INC)
 
 OPTIMIZE =  $(OPTFLAGS) -fomit-frame-pointer \
             -fexpensive-optimizations -fschedule-insns2 -Wall

@@ -390,6 +390,9 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
 // check font
 #ifdef USE_OSD
+#ifdef HAVE_FREETYPE
+  init_freetype();
+#else
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
        if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
@@ -399,6 +402,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        if(!vo_font)
        vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
   }
+#endif
 #endif
 
   vo_init_osd();

@@ -1,8 +1,18 @@
+#ifndef __MPLAYER_FONT_LOAD_H
+#define __MPLAYER_FONT_LOAD_H
+
+#ifdef HAVE_FREETYPE
+#include <freetype/freetype.h>
+#endif
 
 typedef struct {
     unsigned char *bmp;
     unsigned char *pal;
     int w,h,c;
+#ifdef HAVE_FREETYPE
+    int charwidth,charheight,pen,baseline,padding;
+    int current_count, current_alloc;
+#endif
 } raw_file;
 
 typedef struct {
@@ -18,9 +28,80 @@ typedef struct {
     short font[65536];
     int start[65536];   // short is not enough for unicode fonts
     short width[65536];
+
+#ifdef HAVE_FREETYPE
+    int face_cnt;
+    
+    FT_Face faces[16];
+    FT_UInt glyph_index[65536];
+
+    int max_width, max_height;
+
+    struct 
+    {
+	int g_r;
+	int o_r;
+	int g_w;
+	int o_w;
+	int o_size;
+	unsigned volume;
+
+	unsigned *g;
+	unsigned *gt;
+	unsigned *gt2;
+	unsigned *om;
+	unsigned char *omt;
+	unsigned short *tmp;
+    } tables;
+#endif
+
 } font_desc_t;
 
 extern font_desc_t* vo_font;
 
+#ifdef HAVE_FREETYPE
+
+extern char *subtitle_font_encoding;
+extern float text_font_scale_factor;
+extern float osd_font_scale_factor;
+extern float subtitle_font_radius;
+extern float subtitle_font_thickness;
+extern int subtitle_autoscale;
+
+extern int vo_image_width;
+extern int vo_image_height;
+
+extern int force_load_font;
+
+int init_freetype();
+int done_freetype();
+
+font_desc_t* read_font_desc(char* fname,float factor,int movie_width, int movie_height);
+void free_font_desc(font_desc_t *desc);
+
+void render_one_glyph(font_desc_t *desc, int c);
+int kerning(font_desc_t *desc, int prevc, int c);
+
+void load_font(int width, int height);
+
+#else
+
 raw_file* load_raw(char *name,int verbose);
 font_desc_t* read_font_desc(char* fname,float factor,int verbose);
+
+static void inline render_one_glyph(font_desc_t *desc, int c) 
+{
+}
+
+static int inline kerning(font_desc_t *desc, int prevc, int c) 
+{
+    return 0;
+}
+
+static void inline load_font(int width, int height)
+{
+}
+
+#endif
+
+#endif /* ! __MPLAYER_FONT_LOAD_H */

@@ -168,6 +168,7 @@ Optional features:
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --disable-big-endian   Force byte order to little endian [autodetect]
   --enable-big-endian    Force byte order to big endian [autodetect]
+  --enable-freetype      Enable freetype support [disabled]
   
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
@@ -978,6 +979,7 @@ _sighandler=yes
 _libdv=auto
 _cdparanoia=auto
 _big_endian=auto
+_freetype=no
 
 for ac_option do
   case "$ac_option" in
@@ -1136,6 +1138,8 @@ for ac_option do
   --disable-cdparanoia)	_cdparanoia=no	;;
   --enable-big-endian)  _big_endian=yes ;;
   --disable-big-endian) _big_endian=no  ;;
+  --enable-freetype)    _freetype=yes   ;;
+  --disable-freetype)   _freetype=no    ;;
 
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
   --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
@@ -3185,7 +3189,7 @@ if test "$_cdparanoia" = auto ; then
 int main(void) { return 1; }
 EOF
     _cdparanoia=no
-    cc_check $_inc_cdparnoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia && _cdparanoia=yes
+    cc_check $_inc_cdparanoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia && _cdparanoia=yes
 fi
 if test "$_cdparanoia" = yes ; then
     _def_cdparanoia='#define HAVE_CDDA'
@@ -3196,6 +3200,34 @@ else
     _noinputmodules="cdda $_noinputmodules"
 fi
 echores "$_cdparanoia"
+
+echocheck "freetype 2"
+if test "$_freetype" = yes ; then
+    if ( freetype-config --version ) >/dev/null 2>&1 ; then
+	cat > $TMPC << EOF
+#include <freetype/freetype.h>
+#if !(FREETYPE_MAJOR >= 2)
+#error "Need FreeType 2.0 or newer"
+#endif
+int main()
+{
+    return 0;
+}
+EOF
+	_freetype=no
+	cc_check `freetype-config --cflags` && _freetype=yes
+    else
+	_freetype=no
+    fi
+fi
+if test "$_freetype" = yes ; then
+    _def_freetype='#define HAVE_FREETYPE'
+    _inc_freetype=`freetype-config --cflags`
+    _ld_freetype=`freetype-config --libs`
+else
+    _def_freetype='#undef HAVE_FREETYPE'
+fi
+echores "$_freetype"
 
 echocheck "zlib"
 cat > $TMPC << EOF
@@ -4274,8 +4306,10 @@ MENCODER = $_mencoder
 ENCORE_LIB =  $_ld_encore $_ld_mp3lame
 DIRECTFB_INC = $_inc_directfb
 DIRECTFB_LIB = $_ld_directfb
-CDPARANOIA_INC = $_inc_cdparnoia
+CDPARANOIA_INC = $_inc_cdparanoia
 CDPARANOIA_LIB = $_ld_cdparanoia
+FREETYPE_INC = $_inc_freetype
+FREETYPE_LIB = $_ld_freetype
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -4608,6 +4642,9 @@ $_def_jpg
 /* enable GIF support */
 $_def_gif
 $_def_gif_4
+
+/* enable FreeType support */
+$_def_freetype
 
 /* libmad support */
 $_def_mad

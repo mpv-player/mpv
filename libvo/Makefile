@@ -3,14 +3,14 @@ include config.mak
 
 LIBNAME = libvo.a
 
-SRCS=aspect.c aclib.c osd.c font_load.c gtf.c spuenc.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c vo_yuv4mpeg.c $(OPTIONAL_SRCS) sub.c
+SRCS=aspect.c aclib.c osd.c font_load.c gtf.c spuenc.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c vo_yuv4mpeg.c $(OPTIONAL_SRCS) sub.c font_load_ft.c
 OBJS=$(SRCS:.c=.o)
 
 ifeq ($(VIDIX),yes)
 SRCS += vosub_vidix.c
 endif
 
-CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DXR2_INC) $(DVB_INC) $(DIRECTFB_INC) -DMPG12PLAY #-Wall
+CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DXR2_INC) $(DVB_INC) $(DIRECTFB_INC) $(FREETYPE_INC) -DMPG12PLAY #-Wall
 ifeq ($(VIDIX),yes)
 CFLAGS += -DVIDIX_PATH='"$(prefix)/lib/mplayer/vidix/"'
 endif

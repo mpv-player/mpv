@@ -668,9 +668,9 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 
 //------ load global data first ------
 
-
-// check font
 #ifdef USE_OSD
+#ifndef HAVE_FREETYPE
+// check font
   if(font_name){
        vo_font=read_font_desc(font_name,font_factor,verbose>1);
        if(!vo_font) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadFont,font_name);
@@ -680,8 +680,10 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
        if(!vo_font)
        vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
   }
+#else
+  init_freetype();
 #endif
-
+#endif
   vo_init_osd();
 
 #ifdef HAVE_RTC
@@ -1323,6 +1325,10 @@ current_module="init_vo";
 
    if(vo_flags & 0x08 && vo_spudec)
       spudec_set_hw_spu(vo_spudec,video_out);
+
+#ifdef HAVE_FREETYPE
+   force_load_font = 1;
+#endif
 
 //================== MAIN: ==========================
    main:
@@ -2774,6 +2780,12 @@ while(playtree_iter != NULL) {
 
 if(use_gui || playtree_iter != NULL){
 
+#ifdef HAVE_FREETYPE
+    current_module="uninit_font";
+    if (vo_font) free_font_desc(vo_font);
+    vo_font = NULL;
+#endif
+
   current_module="uninit_acodec";
   if(sh_audio) uninit_audio(sh_audio);
   sh_audio=NULL;
@@ -2804,6 +2816,10 @@ if(use_gui || playtree_iter != NULL){
   eof = 0;
   goto play_next_file;
 }
+
+#ifdef HAVE_FREETYPE
+done_freetype();
+#endif
 
 exit_player(MSGTR_Exit_eof);
 

@@ -1,3 +1,6 @@
+#include "config.h"
+
+#ifndef HAVE_FREETYPE
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,7 +9,6 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "config.h"
 #include "font_load.h"
 
 extern char *get_path ( char * );
@@ -300,3 +302,5 @@ read_font_desc("high_arpi.desc",1);
 
 }
 #endif
+
+#endif /* HAVE_FREETYPE */

@@ -201,6 +201,9 @@ extern char **          vo_plugin_args;
 #if defined( USE_OSD ) || defined( USE_SUB )
 void guiLoadFont( void )
 {
+#ifdef HAVE_FREETYPE
+  load_font(vo_image_width, vo_image_height);
+#else
  if ( vo_font )
   {
    int i;
@@ -235,6 +238,7 @@ void guiLoadFont( void )
       vo_font=read_font_desc( font_name,font_factor,0 );
      }
    }
+#endif
 }
 #endif
 
