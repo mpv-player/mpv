@@ -2,69 +2,96 @@ MPlayer (1.0)
 
   pre5: "Niu ririsu" June 29, 2004
 
+    Name:
+    * It's "MPlayer - The Movie Player" instead of
+      "MPlayer - The Movie Player for Linux" now.
+
     Security:
     * complete review of string operations, buffer overflows fixed
 
     DOCS:
-    * Hungarian XML documentation translation started
     * small additions, corrections, updates all over the place
     * audio output driver section added to the man page
     * several bug fixes and improvements in the MEncoder documentation
     * -vo winvidix documented
+    * AUTHORS file massively extended
+    * Hungarian XML documentation translation started
 
     Ports:
     * encrypted DVD playback on Windows fixed (again)
     * Cygwin and MinGW now accept the same -dvd-device syntax
-    * AC3 passthrough for ao_win32
-    * improved vo_quartz (esp. YUV support), made default on Mac OS X
-    * Bigendian fixed (vf.c, vo_tga)
-    * OpenBSD/VAX support
+    * LIVE.COM now works under MinGW
+    * foundations for MinGW crosscompilation
     * disabled SSE on MinGW as it caused crashes
+    * AC3 passthrough for ao_win32
+    * improved vo_quartz (YUV, multiple screens support)
+    * vo_quartz made default on Mac OS X
     * RealVideo binary codecs support on MacOS X (still buggy)
+    * bigendian fixes in vf.c, vo_tga
+    * OpenBSD/VAX support
+    * AMD64 support
 
     Drivers:
     * support for more Radeons (9800 XT among them) in VIDIX
+    * Radeon related bug fixes in VIDIX
     * gl2 vo now supports GUI, fix for flickering borders in fullscreen
-    * support 24 bit and 32bit pcm files, bigendian fixes
-    * sdl ao converts unsupported formats instead of quitting
+    * support 24 and 32 bit PCM files, bigendian fixes
+    * ao_sdl now converts unsupported formats instead of quitting
     * ENCA support
-    * merged alsa9 and alsa1x ao drivers to ao_alsa
+    * merged ao_alsa9 and ao_alsa1x drivers into ao_alsa
     * NeoMagic TV-out support through VESA
-    * JACK ao output module
+    * JACK audio output driver
     * mga_vid ported to 2.6 kernels
     * vo_sdl fixes (wrong flags)
+    * vo_directx fixes
 
     Decoders:
-    * MSZH/ZLIB, FLI, QTRLE, RoQ video and audio support moved to FFmpeg
+    * MSZH/ZLIB, FLI, QTRLE, RoQ video and RoQ audio support moved to FFmpeg
+    * FFmpeg Cinepak and CYUV decoders preferred
+    * paletted Cinepak support
     * audio format 0xff support (is AAC)
     * "raw" audio in MOV supported
-    * Indeo audio (iac25) supported via dshow DLL
-    * upgrade libfaad2 to the faad 2.0 release
+    * Indeo audio (iac25) support via binary codec
+    * upgrade libfaad2 to the FAAD 2.0 release
+    * MPEG2 chroma422/444 support
 
     Demuxers:
-    * support NSA streams
-    * ASF, MMST streaming fixes
-    * Ogg subtitle handling fixes
+    * Ogg subtitle handling and other bug fixes
+    * Matroska improvements
     * support seeking in Real files without -idx
     * support seeking in Real files without index with -forceidx
 
     Streaming:
-    * misc bug fixes
+    * ASF, MMST streaming fixes
+    * URL escaping fixed
+    * NSA streaming support
+    * embedded RAM playlist support
+    * multibyte URL support
+    * miscellaneous bug fixes
 
     Filters:
     * vf_softskip: frame skipping filter for MEncoder
     * vf_harddup: frame duplication filter for MEncoder
+    * vf_pullup minor fixes and improvments
+    * AltiVec-optimized YUV to RGB converter
 
     Others:
     * Metacity fullscreen fixes
     * fix crash on original Pentiums and older
-    * support for ram playlist
     * dvd://start-end support
-    * URL escaping ?
-    * mpst:// support
-    * better AMD64 support
-    * support comments in playlists
+    * netstream (mpst://) support fixed
+    * support comments in plaintext playlists
     * loader/ dependency removed
+    * keepaspect option extended to all video output drivers
+    * WMA to Ogg conversion and simple subtitle editing script added to TOOLS
+    * support for more lame options
+    * new set of GUI icons
+    * memory conserving implementation of GUI potmeters
+    * X11 code reindented
+    * further gcc 3.4 support fixes
+    * mixer API written for changing volume through libaf
+    * -rtc RTC device option
+    * miscellaneous bug fixes and cleanups
 
 
   pre4: "YAML Counter" Apr 28, 2004
