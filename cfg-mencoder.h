@@ -93,6 +93,26 @@ struct config oac_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
+struct config info_conf[]={
+	{"name", &info_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"artist", &info_artist, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"genre", &info_genre, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"subject", &info_subject, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"copyright", &info_copyright, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"srcform", &info_sourceform, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"comment", &info_comment, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"help", "\nAvailable INFO fields:\n"
+	"   name      - title of the subject of the file\n"
+	"   artist    - artist or author of the original subject of the file\n"
+	"   genre     - original work category\n"
+	"   subject   - contents of the file\n"
+	"   copyright - copyright information for the file\n"
+	"   srcform   - original form of the material that was digitized\n"
+	"   comment   - general comments about the file or the subject of the file\n"
+	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
+
 static config_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this must be the first!!! */
@@ -129,6 +149,9 @@ static config_t mencoder_opts[]={
 	{"vobsubout", &vobsub_out, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vobsuboutindex", &vobsub_out_index, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	{"vobsuboutid", &vobsub_out_id, CONF_TYPE_STRING, 0, 0, 0, NULL},
+
+	// info header strings
+	{"info", info_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
 #ifdef HAVE_DIVX4ENCORE
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

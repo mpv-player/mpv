@@ -164,6 +164,15 @@ static subtitle* subtitles=NULL;
 float sub_last_pts = -303;
 #endif
 
+// infos are empty by default
+char *info_name=NULL;
+char *info_artist=NULL;
+char *info_genre=NULL;
+char *info_subject=NULL;
+char *info_copyright=NULL;
+char *info_sourceform=NULL;
+char *info_comment=NULL;
+
 
 
 //char *out_audio_codec=NULL; // override audio codec

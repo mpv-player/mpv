@@ -26,6 +26,11 @@ typedef struct {
 } aviwrite_stream_t;
 
 typedef struct {
+  unsigned int id;
+  char *text;
+} aviwrite_info_t;
+
+typedef struct {
   // encoding:
   MainAVIHeader avih;
   unsigned int movi_start;

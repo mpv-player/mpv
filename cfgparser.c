@@ -707,7 +707,7 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			    /* clear out */
 			    subopt[0] = subparam[0] = 0;
 			    
-			    sscanf_ret = sscanf(token, "%[^=]=%s", subopt, subparam);
+			    sscanf_ret = sscanf(token, "%[^=]=%[^:]", subopt, subparam);
 
 			    mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "token: '%s', i=%d, subopt='%s', subparam='%s' (ret: %d)\n", token, i, subopt, subparam, sscanf_ret);
 			    switch(sscanf_ret)

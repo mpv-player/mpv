@@ -18,6 +18,14 @@
 #include "aviwrite.h"
 #include "aviheader.h"
 
+extern char *info_name;
+extern char *info_artist;
+extern char *info_genre;
+extern char *info_subject;
+extern char *info_copyright;
+extern char *info_sourceform;
+extern char *info_comment;
+
 aviwrite_stream_t* aviwrite_new_stream(aviwrite_t *muxer,int type){
     aviwrite_stream_t* s;
     if(muxer->avih.dwStreams>=AVIWRITE_MAX_STREAMS){
@@ -135,6 +143,8 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
   unsigned int riff[3];
   int i;
   unsigned int hdrsize;
+  aviwrite_info_t info[16];
+
   // RIFF header:
 #ifdef WORDS_BIGENDIAN 
   /* FIXME: updating the header on big-endian causes the video
@@ -218,6 +228,56 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
           le2me_WAVEFORMATEX(muxer->streams[i]->wf);
 }	  
 	  break;
+      }
+  }
+
+// ============= INFO ===============
+// always include software info
+info[0].id=mmioFOURCC('I','S','F','T'); // Software:
+info[0].text="MEncoder " VERSION;
+// include any optional strings
+i=1;
+if(info_name!=NULL){
+  info[i].id=mmioFOURCC('I','N','A','M'); // Name:
+  info[i++].text=info_name;
+}
+if(info_artist!=NULL){
+  info[i].id=mmioFOURCC('I','A','R','T'); // Artist:
+  info[i++].text=info_artist;
+}
+if(info_genre!=NULL){
+  info[i].id=mmioFOURCC('I','G','N','R'); // Genre:
+  info[i++].text=info_genre;
+}
+if(info_subject!=NULL){
+  info[i].id=mmioFOURCC('I','S','B','J'); // Subject:
+  info[i++].text=info_subject;
+}
+if(info_copyright!=NULL){
+  info[i].id=mmioFOURCC('I','C','O','P'); // Copyright:
+  info[i++].text=info_copyright;
+}
+if(info_sourceform!=NULL){
+  info[i].id=mmioFOURCC('I','S','R','F'); // Source Form:
+  info[i++].text=info_sourceform;
+}
+if(info_comment!=NULL){
+  info[i].id=mmioFOURCC('I','C','M','T'); // Comment:
+  info[i++].text=info_comment;
+}
+info[i].id=0;
+
+  hdrsize=0;
+  // calc info size:
+  for(i=0;info[i].id!=0;i++) if(info[i].text){
+      size_t sz=strlen(info[i].text)+1;
+      hdrsize+=sz+8+sz%2;
+  }
+  // write infos:
+  if (hdrsize!=0){
+      write_avi_list(f,mmioFOURCC('I','N','F','O'),hdrsize);
+      for(i=0;info[i].id!=0;i++) if(info[i].text){
+          write_avi_chunk(f,info[i].id,strlen(info[i].text)+1,info[i].text);
       }
   }
 
