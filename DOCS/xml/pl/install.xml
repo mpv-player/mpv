@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.55 -->
+<!-- synced with 1.57 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -122,7 +122,7 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">ALSA</emphasis> - opcjonalna, do obsługi wyjścia dźwięku
-  przez ALSA. Wymagana jeest przynajmniej wersja 0.9.0rc4.
+  przez ALSA. Wymagana jest przynajmniej wersja 0.9.0rc4.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">bio2jack</emphasis> - opcjonalna, do obsługi wyjścia
@@ -686,7 +686,7 @@ Jeżeli chciałbyś rozwiązać ten problem ostatecznie, musisz ręcznie zmienić
 wartość framerate pliku z napisami.
 <application>MPlayer</application> może zrobić to za ciebie:
 
-<screen>mplayer <replaceable>atrapa.avi</replaceable> -fps fps_napisów -subfps fps_filmu [-subdelay sek] [-sub zbiór_z_napisami] <replaceable>-dumpmicrodvdsub</replaceable></screen>
+<screen>mplayer -dumpmicrodvdsub -fps <replaceable>fps_napisów</replaceable> -subfps <replaceable>fps_filmu</replaceable> -sub <replaceable>zbiór_z_napisami</replaceable> <replaceable>atrapa.avi</replaceable></screen>
 </para>
 
 <para>
