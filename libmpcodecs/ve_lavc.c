@@ -133,6 +133,7 @@ static char *lavc_param_intra_matrix = NULL;
 static char *lavc_param_inter_matrix = NULL;
 static int lavc_param_cbp= 0;
 static int lavc_param_mv0= 0;
+static int lavc_param_noise_reduction= 0;
 
 #include "m_option.h"
 
@@ -236,6 +237,7 @@ m_option_t lavcopts_conf[]={
 #if LIBAVCODEC_BUILD >= 4683
 	{"mv0", &lavc_param_mv0, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_MV0, NULL},
 #endif
+	{"nr", &lavc_param_noise_reduction, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -345,6 +347,9 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4669
     lavc_venc_context->coder_type= lavc_param_coder;
     lavc_venc_context->context_model= lavc_param_context;
+#endif
+#if LIBAVCODEC_BUILD >= 4690
+    lavc_venc_context->noise_reduction= lavc_param_noise_reduction;
 #endif
 #if LIBAVCODEC_BUILD >= 4675
     if (lavc_param_intra_matrix)
