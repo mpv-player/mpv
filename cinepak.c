@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "bswap.h"
 
 #include "libvo/img_format.h"
 #include "mp_image.h"
@@ -48,16 +49,16 @@ typedef struct
 	// Lower pair (y2 y3):
 	unsigned short yv12_v4_l;
 
-	// These longs are for YUYV output: The v1 vars are for when the
+	// These longs are for YUY2 output: The v1 vars are for when the
 	// vector is doublesized and used by itself to paint a 4x4 block.
 	// The names stand for the upper-left, upper-right,
-	// lower-left, and lower-right YUYV pixel pairs.
-        unsigned long yuyv_v1_ul, yuyv_v1_ur;
-        unsigned long yuyv_v1_ll, yuyv_v1_lr;
+	// lower-left, and lower-right YUY2 pixel pairs.
+        unsigned long yuy2_v1_ul, yuy2_v1_ur;
+        unsigned long yuy2_v1_ll, yuy2_v1_lr;
 	// The v4 vars are for when the vector is used as 1 of 4 vectors
 	// to paint a 4x4 block. The names stand for upper and lower
-	// YUYV pixel pairs.
-        unsigned long yuyv_v4_u, yuyv_v4_l;
+	// YUY2 pixel pairs.
+        unsigned long yuy2_v4_u, yuy2_v4_l;
 
 	// These longs are for BGR32 output
 	unsigned long rgb0, rgb1, rgb2, rgb3;
@@ -92,8 +93,12 @@ static long CU_Y_tab[256], CV_Y_tab[256], CU_Cb_tab[256], CV_Cb_tab[256],
 
 /* ---------------------------------------------------------------------- */
 
-#define PACK_YV12_V1_Y(cb,y0,y1) ((((unsigned char)cb->y1)<<24)|(cb->y1<<16)|(((unsigned char)cb->y0)<<8)|(cb->y0))
-#define PACK_YV12_V4_Y(cb,y0,y1) ((((unsigned char)cb->y1)<<8)|(cb->y0))
+// This PACKing macro packs the luminance bytes as y1-y1-y0-y0, which is
+// stored on a little endian machine as y0-y0-y1-y1. Therefore, treat it as
+// a little endian number and rearrange the bytes on big endian machines
+// using the built-in byte order macros.
+#define PACK_YV12_V1_Y(cb,y0,y1) le2me_32((((unsigned char)cb->y1)<<24)|(cb->y1<<16)|(((unsigned char)cb->y0)<<8)|(cb->y0))
+#define PACK_YV12_V4_Y(cb,y0,y1) le2me_16((((unsigned char)cb->y1)<<8)|(cb->y0))
 
 static inline void read_codebook_yv12(cvid_codebook *c, int mode)
 {
@@ -139,22 +144,12 @@ int y_uv;
 
 /* ---------------------------------------------------------------------- */
 
-//static unsigned char *yv12_y_plane = NULL;
-//static unsigned char *yv12_v_plane = NULL;
-//static unsigned char *yv12_u_plane = NULL;
-
 inline void cvid_v1_yv12(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb)
 {
-//int uv_offset = (frm - yv12_y_plane) / 4;
-//int row_inc = stride / sizeof(unsigned long);
-//unsigned long *y_ptr = (unsigned long *)frm;
-//unsigned char *v_ptr = yv12_v_plane + uv_offset;
-//unsigned char *u_ptr = yv12_u_plane + uv_offset;
-//int uv_stride = stride / 2;
 unsigned char *p;
 int stride;
 
-	if(y+3>=mpi->height) return; // avoid sig11
+	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
 
 	// take care of the luminance
 	stride = mpi->stride[0];
@@ -181,17 +176,10 @@ int stride;
 inline void cvid_v4_yv12(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb0,
 	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
 {
-//int uv_offset = (frm - yv12_y_plane) / 4;
-//int row_inc = stride / sizeof(unsigned short);
-//unsigned short *y_ptr = (unsigned short *)frm;
-//unsigned char *v_ptr = yv12_v_plane + uv_offset;
-//unsigned char *u_ptr = yv12_u_plane + uv_offset;
-//int uv_stride = stride / 2;
-
 unsigned char *p;
 int stride;
 
-	if(y+3>=mpi->height) return; // avoid sig11
+	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
 
 	// take care of the luminance
 	stride = mpi->stride[0];
@@ -222,9 +210,7 @@ int stride;
 
 /* ---------------------------------------------------------------------- */
 
-#if 0
-
-#define PACK_YUYV(cb,y0,y1,u,v) ((((unsigned char)cb->v)<<24)|(cb->y1<<16)|(((unsigned char)cb->u)<<8)|(cb->y0))
+#define PACK_YUY2(cb,y0,y1,u,v) le2me_32(((((unsigned char)cb->v)<<24)|(cb->y1<<16)|(((unsigned char)cb->u)<<8)|(cb->y0)))
 
 static inline void read_codebook_yuy2(cvid_codebook *c, int mode)
 {
@@ -261,61 +247,67 @@ int y_uv;
 		c->u = uiclp[(int)((CU_Cb_tab[u] + CV_Cb_tab[v]) >> SCALEBITS)];
 		c->v = uiclp[(int)((CU_Cr_tab[u] + CV_Cr_tab[v]) >> SCALEBITS)];
 
-		c->yuyv_v4_u = PACK_YUYV(c, y0, y1, u, v);
-		c->yuyv_v4_l = PACK_YUYV(c, y2, y3, u, v);
-		c->yuyv_v1_ul = PACK_YUYV(c, y0, y0, u, v);
-		c->yuyv_v1_ur = PACK_YUYV(c, y1, y1, u, v);
-		c->yuyv_v1_ll = PACK_YUYV(c, y2, y2, u, v);
-		c->yuyv_v1_lr = PACK_YUYV(c, y3, y3, u, v);
+		c->yuy2_v4_u = PACK_YUY2(c, y0, y1, u, v);
+		c->yuy2_v4_l = PACK_YUY2(c, y2, y3, u, v);
+		c->yuy2_v1_ul = PACK_YUY2(c, y0, y0, u, v);
+		c->yuy2_v1_ur = PACK_YUY2(c, y1, y1, u, v);
+		c->yuy2_v1_ll = PACK_YUY2(c, y2, y2, u, v);
+		c->yuy2_v1_lr = PACK_YUY2(c, y3, y3, u, v);
 		}
 }
 
 /* ------------------------------------------------------------------------ */
-inline void cvid_v1_yuy2(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb)
+inline void cvid_v1_yuy2(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb)
 {
-unsigned long *vptr = (unsigned long *)frm;
-int row_inc = stride/4;
+int stride = mpi->stride[0] / 2;
+unsigned long *vptr = (unsigned long *)mpi->planes[0];
 
-	if(vptr > (unsigned long *)end) return;
-	vptr[0] = cb->yuyv_v1_ul;
-	vptr[1] = cb->yuyv_v1_ur;
+	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
 
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
-	vptr[0] = cb->yuyv_v1_ul;
-	vptr[1] = cb->yuyv_v1_ur;
+	vptr += (y * mpi->stride[0] + x) / 2;
 
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
-	vptr[0] = cb->yuyv_v1_ll;
-	vptr[1] = cb->yuyv_v1_lr;
+	vptr[0] = cb->yuy2_v1_ul;
+	vptr[1] = cb->yuy2_v1_ur;
 
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
-	vptr[0] = cb->yuyv_v1_ll;
-	vptr[1] = cb->yuyv_v1_lr;
+	vptr += stride;
+	vptr[0] = cb->yuy2_v1_ul;
+	vptr[1] = cb->yuy2_v1_ur;
+
+	vptr += stride;
+	vptr[0] = cb->yuy2_v1_ll;
+	vptr[1] = cb->yuy2_v1_lr;
+
+	vptr += stride;
+	vptr[0] = cb->yuy2_v1_ll;
+	vptr[1] = cb->yuy2_v1_lr;
 }
 
 
 /* ------------------------------------------------------------------------ */
-inline void cvid_v4_yuy2(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb0,
+inline void cvid_v4_yuy2(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb0,
 	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
 {
-unsigned long *vptr = (unsigned long *)frm;
-int row_inc = stride/4;
+int stride = mpi->stride[0] / 2;
+unsigned long *vptr = (unsigned long *)mpi->planes[0];
 
-	if(vptr > (unsigned long *)end) return;
-	vptr[0] = cb0->yuyv_v4_u;
-	vptr[1] = cb1->yuyv_v4_u;
+	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
 
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
-	vptr[0] = cb0->yuyv_v4_l;
-	vptr[1] = cb1->yuyv_v4_l;
+	vptr += (y * mpi->stride[0] + x) / 2;
 
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
-	vptr[0] = cb2->yuyv_v4_u;
-	vptr[1] = cb3->yuyv_v4_u;
+	vptr[0] = cb0->yuy2_v4_u;
+	vptr[1] = cb1->yuy2_v4_u;
 
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
-	vptr[0] = cb2->yuyv_v4_l;
-	vptr[1] = cb3->yuyv_v4_l;
+	vptr += stride;
+	vptr[0] = cb0->yuy2_v4_l;
+	vptr[1] = cb1->yuy2_v4_l;
+
+	vptr += stride;
+	vptr[0] = cb2->yuy2_v4_u;
+	vptr[1] = cb3->yuy2_v4_u;
+
+	vptr += stride;
+	vptr[0] = cb2->yuy2_v4_l;
+	vptr[1] = cb3->yuy2_v4_l;
 }
 
 /* ---------------------------------------------------------------------- */
@@ -349,62 +341,70 @@ int uvr, uvg, uvb;
 		uvg = -((c->u+1) >> 1) - c->v;
 		uvb = c->u << 1;
 
-		c->rgb0 = (uiclp[c->y0 + uvr] << 16) | (uiclp[c->y0 + uvg] << 8) | uiclp[c->y0 + uvb];
-		c->rgb1 = (uiclp[c->y1 + uvr] << 16) | (uiclp[c->y1 + uvg] << 8) | uiclp[c->y1 + uvb];
-		c->rgb2 = (uiclp[c->y2 + uvr] << 16) | (uiclp[c->y2 + uvg] << 8) | uiclp[c->y2 + uvb];
-		c->rgb3 = (uiclp[c->y3 + uvr] << 16) | (uiclp[c->y3 + uvg] << 8) | uiclp[c->y3 + uvb];
+		c->rgb0 = le2me_32((uiclp[c->y0 + uvr] << 16) | (uiclp[c->y0 + uvg] << 8) | uiclp[c->y0 + uvb]);
+		c->rgb1 = le2me_32((uiclp[c->y1 + uvr] << 16) | (uiclp[c->y1 + uvg] << 8) | uiclp[c->y1 + uvb]);
+		c->rgb2 = le2me_32((uiclp[c->y2 + uvr] << 16) | (uiclp[c->y2 + uvg] << 8) | uiclp[c->y2 + uvb]);
+		c->rgb3 = le2me_32((uiclp[c->y3 + uvr] << 16) | (uiclp[c->y3 + uvg] << 8) | uiclp[c->y3 + uvb]);
 		}
 }
 
 
 /* ------------------------------------------------------------------------ */
-inline void cvid_v1_32(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb)
+inline void cvid_v1_32(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb)
 {
-unsigned long *vptr = (unsigned long *)frm, rgb;
-int row_inc = stride/4;
+int stride = mpi->stride[0];
+unsigned long *vptr = (unsigned long *)mpi->planes[0];
+unsigned long rgb;
+
+	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
+
+	vptr += (y * stride + x);
 
 	vptr[0] = rgb = cb->rgb0; vptr[1] = rgb;
 	vptr[2] = rgb = cb->rgb1; vptr[3] = rgb;
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr += stride;
 	vptr[0] = rgb = cb->rgb0; vptr[1] = rgb;
 	vptr[2] = rgb = cb->rgb1; vptr[3] = rgb;
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr += stride;
 	vptr[0] = rgb = cb->rgb2; vptr[1] = rgb;
 	vptr[2] = rgb = cb->rgb3; vptr[3] = rgb;
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr += stride;
 	vptr[0] = rgb = cb->rgb2; vptr[1] = rgb;
 	vptr[2] = rgb = cb->rgb3; vptr[3] = rgb;
 }
 
 
 /* ------------------------------------------------------------------------ */
-inline void cvid_v4_32(unsigned char *frm, unsigned char *end, int stride, cvid_codebook *cb0,
+inline void cvid_v4_32(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb0,
 	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
 {
-unsigned long *vptr = (unsigned long *)frm;
-int row_inc = stride/4;
+int stride = mpi->stride[0];
+unsigned long *vptr = (unsigned long *)mpi->planes[0];
+
+	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
+
+	vptr += (y * stride + x);
 
 	vptr[0] = cb0->rgb0;
 	vptr[1] = cb0->rgb1;
 	vptr[2] = cb1->rgb0;
 	vptr[3] = cb1->rgb1;
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr += stride;
 	vptr[0] = cb0->rgb2;
 	vptr[1] = cb0->rgb3;
 	vptr[2] = cb1->rgb2;
 	vptr[3] = cb1->rgb3;
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr += stride;
 	vptr[0] = cb2->rgb0;
 	vptr[1] = cb2->rgb1;
 	vptr[2] = cb3->rgb0;
 	vptr[3] = cb3->rgb1;
-	vptr += row_inc; if(vptr > (unsigned long *)end) return;
+	vptr += stride;
 	vptr[0] = cb2->rgb2;
 	vptr[1] = cb2->rgb3;
 	vptr[2] = cb3->rgb2;
 	vptr[3] = cb3->rgb3;
 }
-
 
 
 /* ---------------------------------------------------------------------- */
@@ -447,26 +447,29 @@ int uvr, uvg, uvb;
 
 
 /* ------------------------------------------------------------------------ */
-void cvid_v1_24(unsigned char *vptr, unsigned char *end, int stride, cvid_codebook *cb)
+inline void cvid_v1_24(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb)
 {
 unsigned char r, g, b;
-int row_inc = stride-4*3;
+int stride = (mpi->stride[0]-4)*3;
+unsigned char *vptr = mpi->planes[0] + (y * mpi->stride[0] + x) * 3;
+
+	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
 
 	*vptr++ = b = cb->b[0]; *vptr++ = g = cb->g[0]; *vptr++ = r = cb->r[0];
 	*vptr++ = b; *vptr++ = g; *vptr++ = r;
 	*vptr++ = b = cb->b[1]; *vptr++ = g = cb->g[1]; *vptr++ = r = cb->r[1];
 	*vptr++ = b; *vptr++ = g; *vptr++ = r;
-	vptr += row_inc; if(vptr > end) return;
+	vptr += stride;
 	*vptr++ = b = cb->b[0]; *vptr++ = g = cb->g[0]; *vptr++ = r = cb->r[0];
 	*vptr++ = b; *vptr++ = g; *vptr++ = r;
 	*vptr++ = b = cb->b[1]; *vptr++ = g = cb->g[1]; *vptr++ = r = cb->r[1];
 	*vptr++ = b; *vptr++ = g; *vptr++ = r;
-	vptr += row_inc; if(vptr > end) return;
+	vptr += stride;
 	*vptr++ = b = cb->b[2]; *vptr++ = g = cb->g[2]; *vptr++ = r = cb->r[2];
 	*vptr++ = b; *vptr++ = g; *vptr++ = r;
 	*vptr++ = b = cb->b[3]; *vptr++ = g = cb->g[3]; *vptr++ = r = cb->r[3];
 	*vptr++ = b; *vptr++ = g; *vptr++ = r;
-	vptr += row_inc; if(vptr > end) return;
+	vptr += stride;
 	*vptr++ = b = cb->b[2]; *vptr++ = g = cb->g[2]; *vptr++ = r = cb->r[2];
 	*vptr++ = b; *vptr++ = g; *vptr++ = r;
 	*vptr++ = b = cb->b[3]; *vptr++ = g = cb->g[3]; *vptr++ = r = cb->r[3];
@@ -475,33 +478,34 @@ int row_inc = stride-4*3;
 
 
 /* ------------------------------------------------------------------------ */
-void cvid_v4_24(unsigned char *vptr, unsigned char *end, int stride, cvid_codebook *cb0,
+inline void cvid_v4_24(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *cb0,
 	cvid_codebook *cb1, cvid_codebook *cb2, cvid_codebook *cb3)
 {
-int row_inc = stride-4*3;
+int stride = (mpi->stride[0]-4)*3;
+unsigned char *vptr = mpi->planes[0] + (y * mpi->stride[0] + x) * 3;
+
+	if(y+3>=(unsigned int)mpi->height) return; // avoid sig11
 
 	*vptr++ = cb0->b[0]; *vptr++ = cb0->g[0]; *vptr++ = cb0->r[0];
 	*vptr++ = cb0->b[1]; *vptr++ = cb0->g[1]; *vptr++ = cb0->r[1];
 	*vptr++ = cb1->b[0]; *vptr++ = cb1->g[0]; *vptr++ = cb1->r[0];
 	*vptr++ = cb1->b[1]; *vptr++ = cb1->g[1]; *vptr++ = cb1->r[1];
-	vptr += row_inc; if(vptr > end) return;
+	vptr += stride;
 	*vptr++ = cb0->b[2]; *vptr++ = cb0->g[2]; *vptr++ = cb0->r[2];
 	*vptr++ = cb0->b[3]; *vptr++ = cb0->g[3]; *vptr++ = cb0->r[3];
 	*vptr++ = cb1->b[2]; *vptr++ = cb1->g[2]; *vptr++ = cb1->r[2];
 	*vptr++ = cb1->b[3]; *vptr++ = cb1->g[3]; *vptr++ = cb1->r[3];
-	vptr += row_inc; if(vptr > end) return;
+	vptr += stride;
 	*vptr++ = cb2->b[0]; *vptr++ = cb2->g[0]; *vptr++ = cb2->r[0];
 	*vptr++ = cb2->b[1]; *vptr++ = cb2->g[1]; *vptr++ = cb2->r[1];
 	*vptr++ = cb3->b[0]; *vptr++ = cb3->g[0]; *vptr++ = cb3->r[0];
 	*vptr++ = cb3->b[1]; *vptr++ = cb3->g[1]; *vptr++ = cb3->r[1];
-	vptr += row_inc; if(vptr > end) return;
+	vptr += stride;
 	*vptr++ = cb2->b[2]; *vptr++ = cb2->g[2]; *vptr++ = cb2->r[2];
 	*vptr++ = cb2->b[3]; *vptr++ = cb2->g[3]; *vptr++ = cb2->r[3];
 	*vptr++ = cb3->b[2]; *vptr++ = cb3->g[2]; *vptr++ = cb3->r[2];
 	*vptr++ = cb3->b[3]; *vptr++ = cb3->g[3]; *vptr++ = cb3->r[3];
 }
-
-#endif
 
 /* ------------------------------------------------------------------------
  * Call this function once at the start of the sequence and save the
@@ -549,7 +553,7 @@ int i, x;
  *   frame; depths support:
  *     32: BGR32
  *     24: BGR24
- *     16: YUYV
+ *     16: YUY2
  *     12: YV12
  */
 void decode_cinepak(void *context, unsigned char *buf, int size, mp_image_t *mpi)
@@ -559,7 +563,6 @@ cvid_codebook *v4_codebook, *v1_codebook, *codebook = NULL;
 unsigned long x, y, y_bottom, frame_flags, strips, cv_width, cv_height, cnum,
 	strip_id, chunk_id, x0, y0, x1, y1, ci, flag, mask;
 long len, top_size, chunk_size;
-unsigned char *frm_ptr, *frm_end;
 unsigned int i, cur_strip, d0, d1, d2, d3;
 int modulo;
 void (*read_codebook)(cvid_codebook *c, int mode) = NULL;
@@ -582,13 +585,8 @@ void (*cvid_v4)(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *
 			read_codebook = read_codebook_yv12;
 			cvid_v1 = cvid_v1_yv12;
 			cvid_v4 = cvid_v4_yv12;
-//			yv12_y_plane = frame;
-//			yv12_v_plane = frame + width * height;
-//			yv12_u_plane = frame + (width * height) +
-//				(width * height / 4);
 			break;
-/*
-		case IMGFMT_YUY2:  // YUYV
+		case IMGFMT_YUY2:  // YUY2
 			read_codebook = read_codebook_yuy2;
 			cvid_v1 = cvid_v1_yuy2;
 			cvid_v4 = cvid_v4_yuy2;
@@ -603,12 +601,7 @@ void (*cvid_v4)(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *
 			cvid_v1 = cvid_v1_32;
 			cvid_v4 = cvid_v4_32;
 			break;
-*/
 		}
-
-//	frm_stride = stride_ ? stride_ : width * bpp;
-//	frm_ptr = frame;
-//	frm_end = frm_ptr + width * height * bpp;
 
 	if(len != size)
 		{
@@ -674,7 +667,7 @@ void (*cvid_v4)(mp_image_t *mpi, unsigned int x, unsigned int y, cvid_codebook *
 		y_bottom += y1;
 		top_size -= 12;
 		x = 0;
-		if(x1 != mpi->width) 
+		if(x1 != (unsigned int)mpi->width) 
 			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "CVID: Warning x1 (%ld) != width (%d)\n", x1, mpi->width);
 x1 = mpi->width;
 #if DBUG
@@ -789,7 +782,7 @@ x1 = mpi->width;
 								}
 
 							x += 4;
-							if(x >= mpi->width)
+							if(x >= (unsigned int)mpi->width)
 								{
 								x = 0;
 								y += 4;
@@ -839,7 +832,7 @@ x1 = mpi->width;
 
 							mask >>= 1;
 							x += 4;
-							if(x >= mpi->width)
+							if(x >= (unsigned int)mpi->width)
 								{
 								x = 0;
 								y += 4;
@@ -856,7 +849,7 @@ x1 = mpi->width;
 						cvid_v1(mpi, x, y, v1_codebook + get_byte());
 						chunk_size--;
 						x += 4;
-						if(x >= mpi->width)
+						if(x >= (unsigned int)mpi->width)
 							{
 							x = 0;
 							y += 4;
