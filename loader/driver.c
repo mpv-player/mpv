@@ -8,13 +8,13 @@
 #include <sys/time.h>
 #endif
 
-#include <win32.h>
-#include <wine/driver.h>
-#include <wine/pe_image.h>
-#include <wine/winreg.h>
-#include <wine/vfw.h>
-#include <registry.h>
-#include <setup_FS.h>
+#include "win32.h"
+#include "wine/driver.h"
+#include "wine/pe_image.h"
+#include "wine/winreg.h"
+#include "wine/vfw.h"
+#include "registry.h"
+#include "ldt_keeper.h"
 #include "driver.h"
 
 
@@ -98,7 +98,7 @@ static NPDRVR DrvAlloc(HDRVR*lpDriver, LPUINT lpDrvResult)
 static void DrvFree(HDRVR hDriver)
 {
     int i;
-    setup_FS_Segment();
+    Setup_FS_Segment();
     if(hDriver)
     	if(((DRVR*)hDriver)->hDriverModule)
     	if(((DRVR*)hDriver)->DriverProc)
@@ -195,7 +195,7 @@ DrvOpen(LPARAM lParam2)
     //TRACE("DriverProc == %X\n", npDriver->DriverProc);
      npDriver->dwDriverID = ++dwDrvID;
 
-     setup_FS_Segment();
+     Setup_FS_Segment();
 
 	STORE_ALL;
         (npDriver->DriverProc)(0, hDriver, DRV_LOAD, 0, 0);
