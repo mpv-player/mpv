@@ -41,6 +41,8 @@ static unsigned int outfmt_list[]={
     IMGFMT_RGB8,
     IMGFMT_BGR4,
     IMGFMT_RGB4,
+    IMGFMT_BG4B,
+    IMGFMT_RG4B,
     IMGFMT_BGR1,
     IMGFMT_RGB1,
 // YUV:
@@ -178,7 +180,8 @@ static int config(struct vf_instance_s* vf,
 	    vf->priv->palette[4*i+2]=4*((i>>5)&7)*9;
 	}
 	break; }
-    case IMGFMT_BGR4: {
+    case IMGFMT_BGR4: 
+    case IMGFMT_BG4B: {
 	int i;
 	vf->priv->palette=malloc(4*16);
 	for(i=0; i<16; i++){

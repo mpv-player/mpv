@@ -517,7 +517,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   }	
 #endif
   if (pformat == IMGFMT_YV12) {
-    yuv2rgb_init(bpp, MODE_RGB);
+    if(bpp==4)
+        yuv2rgb_init(bpp|128, MODE_RGB);
+    else
+        yuv2rgb_init(bpp, MODE_RGB);
   }
 
   x_pos = (WIDTH - maxw) / 2;
@@ -748,7 +751,7 @@ static uint32_t query_format(uint32_t format) {
       case 8 : if ((format == IMGFMT_RGB8 ) || (format == IMGFMT_BGR8))
                  return ((bpp_avail & BPP_8 ) ? 1 : 0);
 	       break;
-      case 4 : if ((format == IMGFMT_RGB4 ) || (format == IMGFMT_BGR4))
+      case 4 : if ((format == IMGFMT_RG4B ) || (format == IMGFMT_BG4B))
                  return ((bpp_avail & BPP_4 ) ? 1 : 0);
 	       break;
       case 1 : if ((format == IMGFMT_RGB1 ) || (format == IMGFMT_BGR1))

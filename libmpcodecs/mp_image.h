@@ -96,14 +96,14 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     }
     mpi->num_planes=1;
     if (IMGFMT_IS_RGB(out_fmt)) {
-	if (IMGFMT_RGB_DEPTH(out_fmt) < 8)
+	if (IMGFMT_RGB_DEPTH(out_fmt) < 8 && !(out_fmt&128))
 	    mpi->bpp = IMGFMT_RGB_DEPTH(out_fmt);
 	else
 	    mpi->bpp=(IMGFMT_RGB_DEPTH(out_fmt)+7)&(~7);
 	return;
     }
     if (IMGFMT_IS_BGR(out_fmt)) {
-	if (IMGFMT_BGR_DEPTH(out_fmt) < 8)
+	if (IMGFMT_BGR_DEPTH(out_fmt) < 8 && !(out_fmt&128))
 	    mpi->bpp = IMGFMT_BGR_DEPTH(out_fmt);
 	else
 	    mpi->bpp=(IMGFMT_BGR_DEPTH(out_fmt)+7)&(~7);
