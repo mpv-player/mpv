@@ -201,7 +201,7 @@ found:
 
 void getch2_enable(){
 struct termios tio_new;
-#if defined(__NetBSD__) || defined(__svr4__)
+#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
     tcgetattr(0,&tio_orig);
 #elif defined(__FreeBSD__)
     ioctl(0,TIOCGETA,&tio_orig);
@@ -212,7 +212,7 @@ struct termios tio_new;
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
-#if defined(__NetBSD__) || defined(__svr4__)
+#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
     tcsetattr(0,TCSANOW,&tio_new);
 #elif defined(__FreeBSD__)
     ioctl(0,TIOCSETA,&tio_new);
@@ -222,7 +222,7 @@ struct termios tio_new;
 }
 
 void getch2_disable(){
-#if defined(__NetBSD__) || defined(__svr4__)
+#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
     tcsetattr(0,TCSANOW,&tio_orig);
 #elif defined(__FreeBSD__)
     ioctl(0,TIOCSETA,&tio_orig);
