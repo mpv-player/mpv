@@ -93,11 +93,10 @@ Fully functional Win32 ACM/DShow codecs:
   voxmsdec.ax: works
 - MS-GSM: (0x31,0x32)
   msgsm32.acm: works   (or you can use the  built-in codec)
+- IMA ADPCM (0x11)
+  imaadp32.acm: works
 
 Problems:
-
-- IMA ADPCM (0x11)
-  imaadp32.acm: segfault
 
 Not tested:
 
