@@ -109,13 +109,13 @@
 
 # SOME MACROS/USEFUL FUNCTIONS
 # Returns error code only - NO displaye
-function cc_check() {
+cc_check() {
 	"$_cc" "$TMPC" -o "$TMPO" "$@" >/dev/null 2>&1
 	return "$?"
 }
 
 # Display error message, flushes tempfile, exit 
-function die () {
+die () {
 	echo
 	echo "Error: $@" >&2
 	echo >&2
@@ -123,23 +123,23 @@ function die () {
 	exit 1
 }
 
-function linux() {
+linux() {
 	test "$system_name" = "Linux"
 	return "$?"
 }
-function freebsd() {
+freebsd() {
 	test "$system_name" = "FreeBSD"
 	return "$?"
 }
-function openbsd() {
+openbsd() {
 	test "$system_name" = "OpenBSD"
 	return "$?"
 }
-function bsdos() {
+bsdos() {
 	test "$system_name" = "BSD/OS"
 	return "$?"
 }
-function bsd() {
+bsd() {
 	freebsd || openbsd || bsdos
 	return "$?"
 }
@@ -1948,10 +1948,10 @@ else
 fi
 
 # malloc.h useless in FreeBSD
-if test "$_malloc_h" = yes && ! freebsd ; then
- _have_malloc_h='#define HAVE_MALLOC_H 1'
+if test "$_malloc_h" = yes && test ! freebsd ; then
+  _have_malloc_h='#define HAVE_MALLOC_H 1'
 else
- _have_malloc_h='#undef  HAVE_MALLOC_H'
+  _have_malloc_h='#undef  HAVE_MALLOC_H'
 fi
 
 if test "$_memalign" = yes ; then
