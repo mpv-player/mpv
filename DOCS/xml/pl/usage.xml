@@ -495,4 +495,78 @@ wiêc na liczne nadu¿ycia, które s± przez to mo¿liwe. Zamias tego wy¶lij jak±¶
 </sect2>
 
 </sect1>
+
+<sect1 id="edl" xreflabel="Edit Decision Lists (EDL)">
+<title>Decyzyjne Listy Edycji (Edit Decision Lists - EDL)</title>
+
+<para>
+Decyzyjna lista edycji (EDL) pozwala na automatyczne omijanie, b±d¼ wyciszanie
+fragmentów filmów podczas ich odtwarzania, na podstawie pliku konfiguracji EDL
+dla danego filmu.
+</para>
+
+<para>
+Funkcja ta jest u¿yteczna dla osób, które zechc± obejrzeæ film w "przyjaznym
+dla rodziny" trybie. Mo¿esz usun±æ z filmu przemoc, przekleñstwa, Jar-Jar
+Binksa zgodnie z w³asnymi preferencjami. Ponadto istniej± tak¿e inne
+zastosowania, jak automatyczne pomijanie reklam w ogl±danych filmach.
+</para>
+
+<para>
+Format pliku EDL jest raczej "go³y". Jako, ¿e system EDL osi±gn±³ pewien
+stopieñ dojrza³o¶ci, prawdopodobnie zostanie zaimplamentowany format pliku
+bazuj±cy na XML. (zachowuj±c wsteczn± kompatybilno¶æ z wcze¶niejszymi formatami
+EDL).
+</para>
+
+<para>
+Maksymalna liczba wpisów dla aktualnego wcielenia EDL wynosi 1000.
+Je¿eli zdarzy siê, ¿e bêdziesz potrzebowa³ wiêcej, zmieñ tê warto¶æ w
+<systemitem>#define MAX_EDL_ENTRIES</systemitem> w pliku
+<filename>edl.h</filename>.
+</para>
+
+<sect2 id="edl_using">
+<title>U¿ywanie pliku EDL</title>
+<para>
+U¿yj podczas uruchamiania <application>MPlayera</application> flagi
+<option>-edl &lt;nazwa pliku&gt;</option> z nazw± pliku EDL, który ma byæ
+zastosowany do filmu.
+</para>
+</sect2>
+
+<sect2 id="edl_making">
+<title>Tworzenie pliku EDL</title>
+<para>
+Aktualny format pliku EDL jest nastêpuj±cy:
+<programlisting>
+[sekunda pocz±tkowa] [sekunda koñcowa] [akcja]
+</programlisting>
+gdzie liczby odpowiadaj±ce sekundom nie musz± byæ ca³kowite, za¶ akcja mo¿e
+przyjmowaæ warto¶æ <literal>0</literal> dla pominiêcia b±d¼
+<literal>1</literal> dla wyciszenia.
+Na przyk³ad: 
+<programlisting>
+5.3   7.1    0
+15    16.7   1
+420   422    0
+</programlisting>
+Oznacza to pominiêcie filmu miêdzy 5,3 sekund±, a 7,1 sekund± filmu, nastêpnie
+wyciszenie od 15-tej sekundy do 16,7 sekundy i wreszcie pominiêcie filmu
+pomiêdzy 420 a 422 sekund± Akcje te s± wykonywane, gdy licznik czasu filmu
+osi±gnie zadeklarowan± warto¶æ.
+</para>
+
+<para>
+Aby stworzyæ plik EDL, bêd±cy punktem wyj¶cia do dalszej edycji, u¿yj flagi
+<option>-edlout &lt;nazwa pliku&gt;</option>.
+Nastêpnie, podczas odtwarzania filmu, gdy zechcesz oznaczyæ ostatnie dwie
+sekundy do pominiêcia, naci¶nij <keycap>i</keycap>. Odpowiedni wpis zostanie
+utworzony w pliku. Wtedy mo¿esz wróciæ do edycji i "dostrajania" wygenerowanego
+pliku EDL.
+</para>
+</sect2>
+
+</sect1>
+
 </chapter>
