@@ -48,6 +48,7 @@ typedef struct af_instance_s
   af_data_t* data; // configuration for outgoing data stream
   struct af_instance_s* next;
   struct af_instance_s* prev;  
+  double delay; // Delay caused by the filter [ms]
   frac_t mul; /* length multiplier: how much does this instance change
 		 the length of the buffer. */
 }af_instance_t;
@@ -180,6 +181,8 @@ int af_inputlen(af_stream_t* s, int len);
 int af_calc_insize_constrained(af_stream_t* s, int len,
 			       int max_outsize,int max_insize);
 
+/* Calculate the total delay caused by the filters */
+double af_calc_delay(af_stream_t* s);
 
 // Helper functions and macros used inside the audio filters
 

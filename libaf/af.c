@@ -487,6 +487,19 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
   return in;
 }
 
+/* Calculate the total delay [ms] caused by the filters */
+double af_calc_delay(af_stream_t* s)
+{
+  af_instance_t* af=s->first; 
+  register double delay = 0.0;
+  // Iterate through all filters 
+  while(af){
+    delay += af->delay;
+    af=af->next;
+  }
+  return delay;
+}
+
 /* Helper function called by the macro with the same name this
    function should not be called directly */
 inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)

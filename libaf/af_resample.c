@@ -258,7 +258,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       mp_msg(MSGT_AFILTER,MSGL_V,"[resample] New filter designed up: %i down: %i\n", s->up, s->dn);
     }
 
-    // Set multiplier
+    // Set multiplier and delay
+    af->delay = (double)(1000*L/2)/((double)n->rate);
     af->mul.n = s->up;
     af->mul.d = s->dn;
     return rv;

@@ -41,11 +41,13 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
       mp_msg(MSGT_AFILTER,MSGL_ERR,"Error setting delay length in af_delay. Delay must be between 0s and 30s\n");
       s->len=0;
       s->tlen=0.0;
+      af->delay=0.0;
       return AF_ERROR;
     }
 
     // Set new len and allocate new buffer
     s->tlen = *((float*)arg);
+    af->delay = s->tlen * 1000.0;
     s->len  = af->data->rate*af->data->bps*af->data->nch*(int)s->tlen;
     s->buf  = malloc(s->len);
     mp_msg(MSGT_AFILTER,MSGL_DBG2,"[delay] Delaying audio output by %0.2fs\n",s->tlen);
