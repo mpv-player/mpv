@@ -28,62 +28,51 @@ int edl_check_mode(void)
     return (1);
 }
 
-/** Calculates the total amount of edl_records we will need
- *  to hold the EDL operations queue, we need one edl_record
- *  for each SKIP and two for each MUTE.
- *  \return Number of necessary EDL entries, EDL_ERROR when file can't be read.
- *  \brief Counts needed EDL entries.
+/**
+ *  Allocates a new EDL record and makes sure allocation was successful.
+ *
+ *  \return New allocated EDL record.
+ *  \brief Allocate new EDL record
  */
 
-int edl_count_entries(void)
+static edl_record_ptr edl_alloc_new(edl_record_ptr next_edl_record)
 {
-    FILE *fd = NULL;
-    int entries = 0;
-    int action = 0;
-    float start = 0;
-    float stop = 0;
-    char line[100];
-
-    if (edl_filename)
-    {
-        if ((fd = fopen(edl_filename, "r")) == NULL)
-        {
-            mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlCantOpenForRead,
-                   edl_filename);
-            return (EDL_ERROR);
-        } else
-        {
-            while (fgets(line, 99, fd) != NULL)
-            {
-                if ((sscanf(line, "%f %f %d", &start, &stop, &action)) ==
-                    3)
-                {
-                    if (action == EDL_SKIP)
-                        entries += 1;
-                    if (action == EDL_MUTE)
-                        entries += 2;
-                } else
-                {
-                    mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
-                    return (EDL_ERROR);
-                }
-
-            }
-        }
-    } else
-    {
-        return (EDL_ERROR);
+    edl_record_ptr new_record = calloc(1, sizeof(struct edl_record));
+    if (!new_record) {
+        mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_EdlOutOfMem);
+        exit(1);
     }
+    
+    if (next_edl_record) // if this isn't the first record, tell the previous one what the new one is.
+        next_edl_record->next = new_record;
+    new_record->prev = next_edl_record;
+    
+    return new_record;
+}
 
-    return (entries);
+/**
+ *  Goes through entire EDL records and frees all memory.
+ *  Assumes next_edl_record is valid or NULL.
+ *
+ *  \brief Free EDL memory
+ */
+
+void free_edl(edl_record_ptr next_edl_record)
+{
+    edl_record_ptr tmp;
+    while (next_edl_record) {
+        tmp = next_edl_record->next;
+        free(next_edl_record);
+        next_edl_record = tmp;
+    }
 }
 
 /** Parses edl_filename to fill EDL operations queue.
- *  \return Number of stored EDL records or EDL_ERROR when file can't be read.
+ * Prints out how many EDL operations recorded total.
  *  \brief Fills EDL operations queue.
  */
 
-int edl_parse_file(edl_record_ptr edl_records)
+edl_record_ptr edl_parse_file()
 {
     FILE *fd;
     char line[100];
@@ -91,13 +80,14 @@ int edl_parse_file(edl_record_ptr edl_records)
     int action;
     int record_count = 0;
     int lineCount = 0;
-    struct edl_record *next_edl_record = edl_records;
+    edl_record_ptr edl_records = edl_alloc_new(NULL);
+    edl_record_ptr next_edl_record = edl_records;
 
     if (edl_filename)
     {
         if ((fd = fopen(edl_filename, "r")) == NULL)
         {
-            return (EDL_ERROR);
+            return NULL;
         } else
         {
             while (fgets(line, 99, fd) != NULL)
@@ -111,17 +101,12 @@ int edl_parse_file(edl_record_ptr edl_records)
                     continue;
                 } else
                 {
-                    if (record_count > 0)
+                    if (next_edl_record->prev && start <= next_edl_record->prev->stop_sec)
                     {
-                        if (start <= (next_edl_record - 1)->stop_sec)
-                        {
-                            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                                   MSGTR_EdlNOValidLine, line);
-                            mp_msg(MSGT_CPLAYER, MSGL_WARN,
-                                   MSGTR_EdlBadLineOverlap,
-                                   (next_edl_record - 1)->stop_sec, start);
-                            continue;
-                        }
+                        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlNOValidLine, line);
+                        mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_EdlBadLineOverlap,
+                               next_edl_record->prev->stop_sec, start);
+                        continue;    
                     }
                     if (stop <= start)
                     {
@@ -136,44 +121,36 @@ int edl_parse_file(edl_record_ptr edl_records)
                         next_edl_record->length_sec = 0;
                         next_edl_record->start_sec = start;
                         next_edl_record->stop_sec = start;
-                        next_edl_record->mute_state = EDL_MUTE_START;
-                        next_edl_record++;
-                        (next_edl_record - 1)->next = next_edl_record;
+                        
+                        next_edl_record = edl_alloc_new(next_edl_record);
+                        
                         next_edl_record->action = action;
                         next_edl_record->length_sec = 0;
                         next_edl_record->start_sec = stop;
                         next_edl_record->stop_sec = stop;
-                        next_edl_record->mute_state = EDL_MUTE_END;
-
                     } else
                     {
                         next_edl_record->length_sec = stop - start;
                         next_edl_record->start_sec = start;
                         next_edl_record->stop_sec = stop;
                     }
-                    next_edl_record++;
-
-                    if (record_count >= 0)
-                    {
-                        (next_edl_record - 1)->next = next_edl_record;
-                    }
-
+                    next_edl_record = edl_alloc_new(next_edl_record);
                     record_count++;
                 }
             }
-
-            if (record_count > 0)
-            {
-                (next_edl_record - 1)->next = NULL;
-            }
         }
         fclose(fd);
-    } else
-    {
-        return (EDL_ERROR);
+    }        
+    if (next_edl_record->prev) {
+        next_edl_record->prev->next = NULL; // a record was before me, i don't want them thinking i'm a real record.
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo, record_count);
     }
-
-    return (record_count);
+    else {
+        mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
+        edl_records = NULL; // there was no previous record, we only had one record, the empty one.
+    }
+    free(next_edl_record);
+    return edl_records;
 }
 
 #endif

@@ -363,8 +363,6 @@ static char* rtc_device;
 #ifdef USE_EDL
 edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
-int edl_memory_slots = 0; ///< number of EDL entries (1 for skip + 2 for each mute)
-int edl_operations = 0; ///< number of EDL operations, skip + mute
 short user_muted = 0; ///< Stores whether User wanted muted mode.
 short edl_muted  = 0; ///< Stores whether EDL is currently in muted mode.
 short edl_decision = 0; ///< 1 when an EDL operation has been made
@@ -1249,30 +1247,8 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
     exit_player(NULL);
 } else if (edl_filename)
 {
-    edl_memory_slots = edl_count_entries();
-    if (edl_memory_slots > 0)
-    {
-        edl_records = calloc(edl_memory_slots, sizeof(struct edl_record));
-        if (edl_records == NULL)
-        {
-            mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_EdlOutOfMem);
-            exit_player(NULL);	    
-        } else
-        {
-            if ((edl_operations = edl_parse_file(edl_records)) > 0)
-            {
-                mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlRecordsNo,
-                       edl_operations);
-            } else
-            {
-
-                mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_EdlQueueEmpty);
-            }
-        }
-    }
-
-    next_edl_record = edl_records;
-
+    if (edl_records) free_edl(edl_records);
+    next_edl_record = edl_records = edl_parse_file();
 } else if (edl_output_filename)
 {
     if ((edl_fd = fopen(edl_output_filename, "w")) == NULL)
@@ -2718,7 +2694,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
  if( next_edl_record ) { // Are we (still?) doing EDL?
   if ( !sh_video ) {
     mp_msg( MSGT_CPLAYER, MSGL_ERR, MSGTR_EdlNOsh_video );
-    free(edl_records);
+    free_edl(edl_records);
     next_edl_record = NULL; 
     edl_records = NULL;
   } else {
