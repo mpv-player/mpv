@@ -27,8 +27,8 @@
 #define MKV_A_REALCOOK   "A_REAL/COOK"
 #define MKV_A_REALDNET   "A_REAL/DNET"
 #define MKV_A_REALSIPR   "A_REAL/SIPR"
-#define MKV_A_QDMC       "A_QDESIGNMUSIC"
-#define MKV_A_QDMC2      "A_QDESIGNMUSIC/V2"
+#define MKV_A_QDMC       "A_QUICKTIME/QDMC"
+#define MKV_A_QDMC2      "A_QUICKTIME/QDM2"
 
 #define MKV_V_MSCOMP     "V_MS/VFW/FOURCC"
 #define MKV_V_REALV10    "V_REAL/RV10"
@@ -43,5 +43,6 @@
 
 #define MKV_S_TEXTASCII  "S_TEXT/ASCII"
 #define MKV_S_TEXTUTF8   "S_TEXT/UTF8"
+#define MKV_S_TEXTSSA    "S_TEXT/SSA"
 
 #endif /* __MATROSKA_H */

@@ -69,6 +69,9 @@ extern char *audio_lang;
 // default values for Matroska elements
 #define MKVD_TIMECODESCALE 1000000 // 1000000 = 1ms
 
+#define MKV_SUBTYPE_TEXT   1
+#define MKV_SUBTYPE_SSA    2
+
 class mpstream_io_callback: public IOCallback {
   private:
     stream_t *s;
@@ -187,9 +190,10 @@ typedef struct mkv_demuxer {
 
   mpstream_io_callback *in;
 
-  uint64_t clear_subs_at;
+  uint64_t clear_subs_at[SUB_MAX_TEXT];
 
   subtitle subs;
+  int subtitle_type;
 
   EbmlStream *es;
   EbmlElement *saved_l1, *saved_l2;
@@ -397,7 +401,7 @@ unsigned int read_dword(unsigned char *p, int &pos, int size) {
 
 static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *)d->priv;
-  int len, line, state;
+  int len, line, state, i;
   char *s1, *s2, *buffer;
 
   if (duration == -1) {
@@ -417,34 +421,83 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
     s1++;
 
   line = 0;
-  s2 = mkv_d->subs.text[0];
-  mkv_d->subs.lines = 1;
+  mkv_d->subs.lines++;
+  s2 = mkv_d->subs.text[mkv_d->subs.lines - 1];
   state = 0;
-  while ((unsigned int)(s1 - buffer) != data.Size()) {
-    if ((*s1 == '\n') || (*s1 == '\r')) {
-      if (state == 0) {       // normal char --> newline
-        if (mkv_d->subs.lines == SUB_MAX_TEXT)
-          break;
-        *s2 = 0;
-        s2 = mkv_d->subs.text[mkv_d->subs.lines];
-        mkv_d->subs.lines++;
+
+  if (mkv_d->subtitle_type == MKV_SUBTYPE_SSA) {
+    /* Matroska's SSA format does not have timecodes embedded into 
+       the SAA line. Timescodes are encoded into the blocks timecode
+       and duration. */
+
+    /* Find text section. */
+    for (i = 0; (i < 8) && (*s1 != 0); s1++)
+      if (*s1 == ',')
+        i++;
+
+    if (*s1 == 0) {             // Broken line?
+      mkv_d->subs.lines--;
+      return;
+    }
+
+    /* Load text. */
+    while ((unsigned int)(s1 - buffer) < data.Size()) {
+      if ((*s1 == '{') && ((unsigned int)(s1 + 2 - buffer) < data.Size())) {
+        /* Newline */
+        if (*(s1 + 1) == '\\' && (*(s1 + 2) == 'N' || *(s1 + 2) == 'n')) {
+          mkv_d->clear_subs_at[mkv_d->subs.lines - 1] = 
+            block->GlobalTimecode() / 1000000 - mkv_d->first_tc + duration;
+
+          mkv_d->subs.lines++;
+          *s2 = 0;
+          s2 = mkv_d->subs.text[mkv_d->subs.lines - 1];
+        }
         state = 1;
-      }
-    } else if (*s1 == '<')    // skip HTML tags
-      state = 2;
-    else if (*s1 == '>')
-      state = 0;
-    else if (state != 2) {      // normal character
-      state = 0;
-      if ((s2 - mkv_d->subs.text[mkv_d->subs.lines - 1]) < 255) {
+      } else if (*s1 == '}' && state == 1)
+        state = 2;
+
+      if (state == 0) {
         *s2 = *s1;
         s2++;
+        if ((s2 - mkv_d->subs.text[mkv_d->subs.lines - 1]) >= 255)
+          break;
       }
+      s1++;
+      
+      if (state == 2)
+        state = 0;
     }
-    s1++;
-  }
+    *s2 = 0;
 
-  *s2 = 0;
+  } else {
+    while ((unsigned int)(s1 - buffer) != data.Size()) {
+      if ((*s1 == '\n') || (*s1 == '\r')) {
+        if (state == 0) {       // normal char --> newline
+          if (mkv_d->subs.lines == SUB_MAX_TEXT)
+            break;
+          *s2 = 0;
+          mkv_d->clear_subs_at[mkv_d->subs.lines - 1]= 
+            block->GlobalTimecode() / 1000000 - mkv_d->first_tc + duration;
+          s2 = mkv_d->subs.text[mkv_d->subs.lines];
+          mkv_d->subs.lines++;
+          state = 1;
+        }
+      } else if (*s1 == '<')    // skip HTML tags
+        state = 2;
+      else if (*s1 == '>')
+        state = 0;
+      else if (state != 2) {      // normal character
+        state = 0;
+        if ((s2 - mkv_d->subs.text[mkv_d->subs.lines - 1]) < 255) {
+          *s2 = *s1;
+          s2++;
+        }
+      }
+      s1++;
+    }
+
+    *s2 = 0;
+  }
 
 #ifdef USE_ICONV
   subcp_recode1(&mkv_d->subs);
@@ -453,8 +506,8 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
   vo_sub = &mkv_d->subs;
   vo_osd_changed(OSDTYPE_SUBTITLE);
 
-  mkv_d->clear_subs_at = block->GlobalTimecode() / 1000000 - mkv_d->first_tc +
-    duration;
+  mkv_d->clear_subs_at[mkv_d->subs.lines - 1] = 
+    block->GlobalTimecode() / 1000000 - mkv_d->first_tc + duration;
 }
 
 static mkv_track_t *new_mkv_track(mkv_demuxer_t *d) {
@@ -1837,7 +1890,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     track = find_track_by_language(mkv_d, dvdsub_lang, NULL);
   if (track) {
     if (strcmp(track->codec_id, MKV_S_TEXTASCII) &&
-        strcmp(track->codec_id, MKV_S_TEXTUTF8))
+        strcmp(track->codec_id, MKV_S_TEXTUTF8) && 
+        strcmp(track->codec_id, MKV_S_TEXTSSA))
       mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] Subtitle type '%s' is not "
              "supported. Track will not be displayed.\n", track->codec_id);
     else {
@@ -1850,6 +1904,10 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
         if (!strcmp(track->codec_id, MKV_S_TEXTUTF8))
           sub_utf8 = 1;       // Force UTF-8 conversion.
+        if (!strcmp(track->codec_id, MKV_S_TEXTSSA))
+          mkv_d->subtitle_type = MKV_SUBTYPE_SSA;
+        else
+          mkv_d->subtitle_type = MKV_SUBTYPE_TEXT;
       } else
         mp_msg(MSGT_DEMUX, MSGL_ERR, "[mkv] File does not contain a "
                "subtitle track with the id %u.\n", demuxer->sub->id);
@@ -1992,13 +2050,14 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
   demux_packet_t *dp;
   demux_stream_t *ds;
   mkv_demuxer_t *mkv_d;
-  int upper_lvl_el, exit_loop, found_data, i;
+  int upper_lvl_el, exit_loop, found_data, i, linei, sl;
+  char *texttmp;
   // Elements for different levels
   EbmlElement *l0 = NULL, *l1 = NULL, *l2 = NULL, *l3 = NULL;
   EbmlStream *es;
   KaxBlock *block;
   int64_t block_duration, block_bref, block_fref;
-  bool use_this_block;
+  bool use_this_block, lines_cut;
   float current_pts;
 
   mkv_d = (mkv_demuxer_t *)d->priv;
@@ -2087,13 +2146,26 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
 
             if (kblock != NULL) {
               // Clear the subtitles if they're obsolete now.
-              if ((mkv_d->clear_subs_at > 0) &&
-                  (mkv_d->clear_subs_at <=
-                   (kblock->GlobalTimecode() / 1000000 - mkv_d->first_tc))) {
-                mkv_d->subs.lines = 0;
-                vo_sub = &mkv_d->subs;
-                vo_osd_changed(OSDTYPE_SUBTITLE);
-                mkv_d->clear_subs_at = 0;
+              lines_cut = false;
+              for (linei = 0; linei < mkv_d->subs.lines; linei++) {
+                if (mkv_d->clear_subs_at[linei] <=
+                    (kblock->GlobalTimecode() / 1000000 - mkv_d->first_tc)) {
+                  sl = linei; 
+                  texttmp = mkv_d->subs.text[sl];
+                  while (sl < mkv_d->subs.lines) {
+                    mkv_d->subs.text[sl] = mkv_d->subs.text[sl + 1];
+                    mkv_d->clear_subs_at[sl] = mkv_d->clear_subs_at[sl + 1];
+                    sl++;
+                  }
+                  mkv_d->subs.text[sl] = texttmp;
+                  mkv_d->subs.lines--;
+                  linei--;
+                  lines_cut = true;
+                }
+                if (lines_cut) {
+                  vo_sub = &mkv_d->subs;
+                  vo_osd_changed(OSDTYPE_SUBTITLE);
+                }
               }
 
               ds = NULL;
@@ -2424,7 +2496,6 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
     mkv_d->subs.lines = 0;
     vo_sub = &mkv_d->subs;
     vo_osd_changed(OSDTYPE_SUBTITLE);
-    mkv_d->clear_subs_at = 0;
 
     if(demuxer->audio->sh != NULL)
       resync_audio_stream((sh_audio_t *)demuxer->audio->sh); 
