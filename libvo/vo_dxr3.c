@@ -211,7 +211,7 @@ uint32_t control(uint32_t request, void *data, ...)
 		em8300_bcs_t bcs;
 		
 		va_start(ap, data);
-		value = va_arg(ap, int);
+		value = va_arg(ap, int*);
 		va_end(ap);
 
 		if (ioctl(fd_control, EM8300_IOCTL_GETBCS, &bcs) < 0)

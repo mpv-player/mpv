@@ -465,7 +465,7 @@ static uint32_t control(uint32_t request, void *data, ...)
     int *value;
     
     va_start(ap, data);
-    value = va_arg(ap, int);
+    value = va_arg(ap, int*);
     va_end(ap);
 
     return vidix_control(request, data, value);
