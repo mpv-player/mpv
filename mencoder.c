@@ -303,6 +303,8 @@ int main(int argc,char* argv[], char *envp[]){
 
 stream_t* stream=NULL;
 demuxer_t* demuxer=NULL;
+stream_t* stream2=NULL;
+demuxer_t* demuxer2=NULL;
 demux_stream_t *d_audio=NULL;
 demux_stream_t *d_video=NULL;
 demux_stream_t *d_dvdsub=NULL;
@@ -335,8 +337,10 @@ double v_timer_corr=0;
 play_tree_t* playtree;
 play_tree_iter_t* playtree_iter;
 char* filename=NULL;
+char* frameno_filename="frameno.avi";
 
 int decoded_frameno=0;
+int next_frameno=-1;
 
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
@@ -369,6 +373,13 @@ divx4_param.rc_period = 2000;
 divx4_param.rc_reaction_period = 10;
 divx4_param.rc_reaction_ratio  = 20;
 #endif
+
+  // FIXME: get rid of -dvd and other tricky options and config/playtree
+  stream2=open_stream(frameno_filename,0,&i);
+  if(stream2){
+    demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2);
+    if(demuxer2) printf("Using pass3 control file: %s\n",frameno_filename);
+  }
 
   playtree = play_tree_new();
   mconfig = m_config_new(playtree);
@@ -424,7 +435,7 @@ divx4_param.rc_reaction_ratio  = 20;
   }
 #endif
 
-  if(!has_audio) audio_id=-2; /* do NOT read audio packets... */
+  if(!has_audio || demuxer2) audio_id=-2; /* do NOT read audio packets... */
 
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
@@ -433,7 +444,7 @@ divx4_param.rc_reaction_ratio  = 20;
 	exit(1);
   }
 
-d_audio=demuxer->audio;
+d_audio=demuxer2 ? demuxer2->audio : demuxer->audio;
 d_video=demuxer->video;
 d_dvdsub=demuxer->sub;
 sh_audio=d_audio->sh;
@@ -542,7 +553,7 @@ if(!init_video(sh_video)){
 
 } // if(out_video_codec)
 
-if(sh_audio){
+if(sh_audio && out_audio_codec){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
   if(audio_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceAudioFmt,audio_family);
@@ -567,7 +578,7 @@ if(sh_audio){
   }
 }
 
-if(sh_audio){
+if(sh_audio && out_audio_codec){
   mp_msg(MSGT_MENCODER,MSGL_V,"Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
     mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
@@ -1125,7 +1136,8 @@ if(sh_audio){
 	    // VBR - encode/copy an audio frame
 	    switch(mux_a->codec){
 	    case ACODEC_COPY: // copy
-		printf("VBR audio framecopy not yet implemented!\n");
+		len=ds_get_packet(sh_audio->ds,(unsigned char**) &mux_a->buffer);
+//		printf("VBR audio framecopy not yet implemented!\n");
 		break;
 #ifdef HAVE_MP3LAME
 	    case ACODEC_VBRMP3:
@@ -1175,6 +1187,30 @@ if(sh_audio){
     
     v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
 
+if(demuxer2){
+    // find our frame:
+	while(next_frameno<decoded_frameno){
+	    int* start;
+	    int len=ds_get_packet(demuxer2->video,(unsigned char**) &start);
+	    if(len<0){ eof=1;break;}
+	    if(len==0) --skip_flag; else  // duplicate
+	    if(len==4) next_frameno=start[0];
+	}
+    if(eof) break;
+	if(skip_flag) printf("!!!!!!!!!!!!\n");
+	skip_flag=next_frameno-decoded_frameno;
+    // find next frame:
+	while(next_frameno<=decoded_frameno){
+	    int* start;
+	    int len=ds_get_packet(demuxer2->video,(unsigned char**) &start);
+	    if(len<0){ eof=1;break;}
+	    if(len==0) --skip_flag; else  // duplicate
+	    if(len==4) next_frameno=start[0];
+	}
+//    if(eof) break;
+//	    printf("Current fno=%d  requested=%d  skip=%d  \n",decoded_frameno,fno,skip_flag);
+} else {
+
 // check frame duplicate/drop:
 
 if(v_timer_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate){
@@ -1197,6 +1233,8 @@ if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
     v_pts_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
     ++skip_flag; // skip
   }
+
+} // demuxer2
 
 #ifdef USE_DVDREAD
 // DVD sub:
@@ -1227,10 +1265,10 @@ case VCODEC_RAW:
     mux_v->buffer = vo_image_ptr;
     aviwrite_write_chunk(muxer,mux_v,muxer_f,mux_v->buffer_size,0x10);
     break;
-case VCODEC_FRAMENO:
+case VCODEC_FRAMENO: {
     mux_v->buffer=&decoded_frameno; // tricky
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0x10);
-    break;
+    break; }
 case VCODEC_DIVX4:
 #ifndef HAVE_DIVX4ENCORE
     printf("No support for Divx4 encore compiled in\n");
@@ -1309,7 +1347,7 @@ if(skip_flag>0){
     --skip_flag;
 }
 
-if(sh_audio){
+if(sh_audio && !demuxer2){
     float AV_delay,x;
     // A-V sync!
     if(pts_from_bps){
