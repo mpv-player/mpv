@@ -23,6 +23,10 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.24  2001/06/17 20:59:39  acki2
+ * - doublebuffering now can be switched on and off with the -(no)double switch.
+ *   Default in libvo is disabled.
+ *
  * Revision 1.23  2001/05/24 20:48:45  arpi_esp
  * removed redundant osd.h includes
  *
@@ -276,6 +280,7 @@ static XF86VidModeModeInfo **vo_dga_vidmodes=NULL;
 
 extern int       verbose;          
 extern int       vo_dbpp;
+extern int	 vo_doublebuffering;
 
 static int       vo_dga_src_format;
 static int       vo_dga_width;           // bytes per line in framebuffer
@@ -499,9 +504,8 @@ static void check_events(void)
 
 static void flip_page( void ){
 
-  vo_draw_text(vo_dga_src_width,vo_dga_src_height,draw_alpha);
-  
   if(vo_dga_dbf_mem_offset != 0){
+    vo_draw_text(vo_dga_src_width,vo_dga_src_height,draw_alpha);
 
 #ifdef HAVE_DGA2
     XDGASetViewport (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
@@ -1034,6 +1038,9 @@ static uint32_t init( uint32_t width,  uint32_t height,
   vo_dga_dbf_y_offset = y_off + vo_dga_src_height;
   vo_dga_dbf_mem_offset = vo_dga_width * HW_MODE.vdm_bytespp *  vo_dga_dbf_y_offset;
   vo_dga_dbf_current = 0;
+
+
+ if(!vo_doublebuffering) vo_dga_dbf_mem_offset = NULL;
   
   // if(format ==IMGFMT_YV12 )
   //vo_dga_dbf_mem_offset = 0;
