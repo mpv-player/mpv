@@ -75,8 +75,9 @@ másoló, és video átméretezõ képességgel.</P>
     <LI>opcionálisan külsõ audio stream használata</LI>
     <LI>1, 2 vagy 3 menetes <B>DivX4</B> video</LI>
     <LI><B>VBR</B> MP3 audio - <B>FONTOS</B> : a VBR-es mp3-ak nem minden
-      körülmények között lejátszhatóak windows rendszereken! Ha windows-on
-      (is) lejátszandó AVI-t akarsz létrehozni, csinálj CBR-es mp3-at!</LI>
+      körülmények között lejátszhatóak windows rendszereken! Viszont a
+      <B>MEncoderrel</B> által létrehozott CBR AVI-k teljesen lejátszhatatlanok
+      Win32 lejátszókkal :)</LI>
     <LI>PCM audio</LI>
     <LI>stream másolás</LI>
     <LI>bemeneti file A/V szinkronizálása (PTS-alapú, az -mc 0 opcióval
@@ -431,6 +432,8 @@ támogatottak). A következõ codec-ekkel lehet enkódolni :</P>
     &nbsp;&nbsp;<B>cbr</B> - <B>CBR</B>-es MP3 kiválasztása (az alapértelmezett a <B>VBR</B>)<BR>
     &nbsp;&nbsp;<B>br</B>=XXX - bitráta megadása kbit-ben &lt;0-1024&gt; (csak <B>CBR</B>-nél!)<BR>
     &nbsp;&nbsp;<B>q</B>=XXXX - minõség (0-legjobb, 9-leggyorsabb) (csak <B>VBR</B>-nél!)<BR>
+    &nbsp;&nbsp;<B>vbr</B>=XXXX - VBR alüzemmód (3-ABR, ennek van a legjobb
+      sebesség/minõség mutatója) (csak <B>VBR</B>-nél!)<BR>
   </TD>
 </TR>
 </TABLE>

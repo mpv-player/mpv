@@ -155,6 +155,7 @@
 	    <LI><A HREF="sound.html#2.3.2.2.5">2.3.2.2.5 Software volume control</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.6">2.3.2.2.6 Extrastereo</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.7">2.3.2.2.7 Volume Normalizer</A></LI>
+	    <LI><A HREF="sound.html#2.3.2.2.8">2.3.2.2.8 Surround</A></LI>
 	  </UL>
       </UL>
     </UL>
@@ -426,7 +427,9 @@ movies (even faster than the original DivX4 library itself) ! Recommended!</LI>
 
 <LI><B>Win32 codecs</B> : If you plan to use <B>MPlayer</B> on x86
 architecture, you will possibly need them. Download and unzip w32codecs.zip to
-/usr/lib/win32 . Note: the avifile project has similar codecs package, but it
+/usr/lib/win32 <B>BEFORE</B> compiling <B>MPlayer</B>, otherwise no Win32
+support will be compiled!<BR>
+Note: the avifile project has similar codecs package, but it
 differs from ours, so if you want to use all supported codecs, then use our
 package! However, you can use our codecs package with avifile. Features:<BR>
 <UL>
@@ -1913,7 +1916,6 @@ other technical help from:</P>
   <LI><B>vo_png.c</B> - Atmos
   <LI><B>vo_sdl.c</B> - Atmos
   <LI><B>vo_svga.c</B> - se7en
-  <LI><B>vo_syncfb.c</B> - OBSOLETED, use mga
   <LI><B>vo_vesa.c</B> - Nick Kurshev
   <LI><B>vo_x11.c</B> - Pontscho
   <LI><B>vo_xmga.c</B> - Pontscho

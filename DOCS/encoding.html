@@ -71,8 +71,8 @@ stream copying and video resizing abilities.</P>
     <LI>creating files from external audio stream</LI>
     <LI>1, 2 or 3 pass <B>DivX4</B> video</LI>
     <LI><B>VBR</B> MP3 audio - <B>IMPORTANT NOTE</B> : VBR MP3 audio doesn't
-      always play nicely on windows players! If you intend to encode AVIs
-      mainly for windows, encode with CBR!</LI>
+      always play nicely on windows players! On the other hand, currently
+      <B>MEncoder</B>'s CBR encoding is totally broken on win32 players :)</LI>
     <LI>PCM audio</LI>
     <LI>stream copying</LI>
     <LI>input A/V synchronizing (PTS-based, can be disabled with -mc 0 option)</LI>
@@ -431,6 +431,7 @@ unsupported). You can encode to the following codecs :</P>
     &nbsp;&nbsp;<B>cbr</B> - select <B>CBR</B> MP3 (default is <B>VBR</B>)<BR>
     &nbsp;&nbsp;<B>br</B>=&lt;value&gt; - specify bitrate in kbit &lt;0-1024&gt; (this is for <B>CBR</B> only!)<BR>
     &nbsp;&nbsp;<B>q</B>=&lt;value&gt; - quality (0-highest, 9-fastest - default 0) (this is for <B>VBR</B> only!)<BR>
+    &nbsp;&nbsp;<B>vbr</B>=&lt;value&gt; - VBR sub-mode (3-ABR, best quality/speed) (this is for <B>VBR</B> only!)<BR>
   </TD>
 </TR>
 </TABLE>
