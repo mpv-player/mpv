@@ -1575,7 +1575,7 @@ int WINAPI expLoadLibraryA(char* name)
 {
     char qq[256];
     int result;
-    printf("They want library %s\n", def_path, name);
+    printf("They want library [%s] %s\n", def_path, name);
     if(strncmp(name, "c:\\windows\\", 11)==0)name+=11;
     if(name[0]!='/')
     {
@@ -1586,9 +1586,9 @@ int WINAPI expLoadLibraryA(char* name)
 	else
 	    strcat(qq, name);
     }
-    dbgprintf("Entering LoadLibraryA(%s)\n", name);
+    printf("Entering LoadLibraryA(%s)\n", name);
     result=LoadLibraryA(qq);
-    dbgprintf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
+    printf("Returned LoadLibraryA(0x%x='%s'), def_path=%s => 0x%x\n", name, name, def_path, result);
     return result;
 }      
 int WINAPI expFreeLibrary(int module)
@@ -1872,6 +1872,12 @@ int expmemcmp(void* dest, void* src, int n)
 {
     int result=memcmp(dest, src, n);
     dbgprintf("memcmp(0x%x, 0x%x, %d) => %d\n", dest, src, n, result);
+    return result;
+}
+int expmemcpy(void* dest, void* src, int n) 
+{
+    int result=memcpy(dest, src, n);
+    dbgprintf("memcpy(0x%x, 0x%x, %d) => %x\n", dest, src, n, result);
     return result;
 }
 time_t exptime(time_t* t)
@@ -2480,6 +2486,7 @@ FF(strcmp, -1)
 FF(strcat, -1)
 FF(memmove, -1)
 FF(memcmp, -1)
+//FF(memcpy, -1)
 FF(time, -1)
 };
 struct exports exp_winmm[]={
@@ -2522,6 +2529,10 @@ FF(CoTaskMemFree, -1)
 FF(CoCreateInstance, -1)
 FF(StringFromGUID2, -1)
 };
+struct exports exp_crtdll[]={
+FF(memcpy, -1)
+};
+
 #define LL(X) \
 {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
 
@@ -2534,6 +2545,7 @@ LL(advapi32)
 LL(gdi32)
 LL(version)
 LL(ole32)
+LL(crtdll)
 };
 
 void* LookupExternal(const char* library, int ordinal)
