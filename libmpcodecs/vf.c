@@ -25,6 +25,7 @@ extern vf_info_t vf_info_rotate;
 extern vf_info_t vf_info_mirror;
 extern vf_info_t vf_info_palette;
 extern vf_info_t vf_info_lavc;
+extern vf_info_t vf_info_dvbscale;
 
 char** vo_plugin_args=(char**) NULL;
 
@@ -49,6 +50,7 @@ static vf_info_t* filter_list[]={
 #ifdef USE_LIBAVCODEC
     &vf_info_lavc,
 #endif
+    &vf_info_dvbscale,
     NULL
 };
 
@@ -95,6 +97,12 @@ void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h){
   mp_image_t* mpi=NULL;
   int w2=w; //(mp_imgflag&MP_IMGFLAG_ACCEPT_STRIDE)?((w+15)&(~15)):w;
+  
+  if(vf->put_image==vf_next_put_image){
+      // passthru mode, if the plugin uses the fallback/default put_image() code
+      return vf_get_image(vf->next,outfmt,mp_imgtype,mp_imgflag,w,h);
+  }
+  
   // Note: we should call libvo first to check if it supports direct rendering
   // and if not, then fallback to software buffers:
   switch(mp_imgtype){
@@ -288,7 +296,7 @@ int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt){
 }
 
 void vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){
-    return vf->next->put_image(vf->next,mpi);
+    vf->next->put_image(vf->next,mpi);
 }
 
 //============================================================================
