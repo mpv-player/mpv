@@ -1,0 +1,91 @@
+
+Tartalom
+~~~~~~~~
+
+ 1. Eloszo
+ 2. Mi az a DGA
+ 3. Felbontasvaltas
+ 4. DGA es MPlayer
+ 5. A DGA driver kepessegei
+ 6. Sebesseg
+ 7. Ismert hibak
+ 8. Beepitendo dolgok
+ 
+ A. Nehany modeline
+
+
+
+1. Eloszo
+~~~~~~~~~
+ Ez a dokumentum nehany szoban elmagyarazza hogy altalaban veve mi is az a
+ DGA, es mit tud az MPlayerben (es mit nem).
+
+2. Mi a DGA?
+~~~~~~~~~~~~
+
+ A DGA szo a Direct Graphics Access roviditese, es egy olyan modszert takar
+ amivel a program az X szerver kikerulesevel kozvetlenul irhat a framebuffer
+ memoriaba. Szaknyelven szolva ez a framebuffer memorianak a processz
+ teruletere torteno lapozasaval tortenik. Ezt a kernel csak root jogosultsaggal
+ engedi. Ez tortenhet root-kent torteno bejelentkezessel, vagy a suid bit
+ beallitasaval az mplayer programon.
+
+ A DGA-nak ket verzioja van: a DGA1-et az XFree 3.X.X hasznalja, a DGA2
+ pedig az XFree 4.0.1 ota letezik.
+
+ A DGA1 csak a fent leirt kozvetlen hozzaferest nyujtja. A felbontasvaltashoz
+ itt szukseg van az XVidMode kiterjesztesre.
+
+ A DGA2 tartalmazza az XVidMode tudasat, tovabba engedelyezi a szinmelyseg
+ megvaltoztatasat. Igy lehetseges, hogy egy 32 bites melysegu X szervert
+ atvaltsunk 15 bitesbe, vagy forditva.
+
+ A DGA-nak van nehany hatranya. Valamelyest fugg a grafikus chiptol, es ennek
+ X-es driveretol, ezert nem minden rendszeren mukodik ...
+
+
+3. Felbontasvaltas
+~~~~~~~~~~~~~~~~~~
+ A DGA driver kepes felbontasvaltasra. Ezzel kikerulheto a (lassu) szoftveres
+ scale, ugyanakkor teljeskepernyos lesz a lejatszas. Idealis esetben pontosan
+ egyezo felbontast valaszt, de csak azon videomodok kozul tud valasztani,
+ ami az /etc/X11/XF86Config fileban szerepel. Ezeket ugynevezett modeline-okkal
+ definialjuk, es a videokartya kepessegeitol fuggenek. Az X szerver ezt
+ a konfig filet nezi at indulaskor, es kikapcsolja mindazokat amiket a
+ kartya nem tud. A fennmarado modok az X11 log-jaban talalhatoak:
+ /var/log/XFree86.0.log
+ Az A fuggelekben nehany modeline pelda talalhato.
+
+4. DGA es MPlayer
+~~~~~~~~~~~~~~~~
+
+ Az MPlayer-ben ket helyen lehet DGA-t hasznalni: az SDL driverben
+ (-vo sdl -sdl dga), valamint a DGA driverben (-vo dga). A fentiek mindkettore
+ igazak; a kovetkezo nehany reszben elmagyarazom hogy is mukodik az MPlayer
+ DGA drivere.
+
+
+5. A DGA driver kepessegei
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+ ... folyt. kov. ...
+
+
+A. Nehany modeline
+~~~~~~~~~~~~~~~~~~
+Section "Modes"
+  Identifier    "Modes[0]"
+  Modeline      "712x600"  35.0   712 740 850 900   400 410 412 425
+  Modeline      "640x480"  25.175 640 664 760 800   480 491 493 525 
+  Modeline      "352x240"  15.750 352 368 416 432   240 244 246 262 Doublescan
+  # 800x600 @ 60 Hz, 37.8 kHz hsync
+  Modeline	"800x600"  40     800 840 968 1056  600 601 605 628 
+  Modeline	"352x288"  25.10  352 368 416 432   288 296 290 310
+EndSection
+
+
+ Ezek a bejegyzesek mukodnek az en Riva128-asomon, az nv.o driverrel.
+
+ Acki (acki@acki-netz.de, www.acki-netz.de)                  17.5.2001 
+
+ 

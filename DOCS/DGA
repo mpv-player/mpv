@@ -23,12 +23,12 @@ Contents
 2. What is DGA?
 ~~~~~~~~~~~~~~~
 
- DGA is short for Direct Graphics Access and is a means for a programm to
+ DGA is short for Direct Graphics Access and is a mean for a program to
  bypass the X-Server and directly modifying the framebuffer memory. 
  Technically spoken this happens by mapping the framebuffer memory into
  the memory range of your process. This is just allowed by the kernel
  if you have superuser privileges. You can get these either by logging in 
- as root or by setting the suid bit on the mplayer excecutable.
+ as root or by setting the suid bit on the mplayer executable.
 
  There are two versions of DGA: DGA1 is used by XFree 3.X.X and DGA2 was 
  introduced with XFree 4.0.1.

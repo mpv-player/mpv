@@ -1,0 +1,103 @@
+                         MPlayer requirements
+                         ====================
+Intro
+*****
+This document is to tell you what MPlayer's requirements are, and where can you
+find 'em.
+
+Current Minimal Requirements:
+*****************************
+
+Binutils:
+~~~~~~~~~
+Brief:    These utilities deal with object files.
+URL:      ftp://ftp.gnu.org/pub/gnu/binutils
+Checking: as --version
+          ld --version
+Note:     Preferred versions are 2.9.1 or 2.10.1
+
+GCC
+~~~
+Brief:    Gnu Compilers Collection
+URL:      http://gcc.gnu.org
+Checking: gcc --version
+Note:     Preferred versions are 2.95.3 (2.95.2 with updated libstc++ stuff)
+          2.96.xx won't work, they are RedHat's UNOFFICIAL and BUGGY releases
+          egcs-2.91.xx and early may have problems with inline assembler
+
+GLIBC
+~~~~~
+Brief:    GNU C library
+URL:      ftp://ftp.gnu.org/pub/gnu/glibc
+Checking: ls -l /lib/libc[.-]*
+Note:     Preferred versions are 2.1.3 or 2.2.3
+
+XFree86
+~~~~~~~
+Brief:    Free port of X11 system on x86 architecture
+URL:      http://www.xfree86.org
+Checking: X -version
+Note:     Preferred versions are 4.0.2 and 4.0.3
+
+Win32 codecs:
+~~~~~~~~~~~~~
+Brief: Collection of audio/video codecs for Windows.
+URL:   http://mplayer.sourceforge.net/DOCS/codecs.html
+Note:  Please use only this codec set
+
+Optional Requirements:
+**********************
+
+ALSA
+~~~~
+Brief: Advanced Linux Sound Architecture
+URL:   http://www.alsa-project.org/
+Note:  Preferred version is 0.9.x+ . For details see DOCS/README
+
+DRI
+~~~
+Brief: The Direct Rendering Infrastructure
+URL:   http://dri.sourceforge.net/
+Note:  For details see DOCS/VIDEOCARDS
+
+Utah-GLX
+~~~~~~~~
+Brief: An open source hardware accelerated implementation of GLX.
+URL:   http://utah-glx.sourceforge.net/
+Note:  For detail see DOCS/VIDEOCARDS
+
+libcss
+~~~~~~
+Brief: libcss is required for viewing encrypted DVDs
+URL:   http://www.linuxvideo.org/user/dl.html
+Note:  For details see DOCS/DVD
+
+liblirc
+~~~~~~~
+Brief: Linux Infrared Remote Control. LIRC is a package that supports receiving
+       and sending IR signals from/for the most common IR remote controls.
+URL:   http://sourceforge.net/projects/lirc/
+Note:  For details see DOCS/LIRC
+
+libpng
+~~~~~~
+Brief: Portable Network Graphic library
+URL:   http://www.libpng.org/pub/png/pngcode.html
+Note:  For details see DOCS/README
+
+libsdl
+~~~~~~
+Brief: Simple DirectMedia Layer is a cross-platform multimedia library designed
+       to provide fast access to the graphics framebuffer and audio device
+URL:   http://www.libsdl.org
+Note:  Preferred versions are 1.2.0+. For details see DOCS/SDL
+
+xmmplib
+~~~~~~~
+Brief:   Linux MultiMedia Project
+URL:     http://www.frozenproductions.com/xmmp/
+Alt URL: http://xmmp.sourceforge.net
+Note:    For details see DOCS/ChangeLog
+
+Enjoy!
+	MPlayer team

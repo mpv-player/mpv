@@ -4,16 +4,16 @@ http://mplayer.sourceforge.net
 
 Röviden:
 ~~~~~~~~
-Az MPlayer egy LINUXON mûködõ videolejátszó. Le tudja játszani a legtöbb
-mpeg, avi és asf file-t, valamint felsorakoztat jónéhány nativ és Win32
-codecet. Nézhetsz vele VCD-t, DVD-t, és még DivX-et is. A másik óriási
-tulajdonsága az MPlayernek a megjelenítési módok széles választéka.
-Mûködik X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib driverekkel, sõt
-SDL-lel is (beleértve ezáltal az SDL képességeit is), és néhány alacsonyszintû
-kártyaspecifikus driver (Matrox/3dfx/SiS) is használható! Legtöbbjük
-támogat software vagy hardware scaling-et, így a teljesképernyõs mód is
-elérhetõ. És még nem is szóltam a szép, elsimított, árnyékolt feliratozásról,
-ami támogat magyar, angol, cirill, cseh és koreai fontokat, valamint OSD-t!
+Az MPlayer egy LINUXON mûködõ videolejátszó. Le tudja játszani a legtöbb mpeg,
+avi és asf file-t, valamint felsorakoztat jónéhány nativ és Win32 codecet.
+Nézhetsz vele VCD-t, DVD-t, és még DivX-et is. A másik óriási tulajdonsága az
+MPlayernek a megjelenítési módok széles választéka. Mûködik X11, Xv, DGA,
+OpenGL, SVGAlib, fbdev, AAlib driverekkel, sõt SDL-lel is (beleértve ezáltal az
+SDL képességeit is), és néhány alacsonyszintû kártyaspecifikus driver
+(Matrox/3dfx/SiS) is használható! Legtöbbjük támogat software vagy hardware
+scaling-et, így a teljesképernyõs mód is elérhetõ. És még nem is szóltam a
+szép, elsimított, árnyékolt feliratozásról (6 tamogatott tipus!), ami támogat
+magyar, angol, cirill, cseh és koreai fontokat, valamint OSD-t!
 
 Történet:
 ~~~~~~~~~
