@@ -1080,7 +1080,7 @@ for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <H4>Usage:</H4>
 <DL>
-  <DT><CODE>-vo dxr3:prebuf:sync:&lt;device&gt;</CODE></DT>
+  <DT><CODE>-vo dxr3:prebuf:sync:norm=x:&lt;device&gt;</CODE></DT>
   <DD><CODE>overlay</CODE> activates the overlay instead of TVOut. It requires
     that you have a properly configured overlay setup to work right. The easiest
     way to configure the overlay is to first run autocal. Then run mplayer with
@@ -1107,6 +1107,14 @@ for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     clock will be monitored at all times, if it starts to deviate from MPlayer's
     clock it will be reset causing the em8300 to drop any frames that are lagging
     behind.<BR>
+    <CODE>norm=x</CODE> will set the TV norm of the DXR3 card without the need
+    for external tools like em8300setup. Valid norms are 5 = NTSC, 4 = PAL-60,
+    3 = PAL. Special norms are 2 (auto-adjust using PAL/PAL-60) and 1
+    (auto-adjust using PAL/NTSC) because they decide which norm to use by
+    looking at the frame rate of the movie. Modern TVs are capable of PAL and
+    NTSC. Watching movies with the framerate they were initially encoded with
+    results in smooth playback without framedrop. norm = 0 (default) does not
+    change the current norm.<BR>
     <CODE>&lt;device&gt;</CODE> = device number to use if you have more than one
     em8300 card.
     <BR>
