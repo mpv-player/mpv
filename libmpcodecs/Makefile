@@ -45,7 +45,7 @@ OBJS=$(SRCS:.c=.o)
 SRCS2=$(ENCODER_SRCS)
 OBJS2=$(SRCS2:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -Inative -I.. -I../libmpdemux -I../loader $(EXTRA_INC) -D_GNU_SOURCE
+CFLAGS  = $(OPTFLAGS) -I. -Inative -I.. -I../libmpdemux -I../loader $(EXTRA_INC) $(X264_INC) -D_GNU_SOURCE
 
 .SUFFIXES: .c .o
 
