@@ -15,13 +15,13 @@ Wir werden keine persönliche Kopie senden, also bitte anmelden!!!
 Sende auf keinen Fall Fehlerberichte direkt an die private Mail-Adresse
 des Autors!!! Wir arbeiten miteinander am Quellcode, also ist jeder
 interessiert.
-Nebenbei gesagt: Oft wissen auf andere Benutzer eine Lösung
+Nebenbei gesagt: Oft wissen auch andere Benutzer eine Lösung
 (Systemkonfigurationsprobleme, fehlerhafte Treiber usw.), sogar wenn wir
-denken, es sei ein Fehler in unserem Code.
+denken es sei ein Fehler in unserem Code.
 Die Sprache dieser Mailingliste ist ENGLISCH!
 
 Bitte beschreibe dein Problem detailiert - Beispiele usw. - aber vergiss
-nicht, das dein Bericht folgendes beinhalten sollte:
+nicht, dass dein Bericht folgendes beinhalten sollte:
 
 Was?
 ====
@@ -79,18 +79,18 @@ Bei Wiedergabeproblemen:
 3. Ausgabe von MPlayer in Ausführlichkeits-Stufe 1 (-v)
   mplayer -v [Optionen] Dateiname &> mplayer.log
 
-4. Wenn das Problem spezifisch für eine oder einige wenige Datien besteht,
+4. Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
   lade die Datei bitte auf:
     ftp://thot.banki.hu/MPlayer/incoming/
   Normalerweise reichen die ersten 1-5MB der Datei aus, um das Problem zu
-  reproduzieren, aber als Erstes solltest du das ausprobieren:
+  reproduzieren, aber als erstes solltest du das ausprobieren:
     dd if=deinedatei of=kleinedatei bs=1k count=1024
   (kopiert das erste MB von 'deinedatei' in die Datei 'kleinedatei')
-  Nun versuche es nochmals mit dieser kleinen Datei, und wenn der Fehler
-  immer noch auftritt, reicht es die kleine Datei hochzuladen.
+  Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
+  immer noch auftritt reicht es die kleine Datei hochzuladen.
   Sende NIE solche Dateien via mail! Lade es herauf und schicke nur den Pfad/
-  Dateinamen der Daei auf dem FTP.
-  Wenn die Datei im Internet bereits verfügbar ist, reicht ri4 _exakte_ URL
+  Dateinamen der Datei auf den FTP Server.
+  Wenn die Datei im Internet bereits verfügbar ist reicht die _exakte_ URL
   aus!
 
 5. Bei Abstürzen (Speicherverletzung, SIGILL, signal 4 usw.):
@@ -98,7 +98,7 @@ Bei Wiedergabeproblemen:
 Wenn du ein Speicherabbild (Coredump) vom Absturz besitzt, siehe 5.a,
 ansonsten 5.b:
 
-5.a: Bitte gib uns den Coredump aus (sofern es erzeugt wurde).
+5.a: Bitte gib uns den Coredump aus (sofern er erzeugt wurde).
 Wie:
 Bitte erzeuge die folgende Kommandodatei (Command File):
 
@@ -115,7 +115,7 @@ printf "esi=%08lX\n",$esi
 Dann führe einfach den folgenden Befehl aus:
 gdb mplayer --core=core -batch --command=kommando_datei >mplayer.bug
 
-5.b.: Führe MPlayer in gdb aus:
+5.b.: Führe MPlayer im gdb (GNU Debugger) aus:
 [im Root/User Shell Prompt:]
   # gdb mplayer
 [im gdb Prompt:]
@@ -127,7 +127,7 @@ Sende uns die gesamte Ausgabe obiger Dinge!
 
 Allgemein:
 ~~~~~~~~~~
-  Wenn etwas sehr groß ist (Log-Dateien usw.), ist es besser, es (gzippt)
+  Wenn etwas sehr groß ist (Log-Dateien usw.) ist es besser es gezippt
   auf den FTP hochzuladen und nur den Pfad-/Dateinamen im Fehlerbericht
   anzugebeben!
 
