@@ -71,7 +71,7 @@ struct config {
   void *p; 
   struct m_option_type* type;
   unsigned int flags;
-  float min,max;
+  double min,max;
   void* priv;
 };
 

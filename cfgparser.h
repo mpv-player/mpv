@@ -57,7 +57,7 @@ struct config {
 	void *p;
 	unsigned int type;
 	unsigned int flags;
-	float min,max;
+	double min,max;
   /* Use this field when your need to do something before a new value is
      assigned to your option */
 	cfg_default_func_t default_func;
