@@ -107,12 +107,12 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     len-=2;
     mp_dbg(MSGT_DEMUX,MSGL_DBG3,"  hdrlen=%d  (len=%d)",hdrlen,len);
     if(hdrlen>len){ mp_msg(MSGT_DEMUX,MSGL_V,"demux_mpg: invalid header length  \n"); return -1;}
-    if(pts_flags==2){
+    if(pts_flags==2 && hdrlen>=5){
       c=stream_read_char(demux->stream);
       pts=read_mpeg_timestamp(demux->stream,c);
       len-=5;hdrlen-=5;
     } else
-    if(pts_flags==3){
+    if(pts_flags==3 && hdrlen>=10){
       c=stream_read_char(demux->stream);
       pts=read_mpeg_timestamp(demux->stream,c);
       c=stream_read_char(demux->stream);
@@ -154,27 +154,37 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         if(demux->audio->id==-1) demux->audio->id=aid;
 
       if(demux->audio->id==aid){
-//        int type;
+        int type;
         ds=demux->audio;
         if(!ds->sh) ds->sh=demux->a_streams[aid];
         // READ Packet: Skip additional audio header data:
-        c=stream_read_char(demux->stream);//type=c;
-        c=stream_read_char(demux->stream);//type|=c<<8;
-        c=stream_read_char(demux->stream);//type|=c<<16;
-//        printf("[%06X]",type);
+        c=stream_read_char(demux->stream);//num of frames
+        type=stream_read_char(demux->stream);//startpos hi
+        type=(type<<8)|stream_read_char(demux->stream);//startpos lo
+//        printf("\r[%02X][%04X]",c,type);
         len-=3;
-        if((aid&0xE0)==0xA0 && len>=2){
-          // read PCM header
-          int head;
-          head=stream_read_char(demux->stream); head=c<<8;
-          c=stream_read_char(demux->stream);    head|=c;  len-=2;
-          while(len>0 && head!=0x180){
-            head=c<<8;
-            c=stream_read_char(demux->stream);
-            head|=c;--len;
-          }
-          if(!len) mp_msg(MSGT_DEMUX,MSGL_V,"End of packet while searching for PCM header\n");
+        if((aid&0xE0)==0xA0 && len>=3){
+	  unsigned char* hdr;
+	  // save audio header as codecdata!
+	  if(!((sh_audio_t*)(ds->sh))->codecdata_len){
+	      ((sh_audio_t*)(ds->sh))->codecdata=malloc(3);
+	      ((sh_audio_t*)(ds->sh))->codecdata_len=3;
+	  }
+	  hdr=((sh_audio_t*)(ds->sh))->codecdata;
+          // read LPCM header:
+	  // emphasis[1], mute[1], rvd[1], frame number[5]:
+          hdr[0]=stream_read_char(demux->stream);
+//          printf(" [%01X:%02d]",c>>5,c&31);
+	  // quantization[2],freq[2],rvd[1],channels[3]
+          hdr[1]=stream_read_char(demux->stream);
+//          printf("[%01X:%01X] ",c>>4,c&15);
+	  // dynamic range control (0x80=off):
+          hdr[2]=stream_read_char(demux->stream);
+//          printf("[%02X] ",c);
+          len-=3;
+          if(len<=0) mp_msg(MSGT_DEMUX,MSGL_V,"End of packet while searching for PCM header\n");
         }
+//        printf("  \n");
       } //  if(demux->audio->id==aid)
 
       } else mp_msg(MSGT_DEMUX,MSGL_V,"Unknown 0x1BD substream: 0x%02X  \n",aid);
