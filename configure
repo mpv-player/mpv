@@ -1776,35 +1776,44 @@ echo "Extra headers : $_extraincdir"
 if test "$_gui" = yes ; then
 # --------------- GUI begin -------------------
 
+test -z `which gtk-config` || _gtkconfig="gtk-config"
+test -z `which gtk12-config` || _gtkconfig="gtk12-config"
+test -z $_gtkconfig && die "gtk-config not found"
+
+test -z `which glib-config` || _glibconfig="glib-config"
+test -z `which glib12-config` || _glibconfig="glib12-config"
+test -z $_glibconfig && die "glib-config not found"
+
 echo
+#echo "gtk-config binary: $_gtkconfig"
 echo $_echo_n "Checking for gtk version ... $_echo_c"
-_gtk=`gtk-config --version 2>&1`
+_gtk=`$_gtkconfig --version 2>&1`
 test -z "$_gtk" && die "gtk not found."
 echo "$_gtk"
 
 echo $_echo_n "Checking for gtk includes ... $_echo_c"
-_gtkinc=`gtk-config --cflags 2>&1`
+_gtkinc=`$_gtkconfig --cflags 2>&1`
 test -z "$_gtkinc" && die "gtk not found."
 echo "done"
 
 echo $_echo_n "Checking for gtk libs ... $_echo_c"
-_gtklib=`gtk-config --libs 2>&1`
+_gtklib=`$_gtkconfig --libs 2>&1`
 test -z "$_gtklib" && die "gtk not found."
 echo "done"
 
 echo
 echo $_echo_n "Checking for glib version ... $_echo_c"
-_glib=`glib-config --version 2>&1`
+_glib=`$_glibconfig --version 2>&1`
 test -z "$_glib" && die "glib not found."
 echo "$_glib"
 
 echo $_echo_n "Checking for glib includes ... $_echo_c"
-_glibinc=`glib-config --cflags 2>&1`
+_glibinc=`$_glibconfig --cflags 2>&1`
 test -z "$_glibinc" && die "glib not found."
 echo "done"
 
 echo $_echo_n "Checking for glib libs ... $_echo_c"
-_gliblib=`glib-config --libs 2>&1`
+_gliblib=`$_glibconfig --libs 2>&1`
 test -z "$_gliblib" && die "glib not found."
 echo "done"
 
