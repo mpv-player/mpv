@@ -279,11 +279,14 @@ static int control(int cmd,int arg){
 	    float volume;
 	    AUDIO_INITINFO(&info);
 	    volume = vol->right > vol->left ? vol->right : vol->left;
-	    info.play.gain = volume * AUDIO_MAX_GAIN / 100;
-	    if ( vol->right == vol->left )
-		info.play.balance = AUDIO_MID_BALANCE;
-	    else
-		info.play.balance = (vol->right - vol->left + volume) * AUDIO_RIGHT_BALANCE / (2*volume);
+	    info.output_muted = (volume == 0);
+	    if ( !info.output_muted ) {
+		info.play.gain = volume * AUDIO_MAX_GAIN / 100;
+		if ( vol->right == vol->left )
+		    info.play.balance = AUDIO_MID_BALANCE;
+		else
+		    info.play.balance = (vol->right - vol->left + volume) * AUDIO_RIGHT_BALANCE / (2*volume);
+	    }
 	    ioctl( fd,AUDIO_SETINFO,&info );
 	    close( fd );
 	    return CONTROL_OK;
