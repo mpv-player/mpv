@@ -19,7 +19,7 @@ configure-stamp:
 	dh_testdir
 	# Add here commands to configure the package.
 	$(checkdir)
-	./configure --prefix=/usr --enable-gui --enable-streaming
+	./configure --prefix=/usr --enable-gui
 
 	touch configure-stamp
 
