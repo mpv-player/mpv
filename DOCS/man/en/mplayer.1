@@ -4895,6 +4895,9 @@ noise reduction, 0 is disabled
 .B qns=<0\-3>
 quantizer noise shaping, reduces ringing artefacts, larger values are slower
 but may not result in better quality
+this can and should be used together with trellis quantization, in which case
+the trellis quantization (optimal for constant weight) will be used as startpoint
+for the iterative search.
 .PD 0
 .RSs
 .IPs 0
