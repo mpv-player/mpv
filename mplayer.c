@@ -764,6 +764,22 @@ play_dvd:
 
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
 
+    current_module="vobsub";
+    if (vobsub_name){
+      vo_vobsub=vobsub_open(vobsub_name);
+      if(vo_vobsub==NULL)
+        mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,vobsub_name);
+    }else if(sub_auto && filename && (strlen(filename)>=5)){
+      /* try to autodetect vobsub from movie filename ::atmos */
+      char *buf = malloc((strlen(filename)-3) * sizeof(char));
+      memset(buf,0,strlen(filename)-3); // make sure string is terminated
+      strncpy(buf, filename, strlen(filename)-4); 
+      vo_vobsub=vobsub_open(buf);
+      free(buf);
+    }
+    if(vo_vobsub)
+      sub_auto=0; // don't do autosub for textsubs if vobsub found
+
 #ifdef USE_SUB_OLD
 // check .sub
   if(sub_name){
@@ -788,13 +804,6 @@ play_dvd:
   if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, fps);
 #endif
-
-  current_module="vobsub";
-  if (vobsub_name){
-    vo_vobsub=vobsub_open(vobsub_name);
-    if(vo_vobsub==NULL)
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,vobsub_name);
-  }
 
     stream=NULL;
     demuxer=NULL;
