@@ -75,6 +75,7 @@ typedef struct {
   BITMAPINFOHEADER o_bih; // out format
   void* context; // codec-specific stuff (usually HANDLE or struct pointer)
   HIC hic;  // handle
+  void* video_out;
 } sh_video_t;
 
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id);
