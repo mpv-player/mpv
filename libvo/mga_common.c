@@ -85,8 +85,14 @@ draw_slice_g200(uint8_t *image[], int stride[], int width,int height,int x,int y
         width/=2;height/=2;x/=2;y/=2;
 
 	dest = vid_data + bespitch*mga_vid_config.src_height + bespitch*y + 2*x;
-        src = image[1];
-        src2 = image[2];
+	if(mga_vid_config.format==MGA_VID_FORMAT_YV12){
+	    src = image[1];
+	    src2 = image[2];
+	} else {
+	    src = image[2];
+	    src2 = image[1];
+	}
+	
 	for(h=0; h < height; h++)
 	{
 #ifdef HAVE_MMX
@@ -145,6 +151,7 @@ draw_slice_g400(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
+    uint8_t *dest2;
     uint32_t bespitch,bespitch2;
     int i;
 
@@ -155,14 +162,18 @@ draw_slice_g400(uint8_t *image[], int stride[], int w,int h,int x,int y)
     mem2agpcpy_pic(dest, image[0], w, h, bespitch, stride[0]);
     
     w/=2;h/=2;x/=2;y/=2;
-    
-    dest = vid_data + bespitch*mga_vid_config.src_height + bespitch2 * y + x;
-    mem2agpcpy_pic(dest, image[1], w, h, bespitch2, stride[1]);
 
-    dest = vid_data + bespitch*mga_vid_config.src_height
-                    + bespitch*mga_vid_config.src_height / 4 
-                    + bespitch2 * y + x;
+    dest = vid_data + bespitch*mga_vid_config.src_height + bespitch2 * y + x;
+    dest2= dest + bespitch2*mga_vid_config.src_height / 2; 
+
+  if(mga_vid_config.format==MGA_VID_FORMAT_YV12){
+    // mga_vid's YV12 assumes Y,U,V order (insteda of Y,V,U) :(
+    mem2agpcpy_pic(dest, image[1], w, h, bespitch2, stride[1]);
+    mem2agpcpy_pic(dest2,image[2], w, h, bespitch2, stride[2]);
+  } else {
     mem2agpcpy_pic(dest, image[2], w, h, bespitch2, stride[2]);
+    mem2agpcpy_pic(dest2,image[1], w, h, bespitch2, stride[1]);
+  }
 
 }
 
@@ -233,9 +244,13 @@ get_image(mp_image_t *mpi){
        // we're lucky or codec accepts stride => ok, let's go!
        if(mpi->flags&MP_IMGFLAG_PLANAR){
 	   mpi->planes[0]=vid_data;
-	   mpi->planes[1]=vid_data + bespitch*mga_vid_config.src_height;
-	   mpi->planes[2]=vid_data + bespitch*mga_vid_config.src_height
-                    + bespitch*mga_vid_config.src_height / 4;
+	   if(mpi->flags&MP_IMGFLAG_SWAPPED){
+	       mpi->planes[1]=vid_data + bespitch*mga_vid_config.src_height;
+	       mpi->planes[2]=mpi->planes[1] + bespitch2*mga_vid_config.src_height/2;
+	   } else {
+	       mpi->planes[2]=vid_data + bespitch*mga_vid_config.src_height;
+	       mpi->planes[1]=mpi->planes[2] + bespitch2*mga_vid_config.src_height/2;
+	   }
 	   mpi->width=mpi->stride[0]=bespitch;
 	   mpi->stride[1]=mpi->stride[2]=bespitch2;
        } else {
