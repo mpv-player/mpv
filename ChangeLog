@@ -52,9 +52,10 @@ MPlayer (1.0)
     * support for selecting subtitle streams with -slang inside Ogg
     * wrapper demuxer for FFMpeg's libavformat (Nut is playable this way)
     * much improved seeking in Ogg
+    * Nullsoft streaming video (NSV) demuxer
+    * AVI OpenDML read and write support
 
     Streaming:
-    * Nullsoft streaming video (NSV) demuxer
     * support for URL redirection
     * support for seeking in HTTP streams
     * updated LIVE.COM streaming code
@@ -71,6 +72,7 @@ MPlayer (1.0)
     * AltiVec optimized resampler in liba52
     * support for VP5 and VP6 DLL decoders
     * support for Alparysoft lossless video codec (through DLLs)
+    * support for Lead MCMW wavelet video codec (through DLLs)
     * HE-AAC working through libfaad
     * removed libmpflac in favor of FFmpeg's FLAC implementation
     * liba52 dynamic range compression support
@@ -146,6 +148,7 @@ MPlayer (1.0)
     * more robust MJPEG startcode search mechanism
     * better WMV8 decoding
     * native Sparc VIS optimizations
+    * native G.726 codec
 
     Others:
     * -codecs-file option for specifying alternative codecs.conf file
@@ -163,6 +166,8 @@ MPlayer (1.0)
     * AVI VPRP (video property) read and write support
     * fixed long standing lame quality option off-by-one bug in MEncoder
     * MPL2 subtitle support
+    * smil playlist parser
+    * less verbosity in Win32 loader and in other places
 
 
   pre3try2: security fix release Mar 3, 2004
