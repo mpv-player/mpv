@@ -103,6 +103,7 @@ static uint32_t preinit(const char *arg){
     if(!arg){
     //|O_NONBLOCK
 #ifndef HAVE_DVB_HEAD
+	printf("Opening /dev/ost/video+audio\n");
 	if((vo_mpegpes_fd = open("/dev/ost/video",O_RDWR)) < 0){
 		perror("DVB VIDEO DEVICE: ");
 		return -1;
@@ -112,6 +113,7 @@ static uint32_t preinit(const char *arg){
 		return -1;
 	}
 #else
+	printf("Opening /dev/dvb/adapter0/video0+audio0\n");
 	if((vo_mpegpes_fd = open("/dev/dvb/adapter0/video0",O_RDWR)) < 0){
         	perror("DVB VIDEO DEVICE: ");
         	return -1;
