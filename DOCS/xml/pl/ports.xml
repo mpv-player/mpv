@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.22 -->
+<!-- synced with 1.23 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -324,7 +324,7 @@ wolna. Używaj SDL.
   Umieść plik
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
   w katalogu <filename class="directory">/usr/include/</filename>, żeby umożliwić kompilację
-  MPlayera.</para>
+  <application>MPlayera</application>.</para>
 
 <para>Pliki nagłówkowe DirectX muszą być rozpakowane do <filename class="directory">/usr/include/</filename> lub
   <filename class="directory">/usr/local/include/</filename>.</para>
@@ -394,7 +394,7 @@ ich zmodyfikowane GCC 2.95.x nie obsługuje poprawnie składni C99.
 
 <para>
 Możesz pobrać Aqua GUI dla <application>MPlayera</application> razem z
-jego skompilowanymi binariami dla MacOS X ze strony projektu
+jego skompilowanymi binariami dla Mac OS X ze strony projektu
 <ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink>.
 </para>
 </sect1>
