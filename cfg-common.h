@@ -77,6 +77,7 @@
         {"oldpp", "MPlayer was compiled without opendivx library\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 	{"sws", &sws_flags, CONF_TYPE_INT, 0, 0, 2, NULL},
+	{"ssf", scaler_filter_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 
 #ifdef USE_TV
 	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -108,6 +109,19 @@ struct config tvopts_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
+
+extern int sws_chr_vshift;
+extern int sws_chr_hshift;
+extern float sws_chr_gblur;
+extern float sws_lum_gblur;
+
+struct config scaler_filter_conf[]={
+	{"lgb", &sws_lum_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
+	{"cgb", &sws_chr_gblur, CONF_TYPE_FLOAT, 0, 0, 100.0, NULL},
+	{"cvs", &sws_chr_vshift, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{"chs", &sws_chr_hshift, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
+};
 
 /* VIVO demuxer options: */
 extern int vivo_param_version;
