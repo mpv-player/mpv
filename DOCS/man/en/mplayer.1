@@ -5833,11 +5833,11 @@ sane range
 .B tcplx_mask=<0.0\-1.0>
 temporal complexity masking (default: 0.0 (disabled))
 Imagine a scene with a bird flying across the whole scene; tcplx_mask
-will decrease the quantizers of the bird's macroblocks (thus decreasing their
+will raise the quantizers of the bird's macroblocks (thus decreasing their
 quality), as the human eye usually does not have time to see all the bird's
 details.
 Be warned that if the masked object stops (e.g.\& the bird lands) it is
-likely to look horrible for a a short period of time, until the encoder
+likely to look horrible for a short period of time, until the encoder
 figures out that the object is not moving and needs refined blocks.
 The saved bits will be spent on other parts of the video, which may increase
 subjective quality, provided that tcplx_mask is carefully chosen.
@@ -6873,11 +6873,45 @@ quantizer factor between I and P frames (default: 2.0)
 quantizer factor between P and B frames (default: 2.0)
 .
 .TP
-.B pass=<1|2>
-Enable 2-pass mode.
-The first pass saves statistics.
-It is recommended to always encode in 2-pass mode as it leads to a better bit
-distribution and improves overall quality.
+.B pass=<1\-3>
+Enable 2 or 3-pass mode.
+It is recommended to always encode in 2 or 3-pass mode as it leads to a
+better bit distribution and improves overall quality.
+.PD 0
+.RSs
+.IPs 1
+first pass
+.IPs 2
+second pass
+.IPs 3
+Nth pass (second and third passes of three pass encoding)
+.RE
+.RS
+Here is how it works, and how to use it:
+.br
+The first pass (pass=1) collects statistics on the video and writes them
+to a file.
+You might want to deactivate some CPU-hungry options, appart from the ones
+that are on by default.
+.br
+In two pass mode, the second pass (pass=2) reads the stats file and
+bases ratecontrol decisions on it.
+.br
+In three pass mode, the second pass (pass=3, that is not a typo)
+does both: It first reads the stats, then overwrites them.
+You might want to backup divx2pass.log before doing this if there is
+any possibility that you will have to cancel MEncoder.
+You can use all encoding options, except very CPU-hungry options.
+.br
+The third pass (pass=3) is the same as the second pass, except that it has
+the second pass' stats to work from.
+You can use all encoding options, including CPU-hungry ones.
+.I
+NOTE:
+Three pass and x264 support being quite recent in MEncoder, we welcome any
+feedback you could give us on good combinations of x264 options that are
+both fast and provide good quality.
+.REss
 .
 .TP
 .B qcomp=<0\-1>
