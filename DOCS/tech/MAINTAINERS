@@ -91,7 +91,7 @@ demuxers:
     * demux_realaud.c - Roberto Togni
     * demux_rtp* - Ross Finlayson
 
-codec libraries:
+codec support:
     * FFmpeg: Michael Niedermayer
     * XviD: Ivan Kalvachev
 
