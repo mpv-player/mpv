@@ -334,6 +334,8 @@ void uninit_player(unsigned int mask){
   }
 #endif
 
+  current_module=NULL;
+
 }
 
 void exit_player(char* how){
