@@ -23,14 +23,14 @@ daily generated list!!!</P>
 <P>The most important ones above all:<BR>
 <UL>
 <LI>MPEG1 (VCD) and MPEG2 (DVD) video</LI>
-<LI>DivX ;-), OpenDivX (DivX4), 3ivx and other MPEG4 variants</LI>
+<LI>DivX ;-), OpenDivX (DivX4), DivX 5.00, 3ivX and other MPEG4 variants</LI>
 <LI>Windows Media Video 7 (WMV1) and 8 (WMV2) used in .wmv files</LI>
-<LI>Intel Indeo codecs (3.1,3.2,4.1,5.0)</LI>
-<LI>MJPEG, ASV2 and other hardware formats</LI>
-<LI>XAnim codecs</LI>
-<LI>VIVO</LI>
-<LI>FLI</LI>
+<LI>Cinepak and Intel Indeo codecs (3.1,3.2,4.1,5.0)</LI>
+<LI>MJPEG, AVID, VCR2, ASV2 and other hardware formats</LI>
+<LI>VIVO 1.0, 2.0, I263 and other h263(+) variants</LI>
+<LI>FLI/FLC</LI>
 <LI>RealVideo 1.0</LI>
+<LI>Various old simple RLE-like formats</LI>
 </UL></P>
 
 <P>If you have a Win32 codec not listed here, and not supported yet, just read the <A
@@ -92,7 +92,10 @@ bandwidth on the bus. For packed YUV modes (YUY2, UYVY) use the 'divx4'
 method. For RGB modes you can choose freely, their speed is same, maybe
 differ according to the current bpp.</P>
 
-<P>Note: it supports postprocessing too (use option <CODE>-oldpp</CODE> to
+<P>NOTE: If your -vo driver supports direct rendering, then -vc divx4 may be
+faster, or even the fastest solution.</P>
+
+<P>Note: it supports postprocessing too (use option <CODE>-pp</CODE> to
 enable using it), but range of values is strange: </P>
 
 <P><TABLE BORDER=0>
@@ -123,7 +126,7 @@ h263+, etc.</P>
   <LI>from release : then you have libavcodec right in the package, just
     build <B>MPlayer</B> as usual.</LI>
   <LI>from CVS : you have to download it manually directly from <B>FFmpeg</B>'s
-    tree:
+    CVS tree (ffmpeg 0.4.5 version will NOT work with mplayer!):
 
 <P><CODE>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
@@ -176,12 +179,12 @@ easy to enable them:</P>
   isn't there, so download it from the <A HREF="http://www.3ivx.com">3ivx site</A>.</LI>
 
   <LI>use the <CODE>--with-xanimlibdir</CODE> option to tell configure where
-  it can find the xanim codecs if you didn't install them to the default
-  location : <CODE>/usr/lib/xanim</CODE> .
+  it can find the xanim codecs. By default, it checks them at
+  <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods and /usr/lib/xanim</CODE>.
   Alternatively you can set the environment variable <I>XANIM_MOD_DIR</I> to
   the dir of the XAnim codecs.</LI>
 
-  <LI>rename the filenames by cutting out the architecture stuff, so they will
+  <LI>rename/symlink the filenames by cutting out the architecture stuff, so they will
   have filenames like these : <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>
 
 </UL>
@@ -209,10 +212,10 @@ VIVO 2.0 files in the future.</P>
 <P><B><A NAME=2.2.1.5>2.2.1.5.  MPEG 1/2 video</A></B></P>
 
 <P>MPEG1 and MPEG2 are decoded with the native library <B>libmpeg2</B>.
-Its source code is included in <B>MPlayer</B>, and of course is multiplatform.
-We handle buggy MPEG1/2 video files by checking for what signature does
-libmpeg2 return, and when it gives sig11 (segmentation fault), we quickly
-reinitialize the codec, and continue exactly from where the failure did occur.
+Its source code is included in <B>MPlayer</B>, and of course it is multiplatform.
+We handle buggy MPEG 1/2 video files by catching sig11 (segmentation fault),
+and quickly reinitializing the codec, and continue exactly from where the failure
+did occur.
 No speed decrease is measurable.</P>
 
 
@@ -257,7 +260,7 @@ development was DivX4).</P>
 
 <P><B>Disadvantages</B> :
   <UL>
-    <LI>currently it doesn't properly decode all DivX/DivX4 files</LI>
+    <LI>currently it doesn't properly <B>decode</B> all DivX/DivX4 files (but who cares, we can play them using libavcodec)</LI>
     <LI>you have to choose between DivX4 <B>OR</B> XViD support at
       compiletime</LI>
     <LI>under development</LI>
@@ -273,6 +276,7 @@ development was DivX4).</P>
   &nbsp;&nbsp;<CODE>cd xvidcore/build/generic</CODE><BR>
   &nbsp;&nbsp;<CODE>Edit Makefile.linux to fit your needs</CODE><BR>
   &nbsp;&nbsp;<CODE>make -f Makefile.linux</CODE><BR>
+  &nbsp;&nbsp;Get encore2.h and decore.h from Divx4linux package, and copy them to <CODE>/usr/local/include/</CODE><BR>
   &nbsp;&nbsp;<CODE>recompile <B>MPlayer</B> with
     --with-xvidcore=/path/to/libcore.a</CODE><BR>
 </P>
@@ -284,7 +288,7 @@ development was DivX4).</P>
 <UL>
 <LI>MPEG layer 2, and layer 3 (MP3) audio (<B>native</B> code, with MMX/SSE/3DNow! optimization)</LI>
 <LI>MPEG layer 1 audio (<B>native</B> code, with libavcodec)</LI>
-<LI>AC3 Dolby audio (<B>native</B> code, with SSE/3DNow! optimization)</LI>
+<LI>AC3 Dolby audio (<B>native</B> code, with MMX/SSE/3DNow! optimization)</LI>
 <LI>Ogg Vorbis audio codec (<B>native</B> lib)</LI>
 <LI>Voxware audio (using DirectShow DLL)</LI>
 <LI>alaw, msgsm, pcm and other simple old audio formats</LI>
@@ -323,17 +327,19 @@ August 2001 should be suitable (I heard newest ALSA CVS supports this too).</P>
 <P><B><A NAME=2.2.2.2>2.2.2.2.  Hardware AC3 decoding</A></B></P>
 
 <P>You'll need an AC3 capable soundcard, with digital out (SP/DIF). The
-card's driver must support the AFMT_AC3 format (like SB Live! or C-Media does).
+card's driver must properly support the AFMT_AC3 format (like C-Media does).
 Connect your AC3 decoder to the SP/DIF output, and use the '-ac hwac3'
 option. It may or may not work (experimental). It will work with C-Media
 cards, and with SB Live! + ALSA driver. It won't work with Live!'s OSS
-driver.</P>
+driver!</P>
 
 
 <P><B><A NAME=2.2.2.3>2.2.2.3.  libmad support</A></B></P>
 
 <P><A HREF="http://mad.sourceforge.net">libmad</A> is a multiplatform MPEG audio
 decoding library. If you don't know why is it good, you probably don't need it.</P>
+
+<P>It doesn't handle broken files well, and sometimes has problems with seeking</P>
 
 <P>To enable support, compile with the <CODE>--enable-mad</CODE> configure
 option.</P>
