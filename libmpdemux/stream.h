@@ -208,10 +208,17 @@ int dvd_parse_chapter_range(struct config*, const char*);
 
 #ifdef USE_DVDREAD
 
+#ifdef USE_MPDVDKIT
+#include "../libmpdvdkit/dvd_reader.h"
+#include "../libmpdvdkit/ifo_types.h"
+#include "../libmpdvdkit/ifo_read.h"
+#include "../libmpdvdkit/nav_read.h"
+#else
 #include <dvdread/dvd_reader.h>
 #include <dvdread/ifo_types.h>
 #include <dvdread/ifo_read.h>
 #include <dvdread/nav_read.h>
+#endif
 
 typedef struct {
  int id; // 0 - 31 mpeg; 128 - 159 ac3; 160 - 191 pcm

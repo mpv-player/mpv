@@ -39,11 +39,6 @@ int dvd_nav=0;                  /* use libdvdnav? */
 
 #ifdef USE_DVDREAD
 
-#include <dvdread/dvd_reader.h>
-#include <dvdread/ifo_types.h>
-#include <dvdread/ifo_read.h>
-#include <dvdread/nav_read.h>
-
 #define	DVDREAD_VERSION(maj,min,micro)	((maj)*10000 + (min)*100 + (micro))
 
 /*
