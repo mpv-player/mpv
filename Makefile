@@ -280,6 +280,9 @@ distclean:
 	-rm -f *.o *.a .depend configure.log
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
+strip:
+	strip -s $(ALL_PRG)
+
 dep:	depend
 
 depend:
