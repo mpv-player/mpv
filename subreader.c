@@ -46,7 +46,7 @@ static int eol(char p) {
 /* Remove leading and trailing space */
 static void trail_space(char *s) {
 	int i = 0;
-	while (isspace(*s)) ++i;
+	while (isspace(s[i])) ++i;
 	if (i) strcpy(s, s + i);
 	i = strlen(s) - 1;
 	while (i > 0 && isspace(s[i])) s[i--] = '\0';
