@@ -56,6 +56,10 @@
 #include "../../libdha/libdha.h"
 #include "mga_vid.h"
 
+#if    !defined(ENOTSUP) && defined(EOPNOTSUPP)
+#define ENOTSUP EOPNOTSUPP
+#endif
+
 #define TRUE 1
 #define FALSE 0
 
