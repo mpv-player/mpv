@@ -1498,6 +1498,11 @@ total_time_usage_start=GetTimer();
 
 while(!eof){
 
+    if(play_n_frames>=0){
+      --play_n_frames;
+      if(play_n_frames<0) exit_player("Requested number of frames played");
+    }
+
 /*========================== PLAY AUDIO ============================*/
 //if(!has_audio){
 //  int playsize=512;
@@ -1835,11 +1840,6 @@ switch(sh_video->codec->driver){
     }
 
     current_module=NULL;
-    
-    if(play_n_frames>=0){
-      --play_n_frames;
-      if(play_n_frames<0) exit_player("Requested number of frames played");
-    }
     
     if(eof) break;
     if(force_redraw){
