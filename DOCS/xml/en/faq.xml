@@ -443,10 +443,10 @@ Example:
 <listitem><para>ct: total A-V sync correction done</para></listitem>
 <listitem><para>frames played (counting from last seek)</para></listitem>
 <listitem><para>frames decoded (counting from last seek)</para></listitem>
-<listitem><para>video codec cpu usage in percent (for slices and DR this includes
+<listitem><para>video codec CPU usage in percent (for slices and DR this includes
 video_out)</para></listitem>
-<listitem><para>video_out cpu usage</para></listitem>
-<listitem><para>audio codec cpu usage in percent</para></listitem>
+<listitem><para>video_out CPU usage</para></listitem>
+<listitem><para>audio codec CPU usage in percent</para></listitem>
 <listitem><para>frames needed to drop to maintain A-V sync</para></listitem>
 <listitem><para>current level of image postprocessing (when using
 <option>-autoq</option>)</para></listitem>
@@ -467,7 +467,7 @@ Use the <option>-quiet</option> option and read the man page.
 
 <qandaentry>
 <question><para>
-Why is video_out cpu usage zero (0%) for some files?
+Why is video_out CPU usage zero (0%) for some files?
 </para></question>
 <answer><para>
 It's not zero, but it's called from the codec and thus cannot be measured
@@ -632,7 +632,7 @@ Error opening/initializing the selected video_out (-vo) device.
 How can I solve my problem?
 </para></question>
 <answer><para>
-Just change your video output device. Issue the following comand to get
+Just change your video output device. Issue the following command to get
 a list of available video output drivers:
 <screen>
 mplayer -vo help
@@ -673,7 +673,7 @@ Do you have a stray <filename>codecs.conf</filename> file in
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
 <filename>/usr/local/etc/</filename> or a similar location? Remove it,
 outdated <filename>codecs.conf</filename> files can cause obscure
-problems. <application>MPlayer</application> will use its builtin one instead.
+problems. <application>MPlayer</application> will use its built-in one instead.
 </para></answer>
 </qandaentry>
 
@@ -775,18 +775,18 @@ then there is a problem with your kernel/libc. Maybe you are using some security
 patches (for example Solar Designer's OpenWall patch) which forces loading
 libraries to very low addresses. Because <filename>l3codeca.acm</filename> is a
 non-relocatable DLL, it must be loaded to <literal>0x00400000</literal>, we can't
-change this. You should use a non-patched kernel, or use <application>MPlayer's</application>
+change this. You should use a non-patched kernel, or use <application>MPlayer</application>'s
 <option>-afm 1</option> option to disable using <filename>l3codeca.acm</filename>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-My computer plays MS DivX AVIs with resolutions ~ 640x300 and stereo mp3 sound
+My computer plays MS DivX AVIs with resolutions ~ 640x300 and stereo MP3 sound
 too slow. When I use <option>-nosound</option> option, everything is OK (but quiet).
 </para></question>
 <answer><para>
-Your machine is too slow or your soundcard driver is broken. Consult the
+Your machine is too slow or your sound card driver is broken. Consult the
 documentation to see if you can improve performance.
 </para></answer>
 </qandaentry>
@@ -903,7 +903,8 @@ When I try to grab from my tuner, it works, but colors are strange. It's OK with
 applications.
 </para></question>
 <answer><para>
-Your card probably misreports its colorspace capacity. Try with YUY2 instead of
+Your card probably reports some colorspaces as supported when in fact
+it does not support them. Try with YUY2 instead of the
 default YV12 (see the <link linkend="tv-input">TV</link> section).
 </para></answer>
 </qandaentry>
@@ -970,7 +971,7 @@ Try <option>-nocache</option>.
 
 <qandaentry>
 <question><para>
-How can I play MPEG Layer 2 (mp2) audio files?
+How can I play MPEG Layer 2 (MP2) audio files?
 </para></question>
 <answer><para>
 You have to use <option>-rawaudio on:format=0x50</option>.
@@ -1048,7 +1049,7 @@ X Error of failed request: BadAccess (attempt to access private resource denied)
 </para></question>
 <answer><para>
 The <systemitem>tdfx</systemitem> driver in XFree86 4.0.2/4.0.3 had this bug. This was
-solved by <ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bugfix #621
+solved by <ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bug fix #621
 of the XFree86 4.1.0 CVS log</ulink>. So upgrade to XFree86 4.1.0 or later.
 Alternatively, either download (at least) DRI version 0.6 from the
 <ulink url="http://dri.sourceforge.net">DRI homepage</ulink>, or use CVS DRI.
