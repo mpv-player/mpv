@@ -47,7 +47,7 @@ inline void TranslateFilename( int c,char * tmp,size_t tmplen )
    case STREAMTYPE_FILE:
           if ( ( guiIntfStruct.Filename )&&( guiIntfStruct.Filename[0] ) )
            {
-            if ( p = strrchr(guiIntfStruct.Filename, '/') )
+            if ( (p = strrchr(guiIntfStruct.Filename, '/')) )
               strlcpy(tmp, p + 1, tmplen);
             else
               strlcpy(tmp, guiIntfStruct.Filename, tmplen);
