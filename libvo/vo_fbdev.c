@@ -27,7 +27,7 @@ static vo_info_t vo_info = {
 	""
 };
 
-static int vt_active;
+static int vt_active = -1;
 static int vt_fd;
 
 char *fb_dev_name = NULL;
@@ -195,8 +195,8 @@ static uint32_t query_format(uint32_t format)
 		if (fb_init())
 			return 0;
 	printf("vo_fbdev: query_format(%#x): ", format);
-	if (format & IMGFMT_BGR_MASK == IMGFMT_BGR)
-		goto not_supported;
+//	if (format & IMGFMT_BGR_MASK == IMGFMT_BGR)
+//		goto not_supported;
 	switch (format) {
 		case IMGFMT_YV12:
 			goto supported;
@@ -275,16 +275,16 @@ static uint32_t draw_frame(uint8_t *src[])
 		yuv2rgb(next_frame, src[0], src[1], src[2], in_width,
 				in_height, in_width * (fb_bpp / 8),
 				in_width, in_width / 2);
-	} else if ((pixel_format & IMGFMT_RGB_MASK) == IMGFMT_RGB) {
+	} else if ((pixel_format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
 		int i;
 		uint8_t *dst = next_frame;
 		uint8_t *s = src[0];
 		for (i = 0; i < in_height; i++) {
-			memcpy(next_frame, s, in_width * (fb_bpp / 8));
-			dst += screen_width;
+			memcpy(dst, s, in_width * (fb_bpp / 8));
+			dst += in_width * (fb_bpp / 8);
 			s += in_width * (fb_bpp / 8);
 		}
-	} else {
+	} else if ((pixel_format & IMGFMT_RGB_MASK) == IMGFMT_RGB) {
 	}
 	return 0;
 }
