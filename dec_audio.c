@@ -418,7 +418,7 @@ case AFM_GSM:
 case AFM_IMAADPCM:
   sh_audio->audio_out_minsize=4096;
   sh_audio->ds->ss_div=IMA_ADPCM_SAMPLES_PER_BLOCK;
-  sh_audio->ds->ss_mul=IMA_ADPCM_BLOCK_SIZE;
+  sh_audio->ds->ss_mul=IMA_ADPCM_BLOCK_SIZE * sh_audio->wf->nChannels;
   break;
 case AFM_MSADPCM:
   sh_audio->audio_out_minsize=sh_audio->wf->nBlockAlign * 8;
