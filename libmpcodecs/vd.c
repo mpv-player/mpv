@@ -306,6 +306,8 @@ csp_again:
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       "MPlayer",out_fmt);
 
+    vf->w = sh->disp_w;
+    vf->h = sh->disp_h;
     if(vf->config(vf,sh->disp_w,sh->disp_h,
                       screen_size_x,screen_size_y,
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),

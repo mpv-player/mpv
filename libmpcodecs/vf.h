@@ -42,6 +42,7 @@ typedef struct vf_instance_s {
     unsigned int default_caps; // used by default query_format()
     unsigned int default_reqs; // used by default config()
     // data:
+    int w, h;
     vf_image_context_t imgctx;
     struct vf_instance_s* next;
     mp_image_t *dmpi;

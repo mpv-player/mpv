@@ -7,6 +7,10 @@
 #include <malloc.h>
 #endif
 
+#ifdef MP_DEBUG
+#include <assert.h>
+#endif
+
 #include "../mp_msg.h"
 #include "../help_mp.h"
 #include "../m_option.h"
@@ -238,7 +242,21 @@ void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
 
 mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype, int mp_imgflag, int w, int h){
   mp_image_t* mpi=NULL;
-  int w2=(mp_imgflag&MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE)?((w+15)&(~15)):w;
+  int w2;
+
+#ifdef MP_DEBUG
+  assert(w == -1 || w >= vf->w);
+  assert(h == -1 || h >= vf->h);
+  assert(vf->w > 0);
+  assert(vf->h > 0);
+#endif
+
+//  fprintf(stderr, "get_image: %d:%d, vf: %d:%d\n", w,h,vf->w,vf->h);
+
+  if (w == -1) w = vf->w;
+  if (h == -1) h = vf->h;
+
+  w2=(mp_imgflag&MP_IMGFLAG_ACCEPT_ALIGNED_STRIDE)?((w+15)&(~15)):w;
   
   if(vf->put_image==vf_next_put_image){
       // passthru mode, if the plugin uses the fallback/default put_image() code
@@ -274,7 +292,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
   }
   if(mpi){
     mpi->type=mp_imgtype;
-    mpi->w=w; mpi->h=h;
+    mpi->w=vf->w; mpi->h=vf->h;
     // keep buffer allocation status & color flags only:
 //    mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE|MP_IMGFLAG_DIRECT);
     mpi->flags&=MP_IMGFLAG_ALLOCATED|MP_IMGFLAG_TYPE_DISPLAYED|MP_IMGFLAGMASK_COLORS;
@@ -526,6 +544,7 @@ int vf_next_config(struct vf_instance_s* vf,
 	if(!vf2) return 0; // shouldn't happen!
 	vf->next=vf2;
     }
+    vf->next->w = width; vf->next->h = height;
     return vf->next->config(vf->next,width,height,d_width,d_height,voflags,outfmt);
 }
 
