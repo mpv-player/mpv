@@ -3563,6 +3563,8 @@ Enable soft clipping.
 .TP
 .B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Mixes channels arbitrarily, see DOCS/\:HTML/\:en/\:audio.html for details.
+An example how to downmix a six-channel file to two channels with this
+filter can be found in the examples section near the end of the manpage.
 .PD 0
 .RSs
 .IPs n
@@ -7665,7 +7667,9 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
 .B Play a 6-channel AAC file with only two speakers:
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
+mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+You might want to play a bit with the pan values (e.g multiply with a value) to
+increase volume or avoid clipping.
 .
 .SH EXAMPLES OF MENCODER USAGE
 .
