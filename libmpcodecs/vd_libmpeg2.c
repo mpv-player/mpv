@@ -74,6 +74,7 @@ static int init(sh_video_t *sh){
 static void uninit(sh_video_t *sh){
     mpeg2dec_t * mpeg2dec = sh->context;
     if (mpeg2dec->pending_buffer) free(mpeg2dec->pending_buffer);
+    mpeg2dec->decoder.convert_id=NULL;
     mpeg2_close (mpeg2dec);
 }
 
