@@ -21,6 +21,8 @@ mplayer \- Movie Player for Linux
 .RB [ \-mc\ seconds/5f ]
 .RB [ \-afm\ audio\ decoder ]
 .RB [ \-fs\ ]
+.RB [ \-vm\ ]
+.RB [ \-zoom\ ]
 .RB [ \-x\ x ]
 .RB [ \-y\ y ]
 .RB [ \-xy\ factor ]
@@ -28,6 +30,8 @@ mplayer \- Movie Player for Linux
 .RB [ \-pp\ quality ]
 .RB [ \-include\ configfile ]
 .RB [ \-ffactor\ number ]
+.RB [ \-sub\ file ]
+.RB [ \-subfps\ rate ]
 .I file
 .PP
 .SH DESCRIPTION
@@ -60,12 +64,14 @@ play video cd track from device instead of plain file
 don't play sound
 .TP
 .B \-fs
-fullscreen playing (only gl, xmga and xv drivers)
-
-.I NOTE
-The X11 driver doesn't support fullscreen and scaling.
-However, you can do it yourself, just press ALT,CTRL,-
-or ALT,CTRL,+ simultaneously, see X-server docs for details.
+fullscreen playing (centers movie, and makes black
+bands around it)
+.TP
+.B \-vm
+use XF86VidMode extension for mode changing
+.TP
+.B \-zoom
+use software scaling, where available
 .TP
 .B \-x\ x
 scale image to x width [if driver suppports!]
@@ -101,6 +107,13 @@ resample alphamap of the font. Can be:
         0.75 very narrow black outline [default]
         1    narrow black outline
         10   bold black outline
+.TP
+.B \-sub\ file
+use/display this subtitle file
+.TP
+.B \-subfps\ rate
+specify frame/sec rate of subtitle file
+(default: the same as the movie)
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
