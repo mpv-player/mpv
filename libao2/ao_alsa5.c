@@ -1,5 +1,5 @@
 /*
-  ao_alsa5 - ALSA 5.x output plugin for MPlayer
+  ao_alsa5 - ALSA-0.5.x output plugin for MPlayer
 
   (C) Alex Beregszaszi <alex@naxine.org>
 
@@ -237,8 +237,23 @@ static int init(int rate_hz, int channels, int format, int flags)
 /* close audio device */
 static void uninit()
 {
-    reset();
-    snd_pcm_close(alsa_handler);
+    if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
+    {
+	printf("alsa-uninit: playback drain error: %s\n", snd_strerror(err));
+	return;
+    }
+
+    if ((err = snd_pcm_channel_flush(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
+    {
+	printf("alsa-uninit: playback flush error: %s\n", snd_strerror(err));
+	return;
+    }
+
+    if ((err = snd_pcm_close(alsa_handler)) < 0)
+    {
+	printf("alsa-uninit: pcm close error: %s\n", snd_strerror(err));
+	return;
+    }
 }
 
 /* stop playing and empty buffers (for seeking/pause) */
@@ -268,13 +283,29 @@ static void reset()
 /* stop playing, keep buffers (for pause) */
 static void audio_pause()
 {
-    /* for now, just call reset(); */
-    reset();
+    int err;
+
+    if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
+    {
+	printf("alsa-pause: playback drain error: %s\n", snd_strerror(err));
+	return;
+    }
+
+    if ((err = snd_pcm_channel_flush(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
+    {
+	printf("alsa-pause: playback flush error: %s\n", snd_strerror(err));
+	return;
+    }
 }
 
 /* resume playing, after audio_pause() */
 static void audio_resume()
 {
+    if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
+    {
+	printf("alsa-resume: channel prepare error: %s\n", snd_strerror(err));
+	return;
+    }
 }
 
 /*
@@ -314,7 +345,7 @@ static int get_space()
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
 
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
-	return(0);
+	return(0); /* error occured */
     else
 	return(ch_stat.free);
 }
@@ -327,7 +358,7 @@ static int get_delay()
     ch_stat.channel = SND_PCM_CHANNEL_PLAYBACK;
     
     if (snd_pcm_channel_status(alsa_handler, &ch_stat) < 0)
-	return(0);
+	return(ao_buffersize); /* error occured */
     else
 	return(ch_stat.count);
 }
