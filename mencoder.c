@@ -730,6 +730,8 @@ mux_a=muxer_new_stream(muxer,MUXER_TYPE_AUDIO);
 
 mux_a->buffer_size=0x100000; //16384;
 mux_a->buffer=malloc(mux_a->buffer_size);
+if (!mux_a->buffer)
+    mencoder_exit(1,"memory allocation failed");
 
 mux_a->source=sh_audio;
 
@@ -894,10 +896,7 @@ case ACODEC_LAVC:
 	exit(1);
     }
 
-    if (sizeof(MPEGLAYER3WAVEFORMAT) != 30)  // should be 30
-	broken_c_compiler___size_of_MPEGLAYER3WAVEFORMAT_not_30();
-
-    mux_a->wf = malloc(sizeof(MPEGLAYER3WAVEFORMAT));
+    mux_a->wf = malloc(sizeof(WAVEFORMATEX)+lavc_actx->extradata_size+256);
     mux_a->wf->wFormatTag = lavc_param_atag;
     mux_a->wf->nChannels = lavc_actx->channels;
     mux_a->wf->nSamplesPerSec = lavc_actx->sample_rate;
@@ -942,10 +941,20 @@ case ACODEC_LAVC:
 	((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->nCodecDelay = 0;
 	break;
     default:
-	mux_a->wf->cbSize = 0;
 	mux_a->wf->wBitsPerSample = 0; /* Unknown */
+	if (lavc_actx->extradata && (lavc_actx->extradata_size > 0))
+	{
+	    memcpy(mux_a->wf+sizeof(WAVEFORMATEX), lavc_actx->extradata,
+		    lavc_actx->extradata_size);
+	    mux_a->wf->cbSize = lavc_actx->extradata_size;
+	}
+	else
+	    mux_a->wf->cbSize = 0;
 	break;
     }
+
+    // Fix allocation    
+    mux_a->wf = realloc(mux_a->wf, sizeof(WAVEFORMATEX)+mux_a->wf->cbSize);
 
     // setup filter:
     if (!init_audio_filters(
@@ -1826,6 +1835,9 @@ static uint32_t lavc_find_atag(char *codec)
 
     if(! strcasecmp(codec, "adpcm_ima_wav"))
        return 0x11;
+
+    if(! strncasecmp(codec, "bonk", 4))
+       return 0x2048;
 
     return 0;
 }
