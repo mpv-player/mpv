@@ -35,7 +35,6 @@ static GtkWidget * EVFM;
 
 static GtkWidget * CBVFM;
 static GtkWidget * CBAudioEqualizer;
-static GtkWidget * CBVideoEqualizer;
 //static GtkWidget * CBSurround;
 static GtkWidget * CBExtraStereo;
 static GtkWidget * CBNoSound;
@@ -122,7 +121,7 @@ void ShowPreferences( void )
    {
     const ao_info_t *info = audio_out_drivers[i++]->info;
     if ( !strcmp( info->short_name,"plugin" ) ) continue;
-    if ( !strcmp( gtkAODriver,info->short_name ) ) old_audio_driver=i - 1;
+    if ( !gstrcmp( gtkAODriver,info->short_name ) ) old_audio_driver=i - 1;
     tmp[0]=(char *)info->short_name; tmp[1]=(char *)info->name; gtk_clist_append( GTK_CLIST( CLADrivers ),tmp );
    }
   gtk_clist_select_row( GTK_CLIST( CLADrivers ),old_audio_driver,0 );
@@ -132,7 +131,6 @@ void ShowPreferences( void )
  }
 
 // -- 2. page
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBVideoEqualizer ),gtkEnableVideoEqualizer );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDoubleBuffer ),gtkVODoubleBuffer );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBDR ),gtkVODirectRendering );
  gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFramedrop ),gtkVFrameDrop );
@@ -282,7 +280,6 @@ void prButton( GtkButton * button,gpointer user_data )
 	gtkVODriver=gstrdup( vo_driver[0] );
 
 	// -- 2. page
-	gtkEnableVideoEqualizer=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBVideoEqualizer ) );
 	gtkVODoubleBuffer=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDoubleBuffer ) );
 	gtkVODirectRendering=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBDR ) );
 	gtkVFrameDrop=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFramedrop ) );
@@ -821,13 +818,6 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( vbox5 );
   gtk_container_add( GTK_CONTAINER( frame ),vbox5 );
   gtk_widget_set_usize( vbox5,250,-2 );
-
-  CBVideoEqualizer=gtk_check_button_new_with_label( MSGTR_PREFERENCES_VideoEqu );
-  gtk_widget_set_name( CBVideoEqualizer,"CBVideoEqualizer" );
-  gtk_widget_ref( CBVideoEqualizer );
-  gtk_object_set_data_full( GTK_OBJECT( Preferences ),"CBVideoEqualizer",CBVideoEqualizer,(GtkDestroyNotify)gtk_widget_unref );
-  gtk_widget_show( CBVideoEqualizer );
-  gtk_box_pack_start( GTK_BOX( vbox5 ),CBVideoEqualizer,FALSE,FALSE,0 );
 
   CBDoubleBuffer=gtk_check_button_new_with_label( MSGTR_PREFERENCES_DoubleBuffer );
   gtk_widget_set_name( CBDoubleBuffer,"CBDoubleBuffer" );

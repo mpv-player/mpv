@@ -116,7 +116,7 @@ void ShowEqualizer( void )
  VHueadj->value=(float)vo_gamma_hue;
  VSaturationadj->value=(float)vo_gamma_saturation;
 
- if ( !guiIntfStruct.Playing || !gtkEnableVideoEqualizer )
+ if ( !guiIntfStruct.Playing )
   {
    gtk_widget_set_sensitive( VContrast,FALSE );
    gtk_widget_set_sensitive( VBrightness,FALSE );
@@ -210,7 +210,7 @@ static void eqButtonReleased( GtkButton * button,gpointer user_data )
 	 }
 	 else
 	  {
-	   if ( !guiIntfStruct.Playing || !gtkEnableVideoEqualizer ) break;
+	   if ( !guiIntfStruct.Playing ) break;
 	   gtkSet( gtkSetContrast,0.0f,NULL );
 	   gtkSet( gtkSetBrightness,0.0f,NULL );
 	   gtkSet( gtkSetHue,0.0f,NULL );

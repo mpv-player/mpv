@@ -3,7 +3,6 @@
 #define __CFG_H
 
 extern int gtkEnableAudioEqualizer;
-extern int gtkEnableVideoEqualizer;
 
 extern char * gtkVODriver;
 extern int    gtkVODoubleBuffer;

@@ -1358,7 +1358,7 @@ fflush(stdout);
      guiGetEvent( guiSetFileName,filename );
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
      if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,(char *)1 ); else guiGetEvent( guiSetAudioOnly,(char *)0 );
-     guiGetEvent( guiSetValues,NULL );
+     guiGetEvent( guiSetValues,(char *)sh_video );
     }
 #endif
 
@@ -2920,12 +2920,9 @@ if(rel_seek_secs || abs_seek_pos){
 	  // get pos from frame number / total frames
 	  guiIntfStruct.Position=(float)d_video->pack_no*100.0f/sh_video->video.dwLength;
 	} else {
-	  // get pos from file position / filesize
-          int len=((demuxer->movi_end-demuxer->movi_start));
-	  int pos;
-	  if ( demuxer->file_format==DEMUXER_TYPE_AUDIO ) pos=stream->pos;
-	   else pos=(demuxer->file_format==DEMUXER_TYPE_AVI)?demuxer->filepos:d_video->pos;
-	  guiIntfStruct.Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
+	 int len = ( ( demuxer->movi_end - demuxer->movi_start ) >> 8 );
+	 int pos = ( demuxer->file_format == DEMUXER_TYPE_AUDIO?stream->pos:demuxer->filepos );
+	 guiIntfStruct.Position=(len <= 0? 0.0f : ( pos - demuxer->movi_start ) / len / 2.56f /* / 256.0f * 100.0f */ );
 	}
 	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
 	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->timer;

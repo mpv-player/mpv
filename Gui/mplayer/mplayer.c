@@ -54,10 +54,10 @@ void mplInit( void * disp )
 
  // read gui.conf, gui.pl
  cfg_read();
-#endif 
 
  // opens X display, checks for extensions (XShape, DGA etc)
  wsXInit( disp );
+#endif 
 
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   {

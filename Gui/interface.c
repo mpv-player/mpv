@@ -87,7 +87,8 @@ void guiInit( void )
  gtkAOOSSDevice=strdup( PATH_DEV_DSP );
    
  gtkInit();
-    
+ wsXInit( (void *)mDisplay );
+     
  cfg_read(); 
  appInit( (void*)mDisplay );
        
@@ -298,6 +299,18 @@ void guiGetEvent( int type,char * arg )
 	}
 	break;
    case guiSetValues:
+// -- video
+	if ( arg )
+	 {
+	  if ( vo_gamma_brightness == 1000 )
+	   { vo_gamma_brightness=0; get_video_colors( (void *)arg,"brightness",&vo_gamma_brightness ); }
+	  if ( vo_gamma_contrast == 1000 )
+	   { vo_gamma_contrast=0; get_video_colors( (void *)arg,"contrast",&vo_gamma_contrast ); }
+	  if ( vo_gamma_hue == 1000 )
+	   { vo_gamma_hue=0; get_video_colors( (void *)arg,"hue",&vo_gamma_hue ); }
+	  if ( vo_gamma_saturation  == 1000 )
+	   { vo_gamma_saturation=0; get_video_colors( (void *)arg,"saturation",&vo_gamma_saturation ); }
+	 }
 // -- audio
         if ( audio_out )
 	{

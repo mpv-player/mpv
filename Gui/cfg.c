@@ -18,7 +18,6 @@
 // --- params
 
 int    gtkEnableAudioEqualizer = 0;
-int    gtkEnableVideoEqualizer = 0;
 
 char * gtkVODriver = NULL;
 int    gtkVODoubleBuffer = 1;
@@ -61,7 +60,6 @@ static m_config_t * gui_conf;
 static config_t gui_opts[] =
 {
  { "enable_audio_equ",&gtkEnableAudioEqualizer,CONF_TYPE_FLAG,0,0,1,NULL },
- { "enable_video_equ",&gtkEnableVideoEqualizer,CONF_TYPE_FLAG,0,0,1,NULL },
  
  { "vo_driver",&gtkVODriver,CONF_TYPE_STRING,0,0,0,NULL },
  { "vo_panscan",&vo_panscan,CONF_TYPE_FLOAT,CONF_RANGE,0.0,1.0,NULL },

@@ -102,11 +102,14 @@ void mplEnd( void )
   } 
   else
     {
-     if ( mplMainAutoPlay ) { mplMainAutoPlay=0; return; }
+     if ( guiIntfStruct.FilenameChanged ) return;
 
      guiIntfStruct.TimeSec=0;
      guiIntfStruct.Position=0;
      guiIntfStruct.AudioType=0;
+     guiIntfStruct.DVD.current_title=1;
+     guiIntfStruct.DVD.current_chapter=1;
+     guiIntfStruct.DVD.current_angle=1;
 
      if ( !appMPlayer.subWindow.isFullScreen )
       {
