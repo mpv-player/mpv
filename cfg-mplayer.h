@@ -39,6 +39,9 @@ struct config conf[]={
 	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
 	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 1, 4096},
+#ifdef HAVE_XF86VM
+        {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1},
+#endif
 	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0},
 	{"idx", &no_index, CONF_TYPE_FLAG, 0, 1, 0},
