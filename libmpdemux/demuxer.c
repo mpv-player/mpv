@@ -18,6 +18,8 @@
 #include "stheader.h"
 #include "mf.h"
 
+#include "../libvo/fastmemcpy.h"
+
 void free_demuxer_stream(demux_stream_t *ds){
     ds_free_packs(ds);
     free(ds);
@@ -67,8 +69,19 @@ demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id){
   return d;
 }
 
+sh_audio_t *get_sh_audio(demuxer_t *demuxer, int id)
+{
+    if(id > MAX_A_STREAMS-1 || id < 0)
+    {
+	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
+	    id, MAX_A_STREAMS);
+	return NULL;
+    }
+    return demuxer->a_streams[id];
+}
+
 sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
-    if(id > MAX_A_STREAMS-1)
+    if(id > MAX_A_STREAMS-1 || id < 0)
     {
 	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested audio stream id overflow (%d > %d)\n",
 	    id, MAX_A_STREAMS);
@@ -91,8 +104,19 @@ void free_sh_audio(sh_audio_t* sh){
     free(sh);
 }
 
+sh_video_t *get_sh_video(demuxer_t *demuxer, int id)
+{
+    if(id > MAX_V_STREAMS-1 || id < 0)
+    {
+	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
+	    id, MAX_V_STREAMS);
+	return NULL;
+    }
+    return demuxer->v_streams[id];
+}
+
 sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
-    if(id > MAX_V_STREAMS-1)
+    if(id > MAX_V_STREAMS-1 || id < 0)
     {
 	mp_msg(MSGT_DEMUXER,MSGL_WARN,"Requested video stream id overflow (%d > %d)\n",
 	    id, MAX_V_STREAMS);
@@ -851,6 +875,7 @@ int demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_nuv(demuxer_t *demuxer,float rel_seek_secs,int flags);
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
+int demux_seek_real(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
@@ -901,6 +926,9 @@ switch(demuxer->file_format){
 
   case DEMUXER_TYPE_MOV:
       demux_seek_mov(demuxer,rel_seek_secs,flags);  break;
+
+  case DEMUXER_TYPE_REAL:
+      demux_seek_real(demuxer,rel_seek_secs,flags);  break;
 
   case DEMUXER_TYPE_Y4M:
       demux_seek_y4m(demuxer,rel_seek_secs,flags);  break;
