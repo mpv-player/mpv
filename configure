@@ -2217,7 +2217,7 @@ if test -z "$_ld_x11" ; then
 else
   echores "yes (using $_ld_x11)"
 fi
-_ld_x11="$_ld_x11 -lX11 -lXext $_ld_sock"
+_ld_x11="$_ld_x11 -lXext -lX11 $_ld_sock"
 
 
 echocheck "X11"
@@ -2256,7 +2256,7 @@ int main(void) {
   (void) DPMSQueryExtension(0, 0, 0);
 }
 EOF
-  cc_check $_inc_x11 $_ld_x11 -lXdpms && _xdpms3=yes
+  cc_check $_inc_x11 -lXdpms $_ld_x11 && _xdpms3=yes
 fi
 _xdpms4=no
 if test "$_x11" = yes ; then
@@ -2274,7 +2274,7 @@ if test "$_xdpms4" = yes ; then
   echores "yes (using Xdpms 4)"
 elif test "$_xdpms3" = yes ; then
   _def_xdpms='#define HAVE_XDPMS 1'
-  _ld_x11="$_ld_x11 -lXdpms"
+  _ld_x11="-lXdpms $_ld_x11"
   echores "yes (using Xdpms 3)"
 else
   _def_xdpms='#undef HAVE_XDPMS'
@@ -2290,7 +2290,7 @@ if test "$_x11" = yes && test "$_xv" != no ; then
 int main(void) { (void) XvGetPortAttribute(0, 0, 0, 0); return 0; }
 EOF
   _xv=no
-  cc_check $_inc_x11 $_ld_x11 -lXv && _xv=yes
+  cc_check $_inc_x11 -lXv $_ld_x11 && _xv=yes
 else
   _xv=no
 fi
@@ -2314,7 +2314,7 @@ if test "$_x11" = yes && test "$_xinerama" != no ; then
 int main(void) { (void) XineramaIsActive(0); return 0; }
 EOF
   _xinerama=no
-  cc_check $_inc_x11 $_ld_x11 -lXinerama && _xinerama=yes
+  cc_check $_inc_x11 -lXinerama $_ld_x11 && _xinerama=yes
 else
   _xinerama=no
 fi
@@ -2340,7 +2340,7 @@ if test "$_x11" = yes && test "$_vm" != no ; then
 int main(void) { (void) XF86VidModeQueryExtension(0, 0, 0); return 0; }
 EOF
   _vm=no
-  cc_check $_inc_x11 $_ld_x11 -lXxf86vm && _vm=yes
+  cc_check $_inc_x11 -lXxf86vm $_ld_x11 && _vm=yes
 else
   _vm=no
 fi
@@ -2362,14 +2362,14 @@ if test "$_dga" = auto ; then
 int main (void) { (void) XF86DGASetViewPort(0, 0, 0, 0); return 0; }
 EOF
   _dga=no
-  cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm && _dga=1
+  cc_check $_inc_x11 -lXxf86dga -lXxf86vm $_ld_x11 && _dga=1
 
   cat > $TMPC << EOF
 #include <X11/Xlib.h>
 #include <X11/extensions/xf86dga.h>
 int main (void) { (void) XDGASetViewport(0, 0, 0, 0, 0); return 0; }
 EOF
-  cc_check $_inc_x11 $_ld_x11 -lXxf86dga && _dga=2
+  cc_check $_inc_x11 -lXxf86dga $_ld_x11 && _dga=2
 fi
 
 _def_dga='#undef HAVE_DGA'
@@ -2831,11 +2831,11 @@ if test "$_nas" = auto || test "$_nas" = yes ; then
 int main(void) { return 0; }
 EOF
   _nas=no
-  cc_check -laudio $_inc_x11 $_ld_x11 -lXt -lm && _nas=yes
+  cc_check -laudio $_inc_x11 -lXt $_ld_x11 -lm && _nas=yes
 fi
 if test "$_nas" = yes ; then
   _def_nas='#define HAVE_NAS 1'
-  _ld_nas="-laudio  $_ld_x11 -lXt"
+  _ld_nas="-laudio -lXt $_ld_x11"
   _aosrc="$_aosrc ao_nas.c"
   _aomodules="nas $_aomodules"
 else
@@ -4397,7 +4397,7 @@ X11DIR = $_ld_x11
 SRC_PATH=.
 
 # video output
-X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_sock
+X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_x11 $_ld_mad $_ld_sock
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib

@@ -39,13 +39,13 @@ OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
 VO_LIBS = libvo/libvo.a
 VO_INC = -Ilibvo
-V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
+V_LIBS = $(SDL_LIB) $(GGI_LIB) $(AA_LIB) $(X_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB)
 
 AO_LIBS = libao2/libao2.a
 A_LIBS = $(ALSA_LIB) $(ARTS_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(SGIAUDIO_LIB)
 
 CODEC_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(AV_LIB) $(FAME_LIB)
-COMMON_LIBS = $(CODEC_LIBS) libmpdemux/libmpdemux.a input/libinput.a postproc/libpostproc.a linux/libosdep.a $(LIB_LOADER) $(FREETYPE_LIB) $(A_LIBS) $(CSS_LIB) $(XVID_LIB) $(DECORE_LIB) $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(ARCH_LIB) -Llibaf -laf -lm 
+COMMON_LIBS = $(CODEC_LIBS) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libpostproc.a linux/libosdep.a $(LIB_LOADER) $(FREETYPE_LIB) $(A_LIBS) $(CSS_LIB) $(XVID_LIB) $(DECORE_LIB) $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(ARCH_LIB) -lm 
 ifeq ($(VIDIX),yes)
 MISC_LIBS += -Llibdha -ldha vidix/libvidix.a
 endif
@@ -185,7 +185,7 @@ endif
 
 $(PRG):	$(MPLAYER_DEP)
 	./darwinfixlib.sh $(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(VO_LIBS)  $(COMMON_LIBS) $(EXTRA_LIB) $(AO_LIBS) $(V_LIBS) $(VIDIX_LIBS) $(GUI_LIBS)  $(LIRC_LIB) $(STATIC_LIB) 
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(VO_LIBS) $(AO_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(V_LIBS) $(COMMON_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) 
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
