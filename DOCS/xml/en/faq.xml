@@ -626,6 +626,64 @@ problems. <application>MPlayer</application> will use its builtin one instead.
 
 <qandaentry>
 <question><para>
+Why doesn't <application>MPlayer</application> work on Fedora Core?
+</para></question>
+<answer><para>
+There is a bad interaction on Fedora between exec-shield,
+prelink, and any applications which use Windows DLLs
+(such as <application>MPlayer</application>).
+</para>
+<para>
+The problem is that exec-shield randomizes the load addresses of all the
+system libraries. This randomization happens at prelink time (once every
+two weeks).
+</para>
+<para>
+When <application>MPlayer</application> tries to load a Windows DLL it
+wants to put it at a specific address (0x400000). If an important system
+library happens to be there already, MPlayer will crash.
+(A typical symptom would be a segmentation fault when trying
+to play Windows Media 9 files.)
+</para>
+<para>
+If you run into this problem you have two options:
+<itemizedlist>
+<listitem><para>Wait two weeks. It might start working again.</para></listitem>
+<listitem><para>Relink all the binaries on the system with different
+prelink options. Here are step by step instructions:</para>
+<para>
+<orderedlist>
+<listitem><para>Edit <filename>/etc/syconfig/prelink</filename> and change</para>
+<para>
+<programlisting>
+PRELINK_OPTS=-mR
+</programlisting>
+</para>
+<para>
+to
+<programlisting>
+PRELINK_OPTS="-mR --no-exec-shield"
+</programlisting>
+</para>
+</listitem>
+<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
+<listitem><para><command>/etc/cron.daily/prelink</command>
+(This relinks all the applications, and it takes
+quite a while.)</para></listitem>
+<listitem>
+<para><command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
+(This turns off execshield for the <application>MPlayer</application> binary.)
+</para>
+</listitem>
+</orderedlist>
+</para>
+</listitem>
+</itemizedlist>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 ... works with <application>xine/avifile/...</application> but doesn't with
 <application>MPlayer</application>.
 </para></question>
