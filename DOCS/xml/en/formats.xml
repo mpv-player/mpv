@@ -325,11 +325,6 @@ are required.)
 PVA is an MPEG-like format used by DVB TV boards' software (e.g.:
 <application>MultiDec</application>, <application>WinTV</application> under Windows).
 </para>
-
-<para>
-The PVA specifications can be downloaded from the following address:
-<ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
-</para>
 </sect3>
 
 
