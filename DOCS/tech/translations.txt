@@ -1,0 +1,51 @@
+________________________________________
+HOW TO DO A GOOD TRANSLATION FOR MPLAYER
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+We always welcome new translations, but please be aware that
+translations are not just one time jobs. They have to be maintained
+in order to be useful. Otherwise they quickly get outdated and become
+obsolete, useless cruft. That said, we would be happy if you could
+maintain a new documentation translation.
+
+Documentation related discussions happen on the MPlayer-DOCS mailing list.
+If you want to maintain a translation you should subscribe there, as all
+documentation CVS changelogs are also sent there, which you need to keep
+the translation up to date. You can subscribe here:
+
+http://mplayerhq.hu/mailman/listinfo/mplayer-docs
+
+Send updates and patches to this mailing list or directly to the documentation
+or console message maintainers, see DOCS/tech/MAINTAINERS for details.
+
+Translations of MPlayer documentation consist of 3 parts in descending
+order of importance:
+
+1) console messages (help/help_mp-XX.h)
+2) man page
+3) XML documentation
+
+Please note that only doing 1) or 1) + 2) is perfectly fine.
+
+You can find the latest versions of the help_mp-XX.h files in CVS or
+here:
+
+http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/help/
+
+help_mp-en.h is the master file that you should use as a base for translations.
+If you are adopting an already existing translation, please check it from top
+to bottom once. Later it should suffice to just translate missing messages. If
+you want to check for untranslated messages the help/help-diff.sh script comes
+in handy:
+
+  help_diff.sh help_mp-XX.h < help_mp-en.h
+
+will print untranslated messages to the screen, just substitute XX with your
+language code. Additionally, please make sure that your translated messages fit
+on an 80 character wide display to avoid overflowing output.
+
+Translations are for documentation what porting is for code. Many more eyes
+see it and get to find mistakes. If you stumble over mistakes, inaccuracies,
+clumsy wording, spelling/grammar errors or if you notice that something is
+incomplete, please let us know, we'll fix it. Patches are more than welcome,
+of course.
