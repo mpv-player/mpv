@@ -159,6 +159,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	glFindFormat(format, &image_bytes, &gl_texfmt, &gl_format, &gl_type);
 	image_bytes = (image_bytes + 7) / 8;
 
+  if (use_osd)
   sub_bg_alpha = 255; // We need alpha = 255 for invisible part of the OSD
 	int_pause = 0;
 
