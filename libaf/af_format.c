@@ -287,25 +287,25 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     af_data_t *data = arg;
     
     // Make sure this filter isn't redundant 
-    if(af->data->format == ((af_data_t*)arg)->format && 
-       af->data->bps == ((af_data_t*)arg)->bps)
+    if(af->data->format == data->format && 
+       af->data->bps == data->bps)
       return AF_DETACH;
 
     // Check for errors in configuraton
-    if((AF_OK != check_bps(((af_data_t*)arg)->bps)) ||
-       (AF_OK != check_format(((af_data_t*)arg)->format)) ||
+    if((AF_OK != check_bps(data->bps)) ||
+       (AF_OK != check_format(data->format)) ||
        (AF_OK != check_bps(af->data->bps)) ||
        (AF_OK != check_format(af->data->format)))
       return AF_ERROR;
 
     af_msg(AF_MSG_VERBOSE,"[format] Changing sample format from %s to %s\n",
-	   af_fmt2str(((af_data_t*)arg)->format,buf1,256),
+	   af_fmt2str(data->format,buf1,256),
 	   af_fmt2str(af->data->format,buf2,256));
 
-    af->data->rate = ((af_data_t*)arg)->rate;
-    af->data->nch  = ((af_data_t*)arg)->nch;
+    af->data->rate = data->rate;
+    af->data->nch  = data->nch;
     af->mul.n      = af->data->bps;
-    af->mul.d      = ((af_data_t*)arg)->bps;
+    af->mul.d      = data->bps;
     af_frac_cancel(&af->mul);
     
     af->play = play; // set default
@@ -321,7 +321,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	(af->data->format == AF_FORMAT_S16_NE))
     {
 	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %s to %s conversion\n",
-	   af_fmt2str(((af_data_t*)arg)->format,buf1,256),
+	   af_fmt2str(data->format,buf1,256),
 	   af_fmt2str(af->data->format,buf2,256));
 	af->play = play_float_s16;
     }
@@ -329,7 +329,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 	(af->data->format == AF_FORMAT_FLOAT_NE))
     {
 	af_msg(AF_MSG_VERBOSE,"[format] Accelerated %s to %s conversion\n",
-	   af_fmt2str(((af_data_t*)arg)->format,buf1,256),
+	   af_fmt2str(data->format,buf1,256),
 	   af_fmt2str(af->data->format,buf2,256));
 	af->play = play_s16_float;
     }
