@@ -646,7 +646,7 @@ you have to pass the option <option>-sub
   <term><option>-subdelay <replaceable>sec</replaceable></option></term>
   <listitem><simpara>
     Delays subtitles by <option><replaceable>sec</replaceable></option> seconds.
-    Can be negative.
+    Can be negative. The value is added to movie's time position counter.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -667,13 +667,15 @@ you have to pass the option <option>-sub
 If you experience a growing delay between the movie and the subtitles when
 using a MicroDVD subtitle file, most likely the frame rate of the movie and
 the subtitle file are different. Please note that the MicroDVD subtitle
-format uses absolute frame numbers for its timing, and therefore the
-<option>-subfps</option> option cannot be used with this format. As
-<application>MPlayer</application> has no way to guess the frame rate of
-the subtitle file, you have to manually convert the frame rate. There is a
-little perl script in the <filename class="directory">contrib</filename>
-directory of the <application>MPlayer</application> FTP site to do this
-conversion for you.
+format uses absolute frame numbers for its timing, but there is no fps information
+in it, and therefore the <option>-subfps</option> option should be used with this
+format. If you like to solve this problem permanently, you have to manually
+convert the subtitle file framerate. <application>MPlayer</application> can do this
+conversion for you:
+
+<screen>mplayer <replaceable>dummy.avi</replaceable> -fps subtitles_fps -subfps avi_fps
+[-subdelay sec] [-sub subtitle_filename]
+<replaceable>-dumpmicrodvdsub</replaceable></screen>
 </para>
 
 <para>
