@@ -7,7 +7,10 @@
 
 long __attribute__((aligned(8))) decwins [544];
 
-static long decwin [544];
+#define real float
+extern real decwin[(512+32)];
+// static long decwin [544];
+
 static short intwinbase_MMX[] = 
 {
 	      0,    -1,    -1,    -1,    -1,    -1,    -1,    -2,
