@@ -375,6 +375,7 @@ tv_err:
 	streaming_ctrl_t *streaming_ctrl;
 	streaming_ctrl = streaming_ctrl_new();
 	if( streaming_ctrl==NULL ) return NULL;
+	url = check4proxies( url );
 	streaming_ctrl->url = url_copy( url );
 	if( autodetectProtocol( streaming_ctrl, &f, file_format )<0 ) {
 		mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_UnableOpenURL, filename );

@@ -173,6 +173,49 @@ connect2Server(char *host, int port) {
 	return socket_server_fd;
 }
 
+URL_t*
+check4proxies( URL_t *url ) {
+	if( !strcasecmp(url->protocol, "http_proxy") ) {
+			printf("Using HTTP proxy: http://%s:%d\n", url->hostname, url->port );
+			return url;
+	}
+	// Check if the http_proxy environment variable is set.
+	if( !strcasecmp(url->protocol, "http") ) {
+		char *proxy;
+		proxy = getenv("http_proxy");
+		if( proxy!=NULL ) {
+			// We got a proxy, build the URL to use it
+			int len;
+			char *new_url;
+			URL_t *tmp_url;
+			URL_t *proxy_url = url_new( proxy );
+
+			if( proxy_url==NULL ) {
+				printf("Invalid proxy setting...Trying without proxy.\n");
+				return url;
+			}
+
+			printf("Using HTTP proxy: %s\n", proxy_url->url );
+			len = strlen( proxy_url->hostname ) + strlen( url->url ) + 20;	// 20 = http_proxy:// + port
+			new_url = malloc( len+1 );
+			if( new_url==NULL ) {
+				printf("Memory allocation failed\n");
+				return url;
+			}
+			sprintf( new_url, "http_proxy://%s:%d/%s", proxy_url->hostname, proxy_url->port, url->url);
+			tmp_url = url_new( new_url );
+			if( tmp_url==NULL ) {
+					return url;
+			}
+			url_free( url );
+			url = tmp_url;
+			free( new_url );
+			url_free( proxy_url );
+		}
+	}
+	return url;
+}
+
 int
 http_send_request( URL_t *url ) {
 	HTTP_header_t *http_hdr;
@@ -326,8 +369,6 @@ extension=NULL;
 
 		// HTTP based protocol
 		if( !strcasecmp(url->protocol, "http") || !strcasecmp(url->protocol, "http_proxy") ) {
-			//if( url->port==0 ) url->port = 80;
-
 			fd = http_send_request( url );
 			if( fd<0 ) {
 				return -1;
