@@ -31,6 +31,7 @@ mplayer (0.90)
     * subtitle overlapping can be disabled, added subtitle sorting
     * subtitle dump to JACOsub and SAMI formats
     * displays URLs from 'Reference Media' type .mov files, dump generic data
+    * find best (longest) streams in .mov files (twotowers...)
     * get position/length function in demuxers - for slavemode & -indentify
     * -ao alsa9 surround fixes, 8-bit PCM fixed
     * -vo dfbmga: -dr support, fixed OSD flickering
