@@ -1,31 +1,6 @@
-<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<?xml version="1.0" encoding="iso-8859-1"?>
 <!-- synced with 1.8 -->
-<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
-	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
-[
-<!ENTITY audio.xml		SYSTEM "audio.xml">
-<!ENTITY bugreports.xml		SYSTEM "bugreports.xml">
-<!ENTITY bugs.xml		SYSTEM "bugs.xml">
-<!ENTITY cd-dvd.xml		SYSTEM "cd-dvd.xml">
-<!ENTITY codecs.xml		SYSTEM "codecs.xml">
-<!ENTITY faq.xml		SYSTEM "faq.xml">
-<!ENTITY features.xml		SYSTEM "features.xml">
-<!ENTITY formats.xml		SYSTEM "formats.xml">
-<!ENTITY history.xml		SYSTEM "history.xml">
-<!ENTITY install.xml		SYSTEM "install.xml">
-<!ENTITY mail-lists.xml		SYSTEM "mail-lists.xml">
-<!ENTITY mencoder.xml		SYSTEM "mencoder.xml">
-<!ENTITY patches.xml		SYSTEM "patches.xml">
-<!ENTITY ports.xml		SYSTEM "ports.xml">
-<!ENTITY skin.xml		SYSTEM "skin.xml">
-<!ENTITY tvinput.xml		SYSTEM "tvinput.xml">
-<!ENTITY usage.xml		SYSTEM "usage.xml">
-<!ENTITY users-vs-dev.xml	SYSTEM "users-vs-dev.xml">
-<!ENTITY video-filters.xml	SYSTEM "video-filters.xml">
-<!ENTITY video.xml		SYSTEM "video.xml">
-]>
 
-<book lang="es">
 <bookinfo id="toc">
 <title>MPlayer - El reproductor de Películas para LINUX</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
@@ -209,4 +184,3 @@ License Version 2 (GPL v.2).
 &skin.xml;
 &users-vs-dev.xml;
 &patches.xml;
-</book>

@@ -26,7 +26,7 @@ help:
 
 .PHONY: build-html-chunked
 build-html-chunked: xsltproc.sh xmllint.sh
-	test -d $(HTML_CHUNKED) || mkdir $(HTML_CHUNKED)
+	@test -d $(HTML_CHUNKED) || mkdir $(HTML_CHUNKED)
 	@for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
 		(test -d $(HTML_CHUNKED)/$$dir || mkdir $(HTML_CHUNKED)/$$dir) &&\
@@ -35,7 +35,7 @@ build-html-chunked: xsltproc.sh xmllint.sh
 
 .PHONY: build-html-single
 build-html-single: xsltproc.sh xmllint.sh
-	test -d $(HTML_SINGLE) || mkdir $(HTML_SINGLE)
+	@test -d $(HTML_SINGLE) || mkdir $(HTML_SINGLE)
 	@for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
 		(test -d $(HTML_SINGLE)/$$dir || mkdir $(HTML_SINGLE)/$$dir) &&\
@@ -44,11 +44,11 @@ build-html-single: xsltproc.sh xmllint.sh
 
 .PHONY: clean-html-chunked
 clean-html-chunked:
-	-rm -rf $(HTML_CHUNKED)
+	@-rm -rf $(HTML_CHUNKED)
 
 .PHONY: clean-html-single
 clean-html-single:
-	-rm -rf $(HTML_SINGLE)
+	@-rm -rf $(HTML_SINGLE)
 
 .PHONY: distclean
 distclean: clean-html-chunked clean-html-single
@@ -56,9 +56,9 @@ distclean: clean-html-chunked clean-html-single
 		test -f $$dir/Makefile &&\
 		if $(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$$dir -C $$dir distclean ; then :; else exit 1; fi;\
 	done
-	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
+	@-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
 
 xsltproc.sh xmllint.sh:
-	sh configure
+	@sh configure
 
 clean: clean-html-chunked clean-html-single

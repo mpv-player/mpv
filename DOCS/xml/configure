@@ -6,6 +6,7 @@
 _xsltwrapper="xsltproc.sh"
 _xmllintwrapper="xmllint.sh"
 
+echo "Searching for XML catalogs..."
 for _try_catalog in /etc/sgml/catalog /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog /usr/share/apps/ksgmltools2/customization/en/catalog /usr/share/sgml/catalog /usr/local/share/sgml/catalog /usr/lib/sgml/catalog /usr/local/lib/sgml/catalog /usr/share/docbook-xml42/catalog.xml /usr/share/sgml/docbook/xmlcatalog
 do
   if test -f "$_try_catalog"
@@ -93,7 +94,44 @@ cat > html-single.xsl << EOF
 </xsl:stylesheet>
 EOF
 
+echo "Searching for DTD..."
+for _try_dtd in /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd /usr/share/docbook-xml42/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.1.2/docbookx.dtd
+do
+  if test -f "$_try_dtd"
+  then
+    _dtd=$_try_dtd
+    break
+  fi
+done
 
+if test -z "$_dtd"
+then
+  _dtd=/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd
+  echo "Not found. Using default ($_dtd)."
+else
+  echo "Found docbookx.dtd at $_dtd"
+fi
+
+for lang in `grep 'SUBDIRS =' Makefile|cut -d= -f2`; do
+  cat > $lang/main.xml << EOF
+<?xml version="1.0" encoding="iso-8859-1" standalone="no"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
+    "$_dtd"
+[ 
+EOF
+
+  for file in `find $lang en -name \*.xml -exec basename \{\} \; | uniq`; do
+    echo '<!ENTITY '$file'	SYSTEM "'$file'">' >> $lang/main.xml
+  done
+
+  cat >> $lang/main.xml << EOF
+]>
+<book id="index" lang="$lang">
+&documentation.xml;
+</book>
+EOF
+
+done
 
 echo "Looking for a valid XSLT processor..."
 # Checks for xsltproc, then checks for the Saxon processor (it needs Java).
@@ -250,7 +288,7 @@ for _try_xmllint in xmllint
 do
   if command -v $_try_xmllint > /dev/null 2>&1
   then
-    echo "Found: $_try_xmllint"
+    echo "Found $_try_xmllint"
     if test -n "$_catalog"
     then
       _xmllint_command="$_try_xmllint --noout --noent --postvalid --catalogs \$*"
