@@ -245,7 +245,7 @@ int init_video_codec(){
   }
 
   if(sh_video->codec->outflags[sh_video->outfmtidx] & CODECS_FLAG_YUVHACK)
-    sh_video->o_bih.biCompression = mmioFOURCC('Y','U','Y','2');
+    sh_video->o_bih.biCompression = outfmt;
 
 //  avi_header.our_in_buffer=malloc(avi_header.video.dwSuggestedBufferSize); // FIXME!!!!
   
