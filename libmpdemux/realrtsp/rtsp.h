@@ -62,6 +62,7 @@ void  rtsp_set_session(rtsp_t *s, const char *id);
 char *rtsp_get_session(rtsp_t *s);
 
 char *rtsp_get_mrl(rtsp_t *s);
+char *rtsp_get_param(rtsp_t *s, char *param);
 
 /*int      rtsp_peek_header (rtsp_t *this, char *data); */
 

@@ -649,6 +649,25 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char *buffer) {
   return n+12;
 }
 
+int convert_timestamp(char *str, int *sec, int *msec) {
+  int hh, mm, ss, ms = 0;
+  if (sscanf(str, "%d:%d:%d.%d", &hh, &mm, &ss, &ms) < 3) {
+    hh = 0;
+    if (sscanf(str, "%d:%d.%d", &mm, &ss, &ms) < 2) {
+      mm = 0;
+      if (sscanf(str, "%d.%d", &ss, &ms) < 1) {
+	ss = 0;
+	ms = 0;
+      }
+    }
+  }
+  if (sec)
+    *sec = hh * 3600 + mm * 60 + ss;
+  if (msec)
+    *msec = ms;
+  return 1;
+}
+
 rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwidth) {
 
   char *description=NULL;
@@ -745,10 +764,24 @@ rmff_header_t  *real_setup_and_get_header(rtsp_t *rtsp_session, uint32_t bandwid
   rtsp_schedule_field(rtsp_session, subscribe);
   rtsp_request_setparameter(rtsp_session,NULL);
 
+  {
+    int s_ss = 0, s_ms = 0, e_ss = 0, e_ms = 0;
+    char *str;
+    if ((str = rtsp_get_param(rtsp_session, "start"))) {
+      convert_timestamp(str, &s_ss, &s_ms);
+      free(str);
+    }
+    if ((str = rtsp_get_param(rtsp_session, "end"))) {
+      convert_timestamp(str, &e_ss, &e_ms);
+      free(str);
+    }
+    str = buf + sprintf(buf, s_ms ? "%s%d.%d-" : "%s%d-", "Range: npt=", s_ss, s_ms);
+    if (e_ss || e_ms)
+      sprintf(str, e_ms ? "%d.%d" : "%d", e_ss, e_ms);
+  }
+  rtsp_schedule_field(rtsp_session, buf);
   /* and finally send a play request */
-  rtsp_schedule_field(rtsp_session, "Range: npt=0-");
   rtsp_request_play(rtsp_session,NULL);
 
   return h;
 }
-

@@ -65,6 +65,7 @@ struct rtsp_s {
   char         *host;
   int           port;
   char         *path;
+  char         *param;
   char         *mrl;
   char         *user_agent;
 
@@ -622,7 +623,13 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
   s->mrl = strdup(mrl);
   s->host = strdup(host);
   s->port = port;
+  while (*path == '/')
+    path++;
   s->path = strdup(path);
+  if ((s->param = strchr(s->path, '?')) != NULL)
+    s->param++;
+  //printf("path=%s\n", s->path);
+  //printf("param=%s\n", s->param ? s->param : "NULL");
   s->s = fd;
 
   if (s->s < 0) {
@@ -716,6 +723,30 @@ char *rtsp_get_mrl(rtsp_t *s) {
 
 }
 
+char *rtsp_get_param(rtsp_t *s, char *p) {
+  int len;
+  char *param;
+  if (!s->param)
+    return NULL;
+  if (!p)
+    return strdup(s->param);
+  len = strlen(p);
+  param = s->param;
+  while (param && *param) {
+    char *nparam = strchr(param, '&');
+    if (strncmp(param, p, len) == 0 && param[len] == '=') {
+      param += len + 1;
+      len = nparam ? nparam - param : strlen(param);
+      nparam = malloc(len + 1);
+      memcpy(nparam, param, len);
+      nparam[len] = 0;
+      return nparam;
+    }
+    param = nparam ? nparam + 1 : NULL;
+  }
+  return NULL;
+}
+  
 /*
  * schedules a field for transmission
  */
