@@ -236,7 +236,7 @@ szczê¶cia. Bêdziesz go potrzebowa³ :) </P>
 <P><B>MPlayer</B> jest odgrywark± filmów pod LINUXem (dzia³a pod wieloma innymi
 Unixami, i systemami opartymi na innych procesorach ni¿ <B>x86</B>, zobacz <A
 HREF="#6">sekcja 6</A>). Wy¶wietla wiêkszo¶æ plików MPEG, VOB, AVI, VIVO,
-ASF/WMV, QT/MOV oraz FLI, korzystaj±c z wielu w³asnych, XAnim oraz Win32 DLL
+ASF/WMV, QT/MOV, FLI oraz RM, korzystaj±c z wielu w³asnych, XAnim oraz Win32 DLL
 kodeków. Mo¿esz równie¿ ogl±daæ <B>VideoCD</B>, <B>SVCD</B>, <B>DVD</B>,
 <B>3ivx</B>, a nawet filmy <B>DivX</B> (i nie potrzebujesz wcale biblioteki
 avifile!). Kolejn± du¿± zalet± mplayera jest szeroki wachlarz sterowników
@@ -260,7 +260,7 @@ kierunku GPL.</P>
 <P>Rozprowadzanie <B>MPlayera</B> w formie binarnej i/lub w pakietach binarnych
 jest aktualnie niemo¿liwe, zarówno ze wzglêdów <B>technicznych</B>, jak i
 <B>prawnych</B>. O szczegó³ach na ten temat mo¿na przeczytaæ, i jest to
-zalecane, w drugiej czê¶ci <A HREF="users_against_developers.html">tego
+zalecane, w drugiej czê¶ci <A HREF="users_against_developers.html#binary">tego
 pliku</A>.</P>
 
 <P>Nie napisa³em ¿adnych kodeków, tylko kilka odgrywarek. Spêdzi³em wiele
@@ -288,40 +288,44 @@ zmodyfikowaæ jeden z tych programów...</P>
 <LI><B>mpg12play v0.1-v0.3:</B><BR>
     Pierwsza próba, wszystko zakodowane w pó³ godziny!
     U¿y³em libmpeg3 z www.heroinewarrior.com a¿ do wersji 0.3,
-    ale by³y z tym problemy z jako¶ci± obrazu i szybko¶ci±.
+    ale by³y z tym problemy z jako¶ci± obrazu i szybko¶ci±.</LI>
 <LI><B>mpg12play v0.5-v0.87:</B><BR>
     Kodek Mpeg zast±piony kodekiem DVDview przez Dirka Farina, to by³a wielka
-    sprawa, ale to by³o wolne i napisane w C++ (nie znoszê C++!!!)
+    sprawa, ale to by³o wolne i napisane w C++ (nie znoszê C++!!!)</LI>
 <LI><B>mpg12play v0.9-v0.95pre5:</B><BR>
     Kodek Mpeg by³ libmpeg2 (mpeg2dec) wykonany przez Aaron Holtzman & Michel
     Lespinasse.
-    To wspania³e, zoptymalizowany, bardzo szybki kod C z doskona³± jako¶ci±
-    obrazu i 100% zgodno¶ci± ze standardem MPEG.
+    To wspania³e, zoptymalizowany, bardzo szybki kod C z doskona³± jako¶ci±k
+    obrazu i 100% zgodno¶ci± ze standardem MPEG.</LI>
 <LI><B>MPlayer v0.3-v0.9:</B><BR>
     Paczka sk³adaj±ca siê z dwóch programów: mpg12playv0.95pre6 oraz mojej
     nowej, prostej odgrywarki AVI 'avip' opartej na programie ³aduj±cym Win32
-    DLL z avifile.
+    DLL z avifile.</LI>
 <LI><B>MPlayer v0.10:</B><BR>
-    Oddzielne binaria dla odgrywarki MPEG i AVI!
+    Oddzielne binaria dla odgrywarki MPEG i AVI!</LI>
 <LI><B>MPlayer v0.11:</B><BR>
     Kilku nowych developerów do³±czy³o i od 0.11 projekt mplayer jest prac±
     zespo³ow±!
     Dodano wsparcie dla plików .ASF i kodowania/dekodowania OpenDivX (zobacz
-    www.projectmayo.com).
+    www.projectmayo.com).</LI>
 <LI><B>MPlayer v0.17 "The IdegCounter"</B><BR>
     Wersja 0.11pre wydana po 4 miesi±cach wzmo¿onego rozwoju!
     Wypróbuj tego, i dziw siê! Dodano tysi±ce nowych w³a¶ciwo¶ci ... i
-    oczywi¶cie naprawiono stary kod tak¿e, usuniêto b³êdy itp.
+    oczywi¶cie naprawiono stary kod tak¿e, usuniêto b³êdy itp.</LI>
 <LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
     2 miesi±ce odk±d pojawi³o siê 0.17 i proszê, oto nowe wydanie ... Ukoñczona
     obs³uga ASF, wiecej formatów napisów, wprowadzenie libao (podobnej do libvo
     ale dla d¼wiêku) i bardziej stabilne, ni¿ kiedykolwiek i tak dalej. To jest
-    prze³om!
+    prze³om!</LI>
 <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
     Hmm. Nastêpne wydanie. Tony nowych w³a¶ciwo¶ci, wersja beta GUI, poprawione
     b³êdy, nowe sterowniki vo i ao, przeniesione na wiele systemów, w³±czaj±c
-    kodeki opensource DivX i wiele innych. Wypróbuj to!
-
+    kodeki opensource DivX i wiele innych. Wypróbuj to!</LI>
+<LI><B>MPlayer 0.60 "The RTFMCounter"</B><BR>
+    Obs³uga formatów plików MOV/VIVO/RM/FLI/NUV, w³asne kodeki CRAM, Cinepak i
+    ADPCM i wsparcie dla binarnych kodeków XAnim; obs³uga napisów DVD, pierwsze
+    wydanie MEncodera, odbioru telewizji, cache, liba52, niezliczone
+    poprawki.</LI>
 </UL></P>
 
 <P><B><A NAME=1.3>1.3. Instalacja</A></B></P>
@@ -377,7 +381,7 @@ W³a¶ciwo¶ci:<BR>
 <UL>
   <LI>mo¿esz <B>osi±gn±æ odgrywanie <I>DivX/DivX4</I> na maszynach
 nie-x86</B></LI>
-  <LI>odgrywanie i kodowanie RealVideo 1.0/MJPEG/h263/i innych</LI>
+  <LI>odgrywanie i kodowanie RealVideo 1.0/VIVO/MJPEG/h263/i innych</LI>
   <LI>ten kodek posiada <B>najlepsz± prêdko¶æ dekodowania</B> filmów DivX i
 DivX4 (wiêksz± nawet ni¿ oryginalna biblioteka DivX4)! Rekomendowany!</LI>
 </UL>
@@ -401,6 +405,7 @@ HREF="codecs.html#2.2.1.1">2.2.1.1</A>. Je¿eli nie chcesz u¿ywaæ
 <B>MEncodera</B>, nie bêdziesz chcia³ te¿ u¿ywaæ tego kodeka, gdy¿
 <B>libavcodec</B> (zobacz powy¿ej) jest znacznie od niego szybszy.<BR>
 W³a¶ciwo¶ci :<UL>
+  <LI>jedno lub dwupasmowe kodowanie z <A HREF="encoding.html">MEncoderem</A></LI>
   <LI>potrafi odgrywaæ stare filmy <B>DivX3</B> znacznie szybciej ni¿ Win32
 DLL, ale wolniej ni¿ <B>libavcodec</B>!</LI>
   <LI>jest closed-source i dostêpna jest tylko wersja na x86.</LI>
@@ -918,20 +923,6 @@ size=2>dostosuj odcieñ</TD></TR>
 <TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7
 lub 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
 size=2>dostosuj nasycenie</TD></TR>
-
-<TR><TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-(nastêpuj±ce klawisze s± wa¿ne tylko przy obs³udze wej¶cia TV)</I></P></TD></TR>
-
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h
-lub  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica,
-sans-serif" size=2>wybierz poprzedni/nastêpny kana³</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>zmieñ normê</TD></TR>
-<TR><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-size=2>zmieñ listê kana³ów</TD></TR>
-</TABLE></P>
 
 <P><B>Obs³uga GUI z klawiatury</B></P>
 
@@ -1666,11 +1657,11 @@ other technical help from:</P>
 <UL>
   <LI><B>wêgierskie</B>: Gabucino
   <LI><B>niemieckie</B>: <A HREF="mailto:johannes.feigl@mcse.at">Johannes Feigl</A>
-  <LI><B>francuskie</B>: <A HREF="mailto:smarteau@eso.org">Stephane Marteau</A> (outdated)
-  <LI><B>w³oskie</B>: TeLeNiEkO (nieuaktualnione)
-  <LI><B>rosyjskie</B>: Nick Kurshev (nieuaktualnione)
-  <LI><B>polskie</B>: Dariush Pietrzak (wersja nieshierarchizowana w ascii) oraz 
-  <A HREF="mailto:nell@skrzynka.pl">Justyna Biala</A>(wersja aktualna w html)
+  <LI><B>francuskie</B>: <A HREF="mailto:smarteau@eso.org">Stephane Marteau</A> (nieaktualne)
+  <LI><B>w³oskie</B>: TeLeNiEkO (nieaktualne)
+  <LI><B>rosyjskie</B>: Nick Kurshev (nieaktualne)
+  <LI><B>polskie</B>: Dariush Pietrzak (dawna wersja nieshierarchizowana, w ascii) oraz 
+  <A HREF="mailto:nell@skrzynka.pl">Justyna Bia³a</A> (wersja aktualna, w html)
 </UL></P>
 <P>Platformy sprzêtowe/porty
 <UL>
@@ -1683,10 +1674,10 @@ other technical help from:</P>
 <UL>
   <LI><B>wykrywanie formatów plików, demuxers</B>: A'rpi
   <LI><B>obs³uga DVD</B>: (werjsa alfa by³a: LGB) teraz: A'rpi
-  <LI><B>potoki sieciowe</B>: Bertrand BAUDET
-  <LI><B>Synchronizacja A-V</B>: A'rpi
-  <LI><B>parser/czytnik plików z napisami</B>: Lez (most of them)
-  <LI><B>pliki konfiguracyjne & i parser linii poleceñ</B>: Szabi
+  <LI><B>odtwarzanie z sieci</B>: Bertrand BAUDET
+  <LI><B>synchronizacja A-V</B>: A'rpi
+  <LI><B>parser/czytnik plików z napisami</B>: Lez (wiêkszo¶æ z nich)
+  <LI><B>pliki konfiguracyjne i parser linii poleceñ</B>: Szabi
   <LI><B>fastmemcpy</B>: Nick Kurshev
   <LI><B>obs³uga LIRC</B>: Acki
   <LI><B>renderer SUB/OSD</B>: Adam Tla/lka
@@ -1748,16 +1739,17 @@ other technical help from:</P>
 
 <P><B><A NAME=B>Appendix B - Listy dyskusyjne</A></B></P>
 
-<P>There are some public mailing lists on <B>MPlayer</B>. Subscribing can be
-achieved on the following addresses:</P>
+<P>Istnieje kilka publicznych list dyskusyjnych o <B>MPlayerze</B>.
+Zasubskrybowaæ je mo¿na pod podanymi adresami:</P>
 
 <P><UL>
 <LI>Lista developerów MPlayera:<BR>
-<A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
-<P>This list is about mplayer development! Talking about interface/API changes,
-new libraryes, code optimization, ./configure changes, and send patches here.
-Do NOT send bugreports, user questions, feature requests here!
-This list should be kept low-traffic.</P>
+<A
+HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
+<P>Jest to lista o rozwijaniu Mplayera! Mówi siê tam o zmianach w interfejsie/API,
+nowych bibliotekach, optymalizacji kodu, zmianach w ./configure. Tu te¿ s± wysy³ane ³aty.
+NIE wysy³a siê na tê listê raportów o b³êdach, pytañ u¿ytkowników, ¿±dañ na przysz³o¶æ!
+Na tej li¶cie powinien byæ zachowany ma³y ruch.</P>
 
 </LI><LI>Lista uzytkowników MPlayera:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
