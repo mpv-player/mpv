@@ -18,7 +18,7 @@ commandline();
 demo_file();
 
 system ("gnuplot $dem_file");
-#system("rm $dem_file $options{file}.[IPB] $options{file}.diff* 2>/dev/null");
+system("rm $dem_file $options{file}.[IPB] $options{file}.diff* 2>/dev/null");
 exit 0;
 
 
