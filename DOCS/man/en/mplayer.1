@@ -3215,8 +3215,11 @@ grayscale only decoding (a bit faster than with color)
 .IPs "idct=<0\-99> (see \-lavcopts)"
 For best decoding quality use the same idct algorithm for decoding and encoding.
 This may come at a price in accuracy, though.
-.IPs lowres=<number> 
-Low resolution decode
+.IPs lowres=<number>
+Decode at lower resolutions.
+Low resolution decoding is not supported by all codecs, and it will
+often result in ugly artifacts, this is not a bug, but a side effect
+of not decoding at the full resolution.
 .RSss
 .br
 0: disabled
@@ -3227,9 +3230,6 @@ Low resolution decode
 .br
 3: 1/8 resolution
 .REss
-Low resolution decode isnt supported by all codecs, and it will often result in
-ugly artefacts, this is not a bug but a sideeffect of not decoding at the full
-resolution.
 .IPs "sb=<number> (MPEG2 only)"
 Skip the given number of macroblock rows at the bottom.
 .IPs "st=<number> (MPEG2 only)"
@@ -4413,15 +4413,15 @@ Available modes are:
 .PD 0
 .RSs
 .IPs 0
-odd frames into upper field, even to lower, generating a full-height
-frame at half the framerate
+Move odd frames into the upper field, even into the lower field, generating
+a full-height frame at half framerate.
 .IPs 1
-only output odd frames, even frames are dropped, height unchanged
+Only output odd frames, even frames are dropped; height unchanged.
 .IPs 2
-only output even frames, odd frames are dropped, height unchanged
+Only output even frames, odd frames are dropped; height unchanged.
 .IPs 3
-expand each frame to full height, but pad alternate lines with black,
-framerate unchanged
+Expand each frame to full height, but pad alternate lines with black;
+framerate unchanged.
 .RE
 .PD 1
 .
@@ -4436,13 +4436,13 @@ Available modes are:
 .PD 0
 .RSs
 .IPs 0
-leave fields unchanged (this will jump/\:flicker)
+Leave fields unchanged. (This will jump/\:flicker.)
 .IPs 1
-interpolate missing lines (the algorithm used might not be so good)
+Interpolate missing lines. (The algorithm used might not be so good.)
 .IPs 2
-translate fields by 1/\:4 pixel with linear interp (no jump)
+Translate fields by 1/4 pixel with linear interpolation (no jump).
 .IPs 4
-translate fields by 1/\:4 pixel with 4tap filter (higher quality)
+Translate fields by 1/4 pixel with 4tap filter (higher quality).
 .RE
 .PD 1
 .
@@ -4463,33 +4463,32 @@ How often the filter should be applied.
 shape adaptive blur
 .PD 0
 .RSs
-.IPs rad\ \ \ 
+.IPs <rad>
 blur filter strength (~0.1\-4.0) (slower if larger)
-.IPs pf\ \ \ 
+.IPs <pf>\ 
 prefilter strength (~0.1\-2.0)
-.IPs colorDiff
-How different the pixels are allowed to be considered.
-(~0.1\-100.0)
+.IPs <colorDiff>
+maximum difference between pixels to still be considered (~0.1\-100.0)
 .RE
 .PD 1
 .
 .TP
-.B smartblur=rad:strength:thresh[:rad:strength:thresh]
+.B smartblur=radius:strength:threshold[:radius:strength:threshold]
 smart blur
 .PD 0
 .RSs
-.IPs rad\ \ 
+.IPs <radius>
 blur filter strength (~0.1\-5.0) (slower if larger)
-.IPs strength
+.IPs <strength>
 blur (0.0\-1.0) or sharpen (-1.0\-0.0)
-.IPs thresh
+.IPs <threshold>
 filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
 .RE
 .PD 1
 .
 .TP
 .B perspective=x0:y0:x1:y1:x2:y2:x3:y3:t
-perspective correction
+Correct the perspective of movies not filmed perpendicular to the screen.
 .PD 0
 .RSs
 .IPs x0,y0,...
@@ -4501,7 +4500,7 @@ linear (0) or cubic resampling (1)
 .
 .TP
 .B 2xsai\ \ 
-Use the 2x scale and interpolate algorithm for scaling and smoothing images.
+Scale and smooth the image with the 2x scale and interpolate algorithm.
 .
 .TP
 .B 1bpp\ \ \ 
@@ -4520,15 +4519,17 @@ number of lines to select from the middle of the image (default: 12)
 .PD 1
 .
 .TP
-.B bmovl=hidden:opaque:<fifo>
-Read bitmaps from a FIFO and display them in a window.
+.B bmovl=hidden:opaque:fifo
+Reads bitmaps from a FIFO and displays them on top of the movie,
+allowing some transformations on the image.
+Also see TOOLS/bmovl-test.c for a small bmovl test program.
 .PD 0
 .RSs
-.IPs hidden
-sets the default value of the 'hidden' flag (boolean)
-.IPs opaque
-flag switching between alphablended (transparent) and opaque (fast) mode
-.IPs fifo\ 
+.IPs <hidden>
+Set the default value of the 'hidden' flag (0=visible, 1=hidden).
+.IPs <opaque>
+Set the default value of the 'opaque' flag (0=transparent, 1=opaque).
+.IPs <fifo>
 path/\:filename for the FIFO (named pipe connecting mplayer \-vf bmovl to the
 controlling application)
 .RE
@@ -4544,20 +4545,20 @@ followed by width*height*4 Bytes of raw RGBA32 data.
 .IPs "ABGR32 width height xpos ypos alpha clear"
 followed by width*height*4 Bytes of raw ABGR32 data.
 .IPs "RGB24 width height xpos ypos alpha clear"
-followed by width*height*3 Bytes of raw RGB32 data.
+followed by width*height*3 Bytes of raw RGB24 data.
 .IPs "BGR24 width height xpos ypos alpha clear"
-followed by width*height*3 Bytes of raw BGR32 data.
+followed by width*height*3 Bytes of raw BGR24 data.
 .IPs "ALPHA width height xpos ypos alpha"
-change alpha for area
+Change alpha transparency of the specified area.
 .IPs "CLEAR width height xpos ypos"
-clear area
+Clear area.
 .IPs OPAQUE
-disable all alpha transparency.
+Disable all alpha transparency.
 Send "ALPHA 0 0 0 0 0" to enable it again.
 .IPs HIDE\ 
-hide bitmap
+Hide bitmap.
 .IPs SHOW\ 
-show bitmap
+Show bitmap.
 .RE
 .PD 1
 .sp 1
@@ -4567,9 +4568,9 @@ Arguments are:
 .PD 0
 .RSs
 .IPs "width, height"
-size of image/\:area
+image/area size
 .IPs "xpos, ypos"
-start blitting at X/\:Y position
+Start blitting at position x/y.
 .IPs alpha
 Set alpha difference.
 If you set this to -255 you can then send a sequence of ALPHA-commands to set
@@ -4577,15 +4578,15 @@ the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
 .RSss
 0:    same as original
 .br
-255:  makes everything opaque
+255:  Make everything opaque.
 .br
--255: makes everything transparent
+-255: Make everything transparent.
 .REss
 .IPs clear
-clear the framebuffer before blitting.
+Clear the framebuffer before blitting.
 .RSss
-0: The image will just be blitted on top of the old one, so you don't need to
-send 1,8MB of RGBA32 data everytime a small part of the screen is updated.
+0: The image will just be blitted on top of the old one, so you do not need to
+send 1.8MB of RGBA32 data every time a small part of the screen is updated.
 .br
 1: clear
 .REss
@@ -4617,31 +4618,31 @@ If you give only the i then nothing is done to the frames, only I! is
 printed.
 .
 .TP
-.B tile=xtile:ytile:output:start:delta
+.B tile=xtiles:ytiles:output:start:delta
 Tile a series of images into a single, bigger image.
 If you omit a parameter or use a value less than 0, then the default
 value is used.
-You can also stop when you're OK (... \-vf tile=10:5 ...).
+You can also stop when you are satisfied (... \-vf tile=10:5 ...).
 It is probably a good idea to put the scale filter before the tile :-)
 .sp 1
 The parameters are:
 .sp 1
 .PD 0
 .RSs
-.IPs xtile
+.IPs <xtiles>
 number of tiles on the x axis (default: 5)
-.IPs ytile
+.IPs <ytiles>
 number of tiles on the y axis (default: 5)
-.IPs output
+.IPs <output>
 Render the tile when 'output' number of frames are reached, where 'output'
 should be a number less than xtile * ytile.
 Missing tiles are left blank.
 You could, for example, write an 8 * 7 tile every 50 frames to have one
 image every 2 seconds @ 25 fps.
-.IPs start
-pixel at the start (x/\:y) (default: 2)
-.IPs delta
-pixel between 2 tiles, (x/\:y) (default: 4)
+.IPs <start>
+outer border thickness in pixels (default: 2)
+.IPs <delta>
+inner border thickness in pixels (default: 4)
 .RE
 .PD 1
 .
@@ -4654,9 +4655,9 @@ sometimes something even uglier appear \- your mileage may vary).
 .PD 0
 .RSs
 .IPs x,y
-Position of the top left corner of the logo.
+logo top left corner position
 .IPs w,h
-Width and height of the cleared rectangle.
+cleared rectangle width and height
 .IPs t
 Thickness of the fuzzy edge of the rectangle (added to w and h).
 When set to -1, a green rectangle is drawn on the screen to
