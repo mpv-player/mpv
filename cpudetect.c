@@ -479,7 +479,6 @@ void GetCpuCaps( CpuCaps *caps)
                 if (err == 0)
                         if (has_vu != 0)
                                 caps->hasAltiVec = 1;
-                mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
         }
 #else /* SYS_DARWIN */
 /* no Darwin, do it the brute-force way */
@@ -501,6 +500,7 @@ void GetCpuCaps( CpuCaps *caps)
           }
         }
 #endif /* SYS_DARWIN */
+        mp_msg(MSGT_CPUDETECT,MSGL_INFO,"AltiVec %sfound\n", (caps->hasAltiVec ? "" : "not "));
 #endif /* HAVE_ALTIVEC */
 }
 #endif /* !ARCH_X86 */
