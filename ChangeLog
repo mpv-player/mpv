@@ -31,7 +31,7 @@ mplayer (1.0)
     * MPEG-TS demuxer updates
     * fixed the MPEG muxer
     * fixed tons of bugs in MMS streaming
-    * user settable http user-agent field
+    * user settable HTTP user-agent field
     * improved (now working) seeking with support for growing files in
       Realmedia format
     * saveable and loadable index files (workaround for formats not
@@ -49,7 +49,7 @@ mplayer (1.0)
     * fixed stereo 16 bit TWOS
     * fixed MPNG when using BGR24 images
     * control functions in OGG demuxer
-    * http cookies support
+    * HTTP cookies support
     * LML-M4 MPEG4 capture card raw stream format support
     
     Filters:
@@ -60,7 +60,7 @@ mplayer (1.0)
     * alternative postprocessing filter (spp)
     * big scale filter updates
     * zrmjpeg filter, a kick-ass mjpeg encoder using FFmpeg/libavcodec
-    * filmdint: new inverse telecine filter, heavily mmx and 3dnow optimized
+    * filmdint: new inverse telecine filter, heavily MMX and 3DNow! optimized
     
     FFmpeg/libavcodec:
     * Lagrange multipliers instead of qscale, encoding quality much improved
@@ -145,7 +145,7 @@ mplayer (1.0)
     * GUI file selector updated for newer formats
     * Fontconfig support
     * proper VobSub seeking support
-    * removed oldskool libcss support (nobody uses it and has drawbacks)
+    * removed oldskool libcss support (nobody uses it and it has drawbacks)
 
     MEncoder:
     * FFmpeg/libavcodec audio encoding support
@@ -863,7 +863,7 @@ mplayer (0.90)
     * lot of other fixes
 
   pre3:
-    * 3DNow optimization of AC3 4ch downmix fixed, optims re-enabled
+    * 3DNow! optimization of AC3 4ch downmix fixed, optims re-enabled
     * DGA error/fail after 1 second of playing fixed
     * big A-V desync for some AVI files fixed
     * image distortions when seeking in some MPEG files fixed
@@ -1310,7 +1310,7 @@ mplayer v0.11-pre2: Jan  4  2001
   - demuxer.c: error message printed if A or V chunk buffer is full
     'mplayer test.avi -aid -2' still not works without option '-nosound'
   - adding new config.h option to set default MP3 audio codec (mpg123/l3codeca)
-    ./configure selects mp3lib only if you have 3Dnow    [idea: Gabucino]
+    ./configure selects mp3lib only if you have 3DNow!   [idea: Gabucino]
   - automatic fallback to mp3lib/mpg123 if l3codeca.acm can't be loaded/inited
 
 mplayer v0.11-pre1:
