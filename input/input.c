@@ -209,7 +209,7 @@ typedef struct mp_input_fd {
 } mp_input_fd_t;
 
 
-static mp_cmd_bind_t* cmd_binds = def_cmd_binds;
+static mp_cmd_bind_t* cmd_binds = NULL;
 
 static mp_input_fd_t key_fds[MP_MAX_KEY_FD];
 static unsigned int num_key_fd = 0;
@@ -337,8 +337,9 @@ mp_input_parse_cmd(char* str) {
   assert(str != NULL);
 #endif
 
-  ptr = strchr(str,' ');
-  if(ptr)
+  for(ptr = str ; ptr[0] != '\0'  && ptr[0] != '\t' && ptr[0] != ' ' ; ptr++)
+    /* NOTHING */;
+  if(ptr[0] != '\0')
     l = ptr-str;
   else
     l = strlen(str);
@@ -498,31 +499,44 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
     return MP_INPUT_NOTHING;
 }
 
-static mp_cmd_t*
-mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
+static char*
+mp_input_find_bind_for_key(mp_cmd_bind_t* binds, int n,int* keys) {
   int j;
-  // In pause mode we return pause for the first key wich come
-  if(paused)
-    return mp_input_parse_cmd("pause");
-  for(j = 0; cmd_binds[j].cmd != NULL; j++) {
+
+  for(j = 0; binds[j].cmd != NULL; j++) {
     if(n > 0) {
       int found = 1,s;
-      for(s = 0; s < n && cmd_binds[j].input[s] != 0; s++) {
-	if(cmd_binds[j].input[s] != keys[s]) {
+      for(s = 0; s < n && binds[j].input[s] != 0; s++) {
+	if(binds[j].input[s] != keys[s]) {
 	  found = 0;
 	  break;
 	}
       }
-      if(found && cmd_binds[j].input[s] == 0 && s == n)
+      if(found && binds[j].input[s] == 0 && s == n)
 	break;
       else
 	continue;
     } else if(n == 1){
-      if(cmd_binds[j].input[0] == keys[0] && cmd_binds[j].input[1] == 0)
+      if(binds[j].input[0] == keys[0] && binds[j].input[1] == 0)
 	break;
     }
   }
-  if(cmd_binds[j].cmd == NULL) {
+  return binds[j].cmd;
+}
+
+static mp_cmd_t*
+mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
+  char* cmd = NULL;
+  // In pause mode we return pause for the first key wich come
+  if(paused)
+    return mp_input_parse_cmd("pause");
+
+  if(cmd_binds)
+    cmd = mp_input_find_bind_for_key(cmd_binds,n,keys);
+  if(cmd == NULL)
+    cmd = mp_input_find_bind_for_key(def_cmd_binds,n,keys);
+
+  if(cmd == NULL) {
     printf("No bind found for key %s",mp_input_get_key_name(keys[0]));
     if(n > 1) {
       int s;
@@ -532,7 +546,7 @@ mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
     printf("                         \n");
     return NULL;
   }
-  return  mp_input_parse_cmd(cmd_binds[j].cmd);
+  return  mp_input_parse_cmd(cmd);
 }
 
 static mp_cmd_t*
@@ -646,6 +660,15 @@ mp_input_read_keys(int time,int paused) {
     } 
     // We ignore key from last combination
     ret = last_key_down ? mp_input_get_cmd_from_keys(num_key_down,key_down,paused) : NULL;
+    if(last_key_down && !ret) {     
+      printf("Invalid command for binded key %s",mp_input_get_key_name(key_down[0]));
+      if(  num_key_down > 1) {
+	unsigned int s;
+	for(s=1; s < num_key_down; s++)
+	  printf("-%s",mp_input_get_key_name(key_down[s]));
+      }
+      printf("             \n");
+    }
     // Remove the key
     if(j+1 < num_key_down)
       memmove(&key_down[j],&key_down[j+1],(num_key_down-(j+1))*sizeof(int));
@@ -902,6 +925,39 @@ mp_input_get_input_from_name(char* name,int* keys) {
   return 1;
 }
 
+void
+mp_input_bind_keys(int keys[MP_MAX_KEY_DOWN+1], char* cmd) {
+  int i = 0,j;
+  mp_cmd_bind_t* bind = NULL;
+
+#ifdef MP_DEBUG
+  assert(keys != NULL);
+  assert(cmd != NULL);
+#endif
+
+  if(cmd_binds) {
+    for(i = 0; cmd_binds[i].cmd != NULL ; i++) {
+      for(j = 0 ; cmd_binds[i].input[j] == keys[j]  && keys[j] != 0 ; j++)
+	/* NOTHING */;
+      if(keys[j] == 0 && cmd_binds[i].input[j] == 0 ) {
+	bind = &cmd_binds[i];
+	break;
+      }
+    }
+  }
+  
+  if(!bind) {
+    cmd_binds = (mp_cmd_bind_t*)realloc(cmd_binds,(i+2)*sizeof(mp_cmd_bind_t));
+    memset(&cmd_binds[i],0,2*sizeof(mp_cmd_bind_t));
+    bind = &cmd_binds[i];
+  }
+  if(bind->cmd)
+    free(bind->cmd);
+  bind->cmd = strdup(cmd);
+  memcpy(bind->input,keys,MP_MAX_KEY_DOWN+1);
+}
+
+
 static void
 mp_input_free_binds(mp_cmd_bind_t* binds) {
   int i;
@@ -1058,11 +1114,8 @@ mp_input_parse_config(char *file) {
 	strncpy(cmd,iter,end-iter);
 	cmd[end-iter] = '\0';
 	//printf("Set bind %d => %s\n",code,cmd);
-	binds = (mp_cmd_bind_t*)realloc(binds,(n_binds+2)*sizeof(mp_cmd_bind_t));
-	memcpy(&binds[n_binds].input,keys,MP_MAX_KEY_DOWN+1);
-	binds[n_binds].cmd = strdup(cmd);
+	mp_input_bind_keys(keys,cmd);
 	n_binds++;
-	memset(&binds[n_binds],0,sizeof(mp_cmd_bind_t));
       }
       keys[0] = 0;
       end++;
