@@ -20,10 +20,11 @@ MPlayer (1.0)
     * integrated Tremor decoder for Ogg/Vorbis
     * fixed decoding of stereo alaw files
     * preload QT DLLs to work around problems with their hardcoded paths
-    * support for Real 10 RV30/40 binary codec
+    * support for Real 10 RV30/40 Linux binary codec (fixes some RV40 files)
     * expose support for 422P and 444P raw formats
     * 32 bit RGB support in binary TSCC decoder
     * dropped support of old faad2 versions (<= 1.1)
+    * support for Real 10 cook Linux binary codec (decodes cook5.1)
 
     Demuxers:
     * vqf demuxer
@@ -33,6 +34,7 @@ MPlayer (1.0)
     * MP3 in Real files
     * more user-friendly info about audio and subtitle tracks in Ogg files
     * avisynth demuxer
+    * Multichannel MP3 in mp4 files support (MP3on4)
 
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP
@@ -44,6 +46,7 @@ MPlayer (1.0)
     * B-frames in H.264, H.264 weighted prediction support
     * a lot of integer overflow and pointer fixes
     * 32 bit RGB support in TSCC
+    * Multichannel MP3 decoder (MP3on4)
 
     GUI:
     * half size event implemented and added to the menu
