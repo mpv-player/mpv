@@ -328,6 +328,12 @@ static char help_text[]=
 #define MSGTR_EQU_Bass "Basowy"
 #define MSGTR_EQU_All "Wszystkie"
 
+// --- playlist
+#define MSGTR_PLAYLIST_Path "¦cie¿ka"
+#define MSGTR_PLAYLIST_Selected "Wybrane pliki"
+#define MSGTR_PLAYLIST_Files "Pliki"
+#define MSGTR_PLAYLIST_DirectoryTree "Drzewo katalogów"
+
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
 #define MSGTR_MSGBOX_LABEL_Error "b³±d ..."
