@@ -434,8 +434,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
 //  win->wGCV.background=wsBlack;
 
  win->wGC=XCreateGC( wsDisplay,win->WindowID,
-//  GCForeground | GCBackground,
-  0,
+  GCForeground | GCBackground,
   &win->wGCV );
 
  win->Visible=0;
@@ -881,6 +880,23 @@ void wsSetBackgroundRGB( wsTWindow * win,int r,int g,int b )
  XSetWindowBackground( wsDisplay,win->WindowID,color );
 }
 
+void wsSetForegroundRGB( wsTWindow * win,int r,int g,int b )
+{
+ int color = 0;
+ switch ( wsOutMask )
+  {
+   case wsRGB32:
+   case wsRGB24: color=( r << 16 ) + ( g << 8 ) + b;  break;
+   case wsBGR32:
+   case wsBGR24: color=( b << 16 ) + ( g << 8 ) + r;  break;
+   case wsRGB16: PACK_RGB16( r,g,b,color ); break;
+   case wsBGR16: PACK_RGB16( b,g,r,color ); break;
+   case wsRGB15: PACK_RGB15( r,g,b,color ); break;
+   case wsBGR15: PACK_RGB15( b,g,r,color ); break;
+  }
+ XSetForeground( wsDisplay,win->wGC,color );
+// XSetWindowBackground( wsDisplay,win->WindowID,color );
+}
 
 // ----------------------------------------------------------------------------------------------
 //    Draw string at x,y with fc ( foreground color ) and bc ( background color ).

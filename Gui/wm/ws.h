@@ -202,6 +202,7 @@ extern void wsResizeWindow( wsTWindow * win,int sx, int sy );
 extern void wsIconify( wsTWindow win );
 extern void wsMoveTopWindow( wsTWindow * win );
 extern void wsSetBackground( wsTWindow * win,int color );
+extern void wsSetForegroundRGB( wsTWindow * win,int r,int g,int b );
 extern void wsSetBackgroundRGB( wsTWindow * win,int r,int g,int b );
 #define wsClearWindow( win ); XClearWindow( wsDisplay,win.WindowID );
 extern void wsSetTitle( wsTWindow * win,char * name );
