@@ -1391,10 +1391,20 @@ GtkWidget * create_OSSConfig( void )
   CBOssMixer=AddComboBox( NULL );
     gtk_table_attach( GTK_TABLE( table2 ),CBOssMixer,1,2,1,2,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
   CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer" );
-  CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer0" );
-  CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer1" );
-  CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer2" );
-  CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer3" );
+  if ( gtkAOOSSMixer && !strncmp( gtkAOOSSMixer,"/dev/sound",10 ) )
+   {
+    CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/sound/mixer0" );
+    CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/sound/mixer1" );
+    CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/sound/mixer2" );
+    CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/sound/mixer3" );
+   }
+   else
+    {
+     CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer0" );
+     CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer1" );
+     CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer2" );
+     CBOssMixer_items=g_list_append( CBOssMixer_items,(gpointer)"/dev/mixer3" );
+    }
   gtk_combo_set_popdown_strings( GTK_COMBO( CBOssMixer ),CBOssMixer_items );
   g_list_free( CBOssMixer_items );
 
