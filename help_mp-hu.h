@@ -144,6 +144,7 @@ static char help_text[]=
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Túl sok (%d db, %d bájt) audio-csomag a pufferben!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Túl sok (%d db, %d bájt) video-csomag a pufferben!\n"
 #define MSGTR_MaybeNI "(talán ez egy nem összefésült file vagy a CODEC nem mûködik jól)\n"
+#define MSGTR_SwitchToNi "\nHibás interleave-û file, átváltás non-interleaved módba!\n"
 #define MSGTR_DetectedFILMfile "Ez egy FILM formátumú file!\n"
 #define MSGTR_DetectedFLIfile "Ez egy FLI formátumú file!\n"
 #define MSGTR_DetectedROQfile "Ez egy RoQ formátumú file!\n"
