@@ -1,113 +1,126 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.15 -->
 <appendix id="mailinglists">
 <title>Levelezési listák</title>
 <para>
-Számos publikus levelezési lista foglalkozik az <application>MPlayer</application>-rel.
+Számos publikus levelezési lista foglalkozik az <application>MPlayer</application>rel.
 Mindegyik nyelve az <emphasis role="bold">angol</emphasis>, kivéve, ha külön más van
-feltüntetve. Kérlek ne küldj más nyelvű vagy HTML leveleket! A levelek mérete 80kb-ra
-van korlátozva, ha mégis valami nagyobbat szeretnél küldeni, akkor mellékelj egy URL-t.
-Az alábbi linkeket lehet feliratkozni a listákra. A listákon a szokásos szabályok
-érvényesek, melyeket be kell tartani! Ha nem ismernéd az etikettet:
-&quot;<ulink url="http://learn.to/edit_messages">Hogy írjunk</ulink>&quot; vagy ha sietős a dolgot:
-&quot;<ulink url="http://www.xs4all.nl/~hanb/documents/quotingguide.html">Hogyan válaszoljunk</ulink>&quot;.
+feltüntetve. Kérlek ne küldj más nyelvű vagy HTML leveleket! Ha valami nagyon nagy
+dolgot csatolsz és visszapattan a leveled, inkább töltsd fel valahova a mellékletet.
+Az alábbi linkekre kattintva iratkozhatsz fel a listákra. A listákon a Netikett
+szabályok érvényesek az írásra és a visszaidézésre, ugyan úgy, mint a usenet-en. Kérjük
+tartsd be őket, így sokkal könnyebb lesz a leveleidet olvasók élete. Ha nem ismernéd az etikettet:
+<ulink url="http://www.river.com/users/share/etiquette/edit.html">HOGYAN írjunk üzeneteket</ulink> (angol nyelvű)
+vagy <ulink url="http://vet.info.hu/vm/netiquette.htm">Magyar Netikett</ulink>.
 <itemizedlist>
 <listitem><para>
-<application>MPlayer</application> announce lista:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"/>
-Az <application>MPlayer</application>-rel kapcsolatos bejelentések listája.
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-announce"><application>MPlayer</application>-announce</ulink>
+</para>
+<para>
+Az <application>MPlayer</application>rel kapcsolatos bejelentések listája.
+Iratkozz fel ha meg szeretnéd kapni a biztonsági és kiadási értesítéseket.
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> fejlesztői lista:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"/>
-Szigorúan a fejlesztésekről szól! Csak akkor iratkozz fel, ha fejlesztő
-vagy, és javításokat küldesz.
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"><application>MPlayer</application>-users</ulink>
+</para>
+<para>Az <application>MPlayer</application>rel kapcsolatos kérdésekkel
+foglalkozó általános levelezési lista.
+Kérjük olvasd el a <emphasis role="bold">teljes dokumentációt</emphasis>, mielőtt
+megírnád a problémádat vagy a kérésedet ide.
+Az <application>MPlayer</application> hiba jelentések is erre a listára
+tartoznak, de olvasd el az <link linkend="bugs">ismert hibákat</link> és
+a <link linkend="bugreports">hiba jelentési</link> fejezetet először.
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> DOCS lista:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"/>
-A dokumentációval és fordítással kapcsolatos lista. A dokumentáció és a honlap
-CVS logjai is ide érkeznek.
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"><application>MPlayer</application>-felhasznalok</ulink> (magyar)
+</para>
+<para>Magyar nyelvű lista. Téma? Nos, lássuk csak... Leginkább flame és RTFM kérdések :(
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> felhasználói lista:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
-  <itemizedlist>
-  <listitem><para>
-  Ide lehet hibabejelentéseket küldeni, ha elolvastad a <link linkend="bugs">Ismert hibák</link>
-  és a <link linkend="bugreports">hogyan küldjek hibajegyet</link> fejezeteket.
-  </para></listitem>
-  <listitem><para>
-  Ide küld a kívánságaidat is, miután elolvastad a <emphasis role="bold">teljes
-  dokumentációt</emphasis>.
-  </para></listitem>
-  <listitem><para>
-  Egyéb felhasználói kérdéseket is feltehetsz itt, feltéve ha elolvastad a
-  <emphasis role="bold">teljes dokumentációt</emphasis>.
-  </para></listitem>
-  </itemizedlist>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"><application>MPlayer</application>-Matrox</ulink>
+</para>
+<para>Matrox grafikus kártyákkal kapcsolatos kérdések listája,
+<link linkend="mga_vid">mga_vid</link>, Matrox hivatalos béta vezérlői
+(XFree86 4.x.x-hez), matroxfb-TVout cucc.
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> magyar felhasználói lista:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>
-  <itemizedlist>
-  <listitem><para>
-  Magyar nyelvű lista
-  </para></listitem>
-  <listitem><para>
-  Témája manapság csak flame és RTFM kérdések :(
-  </para></listitem>
-  </itemizedlist>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"><application>MPlayer</application>-dvb</ulink>
+</para>
+<para>A DVB nevű hardveres dekóder kártyával kapcsolatos dolgok (nem <emphasis role="bold">DXR3</emphasis>!).
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> &amp; Matrox G200/G400/G450/G550 felhasználók:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-matrox"/>
-Matrox related questions like
-  <itemizedlist>
-  <listitem><para>
-  Az mga_vid-del kapcsolatos kérdések.
-  </para></listitem>
-  <listitem><para>
-  Matrox hivatalos beta meghajtói
-  </para></listitem>
-  <listitem><para>
-  matroxfb-TV kimenet
-  </para></listitem>
-  </itemizedlist>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mencoder-users"><application>MEncoder</application>-users</ulink>
+</para>
+<para>A <application>MEncoder</application>rel kapcsolatos kérdésekkel
+foglalkozó általános levelezési lista.
+Kérjük olvasd el a <emphasis role="bold">teljes dokumentációt</emphasis>, mielőtt
+megírnád a problémádat vagy a kérésedet ide.
+A <application>MEncoder</application> hiba jelentések is erre a listára
+tartoznak, de olvasd el az <link linkend="bugs">ismert hibákat</link> és
+a <link linkend="bugreports">hiba jelentési</link> fejezetet először.
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> &amp; DVB felhasználók:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb"/>
-Minden DVB-vel kapcsolatos kérdés (és nem <emphasis role="bold">DXR3</emphasis>!).
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng"><application>MPlayer</application>-dev-eng</ulink>
+</para>
+<para>Ez a lista az <application>MPlayer</application> fejlesztésével
+foglalkozik! Interfész/API változások, új függvénykönyvtárak, kód optimalizáció,
+configure változásai a téma itt. Javításokat küldj ide, ne hiba jelentéseket,
+felhasználói kérdéseket, új tulajdonság igényeket vagy flame-t ide, hogy alacsonyan
+tudjuk tartani a lista forgalmát.
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> CVS-log:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"/>
-Az <application>MPlayer</application>-ben történő mindennemű változtatásról
-automatikusan küld a rendszer egy logot. Csak az egyes változtatásokkal
-kapocslatosan felmerülő kérdéseknek van itt helye (például, ha nem értesz
-egy-egy változtatást vagy ha hibát fedeztél fel benne).
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cvslog"><application>MPlayer</application>-cvslog</ulink>
+</para>
+<para>Az összes változás az <application>MPlayer</application> kódjában automatikusan
+elküldődik erre a listára. Csak ezekkel a változásokkal kapcsolatos kérdések tartoznak
+erre a listára (ha nem érted, hogy egy változtatás miért kell vagy jobb javításod van
+vagy egy lehetséges hibát/problémát találtál a beküldött változtatásban).
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> Cygwin-portolás lista:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
-Az <application>MPlayer</application> <application>Cygwin</application> és
-<application>MinGW</application> változatairól szól a lista.
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>
+</para>
+<para>Ez a lista az <application>MPlayer</application> dokumentációjával
+és fordításaival foglalkozik.
+A dokumentációval és a weboldallal kapcsolatos CVS logot is elküldjük ide.
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> OS/2-portolás list:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"/>
-Az <application>MPlayer</application> <application>OS/2</application>-es
-változatáról szól a lista.
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"><application>MPlayer</application>-cygwin</ulink>
+</para>
+<para>Az <application>MPlayer</application>
+<application>Cygwin</application> és <application>MinGW</application> alatti portjaival
+kapcsolatos megbeszélések helye.
 </para></listitem>
 <listitem><para>
-<application>MPlayer</application> Heti Hírek szerkesztői és fordítói lista:
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"/>
-A Heti Hírekkel kapcsolatos mindennemű aktivitás.
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-g2-dev"><application>MPlayer</application>-G2-dev</ulink>
+</para>
+<para>Az <application>MPlayer</application> G2-vel, a következő
+generációs videó lejátszóval foglalkozó lista.
+</para></listitem>
+<listitem><para>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mirror"><application>MPlayer</application>-mirror</ulink>
+</para>
+<para>Az <application>MPlayer</application> tükörszervereinek infrastruktúrájáról
+szóló beszélgetések.
+</para></listitem>
+<listitem><para>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn"><application>MPlayer</application>-MWN</ulink> (INAKTÍV)
+</para>
+<para>Az <application>MPlayer</application> Weekly
+News (<application>MPlayer</application> Heti Hírek) kiadásaival kapcsolatos dolgok.
+</para></listitem>
+<listitem><para>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-os2"><application>MPlayer</application>-os2</ulink> (INAKTÍV)
+</para>
+<para>Az <application>MPlayer</application> OS/2-es portjával foglalkozó lista.
+</para></listitem>
+<listitem><para>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-qt-codecs-porting"><application>MPlayer</application>-qt-codecs-porting</ulink> (INAKTÍV)
+</para>
+<para>A QuickTime codec-ek támogatásával foglalkozó lista.
 </para></listitem>
 </itemizedlist>
 <note><para>
-Mindegyik lista kereshető a
+Mindegyik listának kereshető archívuma van a
 <ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi"/> oldalon.
 </para></note>
 </para>
