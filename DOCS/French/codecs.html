@@ -1,0 +1,225 @@
+<HTML>
+<BODY BGCOLOR=WHITE>
+
+<FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>
+
+<P><B><A NAME=2.1>2.1. Formats vid&eacute;o, codecs audio &amp; vid&eacute;o </A></B></P>
+
+<P><B><A NAME=2.1.1>2.1.1. Formats d'entr&eacute;e support&eacute;s</A></B></P>
+
+<P><B>MPlayer</B> peut lire/&eacute;crire depuis les lecteurs/formats suivants : <BR>
+<UL>
+<LI> VCD (Video CD) directement depuis le CD-ROM ou depuis une image disque .bin cr&eacute;e par CDRwin.
+<LI> DVD, directement depuis le lecteur DVD, avec le support de libcss pour le d&eacute;cryptage.
+<LI> Les fichiers MPEG 1/2 System Stream (PS/PES/VOB) et Elementary Stream (ES) 
+<LI> Les fichiers RIFF AVI.
+<LI> Les fichiers ASF/WMV 1.0.
+<LI> Supporte la lecture depuis un fichier, l'entr&eacute;e standard, ou le r&eacute;seau via HTTP
+</UL></P>
+
+<P>Note : concernant le support de quicktime (.mov/.qt) et realmedia (.ra/.rm) lisez la FAQ!</P>
+
+
+<P><B><A NAME=2.1.2>2.1.2. Codecs audio &amp; vid&eacute;o support&eacute;s</A></B></P>
+
+<P>Voir <A
+HREF=&quot;http://www.mplayerhq.hu/DOCS/codecs-status.html&quot;>http://www.mplayerhq.hu/DOCS/codecs-status.html</A>
+pour une liste compl&egrave;te et actualis&eacute;e !!!</P>
+
+<P>Les principaux codecs vid&eacute;o :<BR>
+<UL>
+<LI>MPEG1 (VCD) et MPEG2 (DVD)
+<LI>DivX ;-), OpenDivX (DivX4) et autre variantes MPEG4
+<LI>Windows Media Video 7 (WMV1) et 8 (WMV2) utilis&eacute;s dans les fichiers .wmv
+<LI>Codecs Intel Indeo (3.1,3.2,4.1,5.0)
+<LI>MJPEG, ASV2 et autres formats mat&eacute;riels
+</UL></P>
+
+<P>Les principaux codecs audio :<BR>
+<UL>
+<LI>MPEG layer 2 et layer 3 (MP3), avec optimisation mmx/sse/3dnow
+<LI>AC3 dolby, avec optimisation mmx/sse/3dnow
+<LI>Ogg Vorbis (librairie native)
+<LI>Voxware (utilisant la DLL directshow)
+<LI>alaw, msgsm, pcm et autres formats audio anciens
+</UL></P>
+
+<P>Si vous utilisez un codec non encore support&eacute;, lisez la <A
+HREF=&quot;#2.1.4&quot;>section 2.1.4</A> pour obtenir des informations sur comment nous aider pour ajouter ce support !</P>
+
+<P><B><A NAME=2.1.2.1>2.1.2.1. DivX4</A></B></P>
+
+<P>Cette section contient des informations sur le codec DivX4 de
+<A HREF="http://www.projectmayo.com">ProjectMayo</A>. Leur premi&egrave;re version (alpha) disponible est OpenDivX 4.0
+alpha 47 et 48. Son support est inclut dans <B>MPlayer</B>, et compil&eacute; par d&eacute;faut. 
+Nous avons fr&eacute;quemment utilis&eacute; son code de postprocessing pour am&eacute;liorer la qualit&eacute; visuelle des vid&eacute;os
+MPEG1/2.</P>
+
+<P>La nouvelle g&eacute;n&eacute;ration de ce codec peut m&ecirc;me d&eacute;coder les vid&eacute;os cr&eacute;&eacute;es avec le tr&egrave;s mauvais codec DivX ! 
+Il permet m&ecirc;me d'obtenir un BIEN MEILLEUR r&eacute;sutat qu'avec les DLLs Win32 DivX traditionnelles. 
+Voir ci-dessous comment le configurer. Le seul d&eacute;faut de ce codec est de ne pas &ecirc;tre Open-Source :(</P>
+
+<P>Ce codec peut &ecirc;tre t&eacute;l&eacute;charg&eacute; depuis l'adresse suivante :</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF=&quot;http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip&quot;>http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip</A></P>
+
+<P>Aucune installation automatique n'est encore disponible, donc suivez EXACTEMENT la proc&eacute;dure suivante.
+ D&eacute;compressez le, et ex&eacute;cutez les commandes suivantes (en tant que root) :</P>
+
+<P><CODE>cp libdivxdecore.so.0.0.0 /usr/local/lib/<BR>
+ln -s /usr/local/lib/libdivxdecore.so.0.0.0 /usr/local/lib/libdivxdecore.so.0<BR>
+ln -s /usr/local/lib/libdivxdecore.so.0 /usr/local/lib/libdivxdecore.so<BR>
+ldconfig<BR>
+cp decore.h /usr/local/include/</CODE></P>
+
+<P>Note: n'oubliez pas d'ajouter /usr/local/lib a votre fichier /etc/ld.so.conf !</P>
+
+<P><B>MPlayer</B> d&eacute;tecte si DivX4 est (correctement) install&eacute;, donc compilez le normalement.
+Si le script ./configure ne d&eacute;tecte pas le codec, votre installation est erron&eacute;e,
+et/ou votre configuration pas tr&egrave;s propre (voir la derni&egrave;re question de la section 5.1).</P>
+
+<P>Utiliser ce codec est un peu d&eacute;licat. Il entre en conflit avec l'ancien OpenDivX (leurs APIs sont tr&egrave;s proches). 
+Le code OpenDivX code n'est pas charg&eacute;, et le driver OpenDivX fait lui aussi appel &agrave; cette librarie.</P>
+
+<P>G&eacute;n&eacute;rallement nous contournont ce probl&egrave;me pour que vous obteniez deux options :</P>
+
+<P><TABLE BORDER=0>
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>-vc&nbsp;odivx</FONT></TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>utilise le codec divx4 comme une nouvelle version d'OpenDivX.
+Dans ce cas il affiche des images YV12 dans son propre buffer,
+et <B>MPlayer</B> (libvo) fait la conversion de palette. <B>(RECOMMAND&Eacute; !)</B></FONT></TD><TR>
+<TD></TD><TD VALIGN=top><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>-vc&nbsp;divx4</FONT></TD><TD></TD>
+<TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>utilise la conversion de palette du codec divx4.
+Dans ce mode, vous pouvez &eacute;galement utiliser le format YUY2/UYVY.</FONT></TD><TR>
+</TABLE></P>
+
+<P>La m&eacute;thode 'odivx' est g&eacute;n&eacute;ralement plus rapide, gr&acirc;ce au transfert des donn&eacute;es d'images au format 
+YV12 (YUV 4:2:0 planaire), n&eacute;cessitant beaucoup moins de bande passante sur le bus. 
+Pour les modes YUV (YUY2, UYVY) utilisez la m&eacute;thode 'divx4'. 
+Cela ne pr&eacute;sente pas de diff&eacute;rence pour le mode RGB, leur vitesse est &eacute;quivalente et d&eacute;pend du nombre de bpp.</P>
+
+<P>Note: Il supporte aussi le postprocessing, mais son intervalle de valeurs est particuli&egrave;re :</P>
+
+<P><TABLE BORDER=0>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>
+0
+</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>
+pas de postprocessing
+</FONT></TD><TR>
+<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>
+10 .. 20
+</FONT></TD>
+<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>
+postprocessing, normal (&eacute;quivalent au niveau 2 de divxds)
+</FONT></TD><TR>
+<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>
+30 .. 60
+</FONT></TD>
+<TD></TD><TD><FONT face=&quot;Verdana, Arial, Helvetica, sans-serif&quot; size=2>
+prostprocessing mat&eacute;riel, utilise beaucoup de temps CPU (&eacute;quivalent au niveau 4 de divxds)
+</FONT></TD><TR>
+</TABLE></P>
+
+<P><B><A NAME=2.1.2.2>2.1.2.2. DivX/libavcodec de ffmpeg</A></B></P>
+
+<P>Apparu &agrave; sa version 0.4.2 , <A HREF=&quot;http://ffmpeg.sourceforge.net&quot;>ffmpeg</A> contient un codec DivX <B>opensource</B>,
+compatible avec le DivX traditionnel. <B>MPlayer</B> supporte ce codec,
+qui rend possible <B>la lecture de films DivX sur des plates-formes non-x86 !</B>
+Il a &eacute;t&eacute; retir&eacute; des CVS de <B>MPlayer</B>, vous devez le t&eacute;l&eacute;charger directement depuis le CVS de <B>FFmpeg</B> :</P>
+
+<P><CODE>
+  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<br>
+  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
+</CODE></P>
+
+<P>Note: <I>si vous copiez l'arborescence CVS compl&egrave;te, la prochaine fois il vous suffira de faire un
+'cvs update'.</I></P>
+
+<P>Maintenant, d&eacute;placez le r&eacute;pertoire <B>libavcodec</B> des sources de ffmpeg,
+(avec ses sous-r&eacute;pertoires) vers le r&eacute;pertoire des sources de <B>MPlayer</B>, pour ressembler &agrave; ceci:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
+
+<P>Les liens symboliques ne fonctionneront pas, vous devez le d&eacute;placer physiquement !!!</P>
+
+<P>./configure d&eacute;tecte si la compilation avec libavcodec est r&eacute;alisable. Ce codec supporte &eacute;galement le 
+postprocessing.</P>
+
+<P>Pour l'utiliser, mettez &agrave; jour votre fichier codecs.conf, et proc&eacute;dez comme expliqu&eacute; dans la page man et le fichier
+example.conf (avec l'option -vfm).</P>
+
+<P>Note: libavcodec couvre &eacute;galement d'autres codecs (ffmpeg12 par exemple), mais nous nous concentrons principalement sur ffdivx, jusqu'a
+nouvel ordre.</P>
+
+
+<P><B><A NAME=2.1.2.3>2.1.2.3. Decodage hardware AC3</A></B></P>
+
+<P>Cela n&eacute;cessite une carte son compatible AC3, avec sortie num&eacute;rique (SP/DIF). Le driver de la carte doit supporter
+ le format AFMT_AC3 (comme celui de la SB Live! par exemple).
+Connectez votre d&eacute;codeur AC3 sur la sortie SP/DIF, et utilisez le avec l'option '-ac hwac3'. 
+Ceci est encore exp&eacute;rimental, et peut ne pas fonctionner.</P>
+
+
+<P><B><A NAME=2.1.4>2.1.4. Comment importer des codecs </A></B></P>
+
+<P><B><A NAME=2.1.4.1>2.1.4.1. Codecs VFW </A></B></P>
+
+<P>VfW (Video for Windows) est une ancienne API vid&eacute;o pour windows. Ses codecs portent l'extension .DLL ou plus rarement .DRV .
+Si <B>MPlayer</B> n'arrive pas &agrave; lire votre AVI et renvoie :</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>UNKNOWN video codec: HFYU (0x55594648)</CODE></P>
+
+<P>Cela signifie que votre AVI est encod&eacute; avec un codec HFYU fourcc (HFYU =
+HuffYUV codec, DIV3 = DivX Low Motion, etc...). Maintenant que nous savons cela, nous devons d&eacute;terminer quelle 
+DLL windows utilise pour lire ce fichier. Dans votre cas, le fichier system.ini contient (entre autres):</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>VIDC.HFYU=huffyuv.dll</CODE></P>
+
+<P>Donc nous aurons besoin de la librarie huffyuv.dll. Notez que les codecs audio sont sp&eacute;cifi&eacute;s par le pr&eacute;fixe MSACM :</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>msacm.l3acm=L3codeca.acm</CODE></P>
+
+
+<P>C'est le codec MP3.
+Nous avons d&eacute;sormais toutes les informations n&eacute;cessaires (fourcc, fichier codec, fichier AVI). Demandez le support de
+votre codec par mail, et envoyez ces fichiers sur le FTP :</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</CODE></P>
+
+
+<P><B><A NAME=2.1.4.2>2.1.4.2. Codecs DirectShow</A></B></P>
+
+<P>DirectShow est une API vid&eacute;o r&eacute;cente pour windows, sans doute plus mauvaise que la pr&eacute;c&eacute;dente :-(
+La situations est plus d&eacute;licate avec DirectShow, puisque
+<UL>
+<LI>system.ini ne contient aucune information, qui sont d&eacute;sormais plac&eacute;es dans le registre.
+<LI>Nous aurons besoin du GUID du codec.
+</UL></P>
+
+<P>Fouillons donc dans la base de registre :-(.
+<UL>
+<LI>Ex&eacute;cutez 'regedit'
+<LI>Pressez ctrl-f, d&eacute;cochez les deux premi&egrave;res cases, et cochez la troisi&egrave;me. Entrez le fourcc du codec. (par ex.: TM20)
+<LI>vous devriez trouver un champ contenant le chemin et le nom du fichier utilis&eacute; 
+(par ex. : C:\WINDOWS\SYSTEM\TM20DEC.AX)
+<LI>Maintenant que nous connaissons ce fichier, nous devons trouver son GUID. Cherchez d&eacute;sormais le nom du codec, pas son
+fourcc. Son nom peut &ecirc;tre trouv&eacute; quand Media Player lit le fichier, en regardant dans Fichier/Propri&eacute;t&eacute;s/Avanc&eacute;es.
+Si rien n'apparait, pas de chance ;) Essayez de le deviner.
+(par ex. cherchez : TrueMotion)
+<LI>S'il apparait dans la base de registre, il devrait apparaitre un champ NomDuFichier, et un champ CLSID. 
+Copiez les 16 bits du CLSID, c'est le GUID dont nous avons besoin.
+</UL></P>
+
+<P>NOTE: si la recherche &eacute;choue, cochez toutes les options de la fen&ecirc;tre de recherche.. vous aurez des mauvaises
+occurrences, mais finirez par obtenir la bonne...</P>
+<P>NOTE: Exportez la cl&eacute; du registre, et donnez des sous &agrave; M$, ils aiment bien &ccedil;a.</P>
+
+
+<P>Nous avons d&eacute;sormais toutes les informations n&eacute;cessaires (fourcc, GUID, fichier codec, fichier AVI). Demandez le support de
+votre codec par mail, et envoyez ces fichiers sur le FTP :
+<BR>
+ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecname]/</P>
+
+</BODY>
+</HTML>
