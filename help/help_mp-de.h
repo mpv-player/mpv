@@ -56,7 +56,6 @@ static char help_text[]=
 // ========================= MPlayer Ausgaben ===========================
 
 // mplayer.c: 
-
 #define MSGTR_Exiting "\nBeende... (%s)\n"
 #define MSGTR_Exit_quit "Ende"
 #define MSGTR_Exit_eof "Ende der Datei"
@@ -132,7 +131,6 @@ static char help_text[]=
 #define MSGTR_PlaylistLoadUnable "\nKann Playliste %s nicht laden\n"
 
 // mencoder.c:
-
 #define MSGTR_MEncoderCopyright "(C) 2000-2002 Arpad Gereoffy (siehe DOCS!)\n"
 #define MSGTR_UsingPass3ControllFile "Verwende Pass 3 Kontrolldatei: %s\n"
 #define MSGTR_MissingFilename "\nDateiname nicht angegeben!\n\n"
@@ -223,7 +221,6 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxerinfo %s existiert bereits\n!"
 #define MSGTR_ClipInfo "Clipinfo: \n"
 
-				  
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "kann Codec nicht öffnen\n"
 #define MSGTR_CantCloseCodec "kann Codec nicht schließen\n"
@@ -257,7 +254,7 @@ static char help_text[]=
 #define MSGTR_ADecoderPreinitFailed "Preinitialisierung des Audiodecoder fehlgeschlagen :(\n"
 #define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Reserviere %d Bytes für Eingangsbuffer\n"
 #define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Reserviere %d + %d = %d Bytes füs Ausgabebuffer\n"
-			 
+
 // LIRC:
 #define MSGTR_SettingUpLIRC "Initialisiere LIRC Unterstützung...\n"
 #define MSGTR_LIRCdisabled "Verwenden der Fernbedienung nicht möglich\n"
@@ -276,7 +273,6 @@ static char help_text[]=
 #define MSGTR_CouldNotFindColorspace "Kann keinen passenden Colorspace finden - versuche erneut mithilfe von -vop scale...\n"
 #define MSGTR_MovieAspectIsSet "Movie-Aspect ist %.2f:1 - Prescaling zur korrekten Videogröße.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect ist undefiniert - kein Prescaling verwendet.\n"
-			 
 
 // ====================== GUI messages/buttons ========================
 
@@ -300,7 +296,6 @@ static char help_text[]=
 #define MSGTR_NoChapter "kein Kapitel"
 #define MSGTR_Chapter "Kapitel %d"
 #define MSGTR_NoFileLoaded "keine Datei geladenno file loaded"
-			 
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
@@ -311,14 +306,13 @@ static char help_text[]=
 #define MSGTR_Config "Konfiguration"
 #define MSGTR_ConfigDriver "Konfiguriere Treiber"
 #define MSGTR_Browse "Durchsuchen"
-			 
-			 
+
 // --- error messages ---
 #define MSGTR_NEMDB "Sorry, nicht genug Speicher für den Zeichen-Puffer."
 #define MSGTR_NEMFMR "Sorry, nicht genug Speicher für Menü-Rendering."
 #define MSGTR_IDFGCVD "Sorry, kann keinen GUI-kompatiblen Ausgabetreiber finden"
 #define MSGTR_NEEDLAVCFAME "Sorry, du versuchst Nicht-MPEG Dateien über deine DXR3/H+ Karte ohne Neuenkodierung abzuspielen.\nBitte aktiviere lavc oder fame in der DXR3/H+ Configbox."
-			 
+
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[Skin] Fehler in Skin-Konfigurationsdatei in Zeile %d: %s" 
 #define MSGTR_SKIN_WARNING1 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d: Widget gefunden, aber davor wurde \"section\" nicht gefunden ( %s )"
@@ -440,6 +434,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Font "Schrift"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocess"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & Demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "Cache"
 #define MSGTR_PREFERENCES_OSS_Device "Gerät:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Message "Bitte bedenke, mache Funktionen erfordern einen Neustart der Wiedergabe."
@@ -477,7 +472,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Text Scaling:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD Scaling:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Untertitel & OSD"
-			 
+#define MSGTR_PREFERENCES_Cache "Cache ein/aus"
+
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Fataler Fehler ..."
 #define MSGTR_MSGBOX_LABEL_Error "Fehler ..."
