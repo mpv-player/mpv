@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.57 -->
+<!-- synced with 1.58 -->
 <sect1 id="codecs">
 <title>Obsługiwane kodeki</title>
 
@@ -734,8 +734,8 @@ Instrukcje instalacji znajdują się w dziale
 AAC (Advanced Audio Coding) jest kodekiem audio spotykanym czasami w plikach
 MOV i MP4. Otwarty dekoder nazywany FAAD dostępny jest na stronie
 <ulink url="http://www.audiocoding.com"/>.
-<application>MPlayer</application> zawiera libfaad 2.0RC1, więc nie musisz
-ściągać go oddzielnie.
+<application>MPlayer</application> zawiera migawkę CVSu z
+libfaad 2.1beta, więc nie musisz ściągać go oddzielnie.
 </para>
 
 <para>
