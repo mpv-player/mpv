@@ -293,69 +293,69 @@ struct NewMainArchiveHeader NewMhd;
 struct NewFileHeader NewLhd;
 struct BlockHeader BlockHead;
 
-UBYTE *TempMemory = NULL;                          /* temporary unpack-buffer      */
-char *CommMemory = NULL;
+static UBYTE *TempMemory = NULL;                          /* temporary unpack-buffer      */
+static char *CommMemory = NULL;
 
 
-UBYTE *UnpMemory = NULL;
-char ArgName[NM];                           /* current file in rar archive  */
-char ArcFileName[NM];                       /* file to decompress           */
+static UBYTE *UnpMemory = NULL;
+static char* ArgName = NULL;                           /* current file in rar archive  */
+static char* ArcFileName = NULL;                       /* file to decompress           */
 
 #ifdef _USE_MEMORY_TO_MEMORY_DECOMPRESSION  /* mem-to-mem decompression     */
-  MemoryFile *MemRARFile;                   /* pointer to RAR file in memory*/
+  static MemoryFile *MemRARFile;                   /* pointer to RAR file in memory*/
 #else
-  char ArcName[255];                        /* RAR archive name             */
-  FILE *ArcPtr;                             /* input RAR file handler       */
+  static char* ArcName = NULL;                        /* RAR archive name             */
+  static FILE *ArcPtr;                             /* input RAR file handler       */
 #endif
-char Password[255];                         /* password to decrypt files    */
+static char *Password = NULL;                         /* password to decrypt files    */
 
-unsigned char *temp_output_buffer;          /* extract files to this pointer*/
-unsigned long *temp_output_buffer_offset;   /* size of temp. extract buffer */
+static unsigned char *temp_output_buffer;          /* extract files to this pointer*/
+static unsigned long *temp_output_buffer_offset;   /* size of temp. extract buffer */
 
-BOOL FileFound;                             /* TRUE=use current extracted   */
+static BOOL FileFound;                             /* TRUE=use current extracted   */
                                             /* data FALSE=throw data away,  */
                                             /* wrong file                   */
-int MainHeadSize;
-long CurBlockPos,NextBlockPos;
+static int MainHeadSize;
+static long CurBlockPos,NextBlockPos;
 
-unsigned long CurUnpRead, CurUnpWrite;
-long UnpPackedSize;
-long DestUnpSize;
+static unsigned long CurUnpRead, CurUnpWrite;
+static long UnpPackedSize;
+static long DestUnpSize;
 
-UDWORD HeaderCRC;
-int Encryption;
+static UDWORD HeaderCRC;
+static int Encryption;
 
-unsigned int UnpWrSize;
-unsigned char *UnpWrAddr;
-unsigned int UnpPtr,WrPtr;
+//static unsigned int UnpWrSize;
+//static unsigned char *UnpWrAddr;
+static unsigned int UnpPtr,WrPtr;
 
-unsigned char PN1,PN2,PN3;
-unsigned short OldKey[4];
+static unsigned char PN1,PN2,PN3;
+static unsigned short OldKey[4];
 
 
 
 /* function header definitions                                              */
-int ReadHeader(int BlockType);
-BOOL ExtrFile(void);
-BOOL ListFile(void);
-int tread(void *stream,void *buf,unsigned len);
-int tseek(void *stream,long offset,int fromwhere);
-BOOL UnstoreFile(void);
-int IsArchive(void);
-int ReadBlock(int BlockType);
-unsigned int UnpRead(unsigned char *Addr,unsigned int Count);
-void UnpInitData(void);
-void Unpack(unsigned char *UnpAddr);
-UBYTE DecodeAudio(int Delta);
+static int ReadHeader(int BlockType);
+static BOOL ExtrFile(void);
+//BOOL ListFile(void);
+static int tread(void *stream,void *buf,unsigned len);
+static int tseek(void *stream,long offset,int fromwhere);
+static BOOL UnstoreFile(void);
+static int IsArchive(void);
+static int ReadBlock(int BlockType);
+static unsigned int UnpRead(unsigned char *Addr,unsigned int Count);
+static void UnpInitData(void);
+static void Unpack(unsigned char *UnpAddr);
+static UBYTE DecodeAudio(int Delta);
 static void DecodeNumber(struct Decode *Dec);
-void UpdKeys(UBYTE *Buf);
-void SetCryptKeys(char *Password);
-void SetOldKeys(char *Password);
-void DecryptBlock(unsigned char *Buf);
-void InitCRC(void);
-UDWORD CalcCRC32(UDWORD StartCRC,UBYTE *Addr,UDWORD Size);
-void UnpReadBuf(int FirstBuf);
-void ReadTables(void);
+static void UpdKeys(UBYTE *Buf);
+static void SetCryptKeys(char *Password);
+static void SetOldKeys(char *Password);
+static void DecryptBlock(unsigned char *Buf);
+static void InitCRC(void);
+static UDWORD CalcCRC32(UDWORD StartCRC,UBYTE *Addr,UDWORD Size);
+static void UnpReadBuf(int FirstBuf);
+static void ReadTables(void);
 static void ReadLastTables(void);
 static void MakeDecodeTables(unsigned char *LenTab,
                              struct Decode *Dec,
@@ -393,14 +393,19 @@ int urarlib_get(void *output,
 
   InitCRC();                                /* init some vars               */
 
-  strcpy(ArgName, filename);                /* set file(s) to extract       */
+  if(ArgName) free(ArgName);
+  ArgName = strdup(filename);                /* set file(s) to extract       */
 #ifdef _USE_MEMORY_TO_MEMORY_DECOMPRESSION
   MemRARFile = rarfile;                     /* set pointer to mem-RAR file  */
 #else
-  strcpy(ArcName, rarfile);                 /* set RAR file name            */
+  if(ArcName) free(ArcName);
+  ArcName = strdup(rarfile);                 /* set RAR file name            */
 #endif
+  if(Password) free(Password);
   if(libpassword != NULL)
-    strcpy(Password, libpassword);          /* init password                */
+    Password = strdup(libpassword);          /* init password                */
+  else
+    Password = strdup("");
 
   temp_output_buffer = NULL;
   temp_output_buffer_offset=size;           /* set size of the temp buffer  */
@@ -413,7 +418,7 @@ int urarlib_get(void *output,
 
   retcode = ExtrFile();                     /* unpack file now!             */
 
-  memset(Password,0,sizeof(Password));      /* clear password               */
+  //memset(Password,0,sizeof(Password));      /* clear password               */
 
 #ifndef _USE_MEMORY_TO_MEMORY_DECOMPRESSION
   if (ArcPtr!=NULL){
@@ -1578,7 +1583,7 @@ unsigned int UnpRead(unsigned char *Addr,unsigned int Count)
   while (Count > 0)
   {
     ReadSize=(unsigned int)((Count>(unsigned long)UnpPackedSize) ?
-                                                  UnpPackedSize : Count);
+                                                  (unsigned int)UnpPackedSize : Count);
 #ifdef _USE_MEMORY_TO_MEMORY_DECOMPRESSION
     if(MemRARFile->data == NULL)
       return(0);
