@@ -8,8 +8,9 @@
 
 <sect1 id="devices">
 <title>Устройства вывода</title>
-&video.xml;
-&audio.xml;
+<!-- FIXME: uncomment each file when translation is finished -->
+<!-- &video.xml; -->
+<!-- &audio.xml; -->
 </sect1>
 
 &tvinput.xml;
