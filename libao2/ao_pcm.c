@@ -107,6 +107,9 @@ static int init(int rate,int channels,int format,int flags){
 	wavhdr.sample_rate = le2me_32(ao_data.samplerate);
 	wavhdr.bytes_per_second = le2me_32(ao_data.bps);
 	wavhdr.bits = le2me_16(bits);
+	
+	wavhdr.data_length=le2me_32(0x7ffff000);
+	wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
 
 	printf("PCM: File: %s (%s)\n"
 	       "PCM: Samplerate: %iHz Channels: %s Format %s\n",
@@ -118,8 +121,10 @@ static int init(int rate,int channels,int format,int flags){
 
 	fp = fopen(ao_outputfilename, "wb");
 	if(fp) {
-		if(ao_pcm_waveheader) /* Reserve space for wave header */
+		if(ao_pcm_waveheader){ /* Reserve space for wave header */
 			fwrite(&wavhdr,sizeof(wavhdr),1,fp);
+			wavhdr.file_length=wavhdr.data_length=0;
+		}
 		return 1;
 	}
 	printf("PCM: Failed to open %s for writing!\n", ao_outputfilename);
