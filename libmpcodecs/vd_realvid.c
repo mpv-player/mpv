@@ -211,7 +211,7 @@ static int init(sh_video_t *sh){
 	if(strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
 #ifdef USE_WIN32DLL
-	    if (!load_syms_windows(path))
+	    if (!load_syms_windows(sh->codec->dll))
 #endif
 	{
 		mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);

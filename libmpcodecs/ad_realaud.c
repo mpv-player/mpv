@@ -223,7 +223,7 @@ static int preinit(sh_audio_t *sh){
     if (strstr(sh->codec->dll,".dll") || !load_syms_linux(path))
 #endif
 #ifdef USE_WIN32DLL
-	if (!load_sysm_windows(path))
+	if (!load_sysm_windows(sh->codec->dll))
 #endif
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_ERR, MSGTR_MissingDLLcodec, sh->codec->dll);
