@@ -43,6 +43,7 @@ void bit_allocate (a52_state_t * state, a52_ba_t * ba, int bndstart,
 
 int downmix_init (int input, int flags, sample_t * level,
 		  sample_t clev, sample_t slev);
+void downmix_accel_init(uint32_t mm_accel);
 int downmix_coeff (sample_t * coeff, int acmod, int output, sample_t level,
 		   sample_t clev, sample_t slev);
 extern void (*downmix) (sample_t * samples, int acmod, int output, sample_t bias,

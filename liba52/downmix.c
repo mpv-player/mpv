@@ -24,18 +24,16 @@
  */
 
 #include "config.h"
-#include "../cpudetect.h"
 
 #include <string.h>
 #include <inttypes.h>
 
 #include "a52.h"
 #include "a52_internal.h"
+#include "mm_accel.h"
 
 #define CONVERT(acmod,output) (((output) << 3) + (acmod))
 
-//#undef HAVE_SSE
-//#undef HAVE_MMX
 
 void (*downmix)(sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev)= NULL;
@@ -47,7 +45,17 @@ static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
 	      sample_t clev, sample_t slev);
 static void upmix_MMX (sample_t * samples, int acmod, int output);
 static void upmix_C (sample_t * samples, int acmod, int output);
-      
+
+void downmix_accel_init(uint32_t mm_accel)
+{
+    upmix= upmix_C;
+    downmix= downmix_C;
+#ifdef ARCH_X86    
+    if(mm_accel & MM_ACCEL_X86_MMX) upmix= upmix_MMX;
+    if(mm_accel & MM_ACCEL_X86_SSE) downmix= downmix_SSE;
+#endif
+}
+   
 int downmix_init (int input, int flags, sample_t * level,
 		  sample_t clev, sample_t slev)
 {
@@ -76,13 +84,6 @@ int downmix_init (int input, int flags, sample_t * level,
 	 A52_DOLBY,	A52_DOLBY,	A52_DOLBY,	A52_DOLBY}
     };
     int output;
-
-    upmix= upmix_C;
-    downmix= downmix_C;
-#ifdef ARCH_X86    
-    if(gCpuCaps.hasMMX) upmix= upmix_MMX;
-    if(gCpuCaps.hasSSE) downmix= downmix_SSE;
-#endif
 
     output = flags & A52_CHANNEL_MASK;
     if (output > A52_DOLBY)

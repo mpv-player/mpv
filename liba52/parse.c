@@ -57,6 +57,7 @@ sample_t * a52_init (uint32_t mm_accel)
     int i;
 
     imdct_init (mm_accel);
+    downmix_accel_init(mm_accel);
 
     samples = memalign (16, 256 * 12 * sizeof (sample_t));
     if (samples == NULL)
