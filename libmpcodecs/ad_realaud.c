@@ -23,10 +23,13 @@ static ad_info_t info =  {
 
 LIBAD_EXTERN(realaud)
 
-static void *handle=NULL;
-
 void *__builtin_new(unsigned long size) {
 	return malloc(size);
+}
+
+// required for cook's uninit:
+void __builtin_delete(void* ize) {
+	free(ize);
 }
 
 #if defined(__FreeBSD__) || defined(__NetBSD__)
@@ -127,14 +130,14 @@ static int load_syms_linux(char *path)
     raFreeDecoder = dlsym(handle, "RAFreeDecoder");
     raGetFlavorProperty = dlsym(handle, "RAGetFlavorProperty");
     raOpenCodec = dlsym(handle, "RAOpenCodec");
-//    raOpenCodec2 = dlsym(handle, "RAOpenCodec2");
+    raOpenCodec2 = dlsym(handle, "RAOpenCodec2");
     raInitDecoder = dlsym(handle, "RAInitDecoder");
     raSetFlavor = dlsym(handle, "RASetFlavor");
     raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
     raSetPwd = dlsym(handle, "RASetPwd"); // optional, used by SIPR
     
     if (raCloseCodec && raDecode && raFlush && raFreeDecoder &&
-	raGetFlavorProperty && raOpenCodec/*2*/ && raSetFlavor &&
+	raGetFlavorProperty && (raOpenCodec||raOpenCodec2) && raSetFlavor &&
 	/*raSetDLLAccessPath &&*/ raInitDecoder)
     {
 	rv_handle = handle;
@@ -172,14 +175,14 @@ static int load_sysm_windows(char *path)
     wraFreeDecoder = GetProcAddress(handle, "RAFreeDecoder");
     wraGetFlavorProperty = GetProcAddress(handle, "RAGetFlavorProperty");
     wraOpenCodec = GetProcAddress(handle, "RAOpenCodec");
-//    wraOpenCodec2 = GetProcAddress(handle, "RAOpenCodec2");
+    wraOpenCodec2 = GetProcAddress(handle, "RAOpenCodec2");
     wraInitDecoder = GetProcAddress(handle, "RAInitDecoder");
     wraSetFlavor = GetProcAddress(handle, "RASetFlavor");
     wraSetDLLAccessPath = GetProcAddress(handle, "SetDLLAccessPath");
     wraSetPwd = GetProcAddress(handle, "RASetPwd"); // optional, used by SIPR
     
     if (wraCloseCodec && wraDecode && wraFlush && wraFreeDecoder &&
-	wraGetFlavorProperty && wraOpenCodec/*2*/ && wraSetFlavor &&
+	wraGetFlavorProperty && (wraOpenCodec || wraOpenCodec2) && wraSetFlavor &&
 	/*wraSetDLLAccessPath &&*/ wraInitDecoder)
     {
 	rv_handle = handle;
@@ -237,13 +240,17 @@ static int preinit(sh_audio_t *sh){
   }
 
 #ifdef USE_WIN32DLL
-    if (dll_type == 1)
-//	result=wraOpenCodec2(&sh->context,NULL);
+    if (dll_type == 1){
+      if(wraOpenCodec2)
+	result=wraOpenCodec2(&sh->context,REALCODEC_PATH "\\");
+      else
 	result=wraOpenCodec(&sh->context);
-    else
+    } else
 #endif
-//    result=raOpenCodec2(&sh->context,NULL);
-    result=raOpenCodec(&sh->context);
+    if(raOpenCodec2)
+      result=raOpenCodec2(&sh->context,REALCODEC_PATH "/");
+    else
+      result=raOpenCodec(&sh->context);
     if(result){
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Decoder open failed, error code: 0x%X\n",result);
       return 0;
@@ -327,9 +334,12 @@ static int preinit(sh_audio_t *sh){
     else
 #endif
     prop=raGetFlavorProperty(sh->context,((short*)(sh->wf+1))[2],1,&len);
-    sh->i_bps=((*((int*)prop))+4)/8;
-    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Audio bitrate: %5.3f kbit/s (%d bps)  \n",(*((int*)prop))*0.001f,sh->i_bps);
-
+    if(prop){
+      sh->i_bps=((*((int*)prop))+4)/8;
+      mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Audio bitrate: %5.3f kbit/s (%d bps)  \n",(*((int*)prop))*0.001f,sh->i_bps);
+    } else
+      sh->i_bps=12000; // dunno :(((  [12000 seems to be OK for crash.rmvb too]
+    
 //    prop=raGetFlavorProperty(sh->context,((short*)(sh->wf+1))[2],0x13,&len);
 //    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Samples/block?: %d  \n",(*((int*)prop)));
 
@@ -358,8 +368,9 @@ static void uninit(sh_audio_t *sh){
     {
 	if (wraFreeDecoder) wraFreeDecoder(sh->context);
 	if (wraCloseCodec) wraCloseCodec(sh->context);
-    } else
+    }
 #endif
+
     if (raFreeDecoder) raFreeDecoder(sh->context);
     if (raCloseCodec) raCloseCodec(sh->context);
 
@@ -369,7 +380,8 @@ static void uninit(sh_audio_t *sh){
 	if (rv_handle) FreeLibrary(rv_handle);
     } else
 #endif
-    if (rv_handle) dlclose(rv_handle);
+// this dlclose() causes some memory corruption, and crashes soon (in caller):
+//    if (rv_handle) dlclose(rv_handle);
     rv_handle = NULL;
 }
 
