@@ -13,6 +13,7 @@ extern int use_old_pp;
 
 extern int sws_flags;
 
+#ifdef HAVE_DIVX4ENCORE
 struct config divx4opts_conf[]={
 	{"br", &divx4_param.bitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000},
 	{"rc_period", &divx4_param.rc_period, CONF_TYPE_INT, 0,0,0},
@@ -27,6 +28,7 @@ struct config divx4opts_conf[]={
 	{"help", "TODO: divx4opts help!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{NULL, NULL, 0, 0, 0, 0}
 };
+#endif
 
 #ifdef HAVE_MP3LAME
 struct config lameopts_conf[]={
@@ -102,10 +104,12 @@ struct config conf[]={
 
 	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4},
 
+#ifdef HAVE_DIVX4ENCORE
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2},
 	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0},
 	
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
+#endif
 #ifdef HAVE_MP3LAME
 	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 #endif

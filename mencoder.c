@@ -1,3 +1,5 @@
+#define HAVE_DIVX4ENCORE /* FIXME!! add it to configure */
+
 #define VCODEC_COPY 0
 #define VCODEC_FRAMENO 1
 #define VCODEC_DIVX4 2
@@ -25,7 +27,6 @@ static char* banner_text=
 
 #include "cpudetect.h"
 
-
 #include "codec-cfg.h"
 
 #include "stream.h"
@@ -43,8 +44,10 @@ static char* banner_text=
 #include "dec_audio.h"
 #include "dec_video.h"
 
+#ifdef HAVE_DIVX4ENCORE
 #include <encore2.h>
 #include "divx4_vbr.h"
+#endif
 
 #ifdef HAVE_MP3LAME
 #include <lame/lame.h>
@@ -134,9 +137,11 @@ char* ac3_filename=NULL;
 
 char *force_fourcc=NULL;
 
+#ifdef HAVE_DIVX4ENCORE
 static int pass=0;
 static char* passtmpfile="divx2pass.log";
 int pass_working=0;
+#endif
 
 static int play_n_frames=-1;
 
@@ -146,8 +151,10 @@ static int play_n_frames=-1;
 //#include "libmpeg2/mpeg2.h"
 //#include "libmpeg2/mpeg2_internal.h"
 
+#ifdef HAVE_DIVX4ENCORE
 ENC_PARAM divx4_param;
 int divx4_crispness=100;
+#endif
 
 #ifdef HAVE_MP3LAME
 int lame_param_quality=0; // best
@@ -302,9 +309,11 @@ aviwrite_stream_t* mux_a=NULL;
 aviwrite_stream_t* mux_v=NULL;
 FILE* muxer_f=NULL;
 
+#ifdef HAVE_DIVX4ENCORE
 ENC_FRAME enc_frame;
 ENC_RESULT enc_result;
 void* enc_handle=NULL;
+#endif
 
 #ifdef HAVE_MP3LAME
 lame_global_flags *lame;
@@ -344,14 +353,14 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
 #endif
 
-
+#ifdef HAVE_DIVX4ENCORE
 // set some defaults, before parsing configfile/commandline:
 divx4_param.min_quantizer = 2;
 divx4_param.max_quantizer = 31;
 divx4_param.rc_period = 2000;
 divx4_param.rc_reaction_period = 10;
 divx4_param.rc_reaction_ratio  = 20;
-
+#endif
 
   num_filenames=parse_command_line(conf, argc, argv, envp, &filenames);
   if(num_filenames<0) exit(1); // error parsing cmdline
@@ -588,6 +597,10 @@ case VCODEC_FRAMENO:
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
     break;
 case VCODEC_DIVX4:
+#ifndef HAVE_DIVX4ENCORE
+    printf("No support for Divx4 encore compiled in\n");
+    return 0; /* FIXME */
+#else
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
     mux_v->bih->biWidth=vo_w;
@@ -600,9 +613,11 @@ case VCODEC_DIVX4:
     if (pass)
 	printf("Divx: 2-pass logfile: %s\n", passtmpfile);
     break;
+#endif
 case VCODEC_LIBAVCODEC:
 #ifndef USE_LIBAVCODEC
     printf("No support for FFmpeg's libavcodec compiled in\n");
+    return 0; /* FIXME */
 #else
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
@@ -713,6 +728,10 @@ case VCODEC_FRAMENO:
     decoded_frameno=0;
     break;
 case VCODEC_DIVX4:
+#ifndef HAVE_DIVX4ENCORE
+    printf("No support for Divx4 encore compiled in\n");
+    return 0; /* FIXME */
+#else
     // init divx4linux:
     divx4_param.x_dim=vo_w;
     divx4_param.y_dim=vo_h;
@@ -761,6 +780,7 @@ case VCODEC_DIVX4:
 	break;
     }
     break;
+#endif
 case VCODEC_LIBAVCODEC:
 #ifndef USE_LIBAVCODEC
     printf("No support for FFmpeg's libavcodec compiled in\n");
@@ -840,14 +860,14 @@ case VCODEC_LIBAVCODEC:
 	case IMGFMT_UYVY:
 	    lavc_venc_context.pix_fmt = PIX_FMT_YUV422;
 	    break;
-#if 0 /* it's faulting :( */
+#if 0 /* it's faulting :( -- libavcodec's bug! -- alex */
 	case IMGFMT_BGR24:
 	    lavc_venc_context.pix_fmt = PIX_FMT_BGR24;
 	    break;
-#endif
 	case IMGFMT_RGB24:
 	    lavc_venc_context.pix_fmt = PIX_FMT_RGB24;
 	    break;
+#endif
 	default:
 	    printf("Not supported image format! (%s)\n",
 		vo_format_name(out_fmt));
@@ -865,7 +885,7 @@ case VCODEC_LIBAVCODEC:
 	char buf[1024];
 	
 	avcodec_string((char *)&buf[0], 1023, &lavc_venc_context, 1);
-	printf(buf);
+	printf("%s\n", buf);
     }
 #endif
 }
@@ -1036,6 +1056,10 @@ case VCODEC_FRAMENO:
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0x10);
     break;
 case VCODEC_DIVX4:
+#ifndef HAVE_DIVX4ENCORE
+    printf("No support for Divx4 encore compiled in\n");
+    return 0; /* FIXME */
+#else
     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
     if(skip_flag>0) break;
     if(!blit_frame){
@@ -1071,6 +1095,7 @@ case VCODEC_DIVX4:
 //    printf("  len=%d  key:%d  qualt:%d  \n",enc_frame.length,enc_result.is_key_frame,enc_result.quantizer);
     aviwrite_write_chunk(muxer,mux_v,muxer_f,enc_frame.length,enc_result.is_key_frame?0x10:0);
     break;
+#endif
 case VCODEC_LIBAVCODEC:
     {
 #ifndef USE_LIBAVCODEC
@@ -1172,6 +1197,11 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
     printf("\n\nCBR audio effective bitrate: %8.3f kbit/s  (%d bytes/sec)\n",
 	    mux_a->h.dwRate*8.0f/1000.0f,mux_a->h.dwRate);
 }
+#endif
+
+#ifdef USE_LIBAVCODEC
+    if (mux_v->codec == VCODEC_LIBAVCODEC)
+	avcodec_close(&lavc_venc_context);
 #endif
 
 printf("\nWriting AVI index...\n");
