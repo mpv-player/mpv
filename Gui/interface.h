@@ -110,7 +110,7 @@ extern guiInterface_t guiIntfStruct;
 
 extern char *get_path(char *filename); 
 
-extern void guiInit( int argc,char* argv[], char *envp[] );
+extern void guiInit( void );
 extern void guiDone( void );
 extern void guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );

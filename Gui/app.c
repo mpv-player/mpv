@@ -97,21 +97,17 @@ int appFindMessage( unsigned char * str )
  return -1;
 }
 
-void appInit( int argc,char* argv[], char *envp[], void* disp )
+void appInit( void * disp )
 {
  skinDirInHome=get_path("Skin");
  skinMPlayerDir=DATADIR "/Skin";
  printf("SKIN dir 1: '%s'\n",skinDirInHome);
  printf("SKIN dir 2: '%s'\n",skinMPlayerDir);
- if ( !skinName )
-  {
-   if ( ( skinName=(char *)calloc( 1,7 ) ) == NULL ) { mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[config] Not enough memory.\n" ); exit( 1 ); }
-   strcpy( skinName,"default" );
-  }
+ if ( !skinName ) skinName=strdup( "default" );
  switch ( skinRead( skinName ) )
   {
    case -1: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinNotFound,skinName ); exit( 0 );
    case -2: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinCfgReadError,skinName ); exit( 0 );
   }
- mplInit( argc,argv,envp,disp ); // does gtk & ws initialization, create windows
+ mplInit( disp ); // does gtk & ws initialization, create windows
 }

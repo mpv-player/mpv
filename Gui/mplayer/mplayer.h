@@ -12,7 +12,7 @@ extern int             mainVisible;
 extern int             mplMainAutoPlay;
 extern int             mplMiddleMenu;
 
-extern void mplInit( int argc,char* argv[], char *envp[], void* disp );
+extern void mplInit( void * disp );
 extern void mplEventHandling( int msg,float param );
 extern void mplTimerHandler( void );
 

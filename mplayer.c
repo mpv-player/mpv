@@ -775,7 +775,7 @@ current_module = NULL;
 
 #ifdef HAVE_NEW_GUI
   if(use_gui){
-       guiInit( argc,argv,envp );
+       guiInit();
        inited_flags|=INITED_GUI;
        guiGetEvent( guiCEvent,(char *)((gui_no_filename) ? 0 : 1) );
   }

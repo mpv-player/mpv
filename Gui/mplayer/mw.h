@@ -196,8 +196,6 @@ drawrenderedtext:
 // XFlush( wsDisplay );
 }
 
-#define IZE(x) printf("@@@ " x " @@@\n");
-
 extern void exit_player(char* how);
 extern int audio_id;
 extern int dvdsub_id;
@@ -307,30 +305,14 @@ NoPause:
         break;
 
    case evPlayList:
-        IZE("evPlayList");
         mplMainRender=1;
         gtkShow( evPlayList,NULL );
-#warning disabled old gtk code
-#if 0
-        if ( gtkVisiblePlayList )
-         {
-          btnModify( evPlayList,btnReleased );
-          gtkShMem->vs.window=evPlayList;
-          gtkSendMessage( evHideWindow );
-          gtkVisiblePlayList=0;
-         }
-         else
-          {
-           gtkSendMessage( evPlayList );
-           btnModify( evPlayList,btnPressed );
-           gtkVisiblePlayList=1;
-          }
-#endif
         break;
 
    case evSkinBrowser: gtkShow( evSkinBrowser,skinName ); break;
    case evAbout:       gtkShow( evAbout,NULL ); break;
    case evPreferences: gtkShow( evPreferences,NULL ); break;
+   case evEqualeaser:  gtkMessageBox( GTK_MB_WARNING,"Sorry, this feature not implemented ..." ); break;
 
    case evForward1min:      mplRelSeek( 60 );  break;
    case evBackward1min:     mplRelSeek( -60 ); break;
@@ -395,12 +377,14 @@ NoPause:
         mplRedrawTimer=mplRedrawTimerConst;
         break;
 // --- system events
+#ifdef MP_DEBUG
    case evNone:
         mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[mw] event none received.\n" );
         break;
    default:
         mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[mw] unknown event received ( %d,%.2f ).\n",msg,param );
         break;
+#endif
   }
 }
 

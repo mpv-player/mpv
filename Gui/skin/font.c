@@ -12,22 +12,31 @@
 
 int items;
 
-bmpFont * Fonts[25] = { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL };
+bmpFont * Fonts[26] = { NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL };
 
 int fntAddNewFont( char * name )
 {
  int id;
- for( id=0;id<25;id++ ) if ( !Fonts[id] ) break;
- if ( ( Fonts[id]=malloc( sizeof( bmpFont ) ) ) == NULL ) return -1;
+ int i;
+
+ for( id=0;id<26;id++ )
+   if ( !Fonts[id] ) break;
+
+ if ( id == 25 ) return -2;
+
+ if ( ( Fonts[id]=calloc( 1,sizeof( bmpFont ) ) ) == NULL ) return -1;
+
  strcpy( Fonts[id]->name,name );
- memset( Fonts[id]->Fnt,-1,256 * sizeof( fntChar ) );
+ for ( i=0;i<256;i++ ) 
+   Fonts[id]->Fnt[i].x=Fonts[id]->Fnt[i].y=Fonts[id]->Fnt[i].sx=Fonts[id]->Fnt[i].sy=-1;
+
  return id;
 }
 
 void fntFreeFont( void )
 {
  int i;
- for( i=0;i<25;i++ )
+ for( i=0;i < 25;i++ )
   {
    if ( Fonts[i] )
     {
@@ -38,7 +47,7 @@ void fntFreeFont( void )
   }
 }
 
-int fntRead( char * path,char * fname,int id )
+int fntRead( char * path,char * fname )
 {
  FILE * f;
  unsigned char   tmp[512];
@@ -46,9 +55,14 @@ int fntRead( char * path,char * fname,int id )
  unsigned char   command[32];
  unsigned char   param[256];
  int             c,linenumber = 0;
+ int             id = fntAddNewFont( fname );
+ 
+ if ( id < 0 ) return id;
 
  strcpy( tmp,path ); strcat( tmp,fname ); strcat( tmp,".fnt" );
- if ( ( f=fopen( tmp,"rt" ) ) == NULL ) return -1;
+ if ( ( f=fopen( tmp,"rt" ) ) == NULL ) 
+   { free( Fonts[id] ); return -3; }
+   
  while ( !feof( f ) )
   {
    fgets( tmp,255,f ); linenumber++;
@@ -56,14 +70,10 @@ int fntRead( char * path,char * fname,int id )
    c=tmp[ strlen( tmp ) - 1 ]; if ( ( c == '\n' )||( c == '\r' ) ) tmp[ strlen( tmp ) - 1 ]=0;
    c=tmp[ strlen( tmp ) - 1 ]; if ( ( c == '\n' )||( c == '\r' ) ) tmp[ strlen( tmp ) - 1 ]=0;
    for ( c=0;c < (int)strlen( tmp );c++ )
-    if ( tmp[c] == ';' )
-     {
-      tmp[c]=0;
-      break;
-     }
-   if ( strlen( tmp ) == 0 ) continue;
+     if ( tmp[c] == ';' ) { tmp[c]=0; break; }
+   if ( !tmp[0] ) continue;
    ptmp=strdelspacesbeforecommand( tmp );
-   if ( strlen( ptmp ) == 0 ) continue;
+   if ( !tmp[0] ) continue;
    ptmp=strswap( ptmp,'\t',' ' );
    ptmp=strdelspaces( ptmp );
    cutItem( ptmp,command,'=',0 ); cutItem( ptmp,param,'=',1 );
@@ -84,10 +94,11 @@ int fntRead( char * path,char * fname,int id )
        {
         strcpy( tmp,path ); strcat( tmp,param );
         mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[font] font imagefile: %s\n",tmp );
-        if ( skinBPRead( tmp,&Fonts[id]->Bitmap ) ) return -2;
+        if ( skinBPRead( tmp,&Fonts[id]->Bitmap ) ) return -4;
        }
      }
-  }
+   }
+
  return 0;
 }
 
@@ -95,8 +106,8 @@ int fntFindID( char * name )
 {
  int i;
  for ( i=0;i < 25;i++ )
-  if ( Fonts[i] )
-   if ( !strcmp( name,Fonts[i]->name ) ) return i;
+   if ( Fonts[i] )
+     if ( !strcmp( name,Fonts[i]->name ) ) return i;
  return -1;
 }
 
@@ -104,18 +115,25 @@ int fntTextWidth( int id,char * str )
 {
  int size = 0;
  int i;
- if ( !Fonts[id] ) return 0;
- for ( i=0;i < (int)strlen( str );i++ )
-   if ( Fonts[id]->Fnt[ (int)str[i] ].sx != -1 ) size+=Fonts[id]->Fnt[ (int)str[i] ].sx;
+
+ if ( ( !Fonts[id] )||( !str[0] ) ) return 0;
+
+ for ( i=0;i < (unsigned int)strlen( str );i++ )
+   size+=( Fonts[id]->Fnt[ (unsigned char)str[i] ].sx == -1? Fonts[id]->Fnt[ 32 ].sx : Fonts[id]->Fnt[ (unsigned char)str[i] ].sx );
  return size;
 }
 
 int fntTextHeight( int id,char * str )
 {
  int max = 0,i;
- if ( !Fonts[id] ) return 0;
+
+ if ( ( !Fonts[id] )||( !str[0] ) ) return 0;
+
  for ( i=0;i < (int)strlen( str );i++ )
-   if ( Fonts[id]->Fnt[ (int)str[i] ].sy > max ) max=Fonts[id]->Fnt[ (int)str[i] ].sy;
+  {
+   int h = Fonts[id]->Fnt[ (unsigned char)str[i] ].sy;
+   if ( h > max ) max=h;
+  }
  return max;
 }
 
@@ -138,24 +156,21 @@ txSample * fntRender( int id,int px,int sx,char * fmt,... )
       ( !strlen( p ) )||
       ( !fntTextWidth( id,p ) )||
       ( (tmp=malloc( sizeof( txSample ) )) == NULL ) ) return NULL;
-
+      
  tmp->Width=fntTextWidth( id,p );
  tmp->Height=fntTextHeight( id,p );
  tmp->BPP=32;
  tmp->ImageSize=tmp->Width * tmp->Height * 4;
  if ( ( tmp->Image=malloc( tmp->ImageSize ) ) ==  NULL ) return NULL;
-
  obuf=(uint32_t *)tmp->Image;
  ibuf=(uint32_t *)Fonts[id]->Bitmap.Image;
  for ( i=0;i < (int)strlen( p );i++ )
   {
-   char c = p[i];
-   if ( Fonts[id]->Fnt[c].x == -1 ) c=32;
+   unsigned int c = (unsigned char)p[i];
+   if ( Fonts[id]->Fnt[c].sx == -1 ) c=32;
    for ( oy=0,y=Fonts[id]->Fnt[c].y;y < Fonts[id]->Fnt[c].y + Fonts[id]->Fnt[c].sy; y++,oy++ )
-    for ( ox=0,x=Fonts[id]->Fnt[c].x;x < Fonts[id]->Fnt[c].x + Fonts[id]->Fnt[c].sx; x++,ox++ )
-     {
-      obuf[ oy * tmp->Width + dx + ox ]=ibuf[ y * Fonts[id]->Bitmap.Width + x ];
-     }
+     for ( ox=0,x=Fonts[id]->Fnt[c].x;x < Fonts[id]->Fnt[c].x + Fonts[id]->Fnt[c].sx; x++,ox++ )
+       obuf[ oy * tmp->Width + dx + ox ]=ibuf[ y * Fonts[id]->Bitmap.Width + x ];
    dx+=Fonts[id]->Fnt[c].sx;
   }
 

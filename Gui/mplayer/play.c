@@ -138,7 +138,7 @@ void mplState( void )
    }
 }
 
-void mplMPlayerInit( int argc,char* argv[], char *envp[] )
+void mplMPlayerInit( void )
 {
  guiIntfStruct.Balance=50.0f;
  guiIntfStruct.StreamType=-1;

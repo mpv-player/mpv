@@ -42,18 +42,18 @@ void mplTimerHandler( void )
  if ( mplRedrawTimer == 0 ) mplEventHandling( evRedraw,0 );
 }
 
-void mplInit( int argc,char* argv[], char *envp[], void* disp )
+void mplInit( void * disp )
 {
  int i;
 
  // init fields of this struct to default values
- mplMPlayerInit( argc,argv,envp );
+ mplMPlayerInit();
 
  // fork() a process which runs gtkThreadProc()  [gtkPID]
- gtkInit( argc,argv,envp );
+ gtkInit();
 
  // opens X display, checks for extensions (XShape, DGA etc)
- wsXInit(disp);
+ wsXInit( disp );
 
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
   {

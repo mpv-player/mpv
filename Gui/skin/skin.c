@@ -29,8 +29,6 @@ void ERRORMESSAGE( const char * format, ... )
  va_start( ap,format );
  vsnprintf( p,512,format,ap );
  va_end( ap );
-// message( False,"[skin] error in skin config file on line %d: %s",linenumber,p );
-// message( False,MSGTR_SKIN_ERRORMESSAGE,linenumber,p );
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,MSGTR_SKIN_ERRORMESSAGE,linenumber,p );
 }
 
@@ -414,21 +412,14 @@ int __font( char * in )
  defList->NumberOfItems++;
  item=&defList->Items[ defList->NumberOfItems ];
  item->type=itFont;
- item->fontid=fntAddNewFont( name );
+ item->fontid=fntRead( path,name );
  switch ( item->fontid )
   {
    case -1: ERRORMESSAGE( MSGTR_SKIN_FONT_NotEnoughtMemory ); return 1;
    case -2: ERRORMESSAGE( MSGTR_SKIN_FONT_TooManyFontsDeclared ); return 1;
+   case -3: ERRORMESSAGE( MSGTR_SKIN_FONT_FontFileNotFound ); return 1;
+   case -4: ERRORMESSAGE( MSGTR_SKIN_FONT_FontImageNotFound ); return 1;
   }
-
- mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[skin]  id: %s ( %d )\n",id,item->fontid );
-
- switch ( fntRead( path,name,item->fontid ) )
-  {
-   case -1: ERRORMESSAGE( MSGTR_SKIN_FONT_FontFileNotFound ); return 1;
-   case -2: ERRORMESSAGE( MSGTR_SKIN_FONT_FontImageNotFound ); return 1;
-  }
-
  return 0;
 }
 

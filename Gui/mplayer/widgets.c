@@ -48,11 +48,14 @@ int gtkInited = 0;
 
 // --- init & close gtk
 
-void gtkInit( int argc,char* argv[], char *envp[] )
+void gtkInit( void )
 {
+ int largc = 1;
+ char * largv[1] = { "asd" };
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[widget] init gtk ...\n" );
  gtk_set_locale();
- gtk_init( &argc,&argv );
+// gtk_init( &argc,&argv );
+ gtk_init( 0,NULL );
 // gdk_set_use_xshm( TRUE );
  
  gtkInited=1;

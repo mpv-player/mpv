@@ -21,10 +21,10 @@
 
 guiInterface_t guiIntfStruct;
 
-void guiInit( int argc,char* argv[], char *envp[] )
+void guiInit( void )
 {
  memset( &guiIntfStruct,0,sizeof( guiIntfStruct ) );
- appInit( argc,argv,envp,(void*)mDisplay );
+ appInit( (void*)mDisplay );
 }
 
 void guiDone( void )

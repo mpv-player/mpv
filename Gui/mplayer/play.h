@@ -6,7 +6,7 @@
 
 #include "./mplayer.h"
 
-extern void mplMPlayerInit( int argc,char* argv[], char *envp[] );
+extern void mplMPlayerInit( void );
 
 extern void mplStop();
 extern void mplFullScreen( void );

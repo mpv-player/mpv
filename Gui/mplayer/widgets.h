@@ -37,7 +37,7 @@ extern char          * sbMPlayerPrefixDir;
 
 extern void widgetsCreate( void );
 
-extern void gtkInit( int argc,char* argv[], char *envp[] );
+extern void gtkInit( void );
 extern void gtkDone( void );
 
 extern int  gtkFillSkinList( gchar * dir );

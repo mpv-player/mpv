@@ -77,7 +77,7 @@ extern char      * skinDirInHome;
 extern char      * skinMPlayerDir;
 extern char      * skinName;
 
-extern void appInit( int argc,char* argv[], char *envp[], void* disp );
+extern void appInit( void * disp );
 extern void appInitStruct( listItems * item );
 extern void appClearItem( wItem * item );
 extern void appCopy( listItems * item1,listItems * item2 );
