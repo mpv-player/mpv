@@ -49,16 +49,13 @@ typedef struct _film_data_t
 void demux_seek_film(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
   film_data_t *film_data = (film_data_t *)demuxer->priv;
-  int new_current_chunk;
+  int new_current_chunk=(flags&1)?0:film_data->current_chunk;
 
-  // bit 2 of the flags apparently means that the seek is relative to
-  // the beginning of the file
-  if (flags & 1)
-    new_current_chunk =
-      rel_seek_secs * film_data->chunks_per_second;
+  if(flags&2)
+      new_current_chunk += rel_seek_secs * film_data->total_chunks; // 0..1
   else
-    new_current_chunk = film_data->current_chunk +
-      rel_seek_secs * film_data->chunks_per_second;
+      new_current_chunk += rel_seek_secs * film_data->chunks_per_second; // secs
+
 
 printf ("current, total chunks = %d, %d; seek %5.3f sec, new chunk guess = %d\n",
   film_data->current_chunk, film_data->total_chunks,
@@ -110,6 +107,7 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
   // (all ones in syncinfo1 indicates an audio chunk)
   if (film_chunk.syncinfo1 == 0xFFFFFFFF)
   {
+   if(demuxer->audio->id>=-1){   // audio not disabled
     dp = new_demux_packet(film_chunk.chunk_size);
     if (stream_read(demuxer->stream, dp->buffer, film_chunk.chunk_size) !=
       film_chunk.chunk_size)
@@ -134,7 +132,7 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
 
     // append packet to DS stream
     ds_add_packet(demuxer->audio, dp);
-    film_data->current_chunk++;
+   }
   }
   else
   {
@@ -171,16 +169,15 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
 
       // append packet to DS stream
       ds_add_packet(demuxer->video, dp);
-      film_data->current_chunk++;
     }
     else
     {
       ds_read_packet(demuxer->video, demuxer->stream, film_chunk.chunk_size,
         film_chunk.pts,
         film_chunk.chunk_offset, (film_chunk.syncinfo1 & 0x80000000) ? 1 : 0);
-      film_data->current_chunk++;
     }
   }
+  film_data->current_chunk++;
 
   return 1;
 }
@@ -265,6 +262,12 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
       else
         // skip height and width if no video
         stream_skip(demuxer->stream, 8);
+
+      if(demuxer->audio->id<-1){
+          printf("chunk size = 0x%X \n",chunk_size);
+	stream_skip(demuxer->stream, chunk_size-12-8);
+	break; // audio disabled (or no soundcard)
+      }
 
       // skip over unknown byte, but only if file had non-NULL version
       if (film_data->film_version)
@@ -378,6 +381,7 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
         // precalculate PTS
         if (film_chunk.syncinfo1 == 0xFFFFFFFF)
         {
+	  if(demuxer->audio->id>=-1)
           film_chunk.pts =
             (float)total_audio_bytes / (float)sh_audio->wf->nAvgBytesPerSec;
           total_audio_bytes += film_chunk.chunk_size;
