@@ -778,6 +778,10 @@ qualité.
 Vous ne pouvez utiliser cette option que si le media en question supporte les
 déplacements (c-a-d pas depuis stdin, un pipe, etc).
 .TP
+.B \-ipv4-only-proxy
+Saute le proxy pour les adresses IPv6.
+Il sera toujours utilisé pour les connections IPv4.
+.TP
 .B \-mc <secondes/trame>
 Correction de synchro A-V maximum par trame (en secondes).
 .TP
@@ -817,6 +821,14 @@ toujours sur une sélection de demuxer basée sur le contenu.
 .TP
 .B \-passwd <mot\ de\ passe> (voir également l'option \-user)
 Indique le mot de passe pour l'identification http.
+.TP
+.B \-prefer-ipv4
+Utilise IPv4 pour les connections réseau.
+Se rabat sur IPv6 automatiquement.
+.TP
+.B \-prefer-ipv6
+Utilise IPv4 pour les connections réseau.
+Se rabat sur IPv4 automatiquement.
 .TP
 .B \-rawaudio <option1:option2:...>
 Cette option vous permet de lire des fichiers audio bruts.
@@ -3487,9 +3499,11 @@ correcte.
 utilise un dct entrelacé
 .IPs format=<valeur>
 .RSss
-YV12: défaut
+YV12: par défaut
 .br
-422P: pour huffyuv
+422P: pour huffyuv ou jpeg sans perte
+.br
+411P,410P,BGR32: for jpeg sans perte
 .REss
 .IPs pred
 (pour huffyuv)
@@ -3499,6 +3513,19 @@ YV12: défaut
 1: prédiction plane/gradient
 .br
 2: prédiction médiane 
+.REss
+.IPs pred
+(for lossless jpeg)
+.RSss
+0: prédiction à gauche
+.br
+1: prédiction en haut
+.br
+2: prédiction en haut à gauche
+.br
+3: prédiction plane/graduelle
+.br
+6: prédiction significative
 .REss
 .IPs qpel
 utilise la compensation par quarter pel motion

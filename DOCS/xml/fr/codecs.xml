@@ -453,10 +453,6 @@ Les deux projets ont donc la même origine.
   <link linkend="ffmpeg">libavcodec</link> peut les jouer)
   </simpara></listitem>
 <listitem><simpara>
-  vous devez choisir DivX4 <emphasis role="bold">ou</emphasis> XviD
-  à la compilation
-  </simpara></listitem>
-<listitem><simpara>
   en développement
   </simpara></listitem>
 </itemizedlist>
@@ -533,9 +529,6 @@ décodeurs suivants:
 <title>COMPILER MPLAYER AVEC LE SUPPORT DES LIBRAIRIES QUICKTIME</title>
 <note><para>actuellement seules les plateformes Intel 32bit sont supportées.</para></note>
 <step><para>téléchargez le CVS de MPlayer</para></step>
-<step><para>compilez MPlayer avec:
-<screen>$ ./configure --enable-qtx</screen>
-</para></step>
 <step><para>téléchargez le pack de DLL QuickTime sur
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
@@ -543,6 +536,7 @@ décodeurs suivants:
 répertoire de codecs Win32
 (par défaut: <filename class="directory">/usr/local/lib/codecs/</filename>)
 </para></step>
+<step><para>compilez MPlayer</para></step>
 </procedure>
 
 </sect3>
