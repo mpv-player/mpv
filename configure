@@ -217,7 +217,7 @@ Miscellaneous options:
                          options with --enable-static="-lslang -lncurses"
   --language=xx          select a language (for translated messages/gui) [en]
                          (Available: $LANGUAGES)
-  --enabled-shared-pp    install & use shared postprocessing lib
+  --enable-shared-pp     install & use shared postprocessing lib
 
 Advanced options:
   --enable-mmx           build with mmx support [autodetect]
@@ -4181,7 +4181,7 @@ echores "$_byte_order"
 
 echocheck "shared postprocess lib"
 if test "$_shared_pp" = yes ; then
-  _ld_pp='-lpostproc'
+  _ld_pp='-lpostproc -L postproc'
 else
   _ld_pp='postproc/libpostproc.a'
 fi
