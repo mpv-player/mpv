@@ -17,27 +17,79 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(qtrle)
 
+typedef struct {
+    int depth;
+    void *palette;
+} vd_qtrle_ctx;
+
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
+    vd_qtrle_ctx *ctx = sh->context;
+    switch(cmd)
+    {
+	case VDCTRL_QUERY_FORMAT:
+	{
+	    int req_format = *((int*)arg);
+	    
+	    /* qtrle24 supports 32bit output too */
+	    if ((req_format == (IMGFMT_BGR|ctx->depth)) ||
+		((IMGFMT_BGR_DEPTH(req_format) == 32) && (ctx->depth == 24)))
+		return(CONTROL_TRUE);
+	    else
+		return(CONTROL_FALSE);
+	}
+    }
     return CONTROL_UNKNOWN;
 }
 
 // init driver
 static int init(sh_video_t *sh){
-  if (sh->bih->biBitCount != 24){
-    mp_msg(MSGT_DECVIDEO,MSGL_ERR,
-    "    *** FYI: This Quicktime file is using %d-bit RLE Animation\n" \
-    "    encoding, which is not yet supported by MPlayer. But if you upload\n" \
-    "    this Quicktime file to the MPlayer FTP, the team could look at it.\n",
-    sh->bih->biBitCount);
-    return 0;
-  }
+    vd_qtrle_ctx *ctx;
     
-    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR24);
+    ctx = sh->context = malloc(sizeof(vd_qtrle_ctx));
+    if (!ctx)
+	return(0);
+    memset(ctx, 0, sizeof(vd_qtrle_ctx));
+    
+    if (!sh->bih)
+	return(0);
+    ctx->depth = sh->bih->biBitCount;
+
+    switch(ctx->depth)
+    {
+	case 2:
+	case 4:
+	case 8:
+	    if (sh->bih->biSize > 40)
+	    {
+		ctx->palette = malloc(sh->bih->biSize-40);
+		memcpy(ctx->palette, sh->bih+40, sh->bih->biSize-40);
+	    }
+	    break;
+	case 16:
+	    ctx->depth--; /* this is the trick ;) */
+	    break;
+	case 24:
+	    break;
+	default:
+	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,
+		"*** FYI: This Quicktime file is using %d-bit RLE Animation\n" \
+		"encoding, which is not yet supported by MPlayer. But if you upload\n" \
+	        "this Quicktime file to the MPlayer FTP, the team could look at it.\n",
+		ctx->depth);
+	    return(0);
+    }
+
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_BGR|ctx->depth);
 }
 
 // uninit driver
 static void uninit(sh_video_t *sh){
+    vd_qtrle_ctx *ctx = sh->context;
+
+    if (ctx->palette)
+	free(ctx->palette);
+    free(ctx);
 }
 
 //mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
@@ -53,6 +105,7 @@ void qt_decode_rle(
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
+    vd_qtrle_ctx *ctx = sh->context;
     mp_image_t* mpi;
     if(len<=0) return NULL; // skipped frame
     
@@ -65,6 +118,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         sh->disp_w, sh->disp_h,
         sh->bih->biBitCount,
         mpi->bpp/8);
+
+    if (ctx->palette)
+	mpi->planes[1] = ctx->palette;
     
     return mpi;
 }
