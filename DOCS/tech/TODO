@@ -3,12 +3,12 @@ TODO:
 =====
 
 demuxer:
-- .VDR files from stdinput (ff detection bug)
-- CivIIIE3Teaser.wmv (asf demuxer bug)
+- .VDR files from stdinput (ff detection bug) -- DONE (?)
+- CivIIIE3Teaser.wmv (asf demuxer bug) -- DONE (not bug!, just use -vid 4)
 - test and cleanup FLI/FLC support (and implement seek)
-- check dvdread/dvdcss version problems
-- add -dumpstream
-- clean up vcd support (so it can be en/disabled)
+- check dvdread/dvdcss version problems -- .so ?
+- add -dumpstream  -- DONE!
+- clean up vcd support (so it can be en/disabled) -- DONE!
 - implement forward seeking in indexed avi streams
 
 decoders:
