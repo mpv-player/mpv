@@ -43,8 +43,6 @@ LIBVD_EXTERN(xanim)
 #include "linux/timer.h"
 #include "libvo/fastmemcpy.h"
 
-#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
-
 #if 0
 /* this should be removed */
 #ifndef RTLD_NOW
@@ -206,7 +204,8 @@ static int xacodec_load(sh_video_t *sh, char *filename)
     XAVID_FUNC_HDR *func;
     int i;
 
-    priv->file_handler = dlopen(filename, RTLD_NOW|RTLD_GLOBAL);
+//    priv->file_handler = dlopen(filename, RTLD_NOW|RTLD_GLOBAL);
+    priv->file_handler = dlopen(filename, RTLD_LAZY);
     if (!priv->file_handler)
     {
 	error = dlerror();
@@ -587,34 +586,12 @@ void *XA_YUV1611_Func(unsigned int image_type)
     return((void *)XA_YUV1611_Convert);
 }
 
-#if 0
-/* this should be removed too */
-
-/* -------------- YUV 4x1 1x1 1x1 (4:1:1 but interleaved) [CYUV] ------------------ */
-
-void XA_YUV411111_Convert(unsigned char *image, unsigned int imagex, unsigned int imagey,
-    unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
-    unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
-{
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV411111_Convert('image: %d', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
-	    image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
-    return;
-}
-
-void *XA_YUV411111_Func(unsigned int image_type)
-{
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2, "XA_YUV411111_Func('image_type: %d')", image_type);
-    return((void*)XA_YUV411111_Convert);
-}
-#endif
-
 /* --------------- YUV 2x2 1x1 1x1 (4:2:0 aka YV12) [3ivX,H263] ------------ */
 
 void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs, unsigned int map_flag,
     unsigned int *map, XA_CHDR *chdr)
 {
-#if 1
     sh_video_t *sh = (sh_video_t*)image_p;
     vd_xanim_ctx *priv = sh->context;
     mp_image_t *mpi;
@@ -623,7 +600,7 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
     int uvstride=imagex/2; //(yuv->uv_w)?yuv->uv_w:(imagex/2);
 
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "XA_YUV221111_Convert(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
-	image_p,imagex,imagey,i_x,i_y, mpi->width,mpi->height,
+	image_p,imagex,imagey,i_x,i_y, sh->disp_w, sh->disp_h,
 	yuv,yuv_tabs,map_flag,map,chdr);
 
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG3, "YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
@@ -639,7 +616,6 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
     mpi->width=imagex;
     mpi->stride[0]=ystride; //i_x; // yuv->y_w
     mpi->stride[1]=mpi->stride[2]=uvstride;  //=i_x/4; // yuv->uv_w
-#endif
 }
 
 void *XA_YUV221111_Func(unsigned int image_type)
