@@ -2981,16 +2981,17 @@ send 1,8MB of RGBA32 data everytime a small part of the screen is updated.
 .PD 1
 .TP
 .B "framestep=I|[i]step"
-Filters only the Intra (Key) frame or one every step frmae.
-If you call the filter with I (uppercase) as the parameter then ONLY 
-the keyframes are outputted.
-For DVD it means, generally, one every 15/ 12  frames (IBBPBBPBBPBBPBB), 
-for avi it means every scene change or every keyint value (see -lavcopts 
+Passes only the given number (step) of frames, and also the Intra (Key).
+If you call the filter with I (uppercase) as the parameter, then ONLY 
+the keyframes are output.
+For DVD it means, generally, one every 15/ 12  frames (IBBPBBPBBPBBPBB), and
+for AVI it means every scene change or every keyint value (see -lavcopts
 keyint= value if you use mencoder to encode the videos).
 
-When a key frame is found a I! followed by a cr is printed, leaving 
-the current line of mplayer/mencoder, where you got the time (in seconds) 
-and frame of the key (use this information to split the AVI).
+When a key frame is found a, "I!" string followed by a newline character is
+printed, leaving the current line of mplayer/mencoder on the scren, because it
+contains the time (in seconds) and frame number of the keyframe - you can use
+these informations to split the AVI).
 
 If you call the filter with a numeric parameter n then only one frame 
 every n is outputted.
@@ -3002,7 +3003,7 @@ If you put only the i then nothing is done on the frames, only the I! is
 printed.
 .TP
 .B "tile=xtile:ytile:output:start:delta"
-Tile a serie of image in a single, bigger, image.
+Tile a serie of image into a single, bigger image.
 
 The parameters are:
 .PD 0
@@ -3021,10 +3022,10 @@ pixel at the start (x/y), default 2
 pixel between 2 tile, (x/y), default 4
 .RE
 .PD 1
-If you omit a parameter or put a value less then 0, the default is used.
-You can also stop when you're ok (... -vf tile=10:5 ...)
+If you omit a parameter or put a value less then 0, then the default value is
+used. You can also stop when you're ok (... -vf tile=10:5 ...)
 
-Probably is good to put the scale filter before the tile :-)
+Probably it is good idea to put the scale filter before the tile :-)
 
 
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
