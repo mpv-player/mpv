@@ -3554,6 +3554,36 @@ Play video using the DirectFB library, second generation.
 .B dfbmga\ 
 Matrox G400/G450/G550 specific output driver that uses the DirectFB library.
 Enables CRTC2 (second head), displaying video independently of the first head.
+
+.PD 0
+.RSs
+.IPs (no)bes
+Enable the use of the Matrox BES (backend scaler). Gives very good results concerning speed and output quality as interpolated picture processing is done in hardware. Works only on the primary head. Default: Disabled
+.IPs (no)spic
+Make use of the Matrox sub picture layer to display mplayer's OSD. Default: Enabled
+.IPs (no)crtc2
+Turn on TV-out on the second head. The output quality is amazing as it's a full interlaced picture
+with proper sync to every odd/even field. Default: Enabled
+.IPs (no)input
+Use DirectFB's keyboard code instead of mplayer's normal keyboard code. Default: Disabled
+.IPs buffermode=single|double|triple
+Double and triple buffering give best results if you want to avoid tearing issues.
+Triple buffering is more efficent than double buffering as it doesn't block mplayer
+while waiting for the vertical retrace. Single buffering should be avoided. Default: Triple
+.IPs fieldparity=top|bottom
+Control the output order for interlaced frames. Valid values are top = top fields first,
+bottom = bottom fields first. This option doesn't have any effect on progressive film material
+like most MPEG movies are. You need to enable this option if you have tearing issues/unsmooth motions
+watching interlaced film material. (Good examples for interlaced film material on DVD are Star Trek Enterprise
+and Star Trek DS9) Default: Disabled (not set)
+.IPs tvnorm=pal|ntsc|auto
+Will set the TV norm of the Matrox card without the need
+for modifying /etc/directfbrc. Valid norms are pal = PAL, ntsc = NTSC.
+Special norm is auto (auto-adjust using PAL/NTSC) because it decides
+which norm to use by looking at the frame rate of the movie.
+Default: Disabled (not set)
+.RE
+.PD 1
 .TP
 .B mga (Linux only)
 Matrox specific output driver that makes use of the YUV back
