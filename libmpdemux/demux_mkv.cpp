@@ -466,9 +466,26 @@ unsigned int read_dword(unsigned char *p, int &pos, int size) {
   return v;
 }
 
+static void
+finish_text_sub_handling(mkv_demuxer_t *mkv_d, KaxBlock *block,
+                         int64_t duration, int first_line) {
+  int i;
+
+#ifdef USE_ICONV
+  subcp_recode1(&mkv_d->subs);
+#endif
+
+  vo_sub = &mkv_d->subs;
+  vo_osd_changed(OSDTYPE_SUBTITLE);
+
+  for (i = first_line; i <= (mkv_d->subs.lines - 1); i++)
+    mkv_d->clear_subs_at[i] =  block->GlobalTimecode() / 1000000 -
+      mkv_d->first_tc + duration;
+}
+
 static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *)d->priv;
-  int len, line, state, i;
+  int len, line, state, i, first_line;
   char *s1, *s2, *buffer;
 
   if (duration == -1) {
@@ -489,12 +506,13 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
 
   line = 0;
   mkv_d->subs.lines++;
-  if (mkv_d->subs.lines> SUB_MAX_TEXT - 1 )
-  {
-  	mp_msg(MSGT_DEMUX, MSGL_WARN,"[mkv] Warning: too many sublines to render, skipping\n");
-  	mkv_d->subs.lines--;
+  if (mkv_d->subs.lines > SUB_MAX_TEXT) {
+  	mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Warning: too many sublines to "
+           "render, skipping\n");
+  	mkv_d->subs.lines = SUB_MAX_TEXT;
   	return;
   }
+  first_line = mkv_d->subs.lines - 1;
   s2 = mkv_d->subs.text[mkv_d->subs.lines - 1];
   state = 0;
 
@@ -531,11 +549,15 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
       /* Newline */
       if ((*s1 == '\\') && ((unsigned int)(s1 + 1 - buffer) < data.Size()) &&
           ((*(s1 + 1) == 'N') || (*(s1 + 1) == 'n'))) {
-        mkv_d->clear_subs_at[mkv_d->subs.lines - 1] = 
-          block->GlobalTimecode() / 1000000 - mkv_d->first_tc + duration;
-        
-        mkv_d->subs.lines++;
         *s2 = 0;
+        mkv_d->subs.lines++;
+        if (mkv_d->subs.lines > SUB_MAX_TEXT) {
+          mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] Warning: too many sublines to "
+                 "render, skipping\n");
+          mkv_d->subs.lines = SUB_MAX_TEXT;
+          finish_text_sub_handling(mkv_d, block, duration, first_line);
+          return;
+        }
         s2 = mkv_d->subs.text[mkv_d->subs.lines - 1];
         s1 += 2;
       }
@@ -575,15 +597,7 @@ static void handle_subtitles(demuxer_t *d, KaxBlock *block, int64_t duration) {
     *s2 = 0;
   }
 
-#ifdef USE_ICONV
-  subcp_recode1(&mkv_d->subs);
-#endif
-
-  vo_sub = &mkv_d->subs;
-  vo_osd_changed(OSDTYPE_SUBTITLE);
-
-  mkv_d->clear_subs_at[mkv_d->subs.lines - 1] = 
-    block->GlobalTimecode() / 1000000 - mkv_d->first_tc + duration;
+  finish_text_sub_handling(mkv_d, block, duration, first_line);
 }
 
 static mkv_track_t *new_mkv_track(mkv_demuxer_t *d) {
@@ -1139,7 +1153,10 @@ static void free_mkv_demuxer(mkv_demuxer_t *d) {
   for (i = 0; i < d->num_indexes; i++)
     free(d->index[i].entries);
   free(d->index);
-  
+
+  for (i = 0; i <= SUB_MAX_TEXT; i++)
+    safefree(d->subs.text[i]);
+
   if (d->es != NULL)
     delete d->es;
   if (d->saved_l1 != NULL)
@@ -2452,7 +2469,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
              track->tnum);
       mkv_d->subs_track = track;
       if (!mkv_d->subs.text[0]) {
-        for (i = 0; i < SUB_MAX_TEXT; i++)
+        for (i = 0; i <= SUB_MAX_TEXT; i++)
           mkv_d->subs.text[i] = (char *)safemalloc(256);
 
         if (!strcmp(track->codec_id, MKV_S_TEXTUTF8))
