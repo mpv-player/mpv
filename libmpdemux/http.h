@@ -7,7 +7,10 @@
 #ifndef __HTTP_H
 #define __HTTP_H
 
-#define HTTP_FIELD_MAX	20
+typedef struct HTTP_field_type {
+	char *field_name;
+	struct HTTP_field_type *next;
+} HTTP_field_t;
 
 typedef struct {
 	char *protocol;
@@ -16,10 +19,13 @@ typedef struct {
 	int status_code;
 	char *reason_phrase;
 	int http_minor_version;
-	char *fields[HTTP_FIELD_MAX];
+	// Field variables
+	HTTP_field_t *first_field;
+	HTTP_field_t *last_field;
 	int field_nb;
 	char *field_search;
-	int search_pos;
+	HTTP_field_t *field_search_pos;
+	// Body varibles
 	char *body;
 	int body_size;
 	char *buffer;
@@ -35,7 +41,7 @@ int		http_is_header_entire( HTTP_header_t *http_hdr );
 char* 		http_build_request( HTTP_header_t *http_hdr );
 char* 		http_get_field( HTTP_header_t *http_hdr, const char *field_name );
 char*		http_get_next_field( HTTP_header_t *http_hdr );
-void		http_set_field( HTTP_header_t *http_hdr, const char *field );
+void		http_set_field( HTTP_header_t *http_hdr, const char *field_name );
 void		http_set_method( HTTP_header_t *http_hdr, const char *method );
 void		http_set_uri( HTTP_header_t *http_hdr, const char *uri );
 

@@ -23,7 +23,7 @@ http_new_header() {
 
 void
 http_free( HTTP_header_t *http_hdr ) {
-	int i;
+	HTTP_field_t *field, *field2free;
 	if( http_hdr==NULL ) return;
 	if( http_hdr->protocol!=NULL ) free( http_hdr->protocol );
 	if( http_hdr->uri!=NULL ) free( http_hdr->uri );
@@ -32,9 +32,14 @@ http_free( HTTP_header_t *http_hdr ) {
 	if( http_hdr->field_search!=NULL ) free( http_hdr->field_search );
 	if( http_hdr->method!=NULL ) free( http_hdr->method );
 	if( http_hdr->buffer!=NULL ) free( http_hdr->buffer );
-	for( i=0 ; i<http_hdr->field_nb ; i++ ) 
-		if( http_hdr->fields[i]!=NULL ) free( http_hdr->fields[i] );
+	field = http_hdr->first_field;
+	while( field!=NULL ) {
+		field2free = field;
+		field = field->next;
+		free( field2free );
+	}
 	free( http_hdr );
+	http_hdr = NULL;
 }
 
 int
@@ -168,8 +173,8 @@ http_response_parse( HTTP_header_t *http_hdr ) {
 char *
 http_build_request( HTTP_header_t *http_hdr ) {
 	char *ptr;
-	int i;
 	int len;
+	HTTP_field_t *field;
 	if( http_hdr==NULL ) return NULL;
 
 	if( http_hdr->method==NULL ) http_set_method( http_hdr, "GET");
@@ -177,8 +182,11 @@ http_build_request( HTTP_header_t *http_hdr ) {
 
 	// Compute the request length
 	len = strlen(http_hdr->method)+strlen(http_hdr->uri)+12;	// Method line
-	for( i=0 ; i<http_hdr->field_nb ; i++ ) 			// Fields
-		len += strlen(http_hdr->fields[i])+2;
+	field = http_hdr->first_field; 					// Fields
+	while( field!=NULL ) {
+		len += strlen(field->field_name)+2;
+		field = field->next;
+	}
 	len += 2;							// CRLF
 	if( http_hdr->body!=NULL ) {
 		len += http_hdr->body_size;
@@ -196,8 +204,11 @@ http_build_request( HTTP_header_t *http_hdr ) {
 
 	ptr = http_hdr->buffer;
 	ptr += sprintf( ptr, "%s %s HTTP/1.%d\r\n", http_hdr->method, http_hdr->uri, http_hdr->http_minor_version );
-	for( i=0 ; i<http_hdr->field_nb ; i++ ) 
-		ptr += sprintf( ptr, "%s\r\n", http_hdr->fields[i] );
+	field = http_hdr->first_field;
+	while( field!=NULL ) {
+		ptr += sprintf( ptr, "%s\r\n", field->field_name );
+		field = field->next;
+	}
 	ptr += sprintf( ptr, "\r\n" );
 	if( http_hdr->body!=NULL ) {
 		memcpy( ptr, http_hdr->body, http_hdr->body_size );
@@ -208,9 +219,8 @@ http_build_request( HTTP_header_t *http_hdr ) {
 char *
 http_get_field( HTTP_header_t *http_hdr, const char *field_name ) {
 	if( http_hdr==NULL || field_name==NULL ) return NULL;
-	http_hdr->search_pos = 0;
-	if( http_hdr->field_search!=NULL ) free( http_hdr->field_search );
-	http_hdr->field_search = (char*)malloc(strlen(field_name)+1);
+	http_hdr->field_search_pos = http_hdr->first_field;
+	http_hdr->field_search = (char*)realloc( http_hdr->field_search, strlen(field_name)+1 );
 	if( http_hdr->field_search==NULL ) {
 		printf("Memory allocation failed\n");
 		return NULL;
@@ -223,35 +233,49 @@ char *
 http_get_next_field( HTTP_header_t *http_hdr ) {
 	char *ptr;
 	int i;
+	HTTP_field_t *field;
 	if( http_hdr==NULL ) return NULL;
 
-	for( i=http_hdr->search_pos ; i<http_hdr->field_nb ; i++ ) {
-		ptr = strstr( http_hdr->fields[i], ":" );
+	field = http_hdr->field_search_pos;
+	while( field!=NULL ) { 
+		ptr = strstr( field->field_name, ":" );
 		if( ptr==NULL ) return NULL;
-		if( !strncasecmp( http_hdr->fields[i], http_hdr->field_search, ptr-http_hdr->fields[i] ) ) {
+		if( !strncasecmp( field->field_name, http_hdr->field_search, ptr-(field->field_name) ) ) {
 			ptr++;	// Skip the column
 			while( ptr[0]==' ' ) ptr++; // Skip the spaces if there is some
-			http_hdr->search_pos = i+1;
+			http_hdr->field_search_pos = field->next;
 			return ptr;	// return the value without the field name
 		}
+		field = field->next;
 	}
 	return NULL;
 }
 
 void
-http_set_field( HTTP_header_t *http_hdr, const char *field ) {
-	int pos;
-	if( http_hdr==NULL || field==NULL ) return;
+http_set_field( HTTP_header_t *http_hdr, const char *field_name ) {
+	HTTP_field_t *new_field;
+	if( http_hdr==NULL || field_name==NULL ) return;
 
-	pos = http_hdr->field_nb;
-
-	http_hdr->fields[pos] = (char*)malloc(strlen(field)+1);
-	if( http_hdr->fields[pos]==NULL ) {
+	new_field = (HTTP_field_t*)malloc(sizeof(HTTP_field_t));
+	if( new_field==NULL ) {
 		printf("Memory allocation failed\n");
 		return;
 	}
+	new_field->next = NULL;
+	new_field->field_name = (char*)malloc(strlen(field_name)+1);
+	if( new_field->field_name==NULL ) {
+		printf("Memory allocation failed\n");
+		return;
+	}
+	strcpy( new_field->field_name, field_name );
+
+	if( http_hdr->last_field==NULL ) {
+		http_hdr->first_field = new_field;
+	} else {
+		http_hdr->last_field->next = new_field;
+	}
+	http_hdr->last_field = new_field;
 	http_hdr->field_nb++;
-	strcpy( http_hdr->fields[pos], field );
 }
 
 void
@@ -280,7 +304,8 @@ http_set_uri( HTTP_header_t *http_hdr, const char *uri ) {
 
 void
 http_debug_hdr( HTTP_header_t *http_hdr ) {
-	int i;
+	HTTP_field_t *field;
+	int i = 0;
 	if( http_hdr==NULL ) return;
 
 	printf("protocol: %s\n", http_hdr->protocol );
@@ -291,6 +316,9 @@ http_debug_hdr( HTTP_header_t *http_hdr ) {
 	printf("reason phrase: %s\n", http_hdr->reason_phrase );
 
 	printf("Fields:\n");
-	for( i=0 ; i<http_hdr->field_nb ; i++ )
-		printf(" %d - %s\n", i, http_hdr->fields[i] );
+	field = http_hdr->first_field;
+	while( field!=NULL ) {
+		printf(" %d - %s\n", i++, field->field_name );
+		field = field->next;
+	}
 }
