@@ -168,7 +168,7 @@ void Setup_LDT_Keeper(void)
 	perror("ERROR: Couldn't allocate memory for fs segment");
 	return;
     }
-    printf("fs seg %p\n", fs_seg);
+//    printf("fs seg %p\n", fs_seg);
     *(void**)((char*)fs_seg+0x18) = fs_seg;
     array.base_addr=(int)fs_seg;
     array.entry_number=TEB_SEL_IDX;
