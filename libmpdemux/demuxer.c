@@ -196,6 +196,7 @@ void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t 
 int demux_mf_fill_buffer( demuxer_t *demux);
 int demux_roq_fill_buffer(demuxer_t *demux);
 int demux_film_fill_buffer(demuxer_t *demux);
+int demux_bmp_fill_buffer(demuxer_t *demux);
 int demux_fli_fill_buffer(demuxer_t *demux);
 int demux_mpg_es_fill_buffer(demuxer_t *demux);
 int demux_mpg_fill_buffer(demuxer_t *demux);
@@ -227,6 +228,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_MF: return demux_mf_fill_buffer(demux);
     case DEMUXER_TYPE_ROQ: return demux_roq_fill_buffer(demux);
     case DEMUXER_TYPE_FILM: return demux_film_fill_buffer(demux);
+    case DEMUXER_TYPE_BMP: return demux_bmp_fill_buffer(demux);
     case DEMUXER_TYPE_FLI: return demux_fli_fill_buffer(demux);
     case DEMUXER_TYPE_MPEG_ES: return demux_mpg_es_fill_buffer(demux);
     case DEMUXER_TYPE_MPEG_PS: return demux_mpg_fill_buffer(demux);
@@ -422,6 +424,7 @@ int mov_read_header(demuxer_t* demuxer);
 int demux_open_fli(demuxer_t* demuxer);
 int demux_open_mf(demuxer_t* demuxer);
 int demux_open_film(demuxer_t* demuxer);
+int demux_open_bmp(demuxer_t* demuxer);
 int demux_open_roq(demuxer_t* demuxer);
 
 extern int vivo_check_file(demuxer_t *demuxer);
@@ -598,6 +601,17 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
       demuxer = NULL;
   }
 }
+//=============== Try to open as BMP file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_BMP,audio_id,video_id,dvdsub_id);
+  if(bmp_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"BMP file\n");
+      file_format=DEMUXER_TYPE_BMP;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
 //=============== Try to open as Ogg file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_OGG,audio_id,video_id,dvdsub_id);
@@ -722,6 +736,10 @@ switch(file_format){
  }
  case DEMUXER_TYPE_FILM: {
   if (!demux_open_film(demuxer)) return NULL;
+  break;
+ }
+ case DEMUXER_TYPE_BMP: {
+  if (!demux_open_bmp(demuxer)) return NULL;
   break;
  }
  case DEMUXER_TYPE_ROQ: {
