@@ -37,6 +37,7 @@ struct vf_priv_s {
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int voflags, unsigned int outfmt){
+    if(vf->priv->context) pp_free_context(vf->priv->context);
     vf->priv->context= pp_get_context(width, height,
           (gCpuCaps.hasMMX   ? PP_CPU_CAPS_MMX   : 0)
 	| (gCpuCaps.hasMMX2  ? PP_CPU_CAPS_MMX2  : 0)
