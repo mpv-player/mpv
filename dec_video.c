@@ -84,6 +84,58 @@ void convert_linux(unsigned char *puc_y, int stride_y,
 }
 #endif
 
+int get_video_quality_max(sh_video_t *sh_video){
+ switch(sh_video->codec->driver){
+#ifdef USE_DIRECTSHOW
+  case VFM_DSHOW:
+      return 4;
+#endif
+#ifdef MPEG12_POSTPROC
+  case VFM_MPEG:
+#endif
+  case VFM_DIVX4:
+  case VFM_ODIVX:
+      return 6;
+ }
+ return 0;
+}
+
+void set_video_quality(sh_video_t *sh_video,int quality){
+ switch(sh_video->codec->driver){
+#ifdef ARCH_X86
+#ifdef USE_DIRECTSHOW
+  case VFM_DSHOW: {
+   if(quality<0 || quality>4) quality=4;
+   DS_SetValue_DivX("Quality",quality);
+  }
+  break;
+#endif
+#endif
+#ifdef MPEG12_POSTPROC
+  case VFM_MPEG: {
+   if(quality<0 || quality>6) quality=6;
+   picture->pp_options=(1<<quality)-1;
+  }
+  break;
+#endif
+  case VFM_DIVX4:
+  case VFM_ODIVX: {
+   DEC_SET dec_set;
+   if(quality<0 || quality>6) quality=6;
+   dec_set.postproc_level=(1<<quality)-1;
+   decore(0x123,DEC_OPT_SETPP,&dec_set,NULL);
+  }
+  break;
+ }
+}
+
+int set_video_colors(sh_video_t *sh_video,char *item,int value){
+    if(!strcmp(sh_video->codec->name,"divxds")){
+	DS_SetValue_DivX(item,value);
+	return 1;
+    }
+    return 0;
+}
 
 int init_video(sh_video_t *sh_video){
 unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];

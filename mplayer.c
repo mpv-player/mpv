@@ -173,6 +173,10 @@ int read_asf_header(demuxer_t *demuxer);
 demuxer_t* demux_open(stream_t *stream,int file_format);
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
+int get_video_quality_max(sh_video_t *sh_video);
+void set_video_quality(sh_video_t *sh_video,int quality);
+int set_video_colors(sh_video_t *sh_video,char *item,int value);
+
 // MPEG video stream parser:
 #include "parse_es.h"
 
@@ -227,6 +231,7 @@ extern void avi_fixate();
 // options:
 int osd_level=2;
 int divx_quality=0;
+int auto_quality=-1;
 char *seek_to_sec=NULL;
 off_t seek_to_byte=0;
 int has_audio=1;
@@ -460,6 +465,11 @@ int out_fmt=0;
 int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
+
+int v_bright=50;
+int v_cont=50;
+int v_hue=50;
+int v_saturation=50;
 
 //float a_frame=0;    // Audio
 
@@ -1565,6 +1575,83 @@ if(1)
     case 'm':
       mixer_usemaster=!mixer_usemaster;
       break;
+
+    // Contrast:
+    case '1':
+    case '2':
+        if(c=='2'){
+	    if ( v_cont++ > 100 ) v_cont = 100;
+        } else {
+    	    if ( v_cont-- < 0 ) v_cont = 0;	    
+        }
+	if(set_video_colors(sh_video,"Contrast",v_cont)){
+#ifdef USE_OSD
+    		if(osd_level){
+            	    osd_visible=sh_video->fps; // 1 sec
+	    	    vo_osd_progbar_type=OSD_CONTRAST;
+            	    vo_osd_progbar_value=(v_cont)*10/4;
+		}
+#endif
+	}
+	break;
+
+    // Brightness:
+    case '3':
+    case '4':
+        if(c=='4'){
+	    if ( v_bright++ > 100 ) v_bright = 100;
+        } else {
+    	    if ( v_bright-- < 0 ) v_bright = 0;	    
+        }
+	if(set_video_colors(sh_video,"Brightness",v_bright)){
+#ifdef USE_OSD
+    		if(osd_level){
+            	    osd_visible=sh_video->fps; // 1 sec
+	    	    vo_osd_progbar_type=OSD_BRIGHTNESS;
+            	    vo_osd_progbar_value=(v_bright)*10/4;
+		}
+#endif
+	}
+	break;
+
+    // Hue:
+    case '5':
+    case '6':
+        if(c=='6'){
+	    if ( v_hue++ > 100 ) v_hue = 100;
+        } else {
+    	    if ( v_hue-- < 0 ) v_hue = 0;	    
+        }
+	if(set_video_colors(sh_video,"Hue",v_hue)){
+#ifdef USE_OSD
+    		if(osd_level){
+            	    osd_visible=sh_video->fps; // 1 sec
+	    	    vo_osd_progbar_type=OSD_HUE;
+            	    vo_osd_progbar_value=(v_hue)*10/4;
+		}
+#endif
+	}
+	break;
+
+    // Saturation:
+    case '7':
+    case '8':
+        if(c=='8'){
+	    if ( v_saturation++ > 100 ) v_saturation = 100;
+        } else {
+    	    if ( v_saturation-- < 0 ) v_saturation = 0;	    
+        }
+	if(set_video_colors(sh_video,"Saturation",v_saturation)){
+#ifdef USE_OSD
+    		if(osd_level){
+            	    osd_visible=sh_video->fps; // 1 sec
+	    	    vo_osd_progbar_type=OSD_SATURATION;
+            	    vo_osd_progbar_value=(v_saturation)*10/4;
+		}
+#endif
+	}
+	break;
+
     case 'd':
       frame_dropping=(frame_dropping+1)%3;
       printf("== drop: %d ==  \n",frame_dropping);
