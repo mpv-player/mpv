@@ -154,13 +154,14 @@ be prepared for problems).
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Are there rpm/deb/... packages of <B>MPlayer</B>?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>You can make a .deb package for yourself, check the <A HREF="documentation.html#6.1">Debian packaging</A> section.
-There are RPM packages available on our homepage, don't use other sources!
+There are links to official Red Hat RPM packages available on our
+<A HREF="http://www.mplayerhq.hu/homepage/dload.html">download page</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>During 'make', MPlayer complains about X11 libraries. I don't understand,
 I DO have X installed!?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>... but you don't have the X development package installed. Or not
-correctly. It's called XFree86-devel* under Red Hat, and xlib6g-dev* under
+correctly. It's called XFree86-devel* under Red Hat, and xlibs-dev under
 Debian.  Also check if the <CODE>/usr/X11</CODE> and <CODE>/usr/include/X11</CODE>
 symlinks exist (this can be a problem on Mandrake systems). They can be created
 with these commands:<BR>
@@ -245,7 +246,7 @@ separately. You should try to play the file using <CODE>-vo null</CODE> and then
 <CODE>-vo ...</CODE> and check the difference to see the video_out speed.
 </TD><TR><TD></TD><TD VALIGN=top>A2:</TD><TD>You are using Direct Rendering,
 where the codec renders to the video memory itself. In this case, the
-decoding percentage contains the display percentage too.
+decoding percentage contains the display percentage, too.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>There are error messages about file not found <CODE>/usr/lib/win32/</CODE> ...
@@ -286,8 +287,8 @@ the perverted minds of the MPlayer developers.
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>LIRC doesn't work, because ...
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD>Are you sure you are using <CODE>mplayer</CODE> instead of <CODE>mplayer_lirc</CODE>?
-Note that it was <CODE>mplayer_lirc</CODE> for long time, including the 0.60 release, but recently
-changed back to <CODE>mplayer</CODE>.
+Note that it was <CODE>mplayer_lirc</CODE> for a long time, including the 0.60
+release, but it was recently changed back to <CODE>mplayer</CODE>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH="100%"><B>Subtitles are very nice, the most beautiful I've ever seen, but they slow
