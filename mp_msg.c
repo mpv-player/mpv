@@ -30,7 +30,7 @@ void mp_msg_c( int x, const char *format, ... ){
     va_start(va, format);
 #ifdef HAVE_NEW_GUI
     if(use_gui){
-      char tmp[8*80];
+      char tmp[16*80];
       vsnprintf( tmp,8*80,format,va ); tmp[8*80-1]=0;
       switch( x&255 ) {
        case MSGL_FATAL: 
