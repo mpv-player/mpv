@@ -2,6 +2,17 @@ __________________________________________
 MPlayer code and documentation maintainers
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+NOTE: This file (should) contain the up-to-date list of the maintainers of
+each part/module of the mplayer CVS / source tree, including docs & homepage.
+You should NOT commit non-trivial changes without the agreement by the
+maintainer of the given part. The job of the maintainer is commenting,
+refusing or accepting patches, suggestions.
+If you're listed here as maintainer of one or more parts, but you don't want
+it to be so, tell us and you will be removed... this list has been created
+based on maillist/cvs activity. It may be wrong.
+
+Always send patches, comments to the mplayer-dev-eng maillist!
+
 Homepage:
     * Design: Chass and Tornado
     * Contents: Gabucino
@@ -34,9 +45,9 @@ Platforms/ports:
     * Win32/Cygwin support: Atmosfear
 
 MPlayer code:
-    * A-V sync code: A'rpi
+    * A-V sync code, mplayer/mencoder core: A'rpi
     * libmpdemux, libmpcodecs: A'rpi
-    * TV input: Alex, Jindrich Makovicka
+    * TV input/capture: Alex, Jindrich Makovicka
     * DVD support (experimental - dvdnav): -
     * DVD support (new - dvdread/dvdcss): A'rpi
     * DVD support (old - libcss): LGB
@@ -46,7 +57,7 @@ MPlayer code:
     * playtree, input layer: Albeu
     * postproc, colorspace converters: Michael Niedermayer
     * libavcodec: Michael Niedermayer, Fabrice Bellard @ ffmpeg
-    * VIDIX core, libdha, drivers: Alex, Nick Kurshev @ mplayerxp
+    * VIDIX core, libdha: Alex, Nick Kurshev @ mplayerxp
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
