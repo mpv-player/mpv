@@ -484,7 +484,7 @@ otherwise it is aligned within the specified space by the value of the
 </para>
 <para>
 The text to be displayed is given by <literal>text</literal>: It must be written
-between double quotes (but the quot; character cannot be part of the text). The
+between double quotes (but the &quot; character cannot be part of the text). The
 label is displayed using the font identified by <literal>fontid</literal>. You
 can use the following variables in the text:
 </para>
