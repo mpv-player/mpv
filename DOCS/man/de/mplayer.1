@@ -5317,7 +5317,6 @@ Diese Option muss gesetzt werden, wenn eine Quelldatei mit
 variabler Framerate (ASF, einige MOV) oder ein progressiver Film (29.97fps
 telecined MPEG) encodiert wird.
 .
-.\" manpage is synced from top down to this option.
 .TP
 .B \-ovc <Codecname>
 Encodiere Video mit dem angegebenen Codec.
@@ -5367,6 +5366,98 @@ Dieser Wert überschreibt, was von der DVD oder der .ifo-Datei gelesen wurde.
 .B \-vobsuboutindex <Index>
 Gibt den Index der ausgegebenen VOBsub-Untertitel an (Standardwert: 0).
 .
+.
+.
+.SH "CODEC-SPEZIFISCHE ENCODING-OPTIONEN (NUR BEI MPLAYER)"
+Für die Encodierung kannst du Codec-spezifische Parameter angeben, indem du
+folgende Syntax benutzt:
+.
+.TP
+.B \-<Codec>opts <Option1[=Wert1],Option2,...>
+.
+.PP
+wobei <Codec> einer der folgenden sein kann: lavc, xvidenc, divx4, lame,
+toolame und x264enc
+.
+.
+.SS divx4 (\-divx4opts)
+DivX4 ist überholt und wird nur der Vollständigkeit halber unterstützt.
+Für Details zu den DivX4-Optionen musst du den Quellcode lesen, die meisten
+Optionen werden hier nicht vorgestellt.
+.
+.TP
+.B help\ \ \ 
+Gibt einen Hilfstext aus.
+.
+.TP
+.B br=<Wert>
+Gibt die Bitrate an.
+.RSs
+.IPs 4\-16000
+(in kbit)
+.IPs 16001\-24000000
+(in bit)
+.RE
+.
+.TP
+.B key=<Wert>
+maximale Anzahl der Bilder zwischen zwei Keyframes (Schlüsselbildern)
+.
+.TP
+.B deinterlace
+Aktiviert Deinterlacing (vermeide dies, da es bei DivX4 fehleranfällig ist).
+.
+.TP
+.B q=<1\-5>
+Qualitätslevel (1 \- am schnellsten, 5 \- am besten)
+.
+.TP
+.B min_quant=<1\-31>
+minimaler Quantisierungsparameter
+.
+.TP
+.B max_quant=<1\-31>
+maximaler Quantisierungsparameter
+.
+.TP
+.B rc_period=<Wert>
+Bitratenkontrollzeitrahmen
+.
+.TP
+.B rc_reaction_period=<Wert>
+Reaktionszeitrahmen für die Bitratenkontrolle
+.
+.TP
+.B rc_reaction_ratio=<Wert>
+Reaktionsverhältnis für die Bitratenkontrolle
+.
+.TP
+.B crispness=<0\-100>
+Gibt Schärfe/\:Glätte an.
+.
+.TP
+.B pass=<1\-2>
+Mit dieser Option können DivX4-Dateien im two-pass-Modus erstellt werden.
+Zuerst encodierst du mit pass=1, dann mit denselben Parametern und pass=2
+anstelle von pass=1.
+.
+.TP
+.B vbrpass=<0\-2>
+Überschreibt den pass-Parameter und benutzt die VBR-Bibliothek von XviD
+anstelle der von DivX4.
+Verfügbare Optionen sind:
+.RSs
+.IPs 0
+Encodieren in einem Durchlauf (als ob pass überhaupt nicht verwendet würde)
+.IPs 1
+Analyse bzw. erster Durchlauf im two-pass-Modus.
+Das erstellte AVI kann nach /dev/\:null umgeleitet werden.
+.IPs 2
+Finaler (zweiter) Durchlauf im two-pass-Modus.
+.RE
+.
+.
+.\" manpage is synced from top down to this option.
 .TP
 .B \-xvidencopts <option1:option2:...>
 Wenn mit XviD encodiert wird, können hier die Parameter dafür angegeben werden.
