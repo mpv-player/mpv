@@ -31,7 +31,8 @@ other interesting stuff.</P>
     panic if it's <B>400</B> or so, you shouldn't heard any audible
     quality decrease. Oh, and if your compiler doesn't even run <CODE>make test</CODE> ...
     Well, delete that <B>GCC 2.96</B>.</LI>
-    <LI>use <CODE>./configure</CODE> with optional parameters as usual, and
+    <LI>use <CODE>./configure</CODE> with optional parameters as usual
+    (use <CODE>--enable-tv</CODE> to include V4L tuner grabbing code), and
     type : <CODE>make mencoder</CODE> , then <CODE>make install</CODE> .
   </UL>
 </P>
@@ -168,6 +169,9 @@ commands are needed :<BR>
 
 <P>Encoding multiple *.vob files :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;options&gt; -</CODE></P>
+
+<P>Encoding from tuner (for tuner options <A HREF="documentation.html#2.5">see the TV input section !</A>) :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -tv on:driver=v4l:width=640:height=480 &lt;options&gt; -</CODE></P>
 
 <P>For all available options, <B><I>check the MEncoder man page !</I></B>
 <P>
