@@ -360,6 +360,11 @@ static char help_text[]=
 #define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
 #define MSGTR_MovieAspectUndefined "Movie-Aspect is undefined - no prescaling applied.\n"
 
+// vd_dshow.c, vd_dmo.c
+#define MSGTR_DownloadCodecPackage "You need to upgrade/install the binary codecs package.\nGo to http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DShowInitOK "INFO: Win32/DShow video codec init OK.\n"
+#define MSGTR_DMOInitOK "INFO: Win32/DMO video codec init OK.\n"
+
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Couldn't send EWMH fullscreen Event!\n"
 

@@ -52,8 +52,7 @@ static int init(sh_video_t *sh){
     unsigned int out_fmt;
     if(!(sh->context=DS_VideoDecoder_Open(sh->codec->dll,&sh->codec->guid, sh->bih, 0, 0))){
         mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);
-        mp_msg(MSGT_DECVIDEO,MSGL_HINT,"Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
-        mp_msg(MSGT_DECVIDEO,MSGL_HINT,"package from:  ftp://mplayerhq.hu/MPlayer/releases/w32codec.tar.bz2!\n");
+        mp_msg(MSGT_DECVIDEO,MSGL_HINT,MSGTR_DownloadCodecPackage);
 	return 0;
     }
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
@@ -73,7 +72,7 @@ static int init(sh_video_t *sh){
     }
     DS_SetAttr_DivX("Quality",divx_quality);
     DS_VideoDecoder_StartInternal(sh->context);
-    mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32/DShow video codec init OK!\n");
+    mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_DShowInitOK);
     return 1;
 }
 
