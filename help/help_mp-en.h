@@ -68,13 +68,13 @@ static char help_text[]=
 #define MSGTR_InvalidVOdriver "Invalid video output driver name: %s\nUse '-vo help' to get a list of available video drivers.\n"
 #define MSGTR_InvalidAOdriver "Invalid audio output driver name: %s\nUse '-ao help' to get a list of available audio drivers.\n"
 #define MSGTR_CopyCodecsConf "(Copy/link etc/codecs.conf from the MPlayer sources to ~/.mplayer/codecs.conf)\n"
-#define MSGTR_BuiltinCodecsConf "Using built-in default codecs.conf\n"
+#define MSGTR_BuiltinCodecsConf "Using built-in default codecs.conf.\n"
 #define MSGTR_CantLoadFont "Cannot load font: %s\n"
 #define MSGTR_CantLoadSub "Cannot load subtitles: %s\n"
 #define MSGTR_ErrorDVDkey "Error processing DVD key.\n"
 #define MSGTR_CmdlineDVDkey "The requested DVD key is used for descrambling.\n"
 #define MSGTR_DVDauthOk "DVD authentication sequence seems to be OK.\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: selected stream missing!\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATAL: Selected stream missing!\n"
 #define MSGTR_CantOpenDumpfile "Cannot open dump file.\n"
 #define MSGTR_CoreDumped "Core dumped ;)\n"
 #define MSGTR_FPSnotspecified "FPS not specified in the header or invalid, use the -fps option.\n"
@@ -113,10 +113,10 @@ static char help_text[]=
 
 #define MSGTR_NoGui "MPlayer was compiled WITHOUT GUI support.\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI requires X11.\n"
-#define MSGTR_Playing "Playing %s\n"
+#define MSGTR_Playing "Playing %s.\n"
 #define MSGTR_NoSound "Audio: no sound\n"
-#define MSGTR_FPSforced "FPS forced to be %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "Compiled with Runtime CPU Detection - WARNING - this is not optimal!\nTo get best performance, recompile MPlayer with --disable-runtime-cpudetection\n"
+#define MSGTR_FPSforced "FPS forced to be %5.3f  (ftime: %5.3f).\n"
+#define MSGTR_CompiledWithRuntimeDetection "Compiled with Runtime CPU Detection - WARNING - this is not optimal!\nTo get best performance, recompile MPlayer with --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Compiled for x86 CPU with extensions:"
 #define MSGTR_AvailableVideoOutputPlugins "Available video output plugins:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Available video output drivers:\n"
@@ -146,11 +146,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL \
 "- MPlayer crashed by an 'Illegal Instruction'.\n"\
 "  It usually happens when you run it on a CPU different than the one it was\n"\
-"  compiled/optimized for.\n  Verify this!\n"
+"  compiled/optimized for.\n"\
+"  Verify this!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
 "  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
-"  disassembly. For details, see DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
+"  disassembly. Details in DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer crashed. This shouldn't happen.\n"\
 "  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your\n"\
@@ -166,8 +167,8 @@ static char help_text[]=
 #define MSGTR_CannotOpenFile_Device "Cannot open file/device.\n"
 #define MSGTR_ErrorDVDAuth "Error in DVD authentication.\n"
 #define MSGTR_CannotOpenDemuxer "Cannot open demuxer.\n"
-#define MSGTR_NoAudioEncoderSelected "\nNo audio encoder (-oac) selected. Select one or use -nosound. Use -oac help!\n"
-#define MSGTR_NoVideoEncoderSelected "\nNo video encoder (-ovc) selected. Select one, use -ovc help!\n"
+#define MSGTR_NoAudioEncoderSelected "\nNo audio encoder (-oac) selected. Select one (see -oac help) or use -nosound.\n"
+#define MSGTR_NoVideoEncoderSelected "\nNo video encoder (-ovc) selected. Select one (see -ovc help).\n"
 #define MSGTR_InitializingAudioCodec "Initializing audio codec...\n"
 #define MSGTR_CannotOpenOutputFile "Cannot open output file '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Failed to open the encoder.\n"
@@ -195,7 +196,7 @@ static char help_text[]=
 " abr           average bitrate\n"\
 "\n"\
 " cbr           constant bitrate\n"\
-"               Forces also CBR mode encoding on subsequent ABR presets modes\n"\
+"               Also forces CBR mode encoding on subsequent ABR presets modes.\n"\
 "\n"\
 " br=<0-1024>   specify bitrate in kBit (CBR and ABR only)\n"\
 "\n"\
@@ -218,10 +219,10 @@ static char help_text[]=
 "                1: all\n"\
 "                2: adjust\n"\
 "\n"\
-" fast          switch on faster encoding on subsequent VBR presets modes,\n"\
+" fast          Switch on faster encoding on subsequent VBR presets modes,\n"\
 "               slightly lower quality and higher bitrates.\n"\
 "\n"\
-" preset=<value> provide the highest possible quality settings.\n"\
+" preset=<value> Provide the highest possible quality settings.\n"\
 "                 medium: VBR  encoding,  good  quality\n"\
 "                 (150-180 kbps bitrate range)\n"\
 "                 standard:  VBR encoding, high quality\n"\
@@ -242,7 +243,7 @@ static char help_text[]=
 
 #define MSGTR_SMBInitError "Cannot init the libsmbclient library: %d\n"
 #define MSGTR_SMBFileNotFound "Could not open from LAN: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support\n"
+#define MSGTR_SMBNotCompiled "MPlayer was not compiled with SMB reading support.\n"
 
 #define MSGTR_CantOpenDVD "Couldn't open DVD device: %s\n"
 #define MSGTR_DVDwait "Reading disc structure, please wait...\n"
@@ -281,7 +282,7 @@ static char help_text[]=
 #define MSGTR_NI_Message "%s NON-INTERLEAVED AVI file format.\n"
 
 #define MSGTR_UsingNINI "Using NON-INTERLEAVED broken AVI file format.\n"
-#define MSGTR_CouldntDetFNo "Could not determine number of frames (for absolute seek)\n"
+#define MSGTR_CouldntDetFNo "Could not determine number of frames (for absolute seek).\n"
 #define MSGTR_CantSeekRawAVI "Cannot seek in raw AVI streams. (Index required, try with the -idx switch.)\n"
 #define MSGTR_CantSeekFile "Cannot seek in this file.\n"
 
@@ -304,8 +305,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s already present!\n"
 #define MSGTR_ClipInfo "Clip info:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressive seq detected, leaving 3:2 TELECINE mode\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE detected, enabling inverse telecine fx. FPS changed to %5.3f!  \n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressive seq detected, leaving 3:2 TELECINE mode.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE detected, enabling inverse telecine fx.\nFPS changed to %5.3f!\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Could not open codec.\n"
@@ -321,16 +322,16 @@ static char help_text[]=
 #define MSGTR_BadMpegSequHdr "MPEG: bad sequence header\n"
 #define MSGTR_BadMpegSequHdrEx "MPEG: bad sequence header extension\n"
 
-#define MSGTR_ShMemAllocFail "Cannot allocate shared memory\n"
-#define MSGTR_CantAllocAudioBuf "Cannot allocate audio out buffer\n"
+#define MSGTR_ShMemAllocFail "Cannot allocate shared memory.\n"
+#define MSGTR_CantAllocAudioBuf "Cannot allocate audio out buffer.\n"
 
 #define MSGTR_UnknownAudio "Unknown/missing audio format -> no sound\n"
 
 #define MSGTR_UsingExternalPP "[PP] Using external postprocessing filter, max q = %d.\n"
 #define MSGTR_UsingCodecPP "[PP] Using codec's postprocessing, max q = %d.\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "Video attribute '%s' is not supported by selected vo & vd.\n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "Requested video codec family [%s] (vfm=%s) not available (enable it at compilation)\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "Requested audio codec family [%s] (afm=%s) not available (enable it at compilation)\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Requested video codec family [%s] (vfm=%s) not available.\nEnable it at compilation.\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Requested audio codec family [%s] (afm=%s) not available.\nEnable it at compilation.\n"
 #define MSGTR_OpeningVideoDecoder "Opening video decoder: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "Opening audio decoder: [%s] %s\n"
 #define MSGTR_UninitVideoStr "uninit video: %s\n"
@@ -338,8 +339,8 @@ static char help_text[]=
 #define MSGTR_VDecoderInitFailed "VDecoder init failed :(\n"
 #define MSGTR_ADecoderInitFailed "ADecoder init failed :(\n"
 #define MSGTR_ADecoderPreinitFailed "ADecoder preinit failed :(\n"
-#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Allocating %d bytes for input buffer\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allocating %d + %d = %d bytes for output buffer\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Allocating %d bytes for input buffer.\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allocating %d + %d = %d bytes for output buffer.\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "Setting up LIRC support...\n"
@@ -348,8 +349,8 @@ static char help_text[]=
 #define MSGTR_LIRCcfgerr "Failed to read LIRC config file %s.\n"
 
 // vf.c
-#define MSGTR_CouldNotFindVideoFilter "Couldn't find video filter '%s'\n"
-#define MSGTR_CouldNotOpenVideoFilter "Couldn't open video filter '%s'\n"
+#define MSGTR_CouldNotFindVideoFilter "Couldn't find video filter '%s'.\n"
+#define MSGTR_CouldNotOpenVideoFilter "Couldn't open video filter '%s'.\n"
 #define MSGTR_OpeningVideoFilter "Opening video filter: "
 #define MSGTR_CannotFindColorspace "Cannot find common colorspace, even by inserting 'scale' :(\n"
 
@@ -397,7 +398,7 @@ static char help_text[]=
 // --- error messages ---
 #define MSGTR_NEMDB "Sorry, not enough memory for draw buffer."
 #define MSGTR_NEMFMR "Sorry, not enough memory for menu rendering."
-#define MSGTR_IDFGCVD "Sorry, i didn't find a GUI compatible video output driver."
+#define MSGTR_IDFGCVD "Sorry, I did not find a GUI compatible video output driver."
 #define MSGTR_NEEDLAVCFAME "Sorry, you cannot play non-MPEG files with your DXR3/H+ device without reencoding.\nPlease enable lavc or fame in the DXR3/H+ configbox."
 
 // --- skin loader error messages
@@ -415,14 +416,14 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_ConvertError "24 bit to 32 bit convert error (%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "unknown message: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "not enough memory\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "too many fonts declared\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "font file not found\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "font image file not found\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "Too many fonts declared.\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "Font file not found.\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "Font image file not found.\n"
 #define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier (%s)\n"
 #define MSGTR_SKIN_UnknownParameter "unknown parameter (%s)\n"
-#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] not enough memory.\n"
+#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] not enough memory\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin not found (%s).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin configfile read error (%s).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "skin configfile read error (%s)\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
 // --- gtk menus
@@ -591,7 +592,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM device:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD device:"
 #define MSGTR_PREFERENCES_FPS "Movie FPS:"
-#define MSGTR_PREFERENCES_ShowVideoWindow "Show Video Window when inactive"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Show video window when inactive"
 
 #define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer core team:\n"
