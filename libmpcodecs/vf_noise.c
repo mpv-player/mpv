@@ -53,6 +53,7 @@ typedef struct FilterParam{
 	int temporal;
 	int quality;
         int averaged;
+        int pattern;
         int shiftptr;
 	int8_t *noise;
 	int8_t *prev_shift[MAX_RES][3];
@@ -67,40 +68,60 @@ struct vf_priv_s {
 
 static int nonTempRandShift[MAX_RES]= {-1};
 
+static int patt[4] = {
+    -1,0,1,0
+};
+
+#define RAND_N(range) ((int) ((double)range*rand()/(RAND_MAX+1.0)))
 static int8_t *initNoise(FilterParam *fp){
 	int strength= fp->strength;
 	int uniform= fp->uniform;
 	int averaged= fp->averaged;
+	int pattern= fp->pattern;
 	int8_t *noise= memalign(16, MAX_NOISE*sizeof(int8_t));
 	int i, j;
 
 	srand(123457);
 
-	for(i=0; i<MAX_NOISE; i++)
+	for(i=0,j=0; i<MAX_NOISE; i++,j++)
 	{
-	        if(uniform) {
-		        if (averaged) {
-			        noise[i]= (((rand()/11)%strength) - strength/2)/3;
-		        } else {
-			        noise[i]= ((rand()/11)%strength) - strength/2;
-		        }
-                } else {
+		if(uniform) {
+			if (averaged) {
+		    		if (pattern) {
+					noise[i]= (RAND_N(strength) - strength/2)/6
+						+patt[j%4]*strength*0.25/3;
+				} else {
+					noise[i]= (RAND_N(strength) - strength/2)/3;
+		    		}
+			} else {
+		    		if (pattern) {
+				    noise[i]= (RAND_N(strength) - strength/2)/2
+					    + patt[j%4]*strength*0.25;
+				} else {
+					noise[i]= RAND_N(strength) - strength/2;
+		    		}
+			}
+	    	} else {
 			double x1, x2, w, y1;
 			do {
 				x1 = 2.0 * rand()/(float)RAND_MAX - 1.0;
 				x2 = 2.0 * rand()/(float)RAND_MAX - 1.0;
 				w = x1 * x1 + x2 * x2;
 			} while ( w >= 1.0 );
-
+		
 			w = sqrt( (-2.0 * log( w ) ) / w );
 			y1= x1 * w;
-
 			y1*= strength / sqrt(3.0);
+			if (pattern) {
+			    y1 /= 2;
+			    y1 += patt[j%4]*strength*0.35;
+			}
 			if     (y1<-128) y1=-128;
 			else if(y1> 127) y1= 127;
 			if (averaged) y1 /= 3.0;
 			noise[i]= (int)y1;
 		}
+		if (RAND_N(6) == 0) j--;
 	}
 	
 
@@ -382,6 +403,8 @@ static void parse(FilterParam *fp, char* args){
 	if(pos && pos<max) fp->temporal=1;
 	pos= strchr(args, 'h');
 	if(pos && pos<max) fp->quality=1;
+	pos= strchr(args, 'p');
+	if(pos && pos<max) fp->pattern=1;
 	pos= strchr(args, 'a');
 	if(pos && pos<max) {
 	    fp->temporal=1;

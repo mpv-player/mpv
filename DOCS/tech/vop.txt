@@ -161,5 +161,6 @@ Current plugins:
     t temporal noise (noise pattern changes between frames)
     a averaged temporal (smoother, but a lot slower)
     h high quality (slightly better looking, slightly slower)
+    p mix random noise with a (semi)regular pattern
     MPI: DR (if possible) or TEMP, accepts stride
 
