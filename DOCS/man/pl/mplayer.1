@@ -1,4 +1,4 @@
-.\" synced with 1.718
+.\" synced with 1.721
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -558,6 +558,10 @@ Wskazuje alternatywny plik konfiguracyjny menu.conf.
 .TP
 .B \-menu-root <warto¶æ> (tylko z menu OSD)
 Wybiera menu g³ówne.
+.
+.TP
+.B \-menu-startup (tylko z menu OSD)
+Wy¶wietla g³ówne menu zaraz po uruchomieniu MPlayera.
 .
 .TP
 .B \-noconsolecontrols
@@ -1574,7 +1578,7 @@ Ustawia wska¼nik automatycznego skalowania napisów jako procent rozmiaru ekranu
 Ustawia prêdko¶æ (w klatkach/\:sek) zbioru napisów (domy¶lnie: jak w filmie).
 .br
 .I INFORMACJA:
-Tylko dla zbiorów opartych na klatkach tj.\& nie format MicroDVD!
+Tylko dla zbiorów opartych na klatkach np.\& format MicroDVD.
 .
 .TP
 .B \-subpos <0\-100> (przydatne przy \-vf expand) (tylko z OSD)
@@ -2374,7 +2378,7 @@ Odtwarza video korzystaj±c z rozszerzenia XFree86 Direct Graphics Access.
 Uwa¿any za prze¿ytek.
 .
 .TP
-.B sdl (tylko SDL) (patrz te¿ \-forcexc, \-noxv)
+.B sdl (patrz te¿ \-forcexc, \-noxv) (tylko SDL)
 Sterownik wyj¶cia oparty na wysoce niezale¿nej od platformy bibliotece SDL
 (Simple Directmedia Layer).
 Poniewa¿ SDL u¿ywa w³asnej warstwy X11, opcje MPlayera dotycz±ce X11 nie maj±
@@ -2461,7 +2465,7 @@ U¿ywa bufora ramki oferowanego przez j±dro do wy¶wietlania obrazu.
 .RSs
 .IPs <urz±dzenie>
 Wybiera nazwê u¿ywanego urz±dzenia fbdev (np.\& /dev/\:fb0) albo nazwê
-podurz±dzenia vidix je¶li nazwa zaczyna siê od vidix (np.\& vidixsis_vid w³±cza
+podurz±dzenia VIDIX, je¶li zaczyna siê od "vidix" (np.\& vidixsis_vid w³±cza
 sterownik sis).
 .RE
 .PD 1
@@ -2494,7 +2498,7 @@ W³±cza wyj¶cie TV karty NeoMagic i ustawia je na normê NTSC.
 .IPs vidix
 U¿ywa sterownika VIDIX.
 .IPs lvo:\ \ 
-W³±cza Linux Video Overlay na trybie vesa.
+W³±cza Linux Video Overlay na trybie VESA.
 .RE
 .PD 1
 .
@@ -2662,7 +2666,7 @@ Je¿eli posiadasz tak± kartê, jest to wybór oferuj±cy najwiêksz± szybko¶æ.
 .PD 0
 .RSs
 .IPs <urz±dzenie>
-Wybiera urzywane urz±dzenie matrox (domy¶lnie: /dev/\:mga_vid).
+Wybiera urzywane urz±dzenie Matrox (domy¶lnie: /dev/\:mga_vid).
 .RE
 .PD 1
 .
@@ -2672,7 +2676,7 @@ Sterownik wyj¶cia video mga dzia³aj±cy w oknie X11.
 .PD 0
 .RSs
 .IPs <urz±dzenie>
-Wybiera urzywane urz±dzenie matrox (domy¶lnie: /dev/\:mga_vid).
+Wybiera urzywane urz±dzenie Matrox (domy¶lnie: /dev/\:mga_vid).
 .RE
 .PD 1
 .
@@ -2735,7 +2739,7 @@ Sprawd¼ równie¿ filtr video lavc.
 W³±cza overlay zamiast wyj¶cia TV.
 .IPs prebuf
 W³±cza prebuforowanie.
-.IPs sync
+.IPs sync\
 W³±cz± nowy silnik synchronizuj±cy.
 .IPs norm=<norma>
 Okre¶la normê TV.
@@ -2752,7 +2756,7 @@ Okre¶la normê TV.
 .br
 5: NTSC
 .REss
-.IPs 0\ 1\ 2\ 3\ 
+.IPs <0\-3> 
 Okre¶la numer urz±dzenia, które ma byæ u¿yte, je¿eli masz wiêcej ni¿ jedn±
 kartê em8300.
 .RE
@@ -2760,20 +2764,20 @@ kartê em8300.
 .
 .TP
 .B mpegpes (tylko DVB)
-Sterownik wyj¶cia video przeznaczony dla DVB albo do zapisu zbiorów MPEG-PES.
+Sterownik wyj¶cia video przeznaczony dla DVB, który zapisuje wyj¶cie
+do pliku MPEG-PES, je¶li karta nie jest zainstalowana.
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Okre¶la numer urz±dzenia, które ma byæ u¿yte, je¶li masz wiêcej ni¿ jedn±
 kartê DVB (tylko API V3, tak jak sterowniki z serii 1.x.y).
 .IPs <nazwa\ zbioru>
-Je¶li nie masz karty DVB ten sterownik zapisuje zbiór w formacie MPEG-PES pod
-nazw±, któr± podasz (domy¶lnie: ./grab.mpg).
+Okre¶la nazwê pliku, do którego zostanie zapisane wyj¶cie (domy¶lnie: ./grab.mpg).
 .RE
 .PD 1
 .
 .TP
-.B zr (patrz te¿ \-zr* i \-zrhelp)
+.B zr (patrz te¿ \-zr* i \-zrhelp i filtr video zrmjpeg)
 Sterownik wyj¶cia video przeznaczony dla wielu kart
 przechwytuj±cych/\:odtwarzaj±cych MJPEG.
 .
@@ -2786,12 +2790,12 @@ Zwróæ równie¿ uwagê na filtr video zrmjpeg.
 .RSs
 .IPs dev=<urz±dzenie>
 Wybiera u¿ywane urz±dzenie.
-.IPs PAL\ \ \ 
-W³acza normê video pal.
-.IPs SECAM
-W³±cza normê video secam.
-.IPs NTSC\ \ \ 
-W³±cza normê video ntsc.
+.IPs pal\ \
+W³acza normê video PAL.
+.IPs secam
+W³±cza normê video SECAM.
+.IPs ntsc\ 
+W³±cza normê video NTSC.
 .IPs prebuf
 W³±cza prebuforowanie, jeszcze nie obs³ugiwane.
 .RE
@@ -2837,7 +2841,7 @@ Obs³uguje tylko format RGB z 24 bpp, wyj¶cie natomiast jest konwertowane do
 256 kolorów.
 .PD 0
 .RSs
-.IPs <fps>\ \ \ 
+.IPs <fps> 
 Liczba rzeczywista opisuj±ca ilo¶æ klatek na sekundê (domy¶lnie: 5.0).
 .IPs <nazwa\ zbioru>
 Nazwa zbioru wyj¶ciowego (domy¶lnie: ./out.gif).
@@ -3259,7 +3263,7 @@ Pokazuje streszczenie dostêpnych filtrów postprocesu i sposób ich u¿ycia.
 .
 .TP
 .B \-ssf <tryb>
-Okre¶la parametry SwScaler.
+Okre¶la parametry dla skalowania programowego.
 .sp 1
 .I PRZYK£AD:
 .PD 0
