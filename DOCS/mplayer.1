@@ -1954,11 +1954,16 @@ p: mix random noise with a (semi)regular pattern
 Activates the software equalizer with interactive controls like the hardware
 eq controls.
 The values can be from -100 to 100.
-.IPs halfpack
+.IPs halfpack[=f]
 Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
 keeping all chroma samples.
 Useful for output to low-resolution display devices when hardware downscaling
-is poor quality or is not available.
+is poor quality or is not available. Can also be used as a primitive
+luma-only deinterlacer with very low cpu usage.
+By default, halfpack averages pairs of lines when downsampling. The
+optional parameter f can be 0 to only use even lines, or 1 to only use
+odd lines. Any other value for f gives the default (averaging)
+behavior.
 .IPs dint[=sense:level]
 Detects and drops first of interlaced frames in video stream.
 Values can be from 0.0 to 1.0 - first (default 0.1) is relative difference
