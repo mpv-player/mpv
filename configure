@@ -127,6 +127,7 @@ Optional features:
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-mp1e	 disable libmp1e support (only if it won't compile) [enable]
+  --disable-streaming    disable network streaming support (http/mms/rtp) [ena]
 
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
@@ -679,7 +680,7 @@ _dshow=yes
 _select=yes
 _tv=yes
 _tv_v4l=auto
-_streaming=no
+_streaming=auto
 _divx4linux=auto
 _lirc=auto
 _gui=no
@@ -2457,10 +2458,9 @@ echores "$_select"
 
 echocheck "streaming"
 # FIXME streaming check
-if test "$_streaming" = yes ; then
+if test "$_streaming" != no ; then
   _def_streaming='#define STREAMING 1'
   _inputmodules="network $_inputmodules"
-# FIXME   _streamingsrcs='asf_streaming.c network.c url.c http.c'
 else
   _def_streaming='#undef STREAMING'
 fi
