@@ -35,12 +35,12 @@ else
 VO_LIBS = -Llibvo -lvo
 VO_INC = -Ilibvo
 endif
-V_LIBS = $(X_LIB) $(DXR3_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
+V_LIBS = $(X_LIB) $(MP1E_LIB) $(GGI_LIB) $(MLIB_LIB) $(PNG_LIB) $(SDL_LIB) $(SVGA_LIB) $(AA_LIB) $(DIRECTFB_LIB)
 
 AO_LIBS = -Llibao2 -lao2
 A_LIBS = $(ALSA_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(SGIAUDIO_LIB)
 
-CODEC_LIBS = -Lg72x -lg72x -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 -Llibmp1e -lmp1e $(AV_LIB)
+CODEC_LIBS = -Lg72x -lg72x -Lmp3lib -lMP3 -Llibac3 -lac3 -Lliba52 -la52 -Lxa -lxa -Llibmpeg2 -lmpeg2 $(AV_LIB)
 COMMON_LIBS = -Llinux -losdep -Lpostproc -lpostproc
 
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
@@ -84,7 +84,7 @@ all:	$(ALL_PRG)
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
 
-COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmp1e/libmp1e.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
+COMMON_DEPS = g72x/libg72x.a libmpdemux/libmpdemux.a libao2/libao2.a libac3/libac3.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a opendivx/libdecore.a linux/libosdep.a postproc/libpostproc.a xa/libxa.a
 
 ifeq ($(VO2),yes)
 COMMON_DEPS += libvo2/libvo2.a
@@ -149,8 +149,8 @@ xa/libxa.a:
 g72x/libg72x.a:
 	$(MAKE) -C g72x
 
-MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(AV_DEP) $(COMMON_DEPS) 
-MENCODER_DEP = $(OBJS_MENCODER) $(LOADER_DEP) $(AV_DEP) $(COMMON_DEPS)
+MPLAYER_DEP = $(OBJS_MPLAYER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS) 
+MENCODER_DEP = $(OBJS_MENCODER) $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) $(COMMON_DEPS)
 
 ifeq ($(GUI),yes)
 MPLAYER_DEP += Gui/libgui.a

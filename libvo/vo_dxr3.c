@@ -21,7 +21,9 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+#ifdef USE_MP1E
 #include "../libmp1e/libmp1e.h"
+#endif
 
 #include "../postproc/rgb2rgb.h"
 #ifdef HAVE_MMX
@@ -30,9 +32,11 @@
 
 LIBVO_EXTERN (dxr3)
 
+#ifdef USE_MP1E
 rte_context *mp1e_context = NULL;
 rte_codec *mp1e_codec = NULL;
 rte_buffer mp1e_buffer;
+#endif
 struct { uint16_t Y,U,V; } YUV_s;
 #define RGBTOY(R,G,B) (uint16_t)( (0.257 * R) + (0.504 * G) + (0.098 * B) + 16 )
 #define RGBTOU(R,G,B) (uint16_t)( -(0.148 * R) - (0.291 * G) + (0.439 * B) + 128 )
@@ -66,10 +70,12 @@ static vo_info_t vo_info =
 	""
 };
 
+#ifdef USE_MP1E
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
     write( fd_video, data, size );
 }
+#endif
 
 static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
@@ -116,6 +122,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 
     if( format == IMGFMT_YV12 || format == IMGFMT_YUY2 || format == IMGFMT_BGR24 )
     {
+#ifdef USE_MP1E
 	int size;
 	enum rte_frame_rate frame_rate;
 
@@ -235,6 +242,8 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	}
 
 	return 0;
+#endif
+	return -1;
     }
     else if(format==IMGFMT_MPEGPES)
     {
@@ -272,6 +281,7 @@ static uint32_t draw_frame(uint8_t * src[])
 
 	return 0;
     }
+#ifdef USE_MP1E
     else if( img_format == IMGFMT_YUY2 )
     {
 	int w=v_width,h=v_height;
@@ -342,12 +352,13 @@ static uint32_t draw_frame(uint8_t * src[])
 	
 	return 0;
     }
-
+#endif
     return -1;
 }
 
 static void flip_page (void)
 {
+#ifdef USE_MP1E
     if( img_format == IMGFMT_YV12 )
     {
 	mp1e_buffer.data = picture_data[0];
@@ -355,6 +366,7 @@ static void flip_page (void)
 	mp1e_buffer.user_data = NULL;
 	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
     }
+#endif
 }
 
 static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0 )
@@ -404,11 +416,15 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 0x2;0x4;
+    if(format==IMGFMT_MPEGPES) return 0x2|0x4;
+#ifdef USE_MP1E
     if(format==IMGFMT_YV12) return 0x1|0x4;
     if(format==IMGFMT_YUY2) return 0x1|0x4;
     if(format==IMGFMT_BGR24) { printf( "VO: [dxr3] WARNING\tExperimental output, black&white only and very slow\n\t(will be inproved later, this format is rarely used)\n" ); return 0x1|0x4; }
     else printf( "VO: [dxr3] Format unsupported, mail dholm@iname.com\n" );
+#else
+    else printf( "VO: [dxr3] You have disabled libmp1e support, you won't be able to play this format!\n" );
+#endif
     return 0;
 }
 

@@ -126,6 +126,7 @@ Optional features:
   --enable-vorbis        build with OggVorbis support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
+  --disable-mp1e	 disable libmp1e support (only if it won't compile) [enable]
 
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
@@ -640,6 +641,7 @@ _prefix="/usr/local"
 # If autodetection is available then the third state is: auto
 _libavcodec=auto
 _libavcodecso=no # changed default to no as it causes problems - atmos
+_mp1e=yes
 _mencoder=auto
 _x11=auto
 _dga=auto	# 1 2 no auto
@@ -735,6 +737,7 @@ for ac_option do
   --disable-iconv)	_iconv=no	;;
   --enable-rtc)	        _rtc=yes	;;
   --disable-rtc)	_rtc=no	        ;;
+  --disable-mp1e)	_mp1e=no	;;
   --enable-ossaudio)	_ossaudio=yes	;;
   --disable-ossaudio)	_ossaudio=no	;;
   --enable-mad)		_mad=yes	;;
@@ -1810,6 +1813,22 @@ else
 fi
 echores "$_nas"
 
+if test "$_mmx" = no ; then
+  _mp1e=no
+fi
+if test "$_mp1e" = yes ; then
+  _def_mp1e='#define USE_MP1E'
+  _ld_mp1e="-Llibmp1e -lmp1e"
+  _dep_mp1e='libmp1e/libmp1e.a'
+else
+  echocheck "libmp1e"
+  _mp1e=no
+  _def_mp1e='#undef USE_MP1E'
+  _ld_mp1e=""
+  _dep_mp1e=''
+  echores "$_mp1e"
+fi
+
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
   cat > $TMPC << EOF
@@ -2650,6 +2669,8 @@ DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec
 AV_LIB = $_ld_libavcodec
+MP1E_DEP = $_dep_mp1e
+MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
 DIVX4LINUX = $_divx4linux
 DECORE_LIB = $_ld_decore
@@ -2714,6 +2735,9 @@ $_def_encore
 /* Indicates if libmp3lame is available
    Note: REQUIRED for mencoder */
 $_def_mp3lame
+
+/* Define libmp1e */
+$_def_mp1e
 
 /* Define this to enable avg. byte/sec-based AVI sync method by default:
    (use -bps or -nobps commandline option for run-time method selection)
