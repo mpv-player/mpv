@@ -126,7 +126,9 @@ params:
         --with-win32libdir=DIR  windows codec files
         --with-csslibdir=DIR    directory contains libcss.so shared library
         --with-cssincdir=DIR    directory contains libcss header file (css.h)
-				(--with-css* only needed, if libCSS autodetect fails)
+                                (--with-css* only needed, if libCSS autodetect fails)
+        --with-sdl-config=PATH  specify location of sdl-config if it's not in your PATH
+                                (example: --with-sdl-cofig=/usr/sdl/bin/sdl-config)
 
 	--size-x=SIZE		default screen width
 	--size-y=SIZE		default screen height
@@ -176,6 +178,7 @@ else
 fi
 
 _skip_cc_check=no
+_sdlconfig='sdl-config'
 
 for ac_option
 do
@@ -194,6 +197,9 @@ do
         ;;
   --disable-x11)
         _x11=no
+        ;;
+  --with-sdl-config=*)
+        _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
         ;;
  esac
 done
@@ -469,9 +475,9 @@ $_cc $TMPC -o $TMPO -lpthread &> /dev/null || \
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
-if $_cc $TMPC -o $TMPO -L/usr/lib/ -L/usr/local/lib/ -lSDL -lpthread &> /dev/null ; then
-	if test `sdl-config --version | sed s/[=[:punct:]=]//g` -gt 116 ; then
-		if test `sdl-config --version | sed s/[=[:punct:]=]//g` -lt 121 ; then
+if $_cc $TMPC -o $TMPO `$_sdlconfig --libs` &> /dev/null ; then
+	if test `$_sdlconfig --version | sed s/[=[:punct:]=]//g` -gt 116 ; then
+		if test `$_sdlconfig --version | sed s/[=[:punct:]=]//g` -lt 121 ; then
 			_sdlbuggy='#define BUGGY_SDL'
 		else	
 			_sdlbuggy='#undef BUGGY_SDL'
@@ -894,7 +900,7 @@ if [ $_xv = yes ]; then
 fi
 
 if [ $_sdl = yes ]; then
-  _sdllib='-lSDL -lpthread' 
+  _sdllib=`$_sdlconfig --libs` 
 fi
 
 if [ $_dga = yes ]; then
