@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.22 -->
+<!-- Synced with: 1.23 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Multimediální přehrávač</title>
@@ -143,7 +143,7 @@ audia.
   </simpara></listitem>
 <listitem><simpara>
   Korekce snímkové rychlosti pomocí volby <option>-ofps</option> (užitečné při enkódování
-  29.97 fps VOB do 24 fps AVI)
+  30000/1001 fps VOB do 24000/1001 fps AVI)
   </simpara></listitem>
 <listitem><simpara>
   Používá výkonný systém filtrů (ořez, expanze, postproces, rotace, škálování (změna velikosti),
