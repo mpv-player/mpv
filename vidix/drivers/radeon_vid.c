@@ -606,7 +606,7 @@ vidix_capability_t def_cap =
     4,
     -1,
     FLAG_UPSCALER | FLAG_DOWNSCALER,
-    1002,
+    VENDOR_ATI,
     0,
     { 0, 0, 0, 0}
 };
