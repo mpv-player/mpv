@@ -62,6 +62,9 @@
  *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 11, 2001
  *    - OSD and subtitle support added
  *    - some minor code-changes
+ *    - added code to comply with new fullscreen meaning
+ *    - changed fullscreen-mode-cycling from '+' to 'c' (interferred with audiosync
+ *       adjustment)
  */
 
 #include <stdio.h>
@@ -348,7 +351,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 //static int sdl_setup (int width, int height)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
-        unsigned int sdl_format;
+        unsigned int sdl_format, mode;
 
 
         switch(format){
@@ -368,7 +371,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	sdl_open (NULL, NULL);
 
 	/* Set output window title */
-	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : Keypad + = Cycle Fullscreen Resolutions :.", "SDL Video Out");
+	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : C = Cycle Fullscreen Resolutions :.", "SDL Video Out");
 
 	/* Save the original Image size */
 	
@@ -376,15 +379,46 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	priv->height = height;
         priv->format = format;
         
-        if(fullscreen){
-	    priv->windowsize.w = width;
-	    priv->windowsize.h = height;
-            priv->surface=NULL;
-            set_fullmode(priv->fullmode);
-        } else {
-	    priv->windowsize.w = d_width;
-	    priv->windowsize.h = d_height;
-            priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlflags);
+	/* bit 0 (0x01) means fullscreen (-fs)
+	 * bit 1 (0x02) means mode switching (-vm)
+	 * bit 2 (0x04) enables software scaling (-zoom)
+	 */  
+//      printf("SDL: fullscreenflag is set to: %i\n", fullscreen);
+//	printf("SDL: Width: %i Height: %i D_Width %i D_Height: %i\n", width, height, d_width, d_height);
+	switch(fullscreen){
+	  case 0x01:
+	  case 0x05:
+	  	printf("SDL: setting zoomed fullscreen without modeswitching\n");
+		//priv->fullmodes[mode]->w 
+		/*priv->fullmode++;
+		if (priv->fullmode > (findArrayEnd(priv->fullmodes) - 1)) priv->fullmode = 0;
+		set_fullmode(priv->fullmode);*/
+		priv->windowsize.w = d_width;
+	  	priv->windowsize.h = d_height;
+          	if(priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags))
+			SDL_ShowCursor(0);
+	  break;	
+	  case 0x02:
+	  case 0x03:
+	 	printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
+		priv->windowsize.w = width;
+	  	priv->windowsize.h = height;
+          	if(priv->surface = SDL_SetVideoMode (width, height, priv->bpp, priv->sdlfullflags))
+			SDL_ShowCursor(0);
+	  break;		
+	  case 0x06:
+	  case 0x07:
+	 	printf("SDL: setting zoomed fullscreen with modeswitching\n");
+	  	priv->windowsize.w = width;
+	  	priv->windowsize.h = height;
+          	priv->surface=NULL;
+          	set_fullmode(priv->fullmode);
+	  break;  
+          default:
+	 	printf("SDL: setting windowed mode\n");
+	  	priv->windowsize.w = d_width;
+	  	priv->windowsize.h = d_height;
+          	priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlflags);
         }
         if(!priv->surface) return -1; // cannot SetVideoMode
 
@@ -549,8 +583,8 @@ static void check_events (void)
 			case SDL_KEYUP:
 				keypressed = event.key.keysym.sym;
 
-				/* plus key pressed. plus cycles through available fullscreenmodes, if we have some */
-				if ( ((keypressed == SDLK_PLUS) || (keypressed == SDLK_KP_PLUS)) && (priv->fullmodes) ) {
+				/* c key pressed. plus cycles through available fullscreenmodes, if we have some */
+				if ( ((keypressed == SDLK_c)) && (priv->fullmodes) ) {
 					/* select next fullscreen mode */
 					priv->fullmode++;
 					if (priv->fullmode > (findArrayEnd(priv->fullmodes) - 1)) priv->fullmode = 0;
