@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.11 -->
 <appendix id="skin">
-<title>Format de skins MPlayer</title>
+<title>Format de skins <application>MPlayer</application></title>
 <para>
-L'objectif de ce document est de décrire le format de skins de MPlayer. Les
+L'objectif de ce document est de décrire le format de skins de <application>MPlayer</application>. Les
 informations présentées ici peuvent s'avérer fausses, du fait que
 <orderedlist>
 <listitem><para>Ce n'est pas moi qui ait écrit la GUI.</para></listitem>
@@ -21,7 +21,7 @@ Ne soyez donc pas surpris si quelque chose ne correspond pas à cette description
 <title>Aperçu</title>
 <para>
 Ce n'est pas en rapport direct avec le format des skins, mais vous devez savoir
-que MPlayer n'a <emphasis role="bold">pas</emphasis> de skin par défaut, donc
+que <application>MPlayer</application> n'a <emphasis role="bold">pas</emphasis> de skin par défaut, donc
 <emphasis role="bold">au moins une skin doit être installée pour pouvoir utiliser
 la GUI.</emphasis>
 </para>
@@ -29,7 +29,7 @@ la GUI.</emphasis>
 <sect2 id="skin-overview-directories">
 <title>Répertoires</title>
 <para>
-MPlayer cherche des skins dans ces répertoires (dans cet ordre):
+<application>MPlayer</application> cherche des skins dans ces répertoires (dans cet ordre):
 <orderedlist>
 <listitem><para>
 <filename class="directory">$(DATADIR)/Skin/</filename>
@@ -44,8 +44,8 @@ MPlayer cherche des skins dans ces répertoires (dans cet ordre):
 </para>
 
 <para>
-Notez que le premier répertoire peut varier suivant la façon dont MPlayer a été
-configuré (c.f. les arguments <option>--prefix</option> et <option>--datadir</option>
+Notez que le premier répertoire peut varier suivant la façon dont <application>MPlayer</application> a été
+configuré (voir les arguments <option>--prefix</option> et <option>--datadir</option>
 du script <command>configure</command>).
 </para>
 
@@ -63,8 +63,8 @@ format PNG.</para>
 <para>
 Dans la fenêtre principale et la barre de lecture (c.f. ci-dessous) vous pouvez
 utiliser des images dotées de régions &quot;transparentes&quot;: les régions
-remplies avec la couleur #FF00FF (magenta) deviennent transparentes dans MPlayer.
-De même, vous pouvez obtenir des formes particulières pour vos fenêtres si votre
+remplies avec la couleur #FF00FF (magenta) deviennent transparentes dans <application>MPlayer</application>.
+Cela signifie que vous pouvez obtenir des formes particulières pour vos fenêtres si votre
 serveur X possède l'extension XShape.
 </para>
 </sect2>
@@ -86,7 +86,7 @@ Actuellement, trois fenêtres doivent être décorées: la
 
 <itemizedlist>
 <listitem><para>
-  Vous contrôlez MPlayer par la <emphasis role="bold">fenêtre principale</emphasis>
+  Vous contrôlez <application>MPlayer</application> par la <emphasis role="bold">fenêtre principale</emphasis>
   et/ou la <emphasis role="bold">barre de lecture</emphasis>. L'arrière plan est
   une image. Divers objets peuvent (et doivent) venir se placer dans cette fenêtre:
   <emphasis>boutons</emphasis>, <emphasis>podomètres</emphasis>
@@ -129,7 +129,7 @@ Actuellement, trois fenêtres doivent être décorées: la
 
 <listitem><para>
   Le <emphasis role="bold">menu</emphasis> est simplement un moyen de contrôler
-  MPlayer par des entrées graphiques. Deux images sont nécessaires pour le menu:
+  <application>MPlayer</application> par des entrées graphiques. Deux images sont nécessaires pour le menu:
   l'une d'elle, l'image de base, affiche le menu dans son été normal, l'autre est
   utilisée pour afficher les entrées sélectionnées. Quand vous faites apparaître le
   menu, la première image s'affiche. Si vous passez la souris sur les entrées du
@@ -137,7 +137,7 @@ Actuellement, trois fenêtres doivent être décorées: la
   partie concernée par cette sélection (la seconde image ne s'affiche jamais
   complètement.)
 </para><para>
-  Une entrée de menu se définit par sa position et sa taille dans l'image (c.f. la
+  Une entrée de menu se définit par sa position et sa taille dans l'image (voir la
   section <link linkend="skin-file-menu">menu</link> pour plus de détails).
 </para></listitem>
 </itemizedlist>
@@ -145,7 +145,7 @@ Actuellement, trois fenêtres doivent être décorées: la
 
 <para>
   Une chose essentielle n'a pas encore été mentionnée : pour que les boutons,
-  podomètres et entrées du menu fonctionnent, MPlayer doit savoir quoi en faire.
+  podomètres et entrées du menu fonctionnent, <application>MPlayer</application> doit savoir quoi en faire.
   Ceci dépend des <link linkend="skin-gui">messages</link> (events) envoyés. Pour
   chacun de ces objets vous devez définir le message à afficher quand on clique
   dessus.
@@ -159,7 +159,7 @@ Vous aurez besoin des fichiers suivants pour construire une skin:
 <itemizedlist>
 <listitem><para>
   Le fichier de configuration nommé <link linkend="skin-file">skin</link> indique
-  à MPlayer comment assembler les différentes images et comment interpréter les
+  à <application>MPlayer</application> comment assembler les différentes images et comment interpréter les
   clics de souris sur l'interface.
 </para></listitem>
 <listitem><para>
@@ -270,7 +270,7 @@ end
 Le nom d'un fichier image doit être donné sans distinction de répertoire - les
 images seront cherchées dans le répertoire <filename class="directory">Skin</filename>.
 Vous pouvez (mais ce n'est pas obligatoire) spécifier l'extension du fichier. Si
-le fichier n'existe pas, MPlayer essaie de charger le fichier
+le fichier n'existe pas, <application>MPlayer</application> essaie de charger le fichier
 <filename>&lt;nomfichier&gt;.&lt;ext&gt;</filename>, où <literal>png</literal>
 et <literal>PNG</literal> sera respectivement <filename>&lt;ext&gt;</filename>
 (dans cet ordre). La première correspondance trouvée sera utilisée.
@@ -442,7 +442,7 @@ horizontalement.
   <anchor id="skin-potmeter"/>potmeter = phases, numphases, default, X, Y, largeur, hauteur, message
   </literal></term>
   <listitem><para>
-Un <literal>hpotmeter</literal> sans boutons. (je suppose qu'il est censé tourner
+Un <literal>hpotmeter</literal> sans bouton. (je suppose qu'il est censé tourner
 en rond, mais il réagit uniquement aux tractions horizontales.) Pour une
 description de ses paramètres lisez <link linkend="skin-hpotmeter">hpotmeter</link>.
 Ses <literal>phases</literal> peuvent être fixés à <literal>NULL</literal>, mais ce n'est
@@ -621,7 +621,7 @@ a le caractère <keycap>e</keycap>)</entry>
 <note><para>
 Les variables <literal>$a, $T, $p, $s</literal> et <literal>$e</literal>
 <keycap>e</keycap> retournent toutes des caractères pouvant s'afficher comme des
-symboles spéciaux (par exemple, &quot;e&quot; est le symbole de pause qui
+symboles spéciaux (par exemple, <keycap>e</keycap> est le symbole de pause qui
 ressemble généralement à ||). Vous pouvez avoir une police pour les caractères
 normaux et une autre pour les symboles. Lisez la section sur les
 <link linkend="skin-fonts-symbols">symboles</link> pour plus d'informations.
@@ -740,7 +740,7 @@ dimensions du caractère en pixels.
 </para>
 
 <para>
-Voici un exemple définissant les caractères A, B, C utilisant la police <filename>font.png</filename>.
+Voici un exemple définissant les caractères A, B, C utilisant <filename>font.png</filename>.
 <programlisting>
 ; Peut être &quot;font&quot; au lieu de &quot;font.png&quot;.
 image = font.png
@@ -850,11 +850,11 @@ Stoppe la lecture.
 </variablelist>
 
 <variablelist>
-<title>Avancée dans le flux:</title>
+<title>Déplacement dans le flux:</title>
 <varlistentry>
   <term><emphasis role="bold">evBackward10sec</emphasis></term>
   <listitem><para>
-Recule de 10 secondes
+Recule de 10 secondes.
     </para></listitem>
 </varlistentry>
 
@@ -875,7 +875,7 @@ Recule de 10 minutes.
 <varlistentry>
   <term><emphasis role="bold">evForward10sec</emphasis></term>
   <listitem><para>
-Avance de 10 secondes
+Avance de 10 secondes.
     </para></listitem>
 </varlistentry>
 

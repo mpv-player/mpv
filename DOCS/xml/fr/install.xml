@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.36 -->
+<!-- synced with 1.49 -->
 <sect1 id="install">
 <title>Installation</title>
 
@@ -10,7 +10,7 @@ Veuillez le lire d'abord et revenir ensuite ici pour le reste des détails.
 
 <para>
 Dans ce chapitre je vais essayer de vous guider à travers la compilation
-et la configuration de MPlayer. Ce n'est pas facile, mais pas vraiment difficile
+et la configuration de <application>MPlayer</application>. Ce n'est pas facile, mais pas vraiment difficile
 non plus. Si vous rencontrez un comportement différent de celui de mes explications,
 cherchez dans la doc et vous trouverez les réponses. Si vous voyez des liens, suivez-les
 et lisez attentivement ce qu'ils contiennent. Cela prendra du temps, mais ça en vaut
@@ -28,9 +28,9 @@ recommandés.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">binutils</emphasis> - version conseillée : <emphasis role="bold">2.11.x</emphasis>.
+  <emphasis role="bold">binutils</emphasis> - la version conseillée est la <emphasis role="bold">2.11.x</emphasis>.
   Ce programme génère les instructions spécifiques MMX/3DNow!,
-  donc très important.
+  il est donc très important.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> - versions conseillées: <emphasis role="bold">2.95.3</emphasis>
@@ -117,6 +117,17 @@ recommandés.
 <listitem><para>
   <emphasis role="bold">libsmb</emphasis> - optionnel, pour le support Samba.
   </para></listitem>
+<listitem><para>
+  <emphasis role="bold">bio2jack</emphasis> - optionnel, pour le support de la
+  sortie audio JACK, requis seulement au moment de la compilation. Vous pouvez
+  l'obtenir depuis 
+  <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Il n'a pas
+  d'options d'installation donc vous devez placer manuellement le fichier
+  <filename>libbio2jack.a</filename> quelque part dans votre chemin de librairies
+  (par ex. <filename>/usr/local/lib</filename>) ou utiliser l'option
+  <option>--with-bio2jack=DIR</option> pour dire à
+  <filename>./configure</filename> où se trouve le fichier.
+  </para></listitem>
 </itemizedlist>
 </sect2>
 
@@ -140,8 +151,8 @@ recommandés.
     encodage avec la plupart des codecs mentionnés
     </simpara></listitem>
   <listitem><simpara>
-    ce codec est le <emphasis role="bold">plus rapide codec disponible</emphasis> pour
-    les formats DivX/3/4/5 et autre MPEG4. Recommendé!
+    ce codec est le <emphasis role="bold">plus rapide disponible</emphasis> pour
+    les formats DivX/3/4/5 et autre MPEG-4. Recommendé!
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
@@ -150,7 +161,7 @@ recommandés.
   <application>MPlayer</application> sur une architecture non x86, vous en aurez
   probablement besoin. Téléchargez les codecs Win32 depuis notre
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">page de codecs</ulink>
-  et installez-les dans <filename class="directory">/usr/local/lib/codecs</filename>
+  et installez-les dans <filename class="directory">/usr/local/lib/codecs/</filename>
   <emphasis role="bold">AVANT</emphasis> de compiler <application>MPlayer</application>,
   sinon aucun support Win32 ne sera compilé!
   <note><para>Le projet avifile a un paquet de codecs similaire, mais qui diffère
@@ -191,7 +202,7 @@ recommandés.
   Fonctionnalités:
   <itemizedlist>
   <listitem><simpara>
-    encodage 1 passe ou 2 passes avec <link linkend="mencoder">MEncoder</link>
+    encodage 1 passe ou 2 passes avec <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
     peut lire les films au vieux format <emphasis role="bold">DivX3</emphasis>
@@ -208,7 +219,7 @@ recommandés.
   Caractéristiques:
   <itemizedlist>
   <listitem><simpara>
-    encodage 1 passe ou 2 passes avec <link linkend="mencoder">MEncoder</link>
+    encodage 1 passe ou 2 passes avec <link linkend="mencoder"><application>MEncoder</application></link>
     </simpara></listitem>
   <listitem><simpara>
     les sources sont ouvertes, donc c'est multi-plateformes.
@@ -220,12 +231,12 @@ recommandés.
   </itemizedlist>
   </para></listitem>
 <listitem><para>
-  Les <emphasis role="bold"><link linkend="xanim">codecs XAnim</link></emphasis>
-  (plein écran, zoom YUV matériel) pour décoder les films
+  Les <emphasis role="bold"><link linkend="xanim">codecs XAnim</link></emphasis> sont
+  les meilleurs (plein écran, zoom YUV matériel) pour décoder les films
   <emphasis role="bold">3ivx</emphasis> et Indeo 3/4/5, et quelques autres vieux
   formats. Et ils sont multiplateforme, c'est donc la seule façon de lire de l'Indeo
   sur des plateformes non-x86 (bon, à part en utilisant XAnim:). Mais par exemple les
-  films Cinepak sont mieux joués par le décodeur Cinepak de <application>MPlayer</application>!
+  films Cinepak sont mieux joués par le décodeur Cinepak de <application>MPlayer</application> !
   </para></listitem>
 <listitem><para>
   Pour le décodage d'<emphasis role="bold">Ogg Vorbis</emphasis>, vous aurez besoin
@@ -236,7 +247,7 @@ recommandés.
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> peut utiliser les bibliothèques de RealPlayer 8
-  ou RealONE pour lire de la vidéo <emphasis role="bold">RealVideo 2.0-4.0</emphasis>,
+  ou RealONE pour lire de la vidéo <emphasis role="bold">RealVideo 3.0 et 4.0</emphasis>,
   et de l'audio Sipro/Cook. Voir la section <link linkend="realmedia">format de fichier RealMedia</link>
   pour les instructions d'installation et plus d'information.
   </para></listitem>
@@ -399,12 +410,12 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
 <itemizedlist>
 <listitem><simpara>
   <emphasis role="bold">Soundblaster Live!</emphasis>: avec cette carte vous pouvez utiliser 4 ou 6
-    canaux AC3 (5.1) au lieu de 2. Voir la section
+    canaux AC3 (<emphasis role="bold">5.1</emphasis>) au lieu de 2. Voir la section
   <link linkend="swac3">Décodage AC3 logiciel</link>. Pour le transfert AC3 matériel vous 
-  <emphasis role="bold">devez</emphasis> utiliser ALSA 0.9 avec l'émulation OSS!
+  <emphasis role="bold">devez</emphasis> utiliser ALSA 0.9 avec l'émulation OSS !
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">C-Media avec sortie SP/DIF</emphasis>: Le transfert AC3 matériel est possible
+  <emphasis role="bold">C-Media avec sortie S/PDIF</emphasis>: Le transfert AC3 matériel est possible
     avec ces cartes, voir la section <link linkend="hwac3">Décodage AC3 matériel</link>.
   </simpara></listitem>
 <listitem><simpara>
@@ -417,7 +428,7 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
 
 
 <sect2>
-<title>Fonctions</title>
+<title>Fonctionalités</title>
 
 <itemizedlist>
 <listitem><para>
@@ -426,11 +437,11 @@ n'avez pas d'accélération YUV, cette dernière méthode est recommandée. Le change
   </para></listitem>
 <listitem><para>
   Si vous voulez installer <application>MEncoder</application> (notre excellent
-  encodeur multi-usages), voir la section <link linkend="mencoder">MEncoder</link>.
+  encodeur multi-usages), voir la section <link linkend="mencoder"><application>MEncoder</application></link>.
   </para></listitem>
 <listitem><para>
   Si vous possédez une carte <emphasis role="bold">tuner TV</emphasis> compatible
-  V4L, et désirez voir/enregistrer et encoder des films avec MPlayer, voyez la section
+  V4L, et désirez voir/enregistrer et encoder des films avec <application>MPlayer</application>, voyez la section
   <link linkend="tv-input">Entrée TV</link>.
   </para></listitem>
 <listitem><para>
@@ -463,7 +474,7 @@ Notez que si vous avez un <filename>codecs.conf</filename> dans
 <filename>~/.mplayer/</filename>, les fichier <filename>codecs.conf</filename>
 du système ou celui intégré seront complètement ignorés.
 Ne faites pas cela à moins de vouloir jouer avec le fonctionnement interne de
-MPlayer car cela peut poser des problèmes. Si vous voulez changer l'ordre de
+<application>MPlayer</application> car cela peut poser des problèmes. Si vous voulez changer l'ordre de
 recherche des codecs, utilisez les options <option>-vc</option>, <option>-ac</option>,
 <option>-vfm</option>, ou <option>-afm</option> soit en ligne de commande soit dans
 votre fichier de config (voir la page de man).
@@ -493,7 +504,7 @@ d'en-tête (généralement les paquets -dev) et que leur version correspond. Le fic
 <para>
 Bien que n'étant pas indispensables, les polices peuvent être installées pour 
 l'affichage de l'OSD, et le support des sous-titres. La méthode recommandée est 
-d'installer un fichier de police TTF et de dire à MPlayer de l'utiliser. Voir la 
+d'installer un fichier de police TTF et de dire à <application>MPlayer</application> de l'utiliser. Voir la 
 section <link linkend="subosd">Sous-titres et OSD</link> pour les détails.
 </para>
 
@@ -529,7 +540,7 @@ Elles pourront se placer dans le répertoire commun (<filename class="directory">
 $PREFIX/share/mplayer/Skin</filename>), ou dans <filename class="directory">$HOME/.mplayer/Skin</filename>.
 Par défaut, <application>MPlayer</application> consulte ces répertoires à la recherche
 d'un répertoire nommé <filename class="directory">default</filename>, mais vous pouvez utiliser l'option
-<option>-skin <replaceable>newskin</replaceable></option>, ou placer <literal>skin=nouvelleskin</literal>
+<option>-skin <replaceable>nouvelleskin</replaceable></option>, ou placer <literal>skin=nouvelleskin</literal>
 dans votre fichier de configuration pour utiliser la skin dans le répertoire <filename class="directory">*/Skin/newskin</filename>.
 </para>
 </sect1>
@@ -561,7 +572,7 @@ dans votre fichier de configuration pour utiliser la skin dans le répertoire <fi
 </para>
 
 <para>
-MPlayer peut convertir les formats précédemment listés
+<application>MPlayer</application> peut convertir les formats précédemment listés
 (<emphasis role="bold">excepté les trois premiers</emphasis>)
 dans dans les formats de destination suivants, en utilisant ces options:
 <itemizedlist>
@@ -574,7 +585,7 @@ dans dans les formats de destination suivants, en utilisant ces options:
 </para>
 
 <para>
-MEncoder peut convertir les sous-titres DVD au format <link linkend="menc-feat-extractsub">VobSub</link>.
+<application>MEncoder</application> peut convertir les sous-titres DVD au format <link linkend="menc-feat-extractsub">VOBSub</link>.
 </para>
 
 <para>
@@ -582,9 +593,9 @@ Les options en ligne de commande diffèrent légèrement suivant les différents for
 </para>
 
 <formalpara>
-<title>Sous-titres VobSub</title>
+<title>Sous-titres VOBSub</title>
 <para>
-Les sous-titres VobSub consistent en un gros (plusieurs méga-octets) fichier <filename>.SUB</filename>,
+Les sous-titres VOBSub consistent en un gros (plusieurs méga-octets) fichier <filename>.SUB</filename>,
 et d'éventuels fichiers <filename>.IDX</filename> et/ou <filename>.IFO</filename>.
 Si vous avez des fichiers tels que
 <filename><replaceable>sample.sub</replaceable></filename>,
@@ -642,8 +653,8 @@ de sous-titres MicroDVD utilise des numéros de trames absolus pour sa synchronis
 et de plus l'option <option>-subfps</option> ne peut pas être utilisée avec ce format. 
 <application>MPlayer</application> n'a pas la possibilité de deviner la vitesse du fichier de sous-titres, vous devrez
 donc convertir manuellement la vitesse. Il y a un petit script perl dans le répertoire 
-<filename class="directory">contrib</filename> du serveur FTP de MPlayer qui fera la 
-conversion pour vous.
+<filename class="directory">contrib</filename> du serveur FTP de <application>MPlayer</application> 
+qui fera la conversion pour vous.
 </para>
 
 <para>
@@ -698,7 +709,7 @@ le temps de lecture, la barre de volume, d'avance/retour rapide, le contraste, e
 
 <para>
 Vous aurez besoin d'un paquet de polices <application>MPlayer</application> afin d'utiliser
-les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
+les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir:
 </para>
 
 <itemizedlist>
@@ -711,7 +722,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
 <listitem><para>
   Utiliser le plugin générateur de polices de <application>GIMP</application> dans <filename
   class="directory">TOOLS/subfont-GIMP</filename> (note: vous devez avoir le
-  plugin brut HSI également, voir <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
+  plugin HSI RAW également, voir <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
  </para></listitem>
 <listitem><para>
   Utiliser une fonte TrueType (TTF), par l'intermédiaire de la librairie
@@ -736,7 +747,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
   Exemple: <option>-font <replaceable>'Bitstream Vera Sans'</replaceable></option>
   </para></listitem>
 <listitem><para>
-  Télécharger des paquetages de polices prêtes à l'emploi depuis le site de MPlayer.
+  Télécharger des paquetages de polices prêtes à l'emploi depuis le site de <application>MPlayer</application>.
   Note: Les polices actuellement disponibles sont limitées a l'iso 8859-1/2, mais
   il y en a quelques autres (coréen, russe, 8859-8, etc) dans la section contrib/font
   du FTP, créées par les utilisateurs.
@@ -747,7 +758,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
   sous-titré. Une autre solution est d'avoir des sous-titres encodés en UTF8 
   et d'utiliser l'option <option>-utf8</option> ou de renommer le fichier 
   des sous-titres en <filename>&lt;nom_video&gt;.utf</filename>. Enregistrer
-  de codepages différents en UTF8 peut se faire en utilisant les programmes
+  de codepages différents en UTF-8 peut se faire en utilisant les programmes
   <command>konwert</command> ou <command>iconv</command>.
   </para><para>
   
@@ -759,7 +770,7 @@ les fonctions d'OSD/SUB. Il y a plusieurs manières de les obtenir :
   </thead>
   <tbody>
   <row><entry>
-    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/"></ulink>
+    <ulink url="ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/"></ulink>
     </entry><entry>
     polices ISO
     </entry></row>
@@ -793,8 +804,10 @@ avec la touche <keycap>o</keycap>).
 <para>
 (les sous-titres sont <emphasis>toujours activés</emphasis>, pour les désactiver merci de lire la page de man)
 </para>
+
 <para>
 L'OSD possède 4 états (interchangeable avec <keycap>o</keycap>):
+
 <orderedlist>
 <listitem><simpara>
   barre de volume + barre d'avancement (par défaut)
@@ -821,7 +834,7 @@ dans le fichier config, ou en précisant l'option <option>-osdlevel</option> en l
 <title>Menu OSD</title>
 
 <para>
-MPlayer possède une interface de menu OSD complètement modulable.
+<application>MPlayer</application> possède une interface de menu OSD complètement modulable.
 </para>
 
 <note><simpara>
@@ -867,7 +880,7 @@ Le menu des préférences n'est PAS IMPLÉMENTÉ pour l'instant !
 <sect1 id="rtc">
 <title>RTC</title>
 <para>
-Il y a trois méthodes de synchro dans MPlayer.
+Il y a trois méthodes de synchro dans <application>MPlayer</application>.
 
 <itemizedlist>
 <listitem><simpara>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.14 -->
 <appendix id="users-vs-dev">
 <title>Lamentations du développeur</title>
 
@@ -30,7 +30,7 @@ L'équipe GCC a nié tout lien avec GCC 2.96 et a publié une
 à GCC 2.96. De nombreux développeurs à travers le monde ont commencé à avoir des
 problèmes avec GCC 2.96, et ont commencé à recommander d'autres compilateurs. Par Exemple
 <ulink url="http://www.mysql.com/downloads/mysql-3.23.html">MySQL</ulink> et
-<ulink url="http://avifile.sourceforge.net/news-old1.htm">avifile</ulink>.
+<ulink url="http://avifile.sf.net/news-old1.htm">avifile</ulink>.
 D'autres liens intéressants sont
 <ulink url="http://www.atnf.csiro.au/people/rgooch/linux/docs/kernel-newsflash.html">
 Linux kernel news flash about kernel 2.4.17</ulink>
@@ -180,9 +180,9 @@ son échange avec Günter Bartsch, l'auteur original de <application>xine</applica
 qui résume parfaitement la situation:
 
 <blockquote><para>
-Toutefois, il a ajouté qu'il avait été "surpris" par mon papier à propos de <application>MPlayer</application>
+Toutefois, il a ajouté qu'il avait été &quot;surpris&quot; par mon papier à propos de <application>MPlayer</application>
 et pensait que c'était déloyal, me rappelant que c'est un projet de logiciel libre.
-"Si vous ne l'aimez pas," à dit Bartsch, "vous êtes libre de ne pas l'utiliser."
+&quot;Si vous ne l'aimez pas,&quot; à dit Bartsch, &quot;vous êtes libre de ne pas l'utiliser.&quot;
 </para></blockquote>
 
 Presque deux ans après, en octobre 2003, il a écrit un autre article appelé

@@ -1,24 +1,25 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.13 -->
 <chapter id="cd-dvd">
 <title>Utilisation des CD/DVD</title>
 
 <sect1 id="drives">
 <title>Lecteurs CD/DVD</title>
 <para>
-Extrait de la documentation GNU/Linux :
+Extrait de la documentation Linux :
 </para>
 
 <para>
-Certains lecteurs de CD-ROM sont capables de changer leur vitesse de lecture.
+Les lecteurs de CD-ROM peuvent atteindre de très hautes vitesses de lecture, 
+bien que certains soient capables de diminuer leur vitesse.
 Il y a plusieurs raisons possibles pour changer cette vitesse:
 </para>
 
 <itemizedlist>
 <listitem><para>
 Il a été signalé que des lecteurs peuvent commettre des erreurs fréquentes à
-haute vitesse (surtout avec des CDs mal pressés), la diminuer peut alors empêcher
-ces erreurs.
+haute vitesse, surtout avec des CDs mal pressés. Diminuer la vitesse peut alors 
+empêcher ces erreurs.
 </para></listitem>
 
 <listitem><para>
@@ -30,8 +31,8 @@ peut contribuer à diminuer.
 <para>
 Vous pouvez réduire la vitesse des lecteurs de CD-ROM IDE avec <command>hdparm</command>
 ou avec un programme nommé <command>setcd</command>. Ils fonctionnent comme cela:
-<screen>hdparm -E [vitesse] [périph. cdrom]</screen>
-<screen>setcd -x [vitesse] [périph. cdrom]</screen>
+<screen>hdparm -E <replaceable>[vitesse]</replaceable> <replaceable>[périph. cdrom]</replaceable></screen>
+<screen>setcd -x <replaceable>[vitesse]</replaceable> <replaceable>[périph. cdrom]</replaceable></screen>
 </para>
 
 <para>
@@ -40,7 +41,7 @@ Si vous avez les privilèges root, la commande suivante peut également aider:
 </para>
 
 <para>
-Ceci créé un cache de 2 Mo, ce qui est utile pour les CD-Roms endommagés.
+Ceci créé un cache de 2 Mo, ce qui est utile pour les CD-ROMs endommagés.
 Si vous lui donnez une valeur trop haute, le lecteur ne va pas cesser de s'arrêter
 et de repartir, ce qui va dramatiquement diminuer les performances. Il est
 également recommandé d'optimiser votre lecteur de CD-ROM avec <command>hdparm</command>:
@@ -72,7 +73,7 @@ connaissez une ? Dites-la nous!) Il y a un outil qui fonctionne pour les
 <title>Lecture de DVDs</title>
 <para>
 Pour voir la liste complète des options disponibles, veuillez lire la page de man.
-La syntaxe des Digital Versatile Disc (DVD) est la suivante:
+La syntaxe pour lire un Digital Versatile Disc (DVD) est la suivante:
 <screen>mplayer dvd://<replaceable>&lt;piste&gt;</replaceable> [-dvd-device <replaceable>&lt;périphérique&gt;</replaceable>]</screen>
 </para>
 
@@ -94,9 +95,9 @@ correct en ligne de commande avec l'option <option>-dvd-device</option>.
 <systemitem>libdvdcss</systemitem> pour le décryptage et la lecture de DVD.
 Ces deux bibliothèques sont incluses dans le sous-répertoire
 <filename class="directory">libmpdvdkit2/</filename> du répertoire
-source de MPlayer, vous n'avez donc pas besoin de les installer séparément. Nous
-avons opté pour cette solution car nous devions corriger un bug de
-<systemitem>libdvdread</systemitem>, et appliquer un patch qui ajoute
+source de <application>MPlayer</application>, vous n'avez donc pas besoin de les 
+installer séparément. Nous avons opté pour cette solution car nous devions corriger 
+un bug de <systemitem>libdvdread</systemitem>, et appliquer un patch qui ajoute
 <emphasis role="bold">un cache pour les clés CSS cassées</emphasis> à
 <systemitem>libdvdcss</systemitem>. Le résultat est bien plus rapide car les clés
 n'ont pas à être cassées à chaque lecture.
@@ -238,7 +239,7 @@ pour changer le code de zone de votre lecteur DVD (sous Linux).
 <title>Lecture de VCDs</title>
 <para>
 Pour voir la liste complète des options disponibles, veuillez lire la page de man.
-La syntaxe pour un Video CD standard (VCD) est la suivante:
+La syntaxe pour lire un Video CD standard (VCD) est la suivante:
 <screen>mplayer vcd://<replaceable>&lt;piste&gt;</replaceable> [-cdrom-device <replaceable>&lt;périphérique&gt;</replaceable>]</screen>
 Exemple:
 <screen>mplayer vcd://<replaceable>2</replaceable> -cdrom-device <replaceable>/dev/hdc</replaceable></screen>
@@ -257,7 +258,7 @@ les VCDs.
 
 <para>
 À ce propos vous pouvez extraire des données d'un VCD avec
-<ulink url="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
+<ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
 et lire le fichier obtenu avec <application>MPlayer</application>.
 </para>
 
@@ -302,7 +303,7 @@ avec le pilote iso9660 standard du noyau! Il est recommandé d'utiliser l'option 
 à la place. D'autres possibilités pour la copie de VCD sont le nouveau pilote noyau
 <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> (qui ne fait pas partie du noyau
 officiel) qui montre les sessions du CD en temps que fichiers image) et
-<ulink url="http://cdrdao.sourceforge.net/">cdrdao</ulink>, une application d'enregistrement/copie
+<ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, une application d'enregistrement/copie
 bit-a-bit).
 </para>
 </formalpara>

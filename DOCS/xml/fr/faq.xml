@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.30 -->
+<!--synced with 1.55 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -62,7 +62,7 @@ Pourquoi n'utilisez-vous pas autoconf/automake ?
 Nous avons un système modulaire écrit à la main. Il fait un travail
 relativement bon, donc pourquoi changer ? Nous n'aimons pas les outils
 auto*, comme d'
-<ulink url="http://freshmeat.net/articles/view/889/">autres gens</ulink>.
+<ulink url="http://freshmeat.net/articles/view/889/">autres personnes</ulink>.
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -76,6 +76,32 @@ Y'a-t-il des paquets binaires (RPM/deb) de <application>MPlayer</application> ?
 <answer><para>
 Voir les sections <link linkend="debian">Debian</link> et <link linkend="rpm">RPM</link>
 pour plus de détails.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+La compilation s'arrête avec un message d'erreur similaire à celui-ci:
+<screen>
+    cfft.c: In function`passf2':
+    cfft.c:556: unable to find a register to spill in class `FLOAT_REGS'
+    cfft.c:556: this is the insn:
+    (insn 235 233 246 (set (subreg:SF (reg/v:DI 29 rmm0 [110]) 0)
+            (minus:SF (mem:SF (plus:SI (mult:SI (reg:SI 1 edx [112])
+                            (const_int 8 [0x8]))
+                        (reg/v/f:SI 3 ebx [62])) [4 S4 A32])
+                (reg:SF 8 st(0) [132]))) 533 {*fop_sf_1_nosse} (insn_list
+    232 (nil))    (expr_list:REG_DEAD (reg:SF 8 st(0) [132])
+            (nil)))
+    cfft.c:556: confused by earlier errors, bailing out
+</screen>
+</para></question>
+<answer><para>
+C'est un problème connu de <application>gcc</application> 3.2, upgradez
+en 3.3 pour résoudre le problème. Comment installer gcc est décrit dans la
+section <link linkend="gcc-296">gcc 2.96</link>. Vous pouvez également utiliser
+une librairie FAAD externe comme décrit dans la section 
+<link linkend="aac">AAC</link>.
 </para></answer>
 </qandaentry>
 
@@ -99,7 +125,7 @@ section <link linkend="gcc-296">gcc 2.96</link>.
 
 <qandaentry>
 <question><para>
-Configure se termine par ce texte, et MPlayer ne compile pas !
+Configure se termine par ce texte, et <application>MPlayer</application> ne compile pas !
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
@@ -127,11 +153,11 @@ rencontrez des problèmes.
 
 <qandaentry>
 <question><para>
-Génial, J'ai le gcc 3.0.1 fournit avec Red Hat/Mandrake, donc je suis tranquille !
+Génial, J'ai gcc 3.0.1 fournit avec Red Hat/Mandrake, donc je suis tranquille !
 </para></question>
 <answer><para>
 Non, car il y a (eu) des problèmes avec ces compilateurs également. Pour vérifier
-l'état des compilateurs gcc pour MPlayer, voyez la section
+l'état des compilateurs gcc pour MPlayer, voir la section
 <link linkend="install">Installation</link>.
 </para></answer>
 </qandaentry>
@@ -149,13 +175,13 @@ que A'rpi a envoyé à la liste <ulink url="http://mplayerhq.hu/pipermail/mplayer-
 Et nous avons des idegs. Et notre compteur d'ideg à été dépassé encore et encore.
 </para>
 <para>
-Malheureusement MPlayer est hors de contrôle. Il est utilisé par des lamers, des
+Malheureusement <application>MPlayer</application> est hors de contrôle. Il est utilisé par des lamers, des
 utilisateurs Linux qui ne peuvent même pas utiliser Windows, et n'ont jamais
 essayé de compiler un noyau. Ils ont installé (avec les options par défaut) une
 Mandrake ou une Red Hat ou une SuSE, et sans lire le manuel ils envoient des
-messages disant 'cela ne marche pas! aidez-moi ! SVP! je suis nouveau sous Linux!
-de l'aide! oh! aidez-moi!'. Nous ne pouvons pas les arrêter, mais au moins nous
-les forçons à lire le manuel et à lire les messages de ./configure et de MPlayer.
+messages disant 'cela ne marche pas ! aidez-moi ! SVP ! je suis nouveau sous Linux !
+de l'aide ! oh ! aidez-moi !'. Nous ne pouvons pas les arrêter, mais au moins nous
+les forçons à lire le manuel et à lire les messages de ./configure et de <application>MPlayer</application>.
 </para>
 <para>
 Et vous gens intelligents venez et nous insultez à propos de gcc 2.96 et des
@@ -182,7 +208,7 @@ Peut-être que nous devrions fermer le projet, le rendre closed source, commercia
 et fournir un support d'installation pour lui. ensuite nous pourrions quitter
 notre travail actuel, donc le développement pourrait être plus rapide, et nous
 pourrions gagner beaucoup d'argent avec et acheter une grande maison, etc etc.
-Le voulez-vous vraiment? Il semblerait.
+Le voulez-vous vraiment ? Il semblerait.
 </para>
 </blockquote>
 </para></answer>
@@ -195,7 +221,7 @@ La sortie SDL ne fonctionne ou ne compile pas. Le problème est ...
 <answer><para>
 Testé et fonctionnel avec SDL 1.2.x et devrait fonctionner sur SDL 1.1.7+.
 Il ne fonctionne <emphasis role="bold">pas</emphasis> avec les versions
-antérieures. Donc si vous choisissez d'utiliser une telle version, vous serez seul.
+antérieures. Donc si vous choisissez d'utiliser une telle version, débrouillez-vous.
 </para></answer>
 </qandaentry>
 
@@ -205,7 +231,7 @@ J'ai toujours des ennuis pour compiler le support SDL. gcc dit quelques chose co
 <screen>undefined reference to SDL_EnableKeyRepeat</screen>. Que faire ?
 </para></question>
 <answer><para>
-Où avez-vous installé la librairie SDL? Si vous l'avez installé dans
+Où avez-vous installé la librairie SDL ? Si vous l'avez installé dans
 <filename class="directory">/usr/local</filename> (par défaut) alors éditez le fichier
 <filename>config.mak</filename> à la racine et ajoutez &quot;-L/usr/local/lib&quot;
 après <systemitem>X_LIBS=</systemitem>. Maintenant tapez <command>make</command>.
@@ -215,20 +241,20 @@ C'est prêt !
 
 <qandaentry>
 <question><para>
-Cela ne compile pas, il manque un <systemitem>uint64_t</systemitem> ou des
-choses similaires ...
+Cela ne compile pas, il manque un <systemitem>uint64_t</systemitem>, 
+<filename>inttypes.h</filename> ou des choses similaires...
 </para></question>
 <answer><para>
 Copiez <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">ce <filename>inttypes.h</filename></ulink>
 dans <filename class="directory">/usr/local/include/</filename> ou dans un endroit
-équivalent et essayez de nouveau ...
+équivalent et essayez de nouveau...
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
 J'ai un Linux tournant sur un Pentium III mais <filename>./configure</filename>
-ne détecte pas SSE ...
+ne détecte pas SSE...
 </para></question>
 <answer><para>
 Seuls les noyaux de version 2.4.x supportent SSE (ou essayez le 2.2.19 ou supérieur,
@@ -262,7 +288,7 @@ closed source). Upgradez vos noyau, modutils et <application>MPlayer</applicatio
 
 <qandaentry>
 <question><para>
-Pendant 'make', MPlayer se plaint à propose de librairies X11. Je ne comprends pas,
+Pendant 'make', <application>MPlayer</application> se plaint à propose de librairies X11. Je ne comprends pas,
 J'ai VRAIMENT installé X !?
 </para></question>
 <answer><para>
@@ -293,7 +319,7 @@ Vous devez éditer le <filename>Makefile.cfg</filename> et décommenter
 
 <qandaentry>
 <question><para>
-J'ai compilé MPlayer avec le support libdvdcss/libdivxdecore, mais quand j'essaie de lancer, il dit:
+J'ai compilé <application>MPlayer</application> avec le support libdvdcss/libdivxdecore, mais quand j'essaie de lancer, il dit:
 <screen>
 error while loading shared libraries: lib*.so.0: cannot load shared object file: No such file or directory
 </screen>
@@ -350,7 +376,7 @@ Oui. Voir la section <link linkend="mailinglists">listes de diffusion</link>
 
 <qandaentry>
 <question><para>
-J'ai trouvé un sale bogue quand j'essaie de lire ma vidéo préférée! Qui dois-je
+J'ai trouvé un sale bogue quand j'essaie de lire ma vidéo préférée ! Qui dois-je
 informer ?
 </para></question>
 <answer><para>
@@ -361,12 +387,12 @@ suivez les instructions.
 
 <qandaentry>
 <question><para>
-J'ai des problèmes pour lire les fichiers avec le codec ... . Puis-je l'utiliser?
+J'ai des problèmes pour lire les fichiers avec le codec ... . Puis-je l'utiliser ?
 </para></question>
 <answer><para>
 Regardez l'<ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">état des codecs</ulink>,
 si il ne contient pas votre codec, lisez la <link linkend="codecs">documentation des codecs</link>,
-surtout le <link linkend="win32-codecs">HOWTO importation des codecs</link> et contactez-nous.
+surtout le <link linkend="codec-importing">HOWTO importation des codecs</link> et contactez-nous.
 </para></answer>
 </qandaentry>
 
@@ -378,6 +404,17 @@ Quand je démarre la lecture, j'obtiens ce message mais tout semble se dérouler n
 <answer><para>
 Vous avez besoin des droits root ou un noyau configuré spécialement pour utiliser le nouveau
 code de timing. Pour les détails voir la section <link linkend="rtc">RTC</link> de la documentation.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Comment puis-je faire une copie d'écran ?
+</para></question>
+<answer><para>
+Vous devez utiliser un pilote de sortie vidéo qui n'utilise pas d"overlay pour 
+pouvoir faire une copie d'écran. Sous X11, <option>-vo x11</option> peut le faire,
+sous Windows <option>-vo directx:noaccel</option> fonctionne.
 </para></answer>
 </qandaentry>
 
@@ -428,6 +465,7 @@ DR ceci inclut video_out)</para></listitem>
 <listitem><para>niveau actuel de postprocessing (en utilisant
 <option>-autoq</option>)</para></listitem>
 <listitem><para>taille actuelle du cache (environ 50% est normal)</para></listitem>
+<listitem><para>vitesse de lecture en tant que facteur de la vitesse originale</para></listitem>
 </itemizedlist>
 La plupart d'entre eux sont là pour des raisons de déboggage et seront retirés à
 un moment ou un autre.
@@ -499,7 +537,7 @@ LIRC ne fonctionne pas, parce que ...
 </para></question>
 <answer><para>
 Êtes-vous sûr d'utiliser <command>mplayer</command> au lieu de
-<command>mplayer_lirc</command>? Notez que c'était <command>mplayer_lirc</command>
+<command>mplayer_lirc</command> ? Notez que c'était <command>mplayer_lirc</command>
 pendant un long moment, incluant la version 0.60, mais il à été récemment été renommé en
 <command>mplayer</command>.
 </para></answer>
@@ -511,7 +549,7 @@ Les sous-titres sont très jolis, les plus beaux que j'ai jamais vu, mais ils
 ralentissent la lecture! Je sais que ce n'est pas courant ...
 </para></question>
 <answer><para>
-Après avoir exécuté <filename>./configure</filename>, editez <filename>config.h</filename>
+Après avoir exécuté <filename>./configure</filename>, éditez <filename>config.h</filename>
 et remplacez <systemitem>#undef FAST_OSD</systemitem> par
 <systemitem>#define FAST_OSD</systemitem>. Ensuite recompilez.
 </para></answer>
@@ -543,7 +581,7 @@ Mais configure me dit
 </para></question>
 <answer><para>
 Vous avez besoin d'obtenir <systemitem class="library">libavcodec</systemitem> depuis le CVS de FFmpeg. Lisez les
-instructions dans la section <link linkend="ffmpeg">libavcodec</link>.
+instructions dans la section <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para></answer>
 </qandaentry>
 
@@ -575,7 +613,7 @@ Utilisez-vous FVWM ? Essayez cela:
 
 <qandaentry>
 <question><para>
-Comment puis-je lancer MPlayer en tâche de fond ?
+Comment puis-je lancer <application>MPlayer</application> en tâche de fond ?
 </para></question>
 <answer><para>
 Utilisez:
@@ -589,6 +627,89 @@ Utilisez:
 
 <qandaentry>
 <question><para>
+Comment sélectionner les pistes audio ou les sous-titres d'un DVD ou de fichiers
+OGM, Matroska ou NUT ?
+</para></question>
+<answer><para>
+Vous devez utiliser <option>-aid</option> (audio ID) ou <option>-alang</option>
+(audio language), <option>-sid</option>(subtitle ID) ou <option>-slang</option>
+(subtitle language), par exemple:
+<screen>
+mplayer example.mkv -alang eng -slang eng
+mplayer example.mkv -aid 1 -sid 1
+</screen>
+Pour voir ceux qui sont disponibles:
+<screen>
+mplayer -vo null -ao null -frames 0 -v <replaceable>fichier</replaceable> | grep sid
+mplayer -vo null -ao null -frames 0 -v <replaceable>fichier</replaceable> | grep aid
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+J'essaie de lire un flux aléatoire depuis l'internet mais cela échoue.
+</para></question>
+<answer><para>
+Essayez de lire le flux avec l'option <option>-playlist</option>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+J'ai téléchargé un film sur un réseau P2P mais il ne fonctionne pas !
+</para></question>
+<answer><para>
+Votre fichier est probablement endommagé ou faux. Si vous l'avez obtenu par un
+ami, et qu'il dit qu'il fonctionne, essayez de comparer les sommes 
+<application>md5sum</application>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Je viens d'installer <application>MPlayer</application>. Quand je veux ouvrir
+un fichier vidéo cela provoque une erreur fatale:
+<screen>
+Error opening/initializing the selected video_out (-vo) device.
+</screen>
+Comment résoudre ce problème ?
+</para></question>
+<answer><para>
+Changez de pilote de sortie vidéo. Lancez la commande suivante pour obtenir une
+liste des pilotes de sortie vidéo disponibles:
+<screen>
+mplayer -vo help
+</screen>
+Après avoir choisi le pilote vidéo approprié, ajoutez-leà votre fichier de configuration.
+Ajoutez
+<programlisting>
+ vo = <replaceable>pilote_choisi</replaceable>
+</programlisting>
+à <filename>~/.mplayer/config</filename> et/ou
+<programlisting>
+vo_driver = <replaceable>pilote_choisi</replaceable>
+</programlisting>
+à <filename>~/.mplayer/gui.conf</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+J'ai des problèmes pour afficher mes sous-titres, à l'aide !!
+</para></question>
+<answer><para>
+Assurez-vous d'avoir installé les polices correctement. Suivez les étapes de la
+partie <link linkend="mpsub-install">OSD et sous-titres</link> de la section
+installation. Si vous utilisez des polices TrueType, vérifiez que la librairie
+<systemitem class="library">freetype</systemitem> est installé.
+Vous pouvez aussi essayer de vérifier vos sous-titres dans un éditeur de texte
+ou avec d'autres lecteurs. Ou encore les convertir dans un autre format.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Je n'arrive pas à trouver la cause de certains problèmes étranges de lecture.
 </para></question>
 <answer><para>
@@ -597,6 +718,62 @@ Avez-vous un fichier <filename>codecs.conf</filename> encore présent dans
 <filename>/usr/local/etc/</filename> ou dans un endroit similaire ? Supprimez-le,
 les fichiers <filename>codecs.conf</filename> obsolètes peuvent causer d'obscurs
 problèmes. MPlayer utilisera son fichier intégré à la place.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Pourquoi <application>MPlayer</application> ne fonctionne-t-il pas sur Fedora Core?
+</para></question>
+<answer><para>
+Il y a une mauvaise intéraction sur Fedora entre exec-shield, prelink, et toute
+application utilisant les DLLs Windows (comme <application>MPlayer</application>).
+</para>
+<para>
+Le problème est que exec-shield rend les adresses de chargement de toutes les 
+librairies système aléatoires. Cela se produit durant la phase de prelink (une
+fois toutes les deux semaines).
+</para>
+<para>
+Quand <application>MPlayer</application> essaie de charger une DLL Windows
+il veut la placer à une adresse spécifique (0x400000). Si une librairie système
+importante s'y trouve déjà, <application>MPlayer</application> plantera
+(Un symptôme typique est un segmentation fault en essayant de lire des fichiers
+Windows Media 9). 
+</para>
+<para>
+Si vous avez ce problème vous avez deux options:
+<itemizedlist>
+<listitem><para>Attendez deux semaines. Cela peut fonctionner de nouveau.</para></listitem>
+<listitem><para>Relinkez toutes les binaires du système avec des options de 
+prelink différentes. Voici les étapes à suivre:</para>
+<para>
+<orderedlist>
+<listitem><para>Éditez <filename>/etc/syconfig/prelink</filename> et changez</para>
+<para>
+<programlisting>
+PRELINK_OPTS=-mR
+</programlisting>
+</para>
+<para>
+par
+<programlisting>
+PRELINK_OPTS="-mR --no-exec-shield"
+</programlisting>
+</para>
+</listitem>
+<listitem><para><command>touch /var/lib/misc/prelink.force</command></para></listitem>
+<listitem><para><command>/etc/cron.daily/prelink</command>
+(Cela relink toutes les applications, et peut prendre beaucoup de temps.)</para></listitem>
+<listitem>
+<para><command>execstack -s <replaceable>/chemin/de/</replaceable>mplayer</command>
+(Cela désactive exec-shield pour le binaire <application>MPlayer</application>.)
+</para>
+</listitem>
+</orderedlist>
+</para>
+</listitem>
+</itemizedlist>
 </para></answer>
 </qandaentry>
 
@@ -674,7 +851,7 @@ sans utiliser cette option.
 <qandaentry>
 <question><para>
 J'ai des problèmes avec [votre gestionnaire de fenêtres] et les modes plein écran
-xv/xmga/sdl/x11 ...
+xv/xmga/sdl/x11...
 </para></question>
 <answer><para>
 Lisez <link linkend="bugreports">Comment reporter des bogues</link> et envoyez-nous un
@@ -738,7 +915,7 @@ Il peut y avoir plusieurs raisons.
 <listitem><para>
 Votre CPU <emphasis role="bold">et/ou</emphasis> votre carte graphique
 <emphasis role="bold">et/ou</emphasis> votre bus est trop lent. MPlayer affiche un
-message si c'est le cas (et le compteur de trames sautées grandit vite).
+message si c'est le cas (et le compteur de trames sautées augmente vite).
 </para></listitem>
 <listitem><para>
 Si c'est un AVI, peut-être qu'il a un mauvais entrelacement. Essayez l'option
@@ -746,7 +923,7 @@ Si c'est un AVI, peut-être qu'il a un mauvais entrelacement. Essayez l'option
 </para></listitem>
 <listitem><para>
 Votre pilote son est boggué, ou vous utilisez ALSA 0.5 avec <option>-ao oss</option>.
-Voir la section <link linkend="audio-dev">cartes sons</link>.
+Voir la section <link linkend="audio-dev">cartes son</link>.
 </para></listitem>
 <listitem><para>
 L'AVI a un mauvais entête, essayez l'option <option>-nobps</option>, et/ou <option>-mc 0</option>.
@@ -783,7 +960,7 @@ d'autres sont lus à double vitesse !
 </para></question>
 <answer><para>
 Vous avez une carte son/pilote boguée. Elle est certainement fixé à 44100Hz, et
-vous essayez de lire un fichier qui a de l'audio à 22050Hz. Essayez le plugin resample.
+vous essayez de lire un fichier qui a de l'audio à 22050Hz. Essayez le filtre audio resample.
 </para></answer>
 </qandaentry>
 
@@ -840,7 +1017,7 @@ Essayez <option>-nocache</option>.
 
 <qandaentry>
 <question><para>
-Comment puis-je lire les fichiers audio MPEG Layer 2 (mp2) ?
+Comment puis-je lire les fichiers audio MPEG Layer 2 (MP2) ?
 </para></question>
 <answer><para>
 Vous devez utiliser <option>-rawaudio on:format=0x50</option>.
@@ -851,6 +1028,19 @@ Vous devez utiliser <option>-rawaudio on:format=0x50</option>.
 
 <qandadiv id="faq-driver">
 <title>Problèmes de pilotes Vidéo/audio (vo/ao)</title>
+
+<qandaentry>
+<question><para>
+Comment puis-je utiliser <application>dmix</application> avec
+<application>MPlayer</application>?
+</para></question>
+<answer><para>
+Après avoir configuré votre 
+<ulink url="http://alsa.opensrc.org/index.php?page=DmixPlugin">asoundrc</ulink>
+vous devez utiliser <option>-ao alsa:device=dmix</option>.
+</para></answer>
+</qandaentry>
+
 <qandaentry>
 <question><para>
 Je n'ai pas de son en jouant une vidéo et j'obtiens des messages similaires à celui ci:
@@ -863,15 +1053,15 @@ Je n'ai pas de son en jouant une vidéo et j'obtiens des messages similaires à ce
 </screen>
 </para></question>
 <answer><para>
-Vous êtes sous KDE ou GNOME avec le démon son ARTS ou ESD? Essayez de désactiver le
+Vous êtes sous KDE ou GNOME avec le démon son ARTS ou ESD ? Essayez de désactiver le
 démon son, ou utilisez les options <option>-ao arts</option> ou <option>-ao esd</option>
-pour faire utiliser ARTS ou ESD à MPlayer.
+pour faire utiliser ARTS ou ESD à <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Et a propos du pilote DGA? Je ne le trouve pas !
+Et a propos du pilote DGA ? Je ne le trouve pas !
 </para></question>
 <answer><para>
 <filename>./configure</filename> autodétecte votre pilote DGA. Si <option>-vo help</option>
@@ -899,7 +1089,7 @@ root, mais ce n'est <emphasis role="bold">pas recommandé</emphasis> !
 Cela présente une <emphasis role="bold">grosse</emphasis> faille de sécurité !
 Ne faites <emphasis role="bold">jamais</emphasis> ceci sur un serveur ou un ordinateur
 accessible par d'autres personnes que vous, elles pourraient obtenir les privilèges
-root par l'exécutable SUID root MPlayer.
+root par l'exécutable SUID root <application>MPlayer</application>.
 <emphasis role="bold">Vous êtes prévenu</emphasis>.
 </para></warning>
 </para></answer>
@@ -985,14 +1175,15 @@ forcer/désactiver Xv en utilisant <option>-forcexv</option> et <option>-noxv</op
 <title>Lecture DVD</title>
 <qandaentry>
 <question><para>
-Et a propos de la navigation DVD ?
+Et a propos de la navigation et des menus DVD ?
 </para></question>
 <answer><para>
-Le support pour dvdnav dans <application>MPlayer</application> est actuellement cassé,
-bien que la lecture normale fonctionne. Si vous voulez jouer avec des jolis menus, vous
-devrez utiliser un autre lecteur comme <application>xine</application> ou
-<application>Ogle</application>. Si vous vous souciez de la navigation DVD, envoyez un
-<ulink url="../../tech/patches.txt">patch</ulink>.
+<application>MPlayer</application> ne supporte pas les menus DVD à cause de sérieuses
+limitations architecturales qui empèchent de gérer correctement les images fixes
+et le contenu intéractif. Si vous voulez jouer avec des jolis menus, vous
+devrez utiliser un autre lecteur comme <application>xine</application>, <application>vlc</application> ou
+<application>Ogle</application>. Si vous voulez voir la navigation DVD dans <application>MPlayer</application>,
+vous devrez l'implémenter vous-même, mais soyez conscient que ce sera très dur.
 </para></answer>
 </qandaentry>
 
@@ -1021,7 +1212,7 @@ qui est présent dans les sources de <application>MPlayer</application>, et est u
 
 <qandaentry>
 <question><para>
-Et à propos des sous-titres? Est ce que MPlayer peut les afficher ?
+Et à propos des sous-titres? Est-ce que MPlayer peut les afficher ?
 </para></question>
 <answer><para>
 Oui. Voir le <link linkend="dvd">chapitre DVD</link>.
@@ -1077,14 +1268,28 @@ d'activer le DMA pour le lecteur DVD avec l'outil <command>hdparm</command> (déc
 dans le <link linkend="drives">chapitre CD</link>).
 </para></answer>
 </qandaentry>
+
+<qandaentry>
+<question><para>
+J'ai copié un DVD en utilisant vobcopy. Comment puis-je le lire/l'encoder depuis
+mon disque dur ?
+</para></question>
+<answer><para>
+Utilisez l'option <option>-dvd-device</option> pour préciser le répertoire qui
+contient les fichiers:
+<screen>
+mplayer dvd://1 -dvd-device <replaceable>/chemin/du/répertoire</replaceable>
+</screen>
+</para></answer>
+</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-features">
 <title>Demandes de fonctionnalités</title>
 <qandaentry>
 <question><para>
-Si est MPlayer est en pause et que j'essaie de me déplacer ou de presser
-n'importe quelle touche, MPlayer sort de pause. Je voudrais être capable de me
+Si est <application>MPlayer</application> est en pause et que j'essaie de me déplacer ou de presser
+n'importe quelle touche, <application>MPlayer</application> sort de pause. Je voudrais être capable de me
 déplacer dans la vidéo en pause.
 </para></question>
 <answer><para>
@@ -1105,7 +1310,7 @@ Vous êtes libre de l'implémenter, et d'envoyer un patch. Ne le demandez pas.
 
 <qandaentry>
 <question><para>
-Comment puis-je faire pour que MPlayer se rappelle des options que j'utilise pour
+Comment puis-je faire pour que <application>MPlayer</application> se rappelle des options que j'utilise pour
 ce fichier en particulier ?
 </para></question>
 <answer><para>
@@ -1123,7 +1328,7 @@ ou dans le même répertoire que le fichier.
 Comment puis-je encoder ?
 </para></question>
 <answer><para>
-Lisez la section <link linkend="mencoder">MEncoder</link>.
+Lisez la section <link linkend="mencoder"><application>MEncoder</application></link>.
 </para></answer>
 </qandaentry>
 
@@ -1232,7 +1437,27 @@ Comment puis-je insérer des sous-titres dans le fichier de sortie ?
 </para></question>
 <answer><para>
 Passez simplement l'option <option>-sub &lt;nomfichier&gt;</option> (ou <option>-sid</option>,
-<option>-vobsub</option>, respectivement) à MEncoder.
+<option>-vobsub</option>, respectivement) à <application>MEncoder</application>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Comment puis-je encoder uniquement le son d'une vidéo musicale ?
+</para></question>
+<answer><para>
+Cela n'est pas possible directement, mais vous pouvez essayer ça (notez le 
+<emphasis role="bold">&amp;</emphasis> à la fin de la commande
+<command>mplayer</command>):
+<screen>
+    mkfifo encode
+    mplayer -ao pcm -aofile encode dvd://1 &amp;
+    lame <replaceable>vos_options</replaceable> encode music.mp3
+    rm encode
+</screen>
+Cela vous permet d'utiliser n'importe quel encodeur, pas seulement <application>LAME</application>,
+remplacez simplement <command>lame</command> par votre encodeur audio préféré dans la
+commande ci-dessus.
 </para></answer>
 </qandaentry>
 

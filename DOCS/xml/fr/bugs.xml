@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.6 $ -->
+<!-- synced with 1.12 $ -->
 <appendix id="bugs">
 <title>Bogues connus</title>
 <sect1 id="bugs-special">
@@ -13,13 +13,15 @@
 </listitem>
 <listitem>
 <para>SIGILL (signal 4) Général:</para>
-<para>Problème: vous avez compilé et utilisez mplayer sur des machines différentes
+<para>Problème: vous avez compilé et utilisez <application>MPlayer</application> sur des machines différentes
 (par exemple compilé sur P3 et tournant sur Celeron)</para>
-<para>Solution: compilez MPlayer sur la machine sur laquelle vous l'utiliserez !</para>
-<para>Contournement: <command>./configure --disable-sse</command> etc. options</para>
+<para>Solution: compilez <application>MPlayer</application> sur la machine sur laquelle vous l'utiliserez !</para>
+<para>Contournement: Vous pouvez oublier tout ceci en passant l'option <option>--enable-runtime-cpudetection</option>
+ou en désactivant les instructions spécifiques au CPU (comme <option>--disable-mmx</option>, <option>--disable-3dnow</option>, etc)
+lors de l'étape de configuration.</para>
 </listitem>
 <listitem>
-<para>&quot;Internal buffer inconsistency&quot; pendant l'exécution de MEncoder:</para>
+<para>&quot;Internal buffer inconsistency&quot; pendant l'exécution de <application>MEncoder</application>:</para>
 <para>Problème: problème connu quand lame &lt; 3.90 à été compilé avec gcc 2.96 ou 3.x</para>
 <para>Solution: utilisez lame &gt;=3.90.</para>
 <para>Contournement: compilez lame avec gcc 2.95.x et retirez les paquetages lame éventuellement
@@ -31,8 +33,9 @@ installés, ils peuvent avoir été compilé avec gcc 2.96.</para>
 <para>Contournement: utilisez le décodeur MP1/MP2/MP3 de FFmpeg (lent) (<option>-ac ffmpeg</option>)</para>
 </listitem>
 <listitem>
-<para>sig11 dans libmpeg2, pendant le redimensionnement+encodage:</para>
-<para>Problème: bogue MMX connu du GCC 2.95.2, mettez à jour en 2.95.3.</para>
+<para>SIGSEGV (signal 11) dans libmpeg2, pendant le redimensionnement+encodage:</para>
+<para>Problème: bogue MMX connu du GCC 2.95.2</para>
+<para>Solution: mettez à jour en 2.95.3.</para>
 </listitem>
 </itemizedlist>
 </sect1>
@@ -43,7 +46,7 @@ installés, ils peuvent avoir été compilé avec gcc 2.96.</para>
 <sect2 id="bugs-delay-all">
 <title>Décalage audio général ou son saccadé (existe avec tous ou de nombreux fichiers)</title>
 <itemizedlist>
-<listitem><para>Le plus commun: pilote audio bogué! - Essayez d'utiliser différent pilotes, essayez
+<listitem><para>Le plus courant: pilote audio bogué ! - Essayez d'utiliser d'autres pilotes, essayez
 l'émulation OSS ALSA 0.9 avec <option>-ao oss</option>, essayez aussi <option>-ao sdl</option>,
 des fois ça aide. Si votre fichier est lu correctement avec <option>-nosound</option>,
 alors vous pouvez être certain qu'il s'agit d'un problème de carte son (ou de pilote).
@@ -52,7 +55,7 @@ alors vous pouvez être certain qu'il s'agit d'un problème de carte son (ou de pi
 <itemizedlist>
 <listitem>
 <para>Problèmes de buffer audio (taille de buffer mal détectée)</para>
-<para>Contournement: option <option>-abs</option> de MPlayer</para>
+<para>Contournement: option <option>-abs</option> de <application>MPlayer</application></para>
 </listitem>
 </itemizedlist>
 <itemizedlist>
@@ -82,7 +85,7 @@ augmenter la vitesse.</para>
 Contournement:
   <itemizedlist>
   <listitem>
-    <para>option <option>-ni</option> ou <option>-nobps</option> (pour les fichiers
+    <para>options <option>-ni</option> ou <option>-nobps</option> (pour les fichiers
     non-entrelacés ou mauvais)</para>
     <para>et/ou</para>
   </listitem>
@@ -102,7 +105,7 @@ Si rien de tous ça n'aide, uploadez le fichier SVP, nous regarderons (et réparer
 <para>Votre carte son ne supporte pas la lecture à 48kHz</para>
 <para>Contournement: achetez une meilleur carte son... ou essayez de décrémenter les
 fps de 10% (utilisez <option>-fps 27</option> pour un film à 30fps) ou utilisez le
-plugin resampler</para>
+filtre resample</para>
 </listitem>
 <listitem>
 <para>Machine lente (si A-V n'est pas proche de 0, et que le dernier nombre de la ligne
@@ -117,7 +120,7 @@ d'état augmente)</para>
 <itemizedlist>
 <listitem>
 <para>Votre fichier utilise un codec audio non-supporté</para>
-<para>Contournement: lisez la documentation et aidez-nous à en ajouter le support</para>
+<para>Lisez la documentation et aidez-nous à en ajouter le support</para>
 </listitem>
 </itemizedlist>
 </sect2>
@@ -138,7 +141,7 @@ utilisant les options <option>-vc</option> ou <option>-vfm</option>
 <listitem>
 <para>
 Vous essayez de lire un fichier DivX 3.x avec le décodeur OpenDivX ou XviD
-(<option>-vc odivx</option>) - installez DivX4Linux et recompilez MPlayer
+(<option>-vc odivx</option>) - installez DivX4Linux et recompilez
 </para>
 </listitem>
 </itemizedlist>

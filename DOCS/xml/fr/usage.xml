@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.23 -->
 <chapter id="usage">
 <title>Utilisation</title>
 
@@ -112,11 +112,18 @@ Voir la page de man pour une liste complète des contrôles clavier.
 
 <para>
 <application>MPlayer</application> vous permet d'associer n'importe quel
-touche/bouton à n'importe quelle commande MPlayer en utilisant un simple fichier
+touche/bouton à n'importe quelle commande <application>MPlayer</application> en utilisant un simple fichier
 de config. La syntaxe consiste un nom de touche suivi d'une commande. Le fichier
 de config par défaut est <filename>$HOME/.mplayer/input.conf</filename> mais cela
 peut être outrepassé en utilisant l'option <option>-input <replaceable>conf</replaceable></option>
 (les chemins relatifs le sont par rapport à <filename>$HOME/.mplayer</filename>).
+</para>
+
+<para>
+Vous pouvez obtenir une liste complète des touches supportées en tapant
+<command>mplayer -input keylist</command>
+et une liste complète des commandes disponibles en tapant
+<command>mplayer -input cmdlist</command>.
 </para>
 
 <example>
@@ -136,190 +143,6 @@ q quit
 ENTER pt_step 1 1<!--
 --></programlisting>
 </example>
-
-
-<sect3 id="ctrl-cfg-keys">
-<title>Noms des touches</title>
-
-<para>
-Vous pouvez obtenir la liste complète en exécutant
-<command>mplayer -input keylist</command>.
-</para>
-
-<itemizedlist>
-<title>Keyboard</title>
-<listitem><simpara>N'importe quel caractère imprimable</simpara></listitem>
-<listitem><simpara><literal>SPACE</literal></simpara></listitem>
-<listitem><simpara><literal>ENTER</literal></simpara></listitem>
-<listitem><simpara><literal>TAB</literal></simpara></listitem>
-<listitem><simpara><literal>CTRL</literal></simpara></listitem>
-<listitem><simpara><literal>BS</literal></simpara></listitem>
-<listitem><simpara><literal>DEL</literal></simpara></listitem>
-<listitem><simpara><literal>INS</literal></simpara></listitem>
-<listitem><simpara><literal>HOME</literal></simpara></listitem>
-<listitem><simpara><literal>END</literal></simpara></listitem>
-<listitem><simpara><literal>PGUP</literal></simpara></listitem>
-<listitem><simpara><literal>PGDWN</literal></simpara></listitem>
-<listitem><simpara><literal>ESC</literal></simpara></listitem>
-<listitem><simpara><literal>RIGHT</literal></simpara></listitem>
-<listitem><simpara><literal>LEFT</literal></simpara></listitem>
-<listitem><simpara><literal>UP</literal></simpara></listitem>
-<listitem><simpara><literal>DOWN</literal></simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>Souris (uniquement sous X)</title>
-<listitem><simpara>
-  <literal>MOUSE_BTN0</literal> (Bouton gauche)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN1</literal> (Bouton droit)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN2</literal> (Bouton du milieu)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN3</literal> (molette)</simpara></listitem>
-<listitem><simpara>
-  <literal>MOUSE_BTN4</literal> (molette)</simpara></listitem>
-<listitem><simpara>...</simpara></listitem>
-<listitem><simpara><literal>MOUSE_BTN9</literal></simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>Joystick (son support doit avoir été activé à la compilation)</title>
-<listitem><simpara>
-  <literal>JOY_RIGHT</literal> ou
-  <literal>JOY_AXIS0_PLUS</literal></simpara></listitem>
-<listitem><simpara>
-  <literal>JOY_LEFT</literal> ou
-  <literal>JOY_AXIS0_MINUS</literal></simpara></listitem>
-<listitem><simpara>
-  <literal>JOY_UP</literal> ou
-  <literal>JOY_AXIS1_MINUS</literal></simpara></listitem>
-<listitem><simpara>
-  <literal>JOY_DOWN</literal> ou
-  <literal>JOY_AXIS1_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS2_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS2_MINUS</literal></simpara></listitem>
-<listitem><simpara>...</simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS9_PLUS</literal></simpara></listitem>
-<listitem><simpara><literal>JOY_AXIS9_MINUS</literal></simpara></listitem>
-</itemizedlist>
-</sect3>
-
-
-<sect3 id="ctrl-cfg-commands">
-<title>Commandes</title>
-
-<para>
-Vous pouvez obtenir la liste complète des commandes en exécutant
-<command>mplayer -input cmdlist</command>.
-</para>
-
-<itemizedlist>
-<listitem><para><literal>seek</literal> (int) val [(int) type=0]</para>
-  <para>
-  Saute à une position donnée.
-  Le type <literal>0</literal> est un déplacement relatif de +/- val secondes.
-  Le type <literal>1</literal> se déplace à val% du film.
-  </para></listitem>
-<listitem><para><literal>audio_delay</literal> (float) val</para>
-  <para>
-  Ajuste le décalage audio de val secondes
-  </para></listitem>
-<listitem><para><literal>quit</literal></para>
-  <para>
-  Quitte <application>MPlayer</application>
-  </para></listitem>
-<listitem><para><literal>pause</literal></para>
-  <para>
-  Pause/relance la lecture
-  </para></listitem>
-<listitem><para><literal>grap_frames</literal></para>
-  <para>
-  Quelqu'un sait ?
-  </para></listitem>
-<listitem><para><literal>pt_step</literal> (int) val [(int) force=0]</para>
-  <para>
-  Va vers l'entrée précédente/suivante de l'ordre de lecture. Le signe de val
-  indique la direction. Si aucune entrée n'est disponible dans la direction
-  demandée, cela ne fera rien à moins que force ne soit pas égal à 0.
-  </para></listitem>
-<listitem><para><literal>pt_up_step</literal> (int) val [(int) force=0]</para>
-  <para>
-  Comme pt_step mais il saute au prochain/précédent dans la liste parente. Il
-  est utilisé pour casser les boucles internes dans le playtree.
-  </para></listitem>
-<listitem><para><literal>alt_src_step</literal> (int) val</para>
-  <para>
-  Quand plusieurs sources sont disponibles cela sélectionne la prochaine/précédente
-  (pas supporté par les playlists asx).
-  </para></listitem>
-<listitem><para><literal>sub_delay</literal> (float) val [(int) abs=0]</para>
-  <para>
-  Ajuste le décalage des sous-titres de +/- val secondes or ou le fixe à val secondes
-  quand abs est différent de zéro.
-  </para></listitem>
-<listitem><para><literal>osd</literal> [(int) level=-1]</para>
-  <para>
-  Bascule le mode osd ou change le niveau quand level &gt; 0.
-  </para></listitem>
-<listitem><para><literal>volume</literal> (int) dir</para>
-  <para>Augmente/diminue le volume
-  </para></listitem>
-<listitem><simpara><literal>contrast</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
-<listitem><simpara><literal>brightness</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
-<listitem><simpara><literal>hue</literal> (int) val [(int) abs=0]
-  </simpara></listitem>
-<listitem><para><literal>saturation</literal> (int) val [(int) abs=0]</para>
-  <para>
-  Fixe/Ajuste les paramètres vidéo. L'intervalle de Val va de -100 à 100.
-  </para></listitem>
-<listitem><para><literal>frame_drop</literal> [(int) type=-1]</para>
-  <para>
-  Bascule/Fixe le mode saut de trames.
-  </para></listitem>
-<listitem><para><literal>sub_visibility</literal></para>
-  <para>
-  Bascule l'affichage des sous-titres.
-  </para></listitem>
-<listitem><para><literal>sub_pos</literal> (int) val</para>
-  <para>
-  Ajuste la position des sous-titres.
-  </para></listitem>
-<listitem><para><literal>vobsub_lang</literal></para>
-  <para>
-  Change la langue des sous-titres VobSub.
-  </para></listitem>
-<listitem><para><literal>vo_fullscreen</literal></para>
-  <para>
-  Active le plein-écran.
-  </para></listitem>
-<listitem><para><literal>tv_step_channel</literal> (int) dir</para>
-  <para>
-  Sélectionne le prochain/précédent canal TV.
-  </para></listitem>
-<listitem><para><literal>tv_step_norm</literal></para>
-  <para>
-  Change la norme TV.
-  </para></listitem>
-<listitem><para><literal>tv_step_chanlist</literal></para>
-  <para>
-  Change la liste des canaux.
-  </para></listitem>
-<listitem><simpara><literal>gui_loadfile</literal></simpara></listitem>
-<listitem><simpara><literal>gui_loadsubtitle</literal></simpara></listitem>
-<listitem><simpara><literal>gui_about</literal></simpara></listitem>
-<listitem><simpara><literal>gui_play</literal></simpara></listitem>
-<listitem><simpara><literal>gui_stop</literal></simpara></listitem>
-<listitem><simpara><literal>gui_playlist</literal></simpara></listitem>
-<listitem><simpara><literal>gui_preferences</literal></simpara></listitem>
-<listitem><para><literal>gui_skinbrowser</literal></para>
-  <para>
-  actions GUI
-  </para></listitem>
-</itemizedlist>
-</sect3>
 </sect2>
 
 
@@ -329,13 +152,13 @@ Vous pouvez obtenir la liste complète des commandes en exécutant
 <para>
 Linux Infrared Remote Control - utilisez un récepteur infrarouge fait
 maison, une télécommande, et contrôlez votre linux à distance ! Plus d'infos
-sur <ulink url="http://www.lirc.org">www.lirc.org</ulink>.
+sur <ulink url="http://www.lirc.org">la page de LIRC</ulink>.
 </para>
 
 <para>
-Si vous avez installé le paquetage lirc, configure le détectera automatiquement. Si
+Si vous avez installé le paquet LIRC, <filename>configure</filename> le détectera automatiquement. Si
 tout c'est bien passé, <application>MPlayer</application> affichera un
-message du genre "<computeroutput>Setting up lirc support...</computeroutput>"
+message du genre &quot;<computeroutput>Setting up LIRC support...</computeroutput>&quot;
 au démarrage. Si une erreur se produit il vous le dira. Si il ne vous dit
 rien à propos de LIRC c'est que son support n'est pas compilé. C'est tout :-)
 </para>
@@ -343,10 +166,10 @@ rien à propos de LIRC c'est que son support n'est pas compilé. C'est tout :-)
 <para>
 Le nom de l'application à lancer avec <application>MPlayer</application> est
 - oh surprise - <filename>mplayer</filename>. Vous pouvez utiliser n'importe
-quelle commande mplayer et même passer plus d'une commande en les séparant avec
+quelle commande <application>MPlayer</application> et même passer plus d'une commande en les séparant avec
 <literal>\n</literal>. N'oubliez pas d'activer le flag repeat dans
 <filename>.lircrc</filename> quand cela est approprié (déplacement, volume, etc).
-Voici un extrait de mon
+Voici un extrait d'un fichier d'exemple
 <filename>.lircrc</filename>:
 </para>
 
@@ -393,6 +216,8 @@ Le mode esclave vous permet de construire un frontend à
 <application>MPlayer</application>. Quand il est activé (avec
 <option>-slave</option>) <application>MPlayer</application> lit les commandes
 séparées par un saut de ligne (\n) depuis l'entrée par défaut (stdin).
+Les commandes sont documentées dans le fichier
+<ulink url="../../tech/slave.txt">slave.txt</ulink>.
 </para>
 </sect2>
 </sect1>
@@ -409,7 +234,7 @@ utilisant les protocoles HTTP, FTP, MMS ou RTSP/RTP.
 <para>
 La lecture se fait juste en ajoutant l'URL à la ligne de commande.
 <application>MPlayer</application> utilise également la variable d'environnement
-<envar>http_proxy</envar>, et utilise le proxy si disponible. L'utilisation du Proxy
+<envar>http_proxy</envar>, et utilise le proxy si disponible. L'utilisation du proxy
 peut aussi être forcé:
 <screen>mplayer <replaceable>http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</replaceable></screen>
 </para>
@@ -496,7 +321,7 @@ basé sur un fichier de configuration EDL spécifique au film.
 Ceci est utile pour ceux qui veulent voir un film en mode "tout public".
 Vous pouvez couper toutes violence, profanation, Jar-Jar Binks .. d'un film
 suivant vos préférences personnelles. A part ça, il y a d'autres
-utilisations, comme sauter automatiquement les pubs dans les fichiers vidéos
+utilisations, comme sauter automatiquement les publicités dans les fichiers vidéos
 que vous regardez.
 </para>
 

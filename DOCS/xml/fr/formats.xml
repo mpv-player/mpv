@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.17 -->
 <sect1 id="formats">
 <title>Formats supportés</title>
 
@@ -8,26 +8,27 @@ Il est important de clarifier une erreur commune. Quand les gens voient
 un fichier avec une extension <filename>.AVI</filename>, ils en concluent
 immédiatement qu'il ne s'agit pas d'un fichier MPEG. Ce n'est pas vrai.
 Du moins pas entièrement. Contrairement aux suppositions populaires, un
-tel fichier <emphasis>peut</emphasis> contenir de la vidéo MPEG1.
+tel fichier <emphasis>peut</emphasis> contenir de la vidéo MPEG-1.
 </para>
 
 <para>
 Vous voyez, un <emphasis role="bold">codec</emphasis> n'est pas la même chose qu'un
 <emphasis role="bold">format de fichier</emphasis>.
-Exemples de <emphasis role="bold">codecs</emphasis> vidéo: MPEG1, MPEG2, DivX, Indeo5, 3ivx.
+Exemples de <emphasis role="bold">codecs</emphasis> vidéo: MPEG-1, MPEG-2, 
+MPEG-4 (DivX), Indeo5, 3ivx.
 Exemples de <emphasis role="bold">formats</emphasis> de fichier: MPG, AVI, ASF.
 </para>
 
 <para>
 En théorie, vous pouvez placer une vidéo OpenDivX et de l'audio MP3 dans un format
 de fichier <emphasis role="bold">MPG</emphasis>. Par contre, la plupart des lecteurs
-ne pourrons pas lire ce fichier car ils attendent de la vidéo MPEG1 et de l'audio
+ne pourrons pas lire ce fichier car ils attendent de la vidéo MPEG-1 et de l'audio
 MP2 (contrairement à l'<emphasis role="bold">AVI</emphasis>, le
 <emphasis role="bold">MPG</emphasis> ne contient pas les champs nécessaires pour
-décrire ses flux vidéo et audio). Ou vous pouvez placer de la vidéo MPEG1 dans
+décrire ses flux vidéo et audio). Ou vous pouvez placer de la vidéo MPEG-1 dans
 un fichier AVI.
-<ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> et
-<link linkend="mencoder">MEncoder</link> peuvent créer ces fichiers.
+<ulink url="http://ffmpeg.org/">FFmpeg</ulink> et
+<link linkend="mencoder"><application>MEncoder</application></link> peuvent créer ces fichiers.
 </para>
 
 
@@ -44,7 +45,7 @@ Les fichiers MPEG peuvent avoir des apparences différentes:
 <itemizedlist>
 <listitem><simpara>
   MPG: C'est la forme la plus <emphasis role="bold">basique</emphasis> des formats
-  de fichier MPEG. Il contient de la vidéo MPEG1, et de l'audio MP2 (MPEG-1 layer 2)
+  de fichier MPEG. Il contient de la vidéo MPEG-1, et de l'audio MP2 (MPEG-1 layer 2)
   ou plus rarement MP1.
   </simpara></listitem>
 <listitem><simpara>
@@ -72,9 +73,10 @@ restera parfaitement lisible.
 
 <para>
 Une fonction importante des MPGs est qu'ils ont un champ décrivant le rapport
-d'aspect du flux vidéo, et dans l'entête ce champs est fixé à 4:3, il est donc
-lu en 640x480. Les fichiers AVI n'ont pas ce champs, donc ils doivent être
-redimensionné durant l'encodage ou joués avec l'option <option>-aspect</option>.
+d'aspect du flux vidéo à l'interieur du flux. Par exemple les SVCDs ont une résolution
+de 480x480, et dans l'entête ce champ est fixé à 4:3, il est donc
+lu en 640x480. Les fichiers AVI n'ont pas ce champ, ils doivent donc être
+redimensionnés durant l'encodage ou joués avec l'option <option>-aspect</option>.
 </para>
 </sect3>
 
@@ -85,10 +87,10 @@ redimensionné durant l'encodage ou joués avec l'option <option>-aspect</option>.
 <para>
 Conçu par Microsoft, <emphasis role="bold">AVI (Audio Video Interleaved)</emphasis>
 est un format répandu et multi-usages actuellement utilisé par la plupart des vidéos
-DivX et DivX4. Il a de nombreux inconvénients et défauts (par exemple en streaming).
+MPEG-4 (DivX et DivX4). Il a de nombreux inconvénients et défauts (par exemple en streaming).
 Il supporte un flux vidéo et de 0 à 99 flux audio. La taille du fichier est limité
 à 2Go, mais il existe une extension permettant des fichiers plus gros appelée
-OpenDML. Actuellement Microsoft Décourage fortement son utilisation au profit
+<emphasis role="bold">OpenDML</emphasis>. Actuellement Microsoft décourage fortement son utilisation au profit
 d' ASF/WMV.
 </para>
 
@@ -119,7 +121,7 @@ Il y a deux types de fichiers AVI:
   Certains outils créent des AVIs entrelacés avec une mauvaise synchro.
   <application>MPlayer</application> les détecte comme entrelacés, ce qui va
   enduire une perte de synchro A/V, probablement pendant un déplacement. Ces
-  fichiers devraient être lu en temps que non-entrelacés (avec l'option <option>-ni</option>).
+  fichiers devraient être lu en tant que non-entrelacés (avec l'option <option>-ni</option>).
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Non-entrelacé:</emphasis> D'abord vient le flux vidéo
@@ -134,8 +136,8 @@ Il y a deux types de fichiers AVI:
 <itemizedlist>
 <listitem><simpara>
   <emphasis role="bold">basé sur bps</emphasis>: Basé sur le bitrate/samplerate du flux
-  video/audio stream. Cette méthode est utilisé dans la plupart des lecteurs,
-  incluant<ulink url="http://avifile.sourceforge.net">avifile</ulink>
+  video/audio. Cette méthode est utilisé dans la plupart des lecteurs,
+  incluant <ulink url="http://avifile.sf.net">avifile</ulink>
   et <application>Windows Media Player</application>. Les fichiers avec des entêtes endommagées,
   et les fichiers créés avec de l'audio VBR mais pas avec un encodeur VBR-compliant
   auront une désynchro A/V avec cette méthode (la plupart du temps en se déplaçant).
@@ -167,22 +169,23 @@ Il n'y a que deux exceptions:
 ASF (Active Streaming Format) provient de Microsoft. Ils ont développé deux
 variantes de l'ASF, v1.0 et v2.0. v1.0 est utilisé par leurs outils multimédia
 (<application>Windows Media Player</application> et <application>Windows Media Encoder</application>)
+et sont très secrètes. v2.0 est publié et breveté :).
 Bien sûr elles diffèrent, il n'y a pas de compatibilité du tout (ce n'est juste
 qu'un autre nom légal).
 <application>MPlayer</application> ne supporte que la v1.0, car personne n'a vu de fichiers v2.0 :).
-Notez que les fichiers ASF viennent de nos jours avec l'extension
+Notez que les fichiers ASF portent maintenant l'extension
 <filename>.WMA</filename> ou <filename>.WMV</filename>.
 </para>
 </sect3>
 
 
-<sect3 id="qt-mov">
+<sect3 id="mov">
 <title>Fichiers QuickTime/MOV</title>
 
 <para>
 Ces formats ont été conçus par Apple et peuvent contenir n'importe quel codec, CBR ou VBR.
 Ils ont généralement une extension <filename>.QT</filename> ou <filename>.MOV</filename>.
-extension. Notez que depuis que le group MPEG4 a choisi QuickTime en temps que
+Notez que depuis que le groupe MPEG4 a choisi QuickTime en tant que
 format recommandé pour le MPEG4, leur fichiers MOV sont diffusés avec une
 extension <filename>.MPG</filename> ou <filename>.MP4</filename> (Au passage les
 flux vidéo et audio de ces fichiers sont de véritables fichiers MPG et AAC. Vous
@@ -207,7 +210,7 @@ notre section sur le codec <link linkend="sorenson">Sorenson</link>.
 <application>MPlayer</application> démuxe les fichiers VIVO avec plaisir.
 Le plus gros désavantage de ce format est qu'il n'a pas de bloc d'index, ni
 de taille de paquets fixe ou d'octet de synchro et la plupart des fichiers
-manquent même de trames clés, donc oubliez le déplacement!
+manquent même de trames clés, donc oubliez le déplacement !
 </para>
 
 <para>
@@ -246,8 +249,7 @@ sera brouillée pendant un court instant après le déplacement.
 
 <para>
 Oui, <application>MPlayer</application> peut lire (démuxer) les fichiers RealMedia
-(<filename>.rm</filename>). Le déplacement fonctionne mais vous devrez spécifier
-explicitement l'option <option>-forceidx</option> (le format supporte les trames cl).
+(<filename>.rm</filename>). 
 Voici une liste des codecs <link linkend="realvideo">RealVideo</link> et <link
 linkend="realaudio">RealAudio</link> supportés.
 </para>
@@ -263,7 +265,8 @@ peut lire ses fichiers <filename>.NUV</filename> (NuppelVideo 5.0 uniquement).
 Ces fichiers peuvent contenir des trames YV12 non-compressées, YV12+RTJpeg compressées,
 YV12 RTJpeg+lzo compressées, et YV12+lzo compressées.
 <application>MPlayer</application> les décode tous (et les <emphasis role="bold">encode</emphasis>
-également avec <application>MEncoder</application> en DivX/etc!). Le déplacement fonctionne.
+également avec <application>MEncoder</application> en MPEG-4 (DivX)/etc!). 
+Le déplacement fonctionne.
 </para>
 </sect3>
 
@@ -271,7 +274,7 @@ YV12 RTJpeg+lzo compressées, et YV12+lzo compressées.
 <sect3 id="yuv4mpeg">
 <title>Fichiers yuv4mpeg</title>
 <para>
-<ulink url="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</ulink>
+<ulink url="http://mjpeg.sf.net">yuv4mpeg / yuv4mpeg2</ulink>
 est un format de fichier utilisé par les
 <ulink url="http://mjpeg.sf.net">programmes mjpegtools</ulink>.
 Vous pouvez grabber, produire, filtrer ou encoder de la vidéo dans ce format
@@ -335,16 +338,31 @@ Les spécifications PVA peuvent être téléchargées à l'adresse suivante:
 </para>
 </sect3>
 
+<sect3 id="nsv">
+<title>Fichiers NSV</title>
+<para>
+NSV (NullSoft Video) est un format utilisé par le lecteur 
+<application>Winamp</application> pour faire du stream audio et vidéo.
+La vidéo est en VP3, VP5 ou VP6, l'audio en MP3, AAC ou VLB.
+La version audio uniquement de NSV a une extension <filename>.nsa</filename>.
+<application>MPlayer</application> peut lire les deux types de flux et fichiers NSV.
+Veuillez noter que la plupart des fichiers du 
+<ulink url="http://www.winamp.com">site de Winamp</ulink> utilisent de l'audio VLB,
+qui ne peut être décodé pour l'instant. De plus les flux de ce site nécessitent
+une couche suplémentaire de dépaquetage qui doit encore être implémentée (ces 
+fichiers sont de toute façon illisibles car ils utilisent de l'audio VLB).
+</para>
+</sect3>
 
 <sect3 id="gif">
 <title>Fichiers GIF</title>
 <para>
 Le format <emphasis role="bold">GIF</emphasis>est un format courant pour les
 graphismes web. Il y a deux versions des specs GIF, GIF87a et GIF89a. La
-principale différence est que le GIF89a autorise l'animation. MPlayer supporte
+principale différence est que le GIF89a autorise l'animation. <application>MPlayer</application> supporte
 les deux formats en utilisant <systemitem class="library">libungif</systemitem>
 ou une autre librairie compatible libgif. Les GIFs non-animées seront affichées
-comme des vidéos à simple trame. (Utilisez les options  <option>-loop</option>
+comme des vidéos à simple trame. (Utilisez les options <option>-loop</option>
 et <option>-fixed-vo</option> pour les afficher plus longtemps).
 </para>
 
@@ -447,7 +465,7 @@ via <option>-cdda</option>.
 Il y a des plugins pour les thèmes de jeux SNES, les thèmes SID (du Commodore
 64), de nombreux formats Amiga, .xm, .it, VQF, musepack, Bonk, shorten et bien
 d'autres. Vous pouvez les trouver sur la
-<ulink url="http://www.xmms.org/plugins_input.html">page des plugins d'entrée XMMS</ulink>.
+<ulink url="http://www.xmms.org/plugins.php?category=input">page des plugins d'entrée XMMS</ulink>.
 </para>
 
 <para>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.12 -->
 <sect1 id="tv-input" xreflabel="TV input">
 <title>Entrée TV</title>
 
@@ -75,14 +75,14 @@ passante inutilement. Plus précisément ce ne sont pas les zones noires elles-mêm
 mais les transitions nettes entre le noir et la vidéo plus claire qui jouent, mais
 ce n'est pas très important pour le moment. Avant que vous commenciez la capture,
 ajustez les arguments de l'option <option>crop</option> pour que toutes les saletés
-des bords soient coupées. De nouveau, n'oubliez pas de garder des dimensions censées.
+des bords soient coupées. De nouveau, n'oubliez pas de garder des dimensions sensées.
 </para>
 </listitem>
 
 <listitem>
 <para>
 Regardez la charge CPU. Elle ne devrait pas dépasser la limite des 90% la plupart du
-temps. Si vous avez un gros tampon, MEncoder peut survivre à une surcharge pendant
+temps. Si vous avez un gros tampon, <application>MEncoder</application> peut survivre à une surcharge pendant
 quelques secondes mais pas plus. Il vaut mieux désactiver l'économiseur d'écran
 OpenGL et les trucs similaires.
 </para>
@@ -92,7 +92,7 @@ OpenGL et les trucs similaires.
 <para>
 Ne jouez pas avec l'horloge système. <application>MEncoder</application> l'utilise
 pour la synchro A/V. Si vous réglez l'horloge système (surtout en arrière dans le
-temps), MEncoder va se sentir perdu et va perdre des trames. C'est un problème
+temps), <application>MEncoder</application> va se sentir perdu et va perdre des trames. C'est un problème
 important lorsque vous êtes en réseau et que vous utilisez certains logiciels de
 synchronisation comme NTP. Vous devrez désactiver NTP pendant le processus de capture
 si vous voulez capturer correctement.
@@ -128,7 +128,7 @@ votre carte son via un cable externe entre la carte vidéo et l'entrée ligne, soi
 en utilisant le DAC intégré au chip bt878. Dans ce dernier cas, vous devrez charger
 le pilote <emphasis role="bold">btaudio</emphasis>. Lisez le fichier
 <filename>linux/Documentation/sound/btaudio</filename> (dans l'arborescence du noyau,
-pas celle de MPlayer) pour les instructions d'utilisations de ce pilote.
+pas celle de <application>MPlayer</application>) pour les instructions d'utilisations de ce pilote.
 </para>
 </listitem>
 
@@ -137,7 +137,7 @@ pas celle de MPlayer) pour les instructions d'utilisations de ce pilote.
 Si <application>MEncoder</application> ne peut pas ouvrir le périphérique audio,
 assurez-vous qu'il soit réellement disponible. Il peut y avoir des ennuis avec
 certains serveurs de son comme arts (KDE) ou esd (GNOME). Si vous avez une carte
-son full duplex (presques toutes les cartes descentes le supportent aujourd'hui),
+son full duplex (presques toutes les cartes décentes le supportent aujourd'hui),
 et que vous utilisez KDE, essayez d'activer l'otpion &quot;full duplex&quot; dans le
 menu des préférences du serveur de son.
 </para>
@@ -169,9 +169,9 @@ mplayer -tv driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv tv://
 
 <informalexample>
 <para>
-Un exemple plus élaboré. MEncoder capture l'image PAL entière, coupe les marges, et
+Un exemple plus élaboré. Ici <application>MEncoder</application> capture l'image PAL entière, coupe les marges, et
 désentrelace l'image en utilisant un algorithme de mélange linéaire. L'audio est
-compressé à un bitrate constant de 64kbps, en utilisant le codec LAME. Cette
+compressé à un débit constant de 64kbps, en utilisant le codec LAME. Cette
 combinaison est adaptée pour capturer des films.
 <screen>
      mencoder -tv driver=v4l:width=768:height=576 \
@@ -184,9 +184,9 @@ combinaison est adaptée pour capturer des films.
 
 <informalexample>
 <para>
-Cela dimensionne également l'image en 384x288 et compresse la vidéo avec un bitrate
+Cela dimensionne également l'image en 384x288 et compresse la vidéo avec un débit
 de 350kbps en mode haute qualité. L'option vqmax perd le quantizer et permet au
-compresseur vidéo d'atteindre un bitrate plus bas au détriment de la qualité. Cela
+compresseur vidéo d'atteindre un débit plus bas au détriment de la qualité. Cela
 peut être utilisé pour capturer des longues séries TV, quand la qualité n'est pas
 très importante.
 <screen>
@@ -198,7 +198,7 @@ très importante.
 Il est également possible de spécifier des dimensions d'image plus petites
 dans l'option <option>-tv</option> et d'omettre le zoom logiciel mais cette approche
 utilise le maximum d'informations disponibles et est un peut plus résistant au bruit.
-Les chips bt8x8 peuvent faire une moyenne de pixels uniquement dans la direction
+Les chipsets bt8x8 peuvent faire une moyenne de pixels uniquement dans la direction
 horizontale à cause d'une limitation matérielle.
 </para>
 </informalexample>
