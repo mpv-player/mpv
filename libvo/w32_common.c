@@ -3,6 +3,7 @@
 
 #include "../osdep/keycodes.h"
 #include "../input/input.h"
+#include "../input/mouse.h"
 #include "../mp_msg.h"
 #include "video_out.h"
 #include "aspect.h"
