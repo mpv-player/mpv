@@ -55,11 +55,9 @@ static unsigned int outfmt_list[]={
     IMGFMT_YVU9,
     IMGFMT_IF09,
     IMGFMT_411P,
-    IMGFMT_Y800,
-    IMGFMT_Y8,
     IMGFMT_YUY2,
     IMGFMT_UYVY,
-// RGB:
+// RGB and grayscale (Y8 and Y800):
     IMGFMT_BGR32,
     IMGFMT_RGB32,
     IMGFMT_BGR24,
@@ -68,6 +66,8 @@ static unsigned int outfmt_list[]={
     IMGFMT_RGB16,
     IMGFMT_BGR15,
     IMGFMT_RGB15,
+    IMGFMT_Y800,
+    IMGFMT_Y8,
     IMGFMT_BGR8,
     IMGFMT_RGB8,
     IMGFMT_BGR4,
