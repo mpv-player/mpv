@@ -275,19 +275,6 @@ switch(demuxer->file_format){
 
 } // switch(demuxer->file_format)
 
-      //====================== re-sync audio: =====================
-      if(sh_audio){
-	if(verbose){
-	    float a_pts=d_audio->pts;
-            a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-	    printf("SEEK: A: %5.3f  V: %5.3f  A-V: %5.3f   \n",a_pts,d_video->pts,a_pts-d_video->pts);
-	}
-        printf("A:%6.1f  V:%6.1f  A-V:%7.3f  ct: ?   \r",d_audio->pts,d_video->pts,0.0f);
-      } else {
-        printf("A: ---   V:%6.1f   \r",d_video->pts);
-      }
-      fflush(stdout);
-
       if(sh_audio) sh_audio->timer=-skip_audio_secs;
       sh_video->timer=0; // !!!!!!
 
