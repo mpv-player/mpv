@@ -2691,7 +2691,7 @@ if mingw32 ; then
 elif hpux ; then
   _ld_pthread=''
 elif ( cc_check && $TMPO ) ; then              # QNX
-  _ld_pthread=''
+  _ld_pthread=' ' # _ld_pthread='' would disable pthreads, but the test worked
 elif ( cc_check -lpthread && $TMPO ) ; then
   _ld_pthread='-lpthread'
 elif ( cc_check -pthread && $TMPO ) ; then
