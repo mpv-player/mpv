@@ -183,6 +183,10 @@
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 	{"tsfastparse", &ts_fastparse, CONF_TYPE_INT, 0, 0, 0, NULL},
 
+	// draw by slices or whole frame (useful with libmpeg2/libavcodec)
+	{"slices", &vd_use_slices, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noslices", &vd_use_slices, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+
 #ifdef USE_LIBAVCODEC
 	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
@@ -244,6 +248,7 @@ extern float screen_size_xy;
 extern float movie_aspect;
 extern int softzoom;
 extern int flip;
+extern int vd_use_slices;
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;

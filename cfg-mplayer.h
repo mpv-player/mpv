@@ -56,7 +56,6 @@ extern int vo_vsync;
 extern int vo_fsmode;
 extern int vo_dbpp;
 extern int vo_directrendering;
-extern int vd_use_slices;
 extern float vo_panscan;
 /* only used by startup (setting these values from configfile) */
 extern int vo_gamma_brightness;
@@ -308,10 +307,6 @@ static config_t mplayer_opts[]={
 	{"nodr", &vo_directrendering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"vaa_dr", "Use -dr, -vaa_dr was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"vaa_nodr", "Use -nodr, -vaa_nodr was obsoleted\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-
-	// draw by slices or whole frame (usefull with libmpeg2/libavcodec)
-	{"slices", &vd_use_slices, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noslices", &vd_use_slices, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 #ifdef HAVE_AA
 	// -vo aa
