@@ -7,14 +7,11 @@ FOR THE RELEASE:
 
 URGENT:
 - prebuffering to cache2 (req. for MMS) - URGENT!
-- check wmv8 with gcc 3.0x
-- fix cvid on ppc
-- fix ACELP DirectShow sound decoder (in avifile it's already fixed!)
 - mencoder: implement VBR audio copy
 - mencoder: Estimated Size and Time
-- mencoder: image cut/crop/extend filter
 
 decoders:
+- fix cvid on ppc
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
 - getting PIM1 codec (DLL) working... - kabi
 - getting 3ivX DLL working (CoCreateFreeThreadedMarshaler call required)
@@ -22,6 +19,7 @@ decoders:
 - fix seeking with libmad audio codec (codec lost sync and can't resync?)
 
 mencoder:
+- mencoder: image cut/crop/extend filter
 - add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
 - add a endpoint for encoding, like above
 - finish 3-pass encoding (audio, video1, video2)
