@@ -127,7 +127,7 @@ static char help_text[]=
 #define MSGTR_Video_NoVideo "Видео: няма видео\n"
 #define MSGTR_NotInitializeVOPorVO "\nФАТАЛНО: Видео филтъра (-vf) или изхода (-vo) не могат да бъдат инициализирани.\n"
 #define MSGTR_Paused "\n  =====  ПАУЗА  =====\r" // no more than 23 characters (status line for audio files)
-#define MSGTR_PlaylistLoadUnable "\nPlaylist-а не може да бъде зареден %s.\n"
+#define MSGTR_PlaylistLoadUnable "\nPlaylist-ът не може да бъде зареден %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer катастрофира заради 'Невалидна инструкция'.\n"\
 "  Може да е бъг в кода за динамично установяване на процесора...\n"\
@@ -203,12 +203,12 @@ static char help_text[]=
 #define MSGTR_UsingPass3ControllFile "Използва се файл за контрол на pass3: %s\n"
 #define MSGTR_MissingFilename "\nЛипсва име на файл.\n\n"
 #define MSGTR_CannotOpenFile_Device "Файла/устройството не може да бъде отворен.\n"
-#define MSGTR_CannotOpenDemuxer "Не може да бъде отворен демултиплексор.\n"
+#define MSGTR_CannotOpenDemuxer "Не може да бъде отворен разпределител.\n"
 #define MSGTR_NoAudioEncoderSelected "\nНе е избран аудио енкодер (-oac). Изберете или енкодер (вижте -oac help) или опцията -nosound.\n"
 #define MSGTR_NoVideoEncoderSelected "\nНе е избран видео енкодер (-ovc). Изберете си (вижте -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Изходния файл '%s'не може да бъде отворен.\n"
-#define MSGTR_EncoderOpenFailed "Енкодера не може да бъде отворен.\n"
-#define MSGTR_ForcingOutputFourcc "Налагане на изходния fourcc да бъде %x [%.4s]\n"
+#define MSGTR_EncoderOpenFailed "Енкодерът не може да бъде отворен.\n"
+#define MSGTR_ForcingOutputFourcc "Налагане на изходния fourcc код да бъде %x [%.4s]\n"
 #define MSGTR_WritingAVIHeader "Запис на AVI header...\n"
 #define MSGTR_DuplicateFrames "\n%d дублиращи се кадъра!\n"
 #define MSGTR_SkipFrame "\nПрескочен кадър!\n"
@@ -218,7 +218,7 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Препоръчителен битрейт за %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nВидео поток: %8.3f Кбита/с  (%d bps)  размер: %d байта  %5.3f сек.  %d кадъра\n"
 #define MSGTR_AudioStreamResult "\nАудио поток: %8.3f Кбита/с  (%d bps)  размер: %d байта  %5.3f сек.\n"
-#define MSGTR_OpenedStream "uspeh: формат: %d  данни: 0x%X - 0x%x\n"
+#define MSGTR_OpenedStream "успех: формат: %d  данни: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d bps=%ld sample-%ld)\n"
 #define MSGTR_CBRPCMAudioSelected "Избрано е CBR (постоянен битрейт) PCM аудио\n"
@@ -397,15 +397,15 @@ static char help_text[]=
 "                 <8-320>: ABR кодиране със зададен среден битрейт.\n\n"
 
 //codec-cfg.c:
-#define MSGTR_DuplicateFourcc "дублиран FourCC"
-#define MSGTR_TooManyFourccs "твърде много FourCCs/формати..."
+#define MSGTR_DuplicateFourcc "дублиран FourCC код"
+#define MSGTR_TooManyFourccs "твърде много FourCC кодoве/формати..."
 #define MSGTR_ParseError "грешка при разчитане"
 #define MSGTR_ParseErrorFIDNotNumber "грешка при разчитане (ID на формата не е число?)"
 #define MSGTR_ParseErrorFIDAliasNotNumber "грешка при разчитане (ID псевдонима на формата не е число?)"
 #define MSGTR_DuplicateFID "дублирано ID на формата"
 //#define MSGTR_TooManyOut "too many out..."
 #define MSGTR_InvalidCodecName "\nкодекът(%s) има невалидно име!\n"
-#define MSGTR_CodecLacksFourcc "\nкодекът(%s) няма FourCC/формат!\n"
+#define MSGTR_CodecLacksFourcc "\nкодекът(%s) няма FourCC код/формат!\n"
 #define MSGTR_CodecLacksDriver "\nкодекът(%s) няма драйвер!\n"
 #define MSGTR_CodecNeedsDLL "\nкодекът(%s) се нуждае от 'dll'!\n"
 #define MSGTR_CodecNeedsOutfmt "\nкодекът(%s) се нуждае от 'outfmt'!\n"
@@ -474,7 +474,7 @@ static char help_text[]=
 #define MSGTR_TooManyVideoInBuffer "\nТвърде много видео пакети в буфера: (%d в %d байта).\n"
 #define MSGTR_MaybeNI "Може би възпроизвеждате non-interleaved поток/файл или кодекът не се е справил?\n" \
 		      "За AVI файлове, опитайте да наложите non-interleaved режим със опцията -ni.\n"
-#define MSGTR_SwitchToNi "\nЗле структуриран файл AVI файл - превключване към -ni режим...\n"
+#define MSGTR_SwitchToNi "\nЗле структуриран AVI файл - превключване към -ni режим...\n"
 #define MSGTR_Detected_XXX_FileFormat "%s формат.\n"
 #define MSGTR_DetectedAudiofile "Аудио файл.\n"
 #define MSGTR_NotSystemStream "Не е MPEG System Stream... (може би Transport Stream?)\n"
@@ -493,13 +493,13 @@ static char help_text[]=
 
 #define MSGTR_UsingNINI "Използва се NON-INTERLEAVED AVI формат.\n"
 #define MSGTR_CouldntDetFNo "Не може да се определи броя на кадрите (за превъртане).\n"
-#define MSGTR_CantSeekRawAVI "Не могат да се превърта сурови AVI потоци. (Изисква се индекс, опитайте с -idx .)\n"
+#define MSGTR_CantSeekRawAVI "Не могат да се превъртат сурови AVI потоци. (Изисква се индекс, опитайте с -idx .)\n"
 #define MSGTR_CantSeekFile "Този файл не може да се превърта.\n"
 
 #define MSGTR_EncryptedVOB "Криптиран VOB файл! Прочетете DOCS/HTML/en/dvd.html.\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Поддръжката на компресирани хедъри изисква ZLIB!\n"
-#define MSGTR_MOVvariableFourCC "MOV: ВНИМАНИЕ: Открит е променлив FOURCC!?\n"
+#define MSGTR_MOVvariableFourCC "MOV: ВНИМАНИЕ: Открит е променлив FOURCC код!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: ВНИМАНИЕ: твърде много пътечки"
 #define MSGTR_FoundAudioStream "==> Открит е аудио поток: %d\n"
 #define MSGTR_FoundVideoStream "==> Открит е видео поток: %d\n"
