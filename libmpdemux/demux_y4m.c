@@ -34,7 +34,6 @@ int y4m_check_file(demuxer_t* demuxer){
     buf[9] = 0;
     
     if (strncmp("YUV4MPEG2", buf, 9) && strncmp("YUV4MPEG ", buf, 9)) {
-	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Failed: YUV4MPEG2\n");
 	    return 0;
     }
 
@@ -67,6 +66,8 @@ int demux_y4m_fill_buffer(demuxer_t *demux) {
   y4m_frame_info_t fi;
   unsigned char *buf[3];
   int err, size;
+
+  y4m_init_frame_info(&fi);
 
   demux->filepos=stream_tell(demux->stream);
 
