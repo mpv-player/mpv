@@ -416,17 +416,45 @@ extension=NULL;
 			
 			// Check if the response is an ICY status_code reason_phrase
 			if( !strcasecmp(http_hdr->protocol, "ICY") ) {
-				// Ok, we have detected an mp3 streaming
-				*file_format = DEMUXER_TYPE_AUDIO;
+				switch( http_hdr->status_code ) {
+					case 200: { // OK
+						char *field_data = NULL;
+						// note: I skip icy-notice1 and 2, as they contain html <BR>
+						// and are IMHO useless info ::atmos
+						if( (field_data = http_get_field(http_hdr, "icy-name")) != NULL )
+							printf("Name   : %s\n", field_data); field_data = NULL;
+						if( (field_data = http_get_field(http_hdr, "icy-genre")) != NULL )
+							printf("Genre  : %s\n", field_data); field_data = NULL;
+						if( (field_data = http_get_field(http_hdr, "icy-url")) != NULL )
+							printf("Website: %s\n", field_data); field_data = NULL;
+						// XXX: does this really mean public server? ::atmos
+						if( (field_data = http_get_field(http_hdr, "icy-pub")) != NULL )
+							printf("Public : %s\n", atoi(field_data)?"yes":"no"); field_data = NULL;
+						if( (field_data = http_get_field(http_hdr, "icy-br")) != NULL )
+							printf("Bitrate: %skbit/s\n", field_data); field_data = NULL;
+						// Ok, we have detected an mp3 stream
+						*file_format = DEMUXER_TYPE_AUDIO;
+						return 0;
+					}
+					case 404: // Resource Not Found
+						printf("Error: ICY-Server couldn't find requested stream, skipping!\n");
+						return -1;
+					default:
+						printf("Error: unhandled ICY-Errorcode, contact MPlayer developers!\n");
+						return -1;
+				}
 			}
-			
+
+			// Assume standard http if not ICY			
 			switch( http_hdr->status_code ) {
 				case 200: // OK
 					// Look if we can use the Content-Type
 					content_type = http_get_field( http_hdr, "Content-Type" );
 					if( content_type!=NULL ) {
+						char *content_length = NULL;
 						printf("Content-Type: [%s]\n", content_type );
-						printf("Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length") );
+						if( (content_length = http_get_field(http_hdr, "Content-Length")) != NULL)
+							printf("Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length"));
 						// Check in the mime type table for a demuxer type
 						for( i=0 ; i<(sizeof(mime_type_table)/sizeof(mime_type_table[0])) ; i++ ) {
 							if( !strcasecmp( content_type, mime_type_table[i].mime_type ) ) {
