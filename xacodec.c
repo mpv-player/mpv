@@ -80,7 +80,7 @@ void XA_Print(char *fmt, ...)
 
     va_start(vallist, fmt);
     vsnprintf(buf, 1024, fmt, vallist);
-    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "[xacodec] %s\n", buf);
+    mp_msg(MSGT_XACODEC, MSGL_DBG2, "[xacodec] %s\n", buf);
     va_end(vallist);
 
     return;
@@ -258,16 +258,17 @@ int xacodec_init_video(sh_video_t *vidinfo, int out_format)
     if (xacodec_init(dll, xacodec_driver) == 0)
 	return(0);
 
+    codec_hdr.xapi_rev = XAVID_API_REV;
     codec_hdr.anim_hdr = malloc(4096);
     codec_hdr.description = vidinfo->codec->info;
     codec_hdr.compression = bswap_32(vidinfo->bih->biCompression);
     codec_hdr.decoder = NULL;
+    codec_hdr.x = vidinfo->bih->biWidth; /* ->disp_w */
+    codec_hdr.y = vidinfo->bih->biHeight; /* ->disp_h */
+    /* extra fields to store palette */
     codec_hdr.avi_ctab_flag = 0;
     codec_hdr.avi_read_ext = NULL;
-    codec_hdr.xapi_rev = XAVID_API_REV;
     codec_hdr.extra = NULL;
-    codec_hdr.x = vidinfo->disp_w;
-    codec_hdr.y = vidinfo->disp_h;
 
     switch(out_format)
     {
@@ -723,14 +724,19 @@ void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned 
     xacodec_image_t *image=(xacodec_image_t*)image_p;
 
 #if 0
-    printf("XA_YUV221111_Convert(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
+    XA_Print("XA_YUV221111_Convert(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
 	image,imagex,imagey,i_x,i_y, image->width,image->height,
 	yuv,yuv_tabs,map_flag,map,chdr);
 
-    printf("YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
+    XA_Print("YUV: %p %p %p %X (%X) %Xx%X %Xx%X\n",
 	yuv->Ybuf,yuv->Ubuf,yuv->Vbuf,yuv->the_buf,yuv->the_buf_size,
 	yuv->y_w,yuv->y_h,yuv->uv_w,yuv->uv_h);
 #endif
+
+    /* hotfix for Vivo/2.00 - do not fault - but no decode ;( */
+#warning "FIXME! Decoder doesn't supports Vivo/2.00 :("
+    if (!yuv->the_buf_size)
+	return;
 
 if(i_x==image->width && i_y==image->height){
 //    printf("Direct render!!!\n");
