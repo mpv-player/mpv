@@ -1,9 +1,16 @@
 /* Valid values for ANTIALIASING_ALGORITHM:
+  -1: bilinear (similiar to vobsub, fast and good quality)
    0: none (fastest, most ugly)
    1: aproximate
    2: full (slowest, best looking)
  */
-#define ANTIALIASING_ALGORITHM 2
+#define ANTIALIASING_ALGORITHM -1
+
+/* Valid values for SUBPOS:
+   0: leave the sub on it's original place
+   1: put the sub at the bottom of the picture
+ */
+#define SUBPOS 0
 
 /* SPUdec.c
    Skeleton of function spudec_process_controll() is from xine sources.
@@ -119,6 +126,35 @@ static inline int mkalpha(int i)
   }
 }
 
+/* Cut the sub to visible part */
+static inline void spudec_cut_image(spudec_handle_t *this)
+{
+  unsigned int fy, ly;
+  unsigned int first_y, last_y;
+  unsigned char *image;
+  unsigned char *aimage;
+  for (fy = 0; fy < this->image_size && !this->aimage[fy]; fy++);
+  for (ly = this->stride * this->height-1; ly && !this->aimage[ly]; ly--);
+  first_y = fy / this->stride;
+  last_y = ly / this->stride;
+  //printf("first_y: %d, last_y: %d\n", first_y, last_y);
+  this->start_row += first_y;
+  this->height = last_y - first_y +1;
+  //printf("new h %d new start %d (sz %d st %d)---\n\n", this->height, this->start_row, this->image_size, this->stride);
+  image = malloc(2 * this->stride * this->height);
+  if(image){
+    this->image_size = this->stride * this->height;
+    aimage = image + this->image_size;
+    memcpy(image, this->image + this->stride * first_y, this->image_size);
+    memcpy(aimage, this->aimage + this->stride * first_y, this->image_size);
+    free(this->image);
+    this->image = image;
+    this->aimage = aimage;
+  }
+  else
+    perror("Fatal: update_spu: malloc");
+}
+
 static void spudec_process_data(spudec_handle_t *this)
 {
   unsigned int cmap[4], alpha[4];
@@ -195,6 +231,7 @@ static void spudec_process_data(spudec_handle_t *this)
       ++y;
     }
   }
+  spudec_cut_image(this);
 }
 
 
@@ -452,6 +489,7 @@ void spudec_draw(void *this, void (*draw_alpha)(int x0,int y0, int w,int h, unsi
 		   spu->image, spu->aimage, spu->stride);
 }
 
+/* calc the bbox for spudec subs */
 void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int* bbox)
 {
   spudec_handle_t *spu;
@@ -468,20 +506,77 @@ void spudec_calc_bbox(void *me, unsigned int dxs, unsigned int dys, unsigned int
     unsigned int scaley = 0x100 * dys / spu->orig_frame_height;
     bbox[0] = spu->start_col * scalex / 0x100;
     bbox[1] = spu->start_col * scalex / 0x100 + spu->width * scalex / 0x100;
+#if SUBPOS == 0
     bbox[2] = spu->start_row * scaley / 0x100;
     bbox[3] = spu->start_row * scaley / 0x100 + spu->height * scaley / 0x100;
+#elif SUBPOS == 1
+    bbox[3] = dys -1;
+    bbox[2] = bbox[3] -spu->height * scaley / 0x100;
+#endif
   }
 }
-
 /* transform mplayer's alpha value into an opacity value that is linear */
 static inline int canon_alpha(int alpha)
 {
   return alpha ? 256 - alpha : 0;
 }
 
+typedef struct {
+  unsigned position;
+  unsigned left_up;
+  unsigned right_down;
+}scale_pixel;
+
+
+static int scale_table(unsigned int start_src, unsigned int start_tar, unsigned int end_src, unsigned int end_tar, scale_pixel * table)
+{
+  unsigned int t;
+  unsigned int delta_src = end_src - start_src;
+  unsigned int delta_tar = end_tar - start_tar;
+  int src = 0;
+  int src_step = (delta_src << 16) / delta_tar >>1;
+  for (t = 0; t<=delta_tar; src += (src_step << 1), t++){
+    table[t].position= MIN(src >> 16, end_src - 1);
+    table[t].right_down = src & 0xffff;
+    table[t].left_up = 0x10000 - table[t].right_down;
+  }
+}
+
+/* bilinear scale, similar to vobsub's code */
+static int scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y, spudec_handle_t * spu)
+{
+  int i;
+  int alpha[4];
+  int color[4];
+  unsigned int scale[4];
+  int base = table_y[y].position * spu->stride + table_x[x].position;
+  int scaled = y * spu->scaled_stride + x;
+  alpha[0] = canon_alpha(spu->aimage[base]);
+  alpha[1] = canon_alpha(spu->aimage[base + 1]);
+  alpha[2] = canon_alpha(spu->aimage[base + spu->stride]);
+  alpha[3] = canon_alpha(spu->aimage[base + spu->stride + 1]);
+  color[0] = spu->image[base];
+  color[1] = spu->image[base + 1];
+  color[2] = spu->image[base + spu->stride];
+  color[3] = spu->image[base + spu->stride + 1];
+  scale[0] = (table_x[x].left_up * table_y[y].left_up >> 16) * alpha[0];
+  scale[1] = (table_x[x].right_down * table_y[y].left_up >>16) * alpha[1];
+  scale[2] = (table_x[x].left_up * table_y[y].right_down >> 16) * alpha[2];
+  scale[3] = (table_x[x].right_down * table_y[y].right_down >> 16) * alpha[3];
+  spu->scaled_image[scaled] = (color[0] * scale[0] + color[1] * scale[1] + color[2] * scale[2] + color[3] * scale[3])>>24;
+  spu->scaled_aimage[scaled] = (scale[0] + scale[1] + scale[2] + scale[3]) >> 16;
+  if (spu->scaled_aimage[scaled]){
+    spu->scaled_aimage[scaled] = 256 - spu->scaled_aimage[scaled];
+    if(spu->scaled_aimage[scaled] + spu->scaled_image[scaled] > 255)
+      spu->scaled_image[scaled] = 256 - spu->scaled_aimage[scaled];
+  }
+}
+
 void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
   spudec_handle_t *spu = (spudec_handle_t *)me;
+  scale_pixel *table_x;
+  scale_pixel *table_y;
   if (spu->start_pts <= spu->now_pts && spu->now_pts < spu->end_pts) {
     if (spu->orig_frame_width == 0 || spu->orig_frame_height == 0
 	|| (spu->orig_frame_width == dxs && spu->orig_frame_height == dys)) {
@@ -524,7 +619,19 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	      memset(spu->scaled_image + y * spu->scaled_stride + spu->scaled_width, 0,
 		     spu->scaled_stride - spu->scaled_width);
 	    }
-#if ANTIALIASING_ALGORITHM == 0
+#if ANTIALIASING_ALGORITHM == -1
+	  table_x = calloc(spu->scaled_width, sizeof(scale_pixel));
+	  table_y = calloc(spu->scaled_height, sizeof(scale_pixel));
+	  scale_table(0, 0, spu->width - 1, spu->scaled_width - 1, table_x);
+	  scale_table(0, 0, spu->height - 1, spu->scaled_height - 1, table_y);
+	  for (y = 0; y < spu->scaled_height; y++)
+	    for (x = 0; x < spu->scaled_width; x++)
+	      scale_image(x, y, table_x, table_y, spu);
+	  if(table_x)
+	    free(table_x);
+	  if(table_y)
+	    free(table_y);
+#elif ANTIALIASING_ALGORITHM == 0
 	  /* no antialiasing */
 	  for (y = 0; y < spu->scaled_height; ++y) {
 	    int unscaled_y = y * 0x100 / scaley;
@@ -747,6 +854,10 @@ void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*dra
 	}
       }
       if (spu->scaled_image){
+#if SUBPOS == 1
+	/*set subs at the bottom, i don't like to put it at the very bottom, so -1 :)*/
+	spu->scaled_start_row = dys - spu->scaled_height - 1;
+#endif
 	draw_alpha(spu->scaled_start_col, spu->scaled_start_row, spu->scaled_width, spu->scaled_height,
 		   spu->scaled_image, spu->scaled_aimage, spu->scaled_stride);
 	spu_changed = 0;
