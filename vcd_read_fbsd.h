@@ -12,6 +12,7 @@ typedef struct {
 	uint8_t spare           [4];
 } cdsector_t;
 
+static cdsector_t vcd_buf;
 static struct ioc_read_toc_single_entry vcd_entry;
 
 static inline void vcd_set_msf(unsigned int sect){
@@ -77,13 +78,10 @@ void vcd_read_toc(int fd){
     }
 }
 
-static cdsector_t vcd_buf;
-
 static int vcd_read(int fd,char *mem){
-	off_t offset = 0;
+
       if (pread(fd,&vcd_buf,VCD_SECTOR_SIZE,vcd_get_msf()*VCD_SECTOR_SIZE)
 	 != VCD_SECTOR_SIZE) return 0;  // EOF?
-      offset++;
 
       vcd_entry.entry.addr.msf.frame++;
       if (vcd_entry.entry.addr.msf.frame==75){
