@@ -26,7 +26,7 @@ typedef void **Globals;
 
 //==================== COMPONENTS ===========================
 
-struct ComponentParameters {
+struct __attribute__((__packed__)) ComponentParameters {
     UInt8                           flags;                      /* call modifiers: sync/async, deferred, immed, etc */
     UInt8                           paramSize;                  /* size in bytes of actual parameters passed to this call */
     short                           what;                       /* routine selector, negative for Component management calls */
@@ -35,7 +35,7 @@ struct ComponentParameters {
 typedef struct ComponentParameters      ComponentParameters;
 
 
-struct ComponentDescription {
+struct __attribute__((__packed__)) ComponentDescription {
     OSType                          componentType;              /* A unique 4-byte code indentifying the command set */
     OSType                          componentSubType;           /* Particular flavor of this instance */
     OSType                          componentManufacturer;      /* Vendor indentification */
@@ -45,14 +45,14 @@ struct ComponentDescription {
 typedef struct ComponentDescription     ComponentDescription;
 
 
-struct ResourceSpec {
+struct __attribute__((__packed__)) ResourceSpec {
     OSType                          resType;                    /* 4-byte code    */
     short                           resID;                      /*         */
 };
 typedef struct ResourceSpec             ResourceSpec;
 
 
-struct ComponentResource {
+struct __attribute__((__packed__)) ComponentResource {
     ComponentDescription            cd;                         /* Registration parameters */
     ResourceSpec                    component;                  /* resource where Component code is found */
     ResourceSpec                    componentName;              /* name string resource */
@@ -64,14 +64,14 @@ typedef ComponentResource *             ComponentResourcePtr;
 typedef ComponentResourcePtr *          ComponentResourceHandle;
 
 
-struct ComponentRecord {
+struct __attribute__((__packed__)) ComponentRecord {
     long                            data[1];
 };
 typedef struct ComponentRecord          ComponentRecord;
 typedef ComponentRecord *               Component;
 
 
-struct ComponentInstanceRecord {
+struct __attribute__((__packed__)) ComponentInstanceRecord {
     long                            data[1];
 };
 typedef struct ComponentInstanceRecord  ComponentInstanceRecord;
@@ -89,7 +89,7 @@ struct __attribute__((__packed__)) Rect {
 typedef struct Rect                     Rect;
 typedef Rect *                          RectPtr;
 
-struct RGBColor {
+struct __attribute__((__packed__)) RGBColor {
     unsigned short                  red;                        /*magnitude of red component*/
     unsigned short                  green;                      /*magnitude of green component*/
     unsigned short                  blue;                       /*magnitude of blue component*/
@@ -98,7 +98,7 @@ typedef struct RGBColor                 RGBColor;
 typedef RGBColor *                      RGBColorPtr;
 typedef RGBColorPtr *                   RGBColorHdl;
 
-struct ColorSpec {
+struct __attribute__((__packed__)) ColorSpec {
     short                           value;                      /*index or other value*/
     RGBColor                        rgb;                        /*true color*/
 };
@@ -106,7 +106,7 @@ typedef struct ColorSpec                ColorSpec;
 typedef ColorSpec *                     ColorSpecPtr;
 typedef ColorSpec                       CSpecArray[1];
 
-struct ColorTable {
+struct __attribute__((__packed__)) ColorTable {
     long                            ctSeed;                     /*unique identifier for table*/
     short                           ctFlags;                    /*high bit: 0 = PixMap; 1 = device*/
     short                           ctSize;                     /*number of entries in CTTable*/
@@ -116,7 +116,7 @@ typedef struct ColorTable               ColorTable;
 typedef ColorTable *                    CTabPtr;
 typedef CTabPtr *                       CTabHandle;
 
-struct MatrixRecord {
+struct __attribute__((__packed__)) MatrixRecord {
     Fixed                           matrix[3][3];
 };
 typedef struct MatrixRecord             MatrixRecord;
@@ -127,7 +127,7 @@ typedef OSType                          CodecType;
 typedef unsigned short                  CodecFlags;
 typedef unsigned long                   CodecQ;
 
-struct ImageDescription {
+struct __attribute__((__packed__)) ImageDescription {
     long                            idSize;                     /* total size of ImageDescription including extra data ( CLUTs and other per sequence data ) */
     CodecType                       cType;                      /* what kind of codec compressed this data */
     long                            resvd1;                     /* reserved for Apple use */
@@ -172,7 +172,7 @@ enum {
     k2vuyPixelFormat            = FOUR_CHAR_CODE('2vuy')        /* UYVY 4:2:2 byte ordering   16*/
 };
 
-struct PixMapExtension {
+struct __attribute__((__packed__)) PixMapExtension {
     long                            extSize;                    /*size of struct, duh!*/
     unsigned long                   pmBits;                     /*pixmap attributes bitfield*/
     void *                          pmGD;                       /*this is a GDHandle*/
@@ -190,7 +190,7 @@ typedef PixMapExtension *               PixMapExtPtr;
 typedef PixMapExtPtr *                  PixMapExtHandle;
 
 
-struct PixMap {
+struct __attribute__((__packed__)) PixMap {
     Ptr                             baseAddr;                   /*pointer to pixels*/
     short                           rowBytes;                   /*offset to next line*/
     Rect                            bounds;                     /*encloses bitmap*/
@@ -212,7 +212,7 @@ typedef PixMap *                        PixMapPtr;
 typedef PixMapPtr *                     PixMapHandle;
 
 
-struct BitMap {
+struct __attribute__((__packed__)) BitMap {
     Ptr                             baseAddr;
     short                           rowBytes;
     Rect                            bounds;
@@ -220,6 +220,87 @@ struct BitMap {
 typedef struct BitMap                   BitMap;
 typedef BitMap *                        BitMapPtr;
 typedef BitMapPtr *                     BitMapHandle;
+typedef struct OpaqueRgnHandle*         RgnHandle;
+
+struct Pattern {
+    UInt8                           pat[8];
+};
+typedef struct Pattern                  Pattern;
+typedef unsigned char                   Style;
+typedef Style                           StyleField;
+struct __attribute__((__packed__)) Point {
+    short                           v;
+    short                           h;
+};
+typedef struct Point                    Point;
+struct __attribute__((__packed__)) GrafPort {
+    short                           device;
+    BitMap                          portBits;
+    Rect                            portRect;
+    RgnHandle                       visRgn;
+    RgnHandle                       clipRgn;
+    Pattern                         bkPat;
+    Pattern                         fillPat;
+    Point                           pnLoc;
+    Point                           pnSize;
+    short                           pnMode;
+    Pattern                         pnPat;
+    short                           pnVis;
+    short                           txFont;
+    StyleField                      txFace;                     /*StyleField occupies 16-bits, but only first 8-bits are used*/
+    UInt8                           txFlags;                    /* QuickTime uses second 8 bits of StyleField for txFlags */
+    short                           txMode;
+    short                           txSize;
+    Fixed                           spExtra;
+    long                            fgColor;
+    long                            bkColor;
+    short                           colrBit;
+    short                           patStretch;
+    Handle                          picSave;
+    Handle                          rgnSave;
+    Handle                          polySave;
+    /*QDProcsPtr*/void*                      grafProcs;
+};
+typedef struct GrafPort                 GrafPort;
+typedef GrafPort *GWorldPtr;
+typedef GWorldPtr *GWorldHandle;
+#define anyCodec                ((CodecComponent)0)
+enum {
+                                                                /* transfer modes */
+    srcCopy                     = 0,                            /*the 16 transfer modes*/
+    srcOr                       = 1,
+    srcXor                      = 2,
+    srcBic                      = 3,
+    notSrcCopy                  = 4,
+    notSrcOr                    = 5,
+    notSrcXor                   = 6,
+    notSrcBic                   = 7,
+    patCopy                     = 8,
+    patOr                       = 9,
+    patXor                      = 10,
+    patBic                      = 11,
+    notPatCopy                  = 12,
+    notPatOr                    = 13,
+    notPatXor                   = 14,
+    notPatBic                   = 15,                           /* Special Text Transfer Mode */
+    grayishTextOr               = 49,
+    hilitetransfermode          = 50,
+    hilite                      = 50,                           /* Arithmetic transfer modes */
+    blend                       = 32,
+    addPin                      = 33,
+    addOver                     = 34,
+    subPin                      = 35,
+    addMax                      = 37,
+    adMax                       = 37,
+    subOver                     = 38,
+    adMin                       = 39,
+    ditherCopy                  = 64,                           /* Transparent mode constant */
+    transparent                 = 36
+};
+
+typedef unsigned long                   GWorldFlags;
+
+
 
 // ============================== CODECS ===========================
 
@@ -227,11 +308,22 @@ typedef Component                       CompressorComponent;
 typedef Component                       DecompressorComponent;
 typedef Component                       CodecComponent;
 
+enum {
+    codecLosslessQuality        = 0x00000400,
+    codecMaxQuality             = 0x000003FF,
+    codecMinQuality             = 0x00000000,
+    codecLowQuality             = 0x00000100,
+    codecNormalQuality          = 0x00000200,
+    codecHighQuality            = 0x00000300
+};
+
+
+
 // callbacks:
 typedef void* ImageCodecDrawBandCompleteUPP;
-typedef void* ICMProgressProcRecord;
-typedef void* ICMCompletionProcRecord;
-typedef void* ICMDataProcRecord;
+typedef long long ICMProgressProcRecord;
+typedef long long ICMCompletionProcRecord;
+typedef long long ICMDataProcRecord;
 typedef void* ICMFrameTimePtr;
 typedef void* CDSequenceDataSourcePtr;
 typedef void* ICMFrameTimeInfoPtr;
@@ -239,8 +331,6 @@ typedef void* ICMFrameTimeInfoPtr;
 // graphics port
 typedef struct OpaqueGrafPtr*           GrafPtr;
 typedef GrafPtr                         CGrafPtr;
-
-typedef struct OpaqueRgnHandle*         RgnHandle;
 
 
 /*  codec capabilities flags    */
@@ -354,7 +444,7 @@ enum {
 
 
 
-struct CodecCapabilities {
+struct __attribute__((__packed__)) CodecCapabilities {
     long                            flags;
     short                           wantedPixelSize;
     short                           extendWidth;
@@ -444,7 +534,7 @@ typedef struct CodecDecompressParams    CodecDecompressParams;
 
 
 
-struct ImageSubCodecDecompressCapabilities {
+struct __attribute__((__packed__)) ImageSubCodecDecompressCapabilities {
     long                            recordSize;                 /* sizeof(ImageSubCodecDecompressCapabilities)*/
     long                            decompressRecordSize;       /* size of your codec's decompress record*/
     Boolean                         canAsync;                   /* default true*/
@@ -466,7 +556,7 @@ struct ImageSubCodecDecompressCapabilities {
 typedef struct ImageSubCodecDecompressCapabilities ImageSubCodecDecompressCapabilities;
 
 
-struct ImageSubCodecDecompressRecord {
+struct __attribute__((__packed__)) ImageSubCodecDecompressRecord {
     Ptr                             baseAddr;
     long                            rowBytes;
     Ptr                             codecData;
@@ -531,7 +621,7 @@ enum {
     codecInfoSequenceSensitive  = (1L << 13)                    /* compressed data is sensitive to out of sequence decoding */
 };
 
-struct CodecInfo {
+struct __attribute__((__packed__)) CodecInfo {
     Str31                           typeName;                   /* name of the codec type i.e.: 'Apple Image Compression' */
     short                           version;                    /* version of the codec data that this codec knows about */
     short                           revisionLevel;              /* revision level of this codec i.e: 0x00010001 (1.0.1) */
@@ -556,6 +646,15 @@ typedef struct CodecInfo                CodecInfo;
 static inline void dump_ImageDescription(void* xxx){
     ImageDescription* id=(ImageDescription*)xxx;
     unsigned char* x;
+    int i;
+
+    for(i=0;i<id->idSize;i++){
+	printf(" %02X",((unsigned char*)id)[i]);
+	if((i%16)==15) printf("\n");
+    }
+    printf("\n");
+
+
     printf("=============== ImageDescription at %p ==================\n",xxx);
     printf("idSize=0x%X  fourcc=0x%08X\n",id->idSize,id->cType);
     printf("ver=%d rev=%d vendor=0x%08X\n",id->version,id->revisionLevel,id->vendor);
@@ -616,11 +715,19 @@ static inline void dump_CodecCapabilities(void* xxx){
 static inline void dump_CodecDecompressParams(void* xxx){
     CodecDecompressParams* cd=xxx;
     ImageDescription **idh;
+    int i;
     if(!xxx) return;
     printf("=============== CodecDecompressParams at %p ==================\n",xxx);
     printf("sequenceID=%d\n",cd->sequenceID);
     idh=cd->imageDescription;
     if(idh && idh[0]) dump_ImageDescription(idh[0]);
+    
+    for(i=0;i<sizeof(CodecDecompressParams);i++){
+	printf(" %02X",((unsigned char*)cd)[i]);
+	if((i%16)==15) printf("\n");
+    }
+    printf("\n");
+    
     printf("data=%p  size=%d\n",cd->data,cd->bufferSize);
     printf("frameno=%d  lines: %d .. %d   condflags=0x%X  callerflags=0x%X\n",
 	cd->frameNumber, cd->startLine, cd->stopLine, cd->conditionFlags,cd->callerFlags);
