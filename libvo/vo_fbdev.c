@@ -588,6 +588,8 @@ static int in_height;
 static int out_width;
 static int out_height;
 static uint32_t pixel_format;
+static int fs;
+static int flip;
 
 /*
  * Note: this function is completely cut'n'pasted from
@@ -704,14 +706,6 @@ err_out:
 	return 1;
 }
 
-static void clear_bg(void)
-{
-	int i, offset = 0;
-
-	for (i = 0; i < out_height; i++, offset += fb_screen_width)
-		memset(frame_buffer + offset, 0x0, out_width * fb_pixel_size);
-}
-
 static void lots_of_printf(void)
 {
 	if (verbose > 0) {
@@ -783,14 +777,18 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 #define FS	(fullscreen & 0x01)
 #define VM	(fullscreen & 0x02)
 #define ZOOM	(fullscreen & 0x04)
+#define FLIP	(fullscreen & 0x08)
 
 	struct fb_cmap *cmap;
 
+	fs = FS;
 	if (!fb_preinit_done)
 		if (fb_preinit())
 			return 1;
 	if (!fb_works)
 		return 1;
+
+	flip = FLIP;
 
 	if (ZOOM) {
 		printf(FBDEV "-zoom is not supported\n");
@@ -804,13 +802,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	if (VM)
 		if (parse_fbmode_cfg(fb_mode_cfgfile) < 0)
 			return 1;
-#if 0
-	if ((!d_width + !d_height) == 1) {
-		printf(FBDEV "use both -x and -y, or none of them\n");
-		return 1;
-	}
-#endif
-	if (d_width) {
+	if (d_width && (fs || VM)) {
 		out_width = d_width;
 		out_height = d_height;
 	} else {
@@ -891,17 +883,13 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 			free(cmap->blue);
 			free(cmap);
 			break;
-//		case FB_VISUAL_PSEUDOCOLOR:
-//			printf(FBDEV "visual is FB_VISUAL_PSEUDOCOLOR."
-//					"it's not tested!\n");
-//			break;
 		default:
 			printf(FBDEV "visual: %d not yet supported\n",
 					fb_finfo.visual);
 			return 1;
 	}
 
-	if (FS || (d_width && VM)) {
+	if (VM || fs) {
 		out_width = fb_vinfo.xres;
 		out_height = fb_vinfo.yres;
 	}
@@ -961,9 +949,13 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		return 1;
 	}
 
+	if (flip & (((pixel_format & 0xff) + 7) / 8) != fb_pixel_size) {
+		printf(FBDEV "Flipped output with depth conversion is not "
+				"supported\n");
+		return 1;
+	}
 	if (format == IMGFMT_YV12)
 		yuv2rgb_init(fb_bpp, MODE_RGB);
-	clear_bg();
 	return 0;
 }
 
@@ -1012,6 +1004,16 @@ static uint32_t draw_frame(uint8_t *src[])
 		yuv2rgb(next_frame, src[0], src[1], src[2], in_width,
 				in_height, in_width * fb_pixel_size,
 				in_width, in_width / 2);
+	} else if (flip) {
+		int h = in_height;
+		int len = in_width * fb_pixel_size;
+		char *d = next_frame + (in_height - 1) * len;
+		char *s = src[0];
+		while (h--) {
+			memcpy(d, s, len);
+			s += len;
+			d -= len;
+		}
 	} else {
 		int sbpp = ((pixel_format & 0xff) + 7) / 8;
 		char *d = next_frame;
