@@ -38,6 +38,7 @@ static uint32_t xmms_afmt;
 static int xmms_length;
 static char *xmms_title=NULL;
 static uint32_t xmms_audiopos=0;
+static int xmms_playing=0;
 
 static uint64_t written = 0;
 
@@ -140,8 +141,12 @@ static void input_add_vis_pcm(int time, AFormat fmt, int nch, int length, void *
 //static void input_update_vis(gint time){}
 //static gchar *input_get_info_text(void){return NULL;}
 static void input_set_info_text(char * text){}
-static void input_set_info(char* ha,int a, int b, int c, int d){};
+
 /* Dummy functions  END*/
+
+static void input_set_info(char* title,int length, int rate, int freq, int nch){
+    xmms_length=length;
+}
 
 static void init_plugins(){
     DIR *dir;
@@ -226,12 +231,11 @@ int demux_xmms_open(demuxer_t* demuxer) {
   sh_audio->ds = demuxer->audio;
 
   xmms_output_plugin.init();
-  ip->get_song_info(demuxer->stream->url,&xmms_title,&xmms_length);
-  if (xmms_length<=0) demuxer->seekable=0;
-//  printf("XMMS song title='%s' length=%d\n",xmms_title,xmms_length);
-//  input_play(demuxer->stream->url);
   ip->output = &xmms_output_plugin;
   ip->play_file(demuxer->stream->url);
+  xmms_playing=1;
+  ip->get_song_info(demuxer->stream->url,&xmms_title,&xmms_length);
+  if (xmms_length<=0) demuxer->seekable=0;
 
   mp_msg(MSGT_DEMUX,MSGL_INFO,"Waiting for the XMMS plugin to start playback of '%s'...\n",demuxer->stream->url);
   while (xmms_channels==0) {
@@ -263,9 +267,15 @@ int demux_xmms_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   sh_audio_t *sh_audio = demuxer->audio->sh;
   xmms_priv_t *priv=demuxer->priv;
   demux_packet_t*  dp;
+  
+  if (xmms_length<=0) demuxer->seekable=0;
+  else demuxer->seekable=1;
 
   while (xmms_audiopos<XMMS_PACKETSIZE/2) {
-    if(priv->ip->get_time()<0) return 0;
+    if((priv->ip->get_time()<0) || !xmms_playing) {
+	xmms_audiopos=0;  // xmp on exit waits until buffer is freed somewhat
+	return 0;
+    }
     usleep(1000);    
   }
 
@@ -307,6 +317,7 @@ void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
 int demux_close_xmms(demuxer_t* demuxer) {
   xmms_priv_t *priv=demuxer->priv;
+  xmms_playing=0;
   priv->ip->stop();
   free(priv); demuxer->priv=NULL;
   cleanup_plugins();
