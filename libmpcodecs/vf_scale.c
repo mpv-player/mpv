@@ -121,7 +121,7 @@ static int config(struct vf_instance_s* vf,
 	if(vf->priv->w<0) vf->priv->w=width; else
 	if(vf->priv->w==0) vf->priv->w=d_width;
 	if(vf->priv->h==-3) vf->priv->h=(vf->priv->w*height/width+1)&~1; else
-	if(vf->priv->h==-2) vf->priv->h=(vf->priv->w*d_height/d_width+2)&~1;
+	if(vf->priv->h==-2) vf->priv->h=(vf->priv->w*d_height/d_width+1)&~1;
 	break;
     default:
     if(vf->priv->w==-3) vf->priv->w=vf->priv->h*width/height; else
