@@ -641,7 +641,8 @@ two weeks).
 <para>
 When <application>MPlayer</application> tries to load a Windows DLL it
 wants to put it at a specific address (0x400000). If an important system
-library happens to be there already, MPlayer will crash.
+library happens to be there already, <application>MPlayer</application>
+will crash.
 (A typical symptom would be a segmentation fault when trying
 to play Windows Media 9 files.)
 </para>
@@ -672,7 +673,7 @@ PRELINK_OPTS="-mR --no-exec-shield"
 quite a while.)</para></listitem>
 <listitem>
 <para><command>execstack -s <replaceable>/path/to/</replaceable>mplayer</command>
-(This turns off execshield for the <application>MPlayer</application> binary.)
+(This turns off exec-shield for the <application>MPlayer</application> binary.)
 </para>
 </listitem>
 </orderedlist>
