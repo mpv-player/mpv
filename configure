@@ -5051,9 +5051,6 @@ EOF
     _def_mp3lame='#undef HAVE_MP3LAME'
   fi
   echores "$_mp3lame"
-  if freebsd ; then
-    _mp3lame=no
-  fi
 
 
   echocheck "DivX4linux encore (for mencoder)"
@@ -5714,8 +5711,8 @@ AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
-OPTFLAGS = $CFLAGS
 EXTRA_INC = $_inc_extra $_inc_gtk
+OPTFLAGS = $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
 
 $_live_libs_def
