@@ -16,8 +16,8 @@ extern "C" {
 #include <liveMedia.hh>
 #endif
 
-#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1046649600)
-#error Please upgrade to version 2003.03.03 or later of the "LIVE.COM Streaming Media" libraries - available from <www.live.com/liveMedia/>
+#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1073260800)
+#error Please upgrade to version 2004.01.05 or later of the "LIVE.COM Streaming Media" libraries - available from <www.live.com/liveMedia/>
 #endif
 
 // Codec-specific initialization routines:
