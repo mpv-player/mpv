@@ -27,7 +27,7 @@ int ai_oss_set_samplerate(audio_in_t *ai)
 {
     int tmp = ai->req_samplerate;
     if (ioctl(ai->oss.audio_fd, SNDCTL_DSP_SPEED, &tmp) == -1) return -1;
-    ai->samplerate = ai->req_samplerate;
+    ai->samplerate = tmp;
     return 0;
 }
 
