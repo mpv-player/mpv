@@ -986,6 +986,10 @@ static struct {
   {"rgb4", IMGFMT_RGB4},
   {"rg4b", IMGFMT_RG4B},
   {"rgb1", IMGFMT_RGB1},
+  {"rgba", IMGFMT_RGBA},
+  {"argb", IMGFMT_ARGB},
+  {"bgra", IMGFMT_BGRA},
+  {"abgr", IMGFMT_ABGR},
   { NULL, 0 }
 };
 
