@@ -1,7 +1,7 @@
 // Translated by: Fabio Olimpieri <fabio.olimpieri@tin.it>
 // Updated by: Roberto Togni <see AUTHORS for email address>
 
-// Updated to help_mp-en.h v1.83
+// Updated to help_mp-en.h v1.84
 
 // Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
 // and send a notify message to mplayer-dev-eng maillist.
@@ -580,6 +580,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
 #define MSGTR_PREFERENCES_CDROMDevice "Dispositivo CD-ROM:"
 #define MSGTR_PREFERENCES_DVDDevice "Dispositivo DVD:"
+#define MSGTR_PREFERENCES_FPS "FPS del filmato:"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Errore fatale!"
