@@ -3316,14 +3316,10 @@ echocheck "RealPlayer DLL"
 if test "$_real" = auto ; then
   _real=no
   if test "$_dl" = yes ; then
-    if linux ; then
-      _real=yes
-    elif freebsd ; then
-      _real=yes
-    elif netbsd ; then
+    if linux || freebsd || netbsd || cygwin ; then
       _real=yes
     else
-      echores "no (tested only on Linux/FreeBSD/NetBSD)"
+      echores "no (tested only on Linux/FreeBSD/NetBSD/CygWin)"
     fi
     if test "$_real" = yes ; then
       if test -z "$_reallibdir" ; then
