@@ -321,14 +321,14 @@ static char* print_str(m_option_t* opt,  void* val) {
 
 static void copy_str(m_option_t* opt,void* dst, void* src) {
   if(dst && src) {
-    if(VAL(dst)) free(VAL(dst));
+//    if(VAL(dst)) free(VAL(dst)); //FIXME!!!
     VAL(dst) = VAL(src) ? strdup(VAL(src)) : NULL;
   }
 }
   
 static void free_str(void* src) {
   if(src && VAL(src)){ 
-    free(VAL(src));
+//    free(VAL(src)); //FIXME!!!
     VAL(src) = NULL;
   }
 }
@@ -365,10 +365,10 @@ static void free_str_list(void* dst) {
   if(!dst || !VAL(dst)) return;
   d = VAL(dst);
 
-
-  for(i = 0 ; d[i] != NULL ; i++)
-    free(d[i]);
-  free(d);
+// FIXME!!!
+//  for(i = 0 ; d[i] != NULL ; i++)
+//    free(d[i]);
+//  free(d);
   VAL(dst) = NULL;
 }
 
