@@ -944,8 +944,7 @@ Naboo was under an attack.<BR>
   <LI>a betûtipus generáló GIMP plugin használata, ami a TOOLS/subfont-GIMP
     könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.</LI>
   <LI>TTF font használata. Ehhez a freetype könyvtár legalább 2.0.9-es
-    verziója szükséges. Add meg a ./configure-nak az <CODE>--enable-freetype</CODE>
-    opciót, és így fordítsd le az MPlayert. Ezután két lehetõséged van:
+    verziója szükséges. Fordítsd le az MPlayert. Ezután két lehetõséged van:
     <UL>
       <LI>minden alkalommal megadod az MPlayer-nek a <CODE>-font /útvonal/arial.ttf</CODE>
         opciót</LI>
@@ -1096,6 +1095,12 @@ kimeneti eszközök</P>
   hasznos tipp:</P>
 
 <UL>
+  <LI>Használd a <CODE>channels</CODE> opciót. Egy példa:<BR>
+    <CODE>-tv on:channels=26-MTV1,23-TV2</CODE><BR>
+    Magyarázat: a fenti opció használatakor csak a 26-os és 23-as csatornák
+    között lehet majd váltani, valamint váltáskor egy OSD jön fel és írja ki
+    a csatorna nevét. Amennyiben a csatornanév tartalmaz szóközt, azt
+    a "_" karakterrel kell helyettesíteni.</LI>
   <LI>Érdemes ésszerû képméretet választani. Nagyon ajánlott hogy a szélesség
     és a magasság mérete 16-tal osztható legyen.</LI>
   <LI>Ha a grabbelt kép vertikális felbontás több mint fele a teljes
@@ -1594,29 +1599,27 @@ end
 
 <H2><A NAME=cygwin>6.7. Cygwin</A></H2>
 
-<P>A Cygwin port még mindig gyerekcipõben jár, és szívesen fogad
-  <A HREF="../tech/patches.txt">patcheket</A>. Van
+<P>A Cygwin port még mindig gyerekcipõben jár, jelenleg az MPlayer paraméterei
+  közül a Win32-es DLL-ek használata, a Video CD-k lejátszása és az OpenGL
+  nem használható Cygwin platform alatt. Az SDL-rõl ismert hogy egyes esetekben
+  eltorzítja a képet és a hangot, vagy crashel. Szívesen veszünk
+  <A HREF="../tech/patches.txt">patcheket</A> bárkitõl. A legjobb eredmény
+  a natív DirectX-es video kimenet (<CODE>-vo directx</CODE>), és a Windows
+  waveout audio meghajtó használatával (<CODE>-ao win32</CODE>) érhetõ el.
+  Van
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">levelezési listája</A>
   is.</P>
 
+<P>Amennyiben le akarod fordítani az MPlayer-t, másold vagy linkeld át az
+  <CODE>etc/cygwin_inttypes.h</CODE> file-t az MPlayer forrásból az
+  <CODE>/usr/include/inttypes.h</CODE> helyre.</P>
+
 <P>Natív DirectX video (<CODE>-vo directx</CODE>) használatához tömörítsd ki
   a <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header
-  file-okat</A>, az <CODE>/usr/include</CODE> és
-  <CODE>/usr/local/include</CODE> könyvtárakba, és fordítsd le az MPlayer-t.
-  Ez, és az <CODE>-ao win32</CODE> opció használata adja a legjobb
-  eredményt. Ha a kép torz, próbáld kapcsold ki a hardveres gyorsítást a
-  <CODE>-vo directx:noaccel</CODE> opcióval.</P>
-
-<P>Be kell lépned az <B>MPlayer</B> könyvtárába és át kell másolnod az
-  <CODE>etc/cygwin_inttypes.h</CODE> file-t az
-  <CODE>/usr/include/inttypes.h</CODE> file helyére hogy az <B>MPlayer</B>
-  leforduljon. Máskülönben a fordításkor panaszkodni fog az inttypes.h
-  hiányára.</P>
-
-<P>Mivel Win32 alatt nem támogatottak a Win32 DLLek és az OpenGL, mpdvdkit
-  nem mûködik/fordul, ezeket fordításnál ki kell kapcsolni, a
-  <CODE>./configure --disable-win32 --disable-gl --disable-mpdvdkit</CODE>
-  paranccsal.</P>
+  file-okat</A>, az <CODE>/usr/include</CODE> vagy az
+  <CODE>/usr/local/include</CODE> könyvtárba, és fordítsd le az MPlayer-t. 
+  Ha a kép torz, próbáld kapcsold ki a hardveres gyorsítást a <CODE>-vo
+  directx:noaccel</CODE> opcióval.</P>
 
 <P>Az SDL Cygwin-es verzióját a <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libSDL site-ról</A>
   töltheted le.</P>
