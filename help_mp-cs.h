@@ -8,8 +8,6 @@ static char* banner_text=
 "MPlayer " VERSION "(C) 2000-2002 Arpad Gereoffy (viz DOCS!)\n"
 "\n";
 
-// Pøeklad do èe¹tiny Jiøí Svoboda
-
 static char help_text[]=
 #ifdef HAVE_NEW_GUI
 "Pou¾ití:   mplayer [-gui] [pøepínaèe] [cesta/]jmenosouboru\n"
@@ -80,24 +78,24 @@ static char help_text[]=
 #define MSGTR_ErrorDVDkey "Chyba pøi zpracování klíèe DVD.\n"
 #define MSGTR_CmdlineDVDkey "DVD klíè po¾adovaný na pøíkazové øádce je uschován pro rozkódování.\n"
 #define MSGTR_DVDauthOk "DVD autentikaèní sekvence vypadá vpoøádku.\n"
-#define MSGTR_DumpSelectedSteramMissing "dump: FATAL: po¾adovaný proud chybí!\n"
+#define MSGTR_DumpSelectedSteramMissing "dump: Kritická chyba: po¾adovaný proud chybí!\n"
 #define MSGTR_CantOpenDumpfile "Nelze otevøít soubor pro dump!!!\n"
 #define MSGTR_CoreDumped "jádro vypsáno :)\n"
 #define MSGTR_FPSnotspecified "V hlavièce souboru není udáno (nebo je ¹patné) FPS! Pou¾ijte volbu -fps !\n"
 #define MSGTR_NoVideoStream "Bohu¾el, ¾ádný videoproud... to se zatím nedá pøehrát.\n"
-#define MSGTR_TryForceAudioFmt "Pokou¹ím se vynutit rodinu audiokodeku %d ...\n"
+#define MSGTR_TryForceAudioFmtStr "Pokou¹ím se vynutit rodinu audiokodeku %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Nemohu nalézt audio kodek pro po¾adovanou rodinu, pou¾iji ostatní.\n"
 #define MSGTR_CantFindAudioCodec "Nemohu nalézt kodek pro audio formát 0x%X !\n"
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Pokuste se upgradovat %s z etc/codecs.conf\n*** Pokud problém pøetrvá, pak si pøeètìte DOCS/CODECS!\n"
 #define MSGTR_CouldntInitAudioCodec "Nelze inicializovat audio kodek! -> beze zvuku\n"
-#define MSGTR_TryForceVideoFmt "Poku¹ím se vynutit rodinu videokodeku %d ...\n"
+#define MSGTR_TryForceVideoFmtStr "Poku¹ím se vynutit rodinu videokodeku %d ...\n"
 #define MSGTR_CantFindVfmtFallback "Nemohu nalézt video kodek pro po¾adovanou rodinu, pou¾iji ostatní.\n"
 #define MSGTR_CantFindVideoCodec "Nemohu nalézt kodek pro video formát 0x%X !\n"
 #define MSGTR_VOincompCodec "Bohu¾el, vybrané video_out zaøízení je nekompatibilní s tímto kodekem.\n"
-#define MSGTR_CouldntInitVideoCodec "FATAL: Nemohu inicializovat videokodek :(\n"
+#define MSGTR_CouldntInitVideoCodec "Kritická chyba: Nemohu inicializovat videokodek :(\n"
 #define MSGTR_EncodeFileExists "Soubor ji¾ existuje: %s (nepøepi¹te si svùj oblíbený AVI soubor!)\n"
 #define MSGTR_CantCreateEncodeFile "Nemohu vytvoøit soubor\n" // toto doopravit - need to be corrected
-#define MSGTR_CannotInitVO "FATAL: Nemohu inicializovat video driver!\n"
+#define MSGTR_CannotInitVO "Kritická chyba: Nemohu inicializovat video driver!\n"
 #define MSGTR_CannotInitAO "nemohu otevøít/inicializovat audio driver -> TICHO\n"
 #define MSGTR_StartPlaying "Zaèínám pøehrávat...\n"
 
@@ -129,6 +127,8 @@ static char help_text[]=
 #define MSGTR_AvailableAudioOutputDrivers "Dostupné ovladaèe pro audio:\n"
 #define MSGTR_AvailableAudioCodecs "Dostupné audio kodeky:\n"
 #define MSGTR_AvailableVideoCodecs "Dostupné video kodeky:\n"
+#define MSGTR_AvailableAudioFm "\nDostupné (pøikompilované) rodiny audio kodekù/ovladaèe:\n"
+#define MSGTR_AvailableVideoFm "\nDostupné (pøikompilované) rodiny video kodekù/ovladaèe:\n"
 #define MSGTR_UsingRTCTiming "Pou¾ito èasování pomocí Linux hardware RTC (%ldHz)\n"
 #define MSGTR_CannotReadVideoPropertiers "Video: nelze pøeèíst vlastnosti\n"
 #define MSGTR_NoStreamFound "Nenalezen ¾ádný proud\n"
@@ -138,7 +138,7 @@ static char help_text[]=
 #define MSGTR_AODescription_AOAuthor "AO: Popis: %s\nAO: Autor: %s\n"
 #define MSGTR_AOComment "AO: Poznámka: %s\n"
 #define MSGTR_Video_NoVideo "Video: ¾ádné video!!!\n"
-#define MSGTR_NotInitializeVOPorVO "\nFATAL: Nemohu inicializovat video filtry (-vop) nebo video ovladaè (-vo) !\n"
+#define MSGTR_NotInitializeVOPorVO "\nKritická chyba: Nemohu inicializovat video filtry (-vop) nebo video ovladaè (-vo) !\n"
 #define MSGTR_Paused "\n------ MÁM PAUZU :-P -------\r"
 #define MSGTR_PlaylistLoadUnable "\nNemohu naèíst seznam souborù pro pøehrání %s\n"
 
@@ -163,8 +163,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nZapisuji AVI index...\n"
 #define MSGTR_FixupAVIHeader "Opravuji AVI hlavièku...\n"
 #define MSGTR_RecommendedVideoBitrate "Doporuèený datový tok videa pro %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nVideo proud: %8.3f kbit/s  (%d bps)  velikost: %d bytù  %5.3f sekund  %d snímkù\n"
-#define MSGTR_AudioStreamResult "\nAudio proud: %8.3f kbit/s  (%d bps)  velikost: %d bytù  %5.3f sekund\n"
+#define MSGTR_VideoStreamResult "\nVideo proud: %8.3f kbit/s  (%d bps)  velikost: %d bajtù  %5.3f sekund  %d snímkù\n"
+#define MSGTR_AudioStreamResult "\nAudio proud: %8.3f kbit/s  (%d bps)  velikost: %d bajtù  %5.3f sekund\n"
 
 
 // open.c, stream.c:
@@ -271,9 +271,9 @@ static char help_text[]=
 #define MSGTR_MpegPPhint "Upozornìní! Po¾adujete video postprocesing pro MPEG 1/2, ale MPlayer byl\n" \
 			 "         pøelo¾en bez podpory posprocesingu MPEG 1/2!\n" \
 			 "         #define MPEG12_POSTPROC v config.h a pøelo¾te znovu libmpeg2!\n"
-#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF - konec souboru v prùbìhu vyhledávání hlavièky sekvence\n"
-#define MSGTR_CannotReadMpegSequHdr "FATAL: Nelze pøeèíst hlavièku sekvence!\n"
-#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Nelze pøeèíst roz¹íøení hlavièky sekvence!\n"
+#define MSGTR_MpegNoSequHdr "MPEG: Kritická chyba: EOF - konec souboru v prùbìhu vyhledávání hlavièky sekvence\n"
+#define MSGTR_CannotReadMpegSequHdr "Kritická chyba: Nelze pøeèíst hlavièku sekvence!\n"
+#define MSGTR_CannotReadMpegSequHdrEx "Kritická chyba: Nelze pøeèíst roz¹íøení hlavièky sekvence!\n"
 #define MSGTR_BadMpegSequHdr "MPEG: ©patná hlavièka sekvence!\n"
 #define MSGTR_BadMpegSequHdrEx "MPEG: ©patné roz¹íøení hlavièky sekvence!\n"
 
@@ -288,12 +288,12 @@ static char help_text[]=
 #define MSGTR_UsingExternalPP "[PP] Pou¾ívám externí filtr pro postprocessing , max q = %d\n"
 #define MSGTR_UsingCodecPP "[PP] Pou¾ívám integrovaný postprocesing kodeku, max q = %d\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "Video atribut '%s' není podporován vybraným vo & vd! \n"
-#define MSGTR_VideoCodecFamilyNotAvailable "Po¾adovaná rodina video kodeku [%s] (vfm=%d) není dostupná (aktivujte ji pøi kompilace!)\n"
-#define MSGTR_AudioCodecFamilyNotAvailable "Po¾adovaná rodina audio kodeku [%s] (afm=%d) not available (aktivujte ji pøi kompilace!)\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Po¾adovaná rodina video kodeku [%s] (vfm=%d) není dostupná (aktivujte ji pøi kompilace!)\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Po¾adovaná rodina audio kodeku [%s] (afm=%d) not available (aktivujte ji pøi kompilace!)\n"
 #define MSGTR_OpeningVideoDecoder "Otevírám viedo dekodér: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "Otevírám audio decodér: [%s] %s\n"
-#define MSGTR_UninitVideo "uninit video: %d  \n"
-#define MSGTR_UninitAudio "uninit audio: %d  \n"
+#define MSGTR_UninitVideoStr "uninit video: %d  \n"
+#define MSGTR_UninitAudioStr "uninit audio: %d  \n"
 #define MSGTR_VDecoderInitFailed "VDecoder - inicializace selhala :(\n"
 #define MSGTR_ADecoderInitFailed "ADecoder - inicializace selhala :(\n"
 #define MSGTR_ADecoderPreinitFailed "ADecoder preinit selhal :(\n"
@@ -335,9 +335,14 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Vybrat ..."
 #define MSGTR_AudioFileSelect "Vybrat externí zvukový kanál ..."
 #define MSGTR_Network "Sí» ..." //opravit
+#define MSGTR_Preferences "Nastavení" // Pøedvolby?
 #define MSGTR_FontSelect "Vybrat font ..."
 #define MSGTR_OSSPreferences "Konfigurace ovladaèe OSS"
-#define MSGTR_Preferences "Nastavení" // Pøedvolby?
+#define MSGTR_NoMediaOpened "nic není otevøeno"
+#define MSGTR_VCDTrack "VCD stopa %d"
+#define MSGTR_NoChapter "¾ádná kapitola" //bez kapitoly?
+#define MSGTR_Chapter "kapitola %d"
+#define MSGTR_NoFileLoaded "¾ádný soubor nenaèten"
 
 // --- buttons ---
 #define MSGTR_Ok "Ok"
@@ -388,6 +393,7 @@ static char help_text[]=
 #define MSGTR_MENU_PlayDVD "Pøehrát DVD ..."
 #define MSGTR_MENU_PlayURL "Ètení URL ..."
 #define MSGTR_MENU_LoadSubtitle "Naèíst titulky ..."
+#define MSGTR_MENU_DropSubtitle "Zahodit titulky ..."
 #define MSGTR_MENU_LoadExternAudioFile "Naèíst externí soubor se zvukem ..."
 #define MSGTR_MENU_Playing "Ovládání pøehrávání"
 #define MSGTR_MENU_Play "Pøehrát"
@@ -465,12 +471,13 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_MPSUB "Pøevést dané titulky do vlastního formátu titulkù MPlayeru"
 #define MSGTR_PREFERENCES_SUB_SRT "Pøevést dané titulky do èasovì orientovaného formátu SubViewer (SRT)"
 #define MSGTR_PREFERENCES_Font "Font:"
-#define MSGTR_PREFERENCES_FontFactor "Font factor:" //????
+#define MSGTR_PREFERENCES_FontFactor "Font faktor:" //????
 #define MSGTR_PREFERENCES_PostProcess "Aktivovat postprocessing"
 #define MSGTR_PREFERENCES_AutoQuality "Automatická kontrola kvality:"
 #define MSGTR_PREFERENCES_NI "Pou¾ít parser pro neprokládaný AVI formát"
 #define MSGTR_PREFERENCES_IDX "Vytvoøit tabulku indexù pokud je tøeba"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Rodina video kodeku:"
+#define MSGTR_PREFERENCES_AudioCodecFamily "Rodina audio kodeku:"
 #define MSGTR_PREFERENCES_FRAME_OSD_Level "Typ OSD"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Titulky"
 #define MSGTR_PREFERENCES_FRAME_Font "Font"
@@ -482,9 +489,39 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DXR3_VENC "Video enkoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Pou¾ít LAVC (ffmpeg)"
 #define MSGTR_PREFERENCES_DXR3_FAME "Pou¾ít FAME"
+#define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
+#define MSGTR_PREFERENCES_FontEncoding2 "Západoevropské jazyky (ISO-8859-1)"
+#define MSGTR_PREFERENCES_FontEncoding3 "Západoevropské jazyky s Eurem (ISO-8859-15)"
+#define MSGTR_PREFERENCES_FontEncoding4 "Slovanské/støedoevropské jazyky (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, gal¹tina, maltéz¹tina, tureètina (ISO-8859-3)"
+#define MSGTR_PREFERENCES_FontEncoding6 "Staré Baltské kódování (ISO-8859-4)"
+#define MSGTR_PREFERENCES_FontEncoding7 "Cyrilice (ISO-8859-5)"
+#define MSGTR_PREFERENCES_FontEncoding8 "Arab¹tina (ISO-8859-6)"
+#define MSGTR_PREFERENCES_FontEncoding9 "Moderní øeètina (ISO-8859-7)"
+#define MSGTR_PREFERENCES_FontEncoding10 "Tureètina (ISO-8859-9)"
+#define MSGTR_PREFERENCES_FontEncoding11 "Baltické (ISO-8859-13)"
+#define MSGTR_PREFERENCES_FontEncoding12 "Celtic (ISO-8859-14)"
+#define MSGTR_PREFERENCES_FontEncoding13 "Hebrej¹tina (ISO-8859-8)"
+#define MSGTR_PREFERENCES_FontEncoding14 "Ru¹tina (KOI8-R)"
+#define MSGTR_PREFERENCES_FontEncoding15 "Ukrajin¹tina, bìloru¹tina (KOI8-U/RU)"
+#define MSGTR_PREFERENCES_FontEncoding16 "Jednoduchá èín¹tina (CP936)"
+#define MSGTR_PREFERENCES_FontEncoding17 "Tradièní èín¹tina (BIG5)"
+#define MSGTR_PREFERENCES_FontEncoding18 "Japon¹tina (SHIFT-JIS)"
+#define MSGTR_PREFERENCES_FontEncoding19 "Korej¹tina (CP949)"
+#define MSGTR_PREFERENCES_FontEncoding20 "Thaj¹tina (CP874)"
+#define MSGTR_PREFERENCES_FontNoAutoScale "Bez automatické velikosti"
+#define MSGTR_PREFERENCES_FontPropWidth "Proporènì dle ¹íøky obrazu"
+#define MSGTR_PREFERENCES_FontPropHeight "Proporènì dle vý¹ky obrazu"
+#define MSGTR_PREFERENCES_FontPropDiagonal "Proporènì dle úhlopøíèky"
+#define MSGTR_PREFERENCES_FontEncoding "Kódování:"
+#define MSGTR_PREFERENCES_FontBlur "Rozmazání:"
+#define MSGTR_PREFERENCES_FontOutLine "Obrys:"
+#define MSGTR_PREFERENCES_FontTextScale "Velikost textu:"
+#define MSGTR_PREFERENCES_FontOSDScale "Velikost OSD:"
+#define MSGTR_PREFERENCES_SubtitleOSD "Titulky & OSD"
 
 // --- messagebox
-#define MSGTR_MSGBOX_LABEL_FatalError "Fatální chyba ..."
+#define MSGTR_MSGBOX_LABEL_FatalError "Kritická chyba ..."
 #define MSGTR_MSGBOX_LABEL_Error "Chyba ..."
 #define MSGTR_MSGBOX_LABEL_Warning "Upozornìní ..."
 
