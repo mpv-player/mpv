@@ -43,8 +43,8 @@ inline void TranslateFilename( int c,char * tmp )
    case STREAMTYPE_FILE:
           if ( ( guiIntfStruct.Filename )&&( guiIntfStruct.Filename[0] ) )
            {
-	    if ( strrchr( guiIntfStruct.Filename,'/' ) ) strcpy( tmp,strrchr( guiIntfStruct.Filename,'/' ) + 1 );
-	     else strcpy( tmp,guiIntfStruct.Filename );
+	    if ( strrchr( guiIntfStruct.Filename,'/' ) ) strncpy( tmp,strrchr( guiIntfStruct.Filename,'/' ) + 1, 511 );
+	     else strncpy( tmp,guiIntfStruct.Filename , 511);
             if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
             if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
            } else strcpy( tmp,MSGTR_NoFileLoaded );
