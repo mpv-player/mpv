@@ -11,28 +11,51 @@
 #include <sys/ioctl.h>
 #include <sys/stat.h>
 
+#include "mp_msg.h"
+
 #ifndef FIBMAP
 #define FIBMAP 1
 #endif
 
 int main ( int argc , char ** argv )
 {
-	int fd,lba=0;
-	if (argc!=2) {
-	    fprintf(stderr,"Bad usage.\n");
+	int fd,ret,lba=0;
+	if (geteuid()!=0) {
+	    mp_msg(MSGT_CPLAYER,MSGL_FATAL, "%s must be setuid root to work\n",
+	    argv[0]);
+                       return 1;
+	}
+	if (seteuid(getuid()) == -1) {
+	    mp_msg(MSGT_CPLAYER,MSGL_FATAL, "Couldn't drop privileges: %s\n",
+	    strerror(errno));
+	    return 1;
+	}
+	if (argc!=2 || argv[1]==NULL) {
+	    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Usage: %s <filename>\n", argv[0]);
 	    return 1;
 	}
 	if ((fd = open(argv[1], O_RDONLY)) == -1) {
-    	    fprintf(stderr,"Cannot open file %s: %s\n",
-	    argv[1] ? argv[1] : "(NULL)", strerror(errno));
+    	    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Cannot open file %s: %s\n",
+	    argv[1], strerror(errno));
     	    return 1;
 	}
-        if (ioctl(fd, FIBMAP, &lba) != 0) {
-	    fprintf(stderr,"fibmap ioctl: %s (Hint: %s is not suid root?)\n",strerror(errno),argv[0]);
-            close(fd);
+        if (seteuid(0) == -1) {
+            mp_msg(MSGT_CPLAYER,MSGL_FATAL, "Couldn't restore root privileges: %s\n",
+            strerror(errno));
             return 1;
         }
-	close(fd);
+        ret = ioctl(fd, FIBMAP, &lba);
+        if (seteuid(getuid()) == -1) {
+            mp_msg(MSGT_CPLAYER,MSGL_FATAL, "Couldn't re-drop privileges: %s\n",
+            strerror(errno));
+            return 1;
+        }
+        close(fd);
+        if (ret != 0) {
+	    mp_msg(MSGT_CPLAYER,MSGL_FATAL,"fibmap ioctl failed: %s\n",
+	    strerror(errno));
+            return 1;
+        }
 	printf("%d\n",lba);
 	return 0;
 }
