@@ -129,30 +129,15 @@ die () {
 	exit 1
 }
 
-linux() {
-	test "$system_name" = "Linux"
-	return "$?"
-}
-freebsd() {
-	test "$system_name" = "FreeBSD"
-	return "$?"
-}
-openbsd() {
-	test "$system_name" = "OpenBSD"
-	return "$?"
-}
-bsdos() {
-	test "$system_name" = "BSD/OS"
-	return "$?"
-}
-bsd() {
-	freebsd || openbsd || bsdos
-	return "$?"
-}
-irix64() {
-	test "$system_name" = "IRIX64"
-	return "$?"
-}
+linux()   { test "$system_name" = "Linux"   ; return "$?" ; }
+sunos()   { test "$system_name" = "SunOS"   ; return "$?" ; }
+irix()    { test "$system_name" = "IRIX"    ; return "$?" ; }
+cygwin()  { test "$system_name" = "CYGWIN"  ; return "$?" ; }
+freebsd() { test "$system_name" = "FreeBSD" ; return "$?" ; }
+netbsd()  { test "$system_name" = "NetBSD"  ; return "$?" ; }
+bsdos()   { test "$system_name" = "BSD/OS"  ; return "$?" ; }
+openbsd() { test "$system_name" = "OpenBSD" ; return "$?" ; }
+bsd()     { freebsd || netbsd || bsdos || openbsd ; return "$?" ; }
 
 
 # Check how echo works in this /bin/sh
@@ -215,7 +200,7 @@ Audio:
   --disable-sunaudio     disable Sun sound support [autodetect]
   --disable-mad          disable mad audio support [autodetect]
 
-Miscellaneous features:
+Miscellaneous options:
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
   --language=xx          select a language [en]
@@ -326,11 +311,28 @@ EOF
 
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
-   system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, OpenBSD, SunOS
-   host_arch=`uname -p 2>&1`   # host's instruction set or processor type
+   # OS name
+   system_name=`( uname -s ) 2>&1`
+   case "$system_name" in
+   Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS)
+      : # well-known OSes
+      ;;
+   IRIX*)
+      system_name=IRIX
+      ;;
+   [cC][yY][gG][wW][iI][nN]*)
+      system_name=CYGWIN
+      ;;
+   *)
+      system_name="$system_name-UNKNOWN"
+      ;;
+   esac
 
+
+   # host's CPU/instruction set 
+   host_arch=`( uname -p ) 2>&1`
    case "$host_arch" in
-   i386|sparc|ppc|alpha|arm)
+   i386|sparc|ppc|alpha|arm|mips)
        # fine, uname -p output looks good, it has returned
        # something this configure script recognizes
        ;;
@@ -368,7 +370,7 @@ _confcygwin="TARGET_CYGWIN=no"
 _confwin32=
 if bsd ; then
     _archlibs="-rdynamic -pthread"
-elif test `echo $system_name | sed 's/[cC][yY][gG][wW][iI][nN].*/CYGWIN/'` = "CYGWIN" ; then
+elif cygwin ; then
     _confcygwin="TARGET_CYGWIN=yes"
     _confwin32="#define WIN32"
     _archlibs="-lpthread"
@@ -395,7 +397,6 @@ TMPS="$I/mplayer-conf-$RANDOM-$RANDOM-$$.S"
 CCONF='config.h'
 MCONF='config.mak'
 CHELP='help_mp.h'
-# ---  Check for C compiler:
 
 if test -z "$_x11libdir" ; then
   for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib ; do 	
@@ -432,20 +433,8 @@ _extralibdir=-L/usr/local/lib
 _extraincdir=-I/usr/local/include
 fi
 
-if test -z "$_extralibdir" ; then
-_extralibdir=-L/usr/lib
-fi
-if test -z "$_extraincdir" ; then
-_extraincdir=-I/usr/include
-fi
-
-if test -z "$_sdlconfig" ; then
-   if freebsd ; then
-      _sdlconfig='sdl11-config'
-   else
-      _sdlconfig='sdl-config'
-   fi
-fi
+test -z "$_extralibdir" && _extralibdir=-L/usr/lib
+test -z "$_extraincdir" && _extraincdir=-I/usr/include
 
 # ---
 
@@ -632,7 +621,7 @@ for i in $pparam; do
 done
 
 
-# XXX check codecs presence
+# Check for win32 codecs directory
 _win32libdir=
 if test "$_win32" = yes ; then
   for I in /usr/local/lib/win32 /usr/lib/win32 ; do
@@ -867,10 +856,21 @@ echo Using ... "$_mp_help" file
 
 cc_check $_extraincdir $_extralibdir -lvgagl -lvga && _svga=yes
 
+# Checking for posix threads lib...
 if bsd ; then
   cc_check -pthread || die "Lib pthread not found."
 else
   cc_check -lpthread || die "Lib pthread not found."
+fi
+
+
+# Checking for SDL ...
+if ( sdl-config --version ) >/dev/null 2>&1 ; then
+  _sdlconfig="sdl-config"
+elif ( sdl11-config --version ) >/dev/null 2>&1 ; then
+  _sdlconfig="sdl11-config"
+else
+  _sdlconfig=false
 fi
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
@@ -913,7 +913,7 @@ _termcap=no
 cc_check $_extraincdir $_extralibdir -ltermcap && _termcap=yes
 
 _png=no
-if irix64 ; then
+if irix ; then
   # Don't check for -lpng on irix since it has its own libpng
   # incompatible with the GNU libpng
   :
@@ -1795,46 +1795,37 @@ echo "Extra headers : $_extraincdir"
 if test "$_gui" = yes ; then
 # --------------- GUI begin -------------------
 
-test -z `which gtk-config` || _gtkconfig="gtk-config"
-test -z `which gtk12-config` || _gtkconfig="gtk12-config"
-test -z $_gtkconfig && die "gtk-config not found"
 
-test -z `which glib-config` || _glibconfig="glib-config"
-test -z `which glib12-config` || _glibconfig="glib12-config"
-test -z $_glibconfig && die "glib-config not found"
-
+# Check for GTK:
 echo
-#echo "gtk-config binary: $_gtkconfig"
 echo $_echo_n "Checking for gtk version ... $_echo_c"
+if ( gtk-config --version ) >/dev/null 2>&1 ; then
+	_gtkconfig="gtk-config"
+elif ( gtk12-config --version ) >/dev/null 2>&1 ; then
+	_gtkconfig="gtk12-config"
+else
+	die "gtk not found (check for gtk-config or gtk12-config)"
+fi
 _gtk=`$_gtkconfig --version 2>&1`
-test -z "$_gtk" && die "gtk not found."
 echo "$_gtk"
-
-echo $_echo_n "Checking for gtk includes ... $_echo_c"
 _gtkinc=`$_gtkconfig --cflags 2>&1`
-test -z "$_gtkinc" && die "gtk not found."
-echo "done"
-
-echo $_echo_n "Checking for gtk libs ... $_echo_c"
 _gtklib=`$_gtkconfig --libs 2>&1`
-test -z "$_gtklib" && die "gtk not found."
-echo "done"
 
+
+# Check for GLIB
 echo
 echo $_echo_n "Checking for glib version ... $_echo_c"
+if ( glib-config --version ) >/dev/null 2>&1 ; then
+	_glibconfig="glib-config"
+elif ( glib12-config --version ) >/dev/null 2>&1 ; then
+	_glibconfig="glib12-config"
+else
+	die "glib not found (check for glib-config or glib12-config)"
+fi
 _glib=`$_glibconfig --version 2>&1`
-test -z "$_glib" && die "glib not found."
 echo "$_glib"
-
-echo $_echo_n "Checking for glib includes ... $_echo_c"
 _glibinc=`$_glibconfig --cflags 2>&1`
-test -z "$_glibinc" && die "glib not found."
-echo "done"
-
-echo $_echo_n "Checking for glib libs ... $_echo_c"
 _gliblib=`$_glibconfig --libs 2>&1`
-test -z "$_gliblib" && die "glib not found."
-echo "done"
 
 cat > Gui/config.mak << EOF
 
@@ -2774,7 +2765,7 @@ EOF
       echo "Ok, found Win32 codecs directory at $_win32libdir."
     else
       cat <<EOF
-Failed to find a WIN32 codecs dir at $_win32libdir!
+Failed to find a WIN32 codecs dir!
 Create it and copy the DLL files there! (You can get them from your windows
 directory or download them from:
   ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.zip
