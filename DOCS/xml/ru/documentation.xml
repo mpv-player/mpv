@@ -151,7 +151,7 @@ MEncoder (Кодировщик фильмов MPlayer'a [MPlayer's Movie Encoder]) - это простой
 </para>
 
 <itemizedlist>
-<title>Особенности MEncoder'а</title>
+<title>Возможности MEncoder'а</title>
 <listitem><simpara>
   кодирование из широкого спектра форматов файлов и декодеров
   <application>MPlayer'а</application>
@@ -209,7 +209,7 @@ MEncoder (Кодировщик фильмов MPlayer'a [MPlayer's Movie Encoder]) - это простой
 </itemizedlist>
 
 <itemizedlist>
-<title>Планируемые особенности</title>
+<title>Планируемые возможности</title>
 <listitem><simpara>
   еще большее количество доступных форматов кодирования.декодирования
 (создание VOB файлов с DivX4/Indeo5/VIVO потоками :)

@@ -818,13 +818,13 @@ DirectShow - это более новый Video API, которые даже хуже, чем его предшественни
   Запустите <command>graphedit.exe</command>.
   </para></step>
 <step><para>
-  В меню выберете Graph -> Insert Filters.
+  В меню выберите Graph -> Insert Filters.
   </para></step>
 <step><para>
   Щелкните <systemitem>DirectShow Filters</systemitem>
   </para></step>
 <step><para>
-  Выберете нужное имя кодека и щелкните по нему.
+  Выберите нужное имя кодека и щелкните по нему.
   </para></step>
 <step><para>
   В поле <systemitem>DisplayName</systemitem> обратите внимание на текст в
