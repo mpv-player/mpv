@@ -222,6 +222,9 @@ Miscellaneous options:
   --language=xx          select a language (for translated messages/gui) [en]
                          (Available: $LANGUAGES)
   --enable-shared-pp     install & use shared postprocessing lib
+  --install-path=PATH    the path to a custom install program (useful if
+                         your OS uses a GNU-incompatible install utility by
+                         default and you want to point to the GNU version)
 
 Advanced options:
   --enable-mmx           build with mmx support [autodetect]
@@ -272,6 +275,8 @@ done # for parm in ...
 
 
 # 1st pass checking for vital options
+_install=install
+_ranlib=ranlib
 _cc=gcc
 test "$CC" && _cc="$CC"
 _as=auto
@@ -314,6 +319,9 @@ for ac_option do
     ;;
   --disable-runtime-cpudetection)
     _runtime_cpudetection=no
+    ;;
+  --install-path=*)
+    _install=`echo $ac_option | cut -d '=' -f 2 | sed 's/\/$//'`"/install"
     ;;
   esac
 done
@@ -1036,6 +1044,7 @@ for ac_option do
   --with-extralibdir=*) ;;
   --enable-runtime-cpudetection) ;;
   --disable-runtime-cpudetection) ;;
+  --install-path=*) ;;
 
   # Real 2nd pass
   --enable-mencoder)	_mencoder=yes	;;
@@ -1474,6 +1483,10 @@ die "no awk"
 fi
 fi
 
+# If IRIX we must use ar instead of ranlib (not present on IRIX systems)
+if irix ; then
+  _ranlib='ar -r'
+fi
 
 ######################
 # MAIN TESTS GO HERE #
@@ -4570,7 +4583,8 @@ LIBDIR = \$(DESTDIR)$_libdir
 #AR = ar
 CC = $_cc
 AWK = $_awk
-RANLIB = ranlib
+RANLIB = $_ranlib
+INSTALL = $_install
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS = $CFLAGS
 EXTRA_INC = $_inc_extra $_inc_gtk

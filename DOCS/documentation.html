@@ -1616,8 +1616,30 @@ end
 
 <H2><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></H2>
 
-<P>Reported working. You'll probably have to use the <I>SGI</I> ao driver.
-  Anyone has closer info?</P>
+<P>You can either try to install the GNU install program, and (if you did not
+  put it in your global path) then point to the location with:</P>
+<PRE>
+  ./configure --install-path=PATH
+</PRE>
+<P>Or you can use the default install delivered with IRIX 6.5 in which case you
+  will have to edit the Makefile a littlebit by hand. Change the following two
+  lines:</P>
+<PRE>
+  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
+
+  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
+</PRE>
+<P>to:</P>
+<PRE>
+  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
+
+  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
+</PRE>
+<P>And then do (from within the MPlayer source dir):</P>
+<PRE>
+  cp DOCS/mplayer.1 . ; cp etc/codecs.conf .
+</PRE>
+<P>and then go on with building and installing.</P>
 
 
 <H2><A NAME="qnx">6.6 QNX</A></H2>
