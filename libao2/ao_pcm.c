@@ -80,17 +80,37 @@ static int init(int rate,int channels,int format,int flags){
 		strcpy(ao_outputfilename,
 		       (ao_pcm_waveheader ? "audiodump.wav" : "audiodump.pcm"));
 	}
-	
+
 	/* bits is only equal to format if (format == 8) or (format == 16);
 	   this means that the following "if" is a kludge and should
 	   really be a switch to be correct in all cases */
-	if (format == AFMT_S16_BE) { bits = 16;	}
-	else { bits = format; }
 
-	wavhdr.channels = le2me_16(channels);
-	wavhdr.sample_rate = le2me_32(rate);
-	wavhdr.bytes_per_second = rate * (bits / 8) * channels;
-	wavhdr.bytes_per_second = le2me_32(wavhdr.bytes_per_second);
+	bits=8;
+	switch(format){
+	case AFMT_S8:
+	    format=AFMT_U8;
+	case AFMT_U8:
+	    break;
+	default:
+#ifdef WORDS_BIGENDIAN
+	    format=AFMT_S16_BE;
+#else
+	    format=AFMT_S16_LE;
+#endif
+	    bits=16;
+	    break;
+	}
+
+	ao_data.outburst = 65536;
+	ao_data.buffersize= 2*65536;
+	ao_data.channels=channels;
+	ao_data.samplerate=rate;
+	ao_data.format=format;
+	ao_data.bps=channels*rate*(bits/8);
+
+	wavhdr.channels = le2me_16(ao_data.channels);
+	wavhdr.sample_rate = le2me_32(ao_data.samplerate);
+	wavhdr.bytes_per_second = le2me_32(ao_data.bps);
 	wavhdr.bits = le2me_16(bits);
 
 	printf("PCM: File: %s (%s)\n"
@@ -102,10 +122,6 @@ static int init(int rate,int channels,int format,int flags){
 	       "for RAW PCM -nowaveheader.\n");
 
 	fp = fopen(ao_outputfilename, "wb");
-
-	ao_data.outburst = 65536;
-
-
 	if(fp) {
 		if(ao_pcm_waveheader) /* Reserve space for wave header */
 			fwrite(&wavhdr,sizeof(wavhdr),1,fp);
@@ -158,18 +174,18 @@ static int get_space(){
 // return: number of bytes played
 static int play(void* data,int len,int flags){
 
-#ifdef WORDS_BIGENDIAN
-	register int i;
-	unsigned short *buffer = (unsigned short *) data;
-
-	if (wavhdr.bits == le2me_16(16)) {
+// let libaf to do the conversion...
+#if 0
+//#ifdef WORDS_BIGENDIAN
+	if (ao_data.format == AFMT_S16_LE) {
+	  unsigned short *buffer = (unsigned short *) data;
+	  register int i;
 	  for(i = 0; i < len/2; ++i) {
 	    buffer[i] = le2me_16(buffer[i]);
 	  }
 	}
-	/* FIXME: take care of cases with more than 8 bits here? */
 #endif 
-	
+
 	//printf("PCM: Writing chunk!\n");
 	fwrite(data,len,1,fp);
 
