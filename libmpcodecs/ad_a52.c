@@ -13,10 +13,9 @@
 #include "../liba52/a52.h"
 #include "../liba52/mm_accel.h"
 
-sample_t * a52_samples;
-a52_state_t a52_state;
-uint32_t a52_accel=0;
-uint32_t a52_flags=0;
+static sample_t * a52_samples;
+static a52_state_t a52_state;
+static uint32_t a52_flags=0;
 
 #include "bswap.h"
 
@@ -102,6 +101,7 @@ static int preinit(sh_audio_t *sh)
 
 static int init(sh_audio_t *sh_audio)
 {
+  uint32_t a52_accel=0;
   sample_t level=1, bias=384;
   int flags=0;
   /* Dolby AC3 audio:*/
