@@ -748,7 +748,7 @@
 </PRE>
 
 <P>At this point, MPlayer is ready to use. The directory
-  <CODE>$PREFIX/share/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
+  <CODE>$PREFIX/etc/mplayer</CODE> contains the <CODE>codecs.conf</CODE>
   file, which is used to tell the program all the codecs and their
   capabilities.  This file should always be kept up to date together with the
   main binary.<BR>
@@ -771,16 +771,10 @@
   <CODE>configure.log</CODE> file usually tells you what is missing.</P>
 
 <P>Though not mandatory, the fonts should be installed in order to gain OSD,
-  and subtitle functionality. Download <CODE>mp-arial-iso-8859-*.zip</CODE>
-  and/or optional (if exists) language updates. See the
-  <A HREF="#subtitles_osd">Subtitles and OSD</A> section for details.</P>
+  and subtitle functionality. The recommended method is installing a TTF
+  font file and telling MPlayer to use it. See the
+  <A HREF="#install_osd">Subtitles and OSD</A> section for details.</P>
 
-<PRE>
-    mkdir ~/.mplayer
-    cd ~/.mplayer
-    unzip mp-arial-iso-8859-1.zip
-    ln -s ~/.mplayer/iso-8859-1/arial-24 font
-</PRE>
 
 
 <H2><A NAME="gui">1.3 What about the GUI?</A></H2>
@@ -825,6 +819,7 @@
   <LI>SSA</LI>
   <LI>MPsub</LI>
   <LI>AQTitle</LI>
+  <LI>JACOsub</LI>
 </UL>
 
 <P>MPlayer can dump the previously listed subtitle formats into the following
@@ -834,6 +829,8 @@
   <LI>MPsub: <CODE>-dumpmpsub</CODE></LI>
   <LI>SubRip: <CODE>-dumpsrtsub</CODE></LI>
   <LI>Microdvd: <CODE>-dumpmicrodvdsub</CODE></LI>
+  <LI>JACOsub: <CODE>-dumpjacosub</CODE></LI>
+  <LI>Sami: <CODE>-dumpsami</CODE></LI>
 </UL>
 
 <P>The command line options differ slightly for the different formats:</P>
@@ -945,14 +942,23 @@
   <LI>use the font generator GIMP plugin at TOOLS/subfont-GIMP
     (note: you must have HSI RAW plugin too, see URL below)</LI>
   <LI>using a TrueType (TTF) font, by the means of the <B>freetype</B>
-    library. Version 2.0.9 or greater is mandatory! TODO: complete this</LI>
+    library. Version 2.0.9 or greater is mandatory! You have to pass the
+    <CODE>--enable-freetype</CODE> option to ./configure. Then you
+    have two methods:
+    <UL>
+      <LI>use the <CODE>-font /path/to/arial.ttf</CODE> option to specify
+        a TrueType font file on every occassion</LI>
+      <LI>create a symlink: <CODE>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</CODE></LI>
+    </UL>
+  </LI>
 </UL>
 
-<P>After that, UNZIP the file you downloaded to <CODE>~/.mplayer</CODE> or
-  <CODE>$PREFIX/share/mplayer</CODE>. Then rename or symlink one of them to
+<P>If you chose non-TTF fonts, UNZIP the file you downloaded to <CODE>~/.mplayer</CODE> or
+  <CODE>$PREFIX/share/mplayer</CODE>. Then rename or symlink one of the extracted directories to
   <CODE>font</CODE> (like: <CODE>ln -s ~/.mplayer/arial-24
   ~/.mplayer/font</CODE>). Now you have to see a timer at the upper left corner
   of the movie (switch it off with the "o" key).</P>
+
 
 <P>OSD has 3 states: (switch with 'o')</P>
 
