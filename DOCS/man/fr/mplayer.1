@@ -3646,10 +3646,9 @@ Conversion d'espace de couleur RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp en
 utilisant palette.
 .
 .TP
-.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .B format[=fourcc]
-Restreint l'espace de couleur pour le prochain filtre sans faire de conversion.
-Utilisez-le avec le filtre scale pour une véritable conversion.
+Restreint l'espace de couleur du prochain filtre sans faire de conversion.
+Utilisez-le avec le filtre scale pour faire une véritable conversion.
 Pour avoir une liste des formats disponibles, voir format=fmt=help.
 .PD 0
 .RSs
@@ -3663,7 +3662,7 @@ nom de format comme rgb15, bgr24, yv12, etc (par défaut\ : yuy2)
 Restreint l'espace de couleur au prochain filtre sans faire aucune conversion.
 Contrairement au filtre format, il permet n'importe quel espace de couleur
 .B excepté
-celui que vous spécifiez.
+celui que vous donnez.
 Pour une liste des différents formats disponible, voyez noformat=fmt=help.
 .PD 0
 .RSs
@@ -3679,7 +3678,8 @@ propose une interface où vous pouvez passer des options au filtre nommé.
 Les sous-filtres doivent être séparés avec le signe /.
 Chaque filtre est par défaut à 'c' (chrominance).
 Les mots-clés acceptent un préfixe '-' pour désactiver une option.
-Un ':' suivi d'une lettre peut être ajouté à l'option pour indiquer sa portée:
+Un ':' suivi d'une lettre peut être ajouté à l'option pour indiquer sa
+portée\ :
 .PD 0
 .RSs
 .IPs a
@@ -3720,7 +3720,7 @@ le déblocage vertical suivant la puissance de calcul processeur disponible.
 filtre de postprocessing simple
 .RSs
 .IPs qualité
-0\-6
+0\-6 (par défaut\ : 3)
 .IPs qp\ \ \ 
 paramètre pour forcer la quantisation (par défaut\ : 0, utilise le QP de
 la video)
@@ -3745,12 +3745,12 @@ Génère divers motifs de test.
 .
 .TP
 .B rgbtest
-Génère un motif de test RGB utile pour détecter les problèmes RGB contre BGR.
+Génère un motif de test RGB utile pour détecter les problèmes entre RGB BGR.
 Vous devriez voir une frise rouge, verte et bleue du haut vers le bas.
 .
 .TP
 .B lavc[=qualité:fps]
-Conversion logicielle YV12 vers MPEG1 rapide avec libavcodec pour utilisation
+Conversion logicielle rapide YV12 vers MPEG1 avec libavcodec pour utilisation
 avec DVB/\:DXR3.
 Plus rapide et de meilleur qualitée que \-vf fame.
 .RSs
@@ -3758,16 +3758,16 @@ Plus rapide et de meilleur qualitée que \-vf fame.
 .RSss
 1\-31: qscale fixe
 .br
-32\-: débit fixe en kBits
+32\-: débit binaire fixe en kBits
 .REss
-.IPs fps
+.IPs fps\ \ 
 force le nombre de trames par seconde en sortie (nombre flottant)
 (par défaut\ : 0, autodétection basée sur la hauteur)
 .RE
 .
 .TP
 .B fame\ \ \ 
-Conversion logicielle YV12 vers MPEG1 rapide avec libfame pour utilisation avec
+Conversion logicielle rapide YV12 vers MPEG1 avec libfame pour utilisation avec
 DVB/\:DXR3.
 .
 .TP
@@ -3779,7 +3779,7 @@ Utile uniquement avec expand+scale
 (\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
 .RSs
 .IPs aspect
-contrôle le rapport hauteur/\:largeur (aspect ratio), calculé comme ceci:
+contrôle le rapport hauteur/\:largeur (aspect ratio), calculé comme ceci\ :
 DVB_HAUTEUR*ASPECTRATIO (par défaut\ : 576*4/\:3=768, fixez-le à
 576*(16/\:9)=1024 pour une télé 16:9).
 .RE
@@ -3831,8 +3831,8 @@ Les paramètres et le comportement sont les mêmes.
 .TP
 .B eq[=lumi:cont]
 Égaliseur logiciel avec contrôles interactifs tout comme les égaliseurs
-matériels, pour les cartes/\:pilotes qui ne permettent pas le contrôle de
-la luminosité et du contraste de façon matérielle.
+matériels, pour les cartes/\:pilotes qui ne permettent pas de contrôler
+la luminosité et le contraste de façon matérielle.
 Peut également être utile avec MEncoder, soit pour réparer des films mal
 capturés, soit pour réduire légèrement le contraste pour masquer des
 artefacts et s'accomoder de débits plus bas.
@@ -3848,9 +3848,9 @@ Notez que cela utilise le même code MMX optimisé que \-vf eq si toutes les
 valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres flottants.
 Les paramètres rg, vg, bg sont les valeurs gamma indépendantes pour les
-composants Rouge, Vert et Bleu.
-Le paramètre poids peut être utilisé pour réduire l'effet de hautes valeurs
-de gamma sur les parties claires de l'image, c-à-d.\& les empécher d'être
+composantes Rouge, Vert et Bleu.
+Le paramètre poids peut être utilisé pour réduire l'effet d'un gamma trop
+grand sur les parties claires de l'image, c-à-d.\& les empécher d'être
 sur-amplifiées et de devenir complètement blanches.
 Une valeur de 0.0 désactive complètement la correction gamma tandis que 1.0
 lui laisse toute sa force.
@@ -3863,19 +3863,20 @@ luminosité, 0\-3 pour la saturation et 0\-1 pour le poids.
 .TP
 .B hue[=couleur:saturation]
 Les valeur par défaut sont couleur=0.0, saturation=1.0.
-Les intervalles sont -180\-180 pour couleur, -2\-2 pour saturation (des
-valeurs négatives impliquent un chroma négatif).
+Les intervalles pour la couleur sont -180\-180, et -2\-2 pour la saturation
+(des valeurs négatives impliquent un chroma négatif).
 .
 .TP
 .B halfpack[=f]
-Convertit le planar YUV 4:2:0 en 4:2:2 demi-hauteur, en sous-échantillonnant
+Convertit le YUV 4:2:0 planaire en 4:2:2 demi-hauteur, en sous-échantillonnant
 le luma mais en gardant les échantillons chroma.
-Utile quand la sortie est un périphérique à basse résolution et que la
-réduction d'échelle matérielle est de mauvais qualité ou n'existe pas.
+Utile quand la sortie est un périphérique à basse résolution et dont
+les fonctions matérielles de mise à l'échelle sont de mauvaise qualité ou
+n'existent pas.
 Peut également être utilisé comme désentrelaceur primitif pour luma
-uniquement avec une utilisation CPU très basse.
-Par défaut, halfpack fait une moyenne des paires de lignes pendant le
-sous-échantillonnage.
+uniquement avec une très faible utilisation du processeur.
+Par défaut, halfpack fait une moyenne des lignes deux à deux pour
+sous-échantillonner.
 Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires,
 ou 1 pour n'utiliser que les lignes impaires.
 Tout autre valeur de f renvoie au comportement par défaut (moyenne).
@@ -3891,7 +3892,7 @@ ligne de balayage (scanline), les données luma et chroma proviennent toutes
 deux du même champs.
 L'argument optionnel sélectionne le mode d'échantillonage.
 Par défaut, l'interpolation linéaire (mode 1) est utilisé.
-Le mode 0 utilise un échantillonage 'plus proche voisin' (nearest-neighbor),
+Le mode 0 utilise un échantillonage du 'plus proche voisin' (nearest-neighbor),
 qui est rapide mais incorrect.
 .
 .TP
@@ -3916,7 +3917,6 @@ Cela permet aux filtre qui ont besoin de voir toutes les trames
 correctement.
 Devrait être placé après les filtres qui ont besoin de voir toutes
 les trames et avant tout filtre gourmant en temps de calcul.
-.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .
 .TP
 .B decimate[=max:haut:bas:frac]
@@ -3924,16 +3924,18 @@ Saute les trames qui ne différent pas beaucoup de la trame précédente de
 façon à réduire le débit.
 L'argument max (si positif) définit le nombre maximum de trames consécutives
 qui peuvent être sautées, ou (si négatif) l'interval minimum entre les trames
-sautées. Une frame peut être sautée si aucune région 8x8 ne différe de plus de
-la limite de haut, et si pas plus d'une portion de frac (1 signifiant l'image
-entière) ne diffère de plus que la limite de bas.
-Les valeurs de haut et bas sont des blocs de 8x8 pixels et représentent les
-différences actuelles de pixels, donc une limite de 64 coresponds à 1 unité de
-différence pour chaque pixel, ou la même chose répartie différemment sur le
-bloc.
-L'utilisation principale de ce filtre est l'encodage à très bas débit (par ex.
-streaming sur modem bas-débit), mais il peut être utilisé en théorie pour
-réparer les films qui n'ont pas été retro-téléciné correctement.
+sautées.
+Une trame peut être sautée si aucune région 8x8 ne différe de plus de
+la limite "haut", et si pas plus de "frac" portions (1 signifiant l'image
+entière) ne diffèrent de plus que la limite "bas".
+Les valeurs de haut et bas sont pour des blocs de 8x8 pixels et représentent
+les différences effectives de pixels, donc une limite de 64 corespond à
+1 unité de différence pour chaque pixel, ou la même chose répartie
+différemment sur le bloc.
+L'utilisation principale de ce filtre est l'encodage à très bas débit
+(par ex.\& le streaming par modem bas-débit), mais il peut en théorie être
+utilisé pour réparer les films qui n'auraient pas été "inverse-telecined"
+correctement.
 .
 .TP
 .B dint[=sens:niveau]
@@ -3945,29 +3947,30 @@ la trame.
 .
 .TP
 .B lavcdeint
-Utilise le filtre de desentrelacement de libavcodec.
+Utilise le filtre de désentrelacement de libavcodec.
 .
 .TP
-.B kerndeint[=carte[:ordre[:seuil[:dureté[:deuxsens]]]]]
-désentrelaceur noyau de Donald Graft.
+.B kerndeint[=seuil[:carte[:ordre[:netteté[:deuxsens]]]]]
+désentrelaceur noyau adaptatif de Donald Graft.
 Désentrelace des parties de la vidéo si un seuil configurable est dépassé.
 .PD 0
 .RSs
-.IPs "carte (0 ou 1)"
-Paint en blanc les pixels qui dépassent le seui (par défaut\ : 0).
-.IPs "ordre (0 ou 1)"
-Échange les champs si 1 (par défaut\ : 0).
 .IPs "seuil (0 - 255)"
 Seuil (par défaut\ : 10).
-.IPs "dureté (0 ou 1)"
-Autorise plus de dureté (sharpening) (par défaut\ : 0).
+.IPs "carte (0 ou 1)"
+Affiche en blanc les pixels qui dépassent le seuil (par défaut\ : 0).
+.IPs "ordre (0 ou 1)"
+Échange les champs si à 1 (par défaut\ : 0).
+.IPs "netteté (0 ou 1)"
+Améliore davantage la netteté (sharpening) (par défaut\ : 0).
 .IPs "deuxsens (0 ou 1)"
-Autorise la dureté (sharpening) dans les deux sens (par défaut\ : 0).
+Autorise l'augmentation de la netteté (sharpening) dans les deux sens
+(par défaut\ : 0).
 .RE
 .PD 1
 .
 .TP
-.B "unsharp=l|cLxH:montant[:l|cLxH:montant]"
+.B "unsharp=l|cLxH:quantité[:l|cLxH:quantité]"
 Masque unsharp / flou gaussien.
 .RSs
 .IPs 1
@@ -3975,20 +3978,20 @@ Applique l'effet sur le composant luma
 .IPs c
 Applique l'effet sur les composants chroma
 .IPs LxH
-largeur et hauteur de la matrice, tailles impaires dans les deux directions
+largeur et hauteur de la matrice, dont les deux dimensions sont impaires
 (min = 3x3, max = 13x11 ou 11x13, généralement quelque chose entre 3x3 et 7x7)
-.IPs montant
+.IPs quantité
 taux relatif de dureté / flou à ajouter à l'image
 (généralement quelque chose entre \-1.5 et 1.5)
 .RSss
 <0: flou
 .br
->0: dur
+>0: netteté
 .REss
 .RE
 .
 .TP
-.B swapuv
+.B swapuv\ 
 Echange les plans U & V.
 .
 .TP
@@ -3997,17 +4000,18 @@ Echange les plans U & V.
 Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champs
 d'images entrelacées sans les désentrelacer.
 Vous pouvez filtrer votre DVD entrelacé et le jouer sur la TV sans casser
-l'entrelacement. Pendant que le désentrelacement (avec le filtre de
-postprocessing) supprime le désentrelacement de façon permanente (en lissant
+l'entrelacement.
+Pendant que le désentrelacement (avec le filtre de post-traitement)
+supprime le désentrelacement de façon permanente (en lissant
 la moyenne etc), le démultiplexage sépare la trame en 2 champs (appelé
 demi-images), de façon à ce que vous puissiez les traiter (filtrer)
 indépendemment et les re-multiplexer.
 .PD 0
 .RSs
 .IPs d
-désentrelace (en en plaçant une au dessus des autres)
+démultiplexe (en plaçant l'une au dessus de l'autre)
 .IPs i
-entrelace
+multiplexe
 .IPs s
 échange les champs (échange les lignes paires & impaires)
 .RE
@@ -4015,122 +4019,136 @@ entrelace
 .
 .TP
 .B "fil=[i|d]"
-(des)entrelace les lignes.
+(dé)multiplexe les lignes.
 Ce filtre est très proche du filtre il mais bien plus rapide, son principal
 inconvénient est qu'il ne fonctionne pas toujours.
-Surtout si il est combiné avec d'autres filtres, il peut produire des images
+Surtout s'il est combiné avec d'autres filtres, il peut produire des images
 corrompues aléatoirement, donc soyez heureux si il fonctionne mais ne vous
 plaignez pas si il ne fonctionne pas avec votre combinaison de filtres.
 .PD 0
 .RSs
 .IPs d
-Désentrelace les champs, les plaçant cote-à-cote.
+Démultiplexe les champs, les plaçant cote-à-cote.
 .IPs i
-Ré-entrelace les champs (inversant l'effet de fil=d).
+Re-multiplexe les champs (inversant l'effet de fil=d).
 .RE
 .PD 1
 .
 .TP
 .B "field[=n]"
-Extrait un seul champs d'une image entrelacée en utilisant un calcul large
-pour éviter de gaspiller le temps CPU. L'argument optionnel n spécifie si
-l'on doit extraire un champs pair ou impair (selon que n soit paire ou impaire).
+Extrait un seul champs d'une image entrelacée en utilisant des astuces de
+calculs pour éviter de gaspiller le temps CPU.
+L'argument optionnel n spécifie si l'on doit extraire un champs pair ou
+impair (selon que n soit paire ou impaire).
 .
 .TP
 .B "detc[=var1=valeur1:var2=valeur2:...]"
 Essaie d'inverser le processus de "telecine" pour retrouver un flux propre et
-non-entralaçé au débit du film. Ce filtre est toujours expérimental mais semble
-être utilisable. Soyez conscient qu'il n'y a absolument aucun usage de ce filtre
-à moins que vous ne voyez d'entrelacement pendant la lecture d'un film! Les
-arguments suivants (voir leur syntaxe plus bas) peuvent être utilisés pour
-contrôler son comportement:
+non-entralaçé au bon débit de trame du film.
+Ce filtre "inverse telecine" a été le premier à être inclus dans
+MPlayer/\:MEncoder et c'est aussi le plus primitif.
+Il fonctionne en basculant vers le motif telecine 3:2 et en le suivant aussi
+longtemps que possible.
+Il peut être utilisé uniquement avec des films qui auraient été parfaitement
+"televined", avec une faible présence de bruit.
+Ce filtre n'est plus maintenu puisque les filtres ivtc, pullup et filmdint
+remplissent mieux ce rôle.
+Les arguments suivants (voir leur syntaxe plus haut) peuvent être utilisés
+pour contrôler son comportement:
 .RSs
 .IPs dr
-Définie le mode saut de trames.
+Définit le mode saut de trames.
 0 (par défaut) signifie ne pas sauter de trames pour maintenir le débit de
 sortie.
 1 signifie toujours sauter la trame si il n'y a pas eu de sauts ou d'assemblage
 telecine dans les 5 dernières trames.
 2 signifie toujours maintenir le rapport exact 5:4 entre l'entrée et la sortie.
 .br
-.I NOTE:
+.I NOTE\ :
 Utilisez le mode 1 avec MEncoder.
 .IPs am
-Type d'analyse. Les valeurs disponibles sont 0 (motif fixé avec numéro de
-trame initiale spécifiée par fr=#) et 1 (recherche agressive du motif telecine).
+Type d'analyse.
+Les valeurs disponibles sont 0 (motif fixé avec numéro de trame initiale
+définit par fr=#) et 1 (recherche agressive du motif telecine).
 La valeur par défaut est 1.
 .IPs fr
 Définie le numéro de trame initiale de la séquence.
-0\-2 sont les trois trames progressives propre; 3 et 4 sont les deux trames
+0\-2 sont les trois trames progressives propres; 3 et 4 sont les deux trames
 entrelaçées.
 La valeur par défaut, -1, signifie "pas dans la séquence telecine".
 Le nombre spécifié ici est le type de la précédente trame imaginaire avant le
 début du film.
 .IPs "tr0, tr1, tr2, tr3"
-Valeurs seuil à utiliser dans certains types.
+Valeurs seuils à utiliser dans certains types.
 .RE
 .
 .TP
 .B ivtc[=1]
-filtre d'inversement expérimental "sans état".
+filtre expérimental d'inversement téléciné "sans état".
 Plutôt que d'essayer de se bloquer sur un motif comme le fait le filtre detc,
-ivtc prends ces décisions indépendemment pour chaque trame.
-Cela donne de bien meilleurs résultats pour un matériel ayant subi de lourds
-changements après que telecine ait été appliqué, mais par contre il n'est pas
-aussi efficace pour les entrées avec beaucoup de bruit, comme par exemple la
-capture TV.
+ivtc prend ses décisions indépendemment pour chaque trame.
+Cela donne de bien meilleurs résultats pour une vidéo ayant subi d'importantes
+modifications/\:éditions après que telecine ait été appliqué, mais par contre
+il n'est pas aussi tolérant aux entrées avec beaucoup de bruit, comme par
+exemple la capture TV.
 Le paramètre optionnel (itvc=1) corresponds à l'option dr=1 du filtre detc,
 et devrait être utilisé avec MEncoder mais pas avec MPlayer.
-Comme pour detc, vous devez spécifier le débit de sortie correct (\-ofps 23.976)
-en utilisant MEncoder.
+Comme pour detc, vous devez définir le débit de trame de sortie correct
+(\-ofps 23.976) en utilisant MEncoder.
 .
 .TP
-.B pullup\ 
+.B pullup[=jg:jd:jh:jb:cs]\ 
 Filtre d'inversion de pulldown (telecine inversé) de troisième génération,
-capable de gérer du contenu composé de hard-telecine, 24 fps progressif, et
+capable de gérer une vidéo composée de hard-telecine, 24 fps progressif, et
 30 fps progressif.
-Le filtre pullup est conçu pour être plus robuste que detc ou ivtc, mais il est
-encore en developpement.
-Aucune option de configuration n'est encore disponible.
-Le moteur d'inversion de pulldown est conçu pour bénéficier des nouvelles
-fonctionnalités de MPlayer G2, l'implémentation actuelle de G1 est supposée
-servir principalement d'environnement de test.
-.I NOTE:
-Pour l'instant pullup ne peut pas se baser sur le débit de sortie, donc
-dans des séquences de 30 fps progressif, il sortira avec plus de 24 fps, ce qui
-veut dire que vous aurez des ennuis si vous l'utilisez avec mencoder
-\-ofps 23.976.
+Le filtre pullup est conçu pour être plus robuste que detc ou ivtc, en se
+basant sur le contexte futur pour prendre ses décisions.
+Tout comme ivtc, pullup est sans état, dans le sens où il ne reste pas
+pas dans un seul mode, mais plutôt observe les champs à venir pour
+sélectionner le bon mode et reconstuire correctement les trames.
+Il est toujours en développement, mais est déjà très correct.
+Les paramètres jg, jd, jh et jb définit la quantité de d'information à
+balancer respectivement à gauche, à droite, en haut et en bas de l'image.
+Gauche/\:droite sont donnés par colonnes de 8 pixels, tandis que le haut/\:bas
+sont donné par paquet de 2 lignes.
+Mettre le paramètre cb (changement strict) à 1 réduira les chances que pullup
+reconstruise incorrectement une trame, mais peut aussi déboucher sur un saut
+trop important de trames lors de scènes avec beaucoup de mouvements.
+.I NOTE\ :
+Faites toujours suivre pullup du filtre logiciel softskip lors d'un encodage
+pour s'assurer que pullup soit capable de voir toutes les trames.
+Sinon, le flux de sortie sera incorrect ou même plantera, pour des raisons
+de limitations de design de la couche codec/\:filtre.
 .
 .TP
 .B filmdint[=options]
 Filtre telecine inversé, similaire au filtre pullup ci-dessus.
-Il est conçu pour gérer n'importe quel motif pulldown, incluant telecine soft
-et hard mélangés et une gestion limité pour les films qui sont ralentis ou
+Il est conçu pour gérer n'importe quel motif pulldown (même le telecine soft
+et hard mélangés) et gère de façon limitée les films qui sont ralentis ou
 accélérés pour la TV.
-Seul le plan luma est utilisé pour détecter les changements de trame.
-Si un champs n'a pas de corespondance, il est désentrelaçé par simple
+Seul le plan luma est utilisé pour détecter les changements de trames.
+Si un champs n'a pas de corespondance, il est désentrelacé par simple
 approximation linéaire.
-Si la source est en MPEG-2, libmpeg2 doit être utilisé pour le décodage (pas
-ffmpeg2 !), et ceci doit être le premier filtre à avoir accès aux flags field
-initialisés par le décodeur MPEG-2.
-Suivant la source mpeg, vous pouvez ne pas tenir compte de ce conseil, du
-moment que vous ne voyez pas plein de warnings "Bottom-first field".
+Si la source est en MPEG-2, il doit être le premier filtre à avoir accès
+aux "field-flags" initialisés par l'encodeur MPEG-2.
+Suivant la source MPEG, vous pouvez ne pas tenir compte de ce conseil, du
+moment que vous ne voyez pas plein d'avertissements "Bottom-first field".
 Sans options il fait un telecine inverse normal, et devrait être utilisé avec
 mencoder \-fps 29.97 \-ofps 23.976.
 Quand ce filtre est utilisé avec mplayer, cela produira un débit impaire
-pendant la lecture, mais cela cera certainement meilleur qu'en utilisant
+pendant la lecture, mais il sera généralement meilleur qu'en utilisant
 pp=lb ou pas de désentrelacement du tout.
 Les options multiples doivent être séparées par /.
 .RSs
 .IPs crop=l:h:x:y
 Exactement comme le filtre crop, mais plus rapide, et fonctionne également sur
-du contenu teleciné hard et soft mélangés du moment que y soit un multiple de
-4.
-Si x ou y nécessitaient de couper des pixels fractionnels du plan chroma,
-l'aire coupé serait étendu.
+avec des films teleciné hard et soft mélangés, du moment que y soit un
+multiple de 4.
+Si x ou y nécessitaient de couper des fractions de pixels du plan chroma,
+l'aire coupée serait étendue.
 Ceci signifie généralement que x et y doivent être pairs.
 .IPs io=ifps:ofps
-Pour ifps trames d'entrées le filtre sortira ofps trames.
+Pour chaque ifps trames d'entrées le filtre sortira ofps trames.
 Le rapport ifps/\:ofps devrait correspondre au rapport \-fps/\-ofps.
 Ceci peut être utilisé pour filtrer des films qui sont diffusés à la TV à
 un débit différent de celui d'origine.
@@ -4148,15 +4166,16 @@ Une valeur de n plus grande accélère le filtre au détriment de l'exactitude.
 La valeur par défaut est n=3.
 Si n est impaire, une trame suivant immédiatement une trame marquée par le flag
 mpeg REPEAT_FIRST_FIELD est supposée progressive, ainsi le filtre ne passera
-son temps sur le contenu MPEG-2 soft-telecine.
+son temps sur la vidéo MPEG-2 soft-telecine.
 C'est le seul effet de ce flag si MMX2 ou 3DNow! est disponible.
 Sans MMX2 et 3DNow, si n=0 ou 1, les mêmes calculs seront faits comme pour
 MMX2.
 Si n=2 ou 3, le nombre de niveaux luma utilisé pour trouver les changements de
 trame est réduit de 256 à 128, ce qui donne un filtre plus rapide sans perdre
 trop d'exactitude.
-Si n=4 ou 5, des métriques plus rapides, mais bien moins exactes sont utilisés,
-ce qui risque de mal détecter les détails verticaux d'un contenu entrelaçé.
+Si n=4 ou 5, des métriques plus rapides, mais bien moins exactes sont
+utilisés pour trouver les changements de trames, mais risque de prendre les
+détails verticaux pour une vidéo entrelacé.
 .IPs verbose=n
 Si n est non-nul, affiche les métriques détaillés pour chaque trame.
 Utile pour déboguage.
@@ -4164,16 +4183,13 @@ Utile pour déboguage.
 Seuil de désentrelacement.
 Utilisé pour désentrelacer les trames sans correspondance.
 De plus grande valeurs signifient moins de désentrelacement, utilisez n=256
-pour désactiver complétement le désentrelacement.
-La valeur par défaut est n=8.
+pour désactiver complètement le désentrelacement (par défaut\ : 8).
 .IPs comb_thres=n
-Seuil pour comparer les champs haut et bas.
-Seuil à 128.
+Seuil pour comparer les champs haut et bas (par défaut\ : 128).
 .IPs diff_thres=n
-Seuil pour détecter les changements temporels d'un champs.
-La valeur par défaut est 128.
+Seuil pour détecter les changements temporels d'un champs (par défaut\ : 128).
 .IPs sad_thres=n
-Somme des Différences Absolues du seuil, par défaut 64.
+Seuil de la Somme des Différences Absolues (par défaut\ : 64).
 .RE
 .
 .TP
@@ -4182,11 +4198,132 @@ Ce filtre ne fonctionne qu'avec MEncoder et agit sur les flags MPEG2 utilisés
 pour le pulldown soft 3:2 (soft telecine).
 Si vous voulez utiliser les filtres ivtc ou detc sur des films qui sont
 soft téléciné, insérer ce filtre avant eux devrait les rendre plus efficaces.
-Actuellement seule libmpeg2 exporte les flags nécessaires.
-Si utilisé sur du matériel qui ne les initialise pas ou si utilisé avec
-ffmpeg12, le filtre ne fait rien.
 .
 .TP
+.B divtc[=options]
+Inverse telecine pour les vidéo désentrelacées.
+Si une vidéo 3:2-pulldown telecine a perdu l'un de ses champs ou a été
+désentrelacé  avec une méthode qui garde un champ et interpole d'autre,
+la vidéo se retrouve saccadée dont une trame sur quatre est dupliquée.
+Ce filtre a pour but de trouver et jetter ces trames dupliquées pour
+retrouver le débit de trame (framerate) original.
+Lorsque vous utilisez ce filtre, vous devez définir \-ofps à 4/\:5 du débit
+de trame du fichier d'entrée (23.976 si l'entrée est à 29.97fps).
+Les options sont\ :
+.RSs
+.IPs pass=1|2
+Mode 2-passes.
+Cela produit de meilleurs résultats.
+La passe 1 analyse la vidéo et écrit les résultats dans un fichier journal.
+La 2ème passe lit alors le journal et utilise ces informations pour faire
+le travail.
+Notez que ces deux passes ne correspondent aux deux passes du processus
+d'encodage.
+Si vous voulez utiliser le mode 2-passes de divtc lors d'un encodage vidéo,
+il vous faut réaliser 3 passes\ : d'abord la passe 1 de divtc et la passe 1
+de l'encodeur, puis la passe 2 de divtc et la passe 1 de l'encodeur, et enfin
+la passe 2 de divtc avec la passe 2 de l'encodeur.
+.IPs file=nom_fichier
+Définit le nom du fichier journal (par défaut\ : "framediff.log").
+.IPs threshold=valeur
+Définit la force minimum que le motif telecine doit avoir pour que le filtre
+le voit (par défaut\ : 0.5).
+Ceci est utilisé pour éviter de reconnaître des motifs erronés lors des
+moments vraiment sombres ou statiques.
+.IPs window=nombre_trames
+Définit le nombre de trames précédents à considérer lors que la recherche
+de motif (par défaut\ : 30).
+Une fenêtre (window) plus grande améliore la fiabilité de la recherche de
+motif, mais une fenêtre plus étroite améliore le temps de réaction aux
+changements dans la phase telecine.
+Cela n'affecte que le mode à passe unique.
+Le mode 2-passes considère une fenêtre fixe de trames futures et passées.
+.IPs phase=0|1|2|3|4
+Définit la phase initiale telecine pour le mode à passe unique
+(par défaut\ : 0).
+Le mode 2-passes peut voir le future, il est donc possible d'utiliser la
+bonne phase depuis le début, tandis que le mode à passe unique ne peut que
+deviner.
+Il se met à utilise la phase adéquate dès qu'il trouve cette information,
+mais cette option peut vous aider à vous débarasser des saccades du début.
+La première passe du mode 2-passes utilise aussi cette option, donc si
+vous enregistrez la sortie de la première passe, vous aurez un fichier où
+la phase est constante.
+.IPs deghost=valeur
+Définit le seuil "deghosting" (0\-255 pour le mode à passe unique,
+-255\-255 pour celui 2-passes, par défaut 0).
+Si non-nul, le mode deghosting est utilisé.
+Ceci est destiné aux vidéo ayant été désentrelacées en fusionnant les champs
+ensemble au lieu d'en jetter un.
+Le deghosting amplifie les artefacts de compression des champs fusionnés,
+et la valeur du paramètre est celle du seuil pour exclure les pixels 
+du du filtre deghosting s'il diffèrent moins que ce seuil de la trame
+précédente.
+En mode 2-passes, une valeur négative peut être utilisé pour que le filtre
+analyse la totalité de la vidéo au début de la 2ème passe pour déterminer
+si un deghosting est nécessaire, et prendra alors pour paramètre zéro où
+la valeur absolue du paramètre négatif.
+Définissez cette option pour la 2ème passe, elle ne change rien à la 1ere
+passe.
+.RE
+.
+.TP
+.B phase=[t|b|p|a|u|T|B|A|U][:v]
+.I NOTE\ :
+Si vous aves des connaissances audiovisuelles, veuillez indiquez au traducteur
+si cette option -très technique- est correctement décrite, en vous aidant de
+sa version anglaise.
+.br
+Retarde la vidéo entrelacée du temps d'un champ pour changer l'ordre des
+champs.
+Le but est de pouvoir réparer des films PAL avant été mal capturés avec
+un ordre de champ inversé vers le transfert film-vers-vidéo.
+Les options sont\ :
+.RSs
+.IPs t
+Capture l'ordre des champs en commençant par le haut, transfert depuis le bas.
+Le filtre retardera les champs du bas.
+.IPs b
+Capture en commençant du bas, transfert depuis le haut.
+Le filtre retardera les champs du haut.
+.IPs p
+La capture et le transfer se refont avec le même ordre de champs.
+Ce mode n'existe comme référence pour la documentation des autres options,
+mais si vous le sélectionnez effectivement, ce filtre ne fera tout simplement
+rien ;-)
+.IPs a
+Capture l'ordre des champs déterminés automatiquement par les "field flags",
+le transfert à l'opposé.
+Le filtre choisit entre les mode t et b à chaque trame d'après les
+"field flags".
+S'il n'existe aucune information sur les champs, alors cette fonction se
+comporte comme u.
+.IPs u
+Capture inconnue ou variée, transfert à l'opposé.
+Le filtre choisit entre les modes t et b à chaque trame en analysant les
+images et sélectionnant le mode qui produit la correspondance la plus
+proche entre les champs.
+.IPs T
+Capture depuis le haut, tranfert inconnu ou varié.
+Le filtre choisit entre les modes t et p en analysant l'image.
+.IPs B
+Capture depuis le bas, tranfert inconnu ou varié.
+Le filtre choisit entre les modes b et p en analysant l'image.
+.IPs A
+Capture en fonction des "field flags", tranfert inconnu ou varié (par défaut).
+Si aucune information sur les champs n'est disponible, fonctionne tout
+comme U.
+.IPs U
+Capture autant que tranfert inconnu ou varié.
+Le filtre choisit entre les modes t, b et p en analysant l'image.
+.IPs v
+opération bavarde (verbose)
+Affiche le mode sélectionné pour chaque trame et la moyenne de la différence
+au carré des champs pour les modes t, b, and p.
+.RE
+.
+.TP
+.\" -- Les options décrites ci-dessous ne sont plus garanties d'être à jour --
 .B "telecine[=départ]"
 Applique un processus telecine 3:2 "telecine" pour augmenter le débit de 20%.
 Cela ne fonctionnera surement pas correctement avec MPlayer, mais peut être
