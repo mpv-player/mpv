@@ -47,11 +47,17 @@ char* get_vids_codec_name(){
 	  printf("Video in MPEG-4 v3 (really DivX) format\n");
           avi_header.bih.biCompression=mmioFOURCC('d', 'i', 'v', '3'); // hack
           avi_header.yuv_supported=1;
+#ifdef USE_DIRECTSHOW
+          avi_header.vids_guid=&CLSID_DivxDecompressorCF;
+          return "divx_c32.ax";
+#else
           avi_header.yuv_hack_needed=1;
 #ifdef ANGELPOTION
           return "APmpg4v1.dll";
-#endif
+#else
           return "divxc32.dll";
+#endif
+#endif
 
 	case mmioFOURCC('D', 'I', 'V', 'X'):
 	case mmioFOURCC('d', 'i', 'v', 'x'):
