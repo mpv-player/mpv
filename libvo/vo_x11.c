@@ -480,7 +480,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
     SwsContext *oldContext= swsContext;
     
     if(newAspect>aspect) newW= (newH*aspect + (1<<15))>>16;
-    else                 newH= (newW*(1<<16) + (1<<15)) /aspect;
+    else                 newH= ((newW<<16) + (aspect>>1)) /aspect;
 
     old_vo_dwidth=  vo_dwidth;
     old_vo_dheight= vo_dheight;
