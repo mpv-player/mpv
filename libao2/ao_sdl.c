@@ -40,7 +40,7 @@ extern int verbose;
 char *sdl_adriver;
 
 // Samplesize used by the SDLlib AudioSpec struct
-#define SAMPLESIZE 512
+#define SAMPLESIZE 1024
 
 // General purpose Ring-buffering routines
 
