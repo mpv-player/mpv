@@ -117,7 +117,7 @@ static int init(int rate,int channels,int format,int flags){
 #ifdef __linux__
   /* Remove the non-blocking flag */
   if(fcntl(audio_fd, F_SETFL, 0) < 0) {
-   mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Can't make filedescriptor non-blocking: %s\n", strerror(errno));
+   mp_msg(MSGT_AO,MSGL_ERR,"audio_setup: Can't make filedescriptor blocking: %s\n", strerror(errno));
    return 0;
   }  
 #endif
