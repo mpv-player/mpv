@@ -640,6 +640,7 @@ _prefix="/usr/local"
 # If autodetection is available then the third state is: auto
 _libavcodec=auto
 _libavcodecso=no # changed default to no as it causes problems - atmos
+_mp3lame=auto
 _mencoder=auto
 _x11=auto
 _dga=auto	# 1 2 no auto
@@ -1552,10 +1553,10 @@ EOF
   _gl=no
   if cc_check $_inc_x11 $_ld_x11 -lGL -lm ; then
     _gl=yes
-    _ld_gl="-lGL -lm"
+    _ld_gl="-lGL"
   elif cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_pthread ; then
     _gl=yes
-    _ld_gl="-lGL -lm $_ld_pthread"
+    _ld_gl="-lGL $_ld_pthread"
   fi
 else
   _gl=no
@@ -2077,7 +2078,7 @@ EOF
 fi
 if test "$_vorbis" = yes ; then
   _def_vorbis='#define HAVE_OGGVORBIS 1'
-  _ld_vorbis='-lvorbis -logg -lm'
+  _ld_vorbis='-lvorbis -logg'
 else
   _def_vorbis='#undef HAVE_OGGVORBIS'
 fi
@@ -2312,21 +2313,38 @@ if test "$_divx4linux_decore" = yes ; then
 fi
 
 
-echocheck "lame and encore (for mencoder)"
+echocheck "libmp3lame (for mencoder)"
+if test "$_mp3lame" == auto ; then
+  cat > $TMPC <<EOF
+#include <lame/lame.h>
+int main(void) { (void) lame_init(); return 0; }
+EOF
+  _mp3lame=no
+  # Note: libmp3lame usually depends on vorbis
+  if cc_check -lmp3lame $_ld_vorbis -lm ; then
+    _mp3lame=yes
+  fi
+fi
+if test "$_mp3lame" = yes ; then
+    _def_mp3lame='#define HAVE_MP3LAME 1'
+    _ld_mp3lame="-lmp3lame $_ld_vorbis"
+else
+    _def_mp3lame='#undef HAVE_MP3LAME'
+fi
+echores "$_mp3lame"
+
+
+echocheck "divx4 encore (for mencoder)"
 #mencoder requires those libs
 if test "$_mencoder" != no ; then
   cat > $TMPC <<EOF
 #include <encore2.h>
-#include <lame/lame.h>
-int main(void) { (void) lame_init(); (void) encore(0, 0, 0, 0); return 0; }
+int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
   _mencoder=no
-  if cc_check -lmp3lame -ldivxencore -lm ; then
+  if cc_check -ldivxencore -lm ; then
     _mencoder=yes 
-    _ld_encore='-lmp3lame -ldivxencore -lm'
-  elif cc_check -lmp3lame $_ld_vorbis  -ldivxencore -lm ; then
-    _mencoder=yes 
-    _ld_encore="-lmp3lame -ldivxencore -lm $_ld_vorbis"
+    _ld_encore='-ldivxencore'
   fi
 fi
 if test "$_mencoder" = yes ; then
@@ -2335,7 +2353,6 @@ else
   _def_encore='#undef NEW_ENCORE'
 fi
 echores "$_mencoder"
-
 
 echocheck "lirc"
 if test "$_lirc" = auto ; then
@@ -2640,7 +2657,7 @@ ARCH_LIB =  $_ld_arch $_ld_iconv
 DIVX4LINUX = $_divx4linux
 DECORE_LIB = $_ld_decore
 MENCODER = $_mencoder
-ENCORE_LIB =  $_ld_encore 
+ENCORE_LIB =  $_ld_encore $_ld_mp3lame
 DIRECTFB_LIB = $_ld_directfb
 
 # --- Some stuff for autoconfigure ----
@@ -2690,6 +2707,8 @@ $_def_dvdread
 /* You have to change DECORE_LIBS in config.mak too! */
 $_def_decore
 $_def_encore
+
+$_def_mp3lame
 
 /* Define this to enable avg. byte/sec-based AVI sync method by default:
    (use -bps or -nobps commandline option for run-time method selection)
