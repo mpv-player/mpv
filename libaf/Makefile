@@ -19,6 +19,7 @@ endif
 
 $(LIBNAME):     $(OBJS) Makefile
 	$(AR) r $(LIBNAME) $(OBJS)
+	$(RANLIB) $(LIBNAME)
 
 $(OBJS):af.h control.h dsp.h filter.h window.h af_mp.h
 

@@ -21,7 +21,7 @@ all:	$(SUBDIRS) $(LIBNAME)
 
 $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
-
+	$(RANLIB) $(LIBNAME)
 
 clean:
 	rm -f *.o *.a *~

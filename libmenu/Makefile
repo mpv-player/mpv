@@ -20,6 +20,7 @@ CFLAGS  = $(OPTFLAGS) -I. -I.. -I../libmpcodecs $(EXTRA_INC) -Wall
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
+	$(RANLIB) $(LIBNAME)
 
 all:    $(LIBNAME)
 

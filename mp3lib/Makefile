@@ -47,6 +47,8 @@ decode_i586.o: decode_i586.c
 
 libMP3.a:	$(OBJS)
 	$(AR) r libMP3.a $(OBJS)
+	$(RANLIB) libMP3.a
+
 test1:	libMP3.a test.c
 	$(CC) $(CFLAGS) test.c ../libvo/aclib.c -o test1 -I.. ./libMP3.a ../mp_msg-mencoder.o ../cpudetect.o -lm
 

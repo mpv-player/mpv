@@ -208,7 +208,6 @@ OBJS_MPLAYER += mplayer-rc.o
 endif
 
 $(PRG):	$(MPLAYER_DEP)
-	./darwinfixlib.sh $(MPLAYER_DEP)
     ifeq ($(TARGET_WIN32),yes)
 	windres -o mplayer-rc.o mplayer.rc
     endif
@@ -223,12 +222,10 @@ mplayer.exe.so:	$(MPLAYER_DEP) mplayer.exe.spec.c
 	$(CC) $(CFLAGS) -Wall -shared  -Wl,-rpath,/usr/local/lib -Wl,-Bsymbolic  -o mplayer.exe.so $(OBJS_MPLAYER) mplayer.exe.spec.c libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(STATIC_LIB) $(ARCH_LIB) -lwine -lm 
 
 mplayer_wine.so:	$(MPLAYER_DEP)
-	./darwinfixlib.sh $(MPLAYER_DEP)
 	$(CC) $(CFLAGS) -shared -Wl,-Bsymbolic -o mplayer_wine.so mplayer_wine.spec.c $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(STATIC_LIB) -lwine $(ARCH_LIB) -lm
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	./darwinfixlib.sh $(MENCODER_DEP) libmpcodecs/libmpencoders.a
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(ENCORE_LIB) $(COMMON_LIBS) $(EXTRA_LIB) $(MLIB_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(ARCH_LIB) $(I18NLIBS) -lm 
 endif
 

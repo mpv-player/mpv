@@ -17,6 +17,7 @@ CFLAGS  = -I. $(OPTFLAGS)
 
 $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
+	$(RANLIB) $(LIBNAME)
 
 all:	$(LIBNAME)
 

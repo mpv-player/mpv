@@ -27,6 +27,7 @@ OBJS = $(SRCS:.c=.o)
 $(LIB):	.depend	$(OBJS)
 	rm -f $(LIB)
 	$(AR) rc $(LIB) $(OBJS) $(MPLAYEROBJS)
+	$(RANLIB) $(LIB)
 
 all:	$(LIB)
 

@@ -33,6 +33,7 @@ default: $(LIB).a
 
 $(LIB).a: $(OBJS)
 	$(AR) rc $(LIB).a $(OBJS)
+	$(RANLIB) $(LIB).a
 
 $(LIB).so: $(OBJS)
 	$(CC) -o $(LIB).so -shared -rdynamic $(OBJS)

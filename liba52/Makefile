@@ -17,6 +17,7 @@ CFLAGS  = $(MLIB_INC) $(OPTFLAGS)
 
 $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
+	$(RANLIB) $(LIBNAME)
 
 test:        $(LIBNAME) test.c
 	$(CC) $(CFLAGS)  test.c ../cpudetect.c -o test ./liba52.a -lm

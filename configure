@@ -1892,6 +1892,8 @@ fi
 # If IRIX we must use ar instead of ranlib (not present on IRIX systems)
 if irix ; then
   _ranlib='ar -r'
+elif linux ; then
+  _ranlib='true'
 fi
 
 ######################

@@ -22,6 +22,7 @@ endif
 
 $(LIBNAME):	$(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
+	$(RANLIB) $(LIBNAME)
 
 all:	$(LIBNAME)
 

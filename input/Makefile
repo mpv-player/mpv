@@ -16,6 +16,7 @@ CFLAGS  = $(OPTFLAGS) -I. -I.. $(EXTRA_INC)
 
 $(LIBNAME):     $(OBJS)
 	$(AR) r $(LIBNAME) $(OBJS)
+	$(RANLIB) $(LIBNAME)
 
 all:    $(LIBNAME)
 

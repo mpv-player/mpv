@@ -36,6 +36,7 @@ ifeq ($(TARGET_OS),OpenBSD)
 	./loader_objfix.sh
 endif
 	$(AR) -r libloader.a $(LIB_OBJECTS) stubs.o
+	$(RANLIB) libloader.a
 
 dep:
 	echo "dependency not required/supported"
