@@ -254,7 +254,7 @@ extern int  wsGetOutMask( void );
 extern void wsScreenSaverOn( Display *mDisplay );
 extern void wsScreenSaverOff( Display * mDisplay );
 
-#define wgIsRect( X,Y,tX,tY,bX,bY ) ( ( X > tX )&&( Y > tY )&&( X < bX )&&( Y < bY ) )
+#define wgIsRect( X,Y,tX,tY,bX,bY ) ( ( (X) > (tX) )&&( (Y) > (tY) )&&( (X) < (bX) )&&( (Y) < (bY) ) )
 
 #endif
 

@@ -1060,10 +1060,10 @@
 extern void *pm3_reg_base;
 
 #define WRITE_REG(offset,val)				\
-    *(volatile unsigned long *)(((unsigned char *)(pm3_reg_base)) + offset) = (val)
+    *(volatile unsigned long *)(((unsigned char *)(pm3_reg_base)) + (offset)) = (val)
 	
 #define READ_REG(offset)					\
-    *(volatile unsigned long *)(((unsigned char *)(pm3_reg_base)) + offset)
+    *(volatile unsigned long *)(((unsigned char *)(pm3_reg_base)) + (offset))
 
 #define UPDATE_SET_REG(offset,val)				\
     {								\
@@ -1094,8 +1094,8 @@ do{						\
 
 #define RAMDAC_SET_INDEX(index)					\
 {								\
-    SLOW_WRITE_REG (PM3RD_IndexHigh,(index>>8)&0xff);		\
-    SLOW_WRITE_REG (PM3RD_IndexLow,index&0xff);			\
+    SLOW_WRITE_REG (PM3RD_IndexHigh,((index)>>8)&0xff);		\
+    SLOW_WRITE_REG (PM3RD_IndexLow,(index)&0xff);			\
 }
 
 #define RAMDAC_SET_REG(index, data)				\

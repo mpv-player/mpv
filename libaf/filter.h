@@ -63,7 +63,7 @@ extern int szxform(_ftype_t* a, _ftype_t* b, _ftype_t Q, _ftype_t fc, _ftype_t f
    long. 
 */
 #define updateq(n,xi,xq,in)\
-  xq[xi]=xq[xi+n]=*in;\
-  xi=(++xi)&(n-1);
+  xq[xi]=(xq)[(xi)+(n)]=*(in);\
+  xi=(++(xi))&((n)-1);
 
 #endif

@@ -17,7 +17,7 @@ void wsXDNDClearAwareness(wsTWindow* window);
 #define XDND_ENTER_THREE_TYPES_SET(e,b)	(e)->xclient.data.l[1] = ((e)->xclient.data.l[1] & ~0x1UL) | (((b) == 0) ? 0 : 0x1UL)
 #define XDND_ENTER_VERSION(e)		((e)->xclient.data.l[1] >> 24)
 #define XDND_ENTER_VERSION_SET(e,v)	(e)->xclient.data.l[1] = ((e)->xclient.data.l[1] & ~(0xFF << 24)) | ((v) << 24)
-#define XDND_ENTER_TYPE(e,i)		((e)->xclient.data.l[2 + i])	/* i => (0, 1, 2) */
+#define XDND_ENTER_TYPE(e,i)		((e)->xclient.data.l[2 + (i)])	/* i => (0, 1, 2) */
 
 /* XdndPosition */
 #define XDND_POSITION_SOURCE_WIN(e)	((e)->xclient.data.l[0])

@@ -129,10 +129,10 @@
 
 int HACKBUCKET12345678;  /* Horrible hack to work around cache/speed issue */
 
-#define INB(addr) (HACKBUCKET12345678=*(cyberblade_reg_base+addr))
-#define INW(addr) (HACKBUCKET12345678=*(unsigned short *)(cyberblade_reg_base+addr))
-#define OUTB(addr,val) (*(cyberblade_reg_base+addr)=(val))
-#define OUTW(addr,val) (*(unsigned short *)(cyberblade_reg_base+addr)=(val))
+#define INB(addr) (HACKBUCKET12345678=*(cyberblade_reg_base+(addr)))
+#define INW(addr) (HACKBUCKET12345678=*(unsigned short *)(cyberblade_reg_base+(addr)))
+#define OUTB(addr,val) (*(cyberblade_reg_base+(addr))=(val))
+#define OUTW(addr,val) (*(unsigned short *)(cyberblade_reg_base+(addr))=(val))
 
 #define SRINB(reg) (OUTB(0x3c4,reg), INB(0x3c5))
 #define SROUTB(reg,val) (OUTW(0x3c4,((val)<<8)|(reg)))

@@ -18,7 +18,7 @@
 #undef af_msg
 #endif
 #define af_msg(lev, args... ) \
-  mp_msg(MSGT_AFILTER,((lev<0)?(lev+3):((lev==0)?MSGL_INFO:(lev+5))), ##args )
+  mp_msg(MSGT_AFILTER,(((lev)<0)?((lev)+3):(((lev)==0)?MSGL_INFO:((lev)+5))), ##args )
 
 /* Decodes the format from mplayer format to libaf format */
 extern int af_format_decode(int format);

@@ -93,7 +93,7 @@ int mp_msg_test(int mod, int lev);
 
 #ifdef TARGET_OS2
 // va_start/vsnprintf seems to be broken under OS2 :(
-#define mp_msg(mod,lev, fmt, args... ) do{if(lev<=mp_msg_levels[mod]) printf( fmt, ## args );}while(0)
+#define mp_msg(mod,lev, fmt, args... ) do{if((lev)<=mp_msg_levels[mod]) printf( fmt, ## args );}while(0)
 #define mp_dbg(mod,lev, args... ) 
 #else
 
@@ -108,19 +108,19 @@ int mp_msg_test(int mod, int lev);
 void mp_msg_c( int x, const char *format, ... );
 
 #ifdef __GNUC__
-#define mp_msg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
+#define mp_msg(mod,lev, args... ) mp_msg_c(((mod)<<8)|(lev), ## args )
 
 #ifdef MP_DEBUG
-#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
+#define mp_dbg(mod,lev, args... ) mp_msg_c(((mod)<<8)|(lev), ## args )
 #else
 // these messages are only usefull for developers, disable them
 #define mp_dbg(mod,lev, args... ) 
 #endif
 #else // not GNU C
-#define mp_msg(mod,lev, ... ) mp_msg_c((mod<<8)|lev, __VA_ARGS__)
+#define mp_msg(mod,lev, ... ) mp_msg_c(((mod)<<8)|(lev), __VA_ARGS__)
 
 #ifdef MP_DEBUG
-#define mp_dbg(mod,lev, ... ) mp_msg_c((mod<<8)|lev, __VA_ARGS__)
+#define mp_dbg(mod,lev, ... ) mp_msg_c(((mod)<<8)|(lev), __VA_ARGS__)
 #else
 // these messages are only usefull for developers, disable them
 #define mp_dbg(mod,lev, ... ) 

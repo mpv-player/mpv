@@ -247,8 +247,8 @@ extern af_msg_cfg_t af_msg_cfg; // Message
 /* Macro for printing error messages */
 #ifndef af_msg
 #define af_msg(lev, args... ) \
-((lev<AF_MSG_WARN)?(fprintf(af_msg_cfg.err?af_msg_cfg.err:stderr, ## args )): \
-((lev<=af_msg_cfg.level)?(fprintf(af_msg_cfg.msg?af_msg_cfg.msg:stdout, ## args )):0))
+(((lev)<AF_MSG_WARN)?(fprintf(af_msg_cfg.err?af_msg_cfg.err:stderr, ## args )): \
+(((lev)<=af_msg_cfg.level)?(fprintf(af_msg_cfg.msg?af_msg_cfg.msg:stdout, ## args )):0))
 #endif
 
 #endif /* __aop_h__ */
