@@ -146,26 +146,26 @@ est un lecteur vidéo pour Linux (il fonctionne sur beaucoup d'autres
 Unices et processeurs non\-x86, voir la documentation).
 Il joue la plupart des formats MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV,
 RM, QT/\:MOV/\:MP4, OGG/\:OGM, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM
-et RoQ, supportés par plusieurs codecs natifs et par des codecs binaires.
+et RoQ, gérés par plusieurs codecs natifs et par des codecs binaires.
 Vous pouvez regarder des VideoCD, SVCD, DVD, 3ivx, DivX\ 3/\:4/\:5 et
 même des films WMV.
 .PP
 Un autre gros atout de MPlayer est la grande variété de pilotes de
-sortie audio et vidéo supportés.
+sortie audio et vidéo gérés.
 Il fonctionne avec X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
 DirectFB, Quartz, mais vous pouvez aussi utiliser GGI, SDL (et de cette
 façon tous leurs drivers), VESA (sur n'importe quelle carte compatible
 VESA, même sans X11), quelques drivers spécifiques à certaines cartes
 (pour Matrox, 3Dfx et ATI) et certaines carte de décompression MPEG,
 telles que les Siemens DVB, DXR2 et DXR3/\:Hollywood+.
-La plupart d'entre eux supportent le redimensionnement logiciel ou
+La plupart d'entre eux gèrent le redimensionnement logiciel ou
 matériel, vous pouvez donc apprécier les films en plein écran.
 .PP
 MPlayer possède un affichage sur écran (OnScreenDisplay) pour les
 informations, de belles et grandes polices lissées et des effets
 visuels pour confirmer les contrôles au clavier. Les polices
 européennes/\:ISO 8859-1,2 (Hongroise, Anglaise, Tchèque, etc),
-Cyrillique et Coréenne sont supportées ainsi que 11 formats de
+Cyrillique et Coréenne sont gérés ainsi que 11 formats de
 sous-titres (MicroDVD, SubRip, OGM, SubViewer, Sami, VPlayer, RT,
 SSA, AQTitle, JACOsub, PJS et le nôtre: MPsub) et les sous-titres
 DVD (SPU streams, VobSub et Closed Captions).
@@ -234,10 +234,10 @@ coupe le son (mute)
 bascule en plein-écran
 .IPs T\ \ \ \ 
 bascule le mode toujours visible.
-Supporté par les drivers de sortie vidéo basés sur X11, à l'exception
+Géré par les drivers de sortie vidéo basés sur X11, à l'exception
 de SDL et de directx et gl2 sous Windows.
 .IPs "w et e"
-réduit/\:augmente l'intervalle panscan
+réduit/\:augmente l'intervalle pan (horizontal) et scan
 .IPs o\ \ \ \ 
 bascule entre les états OSD: aucun / déplacement /
 déplacement + chrono / déplacement + chrono + durée totale
@@ -442,12 +442,12 @@ lecture de vidéo uniquement (vous pouvez le comprendre comme des fps infinis).
 .B \-colorkey <nombre>
 Affecte une valeur RVB de votre choix à la couleur clé.
 0x000000 est noir et 0xffffff est blanc.
-Supporté par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
+Géré par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
 xvidix et xover uniquement.
 .TP
 .B \-nocolorkey
 Désactive la couleur clé.
-Supporté par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
+Géré par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
 xvidix et xover uniquement.
 .TP
 .B \-edl <nomfichier> (EDL uniquement)
@@ -499,7 +499,7 @@ système de contrôle.
 Les chemins sont relatifs à ~/\:.mplayer/.
 .br
 .I NOTE:
-La répétition automatique n'est pour l'instant supporté que par les joysticks.
+La répétition automatique n'est pour l'instant géré que par les joysticks.
 
 Les commandes disponibles sont:
 
@@ -565,11 +565,11 @@ lire depuis la couche stdin par le truchement des commandes loadfile
 ou loadlist du mode esclave.
 .TP
 .B \-nojoystick
-Désactive le support joystick.
+Désactive la gestion du joystick.
 Activé par défaut, si il a été compilé pour.
 .TP
 .B \-nolirc
-Désactive le support de LIRC.
+Désactive la gestion de LIRC.
 .TP
 .B \-nomouseinput (X11 uniquement)
 Désactive l'interprétation des boutons de la souris (le menu contextuel
@@ -618,6 +618,8 @@ Ceci est prévu pour l'utilisation de MPlayer en tant que base (backend)
 pour d'autres programmes.
 Au lieu d'intercepter les évènements clavier, MPlayer va lire ses
 commandes via son entrée stdin.
+.br
+.I NOTE\ :
 Voir DOCS/tech/slave.txt et \-input expliquent la syntaxe et les commandes
 valides.
 .TP
@@ -840,7 +842,7 @@ Vous pouvez réparer l'index de façon permanente avec MEncoder (voir la
 documentation).
 .br
 .I NOTES:
-Vous ne pouvez utiliser cette option que si le media en question supporte les
+Vous ne pouvez utiliser cette option que si le media en question permet les
 déplacements (c-à-d pas depuis stdin, un pipe, etc).
 .TP
 .B \-fps <flottant>
@@ -864,7 +866,7 @@ Utile avec les téléchargements cassés/\:incomplets, les vidéos en cours
 de/ou mal générée.
 .br
 .I NOTES:
-Vous ne pouvez utiliser cette option que si le media en question supporte les
+Vous ne pouvez utiliser cette option que si le media en question permet les
 déplacements (c-à-d pas depuis stdin, un pipe, etc).
 .TP
 .B \-ipv4-only-proxy (réseau uniquement)
@@ -878,7 +880,7 @@ la vidéo jouée
 Attention, MPlayer ne vous empêchera pas de charger l'index
 généré pour un AVI différent, mais cela vous causera sûrement des torts.
 .I NOTE:
-Cette option est obsolète maintenant que Mplayer supporte OpenDML.
+Cette option est obsolète maintenant que MPlayer gère OpenDML.
 .TP
 .B \-mc <secondes/trame>
 Correction de synchro A-V maximum par trame (en secondes).
@@ -998,7 +1000,7 @@ Force la reconstruction de l'index et le sauvegarde dans <nomfichier>.
 Pour l'instant cela ne fonctionne qu'avec les fichiers AVI.
 .br
 .I NOTE:
-Cette option est obsolète maintenant que Mplayer supporte OpenDML.
+Cette option est obsolète maintenant que MPlayer gère OpenDML.
 .TP
 .B \-sb <position\ octet> (voir aussi l'option \-ss)
 Se place à la position donnée en octets.
@@ -1076,7 +1078,7 @@ Spécifie sur quelle fréquence régler le tuner (par exemple \& 511.250).
 Non compatible avec le paramètre channels.
 .IPs outfmt=<valeur>
 Spécifie le format de sortie du tuner avec une valeur pré-selectionnée
-supportée par le pilote v4l (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
+Géré par le pilote v4l (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
 i420) ou un format arbitraire donné en valeur héxa.
 Essayez outfmt=help pour avoir la liste des formats disponibles.
 .IPs width=<valeur>
@@ -1162,7 +1164,7 @@ ensemble (par défaut pour MEncoder).
 Une valeur de 1 (par défaut pour MPlayer) signifie ne capturer que la vidéo et
 laisser l'audio passer directement de la carte TV à la carte son.
 .IPs mjpeg
-Utilise la compression mjpeg matérielle (si la carte le supporte).
+Utilise la compression mjpeg matérielle (si la carte le gère).
 En utilisant cette option, vous n'avez pas besoin de spécifier la largeur
 et la hauteur de la fenêtre de sortie, car MPlayer la déterminera
 automatiquement d'après la valeur affectée à l'option decimation
@@ -1206,7 +1208,7 @@ Force les paramètres audio du démultiplexeur VIVO (pour débogage).
 .
 .SH "OPTIONS OSD/SUB"
 .I NOTE:
-voir également \-vf expand.
+Voir également \-vf expand.
 .TP
 .B \-dumpjacosub (MPlayer uniquement)
 Converti les sous-titres donnés (via l'option \-sub) au format basé sur le
@@ -1316,7 +1318,7 @@ volume + position + compteur + pourcentage + temps total
 .TP
 .B \-overlapsub
 Permet au prochain sous-titre de s'afficher pendant que l'actuel est toujours
-visible (le comportement par défaut est d'en activer le support que pour des
+visible (le comportement par défaut est d'en activer la gestion que pour des
 formats spécifiques).
 .TP
 .B \-sid <ID> (voir aussi l'option \-slang)
@@ -1443,7 +1445,7 @@ Actuellement il ne semble pas y avoir de sous-titres CC sur les DVD
 d'autres zones.
 .TP
 .B \-subcp <codepage> (iconv uniquement)
-Si votre système supporte iconv(3), vous pouvez utiliser cette
+Si votre système gère iconv(3), vous pouvez utiliser cette
 option pour définir la page de code du sous-titres
 .sp 1
 .I EXEMPLE:
@@ -1561,9 +1563,13 @@ Défini le numéro de sous-titre du fichier VOBsub.
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
 .TP
-.B \-abs <valeur> (OBSOLÈTE)
+.B \-abs <valeur> (\-ao oss uniquement) (OBSOLÈTE)
 Outrepasse la détection de la taille du buffer audio du pilote/\:de la 
-carte, \-ao oss uniquement
+carte.
+.TP
+.B \-aofile <nomfichier>
+Outrepasse le nom de fichier par défaut utilisé par \-ao pcm.
+.TP
 .TP
 .B \-aop <list=plugin1,plugin2...:option1=valeur1:opt2=val2...>
 Défini le(s) plugin(s) et leurs options (voir également la
@@ -1591,7 +1597,7 @@ capacités de compression/\:'soft-clipping' (plugin volume uniquement)
 .
 .TP
 .B \-delay <sec>
-Décalage audio en secondes (peut être +/\:- nombre flottant).
+Décalage audio en secondes (nombre flottant positif ou négatif).
 .TP
 .B \-format <0\-8192>
 Sélectionne le format utilisé pour la sortie depuis la couche filtre 
@@ -1606,17 +1612,17 @@ A-Law
 .IPs 4
 Ima-ADPCM
 .IPs 8
-8-bit signé
-.IPs 16
 8-bit non signé
+.IPs 16
+32-bit signé (little-endian)
 .IPs 32
-16-bit non signé (little-endian)
+16-bit signé (big-endian)
 .IPs 64
-16-bit non signé (big-endian)
+8-bit signé
 .IPs 128
 16-bit non signé (little-endian)
 .IPs 256
-16-bit signé (big-endian)
+16-bit non signé (big-endian)
 .IPs 512
 MPEG (2) audio
 .IPs 1024
@@ -1630,8 +1636,7 @@ AC3
 .
 .TP
 .B \-mixer <périph.>
-Cette option indique à MPlayer d'utiliser un autre périphérique de mixage que
-/dev/\:mixer.
+Utilise un autre périphérique de mixage que celui par défaut /dev/\:mixer.
 C'est le mixeur utilisé par ALSA
 .TP
 .B \-mixer-channel <mixer line> (\-ao oss et \-ao alsa uniquement)
@@ -1647,12 +1652,15 @@ alsamixer, comme
 .TP
 .B \-nowaveheader (\-ao pcm uniquement)
 Ne pas inclure l'entête wave.
-Utilisé avec PCM brut (RAW).
+Utilisé avec PCM brut (raw).
+.TP
+.B \-volstep <0\-100>
+Défini l'incrément de volume du mixeur en pourcentage (3 par défaut).
 .
 .
 .SH "OPTIONS DE SORTIE AUDIO (MPLAYER UNIQUEMENT)"
 Les pilotes de sortie audio sont des interfaces vers différentes
-architectures de sortie.
+architectures de sortie audio.
 La syntaxe est\ :
 .TP
 .B \-ao <driver1[:sous-option1[=valeur]:...],driver2,...[,]>
@@ -1757,7 +1765,7 @@ Pilote de sortie spécifique à DVB.
 N'émet pas de son mais maintient la vitesse de lecture.
 Utilisez \-nosound pour des mesures (benchmarking).
 .TP
-.B pcm\ \ \ \ 
+.B pcm (voir aussi \-aofile)
 Extrait le son PCM/wave brut.
 Enregistre le son dans ./audiodump.wav.
 .TP
@@ -1773,22 +1781,21 @@ en exécutant
 .I mplayer \-aahelp
 .TP
 .B \-bpp <profondeur>
-Utilise une profondeur de couleur différente de celle détectée.
-Les pilotes \-vo ne la supporte pas tous (fbdev, dga2, svga, vesa).
+Outrepasse la profondeur de couleur détectée automatiquement.
+Géré uniquement par les pilotes de sortie vidéo fbdev, dga, svga, vesa.
 .TP
 .B \-brightness <-100\-100>
-Ajuste la luminosité de la sortie vidéo (0 par défaut).
-Cela change l'intensité des composants RGB du signal vidéo de noir jusqu'à
-blanc.
+Ajuste la luminosité du signal vidéo (0 par défaut).
+N'est pas géré par tous les pilotes de sortie vidéo.
 .TP
 .B \-contrast <-100\-100>
-Ajuste le contraste de la sortie vidéo (0 par défaut).
-Fonctionne de manière similaire à la luminosité.
+Ajuste le contraste du signal vidéo (0 par défaut).
+N'est pas géré par tous les pilotes de sortie vidéo.
 .TP
 .B \-dfbopts <valeur> (\-vo directfb2 uniquement)
-Spécifie une liste de paramètres pour le pilote directfb.
+Défini une liste de paramètres pour le pilote de sortie vidéo directfb.
 .TP
-.B \-display <nom>
+.B \-display <nom> (X11 uniquement)
 Spécifier le nom d'hôte et le numéro d'affichage du serveur X sur lequel vous
 désirer afficher la vidéo.
 
@@ -1801,28 +1808,29 @@ désirer afficher la vidéo.
 .
 .TP
 .B \-double
-Active le doublebuffering.
+Active le double buffering.
 Evite le scintillement en plaçant deux trames en mémoire, et en affichant
 l'une tandis que l'on décode l'autre.
-Peut affecter l'OSD.
+Peut affecter négativement l'OSD, mais évite les effets de scintillement
+de l'OSD.
 Nécessite deux fois plus de mémoire que pour un buffer simple, cela ne
 marchera donc pas sur les cartes qui ont très peu de mémoire.
 .TP
 .B \-dr \ \ \
-Active le rendu direct (pas supporté par tous les codecs et sorties vidéo)
+Active le rendu direct (pas géré par tous les codecs et sorties vidéo)
 (off par défaut).
 Attention: peut corrompre OSD/\:SUB!
 .TP
 .B \-dxr2 <option1:option2:...>
-Cette option est utilisée pour contrôler le pilote dxr2.
+Cette option est utilisée pour contrôler le pilote de sortie vidéo dxr2.
 .
 .RSs
 .IPs ar-mode=<valeur>
-mode aspect ratio (0 = normal, 1 = pan scan, 2 = letterbox (par défault))
+mode aspect ratio (0 = normal, 1 = pan et scan, 2 = letterbox (par défault))
 .IPs iec958-encoded
-mode de sortie iec958
+Met le mode de sortie iec958 à "encodé".
 .IPs iec958-decoded
-initialise le mode de sortie iec958 à decoded (par défaut)
+Met le mode de sortie iec958 à "décodé" (par défaut)
 .IPs macrovision=<valeur>
 mode macrovision mode (0 = off (par défaut), 1 = agc, 2 = agc 2 colorstripe,
 3 = agc 4 colorstripe)
@@ -1857,75 +1865,83 @@ initialise le mode pixel à ccir601
 .RE
 .RS
 
-.I Overlay
+.I overlay
 .RE
 .RSs
 .IPs cr-left=<0\-500>
-initialise la valeur de découpage gauche (par défaut: 50)
+Initialise la valeur de découpage gauche (par défaut: 50).
 .IPs cr-right=<0\-500>
-initialise la valeur de découpage droite (par défaut: 300)
+Initialise la valeur de découpage droite (par défaut: 300).
 .IPs cr-top=<0\-500>
-initialise la valeur de découpage haute (par défaut: 0)
+Initialise la valeur de découpage haute (par défaut: 0).
 .IPs cr-bottom=<0\-500>
-initialise la valeur de découpage basse (par défaut: 0)
+Initialise la valeur de découpage basse (par défaut: 0).
 .IPs ck-[r|v|b]=<0\-255>
-initialise le gain de r(ouge), v(ert) ou b(leu) pour la couleur-clé d'ensemble
+Initialise le gain de r(ouge), v(ert) ou b(leu) pour la couleur-clé d'ensemble.
 .IPs ck-[r|v|b]min=<0\-255>
 valeur minimum pour les couleurs-clé respectives
 .IPs ck-[r|v|b]max=<0\-255>
 valeur maximum pour les couleurs-clé respectives
 .IPs ignore-cache
-ignore les paramètres de recouvrement caché
+Ignore les paramètres de recouvrement caché.
 .IPs update-cache
-met à jour les paramètres de recouvrement caché
+Met à jour les paramètres de recouvrement caché.
 .IPs ol-osd
-active le recouvrement OnScreen Display
+Active le recouvrement OnScreen Display (OSD).
 .IPs nool-osd
 désactive le recouvrement OnScreen Display (par défaut)
 .IPs ol[h|w|x|y]-cor=<-20\-20>
-ajuste la taille et la position de l'overlay au cas où il ne corresponde
-pas parfaitement à la fenêtre (par défaut: 0)
+Ajuste la taille et la position de l'overlay au cas où il ne corresponde
+pas parfaitement à la fenêtre (par défaut: 0).
 .IPs overlay
-active l'overlay
+Active l'overlay (par défaut).
 .IPs nooverlay
-active la sortie TV
+Active la sortie TV.
 .IPs overlay-ratio=<1\-2500>
-règle l'overlay (1000 par défaut)
+Règle l'overlay (1000 par défaut).
 .RE
 .
 .TP
 .B \-fb <périphérique> (fbdev ou DirectFB uniquement) (OBSOLÈTE)
-Spécifie un périphérique framebuffer à utiliser.
+Défini un périphérique framebuffer à utiliser (/dev/\:fb0 par défaut).
 Par défaut /dev/\:fb0 est utilisé.
 .TP
-.B \-fbmode <nommode> (fbdev uniquement)
+.B \-fbmode <nommode> (\-vo fbdev uniquement)
 Se place dans le mode vidéo <nommode> tel qu'indiqué dans
 /etc/\:fb.modes.
 .br
 .I NOTE:
-Le framebuffer VESA ne supporte pas le changement de mode.
+Le framebuffer VESA ne permet pas le changement de mode.
 .TP
-.B \-fbmodeconfig <nomfichier> (fbdev uniquement)
-Utilise ce fichier de configuration à la place de celui par défaut
-/etc/\:fb.modes.
-Valide uniquement avec le pilote fbdev.
+.B \-fbmodeconfig <nomfichier> (\-vo fbdev uniquement)
+Outrepasse la configuration du framebuffer (défini dans /etc/\:fb.modes
+par défaut).
 .TP
-.B \-forcexv (SDL uniquement)
-Force l'utilisation de XVideo.
+.B \-forcexv (\-vo sdl uniquement)
+Force l'utilisation de XVideo à travers le pilote de sortie viéo sdl.
 .TP
-.B \-fs
+.B \-fs (voir aussi \-zoom)
 Affichage plein-écran (centre le film, et place les bandes noires autour).
-Basculer avec la touche 'f' (les modes de sortie vidéo ne le supportent pas
+Basculer avec la touche 'f' (les modes de sortie vidéo ne le permettent pas
 tous).
 Voir aussi \-zoom.
 .TP
-.B \-fsmode-dontuse <0\-31> (OBSOLÈTE) (utiliser l'option \-fs)
+.B \-fsmode-dontuse <0\-31> (OBSOLÈTE, utilisez l'option \-fs)
 Essayez cette option si vous avez encore des problèmes en plein écran.
 .TP
-.B \-fstype <type1,type2,...>
-Spécifie une liste de priorité des couches de paramètres plein-écran à utiliser.
+.B \-fstype <type1,type2,...> (X11 uniquement)
+Défini une liste de liste classé par ordre de priorité des mode plein-écran
+à utiliser.
+Vous pouvez inverser les modes en les préfixant par '\-'.
+.br
+Si vous avez des problèmes d'affichage où votre vidéo en plein écran est
+cachée par d'autres fenêtres, essayez de ré-ordonner cette liste.
+.br
+.I NOTE:
+Voir \-fstype help pour une liste complète des modes disponibles.
+.sp 1
 Les types disponibles sont:
-
+.sp 1
 .PD 0
 .RSs
 .IPs "above"
@@ -1944,37 +1960,32 @@ Force le style NETWM.
 N'initialise pas la couche plein-écran de la fenêtre.
 .IPs "stays_on_top"
 Utilise l'astuce _NETWM_STATE_STAYS_ON_TOP si disponible.
+.REss
+.\" Ceci est un hack pour garder EXAMPLE indenté. Sera corrigé un jour...
+.B \
+.I EXEMPLE:
+.PD 0
+.RSs
+.IPs layer,stays_on_top,above,fullscreen
+L'ordre par défaut, si des modes incorrects ou non gérés sont donnés, sera
+utilisé en recours.
+.IPs \-fullscreen
+Corrige le basculement en mode plein écran sur OpenBox 1.x.
 .RE
 .PD 1
-.B \
-Vous pouvez inverser les modes en les préfixant de '-'.
-.br
-L'ordre par défaut est layer,stays_on_top,above,fullscreen.
-Ce sera utilisé pour se rabattre au cas où un mode incorrect ou insupporté soit
-indiqué.
-.br
-Les utilisateurs d'OpenBox 1.x doivent utiliser \-fstype \-fullscreen
-pour avoir un basculement en plein écran fonctionnel.
-.br
-Si des fenêtres recouvrent le plein écran, essayez un ordre différent.
-.br
-.I NOTE:
-Voir \-fstype help pour une liste complète des modes disponibles.
 .TP
 .B \-geometry x[%][:y[%]] ou [WxH][+x+y]
 Ajuste la position d'origine sur l'écran de la sortie.
-Les variables x et y sont en pixels mesurés à partir du coin supérieur droit de 
-l'écran jusqu'au coin supérieur droit de la vidéo affichée, cependant si un 
-signe pourcentage est indiqué après la variable, cette valeur est alors
+Les variables x et y sont en pixels mesurés à partir du coin supérieur droit
+de l'écran jusqu'au coin supérieur droit de la vidéo affichée, cependant si
+un signe pourcentage est indiqué après la variable, cette valeur est alors
 considérée comme le pourcentage de la taille de l'écran dans cette direction. 
-Il supporte également le format d'option standard pour l'option X standard 
-\-geometry.
-Les valeur données doivent être des valeurs entières.
+Il gère également le format d'option standard X11 \-geometry.
 .br
 .I NOTE:
-Cette option n'est supportée que par vo x11, xmga, xv, xvmc, xvidix, directx et
-tdfxfb.
-
+Cette option n'est permise que par les pilotes de sortie vidéo x11, xmga, xv,
+xvmc, xvidix, directx et tdfxfb.
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -1990,7 +2001,7 @@ Place la fenêtre en bas à gauche de l'écran
 .PD 1
 .
 .TP
-.B \-guiwid <id\ fenêtre>
+.B \-guiwid <id\ fenêtre> (voir aussi \-wid) (GUI uniquement)
 Indique à la GUI d'utiliser également une fenêtre X11 et de se fixer au bas de
 la vidéo, ce qui est utile pour embarquer une mini-GUI dans un navigateur (avec
 mplayerplug-in par exemple).
@@ -1998,9 +2009,10 @@ mplayerplug-in par exemple).
 .B \-hue <-100\-100>
 Ajuste la couleur (hue) du signal vidéo (0 par défaut).
 Vous pouvez obtenir un négatif de l'image avec cette option.
+Non géné par tous les pilotes de sortie vidéo.
 .TP
 .B \-jpeg <option1:option2:...> (\-vo jpeg uniquement)
-Spécifie les option de la sortie JPEG.
+Spécifie les option du pilote de sortie vidéo jpeg.
 .br
 Les options disponibles sont:
 
@@ -2011,31 +2023,31 @@ Fichiers JPEG standards ou progressifs.
 .IPs [no]baseline
 Utilisation de la baseline ou pas.
 .IPs optimize=<valeur>
-Facteur d'optimisation [0\-100]
+facteur d'optimisation (0\-100)
 .IPs smooth=<valeur>
-Facteur de douceur [0\-100]
+facteur de douceur (0\-100)
 .IPs quality=<valeur>
-Facteur de qualité [0\-100]
+facteur de qualité (0\-100)
 .IPs outdir=<valeur>
-Répertoire où sauver les fichiers JPEG
+répertoire où sauver les fichiers JPEG
 .RE
 .PD 1
 .
 .TP
-.B \-monitor-dotclock <dotclock\ (ou\ pixelclock) range> (fbdev et vesa
+.B \-monitor-dotclock <dotclock\ (ou\ pixelclock) range> (\-vo fbdev et vesa \
 uniquement)
 Regardez dans etc/\:example.conf pour plus d'info, ainsi que dans
 DOCS/\:HTML/\:fr/\:devices.html#video-dev.
 .TP
-.B \-monitor-hfreq <intervalle de fréquence horizontal> (fbdev et vesa
+.B \-monitor-hfreq <intervalle de fréquence horizontal> (\-vo fbdev et vesa \
 uniquement)
 .TP
-.B \-monitor-vfreq <intervalle de fréquence vertical> (fbdev et vesa uniquement)
+.B \-monitor-vfreq <intervalle de fréquence vertical> (\-vo fbdev et vesa \
+uniquement)
 .TP
-.B \-monitoraspect <rapport>
+.B \-monitoraspect <rapport> (Voir aussi \-aspect)
 Fixe le rapport hauteur/largeur de votre moniteur ou de votre TV.
-Voir aussi \-aspect pour l'aspect du film.
-
+.sp 1
 .I EXEMPLE:
 .PD 0
 .RSs
@@ -2047,76 +2059,79 @@ Voir aussi \-aspect pour l'aspect du film.
 .
 .TP
 .B \-nograbpointer
-Ne capte pas le pointeur de la sourie après une changement de Vidmode (\-vm),
- utile pour les configurations multihead.
+Ne capture pas le pointeur de la sourie après une changement de mode vidéo
+(\-vm).
+Utile pour les configurations multi-écrans.
 .TP
 .B \-nokeepaspect
-Ne garde pas l'aspect ratio de la fenêtre en redimensionnant les fenêtres X11
-(Ne fonctionne actuellement qu'avec \-vo x11, xv, xmga et xvidix et votre
-gestionnaire de fenêtres doit comprendre les astuces d'aspect de fenêtres.).
+Ne garde pas l'aspect ratio de la fenêtre lors d'un redimensionnant de fenêtre
+X11.
+Ne fonctionne actuellement qu'avec les pilotes de sortie vidéo x11, xv, xmga
+et xvidix.
+De plus, votre gestionnaire de fenêtres doit comprendre les astuces d'aspect
+de fenêtres.
 .TP
-.B \-noxv (SDL uniquement)
-Désactive le pilote XVideo de SDL.
+.B \-noxv (\-vo sdl uniquement)
+Désactive l'utilisation de XVideo au travers du pilote de sortie vidéo SDL.
 .TP
 .B \-ontop
 Rends le lecteur toujours visible
-Supporté par les pilotes qui utilisent X11, excepté SDL, aussi bien que directx
+Permise par les pilotes qui utilisent X11, excepté SDL, aussi bien que directx
 et gl2 sous Windows.
 .TP
 .B \-panscan <0.0\-1.0>
-Active la fonctionnalité Pan & Scan; par exemple pour afficher un film 16/\:9
-sur un affichage 4/\:3, les bords du film sont coupés pour obtenir une image
-4/\:3 plein-écran.
-Cette option ne fonctionne qu'avec les pilotes de sortie xv, xmga, mga et
-xvidix.
-.br
+Active la fonctionnalité pan et scan (par ex.\& couper les côtés d'un
+film 16/\:9e pour qu'il tienne sans bords noirs sur un écran 4/\:3)
 L'intervalle définit à quel point l'image sera coupée.
+Cette option ne fonctionne qu'avec les pilotes de sortie vidéo xv, xmga, mga
+et xvidix.
 .TP
 .B \-rootwin
-Joue le film dans la fenêtre root (le fond du bureau) au lieu d'en ouvrir
-une nouvelle.
-Cette option ne fonctionne qu'avec les pilotes x11, xv, xmga, xvidix, quartz et
-directx.
+Joue le film dans la fenêtre root (le fond du bureau).
+Les images en fond d'écran peuvent néanmoins cacher le film.
+Cette option ne fonctionne qu'avec les pilotes de sortie vidéo x11, xv, xmga,
+xvidix, quartz et directx.
 .TP
 .B \-saturation <-100\-100>
 Ajuste la saturation du signal vidéo (0 par défaut).
 Vous pouvez obtenir une sortie noir&blanc avec cette option.
+N'est pas génré par tous les pilotes de sortie vidéo.
 .TP
-.B \-screenw <pixels> \-screenh <pixels>
-Si vous utilisez un pilote de sortie qui ne connaît pas la résolution de l'écran
-(fbdev/\:x11 et/\:ou TVout) vous pouvez spécifier ici les résolutions 
-horizontales et verticales.
+.B \-screenw <pixels>
+Défini la résolution horizontale de votre écran pour des pilotes de
+sortie vidéo qui ne connaîssent pas la résolution de l'écran, comme
+fbdev, x11 et TVout
+.TP
+.B \-screenh <pixels>
+Défini la résolution verticale de votre écran pour des pilotes de
+sortie vidéo qui ne connaîssent pas la résolution de l'écran, comme
+fbdev, x11 et TVout
 .TP
 .B \-stop-xscreensaver
 Désactive xscreensaver au lancement et le réactive à la sortie.
 .TP
 .B \-vm \ \ \
-Essaie de changer vers un meilleur mode vidéo.
-Les pilotes de sortie dga, x11/\:xv (XF86VidMode) et sdl le supportent.
+Essaie de changer vers autre mode vidéo.
+Les pilotes de sortie vidéo dga, x11, xv, sdl et directx le permettent.
+Si utilisée avec le pilote de sortie vidéo directx, les options \-screenw,
+\-screenh, \-bpp et \-refreshrate peuvent être utilisées pour paramétrer ce
+nouveau mode vidéo.
 .TP
 .B \-vsync \ \
-Active VBI pour vesa.
+Active VBI pour les pilotes de sortie vidéo vesa, dfbmga et svga.
 .TP
-.B \-wid <window\ id>
-Permet d'utiliser une fenêtre X11, ce qui est utile pour intégrer MPlayer dans
-un navigateur (avec l'extension plugger par exemple).
+.B \-wid <window\ id> (voir aussi \-guiwid) (X11 uniquement)
+Dit à MPlayer de s'attacher à une fenêtre X11 existante.
+Utile pour intégrer MPlayer dans un navigateur (avec l'extension plugger
+par exemple).
 .TP
 .B \-xineramascreen <0\-...>
 Dans les configurations xinerama (c'est à dire un bureau unique s'étendant sur
 plusieurs écrans, cette option dit à MPlayer sur quel écran afficher le film.
 .TP
-.B \-z <0\-9>
-Spécifie le taux de compression pour la sortie PNG (\-vo png)
-.
-.PD 0
-.RSs
-.IPs 0
-pas de compression
-.IPs 9
-compression maximum
-.RE
-.PD 1
-.
+.B \-z <0\-9> (\-vo png uniquement)
+Défini le taux de compression du pilote de sortie vidéo PNG 
+0 équivaut à pas de compression et 9 à la compression maximale.
 .TP
 .B \-zrbw (\-vo zr uniquement)
 Affiche en noir et blanc (pour des performances optimales, cette option
@@ -2126,43 +2141,52 @@ codecs appartenant à la famille FFmpeg).
 .B \-zrcrop <[width]x[height]+[x offset]+[y offset]> (\-vo zr uniquement)
 Sélectionne une une partie de l'image pour affichage, de multiples occurrences
 de cette option activent le mode cinérama.
-En mode cinérama le film est répartie sur plusieurs TV (ou moniteurs) pour créer
-un écran plus large.
+En mode cinérama le film est réparti sur plusieurs TV (ou moniteurs) pour
+créer un écran plus large.
 Les options apparaissant après le n-ième \-zrcrop s'appliquent à la n-ième
 carte MJPEG, chaque carte devant au moins avoir un \-zrdev en plus de \-zrcrop.
 Voir la sortie de \-zrhelp et la section Zr de la documentation pour les
 exemples.
 .TP
-.B \-zrdev <device> (\-vo zr uniquement)
-Spécifier le fichier spécial qui corresponds à votre carte MJPEG, par défaut
-le pilote prends le premier périphérique v4l qu'il peut trouver.
+.B \-zrdev <périphérique> (\-vo zr uniquement)
+Définir le fichier de périphérique spécial qui corresponds à votre carte
+MJPEG, par défaut le pilote de sortie vidéo zr prend le premier périphérique
+v4l qu'il peut trouver.
 .TP
 .B \-zrfd (\-vo zr uniquement)
-Forcer la décimation: La décimation, paramétré via \-zrhdec et \-zrvdec, ne
-fonctionne que si le zoom hardware peut étirer l'image à sa taille originale.
-Utilisez cette option pour forcer la décimation.
+Forcer le sous-échantillonnage\ : le sous-échantillonnage, paramétré via
+\-zrhdec et \-zrvdec, ne fonctionne que si le zoom matériel peut étirer
+l'image à sa taille originale.
+Utilisez cette option pour forcer le sous-échantillonnage.
+\-zrhdec <1,2,4> (\-vo zr uniquement)
+Sous-échantillonnage horizontal\ : Demande au pilote de n'envoyer que chaque 
+2ème ou 4ème ligne/pixel de l'image à la carte MJPEG et d'utiliser
+le zoom de la carte MJPEG pour étirer l'image à sa taille initiale.
 .TP
 .B \-zrhelp (\-vo zr uniquement)
 Affiche la liste de toutes les options \-zr*, leur valeur par défaut et un
 exemple de mode cinérama.
 .TP
 .B \-zrnorm <norm> (\-vo zr uniquement)
-Spécifie la norme PAL/\:NTSC, par défaut:'no change'.
+Défini la norme TV à PAL ou NTSC ('no change' par défaut).
 .TP
 .B \-zrquality <1\-20> (\-vo zr uniquement)
-Un nombre entre 1 et 20 représentant la qualité de l'encodage jpeg.
+Un nombre de 1 (meilleur) à 20 (pire) représentant la qualité de l'encodage
+JPEG.
 1 est la meilleur qualité et 20 la plus mauvaise.
 .TP
-.B \-zrvdec <1,2,4> \-zrhdec <1,2,4> (\-vo zr uniquement)
-Décimation verticale/\:horizontale: Demande au pilote de n'envoyer que chaque 
-second(e) ou quatrième ligne/pixel de l'image à la carte MJPEG et d'utiliser
+.B \-zrvdec <1,2,4> (\-vo zr uniquement)
+Sous-échantillonnage vertical\ : Demande au pilote de n'envoyer que chaque 
+2ème ou 4ème ligne/pixel de l'image à la carte MJPEG et d'utiliser
 le zoom de la carte MJPEG pour étirer l'image à sa taille initiale.
 .TP
-.B \-zrxdoff <x display offset>, \-zrydoff <y display offset> (\-vo zr
-uniquement)
-Si le film est plus petit que l'écran, cette option contrôle la position du
-film par rapport au coin supérieur gauche de l'écran.
-Le film est centré par défaut.
+.B \-zrxdoff <offset d'affichage x> (\-vo zr uniquement)
+Si le film est plus petit que l'écran, cette option contrôle la position x du
+film par rapport au coin supérieur gauche de l'écran (centré par défaut).
+.TP
+.B \-zrydoff <offset d'affichage  y> (\-vo zr uniquement)
+Si le film est plus petit que l'écran, cette option contrôle la position y du
+film par rapport au coin supérieur gauche de l'écran (centré par défaut).
 .
 .
 .SH "OPTIONS DE DÉCODAGE/FILTRAGE"
@@ -2200,7 +2224,7 @@ Les filtres disponibles sont:
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
 Change la fréquence d'échantionnage du flux audio à un srate entier (Hz).
-Il ne supporte que le format 16 bit little endian.
+Il ne permet que le format 16 bit little endian.
 .IPs channels[=nca]
 Change le nombre de canaux à nca canaux de sortie.
 Si le nombre de canaux de sortie est plus grand que le nombre de canaux d'entrée
@@ -2239,12 +2263,12 @@ les détails.
 .RSss
 n: nombre de canaux de sortie (1\-6).
 .br
-lij: combien du canal j est mixé dans le canal de sortie i.
+lij: Combien du canal j est mixé dans le canal de sortie i.
 .REss
 .IPs sub[=fc:ca]
 Ajoute le canal sub-woofer.
 .RSss
-fc: Fréquence du cutoff pour le filtre pass-bas (20Hz à 300Hz) la valeur par
+fc: Fréquence de coupure pour le filtre passe-bas (20Hz à 300Hz) la valeur par
 défaut est 60Hz.
 .br
 ca: numéro de canal pour le sous-canal.
@@ -2253,7 +2277,8 @@ ca: numéro de canal pour le sous-canal.
 Décodeur pour le son surround encodé en matrice, fonctionne sur de nombreux
 fichiers à deux canaux.
 .RSss
-d: décalage en ms pour les haut-parleurs arrière (0ms à 1000ms) 15ms par défaut.
+d: Décalage en ms pour les haut-parleurs arrière (0ms à 1000ms) (15ms par
+défaut).
 .REss
 .IPs delay[=ca1:ca2:...]
 Décale la sortie du son.
@@ -2280,11 +2305,11 @@ Force l'insertion des filtres audio de l'une des façons suivantes:
 .RSss
 0: Insertion totalement automatique des filtres (par défaut)
 .br
-1: Optimise pour l'exactitude
+1: Optimise pour l'exactitude.
 .br
-2: Optimise pour la vitesse
+2: Optimise pour la vitesse.
 .br
-3: Désactive auto
+3: Désactive auto.
 .REss
 .IPs list=<filters>
 Identique à \-af (voir cette option).
@@ -2292,8 +2317,8 @@ Identique à \-af (voir cette option).
 .
 .TP
 .B \-afm <driver1,driver2,...>
-Spécifie une liste de priorité des pilotes audio à utiliser, d'après leur
-nom de pilote dans codecs.conf.
+Défini une liste de priorité des familles de codecs audio à utiliser,
+d'après leur nom de pilote dans codecs.conf.
 Il se rabat sur celui par défaut si aucun ne convient.
 .br
 .I NOTE:
@@ -2471,7 +2496,7 @@ Ne pas jouer/\:encoder le son.
 .B \-novideo
 Ne pas jouer/\:encoder la vidéo.
 .TP
-.B \-oldpp <qualité> (OBSOLÈTE)
+.B \-oldpp <qualité> (OpenDivX uniquement) (OBSOLÈTE)
 Utilise le code de postprocessing d'opendivx au lieu de l'interne.
 À ne plus utiliser au profit de \-pp, car le postprocessing interne offre
 une meilleur qualité et de meilleurs performances.
@@ -2599,12 +2624,12 @@ essaie le codec MPEG1/\:2 de libavcodec, puis libmpeg2, puis les autres
 .
 .TP
 .B \-vfm <pilote1,pilote2,...>
-Spécifie une liste de priorité des codecs vidéo à utiliser, suivant leur nom de
-pilote dans codecs.conf.
-Se rabattra sur celui par défaut si aucun ne convient.
+Défini une liste de priorité des familles de codecs vidéo à utiliser,
+d'après leur nom de pilote dans codecs.conf.
+Il se rabat sur celui par défaut si aucun ne convient.
 .br
 .I NOTE:
-Si le support libdivxdecore a été compilé, alors odivx et divx4 contiennent
+Si la gestion de libdivxdecore a été compilé, alors odivx et divx4 contiennent
 maintenant le même codec DivX4, mais plusieurs APIs pour l'atteindre.
 Pour les différences entre elles et quand utiliser laquelle, regardez la section
 DivX4 de la documentation.
@@ -2705,7 +2730,7 @@ de la liste (-1 pour le dernier).
 .B \-vf-clr
 Vide complètement la liste de filtres.
 .PP
-Avec les filtres qui le supporte, vous pouvez accéder à leur paramètres via 
+Avec les filtres qui le permetent, vous pouvez accéder à leur paramètres via 
 noms.
 .TP
 .B \-vf <filtre>=help
@@ -2864,7 +2889,7 @@ en corrigeant l'aspect.
 .TP
 .B yuy2
 Force la conversion logicielle YV12/\:I420 ou 422P vers YUY2
-Utile pour les cartes graphiques/\:pilotes qui ont un support lent de YV12 mais
+Utile pour les cartes graphiques/\:pilotes qui gèrent YV12 trop lentement mais
 rapide de YUY2.
 .TP
 .B yvu9
@@ -3054,7 +3079,7 @@ Les paramètres et le comportement sont les mêmes.
 .TP
 .B eq[=lumi:cont]
 Égaliseur logiciel avec contrôles interactifs comme les ég. matériels. Pour les
-cartes/\:pilotes qui ne supportent pas les contrôles de la luminosité et du
+cartes/\:pilotes qui ne permettent pas les contrôles de la luminosité et du
 contraste de façon matérielle.
 Peut également être utile avec MEncoder, soit pour réparer des films mal
 encodés, soit pour réduire légèrement le contraste pour masquer les artefacts et
@@ -3282,8 +3307,8 @@ veut dire que vous aurez des ennuis si vous l'utilisez avec mencoder
 .TP
 .B filmdint[=options]
 Filtre telecine inversé, similaire au filtre pullup ci-dessus.
-Il est conçu pour gérer n'importe quel motif pulldown, encluant telecine soft
-et hard mélangés et un support limité pour les films qui sont ralantis ou
+Il est conçu pour gérer n'importe quel motif pulldown, incluant telecine soft
+et hard mélangés et une gestion limité pour les films qui sont ralentis ou
 accélérés pour la TV.
 Seul le plan luma est utilisé pour détecter les changements de trame.
 Si un champs n'a pas de corespondance, il est désentrelaçé par simple
@@ -3650,15 +3675,15 @@ Décimation verticale 1, 2 ou 4.
 .IPs quality=1-20
 Définie la qualité de la compression JPEG [MEILLEUR] 1 - 20 [TRÈS MAUVAIS].
 .IPs fd|nofd
-Par défaut, la décimation n'est appliquée que si le matériel zoran peut
-agrandir les images MJPEG à leur taille originale. 
+Par défaut, le sous-échantillonnage n'est appliqué que si le matériel zoran
+peut agrandir les images MJPEG à leur taille originale.
 L'option fd dit au filtre de toujours appliquer la décimation demandée (sale).
 .RE
 .
 .
 .SH "PILOTES DE SORTIE VIDÉO  (MPLAYER UNIQUEMENT)"
 Les pilotes de sortie vidéo sont des interfaces pour accéder aux
-fonctions de sortie.
+fonctions de sortie vidéo.
 La syntaxe est:
 .TP
 .B \-vo <pilote1[:option],pilote2,...[,]>
@@ -3668,7 +3693,7 @@ Si la liste ce termine par ';'   les autres pilotes seront essayés en cas d'éche
 Les sous-options sont optionnelles et peuvent être omises pour la plupart.
 .br
 .I NOTE:
-Voir \-vo help pour la liste des pilotes incorporés.
+Voir \-vo help pour la liste des pilotes de sortie vidéo incorporés.
 
 .I EXEMPLE:
 .PD 0
@@ -3702,7 +3727,8 @@ Pilote de sortie en mémoire partagée sans accélération matérielle qui
 fonctionne dès que X11 est présent.
 .TP
 .B xover (X11 uniquement)
-Ajoute le support X11 à tous les pilotes de sortie vidéo basés sur l'overlay.
+Ajoute la gestion de X11 à tous les pilotes de sortie vidéo basés sur
+l'overlay.
 Actuellement uniquement utilisé par tdfx_vid.
 .TP
 .B xvmc (X11 uniquement)
@@ -3720,7 +3746,7 @@ Layer).
 .B vidix\ \ 
 VIDIX (VIDeo Interface for *niX) est une interface pour les fonctionnalités
 d'accélération vido des différentes cartes graphiques.
-Pilote de sortie vidéo très rapide sur les cartes le supportant.
+Pilote de sortie vidéo très rapide sur les cartes le gérant.
 .TP
 .B xvidix (X11 uniquement)
 VIDIX tournant sous X11.
@@ -3796,7 +3822,7 @@ Lecture vidéo en utilisant le protocole UDP  Blinkenlights.
 Ce pilote est hautement spécifique à certains matériels.
 .TP
 .B ggi\ \ \ \ 
-Pilote de sortie pour le système graphique GGI.
+Pilote de sortie vidéo pour le système graphique GGI.
 .TP
 .B directfb
 Joue la vidéo en utilisant la librairie DirectFB.
@@ -4123,7 +4149,7 @@ Où <codec> peut être: lavc, xvidenc, divx4, lame
 .
 .
 .SS divx4 (\-divx4opts)
-divx4 est obsolète est n'est supporté que pour l'exhaustivité.
+divx4 est obsolète est n'est géré que par soucis d'exhaustivité.
 Pour avoir des détails sur les options divx4, lisez les sources, la plupart des
 options ne sont pas documentées ici.
 .TP
@@ -4402,7 +4428,7 @@ Recommandé pour l'encodage normal mpeg4/mpeg1video (par défaut).
 Recommandé pour h263(p)/msmpeg4. La raison de préférer 3 à 2 est que
 2 peut conduire à des dépassements (ceci sera corrigé pour h263(p) en changeant
 les quantificateur par BM dans le futur, msmpeg4 ne peut être corrigé car il ne
-supporte pas cela).
+gère pas cela).
 .RE
 .TP
 .B lmin=<0.01\-255.0>
@@ -5311,7 +5337,7 @@ long; aussi, si vous devez faire un encodage en temps réel, agissez sur ce
 paramètre. (par défaut\ : 6)
 .TP
 .B interlacing
-Active le support des vidéos entrelacées.
+Active la gestion des vidéos entrelacées.
 Ainsi vous n'avez pas besoin d'utiliser de filtre de désentrelacement.
 .TP
 .B 4mv
@@ -5601,10 +5627,10 @@ mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B Lecture sur carte zoran (ancienne méthode, depréciée)
-mplayer -vo zr -vf scale=352:288 file.avi
+mplayer \-vo zr \-vf scale=352:288 file.avi
 .TP
 .B Lecture sur carte zoran (nouvelle méthode)
-mplayer -vo zr2 -vf scale=352:288,zrmjpeg file.avi
+mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Encodage du titre #2 d'un DVD, uniquement les chapitres sélectionnés
 mencoder dvd://2 \-chapter 10-15 \-o titre2.avi \-oac copy \-ovc divx4
