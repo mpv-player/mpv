@@ -96,6 +96,9 @@
 
 //#define BUGGY_SDL //defined by configure
 
+/* MONITOR_ASPECT MUST BE FLOAT */
+#define MONITOR_ASPECT 4.0/3.0
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -130,6 +133,11 @@ static vo_info_t vo_info =
 
 #include <SDL/SDL.h>
 
+#define FS 0x01
+#define VM 0x02
+#define ZOOM 0x04
+#define FLIP 0x08  
+
 /** Private SDL Data structure **/
 
 static struct sdl_priv_s {
@@ -145,9 +153,6 @@ static struct sdl_priv_s {
 	
 	/* SDL YUV overlay */
 	SDL_Overlay *overlay;
-
-	/* x,y video position for centering */
-	SDL_Rect vidpos;
 
 	/* available fullscreen modes */
 	SDL_Rect **fullmodes;
@@ -171,8 +176,8 @@ static struct sdl_priv_s {
 	int fullmode;
 
 	/* YUV ints */
-	int framePlaneY, framePlaneUV;
-	int stridePlaneY, stridePlaneUV;
+	int framePlaneY, framePlaneUV, framePlaneYUY;
+	int stridePlaneY, stridePlaneUV, stridePlaneYUY;
 	
 	/* RGB ints */
 	int framePlaneRGB;
@@ -180,8 +185,22 @@ static struct sdl_priv_s {
 
 	/* Flip image */
 	int flip;
+
+	/* fullscreen behaviour; see init */
+	int fulltype;
+
+#ifdef HAVE_X11
+	/* X11 Resolution */
+	int XWidth, XHeight;
+#endif
 	
-        int width,height;
+        /* original image dimensions */
+	int width, height;
+
+	/* destination dimensions */
+	int dstwidth, dstheight;
+
+	/* source image format (YUV/RGB/...) */
         int format;
 } sdl_priv;
 
@@ -409,6 +428,37 @@ static int sdl_close (void)
 	return 0;
 }
 
+/**
+ * Do aspect ratio calculations
+ *
+ *   params : srcw == sourcewidth
+ *            srch == sourceheight
+ *            dstw == destinationwidth
+ *            dsth == destinationheight
+ *
+ *  returns : SDL_Rect structure with new x and y, w and h
+ **/
+
+static SDL_Rect aspect(int srcw, int srch, int dstw, int dsth) {
+	SDL_Rect newres;
+	if(verbose > 1) printf("SDL Aspect: src: %ix%i dst: %ix%i\n", srcw, srch, dstw, dsth);
+	newres.h = ((float)dstw / (float)srcw * (float)srch) * ((float)dsth/((float)dstw/(MONITOR_ASPECT)));
+	if(newres.h > dsth) {
+		newres.w = ((float)dsth / (float)newres.h) * dstw;
+		newres.h = dsth;
+		newres.x = (dstw - newres.w) / 2;
+		newres.y = 0;
+	}
+	else {
+		newres.w = dstw;
+		newres.x = 0;
+		newres.y = (dsth - newres.h) / 2;
+	}
+	
+	if(verbose) printf("SDL Aspect-Destinationres: %ix%i (x: %i, y: %i)\n", newres.w, newres.h, newres.x, newres.y);
+
+	return newres;
+}
 
 /**
  * Sets the specified fullscreen mode.
@@ -416,7 +466,8 @@ static int sdl_close (void)
  *   params : mode == index of the desired fullscreen mode
  *  returns : doesn't return
  **/
- 
+
+#if 0
 static void set_fullmode (int mode)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
@@ -446,10 +497,39 @@ static void set_fullmode (int mode)
 		SDL_ShowCursor(0);
 	}
 	//TODO: check if this produces memhole! (no surface freeing)
-	priv->vidpos.x = (priv->surface->w - priv->width) / 2;
-	priv->vidpos.y = (priv->surface->h - priv->height) / 2;
 }
+#endif
 
+static void set_fullmode (int mode) {
+	struct sdl_priv_s *priv = &sdl_priv;
+	SDL_Surface *newsurface = NULL;
+	SDL_Rect newsize;
+	
+	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
+	if(mode < 0) 
+		mode = priv->fullmode = findArrayEnd(priv->fullmodes) - 1;
+	
+	/* calculate new video size/aspect */
+	if(priv->fulltype&FS) {
+		newsize = aspect(priv->width, priv->height, priv->XWidth ? priv->XWidth : priv->dstwidth, priv->XHeight ? priv->XHeight : priv->dstheight);
+	} else
+	if(priv->fulltype&VM) {	
+		newsize = aspect(priv->dstwidth, priv->dstheight, priv->dstwidth, priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth));
+	}	
+	else {
+		newsize = aspect(priv->dstwidth, priv->dstheight, priv->fullmodes[mode]->w, priv->fullmodes[mode]->h);
+	}
+
+	/* try to change to given fullscreenmode */
+	newsurface = SDL_SetVideoMode(newsize.w, newsize.h, priv->bpp, priv->sdlfullflags);
+	
+	/* if creation of new surface was successfull, save it and hide mouse cursor */
+	if(newsurface) {
+		priv->surface = newsurface;
+		SDL_ShowCursor(0);
+	}		
+}
+	
 
 /**
  * Initialize an SDL surface and an SDL YUV overlay.
@@ -467,12 +547,12 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 {
 	struct sdl_priv_s *priv = &sdl_priv;
         unsigned int sdl_format;
+	SDL_Rect res;
 #ifdef HAVE_X11	
 	static Display *XDisplay;
+	static int XScreen;
 #endif
 
-	//priv->flip = 1; // debugging only
-	
 	sdl_format = format;
         switch(format){
 		case IMGFMT_YV12:
@@ -527,15 +607,19 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			return -1;
 	}
 
-	sdl_open (NULL, NULL);
 #ifdef HAVE_X11
 	if(getenv("DISPLAY")) {
 		if(verbose) printf("SDL: deactivating XScreensaver/DPMS\n");
 		XDisplay = XOpenDisplay(getenv("DISPLAY"));
+		XScreen = DefaultScreen(XDisplay);
+		priv->XWidth = DisplayWidth(XDisplay, XScreen);
+		priv->XHeight = DisplayHeight(XDisplay, XScreen);
+		if(verbose) printf("SDL: X11 Resolution %ix%i\n", priv->XWidth, priv->XHeight);
 		saver_off(XDisplay);
 		XCloseDisplay(XDisplay);
 	}
 #endif
+	sdl_open (NULL, NULL);
 
 	/* Set output window title */
 	SDL_WM_SetCaption (".: MPlayer : F = Fullscreen/Windowed : C = Cycle Fullscreen Resolutions :.", "SDL Video Out");
@@ -543,53 +627,78 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 
 	/* Save the original Image size */
 	
-	//priv->width  = d_width ? d_width : width;
-	//priv->height = d_height ? d_height : height;
 	priv->width  = width;
 	priv->height = height;
+	priv->dstwidth  = d_width ? d_width : width;
+	priv->dstheight = d_height ? d_height : height;
+
+	/*priv->width  = res.w;
+	priv->height = res.h;*/
         priv->format = format;
-	priv->windowsize.w = d_width ? d_width : width;
-  	priv->windowsize.h = d_height ? d_height : height;
+#ifdef HAVE_X11
+	res = aspect(priv->dstwidth, priv->dstheight, priv->dstwidth, priv->dstwidth*((float)priv->XHeight / (float)priv->XWidth));
+	priv->windowsize.w = res.w;
+  	priv->windowsize.h = res.h;
+#else		
+	priv->windowsize.w = priv->dstwidth;
+  	priv->windowsize.h = priv->dstheight;
+#endif
         
 	/* bit 0 (0x01) means fullscreen (-fs)
 	 * bit 1 (0x02) means mode switching (-vm)
 	 * bit 2 (0x04) enables software scaling (-zoom)
 	 * bit 3 (0x08) enables flipping (-flip)
 	 */
-	#define FS 0x01
-	#define VM 0x02
-	#define ZOOM 0x04
-	#define FLIP 0x08  
 //      printf("SDL: flags are set to: %i\n", flags);
 //	printf("SDL: Width: %i Height: %i D_Width %i D_Height: %i\n", width, height, d_width, d_height);
-	if(flags&FLIP) { // flipping flag set, use it
-		if(verbose) printf("SDL: using flipped video (only with RGB/BGR)\n");
+	if(flags&FLIP) {
+		if(verbose) printf("SDL: using flipped video (only with RGB/BGR/packed YUV)\n");
 		priv->flip = 1; 
 	}
 	if(flags&FS) {
-	  	priv->width = width;
-		priv->height = height;
 	  	if(verbose) printf("SDL: setting zoomed fullscreen without modeswitching\n");
 		printf("SDL: Info - please use -vm (unscaled) or -zoom (scaled) for best fullscreen experience\n");
-          	if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags)))
-			SDL_ShowCursor(0);
+          	priv->surface = NULL;
+		priv->fulltype = FS;
+		set_fullmode(priv->fullmode);
+          	/*if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags)))
+			SDL_ShowCursor(0);*/
 	} else	
 	if(flags&VM) {
 	 	if(verbose) printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
 		printf("SDL: Info - please use -zoom switch to scale video\n");
-          	if((priv->surface = SDL_SetVideoMode (d_width ? d_width : width, d_height ? d_height : height, priv->bpp, priv->sdlfullflags)))
-			SDL_ShowCursor(0);
+		
+          	priv->surface = NULL;
+		priv->fulltype = VM;
+		set_fullmode(priv->fullmode);
+          	/*if((priv->surface = SDL_SetVideoMode (d_width ? d_width : width, d_height ? d_height : height, priv->bpp, priv->sdlfullflags)))
+			SDL_ShowCursor(0);*/
 	} else
 	if(flags&ZOOM) {
 	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
 		printf("SDL: Info - please use -vm switch instead if you don't want scaled video\n");
-          	priv->surface=NULL;
-          	set_fullmode(priv->fullmode);
+		
+          	priv->surface = NULL;
+		priv->fulltype = ZOOM;
+		set_fullmode(priv->fullmode);
 	} 
         else {
-		if(verbose) printf("SDL: setting windowed mode\n");
-          	if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlflags))
-			&& (strcmp(priv->driver, "dga") == 0)) SDL_ShowCursor(0); //TODO: other sdl drivers that are fullscreen only?
+		if(strcmp(priv->driver, "x11") == 0) {
+			if(verbose) printf("SDL: setting windowed mode\n");
+#ifdef HAVE_X11		
+          	priv->surface = SDL_SetVideoMode (res.w, res.h, priv->bpp, priv->sdlflags);
+#else			
+          	priv->surface = SDL_SetVideoMode (priv->dstwidth, priv->dstheight, priv->bpp, priv->sdlflags);
+#endif
+		}
+		else {
+			if(verbose) printf("SDL: setting nonzoomed fullscreen with modeswitching\n");
+			printf("SDL: Info - please use -zoom switch to scale video\n");
+			
+			priv->surface = NULL;
+			priv->fulltype = VM;
+			set_fullmode(priv->fullmode);
+		}	
 	}
 
         if(!priv->surface) { // cannot SetVideoMode
@@ -662,8 +771,10 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		}
 		priv->framePlaneY = width * height;
 		priv->framePlaneUV = (width * height) >> 2;
+		priv->framePlaneYUY = width * height * 2;
 		priv->stridePlaneY = width;
 		priv->stridePlaneUV = width/2;
+		priv->stridePlaneYUY = width * 2;
 	}
 	
 	if(priv->mode) {
@@ -714,7 +825,15 @@ static uint32_t draw_frame(uint8_t *src[])
 		return -1;
 	    }*/
 	    dst = (uint8_t *) *(priv->overlay->pixels);
-	    memcpy (dst, src[0], priv->width*priv->height*2);
+	    if(priv->flip) {
+	    	mysrc+=priv->framePlaneYUY;
+		for(i = 0; i < priv->height; i++) {
+			mysrc-=priv->stridePlaneYUY;
+			memcpy (dst, mysrc, priv->stridePlaneYUY);
+			dst+=priv->stridePlaneYUY;
+		}
+	    }
+	    else memcpy (dst, src[0], priv->framePlaneYUY);
 	    /*SDL_UnlockYUVOverlay (priv->overlay);*/
             break;
 	
@@ -969,21 +1088,14 @@ static void flip_page (void)
 	    case IMGFMT_RGB32:
 	    case IMGFMT_BGR32:
 	    	/* blit to the RGB surface */
-		blitconv = SDL_DisplayFormat(priv->rgbsurface);
-		if(SDL_BlitSurface (blitconv, NULL, priv->surface, &priv->vidpos))
+		blitconv = SDL_DisplayFormat(priv->rgbsurface);	
+		if(SDL_BlitSurface (blitconv, NULL, priv->surface, NULL))
 			printf("SDL: Blit failed: %s\n", SDL_GetError());
 		SDL_FreeSurface(blitconv);	
 
-		/*if(SDL_MUSTLOCK(priv->surface)) {
-	    		if (SDL_LockSurface (priv->surface)) {
-				if(verbose) printf("SDL: Couldn't lock RGB surface\n");
-				return;
-	    		}
-		}*/
 		/* update screen */
-		SDL_UpdateRect(priv->surface, priv->vidpos.x, priv->vidpos.y, priv->width, priv->height);
-		/*if(SDL_MUSTLOCK(priv->surface)) 
-			SDL_UnlockSurface (priv->surface);*/
+		//SDL_UpdateRect(priv->surface, 0, 0, priv->surface->clip_rect.w, priv->surface->clip_rect.h);
+		SDL_UpdateRects(priv->surface, 1, &priv->surface->clip_rect);
 		
 		/* check if we have a double buffered surface and flip() if we do. */
 		if ( priv->surface->flags & SDL_DOUBLEBUF )
