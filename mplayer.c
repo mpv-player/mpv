@@ -1232,8 +1232,11 @@ if(1)
 //------------------------ frame decoded. --------------------
 //------------------------ add OSD to frame contents ---------
 #ifndef USE_LIBVO2
+    current_module="draw_osd";
     video_out->draw_osd();
 #endif
+
+    current_module="av_sync";
 
     // Increase video timers:
     sh_video->num_frames+=frame_time;
