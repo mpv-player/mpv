@@ -497,6 +497,8 @@ char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
 int   sub_auto = 1;
+char stream_dump_name=NULL;
+int stream_dump_type=0;
 //int user_bpp=0;
 
 #include "mixer.h"
@@ -928,6 +930,24 @@ printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
 );
 
 fflush(stdout);
+
+if(stream_dump_type){
+  FILE *f;
+  int len;
+  demux_stream_t *ds=(stream_dump_type==1)?d_audio:d_video;
+  demux_stream_t *ds2=(stream_dump_type!=1)?d_audio:d_video;
+  ds_free_packs(ds2); ds2->id=-2; // ignore this stream!
+  f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
+  if(!f){ printf("Can't open dump file!!!\n");exit(1); }
+  while(!ds->eof){
+    char* start;
+    int in_size=ds_get_packet(ds,&start);
+    if(in_size>0) fwrite(start,in_size,1,f);
+  }
+  fclose(f);
+  printf("core dumped :)\n");
+  exit(1);
+}
 
 //================== Init AUDIO (codec) ==========================
 if(has_audio){

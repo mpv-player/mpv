@@ -62,6 +62,11 @@ struct config conf[]={
 	{"noni", &force_ni, CONF_TYPE_FLAG, 0, 1, 0},
 	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 256},
+
+	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0},
+	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1},
+	{"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2},
+
 //	{"auds", &avi_header.audio_codec, CONF_TYPE_STRING, 0, 0, 0},
 //	{"vids", &avi_header.video_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"mc", &default_max_pts_correction, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10},
