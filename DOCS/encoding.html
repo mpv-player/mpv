@@ -157,8 +157,11 @@ commands are needed :<BR>
 <P>Encoding from HTTP :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/example.avi  -o  example.avi</CODE></P>
 
-<P>Encoding from standard input :<BR>
+<P>Encoding from a pipe :<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -</CODE></P>
+
+<P>Encoding multiple *.vob files :<BR>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;options&gt; -</CODE></P>
 
 <P>For all available options, <B><I>check the MEncoder man page !</I></B>
 <P>

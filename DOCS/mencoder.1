@@ -204,8 +204,11 @@ mencoder -dvd 2 -o title2.avi
 .B Encoding from HTTP
 mencoder http://mplayer.hq/example.avi -o example.avi
 .TP
-.B Encoding from pipe
+.B Encoding from a pipe
 rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -
+.TP
+.B Encoding multiple *.vob files
+cat *.vob | mencoder <options> -
 .IP
 .SH BUGS
 Probably. Check the documentation.
