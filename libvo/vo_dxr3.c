@@ -6,6 +6,11 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-01-02:
+ *  Added native overlay support, activate with :overlay
+ *   you have to run dxr3view to modify settings (or manually
+ *   edit the files in ~/.overlay.
+ *
  * 2002-10-29:
  *  Added new sync-engine, activate with :sync option.
  *  Greatly improved commandline parser.
@@ -98,6 +103,8 @@
 #include <fcntl.h>
 #include <stdio.h>
 #include <time.h>
+#include <math.h>
+#include <malloc.h>
 
 #include "config.h"
 #include "fastmemcpy.h"
@@ -107,6 +114,12 @@
 #include "aspect.h"
 #include "spuenc.h"
 #include "sub.h"
+#ifdef HAVE_NEW_GUI
+#include "../Gui/interface.h"
+#endif
+#ifdef HAVE_X11
+#include "x11_common.h"
+#endif
 
 #define SPU_SUPPORT
 
@@ -125,6 +138,8 @@ static int s_width, s_height;
 static int osd_w, osd_h;
 static int prebuf = 0;
 static int newsync = 0;
+static int overlay = 0;
+static int fullscreen = 0;
 static int img_format = 0;
 
 /* File descriptors */
@@ -144,6 +159,7 @@ static encodedata *spued;
 static encodedata *spubuf;
 #endif
 
+
 /* Static variable used in ioctl's */
 static int ioval = 0;
 static int prev_pts = 0;
@@ -152,12 +168,97 @@ static int pts_offset = 0;
 static int get_video_eq(vidix_video_eq_t *info);
 static int set_video_eq(vidix_video_eq_t *info);
 
+
+/* Begin overlay.h */
+/*
+  Simple analog overlay API for DXR3/H+ linux driver.
+
+  Henrik Johansson
+*/
+
+
+/* Pattern drawing callback used by the calibration functions.
+   The function is expected to:
+     Clear the entire screen.
+     Fill the screen with color bgcol (0xRRGGBB)
+     Draw a rectangle at (xpos,ypos) of size (width,height) in fgcol (0xRRGGBB)
+*/
+
+typedef int (*pattern_drawer_cb)(int fgcol, int bgcol,
+			     int xpos, int ypos, int width, int height, void *arg);
+
+struct coeff {
+    float k,m;
+};
+
+typedef struct {
+    int dev;
+
+    int xres, yres,depth;
+    int xoffset,yoffset,xcorr;
+    int jitter;
+    int stability;
+    int keycolor;
+    struct coeff colcal_upper[3];
+    struct coeff colcal_lower[3];
+    float color_interval;
+
+    pattern_drawer_cb draw_pattern;
+    void *dp_arg;
+} overlay_t;
+
+
+overlay_t *overlay_init(int dev);
+int overlay_release(overlay_t *);
+
+int overlay_read_state(overlay_t *o, char *path);
+int overlay_write_state(overlay_t *o, char *path);
+
+int overlay_set_screen(overlay_t *o, int xres, int yres, int depth);
+int overlay_set_mode(overlay_t *o, int mode);
+int overlay_set_attribute(overlay_t *o, int attribute, int val);
+int overlay_set_keycolor(overlay_t *o, int color);
+int overlay_set_window(overlay_t *o, int xpos,int ypos,int width,int height);
+int overlay_set_bcs(overlay_t *o, int brightness, int contrast, int saturation);
+
+int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg);
+void overlay_update_params(overlay_t *o);
+int overlay_signalmode(overlay_t *o, int mode);
+/* End overlay.h */
+
+
+#ifdef HAVE_X11
+#define KEY_COLOR 0x80a040
+static XWindowAttributes xwin_attribs;
+static overlay_t *overlay_data;
+#endif
+
+
 static uint32_t control(uint32_t request, void *data, ...)
 {
 	switch (request) {
 	case VOCTRL_GUISUPPORT:
-	case VOCTRL_GUI_NOWINDOW:
 		return VO_TRUE;
+	case VOCTRL_GUI_NOWINDOW:
+		if (overlay) {
+			return VO_FALSE;
+		}
+		return VO_TRUE;
+#ifdef HAVE_X11
+	case VOCTRL_FULLSCREEN:
+		if (overlay) {
+			vo_x11_fullscreen();
+			if (fullscreen) {
+				overlay_signalmode(overlay_data, EM8300_OVERLAY_SIGNAL_WITH_VGA);
+				fullscreen = 0;
+			} else {
+				overlay_signalmode(overlay_data, EM8300_OVERLAY_SIGNAL_ONLY);
+				fullscreen = 1;
+			}
+			return VO_TRUE;
+		}
+		return VO_FALSE;
+#endif
 	case VOCTRL_RESUME:
 		if (prebuf) {
 			ioval = EM8300_PLAYMODE_PLAY;
@@ -245,6 +346,23 @@ static uint32_t control(uint32_t request, void *data, ...)
 	    }
 	}
 	return VO_NOTIMPL;
+}
+
+void calculate_cvals(unsigned long mask, int *shift, int *prec)
+{
+	/* Calculate shift and precision */
+	(*shift) = 0;
+	(*prec) = 0;
+	
+	while (!(mask & 0x1)) {
+		(*shift)++;
+		mask >>= 1;
+	}
+	
+	while (mask & 0x1) {
+		(*prec)++;
+		mask >>= 1;
+	}
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
@@ -370,6 +488,93 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
 #endif
 
+#ifdef HAVE_X11
+	if (overlay) {
+		XVisualInfo vinfo;
+		XSetWindowAttributes xswa;
+		XSizeHints hint;
+		unsigned long xswamask;
+		Colormap cmap;
+		XColor key_color;
+		Window junkwindow;
+		Screen *scr;
+		int depth, red_shift, red_prec, green_shift, green_prec, blue_shift, blue_prec, acq_color;
+		em8300_overlay_screen_t ovlscr;
+		em8300_attribute_t ovlattr;
+
+#ifdef HAVE_NEW_GUI
+		if (use_gui) {
+			guiGetEvent(guiSetShVideo, 0);
+			XSetWindowBackground(mDisplay, vo_window, KEY_COLOR);
+			XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &xwin_attribs);
+			depth = xwin_attribs.depth;
+			if (depth != 15 && depth != 16 && depth != 24 && depth != 32) {
+				depth = 24;
+			}
+			XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
+		} else
+#endif
+		{
+			XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &xwin_attribs);
+			depth = xwin_attribs.depth;
+			if (depth != 15 && depth != 16 && depth != 24 && depth != 32) {
+				depth = 24;
+			}
+			XMatchVisualInfo(mDisplay, mScreen, depth, TrueColor, &vinfo);
+			xswa.background_pixel = KEY_COLOR;
+			xswa.border_pixel = 0;
+			xswamask = CWBackPixel | CWBorderPixel;
+			hint.y = (vo_screenheight - d_height) / 2;
+			hint.x = (vo_screenwidth - d_width) / 2;
+			hint.base_width = hint.width = vo_dwidth = d_width;
+			hint.base_height = hint.height = vo_dheight = d_height;
+			hint.flags = PPosition | PSize;
+			vo_window = XCreateWindow(mDisplay, mRootWin, hint.x, hint.y, hint.width, hint.height, 0, depth, CopyFromParent, vinfo.visual, xswamask, &xswa);
+			vo_x11_classhint(mDisplay, vo_window, "Viewing Window");
+			vo_hidecursor(mDisplay, vo_window);
+			vo_x11_selectinput_witherr(mDisplay, vo_window, StructureNotifyMask | KeyPressMask | PropertyChangeMask);
+			XSetStandardProperties(mDisplay, vo_window, "DXR3 Overlay", "DXR3 Overlay", None, NULL, 0, &hint);
+			XSetWMNormalHints(mDisplay, vo_window, &hint);
+			XMapWindow(mDisplay, vo_window);
+			XFlush(mDisplay);
+			XSync(mDisplay, False);
+		}
+		
+		/* Start setting up overlay */
+		XGetWindowAttributes(mDisplay, mRootWin, &xwin_attribs);
+		overlay_set_screen(overlay_data, xwin_attribs.width, xwin_attribs.height, xwin_attribs.depth);
+		overlay_read_state(overlay_data, NULL);
+
+		/* Allocate keycolor */
+		cmap = vo_x11_create_colormap(&vinfo);
+		calculate_cvals(vinfo.red_mask, &red_shift, &red_prec);
+		calculate_cvals(vinfo.green_mask, &green_shift, &green_prec);
+		calculate_cvals(vinfo.blue_mask, &blue_shift, &blue_prec);
+		
+		key_color.red = ((KEY_COLOR >> 16) & 0xff) * 256;
+		key_color.green = ((KEY_COLOR >> 8) & 0xff) * 256;
+		key_color.blue = (KEY_COLOR & 0xff) * 256;
+		key_color.pixel = (((key_color.red >> (16 - red_prec)) << red_shift) +
+				   ((key_color.green >> (16 - green_prec)) << green_shift) +
+				   ((key_color.blue >> (16 - blue_prec)) << blue_shift));
+		key_color.flags = DoRed | DoGreen | DoBlue;
+		if (!XAllocColor(mDisplay, cmap, &key_color)) {
+			printf("VO: [dxr3] Unable to allocate keycolor!\n");
+			return -1;
+		}
+		
+		acq_color = ((key_color.red / 256) << 16) | ((key_color.green / 256) << 8) | key_color.blue;
+		if (acq_color != KEY_COLOR) {
+			printf("VO: [dxr3] Unable to allocate exact keycolor, using closest match (%0x)\n", acq_color);	
+		}
+		
+		/* Set keycolor and activate overlay */
+		overlay_set_keycolor(overlay_data, acq_color);
+		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OVERLAY);
+		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_RECTANGLE);
+	}
+#endif
+
 	return 0;
 }
 
@@ -452,7 +657,7 @@ static void draw_osd(void)
 static uint32_t draw_frame(uint8_t * src[])
 {
 	vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
-		
+
 #ifdef SPU_SUPPORT
 	if (p->id == 0x20) {
 		write(fd_spu, p->data, p->size);
@@ -464,6 +669,26 @@ static uint32_t draw_frame(uint8_t * src[])
 
 static void flip_page(void)
 {
+#ifdef HAVE_X11
+	if (overlay) {
+		int event = vo_x11_check_events(mDisplay);
+		if (event & VO_EVENT_RESIZE) {
+			Window junkwindow;
+			XGetWindowAttributes(mDisplay, vo_window, &xwin_attribs);
+			XTranslateCoordinates(mDisplay, vo_window, mRootWin, -xwin_attribs.border_width, -xwin_attribs.border_width, &xwin_attribs.x, &xwin_attribs.y, &junkwindow);
+			overlay_set_window(overlay_data, xwin_attribs.x, xwin_attribs.y, xwin_attribs.width, xwin_attribs.height);
+		}
+		if (event & VO_EVENT_EXPOSE) {
+			Window junkwindow;
+			XSetWindowBackground(mDisplay, vo_window, KEY_COLOR);
+			XClearWindow(mDisplay, vo_window);
+			XGetWindowAttributes(mDisplay, vo_window, &xwin_attribs);
+			XTranslateCoordinates(mDisplay, vo_window, mRootWin, -xwin_attribs.border_width, -xwin_attribs.border_width, &xwin_attribs.x, &xwin_attribs.y, &junkwindow);
+			overlay_set_window(overlay_data, xwin_attribs.x, xwin_attribs.y, xwin_attribs.width, xwin_attribs.height);
+		}
+	}
+#endif
+
 	if (newsync) {
 		ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
 		ioval <<= 1;
@@ -498,6 +723,16 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0
 static void uninit(void)
 {
 	printf("VO: [dxr3] Uninitializing\n");
+#ifdef HAVE_X11
+	if (overlay) {
+		overlay_set_mode(overlay_data, EM8300_OVERLAY_MODE_OFF);
+		overlay_release(overlay_data);
+		
+		if (!use_gui) {
+			vo_x11_uninit();
+		}
+	}
+#endif
 	if (fd_video) {
 		close(fd_video);
 	}
@@ -535,6 +770,13 @@ static uint32_t preinit(const char *arg)
 		} else if (!strncmp("sync", arg, 4) && !newsync) {
 			printf("VO: [dxr3] Using new sync engine.\n");
 			newsync = 1;
+		} else if (!strncmp("overlay", arg, 7) && !overlay) {
+#ifdef HAVE_X11
+			printf("VO: [dxr3] Using overlay.\n");
+			overlay = 1;
+#else
+			printf("VO: [dxr3] Error: You need to compile mplayer with x11 libraries and headers installed to use overlay.\n");
+#endif
 		} else if (arg[0] == '0' || arg[0] == '1' || arg[0] == '2' || arg[0] == '3') {
 			devnum = arg[0];
 		}
@@ -617,6 +859,506 @@ static uint32_t preinit(const char *arg)
 	
 	ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
 	pts_offset = vo_pts - (ioval << 1);
+
+#ifdef HAVE_X11
+	if (overlay) {
 	
+		/* Fucked up hack needed to enable overlay.
+		 * Will be removed as soon as I figure out
+		 * how to make it work like it should
+		 */
+		Display *dpy;
+		overlay_t *ov;
+		XWindowAttributes attribs;
+		
+		ioval = open("/dev/em8300-0", fdflags);
+		dpy = XOpenDisplay(NULL);
+	    	if (!dpy) {
+			printf("VO: [dxr3] Unable to open display during overlay hack setup!\n");
+			return -1;
+		}
+		XGetWindowAttributes(dpy, RootWindow(dpy, DefaultScreen(dpy)), &attribs);
+		ov = overlay_init(ioval);
+		overlay_set_screen(ov, attribs.width, attribs.height, PlanesOfScreen(ScreenOfDisplay(dpy, 0)));
+		overlay_read_state(ov, NULL);
+		overlay_set_keycolor(ov, KEY_COLOR);
+		overlay_set_mode(ov, EM8300_OVERLAY_MODE_OVERLAY);
+		overlay_set_mode(ov, EM8300_OVERLAY_MODE_RECTANGLE);
+		overlay_release(ov);
+		XCloseDisplay(dpy);
+		close(ioval);
+		/* End of fucked up hack */
+		
+		/* Initialize overlay and X11 */
+		overlay_data = overlay_init(fd_control);
+		if (!use_gui) {
+			if (!vo_init()) {
+				printf("VO: [dxr3] Unable to init x11!\n");
+				return -1;
+			}
+		}
+	}
+#endif
+
 	return 0;
 }
+
+/* Begin overlay.c */
+static int update_parameters(overlay_t *o)
+{
+    overlay_set_attribute(o, EM9010_ATTRIBUTE_XOFFSET, o->xoffset);
+    overlay_set_attribute(o, EM9010_ATTRIBUTE_YOFFSET, o->yoffset);
+    overlay_set_attribute(o, EM9010_ATTRIBUTE_XCORR, o->xcorr);
+    overlay_set_attribute(o, EM9010_ATTRIBUTE_STABILITY, o->stability);
+    overlay_set_attribute(o, EM9010_ATTRIBUTE_JITTER, o->jitter);
+    return 0;
+}
+
+int overlay_set_attribute(overlay_t *o, int attribute, int value)
+{
+    em8300_attribute_t attr;
+    
+    attr.attribute = attribute;
+    attr.value = value;
+    if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SET_ATTRIBUTE, &attr)==-1)
+        {
+	     perror("Failed set attribute");
+	     return -1;
+        }
+
+    return 0;
+}
+
+overlay_t *overlay_init(int dev)
+{
+    overlay_t *o;
+
+    o = (overlay_t *) malloc(sizeof(overlay_t));
+
+    if(!o)
+	return NULL;
+
+    memset(o,sizeof(overlay_t),0);
+
+    o->dev = dev;
+    o->xres = 1280; o->yres=1024; o->xcorr=1000;
+    o->color_interval=10;
+
+    return o;
+}
+
+int overlay_release(overlay_t *o)
+{
+    if(o)
+	free(o);
+
+    return 0;
+}
+#define TYPE_INT 1
+#define TYPE_XINT 2
+#define TYPE_COEFF 3
+#define TYPE_FLOAT 4
+
+struct lut_entry {
+    char *name;
+    int type;
+    void *ptr;
+};
+
+static struct lut_entry *new_lookuptable(overlay_t *o)
+{
+    struct lut_entry m[] = {
+	{"xoffset", TYPE_INT, &o->xoffset},
+	{"yoffset", TYPE_INT, &o->yoffset},
+	{"xcorr", TYPE_INT, &o->xcorr},
+	{"jitter", TYPE_INT, &o->jitter},
+	{"stability", TYPE_INT, &o->stability},
+	{"keycolor", TYPE_XINT, &o->keycolor},
+	{"colcal_upper", TYPE_COEFF, &o->colcal_upper[0]},
+	{"colcal_lower", TYPE_COEFF, &o->colcal_lower[0]},
+	{"color_interval", TYPE_FLOAT, &o->color_interval},
+	{0,0,0}
+    },*p;
+
+    p = malloc(sizeof(m));
+    memcpy(p,m,sizeof(m));
+    return p;
+}
+
+int lookup_parameter(overlay_t *o, struct lut_entry *lut, char *name, void **ptr, int *type) {
+    int i;
+
+    for(i=0; lut[i].name; i++) {
+	if(!strcmp(name,lut[i].name)) {
+	    *ptr = lut[i].ptr;
+	    *type = lut[i].type;
+	    return 1;
+	}
+    }
+    return 0;
+}
+
+int overlay_read_state(overlay_t *o, char *p)
+{
+    char *a,*tok;
+    char path[128],fname[128],tmp[128],line[256];
+    FILE *fp;
+    struct lut_entry *lut;
+    void *ptr;
+    int type;
+    int j;
+	
+    if(!p) {
+	strcpy(fname,getenv("HOME"));
+	strcat(fname,"/.overlay");	    
+    } else
+	strcpy(fname,p);
+    
+    sprintf(tmp,"/res_%dx%dx%d",o->xres,o->yres,o->depth);
+    strcat(fname,tmp);
+
+    if(!(fp=fopen(fname,"r")))
+	return -1;
+
+    lut = new_lookuptable(o);
+    
+    while(!feof(fp)) {
+	if(!fgets(line,256,fp))
+	    break;
+	tok=strtok(line," ");
+	if(lookup_parameter(o,lut,tok,&ptr,&type)) {
+	    tok=strtok(NULL," ");
+	    switch(type) {
+	    case TYPE_INT:
+		sscanf(tok,"%d",(int *)ptr);
+		break;
+	    case TYPE_XINT:
+		sscanf(tok,"%x",(int *)ptr);
+		break;
+	    case TYPE_FLOAT:
+		sscanf(tok,"%f",(float *)ptr);
+		break;
+	    case TYPE_COEFF:
+		for(j=0;j<3;j++) {
+		    sscanf(tok,"%f",&((struct coeff *)ptr)[j].k);
+		    tok=strtok(NULL," ");
+		    sscanf(tok,"%f",&((struct coeff *)ptr)[j].m);
+		    tok=strtok(NULL," ");
+		}
+		break;	    
+	    }
+	    
+	}	
+    }
+
+    update_parameters(o);
+    
+    free(lut);
+    fclose(fp);
+    return 0;
+}
+
+void overlay_update_params(overlay_t *o) {
+    update_parameters(o);
+}
+
+int overlay_write_state(overlay_t *o, char *p)	
+{
+    char *a;
+    char path[128],fname[128],tmp[128];
+    FILE *fp;
+    char line[256],*tok;
+    struct lut_entry *lut;
+    int i,j;
+	
+    if(!p) {
+	strcpy(fname,getenv("HOME"));
+	strcat(fname,"/.overlay");	    
+    } else
+	strcpy(fname,p);
+
+    if(access(fname, W_OK|X_OK|R_OK)) {
+	if(mkdir(fname,0766))
+	    return -1;
+    }	
+    
+    sprintf(tmp,"/res_%dx%dx%d",o->xres,o->yres,o->depth);
+    strcat(fname,tmp);
+    
+    if(!(fp=fopen(fname,"w")))
+	return -1;
+    
+    lut = new_lookuptable(o);
+
+    for(i=0; lut[i].name; i++) {	
+	fprintf(fp,"%s ",lut[i].name);
+	switch(lut[i].type) {
+	case TYPE_INT:
+	    fprintf(fp,"%d\n",*(int *)lut[i].ptr);
+	    break;
+	case TYPE_XINT:
+	    fprintf(fp,"%06x\n",*(int *)lut[i].ptr);
+	    break;
+	case TYPE_FLOAT:
+	    fprintf(fp,"%f\n",*(float *)lut[i].ptr);
+	    break;
+	case TYPE_COEFF:
+	    for(j=0;j<3;j++) 
+		fprintf(fp,"%f %f ",((struct coeff *)lut[i].ptr)[j].k,
+			((struct coeff *)lut[i].ptr)[j].m);
+	    fprintf(fp,"\n");
+	    break;	    
+	}
+    }
+
+    fclose(fp);
+    return 0;
+}
+
+int overlay_set_screen(overlay_t *o, int xres, int yres, int depth)
+{
+   em8300_overlay_screen_t scr;
+
+   o->xres = xres;
+   o->yres = yres;
+   o->depth = depth;
+
+   scr.xsize = xres;
+   scr.ysize = yres;
+   
+   if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETSCREEN, &scr)==-1)
+        {
+            perror("Failed set screen...exiting");
+            return -1;
+	}
+   return 0;
+}
+
+int overlay_set_mode(overlay_t *o, int mode)
+{
+    if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETMODE, &mode)==-1) {
+	perror("Failed enabling overlay..exiting");
+	return -1;
+    }
+    return 0;
+}
+
+int overlay_set_window(overlay_t *o, int xpos,int ypos,int width,int height)
+{
+    em8300_overlay_window_t win;
+    win.xpos = xpos;
+    win.ypos = ypos;
+    win.width = width;
+    win.height = height;
+
+    if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETWINDOW, &win)==-1)
+        {
+            perror("Failed resizing window");
+            return -1;
+        }
+    return 0;
+}
+
+int overlay_set_bcs(overlay_t *o, int brightness, int contrast, int saturation)
+{
+    em8300_bcs_t bcs;
+    bcs.brightness = brightness;
+    bcs.contrast = contrast;
+    bcs.saturation = saturation;
+
+    if (ioctl(o->dev, EM8300_IOCTL_GETBCS, &bcs)==-1)
+        {
+            perror("Failed setting bcs");
+            return -1;
+        }
+    return 0;
+}
+
+static int col_interp(float x, struct coeff c)
+{
+    float y;
+    y = x*c.k + c.m;
+    if(y > 255)
+	y = 255;
+    if(y < 0)
+	y = 0;
+    return rint(y);
+}
+
+int overlay_set_keycolor(overlay_t *o, int color) {
+    int r = (color & 0xff0000) >> 16;
+    int g = (color & 0x00ff00) >> 8;
+    int b = (color & 0x0000ff);
+    float ru,gu,bu;
+    float rl,gl,bl;
+    int upper,lower;
+
+    ru = r+o->color_interval;
+    gu = g+o->color_interval;
+    bu = b+o->color_interval;
+
+    rl = r-o->color_interval;
+    gl = g-o->color_interval;
+    bl = b-o->color_interval;
+    
+    upper = (col_interp(ru, o->colcal_upper[0]) << 16) |
+	    (col_interp(gu, o->colcal_upper[1]) << 8) |
+	    (col_interp(bu, o->colcal_upper[2]));
+
+    lower = (col_interp(rl, o->colcal_lower[0]) << 16) |
+	    (col_interp(gl, o->colcal_lower[1]) << 8) |
+	    (col_interp(bl, o->colcal_lower[2]));
+
+    //printf("0x%06x 0x%06x\n",upper,lower);
+    overlay_set_attribute(o,EM9010_ATTRIBUTE_KEYCOLOR_UPPER,upper);
+    overlay_set_attribute(o,EM9010_ATTRIBUTE_KEYCOLOR_LOWER,lower);
+    return 0;
+}
+
+static void least_sq_fit(int *x, int *y, int n, float *k, float *m)
+{
+    float sx=0,sy=0,sxx=0,sxy=0;
+    float delta,b;
+    int i;
+
+    for(i=0; i < n; i++) {
+	sx=sx+x[i];
+	sy=sy+y[i];
+	sxx=sxx+x[i]*x[i];
+	sxy=sxy+x[i]*y[i];
+    }
+
+    delta=sxx*n-sx*sx;
+
+    *m=(sxx*sy-sx*sxy)/delta;
+    *k=(sxy*n-sx*sy)/delta;
+}
+
+int overlay_autocalibrate(overlay_t *o, pattern_drawer_cb pd, void *arg)
+{
+    em8300_overlay_calibrate_t cal;
+    em8300_overlay_window_t win;
+    int x[256],r[256],g[256],b[256],n;
+    float k,m;
+
+    int i;
+
+    o->draw_pattern=pd;
+    o->dp_arg = arg;
+
+    overlay_set_mode(o, EM8300_OVERLAY_MODE_OVERLAY);
+    overlay_set_screen(o, o->xres, o->yres, o->depth);
+
+    /* Calibrate Y-offset */
+
+    o->draw_pattern(0x0000ff, 0, 0, 0, 355, 1, o->dp_arg);
+
+    cal.cal_mode = EM8300_OVERLAY_CALMODE_YOFFSET;
+    if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
+        {
+	    perror("Failed getting Yoffset values...exiting");
+	    return -1;
+        }
+    o->yoffset = cal.result;
+    printf("Yoffset: %d\n",cal.result);
+
+    /* Calibrate X-offset */
+
+    o->draw_pattern(0x0000ff, 0, 0, 0, 2, 288, o->dp_arg);
+
+    cal.cal_mode = EM8300_OVERLAY_CALMODE_XOFFSET;
+    if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
+	{
+ 	    perror("Failed getting Xoffset values...exiting");
+ 	    return -1;
+	}
+    o->xoffset = cal.result;
+    printf("Xoffset: %d\n",cal.result);
+
+    /* Calibrate X scale correction */
+
+    o->draw_pattern(0x0000ff, 0, 355, 0, 2, 288, o->dp_arg);
+
+    cal.cal_mode = EM8300_OVERLAY_CALMODE_XCORRECTION;
+    if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
+	{
+ 	    perror("Failed getting Xoffset values...exiting");
+ 	    return -1;
+	}
+    printf("Xcorrection: %d\n",cal.result);
+    o->xcorr = cal.result;
+
+    win.xpos = 10;
+    win.ypos = 10;
+    win.width = o->xres-20;
+    win.height = o->yres-20;
+    if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_SETWINDOW, &win)==-1) {
+	perror("Failed resizing window");
+	exit(1);
+    }
+
+    /* Calibrate key color upper limit */
+
+    for(i=128,n=0; i <= 0xff; i+=4) {
+	o->draw_pattern(i | (i << 8) | (i << 16), 0,
+			(o->xres-200)/2,0,200,o->yres,o->dp_arg);
+
+	cal.arg = i;
+	cal.arg2 = 1;
+	cal.cal_mode = EM8300_OVERLAY_CALMODE_COLOR;
+
+	if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
+	    {
+		return -1 ;
+	    }
+
+	x[n] = i;
+	r[n] = (cal.result>>16)&0xff;
+	g[n] = (cal.result>>8)&0xff;
+	b[n] = (cal.result)&0xff;
+	n++;
+    }
+
+    least_sq_fit(x,r,n,&o->colcal_upper[0].k,&o->colcal_upper[0].m);
+    least_sq_fit(x,g,n,&o->colcal_upper[1].k,&o->colcal_upper[1].m);
+    least_sq_fit(x,b,n,&o->colcal_upper[2].k,&o->colcal_upper[2].m);
+
+    /* Calibrate key color lower limit */
+
+    for(i=128,n=0; i <= 0xff; i+=4) {
+	o->draw_pattern(i | (i << 8) | (i << 16), 0xffffff,
+			(o->xres-200)/2,0,200,o->yres, o->dp_arg);
+
+	cal.arg = i;
+	cal.arg2 = 2;
+	cal.cal_mode = EM8300_OVERLAY_CALMODE_COLOR;
+
+	if (ioctl(o->dev, EM8300_IOCTL_OVERLAY_CALIBRATE, &cal))
+	    {
+		return -1 ;
+	    }
+	x[n] = i;
+	r[n] = (cal.result>>16)&0xff;
+	g[n] = (cal.result>>8)&0xff;
+	b[n] = (cal.result)&0xff;
+	n++;
+    }
+
+    least_sq_fit(x,r,n,&o->colcal_lower[0].k,&o->colcal_lower[0].m);
+    least_sq_fit(x,g,n,&o->colcal_lower[1].k,&o->colcal_lower[1].m);
+    least_sq_fit(x,b,n,&o->colcal_lower[2].k,&o->colcal_lower[2].m);
+
+    overlay_set_mode(o, EM8300_OVERLAY_MODE_OFF);
+
+    return 0;
+}
+
+
+int overlay_signalmode(overlay_t *o, int mode) {
+	if(ioctl(o->dev, EM8300_IOCTL_OVERLAY_SIGNALMODE, &mode) ==-1) {
+	    perror("Failed set signal mix");
+	    return -1;
+	}
+	return 0;
+}
+/* End overlay.c */
