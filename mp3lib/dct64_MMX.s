@@ -989,6 +989,4 @@ dct64_MMX:
 	popl %edi
 	popl %esi
 	popl %ebx
-	ret
-	
-
+	ret	$12

@@ -7,6 +7,11 @@
 # Warning: Phases 7 & 8 are not tested
 #
 
+.data
+	.align 8
+x_plus_minus_3dnow: .long 0x00000000, 0x80000000
+plus_1f: .float 1.0
+
 .text
 
 	.align 16
@@ -201,6 +206,9 @@ dct64_MMX_3dnowex:
 	
 /* Phase 4*/
 
+	movq	96(%ebx), %mm2
+	movq	104(%ebx), %mm6
+
 	movq	(%ecx), %mm0
 	movq	8(%ecx), %mm4
 	movq	%mm0, %mm3
@@ -215,8 +223,8 @@ dct64_MMX_3dnowex:
 	movq	%mm4, 8(%edx)
 	pfsub	%mm1, %mm3
 	pfsub	%mm5, %mm7
-	pfmul	96(%ebx), %mm3
-	pfmul	104(%ebx), %mm7
+	pfmul	%mm2, %mm3
+	pfmul	%mm6, %mm7
 	pswapd	%mm3, %mm3
 	pswapd	%mm7, %mm7
 	movq	%mm3, 24(%edx)
@@ -236,8 +244,8 @@ dct64_MMX_3dnowex:
 	movq	%mm4, 40(%edx)
 	pfsubr	%mm1, %mm3
 	pfsubr	%mm5, %mm7
-	pfmul	96(%ebx), %mm3
-	pfmul	104(%ebx), %mm7
+	pfmul	%mm2, %mm3
+	pfmul	%mm6, %mm7
 	pswapd	%mm3, %mm3
 	pswapd	%mm7, %mm7
 	movq	%mm3, 56(%edx)
@@ -257,8 +265,8 @@ dct64_MMX_3dnowex:
 	movq	%mm4, 72(%edx)
 	pfsub	%mm1, %mm3
 	pfsub	%mm5, %mm7
-	pfmul	96(%ebx), %mm3
-	pfmul	104(%ebx), %mm7
+	pfmul	%mm2, %mm3
+	pfmul	%mm6, %mm7
 	pswapd	%mm3, %mm3
 	pswapd	%mm7, %mm7
 	movq	%mm3, 88(%edx)
@@ -278,14 +286,16 @@ dct64_MMX_3dnowex:
 	movq	%mm4, 104(%edx)
 	pfsubr	%mm1, %mm3
 	pfsubr	%mm5, %mm7
-	pfmul	96(%ebx), %mm3
-	pfmul	104(%ebx), %mm7
+	pfmul	%mm2, %mm3
+	pfmul	%mm6, %mm7
 	pswapd	%mm3, %mm3
 	pswapd	%mm7, %mm7
 	movq	%mm3, 120(%edx)
 	movq	%mm7, 112(%edx)
 
 /* Phase 5 */
+
+	movq	112(%ebx), %mm2
 
 	movq	(%edx), %mm0
 	movq	16(%edx), %mm4
@@ -301,8 +311,8 @@ dct64_MMX_3dnowex:
 	movq	%mm4, 16(%ecx)
 	pfsub	%mm1, %mm3
 	pfsubr	%mm5, %mm7
-	pfmul	112(%ebx), %mm3
-	pfmul	112(%ebx), %mm7
+	pfmul	%mm2, %mm3
+	pfmul	%mm2, %mm7
 	pswapd	%mm3, %mm3
 	pswapd	%mm7, %mm7
 	movq	%mm3, 8(%ecx)
@@ -322,8 +332,8 @@ dct64_MMX_3dnowex:
 	movq	%mm4, 48(%ecx)
 	pfsub	%mm1, %mm3
 	pfsubr	%mm5, %mm7
-	pfmul	112(%ebx), %mm3
-	pfmul	112(%ebx), %mm7
+	pfmul	%mm2, %mm3
+	pfmul	%mm2, %mm7
 	pswapd	%mm3, %mm3
 	pswapd	%mm7, %mm7
 	movq	%mm3, 40(%ecx)
@@ -343,8 +353,8 @@ dct64_MMX_3dnowex:
 	movq	%mm4, 80(%ecx)
 	pfsub	%mm1, %mm3
 	pfsubr	%mm5, %mm7
-	pfmul	112(%ebx), %mm3
-	pfmul	112(%ebx), %mm7
+	pfmul	%mm2, %mm3
+	pfmul	%mm2, %mm7
 	pswapd	%mm3, %mm3
 	pswapd	%mm7, %mm7
 	movq	%mm3, 72(%ecx)
@@ -364,33 +374,52 @@ dct64_MMX_3dnowex:
 	movq	%mm4, 112(%ecx)
 	pfsub	%mm1, %mm3
 	pfsubr	%mm5, %mm7
-	pfmul	112(%ebx), %mm3
-	pfmul	112(%ebx), %mm7
+	pfmul	%mm2, %mm3
+	pfmul	%mm2, %mm7
 	pswapd	%mm3, %mm3
 	pswapd	%mm7, %mm7
 	movq	%mm3, 104(%ecx)
 	movq	%mm7, 120(%ecx)
 	
+	
 /* Phase 6. This is the end of easy road. */
 /* Code below is coded in scalar mode. Should be optimized */
 
-	movd   32(%ecx), %mm0
-	pfadd  36(%ecx), %mm0
-	movd   %mm0, 32(%edx)
+	movd	plus_1f, %mm6
+	punpckldq 120(%ebx), %mm6      /* mm6 = 1.0 | 120(%ebx)*/
+	movq	x_plus_minus_3dnow, %mm7 /* mm7 = +1 | -1 */
 
-	movd   32(%ecx), %mm0
-	pfsub  36(%ecx), %mm0
-	pfmul  120(%ebx),%mm0
-	movd   %mm0, 36(%edx)
+	movq	32(%ecx), %mm0
+	movq	64(%ecx), %mm2
+	movq	%mm0, %mm1
+	movq	%mm2, %mm3
+	pxor	%mm7, %mm1
+	pxor	%mm7, %mm3
+	pfacc	%mm1, %mm0
+	pfacc	%mm3, %mm2
+	pfmul	%mm6, %mm0
+	pfmul	%mm6, %mm2
+	movq	%mm0, 32(%edx)
+	movq	%mm2, 64(%edx)
 
-	movd   44(%ecx), %mm0
-	pfsub  40(%ecx), %mm0
-	pfmul  120(%ebx),%mm0
-
-	movd   %mm0, 44(%edx)
-	pfadd  40(%ecx), %mm0
-	pfadd  44(%ecx), %mm0
-	movd   %mm0, 40(%edx)
+	movd	44(%ecx), %mm0
+	movd	40(%ecx), %mm2
+	movd	120(%ebx), %mm3
+	punpckldq 76(%ecx), %mm0
+	punpckldq 72(%ecx), %mm2
+	punpckldq %mm3, %mm3
+	movq	%mm0, %mm4
+	movq	%mm2, %mm5
+	pfsub	%mm2, %mm0
+	pfmul	%mm3, %mm0
+	movq	%mm0, %mm1
+	pfadd	%mm5, %mm0
+	pfadd	%mm4, %mm0
+	movq	%mm0, %mm2
+	punpckldq %mm1, %mm0
+	punpckhdq %mm1, %mm2
+	movq	%mm0, 40(%edx)
+	movq	%mm2, 72(%edx)
 
 	movd   48(%ecx), %mm3
 	pfsub  52(%ecx), %mm3
@@ -407,38 +436,22 @@ dct64_MMX_3dnowex:
 
 	pfadd  48(%ecx), %mm0
 	pfadd  52(%ecx), %mm0
-	movd   %mm0, 48(%edx)
-	pfadd  %mm3, %mm1
-	movd   %mm1, 56(%edx)
-	movd   %mm2, 60(%edx)
-	pfadd  %mm3, %mm2
-	movd   %mm2, 52(%edx)
+	pfadd	%mm3, %mm1
+	punpckldq %mm2, %mm1
+	pfadd	%mm3, %mm2
+	punpckldq %mm2, %mm0
+	movq	%mm1, 56(%edx)
+	movq	%mm0, 48(%edx)
 
 /*---*/
-	movd   64(%ecx), %mm0
-	pfadd  68(%ecx), %mm0
-	movd   %mm0, 64(%edx)
 
-	movd   64(%ecx), %mm0
-	pfsub  68(%ecx), %mm0
-	pfmul 120(%ebx), %mm0
-	movd   %mm0, 68(%edx)
-
-	movd   76(%ecx), %mm0
-	pfsub  72(%ecx), %mm0
-	pfmul 120(%ebx), %mm0
-	movd   %mm0, 76(%edx)
-	pfadd  72(%ecx), %mm0
-	pfadd  76(%ecx), %mm0
-	movd   %mm0, 72(%edx)
-
-	movd   92(%ecx), %mm0
-	pfsub  88(%ecx), %mm0
-	pfmul 120(%ebx), %mm0
-	movd   %mm0, 92(%edx)
-	pfadd  92(%ecx), %mm0
-	pfadd  88(%ecx), %mm0
-	movq   %mm0, %mm1
+	movd   92(%ecx), %mm1
+	pfsub  88(%ecx), %mm1
+	pfmul 120(%ebx), %mm1
+	movd   %mm1, 92(%edx)
+	pfadd  92(%ecx), %mm1
+	pfadd  88(%ecx), %mm1
+	movq   %mm1, %mm0
 	
 	pfadd  80(%ecx), %mm0
 	pfadd  84(%ecx), %mm0
@@ -452,14 +465,12 @@ dct64_MMX_3dnowex:
 	movd   %mm0, 84(%edx)
 	movd   %mm1, 88(%edx)
 
-	movd   96(%ecx), %mm0
-	pfadd 100(%ecx), %mm0
-	movd   %mm0, 96(%edx)
-
-	movd   96(%ecx), %mm0
-	pfsub 100(%ecx), %mm0
-	pfmul 120(%ebx), %mm0
-	movd  %mm0, 100(%edx)
+	movq	96(%ecx), %mm0
+	movq	%mm0, %mm1
+	pxor	%mm7, %mm1
+	pfacc	%mm1, %mm0
+	pfmul	%mm6, %mm0
+	movq	%mm0, 96(%edx)
 
 	movd  108(%ecx), %mm0
 	pfsub 104(%ecx), %mm0
@@ -469,13 +480,13 @@ dct64_MMX_3dnowex:
 	pfadd 108(%ecx), %mm0
 	movd  %mm0, 104(%edx)
 
-	movd  124(%ecx), %mm0
-	pfsub 120(%ecx), %mm0
-	pfmul 120(%ebx), %mm0
-	movd  %mm0, 124(%edx)
-	pfadd 120(%ecx), %mm0
-	pfadd 124(%ecx), %mm0
-	movq  %mm0, %mm1
+	movd  124(%ecx), %mm1
+	pfsub 120(%ecx), %mm1
+	pfmul 120(%ebx), %mm1
+	movd  %mm1, 124(%edx)
+	pfadd 120(%ecx), %mm1
+	pfadd 124(%ecx), %mm1
+	movq  %mm1, %mm0
 
 	pfadd 112(%ecx), %mm0
 	pfadd 116(%ecx), %mm0
@@ -611,18 +622,18 @@ dct64_MMX_3dnowex:
 	jmp	.L_bye
 .L01:	
 /* Phase 9*/
-	movd      (%ecx), %mm0
-	pfadd    4(%ecx), %mm0
-	pf2id    %mm0, %mm0
-	movd	 %mm0, %eax
-	movw     %ax, 512(%esi)
 
-	movd      (%ecx), %mm0
-	pfsub    4(%ecx), %mm0
-	pfmul  120(%ebx), %mm0
-	pf2id    %mm0, %mm0
-	movd	 %mm0, %eax
-	movw     %ax, (%esi)
+	movq	(%ecx), %mm0
+	movq	%mm0, %mm1
+	pxor    %mm7, %mm1
+	pfacc	%mm1, %mm0
+	pfmul	%mm6, %mm0
+	pf2id	%mm0, %mm0
+	movd	%mm0, %eax
+	movw    %ax, 512(%esi)
+	psrlq	$32, %mm0
+	movd	%mm0, %eax
+	movw    %ax, (%esi)
 
 	movd    12(%ecx), %mm0
 	pfsub    8(%ecx), %mm0
@@ -636,22 +647,24 @@ dct64_MMX_3dnowex:
 	movd	 %mm0, %eax
 	movw     %ax, 256(%esi)
 
-	movd   16(%ecx), %mm0
-	pfsub  20(%ecx), %mm0
-	pfmul  120(%ebx), %mm0
-	movq   %mm0, %mm3
+	movd   16(%ecx), %mm3
+	pfsub  20(%ecx), %mm3
+	pfmul  120(%ebx), %mm3
+	movq   %mm3, %mm2
 
-	movd   28(%ecx), %mm0
-	pfsub  24(%ecx), %mm0
-	pfmul 120(%ebx), %mm0
-	pf2id  %mm0, %mm7
+	movd   28(%ecx), %mm2
+	pfsub  24(%ecx), %mm2
+	pfmul 120(%ebx), %mm2
+	movq   %mm2, %mm1
+
+	pf2id  %mm2, %mm7
 	movd   %mm7, %eax
 	movw   %ax, 384(%edi)
-	movq   %mm0, %mm2
 	
-	pfadd  24(%ecx), %mm0
-	pfadd  28(%ecx), %mm0
-	movq   %mm0, %mm1
+	pfadd  24(%ecx), %mm1
+	pfadd  28(%ecx), %mm1
+	movq   %mm1, %mm0
+	
 	pfadd  16(%ecx), %mm0
 	pfadd  20(%ecx), %mm0
 	pf2id  %mm0, %mm0
@@ -665,7 +678,6 @@ dct64_MMX_3dnowex:
 	pf2id  %mm2, %mm2
 	movd   %mm2, %eax
 	movw   %ax, 128(%edi)
-	
 	
 /* Phase 10*/
 
@@ -686,32 +698,51 @@ dct64_MMX_3dnowex:
 	movw    %ax, 64(%edi)
 	movw    %cx, 192(%edi)
 
-	movd   40(%edx), %mm0
-	pfadd  56(%edx), %mm0
-	pf2id  %mm0, %mm0
-	movd   %mm0, %eax
-	movw   %ax, 192(%esi)
-
-	movd   56(%edx), %mm0
-	pfadd  36(%edx), %mm0
-	pf2id  %mm0, %mm0
-	movd   %mm0, %eax
-	movw   %ax, 64(%esi)
-
+	movd   40(%edx), %mm3
+	movd   56(%edx), %mm4
 	movd   60(%edx), %mm0
-	pf2id  %mm0, %mm7
-	movd   %mm7, %eax
+	movd   44(%edx), %mm2
+	movd  120(%edx), %mm5
+	punpckldq %mm4, %mm3
+	punpckldq 124(%edx), %mm0
+	pfadd 100(%edx), %mm5
+	punpckldq 36(%edx), %mm4
+	punpckldq 92(%edx), %mm2	
+	movq  %mm5, %mm6
+	pfadd  %mm4, %mm3
+	pf2id  %mm0, %mm1
+	pf2id  %mm3, %mm3
+	pfadd  88(%edx), %mm5
+	movd   %mm1, %eax
+	movd   %mm3, %ecx
 	movw   %ax, 448(%edi)
-	pfadd  44(%edx), %mm0
+	movw   %cx, 192(%esi)
+	pf2id  %mm5, %mm5
+	psrlq  $32, %mm1
+        psrlq  $32, %mm3
+	movd   %mm5, %ebx
+	movd   %mm1, %eax
+	movd   %mm3, %ecx
+	movw   %bx, 96(%esi)
+	movw   %ax, 480(%edi)
+	movw   %cx, 64(%esi)
+	pfadd  %mm2, %mm0
 	pf2id  %mm0, %mm0
 	movd   %mm0, %eax
+	pfadd  68(%edx), %mm6
 	movw   %ax, 320(%edi)
+	psrlq  $32, %mm0
+	pf2id  %mm6, %mm6
+	movd   %mm0, %eax
+	movd   %mm6, %ebx
+	movw   %ax, 416(%edi)
+	movw   %bx, 32(%esi)
 
 	movq   96(%edx), %mm0
 	movq  112(%edx), %mm2
 	movq  104(%edx), %mm4
-	pfadd 112(%edx), %mm0
-	pfadd 104(%edx), %mm2
+	pfadd %mm2, %mm0
+	pfadd %mm4, %mm2
 	pfadd 120(%edx), %mm4
 	movq  %mm0, %mm1
 	movq  %mm2, %mm3
@@ -719,20 +750,20 @@ dct64_MMX_3dnowex:
 	pfadd  64(%edx), %mm0
 	pfadd  80(%edx), %mm2
 	pfadd  72(%edx), %mm4
-	pf2id  %mm0, %mm7
-	pf2id  %mm2, %mm6
+	pf2id  %mm0, %mm0
+	pf2id  %mm2, %mm2
 	pf2id  %mm4, %mm4
-	movd   %mm7, %eax
-	movd   %mm6, %ecx
+	movd   %mm0, %eax
+	movd   %mm2, %ecx
 	movd   %mm4, %ebx
 	movw   %ax, 480(%esi)
 	movw   %cx, 352(%esi)
 	movw   %bx, 224(%esi)
-	psrlq  $32, %mm7
-	psrlq  $32, %mm6
+	psrlq  $32, %mm0
+	psrlq  $32, %mm2
 	psrlq  $32, %mm4
-	movd   %mm7, %eax
-	movd   %mm6, %ecx
+	movd   %mm0, %eax
+	movd   %mm2, %ecx
 	movd   %mm4, %ebx
 	movw   %ax, 32(%edi)
 	movw   %cx, 160(%edi)
@@ -759,27 +790,6 @@ dct64_MMX_3dnowex:
 	movw   %cx, 224(%edi)
 	movw   %bx, 352(%edi)
 
-	movd  120(%edx), %mm0
-	pfadd 100(%edx), %mm0
-	movq  %mm0, %mm1
-	pfadd  88(%edx), %mm0
-	pf2id  %mm0, %mm0
-	movd   %mm0, %eax
-	movw   %ax, 96(%esi)
-	pfadd  68(%edx), %mm1
-	pf2id  %mm1, %mm1
-	movd   %mm1, %eax
-	movw   %ax, 32(%esi)
-
-	movq  124(%edx), %mm0
-	pf2id  %mm0, %mm1
-	movd   %mm1, %eax
-	movw   %ax, 480(%edi)
-	pfadd  92(%edx), %mm0
-	pf2id  %mm0, %mm0
-	movd   %mm0, %eax
-	movw   %ax, 416(%edi)
-
 	movsw
 
 .L_bye:
@@ -788,6 +798,4 @@ dct64_MMX_3dnowex:
 	popl %edi
 	popl %esi
 	popl %ebx
-	ret
-	
-
+	ret	$12

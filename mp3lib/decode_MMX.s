@@ -48,46 +48,48 @@ costab_mmx:
 .text
 
 .globl synth_1to1_MMX_s
-
+/*
+   void synth_1to1_MMX_s(real *bandPtr, int channel, short *samples,
+                         short *buffs, int *bo);
+*/
 synth_1to1_MMX_s:
         pushl %ebp
         pushl %edi
         pushl %esi
         pushl %ebx
-        movl 24(%esp),%ecx              
-        movl 28(%esp),%edi              
+        movl 24(%esp),%ecx
+        movl 28(%esp),%edi
         movl $15,%ebx
-        movl 36(%esp),%edx              
+        movl 36(%esp),%edx
         leal (%edi,%ecx,2),%edi
 	decl %ecx
-        movl 32(%esp),%esi              
-        movl (%edx),%eax                
+        movl 32(%esp),%esi
+        movl (%edx),%eax
         jecxz .L1
         decl %eax
-        andl %ebx,%eax                  
-        leal 1088(%esi),%esi                            
-        movl %eax,(%edx)                
+        andl %ebx,%eax
+        leal 1088(%esi),%esi
+        movl %eax,(%edx)
 .L1:
-        leal (%esi,%eax,2),%edx         
-        movl %eax,%ebp                  
-        incl %eax                       
-        pushl 20(%esp)                  
-        andl %ebx,%eax                  
-        leal 544(%esi,%eax,2),%ecx      
-        incl %ebx                       
+        leal (%esi,%eax,2),%edx
+        movl %eax,%ebp
+        incl %eax
+        pushl 20(%esp)
+        andl %ebx,%eax
+        leal 544(%esi,%eax,2),%ecx
+        incl %ebx
 	testl $1, %eax
-	jnz .L2                       
+	jnz .L2
         xchgl %edx,%ecx
 	incl %ebp
-        leal 544(%esi),%esi           
+        leal 544(%esi),%esi
 .L2: 
 	emms
         pushl %edx
         pushl %ecx
         call *dct64_MMX_func
-        addl $12,%esp
 	leal 1(%ebx), %ecx
-        subl %ebp,%ebx                
+        subl %ebp,%ebx
 	pushl %ecx
 	leal decwins(%ebx,%ebx,1), %edx
 	shrl $1, %ecx
@@ -248,5 +250,3 @@ synth_1to1_MMX_s:
         popl %edi
         popl %ebp
         ret
-
-
