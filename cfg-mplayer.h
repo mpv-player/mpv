@@ -135,7 +135,7 @@ struct config conf[]={
 	{"fps", &force_fps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0},
 	{"srate", &force_srate, CONF_TYPE_INT, CONF_RANGE, 1000, 8*48000},
 	{"afm", &audio_family, CONF_TYPE_INT, CONF_RANGE, 0, 8}, // keep ranges in sync
-	{"vfm", &video_family, CONF_TYPE_INT, CONF_RANGE, 0, 6}, // with codec-cfg.c
+	{"vfm", &video_family, CONF_TYPE_INT, CONF_RANGE, 0, 7}, // with codec-cfg.c
 	{"ac", &audio_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"vc", &video_codec, CONF_TYPE_STRING, 0, 0, 0},
 	{"dshow", &allow_dshow, CONF_TYPE_FLAG, 0, 0, 1}, // Is this still needed? atmos ::
