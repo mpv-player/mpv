@@ -77,6 +77,7 @@ extern vo_functions_t video_out_dxr3;
 #ifdef TARGET_LINUX
 extern vo_functions_t video_out_vesa;
 #endif
+extern vo_functions_t video_out_directfb;
 vo_functions_t* video_out_drivers[] =
 {
 #ifdef HAVE_XMGA
@@ -138,6 +139,9 @@ vo_functions_t* video_out_drivers[] =
 #if defined( ARCH_X86 ) && defined( TARGET_LINUX )
 	&video_out_vesa,
 #endif
+#ifdef HAVE_DIRECTFB
+	&video_out_directfb,
+#endif	
         NULL
 };
 

@@ -13,6 +13,10 @@ extern char *fb_mode_name;
 extern char *monitor_hfreq_str;
 extern char *monitor_vfreq_str;
 extern char *monitor_dotclock_str;
+#else
+#ifdef HAVE_DIRECTFB
+extern char *fb_dev_name;
+#endif
 #endif
 #ifdef HAVE_PNG
 extern int z_compression;
@@ -118,6 +122,10 @@ struct config conf[]={
 	{"monitor_hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0},
 	{"monitor_vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0},
 	{"monitor_dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0},
+#else
+#ifdef HAVE_DIRECTFB
+	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0},
+#endif
 #endif
 //	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
 #ifdef USE_SUB

@@ -148,6 +148,7 @@ Video:
   --enable-mlib          build with MLIB support (Solaris only) [autodetect]
   --enable-3dfx          build with 3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb support [disable]
+  --enable-directfb      build with DirectFB support [autodetect]
 
 Audio:
   --disable-ossaudio     disable OSS sound support [autodetect]
@@ -684,6 +685,7 @@ _termcap=auto
 _termios=auto
 _3dfx=no
 _tdfxfb=no
+_directfb=auto
 _largefiles=no
 _vo2=no
 _language=en
@@ -784,6 +786,8 @@ for ac_option do
   --disable-3dfx)	_3dfx=no	;;
   --enable-tdfxfb)	_tdfxfb=yes	;;
   --disable-tdfxfb)	_tdfxfb=no	;;
+  --enable-directfb)	_directfb=yes	;;
+  --disable-directfb)	_directfb=no	;;
   --enable-mtrr)	_mtrr=yes	;;
   --disable-mtrr)	_mtrr=no	;;
   --enable-largefiles)	_largefiles=yes	;;
@@ -1256,6 +1260,25 @@ else
   _def_tdfxfb='#undef HAVE_TDFXFB'
 fi
 echores "$_tdfxfb"
+
+
+echocheck "DirectFB"
+if test "$_directfb" = auto ; then
+  _directfb=no
+  cat > $TMPC <<EOF
+#include <directfb.h>
+int main(void) { IDirectFB *foo; return 0; }
+EOF
+  cc_check -ldirectfb && _directfb=yes
+fi
+if test "$_directfb" = yes ; then
+  _def_directfb='#define HAVE_DIRECTFB 1'
+  _vosrc="$_vosrc vo_directfb.c"
+  _ld_directfb='-ldirectfb'
+else
+  _def_directfb='#undef HAVE_DIRECTFB'
+fi
+echores "$_directfb"
 
 
 # Checking for localization ...
@@ -2597,6 +2620,7 @@ DIVX4LINUX = $_divx4linux
 DECORE_LIB = $_ld_decore
 MENCODER = $_mencoder
 ENCORE_LIB =  $_ld_encore 
+DIRECTFB_LIB = $_ld_directfb
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -2856,6 +2880,7 @@ $_def_sdlbuggy
 $_def_ggi
 $_def_3dfx
 $_def_tdfxfb
+$_def_directfb
 $_def_mga
 $_def_xmga
 $_def_syncfb
