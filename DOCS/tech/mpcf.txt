@@ -412,7 +412,7 @@ zero_bit
 	      their size, and all startcodes start with a 1 bit
 
 checksum
-	crc32 checksum using the generator polynomial 0x104c11db7 (same as ogg)
+	adler32 checksum
 
 frame_checksum
 	identical to checksum, but instead of covering just the current 
