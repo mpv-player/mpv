@@ -594,7 +594,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		    printf("vo_vesa: Can't convert %u to %u\n",image_bpp,video_mode_info.BitsPerPixel);
 		    return -1;
 		  }
-		  if(verbose) printf("vo_vesa: using %u to %u sw convertor\n",image_bpp,video_mode_info.BitsPerPixel);
+		  printf("vo_vesa: using %u-bpp to %u-bpp sw convertor\n",image_bpp,video_mode_info.BitsPerPixel);
 		}		
 		if((video_mode_info.WinAAttributes & FRAME_MODE) == FRAME_MODE)
 		   win.idx = 0; /* frame A */
