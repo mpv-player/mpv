@@ -2493,7 +2493,7 @@ if test "$_vorbis" = auto ; then
   _vorbis=no
   cat > $TMPC << EOF
 #include <vorbis/codec.h>
-int main(void) { return 0; }
+int main(void) { vorbis_packet_blocksize(0,0); return 0; }
 EOF
   cc_check -lvorbis -logg -lm && _vorbis=yes
 fi
