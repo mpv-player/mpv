@@ -2649,7 +2649,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 
 			len = pes_parse2(p, buf_size, es, pid_type, pmt, pid);
 			es->pid = tss->pid;
-			tss->is_synced = es->is_synced | rap_flag;
+			tss->is_synced = es->is_synced || rap_flag;
 			
 			if(es->type==SL_PES_STREAM && !tss->is_synced)
 			{
