@@ -70,6 +70,7 @@ int first = 1;
 
 static int open_mode;
 static int set_block_mode;
+static int alsa_can_pause = 0;
 
 #define ALSA_DEVICE_SIZE 48
 
@@ -683,6 +684,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	     snd_pcm_format_description(alsa_format));
 
     } // end switch alsa_handler (spdif)
+    alsa_can_pause = snd_pcm_hw_params_can_pause(alsa_hwparams);
     return(1);
 } // end init
 
@@ -695,9 +697,9 @@ static void uninit()
     int err;
 
     if (!ao_noblock) {
-      if ((err = snd_pcm_drain(alsa_handler)) < 0)
+      if ((err = snd_pcm_drop(alsa_handler)) < 0)
 	{
-	  printf("alsa-uninit: pcm drain error: %s\n", snd_strerror(err));
+	  printf("alsa-uninit: pcm drop error: %s\n", snd_strerror(err));
 	  return;
 	}
     }
@@ -722,19 +724,20 @@ static void audio_pause()
 {
     int err;
 
-    if (!ao_noblock) {
-      //drain causes error in nonblock-mode!
-      if ((err = snd_pcm_drain(alsa_handler)) < 0)
-	{
-	  printf("alsa-pause: pcm drain error: %s\n", snd_strerror(err));
-	  return;
-	}
-    }
-    else {
-      if (verbose>0)
-	printf("alsa-pause: paused nonblock\n");
-
-      return;
+    if (alsa_can_pause) {
+        if ((err = snd_pcm_pause(alsa_handler, 1)) < 0)
+        {
+            printf("alsa-pause: pcm pause error: %s\n", snd_strerror(err));
+            return;
+        }
+        if (verbose)
+          printf("alsa-pause: pause supported by hardware\n");
+    } else {
+        if ((err = snd_pcm_drop(alsa_handler)) < 0)
+        {
+            printf("alsa-pause: pcm drop error: %s\n", snd_strerror(err));
+            return;
+        }
     }
 }
 
@@ -742,10 +745,20 @@ static void audio_resume()
 {
     int err;
 
-    if ((err = snd_pcm_prepare(alsa_handler)) < 0)
-    {
-	printf("alsa-resume: pcm prepare error: %s\n", snd_strerror(err));
-	return;
+    if (alsa_can_pause) {
+        if ((err = snd_pcm_pause(alsa_handler, 0)) < 0)
+        {
+            printf("alsa-resume: pcm resume error: %s\n", snd_strerror(err));
+            return;
+        }
+        if (verbose)
+          printf("alsa-resume: resume supported by hardware\n");
+    } else {
+        if ((err = snd_pcm_prepare(alsa_handler)) < 0)
+        {
+           printf("alsa-resume: pcm prepare error: %s\n", snd_strerror(err));
+            return;
+        }
     }
 }
 
