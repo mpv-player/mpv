@@ -277,8 +277,9 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
                     }
                 }
 
-
-                stream_seek(demuxer->stream,stream_tell(demuxer->stream)-10);
+                // data starts 10 bytes before current pos but later
+                // we seek 17 backwards
+                stream_skip(demuxer->stream,7);
             } 
             
         switch(priv->fps){
@@ -304,7 +305,8 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
        }
     }   
 
-    
+    // seek to start of NSV header
+    stream_seek(demuxer->stream,stream_tell(demuxer->stream)-17);
     
     return demuxer;
 }
