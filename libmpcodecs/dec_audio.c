@@ -25,6 +25,7 @@ int fakemono=0;
 #endif
 /* used for ac3surround decoder - set using -channels option */
 int audio_output_channels = 2;
+af_cfg_t af_cfg; // Configuration for audio filters
 
 static ad_functions_t* mpadec;
 
@@ -255,8 +256,7 @@ int init_audio_filters(sh_audio_t *sh_audio,
   afs->output.bps    = out_bps ? out_bps : afs->input.bps;
 
   // filter config:  
-  afs->cfg.force = 0;
-  afs->cfg.list = NULL;
+  memcpy(&afs->cfg,&af_cfg,sizeof(af_cfg_t));
   
   mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Building audio filter chain for %dHz/%dch/%dbit -> %dHz/%dch/%dbit...\n",
       afs->input.rate,afs->input.nch,afs->input.bps*8,

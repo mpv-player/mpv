@@ -212,6 +212,7 @@ static int softsleep=0;
 
 static float force_fps=0;
 static int force_srate=0;
+static int audio_output_format=0;
        int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames=-1;
 static int play_n_frames_mf=-1;
@@ -1240,7 +1241,8 @@ if(sh_audio){
       (ao_plugin_cfg.plugin_list), // plugin flag
       force_srate?force_srate:sh_audio->samplerate*playback_speed,
       audio_output_channels?audio_output_channels:
-      sh_audio->channels,sh_audio->sample_format,0))){
+      sh_audio->channels,audio_output_format?audio_output_format:
+      sh_audio->sample_format,0))){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     sh_audio=d_audio->sh=NULL; // -> nosound

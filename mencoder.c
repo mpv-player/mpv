@@ -130,6 +130,7 @@ static float force_ofps=0; // set to 24 for inverse telecine
 static int skip_limit=-1;
 
 static int force_srate=0;
+static int audio_output_format=0;
 
 char *vobsub_out=NULL;
 unsigned int vobsub_out_index=0;
@@ -671,7 +672,7 @@ case ACODEC_COPY:
     } else {
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX));
 	mux_a->wf->nBlockAlign = 1; //mux_a->h.dwSampleSize;
-	mux_a->wf->wFormatTag = sh_audio->format;
+	mux_a->wf->wFormatTag = audio_output_format?audio_output_format:sh_audio->format;
 	mux_a->wf->nChannels = sh_audio->channels;
 	mux_a->wf->nSamplesPerSec = sh_audio->samplerate;
 	mux_a->wf->nAvgBytesPerSec=sh_audio->i_bps; //mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
