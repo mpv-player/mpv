@@ -460,7 +460,7 @@ mp_image_setfmt(sh_video->image,out_fmt);
 switch(sh_video->codec->driver){
  case VFM_ROQVIDEO:
 #ifdef USE_MP_IMAGE
-   sh_video->image->type=MP_IMGTYPE_STATIC;
+   sh_video->image->type=MP_IMGTYPE_IP;
 #else
    sh_video->our_out_buffer_size = sh_video->disp_w * sh_video->disp_h * 1.5;
    sh_video->our_out_buffer = (char*)memalign(64, sh_video->our_out_buffer_size);
@@ -469,7 +469,7 @@ switch(sh_video->codec->driver){
    break;
  case VFM_CINEPAK: {
 #ifdef USE_MP_IMAGE
-   sh_video->image->type=MP_IMGTYPE_IP;
+   sh_video->image->type=MP_IMGTYPE_STATIC;
 #else
    int bpp=((out_fmt&255)+7)/8;
    sh_video->our_out_buffer_size = sh_video->disp_w*sh_video->disp_h*bpp;
