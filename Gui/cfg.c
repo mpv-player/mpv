@@ -40,6 +40,9 @@ float  gtkAOExtraStereoMul = 1.0;
 char * gtkAOOSSMixer;
 char * gtkAOOSSDevice;
 #endif
+#ifdef HAVE_SDL
+char * gtkAOSDLDriver;
+#endif
 
 int    gtkCacheOn = 0;
 int    gtkCacheSize = 2048;
@@ -101,6 +104,9 @@ static config_t gui_opts[] =
 #ifdef USE_OSS_AUDIO
  { "ao_oss_mixer",&gtkAOOSSMixer,CONF_TYPE_STRING,0,0,0,NULL },
  { "ao_oss_device",&gtkAOOSSDevice,CONF_TYPE_STRING,0,0,0,NULL },
+#endif
+#ifdef HAVE_SDL
+ { "ao_sdl_subdriver",&gtkAOSDLDriver,CONF_TYPE_STRING,0,0,0,NULL },
 #endif
  
  { "osd_level",&osd_level,CONF_TYPE_INT,CONF_RANGE,0,2,NULL },

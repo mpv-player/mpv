@@ -702,7 +702,14 @@ int guiGetEvent( int type,char * arg )
 	  gaddlist( &audio_driver_list,tmp );
 	 }
 #endif
-
+#ifdef HAVE_SDL
+	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"sdl",3 ) && gtkAOSDLDriver )
+	 {
+	  char * tmp = calloc( 1,strlen( gtkAOSDLDriver ) + 10 );
+	  sprintf( tmp,"sdl:%s",gtkAOSDLDriver );
+	  gaddlist( &audio_driver_list,tmp );
+	 }
+#endif
 // -- subtitle
 #ifdef USE_SUB
 	sub_name=gstrdup( guiIntfStruct.Subtitlename );

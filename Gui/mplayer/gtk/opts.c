@@ -146,6 +146,10 @@ static int    old_video_driver = 0;
  void ShowDXR3Config( void );
  void HideDXR3Config( void );
 #endif
+#ifdef HAVE_SDL
+ void ShowSDLConfig( void );
+ void HideSDLConfig( void );
+#endif
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
@@ -197,6 +201,9 @@ void ShowPreferences( void )
     gtk_widget_set_sensitive( AConfig,FALSE );
 #ifdef USE_OSS_AUDIO
     if ( !strncmp( ao_driver[0],"oss",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+#endif
+#ifdef HAVE_SDL
+    if ( !strncmp( ao_driver[0],"sdl",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
 #endif
    }
  }
@@ -400,6 +407,9 @@ void HidePreferences( void )
 #ifdef USE_OSS_AUDIO
  HideOSSConfig();
 #endif
+#ifdef HAVE_SDL
+ HideSDLConfig();
+#endif
 #ifdef HAVE_DXR3
  HideDXR3Config();
 #endif
@@ -518,6 +528,9 @@ void prButton( GtkButton * button,gpointer user_data )
 #ifdef USE_OSS_AUDIO
         if ( !strncmp( ao_driver[0],"oss",3 ) ) { ShowOSSConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
 #endif
+#ifdef HAVE_SDL
+        if ( !strncmp( ao_driver[0],"sdl",3 ) ) { ShowSDLConfig(); gtk_widget_set_sensitive( AConfig,TRUE ); }
+#endif
 	break;
    case bVconfig:
 	if ( !vo_driver[0] ) break;
@@ -623,6 +636,9 @@ static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,g
 	gtk_widget_set_sensitive( AConfig,FALSE );
 #ifdef USE_OSS_AUDIO
 	if ( !strncmp( ao_driver[0],"oss",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
+#endif
+#ifdef HAVE_SDL
+	if ( !strncmp( ao_driver[0],"sdl",3 ) ) gtk_widget_set_sensitive( AConfig,TRUE );
 #endif
 	break;
    case 1: // video driver 
@@ -1230,6 +1246,116 @@ GtkWidget * create_OSSConfig( void )
   return OSSConfig;
 }
 
+#endif
+
+#ifdef HAVE_SDL
+       GtkWidget * SDLConfig;
+static GtkWidget * CESDLDriver;
+static GtkWidget * CBSDLDriver;
+static GtkWidget * BSDLOk;
+static GtkWidget * BSDLCancel;
+
+void ShowSDLConfig( void )
+{
+ if ( SDLConfig ) gtkActive( SDLConfig );
+   else SDLConfig=create_SDLConfig();
+
+ if ( gtkAOSDLDriver )
+   gtk_entry_set_text( GTK_ENTRY( CESDLDriver ), gtkAOSDLDriver );
+
+ gtk_widget_show( SDLConfig );
+ gtkSetLayer( SDLConfig );
+}
+
+void HideSDLConfig( void )
+{
+ if ( !SDLConfig ) return;
+ gtk_widget_hide( SDLConfig );
+ gtk_widget_destroy( SDLConfig ); 
+ SDLConfig=NULL;
+}
+
+static void sdlButton( GtkButton * button,gpointer user_data )
+{
+ switch( (int)user_data )
+  {
+   case 1:
+        gfree( (void **)&gtkAOSDLDriver );  gtkAOSDLDriver=strdup( gtk_entry_get_text( GTK_ENTRY( CESDLDriver ) ) );
+   case 0:
+	HideSDLConfig();
+	break;
+  }
+}
+
+GtkWidget * create_SDLConfig( void )
+{
+  GList     * CBSDLDriver_items=NULL;
+  GtkWidget * vbox604;
+  GtkWidget * table2;
+  GtkWidget * label;
+  GtkWidget * hbuttonbox6;
+  GtkAccelGroup * accel_group;
+
+  accel_group=gtk_accel_group_new();
+
+  SDLConfig=gtk_window_new( GTK_WINDOW_TOPLEVEL );
+  gtk_widget_set_name( SDLConfig,"SDLConfig" );
+  gtk_object_set_data( GTK_OBJECT( SDLConfig ),"SDLConfig",SDLConfig );
+  gtk_widget_set_usize( SDLConfig,270,70 );
+  gtk_window_set_title( GTK_WINDOW( SDLConfig ),MSGTR_SDLPreferences );
+  gtk_window_set_position( GTK_WINDOW( SDLConfig ),GTK_WIN_POS_CENTER );
+  gtk_window_set_policy( GTK_WINDOW( SDLConfig ),FALSE,FALSE,FALSE );
+  gtk_window_set_wmclass( GTK_WINDOW( SDLConfig ),"SDL Config","MPlayer" );
+
+  gtk_widget_realize( SDLConfig );
+  gtkAddIcon( SDLConfig );
+
+  vbox604=AddVBox( AddDialogFrame( SDLConfig ),0 );
+
+  table2=gtk_table_new( 2,2,FALSE );
+  gtk_widget_set_name( table2,"table2" );
+  gtk_widget_show( table2 );
+  gtk_box_pack_start( GTK_BOX( vbox604 ),table2,TRUE,TRUE,0 );
+
+  label=AddLabel( MSGTR_PREFERENCES_SDL_Driver,NULL );
+    gtk_table_attach( GTK_TABLE( table2 ),label,0,1,0,1,(GtkAttachOptions)( GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+
+  CBSDLDriver=AddComboBox( NULL );
+  gtk_table_attach( GTK_TABLE( table2 ),CBSDLDriver,1,2,0,1,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
+  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer) NULL );
+  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"alsa" );
+  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"arts" );
+  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"esd" );
+  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"jack" );
+  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"oss" );
+  CBSDLDriver_items=g_list_append( CBSDLDriver_items,(gpointer)"nas" );
+  gtk_combo_set_popdown_strings( GTK_COMBO( CBSDLDriver ),CBSDLDriver_items );
+  g_list_free( CBSDLDriver_items );
+
+  CESDLDriver=GTK_COMBO( CBSDLDriver )->entry;
+  gtk_widget_set_name( CESDLDriver,"CESDLDriver" );
+  gtk_widget_show( CESDLDriver );
+
+  AddHSeparator( vbox604 );
+
+  hbuttonbox6=AddHButtonBox( vbox604 );
+    gtk_button_box_set_layout( GTK_BUTTON_BOX( hbuttonbox6 ),GTK_BUTTONBOX_END );
+    gtk_button_box_set_spacing( GTK_BUTTON_BOX( hbuttonbox6 ),10 );
+  BSDLOk=AddButton( MSGTR_Ok,hbuttonbox6 );
+  BSDLCancel=AddButton( MSGTR_Cancel,hbuttonbox6 );
+
+  gtk_signal_connect( GTK_OBJECT( SDLConfig ),"destroy",GTK_SIGNAL_FUNC( gtk_widget_destroyed ),&SDLConfig );
+  
+  gtk_signal_connect( GTK_OBJECT( BSDLOk ),"clicked",GTK_SIGNAL_FUNC( sdlButton ),(void*)1 );
+  gtk_signal_connect( GTK_OBJECT( BSDLCancel ),"clicked",GTK_SIGNAL_FUNC( sdlButton ),(void*)0 );
+
+  gtk_widget_add_accelerator( BSDLOk,"clicked",accel_group,GDK_Return,0,GTK_ACCEL_VISIBLE );
+  gtk_widget_add_accelerator( BSDLCancel,"clicked",accel_group,GDK_Escape,0,GTK_ACCEL_VISIBLE );
+
+  gtk_window_add_accel_group( GTK_WINDOW( SDLConfig ),accel_group );
+
+  return SDLConfig;
+}
 #endif
 
 #ifdef HAVE_DXR3

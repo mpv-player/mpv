@@ -17,6 +17,9 @@ extern float  gtkAOExtraStereoMul;
 extern char * gtkAOOSSMixer;
 extern char * gtkAOOSSDevice;
 #endif
+#ifdef HAVE_SDL
+extern char * gtkAOSDLDriver;
+#endif
 #ifdef HAVE_DXR3
 extern char * gtkDXR3Device;
 #endif
