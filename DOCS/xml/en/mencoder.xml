@@ -592,8 +592,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   low enough bitrate that <systemitem class="library">libavcodec</systemitem>
   is forced to use a higher quantizer, then you're almost certainly ruining
   the quality of your video.
-  In order to avoid that, you should probably down-scale your video, according
-  to the method which will be exposed later on that guide.
+  In order to avoid that, you should probably down scale your video, according
+  to the method which will be gone over later on that guide.
   In general, you should avoid CBR altogether if you care about quality.
 </para>
 
@@ -751,7 +751,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   there's a limited total number of bits that you can spend; therefore it's
   necessary to find a good tradeoff between compressibility and quality.
   The CQ depends both on the bitrate and the movie resolution.
-  In order to raise the CQ, typically you'd downscale the movie given that the
+  In order to raise the CQ, typically you'd down scale the movie given that the
   bitrate is computed in function of the target size and the length of the
   movie, which are constant.
   A CQ below 0.18 usually ends up in a very blocky picture, because there
@@ -810,7 +810,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   You may want to normalize the sound before encoding, as DVD audio tracks
   are commonly recorded at low volumes.
   You can use the tool <application>normalize</application> for instance,
-  which is available in most distribution.
+  which is available in most distributions.
+  If you're using Windows, a tool such as <application>BeSweet</application>
+  can do the same job.
   You will compress in either Ogg Vorbis or MP3.
   For example:
   <screen>oggenc -q1 destination_sound.wav</screen>
@@ -920,11 +922,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   into "high quality" mode and move on.
   That would probably be nice, but unfortunately hard to implement as different
   encoding options yield different qualities depending on the source material.
-  Anime and live action are for example two very different materials that
-  require different care.
+  That's because compression depends on the visual properties of the video
+  in question.
+  For example, anime and live action have very different properties and
+  thus require different options to obtain optimum encoding.
   The good news is that some options should never be left out, like
   <option>mbd=2</option>, <option>trell</option>, and <option>v4mv</option>.
-  See below a detailed description of common encoding options. 
+  See below a for detailed description of common encoding options. 
 </para>
 
 
@@ -991,9 +995,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">qns</emphasis>: very slow, especially when combined
   with qprd.
-  This option will make the encoder reduce as much as possible noise due to
-  compression artifacts instead making the encoded video strictly match the
-  source.
+  This option will make the encoder minimize noise due to compression
+  artifacts instead making the encoded video strictly match the source.
   Don't use this unless you've already tweaked everything else as far as it
   will go and the results still aren't good enough.
 </para></listitem>
@@ -1048,7 +1051,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">lumi_mask, dark_mask</emphasis>: Psychovisual adaptive
   quantization.
   You don't want to play with those options if you care about quality.
-  Reasonable values may be effective in your case, but be warned this is a very
+  Reasonable values may be effective in your case, but be warned this is very
   subjective.
 </para></listitem>
 
