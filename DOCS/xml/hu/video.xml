@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.77 -->
+<!-- synced to 1.78 -->
 <sect1 id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -2090,10 +2090,10 @@ a lavc gyorsabb is és jobb képminőséget is ad, javaslom, hogy ezt
 használd, hacsak nincs problémád vele. Lásd a man oldalt a további
 infókért a <option>-vf lavc/fame</option> kapcsolóról.
 A lavc használata nagyon javasolt. Jelenleg nem lehet az em8300 fps értékét
-módosítani, ami azt jelenti, hogy fixen 29.97fps. Emiatt javasolt a
-<option>-vf lavc=<replaceable>quality</replaceable>:25</option> kapcsoló
+módosítani, ami azt jelenti, hogy fixen 30000/1001 fps. Emiatt javasolt a
+<option>-vf lavc=<replaceable>minőség</replaceable>:25</option> kapcsoló
 használata, különösen ha előbufferelést használsz. Hogy miért 25 és nem
-29.97? Nos, a dolog úgy áll, hogy ha 29.97-et használsz, a kép kicsit
+30000/1001? Nos, a dolog úgy áll, hogy ha 30000/1001-et használsz, a kép kicsit
 ugrálós lesz. Ennek az okát nem tudjuk. Ha beállítod valahova 25 és 27
 közé, a kép stabillá válik. Jelenleg mást nem tehetünk, elfogadjuk ezt
 tényként.
