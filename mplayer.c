@@ -609,6 +609,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       printf("num_filenames: %d\n",num_filenames);
     }
 
+    mp_msg_init(verbose+MSGL_STATUS);
 
 //------ load global data first ------
 
