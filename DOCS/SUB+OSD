@@ -15,7 +15,7 @@ INSTALLING OSD and SUB
 @ download fonts from mplayer's download page                            @
 @  mplayer.sourceforge.net/homepage/dload.html                           @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Standard (dutch, french, german, italian, portugese) font package:
+Standard (Central-European, Latin1) font package:
 	http://thot.banki.hu/mp-ftp/releases/mp_font3.zip
 	(it obsoletes mp_font1.zip and mp_font2.zip)
 
