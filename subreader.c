@@ -404,9 +404,9 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 		if (!fgets(line, LINE_LEN, fd)) return NULL;
 	} while (sscanf (line, "%f %f", &a, &b) !=2);
 
-	mpsub_position += (a*100.0);
+	mpsub_position += a*(sub_uses_time ? 100.0 : 1.0);
 	current->start=(int) mpsub_position;
-	mpsub_position += (b*100.0);
+	mpsub_position += b*(sub_uses_time ? 100.0 : 1.0);
 	current->end=(int) mpsub_position;
 
 	while (num < SUB_MAX_TEXT) {
