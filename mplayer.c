@@ -139,6 +139,12 @@ static int cfg_include(struct config *conf, char *filename){
 #include "get_path.c"
 
 //**************************************************************************//
+//             XScreensaver
+//**************************************************************************//
+
+void xscreensaver_heartbeat(float time);
+
+//**************************************************************************//
 //**************************************************************************//
 //             Input media streaming & demultiplexer:
 //**************************************************************************//
@@ -3253,6 +3259,12 @@ if(rel_seek_secs || abs_seek_pos){
       current_module=NULL;
   }
 #endif
+
+if (stop_xscreensaver && sh_video) {
+  current_module="stop_xscreensaver";
+  xscreensaver_heartbeat(sh_video->pts);
+  current_module=NULL;
+}
   
   // DVD sub:
 if(vo_config_count && vo_spudec) {

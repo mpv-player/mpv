@@ -13,6 +13,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
+#include <signal.h>
 
 #include "video_out.h"
 #include "help_mp.h"
@@ -54,7 +55,6 @@ int stop_xscreensaver=0;
 
 static int dpms_disabled=0;
 static int timeout_save=0;
-static int xscreensaver_was_running=0;
 static int kdescreensaver_was_running=0;
 
 char* mDisplayName=NULL;
@@ -853,6 +853,119 @@ void vo_x11_fullscreen( void )
  XFlush( mDisplay );
 }
 
+/*
+ * XScreensaver stuff
+ */
+
+static int got_badwindow;
+static XErrorHandler old_handler;
+
+static int badwindow_handler(Display *dpy, XErrorEvent *error)
+{
+    if (error->error_code != BadWindow)
+	return (*old_handler)(dpy, error);
+
+    got_badwindow = True;
+    return 0;
+}
+
+static Window find_xscreensaver_window(Display *dpy)
+{
+    int i;
+    Window root = RootWindowOfScreen(DefaultScreenOfDisplay(dpy));
+    Window root2, parent, *kids;
+    Window retval = 0;
+    Atom xs_version;
+    unsigned int nkids = 0;
+
+    xs_version = XInternAtom(dpy, "_SCREENSAVER_VERSION", True);
+
+    if (!(xs_version != None &&
+          XQueryTree(dpy, root, &root2, &parent, &kids, &nkids) &&
+          kids && nkids)) return 0;
+
+    old_handler = XSetErrorHandler(badwindow_handler);
+
+    for (i = 0; i < nkids; i++) {
+	Atom type;
+	int format;
+	unsigned long nitems, bytesafter;
+	char *v;
+	int status;
+
+        got_badwindow = False;
+	status = XGetWindowProperty(dpy, kids[i], xs_version, 0, 200, False,
+	                            XA_STRING, &type, &format, &nitems,
+	                            &bytesafter, (unsigned char**) &v);
+	XSync(dpy, False);
+	if (got_badwindow) status = BadWindow;
+
+	if (status == Success && type != None) {
+	    retval = kids[i];
+	    break;
+	}
+    }
+    XFree(kids);
+    XSetErrorHandler(old_handler);
+
+    return retval;
+}
+
+static Window xs_windowid = 0;
+static Atom deactivate;
+static Atom screensaver;
+
+static float time_last;
+
+void xscreensaver_heartbeat(float time)
+{
+    XEvent ev;
+
+    if (xs_windowid &&
+	((time - time_last)>30 ||
+	 (time - time_last)<0)) {
+	time_last = time;
+
+	ev.xany.type = ClientMessage;
+	ev.xclient.display = mDisplay;
+	ev.xclient.window = xs_windowid;
+	ev.xclient.message_type = screensaver;
+	ev.xclient.format = 32;
+	memset(&ev.xclient.data, 0, sizeof(ev.xclient.data));
+	ev.xclient.data.l[0] = (long) deactivate;
+
+	mp_msg(MSGT_VO,MSGL_DBG2, "Pinging xscreensaver.\n");
+	XSendEvent(mDisplay, xs_windowid, False, 0L, &ev);
+	XSync(mDisplay, False);
+    }
+}
+
+static void xscreensaver_disable(Display *dpy)
+{
+    mp_msg(MSGT_VO,MSGL_DBG2, "xscreensaver_disable()\n");
+
+    xs_windowid = find_xscreensaver_window(dpy);
+    if (!xs_windowid) {
+	mp_msg(MSGT_VO,MSGL_INFO,
+	       "xscreensaver_disable: Could not find xscreensaver window.\n");
+	return;
+    }
+    mp_msg(MSGT_VO,MSGL_INFO,
+           "xscreensaver_disable: xscreensaver wid=%d.\n", xs_windowid);
+
+    deactivate = XInternAtom(dpy, "DEACTIVATE", False);
+    screensaver = XInternAtom(dpy, "SCREENSAVER", False);
+}
+
+static void xscreensaver_enable(void)
+{
+    xs_windowid = 0;
+}
+
+/*
+ * End of XScreensaver stuff
+ */
+
 void saver_on(Display *mDisplay) {
 
 #ifdef HAVE_XDPMS
@@ -889,10 +1002,7 @@ void saver_on(Display *mDisplay) {
 	timeout_save=0;
     }
 
-    if (xscreensaver_was_running && stop_xscreensaver) {
-	system("cd /; xscreensaver -no-splash &");
-	xscreensaver_was_running = 0;
-    }
+    if (stop_xscreensaver) xscreensaver_enable();
     if (kdescreensaver_was_running && stop_xscreensaver) {
 	system("dcop kdesktop KScreensaverIface enable true 2>/dev/null >/dev/null");
 	kdescreensaver_was_running = 0;
@@ -928,12 +1038,7 @@ void saver_off(Display *mDisplay) {
 	    XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
     }
 		    // turning off screensaver
-    if (stop_xscreensaver && !xscreensaver_was_running)
-    {
-      xscreensaver_was_running = (system("xscreensaver-command -version 2>/dev/null >/dev/null")==0);
-      if (xscreensaver_was_running)
-	 system("xscreensaver-command -exit 2>/dev/null >/dev/null");    
-    }
+    if (stop_xscreensaver) xscreensaver_disable(mDisplay);
     if (stop_xscreensaver && !kdescreensaver_was_running)
     {
       kdescreensaver_was_running=(system("dcop kdesktop KScreensaverIface isEnabled 2>/dev/null | sed 's/1/true/g' | grep true 2>/dev/null >/dev/null")==0);
