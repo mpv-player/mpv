@@ -3,6 +3,7 @@
 #ifdef USE_TV
 #include "../libao2/afmt.h"
 #include "../libvo/img_format.h"
+#include "../libvo/fastmemcpy.h"
 
 extern unsigned long tv_param_freq;
 extern char *tv_param_channel;
@@ -13,6 +14,7 @@ extern char *tv_param_driver;
 extern int tv_param_width;
 extern int tv_param_height;
 extern int tv_param_input;
+extern char *tv_param_outfmt;
 
 typedef struct tvi_info_s
 {

@@ -31,6 +31,7 @@ char *tv_param_driver = "dummy";
 int tv_param_width = -1;
 int tv_param_height = -1;
 int tv_param_input = 0; /* used in v4l and bttv */
+char *tv_param_outfmt = "yv12";
 
 
 /* ================== DEMUX_TV ===================== */
@@ -95,8 +96,24 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     
     sh_video = new_sh_video(demuxer, 0);
 
-    /* hack to use YUV 4:2:0 format ;) */
-    sh_video->format = IMGFMT_UYVY;
+    if (!strcasecmp(tv_param_outfmt, "yv12"))
+	sh_video->format = IMGFMT_YV12;
+    else if (!strcasecmp(tv_param_outfmt, "uyvy"))
+	sh_video->format = IMGFMT_UYVY;
+    else if (!strcasecmp(tv_param_outfmt, "rgb32"))
+	sh_video->format = IMGFMT_RGB32;
+    else if (!strcasecmp(tv_param_outfmt, "rgb24"))
+	sh_video->format = IMGFMT_RGB24;
+    else if (!strcasecmp(tv_param_outfmt, "rgb16"))
+	sh_video->format = IMGFMT_RGB16;
+    else if (!strcasecmp(tv_param_outfmt, "rgb15"))
+	sh_video->format = IMGFMT_RGB15;
+    else
+    {
+	printf("Unknown format given: %s\n", tv_param_outfmt);
+	printf("Using default: Planar YV12\n");
+	sh_video->format = IMGFMT_YV12;
+    }
     funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &sh_video->format);
 
     /* get IMGFMT_ */
@@ -185,7 +202,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	    case AFMT_MPEG:
 	    case AFMT_AC3:
 	    default:
-		printf("%s unsupported!\n", audio_out_format_name(audio_format));
+//		printf("%s unsupported!\n", audio_out_format_name(audio_format));
 		goto no_audio;
 	}
 	
