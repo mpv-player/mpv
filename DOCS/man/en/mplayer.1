@@ -3215,8 +3215,8 @@ This may come at a price in accuracy, though.
 .IPs lowres=<number>
 Decode at lower resolutions.
 Low resolution decoding is not supported by all codecs, and it will
-often result in ugly artifacts, this is not a bug, but a side effect
-of not decoding at the full resolution.
+often result in ugly artifacts.
+This is not a bug, but a side effect of not decoding at full resolution.
 .RSss
 .br
 0: disabled
@@ -4517,8 +4517,8 @@ number of lines to select from the middle of the image (default: 12)
 .
 .TP
 .B bmovl=hidden:opaque:fifo
-Reads bitmaps from a FIFO and displays them on top of the movie,
-allowing some transformations on the image.
+The bitmap overlay filter reads bitmaps from a FIFO and displays them
+on top of the movie, allowing some transformations on the image.
 Also see TOOLS/bmovl-test.c for a small bmovl test program.
 .PD 0
 .RSs
@@ -4652,9 +4652,9 @@ sometimes something even uglier appear \- your mileage may vary).
 .PD 0
 .RSs
 .IPs x,y
-logo top left corner position
+top left corner of the logo
 .IPs w,h
-cleared rectangle width and height
+width and height of the cleared rectangle
 .IPs t
 Thickness of the fuzzy edge of the rectangle (added to w and h).
 When set to -1, a green rectangle is drawn on the screen to
