@@ -68,7 +68,8 @@ int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   dp->pts = (spos - demuxer->movi_start)  / (float)(sh_audio->wf->nAvgBytesPerSec);
   dp->pos = (spos - demuxer->movi_start);
 
-  stream_read(demuxer->stream,dp->buffer,l);
+  l = stream_read(demuxer->stream,dp->buffer,l);
+  resize_demux_packet(dp, l);
   ds_add_packet(ds,dp);
 
   return 1;

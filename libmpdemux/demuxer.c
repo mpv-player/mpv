@@ -265,7 +265,8 @@ void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp){
 
 void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t pos,int flags){
     demux_packet_t* dp=new_demux_packet(len);
-    stream_read(stream,dp->buffer,len);
+    len = stream_read(stream,dp->buffer,len);
+    resize_demux_packet(dp, len);
     dp->pts=pts; //(float)pts/90000.0f;
     dp->pos=pos;
     dp->flags=flags;

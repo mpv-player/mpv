@@ -265,7 +265,8 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
   case WAV : {
     int l = sh_audio->wf->nAvgBytesPerSec;
     demux_packet_t*  dp = new_demux_packet(l);
-    stream_read(s,dp->buffer,l);
+    l = stream_read(s,dp->buffer,l);
+    resize_demux_packet(dp, l);
     priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + l/(float)sh_audio->i_bps;
     ds->pts = priv->last_pts - (ds_tell_pts(demux->audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
     ds_add_packet(ds,dp);
