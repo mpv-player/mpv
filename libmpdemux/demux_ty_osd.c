@@ -549,7 +549,7 @@ static void ty_DisplayXDSInfo()
    else
    {
       // We displayed that piece of XDS information long enough
-      // Lets move on
+      // Let's move on
       ty_XDSDisplayCount++;
       if ( ty_XDSDisplayCount >= XDS_DISPLAY_FRAMES )
       {

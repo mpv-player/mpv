@@ -556,7 +556,7 @@ static void drawTextureDisplay ()
     } /* for all texnumx */
   } /* for all texnumy */
 
-  /* YES - lets catch this error ... 
+  /* YES - let's catch this error ... 
    */
   (void) glGetError ();
 }

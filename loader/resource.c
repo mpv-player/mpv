@@ -354,7 +354,7 @@ INT WINAPI LoadStringW( HINSTANCE instance, UINT resource_id,
 	    return 0;
 	}
 #if 0
-	WARN("Dont know why caller give buflen=%d *p=%d trying to obtain string '%s'\n", buflen, *p, p + 1);
+	WARN("Don't know why caller give buflen=%d *p=%d trying to obtain string '%s'\n", buflen, *p, p + 1);
 #endif
     }
 

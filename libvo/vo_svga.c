@@ -475,7 +475,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 //we may try to set a bigger stride for video mode that will match the mpi->stride, 
 //this way we will transfer more data, but HW put_image can do it in backgraund!
 
-//now lets see how many pages we can use  
+//now let's see how many pages we can use  
   max_pages = modeinfo->maxpixels/(modeinfo->height * modeinfo->width);
   if(max_pages > MAXPAGES) max_pages = MAXPAGES;
   if(!vo_doublebuffering) max_pages=1;

@@ -780,8 +780,8 @@ for(i=0; i<32; i++){
         config->offsets[i] = config->offsets[i-1] + config->frame_size;
     
 	/*FIXME the left / top stuff is broken (= zoom a src rectangle from a larger one)
-		1. the framesize isnt known as the outer src rectangle dimensions arent known
-		2. the mach64 needs aligned addresses so it cant work anyway
+		1. the framesize isn't known as the outer src rectangle dimensions aren't known
+		2. the mach64 needs aligned addresses so it can't work anyway
 		   -> so we could shift the outer buffer to compensate that but that would mean
 		      alignment problems for the code which writes into it
 	*/

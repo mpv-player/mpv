@@ -275,7 +275,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
    XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
  /* set image size (which is indeed neither the input nor output size), 
-    if zoom is on it will be changed during draw_slice anyway so we dont dupplicate the aspect code here 
+    if zoom is on it will be changed during draw_slice anyway so we don't duplicate the aspect code here 
  */
  image_width=(width + 7) & (~7);
  image_height=height;

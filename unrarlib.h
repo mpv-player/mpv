@@ -61,7 +61,7 @@ extern "C"
 
 /*#define _USE_MEMORY_TO_MEMORY_DECOMPRESSION*/ /* read file from memory or a   */
                                             /* resource instead of reading  */
-                                            /* from a file. NOTE: you wont't*/
+                                            /* from a file. NOTE: you won't */
                                             /*  be able to decompress from  */
                                             /*  file if you enable this     */
                                             /*  option!                     */

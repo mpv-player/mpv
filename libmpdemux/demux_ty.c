@@ -387,7 +387,7 @@ int demux_ty_fill_buffer( demuxer_t *demux )
    if( demux->stream->eof ) return 0;
  
    // ======================================================================
-   // If we haven't figured out the size of the stream, lets do so
+   // If we haven't figured out the size of the stream, let's do so
    // ======================================================================
 #ifdef STREAMTYPE_STREAM_TY
    if ( demux->stream->type == STREAMTYPE_STREAM_TY )
@@ -532,7 +532,7 @@ int demux_ty_fill_buffer( demuxer_t *demux )
 		0x20000 ) );
 
 
-   // Lets make a Video Demux Stream for Mplayer
+   // Let's make a Video Demux Stream for Mplayer
    aid = 0x0;
    if( !demux->v_streams[ aid ] ) new_sh_video( demux, aid );
    if( demux->video->id == -1 ) demux->video->id = aid;

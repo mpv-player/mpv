@@ -408,13 +408,13 @@ static int init(int rate_hz, int channels, int format, int flags)
 
 	if ((tmp_device = snd_pcm_info_get_device(alsa_info)) < 0)
 	  {
-	    printf("alsa-init: cant get device\n");
+	    printf("alsa-init: can't get device\n");
 	    return(0);
 	  }
 
 	if ((tmp_subdevice = snd_pcm_info_get_subdevice(alsa_info)) < 0)
 	  {
-	    printf("alsa-init: cant get subdevice\n");
+	    printf("alsa-init: can't get subdevice\n");
 	    return(0);
 	  }
 	
@@ -423,7 +423,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
 	if ((err = snprintf(alsa_device, ALSA_DEVICE_SIZE, "hw:%1d,%1d", tmp_device, tmp_subdevice)) <= 0)
 	  {
-	    printf("alsa-init: cant wrote device-id\n");
+	    printf("alsa-init: can't write device-id\n");
 	  }
 
 	snd_pcm_info_free(alsa_info);

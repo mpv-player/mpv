@@ -23,7 +23,7 @@ typedef struct mp_osd_bbox_s {
 typedef struct mp_osd_obj_s {
     struct mp_osd_obj_s* next;
     unsigned char type;
-    unsigned char alignment; // 2 bits: x;y percents, 2 bits: x;y relative to parent; 2 bits: alignment left/right/center
+    unsigned char alignment; // 2 bits: x;y percentages, 2 bits: x;y relative to parent; 2 bits: alignment left/right/center
     unsigned short flags;
     int x,y;
     int dxs,dys;

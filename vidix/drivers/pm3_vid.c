@@ -196,7 +196,7 @@ int vixQueryFourcc(vidix_fourcc_t *to)
 #define FORMAT_VUY422	PM3VideoOverlayMode_COLORFORMAT_VUY422
 #define FORMAT_YUV422	PM3VideoOverlayMode_COLORFORMAT_YUV422
 
-/* Notice, have to check that we dont overflow the deltas here ... */
+/* Notice, have to check that we don't overflow the deltas here ... */
 static void
 compute_scale_factor(
     short* src_w, short* dst_w,

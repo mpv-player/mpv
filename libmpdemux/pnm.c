@@ -441,7 +441,7 @@ static void pnm_send_request(pnm_t *p, uint32_t bandwidth) {
 
   /* client id string */
   p->buffer[c]=PNA_CLIENT_STRING;
-  i16=BE_16D((strlen(client_string)-1)); /* dont know why do we have -1 here */
+  i16=BE_16D((strlen(client_string)-1)); /* don't know why do we have -1 here */
   memcpy(&p->buffer[c+1],&i16,2);
   memcpy(&p->buffer[c+3],client_string,strlen(client_string)+1);
   c=c+3+strlen(client_string)+1;
@@ -673,7 +673,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   }
 
   /* skip bytewise to next chunk.
-   * seems, that we dont need that, if we send enough
+   * seems, that we don't need that, if we send enough
    * keepalives
    */
   n=0;

@@ -5365,7 +5365,7 @@ if test "$_largefiles" = yes || freebsd ; then
 fi
 
 echocheck "ftello()"
-# if we dont have ftello map it to ftell
+# if we don't have ftello map it to ftell
 cat > $TMPC << EOF
 #include <stdio.h>
 int main (void) { ftello(stdin); return 0; }

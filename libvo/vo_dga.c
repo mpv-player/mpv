@@ -727,7 +727,7 @@ static uint32_t config( uint32_t width,  uint32_t height,
     return 1;
   }
   
-// now lets start the DGA thing 
+// now let's start the DGA thing 
 
  if ( !vo_config_count || width != prev_width || height != prev_height )
   {

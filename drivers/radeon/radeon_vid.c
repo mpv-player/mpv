@@ -88,7 +88,7 @@ static int mtrr __initdata = 1;
 static struct { int vram; int vram_valid; } smtrr;
 #endif
 MODULE_PARM(swap_fourcc, "i");
-MODULE_PARM_DESC(swap_fourcc, "Swap fourcc (dont't swap=0(default))");
+MODULE_PARM_DESC(swap_fourcc, "Swap fourcc (don't swap=0(default))");
 static int swap_fourcc __initdata = 0;
 
 #ifdef RAGE128

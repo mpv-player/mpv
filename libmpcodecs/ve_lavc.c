@@ -37,7 +37,7 @@ extern char* passtmpfile;
 #endif
 
 #if LIBAVCODEC_BUILD < 4641
-#error we dont support libavcodec prior to build 4641, get the latest libavcodec CVS
+#error we do not support libavcodec prior to build 4641, get the latest libavcodec CVS
 #endif
 
 #if LIBAVCODEC_BUILD < 4659

@@ -1486,7 +1486,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
         void *dst;
         int pitch;
 	
-	unlock(); // isnt it silly I have to unlock surface and than lock it again :-)
+	unlock(); // isn't it silly I have to unlock surface and then lock it again :-)
 	
 	if (frame) {
 		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch));

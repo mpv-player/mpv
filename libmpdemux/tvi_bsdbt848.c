@@ -795,7 +795,7 @@ if(ioctl(priv->dspfd, FIONREAD, &bytesavail) < 0)
     }
 
 /* When mencoder wants audio data, it wants data..
-   it wont go do anything else until it gets it :( */
+   it won't go do anything else until it gets it :( */
 
 if(bytesavail == 0) return FRAGSIZE;
 

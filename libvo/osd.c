@@ -240,7 +240,7 @@ void vo_draw_alpha_init(){
         fast_osd_16bpp_table[i]=((i>>3)<<11)|((i>>2)<<5)|(i>>3);
     }
 #endif
-//FIXME the optimized stuff is a lie for 15/16bpp as they arent optimized yet
+//FIXME the optimized stuff is a lie for 15/16bpp as they aren't optimized yet
 	if(verbose)
 	{
 #ifdef RUNTIME_CPUDETECT

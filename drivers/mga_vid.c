@@ -1518,7 +1518,7 @@ static int mga_vid_open(struct inode *inode, struct file *file)
 		// we are not using devfs, use the minor
 		// number to specify the card we are using
 
-		// we dont have that many cards
+		// we don't have that many cards
 		if(minor >= mga_cards_num)
 		 return(-ENXIO);
 

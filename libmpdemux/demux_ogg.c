@@ -322,7 +322,7 @@ static unsigned char* demux_ogg_read_packet(ogg_stream_t* os,ogg_packet* pack,vo
     {
        vorbis_info *vi = &((ov_struct_t*)context)->vi;
 
-       // When we dump the audio, there is no vi, but we dont care of timestamp in this case
+       // When we dump the audio, there is no vi, but we don't care of timestamp in this case
        int32_t blocksize = vorbis_packet_blocksize(vi,pack) / vi->channels;
        // Calculate the timestamp if the packet don't have any
        if(pack->granulepos == -1) {

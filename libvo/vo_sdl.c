@@ -564,7 +564,7 @@ static int sdl_close (void)
 		priv->surface=NULL;
 	}
 	
-	/* DONT attempt to free the fullscreen modes array. SDL_Quit* does this for us */
+	/* DON'T attempt to free the fullscreen modes array. SDL_Quit* does this for us */
 	
 	return 0;
 }

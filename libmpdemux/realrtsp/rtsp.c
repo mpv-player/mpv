@@ -571,7 +571,7 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
 #endif
         seq=1;
       }
-      /* lets make the server happy */
+      /* let's make the server happy */
       rtsp_put(s, "RTSP/1.0 451 Parameter Not Understood");
       rest=malloc(sizeof(char)*16);
       sprintf(rest,"CSeq: %u", seq);
@@ -633,7 +633,7 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
 
   s->server_state=RTSP_CONNECTED;
 
-  /* now lets send an options request. */
+  /* now let's send an options request. */
   rtsp_schedule_field(s, "CSeq: 1");
   rtsp_schedule_field(s, s->user_agent);
   rtsp_schedule_field(s, "ClientChallenge: 9e26d33f2984236010ef6253fb1887f7");

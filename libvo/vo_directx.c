@@ -249,7 +249,7 @@ static uint32_t Directx_CreateOverlay(uint32_t imgfmt)
 	      case DDERR_NODIRECTDRAWHW:
 		     {mp_msg(MSGT_VO, MSGL_ERR,"no directdraw hardware\n");break;}
 	      case DDERR_NOEMULATION:
-		     {mp_msg(MSGT_VO, MSGL_ERR,"cant emulate\n");break;}
+		     {mp_msg(MSGT_VO, MSGL_ERR,"can't emulate\n");break;}
 	      case DDERR_NOFLIPHW:
 		     {mp_msg(MSGT_VO, MSGL_ERR,"hardware can't do flip\n");break;}
 	      case DDERR_NOOVERLAYHW:

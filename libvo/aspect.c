@@ -64,7 +64,7 @@ void aspect(int *srcw, int *srch, int zoom){
 #ifdef ASPECT_DEBUG
     printf("aspect(0) no aspect forced!\n");
 #endif
-    return; // the user doesnt want to fix aspect
+    return; // the user doesn't want to fix aspect
   }
 #ifdef ASPECT_DEBUG
   printf("aspect(0) fitin: %dx%d zoom: %d screenaspect: %.2f\n",aspdat.scrw,aspdat.scrh,

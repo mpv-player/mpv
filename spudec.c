@@ -304,7 +304,7 @@ static void spudec_process_data(spudec_handle_t *this, packet_t *packet)
 
 /*
   This function tries to create a usable palette.
-  Is searchs how many non-transparent colors are used and assigns different
+  It determines how many non-transparent colors are used, and assigns different
 gray scale values to each color.
   I tested it with four streams and even got something readable. Half of the
 times I got black characters with white around and half the reverse.

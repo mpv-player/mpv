@@ -362,7 +362,7 @@ if (verbose) printf("DirectFB: Preinit entered\n");
         DFBCHECK (DirectFBCreate (&dfb));
         DFBCHECK (dfb->SetCooperativeLevel (dfb, DFSCL_FULLSCREEN));
 
-  // lets try to get YUY2 layer - borrowed from DirectFb examples
+  // let's try to get YUY2 layer - borrowed from DirectFb examples
 
      /* Enumerate display layers */
         DFBCHECK (dfb->EnumDisplayLayers( dfb, enum_layers_callback, &videolayer ));
@@ -1496,7 +1496,7 @@ static void draw_osd(void)
 		    framelocked=0;
 		};
 #endif
-		// lets clear blackborders
+		// let's clear blackborders
 		primary->SetColor(primary,0,0,0,0);
 		// top
 		primary->FillRectangle(primary,0,0,screen_width,yoffset);

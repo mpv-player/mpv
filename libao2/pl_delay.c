@@ -1,4 +1,4 @@
-/* Audio out plugin it doesnt't really do anything useful but serves
+/* Audio out plugin it doesn't really do anything useful but serves
    an example of how audio plugins work. It delays the output signal
    by the nuber of samples set by delay=n where n is the number of
    bytes.  

@@ -376,7 +376,7 @@ int cue_read_cue (char *in_cue_filename)
   tracks[nTracks].minute = sect;
 
 
-  /* lets calculate the start sectors and offsets */
+  /* let's calculate the start sectors and offsets */
   for(i = 0; i <= nTracks; i++)
   {
     tracks[i].start_sector = cue_msf_2_sector(tracks[i].minute,

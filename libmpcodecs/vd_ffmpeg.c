@@ -30,7 +30,7 @@ LIBVD_EXTERN(ffmpeg)
 #endif
 
 #if LIBAVCODEC_BUILD < 4641
-#error we dont support libavcodec prior to build 4641, get the latest libavcodec CVS
+#error we do not support libavcodec prior to build 4641, get the latest libavcodec CVS
 #endif
 
 #if LIBAVCODEC_BUILD < 4645
@@ -469,7 +469,7 @@ static int get_buffer(AVCodecContext *avctx, AVFrame *pic){
     mpi= mpcodecs_get_image(sh,type, flags,
 			(width+align)&(~align), (height+align)&(~align));
 
-    // ok, lets see what did we get:
+    // ok, let's see what did we get:
     if(  mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&
        !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// nice, filter/vo likes draw_callback :)
