@@ -68,9 +68,10 @@ qnx()     { issystem "QNX"     ; return "$?" ; }
 darwin()  { issystem "Darwin"  ; return "$?" ; }
 
 # arch test boolean functions
+# x86/x86pc is used by QNX
 x86() {
   case "$host_arch" in
-    i[3-9]86|x86*) return 0 ;;
+    i[3-9]86|x86|x86pc) return 0 ;;
     *) return 1 ;;
   esac
 }
@@ -128,6 +129,7 @@ Optional features:
   --enable-gif		 enable gif89a support [autodetect]
   --disable-tv           disable TV Interface (tv/dvb grabbers) [enable]
   --disable-tv-v4l       disable Video 4 Linux TV Interface support [autodetect]
+  --disable-tv-bsdbt848  disable BSD BT848 Interface support [autodetect]
   --disable-win32        disable Win32 DLL support [autodetect]
   --disable-dshow        disable DirectShow support [autodetect]
   --disable-xanim        disable XAnim DLL support [autodetect]
@@ -314,12 +316,17 @@ if test -z "$_target" ; then
       # Maybe uname -m (machine hardware name) returns something we
       # recognize.
 
+      # x86/x86pc is used by QNX
       case "`( uname -m ) 2>&1`" in
-      i[3-9]86|x86*) host_arch=i386 ;;
+      i[3-9]86|x86|x86pc) host_arch=i386 ;;
+      ia64) host_arch=ia64 ;;
+      x86_64) host_arch=x86_64 ;;
       ppc) host_arch=ppc ;;
       alpha) host_arch=alpha ;;
       sparc*) host_arch=sparc ;;
       arm*) host_arch=arm ;;
+      s390) host_arch=s390 ;;
+      s390x) host_arch=s390x ;;
       *) host_arch=UNKNOWN ;;
     esac
     ;;
@@ -540,8 +547,9 @@ EOF
 fi
 
 
+# x86/x86pc is used by QNX
 case "$host_arch" in
-  i[3-9]86|x86*)
+  i[3-9]86|x86|x86pc)
   _def_arch="#define ARCH_X86 1"
   _target_arch="TARGET_ARCH_X86 = yes"
   _def_words_endian="#undef WORDS_BIGENDIAN"
@@ -652,6 +660,26 @@ EOF
     echores "$proc"
     ;;
 
+  ia64)
+    _def_arch='#define ARCH_IA64 1'
+    _target_arch='TARGET_ARCH_IA64 = yes'
+    _def_words_endian='#undef WORDS_BIGENDIAN'
+    iproc='ia64'
+    proc=''
+    _march=''
+    _mcpu=''
+    ;;
+
+  x86_64)
+    _def_arch='#define ARCH_X86_64 1'
+    _target_arch='TARGET_ARCH_X86_64 = yes'
+    _def_words_endian='#undef WORDS_BIGENDIAN'
+    iproc='x86_64'
+    proc=''
+    _march=''
+    _mcpu=''
+    ;;
+
   sparc)
     _def_arch='#define ARCH_SPARC 1'
     _target_arch='TARGET_ARCH_SPARC = yes'
@@ -663,7 +691,7 @@ EOF
     ;;
 
   arm)
-    _def_arch="#define ARCH_ARM 1"
+    _def_arch='#define ARCH_ARM 1'
     _target_arch='TARGET_ARCH_ARM = yes'
     _def_words_endian='#undef WORDS_BIGENDIAN'
     iproc=arm
@@ -700,10 +728,30 @@ EOF
     ;;
 
   mips)
-    _def_arch="#define ARCH_SGI_MIPS 1"
-    _target_arch="TARGET_ARCH_SGI_MIPS = yes"
+    _def_arch='#define ARCH_SGI_MIPS 1'
+    _target_arch='TARGET_ARCH_SGI_MIPS = yes'
     _def_words_endian='#define WORDS_BIGENDIAN 1'
     iproc='sgi-mips'
+    proc=''
+    _march=''
+    _mcpu=''
+    ;;
+
+  s390)
+    _def_arch='#define ARCH_S390 1'
+    _target_arch='TARGET_ARCH_S390 = yes'
+    _def_words_endian='#define WORDS_BIGENDIAN 1'
+    iproc='390'
+    proc=''
+    _march=''
+    _mcpu=''
+    ;;
+
+  s390x)
+    _def_arch='#define ARCH_S390X 1'
+    _target_arch='TARGET_ARCH_S390X = yes'
+    _def_words_endian='#define WORDS_BIGENDIAN 1'
+    iproc='390x'
     proc=''
     _march=''
     _mcpu=''
@@ -1787,7 +1835,7 @@ fi
 
 echocheck "X11 libs"
 if test -z "$_ld_x11" ; then
-  for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib ; do
+  for I in /usr/X11R6/lib /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 ; do
     if test -d "$I" ; then
       _ld_x11="-L$I"
       echores "yes (using $I)"
@@ -4259,6 +4307,7 @@ You need to re-run ./configure and recompile after updating SDL.  If you are
 only interested in the libSDL audio drivers, then older version might work.
 
 Use --enable-sdl to force usage of libSDL.
+
 EOF
 fi
 
@@ -4270,6 +4319,7 @@ Failed to find a WIN32 codecs dir at $_win32libdir!
 Create it and copy the DLL files there! (You can get them from your windows
 directory or download them from:
   ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.zip
+
 EOF
     fi
   else
@@ -4282,6 +4332,7 @@ Failed to find a WIN32 codecs dir!
 Create it and copy the DLL files there! (You can get them from your windows
 directory or download them from:
   ftp://ftp.MPlayerHQ.hu/MPlayer/releases/w32codec.zip
+
 EOF
     fi
   fi
@@ -4290,6 +4341,7 @@ else
 NOTE: WIN32 codec DLLs are not supported on your CPU ($host_arch).
 You may encounter a few AVI files that cannot be played due to missing
 opensource video/audio codec support.
+
 EOF
 fi
 
@@ -4305,13 +4357,12 @@ EOF
 
 if test "$_vidix" = no ; then
 cat <<EOF
-You've disabled VIDIX. Although it would be better to PORT it instead.
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Also currently the only driver in VIDIX is for ATI Radeon and Rage128.
-Matrox G200/400 needs to be ported.
+You've disabled VIDIX. Although it would be better to PORT it instead,
+if you've got an ATI or Matrox card. Currently ATI Radeons, Rage128 and
+Matrox G200/400 are supported.
+
 EOF
 fi
 
 # Last move:
 rm -f "$TMPO" "$TMPC" "$TMPS" "$TMPCPP"
-
