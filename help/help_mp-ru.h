@@ -1,6 +1,6 @@
 /* Translated by:  Nick Kurshev <nickols_k@mail.ru>,
  *		Dmitry Baryshkov <lumag@qnc.ru>
-   Was synced with help_mp-en.h: rev 1.89
+   Was synced with help_mp-en.h: rev 1.97
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -574,6 +574,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "Корейская кодировка (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Тайская кодировка (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Кириллица Windows (CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Славянский/Центрально европейский Windows (CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Не масштабировать"
 #define MSGTR_PREFERENCES_FontPropWidth "Пропорционально ширине фильма"
 #define MSGTR_PREFERENCES_FontPropHeight "Пропорционально высоте фильма"
