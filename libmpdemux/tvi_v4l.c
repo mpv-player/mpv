@@ -1169,10 +1169,7 @@ static void *video_grabber(void *data)
     int fsize = priv->bytesperline * priv->height;
     int i;
     int first = 1;
-
-    int dropped = 0;
-    double dropped_time = 0.0;
-    double drop_delta = 0.0;
+    int framecount;
 
     /* start the capture process */
     if (ioctl(priv->video_fd, VIDIOCMCAPTURE, &priv->buf[0]) == -1)
@@ -1186,9 +1183,16 @@ static void *video_grabber(void *data)
     prev_interval = 0.0;
     prev_skew = 0.0;
 
-    for (;!priv->shutdown;)
+    for (framecount = 0; !priv->shutdown;)
     {
-	for (i = 0; i < priv->nbuf && !priv->shutdown; i++) {
+	for (i = 0; i < priv->nbuf && !priv->shutdown; i++, framecount++) {
+
+	    if (priv->immediate_mode) {
+		while ((priv->video_tail+1) % priv->video_buffer_size == priv->video_head) {
+		    usleep(10000);
+		}
+	    }
+		
 	    frame = i;
 	    nextframe = (i+1)%priv->nbuf;
 	    
@@ -1215,7 +1219,11 @@ static void *video_grabber(void *data)
 		interval = 0.0;
 		first = 0;
 	    } else {
-		interval = curtime.tv_sec + curtime.tv_usec*.000001 - priv->starttime;
+		if (!priv->immediate_mode) {
+		    interval = curtime.tv_sec + curtime.tv_usec*.000001 - priv->starttime;
+		} else {
+		    interval = (double)framecount/priv->fps;
+		}
 
 		if (!priv->immediate_mode && (
 			(interval - prev_interval < 1.0/priv->fps*0.85)
@@ -1246,29 +1254,16 @@ static void *video_grabber(void *data)
 	    prev_interval = interval;
 	    
 	    if ((priv->video_tail+1) % priv->video_buffer_size == priv->video_head) {
-
 		if (!priv->immediate_mode) {
 		    mp_msg(MSGT_TV, MSGL_ERR, "\nvideo buffer full - dropping frame\n");
-		} else {
-		    if (!dropped) {
-			dropped = 1;
-			dropped_time = interval - skew;
-		    }
 		}
 	    } else {
 		if (priv->immediate_mode) {
-		    if (dropped) {
-			drop_delta += interval - skew - dropped_time;
-			dropped = 0;
-		    }
+		    priv->video_timebuffer[priv->video_tail] = interval;
+		} else {
 		    // compensate for audio skew
 		    // negative skew => there are more audio samples, increase interval
 		    // positive skew => less samples, shorten the interval
-		    
-		    // for TV, we pretend that dropped frames never existed
-		    // without this, mplayer gets confused after pressing pause
-		    priv->video_timebuffer[priv->video_tail] = interval - skew - drop_delta;
-		} else {
 		    priv->video_timebuffer[priv->video_tail] = interval - skew;
 		}
 		
