@@ -1381,7 +1381,7 @@ static void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
 #else
 	cs = (*(struct CRITSECT**)c);
 #endif
-	printf("Win32 Warning: Accessed uninitialized Critical Section (%p)!\n", c);
+	dbgprintf("Win32 Warning: Accessed uninitialized Critical Section (%p)!\n", c);
     }
     if(cs->locked)
 	if(cs->id==pthread_self())
@@ -1402,7 +1402,7 @@ static void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
     dbgprintf("LeaveCriticalSection(0x%x) 0x%x\n",c, cs);
     if (!cs)
     {
-	printf("Win32 Warning: Leaving uninitialized Critical Section %p!!\n", c);
+	dbgprintf("Win32 Warning: Leaving uninitialized Critical Section %p!!\n", c);
 	return;
     }
     if (cs->locked)
@@ -1411,7 +1411,7 @@ static void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
 	pthread_mutex_unlock(&(cs->mutex));
     }
     else
-	printf("Win32 Warning: Unlocking unlocked Critical Section %p!!\n", c);
+	dbgprintf("Win32 Warning: Unlocking unlocked Critical Section %p!!\n", c);
     return;
 }
 
@@ -1429,13 +1429,13 @@ static void WINAPI expDeleteCriticalSection(CRITICAL_SECTION *c)
 
     if (!cs)
     {
-	printf("Win32 Warning: Deleting uninitialized Critical Section %p!!\n", c);
+	dbgprintf("Win32 Warning: Deleting uninitialized Critical Section %p!!\n", c);
 	return;
     }
     
     if (cs->locked)
     {
-	printf("Win32 Warning: Deleting unlocked Critical Section %p!!\n", c);
+	dbgprintf("Win32 Warning: Deleting unlocked Critical Section %p!!\n", c);
 	pthread_mutex_unlock(&(cs->mutex));
     }
 
