@@ -192,7 +192,7 @@
       <LI><A HREF=#2.6.2>2.6.2 Verwendung</A></LI>
       <LI><A HREF=#2.6.3>2.6.3 Schneiden (crop)</A></LI>
       <LI><A HREF=#2.6.4>2.6.4 Erweitern (expand)</A></LI>
-      <LI><A HREF=#2.6.5>2.6.5 Fame</A></LI>
+      <LI><A HREF=#2.6.5>2.6.5 Fame/Lavc</A></LI>
       <LI><A HREF=#2.6.6>2.6.6 Spiegeln (flip)</A></LI>
       <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
       <LI><A HREF=#2.6.8>2.6.8 Nachbearbeiten (postprocess)</A></LI>
@@ -200,7 +200,9 @@
       <LI><A HREF=#2.6.10>2.6.10 Drehen (rotate)</A></LI>
       <LI><A HREF=#2.6.11>2.6.11 Skalieren (scale)</A></LI>
       <LI><A HREF=#2.6.12>2.6.12 YUY2</A></LI>
-      <LI><A HREF=#2.6.13>2.6.13 Lavc</A></LI>
+      <LI><A HREF=#2.6.13>2.6.13 Spiegeln (mirror)</A></LI>
+      <LI><A HREF=#2.6.14>2.6.14 DVBscale</A></LI>
+      <LI><A HREF=#2.6.15>2.6.15 Cropdetect</A></LI>
     </UL>
   </UL>
   <LI><A HREF="#3">3. Verwendung</A></LI>
@@ -409,8 +411,7 @@ es zahlt sich aus.</P>
     Dies ist normalerweise nicht so wichtig.</LI>
   <LI><B>SDL</B> - es ist nicht vorgeschrieben, aber es ist hilfreich in einigen Fällen 
     (schlechter Ton oder Videokarten, welche mit Probleme mit dem Xv-Treiber haben).
-    Verwende immer die aktuellste Version (beginnend bei 1.2.x). Kann auch <B>Untertitel unter
-    dem Film (auf dem schwarzen Streifen)</B> darstellen.</LI>
+    Verwende immer die aktuellste Version (beginnend bei 1.2.x).</LI>
   <LI><B>libjpeg</B> - optionaler (M)JPEG Decoder, benutzt bei -mf und einigen qt mov Dateien. 
     Sowohl für <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
   <LI><B>libpng</B> - empfohlen und standard (M)PNG Decoder. Benötigt für das GUI.
@@ -616,7 +617,7 @@ Es wäre für jeden ein einfacher Weg Root zu werden.</LI>
     make install</PRE>
 
 <P>Ab diesem Zeitpunkt ist <B>MPlayer</B> zur Benutzung bereit. Das Verzeichnis
-<CODE>/usr/local/share/mplayer</CODE> enthält die <CODE>codecs.conf</CODE>
+<CODE>$PREFIX/share/mplayer</CODE> enthält die <CODE>codecs.conf</CODE>
 Datei, welche benutzt wird um dem Programm alle Codecs und deren Möglichkeiten zu sagen.
 Diese Datei sollte zusammen mit dem Hauptprogramm immer aktuell gehalten werden!<BR>
 Es sollte ausserdem überprüft werden, ob eine codecs.conf in dem Home-Verzeichnis 
@@ -644,8 +645,8 @@ für Details zu lesen.</P>
 
 <PRE>    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
-    unzip mp_arial-iso-8859-1.zip</PRE>
-
+    unzip mp_arial-iso-8859-1.zip
+    ln -s ~/.mplayer/font/arial-24 font</PRE>
 
 <P><B><A NAME=1.4>1.4. Was ist mit dem GUI?</A></B></P>
 
@@ -655,7 +656,7 @@ Um MPlayer im GUI-Modus zu betreiben kannst du entweder
 <UL>
   <LI>die <CODE>-gui</CODE> Option verwenden</LI>
   <LI><CODE>gui=yes</CODE> in deine Config-File eintragen</LI>
-  <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> ausführen 
+  <LI><CODE>ln -s $PREFIX/bin/mplayer $PREFIX/bin/gmplayer</CODE> ausführen 
   und <CODE>gmplayer</CODE> aufrufen.
 </UL>
 </P>
@@ -665,7 +666,7 @@ gleichzeitig) um ein GTK-Menu  mit DVD Wiedergabeoptionen zu öffnen!</P>
 
 <P>Da <B>MPlayer</B> keine Skins enthält musst du dir welche downloaden, wenn du
 das GUI verwenden willst. Schau dazu auf die <A HREF="http://www.mplayerhq.hu/homepage/dload.html">Download-Seite</A>.
-Diese sollten in das normale, systemweite Verzeichnis (<CODE>/usr/local/share/mplayer/Skin</CODE>)
+Diese sollten in das normale, systemweite Verzeichnis (<CODE>$PREFIX/share/mplayer/Skin</CODE>)
 oder nach <CODE>$HOME/.mplayer/Skin</CODE> extrahiert werden. <B>Mplayer</B>
 sucht standardmäßig nach einem Verzeichnis namens <I>default</I>, aber du kannst
 mit der Option <I>-skin (neuer Skin)</I> oder dem Eintrag <I>skin=(neuer Skin)</I> in
@@ -795,7 +796,7 @@ zu konvertieren (lese TOOLS/subfont-c/README für Details)
 <CODE>$PREFIX/share/mplayer</CODE>. Dann benennst du eine davon um oder erstellst 
 einen symbolischen Links zu <CODE>font</CODE> (wie z.B. : <CODE>ln -s ~/.mplayer/arial-24 
 ~/.mplayer/font</CODE>). Nun musst du die Zeit im oberen, linken Ecke des Films sehen (kann
-man mit 'o' ausschalten).</P>
+man mit der Taste "o" ausschalten).</P>
 
 <P>Das OSD hat 3 Anzeigearten: (Wechsel mit 'o')<BR>
 <UL>
@@ -825,10 +826,15 @@ in der Konfigurationsdatei einstellen.</P>
 
 <P><A NAME=2.5><B>2.5. TV input</B></P>
 
+
 <A NAME=2.5.1><P><B><I>2.5.1.  Übersicht</I></B></P>
 
 <P>Dieser Teil der Docs zeigt wie man <B>das Sehen/Grabben über einen V4L-kompatiblen
 TV-Tuner ermöglicht</B>.</P>
+
+<P><B>DER CODE WIRD MOMENTAN NICHT WEITERENTWICKELT! Es ist kein reibungsloser Ablauf ohne
+  Bearbeiten/Experimentieren zu erwarten!</B></P>
+
 
 <A NAME=2.5.2><P><B><I>2.5.2.  Kompilierung</I></B></P>
 
@@ -999,6 +1005,10 @@ Eingabe von Standard-V4L<BR>
   ausgeführte Filter sein wird (danach kommt libvo oder, wenn <B>MEncoder</B> verwendet
   wird, encoding).</P>
 
+<P>Um eine Liste aller verfügbaren Videofilter zu erhalten, kann folgender Befehl
+  verwendet werden:<BR>
+  <CODE>mplayer -vop help</CODE></P>
+
 
 <A NAME=2.6.3><P><B><I>2.6.3.  Schneiden (crop)</I></B></P>
 
@@ -1026,15 +1036,17 @@ Eingabe von Standard-V4L<BR>
 
 <P><CODE>&nbsp;&nbsp;-vop expand[=höhe:breite:x:y]</CODE></P>
 
-<A NAME=2.6.5><P><B><I>2.6.5.  Fame</I></B></P>
+<A NAME=2.6.5><P><B><I>2.6.5.  Fame/Lavc</I></B></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
-<P>Echtzeit MPEG1-Konvertierer (um mit DVB/DXR3 benutzt zu werden).</P>
+<P>Echtzeit MPEG1-Konvertierer (unter Verwendung von libfame oder libavcodec) (um mit DVB/DXR3 benutzt zu werden).</P>
 
 <P><B><U>Verwendung</U></B>:</P>
 
 <P><CODE>&nbsp;&nbsp;-vop fame</CODE></P>
+
+<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
 
 
 <A NAME=2.6.6><P><B><I>2.6.6.  Spiegeln (flip)</I></B></P>
@@ -1132,15 +1144,38 @@ bilder wiedergeben können (diese werden automatisch erkannt).</P>
 <P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
 
 
-<A NAME=2.6.13><P><B><I>2.6.13.  Lavc</I></B></P>
+<A NAME=2.6.13><P><B><I>2.6.13.  Spiegeln (mirror)</I></B></P>
 
 <P><B><U>Beschreibung</U></B>:</P>
 
-<P>Echtzeit MPEG1-Konvertierer (um mit DVB/DXR3 verwendet zu werden).</P>
+<P>Spiegelt das Bild der in Y-Achsenrichtung.</P>
 
 <P><B><U>Verwendung</U></B>:</P>
 
-<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
+<P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
+
+
+<A NAME=2.6.14><P><B><I>2.6.14.  DVBscale</I></B></P>
+
+<P><B><U>Beschreibung</U></B>:</P>
+
+<P>Berechnet die Y-Skalierung für DVB Karten.</P>
+
+<P><B><U>Verwendung</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
+
+
+<A NAME=2.6.15><P><B><I>2.6.15.  Cropdetect</I></B></P>
+
+<P><B><U>Beschreibung</U></B>:</P>
+
+<P>Berechnet die benötigten Parameter zum Schneiden (crop). Die empfohlene
+  -vop Option wird ausgegeben (stdout).</P>
+
+<P><B><U>Verwendung</U></B>:</P>
+
+<P><CODE>&nbsp;&nbsp;-vop cropdetect</CODE></P>
 
 
 <P><B><A NAME=3>3. Verwendung</A></P></B>
@@ -1239,8 +1274,8 @@ zu steuern.</P>
 
 <P><B><A NAME=3.2.2>3.2.2. Steuerungskonfiguration</A></B></P>
 
-<P>MPlayer erlaubt dir eine beliebige Taste auf ein MPlayer-Befehl festzulegen unter Verwendung einer
-einfachen Konfigurationsdatei. Die Syntax besteht aus einem Tastennamen gefolgt von einem Befehl.
+<P><B>MPlayer</B> erlaubt dir eine beliebige Taste auf ein Befehl von <B>MPlayer</B> festzulegen unter Verwendung
+einer einfachen Konfigurationsdatei. Die Syntax besteht aus einem Tastennamen gefolgt von einem Befehl.
 Die standard Konfigurationsdatei befindet sich in <CODE>$HOME/.mplayer/input.conf</CODE>, kann jedoch
 durch die <CODE>-input conf</CODE> überschrieben werden (relative Pfade sind relativ zu <CODE>$HOME/.mplayer</CODE>).
 <P>

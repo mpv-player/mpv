@@ -92,8 +92,8 @@ besitzen. Wenn dies das erst Mal ist das du davon hörst, solltest du einige Guid
 <P>Dieses Beispiel zeigt dir, wie du eine DVD in ein 2-Pass DivX4 AVI encodierst. Nur 2 Befehle sind erforderlich:<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - Lösche diese Datei, welche von einer früheren 
   Encodierung kommen kann (Sie führt zu einem Konflikt mit der momentanen)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100 -o film.avi -pass 1</CODE><BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -divx4opts br=1100 -o film.avi -pass 2</CODE>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:mehr_optionen -o film.avi -pass 1</CODE><BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:mehr_optionen -o film.avi -pass 2</CODE>
 </P>
 
 <P><U><B>3-pass Encodierung :</B></U> Dies ist eine Erweiterung der 2-Pass Encodierung, 
@@ -123,7 +123,7 @@ besitzen. Wenn dies das erst Mal ist das du davon hörst, solltest du einige Guid
   <TR>
     <TD><FONT CLASS="text">
       <CODE>mencoder &lt;datei/DVD&gt; -oac copy -pass 1
-        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
     <TD><FONT CLASS="text">
       <B><U>Zweiter Durchlauf</U> : Integriert den ersten Durchlauf der DivX4 Video-Encodierung. 
       Optional kann die Video-Bitrate, welche am Ende des letzten Durchlaufes gezeigt wurde, 
@@ -132,7 +132,7 @@ besitzen. Wenn dies das erst Mal ist das du davon hörst, solltest du einige Guid
   <TR>
     <TD><FONT CLASS="text">
       <CODE>mencoder &lt;datei/DVD&gt; -oac copy -pass 2
-        -divx4opts br=&lt;bitrate&gt;</CODE></TD>
+        -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
     <TD><FONT CLASS="text">
       <B><U>Dritter Durchlauf</U> : Integriert den zweiten Durchlauf der DivX4 Video Encodierung. 
       Optional kann die Video-Bitrate, welche am Ende des letzten Durchlaufes gezeigt wurde, 
@@ -150,9 +150,9 @@ besitzen. Wenn dies das erst Mal ist das du davon hörst, solltest du einige Guid
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -ovc frameno
   -o frameno.avi</CODE><BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -divx4opts br=1100 -oac copy -o film.avi -pass 1</CODE><BR>
+  -lavcopts vcodec=mpeg4:mehr_optionen -oac copy -o film.avi -pass 1</CODE><BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2
-  -divx4opts br=1100 -oac copy -o film.avi -pass 2</CODE>
+  -lavcopts vcodec=mpeg4:mehr_optionen -oac copy -o film.avi -pass 2</CODE>
 </P>
 
 <P><U><B>2 oder 3-pass Encodierung unter Benutzung des internen libavcodec Kontrollers</B></U> :
@@ -162,14 +162,14 @@ besseren endgültigen Genauigkeitrate führt als bei der Benutzung des externen, D
 <UL>
 <B>2-pass Encodierung</B>:<BR>
 <CODE>rm -f lavc_stats.txt<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 (Audio-Optionen) -o film.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 (Audio-Optionen) -o film.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=1 (Audio-Optionen) -o film.avi<BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=2 (Audio-Optionen) -o film.avi</CODE><BR>
 <BR>
 <B>3-pass Encodierung</B>:<BR>
 <CODE>rm -f frameno.avi lavc_stats.txt<BR>
 mencoder -dvd 2 -ovc frameno (Audio-Optionen) -o frameno.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=1 -oac copy -o film.avi<BR>
-mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o film.avi</CODE><BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=1 -oac copy -o film.avi<BR>
+mencoder -dvd 2 -ovc lavc -lacvopts vcodec=mpeg4:vpass=2 -oac copy -o film.avi</CODE><BR>
 </UL>
 </P>
 
@@ -190,7 +190,7 @@ mencoder -dvd 2 -ovc lavc -lacvopts vpass=2 -oac copy -o film.avi</CODE><BR>
   fast bilinear.</P>
 
 <P>Verwendung:<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder beispiel-svcd.mpg -divx4opts br=1300 -vop scale=640:480 -sws 2 -o ausgabe.avi</CODE></P>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder beispiel-svcd.mpg -lavcopts vcodec=mpeg4:mehr_optionen -vop scale=640:480 -sws 2 -o ausgabe.avi</CODE></P>
 
 <P><B><A NAME=2.4.3.3>2.4.3.3.  Stream-Copy</B></P>
 
@@ -365,8 +365,8 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
 </TR>
 <TR>
   <TD><FONT CLASS="text">
-    <I>-mf</I>Optionen für mehrere Eingangsdateien</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <I>-mf</I> Optionen für mehrere Eingangsdateien</TD>
+  <TD><FONT CLASS="text">
     Wenn von mehreren JPEG-Dateien konvertiert wird, kann man folgende Unteroptionen
     angeben:<BR>
     &nbsp;&nbsp;<B>on</B> - aktiviert die Unterstützung für mehrere Eingangsdateien<BR>
@@ -427,19 +427,19 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
 <P>Die Verwendung von <B>MEncoder</B> ist das Einfachste auf das Erde. Siehe folgendes:</P>
 
 <P>Encodierung von DVD, Titel 2:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o titel2.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mpeg4:mehr_optionen -o titel2.avi</CODE></P>
 
 <P>Das gleiche, aber mit der libavcodec Familie, MJPEG Kompression :<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts vcodec=mjpeg</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -lavcopts vcodec=mjpeg:mehr_optionen -ffourcc mjpg -o titel2.avi</CODE></P>
 
 <P>Encodierung von DVD, Title 2, mit Rescaling:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -o titel2.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -vop scale=640:480 -sws 2 -lavcopts vcodec=mpeg4:mehr_optionen -o titel2.avi</CODE></P>
 
 <P>Encodierung von HTTP:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/beispiel.avi  -o  beispiel.avi</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder http://mplayer.hq/beispiel.avi -lavcopts vcodec=mpeg4:mehr_optionen -o beispiel.avi</CODE></P>
 
 <P>Encodierung von Pipe:<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -</CODE></P>
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rar p test-SVCD.rar | mencoder -lavcopts vcodec=mpeg4:mehr_optionen -ofps 24 -pass 1 -- -</CODE></P>
 
 <P>Encodierung von mehreren *.vob-Dateien:<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;cat *.vob | mencoder &lt;options&gt; -</CODE></P>

@@ -36,7 +36,7 @@ Vermutlich gibt es keine solche Datei oder kein solches Verzeichnis.
 Was ist das Problem mit gcc 2.96?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 <B><I>Es wird sehr davon abgeraten, den gcc 2.96 zu gebrauchen!!!</I></B><BR>
-Lies <A HREF="gcc-2.96-3.0.html">hier</A> und <A HREF="../users_against_developers.html">hier (Englisch)</A>!
+Lies <A HREF="../users_against_developers.html">dieses</A> Dokument (Englisch) für Details!
 Wenn du es aber trotzdem wirklich willst, stelle sicher das du eine der neuesten Versionen verwendest.
 Bedenke aber, dass du auf dich alleine gestellt bist. Sende <B>keine</B> Meldungen oder Bugs und
 frag in der Mailingliste nicht um Hilfe. Wir werden sie <B>nicht</B> zur Verfügung stellen, noch
@@ -47,7 +47,7 @@ Unterstützung bei Problemen anbieten.
 Großartig, ich habe gcc 3.0.1 von Red Hat/Mandrake, dann ist alles fein!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 Nein. Auch damit gibt/gab es Probleme. <BR>
-Verwende die 2.95.x Serie, diese sind zuverlässiger (auf keine Fall <A HREF="gcc-2.96-3.0.html">2.96</A>).
+Verwende die 2.95.x Serie, diese sind zuverlässiger (auf keine Fall <A HREF="../users_against_developers.html#gcc">2.96</A>).
 Wenn du wirklich 3.0.x verwenden willst, verwende immer die neuere Version.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -111,8 +111,8 @@ Geld verdienen und ein großes Haus kaufen, usw. usw.  Willst du das wirklich? Es
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Wo kann ich Informationen über die Bugs von gcc 2.96 erhalten?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-In <A HREF="gcc-2.96-3.0.html">diesem</A> und <A HREF="users_against_developers.html">diesem</A>
-Dokument kannst du noch nachlesen warum Red Hat 2.96 herausgebracht hat und andere intessante Dinge.
+<A HREF="../users_against_developers.html">Dieses</A>
+Dokument (Englisch) beschreibt, warum Red Hat 2.96 herausgebracht hat und andere intessante Dinge.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 					
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -279,7 +279,7 @@ zu spielen und die Geschwindigkeit ist die Video-Ausgabe ...
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Ich habe Fehlermeldunge über "file not found <CODE>/usr/lib/win32/</CODE> ..."
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Downloade und installiere die <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.60.tar.bz2">Win32 Codecs</A>
+Downloade und installiere die <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.90.tar.bz2">Win32 Codecs</A>
 von <B>unserem</B> FTP Server (avifiles Codec-Paket hat unterschiedliche DLLs).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -359,12 +359,11 @@ Sektion</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Das GUI kann nicht mir icewm verwendet werden, denn ein Button ist über der Filmausgabe!
+Icewm's Taskbar bleibt im Vollbildschirm-Modus ständig über der Filmausgabe!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Ein bekanntes Problem mit icewm. Es ist von unserer seite her unlösbar. Im Detail:
-Icewm's Taskbar überschreibt die Angaben für die Festergrößenänderung. 
-Wenn eine Änderung auf 800x600 gewünscht wird, ändert icewm die Fenstergrösse 
-auf 800x(600-Taskbar-Größe). 
+Die Taskbar kann von keinem Fenster überschrieben werden, es sei denn man fügt folgende
+Zeile zu <CODE>~/.icewm/preferences</CODE> dazu:<BR>
+<CODE>TaskBarKeepBelow=1</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -594,22 +593,6 @@ verwenden.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Wenn ich Xvideo verwende kann ich keine DivX-AVIs mit meiner Voodoo 3/Banshee abspielen!
-MPlayer meldet:<BR>
-...<BR>
-<CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
-Xvideo image format: 0x30323449 (I420) planar</CODE><BR>
-...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A1:</TD><TD><FONT CLASS="text">
-Siehe vorherige Antwort.
-</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A2:</TD><TD><FONT CLASS="text">
-Seit 0.18pre4 unterstützet <B>MPlayer</B> libavcodec vom FFmpeg-Paket. Es enthält
-eine C-spachigen DivX und OpenDivX Dekoder. Der DivX Dekoder verwendet YV12
-Format für die Ausgabe, dies sollte also bei dir funktionieren.
-Kompliere als libavcodec in dein <B>MPlayer</B>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 OpenGL (<CODE>-vo gl</CODE>)-Ausgabe funktioniert nicht (aufhängen/schwarzes Fenster/X11-Fehler/ ...).
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 Dein OpenGL-Treiber unterstützt keine "Dynamic Texture Changes" (glTexSubImage)
@@ -662,17 +645,7 @@ machen ... Hinweis: Du kannst Xv via SDL mit den Optionen <CODE>-forcexv<CODE> u
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Gibt es eine Möglichkeit RealMedia Filme mit MPlayer abzuspielen?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Es gibt keinen Weg, um dies zu ermöglichen. Darum verdient es dieses Format in
-Flammen zu sterben. Theoretisch kann du die Real-Codes für Linux
-(welche als .so-Dateien verfügbar sind) rückwärtskompilieren, aber in der Praxis
-ist es sehr schwierig, auch wenn du weisst, wie der Kompiler, der von Real
-verwendet wurde, den Assembler Code erzeugt.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Ich möchte gerne 1 Frames nach vor oder zurück springen anstatt von 10 Sekunden.
+Ich möchte gerne 1 Frames vorwärts oder rückwärts springen anstatt den 10 Sekunden.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 Dies ist nicht implementiert. Es war bereits implementiert, aber es funktionierte nicht mit dem A/V Sync.
 Implementiere es und send uns einen Patch ... aber frag nicht danach.
