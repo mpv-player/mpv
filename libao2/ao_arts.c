@@ -15,6 +15,7 @@
 #include "afmt.h"
 #include "../config.h"
 #include "../mp_msg.h"
+#include "../help_mp.h"
 
 #define OBTAIN_BITRATE(a) (((a != AFMT_U8) && (a != AFMT_S8)) ? 16 : 8)
 
@@ -45,10 +46,10 @@ static int init(int rate_hz, int channels, int format, int flags)
 	int frag_spec;
 
 	if( (err=arts_init()) ) {
-		mp_msg(MSGT_AO, MSGL_ERR, "AO: [arts] %s\n", arts_error_text(err));
+		mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ARTS_CantInit, arts_error_text(err));
 		return 0;
 	}
-	mp_msg(MSGT_AO, MSGL_INFO, "AO: [arts] Connected to sound server\n");
+	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_ARTS_ServerConnect);
 
 	/*
 	 * arts supports 8bit unsigned and 16bit signed sample formats
@@ -79,7 +80,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	stream=arts_play_stream(rate_hz, OBTAIN_BITRATE(format), channels, "MPlayer");
 
 	if(stream == NULL) {
-		mp_msg(MSGT_AO, MSGL_ERR, "AO: [arts] Unable to open a stream\n");
+		mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ARTS_CantOpenStream);
 		arts_free();
 		return 0;
 	}
@@ -90,11 +91,11 @@ static int init(int rate_hz, int channels, int format, int flags)
 	frag_spec = ARTS_PACKET_SIZE_LOG2 | ARTS_PACKETS << 16;
 	arts_stream_set(stream, ARTS_P_PACKET_SETTINGS, frag_spec);
 	ao_data.buffersize = arts_stream_get(stream, ARTS_P_BUFFER_SIZE);
-	mp_msg(MSGT_AO, MSGL_INFO, "AO: [arts] Stream opened\n");
+	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_ARTS_StreamOpen);
 
-	mp_msg(MSGT_AO, MSGL_INFO,"AO: [arts] buffer size: %d\n",
+	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_ARTS_BufferSize,
 	    ao_data.buffersize);
-	mp_msg(MSGT_AO, MSGL_INFO,"AO: [arts] packet size: %d\n",
+	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_ARTS_BufferSize,
 	    arts_stream_get(stream, ARTS_P_PACKET_SIZE));
 
 	return 1;

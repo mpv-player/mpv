@@ -11,6 +11,8 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
+#include "../mp_msg.h"
+#include "../help_mp.h"
 
 static ao_info_t info = 
 {
@@ -31,7 +33,7 @@ static int queue_size;
 // to set/get/query special features/parameters
 static int control(int cmd, void *arg){
   
-  printf("ao_sgi, control\n");
+  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_INFO);
   
   return -1;
 }
@@ -40,7 +42,7 @@ static int control(int cmd, void *arg){
 // return: 1=success 0=fail
 static int init(int rate, int channels, int format, int flags) {
   
-  printf("ao_sgi, init: Samplerate: %iHz Channels: %s Format %s\n", rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
+  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_InitInfo, rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
   
   { /* from /usr/share/src/dmedia/audio/setrate.c */
   
@@ -51,7 +53,7 @@ static int init(int rate, int channels, int format, int flags) {
 
     rv = alGetResourceByName(AL_SYSTEM, "out.analog", AL_DEVICE_TYPE);
     if (!rv) {
-      printf("ao_sgi, play: invalid device\n");
+      mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InvalidDevice);
       return 0;
     }
     
@@ -63,20 +65,19 @@ static int init(int rate, int channels, int format, int flags) {
     x[1].value.i = AL_CRYSTAL_MCLK_TYPE;
 
     if (alSetParams(rv,x, 2)<0) {
-      printf("ao_sgi, init: setparams failed: %s\n", alGetErrorString(oserror()));
-      printf("ao_sgi, init: could not set desired samplerate\n"); 
+      mp_msg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantSetParms_Samplerate, alGetErrorString(oserror()));
     }
     
     if (x[0].sizeOut < 0) {
-      printf("ao_sgi, init: AL_RATE was not accepted on the given resource\n");
+      mp_msg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantSetAlRate);
     }
 
     if (alGetParams(rv,x, 1)<0) {
-      printf("ao_sgi, init: getparams failed: %s\n", alGetErrorString(oserror()));
+      mp_msg(MSGT_AO, MSGL_WARN, MSGTR_AO_SGI_CantGetParms, alGetErrorString(oserror()));
     }
     
     if (frate != alFixedToDouble(x[0].value.ll)) {
-      printf("ao_sgi, init: samplerate is now %lf (desired rate is %lf)\n", alFixedToDouble(x[0].value.ll), frate);
+      mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_SampleRateInfo, alFixedToDouble(x[0].value.ll), frate);
     } 
     sample_rate = (int)frate;
   }
@@ -88,7 +89,7 @@ static int init(int rate, int channels, int format, int flags) {
   ao_config = alNewConfig();
   
   if (!ao_config) {
-    printf("ao_sgi, init: %s\n", alGetErrorString(oserror()));
+    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitConfigError, alGetErrorString(oserror()));
     return 0;
   }
   
@@ -100,14 +101,14 @@ static int init(int rate, int channels, int format, int flags) {
   alSetQueueSize(ao_config, 48000);
   
   if (alSetDevice(ao_config, AL_DEFAULT_OUTPUT) < 0) {
-    printf("ao_sgi, init: %s\n", alGetErrorString(oserror()));
+    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitConfigError, alGetErrorString(oserror()));
     return 0;
   }
   
   ao_port = alOpenPort("mplayer", "w", ao_config);
   
   if (!ao_port) {
-    printf("ao_sgi, init: Unable to open audio channel: %s\n", alGetErrorString(oserror()));
+    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SGI_InitOpenAudioFailed, alGetErrorString(oserror()));
     return 0;
   }
   
@@ -122,7 +123,7 @@ static void uninit(int immed) {
 
   /* TODO: samplerate should be set back to the value before mplayer was started! */
 
-  printf("ao_sgi, uninit: ...\n");
+  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_Uninit);
 
   if (ao_port) {
     while(alGetFilled(ao_port) > 0) sginap(1);  
@@ -135,21 +136,21 @@ static void uninit(int immed) {
 // stop playing and empty buffers (for seeking/pause)
 static void reset() {
   
-  printf("ao_sgi, reset: ...\n");
+  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_Reset);
   
 }
 
 // stop playing, keep buffers (for pause)
 static void audio_pause() {
     
-  printf("ao_sgi, audio_pause: ...\n");
+  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_PauseInfo);
     
 }
 
 // resume playing, after audio_pause()
 static void audio_resume() {
 
-  printf("ao_sgi, audio_resume: ...\n");
+  mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_SGI_ResumeInfo);
 
 }
 

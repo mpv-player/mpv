@@ -18,6 +18,7 @@
 #include "afmt.h"
 
 #include "../mp_msg.h"
+#include "../help_mp.h"
 
 #ifdef HAVE_DVB
 #ifndef HAVE_DVB_HEAD
@@ -67,7 +68,7 @@ static int control(int cmd,void *arg){
 	    if(dvb_mixer.volume_right>255) dvb_mixer.volume_right=255;
 	    //	 printf("Setting DVB volume: %d ; %d  \n",dvb_mixer.volume_left,dvb_mixer.volume_right);
 	    if ( (ioctl(vo_mpegpes_fd2,AUDIO_SET_MIXER, &dvb_mixer) < 0)){
-		mp_msg(MSGT_AO, MSGL_ERR, "DVB audio set mixer failed: %s\n",
+		mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_MPEGPES_CantSetMixer,
 		    strerror(errno));
 	      return CONTROL_ERROR;
 	    }
@@ -112,7 +113,7 @@ retry:
 	case 44100:	freq_id=2;break;
 	case 32000:	freq_id=3;break;
 	default:
-	    mp_msg(MSGT_AO, MSGL_ERR, "ao_mpegpes: %d Hz not supported, try to resample...\n",rate);
+	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_MPEGPES_UnsupSamplerate, rate);
 #if 0
 	    if(rate>48000) rate=96000; else
 	    if(rate>44100) rate=48000; else

@@ -8,6 +8,9 @@
 #include "afmt.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
+#include "../mp_msg.h"
+#include "../help_mp.h"
+
 
 static ao_info_t info = 
 {
@@ -111,13 +114,10 @@ static int init(int rate,int channels,int format,int flags){
 	wavhdr.data_length=le2me_32(0x7ffff000);
 	wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
 
-	printf("PCM: File: %s (%s)\n"
-	       "PCM: Samplerate: %iHz Channels: %s Format %s\n",
-	       ao_outputfilename, (ao_pcm_waveheader?"WAVE":"RAW PCM"), rate,
+	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_PCM_FileInfo, ao_outputfilename, 
+	       (ao_pcm_waveheader?"WAVE":"RAW PCM"), rate, 
 	       (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
-	printf("PCM: Info: fastest dumping is achieved with -vc dummy -vo null\n"
-	       "PCM: Info: to write WAVE files use -waveheader (default); "
-	       "for RAW PCM -nowaveheader.\n");
+	mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_PCM_HintInfo);
 
 	fp = fopen(ao_outputfilename, "wb");
 	if(fp) {
@@ -127,7 +127,8 @@ static int init(int rate,int channels,int format,int flags){
 		}
 		return 1;
 	}
-	printf("PCM: Failed to open %s for writing!\n", ao_outputfilename);
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_PCM_CantOpenOutputFile, 
+               ao_outputfilename);
 	return 0;
 }
 

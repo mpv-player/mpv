@@ -50,7 +50,7 @@ static int control(int cmd,void *arg){
       if(v.arg != volume) {
 	volume = v.arg;
 	if( ioctl(dxr2_fd,DXR2_IOC_SET_AUDIO_VOLUME,&v) < 0) {
-	  mp_msg(MSGT_AO,MSGL_ERR,"DXR2 : Setting volume to %d failed\n",volume);
+	  mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_DXR2_SetVolFailed,volume);
 	  return CONTROL_ERROR;
 	}
       }
@@ -110,7 +110,7 @@ static int init(int rate,int channels,int format,int flags){
 		break;
 #endif
 	default:
-		mp_msg(MSGT_AO,MSGL_ERR,"[AO] dxr2: %d Hz not supported, try \"-aop list=resample\"\n",rate);
+		mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_DXR2_UnsupSamplerate,rate);
 		return 0;
 	}
 

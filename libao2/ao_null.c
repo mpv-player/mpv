@@ -110,9 +110,3 @@ static float get_delay(){
     drain();
     return (float) buffer / (float) ao_data.bps;
 }
-
-
-
-
-
-

@@ -781,3 +781,101 @@ static char help_text[]=
 #define MSGTR_VO_JPEG_BaselineJPEG "Baseline JPEG enabled."
 #define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline JPEG disabled."
 
+// ======================= AO Audio Output drivers ========================
+
+// libao2 
+
+// ao_oss.c
+#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Can't open mixer device %s: %s\n"
+#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Audio card mixer does not have channel '%s' using default.\n"
+#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Can't open audio device %s: %s\n"
+#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Can't make filedescriptor blocking: %s\n"
+#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Can't set audio device %s to AC3 output, trying S16...\n"
+#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Failed to set audio device to %d channels.\n"
+#define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n"
+#define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Your audio driver DOES NOT support select()  ***\n Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n"
+#define MSGTR_AO_OSS_CantReopen "[AO OSS]\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE *** %s\n"
+
+// ao_arts.c
+#define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
+#define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Connected to sound server.\n"
+#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Unable to open a stream.\n"
+#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] Stream opened.\n"
+#define MSGTR_AO_ARTS_BufferSize "[AO ARTS] buffer size: %d\n"
+
+// ao_dxr2.c
+#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Setting volume to %d failed.\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz not supported, try \"-aop list=resample\"\n"
+
+// ao_esd.c
+#define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound failed: %s\n"
+#define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latency: [server: %0.2fs, net: %0.2fs] (adjust %0.2fs)\n"
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] failed to open esd playback stream: %s\n"
+
+// ao_mpegpes.c
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB audio set mixer failed: %s\n" 
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz not supported, try to resample...\n"
+
+// ao_null.c
+// This one desn't even  have any mp_msg nor printf's?? [CHECK]
+
+// ao_pcm.c
+#define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Samplerate: %iHz Channels: %s Format %s\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: fastest dumping is achieved with -vc dummy -vo null\nPCM: Info: to write WAVE files use -waveheader (default)."
+#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Failed to open %s for writing!\n"
+
+// ao_sdl.c
+#define MSGTR_AO_SDL_INFO "[AO SDL] Samplerate: %iHz Channels: %s Format %s\n"
+#define MSGTR_AO_SDL_DriverInfo "[AO SDL] using %s audio driver.\n"
+#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Unsupported audio format: 0x%x.\n"
+#define MSGTR_AO_SDL_CantInit "[AO SDL] Initializing of SDL Audio failed: %s\n"
+#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Unable to open audio: %s\n"
+
+// ao_sgi.c
+#define MSGTR_AO_SGI_INFO "[AO SGI] control.\n"
+#define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Samplerate: %iHz Channels: %s Format %s\n"
+#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: invalid device.\n"
+#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: setparams failed: %s\nCould not set desired samplerate.\n"
+#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE was not accepted on the given resource.\n"
+#define MSGTR_AO_SGI_CantGetParms "[AO SGI] init: getparams failed: %s\n"
+#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: samplerate is now %lf (desired rate is %lf)\n"
+#define MSGTR_AO_SGI_InitConfigError "[AO SGI] init: %s\n"
+#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: Unable to open audio channel: %s\n"
+#define MSGTR_AO_SGI_Uninit "[AO SGI] uninit: ...\n"
+#define MSGTR_AO_SGI_Reset "[AO SGI] reset: ...\n"
+#define MSGTR_AO_SGI_PauseInfo "[AO SGI] audio_pause: ...\n"
+#define MSGTR_AO_SGI_ResumeInfo "[AO SGI] audio_resume: ...\n"
+
+// ao_sun.c
+#define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO failed.\n"
+#define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: write failed."
+#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Can't open audio device %s, %s  -> nosound.\n"
+#define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: your card doesn't support %d channel, %s, %d Hz samplerate.\n"
+#define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Your audio driver DOES NOT support select()  ***\nRecompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n"
+#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE (%s) ***\n"
+
+// ao_alsa5.c
+#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: requested format: %d Hz, %d channels, %s\n"
+#define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: no soundcards found.\n"
+#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: invalid format (%s) requested - output disabled.\n"
+#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: playback open error: %s\n"
+#define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: pcm info error: %s\n"
+#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d soundcard(s) found, using: %s\n"
+#define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: pcm channel info error: %s\n"
+#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: error setting parameters: %s\n"
+#define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: error setting up channel: %s\n"
+#define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: channel prepare error: %s\n"
+#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: playback drain error: %s\n"
+#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: playback flush error: %s\n"
+#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: pcm close error: %s\n"
+#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: playback drain error: %s\n"
+#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: playback flush error: %s\n"
+#define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: channel prepare error: %s\n"
+#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: playback drain error: %s\n"
+#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: playback flush error: %s\n"
+#define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: channel prepare error: %s\n"
+#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: alsa underrun, resetting stream.\n"
+#define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: playback prepare error: %s\n"
+#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: write error after reset: %s - giving up.\n"
+#define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: output error: %s\n"
+

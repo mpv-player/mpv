@@ -671,6 +671,7 @@ Vajna, Miklós (VMiklos) <mamajom@axelero.hu>
 
 Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
     * improved EDL support
+    * mp_msg transition on unmantained libao2 drivers
 
 Wigren, Per <wigren@home.se>
     * bmovl - Bitmap Overlay video filter

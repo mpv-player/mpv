@@ -16,6 +16,7 @@
 #include "afmt.h"
 
 #include "../mp_msg.h"
+#include "../help_mp.h"
 
 static ao_info_t info = 
 {
@@ -50,7 +51,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     snd_pcm_info_t info;
     snd_pcm_channel_info_t chninfo;
 
-    mp_msg(MSGT_AO, MSGL_INFO, "alsa-init: requested format: %d Hz, %d channels, %s\n", rate_hz,
+    mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_ALSA5_InitInfo, rate_hz,
 	channels, audio_out_format_name(format));
 
     alsa_handler = NULL;
@@ -60,7 +61,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if ((cards = snd_cards()) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: no soundcards found\n");
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_SoundCardNotFound);
 	return(0);
     }
 
@@ -110,7 +111,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	    ao_data.bps *= 2;
 	    break;
 	case -1:
-	    mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: invalid format (%s) requested - output disabled\n",
+	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_InvalidFormatReq,
 		audio_out_format_name(format));
 	    return(0);
 	default:
@@ -163,17 +164,17 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if ((err = snd_pcm_open(&alsa_handler, 0, 0, SND_PCM_OPEN_PLAYBACK)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: playback open error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PlayBackError, snd_strerror(err));
 	return(0);
     }
 
     if ((err = snd_pcm_info(alsa_handler, &info)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: pcm info error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PcmInfoError, snd_strerror(err));
 	return(0);
     }
 
-    mp_msg(MSGT_AO, MSGL_INFO, "alsa-init: %d soundcard(s) found, using: %s\n",
+    mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AO_ALSA5_SoundcardsFound,
 	cards, info.name);
 
     if (info.flags & SND_PCM_INFO_PLAYBACK)
@@ -182,7 +183,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 	chninfo.channel = SND_PCM_CHANNEL_PLAYBACK;
 	if ((err = snd_pcm_channel_info(alsa_handler, &chninfo)) < 0)
 	{
-	    mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: pcm channel info error: %s\n", snd_strerror(err));
+	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PcmChanInfoError, snd_strerror(err));
 	    return(0);
 	}
 
@@ -206,7 +207,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
     if ((err = snd_pcm_channel_params(alsa_handler, &params)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: error setting parameters: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_CantSetParms, snd_strerror(err));
 	return(0);
     }
 
@@ -219,13 +220,13 @@ static int init(int rate_hz, int channels, int format, int flags)
     
     if ((err = snd_pcm_channel_setup(alsa_handler, &setup)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: error setting up channel: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_CantSetChan, snd_strerror(err));
 	return(0);
     }
 
     if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-init: channel prepare error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_ChanPrepareError, snd_strerror(err));
 	return(0);
     }
 
@@ -242,19 +243,19 @@ static void uninit(int immed)
 
     if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-uninit: playback drain error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_DrainError, snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_channel_flush(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-uninit: playback flush error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_FlushError, snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_close(alsa_handler)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-uninit: pcm close error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PcmCloseError, snd_strerror(err));
 	return;
     }
 }
@@ -266,19 +267,19 @@ static void reset()
 
     if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-reset: playback drain error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_ResetDrainError, snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_channel_flush(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-reset: playback flush error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_ResetFlushError, snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-reset: channel prepare error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_ResetChanPrepareError, snd_strerror(err));
 	return;
     }
 }
@@ -290,13 +291,13 @@ static void audio_pause()
 
     if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-pause: playback drain error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PauseDrainError, snd_strerror(err));
 	return;
     }
 
     if ((err = snd_pcm_channel_flush(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-pause: playback flush error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PauseFlushError, snd_strerror(err));
 	return;
     }
 }
@@ -307,7 +308,7 @@ static void audio_resume()
     int err;
     if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-resume: channel prepare error: %s\n", snd_strerror(err));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_ResumePrepareError, snd_strerror(err));
 	return;
     }
 }
@@ -327,21 +328,21 @@ static int play(void* data, int len, int flags)
     {
 	if (got_len == -EPIPE) /* underrun? */
 	{
-	    mp_msg(MSGT_AO, MSGL_ERR, "alsa-play: alsa underrun, resetting stream\n");
+	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_Underrun);
 	    if ((got_len = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
 	    {
-		mp_msg(MSGT_AO, MSGL_ERR, "alsa-play: playback prepare error: %s\n", snd_strerror(got_len));
+		mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_PlaybackPrepareError, snd_strerror(got_len));
 		return(0);
 	    }
 	    if ((got_len = snd_pcm_write(alsa_handler, data, len)) < 0)
 	    {
-		mp_msg(MSGT_AO, MSGL_ERR, "alsa-play: write error after reset: %s - giving up\n",
+		mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_WriteErrorAfterReset,
 		    snd_strerror(got_len));
 		return(0);
 	    }
 	    return(got_len); /* 2nd write was ok */
 	}
-	mp_msg(MSGT_AO, MSGL_ERR, "alsa-play: output error: %s\n", snd_strerror(got_len));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_ALSA5_OutPutError, snd_strerror(got_len));
 	return(0);
     }
     return(got_len);

@@ -16,6 +16,7 @@
 
 #include "../config.h"
 #include "../mp_msg.h"
+#include "../help_mp.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -171,11 +172,11 @@ static int init(int rate,int channels,int format,int flags){
 	/* Allocate ring-buffer memory */
 	for(i=0;i<NUM_BUFS;i++) buffer[i]=(unsigned char *) malloc(BUFFSIZE);
 
-	mp_msg(MSGT_AO,MSGL_INFO,"SDL: Samplerate: %iHz Channels: %s Format %s\n", rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
+	mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_INFO, rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
 
 	if(ao_subdevice) {
 		setenv("SDL_AUDIODRIVER", ao_subdevice, 1);
-		mp_msg(MSGT_AO,MSGL_INFO,"SDL: using %s audio driver\n", ao_subdevice);
+		mp_msg(MSGT_AO,MSGL_INFO,MSGTR_AO_SDL_DriverInfo, ao_subdevice);
 	}
 
 	ao_data.channels=channels;
@@ -209,7 +210,7 @@ static int init(int rate,int channels,int format,int flags){
 	    default:
                 aspec.format = AUDIO_S16LSB;
                 ao_data.format = AFMT_S16_LE;
-                mp_msg(MSGT_AO,MSGL_WARN,"SDL: Unsupported audio format: 0x%x.\n", format);
+                mp_msg(MSGT_AO,MSGL_WARN,MSGTR_AO_SDL_UnsupportedAudioFmt, format);
 	}
 
 	/* The desired audio frequency in samples-per-second. */
@@ -230,13 +231,13 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 
 	/* initialize the SDL Audio system */
         if (SDL_Init (SDL_INIT_AUDIO/*|SDL_INIT_NOPARACHUTE*/)) {
-                mp_msg(MSGT_AO,MSGL_ERR,"SDL: Initializing of SDL Audio failed: %s.\n", SDL_GetError());
+                mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_SDL_CantInit, SDL_GetError());
                 return 0;
         }
 
 	/* Open the audio device and start playing sound! */
 	if(SDL_OpenAudio(&aspec, &obtained) < 0) {
-        	mp_msg(MSGT_AO,MSGL_ERR,"SDL: Unable to open audio: %s\n", SDL_GetError());
+        	mp_msg(MSGT_AO,MSGL_ERR,MSGTR_AO_SDL_CantOpenAudio, SDL_GetError());
         	return(0);
 	} 
 
@@ -264,7 +265,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 		ao_data.format = AFMT_U16_BE;
 	    break;
 	    default:
-                mp_msg(MSGT_AO,MSGL_WARN,"SDL: Unsupported SDL audio format: 0x%x.\n", obtained.format);
+                mp_msg(MSGT_AO,MSGL_WARN,MSGTR_AO_SDL_UnsupportedAudioFmt, obtained.format);
                 return 0;
 	}
 

@@ -26,6 +26,8 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "afmt.h"
+#include "../mp_msg.h"
+#include "../help_mp.h"
 
 static ao_info_t info = 
 {
@@ -126,13 +128,13 @@ static int realtime_samplecounter_available(char *dev)
     info.play.samples = 0;
     if (ioctl(fd, AUDIO_SETINFO, &info)) {
 	if (verbose>0)
-	    printf("rtsc: SETINFO failed\n");
+	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_RtscSetinfoFailed);
 	goto error;
     }
     
     if (write(fd, silence, len) != len) {
 	if (verbose>0)
-	    printf("rtsc: write failed");
+	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_RtscWriteFailed);
 	goto error;
     }
 
@@ -482,7 +484,7 @@ static int init(int rate,int channels,int format,int flags){
 
     audio_fd=open(audio_dev, O_WRONLY);
     if(audio_fd<0){
-	printf("Can't open audio device %s, %s  -> nosound\n", audio_dev, strerror(errno));
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_CantOpenAudioDev, audio_dev, strerror(errno));
 	return 0;
     }
 
@@ -556,7 +558,7 @@ static int init(int rate,int channels,int format,int flags){
     }
 
     if (!ok) {
-	printf("audio_setup: your card doesn't support %d channel, %s, %d Hz samplerate\n",
+	mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_UnsupSampleRate,
 	       channels, audio_out_format_name(format), rate);
 	return 0;
     }
@@ -588,8 +590,7 @@ static int init(int rate,int channels,int format,int flags){
 	}
 	free(data);
 	if(ao_data.buffersize==0){
-	    printf("\n   ***  Your audio driver DOES NOT support select()  ***\n");
-	    printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
+	    mp_msg(MSGT_AO, MSGL_ERR, MSGTR_AO_SUN_CantUseSelect);
 	    return 0;
 	}
 #ifdef	__svr4__
@@ -631,7 +632,7 @@ static void reset(){
     uninit(1);
     audio_fd=open(audio_dev, O_WRONLY);
     if(audio_fd<0){
-	printf("\nFatal error: *** CANNOT RE-OPEN / RESET AUDIO DEVICE (%s) ***\n", strerror(errno));
+	mp_msg(MSGT_AO, MSGL_FATAL, MSGTR_AO_SUN_CantReopenReset, strerror(errno));
 	return;
     }
 
