@@ -96,7 +96,7 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Reinit must be called after this function has been called
 
     // Sanity check
-    if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > 6){
+    if(((int*)arg)[0] <= 0 || ((int*)arg)[0] > AF_NCH){
       af_msg(AF_MSG_ERROR,"[pan] The number of output channels must be" 
 	     " between 1 and %i. Current value is %i\n",AF_NCH,((int*)arg)[0]);
       return AF_ERROR;
