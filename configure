@@ -1584,6 +1584,7 @@ echores "$_cdio"
 
 echocheck "linux/cdrom.h"
 cat > $TMPC << EOF
+#include <sys/types.h>
 #include <linux/cdrom.h>
 int main(void) { return 0; }
 EOF
