@@ -66,7 +66,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
         if(mpi->bpp == 12 && mpi->flags&MP_IMGFLAG_YUV) {
             // Support for some common Planar YUV formats
             int cb=2, cr=1;
-            if (sh->format == IMGFMT_IYUV || sh->format == IMGFMT_I420) {
+            if(mpi->flags&MP_IMGFLAG_SWAPPED) {
                 cb=1; cr=2;
             }
             mpi->planes[cb]=data+mpi->width*mpi->height;
