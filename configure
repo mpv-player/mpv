@@ -275,6 +275,9 @@ else
    host_arch=`echo $_target | cut -d '-' -f 1`
 fi
 
+echo "Detected operating system: $system_name"
+echo "Detected host architecture: $host_arch"
+
 # Determine OS dependent libs
 
 if [ "$system_name" = "FreeBSD" ]; then
