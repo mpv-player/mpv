@@ -280,6 +280,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 
 	mp_msg(MSGT_AO,MSGL_V,"SDL: buf size = %d\n",obtained.size);
 	ao_data.buffersize=obtained.size;
+	ao_data.outburst = CHUNK_SIZE;
 	
 	reset();
 	/* unsilence audio, if callback is ready */
@@ -291,6 +292,7 @@ void callback(void *userdata, Uint8 *stream, int len); userdata is the pointer s
 // close audio device
 static void uninit(int immed){
 	mp_msg(MSGT_AO,MSGL_V,"SDL: Audio Subsystem shutting down!\n");
+	if (!immed)
 	while(buf_free() < BUFFSIZE - CHUNK_SIZE)
 		usec_sleep(50000);
 	SDL_CloseAudio();
