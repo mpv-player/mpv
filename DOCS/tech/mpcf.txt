@@ -113,11 +113,9 @@ audio_stream_header:
 	stream_header
 	samplerate				v
 	channel_count				v
-	sub_packet_size				v
-	shuffle_type				v
 	reserved_bytes
 	checksum				u(32)
- 
+
 frame
 	packet header
 	if(keyframe){
@@ -127,13 +125,27 @@ frame
 	priority				u(2)
 	checksum_flag				u(1)
 	msb_timestamp_flag			u(1)
-	reserved				u(3)
+	subpacket_type				u(2)
+	reserved				u(1)
 	lsb_timestamp				v
 	stream_id				v
 	if(msb_timestamp_flag)
 		msb_timestamp			v
-	bitstream
-        if(checksum_flag)
+	if(sub_packet_type==00)
+		sub_packet[0]
+	else{
+		subpacket_base_size		v
+		subpacket_count			v
+		shuffle_type			v
+		if(subpacket_type==10){
+		    for(i=0; i<subpacket_count; i++)
+			subpacket_size_diff[i]	v
+		}
+		for(i=0; i<subpacket_count; i++)
+		    subpacket[i]
+		}
+	}
+	if(checksum_flag)
 		frame_checksum			u(32)
 
 Index:
@@ -271,6 +283,32 @@ msb_timestamp_flag
 	indicates that the msb_timestamp is coded
 	MUST be 1 for keyframes
         
+subpacket_type
+	00	1		subpacket per packet (normally used for video)
+	01	subpacket_count	fixed length subpackets per packet
+	10	subpacket_count	variable length subpackets per packet
+	11	reserved
+	Note, if there are multiple subpackets then the timestamp of the packet
+	is the timestamp of the first subpacket
+	Note, if multiple subpackets are stored in one frame then the resulting
+	framesize SHOULD be < 16kbyte and not more then 0.5 sec of data SHOULD
+	be put in a single packet
+
+subpacket_base_size
+	the size of the subpackets for fixed fize subpackets
+	an offset which should be added to the subpacket_size_diff of each 
+	subpacket to get the actual size, so its normally the size of the 
+	smallest subpacket
+
+subpacket_count
+	the number of subpackets, if not pressent then 1
+
+subpacket_size_diff
+	the (allways positive) difference from the subpacket_base_size to the
+	actual size of the current subpacket, if its not coded 
+	(subpacket_type != 10) then its 0
+	Note a subpacket MUST be in exactly one packet, it cannot be split
+       
 msb_timestamp
 	most significant bits of the timestamp, SHOULD be 0 for the first frame
  
@@ -310,12 +348,8 @@ priority
 	if 0 then the frame isnt used as reference (b frame) and can be droped
 	MUST be > 0 for keyframes
 
-sub_packet_size
-	size of an audio packet
-	Note a subpacket MUST be in exactly one packet, it cannot be split
-
 shuffle_type
-	audio is often encoded in small fixed size packets, and to increase the
+	audio is often encoded in small subpackets, and to increase the
 	error robustness these can be shuffled
 	0 -> no shuffle
 	1-16 -> interleave packets by 2^n 
