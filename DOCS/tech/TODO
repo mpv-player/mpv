@@ -2,12 +2,22 @@
 TODO:
 =====
 
-FOR THE LAST RC-RELEASE:
-~~~~~~~~~~~~~~~~~~~~~~~~
-- fix vo_svga vs. -vop scale - FIXED?
+CVS CLEANUP work:
+~~~~~~~~~~~~~~~~~
+- remove old config/cmdline parser code
+- maybe remove .raw font support too
+- renaming DOCS/translations: Hungarian->hu etc
+- rename linux->osdep
+- upgrade libmpeg2 to 0.3.1+Fabian's patch
+- maybe upgrade to liba52 cvs & merge in (or redo?) the asm optimizations
+- change build & install stuff (cross-lib dependency etc)
+- we should apply the delayed patches (see my mail sent yesterday about patches
+- we should switch to the patch tracker (roundup)
+
 
 FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
+- fix vo_svga vs. -vop scale
 - Re: [Mplayer-cvslog] CVS: main/libvo vo_vesa.c,1.82,1.83
   This patch makes mplayer unusable in console mode, always leaves the 
   console in graphic mode.
