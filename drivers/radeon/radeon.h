@@ -643,7 +643,11 @@
 #define	OV0_P2_X_START_END			0x0498
 #define	OV0_P3_X_START_END			0x049C
 #define	OV0_FILTER_CNTL				0x04A0
+#	define FILTER_PROGRAMMABLE_COEF		0x00000000
 #	define FILTER_HARDCODED_COEF		0x0000000F
+#	define FILTER_COEF_MASK			0x0000000F
+/* other values allow us use hardcoded coefs for Y and
+   programmable for UV that's nosense. */
 /*
    Top quality 4x4-tap filtered vertical and horizontal scaler.
    It allows up to 64:1 upscaling and downscaling without
