@@ -1,0 +1,468 @@
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced with 1.42 -->
+<chapter id="ports" xreflabel="Ports">
+<title>Portok</title>
+
+<sect1 id="linux">
+<title>Linux</title>
+<para>
+Az elsődleges fejlesztési platform a Linux x86-on, ennek ellenére az 
+<application>MPlayer</application> számos más Linux által támogatott architektúrán
+fut.
+Bináris csomagok számos forrásból elérhetőek, de ezek közül <emphasis role="bold">
+egyik sem támogatott a fejlesztők által</emphasis>, ezért, ha bármi gond adódik velük,
+akkor a bináris csomagot készítóvel kell felvenni a kapcsolatot, nem pedig velünk.
+</para>
+
+<sect2 id="debian">
+<title>Debian csomagolás</title>
+<para>
+Egyszerűen készíthetők Debian csomagok a forrásból. A következő parancsok
+kell lefuttatni: <screen>fakeroot debian/rules binary</screen>
+Rendszergazdaként a szokásos módszerrel telepíthető a <filename>.deb</filename> csomag:
+<screen>dpkg -i ../mplayer_<replaceable>verziószám</replaceable>.deb</screen>
+</para>
+
+<para>
+Christian Marillat már évek óta csinál nem-hivatalos Debian 
+<application>MPlayer</application> és <application>MEncoder</application>
+csomagokat, melyek akár az apt-get segítségével is telepíthetők
+<ulink url="http://marillat.free.fr/">innen</ulink>.
+</para>
+</sect2>
+
+<sect2 id="rpm">
+<title>RedHat csomagolás</title>
+<para>
+Dominik Mierzejweski a "hivatalos" <application>MPlayer</application> csomagok
+karbantartója. A 
+<ulink url="http://www.piorunek.pl/~dominik/linux/pkgs/mplayer/">honapjáról</ulink>.
+elérhetőek a csomagok.
+</para>
+
+<para>
+Mandrake RPM csomagok a <ulink url="http://plf.zarb.org/">P.L.F.</ulink> oldalán
+találhatóak, de ezek nem hivtalosak.
+A SuSE régen egy csonkított verzióját tartalmazta az <application>MPlayer</application>-nek,
+de az utóbbi kiadásokból már kiszedték. SuSEval működő csomagok a
+<ulink url="http://packman.links2linux.de/?action=128">links2linux.de</ulink>
+oldalon találhatóak.
+</para>
+</sect2>
+
+<sect2 id="arm">
+<title>ARM</title>
+<para>
+Az <application>MPlayer</application> működik ARM CPU-val rendelkező PDA-kon is,
+mint páldául a Sharp Zaurus, vagy a Compaq Ipaq. Megszerzésének legegyszerűbb
+módja az  <ulink url="http://www.openzaurus.org">OpenZaurus</ulink> webhelyéről
+történő letöltés. Ha saját erődből akarod lefordítani, érdemes körülnézni az
+<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</ulink>
+és a
+<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
+Openzaurus buildroot könyvtárakban, ezek ugyanis mindig tartalmazzál a legújabb
+Makefile-okat és patcheket az <application>MPlayer</application> CVS verziójának
+lefordításához.
+GUI frontend is rendelkezésre áll xmms-embedded néven.
+</para>
+</sect2>
+</sect1>
+
+<sect1 id="bsd">
+<title>*BSD</title>
+<para>
+Az <application>MPlayer</application> fut FreeBSD, OpenBSD, NetBSD, BSD/OS és
+Darwin rendszereken. Léteznek ports/pkgsrc/fink és más verziók az
+<application>MPlayer</application>-ből, amelyek nagy valószínűséggel
+egyszerűbben fordíthatóak le.
+</para>
+
+<para>
+A fordításhoz szükséged lesz GNU make-ra (gmake, mivel a natív BSD make más
+szintaxist hasznél) és a binutils valamelyik frissebb verziójára.
+</para>
+
+<para>
+Ha az <application>MPlayer</application> nem találja a <filename>/dev/cdrom</filename>-ot
+vagy a <filename>/dev/dvd</filename>-t, csinálj egy symlinket:
+<screen>ln -s /dev/<replaceable>cdrom_egység</replaceable> /dev/cdrom</screen>
+</para>
+
+<para>
+A Win32 DLL-ek használatához fordítsd újra a kernelt
+&quot;<envar>option USER_LDT</envar>&quot;-vel, kivéve, ha FreeBSD-CURRENT-et
+használsz, ahol ez az alapállapot.
+</para>
+
+
+<sect2 id="freebsd">
+<title>FreeBSD</title>
+<para>
+Ha a processzorod támogatja az SSE-t, akkor e utasításkészlet kihasználásához
+a kernelt az &quot;<envar>options CPU_ENABLE_SSE</envar>&quot; beállítással
+kell fordítani (ehhez FreeBSD-STABLE vagy kernelpatchekre van szükség).
+</para>
+</sect2>
+
+<sect2 id="openbsd">
+<title>OpenBSD</title>
+<para>
+A gas különböző verzióinak hiányosságai miatt (relokáció vs MMX), két
+lépésben kell fordítani: előszőr legyen a nem-natív verzió a <envar>$PATH</envar>-ban
+és add ki a <command>gmake -k</command> parancsot, majd a natív verzióval
+<command>gmake</command>.
+</para>
+</sect2>
+
+<sect2 id="darwin">
+<title>Darwin</title>
+<para>
+Lásd a <link linkend="macos">Mac OS</link> részt.
+</para>
+</sect2>
+</sect1>
+
+<sect1 id="solaris">
+<title>Sun Solaris</title>
+<para>
+Az <application>MPlayer</application> Solaris 2.6 vagy újabb rendszereken működik.
+</para>
+
+<para>
+Az <application>MPlayer</application> kihasználja az
+<emphasis role="bold">UltraSPARC</emphasis> gépek <emphasis role="bold">VIS</emphasis>
+utasításkészletét (az MMX-hez hasonló), bár jelenleg csak a
+<systemitem class="library">libmpeg2</systemitem>-ben,
+<systemitem class="library">libvo</systemitem>-ben és
+a <systemitem class="library">libavcodec</systemitem>-ben, de az
+<systemitem class="library">mp3lib</systemitem>-ben nem.
+Egy 400Mhz-es CPU elég, hogy élvezhetően lejátsz egy VOB filet.
+Szükséged lesz egy felinstallált
+<ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>-re
+is.
+</para>
+
+<para>
+A fordításhoz GNU <application>make</application>-re lesz szükséged
+(<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), natív
+Solaris make nem jo. Egy tipikus hiba, ha mégis azzal probálkozol:
+<screen>
+   % /usr/ccs/bin/make
+   make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
+</screen>
+</para>
+
+<para>
+Solaris SPARC-on GNU C/C++ fordító is kell; az nem számít, ha assemblerrel
+vagy nélküle van.
+</para>
+
+<para>
+Solaris x86-on kell a GNU assembler és a GNU C/C++ fordító is, aminek támogatnia
+kell a GNU assemblert! Az <application>MPlayer</application> igencsak
+támaszkodik az MMX, SSE és 3DNOW! utasításokra, amiket a Sun standard
+assemblere (<filename>/usr/ccs/bin/as</filename>) nem támogat.
+</para>
+
+<para>
+A <filename>configure</filename> script megpróbálja megkerseni, hogy a
+&quot;gcc&quot; parancsod melyik assemblert indítja (ha nem sikerül neki,
+használd a &quot;<option>--as=<replaceable>/ahova/installáltad/gnu-as</replaceable></option>&quot;
+parancsot).
+</para>
+
+<para>
+Hibaüzenet GNU assembler nélküli GCC használata esetén:
+<screen>
+   % configure
+   ...
+   Checking assembler (/usr/ccs/bin/as) ... , failed
+   Please upgrade(downgrade) binutils to 2.10.1...
+</screen>
+(Megoldás: &quot;<option>--with-as=gas</option>&quot;-al fordított GCC használata)
+</para>
+
+<para>
+Tipikus hiba, ha a GNU C fordító nem GNU assemblert (GNU as) használ:
+<screen>
+   % gmake
+   ...
+   gcc -c -Iloader -Ilibvo -O4 -march=i686 -mcpu=i686 -pipe -ffast-math
+        -fomit-frame-pointer  -I/usr/local/include   -o mplayer.o mplayer.c
+   Assembler: mplayer.c
+   "(stdin)", line 3567 : Illegal mnemonic
+   "(stdin)", line 3567 : Syntax error
+   ... more "Illegal mnemonic" and "Syntax error" errors ...
+</screen>
+</para>
+
+<para>
+2 hiba miatt nem tudsz megbízhatóan DVD-t lejátszani Solaris 8 x86-on,
+ha annak kapacitása nagyobb mint 4 GB:
+</para>
+
+<itemizedlist>
+<listitem><para>
+The sd(7D) driver on Solaris 8 x86 has a bug when accessing a disk block >4GB
+on a device using a logical blocksize != DEV_BSIZE (i.e. CD-ROM and DVD media).
+Due to a 32Bit int overflow, a disk address modulo 4GB is accessed
+(<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
+Ez a probláma a SPARC gépeket nem érinti.
+</para></listitem>
+
+<listitem><para>
+A similar bug is present in the hsfs(7FS) filesystem code (aka ISO9660),
+hsfs may not not support partitions/disks larger than 4GB, all data is
+accessed modulo 4GB
+(<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
+Ez a hiba a 109764-04 (sparc) illetve 109765-04 (x86) jelzésű patch-ek installálása
+után megszűnik.
+</para></listitem>
+</itemizedlist>
+</sect1>
+
+<sect1 id="irix">
+<title>Silicon Graphics Irix</title>
+<para>
+A GNU install programot kell felinstallálnod, és (ha nem tetted bel a globális
+path-ba) add meg a helyét:
+<screen>./configure --with-install=<replaceable>install_elérési_útja</replaceable></screen>
+</para>
+
+<para>
+Lehet az alap IRIX 6.5-ös install-t is használni, de ebben az esetben
+a <filename>Makefile</filename> egy kis kézi átírásra szorul. A következő
+két sort kell átírni:
+<programlisting>
+  $(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
+
+  $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
+</programlisting>
+erre:
+<programlisting>
+  $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
+
+  $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
+</programlisting>
+Add ki a következő parancsokat (az <application>MPlayer</application> forrás könyvtárában):
+<screen>cp DOCS/mplayer.1 . ; cp etc/codecs.conf .</screen>
+ezután símán fordítsd le az MPlayer-t.
+</para>
+</sect1>
+
+<sect1 id="qnx">
+<title>QNX</title>
+<para>
+Működik. Szükséged lesz SDL-re is. Ha az SDL-t felraktad, akkor az 
+<application>MPlayer</application>-t a <option>-vo sdl:photon</option>
+és az <option>-ao sdl:nto</option> opciókkal használd, így használható sebességet
+kell produkálnia.
+</para>
+
+<para>
+A <option>-vo x11</option> meghajtó nagyon lassú lesz, mert a QNX csak X
+<emphasis>emulációt</emphasis> tartalmaz, amely rettenetesen lassu.
+</para>
+</sect1>
+
+<sect1 id="windows">
+<title>Windows</title>
+
+<para>Yes, <application>MPlayer</application> runs on Windows under
+  <ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> and
+  <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
+  It does not have a GUI yet, but the command line version is almost completely
+  functional. <ulink url="../../tech/patches.txt">Patches</ulink> are always welcome.
+  You should check out the
+  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
+  mailing list for help and latest information.</para>
+
+<para>Best results are achieved with the native DirectX video output driver
+  (<option>-vo directx</option>) and the native Windows waveout audio driver
+  (<option>-ao win32</option>). Alternatives are OpenGL and SDL, but OpenGL
+  performance varies greatly between systems and SDL is known to
+  distort sound and video or crash on some systems. If the image is
+  distorted, try turning off hardware acceleration with
+  <option>-vo directx:noaccel</option>. Download
+  <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>
+  to compile the DirectX video output driver.</para>
+
+<para><link linkend="vidix">VIDIX</link> now works under Windows as
+  <option>-vo winvidix</option>, although it is still experimental
+	and needs a bit of manual setup. Download
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>
+  and copy it to the
+  <filename class="directory">libdha/dhahelperwin</filename> directory in your
+	<application>MPlayer</application> source tree.
+	Open a console and change to that directory. Then type
+
+  <screen>gcc -o dhasetup.exe dhasetup.c</screen>
+
+  and execute
+
+  <screen>dhasetup.exe install</screen>
+
+  as Administrator.  After that you will have to reboot.  When you are
+  done, copy the <systemitem class="library">.so</systemitem> files from
+	<filename class="directory">vidix/drivers</filename> to the
+	<filename class="directory">mplayer/vidix</filename> directory
+  relative to your <filename>mplayer.exe</filename>.</para>
+
+<para>For best results <application>MPlayer</application> should use a
+  colorspace that your video card supports in hardware.  Unfortunately many
+  Windows graphics drivers wrongly report some colorspaces as supported in
+  hardware. To find out which, try
+
+  <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>colorspace</replaceable> <replaceable>movie</replaceable></screen>
+
+  where <replaceable>colorspace</replaceable> can be any colorspace
+  printed by the <option>-vf format=fmt=help</option> option.  If you
+  find a colorspace your card handles particularly bad
+  <option>-vf noformat=<replaceable>colorspace</replaceable></option>
+  will keep it from being used. Add this to your config file to permanently
+	keep it from being used.</para>
+
+<para>You can use Win32 codecs and Real Win32 codecs (not Real Linux codecs)
+  if you want to. Put the codecs somewhere in your path or pass
+  <option>--with-codecsdir=<replaceable>c:/path/to/your/codecs</replaceable></option> (alternatively
+  <option>--with-codecsdir=<replaceable>/path/to/your/codecs</replaceable></option> only on
+  <application>Cygwin</application>) to <filename>configure</filename>. We
+  have had some reports that Real DLLs need to be writable by the user running
+  <application>MPlayer</application>, but only on some systems. Try making
+  them writable if you have problems. QuickTime DLLs also work, but you will
+  have to put them in your Windows system directory
+  (<filename class="directory"><replaceable>C:\Windows\system\</replaceable></filename>
+  or similar). As a last resort, try putting them in the same directory as
+  <application>MPlayer</application>.</para>
+
+<para>You can play VCDs by playing the <filename>.DAT</filename> or <filename>.MPG</filename> files
+  that Windows exposes on VCDs.  It works like this (adjust for the drive letter
+  of your CD-ROM):</para>
+
+<screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
+
+<para>DVDs also work, adjust <option>-dvd-device</option> for the drive letter
+  of your DVD-ROM:</para>
+
+<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
+
+<para>The <application>Cygwin</application>/<application>MinGW</application>
+  console is rather slow. Redirecting output or using the
+  <option>-quiet</option> option has been reported to improve performance on
+  some systems. Direct rendering (<option>-dr</option>) may also help.
+  You can prevent OSD flicker through double buffering with the
+  <option>-double</option> option. If playback is jerky, try
+  <option>-autosync 100</option>. If some of these options help you, you
+  may want to put them in your config file.</para>
+
+<para>Sascha Sommer releases official Windows binaries from time to time,
+  Joey Parrish makes unofficial Windows packages complete with installer.
+  Look for these in the Windows section of
+  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">our projects page</ulink>.</para>
+
+<sect2 id="cygwin">
+<title><application>Cygwin</application></title>
+
+<para><application>Cygwin</application> versions prior to 1.5.0 do
+  not include <filename>inttypes.h</filename>. Put this
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
+  in <filename class="directory">/usr/include/</filename> in order to
+  make <application>MPlayer</application> compile.</para>
+
+<para>DirectX header files need to be extracted to <filename class="directory">/usr/include/</filename> or
+  <filename class="directory">/usr/local/include/</filename>.</para>
+
+<para>Instructions and files for making SDL run under
+  <application>Cygwin</application> can be found on the
+  <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</ulink>.</para>
+
+</sect2>
+
+
+<sect2 id="mingw">
+<title><application>MinGW</application></title>
+
+<para>Installing a version of <application>MinGW</application> that could
+  compile <application>MPlayer</application> used to be quite tricky, but it
+  works out of the box now. Just install <application>MinGW</application>
+  3.1.0 or later and MSYS 1.0.9 or later and tell the MSYS postinstall that
+  <application>MinGW</application> is installed.</para>
+
+<para>If you use a version of <application>MinGW</application> before 3.1.0,
+  you need to replace <filename>/mingw/include/sys/types.h</filename> with this
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para>
+
+<para>Extract DirectX header files to <filename class="directory">/mingw/include/</filename>.</para>
+
+<para>MOV compressed header support requires
+  <ulink url="http://www.gzip.org/zlib/">zlib</ulink>, which
+  <application>MinGW</application> does not provide by default.
+  Configure it with <option>--prefix=/mingw</option> and install
+  it before compiling <application>MPlayer</application>.</para>
+
+</sect2>
+
+
+</sect1>
+
+<sect1 id="macos">
+<title>Mac OS</title>
+<para>
+Csak a Mac OS X 10.2-es verzió és utódai támogatottak a hivatalos
+<application>MPlayer</application> forrásban. Javításokat szívesen fogadunk!
+</para>
+
+<para>
+Az Apple saját GCC 3.x-es fordítója ajánlott, legfőképp, ha 
+<systemitem class="library">libavcodec</systemitem>-et is használunk, mert
+azt az Apple módosított GCC 2.95.x verziója nem képes lefordítani.
+</para>
+
+<para>
+Mindezek mellett még egy GUI is elérhető az <application>MPlayer</application>-hez,
+melyet egy előre lefordított lejátszó binárissal együtt tölthetünk le az
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> csapat oldaláról.
+</para>
+</sect1>
+
+<sect1 id="hpux">
+<title>HP UX</title>
+<para>
+Martin Gansser írt és karbantart egy
+<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">HOWTO</ulink>-t
+az <application>MPlayer</application> HP-UX alatti használatáról. 
+</para>
+
+<para>
+Mindenesetre a hivatalos <application>MPlayer</application> forrás is képes
+lefordulni HP-UX alatt.
+</para>
+</sect1>
+
+<sect1 id="amiga">
+<title>Amiga/MorphOS (GeekGadgets)</title>
+<para>
+Nicholas Det (Genesi) sikeresen átültette az <application>MPlayer</application>-t
+MorphOS alá. Sajnálatos módon csak a 0.90-es széria van kész.
+</para>
+
+<para>
+Letölthető a <ulink url="http://www.morphzone.org/">MorphZone</ulink>-ról:
+<itemizedlist>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
+<application>MPlayer</application> 0.91 bináris</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
+<application>MPlayer</application> 0.91 forrás</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
+<application>MEncoder</application> 0.91 bináris</ulink>
+</para></listitem>
+</itemizedlist>
+</para>
+</sect1>
+
+</chapter>
