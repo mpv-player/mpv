@@ -47,8 +47,7 @@ If your video height differs, you have to clip it or extend by adding
 black bands. It's done by mplayer, just specify image size using the
 -x and -y options. You must use either -y 288 or -y 576.
 
-To force letterbox size (16:9 at 4:3 TV), add options:  -x 352 -y 288
-
+To force pan&scan (16:9 at 4:3 TV), add options:  -x 352 -y 288
 
 Mailing list:
 ~~~~~~~~~~~~~
