@@ -612,7 +612,7 @@ int skinRead( char * dname )
 
  mp_dbg( MSGT_GPLAYER,MSGL_DBG2,"[skin] file: %s\n",fn );
 
- appInitStruct( &appMPlayer );
+ appInitStruct( skinAppMPlayer );
 
  linenumber=0;
  while ( !feof( skinFile ) )

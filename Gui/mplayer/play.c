@@ -141,7 +141,7 @@ listItems tmpList;
 void ChangeSkin( char * name )
 {
  int ret;
-// if ( !strcmp( skinName,name ) ) return;
+
  mainVisible=0;
 
  appInitStruct( &tmpList );

@@ -20,6 +20,7 @@ char      * sbMPlayerDirInHome=NULL;
 char      * sbMPlayerPrefixDir=NULL;
 
 char * gtkOldSkin;
+static char * prev;
 
 int gtkFillSkinList( gchar * mdir )
 {
@@ -30,6 +31,7 @@ int gtkFillSkinList( gchar * mdir )
  struct stat     fs;
 
  gtkOldSkin=strdup( skinName );
+ prev=gtkOldSkin;
  if ( ( str[0]=(char *)calloc( 1,7 ) ) == NULL )
   {
    gtkMessageBox( GTK_MB_FATAL,MSGTR_SKINBROWSER_NotEnoughMemory );
@@ -64,7 +66,7 @@ void on_SkinBrowser_destroy( GtkObject * object,gpointer user_data )
 
 void on_SkinBrowser_Cancel( GtkObject * object,gpointer user_data )
 {
- ChangeSkin( skinName );
+ if ( strcmp( sbSelectedSkin,gtkOldSkin ) ) ChangeSkin( gtkOldSkin );
  gtk_widget_hide( SkinBrowser );
 }
 
@@ -79,9 +81,18 @@ void on_SkinBrowser_Ok( GtkObject * object,gpointer user_data )
 void on_SkinList_select_row( GtkCList * clist,gint row,gint column,GdkEvent * bevent,gpointer user_data )
 {
  gtk_clist_get_text( clist,row,0,&sbSelectedSkin );
- ChangeSkin( sbSelectedSkin );
+ if ( strcmp( prev,sbSelectedSkin ) )
+  {
+   prev=sbSelectedSkin;
+   ChangeSkin( sbSelectedSkin );
+  }
  if( !bevent ) return;
- if( bevent->type == GDK_2BUTTON_PRESS ) gtk_widget_hide( SkinBrowser );
+ if( bevent->type == GDK_2BUTTON_PRESS )
+  {
+   if ( skinName ) free( skinName );
+   skinName=strdup( sbSelectedSkin );
+   gtk_widget_hide( SkinBrowser );
+  }
 }
 
 GtkWidget * create_SkinBrowser( void )
