@@ -256,67 +256,102 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 </para>
 </sect1>
 
-<sect1 id="cygwin">
+<sect1 id="windows">
+<title>Windows</title>
+
+<para>Yes, MPlayer runs on Windows under
+  <ulink url="http://www.cygwin.com/">Cygwin</ulink> and
+  <ulink url="http://www.mingw.org/">MinGW</ulink>.
+  It does not have a GUI yet, but the command line version is almost completely
+  functional. <ulink url="../../tech/patches.txt">Patches</ulink> are always welcome.
+  You should check out the
+  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
+  mailing list for help and latest information.</para>
+
+<para>Best results are achieved with the native DirectX video output driver
+  (<option>-vo directx</option>) and the native Windows waveout audio driver
+  (<option>-ao win32</option>)  as OpenGL does not work and SDL is known to
+  distort sound and image or crash on some systems. You can make the movie
+  window stay on top with <option>-vo directx:ontop</option>. If the image is
+  distorted, try turning off hardware acceleration with
+  <option>-vo directx:noaccel</option>. Download
+  <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>
+  to compile the DirectX video output driver.</para>
+
+<para>QuickTime and Real DLLs also work. Compile with <option>--enable-qtx</option>
+  and <option>--enable-real</option> and put the codecs into the
+  default Windows DLL location, <filename class="directory">C:\WINNT\system32</filename> or
+  <filename class="directory">C:\Windows\system</filename> depending on your Windows version.</para>
+
+<para>There are precompiled binary versions made by Sascha Sommer available for
+  download from
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/">our homepage</ulink>.
+  Joey Parrish has been making
+  <ulink url="http://joey.nicewarrior.org/cygmp/">unofficial Windows packages</ulink>
+  complete with installer.</para>
+
+<sect2 id="cygwin">
 <title>Cygwin</title>
-<para>
-The Cygwin port is still in its infancy. Currently there is no support for
-OpenGL. SDL is known to distort sound and image or crash on
-some systems. <ulink url="../../tech/patches.txt">Patches</ulink>
-are always welcome. Best results are achieved with the native DirectX video
-output driver (<option>-vo directx</option>) and the native Windows waveout
-audio driver (<option>-ao win32</option>). You should also check out the
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
-mailing list for help and latest information.
-</para>
 
-<para>
-Cygwin versions prior to 1.3.23 do not include <filename>inttypes.h</filename>.
-You will have to copy or symlink <filename>etc/cygwin_inttypes.h</filename>
-from the MPlayer source directory to <filename>/usr/include/inttypes.h</filename>
-in order to make MPlayer compile.
-</para>
+<para>Cygwin versions prior to 1.5.0 do not include <filename>inttypes.h</filename>. You
+  will have to copy or symlink <filename>etc/cygwin_inttypes.h</filename> from the
+  MPlayer source directory to <filename>/usr/include/inttypes.h</filename> in order to
+  make MPlayer compile.</para>
 
-<para>
-To get native DirectX video, download
-<ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>,
-extract them to <filename>/usr/include/</filename> or <filename>/usr/local/include/</filename>
-and recompile. You will then be able to use the directx video out driver. You
-can make the movie window stay on top with <option>-vo directx:ontop</option>. If
-the image is distorted, try turning off hardware acceleration with
-<option>-vo directx:noaccel</option>.
-</para>
+<para>DirectX header files need to be extracted to <filename class="directory">/usr/include/</filename> or
+  <filename class="directory">/usr/local/include/</filename>.</para>
 
-<para>
-Instructions and files for making SDL run under Cygwin can be found on the
-<ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</ulink>.
-</para>
+<para>Instructions and files for making SDL run under Cygwin can be found on the
+  <ulink url="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</ulink>.</para>
 
-<para>
-You can play VCDs by playing the .DAT or .MPG files that Windows exposes on
-VCDs. It works like this (adjust for the drive letter of your CD-ROM):
+<para>You can play VCDs by playing the <filename>.DAT</filename> or <filename>.MPG</filename> files
+  that Windows exposes on VCDs.  It works like this (adjust for the drive letter
+  of your CD-ROM):</para>
+
 <screen>mplayer d:/mpegav/avseq01.dat</screen>
+
 <screen>mplayer /cygdrive/d/MPEG2/AVSEQ01.MPG</screen>
-</para>
 
-<para>
-DVDs also work, just set the DVD device correctly to whatever your CD-ROM
-device is:
+<para>DVDs also work, just set the DVD device correctly to whatever your CD-ROM
+  device is:</para>
+
 <screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
-</para>
 
-<para>
-QuickTime and Real DLLs also work. Compile with <option>--enable-qtx</option>
-and <option>--enable-real</option> and put the codecs into
-the default Windows DLL location, <filename class="directory">C:\WINNT\system32</filename>
-or <filename class="directory">C:\Windows\system</filename> depending on your
-Windows version.
-</para>
+<para>The Cygwin console is rather slow. Redirecting output or using the
+  <option>-quiet</option> option has been reported to improve performance.</para>
 
-<para>
-The Cygwin console is rather slow. Redirecting output or using the
-<option>-quiet</option> option has been reported to improve performance.
-</para>
- 
+</sect2>
+
+
+<sect2 id="mingw">
+<title>MinGW</title>
+
+<para>Installing a version of MinGW that could compile MPlayer used to be quite
+  tricky, but only consists of three simple steps now and should work out of
+  the box soon.</para>
+
+<itemizedlist>
+  <listitem><para>Install MinGW 3.0.0 or later.</para></listitem>
+  <listitem><para>Install MSYS 1.0.9 or later and tell the MSYS postinstall that
+    MinGW is installed.</para></listitem>
+  <listitem><para>Replace <filename>/mingw/include/sys/types.h</filename> with this
+    <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para></listitem>
+</itemizedlist>
+
+<para>Extract DirectX header files to <filename class="directory">/mingw/include/</filename>.</para>
+
+<para>VCDs and DVDs work almost like Cygwin (adjust for the drive letter of your
+  CD-ROM):</para>
+
+<screen>mplayer d:/mpegav/avseq01.dat</screen>
+
+<screen>mplayer /d/MPEG2/AVSEQ01.MPG</screen>
+
+<screen>mplayer dvd://&lt;title&gt; -dvd-device /d/</screen>
+
+</sect2>
+
+
 </sect1>
 
 </chapter>
