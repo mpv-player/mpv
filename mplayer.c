@@ -1742,9 +1742,15 @@ if(rel_seek_secs || abs_seek_pos){
 
 #ifdef HAVE_NEW_GUI
       if(use_gui){
-        int len=((demuxer->movi_end-demuxer->movi_start));
-	if ( len > 0 ) mplShMem->Position=(float)(demuxer->filepos-demuxer->movi_start) / len * 100.0f;
-	 else mplShMem->Position=0;
+	if(demuxer->file_format==DEMUXER_TYPE_AVI && sh_video->video.dwLength>2){
+	  // get pos from frame number / total frames
+	  mplShMem->Position=(float)d_video->pack_no*100.0f/sh_video->video.dwLength;
+	} else {
+	  // get pos from file position / filesize
+          int len=((demuxer->movi_end-demuxer->movi_start));
+	  int pos=(demuxer->file_format==DEMUXER_TYPE_AVI)?demuxer->filepos:d_video->pos;
+	  mplShMem->Position=(len<=0)?0:((float)(pos-demuxer->movi_start) / len * 100.0f);
+	}
 	mplShMem->TimeSec=d_video->pts; 
       }
 #endif
