@@ -563,6 +563,8 @@ static uint32_t query_format( uint32_t format )
     mp_msg(MSGT_VO,MSGL_DBG2,"vo_x11: query_format was called: %x (%s)\n",format,vo_format_name(format));
     if (IMGFMT_IS_BGR(format))
     {
+	if (IMGFMT_BGR_DEPTH(format) == 8)
+	    return 0;
 	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
 	    return 3|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
 	else
