@@ -1,7 +1,6 @@
-/* This audio filter doesn't really do anything useful but serves an
-   example of how audio filters work. It delays the output signal by
-   the number of seconds set by delay=n where n is the number of
-   seconds.
+/* This audio filter delays the output signal for the different
+   channels and can be used for simple position panning. Extension for
+   this filter would be a reverb.
 */
 #include <stdio.h>
 #include <stdlib.h>
@@ -9,74 +8,83 @@
 
 #include "af.h"
 
+#define L 65536
+
+#define UPDATEQI(qi) qi=(qi+1)&(L-1)
+
 // Data for specific instances of this filter
 typedef struct af_delay_s
 {
-  void* buf; 	    // data block used for delaying audio signal
-  int   len;        // local buffer length
-  float tlen;       // Delay in seconds
+  void* q[AF_NCH];   	// Circular queues used for delaying audio signal
+  int 	wi[AF_NCH];  	// Write index
+  int 	ri;		// Read index
+  float	d[AF_NCH];   	// Delay [ms] 	
 }af_delay_t;
 
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
+  af_delay_t* s = af->setup;
   switch(cmd){
   case AF_CONTROL_REINIT:{
+    int i;
+
+    // Free prevous delay queues
+    for(i=0;i<af->data->nch;i++){
+      if(s->q[i])
+	free(s->q[i]);
+    }
+
     af->data->rate   = ((af_data_t*)arg)->rate;
     af->data->nch    = ((af_data_t*)arg)->nch;
     af->data->format = ((af_data_t*)arg)->format;
     af->data->bps    = ((af_data_t*)arg)->bps;
-    
-    return af->control(af,AF_CONTROL_DELAY_LEN | AF_CONTROL_SET,
-		       &((af_delay_t*)af->setup)->tlen);
+
+    // Allocate new delay queues
+    for(i=0;i<af->data->nch;i++){
+      s->q[i] = calloc(L,af->data->bps);
+      if(NULL == s->q[i])
+	af_msg(AF_MSG_FATAL,"[delay] Out of memory\n");
+    }
+
+    return control(af,AF_CONTROL_DELAY_LEN | AF_CONTROL_SET,s->d);
   }
   case AF_CONTROL_COMMAND_LINE:{
-    float d = 0;
-    sscanf((char*)arg,"%f",&d);
-    return af->control(af,AF_CONTROL_DELAY_LEN | AF_CONTROL_SET,&d);
-  }  
-  case AF_CONTROL_DELAY_LEN | AF_CONTROL_SET:{
-    af_delay_t* s  = (af_delay_t*)af->setup;
-    void*       bt = s->buf; // Old buffer
-    int         lt = s->len; // Old len
-
-    if(*((float*)arg) > 30 || *((float*)arg) < 0){
-      af_msg(AF_MSG_ERROR,"Error setting delay length in af_delay. Delay must be between 0s and 30s\n");
-      s->len=0;
-      s->tlen=0.0;
-      af->delay=0.0;
-      return AF_ERROR;
-    }
-
-    // Set new len and allocate new buffer
-    s->tlen = *((float*)arg);
-    af->delay = s->tlen * 1000.0;
-    s->len  = af->data->rate*af->data->bps*af->data->nch*(int)s->tlen;
-    s->buf  = malloc(s->len);
-    af_msg(AF_MSG_DEBUG0,"[delay] Delaying audio output by %0.2fs\n",s->tlen);
-    af_msg(AF_MSG_DEBUG1,"[delay] Delaying audio output by %i bytes\n",s->len);
-
-    // Out of memory error
-    if(!s->buf){
-      s->len = 0;
-      free(bt);
-      return AF_ERROR;
-    }
-      
-    // Clear the new buffer
-    memset(s->buf, 0, s->len);
-    
-    /* Copy old buffer to avoid click in output 
-       sound (at least most of it) and release it */
-    if(bt){
-      memcpy(s->buf,bt,min(lt,s->len));
-      free(bt);
+    int n = 1;
+    int i = 0;
+    char* cl = arg;
+    while(n && i < AF_NCH ){
+      sscanf(cl,"%f:%n",&s->d[i],&n);
+      if(n==0 || cl[n-1] == '\0')
+	break;
+      cl=&cl[n];
+      i++;
     }
     return AF_OK;
   }
-  case AF_CONTROL_DELAY_LEN | AF_CONTROL_GET:
-    *((float*)arg) = ((af_delay_t*)af->setup)->tlen;
+  case AF_CONTROL_DELAY_LEN | AF_CONTROL_SET:{
+    int i;
+    if(AF_OK != af_from_ms(AF_NCH, arg, s->wi, af->data->rate, 0.0, 1000.0))
+      return AF_ERROR;
+    s->ri = 0;
+    for(i=0;i<AF_NCH;i++){
+      af_msg(AF_MSG_DEBUG0,"[delay] Channel %i delayed by %0.3fms\n",
+	     i,clamp(s->d[i],0.0,1000.0));
+      af_msg(AF_MSG_DEBUG1,"[delay] Channel %i delayed by %i samples\n",
+	     i,s->wi[i]);
+    }
     return AF_OK;
+  }
+  case AF_CONTROL_DELAY_LEN | AF_CONTROL_GET:{
+    int i;
+    for(i=0;i<AF_NCH;i++){
+      if(s->ri > s->wi[i])
+	s->wi[i] = L - (s->ri - s->wi[i]);
+      else
+	s->wi[i] = s->wi[i] - s->ri;
+    }
+    return af_to_ms(AF_NCH, s->wi, arg, af->data->rate);
+  }
   }
   return AF_UNKNOWN;
 }
@@ -84,12 +92,12 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
 // Deallocate memory 
 static void uninit(struct af_instance_s* af)
 {
-  if(af->data->audio)
-    free(af->data->audio);
+  int i;
   if(af->data)
     free(af->data);
-  if(((af_delay_t*)(af->setup))->buf)
-    free(((af_delay_t*)(af->setup))->buf);
+  for(i=0;i<AF_NCH;i++)
+    if(((af_delay_t*)(af->setup))->q[i])
+      free(((af_delay_t*)(af->setup))->q[i]);
   if(af->setup)
     free(af->setup);
 }
@@ -97,34 +105,59 @@ static void uninit(struct af_instance_s* af)
 // Filter data through filter
 static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 {
-  af_data_t*   c = data;			// Current working data
-  af_data_t*   l = af->data;	 		// Local data
-  af_delay_t*  s = (af_delay_t*)af->setup; 	// Setup for this instance
- 
-  
-  if(AF_OK != RESIZE_LOCAL_BUFFER(af , data))
-    return NULL;
-  
-  if(s->len > c->len){ // Delay bigger than buffer
-    // Copy beginning of buffer to beginning of output buffer
-    memcpy(l->audio,s->buf,c->len);
-    // Move buffer left
-    memmove(s->buf,s->buf+c->len,s->len-c->len);
-    // Save away current audio to end of buffer
-    memcpy(s->buf+s->len-c->len,c->audio,c->len);
+  af_data_t*   	c   = data;	 // Current working data
+  af_delay_t*  	s   = af->setup; // Setup for this instance
+  int 		nch = c->nch;	 // Number of channels
+  int		len = c->len/c->bps; // Number of sample in data chunk
+  int		ri  = 0;
+  int 		ch,i;
+  for(ch=0;ch<nch;ch++){
+    switch(c->bps){
+    case 1:{
+      int8_t* a = c->audio;
+      int8_t* q = s->q[ch]; 
+      int wi = s->wi[ch];
+      ri = s->ri;
+      for(i=ch;i<len;i+=nch){
+	q[wi] = a[i];
+	a[i]  = q[ri];
+	UPDATEQI(wi);
+	UPDATEQI(ri);
+      }
+      s->wi[ch] = wi;
+      break;
+    }
+    case 2:{
+      int16_t* a = c->audio;
+      int16_t* q = s->q[ch]; 
+      int wi = s->wi[ch];
+      ri = s->ri;
+      for(i=ch;i<len;i+=nch){
+	q[wi] = a[i];
+	a[i]  = q[ri];
+	UPDATEQI(wi);
+	UPDATEQI(ri);
+      }
+      s->wi[ch] = wi;
+      break;
+    }
+    case 4:{
+      int32_t* a = c->audio;
+      int32_t* q = s->q[ch]; 
+      int wi = s->wi[ch];
+      ri = s->ri;
+      for(i=ch;i<len;i+=nch){
+	q[wi] = a[i];
+	a[i]  = q[ri];
+	UPDATEQI(wi);
+	UPDATEQI(ri);
+      }
+      s->wi[ch] = wi;
+      break;
+    }
+    }
   }
-  else{
-    // Copy end of previous block to beginning of output buffer
-    memcpy(l->audio,s->buf,s->len);
-    // Copy current block except end
-    memcpy(l->audio+s->len,c->audio,c->len-s->len);
-    // Save away end of current block for next call
-    memcpy(s->buf,c->audio+c->len-s->len,s->len);
-  }
-  
-  // Set output data
-  c->audio=l->audio;
-
+  s->ri = ri;
   return c;
 }
 
