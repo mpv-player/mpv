@@ -43,11 +43,14 @@
 
 #define vo_wm_Unknown     0
 #define vo_wm_NetWM       1
-#define vo_wm_KDE         2
-#define vo_wm_IceWM       3
-#define vo_wm_WMakerStyle 4
+#define vo_wm_Layered     2
 
-int ice_layer=12;
+#define WIN_LAYER_ONBOTTOM               2
+#define WIN_LAYER_NORMAL                 4
+#define WIN_LAYER_ONTOP                  6
+#define WIN_LAYER_ABOVE_DOCK             12
+ 
+int ice_layer=WIN_LAYER_ABOVE_DOCK;
 int stop_xscreensaver=0;
 
 static int dpms_disabled=0;
@@ -131,18 +134,6 @@ static int x11_errorhandler(Display *display, XErrorEvent *event)
 #undef MSGLEN
 }
 
-int vo_wm_string_test( char * name )
-{
- if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
-  { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" ); return vo_wm_IceWM; }
- if ( !strncmp( name,"_KDE_",5 ) )
-  { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is KDE.\n" ); return vo_wm_KDE; }
- if ( !strncmp( name,"KWM_WIN",7 ) )
-  { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" ); return vo_wm_WMakerStyle; }
-// fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",win,name,xev.xproperty.atom );
- return vo_wm_Unknown;
-}
-
 int net_wm_support_state_test( char *name )
 {
   mp_dbg(MSGT_VO,MSGL_DBG2, "[x11] NetWM supports %s\n",name);
@@ -158,19 +149,15 @@ int net_wm_support_state_test( char *name )
 int vo_wm_detect( void )
 {
  Atom            type;
- Window		 win;
  XEvent          xev;
- int		 c = 0;
+ int             i;
  int             wm = vo_wm_Unknown;
  int             format;
  unsigned long   nitems, bytesafter;
  Atom          * args = NULL;
- char          * name = NULL;
- int i;
  
  if ( WinID >= 0 ) return vo_wm_Unknown;
  
-#if 1
 // --- netwm 
  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **) &args ) && nitems > 0 )
@@ -179,35 +166,22 @@ int vo_wm_detect( void )
    for (i = 0; i < nitems; i++)
      net_wm_support |= net_wm_support_state_test (XGetAtomName (mDisplay, args[i]));
    XFree( args );
-   return vo_wm_NetWM;
+   if (net_wm_support)
+     return vo_wm_NetWM;
   }
-#endif
-// --- other wm
- mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Create window for WM detect ...\n" );
- win=XCreateSimpleWindow( mDisplay,mRootWin,vo_screenwidth,vo_screenheight,1,1,0,0,0 );
- XSelectInput( mDisplay,win,PropertyChangeMask | StructureNotifyMask );
- XMapWindow( mDisplay,win );
- XMoveWindow( mDisplay,win,vo_screenwidth,vo_screenheight );
- do 
-  { 
-   XCheckWindowEvent( mDisplay,win,PropertyChangeMask | StructureNotifyMask,&xev );
 
-   if ( xev.type == PropertyNotify )
-    {
-     name=XGetAtomName( mDisplay,xev.xproperty.atom );
-     if ( !name ) break;
-
-     wm=vo_wm_string_test( name );
-     if ( wm != vo_wm_Unknown ) break;
-     XFree( name ); name=NULL;
-    }
- } while( c++ < 25 );
- if ( name ) XFree( name );
- XUnmapWindow( mDisplay,win );
- XDestroyWindow( mDisplay,win );
-#ifdef MP_DEBUG
+// -- supports layers
+ type=XInternAtom( mDisplay,"_WIN_PROTOCOLS",False );
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char **) &args ) && nitems > 0 )
+  {
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports layers.\n" );
+   for (i = 0; i < nitems; i++)
+     if (!strcmp( XGetAtomName (mDisplay, args[i]), "_WIN_LAYER"));
+       return vo_wm_Layered;
+   XFree( args );
+  }
+ 
  if ( wm == vo_wm_Unknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Unknown wm type...\n" );
-#endif
  return wm;
 }    
 
@@ -628,9 +602,6 @@ int vo_x11_check_events(Display *mydisplay){
 	    
 	    if ( !name ) break;
 	    
-	    wm=vo_wm_string_test(name);
-	    if ( wm != vo_wm_Unknown ) vo_wm_type=wm;
-
 //          fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",vo_window,name,Event.xproperty.atom );
 	      
 	    XFree( name );
@@ -654,12 +625,6 @@ void vo_x11_sizehint( int x, int y, int width, int height, int max )
  XSetWMNormalHints( mDisplay,vo_window,&vo_hint );
 }
 
-#define WIN_LAYER_ONBOTTOM               2
-#define WIN_LAYER_NORMAL                 4
-#define WIN_LAYER_ONTOP                  6
-#define WIN_LAYER_ABOVE_DOCK             10
- 
-
 void vo_x11_setlayer( int layer )
 {
  Atom            type,arg1,arg2;
@@ -671,7 +636,7 @@ void vo_x11_setlayer( int layer )
  if ( WinID >= 0 ) return;
  
  switch ( vo_wm_type )
- { case vo_wm_IceWM:
+ { case vo_wm_Layered:
   {
     XClientMessageEvent xev;
     memset(&xev, 0, sizeof(xev));
@@ -680,9 +645,9 @@ void vo_x11_setlayer( int layer )
     xev.window = vo_window;
     xev.message_type = XInternAtom(mDisplay, "_WIN_LAYER", False);
     xev.format = 32;
-    xev.data.l[0] = layer?ice_layer:4; // if not fullscreen, stay on layer "Normal"
+    xev.data.l[0] = layer?ice_layer:WIN_LAYER_NORMAL; // if not fullscreen, stay on layer "Normal"
     xev.data.l[1] = CurrentTime;
-    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] IceWM style stay on top ( layer %d ).\n",xev.data.l[0] );
+    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Layered style stay on top ( layer %d ).\n",xev.data.l[0] );
     XSendEvent(mDisplay, mRootWin, False, SubstructureNotifyMask, (XEvent *) &xev);
     break;
   }
@@ -691,8 +656,6 @@ void vo_x11_setlayer( int layer )
    XClientMessageEvent  xev;
    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] NET style stay on top ( layer %d ).\n",layer );
 
-   if (net_wm_support & SUPPORT_FULLSCREEN)
-   {
    memset( &xev,0,sizeof( xev ) );
    xev.type=ClientMessage;
    xev.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
@@ -700,60 +663,23 @@ void vo_x11_setlayer( int layer )
    xev.window=vo_window;
    xev.format=32;
    xev.data.l[0]=layer;
-   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
-   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
+   
+   if (net_wm_support & SUPPORT_FULLSCREEN)
+   {
+     xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_FULLSCREEN",False );
+     XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    } else
    if (net_wm_support & SUPPORT_STAYS_ON_TOP)
    {
-   memset( &xev,0,sizeof( xev ) );
-   xev.type=ClientMessage;
-   xev.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
-   xev.display=mDisplay;
-   xev.window=vo_window;
-   xev.format=32;
-   xev.data.l[0]=layer;
-   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
-   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
+     xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_STAYS_ON_TOP",False );
+     XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    } else
    if (net_wm_support & SUPPORT_ABOVE)
    {
-   memset( &xev,0,sizeof( xev ) );
-   xev.type=ClientMessage;
-   xev.message_type=XInternAtom( mDisplay,"_NET_WM_STATE",False );
-   xev.display=mDisplay;
-   xev.window=vo_window;
-   xev.format=32;
-   xev.data.l[0]=layer;
-   xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
-   XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
+     xev.data.l[1]=XInternAtom( mDisplay,"_NET_WM_STATE_ABOVE",False );
+     XSendEvent( mDisplay,mRootWin,False,SubstructureRedirectMask,(XEvent*)&xev );
    }
-   break;
   }
- default:
- {
- type=XInternAtom( mDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
- if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,16384,False,AnyPropertyType,&type,&format,&nitems,&bytesafter,(unsigned char**)(&args) ) && nitems > 0 )
-  {
-   XClientMessageEvent  xev;
-   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Gnome style stay on top ( layer %d ).\n",layer );
-   memset( &xev,0,sizeof( xev ) );
-   xev.type=ClientMessage;
-   xev.window=vo_window;
-   xev.message_type=XInternAtom( mDisplay,"_WIN_LAYER",False );
-   xev.format=32;
-   switch ( layer ) 
-    {
-     case -1: xev.data.l[0] = WIN_LAYER_ONBOTTOM; break;
-     case  0: xev.data.l[0] = WIN_LAYER_NORMAL;   break;
-     case  1: xev.data.l[0] = WIN_LAYER_ABOVE_DOCK; break;
-    }
-   
-   if ( layer ) XRaiseWindow( mDisplay,vo_window );
-   XSendEvent( mDisplay,mRootWin,False,SubstructureNotifyMask,(XEvent*)&xev );
-   XFree( args );
-   return;
-  }
- }
  }
 }
 
@@ -763,6 +689,9 @@ void vo_x11_fullscreen( void )
 
  if ( WinID >= 0 ) return;
 
+ // window manager could be changed during play
+ vo_wm_type=vo_wm_detect();
+ 
  if ( vo_fs ){
    // fs->win
    if(vo_dwidth != vo_screenwidth && vo_dheight != vo_screenheight) return;
