@@ -6,12 +6,6 @@ LIBNAME = libvo.a
 SRCS=aspect.c aclib.c osd.c font_load.c video_out.c vo_null.c vo_pgm.c vo_md5.c vo_mpegpes.c x11_common.c $(OPTIONAL_SRCS) img_format.c
 OBJS=$(SRCS:.c=.o)
 
-ifeq ($(TARGET_ARCH_X86),yes)
-ifeq ($(TARGET_OS),Linux)
-SRCS += vo_vesa.c vesa_lvo.c
-endif
-endif
-
 CFLAGS  = $(OPTFLAGS) -I. -I.. $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DVB_INC) -DMPG12PLAY #-Wall
 # -I/usr/X11R6/include/
 
