@@ -275,14 +275,17 @@ static int config(struct vf_instance_s* vf,
 #endif
     case 1: 
 	lavc_venc_context.flags|= CODEC_FLAG_PASS1; 
+#if LIBAVCODEC_BUILD >= 4620
 	stats_file= fopen(passtmpfile, "w");
 	if(stats_file==NULL){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
             return 0;
 	}
+#endif
 	break;
     case 2:
 	lavc_venc_context.flags|= CODEC_FLAG_PASS2; 
+#if LIBAVCODEC_BUILD >= 4620
 	stats_file= fopen(passtmpfile, "r");
 	if(stats_file==NULL){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
@@ -298,8 +301,8 @@ static int config(struct vf_instance_s* vf,
 	if(fread(lavc_venc_context.stats_in, size, 1, stats_file)<1){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: reading from filename=%s\n", passtmpfile);
             return 0;
-	}
-        
+	}        
+#endif
 	break;
     }
 
@@ -423,9 +426,9 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 static void uninit(struct vf_instance_s* vf){
     avcodec_close(&lavc_venc_context);
 
-    if(stats_file) fclose(stats_file);
-
 #if LIBAVCODEC_BUILD >= 4620
+    if(stats_file) fclose(stats_file);
+    
     /* free rc_override */
     if(lavc_venc_context.rc_override) free(lavc_venc_context.rc_override);
     lavc_venc_context.rc_override= NULL;
