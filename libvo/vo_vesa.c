@@ -354,15 +354,20 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
   uint32_t w,h;
   unsigned short *mode_ptr,win_seg;
   unsigned bpp,best_x = UINT_MAX,best_y=UINT_MAX,best_mode_idx = UINT_MAX;
-  int err;
+  int err,fs_mode;
 	image_width = width;
 	image_height = height;
+	fs_mode = 0;
 	if(flags & 0x8)
 	{
 	  printf("vo_vesa: switch -flip is not supported\n");
 	}
 	if(flags & 0x04) vesa_zoom = 1;
-	if(flags & 0x01 && vesa_zoom) vesa_zoom = 2;
+	if(flags & 0x01)
+	{
+	  if(vesa_zoom) vesa_zoom = 2;
+	  else          fs_mode = 1;
+	} 
 	if((err=vbeInit()) != VBE_OK) { PRINT_VBE_ERR("vbeInit",err); return -1; }
 	memcpy(vib.VESASignature,"VBE2",4);
 	if((err=vbeGetControllerInfo(&vib)) != VBE_OK)
@@ -498,7 +503,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		printf("vo_vesa: Using VESA mode (%u) = %x [%ux%u@%u]\n"
 			,best_mode_idx,video_mode,video_mode_info.XResolution
 			,video_mode_info.YResolution,video_mode_info.BitsPerPixel);
-		if( vesa_zoom )
+		if( vesa_zoom || fs_mode )
 		{
 		  if( format==IMGFMT_YV12 )
 		  {
@@ -507,8 +512,13 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		      vesa_aspect(image_width,image_height,  
 		    		  video_mode_info.XResolution,video_mode_info.YResolution,
 				  &image_width,&image_height);
-/*			image_width = video_mode_info.XResolution;
-			image_height = video_mode_info.YResolution;*/
+		      else
+		      if(fs_mode)
+		      {
+			image_width = video_mode_info.XResolution;
+			image_height = video_mode_info.YResolution;
+			vesa_zoom = 1;
+		      }
 		      scale_xinc=(width << 16) / image_width - 2;  /* needed for proper rounding */
 	    	      scale_yinc=(height << 16) / image_height + 2;
 		      SwScale_Init();
