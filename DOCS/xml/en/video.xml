@@ -2204,7 +2204,14 @@ to finish and <emphasis role="bold">THEN</emphasis> stop XawTV.
 <para>
 This driver is capable of playback using the Blinkenlights UDP protocol. If you
 don't know what <ulink url="http://www.blinkenlights.de/">Blinkenlights</ulink>
-is, you don't need this driver.
+or its successor
+<ulink url="http://www.blinkenlights.de/arcade/">Arcade</ulink>
+are, find it out. Although this is most probably the least used video output
+driver, without a doubt it is the coolest <application>MPlayer</application>
+has to offer. Just watch some of the
+<ulink url="http://www.blinkenlights.de/video.en.html">Blinkenlights documentation videos</ulink>.
+On the Arcade video you can see the Blinkenlights output driver in
+action at 00:07:50.
 </para>
 </sect4>
 </sect3>
