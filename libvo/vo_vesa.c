@@ -28,6 +28,7 @@
 #include <pwd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <fcntl.h>
 
 
 #include "video_out.h"
@@ -1009,6 +1010,7 @@ static void check_events(void)
 static uint32_t preinit(const char *arg)
 {
   int pre_init_err = 0;
+  int fd;
   if(verbose>1) printf("vo_vesa: preinit(%s) was called\n",arg);
   if(verbose > 2)
         printf("vo_vesa: subdevice %s is being initialized\n",arg);
@@ -1018,6 +1020,11 @@ static uint32_t preinit(const char *arg)
 #ifdef CONFIG_VIDIX
   else if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_vesa);
 #endif
+  // check if we can open /dev/mem (it will be opened later in config(), but if we
+  // detect now that we can't we can exit cleanly)
+  fd = open("/dev/mem", O_RDWR);
+  if (fd < 0)
+  	return -1;
   if(verbose > 2)
         printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
   return pre_init_err;
