@@ -76,7 +76,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmtStr "尝试指定音频解码器驱动族 %s ...\n"
 #define MSGTR_CantFindAfmtFallback "找不到指定驱动族的音频解码器, 只能使用其他驱动.\n"
 #define MSGTR_CantFindAudioCodec "找不到音频格式 0x%X 的解码器.\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** 尝试用 etc/codecs.conf 升级 %s \n*** 如果这样还不行, 查看DOCS/codecs.html!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** 尝试用 etc/codecs.conf 升级 %s \n*** 如果这样还不行, 查看DOCS/zh/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "无法初始化音频解码器! -> nosound\n"
 #define MSGTR_TryForceVideoFmtStr "尝试指定视频解码器驱动族 %s ...\n"
 #define MSGTR_CantFindVideoCodec "找不到适合所选的-vo和视频格式 0x%X 的解码器!\n"
@@ -103,8 +103,8 @@ static char help_text[]=
 "  - 试试 -cache 8192。\n"\
 "- 你使用-cache选项播放一个非交错的avi文件？\n"\
 "  - 试试-nocache\n"\
-"阅读DOCS/video.html和DOCS/sound.html来寻找调整/加速的技巧。\n"\
-"如果这些一个都用不上，阅读DOCS/bugreports.html！\n\n"
+"阅读DOCS/zh/video.html和DOCS/zh/sound.html来寻找调整/加速的技巧。\n"\
+"如果这些一个都用不上，阅读DOCS/zh/bugreports.html！\n\n"
 
 #define MSGTR_NoGui "Mplayer没有编译GUI的支持!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI需要X11!\n"
@@ -137,7 +137,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- “非法指令”导致MPlayer崩溃。\n"\
 "  这可能是我们新的运行时CPU检测代码的一个bug...\n"\
-"  请阅读DOCS/bugreports.html\n"
+"  请阅读DOCS/zh/bugreports.html\n"
 #define MSGTR_Exit_SIGILL \
 "- “非法指令”导致MPlayer崩溃。\n"\
 "  这通常发生在你在与编译/优化MPlayer不同的CPU上使用\n"\
@@ -145,11 +145,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- 过度使用CPU/FPU/RAM导致MPlayer崩溃.\n"\
 "  使用--enable-debug重新编译MPlayer用“gdb”backtrace和\n"\
-"  反汇编。具体细节看DOCS/bugreports.html#crash\n"
+"  反汇编。具体细节看DOCS/zh/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer崩溃了。这不应该发生。\n"\
 "  这可能是MPlayer代码中的 _或者_ 你的驱动中的 _or_ 你的gcc的\n"\
-"  一个bug。如果你觉得这是MPlayer的错，请阅读DOCS/bugreports.html\n"\
+"  一个bug。如果你觉得这是MPlayer的错，请阅读DOCS/zh/bugreports.html\n"\
 "  并遵循上面的步骤。我们不能也不会帮助你除非你在报告一个可能bug的时候\n"\
 "  提供所需要的信息。\n"
 
@@ -280,7 +280,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "无法在不完整的.AVI流中搜索. (需要索引, 尝试使用-idx 选项!)  \n"
 #define MSGTR_CantSeekFile "无法在这个文件中搜索.  \n"
 
-#define MSGTR_EncryptedVOB "加密的VOB文件(没有编译libcss支持)! 阅读DOCS/cd-dvd.html.\n"
+#define MSGTR_EncryptedVOB "加密的VOB文件(没有编译libcss支持)! 阅读DOCS/zh/cd-dvd.html.\n"
 #define MSGTR_EncryptedVOBauth "加密流但你没有要求使用授权!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: 压缩的文件头(目前)不支持.\n"
