@@ -107,6 +107,7 @@ A: You can make a .deb package for yourself, check DOCS/DEBIAN .
    It's _STRONGLY_ discouraged to use precompiled packages
    of MPlayer, since it (currently) _highly_ depends on compile-time
    options and optimizations!
+   Precompiled packages are COMPLETELY unsupported by the MPlayer team!
 
 Q: Are there any mailing lists on MPlayer?
 A: Yes! See README on how to subscribe them!

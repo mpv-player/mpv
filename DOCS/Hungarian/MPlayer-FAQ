@@ -109,6 +109,7 @@ A: Csinalhatsz magadnak .deb csomagot, lasd DOCS/DEBIAN .
    _ROPPANTUL_ ellene vagyunk az eloreforditott MPlayer csomagok
    hasznalatanak, mivel (jelenleg) _erosen_ fugg a forditaskor
    hasznalt opcioktol es optimalizacioktol!
+   Eloreforditott csomagokhoz az MPlayer team SEMMILYEN tamogatast nem nyujt!
 
 Q: Vannak MPlayer levelezesi listak?
 A: Igen! Lasd README a feliratkozashoz!
