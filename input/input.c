@@ -36,7 +36,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_AUDIO_DELAY, "audio_delay", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_QUIT, "quit", 0, { {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
-  { MP_CMD_GRAB_FRAMES, "grap_frames",0, { {-1,{0}} }  },
+  { MP_CMD_GRAB_FRAMES, "grab_frames",0, { {-1,{0}} }  },
   { MP_CMD_PLAY_TREE_STEP, "pt_step",1, { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
   { MP_CMD_PLAY_TREE_UP_STEP, "pt_up_step",1,  { { MP_CMD_ARG_INT,{0} }, {-1,{0}} } },
   { MP_CMD_PLAY_ALT_SRC_STEP, "alt_src_step",1, { { MP_CMD_ARG_INT,{0} }, {-1,{0}} } },
@@ -423,7 +423,7 @@ mp_input_parse_cmd(char* str) {
     case -1:
       ptr = NULL;
     default :
-      printf("Unknow argument %d\n",i);
+      printf("Unknown argument %d\n",i);
     }
   }
   cmd->nargs = i;
@@ -555,7 +555,7 @@ static mp_cmd_t*
 mp_input_get_cmd_from_keys(int n,int* keys, int paused) {
   char* cmd = NULL;
   mp_cmd_t* ret;
-  // In pause mode we return pause for the first key wich come
+  // In pause mode we return pause for the first key which come
   if(paused)
     return mp_input_parse_cmd("pause");
 
@@ -668,7 +668,7 @@ mp_input_read_keys(int time,int paused) {
 	continue;
       }
       code &= ~MP_KEY_DOWN;
-      // Check if we don't alredy have this key as pushed
+      // Check if we don't already have this key as pushed
       for(j = 0; j < num_key_down; j++) { 
 	if(key_down[j] == code)
 	  break;
@@ -682,7 +682,7 @@ mp_input_read_keys(int time,int paused) {
       continue;
     }
     // key released
-    // Check if the key is in the down key, driver wich can't send push event
+    // Check if the key is in the down key, driver which can't send push event
     // send only release event
     for(j = 0; j < num_key_down; j++) { 
       if(key_down[j] == code)
@@ -1072,7 +1072,7 @@ mp_input_parse_config(char *file) {
 
     // Find the wanted key
     if(keys[0] == 0) {
-      // Jump beginnig space
+      // Jump beginning space
       for(  ; iter[0] != '\0' && strchr(SPACE_CHAR,iter[0]) != NULL ; iter++)
 	/* NOTHING */;
       if(iter[0] == '\0') { // Buffer was full of space char
@@ -1104,7 +1104,7 @@ mp_input_parse_config(char *file) {
 	strncpy(name,iter,end-iter);
 	name[end-iter] = '\0';
 	if(! mp_input_get_input_from_name(name,keys)) {
-	  printf("Unknow key '%s'\n",name);
+	  printf("Unknown key '%s'\n",name);
 	  mp_input_free_binds(binds);
 	  return 0;
 	}
