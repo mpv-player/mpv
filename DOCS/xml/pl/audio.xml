@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.18 -->
 <sect2 id="audio-dev">
 <title>Urządzenia wyjściowe audio</title>
 <sect3 id="sync">
@@ -580,7 +580,7 @@ jeżeli nie jest używany. Liczba parametrów jest dynamiczna:
 <term><option>nch &lt;1-6&gt;</option></term>
 <listitem><para>
   jest to liczba całkowita z zakresu od <literal>1</literal> do <literal>6</literal>, 
-  która ustawia liczbę kanałów wyjściowych. Ta opcja jest wymagana.
+  która ustawia liczbę kanałów wejściowych. Ta opcja jest wymagana.
   Nie podanie jej spowoduje błąd uruchamiania (runtime error) programu.
 </para></listitem>
 </varlistentry>

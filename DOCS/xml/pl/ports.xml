@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.47 -->
+<!-- synced with 1.48 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -109,6 +109,9 @@ Jeżeli Twój procesor ma rozszerzenie SSE, przekompiluj jądro z opcją
 Po pierwsze, upewnij się, że wersja nierdzenna występuje w zmiennej <envar>$PATH</envar>
 i wykonaj <command>gmake -k</command>, a następnie upewnij się, że używana jest wersja rdzenna
 i wykonaj <command>gmake</command>.
+</para>
+<para>
+Powyższa metoda nie jest już potrzebna w OpenBSD 3.4.
 </para>
 </sect2>
 
