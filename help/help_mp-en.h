@@ -1,7 +1,7 @@
 // MASTER FILE. Use this file as base for translations.
 
-// Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming.
-// Also send a notify message to the mplayer-dev-eng mailing list.
+// Translated files should be sent to the mplayer-dev-eng mailing list or
+// to the help messages maintainer, see DOCS/tech/MAINTAINERS.
 
 // ========================= MPlayer help ===========================
 
