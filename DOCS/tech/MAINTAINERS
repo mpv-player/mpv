@@ -71,7 +71,7 @@ Imported libs/projects:
 
 libvo drivers:
     * vo_3dfx.c - OBSOLETED, use xv or tdfxfb
-    * vo_aa.c - ? (Folke Ashberg)
+    * vo_aa.c - Alban Bedel
     * vo_bl.c - Rik Snel
     * vo_cvidix.c - Sascha Sommer
     * vo_dga.c - ? (Acki (outdated))
@@ -84,8 +84,8 @@ libvo drivers:
     * vo_fbdev2.c - Joey Parrish
     * vo_ggi.c - Alex
     * vo_gif89a.c - Joey Parrish
-    * vo_gl.c - ? (A'rpi)
-    * vo_gl2.c - ? (Sven Goethel)
+    * vo_gl.c - Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
+    * vo_gl2.c - Reimar Döffinger
     * vo_jpeg.c - Pontscho
     * vo_md5.c - A'rpi
     * vo_mga.c - A'rpi
@@ -95,7 +95,7 @@ libvo drivers:
     * vo_png.c - Atmos
     * vo_sdl.c - Atmos
     * vo_svga.c - ? (Matan Ziv-Av)
-    * vo_tdfxfb.c - ? (Mark Zealey)
+    * vo_tdfxfb.c - Alban Bedel
     * vo_tga.c - Daniele Forghieri
     * vo_vesa.c - ? (Nick Kurshev)
     * vo_winvidix.c - Sascha Sommer
