@@ -252,11 +252,11 @@
     -lavcopts vcodec=mjpeg</CODE></P>
 
 
-<H4><A NAME="image_files">2.4.2.6  Encoding from multiple input image files (JPEGs or PNGs)</A></H4>
+<H4><A NAME="image_files">2.4.2.6  Encoding from multiple input image files (JPEGs, PNGs or TGAs)</A></H4>
 
-<P><B>MEncoder</B> is capable of creating movies from one or more JPEG or PNG
-  files. With simple framecopy it can create MJPEG (Motion JPEG) or MPNG
-  (Motion PNG) files.</P>
+<P><B>MEncoder</B> is capable of creating movies from one or more JPEG, PNG or TGA
+  files. With simple framecopy it can create MJPEG (Motion JPEG), MPNG
+  (Motion PNG) or MTGA (Motion TGA) files.</P>
 
 Explanation of the process:
 
@@ -293,6 +293,10 @@ Explanation of the process:
 
 <P><I>Creating a Motion PNG (MPNG) file from all the PNG files in the current dir:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.png -mf on:w=800:h=600:fps=25:type=png -ovc copy
+  -o output.avi</CODE></P>
+
+<P><I>Creating a Motion TGA (MTGA) file from all the TGA files in the current dir:</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder \*.tga -mf on:w=800:h=600:fps=25:type=tga -ovc copy
   -o output.avi</CODE></P>
 
 
