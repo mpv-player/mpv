@@ -389,7 +389,7 @@ void MP3_Init(){
   int accel=0;
 
 #ifdef CAN_COMPILE_X86_ASM
-    GetCpuCaps(&gCpuCaps);
+//    GetCpuCaps(&gCpuCaps);
     if(gCpuCaps.hasMMX) 	accel |= MM_ACCEL_X86_MMX;
     if(gCpuCaps.hasMMX2) 	accel |= MM_ACCEL_X86_MMXEXT;
     if(gCpuCaps.hasSSE) 	accel |= MM_ACCEL_X86_SSE;
