@@ -341,12 +341,12 @@ static void mga_vid_write_regs(void)
 	writel( regs.besglobctl + ((readl(mga_mmio_base + VCOUNT)+2)<<16),
 			mga_mmio_base + BESGLOBCTL);
 
-	printk("mga_vid: wrote BES registers\n");
-	printk("mga_vid: BESCTL = 0x%08x\n",
+	printk(KERN_DEBUG "mga_vid: wrote BES registers\n");
+	printk(KERN_DEBUG "mga_vid: BESCTL = 0x%08x\n",
 			readl(mga_mmio_base + BESCTL));
-	printk("mga_vid: BESGLOBCTL = 0x%08x\n",
+	printk(KERN_DEBUG "mga_vid: BESGLOBCTL = 0x%08x\n",
 			readl(mga_mmio_base + BESGLOBCTL));
-	printk("mga_vid: BESSTATUS= 0x%08x\n",
+	printk(KERN_DEBUG "mga_vid: BESSTATUS= 0x%08x\n",
 			readl(mga_mmio_base + BESSTATUS));
 }
 
@@ -362,7 +362,7 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 	dw = config->dest_width;
 	dh = config->dest_height;
 
-	printk("mga_vid: Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
+	printk(KERN_DEBUG "mga_vid: Setting up a %dx%d+%d+%d video window (src %dx%d) format %X\n",
 	       dw, dh, x, y, sw, sh, config->format);
 
 	//FIXME check that window is valid and inside desktop
@@ -411,7 +411,7 @@ switch(config->format){
 	regs.besglobctl = 0;        // YUY2 format selected
         break;
     default:
-	printk("mga_vid: Unsupported pixel format: 0x%X\n",config->format);
+	printk(KERN_ERR "mga_vid: Unsupported pixel format: 0x%X\n",config->format);
 	return -1;
 }
 
@@ -482,7 +482,7 @@ static void enable_irq(){
 	long int cc;
 
 	cc = readl(mga_mmio_base + IEN);
-	printk("<1>*** !!! IRQREG = %d\n", (int)(cc&0xff));
+	printk(KERN_ALERT "*** !!! IRQREG = %d\n", (int)(cc&0xff));
 
 	writeb( 0x11, mga_mmio_base + CRTCX);
 	
@@ -574,40 +574,40 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 	{
 		case MGA_VID_CONFIG:
 			//FIXME remove
-			printk("vcount = %d\n",readl(mga_mmio_base + VCOUNT));
-			printk("mga_mmio_base = %p\n",mga_mmio_base);
-			printk("mga_mem_base = %08lx\n",mga_mem_base);
+			printk(KERN_DEBUG "vcount = %d\n",readl(mga_mmio_base + VCOUNT));
+			printk(KERN_DEBUG "mga_mmio_base = %p\n",mga_mmio_base);
+			printk(KERN_DEBUG "mga_mem_base = %08lx\n",mga_mem_base);
 			//FIXME remove
 
-			printk("mga_vid: Received configuration\n");
+			printk(KERN_DEBUG "mga_vid: Received configuration\n");
 
  			if(copy_from_user(&mga_config,(mga_vid_config_t*) arg,sizeof(mga_vid_config_t)))
 			{
-				printk("mga_vid: failed copy from userspace\n");
+				printk(KERN_ERR "mga_vid: failed copy from userspace\n");
 				return(-EFAULT);
 			}
 			if(mga_config.version != MGA_VID_VERSION){
-				printk("mga_vid: incompatible version! driver: %X  requested: %X\n",MGA_VID_VERSION,mga_config.version);
+				printk(KERN_ERR "mga_vid: incompatible version! driver: %X  requested: %X\n",MGA_VID_VERSION,mga_config.version);
 				return(-EFAULT);
 			}
 
 			if(mga_config.frame_size==0 || mga_config.frame_size>1024*768*2){
-				printk("mga_vid: illegal frame_size: %d\n",mga_config.frame_size);
+				printk(KERN_ERR "mga_vid: illegal frame_size: %d\n",mga_config.frame_size);
 				return(-EFAULT);
 			}
 
 			if(mga_config.num_frames<1 || mga_config.num_frames>4){
-				printk("mga_vid: illegal num_frames: %d\n",mga_config.num_frames);
+				printk(KERN_ERR "mga_vid: illegal num_frames: %d\n",mga_config.num_frames);
 				return(-EFAULT);
 			}
 			
 			mga_src_base = (mga_ram_size*0x100000-mga_config.num_frames*mga_config.frame_size);
 			if(mga_src_base<0){
-				printk("mga_vid: not enough memory for frames!\n");
+				printk(KERN_ERR "mga_vid: not enough memory for frames!\n");
 				return(-EFAULT);
 			}
 			mga_src_base &= (~0xFFFF); // 64k boundary
-			printk("mga YUV buffer base: 0x%X\n", mga_src_base);
+			printk(KERN_DEBUG "mga YUV buffer base: 0x%X\n", mga_src_base);
 			
 			if (is_g400) 
 			  mga_config.card_type = MGA_G400;
@@ -618,14 +618,14 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 
 			if (copy_to_user((mga_vid_config_t *) arg, &mga_config, sizeof(mga_vid_config_t)))
 			{
-				printk("mga_vid: failed copy to userspace\n");
+				printk(KERN_ERR "mga_vid: failed copy to userspace\n");
 				return(-EFAULT);
 			}
 			return mga_vid_set_config(&mga_config);	
 		break;
 
 		case MGA_VID_ON:
-			printk("mga_vid: Video ON\n");
+			printk(KERN_DEBUG "mga_vid: Video ON\n");
 			vid_src_ready = 1;
 			if(vid_overlay_on)
 			{
@@ -637,7 +637,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 		case MGA_VID_OFF:
-			printk("mga_vid: Video OFF\n");
+			printk(KERN_DEBUG "mga_vid: Video OFF\n");
 			vid_src_ready = 0;   
 			if ( mga_irq != -1 ) disable_irq();
 			regs.besctl &= ~1;
@@ -647,7 +647,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		case MGA_VID_FSEL:
 			if(copy_from_user(&frame,(int *) arg,sizeof(int)))
 			{
-				printk("mga_vid: FSEL failed copy from userspace\n");
+				printk(KERN_ERR "mga_vid: FSEL failed copy from userspace\n");
 				return(-EFAULT);
 			}
 
@@ -655,7 +655,7 @@ static int mga_vid_ioctl(struct inode *inode, struct file *file, unsigned int cm
 		break;
 
 	        default:
-			printk("mga_vid: Invalid ioctl\n");
+			printk(KERN_ERR "mga_vid: Invalid ioctl\n");
 			return (-EINVAL);
 	}
        
@@ -671,21 +671,21 @@ static int mga_vid_find_card(void)
 	if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G400, NULL)))
 	{
 		is_g400 = 1;
-		printk("mga_vid: Found MGA G400\n");
+		printk(KERN_DEBUG "mga_vid: Found MGA G400\n");
 	}
 	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G200_AGP, NULL)))
 	{
 		is_g400 = 0;
-		printk("mga_vid: Found MGA G200 AGP\n");
+		printk(KERN_DEBUG "mga_vid: Found MGA G200 AGP\n");
 	}
 	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G200_PCI, NULL)))
 	{
 		is_g400 = 0;
-		printk("mga_vid: Found MGA G200 PCI\n");
+		printk(KERN_DEBUG "mga_vid: Found MGA G200 PCI\n");
 	}
 	else
 	{
-		printk("mga_vid: No supported cards found\n");
+		printk(KERN_ERR "mga_vid: No supported cards found\n");
 		return FALSE;   
 	}
 
@@ -701,17 +701,17 @@ static int mga_vid_find_card(void)
 	mga_mem_base =  dev->base_address[0] & PCI_BASE_ADDRESS_MEM_MASK;
 #endif
 //	printk("mga_vid: MMIO at 0x%p\n", mga_mmio_base);
-	printk("syncfb (mga): MMIO at 0x%p IRQ: %d\n", mga_mmio_base, mga_irq);
-	printk("mga_vid: Frame Buffer at 0x%08lX\n", mga_mem_base);
+	printk(KERN_DEBUG "syncfb (mga): MMIO at 0x%p IRQ: %d\n", mga_mmio_base, mga_irq);
+	printk(KERN_DEBUG "mga_vid: Frame Buffer at 0x%08lX\n", mga_mem_base);
 
 	pci_read_config_dword(dev,  0x40, &card_option);
-	printk("OPTION word: 0x%08x\n", card_option);
+	printk(KERN_DEBUG "OPTION word: 0x%08x\n", card_option);
 
 //	temp = (card_option >> 10) & 0x17;
 
 #ifdef MGA_MEMORY_SIZE
 	mga_ram_size = MGA_MEMORY_SIZE;
-	printk("mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+	printk(KERN_DEBUG "mga_vid: hard-coded RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 
 #else
 	if (is_g400){
@@ -725,26 +725,26 @@ static int mga_vid_find_card(void)
 	    struct resource *res=&pci_dev->resource[temp];
 	    if(res->flags){
 	      int size=(1+res->end-res->start)>>20;
-	      printk("res %d:  start: 0x%X   end: 0x%X  (%d MB) flags=0x%X\n",temp,res->start,res->end,size,res->flags);
+	      printk(KERN_DEBUG "res %d:  start: 0x%X   end: 0x%X  (%d MB) flags=0x%X\n",temp,res->start,res->end,size,res->flags);
 	      if(res->flags&(IORESOURCE_MEM|IORESOURCE_PREFETCH)){
 	          if(size>mga_ram_size && size<=64) mga_ram_size=size;
 	      }
 	    }
 	}
 
-	printk("mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
+	printk(KERN_DEBUG "mga_vid: detected RAMSIZE is %d MB\n", (unsigned int) mga_ram_size);
 #endif
 
 	if ( mga_irq != -1 ) {
 		int tmp = request_irq(mga_irq, mga_handle_irq, SA_INTERRUPT | SA_SHIRQ, "Syncfb Time Base", &mga_irq);
 		if ( tmp ) {
-			printk("syncfb (mga): cannot register irq %d (Err: %d)\n", mga_irq, tmp);
+			printk(KERN_INFO "syncfb (mga): cannot register irq %d (Err: %d)\n", mga_irq, tmp);
 			mga_irq=-1;
 		} else {
-			printk("syncfb (mga): registered irq %d\n", mga_irq);
+			printk(KERN_DEBUG "syncfb (mga): registered irq %d\n", mga_irq);
 		}
 	} else {
-		printk("syncfb (mga): No valid irq was found\n");
+		printk(KERN_INFO "syncfb (mga): No valid irq was found\n");
 		mga_irq=-1;
 	}
 
@@ -766,11 +766,11 @@ static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, l
 static int mga_vid_mmap(struct file *file, struct vm_area_struct *vma)
 {
 
-	printk("mga_vid: mapping video memory into userspace\n");
+	printk(KERN_DEBUG "mga_vid: mapping video memory into userspace\n");
 	if(remap_page_range(vma->vm_start, mga_mem_base + mga_src_base,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
-		printk("mga_vid: error mapping video memory\n");
+		printk(KERN_INFO "mga_vid: error mapping video memory\n");
 		return(-EAGAIN);
 	}
 
@@ -848,16 +848,16 @@ static int mga_vid_initialize(void)
 {
 	mga_vid_in_use = 0;
 
-	printk( "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
+	printk(KERN_DEBUG "Matrox MGA G200/G400 YUV Video interface v0.01 (c) Aaron Holtzman \n");
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
 	{
-		printk("mga_vid: unable to get major: %d\n", MGA_VID_MAJOR);
+		printk(KERN_ERR "mga_vid: unable to get major: %d\n", MGA_VID_MAJOR);
 		return -EIO;
 	}
 
 	if (!mga_vid_find_card())
 	{
-		printk("mga_vid: no supported devices found\n");
+		printk(KERN_ERR "mga_vid: no supported devices found\n");
 		unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 		return -EINVAL;
 	}
@@ -880,7 +880,7 @@ void cleanup_module(void)
 		iounmap(mga_mmio_base);
 
 	//FIXME turn off BES
-	printk("mga_vid: Cleaning up module\n");
+	printk(KERN_DEBUG "mga_vid: Cleaning up module\n");
 	unregister_chrdev(MGA_VID_MAJOR, "mga_vid");
 }
 
