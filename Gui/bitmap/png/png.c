@@ -113,7 +113,7 @@ int pngRead( unsigned char * fname,txSample * bf )
   }
  bf->Width=raw.Width;
  bf->Height=raw.Height;
- bf->BPP=( raw.Depth * raw.Components ) + raw.Alpha;
+ bf->BPP=( raw.Depth * raw.Components );
  bf->ImageSize=bf->Width * bf->Height * ( bf->BPP / 8 );
  if ( ( bf->Image=malloc( bf->ImageSize ) ) == NULL )
   {
