@@ -31,6 +31,8 @@
 #include "linux/timer.h"
 #include "xacodec.h"
 
+#include "fastmemcpy.h"
+
 #ifdef USE_XANIM
 
 #if 0
