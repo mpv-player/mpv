@@ -5,6 +5,8 @@ void read_avi_header(int index_mode){
 sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 int stream_id=-1;
+int idxfix_videostream=0;
+int idxfix_divx=0;
 
 //---- AVI header:
 avi_header.idx_size=0;
@@ -64,6 +66,22 @@ while(1){
 //        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
 //        sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
 //        if(demuxer->video->id==-1) demuxer->video->id=stream_id;
+        // IdxFix:
+        idxfix_videostream=stream_id;
+        switch(sh_video->bih->biCompression){
+	case mmioFOURCC('D', 'I', 'V', '3'):
+	case mmioFOURCC('d', 'i', 'v', '3'):
+	case mmioFOURCC('D', 'I', 'V', '4'):
+        case mmioFOURCC('d', 'i', 'v', '4'):
+	case mmioFOURCC('D', 'I', 'V', '5'):
+	case mmioFOURCC('d', 'i', 'v', '5'):
+	case mmioFOURCC('D', 'I', 'V', '6'):
+        case mmioFOURCC('d', 'i', 'v', '6'):
+	case mmioFOURCC('M', 'P', '4', '3'):
+	case mmioFOURCC('m', 'p', '4', '3'):
+        case mmioFOURCC('A', 'P', '4', '1'):
+          idxfix_divx=1; // we can fix keyframes only for divx coded files!
+        }
       } else
       if(last_fccType==streamtypeAUDIO){
         sh_audio->wf=calloc((chunksize<sizeof(WAVEFORMATEX))?sizeof(WAVEFORMATEX):chunksize,1);
@@ -92,7 +110,7 @@ while(1){
   
 }
 
-if(avi_header.idx_size==0 && index_mode==1){
+if(index_mode>=2 || (avi_header.idx_size==0 && index_mode==1)){
   // build index for file:
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,avi_header.movi_start);
@@ -122,9 +140,27 @@ if(avi_header.idx_size==0 && index_mode==1){
     idx->dwFlags=AVIIF_KEYFRAME; // FIXME
     idx->dwChunkOffset=demuxer->filepos;
     idx->dwChunkLength=len;
-    if(verbose>=2) printf("0x%08X  0x%08X %.4s\n",demuxer->filepos,id,&id);
+
+    // Fix keyframes for DivX files:
+    if(idxfix_divx)
+      if(avi_stream_id(id)==idxfix_videostream){
+        unsigned char c=stream_read_char(demuxer->stream);
+//        --skip;
+        if(!(c&0x40)) idx->dwFlags=0;
+      }
+    
+    if(verbose>=2) printf("0x%08X  0x%08X %.4s  %X\n",demuxer->filepos,id,&id,idx->dwFlags);
+#if 0
+    { unsigned char tmp[64];
+      int i;
+      stream_read(demuxer->stream,tmp,64);
+      printf("%.4s",&id);
+      for(i=0;i<64;i++) printf(" %02X",tmp[i]);
+      printf("\n");
+    }
+#endif
     skip=(len+1)&(~1); // total bytes in this chunk
-    stream_skip(demuxer->stream,skip);
+    stream_seek(demuxer->stream,8+demuxer->filepos+skip);
   }
   avi_header.idx_size=avi_header.idx_pos;
   printf("AVI: Generated index table for %d chunks!\n",avi_header.idx_size);
