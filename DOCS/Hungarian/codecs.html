@@ -165,6 +165,35 @@ SB Live!). Kapcsold rá a hardveres AC3 dekódered az SP/DIF kimenetre,
 és használd az -ac hwac3 opciót. Akár mûködhet is. De nem fog. Tényleg. :)</P>
 
 
+<P><B><A NAME=2.1.2.4>2.1.2.4.  XAnim codec-ek</B></P>
+
+<P>Elõszó: (néhány) XAnim codec nem XAnim-mal történõ használata <B><I>ILLEGÁLIS</I></B>.
+A <B>TE</B> felelõsséged a licensz elolvasása, és betartása. Az <B>MPlayer</B>
+szerzõi nem tehetõk felelõssé a felhasználó hibái miatt.</P>
+
+<P>Nos igen, az <B>MPlayer</B> tudja használni az XAnim codec-eit dekódolásra.
+Nagyon könnyû bekapcsolni õket:</P>
+
+<P>
+<UL>
+  <LI>töltsd le a használni kívánt codec-eket az <A HREF="http://xanim.va.pubnix.com">XAnim honlapjáról</A>.
+  A <B>3ivx</B> codec-et nem találod meg ott, így azt töltsd le a
+  <A HREF="http://www.3ivx.com">3ivx honlapjáról</A>.</LI>
+
+  <LI>a codeceket másold, vagy symlink-eld a <CODE>/usr/lib/xanim/mods</CODE>
+  könyvtárba a következõképp:<BR><CODE>ln -s vid_cvid_2.1_linuxELFx86c6.xa vid_cvid.xa</CODE>
+  mindegyikre.<BR>Megadhatsz másik keresési útvonalat, csak írd át az xacodec.c
+  file-t: <CODE>#define XACODEC_PATH "/usr/lib/xanim/mods"</CODE>.</LI>
+</UL>
+</P>
+
+<P>Ezek a 10-es video codec családba tartoznak, így a <CODE>-vfm 10</CODE>
+opcióval megadhatod az <B>MPlayer</B>-nek, hogy ezeket használja, ha
+lehetséges.</P>
+
+<P>Az eddig tesztelt codec-ek a következõk: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
+
+
 <P><B><A NAME=2.1.4>2.1.4.  Hogyan használj ismeretlen Win32 codec-et</A></B></P>
 
 <P><B><A NAME=2.1.4.1>2.1.4.1.  VfW</A></B></P>

@@ -164,6 +164,34 @@ Connect your AC3 decoder to the SP/DIF output, and use the '-ac hwac3'
 option. It may or may not work (experimental). (probably won't...)</P>
 
 
+<P><B><A NAME=2.1.2.4>2.1.2.4.  XAnim codecs</A></B></P>
+
+<P>Foreword: using (some) XAnim codecs with other program than XAnim, is
+<B><I>ILLEGAL</I></B>. It is <B>YOUR</B> responsibility to read its license,
+and do accordingly. The authors of <B>MPlayer</B> can't be held responsible for
+any unlawful act of the user.</P>
+
+<P>So yes, <B>MPlayer</B> can use XAnim's codecs for decoding. It's very
+easy to enable them:</P>
+
+<P>
+<UL>
+  <LI>download the codecs you wish to use from the
+  <A HREF="http://xanim.va.pubnix.com">XAnim site</A>. The <B>3ivx</B> codec
+  isn't there, so download it from the <A HREF="http://www.3ivx.com">3ivx site</A>.</LI>
+
+  <LI>copy the codecs, or make symlinks for them to <CODE>/usr/lib/xanim/mods</CODE> .
+  Accordingly :<BR> <CODE>ln -s vid_cvid_2.1_linuxELFx86c6.xa vid_cvid.xa</CODE>
+  for all of them.<BR> You can define another search path in xacodec.c:
+  <CODE>#define XACODEC_PATH "/usr/lib/xanim/mods"</CODE>.</LI>
+</UL>
+</P>
+
+<P>They are video codec family number 10, so you may want to use <CODE>-vfm 10</CODE>
+option to tell <B>MPlayer</B> to use them if possible.</P>
+
+<P>Tested codecs are: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
+
 <P><B><A NAME=2.1.4>2.1.4. Codec importing howto</A></B></P>
 
 <P><B><A NAME=2.1.4.1>2.1.4.1. VFW codecs</A></B></P>
