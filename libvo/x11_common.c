@@ -139,9 +139,9 @@ int net_wm_support_state_test( char *name )
   mp_dbg(MSGT_VO,MSGL_DBG2, "[x11] NetWM supports %s\n",name);
  if ( !strncmp( name,"_NET_WM_STATE_FULLSCREEN", 24 ) )
   { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports FULLSCREEN state.\n" ); return SUPPORT_FULLSCREEN; }
- if ( !strncmp( name,"_NET_WM_STATE_STAYS_ON_TOP", 24 ) )
+ if ( !strncmp( name,"_NET_WM_STATE_STAYS_ON_TOP", 26 ) )
   { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports STAYS_ON_TOP state.\n" ); return SUPPORT_STAYS_ON_TOP; }
- if ( !strncmp( name,"_NET_WM_STATE_ABOVE", 24 ) )
+ if ( !strncmp( name,"_NET_WM_STATE_ABOVE", 19 ) )
   { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm supports ABOVE state.\n" ); return SUPPORT_ABOVE; }
  return SUPPORT_NONE;
 }
