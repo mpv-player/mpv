@@ -36,6 +36,10 @@
 #include "../loader/qtx/qtxsdk/components.h"
 #endif
 
+#ifdef MACOSX
+#include <QuickTime/QuickTime.h>
+#endif
+
 #ifdef HAVE_ZLIB
 #include <zlib.h>
 #endif
@@ -1000,7 +1004,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //      82  char[4]	atom type
 //	86  ...		atom data
 
-#ifdef USE_QTX_CODECS
+#if defined(USE_QTX_CODECS) || defined(MACOSX)
 	{	ImageDescription* id=malloc(8+trak->stdata_len);
 		trak->desc=id;
 		id->idSize=8+trak->stdata_len;

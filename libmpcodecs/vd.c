@@ -118,7 +118,7 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 	&mpcodecs_vd_libdv,
 #endif
 	&mpcodecs_vd_lcl,
-#ifdef USE_QTX_CODECS
+#if defined(USE_QTX_CODECS) || defined(MACOSX)
 	&mpcodecs_vd_qtvideo,
 #endif
 	NULL
