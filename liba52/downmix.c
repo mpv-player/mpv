@@ -305,8 +305,29 @@ static void mix2to1 (sample_t * dest, sample_t * src, sample_t bias)
 {
     int i;
 
+#ifdef HAVE_SSE
+	asm volatile(
+	"movlps %2, %%xmm7		\n\t"
+	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+	"movl $-1024, %%esi		\n\t"
+	"1:				\n\t"
+	"movaps (%0, %%esi), %%xmm0	\n\t" 
+	"movaps 16(%0, %%esi), %%xmm1	\n\t" 
+	"addps (%1, %%esi), %%xmm0	\n\t" 
+	"addps 16(%1, %%esi), %%xmm1	\n\t" 
+	"addps %%xmm7, %%xmm0		\n\t"
+	"addps %%xmm7, %%xmm1		\n\t"
+	"movaps %%xmm0, (%1, %%esi)	\n\t"
+	"movaps %%xmm1, 16(%1, %%esi)	\n\t"
+	"addl $32, %%esi		\n\t"
+	" jnz 1b			\n\t"
+	:: "r" (src+256), "r" (dest+256), "m" (bias)
+	: "%esi"
+	);
+#else
     for (i = 0; i < 256; i++)
 	dest[i] += src[i] + bias;
+#endif
 }
 
 static void mix3to1 (sample_t * samples, sample_t bias)
