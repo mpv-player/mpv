@@ -134,10 +134,9 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 
 void resync_audio_stream(sh_audio_t *sh_audio)
 {
-  if(!sh_audio->inited) return;
-  if(mpadec->control(sh_audio,ADCTRL_RESYNC_STREAM,NULL)==CONTROL_TRUE) return;
-  // default resync code:
   sh_audio->a_in_buffer_len=0;        // clear audio input buffer
+  if(!sh_audio->inited) return;
+  mpadec->control(sh_audio,ADCTRL_RESYNC_STREAM,NULL);
 }
 
 void skip_audio_frame(sh_audio_t *sh_audio)

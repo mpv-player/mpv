@@ -113,8 +113,7 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...){
     switch(cmd){
       case ADCTRL_RESYNC_STREAM:
         // it is called once after seeking, to resync.
-	// if you don't return CONTROL_TRUE, it will defaults to:
-	//	sh_audio->a_in_buffer_len=0;   // clear input buffer
+	// Note: sh_audio->a_in_buffer_len=0; is done _before_ this call!
 	...
 	return CONTROL_TRUE;
       case ADCTRL_SKIP_FRAME:

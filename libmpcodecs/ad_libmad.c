@@ -160,7 +160,6 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...){
     // various optional functions you MAY implement:
     switch(cmd){
       case ADCTRL_RESYNC_STREAM:
-	sh->a_in_buffer_len=0;        // clear audio input buffer
 	this->have_frame=0;
 	mad_synth_init  (&this->synth);
 	mad_stream_init (&this->stream);
