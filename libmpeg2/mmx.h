@@ -1,8 +1,10 @@
 /*
  * mmx.h
- * Copyright (C) 1997-2001 H. Dietz and R. Fisher
+ * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
+ * See http://libmpeg2.sourceforge.net/ for updates.
  *
  * mpeg2dec is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -61,7 +63,12 @@ typedef	union {
 
 #define	movd_m2r(var,reg)	mmx_m2r (movd, var, reg)
 #define	movd_r2m(reg,var)	mmx_r2m (movd, reg, var)
-#define	movd_r2r(regs,regd)	mmx_r2r (movd, regs, regd)
+#define	movd_v2r(var,reg)	__asm__ __volatile__ ("movd %0, %%" #reg \
+						      : /* nothing */ \
+						      : "rm" (var))
+#define	movd_r2v(reg,var)	__asm__ __volatile__ ("movd %%" #reg ", %0" \
+						      : "=rm" (var) \
+						      : /* nothing */ )
 
 #define	movq_m2r(var,reg)	mmx_m2r (movq, var, reg)
 #define	movq_r2m(reg,var)	mmx_r2m (movq, reg, var)
@@ -196,18 +203,19 @@ typedef	union {
 
 
 #define mmx_m2ri(op,mem,reg,imm) \
-        __asm__ __volatile__ (#op " %1, %0, %%" #reg \
-                              : /* nothing */ \
-                              : "X" (mem), "X" (imm))
+	__asm__ __volatile__ (#op " %1, %0, %%" #reg \
+			      : /* nothing */ \
+			      : "m" (mem), "i" (imm))
+
 #define mmx_r2ri(op,regs,regd,imm) \
-        __asm__ __volatile__ (#op " %0, %%" #regs ", %%" #regd \
-                              : /* nothing */ \
-                              : "X" (imm) )
+	__asm__ __volatile__ (#op " %0, %%" #regs ", %%" #regd \
+			      : /* nothing */ \
+			      : "i" (imm) )
 
 #define	mmx_fetch(mem,hint) \
 	__asm__ __volatile__ ("prefetch" #hint " %0" \
 			      : /* nothing */ \
-			      : "X" (mem))
+			      : "m" (mem))
 
 
 #define	maskmovq(regs,maskreg)		mmx_r2ri (maskmovq, regs, maskreg)

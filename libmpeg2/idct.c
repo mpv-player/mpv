@@ -1,12 +1,10 @@
 /*
  * idct.c
- * Copyright (C) 1999-2001 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
- *
- * Portions of this code are from the MPEG software simulation group
- * idct implementation. This code will be replaced with a new
- * implementation soon.
+ * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
+ * See http://libmpeg2.sourceforge.net/ for updates.
  *
  * mpeg2dec is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,27 +21,14 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/**********************************************************/
-/* inverse two dimensional DCT, Chen-Wang algorithm */
-/* (cf. IEEE ASSP-32, pp. 803-816, Aug. 1984) */
-/* 32-bit integer arithmetic (8 bit coefficients) */
-/* 11 mults, 29 adds per DCT */
-/* sE, 18.8.91 */
-/**********************************************************/
-/* coefficients extended to 12 bit for IEEE1180-1990 */
-/* compliance sE, 2.1.94 */
-/**********************************************************/
-
-/* this code assumes >> to be a two's-complement arithmetic */
-/* right shift: (-2)>>1 == -1 , (-3)>>1 == -2 */
-
 #include "config.h"
 
-#include <stdio.h>
+#include <stdlib.h>
 #include <inttypes.h>
 
+#include "mpeg2.h"
 #include "mpeg2_internal.h"
-#include "mm_accel.h"
+#include "attributes.h"
 
 #define W1 2841 /* 2048*sqrt (2)*cos (1*pi/16) */
 #define W2 2676 /* 2048*sqrt (2)*cos (2*pi/16) */
@@ -53,199 +38,131 @@
 #define W7 565  /* 2048*sqrt (2)*cos (7*pi/16) */
 
 /* idct main entry point  */
-void (*idct_block_copy) (int16_t * block, uint8_t * dest, int stride);
-void (*idct_block_add) (int16_t * block, uint8_t * dest, int stride);
-
-static void idct_block_copy_c (int16_t *block, uint8_t * dest, int stride);
-static void idct_block_add_c (int16_t *block, uint8_t * dest, int stride);
+void (* mpeg2_idct_copy) (int16_t * block, uint8_t * dest, int stride);
+void (* mpeg2_idct_add) (int last, int16_t * block,
+			 uint8_t * dest, int stride);
 
 static uint8_t clip_lut[1024];
-#define CLIP(i) ((clip_lut+384)[ (i)])
-
-void idct_init (void)
-{
-#ifdef ARCH_X86
-    if (config.flags & MM_ACCEL_X86_MMXEXT) {
-	printf ("libmpeg2: Using MMXEXT for IDCT transform\n");
-	idct_block_copy = idct_block_copy_mmxext;
-	idct_block_add = idct_block_add_mmxext;
-	idct_mmx_init ();
-    } else if (config.flags & MM_ACCEL_X86_MMX) {
-	printf ("libmpeg2: Using MMX for IDCT transform\n");
-	idct_block_copy = idct_block_copy_mmx;
-	idct_block_add = idct_block_add_mmx;
-	idct_mmx_init ();
-    } else
-#endif
-#ifdef LIBMPEG2_MLIB
-    if (config.flags & MM_ACCEL_MLIB) {
-	printf ("libmpeg2: Using mlib for IDCT transform\n");
-	idct_block_copy = idct_block_copy_mlib;
-	idct_block_add = idct_block_add_mlib;
-    } else
-#endif
-    {
-	int i;
-
-	printf ("libmpeg2: No accelerated IDCT transform found\n");
-	idct_block_copy = idct_block_copy_c;
-	idct_block_add = idct_block_add_c;
-	for (i = -384; i < 640; i++)
-	    clip_lut[i+384] = (i < 0) ? 0 : ((i > 255) ? 255 : i);
-    }
-}
-
-/* row (horizontal) IDCT
- *
- * 7 pi 1
- * dst[k] = sum c[l] * src[l] * cos ( -- * ( k + - ) * l )
- * l=0 8 2
- *
- * where: c[0] = 128
- * c[1..7] = 128*sqrt (2)
- */
-
-static inline void idct_row (int16_t * block)
-{
-    int x0, x1, x2, x3, x4, x5, x6, x7, x8;
-
-    x1 = block[4] << 11;
-    x2 = block[6];
-    x3 = block[2];
-    x4 = block[1];
-    x5 = block[7];
-    x6 = block[5];
-    x7 = block[3];
-
-    /* shortcut */
-    if (! (x1 | x2 | x3 | x4 | x5 | x6 | x7 )) {
-	block[0] = block[1] = block[2] = block[3] = block[4] =
-	    block[5] = block[6] = block[7] = block[0]<<3;
-	return;
-    }
-
-    x0 = (block[0] << 11) + 128; /* for proper rounding in the fourth stage */
-
-    /* first stage */
-    x8 = W7 * (x4 + x5);
-    x4 = x8 + (W1 - W7) * x4;
-    x5 = x8 - (W1 + W7) * x5;
-    x8 = W3 * (x6 + x7);
-    x6 = x8 - (W3 - W5) * x6;
-    x7 = x8 - (W3 + W5) * x7;
- 
-    /* second stage */
-    x8 = x0 + x1;
-    x0 -= x1;
-    x1 = W6 * (x3 + x2);
-    x2 = x1 - (W2 + W6) * x2;
-    x3 = x1 + (W2 - W6) * x3;
-    x1 = x4 + x6;
-    x4 -= x6;
-    x6 = x5 + x7;
-    x5 -= x7;
- 
-    /* third stage */
-    x7 = x8 + x3;
-    x8 -= x3;
-    x3 = x0 + x2;
-    x0 -= x2;
-    x2 = (181 * (x4 + x5) + 128) >> 8;
-    x4 = (181 * (x4 - x5) + 128) >> 8;
- 
-    /* fourth stage */
-    block[0] = (x7 + x1) >> 8;
-    block[1] = (x3 + x2) >> 8;
-    block[2] = (x0 + x4) >> 8;
-    block[3] = (x8 + x6) >> 8;
-    block[4] = (x8 - x6) >> 8;
-    block[5] = (x0 - x4) >> 8;
-    block[6] = (x3 - x2) >> 8;
-    block[7] = (x7 - x1) >> 8;
-}
-
-/* column (vertical) IDCT
- *
- * 7 pi 1
- * dst[8*k] = sum c[l] * src[8*l] * cos ( -- * ( k + - ) * l )
- * l=0 8 2
- *
- * where: c[0] = 1/1024
- * c[1..7] = (1/1024)*sqrt (2)
- */
-
-static inline void idct_col (int16_t *block)
-{
-    int x0, x1, x2, x3, x4, x5, x6, x7, x8;
-
-    /* shortcut */
-    x1 = block [8*4] << 8;
-    x2 = block [8*6];
-    x3 = block [8*2];
-    x4 = block [8*1];
-    x5 = block [8*7];
-    x6 = block [8*5];
-    x7 = block [8*3];
+#define CLIP(i) ((clip_lut+384)[(i)])
 
 #if 0
-    if (! (x1 | x2 | x3 | x4 | x5 | x6 | x7 )) {
-	block[8*0] = block[8*1] = block[8*2] = block[8*3] = block[8*4] =
-	    block[8*5] = block[8*6] = block[8*7] = (block[8*0] + 32) >> 6;
-	return;
-    }
+#define BUTTERFLY(t0,t1,W0,W1,d0,d1)	\
+do {					\
+    t0 = W0*d0 + W1*d1;			\
+    t1 = W0*d1 - W1*d0;			\
+} while (0)
+#else
+#define BUTTERFLY(t0,t1,W0,W1,d0,d1)	\
+do {					\
+    int tmp = W0 * (d0 + d1);		\
+    t0 = tmp + (W1 - W0) * d1;		\
+    t1 = tmp - (W1 + W0) * d0;		\
+} while (0)
 #endif
 
-    x0 = (block[8*0] << 8) + 8192;
+static void inline idct_row (int16_t * const block)
+{
+    int d0, d1, d2, d3;
+    int a0, a1, a2, a3, b0, b1, b2, b3;
+    int t0, t1, t2, t3;
 
-    /* first stage */
-    x8 = W7 * (x4 + x5) + 4;
-    x4 = (x8 + (W1 - W7) * x4) >> 3;
-    x5 = (x8 - (W1 + W7) * x5) >> 3;
-    x8 = W3 * (x6 + x7) + 4;
-    x6 = (x8 - (W3 - W5) * x6) >> 3;
-    x7 = (x8 - (W3 + W5) * x7) >> 3;
- 
-    /* second stage */
-    x8 = x0 + x1;
-    x0 -= x1;
-    x1 = W6 * (x3 + x2) + 4;
-    x2 = (x1 - (W2 + W6) * x2) >> 3;
-    x3 = (x1 + (W2 - W6) * x3) >> 3;
-    x1 = x4 + x6;
-    x4 -= x6;
-    x6 = x5 + x7;
-    x5 -= x7;
- 
-    /* third stage */
-    x7 = x8 + x3;
-    x8 -= x3;
-    x3 = x0 + x2;
-    x0 -= x2;
-    x2 = (181 * (x4 + x5) + 128) >> 8;
-    x4 = (181 * (x4 - x5) + 128) >> 8;
- 
-    /* fourth stage */
-    block[8*0] = (x7 + x1) >> 14;
-    block[8*1] = (x3 + x2) >> 14;
-    block[8*2] = (x0 + x4) >> 14;
-    block[8*3] = (x8 + x6) >> 14;
-    block[8*4] = (x8 - x6) >> 14;
-    block[8*5] = (x0 - x4) >> 14;
-    block[8*6] = (x3 - x2) >> 14;
-    block[8*7] = (x7 - x1) >> 14;
+    /* shortcut */
+    if (likely (!(block[1] | ((int32_t *)block)[1] | ((int32_t *)block)[2] |
+		  ((int32_t *)block)[3]))) {
+	uint32_t tmp = (uint16_t) (block[0] << 3);
+	tmp |= tmp << 16;
+	((int32_t *)block)[0] = tmp;
+	((int32_t *)block)[1] = tmp;
+	((int32_t *)block)[2] = tmp;
+	((int32_t *)block)[3] = tmp;
+	return;
+    }
+
+    d0 = (block[0] << 11) + 128;
+    d1 = block[1];
+    d2 = block[2] << 11;
+    d3 = block[3];
+    t0 = d0 + d2;
+    t1 = d0 - d2;
+    BUTTERFLY (t2, t3, W6, W2, d3, d1);
+    a0 = t0 + t2;
+    a1 = t1 + t3;
+    a2 = t1 - t3;
+    a3 = t0 - t2;
+
+    d0 = block[4];
+    d1 = block[5];
+    d2 = block[6];
+    d3 = block[7];
+    BUTTERFLY (t0, t1, W7, W1, d3, d0);
+    BUTTERFLY (t2, t3, W3, W5, d1, d2);
+    b0 = t0 + t2;
+    b3 = t1 + t3;
+    t0 -= t2;
+    t1 -= t3;
+    b1 = ((t0 + t1) * 181) >> 8;
+    b2 = ((t0 - t1) * 181) >> 8;
+
+    block[0] = (a0 + b0) >> 8;
+    block[1] = (a1 + b1) >> 8;
+    block[2] = (a2 + b2) >> 8;
+    block[3] = (a3 + b3) >> 8;
+    block[4] = (a3 - b3) >> 8;
+    block[5] = (a2 - b2) >> 8;
+    block[6] = (a1 - b1) >> 8;
+    block[7] = (a0 - b0) >> 8;
 }
 
-void idct_block_copy_c (int16_t * block, uint8_t * dest, int stride)
+static void inline idct_col (int16_t * const block)
+{
+    int d0, d1, d2, d3;
+    int a0, a1, a2, a3, b0, b1, b2, b3;
+    int t0, t1, t2, t3;
+
+    d0 = (block[8*0] << 11) + 65536;
+    d1 = block[8*1];
+    d2 = block[8*2] << 11;
+    d3 = block[8*3];
+    t0 = d0 + d2;
+    t1 = d0 - d2;
+    BUTTERFLY (t2, t3, W6, W2, d3, d1);
+    a0 = t0 + t2;
+    a1 = t1 + t3;
+    a2 = t1 - t3;
+    a3 = t0 - t2;
+
+    d0 = block[8*4];
+    d1 = block[8*5];
+    d2 = block[8*6];
+    d3 = block[8*7];
+    BUTTERFLY (t0, t1, W7, W1, d3, d0);
+    BUTTERFLY (t2, t3, W3, W5, d1, d2);
+    b0 = t0 + t2;
+    b3 = t1 + t3;
+    t0 = (t0 - t2) >> 8;
+    t1 = (t1 - t3) >> 8;
+    b1 = (t0 + t1) * 181;
+    b2 = (t0 - t1) * 181;
+
+    block[8*0] = (a0 + b0) >> 17;
+    block[8*1] = (a1 + b1) >> 17;
+    block[8*2] = (a2 + b2) >> 17;
+    block[8*3] = (a3 + b3) >> 17;
+    block[8*4] = (a3 - b3) >> 17;
+    block[8*5] = (a2 - b2) >> 17;
+    block[8*6] = (a1 - b1) >> 17;
+    block[8*7] = (a0 - b0) >> 17;
+}
+
+static void mpeg2_idct_copy_c (int16_t * block, uint8_t * dest,
+			       const int stride)
 {
     int i;
 
     for (i = 0; i < 8; i++)
 	idct_row (block + 8 * i);
-
     for (i = 0; i < 8; i++)
 	idct_col (block + i);
-
-    i = 8;
     do {
 	dest[0] = CLIP (block[0]);
 	dest[1] = CLIP (block[1]);
@@ -256,33 +173,112 @@ void idct_block_copy_c (int16_t * block, uint8_t * dest, int stride)
 	dest[6] = CLIP (block[6]);
 	dest[7] = CLIP (block[7]);
 
+	block[0] = 0;	block[1] = 0;	block[2] = 0;	block[3] = 0;
+	block[4] = 0;	block[5] = 0;	block[6] = 0;	block[7] = 0;
+
 	dest += stride;
 	block += 8;
     } while (--i);
 }
 
-void idct_block_add_c (int16_t * block, uint8_t * dest, int stride)
+static void mpeg2_idct_add_c (const int last, int16_t * block,
+			      uint8_t * dest, const int stride)
 {
     int i;
 
-    for (i = 0; i < 8; i++)
-	idct_row (block + 8 * i);
+    if (last != 129 || (block[0] & 7) == 4) {
+	for (i = 0; i < 8; i++)
+	    idct_row (block + 8 * i);
+	for (i = 0; i < 8; i++)
+	    idct_col (block + i);
+	do {
+	    dest[0] = CLIP (block[0] + dest[0]);
+	    dest[1] = CLIP (block[1] + dest[1]);
+	    dest[2] = CLIP (block[2] + dest[2]);
+	    dest[3] = CLIP (block[3] + dest[3]);
+	    dest[4] = CLIP (block[4] + dest[4]);
+	    dest[5] = CLIP (block[5] + dest[5]);
+	    dest[6] = CLIP (block[6] + dest[6]);
+	    dest[7] = CLIP (block[7] + dest[7]);
 
-    for (i = 0; i < 8; i++)
-	idct_col (block + i);
+	    block[0] = 0;	block[1] = 0;	block[2] = 0;	block[3] = 0;
+	    block[4] = 0;	block[5] = 0;	block[6] = 0;	block[7] = 0;
 
-    i = 8;
-    do {
-	dest[0] = CLIP (block[0] + dest[0]);
-	dest[1] = CLIP (block[1] + dest[1]);
-	dest[2] = CLIP (block[2] + dest[2]);
-	dest[3] = CLIP (block[3] + dest[3]);
-	dest[4] = CLIP (block[4] + dest[4]);
-	dest[5] = CLIP (block[5] + dest[5]);
-	dest[6] = CLIP (block[6] + dest[6]);
-	dest[7] = CLIP (block[7] + dest[7]);
+	    dest += stride;
+	    block += 8;
+	} while (--i);
+    } else {
+	int DC;
 
-	dest += stride;
-	block += 8;
-    } while (--i);
+	DC = (block[0] + 4) >> 3;
+	block[0] = block[63] = 0;
+	i = 8;
+	do {
+	    dest[0] = CLIP (DC + dest[0]);
+	    dest[1] = CLIP (DC + dest[1]);
+	    dest[2] = CLIP (DC + dest[2]);
+	    dest[3] = CLIP (DC + dest[3]);
+	    dest[4] = CLIP (DC + dest[4]);
+	    dest[5] = CLIP (DC + dest[5]);
+	    dest[6] = CLIP (DC + dest[6]);
+	    dest[7] = CLIP (DC + dest[7]);
+	    dest += stride;
+	} while (--i);
+    }
+}
+
+void mpeg2_idct_init (uint32_t accel)
+{
+#ifdef ARCH_X86
+    if (accel & MPEG2_ACCEL_X86_MMXEXT) {
+	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
+	mpeg2_idct_add = mpeg2_idct_add_mmxext;
+	mpeg2_idct_mmx_init ();
+    } else if (accel & MPEG2_ACCEL_X86_MMX) {
+	mpeg2_idct_copy = mpeg2_idct_copy_mmx;
+	mpeg2_idct_add = mpeg2_idct_add_mmx;
+	mpeg2_idct_mmx_init ();
+    } else
+#endif
+#ifdef ARCH_PPC
+    if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
+	mpeg2_idct_copy = mpeg2_idct_copy_altivec;
+	mpeg2_idct_add = mpeg2_idct_add_altivec;
+	mpeg2_idct_altivec_init ();
+    } else
+#endif
+#ifdef ARCH_ALPHA
+    if (accel & MPEG2_ACCEL_ALPHA_MVI) {
+	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
+	mpeg2_idct_add = mpeg2_idct_add_mvi;
+	mpeg2_idct_alpha_init (0);
+    } else if (accel & MPEG2_ACCEL_ALPHA) {
+	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
+	mpeg2_idct_add = mpeg2_idct_add_alpha;
+	mpeg2_idct_alpha_init (1);
+    } else
+#endif
+#ifdef LIBMPEG2_MLIB
+    if (accel & MPEG2_ACCEL_MLIB) {
+	mpeg2_idct_copy = mpeg2_idct_copy_mlib_non_ieee;
+	mpeg2_idct_add = (getenv ("MLIB_NON_IEEE") ?
+			  mpeg2_idct_add_mlib_non_ieee : mpeg2_idct_add_mlib);
+    } else
+#endif
+    {
+	extern uint8_t mpeg2_scan_norm[64];
+	extern uint8_t mpeg2_scan_alt[64];
+	int i, j;
+
+	mpeg2_idct_copy = mpeg2_idct_copy_c;
+	mpeg2_idct_add = mpeg2_idct_add_c;
+	for (i = -384; i < 640; i++)
+	    clip_lut[i+384] = (i < 0) ? 0 : ((i > 255) ? 255 : i);
+	for (i = 0; i < 64; i++) {
+	    j = mpeg2_scan_norm[i];
+	    mpeg2_scan_norm[i] = ((j & 0x36) >> 1) | ((j & 0x09) << 2);
+	    j = mpeg2_scan_alt[i];
+	    mpeg2_scan_alt[i] = ((j & 0x36) >> 1) | ((j & 0x09) << 2);
+	}
+    }
 }

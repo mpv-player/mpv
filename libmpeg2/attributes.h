@@ -1,8 +1,10 @@
 /*
  * attributes.h
- * Copyright (C) 1999-2001 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+ * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
+ * See http://libmpeg2.sourceforge.net/ for updates.
  *
  * mpeg2dec is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +23,15 @@
 
 /* use gcc attribs to align critical data structures */
 #ifdef ATTRIBUTE_ALIGNED_MAX
-#define ATTR_ALIGN(align) __attribute__ ((__aligned__ ((ATTRIBUTE_ALIGNED_MAX < (align)) ? ATTRIBUTE_ALIGNED_MAX : (align))))
+#define ATTR_ALIGN(align) __attribute__ ((__aligned__ ((ATTRIBUTE_ALIGNED_MAX < align) ? ATTRIBUTE_ALIGNED_MAX : align)))
 #else
 #define ATTR_ALIGN(align)
+#endif
+
+#ifdef HAVE_BUILTIN_EXPECT
+#define likely(x) __builtin_expect ((x) != 0, 1)
+#define unlikely(x) __builtin_expect ((x) != 0, 0)
+#else
+#define likely(x) (x)
+#define unlikely(x) (x)
 #endif

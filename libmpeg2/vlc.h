@@ -1,8 +1,10 @@
 /*
  * vlc.h
- * Copyright (C) 1999-2001 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
+ * Copyright (C) 2000-2002 Michel Lespinasse <walken@zoy.org>
+ * Copyright (C) 1999-2000 Aaron Holtzman <aholtzma@ess.engr.uvic.ca>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
+ * See http://libmpeg2.sourceforge.net/ for updates.
  *
  * mpeg2dec is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,17 +27,18 @@ do {								\
     bit_ptr += 2;						\
 } while (0)
 
-static inline void bitstream_init (picture_t * picture, uint8_t * start)
+static inline void bitstream_init (decoder_t * decoder, const uint8_t * start)
 {
-    picture->bitstream_buf = 0;    GETWORD (picture->bitstream_buf, 16, start);
-    picture->bitstream_ptr = start;
-    picture->bitstream_bits = 0;
+    decoder->bitstream_buf =
+	(start[0] << 24) | (start[1] << 16) | (start[2] << 8) | start[3];
+    decoder->bitstream_ptr = start + 4;
+    decoder->bitstream_bits = -16;
 }
 
 /* make sure that there are at least 16 valid bits in bit_buf */
 #define NEEDBITS(bit_buf,bits,bit_ptr)		\
 do {						\
-    if (bits > 0) {				\
+    if (unlikely (bits > 0)) {			\
 	GETWORD (bit_buf, bits, bit_ptr);	\
 	bits -= 16;				\
     }						\
@@ -94,14 +97,14 @@ typedef struct {
 #define INTRA MACROBLOCK_INTRA
 #define QUANT MACROBLOCK_QUANT
 
-static MBtab MB_I [] = {
+static const MBtab MB_I [] = {
     {INTRA|QUANT, 2}, {INTRA, 1}
 };
 
 #define MC MACROBLOCK_MOTION_FORWARD
 #define CODED MACROBLOCK_PATTERN
 
-static MBtab MB_P [] = {
+static const MBtab MB_P [] = {
     {INTRA|QUANT, 6}, {CODED|QUANT, 5}, {MC|CODED|QUANT, 5}, {INTRA,    5},
     {MC,          3}, {MC,          3}, {MC,             3}, {MC,       3},
     {CODED,       2}, {CODED,       2}, {CODED,          2}, {CODED,    2},
@@ -116,7 +119,7 @@ static MBtab MB_P [] = {
 #define BWD MACROBLOCK_MOTION_BACKWARD
 #define INTER MACROBLOCK_MOTION_FORWARD|MACROBLOCK_MOTION_BACKWARD
 
-static MBtab MB_B [] = {
+static const MBtab MB_B [] = {
     {0,                 0}, {INTRA|QUANT,       6},
     {BWD|CODED|QUANT,   6}, {FWD|CODED|QUANT,   6},
     {INTER|CODED|QUANT, 5}, {INTER|CODED|QUANT, 5},
@@ -146,11 +149,11 @@ static MBtab MB_B [] = {
 #undef INTER
 
 
-static MVtab MV_4 [] = {
+static const MVtab MV_4 [] = {
     { 3, 6}, { 2, 4}, { 1, 3}, { 1, 3}, { 0, 2}, { 0, 2}, { 0, 2}, { 0, 2}
 };
 
-static MVtab MV_10 [] = {
+static const MVtab MV_10 [] = {
     { 0,10}, { 0,10}, { 0,10}, { 0,10}, { 0,10}, { 0,10}, { 0,10}, { 0,10},
     { 0,10}, { 0,10}, { 0,10}, { 0,10}, {15,10}, {14,10}, {13,10}, {12,10},
     {11,10}, {10,10}, { 9, 9}, { 9, 9}, { 8, 9}, { 8, 9}, { 7, 9}, { 7, 9},
@@ -160,12 +163,12 @@ static MVtab MV_10 [] = {
 };
 
 
-static DMVtab DMV_2 [] = {
+static const DMVtab DMV_2 [] = {
     { 0, 1}, { 0, 1}, { 1, 2}, {-1, 2}
 };
 
 
-static CBPtab CBP_7 [] = {
+static const CBPtab CBP_7 [] = {
     {0x22, 7}, {0x12, 7}, {0x0a, 7}, {0x06, 7},
     {0x21, 7}, {0x11, 7}, {0x09, 7}, {0x05, 7},
     {0x3f, 6}, {0x3f, 6}, {0x03, 6}, {0x03, 6},
@@ -196,7 +199,7 @@ static CBPtab CBP_7 [] = {
     {0x3c, 3}, {0x3c, 3}, {0x3c, 3}, {0x3c, 3}
 };
 
-static CBPtab CBP_9 [] = {
+static const CBPtab CBP_9 [] = {
     {0,    0}, {0x00, 9}, {0x27, 9}, {0x1b, 9},
     {0x3b, 9}, {0x37, 9}, {0x2f, 9}, {0x1f, 9},
     {0x3a, 8}, {0x3a, 8}, {0x36, 8}, {0x36, 8},
@@ -216,21 +219,21 @@ static CBPtab CBP_9 [] = {
 };
 
 
-static DCtab DC_lum_5 [] = {
+static const DCtab DC_lum_5 [] = {
     {1, 2}, {1, 2}, {1, 2}, {1, 2}, {1, 2}, {1, 2}, {1, 2}, {1, 2},
     {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2},
     {0, 3}, {0, 3}, {0, 3}, {0, 3}, {3, 3}, {3, 3}, {3, 3}, {3, 3},
     {4, 3}, {4, 3}, {4, 3}, {4, 3}, {5, 4}, {5, 4}, {6, 5}
 };
 
-static DCtab DC_chrom_5 [] = {
+static const DCtab DC_chrom_5 [] = {
     {0, 2}, {0, 2}, {0, 2}, {0, 2}, {0, 2}, {0, 2}, {0, 2}, {0, 2},
     {1, 2}, {1, 2}, {1, 2}, {1, 2}, {1, 2}, {1, 2}, {1, 2}, {1, 2},
     {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2}, {2, 2},
     {3, 3}, {3, 3}, {3, 3}, {3, 3}, {4, 4}, {4, 4}, {5, 5}
 };
 
-static DCtab DC_long [] = {
+static const DCtab DC_long [] = {
     {6, 5}, {6, 5}, {6, 5}, {6, 5}, {6, 5}, {6, 5}, { 6, 5}, { 6, 5},
     {6, 5}, {6, 5}, {6, 5}, {6, 5}, {6, 5}, {6, 5}, { 6, 5}, { 6, 5},
     {7, 6}, {7, 6}, {7, 6}, {7, 6}, {7, 6}, {7, 6}, { 7, 6}, { 7, 6},
@@ -238,7 +241,7 @@ static DCtab DC_long [] = {
 };
 
 
-static DCTtab DCT_16 [] = {
+static const DCTtab DCT_16 [] = {
     {129, 0, 0}, {129, 0, 0}, {129, 0, 0}, {129, 0, 0},
     {129, 0, 0}, {129, 0, 0}, {129, 0, 0}, {129, 0, 0},
     {129, 0, 0}, {129, 0, 0}, {129, 0, 0}, {129, 0, 0},
@@ -249,7 +252,7 @@ static DCTtab DCT_16 [] = {
     { 31, 1, 0}, { 30, 1, 0}, { 29, 1, 0}, { 28, 1, 0}
 };
 
-static DCTtab DCT_15 [] = {
+static const DCTtab DCT_15 [] = {
     {  1,40,15}, {  1,39,15}, {  1,38,15}, {  1,37,15},
     {  1,36,15}, {  1,35,15}, {  1,34,15}, {  1,33,15},
     {  1,32,15}, {  2,14,15}, {  2,13,15}, {  2,12,15},
@@ -264,7 +267,7 @@ static DCTtab DCT_15 [] = {
     {  1,17,14}, {  1,17,14}, {  1,16,14}, {  1,16,14}
 };
 
-static DCTtab DCT_13 [] = {
+static const DCTtab DCT_13 [] = {
     { 11, 2,13}, { 10, 2,13}, {  6, 3,13}, {  4, 4,13},
     {  3, 5,13}, {  2, 7,13}, {  2, 6,13}, {  1,15,13},
     {  1,14,13}, {  1,13,13}, {  1,12,13}, { 27, 1,13},
@@ -279,12 +282,12 @@ static DCTtab DCT_13 [] = {
     {  7, 2,12}, {  7, 2,12}, { 18, 1,12}, { 18, 1,12}
 };
 
-static DCTtab DCT_B14_10 [] = {
+static const DCTtab DCT_B14_10 [] = {
     { 17, 1,10}, {  6, 2,10}, {  1, 7,10}, {  3, 3,10},
     {  2, 4,10}, { 16, 1,10}, { 15, 1,10}, {  5, 2,10}
 };
 
-static DCTtab DCT_B14_8 [] = {
+static const DCTtab DCT_B14_8 [] = {
     { 65, 0, 6}, { 65, 0, 6}, { 65, 0, 6}, { 65, 0, 6},
     {  3, 2, 7}, {  3, 2, 7}, { 10, 1, 7}, { 10, 1, 7},
     {  1, 4, 7}, {  1, 4, 7}, {  9, 1, 7}, {  9, 1, 7},
@@ -296,7 +299,7 @@ static DCTtab DCT_B14_8 [] = {
     {  4, 2, 8}, {  2, 3, 8}, {  1, 5, 8}, { 11, 1, 8}
 };
 
-static DCTtab DCT_B14AC_5 [] = {
+static const DCTtab DCT_B14AC_5 [] = {
 		 {  1, 3, 5}, {  5, 1, 5}, {  4, 1, 5},
     {  1, 2, 4}, {  1, 2, 4}, {  3, 1, 4}, {  3, 1, 4},
     {  2, 1, 3}, {  2, 1, 3}, {  2, 1, 3}, {  2, 1, 3},
@@ -306,7 +309,7 @@ static DCTtab DCT_B14AC_5 [] = {
     {  1, 1, 2}, {  1, 1, 2}, {  1, 1, 2}, {  1, 1, 2}
 };
 
-static DCTtab DCT_B14DC_5 [] = {
+static const DCTtab DCT_B14DC_5 [] = {
 		 {  1, 3, 5}, {  5, 1, 5}, {  4, 1, 5},
     {  1, 2, 4}, {  1, 2, 4}, {  3, 1, 4}, {  3, 1, 4},
     {  2, 1, 3}, {  2, 1, 3}, {  2, 1, 3}, {  2, 1, 3},
@@ -316,12 +319,12 @@ static DCTtab DCT_B14DC_5 [] = {
     {  1, 1, 1}, {  1, 1, 1}, {  1, 1, 1}, {  1, 1, 1}
 };
 
-static DCTtab DCT_B15_10 [] = {
+static const DCTtab DCT_B15_10 [] = {
     {  6, 2, 9}, {  6, 2, 9}, { 15, 1, 9}, { 15, 1, 9},
     {  3, 4,10}, { 17, 1,10}, { 16, 1, 9}, { 16, 1, 9}
 };
 
-static DCTtab DCT_B15_8 [] = {
+static const DCTtab DCT_B15_8 [] = {
     { 65, 0, 6}, { 65, 0, 6}, { 65, 0, 6}, { 65, 0, 6},
     {  8, 1, 7}, {  8, 1, 7}, {  9, 1, 7}, {  9, 1, 7},
     {  7, 1, 7}, {  7, 1, 7}, {  3, 2, 7}, {  3, 2, 7},
@@ -388,14 +391,14 @@ static DCTtab DCT_B15_8 [] = {
 };
 
 
-static MBAtab MBA_5 [] = {
+static const MBAtab MBA_5 [] = {
 		    {6, 5}, {5, 5}, {4, 4}, {4, 4}, {3, 4}, {3, 4},
     {2, 3}, {2, 3}, {2, 3}, {2, 3}, {1, 3}, {1, 3}, {1, 3}, {1, 3},
     {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1},
     {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}, {0, 1}
 };
 
-static MBAtab MBA_11 [] = {
+static const MBAtab MBA_11 [] = {
     {32, 11}, {31, 11}, {30, 11}, {29, 11},
     {28, 11}, {27, 11}, {26, 11}, {25, 11},
     {24, 11}, {23, 11}, {22, 11}, {21, 11},

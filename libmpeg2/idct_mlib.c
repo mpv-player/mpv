@@ -1,8 +1,9 @@
 /*
  * idct_mlib.c
- * Copyright (C) 1999-2001 Håkan Hjort <d95hjort@dtek.chalmers.se>
+ * Copyright (C) 1999-2002 Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
  * This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
+ * See http://libmpeg2.sourceforge.net/ for updates.
  *
  * mpeg2dec is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,25 +24,37 @@
 
 #ifdef LIBMPEG2_MLIB
 
-#include <inttypes.h>
 #include <mlib_types.h>
 #include <mlib_status.h>
 #include <mlib_sys.h>
 #include <mlib_video.h>
+#include <string.h>
+#include <inttypes.h>
 
+#include "mpeg2.h"
 #include "mpeg2_internal.h"
 
-void idct_block_copy_mlib (int16_t * block, uint8_t * dest, int stride)
+void mpeg2_idct_add_mlib (const int last, int16_t * const block,
+			  uint8_t * const dest, const int stride)
 {
-    mlib_VideoIDCT8x8_U8_S16 (dest, block, stride);
+    mlib_VideoIDCT_IEEE_S16_S16 (block, block);
+    mlib_VideoAddBlock_U8_S16 (dest, block, stride);
+    memset (block, 0, 64 * sizeof (uint16_t));
 }
 
-void idct_block_add_mlib (int16_t * block, uint8_t * dest, int stride)
+void mpeg2_idct_copy_mlib_non_ieee (int16_t * const block,
+				    uint8_t * const dest, const int stride)
 {
-    /* Should we use mlib_VideoIDCT_IEEE_S16_S16 here ?? */
-    /* it's ~30% slower. */
+    mlib_VideoIDCT8x8_U8_S16 (dest, block, stride);
+    memset (block, 0, 64 * sizeof (uint16_t));
+}
+
+void mpeg2_idct_add_mlib_non_ieee (const int last, int16_t * const block,
+				   uint8_t * const dest, const int stride)
+{
     mlib_VideoIDCT8x8_S16_S16 (block, block);
     mlib_VideoAddBlock_U8_S16 (dest, block, stride);
+    memset (block, 0, 64 * sizeof (uint16_t));
 }
 
 #endif
