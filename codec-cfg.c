@@ -18,7 +18,11 @@
 // for mmioFOURCC:
 #include "wine/avifmt.h"
 
+#ifdef USE_LIBVO2
+#include "libvo2/img_format.h"
+#else
 #include "libvo/img_format.h"
+#endif
 #include "codec-cfg.h"
 
 #define PRINT_LINENUM printf(" at line %d\n", line_num)

@@ -39,9 +39,11 @@ void find_sub(subtitle* subtitles,int key);
 extern void* mDisplay; // Display* mDisplay;
 #endif
 
-//#ifdef USE_OSD
+#ifdef USE_LIBVO2
+#include "libvo2/sub.h"
+#else
 #include "libvo/sub.h"
-//#endif
+#endif
 
 #include "libao2/audio_out.h"
 

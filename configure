@@ -2522,12 +2522,12 @@ else
 fi
 
 if test "$_vo2" = yes ; then
- _vodef='#define USE_LIBVO2'
+ _vodef='-DUSE_LIBVO2'
  _volib='-Llibvo2 -lvo2'
  _voinc='-Ilibvo2'
  _vodir='libvo2'
 else
- _vodef='#undef USE_LIBVO2'
+ _vodef=''
  _volib='-Llibvo -lvo'
  _voinc='-Ilibvo'
  _vodir='libvo'
@@ -2582,7 +2582,7 @@ prefix = $_prefix
 AR=ar
 CC=$_cc
 # OPTFLAGS=-O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
-OPTFLAGS=$CFLAGS
+OPTFLAGS=$CFLAGS $_vodef
 EXTRA_INC=$_extraincdir $_voinc $_gtkinc
 WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
 VO_INC=$_voinc
@@ -2650,7 +2650,6 @@ cat > $CCONF << EOF
 
 #define USE_OSD
 #define USE_SUB
-$_vodef
 
 $_debugdef
 

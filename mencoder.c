@@ -20,7 +20,11 @@
 
 #include "aviwrite.h"
 
+#ifdef USE_LIBVO2
+#include "libvo2/libvo2.h"
+#else
 #include "libvo/video_out.h"
+#endif
 
 #include "dec_audio.h"
 #include "dec_video.h"
