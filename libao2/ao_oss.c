@@ -31,11 +31,11 @@ static ao_info_t info =
 
 LIBAO_EXTERN(oss)
 
-static char *dsp="/dev/dsp";
+static char *dsp=PATH_DEV_DSP;
 static audio_buf_info zz;
 static int audio_fd=-1;
 
-char *oss_mixer_device = "/dev/mixer";
+char *oss_mixer_device = PATH_DEV_MIXER;
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
