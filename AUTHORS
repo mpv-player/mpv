@@ -514,7 +514,7 @@ Attila Kinali <attila@kinali.ch>
     * patch application monkey, mailer daemon
 
 Nico Sabbi <nsabbi@tiscali.it>
-    * DVB code improvements
+    * DVB input support
     * MPEG TS support
 
 Andoni Zubimendi <andoni@lpsat.net>.
