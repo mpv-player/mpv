@@ -42,16 +42,20 @@
 #define DEMUXER_TYPE_MATROSKA 31
 #define DEMUXER_TYPE_REALAUDIO 32
 #define DEMUXER_TYPE_MPEG_TY 33
-#define DEMUXER_TYPE_MPEG4_IN_TS 34
+
 
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 34
+#define DEMUXER_TYPE_MAX 33
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code
 #define DEMUXER_TYPE_PLAYLIST (2<<16)
+
+//This one is needed only to identify mpeg4 in mpeg2-ts, shouldn't be used explicitly,
+// rather use ths usual _TYPE_TS
+#define DEMUXER_TYPE_MPEG4_IN_TS (3<<16)
 
 
 #define DEMUXER_TIME_NONE 0
