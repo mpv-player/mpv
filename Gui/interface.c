@@ -60,6 +60,7 @@ void guiGetEvent( int type,char * arg )
           case guiSetPause: guiIntfStruct.Playing=2; mplState(); break;
 	 }
         break;
+#ifdef HAVE_NEW_INPUT
    case guiIEvent:
         printf( "cmd: %d\n",(int)arg );
 	switch( (int)arg )
@@ -74,6 +75,7 @@ void guiGetEvent( int type,char * arg )
 	       mplEventHandling( guiCMDArray[ (int)arg - MP_CMD_GUI_EVENTS - 1 ],0 );
 	 }
 	break;
+#endif
   }
 }
 
