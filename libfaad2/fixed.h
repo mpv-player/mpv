@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: fixed.h,v 1.9 2003/07/29 08:20:12 menno Exp $
+** $Id: fixed.h,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 #ifndef __FIXED_H__
@@ -35,15 +35,15 @@ extern "C" {
 
 #define COEF_BITS 28
 #define COEF_PRECISION (1 << COEF_BITS)
-#define REAL_BITS 15 //7
+#define REAL_BITS 14 // MAXIMUM OF 14 FOR FIXED POINT SBR
 #define REAL_PRECISION (1 << REAL_BITS)
 
 
 typedef int32_t real_t;
 
 
-#define REAL_CONST(A) ((real_t)(A*(REAL_PRECISION)))
-#define COEF_CONST(A) ((real_t)(A*(COEF_PRECISION)))
+#define REAL_CONST(A) ((real_t)((A)*(REAL_PRECISION)))
+#define COEF_CONST(A) ((real_t)((A)*(COEF_PRECISION)))
 
 #if defined(_WIN32) && !defined(_WIN32_WCE)
 

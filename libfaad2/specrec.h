@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: specrec.h,v 1.13 2003/07/29 08:20:14 menno Exp $
+** $Id: specrec.h,v 1.15 2003/09/24 08:05:45 menno Exp $
 **/
 
 #ifndef __SPECREC_H__
@@ -37,13 +37,10 @@ extern "C" {
 uint8_t window_grouping_info(faacDecHandle hDecoder, ic_stream *ics);
 void quant_to_spec(ic_stream *ics, real_t *spec_data, uint16_t frame_len);
 void inverse_quantization(real_t *x_invquant, int16_t *x_quant, uint16_t frame_len);
-#ifdef FIXED_POINT
 void apply_scalefactors(faacDecHandle hDecoder, ic_stream *ics, real_t *x_invquant,
                         uint16_t frame_len);
-#else
+#ifndef FIXED_POINT
 void build_tables(real_t *pow2_table);
-void apply_scalefactors(ic_stream *ics, real_t *x_invquant, real_t *pow2_table,
-                        uint16_t frame_len);
 #endif
 
 #ifdef __cplusplus

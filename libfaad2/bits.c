@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: bits.c,v 1.22 2003/07/29 08:20:12 menno Exp $
+** $Id: bits.c,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 #include "common.h"
@@ -36,6 +36,18 @@
 void faad_initbits(bitfile *ld, void *_buffer, uint32_t buffer_size)
 {
     uint32_t tmp;
+
+    if (ld == NULL)
+        return;
+
+    memset(ld, 0, sizeof(bitfile));
+
+    if (buffer_size == 0 || _buffer == NULL)
+    {
+        ld->error = 1;
+        ld->no_more_reading = 1;
+        return;
+    }
 
     ld->buffer = malloc((buffer_size+12)*sizeof(uint8_t));
     memset(ld->buffer, 0, (buffer_size+12)*sizeof(uint8_t));
@@ -71,10 +83,9 @@ void faad_endbits(bitfile *ld)
         if (ld->buffer) free(ld->buffer);
 }
 
-
 uint32_t faad_get_processed_bits(bitfile *ld)
 {
-    return 8 * (4*(ld->tail - ld->start) - 4) - (ld->bits_left);
+    return (uint32_t)(8 * (4*(ld->tail - ld->start) - 4) - (ld->bits_left));
 }
 
 uint8_t faad_byte_align(bitfile *ld)
@@ -87,6 +98,25 @@ uint8_t faad_byte_align(bitfile *ld)
         return (8 - remainder);
     }
     return 0;
+}
+
+void faad_flushbits_ex(bitfile *ld, uint32_t bits)
+{
+    uint32_t tmp;
+
+    ld->bufa = ld->bufb;
+    tmp = getdword(ld->tail);
+    ld->tail++;
+#ifndef ARCH_IS_BIG_ENDIAN
+    BSWAP(tmp);
+#endif
+    ld->bufb = tmp;
+    ld->bits_left += (32 - bits);
+    ld->bytes_used += 4;
+    if (ld->bytes_used == ld->buffer_size)
+        ld->no_more_reading = 1;
+    if (ld->bytes_used > ld->buffer_size)
+        ld->error = 1;
 }
 
 /* rewind to beginning */

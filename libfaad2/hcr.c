@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: hcr.c,v 1.5 2003/07/29 08:20:12 menno Exp $
+** $Id: hcr.c,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 
@@ -38,225 +38,11 @@
 #include "pulse.h"
 #include "analysis.h"
 #include "bits.h"
-#include "codebook/hcb.h"
+#include "huffman.h"
 
 /* Implements the HCR11 tool as described in ISO/IEC 14496-3/Amd.1, 8.5.3.3 */
 
 #ifdef ERROR_RESILIENCE
-
-typedef struct
-{
-    /* bit input */
-    uint32_t bufa;
-    uint32_t bufb;
-    int8_t len; 
-} bits_t;
-
-
-static INLINE uint32_t showbits(bits_t *ld, uint8_t bits)
-{
-    if (bits == 0) return 0;
-    if (ld->len <= 32){
-        /* huffman_spectral_data_2 needs to read more than may be available, bits maybe
-           > ld->len, deliver 0 than */
-        if (ld->len >= bits)
-            return ((ld->bufa >> (ld->len - bits)) & (0xFFFFFFFF >> (32 - bits)));
-        else
-            return ((ld->bufa << (bits - ld->len)) & (0xFFFFFFFF >> (32 - bits)));        
-    } else {
-        if ((ld->len - bits) < 32)
-        {
-            return ( (ld->bufb & (0xFFFFFFFF >> (64 - ld->len))) << (bits - ld->len + 32)) |
-                (ld->bufa >> (ld->len - bits));
-        } else {
-            return ((ld->bufb >> (ld->len - bits - 32)) & (0xFFFFFFFF >> (32 - bits)));
-        }
-    }
-}
-
-/* return 1 if position is outside of buffer, 0 otherwise */
-static INLINE int8_t flushbits( bits_t *ld, uint8_t bits)
-{
-    ld->len -= bits;
-
-    if (ld->len <0)
-    {
-        ld->len = 0;
-        return 1;
-    } else {
-        return 0;
-    }
-}
-
-
-static INLINE int8_t getbits(bits_t *ld, uint8_t n, uint32_t *result)
-{
-    *result = showbits(ld, n);
-    return flushbits(ld, n);
-}
-
-static INLINE int8_t get1bit(bits_t *ld, uint8_t *result)
-{
-    uint32_t res;
-    int8_t ret;
-
-    ret = getbits(ld, 1, &res);
-    *result = (int8_t)(res & 1);
-    return ret;
-}
-
-/* Special version of huffman_spectral_data adapted from huffman.h
-Will not read from a bitfile but a bits_t structure.
-Will keep track of the bits decoded and return the number of bits remaining.
-Do not read more than ld->len, return -1 if codeword would be longer */
-
-static int8_t huffman_spectral_data_2(uint8_t cb, bits_t *ld, int16_t *sp )
-{
-    uint32_t cw;
-    uint16_t offset = 0;
-    uint8_t extra_bits;
-    uint8_t i;
-    uint8_t save_cb = cb;
-
-
-    switch (cb)
-    {
-    case 1: /* 2-step method for data quadruples */
-    case 2:
-    case 4:
-
-        cw = showbits(ld, hcbN[cb]);
-        offset = hcb_table[cb][cw].offset;
-        extra_bits = hcb_table[cb][cw].extra_bits;
-
-        if (extra_bits)
-        {
-            /* we know for sure it's more than hcbN[cb] bits long */
-            if ( flushbits(ld, hcbN[cb]) ) return -1;
-            offset += (uint16_t)showbits(ld, extra_bits);
-            if ( flushbits(ld, hcb_2_quad_table[cb][offset].bits - hcbN[cb]) ) return -1;
-        } else {
-            if ( flushbits(ld, hcb_2_quad_table[cb][offset].bits) ) return -1;
-        }
-
-        sp[0] = hcb_2_quad_table[cb][offset].x;
-        sp[1] = hcb_2_quad_table[cb][offset].y;
-        sp[2] = hcb_2_quad_table[cb][offset].v;
-        sp[3] = hcb_2_quad_table[cb][offset].w;
-        break;
-
-    case 6: /* 2-step method for data pairs */
-    case 8:
-    case 10:
-    case 11:
-    /* VCB11 uses codebook 11 */
-    case 16: case 17: case 18: case 19: case 20: case 21: case 22: case 23:
-    case 24: case 25: case 26: case 27: case 28: case 29: case 30: case 31:
-
-        /* TODO: If ER is used, some extra error checking should be done */
-        if (cb >= 16)
-            cb = 11;
-            
-        cw = showbits(ld, hcbN[cb]);
-        offset = hcb_table[cb][cw].offset;
-        extra_bits = hcb_table[cb][cw].extra_bits;
-
-        if (extra_bits)
-        {
-            /* we know for sure it's more than hcbN[cb] bits long */
-            if ( flushbits(ld, hcbN[cb]) ) return -1;
-            offset += (uint16_t)showbits(ld, extra_bits);
-            if ( flushbits(ld, hcb_2_pair_table[cb][offset].bits - hcbN[cb]) ) return -1;
-        } else {
-            if ( flushbits(ld, hcb_2_pair_table[cb][offset].bits) ) return -1;
-        }
-        sp[0] = hcb_2_pair_table[cb][offset].x;
-        sp[1] = hcb_2_pair_table[cb][offset].y;
-        break;
-
-    case 3: /* binary search for data quadruples */
-
-        while (!hcb3[offset].is_leaf)
-        {
-            uint8_t b;
-            
-            if ( get1bit(ld, &b) ) return -1;
-            offset += hcb3[offset].data[b];
-        }
-
-        sp[0] = hcb3[offset].data[0];
-        sp[1] = hcb3[offset].data[1];
-        sp[2] = hcb3[offset].data[2];
-        sp[3] = hcb3[offset].data[3];
-
-        break;
-
-    case 5: /* binary search for data pairs */
-    case 7:
-    case 9:
-
-        while (!hcb_bin_table[cb][offset].is_leaf)
-        {
-            uint8_t b;
-            
-            if (get1bit(ld, &b) ) return -1;
-            offset += hcb_bin_table[cb][offset].data[b];
-        }
-
-        sp[0] = hcb_bin_table[cb][offset].data[0];
-        sp[1] = hcb_bin_table[cb][offset].data[1];
-
-        break;
-    }
-
-	/* decode sign bits */
-    if (unsigned_cb[cb]) {
-
-        for(i = 0; i < ((cb < FIRST_PAIR_HCB) ? QUAD_LEN : PAIR_LEN); i++)
-        {
-            if(sp[i])
-            {
-            	uint8_t b;
-                if ( get1bit(ld, &b) ) return -1;
-                if (b != 0) {
-                    sp[i] = -sp[i];
-                }
-           }
-        }
-    }
-
-    /* decode huffman escape bits */
-    if ((cb == ESC_HCB) || (cb >= 16))
-    {
-        uint8_t k;
-        for (k = 0; k < 2; k++)
-        {
-            if ((sp[k] == 16) || (sp[k] == -16))
-            {
-                uint8_t neg, i;
-                int32_t j;
-                uint32_t off;
-
-                neg = (sp[k] < 0) ? 1 : 0; 
-
-                for (i = 4; ; i++)
-                {
-                    uint8_t b;
-                    if (get1bit(ld, &b))
-                        return -1;
-                    if (b == 0)
-                        break;
-                }
-// TODO: here we would need to test "off" if VCB11 is used!
-                if (getbits(ld, i, &off))
-                    return -1;
-                j = off + (1<<i);
-                sp[k] = (int16_t)((neg) ? -j : j);
-            }
-        }
-    }    
-    return ld->len;
-}
 
 /* rewind len (max. 32) bits so that the MSB becomes LSB */
 
@@ -304,7 +90,7 @@ static void rewind_bits(bits_t * r)
         r->bufb = hw;
 
     } else {
-        lw = showbits(r, r->len );
+        lw = showbits_hcr(r, r->len );
         r->bufa = rewind_word( lw, r->len);
         r->bufb = 0;
     }
@@ -322,14 +108,14 @@ static void concat_bits( bits_t * a, bits_t * b)
         lwa = a->bufa;
         hwa = a->bufb & (0xFFFFFFFF >> (64 - a->len));
     } else {
-        lwa = showbits(a, a->len );
+        lwa = showbits_hcr(a, a->len );
         hwa = 0;
     }
     if (b->len >=32) {
         lwb = b->bufa;
         hwb = (b->bufb & (0xFFFFFFFF >> (64 - b->len)) ) | ( lwa << (b->len - 32));
     } else {
-        lwb = showbits(b, b->len ) | (lwa << (b->len));
+        lwb = showbits_hcr(b, b->len ) | (lwa << (b->len));
         hwb = (lwa >> (32 - b->len)) | (hwa << (b->len));
     }
 
@@ -493,12 +279,12 @@ uint8_t reordered_spectral_data(faacDecHandle hDecoder, ic_stream *ics, bitfile 
                                                 if (Segment[ numberOfSegments-1 ].len > 32)
                                                 {
                                                     Segment[ numberOfSegments-1 ].bufb = hw + 
-                                                        showbits(&Segment[ numberOfSegments-1 ], Segment[ numberOfSegments-1 ].len - 32);
+                                                        showbits_hcr(&Segment[ numberOfSegments-1 ], Segment[ numberOfSegments-1 ].len - 32);
                                                     Segment[ numberOfSegments-1 ].bufa = lw + 
-                                                        showbits(&Segment[ numberOfSegments-1 ], 32);
+                                                        showbits_hcr(&Segment[ numberOfSegments-1 ], 32);
                                                 } else {
                                                     Segment[ numberOfSegments-1 ].bufa = lw + 
-                                                        showbits(&Segment[ numberOfSegments-1 ], Segment[ numberOfSegments-1 ].len);
+                                                        showbits_hcr(&Segment[ numberOfSegments-1 ], Segment[ numberOfSegments-1 ].len);
                                                     Segment[ numberOfSegments-1 ].bufb = hw;
                                                 }
                                                 Segment[ numberOfSegments-1 ].len += additional_bits;

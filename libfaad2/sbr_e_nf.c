@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_e_nf.c,v 1.1 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_e_nf.c,v 1.4 2003/09/09 18:37:32 menno Exp $
 **/
 
 #include "common.h"
@@ -38,13 +38,6 @@
 void extract_envelope_data(sbr_info *sbr, uint8_t ch)
 {
     uint8_t l, k;
-
-#if 0
-    if (sbr->frame == 19)
-    {
-        sbr->frame = 19;
-    }
-#endif
 
     for (l = 0; l < sbr->L_E[ch]; l++)
     {
@@ -113,23 +106,6 @@ void extract_envelope_data(sbr_info *sbr, uint8_t ch)
             }
         }
     }
-
-#if 0
-    if (sbr->frame == 23)
-    {
-        int l, k;
-
-        for (l = 0; l < sbr->L_E[ch]; l++)
-        {
-            for (k = 0; k < sbr->n[sbr->f[ch][l]]; k++)
-            {
-                //printf("l:%d k:%d E:%d\n",l,k, sbr->E[ch][k][l]);
-                printf("%d\n", sbr->E[ch][k][l]);
-            }
-        }
-        printf("\n");
-    }
-#endif
 }
 
 void extract_noise_floor_data(sbr_info *sbr, uint8_t ch)
@@ -159,23 +135,6 @@ void extract_noise_floor_data(sbr_info *sbr, uint8_t ch)
             }
         }
     }
-
-#if 0
-    if (sbr->frame == 23)
-    {
-        int l, k;
-
-        for (l = 0; l < sbr->L_Q[ch]; l++)
-        {
-            for (k = 0; k < sbr->N_Q; k++)
-            {
-                //printf("l:%d k:%d E:%d\n",l,k, sbr->E[ch][k][l]);
-                printf("%d\n", sbr->Q[ch][k][l]);
-            }
-        }
-        printf("\n");
-    }
-#endif
 }
 
 /* FIXME: pow() not needed */
@@ -184,37 +143,14 @@ void envelope_noise_dequantisation(sbr_info *sbr, uint8_t ch)
     if (sbr->bs_coupling == 0)
     {
         uint8_t l, k;
-#ifdef FIXED_POINT
-        uint8_t amp = (sbr->amp_res[ch]) ? 0 : 1;
-#else
-        real_t amp = (sbr->amp_res[ch]) ? 1.0 : 0.5;
-#endif
+        real_t amp = (sbr->amp_res[ch]) ? 1.0f : 0.5f;
 
         for (l = 0; l < sbr->L_E[ch]; l++)
         {
             for (k = 0; k < sbr->n[sbr->f[ch][l]]; k++)
             {
-#ifndef FIXED_POINT
                 /* +6 for the *64 */
-                sbr->E_orig[ch][k][l] = pow(2, sbr->E[ch][k][l]*amp + 6);
-#else
-                int8_t exp;
-
-                /* +6 for the *64 and -10 for the /32 in the synthesis QMF
-                 * since this is a energy value: (x/32)^2 = (x^2)/1024
-                 */
-                exp = (sbr->E[ch][k][l] >> amp) + 6 - 10;
-
-//                printf("%d\n", exp);
-
-                if (exp < 0)
-                    sbr->E_orig[ch][k][l] = 0; //REAL_CONST(1) >> -exp;
-                else
-                    sbr->E_orig[ch][k][l] = 1 << exp; //REAL_CONST(1) << exp;
-
-                if (amp && (sbr->E[ch][k][l] & 1))
-                    sbr->E_orig[ch][k][l] = MUL(sbr->E_orig[ch][k][l], REAL_CONST(1.414213562));
-#endif
+                sbr->E_orig[ch][k][l] = (real_t)pow(2, sbr->E[ch][k][l]*amp + 6);
             }
         }
 
@@ -225,15 +161,7 @@ void envelope_noise_dequantisation(sbr_info *sbr, uint8_t ch)
                 if (sbr->Q[ch][k][l] < 0 || sbr->Q[ch][k][l] > 30)
                     sbr->Q_orig[ch][k][l] = 0;
                 else {
-#ifndef FIXED_POINT
-                    sbr->Q_orig[ch][k][l] = pow(2, NOISE_FLOOR_OFFSET - sbr->Q[ch][k][l]);
-#else
-                    int8_t exp = NOISE_FLOOR_OFFSET - sbr->Q[ch][k][l];
-                    if (exp < 0)
-                        sbr->Q_orig[ch][k][l] = REAL_CONST(1) >> -exp;
-                    else
-                        sbr->Q_orig[ch][k][l] = REAL_CONST(1) << exp;
-#endif
+                    sbr->Q_orig[ch][k][l] = (real_t)pow(2, NOISE_FLOOR_OFFSET - sbr->Q[ch][k][l]);
                 }
             }
         }
@@ -243,13 +171,8 @@ void envelope_noise_dequantisation(sbr_info *sbr, uint8_t ch)
 void unmap_envelope_noise(sbr_info *sbr)
 {
     uint8_t l, k;
-#ifdef FIXED_POINT
-    uint8_t amp0 = (sbr->amp_res[0]) ? 0 : 1;
-    uint8_t amp1 = (sbr->amp_res[1]) ? 0 : 1;
-#else
-    real_t amp0 = (sbr->amp_res[0]) ? 1.0 : 0.5;
-    real_t amp1 = (sbr->amp_res[1]) ? 1.0 : 0.5;
-#endif
+    real_t amp0 = (sbr->amp_res[0]) ? (real_t)1.0 : (real_t)0.5;
+    real_t amp1 = (sbr->amp_res[1]) ? (real_t)1.0 : (real_t)0.5;
 
     for (l = 0; l < sbr->L_E[0]; l++)
     {
@@ -257,59 +180,13 @@ void unmap_envelope_noise(sbr_info *sbr)
         {
             real_t l_temp, r_temp;
 
-#ifdef FIXED_POINT
-            int8_t exp;
-
-            /* +6: * 64 ; +1: * 2 ; -10: /1024 QMF */
-            exp = (sbr->E[0][k][l] >> amp0) - 3;
-
-//            printf("%d\n", exp);
-
-            if (exp < 0)
-                l_temp = REAL_CONST(1) >> -exp;
-            else
-                l_temp = REAL_CONST(1) << exp;
-
-            if (amp0 && (sbr->E[0][k][l] & 1))
-                l_temp = MUL(l_temp, REAL_CONST(1.414213562373095));
-
-            /* UN_MAP removed: (x / 4096) same as (x >> 12) */
-            exp = (sbr->E[1][k][l] >> amp1) - 12;
-
-//            printf("%d\n", exp);
-
-            if (exp < 0)
-                r_temp = REAL_CONST(1) >> -exp;
-            else
-                r_temp = REAL_CONST(1) << exp;
-
-            if (amp1 && (sbr->E[1][k][l] & 1))
-                r_temp = MUL(r_temp, REAL_CONST(1.414213562373095));
-#else
             /* +6: * 64 ; +1: * 2 */
-            l_temp = pow(2, sbr->E[0][k][l]*amp0 + 7);
+            l_temp = (real_t)pow(2, sbr->E[0][k][l]*amp0 + 7);
             /* UN_MAP removed: (x / 4096) same as (x >> 12) */
-            r_temp = pow(2, sbr->E[1][k][l]*amp1 - 12);
-#endif
+            r_temp = (real_t)pow(2, sbr->E[1][k][l]*amp1 - 12);
 
-
-#ifdef FIXED_POINT
-            {
-                real_t tmp = REAL_CONST(1.0) + r_temp;
-                sbr->E_orig[1][k][l] = SBR_DIV(l_temp, tmp);
-            }
-#else
-            sbr->E_orig[1][k][l] = l_temp / (1.0 + r_temp);
-#endif
+            sbr->E_orig[1][k][l] = l_temp / ((real_t)1.0 + r_temp);
             sbr->E_orig[0][k][l] = MUL(r_temp, sbr->E_orig[1][k][l]);
-
-#ifdef FIXED_POINT
-            sbr->E_orig[0][k][l] >>= REAL_BITS;
-            sbr->E_orig[1][k][l] >>= REAL_BITS;
-#endif
-
-            //printf("%f\t%f\n", sbr->E_orig[0][k][l] /(float)(1<<REAL_BITS), sbr->E_orig[1][k][l] /(float)(1<<REAL_BITS));
-            //printf("%f\t%f\n", sbr->E_orig[0][k][l]/1024., sbr->E_orig[1][k][l]/1024.);
         }
     }
     for (l = 0; l < sbr->L_Q[0]; l++)
@@ -324,30 +201,10 @@ void unmap_envelope_noise(sbr_info *sbr)
             } else {
                 real_t l_temp, r_temp;
 
-#ifndef FIXED_POINT
-                l_temp = pow(2.0, NOISE_FLOOR_OFFSET - sbr->Q[0][k][l] + 1);
-                r_temp = pow(2.0, sbr->Q[1][k][l] - 12);
-#else
-                int8_t exp;
+                l_temp = (real_t)pow(2.0, NOISE_FLOOR_OFFSET - sbr->Q[0][k][l] + 1);
+                r_temp = (real_t)pow(2.0, sbr->Q[1][k][l] - 12);
 
-                exp = NOISE_FLOOR_OFFSET - sbr->Q[0][k][l] + 1;
-                if (exp < 0)
-                    l_temp = REAL_CONST(1) >> -exp;
-                else
-                    l_temp = REAL_CONST(1) << exp;
-
-                exp = sbr->Q[1][k][l] - 12;
-                if (exp < 0)
-                    r_temp = REAL_CONST(1) >> -exp;
-                else
-                    r_temp = REAL_CONST(1) << exp;
-#endif
-
-#ifdef FIXED_POINT
-                sbr->Q_orig[1][k][l] = SBR_DIV(l_temp, (REAL_CONST(1.0) + r_temp));
-#else
-                sbr->Q_orig[1][k][l] = l_temp / (1.0 + r_temp);
-#endif
+                sbr->Q_orig[1][k][l] = l_temp / ((real_t)1.0 + r_temp);
                 sbr->Q_orig[0][k][l] = MUL(r_temp, sbr->Q_orig[1][k][l]);
             }
         }

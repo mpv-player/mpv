@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_huff.h,v 1.5 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_huff.h,v 1.6 2003/09/09 18:09:52 menno Exp $
 **/
 
 #ifndef __SBR_HUFF_H__
@@ -32,20 +32,9 @@
 extern "C" {
 #endif
 
-typedef const int8_t (*sbr_huff_tab)[2];
 
-int16_t sbr_huff_dec(bitfile *ld, sbr_huff_tab t_huff);
-
-const int8_t t_huffman_env_1_5dB[120][2];
-const int8_t f_huffman_env_1_5dB[120][2];
-const int8_t t_huffman_env_bal_1_5dB[48][2];
-const int8_t f_huffman_env_bal_1_5dB[48][2];
-const int8_t t_huffman_env_3_0dB[62][2];
-const int8_t f_huffman_env_3_0dB[62][2];
-const int8_t t_huffman_env_bal_3_0dB[24][2];
-const int8_t f_huffman_env_bal_3_0dB[24][2];
-const int8_t t_huffman_noise_3_0dB[62][2];
-const int8_t t_huffman_noise_bal_3_0dB[24][2];
+void sbr_envelope(bitfile *ld, sbr_info *sbr, uint8_t ch);
+void sbr_noise(bitfile *ld, sbr_info *sbr, uint8_t ch);
 
 #ifdef __cplusplus
 }

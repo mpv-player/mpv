@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_huff.c,v 1.5 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_huff.c,v 1.7 2003/09/09 18:37:32 menno Exp $
 **/
 
 #include "common.h"
@@ -30,26 +30,15 @@
 
 #ifdef SBR_DEC
 
+#include "sbr_syntax.h"
 #include "bits.h"
 #include "sbr_huff.h"
+#include "sbr_e_nf.h"
 
 
-int16_t sbr_huff_dec(bitfile *ld, sbr_huff_tab t_huff)
-{
-    uint8_t bit;
-    int16_t index = 0;
+typedef const int8_t (*sbr_huff_tab)[2];
 
-    while (index >= 0)
-    {
-        bit = (uint8_t)faad_getbits(ld, 1);
-        index = t_huff[index][bit];
-    }
-
-    return index + 64;
-}
-
-
-const int8_t t_huffman_env_1_5dB[120][2] = {
+static const int8_t t_huffman_env_1_5dB[120][2] = {
     {   1,   2 },    { -64, -65 },    {   3,   4 },    { -63, -66 },
     {   5,   6 },    { -62, -67 },    {   7,   8 },    { -61, -68 },
     {   9,  10 },    { -60, -69 },    {  11,  12 },    { -59, -70 },
@@ -82,7 +71,7 @@ const int8_t t_huffman_env_1_5dB[120][2] = {
     {  -9,  -8 },    { 118, 119 },    {  -7,  -6 },    {  -5,  -4 }
 };
 
-const int8_t f_huffman_env_1_5dB[120][2] = {
+static const int8_t f_huffman_env_1_5dB[120][2] = {
     {   1,   2 },    { -64, -65 },    {   3,   4 },    { -63, -66 },
     {   5,   6 },    { -67, -62 },    {   7,   8 },    { -68, -61 },
     {   9,  10 },    { -69, -60 },    {  11,  13 },    { -70,  12 },
@@ -115,7 +104,7 @@ const int8_t f_huffman_env_1_5dB[120][2] = {
     {  -9,  -8 },    { 118, 119 },    {  -7,  -6 },    {  -5,  -4 }
 };
 
-const int8_t t_huffman_env_bal_1_5dB[48][2] = {
+static const int8_t t_huffman_env_bal_1_5dB[48][2] = {
     { -64,   1 },    { -63,   2 },    { -65,   3 },    { -62,   4 },
     { -66,   5 },    { -61,   6 },    { -67,   7 },    { -60,   8 },
     { -68,   9 },    {  10,  11 },    { -69, -59 },    {  12,  13 },
@@ -130,7 +119,7 @@ const int8_t t_huffman_env_bal_1_5dB[48][2] = {
     { -45, -44 },    {  46,  47 },    { -43, -42 },    { -41, -40 }
 };
 
-const int8_t f_huffman_env_bal_1_5dB[48][2] = {
+static const int8_t f_huffman_env_bal_1_5dB[48][2] = {
     { -64,   1 },    { -65,   2 },    { -63,   3 },    { -66,   4 },
     { -62,   5 },    { -61,   6 },    { -67,   7 },    { -68,   8 },
     { -60,   9 },    {  10,  11 },    { -69, -59 },    { -70,  12 },
@@ -145,7 +134,7 @@ const int8_t f_huffman_env_bal_1_5dB[48][2] = {
     {  45,  46 },    { -44, -43 },    { -42,  47 },    { -41, -40 }
 };
 
-const int8_t t_huffman_env_3_0dB[62][2] = {
+static const int8_t t_huffman_env_3_0dB[62][2] = {
     { -64,   1 },    { -65,   2 },    { -63,   3 },    { -66,   4 },
     { -62,   5 },    { -67,   6 },    { -61,   7 },    { -68,   8 },
     { -60,   9 },    {  10,  11 },    { -69, -59 },    {  12,  14 },
@@ -164,7 +153,7 @@ const int8_t t_huffman_env_3_0dB[62][2] = {
     { -36, -35 },    { -34, -33 }
 };
 
-const int8_t f_huffman_env_3_0dB[62][2] = {
+static const int8_t f_huffman_env_3_0dB[62][2] = {
     { -64,   1 },    { -65,   2 },    { -63,   3 },    { -66,   4 },
     { -62,   5 },    { -67,   6 },    {   7,   8 },    { -61, -68 },
     {   9,  10 },    { -60, -69 },    {  11,  12 },    { -59, -70 },
@@ -183,7 +172,7 @@ const int8_t f_huffman_env_3_0dB[62][2] = {
     { -36, -35 },    { -34, -33 }
 };
 
-const int8_t t_huffman_env_bal_3_0dB[24][2] = {
+static const int8_t t_huffman_env_bal_3_0dB[24][2] = {
     { -64,   1 },    { -63,   2 },    { -65,   3 },    { -66,   4 },
     { -62,   5 },    { -61,   6 },    { -67,   7 },    { -68,   8 },
     { -60,   9 },    {  10,  16 },    {  11,  13 },    { -69,  12 },
@@ -192,7 +181,7 @@ const int8_t t_huffman_env_bal_3_0dB[24][2] = {
     {  21,  22 },    { -56, -55 },    { -54,  23 },    { -53, -52 }
 };
 
-const int8_t f_huffman_env_bal_3_0dB[24][2] = {
+static const int8_t f_huffman_env_bal_3_0dB[24][2] = {
     { -64,   1 },    { -65,   2 },    { -63,   3 },    { -66,   4 },
     { -62,   5 },    { -61,   6 },    { -67,   7 },    { -68,   8 },
     { -60,   9 },    {  10,  13 },    { -69,  11 },    { -59,  12 },
@@ -202,7 +191,7 @@ const int8_t f_huffman_env_bal_3_0dB[24][2] = {
 };
 
 
-const int8_t t_huffman_noise_3_0dB[62][2] = {
+static const int8_t t_huffman_noise_3_0dB[62][2] = {
     { -64,   1 },    { -63,   2 },    { -65,   3 },    { -66,   4 },
     { -62,   5 },    { -67,   6 },    {   7,   8 },    { -61, -68 },
     {   9,  30 },    {  10,  15 },    { -60,  11 },    { -69,  12 },
@@ -221,7 +210,7 @@ const int8_t t_huffman_noise_3_0dB[62][2] = {
     { -35,  61 },    { -34, -33 }
 };
 
-const int8_t t_huffman_noise_bal_3_0dB[24][2] = {
+static const int8_t t_huffman_noise_bal_3_0dB[24][2] = {
     { -64,   1 },    { -65,   2 },    { -63,   3 },    {   4,   9 },
     { -66,   5 },    { -62,   6 },    {   7,   8 },    { -76, -75 },
     { -74, -73 },    {  10,  17 },    {  11,  14 },    {  12,  13 },
@@ -229,5 +218,148 @@ const int8_t t_huffman_noise_bal_3_0dB[24][2] = {
     { -61, -60 },    {  18,  21 },    {  19,  20 },    { -59, -58 },
     { -57, -56 },    {  22,  23 },    { -55, -54 },    { -53, -52 }
 };
+
+
+INLINE int16_t sbr_huff_dec(bitfile *ld, sbr_huff_tab t_huff)
+{
+    uint8_t bit;
+    int16_t index = 0;
+
+    while (index >= 0)
+    {
+        bit = (uint8_t)faad_getbits(ld, 1);
+        index = t_huff[index][bit];
+    }
+
+    return index + 64;
+}
+
+/* table 10 */
+void sbr_envelope(bitfile *ld, sbr_info *sbr, uint8_t ch)
+{
+    uint8_t env, band;
+    int8_t delta = 0;
+    sbr_huff_tab t_huff, f_huff;
+
+#ifdef DRM
+    if (sbr->Is_DRM_SBR)
+        sbr->amp_res[ch] = sbr->bs_amp_res;
+    else
+#endif
+    {
+        if ((sbr->L_E[ch] == 1) && (sbr->bs_frame_class[ch] == FIXFIX))
+            sbr->amp_res[ch] = 0;
+        else
+            sbr->amp_res[ch] = sbr->bs_amp_res;
+    }
+
+    if ((sbr->bs_coupling) && (ch == 1))
+    {
+        delta = 1;
+        if (sbr->amp_res[ch])
+        {
+            t_huff = t_huffman_env_bal_3_0dB;
+            f_huff = f_huffman_env_bal_3_0dB;
+        } else {
+            t_huff = t_huffman_env_bal_1_5dB;
+            f_huff = f_huffman_env_bal_1_5dB;
+        }
+    } else {
+        delta = 0;
+        if (sbr->amp_res[ch])
+        {
+            t_huff = t_huffman_env_3_0dB;
+            f_huff = f_huffman_env_3_0dB;
+        } else {
+            t_huff = t_huffman_env_1_5dB;
+            f_huff = f_huffman_env_1_5dB;
+        }
+    }
+
+    for (env = 0; env < sbr->L_E[ch]; env++)
+    {
+        if (sbr->bs_df_env[ch][env] == 0)
+        {
+            if ((sbr->bs_coupling == 1) && (ch == 1))
+            {
+                if (sbr->amp_res[ch])
+                {
+                    sbr->E[ch][0][env] = (faad_getbits(ld, 5
+                        DEBUGVAR(1,272,"sbr_envelope(): bs_data_env")) << delta);
+                } else {
+                    sbr->E[ch][0][env] = (faad_getbits(ld, 6
+                        DEBUGVAR(1,273,"sbr_envelope(): bs_data_env")) << delta);
+                }
+            } else {
+                if (sbr->amp_res[ch])
+                {
+                    sbr->E[ch][0][env] = (faad_getbits(ld, 6
+                        DEBUGVAR(1,274,"sbr_envelope(): bs_data_env")) << delta);
+                } else {
+                    sbr->E[ch][0][env] = (faad_getbits(ld, 7
+                        DEBUGVAR(1,275,"sbr_envelope(): bs_data_env")) << delta);
+                }
+            }
+
+            for (band = 1; band < sbr->n[sbr->f[ch][env]]; band++)
+            {
+                sbr->E[ch][band][env] = (sbr_huff_dec(ld, f_huff) << delta);
+            }
+
+        } else {
+            for (band = 0; band < sbr->n[sbr->f[ch][env]]; band++)
+            {
+                sbr->E[ch][band][env] = (sbr_huff_dec(ld, t_huff) << delta);
+            }
+        }
+    }
+
+    extract_envelope_data(sbr, ch);
+}
+
+/* table 11 */
+void sbr_noise(bitfile *ld, sbr_info *sbr, uint8_t ch)
+{
+    uint8_t noise, band;
+    int8_t delta = 0;
+    sbr_huff_tab t_huff, f_huff;
+
+    if ((sbr->bs_coupling == 1) && (ch == 1))
+    {
+        delta = 1;
+        t_huff = t_huffman_noise_bal_3_0dB;
+        f_huff = f_huffman_env_bal_3_0dB;
+    } else {
+        delta = 0;
+        t_huff = t_huffman_noise_3_0dB;
+        f_huff = f_huffman_env_3_0dB;
+    }
+
+    for (noise = 0; noise < sbr->L_Q[ch]; noise++)
+    {
+        if(sbr->bs_df_noise[ch][noise] == 0)
+        {
+            if ((sbr->bs_coupling == 1) && (ch == 1))
+            {
+                sbr->Q[ch][0][noise] = (faad_getbits(ld, 5
+                    DEBUGVAR(1,276,"sbr_noise(): bs_data_noise")) << delta);
+            } else {
+                sbr->Q[ch][0][noise] = (faad_getbits(ld, 5
+                    DEBUGVAR(1,277,"sbr_noise(): bs_data_noise")) << delta);
+            }
+            for (band = 1; band < sbr->N_Q; band++)
+            {
+                sbr->Q[ch][band][noise] = (sbr_huff_dec(ld, f_huff) << delta);
+            }
+        } else {
+            for (band = 0; band < sbr->N_Q; band++)
+            {
+                sbr->Q[ch][band][noise] = (sbr_huff_dec(ld, t_huff) << delta);
+            }
+        }
+    }
+
+    extract_noise_floor_data(sbr, ch);
+}
 
 #endif

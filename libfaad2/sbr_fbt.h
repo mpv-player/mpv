@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_fbt.h,v 1.1 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_fbt.h,v 1.2 2003/09/09 18:09:52 menno Exp $
 **/
 
 #ifndef __SBR_FBT_H__
@@ -32,16 +32,17 @@
 extern "C" {
 #endif
 
-uint16_t qmf_start_channel(uint8_t bs_start_freq, uint8_t bs_samplerate_mode,
+static int32_t find_bands(uint8_t warp, uint8_t bands, uint8_t a0, uint8_t a1);
+uint8_t qmf_start_channel(uint8_t bs_start_freq, uint8_t bs_samplerate_mode,
                            uint32_t sample_rate);
-uint16_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
-                          uint16_t k0);
-void master_frequency_table_fs0(sbr_info *sbr, uint16_t k0, uint16_t k2,
+uint8_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
+                          uint8_t k0);
+void master_frequency_table_fs0(sbr_info *sbr, uint8_t k0, uint8_t k2,
                                 uint8_t bs_alter_scale);
-void master_frequency_table(sbr_info *sbr, uint16_t k0, uint16_t k2,
+void master_frequency_table(sbr_info *sbr, uint8_t k0, uint8_t k2,
                             uint8_t bs_freq_scale, uint8_t bs_alter_scale);
-void derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
-                             uint16_t k2);
+uint8_t derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
+                                uint8_t k2);
 void limiter_frequency_table(sbr_info *sbr);
 
 

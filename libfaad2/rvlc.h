@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: rvlc.h,v 1.2 2003/07/29 08:20:13 menno Exp $
+** $Id: rvlc.h,v 1.3 2003/09/09 18:09:52 menno Exp $
 **/
 
 #ifndef __RVLC_SCF_H__

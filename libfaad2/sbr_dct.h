@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_dct.h,v 1.1 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_dct.h,v 1.3 2003/09/24 11:52:12 menno Exp $
 **/
 
 #ifndef __SBR_DCT_H__
@@ -35,7 +35,6 @@ extern "C" {
 void DCT3_32_unscaled(real_t *y, real_t *x);
 void DCT2_64_unscaled(real_t *y, real_t *x);
 void DCT4_64(real_t *y, real_t *x);
-void DST4_64(real_t *y, real_t *x);
 
 
 #ifdef __cplusplus

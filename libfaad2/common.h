@@ -242,8 +242,8 @@ char *strchr(), *strrchr();
   #define MUL_C_C(A,B) ((A)*(B))
   #define MUL_R_C(A,B) ((A)*(B))
 
-  #define REAL_CONST(A) ((real_t)A)
-  #define COEF_CONST(A) ((real_t)A)
+  #define REAL_CONST(A) ((real_t)(A))
+  #define COEF_CONST(A) ((real_t)(A))
 
 #else /* Normal floating point operation */
 
@@ -253,8 +253,8 @@ char *strchr(), *strrchr();
   #define MUL_C_C(A,B) ((A)*(B))
   #define MUL_R_C(A,B) ((A)*(B))
 
-  #define REAL_CONST(A) ((real_t)A)
-  #define COEF_CONST(A) ((real_t)A)
+  #define REAL_CONST(A) ((real_t)(A))
+  #define COEF_CONST(A) ((real_t)(A))
 
   #ifdef __ICL /* only Intel C compiler has fmath ??? */
 
@@ -307,6 +307,7 @@ typedef real_t complex_t[2];
 int32_t int_log2(int32_t val);
 uint32_t random_int(void);
 uint8_t get_sr_index(uint32_t samplerate);
+uint32_t get_sample_rate(uint8_t sr_index);
 int8_t can_decode_ot(uint8_t object_type);
 
 #ifndef M_PI

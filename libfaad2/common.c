@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: common.c,v 1.6 2003/07/29 08:20:12 menno Exp $
+** $Id: common.c,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 /* just some common functions that could be used anywhere */
@@ -35,7 +35,6 @@
 /* Returns the sample rate index based on the samplerate */
 uint8_t get_sr_index(uint32_t samplerate)
 {
-    if (16428320 <= samplerate) return 11;
     if (92017 <= samplerate) return 0;
     if (75132 <= samplerate) return 1;
     if (55426 <= samplerate) return 2;
@@ -47,8 +46,24 @@ uint8_t get_sr_index(uint32_t samplerate)
     if (13856 <= samplerate) return 8;
     if (11502 <= samplerate) return 9;
     if (9391 <= samplerate) return 10;
+    if (16428320 <= samplerate) return 11;
 
     return 11;
+}
+
+/* Returns the sample rate based on the sample rate index */
+uint32_t get_sample_rate(uint8_t sr_index)
+{
+    static const uint32_t sample_rates[] =
+    {
+        96000, 88200, 64000, 48000, 44100, 32000,
+        24000, 22050, 16000, 12000, 11025, 8000
+    };
+
+    if (sr_index < 12)
+        return sample_rates[sr_index];
+
+    return 0;
 }
 
 /* Returns 0 if an object type is decodable, otherwise returns -1 */

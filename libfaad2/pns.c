@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: pns.c,v 1.21 2003/07/29 08:20:12 menno Exp $
+** $Id: pns.c,v 1.22 2003/09/09 18:09:52 menno Exp $
 **/
 
 #include "common.h"
@@ -33,7 +33,7 @@
 
 #ifdef FIXED_POINT
 
-#define DIV(A, B) (((int64_t)A << COEF_BITS)/B)
+#define DIV(A, B) (((int64_t)A << REAL_BITS)/B)
 
 #define step(shift) \
     if ((0x40000000l >> shift) + root <= value)       \
@@ -45,6 +45,7 @@
     }
 
 /* fixed point square root approximation */
+/* !!!! ONLY WORKS FOR EVEN %REAL_BITS% !!!! */
 real_t fp_sqrt(real_t value)
 {
     real_t root = 0;
@@ -57,7 +58,7 @@ real_t fp_sqrt(real_t value)
     if (root < value)
         ++root;
 
-    root <<= (COEF_BITS/2);
+    root <<= (REAL_BITS/2);
 
     return root;
 }
@@ -79,13 +80,14 @@ static real_t pow2_table[] =
    value. A suitable random number generator can be realized using one
    multiplication/accumulation per random value.
 */
-static INLINE void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t size)
+static INLINE void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t size,
+                                   uint8_t sub)
 {
 #ifndef FIXED_POINT
     uint16_t i;
     real_t energy = 0.0;
 
-    real_t scale = 1.0/(real_t)size * ISQRT_MEAN_NRG;
+    real_t scale = (real_t)1.0/(real_t)size;
 
     for (i = 0; i < size; i++)
     {
@@ -94,7 +96,7 @@ static INLINE void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t 
         energy += tmp*tmp;
     }
 
-    scale = 1.0/(real_t)sqrt(energy);
+    scale = (real_t)1.0/(real_t)sqrt(energy);
     scale *= (real_t)pow(2.0, 0.25 * scale_factor);
     for (i = 0; i < size; i++)
     {
@@ -107,24 +109,28 @@ static INLINE void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t 
 
     for (i = 0; i < size; i++)
     {
-        real_t tmp = ISQRT_MEAN_NRG * (int32_t)random_int();
-        tmp = MUL_C_C(COEF_CONST(1)/size, tmp);
+        /* this can be replaced by a 16 bit random generator!!!! */
+        real_t tmp = (int32_t)random_int();
+        if (tmp < 0)
+            tmp = -(tmp & ((1<<(REAL_BITS-1))-1));
+        else
+            tmp = (tmp & ((1<<(REAL_BITS-1))-1));
 
-        energy += MUL_C_C(tmp,tmp);
+        energy += MUL(tmp,tmp);
 
-        /* convert COEF to REAL */
-        spec[i] = (tmp >> -(REAL_BITS-COEF_BITS));
+        spec[i] = tmp;
     }
 
     energy = fp_sqrt(energy);
     if (energy > 0)
     {
-        scale = DIV(COEF_CONST(1),energy);
-
-        scale >>= -(REAL_BITS-COEF_BITS);
+        scale = DIV(REAL_CONST(1),energy);
 
         exp = scale_factor / 4;
         frac = scale_factor % 4;
+
+        /* IMDCT pre-scaling */
+        exp -= sub;
 
         if (exp < 0)
             scale >>= -exp;
@@ -144,13 +150,28 @@ static INLINE void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t 
 
 void pns_decode(ic_stream *ics_left, ic_stream *ics_right,
                 real_t *spec_left, real_t *spec_right, uint16_t frame_len,
-                uint8_t channel_pair)
+                uint8_t channel_pair, uint8_t object_type)
 {
     uint8_t g, sfb, b;
     uint16_t size, offs;
 
     uint8_t group = 0;
     uint16_t nshort = frame_len >> 3;
+
+    uint8_t sub = 0;
+
+#ifdef FIXED_POINT
+    /* IMDCT scaling */
+    if (object_type == LD)
+    {
+        sub = 9 /*9*/;
+    } else {
+        if (ics_left->window_sequence == EIGHT_SHORT_SEQUENCE)
+            sub = 7 /*7*/;
+        else
+            sub = 10 /*10*/;
+    }
+#endif
 
     for (g = 0; g < ics_left->num_window_groups; g++)
     {
@@ -179,7 +200,7 @@ void pns_decode(ic_stream *ics_left, ic_stream *ics_right,
 
                     /* Generate random vector */
                     gen_rand_vector(&spec_left[(group*nshort)+offs],
-                        ics_left->scale_factors[g][sfb], size);
+                        ics_left->scale_factors[g][sfb], size, sub);
                 }
 
 /* From the spec:
@@ -223,7 +244,7 @@ void pns_decode(ic_stream *ics_left, ic_stream *ics_right,
 
                             /* Generate random vector */
                             gen_rand_vector(&spec_right[(group*nshort)+offs],
-                                ics_right->scale_factors[g][sfb], size);
+                                ics_right->scale_factors[g][sfb], size, sub);
                         }
                     }
                 }

@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_e_nf.h,v 1.1 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_e_nf.h,v 1.2 2003/09/09 18:09:52 menno Exp $
 **/
 
 #ifndef __SBR_E_NF_H__
@@ -35,6 +35,7 @@ extern "C" {
 void extract_envelope_data(sbr_info *sbr, uint8_t ch);
 void extract_noise_floor_data(sbr_info *sbr, uint8_t ch);
 void envelope_noise_dequantisation(sbr_info *sbr, uint8_t ch);
+void unmap_envelope_noise(sbr_info *sbr);
 
 
 #ifdef __cplusplus

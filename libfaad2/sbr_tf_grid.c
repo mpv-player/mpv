@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_tf_grid.c,v 1.1 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_tf_grid.c,v 1.4 2003/09/30 16:32:02 menno Exp $
 **/
 
 /* Time/Frequency grid */
@@ -37,9 +37,9 @@
 #include "sbr_syntax.h"
 #include "sbr_tf_grid.h"
 
-void envelope_time_border_vector(sbr_info *sbr, uint8_t ch)
+uint8_t envelope_time_border_vector(sbr_info *sbr, uint8_t ch)
 {
-    uint8_t l, border;
+    uint8_t l, border, temp;
 
     for (l = 0; l <= sbr->L_E[ch]; l++)
     {
@@ -55,12 +55,13 @@ void envelope_time_border_vector(sbr_info *sbr, uint8_t ch)
         switch (sbr->L_E[ch])
         {
         case 4:
-            sbr->t_E[ch][3] = sbr->rate * 12;
-            sbr->t_E[ch][2] = sbr->rate * 8;
-            sbr->t_E[ch][1] = sbr->rate * 4;
+            temp = (int) (sbr->numTimeSlots / 4);
+            sbr->t_E[ch][3] = sbr->rate * 3 * temp;
+            sbr->t_E[ch][2] = sbr->rate * 2 * temp;
+            sbr->t_E[ch][1] = sbr->rate * temp;
             break;
         case 2:
-            sbr->t_E[ch][1] = sbr->rate * 8;
+            sbr->t_E[ch][1] = sbr->rate * (int) (sbr->numTimeSlots / 2);
             break;
         default:
             break;
@@ -75,6 +76,9 @@ void envelope_time_border_vector(sbr_info *sbr, uint8_t ch)
 
             for (l = 0; l < (sbr->L_E[ch] - 1); l++)
             {
+                if (border < sbr->bs_rel_bord[ch][l])
+                    return 1;
+
                 border -= sbr->bs_rel_bord[ch][l];
                 sbr->t_E[ch][--i] = sbr->rate * border;
             }
@@ -90,6 +94,10 @@ void envelope_time_border_vector(sbr_info *sbr, uint8_t ch)
             for (l = 0; l < (sbr->L_E[ch] - 1); l++)
             {
                 border += sbr->bs_rel_bord[ch][l];
+
+                if (sbr->rate * border + sbr->tHFAdj > sbr->numTimeSlotsRate+sbr->tHFGen)
+                    return 1;
+
                 sbr->t_E[ch][i++] = sbr->rate * border;
             }
         }
@@ -104,6 +112,10 @@ void envelope_time_border_vector(sbr_info *sbr, uint8_t ch)
             for (l = 0; l < sbr->bs_num_rel_0[ch]; l++)
             {
                 border += sbr->bs_rel_bord_0[ch][l];
+
+                if (sbr->rate * border + sbr->tHFAdj > sbr->numTimeSlotsRate+sbr->tHFGen)
+                    return 1;
+
                 sbr->t_E[ch][i++] = sbr->rate * border;
             }
         }
@@ -115,12 +127,17 @@ void envelope_time_border_vector(sbr_info *sbr, uint8_t ch)
 
             for (l = 0; l < sbr->bs_num_rel_1[ch]; l++)
             {
+                if (border < sbr->bs_rel_bord_1[ch][l])
+                    return 1;
+
                 border -= sbr->bs_rel_bord_1[ch][l];
                 sbr->t_E[ch][--i] = sbr->rate * border;
             }
         }
         break;
     }
+
+    return 0;
 }
 
 void noise_floor_time_border_vector(sbr_info *sbr, uint8_t ch)
@@ -146,7 +163,7 @@ static int16_t rel_bord_lead(sbr_info *sbr, uint8_t ch, uint8_t l)
     switch (sbr->bs_frame_class[ch])
     {
     case FIXFIX:
-        return NO_TIME_SLOTS/sbr->L_E[ch];
+        return sbr->numTimeSlots/sbr->L_E[ch];
     case FIXVAR:
         return 0;
     case VARFIX:

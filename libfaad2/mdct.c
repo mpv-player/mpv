@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: mdct.c,v 1.26 2003/07/29 08:20:12 menno Exp $
+** $Id: mdct.c,v 1.28 2003/09/30 12:43:05 menno Exp $
 **/
 
 /*
@@ -113,6 +113,9 @@ real_t const_tab[][5] =
 
 uint8_t map_N_to_idx(uint16_t N)
 {
+    /* gives an index into const_tab above */
+    /* for normal AAC deocding (eg. no scalable profile) only */
+    /* index 0 and 4 will be used */
     switch(N)
     {
     case 2048: return 0;
@@ -151,14 +154,23 @@ mdct_info *faad_mdct_init(uint16_t N)
     c = const_tab[N_idx][3];
     s = const_tab[N_idx][4];
 
+    /* (co)sine table build using recurrence relations */
+    /* this can also be done using static table lookup or */
+    /* some form of interpolation */
     for (k = 0; k < N/4; k++)
     {
+#if 1
         RE(mdct->sincos[k]) = -1*MUL_C_C(c,scale);
         IM(mdct->sincos[k]) = -1*MUL_C_C(s,scale);
 
         cold = c;
         c = MUL_C_C(c,cangle) - MUL_C_C(s,sangle);
         s = MUL_C_C(s,cangle) + MUL_C_C(cold,sangle);
+#else
+        /* no recurrence, just sines */
+        RE(mdct->sincos[k]) = -scale*cos(2.0*M_PI*(k+1./8.) / (float)N);
+        IM(mdct->sincos[k]) = -scale*sin(2.0*M_PI*(k+1./8.) / (float)N);
+#endif
     }
 
     /* initialise fft */
@@ -196,20 +208,16 @@ void faad_imdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
     /* pre-IFFT complex multiplication */
     for (k = 0; k < N4; k++)
     {
-        uint16_t n = k << 1;
-        RE(x) = X_in[         n];
-        IM(x) = X_in[N2 - 1 - n];
-        RE(Z1[k]) = MUL_R_C(IM(x), RE(sincos[k])) - MUL_R_C(RE(x), IM(sincos[k]));
-        IM(Z1[k]) = MUL_R_C(RE(x), RE(sincos[k])) + MUL_R_C(IM(x), IM(sincos[k]));
+        RE(Z1[k]) = MUL_R_C(X_in[N2 - 1 - 2*k], RE(sincos[k])) - MUL_R_C(X_in[2*k], IM(sincos[k]));
+        IM(Z1[k]) = MUL_R_C(X_in[2*k], RE(sincos[k])) + MUL_R_C(X_in[N2 - 1 - 2*k], IM(sincos[k]));
     }
 
-    /* complex IFFT */
+    /* complex IFFT, any non-scaling FFT can be used here */
     cfftb(mdct->cfft, Z1);
 
     /* post-IFFT complex multiplication */
     for (k = 0; k < N4; k++)
     {
-        uint16_t n = k << 1;
         RE(x) = RE(Z1[k]);
         IM(x) = IM(Z1[k]);
 
@@ -220,15 +228,14 @@ void faad_imdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
     /* reordering */
     for (k = 0; k < N8; k++)
     {
-        uint16_t n = k << 1;
-        X_out[              n] =  IM(Z1[N8 +     k]);
-        X_out[          1 + n] = -RE(Z1[N8 - 1 - k]);
-        X_out[N4 +          n] =  RE(Z1[         k]);
-        X_out[N4 +      1 + n] = -IM(Z1[N4 - 1 - k]);
-        X_out[N2 +          n] =  RE(Z1[N8 +     k]);
-        X_out[N2 +      1 + n] = -IM(Z1[N8 - 1 - k]);
-        X_out[N2 + N4 +     n] = -IM(Z1[         k]);
-        X_out[N2 + N4 + 1 + n] =  RE(Z1[N4 - 1 - k]);
+        X_out[              2*k] =  IM(Z1[N8 +     k]);
+        X_out[          1 + 2*k] = -RE(Z1[N8 - 1 - k]);
+        X_out[N4 +          2*k] =  RE(Z1[         k]);
+        X_out[N4 +      1 + 2*k] = -IM(Z1[N4 - 1 - k]);
+        X_out[N2 +          2*k] =  RE(Z1[N8 +     k]);
+        X_out[N2 +      1 + 2*k] = -IM(Z1[N8 - 1 - k]);
+        X_out[N2 + N4 +     2*k] = -IM(Z1[         k]);
+        X_out[N2 + N4 + 1 + 2*k] =  RE(Z1[N4 - 1 - k]);
     }
 }
 
@@ -265,7 +272,7 @@ void faad_mdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
         IM(Z1[k + N8]) = -MUL_R_C(IM(x), RE(sincos[k + N8])) + MUL_R_C(RE(x), IM(sincos[k + N8]));
     }
 
-    /* complex FFT */
+    /* complex FFT, any non-scaling FFT can be used here  */
     cfftf(mdct->cfft, Z1);
 
     /* post-FFT complex multiplication */

@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_hfgen.h,v 1.1 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_hfgen.h,v 1.3 2003/09/30 08:07:47 menno Exp $
 **/
 
 #ifndef __SBR_HFGEN_H__
@@ -32,14 +32,14 @@
 extern "C" {
 #endif
 
-void hf_generation(sbr_info *sbr, qmf_t *Xlow,
+void hf_generation(sbr_info *sbr, const qmf_t *Xlow,
                    qmf_t *Xhigh
 #ifdef SBR_LOW_POWER
                    ,real_t *deg
 #endif
                    ,uint8_t ch);
 
-static void calc_prediction_coef(sbr_info *sbr, qmf_t *Xlow,
+static void calc_prediction_coef(sbr_info *sbr, const qmf_t *Xlow,
                                  complex_t *alpha_0, complex_t *alpha_1
 #ifdef SBR_LOW_POWER
                                  , real_t *rxx

@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_dec.h,v 1.4 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_dec.h,v 1.7 2003/09/25 12:04:31 menno Exp $
 **/
 
 #ifndef __SBR_DEC_H__
@@ -33,16 +33,13 @@ extern "C" {
 #endif
 
 typedef struct {
-#if 0
-    real_t post_exp_re[64];
-    real_t post_exp_im[64];
-#endif
     real_t *x;
     uint8_t channels;
 } qmfa_info;
 
 typedef struct {
-    real_t *v;
+    real_t *v[2];
+    uint8_t v_index;
     uint8_t channels;
 } qmfs_info;
 
@@ -144,6 +141,17 @@ typedef struct
     qmf_t *Xsbr[2];
     qmf_t *Xcodec[2];
 
+#ifdef DRM
+	int8_t lcstereo_flag;
+	uint8_t bs_dataextra;
+	uint16_t data_size_bits;
+    uint8_t Is_DRM_SBR;
+#endif
+
+	uint16_t numTimeSlotsRate;
+	uint16_t numTimeSlots;
+	uint8_t tHFGen;
+	uint8_t tHFAdj;
 
     /* to get it compiling */
     /* we'll see during the coding of all the tools, whether
@@ -184,12 +192,16 @@ typedef struct
     uint8_t bs_df_noise[2][3];
 } sbr_info;
 
-sbr_info *sbrDecodeInit();
+sbr_info *sbrDecodeInit(uint16_t framelength
+#ifdef DRM
+						, uint8_t IsDRM
+#endif
+						);
 void sbrDecodeEnd(sbr_info *sbr);
 
 void sbrDecodeFrame(sbr_info *sbr, real_t *left_channel,
                     real_t *right_channel, uint8_t id_aac,
-                    uint8_t just_seeked);
+                    uint8_t just_seeked, uint8_t upsample_only);
 
 
 #ifdef __cplusplus

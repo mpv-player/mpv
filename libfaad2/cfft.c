@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: cfft.c,v 1.11 2003/07/29 08:20:12 menno Exp $
+** $Id: cfft.c,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 /*
@@ -65,8 +65,8 @@ static void passf2(uint16_t ido, uint16_t l1, complex_t *cc, complex_t *ch,
             ac = 4*k;
 
             RE(ch[ah]) = RE(cc[ac]) + RE(cc[ac+1]);
-            IM(ch[ah]) = IM(cc[ac]) + IM(cc[ac+1]);
             RE(ch[ah+l1]) = RE(cc[ac]) - RE(cc[ac+1]);
+            IM(ch[ah])    = IM(cc[ac]) + IM(cc[ac+1]);
             IM(ch[ah+l1]) = IM(cc[ac]) - IM(cc[ac+1]);
         }
     } else {
@@ -79,16 +79,14 @@ static void passf2(uint16_t ido, uint16_t l1, complex_t *cc, complex_t *ch,
             {
                 complex_t t2;
 
-                RE(ch[ah]) = RE(cc[ac]) + RE(cc[ac+ido]);
-                IM(ch[ah]) = IM(cc[ac]) + IM(cc[ac+ido]);
+                RE(ch[ah+i]) = RE(cc[ac+i]) + RE(cc[ac+i+ido]);
+                RE(t2)       = RE(cc[ac+i]) - RE(cc[ac+i+ido]);
 
-                RE(t2) = RE(cc[ac]) - RE(cc[ac+ido]);
-                IM(t2) = IM(cc[ac]) - IM(cc[ac+ido]);
+                IM(ch[ah+i]) = IM(cc[ac+i]) + IM(cc[ac+i+ido]);
+                IM(t2)       = IM(cc[ac+i]) - IM(cc[ac+i+ido]);
 
-                RE(ch[ah+l1*ido]) = MUL_R_C(RE(t2),RE(wa[i])) - MUL_R_C(IM(t2),IM(wa[i]))*isign;
-                IM(ch[ah+l1*ido]) = MUL_R_C(IM(t2),RE(wa[i])) + MUL_R_C(RE(t2),IM(wa[i]))*isign;
-                ah++;
-                ac++;
+                RE(ch[ah+i+l1*ido]) = MUL_R_C(RE(t2),RE(wa[i])) - MUL_R_C(IM(t2),IM(wa[i]))*isign;
+                IM(ch[ah+i+l1*ido]) = MUL_R_C(IM(t2),RE(wa[i])) + MUL_R_C(RE(t2),IM(wa[i]))*isign;
             }
         }
     }
@@ -164,66 +162,74 @@ static void passf4(uint16_t ido, uint16_t l1, complex_t *cc, complex_t *ch,
                    complex_t *wa1, complex_t *wa2, complex_t *wa3, int8_t isign)
 {
     uint16_t i, k, ac, ah;
-    complex_t c2, c3, c4, t1, t2, t3, t4;
 
     if (ido == 1)
     {
         for (k = 0; k < l1; k++)
         {
+            complex_t t1, t2, t3, t4;
+
             ac = 4*k;
             ah = k;
 
             RE(t2) = RE(cc[ac]) + RE(cc[ac+2]);
-            IM(t2) = IM(cc[ac]) + IM(cc[ac+2]);
-            RE(t3) = RE(cc[ac+1]) + RE(cc[ac+3]);
-            IM(t3) = IM(cc[ac+1]) + IM(cc[ac+3]);
             RE(t1) = RE(cc[ac]) - RE(cc[ac+2]);
+            IM(t2) = IM(cc[ac])   + IM(cc[ac+2]);
             IM(t1) = IM(cc[ac]) - IM(cc[ac+2]);
-            RE(t4) = IM(cc[ac+3]) - IM(cc[ac+1]);
+            RE(t3) = RE(cc[ac+1]) + RE(cc[ac+3]);
             IM(t4) = RE(cc[ac+1]) - RE(cc[ac+3]);
+            IM(t3) = IM(cc[ac+3]) + IM(cc[ac+1]);
+            RE(t4) = IM(cc[ac+3]) - IM(cc[ac+1]);
 
             RE(ch[ah]) = RE(t2) + RE(t3);
-            IM(ch[ah]) = IM(t2) + IM(t3);
-            RE(ch[ah+l1]) = RE(t1) + RE(t4)*isign;
-            IM(ch[ah+l1]) = IM(t1) + IM(t4)*isign;
             RE(ch[ah+2*l1]) = RE(t2) - RE(t3);
+
+            IM(ch[ah])      = IM(t2) + IM(t3);
             IM(ch[ah+2*l1]) = IM(t2) - IM(t3);
+
+            RE(ch[ah+l1])   = RE(t1) + RE(t4)*isign;
             RE(ch[ah+3*l1]) = RE(t1) - RE(t4)*isign;
+
+            IM(ch[ah+l1])   = IM(t1) + IM(t4)*isign;
             IM(ch[ah+3*l1]) = IM(t1) - IM(t4)*isign;
         }
     } else {
         for (k = 0; k < l1; k++)
         {
+            ac = 4*k*ido;
+            ah = k*ido;
+
             for (i = 0; i < ido; i++)
             {
-                ac = i + 4*k*ido;
-                ah = i + k*ido;
+                complex_t c2, c3, c4, t1, t2, t3, t4;
 
-                RE(t2) = RE(cc[ac]) + RE(cc[ac+2*ido]);
-                IM(t2) = IM(cc[ac]) + IM(cc[ac+2*ido]);
-                RE(t3) = RE(cc[ac+ido]) + RE(cc[ac+3*ido]);
-                IM(t3) = IM(cc[ac+ido]) + IM(cc[ac+3*ido]);
-                RE(t1) = RE(cc[ac]) - RE(cc[ac+2*ido]);
-                IM(t1) = IM(cc[ac]) - IM(cc[ac+2*ido]);
-                RE(t4) = IM(cc[ac+3*ido]) - IM(cc[ac+ido]);
-                IM(t4) = RE(cc[ac+ido]) - RE(cc[ac+3*ido]);
-
-                RE(ch[ah]) = RE(t2) + RE(t3);
-                IM(ch[ah]) = IM(t2) + IM(t3);
+                RE(t2) = RE(cc[ac+i]) + RE(cc[ac+i+2*ido]);
+                RE(t1) = RE(cc[ac+i]) - RE(cc[ac+i+2*ido]);
+                IM(t2) = IM(cc[ac+i]) + IM(cc[ac+i+2*ido]);
+                IM(t1) = IM(cc[ac+i]) - IM(cc[ac+i+2*ido]);
+                RE(t3) = RE(cc[ac+i+ido]) + RE(cc[ac+i+3*ido]);
+                IM(t4) = RE(cc[ac+i+ido]) - RE(cc[ac+i+3*ido]);
+                IM(t3) = IM(cc[ac+i+3*ido]) + IM(cc[ac+i+ido]);
+                RE(t4) = IM(cc[ac+i+3*ido]) - IM(cc[ac+i+ido]);
 
                 RE(c2) = RE(t1) + RE(t4)*isign;
-                IM(c2) = IM(t1) + IM(t4)*isign;
-                RE(c3) = RE(t2) - RE(t3);
-                IM(c3) = IM(t2) - IM(t3);
                 RE(c4) = RE(t1) - RE(t4)*isign;
+
+                IM(c2) = IM(t1) + IM(t4)*isign;
                 IM(c4) = IM(t1) - IM(t4)*isign;
 
-                RE(ch[ah+l1*ido]) = MUL_R_C(RE(c2),RE(wa1[i])) - MUL_R_C(IM(c2),IM(wa1[i]))*isign;
-                IM(ch[ah+l1*ido]) = MUL_R_C(IM(c2),RE(wa1[i])) + MUL_R_C(RE(c2),IM(wa1[i]))*isign;
-                RE(ch[ah+2*l1*ido]) = MUL_R_C(RE(c3),RE(wa2[i])) - MUL_R_C(IM(c3),IM(wa2[i]))*isign;
-                IM(ch[ah+2*l1*ido]) = MUL_R_C(IM(c3),RE(wa2[i])) + MUL_R_C(RE(c3),IM(wa2[i]))*isign;
-                RE(ch[ah+3*l1*ido]) = MUL_R_C(RE(c4),RE(wa3[i])) - MUL_R_C(IM(c4),IM(wa3[i]))*isign;
-                IM(ch[ah+3*l1*ido]) = MUL_R_C(IM(c4),RE(wa3[i])) + MUL_R_C(RE(c4),IM(wa3[i]))*isign;
+                RE(ch[ah+i]) = RE(t2) + RE(t3);
+                RE(c3) = RE(t2) - RE(t3);
+
+                IM(ch[ah+i]) = IM(t2) + IM(t3);
+                IM(c3) = IM(t2) - IM(t3);
+
+                IM(ch[ah+i+l1*ido])   = MUL_R_C(IM(c2),RE(wa1[i])) + MUL_R_C(RE(c2),IM(wa1[i]))*isign;
+                RE(ch[ah+i+l1*ido])   = MUL_R_C(RE(c2),RE(wa1[i])) - MUL_R_C(IM(c2),IM(wa1[i]))*isign;
+                IM(ch[ah+i+2*l1*ido]) = MUL_R_C(IM(c3),RE(wa2[i])) + MUL_R_C(RE(c3),IM(wa2[i]))*isign;
+                RE(ch[ah+i+2*l1*ido]) = MUL_R_C(RE(c3),RE(wa2[i])) - MUL_R_C(IM(c3),IM(wa2[i]))*isign;
+                IM(ch[ah+i+3*l1*ido]) = MUL_R_C(IM(c4),RE(wa3[i])) + MUL_R_C(RE(c4),IM(wa3[i]))*isign;
+                RE(ch[ah+i+3*l1*ido]) = MUL_R_C(RE(c4),RE(wa3[i])) - MUL_R_C(IM(c4),IM(wa3[i]))*isign;
             }
         }
     }
@@ -355,6 +361,17 @@ INLINE void cfftf1(uint16_t n, complex_t *c, complex_t *ch,
 
         switch (ip)
         {
+        case 4:
+            ix2 = iw + ido;
+            ix3 = ix2 + ido;
+
+            if (na == 0)
+                passf4(ido, l1, c, ch, &wa[iw], &wa[ix2], &wa[ix3], isign);
+            else
+                passf4(ido, l1, ch, c, &wa[iw], &wa[ix2], &wa[ix3], isign);
+
+            na = 1 - na;
+            break;
         case 2:
             if (na == 0)
                 passf2(ido, l1, c, ch, &wa[iw], isign);
@@ -370,17 +387,6 @@ INLINE void cfftf1(uint16_t n, complex_t *c, complex_t *ch,
                 passf3(ido, l1, c, ch, &wa[iw], &wa[ix2], isign);
             else
                 passf3(ido, l1, ch, c, &wa[iw], &wa[ix2], isign);
-
-            na = 1 - na;
-            break;
-        case 4:
-            ix2 = iw + ido;
-            ix3 = ix2 + ido;
-
-            if (na == 0)
-                passf4(ido, l1, c, ch, &wa[iw], &wa[ix2], &wa[ix3], isign);
-            else
-                passf4(ido, l1, ch, c, &wa[iw], &wa[ix2], &wa[ix3], isign);
 
             na = 1 - na;
             break;
@@ -474,7 +480,7 @@ startloop:
     ifac[1] = nf;
 
 #ifndef FIXED_POINT
-    argh = 2.0*M_PI / (real_t)n;
+    argh = (real_t)2.0*M_PI / (real_t)n;
     i = 0;
     l1 = 1;
 
@@ -500,8 +506,8 @@ startloop:
                 i++;
                 fi++;
                 arg = fi * argld;
-                RE(wa[i]) = cos(arg);
-                IM(wa[i]) = sin(arg);
+                RE(wa[i]) = (real_t)cos(arg);
+                IM(wa[i]) = (real_t)sin(arg);
             }
 
             if (ip > 5)

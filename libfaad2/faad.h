@@ -1,19 +1,19 @@
 /*
 ** FAAD2 - Freeware Advanced Audio (AAC) Decoder including SBR decoding
 ** Copyright (C) 2003 M. Bakker, Ahead Software AG, http://www.nero.com
-**  
+**
 ** This program is free software; you can redistribute it and/or modify
 ** it under the terms of the GNU General Public License as published by
 ** the Free Software Foundation; either version 2 of the License, or
 ** (at your option) any later version.
-** 
+**
 ** This program is distributed in the hope that it will be useful,
 ** but WITHOUT ANY WARRANTY; without even the implied warranty of
 ** MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ** GNU General Public License for more details.
-** 
+**
 ** You should have received a copy of the GNU General Public License
-** along with this program; if not, write to the Free Software 
+** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 **
 ** Any non-GPL usage of this software or parts of this software is strictly
@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: faad.h,v 1.26 2003/07/29 08:20:11 menno Exp $
+** $Id: faad.h,v 1.33 2003/09/24 19:55:34 menno Exp $
 **/
 
 #ifndef __AACDEC_H__
@@ -46,10 +46,11 @@ extern "C" {
 #define FAAD2_VERSION "2.0 RC1 "
 
 /* object types for AAC */
-#define MAIN       0
-#define LC         1
-#define SSR        2
-#define LTP        3
+#define MAIN       1
+#define LC         2
+#define SSR        3
+#define LTP        4
+#define HE_AAC     5
 #define ER_LC     17
 #define ER_LTP    19
 #define LD        23
@@ -59,6 +60,12 @@ extern "C" {
 #define RAW        0
 #define ADIF       1
 #define ADTS       2
+
+/* SBR signalling */
+#define NO_SBR           0
+#define SBR_UPSAMPLED    1
+#define SBR_DOWNSAMPLED  2
+#define NO_SBR_UPSAMPLED 3
 
 /* library output formats */
 #define FAAD_FMT_16BIT  1
@@ -91,6 +98,13 @@ extern "C" {
 #define LFE_CHANNEL          (9)
 #define UNKNOWN_CHANNEL      (0)
 
+/* DRM channel definitions */
+#define DRMCH_MONO          1
+#define DRMCH_STEREO        2
+#define DRMCH_SBR_MONO      3
+#define DRMCH_SBR_LC_STEREO 4
+#define DRMCH_SBR_STEREO    5
+
 
 /* A decode call can eat up to FAAD_MIN_STREAMSIZE bytes per decoded channel,
    so at least so much bytes per channel should be available in this stream */
@@ -118,6 +132,7 @@ typedef struct mp4AudioSpecificConfig
     unsigned char epConfig;
 
     char sbr_present_flag;
+    char forceUpSampling;
 } mp4AudioSpecificConfig;
 
 typedef struct faacDecConfiguration
@@ -126,6 +141,7 @@ typedef struct faacDecConfiguration
     unsigned long defSampleRate;
     unsigned char outputFormat;
     unsigned char downMatrix;
+    unsigned char useOldADTSFormat;
 } faacDecConfiguration, *faacDecConfigurationPtr;
 
 typedef struct faacDecFrameInfo
@@ -135,6 +151,15 @@ typedef struct faacDecFrameInfo
     unsigned char channels;
     unsigned char error;
     unsigned long samplerate;
+
+    /* SBR: 0: off, 1: on; upsample, 2: on; downsampled, 3: off; upsampled */
+    unsigned char sbr;
+
+    /* MPEG-4 ObjectType */
+    unsigned char object_type;
+
+    /* AAC header type; MP4 will be signalled as RAW also */
+    unsigned char header_type;
 
     /* multichannel configuration */
     unsigned char num_front_channels;
@@ -170,6 +195,8 @@ char FAADAPI faacDecInit2(faacDecHandle hDecoder, unsigned char *pBuffer,
 /* Init the library for DRM */
 char FAADAPI faacDecInitDRM(faacDecHandle hDecoder, unsigned long samplerate,
                             unsigned char channels);
+
+void FAADAPI faacDecPostSeekReset(faacDecHandle hDecoder, long frame);
 
 void FAADAPI faacDecClose(faacDecHandle hDecoder);
 

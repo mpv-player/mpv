@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: decoder.h,v 1.26 2003/07/29 08:20:12 menno Exp $
+** $Id: decoder.h,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 #ifndef __DECODER_H__
@@ -111,6 +111,8 @@ int8_t FAADAPI faacDecInitDRM(faacDecHandle hDecoder, uint32_t samplerate,
 
 void FAADAPI faacDecClose(faacDecHandle hDecoder);
 
+void FAADAPI faacDecPostSeekReset(faacDecHandle hDecoder, int32_t frame);
+
 void* FAADAPI faacDecDecode(faacDecHandle hDecoder,
                             faacDecFrameInfo *hInfo,
                             uint8_t *buffer,
@@ -118,16 +120,13 @@ void* FAADAPI faacDecDecode(faacDecHandle hDecoder,
 
 element *decode_sce_lfe(faacDecHandle hDecoder,
                         faacDecFrameInfo *hInfo, bitfile *ld,
-                        int16_t **spec_data, real_t **spec_coef,
-                        uint8_t id_syn_ele);
+                        real_t **spec_coef, uint8_t id_syn_ele);
 element *decode_cpe(faacDecHandle hDecoder,
                     faacDecFrameInfo *hInfo, bitfile *ld,
-                    int16_t **spec_data, real_t **spec_coef,
-                    uint8_t id_syn_ele);
+                    real_t **spec_coef, uint8_t id_syn_ele);
 element **raw_data_block(faacDecHandle hDecoder, faacDecFrameInfo *hInfo,
                          bitfile *ld, element **elements,
-                         int16_t **spec_data, real_t **spec_coef,
-                         program_config *pce, drc_info *drc);
+                         real_t **spec_coef, program_config *pce, drc_info *drc);
 
 #ifdef _WIN32
   #pragma pack(pop)

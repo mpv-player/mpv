@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_tf_grid.h,v 1.1 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_tf_grid.h,v 1.2 2003/09/09 18:09:52 menno Exp $
 **/
 
 #ifndef __SBR_TF_GRID_H__
@@ -33,7 +33,7 @@ extern "C" {
 #endif
 
 
-void envelope_time_border_vector(sbr_info *sbr, uint8_t ch);
+uint8_t envelope_time_border_vector(sbr_info *sbr, uint8_t ch);
 void noise_floor_time_border_vector(sbr_info *sbr, uint8_t ch);
 
 static int16_t rel_bord_lead(sbr_info *sbr, uint8_t ch, uint8_t l);

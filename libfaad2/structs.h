@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: structs.h,v 1.10 2003/07/29 08:20:14 menno Exp $
+** $Id: structs.h,v 1.16 2003/09/23 08:12:29 menno Exp $
 **/
 
 #ifndef __STRUCTS_H__
@@ -160,6 +160,9 @@ typedef struct
     uint16_t adts_buffer_fullness;
     uint8_t no_raw_data_blocks_in_frame;
     uint16_t crc_check;
+
+    /* control param */
+    uint8_t old_format;
 } adts_header;
 
 typedef struct
@@ -318,6 +321,7 @@ typedef struct mp4AudioSpecificConfig
     uint8_t epConfig;
 
     int8_t sbr_present_flag;
+    int8_t forceUpSampling;
 } mp4AudioSpecificConfig;
 
 typedef struct faacDecConfiguration
@@ -326,6 +330,7 @@ typedef struct faacDecConfiguration
     uint32_t defSampleRate;
     uint8_t outputFormat;
     uint8_t downMatrix;
+    uint8_t useOldADTSFormat;
 } faacDecConfiguration, *faacDecConfigurationPtr;
 
 typedef struct faacDecFrameInfo
@@ -335,6 +340,15 @@ typedef struct faacDecFrameInfo
     uint8_t channels;
     uint8_t error;
     uint32_t samplerate;
+
+    /* SBR: 0: off, 1: on; normal, 2: on; downsampled */
+    uint8_t sbr;
+
+    /* MPEG-4 ObjectType */
+    uint8_t object_type;
+
+    /* AAC header type; MP4 will be signalled as RAW also */
+    uint8_t header_type;
 
     /* multichannel configuration */
     uint8_t num_front_channels;
@@ -357,7 +371,6 @@ typedef struct
     uint8_t aacSpectralDataResilienceFlag;
 #endif
     uint16_t frameLength;
-    uint16_t samplesLeft;
     uint8_t postSeekResetFlag;
 
     uint32_t frame;
@@ -382,12 +395,16 @@ typedef struct
 
 #ifdef SBR_DEC
     int8_t sbr_present_flag;
+    int8_t forceUpSampling;
 
     real_t *time_out2[MAX_CHANNELS];
 
     uint8_t sbr_used[32];
 
     sbr_info *sbr[32];
+#ifdef DRM
+    int8_t lcstereo_flag;
+#endif
 #endif
 
 #ifdef SSR_DEC

@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: pns.h,v 1.11 2003/07/29 08:20:13 menno Exp $
+** $Id: pns.h,v 1.12 2003/09/09 18:09:52 menno Exp $
 **/
 
 #ifndef __PNS_H__
@@ -37,20 +37,14 @@ extern "C" {
 #include "syntax.h"
 
 #define NOISE_OFFSET 90
-/* #define MEAN_NRG 1.537228e+18 */ /* (2^31)^2 / 3 */
-#ifdef FIXED_POINT
-#define ISQRT_MEAN_NRG 0x1DC7 /* sqrt(1/sqrt(MEAN_NRG)) */
-#else
-#define ISQRT_MEAN_NRG 8.0655e-10 /* 1/sqrt(MEAN_NRG) */
-#endif
-
 
 void pns_decode(ic_stream *ics_left, ic_stream *ics_right,
                 real_t *spec_left, real_t *spec_right, uint16_t frame_len,
-                uint8_t channel_pair);
+                uint8_t channel_pair, uint8_t object_type);
 
 static INLINE int32_t random2();
-static void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t size);
+static void gen_rand_vector(real_t *spec, int16_t scale_factor, uint16_t size,
+                            uint8_t sub);
 
 static INLINE uint8_t is_noise(ic_stream *ics, uint8_t group, uint8_t sfb)
 {

@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: syntax.h,v 1.32 2003/07/29 08:20:14 menno Exp $
+** $Id: syntax.h,v 1.37 2003/09/24 19:55:34 menno Exp $
 **/
 
 #ifndef __SYNTAX_H__
@@ -36,14 +36,33 @@ extern "C" {
 #include "drc.h"
 #include "bits.h"
 
-#define MAIN       0
-#define LC         1
-#define SSR        2
-#define LTP        3
+#define MAIN       1
+#define LC         2
+#define SSR        3
+#define LTP        4
+#define HE_AAC     5
 #define LD        23
 #define ER_LC     17
 #define ER_LTP    19
 #define DRM_ER_LC 27 /* special object type for DRM */
+
+/* header types */
+#define RAW        0
+#define ADIF       1
+#define ADTS       2
+
+/* SBR signalling */
+#define NO_SBR           0
+#define SBR_UPSAMPLED    1
+#define SBR_DOWNSAMPLED  2
+#define NO_SBR_UPSAMPLED 3
+
+/* DRM channel definitions */
+#define DRMCH_MONO          1
+#define DRMCH_STEREO        2
+#define DRMCH_SBR_MONO      3
+#define DRMCH_SBR_LC_STEREO 4
+#define DRMCH_SBR_STEREO    5
 
 
 /* First object type that has ER */
@@ -85,12 +104,6 @@ extern "C" {
 #define INTENSITY_HCB2 14
 #define INTENSITY_HCB  15
 
-static uint32_t sample_rates[] =
-{
-    96000, 88200, 64000, 48000, 44100, 32000, 24000, 22050, 16000,
-    12000, 11025, 8000
-};
-
 int8_t GASpecificConfig(bitfile *ld, mp4AudioSpecificConfig *mp4ASC,
                         program_config *pce);
 
@@ -101,10 +114,10 @@ void get_adif_header(adif_header *adif, bitfile *ld);
 /* static functions */
 static uint8_t single_lfe_channel_element(faacDecHandle hDecoder,
                                           element *sce, bitfile *ld,
-                                          int16_t *spec_data);
+                                          real_t *spec_coef);
 static uint8_t channel_pair_element(faacDecHandle hDecoder, element *cpe,
-                                    bitfile *ld, int16_t *spec_data1,
-                                    int16_t *spec_data2);
+                                    bitfile *ld,
+                                    real_t *spec_coef1, real_t *spec_coef2);
 static uint8_t coupling_channel_element(faacDecHandle hDecoder, bitfile *ld);
 static uint16_t data_stream_element(faacDecHandle hDecoder, bitfile *ld);
 static uint8_t program_config_element(program_config *pce, bitfile *ld);

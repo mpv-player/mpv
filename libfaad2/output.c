@@ -50,7 +50,7 @@
 dither_t Dither;
 double doubletmp;
 
-#define DM_MUL (1./(1.+sqrt(2.)))
+#define DM_MUL ((real_t)1.0/((real_t)1.0+(real_t)sqrt(2.0)))
 
 static INLINE real_t get_sample(real_t **input, uint8_t channel, uint16_t sample,
                                 uint8_t downMatrix, uint8_t *internal_channel)
@@ -60,12 +60,12 @@ static INLINE real_t get_sample(real_t **input, uint8_t channel, uint16_t sample
         if (channel == 0)
         {
             return DM_MUL * (input[internal_channel[1]][sample] +
-                input[internal_channel[0]][sample]/sqrt(2.) +
-                input[internal_channel[3]][sample]/sqrt(2.));
+                input[internal_channel[0]][sample]/(real_t)sqrt(2.) +
+                input[internal_channel[3]][sample]/(real_t)sqrt(2.));
         } else {
             return DM_MUL * (input[internal_channel[2]][sample] +
-                input[internal_channel[0]][sample]/sqrt(2.) +
-                input[internal_channel[4]][sample]/sqrt(2.));
+                input[internal_channel[0]][sample]/(real_t)sqrt(2.) +
+                input[internal_channel[4]][sample]/(real_t)sqrt(2.));
         }
     } else {
         return input[internal_channel[channel]][sample];
@@ -107,7 +107,8 @@ void* output_to_PCM(faacDecHandle hDecoder,
         case FAAD_FMT_16BIT_DITHER:
             for(i = 0; i < frame_len; i++, j++)
             {
-                real_t inp = input[internal_channel][i];
+                //real_t inp = input[internal_channel][i];
+                real_t inp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
                 double Sum = inp * 65535.f;
                 int64_t val;
                 if(j > 31)
@@ -125,7 +126,8 @@ void* output_to_PCM(faacDecHandle hDecoder,
         case FAAD_FMT_16BIT_H_SHAPE:
             for(i = 0; i < frame_len; i++, j++)
             {
-                real_t inp = input[internal_channel][i];
+                //real_t inp = input[internal_channel][i];
+                real_t inp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
                 double Sum = inp * 65535.f;
                 int64_t val;
                 if(j > 31)
@@ -141,7 +143,8 @@ void* output_to_PCM(faacDecHandle hDecoder,
         case FAAD_FMT_24BIT:
             for(i = 0; i < frame_len; i++)
             {
-                real_t inp = input[internal_channel][i];
+                //real_t inp = input[internal_channel][i];
+                real_t inp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
                 if (inp > (1<<15)-1)
                     inp = (1<<15)-1;
                 else if (inp < -(1<<15))
@@ -152,7 +155,8 @@ void* output_to_PCM(faacDecHandle hDecoder,
         case FAAD_FMT_32BIT:
             for(i = 0; i < frame_len; i++)
             {
-                real_t inp = input[internal_channel][i];
+                //real_t inp = input[internal_channel][i];
+                real_t inp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
                 if (inp > (1<<15)-1)
                     inp = (1<<15)-1;
                 else if (inp < -(1<<15))
@@ -163,14 +167,16 @@ void* output_to_PCM(faacDecHandle hDecoder,
         case FAAD_FMT_FLOAT:
             for(i = 0; i < frame_len; i++)
             {
-                real_t inp = input[internal_channel][i];
+                //real_t inp = input[internal_channel][i];
+                real_t inp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
                 float_sample_buffer[(i*channels)+ch] = inp*FLOAT_SCALE;
             }
             break;
         case FAAD_FMT_DOUBLE:
             for(i = 0; i < frame_len; i++)
             {
-                real_t inp = input[internal_channel][i];
+                //real_t inp = input[internal_channel][i];
+                real_t inp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
                 double_sample_buffer[(i*channels)+ch] = (double)inp*FLOAT_SCALE;
             }
             break;
@@ -191,13 +197,13 @@ static int64_t dither_output(uint8_t dithering, uint8_t shapingtype, uint16_t i,
         if(!shapingtype)
         {
             double tmp = Random_Equi(Dither.Dither);
-            Sum2 = tmp - Dither.LastRandomNumber[k];
-            Dither.LastRandomNumber[k] = tmp;
+            Sum2 = tmp - (double)Dither.LastRandomNumber[k];
+            Dither.LastRandomNumber[k] = (int32_t)tmp;
             Sum2 = Sum += Sum2;
             val = ROUND64(Sum2)&Dither.Mask;
         } else {
             Sum2 = Random_Triangular(Dither.Dither) - scalar16(Dither.DitherHistory[k], Dither.FilterCoeff + i);
-            Sum += Dither.DitherHistory[k][(-1-i)&15] = Sum2;
+            Sum += Dither.DitherHistory[k][(-1-i)&15] = (float32_t)Sum2;
             Sum2 = Sum + scalar16(Dither.ErrorHistory[k], Dither.FilterCoeff + i );
             val = ROUND64(Sum2)&Dither.Mask;
             Dither.ErrorHistory[k][(-1-i)&15] = (float)(Sum - val);

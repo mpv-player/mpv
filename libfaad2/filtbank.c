@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: filtbank.c,v 1.25 2003/07/29 08:20:12 menno Exp $
+** $Id: filtbank.c,v 1.1 2003/08/30 22:30:21 arpi Exp $
 **/
 
 #include "common.h"
@@ -191,17 +191,31 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
     {
     case ONLY_LONG_SEQUENCE:
         imdct(fb, freq_in, transf_buf, 2*nlong);
-        for (i = nlong-1; i >= 0; i--)
+        for (i = 0; i < nlong; i+=4)
         {
             time_out[i] = time_out[nlong+i] + MUL_R_C(transf_buf[i],window_long_prev[i]);
+            time_out[i+1] = time_out[nlong+i+1] + MUL_R_C(transf_buf[i+1],window_long_prev[i+1]);
+            time_out[i+2] = time_out[nlong+i+2] + MUL_R_C(transf_buf[i+2],window_long_prev[i+2]);
+            time_out[i+3] = time_out[nlong+i+3] + MUL_R_C(transf_buf[i+3],window_long_prev[i+3]);
+        }
+        for (i = 0; i < nlong; i+=4)
+        {
             time_out[nlong+i] = MUL_R_C(transf_buf[nlong+i],window_long[nlong-1-i]);
+            time_out[nlong+i+1] = MUL_R_C(transf_buf[nlong+i+1],window_long[nlong-2-i]);
+            time_out[nlong+i+2] = MUL_R_C(transf_buf[nlong+i+2],window_long[nlong-3-i]);
+            time_out[nlong+i+3] = MUL_R_C(transf_buf[nlong+i+3],window_long[nlong-4-i]);
         }
         break;
 
     case LONG_START_SEQUENCE:
         imdct(fb, freq_in, transf_buf, 2*nlong);
-        for (i = 0; i < nlong; i++)
+        for (i = 0; i < nlong; i+=4)
+        {
             time_out[i] = time_out[nlong+i] + MUL_R_C(transf_buf[i],window_long_prev[i]);
+            time_out[i+1] = time_out[nlong+i+1] + MUL_R_C(transf_buf[i+1],window_long_prev[i+1]);
+            time_out[i+2] = time_out[nlong+i+2] + MUL_R_C(transf_buf[i+2],window_long_prev[i+2]);
+            time_out[i+3] = time_out[nlong+i+3] + MUL_R_C(transf_buf[i+3],window_long_prev[i+3]);
+        }
         for (i = 0; i < nflat_ls; i++)
             time_out[nlong+i] = transf_buf[nlong+i];
         for (i = 0; i < nshort; i++)

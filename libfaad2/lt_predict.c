@@ -22,8 +22,9 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: lt_predict.c,v 1.11 2003/07/29 08:20:12 menno Exp $
+** $Id: lt_predict.c,v 1.12 2003/09/09 18:09:52 menno Exp $
 **/
+
 
 #include "common.h"
 #include "structs.h"

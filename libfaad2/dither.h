@@ -36,7 +36,7 @@ uint32_t                   random_int ( void );
 extern double              scalar16 ( const float32_t* x, const float32_t* y );
 extern double              Random_Equi ( double mult );
 extern double              Random_Triangular ( double mult );
-void                       Init_Dither ( unsigned char bits, unsigned char shapingtype );
+void                       Init_Dither ( uint8_t bits, uint8_t shapingtype );
 
 #endif
 

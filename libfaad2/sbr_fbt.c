@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_fbt.c,v 1.1 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_fbt.c,v 1.3 2003/09/09 18:37:32 menno Exp $
 **/
 
 /* Calculate frequency band tables */
@@ -37,13 +37,16 @@
 #include "sbr_syntax.h"
 #include "sbr_fbt.h"
 
-
 /* calculate the start QMF channel for the master frequency band table */
 /* parameter is also called k0 */
-uint16_t qmf_start_channel(uint8_t bs_start_freq, uint8_t bs_samplerate_mode,
+uint8_t qmf_start_channel(uint8_t bs_start_freq, uint8_t bs_samplerate_mode,
                            uint32_t sample_rate)
 {
-    static int8_t offset[7][16] = {
+    static const uint8_t startMinTable[12] = { 7, 7, 10, 11, 12, 16, 16,
+        17, 24, 32, 35, 48 };
+    static const uint8_t offsetIndexTable[12] = { 5, 5, 4, 4, 4, 3, 2, 1, 0,
+        6, 6, 6 };
+    static const int8_t offset[7][16] = {
         { -8, -7, -6, -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7 },
         { -5, -4, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13 },
         { -5, -3, -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16 },
@@ -52,8 +55,10 @@ uint16_t qmf_start_channel(uint8_t bs_start_freq, uint8_t bs_samplerate_mode,
         { -2, -1, 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16, 20, 24 },
         { 0, 1, 2, 3, 4, 5, 6, 7, 9, 11, 13, 16, 20, 24, 28, 33 }
     };
-    uint8_t startMin;
+    uint8_t startMin = startMinTable[get_sr_index(sample_rate)];
+    uint8_t offsetIndex = offsetIndexTable[get_sr_index(sample_rate)];
 
+#if 0 /* replaced with table (startMinTable) */
     if (sample_rate >= 64000)
     {
         startMin = (uint8_t)((5000.*128.)/(float)sample_rate + 0.5);
@@ -62,9 +67,13 @@ uint16_t qmf_start_channel(uint8_t bs_start_freq, uint8_t bs_samplerate_mode,
     } else {
         startMin = (uint8_t)((4000.*128.)/(float)sample_rate + 0.5);
     }
+#endif
 
     if (bs_samplerate_mode)
     {
+        return startMin + offset[offsetIndex][bs_start_freq];
+
+#if 0 /* replaced by offsetIndexTable */ 
         switch (sample_rate)
         {
         case 16000:
@@ -83,6 +92,7 @@ uint16_t qmf_start_channel(uint8_t bs_start_freq, uint8_t bs_samplerate_mode,
                 return startMin + offset[4][bs_start_freq];
             }
         }
+#endif
     } else {
         return startMin + offset[6][bs_start_freq];
     }
@@ -95,8 +105,8 @@ static int32_t longcmp(const void *a, const void *b)
 
 /* calculate the stop QMF channel for the master frequency band table */
 /* parameter is also called k2 */
-uint16_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
-                          uint16_t k0)
+uint8_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
+                          uint8_t k0)
 {
     if (bs_stop_freq == 15)
     {
@@ -104,10 +114,29 @@ uint16_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
     } else if (bs_stop_freq == 14) {
         return min(64, k0 * 2);
     } else {
+        static const uint8_t stopMinTable[12] = { 13, 15, 20, 21, 23,
+            32, 32, 35, 48, 64, 70, 96 };
+        static const int8_t offset[12][14] = {
+            { 0, 2, 4, 6, 8, 11, 14, 18, 22, 26, 31, 37, 44, 51 },
+            { 0, 2, 4, 6, 8, 11, 14, 18, 22, 26, 31, 36, 42, 49 },
+            { 0, 2, 4, 6, 8, 11, 14, 17, 21, 25, 29, 34, 39, 44 },
+            { 0, 2, 4, 6, 8, 11, 14, 17, 20, 24, 28, 33, 38, 43 },
+            { 0, 2, 4, 6, 8, 11, 14, 17, 20, 24, 28, 32, 36, 41 },
+            { 0, 2, 4, 6, 8, 10, 12, 14, 17, 20, 23, 26, 29, 32 },
+            { 0, 2, 4, 6, 8, 10, 12, 14, 17, 20, 23, 26, 29, 32 },
+            { 0, 1, 3, 5, 7, 9, 11, 13, 15, 17, 20, 23, 26, 29 },
+            { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 14, 16 },
+            { 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 },
+            { 0, -1, -2, -3, -4, -5, -6, -6, -6, -6, -6, -6, -6, -6 },
+            { 0, -3, -6, -9, -12, -15, -18, -20, -22, -24, -26, -28, -30, -32 }
+        };
+#if 0
         uint8_t i;
-        uint8_t stopMin;
         int32_t stopDk[13], stopDk_t[14], k2;
+#endif
+        uint8_t stopMin = stopMinTable[get_sr_index(sample_rate)];
 
+#if 0 /* replaced by table lookup */
         if (sample_rate >= 64000)
         {
             stopMin = (uint8_t)((10000.*128.)/(float)sample_rate + 0.5);
@@ -116,7 +145,10 @@ uint16_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
         } else {
             stopMin = (uint8_t)((8000.*128.)/(float)sample_rate + 0.5);
         }
+#endif
 
+#if 0 /* replaced by table lookup */
+        /* diverging power series */
         for (i = 0; i <= 13; i++)
         {
             stopDk_t[i] = (int32_t)(stopMin*pow(64.0/stopMin, i/13.0) + 0.5);
@@ -126,7 +158,7 @@ uint16_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
             stopDk[i] = stopDk_t[i+1] - stopDk_t[i];
         }
 
-        /* needed? or does this always reverse the array? */
+        /* needed? */
         qsort(stopDk, 13, sizeof(stopDk[0]), longcmp);
 
         k2 = stopMin;
@@ -135,6 +167,9 @@ uint16_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
             k2 += stopDk[i];
         }
         return min(64, k2);
+#endif
+        /* bs_stop_freq <= 13 */
+        return min(64, stopMin + offset[get_sr_index(sample_rate)][min(bs_stop_freq, 13)]);
     }
 
     return 0;
@@ -145,7 +180,7 @@ uint16_t qmf_stop_channel(uint8_t bs_stop_freq, uint32_t sample_rate,
 
    version for bs_freq_scale = 0
 */
-void master_frequency_table_fs0(sbr_info *sbr, uint16_t k0, uint16_t k2,
+void master_frequency_table_fs0(sbr_info *sbr, uint8_t k0, uint8_t k2,
                                 uint8_t bs_alter_scale)
 {
     int8_t incr;
@@ -164,12 +199,21 @@ void master_frequency_table_fs0(sbr_info *sbr, uint16_t k0, uint16_t k2,
     }
 
     dk = bs_alter_scale ? 2 : 1;
+
+#if 0 /* replaced by float-less design */
     nrBands = 2 * (int32_t)((float)(k2-k0)/(dk*2) + (-1+dk)/2.0f);
-    nrBands = min(nrBands, 64);
+#else
+    if (bs_alter_scale)
+    {
+        nrBands = (((k2-k0+2)>>2)<<1);
+    } else {
+        nrBands = (((k2-k0)>>1)<<1);
+    }
+#endif
+    nrBands = min(nrBands, 63);
 
     k2Achieved = k0 + nrBands * dk;
     k2Diff = k2 - k2Achieved;
-    /* for (k = 0; k <= nrBands; k++) Typo fix */
     for (k = 0; k < nrBands; k++)
         vDk[k] = dk;
 
@@ -203,22 +247,34 @@ void master_frequency_table_fs0(sbr_info *sbr, uint16_t k0, uint16_t k2,
 #endif
 }
 
+
+/*
+   This function finds the number of bands using this formula:
+    bands * log(a1/a0)/log(2.0) + 0.5
+*/
+static int32_t find_bands(uint8_t warp, uint8_t bands, uint8_t a0, uint8_t a1)
+{
+    real_t div = (real_t)log(2.0);
+    if (warp) div *= (real_t)1.3;
+
+    return (int32_t)(bands * log((float)a1/(float)a0)/div + 0.5);
+}
+
+
 /*
    version for bs_freq_scale > 0
 */
-void master_frequency_table(sbr_info *sbr, uint16_t k0, uint16_t k2,
+void master_frequency_table(sbr_info *sbr, uint8_t k0, uint8_t k2,
                             uint8_t bs_freq_scale, uint8_t bs_alter_scale)
 {
     uint8_t k, bands, twoRegions;
-    uint16_t k1;
+    uint8_t k1;
     uint32_t nrBand0, nrBand1;
     int32_t vDk0[64], vDk1[64];
     int32_t vk0[64], vk1[64];
-    float warp;
-    uint8_t temp1[] = { 12, 10, 8 };
-    float temp2[] = { 1.0, 1.3 };
+    uint8_t temp1[] = { 6, 5, 4 };
 
-    /* without memset code enters infinte loop,
+    /* without memset code enters infinite loop,
        so there must be some wrong table access */
     memset(vDk0, 0, 64*sizeof(int32_t));
     memset(vDk1, 0, 64*sizeof(int32_t));
@@ -233,22 +289,22 @@ void master_frequency_table(sbr_info *sbr, uint16_t k0, uint16_t k2,
     }
 
     bands = temp1[bs_freq_scale-1];
-    warp = temp2[bs_alter_scale];
 
     if ((float)k2/(float)k0 > 2.2449)
     {
         twoRegions = 1;
-        k1 = 2 * k0;
+        k1 = k0 << 1;
     } else {
         twoRegions = 0;
         k1 = k2;
     }
 
-    nrBand0 = 2 * (int32_t)(bands * log((float)k1/(float)k0)/(2.0*log(2.0)) + 0.5);
-    nrBand0 = min(nrBand0, 64);
+    nrBand0 = 2 * find_bands(0, bands, k0, k1);
+    nrBand0 = min(nrBand0, 63);
+
     for (k = 0; k <= nrBand0; k++)
     {
-        /* MAPLE */
+        /* diverging power series */
         vDk0[k] = (int32_t)(k0 * pow((float)k1/(float)k0, (k+1)/(float)nrBand0)+0.5) -
             (int32_t)(k0 * pow((float)k1/(float)k0, k/(float)nrBand0)+0.5);
     }
@@ -272,8 +328,8 @@ void master_frequency_table(sbr_info *sbr, uint16_t k0, uint16_t k2,
         return;
     }
 
-    nrBand1 = 2 * (int32_t)(bands * log((float)k2/(float)k1)/(2.0 * log(2.0) * warp) + 0.5);
-    nrBand1 = min(nrBand1, 64);
+    nrBand1 = 2 * find_bands(1 /* warped */, bands, k1, k2);
+    nrBand1 = min(nrBand1, 63);
 
     for (k = 0; k <= nrBand1 - 1; k++)
     {
@@ -322,16 +378,18 @@ void master_frequency_table(sbr_info *sbr, uint16_t k0, uint16_t k2,
 }
 
 /* calculate the derived frequency border tables from f_master */
-void derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
-                             uint16_t k2)
+uint8_t derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
+                                uint8_t k2)
 {
     uint8_t k, i;
     uint32_t minus;
 
-    sbr->N_high = sbr->N_master - bs_xover_band;
+    /* The following relation shall be satisfied: bs_xover_band < N_Master */
+    if (sbr->N_master <= bs_xover_band)
+        return 1;
 
-    /* is this accurate? */
-    sbr->N_low = sbr->N_high/2 + (sbr->N_high - 2 * (sbr->N_high/2));
+    sbr->N_high = sbr->N_master - bs_xover_band;
+    sbr->N_low = (sbr->N_high>>1) + (sbr->N_high - ((sbr->N_high>>1)<<1));
 
     sbr->n[0] = sbr->N_low;
     sbr->n[1] = sbr->N_high;
@@ -344,7 +402,6 @@ void derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
     sbr->M = sbr->f_table_res[HI_RES][sbr->N_high] - sbr->f_table_res[HI_RES][0];
     sbr->kx = sbr->f_table_res[HI_RES][0];
 
-    /* correct? */
     minus = (sbr->N_high & 1) ? 1 : 0;
 
     for (k = 0; k <= sbr->N_low; k++)
@@ -355,7 +412,6 @@ void derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
             i = 2*k - minus;
         sbr->f_table_res[LO_RES][k] = sbr->f_table_res[HI_RES][i];
     }
-    /* end correct? */
 
 #if 0
     printf("f_table_res[HI_RES][%d]: ", sbr->N_high);
@@ -379,19 +435,23 @@ void derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
     {
         sbr->N_Q = 1;
     } else {
-        /* MAPLE */
+#if 0
         sbr->N_Q = max(1, (int32_t)(sbr->bs_noise_bands*(log(k2/(float)sbr->kx)/log(2.0)) + 0.5));
-        if (sbr->N_Q == 0)
-            sbr->N_Q = 1;
-    }
+#else
+        sbr->N_Q = max(1, find_bands(0, sbr->bs_noise_bands, sbr->kx, k2));
+#endif
     sbr->N_Q = min(5, sbr->N_Q);
+    }
 
     for (k = 0; k <= sbr->N_Q; k++)
     {
         if (k == 0)
+        {
             i = 0;
-        else /* is this accurate? */
-            i = i + (int32_t)((sbr->N_low - i)/(sbr->N_Q + 1 - k));
+        } else { /* is this accurate? */
+            //i = i + (int32_t)((sbr->N_low - i)/(sbr->N_Q + 1 - k));
+            i = i + (sbr->N_low - i)/(sbr->N_Q + 1 - k);
+        }
         sbr->f_table_noise[k] = sbr->f_table_res[LO_RES][i];
     }
 
@@ -418,6 +478,8 @@ void derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
     }
     printf("\n");
 #endif
+
+    return 0;
 }
 
 /* TODO: blegh, ugly */
@@ -427,13 +489,20 @@ void derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
  */
 void limiter_frequency_table(sbr_info *sbr)
 {
-    static real_t limiterBandsPerOctave[] = { REAL_CONST(1.2),
+#if 0
+    static const real_t limiterBandsPerOctave[] = { REAL_CONST(1.2),
         REAL_CONST(2), REAL_CONST(3) };
+#else
+    static const real_t limiterBandsCompare[] = { REAL_CONST(1.328125),
+        REAL_CONST(1.1875), REAL_CONST(1.125) };
+#endif
     uint8_t k, s;
     int8_t nrLim;
     int32_t limTable[100 /*TODO*/];
     uint8_t patchBorders[64/*??*/];
+#if 0
     real_t limBands;
+#endif
 
     sbr->f_table_lim[0][0] = sbr->f_table_res[LO_RES][0] - sbr->kx;
     sbr->f_table_lim[0][1] = sbr->f_table_res[LO_RES][sbr->N_low] - sbr->kx;
@@ -443,7 +512,9 @@ void limiter_frequency_table(sbr_info *sbr)
     {
         memset(limTable, 0, 100*sizeof(int32_t));
 
+#if 0
         limBands = limiterBandsPerOctave[s - 1];
+#endif
 
         patchBorders[0] = sbr->kx;
         for (k = 1; k <= sbr->noPatches; k++)
@@ -474,11 +545,18 @@ restart:
             real_t nOctaves;
 
             if (limTable[k-1] != 0)
+#if 0
                 nOctaves = REAL_CONST(log((float)limTable[k]/(float)limTable[k-1])/log(2.0));
+#endif
+                nOctaves = (real_t)limTable[k]/(real_t)limTable[k-1];
             else
                 nOctaves = 0;
 
+#if 0
             if ((MUL(nOctaves,limBands)) < REAL_CONST(0.49))
+#else
+            if (nOctaves < limiterBandsCompare[s - 1])
+#endif
             {
                 uint8_t i;
                 if (limTable[k] != limTable[k-1])

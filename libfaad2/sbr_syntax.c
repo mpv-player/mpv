@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: sbr_syntax.c,v 1.7 2003/07/29 08:20:13 menno Exp $
+** $Id: sbr_syntax.c,v 1.11 2003/09/30 16:32:02 menno Exp $
 **/
 
 #include "common.h"
@@ -80,6 +80,15 @@ static void sbr_reset(sbr_info *sbr)
 /* table 2 */
 uint8_t sbr_extension_data(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
 {
+    uint8_t result;
+#ifdef DRM
+    uint8_t crc_len;
+
+    if (sbr->Is_DRM_SBR)
+        faad_getbits(ld, 8); /* 8-bit CRC */
+    else
+#endif
+    {
     uint8_t bs_extension_type = (uint8_t)faad_getbits(ld, 4
         DEBUGVAR(1,198,"sbr_bitstream(): bs_extension_type"));
 
@@ -88,9 +97,46 @@ uint8_t sbr_extension_data(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
         sbr->bs_sbr_crc_bits = (uint16_t)faad_getbits(ld, 10
             DEBUGVAR(1,199,"sbr_bitstream(): bs_sbr_crc_bits"));
     }
+    }
 
     sbr->bs_header_flag = faad_get1bit(ld
         DEBUGVAR(1,200,"sbr_bitstream(): bs_header_flag"));
+
+#ifdef DRM
+    if (sbr->Is_DRM_SBR)
+    {
+        /* Check CRC, get number of bits for check */
+        if (id_aac == ID_SCE)
+        {
+            if (sbr->lcstereo_flag)
+            {
+                if (sbr->bs_header_flag)
+                    crc_len = min(76, sbr->data_size_bits);
+                else
+                    crc_len = min(47, sbr->data_size_bits);
+            } else {
+                if (sbr->bs_header_flag)
+                    crc_len = min(74, sbr->data_size_bits);
+                else
+                    crc_len = min(47, sbr->data_size_bits);
+            }
+        } else {
+            if (sbr->bs_header_flag)
+                crc_len = min(120, sbr->data_size_bits);
+            else
+                crc_len = min(93, sbr->data_size_bits);
+        }
+
+        if ((result = faad_check_CRC(ld, crc_len)) > 0)
+            return result;
+
+        /* Rewind and read bits again to set correct position in bit-stream */
+        faad_rewindbits(ld);
+        faad_getbits(ld, 8);
+        faad_get1bit(ld);
+    }
+#endif
+
     if (sbr->bs_header_flag)
         sbr_header(ld, sbr, id_aac);
 
@@ -104,7 +150,7 @@ uint8_t sbr_extension_data(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
 
     if (sbr->Reset || (sbr->bs_header_flag && sbr->just_seeked))
     {
-        uint16_t k2;
+        uint8_t k2;
 
         /* calculate the Master Frequency Table */
         sbr->k0 = qmf_start_channel(sbr->bs_start_freq, sbr->bs_samplerate_mode,
@@ -131,10 +177,12 @@ uint8_t sbr_extension_data(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
             master_frequency_table(sbr, sbr->k0, k2, sbr->bs_freq_scale,
                 sbr->bs_alter_scale);
         }
-        derived_frequency_table(sbr, sbr->bs_xover_band, k2);
+        if ((result = derived_frequency_table(sbr, sbr->bs_xover_band, k2)) > 0)
+            return result;
     }
 
-    sbr_data(ld, sbr, id_aac);
+    if ((result = sbr_data(ld, sbr, id_aac)) > 0)
+        return result;
 
     /* no error */
     return 0;
@@ -146,6 +194,12 @@ static void sbr_header(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
     uint8_t bs_header_extra_1, bs_header_extra_2;
 
     sbr->header_count++;
+
+#ifdef DRM
+    /* protocol_version (should be 0) */
+    if (sbr->Is_DRM_SBR)
+        faad_getbits(ld, 2);
+#endif
 
     sbr->bs_amp_res = faad_get1bit(ld
         DEBUGVAR(1,203,"sbr_header(): bs_amp_res"));
@@ -160,10 +214,19 @@ static void sbr_header(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
         DEBUGVAR(1,206,"sbr_header(): bs_xover_band"));
     faad_getbits(ld, 2
         DEBUGVAR(1,207,"sbr_header(): bs_reserved_bits_hdr"));
+#ifdef DRM
+    if (sbr->Is_DRM_SBR)
+        sbr->bs_dataextra = faad_getbits(ld, 1);
+#endif
     bs_header_extra_1 = faad_get1bit(ld
         DEBUGVAR(1,208,"sbr_header(): bs_header_extra_1"));
     bs_header_extra_2 = faad_get1bit(ld
         DEBUGVAR(1,209,"sbr_header(): bs_header_extra_2"));
+#ifdef DRM
+    /* No low complexity stereo support so far */
+    if ((sbr->lcstereo_flag) && (sbr->Is_DRM_SBR))
+        faad_getbits(ld, 2);
+#endif
 
     if (bs_header_extra_1)
     {
@@ -173,7 +236,13 @@ static void sbr_header(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
             DEBUGVAR(1,212,"sbr_header(): bs_alter_scale"));
         sbr->bs_noise_bands = faad_getbits(ld, 2
             DEBUGVAR(1,213,"sbr_header(): bs_noise_bands"));
+    } else {
+        /* Default values */
+        sbr->bs_freq_scale = 2;
+        sbr->bs_alter_scale = 1;
+        sbr->bs_noise_bands = 2;
     }
+
     if (bs_header_extra_2)
     {
         sbr->bs_limiter_bands = faad_getbits(ld, 2
@@ -184,6 +253,17 @@ static void sbr_header(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
             DEBUGVAR(1,216,"sbr_header(): bs_interpol_freq"));
         sbr->bs_smoothing_mode = faad_get1bit(ld
             DEBUGVAR(1,217,"sbr_header(): bs_smoothing_mode"));
+#ifdef DRM
+        /* reserved */
+        if (sbr->Is_DRM_SBR)
+            faad_get1bit(ld);
+#endif
+    } else {
+        /* Default values */
+        sbr->bs_limiter_bands = 2;
+        sbr->bs_limiter_gains = 2;
+        sbr->bs_interpol_freq = 1;
+        sbr->bs_smoothing_mode = 1;
     }
 
 #if 0
@@ -210,8 +290,9 @@ static void sbr_header(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
 }
 
 /* table 4 */
-static void sbr_data(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
+static uint8_t sbr_data(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
 {
+    uint8_t result;
 #if 0
     sbr->bs_samplerate_mode = faad_get1bit(ld
         DEBUGVAR(1,219,"sbr_data(): bs_samplerate_mode"));
@@ -219,75 +300,73 @@ static void sbr_data(bitfile *ld, sbr_info *sbr, uint8_t id_aac)
 
     sbr->rate = (sbr->bs_samplerate_mode) ? 2 : 1;
 
+#ifdef DRM
+    if (sbr->Is_DRM_SBR)
+        sbr->rate = 2;
+#endif
+
     switch (id_aac)
     {
     case ID_SCE:
-        sbr_single_channel_element(ld, sbr);
+        if ((result = sbr_single_channel_element(ld, sbr)) > 0)
+            return result;
         break;
     case ID_CPE:
-        sbr_channel_pair_element(ld, sbr);
+        if ((result = sbr_channel_pair_element(ld, sbr)) > 0)
+            return result;
         break;
     }
+
+    return 0;
 }
 
 /* table 5 */
-static void sbr_single_channel_element(bitfile *ld, sbr_info *sbr)
+static uint8_t sbr_single_channel_element(bitfile *ld, sbr_info *sbr)
 {
+    uint8_t result;
+
+#ifdef DRM
+    if (!sbr->Is_DRM_SBR)
+#endif
+    {
     if (faad_get1bit(ld
         DEBUGVAR(1,220,"sbr_single_channel_element(): bs_data_extra")))
     {
         faad_getbits(ld, 4
             DEBUGVAR(1,221,"sbr_single_channel_element(): bs_reserved_bits_data"));
     }
+    }
 
-    sbr_grid(ld, sbr, 0);
+    if ((result = sbr_grid(ld, sbr, 0)) > 0)
+        return result;
     sbr_dtdf(ld, sbr, 0);
     invf_mode(ld, sbr, 0);
+#ifdef DRM
+    if (sbr->Is_DRM_SBR)
+    {
+        /* sbr mode not needed in V1.0. Should be set to 2 by a V1.0 encoder */
+        faad_getbits(ld, 2);
+
+        if (sbr->bs_dataextra)
+            faad_getbits(ld, 3); /* reserved */
+    }
+#endif
     sbr_envelope(ld, sbr, 0);
     sbr_noise(ld, sbr, 0);
 
     envelope_noise_dequantisation(sbr, 0);
 
-#if 0
-// TEMP
-    if (sbr->frame == 21)
-    {
-        int l, k;
-
-        printf("\n");
-        for (l = 0; l < sbr->L_E[0]; l++)
-        {
-            for (k = 0; k < sbr->n[sbr->f[0][l]]; k++)
-            {
-                //printf("%f\n", sbr->E_orig[0][k][l]);
-                printf("%f\n", sbr->E_orig[0][k][l] * 1024.  / (float)(1 << REAL_BITS));
-            }
-        }
-    }
-// end TEMP
-#endif
-
-#if 0
-// TEMP
-    {
-        int l, k;
-
-        printf("\n");
-        for (l = 0; l < sbr->L_Q[0]; l++)
-        {
-            for (k = 0; k < sbr->N_Q; k++)
-            {
-                printf("%f\n", sbr->Q_orig[0][k][l]);
-            }
-        }
-    }
-// end TEMP
-#endif
-
     memset(sbr->bs_add_harmonic[0], 0, 64*sizeof(uint8_t));
 
+#ifdef DRM
+    if (sbr->Is_DRM_SBR)
+        sbr->bs_add_harmonic_flag[0] = 0;
+    else
+#endif
+    {
     sbr->bs_add_harmonic_flag[0] = faad_get1bit(ld
         DEBUGVAR(1,223,"sbr_single_channel_element(): bs_add_harmonic_flag[0]"));
+    }
     if (sbr->bs_add_harmonic_flag[0])
         sinusoidal_coding(ld, sbr, 0);
 
@@ -311,17 +390,28 @@ static void sbr_single_channel_element(bitfile *ld, sbr_info *sbr)
                 DEBUGVAR(1,227,"sbr_single_channel_element(): bs_extension_id"));
             nr_bits_left -= 2;
             /* sbr_extension(ld, sbr, 0, nr_bits_left); */
+#ifdef DRM
+            if (!sbr->Is_DRM_SBR)
+#endif
+            {
             sbr->bs_extension_data = faad_getbits(ld, 6
                 DEBUGVAR(1,279,"sbr_single_channel_element(): bs_extension_data"));
         }
     }
+    }
+
+    return 0;
 }
 
 /* table 6 */
-static void sbr_channel_pair_element(bitfile *ld, sbr_info *sbr)
+static uint8_t sbr_channel_pair_element(bitfile *ld, sbr_info *sbr)
 {
-    uint8_t n;
+    uint8_t n, result;
 
+#ifdef DRM
+    if (!sbr->Is_DRM_SBR)
+#endif
+    {
     if (faad_get1bit(ld
         DEBUGVAR(1,228,"sbr_single_channel_element(): bs_data_extra")))
     {
@@ -330,13 +420,15 @@ static void sbr_channel_pair_element(bitfile *ld, sbr_info *sbr)
         faad_getbits(ld, 4
             DEBUGVAR(1,228,"sbr_channel_pair_element(): bs_reserved_bits_data"));
     }
+    }
 
     sbr->bs_coupling = faad_get1bit(ld
         DEBUGVAR(1,228,"sbr_channel_pair_element(): bs_coupling"));
 
     if (sbr->bs_coupling)
     {
-        sbr_grid(ld, sbr, 0);
+        if ((result = sbr_grid(ld, sbr, 0)) > 0)
+            return result;
 
         /* need to copy some data from left to right */
         sbr->bs_frame_class[1] = sbr->bs_frame_class[0];
@@ -355,6 +447,16 @@ static void sbr_channel_pair_element(bitfile *ld, sbr_info *sbr)
         sbr_dtdf(ld, sbr, 0);
         sbr_dtdf(ld, sbr, 1);
         invf_mode(ld, sbr, 0);
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+        {
+            /* sbr mode not needed in V1.0. Should be set to 2 by a V1.0 encoder */
+            faad_getbits(ld, 2);
+
+            if (sbr->bs_dataextra)
+                faad_getbits(ld, 3); /* reserved */
+        }
+#endif
 
         /* more copying */
         for (n = 0; n < sbr->N_Q; n++)
@@ -368,22 +470,49 @@ static void sbr_channel_pair_element(bitfile *ld, sbr_info *sbr)
         memset(sbr->bs_add_harmonic[0], 0, 64*sizeof(uint8_t));
         memset(sbr->bs_add_harmonic[1], 0, 64*sizeof(uint8_t));
 
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+            sbr->bs_add_harmonic_flag[0] = 0;
+        else
+#endif
+        {
         sbr->bs_add_harmonic_flag[0] = faad_get1bit(ld
             DEBUGVAR(1,231,"sbr_channel_pair_element(): bs_add_harmonic_flag[0]"));
+        }
         if (sbr->bs_add_harmonic_flag[0])
             sinusoidal_coding(ld, sbr, 0);
 
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+            sbr->bs_add_harmonic_flag[1] = 0;
+        else
+#endif
+        {
         sbr->bs_add_harmonic_flag[1] = faad_get1bit(ld
             DEBUGVAR(1,232,"sbr_channel_pair_element(): bs_add_harmonic_flag[1]"));
+        }
         if (sbr->bs_add_harmonic_flag[1])
             sinusoidal_coding(ld, sbr, 1);
     } else {
-        sbr_grid(ld, sbr, 0);
-        sbr_grid(ld, sbr, 1);
+        if ((result = sbr_grid(ld, sbr, 0)) > 0)
+            return result;
+        if ((result = sbr_grid(ld, sbr, 1)) > 0)
+            return result;
         sbr_dtdf(ld, sbr, 0);
         sbr_dtdf(ld, sbr, 1);
         invf_mode(ld, sbr, 0);
         invf_mode(ld, sbr, 1);
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+        {
+            /* sbr mode not needed in V1.0. Should be set to 2 by a V1.0 encoder */
+            faad_getbits(ld, 2);
+            faad_getbits(ld, 2);
+
+            if (sbr->bs_dataextra)
+                faad_getbits(ld, 6); /* reserved */
+        }
+#endif
         sbr_envelope(ld, sbr, 0);
         sbr_envelope(ld, sbr, 1);
         sbr_noise(ld, sbr, 0);
@@ -392,58 +521,35 @@ static void sbr_channel_pair_element(bitfile *ld, sbr_info *sbr)
         memset(sbr->bs_add_harmonic[0], 0, 64*sizeof(uint8_t));
         memset(sbr->bs_add_harmonic[1], 0, 64*sizeof(uint8_t));
 
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+            sbr->bs_add_harmonic_flag[0] = 0;
+        else
+#endif
+        {
         sbr->bs_add_harmonic_flag[0] = faad_get1bit(ld
             DEBUGVAR(1,239,"sbr_channel_pair_element(): bs_add_harmonic_flag[0]"));
+        }
         if (sbr->bs_add_harmonic_flag[0])
             sinusoidal_coding(ld, sbr, 0);
 
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+            sbr->bs_add_harmonic_flag[1] = 0;
+        else
+#endif
+        {
         sbr->bs_add_harmonic_flag[1] = faad_get1bit(ld
             DEBUGVAR(1,240,"sbr_channel_pair_element(): bs_add_harmonic_flag[1]"));
+        }
         if (sbr->bs_add_harmonic_flag[1])
             sinusoidal_coding(ld, sbr, 1);
     }
     envelope_noise_dequantisation(sbr, 0);
     envelope_noise_dequantisation(sbr, 1);
 
-#if 0
-// TEMP
-    if (sbr->frame == 21)
-    {
-        int l, k;
-
-        printf("\n");
-        for (l = 0; l < sbr->L_E[0]; l++)
-        {
-            for (k = 0; k < sbr->n[sbr->f[0][l]]; k++)
-            {
-                printf("%f\n", sbr->E_orig[0][k][l]);
-                //printf("%f\n", sbr->E_orig[0][k][l] * 1024.  / (float)(1 << REAL_BITS));
-            }
-        }
-    }
-// end TEMP
-#endif
-
     if (sbr->bs_coupling)
         unmap_envelope_noise(sbr);
-
-#if 0
-// TEMP
-    if (sbr->bs_coupling)
-    {
-        int l, k;
-
-        printf("\n");
-        for (l = 0; l < sbr->L_Q[0]; l++)
-        {
-            for (k = 0; k < sbr->N_Q; k++)
-            {
-                printf("%f\n", sbr->Q_orig[0][k][l]);
-            }
-        }
-    }
-// end TEMP
-#endif
 
     sbr->bs_extended_data = faad_get1bit(ld
         DEBUGVAR(1,233,"sbr_channel_pair_element(): bs_extended_data[0]"));
@@ -465,26 +571,28 @@ static void sbr_channel_pair_element(bitfile *ld, sbr_info *sbr)
                 DEBUGVAR(1,236,"sbr_channel_pair_element(): bs_extension_id"));
             nr_bits_left -= 2;
             /* sbr_extension(ld, sbr, 0, nr_bits_left); */
+#ifdef DRM
+            if (!sbr->Is_DRM_SBR)
+#endif
+            {
             sbr->bs_extension_data = faad_getbits(ld, 6
                 DEBUGVAR(1,280,"sbr_single_channel_element(): bs_extension_data"));
         }
     }
+    }
+
+    return 0;
 }
 
 /* table 7 */
-static void sbr_grid(bitfile *ld, sbr_info *sbr, uint8_t ch)
+static uint8_t sbr_grid(bitfile *ld, sbr_info *sbr, uint8_t ch)
 {
-    uint8_t i, env, rel;
+    uint8_t i, env, rel, result;
     uint8_t bs_abs_bord, bs_abs_bord_1;
     uint16_t bs_num_env;
 
     sbr->bs_frame_class[ch] = faad_getbits(ld, 2
         DEBUGVAR(1,248,"sbr_grid(): bs_frame_class"));
-
-#if 0
-    if (sbr->bs_frame_class[ch] != FIXFIX)
-        printf("%d", sbr->bs_frame_class[ch]);
-#endif
 
     switch (sbr->bs_frame_class[ch])
     {
@@ -500,14 +608,23 @@ static void sbr_grid(bitfile *ld, sbr_info *sbr, uint8_t ch)
             sbr->f[ch][env] = i;
 
         sbr->abs_bord_lead[ch] = 0;
-        sbr->abs_bord_trail[ch] = NO_TIME_SLOTS;
+        sbr->abs_bord_trail[ch] = sbr->numTimeSlots;
         sbr->n_rel_lead[ch] = bs_num_env - 1;
         sbr->n_rel_trail[ch] = 0;
         break;
 
     case FIXVAR:
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+        {
+            bs_abs_bord = faad_getbits(ld, 3
+                DEBUGVAR(1,251,"sbr_grid(): bs_abs_bord")) + sbr->numTimeSlots;
+        } else
+#endif
+        {
         bs_abs_bord = faad_getbits(ld, 2
-            DEBUGVAR(1,251,"sbr_grid(): bs_abs_bord")) + NO_TIME_SLOTS;
+                DEBUGVAR(1,251,"sbr_grid(): bs_abs_bord")) + sbr->numTimeSlots;
+        }
         bs_num_env = faad_getbits(ld, 2
             DEBUGVAR(1,252,"sbr_grid(): bs_num_env")) + 1;
 
@@ -533,8 +650,17 @@ static void sbr_grid(bitfile *ld, sbr_info *sbr, uint8_t ch)
         break;
 
     case VARFIX:
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+        {
+            bs_abs_bord = faad_getbits(ld, 3
+                DEBUGVAR(1,256,"sbr_grid(): bs_abs_bord"));
+        } else
+#endif
+        {
         bs_abs_bord = faad_getbits(ld, 2
             DEBUGVAR(1,256,"sbr_grid(): bs_abs_bord"));
+        }
         bs_num_env = faad_getbits(ld, 2
             DEBUGVAR(1,257,"sbr_grid(): bs_num_env")) + 1;
 
@@ -554,16 +680,28 @@ static void sbr_grid(bitfile *ld, sbr_info *sbr, uint8_t ch)
         }
 
         sbr->abs_bord_lead[ch] = bs_abs_bord;
-        sbr->abs_bord_trail[ch] = NO_TIME_SLOTS;
+        sbr->abs_bord_trail[ch] = sbr->numTimeSlots;
         sbr->n_rel_lead[ch] = bs_num_env - 1;
         sbr->n_rel_trail[ch] = 0;
         break;
 
     case VARVAR:
+#ifdef DRM
+        if (sbr->Is_DRM_SBR)
+        {
+            bs_abs_bord = faad_getbits(ld, 3
+                DEBUGVAR(1,261,"sbr_grid(): bs_abs_bord_0"));
+            bs_abs_bord_1 = faad_getbits(ld, 3
+                DEBUGVAR(1,262,"sbr_grid(): bs_abs_bord_1")) + sbr->numTimeSlots;
+        }
+        else
+#endif
+        {
         bs_abs_bord = faad_getbits(ld, 2
             DEBUGVAR(1,261,"sbr_grid(): bs_abs_bord_0"));
         bs_abs_bord_1 = faad_getbits(ld, 2
-            DEBUGVAR(1,262,"sbr_grid(): bs_abs_bord_1")) + NO_TIME_SLOTS;
+                DEBUGVAR(1,262,"sbr_grid(): bs_abs_bord_1")) + sbr->numTimeSlots;
+        }
         sbr->bs_num_rel_0[ch] = faad_getbits(ld, 2
             DEBUGVAR(1,263,"sbr_grid(): bs_num_rel_0"));
         sbr->bs_num_rel_1[ch] = faad_getbits(ld, 2
@@ -609,8 +747,11 @@ static void sbr_grid(bitfile *ld, sbr_info *sbr, uint8_t ch)
         sbr->L_Q[ch] = 1;
 
     /* TODO: this code can probably be integrated into the code above! */
-    envelope_time_border_vector(sbr, ch);
+    if ((result = envelope_time_border_vector(sbr, ch)) > 0)
+        return result;
     noise_floor_time_border_vector(sbr, ch);
+
+    return 0;
 }
 
 /* table 8 */
@@ -636,169 +777,24 @@ static void invf_mode(bitfile *ld, sbr_info *sbr, uint8_t ch)
 {
     uint8_t n;
 
-    for (n = 0; n < sbr->N_Q; n++)
+#ifdef DRM
+    if (sbr->Is_DRM_SBR)
     {
-        sbr->bs_invf_mode[ch][n] = faad_getbits(ld, 2
+        /* Only one inv_mode in DRM */
+        uint8_t invf_mode;
+        invf_mode = faad_getbits(ld, 2
             DEBUGVAR(1,271,"invf_mode(): bs_invf_mode"));
-    }
-}
-
-/* table 10 */
-static void sbr_envelope(bitfile *ld, sbr_info *sbr, uint8_t ch)
-{
-    uint8_t env, band;
-    int8_t delta = 0;
-    sbr_huff_tab t_huff, f_huff;
-
-    if ((sbr->L_E[ch] == 1) && (sbr->bs_frame_class[ch] == FIXFIX))
-        sbr->amp_res[ch] = 0;
-    else
-        sbr->amp_res[ch] = sbr->bs_amp_res;
-
-    if ((sbr->bs_coupling) && (ch == 1))
-    {
-        delta = 1;
-        if (sbr->amp_res[ch])
-        {
-            t_huff = t_huffman_env_bal_3_0dB;
-            f_huff = f_huffman_env_bal_3_0dB;
-        } else {
-            t_huff = t_huffman_env_bal_1_5dB;
-            f_huff = f_huffman_env_bal_1_5dB;
-        }
-    } else {
-        delta = 0;
-        if (sbr->amp_res[ch])
-        {
-            t_huff = t_huffman_env_3_0dB;
-            f_huff = f_huffman_env_3_0dB;
-        } else {
-            t_huff = t_huffman_env_1_5dB;
-            f_huff = f_huffman_env_1_5dB;
-        }
-    }
-
-    for (env = 0; env < sbr->L_E[ch]; env++)
-    {
-        if (sbr->bs_df_env[ch][env] == 0)
-        {
-            if ((sbr->bs_coupling == 1) && (ch == 1))
-            {
-                if (sbr->amp_res[ch])
-                {
-                    sbr->E[ch][0][env] = (faad_getbits(ld, 5
-                        DEBUGVAR(1,272,"sbr_envelope(): bs_data_env")) << delta);
-                } else {
-                    sbr->E[ch][0][env] = (faad_getbits(ld, 6
-                        DEBUGVAR(1,273,"sbr_envelope(): bs_data_env")) << delta);
-                }
-            } else {
-                if (sbr->amp_res[ch])
-                {
-                    sbr->E[ch][0][env] = (faad_getbits(ld, 6
-                        DEBUGVAR(1,274,"sbr_envelope(): bs_data_env")) << delta);
-                } else {
-                    sbr->E[ch][0][env] = (faad_getbits(ld, 7
-                        DEBUGVAR(1,275,"sbr_envelope(): bs_data_env")) << delta);
-                }
-            }
-
-            for (band = 1; band < sbr->n[sbr->f[ch][env]]; band++)
-            {
-                sbr->E[ch][band][env] = (sbr_huff_dec(ld, f_huff) << delta);
-            }
-
-        } else {
-            for (band = 0; band < sbr->n[sbr->f[ch][env]]; band++)
-            {
-                sbr->E[ch][band][env] = (sbr_huff_dec(ld, t_huff) << delta);
-            }
-        }
-    }
-
-#if 0
-// TEMP
-    if (sbr->frame == 19)
-    {
-        int l, k;
-
-        printf("\n");
-        for (l = 0; l < sbr->L_E[ch]; l++)
-        {
-            for (k = 0; k < sbr->n[sbr->f[ch][l]]; k++)
-            {
-                printf("l:%d k:%d E:%d\n",l, k, sbr->E[ch][k][l]);
-            }
-        }
-    }
-// end TEMP
+        for (n = 0; n < sbr->N_Q; n++)
+            sbr->bs_invf_mode[ch][n] = invf_mode;
+    } else
 #endif
-
-    extract_envelope_data(sbr, ch);
-
-#if 0
-// TEMP
-    if (sbr->frame == 21)
-    {
-        int l, k;
-
-        printf("\n");
-        for (l = 0; l < sbr->L_E[ch]; l++)
-        {
-            for (k = 0; k < sbr->n[sbr->f[ch][l]]; k++)
             {
-                //printf("l:%d k:%d E:%d\n",l,k, sbr->E[ch][k][l]);
-                printf("%d\n", sbr->E[ch][k][l]);
-            }
+        for (n = 0; n < sbr->N_Q; n++)
+            {
+            sbr->bs_invf_mode[ch][n] = faad_getbits(ld, 2
+                DEBUGVAR(1,271,"invf_mode(): bs_invf_mode"));
         }
     }
-// end TEMP
-#endif
-}
-
-/* table 11 */
-static void sbr_noise(bitfile *ld, sbr_info *sbr, uint8_t ch)
-{
-    uint8_t noise, band;
-    int8_t delta = 0;
-    sbr_huff_tab t_huff, f_huff;
-
-    if ((sbr->bs_coupling == 1) && (ch == 1))
-    {
-        delta = 1;
-        t_huff = t_huffman_noise_bal_3_0dB;
-        f_huff = f_huffman_env_bal_3_0dB;
-    } else {
-        delta = 0;
-        t_huff = t_huffman_noise_3_0dB;
-        f_huff = f_huffman_env_3_0dB;
-    }
-
-    for (noise = 0; noise < sbr->L_Q[ch]; noise++)
-    {
-        if(sbr->bs_df_noise[ch][noise] == 0)
-        {
-            if ((sbr->bs_coupling == 1) && (ch == 1))
-            {
-                sbr->Q[ch][0][noise] = (faad_getbits(ld, 5
-                    DEBUGVAR(1,276,"sbr_noise(): bs_data_noise")) << delta);
-            } else {
-                sbr->Q[ch][0][noise] = (faad_getbits(ld, 5
-                    DEBUGVAR(1,277,"sbr_noise(): bs_data_noise")) << delta);
-            }
-            for (band = 1; band < sbr->N_Q; band++)
-            {
-                sbr->Q[ch][band][noise] = (sbr_huff_dec(ld, f_huff) << delta);
-            }
-        } else {
-            for (band = 0; band < sbr->N_Q; band++)
-            {
-                sbr->Q[ch][band][noise] = (sbr_huff_dec(ld, t_huff) << delta);
-            }
-        }
-    }
-
-    extract_noise_floor_data(sbr, ch);
 }
 
 /* table 12 */

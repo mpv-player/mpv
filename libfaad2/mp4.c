@@ -22,7 +22,7 @@
 ** Commercial non-GPL licensing of this software is possible.
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
-** $Id: mp4.c,v 1.17 2003/07/29 08:20:12 menno Exp $
+** $Id: mp4.c,v 1.19 2003/09/18 13:38:38 menno Exp $
 **/
 
 #include "common.h"
@@ -148,7 +148,7 @@ int8_t FAADAPI AudioSpecificConfig2(uint8_t *pBuffer,
     mp4ASC->channelsConfiguration = (uint8_t)faad_getbits(&ld, 4
         DEBUGVAR(1,3,"parse_audio_decoder_specific_info(): ChannelsConfiguration"));
 
-    mp4ASC->samplingFrequency = sample_rates[mp4ASC->samplingFrequencyIndex];
+    mp4ASC->samplingFrequency = get_sample_rate(mp4ASC->samplingFrequencyIndex);
 
     if (ObjectTypesTable[mp4ASC->objectTypeIndex] != 1)
     {
@@ -180,7 +180,7 @@ int8_t FAADAPI AudioSpecificConfig2(uint8_t *pBuffer,
             mp4ASC->samplingFrequency = (uint32_t)faad_getbits(&ld, 24
                 DEBUGVAR(1,6,"parse_audio_decoder_specific_info(): extensionSamplingFrequencyIndex"));
         } else {
-            mp4ASC->samplingFrequency = sample_rates[mp4ASC->samplingFrequencyIndex];
+            mp4ASC->samplingFrequency = get_sample_rate(mp4ASC->samplingFrequencyIndex);
         }
         mp4ASC->objectTypeIndex = (uint8_t)faad_getbits(&ld, 5
             DEBUGVAR(1,7,"parse_audio_decoder_specific_info(): ObjectTypeIndex"));
@@ -216,7 +216,7 @@ int8_t FAADAPI AudioSpecificConfig2(uint8_t *pBuffer,
 
 
 #ifdef SBR_DEC
-    bits_to_decode = buffer_size*8 - faad_get_processed_bits(&ld);
+    bits_to_decode = (int8_t)(buffer_size*8 - faad_get_processed_bits(&ld));
 
     if ((mp4ASC->objectTypeIndex != 5) && (bits_to_decode >= 16))
     {
@@ -242,10 +242,21 @@ int8_t FAADAPI AudioSpecificConfig2(uint8_t *pBuffer,
                         mp4ASC->samplingFrequency = (uint32_t)faad_getbits(&ld, 24
                             DEBUGVAR(1,13,"parse_audio_decoder_specific_info(): extensionSamplingFrequencyIndex"));
                     } else {
-                        mp4ASC->samplingFrequency = sample_rates[mp4ASC->samplingFrequencyIndex];
+                        mp4ASC->samplingFrequency = get_sample_rate(mp4ASC->samplingFrequencyIndex);
                     }
                 }
             }
+        }
+    }
+
+    /* no SBR signalled, this could mean either implicit signalling or no SBR in this file */
+    /* MPEG specification states: assume SBR on files with samplerate <= 24000 Hz */
+    if (mp4ASC->sbr_present_flag == -1)
+    {
+        if (mp4ASC->samplingFrequency <= 24000)
+        {
+            mp4ASC->samplingFrequency *= 2;
+            mp4ASC->forceUpSampling = 1;
         }
     }
 #endif

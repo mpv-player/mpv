@@ -108,7 +108,7 @@ scalar16 ( const float32_t* x, const float32_t* y )
 
 
 void
-Init_Dither ( unsigned char bits, unsigned char shapingtype )
+Init_Dither ( uint8_t bits, uint8_t shapingtype )
 {
 	static uint8_t          default_dither [] = { 92, 92, 88, 84, 81, 78, 74, 67,  0,  0 };
 	static const float32_t*              F [] = { F44_0, F44_1, F44_2, F44_3 };
@@ -124,7 +124,7 @@ Init_Dither ( unsigned char bits, unsigned char shapingtype )
 	Dither.FilterCoeff = F [shapingtype];
 	Dither.Mask   = ((uint64_t)-1) << (32 - bits);
 	Dither.Add    = 0.5     * ((1L << (32 - bits)) - 1);
-	Dither.Dither = 0.01*default_dither[index] / (((int64_t)1) << bits);
+	Dither.Dither = (float32_t)0.01*default_dither[index] / (((int64_t)1) << bits);
 }
 
 #endif
