@@ -1980,7 +1980,7 @@ U¿yj '-1' by zachowaæ domy¶lne warto¶ci.
 Parametry w:h oznaczaj± szeroko¶æ x wysoko¶æ w pikselach, x:y oznacza x;y pozycjê
 od wy¿szego lewego rogu wiêkszego obrazu.
 .br
-By pobraæ listê dostêpnych pluginów patrz \-vf help.
+By pobraæ listê dostêpnych filtrów patrz \-vf help.
 .br
 Dostêpne filtry to:
 .
@@ -2065,9 +2065,13 @@ Dodatkowe parametry chroma skipping (c z przedzia³u 0\-3) i scaling mog± byæ okr
 (po detale zobacz opcjê \-sws)
 .REss
 .IPs yuy2
-Wymu¶ konwersjê programow± YV12/\:I420 do YUY2.
+Wymu¶ konwersjê programow± YV12/\:I420 lub 422P do YUY2.
 U¿yteczne w kartach/\:steronikach wideo, które powolnie wspieraj± YV12,
 ale szybko YUY2.
+.IPs yvu9
+Wymu¶ progamow± konwersjê przestrzeni kolorów YVU9 do YV12.
+Dzia³a na korzy¶æ skalatorów programowych.
+Deprecated in favor of the software scaler.
 .IPs rgb2bgr[=swap]
 Konwersja kolorów RGB 24/\:32 <\-> BGR 24/\:32
 .RSss
@@ -2176,6 +2180,9 @@ chroma:	wp³yw przestrzeni chroma (domy¶lnie = 3)
 .br
 time:	czas wp³ywu (domy¶lnie = 6)
 .REss
+.IPs "hqdn3d[=luma:chroma:czas]"
+Wersja filtra z wysok± precyzj±/\:jao¶ci±.
+Paramentry i u¿ycie s± takie same.
 .IPs eq[=jasno¶æ:kontrast]
 Programowy korektor (equalizer) z interaktywn± kontrol±, zupe³nie jak korektor
 sprzêtowy, dla kart/\:sterowników które nie obs³uguj± sprzêtowej kontroli jasno¶ci
@@ -2327,6 +2334,13 @@ t: liniowe (0) lub sze¶ciok±tny resampling (1)
 U¿yj podwójne skalowanie i wstaw algorytm ze skalowania oraz rozmyj obrazy.
 .IPs 1bpp
 Konwersja 1bpp bitmapy do YUV/BGR 8/15/16/32
+.IPs down3dright[=linie]
+Przepozycjonowanie i zmiana rozmiaru obrazu stereoskopowego.
+Wydob±d¼ oba pola stereo i umie¶æ je wspólnie, zmieniaj±c im rozmiar
+by utrzymaæ aspekt filmu.
+.RSss
+lines: number of lines to select from the middle of the image (default: 12)
+.REss
 .IPs "bmovl=hidden:opaque:<fifo>"
 Odczytaj bitmapy z FIFO i wy¶wietl je w oknie.
 .
