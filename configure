@@ -384,7 +384,6 @@ for ac_option do
     ;;
   --with-extralibdir=*)
     _ld_extra=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
-#    _ld_extra="${_ld_extra} -Wl,-R"`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -Wl\,-R,g'`" -L"`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --enable-runtime-cpudetection)
     _runtime_cpudetection=yes
@@ -506,6 +505,13 @@ TMPS="$I/mplayer-conf-$RANDOM-$$.S"
 if freebsd ; then
   _ld_extra="$_ld_extra -L/usr/local/lib"
   _inc_extra="$_inc_extra -I/usr/local/include"
+fi
+
+if netbsd ; then
+  for I in `echo $_ld_extra | sed 's/-L//g'` ; do
+    tmp="$tmp ` echo $I | sed 's/.*/ -L& -Wl,-R&/'`"
+  done
+  _ld_extra=$tmp
 fi
 
 _ldd=ldd
@@ -3202,7 +3208,11 @@ echocheck "X11 libs presence"
 if test -z "$_ld_x11" ; then
   for I in /usr/X11R6/lib /usr/lib/X11R6 /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 /usr/lib ; do
     if test -d "$I" && ( test -f "$I/libX11.so" || test -f "$I/libX11.a" || test -f "$I/libX11.dll.a" ) ; then
-      _ld_x11="-L$I"
+      if netbsd; then
+        _ld_x11="-L$I -Wl,-R$I"
+      else
+        _ld_x11="-L$I"
+      fi
       echores "yes (using $I)"
       break;
     fi
