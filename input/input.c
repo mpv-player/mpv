@@ -555,6 +555,9 @@ mp_input_read_keys(int time,int paused) {
     n++;
   }
 
+  if(num_key_fd == 0)
+    return NULL;
+
   if(time >= 0 ) {
     tv.tv_sec=time/1000; 
     tv.tv_usec = (time%1000)*1000;
@@ -700,6 +703,9 @@ mp_input_read_cmds(int time) {
     FD_SET(cmd_fds[i].fd,&fds);
     n++;
   }
+
+  if(num_cmd_fd == 0)
+    return NULL;
 
   if(time >= 0) {
     tv.tv_sec=time/1000; 
@@ -885,7 +891,7 @@ mp_input_free_binds(mp_cmd_bind_t* binds) {
 static int
 mp_input_parse_config(char *file) {
   int fd;
-  int bs = 0,r,eof = 0;
+  int bs = 0,r,eof = 0,comments = 0;
   char *iter,*end;
   char buffer[BS_MAX];
   int n_binds = 0, keys[MP_MAX_KEY_DOWN+1] = { 0 };
@@ -927,6 +933,23 @@ mp_input_parse_config(char *file) {
       
     iter = buffer;
 
+    if(comments) {
+      for( ; iter[0] != '\0' && iter[0] != '\n' ; iter++)
+	/* NOTHING */;
+      if(iter[0] == '\0') { // Buffer was full of comment
+	bs = 0;
+	continue;
+      }
+      iter++;
+      r = strlen(iter);
+      if(r)
+	memmove(buffer,iter,r+1);
+      bs = r+1;
+      if(iter[0] != '#')
+	comments = 0;
+      continue;
+    }
+
     // Find the wanted key
     if(keys[0] == 0) {
       // Jump beginnig space
@@ -934,6 +957,10 @@ mp_input_parse_config(char *file) {
 	/* NOTHING */;
       if(iter[0] == '\0') { // Buffer was full of space char
 	bs = 0;
+	continue;
+      }
+      if(iter[0] == '#') { // Comments
+	comments = 1;
 	continue;
       }
       // Find the end of the key code name
