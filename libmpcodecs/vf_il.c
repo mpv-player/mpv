@@ -47,16 +47,7 @@ struct vf_priv_s {
 	FilterParam chromaParam;
 };
 
-
 /***************************************************************************/
-
-
-static int config(struct vf_instance_s* vf,
-        int width, int height, int d_width, int d_height,
-	unsigned int flags, unsigned int outfmt){
-
-	return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
-}
 
 static int interleave(uint8_t *dst, uint8_t *src, int w, int h, int dstStride, int srcStride, int interleave, int swap){
 	const int a= swap;
@@ -118,11 +109,6 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 //===========================================================================//
 
-static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-	/* we support all formats :) */
-	return vf_next_query_format(vf, fmt); 
-}
-
 static void parse(FilterParam *fp, char* args){
 	char *pos;
 	char *max= strchr(args, ':');
@@ -140,10 +126,8 @@ static void parse(FilterParam *fp, char* args){
 static int open(vf_instance_t *vf, char* args){
 	char *pos, *max;
 
-	vf->config=config;
 	vf->put_image=put_image;
 //	vf->get_image=get_image;
-	vf->query_format=query_format;
 	vf->priv=malloc(sizeof(struct vf_priv_s));
 	memset(vf->priv, 0, sizeof(struct vf_priv_s));
 	
