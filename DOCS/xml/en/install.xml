@@ -559,6 +559,7 @@ Currently the following formats are supported:
 <listitem><para>VPlayer</para></listitem>
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
+<listitem><para>Unknown</para></listitem>
 <listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>
