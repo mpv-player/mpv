@@ -7,6 +7,7 @@ mplayer \- Movie Player for Linux
 .SH SYNOPSIS
 .B mplayer
 .RB [ \-vo\ output\ driver ]
+.RB [ \-ao\ output\ driver ]
 .RB [ \-vcd\ track\ number ]
 .RB [ \-sb\ byte\ position ]
 .RB [ \-nosound\ ]
@@ -37,6 +38,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-forceidx ]
 .RB [ \-nodshow ]
 .RB [ \-sdl\ driver ]
+.RB [ \-sdla\ driver ]
 .RB [ \-noxv ]
 .RB [ \-forcexv ]
 .RB [ \-ss\ sec ]
@@ -48,6 +50,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-hardframedrop ]
 .RB [ \-dvdkey\ key ]
 .RB [ \-stereo\ mode ]
+.RB [ \-srate\ Hz ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -69,11 +72,18 @@ any options.
 .I NOTE
 Every "flag" option has "noflag" pair, e.g. -fs opposite is -nofs
 .TP
-.BI \-vo\ output\ driver
-select output driver
+.B \-vo\ video\ output\ driver
+select video output driver
 
 you can get the list of available drivers executing
 .I mplayer -vo help
+
+.TP
+.B \-ao\ audio\ output\ driver
+select audio output driver
+
+you can get the list of available drivers executing
+.I mplayer -ao help
 
 .TP
 .B \-vcd\ track
@@ -204,7 +214,10 @@ indexes.
 disables usage of DirectShow video codecs
 .TP
 .B \-sdl\ driver
-specify SDL driver to use. For example: aalib, dga, fbdev, svga, x11, ggi
+specify SDL video driver to use. For example: aalib, dga, fbdev, svga, x11, ggi
+.TP
+.B \-sdla\ driver
+specify SDL audio driver to use. For example: esd
 .TP
 .B \-noxv
 disable XVideo hardware acceleration (with SDL only!)
@@ -237,6 +250,9 @@ select type of MPEG1 stereo output. Mode may be 0:stereo 1:left 2:right
         Left channel   1
         Right channel  2
 
+.TP
+.B \-srate Hz
+specifies Hz to playback audio on. Has effect on playback speed!
 .IP
 .SH "ALPHA/BETA CODE"
 .TP

@@ -285,5 +285,5 @@ static int get_delay();
   legrosszabb esetben adja vissza a buffer meretet.
 
 !!!  Mivel a kep a hanghoz (hangkartyahoz) van szinkronizalva, igy nagyon
-!!!  fontos hogy a get-space ill. get_delay fuggvenyek korrektul legyenek megirva!
+!!!  fontos hogy a get_space ill. get_delay fuggvenyek korrektul legyenek megirva!
 
