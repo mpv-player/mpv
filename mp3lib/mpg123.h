@@ -123,3 +123,8 @@ extern void dct64(real *a,real *b,real *c);
  extern void dct36_3dnow(real *,real *,real *,real *,real *);
  extern int  synth_1to1_3dnow( real *,int,unsigned char * );
 #endif
+#ifdef HAVE_3DNOWEX
+ extern void dct64_3dnowex( real *,real *, real * );
+ extern void dct36_3dnowex(real *,real *,real *,real *,real *);
+ extern int  synth_1to1_3dnowex( real *,int,unsigned char * );
+#endif

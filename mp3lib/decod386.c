@@ -117,6 +117,15 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   int clip = 0;
   int bo1;
 
+  #ifdef HAVE_3DNOWEX
+  if ( _3dnow > 1 )
+   {
+    int ret;
+    ret=synth_1to1_3dnowex( bandPtr,channel,out+*pnt );
+    *pnt+=128;
+    return ret;
+   }
+  #endif
   #ifdef HAVE_3DNOW
   if ( _3dnow )
    {
