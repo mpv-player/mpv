@@ -930,7 +930,7 @@ Ha ez egy AVI fájl, talán rossz az interleaving. Próbáld meg a <option>-ni</opti
 </para></listitem>
 <listitem><para>
 A hang vezérlõd hibás, vagy ALSA 0.5-öt használsz az <option>-ao oss</option> kapcsolóval.
-Lásd a <link linkend="audio-dev">hangkártya részt</link>.
+Lásd a <link linkend="audio">hangkártya részt</link>.
 </para></listitem>
 <listitem><para>
 Ha az AVI-nak hibás a fejléce, próbáld meg a <option>-nobps</option> és/vagy a <option>-mc 0</option>

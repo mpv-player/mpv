@@ -1,16 +1,13 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.3 -->
+<!-- synced with 1.4 -->
 <chapter id="features">
 <title>Funkciók</title>
 
 &formats.xml;
 &codecs.xml;
 
-<sect1 id="devices">
-<title>Kimeneti eszközök</title>
 &video.xml;
 &audio.xml;
-</sect1>
 
 &tvinput.xml;
 

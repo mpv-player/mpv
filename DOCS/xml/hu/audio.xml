@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.19 -->
-<sect2 id="audio-dev">
+<!-- synced with 1.20 -->
+<sect1 id="audio">
 <title>Audió kimeneti eszközök</title>
-<sect3 id="sync">
+<sect2 id="sync">
 <title>Audió/Videó szinkronizáció</title>
 
 <para>
@@ -112,9 +112,9 @@ DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
   részben van leírva.
  </para></listitem>
 </itemizedlist>
-</sect3>
+</sect2>
 
-<sect3 id="experiences">
+<sect2 id="experiences">
 <title>Hangkártya tapasztalatok, javaslatok</title>
 <para>
 Linuxon egy 2.4.x kernel nagyon javasolt. A 2.2-es kernelt nem teszteltük.
@@ -331,9 +331,9 @@ Ráadásul elérhetőek számos nem-Linux rendszeren is.
 Örömmel fogadjuk az ezen dokumentummal kapcsolatos visszajelzéseket. Kérjük írd meg,
 hogy hogyan működött együtt az <application>MPlayer</application> és a hang kártyá(i)d.
 </para>
-</sect3>
+</sect2>
 
-<sect3 id="af">
+<sect2 id="af">
 <title>Audio szűrők</title>
 <para>
   A régi audió plugin-eket az új audió szűrő réteg váltotta fel. Az audió szűrők
@@ -489,7 +489,7 @@ egy formátum szűrő (lásd lejebb) beillesztődik, hogy kiigazítsa a különbséget.
 </varlistentry>
 </variablelist>
 
-<sect4 id="af_resample">
+<sect3 id="af_resample">
 <title>Up/Downsampling</title>
 
 <para>
@@ -542,9 +542,9 @@ de explicit módon is engedélyezheted a parancssorban. Három kapcsolója van:
 resample szűrő kimeneti mintavételezési frekvenciáját 44100Hz-re állítja, exakt kimeneti
 frekvenciát használ és lineáris interpolációt.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_channels">
+<sect3 id="af_channels">
 <title>Csatornák számának megváltoztatása</title>
 <para>
 A <option>channels</option> szűrő csatornák hozzáadásához vagy elvételéhez használható,
@@ -606,9 +606,9 @@ elnémul, de a 0-ás és az 1-es marad felcserélve.
 beállítja a csatornák számát 6-ra és 4 útvonalat ad meg, ami a 0. csatornát
 átmásolja a 0. és 3. csatornára. A 4-es és 5-ös csatorna el lesz némítva.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_format">
+<sect3 id="af_format">
 <title>Minta formátum konvertáló</title>
 <para>
 A <option>format</option> szűrő különböző minta formátumok között konvertál.
@@ -643,9 +643,9 @@ Példa:
 <screen>mplayer -af format=4:float <replaceable>media.avi</replaceable></screen>
 beállítja a kimeneti formátumot mintánkénti 4 bájtos lebegőpontos adatra.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_delay">
+<sect3 id="af_delay">
 <title>Késleltetés</title>
 <para>
 A <option>delay</option> szűrő késlelteti a hangot a hangszóróknál, így különböző
@@ -691,9 +691,9 @@ a bal és jobb első hangszórót 10.5ms-sel, a két hátsó és a mély csatornát 0ms-se
 középső csatornát pedig 7ms-sel késlelteti.
 </para>
 
-</sect4>
+</sect3>
 
-<sect4 id="af_volume">
+<sect3 id="af_volume">
 <title>Szoftveres hangerő szabályozás</title>
 <para>A szoftveres hangerő szabályozást a <option>volume</option> audió szűrő
 valósítja meg. Óvatosan használd ezt a szűrőt, mivel lecsökkentheti a jel erősségét
@@ -740,9 +740,9 @@ kilép. Ez a hangerő becslés használható a hangerő szint beállítására az
 <application>MEncoder</application>ben úgy, hogy a maximum dinamikus intervallumot
 használd.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_equalizer">
+<sect3 id="af_equalizer">
 <title>Equalizer</title>
 <para>
 Az <option>equalizer</option> szűrő egy 10 oktáv széles grafikus equalizert
@@ -802,9 +802,9 @@ Például:
 erősíteni fogja a hangot a felső és az alső frekvencia tartományokban, míg
 majdnem teljesen kikapcsolja azt 1 kHz környékén.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_panning">
+<sect3 id="af_panning">
 <title>Pan szűrő</title>
 <para>
 A <option>pan</option> szűrőt csatornák önkényes összekeverésére használhatod.
@@ -859,9 +859,9 @@ Lemixel sztereóból mono-ba.
 3 csatornás kimenetet ad, a 0. és 1. csatornát érintetlenül hagyja, és belemixeli
 a 2. kimeneti csatornába (amit például a mélynyomóra küld ki).
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_sub">
+<sect3 id="af_sub">
 <title>Sub-woofer</title>
 <para>
 A <option>sub</option> szűrő egy mélynyomó csatornát ad az audió folyamhoz.
@@ -903,9 +903,9 @@ Példa:
 <screen>mplayer -af sub=100:4 -channels 5 <replaceable>media.avi</replaceable></screen>
 létrehoz egy mélynyomó csatornát 100 Hz-es vágási frekvenciával a 4. kimeneti csatornán.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_surround">
+<sect3 id="af_surround">
 <title>Surround-sound dekódoló</title>
 <para>
 A mátrix kódolású térhatású hang dekódolható a <option>surround</option>
@@ -936,9 +936,9 @@ Példa:
 bekapcsolja a térhatású hang dekódolását a hátsó hangszórók hangjához képest 15
 ms-os késleltetéssel.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_export">
+<sect3 id="af_export">
 <title>Audio Exporter</title>
 <para>
 Az audió szűrők exportálják a bejövő jeleket más processzeknek a memória map-olás segítségével
@@ -976,9 +976,9 @@ példa:
 <screen>mplayer -af export=/tmp/mplayer-af_export:1024 <replaceable>media.avi</replaceable></screen>
 exportál 1024 mintát csatornánként a <filename>/tmp/mplayer-af_export</filename> fájlba.
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_extrastereo">
+<sect3 id="af_extrastereo">
 <title>Extrastereo</title>
 
 <para>
@@ -1007,9 +1007,9 @@ mplayer -af extrastereo <replaceable>media.avi</replaceable>
 mplayer -af extrastereo=3.45 <replaceable>media.avi</replaceable><!--
 --></screen>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="af_volnorm">
+<sect3 id="af_volnorm">
 <title>Hangerő normalizáló</title>
 
 <para>
@@ -1020,11 +1020,11 @@ Ez az audió szűrő maximalizálja a hangerőt a hang torzítása nélkül.
 Használat:
 <screen>mplayer -af volnorm <replaceable>media.avi</replaceable></screen>
 </para>
-</sect4>
-
 </sect3>
 
-<sect3 id="audio-plugins">
+</sect2>
+
+<sect2 id="audio-plugins">
 <title>Audió plugin-ek (elhanyagolt)</title>
 <note><para><emphasis role="bold">Az audió plugin-eket már nem fejlesztjük,
 az audió szűrők felváltották őket, és hamarosan el is lesznek távolítva.
@@ -1063,7 +1063,7 @@ Jelenleg az audió plugin-ek nem használhatóak a
 </para>
 
 
-<sect4 id="updn-sampling">
+<sect3 id="updn-sampling">
 <title>Up/Downsampling</title>
 
 <para>
@@ -1093,10 +1093,10 @@ vinni. Túl nagy értéknél az audió és a videó folyamok lassan lesznek
 lejátszva, ráadásul a hang is torzulni fog.
 </para>
 </note>
-</sect4>
+</sect3>
 
 
-<sect4 id="surround-decode">
+<sect3 id="surround-decode">
 <title>Térhatású hang dekódolás</title>
 
 <para>
@@ -1111,10 +1111,10 @@ kihasználásához legalább 4 csatornát támogató hangkártya szükséges.
 Használat:
 <screen>mplayer <replaceable>media.avi</replaceable> -aop list=surround</screen>
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="sample-format-conv">
+<sect3 id="sample-format-conv">
 <title>Minta formátum konvertáló</title>
 
 <para>
@@ -1136,10 +1136,10 @@ mplayer <replaceable>media.avi</replaceable> -aop list=format:format=<replaceabl
 ahol az <literal><replaceable>outfmt</replaceable></literal> a kért
 kimeneti formátum.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="audio-delay">
+<sect3 id="audio-delay">
 <title>Késleltetés</title>
 <para>
 Ez a plugin késlelteti a hangot és egyben példa arra, hogy hogyan fejlessz
@@ -1147,10 +1147,10 @@ Ez a plugin késlelteti a hangot és egyben példa arra, hogy hogyan fejlessz
 csak a teljesség miatt kerül megemlítésre. Ne használd ezt a plugint, hacsak
 nem vagy fejlesztő.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="sw-volume">
+<sect3 id="sw-volume">
 <title>Szoftveres hangerő vezérlés</title>
 
 <para>
@@ -1187,9 +1187,9 @@ Használat:
 <screen>
 mplayer <replaceable>media.avi</replaceable> -aop list=volume:softclip</screen>
 </para>
-</sect4>
+</sect3>
 
-<sect4 id="extrastereo">
+<sect3 id="extrastereo">
 <title>Extrastereo</title>
 
 <para>
@@ -1211,10 +1211,10 @@ kapsz (az összes csatorna átlaga). Ha <literal>1.0</literal>-ra, akkor a hang
 változatlan marad, ha <literal>-1.0</literal>-re, akkor a bal és a jobb
 csatorna felcserélődik.
 </para>
-</sect4>
+</sect3>
 
 
-<sect4 id="volnorm">
+<sect3 id="volnorm">
 <title>Hangerő normalizáló</title>
 
 <para>
@@ -1225,6 +1225,6 @@ Ez a plugin maximalizálja a hangerőt a hang torzítása nélkül.
 Használat:
 <screen>mplayer <replaceable>media.avi</replaceable> -aop list=volnorm</screen>
 </para>
-</sect4>
 </sect3>
 </sect2>
+</sect1>

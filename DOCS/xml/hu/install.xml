@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.46 -->
+<!-- synced with 1.47 -->
 <sect1 id="install">
 <title>Telepítés</title>
 
@@ -421,7 +421,7 @@ vezérlőkkel működik:
 <listitem><simpara>
   <emphasis role="bold">Más kártyák</emphasis> tulajdonságait nem támogatja az
   <application>MPlayer</application>. <emphasis role="bold">Nagyon ajánlott, hogy elolvasd
-  a <link linkend="audio-dev">hangkártyákról</link> szóló részt!</emphasis>
+  a <link linkend="audio">hangkártyákról</link> szóló részt!</emphasis>
   </simpara></listitem>
 </itemizedlist>
 </sect2>
