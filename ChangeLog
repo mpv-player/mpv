@@ -25,6 +25,10 @@ mplayer (1.0)
     * support for ELF only OpenBSD
     * optimizing for PPC 970 (aka G5)
     * SDL support fixed on MinGW
+    * VIDIX working under Windows XP (native dhahelper)
+    * builds out of the box under GNU Hurd
+    * enable SSE optimizations under MinGW
+    * SSE support under OpenBSD
 
     Demuxers:
     * Matroska containing RealVideo works better
@@ -36,33 +40,54 @@ mplayer (1.0)
     * LIVE.COM demuxer updated to conform with latest libraries
     * new, independent, C implementation of the Matroska demuxer
     * fix for rare Real files
+    * more robust Real demuxer (can resync after errors)
+    * support for AAC inside Real
     * MPEG Aspect code 4 fixed
+    * support for seeking in HTTP streams
+    * support for selecting subtilte streams with -slang inside Ogg
+    * wrapper demuxer for using FFMpeg's libavformat (Nut is playable through that)
+    * Nullsoft video (NSV) demuxer
+    * updated LIVE.COM streaming code
+    * much improved seeking in Ogg
 
     Decoders:
     * compilation failure without zlib in vd/lcl fixed
     * removed obsoleted decoders (which were moved to libavcodec), affected:
       vd/8bps, vd/msrle, vd/msvideo1, vd/rpza, vd/smc
     * workaround for buggy codecs in ad/acm (support for Sharp G.726)
-    * synced to original FLAC sources
     * fixed chroma-swapping in Hauppauge Macroblock decoder
     * Altivec optimized resampler in liba52
+    * support for VP5 and VP6 DLL decoders
+    * support for Alparysoft lossless video codec (through DLLs)
+    * HE-AAC working through libfaad
+    * removed libmpflac in favor of FFmpeg's FLAC implementation
+    * support for libcaca
 
     Filters:
     * vf_bmovl bugfixes
     * vf_filmdint now handles 15fps NTSC input
     * huge updates and speedup on vf_pullup
     * big updates to vf_ilpack (proper interpolation and MMX optimizations)
-    * new filter: vf_zrmjpeg (fast MJPEG encoder using libavcodec for Zoran)
+    * vf_zrmjpeg: fast MJPEG encoder using libavcodec for Zoran
     * interlaced scaling support in vf_scale
+    * vf_kerndeint: adaptive deinterlacer
+    * vf_rgbtest: rgb test pattern generator for developers
+    * vf_qp: qp change filter
+    * vf_noformat: the same as vf_format but with reversed meaning
+    * Altivec optimized SWScaler
+    * vf_phase: phase shift fields
+    * vf_divtc: removing duplicate frames from deinterlaced telecined video
 
     Drivers:
     * ao/esd behaves better over network now
-    * support for Radeon 9600 Pro in VIDIX
+    * support for Radeon 9200/9600/9600 Pro/9700 in VIDIX
     * -mixer support for alsa9
     * fixed OSS audio grabber module with hardware not supporting 44khz
     * native ALSA 1.x support (not through 0.9 emulation)
     * better multibuffer support in VIDIX nVidia driver
     * pan & scan support in VIDIX nVidia driver
+    * support for more cards in VIDIX nVidia driver
+    * vo_quartz: MacOS X/Quartz video output
 
     FFmpeg/libavcodec:
     * H263 AIC and MQ encoding support
@@ -94,6 +119,19 @@ mplayer (1.0)
     * "packed" XviD decoding
     * fixed some bugs in RV20 B-frames decoding
     * closed GOP encoding
+    * SSE2 optimized FDCT
+    * support for quantizer noise shaping
+    * support for EA ADPCM and SMJPEG IMA ADPCM
+    * QT RLE decoder
+    * OBMC fixes
+    * FLAC decoder
+    * better support for Divx5
+    * MMX and SSE2 optimized VP3/Theora decoding
+    * support for Theora alpha3
+    * lot of H.264 improvements
+    * more robust MJPEG startcode search mechanism
+    * better WMV8 decoding
+    * native SPARC VIS optimizations
 
     Others:
     * -codecs-file option for specifying alternative codecs.conf file
@@ -103,6 +141,14 @@ mplayer (1.0)
     * Swedish and Polish yes/no options in config files
     * support binding F11 and F12 keys
     * TOOLS/divx2svcd updated
+    * more strict threads code in win32 loader (so it works under NetBSD)
+    * PJS subtitle support (was: dunnowhat)
+    * TOOLS/avifix: simple tool to fix chunk sizes in a AVI file
+    * proper extraheader handling when libavcodec is used in MEncoder
+    * AVI OpenDML read and write support
+    * AVI VPRP (video property) read and write support
+    * fixed long standing lame quality option off-by-one bug in MEncoder
+    * MPL2 subtitle support
 
 
   pre3try2: security fix release Mar 3, 2004
