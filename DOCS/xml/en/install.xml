@@ -4,6 +4,12 @@
 <title>Installation</title>
 
 <para>
+A quick installation guide can be found in the <filename>README</filename>
+file. Please read it first and then come back here for the rest of the gory
+details.
+</para>
+
+<para>
 In this section I'll try to guide you through the compiling and configuring
 process of <application>MPlayer</application>. It's not easy, but it won't
 necessarily be hard. If you experience a different behavior than what I
