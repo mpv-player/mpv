@@ -36,8 +36,6 @@ Buffer allocation:
 #include "sub.h"
 #include "aspect.h"
 
-#include "../postproc/rgb2rgb.h"
-
 #ifdef HAVE_NEW_GUI
 #include "../Gui/interface.h"
 #endif
@@ -293,7 +291,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 
    /* check image formats */
      xv_format=0;
-     if(format==IMGFMT_BGR24) format=IMGFMT_YV12;
      for(i = 0; i < formats; i++){
        mp_msg(MSGT_VO,MSGL_V,"Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
        if (fo[i].id == format) xv_format = fo[i].id;
@@ -652,24 +649,13 @@ static uint32_t draw_image(mp_image_t *mpi){
 	    xvimage[current_buf]->pitches[0], mpi->stride[0]);
 	return VO_TRUE;
     }
-    if(mpi->imgfmt==IMGFMT_BGR24){
-	rgb24toyv12(mpi->planes[0]+(flip_flag ? 3*image_width*(image_height-1) : 0),
-	    xvimage[current_buf]->data+xvimage[current_buf]->offsets[0],
-	    xvimage[current_buf]->data+xvimage[current_buf]->offsets[2],
-	    xvimage[current_buf]->data+xvimage[current_buf]->offsets[1],
-	    image_width,image_height,
-	    xvimage[current_buf]->pitches[0],
-	    xvimage[current_buf]->pitches[1],
-	    flip_flag ? -mpi->stride[0] : mpi->stride[0]);
-	return VO_TRUE;
-    }
     return VO_FALSE; // not (yet) supported
 }
 
 static uint32_t get_image(mp_image_t *mpi){
     int buf=current_buf; // we shouldn't change current_buf unless we do DR!
     if(mpi->type==MP_IMGTYPE_STATIC && num_buffers>1) return VO_FALSE; // it is not static
-    if(mpi->imgfmt!=image_format || mpi->imgfmt==IMGFMT_BGR24) return VO_FALSE; // needs conversion :(
+    if(mpi->imgfmt!=image_format) return VO_FALSE; // needs conversion :(
 //    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
     if(mpi->flags&MP_IMGFLAG_READABLE &&
 	(mpi->type==MP_IMGTYPE_IPB || mpi->type==MP_IMGTYPE_IP)){
@@ -717,7 +703,6 @@ static uint32_t query_format(uint32_t format)
     int flag=VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|
 	    VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD|VFCAP_ACCEPT_STRIDE; // FIXME! check for DOWN
    /* check image formats */
-     if(format==IMGFMT_BGR24){ format=IMGFMT_YV12;flag&=~2;flag|=VFCAP_FLIP;} // conversion!
      for(i = 0; i < formats; i++){
        if (fo[i].id == format) return flag; //xv_format = fo[i].id;
      }
