@@ -14,6 +14,9 @@
 #include "../libvo/fastmemcpy.h"
 #include "../postproc/rgb2rgb.h"
 
+struct vf_priv_s {
+	int field;
+};
 
 #ifdef HAVE_MMX
 static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
@@ -149,9 +152,17 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 			  MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 			  mpi->w, mpi->h/2);
 
-	halfpack(dmpi->planes[0], mpi->planes,
-		 dmpi->stride[0], mpi->stride,
-		 mpi->w, mpi->h);
+	switch(vf->priv->field) {
+	case 0:
+	case 1:
+		yuv422ptoyuy2(mpi->planes[0] + mpi->stride[0]*vf->priv->field,
+			mpi->planes[1], mpi->planes[2], dmpi->planes[0],
+			mpi->w, mpi->h/2, mpi->stride[0]*2, mpi->stride[1], dmpi->stride[0]);
+		break;
+	default:
+		halfpack(dmpi->planes[0], mpi->planes, dmpi->stride[0],
+			mpi->stride, mpi->w, mpi->h);
+	}
 
 	return vf_next_put_image(vf,dmpi);
 }
@@ -177,12 +188,22 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt)
 	return 0;
 }
 
+static void uninit(struct vf_instance_s* vf)
+{
+	free(vf->priv);
+}
 
 static int open(vf_instance_t *vf, char* args)
 {
 	vf->config=config;
 	vf->query_format=query_format;
 	vf->put_image=put_image;
+	vf->uninit=uninit;
+	
+	vf->priv = calloc(1, sizeof (struct vf_priv_s));
+	vf->priv->field = 2;
+	if (args) sscanf(args, "%d", &vf->priv->field);
+	
 	halfpack = halfpack_C;
 #ifdef HAVE_MMX
 	if(gCpuCaps.hasMMX) halfpack = halfpack_MMX;
