@@ -217,22 +217,26 @@ static int play(void* data,int len,int flags){
   // Limit length to avoid over flow in plugins
   int tmp = driver()->get_space();
   int ret_len =(tmp<len)?tmp:len;
-  // Filter data
-  ao_plugin_data.len=ret_len;
-  ao_plugin_data.data=data;
-  while(plugin(i))
-    plugin(i++)->play();
-  // Copy data to output buffer
-  memcpy(ao_plugin_local_data.buf+ao_plugin_local_data.len,
-	 ao_plugin_data.data,ao_plugin_data.len);
-  // Send data to output
-  l=driver()->play(ao_plugin_local_data.buf,
-		   ao_plugin_data.len+ao_plugin_local_data.len,flags);
-  // Save away unsent data
-  ao_plugin_local_data.len=ao_plugin_data.len+ao_plugin_local_data.len-l;
-  memcpy(ao_plugin_local_data.buf,ao_plugin_local_data.buf+l,
-	 ao_plugin_local_data.len);
-  
+  if(ret_len){
+    // Filter data
+    ao_plugin_data.len=ret_len;
+    ao_plugin_data.data=data;
+    while(plugin(i)){
+      printf("%i  \n",ao_plugin_data.len);
+      plugin(i++)->play();
+      printf("%i  \n",ao_plugin_data.len);
+    }
+    // Copy data to output buffer
+    memcpy(ao_plugin_local_data.buf+ao_plugin_local_data.len,
+	   ao_plugin_data.data,ao_plugin_data.len);
+    // Send data to output
+    l=driver()->play(ao_plugin_local_data.buf,
+		     ao_plugin_data.len+ao_plugin_local_data.len,flags);
+    // Save away unsent data
+    ao_plugin_local_data.len=ao_plugin_data.len+ao_plugin_local_data.len-l;
+    memcpy(ao_plugin_local_data.buf,ao_plugin_local_data.buf+l,
+	   ao_plugin_local_data.len);
+  }
   return ret_len;
 }
 
