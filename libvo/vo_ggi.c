@@ -27,7 +27,7 @@
 
 #undef GET_DB_INFO
 
-/* max buffers */
+/* maximum buffers */
 #define GGI_FRAMES 4
 
 #include "../postproc/rgb2rgb.h"
@@ -130,14 +130,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     if (ggiSetMode(ggi_conf.vis, &mode))
     {
 	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to set mode\n");
-	uninit();
 	return(-1);
     }
 
     if (ggiGetMode(ggi_conf.vis, &mode) != 0)
     {
 	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] unable to get mode\n");
-	uninit();
 	return(-1);
     }
 
@@ -183,20 +181,28 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	default:
 	    mp_msg(MSGT_VO, MSGL_FATAL, "[ggi] Unknown image format: %s\n",
 		vo_format_name(ggi_conf.srcformat));
-	    uninit();
 	    return(-1);
     }
 
     vo_dwidth = ggi_conf.dstwidth = ggi_conf.gmode.virt.x;
     vo_dheight = ggi_conf.dstheight = ggi_conf.gmode.virt.y;
 
-    for (i = 0; i < GGI_FRAMES; i++)
+    ggi_conf.frames = ggiDBGetNumBuffers(ggi_conf.vis);
+    if (ggi_conf.frames > GGI_FRAMES)
+	ggi_conf.frames = GGI_FRAMES;
+    
+    ggi_conf.currframe = 0;
+    if (!ggi_conf.frames)
+    {
+	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] direct buffer unavailable\n");
+	return(-1);
+    }
+
+    for (i = 0; i < ggi_conf.frames; i++)
         ggi_conf.buffer[i] = NULL;
 
-    ggi_conf.frames = ggi_conf.currframe = 0;
-
     /* get available number of buffers */
-    for (i = 0; DB = ggiDBGetBuffer(ggi_conf.vis, i), i < GGI_FRAMES; i++)
+    for (i = 0; DB = ggiDBGetBuffer(ggi_conf.vis, i), i < ggi_conf.frames; i++)
     {
         if (!(DB->type & GGI_DB_SIMPLE_PLB) ||
     	    (DB->page_size != 0) ||
@@ -207,13 +213,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    continue;
 	
 	ggi_conf.buffer[DB->frame] = DB;
-	ggi_conf.frames++;
     }
 
     if (ggi_conf.buffer[0] == NULL)
     {
 	mp_msg(MSGT_VO, MSGL_ERR, "[ggi] direct buffer unavailable\n");
-	uninit();
 	return(-1);
     }
     
