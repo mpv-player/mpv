@@ -1,4 +1,4 @@
-.\" synced with 1.734
+.\" synced with 1.737
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -1766,7 +1766,7 @@ Utilise un autre périphérique de mixage que celui par défaut /dev/\:mixer.
 C'est le mixeur utilisé par ALSA
 .
 .TP
-.B \-mixer-channel <mixer line> (\-ao oss et \-ao alsa uniquement)
+.B \-mixer-channel <ligne de mixeur>[,index de mixeur] (\-ao oss et \-ao alsa uniquement)
 Cette option dit à MPlayer d'utiliser un canal différent du PCM par défaut
 pour controller le volume.
 Les options OSS incluent
@@ -1776,6 +1776,12 @@ Pour une liste complète des options, cherchez SOUND_DEVICE_NAMES dans
 Pour ALSA vous pouvez utiliser les noms tels qu'indiqués par ex.\& par
 alsamixer, comme
 .B Master, Line, PCM.
+.br
+.I NOTE\ :
+Les canaux du mixeur ALSA suivis par un nombre doivent être donnés au format
+<nom,nombre>, par ex.\& le canal dont le label est 'PCM 1' dans alsamixer doit
+être transformé en
+.B PCM,1.
 .
 .TP
 .B \-nowaveheader (\-ao pcm uniquement)
@@ -5527,7 +5533,7 @@ log (mauvaise qualité)
 .IPs 3
 phods (mauvaise qualité)
 .IPs 4
-EPZS (par défaut)
+EPZS\ : diamant de taille 1 (par défaut)
 .IPs 5
 X1 (expérimental)
 .RE
@@ -5562,7 +5568,7 @@ Identique à mbd=1, gardé pour raisons de compatibilité.
 .TP
 .B v4mv
 Permet 4 vecteurs de mouvement par macro-bloc (qualité légèrement meilleure).
-(par défaut\ : désactivé)
+Gagne à être utilisé en conjonction de mbd>0.
 .
 .TP
 .B obmc\ \ \ 
@@ -5694,6 +5700,8 @@ flottant.
 Même chose que l'option aspect, mais calcule automatiquement le rapport
 hauteur/\:largeur, en prenant en compte tous les ajustements
 (crop/\:expand/\:scale/\:etc.) faits dans la chaine de filtres.
+N'affecte pas la vitesse d'encodage, donc vous pouvez sans problème
+l'activer tout le temps.
 .
 .TP
 .B vbitrate=<valeur>
@@ -6044,10 +6052,16 @@ sh4
 .
 .TP
 .B lumi_mask=<0.0\-1.0>
-masquage de la luminance
+Le luminance masking (masquage des zones saturées de lumière) est un
+algorithme psychosensoriel qui est sensé tenir compte de la moindre
+sensibilité rétinienne aux zones saturées de lumière.
+Le luminance masking compresse plus fortement les zones très lumineuses,
+écomisant ainsi des bits, pouvant être redistribués à d'autres trames,
+augmentant ainsi la qualité subjective globale de la vidéo, tout en
+dégradant probablement un peu le PSNR.
 .br
 .I ATTENTION\ :
-Soyez prudent, de trop grandes valeurs peuvent causer des résultats
+Soyez prudent, un masquage trop violent peut causer des résultats
 désastreux.
 .br
 .I ATTENTION\ :
@@ -6062,10 +6076,16 @@ intervalle sensé
 .
 .TP
 .B dark_mask=<0.0\-1.0>
-masquage de l'obscurité
+Le darkness masking (masquage des zones sombres) est un
+algorithme psychosensoriel qui est sensé tenir compte de la moindre
+sensibilité rétinienne aux zones plus sombres.
+Le darkness masking compresse plus fortement les zones très sombres,
+écomisant ainsi des bits, pouvant être redistribués à d'autres trames,
+augmentant ainsi la qualité subjective globale de la vidéo, tout en
+dégradant probablement un peu le PSNR.
 .br
 .I ATTENTION\ :
-Soyez prudent, de trop grandes valeurs peuvent causer des résultats
+Soyez prudent, un masquage trop violent peut causer des résultats
 désastreux.
 .br
 .I ATTENTION\ :
@@ -6262,8 +6282,10 @@ actuellement
 .
 .TP
 .B nssew=<0\-100>
-poids NSSE, de plus grandes valeurs produiront plus de bruit,
-à 0 NSSE est identique à SSE.
+Si vous préférez garder du bruit dans votre vidéo encodée au lieu
+de le filtrer avant de l'encoder, cette option contrôle le poids NSSE,
+où de plus grandes valeurs laisseront plus de bruit,
+À 0 NSSE est identique à SSE.
 .
 .TP
 .B predia=<-99\-6>
