@@ -341,7 +341,7 @@ void uninit_player(unsigned int mask){
 
 #ifdef HAVE_NEW_INPUT
   if(mask&INITED_INPUT){
-    inited_flags&=INITED_INPUT;
+    inited_flags&=~INITED_INPUT;
     current_module="uninit_input";
     mp_input_uninit();
   }
@@ -1803,6 +1803,13 @@ if(time_frame>0.001 && !(vo_flags&256)){
       // PTS = (last timestamp) + (bytes after last timestamp)/(bytes per sec)
       a_pts=d_audio->pts;
       if(!delay_corrected) if(a_pts) delay_corrected=1;
+#if 0
+      printf("\n#X# pts=%5.3f ds_pts=%5.3f buff=%5.3f total=%5.3f\n",
+          a_pts,
+	  ds_tell_pts(d_audio)/(float)sh_audio->i_bps,
+	  -sh_audio->a_in_buffer_len/(float)sh_audio->i_bps,
+	  a_pts+(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps);
+#endif	  
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
     }
     v_pts=d_video->pts;
