@@ -2870,21 +2870,21 @@ if(benchmark){
   max_audio_time_usage *= our_n_frames;
   total_time_usage_start=GetTimer()-total_time_usage_start;
   total_time_usage = (float)total_time_usage_start*0.000001;
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nAVE BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nAVE BENCHMARKs: VC:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
 	 video_time_usage,vout_time_usage,audio_time_usage,
 	 total_time_usage-tot,total_time_usage);
   if(total_time_usage>0.0)
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AVE BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AVE BENCHMARK%%: VC:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
 	   100.0*video_time_usage/total_time_usage,
 	   100.0*vout_time_usage/total_time_usage,
 	   100.0*audio_time_usage/total_time_usage,
 	   100.0*(total_time_usage-tot)/total_time_usage,
 	   100.0);
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nMAX BENCHMARKs: V:%8.3fs VO:%8.3fs A:%8.3fs\n",
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nMAX BENCHMARKs: VC:%8.3fs VO:%8.3fs A:%8.3fs\n",
 	 max_video_time_usage,max_vout_time_usage,
 	 max_audio_time_usage);
   if(total_time_usage>0.0)
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"MAX BENCHMARK%%: V:%8.4f%% VO:%8.4f%% A:%8.4f%% = %8.4f%%\n",
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"MAX BENCHMARK%%: VC:%8.4f%% VO:%8.4f%% A:%8.4f%% = %8.4f%%\n",
 	   100.0*max_video_time_usage/total_time_usage,
 	   100.0*max_vout_time_usage/total_time_usage,
 	   100.0*max_audio_time_usage/total_time_usage,
