@@ -1,1 +1,3 @@
-files from libfaad 2.1 beta CVS July 7th 2004 libfaad/ and include/ subdir
+This is a FAAD2 2.1 beta CVS snapshot from 2004-07-12.
+Only the content of the libfaad/ and include/ subdirectories is present here.
+MPlayer-specific modifications can be found in local_diff.sh.
