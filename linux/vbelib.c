@@ -17,7 +17,7 @@
 
 static struct VesaProtModeInterface vbe_pm_info;
 
-static inline int VERR(void *p)
+static inline int VERR(const void *p)
 {
   register int retval;
   __asm __volatile(
@@ -31,7 +31,7 @@ static inline int VERR(void *p)
 }
 
 #if 0
-static inline int VERW(void *p)
+static inline int VERW(const void *p)
 {
   register int retval;
   __asm __volatile(
@@ -108,30 +108,46 @@ int vbeInit( void )
 
 int vbeDestroy( void ) { return VBE_OK; }
 
-static int check_str(unsigned char *str)
+/* Fixme!!! This code is compatible only with mplayer's version of lrmi*/
+static inline int is_addr_valid(const void *p)
+{
+  return (p < (const void *)0x502) || 
+	 (p >= (const void *)0x10000 && p < (const void *)0x20000) ||
+	 (p >= (const void *)0xa0000 && p < (const void *)0x100000);
+}
+
+static int check_str(const unsigned char *str)
 {
   size_t i;
   int null_found = 0;
   for(i = 0;i < 256;i++) 
   {
-    if(VERR(&str[i]))
+    if(is_addr_valid(&str[i]))
     {
-      if(!str[i]) { null_found = 1; break; }
+      if(VERR(&str[i]))
+      {
+        if(!str[i]) { null_found = 1; break; }
+      }
+      else break;
     }
     else break;
   }
   return null_found;
 }
 
-static int check_wrd(unsigned short *str)
+static int check_wrd(const unsigned short *str)
 {
   size_t i;
   int ffff_found = 0;
   for(i = 0;i < 1024;i++) 
   {
-    if(VERR(&str[i]))
+    if(is_addr_valid(&str[i]))
     {
-      if(str[i] == 0xffff) { ffff_found = 1; break; }
+      if(VERR(&str[i]))
+      {
+        if(str[i] == 0xffff) { ffff_found = 1; break; }
+      }
+      else break;
     }
     else break;
   }
