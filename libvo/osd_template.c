@@ -7,6 +7,8 @@
 #include "config.h"
 #include "osd.h"
 #include "../mmx_defs.h"
+//#define ENABLE_PROFILE
+#include "../my_profile.h"
 
 void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
@@ -76,25 +78,13 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
     return;
 }
 
-#ifdef PROFILE_ME
-static inline unsigned long long int read_tsc( void )
-{
-  unsigned long long int retval;
-  __asm __volatile ("rdtsc":"=A"(retval)::"memory");
-  return retval;
-}
-#endif
-
 void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, int srcstride, unsigned char* dstbase,int dststride){
     int y;
-#ifdef PROFILE_ME
-unsigned long long v1,v2;
-v1 = read_tsc();
-#endif
+PROFILE_START();
     for(y=0;y<h;y++){
         register int x;
 #ifdef ARCH_X86
-#ifdef HAVE_MMX2
+#ifdef HAVE_MMX
 	asm volatile(
 		"pxor %%mm7, %%mm7		\n\t"
 		"xorl %%eax, %%eax		\n\t"
@@ -121,7 +111,7 @@ v1 = read_tsc();
 		"punpcklbw %%mm2, %%mm2		\n\t" // src AABBCCDD
 		"punpcklbw %%mm2, %%mm2		\n\t" // src AAAABBBB
 		"paddb %%mm2, %%mm0		\n\t"
-		MOVNTQ" %%mm0, (%0, %%eax, 4)	\n\t"
+		"movq %%mm0, (%0, %%eax, 4)	\n\t"
 		"addl $2, %%eax			\n\t"
 		"cmpl %3, %%eax			\n\t"
 		" jb 1b				\n\t"
@@ -175,14 +165,10 @@ v1 = read_tsc();
         srca+=srcstride;
         dstbase+=dststride;
     }
-#ifdef HAVE_MMX2
-	asm volatile(SFENCE:::"memory");
+#ifdef HAVE_MMX
 	asm volatile(EMMS:::"memory");
 #endif
-#ifdef PROFILE_ME
-v2 = read_tsc();
-printf("rd_tsc: %llu\n\t",v2-v1);
-#endif
+PROFILE_END("vo_draw_alpha_rgb32");
     return;
 }
 
