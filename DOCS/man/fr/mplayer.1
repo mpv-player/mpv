@@ -1,4 +1,4 @@
-.\" synced with 1.772
+.\" synced with 1.773
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "11 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "13 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -242,6 +242,11 @@ Va à la prochaine/\:précédente source de rechange (liste de lecture ASX
 uniquement)
 .IPs "p / ESPACE"
 Met le film en pause (n'importe quelle touche pour redémarrer).
+.IPs "s"
+Avance d'une trame.
+Le premier appuis mettra le film en pause, et chaque appuis suivant jouera
+juste une trame et remettra le film en pause (toute autre touche arrête la
+pause).
 .IPs "q / ESC"
 Stoppe la lecture est quitte.
 .IPs "+ et -"
@@ -1310,7 +1315,7 @@ Voir également \-vf expand.
 .
 .TP
 .B \-dumpjacosub (MPlayer uniquement)
-Converti les sous-titres donnés (via l'option \-sub) au format basé sur le
+Convertit les sous-titres donnés (via l'option \-sub) au format basé sur le
 temps JACOsub.
 Crée un fichier dumpsub.js dans le répertoire courant.
 .
