@@ -18,10 +18,12 @@ mplayer (0.90)
     * tons of compiler warning fixes, including some 10l one
     * mga/xmga vo shared code, vesa and svga drivers cleanup
     * major vo drivers are now -fixed-vo compliant: x11, xv, xvidix, xmga, gl2
+    * cleanup of libmpdemux option handling - now it's mplayer-independent again
+    * removed fork() from LIRC input module
     
     Fixes:
     * Some fullscreen switching fixes, including Metacity vs. KDE 3.1
-    * Some GUI bugfixes
+    * Many GUI bugfixes
     * -vo DGA fixes, cleanup
     * -dvdkey sig11 fixed
     * k6-3's 3dnowex vs. mmxext sigill fixed in mp3lib
@@ -38,6 +40,9 @@ mplayer (0.90)
     * SPU decoder (DVD/VOB subs): fixed 2 major bugs, causing subtitles lost
     * various memleak fixes (valgrind rulez :)
     * fixed RealAudio SIPR(O) codec (the wrapper didn't find the dspr.so.6)
+    * mms:// audio (radio) streaming fixed
+    * DVB: -vop lavc=bitrate is working again
+    * various bigendian fixes
 
     Features:
     * new audio filter layer (libaf) - automatic samplerate conversion
@@ -53,6 +58,8 @@ mplayer (0.90)
     * support for quicktime alaw/agsm audio codecs, 3IV2, 3VID video codecs
     * swscale now can output in YUY2 format, upscaled (default) or unscaled (-sws 0)
     * Vidix with LinuxPPC support (mach64 is confirmed to work)
+    * GUI: cache, autoq settings, display current dvd chapter
+    * New video filter to overlay images over video: -vop bmovl
     
     Libavcodec:
     * RV10 codec cleanup (2nd level demuxer moved to demuxer layer)
