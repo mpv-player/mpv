@@ -98,6 +98,7 @@ static NPDRVR DrvAlloc(HDRVR*lpDriver, LPUINT lpDrvResult)
 static void DrvFree(HDRVR hDriver)
 {
     int i;
+    setup_FS_Segment();
     if(hDriver)
     	if(((DRVR*)hDriver)->hDriverModule)
     	if(((DRVR*)hDriver)->DriverProc)
@@ -130,6 +131,8 @@ DrvOpen(LPARAM lParam2)
     NPDRVR npDriver;
     char unknown[0x24];
 //    char* codec_name=icopen->fccHandler;
+
+    Setup_LDT_Keeper();
 
     if (!(npDriver = DrvAlloc(&hDriver, &uDrvResult)))
 	return ((HDRVR) 0);
@@ -192,6 +195,8 @@ DrvOpen(LPARAM lParam2)
 
     //TRACE("DriverProc == %X\n", npDriver->DriverProc);
      npDriver->dwDriverID = ++dwDrvID;
+
+     setup_FS_Segment();
 
 	STORE_ALL;
         (npDriver->DriverProc)(0, hDriver, DRV_LOAD, 0, 0);
