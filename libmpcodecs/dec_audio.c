@@ -114,9 +114,9 @@ int init_audio_codec(sh_audio_t *sh_audio)
   if(!sh_audio->o_bps)
   sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
 
-  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"AUDIO: %d Hz, %d ch, sfmt: 0x%X (%d bps), ratio: %d->%d (%3.1f kbit)\n",
+  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"AUDIO: %d Hz, %d ch, %d bit (0x%X), ratio: %d->%d (%3.1f kbit)\n",
 	sh_audio->samplerate,sh_audio->channels,
-	sh_audio->sample_format,sh_audio->samplesize,
+	sh_audio->samplesize*8,sh_audio->sample_format,
         sh_audio->i_bps,sh_audio->o_bps,sh_audio->i_bps*8*0.001);
   
   return 1;
@@ -206,42 +206,6 @@ if(!sh_audio->inited){
 mp_msg(MSGT_DECAUDIO,MSGL_INFO,"Selected audio codec: [%s] afm:%s (%s)\n",
     sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
 return 1; // success
-}
-
-
-int init_best_audio_codec_old(sh_audio_t *sh_audio,char* audio_codec,char* audio_fm){
-  // Go through the codec.conf and find the best codec...
-  sh_audio->codec=NULL;
-  if(audio_fm) mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_TryForceAudioFmtStr,audio_fm);
-  while(1){
-    sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
-    if(!sh_audio->codec){
-      if(audio_fm) {
-        sh_audio->codec=NULL; /* re-search */
-        mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_CantFindAfmtFallback);
-        audio_fm=NULL;
-        continue;
-      }
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
-      mp_msg(MSGT_DECAUDIO,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-      return 0;
-    }
-    if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
-    if(audio_fm && strcmp(sh_audio->codec->drv,audio_fm)) continue;
-    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"%s audio codec: [%s] afm:%s (%s)\n",
-	audio_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
-    break;
-  }
-  // found it...
-  if(!init_audio_codec(sh_audio)){
-    mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
-    return 0;
-  }
-  mp_msg(MSGT_DECAUDIO,MSGL_INFO,"AUDIO: %d Hz, %d ch, sfmt: 0x%X (%d bps), ratio: %d->%d (%3.1f kbit)\n",
-	sh_audio->samplerate,sh_audio->channels,
-	sh_audio->sample_format,sh_audio->samplesize,
-        sh_audio->i_bps,sh_audio->o_bps,sh_audio->i_bps*8*0.001);
-  return 1; // success!
 }
 
 void uninit_audio(sh_audio_t *sh_audio)
