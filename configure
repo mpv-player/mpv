@@ -339,6 +339,26 @@ if test "$_skip_cc_check" != yes ; then
       ;;
   esac
   echores "$cc_version"
+  # If gcc version is crappy RH one, then check if the user has installed the optional
+  # (at least in Rh7.2) gcc3 packages to save them some pain - malc@tmbg.co.uk
+  if test "$cc_verc_fail" ; then
+    echocheck "gcc3 version"
+    _cc=gcc3
+    cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
+    case $cc_version in
+      '')
+        cc_version="v. ?.??, bad"
+	cc_verc_fail=yes
+	;;
+      2.95.[2-9]|2.95.[2-9].[0-9]|3.[0-9]|3.[0-9].[0-9])
+        cc_version="$cc_version, ok"
+        ;;
+      *)
+        cc_version="$cc_version, bad"
+        cc_verc_fail=yes
+        ;;
+    esac
+  fi
   if test "$cc_verc_fail" ; then
     cat <<EOF
 
