@@ -19,7 +19,7 @@ decoders:
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
 - getting PIM1 codec (DLL) working... - kabi
 - getting 3ivX DLL working (CoCreateFreeThreadedMarshaler call required)
-- optimize (or port optimized code from libac3) liba52 (imdct.c, resample.c)
+- optimize liba52 (downmix.c in 3dnow, rematrix?)
 - fix seeking with libmad audio codec (codec lost sync and can't resync?)
 - fix ACELP DirectShow sound decoder (in avifile it's already fixed!)
 
