@@ -618,7 +618,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 // check .sub
   if(sub_name){
        subtitles=sub_read_file(sub_name);
-       if(!subtitles) printf("Can't load subtitles: %s\n",font_name);
+       if(!subtitles) printf("Can't load subtitles: %s\n",sub_name);
   } else {
     if ( sub_auto )
       {
