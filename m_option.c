@@ -1041,6 +1041,95 @@ m_option_type_t m_option_type_imgfmt = {
   NULL
 };
 
+#include "libaf/af_format.h"
+
+/* FIXME: snyc with af_format.h */
+static struct {
+  char* name;
+  unsigned int fmt;
+} mp_afmt_list[] = {
+  // SPECIAL
+  {"mulaw", AF_FORMAT_MU_LAW},
+  {"alaw", AF_FORMAT_A_LAW},
+  {"mpeg2", AF_FORMAT_MPEG2},
+  {"ac3", AF_FORMAT_AC3},
+  {"imaadpcm", AF_FORMAT_IMA_ADPCM},
+  // ORIDNARY
+  {"u8", AF_FORMAT_U8},
+  {"s8", AF_FORMAT_S8},
+  {"u16le", AF_FORMAT_U16_LE},
+  {"u16be", AF_FORMAT_U16_BE},
+  {"u16ne", AF_FORMAT_U16_NE},
+  {"s16le", AF_FORMAT_S16_LE},
+  {"s16be", AF_FORMAT_S16_BE},
+  {"s16ne", AF_FORMAT_S16_NE},
+  {"u24le", AF_FORMAT_U24_LE},
+  {"u24be", AF_FORMAT_U24_BE},
+  {"u24ne", AF_FORMAT_U24_NE},
+  {"s24le", AF_FORMAT_S24_LE},
+  {"s24be", AF_FORMAT_S24_BE},
+  {"s24ne", AF_FORMAT_S24_NE},
+  {"u32le", AF_FORMAT_U32_LE},
+  {"u32be", AF_FORMAT_U32_BE},
+  {"u32ne", AF_FORMAT_U32_NE},
+  {"s32le", AF_FORMAT_S32_LE},
+  {"s32be", AF_FORMAT_S32_BE},
+  {"s32ne", AF_FORMAT_S32_NE},
+  {"floatle", AF_FORMAT_FLOAT_LE},
+  {"floatbe", AF_FORMAT_FLOAT_BE},
+  {"floatne", AF_FORMAT_FLOAT_NE},
+  { NULL, 0 }
+};
+
+static int parse_afmt(m_option_t* opt,char *name, char *param, void* dst, int src) {
+  uint32_t fmt = 0;
+  int i;
+
+  if (param == NULL || strlen(param) == 0)
+    return M_OPT_MISSING_PARAM;
+
+  if(!strcmp(param,"help")) {
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Available formats:");
+    for(i = 0 ; mp_afmt_list[i].name ; i++)
+      mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s",mp_afmt_list[i].name);
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
+    return M_OPT_EXIT;
+  }
+  
+  if (sscanf(param, "0x%x", &fmt) != 1)
+  {
+  for(i = 0 ; mp_afmt_list[i].name ; i++) {
+    if(!strcasecmp(param,mp_afmt_list[i].name)) {
+      fmt=mp_afmt_list[i].fmt;
+      break;
+    }
+  }
+  if(!mp_afmt_list[i].name) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: unknown format name: '%s'\n",name,param);
+    return M_OPT_INVALID;
+  }
+  }
+
+  if(dst)
+    *((uint32_t*)dst) = fmt;
+
+  return 1;
+}
+
+m_option_type_t m_option_type_afmt = {
+  "Audio format",
+  "Please report any missing formats.",
+  sizeof(uint32_t),
+  0,
+  parse_afmt,
+  NULL,
+  copy_opt,
+  copy_opt,
+  NULL,
+  NULL
+};
+
+
 //// Objects (i.e. filters, etc) settings
 
 #include "m_struct.h"

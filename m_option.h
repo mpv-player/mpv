@@ -20,6 +20,7 @@ extern m_option_type_t m_option_type_print;
 extern m_option_type_t m_option_type_print_indirect;
 extern m_option_type_t m_option_type_subconfig;
 extern m_option_type_t m_option_type_imgfmt;
+extern m_option_type_t m_option_type_afmt;
 
 // Func based types 
 extern m_option_type_t m_option_type_func_full;
@@ -90,6 +91,7 @@ extern m_obj_params_t m_span_params_def;
 #define CONF_TYPE_STRING_LIST	(&m_option_type_string_list)
 #define CONF_TYPE_POSITION	(&m_option_type_position)
 #define CONF_TYPE_IMGFMT	(&m_option_type_imgfmt)
+#define CONF_TYPE_AFMT		(&m_option_type_afmt)
 #define CONF_TYPE_SPAN		(&m_option_type_span)
 #define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
 #define CONF_TYPE_OBJ_PRESETS	(&m_option_type_obj_presets)
