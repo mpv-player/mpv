@@ -63,7 +63,8 @@ DS_VideoDecoder::DS_VideoDecoder(const CodecInfo& info, const BITMAPINFOHEADER& 
         m_sOurType.pbFormat = (char*)m_sVhdr;
 
 	m_sVhdr2 = (VIDEOINFOHEADER*)(new char[sizeof(VIDEOINFOHEADER)+12]);
-	memcpy(m_sVhdr2, m_sVhdr, sizeof(VIDEOINFOHEADER)+12);
+	memcpy(m_sVhdr2, m_sVhdr, sizeof(VIDEOINFOHEADER));
+	memset((char*)m_sVhdr2 + sizeof(VIDEOINFOHEADER), 0, 12);
 	m_sVhdr2->bmiHeader.biCompression = 0;
 	m_sVhdr2->bmiHeader.biBitCount = 24;
 
@@ -79,7 +80,8 @@ DS_VideoDecoder::DS_VideoDecoder(const CodecInfo& info, const BITMAPINFOHEADER& 
 	m_sDestType.pUnk = 0;
 	m_sDestType.cbFormat = sizeof(VIDEOINFOHEADER);
         m_sDestType.pbFormat = (char*)m_sVhdr2;
-	memcpy(&m_obh, m_bh, sizeof(m_obh));
+	memset(&m_obh, 0, sizeof(m_obh));
+	memcpy(&m_obh, m_bh, sizeof(m_obh) < m_bh->biSize ? sizeof(m_obh) : m_bh->biSize);
 	m_obh.SetBits(24);
 
 	HRESULT result;
