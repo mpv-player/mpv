@@ -1,5 +1,7 @@
 
-#define VCODEC_DIVX4 1
+#define VCODEC_FRAMENO 1
+#define VCODEC_DIVX4 2
+
 #define ACODEC_PCM 1
 #define ACODEC_VBRMP3 2
 
@@ -288,6 +290,8 @@ char** filenames=NULL;
 char* filename=NULL;
 int num_filenames;
 
+int decoded_frameno=0;
+
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
 
@@ -366,7 +370,7 @@ sh_video=d_video->sh;
   
 
 sh_video->codec=NULL;
-if(out_video_codec){
+if(out_video_codec>1){
 
 if(video_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
 while(1){
@@ -501,6 +505,16 @@ switch(mux_v->codec){
 case 0:
     mux_v->bih=sh_video->bih;
     break;
+case VCODEC_FRAMENO:
+    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+    mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+    mux_v->bih->biWidth=vo_w;
+    mux_v->bih->biHeight=vo_h;
+    mux_v->bih->biPlanes=1;
+    mux_v->bih->biBitCount=24;
+    mux_v->bih->biCompression=mmioFOURCC('F','r','N','o');
+    mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+    break;
 case VCODEC_DIVX4:
     mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
@@ -574,6 +588,9 @@ aviwrite_write_header(muxer,muxer_f);
 
 switch(mux_v->codec){
 case 0:
+    break;
+case VCODEC_FRAMENO:
+    decoded_frameno=0;
     break;
 case VCODEC_DIVX4:
     // init divx4linux:
@@ -730,7 +747,7 @@ if(sh_audio){
     // get video frame!
     in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
     if(in_size<0){ eof=1; break; }
-    sh_video->timer+=frame_time;
+    sh_video->timer+=frame_time; ++decoded_frameno;
     
     v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
 
@@ -762,6 +779,10 @@ switch(mux_v->codec){
 case 0:
     mux_v->buffer=start;
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
+    break;
+case VCODEC_FRAMENO:
+    mux_v->buffer=&decoded_frameno; // tricky
+    aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0);
     break;
 case VCODEC_DIVX4:
     blit_frame=decode_video(&video_out,sh_video,start,in_size,0);
@@ -887,6 +908,12 @@ printf("Fixup AVI header...\n");
 fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
 fclose(muxer_f);
+
+printf("\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n",
+    (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), mux_v->size, (float)mux_v->timer);
+if(sh_audio)
+printf("\nAudio stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs\n",
+    (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), mux_a->size, (float)mux_a->timer);
 
 if(stream) free_stream(stream); // kill cache thread
 
