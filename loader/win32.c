@@ -2354,6 +2354,20 @@ WIN_BOOL
  
 
 
+LONG WINAPI expInterlockedExchange(long *dest, long l)
+{
+	long retval;
+	retval = *dest;
+	*dest = l;
+	return retval;
+}
+
+INT WINAPI expMulDiv(int nNumber,int nNumerator,int nDenominator)
+{
+	return ((long long)nNumber * (long long)nNumerator) / nDenominator;
+}
+
+
 
 
 
@@ -2480,6 +2494,8 @@ FF(GetWindowsDirectoryA,-1)
 FF(SetErrorMode, -1)
 FF(IsProcessorFeaturePresent, -1)
 FF(GetProcessAffinityMask, -1)
+FF(InterlockedExchange, -1)
+FF(MulDiv, -1)
 };
 
 struct exports exp_msvcrt[]={
