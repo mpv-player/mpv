@@ -635,7 +635,7 @@ video_out.draw_slice=draw_slice;
 video_out.draw_frame=draw_frame;
 
 #ifdef USE_DVDREAD
-vo_spudec=spudec_new_scaled(stream->priv?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
+vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
 			    sh_video->disp_w, sh_video->disp_h);
 #endif
 
