@@ -10,9 +10,9 @@
 <BODY>
 
 
-<H3><A NAME="video">2.3.1. Video-Ausgabe-Ger&auml;te</A></H3>
+<H3><A NAME="video">2.3.1 Video-Ausgabe-Ger&auml;te</A></H3>
 
-<H4><A NAME="mtrr">2.3.1.1. MTRR</A></H4>
+<H4><A NAME="mtrr">2.3.1.1 MTRR</A></H4>
 
 <P>Du solltest UNBEDINGT sicherstellen, dass die MTRR-Register richtig belegt 
 sind, denn sie k&ouml;nnen eine gro&szlig;en Geschwindigkeits-Schub 
@@ -245,13 +245,14 @@ m&ouml;chstest, dann solltest du die Treiber von der
 <H4><A NAME="dga">2.3.1.2.2 DGA</A></H4>
 
 
-<H5>EINLEITUNG</H5>
+<H4>EINLEITUNG</H4>
 
 <P>Dieser Abschnitt versucht, in wenigen Worten zu beschreiben, was DGA 
 generell ist, und was der DGA-Videotreiber in MPlayer erreichen kann, 
 und was nicht.</P>
 
-<H5>Was ist DGA?</H5>
+
+<H4>WAS IST DGA?</H4>
 
 <P>DGA ist die Abk&uuml;rzung f&uuml;r Direct Graphics Access (direkter
 Zugriff auf die Grafikhardware) und gibt Programmen die M&ouml;glichkeit,
@@ -279,7 +280,7 @@ von der Grafikkarte und dem Grafikkartentreiber im X-Server abh&auml;ngig zu
 sein. Es fuktioniert also nicht auf jedem System...</P>
 
 
-<H5>DGA-UNTERST&Uuml;TZUNG F&Uuml;R MPLAYER INSTALLIEREN</H5>
+<H4>DGA-UNTERST&Uuml;TZUNG F&Uuml;R MPLAYER INSTALLIEREN</H4>
 
 <P>Stell als erstes sicher, dass X die DGA-Erweiterung l&auml;dt. Schau
 in /var/log/XFree86.0.log nach:</P>
@@ -319,7 +320,7 @@ m&ouml;chtest, dann installiere MPlayer mit dem SUID-Bit:</P>
 zumindest :))! Du solltest auch ausprobieren, ob bei dir die Option
 <CODE>-vo sdl:dga</CODE> funktioniert. Sie ist viel schneller.</P>
 
-<H5>&Auml;NDERN DER AUFL&Ouml;SUNG</H5>
+<H4><A NAME="dga_modelines">&Auml;NDERN DER AUFL&Ouml;SUNG</A></H4>
 
 <P>Der DGA-Treiber erm&ouml;glicht es, die Aufl&ouml;sung zu &auml;ndern. 
 Damit entf&auml;llt die Notwendigkeit der langsamen Softwareskalierung und 
@@ -352,14 +353,15 @@ Logdatei herausfinden (normalerweise
 </PRE>
 
 
-<H5>DGA &amp; MPLAYER</H5>
+<H4>DGA &amp; MPLAYER</H4>
 
 <P>DGA wird bei MPlayer an zwei Stellen benutzt: beim SDL-Treiber mit 
 <CODE>-vo sdl:dga</CODE> oder beim DGA-Treiber selber (<CODE>-vo dga</CODE>). 
 Das oben gesagte gilt f&uuml;r beide Treiber. In den folgenden Abschnitten 
 erkl&auml;re ich, wie der DGA-Treiber von MPlayer selber arbeitet.</P>
 
-<H5>FEATURES DES DGA-TREIBERS</H5>
+
+<H4>FEATURES DES DGA-TREIBERS</H4>
 
 <P>Der DGA-Treiber wird durch die Option <CODE>-vo dga</CODE> aktiviert. Sein 
 Standardverhalten sieht vor, dass er in die Aufl&ouml;sung schaltet, die der 
@@ -404,7 +406,7 @@ der DGA-Implementierung der Treiber f&uuml;r deine Hardware abh&auml;ngt (auf
 meinem K6-II+ 525 ben&ouml;tigt Doppelpufferung weitere 20% CPU-Zeit!).</P>
 
 
-<H5>PUNKTE BZGL. DER GESCHWINDIGKEIT</H5>
+<H4>PUNKTE BZGL. DER GESCHWINDIGKEIT</H4>
 
 <P>Generell gesehen sollte der Zugriff auf den DGA-Framebuffer genauso 
 schnell sein wie der X11-Treiber, wobei man zus&auml;tzlich noch ein Vollbild 
@@ -432,7 +434,7 @@ wiedergegeben werden konnten. AMD K6-2-CPUs werden ab ca. 400 MHz oder
 h&ouml;her funktionieren.</P>
 
 
-<H5>BEKANNTE FEHLER</H5>
+<H4>BEKANNTE FEHLER</H4>
 
 <P>Die Entwickler von XFree sagen selber, dass DGA ein ganz sch&ouml;nes
 Monstrum ist. Sie raten eher davon ab, es zu benutzen, da seine Implementation
@@ -513,7 +515,8 @@ sind).</P>
     <TD>gleiche Funktionen wie * und / (Mixersteuerung)</TD></TR>
 </TABLE>
 
-<H5>BEKANNTE FEHLER</H5>
+
+<H4>BEKANNTE FEHLER</H4>
 
 <UL>
   <LI>Tasten, die bei sdl:aalib einmal gedr&uuml;ckt werden, bleiben aus
@@ -526,7 +529,7 @@ sind).</P>
 
 <H4><A NAME="svgalib">2.3.1.2.4 SVGAlib</A></H4>
 
-<H5>INSTALLATION</H5>
+<H4>INSTALLATION</H4>
 
 <P>Du must zuerst die svgalib und die dazugeh&ouml;rigen Devel-Pakete 
 installieren, bevor du MPlayer compilierst, da es die Svgalib sonst 
@@ -544,7 +547,7 @@ schlechte Qualit&auml;t produziert, daf&uuml;r aber auch ein wenig schneller
 ist.</P>
 
 
-<H5>EGA(4bpp)-UNTERST&Uuml;TZUNG</H4>
+<H4>EGA(4bpp)-UNTERST&Uuml;TZUNG</H4>
 
 <P>SVGAlib beinhaltet die EGAlib, und MPlayer kann damit jeden Film in 
 16 Farben bei den folgenden Modi anzeigen:</P>
@@ -805,6 +808,7 @@ festgestellt, aber vo_aa versucht, den besten Modus herauszufinden. Lies <A
 HREF="http://aa-project.sourceforge.net/tune/">http://aa-
 project.sourceforge.net/tune/</A> f&uuml;r weitere Tuningtipps.</P>
 
+
 <H4><A NAME="vesa">2.3.1.2.10 VESA-Ausgabe &uuml;ber das VESA-BIOS</A></H4>
 
 <P>Dieser Treiber ist vom Design her ein <B>generischer Treiber</B> f&uuml;r
@@ -837,7 +841,8 @@ Laufen zu bringen.<BR>
 (Ich vermute, dass der TV-Ausgang normalerweise auf einer separaten
 Grafikkarte oder zumindest ein separater Ausgang ist.)</P>
 
-<H5>VORTEILE</H5>
+
+<H4>VORTEILE</H4>
 
 <UL>
   <LI>Du hast die M&ouml;glichkeit, selbst dann Filme anzusehen, wenn
@@ -862,7 +867,8 @@ Grafikkarte oder zumindest ein separater Ausgang ist.)</P>
     werden.</LI>
 </UL>
 
-<H5>NACHTEILE</H5>
+
+<H4>NACHTEILE</H4>
 
 <UL>
   <LI>Der Treiber funtkioniert nur auf <B>x86-Systemen</B>.</LI>
@@ -873,7 +879,9 @@ Grafikkarte oder zumindest ein separater Ausgang ist.)</P>
 <P>Benutz diesen Treiber nicht mit <B>GCC 2.96</B>! Das wird nicht 
 funktionieren!</P>
 
-<H5>BEI VESA VERF&Uuml;GBARE KOMMANDOZEILENOPTIONEN</H5>
+
+<H4>BEI VESA VERF&Uuml;GBARE KOMMANDOZEILENOPTIONEN</H4>
+
 <DL>
   <DT><CODE>-vo vesa:opts</CODE></DT>
   <DD>momentan erkannte Optionen <B>dga</B>, um den DGA-Modus zu erzwingen 
@@ -883,7 +891,8 @@ funktionieren!</P>
     Erkennung</B> des DGA-Modus zu erm&ouml;glichen.</DD>
 </DL>
 
-<H5>BEKANNTE PROBLEME UND WIE MAN SIE UMGEHT</H5>
+
+<H4>BEKANNTE PROBLEME UND WIE MAN SIE UMGEHT</H4>
 
 <UL>
   <LI>Wenn du unter Linux eine <B>NLS</B>-Schrift verwendest und du den 
@@ -944,9 +953,10 @@ dir die Ausgabe von XFree86 an. Einige Treiber k&ouml;nnen nicht die
 niedrigen Pixelclock-Werte benutzen, die f&uuml;r niedrige Aufl&ouml;sungen 
 vonn&ouml;ten sind.</P>
 
+
 <H4><A NAME="vidix">2.3.1.2.12 VIDIX</A></H4>
 
-<H5>EINLEITUNG</H5>
+<H4>EINLEITUNG</H4>
 
 <P>VIDIX ist die Abk&uuml;rzung f&uuml;r <B>VID</B>eo <B>I</B>nterface for 
 *ni<B>X</B> (Video-Schnittstelle f&uuml;r *n*x).<BR> VIDIX wurde entworfen, 
@@ -964,7 +974,8 @@ X11-Leuten in Sachen Grafikmodusumschaltung konkurieren.) Das Ziel dieser
 Schnittstelle liegt also einfach darin, die h&ouml;chstm&ouml;gliche 
 Geschwindigkeit bei der Videowiedergabe zu erreichen.</P>
 
-<H5>BENUTZUNG</H5>
+
+<H4>BENUTZUNG</H4>
 
 <UL>
   <LI>Du kannst den eigenst&auml;ndigen Videotreiber benutzen:
@@ -990,7 +1001,8 @@ Geschwindigkeit bei der Videowiedergabe zu erreichen.</P>
 <P>Es ist in der Tat nicht wichtig, welcher Videoausgabetreiber mit
 <B>VIDIX</B> verwendet wird.</P>
 
-<H5>ANFORDERUNGEN</H5>
+
+<H4>ANFORDERUNGEN</H4>
 
 <UL>
   <LI>Die Grafikkarte sollte sich gerade im Grafikmodus befinden (ich 
@@ -1007,7 +1019,8 @@ Geschwindigkeit bei der Videowiedergabe zu erreichen.</P>
 <P>Ich hoffe, dass jeder von MPlayers Videoausgabetreibern das 
 <CODE>:vidix</CODE>-Unterger&auml;t erkennt.</P>
 
-<H5>BEDIENUNG</H5>
+
+<H4>BEDIENUNG</H4>
 
 <P>Wenn VIDIX als <B>Unterger&auml;t</B> (<CODE>-vo vesa:vidix</CODE>) 
 benutzt wird, dann wird die Konfiguration des Videomodus vom 
@@ -1051,8 +1064,8 @@ spezielle Kernelmodule benutzen:</P>
 <OL>
   <LI>Lade dir die
     <A HREF="http://www.arava.co.il/matan/svgalib/">Entwicklerversion</A>
-    der svgalib herunter (z.B. 1.9.17).</LI>
-  <LI><B>ODER</B> lade dir eine von Alex speziell f&uuml;r die Benutzung mit
+    der svgalib herunter (z.B. 1.9.17),
+    <B>ODER</B> lade dir eine von Alex speziell f&uuml;r die Benutzung mit
     MPlayer modifizierte Version herunter (die nicht die svgalib-Sourcen
     zum Compilieren ben&ouml;tigt):
     <A HREF="http://www.mplayerhq.hu/~alex/svgalib_helper-1.9.17-mplayer.tar.bz2">
@@ -1174,7 +1187,8 @@ explizit den Pfad zu ihnen an:</P>
 
 <P>Dann compiliere und installiere wie sonst auch.</P>
 
-<H5>BEDIENUNG</H5>
+
+<H4>BEDIENUNG</H4>
 
 <P>Hardwaredecodierung (Abspielen von Standard-MPEG1/2-Dateien) geschieht mit 
 diesem Kommando:</P>
@@ -1253,7 +1267,8 @@ f&uuml;r  3:4 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
 f&uuml;r 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 </PRE>
 
-<H5>AUSBLICK</H5>
+
+<H4>AUSBLICK</H4>
 
 <P>Wenn du Fragen hast oder an der Diskussion &uuml;ber zuk&uuml;nfitge 
 Features teilnehen willst, dann melde dich an unserer <A 
@@ -1284,7 +1299,9 @@ du auf der Seite <A HREF="http://dxr3.sourceforge.net/">DXR3 &amp; Hollywood
 Plus for Linux</A>. <CODE>configure</CODE> sollte die Karte automatisch 
 finden. Die Compilierung sollte auch problemlos funktionieren.</P>
 
-<H5>BEDIENUNG</H5>
+
+<H4>BEDIENUNG</H4>
+
 <DL>
   <DT><CODE>-vo dxr3:prebuf:sync:norm=x:&lt;device&gt;</CODE></DT>
 
@@ -1613,13 +1630,15 @@ http://www3.sympatico.ca/dan.eriksen/matrox_tvout/</A> gefunden werden.</P>
 
 <H4><A NAME="tv-out_ati">2.3.1.5.3 ATI-Karten</A></H4>
 
-<H5>VORWORT</H5>
+
+<H4>VORWORT</H4>
 
 <P>Momentan m&ouml;chte ATI keinen einzigen ihrer TV-Ausgabe-Chips unter 
 Linux unterst&uuml;tzen, da sie die Macrovision-Technologie lizensiert 
 haben.</P>
 
-<H5>STATUS DER ATI-TV-AUSGABEUNTERST&Uuml;TZUNG UNTER LINUX</H5>
+
+<H4>STATUS DER ATI-TV-AUSGABEUNTERST&Uuml;TZUNG UNTER LINUX</H4>
 
 <UL>
   <LI><B>ATI Mach64</B>: Von

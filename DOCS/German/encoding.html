@@ -23,7 +23,7 @@ zusammengetragen wurden. Durchsuche auch das
 du eine Unmenge an Diskussionen &uuml;ber alle m&ouml;glichen Themen rund um
 die Encodierung mit MEncoder.</P>
 
-<H3><A NAME="2pass">7.1. MPEG4-Encodierung ("DivX") in zwei oder drei
+<H3><A NAME="2pass">7.1 MPEG4-Encodierung ("DivX") in zwei oder drei
 Durchl&auml;ufen </A></H3>
 
 <P><U><B>2-pass-Encodierung:</B></U> Der Name kommt in der Tat daher, dass
@@ -124,7 +124,7 @@ ge&auml;ndert werden.</P>
 
 
 
-<H3><A NAME="rescaling">7.3. Skalierung von Filmen</A></H3>
+<H3><A NAME="rescaling">7.3 Skalierung von Filmen</A></H3>
 
 <P>Oftmals ist die &Auml;nderung der Bildgr&ouml;&szlig;e erforderlich. Die
 Gr&uuml;nde daf&uuml;r k&ouml;nnen verschieden sein: Dateigr&ouml;&szlig;e
@@ -139,12 +139,12 @@ H&ouml;hen-/Breitenverh&auml;ltnisses</A>.</P>
 <CODE>-sws</CODE> angegeben werden. Wenn nichts angegeben ist, verwendet
 MEncoder 0: schnelle bilienare Filterung ('fast bilinear').</P>
 
-<H5>Verwendung:</H5>
+<H4>VERWENDUNG</H4>
 
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder beispiel-svcd.mpg -ovc lavc -lavcopts
   vcodec=mpeg4 -vop scale=640:480 -sws 2 -oac copy -o ausgabe.avi</CODE></P>
 
-<H3><A NAME="copying">7.4. Stream-Kopiermodus</A></H3>
+<H3><A NAME="copying">7.4 Stream-Kopiermodus</A></H3>
 
 <P>MEncoder kann Input-Streams auf zwei Arten bearbeiten:
 <B>encodieren</B> oder <B>kopieren (copy)</B>. Diese Sektion erkl&auml;rt die
@@ -165,7 +165,7 @@ MEncoder 0: schnelle bilienare Filterung ('fast bilinear').</P>
 </UL>
 
 
-<H3><A NAME="fixing">7.5. Reparieren von AVIs mit defektem Index oder
+<H3><A NAME="fixing">7.5 Reparieren von AVIs mit defektem Index oder
 schlechtem Interleaving</A></H3>
 
 <P>Trivial. Wir kopieren einfach die Video- und Audiostreams, und
@@ -187,12 +187,13 @@ kann:</P>
 <P>Kommando: <CODE>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o
 ausgabe.avi -</CODE></P>
 
-<P><B>Anmerkung:</B> Hier wird angenommen, das 1.avi und 2.avi den gleichen
-Codec verwenden, die gleiche Aufl&ouml;ung und Streamrate besitzen etc., und
-wenigstens 1.avi darf nicht defekt sein. Eventuell musst du, wie 
-<A HREF="#fixing">oben</A> beschrieben, die Quelldateien erst reparieren.</P>
+<P><B>Anmerkung:</B> Hier wird angenommen, dass <CODE>1.avi</CODE> und
+<CODE>2.avi</CODE> den gleichen Codec verwenden, die gleiche Aufl&ouml;ung und
+Streamrate besitzen etc., und wenigstens 1.avi darf nicht defekt sein.
+Eventuell musst du, wie  <A HREF="#fixing">oben</A> beschrieben, die
+Quelldateien erst reparieren.</P>
 
-<H3><A NAME="libavcodec">7.6. Encodierung mit der
+<H3><A NAME="libavcodec">7.6 Encodierung mit der
   <I>libavcodec</I>-Codec-Familie</A></H4>
 
 <P><A HREF="codecs.html#libavcodec">libavcodec</A> bietet eine einfache
@@ -221,7 +222,7 @@ Codecs encodieren:</P>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mencoder -dvd 2 -o titel2.avi -ovc lavc -lavcopts
 vcodec=mjpeg -oac copy</CODE></P>
 
-<H3><A NAME="image_files">7.7. Encodierung von mehreren Einzelbildern
+<H3><A NAME="image_files">7.7 Encodierung von mehreren Einzelbildern
   (JPEGs, PNGs oder TGAs)</A></H3>
 
 <P>MEncoder kann aus mehreren JPEG-, PNG- oder TGA-Einzelbildern
@@ -283,7 +284,7 @@ aktuellen Verzeichnis:</I><BR>
   &nbsp;&nbsp;<CODE>mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy
   -o output.avi \*.tga</CODE></P>
 
-<H3><A NAME="vobsub">7.8. Extrahieren von DVD-Untertiteln in eine
+<H3><A NAME="vobsub">7.8 Extrahieren von DVD-Untertiteln in eine
 Vobsub-Datei</A></H3>
   
 <P>MEncoder kann Untertitel von einer DVD extrahieren und sie als Datei
@@ -333,7 +334,7 @@ pass=1</CODE><BR>
 &nbsp;&nbsp;<CODE>mencoder film.mpg -ifo film.ifo -vobsubout untertitel
 -vobsuboutindex 0 -vobsuboutid fr -sid 1</CODE></P>
 
-<H3><A NAME="aspect">7.9. Das H&ouml;hen-/Breitenverh&auml;ltnisses erhalten
+<H3><A NAME="aspect">7.9 Das H&ouml;hen-/Breitenverh&auml;ltnisses erhalten
 </A></H3>
 
 <P>DVDs und SVCDs (z.B. MPEG1/2) enthalten einen Wert, der das Verh&auml;ltnis
@@ -365,7 +366,7 @@ schwarzen Balken oberhalb und unterhalb des Bildes wegzuschneiden. Lies
 in der man-Page dazu, wie du die <CODE>cropdetect</CODE>- und
 <CODE>crop</CROP>-Filter benutzt.</P>
 
-<H5>Benutzung:</H5>
+<H4>BENUTZUNG</H4>
 
 <P><CODE>$ mencoder beispiel-svcd.mpg -ovc lavc -lavcopts
   vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o

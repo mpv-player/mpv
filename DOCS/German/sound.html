@@ -9,7 +9,7 @@
 
 <BODY>
 
-<H3><A NAME="audio">2.3.2. Audio-Ausgabe-Ger&auml;te</A></H3>
+<H3><A NAME="audio">2.3.2 Audio-Ausgabe-Ger&auml;te</A></H3>
 
 <H4><A NAME="sync">2.3.2.1 Audio-/VideoSynchronisation</A></H4>
 
@@ -93,7 +93,7 @@ Informationen dazu.</P>
 </UL>
 
 
-<H4><A NAME="experiences">2.3.2.2. Soundkarten-Erfahrungen, 
+<H4><A NAME="experiences">2.3.2.2 Soundkarten-Erfahrungen, 
 -Empfehlungen</A></H4>
 
 <P>Unter Linux wird ein 2.4.x Kernel sehr empfohlen. Kernel 2.2 wird nicht
@@ -118,7 +118,7 @@ Sie unterst&uuml;tzen ebenfalls einige Nicht-Linux-Systeme.</P>
     <TH COLSPAN="4"><B>TREIBER</B></TH>
     <TH ROWSPAN="2"><B>Max kHz</B></TH>
     <TH ROWSPAN="2"><B>Max Anz. Kan&auml;le</B></TH>
-    <TH ROWSPAN="2"><B>Max gleichzeitige Zugriffe</B></TH>
+    <TH ROWSPAN="2"><B>Max Anz. gleichzeitiger Zugriffe<FONT SIZE="-2"><A HREF="#note1">[1]</A></FONT></B></TH>
   </TR>
 
   <TR>
@@ -231,7 +231,7 @@ Sie unterst&uuml;tzen ebenfalls einige Nicht-Linux-Systeme.</P>
   <TR>
     <TD><B>C-Media-Karten (welche genau?)</B></TD>
     <TD>nicht OK (zischt) (?)</TD>
-    <TD>OK (?)</TD>
+    <TD>OK</TD>
     <TD>&nbsp;</TD>
     <TD>&nbsp;</TD>
     <TD>?</TD>
@@ -264,7 +264,7 @@ Sie unterst&uuml;tzen ebenfalls einige Nicht-Linux-Systeme.</P>
 
   <TR>
     <TD><B>PC-Lautsprecher oder DAC</B></TD>
-    <TD>OK (mit dem SDL-Treiber: <CODE>-ao sdl</CODE>)</TD>
+    <TD>OK</TD>
     <TD>none</TD>
     <TD>&nbsp;</TD>
     <TD><A HREF="http://www.geocities.com/stssppnn/pcsp.html">OSS-Treiber f&uuml;r den PC-Lautsprecher</a></TD>
@@ -274,6 +274,9 @@ Sie unterst&uuml;tzen ebenfalls einige Nicht-Linux-Systeme.</P>
   </TR>
 
 </TABLE>
+
+<P><A NAME="note1"><B>[1]</B></A>: Die Anzahl der Anwendungen, die <I>zur
+gleichen Zeit</I> auf das Ger&auml;t zugreifen k&ouml;nnen.</P>
 
 <P>R&uuml;ckmeldungen zu diesem Dokument sind willkommen. Bitte sag uns, wie 
 MPlayer und deine Soundkarte(n) zusammen funktionieren.</P>
@@ -381,7 +384,7 @@ beeinflusst:</P>
 </DL>
 
 
-<H5><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H5>
+<H4><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H4>
 
 <P>MPlayer unterst&uuml;tzt vollst&auml;ndig Up-/Downsampling mit dem
 resample-Filter. Dieser Filter kann benutzt werden, wenn du eine Soundkarte
@@ -424,8 +427,8 @@ werden. Er kennt drei Optionen:</P>
 mit linearer Interpolation.</P>
 
 
-<H5><A NAME="af_channels">2.3.2.3.2 &Auml;ndern der Anzahl der Kan&auml;le</A>
-</H5>
+<H4><A NAME="af_channels">2.3.2.3.2 &Auml;ndern der Anzahl der Kan&auml;le</A>
+</H4>
 
 <P>Der <CODE>channels</CODE>-Filter kann benutzt werden, um Kan&auml;le
 hinzuzuf&uuml;gen oder zu entfernen. Er kann auch benutzt werden, um
@@ -474,7 +477,8 @@ leise, aber 0 und 1 werden trotzdem vertauscht.</P>
 <P>&Auml;ndert die Anzahl der Kan&auml;le auf 6 und gibt 4 Routen an, die Kanal
 0 auf Kanal 0 und 3 kopieren. Die Kan&auml;le 4 und 5 bleiben stumm. </P>
 
-<H5><A NAME="af_format">2.3.2.3.3 Formatkonvertierung</A></H5>
+
+<H4><A NAME="af_format">2.3.2.3.3 Formatkonvertierung</A></H4>
 
 <P>Der <CODE>format</CODE>-Filter konvertiert zwischen verschiedenen
 Sampleformaten. Er wird automatisch aktiviert, wenn er von der Soundkarte
@@ -504,7 +508,7 @@ oder einem anderen Filter ben&ouml;tigt wird.</P>
 <P>setzt das Ausgabeformat auf 4 Bytes pro Sample Flie&szlig;kommadaten.</P>
 
 
-<H5><A NAME="af_delay">2.3.2.3.4 Verz&ouml;gerung</A></H5>
+<H4><A NAME="af_delay">2.3.2.3.4 Verz&ouml;gerung</A></H4>
 
 <P>Der <CODE>delay</CODE>-Filter verz&ouml;gert den Sound auf dem Weg zum
 Lautsprecher, damit die verschiedenen Kan&auml;le zur gleichen Zeit bei der
@@ -539,7 +543,8 @@ Kan&auml;le zu berechnen, tu folgendes:</P>
 die beiden hinteren Kan&auml;le um 0ms und den zentrierten Kanal um 7ms.</P>
 
 
-<H5><A NAME="af_volume">2.3.2.3.5 Lautst&auml;rkekontrolle mit Software</A></H5>
+<H4><A NAME="af_volume">2.3.2.3.5 Lautst&auml;rkekontrolle mit Software</A>
+</H4>
 
 <P>Lautst&auml;rkeregelung in Software wird mit dem <CODE>volume</CODE>-Filter
 realisiert. Sei bei der Benutzung dieses Filters vorsichtig, da er den
@@ -582,7 +587,7 @@ kann benutzt werden, um die Verst&auml;rkung in MEncoder so zu setzen, dass
 die Dynamikbandbreite vollst&auml;ndig ausgenutzt wird.</P>
 
 
-<H5><A NAME="af_equalizer">2.3.2.3.6 Equalizer</A></H5>
+<H4><A NAME="af_equalizer">2.3.2.3.6 Equalizer</A></H4>
 
 <P>Der <CODE>equalizer</CODE>-Filter ist ein 10-Band Graphicequalizer, der
 durch 10 IIR-Bandpassfilter (infinite impulse response, rekursive Filter)
@@ -625,7 +630,8 @@ resample-Filter vorgenommen wird.</P>
 <P>verst&auml;rkt den Sound in den oberen und unteren Frequenzbereichen und
 l&ouml;scht ihn um 1kHz beinahe komplett aus.</P>
 
-<H5><A NAME="af_panning">2.3.2.3.7 Panning-Filter</A></H5>
+
+<H4><A NAME="af_panning">2.3.2.3.7 Panning-Filter</A></H4>
 
 <P>Der <CODE>pan</CODE>-Filter kann benutzt werden, um Kan&auml;le beliebig zu
 mischen. Er ist grundlegend nur eine Kombination des Lautst&auml;rkefilters und
@@ -670,7 +676,7 @@ mischt die Quellkan&auml;le 0 und 1 in den Ausgabekanal 2 (welcher z.B. an
 einen Sub-woofer geschickt werden kann).
 
 
-<H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
+<H4><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H4>
 
 <P>Der <CODE>sub</CODE>-Filter f&uuml;gt dem Audiostream einen Sub-woofer-Kanal
 hinzu. Die dazu verwendeten Audiodaten sind der Durchschnitt der Kan&auml;le 0
@@ -702,7 +708,8 @@ Filter bekommt zwei Parameter:</P>
 <P>f&uuml;gt einen Sub-woofer-Kanal mit Grenzfrequenz von 100Hz hinzu und gibt
 ihn auf Kanal 4 aus.</P>
 
-<H5><A NAME="af_surround">2.3.2.3.9 Surround-sound-Decoder</A></H5>
+
+<H4><A NAME="af_surround">2.3.2.3.9 Surround-sound-Decoder</A></H4>
 
 <P>Matrix encodierter Surround-Sound kann mit dem <CODE>surround</CODE>-Filter
 decodiert werden. Dolby Surround ist ein Beispiel f&uuml;r ein matrix
@@ -730,8 +737,7 @@ Filter kennt einen Parameter:</P>
 hinteren Lautsprecher.</P>
 
 
-
-<H4><A NAME="plugins">2.3.2.4. Audio-Plugins (veraltet)</A></H4>
+<H4><A NAME="plugins">2.3.2.4 Audio-Plugins (veraltet)</A></H4>
 
 <H2><STRONG>Anmerkung: Audioplugins sind veraltet und wurden durch Audiofilter
 ersetzt. Sie werden bald entfernt werden.</STRONG></H2>
@@ -765,7 +771,7 @@ Ausgabeformat des Format-Plugins auf AFMT_U8 stellen.</P>
 werden.</P>
           
            
-<H5><A NAME="resample">2.3.2.4.1. Up/Downsampling</A></H5>
+<H4><A NAME="resample">2.3.2.4.1 Up/Downsampling</A></H4>
 
 <P>MPlayer unterst&uuml;tzt vollst&auml;ndiges up/downsampling von 
 Audiostreams. Dieses Plugin kann verwendet werden, wenn man eine Soundkarte 
@@ -785,7 +791,7 @@ Zeitlupe wiedergegeben werden, und man erh&auml;lt zus&auml;tzlich
 Audioverzerrungen.</P>
 
 
-<H5><A NAME="surround_decoding">2.3.2.4.2. Surround-Sound-Decodierung</A></H5>
+<H4><A NAME="surround_decoding">2.3.2.4.2 Surround-Sound-Decodierung</A></H4>
 
 <P>MPlayer hat ein Audio-Plugin das matrix-codierten Surround Sound 
 decodieren kann. Dolby Surround ist ein Beispiel eines matrix-codierten 
@@ -797,7 +803,7 @@ Soundkarte mit mindestens vier Kan&auml;len.</P>
 &nbsp;&nbsp;<CODE>mplayer medium.avi -aop list=surround</CODE></P>
 
 
-<H5><A NAME="format">2.3.2.4.3. Sample-Format-Konvertierer</A></H5>
+<H4><A NAME="format">2.3.2.4.3 Sample-Format-Konvertierer</A></H4>
 
 <P>Wenn deine Soundkarte keinen signed 16bit <CODE>int</CODE> Datentyp 
 unterst&uuml;tzt, kann dieses Plugin benutzt werden, um das Format in eines zu 
@@ -813,7 +819,7 @@ Kan&auml;le &auml;ndert.</P>
 list=format:format=&lt;required output format&gt;</CODE></P>
 
 
-<H5><A NAME="delay">2.3.2.4.4. Verz&ouml;gerung</A></H5>
+<H4><A NAME="delay">2.3.2.4.4 Verz&ouml;gerung</A></H4>
   
 <P>Dieses Plugin verz&ouml;gert den Ton und ist als Beispiel gedacht, wie man 
 neue Plugins schreibt. Es kann f&uuml;r nichts sinnvolles aus der 
@@ -827,7 +833,7 @@ des Abspielens anzupassen. Wenn das OSD aktiviert ist, dann werden die aktuellen
 Werte angezeigt, was die Anpassung erleichtert.</P>
 
 
-<H5><A NAME="volume">2.3.2.4.5. Software Lautst&auml;rkeregelung</A></H5>
+<H4><A NAME="volume">2.3.2.4.5 Software Lautst&auml;rkeregelung</A></H4>
 
 <P>Dieses Plugin ist ein Software-Ersatz f&uuml;r die Lautst&auml;rkereglung 
 und kann in Maschinen mit kaputtem Mixer-Device verwendet werden. Es kann auch 
@@ -863,7 +869,7 @@ sollte erst als letzte M&ouml;glichkeit in Betracht gezogen werden.</P>
 list=volume:softclip</CODE></P>
 
 
-<H5><A NAME="extrastereo">2.3.2.4.6. Extrastereo</A></H5>
+<H4><A NAME="extrastereo">2.3.2.4.6 Extrastereo</A></H4>
 
 <P>Dieses Plugin erh&ouml;ht linear die Differenz zwischen dem linken und 
 rechten Kanal (wie das XMMS Extrastereo-Plugin), was zum Teil zu "live"-
@@ -880,7 +886,7 @@ Wenn man den Wert auf 1.0 setzt, bleibt der Ton gleich. Wenn man den Wert auf
 -1.0 setzt, werden der linke und rechte Kanal vertauscht.</P>
 
 
-<H5><A NAME="normalizer">2.3.2.4.7. Lautst&auml;rkenormalisierer</A></H5>
+<H4><A NAME="normalizer">2.3.2.4.7 Lautst&auml;rkenormalisierer</A></H4>
 
 <P>Dieses Plugin maximiert die Lautst&auml;rke, ohne den Ton zu 
 verzerren.</P>

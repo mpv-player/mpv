@@ -230,6 +230,10 @@ Dazu wird die angegebene Datei ausgewertet. Lies
 DOCS/\:German/\:documentation.html#edl, dort stehen Details, wie du dieses
 Feature benutzen kannst.
 .TP
+.B \-enqueue (nur beim GUI)
+Hänge die auf der Kommandozeile angegebenen Dateien an die Abspielliste an,
+anstatt sie sofort abzuspielen.
+.TP
 .B \-edlout <Dateiname>
 Erstellt eine neue EDL\-Datei und schreibt EDL\-Markierungen in diese Datei.
 Während der Wiedergabe kann der Benutzer 'i' drücken, und ein Eintrag,
@@ -247,7 +251,8 @@ xvidix, xmga, gl2 und svga.
 s.TP
 .B \-framedrop (siehe auch \-hardframedrop)
 Verwirft einige Frames, ohne sie anzuzeigen, um auf langsamen Systemen
-die A/\:V-Sync beizubehalten. B-Frames werden ebenfalls nicht dekodiert
+die A/\:V-Sync beizubehalten. Diese Frames werden dann auch nicht durch die
+Videofilter geschleust. B-Frames werden ebenfalls nicht dekodiert
 und Videofilter nicht benutzt.
 .TP
 .B \-h, \-help, \-\-help
@@ -760,8 +765,8 @@ Höhe des Ausgabefensters
 Bildanzahl, mit der Video aufgenommen wird (Bilder pro Sekunde, frames per
 second).
 .IPs buffersize=<Wert>
-Maximalgröße des Capture-Puffers in Megabytes (Standard ist die Hälfte
-des physikalisch verfügbaren Speichers)
+Maximalgröße des Capture-Puffers in Megabytes (standardmäßig: dynamische
+Größe)
 .IPs norm=<Wert>
 Werte: PAL, SECAM, NTSC
 .IPs channel=<Wert>
