@@ -25,7 +25,7 @@ void   url_free(URL_t* url);
 void url_unescape_string(char *outbuf, char *inbuf);
 void url_escape_string(char *outbuf, char *inbuf);
 
-#ifndef __URL_DEBUG
+#ifdef __URL_DEBUG
 void url_debug(URL_t* url);
 #endif // __URL_DEBUG
 
