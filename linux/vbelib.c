@@ -26,10 +26,10 @@ static void __dump_regs(struct LRMI_regs *r)
 {
   printf("vbelib:    eax=%08lXh ebx=%08lXh ecx=%08lXh edx=%08lXh\n"
 	 "vbelib:    edi=%08lXh esi=%08lXh ebp=%08lXh esp=%08lXh\n"
-	 "vbelib:    ds=%04lXh es=%04Xh ss=%04Xh cs:ip=%04X:%04X\n"
-	 "vbelib:    fs=%04lXh gs=%04Xh ss:sp=%04X:%04X flags=%04X\n"
-	 ,r->eax,r->ebx,r->ecx,r->edx
-	 ,r->edi,r->esi,r->ebp,r->reserved
+	 "vbelib:    ds=%04Xh es=%04Xh ss=%04Xh cs:ip=%04X:%04X\n"
+	 "vbelib:    fs=%04Xh gs=%04Xh ss:sp=%04X:%04X flags=%04X\n"
+	 ,(unsigned long)r->eax,(unsigned long)r->ebx,(unsigned long)r->ecx,(unsigned long)r->edx
+	 ,(unsigned long)r->edi,(unsigned long)r->esi,(unsigned long)r->ebp,(unsigned long)r->reserved
 	 ,r->ds,r->es,r->ss,r->cs,r->ip
 	 ,r->fs,r->gs,r->ss,r->sp,r->flags);
 }
@@ -45,7 +45,7 @@ static inline int VBE_LRMI_int(int int_no, struct LRMI_regs *r)
   retval = LRMI_int(int_no,r);
   if(verbose > 1)
   {
-    printf("vbelib: Interrupt handler returns: %08lXh\n",retval);
+    printf("vbelib: Interrupt handler returns: %X\n",retval);
     printf("vbelib: registers after int %02X\n",int_no);
     __dump_regs(r);
   }    
@@ -277,7 +277,6 @@ int vbeRestoreState(void *data)
 {
   struct LRMI_regs r;
   int retval;
-  void *rm_space;
   memset(&r,0,sizeof(struct LRMI_regs));
   r.eax = 0x4f04;
   r.edx = 0x02;
