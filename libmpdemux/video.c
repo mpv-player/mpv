@@ -279,37 +279,28 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     ++sh_video->num_frames_decoded;
 
     frame_time*=sh_video->frametime;
-    if(demuxer->file_format==DEMUXER_TYPE_ASF && !force_fps){
-        // .ASF files has no fixed FPS - just frame durations!
+
+    // override frame_time for variable/unknown FPS formats:
+    if(!force_fps) switch(demuxer->file_format){
+#ifdef HAVE_TV_BSDBT848
+      case DEMUXER_TYPE_TV:
+#endif
+      case DEMUXER_TYPE_MOV:
+      case DEMUXER_TYPE_FILM:
+      case DEMUXER_TYPE_VIVO:
+      case DEMUXER_TYPE_ASF: {
         float d=d_video->pts-pts1;
-        if(d>=0 && d<5) frame_time=d;
+        if(d>0 && d<5) frame_time=d;
         if(d>0){
           if(verbose)
             if((int)sh_video->fps==1000)
-              mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\rASF framerate: %d fps             \n",(int)(1.0f/d));
+              mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\navg. framerate: %d fps             \n",(int)(1.0f/d));
           sh_video->frametime=d; // 1ms
           sh_video->fps=1.0f/d;
         }
-    } else
-    if(demuxer->file_format==DEMUXER_TYPE_TV && !force_fps){
-        // TV has variable video frame rate, fixed audio...
-	frame_time=d_video->pts-pts1;
-	} else
-    if(demuxer->file_format==DEMUXER_TYPE_MOV && !force_fps){
-        // .MOV files has no fixed FPS - just frame durations!
-	frame_time=d_video->pts-pts1;
-    } else
-    if(demuxer->file_format==DEMUXER_TYPE_FILM && !force_fps){
-        // FILM (CPK) files have no fixed FPS - just frame durations!
-	frame_time=d_video->pts-pts1;
-    } else
-    if(demuxer->file_format==DEMUXER_TYPE_VIVO && !force_fps){
-        // .VIVO files has no fixed FPS - just frame durations!
-	if(d_video->pts-pts1>0)
-	    frame_time=d_video->pts-pts1;
-	mp_msg(MSGT_CPLAYER,MSGL_V,"vivo frame_time=%5.3f   \n",frame_time);
+      }
     }
-
+    
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
        demuxer->file_format==DEMUXER_TYPE_MPEG_ES) d_video->pts+=frame_time;
     
@@ -317,5 +308,4 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     return in_size;
 
 }
-
 
