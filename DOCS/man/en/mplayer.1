@@ -3028,11 +3028,17 @@ field (depending on whether n is even or odd).
 .B detc[=var1=value2:var2=value2:...]
 Attempts to reverse the 'telecine' process to recover a clean,
 non-interlaced stream at film framerate.
-This filter is still experimental but seems to be usable.
-Please be aware that there is absolutely no use in this filter
-unless you see interlacing when playing the movie!
+This was the first and most primitive inverse telecine filter to be
+added to MPlayer/MEncoder.
+It works by latching onto the telecine 3:2 pattern and following it as
+long as possible.
+This makes it suitable for perfectly-telecined material, even in the
+presence of a fair degree of noise, but it will fail in the presence
+of complex post-telecine edits.
+Development on this filter is no longer taking place, as ivtc, pullup,
+and filmdint are better for most applications.
 The following arguments (see syntax above) may be used to control
-its behavior:
+detc's behavior:
 .RSs
 .IPs dr
 Set the frame dropping mode.
@@ -3041,7 +3047,7 @@ Set the frame dropping mode.
 merges in the past 5 frames.
 2 means always maintain exact 5:4 input to output frame ratio.
 .I NOTE:
-Use mode 1 with MEncoder.
+Use mode 1 or 2 with MEncoder.
 .IPs am
 Analysis mode.
 Available values are 0 (fixed pattern with initial frame number
@@ -3069,22 +3075,25 @@ The optional parameter (ivtc=1) corresponds to the dr=1 option for the
 detc filter, and should be used with MEncoder but not with MPlayer.
 As with detc, you must specify the correct output framerate (\-ofps
 23.976) when using MEncoder.
+Further development on ivtc has stopped, as the pullup and filmdint
+filters appear to be much more accurate.
 .TP
 .B pullup\ 
 Third-generation pulldown reversal (inverse telecine) filter,
 capable of handling mixed hard-telecine, 24 fps progressive, and 30
 fps progressive content.
 The pullup filter is designed to be much more robust than detc or
-ivtc, but it is still under development.
+ivtc, by taking advantage of future context in making its decisions.
+Like ivtc, pullup is stateless in the sense that it does not lock onto
+a pattern to follow, but it instead looks forward to the following
+fields in order to identify matches and rebuild progressive frames.
+It is still under development, but believed to be quite accurate.
 No configuration options are available yet.
-As the underlying pulldown reversal engine is designed to take
-advantage of the new features in MPlayer G2, the current
-implementation in G1 is meant to serve mainly as a testbed.
 .I NOTE:
-Presently pullup lacks any way to cap the output framerate, so
-during 30 fps progressive sequences or stills, it will output more
-than 24 fps, meaning you'll have trouble if you use it with mencoder
-\-ofps 23.976.
+Always follow pullup with the softskip filter when encoding to ensure
+that pullup is able to see each frame. Failure to do so will lead to
+incorrect output and will usually crash, due to design limitations in
+the codec/filter layer.
 .TP
 .B filmdint[=options]
 Inverse telecine filter, similar to the pullup filter above.
