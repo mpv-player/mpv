@@ -1,6 +1,6 @@
 // Translated by:  Panagiotis Issaris <takis@lumumba.luc.ac.be>
 //maintained by:   Philippe De Swert <philippe.deswert@student.denayer.wenk.be>
-//synced with help_mp-en.h revision 1.110
+//synced with help_mp-en.h revision 1.115
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
@@ -276,6 +276,8 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Kan niet in raw .AVI streams verplaatsen! (index nodig, probeer met de -idx optie!)  \n"
 #define MSGTR_CantSeekFile "Kan niet verplaatsen in dit bestand!  \n"
 
+#define MSGTR_EncryptedVOB "Ge-encrypteerd VOB bestand! Lees DOCS/HTML/en/dvd.html voor meer informatie.\n"
+
 #define MSGTR_MOVcomprhdr "MOV: Gecomprimeerde headers (nog) niet ondersteund!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Waarschuwing! variabele FOURCC gedetecteerd!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Waarschuwing! te veel tracks!"
@@ -292,6 +294,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s reeds aanwezig!\n"
 #define MSGTR_ClipInfo "Clip info: \n"
 
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC data gevonden, framerate wordt aangepast.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps progressive NTSC data gevonden, framerate wordt aangepast.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "kon codec niet openen\n"
