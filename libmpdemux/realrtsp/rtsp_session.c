@@ -168,7 +168,7 @@ int rtsp_session_read (rtsp_session_t *this, char *data, int len) {
     to_copy -= fill;
     dest += fill;
     this->recv_read = 0;
-    this->recv_size = real_get_rdt_chunk (this->s, &(this->recv));
+    this->recv_size = real_get_rdt_chunk (this->s, (char **)&(this->recv));
     source = this->recv;
     fill = this->recv_size;
 

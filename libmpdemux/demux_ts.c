@@ -36,7 +36,7 @@
 
 #include "bswap.h"
 #include "../unrarlib.h"
-
+#include "../liba52/a52.h" 
 
 #define TS_FEC_PACKET_SIZE 204
 #define TS_PACKET_SIZE 188
@@ -1361,7 +1361,7 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 		if(priv->pmt == NULL)
 		{
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "PARSE_PMT: COULDN'T REALLOC %d bytes, NEXT\n", sz);
-			return NULL;
+			return 0;
 		}
 
 		idx = priv->pmt_cnt;
@@ -1404,7 +1404,7 @@ static int parse_pmt(ts_priv_t * priv, uint16_t progid, uint16_t pid, int is_sta
 	{
 		mp_msg(MSGT_DEMUX, MSGL_V, "FILL_PMT(prog=%d, PID=%d), ERROR! PMT TOO LONG, IGNORING\n", progid, pid);
 		pmt->buffer_len = 0;
-		return NULL;
+		return 0;
 	}
 
 	memcpy(&(pmt->buffer[pmt->buffer_len]), &buff[m], size - m);
