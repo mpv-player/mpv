@@ -51,14 +51,14 @@ static struct {
 int demuxer_type_by_filename(char* filename){
   int i;
   char* extension=strrchr(filename,'.');
-  printf("Searching demuxer type for filename %s ext: %s\n",filename,extension);
+  mp_msg(MSGT_OPEN, MSGL_V, "Searching demuxer type for filename %s ext: %s\n",filename,extension);
   if(extension) {
     ++extension;
 //    mp_msg(MSGT_CPLAYER,MSGL_DBG2,"Extension: %s\n", extension );
     // Look for the extension in the extensions table
     for( i=0 ; i<(sizeof(extensions_table)/sizeof(extensions_table[0])) ; i++ ) {
       if( !strcasecmp(extension, extensions_table[i].extension) ) {
-        printf("\n!!! trying demuxer %d based on filename extension\n",extensions_table[i].demuxer_type);
+        mp_msg(MSGT_OPEN, MSGL_V, "Trying demuxer %d based on filename extension\n",extensions_table[i].demuxer_type);
         return extensions_table[i].demuxer_type;
       }
     }
