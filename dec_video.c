@@ -131,10 +131,12 @@ void set_video_quality(sh_video_t *sh_video,int quality){
 }
 
 int set_video_colors(sh_video_t *sh_video,char *item,int value){
+#ifdef USE_DIRECTSHOW
     if(!strcmp(sh_video->codec->name,"divxds")){
 	DS_SetValue_DivX(item,value);
 	return 1;
     }
+#endif
     return 0;
 }
 
