@@ -21,6 +21,9 @@ requirements:
 
 - way to disable alphablending, and use black outline (FAST_OSD now)
 
+- respect movie and monitor aspect, so osd is rendered/scaled correctly
+  eg. for svcd/anamorphic dvd with hardware scaling (now OSD is squashed)
+
 - develop some text-based apps: osdterm, osdzilla etc ;)
 
 Ok. The basic idea of my design is using 'osd objects', a data structure
