@@ -155,7 +155,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
             unsigned char flags=asf_packet[3];
             unsigned char segtype=asf_packet[4];
             unsigned char* p=&asf_packet[5];
-            unsigned char* p_end=p+asf_packetsize;
+            unsigned char* p_end=asf_packet+asf_packetsize;
             unsigned long time;
             unsigned short duration;
             int segs=1;
@@ -181,7 +181,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               if(flags&(8|16)){
                 padding=p[0];p++;
                 if(flags&16){ padding|=p[0]<<8; p++;}
-                mp_msg(MSGT_DEMUX,MSGL_V,"Warning! explicit=%d  padding=%d  \n",plen,asf_packetsize-padding);
+                mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Warning! explicit=%d  padding=%d  \n",plen,asf_packetsize-padding);
               }
             } else {
               // Padding (relative) size
@@ -272,7 +272,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
                 // single segment
                 len=plen-(p-asf_packet);
               }
-              if(len<0 || (p+len)>=p_end){
+              if(len<0 || (p+len)>p_end){
                 mp_msg(MSGT_DEMUX,MSGL_V,"ASF_parser: warning! segment len=%d\n",len);
               }
               mp_dbg(MSGT_DEMUX,MSGL_DBG4,"  seg #%d: streamno=%d  seq=%d  type=%02X  len=%d\n",seg,streamno,seq,type,len);
