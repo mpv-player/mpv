@@ -213,6 +213,7 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 		{
 			//close window
 			case kEventWindowClosed:
+				uninit();
 				mplayer_put_key(KEY_ESC);
 				break;
 		
