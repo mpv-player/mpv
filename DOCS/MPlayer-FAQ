@@ -126,3 +126,7 @@ A: ...but you don't have the X development package installed. It's called
 
 Q: I have problems playing files with ... codec. Can I use'em?
 A: Check DOCS/TODO , if it doesn't contain your codec, contact us.
+
+Q: What about DGA driver? I can't find it!!!
+A: You have to run ./configure --enable-dga and then recompile.
+   It will be autodetected in the near future.
