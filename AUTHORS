@@ -517,6 +517,12 @@ rgselk <rgselknospam@yahoo.com>
 Zoltan Hidvegi <mplayer@hzoli.2y.net>
     * filmdint filter
 
+Corey Hickey <bugfood-ml@fatooh.org>
+    * telecine/interlacing HOWTO for the MEncoder documentation
+
+Aurelien Jacobs <aurel@gnuage.org>
+    * standalone C Matroska demuxer
+
 
 NOTE: If you think you are missing here, feel free to send a patch.
 =====
