@@ -1049,7 +1049,7 @@ static void put_frame_without_bands(void)
 
 	for (i = 0; i < in_height; i++) {
 		memcpy(frame_buffer + out_offset, next_frame + in_offset,
-		in_width * fb_pixel_size);
+				in_width * fb_pixel_size);
 		out_offset += fb_screen_width;
 		in_offset += in_width * fb_pixel_size;
 	}
