@@ -524,12 +524,12 @@ static void mach64_vid_display_video( void )
 // bit 1 yuv2rgb coeff related
 // bit 2 horizontal interpolation if 0
 // bit 3 vertical interpolation if 0
-// bit 4 chroma related
+// bit 4 chroma encoding (0-> 128=neutral / 1-> 0->neutral)
 // bit 5-6 gamma correction
 // bit 7 nothing visible if set
 // bit 8-27 no effect
 // bit 28-31 nothing interresting just crashed my system when i played with them  :(
-    
+
     mach64_wait_for_idle();
     vf = INREG(VIDEO_FORMAT);
 
@@ -547,7 +547,7 @@ static void mach64_vid_display_video( void )
 // 0xA	YV12
 // 0xB	YUY2
 // 0xC	UYVY
-// 0xD  UYVY (not again ... dont ask me, i dunno the difference)
+// 0xD  UYVY (no difference is visible if i switch between C/D for every even/odd frame)
 // 0xE  dunno behaves strange
 // 0xF  dunno behaves strange
 // Bit 28 all values are assumed to be 7 bit with chroma=64 for black (tested with YV12 & YUY2)
@@ -751,7 +751,13 @@ int vixPlaybackOff(void)
 
 static void mach64_wait_vsync( void )
 {
-#warning MACH64 VSYNC WAS NOT IMPLEMENTED!!!
+    int i;
+
+    for(i=0; i<2000000; i++)
+	if( (INREG(CRTC_INT_CNTL)&CRTC_VBLANK)==0 ) break;
+    for(i=0; i<2000000; i++)
+	if( (INREG(CRTC_INT_CNTL)&CRTC_VBLANK) ) break;
+
 }
 
 int vixPlaybackFrameSelect(unsigned int frame)
@@ -806,18 +812,19 @@ buf2 += ((besr.vid_buf2_base_adrs)&~15) - mach64_overlay_offset;
 }*/
 for(y=0; y<480; y++)
 {
-//	for(x=0; x<1280; x++) buf0[x + y*1280]=0;
-	for(x=0; x<1280/4; x++)
+	for(x=0; x<1280; x++) buf0[x + y*1280]=0;
+	for(x=0; x<1280/2; x++) buf0[x*2 + y*1280]=128;
+	for(x=0; x<1280/24; x++)
 	{
 // 1-> gray0
 //		buf0[x*2 + y*1280 +0] ^= buf0[x*2 + y*1280 +1];
 //		buf0[x*2 + y*1280 +1] ^= buf0[x*2 + y*1280 +0];
 //		buf0[x*2 + y*1280 +0] ^= buf0[x*2 + y*1280 +1];
 		
-		buf0[x*4 + y*1280 +1] =x; //buf0[x*4 + y*1280 +0]>>1;
-		buf0[x*4 + y*1280 +3] =128; //buf0[x*4 + y*1280 +2]>>1;
-		buf0[x*4 + y*1280 +0] =128;
-		buf0[x*4 + y*1280 +2] =128;
+		buf0[x*24 + y*1280 +0] =128;
+		buf0[x*24 + y*1280 +1] =x; //buf0[x*4 + y*1280 +0]>>1;
+		buf0[x*24 + y*1280 +2] =128;
+		buf0[x*24 + y*1280 +3] =x; //buf0[x*4 + y*1280 +2]>>1;
 
 //		buf0[x*8 + y*1280 +0]= 1;
 //		buf0[x*2 + y*1280 +1]= 7;
@@ -830,8 +837,8 @@ for(y=0; y<480; y++)
 //	for(x=0; x<1280; x++) buf0[x + y*1280]=128;
 	for(x=0; x<640; x++)
 	{
-		buf0[x + y*640 ]>>=1;
-		buf0[x + y*640 ]|=128;
+//		buf0[x + y*640 ]=255;//>>=1;
+//		buf0[x + y*640 ]|=128;
 	}
 }
 for(y=0; y<480/2; y++)
@@ -839,23 +846,31 @@ for(y=0; y<480/2; y++)
 //	for(x=0; x<1280; x++) buf0[x + y*1280]=128;
 	for(x=0; x<640/2; x++)
 	{
-		buf1[x + y*320 ]>>=1;
-		buf2[x + y*320 ]>>=1;
+		buf1[x + y*320 ]+=128 ;//>>=1;
+		buf2[x + y*320 ]+=128 ;//>>=1;
 	}
 }*/
 }
 #endif
     }
+#if 0 // delay routine so the individual frames can be ssen better
+{
+volatile int i=0;
+for(i=0; i<10000000; i++);
+}
+#endif
 
-    mach64_wait_vsync();
     mach64_wait_for_idle();
     mach64_fifo_wait(7);
+
     OUTREG(SCALER_BUF0_OFFSET,		off[0]);
     OUTREG(SCALER_BUF0_OFFSET_U,	off[1]);
     OUTREG(SCALER_BUF0_OFFSET_V,	off[2]);
     OUTREG(SCALER_BUF1_OFFSET,		off[3]);
     OUTREG(SCALER_BUF1_OFFSET_U,	off[4]);
     OUTREG(SCALER_BUF1_OFFSET_V,	off[5]);
+    mach64_wait_vsync();
+
     if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
     return 0;
 }
