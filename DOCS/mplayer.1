@@ -688,10 +688,10 @@ available: PAL, SECAM, NTSC
 Set tuner to <value> channel.
 .IPs chanlist=<value>
 available: europe-east, europe-west, us-bcast, us-cable, etc
-.IPs channels=<channel>-<name>,<channel>-<name>,...
+.IPs channels=<channel>\-<name>,<channel>\-<name>,...
 Set names for channels. Use _ for spaces in names (or play with quoting ;-).
 The channel names will then be written using OSD, and the commands tv_step_channel,
-tv_set_channel and tv_last_channel will then be usable using a remote (see. lirc).
+tv_set_channel and tv_last_channel will then be usable using a remote (see lirc).
 Not compatible with frequency parameter.
 Warning : The channel number will then be the position in the 'channels' list,
 beginning with 1. Ie. use tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
@@ -831,9 +831,9 @@ Turns off automatic loading of subtitle files.
 .B \-nooverlapsub
 Turns off support for overlapping subtitles.
 .TP
-.B \-osdlevel <0\-2> (MPLAYER only)
+.B \-osdlevel <0\-3> (MPLAYER only)
 Specifies which mode the OSD should start in (0: none, 1: seek, 2: seek+timer,
-default is 1).
+3: seek+timer+total length, default is 1).
 .TP
 .B \-sid <id> (also see \-slang option)
 Turns on DVD subtitle displaying.
@@ -1667,6 +1667,9 @@ with Win32 DirectShow DLLs which have internal postprocessing routine.
 The valid range of \-pp value vary on codecs, mostly
 0\-6, where 0=disable 6=slowest/\:best.
 .TP
+.B \-pphelp (see \-vop pp option too)
+Show a summary about the available postprocess filters and their usage.
+.TP
 .B \-ssf <mode>
 Specifies SwScaler parameters.
 
@@ -1865,9 +1868,10 @@ RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp colorspace conversion using palette.
 Restricts the colorspace for next filter.
 It does not do any conversion.
 Use together with the scale filter for a real conversion.
-.IPs pp[=filter1[:option1[:option2...]]/[-]filter2...] (see -pp too)
+.IPs pp[=filter1[:option1[:option2...]]/[-]filter2...] (see \-pphelp too)
 This option enables usage of MPlayer's internal postprocessing filter,
 and also gives an interface where you can pass options to the named filter.
+To get a list of available filters, use \-pphelp.
 .br
 Note that each sub-filter must be separated with a / sign.
 .br
@@ -1965,6 +1969,14 @@ amount: relative amount of sharpness / blur to add to the image
 Swap U & V plane.
 .IPs "il=[d|i][s][:[d|i][s]]"
 (de)interleaves lines.
+The goal of this filter is to add ability of processing interlaced images
+pre-field without deinterlacing it.
+You can filter your interlaced dvd and playback on TV without breaking the
+interlacing.
+While deinterlacing (with the post processing filter) removes the interlacing
+permamently (by smoothing averaging etc) deinterleaving splits the frame into
+2 fields (so called half pictures), so you can process (filter) them
+independently and then re-interleave them.
 .RSss
 d: deinterleave
 .br
@@ -1973,12 +1985,14 @@ i: interleave
 s: swap fields (exchange even & odd lines)
 .REss
 .IPs "boxblur=radius:power[:radius:power]"
+box blur
 .RSss
 radius: size of the filter
 .br
 power: how often the filter should be applied
 .REss
 .IPs "sab=rad:pfilter:cDiff[:rad:pfilter:cDiff]"
+shape adaptive blur
 .RSss
 rad: blur filter strength (~0.1\-4.0) (slower if larger)
 .br
@@ -1988,6 +2002,7 @@ cDiff: how different the pixels are allowed to be to be considered
 (~0.1-100.0)
 .REss
 .IPs "smartblur=rad:strength:thresh[:rad:strength:thresh]"
+smart blur
 .RSss
 rad: blur filter strength (~0.1\-5.0) (slower if larger)
 .br
@@ -1996,6 +2011,7 @@ strength: blur (0.0\-1.0) or sharpen (-1.0\-0.0)
 thresh: filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
 .REss
 .IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
+perspective correcture
 .RSss
 x0,y0,...: coordinates of the top left, top right, bottom left, bottom right
 corners
@@ -2005,12 +2021,15 @@ t: linear (0) or cubic resampling (1)
 .IPs 2xsai
 Use the 2x scale and interpolate algorithm for scaling and smoothing images.
 .IPs 1bpp
-TODO: document this
-.IPs eq2
+1bpp bitmap to YUV/BGR 8/15/16/32 conversion
+.IPs eq2[=gamma:cont:bright]
+LUT-based software equalizer.
+The values can be from -100 to 100.
 TODO: document this
 .IPs yvu9
 TODO: document this
 .IPs bmovl
+Read bitmaps from a FIFO and display them in window.
 TODO: document this
 .RE
 .
@@ -2618,7 +2637,11 @@ Crop any black borders to get better quality:
 0.0\-0.5: sane range
 .REss
 .IPs naq\ \ 
-normalize adaptive quantization (experimental)
+Normalize adaptive quantization (experimental).
+When using adaptive quantization (*_mask), the average per-MB quantizer may no
+longer match the requested frame-level quantizer.
+Naq will attempt to adjust the per-MB quantizers to maintain the proper
+average.
 .IPs ildct
 use interlaced dct
 .IPs format=<value>
@@ -2638,6 +2661,8 @@ YV12: default
 .REss
 .IPs qpel
 use quarter pel motion compensation
+.IPs precmp=<0\-2000>
+comparission function for motion estimation pre pass
 .IPs cmp=<0\-2000>
 comparission function for full pel motion estimation
 .IPs subcmp=<0\-2000>
@@ -2657,6 +2682,69 @@ comparission function for sub pel motion estimation
 .br
 +256: use chroma too, doesnt work with b frames currently
 .REss
+.IPs predia=<\-99\-6>
+Diamond type and size for motion estimation pre pass
+.IPs dia=<\-99\-6>
+Diamond type & size for motion estimation.
+Note: The sizes of the normal diamonds and shape adaptive ones dont have the same meaning
+.RSss
+\-3: shape adaptive (fast) diamond with size 3
+.br
+\-2: shape adaptive (fast) diamond with size 2
+.br
+\-1: experimental
+.br
+ 1: normal size=1 diamond (default) =EPZS type diamond
+.nf
+.ne
+      0 
+     000
+      0 
+.fi
+.br
+ 2: normal size=2 diamond
+.nf
+.ne
+      0  
+     000 
+    00000
+     000 
+      0  
+.fi
+.REss
+.IPs trell
+Trellis quantization.
+This will find the optimal encoding for each 8x8 block.
+Trellis quantization is quite simple a optimal quantization in the PSNR vs
+bitrate sense (assuming that there would be no rounding errors introduced 
+by the IDCT, which is obviously not the case) it simply finds a block for
+the minimum of error and lambda*bits.
+.RSss
+lambda: qp dependant constant
+.br
+bits: amount of bits needed to encode the block
+.br
+error: sum of squared errors of the quantization
+.REss
+.IPs last_pred=<0\-99>
+Amount of motion predictors from the previous frame
+.RSss
+0: (default)
+.br
+a: will use 2a+1 x 2a+1 MB square of MV predictors from the previous frame
+.REss
+.IPs preme=<0\-2> 
+motion estimation pre-pass
+.RSss
+0: disabled
+.br
+1: only after I frames (default)
+.br
+2: always
+.REss
+.IPs subq=<1\-8>
+subpel refinement quality (for qpel) (default: 8).
+Note: this has a significant effect on the speed
 .IPs mpeg_quant
 use MPEG quantizers instead of H.263.
 (default: disabled) (i.e.\& use H.263 quantizers)
@@ -2793,10 +2881,10 @@ specify how fast the rate control reacts, lower values are faster
 period to reach the required average
 .IPs rc_buffer=<value>
 size of the rate control buffer
-.IPs quant_range=<1-31>-<1-31>[/<1-31>-<1-31>]
-min & max quantizer for all frames (default=2-31, CBR mode)
+.IPs quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
+min & max quantizer for all frames (default=2\-31, CBR mode)
 .br
-min & max quantizer for I/P frames (default=2-31/2-31, 2pass mode)
+min & max quantizer for I/P frames (default=2\-31/2\-31, 2pass mode)
 .IPs min_key_interval=<value>
 minimum interval between key frames (default=0, 2pass only)
 .IPs max_key_interval=<value>
@@ -2818,11 +2906,11 @@ specify the temporary file to be used by the 'hintedme' option
 save per-frame statistics in xvid.dbg (default=off)
 .br
 this is *not* the 2pass control file
-.IPs keyframe_boost=<0-1000>
+.IPs keyframe_boost=<0\-1000>
 (default=0, 2pass mode only)
 .IPs kfthreshold=<value>
 (default=10, 2pass mode only)
-.IPs kfreduction=<0-100>
+.IPs kfreduction=<0\-100>
 (default=30, 2pass mode only)
 .RE
 
