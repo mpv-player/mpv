@@ -17,20 +17,23 @@ How to use a Sigma Designs Hollywood Plus and/or a Creative DXR3 by David Holm
 
 2. Usage
 
-    -vo dxr3:<devicenum>	For video output
-    -ao oss:<devicefile>	For audio output
-    -ac hwac3			For digital audio output instead of analog
-    -vc mpegpes			For mpeg playback
-    <devicenum>			Number of device to use for playback (if you
-				have more than one card.). This can usually
-				be left out (-vo dxr3).
-				Mandrake 8.1 uses devfs by default. If you are
-				running mandrake 8.1 please use -vo dxr3:0
-    <devicefile>		Normally /dev/em8300_ma or
-				/dev/em8300_ma-<devicenum>
-				(-ao dxr3:/dev/em8300_ma). If left out the
-				default oss device will be used (normally
-				soundcard).
+    -vo dxr3:<devicenum>		For video output
+    -ao oss:<devicefile>		For audio output
+    -ac hwac3				For digital audio output instead of
+					analog
+    -vc mpegpes				For mpeg playback
+    -aop list=resample:fout=48000	If samplerate is below 44100Hz
+    <devicenum>				Number of device to use for playback
+				        (if you	have more than one card.).
+					This can usually be left out (-vo dxr3).
+					Mandrake 8.1 uses devfs by default. If
+					you are running mandrake 8.1 please use
+					-vo dxr3:0
+    <devicefile>			Normally /dev/em8300_ma or
+					/dev/em8300_ma-<devicenum>
+					(-ao dxr3:/dev/em8300_ma). If left out
+					the default oss device will be used
+					(normally soundcard).
 
 MPEG-1, MPEG-2, VCD and DVD Notes
 There are some important notes to take into account here for optimum playback.

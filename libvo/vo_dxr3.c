@@ -91,6 +91,8 @@ void write_dxr3(rte_context* context, void* data, size_t size, void* user_data)
 }
 #endif
 
+extern int vidmode;
+
 static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
 	int tmp1,tmp2;
@@ -112,7 +114,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 		sprintf(devname, "/dev/em8300_mv-%s", vo_subdevice);
 	else
 		sprintf(devname, "/dev/em8300_mv");
-	fd_video = open(devname, O_WRONLY);
+	fd_video = open(devname, O_WRONLY | O_NONBLOCK);
 	if (fd_video < 0) {
 		printf("VO: [dxr3] Error opening %s for writing!\n", devname);
 		uninit();
@@ -135,7 +137,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	/* Subpic code isn't working yet, don't set to ON 
 	 * unless you are really sure what you are doing 
 	 */
-	ioval = EM8300_SPUMODE_OFF;
+	ioval = EM8300_SPUMODE_ON;
 	if (ioctl(fd_control, EM8300_IOCTL_SET_SPUMODE, &ioval) < 0) {
 		printf("VO: [dxr3] Unable to set subpicture mode!\n");
 		uninit();
@@ -332,11 +334,19 @@ static uint32_t draw_frame(uint8_t * src[])
 		vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 		size_t data_left = p->size;
 
-		if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts) < 0)
-			printf("VO: [dxr3] Unable to set pts\n");
+		if (p->id == 0x20) {
+			if (ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &vo_pts) < 0)
+				printf("VO: [dxr3] Unable to set pts\n");
+
+			while (data_left)
+				data_left -= write(fd_spu, (void*) (p->data + p->size-data_left), data_left);
+		} else {
+			if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts) < 0)
+				printf("VO: [dxr3] Unable to set pts\n");
 		
-		while (data_left)
-			data_left -= write(fd_video, (void*) (p->data + p->size-data_left), data_left);
+			while (data_left)
+				data_left -= write(fd_video, (void*) (p->data + p->size-data_left), data_left);
+		}
 		return 0;
 	}
 #ifdef USE_MP1E
@@ -439,7 +449,7 @@ static uint32_t query_format(uint32_t format)
 	uint32_t flag = 0;
 	
 	if (format == IMGFMT_MPEGPES)
-		flag = 0x2 | 0x4;
+		flag = 0x2 | 0x4 | 0x8;
 #ifdef USE_MP1E
 	if (format == IMGFMT_YV12)
 		flag = 0x1 | 0x4;

@@ -2333,7 +2333,16 @@ if(rel_seek_secs || abs_seek_pos){
 
 #ifdef USE_DVDREAD
   // DVD sub:
-  if(vo_spudec){
+  if(vo_flags & 0x08){
+    static vo_mpegpes_t packet;
+    static vo_mpegpes_t *pkg=&packet;
+    packet.timestamp=sh_video->timer*90000.0;
+    packet.id=0x20; /* Subpic */
+    while((packet.size=ds_get_packet_sub(d_dvdsub,&packet.data))>0){
+      mp_msg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",packet.size,d_video->pts,d_dvdsub->pts);
+      video_out->draw_frame(&pkg);
+    }
+  }else if(vo_spudec){
     unsigned char* packet=NULL;
     int len;
     current_module="spudec";
