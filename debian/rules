@@ -3,7 +3,7 @@
 # based on the sample debian/rules file for GNU hello by Ian Jackson.
 #export DH_VERBOSE=1
 # This is the debhelper compatability version to use.
-export DH_COMPAT=1
+export DH_COMPAT=2
 
 package=mplayer
 
@@ -38,7 +38,7 @@ clean:
 #	-rm -f build
 	-$(MAKE) distclean
 #	-rm -f `find . -name "*~"`
-#	-rm -rf debian/tmp debian/files* core debian/substvars
+	-rm -rf debian/tmp debian/files* core debian/substvars
 	dh_clean
 
 
@@ -52,6 +52,7 @@ install: build
 	# Add here commands to install the package into debian/<packagename>
 #	$(MAKE) prefix=`pwd`/debian/`dh_listpackages`/usr install
 #	$(MAKE) install prefix=$(CURDIR)/debian/tmp/usr
+	install -d $(CURDIR)/debian/tmp/usr/bin
 	install -m 755 -s mplayer $(CURDIR)/debian/tmp/usr/bin/mplayer
 #Do we really need this?:	
 #	       install -o root -g root -m 4755 fibmap_mplayer usr/bin/fibmap_mplayer
