@@ -311,6 +311,43 @@ int a52_resample(float * _f, int16_t * s16)
 #endif
 	break;
     case A52_3F | A52_LFE:
+#ifdef HAVE_MMX
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"movq magicF2W, %%mm7		\n\t"
+		"pxor %%mm6, %%mm6		\n\t"
+		"1:				\n\t"
+		"movq 1024(%1, %%esi), %%mm0	\n\t"
+		"movq 3072(%1, %%esi), %%mm1	\n\t"
+		"movq 2048(%1, %%esi), %%mm4	\n\t"
+		"movq (%1, %%esi), %%mm5	\n\t" 
+		"psubd %%mm7, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"psubd %%mm7, %%mm4		\n\t"
+		"psubd %%mm7, %%mm5		\n\t"
+		"leal (%%esi, %%esi, 2), %%edi	\n\t"
+		
+		"packssdw %%mm4, %%mm0		\n\t" // EeAa
+		"packssdw %%mm5, %%mm1		\n\t" // FfBb
+		"movq %%mm0, %%mm2		\n\t" // EeAa
+		"punpcklwd %%mm1, %%mm0		\n\t" // BAba
+		"punpckhwd %%mm1, %%mm2		\n\t" // FEfe
+		"movq %%mm0, %%mm1		\n\t" // BAba
+		"punpckldq %%mm6, %%mm0		\n\t" // 00ba
+		"punpckhdq %%mm1, %%mm1		\n\t" // BABA
+		
+		"movq %%mm0, (%0, %%edi)	\n\t"
+		"punpckhdq %%mm2, %%mm0		\n\t" // FE00
+		"punpckldq %%mm1, %%mm2		\n\t" // BAfe
+		"movq %%mm2, 8(%0, %%edi)	\n\t"
+		"movq %%mm0, 16(%0, %%edi)	\n\t"
+		"addl $8, %%esi			\n\t"
+		" jnz 1b			\n\t"
+		"emms				\n\t"
+		:: "r" (s16+1536), "r" (f+256)
+		:"%esi", "%edi", "memory"
+	);
+#else
 	for (i = 0; i < 256; i++) {
 	    s16[6*i] = convert (f[i+256]);
 	    s16[6*i+1] = convert (f[i+768]);
@@ -318,6 +355,7 @@ int a52_resample(float * _f, int16_t * s16)
 	    s16[6*i+4] = convert (f[i+512]);
 	    s16[6*i+5] = convert (f[i]);
 	}
+#endif	
 	break;
     case A52_2F2R | A52_LFE:
 #ifdef HAVE_MMX
