@@ -1,0 +1,210 @@
+diff -ur orig/cpu_accel.c new/cpu_accel.c
+--- orig/cpu_accel.c	2003-10-06 04:31:52.000000000 +0200
++++ new/cpu_accel.c	2004-02-18 13:48:26.000000000 +0100
+@@ -195,6 +195,7 @@
+ #ifdef ARCH_ALPHA
+ static inline uint32_t arch_accel (void)
+ {
++#ifdef CAN_COMPILE_ALPHA_MVI
+     uint64_t no_mvi;
+ 
+     asm volatile ("amask %1, %0"
+@@ -202,6 +203,9 @@
+ 		  : "rI" (256));	/* AMASK_MVI */
+     return no_mvi ? MPEG2_ACCEL_ALPHA : (MPEG2_ACCEL_ALPHA |
+ 					 MPEG2_ACCEL_ALPHA_MVI);
++#else
++    return MPEG2_ACCEL_ALPHA;
++#endif
+ }
+ #endif /* ARCH_ALPHA */
+ #endif /* ACCEL_DETECT */
+diff -ur orig/cpu_state.c new/cpu_state.c
+--- orig/cpu_state.c	2003-08-21 10:00:49.000000000 +0200
++++ new/cpu_state.c	2004-02-18 13:48:29.000000000 +0100
+@@ -120,7 +120,7 @@
+ 	mpeg2_cpu_state_restore = state_restore_mmx;
+     }
+ #endif
+-#ifdef ARCH_PPC
++#if defined(ARCH_PPC) && defined(HAVE_ALTIVEC)
+     if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
+ 	mpeg2_cpu_state_save = state_save_altivec;
+ 	mpeg2_cpu_state_restore = state_restore_altivec;
+diff -ur orig/decode.c new/decode.c
+--- orig/decode.c	2003-12-22 12:59:34.000000000 +0100
++++ new/decode.c	2004-02-18 14:19:01.000000000 +0100
+@@ -351,6 +351,15 @@
+     fbuf->buf[1] = buf[1];
+     fbuf->buf[2] = buf[2];
+     fbuf->id = id;
++    // HACK! FIXME! At first I frame, copy pointers to prediction frame too!
++    if (mpeg2dec->custom_fbuf && !mpeg2dec->fbuf[1]->buf[0]){
++	mpeg2dec->fbuf[1]->buf[0]=buf[0];
++	mpeg2dec->fbuf[1]->buf[1]=buf[1];
++	mpeg2dec->fbuf[1]->buf[2]=buf[2];
++	mpeg2dec->fbuf[1]->id=NULL;
++    }
++//        printf("libmpeg2: FBUF 0:%p 1:%p 2:%p\n",
++//	    mpeg2dec->fbuf[0]->buf[0],mpeg2dec->fbuf[1]->buf[0],mpeg2dec->fbuf[2]->buf[0]);
+ }
+ 
+ void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf)
+diff -ur orig/header.c new/header.c
+--- orig/header.c	2003-12-22 12:24:02.000000000 +0100
++++ new/header.c	2004-08-02 18:07:50.000000000 +0200
+@@ -100,6 +100,9 @@
+     mpeg2dec->decoder.convert = NULL;
+     mpeg2dec->decoder.convert_id = NULL;
+     mpeg2dec->picture = mpeg2dec->pictures;
++    memset(&mpeg2dec->fbuf_alloc[0].fbuf, 0, sizeof(mpeg2_fbuf_t));
++    memset(&mpeg2dec->fbuf_alloc[1].fbuf, 0, sizeof(mpeg2_fbuf_t));
++    memset(&mpeg2dec->fbuf_alloc[2].fbuf, 0, sizeof(mpeg2_fbuf_t));
+     mpeg2dec->fbuf[0] = &mpeg2dec->fbuf_alloc[0].fbuf;
+     mpeg2dec->fbuf[1] = &mpeg2dec->fbuf_alloc[1].fbuf;
+     mpeg2dec->fbuf[2] = &mpeg2dec->fbuf_alloc[2].fbuf;
+@@ -551,6 +554,7 @@
+ 	if (!(mpeg2dec->sequence.flags & SEQ_FLAG_PROGRESSIVE_SEQUENCE)) {
+ 	    picture->nb_fields = (buffer[3] & 2) ? 3 : 2;
+ 	    flags |= (buffer[3] & 128) ? PIC_FLAG_TOP_FIELD_FIRST : 0;
++	    flags |= (buffer[3] &   2) ? PIC_FLAG_REPEAT_FIRST_FIELD : 0;
+ 	} else
+ 	    picture->nb_fields = (buffer[3]&2) ? ((buffer[3]&128) ? 6 : 4) : 2;
+ 	break;
+@@ -799,6 +803,7 @@
+ 	mpeg2dec->scaled[index] = mpeg2dec->q_scale_type;
+ 	for (i = 0; i < 32; i++) {
+ 	    k = mpeg2dec->q_scale_type ? non_linear_scale[i] : (i << 1);
++	    decoder->quantizer_scale = k;
+ 	    for (j = 0; j < 64; j++)
+ 		decoder->quantizer_prescale[index][i][j] =
+ 		    k * mpeg2dec->quantizer_matrix[index][j];
+diff -ur orig/idct_alpha.c new/idct_alpha.c
+--- orig/idct_alpha.c	2003-09-19 11:26:42.000000000 +0200
++++ new/idct_alpha.c	2004-02-18 13:48:29.000000000 +0100
+@@ -59,7 +59,7 @@
+ } while (0)
+ #endif
+ 
+-static void inline idct_row (int16_t * const block)
++static inline void idct_row (int16_t * const block)
+ {
+     uint64_t l, r;
+     int_fast32_t d0, d1, d2, d3;
+@@ -116,7 +116,7 @@
+     block[7] = (a0 - b0) >> 12;
+ }
+ 
+-static void inline idct_col (int16_t * const block)
++static inline void idct_col (int16_t * const block)
+ {
+     int_fast32_t d0, d1, d2, d3;
+     int_fast32_t a0, a1, a2, a3, b0, b1, b2, b3;
+@@ -157,6 +157,7 @@
+     block[8*7] = (a0 - b0) >> 17;
+ }
+ 
++#ifdef CAN_COMPILE_ALPHA_MVI
+ void mpeg2_idct_copy_mvi (int16_t * block, uint8_t * dest, const int stride)
+ {
+     uint64_t clampmask;
+@@ -289,6 +290,7 @@
+ 	stq (p7, dest + 7 * stride);
+     }
+ }
++#endif
+ 
+ void mpeg2_idct_copy_alpha (int16_t * block, uint8_t * dest, const int stride)
+ {
+diff -ur orig/idct.c new/idct.c
+--- orig/idct.c	2003-09-19 11:26:42.000000000 +0200
++++ new/idct.c	2004-02-18 14:30:15.000000000 +0100
+@@ -66,7 +66,7 @@
+ } while (0)
+ #endif
+ 
+-static void inline idct_row (int16_t * const block)
++static inline void idct_row (int16_t * const block)
+ {
+     int d0, d1, d2, d3;
+     int a0, a1, a2, a3, b0, b1, b2, b3;
+@@ -119,7 +119,7 @@
+     block[7] = (a0 - b0) >> 12;
+ }
+ 
+-static void inline idct_col (int16_t * const block)
++static inline void idct_col (int16_t * const block)
+ {
+     int d0, d1, d2, d3;
+     int a0, a1, a2, a3, b0, b1, b2, b3;
+@@ -254,11 +254,14 @@
+     } else
+ #endif
+ #ifdef ARCH_ALPHA
++#ifdef CAN_COMPILE_ALPHA_MVI
+     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
+ 	mpeg2_idct_add = mpeg2_idct_add_mvi;
+ 	mpeg2_idct_alpha_init ();
+-    } else if (accel & MPEG2_ACCEL_ALPHA) {
++    } else
++#endif
++    if (accel & MPEG2_ACCEL_ALPHA) {
+ 	int i;
+ 
+ 	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
+diff -ur orig/motion_comp.c new/motion_comp.c
+--- orig/motion_comp.c	2003-10-06 04:31:52.000000000 +0200
++++ new/motion_comp.c	2004-02-18 13:48:37.000000000 +0100
+@@ -43,10 +43,12 @@
+     else
+ #endif
+ #ifdef ARCH_PPC
++#ifdef HAVE_ALTIVEC
+     if (accel & MPEG2_ACCEL_PPC_ALTIVEC)
+ 	mpeg2_mc = mpeg2_mc_altivec;
+     else
+ #endif
++#endif
+ #ifdef ARCH_ALPHA
+     if (accel & MPEG2_ACCEL_ALPHA)
+ 	mpeg2_mc = mpeg2_mc_alpha;
+diff -ur orig/mpeg2.h new/mpeg2.h
+--- orig/mpeg2.h	2003-12-22 13:13:35.000000000 +0100
++++ new/mpeg2.h	2004-02-18 13:50:13.000000000 +0100
+@@ -82,6 +82,7 @@
+ #define PIC_FLAG_COMPOSITE_DISPLAY 32
+ #define PIC_FLAG_SKIP 64
+ #define PIC_FLAG_TAGS 128
++#define PIC_FLAG_REPEAT_FIRST_FIELD 256
+ #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
+ 
+ typedef struct mpeg2_picture_s {
+diff -ur orig/mpeg2_internal.h new/mpeg2_internal.h
+--- orig/mpeg2_internal.h	2003-12-22 12:24:02.000000000 +0100
++++ new/mpeg2_internal.h	2004-08-02 18:09:17.000000000 +0200
+@@ -144,6 +144,11 @@
+     int second_field;
+ 
+     int mpeg1;
++
++    /* for MPlayer: */
++    int quantizer_scale;
++    char* quant_store;
++    int quant_stride;
+ };
+ 
+ typedef struct {
+diff -ur orig/slice.c new/slice.c
+--- orig/slice.c	2003-12-22 12:24:02.000000000 +0100
++++ new/slice.c	2004-08-02 18:07:50.000000000 +0200
+@@ -1564,6 +1564,9 @@
+ 
+ #define NEXT_MACROBLOCK							\
+ do {									\
++    if(decoder->quant_store)                                            \
++        decoder->quant_store[decoder->quant_stride*(decoder->v_offset>>4) \
++                    +(decoder->offset>>4)] = decoder->quantizer_scale;  \
+     decoder->offset += 16;						\
+     if (decoder->offset == decoder->width) {				\
+ 	do { /* just so we can use the break statement */		\
