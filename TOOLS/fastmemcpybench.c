@@ -110,7 +110,7 @@ int main( void )
 #endif
   marr2 = &arr2[9];
 
-  for(i=0; i<ARR_SIZE; i++) marr1[i] = marr2[i] = i;
+  for(i=0; i<ARR_SIZE-16; i++) marr1[i] = marr2[i] = i;
 
   t=GetTimer();
   v1 = read_tsc();
