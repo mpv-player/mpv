@@ -24,13 +24,16 @@ static struct vf_priv_s {
     int param;
     unsigned int fmt;
     struct SwsContext *ctx;
+    struct SwsContext *ctx2; //for interlaced slices only
     unsigned char* palette;
+    int interlaced;
     int query_format_cache[64];
 } vf_priv_dflt = {
   -1,-1,
   0,
   0,
   0,
+  NULL,
   NULL,
   NULL
 };
@@ -177,16 +180,24 @@ static int config(struct vf_instance_s* vf,
 
     // free old ctx:
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
+    if(vf->priv->ctx2)sws_freeContext(vf->priv->ctx2);
     
     // new swscaler:
     sws_getFlagsAndFilterFromCmdLine(&int_sws_flags, &srcFilter, &dstFilter);
     int_sws_flags|= vf->priv->v_chr_drop << SWS_SRC_V_CHR_DROP_SHIFT;
     int_sws_flags|= vf->priv->param      << SWS_PARAM_SHIFT;
-    vf->priv->ctx=sws_getContext(width,height,
+    vf->priv->ctx=sws_getContext(width, height >> vf->priv->interlaced,
 	    outfmt,
-		  vf->priv->w,vf->priv->h,
+		  vf->priv->w, vf->priv->h >> vf->priv->interlaced,
 	    best,
 	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter);
+    if(vf->priv->interlaced){
+        vf->priv->ctx2=sws_getContext(width, height >> 1,
+	    outfmt,
+		  vf->priv->w, vf->priv->h >> 1,
+	    best,
+	    int_sws_flags | get_sws_cpuflags(), srcFilter, dstFilter);
+    }
     if(!vf->priv->ctx){
 	// error...
 	mp_msg(MSGT_VFILTER,MSGL_WARN,"Couldn't init SwScaler for this setup\n");
@@ -247,6 +258,26 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
 	vf->priv->w, vf->priv->h);
 }
 
+static void scale(struct SwsContext *sws1, struct SwsContext *sws2, uint8_t *src[3], int src_stride[3], int y, int h, 
+                  uint8_t *dst[3], int dst_stride[3], int interlaced){
+    if(interlaced){
+        int i;
+        uint8_t *src2[3]={src[0], src[1], src[2]};
+        uint8_t *dst2[3]={dst[0], dst[1], dst[2]};
+        int src_stride2[3]={2*src_stride[0], 2*src_stride[1], 2*src_stride[2]};
+        int dst_stride2[3]={2*dst_stride[0], 2*dst_stride[1], 2*dst_stride[2]};
+
+        sws_scale_ordered(sws1, src2, src_stride2, y>>1, h>>1, dst2, dst_stride2);
+        for(i=0; i<3; i++){
+            src2[i] += src_stride[i];
+            dst2[i] += dst_stride[i];
+        }
+        sws_scale_ordered(sws2, src2, src_stride2, y>>1, h>>1, dst2, dst_stride2);
+    }else{
+        sws_scale_ordered(sws1, src, src_stride, y, h, dst, dst_stride);
+    }                  
+}
+
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
     mp_image_t *dmpi=vf->dmpi;
@@ -255,7 +286,7 @@ static void draw_slice(struct vf_instance_s* vf,
 	return;
     }
 //    printf("vf_scale::draw_slice() y=%d h=%d\n",y,h);
-    sws_scale_ordered(vf->priv->ctx,src,stride,y,h,dmpi->planes,dmpi->stride);
+    scale(vf->priv->ctx, vf->priv->ctx2, src, stride, y, h, dmpi->planes, dmpi->stride, vf->priv->interlaced);
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
@@ -270,8 +301,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     dmpi=vf_get_image(vf->next,vf->priv->fmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 	vf->priv->w, vf->priv->h);
-    sws_scale_ordered(vf->priv->ctx,mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride);
-
+    
+      scale(vf->priv->ctx, vf->priv->ctx, mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride, vf->priv->interlaced);
   }
 
     if(vf->priv->w==mpi->w && vf->priv->h==mpi->h){
@@ -331,6 +362,10 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 
 	r= sws_setColorspaceDetails(vf->priv->ctx, inv_table, srcRange, table, dstRange, brightness, contrast, saturation);
 	if(r<0) break;
+	if(vf->priv->ctx2){
+            r= sws_setColorspaceDetails(vf->priv->ctx2, inv_table, srcRange, table, dstRange, brightness, contrast, saturation);
+            if(r<0) break;
+        }
 
 	return CONTROL_TRUE;
     default:
@@ -381,6 +416,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static void uninit(struct vf_instance_s *vf){
     if(vf->priv->ctx) sws_freeContext(vf->priv->ctx);
+    if(vf->priv->ctx2) sws_freeContext(vf->priv->ctx2);
     if(vf->priv->palette) free(vf->priv->palette);
     free(vf->priv);
 }
@@ -397,6 +433,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv=malloc(sizeof(struct vf_priv_s));
     // TODO: parse args ->
     vf->priv->ctx=NULL;
+    vf->priv->ctx2=NULL;
     vf->priv->w=
     vf->priv->h=-1;
     vf->priv->v_chr_drop=0;
@@ -411,6 +448,7 @@ static int open(vf_instance_t *vf, char* args){
     mp_msg(MSGT_VFILTER,MSGL_V,"SwScale params: %d x %d (-1=no scaling)\n",
     vf->priv->w,
     vf->priv->h);
+    
     return 1;
 }
 
@@ -530,6 +568,7 @@ static m_obj_presets_t size_preset = {
 static m_option_t vf_opts_fields[] = {
   {"w", ST_OFF(w), CONF_TYPE_INT, M_OPT_MIN,-3 ,0, NULL},
   {"h", ST_OFF(h), CONF_TYPE_INT, M_OPT_MIN,-3 ,0, NULL},
+  {"interlaced", ST_OFF(interlaced), CONF_TYPE_INT, M_OPT_RANGE, 0, 1, NULL},
   {"chr-drop", ST_OFF(v_chr_drop), CONF_TYPE_INT, M_OPT_RANGE, 0, 3, NULL},
   {"param", ST_OFF(param), CONF_TYPE_INT, M_OPT_RANGE, 0, 100, NULL},
   // Note that here the 2 field is NULL (ie 0)

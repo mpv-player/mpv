@@ -2501,7 +2501,7 @@ Rotates and flips (optional) the image +/\:- 90 degrees.
 For parameters between 4\-7 rotation is only done if the movie's geometry is
 portrait and not landscape.
 .TP
-.B scale[=w:h[:c[:p]]]
+.B scale[=w:h[:i[:c[:p]]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
 colorspace conversion (also see \-sws option).
 .RSs
@@ -2519,6 +2519,8 @@ incapable of scaling, then it defaults to d_width/\:d_height!
 .br
 -3:   Calculate w/\:h using the other dimension and the original aspect ratio.
 .REss
+.IPs i
+interlaced flag
 .IPs c
 chroma skipping
 .RSss
