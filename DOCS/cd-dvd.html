@@ -5,6 +5,27 @@
 
 <P><B><A NAME=4.1>4.1. CD-ROM drives</A></B></P>
 
+<P>Playing standard Video CDs:</P>
+
+<P>
+mplayer -vcd <I>trackno</I> [device]<BR><BR>
+Examples:<BR>
+mplayer -vcd 1<BR>
+mplayer -fs -vcd 2 /dev/hdc<BR>
+</P>
+
+<P>
+Notes:<BR>
+- Do NOT mount VCD disks and play DAT files directly! It may work under windows
+but won't work under linux. You have to play them directly, with the -vcd
+option!<BR>
+- VCD disks usually have 2 tracks: a data track (containing autostart windows
+playback program, karaoke data etc) and a mode-2 track (the movie), so try
+-vcd 2 first!<BR>
+- the default VCD device is /dev/cdrom. if your device differs, then you have
+to make a symlink, or specify it in command line!
+</P>
+
 <P>From Linux documentation:</P>
 
 <P>Some CDROM drives are capable of changing their head-speed. There are several
