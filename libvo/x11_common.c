@@ -1,14 +1,16 @@
+
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
+#include "config.h"
+
+#ifdef X11_FULLSCREEN
+
+#include <string.h>
 #include <unistd.h>
 #include <sys/mman.h>
 
-#include "config.h"
 #include "video_out.h"
-
-#ifdef X11_FULLSCREEN
 
 #include <X11/Xmd.h>
 #include <X11/Xlib.h>
@@ -169,8 +171,6 @@ int vo_x11_check_events(Display *mydisplay){
   return ret;
 }
 
-#endif
-
 void saver_on(Display *mDisplay) {
 
     int nothing;
@@ -215,3 +215,5 @@ void saver_off(Display *mDisplay) {
 	XSetScreenSaver(mDisplay, 0, interval, prefer_blank, allow_exp);
 		    // turning off screensaver
 }
+
+#endif
