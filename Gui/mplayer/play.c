@@ -57,7 +57,7 @@ printf("%%%%%% STOP  \n");
 
 void mplPlay( void )
 {
- if ( strlen( mplShMem->Filename ) == 0 ) return;
+ if ( mplShMem->Filename[0] == 0 ) return;
  if ( mplShMem->Playing ) mplStop();
 // ---
 printf("%%%%%% PLAY  \n");
