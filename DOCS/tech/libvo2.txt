@@ -1,0 +1,324 @@
+This is a brief description on libvo2 interface. It is not C code, just
+draft scheme. Feel free to suggest exact parameters.
+I have tried to put some numbering. So if you want to reply then put the 
+topic number in the subject line. Please don't reply to the whole draft, 
+or at least don't include big paragraphs from it.
+I'm gonna put this text as attachment to force you to copy only the parts 
+you want to reply;)
+
+   Best Regards
+Ivan Kalvachev
+
+1.libvo2 drivers 
+1.1 functions
+Currently these functions are implemented:
+  init
+  control
+  start
+  stop
+  get_surface
+  flip_image
+
+They are simple enough. So I introduce to be implemented and these functions:
+  query
+  update_surface - renamed draw
+  hw_decode
+  subpicture
+
+Here is detailed description of new functions:
+
+  query - the negotiation is more complex than just finding which imgfmt the
+  device could show, we must have list of capabilities, testing modes, etc.
+  this function will have at least 3 modes:
+
+    a) return list of available modes with description.
+    b) check could we use this mode with these parameter. E.g. if we want
+       RGB32 with 3 surfaces for windows image 800x600 we may get out of video
+       memory. We don't want error because this mode could be used with 2
+       surfaces.
+    c) return supported subpicture formats if any.
+
+As you may see I have removed some functionality from control() and made
+separate function. Why? It is generally good thing functions that are
+critical to the driver to have it's own implementation.
+
+  update_surface - as in the note above, this is draw function. Why I change
+    it's name? I have 2 reasons, first I don't want implementation like vo1,
+    second it really must update video surface, it must directly call the
+    system function that will do it. This function should work only with
+    slices, the size of slice should not be limited and should be passed (e.g
+    ystart, yend), if we want draw function, we will call one form libvo2
+    core, that will call this one with start=0; ymax=Ymax;. Also some system
+    screen update functions wait for vertical retrace before return, other
+    functions just can't handle partial updates. In this case we should inform
+    libvo2 core that device cannot slice, and libvo2 core must take care of
+    the additional buffering.
+
+  hw_decode - to make all dvb,dxr3, tv etc. developers happy. This function
+    is for you. Be careful, don't OBSEBE it, think and for the future, this
+    function should have and ability to control HW IDCT, MC that one day will
+    be supported and under linux. Be careful:)
+
+  subpicture - this function will place subtitles. It must be called once to
+    place them and once to remove them, it should not be called on every
+    frame, the driver will take care of this.  Currently I propose this
+    implementation: we get array of bitmaps. Each one have its own starting
+    x, y and it's own height and width, each one (or all together) could be
+    in specific imgfmt (spfmt). THE BITMAPS SHOULD NOT OVERLAP! This may not
+    be hw limitation but sw subtitles may get confused if they work as 'c'
+    filter (look my libvo2 core).
+    
+1.2 control()
+OK, here is list of some control()s that I think that could be useful:
+    SET_ASPECT
+    SET_SCALLE_X, SET_SIZE_X
+    SET_SCALLE_Y, SET_SIZE_Y
+    RESET_SIZE
+    GET/SET_POSITION_X
+    GET/SET_POSTIION_Y
+    GET/SET_RESOLUTION
+    GET/SET_DISPLAY
+    GET/SET_ATTRIBUTES
+
+Here is description of how these controls to be used:
+
+  SET_ASPECT - this is the move/video aspect, why not calculate it in
+  different place (mplayer.c) and pass the results to driver by
+  set_size_x/y. First this is only if hardware could scale. Second we may
+  need this value if we have TV and we won't calculate new height and width.
+
+  SET_SCALLE_X/Y - this is to enlarge/downscale  the image, it WILL NOT
+  override SET_ASPECT, they will have cumulative effect, this could be used
+  for deinterlacing (HALF SIZE). Second if we want to zoom 200% we don't
+  want to lose aspect calculations. Or better SET_SCALLE to work with
+  current size?
+
+  SET_SIZE_X/Y - This is for custom enlarge, to save some scale calculation
+  and for more precise results.
+
+  RESET_SIZE - Set the original size of image, we must call SET_ASPECT agein.
+
+  GET/SET_POSOTION_X/Y - This if for windows only, to allow custom move on
+  window.
+
+  GET/SET_RESOLUTION - change resolution and/or bpp if possible. To be used
+  for window or if we want to change the given resolution of the current
+  fullscreen mode (NOT TO SET IT just to change it if we don't like it)
+
+  GET/SET_DISPLAY - mainly for X11 and remote displays. Not very useful, but
+  may be handy.
+
+  GET/SET_ATTRIBUTES - Xv overlays have contrast, brightness, hue,
+  saturation etc. these and others could be controlled by this. If we want
+  to query it we must call GET_*, and the to check does our attribute is in
+  there (xv developers be careful, 2 or 3 of default attributes sometimes
+  are not queried by X, but could be set).
+
+Do you think that TV encodings (NTSC,PAL,SECAM) should have it's own attribute?
+I would like to hear the GUI developers. Could we separate Mouse/Keyboard
+from the driver. What info do you need to do it. Don't forget that SDL have
+it's own keyboard/mouse interface. Maybe we should allow video driver to
+change the libin driver ?
+
+1.3. query()
+
+Here come and some attributes for the queried modes, each supported mode
+should have such description. It is even possible to have more than one mode
+that could display given imgfmt.
+
+{ Scale y/n - hardware scale, do you think that we mast have one for x and
+  one for y (win does)?
+
+  Fullscreen y/n - if the supported mode is fullscreen, if we have yv12 for
+fullscreen and window we must threat them as separate modes. Window y/n -
+same as Fullscreen.
+
+  GetSurface y/n - if driver could give us video surface we'll use get_surface()
+
+  UpdateSurfece y/n - if driver will update video surface through sys function (X,SDL)
+
+  HWdecode y/n  - if driver could take advantage of hw_decode()
+
+  MaxSurfaces 1..n - Theoretical maximum of surfaces
+
+  SubPicture y/n - Could we put subpicture (OSD) of any kind by hw
+
+  WriteCombine y/n - if GetSurface==yes, most (or all) pci&agp cards are
+  extremely slow on byte access, this is hint to vo2 core those surfaces
+  that got affected by WC. This is only a hint.
+
+  us_clip y/n - if UpdateSurface=yes, this shows could update_surface()
+  remove strides (when stride> width ), this is used and for cropping. If
+  not, we must do it.
+
+  us_slice y/n - if UpdateSurface=yes, this shows that after executing
+  update_surface(), the function won't wait for vertical retrace, and we
+  could update surface slice by slice. If us_slice=0 we will have to
+  accumulate all slices in one buffer.
+
+  us_upsidedown - if UpdateSufrace=yes, this shows that update_suface()
+  could flip the image vertically. In some case this could be united with
+  us_clip /stride game/
+
+  switch_resoliton y/n - if window=y, this shows could we switch resolution
+  of desktop, if fullscreen=y, shows that we could change resolution, after
+  we have set the fullscreen mode.
+
+  deinterlace y/n - indicates that the device could deinterlace on it's own
+  (radeon, TV).
+
+1.4 conclusion 
+
+As you see, I have removed all additional buffering from the driver. There
+is a lot of functionality should be checked and handled by libvo2 core.
+First we should check what else could be added to this draft. Then to check
+all cases and how to handle them. Some of the parameters should be able to
+be overriden by user config, mainly to disable buggy modes or parameters. I
+belive that this should not be done by command line as there are enough
+commands now.
+
+//---------------------------
+2. libvo2 core
+2.1 functions
+now these function are implemented:
+    init
+    new
+    start
+    query_format
+    close
+
+and as draw.c:
+    choose_buffering
+    draw_slice_start
+    draw_slice
+    draw_frame
+    flip
+
+init() is called at mplayer start. internal initialisation.
+new() -> rename to open_drv() or something like this.
+query_format -> not usable in this form, this function mean that all
+  negotiation will be performed outside libvo2. Replace or find better name.
+close -> open/close :)
+
+choose_buffering - all buffering must stay hidden. The only exception is for
+  hw_decode. In the new implementation this functions is not usable.
+draw_slice_start, draw_slice -> if you like it this way, then it's OK.
+draw_frame -> classic draw function.
+
+2.2 Minimal buffering
+
+I should say that I stand after the idea all buffering, postprocessing,
+format conversion , sw draw of subtitles, etc to be done in libvo2 core.
+Why? First this is the only way we could fully control buffering and
+decrease it to minimum. Less buffers means less coping. In some cases this
+could have the opposite effect (mpeg2 with internal buffers in video memory
+without HW IDCT, MC, or if we have unaligned write).
+
+The first step of the analyse is to find out what we need:
+
+DECODER   -   type_of_buffer:{internal/static/normal}, 
+              slice:{not/supported}
+
+FILTER 1..x - processing:{ c-copy(buff1,buff2), p-process(buff1) }, 
+              slice:{not/supported}
+              write_combine:{not/safe}, 
+              runtime_remove:{static/dynamic}
+
+VIDEO_OUT  -  method:{get_surface/update_surface}, 
+              slice:{not/supported}, 
+              write_combine:{not/safe},
+              clip:{can/not},
+              upsidedown:(can/not),
+              surfaces:{1/2/3,..,n}
+
+  If we want direct rendering we need normal buffer, no filters, and (at
+  least) 2 video surfaces. (we may allow 'p' filter like subtitles).
+
+  If we have static buffer, we have 2 choices: to render in 1 surface
+  (visual flickering) or to make additional buffering and draw on flip_page
+  (like in libvo1).
+
+Here I introduce and one letter codes that I use for analyse.
+Details: 
+
+DECODER - We always get buffer from the decoder, some decoders could give
+  pointer to it's internal buffers, other takes pointers to buffers where
+  they should store the final image. Some decoders could call draw_slice
+  after they have finished with some portion of the image.
+
+  type_of_buffer - I take this from the current libvo2 spec.  I call 'I'
+  internal buffer (readonly), 'K' static buffer(one,constant pointer), and
+  'B' - normal buffer.
+
+  slice - this flag shows that decoder knows and want to work with slices.
+
+FILTER - postprocessing, sw drawing subtitles, format conversion, crop,
+additional filters.
+
+  slice - could this filter work with slice order. We could use slice even
+  when decoder does not support slice, we just need 2 or more filters that
+  does. This could give us remarkable speed boost.
+
+  processing - some filters can copy the image from one buffer to the other,
+  I call them 'c', convert and crop(stride copy) are good examples but don't
+  forget simple 1:1 copy. Other filters does process only part if the image,
+  and could reuse the given buffer, e.g. putting subtitles. Other filters
+  could work in one buffer, but could work and with 2, I call them 't'
+  class, after analyse they will fade to 'c' or 'p'.
+
+  runtime_remove - postprocess with autoq. Subtitles appear and disappear,
+  should we copy image from one buffer to another if there is no processing
+  at all?
+
+//clip, crop, upsidedown - all 'c' filters must support strides, and should
+  be able to remove them and to make some tricks like crop and upside_down.
+
+VIDEO_OUT - take a look of libvo2 driver I propose.
+  method - If we get surface -'S'. If we use draw* (update_surface) - 'd'
+
+As you may see hd_decode don't have complicated buffering:)
+I make the analyse this way. First I put decoder buffer, then I put all
+filters, that may be needed, and finally I put video out method.
+
+2.3. Rules for minimal buffering
+The rules are these: 
+The 'p' filters process in the buffer of the left, if we have 'I' buffer
+then insert copy and new 'B' buffer.
+With 'c' filter we must make sure that we have buffer ('B' or 'S') from the right(->) side. 
+We must take care that, if we have S we need to finish with copy ('c'), and
+if we have 'd' we must end with some kind of buffer.
+In the usual case 't' are replaced with 'p' except when 't' is before 'S'.
+If we have 'B S' or 'K S' we may make direct rendering and remove the 'B' or 'K' buffer.
+We must have at least one 'c' if we have to make crop, clip, or flip image upside down.
+Take care for the additional buffering when we have 1 surface (the libvo1 way).
+Be aware that some filters must be before other. E.g. Postporcessing should
+be before subtitles:)
+If we want scale (-zoom), and vo2 driver can't make it then add and scale
+filter 'c'. For better understanding I have one convert filter that can
+copy, convert, convert and scale. The only thing that is missing now is
+simple scale (yv12).
+
+I have made grammar for these cases but it is too big and I hope that
+something cleverer could be made. Don't think that having only 3 filters
+(postporcess, convert/copy, subtitles) may make the things simpler. This
+algorithm could be used and for numerous filters used in encoders.
+
+2.4 Negotiation
+Few words about negotiation. It is hard thing to find the best mode. Here is
+algorithm that could find the best mode. But first I must say that we need
+some kind of weight for the filters and drawing. I think that we could use
+something like megabytes/second, something that we may measure or benchmark.
+
+  1. We choose codec
+  2. We choose video driver.
+  3. For each combination find the total weight and if there are any
+  optional filters find min and max weight. Be careful max weight is not
+  always at maximum filters!!
+  4. Compare the results.
+
+I may say that we don't need automatic codec selection as now we could put
+best codecs at beginning of codecs.conf as it is now. We may need to make
+same thing with videodrv.conf :)
+
+
+
