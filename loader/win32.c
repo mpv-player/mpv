@@ -187,19 +187,11 @@ static inline void dbgprintf(char* fmt, ...)
 	va_end(va);
     }
 #endif
-#if 0
-// al3x: it break divx audio. btw it should be if(verbose>2){ ... } anyway...
-// #ifdef MPLAYER
+#undef MPLAYER
+#ifdef MPLAYER
     #include "../mp_msg.h"
-    {
-	char buf[1024];
-	va_list va;
-
-        va_start(va, fmt);
-	vsnprintf((char *)&buf[0], 1023, fmt, va);
-	mp_dbg(MSGT_WIN32, MSGL_DBG3, (char *)&buf[0]);
-	va_end(va);
-    }
+    if (verbose > 2) 
+	mp_dbg(MSGT_WIN32, MSGL_DBG3, fmt, va);
 #endif
 }
 
@@ -1210,7 +1202,7 @@ static void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 	    printf("InitializeCriticalSection(%p) - no more space in list\n", c);
 	    return;
 	}
-	printf("got unused space at %d\n", i);
+	dbgprintf("got unused space at %d\n", i);
 	cs = expmalloc(sizeof(struct CRITSECT));
 	if (!cs)
 	{
@@ -1245,7 +1237,7 @@ static void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
     dbgprintf("EnterCriticalSection(0x%x)\n",c);
     if (!cs)
     {
-	printf("entered uninitialized critisec!\n");
+	dbgprintf("entered uninitialized critisec!\n");
 	expInitializeCriticalSection(c);
 #ifdef CRITSECS_NEWTYPE
 	cs=critsecs_get_unix(c);
@@ -1273,7 +1265,7 @@ static void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
     dbgprintf("LeaveCriticalSection(0x%x)\n",c);
     if (!cs)
     {
-	printf("Win32 Warning: Leaving noninitialized Critical Section %p!!\n", c);
+	printf("Win32 Warning: Leaving uninitialized Critical Section %p!!\n", c);
 	return;
     }
     cs->locked=0;
@@ -1326,7 +1318,7 @@ static int WINAPI expGetCurrentProcess()
 
 extern void* fs_seg;
 
-#if 0
+#if 1
 // this version is required for Quicktime codecs (.qtx/.qts) to work.
 // (they assume some pointers at FS: segment)
 
@@ -1967,6 +1959,10 @@ static int WINAPI expFreeResource(long res)
 static int WINAPI expCloseHandle(long v1)
 {
     dbgprintf("CloseHandle(0x%x) => 1\n", v1);
+    /* do not close stdin,stdout and stderr */
+    if (v1 > 2)
+	if (!close(v1))
+	    return 0;
     return 1;
 }
 
@@ -2949,6 +2945,23 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
 	return r;
     }
 
+#if 0
+    /* we need this for some virtualdub filters */  
+    {
+	int r;
+	int flg = 0;
+	if (GENERIC_READ & i1)
+	    flg |= O_RDONLY;
+	else if (GENERIC_WRITE & i1)
+	{
+	    flg |= O_WRONLY;
+	    printf("Warning: openning filename %s  %d (flags; 0x%x) for write\n", cs1, r, flg);
+	}
+	r=open(cs1, flg);
+	return r;
+    }    
+#endif
+
     return atoi(cs1+2);
 }
 static UINT WINAPI expGetSystemDirectoryA(
@@ -2967,6 +2980,22 @@ static LPCSTR WINAPI expGetSystemDirectoryA()
     return sysdir;
 }
 */
+static DWORD WINAPI expGetFullPathNameA
+(
+	LPCTSTR lpFileName,
+	DWORD nBufferLength,
+	LPTSTR lpBuffer,
+	LPTSTR lpFilePart
+){
+    if(!lpFileName) return 0;
+    dbgprintf("GetFullPathNameA('%s',%d,%p,%p)\n",lpFileName,nBufferLength,
+	lpBuffer, lpFilePart);
+    strcpy(lpFilePart, lpFileName);
+    strcpy(lpBuffer, lpFileName);
+//    strncpy(lpBuffer, lpFileName, rindex(lpFileName, '\\')-lpFileName);
+    return strlen(lpBuffer);
+}
+
 static DWORD WINAPI expGetShortPathNameA
 (
         LPCSTR longpath,
@@ -3801,6 +3830,7 @@ struct exports exp_kernel32[]=
     FF(GetSystemDirectoryA,-1)
     FF(GetWindowsDirectoryA,-1)
     FF(GetShortPathNameA,-1)
+    FF(GetFullPathNameA,-1)
     FF(SetErrorMode, -1)
     FF(IsProcessorFeaturePresent, -1)
     FF(GetProcessAffinityMask, -1)
