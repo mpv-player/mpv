@@ -51,7 +51,7 @@ ebml_read_vlen_uint (uint8_t *buffer, int *length)
   j = i+1;
   if (length)
     *length = j;
-  if (((int)num &= (len_mask - 1)) == len_mask - 1)
+  if ((num &= (len_mask - 1)) == len_mask - 1)
     num_ffs++;
   while (i--)
     {
@@ -99,7 +99,7 @@ ebml_read_length (stream_t *s, int *length)
   j = i+1;
   if (length)
     *length = j;
-  if (((int)len &= (len_mask - 1)) == len_mask - 1)
+  if ((len &= (len_mask - 1)) == len_mask - 1)
     num_ffs++;
   while (i--)
     {
