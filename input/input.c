@@ -64,6 +64,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_TV_STEP_CHANNEL_LIST, "tv_step_chanlist", 0, { {-1,{0}} }  },
 #endif
   { MP_CMD_VO_FULLSCREEN, "vo_fullscreen", 0, { {-1,{0}} } },
+  { MP_CMD_SCREENSHOT, "screenshot", 0, { {-1,{0}} } },
 
 #ifdef HAVE_NEW_GUI  
   { MP_CMD_GUI_LOADFILE, "gui_loadfile", 0, { {-1,{0}} } },
@@ -241,6 +242,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { JOY_BTN3, 0 }, "volume -1"},
 #endif
   { { 'f', 0 }, "vo_fullscreen" },
+  { { 's', 0 }, "screenshot" },
   { { 0 }, NULL }
 };
 

@@ -25,6 +25,7 @@
 #define MP_CMD_VO_FULLSCREEN 20
 #define MP_CMD_SUB_POS 21
 #define MP_CMD_DVDNAV 22
+#define MP_CMD_SCREENSHOT 23
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001
