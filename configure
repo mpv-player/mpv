@@ -245,7 +245,7 @@ echo "Please wait while ./configure discovers your software and hardware environ
 
 # Determine our OS name and CPU architecture
 if [ "$_target" = "" ]; then
-   system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, SunOS
+   system_name=`uname -s 2>&1` # name of operating system: Linux, FreeBSD, NetBSD, OpenBSD, SunOS
    host_arch=`uname -p 2>&1`   # host's instruction set or processor type
 
    case "$host_arch" in
@@ -285,7 +285,7 @@ echo "Detected host architecture: $host_arch"
 # Determine OS dependent libs
 _confcygwin="TARGET_CYGWIN=no"
 _confwin32=
-if [ "$system_name" = "FreeBSD" ]; then
+if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
     _archlibs="-rdynamic -pthread"
 elif [ `echo $system_name | sed 's/[cC][yY][gG][wW][iI][nN].*/CYGWIN/'` = "CYGWIN" ]; then
     _confcygwin="TARGET_CYGWIN=yes"
@@ -720,7 +720,7 @@ esac
 
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
 
-if [ "$system_name" = "FreeBSD" ]; then
+if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
 $_cc $TMPC -o $TMPO -pthread > /dev/null 2>&1 || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
 else
@@ -805,7 +805,8 @@ $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib > /dev/null 2>&1 && _xv=yes
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&1 && _vm=yes
 
-if [ "$system_name" = "FreeBSD" ]; then
+# this is not yet checked with OpenBSD - atmos
+if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread $_socklib > /dev/null 2>&1 && _gl=yes
 else
 $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib > /dev/null 2>&1 && _gl=yes
@@ -815,7 +816,8 @@ cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
 EOF
-if [ "$system_name" = "FreeBSD" ]; then
+# this is not yet checked with OpenBSD - atmos
+if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
 $_cc $_x11incdir $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread $_socklib > /dev/null 2>&1 || \
  { _gl=no; echo "GL includes not found!";}
 else
@@ -856,7 +858,6 @@ int main( void ) { return DEC_OPT_FRAME_311; }
 EOF
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore > /dev/null 2>&1 || \
  { _divx4linux=no; echo "DivX4Linux includes (decore.h) not found!";}
-
 
 rm -f $TMPC $TMPO
 
@@ -1223,7 +1224,8 @@ if test x"$_datadir" = x; then
 fi
 
 # Checking assembler (_as) compatibility...
-as_version=`$_as --version 2>&1 | sed -n 's/^.*assembler \([0-9.]*\).*$/\1/p'`
+# Added workaround for older as that reads from stdin by default - atmos
+as_version=`echo '' | $_as -version 2>&1 | sed -n 's/^.*assembler \(version \)*\([0-9.]*\).*$/\2/p'`
 echo $_echo_n "Checking assembler ($_as) ... $as_version, $_echo_c"
 _pref_as_version='2.9.1'
 ### this test disabled, see _binutils test above!  --A'rpi
@@ -1402,7 +1404,8 @@ if [ $_streaming = yes ]; then
 fi
 
 if [ $_gl = yes ]; then
-   if [ "$system_name" = "FreeBSD" ]; then
+   # niot yet etsted on OpenBSD - atmos	
+   if [ "$system_name" = "FreeBSD" -o "$system_name" = "OpenBSD" ]; then
       # Under XFree86 4.x GL port is poorly designed
       if [ -r /usr/X11R6/bin/XFree86 ]; then
          _gllib='-lGL -pthread'
@@ -2042,6 +2045,8 @@ Please check config.h and config.mak files, tune CPU
 and optimization flags if you don't like these defaults.
 You can compile the program with 'make' and
 install with  'make install'. Good luck!
+Note: On non-Linux systems you might need to use gmake
+instead of make.
 
 EOF
 
