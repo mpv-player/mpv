@@ -152,6 +152,10 @@ static char * ao_driver[3];
 static char * vo_driver[3];
 static int    old_video_driver = 0;
 
+#ifdef HAVE_DXR3
+ void ShowDXR3Config( void );
+ void HideDXR3Config( void );
+#endif
  void ShowAudioConfig();
  void HideAudioConfig();
 
@@ -1684,7 +1688,7 @@ GtkWidget * create_DXR3Config( void )
  vbox1=AddVBox( AddDialogFrame( DXR3Config ),0 );
  vbox2=AddVBox( vbox1,0 );
  hbox1=AddHBox( vbox2,1 );
- AddLabel( MSGTR_PREFERENCES_OSS_Device,hbox1 );
+ AddLabel( MSGTR_PREFERENCES_Audio_Device,hbox1 );
 
  CBDevice=AddComboBox( hbox1 );
 
