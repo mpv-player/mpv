@@ -922,7 +922,7 @@ Las opciones disponibles son:
 .IPs noaudio
 sin sonido
 .IPs driver=<valor>
-disponibles: dummy, v4l, bsdbt848
+disponibles: dummy, v4l, v4l2, bsdbt848
 .IPs device=<valor>
 Especifica otro dispositivo en lugar del que hay por defecto /dev/\:video0.
 .IPs input=<valor>
@@ -943,7 +943,10 @@ razón de captura de video (imágenes por segundo)
 .IPs buffersize=<valor>
 tamaño máximo del buffer de captura en megabytes (por defecto: dinámico)
 .IPs norm=<valor>
-disponible: PAL, SECAM, NTSC
+disponible: PAL, SECAM, NTSC. Para v4l2 use la opción normid de más abajo.
+.IPs normid=<valor>
+v4l2 solamente. Vea la salida de MPlayer para una lista de normas de TV
+disponibles.
 .IPs channel=<valor>
 Coloca el sintonizador en el canal <valor>.
 .IPs chanlist=<valor>
@@ -994,9 +997,12 @@ ID hardware para ALSA
 .IPs audioid=<valor>
 elije la salida de audio de la tarjeta capturadora, si tiene más
 de una.
-.IPs [volume|bass|treble|balance]=<0\-65535>
+.IPs [volume|bass|treble|balance]=<0\-100>
 Estas opciones establecen los parámetros del mezclador en la tarjeta
 de captura de vídeo. No tiene efecto si la tarjeta no tiene mezclador.
+Para v4l1, 0-65535 es un rango válido. Para v4l2, el rango válido es
+0 a 100, y 50 mapean el valor por defecto de control, como es reportado
+por el controlador.
 .IPs immediatemode=<bool>
 Un valor de 0 significa captura y buffer de audio y video juntos (por
 defecto para MEncoder).
