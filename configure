@@ -5,6 +5,9 @@
 #				   pontscho@makacs.poliod.hu
 #
 # Changes in reversed order:
+# 2001/11/14 by David Holm
+# - added --enable-libvo2 for dev purposes
+#
 # 2001/11/14 by Gabucino
 # - dunno who made the --target option but now it even works
 # - fixed some Intel arch test for --target
@@ -568,6 +571,7 @@ _3dnow=no
 _3dnowex=no
 _mtrr=no
 _sse=no
+_vo2=no
 
 _mga=no
 _gl=no
@@ -619,6 +623,7 @@ _x11lib=
 _xineramalib=
 _iconvlib=
 _dxr3lib=
+_volib=
 
 _select='#define HAVE_AUDIO_SELECT'
 
@@ -1417,6 +1422,9 @@ for ac_option do
   --enable-dxr3)
 	_dxr3=yes
 	;;
+  --enable-libvo2)
+	_vo2=yes
+	;;
   --enable-iconv)
   	_iconv=yes
 	;;
@@ -1816,22 +1824,26 @@ fi
 echo "Screen size ... ${_x}x${_y}"
 echo "Checking for X11 libs ... $_x11libdir"
 echo "Checking for X11 headers ... $_x11incdir"
-echo "Checking mga_vid device ... $_mga"
-echo "Checking for xmga ... $_xmga" 
-echo "Checking for SDL ... $_sdl (with $_sdlconfig)"
-echo "Checking for AA ... $_aa"
-echo "Checking for GGI ... $_ggi"
-echo "Checking for OpenGL ... $_gl"
-echo "Checking for Xv ... $_xv"
-echo "Checking for Xinerama ... $_xinerama"
-echo "Checking for X11 ... $_x11"
-echo "Checking for DGA ... $_dga"
-echo "Checking for DGA 2.0 .. $_dga2"
-echo "Checking for Xf86VM ... $_vm"
-echo "Checking for SVGAlib ... $_svga"
-echo "Checking for FBDev ... $_fbdev"
-echo "Checking for DVB ... $_dvb"
-echo "Checking for DXR3/H+ ... $_dxr3"
+if test "$_vo2" = yes ; then
+ echo "Checking for libvo2 ... $_vo2"
+else
+ echo "Checking mga_vid device ... $_mga"
+ echo "Checking for xmga ... $_xmga" 
+ echo "Checking for SDL ... $_sdl (with $_sdlconfig)"
+ echo "Checking for AA ... $_aa"
+ echo "Checking for GGI ... $_ggi"
+ echo "Checking for OpenGL ... $_gl"
+ echo "Checking for Xv ... $_xv"
+ echo "Checking for Xinerama ... $_xinerama"
+ echo "Checking for X11 ... $_x11"
+ echo "Checking for DGA ... $_dga"
+ echo "Checking for DGA 2.0 .. $_dga2"
+ echo "Checking for Xf86VM ... $_vm"
+ echo "Checking for SVGAlib ... $_svga"
+ echo "Checking for FBDev ... $_fbdev"
+ echo "Checking for DVB ... $_dvb"
+ echo "Checking for DXR3/H+ ... $_dxr3"
+fi
 echo "Checking for OSS Audio ... $_oss_audio"
 echo "Checking for ALSA Audio ... $_alsaver"
 echo "Checking for ESD Audio ... $_esd"
@@ -2509,6 +2521,18 @@ else
  _tv='#undef USE_TV'
 fi
 
+if test "$_vo2" = yes ; then
+ _vodef='#define USE_LIBVO2'
+ _volib='-Llibvo2 -lvo2'
+ _voinc='-Ilibvo2'
+ _vodir='libvo2'
+else
+ _vodef='#undef USE_LIBVO2'
+ _volib='-Llibvo -lvo'
+ _voinc='-Ilibvo'
+ _vodir='libvo'
+fi
+
 if test "$_dxr3" = yes ; then
  _dxr3='#define HAVE_DXR3'
  _dxr3lib='-ldxr3'
@@ -2559,12 +2583,14 @@ AR=ar
 CC=$_cc
 # OPTFLAGS=-O4 $_profile $_debug $_march $_mcpu -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=$CFLAGS
-EXTRA_INC=$_extraincdir $_gtkinc
+EXTRA_INC=$_extraincdir $_voinc $_gtkinc
 WIN32_PATH=-DWIN32_PATH=\\"$_win32libdir\\"
+VO_INC=$_voinc
 
 X11_INC=$_x11incdir
 X11DIR=$_x11libdir
-X_LIBS=$_x11libdir $_extralibdir $_gllib $_ggilib $_dxr3lib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib $_libmad $_zlib
+X_LIBS=$_x11libdir $_extralibdir $_volib $_volibdir $_gllib $_ggilib $_dxr3lib $_sdllib $_dgalib $_x11lib $_xvlib $_vmlib $_svgalib $_libpng $_socklib $_aalib $_libvorbis $_xineramalib $_libmad $_zlib
+VO_LIB=$_volib
 
 TERMCAP_LIB=$_libtermcap
 XMM_LIBS = $_xmmplibs
@@ -2603,6 +2629,7 @@ TARGET_MMX2=$_cfg_mmx2
 TARGET_3DNOW=$_cfg_3dnow
 TARGET_3DNOWEX=$_cfg_3dnowex
 TARGET_SSE=$_cfg_sse
+VODIR=$_vodir
 
 BINUTILS=$_binutils
 
@@ -2623,6 +2650,7 @@ cat > $CCONF << EOF
 
 #define USE_OSD
 #define USE_SUB
+$_vodef
 
 $_debugdef
 
