@@ -514,7 +514,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer가 잘못된 CPU/FPU/RAM의 사용으로 종료되었습니다.\n"\
 "  MPlayer를 --enable-debug 옵션으로 다시 컴파일하고, 'gdb' 백트레이스 및\n"\
-"  디스어셈블해보세요. 자세한 것은 DOCS/bugreports.html#crash.b를 참조하세요.\n"
+"  디스어셈블해보세요. 자세한 것은 DOCS/bugreports.html#crash를 참조하세요.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer가 알 수 없는 이유로 종료되었습니다.\n"\
 "  MPlayer 코드나 드라이버의 버그, 혹은 gcc버전의 문제일 수도 있습니다.\n"\

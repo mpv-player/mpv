@@ -152,7 +152,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer crashed by bad usage of CPU/FPU/RAM.\n"\
 "  Recompile MPlayer with --enable-debug and make a 'gdb' backtrace and\n"\
-"  disassembly. For details, see DOCS/bugreports.html#crash.b.\n"
+"  disassembly. For details, see DOCS/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer crashed. This shouldn't happen.\n"\
 "  It can be a bug in the MPlayer code _or_ in your drivers _or_ in your gcc\n"\

@@ -145,7 +145,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer zhavaroval nespr vnym pou§it¡m CPU/FPU/RAM.\n"\
 "  Prekompilujte MPlayer s --enable-debug a urobte 'gdb' backtrace a\n"\
-"  disassemblujte. Pre detaily, pozrite DOCS/bugreports.html#crash.b.\n"
+"  disassemblujte. Pre detaily, pozrite DOCS/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer zhavaroval. To sa nemalo staœ.\n"\
 "  M“§e to byœ chyba v MPlayer k¢de _alebo_ vo Vaç¡ch ovl daŸoch _alebo_ gcc\n"\

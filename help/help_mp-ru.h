@@ -147,7 +147,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer сломался из-за плохого использования CPU/FPU/RAM.\n"\
 "  Перекомпилируйте MPlayer с --enable-debug и сделайте 'gdb' backtrace и\n"\
-"  дизассемблирование. Для подробностей, см. DOCS/bugreports.html#crash.b.\n"
+"  дизассемблирование. Для подробностей, см. DOCS/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer сломался. Это не должно происходить.\n"\
 "  Это может быть ошибкой в коде MPlayer'а _или_ в Вашем драйвере _или_ Вашей версии \n"\

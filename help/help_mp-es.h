@@ -145,7 +145,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer se detuvo por mal uso de CPU/FPU/RAM.\n"\
 "  Recompila MPlayer con la opción --enable-debug y hace un backtrace en 'gdb' y\n"\
-"  un desensamblado. Para más detalles, vea DOCS/bugreports.html#crash.b.\n"
+"  un desensamblado. Para más detalles, vea DOCS/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer se detuvo. Esto no debería haber pasado.\n"\
 "  Puede ser un defecto en el código de MPlayer _o_ en sus drivers _o_ en su versión\n"\

@@ -150,7 +150,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer è stato interrotto per un errore nell'uso della CPU/FPU/RAM.\n"\
 "  Ricompila MPlayer con --enable-debug e crea un baktrace ed un disassemblato\n"\
-"  con 'gdb'. Per i dettagli, leggi DOCS/bugreports.html sezione 5.b.\n"
+"  con 'gdb'. Per i dettagli, leggi DOCS/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer è andato in crash. Questo non dovrebbe accadere.\n"\
 "  Può essere un errore nel codice di MPlayer _o_ nei tuoi driver _o_ nella tua\n"\

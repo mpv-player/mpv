@@ -152,7 +152,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer a planté à cause d'une mauvaise utilisation de CPU/FPU/RAM.\n"\
 "  Recompilez MPlayer avec --enable-debug et faites un backtrace 'gdb'\n"\
-"  et désassemblez. Pour les détails, voir DOCS/bugreports.html#crash.\n"
+"  et désassemblez. Pour les détails, voir DOCS/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer a planté. Cela n'aurait pas dû arriver.\n"\
 "  Il y a peut-être un bogue dans le code de MPlayer _ou_ dans vos pilotes _ou_ dans votre\n"\

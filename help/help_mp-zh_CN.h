@@ -146,7 +146,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- 过度使用CPU/FPU/RAM导致MPlayer崩溃.\n"\
 "  使用--enable-debug重新编译MPlayer用“gdb”backtrace和\n"\
-"  反汇编。具体细节看DOCS/bugreports.html#crash.b.\n"
+"  反汇编。具体细节看DOCS/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer崩溃了。这不应该发生。\n"\
 "  这可能是MPlayer代码中的 _或者_ 你的驱动中的 _or_ 你的gcc的\n"\

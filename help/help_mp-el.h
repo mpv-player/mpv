@@ -151,7 +151,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- Το MPlayer κράσαρε από κακή χρήση της CPU/FPU/RAM.\n"\
 "  Αναμεταγλωττίστε το MPlayer με --enable-debug και τρέξτε 'gdb' backtrace και\n"\
-"  disassembly. Για λεπτομέρειες, δείτε DOCS/bugreports.html#crash.b.\n"
+"  disassembly. Για λεπτομέρειες, δείτε DOCS/bugreports.html#crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- Το MPlayer κράσαρε. Αυτό δεν θα έπρεπε να είχε συμβεί.\n"\
 "  Μπορεί να είναι ένα προβλημα στον κώδικα του MPlayer _ή_ στους οδηγούς σας _ή_ στην έκδοση\n"\
