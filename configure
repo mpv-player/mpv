@@ -311,7 +311,7 @@ if test "$_skip_cc_check" != yes ; then
   echocheck "$_cc version"
   # also check for name (the version checking is only for _gcc_ up for now)
   # FIXME implement this in ver. check.
-  cc_name=`$_cc -v 2>&1 | tail -n 1 | cut -d ' ' -f 1`
+  cc_name=`$_cc -v 2>&1 | tail -1 | cut -d ' ' -f 1`
   cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
   case $cc_version in
     '')
