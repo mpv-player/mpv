@@ -326,8 +326,11 @@ int demux_close_xmms(demuxer_t* demuxer) {
   xmms_priv_t *priv=demuxer->priv;
   xmms_playing=0;
   xmms_audiopos=0; // xmp on exit waits until buffer is free enough
-  priv->ip->stop();
-  free(priv); xmms_priv=demuxer->priv=NULL;
+  if (priv != NULL) {
+    if (priv->ip != NULL)
+      priv->ip->stop();
+    free(priv); xmms_priv=demuxer->priv=NULL;
+  }
   cleanup_plugins();
   return 1;
 }
