@@ -5105,6 +5105,57 @@ Dicke des äußeren Rahmens in Pixeln (Standard: 2)
 Dicke des inneren Rahmens in Pixeln (Standard: 2)
 .RE
 .PD 1
+.
+.TP
+.B delogo[=x:y:b:h:t]
+Unterdrückt das Logo eines Fernsehsenders durch einfache Interpolation der
+umgebenden Pixel.
+Setze einfach ein Rechteck, das das Logo bedeckt, und siehe wie es
+verschwindet (und manchmal etwas unschöneres entsteht \- deine Erfahrungen
+können variieren).
+.PD 0
+.RSs
+.IPs x,y
+die linke obere Ecke des Logos
+.IPs b,h
+Breite und Höhe des bereinigten Rechtecks
+.IPs t
+Dicke des fließenden Übergangs des Rechtecks zum Rest (wird zur Breite und
+Höhe addiert).
+Auf -1 gesetzt wird ein grünes Rechteck auf den Bildschirm gezeichnet, um das
+Finden der richtigen Parameter für x,y,w und h zu erleichtern.
+.RE
+.PD 1
+.
+.TP
+.B zrmjpeg[=Optionen]
+Software-Encoder von YV12 nach MJPEG für die Benutzung des
+zr2-Videoausgabetreibers.
+.RSs
+.IPs maxheight=h|maxwidth=b
+Diese Optionen setzen die maximale Breite und Höhe, die die zr-Karte handhaben
+kann (die Filterschicht von MPlayer kann diese momentan nicht abfragen).
+.IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
+Benutze diese Option, um die Werte für maxwidth und maxheight bei einer
+bekannten Kombination für Karte/Modus automatisch zu setzen.
+Gültige Optionen sind zum Beispiel dc10-PAL und buz-NTSC (Standard: dc10+PAL).
+.IPs color|bw
+Setze Encodierung auf Farbe oder Schwarz/Weiß.
+Schwarz/Weiß-Encodierung ist schneller.
+Encodierung in Farbe ist Standard.
+.IPs hdec={1,2,4}
+Horizontale Dezimierung 1, 2 oder 4.
+.IPs vdec={1,2,4}
+Vertikale Dezimierung 1, 2 oder 4.
+.IPs quality=1\-20
+Setze Kompressionsqualität für JPEG [BESTE] 1 \- 20 [SEHR SCHLECHT].
+.IPs fd|nofd
+Der Standard ist, dass die Dezimierung nur dann ausgeführt wird, wenn die
+Zoran Hardware die erzeugten MJPEG-Bilder auf die originale Größe
+hochskalieren kann.
+Die Option fd weist den Filter an, die geforderte Skalierung immer auszuführen
+(hässlich).
+.RE
 .\" manpage is synced from top down to this option.
 .
 .
