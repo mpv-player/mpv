@@ -557,14 +557,14 @@ void MP3_Init(){
   else
 #endif
 #ifdef ARCH_X86
-  if (gCpuCaps.cpuType >= CPUTYPE_I386)
+  if (gCpuCaps.cpuType == CPUTYPE_I586)
   {
     synth_func=synth_1to1_pent;
   }    
   else
 #endif
   {
-    synth_func = NULL;
+    synth_func = NULL; /* use default c version */
   }
 #endif
 }
