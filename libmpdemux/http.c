@@ -36,6 +36,8 @@ http_free( HTTP_header_t *http_hdr ) {
 	field = http_hdr->first_field;
 	while( field!=NULL ) {
 		field2free = field;
+		if (field->field_name)
+		  free(field->field_name);
 		field = field->next;
 		free( field2free );
 	}
