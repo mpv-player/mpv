@@ -40,6 +40,8 @@ Small improvements:
 
  * wildcard support for MEncoder - mencoder *.avi blah
 
+ * real mute support, not just setting volume 0
+
 
 
 Cleanup:
@@ -113,11 +115,11 @@ Enhancements:
 
 Difficult stuff:
 
- * reverse engineer all closed source codecs (QDM2, WMV9, Real, ...)
+ * RE all closed source codecs (QDM2, WMV9, RV30, RV40, cook, ...)
 
  * support for Bink/Smacker codecs
 
- * frame stepping
+ * frame by frame seeking/playback
 
  * allow frame insertion & removal in video filters (with timestamps)
 
@@ -127,7 +129,9 @@ Difficult stuff:
 
  * write something like mptv to replace xawtv
 
- * write/adapt a C implementation of RTSP
+ * write/adapt a C implementation of live.com RTSP
+
+ * unify live.com and Real RTSP
 
  * real mmsu:// support
 
@@ -148,3 +152,10 @@ Difficult stuff:
  * TV support under Windows
 
  * DRM support (divx.com, WMV, WMA, iTunes)
+
+ * variable-fps output support for MEncoder
+
+ * smooth stream switching / multiple file caching to avoid the small skip
+   between files when playing multiple files
+
+ * multiple input support for MEncoder
