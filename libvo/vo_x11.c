@@ -113,7 +113,14 @@ static int srcH=-1;
 static int aspect; // 1<<16 based fixed point aspect, so that the aspect stays correct during resizing
 
 static void check_events(){
-  vo_x11_check_events(mDisplay);
+  int ret = vo_x11_check_events(mDisplay);
+  
+   /* clear the old window */
+  if (ret & VO_EVENT_RESIZE)
+  {
+    XSetBackground(mDisplay, vo_gc, 0);
+    XClearWindow(mDisplay, vo_window);
+  }
 }
 
 static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
@@ -597,11 +604,6 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
-    if (!zoomFlag)
-    {
-	mp_msg(MSGT_VO, MSGL_WARN, "X11 Fullscreen: not available without zooming enabled\n");
-	return VO_NOTAVAIL;
-    }
     if ((vo_fs_oldwidth == -1) && (vo_fs_oldheight == -1))
     {
 	int foo;
