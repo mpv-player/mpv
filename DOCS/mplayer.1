@@ -18,16 +18,16 @@
 .de IPs
 .IP "\\$1" \n(SS
 ..
-.\" begin of first grade suboptions, end with .RE
+.\" begin of first level suboptions, end with .RE
 .de RSs
 .RS \n(IN+3
 ..
-.\" begin of 2nd grade suboptions
+.\" begin of 2nd level suboptions
 .de RSss
 .PD 0
 .RS \n(SS+3
 ..
-.\" end of 2nd grade suboptions
+.\" end of 2nd level suboptions
 .de REss
 .RE
 .PD 1
@@ -64,7 +64,7 @@ mencoder \- Movie Encoder for Linux
 .RI [ dvd | vcd | cdda | cddb | tv ] ://title\  [options]
 .br
 .B mplayer
-.RI [ mms[t] | http | http_proxy | rt[s]p ] :// [user:passwd@] URL [:port]\ \
+.RI [ mms[t] | http | http_proxy | rt[s]p | smb ] :// [user:passwd@] URL [:port]\ \
 [options]
 .br
 .B mencoder
@@ -79,37 +79,37 @@ mencoder \- Movie Encoder for Linux
 .
 .SH DESCRIPTION
 .B mplayer
-is a movie player for LINUX (runs on many other Unices, and non\-x86
-CPUs, see the documentation). It plays most MPEG/VOB, AVI, OGG/OGM, VIVO,
-ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ files,
+is a movie player for LINUX (runs on many other Unices and non\-x86
+CPUs, see the documentation). It plays most MPEG/VOB, AVI, ASF/WMA/WMV, RM,
+QT/MOV/MP4, OGG/OGM, VIVO, FLI, NuppelVideo, yuv4mpeg, FILM and RoQ files,
 supported by many native, XAnim, and Win32 DLL codecs. You can watch VideoCD,
 SVCD, DVD, 3ivx, DivX 3/4/5 and even WMV movies, too (without the avifile
 library).
 .PP
-Another great feature of mplayer is the wide range of supported output
+Another great feature of MPlayer is the wide range of supported output
 drivers. It works with X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB,
-but you can use GGI, SDL (and this way all their drivers), VESA (on every VESA
-compatible card, even without X11!) and some low level card-specific drivers
-(for Matrox, 3Dfx and ATI), too!
+but you can also use GGI, SDL (and this way all their drivers), VESA (on every
+VESA compatible card, even without X11!), some low level card-specific drivers
+(for Matrox, 3Dfx and ATI) and some hardware MPEG decoder boards, such as the
+Siemens DVB, DXR2 and DXR3/Hollywood+.
 .br
 Most of them support software or hardware scaling, so you can enjoy movies in
-fullscreen. MPlayer supports displaying through some hardware MPEG decoder
-boards, such as the Siemens DVB, DXR2 and DXR3/Hollywood+!
+fullscreen.
 .PP
 MPlayer has an onscreen display (OSD) for status information, nice big
 antialiased shaded subtitles and visual feedback for keyboard controls.
 European/ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic and Korean
 fonts are supported along with 9 subtitle formats (MicroDVD, SubRip,
-SubViewer, Sami, VPlayer, RT, SSA, AQTitle and our own: MPsub). DVD subtitles
-(SPU streams, VobSub and Closed Captions) are supported.
+SubViewer, Sami, VPlayer, RT, SSA, AQTitle and our own: MPsub) and DVD
+subtitles (SPU streams, VobSub and Closed Captions).
 .PP
 .B mencoder
 (MPlayer's Movie Encoder) is a simple movie encoder, designed to
 encode MPlayer-playable movies (see above) to other MPlayer-playable formats
-(see below). It encodes to DivX4 (1, 2 or 3 passes), XviD, codecs of
-libavcodec, PCM/MP3/VBRMP3 audio. It also has stream copying abilities, a
-powerful plugin system (crop, expand, flip, postprocess, rotate, scale,
-add/remove noise, rgb/yuv conversion) and more.
+(see below). It encodes to DivX4, XviD, one of the libavcodec codecs and
+PCM/MP3/VBRMP3 audio in 1, 2 or 3 passes. Furthermore it has stream copying
+abilities, a powerful plugin system (crop, expand, flip, postprocess, rotate,
+scale, noise, rgb/yuv conversion) and more.
 .PP
 .B gmplayer
 is MPlayer with a graphical user interface.
@@ -121,7 +121,7 @@ It has the same options as MPlayer.
 .\" --------------------------------------------------------------------------
 .
 .SH GENERAL NOTES
-.B Check the HTML documentation, too!
+.B Also see the HTML documentation!
 
 Every "flag" option has a "noflag" counterpart, e.g. the opposite of the \-fs
 option is \-nofs.
@@ -154,10 +154,10 @@ mf= type=png:fps=25
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
 .B \-autoq <quality> (use with \-vop pp!)
-Dynamically changes the level of postprocess, depending on spare CPU time
-available. The number you specify will be the maximum level used. Usually you
+Dynamically changes the level of postprocessing depending on available spare
+CPU time. The number you specify will be the maximum level used. Usually you
 can use some big number. You may not use it together with \-pp but it is OK
-with \-npp!
+with \-npp.
 .TP
 .B \-autosync <factor>
 Gradually adjusts the A/V sync based on audio delay measurements.
@@ -176,14 +176,14 @@ be the only side-effect of turning this option on, for all sound drivers.
 .TP
 .B \-benchmark
 Prints some statistics on CPU usage and dropped frames at the end.
-Used in combination with \-nosound and \-vo null for benchmarking only video
+Use in combination with \-nosound and \-vo null for benchmarking only the video
 codec.
 .TP
-.B \-framedrop (see \-hardframedrop option too!)
-Frame dropping: decode all (except B) frames, video may skip.
-Useful for playback on slow VGA card/bus.
+.B \-framedrop (also see \-hardframedrop)
+Skips displaying some frames to maintain A/V sync on slow systems. Decoding of
+B frames is also skipped and video filters are not used.
 .TP
-.B \-h, \-\-help
+.B \-h, \-help, \-\-help
 Show short summary of options.
 .TP
 .B \-hardframedrop
@@ -191,7 +191,7 @@ More intense frame dropping (breaks decoding). Leads to image distortion!
 .TP
 .B \-input <commands>
 This option can be used to configure certain parts of the input system.
-Relative path are relative to $HOME/.mplayer.
+Paths are relative to $HOME/.mplayer/.
 
 .I NOTE:
 .br
@@ -207,9 +207,9 @@ assumed.
 .IPs ar\-delay
 Delay in msec before we start to autorepeat a key (0 to disable).
 .IPs ar\-rate
-How many key presses/second when we autorepeat.
+How many key presses per second when we autorepeat.
 .IPs keylist
-Prints all keys that can be bound to.
+Prints all keys that can be bound.
 .IPs cmdlist
 Prints all commands that can be bound.
 .IPs js\-dev
@@ -219,8 +219,8 @@ Specifies the joystick device to use (default is /dev/input/js0).
 .
 .TP
 .B \-lircconf <config\ file>
-Specifies a configfile for LIRC (see http://www.lirc.org) if you don't like
-the default ~/.lircrc.
+Specifies a config file for LIRC (Linux Infrared Remote Control, see
+http://www.lirc.org) if you don't like the default ~/.lircrc.
 .TP
 .B \-loop <number>
 Loops movie playback <number> times. 0 means forever.
@@ -229,19 +229,20 @@ Loops movie playback <number> times. 0 means forever.
 Turns off joystick support. Default is on, if compiled in.
 .TP
 .B \-nolirc
-Turns off lirc support.
+Turns off LIRC support.
 .TP
 .B \-nortc \ \ 
-Turns off usage of /dev/rtc (real-time clock).
+Turns off usage of the Linux RTC (real-time clock \- /dev/rtc) as timing
+mechanism.
 .TP
 .B \-playlist <file>
-Play files according to this file list (1 file/row or Winamp or asx format).
+Play files according to a playlist (1 file per row or Winamp or ASX format).
 .TP
 .B \-quiet \ \ 
-Display less output, status messages.
+Display less output and status messages.
 .TP
 .B \-skin <skin\ directory> (BETA CODE)
-Load skin from this directory (WITHOUT path name!).
+Load skin from the given directory (WITHOUT path name).
 
 .I EXAMPLE:
 .PD 0
@@ -261,13 +262,13 @@ tries these:
 This option switches on slave mode. This is intended for use
 of MPlayer as a backend to other programs. Instead of intercepting keyboard
 events, MPlayer will read simplistic command lines from its stdin.
-See section
+The section
 .B SLAVE MODE PROTOCOL
-For the syntax.
+explains the syntax.
 .TP
 .B \-softsleep
-Uses high quality software timers. Efficient as the RTC, doesn't need root,
-but requires more CPU.
+Uses high quality software timers. As precise as the RTC without requiring
+special privileges. Comes at the price of higher CPU consumption.
 .TP
 .B \-sstep <sec>
 Specifies seconds between displayed frames. Useful for slideshows.
@@ -1068,6 +1069,7 @@ If the list has a trailing ',' it will fallback to drivers not listed.
 .RSs
 \-vo xmga,xv,
 Try Matrox kernel driver, then Xv driver, then others
+.br
 \-vo sdl:aalib
 specify the SDL subdriver
 .RE
@@ -1229,7 +1231,7 @@ error resilience:
  1: more aggressive error detection
 .REss
 .IPs bug=<value>
-manual workaround encoder bugs:
+manually work around encoder bugs:
 .RSss
 0: default
 .br
