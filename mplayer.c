@@ -2089,7 +2089,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
     // No audio:
     
     if(!quiet)
-      mp_msg(MSGT_AVSYNC,MSGL_STATUS,"V:%6.1f  %3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",d_video->pts,
+      mp_msg(MSGT_AVSYNC,MSGL_STATUS,"V:%6.1f  %3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",sh_video->pts,
         (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
@@ -2201,7 +2201,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
 #ifdef USE_EDL
  if( next_edl_record->next ) { // Are we (still?) doing EDL?
-   if( d_video->pts >= next_edl_record->start_sec ) {
+   if( sh_video->pts >= next_edl_record->start_sec ) {
      if( next_edl_record->action == EDL_SKIP ) {
        osd_function = OSD_FFW;
        abs_seek_pos = 0;
@@ -2257,7 +2257,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #ifdef USE_EDL
     case MP_CMD_EDL_MARK:
       if( edl_fd ) {
-	float v = d_video->pts;
+	float v = sh_video->pts;
 	fprintf( edl_fd, "%f %f %d\n", v-2, v, 0 );
       }
       break;
@@ -2324,7 +2324,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     } break;
     case MP_CMD_SUB_STEP : {
       int movement = cmd->args[0].v.i;
-      step_sub(subtitles, d_video->pts, movement);
+      step_sub(subtitles, sh_video->pts, movement);
       osd_show_sub_delay = 9; // show the subdelay in OSD
     } break;
     case MP_CMD_OSD : 
@@ -2956,6 +2956,7 @@ if(rel_seek_secs || abs_seek_pos){
   if(demux_seek(demuxer,rel_seek_secs,abs_seek_pos)){
       // success:
       /* FIXME there should be real seeking for vobsub */
+      if(sh_video) sh_video->pts=d_video->pts;
       if (vo_vobsub)
 	vobsub_reset(vo_vobsub);
 #if 0
@@ -3021,7 +3022,7 @@ if(rel_seek_secs || abs_seek_pos){
 	if( !edl_decision ) {
 	  for( x = 0; x < num_edl_records; x++ ) { // FIXME: do binary search
 	    // Find first EDL entry where start follows current time
-	    if( edl_records[ x ].start_sec >= d_video->pts && edl_records[ x ].action != EDL_MUTE ) {
+	    if( edl_records[ x ].start_sec >= sh_video->pts && edl_records[ x ].action != EDL_MUTE ) {
 	      next_edl_record = &edl_records[ x ];
 	      break;
 	    }
@@ -3049,7 +3050,7 @@ if(rel_seek_secs || abs_seek_pos){
 	 off_t pos = ( demuxer->file_format == DEMUXER_TYPE_AUDIO?stream->pos:demuxer->filepos );
 	 guiIntfStruct.Position=(len <= 0? 0.0f : ( pos - demuxer->movi_start ) * 100.0f / len );
 	}
-	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
+	if ( sh_video ) guiIntfStruct.TimeSec=sh_video->pts;
 	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->delay;
 	guiIntfStruct.LengthInSec=demuxer_get_time_length(demuxer);
 	guiGetEvent( guiReDraw,NULL );
@@ -3071,7 +3072,7 @@ if(rel_seek_secs || abs_seek_pos){
 //================= Update OSD ====================
 #ifdef USE_OSD
   if(osd_level>=1){
-      int pts=d_video->pts;
+      int pts=sh_video->pts;
       char osd_text_tmp[64];
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
       vo_osd_text=osd_text_buffer;
@@ -3149,8 +3150,8 @@ if(rel_seek_secs || abs_seek_pos){
   
 #ifdef USE_SUB
   // find sub
-  if(subtitles && d_video->pts>0){
-      float pts=d_video->pts;
+  if(subtitles && sh_video->pts>0){
+      float pts=sh_video->pts;
       if(sub_fps==0) sub_fps=sh_video->fps;
       current_module="find_sub";
       if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
@@ -3170,20 +3171,20 @@ if(vo_config_count && vo_spudec) {
     // Vobsub
     len = 0;
     if(vo_vobsub) {
-      if(d_video->pts+sub_delay>=0) {
+      if(sh_video->pts+sub_delay>=0) {
 	// The + next_frame_time is there because we'll display the sub at the next frame
-	len = vobsub_get_packet(vo_vobsub,d_video->pts+sub_delay+next_frame_time,(void**)&packet,&timestamp);
+	len = vobsub_get_packet(vo_vobsub,sh_video->pts+sub_delay+next_frame_time,(void**)&packet,&timestamp);
 	if(len > 0) {
-	  timestamp -= (d_video->pts + sub_delay - sh_video->timer)*90000;
-	  mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,d_video->pts,sh_video->timer,timestamp / 90000.0);
+	  timestamp -= (sh_video->pts + sub_delay - sh_video->timer)*90000;
+	  mp_dbg(MSGT_CPLAYER,MSGL_V,"\rVOB sub: len=%d v_pts=%5.3f v_timer=%5.3f sub=%5.3f ts=%d \n",len,sh_video->pts,sh_video->timer,timestamp / 90000.0);
 	}
       }
     } else {
       // DVD sub
       len = ds_get_packet_sub(d_dvdsub,(unsigned char**)&packet);
       if(len > 0) {
-	timestamp = 90000*(sh_video->timer + d_dvdsub->pts + sub_delay - d_video->pts);
-	mp_dbg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  ts=%d \n",len,d_video->pts,d_dvdsub->pts,timestamp);
+	timestamp = 90000*(sh_video->timer + d_dvdsub->pts + sub_delay - sh_video->pts);
+	mp_dbg(MSGT_CPLAYER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  ts=%d \n",len,sh_video->pts,d_dvdsub->pts,timestamp);
       }
     }
     return len;

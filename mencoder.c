@@ -1144,7 +1144,7 @@ if(sh_audio && !demuxer2){
       //printf("*** %5.3f ***\n",a_pts);
       a_pts+=(ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
     }
-    v_pts=d_video->pts;
+    v_pts=sh_video ? sh_video->pts : d_video->pts;
     // av = compensated (with out buffering delay) A-V diff
     AV_delay=(a_pts-v_pts); AV_delay-=mux_a->timer-(mux_v->timer-(v_timer_corr+v_pts_corr));
 	// compensate input video timer by av:
@@ -1220,8 +1220,8 @@ if(sh_audio && !demuxer2){
 
 #ifdef USE_SUB
   // find sub
-  if(subtitles && d_video->pts>0){
-      float pts=d_video->pts;
+  if(subtitles && sh_video->pts>0){
+      float pts=sh_video->pts;
       if(sub_fps==0) sub_fps=sh_video->fps;
       if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
          find_sub(subtitles,sub_uses_time?(100*(pts+sub_delay)):((pts+sub_delay)*sub_fps)); // FIXME! frame counter...
@@ -1236,14 +1236,14 @@ if(sh_audio && !demuxer2){
      unsigned char* packet=NULL;
      int len;
      while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
-	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
+	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,sh_video->pts,d_dvdsub->pts);
 	 if (vo_spudec)
 	 spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
 	 if (vobsub_writer)
-	     vobsub_out_output(vobsub_writer,packet,len,mux_v->timer + d_dvdsub->pts - d_video->pts);
+	     vobsub_out_output(vobsub_writer,packet,len,mux_v->timer + d_dvdsub->pts - sh_video->pts);
      }
      if (vo_spudec) {
-     spudec_heartbeat(vo_spudec,90000*d_video->pts);
+     spudec_heartbeat(vo_spudec,90000*sh_video->pts);
      vo_osd_changed(OSDTYPE_SPU);
      }
  }
