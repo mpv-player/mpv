@@ -1694,7 +1694,7 @@ static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
 	save->crtc_offset_cntl = 0;
 
 	rinfo->bpp = mode->bits_per_pixel;
-	return 0;
+	return 1;
 }
 
 static int radeon_init_crtc2_regs(struct radeonfb_info *rinfo,
