@@ -620,6 +620,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 		printf("vosub_vidix: Can't configure playback: %s\n",strerror(err));
 		return -1;
 	}
+	printf("vosub_vidix: using %d buffers\n", vidix_play.num_frames);
 
 	vidix_mem = vidix_play.dga_addr;
 
