@@ -1962,6 +1962,12 @@ $_confwin32
 /* Define this to any prefered value from 386 up to infinity with step 100 */
 #define __CPU__ $iproc
 
+#ifdef sun
+#define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
+#else
+#define DEFAULT_CDROM_DEVICE    "/dev/cdrom"
+#endif
+
 /*----------------------------------------------------------------------------
 **
 ** NOTE: Instead of modifying these definitions here, use the
