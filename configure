@@ -935,6 +935,14 @@ $_xmmpaudio
 #define PLUGINDIR LIBDIR "/xmmp/Plugins"
 #define XMMP_AUDIO_DRIVER PLUGINDIR "/Sound/oss.so"
 
+/* set up audio OUTBURST. Do not change this! */
+#ifdef USE_XMMP_AUDIO
+#define OUTBURST 4096
+#else
+//#define OUTBURST 1024
+#define OUTBURST 512
+#endif
+
 /* LIRC (remote control, see www.lirc.org) support: */
 $_lircdefs
 
