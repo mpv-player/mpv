@@ -182,8 +182,10 @@ int read_cdda(stream_t* s) {
   s->pos = p->sector*CD_FRAMESIZE_RAW;
   memcpy(s->buffer,buf,CD_FRAMESIZE_RAW);
 
-  if(p->sector == p->end_sector)
+  if((p->sector < p->start_sector) || (p->sector >= p->end_sector)) {
     s->eof = 1;
+    return 0;
+  }
 
   for(i=0;i<p->cd->tracks;i++){
 	  if(p->cd->disc_toc[i].dwStartSector==p->sector-1) {
@@ -206,6 +208,11 @@ void seek_cdda(stream_t* s) {
   int sec;
   int current_track=0, seeked_track=0;
   int i;
+  
+  if(s->pos < 0) {
+    s->eof = 1;
+    return;
+  }
 
   sec = s->pos/CD_FRAMESIZE_RAW;
 //printf("pos: %d, sec: %d ## %d\n", (int)s->pos, (int)sec, CD_FRAMESIZE_RAW);
