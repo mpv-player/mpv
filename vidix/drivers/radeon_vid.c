@@ -720,7 +720,10 @@ static unsigned short ati_card_ids[] =
  DEVICE_ATI_RAGE_128_4X2,
  DEVICE_ATI_RAGE_128_PRO,
  DEVICE_ATI_RAGE_128_PRO2,
- DEVICE_ATI_RAGE_128_PRO3
+ DEVICE_ATI_RAGE_128_PRO3,
+/* these seem to be based on rage 128 instead of mach64 */
+ DEVICE_ATI_RAGE_MOBILITY_M3,
+ DEVICE_ATI_RAGE_MOBILITY_M32
 #else
 /* Radeons (indeed: Rage 256 Pro ;) */
  DEVICE_ATI_RADEON_8500_DV,
