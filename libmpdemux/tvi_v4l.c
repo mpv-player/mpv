@@ -88,6 +88,7 @@ static int palette2depth(int palette)
 {
     switch(palette)
     {
+	/* component */
 	case VIDEO_PALETTE_RGB555:
 	    return(15);
 	case VIDEO_PALETTE_RGB565:
@@ -96,10 +97,18 @@ static int palette2depth(int palette)
 	    return(24);
 	case VIDEO_PALETTE_RGB32:
 	    return(32);
+	/* planar */
+	case VIDEO_PALETTE_YUV422P:
+	case VIDEO_PALETTE_YUV411P:
 	case VIDEO_PALETTE_YUV420P:
+	case VIDEO_PALETTE_YUV410P:
 	    return(12);
+	/* packed */
 	case VIDEO_PALETTE_YUV422:
+	case VIDEO_PALETTE_YUYV:
 	case VIDEO_PALETTE_UYVY:
+	case VIDEO_PALETTE_YUV420:
+	case VIDEO_PALETTE_YUV411:
 	    return(16);
     }
     return(-1);
@@ -479,33 +488,6 @@ static int control(priv_t *priv, int cmd, void *arg)
 	{
 	    int output_fmt = -1;
 
-#if 0	    
-	    switch(priv->palette)
-	    {
-		case VIDEO_PALETTE_RGB555:
-		    output_fmt = IMGFMT_RGB15;
-		    break;
-		case VIDEO_PALETTE_RGB565:
-		    output_fmt = IMGFMT_RGB16;
-		    break;
-		case VIDEO_PALETTE_RGB24:
-		    output_fmt = IMGFMT_RGB24;
-		    break;
-		case VIDEO_PALETTE_RGB32:
-		    output_fmt = IMGFMT_RGB32;
-		    break;
-		case VIDEO_PALETTE_UYVY:
-		    output_fmt = IMGFMT_UYVY;
-		    break;
-		case VIDEO_PALETTE_YUV420P:
-		    output_fmt = IMGFMT_YV12;
-		    break;
-		default:
-		    mp_msg(MSGT_TV, MSGL_ERR, "no suitable output format found (%s)\n",
-			PALETTE(priv->palette));
-		    return(TVI_CONTROL_FALSE);
-	    }
-#endif
 	    output_fmt = priv->format;
 	    (int)*(void **)arg = output_fmt;
 	    mp_msg(MSGT_TV, MSGL_INFO, "Output format: %s\n", vo_format_name(output_fmt));
@@ -515,7 +497,7 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    priv->format = (int)*(void **)arg;
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_GET_PLANES:
-	    (int)*(void **)arg = 1;
+	    (int)*(void **)arg = 1; /* FIXME, also not needed at this time */
 	    return(TVI_CONTROL_TRUE);
 	case TVI_CONTROL_VID_GET_BITS:
 	    (int)*(void **)arg = palette2depth(format2palette(priv->format));
