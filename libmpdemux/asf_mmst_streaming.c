@@ -24,7 +24,6 @@
 
 #ifdef USE_ICONV
 #include <locale.h>
-#include <langinfo.h>
 #include <iconv.h>
 #endif
 
@@ -114,7 +113,7 @@ static iconv_t url_conv;
 
 static void string_utf16_open() {
     setlocale(LC_CTYPE, "");
-    url_conv = iconv_open("UTF-16LE",nl_langinfo(CODESET));
+    url_conv = iconv_open("UTF-16LE",setlocale(LC_CTYPE, NULL));
 }
 
 static void string_utf16_close() {
