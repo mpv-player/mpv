@@ -36,6 +36,7 @@ typedef struct ao_plugin_cfg_s
   int pl_delay_len;	// Number of samples to delay sound output
   int pl_resample_fout;	// Output frequency from resampling
   int pl_volume_volume; // Initial volume setting
+  float pl_extrastereo_mul; // Stereo enhancer multiplier
 } ao_plugin_cfg_t;
 
 extern ao_plugin_cfg_t ao_plugin_cfg;
@@ -46,19 +47,21 @@ extern ao_plugin_cfg_t ao_plugin_cfg;
  AFMT_S16_LE, \
  0, \
  48000, \
- 255 \
+ 255, \
+ 2.5 \
 };
 
 // This block should not be available in the pl_xxxx files
 // due to compilation issues
 #ifndef PLUGIN
-#define NPL 5+1 // Number of PLugins ( +1 list ends with NULL )
+#define NPL 6+1 // Number of PLugins ( +1 list ends with NULL )
 // List of plugins 
 extern ao_plugin_functions_t audio_plugin_delay;
 extern ao_plugin_functions_t audio_plugin_format; 
 extern ao_plugin_functions_t audio_plugin_surround;
 extern ao_plugin_functions_t audio_plugin_resample;
 extern ao_plugin_functions_t audio_plugin_volume;
+extern ao_plugin_functions_t audio_plugin_extrastereo;
 
 
 #define AO_PLUGINS { \
@@ -67,6 +70,7 @@ extern ao_plugin_functions_t audio_plugin_volume;
    &audio_plugin_surround, \
    &audio_plugin_resample, \
    &audio_plugin_volume, \
+   &audio_plugin_extrastereo, \
    NULL \
 }
 #endif /* PLUGIN */
