@@ -32,7 +32,7 @@ static unsigned int outfmt_list[]={
     IMGFMT_YV12,
     IMGFMT_I420,
     IMGFMT_IYUV,
-    NULL
+    0
 };
 
 static unsigned int find_best_out(vf_instance_t *vf){

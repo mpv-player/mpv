@@ -19,14 +19,14 @@ static unsigned int bgr_list[]={
     IMGFMT_BGR24,
     IMGFMT_BGR16,
     IMGFMT_BGR15,
-    NULL
+    0
 };
 static unsigned int rgb_list[]={
     IMGFMT_RGB32,
     IMGFMT_RGB24,
     IMGFMT_RGB16,
     IMGFMT_RGB15,
-    NULL
+    0
 };
 
 static unsigned int find_best(struct vf_instance_s* vf, unsigned int fmt){
