@@ -70,7 +70,9 @@ void create_lut (vf_eq2_t *eq2)
         eq2->lut[i] = 255;
       }
       else {
-        eq2->lut[i] = (unsigned char) (256.0 * v);
+        /* we divided by 255.0 so now we also multiply by 255.0, not
+           by 256.0. "+ 0.5" ensures proper rounding */
+        eq2->lut[i] = (unsigned char) (255.0 * v + 0.5);
       }
     }
   }
@@ -85,11 +87,10 @@ void process (unsigned char *dst, int dstride, unsigned char *src, int sstride,
 
   for (j = 0; j < h; j++) {
     for (i = 0; i < w; i++) {
-      *(dst++) = lut[*(src++)];
+      dst[i] = lut[src[i]];
     }
-
-    src += sstride - w;
-    dst += dstride - w;
+    src += sstride;
+    dst += dstride;
   }
 }
 
