@@ -32,7 +32,7 @@ Adding new translations
 
 	<xsl:import href="../html.xsl"/>
 
-5) If you are using you own HTML stylesheet, edit your Makefile and set
+5) If you are using your own HTML stylesheet, edit your Makefile and set
    the HTML_STYLESHEET variable to its name.
    
 That's all, in theory.

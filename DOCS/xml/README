@@ -54,7 +54,7 @@ is the system identifier.
 The problem is that the system identifier is most probably system-dependent.
 To avoid the need to manually fix the system identifiers before building the
 documentation, I've decided to use SGML catalogs.  If you have your catalogs
-set up correctly, xmllint and xsltproc will use the them to find the DTDs
+set up correctly, xmllint and xsltproc will use them to find the DTDs
 based on the public identifiers.
 
 Note that this works only if public identifiers override system identifiers
