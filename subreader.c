@@ -930,12 +930,11 @@ extern float sub_delay;
 extern float sub_fps;
 
 #ifdef USE_ICONV
-static iconv_t icdsc;
+static iconv_t icdsc = (iconv_t)(-1);
 
 void	subcp_open (void)
 {
 	char *tocp = "UTF-8";
-	icdsc = (iconv_t)(-1);
 
 	if (sub_cp){
 		if ((icdsc = iconv_open (tocp, sub_cp)) != (iconv_t)(-1)){
@@ -1178,23 +1177,31 @@ sub_data* sub_read_file (char *filename, float fps) {
 #ifdef USE_ICONV
     sub_utf8_prev=sub_utf8;
     {
-	    int l;
+	    int l,k;
+	    k = -1;
 	    if ((l=strlen(filename))>4){
 		    int k;
 		    char *exts[] = {".utf", ".utf8", ".utf-8" };
 		    for (k=3;--k>=0;)
 			if (!strcasecmp(filename+(l - strlen(exts[k])), exts[k])){
 			    sub_utf8 = 1;
+			    fprintf(stderr,"UTF-8 detected\n");
 			    break;
 			}
 	    }
+	    if (k<0) subcp_open();
     }
-    if (!(sub_utf8 & 1)) subcp_open();
 #endif
 
     sub_num=0;n_max=32;
     first=(subtitle *)malloc(n_max*sizeof(subtitle));
-    if(!first) return NULL;
+    if(!first){
+#ifdef USE_ICONV
+	  subcp_close();
+          sub_utf8=sub_utf8_prev;
+#endif
+	    return NULL;
+    }
     
 #ifdef USE_SORTSUB
     sub = (subtitle *)malloc(sizeof(subtitle));
@@ -1223,7 +1230,6 @@ sub_data* sub_read_file (char *filename, float fps) {
 	 {
 #ifdef USE_ICONV
           subcp_close();
-          sub_utf8=sub_utf8_prev;
 #endif
     	  if ( first ) free(first);
 	  return NULL; 
