@@ -266,5 +266,10 @@ static char help_text[]=
 #define MSGTR_SKIN_UnknownParameter "nieznany parametr ( %s )\n"
 #define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] za ma³o pamiêci.\n"
 
+// --- messagebox
+#define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
+#define MSGTR_MSGBOX_LABEL_Error "b³±d ..."
+#define MSGTR_MSGBOX_LABEL_Warning "ostrze¿enie ..." 
+
 #endif
 
