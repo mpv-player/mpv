@@ -219,13 +219,13 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_rtp(demuxer); break;
 #endif
     case DEMUXER_TYPE_SMJPEG:
-      demux_close_smjpeg(demuxer); return;
+      demux_close_smjpeg(demuxer); break;
     case DEMUXER_TYPE_DEMUXERS:
-      demux_close_demuxers(demuxer); return;
+      demux_close_demuxers(demuxer); break;
     case DEMUXER_TYPE_AVI: 
     case DEMUXER_TYPE_AVI_NI:
     case DEMUXER_TYPE_AVI_NINI:
-      demux_close_avi(demuxer); return;
+      demux_close_avi(demuxer); break;
 #ifdef HAVE_XMMS
     case DEMUXER_TYPE_XMMS:
       demux_close_xmms(demuxer); break;
@@ -250,10 +250,10 @@ void free_demuxer(demuxer_t *demuxer){
 #endif
     }
     // free streams:
-    for(i=0;i<256;i++){
+    for(i = 0; i < MAX_A_STREAMS; i++)
 	if(demuxer->a_streams[i]) free_sh_audio(demuxer->a_streams[i]);
+    for(i = 0; i < MAX_V_STREAMS; i++)
 	if(demuxer->v_streams[i]) free_sh_video(demuxer->v_streams[i]);
-    }
     //if(sh_audio) free_sh_audio(sh_audio);
     //if(sh_video) free_sh_video(sh_video);
     // free demuxers:
@@ -1050,6 +1050,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
         mp_msg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
       else
         mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_NotSystemStream);
+    }
+    if (demuxer && file_format != DEMUXER_TYPE_MPEG_PS) {
       free_demuxer(demuxer);
       demuxer = NULL;
     }

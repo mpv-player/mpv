@@ -731,6 +731,8 @@ char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
   return (index < 0) ? NULL : (index >= ogg_d->n_text) ? NULL : ogg_d->text_langs[index];
 }
 
+void demux_close_ogg(demuxer_t* demuxer);
+
 /// Open an ogg physical stream
 int demux_ogg_open(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d;
@@ -764,8 +766,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
     /// Error
     if(np < 0) {
       mp_msg(MSGT_DEMUX,MSGL_DBG2,"Ogg demuxer : Bad page sync\n");
-      free(ogg_d);
-      return 0;
+      goto err_out;
     }
     /// Need some more data
     if(np == 0) {
@@ -773,8 +774,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
       buf = ogg_sync_buffer(sync,BLOCK_SIZE);
       len = stream_read(s,buf,BLOCK_SIZE);      
       if(len == 0 && s->eof) {
-	free(ogg_d);
-	return 0;
+	goto err_out;
       }
       ogg_sync_wrote(sync,len);
       continue;
@@ -1057,8 +1057,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   }
 
   if(!n_video && !n_audio) {
-    free(ogg_d);
-    return 0;
+    goto err_out;
   }
 
   /// Finish to setup the demuxer
@@ -1095,6 +1094,10 @@ int demux_ogg_open(demuxer_t* demuxer) {
   mp_msg(MSGT_DEMUX,MSGL_V,"Ogg demuxer : found %d audio stream%s, %d video stream%s and %d text stream%s\n",n_audio,n_audio>1?"s":"",n_video,n_video>1?"s":"",ogg_d->n_text,ogg_d->n_text>1?"s":"");
  
   return 1;
+
+err_out:
+  demux_close_ogg(demuxer);
+  return 0;
 }
 
 
