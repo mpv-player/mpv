@@ -370,7 +370,7 @@ void exit_player(char* how){
   current_module="exit_player";
 
   if(how) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Exiting,how);
-  mp_msg(MSGT_CPLAYER,MSGL_V,"max framesize was %d bytes\n",max_framesize);
+  mp_msg(MSGT_CPLAYER,MSGL_DBG2,"max framesize was %d bytes\n",max_framesize);
 
   exit(1);
 }
@@ -2333,6 +2333,10 @@ if(step_sec>0) {
         tv_step_chanlist(tv_handler);
      break;
 #endif
+
+    case 'f':
+	video_out->control(VOCTRL_FULLSCREEN, 0);
+     break;
   }
 } // keyboard event handler
 
@@ -2537,6 +2541,10 @@ if(step_sec>0) {
     case MP_CMD_TV_STEP_CHANNEL_LIST :  {
       if (tv_param_on == 1)
 	tv_step_chanlist(tv_handler);
+    } break;
+    case MP_CMD_VO_FULLSCREEN:
+    {
+	video_out->control(VOCTRL_FULLSCREEN, 0);
     } break;
 #endif
     default :
