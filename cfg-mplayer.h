@@ -39,6 +39,7 @@ struct config conf[]={
 	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
 	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
+        {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0},
 	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0},
 	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0},
 	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1},
