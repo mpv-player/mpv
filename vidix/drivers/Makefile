@@ -108,11 +108,11 @@ depend:
 # do nothing here
 
 install:
-	mkdir -p $(BINDIR)
-	install -m 755 -s -p *.so $(BINDIR)
+	mkdir -p $(LIBDIR)/mplayer/vidix
+	-install -m 755 -s -p *.so $(LIBDIR)/mplayer/vidix
 uninstall:
-	rm -f $(BINDIR)/*.so
-	rmdir -p --ignore-fail-on-non-empty $(BINDIR)
+	rm -f $(LIBDIR)/mplayer/vidix/*.so
+	rmdir -p --ignore-fail-on-non-empty $(LIBDIR)/mplayer/vidix
 
 #
 # include dependency files if they exist
