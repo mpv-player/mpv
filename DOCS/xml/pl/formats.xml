@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.12 -->
 <sect1 id="formats">
 <title>Obsługiwane formaty</title>
 
@@ -257,8 +257,7 @@ będzie trochę zaśmiecony przez krótką chwilę po skoku.
 
 <para>
 Tak, <application>MPlayer</application> potrafi czytać (demultipleksować)
-pliki RealMedia (<filename>.rm</filename>). Skoki działają, ale musisz dodatkowo
-podać opcję <option>-forceidx</option> (format obsługuje klatki kluczowe).
+pliki RealMedia (<filename>.rm</filename>).
 Tu znajdziesz listę obsługiwanych kodeków <link linkend="realvideo">RealVideo</link>
 i <link linkend="realaudio">RealAudio</link>.
 </para>
@@ -343,6 +342,24 @@ Windows).
 <para>
 Specyfikacje PVA są do pobrania pod następującym adresem:
 <ulink url="http://www.technotrend.de/download/av_format_v1.pdf"/>
+</para>
+</sect3>
+
+
+<sect3 id="nsv">
+<title>Pliki NSV</title>
+<para>
+NSV (NullSoft Video) jest formatem plików używanym przez odtwarzacz
+<application>Winamp</application> do strumieniowania audio i video.
+Video to VP3, VP5 lub VP6, audio to MP3, AAC lub VLB.
+Wersja tylko-audio NSV ma rozszerzenie <filename>.nsa</filename>.
+<application>MPlayer</application> potrafi odtwarzać zarówno strumienie, jak i pliki NSV.
+Proszę zauważyć, że większość plików ze
+<ulink url="http://www.winamp.com">strony Winamp'a</ulink> korzysta z audio VLB, które
+jeszcze nie jest dekodowane przez <application>MPlayera</application>. Oprócz tego
+strumienie z tej strony potrzebują dodatkowej warstwy depakietowania, która nie jest
+jeszcze zaimplementowana (plików tych i tak nie da się odtworzyć ze względu na 
+audio VLB).
 </para>
 </sect3>
 
