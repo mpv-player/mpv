@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.53 -->
+<!-- synced to 1.54 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -895,6 +895,13 @@ az FTP-re:
 role="url">ftp://ftp.mplayerhq.hu/MPlayer/incoming/[codecneve]/
 </systemitem>
 </para>
+
+<para>
+Ha saját magad szeretnél beépíteni egy codec-et, olvasd el a
+<ulink url="http://www.mplayerhq.hu/MPlayer/DOCS/tech/codecs.conf.txt">DOCS/tech/codecs.conf.txt</ulink>
+fájlt.
+</para>
+
 </sect3>
 </sect2>
 </sect1>
