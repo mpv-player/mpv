@@ -121,7 +121,6 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     int screen_size_y=0;//SCREEN_SIZE_Y;
 //    vo_functions_t* video_out=sh->video_out;
     vf_instance_t* vf=sh->vfilter;
-    unsigned int fmtlist[CODECS_MAX_OUTFMT+1];
 
 #if 1
     if(!(sh->disp_w && sh->disp_h))
@@ -192,37 +191,41 @@ csp_again:
 
   if(movie_aspect>-1.0) sh->aspect = movie_aspect; // cmdline overrides autodetect
 //  if(!sh->aspect) sh->aspect=1.0;
-  screen_size_x = opt_screen_size_x;
-  screen_size_y = opt_screen_size_y;
-  if(screen_size_xy||screen_size_x||screen_size_y){
-   if(screen_size_xy>0){
-     if(screen_size_xy<=8){
-       screen_size_x=screen_size_xy*sh->disp_w;
-       screen_size_y=screen_size_xy*sh->disp_h;
-     } else {
-       screen_size_x=screen_size_xy;
-       screen_size_y=screen_size_xy*sh->disp_h/sh->disp_w;
-     }
-   } else if(!vidmode){
+
+  if(opt_screen_size_x||opt_screen_size_y){
+    screen_size_x = opt_screen_size_x;
+    screen_size_y = opt_screen_size_y;
+    if(!vidmode){
      if(!screen_size_x) screen_size_x=SCREEN_SIZE_X;
      if(!screen_size_y) screen_size_y=SCREEN_SIZE_Y;
      if(screen_size_x<=8) screen_size_x*=sh->disp_w;
      if(screen_size_y<=8) screen_size_y*=sh->disp_h;
-   }
+    }
   } else {
     // check source format aspect, calculate prescale ::atmos
     screen_size_x=sh->disp_w;
     screen_size_y=sh->disp_h;
+    if(screen_size_xy>0){
+     if(screen_size_xy<=8){
+       // -xy means x+y scale
+       screen_size_x*=screen_size_xy;
+       screen_size_y*=screen_size_xy;
+     } else {
+       // -xy means forced width while keeping correct aspect
+       screen_size_x=screen_size_xy;
+       screen_size_y=screen_size_xy*sh->disp_h/sh->disp_w;
+     }
+    }
     if(sh->aspect>0.01){
+      int w;
       mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n",
              sh->aspect);
-      screen_size_x=(int)((float)sh->disp_h*sh->aspect);
-      screen_size_x+=screen_size_x%2; // round
-      if(screen_size_x<sh->disp_w){
-        screen_size_x=sh->disp_w;
-        screen_size_y=(int)((float)sh->disp_w*(1.0/sh->aspect));
+      w=(int)((float)screen_size_y*sh->aspect); w+=w%2; // round
+      // we don't like horizontal downscale || user forced width:
+      if(w<screen_size_x || screen_size_xy>8){
+        screen_size_y=(int)((float)screen_size_x*(1.0/sh->aspect));
         screen_size_y+=screen_size_y%2; // round
-      }
+      } else screen_size_x=w; // keep new width
     } else {
       mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is undefined - no prescaling applied.\n");
     }
