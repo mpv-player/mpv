@@ -1559,7 +1559,7 @@ if test "$_malloc" = yes ; then
 else
   _def_malloc='#undef HAVE_MALLOC_H'
 fi
-# malloc.h emits a warning in FreeBSD
+# malloc.h emits a warning in FreeBSD and OpenBSD
 (freebsd || openbsd) && _def_malloc='#undef HAVE_MALLOC_H'
 echores "$_malloc"
 
@@ -1706,6 +1706,8 @@ else
   _def_soundcard='#undef HAVE_SOUNDCARD_H'
 fi
 echores "$_soundcard"
+else
+  _def_soundcard='#undef HAVE_SOUNDCARD_H'
 fi
 
 echocheck "sys/dvdio.h"
@@ -2800,6 +2802,7 @@ if test "$_ossaudio" = yes ; then
   else
      if netbsd || openbsd ; then
        _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound"'
+       openbsd && _ld_arch="$_ld_arch -lossaudio"
      else
        _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
      fi
@@ -3232,6 +3235,9 @@ if test "$_win32" = yes ; then
   _dep_win32='loader/libloader.a'
   _codecmodules="win32 $_codecmodules"
   echores "yes (using $_win32libdir)"
+  if openbsd ; then
+    x86 && _ld_win32="$_ld_win32 -li386"
+  fi
 else
   _def_win32='#undef USE_WIN32DLL'
   _nocodecmodules="win32 $_nocodecmodules"
@@ -3412,7 +3418,7 @@ EOF
   _iconv=no
   if freebsd ; then
     cc_check  -lm -lgiconv && _iconv=yes
-  elif bsdos ; then
+  elif bsdos || openbsd ; then
     cc_check  -lm -liconv && _iconv=yes
   else
     cc_check -lm && _iconv=yes
@@ -3422,6 +3428,7 @@ if test "$_iconv" = yes ; then
   _def_iconv='#define USE_ICONV 1'
   freebsd && _ld_iconv='-lgiconv'
   bsdos && _ld_iconv='-liconv'
+  openbsd && _ld_iconv='-liconv'
 else
   _def_iconv='#undef USE_ICONV'
 fi
@@ -3687,7 +3694,7 @@ if test "$_tv_bsdbt848" = auto ; then
  if test "$_tv" = yes ; then
     cat > $TMPC <<EOF
 #include <sys/types.h>
-#ifdef __NetBSD__
+#if defined(__NetBSD__)
 #include <dev/ic/bt8xx.h>
 #else
 #include <machine/ioctl_bt848.h>
@@ -3932,7 +3939,7 @@ test "$_real" = yes && _ld_dl_dynamic='-rdynamic'
 
 _ld_arch="$_ld_arch $_ld_pthread $_ld_dl $_ld_dl_dynamic"
 bsdos && _ld_arch="$_ld_arch -ldvd"
-if netbsd || openbsd ; then
+if netbsd ; then
   _ld_arch="$_ld_arch -lossaudio"
   x86 && _ld_arch="$_ld_arch -li386"
 fi
