@@ -1151,9 +1151,11 @@ framerate at which to capture video (frames per second)
 .IPs buffersize=<value>
 maximum size of the capture buffer in megabytes (default: dynamical)
 .IPs norm=<value>
-available: PAL, SECAM, NTSC.
-For v4l2 use the normid option below.
+For bsdbt848 and v4l, PAL, SECAM, NTSC are available.
+For v4l2, see the console output for a list of all available norms,
+also see the normid option below.
 .IPs "normid=<value> (v4l2 only)"
+Sets the norm with a given numeric ID. Depends on the capture card.
 See console output for a list of available TV norms.
 .IPs channel=<value>
 Set tuner to <value> channel.
