@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.28 -->
+<!-- synced with 1.30 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -1160,7 +1160,7 @@ grabarlo directamente a CD.
 </para></question>
 <answer><para>
 Esta ha sido discutido constantemente en mplayer-users. Busque en los
-<ulink url="http://mplayerhq.hu/cgi-bin/htsearch?restrict=/mplayer-users/">archivos</ulink>
+<ulink url="http://mplayerhq.hu/cgi-bin/s-arch.cgi?sbm=mplayer-users">archivos</ulink>
 para una respuesta completa. Se trata de un asunto complicado y sus resultados variarán
 dependiendo mucho en qué tipo de archivos quiere juntar. MPEGs pueden ser unidos
 a un solo archivo con suerte. Para AVIs hay dos aplicaciones,

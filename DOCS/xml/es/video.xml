@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.47 -->
+<!-- synced with 1.49 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -1763,16 +1763,12 @@ para una TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
 
 <formalpara>
-<title>Usando su tarjeta DVB para ver TV Digital (módulo de entrada DVB)</title>
-<para>
-  Primero necesita pasar el parámetro <literal>dvb_shutdown_timeout=0</literal>
-  al módulo del núcleo <filename>dvb-core</filename>, o MPlayer morirá después
-  de 10 segundos.
-</para>
+<title>TV Digital (módulo de entrada DVB)</title>
+<para>Puede usar su tarjeta DVB para ver TV Digital.</para>
 </formalpara>
 
 <para>
-  También tiene que tener los programas <command>scan</command> y
+  Tiene que tener los programas <command>scan</command> y
   <command>szap/tzap/czap</command> intalados; estos están incluidos
   en el paquete de controladores.
 </para>

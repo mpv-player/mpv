@@ -1,4 +1,4 @@
-.\" synced with 1.522
+.\" synced with 1.534
 .\" MPlayer (C) 2000-2004 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun,
 .\" Jonas Jermann y traducida al español por Juan Martín López.
@@ -159,9 +159,9 @@ MPlayer tiene información en pantalla (OSD, On Screen Display) sobre el estado,
 subtítulos grandes y bonitos con suavizado de bordes y realimentación visual
 de los controles con teclado.
 Tipos de letra Europeo/\:ISO 8859-1,2 (Húngaro, Inglés, Checoslovaco, etc),
-Cirílico y Koreano son soportados en 10 formatos de subtítulo (MicroDVD, SubRip,
-SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub y el nuestro: MPsub) así
-como subtítulos DVD (cadenas SPU, VobSub y Closed Captions).
+Cirílico y Koreano son soportados en 11 formatos de subtítulo (MicroDVD, SubRip,
+SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS y el nuestro: MPsub)
+así como subtítulos DVD (cadenas SPU, VobSub y Closed Captions).
 .PP
 .B mencoder
 (Codificador de Películas de MPlayer) es un codificador simple de películas,
@@ -928,8 +928,7 @@ Se posiciona en el byte indicado.
 principio.
 .TP
 .B \-srate <Hz>
-Fuerza la razón de reproducción de audio dada, cambiando la velocidad del
-video para mantener la sincronización A-V.
+Elige la tasa de muestreo de salida, remuestreando si es necesario.
 MEncoder pasa este valor a lame para remuestreado.
 .TP
 .B \-ss <tiempo> (vea también la opción \-sb)
@@ -1533,6 +1532,14 @@ Signed 32-bit (Big-Endian)
 Esta opción le dice a MPlayer que use un dispositivo diferente para
 mezclar en lugar de /dev/\:mixer.
 .TP
+.B \-mixer-channel <mixer line> (solo para -ao oss)
+Esta opción le dice a MPlayer que use un canal diferente al PCM por
+defecto para controlar el volumen.
+Las opciones incluyen
+.B vol, pcm, line.
+Para una lista completa de opciones busque SOUND_DEVICE_NAMES en
+/usr/include/linux/soundcard.h.
+.TP
 .B \-nowaveheader (\-ao pcm solamente)
 No incluir encabezado wave.
 Usado para RAW PCM.
@@ -2056,9 +2063,9 @@ Fuerza la inserción de filtros de audio de una de las siguientes maneras:
 .RSss
 0: Inserción de filtros completamente automática (por defecto)
 .br
-1: Optimizada para velocidad
+1: Optimizada para precisión
 .br
-2: Optimizada para precisión
+2: Optimizada para velocidad
 .br
 3: Desactiva auto
 .REss
@@ -2565,15 +2572,15 @@ Hace espejo de la imagen en el eje Y.
 .TP
 .B rotate[=<0\-7>]
 Rota y voltea (opcional) la imagen +/\:- 90 grados.
-Para parámetros entre 4-7 la rotación se hace solo si la geometría de la
+Para parámetros entre 4\-7 la rotación se hace solo si la geometría de la
 película es en vertical y no en horizontal.
 .TP
-.B scale[=w:h[:i[c[:p]]]]
+.B scale[=w:h[:interlaced[:chr_drop[:param]:presize]]]
 Escala la imagen con el escalador de software (lento) y realiza una
 conversión en el espacio de color YUV<\->RGB (vea también la opción \-sws).
 .RSs
-.IPs w,h
-nuevo ancho/alto después de escalar (por defecto: ancho,alto original)
+.IPs w,h\ \ 
+Escala a ancho/alto (por defecto: ancho,alto original)
 .I NOTA:
 Si se usa \-zoom, y filtros de capas (incluyendo libvo) no es
 posible escalar, y entonces se usará d_ancho/\:d_alto por defecto!
@@ -2586,10 +2593,10 @@ posible escalar, y entonces se usará d_ancho/\:d_alto por defecto!
 .br
 -3:   Calcula w/\:h usando la otra dimensión y la razón de aspecto original.
 .REss
-.IPs i
-indicador de entrelazado
-.IPs c
-salto de crominancia
+.IPs interlaced
+Cambia indicador de escalado entrelazado.
+.IPs chr_drop
+Salto de crominancia
 .RSss
 0: usa todas las líneas de entrada de crominancia disponibles
 .br
@@ -2599,7 +2606,7 @@ salto de crominancia
 .br
 3: usa solo cada 8. líneas de entrada para crominancia
 .REss
-.IPs p
+.IPs param
 parámetro de escalado (depende del método de escalado usado)
 .RSss
 \-sws 2 (bicúbico):  perfilado (0 (suave) - 100 (nítido))
@@ -2608,9 +2615,24 @@ parámetro de escalado (depende del método de escalado usado)
 .br
 \-sws 9 (lanczos):   longitud del filtro (1 - 10)
 .REss
+.IPs presize
+Escala a tamaños preestablecidos.
+.RSss
+qntsc: 352x240 (NTSC quarter screen)
+.br
+qpal:  352x288 (PAL quarter screen)
+.br
+ntsc:  720x480 (NTSC estándar)
+.br
+pal:   720x576 (PAL estándar)
+.br
+sntsc: 640x480 (NTSC square pixel)
+.br
+spal:  768x576 (PAL square pixel)
+.REss
 .RE
 .TP
-.B dsize={aspect|w:h}
+.B dsize={aspecto|w:h}
 Cambia el tamaño/aspecto deseado de la pantalla en un punto arbitrario
 de la cadena de filtro.
 El aspecto puede ser dado como una fracción (4/3) o como un número en
@@ -2713,6 +2735,11 @@ parámetro para forzar la cuantización
 .TP
 .B test\ \ \ 
 Genera varios patrones de test.
+.TP
+.B rgbtest
+Genera un patrón de test RGB útil para detectar problemas de RGB frente
+a BGR.
+Debe ver franjas roja, verde y azul de arriba a abajo.
 .TP
 .B lavc[=quality:fps]
 Conversión sofware YV12 a MPEG1 con libavcodec para usar con DVB/\:DXR3.
@@ -2870,6 +2897,24 @@ imagen debe ser detectada como entrelazada para eliminar la imagen.
 .B lavcdeint
 Usa el filtro de desentrelazado de livavcodec.
 .TP
+.B kerndeint[=map[:order[:thresh[:sharp[:twoway]]]]]
+Desentralazador de núcleo adaptativo de Donald Graft.
+Desentrelaza partes de video si se excede un umbral configurable.
+.PD 0
+.RSs
+.IPs map (0 ó 1)
+Pinta pixels que exceden el umbral de blanco (por defecto 0).
+.IPs order (0 ó 1)
+Intercambia campos si 1 (por defecto 0).
+.IPs thresh (0 - 255)
+Umbral (por defecto 10).
+.IPs sharp (0 ó 1)
+Activa perfilado adicional (por defecto 0).
+.IPs twoway (0 ó 1)
+Activa perfilado en dos veces (por defecto 0).
+.RE
+.PD 1
+.TP
 .B unsharp=l|cWxH:amount[:l|cWxH:amount]
 Máscara de eliminación de perfilado / difuminado gaussiano.
 .RSs
@@ -2976,7 +3021,7 @@ El parámetro opcional (ivtc=1) corresonde a la opción dr=1 para el filtro
 detc, y debe ser usado con MEncoder pero no con mplayer. Como con detc,
 debe especificar la relación de imágenes por segundo correcta (\-ofps 23.976)
 cuando use MEncoder.
-.B pullup
+.B pullup\ 
 Filtro de pulldown inverso de tercera generación (telecine inverso),
 capaz de manejar contenido de telecine-duro mezclado, 24 fps progresivo,
 y 30 fps progresivo.
@@ -4096,6 +4141,18 @@ ajustar
 cambia en codificación rápida en modos preestablecidos VBR siguientes,
 calidad ligeramente inferior y bitrates altos.
 .TP
+.B highpassfreq=<freq>
+Establece una precuencia de filtrado paso alta en Hz.
+Las frecuencias por debajo de la especificada serán atenuadas.
+Un valor de -1 desactiva el filtrado, un valor de 0 hace
+que se elijan los valores automáticamente.
+.TP
+.B lowpassfreq=<freq>
+Establece una frecuencia de filtrado paso baja en Hz.
+Frecuencias por encima de la especificada serán atenuadas.
+Un valor de -1 desactiva el filtrado, un valor de 0 hace
+que se elijan los valores automáticamente.
+.TP
 .B preset=<valor>
 valores preestablecidos
 .RSs
@@ -4990,6 +5047,29 @@ Consejo: una unión más positiva (-32 \- -16 en lugar de -64) parece mejorar la P
 .B nr=<0\-100000>
 reducción de ruido, 0 es deshabilitado
 .TP
+.B qns=<0\-3>
+cuantizador del perfilado de ruido, reduce artefactos de anillo, valores mayores
+hacen que sea más lento pero puede no resultar en una mejor calidad
+esto puede y debe ser usado junto con cuantización trellis, en cuyo caso la
+cuantización trellis (óptima para peso constante) será usada como punto
+de partida para la búsqueda iterativa.
+.PD 0
+.RSs
+.IPs 0
+desactivado (por defecto)
+.IPs 1
+solo disminuye el valor absoluto de los coeficientes
+.IPs 2
+solo cambia coeficientes antes del último coeficiente no cero + 1
+.IPs 3
+prueba todo
+.RE
+.PD 1
+.TP
+.B inter_matrix=<comma separated matrix>
+Usa matriz interna personalizada. Necesita una cadena separada por comas
+de 64 enteros.
+.TP
 .B vqmod_amp
 modulación cuantizada experimental
 .RE
@@ -5161,6 +5241,19 @@ búsqueda media
 búsqueda extendida
 .RE
 .PD 1
+.TP
+.B aspect=<x/y | f (valor real)>
+Almacena el aspecto de la película internamente, como los archivos MPEG.
+Mucha mayor resolución que el reescalado, porque no disminuye la calidad.
+MPlayer y otros pocos reproductores reproducirán estos archivos correctamente,
+otros los mostrarán con una razón de aspecto incorrecta.
+El parámetro de aspecto se puede dar como una razón o como un número en coma
+flotante.
+.TP
+.B autoaspect
+Lo mismo que la opción aspect, pero el aspecto es calculado automáticamente,
+teniendo en cuenta todos los ajustes (recortado/expansión/escalado/etc.) hechos
+en la cadena de filtros.
 .TP
 .B psnr\ \ \ 
 imprime la psnr (pico de relación señal ruido) para el video completo después

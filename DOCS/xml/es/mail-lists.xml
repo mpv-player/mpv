@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.8 -->
 <appendix id="mailinglists">
 <title>Listas de correo</title>
 <para>
@@ -112,7 +112,7 @@ Lista para discutir acerca de la publicación de las Noticias Semanales.
 </itemizedlist>
 <note><para>
 Puede buscar en los archivos de las listas de correo en 
-<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch"/>.
+<ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi"/>.
 </para></note>
 </para>
 </appendix>

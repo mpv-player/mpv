@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.11 -->
 
 <bookinfo id="toc">
 <title>MPlayer - El reproductor de Películas para LINUX</title>
@@ -45,7 +45,7 @@ linkend="faq">preguntas frecuentes</link>, o intente usando grep entre los
 archivos. La mayoría de las cuestiones debe estar contestadas en algún lugar de por
 aquí y el resto probablemente ya haya sido preguntado en nuestras
 <link linkend="mailinglists">listas de correo</link>. Compruebe los
-<ulink url="http://www.mplayerhq.hu/cgi-bin/htsearch">archivos</ulink>, hay un montón
+<ulink url="http://www.mplayerhq.hu/cgi-bin/s-arch.cgi">archivos</ulink>, hay un montón
 de información valiosa allí.
 </para>
 </preface>

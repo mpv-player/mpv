@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.36 -->
+<!-- synced with 1.37 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Adaptaciones</title>
 
@@ -324,7 +324,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 <para>Sascha Sommer libera binarios oficiales para Windows de vez en
   cuando, Joey Parrish hace paquetes completos para Windows no oficiales
   con instalador. Búsquelos en la sección de Windows de
-  <ulink url="http://www.mplayerhq.hu/homepage/projects.html">nuestra
+  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">nuestra
   página de proyectos</ulink>.</para>
 
 <sect2 id="cygwin">
