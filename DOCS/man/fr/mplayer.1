@@ -1,4 +1,4 @@
-.\" synced with 1.912
+.\" synced with 1.913
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "03 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "11 Mars 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2054,12 +2054,6 @@ pilote de plugin de sortie audio
 .SH "OPTIONS DE SORTIE VIDÉO (MPLAYER UNIQUEMENT)"
 .
 .TP
-.B \-aa* (\-vo aa uniquement)
-Vous pouvez obtenir une liste et des explications sur les options disponibles
-en exécutant
-.I mplayer \-aahelp
-.
-.TP
 .B \-adapter <valeur>
 Définit la carte graphique qui recevra l'image
 Nécessite l'option \-vm.
@@ -2808,8 +2802,12 @@ Pas de sortie vidéo.
 Utile pour les benchmarks.
 .
 .TP
-.B aa (voir aussi \-aa*)
+.B aa\ \ \ \ \ 
 Pilote de sortie vidéo art ASCII fonctionnant dans une console texte.
+Vous pouvez obtenir une liste et des explications sur les options disponibles
+en exécutant
+.I mplayer \-vo aa:help
+.
 .
 .TP
 .B caca\ \ \ 
