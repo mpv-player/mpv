@@ -706,21 +706,17 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      case MOV_FOURCC('e','s','d','s'): {
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
 			if(atom_len >= 8) {
-			  esds_t *esds = (esds_t *)malloc(sizeof(esds_t)); 				  
-			  if(esds && !mp4_parse_esds(&trak->stdata[36], atom_len-8, esds)) {
+			  esds_t esds; 				  
+			  if(!mp4_parse_esds(&trak->stdata[36], atom_len-8, &esds)) {
 			    
-			    sh->i_bps = esds->avgBitrate/8; 
+			    sh->i_bps = esds.avgBitrate/8; 
 
 			    // dump away the codec specific configuration for the AAC decoder
-			    sh->codecdata_len = esds->decoderConfigLen;
+			    sh->codecdata_len = esds.decoderConfigLen;
 			    sh->codecdata = (unsigned char *)malloc(sh->codecdata_len);
-			    memcpy(sh->codecdata, esds->decoderConfig, sh->codecdata_len);
+			    memcpy(sh->codecdata, esds.decoderConfig, sh->codecdata_len);
 			  }
-			  if(esds) {
-			    if(esds->decoderConfig)
-			      free(esds->decoderConfig);
-			    free(esds);
-			  }
+			  mp4_free_esds(&esds); // freeup esds mem
 #if 0
 	  		  { FILE* f=fopen("esds.dat","wb");
 			  fwrite(&trak->stdata[36],atom_len-8,1,f);

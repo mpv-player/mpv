@@ -29,10 +29,10 @@ int mp4_read_descr_len(stream_t *s) {
   return length;
 }
 
+/* parse the data part of MP4 esds atoms */
 int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
   /* create memory stream from data */
   stream_t *s = new_memory_stream(data, datalen);
-  uint8_t tag;
   uint8_t len;
 
   esds->version = stream_read_char(s);
@@ -42,8 +42,7 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
       esds->version, esds->flags);
 
   /* get and verify ES_DescrTag */
-  tag = stream_read_char(s);
-  if (tag == MP4ESDescrTag) {
+  if (stream_read_char(s) == MP4ESDescrTag) {
     /* read length */
     if ((len = mp4_read_descr_len(s)) < 5 + 15) {
       freereturn(s,1);
@@ -107,9 +106,38 @@ int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds) {
   mp_msg(MSGT_DEMUX, MP4_DL,
       "ESDS MPEG4 Decoder Specific Descriptor (%dBytes)\n", len);
 
+  /* get and verify SLConfigDescrTag */
+  if(stream_read_char(s) != MP4SLConfigDescrTag) {
+    freereturn(s,1);
+  }
+
+  if((len = mp4_read_descr_len(s)) < 1) {
+    freereturn(s,1);
+  }
+
+  /* Note: SLConfig is usually constant value 2 size 1Byte */
+  esds->SLConfigLen = len;
+  esds->SLConfig = malloc(esds->SLConfigLen);
+  if (esds->SLConfig) {
+    stream_read(s, esds->SLConfig, esds->SLConfigLen);
+  } else {
+    esds->SLConfigLen = 0;
+  }
+  mp_msg(MSGT_DEMUX, MP4_DL,
+      "ESDS MPEG4 Sync Layer Config Descriptor (%dBytes)\n"
+      " -> predefined: %d\n", len, esds->SLConfig[0]);
+
   /* will skip the remainder of the atom */
   freereturn(s,0);
 
+}
+
+/* cleanup all mem occupied by mp4_parse_esds */
+void mp4_free_esds(esds_t *esds) {
+  if(esds->decoderConfig)
+    free(esds->decoderConfig);
+  if(esds->SLConfig)
+    free(esds->SLConfig);
 }
 
 #undef freereturn

@@ -73,6 +73,7 @@ typedef struct {
 } esds_t;
 
 int mp4_parse_esds(unsigned char *data, int datalen, esds_t *esds);
+void mp4_free_esds(esds_t *esds); 
 
 #endif /* !__PARSE_MP4_H */
 
