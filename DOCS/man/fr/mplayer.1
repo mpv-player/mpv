@@ -1949,7 +1949,7 @@ Pilote de plugin de sortie audio.
 .
 .TP
 .B \-aa* (\-vo aa uniquement)
-Vous pouvez obtenir une liste et des explication sur les options disponibles
+Vous pouvez obtenir une liste et des explications sur les options disponibles
 en exécutant
 .I mplayer \-aahelp
 .
@@ -2127,7 +2127,7 @@ Essayez cette option si vous avez encore des problèmes en plein écran.
 .
 .TP
 .B \-fstype <type1,type2,...> (X11 uniquement)
-Définit une liste de classé par ordre de priorité des mode plein-écran
+Définit une liste de classée par ordre de priorité des modes plein-écran
 à utiliser.
 Vous pouvez inverser les modes en les préfixant par '\-'.
 Si vous avez des problèmes d'affichage, comme votre vidéo en plein écran est
@@ -2288,7 +2288,7 @@ xvidix, quartz et directx.
 .B \-saturation <-100\-100>
 Ajuste la saturation du signal vidéo (par défaut\ : 0).
 Vous pouvez obtenir une sortie en noir et blanc avec cette option.
-N'est pas génré par tous les pilotes de sortie vidéo.
+N'est pas géré par tous les pilotes de sortie vidéo.
 .
 .TP
 .B \-screenh <pixels>
@@ -2353,7 +2353,7 @@ exemples.
 .
 .TP
 .B \-zrdev <périphérique> (\-vo zr uniquement)
-Définir le fichier de périphérique spécial qui corresponds à votre carte
+Définir le fichier de périphérique spécial qui correspond à votre carte
 MJPEG, par défaut le pilote de sortie vidéo zr prend le premier périphérique
 v4l qu'il peut trouver.
 .
@@ -2586,7 +2586,7 @@ Choisit explicitement le périphérique fbdev à utiliser (par défaut\ :
 .
 .TP
 .B vesa\ \ \ 
-Pilote de sortie vidéo générique qui devrait fonctionner sur n'imorte quelle
+Pilote de sortie vidéo générique qui devrait fonctionner sur n'importe quelle
 carte compatible VESA VBE 2.0.
 .PD 0
 .RSs
@@ -2617,8 +2617,8 @@ ex.\& 640x480x16M ou d'après leur numéro de mode graphique, ex.\& 84.
 .IPs bbosd
 Affiche l'OSD sur les bandes noires du film (plus lent)
 .IPs native
-N'utilise que les fonction d'affichage natives.
-Cela évite toute accélération matériele, OSD, et direct rendering.
+N'utilise que les fonctions d'affichage natives.
+Cela évite toute accélération matérielle, OSD, et direct rendering.
 .IPs retrace
 Oblige un échange de trame lors du retracé vertical.
 Ne fonctionne qu'avec \-double.
@@ -2738,21 +2738,21 @@ Utilise la couche de sous-image Matrox (sub picture layer) pour afficher l'OSD
 .IPs (no)crtc2
 Active la sortie TV de la deuxième sortie vidéo (par défaut\ : activé).
 La qualité de l'image y est époustouflante puisque toutes les spécificités
-et limitations de l'affichage sur une TV sont géré (image entrelacée, synchro,
-etc ...)
+et limitations de l'affichage sur une TV sont gérées (image entrelacée,
+synchro, etc ...)
 .IPs (no)input
 Utilise les codes de touches de DirectFB au lieu de ceux de MPlayer
 (par défaut\ : activé).
 .IPs buffermode=single|double|triple
 Le tamponnage (buffering) double ou triple donnent les meilleurs résultats si vous voulez éviter les effets de distortions.
-Le triple tamponnage est plus efficace que le double puisqu'ill ne bloque
+Le triple tamponnage est plus efficace que le double puisqu'il ne bloque
 pas MPlayer lorsqu'il attend le rafraîchissement vertical.
 Le tamponnage simple devrait être évité (par défaut\ : triple).
 .IPs fieldparity=top|bottom
 Contrôle l'ordre d'affichage des trames entrelacées (par défaut\ : désactivé).
-Les paramètres valides sont top = les champs du haut en premier,
-bottom = les champs du bas en premier.
-Cette options n'a aucun effet sur les vidéo non entrelacées, ce qui représente
+Les paramètres valides sont "top" (les champs du haut en premier),
+"bottom" (les champs du bas en premier).
+Cette option n'a aucun effet sur les vidéo non entrelacées, ce qui représente
 la majorité des vidéos MPEG.
 Vous devriez activer cette option si vous observez des distortions ou des
 mouvements saccadés lorsque vous regardez une vidéo entrelacée.
@@ -2961,7 +2961,7 @@ Si vous ne définissez pas d'options, sortie sera "progressive"
 .
 .TP
 .B gif89a\ 
-Écrit chaque trame dans un fichier GIF animé du réperoire courant.
+Écrit chaque trame dans un fichier GIF animé du répertoire courant.
 Ne gère que le format RGB avec 24 bits/pixel en entrée et est limité en
 sortie à 256 couleurs.
 .PD 0
@@ -2989,7 +2989,7 @@ mplayer video.nut \-vo gif89a:15.0:test.gif
 .
 .TP
 .B jpeg\ \ \ 
-sépare chaque trame dans un fichier JPEG du réperoire courant.
+sépare chaque trame dans un fichier JPEG du répertoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 .PD 0
@@ -3052,7 +3052,7 @@ Nombre de fichiers PNM maximum à écrire par sous-répertoire
 .
 .TP
 .B pgm\ \ \ \ 
-sépare chaque trame dans un fichier PGM du réperoire courant.
+sépare chaque trame dans un fichier PGM du répertoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 Ne gère que le format YV12.
@@ -3064,14 +3064,14 @@ aux coordonnées (0,hauteur) jusqu'à (largeur/2,hauteur/2) est le plan U et
 .
 .TP
 .B png (voir aussi \-z)
-Sépare chaque trame dans un fichier PNG du réperoire courant.
+Sépare chaque trame dans un fichier PNG du répertoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 Ne gère que les formats RGB et BGR 24 bits/pixel.
 .
 .TP
 .B tga\ \ \ \ 
-Sépare chaque trame dans un fichier Targa du réperoire courant.
+Sépare chaque trame dans un fichier Targa du répertoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 L'intérêt de ce pilote de sortie vidéo est de pouvoir facilement extraire
@@ -3122,17 +3122,17 @@ options.
 Voir aussi la section des filtres audio de la documentation.
 br
 I NOTE\ :
-Voir \-af help pour la liste complètes des filtres audio disponibles.
+Voir \-af help pour la liste complète des filtres audio disponibles.
 .br
 Les filtres disponibles sont:
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
-Change la fréquence d'échantionnage du flux audio à un entier srate en Hz.
+Change la fréquence d'échantillonnage du flux audio à un entier srate en Hz.
 Il ne permet que le format 16 bit little endian.
 .IPs channels[=nch]
 Change le nombre de canaux à nch canaux de sortie.
 Si le nombre de canaux de sortie est plus grand que le nombre de canaux
-d'entrée des canaux vides sont insérés (exepté pour le mixage de mono vers
+d'entrée des canaux vides sont insérés (excepté pour le mixage de mono vers
 stéréo, où le canal audio est répété sur chacun des canaux de sortie).
 Si le nombre de canaux de sortie est plus petit que le nombre de canaux
 d'entrée les canaux en trop seront tronqués.
@@ -3644,7 +3644,7 @@ Utilisez de préférence \-vf.
 .PP
 La plupart des paramètres sont optionnels et s'initialiseront avec des
 valeurs par défaut si omis.
-Pour explicitement utiliser les valeurs par défaut, mettez la valeur à '-1'.
+Pour utiliser explicitement les valeurs par défaut, mettez la valeur à '-1'.
 Les paramètres l:h signifient largeur x hauteur en pixels, x:y signifient
 position x;y à partir de du coin supérieur gauche de la plus grande image.
 .br
@@ -3720,7 +3720,7 @@ Prenez 2 pour avoir des dimensions paires (obligatoire pour les vidéo
 .
 .TP
 .B rectangle[=l:h:x:y]
-Ce plugin réponds à la directive 'change_rectangle' de input.conf qui prend
+Ce plugin répond à la directive 'change_rectangle' de input.conf qui prend
 deux paramètres.
 .PD 0
 .RSs
@@ -3852,7 +3852,7 @@ spal:    768x576 (PAL à pixels carrés)
 .B dsize={aspect|l:h}
 Change la taille ou le rapport hauteur/\:largeur de l'affichage à un point
 arbitraire de la chaine de fitres.
-Aspect peut être donné en tant que fraction (4/\:3) ou que nombre flottant
+"aspect" peut être donné en tant que fraction (4/\:3) ou que nombre flottant
 (1.33).
 Vous pouvez également spécifier les largeur et hauteur exactes de l'affichage
 désiré.
@@ -3913,7 +3913,7 @@ Contrairement au filtre format, il permet n'importe quel espace de couleur
 celui que vous donnez.
 .br
 .I NOTE\ :
-Pour une liste des différents formats disponible, voyez noformat=fmt=help.
+Pour une liste des différents formats disponibles, voyez noformat=fmt=help.
 .PD 0
 .RSs
 .IPs fourcc
@@ -3926,7 +3926,7 @@ nom du format comme rgb15, bgr24, yv12, etc. (par défaut: yv12)
 Construit la chaîne de filtres spécifiée.
 Les sous-filtres doivent être séparés avec '/', peuvent être désactivés
 en les préfixant de '-'.
-La portée de chaque sous-filtre peur être contrôlée en ajoutant ':' suivi
+La portée de chaque sous-filtre peut être contrôlée en ajoutant ':' suivi
 de 'a', 'c' ou 'y' (par défaut\ : c)\ :
 .PD 0
 .RSs
@@ -4024,7 +4024,7 @@ DVB/\:DXR3.
 Fixe le zoom optimum pour les cartes DVB, en redimmensionnant sur l'axe x de
 façon matérielle et en calculant le redimmensionnement sur l'axe y de façon
 logicielle pour conserver le rapport hauteur/\:largeur.
-Utile uniquement quand combiné avec expand et scale
+Utile uniquement quand il est combiné avec expand et scale
 (\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
 .RSs
 .IPs aspect
@@ -4141,12 +4141,12 @@ Tout autre valeur de f renvoie au comportement par défaut (moyenne).
 .TP
 .B ilpack[=mode]
 Quand une vidéo entrelacée est stockée au format YUV 4:2:0, l'entrelacement
-chroma est mal aligné à cause du sous-échantillonnage vertical des canaux
-chroma.
-Ce filtre convertit les données 4:2:0 planaire au format YUY2 (4:2:2)
+chroma est mal aligné, ce qui est dû au sous-échantillonnage vertical des
+canaux chroma.
+Ce filtre convertit les données 4:2:0 planaires au format YUY2 (4:2:2)
 avec les lignes chroma à leur bon emplacement, de façon à ce que à chaque
 ligne de balayage (scanline), les données luma et chroma proviennent toutes
-deux du même champs.
+deux du même champ.
 L'argument optionnel sélectionne le mode d'échantillonage.
 Par défaut, l'interpolation linéaire (mode 1) est utilisé.
 Le mode 0 utilise un échantillonage du 'plus proche voisin' (nearest-neighbor),
@@ -4166,13 +4166,13 @@ que vous ayez une bonne raison de faire autrement.
 .TP
 .B softskip
 Utile uniquement avec MEncoder.
-Softskip déplace l'étape de saut (skipping) de trame lors de l'encodage
-depuis avant la chaîne de filtres vers quelquepart dans cette même
-chaîne.
-Cela permet aux filtre qui ont besoin de voir toutes les trames
+Softskip change le moment du "skipping" (saut) de trame lors de l'encodage,
+qui se fait normalement avant la chaîne de filtres, pour qu'elle se fasse à
+l'intérieur de la chaîne de filtres.
+Cela permet aux filtres qui ont besoin de voir toutes les trames
 (téléciné inverse, débruitage temporel, etc.\&) pour fonctionner
 correctement.
-Devrait être placé après les filtres qui ont besoin de voir toutes
+Il devrait être placé après les filtres qui ont besoin de voir toutes
 les trames et avant tout filtre gourmant en temps de calcul.
 .
 .TP
@@ -4182,7 +4182,7 @@ façon à réduire le débit.
 L'argument max (si positif) définit le nombre maximum de trames consécutives
 qui peuvent être sautées, ou (si négatif) l'interval minimum entre les trames
 sautées.
-Une trame peut être sautée si aucune région 8x8 ne différe de plus de
+Une trame peut être sautée si aucun bloc 8x8 ne différe de plus que
 la limite "haut", et si pas plus de "frac" portions (1 signifiant l'image
 entière) ne diffèrent de plus que la limite "bas".
 Les valeurs de haut et bas sont pour des blocs de 8x8 pixels et représentent
@@ -4254,7 +4254,7 @@ Echange les plans U & V.
 .TP
 .B "il=[d|i][s][:[d|i][s]]"
 (Dés)entrelace les lignes.
-Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champs
+Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champ
 d'images entrelacées sans les désentrelacer.
 Vous pouvez filtrer votre DVD entrelacé et le jouer sur la TV sans casser
 l'entrelacement.
@@ -4293,9 +4293,9 @@ Re-multiplexe les champs (inversant l'effet de fil=d).
 .
 .TP
 .B "field[=n]"
-Extrait un seul champs d'une image entrelacée en utilisant des astuces de
+Extrait un seul champ d'une image entrelacée en utilisant des astuces de
 calculs pour éviter de gaspiller le temps CPU.
-L'argument optionnel n spécifie si l'on doit extraire un champs pair ou
+L'argument optionnel n spécifie si l'on doit extraire un champ pair ou
 impair (selon que n soit paire ou impaire).
 .
 .TP
@@ -4361,13 +4361,13 @@ capable de gérer une vidéo composée de hard-telecine, 24 fps progressif, et
 Le filtre pullup est conçu pour être plus robuste que detc ou ivtc, en se
 basant sur le contexte futur pour prendre ses décisions.
 Tout comme ivtc, pullup est sans état, dans le sens où il ne reste pas
-pas dans un seul mode, mais plutôt observe les champs à venir pour
+dans un seul mode, mais observe plutôt les champs à venir pour
 sélectionner le bon mode et reconstuire correctement les trames.
 Il est toujours en développement, mais est déjà très correct.
-Les paramètres jg, jd, jh et jb définit la quantité de d'information à
+Les paramètres jg, jd, jh et jb définissent la quantité d'informations à
 balancer respectivement à gauche, à droite, en haut et en bas de l'image.
 Gauche/\:droite sont donnés par colonnes de 8 pixels, tandis que le haut/\:bas
-sont donné par paquet de 2 lignes.
+sont donnés par paquet de 2 lignes.
 Mettre le paramètre cb (changement strict) à 1 réduira les chances que pullup
 reconstruise incorrectement une trame, mais peut aussi déboucher sur un saut
 trop important de trames lors de scènes avec beaucoup de mouvements.
@@ -4398,15 +4398,15 @@ Il est conçu pour gérer n'importe quel motif pulldown (même le telecine soft
 et hard mélangés) et gère de façon limitée les films qui sont ralentis ou
 accélérés pour la TV.
 Seul le plan luma est utilisé pour détecter les changements de trames.
-Si un champs n'a pas de corespondance, il est désentrelacé par simple
+Si un champ n'a pas de corespondance, il est désentrelacé par simple
 approximation linéaire.
 Si la source est en MPEG-2, il doit être le premier filtre à avoir accès
 aux "field-flags" initialisés par l'encodeur MPEG-2.
 Suivant la source MPEG, vous pouvez ne pas tenir compte de ce conseil, du
-moment que vous ne voyez pas plein d'avertissements "Bottom-first field".
+moment que vous ne voyez pas pleins d'avertissements "Bottom-first field".
 Sans options il fait un telecine inverse normal, et devrait être utilisé avec
 mencoder \-fps 29.97 \-ofps 23.976.
-Quand ce filtre est utilisé avec mplayer, cela produira un débit impaire
+Quand ce filtre est utilisé avec mplayer, cela produira un débit impair
 pendant la lecture, mais il sera généralement meilleur qu'en utilisant
 pp=lb ou pas de désentrelacement du tout.
 Les options multiples doivent être séparées par /.
@@ -4425,7 +4425,7 @@ Ceci peut être utilisé pour filtrer des films qui sont diffusés à la TV à
 un débit différent de celui d'origine.
 .IPs luma_only=n
 Si n est non-nul, le plan chroma est copié tel quel.
-C'est utile pour la TV échantillonée en YV12, qui annule un des champs chroma.
+C'est utile pour la TV échantillonée en YV12, qui annule un des champ chroma.
 .IPs mmx2=n
 Sur x86, si n=1, utilise les fonctions optimisées pour MMX2, si n=2, utilise
 les fonctions optimisées pour 3DNow!, sinon, utilise juste du C.
@@ -4453,12 +4453,12 @@ Utile pour déboguage.
 .IPs dint_thres=n
 Seuil de désentrelacement.
 Utilisé pour désentrelacer les trames sans correspondance.
-De plus grande valeurs signifient moins de désentrelacement, utilisez n=256
+Une valeur plus grande signifie moins de désentrelacement, utilisez n=256
 pour désactiver complètement le désentrelacement (par défaut\ : 8).
 .IPs comb_thres=n
 Seuil pour comparer les champs haut et bas (par défaut\ : 128).
 .IPs diff_thres=n
-Seuil pour détecter les changements temporels d'un champs (par défaut\ : 128).
+Seuil pour détecter les changements temporels d'un champ (par défaut\ : 128).
 .IPs sad_thres=n
 Seuil de la Somme des Différences Absolues (par défaut\ : 64).
 .RE
@@ -4472,11 +4472,11 @@ soft téléciné, insérer ce filtre avant eux devrait les rendre plus efficaces.
 .
 .TP
 .B divtc[=options]
-Inverse telecine pour les vidéo désentrelacées.
+Inverse telecine pour les vidéos désentrelacées.
 Si une vidéo 3:2-pulldown telecine a perdu l'un de ses champs ou a été
-désentrelacé  avec une méthode qui garde un champ et interpole d'autre,
+désentrelacé avec une méthode qui garde un champ et interpole l'autre,
 la vidéo se retrouve saccadée dont une trame sur quatre est dupliquée.
-Ce filtre a pour but de trouver et jetter ces trames dupliquées pour
+Ce filtre a pour but de trouver et jeter ces trames dupliquées pour
 retrouver le débit de trame (framerate) original.
 Lorsque vous utilisez ce filtre, vous devez définir \-ofps à 4/\:5 du débit
 de trame du fichier d'entrée (23.976 si l'entrée est à 29.97fps).
@@ -4512,10 +4512,10 @@ Le mode 2-passes considère une fenêtre fixe de trames futures et passées.
 .IPs phase=0|1|2|3|4
 Définit la phase initiale telecine pour le mode à passe unique
 (par défaut\ : 0).
-Le mode 2-passes peut voir le future, il est donc possible d'utiliser la
+Le mode 2-passes peut voir le futur, il est donc possible d'utiliser la
 bonne phase depuis le début, tandis que le mode à passe unique ne peut que
 deviner.
-Il se met à utilise la phase adéquate dès qu'il trouve cette information,
+Il se met à utiliser la phase adéquate dès qu'il trouve cette information,
 mais cette option peut vous aider à vous débarasser des saccades du début.
 La première passe du mode 2-passes utilise aussi cette option, donc si
 vous enregistrez la sortie de la première passe, vous aurez un fichier où
@@ -4524,11 +4524,11 @@ la phase est constante.
 Définit le seuil "deghosting" (0\-255 pour le mode à passe unique,
 -255\-255 pour celui 2-passes, par défaut 0).
 Si non-nul, le mode deghosting est utilisé.
-Ceci est destiné aux vidéo ayant été désentrelacées en fusionnant les champs
+Ceci est destiné aux vidéos ayant été désentrelacées en fusionnant les champs
 ensemble au lieu d'en jetter un.
 Le deghosting amplifie les artefacts de compression des champs fusionnés,
 et la valeur du paramètre est celle du seuil pour exclure les pixels 
-du du filtre deghosting s'il diffèrent moins que ce seuil de la trame
+du filtre deghosting s'il diffère moins que ce seuil de la trame
 précédente.
 En mode 2-passes, une valeur négative peut être utilisé pour que le filtre
 analyse la totalité de la vidéo au début de la 2ème passe pour déterminer
@@ -4558,14 +4558,14 @@ Le filtre retardera les champs du bas.
 Capture en commençant du bas, transfert depuis le haut.
 Le filtre retardera les champs du haut.
 .IPs p
-La capture et le transfer se refont avec le même ordre de champs.
-Ce mode n'existe comme référence pour la documentation des autres options,
+La capture et le transfert se refont avec le même ordre de champs.
+Ce mode n'existe que comme référence pour la documentation des autres options,
 mais si vous le sélectionnez effectivement, ce filtre ne fera tout simplement
 rien ;-)
 .IPs a
 Capture l'ordre des champs déterminés automatiquement par les "field flags",
 le transfert à l'opposé.
-Le filtre choisit entre les mode t et b à chaque trame d'après les
+Le filtre choisit entre les modes t et b à chaque trame d'après les
 "field flags".
 S'il n'existe aucune information sur les champs, alors cette fonction se
 comporte comme u.
@@ -4575,17 +4575,17 @@ Le filtre choisit entre les modes t et b à chaque trame en analysant les
 images et sélectionnant le mode qui produit la correspondance la plus
 proche entre les champs.
 .IPs T
-Capture depuis le haut, tranfert inconnu ou varié.
+Capture depuis le haut, transfert inconnu ou varié.
 Le filtre choisit entre les modes t et p en analysant l'image.
 .IPs B
-Capture depuis le bas, tranfert inconnu ou varié.
+Capture depuis le bas, transfert inconnu ou varié.
 Le filtre choisit entre les modes b et p en analysant l'image.
 .IPs A
-Capture en fonction des "field flags", tranfert inconnu ou varié (par défaut).
+Capture en fonction des "field flags", transfert inconnu ou varié (par défaut).
 Si aucune information sur les champs n'est disponible, fonctionne tout
 comme U.
 .IPs U
-Capture autant que tranfert inconnu ou varié.
+Capture autant que transfert inconnu ou varié.
 Le filtre choisit entre les modes t, b et p en analysant l'image.
 .IPs v
 opération bavarde (verbose)
@@ -4710,8 +4710,7 @@ ré-échantillonnage linéaire (0) ou cubique (1)
 .
 .TP
 .B 2xsai\ \ 
-Redimensionne et lisser l'image avec le zoom x2 et l'algorithme
-d'interpolation.
+Redimensionne et lisse l'image avec l'algorithme "zoom x2 et interpolation".
 .
 .TP
 .B 1bpp\ \ \ 
@@ -4812,8 +4811,8 @@ partie de l'écran est mise à jour.
 N'affiche qu'une trame toutes les n trames ou que chaque trame (clé) Intra.
 .sp 1
 Si vous appelez ce filtre avec I (en majuscule) en paramètre, alors SEULES
-les trames-clées seront affichées.
-Pour les DVDs cela signifie une toute les 15/\:12 trames (IBBPBBPBBPBBPBB),
+les trames-clés seront affichées.
+Pour les DVDs cela signifie une toutes les 15/\:12 trames (IBBPBBPBBPBBPBB),
 pour l'AVI cela signifie à chaque changement de scène ou à chaque valeur de
 keyint (voir \-lavcopts keyint=valeur si vous utilisez MEncoder pour encoder la
 vidéo).
@@ -4834,7 +4833,7 @@ affiché.
 .
 .TP
 .B "tile=xtiles:ytiles:output:start:delta"
-Crée un mosaïque d'images à partir d'une série d'images plus petites.
+Crée une mosaïque d'images à partir d'une série d'images plus petites.
 Si vous omettez un paramètre ou utilisez une valeur plus petite que 0, alors
 la valeur par défaut est utilisée.
 Vous pouvez également arrêter quand vous êtes satisfait (...
@@ -4852,7 +4851,7 @@ nombre d'éléments de mosaïque sur l'axe y (par défaut\ : 5)
 .IPs <output>
 Affiche la mosaïque quand le nombre de trame est égal à 'output',
 où 'output' doit être un nombre inférieur à xtile * ytile.
-Les éléments de la mosaïque manquants sont laissées vides.
+Les éléments de la mosaïque manquants sont laissés vides.
 Vous pouvez, par exemple, écrire une mosaïque de 8 * 7 toutes les 50 trames
 pour obtenir une image toutes les 2 secondes à 25 fps.
 .IPs <start>
@@ -4865,10 +4864,10 @@ pour obtenir une image toutes les 2 secondes à 25 fps.
 .TP
 .B delogo[=x:y:l:h:t]
 Supprime un logo de station de télé par simple interpolation des pixels
-environants.
+environnants.
 Définissez juste un rectangle recouvrant le logo et regardez-le
-disparaître (et parfois quelque chose d'encore pire apparaître \- les résultats
-peuvent varier).
+disparaître (ou parfois voir quelque chose d'encore pire apparaître \-
+ça dépend des cas).
 .PD 0
 .RSs
 .IPs x,y
@@ -4888,7 +4887,7 @@ Encodeur logiciel YV12 vers MJPEG pour utilisation avec le périphérique de
 sortie vidéo zr2.
 .RSs
 .IPs maxheight=h|maxwidth=l
-Ces options initialisent les largeur et hauteur maximum que la carte zr peut
+Ces options initialisent la largeur et la hauteur maximum que la carte zr peut
 gérer (la couche de filtres de MPlayer ne peut actuellement pas les deviner).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
 Utilisez ces options pour initialiser maxwidth et maxheight automatiquement
@@ -5774,7 +5773,8 @@ facteur des quantificateurs entre les trames B et non B (passe\ 1/\:2)
 .
 .TP
 .B vi_qfactor=<-31.0\-31.0>
-(passe\ 1/\:2) (par défaut\ : 0.8)
+facteur des quantificateurs entre les trames I et non I (passe\ 1/\:2)
+(par défaut\ : 0.8)
 .
 .TP
 .B vb_qoffset=<-31.0\-31.0>
@@ -6116,17 +6116,33 @@ intervalle sensé
 .TP
 .B tcplx_mask=<0.0\-1.0>
 masquage de la complexité temporelle (par défaut\ : 0.0 (désactivé))
+Imaginez une scène avec un oiseau y volant, tcplx_mask va diminuer les
+quantificateurs des macro-blocs décrivant l'oiseau (et donc réduit leur
+qualité) puisque l'oeil humain n'a normalement pas le temps de voir tous
+les détails de l'oiseau.
+Sachez cependant que si l'objet masqué s'arrêtre (ex.\& l'oiseau se pose)
+il est très probable qu'il soit très laid un court instant (jusqu'à ce
+que l'encodeur remarque que l'objet ne bouge plus et doit voir ses blocs
+affinés).
+Les bits économisés seront redistribués au reste de la vidéo, ce qui peut
+en améliorer la qualité subjective, pourvu que la valeur donnée à tcplx_mask
+soit bien choisie
 .
 .TP
 .B scplx_mask=<0.0\-1.0>
 masquage de la complexité spatiale
 De plus grandes valeurs peuvent aider contre l'effet de blocs (blockiness),
-si aucun filtre de déblocage n'est utilisé pendant le décodage.
+si aucun filtre de déblocage n'est utilisé pendant le décodage, ce qui
+n'est d'ailleurs pas une bonne idée.
 .br
+Imaginez une scène avec une pelouse (caractéristique d'une grande complexité
+spatiale), un ciel bleu et une maison, scplx_mask va diminuer les
+quantificateurs des macro-blocs décrivant la pelouse (et donc réduit leur
+qualité), pour pouvoir distribuer plus de bits au ciel et à la maison.
 .I
 ASTUCE\ :
-Coupez tous les bords noirs car ils vont réduire la qualité des blocs
-macro (c'est toujours vrai, même sans scplx_mask).
+Enlevez tous les bords noirs car ils vont réduire la qualité des macro-blocs
+(ce qui est toujours vrai, même sans scplx_mask).
 .RSs
 .IPs 0.0
 désactivé (par défaut)
@@ -6135,8 +6151,11 @@ intervalle sensé
 .RE
 .
 .TP
-.B p_mask=<0.0\-1.0>
-masquage inter-MB (par défaut\ : 0.0 (désactivé))
+.B p_mask=<0.0\-1.0> (voir aussi vi_qfactor)
+Réduit la qualité des blocs inter, ce qui revient à augmenter celle blocs
+intra blocks, puisque le même bitrate moyen sera distribué par le "rate
+controller" à l'ensemble de la séquence vidéo (par défaut\ : 0.0 (désactivé)).
+p_mask=1.0 double la quantité de bits donnés à chaque bloc intra.
 .
 .TP
 .B naq\ \ \ \ 
