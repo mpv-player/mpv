@@ -150,7 +150,7 @@ int vbeInit( void )
 
 int vbeDestroy( void ) 
 {
-  __set_cursor_type(my_stdout,1);
+  if (my_stdout)  __set_cursor_type(my_stdout,1);
   close(fd_mem);
   LRMI_free_real(controller_info);
   return VBE_OK;
