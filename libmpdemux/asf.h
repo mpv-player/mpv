@@ -145,7 +145,7 @@ typedef enum {
     (h)->end_timestamp = le2me_64((h)->end_timestamp);			\
     (h)->duration = le2me_64((h)->duration);				\
     (h)->start_timestamp = le2me_32((h)->start_timestamp);		\
-    (h)->unk1 = le2me_32((h)->unk1);					\
+    (h)->preroll = le2me_32((h)->preroll);				\
     (h)->flags = le2me_32((h)->flags);					\
     (h)->packetsize = le2me_32((h)->packetsize);			\
     (h)->packetsize2 = le2me_32((h)->packetsize2);			\
