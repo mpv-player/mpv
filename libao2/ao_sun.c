@@ -25,7 +25,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "afmt.h"
+#include "libaf/af_format.h"
 #include "mp_msg.h"
 #include "help_mp.h"
 
@@ -69,22 +69,22 @@ extern int verbose;
 
 
 // convert an OSS audio format specification into a sun audio encoding
-static int oss2sunfmt(int oss_format)
+static int af2sunfmt(int format)
 {
-    switch (oss_format){
-    case AFMT_MU_LAW:
+    switch (format){
+    case AF_FORMAT_MU_LAW:
 	return AUDIO_ENCODING_ULAW;
-    case AFMT_A_LAW:
+    case AF_FORMAT_A_LAW:
 	return AUDIO_ENCODING_ALAW;
-    case AFMT_S16_BE:
-    case AFMT_S16_LE:
+    case AF_FORMAT_S16_BE:
+    case AF_FORMAT_S16_LE:
 	return AUDIO_ENCODING_LINEAR;
 #ifdef	AUDIO_ENCODING_LINEAR8	// Missing on SunOS 5.5.1...
-    case AFMT_U8:
+    case AF_FORMAT_U8:
 	return AUDIO_ENCODING_LINEAR8;
 #endif
 #ifdef	AUDIO_ENCODING_DVI	// Missing on NetBSD...
-    case AFMT_IMA_ADPCM:
+    case AF_FORMAT_IMA_ADPCM:
 	return AUDIO_ENCODING_DVI;
 #endif
     default:
@@ -465,20 +465,6 @@ static int init(int rate,int channels,int format,int flags){
 	enable_sample_timing = realtime_samplecounter_available(audio_dev);
     }
 
-#define	AF_FILTER_TEST 0
-#if	AF_FILTER_TEST
-    /* test code to force use of the audio filter modules */
-    {
-	char *s;
-	if (s = getenv("AF_RATE"))
-	    rate = atoi(s);
-	if (s = getenv("AF_CHANNELS"))
-	    channels = atoi(s);
-	if (s = getenv("AF_BITS"))
-	    format = atoi(s) == 16 ? AFMT_S16_NE : AFMT_U8;
-    }
-#endif
-
 //    printf("ao2: %d Hz  %d chans  %s [0x%X]\n",
 //	   rate,channels,audio_out_format_name(format),format);
 
@@ -495,7 +481,7 @@ static int init(int rate,int channels,int format,int flags){
 	AUDIO_INITINFO(&info);
 	info.play.encoding = oss2sunfmt(ao_data.format = format);
 	info.play.precision =
-	    (format==AFMT_S16_LE || format==AFMT_S16_BE
+	    (format==AF_FORMAT_S16_LE || format==AF_FORMAT_S16_BE
 	     ? AUDIO_PRECISION_16
 	     : AUDIO_PRECISION_8);
 	info.play.channels = ao_data.channels = channels;
@@ -578,7 +564,7 @@ static int init(int rate,int channels,int format,int flags){
 	ao_data.buffersize=0;
 #ifdef HAVE_AUDIO_SELECT
 	data = malloc(ao_data.outburst);
-	memset(data, format==AFMT_U8 ? 0x80 : 0, ao_data.outburst);
+	memset(data, format==AF_FORMAT_U8 ? 0x80 : 0, ao_data.outburst);
 	while(ao_data.buffersize<0x40000){
 	    fd_set rfds;
 	    struct timeval tv;
@@ -641,7 +627,7 @@ static void reset(){
     AUDIO_INITINFO(&info);
     info.play.encoding = oss2sunfmt(ao_data.format);
     info.play.precision =
-	(ao_data.format==AFMT_S16_LE || ao_data.format==AFMT_S16_BE 
+	(ao_data.format==AF_FORMAT_S16_LE || ao_data.format==AF_FORMAT_S16_BE 
 	 ? AUDIO_PRECISION_16
 	 : AUDIO_PRECISION_8);
     info.play.channels = ao_data.channels;
@@ -710,9 +696,9 @@ static int get_space(){
 // return: number of bytes played
 static int play(void* data,int len,int flags){
 #if	WORDS_BIGENDIAN
-    int native_endian = AFMT_S16_BE;
+    int native_endian = AF_FORMAT_S16_BE;
 #else
-    int native_endian = AFMT_S16_LE;
+    int native_endian = AF_FORMAT_S16_LE;
 #endif
 
     if (len < ao_data.outburst) return 0;
@@ -720,7 +706,7 @@ static int play(void* data,int len,int flags){
     len *= ao_data.outburst;
 
     /* 16-bit format using the 'wrong' byteorder?  swap words */
-    if ((ao_data.format == AFMT_S16_LE || ao_data.format == AFMT_S16_BE)
+    if ((ao_data.format == AF_FORMAT_S16_LE || ao_data.format == AF_FORMAT_S16_BE)
 	&& ao_data.format != native_endian) {
 	static void *swab_buf;
 	static int swab_len;
@@ -734,7 +720,7 @@ static int play(void* data,int len,int flags){
 	}
 	swab(data, swab_buf, len);
 	data = swab_buf;
-    } else if (ao_data.format == AFMT_U8 && convert_u8_s8) {
+    } else if (ao_data.format == AF_FORMAT_U8 && convert_u8_s8) {
 	int i;
 	unsigned char *p = data;
 
