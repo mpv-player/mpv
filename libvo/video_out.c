@@ -87,4 +87,4 @@ vo_functions_t* video_out_drivers[] =
         NULL
 };
 
-
+#include "sub.c"

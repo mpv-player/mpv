@@ -328,7 +328,30 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
 #endif
 }
 
+static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+    int dbpp=( bpp+7 )/8;
+    int x,y;
+
+    for(y=0;y<h;y++){
+        uint8_t *dst = ImageData+ dbpp*((y+y0)*image_width+x0);
+        for(x=0;x<w;x++){
+//            dst[x]=(dst[x]*srca[x]+src[x]*(srca[x]^255))>>8;
+            if(srca[x]){
+                dst[0]=(dst[0]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+                dst[1]=(dst[1]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+                dst[2]=(dst[2]*(srca[x]^255)+src[x]*(srca[x]))>>8;
+            }
+            dst+=dbpp;
+        }
+        src+=stride;
+        srca+=stride;
+    }
+
+}
+
+
 static void flip_page( void ){
+    vo_draw_text(draw_alpha);
     check_events();
     Display_Image( myximage,ImageData );
 }

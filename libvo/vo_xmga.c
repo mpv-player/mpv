@@ -151,6 +151,8 @@ static void flip_page(void){
     timer=t;
 #endif
 
+    vo_draw_text(draw_alpha);
+
     check_events();
     vo_mga_flip_page();
 }
