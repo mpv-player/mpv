@@ -379,9 +379,9 @@ eingelesen werden soll.
 .TP
 .B \-quiet \ \ 
 Konsolenausgaben werden weniger ausführlich; im Besonderen wird damit die 
-Statuszeile (z.B. A:   0.7 V:   0.6 A-V:  0.068 ...) nicht angezeigt.
+Statuszeile (z.B.\& A:   0.7 V:   0.6 A-V:  0.068 ...) nicht angezeigt.
 Besonders nützlich ist dies bei langsamen Terminals oder fehlerhaften, die 
-Zeilenvorschübe nicht richtig verarbeiten (z.B. \\r).
+Zeilenvorschübe nicht richtig verarbeiten (z.B.\& \\r).
 .TP
 .B \-v, \-verbose
 macht Ausgaben ausführlicher (mehrere \-v erzeugen höhere Ausführlichkeit).
@@ -473,7 +473,7 @@ anstatt sie sofort abzuspielen.
 Erzwingt dasselbe Videosystem für mehrere Dateien (einmalige Initialisierung
 für alle Dateien). Dementsprechend wird für alle Dateien nur ein Fenster
 geöffnet. Momentan funktionieren die folgenden Treiber mit fixed\-vo: gl2, mga, 
-svga, x11, xmga, xv and xvidix.
+svga, x11, xmga, xv, xvidix and dfbmga.
 .TP
 .B \-framedrop (siehe auch \-hardframedrop)
 Verwirft einige Frames, ohne sie anzuzeigen, um auf langsamen Systemen
@@ -550,10 +550,10 @@ Benutzt eine andere menu.conf.
 Gibt das Hauptmenü an.
 .TP
 .B \-noconsolecontrols
-Standardinput (stdin) wird anstelle von Schlüssel-Events verwendet.
+Standardinput (stdin) wird anstelle von Tastatureingaben verwendet.
 Wenn du /dev/stdin (oder das Äquivalent auf deinem System) öffnest, stdin in
 einer Playlist öffnest, oder vorhast, irgendwann später von stdin via loadfile
-oder loadlist Slave-Kommandos einzulesen, dann
+oder loadlist Slave-Kommandos zu lesen, dann
 .B brauchst
 du diese Option.
 Die Option -idx ist in diesem Falle nicht verfügbar.
@@ -625,8 +625,8 @@ Erhöht oder verringert die Abspielgeschwindigkeit abhängig vom angegebenen Fakto
 .TP
 .B \-sstep <Sekunden>
 Zeigt einen Frame alle <Sekunden> Sekunden. Für Slideshows nützlich.
-
-
+.
+.
 .SH "DEMUXER/STREAM-OPTIONEN"
 .TP
 .B \-a52drc <Level>
@@ -638,8 +638,8 @@ Diese Option zeigt nur Wirkung, wenn im AC3 Stream die Range Compression
 Information vorhanden ist.
 .TP
 .B \-aid <id> (siehe auch \-alang)
-Gibt die zu verwendende Audiospur an [MPEG: 0\-31 AVI/\:OGM: 1\-99
-ASF/\:RM: 0\-127 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS: 17\-8190].
+Gibt die zu verwendende Audiospur an (MPEG: 0\-31 AVI/\:OGM: 1\-99
+ASF/\:RM: 0\-127 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS: 17\-8190).
 MPlayer gibt alle verwendbaren IDs aus, wenn er im Verbose-Modus (-v) gestartet
 wird.
 Beim Abspielen eines MPEG-TS-Streams wählt MPlayer/MEncoder das erste Programm
@@ -649,9 +649,9 @@ Beim Abspielen eines MPEG-TS-Streams wählt MPlayer/MEncoder das erste Programm
 Funktioniert nur bei DVD-Wiedergabe.
 Wählt die DVD-Audiosprache und versucht, die Audiospur abzuspielen, deren
 Ländercode dem angegebenen entspricht.
-MPlayer gibt alle vorhandenen Ländercodes aus, wenn er im Verbose-Modus (-v)
+MPlayer gibt alle vorhandenen Ländercodes aus, wenn er im Verbose-Modus (\-v)
 gestartet wird.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
@@ -665,7 +665,7 @@ ungarische Audiospur vorhanden ist.
 .B \-audio-demuxer <Nummer> (nur mit \-audiofile)
 Erzwingt den Audiodemuxertyp für \-audiofile.
 Alle in demuxers.h definierten Demuxer-IDs sind zulässig.
-Benutze \-audio\-demuxer 17, um eine Datei als MP3 abzuspielen.
+\-audio-demuxer 17 erzwingt das Abspielen als MP3.
 .TP
 .B \-audiofile <Dateiname>
 Spielt Audio aus einer externen Datei (WAV, MP3 oder Ogg Vorbis) zu einem
@@ -682,12 +682,20 @@ Nützlich, wenn du Live\-Streams über eine langsame Verbindung ansehen
 möchtest.
 .TP
 .B \-cdrom-device <Pfad zum Gerät>
-Überschreibt den Standardwert für das CD-ROM-Gerät, /dev/\:cdrom.
+Gibt das CD-ROM-Gerät an (Standard: /dev/\:cdrom).
 .TP
 .B \-cache <kbytes>
-Diese Option gibt an, wieviel Speicher (in kbytes) MPlayer zum
-Precachen einer Datei/\:URL benutzt.
-Besonders für langsame Medien sinnvoll (Standard ist \-nocache).
+Diese Option gibt an, wieviel Speicher (in kBytes) MPlayer zum
+Precachen einer Datei oder URL benutzt.
+Besonders bei langsamen langsamen Medien sinnvoll.
+.TP
+.B \-cache-min <Prozent>
+Die Wiedergabe startet, wenn der Cache bis zu diesem Grenzwert gefüllt ist.
+.TP
+.B \-cache-prefill <Prozent> (noch nicht implementiert)
+Wenn der Cache leer ist, wird MPlayer pausieren und die Wiedergabe erst dann
+fortsetzen, wenn der Wert für die Auffüllung des Caches erreicht ist, die mit
+diesem Wert gesetzt wird.
 .TP
 .B \-cdda <Option1:Option2> (nur bei CDDA)
 Diese Option kann benutzt werden, um die CD-Audio-Auslesefeatures von
@@ -697,9 +705,9 @@ Vorhandene Optionen sind diese:
 .
 .RSs
 .IPs speed=<Wert>
-setzt die CD-Umdrehungsgeschwindigkeit
+Setzt die CD-Umdrehungsgeschwindigkeit.
 .IPs paranoia=<0\-2>
-setzt den Paranoia-Wert
+Setzt den Paranoia-Wert.
 .RSss
 0: deaktiviert Fehlererkennung
 .br
@@ -708,9 +716,9 @@ setzt den Paranoia-Wert
 2: komplette Datenkorrektur und -überprüfung
 .REss
 .IPs generic-dev=<Wert>
-benutzt das angegebene generische SCSI-Gerät
+Benutzt das angegebene generische SCSI-Gerät.
 .IPs sector-size=<Wert>
-atomare Lesegröße
+Setzt die atomare Lesegröße.
 .IPs overlap=<Wert>
 Erzwingt eine minimal zu durchsuchende Überlappung bei der Datenüberprüfung
 von <Wert> Sektoren.
@@ -728,19 +736,19 @@ Akzeptiere (niemals) nicht perfekte Datenrekonstruktion.
 .
 .TP
 .B \-channels <Anzahl>
-Ändere die Anzahl der wiederzugebenden Kanäle (Standard: 2, wenn nichts
-anderes angegeben wird). Wenn die Anzahl der Ausgabekanäle größer als die
-Anzahl der Eingangskanäle ist, dann werden leere Kanäle erzeugt (es sei
-denn, es wird von Mono zu Stereo erweitert - dann wird der Mono-Kanal auf
-beiden Kanälen wiederholt). 
-Wenn die Anzahl der Eingangskanäle größer als die
-Anzahl der Ausgabekanäle ist, dann hängt das Ergebnis vom Audiodecoder (\-afm)
-ab.
+Ändere die Anzahl der wiederzugebenden Kanäle (Standard: 2).
+Wenn die Anzahl der Ausgabekanäle größer als die Anzahl der Eingangskanäle ist,
+dann werden leere Kanäle erzeugt (es sei denn, es wird von Mono zu Stereo
+erweitert - dann wird der Mono-Kanal auf beiden Kanälen wiederholt).
+Wenn die Anzahl der Eingangskanäle größer als die Anzahl der Ausgabekanäle ist,
+dann hängt das Ergebnis vom Audiodecoder (\-afm) ab.
 MPlayer weist den Decoder an, den Ton in so viele Kanäle zu decodieren,
-wie angegeben wurde. Jetzt liegt es am Decoder, diese Anforderung zu
-erfüllen. Wenn der Decoder mehr Kanäle als angefordert ausgibt, so werden
-die überschüssigen Kanäle abgeschnitten. Das ist normalerweise nur dann
-wichtig, wenn Videos mit AC3-Audio abgespielt werden (wie z.B. DVDs).
+wie angegeben wurde.
+Jetzt liegt es am Decoder, diese Anforderung zu erfüllen.
+Wenn der Decoder mehr Kanäle als angefordert ausgibt, so werden die
+überschüssigen Kanäle abgeschnitten.
+Das ist normalerweise nur dann wichtig, wenn Videos mit AC3-Audio abgespielt
+werden (wie z.B.\& DVDs).
 In diesem Fall decodiert normalerweise die liba52 den Ton und sorgt für
 einen korrekten Downmix des Audios auf die geforderte Anzahl von Kanälen.
 .br
@@ -773,10 +781,9 @@ Unten stehen Beispiele.
 Sende Cookies bei HTTP-Anfragen.
 .TP
 .B \-cookies-file <Dateiname) (nur im Netzwerk)
-Lies HTTP-Cookies aus dieser Datei.
-Es wird angenommen, daß die Datei im Netscape-Format vorliegt.
-Wenn Du diese Option benutzt, wird MPlayer nicht in den Verzeichnissen 
-~/.netscape/ und ~/.mozilla/ nach Cookies suchen.
+Lies HTTP-Cookies aus dieser Datei und überspringe die Suche in den
+Standardverzeichnissen ~/.mozilla/ und ~/.netscape/.
+Es wird angenommen, dass die Datei im Netscape-Format vorliegt.
 .TP
 .B \-demuxer <Nummer>
 Erzwingt einen bestimmten Audiodemuxertyp.
@@ -785,7 +792,7 @@ Benutze \-audio\-demuxer 17, um eine Datei als MP3 abzuspielen.
 .TP
 .B \-dumpaudio (nur MPlayer)
 Schreibt den unbehandelten, komprimierten Audiostream nach ./\:stream.dump
-(mit mpeg/\:AC3 nützlich).
+(mit MPEG/\:AC3 nützlich).
 .TP
 .B \-dumpfile <Dateiname> (nur MPlayer)
 Gibt den Dateinamen an, in den MPlayer schreiben soll. Sollte in Verbindung
@@ -816,28 +823,27 @@ oder ~/.mplayer/channels.conf als letzte Möglichkeit.
 .
 .TP
 .B \-dvd\-device <Pfad\ zum\ Gerät> (nur bei DVD)
-Überschreibt den Standardwert für das CD-ROM-Gerät, /dev/\:dvd an.
+Gibt das DVD-Gerät an (Standard: /dev/\:dvd).
 .TP
 .B \-dvdangle <Winkel\-ID> (nur bei DVD)
 Einige DVDs beinhalten Szenen, die aus verschiedenen Perspektiven/Winkeln
 betrachtet werden können. 
 Mit dieser Option kannst du MPlayer sagen, welche Perspektive er wiedergeben
 soll (Standard: 1).
-Unten stehen Beispiele.
 .TP
 .B \-forceidx
 Erzwingt den Neubau des Index.
-Nützlich für Dateien mit defektem Index (Desynchronisation etc.).
-Spulen wird damit möglich.
+Nützlich für Dateien mit defektem Index (A/V-Desynchronisation etc.).
+Das ermöglicht das Spulen in Dateien, bei denen dies vorher nicht möglich war.
 Mit MEncoder kann der Index permanent repariert werden (siehe Dokumentation).
 .br
 .I ANMERKUNG:
-Diese Option ist nur nutzbar, wenn das zugrundeliegende Medium spulen
+Diese Option funktioniert nur, wenn das zugrunde liegende Medium das Spulen
 unterstützt (z.B.\& nicht bei Standardeingabe, Pipe usw.)
 .TP
-.B \-fps <Wert>
-Überschreibt die Videobildrate (falls diese falsch ist oder im Header fehlt)
-(Fließkommazahl).
+.B \-fps <Fließkommazahl>
+Überschreibt die Videobildrate.
+Nützlich, falls dieser Wert falsch ist oder im Header fehlt.
 .TP
 .B \-frames <Anzahl>
 Nur die ersten <Anzahl> Bilder werden wiedergegeben/encodiert.
@@ -899,8 +905,8 @@ Deaktiviert die auf Dateinamenserweiterungen basierende Demultiplexerauswahl.
 Wenn der Dateityp (und damit der Demultiplexer) nicht zweifelsfrei
 festgestellt werden kann (z.B. wenn die Datei keinen Dateikopf besitzt
 oder dieser nicht eindeutig genug ist), dann wird normalerweise ein
-Demultiplexer anhand der Dateiendung gewählt. Die inhaltsbasierende
-Demultiplexerauswahl wird immer vorgenommen.
+Demultiplexer anhand der Dateiendung gewählt.
+Die inhaltsbasierende Demultiplexerauswahl wird immer vorgenommen.
 .TP
 .B \-passwd <Passwort> (siehe auch \-user) (nur bei Netzwerk)
 Gibt das Passwort für die HTTP-Authentifizierung an.
@@ -917,6 +923,7 @@ Greift automatisch auf IPv4-Verbindungen zurück.
 Mit dieser Option können raw-Audiodateien abgespielt werden.
 Sie kann auch verwendet werden, um Audio-CDs abzuspielen, die nicht mit 44KHz
 16Bit stereo aufgenommen wurden.
+Zum Abspielen von RAW-AC3-Streams benutze \-rawaudio on:format=0x2000.
 
 Verfügbare Optionen:
 
@@ -963,9 +970,9 @@ Bildgröße in Bytes
 .PD 1
 .
 .TP
-.B \-rtsp\-stream\-over\-tcp
-Kann zusammen mit 'rtsp://'\-URLs verwendet werden, um anzugeben, dass die
-daraus resultierenden eingehenden RTP\- und RTCP\-Pakete per TCP 
+.B \-rtsp-stream-over-tcp (nur bei live.com)
+Kann zusammen mit 'rtsp://'-URLs verwendet werden, um anzugeben, dass die
+daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP 
 übertragen werden (mit der gleichen TCP-Verbindung wie RTSP). 
 Diese Option kann hilfreich sein, wenn deine Internetverbindung eingehende
 UDP-Pakete nicht durchlässt (siehe http://www.live.com/mplayer/).
@@ -1000,15 +1007,16 @@ nicht ignoriert.
 Diese Option wird manchmal gebraucht, um korrupte MPEG-TS-Dateien abzuspielen.
 .
 .TP
+.B \-tsprobe <Byte-Position>
+Beim Abspielen eines MPEG-TS-Streams kannst du mit dieser Option auswählen,
+wie viele Bytes MPlayer nach den gewünschten Program-IDs durchsuchen soll.
+.
+.TP
 .B \-tsprog <1\-65534>
 Beim Abspielen eines MPEG-TS-Streams kann mit dieser Option ausgewählt werden,
 welches Programm (falls vorhanden) abgespielt werden soll.
 Kann in Verbindung mit \-vid und \-aid benutzt werden.
-.
-.TP
-.B \-tsprobe <Byte-Position>
-Beim Abspielen eines MPEG-TS-Streams kannst du mit dieser Option auswählen,
-wie viele Bytes MPlayer nach den gewünschten Program-IDs durchsuchen soll.
+
 .
 .TP
 .B \-tv <Option1:Option2:...> (nur bei TV)
@@ -1016,18 +1024,9 @@ Diese Option steuert verschiedene Einstellungen des TV-Empfang-Moduls.
 Um mit MPlayer fernzusehen, benutze die Optionen 'tv://'
 oder 'tv://<Kanalnummer>' oder sogar 'tv://Kanalname' (siehe unten die
 Option 'channels' für die Kanalnamen) als Film-URL.
-.br
-.I ANMERKUNG:
-MPlayer akzeptiert keine Doppelpunkte, benutze stattdessen also Punkte
-in der Geräte-ID (z.B.\& hw.0,0 anstelle von hw:0,0).
-.br
-Sei gewarnt, dass du zwar eine beliebige Samplerate angeben kannst, wenn
-du ALSA verwendest, der LAME-Audiocodec aber nur die 'Standard'-Sampleraten
-unterstützt.
-Du wirst ein AVI ohne Sound erhalten, wenn du eine ungerade Samplerate
-bei diesem Codec wählst.
 .sp 1
 Verfügbare Optionen:
+.
 .RSs
 .IPs noaudio
 kein Sound
@@ -1058,7 +1057,7 @@ Größe)
 .IPs norm=<Wert>
 mögliche Werte: PAL, SECAM, NTSC.
 Siehe normid-Option unten für V4L2.
-.IPs normid=<Wert> (nur bei V4L2)
+.IPs "normid=<Wert> (nur bei V4L2)"
 Siehe MPlayer-Output für eine Liste der verfügbaren TV-Normen.
 .IPs channel=<Wert>
 Setzt den Tuner auf Kanal <Wert>.
@@ -1068,15 +1067,19 @@ Werte: europe-east, europe-west, us-bcast, us-cable, etc
 Setzt Namen für Kanäle. 
 Benutze '_' anstelle von Leerzeichen bei Namen (oder spiel mit der
 Shellquotierung rum ;-).
-Die Sendernamen werden dann mit dem OSD angezeigt, und die Kommandos
-tv_step_channel, tv_set_channel und tv_last_channel werden dann z.B.\& mit
-einer Fernbedienung benutzbar sein (siehe LIRC).
+Die Sendernamen werden dann per OSD angezeigt, und die Slave-Kommandos
+tv_step_channel, tv_set_channel und tv_last_channel werden per
+Fernbedienung benutzbar sein (siehe LIRC).
 Kann nicht zusammen mit dem frequency\-Parameter benutzt werden.
-Warnung: Die Sendernummer wird dann die Position des Eintrags in 
+.br
+.I ANMERKUNG:
+Die Sendernummer wird dann die Position des Eintrags in 
 der 'channels'-Liste sein, wobei der erste Eintrag die 1 bekommt.
-Benutze also z.B.\&  tv://1, tv://2, tv_set_channel 1, tv_set_channel 2, etc.
+.br
+.I BEISPIEL:
+tv://1, tv://TV1, tv_set_channel 1, tv_set_channel TV1
 .IPs [brightness|contrast|hue|saturation]=<-100\-100>
-Setzt Werte des Farb-Equaliziers der Karte.
+Setzt Werte des Bild-Equaliziers der Karte.
 .IPs audiorate=<Werte>
 Setzt die Audiobitrate für's Capturen.
 .IPs forceaudio
@@ -1103,17 +1106,15 @@ Kann benutzt werden, wenn die TV-Karte den aktuellen Audiomodus nicht
 zurückgeben kann.
 .IPs adevice=<Wert>
 Setzt das Audiogerät.
-.RSss
-/dev/\:...\& für OSS
-.br
-Hardware-ID für ALSA
-.REss
+<Wert> sollte /dev/\:xxx bei OSS und eine Hardware-ID bei ALSA sein.
+Siehe Dokumentation von \-ao alsa für Informationen darüber, wie die
+Hardware-ID angegeben wird.
 .IPs audioid=<Wert>
 Wählt einen Audioausgang der TV-Karte, wenn diese mehrere hat.
-.IPs "[volume|bass|treble|balance]=<0\-65535>"
+.IPs "[volume|bass|treble|balance]=<0\-65535> v4l1"
+.IPs "[volume|bass|treble|balance]=<0\-100> v4l2"
 Diese Optionen setzen Parameter des Mixers auf der Capture-Karte.
 Sie haben keinen Effekt, wenn deine Karte keinen Mixer hat.
-0\-65535 ist gültiger Bereich bei V4L1.
 Bei V4L2 geht der gültige Bereich von 0 bis 100, und 50 steht für den vom
 Treiber angegebenen Default-Wert.
 .IPs immediatemode=<Boolean>
@@ -1123,7 +1124,7 @@ Ein Wert von 1 bedeutet: Nimm nur Video direkt von der Karte und Audio
 über ein externes Kabel von der TV-Karte zur Soundkarte auf (Standardwert
 für MPlayer).
 .IPs mjpeg
-Benutzte Hardware-mjpeg-Kompression (wenn dies die Karte unterstützt). 
+Benutzte Hardware-MJPEG-Kompression (wenn dies die Karte unterstützt). 
 Bei dieser Option mußt du Breite und Höhe des Ausgabefensters nicht
 angeben, denn MPlayer ermittelt diese Werte automatisch vom
 Dezimierungswert (siehe unten).
@@ -1144,8 +1145,7 @@ Wählt die Bildgröße für die Hardware-MJPEG-Kompression:
 .REss
 .IPs quality=<0\-100>
 Wählt die Qualität der JPEG-Kompression.
-.br
-(Qualitätseinstellung < 60 für volle Größe empfohlen)
+(< 60 für volle Größe empfohlen)
 .RE
 .
 .TP
@@ -1156,14 +1156,14 @@ Gibt den Benutzernamen für die HTTP-Authentifizierung an.
 Benutze Zeichenkette als User-Agent beim HTTP-Streaming.
 .TP
 .B \-vid <id>
-Wählt die Videospur [MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190].
+Wählt die Videospur (MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190).
 Beim Abspielen von MPEG-TS-Streams benutzt MPlayer/MEncoder das erste Programm
 (falls vorhanden) mit dem gewählten Video-Stream.
 .TP
 .B \-vivo <sub\-Optionen> (DEBUG\-CODE)
 Erzwingt Audioparameter für den VIVO-Demuxer (nur für Debugging-Zwecke).
-
-
+.
+.
 .SH "OSD\-/UNTERTITEL\-OPTIONEN"
 .I ANMERKUNG:
 Siehe auch \-vf expand.
@@ -1226,7 +1226,6 @@ Standard für FreeType\-Schriften: ~/.mplayer/\:subfont.ttf).
 .br
 .I ANMERKUNG:
 Bei FreeType gibt diese Option den Pfad zur Textschriftdatei an.
-.br
 Bei fontconfig gibt diese Option den fontconfig-Schriftnamen an.
 
 .I BEISPIELE:
@@ -1284,8 +1283,7 @@ Standard ist, diese Unterstützung nur bei bestimmten Formaten zu
 aktivieren.
 .TP
 .B \-sid <id> (siehe auch \-slang)
-Aktiviert die Anzeige von DVD-Untertiteln.
-Du MUSST eine ID angeben, die einer DVD-Untertitelsprache entspricht (0\-31).
+Zeigt die DVD-Untertitel an, die durch <ID> (0\-31) angegeben sind.
 Eine Liste der verfügbaren Untertitel erhältst du bei der Verwendung
 der Option \-v.
 .TP
@@ -1308,10 +1306,11 @@ es keine ungarischen gibt.
 .
 .TP
 .B \-spuaa <Modus> (nur bei OSD)
-Antialiasingmodus/Skalierungmodus für DVD/\:VOBsub. Ein Wert von 16 kann zum
-Modus hinzuaddiert werden, um die Skalierung auch dann zu erzwingen, wenn
-das Orignalbild und das skalierte Bild bereits die gleiche Größe haben, um
-z.B.\& auch dann die Untertitel mit einem Gaußschen Unschärfefilter zu glätten.
+Antialiasingmodus/Skalierungmodus für DVD/\:VOBsub.
+Ein Wert von 16 kann zu <Modus> hinzuaddiert werden, um die Skalierung auch
+dann zu erzwingen, wenn das Orignalbild und das skalierte Bild bereits die
+gleiche Größe haben, um z.B.\& auch dann die Untertitel mit einem Gaußschen
+Unschärfefilter zu glätten.
 Die verfügbaren Modi lauten:
 .PD 0
 .RSs
@@ -1332,13 +1331,23 @@ benutzt Gaußsche Unschärfe des Softwareskalierers (sieht sehr gut aus)
 .B \-spualign <-1\-2> (nur bei OSD)
 Gibt an, wie SPU-Untertitel (DVD/\:VOBsub) positioniert werden
 sollen.
-Es gelten die gleichen Werte wie bei \-subpos, wobei -1 für die
-Originalposition steht.
+.PD 0
+.RSs
+.IPs -1
+Originalposition
+.IPs 0
+oben positionieren (Standard)
+.IPs 1
+mittig positionieren
+.IPs 2
+unten positionieren
+.RE
+.PD 1
+.
 .TP
 .B \-spugauss <0.0\-3.0> (nur bei OSD)
 Varianzparameter des Gaußschen Weichzeichners bei Benutzung von \-spuaa 4.
-Höhere Werte stehen für stärkere Weichzeichnung.
-Standardwert ist 1.0.
+Höhere Werte stehen für stärkere Weichzeichnung (Standard: 1.0).
 .TP
 .B \-sub <Untertiteldatei1, Untertiteldatei2,...>
 Diese Untertitel werden benutzt/\:angezeigt.
@@ -1380,8 +1389,17 @@ Wird für Debugging-Zwecke verwendet.
 .TP
 .B \-subalign <0\-2> (nur bei OSD)
 Gibt an, wie die Untertitel mit \-subpos positioniert werden sollen.
-0 bedeutet eine Ausrichtung oben (Standardverhalten), 1 bedeutet 
-Ausrichtung in der Mitte, und 2 bedeutet Ausrichtung unten.
+.PD 0
+.RSs
+.IPs 0
+oben positionieren (Standard)
+.IPs 1
+mittig positionieren
+.IPs 2
+unten positionieren
+.RE
+.PD 1
+.
 .TP
 .B \-subcc \ 
 Zeigt DVD-Closed-Caption-Untertitel an (CC).
@@ -1416,10 +1434,10 @@ automatische Erkennung versagt.
 .PD 0
 .RSs
 .IPs "\-subcp enca:cs:latin2"
-Nimm an, die Untertitel seien tschechisch, und rate die Kodierung.
+Nimm an, die Untertitel seien Tschechisch, und rate die Kodierung.
 Wenn die Erkennung versagt, benutze latin2.
 .IPs "\-subcp enca:pl:cp1250"
-Rate die Kodierung für polnisch, benutze sonst cp1250.
+Rate die Kodierung für Polnisch, benutze sonst cp1250.
 .RE
 .PD 1
 .
@@ -1520,7 +1538,7 @@ Die verfügbaren Filter lauten:
 .RSs
 .IPs resample[=srate[:sloppy][:type]]
 Ändert die Samplerate des Audiostreams zu der ganzzahlen srate (in Hz).
-Unterstützt nur das 16bit Little-Endian-Format.
+Unterstützt nur das 16-bit Little-Endian-Format.
 .IPs channels[=nch]
 Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
 Falls die Anzahl Ausgabekanäle größer ist als die Anzahl Eingangskanäle, 
@@ -1630,7 +1648,7 @@ Gibt den SDL-Untertreiber an.
 .
 .TP
 .B \-aofile <Dateiname>
-Dateiname für \-ao pcm.
+Überschreibt den Standarddateinamen für \-ao pcm.
 .TP
 .B \-aop <list=Plugin1,Plugin2...:Option1=Wert1:opt2=Wert2...>
 Gibt die Audioplugins und ihre Optionen an (siehe auch in der Dokumentation).
@@ -1715,9 +1733,6 @@ Schreibe keinen Wave-Header in die Datei.
 Wird für RAW-PCM benutzt.
 .
 .
-.SH "OPTIONEN FÜR DIE AUDIOAUSGABE (NUR BEI MPLAYER)"
-
-
 .SH "OPTIONEN FÜR DIE VIDEOAUSGABE (NUR BEI MPLAYER)"
 .TP
 .B \-aa* (nur bei \-vo aa)
@@ -3035,7 +3050,7 @@ Wenn du mit libavcodec encodierst, kannst du hiermit die Optionen angeben.
 .PD 1
 
 .RS
-(FIXME) Verfügbare Optionen sind: 
+(FIXME) Verfügbare Optionen sind:
 .RE
 .
 .TP
@@ -4017,14 +4032,5 @@ Diese Manpage wurde geschrieben und wird gepflegt von
 .B Moritz Bunkus
 .PP
 Schicke Mails die Manpage betreffend bitte an die MPlayer-DOCS-Mailingliste.
-.
-.
-.SH "STANDARD\-HAFTUNGSAUSSCHLUSS"
-Benutzung des Programms auf eigene Gefahr!
-Es könnte Fehler und Ungenauigkeiten enthalten, die dein System oder deine
-Augen beschädigen können.
-Sei also vorsichtig.
-Obwohl es sehr unwahrscheinlich ist, dass etwas passiert, übernehmen die
-Autoren keine Verantwortung dafür!
 .\" Ende der Datei
 
