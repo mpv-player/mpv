@@ -75,6 +75,7 @@ m_option_t ovc_conf[]={
 	"   copy     - frame copy, without re-encoding. doesn't work with filters!\n"
 	"   frameno  - special audio-only file for 3-pass encoding, see DOCS!\n"
 	"   rawrgb   - uncompressed RGB 24bpp video\n"
+	"   nuv      - nuppel video\n"
 #ifdef HAVE_DIVX4ENCORE
 #ifdef ENCORE_XVID
 	"   divx4    - using XviD (divx4linux compat. mode)\n"
