@@ -15,6 +15,7 @@ static const short h263_format[8][2] = {
     { 352, 288 },
     { 704, 576 },
     { 1408, 1152 },
+    { 320, 240 }
 };
 
 unsigned char* buffer;
@@ -42,24 +43,35 @@ unsigned int x_get_bits(int n){
 #define skip_bits(xxx,n) x_get_bits(n)
 #define skip_bits1(xxx) x_get_bits(1)
 
-    int format, width, height;
+int format;
+int width=320;
+int height=240;
 
 /* most is hardcoded. should extend to handle all h263 streams */
 int h263_decode_picture_header(unsigned char *b_ptr)
 {
+    int i;
+        
+    for(i=0;i<16;i++) printf(" %02X",b_ptr[i]); printf("\n");
     
     buffer=b_ptr;
     bufptr=bitcnt=buf=0;
 
     /* picture header */
-    if (get_bits(&s->gb, 22) != 0x20)
+    if (get_bits(&s->gb, 22) != 0x20){
+	printf("bad picture header\n");
         return -1;
+    }
     skip_bits(&s->gb, 8); /* picture timestamp */
 
-    if (get_bits1(&s->gb) != 1)
+    if (get_bits1(&s->gb) != 1){
+	printf("bad marker\n");
         return -1;	/* marker */
-    if (get_bits1(&s->gb) != 0)
+    }
+    if (get_bits1(&s->gb) != 0){
+	printf("bad h263 id\n");
         return -1;	/* h263 id */
+    }
     skip_bits1(&s->gb);	/* split screen off */
     skip_bits1(&s->gb);	/* camera  off */
     skip_bits1(&s->gb);	/* freeze picture release off */
@@ -72,8 +84,7 @@ int h263_decode_picture_header(unsigned char *b_ptr)
         width = h263_format[format][0];
         height = h263_format[format][1];
 	printf("%d x %d\n",width,height);
-        if (!width)
-            return -1;
+//        if (!width) return -1;
 
 	printf("pict_type=%d\n",get_bits1(&s->gb));
 	printf("unrestricted_mv=%d\n",get_bits1(&s->gb));
@@ -94,10 +105,14 @@ int h263_decode_picture_header(unsigned char *b_ptr)
     } else {
         printf("h263_plus = 1\n");
         /* H.263v2 */
-        if (get_bits(&s->gb, 3) != 1)
+        if (get_bits(&s->gb, 3) != 1){
+	    printf("H.263v2 A error\n");
             return -1;
-        if (get_bits(&s->gb, 3) != 6) /* custom source format */
+	}
+        if (get_bits(&s->gb, 3) != 6){ /* custom source format */
+	    printf("custom source format\n");
             return -1;
+	}
         skip_bits(&s->gb, 12);
         skip_bits(&s->gb, 3);
 	printf("pict_type=%d\n",get_bits(&s->gb, 3) + 1);
@@ -110,8 +125,8 @@ int h263_decode_picture_header(unsigned char *b_ptr)
         skip_bits1(&s->gb);
         height = get_bits(&s->gb, 9) * 4;
 	printf("%d x %d\n",width,height);
-        if (height == 0)
-            return -1;
+        //if (height == 0)
+        //    return -1;
 	printf("qscale=%d\n",get_bits(&s->gb, 5));
     }
 
@@ -132,14 +147,15 @@ int c;
 unsigned int head=-1;
 int pos=0;
 int frames=0;
-FILE *f=fopen("bion1vd-28.viv","rb");
-FILE *f2=fopen("bion1vd-28.avi","wb");
+FILE *f=fopen("GB1.viv","rb");
+FILE *f2=fopen("GB1.avi","wb");
 aviwrite_t* avi=aviwrite_new_muxer();
 aviwrite_stream_t* mux=aviwrite_new_stream(avi,AVIWRITE_TYPE_VIDEO);
 //unsigned char* buffer=malloc(0x200000);
-int i;
+int i,len;
 int v_id=0;
 int flag=0;
+int flag2=0;
 
 mux->buffer_size=0x200000;
 mux->buffer=malloc(mux->buffer_size);
@@ -154,25 +170,52 @@ mux->bih->biBitCount=24;
 mux->bih->biCompression=0x6f766976;//      7669766f;
 aviwrite_write_header(avi,f2);
 
-while((c=fgetc(f))>=0){
-    if(!flag && c!=0x40 && c!=0x10) continue;
-    flag=1;
+/*
+c=fgetc(f); if(c) printf("error! not vivo file?\n");
+len=0;
+while((c=fgetc(f))>=0x80) len+=0x80*(c&0x0F);
+len+=c;
+printf("hdr1: %d\n",len);
+for(i=0;i<len;i++) fgetc(f);
+*/
 
-    printf("%02X\n",c);
+while((c=fgetc(f))>=0){
+
+//    printf("%02X\n",c);
+
+    if(c==0x00){
+	// header
+	int len=0;
+	while((c=fgetc(f))>=0x80) len+=0x80*(c&0x0F);
+	len+=c;
+	printf("header: 00 (%d)\n",len);
+	for(i=0;i<len;i++) fgetc(f);
+	continue;
+    }
+
     if((c&0xF0)==0x40){
 	// audio
 	printf("audio: %02X (24)\n",c);
 	for(i=0;i<24;i++) fgetc(f);
 	continue;
     }
-    if(((c&0xF0)==0x10 || (c&0xF0)==0x20) && (c&0x0F)!=v_id){
+    if((c&0xF0)==0x30){
+	// audio
+	printf("audio: %02X (40)\n",c);
+	for(i=0;i<40;i++) fgetc(f);
+	continue;
+    }
+    if(flag2 || (((c&0xF0)==0x10 || (c&0xF0)==0x20) && (c&0x0F)!=(v_id&0xF))){
 	// end of frame:
 	printf("Frame size: %d\n",mux->buffer_len);
 	h263_decode_picture_header(mux->buffer);
 	aviwrite_write_chunk(avi,mux,f2,mux->buffer_len,0x10);
 	mux->buffer_len=0;
+	
+	if((v_id&0xF0)==0x10) fprintf(stderr,"hmm. last video packet %02X\n",v_id);
     }
-    v_id=c&0x0F;
+    v_id=c;
+    flag2=0;
     if((c&0xF0)==0x10){
 	// 128 byte
 	printf("video: %02X (128)\n",c);
@@ -181,15 +224,18 @@ while((c=fgetc(f))>=0){
 	continue;
     }
     if((c&0xF0)==0x20){
-	// 128 byte
 	int len=fgetc(f);
 	printf("video: %02X (%d)\n",c,len);
 	fread(mux->buffer+mux->buffer_len,len,1,f);
 	mux->buffer_len+=len;
+	flag2=1;
 	continue;
     }
-    printf("error!\n");
+    printf("error: %02X!\n",c);
 }
+
+if(!width) width=320;
+if(!height) height=240;
 
 mux->bih->biWidth=width;
 mux->bih->biHeight=height;
