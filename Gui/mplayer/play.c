@@ -125,10 +125,3 @@ void mplAbsSeek( float s )
 // ---
 }
 
-void mplIncAudioBufDelay( void )
-{
-}
-
-void mplDecAudioBufDelay( void )
-{
-}

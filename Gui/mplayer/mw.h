@@ -539,9 +539,6 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsGrayMul:   msg=evIncVolume; break;
    case wsGrayDiv:   msg=evDecVolume; break;
 
-   case wsGrayPlus:  msg=evIncAudioBufDelay; break;
-   case wsGrayMinus: msg=evDecAudioBufDelay; break;
-
    case wsEnter:     msg=evPlay; break;
    case wsSpace:     msg=evPause; break;
    case wsa:
@@ -560,6 +557,7 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsS:         msg=evStop; break;
    case wsp:
    case wsP:         msg=evPlayList; break;
+   default:          mplayer_put_key( Key ); return;
   }
  if ( ( msg != evNone )&&( Type == wsKeyPressed ) )
   {
