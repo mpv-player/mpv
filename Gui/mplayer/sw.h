@@ -55,16 +55,9 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
    case wsPLMouseButton:
           if ( appMPlayer.subWindow.isFullScreen )
 	   {
-//            if( SubVisible++%2 )
-//             {
-              wsMoveTopWindow( &appMPlayer.mainWindow );
-              fprintf( stderr,"[sw] MAIN TOP\n" );
-//             }
-//             else
-//              {
-//               wsMoveTopWindow( &appMPlayer.subWindow );
-//               fprintf( stderr,"[sw] SUB TOP\n" );
-//              }
+            if( ++SubVisible%2 ) wsMoveTopWindow( &appMPlayer.mainWindow );
+             else wsMoveTopWindow( &appMPlayer.subWindow );
+            mplSubMoved=1;
 	    break;
 	   }
 	  if ( gtkShMem->visiblepopupmenu ) gtkSendMessage( evHidePopUpMenu );
