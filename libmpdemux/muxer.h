@@ -34,6 +34,8 @@ typedef struct {
   // mpeg specific:
   unsigned int gop_start; // frame number of this GOP start
   size_t ipb[3]; // sizes of I/P/B frames
+  // muxer of that stream
+  struct muxer_t *muxer;
 } muxer_stream_t;
 
 typedef struct {
@@ -57,17 +59,18 @@ typedef struct muxer_t{
   //int num_streams;
   muxer_stream_t* def_v;  // default video stream (for general headers)
   muxer_stream_t* streams[MUXER_MAX_STREAMS];
-  void (*cont_write_chunk)(struct muxer_t *,muxer_stream_t *,FILE *,size_t,unsigned int);
-  void (*cont_write_header)(struct muxer_t *,FILE *);
-  void (*cont_write_index)(struct muxer_t *,FILE *);
+  void (*cont_write_chunk)(muxer_stream_t *,size_t,unsigned int);
+  void (*cont_write_header)(struct muxer_t *);
+  void (*cont_write_index)(struct muxer_t *);
   muxer_stream_t* (*cont_new_stream)(struct muxer_t *,int);
+  FILE* file;
 } muxer_t;
 
-muxer_t* muxer_new_muxer(int type);
+muxer_t *muxer_new_muxer(int type,FILE *);
 #define muxer_new_stream(muxer,a) muxer->cont_new_stream(muxer,a)
-#define muxer_write_chunk(muxer,a,b,c,d) muxer->cont_write_chunk(muxer,a,b,c,d)
-#define muxer_write_header(muxer,f) muxer->cont_write_header(muxer,f)
-#define muxer_write_index(muxer,f) muxer->cont_write_index(muxer,f)
+#define muxer_write_chunk(a,b,c) a->muxer->cont_write_chunk(a,b,c)
+#define muxer_write_header(muxer) muxer->cont_write_header(muxer)
+#define muxer_write_index(muxer) muxer->cont_write_index(muxer)
 
 void muxer_init_muxer_avi(muxer_t *);
 void muxer_init_muxer_mpeg(muxer_t *);

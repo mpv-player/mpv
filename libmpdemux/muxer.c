@@ -14,9 +14,10 @@
 
 #include "muxer.h"
 
-muxer_t* muxer_new_muxer(int type){
+muxer_t *muxer_new_muxer(int type,FILE *f){
     muxer_t* muxer=malloc(sizeof(muxer_t));
     memset(muxer,0,sizeof(muxer_t));
+    muxer->file = f;
     switch (type) {
       case MUXER_TYPE_MPEG:
 	muxer_init_muxer_mpeg(muxer);

@@ -30,6 +30,7 @@ extern char *info_comment;
 
 static muxer_stream_t* avifile_new_stream(muxer_t *muxer,int type){
     muxer_stream_t* s;
+    if (!muxer) return NULL;
     if(muxer->avih.dwStreams>=MUXER_MAX_STREAMS){
 	printf("Too many streams! increase MUXER_MAX_STREAMS !\n");
 	return NULL;
@@ -42,6 +43,7 @@ static muxer_stream_t* avifile_new_stream(muxer_t *muxer,int type){
     s->id=muxer->avih.dwStreams;
     s->timer=0.0;
     s->size=0;
+    s->muxer=muxer;
     switch(type){
     case MUXER_TYPE_VIDEO:
       s->ckid=mmioFOURCC(('0'+s->id/10),('0'+(s->id%10)),'d','c');
@@ -88,7 +90,8 @@ if(len>0){
 }
 }
 
-static void avifile_write_chunk(muxer_t *muxer,muxer_stream_t *s, FILE *f,size_t len,unsigned int flags){
+static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
+    muxer_t *muxer=s->muxer;
 
     // add to the index:
     if(muxer->idx_pos>=muxer->idx_size){
@@ -97,12 +100,12 @@ static void avifile_write_chunk(muxer_t *muxer,muxer_stream_t *s, FILE *f,size_t
     }
     muxer->idx[muxer->idx_pos].ckid=s->ckid;
     muxer->idx[muxer->idx_pos].dwFlags=flags; // keyframe?
-    muxer->idx[muxer->idx_pos].dwChunkOffset=ftell(f)-(muxer->movi_start-4);
+    muxer->idx[muxer->idx_pos].dwChunkOffset=ftell(muxer->file)-(muxer->movi_start-4);
     muxer->idx[muxer->idx_pos].dwChunkLength=len;
     ++muxer->idx_pos;
 
     // write out the chunk:
-    write_avi_chunk(f,s->ckid,len,s->buffer); /* unsigned char */
+    write_avi_chunk(muxer->file,s->ckid,len,s->buffer); /* unsigned char */
 
     // alter counters:
     if(s->h.dwSampleSize){
@@ -135,11 +138,12 @@ static void write_avi_list(FILE *f,unsigned int id,int len){
 // muxer->streams[i]->wf->cbSize
 #define WFSIZE(wf) (sizeof(WAVEFORMATEX)+(((wf)->cbSize)?((wf)->cbSize-2):0))
 
-static void avifile_write_header(muxer_t *muxer,FILE *f){
+static void avifile_write_header(muxer_t *muxer){
   uint32_t riff[3];
   unsigned int i;
   unsigned int hdrsize;
   muxer_info_t info[16];
+  FILE *f=muxer->file;
 
   // RIFF header:
   riff[0]=mmioFOURCC('R','I','F','F');
@@ -275,19 +279,19 @@ info[i].id=0;
   muxer->movi_start=ftell(f);
 }
 
-static void avifile_write_index(muxer_t *muxer,FILE *f){
-  muxer->movi_end=ftell(f);
+static void avifile_write_index(muxer_t *muxer){
+  muxer->movi_end=ftell(muxer->file);
   if(muxer->idx && muxer->idx_pos>0){
       int i;
       // fixup index entries:
 //      for(i=0;i<muxer->idx_pos;i++) muxer->idx[i].dwChunkOffset-=muxer->movi_start-4;
       // write index chunk:
       for (i=0; i<muxer->idx_pos; i++) le2me_AVIINDEXENTRY((&muxer->idx[i]));
-      write_avi_chunk(f,ckidAVINEWINDEX,16*muxer->idx_pos,muxer->idx); /* AVIINDEXENTRY */
+      write_avi_chunk(muxer->file,ckidAVINEWINDEX,16*muxer->idx_pos,muxer->idx); /* AVIINDEXENTRY */
       for (i=0; i<muxer->idx_pos; i++) le2me_AVIINDEXENTRY((&muxer->idx[i]));
       muxer->avih.dwFlags|=AVIF_HASINDEX;
   }
-  muxer->file_end=ftell(f);
+  muxer->file_end=ftell(muxer->file);
 }
 
 void muxer_init_muxer_avi(muxer_t *muxer){

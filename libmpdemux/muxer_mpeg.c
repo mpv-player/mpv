@@ -32,6 +32,7 @@
 static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
   muxer_stream_t *s;
 
+  if (!muxer) return NULL;
   if(muxer->avih.dwStreams>=MUXER_MAX_STREAMS){
     printf("Too many streams! increase MUXER_MAX_STREAMS !\n");
     return NULL;
@@ -75,6 +76,7 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
   s->id=muxer->avih.dwStreams;
   s->timer=0.0;
   s->size=0;
+  s->muxer=muxer;
   muxer->avih.dwStreams++;
   return s;
 }
@@ -239,10 +241,13 @@ static void set_mpeg_pts(muxer_t *muxer, muxer_stream_t *s, unsigned int pts) {
   write_mpeg_ts (s->b_buffer+7, dts, 0x10);
 }
 
-static void mpegfile_write_chunk(muxer_t *muxer,muxer_stream_t *s,FILE *f,size_t len,unsigned int flags){
+static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
   size_t ptr=0, sz;
   unsigned int pts=0;
+  muxer_t *muxer = s->muxer;
+  FILE *f;
 
+  f = muxer->file;
   if (s->type == MUXER_TYPE_VIDEO) { // try to recognize frame type...
     if (s->buffer[0] != 0 || s->buffer[1] != 0 || s->buffer[2] != 1 || len<6) {
       printf ("Unknown block type, possibly non-MPEG stream!\n");
@@ -358,13 +363,14 @@ static void mpegfile_write_chunk(muxer_t *muxer,muxer_stream_t *s,FILE *f,size_t
   }
 }
 
-static void mpegfile_write_header(muxer_t *muxer,FILE *f){
+static void mpegfile_write_header(muxer_t *muxer){
   unsigned int i;
   size_t sz = MUXER_MPEG_BLOCKSIZE-24;
   unsigned char buff[12];
   muxer_stream_t *s = muxer->streams[0];
   uint32_t l1;
   uint16_t l2;
+  FILE *f = muxer->file;
 
   if (s == NULL)
     return; // no streams!?
@@ -407,7 +413,7 @@ static void mpegfile_write_header(muxer_t *muxer,FILE *f){
   muxer->movi_end = MUXER_MPEG_BLOCKSIZE;
 }
 
-static void mpegfile_write_index(muxer_t *muxer,FILE *f){
+static void mpegfile_write_index(muxer_t *muxer){
   unsigned int i;
   unsigned int rsr;
 
@@ -415,9 +421,9 @@ static void mpegfile_write_index(muxer_t *muxer,FILE *f){
   // finish all but one video and audio streams
   rsr = muxer->sysrate; // reserve it since it's silly change it at that point
   for (i = 0; i < muxer->avih.dwStreams-1; i++)
-    write_mpeg_block (muxer, muxer->streams[i], f, NULL, 0, 0);
+    write_mpeg_block (muxer, muxer->streams[i], muxer->file, NULL, 0, 0);
   // end sequence: ISO-11172-End (0x1b9) and finish very last block
-  write_mpeg_block (muxer, muxer->streams[i], f, NULL, 0, 1);
+  write_mpeg_block (muxer, muxer->streams[i], muxer->file, NULL, 0, 1);
 //fprintf (stderr, "PTS to SCR delay: min %u.%03u, max %u.%03u\n",
 //	mpeg_min_delay/90000, (mpeg_min_delay/90)%1000,
 //	mpeg_max_delay/90000, (mpeg_max_delay/90)%1000);
