@@ -31,6 +31,12 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     }
 }
 
+static void draw_osd(void)
+{
+    vo_draw_text(mga_vid_config.src_width,mga_vid_config.src_height,draw_alpha);
+}
+
+
 //static void
 //write_slice_g200(uint8_t *y,uint8_t *cr, uint8_t *cb,uint32_t slice_num)
 
@@ -200,13 +206,8 @@ static void mga_fullscreen()
 	}
 	mga_vid_config.dest_width = w;
 	mga_vid_config.dest_height= h;
-	if (vo_screenwidth && vo_screenheight) {
-		mga_vid_config.x_org=(vo_screenwidth-w)/2;
-		mga_vid_config.y_org=(vo_screenheight-h)/2;
-	} else {
-		mga_vid_config.x_org= 0;
-		mga_vid_config.y_org= 0;
-	}
+	mga_vid_config.x_org=(vo_screenwidth-w)/2;
+	mga_vid_config.y_org=(vo_screenheight-h)/2;
 	if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) )
 		printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
@@ -287,7 +288,10 @@ static uint32_t control(uint32_t request, void *data, ...)
 														       
 #ifndef VO_XMGA
   case VOCTRL_FULLSCREEN:
-    mga_fullscreen();
+    if (vo_screenwidth && vo_screenheight)
+	mga_fullscreen();
+    else
+	printf("Screen width/height unknown!\n");
     return VO_TRUE;
 #endif
 
@@ -344,9 +348,13 @@ static int mga_init(int width,int height,unsigned int format){
 
 	mga_vid_config.src_width = width;
 	mga_vid_config.src_height= height;
-	mga_vid_config.dest_width = width;
-	mga_vid_config.dest_height= height;
+	if(!mga_vid_config.dest_width)
+	    mga_vid_config.dest_width = width;
+	if(!mga_vid_config.dest_height)
+	    mga_vid_config.dest_height= height;
 
+	mga_vid_config.colkey_on=0;
+	
 	mga_vid_config.num_frames=(vo_directrendering && !vo_doublebuffering)?1:3;
 	mga_vid_config.version=MGA_VID_VERSION;
 	if (ioctl(f,MGA_VID_CONFIG,&mga_vid_config))

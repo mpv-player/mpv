@@ -2,25 +2,9 @@
 //#define SHOW_TIME
 
 /*
- *    video_out_xmga.c
+ *    vo_xmga.c
  *
  *      Copyright (C) Zoltan Ponekker - Jan 2001
- *
- *  This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
- *
- *  mpeg2dec is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
- *
- *  mpeg2dec is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *
- *  You should have received a copy of the GNU General Public License
- *  along with GNU Make; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.
  *
  */
 
@@ -67,7 +51,7 @@ static unsigned int timerd=0;
 
 static vo_info_t vo_info =
 {
- "X11 (Matrox G200/G4x0/G550 overlay in window using /dev/mga_vid)",
+ "Matrox G200/G4x0/G550 overlay in X11 window (using /dev/mga_vid)",
  "xmga",
  "Zoltan Ponekker <pontscho@makacs.poliod.hu>",
  ""
@@ -185,9 +169,6 @@ static void check_events(void)
  mDrawColorKey();
  if ( ioctl( f,MGA_VID_CONFIG,&mga_vid_config ) ) mp_msg(MSGT_VO,MSGL_WARN,"Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
-
-static void draw_osd(void)
-{ vo_draw_text(mga_vid_config.src_width,mga_vid_config.src_height,draw_alpha);}
 
 static void flip_page(void){
 #ifdef SHOW_TIME
