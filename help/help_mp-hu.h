@@ -102,7 +102,7 @@ static char help_text[]=
 "  - Próbáld ki a -cache 8192 opciót.\n"\
 "- Talán egy non-interleaved AVI fájlt próbálsz -cache opcióval lejátszani?\n"\
 "  - Használd a -nocache opciót.\n"\
-"Tuninghoz tippeket a DOCS/HTML/hu/devices.html fájlban találsz.\n"\
+"Tuninghoz tippeket a DOCS/HTML/hu/video.html fájlban találsz.\n"\
 "Ha ez sem segít, olvasd el a DOCS/HTML/hu/bugreports.html fájlt.\n\n"
 
 #define MSGTR_NoGui "Az MPlayer grafikus felület NÉLKÜL lett fordítva!\n"

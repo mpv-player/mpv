@@ -106,7 +106,7 @@ static char help_text[]=
 "  - Опитай с -cache 8192\n"\
 "- Използваш опция -cache при неправилно структуриран файл (non-interleaved)? \n"\
 "  - Опитай с -nocache\n"\
-"Прочети DOCS/HTML/en/devices.html за съвети и настойки\n"\
+"Прочети DOCS/HTML/en/video.html за съвети и настойки\n"\
 "Ако нищо не помогне, прочети DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer е компилиран БЕЗ Графичен Потребителски Интерфейс (GUI)!\n"

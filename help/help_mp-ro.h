@@ -104,7 +104,7 @@ static char help_text[]=
 "  - Încearcã '-cache 8192'.\n"\
 "- Foloseºti -cache pentru fiºiere AVI neinterleaved?\n"\
 "  - Încearcã '-nocache'.\n"\
-"Citeºte DOCS/HTML/en/devices.html pentru idei de reglare/accelerare.\n"\
+"Citeºte DOCS/HTML/en/video.html pentru idei de reglare/accelerare.\n"\
 "Dacã tot nu reuºeºti, citeºte DOCS/HTML/en/bugreports.html.\n\n" //lang
 
 #define MSGTR_NoGui "MPlayer a fost compilat FÃRÃ suport pentru GUI.\n"

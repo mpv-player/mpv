@@ -104,7 +104,7 @@ static char help_text[]=
 "  - Tente -cache 8192.\n"\
 "- Você está usando -cache para reproduzir um arquivo AVI não-entrelaçado?\n"\
 "  - Tente -nocache.\n"\
-"Leia DOCS/HTML/en/devices.html para dicas de ajuste/velocidade.\n"\
+"Leia DOCS/HTML/en/video.html para dicas de ajuste/velocidade.\n"\
 "Se nenhum destes ajudar você, leia DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer foi compilado SEM suporte a GUI (interface gráfica com o usuário)!\n"

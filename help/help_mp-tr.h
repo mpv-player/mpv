@@ -82,10 +82,10 @@ static char help_text[]=
 "         ************************************************\n"\
 "!!!  Muhtemel nedenler, problemler,Çözümleri: \n"\
 "- En genel: bozuk/hatalý _ses_ kartý. Çözüm: -ao sdl veya baþka birþey deneyin\n"\
-"  ALSA 0.9 için ALSA 0.5 veya OSS emülasyonu. DOCS/HTML/en/devices.html#audio-dev dosyasýna gözatýn!\n"\
+"  ALSA 0.9 için ALSA 0.5 veya OSS emülasyonu. DOCS/HTML/en/audio.html dosyasýna gözatýn!\n"\
 "  -autosync 30 veya baþka deðerlerle denemeler yapabilirsiniz.\n"\
 "- Yavaþ Video çýkýþý.  -vo komutu ile baþka sürücü seçin(liste için: -vo help) veya\n"\
-"  -framedrop ile deneyin!  DOCS/HTML/en/devices.html#video-dev dosyasýna video hýzlandýrma için gözatýn.\n"\
+"  -framedrop ile deneyin!  DOCS/HTML/en/video.html dosyasýna video hýzlandýrma için gözatýn.\n"\
 "- Yavaþ CPU. Büyük bir DVD/divx i yavaþ bir CPU ile çalýþtýrmayýn! -hardframedrop u\n"\
 "kullanýn. -Bozuk Dosya. Çeþitli seçenekler deneyin: -nobps  -ni  -mc 0  -forceidx gibi.\n"\
 "- Yavaþ sürücüden çalacaksanýz (nfs/smb aglarý, dvd, vcd v.b.) -cache 8192  i deneyin.\n"\

@@ -82,9 +82,9 @@ static char help_text[]=
 "!!! Mulige årsaker, problemer, løsninger: \n"\
 "- Vanligste problem: ødelagte _lyd_ drivere, eller lyddrivere med feil. \n"\
 "  Prøv: -ao sdl eller bruk ALSA 0.5/oss emuleringen i ALSA 0.9. Les også\n"\
-"  DOCS/HTML/en/devices.html#audio-dev for flere tips!\n"\
+"  DOCS/HTML/en/audio.html for flere tips!\n"\
 "- Treg video output. Prøv en annen -vo driver (for liste: -vo help) eller\n"\
-"  prøv med -framedrop! Les DOCS/HTML/en/devices.html#video-dev for flere tips\n"\
+"  prøv med -framedrop! Les DOCS/HTML/en/video.html for flere tips\n"\
 "- Treg CPU. ikke forsøk å spille av store dvd/divx filer på en treg CPU!\n"\
 "  forsøk -hardframedrop\n"\
 "- Feil på filen. forsøk forskjellige kombinasjoner av disse:\n"\

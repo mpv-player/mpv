@@ -104,7 +104,7 @@ static char help_text[]=
 "  - Try -cache 8192.\n"\
 "- Are you using -cache to play a non-interleaved AVI file?\n"\
 "  - Try -nocache.\n"\
-"Read DOCS/HTML/en/devices.html for tuning/speedup tips.\n"\
+"Read DOCS/HTML/en/video.html for tuning/speedup tips.\n"\
 "If none of this helps you, read DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer was compiled WITHOUT GUI support.\n"

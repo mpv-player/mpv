@@ -95,7 +95,7 @@ static char help_text[]=
 "- Za wolne ¼ród³o (zamontowane NFS/SMB, DVD, VCD itd.)\n"\
 "  - Spróbuj: -cache 8192.\n"\
 "- Czy u¿ywasz pamiêci podrêcznej do odtwarzania plików bez przeplotu? Spróbuj -nocache\n"\
-"Przeczytaj DOCS/HTML/pl/devices.html gdzie znajdziesz wskazówki\n"\
+"Przeczytaj DOCS/HTML/pl/video.html gdzie znajdziesz wskazówki\n"\
 "jak przy¶pieszyæ dzia³anie MPlayera\n"\
 "Je¶li nic nie pomaga przeczytaj DOCS/HTML/pl/bugreports.html.\n\n"
 

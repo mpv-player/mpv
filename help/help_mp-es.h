@@ -103,7 +103,7 @@ static char help_text[]=
 "  - Intente con -cache 8192.\n"\
 "- Esta usando -cache para reproducir archivos AVI no entrelazados?\n"\
 "  - Intente con -nocache.\n"\
-"Lea DOCS/HTML/es/devices.html para consejos de ajuste o mayor velocidad.\n"\
+"Lea DOCS/HTML/es/video.html para consejos de ajuste o mayor velocidad.\n"\
 "Si nada de eso sirve, lee DOCS/HTML/es/bugreports.html\n\n"
 
 #define MSGTR_NoGui "MPlayer fue compilado sin soporte para interfaz gráfica.\n"

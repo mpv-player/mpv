@@ -95,7 +95,7 @@ static char help_text[]=
 "  - -cache 8192를 시도해보세요.\n"\
 "- non-interleaved AVI 파일을 -cache 옵션으로 재생하고 있나요?\n"\
 "  - -nocache를 시도해보세요.\n"\
-"미세조정/속도향상 팁은 DOCS/HTML/en/devices.html#video-dev과 DOCS/HTML/en/devices.html#audio-dev을 참조하세요.\n"\
+"미세조정/속도향상 팁은 DOCS/HTML/en/video.html과 DOCS/HTML/en/audio.html을 참조하세요.\n"\
 "위의 어떤 사항도 도움이 되지 않는다면, DOCS/HTML/en/bugreports.html을 참조하세요.\n\n"
 
 #define MSGTR_NoGui "MPlayer가 GUI를 사용할 수 있도록 컴파일되지 않았습니다.\n"

@@ -96,7 +96,7 @@ static char help_text[]=
 "- Пов╕льний нос╕й (диски NFS/SMB, DVD, VCD та ╕н.). Спробуйте -cache 8192.\n"\
 "- Ви використову╓те -cache для програвання неперемеженого AVI файлу?\n"\
 "  - спробуйте -nocache.\n"\
-"Читайте поради в файлах DOCS/HTML/en/devices.html .\n"\
+"Читайте поради в файлах DOCS/HTML/en/video.html .\n"\
 "Якщо н╕чого не допомогло, тод╕ читайте DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer був скомп╕льований БЕЗ п╕дтримки GUI!\n"

@@ -7295,7 +7295,7 @@ EOF
 
 
 if test "$_mtrr" = yes ; then
-  echo "Please check mtrr settings at /proc/mtrr (see DOCS/HTML/$_doc_lang/devices.html#mtrr)"
+  echo "Please check mtrr settings at /proc/mtrr (see DOCS/HTML/$_doc_lang/video.html#mtrr)"
   echo
 fi
 

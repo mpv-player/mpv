@@ -97,7 +97,7 @@ static char help_text[]=
 "  - Essayez -cache 8192\n"\
 "- Utilisez-vous -cache avec un fichier AVI mal multiplexé ? \n"\
 "  - Essayez avec -nocache\n"\
-"Lisez DOCS/HTML/fr/devices.html pour les astuces de réglage/accélération.\n"\
+"Lisez DOCS/HTML/fr/video.html pour les astuces de réglage/accélération.\n"\
 "Si rien de tout cela ne résoud le problème, lisez DOCS/HTML/fr/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer a été compilé SANS support GUI.\n"

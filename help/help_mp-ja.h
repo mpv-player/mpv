@@ -93,7 +93,7 @@ static char help_text[]=
 "  -次のオプションを試みる -cache 8192.\n"\
 "- non-interleaved AVI ファイルに -cacheオプションを使ってませんか?\n"\
 "  - 次のオプションを試みる -nocache.\n"\
-"チューニング、スピードアップの為に DOCS/HTML/en/devices.html を御覧下さい.\n"\
+"チューニング、スピードアップの為に DOCS/HTML/en/video.html を御覧下さい.\n"\
 "もし、これらを試しても何もこう化が得られない場合は、DOCS/HTML/en/bugreports.html を御覧下さい.\n\n"
 
 #define MSGTR_NoGui "MPlayer はGUIサポートを無効にしてコンパイルされました.\n"

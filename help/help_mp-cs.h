@@ -95,7 +95,7 @@ static char help_text[]=
 "  - Zkuste -cache 8192.\n"\
 "- Pou¾íváte -cache pro neprokládané AVI soubory?\n"\
 "  - Zkuste -nocache.\n"\
-"Tipy na vyladìní a zrychlení najdete v DOCS/HTML/en/devices.html.\n"\
+"Tipy na vyladìní a zrychlení najdete v DOCS/HTML/en/video.html.\n"\
 "Pokud nic z toho nepomù¾e, pøeètìte si DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer byl pøelo¾en BEZ podpory GUI.\n"

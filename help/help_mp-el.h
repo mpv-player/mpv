@@ -96,7 +96,7 @@ static char help_text[]=
 "  - Δοκιμάστε -cache 8192\n"\
 "- Μήπως χρησιμοποιείται -cache για την αναπαραγωγή ενός non-interleaved αρχείου;\n"\
 "  - Δοκιμάστε με -nocache\n"\
-"Διαβάστε το DOCS/HTML/en/devices.html για ρύθμιση/επιτάχυνση του βίντεο.\n"\
+"Διαβάστε το DOCS/HTML/en/video.html για ρύθμιση/επιτάχυνση του βίντεο.\n"\
 "Αν κανένα από αυτά δεν βοηθάει, τότε διαβάστε το DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "Το MPlayer μεταφράστηκε ΧΩΡΙΣ υποστήριξη για GUI!\n"

@@ -97,7 +97,7 @@ static char help_text[]=
 "  - Försök med -cache 8192.\n"\
 "- Använder du -cache till att spela upp en ickeinterleaved AVIfil?\n"\
 "  - Försök -nocache.\n"\
-"Läs DOCS/HTML/en/devices.html för optimeringstips.\n"\
+"Läs DOCS/HTML/en/video.html för optimeringstips.\n"\
 "Om inget av dessa hjälper, läs DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer var kompilerad UTAN GUI-support.\n"

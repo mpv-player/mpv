@@ -94,7 +94,7 @@ static char help_text[]=
 "  - Probeer met -cache 8192.\n"\
 "- Gebruik je -cache om een niet-interleaved bestand af te spelen?\n"\
 "  - Probeer met -nocache\n"\
-"Lees DOCS/HTML/en/devices.html voor tips aangaande het afstellen en versnellen van MPlayer.\n"\
+"Lees DOCS/HTML/en/video.html voor tips aangaande het afstellen en versnellen van MPlayer.\n"\
 "Als geen van deze oorzaken van toepassingen zijn, lees dan DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer werd gecompileerd ZONDER GUI ondersteuning!\n"

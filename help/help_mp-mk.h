@@ -96,7 +96,7 @@ static char help_text[]=
 "  - Пробајте со -cache 8192.\n"\
 "- Дали користите -cache за пуштање на непреклопувачка AVI датотека?\n"\
 "  - Пробајте со -nocache.\n"\
-"Прочитајте го DOCS/HTML/en/devices.html за пораки за подобрување/забрзување.\n"\
+"Прочитајте го DOCS/HTML/en/video.html за пораки за подобрување/забрзување.\n"\
 "Ако ништо од ова не ви помага, прочитајте го DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer е компајлиран БЕЗ GUI подршка.\n"

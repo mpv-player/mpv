@@ -83,9 +83,9 @@ static char help_text[]=
 "         ***********************************************************\n"\
 "!!! Mo¾né príèiny, problémy a rie¹enia:\n"\
 "- Nejèastej¹ie: nesprávny/chybný _zvukový_ ovládaè. Rie¹enie: skúste -ao sdl al. pou¾ite\n"\
-"  ALSA 0.5 alebo oss emuláciu z ALSA 0.9. viac tipov sa dozviete v DOCS/HTML/en/devices.html#audio-dev!\n"\
+"  ALSA 0.5 alebo oss emuláciu z ALSA 0.9. viac tipov sa dozviete v DOCS/HTML/en/audio.html!\n"\
 "- Pomalý video výstup. Skúste iný -vo ovládaè (pre zoznam: -vo help) alebo skúste\n"\
-"  s voµbou -framedrop!  Tipy pre ladenie/zrýchlenie videa sú v DOCS/HTML/en/devices.html#video-dev\n"\
+"  s voµbou -framedrop!  Tipy pre ladenie/zrýchlenie videa sú v DOCS/HTML/en/video.html\n"\
 "- Pomalý cpu. Neskú¹ajte prehráva» veµké dvd/divx na pomalom cpu! Skúste -hardframedrop\n"\
 "- Po¹kodený súbor. Skúste rôzne kombinácie týchto volieb: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Pomalé médium (NFS/SMB, DVD, VCD...). Skúste -cache 8192.\n"\

@@ -94,7 +94,7 @@ static char help_text[]=
 "  - Используйте -cache 8192.\n"\
 "- Используете ли Вы -cache для проигрывания не-'слоёных' AVI файлов?\n"\
 "  - Используйте -nocache.\n"\
-"Читайте DOCS/HTML/ru/devices.html для советов по подстройке/ускорению.\n"\
+"Читайте DOCS/HTML/ru/video.html для советов по подстройке/ускорению.\n"\
 "Если ничего не помогло, тогда читайте DOCS/HTML/ru/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer был скомпилирован БЕЗ поддержки GUI!\n"
