@@ -2565,7 +2565,8 @@ if(rel_seek_secs || abs_seek_pos){
         if ( stream->type == STREAMTYPE_DVD )
 	 {
 	  dvd_priv_t * dvdp = stream->priv;
-	  guiIntfStruct.DVD.current_chapter=dvdp->cur_cell + 1;
+	  /*guiIntfStruct.DVD.current_chapter=dvdp->cur_cell + 1;*/
+	  guiIntfStruct.DVD.current_chapter=dvd_chapter_from_cell(dvdp,guiIntfStruct.DVD.current_title-1, dvdp->cur_cell)+1;
 	 }
 #endif
       }

@@ -258,6 +258,7 @@ typedef struct {
 
 int dvd_aid_from_lang(stream_t *stream, unsigned char* lang);
 int dvd_sid_from_lang(stream_t *stream, unsigned char* lang);
+int dvd_chapter_from_cell(dvd_priv_t *dvd,int title,int cell);
 
 #endif
 							    

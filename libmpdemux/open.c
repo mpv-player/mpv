@@ -564,6 +564,34 @@ int dvd_parse_chapter_range(struct config *conf, const char *range){
 }
 
 #ifdef USE_DVDREAD
+int dvd_chapter_from_cell(dvd_priv_t* dvd,int title,int cell)
+{
+  pgc_t * cur_pgc;
+  ptt_info_t* ptt;
+  int chapter = cell;
+  int pgc_id,pgn;
+  if(title < 0 || cell < 0){
+    return 0;
+  }
+  /* for most DVD's chapter == cell */
+  /* but there are more complecated cases... */
+  if(chapter >= dvd->vmg_file->tt_srpt->title[title].nr_of_ptts){
+    chapter = dvd->vmg_file->tt_srpt->title[title].nr_of_ptts-1;
+  }
+  title = dvd->tt_srpt->title[title].vts_ttn-1;
+  ptt = dvd->vts_file->vts_ptt_srpt->title[title].ptt;
+  while(chapter >= 0){
+    pgc_id = ptt[chapter].pgcn;
+    pgn = ptt[chapter].pgn;
+    cur_pgc = dvd->vts_file->vts_pgcit->pgci_srp[pgc_id-1].pgc;
+    if(cell >= cur_pgc->program_map[pgn-1]-1){
+      return chapter;
+    }
+    --chapter;
+  }
+  /* didn't find a chapter ??? */
+  return chapter;
+}
 
 int dvd_aid_from_lang(stream_t *stream, unsigned char* lang){
 dvd_priv_t *d=stream->priv;
