@@ -89,7 +89,7 @@ static char help_text[]=
 "         ****  Vá¹ systém je pøíli¹ POMALÝ pro toto pøehrávání! ****\n"\
 "         ***********************************************************\n\n"\
 "Mo¾né pøíèiny, problémy a øe¹ení:\n"\
-"- Nejèastìj¹í: ¹patný/chybný _zvukový_ ovladaè\n!"\
+"- Nejèastìj¹í: ¹patný/chybný _zvukový_ ovladaè!\n"\
 "  - Zkuste -ao sdl nebo pou¾ijte ALSA 0.5 èi oss emulaci z ALSA 0.9.\n"\
 "  - Pohrajte si s rùznými hodnotami -autosync, pro zaèátek tøeba 30.\n"\
 "- Pomalý obrazový výstup\n"\

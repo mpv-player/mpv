@@ -295,7 +295,7 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Αποτυχία κατά το άνοιγμα του demuxer ήχου: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Αποτυχία κατά το άνοιγμα του demuxer υποτίτλων: %s\n"
 #define MSGTR_TVInputNotSeekable "TV input δεν είναι αναζητήσιμο! (πιθανόν η αναζήτηση να γίνει για την αλλαγή σταθμών ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Οι πληροφορίες για το demuxer %s υπάρχουν ήδη\n!"
+#define MSGTR_DemuxerInfoAlreadyPresent "Οι πληροφορίες για το demuxer %s υπάρχουν ήδη!\n"
 #define MSGTR_ClipInfo "Πληροφορίες του μέσου: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Βρέθηκε progressive seq, επαναφορά σε 3:2 TELECINE mode\n"

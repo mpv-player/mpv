@@ -295,7 +295,7 @@ static char help_text[]=
 #define MSGTR_OpeningAudioDemuxerFailed "Kan audio demuxer niet openen: %s\n"
 #define MSGTR_OpeningSubtitlesDemuxerFailed "Openen van de ondertiteling demuxer is mislukt: %s\n"
 #define MSGTR_TVInputNotSeekable "TV invoer is niet doorzoekbaar! (Waarschijnlijk zal zoeken de kanalen veranderen ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s reeds aanwezig\n!"
+#define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s reeds aanwezig!\n"
 #define MSGTR_ClipInfo "Clip info: \n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressieve seq gedetecteerd, 3:2 TELECINE mode afgezet\n"
