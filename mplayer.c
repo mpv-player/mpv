@@ -1868,6 +1868,8 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
         mplStop();
         mplSubRender=1;
         wsPostRedisplay( &appMPlayer.subWindow );
+        mplShMem->TimeSec=0;
+        mplShMem->Position=0;       
        }	
 #endif
 
