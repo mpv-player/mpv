@@ -198,44 +198,44 @@ extern int write_odml; /* defined in libmpdemux/muxer_avi.c */
 m_option_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 
-	{"endpos", parse_end_at, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL},
+	{"endpos", &end_at_string, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// set output framerate - recommended for variable-FPS (ASF etc) files
 	// and for 29.97FPS progressive MPEG2 streams
-	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
-	{"o", &out_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN|CONF_GLOBAL, 0, 0, NULL},
+	{"o", &out_filename, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 
 	// limit number of skippable frames after a non-skipped one
 	{"skiplimit", &skip_limit, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"noskiplimit", &skip_limit, CONF_TYPE_FLAG, 0, 0, -1, NULL},
 	{"noskip", &skip_limit, CONF_TYPE_FLAG, 0, 0, 0, NULL},
 
-	{"audio-density", &audio_density, CONF_TYPE_INT, CONF_RANGE, 1, 50, NULL},
-	{"audio-preload", &audio_preload, CONF_TYPE_FLOAT, CONF_RANGE, 0, 2, NULL},
-	{"audio-delay",   &audio_delay, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
+	{"audio-density", &audio_density, CONF_TYPE_INT, CONF_RANGE|CONF_GLOBAL, 1, 50, NULL},
+	{"audio-preload", &audio_preload, CONF_TYPE_FLOAT, CONF_RANGE|CONF_GLOBAL, 0, 2, NULL},
+	{"audio-delay",   &audio_delay, CONF_TYPE_FLOAT, CONF_MIN|CONF_GLOBAL, 0, 0, NULL},
 
 	{"x", "-x is obsolete, use -vf scale=w:h for scaling.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"xsize", "-xsize is obsolete, use -vf crop=w:h:x:y for cropping.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 
 	// output audio/video codec selection
-	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"oac", oac_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 
 	// output file format
-	{"of", of_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"of", of_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 
 	// override FOURCC in output file
-	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4, NULL},
+	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, CONF_GLOBAL, 4, 4, NULL},
 
 	// override avi aspect autodetection
-	{"force-avi-aspect", &avi_aspect_override, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
+	{"force-avi-aspect", &avi_aspect_override, CONF_TYPE_FLOAT, CONF_RANGE|CONF_GLOBAL, 0.2, 3.0, NULL},
 
 	{"pass", "-pass is obsolete, use -lavcopts vpass=n, -xvidencopts pass=n, -divx4opts pass=n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 	
-	{"vobsubout", &vobsub_out, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"vobsuboutindex", &vobsub_out_index, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
-	{"vobsuboutid", &vobsub_out_id, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vobsubout", &vobsub_out, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
+	{"vobsuboutindex", &vobsub_out_index, CONF_TYPE_INT, CONF_RANGE|CONF_GLOBAL, 0, 31, NULL},
+	{"vobsuboutid", &vobsub_out_id, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL},
 
 	{"autoexpand", &auto_expand, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noautoexpand", &auto_expand, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -243,42 +243,42 @@ m_option_t mencoder_opts[]={
 	{"encodedups", &encode_duplicates, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noencodedups", &encode_duplicates, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	
-	{"odml", &write_odml, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"noodml", &write_odml, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"odml", &write_odml, CONF_TYPE_FLAG, CONF_GLOBAL, 0, 1, NULL},
+	{"noodml", &write_odml, CONF_TYPE_FLAG, CONF_GLOBAL, 1, 0, NULL},
 	
 	// info header strings
-	{"info", info_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"info", info_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 
 #ifdef HAVE_DIVX4ENCORE
-	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #ifdef HAVE_MP3LAME
-	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"lameopts", lameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #ifdef USE_LIBAVCODEC
-	{"lavcopts", lavcopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"lavcopts", lavcopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"lavcopts", "MPlayer was compiled without libavcodec. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef HAVE_TOOLAME
-	{"toolameopts", toolameopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"toolameopts", toolameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"toolameopts", "MPlayer was compiled without libtoolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef USE_WIN32DLL
-	{"vfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"vfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #if defined(HAVE_XVID3) || defined(HAVE_XVID4)
-	{"xvidencopts", xvidencopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"xvidencopts", xvidencopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 #if defined(HAVE_X264)
-	{"x264encopts", x264encopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"x264encopts", x264encopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif
 
-	{"nuvopts",  nuvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-	{"mpegopts",  mpegopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"nuvopts",  nuvopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+	{"mpegopts",  mpegopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #ifdef USE_LIBAVFORMAT
-	{"lavfopts",  lavfopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"lavfopts",  lavfopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #endif	
 
 #define MAIN_CONF

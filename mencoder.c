@@ -264,7 +264,8 @@ static int cfg_include(m_option_t *conf, char *filename){
 static char *seek_to_sec=NULL;
 static off_t seek_to_byte=0;
 
-static int parse_end_at(m_option_t *conf, const char* param);
+static void parse_end_at();
+static char * end_at_string=0;
 //static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
 
 #include "get_path.c"
@@ -328,6 +329,10 @@ static int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
 
 //---------------------------------------------------------------------------
 
+// this function returns the absoloute time for which MEncoder will switch files or move in the file.
+// so audio can be cut correctly. -1 if there is no limit.
+static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v);
+
 static int at_eof=0;
 static int interrupted=0;
 
@@ -386,6 +391,9 @@ char* frameno_filename="frameno.avi";
 
 int decoded_frameno=0;
 int next_frameno=-1;
+int curfile=0;
+int prevwidth = 0;
+int prevhieght = 0; ///< When different from 0, after decoding a frame, Resolution must be checked to match previous file
 
 unsigned int timer_start;
 
@@ -482,8 +490,10 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 
   vo_init_osd();
 
-  m_entry_set_options(mconfig,&filelist[0]);
-  filename = filelist[0].name;
+play_next_file:
+  m_config_push(mconfig);
+  m_entry_set_options(mconfig,&filelist[curfile]);
+  filename = filelist[curfile].name;
  
   if(!filename){
 	mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_MissingFilename);
@@ -588,6 +598,7 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
 
 // set up video encoder:
 
+if (!curfile) { // curfile is non zero when a second file is opened
 if (vobsub_out) {
     unsigned int palette[16], width, height;
     unsigned char tmp[3] = { 0, 0, 0 };
@@ -664,14 +675,18 @@ mux_v->h.dwRate=mux_v->h.dwScale*(force_ofps?force_ofps:sh_video->fps);
 mux_v->codec=out_video_codec;
 
 mux_v->bih=NULL;
+}
 sh_video->codec=NULL;
 sh_video->video_out=NULL;
 sh_video->vfilter=NULL; // fixme!
 
 switch(mux_v->codec){
 case VCODEC_COPY:
-    if (sh_video->bih)
-	mux_v->bih=sh_video->bih;
+	if (!curfile) {
+		if (sh_video->bih) {
+			mux_v->bih=malloc(sh_video->bih->biSize);
+			memcpy(mux_v->bih, sh_video->bih, sh_video->bih->biSize);
+		}
     else
     {
 	mux_v->bih=calloc(1,sizeof(BITMAPINFOHEADER));
@@ -683,11 +698,37 @@ case VCODEC_COPY:
 	mux_v->bih->biBitCount=24; // FIXME!!!
 	mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
     }
+	}
     mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_VCodecFramecopy,
 	mux_v->bih->biWidth, mux_v->bih->biHeight,
 	mux_v->bih->biBitCount, mux_v->bih->biCompression);
+
+	if (curfile) {
+		if (sh_video->bih) {
+			if ((mux_v->bih->biSize != sh_video->bih->biSize) ||
+			    memcmp(mux_v->bih, sh_video->bih, sh_video->bih->biSize))
+			{
+				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_VCodecFramecopy,
+				       sh_video->bih->biWidth, sh_video->bih->biHeight,
+				       sh_video->bih->biBitCount, sh_video->bih->biCompression);
+				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_FrameCopyFileMismatch);
+				mencoder_exit(1,NULL);
+			}
+		}
+		else {
+			if ((mux_v->bih->biWidth != sh_video->disp_w) ||
+			    (mux_v->bih->biHeight != sh_video->disp_h) ||
+			    (mux_v->bih->biCompression != sh_video->format)) {
+				mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_VCodecFramecopy,
+				       sh_video->disp_w, sh_video->disp_w, 24, sh_video->format);
+				mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_FrameCopyFileMismatch);
+				mencoder_exit(1,NULL);
+			}
+		}
+	}
     break;
 case VCODEC_FRAMENO:
+	if (!curfile) {
     mux_v->bih=calloc(1,sizeof(BITMAPINFOHEADER));
     mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
     mux_v->bih->biWidth=sh_video->disp_w;
@@ -696,6 +737,7 @@ case VCODEC_FRAMENO:
     mux_v->bih->biBitCount=24;
     mux_v->bih->biCompression=mmioFOURCC('F','r','N','o');
     mux_v->bih->biSizeImage=mux_v->bih->biWidth*mux_v->bih->biHeight*(mux_v->bih->biBitCount/8);
+	}
     break;
 default:
 
@@ -737,6 +779,7 @@ default:
 
 }
 
+if (!curfile) {
 /* force output fourcc to .. */
 if ((force_fourcc != NULL) && (strlen(force_fourcc) >= 4))
 {
@@ -767,7 +810,8 @@ mux_a->codec=out_audio_codec;
 switch(mux_a->codec){
 case ACODEC_COPY:
     if (sh_audio->wf){
-	mux_a->wf=sh_audio->wf;
+	mux_a->wf=malloc(sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
+	memcpy(mux_a->wf, sh_audio->wf, sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
 	if(!sh_audio->i_bps) sh_audio->i_bps=mux_a->wf->nAvgBytesPerSec;
     } else {
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX));
@@ -1127,6 +1171,95 @@ signal(SIGQUIT,exit_sighandler); // Quit from keyboard
 signal(SIGTERM,exit_sighandler); // kill
 
 timer_start=GetTimerMS();
+} // if (!curfile) // if this was the first file.
+else if (sh_audio) {
+	int out_format, out_bps, out_minsize, out_maxsize;
+	int do_init_filters = 1;
+	switch(mux_a->codec){
+		case ACODEC_COPY:
+			do_init_filters = 0;
+			mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
+			       mux_a->wf->wFormatTag, mux_a->wf->nChannels, mux_a->wf->nSamplesPerSec,
+			       mux_a->wf->wBitsPerSample, mux_a->wf->nAvgBytesPerSec, mux_a->h.dwSampleSize);
+			if (sh_audio->wf) {
+				if ((mux_a->wf->wFormatTag != sh_audio->wf->wFormatTag) ||
+				    (mux_a->wf->nChannels != sh_audio->wf->nChannels) ||
+				    (mux_a->wf->nSamplesPerSec != sh_audio->wf->nSamplesPerSec))
+				{
+					mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
+					       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, sh_audio->wf->nSamplesPerSec,
+					       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
+					mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
+					mencoder_exit(1,NULL);
+				}
+			}
+			else {
+				if ((mux_a->wf->wFormatTag != sh_audio->format) ||
+				    (mux_a->wf->nChannels != sh_audio->channels) ||
+				    (mux_a->wf->nSamplesPerSec != sh_audio->samplerate))
+				{
+					mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ACodecFramecopy,
+					       sh_audio->wf->wFormatTag, sh_audio->wf->nChannels, sh_audio->wf->nSamplesPerSec,
+					       sh_audio->wf->wBitsPerSample, sh_audio->wf->nAvgBytesPerSec, 0);
+					mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_AudioCopyFileMismatch);
+					mencoder_exit(1,NULL);
+				}
+				
+			}
+			break;
+		case ACODEC_PCM:
+			mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_CBRPCMAudioSelected);
+			out_format = (mux_a->wf->wBitsPerSample==8) ? AF_FORMAT_U8 : AF_FORMAT_S16_LE;
+			out_bps = mux_a->wf->wBitsPerSample/8;
+			out_minsize = 16384;
+			out_maxsize = mux_a->wf->nAvgBytesPerSec;
+			break;
+#ifdef HAVE_MP3LAME
+		case ACODEC_VBRMP3:
+			mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_MP3AudioSelected);
+			out_format = AF_FORMAT_S16_NE;
+			out_bps = 2;
+			out_minsize = 4608;
+			out_maxsize = mux_a->h.dwRate*mux_a->wf->nChannels*2;
+			break;
+#endif
+#ifdef USE_LIBAVCODEC
+		case ACODEC_LAVC:
+			out_format = AF_FORMAT_S16_NE;
+			out_bps = 2;
+			out_minsize = mux_a->h.dwSuggestedBufferSize;
+			out_maxsize = mux_a->h.dwSuggestedBufferSize*2;
+			mp_msg(MSGT_MENCODER, MSGL_V, "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n",
+			       lavc_actx->frame_size, lavc_actx->frame_size * 2 * lavc_actx->channels, mux_a->wf->wFormatTag);
+			break;
+#endif
+#ifdef HAVE_TOOLAME
+		case ACODEC_TOOLAME:
+			out_format = AF_FORMAT_S16_NE;
+			out_bps = 2;
+			out_minsize = mux_a->h.dwSuggestedBufferSize;
+			out_maxsize = mux_a->h.dwSuggestedBufferSize*2;
+			break;
+#endif
+	}
+	if (do_init_filters) if(!init_audio_filters(sh_audio,
+	    sh_audio->samplerate,
+	    sh_audio->channels,
+	    sh_audio->sample_format,
+	    sh_audio->samplesize,
+	    mux_a->wf->nSamplesPerSec,
+	    mux_a->wf->nChannels,
+	    AF_FORMAT_S16_NE,
+	    2,
+	    4608,
+	    mux_a->h.dwRate*mux_a->wf->nChannels*2))
+	{
+		mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoMatchingFilter);
+		exit(1);
+	}
+}
+
+parse_end_at();
 
 if (seek_to_sec) {
     int a,b; float d;
@@ -1166,6 +1299,7 @@ if(file_format == DEMUXER_TYPE_TV)
 	}
 
 play_n_frames=play_n_frames_mf;
+if (curfile && end_at_type == END_AT_TIME) end_at += mux_v->timer;
 
 while(!at_eof){
 
@@ -1178,7 +1312,7 @@ while(!at_eof){
     int skip_flag=0; // 1=skip  -1=duplicate
 
     if((end_at_type == END_AT_SIZE && end_at <= ftello(muxer_f))  ||
-       (end_at_type == END_AT_TIME && end_at < sh_video->timer))
+       (end_at_type == END_AT_TIME && end_at < mux_v->timer))
         break;
 
     if(play_n_frames>=0){
@@ -1246,15 +1380,23 @@ if(sh_audio){
 #endif
 	if(mux_a->h.dwSampleSize){
 	    // CBR - copy 0.5 sec of audio
+	    // or until the end of video:
+	    float tottime = stop_time(demuxer, mux_v);
+	    if (tottime != -1) {
+		    tottime -= mux_a->timer;
+		    if (tottime > 1./audio_density) tottime = 1./audio_density;
+	    }
+	    else tottime = 1./audio_density;
+	    
 	    switch(mux_a->codec){
 	    case ACODEC_COPY: // copy
-		len=mux_a->wf->nAvgBytesPerSec/audio_density;
+		len=mux_a->wf->nAvgBytesPerSec*tottime;
 		len/=mux_a->h.dwSampleSize;if(len<1) len=1;
 		len*=mux_a->h.dwSampleSize;
 		len=demux_read_data(sh_audio->ds,mux_a->buffer,len);
 		break;
 	    case ACODEC_PCM:
-		len=mux_a->h.dwSampleSize*(mux_a->h.dwRate/audio_density);
+		len=mux_a->h.dwSampleSize*(int)(mux_a->h.dwRate*tottime);
 		len=dec_audio(sh_audio,mux_a->buffer,len);
 		break;
 	    }
@@ -1326,6 +1468,9 @@ if(sh_audio){
 
 	audiosamples++;
 	audiorate+= (GetTimerMS() - ptimer_start);
+	
+	// let's not output more audio than necessary
+	if (stop_time(demuxer, mux_v) != -1 && stop_time(demuxer, mux_v) <= mux_a->timer) break;
     }
 }
 
@@ -1405,6 +1550,15 @@ default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
     blit_frame=decode_video(sh_video,start,in_size,
       skip_flag>0 && (!sh_video->vfilter || ((vf_instance_t *)sh_video->vfilter)->control(sh_video->vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) != CONTROL_TRUE));
+    
+    if (prevwidth) {
+	    if ((mux_v->bih->biWidth != prevwidth) || (mux_v->bih->biHeight != prevhieght)) {
+		    mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ResolutionDoesntMatch);
+		    mencoder_exit(1,NULL);
+	    }
+	    prevhieght = prevwidth = 0;
+    }
+    
     if(!blit_frame){
       badframes++;
       if(skip_flag<=0){
@@ -1585,6 +1739,18 @@ if(sh_audio && !demuxer2){
                                                     VFCTRL_FLUSH_FRAMES, 0);
     }
 
+if (!interrupted && filelist[++curfile].name != 0) {
+	if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
+	if(demuxer) free_demuxer(demuxer);
+	if(stream) free_stream(stream); // kill cache thread
+	
+	prevwidth = mux_v->bih->biWidth;
+	prevhieght = mux_v->bih->biHeight;
+	
+	m_config_pop(mconfig);
+	goto play_next_file;
+}
+
 #ifdef HAVE_MP3LAME
 // fixup CBR mp3 audio header:
 if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
@@ -1640,10 +1806,11 @@ if(lavc_abuf != NULL)
 return interrupted;
 }
 
-static int parse_end_at(m_option_t *conf, const char* param)
+static void parse_end_at()
 {
 
     end_at_type = END_AT_NONE;
+    if (!end_at_string) return;
     
     /* End at size parsing */
     {
@@ -1651,7 +1818,7 @@ static int parse_end_at(m_option_t *conf, const char* param)
         
         end_at_type = END_AT_SIZE;
 
-        if(sscanf(param, "%lf%3s", &end_at, unit) == 2) {
+        if(sscanf(end_at_string, "%lf%3s", &end_at, unit) == 2) {
             if(!strcasecmp(unit, "b"))
                 ;
             else if(!strcasecmp(unit, "kb"))
@@ -1673,20 +1840,15 @@ static int parse_end_at(m_option_t *conf, const char* param)
 
         end_at_type = END_AT_TIME;
         
-        if (sscanf(param, "%d:%d:%f", &a, &b, &d) == 3)
+        if (sscanf(end_at_string, "%d:%d:%f", &a, &b, &d) == 3)
             end_at = 3600*a + 60*b + d;
-        else if (sscanf(param, "%d:%f", &a, &d) == 2)
+        else if (sscanf(end_at_string, "%d:%f", &a, &d) == 2)
             end_at = 60*a + d;
-        else if (sscanf(param, "%f", &d) == 1)
+        else if (sscanf(end_at_string, "%f", &d) == 1)
             end_at = d;
         else
             end_at_type = END_AT_NONE;
     }
-
-    if(end_at_type == END_AT_NONE)
-        return ERR_FUNC_ERR;
-
-    return 1;
 }
 
 #if 0
@@ -1867,3 +2029,10 @@ static uint32_t lavc_find_atag(char *codec)
 }
 #endif
 
+static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v) {
+	// demuxer is for future support for EDL
+	float timeleft = -1;
+	if (play_n_frames >= 0) timeleft = mux_v->timer + play_n_frames * (double)(mux_v->h.dwScale) / mux_v->h.dwRate;
+	if (end_at_type == END_AT_TIME && (timeleft > end_at || timeleft == -1)) timeleft = end_at;
+	return timeleft;
+}
