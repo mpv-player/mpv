@@ -349,6 +349,8 @@ static config_t mplayer_opts[]={
 	{"playlist", NULL, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
 	// a-v sync stuff:
+	{"noautosync", &autosync, CONF_TYPE_FLAG, 0, 0, -1, NULL},
+	{"autosync", &autosync, CONF_TYPE_INT, CONF_RANGE, 0, 10000, NULL},
 //	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 //	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 

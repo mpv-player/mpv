@@ -159,13 +159,25 @@ available. The number you specify will be the maximum level used. Usually you
 can use some big number. You may not use it together with \-pp but it is OK
 with \-npp!
 .TP
+.B \-autosync <factor>
+Gradually adjusts the A/V sync based on audio delay measurements.
+Specifying \-autosync 0, the default, will cause frame timing to be based
+entirely on audio delay measurements.  Specifying \-autosync 1 will do the
+same, but will subtly change the A/V correction algorithm used.  An uneven
+video frame rate in a movie which plays fine with -nosound can often be
+helped by setting this to an integer value greater than 1.  The higher
+the value, the closer the timing will be to -nosound.
+
+Try \-autosync 30 to smooth out problems with sound drivers which do
+not implement a perfect audio delay measurement.  With this value, if
+large A/V sync offsets occur, they will only take about 1 or 2 seconds
+to settle out.  This delay in reaction time to sudden A/V offsets should
+be the only side-effect of turning this option on, for all sound drivers.
+.TP
 .B \-benchmark
 Prints some statistics on CPU usage and dropped frames at the end.
 Used in combination with \-nosound and \-vo null for benchmarking only video
 codec.
-.TP
-.B \-dapsync (OBSOLETE)
-Use alternative A/V sync method.
 .TP
 .B \-framedrop (see \-hardframedrop option too!)
 Frame dropping: decode all (except B) frames, video may skip.

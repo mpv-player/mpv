@@ -164,6 +164,9 @@ static off_t seek_to_byte=0;
 static off_t step_sec=0;
 static int loop_times=-1;
 
+// A/V sync:
+static int autosync=0; // 30 might be a good default value.
+
 // may be changed by GUI:  (FIXME!)
 float rel_seek_secs=0;
 int abs_seek_pos=0;
@@ -1446,7 +1449,16 @@ if(!sh_video) {
 }
 #endif
 
-    if(drop_frame && !frame_time_remaining){
+    if(drop_frame && !frame_time_remaining && !autosync){
+      /*
+       * Note: time_frame should not be forced to 0 in autosync mode.
+       * It is used as a cumulative counter to predict and correct the
+       * delay measurements from the audio driver.  time_frame is already
+       * < 0, so the "time to sleep" code does not actually sleep.  Also,
+       * blit_frame is already 0 because drop_frame was true when
+       * decode_video was called (which causes it to set blit_frame to 0.)
+       * When autosync==0, the default behavior is still completely unchanged.
+       */
 
       time_frame=0;	// don't sleep!
       blit_frame=0;	// don't display!
@@ -1461,6 +1473,21 @@ if(!sh_video) {
       if(sh_audio && !d_audio->eof){
 	  float delay=audio_out->get_delay();
 	  mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%f\n",delay);
+
+	  if (autosync){
+	    /*
+	     * Adjust this raw delay value by calculating the expected
+	     * delay for this frame and generating a new value which is
+	     * weighted between the two.  The higher autosync is, the
+	     * closer to the delay value gets to that which "-nosound"
+	     * would have used, and the longer it will take for A/V
+	     * sync to settle at the right value (but it eventually will.)
+	     * This settling time is very short for values below 100.
+	     */
+	    float predicted = sh_audio->timer-sh_video->timer+time_frame;
+	    float difference = delay - predicted;
+	    delay = predicted + difference / (float)autosync;
+	  }
 
           time_frame=sh_video->timer;
           time_frame-=sh_audio->timer-delay;
@@ -1564,6 +1591,22 @@ if(time_frame>0.001 && !(vo_flags&256)){
 
     // unplayed bytes in our and soundcard/dma buffer:
     float delay=audio_out->get_delay()+(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
+
+    if (autosync){
+      /*
+       * If autosync is enabled, the value for delay must be calculated
+       * a bit differently.  It is set only to the difference between
+       * the audio and video timers.  Any attempt to include the real
+       * or corrected delay causes the pts_correction code below to
+       * try to correct for the changes in delay which autosync is
+       * trying to measure.  This keeps the two from competing, but still
+       * allows the code to correct for PTS drift *only*.  (Using a delay
+       * value here, even a "corrected" one, would be incompatible with
+       * autosync mode.)
+       */
+      delay=sh_audio->timer-sh_video->timer;
+      delay+=(float)sh_audio->a_buffer_len/(float)sh_audio->o_bps;
+    }
 
     if(pts_from_bps){
 	// PTS = sample_no / samplerate
