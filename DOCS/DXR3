@@ -63,6 +63,11 @@ harddisk.
  					This does not work with digital audio
 					output (-ac hwac3)
 
+Overlay
+To get overlay run dxr3view that comes with the em8300 package before staring
+mplayer. You can set various options in dxr3view by pressing T while holding
+the mouse cursor above the window.
+
 MPEG-1, MPEG-2, VCD and DVD Notes
 MPEG 1/2 content should now automatically be detected by mplayer and it will
 use the hardware acceleration of the DXR3 to play it. If not, you can force
