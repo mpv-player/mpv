@@ -909,11 +909,17 @@ switch(sh_video->codec->driver){
         exit(1);
    }
    
-   if(out_fmt==IMGFMT_YUY2)
-     DS_VideoDecoder_SetDestFmt(16,mmioFOURCC('Y', 'U', 'Y', '2'));
-//     DS_VideoDecoder_SetDestFmt(16,mmioFOURCC('Y', 'V', '1', '2'));
-   else
-     DS_VideoDecoder_SetDestFmt(out_fmt&255,0);
+   switch(out_fmt){
+   case IMGFMT_YUY2:
+   case IMGFMT_UYVY:
+     DS_VideoDecoder_SetDestFmt(16,out_fmt);break;        // packed YUV
+   case IMGFMT_YV12:
+   case IMGFMT_I420:
+   case IMGFMT_IYUV:
+     DS_VideoDecoder_SetDestFmt(12,out_fmt);break;        // planar YUV
+   default:
+     DS_VideoDecoder_SetDestFmt(out_fmt&255,0);           // RGB/BGR
+   }
 
    DS_VideoDecoder_Start();
 
@@ -1023,6 +1029,9 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
      if((out_fmt&IMGFMT_BGR_MASK)==IMGFMT_RGB)
        printf("RGB%d\n",out_fmt&255); else
      if(out_fmt==IMGFMT_YUY2) printf("YUY2\n"); else
+     if(out_fmt==IMGFMT_UYVY) printf("UYVY\n"); else
+     if(out_fmt==IMGFMT_I420) printf("I420\n"); else
+     if(out_fmt==IMGFMT_IYUV) printf("IYUV\n"); else
      if(out_fmt==IMGFMT_YV12) printf("YV12\n");
    }
 
@@ -1336,7 +1345,19 @@ switch(sh_video->codec->driver){
     if(in_size>max_framesize) max_framesize=in_size;
 
     DS_VideoDecoder_DecodeFrame(start, in_size, 0, 1);
+    current_module="draw_frame";
+
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
+      if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
+        uint8_t* dst[3];
+        int stride[3];
+        stride[0]=sh_video->disp_w;
+        stride[1]=stride[2]=sh_video->disp_w/2;
+        dst[0]=sh_video->our_out_buffer;
+        dst[2]=dst[0]+sh_video->disp_w*sh_video->disp_h;
+        dst[1]=dst[2]+sh_video->disp_w*sh_video->disp_h/4;
+        video_out->draw_slice(dst,stride,sh_video->disp_w,sh_video->disp_h,0,0);
+      } else
         video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
     break;
@@ -1359,7 +1380,19 @@ switch(sh_video->codec->driver){
                         &sh_video->o_bih, sh_video->our_out_buffer);
       if(ret){ printf("Error decompressing frame, err=%d\n",ret);break; }
     }
+    current_module="draw_frame";
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
+//      if(out_fmt==IMGFMT_YV12){
+      if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
+        uint8_t* dst[3];
+        int stride[3];
+        stride[0]=sh_video->disp_w;
+        stride[1]=stride[2]=sh_video->disp_w/2;
+        dst[0]=sh_video->our_out_buffer;
+        dst[2]=dst[0]+sh_video->disp_w*sh_video->disp_h;
+        dst[1]=dst[2]+sh_video->disp_w*sh_video->disp_h/4;
+        video_out->draw_slice(dst,stride,sh_video->disp_w,sh_video->disp_h,0,0);
+      } else
         video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 

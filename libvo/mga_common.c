@@ -14,6 +14,8 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     uint32_t bespitch = (mga_vid_config.src_width + 31) & ~31;
     switch(mga_vid_config.format){
     case MGA_VID_FORMAT_YV12:
+    case MGA_VID_FORMAT_IYUV:
+    case MGA_VID_FORMAT_I420:
         vo_draw_alpha_yv12(w,h,src,srca,stride,vid_data+bespitch*y0+x0,bespitch);
         break;
     case MGA_VID_FORMAT_YUY2:
@@ -171,6 +173,8 @@ query_format(uint32_t format)
 {
     switch(format){
     case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
 //    case IMGFMT_RGB|24:

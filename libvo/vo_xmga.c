@@ -185,6 +185,14 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
         mga_vid_config.format=MGA_VID_FORMAT_YV12;
         mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height + ( ( ( width + 31 ) & ~31 ) * height ) / 2;
         break;
+   case IMGFMT_I420:
+        mga_vid_config.format=MGA_VID_FORMAT_I420;
+        mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height + ( ( ( width + 31 ) & ~31 ) * height ) / 2;
+        break;
+   case IMGFMT_IYUV:
+        mga_vid_config.format=MGA_VID_FORMAT_IYUV;
+        mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height + ( ( ( width + 31 ) & ~31 ) * height ) / 2;
+        break;
    case IMGFMT_YUY2:
         mga_vid_config.format=MGA_VID_FORMAT_YUY2;
         mga_vid_config.frame_size=( ( width + 31 ) & ~31 ) * height * 2;

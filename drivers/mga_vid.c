@@ -395,6 +395,8 @@ static int mga_vid_set_config(mga_vid_config_t *config)
 
 switch(config->format){
     case MGA_VID_FORMAT_YV12:	
+    case MGA_VID_FORMAT_I420:	
+    case MGA_VID_FORMAT_IYUV:	
 	regs.besctl = 1         // BES enabled
                     + (0<<6)    // even start polarity
                     + (1<<10)   // x filtering enabled
@@ -484,13 +486,17 @@ switch(config->format){
 	regs.besb1org = (uint32_t) mga_src_base + baseadrofs + 2*frame_size;
 	regs.besb2org = (uint32_t) mga_src_base + baseadrofs + 3*frame_size;
 
-if(config->format==MGA_VID_FORMAT_YV12){
+if(config->format==MGA_VID_FORMAT_YV12
+ ||config->format==MGA_VID_FORMAT_IYUV
+ ||config->format==MGA_VID_FORMAT_I420
+ ){
         // planar YUV frames:
 	if (is_g400) 
 		baseadrofs = (((ofstop*regs.besviscal)/4)>>16)*regs.bespitch;
 	else 
 		baseadrofs = (((ofstop*regs.besviscal)/2)>>16)*regs.bespitch;
 
+    if(config->format==MGA_VID_FORMAT_YV12){
 	regs.besa1corg = (uint32_t) mga_src_base + baseadrofs + regs.bespitch * sh ;
 	regs.besa2corg = (uint32_t) mga_src_base + baseadrofs + 1*frame_size + regs.bespitch * sh;
 	regs.besb1corg = (uint32_t) mga_src_base + baseadrofs + 2*frame_size + regs.bespitch * sh;
@@ -499,6 +505,17 @@ if(config->format==MGA_VID_FORMAT_YV12){
 	regs.besa2c3org = regs.besa2corg + ((regs.bespitch * sh) / 4);
 	regs.besb1c3org = regs.besb1corg + ((regs.bespitch * sh) / 4);
 	regs.besb2c3org = regs.besb2corg + ((regs.bespitch * sh) / 4);
+    } else {
+	regs.besa1c3org = (uint32_t) mga_src_base + baseadrofs + regs.bespitch * sh ;
+	regs.besa2c3org = (uint32_t) mga_src_base + baseadrofs + 1*frame_size + regs.bespitch * sh;
+	regs.besb1c3org = (uint32_t) mga_src_base + baseadrofs + 2*frame_size + regs.bespitch * sh;
+	regs.besb2c3org = (uint32_t) mga_src_base + baseadrofs + 3*frame_size + regs.bespitch * sh;
+	regs.besa1corg = regs.besa1c3org + ((regs.bespitch * sh) / 4);
+	regs.besa2corg = regs.besa2c3org + ((regs.bespitch * sh) / 4);
+	regs.besb1corg = regs.besb1c3org + ((regs.bespitch * sh) / 4);
+	regs.besb2corg = regs.besb2c3org + ((regs.bespitch * sh) / 4);
+    }
+
 }
 
 	weight = ofstop * (regs.besviscal >> 2);
