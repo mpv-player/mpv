@@ -7598,7 +7598,7 @@ Gute Werte für scenecut können eine bessere Positionierung für Intraframes
 finden.
 Hohe Werte verwenden mehr Intraframes als nötig, was Bits verschwendet.
 -1 deaktiviert die Erkennung von Szenenwechseln, so dass Intraframes nur alle
-keyint Frames eingefügt werden, selbst wenn einen Szenenwechsel schon früher
+keyint Frames eingefügt werden, selbst wenn ein Szenenwechsel schon früher
 stattfindet.
 Dies wird nicht empfohlen und verschwendet Bits, da Szenenwechsel, die als
 P-Frames codiert werden, genauso groß sind wie Intraframes, den Zähler für
@@ -7608,7 +7608,7 @@ keyint aber nicht zurücksetzen.
 .B frameref=<1\-15>
 Anzahl der vorigen Frames, die für die Vorhersage in einem P-Frame verwendet
 werden (Standard: 1).
-Dies is effektiv in Animes, scheint aber in Material mit Live-Action wenig
+Dies is effektiv in Animes, scheint aber bei Material mit Live-Action wenig
 Unterschied zu machen.
 Manche Decoder sind nicht in der Lage, große frameref-Werte zu handhaben.
 .
