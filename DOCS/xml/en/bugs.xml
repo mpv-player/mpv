@@ -17,7 +17,11 @@
 different machines (for example compiled on P3 and running on Celeron)</para>
 <para>Solution: compile <application>MPlayer</application> on the same machine
 where you will use it!</para>
-<para>Workaround: <command>./configure --disable-sse</command> etc. options</para>
+<para>Workaround: You can forget all this by configuring with the
+<option>--enable-runtime-cpudetection</option> option or you can
+disable particular CPU instruction sets with more specific options (like
+<option>--disable-mmx</option>, <option>--disable-3dnow</option>, etc).
+</para>
 </listitem>
 <listitem>
 <para>&quot;Internal buffer inconsistency&quot; during <application>MEncoder</application> run:</para>
