@@ -43,6 +43,7 @@ static char help_text[]=
 " -pp <quality>   enable postprocessing filter (0-4 for DivX, 0-63 for mpegs)\n"
 " -nobps          use alternative A-V sync method for AVI files (may help!)\n"
 " -framedrop      enable frame-dropping (for slow machines)\n"
+" -wid <window id> use existing window for video output (useful with plugger!)\n"
 "\n"
 "Keys:\n"
 " <-  or  ->      seek backward/forward 10 seconds\n"

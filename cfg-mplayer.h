@@ -58,6 +58,7 @@ extern int ao_pcm_waveheader;
 
 #ifdef HAVE_X11
 extern char *mDisplayName;
+extern int WinID;
 #endif
 
 #ifdef HAVE_AA
@@ -247,6 +248,7 @@ struct config conf[]={
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1},
 
 	{"slave", &slave_mode, CONF_TYPE_FLAG, 0, 0, 1},
+	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0},
 
 
 #define MAIN_CONF
