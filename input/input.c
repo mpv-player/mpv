@@ -196,6 +196,8 @@ static mp_cmd_bind_t def_cmd_binds[] = {
 #define MP_FD_GOT_CMD (1<<3)
 #define MP_FD_NO_SELECT (1<<4)
 
+#define CMD_QUEUE_SIZE 10
+
 typedef struct mp_input_fd {
   int fd;
   void* read_func;
@@ -213,6 +215,8 @@ static mp_input_fd_t key_fds[MP_MAX_KEY_FD];
 static unsigned int num_key_fd = 0;
 static mp_input_fd_t cmd_fds[MP_MAX_CMD_FD];
 static unsigned int num_cmd_fd = 0;
+static mp_cmd_t* cmd_queue[CMD_QUEUE_SIZE];
+static unsigned int cmd_queue_length = 0,cmd_queue_start = 0, cmd_queue_end = 0;
 
 // this is the key currently down
 static int key_down[MP_MAX_KEY_DOWN];
@@ -757,9 +761,38 @@ mp_input_read_cmds(int time) {
   return NULL;  
 }
 
+int
+mp_input_queue_cmd(mp_cmd_t* cmd) {
+  if(cmd_queue_length  >= CMD_QUEUE_SIZE)
+    return 0;
+  cmd_queue[cmd_queue_end] = cmd;
+  cmd_queue_end = (cmd_queue_end + 1) % CMD_QUEUE_SIZE;
+  cmd_queue_length++;
+  return 1;
+}
+
+static mp_cmd_t*
+mp_input_get_queued_cmd(void) {
+  mp_cmd_t* ret;
+
+  if(cmd_queue_length == 0)
+    return NULL;
+
+  ret = cmd_queue[cmd_queue_start];
+  
+  cmd_queue_length--;
+  cmd_queue_start = (cmd_queue_start + 1) % CMD_QUEUE_SIZE;
+  
+  return ret;
+}  
+
 mp_cmd_t*
 mp_input_get_cmd(int time, int paused) {
   mp_cmd_t* ret;
+
+  ret = mp_input_get_queued_cmd();
+  if(ret)
+    return ret;
 
   ret = mp_input_read_keys(time,paused);
   if(ret)
@@ -811,19 +844,16 @@ static char*
 mp_input_get_key_name(int key) {
   int i;
 
-  if(key == ' ')
-    return "SPACE";
-
-  if(key >> 8 == 0) {
-    snprintf(key_str,2,"%c",(char)key);
-    return key_str;
-  }
-
   for(i = 0; key_names[i].name != NULL; i++) {
     if(key_names[i].key == key)
       return key_names[i].name;
   }
   
+  if(key >> 8 == 0) {
+    snprintf(key_str,2,"%c",(char)key);
+    return key_str;
+  }
+
   return NULL;
 }
 
@@ -924,13 +954,13 @@ mp_input_parse_config(char *file) {
       }
     }
     // Empty buffer : return
-    if(bs <= 1) {
+    if(bs <= 0) {
       printf("Input config file %s parsed : %d binds\n",file,n_binds);
       if(binds)
 	cmd_binds = binds;
       return 1;
     }
-      
+    
     iter = buffer;
 
     if(comments) {
@@ -1011,7 +1041,7 @@ mp_input_parse_config(char *file) {
       }
       for(end = iter ; end[0] != '\n' && end[0] != '\r' && end[0] != '\0' ; end++)
 	/* NOTHING */;
-      if(end[0] == '\0' && ! (eof && (end - buffer) == bs)) {
+      if(end[0] == '\0' && ! (eof && ((end+1) - buffer) == bs)) {
 	if(iter == buffer) {
 	  printf("Buffer is too small for command %s\n",buffer);
 	  mp_input_free_binds(binds);
@@ -1033,9 +1063,11 @@ mp_input_parse_config(char *file) {
 	memset(&binds[n_binds],0,sizeof(mp_cmd_bind_t));
       }
       keys[0] = 0;
+      end++;
       if(bs > (end-buffer))
 	memmove(buffer,end,bs-(end-buffer));
       bs -= (end-buffer);
+      buffer[bs-1] = '\0';
       continue;
     }
   }

@@ -86,6 +86,9 @@ mp_input_add_key_fd(int fd, int select, mp_key_func_t read_func, mp_close_func_t
 void
 mp_input_rm_key_fd(int fd);
 
+int
+mp_input_queue_cmd(mp_cmd_t* cmd);
+
 mp_cmd_t*
 mp_input_get_cmd(int time, int paused);
 
