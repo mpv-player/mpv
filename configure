@@ -2842,6 +2842,7 @@ $_def_libavcodecso
 
 /* use only decoders from libavcodec: */
 #define CONFIG_DECODERS 1
+#define CONFIG_ENCODERS 1
 
 /* XAnim DLL support */
 $_def_xanim
