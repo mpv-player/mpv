@@ -3283,8 +3283,10 @@ static WIN_BOOL WINAPI expFindNextFileA(HANDLE h,LPWIN32_FIND_DATAA lpfd)
 
 static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 {
+    dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => 0\n", s, s, lpfd);
+//    printf("\n### FindFirstFileA('%s')...\n",s);
 #ifdef QTX
-    if(strstr(s, "*.QTX")){
+    if(strstr(s, "quicktime\\*.QTX")){
 	dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => QTX\n", s, s, lpfd);
 	printf("\n### Searching for QuickTime plugins (*.qtx) at %s...\n",def_path);
 	qtx_dir=opendir(def_path);
@@ -3295,6 +3297,7 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 	printf("loader: Couldn't find the QuickTime plugins (.qtx files) at %s\n",def_path);
 	return (HANDLE)-1;
     }
+#if 0
     if(strstr(s, "QuickTime.qts")){
 	dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => QTS\n", s, s, lpfd);
 //	if(!strcmp(s,"C:\\windows\\QuickTime.qts\\QuickTime.qts\\*.QTX"))
@@ -3304,11 +3307,15 @@ static HANDLE WINAPI expFindFirstFileA(LPCSTR s, LPWIN32_FIND_DATAA lpfd)
 	return FILE_HANDLE_quicktimeqts;
     }
 #endif
-    printf("\n### FindFirstFileA('%s')...\n",s);
-    dbgprintf("FindFirstFileA(0x%x='%s', 0x%x) => 0\n", s, s, lpfd);
-    strcpy(lpfd->cFileName, "msms001.vwp");
-    strcpy(lpfd->cAlternateFileName, "msms001.vwp");
-    return (HANDLE)0;
+#endif
+    if(strstr(s, "*.vwp")){
+	// hack for VoxWare codec plugins:
+	strcpy(lpfd->cFileName, "msms001.vwp");
+	strcpy(lpfd->cAlternateFileName, "msms001.vwp");
+	return (HANDLE)0;
+    }
+    // return 'file not found'
+    return (HANDLE)-1;
 }
 
 static WIN_BOOL WINAPI expFindClose(HANDLE h)
