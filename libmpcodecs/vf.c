@@ -210,8 +210,8 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 		printf("vf.c: have to REALLOCATE buffer memory :(\n");
 	    }
 	} else {
-	    mpi->width=w2; mpi->chroma_width=w2>>mpi->chroma_x_shift;
-	    mpi->height=h; mpi->chroma_height=h>>mpi->chroma_y_shift;
+	    mpi->width=w2; mpi->chroma_width=(w2 + (1<<mpi->chroma_x_shift) - 1)>>mpi->chroma_x_shift;
+	    mpi->height=h; mpi->chroma_height=(h + (1<<mpi->chroma_y_shift) - 1)>>mpi->chroma_y_shift;
 	}
     }
     if(!mpi->bpp) mp_image_setfmt(mpi,outfmt);
@@ -236,7 +236,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 //		  printf("query -> 0x%X    \n",flags);
 		  if(flags&VFCAP_ACCEPT_STRIDE){
 	              mpi->width=w2;
-		      mpi->chroma_width=w2>>mpi->chroma_x_shift;
+		      mpi->chroma_width=(w2 + (1<<mpi->chroma_x_shift) - 1)>>mpi->chroma_x_shift;
 		  }
 	      }
 	  }
