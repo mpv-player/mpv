@@ -1,20 +1,22 @@
-#ifndef _iunk_h
-#define _iunk_h
+#ifndef DS_IUNK_H
+#define DS_IUNK_H
+
 #include "interfaces.h"
 #include "guids.h"
+
 #define DECLARE_IUNKNOWN(CLASSNAME) \
     int refcount; \
-    static long STDCALL QueryInterface (IUnknown * This, GUID* riid, void **ppvObject); \
+    static long STDCALL QueryInterface(IUnknown * This, GUID* riid, void **ppvObject); \
     static long STDCALL AddRef (IUnknown * This); \
     static long STDCALL Release (IUnknown * This); 
     
 #define IMPLEMENT_IUNKNOWN(CLASSNAME) 		\
-long STDCALL CLASSNAME ::QueryInterface (IUnknown * This, GUID* riid, void **ppvObject) \
+long STDCALL CLASSNAME ::QueryInterface(IUnknown * This, GUID* riid, void **ppvObject) \
 { \
     Debug printf(#CLASSNAME "::QueryInterface() called\n");\
-    if(!ppvObject)return 0x80004003; 		\
-    CLASSNAME * me=( CLASSNAME *)This; 		\
-    int i=0; 					\
+    if (!ppvObject) return 0x80004003; 		\
+    CLASSNAME * me = (CLASSNAME *)This;		\
+    unsigned int i = 0;				\
     for(const GUID* r=me->interfaces; i<sizeof(CLASSNAME ::interfaces)/sizeof(CLASSNAME ::interfaces[0]); r++, i++) \
 	if(!memcmp(r, riid, 16)) 		\
 	{ 					\
@@ -23,7 +25,7 @@ long STDCALL CLASSNAME ::QueryInterface (IUnknown * This, GUID* riid, void **ppv
 	    return 0; 				\
 	} 					\
     Debug printf("Failed\n");			\
-    return 0x80004002; 				\
+    return E_NOINTERFACE;			\
 } 						\
 						\
 long STDCALL CLASSNAME ::AddRef ( 		\
@@ -44,4 +46,4 @@ long STDCALL CLASSNAME ::Release ( 		\
     return 0; 					\
 }
 
-#endif
+#endif /* DS_IUNK_H */

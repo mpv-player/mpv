@@ -1,9 +1,12 @@
 #ifndef GUIDS_H
 #define GUIDS_H
-//#include <loader.h>
-//#include <wine/winbase.h>
+
 #include <com.h>
-#include <formats.h>
+#include <wine/winbase.h>
+#include <wine/windef.h>
+#include <wine/winuser.h>
+#include <wine/vfw.h>
+//#include <formats.h>
 extern int DSHOW_DEBUG;
 #define Debug if(DSHOW_DEBUG)
 
@@ -20,43 +23,46 @@ typedef struct  _MediaType
     unsigned long     cbFormat;		//0x40
     char *pbFormat;			//0x44
 } AM_MEDIA_TYPE;
+
 typedef enum
 {
     PINDIR_INPUT	= 0,
     PINDIR_OUTPUT	= PINDIR_INPUT + 1
 } PIN_DIRECTION;
+
 typedef long long REFERENCE_TIME;
-//typedef long long LONGLONG;
+
 struct RECT32
 {
     int left, top, right, bottom;
 };
+
 typedef struct tagVIDEOINFOHEADER {
 
     RECT32            rcSource;          // The bit we really want to use
     RECT32            rcTarget;          // Where the video should go
     unsigned long     dwBitRate;         // Approximate bit data rate
     unsigned long     dwBitErrorRate;    // Bit error rate for this stream
-    REFERENCE_TIME  AvgTimePerFrame;   // Average time per frame (100ns units)
-
+    REFERENCE_TIME    AvgTimePerFrame;   // Average time per frame (100ns units)
     BITMAPINFOHEADER bmiHeader;
-
 } VIDEOINFOHEADER;
+
 typedef struct _AllocatorProperties
 {
     long cBuffers;
     long cbBuffer;
     long cbAlign;
     long cbPrefix;
-}   ALLOCATOR_PROPERTIES;
+} ALLOCATOR_PROPERTIES;
+
 struct IBaseFilter;
+
 typedef struct _PinInfo
 {
     IBaseFilter *pFilter;
     PIN_DIRECTION dir;
-    unsigned short achName[ 128 ];
-}   PIN_INFO;
-
+    unsigned short achName[128];
+} PIN_INFO;
 
 extern GUID IID_IBaseFilter;
 extern GUID IID_IEnumPins;

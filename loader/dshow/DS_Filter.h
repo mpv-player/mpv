@@ -1,22 +1,22 @@
-#ifndef DS_Filter_H
-#define DS_Filter_H
+#ifndef DS_FILTER_H
+#define DS_FILTER_H
 
 #include "interfaces.h"
 #include "inputpin.h"
 #include "outputpin.h"
-#include <string>
 
 /**
-    User will allocate and fill format structures, call Create(),
-    and then set up m_pAll.
-**/    
-class DS_Filter
+   User will allocate and fill format structures, call Create(),
+   and then set up m_pAll.
+ **/
+
+struct DS_Filter
 {
-public:
     DS_Filter();
     virtual ~DS_Filter();
     void Start();
     void Stop();
+
     int m_iHandle;
     IBaseFilter* m_pFilter;
     IPin* m_pInputPin;
@@ -32,10 +32,10 @@ public:
     IMemInputPin* m_pImp;
     int m_iState;
 
-    void Create(char* dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt);
+    void Create(const char* dllname, const GUID* id, AM_MEDIA_TYPE* in_fmt, AM_MEDIA_TYPE* out_fmt);
     void SetPointer(char* pointer);
-private:
-    void clean();
+
+    void destroy();
 };
 
-#endif
+#endif /* DS_FILTER_H */

@@ -1,5 +1,6 @@
-#ifndef INPUTPIN_H
-#define INPUTPIN_H
+#ifndef DS_INPUTPIN_H
+#define DS_INPUTPIN_H
+
 #include "interfaces.h"
 #include "guids.h"
 #include "iunk.h"
@@ -17,61 +18,39 @@ public:
     
     IPin* GetPin() {return pin;}
     IPin* GetUnusedPin() {return unused_pin;}
-//    static long STDCALL QueryInterface(IUnknown* This, GUID* iid, void** ppv);
-//    static long STDCALL AddRef(IUnknown* This);
-//    static long STDCALL Release(IUnknown* This);
 
-    static long STDCALL GetClassID ( 
-        IBaseFilter * This,
-        /* [out] */ CLSID *pClassID);
+    static long STDCALL GetClassID (IBaseFilter * This,
+				    /* [out] */ CLSID *pClassID);
     
-    static long STDCALL Stop ( 
-        IBaseFilter * This);
-    
-    static long STDCALL Pause ( 
-        IBaseFilter * This);
-    
-    static long STDCALL Run ( 
-        IBaseFilter * This,
-        REFERENCE_TIME tStart);
-    
-    static long STDCALL GetState ( 
-        IBaseFilter * This,
-        /* [in] */ unsigned long dwMilliSecsTimeout,
-//        /* [out] */ FILTER_STATE *State);
-    	void* State);
-    
-    static long STDCALL SetSyncSource ( 
-        IBaseFilter * This,
-        /* [in] */ IReferenceClock *pClock);
-    
-    static long STDCALL GetSyncSource ( 
-        IBaseFilter * This,
-        /* [out] */ IReferenceClock **pClock);
-    
-    static long STDCALL EnumPins ( 
-        IBaseFilter * This,
-        /* [out] */ IEnumPins **ppEnum);
-    
-    static long STDCALL FindPin ( 
-        IBaseFilter * This,
-        /* [string][in] */ const unsigned short* Id,
-        /* [out] */ IPin **ppPin);
-    
-    static long STDCALL QueryFilterInfo ( 
-        IBaseFilter * This,
-//        /* [out] */ FILTER_INFO *pInfo);
-	void* pInfo);
-    
-    static long STDCALL JoinFilterGraph ( 
-        IBaseFilter * This,
-        /* [in] */ IFilterGraph *pGraph,
-        /* [string][in] */ const unsigned short* pName);
-    
-    static long STDCALL QueryVendorInfo ( 
-        IBaseFilter * This,
-        /* [string][out] */ unsigned short* *pVendorInfo);
+    static long STDCALL Stop (IBaseFilter * This);
+    static long STDCALL Pause (IBaseFilter * This);
+    static long STDCALL Run (IBaseFilter * This, REFERENCE_TIME tStart);
+    static long STDCALL GetState (IBaseFilter * This,
+				  /* [in] */ unsigned long dwMilliSecsTimeout,
+				  // /* [out] */ FILTER_STATE *State);
+				  void* State);
+
+    static long STDCALL SetSyncSource (IBaseFilter * This,
+				       /* [in] */ IReferenceClock *pClock);
+    static long STDCALL GetSyncSource (IBaseFilter * This,
+				       /* [out] */ IReferenceClock **pClock);
+    static long STDCALL EnumPins (IBaseFilter * This,
+				  /* [out] */ IEnumPins **ppEnum);
+    static long STDCALL FindPin (IBaseFilter * This,
+				 /* [string][in] */ const unsigned short* Id,
+				 /* [out] */ IPin **ppPin);
+    static long STDCALL QueryFilterInfo (IBaseFilter * This,
+					 ///* [out] */ FILTER_INFO *pInfo);
+					 void* pInfo);
+    static long STDCALL JoinFilterGraph (IBaseFilter * This,
+					 /* [in] */ IFilterGraph *pGraph,
+					 /* [string][in] */
+					 const unsigned short* pName);
+    static long STDCALL QueryVendorInfo (IBaseFilter * This,
+					 /* [string][out] */
+					 unsigned short* *pVendorInfo);
 };
+
 class CInputPin: public IPin
 {
     AM_MEDIA_TYPE type;
@@ -214,52 +193,24 @@ public:
         /* [string][out] */ unsigned short* *pVendorInfo);
 };
 
-class CRemotePin: public IPin
+
+struct CRemotePin: public IPin
 {
     CBaseFilter* parent;
     IPin* remote_pin;
     static GUID interfaces[];
     DECLARE_IUNKNOWN(CRemotePin)
-public:
     CRemotePin(CBaseFilter* pt, IPin* rpin);
     ~CRemotePin(){delete vt;}
-
-//    static long STDCALL QueryInterface(IUnknown* This, GUID* iid, void** ppv);
-//    static long STDCALL AddRef(IUnknown* This);
-//    static long STDCALL Release(IUnknown* This);
-    
-    static long STDCALL ConnectedTo ( 
-        IPin * This,
-        /* [out] */ IPin **pPin);
-
-    static long STDCALL QueryDirection (
-        IPin * This,
-        /* [out] */ PIN_DIRECTION *pPinDir);
-
-    static long STDCALL ConnectionMediaType ( 
-        IPin * This,
-        /* [out] */ AM_MEDIA_TYPE *pmt);
-    
-    static long STDCALL QueryPinInfo ( 
-        IPin * This,
-        /* [out] */ PIN_INFO *pInfo);
-    
 };
 
-
-class CRemotePin2: public IPin
+struct CRemotePin2: public IPin
 {
     CBaseFilter2* parent;
     static GUID interfaces[];
     DECLARE_IUNKNOWN(CRemotePin2)
-public:
     CRemotePin2(CBaseFilter2* parent);
     ~CRemotePin2(){delete vt;}
-    
-    static long STDCALL QueryPinInfo ( 
-        IPin * This,
-        /* [out] */ PIN_INFO *pInfo);
 };
 
-
-#endif
+#endif /* DS_INPUTPIN_H */
