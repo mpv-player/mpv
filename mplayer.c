@@ -2675,7 +2675,8 @@ if(rel_seek_secs || abs_seek_pos){
   // VobSub subtitles
   if(vo_vobsub){
     current_module="vobsub";
-    vobsub_process(vo_vobsub,d_video->pts);
+    if(d_video->pts+sub_delay>=0)
+      vobsub_process(vo_vobsub,d_video->pts+sub_delay);
     
     /* Don't know how to detect wether the sub has changed or not */
     vo_osd_changed(1);
