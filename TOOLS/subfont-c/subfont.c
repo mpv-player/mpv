@@ -38,11 +38,10 @@
 char		*encoding = "iso-8859-1";	/* target encoding */
 char		*charmap = "ucs-4";		/* font charmap encoding, I hope ucs-4 is always big endian */
 						/* gcc 2.1.3 doesn't support ucs-4le, but supports ucs-4 (==ucs-4be) */
-int		ppem = 22;			/* font size in pixels */
+float		ppem = 22;			/* font size in pixels */
 
 double		radius = 2;			/* blur radius */
 double		thickness = 1.5;		/* outline thickness */
-int		padding;
 
 char*		font_desc = "font.desc";
 //char*		font_desc = "/dev/stdout";
@@ -62,9 +61,11 @@ char		*encoding_name;
 char		*font_path;
 //char		*font_metrics;
 int		append_mode = 0;
+int		unicode_desc = 0;
 
 unsigned char	*bbuffer, *abuffer;
 int		width, height;
+int		padding;
 static FT_ULong	charset[max_charset_size];		/* characters we want to render; Unicode */
 static FT_ULong	charcodes[max_charset_size];	/* character codes in 'encoding' */
 iconv_t cd;					// iconv conversion descriptor
@@ -83,6 +84,7 @@ iconv_t cd;					// iconv conversion descriptor
 #define f266CeilToInt(x)	(((x)+63)>>6)	// ceiling
 #define f266FloorToInt(x)	((x)>>6)	// floor
 #define f1616ToInt(x)		(((x)+0x8000)>>16)	// 16.16
+#define floatTof266(x)		((int)((x)*(1<<6)+0.5))
 
 #define ALIGN(x)		(((x)+7)&~7)	// 8 byte align
 
@@ -197,21 +199,22 @@ void render() {
 
     /* set size */
     if (FT_IS_SCALABLE(face)) {
-	error = FT_Set_Pixel_Sizes(face, ppem, ppem);
+	error = FT_Set_Char_Size(face, floatTof266(ppem), 0, 0, 0);
+	if (error) WARNING("FT_Set_Char_Size failed.");
     } else {
 	int j = 0;
 	int jppem = face->available_sizes[0].height;
 	/* find closest size */
 	for (i = 0; i<face->num_fixed_sizes; ++i) {
-	    if (abs(face->available_sizes[i].height - ppem) < abs(face->available_sizes[i].height - jppem)) {
+	    if (fabs(face->available_sizes[i].height - ppem) < abs(face->available_sizes[i].height - jppem)) {
 		j = i;
 		jppem = face->available_sizes[i].height;
 	    }
 	}
 	WARNING("Selected font is not scalable. Using ppem=%i.", face->available_sizes[j].height);
 	error = FT_Set_Pixel_Sizes(face, face->available_sizes[j].width, face->available_sizes[j].height);
+	if (error) WARNING("FT_Set_Pixel_Sizes failed.");
     }
-    if (error) WARNING("FT_Set_Pixel_Sizes failed.");
 
 
     if (FT_IS_FIXED_WIDTH(face))
@@ -231,19 +234,21 @@ void render() {
 
     /* print font.desc header */
     if (append_mode) {
-	fprintf(f, "\n\n# Subtitle font for %s encoding, face \"%s%s%s\", ppem=%i\n",
-		encoding_name,
-		face->family_name,
-		face->style_name ? " ":"", face->style_name ? face->style_name:"",
-		ppem);
+	fprintf(f, "\n\n# ");
     } else {
-	fprintf(f, "# This file was generated with subfont for Mplayer.\n# Subfont by Artur Zaprzala <zybi@fanthom.irc.pl>.\n\n");
+	fprintf(f,  "# This file was generated with subfont for Mplayer.\n"
+		    "# Subfont by Artur Zaprzala <zybi@fanthom.irc.pl>.\n\n");
 	fprintf(f, "[info]\n");
-	fprintf(f, "name 'Subtitle font for %s encoding, face \"%s%s%s\", ppem=%i'\n",
-		encoding_name,
-		face->family_name,
-		face->style_name ? " ":"", face->style_name ? face->style_name:"",
-		ppem);
+    }
+
+    fprintf(f, "name 'Subtitle font for %s %s, \"%s%s%s\" face, size: %.1f pixels.'\n",
+	    encoding_name,
+	    unicode_desc ? "charset, Unicode encoding":"encoding",
+	    face->family_name,
+	    face->style_name ? " ":"", face->style_name ? face->style_name:"",
+	    ppem);
+
+    if (!append_mode) {
 #ifdef NEW_DESC
 	fprintf(f, "descversion 2\n");
 #else
@@ -321,7 +326,7 @@ void render() {
 	pen_xa = pen_x + glyph->bitmap.width + 2*padding;
 
 	// font.desc
-	fprintf(f, "0x%02x %i %i %i %i %i %i;\tU+%04X|%c\n", code,
+	fprintf(f, "0x%04x %i %i %i %i %i %i;\tU+%04X|%c\n", unicode_desc ? character:code,
 		pen_x,						// bitmap start
 		glyph->bitmap.width + 2*padding,		// bitmap width
 		glyph->bitmap.rows + 2*padding,			// bitmap height
@@ -344,7 +349,10 @@ void render() {
 	pen_xa = pen_x + f266ToInt(slot->advance.x) + 2*padding;
 
 	/* font.desc */
-	fprintf(f, "0x%02x %i %i;\tU+%04X|%c\n", code, pen_x,  pen_xa-1, character, code<' '||code>255 ? '.':code);
+	fprintf(f, "0x%04x %i %i;\tU+%04X|%c\n", unicode_desc ? character:code,
+		pen_x,						// bitmap start
+		pen_xa-1,					// bitmap end
+		character, code<' '||code>255 ? '.':code);
 #endif
 	pen_x = ALIGN(pen_xa);
     }
@@ -662,16 +670,17 @@ void alpha() {
 
 
 void usage() {
-    printf("Usage: %s [--append] [--blur b] [--outline o] encoding ppem font\n", command);
+    printf("Usage: %s [--append] [--unicode] [--blur b] [--outline o] encoding ppem font\n", command);
     printf("\n"
 	    "  Program creates 3 files: font.desc, <encoding>-a.raw, <encoding>-b.raw.\n"
 	    "\n"
-	    "  --append         append results to existing font.desc.\n"
+	    "  --append         append results to existing font.desc, suppress info header.\n"
+	    "  --unicode        use Unicode in font.desc. This will work with -utf8 option of mplayer.\n"
 	    "  --blur b         specify blur radius, float.\n"
 	    "  --outline o      specify outline thickness, float.\n"
 	    "  encoding         must be an 8 bit encoding, like iso-8859-2, or path to custom encoding file (see README).\n"
 	    "                   To list encodings available on your system use iconv --list.\n"
-	    "  ppem             Font size in pixels (e.g. 24).\n"
+	    "  ppem             Font size in pixels (default 24), float.\n"
 	    "  font             Font file path. Any format supported by the freetype library (*.ttf, *.pfb, ...).\n"
 	    );
     exit(1);
@@ -687,15 +696,17 @@ void parse_args(int argc, char **argv) {
     else ++command;
     ++a; --argc;
 
-    if (argc==0) usage();
-    if (strcmp(argv[a], "--append")==0) {
+    if (argc>=1 && strcmp(argv[a], "--append")==0) {
 	append_mode = 1;
 	++a; --argc;
     }
 
+    if (argc>=1 && strcmp(argv[a], "--unicode")==0) {
+	unicode_desc = 1;
+	++a; --argc;
+    }
 
-    if (argc==0) usage();
-    if (strcmp(argv[a], "--blur")==0) {
+    if (argc>=1 && strcmp(argv[a], "--blur")==0) {
 	++a; --argc;
 	if (argc==0) usage();
 
@@ -705,8 +716,7 @@ void parse_args(int argc, char **argv) {
 	++a; --argc;
     }
 
-    if (argc==0) usage();
-    if (strcmp(argv[a], "--outline")==0) {
+    if (argc>=1 && strcmp(argv[a], "--outline")==0) {
 	++a; --argc;
 	if (argc==0) usage();
 
@@ -718,18 +728,20 @@ void parse_args(int argc, char **argv) {
 
     if (argc<3) usage();
 
+    // encoding
     if (argv[a][0]!=0)
 	encoding = argv[a];
     encoding_name = strrchr(encoding, '/');
     if (!encoding_name) encoding_name=encoding;
     else ++encoding_name;
-    
     ++a; --argc;
 
-    i = atoi(argv[a]);
-    if (i>1) ppem = i;
+    // ppem
+    d = atof(argv[a]);
+    if (d>2.) ppem = d;
     ++a; --argc;
 
+    // font
     font_path = argv[a];
     ++a; --argc;
 }

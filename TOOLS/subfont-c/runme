@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#unicode="--unicode"
 font=arial.ttf
 #font=verdana.ttf
 encoding=iso-8859-2
@@ -10,7 +11,7 @@ outline=1.5
 
 make || exit
 
-./subfont --blur $blur --outline $outline "$encoding" $fontsize "$font" || exit
+./subfont $unicode --blur $blur --outline $outline "$encoding" $fontsize "$font" || exit
 ./subfont --append --blur $blur --outline $outline encodings/osd-mplayer $symbolssize osd/osd.pfb || exit
 
 #cp font.desc *.raw ~/.mplayer/font/
