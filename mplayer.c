@@ -450,6 +450,28 @@ int gui_no_filename=0;
       gCpuCaps.cpuType,gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
+#ifdef RUNTIME_CPUDETECT
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled with RUNTIME CPU Detection - warning, it's untested!\n");
+#else
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"Compiled for x86 CPU with features:");
+#ifdef HAVE_MMX
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX");
+#endif
+#ifdef HAVE_MMX2
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX2");
+#endif
+#ifdef HAVE_3DNOW
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNow");
+#endif
+#ifdef HAVE_3DNOWEX
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNowEx");
+#endif
+#ifdef HAVE_SSE
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE");
+#endif
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n");
+#endif
+
 #endif
 
   if ( argv[0] )
