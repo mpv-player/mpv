@@ -2,23 +2,18 @@
 Some words about Siemens-DVB card support.         by A'rpi
 ==========================================
 
-NOTE: this is very experimental!
-
 Requirements:
 ~~~~~~~~~~~~~
 - Siemens DVB-S card or compatible (technotrend,galaxis,hauppage etc)
   see www.linuxtv.org for details and download latest driver there.
-- MPlayer-CVS, ffmpeg-libavcodec. divx4linux is recommended for speed & pp.
-- Fast CPU - at least for software decoding (divx...)
+- MPlayer-CVS, ffmpeg-libavcodec CVS are recommended for speed & pp.
+- Fast CPU - 1GHz+ recommended at least for software transcoding (divx->mpeg)
 
 
 How to enable?
 ~~~~~~~~~~~~~~
 
-1. Download ffmpeg-CVS and copy libavcodec to mplayer (see DOC for details)
-   Move this line from #ifdef CONFIG_ENCODERS .. #endif section to outside
-   (after the #endif line) at libavcodec/utils.c:361 :
-       register_avcodec(&mpeg1video_encoder);
+1. Download ffmpeg-CVS and copy libavcodec to mplayer (see DOCS for details)
 
 2. Compile mplayer:
     ./configure should detect it. If didn't, force with ./configure --enable-dvb
@@ -32,15 +27,15 @@ How to use?
 ~~~~~~~~~~~
 To play standard mpeg 1/2 files:  (hardware decoding)
 
-  mplayer -ao mpegpes -vo mpegpes -vc mpegpes file.mpg|vob
+  mplayer -ao mpegpes -vo mpegpes file.mpg|vob
 
 To play non-standard mpeg files:  (software decoding)
 
-  mplayer -ao mpegpes -vo mpegpes file.mpg|vob
+  mplayer -ao mpegpes -vo mpegpes -vc mpeg12 file.mpg|vob
 
 To play divx files:
 
-  mplayer -vo mpegpes -vc ffdivx|odivx file.avi|asf
+  mplayer -ao mpegpes -vo mpegpes file.avi|asf|mov...
   
 To play non-25fps movies, or with slow CPU, add option:  -framedrop
 
@@ -52,6 +47,13 @@ black bands. It's done by mplayer, just specify image size using the
 -x and -y options. You must use either -y 288 or -y 576.
 
 To force pan&scan (16:9 at 4:3 TV), add options:  -x 352 -y 288
+
+If you have powerfull CPU, you can also scale image up, using the
+swscale filter. For example, to watch a 640x288 video fullscreen,
+use -vop scale=640:400
+Note that you don't have to scale horizontally, the card will do it
+by hardware, but you have to scale vertically keeping the aspect ratio.
+
 
 Mailing list:
 ~~~~~~~~~~~~~
@@ -66,7 +68,5 @@ Future plans/TODO:
 
 - display OSD and subtitles using DVB card's OSD feature
 - better (more fluent) playback of non-25fps movies
-- more speed optimizations
-- YUY2 support (for win32 codecs, like Indeo5 and WMV 7/8)
 - realtime transcoding between mpeg2 <-> mpeg4 (partial decompression)
-
+- better quality for lowres mpeg1
