@@ -257,14 +257,15 @@
 
 <H5><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H5>
 
-<P>MPlayer fully supports sound up/down-sampling. This filter can be used if you
+<P>MPlayer fully supports sound up/down-sampling through the
+  <CODE>resample</CODE> filter. It can be used if you
   have a fixed frequency sound card or if you are stuck with an old sound card
   that is only capable of max 44.1kHz. This filter is automatically enabled if
   it is necessary, but it can also be explicitly enabled on the command line. It
   has three switches:</P>
 
 <DL>
-  <DT><CODE>srate &lt;8-192&gt;</CODE></DT>
+  <DT><CODE>srate &lt;8000-192000&gt;</CODE></DT>
   <DD>is an integer used for setting the output sample
     frequency in Hz. The valid range for this parameter is 8kHz to 192kHz. If
     the input and output sample frequency are the same or if this parameter is
@@ -291,7 +292,7 @@
 </DL>
 
 <P>Example:<BR>
-  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:1</CODE></P>
+  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:0</CODE></P>
 
 <P>would set the output frequency of the resample filter to 44100Hz using exact
   output frequency scaling and linear interpolation.</P>
@@ -345,8 +346,8 @@
 
 <H5><A NAME="af_format">2.3.2.3.3 Sample format converter</A></H5>
 
-<P>This filter is a sample format converter. It is automatically enabled when
-  needed by the sound card or another filter.</P>
+<P>The <CODE>format</CODE> filter converts between different sample formats. It
+  is automatically enabled when needed by the sound card or another filter.</P>
 
 <DL>
   <DT><CODE>bps &lt;number&gt;</CODE></DT>
@@ -364,7 +365,7 @@
 </DL>
 
 <P>Example:<BR>
-  &nbsp;&nbsp;<CODE>mplayer media.avi -af format=4:float</CODE></P>
+  &nbsp;&nbsp;<CODE>mplayer -af format=4:float media.avi</CODE></P>
 
 <P>would set the output format to 4 bytes per sample floating point
   data.</P>
@@ -372,8 +373,9 @@
 
 <H5><A NAME="af_delay">2.3.2.3.4 Delay</A></H5>
 
-<P>This filter delays the sound to the loudspeakers in order to make the sound
-  in the different channels arrive at the same time to the listening position.
+<P>The <CODE>delay</CODE> filter delays the sound to the loudspeakers such that
+  the sound from the different channels arrives at the listening position
+  simultaneously.
   It is only useful if you have more than 2 loudspeakers. This filter has a
   variable number of parameters:</P>
 
@@ -406,7 +408,8 @@
 
 <H5><A NAME="af_volume">2.3.2.3.5 Software volume control</A></H5>
 
-<P>This filter is a software volume control. Use this filter with caution since
+<P>Software volume control is implemented by the <CODE>volume</CODE> audio
+  filter. Use this filter with caution since
   it can reduce the signal to noise ratio of the sound. In most cases it is best
   to set the level for the PCM sound to max, leave this filter out and control
   the output level to your speakers with the master volume control of the mixer.
@@ -441,7 +444,8 @@
 
 <H5><A NAME="af_equalizer">2.3.2.3.6 Equalizer</A></H5>
 
-<P>This filter is a 10 octave band graphic equalizer, implemented using 10 IIR
+<P>The <CODE>equalizer</CODE> filter represents a 10 octave band graphic
+  equalizer, implemented using 10 IIR
   band pass filters. This means that it works regardless of what type of audio
   is being played back. The center frequencies for the 10 bands are:</P>
 
@@ -480,9 +484,10 @@
 <P>would amplify the sound in the upper and lower frequency region while
   canceling it almost completely around 1kHz.</P>
 
+
 <H5><A NAME="af_panning">2.3.2.3.7 Panning filter </A></H5>
 
-<P>This filter can be used for mixing the channels arbitrarily. It is basically
+<P>Use the <CODE>pan</CODE> filter to mix channels arbitrarily. It is basically
   a combination of the volume control and the channels filter. There are two
   major uses for this filter: </P>
 
@@ -522,7 +527,8 @@
 
 <H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
 
-<P>This filter adds a sub woofer channel to the audio stream. The audio data
+<P>The <CODE>sub</CODE> filter adds a sub woofer channel to the audio stream.
+  The audio data
   used for creating the sub-woofer channel is an average of the sound in channel
   0 and channel 1. The resulting sound is then low-pass filtered by a a 4th
   order Butterworth filter with a default cutoff frequency of 60Hz and added to
@@ -554,7 +560,8 @@
 
 <H5><A NAME="af_surround">2.3.2.3.9 Surround-sound decoder</A></H5>
 
-<P>This filter is a decoder for matrix encoded surround sound. Dolby Surround is
+<P>Matrix encoded surround sound can be decoded by the <CODE>surround</CODE>
+  filter. Dolby Surround is
   an example of a matrix encoded format. Many files with 2 channel audio
   actually contain matrixed surround sound. To use this feature you need a sound
   card supporting at least 4 channels. This filter has one parameter:</P>
@@ -573,7 +580,7 @@
 <P>Example:<BR>
   &nbsp;&nbsp;<CODE>mplayer -af surround=15 -channels 4 media.avi</CODE></P>
 
-<P>would add a surround sound decoding with 15ms delay for the sound to the rear
+<P>would add surround sound decoding with 15ms delay for the sound to the rear
   speakers.</P>
 
 
