@@ -45,6 +45,7 @@ extern vd_functions_t mpcodecs_vd_mpng;
 extern vd_functions_t mpcodecs_vd_ijpg;
 extern vd_functions_t mpcodecs_vd_libmpeg2;
 extern vd_functions_t mpcodecs_vd_huffyuv;
+extern vd_functions_t mpcodecs_vd_zlib;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -86,6 +87,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #endif
         &mpcodecs_vd_libmpeg2,
         &mpcodecs_vd_huffyuv,
+#ifdef HAVE_ZLIB
+        &mpcodecs_vd_zlib,
+#endif
 	NULL
 };
 
