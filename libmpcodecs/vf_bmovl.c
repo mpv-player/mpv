@@ -214,11 +214,13 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 
     if(vf->priv->stream_fd >= 0) {
 		struct timeval tv;
+		int ready;
 
 		FD_SET( vf->priv->stream_fd, &vf->priv->stream_fdset );
 		tv.tv_sec=0; tv.tv_usec=0;
 
-		if( select( vf->priv->stream_fd+1, &vf->priv->stream_fdset, NULL, NULL, &tv ) > 0) {
+		ready = select( vf->priv->stream_fd+1, &vf->priv->stream_fdset, NULL, NULL, &tv );
+		if(ready > 0) {
 			// We've got new data from the FIFO
 
 			char cmd[20], args[100];
@@ -362,7 +364,9 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 				} // for buf_x
 			} // for buf_y
 			free (buffer);
-		} else if(errno) mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: Error %d in fifo: %s\n\n", errno, strerror(errno));
+		} else if(ready < 0) {
+			mp_msg(MSGT_VFILTER, MSGL_WARN, "\nvf_bmovl: Error %d in fifo: %s\n\n", errno, strerror(errno));
+		}
     }
 
 	if(vf->priv->hidden) return vf_next_put_image(vf, dmpi);
