@@ -2,6 +2,9 @@ MPlayer (1.0)
 
   pre7: ""
 
+    DOCS:
+    * Czech documentation translation started
+
     Ports:
     * DirectX video output fixed on Windows95
 
@@ -15,14 +18,24 @@ MPlayer (1.0)
 
     Demuxers:
     * vqf demuxer
+    * seeking in MPEG-ES fixed
 
     Streaming:
-    * stream selection and bandwidth support for mms over http
-    * fallback to http if connection refused on pnm://
+    * stream selection and bandwidth support for MMS over HTTP
+    * fallback to HTTP if connection refused on pnm://
+
+    FFmpeg/libavcodec:
+    * RV20 fixes
+    * many H.264 fixes
+    * B-frames in H.264 support
 
     Filters:
     * big cleanup of audio filter layer
     * faster af_format for most common cases
+    * audio plugins finally removed.
+
+    Others:
+    * -z option replaced by -vo png suboption
 
 
   pre6: "X-mas present" December 23, 2004
