@@ -752,10 +752,13 @@ current_module = NULL;
 
 play_next_file:
 
-if(!use_stdin && !slave_mode){
-  getch2_enable();  // prepare stdin for hotkeys...
-  inited_flags|=INITED_GETCH2;
-}
+// We can enable getch2 *either* here *or* on a per-file basis, but NOT both!!!
+// Doing it both places causes the saved terminal state to get trashed!!
+// Maybe this can be renabled at a later date if it's useful...
+//if(!use_stdin && !slave_mode){
+//  getch2_enable();  // prepare stdin for hotkeys...
+//  inited_flags|=INITED_GETCH2;
+//}
 
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
