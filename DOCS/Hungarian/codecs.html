@@ -1,10 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
   <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2">
 </HEAD>
 
-<BODY BGCOLOR=white>
+<BODY>
 
 
 <P><B><A NAME=2.2>2.2.  Támogatott codec-ek</A></B></P>
@@ -15,7 +17,7 @@
 <P>Lásd <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> a teljes, naponta
 generált listához!!!</P>
 
-<P>A legfontosabb video codecek:<BR>
+A legfontosabb video codecek:<BR>
 <UL>
 <LI>MPEG1 (VCD) és MPEG2 (DVD) video
 <LI>DivX ;-), OpenDivX (DivX4), 3ivx, DivX 5.01, M$ MPEG4 v2 és más MPEG4 variánsok
@@ -26,7 +28,7 @@ generált listához!!!</P>
 <LI>FLI/FLC</LI>
 <LI>RealVideo</LI>
 <LI>egyéb régi RLE-szerű formátumok</LI>
-</UL></P>
+</UL>
 
 <P>Ha van olyan codeced, ami nincs felsorolva vagy támogatva, olvasd el a
 <A HREF="codecs.html#2.2.3">codec importálás</A> fejezetet, amiben le van írva mit kell
@@ -75,7 +77,7 @@ nagyon hasonlít az OpenDivX-éhez), az OpenDivX kód kikapcsolásra kerül,
 <P>Ez az egész tulajdonképpen annyit takar, hogy két lehetőséget van a
 használatára:</P>
 
-<P><TABLE BORDER=0>
+<TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top>-vc odivx</TD><TD>&nbsp;&nbsp;</TD>
 <TD>a codec használata, mint az OpenDivX új verziója.
 Ebben az esetben YV12 képeket produkál a saját bufferében,
@@ -83,7 +85,7 @@ Ebben az esetben YV12 képeket produkál a saját bufferében,
 <TD></TD><TD VALIGN=top>-vc&nbsp;divx4</TD><TD></TD>
 <TD>a codec csinál konverziót.
 Ebben az esetben használhatsz YUY2/UYVY módokat is.</TD></TR>
-</TABLE></P>
+</TABLE>
 
 <P>Az 'odivx' módszer általában gyorsabb, amiatt hogy a képadatokat YV12
 (planar YUV 4:2:0) formátumban kezeli, így sokkal kevesebb sávszélességet
@@ -97,14 +99,14 @@ talán a használt bpp-tol függően változhat.</P>
 <P>Megj: a <B>RÉGI</B> OpenDivX támogat postprocessinget is (ez a módszer az
   <CODE>-oldpp</CODE> opcióval kapcsolható be), de az értékei furcsák :</P>
 
-<P><TABLE BORDER=0>
+<TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>0</TD><TD>&nbsp;&nbsp;</TD>
 <TD>nincs</TD><TR>
 <TD></TD><TD>10 .. 20</TD>
 <TD></TD><TD>postprocessing, normal (mint a 2-es szint a DirectShow-os DivX codeccel)</TD><TR>
 <TD></TD><TD>30 .. 60</TD>
 <TD></TD><TD>hard prostprocessing, sok CPU-t eszik (mint a 4-es)</TD>
-</TABLE></P>
+</TABLE>
 
 
 <P><B><A NAME=2.2.1.2>2.2.1.2.  ffmpeg DivX/libavcodec</A></B></P>
@@ -113,14 +115,14 @@ talán a használt bpp-tol függően változhat.</P>
 <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy <B>nyitott
 forráskódú</B> DivX codec-et, amely kompatibilis a hagyományossal. Az
 <B>MPlayer</B> támogatja ezt a codec-et, lehetővé téve hogy
-<B>DivX/DivX4/DivX5/MP42</B> filmeket nézzünk nem-x86 platformokon</B>, méghozzá
+<B>DivX/DivX4/DivX5/MP42</B> filmeket nézzünk nem-x86 platformokon, méghozzá
 sokkal gyorsabb dekódolással mint amit a Win32 codec-ek, és az eredeti DivX4
 lehetővé tesz!</P>
 
 <P>Ezekenkívül még tartalmaz jónéhány más érdekes codec-et, pl: RealVideo 1.0,
 MJPEG, h263, h263+, stb.</P>
 
-<P>Milyen <B>MPlayer</B>-ed van?
+<P>Milyen <B>MPlayer</B>-ed van?</P>
 
 <UL>
   <LI>release : ebben az esetben semmit nem kell tenned, a libavcodec-et
@@ -144,7 +146,6 @@ MJPEG, h263, h263+, stb.</P>
 
   </LI>
 </UL>
-</P>
 
 <P>Ezután fordítsd le az <B>MPlayer-t</B>. A configure detektálja, ha minden
 rendben. Támogat <B>postprocess-t</B>!</P>
@@ -245,26 +246,24 @@ támogatottságuk valószínűtlen. :(</P>
 <P>Az <B>XViD</B> egy - az OpenDivX-ből származó - video codec. A másik
   származékot DivX4 néven ismerjük.</P>
 
-<P><B>Előnyei</B> :
-  <UL>
-    <LI>nyitott forrás</LI>
-    <LI>az API-ja kompatibilis a DivX4-gyel így könnyen irható hozzá
-      támogatás</LI>
-    <LI>2 menetes enkódolás</LI>
-    <LI>jó minőség, ezzel egyidejűleg a DivX4-nél magasabb sebesség
-      (fordításnál a gépedre optimalizálhatod)</LI>
-  </UL>
-</P>
+<B>Előnyei</B> :
+<UL>
+  <LI>nyitott forrás</LI>
+  <LI>az API-ja kompatibilis a DivX4-gyel így könnyen irható hozzá
+    támogatás</LI>
+  <LI>2 menetes enkódolás</LI>
+  <LI>jó minőség, ezzel egyidejűleg a DivX4-nél magasabb sebesség
+    (fordításnál a gépedre optimalizálhatod)</LI>
+</UL>
 
-<P><B>Hátrányai</B> :
-  <UL>
-    <LI>jelenleg nem minden DivX/DivX4 file-t <B>dekódol</B> helyesen
-      (de kit érdekel. A libavcodec kenterbe ver mindent.)</LI>
-    <LI>nem lehet egyszerre DivX4 <B>ÉS</B> XViD támogatással fordítani
-      az <B>MPlayer</B>-t. Ezt fordításkor kell eldönteni.</LI>
-    <LI>fejlesztés alatt</LI>
-  </UL>
-</P>
+<P><B>Hátrányai</B>:</P>
+<UL>
+  <LI>jelenleg nem minden DivX/DivX4 file-t <B>dekódol</B> helyesen
+    (de kit érdekel. A libavcodec kenterbe ver mindent.)</LI>
+  <LI>nem lehet egyszerre DivX4 <B>ÉS</B> XViD támogatással fordítani
+    az <B>MPlayer</B>-t. Ezt fordításkor kell eldönteni.</LI>
+  <LI>fejlesztés alatt</LI>
+</UL>
 
 <P><B>Installálás</B> : jelenleg csak CVS-ből elérhető. Ezek a letöltési
   utasítások :<BR>

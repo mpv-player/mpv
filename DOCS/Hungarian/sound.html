@@ -1,20 +1,22 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
   <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2">
 </HEAD>
 
-<BODY BGCOLOR=white>
+<BODY>
 
 
-<P><B><A NAME=2.3.2>2.3.2.  Támogatott audio kimenetek:</A></P></B>
+<P><B><A NAME=2.3.2>2.3.2.  Támogatott audio kimenetek:</A></B></P>
 
-<P><B>Az <B>MPlayer</B> audio interfészének a neve <I>libao2</I>. Jelenleg
+<P>Az <B>MPlayer</B> audio interfészének a neve <I>libao2</I>. Jelenleg
 a következő meghajtókat tartalmazza :</P>
 
 <TABLE BORDER=0>
 
-<TD COLSPAN=4><P><B>Általános:</B></P></TD>
+<TD COLSPAN=4><B>Általános:</B></TD>
 
 <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) meghajtó</TD></TR>
 <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL meghajtó (up/downsampling támogatás, <B>ESD</B>, <B>ARTS</B>, stb)</TD></TR>
@@ -28,22 +30,24 @@ a következő meghajtókat tartalmazza :</P>
 <P>A helyzet az, hogy a Linux hangkártyameghajtói nem túl jók, ráadásul
 olyan inkompatibilisek amennyire csak lehet. Lehetséges hogy eltart egy
 ideig amíg megtalálod az optimális beállitásokat.</P>
-<P><UL>
-<LI>ha OSS meghajtót használsz, először próbálkozz az <I>-ao oss</I> opcióval
-(ez az alapértelmezett is). Ha hanghibákat, összeomlásokat tapasztalsz, nézd
-meg az <I>-ao sdl</I>-t (Megj.: ehhez természetesen szükséges egy felinstallált
-SDL csomag, és az SDL fejlesztői csomag is). Sok esetben segíthet (valamint
-tartalmaz ESD, ARTS, és fel/lemintavételezést is /ahol ESD a GNOME felület
-hangkezelője, az ARTS pedig a KDE-é/).</LI>
-<LI>ha ALSA 0.5-öt használsz, akkor MAJDNEM mindig az <I>-ao alsa5</I>-öt kell
-használnod, mert a 0.5 hibás OSS emulációs kódot tartalmaz, amitől kissé
-összeesik az <B>MPlayer</B> :
-  <UL>
-  <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
-</LI>
-<LI>ha ALSA 0.9-ed van, használd az <I>-ao oss</I>-t vagy az <I>-ao sdl</I>-t,
-izlés szerint. Használhatod az <I>-ao alsa9</I>-et is, de az még elég bugos.</LI>
-</UL></P>
+
+<UL>
+  <LI>ha OSS meghajtót használsz, először próbálkozz az <I>-ao oss</I> opcióval
+    (ez az alapértelmezett is). Ha hanghibákat, összeomlásokat tapasztalsz, nézd
+    meg az <I>-ao sdl</I>-t (Megj.: ehhez természetesen szükséges egy felinstallált
+    SDL csomag, és az SDL fejlesztői csomag is). Sok esetben segíthet (valamint
+    tartalmaz ESD, ARTS, és fel/lemintavételezést is /ahol ESD a GNOME felület
+    hangkezelője, az ARTS pedig a KDE-é/).</LI>
+  <LI>ha ALSA 0.5-öt használsz, akkor MAJDNEM mindig az <I>-ao alsa5</I>-öt kell
+    használnod, mert a 0.5 hibás OSS emulációs kódot tartalmaz, amitől kissé
+    összeesik az <B>MPlayer</B> :
+    <UL>
+      <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE>
+    </UL>
+  </LI>
+  <LI>ha ALSA 0.9-ed van, használd az <I>-ao oss</I>-t vagy az <I>-ao sdl</I>-t,
+    izlés szerint. Használhatod az <I>-ao alsa9</I>-et is, de az még elég bugos.</LI>
+</UL>
 
 <P><B>Solaris/FreeBSD</B> rendszereken természetesen a SUN audio meghajtót
 kell használni, az <I>-ao sun</I> opcióval, különben lőttek mind a video, mind az audio
@@ -51,7 +55,7 @@ lejátszásnak.</P>
 
 <P><B><A NAME=2.3.2.1>2.3.2.1.  Ajánlott beállítások különféle hangkártyákhoz</A></B></P>
 
-<P><TABLE BORDER=0 WIDTH=100%>
+<TABLE BORDER=0 WIDTH=100%>
 <TD COLSPAN=3><B>VIA alaplapi chipset (via82cxxx) 48Khz-ra limitált</B></TD><TR>
 <TD></TD><TD>Driver:</TD><TD><A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&release_id=59602">innen</A></TD><TR>
 
@@ -117,20 +121,19 @@ is bugzik...</I></TD><TR>
 <TD></TD><TD>ALSA:</TD><TD>nincs</TD><TR>
 <TD></TD><TD>Max kHz:</TD><TD>a meghajtó 44.1Khz-t emulál, vagy többet</TD><TR>
 <TD></TD><TD>Driver:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
-</TABLE></P>
+</TABLE>
 
-<P><UL>
-<LI>a 2.4-es kerneleket használd, 2.2 nincs tesztelve !
-<LI>ha kattog a hang és CD-ROM-ról játszol le, kapcsold be az IRQ
-     unmasking-ot !
-     például "hdparm -u1 /dev/cdrom" (lásd "man hdparm" !!!)
-     Ez amúgy is ajánlott... (for XMMS, etc...)
-     Olvasd el a <A HREF="cd-dvd.html#4.1">4.1</A>-es fejezetet .
-<LI>ne foglald le a hangkártyád másik programmal (pl. XMMS) !
-     Ha ESD-t használsz, indítsd MPlayer-t az '-ao sdl:esd' opcióval !
-<LI>Írd meg nekünk, hogy működik együtt az MPlayer és a kartyád!  
-</UL></P>
-
+<UL>
+  <LI>a 2.4-es kerneleket használd, 2.2 nincs tesztelve !</LI>
+  <LI>ha kattog a hang és CD-ROM-ról játszol le, kapcsold be az IRQ
+       unmasking-ot !
+       például "hdparm -u1 /dev/cdrom" (lásd "man hdparm" !!!)
+       Ez amúgy is ajánlott... (for XMMS, etc...)
+       Olvasd el a <A HREF="cd-dvd.html#4.1">4.1</A>-es fejezetet.</LI>
+  <LI>ne foglald le a hangkártyád másik programmal (pl. XMMS) !
+       Ha ESD-t használsz, indítsd MPlayer-t az '-ao sdl:esd' opcióval!</LI>
+  <LI>Írd meg nekünk, hogy működik együtt az MPlayer és a kartyád!</LI>
+</UL>
 
 <P><B><A NAME=2.3.2.2>2.3.2.2.  Audio pluginek</A></B></P>
 

@@ -1,10 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
   <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2">
 </HEAD>
 
-<BODY BGCOLOR=WHITE>
+<BODY>
 
 
 <P><B><A NAME=2.1>2.1. Támogatott formátumok</A></B></P>
@@ -37,17 +39,18 @@ jelenti.</P>
 
 <P><B><A NAME=2.1.1.1>2.1.1.1. MPEG file-ok</A></B></P>
 
-<P>
-<LI>MPG : ez a <B>legelterjedtebb</B> formája az MPEG fileoknak. MPEG1-es
-videot és MP2-es (MPEG-1 layer 2) audiot - vagy ritkábban MP1-et - tartalmaz.</LI>
-<LI>DAT : ez teljesen egyezik az MPG-gel, csak más a kiterjesztése. <B>Video
-CD-ken</B> használatos. Linux alatt nem tudsz .DAT fileokat megnézni vagy
-lemásolni a VCD-ről, csak a <CODE>-vcd</CODE> opcióval lejátszani.</LI>
-<LI>VOB : ez a <B>DVD</B>-ken található MPEG formátum. Egyezik az MPG-gel,
-de tud feliratot vagy nem-MPEG (AC3) hangot tárolni. MPEG videot és általában
-AC3 hangot tartalmaz (ritkábban MP2-t, DTS-t, tömörítetlen LPCM-et).<BR>
+<UL>
+  <LI>MPG : ez a <B>legelterjedtebb</B> formája az MPEG fileoknak. MPEG1-es
+    videot és MP2-es (MPEG-1 layer 2) audiot - vagy ritkábban MP1-et - tartalmaz.</LI>
+  <LI>DAT : ez teljesen egyezik az MPG-gel, csak más a kiterjesztése. <B>Video
+    CD-ken</B> használatos. Linux alatt nem tudsz .DAT fileokat megnézni vagy
+    lemásolni a VCD-ről, csak a <CODE>-vcd</CODE> opcióval lejátszani.</LI>
+  <LI>VOB : ez a <B>DVD</B>-ken található MPEG formátum. Egyezik az MPG-gel,
+    de tud feliratot vagy nem-MPEG (AC3) hangot tárolni. MPEG videot és általában
+    AC3 hangot tartalmaz (ritkábban MP2-t, DTS-t, tömörítetlen LPCM-et).</LI>
+</UL>
+
 <B>Olvasd el a <A HREF="cd-dvd.html#4.2">DVD fejezetet</A> !</B></LI>
-</P>
 
 <P>Az MPEG fileokban néhány frame-ből álló csoportok vannak, melyek
 teljesen függetlenek egymástól. Ez annyit tesz hogy akár egy normális
@@ -77,7 +80,8 @@ a használatát, az ASF/WMV javára. Persze nem mintha bárkit is érdekelne.</P>
 egyik a szabványos és lejátszható, a másik nélkülözi mindkét előbb
 felsorolt tulajdonságot.</P>
 
-<P>Két fajta AVI file fajta ismert:
+<P>Két fajta AVI file fajta ismert:</P>
+
 <UL>
   <LI><B>Interleaved</B> : a benne lévő audio és video streamek interleavedek.
     Ez az AVI fileok szabványos felhasználási módja. Ajánlott, és legtöbbször
@@ -90,9 +94,9 @@ felsorolt tulajdonságot.</P>
     és utána az audio stream, ebből következően rengeteg tekergetéssel
     jár a lejátszása. Nagyon egészségtelen például hálózatról vagy CD-ről.</LI>
 </UL>
-</P>
 
-<P>Az <B>MPlayer</B> kétféle időzítést ismer AVI file-ok esetén :
+<P>Az <B>MPlayer</B> kétféle időzítést ismer AVI file-ok esetén:</P>
+
 <UL>
   <LI><B>bps alapú</B> : ez a fejléc bitráta/mintavételezési ráta értékén
     alapul. Ezt a módszert használja a legtöbb lejátszó, beleértve az
@@ -104,7 +108,6 @@ felsorolt tulajdonságot.</P>
     ehelyett relatív pozíciót számol az interleaved audio és video csomagokból.
     Néhány rosszul/VBR audioval enkódolt file-t lejátszhatóvá tesz.</LI>
 </UL>
-</P>
 
 <P>Bármilyen audio és video codec használható, de megjegyzendő hogy a VBR
 audio támogatása igencsak gyenge a legtöbb lejátszóban. Maga a fileformátum

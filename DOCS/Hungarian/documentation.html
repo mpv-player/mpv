@@ -1,13 +1,14 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
   <LINK REL="stylesheet" TYPE="text/css" HREF="../default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2">
 </HEAD>
 
-<BODY BGCOLOR=white>
+<BODY>
 
-
-<P><CENTER><B>MPlayer - Movie Player for LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
+<CENTER><B>MPlayer - Movie Player for LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
 <BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
 <A HREF="../documentation.html">[ Angol ]</A>
 [ Magyar ]
@@ -15,15 +16,14 @@
 <A HREF="../French/documentation.html">[ Francia ]</A>
 <A HREF="../Polish/documentation.html">[ Lengyel ]</A>
 <A HREF="../Italian/documentation.html">[ Olasz ]</A>
-</CENTER></P>
+</CENTER>
 
-<P><HR></P>
+<HR>
 
 <P>Tartalomjegyzék</P>
 
-<P><HR></P>
+<HR>
 
-<P>
 <UL>
   <LI><A HREF="#0">0. Hogyan olvasd ezt a dokumentációt</A></LI>
   <LI><A HREF="#1">1. Bevezetés</A></LI>
@@ -256,9 +256,8 @@
   <LI><A HREF="../documentation.html#D">D. Ismert hibák</A></LI>
   <LI><A HREF="skin-hu.html">X. Hogyan Legyél Világhírű SkinKészítő 5 Perc Alatt!</A></LI>
 </UL>
-</P>
 
-<P><HR></P>
+<HR>
 
 <P><B><A NAME=0>0. Hogyan olvasd ezt a dokumentációt</A></B></P>
 
@@ -317,7 +316,7 @@
   képtelen mind MPEG1, MPEG2 ÉS AVI (DivX) lejátszásra. Sokuknak gondjuk van 
   a képminőséggel, vagy a sebességgel is. Elhatároztam, hogy (át)írok egyet...</P>
 
-<P><UL>
+<UL>
 <LI><B>mpg12play v0.1-v0.3:</B> Szept 22-25, 2000<BR>
     Az első próbálkozás, fél óra alatt összegányolva!
     A libmpeg3-at hasznaltam a www.heroinewarrior.com-ról egészen a 0.3-as
@@ -358,7 +357,7 @@
     fix.</LI>
 <LI><B>MPlayer 0.90 "???"</B> Máj? ??, 2002<BR>                    
     </LI>
-</UL></P>
+</UL>
 
 <P><B><A NAME=1.3>1.3. Installálás</A></B></P>
 
@@ -374,7 +373,8 @@ ajánlottak.</P>
 <P><B><I>SZÜKSÉGES CSOMAGOK</I></B></P>
 
 <P>A következő (és leírt verziójú) csomagokra lesz szükséged ha nem akarsz
-problémákba ütközni:<BR>
+problémákba ütközni:</P>
+
 <UL>
   <LI><B>binutils</B> - <B>2.11.x</B> ajánlott. Ez a program felelős az
     MMX/3DNow!/stb utasításokért, ezért igen fontos.</LI>
@@ -415,7 +415,6 @@ problémákba ütközni:<BR>
   <LI><B>libvorbis</B> - opcionális, szükséges az OGG Vorbis formátumú audio
     lejátszásához.</LI>
 </UL>
-</P>
 
 <P><B><I>CODECEK</I></B></P>
 
@@ -501,7 +500,7 @@ nem.</P>
 <B>Kevés CPU idő felhasználásával</B> tudják
 megjeleníteni vagy nagyítani a képet. Itt a nagyítás <B>ugyanannyi</B>
 CPU időt használ mint a síma megjelenítés, tekintve hogy a videokártya
-végzi. Így a teljes képernyős lejátszás szép és gyors lesz.
+végzi. Így a teljes képernyős lejátszás szép és gyors lesz.</P>
 
 <UL>
 <LI><B>Matrox G200/G400/G450/G550 kártyák</B> : a speciális <B>mga_vid</B>
@@ -557,10 +556,8 @@ végzi. Így a teljes képernyős lejátszás szép és gyors lesz.
 </LI>
 
 </UL>
-</P>
 
-<P>
-<B><I>YUV gyorsítással nem rendelkező kártyák</I></B></P>
+<P><B><I>YUV gyorsítással nem rendelkező kártyák</I></B></P>
 
 <P>
 Ezeknél vagy szoftveresen kell
@@ -568,7 +565,8 @@ nagyítani a képet (ez nagyon lassú), vagy le kell váltani egy kisebb
 videomódba hogy pont akkora legyen a kép (pl 352x288). Ha nincs YUV
 gyorsításod, az utóbbi módszer a célravezetőbb. Az <B>MPlayerben</B>
 <U>ez a <CODE>-vm</CODE> opcióval kapcsolható be</U>. A következő
-meghajtókat érdemes kipróbálni :
+meghajtókat érdemes kipróbálni :</P>
+
 <UL>
   <LI>XFree86 <B>használatával</B> : lásd a
    <A HREF="video.html#2.3.1.3">DGA</A> és az
@@ -581,7 +579,6 @@ meghajtókat érdemes kipróbálni :
     <A HREF="video.html#2.3.1.5">svgalib</A>,
     <A HREF="video.html#2.3.1.11">aalib</A>.</LI>
 </UL>
-</P> 
 
 <P><B><I>HANGKÁRTYÁK</I></B></P>
 
@@ -685,7 +682,8 @@ képet kapj az opciókról.</P>
 <P>A grafikus felület GTK-t használ (de alapban nem épül rá), így a gtk-t (és a
 hozzávaló fejlesztői csomagokat) fel kell installálni. A lefordításhoz meg kell
 adni a <CODE>--enable-gui</CODE> opciót a ./configure-nak. Ezután, a GUI mód
-bekapcsolásához :
+bekapcsolásához :</P>
+
 <UL>
   <LI>használd a <CODE>-gui</CODE> opciót</LI> vagy
   <LI>írd be a <CODE>gui=yes</CODE> sort a konfigurációs file-ba</LI>vagy
@@ -705,8 +703,6 @@ nevű könyvtárat keres alapállapotban, de a <I>-skin newskin</I> opcióval, vagy
 a konfigurációs file-ba a <I>skin=newskin</I> sor beírásával meg lehet adni
 ehelyett másik alapban betöltendő skin-t. Ilyenkor a <CODE>*/Skin/newskin</CODE>
 könyvtárban lévő skin kerül betöltésre.</P>
-
-</P>
 
 <P><B><A NAME=1.5>1.5. Feliratok és OSD</A></B></P>
 
@@ -794,7 +790,8 @@ megjelenítve. Ez az OSD használatos az idő, hangerő, stb megjelenítésére is.</P>
 <P><B>OSD és feliratok installálása</B></P>
 
 <P>Előszöris, egy <B>MPlayer</B> betűtipus csomag kell. Sok módszer van a
-megszerzésére:
+megszerzésére:</P>
+
 <UL>
 
 <LI>kész csomag letöltése, az <B>MPlayer</B> honlapról.
@@ -811,16 +808,16 @@ elvégezni.<BR>
   <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - felhasználók által készített betűtipusok
   <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreai betűtipus, RAW plugin
 </UL>
+</LI>
 
 <LI>a TOOLS/subfont-c könyvtárban található betűtipusgenerátor. Teljesértékű
 program TTF/Type1/stb betűtipusok MPlayer tipussá alakítására. Olvasd el a
-TOOLS/subfont-c/README file-t a részletekért)
+TOOLS/subfont-c/README file-t a részletekért)</LI>
 
 <LI>a betűtipus generáló GIMP plugin használata, ami a TOOLS/subfont-GIMP
-könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.
+könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.</LI>
 
 </UL>
-</P>
 
 <P>Ezután, tömörítsd ki a letöltött file-t a <CODE>~/.mplayer</CODE> vagy a
 <CODE>$PREFIX/share/mplayer</CODE> könyvtárba. Ezután hozz létre egy symlink-et
@@ -867,9 +864,8 @@ TV tuner-ről</B>.</P>
   kísérletezés nélkül majd hirtelen menni fog!</P>
 
 
-<A NAME=2.5.2><P><B><I>2.5.2.  Fordítás</I></B></P>
+<P><A NAME=2.5.2><B><I>2.5.2.  Fordítás</I></B></P>
 
-<P>
 <UL>
   <LI>előszöris, újra kell fordítanod az <B>MPlayer</B>-t. A <CODE>configure</CODE>
     autodetektálja hogy megvannak-e a szükséges bttv kernel headerek, valamint
@@ -878,14 +874,15 @@ TV tuner-ről</B>.</P>
   <LI>bizonyosodj meg róla hogy a tunered működik más TV szoftverekkel Linux
     alatt, mint például az xawtv.</LI>
 </UL>
-</P>
 
 <P><B>Tipp</B> : rosszak a színek? Ezekszerint a tunered nem tudja a képet
-  YV12 colorspace-ben grabbelni. Próbáld az I420-as colorspace-t (ennél meg kell adni a <CODE>-vc rawi420</CODE> opciót is), vagy az
-  YUY2, UYVY, RGB32 colorspace-eket (ezutóbbit <CODE>-vo sdl</CODE>-el). Ezeket a
+  YV12 colorspace-ben grabbelni. Próbáld az I420-as colorspace-t (ennél meg
+  kell adni a <CODE>-vc rawi420</CODE> opciót is), vagy az YUY2, UYVY, RGB32
+  colorspace-eket (ezutóbbit <CODE>-vo sdl</CODE>-el). Ezeket a
   <CODE>outfmt=YV12</CODE> opcióval lehet megadni, lásd lent.</P>
 
 <A NAME=2.5.3><P><B><I>2.5.3.  Rendelkezésre álló opciók</I></B><BR>
+
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
