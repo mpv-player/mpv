@@ -109,7 +109,7 @@ listed above, for example:
 Images must be truecolor (24 or 32 bpp) PNGs.
 
 <p>
-In the main window (see below) you can use images with `transparency':
+In the main window and in the playbar (see below) you can use images with `transparency':
 Regions filled with the color #FF00FF (<font color="#FF00FF">magenta</font>)
 are fully transparent when viewed by MPlayer. This means that you can even
 have shaped windows if your X server has the XShape extension.
@@ -123,14 +123,15 @@ Winamp/XMMS, for example), so it is up to you to create something great.
 
 <p>
 Currently there are three windows to be decorated: the
-<a href="#mainwin">main window</a>, the <a href="#subwindow">subwindow</a> and
+<a href="#mainwin">main window</a>, the <a href="#subwindow">subwindow</a>, the
+<a href="#mainwin">playbar</a>, and
 the <a href="#skinmenu">skin menu</a> (which can be activated by a right
 click).
 </p>
 
 <ul>
 <li>
-The <b>main window</b> is where you can control MPlayer. The background of
+The <b>main window</b> and/or the <b>playbar</b> is where you can control MPlayer. The background of
 the window is an image. Various items can (and must) be
 placed in the window: <em>buttons</em>, <em>potmeters</em> (sliders) and
 <em>labels</em>. For every item, you must
@@ -271,6 +272,7 @@ where <i>window name</i> can be one of these strings:
 <li><b>main</b> - for the main window</li>
 <li><b>sub</b> - for the subwindow</li>
 <li><b>menu</b> - for the skin menu</li>
+<li><b>playbar</b> - playbar</li>
 </ul>
 
 <p>
@@ -310,6 +312,10 @@ section = movieplayer
   
   window = menu
   ; ... items for menu ...
+  end
+
+  window = playbar
+  ; ... items for playbar ...
   end
 end
 </pre></td></tr></table>
@@ -357,10 +363,11 @@ MPlayer tries to load <code>main</code>, <code>main.png</code>,
 </td></tr></table>
 
 
-<h3><a name="mainwin">3.1 Main window</a></h3>
+<h3><a name="mainwin">3.1 Main window and playbar</a></h3>
 
 Below is the list of entries that can be used in the 
-'<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>' block.
+'<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>', and the
+'<code>window = playbar</code>' &nbsp;.&nbsp;. '<code>end</code>' blocks.
 
 <dl>
 <dt><a name="main.base">
@@ -371,6 +378,10 @@ Lets you specify the background image to be used for the main window.
 The window will appear at the given <code>X,Y</code> position on the screen
 The window will have the size of the image.
 <div>
+<em class=warn>
+<b>Note:</b> this coordinating doesn't work for the display window currently.
+</em>
+<br>
 <em class=warn>
 <b>Warning:</b> Transparent regions in the image (colored #FF00FF) appear
 black on X servers without the XShape extension. The image's width must be
@@ -404,12 +415,20 @@ like this:
 <dd>
 Enable or disable window manager decoration of the main window. Default
 is <b>disable</b>.
+<br>
+<br>
+<em class=warn>
+<b>Note:</b> This doesn't work for the display window, there is no need to.
+</em>
+<br>
 </dd>
 
 <dt>
 <a name="main.hpotmeter">
 <b>
 <code>hpotmeter = button, bwidth, bheight, phases, numphases, default, X, Y, width, height, message</code>
+<br>
+<code>vpotmeter = button, bwidth, bheight, phases, numphases, default, X, Y, width, height, message</code>
 </b>
 </a>
 </dt>
@@ -455,10 +474,6 @@ image</li>
 <code>hpotmeter</code> is changed</li>
 </ul>
 
-<em class=note>
-<b>Note:</b> There will be a <code>vpotmeter</code> item, too, but it is not
-implemented yet.
-</em>
 </dd>	
 
 <dt><a name="main.potmeter">
