@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.52 -->
+<!-- synced with 1.55 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -165,9 +165,9 @@ Potrzebujesz dość nowego sprzętu. Jeśli używasz Linuksa, zalecane są jądra z ser
 <listitem><para>
   <emphasis role="bold">Kodeki Win32</emphasis>: Jeśli zamierzasz używać
   <application>MPlayera</application> na architekturze x86, będziesz ich prawdopodobnie
-  potrzebował. Ściągnij je z naszej
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">strony kodeków</ulink>
-  i zainstaluj je do <filename class="directory">/usr/local/lib/codecs</filename>
+  potrzebował. Ściągnij pakiet z naszej
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/codecs.html">strony kodeków</ulink>
+  i umieść je w katalogu <filename class="directory">/usr/local/lib/codecs</filename>
   <emphasis role="bold">PRZED</emphasis> kompilacją <application>MPlayera</application>,
   w przeciwnym wypadku obsługa Win32 nie będzie wkompilowana!
   <note><para>Projekt avifile ma podobny pakiet kodeków, ale różni się on od naszego,
@@ -658,7 +658,7 @@ musisz przekazać opcję <option>-sub
   <term><option>-subdelay <replaceable>sek</replaceable></option></term>
   <listitem><simpara>
     Opóźnia wyświetlanie napisów o <option><replaceable>sek</replaceable></option> sekund.
-    Może być liczbą ujemną.
+    Może być liczbą ujemną. Wartość jest dodawana do licznika czasu filmu.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -678,14 +678,15 @@ musisz przekazać opcję <option>-sub
 <para>
 Jeżeli podczas używania napisów w formacie MicroDVD zauważysz rosnące opóźnienie
 między nimi a filmem, to prawdopodobnie ilość klatek na sekundę filmu różni się
-od wartości, do której zostały przystosowane napisy. Zauważ, że format ten korzysta
-z bezwzględnych numerów ramek, dla wyświetlania napisów w odpowiednim momencie i
-dlatego nie możesz skorzystać w tym wypadku z opcji <option>-subfps</option>. Jako, że
-<application>MPlayer</application> nie może w żaden sposób zgadnąć ilości klatek
-na sekundę, do której były przystosowane napisy, musisz ją ręcznie zmienić.
-W katalogu <filename class="directory">contrib</filename> znajdującym się na
-serwerze FTP <application>MPlayera</application> znajdziesz mały skrypt napisany
-w perlu, który Ci w tym pomoże.
+od wartości, do której zostały przystosowane napisy.
+Zauważ, że format ten korzysta z bezwzględnych numerów ramek do wyświetlania
+napisów w odpowiednim momencie, ale nie zawiera informacji o wartości fps w
+sobie, dlatego powinieneś skorzystać z opcji <option>-subfps</option>.
+Jeżeli chciałbyś rozwiązać ten problem ostatecznie, musisz ręcznie zmienić
+wartość framerate pliku z napisami.
+<application>MPlayer</application> może zrobić to za ciebie:
+
+<screen>mplayer <replaceable>atrapa.avi</replaceable> -fps fps_napisów -subfps fps_filmu [-subdelay sek] [-sub zbiór_z_napisami] <replaceable>-dumpmicrodvdsub</replaceable></screen>
 </para>
 
 <para>
