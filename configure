@@ -139,7 +139,7 @@ Optional features:
   --disable-libdv        disable libdv 0.9.5 support [autodetect]
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
-  --disable-vidix        disable VIDIX stuff [enable]
+  --disable-vidix        disable VIDIX stuff [enable on x86]
   --disable-new-input    disable new input system [enable]
   --enable-joystick      enable joystick support in new input [disable]
   --enable-i18n          GNU internationalisation [disable]
@@ -810,7 +810,7 @@ _tv=yes
 _tv_v4l=auto
 _tv_bsdbt848=auto
 _streaming=yes
-_vidix=yes
+_vidix=auto
 _new_input=yes
 _joystick=no
 _xvid=auto
@@ -1167,6 +1167,12 @@ if x86 && linux ; then
   fi
 fi
 
+if test "$_vidix" = auto ; then
+  _vidix=no
+  # should check for x86 systems supporting vidix (does cygwin or qnx have vidix?)
+  x86 && _vidix=yes
+fi
+
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
 _awk=
 if test "$_vidix" = yes ; then
@@ -1185,7 +1191,7 @@ echo "VIDIX needs Awk, but there was no working implementation found!"
 echo "Try the GNU implementation, which can be downloaded from:"
 echo "ftp://ftp.gnu.org/gnu/gawk/"
 echo "If you don't need vidix, you can use configure --disable-vidix instead."
-exit
+die "no awk"
 fi
 fi
 
