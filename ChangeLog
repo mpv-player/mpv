@@ -1,4 +1,13 @@
 TODO: collect old version changelogs from freshmeat.net, news/maillist archive...
+    -> both was included, freshmeat somehow deleted all logs before 0.50 :((((
+
+TODO: cleanup old (<=0.17a) versions, find the place for these:
+  * new stream selection code (autodetected)
+  * pre-devel-alpha DVD code (libcss)
+  * subtitle code 100% (perfected timing code)
+  * new output drivers (SVGAlib, FBdev)
+  * faster memcpy() routine (MMX/3DNow!/SSE optimized)
+
 
 mplayer (0.90)
 
@@ -224,22 +233,546 @@ mplayer (0.18) "The BugCounter"
     * A-V sync for AVI files fixed (both -bps and -nobps)
 
 
-mplayer (0.17a) "The IdegCounter"
-
+mplayer v0.17a "IdegCounter++" : Apr 27  2001
+  - first 0.17 release failed - buggy files outdated docs etc :(
+    it's (hopefully) fixed now.
+    
+mplayer v0.17 "IdegCounter" : Apr 27  2001
   * DVD playing (libcss)
   * OSD and subtitles with antialiased fonts
   * new Win32 codecs (WMV1,AP42,ASV2 etc)
   * new VO drivers (SVGAlib,fbdev,DGA,SDL etc)
   * source cleanup, most part of the code rewritten
 
-mplayer (0.11pre 1-24)
-mplayer (0.10)
-mplayer (0.10 pre 1-7)
-mplayer (0.3-0.9)
+* jumped to 0.17 * (why 17? oh. chass just got a new 17" monitor :))
 
-  * new stream selection code (autodetected)
-  * pre-devel-alpha DVD code (libcss)
-  * subtitle code 100% (perfected timing code)
-  * new output drivers (SVGAlib, FBdev)
-  * faster memcpy() routine (MMX/3DNow!/SSE optimized)
+mplayer v0.11-pre27-CVS:
+  - updated libmpeg2 source to libmpeg2-0.2.1-CVS version
+  - updated OpenDivX encore/decore to 4.0 alpha48
+  - cmdline/configfile handler by szabi
+  - added DirectShow support (now DivX-only)
+  - bugfix: stream.c/stream_new() uninitialized variables
+
+mplayer v0.11-pre26-CVS:
+  - updated libmpeg2 source to libmpeg2-0.2.0 version
+  - small fixes
+
+mplayer v0.11-pre25-CVS:  yeah, we moved to SourceForge CVS!
+  - DOCS updated (email address changed from arpi@* -> maillist)
+  - LIRC fix, mplayer_lirc changed back to mplayer [Andreas Ackermann]
+  - stream.c: unsigned int fixes, required for some strange .asf files
+  - asfheader.c: using w=h=b=1 for audio_concealment_none
+  - VCD-related stuff moved from stream.c to vcd_read.c
+  - added DGA driver by Andreas Ackermann
+  - added debian/ subdir for the debian package makers... see DOCS/DEBIAN
+  - new Makefile/dependency system
+  - added check_events() to libvo, x11 stuff moved to x11_common.c
+
+mplayer v0.11-pre24: Feb 19  2001
+  small fixes again :(
+  - DOCS/LIRC changed: users *must* enable lirc support manually, it is
+    not autodetected yet.  (./configure --enable-lirc)
+  - the {prefix} bug fixed by Gabucino
+  - added manpage by Gabucino
+  - manpage -vo fixes by A'rpi
+
+mplayer v0.11-pre23: Feb 18  2001
+  lirc support, text updates, mailinglists
+  - added "-ni" option to force usage of the non-interleaved AVI parser
+  - DOCS/* updated by Gabucino
+  - new homepage by Gabucino
+  - mplayer users & announce mailing lists by Dariusz Pietrzak (see README)
+  - LIRC support by Andreas Ackermann (see DOCS/LIRC)
+    enable with ./configure --enable-lirc
+    TODO: ./configure should detect LIRC installed and better Makefile handling
+  - added AVI_NINI parser for broken (no index) non-interleaved files
+
+mplayer v0.11-pre22: Feb 16  2001
+  last fixes, release is coming soon!
+  - non-interleaved avi EOF bug fixed  [thanks to DC-1 for help]
+  - "You" strings in Makefile after make dep bug fixed...  [thx to DC-1]
+  - SDL disabled by default. You have to ./configure --enable-sdl to enable.
+  - homepage updated by Gabucino
+  - homepage updated by A'rpi
+  - FAQ updated by A'rpi
+
+fork()  -> 0.12pre1
+
+mplayer v0.11-pre21: Feb 12  2001
+  mpeg1 pp, stereo fix
+  - "Skip chunk xxxx" messages moved from -v to -v -v -v debug level...
+    [thanks to Christoph H. Lampert]
+  - divx postprocess filter works for mpeg1 files too! (-divxq 1/3/7/31)
+  - mpeg layer-2 audio fixed - it's stereo again!!!
+  - audio select() detection: if detected audio buffer size == 0, then
+    exit with message "recompile mplayer with #undef HAVE_AUDIO_SELECT"...
+  - syncfb driver added to the source tree, under drivers/
+    (it's very similar to mga_vid, but has syncronization to screen and
+     de-interlace features)
+  - draw_slice in syncfb finished for G400 cards (plays mpeg 1/2, opendivx)
+    (de-interlacing has been disabled, because it's buggy now)
+
+mplayer v0.11-pre20: Feb 11  2001
+  NI-AVI support, small fixes & patches...
+  - asf parser: flag 0x40 (explicit packet size) implemented [Marvin]
+  - new option to select DSP device:  -dsp   (default: /dev/dsp) [Pontscho]
+  - option -o changed to -vo
+  - ./configure: applied patches  [LGB,Ian Kumlien,Magnus Pfeffer]
+  - avi chunk_id->ds mapper moved to demux_avi_select_stream()
+  - added non-interleaved .AVI parser
+  - added non-interleaved .AVI detection (if a_pos-v_pos distance > 1MB)
+
+mplayer v0.11-pre19: Feb  9  2001
+  small fixes...
+  - vo_xmga.c: G200 draw_slice fixed
+    xmga + mga: common part (draw_frame & draw_slice) moved to mga_common.c
+  - some independent code (asfinfo.c and GL-test) moved to the new TOOLS subdir
+  - movinfo.c added to TOOLS (small util to dump .mov file structure)
+  - AVI & ASF stream id detection changed: now using IDs from the header
+    (but still can be overriden by -aid or -vid)     [Christoph H. Lampert]
+  - native MS-GSM audio codec ported from avifile source  (-afm 6)
+    [thanks for the testfile to Christoph H. Lampert]
+  - README updated (input & codec lists)
+  - implemented .asf audio descrambling  [Dirk Vornheder & Einon]
+    -> that weird_al_yankovic asf is not so weird now :)
+  - AUTHORS file changed
+
+mplayer v0.11-pre18: Feb  7  2001
+  patch release :)
+  - skip broken .asf fragments (for better seeking)
+  - seeking code cleanup in sources (now it's in a switch(){})
+  - opendivx encoding bitrate option changed from -divxq to -br
+    (for the divx -> divx re-encoding)
+  - TO DO section moved to file TODO
+  - applied ./configure and Makefile changes patch from LGB
+  - libvo function changes by Pontscho: x11 (with -fs), xmga (bugfixed!)
+  - libvo: driver sources renamed from video_out_*.c -> vo_*.c
+  - libvo: added uninit() function to drivers
+  - libvo: fork()'ed X11 eventhandler for x11 and xmga drivers  [me & Pontscho]
+     (gl and xv version is coming soon!)
+  - libvo: sdl driver now closes SDL at QUIT...
+  - small english fixes (docs & messages)   [Balazs Tibor]
+
+mplayer v0.11-pre17: Feb  4  2001
+  fixes
+  - asf "missing video stream" fixed (stream id & 0x7F)  [Christoph H. Lampert]
+  - added GL-test directory, it contains source and compiler script of a
+    very simple open-gl texture updating (glTexSubImage) test program.
+    if it runs well, then mplayer -o gl should work too.
+    it works on G400+Utah-GLX, but segfaults in the G400 driver of X 4.0.2/DRI.
+    try it with different cards/drivers, and please report me the results.
+  - benchmarking in gltest.c: calculate fps and process times
+  - .asf seeking v0.01-pre0.1 :)
+
+mplayer v0.11-pre16: Feb  4  2001
+  ACM fixed
+  - Win32/ACM audio codec fixed (most important for asf with divx audio):
+    There was an output buffer size problem with the Win32/ACM audio codec
+    at low bitrates (usually used for .asf files with divx audio)
+    Input and output buffer sizes are now queryed, problem solved :)
+  - SDL support compiling hint by Michael Durller added to the FAQ
+  - opendivx support in .asf files   [Gérard Lantau]
+  - ./configure & Makefiles patch by Aaron Hope applied.
+    (adds --with-win32libdir and fixes --with-x11libdir)
+  - ./configure fixed, now it defaults to /usr/lib/win32 if detection failed
+
+mplayer v0.11-pre15: Feb  2  2001
+  asf sync fixed
+  - asf parser: now supports other than 0x5D segments  [Dirk Vornheder]
+  - new asf PTS reading: sync works now, including fps...
+    (-fps no longer required!)  [thanks again to Eugene Kuznetsov for docs!]
+
+mplayer v0.11-pre14: Feb  1  2001
+  small fixes, asf sync v0.1 :)
+  - version number incremented :)))
+  - libvo / Xv driver swapped Red-Blue fixed
+  - asf timestamps implemented - now asf A-V should be in sync if you
+    specify the correct fps at commandline (-fps), +-1 fps allowed...
+    [i haven't yet found method to get fps out from asf headers :(((]
+  - some error and consistency checking into demux_asf
+    if you see many warning! messages playing an .asf file, then contact
+    me and upload the file (first 1MB is enough if it represents the problem)
+    Don't forget: there is no public doc about the .asf file format, so 
+    everything we know is suspected and can be wrong... without your help
+    we never will have working .asf player...
+  - asf fragment offset checks disabled for grouping...
+
+mplayer v0.11-pre13: Jan 31  2001
+  libvo changes, mpeg bitrate, vcd fix, asf grouping
+  - libvo: draw_slice() interface changed, now it has src stride[3] and
+    destination rect dimension (w,h,x,y)
+    It's able to blit whole frames, not only 16-pixel slices...
+  - libmpeg2 and opendivx codec changed to use new draw_slice()
+    -> opendivx extra 64-pixel width band at right disappeared!
+  - mpeg bitrate fix: if picture->bitrate==0x3FFFF (means "unspecified" ?)
+    then using standard VCD bitrate (75*2324 bytes/sec)
+    -> fixed seeking for those mpegs with "16MBit/s" bitrate...
+  - drivers/sis_vid: video4linux interface disabled
+  - broken VCD playing fixed: stream_reset shouldn't seek to 0x0...
+    [bugreport: Kang Sun]
+  - asf_parser: grouping implemented!  [test file provided by Gabucino :))]
+
+mplayer v0.11-pre12: Jan 30  2001
+  ./configure fixes, improved odivx-encoding, streaming fixes
+  - ./configure: using /tmp/main$$.c instead /tmp.main.c, and
+    remove file after tests  [SaPe]
+  - ./configure: trying the gcc optimize options and fallback to 'pentium'
+    if fails (useful for people with old gcc and new cpu :))
+  - removed -fomit-frame-pointer from OPTFLAGS at config.mak
+  - version number incremented [Gabucino]
+  - odivx encoder fix: allow long (longer than xxxx.avi) destination filenames
+    (sizeof() changed to strlen()...)  [Gabucino]
+  - avi writer - overwrite disabled (exits with error message if destination
+    file already exists...)  [Gabucino]
+  - use -divxq to set encoding bitrate (in bits (no kbits!) default: 780000)
+  - no audio decoding if -encode option is used
+  - audio streaming disabled if -nosound specified (setting audio_id to -2)
+  - fast Mpeg-ES detection (doesn't read the whole Mpeg-PS file)
+  - compile-time option to disable using soundcard driver's select()
+    (requires for some people with buggy/pre-alpha/etc sound driver...)
+
+mplayer v0.11-pre11: Jan 29  2001
+  streaming fixes, asf support pre, indeo5 fix
+  - asf/asfinfo.c improved: now it dumps streams to files - need testing!
+    (it's ready to be converted to asf demuxer and intergated into MPlayer)
+  - stream.c / stream_reset() fix: now it really seek back to 0 position!
+  - .asf file format detection added (no .asf reading yet!!!)
+  - .asf demultiplexer added, changes in demuxer.c to handle fragmented packets
+  > it plays .asf video well, but still has problems with divx/wma audio. :(((
+  - indeo 5 playing fixed (removed ICDECOMPRESS_UPDATE from flags)
+  - xmga resizing problems with some window managers, so default order is
+    changed xmga,xma... to mga,xmga,...
+  - found gcc bug: compiling MPlayer with flags 
+    OPTFLAGS=-O -g -march=i686 -mcpu=i686 -pipe -fomit-frame-pointer -ffast-math
+    cause image sizes negating -> mga_vid kernel driver Oops... :(((
+  - runaway.bride.sample.avi seeking segfault discovered: AC3 resync fails :(
+  - improved signal handling: module name is now printed. audio_resync added.
+  - RGB opendivx encoding implemented, now AVI->opendivx is possible.
+
+mplayer v0.11-pre10: Jan 22  2001
+  OpenDivX encoding, streaming fixes, avi seek fixes
+  - new libvo driver: odivx  (OpenDivX File Writer)
+  - AVI file writting support, new option:  -encode filename
+    to encode an mpeg/vob/vcd to opendivx:
+      mplayer file1.mpg -encode file2.avi -o odivx -nosound
+    (sound encoding/copy is not yet supported)
+  - libvo: default driver priority changed to: xmga,mga,syncfb,3dfx,xv,x11,gl
+  - avi writer: index support
+  - small fixes in avi writer to be compliant (adjusted chunk/list lengths)
+  - demuxer.c: stream buffering fixes:
+    - missing {} in mplayer.c occuring audio reads when has_audio=0
+    - reordered packet reader and pack count checks -> no more unwanted EOF
+    - added 4MB buffer memory usage limit to demuxed streams
+  - CPU flags in ./configure changed:
+      k7 -> k6  (current stable gcc doesn't supports k7)
+      386,486 -> i386,i486    [Balazs Tibor]
+  - demux_avi: index check now accepts (raw.len+1)==idx.len  [Balazs Tibor]
+  - FAQ added
+
+    **  Now we are ready with planned features & urgent fixes, **
+    **  it's time to final testing and then the 0.11 release!! **
+
+mplayer v0.11-pre9: Jan 18  2001
+  OpenDivX fixes,speedup
+  - solved OpenDivX width problem (stride=width+(Quality?0:64))
+    now -divxq 0 works, and 0 is the default
+  - libvo call moved out from my_convert_yuv() so it can be measured (cpu %)
+  - IDCT code ported from libmpeg2 -> much faster OpenDivX decoding
+
+mplayer v0.11-pre8: Jan 18  2001
+  SDL fixes, OpenDivX support
+  - added -I/usr/X11R6/include to libvo CFLAGS
+  - (removed later: applied libvo SDL driver fixes by Jeffrey Boser)
+  - OpenDivX support, initial hack, maybe not work for you...
+    (I need testfiles, I have just only one)
+    use -divxq option to adjust quality (1..29 works), 1=default
+
+mplayer v0.11-pre7: Jan 14  2001
+  SDL support
+  - ported SDL driver from mpeg2dec/libvo (currect CVS)
+    (it's slower than internal X11 driver, but supports software scaling!)
+  - fixed SDL driver to support -fs and pass keyboard events
+  - SDL driver changed to support YV12 and YUY2 formats instead of IYUV
+    (now works with DivX files too)
+  - 'q' (Quit) disabled in SDL fullscreen mode (because it's impossible
+    to restore screen before exiting so it gets unusable state now)
+
+mplayer v0.11-pre6: Jan 14  2001
+  audio fix
+  - fixed video_out_xv.c compiling problems [bugreport: Kalle Mellerup]
+  - modified audio playing: always keep buffer (both internal and card's)
+    filled using select() -> -alsa audio delays should be fixed.
+  - updated DOCS/AUTHORS and DOCS/README
+
+mplayer v0.11-pre5: Jan 12  2001
+  xmmp audio support, applied Pontscho's libvo patch
+  - xmmp audio driver support by Arthur Kleer
+  - new video_out driver by Pontscho: xmga  (Matrox G200/G400 only!)
+    It does same under X 3.3.x what Xv extension does under X 4.0.x!
+    (you will have a moveable/resizeable window but see an YUV video
+     overlay in it using color keying)
+  - added keyboard event support in X11 windows    [Pontscho]
+    (using mplayer_[put|get]_key() in codecctrl.c)
+
+mplayer v0.11-pre4: Jan  6  2001
+  x11 driver fixes, 15/16bpp support
+  - version in version.h fixed :))) [Pontscho]
+  - inttypes.h moved to DOCS/ (copy back to the root if you need it)
+  - depth calculation in vo_init() changed (Pontscho's version couldn't
+    make difference between 15 and 16bpp)
+  - x11 driver now uses vo_init() instead of get_depth()
+  - yuv2mmx: 15bpp not really supported -> removed from list, now
+    conversion is done (well) by the C code -> MPEG play in 15bpp works!
+  - avi playing support added in 15bpp (memcpy)
+  - avi playing support added in 16bpp (C 15->16 converter by me)
+  - avi playing support added in 16bpp (MMX 15->16 converter by Strepto)
+  - libvo/x11: yuv2rgb used MMX code on non-MMX CPUs too!!! fixed...
+  - all x11 modes tested (and mpeg/24bpp byteorder fixed):
+                  MPEG:            AVI/VfW:
+        15bpp    C convert        memcpy
+        16bpp    MMX/C convert    MMX/C convert
+        24bpp    C convert        memcpy
+        32bpp    MMX/C convert    memcpy / C conv.
+    => now all the movie types are viewable using the -o x11 driver!
+
+mplayer v0.11-pre3: Jan  5  2001
+  mpeg fixes, fullscreen support
+  - vertical.mpg serious libvo (x11,gl) segfaults fixed:
+    yuv2rgb_mmx requires one more lines that vertical image size...
+    fixed (allocating memory for width*(height+1)).   [bugreport: Gabucino]
+  - Pontscho's fullscreen patch applied!
+    Using option -fs will maximize window size (for all resizeable drivers
+    including mga!) and disable window decorations (x11,Xv,gl only)
+  - simple inttypes.h included for libc5 (and glibc2.0 too?) users
+  - homepage updates (links changed ftp->http)
+
+mplayer v0.11-pre2: Jan  4  2001
+  better user messages, mp3 codec selection, demuxer changes
+  - w32codec.zip restored at the FTP site (somehow it damaged...)
+  - added version.h, and used its content everywhere
+  - 'premature end-of-file' problem fixed: freeing audio buffers and
+    setting d_audio->id=-2 if has_audio==0  [bugreport by Dmitri Pogosyan]
+  - some more messages added if verbose>=1
+  - demuxer.c: error message printed if A or V chunk buffer is full
+    'mplayer test.avi -aid -2' still not works without option '-nosound'
+  - adding new config.h option to set default MP3 audio codec (mpg123/l3codeca)
+    ./configure selects mp3lib only if you have 3Dnow    [idea: Gabucino]
+  - automatic fallback to mp3lib/mpg123 if l3codeca.acm can't be loaded/inited
+
+mplayer v0.11-pre1:
+  AVI sync fixes
+  - AVI audio seeking improvements: now using nBlockAlign value to seek
+    inside the chunk, so divx audio works without big delays!!!
+  - AVI PTS calculation modified: counting video PTS when skip_video_frames>0
+    so new audio PTS values will be correct. Solved many sync probs!
+  - A-V sync with AVI files fixed!
+    Now only the Desperado-trailer has 1.0 sec delay after seeking.
+  - fixed AVI sync in -bps mode too! :)  (perfect except that Desperado avi)
+
+mplayer v0.10: Jan  1  2001  "The new year" release!
+  - testing
+  - docs changed
+  - it's time to release and remove the old buggy 0.09 version...
+  - release!!!
   
+mplayer v0.10-pre8:  libvo/x11 changes
+  - libvo: x11/xv driver separated to x11 and xv drivers
+  - libvo: DUMMY_VO_FUNC removed from driver sources
+  - libvo: default driver order changed, because some users with software-only
+           opengl though that this 'slow' player can only play at 1-3fps :)
+
+mplayer v0.10-pre7: Dec 31  2000
+  libmpeg2 interface changes, display size/area changes, AVI fixes
+  - libmpeg2/decode.c modified:
+    - removed unused OMS and mpeg2dec stuff
+    - decode_data rewritten, now works like parse_es.c
+      => doesn't copy any data -> faster and less memory usage
+  - mplayer.c sends code 0x1FF after every frame, so libmpeg2 knows
+    when has to display it
+  - mplayer.c: in_frame flag fixes, didn't work well with mpeg2 streams
+    (because there is a 0x1B2 chunk between 0x100 and 0x101)
+  - 'picture' changed from static to shmem-allocated
+    -> better picture after codec restart (tested with JapAd.mpg)
+    -> keep information of the header changes (after init)
+  - mpeg image size changed, now only the real part of frame is displayed
+    (no more green strip at the bottom)
+    - picture struct: new fields: display_picture_width/height
+    - image buffer allocation (shmem) is done by decode.c instead of libvo
+  - new option:  -xy <value>  (resize both x/y direction)
+    if value<=8  ->  x_scale = y_scale = value
+    else         ->  x_size=value  y_size=aspectratio*x_size
+  - mplayer.c: video output moved out from avi/mpg init sections and
+    now it's common code (added movie_size_x/y variables and out_fmt global)
+  - new keys:
+    ESC       => quit
+    + and -   => adjust audio delay +- 0.1 second
+    k         => kill/restart the mpeg codec process (for testing)
+  - codec control interface changed: wait for syncword after (re)start
+    to avoid receiving old frames => it's stable again!
+  - removed (now unused) allocate/free image buffer code from libvo
+  - mplayer: new internal variable for video format: has_video
+       0 = none (unused yet)
+       1 = mpeg 1/2 video
+       2 = win32/VfW video codec
+  - config.h has defaults for bps-based AVI sync and ALSA timer code options:
+     #undef AVI_SYNC_BPS  => now it's disabled by default!!! use -bps to enable
+     #define ALSA_TIMER   => now it's enabled by default!!! use -noalsa to dis.
+  - help updated
+  - prints max compressed framesize at exit (both avi & mpeg)
+  - AVI audio seeking fixed: some ACM codecs (divx audio and ms-adpcm)
+    can't seek inside a chunk, they are only able to play whole chunks.
+    Current audio seeking has changed to seek inside the chunk only if the
+    codec supports it (only internal codecs and ACM/mp3 allows it).
+  - AVI: audio delay correction if can't seek inside the chunk
+
+mplayer v0.10-pre6: Dec 24  2000 "Xmas edition"
+  mpeg signal & EOF fixes
+  - ./configure: k6_mtrr (2.4.test11+) added [Pontscho]
+  - `term destroys if mplayer (mpg) called from mc.ext` bug fixed:
+    added sighandler to the 3rd process (mpeg codec) to avoid sig. recursion
+  - better output at exit (handled now by exit_player())
+  - mpeg EOF problem (codec restart) fixed: added EOF detection to parse_es.c
+  - internal flag 'current_module' added to get more info at segfaults
+    (contains module number where the segfault occured)
+  - audio detection changed: using afm=4 (Win32/ACM) for MP3 audio (AVI files)
+    (you MUST have l3codeca.acm at /usr/lib/win32, or you have to use '-afm 1')
+
+mplayer v0.10-pre5: Dec 22  2000
+  flipping fixed
+  - AVI image flipping reworked:
+    - new flag: avi_header.flipped, TRUE if upside-down
+    - image flipping code removed/disabled from libvo modules
+    - duplicate flip_page() calls removed (overload with x11 and mga)
+  - aLaw audio codec (AVI id 0x06) added (uses code from xanim source)
+
+mplayer v0.10-pre4: ???
+  test release, small fixes
+  - video_out driver <-> codec incompatibility message changed
+  - fixed the config.format bug in drivers/mga_vid_test, so it works again!
+    [thanks to David Whysong]
+  - libmpeg2 upgraded
+
+mplayer v0.10-pre3: Dec 10  2000
+  test release, verbose mode, new docs
+  - new option:  -v  =  increment verbose level
+    (debug printf's changed to verbose level-dependent)
+    - default level: 0, only some informal output
+    - init debug:    1, some basic debug infos, avi header, function values
+    - player debug:  2, print avi indexes, chunk inputs, more debug infos
+    - parser debug:  3, prints everything related to input parsers
+    to increment verbose level, use multiple -v options (-v -v -v for level-3)
+  - bitrate calculation for AVI files
+  - README rewritten, added Troubleshooting and Bugreports sections
+  - TVout directory added (only the scripts)
+
+mplayer v0.10-pre2: Dec  8  2000
+  bugfix test release, bps-sync enabled
+  - avi: supporting both 0-based and movi-based index types (autodetect)
+  - avi: tested with VBR audio: plays well with -mc 0 option, seek doesn't
+    work yet   [thanks to Alan Chen for testfile]
+  - avi: A-V sync to avg. byte/sec implemented (again) and enabled by default
+    (disable with -nobps if you want)
+  - ./configire: 3rd name ('kni') of the P3 added. Where is the compatibility?
+  - useless '\' removed from libac3/Makefile  [Otvos Ferenc]
+
+mplayer v0.10-pre1: Dec  5  2000
+  test release, players merged!!!
+  - avip and mpegp has been merged to a single binary called 'mplayer'
+    - file type detection (AVI/MPEG-PS/MPEG-ES/Other)
+    - no redundant code (common code for common jobs)
+    - big format-dependent codes moved to functions (separated files)
+    - better error messages, removed some debug stuff, code cleanups
+  - old libmpeg2 version removed from source tree
+  - help texts merged (help_avi+help_mpg -> help_mp)
+  - new options:  -x <x> -y <y>     = scale image (if selected driver supports)
+    if value<=8 then image size will be multiplied by value, otherwise
+    image size will be scaled to <value> pixels.
+    For example:
+      2x ZOOM:  mplayer -x 2 -y 2 test.mpg
+      800x600:  mplayer -x 800 -y 600 test.mpg
+    [default values are still configurable at compile-time, see config.h]
+  - TV project (not finished) codebase added (see tvision.c, or: make tvision)
+
+mplayer v0.09: Dec  5  2000
+  Beta release [same as 0.09-pre3]
+  - version changed in the files
+  - docs updated  
+  
+mplayer v0.09-pre3:  bugfix test-release, X11 support testing
+  - fixed the  if [ -z $pparam ]  bug in ./configure  [Christian Birchinger]
+  - many changes in AVI seek code, resulting near-perfect seeking now!
+    current method calc absolute audio position, so with VBR audio it
+    doesn't work yet...
+  - avip: Xv support (YUY2 image format)
+  - avip: X11 support (24 & 32 bpp only, BGR format)
+    I need a very fast 15->16bpp converter for 16bpp support... anyone helps?
+
+mplayer v0.09-pre2:  bugfix test-release 
+  - removed unnecessary code from libmpeg2/header.c
+    Walken told me that standard mpg/vob streams must NOT use framerate
+    and bitrate extension... and the ext. id check is done by the caller.
+  - CRC support to mp3lib's mpeg audio layer-2 decoder
+    thanks for bugreport & testfile to Samson
+
+mplayer v0.09-pre1:  bugfix test-release
+  - imported new libmpeg2 files (under testing...)
+  - GL renderer flickering bug fixed (MMX missing emms() between yuv2rgb and
+    glTexSubImage(), bug triggered by new Utah-GLX code)
+    [thanks for Christian Birchinger]
+
+mplayer v0.08: Nov 27  2000
+  Index support, avi seeking, DLL loader fix, compilation fixes
+  - Added support for chunk index usage (disable with -noidx option)
+  - Removed code optimization flags from loader/Makefile because
+    it segfaults if compile optimized code (it does some hacks with
+    pointers, maybe the reordered code confuses it)
+  - added new tool called aviparse  (read and check avi file structure)
+  - indexed and raw chunk info comparing, bad chunks dropped
+  - termcap usage is optional (for those debian users without termcap)
+  - #if HAVE_* fixed (to #ifdef HAVE_*)
+  - ./configure supports new /proc/cpuinfo (2.4.0-test11)
+      - sse is called 'sse' again
+      - 'flags' field renamed to 'features'
+  - Xv benchmark results added to DOCS/SPEED
+  - avi seeking (and other goodies, pause etc) implemented
+    no PTS resync after seek yet.
+  - default video_out driver changed from 'mga' to the first available driver
+    new driver priority:  mga_vid, opengl, x11
+
+mplayer v0.07: Nov 21  2000
+  Easier compile
+  - Added Pontscho's ./configure script (it's modified a lot)
+  - Updated makefiles, and tested a lot :)
+  - Updated DOCS/INSTALL
+
+mplayer v0.06: Nov 20  2000
+  Better codec selection
+  - avi audio&video codec selection moved to new codecs.c file,
+    loader/driver.c and loader/afl.c modified for this
+  - yuv support fixed, codecs.c setup flags to handle yuv properly
+    yuv works fine with divx, mpeg4, cvid, and upside-down iv50
+  - DOCS/INSTALL updated
+  - DOCS/SPEED updated, DivX benchmarks added
+
+mplayer v0.05:  Nov 18  2000
+  Merged with MPEGplayer 0.90pre6, first public release of AVI player
+  - code merged with mpegplayer, new Makefile, some small modifications
+  - docs updated and moved to DOCS
+
+mplayer v0.04: YUV support, some code cleanup, preview-release
+
+mplayer v0.01: first version based on new MPEGplayer's codebase.
+
+mpg12play v0.9-v0.95pre5: Oct 21-Nov 2, 2000
+       Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel
+       Lespinasse. It's great, optimized very fast C code with perfect
+       image quality and 100% MPEG standard conformance.
+
+mpg12play v0.5-v0.87: Sep 28-Oct 20, 2000
+       Mpeg codec replaced with DVDview by Dirk Farin, it was a great
+       stuff, but it was slow and was written in C++ (I hate C++!!!)
+
+mpg12play v0.1-v0.3: Sep 22-25, 2000
+       The first try, hacked together in a half hour! I've used libmpeg3
+       from www.heroinewarrior.com up to the version 0.3, but there were
+       image quality and speed problems with it.
