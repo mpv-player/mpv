@@ -26,7 +26,6 @@
 static struct vf_priv_s {
     int exp_w,exp_h;
     int exp_x,exp_y;
-    mp_image_t *dmpi;
     int osd;
     unsigned char* fb_ptr;
 } vf_priv_dflt = {
@@ -49,7 +48,7 @@ static int orig_w,orig_h;
 static void remove_func_2(int x0,int y0, int w,int h){
     // TODO: let's cleanup the place
     //printf("OSD clear: %d;%d %dx%d  \n",x0,y0,w,h);
-    vf_mpi_clear(vf->priv->dmpi,x0,y0,w,h);
+    vf_mpi_clear(vf->dmpi,x0,y0,w,h);
 }
 
 static void remove_func(int x0,int y0, int w,int h){
@@ -77,7 +76,7 @@ static void remove_func(int x0,int y0, int w,int h){
 
 static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
     unsigned char* dst;
-    if(!vo_osd_changed_flag && vf->priv->dmpi->planes[0]==vf->priv->fb_ptr){
+    if(!vo_osd_changed_flag && vf->dmpi->planes[0]==vf->priv->fb_ptr){
 	// ok, enough to update the area inside the video, leave the black bands
 	// untouched!
 	if(x0<vf->priv->exp_x){
@@ -97,25 +96,25 @@ static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned ch
     }
     if(w<=0 || h<=0) return; // nothing to do...
 //    printf("OSD redraw: %d;%d %dx%d  \n",x0,y0,w,h);
-    dst=vf->priv->dmpi->planes[0]+
-			vf->priv->dmpi->stride[0]*y0+
-			(vf->priv->dmpi->bpp>>3)*x0;
-    switch(vf->priv->dmpi->imgfmt){
+    dst=vf->dmpi->planes[0]+
+			vf->dmpi->stride[0]*y0+
+			(vf->dmpi->bpp>>3)*x0;
+    switch(vf->dmpi->imgfmt){
     case IMGFMT_BGR15:
     case IMGFMT_RGB15:
-	vo_draw_alpha_rgb15(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	vo_draw_alpha_rgb15(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
 	break;
     case IMGFMT_BGR16:
     case IMGFMT_RGB16:
-	vo_draw_alpha_rgb16(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	vo_draw_alpha_rgb16(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
 	break;
     case IMGFMT_BGR24:
     case IMGFMT_RGB24:
-	vo_draw_alpha_rgb24(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	vo_draw_alpha_rgb24(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
 	break;
     case IMGFMT_BGR32:
     case IMGFMT_RGB32:
-	vo_draw_alpha_rgb32(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	vo_draw_alpha_rgb32(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
 	break;
     case IMGFMT_YV12:
     case IMGFMT_I420:
@@ -124,13 +123,13 @@ static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned ch
     case IMGFMT_IF09:
     case IMGFMT_Y800:
     case IMGFMT_Y8:
-	vo_draw_alpha_yv12(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	vo_draw_alpha_yv12(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
 	break;
     case IMGFMT_YUY2:
-	vo_draw_alpha_yuy2(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	vo_draw_alpha_yuy2(w,h,src,srca,stride,dst,vf->dmpi->stride[0]);
 	break;
     case IMGFMT_UYVY:
-	vo_draw_alpha_yuy2(w,h,src,srca,stride,dst+1,vf->priv->dmpi->stride[0]);
+	vo_draw_alpha_yuy2(w,h,src,srca,stride,dst+1,vf->dmpi->stride[0]);
 	break;
     }
 }
@@ -141,7 +140,7 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
     if(vf->priv->exp_w!=w || vf->priv->exp_h!=h ||
 	vf->priv->exp_x || vf->priv->exp_y){
 	// yep, we're expanding image, not just copy.
-	if(vf->priv->dmpi->planes[0]!=vf->priv->fb_ptr){
+	if(vf->dmpi->planes[0]!=vf->priv->fb_ptr){
 	    // double buffering, so we need full clear :(
 	    remove_func(0,0,vf->priv->exp_w,vf->priv->exp_h);
 	} else {
@@ -152,8 +151,8 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
     vo_draw_text(vf->priv->exp_w,vf->priv->exp_h,draw_func);
     // save buffer pointer for double buffering detection - yes, i know it's
     // ugly method, but note that codecs with DR support does the same...
-    if(vf->priv->dmpi)
-      vf->priv->fb_ptr=vf->priv->dmpi->planes[0];
+    if(vf->dmpi)
+      vf->priv->fb_ptr=vf->dmpi->planes[0];
 }
 
 #endif
@@ -205,37 +204,37 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(vf->priv->exp_w==mpi->width ||
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ){
 	// try full DR !
-	mpi->priv=vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	    mpi->type, mpi->flags, 
             MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
             MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
 #if 1
-	if((vf->priv->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
-	  !(vf->priv->dmpi->flags & MP_IMGFLAG_DIRECT)){
+	if((vf->dmpi->flags & MP_IMGFLAG_DRAW_CALLBACK) &&
+	  !(vf->dmpi->flags & MP_IMGFLAG_DIRECT)){
 	    printf("Full DR not possible, trying SLICES instead!\n");
 	    return;
 	}
 #endif
 	// set up mpi as a cropped-down image of dmpi:
 	if(mpi->flags&MP_IMGFLAG_PLANAR){
-	    mpi->planes[0]=vf->priv->dmpi->planes[0]+
-		vf->priv->exp_y*vf->priv->dmpi->stride[0]+vf->priv->exp_x;
-	    mpi->planes[1]=vf->priv->dmpi->planes[1]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift);
-	    mpi->planes[2]=vf->priv->dmpi->planes[2]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift);
-	    mpi->stride[1]=vf->priv->dmpi->stride[1];
-	    mpi->stride[2]=vf->priv->dmpi->stride[2];
+	    mpi->planes[0]=vf->dmpi->planes[0]+
+		vf->priv->exp_y*vf->dmpi->stride[0]+vf->priv->exp_x;
+	    mpi->planes[1]=vf->dmpi->planes[1]+
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift);
+	    mpi->planes[2]=vf->dmpi->planes[2]+
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift);
+	    mpi->stride[1]=vf->dmpi->stride[1];
+	    mpi->stride[2]=vf->dmpi->stride[2];
 	} else {
-	    mpi->planes[0]=vf->priv->dmpi->planes[0]+
-		vf->priv->exp_y*vf->priv->dmpi->stride[0]+
-		vf->priv->exp_x*(vf->priv->dmpi->bpp/8);
+	    mpi->planes[0]=vf->dmpi->planes[0]+
+		vf->priv->exp_y*vf->dmpi->stride[0]+
+		vf->priv->exp_x*(vf->dmpi->bpp/8);
 	}
-	mpi->stride[0]=vf->priv->dmpi->stride[0];
-	mpi->width=vf->priv->dmpi->width;
+	mpi->stride[0]=vf->dmpi->stride[0];
+	mpi->width=vf->dmpi->width;
 	mpi->flags|=MP_IMGFLAG_DIRECT;
 	mpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
-//	vf->priv->dmpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
+//	vf->dmpi->flags&=~MP_IMGFLAG_DRAW_CALLBACK;
     }
 }
 
@@ -247,12 +246,12 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
     }
     // they want slices!!! allocate the buffer.
     if(!mpi->priv)
-	mpi->priv=vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 //	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 	    mpi->type, mpi->flags, 
             MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
             MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
-    if(!(vf->priv->dmpi->flags&MP_IMGFLAG_DRAW_CALLBACK))
+    if(!(vf->dmpi->flags&MP_IMGFLAG_DRAW_CALLBACK))
 	printf("WARNING! next filter doesn't support SLICES, get ready for sig11...\n"); // shouldn't happen.
 }
 
@@ -264,16 +263,16 @@ static void draw_slice(struct vf_instance_s* vf,
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT || mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
-	vf->priv->dmpi=mpi->priv;
-	if(!vf->priv->dmpi) { printf("Why do we get NULL \n"); return 0; }
+	vf->dmpi=mpi->priv;
+	if(!vf->dmpi) { printf("Why do we get NULL \n"); return 0; }
 	mpi->priv=NULL;
 	if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK){
 	    if(vf->priv->exp_y>0)
-		vf_next_draw_slice(vf, vf->priv->dmpi->planes, vf->priv->dmpi->stride,
-		vf->priv->dmpi->w,vf->priv->exp_y,0,0);
-	    if(vf->priv->exp_y+mpi->h<vf->priv->dmpi->h)
-		vf_next_draw_slice(vf, vf->priv->dmpi->planes, vf->priv->dmpi->stride,
-		vf->priv->dmpi->w,vf->priv->dmpi->h-(vf->priv->exp_y+mpi->h),
+		vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
+		vf->dmpi->w,vf->priv->exp_y,0,0);
+	    if(vf->priv->exp_y+mpi->h<vf->dmpi->h)
+		vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
+		vf->dmpi->w,vf->dmpi->h-(vf->priv->exp_y+mpi->h),
 		0,vf->priv->exp_y+mpi->h);
 	}
 #ifdef OSD_SUPPORT
@@ -281,40 +280,40 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 #endif
 	// we've used DR, so we're ready...
 	if(!(mpi->flags&MP_IMGFLAG_PLANAR))
-	    vf->priv->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
-	return vf_next_put_image(vf,vf->priv->dmpi);
+	    vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
+	return vf_next_put_image(vf,vf->dmpi);
     }
 
     // hope we'll get DR buffer:
-    vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 	vf->priv->exp_w, vf->priv->exp_h);
     
     // copy mpi->dmpi...
     if(mpi->flags&MP_IMGFLAG_PLANAR){
-	memcpy_pic(vf->priv->dmpi->planes[0]+
-	        vf->priv->exp_y*vf->priv->dmpi->stride[0]+vf->priv->exp_x,
+	memcpy_pic(vf->dmpi->planes[0]+
+	        vf->priv->exp_y*vf->dmpi->stride[0]+vf->priv->exp_x,
 		mpi->planes[0], mpi->w, mpi->h,
-		vf->priv->dmpi->stride[0],mpi->stride[0]);
-	memcpy_pic(vf->priv->dmpi->planes[1]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->priv->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift),
+		vf->dmpi->stride[0],mpi->stride[0]);
+	memcpy_pic(vf->dmpi->planes[1]+
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[1]+(vf->priv->exp_x>>mpi->chroma_x_shift),
 		mpi->planes[1], mpi->chroma_width, mpi->chroma_height,
-		vf->priv->dmpi->stride[1],mpi->stride[1]);
-	memcpy_pic(vf->priv->dmpi->planes[2]+
-		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->priv->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift),
+		vf->dmpi->stride[1],mpi->stride[1]);
+	memcpy_pic(vf->dmpi->planes[2]+
+		(vf->priv->exp_y>>mpi->chroma_y_shift)*vf->dmpi->stride[2]+(vf->priv->exp_x>>mpi->chroma_x_shift),
 		mpi->planes[2], mpi->chroma_width, mpi->chroma_height,
-		vf->priv->dmpi->stride[2],mpi->stride[2]);
+		vf->dmpi->stride[2],mpi->stride[2]);
     } else {
-	memcpy_pic(vf->priv->dmpi->planes[0]+
-	        vf->priv->exp_y*vf->priv->dmpi->stride[0]+vf->priv->exp_x*(vf->priv->dmpi->bpp/8),
-		mpi->planes[0], mpi->w*(vf->priv->dmpi->bpp/8), mpi->h,
-		vf->priv->dmpi->stride[0],mpi->stride[0]);
-	vf->priv->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
+	memcpy_pic(vf->dmpi->planes[0]+
+	        vf->priv->exp_y*vf->dmpi->stride[0]+vf->priv->exp_x*(vf->dmpi->bpp/8),
+		mpi->planes[0], mpi->w*(vf->dmpi->bpp/8), mpi->h,
+		vf->dmpi->stride[0],mpi->stride[0]);
+	vf->dmpi->planes[1] = mpi->planes[1]; // passthrough rgb8 palette
     }
 #ifdef OSD_SUPPORT
     if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
-    return vf_next_put_image(vf,vf->priv->dmpi);
+    return vf_next_put_image(vf,vf->dmpi);
 }
 
 //===========================================================================//

@@ -17,6 +17,8 @@
 #include "mp_image.h"
 #include "vf.h"
 
+#include "../libvo/fastmemcpy.h"
+
 extern vf_info_t vf_info_vo;
 extern vf_info_t vf_info_rectangle;
 #ifndef HAVE_NO_POSIX_SELECT
@@ -479,7 +481,25 @@ int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){
 }
 
 void vf_next_draw_slice(struct vf_instance_s* vf,unsigned char** src, int * stride,int w, int h, int x, int y){
-    vf->next->draw_slice(vf->next,src,stride,w,h,x,y);
+    if (vf->next->draw_slice) {
+	vf->next->draw_slice(vf->next,src,stride,w,h,x,y);
+	return;
+    }
+    if (!vf->dmpi) {
+	mp_msg(MSGT_VFILTER,MSGL_ERR,"draw_slice: dmpi not stored by vf_%s\n", vf->info->name);
+	return;
+    }
+    if (!(vf->dmpi->flags & MP_IMGFLAG_PLANAR)) {
+	memcpy_pic(vf->dmpi->planes[0]+y*vf->dmpi->stride[0]+vf->dmpi->bpp/8*x,
+	    src[0], vf->dmpi->bpp/8*w, h, vf->dmpi->stride[0], stride);
+	return;
+    }
+    memcpy_pic(vf->dmpi->planes[0]+y*vf->dmpi->stride[0]+x, src[0],
+	w, h, vf->dmpi->stride[0], stride[0]);
+    memcpy_pic(vf->dmpi->planes[1]+(y>>vf->dmpi->chroma_y_shift)*vf->dmpi->stride[1]+(x>>vf->dmpi->chroma_x_shift),
+	src[1], w>>vf->dmpi->chroma_x_shift, h>>vf->dmpi->chroma_y_shift, vf->dmpi->stride[1], stride[1]);
+    memcpy_pic(vf->dmpi->planes[2]+(y>>vf->dmpi->chroma_y_shift)*vf->dmpi->stride[2]+(x>>vf->dmpi->chroma_x_shift),
+	src[2], w>>vf->dmpi->chroma_x_shift, h>>vf->dmpi->chroma_y_shift, vf->dmpi->stride[2], stride[2]);
 }
 
 //============================================================================

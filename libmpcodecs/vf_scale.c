@@ -24,7 +24,6 @@ static struct vf_priv_s {
     unsigned int fmt;
     struct SwsContext *ctx;
     unsigned char* palette;
-    mp_image_t *dmpi;
 } vf_priv_dflt = {
   -1,-1,
   0,
@@ -228,7 +227,7 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
 //    printf("start_slice called! flag=%d\n",mpi->flags&MP_IMGFLAG_DRAW_CALLBACK);
     if(!(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)) return; // shouldn't happen
     // they want slices!!! allocate the buffer.
-    mpi->priv=vf->priv->dmpi=vf_get_image(vf->next,vf->priv->fmt,
+    mpi->priv=vf->dmpi=vf_get_image(vf->next,vf->priv->fmt,
 //	mpi->type, mpi->flags & (~MP_IMGFLAG_DRAW_CALLBACK),
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 	vf->priv->w, vf->priv->h);
@@ -236,7 +235,7 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
 
 static void draw_slice(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y){
-    mp_image_t *dmpi=vf->priv->dmpi;
+    mp_image_t *dmpi=vf->dmpi;
     if(!dmpi){
 	mp_msg(MSGT_VFILTER,MSGL_FATAL,"vf_scale: draw_slice() called with dmpi=NULL (no get_image??)\n");
 	return;

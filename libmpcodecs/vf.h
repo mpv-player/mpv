@@ -44,6 +44,7 @@ typedef struct vf_instance_s {
     // data:
     vf_image_context_t imgctx;
     struct vf_instance_s* next;
+    mp_image_t *dmpi;
     struct vf_priv_s* priv;
 } vf_instance_t;
 
