@@ -203,10 +203,10 @@ directory (e.g.\& /etc/\:mplayer or /usr/\:local/\:etc/\:mplayer), the user
 specific one is '~/\:.mplayer/\:config'.
 User specific options override system\-wide options and options given on the
 command line override either.
-The syntax of the configuration files is 'option=<value>', everything after a
-\'#' is considered a comment.
-Options that work without values can be enabled by setting them to 'yes' or
-\'1' and disabled by setting them to 'no' or '0'.
+The syntax of the configuration files is 'option=<value>', everything after
+a '#' is considered a comment.
+Options that work without values can be enabled by setting them to 'yes'
+or '1' and disabled by setting them to 'no' or '0'.
 Even suboptions can be specified in this way.
 
 .I EXAMPLE:
@@ -462,8 +462,8 @@ Read commands from the given file.
 Mostly useful with a fifo.
 .br
 .I NOTE:
-When the given file is a fifo MPlayer opens both ends so you can do several
-\'echo "seek 10" > mp_pipe\' and the pipe will stay valid.
+When the given file is a fifo MPlayer opens both ends so you can do
+several 'echo "seek 10" > mp_pipe' and the pipe will stay valid.
 .RE
 .PD 1
 .
@@ -740,9 +740,9 @@ Play/\:convert only first <number> frames, then quit.
 .B \-hr\-mp3\-seek (MP3 only)
 Hi\-res mp3 seeking.
 Default is: enabled when playing from external MP3 file, as we need to seek
-to the very exact position to keep A/\:V sync.  It can be slow especially when
-seeking backwards \- it has to rewind to the beginning to find the exact
-frame.
+to the very exact position to keep A/\:V sync.
+It can be slow especially when seeking backwards \- it has to rewind to the
+beginning to find the exact frame.
 .TP
 .B \-idx (also see \-forceidx)
 Rebuilds INDEX of the AVI if no INDEX was found,
@@ -886,8 +886,8 @@ seeks to 1\ hour 10\ min
 .
 .TP
 .B \-tv <option1:option2:...>
-This option tunes various properties of tv-capture module.  For
-watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>' 
+This option tunes various properties of tv-capture module.
+For watching TV with MPlayer, use 'tv://' or 'tv://<channel_number>' 
 or even 'tv://<channel_name> (see option channels for channel_name below)
 as a movie URL.
 
@@ -1151,8 +1151,9 @@ Selects Hungarian and falls back to English if Hungarian is not available.
 .
 .TP
 .B \-sub <subtitle\-file1,subtitle\-file2,...>
-Use/\:display these subtitle files.  Only one file can be displayed 
-at the same time and the files can be switched with 'j'. 
+Use/\:display these subtitle files.
+Only one file can be displayed at the same time and the files can be
+switched with 'j'. 
 .TP
 .B \-sub-bg-alpha <0\-255>
 Specify the alpha channel value for subtitles and OSD backgrounds.
@@ -1285,8 +1286,8 @@ load all subs in the current directory
 .TP
 .B \-vobsub <vobsub\ file\ without\ extension>
 Specify the VobSub files that are to be used for subtitle.
-This is the full pathname without extensions, i.e.\& without the '.idx',
-\'.ifo' or '.sub'.
+This is the full pathname without extensions, i.e.\& without
+the '.idx', '.ifo' or '.sub'.
 .TP
 .B \-vobsubid <0-31>
 Specify the VobSub subtitle id.
@@ -1297,10 +1298,11 @@ Values are the same as for -subalign, with the extra choice -1 for original
 position.
 .TP
 .B \-spuaa <mode>
-Antialiasing/scaling mode for DVD/VobSub.  A value of 16 may be added
-to mode in order to force scaling even when original and scaled frame
-size already match, for example to smooth subtitles with the gaussian
-blur.  The available modes are:
+Antialiasing/scaling mode for DVD/VobSub.
+A value of 16 may be added to mode in order to force scaling even
+when original and scaled frame size already match, for example to
+smooth subtitles with the gaussian blur.
+The available modes are:
 .PD 0
 .RSs
 .IPs 0
@@ -1318,8 +1320,9 @@ uses swscaler gaussian blur (looks very good)
 .
 .TP
 .B \-spugauss <0.0\-3.0>
-Variance parameter of gaussian used by -spuaa 4.  Higher means more
-blur.  The default is 1.0.
+Variance parameter of gaussian used by -spuaa 4.
+Higher means more blur.
+The default is 1.0.
 
 
 .SH "AUDIO OUTPUT OPTIONS (MPLAYER ONLY)"
@@ -1330,7 +1333,7 @@ Override audio driver/\:card buffer size detection, \-ao oss only
 .B \-ao <driver1[:device],driver2,...[,]>
 Specify a priority list of audio output drivers (optionally with device) to be
 used.
-\'device' is valid with SDL, too, it means subdriver then.
+With SDL 'device' is valid, too, it means subdriver then.
 
 .I NOTE:
 .br
@@ -1587,8 +1590,9 @@ Try this option if you still experience fullscreen problems.
 Specify a priority list of fullscreen layer setting modes to be
 used.
 
-The default order is "layer,stays_on_top,above,fullscreen".  It will be used
-as a fallback in case of specifying incorrect or unsupported modes.
+The default order is "layer,stays_on_top,above,fullscreen".
+It will be used as a fallback in case of specifying incorrect
+or unsupported modes.
 .br
 If you experience problems with fullscreen window being covered by other
 windows try using a different order.
@@ -1749,7 +1753,7 @@ dga, x11/\:xv (XF86VidMode) and sdl output drivers support it.
 .B \-vo <driver1[:device],driver2,...[,]>
 Specify a priority list of video output drivers (optionally with device) to be
 used.
-\'device' is valid with SDL and GGI, too, it means subdriver then.
+With SDL and GGI 'device' is valid, too, it means subdriver then.
 
 .I NOTE:
 .br
@@ -2503,8 +2507,8 @@ Fast software YV12 to MPEG1 conversion with libfame for use with DVB/\:DXR3.
 .TP
 .B dvbscale[=aspect]
 Set up optimal scaling for DVB cards, scaling the X axis in hardware and
-calculating the Y axis scaling in software to keep aspect.  It's only useful
-together with expand+scale
+calculating the Y axis scaling in software to keep aspect.
+It's only useful together with expand+scale
 (\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc).
 .RSs
 .IPs aspect
@@ -2566,8 +2570,9 @@ Initial values in the range -100 \- 100 may be given on the command line.
 .B eq2[=gamma:contrast:brightness:saturation:rg:gg:bg]
 Alternative software equalizer that uses lookup tables (very slow),
 allowing gamma correction in addition to simple brightness,
-contrast and saturation adjustment.  Note that it uses the same MMX
-optimized code as \-vf eq if all gamma values are 1.0.
+contrast and saturation adjustment.
+Note that it uses the same MMX optimized code as \-vf eq if all
+gamma values are 1.0.
 The parameters are given as floating point values.
 Parameters rg, gg, bg are the independent gamma values for the Red, Green
 and Blue components.
@@ -2667,34 +2672,38 @@ swap fields (exchange even & odd lines)
 .TP
 .B "field[=n]"
 Extracts a single field from an interlaced image using stride arithmetic
-to avoid wasting CPU time.  The optional argument n specifies whether
-to extract the even or the odd field (depending on whether n is even
-or odd).
+to avoid wasting CPU time.
+The optional argument n specifies whether to extract the even or the odd
+field (depending on whether n is even or odd).
 .TP
 .B "detc[=var1=value2:var2=value2:...]"
 Attempts to reverse the "telecine" process to recover a clean,
-non-interlaced stream at film framerate.  This filter is still
-experimental but seems to be usable.  Please be aware that there is
-absolutely no use in this filter unless you see interlacing when
-playing the movie! The following arguments (see syntax above) may be
-used to control its behavior:
+non-interlaced stream at film framerate.
+This filter is still experimental but seems to be usable.
+Please be aware that there is absolutely no use in this filter
+unless you see interlacing when playing the movie!
+The following arguments (see syntax above) may be used to control
+its behavior:
 .RSs
 .IPs dr
-Set the frame dropping mode.  0 (default) means don't drop frames
-to maintain fixed output framerate.  1 means always drop a frame when
-there have been no drops or telecine merges in the past 5 frames.  2
-means always maintain exact 5:4 input to output frame ratio.  (Note:
-use mode 1 with MEncoder!)
+Set the frame dropping mode.
+0 (default) means don't drop frames to maintain fixed output framerate.
+1 means always drop a frame when there have been no drops or telecine
+merges in the past 5 frames.
+2 means always maintain exact 5:4 input to output frame ratio.
+(Note: use mode 1 with MEncoder!)
 .IPs am
-Analysis mode.  Available values are 0 (fixed pattern with initial
-frame number specified by fr=#) and 1 (agressive search for telecine
-pattern).  Default is 1.
+Analysis mode.
+Available values are 0 (fixed pattern with initial frame number
+specified by fr=#) and 1 (agressive search for telecine pattern).
+Default is 1.
 .IPs fr
-Set initial frame number in sequence.  0-2 are the three clean
-progressive frames; 3 and 4 are the two interlaced frames.  The
-default, -1, means "not in telecine sequence".  The number specified
-here is the type for the imaginary previous frame before the movie
-starts.
+Set initial frame number in sequence.
+0-2 are the three clean progressive frames; 3 and 4 are the two
+interlaced frames.
+The default, -1, means "not in telecine sequence".
+The number specified here is the type for the imaginary previous
+frame before the movie starts.
 .IPs tr0, tr1, tr2, tr3
 Threshold values to be used in certain modes.
 .RE
@@ -2712,18 +2721,21 @@ As with detc, you must specify the correct output framerate (-ofps
 23.976) when using mencoder.
 .TP
 .B "telecine[=start]"
-Apply 3:2 "telecine" process to increase framerate by 20%.  This most
-likely will not work correctly with mplayer, but it can be used
-with 'mencoder -fps 29.97 -ofps 29.97 -vf telecine'.  Both fps options
-are essential! (A/V sync will break if they are wrong.) The optional start
-parameter tells the filter where in the telecine pattern to start
-(0-3).
+Apply 3:2 "telecine" process to increase framerate by 20%.
+This most likely will not work correctly with mplayer, but it can
+be used with 'mencoder -fps 29.97 -ofps 29.97 -vf telecine'.
+Both fps options are essential!
+(A/V sync will break if they are wrong.)
+The optional start parameter tells the filter where in the telecine
+pattern to start (0-3).
 .TP
 .B "tfields[=mode]"
 Temporal field separation -- split fields into frames, doubling the
-output framerate.  Like the telecine filter, "tfields" will only work
-properly with mencoder, and only if both -fps and -ofps are set to the
-desired (double) framerate! Available modes are:
+output framerate.
+Like the telecine filter, "tfields" will only work properly with
+MEncoder, and only if both -fps and -ofps are set to the
+desired (double) framerate!
+Available modes are:
 .PD 0
 .RSs
 .IPs 0
@@ -3118,8 +3130,8 @@ First encode with pass=1, then with the same parameters, encode with
 pass=2.
 .TP
 .B vbrpass=<0\-2>
-Override the pass argument and use XviD VBR Library instead of DivX4
-VBR.  Available options are:
+Override the pass argument and use XviD VBR Library instead of DivX4 VBR.
+Available options are:
 .
 .RSs
 .IPs 0
@@ -3327,8 +3339,10 @@ sane range for MPEG4
 .PD 1
 .TP
 .B vme=<0\-5>
-motion estimation method.  Note: 0\-3 currently ignores the amount of Bits
-spent, so quality may be low.  Available methods are:
+motion estimation method.
+Note: 0\-3 currently ignores the amount of Bits spent,
+so quality may be low.
+Available methods are:
 .PD 0
 .RSs
 .IPs 0
@@ -3646,11 +3660,12 @@ Each video packet will be encoded in 3 separate partitions:
 .PD 1
 .TP
 .B
-MV & DC are most important, loosing them looks far worse than loosing the
-AC and the 1. & 2. partition.  (MV&DC) are far smaller than the 3. partition
-(AC) meaning that errors will hit the AC partition much more often than the
-MV&DC partitions.  Thus, the picture will look better with partitioning than
-without, as without partitioning an error will trash AC/DC/MV equally.
+MV & DC are most important, loosing them looks far worse than loosing
+the AC and the 1. & 2. partition.
+(MV&DC) are far smaller than the 3. partition (AC) meaning that errors
+will hit the AC partition much more often than the MV&DC partitions.
+Thus, the picture will look better with partitioning than without,
+as without partitioning an error will trash AC/DC/MV equally.
 .TP
 .B vpsize=<0\-10000>
 video packet size, improves error-resistance (see \-vdpart option too):
@@ -4025,7 +4040,8 @@ this is *not* the 2pass control file
 .RE
 
 The folowing options are only available with the unstable (cvs -HEAD)
-version of XviD.  Be warned that these options are experimental and may
+version of XviD.
+Be warned that these options are experimental and may
 not work as intended.
 .TP
 .B packed
