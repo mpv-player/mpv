@@ -870,11 +870,16 @@ void demux_open_real(demuxer_t* demuxer)
     int a_streams=0;
     int v_streams=0;
     int i;
+    int header_size;
 
-    stream_skip(demuxer->stream, 4); /* header size */
-    stream_skip(demuxer->stream, 2); /* version */
-//    stream_skip(demuxer->stream, 4);
-    i = stream_read_dword(demuxer->stream);
+    header_size = stream_read_dword(demuxer->stream); /* header size */
+    mp_msg(MSGT_DEMUX,MSGL_V, "real: Header size: %d\n", header_size);
+    i = stream_read_word(demuxer->stream); /* version */
+    mp_msg(MSGT_DEMUX,MSGL_V, "real: Header object version: %d\n", i);
+    if (header_size == 0x10)
+    	i = stream_read_word(demuxer->stream);
+    else /* we should test header_size here too. */
+    	i = stream_read_dword(demuxer->stream);
     mp_msg(MSGT_DEMUX,MSGL_V, "real: File version: %d\n", i);
     num_of_headers = stream_read_dword(demuxer->stream);
 //    stream_skip(demuxer->stream, 4); /* number of headers */
