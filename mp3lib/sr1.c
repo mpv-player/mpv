@@ -409,8 +409,8 @@ void MP3_Init(){
        Note: It's ok, Since K8 will have SSE2 support and will much faster
        of P4 ;) 
      */
-      printf( "mp3lib: Using SSE%s! optimized decore.\n",(_isse>1?"2":""));
-//      printf( "mp3lib: Using Pentium%s optimized decore.\n",(_i586>1?"-MMX":""));
+//      printf( "mp3lib: Using SSE%s! optimized decore.\n",(_isse>1?"2":""));
+      printf( "mp3lib: Using Pentium%s optimized decore.\n",(_i586>1?"-MMX":""));
     else
     if(_3dnow)
       printf( "mp3lib: Using AMD 3dnow%s! optimized decore.\n",(_3dnow>1?"-dsp(k7)":""));
@@ -443,14 +443,14 @@ void MP3_Init(){
     tables_done_flag=1;
 
     dct36_func=dct36;
-#ifdef HAVE_SSE
+/*#ifdef HAVE_SSE
   if(_isse)
   {
     synth_func=synth_1to1_MMX;
     dct64_MMX_func=dct64_MMX_sse;
   }    
   else
-#endif
+#endif*/
 #ifdef HAVE_3DNOWEX
   if ( _3dnow > 1 )
   {
@@ -518,7 +518,7 @@ void MP3_Init(){
     tables_done_flag=1;
 
     dct36_func=dct36;
-#ifdef HAVE_SSE
+/*#ifdef HAVE_SSE
   if(gCpuCaps.hasSSE)
   {
     synth_func=synth_1to1_MMX;
@@ -526,7 +526,7 @@ void MP3_Init(){
     printf("mp3lib: using SSE optimized decore!\n");
   }    
   else
-#endif
+#endif*/
 #ifdef HAVE_3DNOWEX
   if (gCpuCaps.has3DNowExt)
   {

@@ -1,9 +1,13 @@
-# This code is a translation of dct64_k7.s from MPlayer.
-# Coded by Felix Buenemann <atmosfear at users.sourceforge.net>
-#
-# TODO: - fix phases 4 and 5 (sse)
-#       - optimize scalar FPU code? (interleave with sse code)
-#
+/ This code is a translation of dct64_k7.s from MPlayer.
+/ Coded by Felix Buenemann <atmosfear at users.sourceforge.net>
+/
+/ TODO: - fix phases 4 and 5 (sse)
+/       - optimize scalar FPU code? (interleave with sse code)
+/       - fix alignment (prohibits finishing this code)
+/       - then use faster insns for aligned data
+/
+/ Note: currently code is disabled as I couldn't get input data aligned!
+/
 
 //.data
 //	.align 8
