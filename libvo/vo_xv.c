@@ -58,7 +58,7 @@ LIBVO_EXTERN(xv)
 static void allocate_xvimage(int);
 static unsigned int ver,rel,req,ev,err;
 static unsigned int formats, adaptors,i,xv_port,xv_format;
-static XvAdaptorInfo        *ai;
+static XvAdaptorInfo        *ai = NULL;
 static XvImageFormatValues  *fo;
 
 static int current_buf=0;
@@ -728,7 +728,8 @@ static void uninit(void)
 {
  int i;
  if ( !vo_config_count ) return;
- free( ai );
+ XvFreeAdaptorInfo(ai);
+ ai = NULL;
  saver_on(mDisplay); // screen saver back on
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
 #ifdef HAVE_XF86VM
