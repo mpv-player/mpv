@@ -9,48 +9,46 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-"Pou¾ití:   mplayer [pøepínaèe] [cesta/]jmenosouboru\n"
+"Pou¾ití:          mplayer [pøepínaèe] [url|cesta/]jméno_souboru\n"
 "\n"
-"Pøepínaèe:\n"
-" -vo <drv[:dev]> výbìr výstupního video ovladaèe&zaøízení (-vo help pro seznam)\n"
-" -ao <drv[:dev]> výbìr výstupního audio ovladaèe&zaøízení (-ao help pro seznam)\n"
-" -vcd <trackno>  pøehrát VCD (video cd) stopu ze zaøízení místo ze souboru\n"
+"Základní pøepínaèe: (kompletní seznam je v manuálové stránce)\n"
+" -vo <ovl[:zaø]>  výbìr výst. video ovladaèe a zaøízení (-vo help pro seznam)\n"
+" -ao <ovl[:zaø]>  výbìr výst. audio ovladaèe a zaøízení (-ao help pro seznam)\n"
+#ifdef HAVE_VCD
+" -vcd <èíslo>     pøehrát VCD (Video CD) stopu ze zaøízení místo ze souboru\n"
+#endif
 #ifdef HAVE_LIBCSS
-" -dvdauth <dev>  urèení DVD zaøízení pro autentizaci (pro kódované disky)\n"
+" -dvdauth <zaø>   urèení DVD zaøízení pro autentikaci (pro kódované disky)\n"
 #endif
 #ifdef USE_DVDREAD
-" -dvd <titleno>  pøehrát DVD titul/stopu ze zaøízení (mechaniky) místo souboru\n"
+" -dvd <èíslo>     pøehrát DVD titul ze zaøízení (mechaniky), místo ze souboru\n"
+" -alang/-slang    zvolit jazyk audia/titulkù na DVD (dvouznakový kód zemì)\n"
 #endif
-" -ss <timepos>   posun na pozici (sekundy nebo hh:mm:ss)\n"
-" -nosound        pøehrávat beze zvuku\n"
-#ifdef USE_FAKE_MONO
-" -stereo <mode>  výbìr audiokanálu pro MPEG1 (0:stereo 1:levý 2:pravý)\n"
-#endif
-" -channels <n>   cílový poèet zvukových výstupních kanálù\n"
-" -fs -vm -zoom   volby pro pøehrávání pøes celou obrazovku (celá obrazovka\n                 mìnit videore¾im, softwarový zoom)\n"
-" -x <x> -y <y>   zvìt¹ení obrazu na rozmìr <x>*<y> (pokud to umí -vo ovladaè!)\n"
-" -sub <file>     volba souboru s titulky (viz také -subfps, -subdelay)\n"
-" -playlist <file> urèení souboru se seznamem pøehrávaných souborù\n"
-" -vid x -aid y   výbìr èísla video (x) a audio (y) proudu pro pøehrání\n"
-" -fps x -srate y volba pro zmìnu video (x fps) a audio (y Hz) frekvence\n"
-" -pp <quality>   aktivace postprocesing filtru (0-4 pro DivX, 0-63 pro mpegy)\n"
-" -nobps          pou¾ít alternativní A-V synchronizaèní metodu pro Avi soubory\n"
-" -framedrop      povolit zahazování snímkù (pro pomalé stroje)\n"
-" -wid <window id> pou¾ít existující okno pro výstup videa\n"
+" -ss <timepos>    posun na danou pozici (sekundy nebo hh:mm:ss)\n"
+" -nosound         pøehrávat beze zvuku\n"
+" -fs              celoobrazovkové pøehrávání (nebo -vm -zoom, viz manuál)\n"
+" -x <x> -y <y>    rozli¹ení zobrazování (pro pou¾ití s -vm èi -zoom)\n"
+" -sub <soubor>    volba souboru s titulky (viz také -subfps, -subdelay)\n"
+" -playlist <soubor> urèení souboru s playlistem\n"
+" -vid x -aid y    výbìr èísla video (x) a audio (y) proudu pro pøehrání\n"
+" -fps x -srate y  zmìna video (x fps) a audio (y Hz) frekvence\n"
+" -pp <quality>    aktivace postprocesing filtru (podrobnosti v manuálu)\n"
+" -framedrop       povolit zahazování snímkù (pro pomalé stroje)\n"
 "\n"
-"Klávesy:\n"
-" <-  nebo  ->    posun vzad/vpøed o 10 sekund\n"
-" nahoru èi dolù  posun vzad/vpøed o  1 minutu\n"
-" < nebo >        posun vzad/vpøed v seznamu pøehrávaných souborù\n"
-" p nebo mezerník pauza pøi pøehrávání (pokraèování stiskem kterékoliv klávesy)\n"
-" q nebo ESC      konec pøehrávání a ukonèení programu\n"
-" + nebo -        upravit zpo¾dìní zvuku v krocích +/- 0.1 sekundy\n"
-" o               cyklická zmìna re¾imu OSD: nic / pozice / pozice a èas/\n"
-"                                            / pozice, procenta a celková délka\n"
-" * nebo /        pøidat nebo ubrat hlasitost (stiskem 'm' výbìr master/pcm)\n"
-" z nebo x        upravit zpo¾dìní titulkù v krocích +/- 0.1 sekundy\n"
+"Základní klávesy: (kompletní seznam je v manuálu, viz také input.conf)\n"
+" <-  nebo  ->     posun vzad/vpøed o 10 sekund\n"
+" nahoru èi dolù   posun vzad/vpøed o  1 minutu\n"
+" pgup èi pgdown   posun vzad/vpøed o 10 minut\n"
+" < nebo >         posun vzad/vpøed v playlistu\n"
+" p nebo mezerník  pauza pøi pøehrávání (pokraèování stiskem kterékoliv klávesy)\n"
+" q nebo ESC       konec pøehrávání a ukonèení programu\n"
+" + nebo -         upravit zpo¾dìní zvuku v krocích +/- 0,1 sekundy\n"
+" o                cyklická zmìna re¾imu OSD: nic / pozice / pozice a èas/\n"
+" * nebo /         pøidat nebo ubrat PCM hlasitost\n"
+" z nebo x         upravit zpo¾dìní titulkù v krocích +/- 0,1 sekundy\n"
+" r nebo t         upravit polohu titulkù nahoru/dolù, viz také -vop expand\n"
 "\n"
-" * * * * PØEÈTÌTE SI MAN STRÁNKU PRO DETAILY (DAL©Í VOLBY A KLÁVESY)! * * * *\n"
+" * * * V MAN STRÁNCE NAJDETE PODROBNOSTI, DAL©Í PARAMETRY A KLÁVESY * * *\n"
 "\n";
 #endif
 
@@ -63,8 +61,8 @@ static char help_text[]=
 #define MSGTR_Exit_eof "Konec souboru"
 #define MSGTR_Exit_error "Záva¾ná chyba"
 #define MSGTR_IntBySignal "\nMPlayer pøeru¹en signálem %d v modulu: %s \n"
-#define MSGTR_NoHomeDir "Nemohu nalézt domácí (HOME) adresáø\n"
-#define MSGTR_GetpathProblem "get_path(\"config\") problém\n"
+#define MSGTR_NoHomeDir "Nemohu nalézt domácí (HOME) adresáø.\n"
+#define MSGTR_GetpathProblem "problém s get_path(\"config\")\n"
 #define MSGTR_CreatingCfgFile "Vytváøím konfiguraèní soubor: %s\n"
 #define MSGTR_InvalidVOdriver "Neplatné jméno výstupního video ovladaèe: %s\nPou¾ijte '-vo help' pro seznam dostupných ovladaèù.\n"
 #define MSGTR_InvalidAOdriver "Neplatné jméno výstupního audio ovladaèe: %s\nPou¾ijte '-ao help' pro seznam dostupných ovladaèù.\n"
@@ -77,7 +75,7 @@ static char help_text[]=
 #define MSGTR_DVDauthOk "DVD autentizaèní sekvence vypadá vpoøádku.\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: Kritická chyba: po¾adovaný proud chybí!\n"
 #define MSGTR_CantOpenDumpfile "Nelze otevøít soubor pro dump!!!\n"
-#define MSGTR_CoreDumped "jádro vypsáno :)\n"
+#define MSGTR_CoreDumped "Jádro vydumpováno ;)\n"
 #define MSGTR_FPSnotspecified "V hlavièce souboru není udáno (nebo je ¹patné) FPS! Pou¾ijte volbu -fps !\n"
 #define MSGTR_TryForceAudioFmtStr "Pokou¹ím se vynutit rodinu audiokodeku %s ...\n"
 #define MSGTR_CantFindAfmtFallback "Nemohu nalézt audio kodek pro po¾adovanou rodinu, pou¾iji ostatní.\n"
@@ -85,7 +83,7 @@ static char help_text[]=
 #define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Pokuste se upgradovat %s z etc/codecs.conf\n*** Pokud problém pøetrvá, pak si pøeètìte DOCS/CODECS!\n"
 #define MSGTR_CouldntInitAudioCodec "Nelze inicializovat audio kodek! -> beze zvuku\n"
 #define MSGTR_TryForceVideoFmtStr "Poku¹ím se vynutit rodinu videokodeku %s ...\n"
-#define MSGTR_CantFindVideoCodec "Nemohu nalézt kodek pro video formát 0x%X !\n"
+#define MSGTR_CantFindVideoCodec "Nemohu nalézt kodek pro vybraný -vo a video formát 0x%X !\n"
 #define MSGTR_VOincompCodec "Bohu¾el, vybrané video_out zaøízení je nekompatibilní s tímto kodekem.\n"
 #define MSGTR_CannotInitVO "Kritická chyba: Nemohu inicializovat video driver!\n"
 #define MSGTR_CannotInitAO "nemohu otevøít/inicializovat audio driver -> TICHO\n"
@@ -94,28 +92,31 @@ static char help_text[]=
 #define MSGTR_SystemTooSlow "\n\n"\
 "         ***********************************************************\n"\
 "         ****  Vá¹ systém je pøíli¹ POMALÝ pro toto pøehrávání! ****\n"\
-"         ***********************************************************\n"\
-"!!! Mo¾né pøíèiny, problémy a øe¹ení:\n"\
-"- Nejèastìj¹í: ¹patný/chybný _zvukový_ ovladaè. Øe¹ení: zkuste -ao sdl\n"\
-"  nebo pou¾ijte ALSA 0.5 èi oss emulaci z ALSA 0.9. Více tipù se dozvíte\n"\
-"  v souboru DOCS/sound.html!\n"\
-"- Pomalý video výstup. Zkuste jiný -vo ovladaè (pro seznam: -vo help) nebo zkuste\n"\
-"  volbu -framedrop ! Tipy pro ladìní/zrychlení videa jsou v DOCS/video.html\n"\
-"- Pomalé cpu. Nezkou¹ejte pøehrávat velké dvd/divx na pomalém cpu!\n"\
-"  Zkuste volbu -hardframedrop\n"\
-"- Po¹kozený soubor. Zkuste rùzné kombinace tìchto voleb:\n"\
-"  -nobps  -ni  -mc 0  -forceidx\n"\
-"- Pøi pøehrávání z pomalých médií (nfs/smb, dvd, vcd etc) zkuste -cache 8192\n"\
-"- Pou¾íváte -cache pro neprokládaní AVI soubory? Zkuste -nocache.\n"\
-"Pokud nic z toho není pravda, pøeètìte si DOCS/bugreports.html!\n\n"
+"         ***********************************************************\n\n"\
+"Mo¾né pøíèiny, problémy a øe¹ení:\n"\
+"- Nejèastìj¹í: ¹patný/chybný _zvukový_ ovladaè\n!"\
+"  - Zkuste -ao sdl nebo pou¾ijte ALSA 0.5 èi oss emulaci z ALSA 0.9.\n"\
+"  - Pohrajte si s rùznými hodnotami -audiosync, pro zaèátek tøeba 30.\n"\
+"- Pomalý video výstup\n"\
+"  - Zkuste jiný -vo ovladaè (pro seznam: -vo help) nebo zkuste -framedrop!\n"\
+"- Pomalá CPU\n"\
+"  - Nezkou¹ejte pøehrávat velké DVD/DivX na pomalém procesoru! Zkuste -hardframedrop.\n"\
+"- Po¹kozený soubor.\n"\
+"  - Zkuste rùzné kombinace tìchto voleb: -nobps -ni -forceidx -mc 0.\n"\
+"- Pøi pøehrávání z pomalých médií (NFS/SMB, DVD, VCD, atd.)\n"\
+"  - Zkuste -cache 8192.\n"\
+"- Pou¾íváte -cache pro neprokládané AVI soubory?\n"\
+"  - Zkuste -nocache.\n"\
+"Tipy na vyladìní a zrychlení najdete v DOCS/video.html a DOCS/sound.html.\n"\
+"Pokud nic z toho nepomù¾e, pøeètìte si DOCS/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer byl pøelo¾en BEZ podpory GUI!\n"
-#define MSGTR_GuiNeedsX "MPlayer GUI vy¾aduje X11!\n"
+#define MSGTR_GuiNeedsX "GUI MPlayeru vy¾aduje X11.\n"
 #define MSGTR_Playing "Pøehrávám %s\n"
 #define MSGTR_NoSound "Audio: beze zvuku!!!\n"
 #define MSGTR_FPSforced "FPS vynuceno na hodnotu %5.3f  (ftime: %5.3f)\n"
 #define MSGTR_CompiledWithRuntimeDetection "Pøelo¾eno s detekcí CPU ZA BÌHU - upozornìní, toto není optimální!\nAbyste získali co nejvìt¹í výkon, pøeolo¾te znovu mplayer ze zdrojového kódu\ns úpøepínaèem --disable-runtime-cpudetection\n"
-#define MSGTR_CompiledWithCPUExtensions "Pøelo¾eno pro architekturu x86 pro CPU s roz¹íøením:"
+#define MSGTR_CompiledWithCPUExtensions "Pøelo¾eno pro CPU x86 s roz¹íøenímy:"
 #define MSGTR_AvailableVideoOutputPlugins "Dostupné zásuvné video moduly:\n"
 #define MSGTR_AvailableVideoOutputDrivers "Dostupné ovladaèe pro video:\n"
 #define MSGTR_AvailableAudioOutputDrivers "Dostupné ovladaèe pro audio:\n"
@@ -135,7 +136,7 @@ static char help_text[]=
 #define MSGTR_Video_NoVideo "Video: ¾ádné video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nKritická chyba: Nemohu inicializovat video filtry (-vop) nebo video ovladaè (-vo) !\n"
 #define MSGTR_Paused "\n------ MÁM PAUZU :-P -------\r"
-#define MSGTR_PlaylistLoadUnable "\nNemohu naèíst seznam souborù pro pøehrání %s\n"
+#define MSGTR_PlaylistLoadUnable "\nNemohu naèíst playlist %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer havaroval kvùli 'Illegal Instruction'.\n"\
 "  To mù¾e být chyba v kódu pro rozpoznání CPU za bìhu...\n"\
@@ -167,11 +168,11 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nNebyl vybrán enkoder videa (-ovc)! Vyberte jeden. Pro nápovìdu pou¾ijte -ovc help !\n"
 #define MSGTR_InitializingAudioCodec "Inicializuji audio kodek...\n"
 #define MSGTR_CannotOpenOutputFile "Nemohu otevøít výstupní soubor '%s'\n"
-#define MSGTR_EncoderOpenFailed "Nepovedlo se otevøít enkoder\n"
+#define MSGTR_EncoderOpenFailed "Nepovedlo se otevøít enkodér\n"
 #define MSGTR_ForcingOutputFourcc "Vynucuji výstupní formát (fourcc) na %x [%.4s]\n"
 #define MSGTR_WritingAVIHeader "Zapisuji hlavièku AVI...\n"
-#define MSGTR_DuplicateFrames "\nduplikovat %d snímek/snímky!!!    \n"
-#define MSGTR_SkipFrame "\npøeskoèit snímek!!!    \n"
+#define MSGTR_DuplicateFrames "\n%d duplicitních snímkù!    \n"
+#define MSGTR_SkipFrame "\nPøeskakuji snímek!\n"
 #define MSGTR_ErrorWritingFile "%s: chyba pøi zápisu souboru.\n"
 #define MSGTR_WritingAVIIndex "\nZapisuji AVI index...\n"
 #define MSGTR_FixupAVIHeader "Opravuji AVI hlavièku...\n"
@@ -478,6 +479,12 @@ static char help_text[]=
 #define MSGTR_EQU_Center "Centrální"
 #define MSGTR_EQU_Bass "Basový"
 #define MSGTR_EQU_All "V¹e"
+#define MSGTR_EQU_Channel1 "Kanál 1:"
+#define MSGTR_EQU_Channel2 "Kanál 2:"
+#define MSGTR_EQU_Channel3 "Kanál 3:"
+#define MSGTR_EQU_Channel4 "Kanál 4:"
+#define MSGTR_EQU_Channel5 "Kanál 5:"
+#define MSGTR_EQU_Channel6 "Kanál 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Cesta"
@@ -579,6 +586,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_CDROMDevice "Zaøízení CD-ROM:"
 #define MSGTR_PREFERENCES_DVDDevice "Zaøízení DVD:"
 #define MSGTR_PREFERENCES_FPS "Snímková rychlost (FPS):"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Zobrazovat video okno pøi neèinnosti"
 
 #define MSGTR_ABOUT_UHU "Vývoj GUI je sponzorován firmou UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   Hlavní vývojáøi programu MPlayer:\n"
