@@ -410,15 +410,18 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
     sh_video_t *sh_video=d_video->sh;
     mpg_demuxer_t *mpg_d=(mpg_demuxer_t*)demuxer->priv;
     int precision = 1;
-    float oldpts = mpg_d->last_pts;
+    float oldpts = 0;
     off_t oldpos = demuxer->filepos;
-    float newpts = (flags & 1) ? 0.0 : oldpts;
+    float newpts = 0; 
     off_t newpos = (flags & 1) ? demuxer->movi_start : oldpos;
 
+    if(mpg_d)
+      oldpts = mpg_d->last_pts;
+    newpts = (flags & 1) ? 0.0 : oldpts;
   //================= seek in MPEG ==========================
   //calculate the pts to seek to
     if(flags & 2) {
-      if (mpg_d->final_pts > 0.0)
+      if (mpg_d && mpg_d->final_pts > 0.0)
         newpts += mpg_d->final_pts * rel_seek_secs;
       else
         newpts += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) * oldpts / oldpos;
@@ -475,9 +478,17 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
 	    }
           }
           i=sync_video_packet(d_video);
-          if(i==0x1B3 || i==0x1B8) break; // found it!
+          if(sh_video->format == 0x10000004) {	//mpeg4
+            if(i==0x1B6) break;			//vop (frame) startcode
+          } else if(sh_video->format == 0x10000005){	//h264
+            if((i & ~0x60) == 0x101 || (i & ~0x60) == 0x102 || (i & ~0x60) == 0x105) break;
+          } else { 	//default mpeg1/2
+	    if(i==0x1B3 || i==0x1B8) break; // found it!
+	  }
           if(!i || !skip_video_packet(d_video)) break; // EOF?
         }
+	if(!mpg_d)
+          break;
         if (!precision || abs(newpts - mpg_d->last_pts) < 0.5 || (mpg_d->last_pts == oldpts)) break;
         if ((newpos - oldpos) * (mpg_d->last_pts - oldpts) < 0) { // invalid timestamps
           mpg_d->has_valid_timestamps = 0;
@@ -485,12 +496,14 @@ void demux_seek_mpg(demuxer_t *demuxer,float rel_seek_secs,int flags){
         }
         precision--;
         //prepare another seek because we are off by more than 0.5s
+	if(mpg_d) {
         newpos += (newpts - mpg_d->last_pts) * (newpos - oldpos) / (mpg_d->last_pts - oldpts);
         ds_free_packs(d_audio);
         ds_free_packs(d_video);
         demuxer->stream->eof=0; // clear eof flag
         d_video->eof=0;
         d_audio->eof=0;
+	}
     }
 }
 
