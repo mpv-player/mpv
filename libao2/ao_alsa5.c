@@ -67,9 +67,9 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
     ao_data.format = format;
-    ao_data.channels = channels - 1;
+    ao_data.channels = channels;
     ao_data.samplerate = rate_hz;
-    ao_data.bps = ao_data.samplerate*(ao_data.channels+1);
+    ao_data.bps = ao_data.samplerate*ao_data.channels;
     ao_data.outburst = OUTBURST;
     ao_data.buffersize = 16384;
 
@@ -232,7 +232,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     }
 
     mp_msg(MSGT_AO, MSGL_INFO, "AUDIO: %d Hz/%d channels/%d bps/%d bytes buffer/%s\n",
-	ao_data.samplerate, ao_data.channels+1, ao_data.bps, ao_data.buffersize,
+	ao_data.samplerate, ao_data.channels, ao_data.bps, ao_data.buffersize,
 	snd_pcm_get_format_name(alsa_format.format));
     return(1);
 }
