@@ -2219,7 +2219,7 @@ if(curr_filename+1<num_filenames || use_gui){
 
 if(use_gui || ++curr_filename<num_filenames
 #if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )
- || mplShMem->DVDChanged 
+ || (mplShMem && mplShMem->DVDChanged)
 #endif 
 ){
 
