@@ -3,7 +3,7 @@
 <appendix id="bugs">
 <title>Bogues connus</title>
 <sect1 id="bugs-special">
-<title>Bogues spécifiques au système ou au CPU/Problèmes</title>
+<title>Bogues/Problèmes spécifiques au système ou au CPU</title>
 <itemizedlist>
 <listitem>
 <para>SIGILL (signal 4) sur P3 en utilisant les noyaux 2.2.x:</para>
@@ -28,8 +28,8 @@ lors de l'étape de configuration.</para>
 installés, ils peuvent avoir été compilé avec gcc 2.96.</para>
 </listitem>
 <listitem>
-<para>Son MP2/MP3 sale sur PPC:</para>
-<para>Problème: bogue de GCC sur les plateformes PPC, pas encore de réparation.</para>
+<para>Son MP2/MP3 altéré sur PPC:</para>
+<para>Problème: bogue de GCC sur les plateformes PPC, pas encore de solution de réparation.</para>
 <para>Contournement: utilisez le décodeur MP1/MP2/MP3 de FFmpeg (lent) (<option>-ac ffmpeg</option>)</para>
 </listitem>
 <listitem>
@@ -60,8 +60,8 @@ alors vous pouvez être certain qu'il s'agit d'un problème de carte son (ou de pi
 </itemizedlist>
 <itemizedlist>
 <listitem><para>
-Problèmes de taux d'échantillonage - peut être que votre carte ne supporte pas le taux
-d'échantillonage utilisé dans vos fichiers - essayez le plugin resampling (<option>-af resample=...</option>)
+Problèmes de taux d'échantillonnage - peut-être que votre carte ne supporte pas le taux
+d'échantillonnage utilisé dans vos fichiers - essayez le plugin resampling (<option>-af resample=...</option>)
 </para></listitem>
 </itemizedlist>
 <itemizedlist>
@@ -98,13 +98,13 @@ Contournement:
     pendant l'exécution pour régler le décalage</para>
   </listitem>
   </itemizedlist>
-Si rien de tous ça n'aide, uploadez le fichier SVP, nous regarderons (et réparerons).
+Si rien de tout ça n'aide, uploadez le fichier SVP, nous le contrôlerons (et réparerons).
 </para>
 </listitem>
 <listitem>
 <para>Votre carte son ne supporte pas la lecture à 48kHz</para>
-<para>Contournement: achetez une meilleur carte son... ou essayez de décrémenter les
-fps de 10% (utilisez <option>-fps 27</option> pour un film à 30fps) ou utilisez le
+<para>Contournement: achetez une meilleur carte son... ou essayez de décrémenter le
+nombre de trames par seconde (fps) de 10% (utilisez <option>-fps 27</option> pour un film à 30fps) ou utilisez le
 filtre resample</para>
 </listitem>
 <listitem>
