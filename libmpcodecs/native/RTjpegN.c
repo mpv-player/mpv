@@ -31,6 +31,7 @@
 #define MMX
 #endif
 
+#include "bswap.h"
 #include "RTjpegN.h"
 
 #ifdef MMX
@@ -2820,9 +2821,9 @@ void RTjpeg_init_compress(__u32 *buf, int width, int height, __u8 Q)
  RTjpeg_quant_init();
 
  for(i=0; i<64; i++)
-  buf[i]=RTjpeg_liqt[i];
+  buf[i]=le2me_32(RTjpeg_liqt[i]);
  for(i=0; i<64; i++)
-  buf[64+i]=RTjpeg_ciqt[i];
+  buf[64+i]=le2me_32(RTjpeg_ciqt[i]);
 }
 
 void RTjpeg_init_decompress(__u32 *buf, int width, int height)
@@ -2840,8 +2841,8 @@ void RTjpeg_init_decompress(__u32 *buf, int width, int height)
 
  for(i=0; i<64; i++)
  {
-  RTjpeg_liqt[i]=buf[i];
-  RTjpeg_ciqt[i]=buf[i+64];
+  RTjpeg_liqt[i]=le2me_32(buf[i]);
+  RTjpeg_ciqt[i]=le2me_32(buf[i+64]);
  }
 
  RTjpeg_lb8=0;

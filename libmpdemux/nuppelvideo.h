@@ -90,3 +90,23 @@ typedef struct audbuffertype
     unsigned char *buffer_offset;
 } audbuffertyp;
 
+#ifdef WORDS_BIGENDIAN
+#define le2me_rtfileheader(h) {					\
+    (h)->width = le2me_32((h)->width);				\
+    (h)->height = le2me_32((h)->height);			\
+    (h)->desiredwidth = le2me_32((h)->desiredwidth);		\
+    (h)->desiredheight = le2me_32((h)->desiredheight);		\
+    (h)->videoblocks = le2me_32((h)->videoblocks);		\
+    (h)->audioblocks = le2me_32((h)->audioblocks);		\
+    (h)->textsblocks = le2me_32((h)->textsblocks);		\
+    (h)->keyframedist = le2me_32((h)->keyframedist);		\
+  }
+#define le2me_rtframeheader(h) {				\
+    (h)->timecode = le2me_32((h)->timecode);			\
+    (h)->packetlength = le2me_32((h)->packetlength);		\
+  }
+#else
+#define le2me_rtfileheader(h) /**/
+#define le2me_rtframeheader(h) /**/
+#endif
+

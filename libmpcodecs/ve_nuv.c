@@ -116,6 +116,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     ench->comptype  = 'R'; // compressor data for RTjpeg
     ench->packetlength = 128*sizeof(long int);
   
+    le2me_rtframeheader(ench);
     mux_v->buffer=vf->priv->buffer;
     muxer_write_chunk(mux_v,FRAMEHEADERSIZE + 128*sizeof(long int), 0x10);
     vf->priv->tbl_wrote = 1;
@@ -172,6 +173,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     
   ench->frametype = 'V'; // video frame
   ench->packetlength = len;
+  le2me_rtframeheader(ench);
   mux_v->buffer=(void*)ench;
   muxer_write_chunk(mux_v, len + FRAMEHEADERSIZE, 0x10);
   return 1;

@@ -13,6 +13,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "bswap.h"
 
 #include "../../libvo/fastmemcpy.h"
 
@@ -37,6 +38,7 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 //	printf("frametype: %c, comtype: %c, encoded_size: %d, width: %d, height: %d\n",
 //	    encodedh->frametype, encodedh->comptype, encoded_size, width, height);
 
+	le2me_rtframeheader(encodedh);
 	switch(encodedh->frametype)
 	{
 	    case 'D':	/* additional data for compressors */

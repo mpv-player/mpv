@@ -69,6 +69,7 @@ void demux_seek_nuv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
 		{	
 			if (stream_read ( demuxer->stream, (char*)& rtjpeg_frameheader, sizeof ( rtjpeg_frameheader ) ) < sizeof(rtjpeg_frameheader))
 				return; /* EOF */
+			le2me_rtframeheader(&rtjpeg_frameheader);
 
 			if ( rtjpeg_frameheader.frametype == 'V' ) 
 			{
@@ -145,6 +146,7 @@ int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 	demuxer->filepos = orig_pos = stream_tell ( demuxer->stream );
 	if (stream_read ( demuxer->stream, (char*)& rtjpeg_frameheader, sizeof ( rtjpeg_frameheader ) ) < sizeof(rtjpeg_frameheader))
 	    return 0; /* EOF */
+	le2me_rtframeheader(&rtjpeg_frameheader);
 
 #if 0
 	printf("NUV frame: frametype: %c, comptype: %c, packetlength: %d\n",
@@ -218,6 +220,7 @@ demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 	stream_seek(demuxer->stream, 0);
 
 	stream_read ( demuxer->stream, (char*)& rtjpeg_fileheader, sizeof(rtjpeg_fileheader) );
+	le2me_rtfileheader(&rtjpeg_fileheader);
 
 	/* no video */
 	if (rtjpeg_fileheader.videoblocks == 0)
