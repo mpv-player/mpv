@@ -62,6 +62,9 @@ extern int init_video_codec(sh_video_t *sh_video,int ex);
 #include <decore.h>
 #endif
 
+void AVI_Decode_RLE8(char *image,char *delta,int tdsize,
+    unsigned int *map,int imagex,int imagey,unsigned char x11_bytes_pixel);
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -351,6 +354,11 @@ switch(sh_video->codec->driver){
  case VFM_RAW: {
    break;
  }
+ case VFM_RLE: {
+   int bpp=((out_fmt&255)+7)/8; // RGB only
+   sh_video->our_out_buffer = memalign(64,sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+   break;
+ }
 }
   sh_video->inited=1;
   return 1;
@@ -551,6 +559,14 @@ else
   case VFM_RAW:
     planes[0]=start;
     blit_frame=2;
+    break;
+  case VFM_RLE:
+//void AVI_Decode_RLE8(char *image,char *delta,int tdsize,
+//    unsigned int *map,int imagex,int imagey,unsigned char x11_bytes_pixel);
+    AVI_Decode_RLE8(sh_video->our_out_buffer,start,in_size, 
+       (int*)(((char*)sh_video->bih)+40),
+      sh_video->disp_w,sh_video->disp_h,((out_fmt&255)+7)/8);
+    blit_frame=3;
     break;
 } // switch
 //------------------------ frame decoded. --------------------
