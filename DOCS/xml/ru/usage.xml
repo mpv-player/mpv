@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.11 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -427,7 +427,7 @@ HTTP, FTP, MMS или RTSP/RTP протокол.
 </para>
 
 <note><para>
-Мы рекомендуем использовать КЭШ при проигрывании из сети:
+Мы рекомендуем включать <option>-cache</option> при проигрывании из сети:
 <screen>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</screen>
 </para></note>
 </sect1>
@@ -474,8 +474,8 @@ mplayer -cache 5000 mpst://servername/vcd://2
 mplayer -cache 5000 mpst://servername//usr/local/movies/lol.avi
 </screen>
 Обратите внимание, что пути не начинающиеся с / будут относительными к каталогу,
-в котором запущен сервер. Использование кэша не требуется, но он будет очень
-полезен.
+в котором запущен сервер. Использование <option>-cache</option> не требуется,
+но это будет очень полезно.
 </para>
 
 <para>
