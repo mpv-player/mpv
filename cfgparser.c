@@ -249,8 +249,8 @@ static int read_option(struct config *conf, int conf_optnr, char *opt, char *par
 			if (param == NULL)
 				goto err_missing_param;
 
-			subparam = malloc(strlen(param));
-			subopt = malloc(strlen(param));
+			subparam = malloc(strlen(param)+1);
+			subopt = malloc(strlen(param)+1);
 
 			subconf = conf[i].p;
 			for (subconf_optnr = 0; subconf[subconf_optnr].name != NULL; subconf_optnr++)
