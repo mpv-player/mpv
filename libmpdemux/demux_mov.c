@@ -32,9 +32,7 @@
 #include "qtpalette.h"
 #include "parse_mp4.h" // .MP4 specific stuff
 
-#ifdef USE_QTX_CODECS
 #include "../loader/qtx/qtxsdk/components.h"
-#endif
 
 #ifdef MACOSX
 #include <QuickTime/QuickTime.h>
@@ -1005,7 +1003,6 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 //      82  char[4]	atom type
 //	86  ...		atom data
 
-#if defined(USE_QTX_CODECS) || defined(MACOSX)
 	{	ImageDescription* id=malloc(8+trak->stdata_len);
 		trak->desc=id;
 		id->idSize=8+trak->stdata_len;
@@ -1034,7 +1031,6 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		}
 #endif
 	}
-#endif
 
 		if(trak->stdata_len >= 86) { // extra atoms found
 		  int pos=78;
