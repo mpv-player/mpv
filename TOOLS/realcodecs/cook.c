@@ -355,12 +355,14 @@ ulong RAOpenCodec(ulong p1) {
 	return result;
 }
 
-ulong RAOpenCodec2(ulong p1) {
+ulong RAOpenCodec2(ulong p1,ulong p2) {
 	ulong result;
 //	loadSyms();
-	fprintf(stderr, "RAOpenCodec2(ulong p1=0x%0x(%d))\n", p1, p1);
+	fprintf(stderr, "RAOpenCodec2(ulong p1=0x%0x(%d), p2=%p)\n", p1, p1, p2);
 	hexdump((void*)p1, 44);
+	hexdump((void*)p2, 44);
 	result=(*raOpenCodec2)(p1);
+	hexdump((void*)p2, 44);
 	hexdump((void*)p1, 44);
 	fprintf(stderr, "--> 0x%0x(%d)\n\n\n", result, result);
 	return result;
@@ -377,7 +379,7 @@ ulong RASetFlavor(ulong p1,ulong p2) {
 	result=(*raSetFlavor)(p1,p2);
 	fprintf(stderr, "--> 0x%0x(%d)\n\n\n", result, result);
 
-#if 0
+#if 1
 	fputs("######################## FLAVOR PROPERTIES ###################\n\n", stderr);
 	numflavors=raGetNumberOfFlavors2();
 	flavor=0;
