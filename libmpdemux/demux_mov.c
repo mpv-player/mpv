@@ -624,9 +624,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      if (count_flag & 0x8000)
 		        entry = i;
 		      // only care about top 8 bits of 16-bit R, G, or B value
-		      palette_map[entry * 4 + 0] = trak->stdata[hdr_ptr + 0];
+		      palette_map[entry * 4 + 2] = trak->stdata[hdr_ptr + 0];
 		      palette_map[entry * 4 + 1] = trak->stdata[hdr_ptr + 2];
-		      palette_map[entry * 4 + 2] = trak->stdata[hdr_ptr + 4];
+		      palette_map[entry * 4 + 0] = trak->stdata[hdr_ptr + 4];
 		      hdr_ptr += 6;
 		    }
 		  }
