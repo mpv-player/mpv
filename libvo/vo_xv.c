@@ -167,8 +167,19 @@ static void set_gamma_correction( unsigned int xv_port )
 		    else
 		    if(strcmp(attributes[i].name,"XV_HUE") == 0)
 				port_value = vo_gamma_hue;
+		    else
+                    /* Note: since 22.01.2002 GATOS supports these attrs for radeons (NK) */
+		    if(strcmp(attributes[i].name,"XV_RED_INTENSITY") == 0)
+				port_value = vo_gamma_red_intensity;
+		    else
+		    if(strcmp(attributes[i].name,"XV_GREEN_INTENSITY") == 0)
+				port_value = vo_gamma_green_intensity;
+		    else
+		    if(strcmp(attributes[i].name,"XV_BLUE_INTENSITY") == 0)
+				port_value = vo_gamma_blue_intensity;
 		    else continue;
-		    /* means that user has untouched this parameter */
+		    /* means that user has untouched this parameter since
+		       NVidia driver has default == min for XV_HUE but not mid */
 		    if(!port_value) continue;
 		    port_min = xv_min;
 		    port_max = xv_max;
