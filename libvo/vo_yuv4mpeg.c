@@ -347,8 +347,8 @@ static uint32_t draw_frame(uint8_t * src[])
 			// gets done in draw_slice
 			break;
 
-		case IMGFMT_BGR|24:
-		case IMGFMT_RGB|24:
+		case IMGFMT_BGR24:
+		case IMGFMT_RGB24:
 			memcpy(rgb_buffer, src[0], image_width * image_height * 3);
 			break;
 	}
@@ -367,10 +367,10 @@ static uint32_t query_format(uint32_t format)
 		switch(format)
 		{
 			case IMGFMT_YV12:
-				return VFCAP_CSP_SUPPORTED|VFCAP_OSD;
+				return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
 			case IMGFMT_BGR|24:
 			case IMGFMT_RGB|24:
-				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD;
+				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
 		}
 	}
 	else
@@ -379,10 +379,10 @@ static uint32_t query_format(uint32_t format)
 		switch(format)
 		{
 			case IMGFMT_YV12:
-				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD;
+				return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
     		case IMGFMT_BGR|24:
     		case IMGFMT_RGB|24:
-        		return VFCAP_CSP_SUPPORTED|VFCAP_OSD;
+        		return VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_ACCEPT_STRIDE;
     	}	
 	}
 	return 0;
