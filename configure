@@ -5513,10 +5513,10 @@ LIVE_LIBS += \$(LIVE_LIB_DIR)/groupsock/libgroupsock.a
 LIVE_LIBS += \$(LIVE_LIB_DIR)/UsageEnvironment/libUsageEnvironment.a
 LIVE_LIBS += \$(LIVE_LIB_DIR)/BasicUsageEnvironment/libBasicUsageEnvironment.a
 LIVE_LIBS += -lstdc++
-LIVE_INCLUDES = -I$\(LIVE_LIB_DIR)/liveMedia/include
-LIVE_INCLUDES += -I$\(LIVE_LIB_DIR)/UsageEnvironment/include
-LIVE_INCLUDES += -I$\(LIVE_LIB_DIR)/BasicUsageEnvironment/include
-LIVE_INCLUDES += -I$\(LIVE_LIB_DIR)/groupsock/include"
+LIVE_INCLUDES = -I\$(LIVE_LIB_DIR)/liveMedia/include
+LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/UsageEnvironment/include
+LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/BasicUsageEnvironment/include
+LIVE_INCLUDES += -I\$(LIVE_LIB_DIR)/groupsock/include"
   _ld_live='$(LIVE_LIBS)'
  _inputmodules="live.com $_inputmodules"
 elif test "$_live_dist" = yes && test "$_network" = yes ; then
