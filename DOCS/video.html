@@ -731,6 +731,36 @@ handy, but you need powerful CPU to use software scaling. Don't use the
 SDL driver's software output+scaler, it has worse image quality !</P>
 
 
+<P><B><A NAME=2.3.1.14>2.3.1.14. Radeon framebuffer (radeon_vid)</A></B></P>
+<P>
+<b>radeon_vid</b> provides support for the <b>BackEnd Scaler</b> on ATI <b>Radeon</b> chipsets.
+It was designed and introduced as analog of <a href="video.html#2.3.1.7">mga_vid</a> driver, so you can use it in the same way!<br>
+But main goal of this driver usage is <a href="video.html#2.3.1.12">VESA</a> driver.<br>
+Simply because VESA enables TV-out on ATI's card but Backend scaler is used after
+mode switching. This implementation outputs video stream on both: <b>TV-screen</b> and <b>CRTC</b>
+display simultaneously. (It slightly degrades quality of video output but it's
+much better than nothing).
+Sorry! I couldn't find out any video overlay's related information
+on ATI pages. (I planned to implement it through <b>int 10h</b> calls). But it was
+very easy to implement this stuff through reading/writing Radeon ports.
+<br><b>NOTE</b>: XXX_VID technology is perfectly undocumented and maybe in the
+future this stuff will be fully rewritten. This is the first public release of
+driver.</P>
+
+<P>
+  <b>Location:</b><BR>
+&nbsp;&nbsp;mplayer-CVS:main/drivers/radeon/radeon_vid*
+<br><b>Usage:</b><BR>
+&nbsp;&nbsp;<CODE>mplayer -vo vesa:lvo:/dev/radeon_vid &lt;your options&gt; filename</CODE>
+</P>
+
+<P><b>Limitations:</b> Currently it works only with <b>YUY2</b> format, so use the DirectShow codec
+family with it. You should have at least 32MB of video memory.<br>
+<b>Conclusion:</b> I know there are lot of lacks and bugs. So if you are able
+to improve something then simply send me your patches.
+</P>
+
+
 <P><B><A NAME=2.3.1.A>2.3.1.A. TV-out support</A></B></P>
 
 <P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Matrox cards</A></B></P>
@@ -874,7 +904,7 @@ documentation.
 </P>
 
 
-<P><B><A NAME=2.3.1.A.3>2.3.1.A.3. Voodoo 3</A></B></P>
+<P><B><A NAME=2.3.1.A.4>2.3.1.A.4. Voodoo 3</A></B></P>
 
 <P>
 Check <A HREF="http://www.iki.fi/too/tvout-voodoo3-3000-xfree">this URL</A>.
