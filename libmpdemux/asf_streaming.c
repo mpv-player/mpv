@@ -14,13 +14,6 @@
 
 #include "network.h"
 
-typedef struct {
-	ASF_StreamType_e streaming_type;
-	int request;
-	int packet_size;
-        int *audio_streams,n_audio,*video_streams,n_video;
-} asf_http_streaming_ctrl_t;
-
 #ifdef ARCH_X86
 #define	ASF_LOAD_GUID_PREFIX(guid)	(*(uint32_t *)(guid))
 #else
@@ -28,7 +21,6 @@ typedef struct {
 	((guid)[3] << 24 | (guid)[2] << 16 | (guid)[1] << 8 | (guid)[0])
 #endif
 
-extern int audio_id,video_id;
 extern int verbose;
 
 // ASF streaming support several network protocol.
@@ -55,7 +47,7 @@ asf_streaming_start( stream_t *stream ) {
 	int fd = -1;
 	
 	strncpy( proto_s, stream->streaming_ctrl->url->protocol, 10 );
-	
+
 	if( 	!strncasecmp( proto_s, "http", 4) || 
 		!strncasecmp( proto_s, "mms", 3)  ||
 		!strncasecmp( proto_s, "http_proxy", 10)
@@ -247,6 +239,9 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 	}
 	asf_ctrl->audio_streams[asf_ctrl->n_audio-1] = streamh.stream_no;
 	pos += streamh.stream_size;
+	if( streaming_ctrl->bandwidth==0 ) {
+	  asf_ctrl->audio_id = streamh.stream_no;
+	}
 	break;
       case 0xBC19EFC0 : // video stream
 	if(asf_ctrl->video_streams == NULL){
@@ -258,9 +253,49 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
 						     asf_ctrl->n_video*sizeof(int));
 	}
 	asf_ctrl->video_streams[asf_ctrl->n_video-1] = streamh.stream_no;
+	if( streaming_ctrl->bandwidth==0 ) {
+	  asf_ctrl->video_id = streamh.stream_no;
+	}
 	break;
       }
       break;
+    case 0x7bf875ce :  // stream bitrate properties object
+printf("Stream bitrate properties object\n");
+printf("Max bandwidth set to %d\n", streaming_ctrl->bandwidth);
+	asf_ctrl->audio_id = 0;
+	asf_ctrl->video_id = 0;
+	if( streaming_ctrl->bandwidth!=0 ) {
+		int stream_count, stream_id, max_bitrate;
+		char *ptr = buffer+pos;
+		int total_bitrate=0, p_id, p_br;
+		int i;
+		ptr += sizeof(objh);
+		stream_count = le2me_16(*(uint16_t*)ptr);
+		ptr += sizeof(uint16_t);
+printf(" stream count=[0x%x][%u]\n", stream_count, stream_count );
+		for( i=0 ; i<stream_count && ptr<((char*)buffer+pos+objh.size) ; i++ ) {
+			stream_id = le2me_16(*(uint16_t*)ptr);
+			ptr += sizeof(uint16_t);
+			memcpy(&max_bitrate, ptr, sizeof(uint32_t));// workaround unaligment bug on sparc
+			max_bitrate = le2me_32(max_bitrate);
+			if( stream_id==1 ) total_bitrate = max_bitrate;
+			else if( total_bitrate+max_bitrate>streaming_ctrl->bandwidth ) {
+				total_bitrate += p_br;
+printf("total_bitrate=%d\n", total_bitrate);
+printf("id=%d\n", p_id);
+				break;
+			}
+			ptr += sizeof(uint32_t);
+printf("   stream id=[0x%x][%u]\n", stream_id, stream_id );
+printf("   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
+			p_id = stream_id;
+			p_br = max_bitrate;
+		}
+		asf_ctrl->audio_id = 1;
+		asf_ctrl->video_id = p_id;
+	}
+	pos += objh.size;
+	break;
     default :
       pos += objh.size;
       break;
@@ -419,10 +454,10 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	asf_http_streaming_ctrl_t *asf_http_ctrl;
 	char str[250];
 	char *ptr;
-	int i,as = -1,vs = -1;
+	int i, enable;
 
 	int offset_hi=0, offset_lo=0, length=0;
-	int asf_nb_stream=0;
+	int asf_nb_stream=0, stream_id;
 
 	// Sanity check
 	if( streaming_ctrl==NULL ) return NULL;
@@ -465,38 +500,28 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 			ptr = str;
 			ptr += sprintf( ptr, "Pragma: stream-switch-entry=");
 			if(asf_http_ctrl->n_audio > 0) {
-				if(audio_id > 0) {
-					for( i=0; i<asf_http_ctrl->n_audio ; i++ ) {
-						if(asf_http_ctrl->audio_streams[i] == audio_id) {
-							as = audio_id;
-							break;
-						}
+				for( i=0; i<asf_http_ctrl->n_audio ; i++ ) {
+					stream_id = asf_http_ctrl->audio_streams[i];
+					if(stream_id == asf_http_ctrl->audio_id) {
+						enable = 0;
+					} else {
+						enable = 2;
 					}
-				}				
-				if(as < 0) {
-					if(audio_id > 0) 
-		       				mp_msg(MSGT_NETWORK,MSGL_ERR,"Audio stream %d don't exist\n", as);
-					as = asf_http_ctrl->audio_streams[0];
+					asf_nb_stream++;
+					ptr += sprintf(ptr, "ffff:%d:%d ", stream_id, enable);
 				}
-				ptr += sprintf(ptr, " ffff:%d:0",as);
-				asf_nb_stream++;
 			}
 			if(asf_http_ctrl->n_video > 0) {
-				if(video_id > 0) {
-					for( i=0; i<asf_http_ctrl->n_video ; i++ ) {
-						if(asf_http_ctrl->video_streams[i] == video_id) {
-							vs = video_id;
-							break;
-						}
+				for( i=0; i<asf_http_ctrl->n_video ; i++ ) {
+					stream_id = asf_http_ctrl->video_streams[i];
+					if(stream_id == asf_http_ctrl->video_id) {
+						enable = 0;
+					} else {
+						enable = 2;
 					}
+					asf_nb_stream++;
+					ptr += sprintf(ptr, "ffff:%d:%d ", stream_id, enable);
 				}
-				if(vs < 0) {
-					if(video_id > 0) 
-						mp_msg(MSGT_NETWORK,MSGL_ERR,"Video stream %d don't exist\n",vs);
-					vs = asf_http_ctrl->video_streams[0];
-		       		}
-				ptr += sprintf( ptr, " ffff:%d:0",vs);
-				asf_nb_stream++;
 			}
 			http_set_field( http_hdr, str );
 			sprintf( str, "Pragma: stream-switch-count=%d", asf_nb_stream );
