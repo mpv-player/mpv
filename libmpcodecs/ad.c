@@ -36,6 +36,7 @@ extern ad_functions_t mpcodecs_ad_libvorbis;
 extern ad_functions_t mpcodecs_ad_libmad;
 extern ad_functions_t mpcodecs_ad_realaud;
 extern ad_functions_t mpcodecs_ad_libdv;
+extern ad_functions_t mpcodecs_ad_qtaudio;
 
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
@@ -59,6 +60,7 @@ ad_functions_t* mpcodecs_ad_drivers[] =
   &mpcodecs_ad_dshow,
 #endif
   &mpcodecs_ad_acm,
+  &mpcodecs_ad_qtaudio,
 #endif
 #ifdef HAVE_FAAD
   &mpcodecs_ad_faad,
