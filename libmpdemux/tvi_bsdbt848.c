@@ -571,7 +571,11 @@ if(priv->tunerfd < 0)
 /* Audio Configuration */
 
 priv->dspready = TRUE;
+#ifdef __NetBSD__
+priv->dspdev = strdup("/dev/sound");
+#else
 priv->dspdev = strdup("/dev/dsp");
+#endif
 priv->dspsamplesize = 16;
 priv->dspstereo = 1;
 priv->dspspeed = 44100;
@@ -581,9 +585,9 @@ priv->dsprate = priv->dspspeed * priv->dspsamplesize/8*(priv->dspstereo+1);
 priv->dspframesize = priv->dspspeed*priv->dspsamplesize/8/priv->fps * 
                      (priv->dspstereo+1);
 
-if((priv->dspfd = open ("/dev/dsp", O_RDONLY, 0)) < 0)
+if((priv->dspfd = open (priv->dspdev, O_RDONLY, 0)) < 0)
     {
-    perror("/dev/dsp open");
+    perror("dsp open");
     priv->dspready = FALSE;
     } 
 
@@ -601,7 +605,7 @@ if((priv->dspready == TRUE) &&
    (ioctl(priv->dspfd, SNDCTL_DSP_SPEED, &priv->dspspeed) == -1) ||
    (ioctl(priv->dspfd, SNDCTL_DSP_SETFMT, &priv->dspfmt) == -1)))
     {
-    perror ("configuration of /dev/dsp failed");
+    perror ("configuration of dsp failed");
     close(priv->dspfd);
     priv->dspready = FALSE;
     }
