@@ -6,6 +6,8 @@ MPlayer (1.0)
     * Czech documentation translation started
     * German man page almost synced
     * slave mode command documentation finished
+    * TOOLS documented in TOOLS/README
+    * audio filter documentation moved to the man page and updated
 
     Ports:
     * DirectX video output fixed on Windows95
@@ -60,14 +62,18 @@ MPlayer (1.0)
     Filters:
     * big cleanup of audio filter layer
     * faster af_format for most common cases
+    * float handling in the audio filter layer finally fixed
     * audio plugins finally removed
+
+    MEncoder:
+    * new experimental MPEG muxer, compatible with DVD and (S)VCD
+    * multiple file support
 
     Others:
     * -z option replaced by -vo png suboption
     * icc fix in the Win32 loader
     * crash with Turkish locale fixed
     * several memleak fixes
-    * new experimental mpeg muxer, compatible with dvd and [s]vcd
 
 
   pre6: "X-mas present" December 23, 2004
