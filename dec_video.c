@@ -470,6 +470,8 @@ switch(sh_video->codec->driver){
  case VFM_CINEPAK: {
 #ifdef USE_MP_IMAGE
    sh_video->image->type=MP_IMGTYPE_STATIC;
+   sh_video->image->width=(sh_video->image->width+3)&(~3);
+   sh_video->image->height=(sh_video->image->height+3)&(~3);
 #else
    int bpp=((out_fmt&255)+7)/8;
    sh_video->our_out_buffer_size = sh_video->disp_w*sh_video->disp_h*bpp;
