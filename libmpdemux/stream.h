@@ -199,6 +199,8 @@ extern int dvd_nav;
 int dvd_parse_chapter_range(struct config*, const char*);
 //#endif
 
+extern int dvbin_param_on;
+
 extern char * audio_stream;
 
 #ifdef USE_DVDNAV

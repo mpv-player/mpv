@@ -2,8 +2,6 @@
 #ifndef DVBIN_H
 #define DVBIN_H
 
-extern int dvbin_param_on;
-
 #ifdef HAVE_DVB_HEAD
 	#include <linux/dvb/dmx.h>
 	#include <linux/dvb/frontend.h>
