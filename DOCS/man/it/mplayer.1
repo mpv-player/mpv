@@ -1,4 +1,4 @@
-.\" synced with 1.810
+.\" synced with 1.825
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -36,7 +36,7 @@
 .\" Titolo
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-17" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-11-30" "The MPlayer Project" "The Movie Player"
 .
 .SH NOME
 mplayer  \- visualizzatore di film
@@ -189,7 +189,7 @@ MPsub) oltre ai sottotitoli dei DVD (flussi SPU, VOBsub e Closed Captions).
 codificatore di film, progettato per codificare tutti i filmati visualizzabili
 da MPlayer (vedi sopra) in altri formati sempre visualizzabili da MPlayer
 (vedi sotto).
-Codifica il video in formato MPEG4 (DivX/XviD), uno qualsiasi dei codec di
+Codifica il video in formato MPEG-4 (DivX/XviD), uno qualsiasi dei codec di
 libavcodec e l'audio in PCM/\:MP3/\:VBRMP3 in 1, 2 o 3 passi.
 Inoltre ha la capacita' di copiare direttamente i flussi (stream), un potente
 sistema di filtri (riduci, espandi, ribalta, post elaborazione, ruota, scalatura,
@@ -559,6 +559,8 @@ Porta a distorsioni delle immagini!
 .TP
 .B \-identify
 Visualizza i parametri del file in un formato facile da interpretare.
+Stampa anche informazioni dettagliate sui sottotitoli, le tracce audio ed i
+vari ID.
 Lo script di appoggio TOOLS/\:midentify toglie il resto delle stampe di MPlayer e
 (si spera) corregge per la shell (shellescapes) i nomi dei file.
 .
@@ -599,6 +601,18 @@ Quando il file specificato e' un FIFO MPlayer ne apre entrambi gli estremi
 cosi' puoi dare molti 'echo "seek 10" > mp_pipe' e la pipe rimarra' valida.
 .RE
 .PD 1
+.
+.TP
+.B \-key-fifo-size <2\-65000>
+Specifica la dimensione del FIFO che memorizza gli eventi della tastiera
+(default: 10).
+Un FIFO di dimensione n puo' bufferizzare (n-1) eventi.
+Se e' troppo piccolo alcuni eventi potrebbero venir persi (portando ad
+effetti di 'bottoni del mouse ignorati' o simili).
+Se e' troppo gramde, MPlayer potrebbe sembrare bloccato mentre elabora
+gli eventi bufferizzati.
+Per avere lo stesso comportamento presentato prima dell'introduzione
+di questa opzione devi caricarla a 2 per Linux ed a 1024 per Windows.
 .
 .TP
 .B \-lircconf <nomefile> (solo LIRC)
@@ -722,6 +736,9 @@ Rallenta o accelera la riproduzione del fattore passato come parametro.
 .B \-sstep <sec>
 Visualizza un fotogramma ogni <sec> secondi.
 Utile per le presentazioni.
+Visto che MPlayer puo' posizionarsi solo sui fotogrammi chiave questo
+posizionamento potrebbe essere inesatto.
+Molti formati hanno un fotogramma chiave ogni <sec> e <sec>+20 secondi.
 .
 .
 .\" --------------------------------------------------------------------------
@@ -1115,7 +1132,7 @@ Seleziona una dimensione standard per il video
 larghezza immagine in pixel
 .IPs h=<valore>
 altezza immagine in pixel
-.IPs i420|yv12|yuy2|y8
+.IPs y420|yv12|yuy2|y8
 seleziona lo spazio coloro
 .IPs format=<valore>
 spazio colore (fourcc) in esadecimale
@@ -1523,13 +1540,13 @@ utilizza la sfocatura gaussiana di swscaler (appare molto bene)
 Specifica come i sottotitoli SPU (DVD/\:VOBsub) devono essere allineati.
 .PD 0
 .RSs
-.IPs -1
+.IPs "-1"
 posizione originale
-.IPs 0
+.IPs " 0"
 allineamento in alto (comportamento originale/\:default)
-.IPs 1
+.IPs " 1"
 allineamento al centro
-.IPs 2
+.IPs " 2"
 allineamento in basso
 .RE
 .PD 1
@@ -1782,25 +1799,25 @@ Seleziona il formato usato per l'uscita dallo strato dei filtri (in
 accordo con quello definito in libao2/\:afmt.h):
 .PD 0
 .RSs
-.IPs 1
+.IPs "   1"
 Mu-Law
-.IPs 2
+.IPs "   2"
 A-Law
-.IPs 4
+.IPs "   4"
 Ima-ADPCM
-.IPs 8
+.IPs "   8"
 8-bit con segno
-.IPs 16
+.IPs "  16"
 8-bit senza segno
-.IPs 32
+.IPs "  32"
 16-bit senza segno (Little-Endian)
-.IPs 64
+.IPs "  64"
 16-bit senza segno (Big-Endian)
-.IPs 128
+.IPs " 1282
 16-bit con segno (Little-Endian)
-.IPs 256
+.IPs " 256"
 16-bit con segno (Big-Endian)
-.IPs 512
+.IPs " 512"
 MPEG (2) Audio
 .IPs 1024
 AC3
@@ -1907,16 +1924,6 @@ Devi essere sicuro di non attivare questa opzione se vuoi l'uscita hwac3 attrave
 S/PDIF, a meno che tu non sappia veramente come attivarla correttamente.
 .RE
 .PD 1
-.
-.TP
-.B alsa1x (OBSOLETO)
-Driver di uscita ALSA 1.x.
-Reso obsoleto dal driver di uscita audio alsa generale.
-.
-.TP
-.B alsa9 (OBSOLETO)
-Driver di uscita ALSA 0.9.
-Reso obsoleto dal driver di uscita audio alsa generale.
 .
 .TP
 .B alsa5\ \ 
@@ -2061,16 +2068,6 @@ vuoi visualizzare il filmato.
 \-display xtest.localdomain:0
 .RE
 .PD 1
-.
-.TP
-.B \-double
-Abilita il doppio buffering.
-Elimina il tremolio (flicker) memorizzando due fotogrammi in memoria
-e visualizzandone uno mentre decodifica l'altro.
-Puo' influenzare l'OSD in maniera negativa ma spesso rimuove il tremolio
-dell'OSD.
-Necessita del doppio di memoria di un buffer singolo percio' non funzionera'
-con schede con molta poca memoria.
 .
 .TP
 .B \-dr \ \ \ 
@@ -2305,6 +2302,14 @@ o dello schermo TV.
 .PD 1
 .
 .TP
+.B \-nodouble
+Disabilita il doppio buffering, fondamentalmente usato a scopi di
+debug..
+Il doppio buffering elimina il tremolio (flicker) memorizzando due
+fotogrammi in memoria e visualizzandone uno mentre decodifica l'altro.
+Puo' influenzare l'OSD in maniera negativa ma spesso ne rimuove il tremolio.
+.
+.TP
 .B \-nograbpointer
 Non acquisire il puntatore del mouse dopo un cambio di modo video (\-vm),
 utile nel caso di configurazioni con piu' monitor.
@@ -2536,7 +2541,7 @@ Seleziona il driver da usare come sorgente dell'overlay da utilizzare con X11.
 .B xvmc (solo X11 con \-vc ffmpeg12mc)
 Driver di uscita video che utilizza le estensioni XvMC (X
 Video Motion Compensation) di XFree86 4.x. per velocizzare la decodica
-dei formati MPEG1/\:2 e VCR2.
+dei formati MPEG-1/2 e VCR2.
 .PD 0
 .RSs
 .IPs benchmark
@@ -3024,17 +3029,20 @@ Specifica il file di uscita (default: ./md5sums).
 .TP
 .B yuv4mpeg
 Trasforma il flusso video in una sequenza di immagini non compresse in
-formato YUV 4:2:0 e le memorizza in un file chiamato 'stream.yuv' nella
-directory corrente.
+formato YUV 4:2:0 e le memorizza in un file (default: ./stream.yuv).
 Il formato e' lo stesso utilizzato da mjpegtools, percio' questo e' utile
 se vuoi processare il video con la suite mjeptools.
 Supporta gli spazi colore YV12, RGB (24 bpp) e BGR (24 bpp).
+Puo' combinarlo con l'opzione \-fixed-vo per concatenare file con le stesse
+dimensioni e la stessa velocita' (fps).
 .PD 0
 .RSs
 .IPs interlaced
 Scrive il file di uscita con fotogrammi interlacciati, prima i field superiori.
 .IPs interlaced_bf
 Scrive il file di uscita con fotogrammi interlacciati, prima i field inferiori.
+.IPs file=<nomefile>
+Scrive l'uscita su <nomefile> invece che il default stream.yuv.
 .REss
 .PD 1
 .RS
@@ -3106,15 +3114,15 @@ Supporta i formati PPM, PGM e PGMYUV nelle modalita' raw ed ASCII.
 Vedi anche pnm(5), ppm(5) e pgm(5).
 .PD 0
 .RSs
-.IPs ppm
+.IPs ppm\ \ 
 Scrive file PPM (default).
-.IPs pgm
+.IPs pgm\ \ 
 Scrive file PGM.
 .IPs pgmyuv
 Scrive file PGMYUV.
 Il formato PGMYUV e' analogo al formato PGM, ma contiene anche i piani U e V,
 attaccati alla fine dell'immagine.
-.IPs raw
+.IPs raw\ \ 
 Scrive i file PNM in modalita' raw, cioe' grezza (default).
 .IPs ascii
 Scrive i file PNM in modalita' ASCII.
@@ -3474,7 +3482,7 @@ decodifica a scala di grigi (un poco piu' veloce che a colori).
 Per la miglior qualita' di decodifica utilizza lo stesso algoritmo di IDCT sia per la
 decodifica che per la codifica.
 Questo puo' pero' portare a qualche inaccuratezza.
-.IPs lowres=<numero>
+.IPs lowres=<numero>[,<l>]
 Decodifica a risoluzione piu' basse.
 La decodifica a basse risoluzioni non e' supportata da tutti i codec e spesso
 generera' degli sgradevoli artefatti.
@@ -3490,9 +3498,13 @@ a risoluzione completa.
 .br
 3: 1/8 di risoluzione
 .REss
-.IPs "sb=<numero> (solo MPEG2)"
+.RS
+Se <l> viene specificato la decodifica a bassa risoluzione verra' usata solo
+se l'ampiezza del video e' maggiore od uguale a <l>.
+.RE
+.IPs "sb=<numero> (solo MPEG-2)"
 Salta il numero indicato di righe di macroblocchi in basso.
-.IPs "st=<numero> (solo MPEG2)"
+.IPs "st=<numero> (solo MPEG-2)"
 Salta il numero indicato di righe di macroblocchi in alto.
 .IPs vismv=<valore>
 vismv:
@@ -3657,7 +3669,7 @@ Prova prima il codec divx4linux, poi passa agli altri
 .IPs "\-vc -divxds,-divx,"
 Ignora i codec DivX di Win32
 .IPs "\-vc ffmpeg12,mpeg12,"
-Prova il codec MPEG1/\:2 di libavcodec, poi libmpeg2, poi gli altri
+Prova il codec MPEG-1/2 di libavcodec, poi libmpeg2, poi gli altri
 .RE
 .PD 1
 .
@@ -4140,7 +4152,7 @@ Dovresti vedere delle strisce rosse, verdi e blu dall'alto al basso.
 .
 .TP
 .B lavc[=quality:fps]
-Conversione software veloce da YV12 a MPEG1 da usare con DVB/\:DXR3.
+Conversione software veloce da YV12 a MPEG-1 da usare con DVB/\:DXR3.
 Veloce e di migliore qualita' che \-vf fame.
 .RSs
 .IPs quality
@@ -4156,7 +4168,7 @@ float) (default: 0, trovato automaticamente basandosi sull'altezza)
 .
 .TP
 .B fame\ \ \ 
-Conversione software veloce da YV12 a MPEG1 fatta con libfame da usare con DVB/\:DXR3.
+Conversione software veloce da YV12 a MPEG-1 fatta con libfame da usare con DVB/\:DXR3.
 .
 .TP
 .B dvbscale[=aspect]
@@ -4241,6 +4253,7 @@ semplici aggiustamento di luminosita' e contrasto.
 Nota che viene utilizzato lo stesso codice ottimizzato per MMX come
 \-vf eq se tutti i valori di gamma sono 1.0.
 I parametri sono passati come valori in floating point.
+.PD 0
 .RSs
 .IPs rg
 valore di gamma per il componente rosso
@@ -4248,7 +4261,9 @@ valore di gamma per il componente rosso
 valore di gamma per il componente verde
 .IPs bg
 valore di gamma per il componente blu
-.RE
+.REss
+.PD 1
+.RS
 I parametri rg, gg, bg sono i valori di gamma indipendenti per i componenti
 rosso, verde (green) e blu.
 Il parametro weight (peso) puo' essere usato per ridurre gli effetti di un
@@ -4262,6 +4277,7 @@ weight=1.0.
 I valori validi sono 0.1\-10 per gamma, -2\-2 per contrasto (valori negativi creano
 un'immagine negativa), -1\-1 per la luminosita', 0\-3 per saturatione e 0\-1 per
 weight.
+.RE
 .
 .TP
 .B hue[=hue:saturation]
@@ -4628,7 +4644,7 @@ Soglia della somma delle differenze assolute, il default e' 64.
 .
 .TP
 .B softpulldown
-Questo filtro funziona correttamente solo con MEncoder e agisce sul flag MPEG2
+Questo filtro funziona correttamente solo con MEncoder e agisce sul flag MPEG-2
 usato per effettuare il pulldown soft 3:2 (noto anche come soft telecine).
 Se vuoi usare il filtro ivtc oppure detc su filmati che sono parzialmente
 codificati in modalita' soft telecine inserendo questo filtro prima li rendi
@@ -5602,7 +5618,7 @@ H.263
 .IPs h263p
 H.263 Plus
 .IPs mpeg4
-MPEG4 (DivX 4/5)
+MPEG-4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
@@ -5614,9 +5630,9 @@ Windows Media Video, versione 2 (AKA WMV8)
 .IPs rv10\ 
 un vecchio codec RealVideo
 .IPs mpeg1video
-MPEG1 video
+MPEG-1 video
 .IPs mpeg2video
-MPEG2 video
+MPEG-2 video
 .IPs huffyuv
 HuffYUV
 .IPs asv1\ 
@@ -5693,7 +5709,7 @@ numero massimo di fotogrammi B tra fotogrammi non B:
 .IPs 0
 niente fotogrammi B (default)
 .IPs 0\-2
-buon valore per MPEG4
+buon valore per MPEG-4
 .RE
 .PD 1
 .
@@ -5783,7 +5799,7 @@ file di dimensione leggermente minore ma un posizionamento meno preciso.
 Valori maggiori di 300 non sono raccomandati perche' la qualita' puo'
 essere non buona e dipende dal programma di codifica, dal programma di
 decodifica e dalla fortuna (o sfortuna)
-Per avere un formato MPEG1/\:2/\:4 conforme deve essere <= 132.
+Per avere un formato MPEG-1/2/4 conforme deve essere <= 132.
 
 .
 .TP
@@ -5935,7 +5951,7 @@ valore minimo del bitrate in kbit/\:sec (passo\ 1/\:2)
 .TP
 .B vrc_buf_size=<valore>
 dimensione del buffer in kbit (passo\ 1/\:2).
-Per MPEG1/\:2 questo regola anche la dimensione del vbv (video buffer
+Per MPEG-1/2 questo regola anche la dimensione del vbv (video buffer
 verifier), utilizza 327 per i VCD, 917 per i SVCD e 1835 per i DVD.
 .
 .TP
@@ -6143,7 +6159,7 @@ conformita' esatta allo standard
 disabilitata (default)
 .IPs 1
 Raccomandato solo se vuoi fornire il file di uscita nel decodificatore di
-riferimento MPEG4.
+riferimento MPEG-4.
 .IPs -1
 Permette codifica HuffYUV YV12 non standard (file 20% piu' piccoli, ma non
 possono venir visualizzati dai codec HuffYUV ufficiali).
@@ -6898,7 +6914,7 @@ a due passi).
 .br
 .I ATTENZIONE:
 Verra' generato un flusso di bit illegale e molto probabilmente non decodificabile
-da nessun decoder MPEG 4 eccetto libavcodec oppure XviD.
+da nessun decoder MPEG-4 eccetto libavcodec oppure XviD.
 .br
 .I ATTENZIONE:
 Da XviD-1.0.x questa opzione non e' piu' disponibile.
@@ -6962,7 +6978,7 @@ meno che tu non sappia esattamente quello che stai facendo.
 .br
 .I ATTENZIONE:
 Verra' generato un flusso illegale, e non sara' decodificabile
-dai decodificatori ISO-MPEG4 eccetto DivX/\:libavcodec/\:XviD
+dai decodificatori ISO-MPEG-4 eccetto DivX/\:libavcodec/\:XviD
 .br
 .I ATTENZIONE:
 Viene anche memorizzata una falsa versione DivX nel file e di
@@ -7018,7 +7034,7 @@ a tuo rischio!
 .
 .TP
 .B (no)qpel
-MPEG4 utilizza per default una ricerca del movimento con una precisione di
+MPEG-4 utilizza per default una ricerca del movimento con una precisione di
 mezzo pixel.
 Lo standard propone un mode in cui e' possibile utilizzare una precisione
 di un quarto di pixel.
@@ -7217,7 +7233,7 @@ Par e' il rapporto tra la larghezza e l'altezza di un singolo punto e percio'
 entrambi sono legati tra logo in questo modo:
 DAR = PAR * (larghezza / altezza).
 .br
-MPEG4 definisce 5 valori di PAR ed uno esteso, dando l'opportunita' di indicare
+MPEG-4 definisce 5 valori di PAR ed uno esteso, dando l'opportunita' di indicare
 I 5 modi standard possono essere specificati:
 .PD 0
 .RSs
@@ -7238,9 +7254,10 @@ Ti permette di specificare il tuo rapporto di aspetto dei pixel con
 par_width e par_height.
 .RE
 .PD 1
-.br
+.RS
 .I NOTA:
 In generale, attivare le opzioni aspect e autoaspect e' sufficiente.
+.RE
 .
 .TP
 .B par_width=<1\-255> (solo par=ext)
