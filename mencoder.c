@@ -311,8 +311,6 @@ sh_video_t *sh_video=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 int i;
 void *vobsub_writer=NULL;
-double vobsubout_origin_pts=0.0;
-int vobsubout_origin_pts_set=0;
 
 uint32_t ptimer_start;
 uint32_t audiorate=0;
@@ -1151,16 +1149,12 @@ if(sh_audio && !demuxer2){
  if(vo_spudec||vobsub_writer){
      unsigned char* packet=NULL;
      int len;
-     if (vobsub_writer && !vobsubout_origin_pts_set) {
-	 vobsubout_origin_pts_set = 1;
-	 vobsubout_origin_pts = d_video->pts;
-     }
      while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
 	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
 	 if (vo_spudec)
 	 spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
 	 if (vobsub_writer)
-	     vobsub_out_output(vobsub_writer,packet,len,d_dvdsub->pts-vobsubout_origin_pts);
+	     vobsub_out_output(vobsub_writer,packet,len,mux_v->timer + d_dvdsub->pts - d_video->pts);
      }
      if (vo_spudec) {
      spudec_heartbeat(vo_spudec,90000*d_video->pts);
