@@ -3,19 +3,7 @@
 #include <stdlib.h>
 
 #include "config.h"
-
-#ifdef	USE_OSS_AUDIO
-#include <sys/soundcard.h>
-#endif
-#ifdef	USE_SUN_AUDIO
-#include <sys/types.h>
-#include <sys/audioio.h>
-#define AFMT_MU_LAW     AUDIO_ENCODING_ULAW
-#define AFMT_A_LAW      AUDIO_ENCODING_ALAW
-#define AFMT_S16_LE     AUDIO_ENCODING_LINEAR
-#define AFMT_IMA_ADPCM  AUDIO_ENCODING_DVI
-#define AFMT_U8         AUDIO_ENCODING_LINEAR8
-#endif
+#include "libao2/afmt.h"
 
 extern int verbose; // defined in mplayer.c
 
@@ -172,12 +160,8 @@ case 2: {
     switch(sh_audio->format){ // hardware formats:
     case 0x6:  sh_audio->sample_format=AFMT_A_LAW;break;
     case 0x7:  sh_audio->sample_format=AFMT_MU_LAW;break;
-#if !defined(__NetBSD__)
     case 0x11: sh_audio->sample_format=AFMT_IMA_ADPCM;break;
-#endif
-#if !defined(__sun) && !defined(__NetBSD__)
     case 0x50: sh_audio->sample_format=AFMT_MPEG;break;
-#endif
 //    case 0x2000: sh_audio->sample_format=AFMT_AC3;
     default: sh_audio->sample_format=(sh_audio->samplesize==2)?AFMT_S16_LE:AFMT_U8;
     }
@@ -278,12 +262,10 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
     switch(sh_audio->codec->driver){
       case 1: // MPEG layer 2 or 3
         len=MP3_DecodeFrame(buf,-1);
-        sh_audio->channels=2; // hack
         break;
       case 2: // AVI PCM
-      { len=demux_read_data(sh_audio->ds,buf,minlen);
+        len=demux_read_data(sh_audio->ds,buf,minlen);
         break;
-      }
       case 8: // DVD PCM
       { int j;
         len=demux_read_data(sh_audio->ds,buf,minlen);

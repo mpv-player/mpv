@@ -16,6 +16,7 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
+#include "afmt.h"
 
 static ao_info_t info = 
 {
@@ -45,6 +46,27 @@ LIBAO_EXTERN(sun)
 static char *dsp="/dev/audio";
 static int queued_bursts = 0;
 static int audio_fd=-1;
+
+// convert an OSS audio format specification into a sun audio encoding
+static int oss2sunfmt(int oss_format)
+{
+  switch (oss_format){
+  case AFMT_MU_LAW:
+    return AUDIO_ENCODING_ULAW;
+  case AFMT_A_LAW:
+    return AUDIO_ENCODING_ALAW;
+  case AFMT_S16_LE:
+    return AUDIO_ENCODING_LINEAR;
+  case AFMT_U8:
+    return AUDIO_ENCODING_LINEAR8;
+#ifdef	AUDIO_ENCODING_DVI	// Missing on NetBSD...
+  case AFMT_IMA_ADPCM:
+    return AUDIO_ENCODING_DVI;
+#endif
+  default:
+    return AUDIO_ENCODING_NONE;
+  }
+}
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -76,18 +98,16 @@ static int init(int rate,int channels,int format,int flags){
   ioctl(audio_fd, AUDIO_DRAIN, 0);
 
   AUDIO_INITINFO(&info);
-  info.play.encoding = ao_format = format;
-  info.play.precision = (format==AUDIO_ENCODING_LINEAR? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
+  info.play.encoding = oss2sunfmt(ao_format = format);
+  info.play.precision = (format==AFMT_S16_LE? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
   info.play.channels = ao_channels = channels;
   --ao_channels;
   info.play.sample_rate = ao_samplerate = rate;
   info.play.samples = 0;
   info.play.eof = 0;
   if(ioctl (audio_fd, AUDIO_SETINFO, &info)<0)
-    printf("audio_setup: your card doesn't support %d Hz samplerate\n",rate);
-  byte_per_sec = (channels
-		  * (format==AUDIO_ENCODING_LINEAR ? 16 : 8)
-		  * rate);
+    printf("audio_setup: your card doesn't support %d channel, %s, %d Hz samplerate\n",channels,audio_out_format_name(format),rate);
+  byte_per_sec = (channels * info.play.precision * rate);
   ao_outburst=byte_per_sec > 100000 ? 16384 : 8192;
   queued_bursts = 0;
 
@@ -113,6 +133,8 @@ static int init(int rate,int channels,int format,int flags){
         return 0;
     }
 #ifdef	__svr4__
+    // remove the 0 bytes from the above ao_buffersize measurement from the
+    // audio driver's STREAMS queue
     ioctl(audio_fd, I_FLUSH, FLUSHW);
 #endif
     ioctl(audio_fd, AUDIO_DRAIN, 0);
@@ -132,6 +154,7 @@ static void reset(){
     audio_info_t info;
 
 #ifdef	__svr4__
+    // throw away buffered data in the audio driver's STREAMS queue
     ioctl(audio_fd, I_FLUSH, FLUSHW);
 #endif
     uninit();
@@ -144,8 +167,8 @@ static void reset(){
     ioctl(audio_fd, AUDIO_DRAIN, 0);
 
     AUDIO_INITINFO(&info);
-    info.play.encoding = ao_format;
-    info.play.precision = (ao_format==AUDIO_ENCODING_LINEAR? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
+    info.play.encoding = oss2sunfmt(ao_format);
+    info.play.precision = (ao_format==AFMT_S16_LE? AUDIO_PRECISION_16:AUDIO_PRECISION_8);
     info.play.channels = ao_channels+1;
     info.play.sample_rate = ao_samplerate;
     info.play.samples = 0;

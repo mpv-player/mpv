@@ -5,13 +5,13 @@
 */
 
 #include <errno.h>
-#include <sys/soundcard.h> /* AFMT_* */
 #include <sys/asoundlib.h>
 
 #include "../config.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
+#include "afmt.h"
 
 extern int verbose;
 

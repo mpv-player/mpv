@@ -2,26 +2,8 @@
 #include <stdlib.h>
 
 #include "../config.h"
-
 #include "audio_out.h"
-
-#include <sys/soundcard.h> /* AFMT_* */
-
-#ifndef SOUNCARD_H
-# define AFMT_MU_LAW              0x00000001
-# define AFMT_A_LAW               0x00000002
-# define AFMT_IMA_ADPCM           0x00000004
-# define AFMT_U8                  0x00000008
-# define AFMT_S16_LE              0x00000010      /* Little endian signed 16*/
-# define AFMT_S16_BE              0x00000020      /* Big endian signed 16 */
-# define AFMT_S8                  0x00000040
-# define AFMT_U16_LE              0x00000080      /* Little endian U16 */
-# define AFMT_U16_BE              0x00000100      /* Big endian U16 */
-# define AFMT_MPEG                0x00000200      /* MPEG (2) audio */
-/* 32 bit formats (MSB aligned) formats */
-# define AFMT_S32_LE              0x00001000
-# define AFMT_S32_BE              0x00002000
-#endif
+#include "afmt.h"
 
 // there are some globals:
 int ao_samplerate=0;
@@ -99,10 +81,16 @@ char *audio_out_format_name(int format)
 	    return("Unsigned 16-bit (Big-Endian)");
 	case AFMT_MPEG:
 	    return("MPEG (2) audio");
+	// the following two formats are not available with old linux kernel
+	// headers (e.g. in 2.2.16)
+#ifdef AFMT_S32_LE
 	case AFMT_S32_LE:
-	    return("Signed 32-bit (Little-Endian");
+	    return("Signed 32-bit (Little-Endian)");
+#endif
+#ifdef AFMT_S32_BE
 	case AFMT_S32_BE:
-	    return("Signed 32-bit (Big-Endian");
+	    return("Signed 32-bit (Big-Endian)");
+#endif
     }
     return("Unknown");
 }
