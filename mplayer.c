@@ -489,6 +489,13 @@ void exit_player(char* how){
   exit_player_with_rc(how, 1);
 }
 
+#ifndef __MINGW32__
+static void child_sighandler(int x){  
+  pid_t pid;
+  while((pid=waitpid(-1,NULL,WNOHANG)) > 0);
+}
+#endif
+
 static void exit_sighandler(int x){
   static int sig_count=0;
   ++sig_count;
@@ -1148,7 +1155,10 @@ current_module = NULL;
  }
 #endif
   
-
+  /// Catch signals
+#ifndef __MINGW32__
+  signal(SIGCHLD,child_sighandler);
+#endif
 
   //========= Catch terminate signals: ================
   // terminate requests:

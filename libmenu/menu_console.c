@@ -245,15 +245,16 @@ static void check_child(menu_t* menu) {
   r = select(max_fd+1,&rfd, NULL, NULL, &tv);
   if(r == 0) {
     r = waitpid(mpriv->child,&child_status,WNOHANG);
-    if(r > 0) {
-      printf("child died\n");
-    for(i = 0 ; i < 3 ; i++) 
-      close(mpriv->child_fd[i]);
-    mpriv->child = 0;
-    mpriv->prompt = mpriv->mp_prompt;
-    //add_line(mpriv,"Child process exited");
-    } else if(r < 0)
-      printf("waitpid error: %s\n",strerror(errno));
+    if(r < 0){
+      if(errno==ECHILD){  ///exiting childs get handled in mplayer.c
+        for(i = 0 ; i < 3 ; i++) 
+          close(mpriv->child_fd[i]);
+        mpriv->child = 0;
+        mpriv->prompt = mpriv->mp_prompt;
+        //add_line(mpriv,"Child process exited");    
+      }
+      else printf("waitpid error: %s\n",strerror(errno));
+    }
   } else if(r < 0) {
     printf("select error\n");
     return;
