@@ -131,6 +131,7 @@ void uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
     mp_msg(MSGT_DECVIDEO,MSGL_V,"uninit video: %d  \n",sh_video->codec->driver);
     mpvdec->uninit(sh_video);
+    vf_uninit_filter_chain(sh_video->vfilter);
     sh_video->inited=0;
 }
 

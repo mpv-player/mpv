@@ -97,4 +97,12 @@ static inline mp_image_t* new_mp_image(int w,int h){
     return mpi;
 }
 
+static inline void free_mp_image(mp_image_t* mpi){
+    if(!mpi) return;
+    if(mpi->flags&MP_IMGFLAG_ALLOCATED){
+	if(mpi->planes[0]) free(mpi->planes[0]);
+    }
+    free(mpi);
+}
+
 #endif
