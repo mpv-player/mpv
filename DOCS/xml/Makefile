@@ -1,7 +1,7 @@
 # Makefile for generating the HTML documentation
 
 # List of subdirectories to be processed.
-SUBDIRS = en fr es ru
+SUBDIRS = en fr es ru pl
 
 # Generated HTML files go here.
 HTML_TOP = ../HTML
