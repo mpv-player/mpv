@@ -89,6 +89,8 @@ static XShmSegmentInfo Shminfo[1];
 static int gXErrorFlag;
 static int CompletionType=-1;
 
+static int Flip_Flag;
+
 static void InstallXErrorHandler()
 {
         //XSetErrorHandler( HandleXError );
@@ -111,9 +113,10 @@ static void check_events(){
   int e=vo_x11_check_events(mDisplay);
 }
 
-static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t fullscreen,char *title,uint32_t format )
+static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t flags,char *title,uint32_t format )
 {
  int screen;
+ int fullscreen=0;
  int interval, prefer_blank, allow_exp, nothing;
  unsigned int fg,bg;
  char *hello=( title == NULL ) ? "X11 render" : title;
@@ -148,6 +151,9 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
  hint.y=0;
  hint.width=image_width;
  hint.height=image_height;
+ 
+ if( flags&0x01 ) fullscreen = 1;
+ if( flags&0x08 ) Flip_Flag = 1;
 
 #ifdef HAVE_XF86VM
  if (fullscreen) {
@@ -434,6 +440,7 @@ static uint32_t draw_frame( uint8_t *src[] )
   }
   else
    {
+    int i;
     int sbpp=( ( image_format&0xFF )+7 )/8;
     int dbpp=( bpp+7 )/8;
     char *d=ImageData;
@@ -490,7 +497,19 @@ static uint32_t draw_frame( uint8_t *src[] )
       }
       else
 #endif
-       { memcpy( d,s,sbpp*image_width*image_height ); }
+       {
+        if( Flip_Flag )
+         {
+          s+=sbpp*image_width*image_height;
+	  for( i=0;i < image_height;i++ )
+           {
+	    s-=sbpp*image_width;
+	    memcpy( d,s,sbpp*image_width );
+	    d+=sbpp*image_width;
+	   }
+         }
+        else memcpy( d,s,sbpp*image_width*image_height );
+       }
    }
    else
     {
