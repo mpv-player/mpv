@@ -1081,15 +1081,16 @@ void vo_x11_fullscreen( void )
 	else
 		old_gravity = vo_hint.win_gravity;
  }
+ if(vo_wm_type==0 && !(vo_fsmode&16))
+//    XUnmapWindow( mDisplay,vo_window );  // required for MWM
+      XWithdrawWindow(mDisplay,vo_window,mScreen);
+
  vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 0 : 1 );
  vo_x11_sizehint( x,y,w,h,0 );
  vo_x11_setlayer( mDisplay,vo_window,vo_fs );
 
  if ((!(vo_fs)) & vo_ontop) vo_x11_setlayer(mDisplay, vo_window,vo_ontop);
 
- if(vo_wm_type==0 && !(vo_fsmode&16))
-//    XUnmapWindow( mDisplay,vo_window );  // required for MWM
-      XWithdrawWindow(mDisplay,vo_window,mScreen);
  XMoveResizeWindow( mDisplay,vo_window,x,y,w,h );
 #ifdef HAVE_XINERAMA
  vo_x11_xinerama_move(mDisplay,vo_window);
