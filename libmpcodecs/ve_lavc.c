@@ -134,6 +134,7 @@ static char *lavc_param_inter_matrix = NULL;
 static int lavc_param_cbp= 0;
 static int lavc_param_mv0= 0;
 static int lavc_param_noise_reduction= 0;
+static int lavc_param_qp_rd= 0;
 
 char *lavc_param_acodec = "mp2";
 int lavc_param_atag = 0;
@@ -245,6 +246,9 @@ m_option_t lavcopts_conf[]={
 	{"mv0", &lavc_param_mv0, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_MV0, NULL},
 #endif
 	{"nr", &lavc_param_noise_reduction, CONF_TYPE_INT, CONF_RANGE, 0, 1000000, NULL},
+#ifdef CODEC_FLAG_QP_RD
+	{"qprd", &lavc_param_qp_rd, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_QP_RD, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -511,6 +515,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->flags|= lavc_param_data_partitioning;
     lavc_venc_context->flags|= lavc_param_cbp;
     lavc_venc_context->flags|= lavc_param_mv0;
+    lavc_venc_context->flags|= lavc_param_qp_rd;
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
 
     if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
