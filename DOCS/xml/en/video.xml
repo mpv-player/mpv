@@ -752,7 +752,7 @@ samplerate on my box, because the sound was broken on 44kHz:
 </para></note>
 
 <para>
-You can turn on OSD and subtitles only with the <systemitem>expand</systemitem>
+You can turn on OSD and subtitles only with the <option>expand</option>
 filter, see the man page for exact parameters.
 </para>
 </sect4>
@@ -1924,7 +1924,7 @@ scaler. The commandline is
 </para>
 
 <para>
-Cropping can be done by the <systemitem>crop</systemitem> filter and by this
+Cropping can be done by the <option>crop</option> filter and by this
 driver itself. Suppose that a movie is too wide for display on your Buz and
 that you want to use <option>-zrcrop</option> to make the movie less wide,
 then you would issue the following command
