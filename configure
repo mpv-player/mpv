@@ -3239,7 +3239,7 @@ if test "$_win32" = auto ; then
   _win32=no
   if x86 ; then
     if test -z "$_win32libdir" ; then
-      for I in /usr/local/lib/win32 /usr/lib/win32 ; do
+      for I in "$_libdir/win32" /usr/local/lib/win32 /usr/lib/win32 ; do
         if test -d "$I" ; then
           _win32libdir="$I"
           break;
