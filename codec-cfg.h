@@ -24,6 +24,11 @@
 #define CODECS_FLAG_NOFLIP	(1<<1)
 #define CODECS_FLAG_YUVHACK	(1<<2)
 
+#define CODECS_STATUS_NOT_WORKING	0
+#define CODECS_STATUS_UNTESTED		-1
+#define CODECS_STATUS_PROBLEMS		1
+#define CODECS_STATUS_WORKING		2
+
 
 //#warning nem kellene ket typedef GUID-nak...
 typedef struct {
@@ -33,18 +38,20 @@ typedef struct {
 	unsigned char f4[8];
 } GUID;
 
+/* I just rearranged, to use less memory... */
 typedef struct {
+	unsigned int fourcc[CODECS_MAX_FOURCC];
+	unsigned int fourccmap[CODECS_MAX_FOURCC];
+	unsigned int outfmt[CODECS_MAX_OUTFMT];
+	unsigned char outflags[CODECS_MAX_OUTFMT];
 	char *name;
 	char *info;
 	char *comment;
-	unsigned int fourcc[CODECS_MAX_FOURCC];
-	unsigned int fourccmap[CODECS_MAX_FOURCC];
-	short driver;
-	short flags;
 	char *dll;
 	GUID guid;
-	unsigned int outfmt[CODECS_MAX_OUTFMT];
-	unsigned char outflags[CODECS_MAX_OUTFMT];
+	short driver;
+	short flags;
+	short status;
 } codecs_t;
 
 codecs_t* parse_codec_cfg(char *cfgfile);

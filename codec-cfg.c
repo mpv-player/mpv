@@ -445,6 +445,21 @@ codecs_t *parse_codec_cfg(char *cfgfile)
 			if (get_token() < 0)
 				goto parse_error_out;
 			//printf(" %s\n", token);
+		} else if (!strcmp(token, "status")) {
+			if (!(state & GOT_NAME))
+				goto parse_error_out;
+			if (get_token() < 0)
+				goto parse_error_out;
+			if (!strcasecmp(token, "rulz"))
+				codec->status = CODECS_STATUS_WORKING;
+			else if (!strcasecmp(token, "suxx"))
+				codec->status = CODECS_STATUS_NOT_WORKING;
+			else if (!strcasecmp(token, "checkthiz"))
+				codec->status = CODECS_STATUS_UNTESTED;
+			else if (!strcasecmp(token, "notsogood"))
+				codec->status = CODECS_STATUS_PROBLEMS;
+			else
+				goto parse_error_out;
 		} else
 			goto parse_error_out;
 	}
