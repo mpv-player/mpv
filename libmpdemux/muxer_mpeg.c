@@ -380,7 +380,7 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
     spriv->framebuf_cnt = 30;
     spriv->framebuf_used = 0;
     spriv->framebuf = init_frames(spriv->framebuf_cnt, (size_t) 5000);
-    bzero(&(spriv->picture), sizeof(spriv->picture));
+    memset(&(spriv->picture), 0, sizeof(spriv->picture));
     if(spriv->framebuf == NULL) {
       mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't allocate initial frames structure, abort!\n");
       return NULL;
