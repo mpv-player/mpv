@@ -181,7 +181,9 @@
 
         {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
-	{"tsfastparse", &ts_fastparse, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{"tsfastparse", "-tsfastparse isn't a valid option anymore.\n", CONF_TYPE_PRINT, CONF_NOCFG ,0,0, NULL
+},
+	{"tsprog", &ts_prog, CONF_TYPE_INT, CONF_RANGE, 0, 65534, NULL},
 
 	// draw by slices or whole frame (useful with libmpeg2/libavcodec)
 	{"slices", &vd_use_slices, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -282,7 +284,7 @@ extern m_option_t cdda_opts[];
 extern char* audio_stream;
 extern char* sub_stream;
 extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
-extern int ts_fastparse;
+extern int ts_prog;
 
 #include "libmpdemux/tv.h"
 
