@@ -8,6 +8,7 @@
 # 2001/11/14 by Gabucino
 # - dunno who made the --target option but now it even works
 # - fixed some Intel arch test for --target
+# - added static linking with --enable-static
 #
 # 2001/10/26 by al3x
 # - added detection of zlib (used by libmpdemux/demux_mov.c)
@@ -210,6 +211,7 @@ Audio:
 Miscellaneous options:
   --cc=COMPILER          use this C compiler to build MPlayer [gcc]
   --target=PLATFORM      target platform (i386-linux, arm-linux, etc)
+  --enable-static        build a statically linked binary
   --language=xx          select a language [en]
                          (Available: $LANGUAGES)
   --disable-select       disable audio select() support (for example, required
@@ -265,6 +267,9 @@ _glibconfig=
 
 for ac_option do
  case "$ac_option" in
+  --enable-static*)
+        _static="-static"
+        ;;
   --target=*)
         _target=`echo $ac_option | cut -d '=' -f 2`
         ;;
@@ -1634,7 +1639,15 @@ for ac_option do
   --as=*)
 	;;
   --target=*)
-        ;;
+	;;
+  --disable-x11*)
+	;;
+  --disable-syncfb*)
+	;;
+  --enable-static*)
+	;;
+  --disable-static*)
+	;;
   *)
 	echo "Unknown parameter: $ac_option"
 	;;
@@ -2577,6 +2590,7 @@ MLIB_LIB = $_mliblib
 MADLIB_INC = $_madincdir
 MADLIB_LIB = $_madlibdir
 DVB_INC = $_dvbincdir
+STATIC = $_static
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
