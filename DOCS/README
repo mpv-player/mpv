@@ -38,9 +38,8 @@ BTW he needs some nice skins, if you are a good graphician, contact him!!!
 Win32 codecs?
 Yes, we are using Win32 (Video for Windows) codecs for AVI/ASF decoding.
 They must be installed to the /usr/lib/win32/ directory, with all lower case.
-You can grab the codecs package from 
-  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip
-or can be found in your C:\WINDOWS\SYSTEM\ dir, see codecs.c for filenames.
+You can grab the codecs package from our homepage, or can be found in your
+C:\WINDOWS\SYSTEM\ dir, see codecs.c for filenames.
 Some people asked why don't we use ActiveMovie/DirectShow codecs. The reason is
 simple: we'd have to emulate the whole DirectX architecture and implement the
 (patented!) COM interface to be able to use them. BTW the old VfW DivX codec
@@ -244,9 +243,7 @@ Troubleshooting:
 
 Contact information:
 ~~~~~~~~~~~~~~~~~~~~
-Download:  ftp://thot.banki.hu/esp-team/linux/MPlayer/
-      or:  http://thot.banki.hu/esp-ftp/linux/MPlayer/
-Homepage:  http://thot.banki.hu/esp-team/MPlayer.html
+Homepage:  http://mplayer.sourceforge.net
 
 Mailing lists:
 ~~~~~~~~~~~~~~
