@@ -246,6 +246,8 @@ static char help_text[]=
 #define MSGTR_Cancel "Anuluj"
 #define MSGTR_Add "Dodaj"
 #define MSGTR_Remove "Usuñ"
+#define MSGTR_Clear "Wyczy¶æ"
+#define MSGTR_Config "Konfiguracja"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Przykro mi, za ma³o pamiêci na bufor rysowania."
