@@ -208,8 +208,11 @@ static void spudec_process_data(spudec_handle_t *this)
 
   /* Kludge: draw_alpha needs width multiple of 8. */
   if (this->width < this->stride)
-    for (y = 0; y < this->height; ++y)
+    for (y = 0; y < this->height; ++y) {
       memset(this->aimage + y * this->stride + this->width, 0, this->stride - this->width);
+      /* FIXME: Why is this one needed? */
+      memset(this->image + y * this->stride + this->width, 0, this->stride - this->width);
+    }
 
   i = this->current_nibble[1];
   x = 0;
