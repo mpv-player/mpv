@@ -177,7 +177,7 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
 #endif
 
 static inline mp_image_t* new_mp_image(int w,int h){
-    mp_image_t* mpi=malloc(sizeof(mp_image_t));
+    mp_image_t* mpi=(mp_image_t*)malloc(sizeof(mp_image_t));
     if(!mpi) return NULL; // error!
     memset(mpi,0,sizeof(mp_image_t));
     mpi->width=mpi->w=w;
