@@ -53,10 +53,7 @@ MISC_LIBS += -Llibdha -ldha -Lvidix -lvidix
 endif
 CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) # -Wall
 
-PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 libavcodec libao2 drivers drivers/syncfb linux postproc xa input
-ifeq ($(OPENDIVX),yes)
-PARTS += opendivx
-endif
+PARTS = g72x libmpdemux mp3lib libac3 liba52 libmp1e libmpeg2 libavcodec opendivx libao2 drivers drivers/syncfb linux postproc xa input
 ifeq ($(VIDIX),yes)
 PARTS += libdha vidix
 endif
@@ -152,6 +149,9 @@ mp3lib/libMP3.a:
 	$(MAKE) -C mp3lib
 
 opendivx/libdecore.a:
+	$(MAKE) -C opendivx
+
+opendivx/postprocess.o:
 	$(MAKE) -C opendivx
 
 libdha/libdha.so:
