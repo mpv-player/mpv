@@ -103,18 +103,21 @@ a3dnow:
         movl   $0x80000000,%eax
         cpuid
         cmpl   $0x80000000,%eax
-        jbe    exit2
+        jbe    no3dnow
         movl   $0x80000001,%eax
         cpuid
         xorl   %eax,%eax
         testl  $0x80000000,%edx
-        jz     exit2
+        jz     no3dnow
 /// eax=1 - K6 3DNow!
         inc    %eax
         testl  $0x40000000,%edx
         jz     exit2
 /// eax=2 - K7 3DNowEx!	
         orl    $2, %eax
+	jmp    exit2
+no3dnow:
+	xorl   %eax,%eax
 exit2:
 
         popl   %ecx
