@@ -17,10 +17,10 @@ timer = timer-lx.c
 ifeq ($(TARGET_OS),Darwin)
 timer = timer-darwin.c
 endif
-ifeq ($(TARGET_CYGWIN),yes)
+ifeq ($(TARGET_OS),CYGWIN)
 timer = timer-win2.c
 endif
-ifeq ($(TARGET_MINGW32),yes)
+ifeq ($(TARGET_OS),MINGW32)
 timer = timer-win2.c
 getch = getch2-win.c
 SRCS += glob-win.c

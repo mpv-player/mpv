@@ -6,9 +6,7 @@
 
 include config.mak
 
-PRG = mplayer
 PRG_CFG = codec-cfg
-PRG_MENCODER = mencoder
 
 # Do not strip the binaries at installation
 ifeq ($(STRIPBINARIES),yes)

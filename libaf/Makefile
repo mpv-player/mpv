@@ -8,7 +8,7 @@ OBJS=$(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS) -I. -Wall $(EXTRA_INC)
 
-ifeq ($(TARGET_MINGW32),yes)
+ifeq ($(TARGET_OS),MINGW32)
 CFLAGS += -D_IO_H_
 endif
 
