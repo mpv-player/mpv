@@ -151,7 +151,7 @@
 #define wsXFMMVolDown     0xa6
 #define wsXFMMMute        0x99
 
-#define wsKeyNumber 128
+#define wsKeyNumber 130
 
 typedef struct
 {
