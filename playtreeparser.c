@@ -192,7 +192,7 @@ parse_asx(play_tree_parser_t* p) {
   while((line = play_tree_parser_get_line(p)) != NULL)
     /* NOTHING */;
 
- mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Parsing asx file : [%s]\n",p->buffer);
+ mp_msg(MSGT_PLAYTREE,MSGL_DBG3,"Parsing asx file: [%s]\n",p->buffer);
  return asx_parser_build_tree(p->buffer,p->deep);
 }
 
@@ -250,13 +250,13 @@ parse_pls(play_tree_parser_t* p) {
   int n_entries = 0,max_entry=0,num;
   play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying winamp playlist...\n");
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying Winamp playlist...\n");
   if (!(line = play_tree_parser_get_line(p)))
     return NULL;
   strstrip(line);
   if(strcasecmp(line,"[playlist]"))
     return NULL;
-  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected winamp playlist format\n");
+  mp_msg(MSGT_PLAYTREE,MSGL_V,"Detected Winamp playlist format\n");
   play_tree_parser_stop_keeping(p);
   line = play_tree_parser_get_line(p);
   if(!line)
@@ -266,9 +266,9 @@ parse_pls(play_tree_parser_t* p) {
     v = pls_entry_get_value(line);
     n_entries = atoi(v);
     if(n_entries < 0)
-      mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Invalid number of entries : very funny !!!\n");
+      mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Invalid number of entries: very funny!!!\n");
     else
-      mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Playlist claim to have %d entries. Let's see.\n",n_entries);
+      mp_msg(MSGT_PLAYTREE,MSGL_DBG2,"Playlist claims to have %d entries. Let's see.\n",n_entries);
     line = play_tree_parser_get_line(p);
   }
 
@@ -525,7 +525,7 @@ parse_playlist_file(char* file) {
   stream = open_stream(file,0,&f);
 
   if(!stream) {
-    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error while opening playlist file %s : %s\n",file,strerror(errno));
+    mp_msg(MSGT_PLAYTREE,MSGL_ERR,"Error while opening playlist file %s: %s\n",file,strerror(errno));
     return NULL;
   }
 
@@ -606,14 +606,14 @@ play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced) {
   }
 
   if(tree)
-    mp_msg(MSGT_PLAYTREE,MSGL_V,"Playlist succefully parsed\n");
+    mp_msg(MSGT_PLAYTREE,MSGL_V,"Playlist successfully parsed\n");
   else 
     mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_ERR:MSGL_V),"Error while parsing playlist\n");
 
   if(tree)
     tree = play_tree_cleanup(tree);
   
-  if(!tree) mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_WARN:MSGL_V),"Warning empty playlist\n");
+  if(!tree) mp_msg(MSGT_PLAYTREE,((forced==1)?MSGL_WARN:MSGL_V),"Warning: empty playlist\n");
 
   return tree;
 }
