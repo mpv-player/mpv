@@ -1661,6 +1661,7 @@ if(1)
   
     float frame_time=1;
     float pts1=d_video->pts;
+    int blit_frame=1;
 
     current_module="decode_video";
     
@@ -1759,6 +1760,7 @@ switch(sh_video->codec->driver){
 
     if(d_video->flags) if(verbose) printf("***keyframe***\n");
 
+    if(in_size<=0) blit_frame=0; else
     if(drop_frame<2){
         int ret = avcodec_decode_video(&lavc_context, &lavc_picture,
 	     &got_picture, start, in_size);
@@ -1952,7 +1954,7 @@ switch(sh_video->codec->driver){
       }
 
         current_module="flip_page";
-        video_out->flip_page();
+        if(blit_frame) video_out->flip_page();
 //        usec_sleep(50000); // test only!
 
     }
