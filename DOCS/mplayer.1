@@ -824,6 +824,16 @@ Selects Hungarian and falls back to English if Hungarian is not available.
 .B \-sub <subtitle\ file>
 Use/\:display this subtitle file.
 .TP
+.B \-sub-bkg-alpha <0-255>
+Specify the alpha channel value for subtitles and OSD backgrounds.
+Big values means more transparent. The 0 value is an exception and means
+completly transparent.
+.TP
+.B \-sub-bkg-color <0-255>
+Specify the color value for subtitles and OSD backgrounds.
+Currently subtitles are grayscale so this value is equivalente to the
+intensity of the color. The 255 value means white and 0 black.
+.TP
 .B \-subcc \ 
 Display DVD Closed Caption (CC) subtitles.
 These are NOT the VOB subtitles, these are special ASCII subtitles for the

@@ -40,6 +40,8 @@ int sub_pos=100;
 int sub_width_p=100;
 int sub_alignment=0; /* 0=top, 1=center, 2=bottom */
 int sub_visibility=1;
+int sub_bkg_color=0; /* subtitles background color */
+int sub_bkg_alpha=0;
 
 // return the real height of a char:
 static inline int get_height(int c,int h){
@@ -97,8 +99,8 @@ static void alloc_buf(mp_osd_obj_t* obj)
 	obj->bitmap_buffer = (unsigned char *)memalign(16, len);
 	obj->alpha_buffer = (unsigned char *)memalign(16, len);
     }
-    memset(obj->bitmap_buffer, 0, len);
-    memset(obj->alpha_buffer, 0, len);
+    memset(obj->bitmap_buffer, sub_bkg_color, len);
+    memset(obj->alpha_buffer, sub_bkg_alpha, len);
 }
 
 // renders the buffer
