@@ -57,7 +57,7 @@ int vidix_preinit(const char *drvname,void *server)
 	  return -1;
 	}
 	vidix_handler = vdlOpen("/usr/lib/mplayer/vidix/",
-				drvname ? drvname[0] == ':' ? &drvname[1] : NULL : NULL,
+				drvname ? drvname[0] == ':' ? &drvname[1] : drvname[0] ? drvname : NULL : NULL,
 				TYPE_OUTPUT,
 				verbose);
 	if(vidix_handler == NULL)

@@ -1,7 +1,7 @@
 /*
     VIDIX accelerated overlay in a X window
     
-    (C) Alex Beregszaszi
+    (C) Alex Beregszaszi & Nick Kurshev
     
     WS window manager by Pontscho/Fresh!
 
@@ -44,6 +44,7 @@ static int X_already_started = 0;
 
 /* VIDIX related stuff */
 static const char *vidix_name = (char *)(-1);
+static int pre_init_err = 0;
 
 /* Image parameters */
 static uint32_t image_width;
@@ -115,6 +116,11 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     XWindowAttributes attribs;
     int window_depth;
 
+    if(pre_init_err)
+    {
+	mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] Quiting due preinit error\n");
+	return -1;
+    }
 //    if (title)
 //	free(title);
     title = strdup("MPlayer VIDIX X11 Overlay");
@@ -325,6 +331,10 @@ static uint32_t draw_frame(uint8_t *src[])
 
 static uint32_t query_format(uint32_t format)
 {
+  static int first = 1;
+  if(first)
+  {
+    first = 0;
     if (vidix_name == (char *)(-1))
     {
 	if (vo_subdevice)
@@ -337,9 +347,12 @@ static uint32_t query_format(uint32_t format)
     }
 
     if (vidix_preinit(vidix_name, &video_out_xvidix) != 0)
+    {
+	pre_init_err = 1;
 	return(0);
-    
-    return(vidix_query_fourcc(format));
+    }
+  }    
+  return pre_init_err ? 0 : vidix_query_fourcc(format);
 }
 
 
