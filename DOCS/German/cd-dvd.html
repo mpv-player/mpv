@@ -78,22 +78,22 @@ Wiedergabe. Dies ist die erste Version mit richtiger DVD-Unterstützung in
 <B>MPlayer</B> und wir sind beschäftigt damit, Fehler zu suchen und grundlegende
 DVD-Player Funktionen zu implementieren.</P>
 
-<P><B>MPlayer</B> verwendet libdvdread, welches eingebaute Unterstützung für IFO
-Parsing, lesen von Navi Blöcken und Authentifizierung/Entschlüsselung hat. libdvdread
-verwendet die gute alte libcss die die letztgenannten Funktionen. Also musst du libcss
+<P><B>MPlayer</B> verwendet libdvdread, welches eingebaute Unterstützung für IFO-Parsing,
+lesen von Navi Blöcken und Authentifizierung/Entschlüsselung hat. Libdvdread
+verwendet libdvdcss für die letztgenannten Funktionen. Also musst du libdvdcss
 und libdvdread heruntergeladen, kompiliert und installiert haben, BEVOR du den 
-./configure Script von <B>MPlayer</B>, welcher libdvdread automatisch erkennt, aus-
-führst.</P>
+./configure Script von <B>MPlayer</B>, welcher libdvdread automatisch erkennt,
+ausführst.</P>
 
 <UL>  
-<LI><P><B>Laden der Sourcen von libdvdread und libcss.</B></P>
+<LI><P><B>Laden der Sourcen von libdvdread und libdvdcss.</B></P>
   
 <P><I>Du sie hier downloaden:
 <A HREF="http://www.dtek.chalmers.se/groups/dvd">http://www.dtek.chalmers.se/groups/dvd</A>
-(klicke auf 'download' im Menü links, und du kannst libcss und libdvdread in der
+(klicke auf 'download' im Menü links, und du kannst libdvdcss und libdvdread in der
 Tabelle finden).</I></P></LI>
   
-<LI><P><B>Kompiliere und Installiere libcss, DANN libdvdread.</B></P>
+<LI><P><B>Kompiliere und installiere libdvdcss, DANACH libdvdread.</B></P>
     
 <P><I>Lese die Dokumentationen dieser Pakete um diesen Schritt einfach zu machen.</I></P></LI>
   
@@ -105,7 +105,7 @@ wird ./configure etwa so was sagen:<BR><CODE>Checking for DVDread support ... ye
 Das wars! Tippe: <CODE>make</CODE>, dann <CODE>make install</CODE>.</I></P></LI>
 </UL>
 
-<P>Natürlich müsst die libcss und libdvdread nicht neu kompilieren, wenn du MPlayer
+<P>Natürlich müsst libdvdcss und libdvdread nicht neu kompilieren, wenn du MPlayer
 neu kompilierst (z.B. aufgrund einer neuen CVS-Version), wenn diese 2 Pakete bereits
 installiert sind.</P>
 
@@ -133,7 +133,7 @@ option) ändern, oder du kannst es als Dateinamen für <B>MPlayer</B> angeben:
 <TABLE BORDER=0 ALIGN=left WIDTH=100%>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Kann ich libdvdread und libcss z.B. auf meinem süssen Sparc/Solaris kompilieren?
+Kann ich libdvdread und libdvdcss z.B. auf meinem süssen Sparc/Solaris kompilieren?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Was weiss ... Bitte teste es und sag uns bescheid. Aber es wird gesagt, dass es
 funktionieren sollte. Bitte lese auch die Documentation von libdvdread und seiner
@@ -167,20 +167,19 @@ Bekanntes Problem, wie versuchen es später zu lösen (wenn wir zu libvo2 wechseln
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Wie kann ich den Reginal-Code meine DVD-Laufwerks einstellen ? I habe kein Win-
-dows!
+Wie kann ich den Reginal-Code meine DVD-Laufwerks einstellen ? I habe kein Windows!
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Verwende das 'regionset'-Tool:
 <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz</A>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Also MPlayer kann DVDs abspielen? Dann musst du DeCSS verwerden! Du bist ver-
-haftet unter dem XYZ#$ Paragraphen von dem--
+Also MPlayer kann DVDs abspielen? Dann musst du DeCSS verwerden! Du bist verhaftet
+unter dem XYZ#$ Paragraphen von dem--
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 Weiche von mir Arschloch, es ist kein DeCSS-Code im <B>MPlayer</B>. <B>MPlayer</B> 
-verwendet libdvdread durch linken und libdvdread verwendet libcss durch dynami-
-sches laden.
+verwendet libdvdread durch linken und libdvdread verwendet libdvdcss durch
+dynamisches laden.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
