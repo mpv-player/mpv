@@ -11,10 +11,12 @@
 #define MP_IMGFLAG_DIRECT 0x08
 // codec accept any stride (>=width):
 #define MP_IMGFLAG_ACCEPT_STRIDE 0x10
+// codec accept any width (width*bpp=stride) (>=width):
+#define MP_IMGFLAG_ACCEPT_WIDTH 0x20
 // stride should be aligned to 16-byte (MB) boundary:
-#define MP_IMGFLAG_ALIGNED_STRIDE 0x20
+#define MP_IMGFLAG_ALIGNED_STRIDE 0x40
 // codec uses drawing/rendering callbacks (draw_slice()-like thing, DR method 2)
-#define MP_IMGFLAG_DRAW_CALBACK 0x40
+#define MP_IMGFLAG_DRAW_CALLBACK 0x80
 
 // set if number of planes > 1
 #define MP_IMGFLAG_PLANAR 0x100
