@@ -108,7 +108,8 @@ esac
 
 # LGB: Help moved here.
 
-if [ "$1" = "--help" -o "$1" = "-help" -o "$1" = "-h" ]; then
+for parm in "$@" ; do
+if [ "$parm" = "--help" -o "$parm" = "-help" -o "$parm" = "-h" ]; then
 cat << EOF
 
 usage: $0 [options]
@@ -178,6 +179,7 @@ params:
 EOF
 exit 0
 fi
+done # for parm in ...
 
 
 # LGB: Some inital help
