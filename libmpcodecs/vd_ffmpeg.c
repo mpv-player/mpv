@@ -389,7 +389,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     while(lavc_param_vstats){ // always one time loop
         static FILE *fvstats=NULL;
         char filename[20];
-        static int all_len=0;
+        static long long int all_len=0;
         static int frame_number=0;
         static double all_frametime=0.0;
 
