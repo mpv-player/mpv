@@ -163,7 +163,7 @@ static int init(sh_video_t *sh){
 	    return 0;
 	}
 	// setup rv30 codec (codec sub-type and image dimensions):
-	if(extrahdr[1]>=0x30000000){
+	if(extrahdr[1]>=0x20200002){
 	    unsigned long cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
 	    unsigned long cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&7),&cmsg24};
 	    (*rvyuv_custom_message)(cmsg_data,sh->context);
