@@ -781,6 +781,13 @@ static char help_text[]=
 #define MSGTR_VO_JPEG_BaselineJPEG "Baseline JPEG enabled."
 #define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline JPEG disabled."
 
+// vo_pnm.c
+#define MSGTR_VO_PNM_ASCIIMode "ASCII mode enabled."
+#define MSGTR_VO_PNM_RawMode "Raw mode enabled."
+#define MSGTR_VO_PNM_PPMType "Will write PPM files."
+#define MSGTR_VO_PNM_PGMType "Will write PGM files."
+#define MSGTR_VO_PNM_PGMYUVType "Will write PGMYUV files."
+
 // ======================= AO Audio Output drivers ========================
 
 // libao2 
