@@ -1,5 +1,5 @@
 // MPlayer Turkish Translation
-// Translated by: "heart_of_the_ocean" Murat ALKAN
+// Translated by: "heart_of_the_ocean" Murat ALKAN <oceanrat@gmail.com>
 
 // ========================= MPlayer help ===========================
 
