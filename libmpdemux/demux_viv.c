@@ -714,6 +714,7 @@ if (demuxer->audio->id >= -1){
 		sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
 nosound:
+		return;
 }
 }
 
