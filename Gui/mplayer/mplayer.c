@@ -18,8 +18,8 @@
 
 #include "../../config.h"
 
-#define mplMouseTimerConst  100
-#define mplRedrawTimerConst 50
+#define mplMouseTimerConst  10
+#define mplRedrawTimerConst 5
 
 int mplMouseTimer  = mplMouseTimerConst;
 int mplRedrawTimer = mplRedrawTimerConst;
@@ -51,11 +51,18 @@ void mplTimerHandler( int signum )
 void mplInit( int argc,char* argv[], char *envp[] )
 {
 // parse_cfgfiles( argc,argv,envp );
+
+ // allocates shmem to gtkShMem
+ // fork() a process which runs gtkThreadProc()  [gtkChildPID]
  gtkInit( argc,argv,envp );
+
+ // allocates shmem to mplShMem
+ // init fields of this struct to default values
  mplMPlayerInit( argc,argv,envp );
 
- message=mplErrorHandler;
+ message=mplErrorHandler;  // error messagebox drawing function
 
+ // opens X display, checks for extensions (XShape, DGA etc)
  wsXInit();
 
  if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
@@ -98,15 +105,15 @@ void mplInit( int argc,char* argv[], char *envp[] )
  btnModify( evSetBalance,mplShMem->Balance );
  btnModify( evSetMoviePosition,mplShMem->Position );
 
- timerSetHandler( mplTimerHandler );
- timerInit();
+// timerSetHandler( mplTimerHandler );  // various timer hacks
+// timerInit();
 
- wsMainLoop();
+ wsMainLoop();  // X event handler (calls mplTimerHandler periodically!)
 
  dbprintf( 1,"[mplayer] exit.\n" );
 
  mplStop();
- timerDone();
- gtkDone();
+// timerDone();
+ gtkDone();  // kills the gtkThreadProc() process
  wsXDone();
 }
