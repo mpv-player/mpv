@@ -3,6 +3,9 @@
    AFMT_U16_LE, AFMT_U16_BE, AFMT_S32_LE and AFMT_S32_BE.
 */
 
+// Must be defined before any libc headers are included!
+#define _ISOC9X_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,6 +16,14 @@
 #include "af.h"
 #include "../bswap.h"
 #include "../libvo/fastmemcpy.h"
+
+// Integer to float conversion through lrintf()
+#ifdef HAVE_LRINTF
+#include <math.h>
+long int lrintf(float);
+#else
+#define lrintf(x) ((int)(x))
+#endif
 
 /* Functions used by play to convert the input audio to the correct
    format */
@@ -31,9 +42,9 @@ static void us2si(void* in, void* out, int len, int bps);
 // Change the number of bits per sample
 static void change_bps(void* in, void* out, int len, int inbps, int outbps);
 // From float to int signed
-static void float2int(void* in, void* out, int len, int bps);
+static void float2int(float* in, void* out, int len, int bps);
 // From signed int to float
-static void int2float(void* in, void* out, int len, int bps);
+static void int2float(void* in, float* out, int len, int bps);
 
 static af_data_t* play(struct af_instance_s* af, af_data_t* data);
 static af_data_t* play_swapendian(struct af_instance_s* af, af_data_t* data);
@@ -488,48 +499,48 @@ static void change_bps(void* in, void* out, int len, int inbps, int outbps)
   }
 }
 
-static void float2int(void* in, void* out, int len, int bps)
+static void float2int(float* in, void* out, int len, int bps)
 {
   register int i;
   switch(bps){
   case(1):
     for(i=0;i<len;i++)
-      ((int8_t*)out)[i] = (int)(127.0 * (1.0+((float*)in)[i])) - 127;
+      ((int8_t*)out)[i] = lrintf(127.0 * in[i]);
     break;
   case(2): 
     for(i=0;i<len;i++)
-      ((int16_t*)out)[i] = (int)(32767.0 * (1.0+((float*)in)[i])) - 32767;
+      ((int16_t*)out)[i] = lrintf(32767.0 * in[i]);
     break;
   case(3):
     for(i=0;i<len;i++)
-      store24bit(out, i, (int)(2147483647.0 * (1.0+((float*)in)[i])) - 2147483647);
+      store24bit(out, i, lrintf(2147483647.0 * in[i]));
     break;
   case(4):
     for(i=0;i<len;i++)
-      ((int32_t*)out)[i] = (int)(2147483647.0 * (1.0+((float*)in)[i])) - 2147483647;
+      ((int32_t*)out)[i] = lrintf(2147483647.0 * in[i]);
     break;
   }	
 }
 
-static void int2float(void* in, void* out, int len, int bps)
+static void int2float(void* in, float* out, int len, int bps)
 {
   register int i;
   switch(bps){
   case(1):
     for(i=0;i<len;i++)
-      ((float*)out)[i]=(1.0/128.0)*((float)((int8_t*)in)[i]);
+      out[i]=(1.0/128.0)*((int8_t*)in)[i];
     break;
   case(2):
     for(i=0;i<len;i++)
-      ((float*)out)[i]=(1.0/32768.0)*((float)((int16_t*)in)[i]);
+      out[i]=(1.0/32768.0)*((int16_t*)in)[i];
     break;
   case(3):
     for(i=0;i<len;i++)
-      ((float*)out)[i]=(1.0/2147483648.0)*((float)((int32_t)load24bit(in, i)));
+      out[i]=(1.0/2147483648.0)*((int32_t)load24bit(in, i));
     break;
   case(4):
     for(i=0;i<len;i++)
-      ((float*)out)[i]=(1.0/2147483648.0)*((float)((int32_t*)in)[i]);
+      out[i]=(1.0/2147483648.0)*((int32_t*)in)[i];
     break;
   }	
 }
