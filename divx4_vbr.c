@@ -1,39 +1,18 @@
 /*
  *  divx4_vbr.c
  *
- *  Copyright (C) Thomas Östreich - June 2001
+ *  This file is subject to the terms and conditions of the GNU General Public
+ *  License. See the file COPYING in the main directory of the Linux
+ *  distribution for more details.
  *
  *  2-pass code OpenDivX port:
  *  Copyright (C) 2001 Christoph Lampert <gruel@gmx.de> 
  *
- *  This file is part of transcode, a linux video stream processing tool
- *      
- *  transcode is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU General Public License as published by
- *  the Free Software Foundation; either version 2, or (at your option)
- *  any later version.
- *   
- *  transcode is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU General Public License for more details.
- *   
- *  You should have received a copy of the GNU General Public License
- *  along with GNU Make; see the file COPYING.  If not, write to
- *  the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA. 
- *
+ *  Large parts of this code were taken from VbrControl() from the OpenDivX
+ *  project, (C) divxnetworks, written by Eugene Kuznetsov <ekuznetsov@divxnetworks.com>
+ *  with the permission of Darrius "Junto" Thompson, Director DivX
  */
 
-
-/**********************************************************
- *                Two-pass-code from OpenDivX             *
- *                                                        *
- *  Large parts of this code were taken from VbrControl() *
- *  from the OpenDivX project, (C) divxnetworks,          *
- *  this code is published under DivX Open license, which *
- *  can be found... somewhere... oh, whatever...          *
- **********************************************************/
- 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
