@@ -117,7 +117,7 @@ static MenuRef windMenu;
 static MenuRef movMenu;
 static MenuRef aspectMenu;
 
-static int border = 20;
+static int border = 15;
 enum
 {
 	kQuitCmd			= 1,
@@ -605,7 +605,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	//Create player window//////////////////////////////////////////////////
 	windowAttrs =   kWindowStandardDocumentAttributes
 					| kWindowStandardHandlerAttribute
-					| kWindowMetalAttribute
 					| kWindowCompositingAttribute
 					| kWindowLiveResizeAttribute;
 					
@@ -629,6 +628,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  	}
 	
 	//Show window
+	SetThemeWindowBackground( theWindow, kThemeBrushModelessDialogBackgroundActive, TRUE);
 	RepositionWindow(theWindow, NULL, kWindowCenterOnMainScreen);
 	ShowWindow (theWindow);
 	
@@ -1146,12 +1146,11 @@ void window_resized()
 	float aspectX;
 	float aspectY;
 	
-	int padding;
+	int padding = 0;
 	
 	uint32_t d_width;
 	uint32_t d_height;
 	
-	Rect tmpRect;
 	CGRect tmpBounds;
 
 	GetPortBounds( GetWindowPort(theWindow), &winRect );
@@ -1181,6 +1180,7 @@ void window_resized()
 	}
 
 	//Clear Background
+	SetThemeWindowBackground( theWindow, kThemeBrushUtilityWindowBackgroundInactive, TRUE);
 	tmpBounds = CGRectMake( 0, border, winRect.right, winRect.bottom);
 	CreateCGContextForPort(GetWindowPort(theWindow),&context);
 	CGContextClearRect(context, tmpBounds);
@@ -1289,7 +1289,7 @@ void window_fullscreen()
 		//go fullscreen
 		border = 0;
 		panscan_calc();
-		ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute);
+		ChangeWindowAttributes(theWindow, 0, kWindowResizableAttribute|kWindowNoShadowAttribute);
 		MoveWindow(theWindow, deviceRect.left-(vo_panscan_x >> 1), deviceRect.top-(vo_panscan_y >> 1), 1);
 		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
 
@@ -1314,8 +1314,8 @@ void window_fullscreen()
 		ShowCursor();
 		
 		//revert window to previous setting
-		border = 20;
-		ChangeWindowAttributes(theWindow, kWindowResizableAttribute, 0);
+		border = 15;
+		ChangeWindowAttributes(theWindow, kWindowResizableAttribute, kWindowNoShadowAttribute);
 		SizeWindow(theWindow, oldWinRect.right, oldWinRect.bottom,1);
 		MoveWindow(theWindow, oldWinBounds.left, oldWinBounds.top, 1);
 
