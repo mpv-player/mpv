@@ -20,6 +20,7 @@ v0.11-CVS:  yeah, we moved to SourceForge CVS!
   - VCD-related stuff moved from stream.c to vcd_read.c
   - added DGA driver by Andreas Ackermann
   - added debian/ subdir for the debian package makers... see DOCS/DEBIAN
+  - new Makefile/dependency system
 
 v0.11-pre24:  small fixes again :(
   - DOCS/LIRC changed: users *must* enable lirc support manually, it is
