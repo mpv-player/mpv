@@ -117,10 +117,10 @@ libmpdvdkit/libmpdvdkit.so:
 
 libmpdvdkit2/libmpdvdkit.a:
 	$(MAKE) -C libmpdvdkit2
-		
+
 libmpdvdkit2/libmpdvdkit.so:
 	$(MAKE) -C libmpdvdkit2 libmpdvdkit.so
-			
+
 loader/libloader.a:
 	$(MAKE) -C loader
 
