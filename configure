@@ -1405,6 +1405,7 @@ if test "$_vidix" = auto ; then
   x86 && _vidix=yes
   cygwin && _vidix=no
   qnx && _vidix=no
+  sunos && _vidix=no
 fi
 
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
