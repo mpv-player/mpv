@@ -27,7 +27,7 @@ LIBVO_EXTERN( x11 )
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-//#include <X11/extensions/XShm.h>
+
 #ifdef HAVE_XF86VM
 #include <X11/extensions/xf86vmode.h>
 #endif
@@ -540,6 +540,7 @@ static uint32_t draw_frame( uint8_t *src[] ){
         memcpy( d,s,sbpp*image_width*image_height );
     } else {
         // sbpp!=dbpp
+#if 0
       char *e=s+sbpp*image_width*image_height;
       //printf( "libvo: using C 24->32bpp conversion\n" );
       while( s<e ){
@@ -548,6 +549,9 @@ static uint32_t draw_frame( uint8_t *src[] ){
         d[2]=s[2];
         s+=sbpp;d+=dbpp;
       }
+#else
+      rgb24to32(s, d, sbpp*image_width*image_height);
+#endif
     }
   }
   return 0;
