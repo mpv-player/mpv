@@ -65,7 +65,8 @@ binary-arch: build
 	dh_installmenu
 #	dh_installmime
 	dh_installinfo
-	dh_installchangelogs ChangeLog
+	dh_installchangelogs
+	#ChangeLog
 	dh_link
 	dh_strip
 	dh_compress
