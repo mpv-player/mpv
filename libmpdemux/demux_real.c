@@ -16,6 +16,19 @@ media encoded with it
 DNET: apparently one of their original audio codecs, to be used with music
 SIPR: SiprNet, based on ACELP, and is great for compressing voice
 COKR(?): Cooker, the fabled G2 audio codec
+
+New infos:
+
+Audio codecs: (supported by RealPlayer8 for Linux)
+    ATRC - RealAudio 8 (ATRAC3)
+    COOK - RealAudio G2
+    DNET - RealAudio 3.0
+    SIPR - SiproLab's audio codec
+
+Video codecs: (supported by RealPlayer8 for Linux)
+    RV10
+    RV20
+    RV30
 */
 
 #include <stdio.h>
@@ -36,6 +49,7 @@ COKR(?): Cooker, the fabled G2 audio codec
 #define MAX_STREAMS 10
 
 typedef struct {
+    int		data_chunk_offset; /* i think for seeking */
     int		num_of_packets;
     int		last_a_stream;
     int 	a_streams[MAX_STREAMS];
@@ -77,7 +91,8 @@ static void skip_str(int isbyte, demuxer_t *demuxer)
     printf("skip_str: %d bytes skipped\n", len);
 }
 
-int real_check_file(demuxer_t* demuxer){
+int real_check_file(demuxer_t* demuxer)
+{
     real_priv_t *priv;
     int c;
 
@@ -107,13 +122,14 @@ int demux_real_fill_buffer(demuxer_t *demuxer)
     int timestamp;
     int stream_id;
     int i;
+    int flags;
 
 //    printf("num_of_packets: %d\n", priv->num_of_packets);
 
 loop:
     if (priv->num_of_packets == 0)
 	return 0; /* EOF */
-    stream_skip(demuxer->stream, 2);
+    stream_skip(demuxer->stream, 2); /* version */
     len = stream_read_word(demuxer->stream);
     if (len == -256) /* EOF */
 	return 0;
@@ -122,16 +138,17 @@ loop:
 	printf("bad packet len (%d)\n", len);
 	stream_skip(demuxer->stream, len);
 	goto loop;
-//	return 0; /* bad packet */
     }
     stream_id = stream_read_word(demuxer->stream);
     timestamp = stream_read_dword(demuxer->stream);
 
-//    printf("packet: len: %d, stream_id: %d, timestamp: %d\n",
-//	len, stream_id, timestamp);
-    
     stream_skip(demuxer->stream, 1); /* reserved */
-    stream_skip(demuxer->stream, 1); /* flags */
+    flags = stream_read_char(demuxer->stream);
+    /* flags:		*/
+    /* 	0x2 - keyframe	*/
+
+    printf("packet#%d: len: %d, stream_id: %d, timestamp: %d, flags: %x\n",
+	priv->num_of_packets, len, stream_id, timestamp, flags);
 
     priv->num_of_packets--;
     len -= 12;    
@@ -166,7 +183,8 @@ loop:
     }
 
     demuxer->filepos = stream_tell(demuxer->stream);
-    ds_read_packet(ds, demuxer->stream, len, timestamp/90000.0f, demuxer->filepos, 0);
+    ds_read_packet(ds, demuxer->stream, len, timestamp/90000.0f,
+	demuxer->filepos, (flags & 0x2) ? 0x10 : 0);
 
     return 1;
 }
@@ -202,7 +220,7 @@ void demux_open_real(demuxer_t* demuxer)
 	switch(chunk)
 	{
 	    case MKTAG('P', 'R', 'O', 'P'):
-		printf("Properties chunk\n");
+//		printf("Properties chunk\n");
 		stream_skip(demuxer->stream, 4); /* max bitrate */
 		stream_skip(demuxer->stream, 4); /* avg bitrate */
 		stream_skip(demuxer->stream, 4); /* max packet size */
@@ -211,16 +229,32 @@ void demux_open_real(demuxer_t* demuxer)
 		stream_skip(demuxer->stream, 4); /* duration */
 		stream_skip(demuxer->stream, 4); /* preroll */
 		stream_skip(demuxer->stream, 4); /* index offset */
-		stream_skip(demuxer->stream, 4); /* data offset */
+//		stream_skip(demuxer->stream, 4); /* data offset */
+		priv->data_chunk_offset = stream_read_dword(demuxer->stream)+10;
+		printf("Data chunk offset: 0x%x\n", priv->data_chunk_offset);
 		stream_skip(demuxer->stream, 2); /* nb streams */
+#if 0
 		stream_skip(demuxer->stream, 2); /* flags */
+#else
+		{
+		    int flags = stream_read_word(demuxer->stream);
+		    printf("Flags (%x): ", flags);
+		    if (flags & 0x1)
+			printf("[save allowed] ");
+		    if (flags & 0x2)
+			printf("[perfect play (?)] ");
+		    if (flags & 0x4)
+			printf("[live broadcast] ");
+		    printf("\n");
+		}
+#endif
 		break;
 	    case MKTAG('C', 'O', 'N', 'T'):
 	    {
 		char *buf;
 		int len;
 
-		printf("Broadcasting informations (title, author, copyright, comment)\n");
+//		printf("Broadcasting informations (title, author, copyright, comment)\n");
 
 		len = stream_read_word(demuxer->stream);
 		if (len > 0)
@@ -271,7 +305,7 @@ void demux_open_real(demuxer_t* demuxer)
 		int bitrate;
 		int codec_data_size;
 		int codec_pos;
-		int v;
+		int tmp;
 
 		stream_id = stream_read_word(demuxer->stream);
 		printf("Found new stream (id: %d)\n", stream_id);
@@ -290,13 +324,14 @@ void demux_open_real(demuxer_t* demuxer)
 		codec_data_size = stream_read_dword(demuxer->stream);
 		codec_pos = stream_tell(demuxer->stream);
 
-		v = stream_read_dword(demuxer->stream);
-		if (v == MKTAG(0xfd, 'a', 'r', '.')) /* audio header */
+		tmp = stream_read_dword(demuxer->stream);
+		if (tmp == MKTAG(0xfd, 'a', 'r', '.')) /* audio header */
 		{
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
+		    char buf[128]; /* for codec name */
+		    int frame_size;
 
 		    printf("Found audio stream!\n");
-//		    printf("pos: %x\n", stream_tell(demuxer->stream));
 		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
 		    stream_skip(demuxer->stream, 2);
 		    stream_skip(demuxer->stream, 4); /* .ra4 or .ra5 */
@@ -309,70 +344,66 @@ void demux_open_real(demuxer_t* demuxer)
 		    stream_skip(demuxer->stream, 4);
 		    stream_skip(demuxer->stream, 4);
 		    stream_skip(demuxer->stream, 2); /* 1 */
-		    stream_skip(demuxer->stream, 2); /* coded frame size */
+//		    stream_skip(demuxer->stream, 2); /* coded frame size */
+		    frame_size = stream_read_word(demuxer->stream);
+		    printf("frame_size: %d\n", frame_size);
 		    stream_skip(demuxer->stream, 4);
 
 		    sh->samplerate = stream_read_word(demuxer->stream);
 		    stream_skip(demuxer->stream, 4);
 		    sh->channels = stream_read_word(demuxer->stream);
 		
-		    {
-			char buf[128];
-			
-			skip_str(1, demuxer);
-//			get_str(1, demuxer, buf, sizeof(buf));
-			get_str(1, demuxer, buf, sizeof(buf));
+		    /* Desc #1 */
+		    skip_str(1, demuxer);
+		    /* Desc #2 */
+		    get_str(1, demuxer, buf, sizeof(buf));
 
-			v = 0; /* not supported audio codec */
-			if (strstr(buf, "dnet"))
-			{
-			    printf("Found AC3 audio\n");
-			    sh->format = 0x2000; /* ac3 */
-			    v = 1;
-			}
-			if (strstr(buf, "sipr"))
-			{
-			    printf("Found SiproLab's ACELP\n");
+		    tmp = 1; /* supported audio codec */
+		    switch (MKTAG(buf[0], buf[1], buf[2], buf[3]))
+		    {
+			case MKTAG('a', 't', 'r', 'c'):
+			    break;
+			case MKTAG('d', 'n', 'e', 't'):
+			    printf("Audio: DNET -> AC3\n");
+			    sh->format = 0x2000;
+			    break;
+			case MKTAG('s', 'i', 'p', 'r'):
+			    printf("Audio: SiproLab's ACELP.net\n");
 			    sh->format = 0x130;
-			    v = 1;
-			}
-			if (strstr(buf, "cook"))
-			{
-			    printf("Found Real's GeneralCooker (unsupported)\n");
-			    v = 0;
-			}
+			    break;
+			case MKTAG('c', 'o', 'o', 'k'):
+			    printf("Audio: Real's GeneralCooker (unsupported)\n");
+			    tmp = 0;
+			    break;
+			default:
+			    printf("Audio: Unknown (%s)\n", buf);
+			    tmp = 0;
+			    sh->format = MKTAG(buf[0], buf[1], buf[2], buf[3]);
 		    }
-//		    skip_str(1, demuxer); /* desc */
-//		    skip_str(1, demuxer); /* desc */
-			
-		    /* the audio codec name is stored in desc */
-		    /* available codecs: DNET -> ac3 */
-//		    sh->format = 0x2000; /* ac3 */
 
-		    if (v)
+		    if (tmp)
 		    {
+			/* Emulate WAVEFORMATEX struct: */
+			sh->wf = malloc(sizeof(WAVEFORMATEX));
+			memset(sh->wf, 0, sizeof(WAVEFORMATEX));
+			sh->wf->wFormatTag = sh->format;
+			sh->wf->nChannels = sh->channels;
+			sh->wf->wBitsPerSample = 16;
+			sh->wf->nSamplesPerSec = sh->samplerate;
+			sh->wf->nAvgBytesPerSec = bitrate;
+			sh->wf->nBlockAlign = frame_size; /* 19 for acelp, pff */
+			sh->wf->cbSize = 0;
 		    
-		    /* Emulate WAVEFORMATEX struct: */
-		    sh->wf = malloc(sizeof(WAVEFORMATEX));
-		    memset(sh->wf, 0, sizeof(WAVEFORMATEX));
-		    sh->wf->wFormatTag = sh->format;
-		    sh->wf->nChannels = sh->channels;
-		    sh->wf->wBitsPerSample = 16;
-		    sh->wf->nSamplesPerSec = sh->samplerate;
-		    sh->wf->nAvgBytesPerSec = bitrate;
-		    sh->wf->nBlockAlign = 19; /* 19 for acelp, pff */
-		    sh->wf->cbSize = 0;
+			/* insert as stream */
+			demuxer->audio->sh = sh;
+			sh->ds = demuxer->audio;
+			demuxer->audio->id = stream_id;
 		    
-		    /* insert as stream */
-		    demuxer->audio->sh = sh;
-		    sh->ds = demuxer->audio;
-		    demuxer->audio->id = stream_id;
-		    
-		    if (priv->last_a_stream+1 < MAX_STREAMS)
-		    {
-			priv->a_streams[priv->last_a_stream] = stream_id;
-			priv->last_a_stream++;
-		    }
+			if (priv->last_a_stream+1 < MAX_STREAMS)
+			{
+			    priv->a_streams[priv->last_a_stream] = stream_id;
+			    priv->last_a_stream++;
+			}
 		    }
 		}
 		else
@@ -380,9 +411,9 @@ void demux_open_real(demuxer_t* demuxer)
 		    /* video header */
 		    sh_video_t *sh = new_sh_video(demuxer, stream_id);
 
-		    v = stream_read_dword_le(demuxer->stream);
-		    printf("video: %.4s (%x)\n", (char *)&v, v);
-		    if (v != MKTAG('V', 'I', 'D', 'O'))
+		    tmp = stream_read_dword_le(demuxer->stream);
+		    printf("video: %.4s (%x)\n", (char *)&tmp, tmp);
+		    if (tmp != MKTAG('V', 'I', 'D', 'O'))
 		    {
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "Unsupported video codec\n");
 			goto skip_this_chunk;
@@ -391,7 +422,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->format = stream_read_dword_le(demuxer->stream); /* fourcc */
 		    printf("video fourcc: %.4s (%x)\n", (char *)&sh->format, sh->format);
 
-		    // emulate BITMAPINFOHEADER:
+		    /* emulate BITMAPINFOHEADER */
 		    sh->bih = malloc(sizeof(BITMAPINFOHEADER));
 		    memset(sh->bih, 0, sizeof(BITMAPINFOHEADER));
 	    	    sh->bih->biSize = 40;
@@ -411,8 +442,8 @@ void demux_open_real(demuxer_t* demuxer)
 		    stream_skip(demuxer->stream, 2);
 
 		    /* h263 hack */
-		    v = stream_read_dword(demuxer->stream);
-		    switch (v)
+		    tmp = stream_read_dword(demuxer->stream);
+		    switch (tmp)
 		    {
 			case 0x10000000:
 			    /* sub id: 0 */
@@ -429,7 +460,7 @@ void demux_open_real(demuxer_t* demuxer)
 			    break;
 			default:
 			    /* codec id: none */
-			    printf("unknown id: %x\n", v);
+			    printf("unknown id: %x\n", tmp);
 		    }
 		        
 		    /* insert as stream */
@@ -445,12 +476,13 @@ void demux_open_real(demuxer_t* demuxer)
 
 skip_this_chunk:
 		/* skip codec info */
-		v = stream_tell(demuxer->stream) - codec_pos;
-		stream_skip(demuxer->stream, codec_data_size - v);		    
+		tmp = stream_tell(demuxer->stream) - codec_pos;
+		stream_skip(demuxer->stream, codec_data_size - tmp);
 		break;
 	    }
 	    case MKTAG('D', 'A', 'T', 'A'):
 		goto header_end;
+	    case MKTAG('I', 'N', 'D', 'X'):
 	    default:
 		printf("Unknown chunk: %x\n", chunk);
 		stream_skip(demuxer->stream, chunk_size - 10);
