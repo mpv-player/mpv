@@ -50,7 +50,8 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
     // Set new len and allocate new buffer
     s->tlen = *((float*)arg);
     af->delay = s->tlen * 1000.0;
-    s->len  = af->data->rate*af->data->bps*af->data->nch*(int)s->tlen;
+//    s->len  = af->data->rate*af->data->bps*af->data->nch*(int)s->tlen;
+    s->len  = ((int)(af->data->rate*s->tlen))*af->data->bps*af->data->nch;
     s->buf  = malloc(s->len);
     af_msg(AF_MSG_DEBUG0,"[delay] Delaying audio output by %0.2fs\n",s->tlen);
     af_msg(AF_MSG_DEBUG1,"[delay] Delaying audio output by %i bytes\n",s->len);
