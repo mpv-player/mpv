@@ -35,7 +35,7 @@ static inline unsigned int vcd_get_msf(mp_vcd_priv_t* vcd){
 int vcd_seek_to_track(mp_vcd_priv_t* vcd, int track){
   vcd->entry.address_format = CD_MSF_FORMAT;
   vcd->entry.track  = track;
-  if (ioctl(vcd->fd, CDIOREADTOCENTRY, &vcd_entry)) {
+  if (ioctl(vcd->fd, CDIOREADTOCENTRY, &vcd->entry)) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif1: %s\n",strerror(errno));
     return -1;
   }
@@ -50,7 +50,7 @@ int vcd_get_track_end(mp_vcd_priv_t* vcd, int track){
   }
   vcd->entry.address_format = CD_MSF_FORMAT;
   vcd->entry.track  = track<tochdr.ending_track?(track+1):CDROM_LEADOUT;
-  if (ioctl(vcd->fd, CDIOREADTOCENTRY, &vcd_entry)) {
+  if (ioctl(vcd->fd, CDIOREADTOCENTRY, &vcd->entry)) {
     mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
     return -1;
   }
@@ -93,7 +93,7 @@ mp_vcd_priv_t* vcd_read_toc(int fd){
 
 static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
 
-      if (pread(vcd->fd,vcd->buf,VCD_SECTOR_SIZE,vcd_get_msf(vcd)*VCD_SECTOR_SIZE)
+      if (pread(vcd->fd,&vcd->buf,VCD_SECTOR_SIZE,vcd_get_msf(vcd)*VCD_SECTOR_SIZE)
 	 != VCD_SECTOR_SIZE) return 0;  // EOF?
 
       vcd->entry.entry.addr.msf.frame++;
@@ -105,7 +105,7 @@ static int vcd_read(mp_vcd_priv_t* vcd,char *mem){
           vcd->entry.entry.addr.msf.minute++;
         }
       }
-      memcpy(mem,vcd_buf.data,VCD_SECTOR_DATA);
+      memcpy(mem,vcd->buf.data,VCD_SECTOR_DATA);
       return VCD_SECTOR_DATA;
 }
 
