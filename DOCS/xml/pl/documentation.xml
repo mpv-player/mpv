@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.13 -->
+<!-- synced with 1.14 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Odtwarzacz filmów dla LINUKSA</title>
@@ -63,8 +63,8 @@ VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA,
 zbiory Matroska, obsługiwanych przez wiele rdzennych kodeków, XAnim,
 RealPlayer, i Win32 DLL. Możesz w nim także oglądać filmy
 <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson,
-Theora</emphasis> i <emphasis role="bold">DivX</emphasis> (i wcale nie
-trzeba do tego biblioteki avifile!). Inną wielką zaletą MPlayera jest
+Theora</emphasis> i <emphasis role="bold">DivX</emphasis>
+Inną wielką zaletą MPlayera jest
 szeroki zakres obsługiwanych sterowników wyjściowych. Działa on z X11, Xv, DGA,
 OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, ale możesz też używać GGI i SDL (i
 dzięki temu wszystkich ich sterowników) i niektórych specyficznych dla kart
@@ -75,7 +75,7 @@ więc filmy można oglądać na pełnym ekranie.
 niektórych sprzętowych dekoderów MPEG, takich jak
 <link linkend="dvb">DVB</link> i <link linkend="dxr3">DXR3/Hollywood+</link>.
 Nie można też zapomnieć o ładnych, dużych, antyaliasowanych i cieniowanych
-napisach (<emphasis role="bold">10 obsługiwanych typów</emphasis>) z
+napisach (<emphasis role="bold">14 obsługiwanych typów</emphasis>) z
 czcionkami europejskimi/ISO&nbsp;8859-1,2 (polskimi, węgierskimi, angielskimi,
 czeskimi, itp.), cyrylicą, koreańskimi i wyświetlaniem na ekranie (OSD)!
 </para>
