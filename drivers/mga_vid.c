@@ -1564,12 +1564,18 @@ static int mga_vid_initialize(void)
 		}
 	}
 #ifdef CONFIG_DEVFS_FS
+/*
+from 2.4.17/2.4.18 linux/devfs_fs_kernel.h:
+extern devfs_handle_t devfs_register (devfs_handle_t dir, const char *name,
+				      unsigned int flags,
+				      unsigned int major, unsigned int minor,
+				      umode_t mode, void *ops, void *info);
+*/
 	if ((dev_handle = devfs_register(
 					NULL,
-					"mga_vid", 0, DEVFS_FL_NONE,
+					"mga_vid", DEVFS_FL_NONE,
 					MGA_VID_MAJOR, 0,
 					S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IFCHR,
-					0, 0,
 					&mga_vid_fops, NULL)) == NULL)
 #else
 	if(register_chrdev(MGA_VID_MAJOR, "mga_vid", &mga_vid_fops))
