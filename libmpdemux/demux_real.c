@@ -639,6 +639,8 @@ got_video:
 	return 1;
     }
 
+if(stream_id<256){
+
     if(demuxer->audio->id==-1 && demuxer->a_streams[stream_id]){
 	sh_audio_t *sh = demuxer->a_streams[stream_id];
 	demuxer->audio->id=stream_id;
@@ -656,6 +658,8 @@ got_video:
         mp_msg(MSGT_DEMUX,MSGL_V,"Auto-selected RM video ID = %d\n",stream_id);
 	goto got_video;
     }
+
+}
 
     mp_msg(MSGT_DEMUX,MSGL_DBG2, "unknown stream id (%d)\n", stream_id);
     stream_skip(demuxer->stream, len);
