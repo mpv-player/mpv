@@ -966,12 +966,12 @@ static void radeon_vid_display_video( void )
     OUTREG(OV0_BASE_ADDR,		besr.base_addr);
 #endif
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	besr.vid_buf_base_adrs_y[0]);
-    OUTREG(OV0_VID_BUF1_BASE_ADRS,	besr.vid_buf_base_adrs_u[0]);
-    OUTREG(OV0_VID_BUF2_BASE_ADRS,	besr.vid_buf_base_adrs_v[0]);
+    OUTREG(OV0_VID_BUF1_BASE_ADRS,	besr.vid_buf_base_adrs_v[0]);
+    OUTREG(OV0_VID_BUF2_BASE_ADRS,	besr.vid_buf_base_adrs_u[0]);
     radeon_fifo_wait(9);
     OUTREG(OV0_VID_BUF3_BASE_ADRS,	besr.vid_buf_base_adrs_y[0]);
-    OUTREG(OV0_VID_BUF4_BASE_ADRS,	besr.vid_buf_base_adrs_u[0]);
-    OUTREG(OV0_VID_BUF5_BASE_ADRS,	besr.vid_buf_base_adrs_v[0]);
+    OUTREG(OV0_VID_BUF4_BASE_ADRS,	besr.vid_buf_base_adrs_v[0]);
+    OUTREG(OV0_VID_BUF5_BASE_ADRS,	besr.vid_buf_base_adrs_u[0]);
     OUTREG(OV0_P1_V_ACCUM_INIT,		besr.p1_v_accum_init);
     OUTREG(OV0_P1_H_ACCUM_INIT,		besr.p1_h_accum_init);
     OUTREG(OV0_P23_H_ACCUM_INIT,	besr.p23_h_accum_init);
