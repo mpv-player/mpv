@@ -46,7 +46,7 @@ int vivo_check_file(demuxer_t* demuxer){
     // parse header:
     i=0;
     while(i<len && buf[i]==0x0D && buf[i+1]==0x0A) i+=2; // skip empty lines
-    if(strncmp(buf+i,"Version:Vivo/1",14)) return 0; // bad version/type!
+    if(strncmp(buf+i,"Version:Vivo/",13)) return 0; // bad version/type!
 
     priv=malloc(sizeof(vivo_priv_t));
     memset(priv,0,sizeof(vivo_priv_t));
@@ -55,6 +55,7 @@ int vivo_check_file(demuxer_t* demuxer){
     // TODO: parse FPS and other info (display title/author etc)
     priv->fps=10.0; // FIXME (parse from header)
 
+#if 0
     c=stream_read_char(demuxer->stream);
     if(c) return 0;
     len2=0;
@@ -66,6 +67,7 @@ int vivo_check_file(demuxer_t* demuxer){
     printf("header block 2 size: %d\n",len2);
     stream_skip(demuxer->stream,len2);
 //    stream_read(demuxer->stream,buf+len,len2);
+#endif
     
 //    c=stream_read_char(demuxer->stream);
 //    printf("first packet: %02X\n",c);
@@ -85,9 +87,13 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
   demux->filepos=stream_tell(demux->stream);
   
   c=stream_read_char(demux->stream);
+//  printf("c=%02X\n",c);
   switch(c&0xF0){
-  case 0x00:  // header - skip it!
+  case 0x00: // header - skip it!
       len=stream_read_char(demux->stream);
+//      printf("header: %02X\n",len);
+      if(len>=0x80) len=0x80*(len-0x80)+stream_read_char(demux->stream);
+      printf("vivo extra header: %d bytes\n",len);
       break;
   case 0x10:  // video packet
       len=128;
@@ -97,6 +103,10 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
       len=stream_read_char(demux->stream);
       ds=demux->video;
       break;
+  case 0x30:  // audio ?
+      len=0x28;
+      ds=demux->audio;
+      break;
   case 0x40:  // audio packet
       len=24;
       ds=demux->audio;
@@ -105,7 +115,7 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
       mp_msg(MSGT_DEMUX,MSGL_WARN,"VIVO - unknown ID found: %02X contact author!\n",c);
   }
   
-  if(!ds){
+  if(!ds || ds->id<-1){
       if(len) stream_skip(demux->stream,len);
       return 1;
   }
@@ -117,6 +127,7 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
         // closed segment, finalize packet:
         ds_add_packet(ds,ds->asf_packet);
         ds->asf_packet=NULL;
+//	printf("packet!\n");
       } else {
         // append data to it!
         demux_packet_t* dp=ds->asf_packet;
@@ -126,6 +137,7 @@ int demux_vivo_fill_buffer(demuxer_t *demux){
         mp_dbg(MSGT_DEMUX,MSGL_DBG4,"data appended! %d+%d\n",dp->len,len);
         dp->len+=len;
         // we are ready now.
+	if((c&0xF0)==0x20) --ds->asf_seq; // hack!
         return 1;
       }
     }
@@ -153,6 +165,7 @@ static const short h263_format[8][2] = {
     { 352, 288 },
     { 704, 576 },
     { 1408, 1152 },
+    { 320, 240 }   // ???????
 };
 
 static unsigned char* buffer;
@@ -184,19 +197,28 @@ static unsigned int x_get_bits(int n){
 /* most is hardcoded. should extend to handle all h263 streams */
 static int h263_decode_picture_header(unsigned char *b_ptr)
 {
+    int i;
+        
+//    for(i=0;i<16;i++) printf(" %02X",b_ptr[i]); printf("\n");
     
     buffer=b_ptr;
     bufptr=bitcnt=buf=0;
 
     /* picture header */
-    if (get_bits(&s->gb, 22) != 0x20)
+    if (get_bits(&s->gb, 22) != 0x20){
+	printf("bad picture header\n");
         return -1;
+    }
     skip_bits(&s->gb, 8); /* picture timestamp */
 
-    if (get_bits1(&s->gb) != 1)
+    if (get_bits1(&s->gb) != 1){
+	printf("bad marker\n");
         return -1;	/* marker */
-    if (get_bits1(&s->gb) != 0)
+    }
+    if (get_bits1(&s->gb) != 0){
+	printf("bad h263 id\n");
         return -1;	/* h263 id */
+    }
     skip_bits1(&s->gb);	/* split screen off */
     skip_bits1(&s->gb);	/* camera  off */
     skip_bits1(&s->gb);	/* freeze picture release off */
@@ -209,8 +231,7 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
         width = h263_format[format][0];
         height = h263_format[format][1];
 	printf("%d x %d\n",width,height);
-        if (!width)
-            return -1;
+//        if (!width) return -1;
 
 	printf("pict_type=%d\n",get_bits1(&s->gb));
 	printf("unrestricted_mv=%d\n",get_bits1(&s->gb));
@@ -231,10 +252,14 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
     } else {
         printf("h263_plus = 1\n");
         /* H.263v2 */
-        if (get_bits(&s->gb, 3) != 1)
+        if (get_bits(&s->gb, 3) != 1){
+	    printf("H.263v2 A error\n");
             return -1;
-        if (get_bits(&s->gb, 3) != 6) /* custom source format */
+	}
+        if (get_bits(&s->gb, 3) != 6){ /* custom source format */
+	    printf("custom source format\n");
             return -1;
+	}
         skip_bits(&s->gb, 12);
         skip_bits(&s->gb, 3);
 	printf("pict_type=%d\n",get_bits(&s->gb, 3) + 1);
@@ -247,8 +272,8 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
         skip_bits1(&s->gb);
         height = get_bits(&s->gb, 9) * 4;
 	printf("%d x %d\n",width,height);
-        if (height == 0)
-            return -1;
+        //if (height == 0)
+        //    return -1;
 	printf("qscale=%d\n",get_bits(&s->gb, 5));
     }
 
@@ -261,6 +286,7 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
 //    s->height = height;
     return 0;
 }
+
 
 
 void demux_open_vivo(demuxer_t* demuxer){
@@ -296,6 +322,7 @@ void demux_open_vivo(demuxer_t* demuxer){
 		demuxer->video->id=0;
 }
 
+if(demuxer->audio->id>=-1){
   if(!ds_fill_buffer(demuxer->audio)){
     mp_msg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingAudioStream);
   } else
@@ -311,7 +338,7 @@ void demux_open_vivo(demuxer_t* demuxer){
 		demuxer->audio->sh=sh; sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
 }
-
+}
 
 }
 
