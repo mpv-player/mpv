@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@skraemer.de>
 
-// In synch with rev 1.121
+// In synch with rev 1.123
 
 // ========================= MPlayer help ===========================
 
@@ -372,7 +372,8 @@ static char help_text[]=
 
 // x11_common.c
 #define MSGTR_EwmhFullscreenStateFailed "\nX11: Konnte EWMH-Fullscreen-Event nicht senden!\n"
-#define MSGTR_NeedAfVolume "Mixer: Der Audioausgabetreiber benötigt \"-af volume\" zum Ändern der Lautstärke.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] Kein Hardware-Mixing, füge Lautstärkefilter ein.\n"
+#define MSGTR_NoVolume "[Mixer] Keine Lautstärkeregelung verfügbar.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -390,8 +391,7 @@ static char help_text[]=
 #define MSGTR_SkinBrowser "Skin-Browser"
 #define MSGTR_Network "Netzwerk-Streaming..."
 #define MSGTR_Preferences "Einstellungen"
-#define MSGTR_OSSPreferences "OSS-Treiberkonfiguration"
-#define MSGTR_SDLPreferences "SDL-Treiberkonfiguration"
+#define MSGTR_AudioPreferences "Audio-Treiberkonfiguration"
 #define MSGTR_NoMediaOpened "Keine Medien geöffnet."
 #define MSGTR_VCDTrack "VCD-Titel %d"
 #define MSGTR_NoChapter "kein Kapitel"
@@ -516,6 +516,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Misc "Sonstiges"
 
 #define MSGTR_PREFERENCES_None "Nichts"
+#define MSGTR_PREFERENCES_DriverDefault "Treiber-Standardeinstellung"
 #define MSGTR_PREFERENCES_AvailableDrivers "Verfügbare Treiber:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Spiele keinen Ton"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalisiere Ton"
@@ -556,9 +557,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & Demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
 #define MSGTR_PREFERENCES_FRAME_Misc "Sonstiges"
-#define MSGTR_PREFERENCES_OSS_Device "Gerät:"
-#define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
-#define MSGTR_PREFERENCES_SDL_Driver "Treiber:"
+#define MSGTR_PREFERENCES_Audio_Device "Gerät:"
+#define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_Audio_MixerChannel "Mixer-Kanal:"
 #define MSGTR_PREFERENCES_Message "Bitte bedenke, dass manche Optionen einen Neustart der Wiedergabe erfordern."
 #define MSGTR_PREFERENCES_DXR3_VENC "Videoencoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Verwende LAVC (FFmpeg)"
