@@ -347,7 +347,7 @@ void ds_free_packs(demux_stream_t *ds){
   demux_packet_t *dp=ds->first;
   while(dp){
     demux_packet_t *dn=dp->next;
-    free(dp->buffer);
+    if(dp->buffer) free(dp->buffer);
     free(dp);
     dp=dn;
   }
