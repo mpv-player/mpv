@@ -83,6 +83,7 @@ extern int fs_layer;
 extern int stop_xscreensaver;
 extern int vo_x11_keepaspect;
 extern char **vo_fstype_list;
+extern int vo_nomouse_input;
 #endif
 
 #ifdef HAVE_AA
@@ -291,6 +292,7 @@ m_option_t mplayer_opts[]={
 	{"keepaspect", &vo_x11_keepaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nokeepaspect", &vo_x11_keepaspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
+	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0,0,-1,NULL},
 #endif
 
 #ifdef HAVE_XINERAMA

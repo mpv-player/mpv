@@ -71,6 +71,7 @@ int mLocalDisplay;
 
 /* output window id */
 int WinID=-1;
+int vo_nomouse_input = 0;
 int vo_mouse_autohide = 0;
 int vo_wm_type = 0;
 static int vo_fs_type = 0;
@@ -1184,7 +1185,11 @@ void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask)
 	XSync(display, False);
 	old_handler = XSetErrorHandler(x11_selectinput_errorhandler);
 	selectinput_err = 0;
-	XSelectInput(display, w, event_mask);
+	if(vo_nomouse_input){
+		XSelectInput(display,w,event_mask & (~(ButtonPressMask | ButtonReleaseMask)));
+	} else {
+		XSelectInput(display, w, event_mask);
+	}
 	XSync(display, False);
 	XSetErrorHandler(old_handler);
 	if (selectinput_err) {
