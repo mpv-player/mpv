@@ -516,7 +516,7 @@ int demux_open_bmp(demuxer_t* demuxer);
 int demux_open_roq(demuxer_t* demuxer);
 #ifdef HAVE_LIBDV095
 int demux_open_rawdv(demuxer_t* demuxer);
-extern int check_file_rawdv(demuxer_t *demuxer);
+extern int rawdv_check_file(demuxer_t *demuxer);
 #endif
 
 extern int vivo_check_file(demuxer_t *demuxer);
@@ -831,7 +831,7 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_RAWDV)
 {
    demuxer=new_demuxer(stream,DEMUXER_TYPE_RAWDV,audio_id,video_id,dvdsub_id);
-   if(check_file_rawdv(demuxer))
+   if(rawdv_check_file(demuxer))
    {
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"RAWDV");
       file_format=DEMUXER_TYPE_RAWDV;

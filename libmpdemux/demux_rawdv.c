@@ -59,12 +59,15 @@ void demux_seek_rawdv(demuxer_t *demuxer,float rel_seek_secs,int flags)
    frames->current_filepos=newpos*frames->frame_size;
 }
 
-int check_file_rawdv(demuxer_t *demuxer)
+int rawdv_check_file(demuxer_t *demuxer)
 {
    unsigned char tmp_buffer[DV_PAL_FRAME_SIZE];
    int bytes_read=0;
    int result=0;
    dv_decoder_t *td;
+
+   mp_msg(MSGT_DEMUX,MSGL_V,"Checking for DV\n");
+
    stream_reset(demuxer->stream);
    stream_seek(demuxer->stream, 0);
    bytes_read=stream_read(demuxer->stream,tmp_buffer,DV_PAL_FRAME_SIZE);
@@ -105,7 +108,7 @@ int demux_rawdv_fill_buffer(demuxer_t *demuxer)
    dp_video->pos=frames->current_filepos;
    dp_video->flags=0;
 
-   if (demuxer->audio)
+   if (demuxer->audio && demuxer->audio->id!=-2)
 	{
       demux_packet_t* dp_audio=clone_demux_packet(dp_video);
       ds_add_packet(demuxer->audio,dp_audio);
