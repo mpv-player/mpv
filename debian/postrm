@@ -3,7 +3,14 @@
 set -e
 
 if [ "$1" = "purge" ]; then
-  if [ -d /etc/mplayer/ ]; then
-    rm -rf /etc/mplayer/
-  fi
+	if [ -e /usr/share/debconf/confmodule ]; then
+		# Source debconf library.
+		. /usr/share/debconf/confmodule
+		# Remove my changes to the db.
+		db_purge
+	fi
+
+	if [ -d /etc/mplayer/ ]; then
+		rm -rf /etc/mplayer/
+	fi
 fi
