@@ -1090,20 +1090,14 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   oss = &os->stream;
 
   if(ogg_d->syncpoints) {
-    float time_pos = flags & 1 ? 0 : os->lastpos/ rate;
-    if(flags & 2) {
-      if(ogg_d->syncpoints)
-	time_pos += ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos / rate * rel_seek_secs;
+    gp = flags & 1 ? 0 : os->lastpos;
+    if(flags & 2)
+      gp += ogg_d->syncpoints[ogg_d->num_syncpoint].granulepos * rel_seek_secs;
       else
-	time_pos += (demuxer->movi_end - demuxer->movi_start) * rel_seek_secs;
-    } else
-      time_pos += rel_seek_secs;
-    
-    gp = time_pos * rate;
+      gp += rel_seek_secs * rate;
 
     for(sp = 0; sp < ogg_d->num_syncpoint ; sp++) {
-      if(ogg_d->syncpoints[sp].granulepos >= gp)
-	break;
+      if(ogg_d->syncpoints[sp].granulepos >= gp) break;
     }
 
     if(sp >= ogg_d->num_syncpoint)
@@ -1114,8 +1108,12 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
     pos = flags & 1 ? 0 : ogg_d->pos;
     if(flags & 2)
       pos += (demuxer->movi_end - demuxer->movi_start) * rel_seek_secs;
+    else {
+      if (ogg_d->final_granulepos > 0)
+        pos += rel_seek_secs * (demuxer->movi_end - demuxer->movi_start) / (ogg_d->final_granulepos / rate);
     else
       pos += rel_seek_secs * ogg_d->pos / (os->lastpos / rate);
+    }
     if (pos < 0)
       pos = 0;
     else if (pos > (demuxer->movi_end - demuxer->movi_start))
