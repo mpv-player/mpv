@@ -519,15 +519,21 @@ if(verbose>1){
 #ifdef FF_POSTPROCESS
 	    if(lavc_pp){
 		// postprocess
-		if(!sh_video->our_out_buffer)
-		    sh_video->our_out_buffer = (char*)memalign(64,sh_video->disp_w*sh_video->disp_h*3/2);
-    		stride[0]=sh_video->disp_w;
-    		stride[1]=stride[2]=sh_video->disp_w/2;
-    		planes[0]=sh_video->our_out_buffer;
-    		planes[2]=planes[0]+sh_video->disp_w*sh_video->disp_h;
-    		planes[1]=planes[2]+sh_video->disp_w*sh_video->disp_h/4;
+		int w=(sh_video->disp_w+15)&(~15);
+		int h=(sh_video->disp_h+15)&(~15);
+		int xoff=0; //(w-sh_video->disp_w)/2;
+		int yoff=0; //(h-sh_video->disp_h)/2;
+		if(!sh_video->our_out_buffer){
+		    sh_video->our_out_buffer = (char*)memalign(64,w*h*3/2);
+		    memset(sh_video->our_out_buffer,0,w*h*3/2);
+		}
+    		stride[0]=w;
+    		stride[1]=stride[2]=w/2;
+    		planes[0]=sh_video->our_out_buffer+stride[0]*yoff+xoff;
+    		planes[2]=sh_video->our_out_buffer+w*h+stride[2]*(yoff>>1)+(xoff>>1);
+    		planes[1]=planes[2]+w*h/4;
 		postprocess(lavc_picture.data,lavc_picture.linesize[0],
-			    planes,sh_video->disp_w,
+			    planes,stride[0],
 			    sh_video->disp_w,sh_video->disp_h,
 			    &quant_store[0][0],MBC+1,lavc_pp);
 	    } else
