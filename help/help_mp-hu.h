@@ -136,7 +136,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Komment: %s\n"
 #define MSGTR_Video_NoVideo "Video: nincs video!!!\n"
 #define MSGTR_NotInitializeVOPorVO "\nHIBA: Nem sikerült a video filterek (-vop) vagy a video kimenet (-vo) inicializálása!\n"
-#define MSGTR_Paused "\n------- SZÜNET -------\r"
+#define MSGTR_Paused "\n  =====  SZÜNET  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nLejátszási lista (%s) betöltése sikertelen\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- Az MPlayer egy 'illegális utasítást' hajtott végre.\n"\
