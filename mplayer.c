@@ -914,6 +914,39 @@ switch(file_format){
  }
 } // switch(file_format)
 
+// DUMP STREAMS:
+if(stream_dump_type){
+  FILE *f;
+  int len;
+  demux_stream_t *ds=NULL;
+  // select stream to dump
+  switch(stream_dump_type){
+  case 1: ds=d_audio;break;
+  case 2: ds=d_video;break;
+  case 3: ds=d_dvdsub;break;
+  }
+  if(!ds){        
+      printf("dump: FATAL: selected stream missing!\n");
+      exit(1);
+  }
+  // disable other streams:
+  if(d_audio && d_audio!=ds) {ds_free_packs(d_audio); d_audio->id=-2; }
+  if(d_video && d_video!=ds) {ds_free_packs(d_video); d_video->id=-2; }
+  if(d_dvdsub && d_dvdsub!=ds) {ds_free_packs(d_dvdsub); d_dvdsub->id=-2; }
+  // let's dump it!
+  f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
+  if(!f){ printf("Can't open dump file!!!\n");exit(1); }
+  while(!ds->eof){
+    unsigned char* start;
+    int in_size=ds_get_packet(ds,&start);
+    if(in_size>0) fwrite(start,in_size,1,f);
+  }
+  fclose(f);
+  printf("core dumped :)\n");
+  exit(1);
+}
+
+
 // Determine image properties:
 switch(file_format){
  case DEMUXER_TYPE_AVI:
@@ -1010,37 +1043,6 @@ printf("[V] filefmt:%d  fourcc:0x%X  size:%dx%d  fps:%5.2f  ftime:=%6.4f\n",
 );
 
 fflush(stdout);
-
-if(stream_dump_type){
-  FILE *f;
-  int len;
-  demux_stream_t *ds=NULL;
-  // select stream to dump
-  switch(stream_dump_type){
-  case 1: ds=d_audio;break;
-  case 2: ds=d_video;break;
-  case 3: ds=d_dvdsub;break;
-  }
-  if(!ds){        
-      printf("dump: FATAL: selected stream missing!\n");
-      exit(1);
-  }
-  // disable other streams:
-  if(d_audio && d_audio!=ds) {ds_free_packs(d_audio); d_audio->id=-2; }
-  if(d_video && d_video!=ds) {ds_free_packs(d_video); d_video->id=-2; }
-  if(d_dvdsub && d_dvdsub!=ds) {ds_free_packs(d_dvdsub); d_dvdsub->id=-2; }
-  // let's dump it!
-  f=fopen(stream_dump_name?stream_dump_name:"stream.dump","wb");
-  if(!f){ printf("Can't open dump file!!!\n");exit(1); }
-  while(!ds->eof){
-    unsigned char* start;
-    int in_size=ds_get_packet(ds,&start);
-    if(in_size>0) fwrite(start,in_size,1,f);
-  }
-  fclose(f);
-  printf("core dumped :)\n");
-  exit(1);
-}
 
 if(!sh_video){
     printf("Sorry, no video stream... it's unplayable yet\n");
