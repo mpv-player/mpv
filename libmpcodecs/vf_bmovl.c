@@ -90,9 +90,9 @@
 #define MIN(a,b) ((a) < (b) ? (a) : (b))
 #define INRANGE(a,b,c)	( ((a) < (b)) ? (b) : ( ((a) > (c)) ? (c) : (a) ) )
 
-#define rgb2y(R,G,B)  (  (0.257 * R) + (0.504 * G) + (0.098 * B) + 16  )
-#define rgb2u(R,G,B)  ( -(0.148 * R) - (0.291 * G) + (0.439 * B) + 128 )
-#define rgb2v(R,G,B)  (  (0.439 * R) - (0.368 * G) - (0.071 * B) + 128 )
+#define rgb2y(R,G,B)  ( (( 263*R + 516*G + 100*B) >> 10) + 16  )
+#define rgb2u(R,G,B)  ( ((-152*R - 298*G + 450*B) >> 10) + 128 )
+#define rgb2v(R,G,B)  ( (( 450*R - 376*G -  73*B) >> 10) + 128 )
 
 #define DBG(a) (mp_msg(MSGT_VFILTER, MSGL_DBG2, "DEBUG: %d\n", a))
 
