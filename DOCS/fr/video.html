@@ -188,10 +188,16 @@
 <H4><A NAME="xv_neomagic">2.3.1.2.1.5 Cartes NeoMagic</A></H4>
 
 <P>Ces cartes sont utilisées sur de nombreux portables. Malheureusement,
-  X 4.2.0 ne gère pas Xv, mais nous avons un pilote modifié et compatible Xv pour vous.
-  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">Téléchargez-le ici</A>.
-  Pilote fournis par Stefan Seyfried.</P>
+  XFree avant la version 4.3.0 ne gère pas Xv, mais Stefan Seyfried fournit
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">des pilotes Xv</A>.
+  Choisissez juste celui qui s'applique à votre version de XFree.</P>
 
+<P>XFree86 4.3.0 inclut le support Xv, mais Bohdan Horst a envoyé un petit
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</A>
+  pour les sources XFree86 qui accélère les opérations framebuffer jusqu'à 4 fois.
+  Ce patch a été inclus dans le CVS de XFree86 et devrait être dans la prochaine
+  version suivant 4.3.0.</P>
+  
 <P>Pour permettre la lecture de contenu de taille DVD changez votre XF86Config comme ceci:</P>
 
 <P>Section "Device"<BR>

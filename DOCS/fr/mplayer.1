@@ -1196,7 +1196,7 @@ Spécifie le numéro de sous-titre du fichier VobSub.
 .TP
 .B \-spualign <-1\-2>
 Spécifie comment les sous-titres spu (DVD/VobSub) devraient être alignés.
-Les valeurs sont les mêmes que pour -subpos, avec le choix supplémentaire -1
+Les valeurs sont les mêmes que pour -subalign, avec le choix supplémentaire -1
 pour la position d'origine.
 .TP
 .B \-spuaa <mode>
@@ -1471,27 +1471,21 @@ Attention: peut corrompre OSD/\:SUB!
 .TP
 .B \-dxr2 <option1:option2:...>
 Cette option est utilisée pour contrôler le pilote dxr2.
-Note: Le filtre lavc est maintenant inséré automatiquement si vous essayez
-de lire un format non MPEG1/2 donc tous les formats supportés par MPlayer
-devraient être jouables de façon externe (si vous avez la puissance CPU requise
-pour encoder à la volée).
-Le chipset d'overlay utilisé sur la dxr2 est d'assez mauvaise qualité mais les
-réglages par défaut devraient fonctionner pour tout le monde. 
-L'OSD peut être utilisable avec l'overlay (pas sur la TV) en le dessinant sur 
-la couleur-clé.
-Avec les réglages de couleur-clé par défaut vous devriez obtenir des résultats
-variables, généralement vous verrez la couleur-clé autour des caractères et
-autres effets amusants. 
-Mais si vous ajustez correctement les paramètres de couleur-clé vous devriez 
-pouvoir obtenir des résultats acceptables.
-.
+
 .RSs
 .IPs ar-mode=<valeur>
 mode aspect ratio (0 = normal, 1 = pan scan, 2 = letterbox (par défault))
-.IPs iec958\-encoded/\:decoded
+.IPs iec958\-encoded
 mode de sortie iec958
+.IPs iec958\-decoded
+initialise le mode de sortie iec958 à decoded (par défaut)
+.IPs macrovision=<valeur>
+mode macrovision mode (0 = off (par défaut), 1 = agc, 2 = agc 2 colorstripe,
+3 = agc 4 colorstripe)
 .IPs mute
 coupe la sortie son
+.IPs unmute
+rétabli la sortie son
 .IPs ucode=<valeur>
 chemin du microcode
 .RE
@@ -1501,47 +1495,58 @@ chemin du microcode
 .RE
 .RSs
 .IPs 75ire
-active 7.5 IRE
+active le mode de sortie 7.5 IRE
+.IPs no75ire
+désactive le mode de sortie 7.5 IRE (par défaut)
 .IPs bw
 sortie TV noir\&blanc
 .IPs color
 sortie TV couleur
 .IPs interlaced
 sortie TV entrelacée
-.IPs macrovision=<valeur>
-mode macrovision (0 = off (par défaut), 1 = agc, 2 = agc 2 colorstripe,
-3 = agc 4 colorstripe)
 .IPs norm=<valeur>
 norme TV (ntsc (par défaut), pal,pal60,palm,paln,palnc)
-.IPs square/\:ccir601\-pixel
-TV mode pixel
+.IPs square\-pixel
+initialise le mode pixel à square (carré)
+.IPs ccir601\-pixel
+initialise le mode pixel à ccir601
 .RE
 .RS
 
 .I Overlay
 .RE
 .RSs
-.IPs cr-[left|right|top|bot]=<\-20\-20>
-ajuste la coupure de l'overlay
-.IPs ck-[rgb]min=<0\-255>
-valeur minimum de couleur clé
-.IPs ck-[rgb]max=<0\-255>
-valeur maximum de couleur clé
-.IPs ck-[rgb]=<0\-255>
-valeurs de couleur clé
+.IPs cr-left=<0\-500>
+initialise la valeur de découpage gauche (par défaut: 50)
+.IPs cr-right=<0\-500>
+initialise la valeur de découpage droite (par défaut: 300)
+.IPs cr-top=<0\-500>
+initialise la valeur de découpage haute (par défaut: 0)
+.IPs cr-bottom=<0\-500>
+initialise la valeur de découpage basse (par défaut: 0)
+.IPs ck-[r|v|b]=<0\-255>
+initialise le gain de r(ouge), v(ert) ou b(leu) pour la couleur-clé d'ensemble
+.IPs ck-[r|v|b]min=<0\-255>
+valeur minimum pour les couleurs-clé respectives
+.IPs ck-[r|v|b]max=<0\-255>
+valeur maximum pour les couleurs-clé respectives
 .IPs ignore\-cache
-ne pas utilise le cache VGA
+ignore les paramètres de recouvrement caché
+.IPs update\-cache
+met à jour les paramètres de recouvrement caché
 .IPs ol-osd
-active le hack osd sur l'overlay
-.IPs ol[hwxy]\-cor=<valeur>
+active le recouvrement onscreen display
+.IPs nool-osd
+désactive le recouvrement onscreen display (par défaut)
+.IPs ol[h|w|x|y]\-cor=<-20\-20>
 ajuste la taille et la position de l'overlay au cas où il ne corresponde
-pas parfaitement à la fenêtre
+pas parfaitement à la fenêtre (par défaut: 0)
 .IPs overlay
-autorise l'overlay
+active l'overlay
+.IPs nooverlay
+active la sortie TV
 .IPs overlay-ratio=<1\-2500>
 règle l'overlay (1000 par défaut)
-.IPs update\-cache
-récréer le cache VGA
 .RE
 .
 .TP
@@ -1984,6 +1989,9 @@ Désactive la compensation automatique de l'aspect ratio.
 .B \-nosound
 Ne pas jouer/\:encoder le son.
 .TP
+.B \-novideo
+Ne pas jouer/\:encoder la vidéo.
+.TP
 .B \-pp <qualité> (voir l'option \-vf pp également!)
 Initialise le niveau de postprocess de la DLL. 
 Cette option N'EST PLUS UTILISABLE avec le filtre de postprocess de MPlayer, 
@@ -2206,6 +2214,16 @@ La valeur 0 est utilisé pour la destination (aspect) zoomé l/\:h.
 des paramètres de saut chroma (c de 0\-3) et de zoom peuvent être spécifiés.
 (voir l'option \-sws pour les détails)
 .REss
+.IPs dsize={aspect|l:h}
+Change la taille/l'aspect de l'affichage à un point arbitraire de la chaine de
+fitres.
+Aspect peut être indiqué en tant que fraction (4/3) ou en tant que nombre à
+virgule (1.33).
+Vous pouvez également spécifier les largeurs et hauteurs exactes d'affichage
+désirées.
+Notez que ce filtre ne fait AUCUN redimmensionnement lui-même; il affecte juste
+ce que feront les prochains redimmensionnements (logiciels ou matériels) feront
+en corrigeant l'aspect.
 .IPs yuy2
 Force la conversion logicielle YV12/\:I420 ou 422P vers YUY2
 Utile pour les cartes graphiques/\:pilotes qui ont un support lent de YV12 mais
@@ -2360,6 +2378,13 @@ downsampling.
 Le paramètre optionnel f peut valoir 0 pour n'utiliser que les lignes paires,
 ou 1 pour n'utiliser que les lignes impaires.
 Tout autre valeur de f renvoie au comportement par défaut (moyenne).
+.IPs ilpack
+Quand de la vidéo entrelacée est stockée aux formats YUV 4:2:0, l'entrelacement
+chroma ne se fait pas proprement à cause du downsampling vertical des canaux
+chroma.
+Ce filtre place les données 4:2:0 au format YUY2 (4:2:2) avec les lignes chroma
+à leur bon emplacement, de façon à ce que à chaque ligne scannée, les données
+luma et chroma proviennent toutes deux du même champs.
 .IPs dint[=sense:niveau]
 Détecte et saute la première des trames entrelacées du flux video.
 Les valeurs peuvent aller de 0.0 à 1.0 la première (0.15 par défaut) est la
@@ -2405,12 +2430,12 @@ s: échange les champs (échange les lignes paires & impaires)
 Extrait un seul champs d'une image entrelacée en utilisant un calcul large
 pour éviter de gaspiller le temps CPU. L'argument optionnel n spécifie si
 l'on doit extraire un champs pair ou impair (selon que n soit pair ou impair).
-.IPs "detc"
+.IPs "detc[=var1=valeur1:var2=valeur2:...]"
 Essaie d'inverser le processus de "telecine" pour retrouver un flux propre et
 non-entralaçé au débit du film. Ce filtre est toujours expérimental mais semble
 être utilisable. Soyez conscient qu'il n'y a absolument aucun usage de ce filtre
 à moins que vous ne voyez d'entrelacement pendant la lecture d'un film! Les
-arguments suivant (voir leur syntaxe plus bas) peuvent être utilisés pour
+arguments suivants (voir leur syntaxe plus bas) peuvent être utilisés pour
 contrôler son comportement:
 .RSss
 dr: Définie le mode saut de trames. 0 (par défaut) signifie ne pas sauter
@@ -2430,6 +2455,18 @@ ici est le type de la précédente trame imaginaire avant le début du film.
 .br
 tr0, tr1, tr2, tr3: Valeurs seuil à utiliser dans certains types.
 .REss
+.IPs "ivtc[=1]"
+filtre d'inversement expérimental "sans état".
+Plutôt que d'essayer de se bloquer sur un motif comme le fait le filtre detc,
+ivtc prends ces décisions indépendemment pour chaque trame.
+Cela donne de bien meilleurs résultats pour un matériel ayant subi de lourds
+changements après que telecine ait été appliqué, mais par contre il n'est pas
+aussi efficace pour les entrées avec beaucoup de bruit, comme par exemple la
+capture TV.
+Le paramètre optionnel (itvc=1) corresponds à l'option dr=1 du filtre detc,
+et devrait être utilisé avec MEncoder mais pas avec MPlayer.
+Comme pour detc, vous devez spécifier le débit de sortie correct (-ofps 23.976)
+en utilisant MEncoder.
 .IPs "telecine[=départ]"
 Applique un processus telecine 3:2 "telecine" pour augmenter le débit de 20%.
 Cela ne fonctionnera surement pas correctement avec MPlayer, mais peut être
@@ -2438,11 +2475,21 @@ fps sont essentielles ! (la synchro A/V sera brisée si elles sont mauvaises.)
 Le paramètre optionnel départ indique où démarrer (0-3).
 .IPs "tfields[=mode]"
 Séparation temporelle des champs -- sépare les champs en trames, doublant le
-débit de sortie. En mode 0, le filtre ne touchera pas aux champs, ce qui
-donnera une sortie demi-hauteur. En mode 1, les parties entrelaçées de l'image
-seront interpolées pour reconstruire des trames pleines-hauteur. Comme le filtre
-telecine, "tfields" ne fonctionnera correctement qu'avec MEncoder, et seulement
-si -fps et -ofps sont définis au débit (double) désiré !
+débit de sortie. Comme le filtre telecine, "tfields" ne fonctionnera
+correctement qu'avec MEncoder, et seulement si -fps et -ofps sont définis au
+débit (double) désiré ! Les modes disponibles sont:
+.RSss
+0: laisse les champs inchangés (cela va sauter/scintiller)
+.br
+1: fait une interpolation des lignes manquantes (l'algorithme utilisé peut ne
+pas être si bon)
+.br
+2: fait une translation de champs de 1/4 pixel avec interp linéaire (pas de
+saut)
+.br
+4: fait une translation de champs de 1/4 pixel avec le filtre 4tap (meilleur
+qualité)
+.REss
 .IPs "boxblur=rayon:puissance[:rayon:puissance]"
 flou boite
 .RSss
@@ -3018,6 +3065,10 @@ Exemple:
 .RSss
 aspect=16/9, aspect=1.78
 .REss
+.IPs autoaspect
+Même chose que l'option aspect, mais calcule automatiquement l'aspect, en
+prenant en compte tous les ajustements (crop/expand/scale/etc.) faits dans la
+chaine de filtres.
 .IPs vbitrate=<valeur>
 spécifie le bitrate (passe 1/\:2) en
 .RSss

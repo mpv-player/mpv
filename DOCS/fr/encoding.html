@@ -287,10 +287,10 @@ Explication du processus:
 
 <P>Les fichiers des DVDs et des SVCDs (c-a-d MPEG1/2) contiennent une valeur
   d'aspect ratio, qui décrit comment le lecteur devrait dimensionner le flux
-  vidéo, pour que les humains n'aient pas des têtes d'oeuf (ex. 480x480 + 4:3 = 640x480).
+  vidéo, pour que les humains n'aient pas des &quot;têtes d'oeuf&quot; (ex. 480x480 + 4:3 = 640x480).
   De toute façon, quand vous encodez un fichier AVI (DivX), vous devez être conscients
   que les entêtes AVI ne stockent pas cette valeur. Redimensionner le film est
-  dégouttant et coûteux en temps, il doit y avoir une meilleur fonction!</P>
+  dégouttant et coûteux en temps, il doit y avoir une meilleur solution !</P>
 
 <P>Il y en a une.</P>
 
@@ -304,12 +304,12 @@ Explication du processus:
 
 <P>Vous devriez sérieusement couper les bandes noires au dessus et en dessous de l'image.
   Voir la page de man pour l'utilisation des filtres <CODE>cropdetect</CODE> et
-  <CODE>crop</CODE>.</P></P>
+  <CODE>crop</CODE>.</P>
 
 <H4>Utilisation:</H4>
 
 <P><CODE>$ mencoder sample-svcd.mpg -ovc lavc -lavcopts
-  vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o sortie.avi</CODE></P>
+  vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o sortie.avi</CODE></P>
 
 </BODY>
 </HTML>
