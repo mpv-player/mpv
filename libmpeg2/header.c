@@ -203,7 +203,7 @@ static int header_process_picture_coding_extension (picture_t * picture, uint8_t
     picture->repeat_first_field = (buffer[3] >> 1) & 1;
     picture->progressive_frame = buffer[4] >> 7;
 
-#if 1
+#if 0
     // repeat_first implementation by A'rpi/ESP-team, based on libmpeg3:
     picture->display_time=100;
     if(picture->repeat_first_field){
@@ -220,7 +220,6 @@ static int header_process_picture_coding_extension (picture_t * picture, uint8_t
     //repeat_count=display_time-100%
 #else
 
-// buggy with file ftp://mplayerhq.hu/MPlayer/incoming/twc-shaolin_soccer-svcd-sample.mpg
 
    // repeat_first implemantation by iive, based on A'rpi/ESP-team and libmpeg3
     if( picture->progressive_sequence == 1 )
@@ -237,7 +236,7 @@ static int header_process_picture_coding_extension (picture_t * picture, uint8_t
 	     picture->display_time=100;//2fields, interlaced in time
 	 else
 	 {
-	     if( picture->top_field_first == 0 ) picture->display_time=100;//reconstruct 2 fields
+	     if( picture->top_field_first == 0 ) picture->display_time=150;//reconstruct 2 fields
 	     else picture->display_time = 150;//reconstruct 3 fields
 	 }
 
