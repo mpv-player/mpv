@@ -2539,9 +2539,18 @@ if test "$_smbsupport" = auto; then
 int main(void) { smbc_opendir("smb://"); return 0; }
 EOF
     if cc_check -lsmbclient ; then 
-# this is not working for me becouse it needs -ldl and some NIS (YP) libs
-# $_ld_dl and -lyp ? should be added
 	_smbsupport=yes
+	_ld_smb="-lsmbclient"
+    else
+	if cc_check -lsmbclient $_ld_dl ; then
+	    _smbsupport=yes
+	    _ld_smb="-lsmbclient $_ld_dl"
+    	else
+	    if cc_check -lsmbclient $_ld_dl -lnsl ; then
+		_smbsupport=yes
+		_ld_smb="-lsmbclient $_ld_dl -lnsl"
+	    fi
+	fi
     fi
 fi
 
@@ -5378,7 +5387,7 @@ echo Checking for joystick ... "$_joystick"
 echocheck "lirc"
 if test "$_lirc" = auto ; then
   _lirc=no
-  if test -c /dev/lirc ; then
+  if test -c /dev/lirc -o -c /dev/lirc/0 ; then
       cat > $TMPC <<EOF
 #include <lirc/lirc_client.h>
 int main(void) { return 0; }
