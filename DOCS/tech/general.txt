@@ -73,11 +73,11 @@ So everything is ok 'till now, I want to move them to a separate lib.
 Now, go on:
 
 3. mplayer.c - ooh, he's the boss :)
-    It's main purpose is connecting the other modules, and maintaining A/V
+    Its main purpose is connecting the other modules, and maintaining A/V
     sync.
 
-    The given stream's actual position is in the corresponding stream header
-    timer field (sh_audio / sh_video).
+    The given stream's actual position is in the 'timer' field of the
+    corresponding stream header (sh_audio / sh_video).
 
 	 The structure of the playing loop :
          while(not EOF) {
@@ -195,7 +195,7 @@ Now, go on:
 	 and one (or both) of BGR15 and BGR24, with conversion, if needed.
 	 If these aren't supported, not every codec will work! The mpeg codecs
 	 can output only YV12, and the older win32 DLLs only 15 and 24bpp.
-	 There is a fast MMX-using 15->16bpp converter, so it's not a
+	 There is a fast MMX-optimized 15->16bpp converter, so it's not a
 	 significant speed-decrease!
 
     The BPP table, if the driver can't change bpp:
@@ -276,5 +276,5 @@ static int get_delay();
   of the buffer.
 
 !!! Because the video is synchronized to the audio (card), it's very important
-!!! that the get_space and get_delay are working!
+!!! that the get_space and get_delay functions be correctly implemented!
 
