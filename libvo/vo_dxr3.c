@@ -72,6 +72,8 @@ static vo_info_t vo_info =
 #ifdef USE_MP1E
 void write_dxr3( rte_context* context, void* data, size_t size, void* user_data )
 {
+    if(ioctl(fd_video,EM8300_IOCTL_VIDEO_SETPTS,&vo_pts) < 0)
+	    printf( "VO: [dxr3] Unable to set pts\n" );
     write( fd_video, data, size );
 }
 #endif
@@ -124,6 +126,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 #ifdef USE_MP1E
 	int size;
 	enum rte_frame_rate frame_rate;
+	enum rte_pixformat pixel_format;
 
 	if( !rte_init() )
 	{
@@ -164,7 +167,11 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	else if( vo_fps > 60.0 ) frame_rate = RTE_RATE_8;
 	else frame_rate = RTE_RATE_NORATE;
 
-        if( !rte_set_video_parameters( mp1e_context, RTE_YUV420, mp1e_context->width,
+	if( format == IMGFMT_YUY2 )
+	    pixel_format = RTE_YUYV;
+	else
+	    pixel_format = RTE_YUV420;
+        if( !rte_set_video_parameters( mp1e_context, pixel_format, mp1e_context->width,
 					mp1e_context->height, frame_rate,
 					3e6, "I" ) )
         {
@@ -268,20 +275,7 @@ static uint32_t draw_frame(uint8_t * src[])
 #ifdef USE_MP1E
     else if( img_format == IMGFMT_YUY2 )
     {
-	int w=v_width,h=v_height;
-	unsigned char *s,*dY,*dU,*dV;
-	
-        if(d_pos_x+w>picture_linesize[0]) w=picture_linesize[0]-d_pos_x;
-        if(d_pos_y+h>s_height) h=s_height-d_pos_y;
-
-	s = src[0]+s_pos_x+s_pos_y*(w*2);
-	dY = picture_data[0]+d_pos_x+d_pos_y*picture_linesize[0];
-	dU = picture_data[1]+(d_pos_x/2)+(d_pos_y/2)*picture_linesize[1];
-	dV = picture_data[2]+(d_pos_x/2)+(d_pos_y/2)*picture_linesize[2];
-	
-	yuy2toyv12( s, dY, dU, dV, w, h, picture_linesize[0], picture_linesize[1], w*2 );
-	
-	mp1e_buffer.data = picture_data[0];
+	mp1e_buffer.data = src[0];
 	mp1e_buffer.time = vo_pts/90000.0;
 	mp1e_buffer.user_data = NULL;
 	rte_push_video_buffer( mp1e_context, &mp1e_buffer );
