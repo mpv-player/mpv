@@ -1,7 +1,7 @@
 /* Stuff for correct aspect scaling. */
 #include "aspect.h"
 
-#define ASPECT_DEBUG
+//#define ASPECT_DEBUG
 
 #ifdef ASPECT_DEBUG
 #include <stdio.h>
