@@ -5680,6 +5680,10 @@ HAVE_XVMC_ACCEL = $_xvmc
 
 # for libavcodec:
 SRC_PATH=.
+LIBPREF=lib
+LIBSUF=.a
+SLIBPREF=lib
+SLIBSUF=.so
 
 # video output
 X_LIB = $_ld_gl $_ld_dga $_ld_xv $_ld_xvmc $_ld_vm $_ld_xinerama $_ld_x11 $_ld_mad $_ld_sock
