@@ -15,7 +15,7 @@ Doxygen
 -------
 
 MPlayer uses doxygen for its code documentation. It generates HTML files
-which contain the specially tagged comment lines from the code including
+which contain specially tagged comment lines from the code including
 cross references. To generate it type `make doxygen` in the source root
 directory. It will generate the files in DOCS/tech/doxygen. To clear them
 again, you can use `make doxygen_clean`.
@@ -41,8 +41,8 @@ What should be documented?
 
 - #define, typedefs, structs
   * all global definitions
-  * all local definitions whos use is not imediatly clear by their name
-    (as a rule of thumb, it's better to document too much then not enough)
+  * all local definitions whose use is not imediatly clear by their name
+    (as a rule of thumb, it's better to document too much than not enough)
   * all dependencies
 
 - non-trivial parts of the code
