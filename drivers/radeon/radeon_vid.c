@@ -148,12 +148,10 @@ static video_registers_t vregs[] =
 };
 
 static uint32_t radeon_vid_in_use = 0;
-static uint32_t vid_src_ready = 0;
-static uint32_t vid_overlay_on = 0;
 
 static uint8_t *radeon_mmio_base = 0;
 static uint32_t radeon_mem_base = 0; 
-#define RADEON_SRC_BASE 0ULL /* this driver uses all video memory */
+#define RADEON_SRC_BASE 2000000ULL /* this driver uses all video memory */
 
 static uint32_t radeon_ram_size = 0;
 
@@ -193,8 +191,6 @@ static void radeon_vid_restore_state( void )
 
 static void radeon_vid_stop_video( void )
 {
-  if(vid_src_ready == 1)
-  {
     OUTREG(OV0_SCALE_CNTL, SCALER_SOFT_RESET);
     OUTREG(OV0_EXCLUSIVE_HORZ, 0);
     OUTREG(OV0_AUTO_FLIP_CNTL, 0);   /* maybe */
@@ -208,13 +204,15 @@ static void radeon_vid_stop_video( void )
 */
     OUTREG(OV0_KEY_CNTL, GRAPHIC_KEY_FN_NE);
     OUTREG(OV0_TEST, 0);
-  } 
-  vid_src_ready = 0;
 }
 
 static void radeon_vid_display_video( void )
 {
     int bes_flags;
+RTRACE("radeon_vid: OV0: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
+RTRACE("radeon_vid: OV0: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
+RTRACE("radeon_vid: OV0: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
+,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
 
@@ -261,9 +259,9 @@ static void radeon_vid_display_video( void )
         case IMGFMT_RGB32:
 	case IMGFMT_BGR32: bes_flags |= SCALER_SOURCE_32BPP; break;
 
+	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
         case IMGFMT_YVU9:  bes_flags |= SCALER_SOURCE_YUV9; break;
 	case IMGFMT_IYUV:  bes_flags |= SCALER_SOURCE_YUV12; break;
-	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
 
 	case IMGFMT_YV12:
 	case IMGFMT_I420:
@@ -286,8 +284,7 @@ static void radeon_vid_display_video( void )
 
 static void radeon_vid_start_video( void )
 {
-  if(vid_src_ready == 0) radeon_vid_display_video();
-  vid_src_ready = 1;
+  radeon_vid_display_video();
 }
 
 #define XXX_SRC_X 0
@@ -295,6 +292,9 @@ static void radeon_vid_start_video( void )
 
 #define XXX_WIDTH   config->dest_width
 #define XXX_HEIGHT  config->dest_height
+
+#define XXX_DRW_W (config->dest_width)
+#define XXX_DRW_H (config->dest_height)
 
 static int radeon_vid_init_video( mga_vid_config_t *config )
 {
@@ -340,8 +340,8 @@ RTRACE("radeon_vid: usr_config: version = %x card=%x ram=%x src(%xx%x) dest(%x:%
     pitch = ((XXX_WIDTH << 1) + 15) & ~15;
     besr.fourcc = config->format;
 
-    besr.v_inc = (config->src_height << 20) / (config->dest_height);
-    besr.h_inc = (config->src_width  << 12) / (config->dest_width);
+    besr.v_inc = (config->src_height << 20) / XXX_DRW_H;
+    besr.h_inc = (config->src_width  << 12) / XXX_DRW_W;
     besr.step_by = 1;
 
     while(besr.h_inc >= (2 << 12)) {
@@ -349,12 +349,10 @@ RTRACE("radeon_vid: usr_config: version = %x card=%x ram=%x src(%xx%x) dest(%x:%
 	besr.h_inc >>= 1;
     }
 
-RTRACE("radeon_vid: BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
     /* keep everything in 16.16 */
 
     besr.vid_buf0_base_adrs = RADEON_SRC_BASE; /* I guess that offset 0 is o'k */
-/*    besr.vid_buf0_base_adrs += (((XXX_SRC_X >> 16) & ~7) << 1)&0xfffffff0;*/
-RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
+    besr.vid_buf0_base_adrs += (((XXX_SRC_X >> 16) & ~7) << 1)&0xfffffff0;
     besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
     besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
     besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
@@ -372,15 +370,17 @@ RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
     tmp = (XXX_SRC_Y & 0x0000ffff) + 0x00018000;
     besr.p1_v_accum_init = ((tmp << 4) & 0x03ff8000) | 0x00000001;
 
-    left = 0; /*(XXX_SRC_X >> 16) & 7;*/
-    besr.h_inc |= ((besr.h_inc/* >> 1*/) << 16);
+    left = (XXX_SRC_X >> 16) & 7;
+    besr.h_inc |= ((besr.h_inc >> 1) << 16);
     besr.step_by |= (besr.step_by << 8);
-    besr.y_x_start = (config->x_org + 8) | (config->y_org << 16);
-    besr.y_x_end = ((config->x_org + config->dest_width) + 8) | ((config->y_org + config->dest_height) << 16);
+    besr.y_x_start = (config->x_org+8) | (config->y_org << 16);
+    besr.y_x_end = (config->x_org + config->dest_width+8) | ((config->y_org + config->dest_height) << 16);
     besr.p1_blank_lines_at_top = 0x00000fff | ((config->src_height - 1) << 16);
     besr.vid_buf_pitch0_value = pitch;
+RTRACE("radeon_vid: BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
+RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
 RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
-    ,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
+,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
     besr.p1_x_start_end = (config->src_width + left - 1) | (left << 16);
     left >>= 1; src_w=config->src_width >> 1;
     besr.p2_x_start_end = (src_w + left - 1) | (left << 16);
@@ -453,8 +453,7 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
 
 		case MGA_VID_ON:
 			RTRACE( "radeon_vid: Video ON (ioctl)\n");
-			vid_src_ready = 1;
-			if(vid_overlay_on) radeon_vid_start_video();
+			radeon_vid_start_video();
 		break;
 
 		case MGA_VID_OFF:
@@ -553,7 +552,6 @@ static int radeon_vid_mmap(struct file *file, struct vm_area_struct *vma)
 static int radeon_vid_release(struct inode *inode, struct file *file)
 {
 	//Close the window just in case
-	vid_src_ready = 0;   
 	radeon_vid_in_use = 0;
 	radeon_vid_stop_video();
 

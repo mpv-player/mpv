@@ -509,8 +509,8 @@
 #define OV0_SCALE_CNTL                         0x0420  
 #	define SCALER_PIX_EXPAND               0x00000001L
 #	define SCALER_Y2R_TEMP                 0x00000002L
-#	define SCALER_HORZ_PICK_NEAREST        0x00000003L
-#	define SCALER_VERT_PICK_NEAREST        0x00000004L
+#	define SCALER_HORZ_PICK_NEAREST        0x00000004L
+#	define SCALER_VERT_PICK_NEAREST        0x00000008L
 #	define SCALER_SIGNED_UV                0x00000010L
 #	define SCALER_GAMMA_SEL_MASK           0x00000060L
 #	define SCALER_GAMMA_SEL_BRIGHT         0x00000000L
