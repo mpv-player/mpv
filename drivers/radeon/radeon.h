@@ -625,13 +625,23 @@
 #define OV0_P2_X_START_END                     0x0498  
 #define OV0_P3_X_START_END                     0x049C  
 #define OV0_FILTER_CNTL                        0x04A0  
+/*
+  radeon notes:
+  value 0x0 makes green background only
+  value 0x1 passes only green colors (probably U or V)
+  value 0x2 passes only red colors   (probably U or V)
+  value 0x3 makes full colored output
+  value 0x4 ???
+  value 0x8 ???
+  value 0xffffffff doesn't make any visible effects
+*/
 #define OV0_FOUR_TAP_COEF_0                    0x04B0  
 #define OV0_FOUR_TAP_COEF_1                    0x04B4  
 #define OV0_FOUR_TAP_COEF_2                    0x04B8
 #define OV0_FOUR_TAP_COEF_3                    0x04BC
 #define OV0_FOUR_TAP_COEF_4                    0x04C0
-#define OV0_FLAG_CNTL                          0x04DC  
-#define OV0_COLOUR_CNTL                        0x04E0
+#define OV0_FLAG_CNTL                          0x04DC  /* probably wronly defined for radeons */
+#define OV0_COLOUR_CNTL                        0x04E0  /* probably wronly defined for radeons */
 #define OV0_VID_KEY_CLR                        0x04E4  
 #define OV0_VID_KEY_MSK                        0x04E8  
 #define OV0_GRAPHICS_KEY_CLR                   0x04EC
