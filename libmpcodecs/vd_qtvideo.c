@@ -18,6 +18,7 @@ static vd_info_t info = {
 
 LIBVD_EXTERN(qtvideo)
 
+#include "../bswap.h"
 #include "qtx/qtxsdk/components.h"
 
 //#include "wine/windef.h"
@@ -131,11 +132,15 @@ static int init(sh_video_t *sh){
 			(((unsigned char)'m')<<16)|
 			(((unsigned char)'d')<<8)|
 			(((unsigned char)'c'));
+#if 0
     desc.componentSubType= 
 		    (((unsigned char)'S'<<24))|
 			(((unsigned char)'V')<<16)|
 			(((unsigned char)'Q')<<8)|
 			(((unsigned char)'3'));
+#else
+    desc.componentSubType = bswap_32(sh->format);
+#endif
     desc.componentManufacturer=0;
     desc.componentFlags=0;
     desc.componentFlagsMask=0;
@@ -144,6 +149,7 @@ static int init(sh_video_t *sh){
 #if 0
     memset(&desc,0,sizeof(desc));
     while((prev=FindNextComponent(prev,&desc))){
+	ComponentDescription desc2;
 	unsigned char* c1=&desc2.componentType;
 	unsigned char* c2=&desc2.componentSubType;
 	memset(&desc2,0,sizeof(desc2));
@@ -160,7 +166,7 @@ static int init(sh_video_t *sh){
     prev=FindNextComponent(NULL,&desc);
     if(!prev){
 	printf("Cannot find requested component\n");
-	exit(1);
+	return(0);
     }
     printf("Found it! ID = 0x%X\n",prev);
 
@@ -201,7 +207,49 @@ static int init(sh_video_t *sh){
 //    result = FindCodec ('SVQ1',anyCodec,&compressor,&decompressor );                 
 //    printf("FindCodec SVQ1 returned:%i compressor: 0x%X decompressor: 0x%X\n",result,compressor,decompressor);
 
+    sh->context = kYUVSPixelFormat;
+#if 0
+    {
+	int imgfmt = sh->codec->outfmt[sh->outfmtidx];
+	int qt_imgfmt;
+    switch(imgfmt)
+    {
+	case IMGFMT_YUY2:
+	    qt_imgfmt = kYUVSPixelFormat;
+	    break;
+	case IMGFMT_YVU9:
+	    qt_imgfmt = kYVU9PixelFormat;
+	    break;
+	case IMGFMT_UYVY:
+	    qt_imgfmt = kUYVY422PixelFormat;
+	    break;
+	case IMGFMT_YVYU:
+	    qt_imgfmt = kYVYU422PixelFormat;
+	    imgfmt = IMGFMT_YUY2;
+	    break;
+	case IMGFMT_RGB16:
+	    qt_imgfmt = k16LE555PixelFormat;
+	    break;
+	case IMGFMT_BGR24:
+	    qt_imgfmt = k24BGRPixelFormat;
+	    break;
+	case IMGFMT_BGR32:
+	    qt_imgfmt = k32BGRAPixelFormat;
+	    break;
+	case IMGFMT_RGB32:
+	    qt_imgfmt = k32RGBAPixelFormat;
+	    break;
+	default:
+	    printf("Unknown requested csp\n");
+	    return(0);    
+    }
+    printf("imgfmt: %s qt_imgfmt: %.4s\n", vo_format_name(imgfmt), &qt_imgfmt);
+    sh->context = qt_imgfmt;
+    if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,imgfmt)) return 0;
+    }
+#else
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
+#endif
 
     return 1;
 }
@@ -227,14 +275,17 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 if(!codec_inited){
     result = QTNewGWorldFromPtr(
         &OutBufferGWorld,  
-        kYUVSPixelFormat, //pixel format of new GWorld == YUY2
+//        kYUVSPixelFormat, //pixel format of new GWorld == YUY2
+	sh->context,
         &OutBufferRect,   //we should benchmark if yvu9 is faster for svq3, too
         0, 
         0, 
         0, 
         mpi->planes[0],
         mpi->stride[0]);
-    printf("NewGWorldFromPtr returned:%i\n",result);
+    printf("NewGWorldFromPtr returned:%d\n",65536-(result&0xffff));
+//    if (65536-(result&0xFFFF) != 10000)
+//	return NULL;
 
 //    printf("IDesc=%d\n",sizeof(ImageDescription));
 
