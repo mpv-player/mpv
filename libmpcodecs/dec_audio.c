@@ -277,12 +277,60 @@ void uninit_audio(sh_audio_t *sh_audio)
 }
 
  /* Init audio filters */
+int preinit_audio_filters(sh_audio_t *sh_audio, 
+	int in_samplerate, int in_channels, int in_format, int in_bps,
+	int* out_samplerate, int* out_channels, int* out_format, int out_bps){
+  char strbuf[200];
+  af_stream_t* afs=malloc(sizeof(af_stream_t));
+  memset(afs,0,sizeof(af_stream_t));
+
+  // input format: same as codec's output format:
+  afs->input.rate   = in_samplerate;
+  afs->input.nch    = in_channels;
+  afs->input.format = af_format_decode(in_format);
+  afs->input.bps    = in_bps;
+
+  // output format: same as ao driver's input format (if missing, fallback to input)
+  afs->output.rate   = *out_samplerate ? *out_samplerate : afs->input.rate;
+  afs->output.nch    = *out_channels ? *out_channels : afs->input.nch;
+  afs->output.format = af_format_decode(*out_format ? *out_format : afs->input.format);
+  afs->output.bps    = out_bps ? out_bps : afs->input.bps;
+
+  // filter config:  
+  memcpy(&afs->cfg,&af_cfg,sizeof(af_cfg_t));
+  
+  mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Checking audio filter chain for %dHz/%dch/%dbit -> %dHz/%dch/%dbit...\n",
+      afs->input.rate,afs->input.nch,afs->input.bps*8,
+      afs->output.rate,afs->output.nch,afs->output.bps*8);
+  
+  // let's autoprobe it!
+  if(0 != af_init(afs,0)){
+    free(afs);
+    return 0; // failed :(
+  }
+  
+  *out_samplerate=afs->output.rate;
+  *out_channels=afs->output.nch;
+  *out_format=af_format_encode((void*)(&afs->output));
+  
+  mp_msg(MSGT_DECAUDIO, MSGL_INFO, "AF_pre: af format: %d bps, %d ch, %d hz, %s\n",
+      afs->output.bps, afs->output.nch, afs->output.rate,
+      fmt2str(afs->output.format,strbuf,200));
+  
+  sh_audio->afilter=(void*)afs;
+  return 1;
+}
+
+ /* Init audio filters */
 int init_audio_filters(sh_audio_t *sh_audio, 
 	int in_samplerate, int in_channels, int in_format, int in_bps,
 	int out_samplerate, int out_channels, int out_format, int out_bps,
 	int out_minsize, int out_maxsize){
-  af_stream_t* afs=malloc(sizeof(af_stream_t));
-  memset(afs,0,sizeof(af_stream_t));
+  af_stream_t* afs=sh_audio->afilter;
+  if(!afs){
+    malloc(sizeof(af_stream_t));
+    memset(afs,0,sizeof(af_stream_t));
+  }
 
   // input format: same as codec's output format:
   afs->input.rate   = in_samplerate;

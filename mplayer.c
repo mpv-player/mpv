@@ -1625,13 +1625,29 @@ osd_text_buffer[0]=0;
 
 if(sh_audio){
   //const ao_info_t *info=audio_out->info;
+  current_module="af_preinit";
+  ao_data.samplerate=force_srate?force_srate:sh_audio->samplerate*playback_speed;
+  ao_data.channels=audio_output_channels?audio_output_channels:sh_audio->channels;
+  ao_data.format=audio_output_format?audio_output_format:sh_audio->sample_format;
+#if 1
+  if(!preinit_audio_filters(sh_audio,
+        // input:
+        (int)(sh_audio->samplerate*playback_speed),
+	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
+	// output:
+	&ao_data.samplerate, &ao_data.channels, &ao_data.format,
+	audio_out_format_bits(ao_data.format)/8)){
+      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Error at audio filter chain pre-init!\n");
+  } else {
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AF_pre: %dHz %dch %s\n",
+      ao_data.samplerate, ao_data.channels,
+      audio_out_format_name(ao_data.format));
+  }
+#endif  
   current_module="ao2_init";
   if(!(audio_out=init_best_audio_out(audio_driver_list,
       (ao_plugin_cfg.plugin_list!=NULL), // plugin flag
-      force_srate?force_srate:sh_audio->samplerate*playback_speed,
-      audio_output_channels?audio_output_channels:
-      sh_audio->channels,audio_output_format?audio_output_format:
-      sh_audio->sample_format,0))){
+      ao_data.samplerate, ao_data.channels, ao_data.format,0))){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     uninit_player(INITED_ACODEC); // close codec
@@ -1639,11 +1655,11 @@ if(sh_audio){
   } else {
     // SUCCESS:
     inited_flags|=INITED_AO;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s\n",
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bps)\n",
       audio_out->info->short_name,
-      force_srate?force_srate:((int)(sh_audio->samplerate*playback_speed)),
-      sh_audio->channels,
-      audio_out_format_name(sh_audio->sample_format));
+      ao_data.samplerate, ao_data.channels,
+      audio_out_format_name(ao_data.format),
+      audio_out_format_bits(ao_data.format)/8 );
     mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_AODescription_AOAuthor,
       audio_out->info->name, audio_out->info->author);
     if(strlen(audio_out->info->comment) > 0)
