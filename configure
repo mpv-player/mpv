@@ -4277,7 +4277,7 @@ if test "$_freetype" = no ; then
 fi
 echocheck "fontconfig"
 if test "$_fontconfig" = auto ; then
-    if ( pkg-config fontconfig --modversion) > /dev/null 2>&1 ; then
+    if ( pkg-config --modversion fontconfig) > /dev/null 2>&1 ; then
         cat > $TMPC << EOF
 #include <stdio.h>
 #include <fontconfig/fontconfig.h>
@@ -4293,15 +4293,15 @@ int main()
 }
 EOF
         _fontconfig=no
-        cc_check `pkg-config fontconfig --cflags --libs` && ( $TMPO >> "$TMPLOG" ) && _fontconfig=yes
+        cc_check `pkg-config --cflags --libs fontconfig` && ( $TMPO >> "$TMPLOG" ) && _fontconfig=yes
     else
         _fontconfig=no
     fi
 fi
 if test "$_fontconfig" = yes ; then
     _def_fontconfig='#define HAVE_FONTCONFIG'
-    _inc_fontconfig=`pkg-config fontconfig --cflags`
-    _ld_fontconfig=`pkg-config fontconfig --libs`
+    _inc_fontconfig=`pkg-config --cflags fontconfig`
+    _ld_fontconfig=`pkg-config --libs fontconfig`
 else
     _def_fontconfig='#undef HAVE_FONTCONFIG'
 fi
