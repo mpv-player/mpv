@@ -2,9 +2,6 @@
 
 <HTML>
   <HEAD>
-    <META name="generator" content=
-    "HTML Tidy for Linux/x86 (vers 1st March 2002), see www.w3.org">
-
     <TITLE>CD, DVD, VCD - MPlayer - Odtwarzacz Filmów dla
     Linuksa</TITLE>
     <LINK rel="stylesheet" type="text/css" href="default.css">
@@ -15,17 +12,17 @@
   <BODY>
     <H2><A name="drives">4.1 Napêdy CD/DVD</A></H2>
 
-    <P>uryweg z dokumentacji Linuksa:</P>
+    <P>Urywek z dokumentacji Linuksa:</P>
 
     <P>Nowoczesne napêdy CD-ROM mog± osi±gaæ bardzo wysokie
-    prêdko¶ci g³owicy, jeszcze niektóre napêdy CD-ROM s± w stanie
-    dzia³aæ przy zmniejszonej prêdko¶ci. Jest kilka powodów, które
+    prêdko¶ci g³owicy, ale niektóre napêdy CD-ROM potrafi± dzia³aæ
+    ze zmniejszon± prêdko¶ci±. Jest kilka powodów, które
     mog± spowodowaæ, ¿e rozwa¿ysz zmianê prêdko¶ci napêdu
     CD-ROM:</P>
 
     <UL>
       <LI>Raportowano o b³êdach odczytu przy wysokich prêdko¶ciach,
-      zw³aszcz ze ¼le wyt³oczonymi CD-ROMami. Zmniejszenie
+      zw³aszcza ze ¼le wyt³oczonymi CD-ROMami. Zmniejszenie
       prêdko¶ci mo¿e zapobiec utracie danych w tych
       sytuacjach.</LI>
 
@@ -41,7 +38,7 @@
 
     <P>    <CODE>setcd -x [prêdko¶æ] [napêd cdrom]</CODE></P>
 
-    <P>Mo¿ez ponad to spróbowaæ</P>
+    <P>Mo¿esz ponad to spróbowaæ</P>
 
     <P>    <CODE>echo current_speed:4 &gt; /proc/ide/[napêd
     cdrom]/settings</CODE></P>
@@ -61,7 +58,7 @@
 
     <P>    <CODE>hdparm -d1 -a8 -u1 (napêd cdrom)</CODE></P>
 
-    <P>W³±zcy to DMA, read-ahead, i odmaskowanie IRQ (przeczytaj
+    <P>W³±czy to DMA, read-ahead, i odmaskowanie IRQ (przeczytaj
     stronê man dla <CODE>hdparm</CODE> po szczegó³owe
     wyja¶nienie).</P>
 
@@ -93,9 +90,9 @@
     <CODE>libmpdvdkit2/</CODE> w drzewie kodu ¼ród³owego MPlayera,
     nie musisz instalowaæ ich osobno. Zdecydowali¶my siê na takie
     rozwi±zanie poniewa¿ musieli¶my naprawiæ b³±d w
-    <CODE>libdvdread</CODE> i na³o¿ych nak³adkê która dodawa³± do
-    <CODE>libdvdcss</CODE> <B>ob³ugê buforowania (cache)
-    skrakowanych kluczy CSS</B>. Da³o to du¿y przyrost sprêdko¶ci,
+    <CODE>libdvdread</CODE> i na³o¿ych nak³adkê która dodawa³a do
+    <CODE>libdvdcss</CODE> <B>obs³ugê buforowania (cache)
+    skrakowanych kluczy CSS</B>. Da³o to du¿y przyrost prêdko¶ci,
     poniewa¿ klucze nie musz± byæ krakowane za ka¿dym razem przed
     odtwarzaniem.</P>
 
@@ -154,7 +151,7 @@
       <CODE>libcss</CODE>).</LI>
 
       <LI>W ogóle nie u¿ywaj sterownika systemu plików kernela i
-      reimpetacji tego w przestrzeni u¿ytkownika.
+      reimplementacji tego w przestrzeni u¿ytkownika.
       <CODE>libdvdread</CODE> 0.9.x i <CODE>libmpdvdkit</CODE>
       robi± to (wsparcie nowego-stylu DVD). System plików UDF
       kernela nie jest potrzebny, poniewa¿ biblioteki te maj± ju¿
@@ -164,13 +161,13 @@
     </UL>
 
     <P>Czasami <CODE>/dev/dvd</CODE> nie mo¿ê byæ odczytany przez
-    u¿ytkownikóws, wiêc autorzy <CODE>libdvdread</CODE>
+    u¿ytkowników, wiêc autorzy <CODE>libdvdread</CODE>
     zaimpletowali emulacjê która przesy³a adresy sektorów do
     nazwplików+przesuniêæ, by zemulowaæ dostêp raw na zamontowanym
     systemie plików lub nawet na dysku twardym.</P>
 
-    <P><CODE>libdvdread</CODE> akceptuje nawet pukty mantowania
-    (ang. mountpoint) zamiast nazwy urz±dzenia dla dostêpy raw i
+    <P><CODE>libdvdread</CODE> akceptuje nawet punkty montowania
+    (ang. mountpoint) zamiast nazwy urz±dzenia dla dostêpu raw i
     sprawdza <CODE>/proc/mounts</CODE> by pobraæ nazwê urz±dzenia.
     Zrobione to zosta³o dla Solarisa, gdzie nazwy urz±dzeñ s±
     dynamicznie przydzielane.</P>
@@ -181,7 +178,7 @@
 
     <H4>Autentyfikacja DVD</H4>
 
-    <P>Wspacia dla autentyfikacji i metod deszyfrowania
+    <P>Wsparcia dla autentyfikacji i metod deszyfrowania
     nowego-stylu DVD s± ukoñczone, u¿ywaj± poprawionej biblioteki
     <CODE>libdvdcss</CODE> (patrz wy¿ej). Metoda mo¿e byæ okre¶lona
     poprzez zmienn± systemow± <CODE>DVDCSS_METHOD</CODE>, która
@@ -275,7 +272,7 @@
     CD-ROMy SCSI Toshiba maj± straszn± osi±gi w czytaniu VCDików.
     Jest tak, poniewa¿ CDROMREADRAW ioctl nie jest w pe³ni
     zaimpletowany dla tych napêdów. Je¿li masz jak±¶ wiedzê na
-    temat programowania SCSI, prosimu <A href=
+    temat programowania SCSI, prosimy <A href=
     "tech/patches.txt">pomó¿ nam</A> wprowadziæ ogólne wsparcie dla
     SCSI VCD.</P>
 
@@ -294,7 +291,7 @@
       zamiast systemu plików. Podobnie do ¶cie¿ek audio CD, te
       ¶cie¿ki <B>nie mog± byæ zamontowane</B> (Montowa³e¶
       kiedykolwiek audio CD, by je odtworzyæ?). Poniewa¿ wiêkszo¶æ
-      filmów jest w tej ¶ie¿ce, powiniene¶ najpierw spróbowaæ
+      filmów jest w tej ¶cie¿ce, powiniene¶ najpierw spróbowaæ
       <CODE>-vcd 2</CODE>.</LI>
 
       <LI>Istniej± dyski VCD bez pierwszej ¶cie¿ki (pojedyñcza
@@ -315,14 +312,14 @@
     sterownika kernela który mo¿esz znale¶æ w wersji linuksowej
     PowerDVD. Zawiera on zmodyfikowany sterownik systemu plików
     iso9660 (<CODE>vcdfs/isofs-2.4.X.o</CODE>), który ma dostêpn±
-    emulacjê ¶cierzek raw bezpo¶rednio do ukrytych plików .DAT.
+    emulacjê ¶cie¿ek raw bezpo¶rednio do ukrytych plików .DAT.
     Je¿eli zamontujesz dysku u¿ywaj±c tego sterownika, mo¿esz
     kopiowaæ i nawet odtwarzaæ pliki .DAT MPlayerem. Ale to <B>nie
     zadzia³a</B> ze standardowym sterownikiem iso9660 kernela
     Linuksa! U¿yj zamiast tego opcji <CODE>-vcd</CODE>.
     Alternatywami dla kopiowania VCD s±: nowy sterownik kernela <A
     href="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</A> (nie
-    jest czê¶ci± oficjalnedo kernela) który pokazuje <I>sesje</I>
+    jest czê¶ci± oficjalnego kernela) który pokazuje <I>sesje</I>
     CD jako pliki obrazów i <A href=
     "http://cdrdao.sourceforge.net/">cdrdao</A>, aplikacja do
     grabowania/kopiowania CD metod± bit-by-bit.</P>
