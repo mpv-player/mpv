@@ -1,7 +1,16 @@
 #include "config.h"
+#ifdef HAVE_SYS_SOUNDCARD_H
+#include <sys/soundcard.h>
+#else
+#ifdef HAVE_SOUNDCARD_H
+#include <soundcard.h>
+#else
 #include <linux/soundcard.h>
+#endif
+#endif
 #include <fcntl.h>
 #include <errno.h>
+#include <sys/ioctl.h>
 
 #include "audio_in.h"
 #include "mp_msg.h"
