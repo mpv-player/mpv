@@ -10,45 +10,46 @@ static char* banner_text=
 
 static char help_text[]=
 #ifdef HAVE_NEW_GUI
-"Indítás:   mplayer [-gui] [opciók] [útvonal/]filenév\n"
+"Indítás:   mplayer [-gui] [opciók] [url|útvonal/]filenév\n"
 #else
-"Indítás:   mplayer [opciók] [útvonal/]filenév\n"
+"Indítás:   mplayer [opciók] [url|útvonal/]filenév\n"
 #endif
 "\n"
-"Opciók:\n"
+"Alapvetõ opciók: (az összes opció listájához lásd a man lapot!)\n"
 " -vo <drv[:dev]> videomeghajtó és -alegység kiválasztása (lista: '-vo help')\n"
 " -ao <drv[:dev]> audiomeghajtó és -alegység kiválasztása (lista: '-ao help')\n"
+#ifdef HAVE_VCD
 " -vcd <sávszám>  lejátszás VCD (video cd)-sávból, közvetlenül az eszközrõl\n"
+#endif
 #ifdef HAVE_LIBCSS
 " -dvdauth <megh> DVD-meghajtó elérési útjának megadása (kódolt lemezekhez)\n"
 #endif
 #ifdef USE_DVDREAD
 " -dvd <titleno>  a megadott DVD sáv lejátszása, file helyett\n"
+" -alang/-slang   DVD audio/felirat nyelv kiválasztása (2 betûs országkóddal)\n"
 #endif
 " -ss <idõpoz>    a megadott (másodperc v. óra:perc:mperc) pozícióra tekerés\n"
 " -nosound        hanglejátszás kikapcsolása\n"
-#ifdef USE_FAKE_MONO
-" -stereo <mód>   MPEG1 sztereó szabályozása (0:sztereó, 1:bal, 2:jobb)\n"
-#endif
 " -fs -vm -zoom   teljesképernyõs lejátszás opciói (teljkép,módvált,szoft.nagy)\n"
-" -x <x> -y <y>   kép nagyítása <x> * <y> méretûre [ha -vo <meghajtó> támogatja]\n"
+" -x <x> -y <y>   lejátszási ablak felbontásának felülbírálata (módváltáshoz vagy szoftveres nagyításhoz)\n"
 " -sub <file>     felhasználandó felirat-file megadása (lásd -subfps, -subdelay)\n"
 " -vid x -aid y   lejátszandó video- (x) és audio- (y) stream-ek kiválasztása\n"
 " -fps x -srate y video (x képkocka/mp) és audio (y Hz) ráta megadása\n"
-" -pp <minõség>   utókezelési fokozatok beállítása (0-63)\n"
-" -nobps          alternatív A/V szinkron módszerének kiválasztása\n"
+" -pp <minõség>   képjavítás fokozatainak beállítása (lásd a man lapot)\n"
 " -framedrop      képkockák eldobásának engedélyezése (lassú gépekhez)\n"
 "\n"
-"Billentyûk:\n"
+"Legfontosabb billentyûk: (a teljes listához lásd a man lapot, és az input.conf file-t)\n"
 " <-  vagy  ->    10 másodperces hátra/elõre ugrás\n"
 " fel vagy le     1 percnyi hátra/elõre ugrás\n"
 " pgup v. pgdown  10 percnyi hátra/elõre ugrás\n"
+" < vagy >        1 file-al elõre/hátra lépés a lejátszási listában\n"
 " p vagy SPACE    pillanatállj (bármely billentyûre továbbmegy)\n"
 " q vagy ESC      kilépés\n"
 " + vagy -        audio késleltetése +/- 0.1 másodperccel\n"
 " o               OSD-mód váltása:  nincs / keresõsáv / keresõsáv+idõ\n"
-" * vagy /        hangerõ fel/le ('m' billentyû master/pcm között vált)\n"
+" * vagy /        hangerõ fel/le\n"
 " z vagy x        felirat késleltetése +/- 0.1 másodperccel\n"
+" r vagy t        felirat pozíciójának megváltoztatása, lásd -vop expand-ot is!\n"
 "\n"
 " * * * A MANPAGE TOVÁBBI RÉSZLETEKET, OPCIÓKAT, BILLENTYÛKET TARTALMAZ ! * * *\n"
 "\n";
