@@ -102,9 +102,14 @@ vstrict strict standart compliance
 	only recomanded if u want to feed the output into the mpeg4 reference decoder
 
 vdpart	data partitioning
-	+2 byte per video packet, and much better looking if the file becomes damaged
+	+2 byte per video packet
+	improves resistance against damages after encoding
 
-        
+vpsize	(0-10000) video packet size
+	0 disabled (default)
+	500-1000 good choice
+	improves resistance against damages after encoding
+
 lavdopts: (decoder options)
 ver	error resilience
 	-1 needed for some very broken, encoders which completly ignore the standarts
@@ -124,6 +129,8 @@ FAQ:	Q: the file is much too small
 	A: vqmin=2 or 1 (be carefull with 1, it could cause strange things to happen)
 	Q: i want to use -pass 1 & -pass 2 with vmax_b_frames>0
 	A: read DOCS/tech/patches.txt and send a patch ;)
+	Q: which provides better error recovery per filesize increase data partitioning or video packets?
+	A: data partitioning
 
 glossary:
 MB	Macroblock (16x16 luminance & 8x8 chrominance samples)
