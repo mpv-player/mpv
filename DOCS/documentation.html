@@ -1557,6 +1557,9 @@ Table of Contents
      happens, after about one minute the video starts playing.
   </B>A: The KDE arts sound daemon is blocking the sound device, either wait the time
      until video starts or you disable the arts-daemon in kontrollcenter.
+     If you want to use arts sound, specify audio output via SDL (ao=sdl), and
+     make sure your SDL can handle arts sound. Yet another option is to start
+     mplayer with artsdsp.
 
 
   <A NAME=6.4>6.4.  Video/audio driver problems (vo/ao)
