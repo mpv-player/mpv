@@ -285,14 +285,48 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     list = list->next;
   }
 
+  if(vo_subdevice) {
+      int vm;
+      vm=vga_getmodenumber(vo_subdevice);
+      list=modelist;
+      while(list) {
+          if(list->modenum == vm) {
+             buf_w = list->modeinfo.width;
+             buf_h = list->modeinfo.height;
+	     res_widescr = (((buf_w*1.0)/buf_h) > (4.0/3)) ? 1 : 0;
+             switch(list->modeinfo.colors) {
+                 case 32768:
+                     bpp=16;
+                     bpp_conv=1;
+                     break;
+                 case 65536:
+                     bpp=16;
+                     bpp_conv=0;
+                     break;
+                 case (1<<24):
+                     if(list->modeinfo.bytesperpixel == 3) {
+                         bpp=32;
+                         bpp_conv=1;
+                     } else {
+                         bpp=32;
+                         bpp_conv=0;
+                     }
+                     break;
+             }
+             vid_mode=vm;
+             list=NULL;
+      	  } else list=list->next;
+      }
+  }
+
   if (verbose)
     printf("vo_svga: vid_mode: %d\n",vid_mode);
-  vga_setlinearaddressing();
   if (vga_setmode(vid_mode) == -1) {
     printf("vo_svga: vga_setmode(%d) failed.\n",vid_mode);
     uninit();
     return(1); // error
   } 
+  vga_setlinearaddressing();
   if (gl_setcontextvga(vid_mode)) {
     printf("vo_svga: gl_setcontextvga(%d) failed.\n",vid_mode);
     uninit();
