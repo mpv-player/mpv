@@ -47,7 +47,7 @@ Problems:
 
 - Indeo Video 4.1:  (IV41)
   ir41_32.dll: works, no YUV, image upside-down
-- Indeo Video 3.2:  (IV32)
+- Indeo Video 3.2:  (IV32, IV31)
   ir32_32.dll: works, no YUV, image upside-down
 - ATI VCR1:  (VCR1)
   ativcr1.dll: can't load (16-bit DLL)
@@ -65,8 +65,6 @@ Not tested:
   asusasvd.dll: ??? not tested
 - Motion Wavelets: (MWV1)
   icmw_32.dll: not tested (no sample file)
-- Indeo Video 3.1:  (IV31)
-  ir32_32.dll: not tested (no sample file)
 - Windows Media Video 8 (WMV2)
   wmv8ds32.ax: not tested (no sample file)
 - I420: (I420)
