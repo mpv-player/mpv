@@ -11,10 +11,6 @@ SRCS += vosub_vidix.c
 endif
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. $(FREETYPE_INC) $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DXR2_INC) $(DIRECTFB_INC) -DMPG12PLAY #-Wall
-ifeq ($(VIDIX),yes)
-CFLAGS += -DVIDIX_PATH='"$(prefix)/lib/mplayer/vidix/"'
-endif
-# -I/usr/X11R6/include/
 
 .SUFFIXES: .c .o
 
