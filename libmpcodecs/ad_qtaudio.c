@@ -180,8 +180,10 @@ static int preinit(sh_audio_t *sh){
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"loader_init DONE!\n");
 
     error = InitializeQTML(6+16);
-    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"InitializeQTML:%i\n",error);
-    if(error) return 0;
+    if(error){
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"InitializeQTML:%i\n",error);
+        return 0;
+    }
 #endif
     
 #if 1
