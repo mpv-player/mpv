@@ -44,6 +44,11 @@ void* mDisplay; // Display* mDisplay;
 #include "libvo/sub.h"
 //#endif
 
+#ifdef HAVE_NEW_GUI
+#define COMPILE_GMPLAYER
+#include "Gui/mplayer/play.h"
+#endif
+
 #include "libao2/audio_out.h"
 
 #include "libmpeg2/mpeg2.h"
@@ -68,10 +73,6 @@ void* mDisplay; // Display* mDisplay;
 
 #ifdef HAVE_LIRC
 #include "lirc_mp.h"
-#endif
-
-#ifdef HAVE_NEW_GUI
-#include "Gui/mplayer/play.h"
 #endif
 
 #define DEBUG if(0)
@@ -262,6 +263,7 @@ static int flip=-1;
 static int screen_size_x=0;//SCREEN_SIZE_X;
 static int screen_size_y=0;//SCREEN_SIZE_Y;
 static int screen_size_xy=0;
+static float movie_aspect=0.0;
 
 // sub:
 char *font_name=NULL;
@@ -995,7 +997,7 @@ if(auto_quality>0){
 
 current_module="init_libvo";
 
-#ifdef X11_FULLSCREEN
+#if 0 /* was X11_FULLSCREEN hack -> moved to libvo/vo_xv.c where it belongs ::atmos */
    if(fullscreen){
      if(vo_init()){
        //if(verbose) printf("X11 running at %dx%d depth: %d\n",vo_screenwidth,vo_screenheight,vo_depthonscreen);
@@ -1003,7 +1005,11 @@ current_module="init_libvo";
      if(!screen_size_xy) screen_size_xy=vo_screenwidth; // scale with asp.ratio
    }
 #endif
+  // Set default VGA 1:1 aspect as fallback ::atmos
+  if(movie_aspect) sh_video->aspect = movie_aspect;
+  if(!sh_video->aspect) sh_video->aspect=1.0;
 
+  if(screen_size_xy||screen_size_x||screen_size_y){
    if(screen_size_xy>0){
      if(screen_size_xy<=8){
        screen_size_x=screen_size_xy*sh_video->disp_w;
@@ -1018,6 +1024,24 @@ current_module="init_libvo";
      if(screen_size_x<=8) screen_size_x*=sh_video->disp_w;
      if(screen_size_y<=8) screen_size_y*=sh_video->disp_h;
    }
+  } else {
+    // check source format aspect, calculate prescale ::atmos
+    screen_size_x=sh_video->disp_w;
+    screen_size_y=sh_video->disp_h;
+    if(sh_video->aspect!=1.0){
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n",
+             sh_video->aspect);
+      screen_size_x=(int)((float)sh_video->disp_h*sh_video->aspect);
+      screen_size_x+=screen_size_x%2; // round
+      if(screen_size_x<sh_video->disp_w){
+        screen_size_x=sh_video->disp_w;
+        screen_size_y=(int)((float)sh_video->disp_w*(1.0/sh_video->aspect));
+        screen_size_y+=screen_size_y%2; // round
+      }
+    } else {
+      mp_msg(MSGT_CPLAYER,MSGL_INFO,"Movie-Aspect is 1:1 - no prescaling applied.\n");
+    }
+  }
 
 #ifndef USE_LIBVO2
    { const vo_info_t *info = video_out->get_info();
