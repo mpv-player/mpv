@@ -5102,8 +5102,8 @@ void* LookupExternal(const char* library, int ordinal)
     }
 
 #ifndef LOADLIB_TRY_NATIVE
-  /* hack for truespeech */
-  if (!strcmp(library, "tsd32.dll"))
+  /* hack for truespeech and vssh264*/
+  if (!strcmp(library, "tsd32.dll") || !strcmp(library,"vssh264dec.dll"))
 #endif
     /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
     {
@@ -5167,6 +5167,40 @@ void* LookupExternalByName(const char* library, const char* name)
 	    return libraries[i].exps[j].func;
 	}
     }
+
+#ifndef LOADLIB_TRY_NATIVE
+  /* hack for vss h264 */
+  if (!strcmp(library,"vssh264core.dll"))
+#endif
+    /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
+    {
+	int hand;
+	WINE_MODREF *wm;
+	void *func;
+
+	hand = LoadLibraryA(library);
+	if (!hand)
+	    goto no_dll_byname;
+	wm = MODULE32_LookupHMODULE(hand);
+	if (!wm)
+	{
+	    FreeLibrary(hand);
+	    goto no_dll_byname;
+	}
+	func = PE_FindExportedFunction(wm, name, 0);
+	if (!func)
+	{
+	    printf("No such name in external dll\n");
+	    FreeLibrary((int)hand);
+	    goto no_dll_byname;
+	}
+
+	printf("External dll loaded (offset: 0x%x, func: %p)\n",
+	       hand, func);
+	return func;
+    }
+
+no_dll_byname:
     if(pos>150)return 0;// to many symbols
     strcpy(export_names[pos], name);
     return add_stub();
