@@ -259,14 +259,21 @@ switch(sh_video->codec->driver){
 
 int decode_video(vo_functions_t *video_out,sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){
 unsigned int out_fmt=sh_video->codec->outfmt[sh_video->outfmtidx];
+int planar=(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420);
 int blit_frame=0;
+
+uint8_t* planes_[3];
+uint8_t** planes=planes_;
+int stride_[3];
+int* stride=stride_;
+
+unsigned int t=GetTimer();
+unsigned int t2;
 
   //--------------------  Decode a frame: -----------------------
 switch(sh_video->codec->driver){
   case 3: {
     // OpenDivX
-    unsigned int t=GetTimer();
-    unsigned int t2;
     DEC_FRAME dec_frame;
 #ifdef NEW_DECORE
     DEC_PICTURE dec_pic;
@@ -281,42 +288,34 @@ switch(sh_video->codec->driver){
         dec_pic.y=dec_pic.u=dec_pic.v=NULL;
 	decore(0x123, (sh_video->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
 #else
+        opendivx_src[0]=NULL;
 	decore(0x123, 0, &dec_frame, NULL);
 #endif
-
-      t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
+  
+      if(!drop_frame)
 
     // let's display
 #ifdef NEW_DECORE
       if(dec_pic.y){
-        void* src[3];
-        int stride[3];
-        src[0]=dec_pic.y;
-        src[1]=dec_pic.u;
-        src[2]=dec_pic.v;
+        planes[0]=dec_pic.y;
+        planes[1]=dec_pic.u;
+        planes[2]=dec_pic.v;
         stride[0]=dec_pic.stride_y;
         stride[1]=stride[2]=dec_pic.stride_uv;
-        video_out->draw_slice(src,stride,
-                            sh_video->disp_w,sh_video->disp_h,0,0);
-        blit_frame=1;
+        blit_frame=2;
       }
 #else
       if(opendivx_src[0]){
-        video_out->draw_slice(opendivx_src,opendivx_stride,
-                            sh_video->disp_w,sh_video->disp_h,0,0);
-        opendivx_src[0]=NULL;
-        blit_frame=1;
+        planes=opendivx_src; stride=opendivx_stride;
+        blit_frame=2;
       }
 #endif
-      t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 
     break;
   }
 #ifdef NEW_DECORE
   case 7: {
     // DivX4Linux
-    unsigned int t=GetTimer();
-    unsigned int t2;
     DEC_FRAME dec_frame;
     // let's decode
         dec_frame.length = in_size;
@@ -326,86 +325,41 @@ switch(sh_video->codec->driver){
         dec_frame.stride=sh_video->disp_w;
 //	printf("Decoding DivX4 frame\n");
 	decore(0x123, (sh_video->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
-      t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
-
-    if(!drop_frame && sh_video->our_out_buffer){
-//	printf("Displaying DivX4 frame\n");
-      if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
-        uint8_t* dst[3];
-        int stride[3];
-        stride[0]=sh_video->disp_w;
-        stride[1]=stride[2]=sh_video->disp_w/2;
-        dst[0]=sh_video->our_out_buffer;
-        dst[2]=dst[0]+sh_video->disp_w*sh_video->disp_h;
-        dst[1]=dst[2]+sh_video->disp_w*sh_video->disp_h/4;
-        video_out->draw_slice(dst,stride,sh_video->disp_w,sh_video->disp_h,0,0);
-      } else
-        video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
-      blit_frame=1;
-    }
-
-      t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
-
+    if(!drop_frame) blit_frame=3;
     break;
   }
 #endif
 #ifdef USE_DIRECTSHOW
   case 4: {        // W32/DirectShow
-    unsigned int t=GetTimer();
-    unsigned int t2;
-
     if(drop_frame<2) DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
-
-    if(!drop_frame && sh_video->our_out_buffer){
-      t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
-      if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
-        uint8_t* dst[3];
-        int stride[3];
-        stride[0]=sh_video->disp_w;
-        stride[1]=stride[2]=sh_video->disp_w/2;
-        dst[0]=sh_video->our_out_buffer;
-        dst[2]=dst[0]+sh_video->disp_w*sh_video->disp_h;
-        dst[1]=dst[2]+sh_video->disp_w*sh_video->disp_h/4;
-        video_out->draw_slice(dst,stride,sh_video->disp_w,sh_video->disp_h,0,0);
-      } else
-        video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
-      t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
-      blit_frame=1;
-    }
+    if(!drop_frame) blit_frame=3;
     break;
   }
 #endif
 #ifdef USE_LIBAVCODEC
   case 5: {        // libavcodec
-    unsigned int t=GetTimer();
-    unsigned int t2;
     int got_picture=0;
-
     if(drop_frame<2 && in_size>0){
         int ret = avcodec_decode_video(&lavc_context, &lavc_picture,
 	     &got_picture, start, in_size);
 	if(ret<0) fprintf(stderr, "Error while decoding frame!\n");
+	if(!drop_frame && got_picture){
+	    planes=lavc_picture.data;
+	    stride=lavc_picture.linesize;
+            blit_frame=2;
+	}
     }
-
-    if(!drop_frame && got_picture){
-      t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
-      video_out->draw_slice(lavc_picture.data,lavc_picture.linesize,sh_video->disp_w,sh_video->disp_h,0,0);
-      t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
-      blit_frame=1;
-    }
-    
     break;
   }
 #endif
+#ifdef ARCH_X86
   case 6:
   case 2:
-#ifdef ARCH_X86
   {
     HRESULT ret;
-    unsigned int t=GetTimer();
-    unsigned int t2;
     
-    if(in_size){
+    if(!in_size) break;
+    
       sh_video->bih->biSizeImage = in_size;
 
 //      sh_video->bih->biWidth = 1280;
@@ -428,43 +382,43 @@ else
                         drop_frame ? 0 : sh_video->our_out_buffer);
 
       if(ret){ printf("Error decompressing frame, err=%d\n",(int)ret);break; }
-    }
-//    current_module="draw_frame";
-    if(!drop_frame){
-      t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
-//      if(out_fmt==IMGFMT_YV12){
-      if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
-        uint8_t* dst[3];
-        int stride[3];
-        stride[0]=sh_video->disp_w;
-        stride[1]=stride[2]=sh_video->disp_w/2;
-        dst[0]=sh_video->our_out_buffer;
-        dst[2]=dst[0]+sh_video->disp_w*sh_video->disp_h;
-        dst[1]=dst[2]+sh_video->disp_w*sh_video->disp_h/4;
-        video_out->draw_slice(dst,stride,sh_video->disp_w,sh_video->disp_h,0,0);
-      } else
-        video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
-      t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
-      blit_frame=1;
-    }
+
+    if(!drop_frame) blit_frame=3;
     break;
   }
-#else
-    printf("Win32 video codec unavailable on non-x86 CPU -> force nosound :(\n");
-    break;
 #endif
   case 1: {
         int t=0;
-
         t-=GetTimer();
           mpeg2_decode_data(video_out, start, start+in_size,drop_frame);
         t+=GetTimer(); video_time_usage+=t*0.000001;
-        blit_frame=1;
-
+	if(!drop_frame) blit_frame=1;
     break;
   }
 } // switch
 //------------------------ frame decoded. --------------------
+
+t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
+
+switch(blit_frame){
+case 3:
+      if(planar){
+        stride[0]=sh_video->disp_w;
+        stride[1]=stride[2]=sh_video->disp_w/2;
+        planes[0]=sh_video->our_out_buffer;
+        planes[2]=planes[0]+sh_video->disp_w*sh_video->disp_h;
+        planes[1]=planes[2]+sh_video->disp_w*sh_video->disp_h/4;
+      } else
+        planes[0]=sh_video->our_out_buffer;
+case 2:
+    if(planar)
+        video_out->draw_slice(planes,stride,sh_video->disp_w,sh_video->disp_h,0,0);
+    else
+        video_out->draw_frame(planes);
+    t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
+    blit_frame=1;
+    break;
+}
 
   return blit_frame;
 }
