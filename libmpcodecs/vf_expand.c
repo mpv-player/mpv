@@ -147,11 +147,8 @@ static int config(struct vf_instance_s* vf,
     // calculate the missing parameters:
     if(vf->priv->exp_w<width) vf->priv->exp_w=width;
     if(vf->priv->exp_h<height) vf->priv->exp_h=height;
-    if(vf->priv->exp_x<0) vf->priv->exp_x=(vf->priv->exp_w-width)/2;
-    if(vf->priv->exp_y<0) vf->priv->exp_y=(vf->priv->exp_h-height)/2;
-    // check:
-//    if(vf->priv->exp_w+vf->priv->exp_x>width) return 0; // bad width
-//    if(vf->priv->exp_h+vf->priv->exp_y>height) return 0; // bad height
+    if(vf->priv->exp_x<0 || vf->priv->exp_x+width>vf->priv->exp_w) vf->priv->exp_x=(vf->priv->exp_w-width)/2;
+    if(vf->priv->exp_y<0 || vf->priv->exp_y+height>vf->priv->exp_h) vf->priv->exp_y=(vf->priv->exp_h-height)/2;
     vf->priv->fb_ptr=NULL;
     ret=vf_next_config(vf,vf->priv->exp_w,vf->priv->exp_h,d_width,d_height,flags,outfmt);
     return ret;
