@@ -748,13 +748,13 @@ case ACODEC_COPY:
     break;
 case ACODEC_PCM:
     printf("CBR PCM audio selected\n");
-    mux_a->h.dwSampleSize=2*sh_audio->channels;
     mux_a->h.dwScale=1;
     mux_a->h.dwRate=force_srate?force_srate:sh_audio->samplerate;
     mux_a->wf=malloc(sizeof(WAVEFORMATEX));
-    mux_a->wf->nBlockAlign=mux_a->h.dwSampleSize;
     mux_a->wf->wFormatTag=0x1; // PCM
     mux_a->wf->nChannels=audio_output_channels?audio_output_channels:sh_audio->channels;
+    mux_a->h.dwSampleSize=2*mux_a->wf->nChannels;
+    mux_a->wf->nBlockAlign=mux_a->h.dwSampleSize;
     mux_a->wf->nSamplesPerSec=mux_a->h.dwRate;
     mux_a->wf->nAvgBytesPerSec=mux_a->h.dwSampleSize*mux_a->wf->nSamplesPerSec;
     mux_a->wf->wBitsPerSample=16;
