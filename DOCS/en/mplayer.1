@@ -480,7 +480,8 @@ Default is on, if compiled in.
 Turns off LIRC support.
 .TP
 .B \-nomouseinput
-Disable any mousebutton press/release input (mozplayerxp's context menu relies on this option) 
+Disable mousebutton press/release input (mozplayerxp's context menu relies
+on this option).
 .TP
 .B \-nortc \ \ 
 Turns off usage of the Linux RTC (real-time clock \- /dev/\:rtc) as timing
@@ -2982,51 +2983,54 @@ send 1,8MB of RGBA32 data everytime a small part of the screen is updated.
 .PD 1
 .TP
 .B "framestep=I|[i]step"
-Passes only the given number (step) of frames, and also the Intra (Key).
+Renders only every nth frame or every Intra (key) frame.
+
 If you call the filter with I (uppercase) as the parameter, then ONLY 
-the keyframes are output.
-For DVD it means, generally, one every 15/ 12  frames (IBBPBBPBBPBBPBB), and
+keyframes are rendered.
+For DVDs it generally means one in every 15/12  frames (IBBPBBPBBPBBPBB),
 for AVI it means every scene change or every keyint value (see -lavcopts
-keyint= value if you use mencoder to encode the videos).
+keyint= value if you use MEncoder to encode the video).
 
-When a key frame is found a, "I!" string followed by a newline character is
-printed, leaving the current line of mplayer/mencoder on the scren, because it
-contains the time (in seconds) and frame number of the keyframe - you can use
-these informations to split the AVI).
+When a key frame is found, an "I!" string followed by a newline character is
+printed, leaving the current line of mplayer/mencoder output on the screen,
+because it contains the time (in seconds) and frame number of the keyframe
+(You can use this information to split the AVI.).
 
-If you call the filter with a numeric parameter n then only one frame 
-every n is outputted.
+If you call the filter with a numeric parameter 'step' then only one in
+every 'step' frames is rendered.
 
-If you put a 'i' (lowercase) before the number then a I! is printed 
+If you put an 'i' (lowercase) before the number then an I! is printed 
 (like the I parameter).
 
-If you put only the i then nothing is done on the frames, only the I! is 
+If you give only the i then nothing is done to the frames, only I! is 
 printed.
 .TP
 .B "tile=xtile:ytile:output:start:delta"
-Tile a serie of image into a single, bigger image.
+Tile a series of images into a single, bigger image.
 
 The parameters are:
 .PD 0
 .RSs
 .IPs xtile
-number of tiles on the x axis (5)
+number of tiles on the x axis (default: 5)
 .IPs ytile
-number of tiles on the y axis (5)
-.IPs xytile
-when write the image, it can be different then xtile * ytile
-(for example you can write 8 * 7 tile, writing the file every
-50 frame, to have one image every 2 seconds @ 25 fps ).
+number of tiles on the y axis (default: 5)
+.IPs output
+Render the tile when 'output' number of frames are reached, where 'output'
+should be a number less than xtile * ytile.
+Missing tiles are left blank.
+You could, for example, write an 8 * 7 tile every 50 frames to have one
+image every 2 seconds @ 25 fps.
 .IPs start  
-pixel at the start (x/y), default 2
+pixel at the start (x/y) (default: 2)
 .IPs delta
-pixel between 2 tile, (x/y), default 4
+pixel between 2 tiles, (x/y) (default: 4)
 .RE
 .PD 1
-If you omit a parameter or put a value less then 0, then the default value is
-used. You can also stop when you're ok (... -vf tile=10:5 ...)
+If you omit a parameter or use a value less than 0, then the default
+value is used. You can also stop when you're OK (... -vf tile=10:5 ...)
 
-Probably it is good idea to put the scale filter before the tile :-)
+It is probably a good idea to put the scale filter before the tile :-)
 
 
 .SH "GENERAL ENCODING OPTIONS (MENCODER ONLY)"
