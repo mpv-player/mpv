@@ -2061,6 +2061,18 @@ h: high quality
 .br
 p: mix random noise with a (semi)regular pattern
 .REss
+.IPs "denoise3d[=luma:chroma:time]"
+This filter aims to reduce image noise producing smooth images and making still
+images really still (This should enhance compressibility.).
+It can be given from 0 to 3 parameters.   If you omit a parameter, a reasonable
+value will be inferred.
+.RSss
+luma:	spatial luma strength (default = 4)
+.br
+chroma:	spatial chroma strength (default = 3)
+.br
+time:	temporal strength (default = 6)
+.REss
 .IPs eq[=bright:cont]
 Activates the software equalizer with interactive controls like the hardware
 eq controls.
