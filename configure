@@ -205,6 +205,7 @@ Audio output:
   --disable-arts         disable aRts sound support [autodetect]
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
+  --disable-win32waveout disable windows waveout sound support [autodetect]
   --disable-select       disable using select() on audio device [enable]
 
 Miscellaneous options:
@@ -933,6 +934,7 @@ _dga=auto	# 1 2 no auto
 _xv=auto
 _sdl=auto
 _directx=auto
+_win32waveout=auto
 _nas=auto
 _png=auto
 _jpg=auto
@@ -1035,6 +1037,8 @@ for ac_option do
   --disable-sdl)	_sdl=no		;;
   --enable-directx)     _directx=yes    ;;
   --disable-directx)    _directx=no     ;;
+  --enable-win32waveout)  _win32waveout=yes ;;
+  --disable-win32waveout) _win32waveout=no  ;;
   --enable-nas)		_nas=yes	;;
   --disable-nas)	_nas=no		;;
   --enable-png)		_png=yes	;;
@@ -2809,6 +2813,27 @@ else
   echores "no"
 fi
 
+echocheck "windows waveout"
+if test "$_win32waveout" = auto ; then
+  cat > $TMPC << EOF
+#include <windows.h>
+#include <mmsystem.h>
+int main(void) { return 0; }
+EOF
+  _win32waveout=no
+  cc_check -lwinmm && _win32waveout=yes
+fi
+if test "$_win32waveout" = yes ; then
+  _def_win32waveout='#define HAVE_WIN32WAVEOUT 1'
+  _ld_win32libs="-lwinmm $_ld_win32libs"
+  _aosrc="$_aosrc ao_win32.c"
+  _aomodules="win32 $_aomodules"
+else
+  _def_win32waveout='#undef HAVE_WIN32WAVEOUT'
+  _noaomodules="win32 $_noaomodules"
+fi
+echores "$_win32waveout"
+
 echocheck "Directx"
 if test "$_directx" = auto ; then
   cat > $TMPC << EOF
@@ -2817,11 +2842,11 @@ if test "$_directx" = auto ; then
 int main(void) { return 0; }
 EOF
   _directx=no
-  cc_check -mwindows && _directx=yes
+  cc_check -lgdi32 && _directx=yes
 fi
 if test "$_directx" = yes ; then
   _def_directx='#define HAVE_DIRECTX 1'
-  _ld_directx='-lgdi32'
+  _ld_win32libs="-lgdi32 $_ld_win32libs"
   _vosrc="$_vosrc vo_directx.c"
   _vomodules="directx $_vomodules"
 else
@@ -4418,6 +4443,7 @@ GIF = $_mkf_gif
 EXTRA_LIB = $_ld_extra
 Z_LIB =  $_ld_static $_ld_zlib
 HAVE_MLIB = $_mlib
+WIN32_LIB = $_ld_win32libs
 STATIC_LIB = $_ld_static
 
 X11_INC = $_inc_x11
@@ -4437,7 +4463,6 @@ PNG_LIB = $_ld_png
 JPEG_LIB = $_ld_jpg
 GIF_LIB = $_ld_gif
 SDL_LIB = $_ld_sdl
-DIRECTX_LIB = $_ld_directx
 SVGA_LIB = $_ld_svga
 AA_LIB = $_ld_aa
 
@@ -4747,6 +4772,7 @@ $_def_sys_asoundlib_h
 $_def_alsa_asoundlib_h
 $_def_sunaudio
 $_def_sgiaudio
+$_def_win32waveout
 $_def_nas
 
 /* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
