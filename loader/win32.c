@@ -145,7 +145,7 @@ static void longcount_stub(long long* z)
     }
     longcount(z);
 }
-#define DETAILED_OUT
+
 int LOADER_DEBUG=1; // active only if compiled with -DDETAILED_OUT
 static inline void dbgprintf(char* fmt, ...)
 {
