@@ -177,11 +177,7 @@ ebml_read_float (stream_t *s, uint64_t *length)
       {
         uint32_t i;
         float *f;
-#ifndef WORDS_BIGENDIAN
         i = stream_read_dword (s);
-#else
-        i = stream_read_dword_le (s);
-#endif
         f = (float *) (void *) &i;
         value = *f;
         break;
@@ -191,11 +187,7 @@ ebml_read_float (stream_t *s, uint64_t *length)
       {
         uint64_t i;
         double *d;
-#ifndef WORDS_BIGENDIAN
         i = stream_read_qword (s);
-#else
-        i = stream_read_qword_le (s);
-#endif
         d = (double *) (void *) &i;
         value = *d;
         break;
@@ -204,17 +196,9 @@ ebml_read_float (stream_t *s, uint64_t *length)
     case 10:
       {
         uint8_t data[10];
-#ifdef WORDS_BIGENDIAN
-        int i = 10;
-#endif
         if (stream_read (s, data, 10) != 10)
           return EBML_FLOAT_INVALID;
-#ifndef WORDS_BIGENDIAN
         value = * (long double *) data;
-#else
-        while (i--)
-          ((uint8_t *) &value)[i] = data[9 - i];
-#endif
         break;
       }
 
