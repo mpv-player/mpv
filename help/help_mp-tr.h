@@ -1,6 +1,5 @@
 // MPlayer Turkish Translation
 // Translated by: "heart_of_the_ocean" Murat ALKAN
-// Also send a notify message to the mplayer-dev-eng mailing list.
 
 // ========================= MPlayer help ===========================
 

@@ -131,7 +131,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Hinweis: %s\n"
 #define MSGTR_Video_NoVideo "Video: kein Video\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Konnte Videofilter (-vop) oder Videoausgabetreiber (-vo) nicht initialisieren.\n"
-#define MSGTR_Paused "\n------ PAUSE -------\r"
+#define MSGTR_Paused "\n  =====  PAUSE  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nKann Abspielliste %s nicht laden.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer stürzte wegen einer 'illegalen Anweisung' ab.\n"\

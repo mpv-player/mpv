@@ -4,12 +4,7 @@
 // Sefanja Ruijsenaars <sefanja at gmx.net>
 // Andoni Zubimendi <andoni at lpsat.net>
 
-// Updated to help_mp-en.h v1.100
-
-// Translated files should be sent to the mplayer-dev-eng mailing list or
-// to the help messages maintainer, see DOCS/tech/MAINTAINERS.
-// Please also put a note like "sync'ed with help_mp-en.h XXX" in the header
-// of the translated file so that we see at a glance if it is outdated.
+// Updated to help_mp-en.h v1.105
 
 // ========================= MPlayer help ===========================
 
@@ -136,7 +131,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Comentario: %s.\n"
 #define MSGTR_Video_NoVideo "Vídeo: no hay vídeo!\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: No se pudieron inicializar los filtros de vídeo (-vop) o de salida de vídeo (-vo)!\n"
-#define MSGTR_Paused "\n------ PAUSADO -------\r"
+#define MSGTR_Paused "\n  =====  PAUSA  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nNo se puede cargar la lista de reproducción %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer se detuvo por una 'Instrucción Ilegal'.\n"\

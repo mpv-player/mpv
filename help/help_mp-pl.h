@@ -134,7 +134,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Komentarz: %s\n"
 #define MSGTR_Video_NoVideo "Video: brak video\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Nie mogê zainicjowaæ filtrów video (-vop) lub wyj¶cia video (-vo).\n"
-#define MSGTR_Paused "\n================= PAUZA =================\r"
+#define MSGTR_Paused "\n  =====  PAUZA  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nNie mo¿na za³adowaæ playlisty %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer wykona³ nieprawid³ow± operacjê.\n"\

@@ -3,11 +3,6 @@
 
 // Updated to help_mp-en.h v1.105
 
-// Translated files should be sent to the mplayer-dev-eng mailing list or
-// to the help messages maintainer, see DOCS/tech/MAINTAINERS.
-// Please also put a note like "sync'ed with help_mp-en.h XXX" in the header
-// of the translated file so that we see at a glance if it is outdated.
-
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC

@@ -1,7 +1,7 @@
 // Translated by:  Anders Rune Jensen <anders@gnulinux.dk>
 // Særlig tak til: Tomas Groth <tomasgroth@hotmail.com>
 //                 Dan Christiansen <danchr@daimi.au.dk>
-// Sync'ed with help_mp-en.h 1.102
+// Sync'ed with help_mp-en.h 1.104
 
 
 // ========================= MPlayer help ===========================
@@ -135,7 +135,7 @@ static char help_text[]=
 #define MSGTR_AOComment "AO: Kommentar: %s\n"
 #define MSGTR_Video_NoVideo "Video: ingen video\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATALT: Kunne ikke initialisere videofiltre (-vop) eller videodriver (-vo) !\n"
-#define MSGTR_Paused "\n------ PAUSE -------\r"
+#define MSGTR_Paused "\n  =====  PAUSE  =====\r"
 #define MSGTR_PlaylistLoadUnable "\nKunne ikke indlæse afspilningslisten %s\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer fik en alvorlig fejl af typen 'ulovlig instruktion'.\n"\

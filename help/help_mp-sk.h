@@ -1,6 +1,5 @@
 // Translated by:  Daniel Beòa, benad@centrum.cz
-// Translated files should be uploaded to ftp://mplayerhq.hu/MPlayer/incoming
-// synced  with 1.95, 1.4.03
+// last sync on 2003-04-01
 
 // ========================= MPlayer help ===========================
 
