@@ -23,6 +23,7 @@
 *
 * $Id$
 */
+#include "../mangle.h"
 #define real float /* ugly - but only way */
 
 static long buffs[1088];
@@ -36,17 +37,17 @@ int synth_1to1_pent(real *bandPtr, int channel, short *samples)
 "        movl %1,%%eax\n\t"/*bandPtr*/
 "        movl %3,%%esi\n\t"
 "        xorl %%edi,%%edi\n\t"
-"        movl bo,%%ebp\n\t"
+"        movl "MANGLE(bo)",%%ebp\n\t"
 "        cmpl %%edi,%2\n\t"
 "        jne .L48\n\t"
 "        decl %%ebp\n\t"
 "        andl $15,%%ebp\n\t"
-"        movl %%ebp,bo\n\t"
-"        movl $buffs,%%ecx\n\t"
+"        movl %%ebp,"MANGLE(bo)"\n\t"
+"        movl $"MANGLE(buffs)",%%ecx\n\t"
 "        jmp .L49\n\t"
 ".L48:\n\t"
 "        addl $2,%%esi\n\t"
-"        movl $buffs+2176,%%ecx\n\t"
+"        movl $"MANGLE(buffs)"+2176,%%ecx\n\t"
 ".L49:\n\t"
 "        testl $1,%%ebp\n\t"
 "        je .L50\n\t"
@@ -72,11 +73,11 @@ int synth_1to1_pent(real *bandPtr, int channel, short *samples)
 "        leal (%%ecx,%%ebp,4),%%eax\n\t"
 ".L74:\n\t"
 "        pushl %%eax\n\t"
-"        call dct64\n\t"
+"        call "MANGLE(dct64)"\n\t"
 "        addl $12,%%esp\n\t"
 "        movl %4,%%edx\n\t"
 "        leal 0(,%%edx,4),%%edx\n\t"
-"        movl $decwin+64,%%eax\n\t"
+"        movl $"MANGLE(decwin)"+64,%%eax\n\t"
 "        movl %%eax,%%ecx\n\t"
 "        subl %%edx,%%ecx\n\t"
 "        movl $16,%%ebp\n\t"

@@ -7,6 +7,7 @@
  * Local ChangeLog:
  * - Partial loops unrolling and removing MOVW insn from loops
 */
+#include "../mangle.h"
 #define real float /* ugly - but only way */
 
 static unsigned long long __attribute__((aligned(8))) null_one = 0x0000ffff0000ffffULL;
@@ -81,11 +82,11 @@ __asm __volatile(
 	"emms\n\t"
         "pushl %%edx\n\t"
         "pushl %%ecx\n\t"
-        "call *dct64_MMX_func\n\t"
+        "call *"MANGLE(dct64_MMX_func)"\n\t"
 	"leal 1(%%ebx), %%ecx\n\t"
         "subl %%ebp,%%ebx\n\t"
 	"pushl %%ecx\n\t"
-	"leal decwins(%%ebx,%%ebx,1), %%edx\n\t"
+	"leal "MANGLE(decwins)"(%%ebx,%%ebx,1), %%edx\n\t"
 	"shrl $1, %%ecx\n\t"
 ".align 16\n\t"
 ".L3:\n\t"
@@ -124,8 +125,8 @@ __asm __volatile(
 
 	"movq	(%%edi), %%mm1\n\t"
 	"punpckldq %%mm4, %%mm0\n\t"
-	"pand   one_null, %%mm1\n\t"
-	"pand   null_one, %%mm0\n\t"
+	"pand   "MANGLE(one_null)", %%mm1\n\t"
+	"pand   "MANGLE(null_one)", %%mm0\n\t"
 	"por    %%mm0, %%mm1\n\t"
 	"movq   %%mm1,(%%edi)\n\t"
 
@@ -206,8 +207,8 @@ __asm __volatile(
 
 	"movq	(%%edi), %%mm1\n\t"
 	"punpckldq %%mm4, %%mm0\n\t"
-	"pand   one_null, %%mm1\n\t"
-	"pand   null_one, %%mm0\n\t"
+	"pand   "MANGLE(one_null)", %%mm1\n\t"
+	"pand   "MANGLE(null_one)", %%mm0\n\t"
 	"por    %%mm0, %%mm1\n\t"
 	"movq   %%mm1,(%%edi)\n\t"
 

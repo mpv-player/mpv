@@ -3,9 +3,15 @@
 * See ChangeLog of mpg123-0.59s-pre.1 for detail
 * Applied to mplayer by Nick Kurshev <nickols_k@mail.ru>
 */
+#include "../mangle.h"
 #define real float /* ugly - but only way */
 
+#ifdef __CYGWIN__
+/* will probably cause sig11 with debuggingsymbols, but otherwise undef. ref */
+void dct64_MMX(real *a,real *b,real *c)
+#else
 void __attribute__ (( __stdcall__ )) dct64_MMX(real *a,real *b,real *c)
+#endif
 {
     char tmp[256];
     __asm __volatile(
@@ -19,7 +25,7 @@ void __attribute__ (( __stdcall__ )) dct64_MMX(real *a,real *b,real *c)
 "	movl %1,%%edi\n\t"
 
 "	flds    4(%%eax)\n\t"
-"	movl $costab_mmx,%%ebx\n\t"
+"	movl $"MANGLE(costab_mmx)",%%ebx\n\t"
 "	fadds 120(%%eax)\n\t"
 "	orl %%ecx,%%ecx\n\t"
 "	fstps   4(%%edx)\n\t"

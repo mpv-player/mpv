@@ -3,6 +3,7 @@
  * See ChangeLog of mpg123-0.59s-pre.1 for detail
  * Applied to mplayer by Nick Kurshev <nickols_k@mail.ru>
 */
+#include "../mangle.h"
 
 long __attribute__((aligned(8))) decwins [544];
 
@@ -66,7 +67,7 @@ void make_decode_tables_MMX(long scaleval)
 ".L01:\n\t"
 	"pushl %%eax\n\t"
 	"fildl (%%esp)\n\t"
-	"fdivs intwindiv\n\t"
+	"fdivs "MANGLE(intwindiv)"\n\t"
 	"popl %%eax\n\t"
 	"fimull %2\n\t"
 	"fsts  %1(,%%ecx,4)\n\t"
