@@ -153,7 +153,7 @@ extern int audio_id;
 extern int video_id;
 
 static int max_idx(int s_count, int *s_rates, int bound) {
-  int i, best = -1, rate = 0;
+  int i, best = -1, rate = -1;
   for (i = 0; i < s_count; i++) {
     if (s_rates[i] > rate && s_rates[i] <= bound) {
       rate = s_rates[i];
