@@ -68,6 +68,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-fbmodeconfig\ file ]
 .RB [ \-benchmark ]
 .RB [ \-dvd\ cím ]
+.RB [ \-sid\ id ]
 .RB [ \-chapter\ fejezet ]
 .RB [ \-dvdangle\ szög ]
 .RB [ \-dvdkey\ kulcs ]
@@ -110,6 +111,11 @@ Minden paraméter nélküli opciónak megvan az ellenpárja, például az "-fs"-nek
 megadja hogy az MPlayer a DVD-n található mely filmeket (amiket számokkal
 jelölnek) játssza le. Például az 1-esek általában elõzetesek, és a 2 az
 igazi film.
+.TP
+.B \-sid\ id
+Bekapcsolja a DVD feliratok megjelenítését. Szükséges egy DVD feliratazonosító
+(1-...) szám megadása. A lehetséges nyelvek listája az ennek és a -v opciónak
+az együttes használata során lesz olvasható a kimenetben.
 .TP
 .B \-chapter\ fejezet
 megadja hogy melyik fejezetnél (DVD) kezdõdjön a lejátszás. Példákat
@@ -526,9 +532,6 @@ A kimeneti OpenDivX file megadása. Nem ír felül.
 .B \-dumpvideo
 video stream kiírása a ./stream.dump file-ba (csak MPEG-PS-nél)
 (nem túl használható)
-.TP
-.B \-sid
-DVD felirat megadása (?) (_NEM FOGJA_ MEGJELENÍTENI! RTFM!)
 .IP
 .SH IRÁNYÍTÁS A BILLENTYÛZETRÕL
 .TP

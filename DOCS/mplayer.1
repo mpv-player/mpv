@@ -113,6 +113,11 @@ see the documentation.
 tell MPlayer which movies (marked with titleid) to play. For example
 sometimes '1' are trailers, and '2' is the real movie.
 .TP
+.B \-sid\ id
+Turns on DVD subtitle displaying. Also, you MUST specify a number which
+corresponds to a DVD subtitle language (1-...). For the list of available
+subtitles, use with the -v switch and look at the output. (EXPERIMENTAL)
+.TP
 .B \-chapter\ chapterid
 specify which chapter to start playing at. Examples can be found below.
 .TP
@@ -523,9 +528,6 @@ Specifies the output OpenDivX file. Won't overwrite.
 .TP
 .B \-dumpvideo
 dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
-.TP
-.B \-sid
-specify DVD subtitle (?) (IT _WILL NOT_ DISPLAY! RTFM!)
 .IP
 .SH KEYBOARD CONTROL
 .TP

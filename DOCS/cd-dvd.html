@@ -127,6 +127,10 @@ machine.</P>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects DVD chapter (default: play from chapter 1)</TD><TR>
 <TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-dvdangle &lt;angle_id&gt;&nbsp;</TD>
 <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Selects camera angle (default: 1)</TD><TR>
+<TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-sid &lt;subtitle_id&gt;&nbsp;</TD>
+<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Turns DVD subtitle displaying (of the given subtitle_id or language) on (default: no)<BR>
+  For the list of available languages, use <CODE>-sid 1 -v</CODE> options and
+  browse the output.</TD><TR>
 </TABLE>
 
 <P>Default device is <CODE>/dev/dvd</CODE>, you can change it in config.h
@@ -134,6 +138,7 @@ machine.</P>
 </P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -sid 5 /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -chapter 5 -dvdangle 2</CODE></P>
 
 <P><B><A NAME=4.3>4.3. DVD playback FAQ</A></B></P>
@@ -157,11 +162,9 @@ as well. We're not authors of libdvdread.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-What about subtitles? Can MPlayer decode them?
+What about subtitles? Can MPlayer display them?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-Yes it can (or at least it would be able to) but there is no DVD subtitle
-displaying functionality inside <B>MPlayer</B> (DVD subs are stored as images,
-not text!). However it's a planned feature (at the time of libvo2).
+Yes! See above in the DVD chapter.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
