@@ -3,6 +3,7 @@ MPlayer (1.0)
   pre5: "Niu ririsu" Mai 22, 2004
 
     DOCS:
+    * Hungarian XML documentation translation started
     * small additions, corrections, updates all over the place
     * audio output driver section added to the man page
     * several bug fixes and improvements in the MEncoder documentation
@@ -65,9 +66,10 @@ MPlayer (1.0)
     * more robust Real demuxer (can resync after errors)
     * support for AAC inside Real
     * MPEG Aspect code 4 fixed
-    * support for selecting subtitle streams with -slang inside Ogg
     * wrapper demuxer for FFMpeg's libavformat (Nut is playable this way)
+    * support for selecting subtitle streams with -slang inside Ogg
     * much improved seeking in Ogg
+    * -sid/-aid/-vid start from zero in Ogg demuxer just like other demuxers
     * Nullsoft streaming video (NSV) demuxer
     * AVI OpenDML read and write support
 
