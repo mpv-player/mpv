@@ -1409,6 +1409,11 @@ Alternatively, you can use a special kernel module, like this:
   directory if you've downloaded the source from the svgalib site) and insmod it.
   </para></step>
 <step><para>
+  To create the neccessary devices in the <filename class="directory">/dev</filename>
+  directory, do a <screen>make device</screen> in the <filename class="directory">svgalib_helper</filename>
+  dir, as root.
+  </para></step>
+<step><para>
   Move the <filename class="directory">svgalib_helper</filename> directory to
   <filename class="directory">mplayer/main/libdha/svgalib_helper</filename>.
   </para></step>
