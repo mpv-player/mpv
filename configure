@@ -971,6 +971,21 @@ EOF
     _march=''
     _mcpu=''
     _optimizing=''
+
+    if irix ; then
+	echocheck "CPU type"
+	proc=`hinv -c processor | grep CPU | cut -d " " -f3`
+	case "`echo $proc`" in
+	    R3000) _march='-mips1' _mcpu='-mtune=r2000' ;;
+	    R4000) _march='-mips3' _mcpu='-mtune=r4000' ;;
+	    R4400) _march='-mips3' _mcpu='-mtune=r4400' ;;
+	    R4600) _march='-mips3' _mcpu='-mtune=r4600' ;;
+	    R5000) _march='-mips4' _mcpu='-mtune=r5000' ;;
+	    R8000|R10000|R12000|R14000|R16000) _march='-mips4' _mcpu='-mtune=r8000' ;;
+	esac
+        echores "$proc"
+    fi
+
     ;;
 
   hppa)
