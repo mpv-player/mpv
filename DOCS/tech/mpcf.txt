@@ -39,7 +39,7 @@ SHOULD	its recommanded to be done that way but its not strictly required
 
 		Type definitions:
 
-f(x)	n fixed bits in big endian order
+f(x)	n fixed bits in big-endian order
 u(x)	unsigned number encoded in x bits in MSB first order
 
 v

@@ -41,7 +41,7 @@ negative, use a command like this:
 
 Don't include the minus (-) sign in delay. Also, keep in mind you'll
 have to change the 1764 number and provide additional options to lame
-if your audio stream isn't 44100/16bit/littleendian/stereo.
+if your audio stream isn't 44100/16bit/little-endian/stereo.
 
 Step 3: Use mencoder to remux your new mp3 file with the movie:
 

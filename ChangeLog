@@ -29,7 +29,7 @@ MPlayer (1.0)
     * vo_quartz made default on Mac OS X
     * ao_macosx fixed and made default again on Mac OS X
     * RealVideo binary codecs support on Mac OS X (still buggy)
-    * bigendian fixes in vf.c, vo_tga
+    * big-endian fixes in vf.c, vo_tga
     * OpenBSD portability fixes
     * OpenBSD/VAX support
     * AMD64 support
@@ -38,7 +38,7 @@ MPlayer (1.0)
     * support for more Radeons (9800 XT among them) in VIDIX
     * Radeon related bug fixes in VIDIX
     * vo_gl2 now supports GUI, fix for flickering borders in fullscreen
-    * support 24 and 32 bit PCM files, bigendian fixes
+    * support 24 and 32 bit PCM files, big-endian fixes
     * ao_sdl now converts unsupported formats instead of quitting
     * ENCA support
     * merged ao_alsa9 and ao_alsa1x drivers into ao_alsa
@@ -782,7 +782,7 @@ MPlayer (0.90)
     * -vo gif89a uninit sig11 fixed
     * the usual compiler warning fixes :)
     * use -pphelp instead of -vop pp=help
-    * various bigendian fixes
+    * various big-endian fixes
     * 16bpp packed YUV fixes in crop, mirror, rotate filters
     * some -fixed-vo and vo_preinit fixes, -vo sdl, xmga, mga should work...
     * various Solaris compatibility fixes (should work out of the box)
@@ -994,7 +994,7 @@ MPlayer (0.90)
     * RTC setup fixes, more verbose messages, hints
     * MEncoder: demuxer/codec uninit order fixed (solves some sig11)
     * various v4l and ALSA capturing fixes
-    * demux_mov: fixed crash with MPEG4 on SPARC, decoding on big endian
+    * demux_mov: fixed crash with MPEG4 on SPARC, decoding on big-endian
     * various NAS ao fixes
     * libvo: optional stride support for packed YUV / RGB formats
     * MEncoder: set keyframe flag on audio packets, fixes Windows seeking
@@ -1005,7 +1005,7 @@ MPlayer (0.90)
     * fixed RealAudio SIPR(O) codec (the wrapper didn't find the dspr.so.6)
     * mms:// audio (radio) streaming fixed
     * DVB: -vop lavc=bitrate is working again
-    * various big endian fixes
+    * various big-endian fixes
 
     Features:
     * new audio filter layer (libaf) - automatic samplerate conversion
@@ -1189,7 +1189,7 @@ MPlayer (0.90)
 
 
   pre2: Apr 30, 2002
-    * hwac3 fixes (try AFMT_AC3 first), bigendian fixes for PCM audio
+    * hwac3 fixes (try AFMT_AC3 first), big-endian fixes for PCM audio
     * 2-pass encoding with libavcodec (-lavcopts vpass=x), B frames support
     * faster Ogg seeking (use -forceidx for slow but accurate one)
     * audio-only with GUI fixed

@@ -637,7 +637,7 @@ The <option>format</option> filter converts between different sample formats. It
     concatenated mix of: <option>alaw</option>, <option>mulaw</option> or
     <option>imaadpcm</option>, <option>float</option> or <option>int</option>,
     <option>unsigned</option> or <option>signed</option>, <option>le</option> or
-    <option>be</option> (little or big endian). This option is required,
+    <option>be</option> (little- or big-endian). This option is required,
     leaving it empty results in a runtime error.
 </para></listitem>
 </varlistentry>
