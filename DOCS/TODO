@@ -2,9 +2,10 @@ TO DO:
 ~~~~~~
 For the Release:
 - update homepage about CVS access (new server)
-- fix cvslog postings for new CVS server - DONE?
+- update win32codec.zip package!!! (missing qdv.dll etc)
 
 After the release:
+- fix cvslog postings for new CVS server - DONE
 - finish OSD control (mixer, brightness/contrast/etc..)
 - libvo2...
 - direct rendering
@@ -16,7 +17,7 @@ After the release:
 - fast forward (changing fps on-the-fly)
 - subtitles with black rectangle background (option)
 - audio downmixing (for fast-forward and for old soundcards)
-- upgrade opendivx decore - FAILED
+- upgrade opendivx decore - FAILED (CVS version is unstable now)
 - remove opendivx encore - SKIPPED
 
 DONE: (move this to ChangeLog among other things)
