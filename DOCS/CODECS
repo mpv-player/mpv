@@ -71,7 +71,7 @@ Built-in native codecs:
 
 - Uncompressed PCM (0)
 - MPEG layer 2 and 3:  (0x50, 0x55)
-  mp3lib, based on mpg123  (sometimes segfaults, then use ACM, see bellow)
+  mp3lib, based on mpg123  (sometimes segfaults, then use ACM, see below)
 - AC3:  (0x2000)
   libac3
 - aLaw audio: (6)
@@ -86,7 +86,7 @@ Fully functional Win32 ACM/DShow codecs:
 - MS ADPCM (0x2)
   msadp32.acm: works
 - MPEG layer 3:  (0x55)
-  l3codeca.acm: works  (you can use built-in 3dnow-optimized codec too)
+  l3codeca.acm: works  (or you can use the built-in 3dnow-optimized codec)
 
 Problems:
 
@@ -103,4 +103,3 @@ Not tested:
   acelpdec.ax: not tested (no sample file)
 - IMC:  (0x401)
   imc32.acm: not tested (no sample file)
-
