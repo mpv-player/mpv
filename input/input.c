@@ -249,7 +249,7 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'd', 0 }, "frame_drop" },
   { { 'r', 0 }, "sub_pos -1" },
   { { 't', 0 }, "sub_pos +1" },
-  { { 'i', 0 }, "sub_alignment" },
+  { { 'a', 0 }, "sub_alignment" },
   { { 'v', 0 }, "sub_visibility" },
   { { 'j', 0 }, "vobsub_lang" },
 #ifdef USE_EDL
@@ -264,7 +264,6 @@ static mp_cmd_bind_t def_cmd_binds[] = {
 #ifdef HAVE_NEW_GUI
   { { 'l', 0 }, "gui_loadfile" },
   { { 't', 0 }, "gui_loadsubtitle" },
-  { { 'a', 0 }, "gui_about" },
   { { KEY_ENTER, 0 }, "gui_play" },
   { { 's', 0 }, "gui_stop" },
   { { 'p', 0 }, "gui_playlist" },
