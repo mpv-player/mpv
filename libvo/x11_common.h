@@ -28,6 +28,7 @@ int vo_x11_check_events(Display *mydisplay);
  extern int       vo_xeventhandling;
  extern int       vo_expose;
  extern int       vo_resize;
+ extern void vo_x11_putkey(int key);
 #endif
 #ifdef HAVE_GUI
  extern Display * vo_display;
