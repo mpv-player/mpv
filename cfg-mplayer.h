@@ -95,8 +95,9 @@ struct config conf[]={
        
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32},
 	
-	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1},
 	{"noidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 0},
+	{"idx", &index_mode, CONF_TYPE_FLAG, 0, -1, 1},
+	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2},
         
 	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},
 	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, 0, 0, 0},
