@@ -654,8 +654,23 @@ read_next:
 
 	    if(d->angle_seek){
 		int i,skip=0;
+#if defined(__GNUC__) && defined(__sparc__)
+		// workaround for a bug in the sparc version of gcc 2.95.X ... 3.2,
+		// it generates incorrect code for unaligned access to a packed
+		// structure member, resulting in an mplayer crash with a SIGBUS
+		// signal.
+		//
+		// See also gcc problem report PR c/7847:
+		// http://gcc.gnu.org/cgi-bin/gnatsweb.pl?database=gcc&cmd=view+audit-trail&pr=7847
+		for(i=0;i<9;i++){	// check if all values zero:
+		    typeof(d->dsi_pack.sml_agli.data[i].address) tmp_addr;
+		    memcpy(&tmp_addr,&d->dsi_pack.sml_agli.data[i].address,sizeof(tmp_addr));
+		    if((skip=tmp_addr)!=0) break;
+		}
+#else
 		for(i=0;i<9;i++)	// check if all values zero:
 		    if((skip=d->dsi_pack.sml_agli.data[i].address)!=0) break;
+#endif
 		if(skip){
 		    // sml_agli table has valid data (at least one non-zero):
 		    d->cur_pack=d->dsi_pack.dsi_gi.nv_pck_lbn+
