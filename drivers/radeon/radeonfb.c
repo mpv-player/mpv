@@ -943,6 +943,73 @@ static char * GET_MON_NAME(int type)
   return pret;
 }
 
+/*This funtion is used to reverse calculate 
+  panel information from register settings in VGA mode.
+  More graceful way is to use EDID information... if it can be detected.
+  This way may be better than directly probing BIOS image. Because
+  BIOS image could change from version to version, while the 
+  registers should always(?) contain right information, otherwise
+  the VGA mode display will not be correct. Well, if someone  
+  messes up these registers before our driver is loaded, we'll be in 
+  trouble...*/
+static int radeon_get_dfp_info(struct radeonfb_info *rinfo)
+{
+    unsigned long r;
+    unsigned short a, b;	
+
+    r = INREG(FP_VERT_STRETCH);
+    r &= 0x00fff000;
+    rinfo->PanelYRes = (unsigned short)(r >> 0x0c) + 1;
+
+    switch(rinfo->PanelYRes)
+    {
+        case 480: rinfo->PanelXRes = 640;
+            break;
+        case 600: rinfo->PanelXRes = 800;
+            break;
+        case 768: rinfo->PanelXRes = 1024;
+            break;
+        case 1024: rinfo->PanelXRes = 1280;
+            break;
+        case 1050: rinfo->PanelXRes = 1400;
+            break;
+        case 1200: rinfo->PanelXRes = 1600;
+            break;
+        default:
+            printk("radeonfb: Failed to detect the DFP panel size.\n");
+            return 0;
+
+    }
+
+    printk("Detected DFP panel size: %dx%d\n", rinfo->PanelXRes, rinfo->PanelYRes);
+
+    r = INREG(FP_CRTC_H_TOTAL_DISP);
+    a = (r & FP_CRTC_H_TOTAL_MASK) + 4;
+    b = (r & 0x01FF0000) >> FP_CRTC_H_DISP_SHIFT;
+    rinfo->HBlank = (a - b + 1) * 8;
+
+    r = INREG(FP_H_SYNC_STRT_WID);
+    rinfo->HOverPlus = 
+        (unsigned short)((r & FP_H_SYNC_STRT_CHAR_MASK)
+        >> FP_H_SYNC_STRT_CHAR_SHIFT) - b - 1;
+    rinfo->HOverPlus *= 8;
+    rinfo->HSyncWidth =    
+        (unsigned short)((r & FP_H_SYNC_WID_MASK)
+        >> FP_H_SYNC_WID_SHIFT);
+    rinfo->HSyncWidth *= 8;
+    r = INREG(FP_CRTC_V_TOTAL_DISP);
+    a = (r & FP_CRTC_V_TOTAL_MASK) + 1;
+    b = (r & FP_CRTC_V_DISP_MASK) >> FP_CRTC_V_DISP_SHIFT;
+    rinfo->VBlank = a - b /*+ 24*/;
+    
+    r = INREG(FP_V_SYNC_STRT_WID);
+    rinfo->VOverPlus = (unsigned short)(r & FP_V_SYNC_STRT_MASK)
+                 - b + 1;
+    rinfo->VSyncWidth = (unsigned short)((r & FP_V_SYNC_WID_MASK)
+                 >> FP_V_SYNC_WID_SHIFT);
+    
+    return 1;
+}
 
 static int radeonfb_pci_register (struct pci_dev *pdev,
 				  const struct pci_device_id *ent)
@@ -1180,10 +1247,14 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 		rinfo->hasTVout = readw(bios_ptr+0x32);
 	}
 
+	if((rinfo->dviDispType == MT_DFP || rinfo->dviDispType == MT_LCD ||
+	    rinfo->crtDispType == MT_DFP))
+				    if(!radeon_get_dfp_info(rinfo)) goto reg_err;
 	rinfo->fb_base = (u32) ioremap (rinfo->fb_base_phys,
 				  		  rinfo->video_ram);
 	if (!rinfo->fb_base) {
 		printk ("radeonfb: cannot map FB\n");
+		reg_err:
 		iounmap ((void*)rinfo->mmio_base);
 		release_mem_region (rinfo->mmio_base_phys,
 				    pci_resource_len(pdev, 2));
@@ -1579,6 +1650,20 @@ static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
 	vSyncStart = mode->yres + mode->lower_margin;
 	vSyncEnd = vSyncStart + mode->vsync_len;
 	vTotal = vSyncEnd + mode->upper_margin;
+
+	if(((prim_mon == MT_DFP) || (prim_mon == MT_LCD)))
+	{
+    	    if(rinfo->PanelXRes < mode->xres)
+        	rinfo->xres = mode->xres = rinfo->PanelXRes;
+    	    if(rinfo->PanelYRes < mode->yres)
+        	rinfo->yres = mode->yres = rinfo->PanelYRes;
+    	    hTotal = mode->xres + rinfo->HBlank + mode->left_margin;
+    	    hSyncStart = mode->xres + rinfo->HOverPlus + mode->right_margin;
+    	    hSyncEnd = hSyncStart + rinfo->HSyncWidth + mode->hsync_len;
+    	    vTotal = mode->yres + rinfo->VBlank + mode->upper_margin;
+    	    vSyncStart = mode->yres + rinfo->VOverPlus + mode->lower_margin;
+    	    vSyncEnd = vSyncStart + rinfo->VSyncWidth + mode->vsync_len;
+	}
 
 	sync = mode->sync;
 	h_sync_pol = sync & FB_SYNC_HOR_HIGH_ACT ? 0 : 1;
@@ -2055,7 +2140,7 @@ RTRACE("radeonfb: radeon_init_mode is called\n");
     prim_mon = PRIMARY_MONITOR(rinfo);
     if (((prim_mon == MT_DFP) || (prim_mon == MT_LCD)))
     {
-/*        radeon_init_fp_regs(rinfo, save, mode);*/
+        radeon_init_fp_regs(rinfo, save, mode);
     }
 
 RTRACE("radeonfb: radeon_init_mode returns SUCCESS\n"); 
