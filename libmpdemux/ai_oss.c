@@ -1,6 +1,15 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "config.h"
 
-#ifdef USE_OSS_AUDIO
+#if defined(USE_TV) && defined(HAVE_TV_V4L) && defined(USE_OSS_AUDIO)
+
+#include <string.h> /* strerror */
+#include <fcntl.h>
+#include <errno.h>
+#include <sys/ioctl.h>
+
 #ifdef HAVE_SYS_SOUNDCARD_H
 #include <sys/soundcard.h>
 #else
@@ -10,10 +19,6 @@
 #include <linux/soundcard.h>
 #endif
 #endif
-#include <fcntl.h>
-#include <errno.h>
-#include <sys/ioctl.h>
-#include <string.h> /* strerror */
 
 #include "audio_in.h"
 #include "mp_msg.h"

@@ -1,6 +1,10 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "config.h"
 
-#ifdef HAVE_ALSA9
+#if defined(USE_TV) && defined(HAVE_TV_V4L) && defined(HAVE_ALSA9)
+
 #include <alsa/asoundlib.h>
 #include "audio_in.h"
 #include "mp_msg.h"

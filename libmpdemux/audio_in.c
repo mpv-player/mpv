@@ -1,8 +1,12 @@
-#include "config.h"
-#include "audio_in.h"
-#include "mp_msg.h"
 #include <stdio.h>
 #include <stdlib.h>
+
+#include "config.h"
+
+#if defined(USE_TV) && defined(HAVE_TV_V4L)
+
+#include "audio_in.h"
+#include "mp_msg.h"
 #include <string.h>
 #include <errno.h>
 
@@ -190,3 +194,5 @@ int audio_in_read_chunk(audio_in_t *ai, unsigned char *buffer)
 	return -1;
     }
 }
+
+#endif
