@@ -55,7 +55,7 @@ HANDLE SegptrHeap;
 WINE_MODREF* MODULE_FindModule(LPCSTR m)
 {
     modref_list* list=local_wm;
-    TRACE("Module %s request\n", m);
+    TRACE("FindModule: Module %s request\n", m);
     if(list==NULL)
 	return NULL;
 //    while(strcmp(m, list->wm->filename))
@@ -104,16 +104,22 @@ static void MODULE_RemoveFromList(WINE_MODREF *mod)
 WINE_MODREF *MODULE32_LookupHMODULE(HMODULE m)
 {
     modref_list* list=local_wm;
-    TRACE("Module %X request\n", m);
+    TRACE("LookupHMODULE: Module %X request\n", m);
     if(list==NULL)
+    {
+	TRACE("LookupHMODULE failed\n");
 	return NULL;
+    }
     while(m!=list->wm->module)
     {
 //      printf("Checking list %X wm %X module %X\n",
 //	list, list->wm, list->wm->module);
 	list=list->prev;
 	if(list==NULL)
+	{
+	    TRACE("LookupHMODULE failed\n");
 	    return NULL;
+	}
     }
     TRACE("LookupHMODULE hit %p\n", list->wm);
     return list->wm;
