@@ -598,6 +598,50 @@ static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsign
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
+static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
+{
+	XVisualInfo template, *vi_list;
+	int vi_num, i, best_i, best_weight;
+	
+	template.screen = scr;
+	vi_list = XGetVisualInfo(dpy, VisualScreenMask, &template, &vi_num);
+	if (!vi_list) return -1;
+	best_weight = 1000000;
+	for (i = 0; i < vi_num; i++) {
+		int val, res, w = 0;
+		/* of course, the visual must support OpenGL rendering... */
+		res = glXGetConfig(dpy, vi_list + i, GLX_USE_GL, &val);
+		if (res || val == False) continue;
+		/* also it must be doublebuffered ... */
+		res = glXGetConfig(dpy, vi_list + i, GLX_DOUBLEBUFFER, &val);
+		if (res || val == False) continue;
+		/* furthermore it must be RGBA (not color indexed) ... */
+		res = glXGetConfig(dpy, vi_list + i, GLX_RGBA, &val);
+		if (res || val == False) continue;
+		/* prefer less depth buffer size, */
+		res = glXGetConfig(dpy, vi_list + i, GLX_DEPTH_SIZE, &val);
+		if (res) continue;
+		w += val*2;
+		/* stencil buffer size */
+		res = glXGetConfig(dpy, vi_list + i, GLX_STENCIL_SIZE, &val);
+		if (res) continue;
+		w += val*2;
+		/* and colorbuffer alpha size */
+		res = glXGetConfig(dpy, vi_list + i, GLX_ALPHA_SIZE, &val);
+		if (res) continue;
+		w += val;
+		/* and finally, prefer DirectColor-ed visuals to allow color corrections */
+		if (vi_list[i].class != DirectColor) w += 100;
+		if (w < best_weight) {
+			best_weight = w;
+			best_i = i;
+		}
+	}
+	if (best_weight < 1000000) *res_vi = vi_list[best_i];
+	XFree(vi_list);
+	return (best_weight < 1000000) ? 0 : -1;
+}
+
 /* connect to server, create and map window,
  * allocate colors and (shared) memory
  */
@@ -609,7 +653,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	char *hello = (title == NULL) ? "OpenGL rulez" : title;
 //	char *name = ":0.0";
 	XSizeHints hint;
-	XVisualInfo *vinfo;
+	XVisualInfo *vinfo, vinfo_buf;
 	XEvent xev;
 
 //	XGCValues xgcv;
@@ -655,7 +699,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 //	XGetWindowAttributes(mDisplay, DefaultRootWindow(mDisplay), &attribs);
 
 //	XMatchVisualInfo(mDisplay, screen, depth, TrueColor, &vinfo);
-  vinfo=glXChooseVisual( mDisplay,mScreen,wsGLXAttrib );
+  vinfo = choose_glx_visual(mDisplay,mScreen,&vinfo_buf) < 0 ? NULL : &vinfo_buf;
   if (vinfo == NULL)
   {
     printf("[gl2] no GLX support present\n");
@@ -664,7 +708,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	xswa.background_pixel = 0;
 	xswa.border_pixel     = 1;
-	xswa.colormap         = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone);
+	xswa.colormap         = vo_x11_create_colormap(vinfo);
 	xswamask = CWBackPixel | CWBorderPixel | CWColormap;
 
   if ( vo_window == None ) 
@@ -1115,6 +1159,26 @@ static uint32_t control(uint32_t request, void *data, ...)
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_SET_EQUALIZER:
+    {
+      va_list ap;
+      int value;
+    
+      va_start(ap, data);
+      value = va_arg(ap, int);
+      va_end(ap);
+      return vo_x11_set_equalizer(data, value);
+	}
+  case VOCTRL_GET_EQUALIZER:
+    {
+      va_list ap;
+      int *value;
+    
+      va_start(ap, data);
+      value = va_arg(ap, int *);
+      va_end(ap);
+      return vo_x11_get_equalizer(data, value);
+    }
   }
   return VO_NOTIMPL;
 }

@@ -36,6 +36,9 @@ extern int vo_x11_check_events(Display *mydisplay);
 extern void vo_x11_selectinput_witherr(Display *display, Window w, long event_mask);
 extern void vo_x11_fullscreen( void );
 extern void vo_x11_uninit();
+extern Colormap vo_x11_create_colormap(XVisualInfo *vinfo);
+extern uint32_t vo_x11_set_equalizer(char *name, int value);
+extern uint32_t vo_x11_get_equalizer(char *name, int *value);
 
 #endif
 

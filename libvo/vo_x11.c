@@ -260,7 +260,8 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
    Visual *visual;
    depth = vo_find_depth_from_visuals(mDisplay, mScreen, &visual);
  }
- XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
+ if ( !XMatchVisualInfo( mDisplay,mScreen,depth,DirectColor,&vinfo ))
+   XMatchVisualInfo( mDisplay,mScreen,depth,TrueColor,&vinfo );
 
  /* set image size (which is indeed neither the input nor output size), 
     if zoom is on it will be changed during draw_slice anyway so we dont dupplicate the aspect code here 
@@ -292,7 +293,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     bg=WhitePixel( mDisplay,mScreen );
     fg=BlackPixel( mDisplay,mScreen );
 
-    theCmap=XCreateColormap( mDisplay,mRootWin,vinfo.visual,AllocNone );
+    theCmap=vo_x11_create_colormap(&vinfo);
 
     xswa.background_pixel=0;
     xswa.border_pixel=0;
@@ -633,6 +634,24 @@ static uint32_t control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_GET_IMAGE:
     return get_image(data);
+  case VOCTRL_SET_EQUALIZER:
+    {
+      va_list ap;
+      int value;
+      va_start(ap, data);
+      value = va_arg(ap, int);
+      va_end(ap);
+      return vo_x11_set_equalizer(data, value);
+	}
+  case VOCTRL_GET_EQUALIZER:
+    {
+      va_list ap;
+      int *value;
+      va_start(ap, data);
+      value = va_arg(ap, int *);
+      va_end(ap);
+      return vo_x11_get_equalizer(data, value);
+    }
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
     return VO_TRUE;

@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <inttypes.h>
 
 #include "config.h"
@@ -968,4 +969,136 @@ int vo_find_depth_from_visuals(Display *dpy, int screen, Visual **visual_return)
   }
   return bestvisual_depth;
 }
+
+
+static Colormap cmap = None;
+static XColor cols[256];
+static int cm_size, red_mask, green_mask, blue_mask;
+
+
+Colormap vo_x11_create_colormap(XVisualInfo *vinfo)
+{
+	unsigned k, r, g, b, ru, gu, bu, m, rv, gv, bv, rvu, gvu, bvu;
+
+	if (vinfo->class != DirectColor)
+	 return XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocNone);
+
+	/* can this function get called twice or more? */
+	if (cmap) return cmap;
+	cm_size = vinfo->colormap_size;
+	red_mask = vinfo->red_mask;
+	green_mask = vinfo->green_mask;
+	blue_mask = vinfo->blue_mask;
+	ru = (red_mask&(red_mask-1))^red_mask;
+	gu = (green_mask&(green_mask-1))^green_mask;
+	bu = (blue_mask&(blue_mask-1))^blue_mask;
+	rvu = 65536ull*ru/(red_mask + ru);
+	gvu = 65536ull*gu/(green_mask + gu);
+	bvu = 65536ull*bu/(blue_mask + bu);
+	r = g = b = 0;
+	rv = gv = bv = 0;
+	m = DoRed|DoGreen|DoBlue;
+	for (k = 0; k < cm_size; k++) {
+		int t;
+		cols[k].pixel = r|g|b;
+		cols[k].red = rv;
+		cols[k].green = gv;
+		cols[k].blue = bv;
+		cols[k].flags = m;
+		t = (r + ru) & red_mask; if (t < r) m &= ~DoRed; r = t;
+		t = (g + gu) & green_mask; if (t < g) m &= ~DoGreen; g = t;
+		t = (b + bu) & blue_mask; if (t < b) m &= ~DoBlue; b = t;
+		rv += rvu;
+		gv += gvu;
+		bv += bvu;
+	}
+	cmap = XCreateColormap(mDisplay, mRootWin, vinfo->visual, AllocAll);
+	XStoreColors(mDisplay, cmap, cols, cm_size);
+	return cmap;
+}
+
+/*
+ * Via colormaps/gamma ramps we can do gamma, brightness, contrast,
+ * hue and red/green/blue intensity, but we cannot do saturation.
+ * Currently only gamma, brightness and contrast are implemented.
+ * Is there sufficient interest for hue and/or red/green/blue intensity?
+ */
+/* these values have range [-100,100] and are initially 0 */
+static int vo_gamma = 0;
+static int vo_brightness = 0;
+static int vo_contrast = 0;
+
+
+uint32_t vo_x11_set_equalizer(char *name, int value)
+{
+	float gamma, brightness, contrast;
+	float rf, gf, bf;
+	int k;
+
+	/*
+	 * IMPLEMENTME: consider using XF86VidModeSetGammaRamp in the case
+	 * of TrueColor-ed window but be careful:
+	 * unlike the colormaps, which are private for the X client
+	 * who created them and thus automatically destroyed on client
+	 * disconnect, this gamma ramp is a system-wide (X-server-wide)
+	 * setting and _must_ be restored before the process exit.
+	 * Unforunately when the process crashes (or get killed
+	 * for some reason) it is impossible to restore the setting,
+	 * and such behaviour could be rather annoying for the users.
+	 */
+	if (cmap == None) return VO_NOTAVAIL;
+
+	if (!strcasecmp(name, "brightness")) vo_brightness = value;
+	else if (!strcasecmp(name, "contrast")) vo_contrast = value;
+	else if (!strcasecmp(name, "gamma")) vo_gamma = value;
+	else return VO_NOTIMPL;
+	
+	brightness = 0.01*vo_brightness;
+	contrast = tan(0.0095*(vo_contrast+100)*M_PI/4);
+	gamma = pow(2, -0.02*vo_gamma);
+
+	rf = (float)((red_mask & (red_mask - 1)) ^ red_mask)/red_mask;
+	gf = (float)((green_mask & (green_mask - 1)) ^ green_mask)/green_mask;
+	bf = (float)((blue_mask & (blue_mask - 1)) ^ blue_mask)/blue_mask;
+
+	/* now recalculate the colormap using the newly set value */
+	for (k = 0; k < cm_size; k++) {
+		float s;
+
+		s = pow(rf*k, gamma);
+		s = (s - 0.5)*contrast + 0.5;
+		s += brightness;
+		if (s < 0) s = 0;
+		if (s > 1) s = 1;
+		cols[k].red = (unsigned short)(s * 65535);
+
+		s = pow(gf*k, gamma);
+		s = (s - 0.5)*contrast + 0.5;
+		s += brightness;
+		if (s < 0) s = 0;
+		if (s > 1) s = 1;
+		cols[k].green = (unsigned short)(s * 65535);
+
+		s = pow(bf*k, gamma);
+		s = (s - 0.5)*contrast + 0.5;
+		s += brightness;
+		if (s < 0) s = 0;
+		if (s > 1) s = 1;
+		cols[k].blue = (unsigned short)(s * 65535);
+	}
+		
+	XStoreColors(mDisplay, cmap, cols, cm_size);
+	XFlush(mDisplay);
+	return VO_TRUE;
+}
+
+uint32_t vo_x11_get_equalizer(char *name, int *value)
+{
+	if (cmap == None) return VO_NOTAVAIL;
+	if (!strcasecmp(name, "brightness")) *value = vo_brightness;
+	else if (!strcasecmp(name, "contrast")) *value = vo_contrast;
+	else if (!strcasecmp(name, "gamma")) *value = vo_gamma;
+	else return VO_NOTIMPL;
+}
+
 
