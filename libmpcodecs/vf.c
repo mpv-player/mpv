@@ -72,7 +72,7 @@ static vf_info_t* filter_list[]={
 void vf_mpi_clear(mp_image_t* mpi,int x0,int y0,int w,int h){
     int y;
     if(mpi->flags&MP_IMGFLAG_PLANAR){
-	int div = (mpi->imgfmt == IMGFMT_YVU9) ? 2 : 1;
+	int div = (mpi->imgfmt == IMGFMT_YVU9 || mpi->imgfmt == IMGFMT_IF09) ? 2 : 1;
 	y0&=~1;h+=h&1;
 	if(x0==0 && w==mpi->width){
 	    // full width clear:
@@ -164,14 +164,19 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	if(vf->get_image) vf->get_image(vf,mpi);
 	
         if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
-          // non-direct and not yet allocaed image. allocate it!
-	  mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
+          // non-direct and not yet allocated image. allocate it!
+	  // IF09 - allocate space for 4. plane delta info - unused
+	  if (mpi->imgfmt == IMGFMT_IF09) 
+	     mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8+
+	    				(mpi->width>>2)*(mpi->height>>2));
+	  else
+	     mpi->planes[0]=memalign(64, mpi->bpp*mpi->width*(mpi->height+2)/8);
 	  if(mpi->flags&MP_IMGFLAG_PLANAR){
-	      // YV12/I420/YVU9. feel free to add other planar formats here...
+	      // YV12/I420/YVU9/IF09. feel free to add other planar formats here...
 	      if(!mpi->stride[0]) mpi->stride[0]=mpi->width;
 	      if (!mpi->stride[1])
 	      {
-	        if (mpi->imgfmt == IMGFMT_YVU9)
+	        if (mpi->imgfmt == IMGFMT_YVU9 || mpi->imgfmt == IMGFMT_IF09)
 		    mpi->stride[1]=mpi->stride[2]=mpi->width/4;
 	        else
 		    mpi->stride[1]=mpi->stride[2]=mpi->width/2;
@@ -183,7 +188,7 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 	      } else {
 	          // YV12,YVU9  (Y,V,U)
 	          mpi->planes[2]=mpi->planes[0]+mpi->width*mpi->height;
-		  if (mpi->imgfmt == IMGFMT_YVU9)
+		  if (mpi->imgfmt == IMGFMT_YVU9 || mpi->imgfmt == IMGFMT_IF09)
 		    mpi->planes[1]=mpi->planes[2]+(mpi->width>>2)*(mpi->height>>2);
 		  else
 	            mpi->planes[1]=mpi->planes[2]+(mpi->width>>1)*(mpi->height>>1);

@@ -64,7 +64,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 //===========================================================================//
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-    if (fmt == IMGFMT_YVU9)
+    if (fmt == IMGFMT_YVU9 || fmt == IMGFMT_IF09)
 	return vf_next_query_format(vf,IMGFMT_YV12) & (~VFCAP_CSP_SUPPORTED_BY_HW);
     return 0;
 }
