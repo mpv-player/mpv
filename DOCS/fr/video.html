@@ -1034,11 +1034,11 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
   être obtenu en utilisant une commande comme celle-ci:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc votrefichier.ext
-  mplayer -ao mpegpes -vo mpegpes -vop fame,expand votrefichier.ext
+  mplayer -ao mpegpes -vo mpegpes votrefichier.ext
+  mplayer -ao mpegpes -vo mpegpes -vop expand votrefichier.ext
 </PRE>
 
-<P>Notez que les cartes DVB ne supportent que les tailles 288 par 576 pour le PAL 
+<P>Notez que les cartes DVB ne supportent que les tailles 288 par 576 pour le PAL
   ou 240 par 480 pour le NTSC. Vous <B>devez</B> redimensionner vers d'autres 
   tailles en ajoutant <CODE>scale=width:height</CODE> avec la largeur et la hauteur
   que vous voulez à l'option <CODE>-vop</CODE>. Les cartes DVB acceptent des 
@@ -1047,7 +1047,7 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
   horizontalement dans la plupart des cas. Pour un Divx en 512x384 (aspect 4:3) essayez:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
+  mplayer -ao mpegpes -vo mpegpes -vop scale=512:576
 </PRE>
 
 <P>Si vous avez un film plein-écran et que vous ne voulez pas l'afficher
@@ -1055,20 +1055,20 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
   pour ajouter des bandes noires. Pour voir un Divx en 640x384, essayez:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 fichier.avi
+  mplayer -ao mpegpes -vo mpegpes -vop expand=640:576 fichier.avi
 </PRE>
 
 <P>Si votre CPU est trop lent pour un DivX en taille complète 720x576,
   essayez de diminuer la taille:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 fichier.avi
+  mplayer -ao mpegpes -vo mpegpes -vop scale=352:576 fichier.avi
 </PRE>
 
 <P>Si la vitesse ne s'améliore pas, essayez également la diminution verticale:</P>
 
 <PRE>
-  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 fichier.avi
+  mplayer -ao mpegpes -vo mpegpes -vop scale=352:288 fichier.avi
 </PRE>
 
 <P>Pour l'OSD et les sous-titres utilisez la fonction expand du plugin OSD.
@@ -1088,8 +1088,8 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
   original), utilisez le nouveau plugin dvbscale:w/P>
 
 <PRE>
-pour une TV 3:4:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+pour une TV 3:4:  -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+pour une TV 16:9: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 </PRE>
 
 <H4>FUTUR</H4>
@@ -1107,7 +1107,31 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <H4><A NAME="dxr2">2.3.1.3.2 DXR2</A></H4>
 
-<P>AFAIRE: que quelqu'un remplisse cette section avec des infos SVP.</P>
+<P>MPlayer supporte l'affichage accéléré avec la carte Creative DXR2.</P>
+
+<P>Tout d'abord vous devrez avoir les pilotes correctement installés.
+  Vous pouvez trouver les pilotes et les instructions d'installation sur le
+  site <A HREF="http://dxr2.sourceforge.net/">DXR2 Resource Center</A>.</P>
+
+<H4>UTILISATION</H4>
+<DL>
+  <DT><CODE>-vo dxr2</CODE></DT>
+  <DD>enable TV output</DD>
+  <DT><CODE>-vo dxr2:x11</CODE> ou <CODE>-vo dxr2:xv</CODE></DT>
+  <DD>active la sortie Overlay sous X11</DD>
+  <DT><CODE>-dxr2 &lt;option1:option2:...&gt;</CODE></DT>
+  <DD>Cette option est utilisée pour contrôler le pilote DXR2.</DD>
+</DL>
+
+<P>Le chipset overlay utilisé sur la DXR2 est d'assez mauvaise qualité mais
+  les paramètres par défaut devraient suffire pour tout le monde. L'OSD peut être
+  utilisable avec l'overlay (pas sur une télé) en la dessinant avec une couleur-clé.
+  Avec les paramètres de couleur-clé par défaut vous obtiendrez des résultats variables,
+  généralement vous vérez la couleur-clé autour des personnages et autres effets amusants.
+  Mais si vous ajustez correctement les paramètres de couleur-clé vous devriez pouvoir
+  obtenir des résultats acceptables.</P>
+
+<P>Veuillez lire la page de man pour les options disponibles.</P>
 
 
 <H4><A NAME="dxr3">2.3.1.3.3 DXR3/Hollywood+</A></H4>
@@ -1182,7 +1206,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     pas avec la sortie audio numérique (<CODE>-ac hwac3</CODE>).</DD>
 
   <DT><CODE>-vop lavc/fame</CODE></DT>
-  <DD>Pour voir du contenu non-MPEG sur l'em8300 (c-a-d DivX ou RealVideo),
+  <DD><B>(AUTO-INSERTED)</B> Pour voir du contenu non-MPEG sur l'em8300 (c-a-d DivX ou RealVideo),
     vous devrez spécifier un filtre vidéo MPEG1 tel que libavcodec (lavc) ou
     libfame (fame). Pour le moment lavc est à la fois plus rapide et donne une
     meilleur qualité, il est recommandé de l'utiliser à moins que vous ayez des
@@ -1197,7 +1221,7 @@ pour une TV 16:9: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     pas la raison. Si vous le réglez quelque part entre 25 et 27 l'image devient
     stable. Pour l'instant tous ce que nous pouvons faire est de l'accepter.</DD>
 
-  <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
+  <DT><CODE>-vop expand=-1:-1:-1:-1:1</CODE></DT>
   <DD>Bien que le pilote DXR3 puisse placer quelques OSD sur de la vidéo
     MPEG1/2/4, il est de bien plus basse qualité que l'OSD traditionnel de MPlayer,
     et de plus possède de nombreux problèmes de rafraîchissement. La ligne
