@@ -1,7 +1,41 @@
 
 mplayer (0.90)
 
-  pre10:
+  pre11:  "CodecCounter"
+
+    Codecs:
+    * New codec pack download page (there are several packs for various IFs)
+    * Win32/Quicktime codec plugin DLL support -> SVQ3 + QDMC/QDM2/Qclp !!!
+    * Win32/DMO codec DLL interface support -> Windows Media Audio/Video 9 !!!
+    * MJPEG 2000 support (using Morgan & Imagepower VfW DLLs)
+    * libavcodec: optimized HuffYUV en/decoder, with experimental YV12 support
+    * libavcodec: mjpeg-b support (need more samples)
+    * more xvidencopts
+    * VorbisGain tag support, tremor (fast vorbis decoder lib) support
+    * BIG libavcodec messups & codmetics & cleanups & API changes & fixes
+    * dynamic plugin support for libmpcodecs (for future binary codec releases)
+
+    Gui:
+    * general code cleanup, more robust gtk code
+    * preferences: Screensaver, Autosync settings
+    * cache=4 fixed (caused jerky/lagging/slow playback with gmplayer)
+
+    Others:
+    * new config/cmdline parser code (optional)
+    * OSD menu system (preferences, shell, file selector etc)
+    * libaf: runtime cpudetection, volume, equalizer, better format conversion
+    * subtitle overlapping can be disabled, added subtitle sorting
+    * subtitle dump to JACOsub and SAMI formats
+    * displays URLs from 'Reference Media' type .mov files, dump generic data
+    * get position/length function in demuxers - for slavemode & -indentify
+    * -ao alsa9 surround fixes, 8-bit PCM fixed
+    * -vo dfbmga: -dr support, fixed OSD flickering
+    * -stop-xscreensaver fixed, support for KDE screensaver too
+    * More compiler warning fixes
+    * Altivec (G4) support
+    * Docs updates (both english & hungarian)
+
+  pre10:  "BirthdayCounter"
     Docs:
     * dvd auth, vcd sections extended (DOCS/cd-dvd.html)
     * unified *BSD sections, extended cygwin
