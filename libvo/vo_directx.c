@@ -290,6 +290,7 @@ static uint32_t Directx_CreateBackpuffer()
 static void uninit(void)
 {
 	if (g_lpddclipper != NULL) g_lpddclipper->lpVtbl->Release(g_lpddclipper);
+	g_lpddclipper = NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>clipper released\n");
 	if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
 	g_lpddsBack = NULL;
