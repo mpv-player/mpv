@@ -66,6 +66,7 @@ openbsd() { issystem "OpenBSD" ; return "$?" ; }
 bsd()     { freebsd || netbsd || bsdos || openbsd ; return "$?" ; }
 qnx()     { issystem "QNX"     ; return "$?" ; }
 darwin()  { issystem "Darwin"  ; return "$?" ; }
+gnu()     { issystem "GNU"     ; return "$?" ; }
 
 # arch test boolean functions
 # x86/x86pc is used by QNX
@@ -317,7 +318,7 @@ if test -z "$_target" ; then
   # OS name
   system_name=`( uname -s ) 2>&1`
   case "$system_name" in
-  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin)
+  Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU)
     ;;
   IRIX*)
     system_name=IRIX
@@ -350,7 +351,7 @@ if test -z "$_target" ; then
 
       # x86/x86pc is used by QNX
       case "`( uname -m ) 2>&1`" in
-      i[3-9]86|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686) host_arch=i386 ;;
+      i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
       x86_64) host_arch=x86_64 ;;
       ppc) host_arch=ppc ;;
