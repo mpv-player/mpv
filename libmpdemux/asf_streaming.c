@@ -209,15 +209,16 @@ asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
       pos += sizeof(objh);
       memcpy(&fileh,buffer + pos,sizeof(fileh));
       le2me_ASF_file_header_t(&fileh);
+/*
       if(fileh.packetsize != fileh.packetsize2) {
 	printf("Error packetsize check don't match\n");
 	return -1;
       }
-      asf_ctrl->packet_size = fileh.packetsize;
-      // FIXME: preroll contains the amount of time to bufferize
-      // before playing. To be able to do that we need to
-      // read the timestamp of the first data packet and bufferize.
-      streaming_ctrl->prebuffer_size = fileh.preroll;
+*/
+      asf_ctrl->packet_size = fileh.max_packet_size;
+      // before playing. 
+      // preroll: time in ms to bufferize before playing
+      streaming_ctrl->prebuffer_size = (unsigned int)((double)((double)fileh.preroll/1000)*((double)fileh.max_bitrate/8));
       pos += sizeof(fileh);
       break;
     case 0xB7DC0791 : // stream header
@@ -655,9 +656,8 @@ asf_http_streaming_start( stream_t *stream ) {
 	} else {
 		stream->streaming_ctrl->streaming_read = asf_http_streaming_read;
 		stream->streaming_ctrl->streaming_seek = asf_http_streaming_seek;
+		stream->streaming_ctrl->buffering = 1;
 	}
-	stream->streaming_ctrl->prebuffer_size = 20000;
-	stream->streaming_ctrl->buffering = 1;
 	stream->streaming_ctrl->status = streaming_playing_e;
 
 	http_free( http_hdr );

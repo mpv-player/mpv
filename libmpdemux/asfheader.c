@@ -200,8 +200,9 @@ while(!stream_eof(demuxer->stream)){
     case ASF_GUID_PREFIX_file_header: // guid_file_header
       stream_read(demuxer->stream,(char*) &fileh,sizeof(fileh));
       le2me_ASF_file_header_t(&fileh);
-      mp_msg(MSGT_HEADER,MSGL_V,"ASF: packets: %d  flags: %d  pack_size: %d  frame_size: %d\n",(int)fileh.packets,(int)fileh.flags,(int)fileh.packetsize,(int)fileh.frame_size);
-      asf_packetsize=fileh.packetsize;
+      //mp_msg(MSGT_HEADER,MSGL_V,"ASF: packets: %d  flags: %d  pack_size: %d  frame_size: %d\n",(int)fileh.packets,(int)fileh.flags,(int)fileh.packetsize,(int)fileh.frame_size);
+      mp_msg(MSGT_HEADER,MSGL_V,"ASF: packets: %d  flags: %d  max_packet_size: %d  min_packet_size: %d  max_bitrate: %d  preroll: %d\n",(int)fileh.num_packets,(int)fileh.flags,(int)fileh.min_packet_size,(int)fileh.max_packet_size,(int)fileh.max_bitrate,(int)fileh.preroll);
+      asf_packetsize=fileh.max_packet_size;
       asf_packet=malloc(asf_packetsize); // !!!
       break;
     case ASF_GUID_PREFIX_data_chunk: // guid_data_chunk

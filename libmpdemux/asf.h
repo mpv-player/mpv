@@ -48,6 +48,7 @@ typedef struct __attribute__((packed)) {
 /////////////////////
 // ASF File Header 
 /////////////////////
+/* Bertrand -- 2002/01/19 -- Start --
 typedef struct __attribute__((packed)) {
   uint8_t client[16]; // Client GUID
   uint64_t file_size;
@@ -62,6 +63,21 @@ typedef struct __attribute__((packed)) {
   uint32_t packetsize2; //Size of packet ( confirm ) UINT32 4
   uint32_t frame_size; //Size of uncompressed video frame UINT32 4
 } ASF_file_header_t;
+*/
+typedef struct __attribute__((packed)) {
+  uint8_t stream_id[16]; // stream GUID
+  uint64_t file_size;
+  uint64_t creation_time; //File creation time FILETIME 8
+  uint64_t num_packets;    //Number of packets UINT64 8
+  uint64_t play_duration; //Timestamp of the end position UINT64 8
+  uint64_t send_duration;  //Duration of the playback UINT64 8
+  uint64_t preroll; //Time to bufferize before playing UINT32 4
+  uint32_t flags; //Unknown, maybe flags ( usually contains 2 ) UINT32 4
+  uint32_t min_packet_size; //Min size of the packet, in bytes UINT32 4
+  uint32_t max_packet_size; //Max size of the packet  UINT32 4
+  uint32_t max_bitrate; //Maximum bitrate of the media (sum of all the stream)
+} ASF_file_header_t;
+// Bertrand -- 2002/01/19 -- End --
 
 ///////////////////////
 // ASF Stream Header
@@ -138,6 +154,7 @@ typedef enum {
     (h)->stream_no = le2me_16((h)->stream_no);				\
     (h)->unk2 = le2me_32((h)->unk2);					\
 }
+/* Bertrand -- 2002/01/19 -- Start --
 #define le2me_ASF_file_header_t(h) {					\
     (h)->file_size = le2me_64((h)->file_size);				\
     (h)->creat_time = le2me_64((h)->creat_time);			\
@@ -151,6 +168,20 @@ typedef enum {
     (h)->packetsize2 = le2me_32((h)->packetsize2);			\
     (h)->frame_size = le2me_32((h)->frame_size);			\
 }
+*/
+#define le2me_ASF_file_header_t(h) {					\
+    (h)->file_size = le2me_64((h)->file_size);				\
+    (h)->creation_time = le2me_64((h)->creation_time);			\
+    (h)->num_packets = le2me_64((h)->num_packets);			\
+    (h)->play_duration = le2me_64((h)->play_duration);			\
+    (h)->send_duration = le2me_64((h)->send_duration);			\
+    (h)->preroll = le2me_64((h)->preroll);				\
+    (h)->flags = le2me_32((h)->flags);					\
+    (h)->min_packet_size = le2me_32((h)->min_packet_size);		\
+    (h)->max_packet_size = le2me_32((h)->max_packet_size);		\
+    (h)->max_bitrate = le2me_32((h)->max_bitrate);			\
+}
+// Bertrand -- 2002/01/19 -- End --
 #define le2me_ASF_content_description_t(h) {				\
     (h)->title_size = le2me_16((h)->title_size);			\
     (h)->author_size = le2me_16((h)->author_size);			\
