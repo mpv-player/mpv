@@ -27,6 +27,9 @@
 
 static mp_mpeg_header_t picture;
 
+static int telecine=0;
+static float telecine_cnt=-2.5;
+
 int video_read_properties(sh_video_t *sh_video){
 demux_stream_t *d_video=sh_video->ds;
 
@@ -92,6 +95,7 @@ switch(d_video->demuxer->file_format){
 //mpeg_header_parser:
    // Find sequence_header first:
    videobuf_len=0; videobuf_code_len=0;
+   telecine=0; telecine_cnt=-2.5;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for sequence header... ");fflush(stdout);
    while(1){
       int i=sync_video_packet(d_video);
@@ -282,7 +286,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 #if 1
     // get mpeg fps:
     //newfps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
-    if((int)(sh_video->fps*10000+0.5)!=picture.fps) if(!force_fps){
+    if((int)(sh_video->fps*10000+0.5)!=picture.fps) if(!force_fps && !telecine){
             mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,picture.fps*0.0001,sh_video->fps-picture.fps*0.0001,picture.frame_rate_code);
             sh_video->fps=picture.fps*0.0001;
             sh_video->frametime=10000.0f/(float)picture.fps;
@@ -293,6 +297,24 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     frame_time=(picture.display_time)*0.01f;
     picture.display_time=100;
     videobuf_len=0;
+
+    telecine_cnt*=0.9; // drift out error
+    telecine_cnt+=frame_time-5.0/4.0;
+//    printf("\r telecine = %5.3f     \n",telecine_cnt);
+    
+    if(telecine){
+	frame_time=1;
+	if(telecine_cnt<-1.5 || telecine_cnt>1.5){
+	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_LeaveTelecineMode);
+	    telecine=0;
+	}
+    } else
+	if(telecine_cnt>-0.5 && telecine_cnt<0.5 && !force_fps){
+	    sh_video->fps=sh_video->fps*4/5;
+	    sh_video->frametime=sh_video->frametime*5/4;
+	    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_EnterTelecineMode,sh_video->fps);
+	    telecine=1;
+	}
 
   } else {
       // frame-based file formats: (AVI,ASF,MOV)
