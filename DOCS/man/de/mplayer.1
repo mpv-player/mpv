@@ -203,82 +203,78 @@ oder Fernbedieung (funktionierende LIRC-Unterstützung vorausgesetzt).
 .br
 Die Standardkonfigurations-Datei für diese Steuerung ist ~/.mplayer/\:input.conf,
 mit der \-input-Option kann man aber auch eine andere Datei angeben.
-.br
-Die folgenden Tasten/Funktionen funktionieren eventuell nicht, nicht jeder 
-Videoausgabetreiber unterstützt alle Funktionen.
 .TP
 .B Allgemeine Kontrolle
 .PD 0
 .RSs
 .IPs "<\- und \->"
-springe 10 Sekunden zurück/\:vor
+Springe 10 Sekunden zurück/\:vor.
 .IPs "HOCH and RUNTER"
-springe 1 Minute zurück/\:vor
+Springe 1 Minute zurück/\:vor.
 .IPs "BildHoch und BildRunter (bzw. PGUP/PGDOWN)"
-springe 10 Minuten zurück/\:vor
+Springe 10 Minuten zurück/\:vor.
 .IPs "< und >"
 zurück\:vor in der Playlist
-.IPs "HOME und END"
-spiele den nächsten/\:vorigen Eintrag des Wiedergabebaums der aktuellen Liste
+.IPs "Pos1 und Ende"
+nächster/\:voriger Eintrag des Wiedergabebaums der aktuellen Liste
 .IPs "INS und DEL"
-wähle die nächste/\:vorige alternative Quelle (nur bei ASX-Playlists)
+nächste/\:vorige alternative Quelle (nur bei ASX-Playlists)
 .IPs "p / LEERTASTE"
-Wiedergabe pausieren (jede Taste unterbricht die Pause)
+Wiedergabe pausieren (jede Taste unterbricht die Pause).
 .IPs "q / ESC"
-beendet die Wiedergabe und MPlayer
+Beendet die Wiedergabe und MPlayer.
 .IPs "+ und -"
-passt die Audioverzögerung um +/\:- 0.1 Sekunde an
+Passt die Audioverzögerung um +/\:- 0.1 Sekunde an.
 .IPs "/ und *"
-Lautstärke verringern/\:erhöhen
+Erhöht/\:verringert die Lautstärke.
 .IPs "9 und 0"
-Lautstärke verringern/\:erhöhen
+Erhöht/\:verringert die Lautstärke.
 .IPs m\ \ \ \ 
-ändert Ton-Stummschaltung (ein/aus)
+Ändert Ton-Stummschaltung (ein/\:aus).
 .IPs f\ \ \ \ 
-ändert Vollbild-Wiedergabe (ein/aus)
+Ändert Vollbild-Wiedergabe (ein/\:aus).
 .IPs T\ \ \ \ 
-ändert Stay-on-top-Eigenschaft (ein/aus); 
-unterstützt von X11-Treibern (außer SDL) sowie von directx and gl2 unter Windows.
+Ändert Stay-on-top-Eigenschaft (ein/\:aus).
 .IPs "w und e"
-verringern/\:erhöhen der Panscan - Weite
+Verringert/\:erhöht den Panscan-Bereich.
 .IPs o\ \ \ \ 
-wechselt zwischen OSD-Anzeigen: keine / Suche / Suche+Zeit /
-Suche+Zeit+Gesamtzeit
+Wechselt zwischen OSD-Anzeigen: keine / Suche / Suche+Zeit /
+Suche+Zeit+Gesamtzeit.
 .IPs d\ \ \ \ 
-wechselt zwischen verschiedenen Framedropping-Einstellungen:  keine /
+Wechselt zwischen verschiedenen Framedropping-Einstellungen:  keine /
 überspringe
-Display / überspringe Dekodierung (siehe \-framedrop und \-hardframedrop)
+Display / überspringe Dekodierung (siehe \-framedrop und \-hardframedrop).
 .IPs v\ \ \ \ 
-ändert Sichtbarkeit der Untertitel (aus/ein)
-.IPs j\ \ \ \ 
-wechselt Untertitel-Sprache
+Ändert Sichtbarkeit der Untertitel (aus/\:ein).
+.IPs "b / j"
+Wechselt durch die verfügbaren Untertitel.
 .IP F\ \ \ \ 
-ändert die Anzeige der "erzwungenen Untertitel"
+Ändert die Anzeige der "erzwungenen Untertitel".
 .IPs a\ \ \ \ 
-ändert Positionierung der Untertitel: oben/mitte/unten
+Ändert die Positionierung der Untertitel: oben/\:mitte/\:unten.
 .IPs "z und x"
-passt die Untertitel-Anzeige um +/\:- 0.1 Sekunde an
+Passt die Untertitel-Anzeige um +/\:- 0.1 Sekunde an.
 .IPs "r und t"
-passt die Untertitel-Position an
+Bewegt die Untertitel nach oben/\:unten.
 .IPs i\ \ \ \ 
-setze EDL-Markierung
+Setze EDL-Markierung.
 .RE
 .PD 1
 .PP
 (Die folgenden Eingaben funktionieren nur in Verbindung mit hardware-beschleunigter
-Videoausgabe (xv, (x)vidix, (x)mga, etc), oder dem Software Equalizer-Filter
-(\-vf eq or \-vf eq2).
+Videoausgabe (xv, (x)vidix, (x)mga, etc) oder dem Software Equalizer-Filter
+(\-vf eq oder \-vf eq2).
 .PP
 .PD 0
 .RSs
 .IPs "1 und 2"
-passe Kontrast an
+Passe Kontrast an.
 .IPs "3 und 4"
-passe Helligkeit an
+Passe Helligkeit an.
 .IPs "5 und 6"
-passe Farbton an
+Passe Farbton an.
 .IPs "7 und 8"
-passe Sättigung an
+Passe Sättigung an.
 .RE
 .PD 1
 .
@@ -287,15 +283,15 @@ passe Sättigung an
 .PD 0
 .RSs
 .IPs ENTER
-startet Wiedergabe
+Startet Wiedergabe.
 .IPs s\ \ \ \ 
-beendet Wiedergabe
+Beendet Wiedergabe.
 .IPs l\ \ \ \ 
-Datei laden
+Datei laden.
 .IPs c\ \ \ \ 
-Skinbrowser
+Skinbrowser.
 .IPs p\ \ \ \ 
-Anzeige der Playlist an/aus
+Anzeige der Playlist an/\:aus.
 .RE
 .PD 1
 .
@@ -304,11 +300,11 @@ Anzeige der Playlist an/aus
 .PD 0
 .RSs
 .IPs "h und k"
-wählt vorigen/\:nächsten Kanal
+Wählt vorigen/\:nächsten Kanal.
 .IPs n\ \ \ \ 
-ändert Norm (PAL/NTSC)
+Ändert Norm (PAL/\:NTSC).
 .IPs u\ \ \ \ 
-ändert die Anzeige der Liste der Kanäle
+Ändert die Anzeige der Liste der Kanäle.
 .RE
 .PD 1
 .
@@ -340,24 +336,17 @@ mit \'no' oder '0'.
 Selbst Unteroptionen können in dieser Art angegeben werden.
 .PP
 .I BEISPIEL:
-.br
+.nf
 # Benutze standardmäßig den Matrox-Treiber
-.br
 vo=xmga
-.br
 # Ich stehe darauf, beim Zusehen einen Handstand zu machen.
-.br
 flip=yes
-.br
 # Decodiere/\:encodiere mehrere Dateien im PNG-Format,
-.br
-# beginne mit mf://Dateimaske
-.br
+# beginne mit mf://Dateimaske.
 mf=type=png:fps=25
-.br
 # Unheimliche Negativbilder sind cool.
-.br
 vf=eq2=1.0:-0.8
+.fi
 .PP
 Du kannst auch dateispezifische Konfigurationsdateien schreiben. Wenn du
 für einen Film namens 'movie.avi' eine Konfigurationsdatei schreiben möchtest,
@@ -450,19 +439,20 @@ Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev,
 svga, vesa, winvidix, xmga, xvidix und xover.
 .TP
 .B \-edl <Dateiname> (nur bei EDL)
-Aktiviert EDL\-Aktionen (Edit Decision List) während der Wiedergabe.
-Teile des Videos werden übersprungen und Teile des Audios stummgeschaltet.
-Dazu wird die angegebene Datei ausgewertet. Lies
-DOCS/\:German/\:documentation.html#edl, dort stehen Details, wie du dieses
+Aktiviert EDL-Aktionen (Edit Decision List) während der Wiedergabe.
+Teile des Videos werden entsprechend den Einträgen der angegebenen
+Datei übersprungen und Teile des Audios stummgeschaltet.
+Siehe DOCS/\:de/\:documentation.html#edl, dort stehen Details, wie du dieses
 Feature benutzen kannst.
 .TP
 .B \-edlout <Dateiname> (nur bei EDL)
-Erstellt eine neue EDL\-Datei und schreibt EDL\-Markierungen in diese Datei.
+Erstellt eine neue EDL-Datei und schreibt EDL-Markierungen in diese Datei.
 Während der Wiedergabe kann der Benutzer 'i' drücken, und ein Eintrag,
 um an der aktuellen Position zwei Sekunden des Video zu überspringen, wird
-in die Datei geschrieben. Damit erhält der Benutzer eine Ausgangsbasis,
-die er auf seine Bedürfnisse anpassen kann. Lies
-DOCS/\:German/\:documentation.html#edl, dort stehen Details, wie du dieses
+in die Datei geschrieben.
+Damit erhält der Benutzer eine Ausgangsbasis, die er auf seine Bedürfnisse
+anpassen kann.
+Siehe DOCS/\:de/\:documentation.html#edl, dort stehen Details, wie du dieses
 Feature benutzen kannst.
 .TP
 .B \-enqueue (nur beim GUI)
@@ -490,9 +480,9 @@ Noch rabiateres Verwerfen von Frames (verhindert evtl. korrektes
 Decodieren). Führt zu Bildstörungen!
 .TP
 .B \-identify
-Zeit Dateiparameter in einem einfach einzulesenden Format an. Das
-Script TOOLS/midentify unterdrückt die anderen Ausgaben von MPlayer
-und führt (hoffentlich) Shellescaping für die Dateinamen aus.
+Zeigt Dateiparameter in einem einfach einzulesenden Format an.
+Das Script TOOLS/\:midentify unterdrückt die anderen Ausgaben von MPlayer
+und führt (hoffentlich) Shell-Escaping für die Dateinamen aus.
 .TP
 .B \-input <Kommandos>
 Diese Option kann benutzt werden, um bestimmte Teile von MPlayers
@@ -508,7 +498,7 @@ Die verfügbaren Kommandos lauten:
 .RSs
 .IPs conf=<Datei>
 Lies eine andere input.conf.
-Wenn kein Pfadname angegeben wird, dann wird ~/\:.mplayer/<Datei> angenommen.
+Wenn kein Pfadname angegeben wird, dann wird ~/\:.mplayer/\:<Datei> angenommen.
 .IPs ar\-delay
 Zeit in Millisekunden, bevor ein Tastendruck automatisch wiederholt
 wird (0 dekativiert dies).
@@ -552,7 +542,7 @@ Gibt das Hauptmenü an.
 .TP
 .B \-noconsolecontrols
 Standardinput (stdin) wird anstelle von Tastatureingaben verwendet.
-Wenn du /dev/stdin (oder das Äquivalent auf deinem System) öffnest, stdin in
+Wenn du /dev/\:stdin (oder das Äquivalent auf deinem System) öffnest, stdin in
 einer Playlist öffnest, oder vorhast, irgendwann später von stdin via loadfile
 oder loadlist Slave-Kommandos zu lesen, dann
 .B brauchst
@@ -566,7 +556,7 @@ Schaltet die Joystickunterstützung aus.
 Schaltet Unterstützung für LIRC aus.
 .TP
 .B \-nomouseinput (nur bei X11)
-Sperrt die Eingabe mittels Mausbuttons (Buttonpress/release), diese Option
+Sperrt die Eingabe mittels Mausbuttons (Buttonpress/\:-release), diese Option
 wird unter anderem von mozplayerxp verwendet, um ein eigenes Kontextmenü
 anzuzeigen.
 .TP
@@ -595,27 +585,28 @@ Spielt die Dateien in zufälliger Reihenfolge ab.
 .TP
 .B \-skin <Verzeichnisname> (nur beim GUI)
 Lädt eine Oberfläche (skin) aus dem Verzeichnis, das sich in einem der beiden
-Standardoberflächenverzeichnisse /usr/local/share/mplayer/Skin und/oder
-~/.mplayer/Skin befindet (nicht den ganzen Pfad angeben!).
-
+Standardoberflächenverzeichnisse /usr/\:local/\:share/\:mplayer/\:Skin/\: und
+~/.mplayer/\:Skin/.
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "\-skin fittyfene"
-Probiert zuerst /usr/local/share/mplayer/Skin/fittyfene und anschließend
-~/.mplayer/Skin/fittyfene.
+Probiert zuerst /usr/\:local/\:share/\:mplayer/\:Skin/\:fittyfene und
+anschließend
+~/.mplayer/\:Skin/\:fittyfene.
 .RE
 .PD 1
 .
 .TP
-.B \-slave (siehe auch -input)
+.B \-slave (siehe auch \-input)
 Diese Option aktiviert den Slave-Modus, der dazu gedacht ist, MPlayer von
 anderen Programmen aus zu steuern.
 Anstatt selber Tastatureingaben auszuwerten, liest MPlayer einfache
 Kommandos von stdin. 
 .br
 .I ANMERKUNG:
-Siehe DOCS/tech/slave.txt (Englisch) und \-input cmdlist für eine
+Siehe DOCS/\:tech/\:slave.txt (Englisch) und \-input cmdlist für eine
 Liste der Befehle.
 .TP
 .B \-softsleep
@@ -627,10 +618,11 @@ Der Preis dafür ist eine höhere CPU-Auslastung.
 Erhöht oder verringert die Abspielgeschwindigkeit abhängig vom angegebenen Faktor.
 .TP
 .B \-sstep <Sekunden>
-Zeigt einen Frame alle <Sekunden> Sekunden. Für Slideshows nützlich.
+Zeigt einen Frame alle <Sekunden> Sekunden.
+Für Slideshows nützlich.
 .
 .
-.SH "DEMUXER/STREAM-OPTIONEN"
+.SH "DEMUXER-/\:STREAM-OPTIONEN"
 .TP
 .B \-a52drc <Level>
 Gibt die Höhe der Dynamic Range Compression für den AC3 Audio Stream an.
@@ -645,7 +637,8 @@ Gibt die zu verwendende Audiospur an (MPEG: 0\-31 AVI/\:OGM: 1\-99
 ASF/\:RM: 0\-127 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS: 17\-8190).
 MPlayer gibt alle verwendbaren IDs aus, wenn er im Verbose-Modus (-v) gestartet
 wird.
-Beim Abspielen eines MPEG-TS-Streams wählt MPlayer/MEncoder das erste Programm
+Beim Abspielen eines MPEG-TS-Streams wählt MPlayer/\:MEncoder das erste
+Programm
 (falls vorhanden) mit der gewählten Audiospur.
 .TP
 .B \-alang <zweibuchstabiger Ländercode> (siehe auch \-aid) (nur bei DVD)
@@ -667,7 +660,7 @@ ungarische Audiospur vorhanden ist.
 .TP
 .B \-audio-demuxer <Nummer> (nur mit \-audiofile)
 Erzwingt den Audiodemuxertyp für \-audiofile.
-Alle in demuxers.h definierten Demuxer-IDs sind zulässig.
+Gib die Demuxer-ID an wie in libmpdemux/\:demuxer.h definiert.
 \-audio-demuxer 17 erzwingt das Abspielen als MP3.
 .TP
 .B \-audiofile <Dateiname>
@@ -789,9 +782,9 @@ Standardverzeichnissen ~/.mozilla/ und ~/.netscape/.
 Es wird angenommen, dass die Datei im Netscape-Format vorliegt.
 .TP
 .B \-demuxer <Nummer>
-Erzwingt einen bestimmten Audiodemuxertyp.
-Alle in demuxers.h definierten Demuxer-IDs sind zulässig.
-Benutze \-audio\-demuxer 17, um eine Datei als MP3 abzuspielen.
+Erzwingt den Demuxertyp.
+Gib die Demuxer-ID an wie in libmpdemux/\:demuxer.h definiert.
+\-demuxer 17 erzwingt das Abspielen als MP3.
 .TP
 .B \-dumpaudio (nur MPlayer)
 Schreibt den unbehandelten, komprimierten Audiostream nach ./\:stream.dump
@@ -819,8 +812,8 @@ die Standardeinstellungen:
 Benute Karte 1\-4 (Standard: 1).
 .IPs file=<Datei>
 Weist MPlayer an, die Liste der Kanäle aus <Datei> zu lesen (Standard:
-~/.mplayer/channels.conf.{sat,ter,cbl} (je nach Kartentyp)
-oder ~/.mplayer/channels.conf als letzte Möglichkeit).
+~/\:.mplayer/\:channels.conf.{sat,ter,cbl} (je nach Kartentyp)
+oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit).
 .RE
 .PD 1
 .
@@ -873,8 +866,8 @@ unterstützt (z.B.\& nicht bei Standardeingabe, Pipe usw.)
 Überspringt Proxy-Server bei IPv6-Adressen.
 Für IPv4-Verbindungen wird er aber benutzt.
 .TP
-.B \-mc <Sekunden/Bild>
-Maximale A-V-Sync-Anpassung pro Bild (in Sekunden).
+.B \-mc <Sekunden/\:Bild>
+Maximale A/\:V-Sync-Anpassung pro Bild (in Sekunden).
 .TP
 .B \-mf <option1:option2:...>
 Wird benutzt, wenn mehrere PNG- oder JPEG-Dateien decodiert werden.
@@ -978,7 +971,7 @@ Kann zusammen mit 'rtsp://'-URLs verwendet werden, um anzugeben, dass die
 daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP 
 übertragen werden (mit der gleichen TCP-Verbindung wie RTSP). 
 Diese Option kann hilfreich sein, wenn deine Internetverbindung eingehende
-UDP-Pakete nicht durchlässt (siehe http://www.live.com/mplayer/).
+UDP-Pakete nicht durchlässt (siehe http://www.live.com/\:mplayer/).
 .TP
 .B \-sb <Byte-Position> (siehe auch \-ss)
 Springt an die Byte-Position.
@@ -1160,14 +1153,15 @@ Benutze Zeichenkette als User-Agent beim HTTP-Streaming.
 .TP
 .B \-vid <id>
 Wählt die Videospur (MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190).
-Beim Abspielen von MPEG-TS-Streams benutzt MPlayer/MEncoder das erste Programm
+Beim Abspielen von MPEG-TS-Streams benutzt MPlayer/\:MEncoder das erste
+Programm
 (falls vorhanden) mit dem gewählten Video-Stream.
 .TP
 .B \-vivo <sub\-Optionen> (DEBUG\-CODE)
 Erzwingt Audioparameter für den VIVO-Demuxer (nur für Debugging-Zwecke).
 .
 .
-.SH "OSD\-/UNTERTITEL\-OPTIONEN"
+.SH "OSD-/\:UNTERTITEL-OPTIONEN"
 .I ANMERKUNG:
 Siehe auch \-vf expand.
 .TP
@@ -1290,14 +1284,13 @@ Zeigt die DVD-Untertitel an, die durch <ID> (0\-31) angegeben sind.
 Eine Liste der verfügbaren Untertitel erhältst du bei der Verwendung
 der Option \-v.
 .TP
-.B \-slang <zweibuchstabiger\ Ländercode> (siehe auch \-sid)
-Aktiviert/\:selektiert bei DVD-Wiedergabe die Sprache der Untertitel.
+.B \-slang <Ländercode[,Ländercode,...]> (siehe auch \-sid)
+Gibt eine Prioritätenliste von DVD-Untertiteln an, die benutzt werden
+sollen.
+Sprachen müssen als zweibuchstabige Ländercodes angegeben werden.
 Eine Liste der verfügbaren Untertitel erhältst du bei der Verwendung
 der Option \-v.
-.br
-Sonst gibt dies ein optionales Untertitel-Suffix an, das bei der Suche nach
-Untertiteln eine höhere Priorität bekommt.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
@@ -1309,7 +1302,7 @@ es keine ungarischen gibt.
 .
 .TP
 .B \-spuaa <Modus> (nur bei OSD)
-Antialiasingmodus/Skalierungmodus für DVD/\:VOBsub.
+Antialiasing-/\:Skalierungsmodus für DVD/\:VOBsub.
 Ein Wert von 16 kann zu <Modus> hinzuaddiert werden, um die Skalierung auch
 dann zu erzwingen, wenn das Orignalbild und das skalierte Bild bereits die
 gleiche Größe haben, um z.B.\& auch dann die Untertitel mit einem Gaußschen
@@ -1354,8 +1347,7 @@ Höhere Werte stehen für stärkere Weichzeichnung (Standard: 1.0).
 .TP
 .B \-sub <Untertiteldatei1, Untertiteldatei2,...>
 Diese Untertitel werden benutzt/\:angezeigt.
-Nur ein Untertitel kann zu einer Zeit angezeigt werden, zwischen
-verschiedenen Untertitel wird mit 'j' umgeschaltet.
+Nur ein Untertitel kann zu einer Zeit angezeigt werden.
 .TP
 .B \-sub-bg-alpha <0\-255>
 Gibt an, wie transparent der Alphakanal bei Untertiteln und dem OSD ist.
@@ -1563,7 +1555,7 @@ Audioverzögerung in Sekunden (positive oder negative Fließkommazahl).
 .TP
 .B \-format <0\-8192>
 Wählt das Ausgabeformat der Filterschicht.
-Die Formatnummer entspricht den in libao2/afmt.h definierten Werten.
+Die Formatnummer entspricht den in libao2/\:afmt.h definierten Werten.
 .
 .PD 0
 .RSs
@@ -1607,7 +1599,7 @@ Anschluß als die Standardeinstellung PCM.
 Optionen für OSS beinhalten
 .B vol, pcm, line.
 Für eine komplette Liste der Optionen suche nach SOUND_DEVICE_NAMES in der
-Datei /usr/include/linux/soundcard.h.
+Datei /usr/\:include/\:linux/\:soundcard.h.
 Bei ALSA kannst du die Namen benutzen, die beispielsweise alsamixer anzeigt,
 wie
 .B Master, Line, PCM.
@@ -1648,13 +1640,13 @@ viertes Gerät.
 .
 .sp 1
 FIXME: Unteroptionen für sdl, arts, esd, jack, nas, macosx, sgi, sun,
-win32, dxr2, mpegpes, null, pcm, plugin.
+dxr2, mpegpes, null, pcm, plugin.
 .sp 1
 Verfügbare Audioausgabetreiber sind folgende:
 .
 .TP
 .B alsa\ \ \ 
-ALSA 0.9/1.x Audioausgabetreiber.
+ALSA 0.9/\:1.x Audioausgabetreiber.
 .PD 0
 .RSs
 .IPs mmap\ \ \ 
@@ -1684,7 +1676,7 @@ OSS Audioausgabetreiber.
 .PD 0
 .RSs
 .IPs dsp-device
-Setzt das Audioausgabegerät (Standard: /dev/dsp).
+Setzt das Audioausgabegerät (Standard: /dev/\:dsp).
 .RE
 .PD 1
 .TP
@@ -1993,17 +1985,28 @@ Verfügbare Optionen sind:
 .PD 0
 .RSs
 .IPs [no]progressive
-Gibt Standard-JPEG oder progressives JPEG an.
+Gibt Standard-JPEG oder progressives JPEG an (Standard: noprogressive).
 .IPs [no]baseline
-Benutze eine/\:keine Baseline.
+Benutze eine/\:keine Baseline (Standard: baseline).
 .IPs optimize=<Wert>
-Optimierungswert <0\-100>
+Optimierungswert <0\-100> (Standard: 100)
 .IPs smooth=<Wert>
-Glättungsfaktor <0\-100>
+Glättungsfaktor <0\-100> (Standard: 0)
 .IPs quality=<Wert>
-Qualitätsfaktor <0\-100>
+Qualitätsfaktor <0\-100> (Standard: 75)
 .IPs outdir=<Wert>
-Verzeichnis, in dem die JPEG-Bilder gespeichert werden.
+Gib das Verzeichnis an, in das die JPEG-Bilder gespeichert werden.
+Falls nicht angegeben, werden alles JPEG-Dateien in das aktuelle Verzeichnis
+geschrieben.
+.IPs subdirs=<Wert>
+Falls angegeben, erstellt MPlayer nummerierte Unterverzeichnisse mit dem
+angegebenen Prefix.
+Falls nicht angegeben, werden alle JPEG-Dateien in das gleiche Verzeichnis
+geschrieben.
+.IPs maxfiles=<Wert>
+Maximale Anzahl an JPEG-Dateien, die pro Unterverzeichnis gespeichert werden,
+falls Unterverzeichnisse angegeben worden sind.
+Muß gleich oder größer 1 sein (Standard: 1000).
 .RE
 .PD 1
 .
@@ -2108,7 +2111,7 @@ das Video angezeigt werden soll.
 .TP
 .B \-z <0\-9>
 Gibt die Kompressionsstufe bei des png-Videoausgabetreibers an.
-0 steht für keine, 9 für maximale Kompression
+0 steht für keine, 9 für maximale Kompression.
 .TP
 .B \-zrbw (nur bei \-vo zr)
 Anzeige in schwarz/\:weiß.
@@ -2198,7 +2201,7 @@ Benutzt den directx-Treiber mit abgeschalteten Beschleunigungs-Features.
 .
 .sp 1
 FIXME: Dokumentiere die Unteroptionen für x11, xover, dga, sdl, vidix, xvidix,
-fbdev, fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx,
+fbdev, fbdev2, vesa, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx,
 tdfx_vid, tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm,
 png, tga.
 .sp 1
@@ -2344,6 +2347,27 @@ FIXME: dokumentiere dies
 .TP
 .B svga\ \ \ 
 Gib das Video über die SVGA-Bibliothek aus.
+.PD 0
+.RSs
+.IPs "<Videomodus>"
+Gib den zu benutzenden Videomodus an.
+Der Modus kann angegeben werden im Format <Breite>x<Höhe>x<Farben>, z.B.\&
+640x480x16M, oder per Grafikmodusnummer, z.B.\& 84.
+.IPs bbosd
+Zeigt das OSD in den schwarzen Rändern des Films an (langsamer).
+.IPs native
+Benutze nur native Darstellungsfunktionen.
+Dies verhindert direktes Rendern, OSD und Hardwarebeschleunigung.
+.IPs retrace
+Erzwingt Frame-Wechsel bei vertikalem Retrace.
+Nur benutzbar mit \-double.
+Dies hat denselben Effekt wie die \-vsync-Option.
+.IPs sq\ \ \
+Versucht, einen Videomodus mit Square-Pixeln zu wählen.
+.IPs vidix
+Benutze svga mit VIDIX.
+.RE
+.PD 1
 .TP
 .B gl\ \ \ \ \ 
 OpenGL-Videoausgabetreiber.
@@ -2410,7 +2434,7 @@ Wird den Layer mit der Id N für die Wiedergabe erzwingen (Standard: -1 - auto).
 .PD 1
 .TP
 .B dfbmga\ 
-Matrox G400/G450/G550-spezifische Videoausgabetreiber, die die
+Matrox G400/\:G450/\:G550-spezifische Videoausgabetreiber, die die
 DirectFB-Bibliothek benutzen.
 Ermöglicht CRTC2 (zweiter Bildschirm), stellt Videos unabhängig vom ersten
 Bildschirm dar.
@@ -2450,7 +2474,7 @@ zu Abreißeffekten oder unscharfen Bewegungen kommt.
 Setzt die TV-Norm der Matrox-Karte, ohne /etc/\:directfbrc ändern zu
 müssen (Standard: deaktiviert).
 Gültige Normen sind pal = PAL, ntsc = NTSC.
-Eine spezielle Norm ist auto (automatisches Anpassen zu PAL/NTSC), denn
+Eine spezielle Norm ist auto (automatisches Anpassen zu PAL/\:NTSC), denn
 die Norm wird bestimmt, indem die Framerate des Films betrachtet wird.
 .RE
 .PD 1
@@ -2511,9 +2535,9 @@ Gibt die TV-Norm an.
 .RSss
 0: Ändert die aktuelle Norm nicht (Standard).
 .br
-1: Automatische Anpassung mit PAL/NTSC.
+1: Automatische Anpassung mit PAL/\:NTSC.
 .br
-2: Automatische Anpassung mit PAL/PAL-60.
+2: Automatische Anpassung mit PAL/\:PAL-60.
 .br
 3: PAL
 .br
@@ -2557,8 +2581,11 @@ Erlaubt die Angabe des Ausgabe-Dateinamens (Standard: ./md5).
 .TP
 .B yuv4mpeg
 Wandelt den Videostream in eine Abfolge von unkomprimierten YUV 4:2:0-Bildern
-um speichert diese in einer Datei namens 'stream.yuv' im aktuellen Verzeichnis.
-Nützlich, wenn du das Video mit den mjpegtools-Tools bearbeiten möchtest.
+um und speichert diese in einer Datei namens 'stream.yuv' im aktuellen
+Verzeichnis.
+Das Format ist das gleiche, das von den mjpegtools benutzt wird, daher ist
+diese Option
+nützlich, wenn du das Video mit den mjpegtools bearbeiten möchtest.
 .TP
 .B gif89a\ 
 Gibt jeden Frame in eine GIF-Datei im aktuellen Verzeichnis aus.
@@ -2586,7 +2613,7 @@ Jede Datei bekommt die Frame-Nummer mit vorangestellt ergänzenden Nullen als
 Name.
 .
 .
-.SH "OPTIONEN FÜR DIE DECODIERUNG/DAS FILTERN"
+.SH "OPTIONEN FÜR DIE DECODIERUNG/\:DAS FILTERN"
 .TP
 .B \-ac <[-]Codec1,[-]Codec2,...[,]>
 Gib eine Prioritätsliste der zu verwendenden Audiocdoecs an.
@@ -2661,7 +2688,7 @@ sc: Aktiviert "soft clipping".
 .REss
 .IPs pan[=n:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...]
 Mischt Kanäle beliebig.
-Details findest du in DOCS/HTML/en/devices.html#audio-dev.
+Details findest du in DOCS/\:HTML/\:en/\:devices.html#audio-dev.
 .RSss
 n: Anzahl der Ausgabekanäle (1\-6).
 .br
@@ -2691,7 +2718,7 @@ Exportiert das Eingangssignal an andere Prozesse mittels Memory Mapping
 (mmap()).
 .RSss
 mmapped_Datei: Datei, zur der die Daten exportiert werden sollen
-(Standard: ~/.mplayer/mplayer-af_export).
+(Standard: ~/\:.mplayer/\:mplayer-af_export).
 .br
 nsamples: Anzahl der Samples pro Kanal (Standard: 512)
 .REss
@@ -4265,195 +4292,8 @@ Durchgängen.
 .IPs kfreduction=<0-\100>
 (Standardwert 30, nur im Modus mit zwei Durchgängen)
 .RE
-
-
-.\" --------------------------------------------------------------------------
-.\" Tastatursteuerung
-.\" --------------------------------------------------------------------------
 .
-.SH "TASTATURSTEUERUNG"
-.I ANMERKUNG:
-.br
-MPlayer verfügt über eine weitgehend konfigurierbare und ereignisgesteuerte
-Eingabeschicht, durch die MPlayer per Tastatur, Maus, Joystick oder
-Fernbedienung (mittels LIRC) gesteuert werden kann.
-.br
-Die Standardkonfigurationsdatei für das Steuerungssystem ist
-~/.mplayer/\:input.conf. Mit \-input kann aber auch eine andere Datei angegeben
-werden.
-.br
-Die Tasten sind wie folgt belegt (funktioniert abhängig vom Videoausgabetreiber
-mal, mal auch nicht):
-.TP
-.B allgemeine Steuerung
-.PD 0
-.RSs
-.IPs "<\- und \->"
-spule 10 Sekunden zurück/\:vor
-.IPs "<Cursor runter> und <Cursor hoch>"
-spule 1 Minute zurück/\:vor
-.IPs "<Bild runter> und <Bild hoch>"
-spule 10 Minuten zurück/\:vor
-.IPs "< und >"
-zurück/\:vorwärts in der Playliste
-.IPs "<Pos1> und <Ende>"
-gehe zum nächsten/\:vorherigen Playtree\-Eintrag in der übergeordneten Liste
-.IPs "<Einfg> und <Entf>"
-gehe zur nächsten/\:vorherigen alternativen Quelle (nur bei ASX-Playlisten)
-.IPs "p / <Leertaste>"
-Pause (beliebige Taste für's Beenden der Pause)
-.IPs "q / <Esc>C"
-beendet MPlayer
-.IPs "+ und \-"
-verändert die Audioverzögerung um +/\:\- 0.1 Sekunden
-.IPs "/ und *"
-verringert/\:erhöht die Lautstärke
-.IPs "9 und 0"
-verringert/\:erhöht die Lautstärke
-.IPs m\ \ \ \ 
-schaltet den Ton stumm
-.IPs f\ \ \ \ 
-wechselt zwischen Vollbild und Fenstermodus
-.IPs "w und e"
-verkleinert/\:vergrößert den Bereich für panscan
-.IPs o\ \ \ \ 
-schaltet durch die OSD-Modi kein OSD / nur Suchleisten / Suchleisten + Zeit
-.IPs d\ \ \ \ 
-schaltet Verwerfen von Bildern an/\:aus
-.IPs v\ \ \ \ 
-de\-/\:aktiviert die Anzeige von Untertiteln
-.IPs j\ \ \ \ 
-schaltet durch die vorhandenen Untertitelsprachen
-.IPs F\ \ \ \ 
-de\-/\:aktiviert "erzwungene Untertitel"
-.IPs a\ \ \ \ 
-wechselt die Ausrichtung der Untertitel: oben, mittig, unten
-.IPs "z und x"
-verändert die Untertitelverzögerung um +/\:\- 0.1 Sekunden
-.IPs "r und t"
-passt die Position der Untertitel an
-.IPs "i"
-setzt eine EDL\-Markierung
-
-.PP
-(Die folgenden Tasten sind nur bei \-vo xv, \-vo [vesa|fbdev]:vidix,
-\-vo xvidix, \-vo (x)mga oder bei \-vc divxds (langsam) gültig.)
-
-.IPs "1 und 2"
-Kontrastanpassung
-.IPs "3 und 4"
-Helligkeitsanpassung
-.IPs "5 und 6"
-Farbanpassung
-.IPs "7 und 8"
-Sättigungsanpassung
-.RE
-.PD 1
 .
-.TP
-.B Tastaturbelegung des GUIs
-.PD 0
-.RSs
-.IPs "ENTER"
-starte das Abspielen
-.IPs s\ \ \ \ 
-beende das Abspielen
-.IPs l\ \ \ \ 
-lädt eine Datei
-.IPs c\ \ \ \ 
-zeigt alle verfügbaren Skins an
-.IPs p\ \ \ \ 
-de\-/\:aktiviert die Playlist
-.RE
-.PD 1
-.
-.TP
-.B TV\-Kontrollen
-.PD 0
-.RSs
-.IPs "h und k"
-wählt den vorherigen/\:nächsten Kanal
-.IPs n\ \ \ \ 
-ändert den TV\-Standard
-.IPs u\ \ \ \ 
-ändert die Senderliste
-.RE
-.PD 1
-.
-.TP
-.B DVDNAV\-Kontrollen
-.PD 0
-.RSs
-.IPs "K,J,H,L"
-Bewegung nach oben/\:unten/\:links/\:rechts
-.IPs M\ \ \ \ 
-gehe zum Hauptmenü
-.IPs S\ \ \ \ 
-Auswahl
-.RE
-.PD 1
-
-
-.\" --------------------------------------------------------------------------
-.\" Slave-Modus-Protokoll
-.\" --------------------------------------------------------------------------
-.
-.SH "SLAVE\-MODUS\-PROTOKOLL"
-Wenn die Option \-slave angegeben wurde, dann wird die Wiedergabe durch
-ein zeilenbasiertes Protokoll geregelt.
-Jede Zeile muss genau ein Kommando enthalten.
-.TP
-.B Kommanods
-.RSs
-.IPs "seek <Wert> [Typ=<0/\:1/\:2>]"
-Spult an eine Stelle im Film.
-Typ 0 ist ein relatives Spulen um +/\:- <Wert. Sekunden.
-Typ 1 springt an <Wert> % des Films.
-Typ 2 ist eine absolute Position von <Wert> Sekunden.
-.IPs "audio_delay <Wert>"
-Passt die Audioverzögerung um <Wert> Sekunden an.
-.IPs quit
-beendet MPlayer
-.IPs pause
-pausiert die Wiedergabe bzw. setzt sie fort
-.IPs grap_frames
-Weiß das jemand?
-.IPs "pt_step <Wert> [force=<Wert>]"
-Springe zum nächsten/\:vorherigen Eintrag im Playtree.
-.IPs "pt_up_step <Wert> [force=<Wert>]"
-Wie pt_step, aber der Sprung erfolgt zum nächsten/\:vorherigen Eintrag
-in der übergeordneten Liste.
-.IPs "alt_src_step <Wert>"
-Wenn mehr als eine Quelle verfügbar ist, so wird hiermit die
-nächste/\:vorherige angewählt (nur bei ASX-Playlisten).
-.IPs "sub_delay <Wert> [abs=<Wert>]"
-Ändert die Verzögerung der Untertitel um +/\:- <Wert> Sekunden oder setzt sie
-auf <Wert> Sekunden, wenn abs ungleich 0 ist.
-.IPs "osd [level=<Wert>]"
-Schaltet durch die OSD-Modi oder setzt ihn auf <Wert>, wenn <Wert> > 0 ist.
-.IPs "volume <dir>"
-Erhöht/\:verringert die Lautstärke
-.IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<Wert>]"
-Setzt/\:Ändert die Videoparameter.
-.IPs "frame_drop [type=<Wert>]"
-Schaltet das Verwerfen von Bildern an/\:aus.
-.IPs "sub_visibility"
-Schaltet die Untertitel ein/\:aus.
-.IPs "sub_pos <Wert>"
-Verändert die Position der Untertitel.
-.IPs vo_fullscreen
-Wechselt zwischen Vollbild und Fenstermodus.
-.IPs "tv_step_channel <dir>"
-Wählt den nächsten/\:vorherigen TV\-Kanal.
-.IPs "tv_step_norm"
-Ändert den TV\-Standard.
-.IPs "tv_step_chanlist"
-Ändert die Kanalliste.
-.IPs "gui_[loadsubtitle|about|play|stop]"
-GUI\-Befehle
-.RE
-
-
 .\" --------------------------------------------------------------------------
 .\" Dateien
 .\" --------------------------------------------------------------------------
@@ -4494,8 +4334,8 @@ Film namens /mnt/\:cdrom/\:film.avi):
 ~/.mplayer/\:default.sub
 .RE
 .PD 1
-
-
+.
+.
 .\" --------------------------------------------------------------------------
 .\" Beispiele
 .\" --------------------------------------------------------------------------
@@ -4594,6 +4434,8 @@ Diese Manpage wurde geschrieben und wird gepflegt von
 .B Jonas Jermann
 .br
 .B Moritz Bunkus
+.br
+.B Sebastian Krämer
 .PP
 Schicke Mails die Manpage betreffend bitte an die MPlayer-DOCS-Mailingliste.
 .\" Ende der Datei
