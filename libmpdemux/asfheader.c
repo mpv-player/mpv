@@ -293,19 +293,16 @@ while(!stream_eof(demuxer->stream)){
         stream_read( demuxer->stream, object, objh.size );
 	// FIXME: We need some endian handling below...
 	ptr = object;
-        stream_count = *(uint16_t*)ptr;
+        stream_count = le2me_16(*(uint16_t*)ptr);
         ptr += sizeof(uint16_t);
         if(stream_count > 0)
               streams = (uint32_t*)malloc(2*stream_count*sizeof(uint32_t));
         printf(" stream count=[0x%x][%u]\n", stream_count, stream_count );
         for( i=0 ; i<stream_count && ptr<((char*)object+objh.size) ; i++ ) {
-          stream_id = *(uint16_t*)ptr;
+          stream_id = le2me_16(*(uint16_t*)ptr);
           ptr += sizeof(uint16_t);
-          max_bitrate = *(uint32_t*)ptr;
+          max_bitrate = le2me_32(*(uint32_t*)ptr);
           ptr += sizeof(uint32_t);
-#ifdef WORDS_BIGENDIAN
-	  stream_id=bswap_16(stream_id); max_bitrate=bswap_32(max_bitrate);
-#endif
           printf("   stream id=[0x%x][%u]\n", stream_id, stream_id );
           printf("   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
           streams[2*i] = stream_id;
