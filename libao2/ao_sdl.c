@@ -150,7 +150,7 @@ static int init(int rate,int channels,int format,int flags){
 	/* Allocate ring-buffer memory */
 	for(i=0;i<NUM_BUFS;i++) buffer[i]=(unsigned char *) malloc(BUFFSIZE);
 
-	printf("SDL: Samplerate: %iHz Channels: %s Format %iBit\n", rate, (channels > 1) ? "Stereo" : "Mono", format);
+	printf("SDL: Samplerate: %iHz Channels: %s Format %s\n", rate, (channels > 1) ? "Stereo" : "Mono", audio_out_format_name(format));
 
 	if(sdl_adriver) {
 		setenv("SDL_AUDIODRIVER", sdl_adriver, 1);
@@ -230,7 +230,7 @@ static void uninit(){
 // stop playing and empty buffers (for seeking/pause)
 static void reset(){
 
-	//printf("SDL: reset called!\n");	
+	printf("SDL: reset called!\n");	
 
 	/* Reset ring-buffer state */
 	buf_read=0;
@@ -246,8 +246,12 @@ static void reset(){
 // stop playing, keep buffers (for pause)
 static void audio_pause()
 {
-    // for now, just call reset();
-    reset();
+
+	printf("SDL: audio_pause called!\n");	
+	
+	// for now, just call reset();
+	//reset();
+
 }
 
 // resume playing, after audio_pause()
