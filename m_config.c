@@ -224,11 +224,11 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 
   // Check if this option isn't forbiden in the current mode
   if((config->mode == M_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"The %s option can't be used in a config file\n",config->lvl);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"The %s option can't be used in a config file\n",arg);
     return M_OPT_INVALID;
   }
   if((config->mode == M_COMMAND_LINE) && (co->opt->flags & M_OPT_NOCMD)) {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"The %s option can't be used on the command line\n",config->lvl);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"The %s option can't be used on the command line\n",arg);
     return M_OPT_INVALID;
   }
 
