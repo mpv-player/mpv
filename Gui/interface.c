@@ -545,8 +545,8 @@ int guiGetEvent( int type,char * arg )
 
 	if ( guiIntfStruct.NoWindow ) wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
 	
-	if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM ) btnSet( evSetMoviePosition,1 );
-	 else btnSet( evSetMoviePosition,0 );
+	if ( guiIntfStruct.StreamType == STREAMTYPE_STREAM ) btnSet( evSetMoviePosition,btnDisabled );
+	 else btnSet( evSetMoviePosition,btnReleased );
 	 
 	if ( gtkCacheOn ) stream_cache_size=gtkCacheSize;
 	 else stream_cache_size=-1;

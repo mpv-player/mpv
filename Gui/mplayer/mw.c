@@ -179,7 +179,7 @@ void mplMainDraw( void )
 {
  wItem    * item;
  txSample * image = NULL;
- int        i;
+ int        i, type;
 
  if ( appMPlayer.mainWindow.State == wsWindowClosed ) exit_player( MSGTR_Exit_quit );
  
@@ -196,7 +196,6 @@ void mplMainDraw( void )
    for( i=0;i < appMPlayer.NumberOfItems + 1;i++ )
     {
      item=&appMPlayer.Items[i];
-    if ( !item->disabled )
      switch( item->type )
       {
        case itButton:

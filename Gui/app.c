@@ -189,6 +189,6 @@ void btnSet( int event,int set )
 {
  int j;
  for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
-   if ( appMPlayer.Items[j].msg == event ) appMPlayer.Items[j].disabled=set;
+   if ( appMPlayer.Items[j].msg == event ) appMPlayer.Items[j].pressed=set;
 }
 												    

@@ -120,7 +120,7 @@ typedef struct
  int        px,py,psx,psy;
 // ---
  int        msg,msg2;
- int        pressed,disabled,tmp;
+ int        pressed,tmp;
  int        key,key2;
  int        phases;
  float      value;
