@@ -70,6 +70,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_PANSCAN, "panscan",1,  { {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_LOADFILE, "loadfile", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
   { MP_CMD_LOADLIST, "loadlist", 1, { {MP_CMD_ARG_STRING, {0}}, {-1,{0}} } },
+  { MP_CMD_VF_CHANGE_RECTANGLE, "change_rectangle", 2, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}}}},
 
 #ifdef HAVE_NEW_GUI  
   { MP_CMD_GUI_LOADFILE, "gui_loadfile", 0, { {-1,{0}} } },
