@@ -522,7 +522,7 @@ static HMODULE WINAPI expGetModuleHandleA(const char* name)
     }
     if(!result)
     {
-	if(strcasecmp(name, "kernel32")==0)
+	if(name && strcasecmp(name, "kernel32")==0)
 	    result=MODULE_HANDLE_kernel32;
     }
     dbgprintf("GetModuleHandleA('%s') => 0x%x\n", name, result);
@@ -3300,6 +3300,24 @@ static int expisalnum(int c)
     dbgprintf("isalnum(0x%x='%c' => %d\n", c, c, result);
     return result;
 }
+static int expisspace(int c)
+{
+    int result= (int) isspace(c);
+    dbgprintf("isspace(0x%x='%c' => %d\n", c, c, result);
+    return result;
+}
+static int expisalpha(int c)
+{
+    int result= (int) isalpha(c);
+    dbgprintf("isalpha(0x%x='%c' => %d\n", c, c, result);
+    return result;
+}
+static int expisdigit(int c)
+{
+    int result= (int) isdigit(c);
+    dbgprintf("isdigit(0x%x='%c' => %d\n", c, c, result);
+    return result;
+}
 static void* expmemmove(void* dest, void* src, int n)
 {
     void* result = memmove(dest, src, n);
@@ -3316,6 +3334,12 @@ static void* expmemcpy(void* dest, void* src, int n)
 {
     void *result = memcpy(dest, src, n);
     dbgprintf("memcpy(0x%x, 0x%x, %d) => %p\n", dest, src, n, result);
+    return result;
+}
+static void* expmemset(void* dest, int c, size_t n)
+{
+    void *result = memset(dest, c, n);
+    dbgprintf("memset(0x%x, %d, %d) => %p\n", dest, c, n, result);
     return result;
 }
 static time_t exptime(time_t* t)
@@ -3624,8 +3648,13 @@ struct exports exp_msvcrt[]={
     FF(_strdup,-1)
     FF(_setjmp3,-1)
     FF(isalnum, -1)
+    FF(isspace, -1)
+    FF(isalpha, -1)
+    FF(isdigit, -1)
     FF(memmove, -1)
     FF(memcmp, -1)
+    FF(memset, -1)
+    FF(memcpy, -1)
     FF(time, -1)
     FF(rand, -1)
     FF(srand, -1)
