@@ -3717,9 +3717,9 @@ Crops the given part of the image and discards the rest.
 Useful to remove black bands from widescreen movies.
 .PD 0
 .RSs
-.IPs w,h
+.IPs <w>,<h>
 Cropped width and height, defaults to original width and height.
-.IPs x,y
+.IPs <x>,<y>
 Position of the cropped picture, defaults to center.
 .RE
 .PD 1
@@ -3730,11 +3730,11 @@ Calculates necessary cropping parameters and prints the recommended parameters
 to stdout.
 .PD 0
 .RSs
-.IPs limit
+.IPs <limit>
 Threshold, which can be optionally specified from nothing (0) to
 everything (255) (default: 24).
 .br
-.IPs round
+.IPs <round>
 Value which the width/\:height should be divisible by (default: 16).
 The offset is automatically adjusted to center the video.
 Use 2 to get only even dimensions (needed for 4:2:2 video).
@@ -3748,10 +3748,10 @@ The plugin responds to the input.conf directive 'change_rectangle'
 that takes two parameters.
 .PD 0
 .RSs
-.IPs w,h
+.IPs <w>,<h>
 width and height (default: -1, maximum possible width where boundaries
 are still visible.)
-.IPs x,y
+.IPs <x>,<y>
 top left corner position (default: -1, uppermost leftmost)
 .RE
 .PD 1
@@ -3762,7 +3762,7 @@ Expands (not scales) movie resolution to the given value and places the
 unscaled original at coordinates x, y.
 Can be used for placing subtitles/\:OSD in the resulting black bands.
 .RSs
-.IPs w,h
+.IPs <w>,<h>
 Expanded width,height (default: original width,height).
 Negative values for w and h are treated as offsets to the original size.
 .sp 1
@@ -3773,9 +3773,9 @@ Negative values for w and h are treated as offsets to the original size.
 Adds a 50 pixel border to the bottom of the picture.
 .RE
 .PD 1
-.IPs x,y
+.IPs <x>,<y>
 position of original image on the expanded image (default: center)
-.IPs o
+.IPs <o>
 OSD/\:subtitle rendering
 .RSss
 0: disable (default)
@@ -3934,7 +3934,7 @@ Use together with the scale filter for a real conversion.
 For a list of available formats see format=fmt=help.
 .PD 0
 .RSs
-.IPs fourcc
+.IPs <fourcc>
 format name like rgb15, bgr24, yv12, etc (default: yuy2)
 .RE
 .PD 1
@@ -3950,7 +3950,7 @@ the one you specify.
 For a list of available formats see noformat=fmt=help.
 .PD 0
 .RSs
-.IPs fourcc
+.IPs <fourcc>
 format name like rgb15, bgr24, yv12, etc (default: yv12)
 .RE
 .PD 1
@@ -4032,11 +4032,11 @@ deringing filter
 .IPs tn/tmpnoise[:threshold1[:threshold2[:threshold3]]]
 temporal noise reducer
 .RSss
-threshold1: larger -> stronger filtering
+<threshold1>: larger -> stronger filtering
 .br
-threshold2: larger -> stronger filtering
+<threshold2>: larger -> stronger filtering
 .br
-threshold3: larger -> stronger filtering
+<threshold3>: larger -> stronger filtering
 .REss
 .IPs al/autolevels[:f/fullyrange]
 automatic brightness / contrast correction
@@ -4095,11 +4095,11 @@ on or off automatically depending on available CPU time.
 .B spp[=quality[:qp[:mode]]]
 simple postprocessing filter
 .RSs
-.IPs quality
+.IPs <quality>
 0\-6 (default: 3)
-.IPs qp\ \ \ 
+.IPs <qp>\ 
 Force quantization parameter (default: 0, use QP from video).
-.IPs mode\ \ \ 
+.IPs <mode>
 0: hard thresholding (default)
 .br
 1: soft thresholding (better deringing, but blurrier)
@@ -4109,7 +4109,7 @@ Force quantization parameter (default: 0, use QP from video).
 .B qp=equation
 quantization parameter (QP) change filter
 .RSs
-.IPs equation
+.IPs <equation>
 some equation like "2+2*sin(PI*qp)"
 .RE
 .
@@ -4127,13 +4127,13 @@ You should see a red, green and blue stripe from top to bottom.
 Fast software YV12 to MPEG-1 conversion with libavcodec for use with DVB/\:DXR3.
 Faster and of better quality than \-vf fame.
 .RSs
-.IPs quality
+.IPs <quality>
 .RSss
 1\-31: fixed qscale
 .br
 32\-:  fixed bitrate in kBits
 .REss
-.IPs fps\ \ 
+.IPs <fps>
 force output fps (float value) (default: 0, autodetect based on height)
 .RE
 .
@@ -4147,7 +4147,7 @@ Set up optimal scaling for DVB cards, scaling the x axis in hardware and
 calculating the y axis scaling in software to keep aspect.
 Only useful together with expand and scale.
 .RSs
-.IPs aspect
+.IPs <aspect>
 Control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
 576*4/\:3=768), set it to 576*(16/\:9)=1024 for a 16:9 TV.
 .RE
@@ -4190,11 +4190,11 @@ This filter aims to reduce image noise producing smooth images and making still
 images really still (This should enhance compressibility.).
 .PD 0
 .RSs
-.IPs luma\ 
+.IPs <luma>
 spatial luma strength (default: 4)
-.IPs chroma
+.IPs <chroma>
 spatial chroma strength (default: 3)
-.IPs time\ 
+.IPs <time>
 temporal strength (default: 6)
 .RE
 .PD 1
@@ -4224,11 +4224,11 @@ gamma values are 1.0.
 The parameters are given as floating point values.
 .PD 0
 .RSs
-.IPs rg
+.IPs <rg>
 gamma value for the red component
-.IPs gg
+.IPs <gg>
 gamma value for the green component
-.IPs bg
+.IPs <bg>
 gamma value for the blue component
 .REss
 .PD 1
@@ -4334,15 +4334,15 @@ Donald Graft's adaptive kernel deinterlacer.
 Deinterlaces parts of a video if a configurable threshold is exceeded.
 .PD 0
 .RSs
-.IPs "thresh (0 \- 255)"
+.IPs "<thresh> (0 \- 255)"
 Threshold (default 10).
-.IPs "map (0 or 1)"
+.IPs "<map> (0 or 1)"
 Paint pixels which exceed the threshold white (default: 0).
-.IPs "order (0 or 1)"
+.IPs "<order> (0 or 1)"
 Swap fields if 1 (default: 0).
-.IPs "sharp (0 or 1)"
+.IPs "<sharp> (0 or 1)"
 Enable additional sharpening (default: 0).
-.IPs "twoway (0 or 1)"
+.IPs "<twoway> (0 or 1)"
 Enable twoway sharpening (default: 0).
 .RE
 .PD 1
@@ -4434,7 +4434,7 @@ and filmdint are better for most applications.
 The following arguments (see syntax above) may be used to control
 detc's behavior:
 .RSs
-.IPs dr\ \ \ 
+.IPs <dr>\ 
 Set the frame dropping mode.
 0 (default) means don't drop frames to maintain fixed output framerate.
 1 means always drop a frame when there have been no drops or telecine
@@ -4443,19 +4443,19 @@ merges in the past 5 frames.
 .br
 .I NOTE:
 Use mode 1 or 2 with MEncoder.
-.IPs am\ \ \ 
+.IPs <am>\ 
 Analysis mode.
 Available values are 0 (fixed pattern with initial frame number
 specified by fr=#) and 1 (agressive search for telecine pattern).
 Default is 1.
-.IPs fr\ \ \ 
+.IPs <fr>\ 
 Set initial frame number in sequence.
 0\-2 are the three clean progressive frames; 3 and 4 are the two
 interlaced frames.
 The default, -1, means 'not in telecine sequence'.
 The number specified here is the type for the imaginary previous
 frame before the movie starts.
-.IPs "tr0, tr1, tr2, tr3"
+.IPs "<tr0>, <tr1>, <tr2>, <tr3>"
 Threshold values to be used in certain modes.
 .RE
 .
@@ -4533,27 +4533,27 @@ framerate during playback, but it is still generally better than using
 pp=lb or no deinterlacing at all.
 Multiple options can be specified separated by /.
 .RSs
-.IPs crop=w:h:x:y
+.IPs crop=<w>:<h>:<x>:<y>
 Just like the crop filter, but faster, and works on mixed hard and soft
 telecined content as well as when y is not a multiple of 4.
 If x or y would require cropping fractional pixels from the chroma
 planes, the crop area is extended.
 This usually means that x and y must be even.
-.IPs io=ifps:ofps
+.IPs io=<ifps>:<ofps>
 For each ifps input frames the filter will output ofps frames.
 The ratio of ifps/\:ofps should match the \-fps/\-ofps ratio.
 This could be used to filter movies that are broadcast on TV at a frame
 rate different from their original framerate.
-.IPs luma_only=n
+.IPs luma_only=<n>
 If n is nonzero, the chroma plane is copied unchanged.
 This is useful for YV12 sampled TV, which discards one of the chroma
 fields.
-.IPs mmx2=n
+.IPs mmx2=<n>
 On x86, if n=1, use MMX2 optimized functions, if n=2, use 3DNow!
 optimized functions, othewise, use plain C.
 If this option is not specified, MMX2 and 3DNow! are auto-detected, use
 this option to override auto-detection.
-.IPs fast=n
+.IPs fast=<n>
 The larger n will speed up the filter at the expense of accuracy.
 The default value is n=3.
 If n is odd, a frame immediately following a frame marked with the
@@ -4568,22 +4568,22 @@ much accuracy.
 If n=4 or 5, a faster, but much less accurate metric will be used to
 find the frame breaks, which is more likely to misdetect high vertical
 detail as interlaced content.
-.IPs verbose=n
+.IPs verbose=<n>
 If n is nonzero, print the detailed metrics for each frame.
 Useful for debugging.
-.IPs dint_thres=n
+.IPs dint_thres=<n>
 Deinterlace threshold.
 Used during de-interlacing of unmatched frames.
 Larger value means less deinterlacing, use n=256 to completely turn off
 deinterlacing.
 Default is n=8.
-.IPs comb_thres=n
+.IPs comb_thres=<n>
 Threshold for comparing a top and bottom fields.
 Defaults to 128.
-.IPs diff_thres=n
+.IPs diff_thres=<n>
 Threshold to detect temporal change of a field.
 Default is 128.
-.IPs sad_thres=n
+.IPs sad_thres=<n>
 Sum of Absolute Difference threshold, default is 64.
 .RE
 .
@@ -4618,14 +4618,14 @@ correspond to pass one and two of the encoding process.
 In order to use divtc two pass with two pass video encoding, you must perform
 three passes: first divtc pass one and encoder pass one, then divtc pass two
 and encoder pass two, and finally divtc pass two and encoder pass two.
-.IPs file=filename
+.IPs file=<filename>
 Set the two pass log filename (default: "framediff.log").
-.IPs threshold=value
+.IPs threshold=<value>
 Set the minimum strength the telecine pattern must have for the filter to
 believe in it (default: 0.5).
 This is used to avoid recognizing false pattern from the parts of the video
 that are very dark or very still.
-.IPs window=numframes
+.IPs window=<numframes>
 Set the number of past frames to look at when searching for pattern
 (default: 30).
 Longer window improves the reliability of the pattern search, but shorter
@@ -4641,7 +4641,7 @@ It catches the correct phase when it finds it, but this option can be used
 to fix the possible juddering at the beginning.
 The first pass of the two pass mode also uses this, so if you save the output
 from the first pass, you get constant phase result.
-.IPs deghost=value
+.IPs deghost=<value>
 Set the deghosting threshold (0\-255 for one pass mode, -255\-255 for two pass
 mode, default 0).
 If nonzero, deghosting mode is used.
@@ -4802,9 +4802,9 @@ filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
 Correct the perspective of movies not filmed perpendicular to the screen.
 .PD 0
 .RSs
-.IPs x0,y0,...
+.IPs <x0>,<y0>,...
 coordinates of the top left, top right, bottom left, bottom right corners
-.IPs t\ \ \ \ 
+.IPs <t>\ \ 
 linear (0) or cubic resampling (1)
 .RE
 .PD 1
@@ -4824,7 +4824,7 @@ Extracts both stereo fields and places them side by side, resizing
 them to maintain the original movie aspect.
 .PD 0
 .RSs
-.IPs lines
+.IPs <lines>
 number of lines to select from the middle of the image (default: 12)
 .RE
 .PD 1
@@ -4878,11 +4878,11 @@ Arguments are:
 .RE
 .PD 0
 .RSs
-.IPs "width, height"
+.IPs "<width>, <height>"
 image/area size
-.IPs "xpos, ypos"
+.IPs "<xpos>, <ypos>"
 Start blitting at position x/y.
-.IPs alpha
+.IPs <alpha>
 Set alpha difference.
 If you set this to -255 you can then send a sequence of ALPHA-commands to set
 the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
@@ -4893,7 +4893,7 @@ the area to -225, -200, -175 etc for a nice fade-in-effect! ;)
 .br
 -255: Make everything transparent.
 .REss
-.IPs clear
+.IPs <clear>
 Clear the framebuffer before blitting.
 .RSss
 0: The image will just be blitted on top of the old one, so you do not need to
@@ -4966,11 +4966,11 @@ Just set a rectangle covering the logo and watch it disappear (and
 sometimes something even uglier appear \- your mileage may vary).
 .PD 0
 .RSs
-.IPs x,y
+.IPs <x>,<y>
 top left corner of the logo
-.IPs w,h
+.IPs <w>,<h>
 width and height of the cleared rectangle
-.IPs t
+.IPs <t>
 Thickness of the fuzzy edge of the rectangle (added to w and h).
 When set to -1, a green rectangle is drawn on the screen to
 simplify finding the right x,y,w,h parameters.
@@ -4982,7 +4982,7 @@ simplify finding the right x,y,w,h parameters.
 Software YV12 to MJPEG encoder for use with the zr2 video
 output device.
 .RSs
-.IPs maxheight=h|maxwidth=w
+.IPs maxheight=<h>|maxwidth=<w>
 These options set the maximum width and height the zr card
 can handle (the MPlayer filter layer currently cannot query those).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
@@ -7204,7 +7204,7 @@ You can use all encoding options, including CPU-hungry ones.
 The first pass may use either constant bitrate or constant quantizer.
 Constant quantizer is often slightly better, but requires that you guess a
 qp_constant that is somewhere near your desired bitrate.
-(It is better to err on the side of lower qp_constant, i.e. higher bitrate.)
+(It is better to err on the side of lower qp_constant, i.e.\& higher bitrate.)
 Subsequent passes are ABR, and must specify bitrate.
 .br
 .I
