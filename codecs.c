@@ -20,6 +20,7 @@ char* get_vids_codec_name(){
           return "APmpg4v1.dll";
 #endif
           return "mpg4c32.dll";
+
 	case mmioFOURCC('M', 'P', '4', '3'):
 	case mmioFOURCC('m', 'p', '4', '3'):
 	  printf("Video in MPEG-4 v3 (really DivX) format\n");
@@ -35,12 +36,15 @@ char* get_vids_codec_name(){
 	case mmioFOURCC('d', 'i', 'v', 'x'):
           return "DivX.dll";
 
+	case mmioFOURCC('D', 'I', 'V', '5'):
+        case mmioFOURCC('d', 'i', 'v', '5'):
+	case mmioFOURCC('D', 'I', 'V', '6'):
+        case mmioFOURCC('d', 'i', 'v', '6'):
+          avi_header.bih.biCompression-=0x02000000; // div5->div3, div6->div4
 	case mmioFOURCC('D', 'I', 'V', '3'):
 	case mmioFOURCC('d', 'i', 'v', '3'):
 	case mmioFOURCC('D', 'I', 'V', '4'):
         case mmioFOURCC('d', 'i', 'v', '4'):
-	case mmioFOURCC('D', 'I', 'V', '5'):
-        case mmioFOURCC('d', 'i', 'v', '5'):
 	case mmioFOURCC('M', 'P', '4', '1'):
 	case mmioFOURCC('m', 'p', '4', '1'):
 	  printf("Video in DivX ;-) format\n");
