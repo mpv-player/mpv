@@ -1,4 +1,4 @@
-.\" synced with 1.759
+.\" synced with 1.760
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "01 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "02 Octobre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3504,8 +3504,8 @@ bicubique spline naturelle
 .RS
 .I NOTE\ :
 Pour \-sws\ 2 et 7, la netteté (sharpness) peut être contrôlé avec le
-paramètre de zoom (p) de \-vf scale (0 (doux) \- 100 (net)), pour \-sws 9,
-il définit la longueur du filtre (1 \- 10).
+paramètre de zoom de \-vf scale (0 (doux) \- 100 (net)), pour \-sws 9,
+le paramètre de zoom définit la longueur du filtre (1 \- 10).
 .
 .TP
 .B \-vc <[-]codec1,[-]codec2,...[,]>
@@ -3755,7 +3755,7 @@ Pour les paramètres entre 4\-7 la rotation n'est faite que si la géométrie
 du film est en mode portrait et non en paysage.
 .
 .TP
-.B scale[=w:h[:interlaced[:chr_drop[:param[:param2[:presize]]]]]]
+.B scale[=w:h[:entrelacé[:chr_drop[:param[:param2[:presize]]]]]]
 Redimensionne l'image avec le zoom logiciel (lent) et applique une conversion
 de palette YUV<\->RGB (voir également l'option \-sws).
 .RSs
@@ -3777,8 +3777,13 @@ hauteur/\:largeur redimensionné.
 -3: Calcule l/\:h en utilisant l'autre dimension et le rapport
 hauteur/\:largeur original.
 .REss
-.IPs interlaced
+.IPs <entrelacé>
 Bascule le redimmensionnement entrelacé.
+.RSss
+0: désactivé (par défaut)
+.br
+1: activé
+.REss
 .IPs <chr_drop>
 saute le chroma
 .RSss
@@ -3790,23 +3795,25 @@ saute le chroma
 .br
 3: N'utilise qu'une ligne d'entrée sur 8 pour le chroma.
 .REss
-.IPs <param>
+.IPs "<param>[:<param2>] (voir aussi \-sws)"
+Définit quelques paramètre dépendants du type de zoom sélectionné
+avec \-sws
 .RSss
--sws 2 (bicubique)\ : B (flou) et C (ringing: scintillement)
+\-sws 2 (bicubique)\ : B (flou) et C (ringing: scintillement)
 .br
-(0.00, 0.60) par défaut
+(0.00:0.60) par défaut
 .br
-(0.00, 0.75) le "precise bicubic" de VirtualDub
-+.br
-+(0.00, 0.50) spline de Catmull-Rom
-+.br
-+(0.33, 0.33) spline de Mitchell-Netravali
-+.br
-+(1.00, 0.00) spline-B cubique
+(0.00:0.75) le "precise bicubic" de VirtualDub
 .br
--sws 7 (gaussien)\ : netteté (0 (doux) \- 100 (dur))
+(0.00:0.50) spline de Catmull-Rom
 .br
--sws 9 (lanczos)\ : longueur du filtre (1\-10)
+(0.33:0.33) spline de Mitchell-Netravali
+.br
+(1.00:0.00) spline-B cubique
+.br
+\-sws 7 (gaussien)\ : netteté (0 (doux) \- 100 (dur))
+.br
+\-sws 9 (lanczos)\ : longueur du filtre (1\-10)
 .REss
 IPs <presize>
 Redimensionne à une taille pré-définie.
@@ -7202,6 +7209,7 @@ différence près qu'elle dispose des stats de la deuxième passe pour mieux
 travailler.
 Vous pouvez utiliser toutes les options d'encodage, même les plus
 gourmandes.
+.br
 .I
 NOTE\ :
 MEncoder gérant x264 et son mode 3 passes depuis peu de temps, nous
