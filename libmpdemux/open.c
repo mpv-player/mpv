@@ -618,7 +618,8 @@ int dvd_chapter_from_cell(dvd_priv_t* dvd,int title,int cell)
 int dvd_aid_from_lang(stream_t *stream, unsigned char* lang){
 dvd_priv_t *d=stream->priv;
 int code,i;
-  while(lang && strlen(lang)>=2){
+if(lang){
+  while(strlen(lang)>=2){
     code=lang[1]|(lang[0]<<8);
     for(i=0;i<d->nr_of_channels;i++){
 	if(d->audio_streams[i].language==code){
@@ -631,7 +632,8 @@ int code,i;
     lang+=2; while (lang[0]==',' || lang[0]==' ') ++lang;
   }
   mp_msg(MSGT_OPEN,MSGL_WARN,"No matching DVD audio language found!\n");
-  return -1;
+}
+return d->nr_of_channels ? d->audio_streams[0].id : -1;
 }
 
 int dvd_sid_from_lang(stream_t *stream, unsigned char* lang){
