@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.11 -->
+<!-- synced to 1.13 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
@@ -235,11 +235,11 @@ lejátszásához (lassú).
 <para>
 Az RPC-1 DVD meghajtók csak szoftveresen védik a régió kódot. Az RPC-2 meghajtókban
 hardveres védelem van, ami csak 5 változtatást engedélyez. Szükséges/javasolt
-a firmware frissítése RPC-1-re ha RPC-2-es DVD meghajtód van. Firmware
-frissítések találhatóak ezen a
-<ulink url="http://www.firmware-flash.com">firmware oldalon</ulink>. Ha nicns firmware
-javítás a te meghajtódhoz, használd a
-<ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset eszközt</ulink>
+a firmware frissítése RPC-1-re ha RPC-2-es DVD meghajtód van. Megpróbálhatsz
+keresni firmware frissítést az Interneten,
+<ulink url="http://forum.rpc-1.com/dl_all.php">ez a firmware fórum</ulink>
+egy jó kiinduló pont lehet. Ha nincs firmware javítás a te meghajtódhoz, használd
+a <ulink url="http://linvdr.org/projects/regionset/">regionset eszközt</ulink>
 a DVD meghajtód régió kódjának beállításához (Linux alatt).
 <emphasis role="bold">Figyelem</emphasis>: Csak 5 alkalommal állíthatod át a régió kódot.
 </para>
@@ -268,7 +268,7 @@ SCSI támogatás elkészítésében VCD-khez.
 
 <para>
 Addig is kinyerheted az adatokat a VCD-ről a
-<ulink url="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
+<ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
 segítségével, majd az eredményül kapott fájlt lejátszhatod az <application>MPlayer</application>rel.
 </para>
 
@@ -318,7 +318,7 @@ csatolod be a lemezt, át tudod másolni és le tudod játszani a .DAT fájlt az
 vezérlőjével ez nem megy! Használd a <option>vcd://</option>-t helyette.
 VCD másolásához alternatíva az új <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink>
 kernel vezérlő (nem része a hivatalos kernelnek) ami a CD meneteket kép fájlok
-formájában mutatja, és a <ulink url="http://cdrdao.sourceforge.net/">cdrdao</ulink>,
+formájában mutatja, és a <ulink url="http://cdrdao.sf.net/">cdrdao</ulink>,
 egy bitről-bitre grabbelő/másoló program.
 </para>
 </formalpara>
