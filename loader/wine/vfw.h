@@ -427,7 +427,7 @@ long VFWAPIV ICUniversalEx(HIC hic,int command,LPBITMAPINFOHEADER lpbiFormat,LPB
 	)
 
 #define ICDecompressEnd(hic) ICSendMessage(hic, ICM_DECOMPRESS_END, 0, 0)
-
+#define ICDecompressEndEx(hic) ICUniversalEx(hic,ICM_DECOMPRESSEX_END, 0, 0)
 
 #define ICDRAW_QUERY        0x00000001L   /* test for support */
 #define ICDRAW_FULLSCREEN   0x00000002L   /* draw to full screen */
