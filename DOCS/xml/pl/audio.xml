@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.9  -->
+<!-- synced with 1.10  -->
 <sect2 id="audio-dev">
 <title>Urządzenia wyjściowe audio</title>
 <sect3 id="sync">
@@ -953,6 +953,47 @@ jeżeli d1 &gt; d2. Domyślna wartość dla d to 20ms.
 Przykład:
 <screen>mplayer -af surround=15 -channels 4 media.avi</screen>
 doda dźwięk przestrzenny dekodując z 15ms opóźnieniem dźwięk dla tylnych głośników.
+</para>
+</sect4>
+
+<sect4 id="af_export">
+<title>Audio Exporter</title>
+<para>
+Ten filtr audio eksportuje nadchodzący sygnał do innych procesów,
+używając mapowania pamięci (<literal>mmap()</literal>). 
+Zmapowane obszary zawierają nagłówek:
+
+<programlisting>
+int nch                      /*ilość kanałów*/
+int size		     /*rozmiar bufora*/
+unsigned long long counter   /*Używany do zachowania synchronizacji, 
+                               aktualizowany za każdym razem kiedy nowe dane
+			       są eksportowane.*/
+</programlisting>
+Reszta to 16-bitowe dane (bez przeplotu).
+</para>
+
+<variablelist>
+<varlistentry>
+<term><option>mmapped_file</option></term>
+<listitem><para>
+Plik, do którego chcesz eksportować. Domyślnie jest to  
+<filename>~/.mplayer/mplayer-af_export</filename>.
+</para></listitem>
+</varlistentry>
+
+<varlistentry>
+<term><option>nsamples</option></term>
+<listitem><para>
+Ilość próbek przypadających na kanał. Domyślnie jest to <literal>512</literal>.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Przykład:
+<screen>mplayer -af export=/tmp/mplayer-af_export:1024 media.avi</screen>
+wyeksportuje 1024 próbek na kanał do <filename>/tmp/mplayer-af_export</filename>.
 </para>
 </sect4>
 </sect3>
