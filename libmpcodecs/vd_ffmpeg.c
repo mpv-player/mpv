@@ -389,7 +389,9 @@ static int init_vo(sh_video_t *sh){
     float aspect= avctx->aspect_ratio;
 #endif
 
-    if ( aspect != ctx->last_aspect ||
+     // it is possible another vo buffers to be used after vo config()
+     // lavc reset its buffers on width/heigh change but not on aspect change!!!
+    if (// aspect != ctx->last_aspect ||
 	avctx->width != sh->disp_w ||
 	avctx->height != sh->disp_h ||
 	!ctx->vo_inited)
@@ -833,6 +835,8 @@ static int mc_get_buffer(AVCodecContext *avctx, AVFrame *pic){
     pic->type= FF_BUFFER_TYPE_USER;
 
     render=(xvmc_render_state_t*)mpi->priv;//same as data[2]
+    if(verbose > 4)
+        printf("vd_ffmpeg::mc_get_buffer (render=%p)\n",render);
     assert(render != 0);
     assert(render->magic == MP_XVMC_RENDER_MAGIC);
     render->state |= MP_XVMC_STATE_PREDICTION;
@@ -858,11 +862,11 @@ static void mc_release_buffer(AVCodecContext *avctx, AVFrame *pic){
 //printf("R%X %X\n", pic->linesize[0], pic->data[0]);
 //mark the surface as not requared for prediction
     render=(xvmc_render_state_t*)pic->data[2];//same as mpi->priv
+    if(verbose > 4)
+        printf("vd_ffmpeg::mc_release_buffer (render=%p)\n",render);
     assert(render!=NULL);
     assert(render->magic==MP_XVMC_RENDER_MAGIC);
     render->state&=~MP_XVMC_STATE_PREDICTION;
-    if(verbose > 4)
-        printf("vd_ffmpeg::mc_release buffer (render=%p)\n",render);
     for(i=0; i<4; i++){
         pic->data[i]= NULL;
     }
