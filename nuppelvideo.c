@@ -13,6 +13,8 @@
 #include "config.h"
 #include "mp_msg.h"
 
+#include "fastmemcpy.h"
+
 #include "libmpdemux/nuppelvideo.h" 
 #include "RTjpegN.h"
 #include "minilzo.h"
@@ -29,8 +31,8 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 	static unsigned char *previous_buffer = 0;
 	static is_lzo_inited = 0;
 
-//	printf("NUV packet: frametype: %c comptype: %c\n",
-//	    encodedh->frametype, encodedh->comptype);
+//	printf("frametype: %c, comtype: %c, encoded_size: %d, width: %d, height: %d\n",
+//	    encodedh->frametype, encodedh->comptype, encoded_size, width, height);
 
 	switch(encodedh->frametype)
 	{
@@ -39,8 +41,9 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 		/* tables are in encoded */
 		if (encodedh->comptype == 'R')
 		{
-		    RTjpeg_init_decompress ( encoded, width, height );
-		    printf("Found RTjpeg tables\n");
+		    RTjpeg_init_decompress ( encoded+12, width, height );
+		    printf("Found RTjpeg tables (size: %d, width: %d, height: %d)\n",
+			encoded_size-12, width, height);
 		}
 		break;
 	    }
@@ -96,12 +99,12 @@ void decode_nuv( unsigned char *encoded, int encoded_size,
 			RTjpeg_decompressYUV420 ( ( __s8 * ) buffer, decoded );
 			break;
 		    case '3': /* raw YUV420 with LZO */
-			r = lzo1x_decompress ( encoded + 12, encodedh->packetlength, buffer, &out_len, NULL );
+			r = lzo1x_decompress ( encoded + 12, encodedh->packetlength, decoded, &out_len, NULL );
 			if ( r != LZO_E_OK ) 
 			{
 				printf ( "Error decompressing\n" );
 			}
-			memcpy(decoded, buffer, width*height*3/2);
+//			memcpy(decoded, buffer, width*height*3/2);
 			break;
 		    case 'N': /* black frame */
 			memset ( decoded, 0,  width * height );
