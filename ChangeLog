@@ -2,6 +2,10 @@
 mplayer (0.90)
 
   pre10:
+    Docs:
+    * dvd auth, vcd sections extended (DOCS/cd-dvd.html)
+    * unified *BSD sections, extended cygwin
+    
     Fixes:
     * LIRC error message (Error while reading cmd fd X : Success) fixed
     * playback of some (streamed?) divx files fixed, starting with non-I frames.
@@ -10,10 +14,20 @@ mplayer (0.90)
     * vidix mach64 colorkey on PPC fixed
     * -ao sdl now handles "featureless" soundcards
     * -vo zr fixes
+    * fixed sig11 if vo init failed
+    * various dxr2 and dxr3 fixes
+    * cleanup of postprocessing code - now it's threadsafe and can be shared
+    * v4l buffering fixed
+    * now auto-inserting -vop lavc for mpeg-only vo's
     
     Features:
     * -ao win32 (for windows port)
     * -vop 2xsai - 2x scaler for drawn images (low color cartoon anims)
+    * libavcodec: native WMA v1/v2 (aka. DivX audio) decoder
+    * better deblocking filter (-vop pp), pp/npp syntax changed!
+    * hw-accelerated video eq for -vo x11 and gl2, using DirectColor colormap
+    * -vop unsharp - an sharp/blur filter, nice, but very slow
+    * overlapping subtitles support, jacosub (*.js) format support
 
   pre9:
     Docs:
