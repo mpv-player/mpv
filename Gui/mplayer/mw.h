@@ -125,11 +125,15 @@ void PutImage( txSample * bf,int x,int y,int max,int ofs )
    }
 }
 
+int mainis = 1;
+
 void mplMainDraw( wsParamDisplay )
 {
  wItem    * item;
  txSample * image = NULL;
  int        i;
+
+if ( appMPlayer.mainWindow.Focused == 2 ) mainis=1;
 
  if ( appMPlayer.mainWindow.Visible == wsWindowNotVisible ||
       !mainVisible ) return;
@@ -532,8 +536,14 @@ void mplMainKeyHandle( int State,int Type,int Key )
    case wsRight:     msg=evForward10sec; break;
    case wsLeft:      msg=evBackward10sec; break;
 
-   case wsGrayMul:   msg=evIncVolume; break;
-   case wsGrayDiv:   msg=evDecVolume; break;
+   case wsGrayMul:   
+        msg=evIncVolume; 
+	vo_x11_putkey( Key );
+	break;
+   case wsGrayDiv:   
+        msg=evDecVolume; 
+	vo_x11_putkey( Key );
+	break;
 
    case wsEnter:     msg=evPlay; break;
    case wsSpace:     msg=evPause; break;
