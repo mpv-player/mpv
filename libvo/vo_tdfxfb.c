@@ -14,6 +14,7 @@
  * as the background, or not.
  * 13/04/02: Fix rough OSD stuff by rendering it straight onto the output
  * buffer. Added double-buffering. Supports hardware zoom/reduce zoom modes.
+ * 13/04/02: Misc cleanups of the code.
  *
  * Hints and tricks:
  * - Use -dr to get direct rendering
@@ -61,8 +62,6 @@ struct YUV_plane {
   char U[0x0100000];
   char V[0x0100000];
 };
-
-extern int verbose;
 
 static int fd;
 static struct fb_fix_screeninfo fb_finfo;
@@ -162,9 +161,11 @@ static void clear_screen()
 }
 
 /* Setup output screen dimensions etc */
-static uint32_t setup_screen(uint32_t full)
+static void setup_screen(uint32_t full)
 {
-	if(full) {					/* Full screen */
+	fs = full;
+
+	if(fs) {					/* Full screen */
 		double ratio = (double)in_width / in_height;
 		vidwidth = screenwidth;
 		vidheight = screenheight;
@@ -177,26 +178,20 @@ static uint32_t setup_screen(uint32_t full)
 		vidx = (screenwidth - vidwidth) / 2;
 		vidy = (screenheight - vidheight) / 2;
 	} else {					/* Reset to normal size */
-		if(r_width > screenwidth || r_height > screenheight) {
-			printf("tdfxfb: your resolution is too small to play the movie...\n");
-			return -1;
-		}
+		if(r_width > screenwidth || r_height > screenheight)
+			printf("tdfxfb: your resolution is too small to display "
+					"the whole movie...\n");
 
 		vidwidth = r_width;
 		vidheight = r_height;
-		vidx = 0;
-		vidy = 0;
+		vidx = vidy = 0;
 	}
 
 	clear_screen();
-
-	fs = full;
-
-	return 0;
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height,
-		uint32_t flags, char *title, uint32_t format,const vo_tune_info_t *info)
+		uint32_t flags, char *title, uint32_t format, const vo_tune_info_t *info)
 {
 	screenwidth = fb_vinfo.xres;
 	screenheight = fb_vinfo.yres;
@@ -275,9 +270,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	if(vo_doublebuffering) {
 		vidpageoffset = screenwidth * screenheight * screendepth;
 		hidpageoffset = vidpageoffset + screenwidth * screenheight * screendepth;
-	} else {
+	} else
 		vidpageoffset = hidpageoffset = 0;		/* Console background */
-	}
 
 	inpageoffset = hidpageoffset + screenwidth * screenheight * screendepth;
 
@@ -290,8 +284,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	hidpage = (void *)memBase1 + (unsigned long)hidpageoffset;
 	inpage = (void *)memBase1 + (unsigned long)inpageoffset;
 
-	if(setup_screen(flags & VOFLAG_FULLSCREEN) == -1)
-		return -1;
+	setup_screen(flags & VOFLAG_FULLSCREEN);
 
 	memset(inpage, 0, in_width * in_height * in_depth);
 
@@ -396,7 +389,6 @@ static void flip_page(void)
 static uint32_t draw_frame(uint8_t *src[])
 {
 	mem2agpcpy(inpage, src[0], in_width * in_depth * in_height);
-
 	return 0;
 }
 
@@ -412,21 +404,16 @@ static uint32_t draw_slice(uint8_t *i[], int s[], int w, int h, int x, int y)
 	mem2agpcpy_pic(YUV->Y, i[0], s[0], h    , YUV_STRIDE, s[0]);
 	mem2agpcpy_pic(YUV->U, i[1], s[1], h / 2, YUV_STRIDE, s[1]);
 	mem2agpcpy_pic(YUV->V, i[2], s[2], h / 2, YUV_STRIDE, s[2]);
-
 	return 0;
 }
 
-/* Attempt to start doing DR (Copied mostly from mga_common.c) */
+/* Attempt to start doing DR */
 static uint32_t get_image(mp_image_t *mpi)
 {
 	static int enabled = 0;
 
-	if(!enabled) {
-		if(mpi->flags & MP_IMGFLAG_READABLE)	/* slow video ram */
+	if(!enabled && mpi->flags & MP_IMGFLAG_READABLE)	/* slow video ram */
 			return VO_FALSE;
-
-		/* More one-time only checks go here */
-	}
 
 	switch(in_format) {
 	case IMGFMT_YUY2:
@@ -456,7 +443,6 @@ static uint32_t get_image(mp_image_t *mpi)
 
 	if(!enabled) {
 		printf("tdfxfb: get_image() SUCCESS -> Direct Rendering ENABLED\n");
-
 		enabled = 1;
 	}
 
@@ -488,7 +474,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 		return 0;		/* Not supported */
 
 	case VOCTRL_FULLSCREEN:
-		return setup_screen(!fs);
+		setup_screen(!fs);
+		return 0;
 	}
 
 	return VO_NOTIMPL;
