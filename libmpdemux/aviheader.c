@@ -32,6 +32,7 @@ int stream_id=-1;
 int idxfix_videostream=0;
 int idxfix_divx=0;
 avi_priv_t* priv=demuxer->priv;
+off_t list_end=0;
 
 //---- AVI header:
 priv->idx_size=0;
@@ -48,6 +49,8 @@ while(1){
     int len=stream_read_dword_le(demuxer->stream)-4; // list size
     id=stream_read_dword_le(demuxer->stream);        // list type
     mp_msg(MSGT_HEADER,MSGL_DBG2,"LIST %.4s  len=%d\n",(char *) &id,len);
+    list_end=stream_tell(demuxer->stream)+((len+1)&(~1));
+    printf("list_end=0x%X\n",(int)list_end);
     if(id==listtypeAVIMOVIE){
       // found MOVI header
       if(!demuxer->movi_start) demuxer->movi_start=stream_tell(demuxer->stream);
@@ -65,12 +68,84 @@ while(1){
   mp_msg(MSGT_HEADER,MSGL_DBG2,"CHUNK %.4s  len=%d\n",(char *) &id,size2);
   chunksize=(size2+1)&(~1);
   switch(id){
-    case mmioFOURCC('I','S','F','T'): hdr="Software";break;
-    case mmioFOURCC('I','N','A','M'): hdr="Name";break;
-    case mmioFOURCC('I','S','B','J'): hdr="Title";break;
-    case mmioFOURCC('I','A','R','T'): hdr="Author";break;
+
+    // Indicates where the subject of the file is archived
+    case mmioFOURCC('I','A','R','L'): hdr="Archival Location";break;
+    // Lists the artist of the original subject of the file;
+    // for example, "Michaelangelo."
+    case mmioFOURCC('I','A','R','T'): hdr="Artist";break;
+    // Lists the name of the person or organization that commissioned
+    // the subject of the file; for example "Pope Julian II."
+    case mmioFOURCC('I','C','M','S'): hdr="Commissioned";break;
+    // Provides general comments about the file or the subject
+    // of the file. If the comment is several sentences long, end each
+    // sentence with a period. Do not include new-line characters.
+    case mmioFOURCC('I','C','M','T'): hdr="Comments";break;
+    // Records the copyright information for the file; for example,
+    // "Copyright Encyclopedia International 1991." If there are multiple
+    // copyrights, separate them by semicolon followed by a space.
     case mmioFOURCC('I','C','O','P'): hdr="Copyright";break;
-    case mmioFOURCC('I','C','M','T'): hdr="Comment";break;
+    // Describes whether an image has been cropped and, if so, how it
+    // was cropped; for example, "lower-right corner."
+    case mmioFOURCC('I','C','R','D'): hdr="Creation Date";break;
+    // Describes whether an image has been cropped and, if so, how it
+    // was cropped; for example, "lower-right corner."
+    case mmioFOURCC('I','C','R','P'): hdr="Cropped";break;
+    // Specifies the size of the original subject of the file; for
+    // example, "8.5 in h, 11 in w."
+    case mmioFOURCC('I','D','I','M'): hdr="Dimensions";break;
+    // Stores dots per inch setting of the digitizer used to
+    // produce the file, such as "300."
+    case mmioFOURCC('I','D','P','I'): hdr="Dots Per Inch";break;
+    // Stores the of the engineer who worked on the file. If there are
+    // multiple engineers, separate the names by a semicolon and a blank;
+    // for example, "Smith, John; Adams, Joe."
+    case mmioFOURCC('I','E','N','G'): hdr="Engineer";break;
+    // Describes the original work, such as "landscape,", "portrait,"
+    // "still liefe," etc.
+    case mmioFOURCC('I','G','N','R'): hdr="Genre";break;
+    // Provides a list of keywords that refer to the file or subject of the
+    // file. Separate multiple keywords with a semicolon and a blank;
+    // for example, "Seattle, aerial view; scenery."
+    case mmioFOURCC('I','K','E','Y'): hdr="Keywords";break;
+    // ILGT - Describes the changes in the lightness settings on the digitizer
+    // required to produce the file. Note that the format of this information
+    // depends on the hardware used.
+    case mmioFOURCC('I','L','G','T'): hdr="Lightness";break;
+    // IMED - Decribes the original subject of the file, such as
+    // "computer image," "drawing," "lithograph," and so on.
+    case mmioFOURCC('I','M','E','D'): hdr="Medium";break;
+    // INAM - Stores the title of the subject of the file, such as
+    // "Seattle from Above."
+    case mmioFOURCC('I','N','A','M'): hdr="Name";break;
+    // IPLT - Specifies the number of colors requested when digitizing
+    // an image, such as "256."
+    case mmioFOURCC('I','P','L','T'): hdr="Palette Setting";break;
+    // IPRD - Specifies the name of title the file was originally intended
+    // for, such as "Encyclopedia of Pacific Northwest Geography."
+    case mmioFOURCC('I','P','R','D'): hdr="Product";break;
+    // ISBJ - Decsribes the contents of the file, such as
+    // "Aerial view of Seattle."
+    case mmioFOURCC('I','S','B','J'): hdr="Subject";break;
+    // ISFT - Identifies the name of the software packages used to create the
+    // file, such as "Microsoft WaveEdit"
+    case mmioFOURCC('I','S','F','T'): hdr="Software";break;
+    // ISHP - Identifies the change in sharpness for the digitizer
+    // required to produce the file (the format depends on the hardware used).
+    case mmioFOURCC('I','S','H','P'): hdr="Sharpness";break;
+    // ISRC - Identifies the name of the person or organization who
+    // suplied the original subject of the file; for example, "Try Research."
+    case mmioFOURCC('I','S','R','C'): hdr="Source";break;
+    // ISRF - Identifies the original form of the material that was digitized,
+    // such as "slide," "paper," "map," and so on. This is not necessarily
+    // the same as IMED
+    case mmioFOURCC('I','S','R','F'): hdr="Source Form";break;
+    // ITCH - Identifies the technician who digitized the subject file;
+    // for example, "Smith, John."
+    case mmioFOURCC('I','T','C','H'): hdr="Technician";break;
+    case mmioFOURCC('I','S','M','P'): hdr="Time Code";break;
+    case mmioFOURCC('I','D','I','T'): hdr="Digitization Time";break;
+
     case ckidAVIMAINHDR:          // read 'avih'
       stream_read(demuxer->stream,(char*) &avih,MIN(size2,sizeof(avih)));
       le2me_MainAVIHeader(&avih); // swap to machine endian
@@ -169,6 +244,10 @@ while(1){
     }
   }
   if(hdr){
+    printf("hdr=%s  size=%d\n",hdr,size2);
+    if(size2==3)
+      chunksize=1; // empty
+    else {
       char buf[256];
       int len=(size2<250)?size2:250;
       stream_read(demuxer->stream,buf,len);
@@ -176,7 +255,16 @@ while(1){
       buf[len]=0;
       mp_msg(MSGT_HEADER,MSGL_V,"%-10s: %s\n",hdr,buf);
       demux_info_add(demuxer, hdr, buf);
+    }
   }
+  mp_msg(MSGT_HEADER,MSGL_DBG2,"list_end=0x%X  pos=0x%X  chunksize=0x%X  next=0x%X\n",
+      (int)list_end, (int)stream_tell(demuxer->stream),
+      chunksize, (int)chunksize+stream_tell(demuxer->stream));
+  if(list_end>0 && chunksize+stream_tell(demuxer->stream)>list_end){
+      mp_msg(MSGT_HEADER,MSGL_V,"Broken chunk?  chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
+      stream_seek(demuxer->stream,list_end);
+      list_end=0;
+  } else
   if(chunksize>0) stream_skip(demuxer->stream,chunksize); else
   if(chunksize<0) mp_msg(MSGT_HEADER,MSGL_WARN,"chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
   
