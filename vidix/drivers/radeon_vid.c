@@ -881,7 +881,7 @@ static unsigned radeon_query_pitch(unsigned fourcc)
 static int radeon_vid_init_video( vidix_playback_t *config )
 {
     uint32_t tmp,src_w,src_h,dest_w,dest_h,pitch,h_inc,step_by,left,leftUV,top;
-    int is_420;
+    int is_420,best_pitch,mpitch;
     radeon_vid_stop_video();
     left = config->src.x << 16;
     top =  config->src.y << 16;
@@ -891,24 +891,26 @@ static int radeon_vid_init_video( vidix_playback_t *config )
     if(config->fourcc == IMGFMT_YV12 ||
        config->fourcc == IMGFMT_I420 ||
        config->fourcc == IMGFMT_IYUV) is_420 = 1;
+    best_pitch = radeon_query_pitch(config->fourcc);
+    mpitch = best_pitch-1;
     switch(config->fourcc)
     {
 	/* 4:2:0 */
 	case IMGFMT_IYUV:
 	case IMGFMT_YV12:
-	case IMGFMT_I420: pitch = (src_w + 31) & ~31;
+	case IMGFMT_I420: pitch = (src_w + mpitch) & ~mpitch;
 			  config->dest.pitch.y = 
 			  config->dest.pitch.u = 
-			  config->dest.pitch.v = 32;
+			  config->dest.pitch.v = best_pitch;
 			  break;
 	/* 4:2:2 */
         default:
 	case IMGFMT_UYVY:
 	case IMGFMT_YUY2:
-			  pitch = ((src_w*2) + 15) & ~15;
+			  pitch = ((src_w*2) + mpitch) & ~mpitch;
 			  config->dest.pitch.y =
 			  config->dest.pitch.u =
-			  config->dest.pitch.v = 16;
+			  config->dest.pitch.v = best_pitch;
 			  break;
     }
     dest_w = config->dest.w;
@@ -965,7 +967,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
       besr.vid_buf0_base_adrs += config->offset.y;
       besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
       besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
-      besr.vid_buf3_base_adrs = besr.vif_buf0_base_adrs+config->frame_size;
+      besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
       besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs;
       besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs+config->frame_size;
     }
