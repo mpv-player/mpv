@@ -13,6 +13,13 @@
 
 #include "../config.h"
 
+#ifndef CAN_COMPILE_X86
+#ifdef  ARCH_X86
+#define CAN_COMPILE_X86
+#endif
+#endif
+
+
 #if 0
  /* old WRITE_SAMPLE */
    /* is portable */
@@ -149,7 +156,7 @@ static int synth_1to1_r(real *bandPtr,int channel,unsigned char *out,int *pnt)
 
 synth_func_t synth_func;
 
-#if (defined(RUNTIME_CPUDETECT) && defined(CAN_COMPILE_X86_ASM)) || defined(HAVE_MMX)
+#if defined(CAN_COMPILE_X86_ASM)
 int synth_1to1_MMX( real *bandPtr,int channel,short * samples)
 {
     static short buffs[2][2][0x110];
@@ -169,7 +176,7 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
   int clip = 0;
   int bo1;
 /* optimized for x86 */
-#if (defined(RUNTIME_CPUDETECT) && defined(CAN_COMPILE_X86_ASM)) || defined(ARCH_X86)
+#if defined(CAN_COMPILE_X86_ASM)
   if ( synth_func )
    {
     int ret;

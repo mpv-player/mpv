@@ -129,7 +129,7 @@ LOCAL unsigned int getbits_fast(short number_of_bits)
 //  if(MP3_frames>=7741) printf("getbits_fast: bits=%d  bitsleft=%d  wordptr=%x\n",number_of_bits,bitsleft,wordpointer);
   if((bitsleft-=number_of_bits)<0) return 0;
   if(!number_of_bits) return 0;
-#if (defined(RUNTIME_CPUDETECT) && defined(CAN_COMPILE_X86_ASM)) || defined(ARCH_X86)
+#if defined(CAN_COMPILE_X86_ASM)
   rval = bswap_16(*((unsigned short *)wordpointer));
 #else
   /*
@@ -172,7 +172,7 @@ LOCAL void set_pointer(long backstep)
 
 LOCAL int stream_head_read(unsigned char *hbuf,unsigned long *newhead){
   if(mp3_read(hbuf,4) != 4) return FALSE;
-#if (defined(RUNTIME_CPUDETECT) && defined(CAN_COMPILE_X86_ASM)) || defined(ARCH_X86)
+#if defined(CAN_COMPILE_X86_ASM)
   *newhead = bswap_32(*((unsigned long *)hbuf));
 #else
   /*
