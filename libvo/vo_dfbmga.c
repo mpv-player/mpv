@@ -601,8 +601,8 @@ config( uint32_t width, uint32_t height,
      if (use_bes) {
           aspect_save_screenres( 0x10000, 0x10000 );
           aspect( &out_width, &out_height, A_ZOOM );
-          besrect.x = (0x10000 - out_width) * in_width / 0x10000 / 2;
-          besrect.y = (0x10000 - out_height) * in_height / 0x10000 / 2;
+          besrect.x = (0x10000 - out_width) * in_width / out_width / 2;
+          besrect.y = (0x10000 - out_height) * in_height / out_height / 2;
           besrect.w = in_width;
           besrect.h = in_height;
 
