@@ -58,6 +58,7 @@ extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
 extern int vo_gamma_contrast;
 extern int vo_gamma_hue;
+extern char *vo_geometry;
 
 extern int opt_screen_size_x;
 extern int opt_screen_size_y;
@@ -239,6 +240,8 @@ static config_t mplayer_opts[]={
 	// set screen dimensions (when not detectable or virtual!=visible)
 	{"screenw", &vo_screenwidth, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	// Geometry string
+	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - usefull for 16:9 TVout
 	{"monitoraspect", &monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
 	// video mode switching: (x11,xv,dga)

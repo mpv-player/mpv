@@ -15,6 +15,7 @@
  * 13/04/02: Fix rough OSD stuff by rendering it straight onto the output
  * buffer. Added double-buffering. Supports hardware zoom/reduce zoom modes.
  * 13/04/02: Misc cleanups of the code.
+ * 22/10/02: Added geometry support to it
  *
  * Hints and tricks:
  * - Use -dr to get direct rendering
@@ -22,7 +23,8 @@
  * - To get a black background and nice smooth OSD, use -double
  * - To get the console as a background, but with scaled OSD, use -nodouble
  * - The driver supports both scaling and shrinking the image using the -x and
- *   -y options on the mplayer commandline.
+ *   -y options on the mplayer commandline. Also repositioning via the -geometry
+ *   option.
  */
 
 #include <stdio.h>
@@ -200,15 +202,9 @@ static void clear_screen()
 /* Setup output screen dimensions etc */
 static void setup_screen(uint32_t full)
 {
+	aspect(&vidwidth, &vidheight, full ? A_ZOOM : A_NOZOOM);
+	geometry(&vidx, &vidy, screenwidth, screenheight, vidwidth, vidheight, full);
 	vo_fs = full;
-
-	aspect(&vidwidth,&vidheight, vo_fs ? A_ZOOM : A_NOZOOM);
-	if(vo_fs) {
-	  vidx = (screenwidth - vidwidth) / 2;
-	  vidy = (screenheight - vidheight) / 2;
-	} else
-	  vidx = vidy = 0;
-
 	clear_screen();
 }
 

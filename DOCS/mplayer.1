@@ -1048,6 +1048,27 @@ See also \-zoom.
 .B \-fsmode-dontuse <0-31> (OBSOLETE) (use \-fs option)
 Try this option if you still experience fullscreen problems.
 .TP
+.B \-geometry x[%][:y[%]]
+Adjust where the output is on the screen initially. The x and y specifications
+are in pixels measured from the top-right of the screen to the top-right of the
+image being displayed, however if a percentage sign is given after the argument
+it turns the value into a percentage of the screen size in that direction. The
+values given must be integers. Examples:
+
+.PD 0
+.RSs
+.IPs 50:40
+Places the window at x=50, y=40
+.IPs 50%:50%
+Places the window in the middle of the screen
+.IPs 100%
+Places the window at the top left corner of the screen
+.IPs 100%:100%
+Places the window at the bottom left corner of the screen
+.RE
+.PD 1
+.
+.TP
 .B \-hue <\-100\ \-\ 100>
 Adjust hue of video signal (default: 0).
 You can get colored negative of image with this option.
