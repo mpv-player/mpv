@@ -98,6 +98,7 @@ typedef struct mkv_track
   int reorder_timecodes;
   demux_packet_t **cached_dps;
   int num_cached_dps, num_allocated_dps;
+  float max_pts;
 
   /* generic content encoding support */
   mkv_content_encoding_t *encodings;
@@ -2865,6 +2866,8 @@ handle_video_bframes (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
   memcpy(dp->buffer, buffer, size);
   dp->pos = demuxer->filepos;
   dp->pts = mkv_d->last_pts;
+  if ((track->num_cached_dps > 0) && (dp->pts < track->max_pts))
+    block_fref = 1;
   if (block_fref == 0)          /* I or P frame */
     flush_cached_dps (demuxer, track);
   if (block_bref != 0)          /* I frame, don't cache it */
@@ -2878,6 +2881,8 @@ handle_video_bframes (demuxer_t *demuxer, mkv_track_t *track, uint8_t *buffer,
     }
   track->cached_dps[track->num_cached_dps] = dp;
   track->num_cached_dps++;
+  if (dp->pts > track->max_pts)
+    track->max_pts = dp->pts;
 }
 
 static int
