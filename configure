@@ -2341,9 +2341,9 @@ fi
 
 echocheck "SDL"
 if test -z "$_sdlconfig" ; then
-  if ( sdl-config --version ) >/dev/null 2>&1 ; then
+  if ( sdl-config --version ) >>"$TMPLOG" 2>&1 ; then
     _sdlconfig="sdl-config"
-  elif ( sdl11-config --version ) >/dev/null 2>&1 ; then
+  elif ( sdl11-config --version ) >>"$TMPLOG" 2>&1 ; then
     _sdlconfig="sdl11-config"
   else
     _sdlconfig=false
@@ -2352,11 +2352,11 @@ fi
 if test "$_sdl" = auto || test "$_sdl" = yes ; then
   cat > $TMPC << EOF
 #include <SDL.h>
-int main(void) { return 0; }
+int main(int argc, char *argv[]) { return 0; }
 EOF
   _sdl=no
-  if "$_sdlconfig" --version >/dev/null 2>&1 ; then
-    if cc_check `$_sdlconfig --cflags` `$_sdlconfig --libs` ; then
+  if "$_sdlconfig" --version >>"$TMPLOG" 2>&1 ; then
+    if cc_check `$_sdlconfig --cflags` `$_sdlconfig --libs` >>"$TMPLOG" 2>&1 ; then
       _sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
         if test "$_sdlversion" -gt 116 ; then
           if test "$_sdlversion" -lt 121 ; then
