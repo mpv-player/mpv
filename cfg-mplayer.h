@@ -4,6 +4,7 @@
 
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
+	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0}, /* this must be the first!!! */
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
 	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},

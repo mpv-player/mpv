@@ -85,6 +85,10 @@ static int cfg_inc_verbose(struct config *conf){
     return 0;
 }
 
+static int cfg_include(struct config *conf, char *filename){
+	return parse_config_file(conf, filename);
+}
+
 static int max_framesize=0;
 
 static int dbg_es_sent=0;
