@@ -18,15 +18,22 @@ static void *mem_base = 0;
 static int32_t overlay_offset = 0;
 static uint32_t ram_size = 0;
 
+#define CARD_FLAGS_NONE		0x00
+#define CARD_FLAGS_NOTSUPPORTED	0x01
+
 struct nv_card_id_s
 {
     const unsigned int id ;
     const char name[17];
+    const int core;
+    const int flags;
 };
 
 static const struct nv_card_id_s nv_card_ids[]=
 {
-    { DEVICE_NVIDIA_RIVA_TNT2_NV5, "nVidia TNT2" },
+    { DEVICE_NVIDIA_RIVA_TNT2_NV5, "nVidia TNT2 (NV5) ", 5, CARD_FLAGS_NOTSUPPORTED},
+    { DEVICE_NVIDIA_VANTA_NV6, "nVidia Vanta (NV6.1)", 6, CARD_FLAGS_NOTSUPPORTED},
+    { DEVICE_NVIDIA_VANTA_NV62, "nVidia Vanta (NV6.2)", 6, CARD_FLAGS_NOTSUPPORTED},
 };
 
 static int find_chip(unsigned int chip_id)
@@ -95,7 +102,15 @@ int vixProbe(int verbose)
 		idx = find_chip(lst[i].device);
 		if (idx == -1)
 		    continue;
-		printf("Found chip: %s\n", nv_card_ids[idx].name);
+		if (nv_card_ids[idx].flags & CARD_FLAGS_NOTSUPPORTED)
+		{
+		    printf("Found chip: %s, but not supported!\n",
+			nv_card_ids[idx].name);
+		    continue;
+		}
+		else
+		
+		    printf("Found chip: %s\n", nv_card_ids[idx].name);
 		nvidia_cap.device_id = nv_card_ids[idx].id;
 		err = 0;
 		memcpy(&pci_info, &lst[i], sizeof(pciinfo_t));
