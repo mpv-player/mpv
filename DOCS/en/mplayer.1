@@ -2718,6 +2718,15 @@ detc filter, and should be used with mencoder but not with mplayer.
 As with detc, you must specify the correct output framerate (-ofps
 23.976) when using mencoder.
 .TP
+.B "softpulldown"
+This filter works only correct with mencoder and acts on the MPEG2 flags
+used for soft 3:2 pulldown (soft telecine).
+If you want to use the ivtc or detc filter on movies that are partly soft
+telecined, inserting this filter before them should make them more reliable.
+Currently only libmpeg2 exports the needed flags.
+If used on material that does not set them or if using ffmpeg12, the
+filter does nothing.
+.TP
 .B "telecine[=start]"
 Apply 3:2 "telecine" process to increase framerate by 20%.
 This most likely will not work correctly with mplayer, but it can
