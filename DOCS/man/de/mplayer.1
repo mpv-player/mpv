@@ -754,20 +754,19 @@ Information vorhanden ist.
 .B \-aid <ID> (siehe auch \-alang)
 Gibt die zu verwendende Audiospur an (MPEG: 0\-31 AVI/\:OGM: 1\-99
 ASF/\:RM: 0\-127 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS: 17\-8190).
-MPlayer gibt alle verwendbaren IDs aus, wenn er im Verbose-Modus (\-v)
+MPlayer gibt alle verwendbaren Audio-IDs aus, wenn er im Verbose-Modus (\-v)
 gestartet wird.
 Beim Abspielen eines MPEG-TS-Streams wählt MPlayer/\:MEncoder das erste
-Programm
-(falls vorhanden) mit der gewählten Audiospur.
+Programm (falls vorhanden) mit der gewählten Audiospur.
 .
 .TP
 .B \-alang <Sprachcode> (siehe auch \-aid)
-Spielt denjenigen Audiostream, der dem angegebenen Sprachcode entspricht.
+Gibt eine Prioritätenliste der abzuspielenden Audiospuren an.
 Verschiedene Containerformate verwenden unterschiedliche Ländercodes.
 DVDs benutzen den zweibuchstabigen ISO 639-1 Sprachcode, Matroska und NUT
 benutzen den dreibuchstabigen ISO 639-2 Sprachcode, während OGM einen
 beliebigen Bezeichner verwendet.
-MPlayer gibt eine Liste aller vorhandenen Sprachen aus, wenn er im
+MPlayer gibt alle vorhandenen Sprachen aus, wenn er im
 Verbose-Modus (\-v) gestartet wird.
 .sp 1
 .I BEISPIEL:
@@ -1473,24 +1472,28 @@ aktivieren.
 .
 .TP
 .B \-sid <id> (siehe auch \-slang)
-Zeigt die DVD-Untertitel an, die durch <ID> (0\-31) angegeben sind.
-Eine Liste der verfügbaren Untertitel erhältst du bei der Verwendung
+Zeigt den Untertitelstream an, der durch <ID> (0\-31) angegeben wird.
+Eine Liste der verfügbaren Untertitel-IDs erhältst du bei der Verwendung
 der Option \-v.
 .
 .TP
-.B \-slang <Ländercode[,Ländercode,...]> (siehe auch \-sid)
-Gibt eine Prioritätenliste von DVD-Untertiteln an, die benutzt werden
-sollen.
-Sprachen müssen als zweibuchstabige Ländercodes angegeben werden.
-Eine Liste der verfügbaren Untertitel erhältst du bei der Verwendung
+.B \-slang <Sprachcode[,Sprachcode,...]> (siehe auch \-sid)
+Gibt eine Prioritätenliste von zu benutzenden Untertitelsprachen an.
+Verschiedene Containerformate verwenden unterschiedliche Sprachcodes.
+DVDs benutzen ISO 639-1-Sprachcodes mit zwei Buchstaben, Matroska verwendet 
+ISO 639-2-Sprachcodes mit drei Buchstaben, während OGM einen formfreien
+Bezeichner gebraucht.
+Die verfügbaren Untertitelsprachen erhältst du bei der Verwendung
 der Option \-v.
 .sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
-.IPs "\-slang hu,en"
-Wählt ungarische Untertitel und verwendet die englischen Untertitel, wenn
-es keine ungarischen gibt.
+.IPs "mplayer dvd://1 \-slang hu,en"
+Wählt den ungarischen Untertitel einer DVD und verwendet die englischen
+Untertitel, wenn es keine ungarischen gibt.
+.IPs "mplayer \-slang jpn example.mkv"
+Spielt eine Matroskadatei mit japanischen Untertiteln ab.
 .RE
 .PD 1
 .
@@ -1952,7 +1955,7 @@ Produziert keine Audioausgabe, behält aber die Videoabspielgeschwindigkeit bei.
 Benutze \-nosound für Benchmarking-Zwecke.
 .
 .TP
-.B pcm
+.B pcm\ \ \ \ 
 Filewriter-Audioausgabe im raw-PCM/\:Wave-Format.
 .PD 0
 .RSs
