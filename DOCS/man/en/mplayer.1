@@ -2134,6 +2134,9 @@ screen to the top-left of the image being displayed, however if a percentage
 sign is given after the argument it turns the value into a percentage of the
 screen size in that direction.
 It also supports the standard X11 \-geometry option format.
+If an external window is specified using the \-wid option, then the x and
+y coordinates are relative to the top-left corner of the window rather
+than the screen.
 .br
 .I NOTE:
 This option is only supported by the x11, xmga, xv, xvmc, xvidix,
@@ -2269,8 +2272,8 @@ the new display mode.
 Enables VBI for the vesa, dfbmga and svga video output drivers.
 .
 .TP
-.B \-wid <window\ ID> (also see \-guiwid) (X11 only)
-This tells MPlayer to attach to an existing X11 window.
+.B \-wid <window\ ID> (also see \-guiwid) (X11 and DirectX only)
+This tells MPlayer to attach to an existing window.
 Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
 .
 .TP

@@ -81,6 +81,7 @@ extern int vo_rootwin;
 extern int vidmode;
 extern int vo_colorkey;
 extern float monitor_aspect;
+extern int WinID;
 
 /*****************************************************************************
  * DirectDraw GUIDs.
@@ -510,6 +511,17 @@ static uint32_t Directx_ManageDisplay()
       rd.top=(vo_screenheight-height)/2;
       if(ShowCursor(FALSE)>=0)while(ShowCursor(FALSE)>=0){}
     }
+    else if (WinID != -1 && vo_geometry) {
+      POINT pt;
+      pt.x = vo_dx;
+      pt.y = vo_dy;
+      ClientToScreen(hWnd,&pt);  
+      width=d_image_width;
+      height=d_image_height;
+      rd.left = pt.x;
+      rd.top = pt.y;
+      while(ShowCursor(TRUE)<=0){}
+    }
     else {
       POINT pt;
       pt.x = 0;  //overlayposition relative to the window
@@ -628,6 +640,7 @@ static uint32_t Directx_ManageDisplay()
     }       
 	
     if(!vidmode && !vo_fs){
+      if(WinID == -1) {
           RECT rdw=rd;
           AdjustWindowRect(&rdw,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,FALSE);
 //          printf("window: %i %i %ix%i\n",rdw.left,rdw.top,rdw.right - rdw.left,rdw.bottom - rdw.top);      
@@ -636,11 +649,9 @@ static uint32_t Directx_ManageDisplay()
 		  rdw.right += monitor_rect.left;
 		  rdw.bottom += monitor_rect.top;
           SetWindowPos(hWnd,(vo_ontop)?HWND_TOPMOST:(vo_rootwin?HWND_BOTTOM:HWND_NOTOPMOST),rdw.left,rdw.top,rdw.right-rdw.left,rdw.bottom-rdw.top,SWP_NOOWNERZORDER); 
+      }
     }
     else SetWindowPos(vidmode?hWnd:hWndFS,vo_rootwin?HWND_BOTTOM:HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOOWNERZORDER);
-
-  	/*for nonoverlay mode we are finished, for overlay mode we have to display the overlay first*/
-	if(nooverlay)return 0;
 
     /*make sure the overlay is inside the screen*/
     if(rd.left<0)rd.left=0;
@@ -648,6 +659,8 @@ static uint32_t Directx_ManageDisplay()
     if(rd.top<0)rd.top=0;
     if(rd.bottom>vo_screenheight)rd.bottom=vo_screenheight;
     
+  	/*for nonoverlay mode we are finished, for overlay mode we have to display the overlay first*/
+	if(nooverlay)return 0;
 	
 //    printf("overlay: %i %i %ix%i\n",rd.left,rd.top,rd.right - rd.left,rd.bottom - rd.top);
 	ddrval = g_lpddsOverlay->lpVtbl->UpdateOverlay(g_lpddsOverlay,&rs, g_lpddsPrimary, &rd, dwUpdateFlags, &ovfx);
@@ -992,6 +1005,8 @@ static uint32_t preinit(const char *arg)
     wc.lpszClassName =  "MPlayer - The Movie Player";
     wc.lpszMenuName  =  NULL;
     RegisterClass(&wc);
+    if (WinID != -1) hWnd = WinID;
+    else
     hWnd = CreateWindowEx(vidmode?WS_EX_TOPMOST:0,
         "MPlayer - The Movie Player","",(vidmode)?WS_POPUP:WS_OVERLAPPEDWINDOW| WS_SIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT, 100, 100,NULL,NULL,hInstance,NULL);
@@ -1144,6 +1159,8 @@ static uint32_t put_image(mp_image_t *mpi){
 	uint32_t y = mpi->y;
 	uint32_t w = mpi->w;
 	uint32_t h = mpi->h;
+
+    if (WinID != -1) Directx_ManageDisplay();
    
     if((mpi->flags&MP_IMGFLAG_DIRECT)||(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK)) 
 	{
@@ -1232,12 +1249,15 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
         rd.top = vo_dy;
         rd.right = rd.left + d_image_width;
         rd.bottom = rd.top + d_image_height;
+        if (WinID == -1) {
         AdjustWindowRect(&rd,WS_OVERLAPPEDWINDOW|WS_SIZEBOX,FALSE);  
         SetWindowPos(hWnd,NULL, vo_dx, vo_dy,rd.right-rd.left,rd.bottom-rd.top,SWP_SHOWWINDOW|SWP_NOOWNERZORDER); 
+        }
     }
     else ShowWindow(hWnd,SW_SHOW); 
      
     if(vo_fs && !vidmode)ShowWindow(hWndFS,SW_SHOW);   
+	if (WinID == -1)
 	SetWindowText(hWnd,title);
     
     
@@ -1380,6 +1400,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	case VOCTRL_DRAW_IMAGE:
         return put_image(data);
     case VOCTRL_ONTOP:
+			if(WinID != -1) return VO_TRUE;
 	        if(vidmode)
 			{
 				mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>ontop has no meaning in exclusive mode\n");
@@ -1392,6 +1413,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 			}
 		return VO_TRUE;
     case VOCTRL_ROOTWIN:
+			if(WinID != -1) return VO_TRUE;
 	        if(vidmode)
 			{
 				mp_msg(MSGT_VO, MSGL_ERR,"<vo_directx><ERROR>rootwin has no meaning in exclusive mode\n");

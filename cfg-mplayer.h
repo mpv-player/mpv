@@ -75,8 +75,8 @@ extern int fs_layer;
 extern int stop_xscreensaver;
 extern char **vo_fstype_list;
 extern int vo_nomouse_input;
-extern int WinID;
 #endif
+extern int WinID;
 
 #ifdef HAVE_MENU
 extern int menu_startup;
@@ -272,9 +272,9 @@ m_option_t mplayer_opts[]={
 	
     {"adapter", &vo_adapter_num, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
     {"refreshrate",&vo_refresh_rate,CONF_TYPE_INT,CONF_RANGE, 0,100, NULL},
+	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
 #ifdef HAVE_X11
 	// x11,xv,xmga,xvidix
-	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"icelayer", "-icelayer is obsolete. Use -fstype layer:<number> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"stop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nostop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
