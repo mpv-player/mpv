@@ -16,6 +16,9 @@ mplayer (1.0)
     * support for (uncompressed) VobSubs inside Matroska
     * support for MP2 inside Matroska
     * MPEG-TS demuxer updates
+    * fixed the MPEG muxer
+    * fixed tons of bugs in MMS streaming
+    * user settable http user-agent field
     
     Filters:
     * some fixes in the delogo filter 
@@ -45,6 +48,7 @@ mplayer (1.0)
     * better interlacing framework
     * support for IBM's XLC compiler
     * support for SAR (sample aspect ratio)
+    * floating point AAN DCT
     
     Drivers:
     * VIDIX equalizer support in fbdev
