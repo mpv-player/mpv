@@ -260,6 +260,12 @@ mp_image_t* vf_get_image(vf_instance_t* vf, unsigned int outfmt, int mp_imgtype,
 
 //============================================================================
 
+// By default vf doesn't accept MPEGPES
+static int vf_default_query_format(struct vf_instance_s* vf, unsigned int fmt){
+  if(fmt == IMGFMT_MPEGPES) return 0;
+  return vf_next_query_format(vf,fmt);
+}
+
 vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char *name, char *args){
     vf_instance_t* vf;
     int i;
@@ -276,7 +282,7 @@ vf_instance_t* vf_open_plugin(vf_info_t** filter_list, vf_instance_t* next, char
     vf->next=next;
     vf->config=vf_next_config;
     vf->control=vf_next_control;
-    vf->query_format=vf_next_query_format;
+    vf->query_format=vf_default_query_format;
     vf->put_image=vf_next_put_image;
     vf->default_caps=VFCAP_ACCEPT_STRIDE;
     vf->default_reqs=0;
