@@ -14,8 +14,7 @@
 #define CODECS_MAX_OUTFMT	16
 
 // Global flags:
-#define CODECS_FLAG_AUDIO	(1<<0)
-#define CODECS_FLAG_SEEKABLE	(1<<1)
+#define CODECS_FLAG_SEEKABLE	(1<<0)
 
 // Outfmt flags:
 #define CODECS_FLAG_FLIP	(1<<0)
@@ -50,7 +49,7 @@ typedef struct {
 	short status;
 } codecs_t;
 
-codecs_t* parse_codec_cfg(char *cfgfile);
+codecs_t** parse_codec_cfg(char *cfgfile);
 codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,int audioflag);
 
 #endif
