@@ -1834,7 +1834,8 @@ else
 fi
 echores "$_nas"
 
-if test "$_mmx" = no ; then
+# libmp1e's audio encoder is failing under QNX
+if test "$_mmx" = no || qnx ; then
   _mp1e=no
 fi
 if test "$_mp1e" = yes ; then
@@ -2128,7 +2129,7 @@ echores "$_vorbis"
 
 
 echocheck "Win32 DLL support"
-if test "$_win32" = auto ; then
+if test "$_win32" = auto && ! qnx ; then
   _win32=no
   if x86 ; then
     if test -z "$_win32libdir" ; then
