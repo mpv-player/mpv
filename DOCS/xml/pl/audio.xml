@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.18 -->
+<!-- synced with 1.19 -->
 <sect2 id="audio-dev">
 <title>Urządzenia wyjściowe audio</title>
 <sect3 id="sync">
@@ -1020,6 +1020,52 @@ mplayer -af export=/tmp/mplayer-af_export:1024 <replaceable>film.avi</replaceabl
 wyeksportuje 1024 próbek na kanał do <filename>/tmp/mplayer-af_export</filename>.
 </para>
 </sect4>
+
+<sect4 id="af_extrastereo">
+<title>Extrastereo</title>
+
+<para>
+Ten filtr dźwięku zwiększa (liniowo) różnicę między lewym a prawym kanałem
+(tak jak wtyczka extrastereo dla <application>XMMSa</application>)
+dodając efekt &quot;przekazu na żywo&quot; do odtwarzania.
+Ma on jeden parametr:</para>
+
+<variablelist>
+<varlistentry>
+<term><option>mul</option></term>
+<listitem><para>
+to współczynnik różnicy wyrażony liczbą rzeczywistą (domyślna wartość to
+<literal>2.5</literal>). Jeśli podasz mu wartość <literal>0.0</literal>, dźwięk będzie
+odtwarzany w trybie mono (średnia z dwóch kanałów). Jeśli natomiast
+ustawisz go na <literal>1.0</literal>, dźwięk pozostamie niezmieniony,
+a jeśli na <literal>-1.0</literal>, lewy kanał z prawym zostaną zamienione.
+</para></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Sposób użycia:
+<screen>
+mplayer -af extrastereo <replaceable>media.avi</replaceable>
+mplayer -af extrastereo=3.45 <replaceable>media.avi</replaceable><!--
++--></screen>
+</para>
+</sect4>
+
+<sect4 id="af_volnorm">
+<title>Volume normalizer</title>
+
+<para>
+Ten filtr audio maksymalnie zwiększa głośność, nie wprowadzając przy tym
+szumów.
+</para>
+
+<para>
+Sposób użycia:
+<screen>mplayer -af volnorm <replaceable>media.avi</replaceable></screen>
+</para>
+</sect4>
+
 </sect3>
 
 <sect3 id="audio-plugins">
