@@ -1,0 +1,32 @@
+Template: mplayer/replace-existing-files
+Type: boolean
+Default: true
+Description: Upgrade existing system?
+ It looks like you've configured your mplayer already.
+ If you'd like to configure it with this program, I'll have
+ to delete the old configuration.  Do you want to continue
+ configuration with this program?  If you say "yes", I'll go ahead
+ and delete your old configuration and you can create it anew with
+ this program. 
+
+Template: mplayer/replace-existing-files-bail
+Type: note
+Description: Files not replaced
+ I'm going to exit now since you don't want me to replace your
+ existing files.  If you change your mind later, you can run
+ dpkg-reconfigure mplayer.
+
+Template: mplayer/mainmenu
+Type: select
+Choices: ${choices}, Exit
+Description: MPlayer Main Menu
+ From this menu, you can modify any of the settings for your device.
+ Simply select the item you'd like to change to modify it.
+ When you are done, select Exit.
+
+Template: mplayer/voutput
+Type: select
+Choices: ${vochoices}, x11
+Description: MPlayer Video Output
+ Yada yada..
+
