@@ -5095,10 +5095,14 @@ else
 fi
 
 _def_libavformat='#undef USE_LIBAVFORMAT'
+_def_libavformat_win32='#undef CONFIG_WIN32'
 if test "$_libavformat" = yes ; then
   _def_libavformat='#define USE_LIBAVFORMAT 1'
   _ld_libavformat='libavformat/libavformat.a'
   _dep_libavformat='libavformat/libavformat.a'
+  if mingw32 || cygwin ; then
+    _def_libavformat_win32='#define CONFIG_WIN32 1'
+  fi
 fi
 
 echocheck "libdv-0.9.5+"
@@ -6296,6 +6300,7 @@ $_def_libavcodecso
 
 /* ffmpeg's libavformat support (requires libavformat source) */
 $_def_libavformat
+$_def_libavformat_win32
 
 /* risky codecs */
 #define CONFIG_RISKY 1
