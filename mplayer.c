@@ -1583,7 +1583,7 @@ if(!sh_video) {
 		    ,(sh_audio->timer>0.5)?100.0*audio_time_usage/(double)sh_audio->timer:0
 		    ,cache_fill_status
 		    );
-  usec_sleep(sh_audio->a_buffer_len/sh_audio->o_bps/1000);
+  usec_sleep(sh_audio->a_buffer_len/(float)sh_audio->o_bps*1000000);
   goto read_input;
 }
 
