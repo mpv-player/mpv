@@ -3922,7 +3922,7 @@ Further development on ivtc has stopped, as the pullup and filmdint
 filters appear to be much more accurate.
 .
 .TP
-.B pullup[=jl:jr:jt:jb:sb]\ 
+.B pullup[=jl:jr:jt:jb:sb:mp]\ 
 Third-generation pulldown reversal (inverse telecine) filter,
 capable of handling mixed hard-telecine, 24 fps progressive, and 30
 fps progressive content.
@@ -3941,6 +3941,18 @@ Setting the sb (strict breaks) option to 1 will reduce the chances of
 pullup generating an occasional mismatched frame, but it may also
 cause an excessive number of frames to be dropped during high motion
 sequences.
+Conversely, setting it to -1 will make pullup match fields more
+easily.
+This may help processing of video where there is slight blurring
+between the fields, but may also cause there to be interlaced frames
+in the output.
+The mp (metric plane) option may be set to 1 or 2 to use a chroma
+plane instead of the luma plane for doing pullup's computations.
+This may improve accuracy on very clean source material, but more
+likely will decrease accuracy, especially if there is chroma noise
+(rainbow effect) or any grayscale video.
+The main purpose of setting mp to a chroma plane is to reduce cpu load
+and make pullup usable in realtime on slow machines.
 .br
 .I NOTE:
 Always follow pullup with the softskip filter when encoding to ensure

@@ -77,7 +77,6 @@ static void init_pullup(struct vf_instance_s* vf, mp_image_t *mpi)
 		c->stride[1] = c->stride[2] = mpi->chroma_width;
 		c->stride[3] = c->w[3];
 		c->background[1] = c->background[2] = 128;
-		c->metric_plane = 0;
 	}
 
 	if (gCpuCaps.hasMMX) c->cpu |= PULLUP_CPU_MMX;
@@ -324,8 +323,9 @@ static int open(vf_instance_t *vf, char* args)
 	c->junk_left = c->junk_right = 1;
 	c->junk_top = c->junk_bottom = 4;
 	c->strict_breaks = 0;
+	c->metric_plane = 0;
 	if (args) {
-		sscanf(args, "%d:%d:%d:%d:%d", &c->junk_left, &c->junk_right, &c->junk_top, &c->junk_bottom, &c->strict_breaks);
+		sscanf(args, "%d:%d:%d:%d:%d:%d", &c->junk_left, &c->junk_right, &c->junk_top, &c->junk_bottom, &c->strict_breaks, &c->metric_plane);
 	}
 	return 1;
 }
