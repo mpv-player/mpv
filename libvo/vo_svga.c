@@ -514,10 +514,14 @@ static void draw_osd(void)
   if (y_pos) {
     gl_fillbox(0, 0, WIDTH, y_pos, 0);
     gl_fillbox(0, HEIGHT - y_pos, WIDTH, y_pos, 0);
-  }
-  if (x_pos) {
-    gl_fillbox(0, 0, x_pos, HEIGHT, 0);
-    gl_fillbox(WIDTH - x_pos, 0, x_pos, HEIGHT, 0);
+    if (x_pos) {
+       int hmy=HEIGHT - (y_pos<<1); 
+       gl_fillbox(0, y_pos, x_pos, hmy, 0);
+       gl_fillbox(WIDTH - x_pos, y_pos, x_pos, hmy, 0);
+    }
+  } else if (x_pos) {
+    gl_fillbox(0, y_pos, x_pos, HEIGHT, 0);
+    gl_fillbox(WIDTH - x_pos, y_pos, x_pos, HEIGHT, 0);
   }
 
   vo_draw_text(WIDTH, HEIGHT, draw_alpha);
