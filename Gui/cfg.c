@@ -132,6 +132,10 @@ int cfg_read( void )
  char * cfg = get_path( "gui.conf" );
  FILE * f;
 
+#ifdef USE_SETLOCALE
+ setlocale( LC_ALL,"C" );
+#endif
+
 // -- read configuration
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[cfg] read config file: %s\n",cfg );
  gui_conf=m_config_new( play_tree_new() ); 
@@ -177,6 +181,10 @@ int cfg_read( void )
   }
  free( cfg );
 
+#ifdef USE_SETLOCALE
+ setlocale( LC_ALL,"" );
+#endif
+
  return 0;
 }
 
@@ -187,7 +195,7 @@ int cfg_write( void )
  int    i;
 
 #ifdef USE_SETLOCALE
- setlocale( LC_ALL,"" );
+ setlocale( LC_ALL,"C" );
 #endif
 
 // -- save configuration 
@@ -198,26 +206,8 @@ int cfg_write( void )
      switch ( gui_opts[i].type )
       {
        case CONF_TYPE_INT:
-       case CONF_TYPE_FLAG:   fprintf( f,"%s = %d\n",gui_opts[i].name,*( (int *)gui_opts[i].p ) );   				      break;
-       case CONF_TYPE_FLOAT:  
-    	    #if 0
-    	    fprintf( f,"%s = %f\n",gui_opts[i].name,*( (float *)gui_opts[i].p ) );
-	    #else
-	    #warning ugly hakk for fucking locale
-	    {
-	     char tmp[64];
-	     snprintf( tmp,64,"%f",*( (float *)gui_opts[i].p ) );
-	     // locale emulator
-	     // { char * c = strchr( tmp,'.' ); if ( c ) *c=','; }
-	     // ---
-	     { int i;
-	       for ( i=0;i < strlen( tmp );i++ )
-	        if ( ( tmp[i] != '.' )&&( ( tmp[i] < '0' )||( tmp[i] > '9' ) ) ) tmp[i]='.';
-	     }
-	     fprintf( f,"%s = %s\n",gui_opts[i].name,tmp );
-	    }
-	    #endif
-	    break;
+       case CONF_TYPE_FLAG:   fprintf( f,"%s = %d\n",gui_opts[i].name,*( (int *)gui_opts[i].p ) );   break;
+       case CONF_TYPE_FLOAT:  fprintf( f,"%s = %f\n",gui_opts[i].name,*( (float *)gui_opts[i].p ) ); break;
        case CONF_TYPE_STRING: 
             {
 	     char * tmp = *( (char **)gui_opts[i].p );
@@ -260,6 +250,10 @@ int cfg_write( void )
    fclose( f );
   }
  free( cfg );
+
+#ifdef USE_SETLOCALE
+ setlocale( LC_ALL,"" );
+#endif
 
  return 0;
 }
