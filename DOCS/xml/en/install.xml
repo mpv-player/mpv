@@ -118,6 +118,10 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   <emphasis role="bold">libsmb</emphasis> - optional, for Samba support.
   </para></listitem>
 <listitem><para>
+  <emphasis role="bold">ALSA</emphasis> - optional, for ALSA audio output
+  support. At least 0.9.0rc4 is required.
+  </para></listitem>
+<listitem><para>
   <emphasis role="bold">bio2jack</emphasis> - optional, for JACK audio output
   support, needed only in compile time. You can obtain it from
   <ulink url="http://bio2jack.sf.net/">http://bio2jack.sf.net</ulink>. Since it
