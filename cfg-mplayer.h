@@ -233,7 +233,7 @@ m_option_t mplayer_opts[]={
 	// Geometry string
 	{"geometry", &vo_geometry, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	// set aspect ratio of monitor - useful for 16:9 TVout
-	{"monitoraspect", &monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
+	{"monitoraspect", &monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 9.0, NULL},
 	// video mode switching: (x11,xv,dga)
         {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
         {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
