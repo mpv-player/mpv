@@ -253,8 +253,9 @@ Just choose the one that applies to your version of Xfree.
 <para>
 XFree86 4.3.0 includes Xv support, yet Bohdan Horst sent a small
 <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch</ulink>
-against the XFree sources that speeds up framebuffer operations up to four
-times.
+against the XFree86 sources that speeds up framebuffer operations up to four
+times. The patch has been included in XFree86 CVS and should be in the next
+release after 4.3.0.
 </para>
 
 <para>
