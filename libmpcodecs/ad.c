@@ -38,6 +38,7 @@ extern ad_functions_t mpcodecs_ad_libmad;
 extern ad_functions_t mpcodecs_ad_realaud;
 extern ad_functions_t mpcodecs_ad_libdv;
 extern ad_functions_t mpcodecs_ad_qtaudio;
+extern ad_functions_t mpcodecs_ad_ra1428;
 
 ad_functions_t* mpcodecs_ad_drivers[] =
 {
@@ -85,5 +86,6 @@ ad_functions_t* mpcodecs_ad_drivers[] =
 #ifdef HAVE_LIBDV095
   &mpcodecs_ad_libdv,
 #endif
+  &mpcodecs_ad_ra1428,
   NULL
 };
