@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.13 -->
 <sect1 id="formats">
 <title>Támogatott formátumok</title>
 
@@ -13,7 +13,7 @@ véleménnyel ellentétben egy ilyen fájl <emphasis>tartalmazhat</emphasis> MPEG1 v
 <para>
 Mint láthatod, egy <emphasis role="bold">codec</emphasis> nem ugyan az, mint egy
 <emphasis role="bold">fájl formátum</emphasis>.
-Például videó <emphasis role="bold">codec</emphasis>-ek ezek: MPEG1, MPEG2, DivX, Indeo5, 3ivx.
+Például videó <emphasis role="bold">codec</emphasis>-ek ezek: MPEG1, MPEG2, MPEG4 (DivX), Indeo5, 3ivx.
 De fájl <emphasis role="bold">formátumok</emphasis> ezek: MPG, AVI, ASF.
 </para>
 
@@ -263,7 +263,7 @@ olvasni a <filename>.NUV</filename> fájlait (csak NuppelVideo 5.0). Ezek a
 fájlok tartalmazhatnak tömörítetlen YV12, YV12+RTJpeg tömörített,
 YV12 RTJpeg+lzo tömörített és YV12+lzo tömörített képkockákat.
 Az <application>MPlayer</application> dekódolja (és <emphasis role="bold">kódolja</emphasis>
-a <application>MEncoder</application>rel DivX-be/stb.!) õket. A keresés
+a <application>MEncoder</application>rel MPEG4-be (DivX)/stb.!) õket. A keresés
 mûködik.
 </para>
 </sect3>
