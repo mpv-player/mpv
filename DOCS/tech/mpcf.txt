@@ -42,6 +42,12 @@ v
 		data				u(7)
 		value= 128*value + data
 	}while(more_data)
+        
+s
+	temp					v
+	temp++
+	if(temp&1) value= -(temp>>1)
+	else       value=  (temp>>1)
 
 b (binary data or string)
 	length					v
@@ -88,7 +94,8 @@ stream_header:
 	language_code				b
 	time_base_nom				v
 	time_base_denom				v
-	lsb_timestamp_length			v
+	msb_timestamp_shift			v
+	shuffle_type				v
 	fixed_fps				u(1)
 	index_flag				u(1)
 	reserved				u(6)
@@ -111,7 +118,7 @@ video_stream_header:
 
 audio_stream_header:
 	stream_header
-	samplerate				v
+	samplerate_mul				v
 	channel_count				v
 	reserved_bytes
 	checksum				u(32)
@@ -127,19 +134,25 @@ frame
 	msb_timestamp_flag			u(1)
 	subpacket_type				u(2)
 	reserved				u(1)
-	lsb_timestamp				v
 	stream_id				v
 	if(msb_timestamp_flag)
 		msb_timestamp			v
-	if(sub_packet_type==00)
+	lsb_timestamp				s
+	if(sub_packet_type==01)
 		sub_packet[0]
 	else{
 		subpacket_count			v
-		shuffle_type			v
-		if(subpacket_type==10){
-		    subpacket_base_size		v
-		    for(i=0; i<subpacket_count; i++)
-			subpacket_size_diff[i]	v
+		if(sub_packet_type&01)
+		    for(i=0; ; i++)
+			keyframe_run[i]		v
+		for(i=0; ; i++){
+		    timestamp_diff[i]		v
+		    if(timestamp_diff[i] & 1)
+			timestamp_diff_run[i]	v
+		}
+		if(sub_packet_type&10){
+		    for(i=0; i<subpacket_count-1; i++)
+			subpacket_size_diff[i]	s
 		}
 		for(i=0; i<subpacket_count; i++)
 		    subpacket[i]
@@ -163,25 +176,25 @@ Index:
 info_packet: (optional)
 	packet header
 	info_startcode				f(64)
-	start_time				v
-	end_time				v
-	start_stream_id				v
-	end_stream_id				v
 	for(;;){
-		type				b
-		if(type=="") break;
-		name				b
-		value				b
+		id				v
+		if(id==0) break
+		name= info_table[id][0]
+		type= info_table[id][1]
+		if(type==NULL)
+			type			b
+		if(name==NULL)
+			name			b
+		if(type=="v")
+			value			v
+		else if(type=="s")
+			value			s
+		else
+			value			b
 	}
 	reserved_bytes
         checksum				u(32)
         
-stuffing_packet: (optional)
-	packet_header
-	stuffing_startcode			f(64)
-	for(i=0; i<forward_ptr - length_of_non_reserved; i++)
-		stuffing			f(8)
-
                 
 forward_ptr
 backward_ptr
@@ -252,15 +265,21 @@ time_base_nom / time_base_denom = time_base
 	if the fixed_fps is 1
 	time_base_denom MUST not be 0
 	time_base_nom and time_base_denom MUST be relative prime
-	time_base_nom MUST be < 2^15
+	time_base_nom MUST be < 2^16
 	examples:
         	fps	time_base_nom	time_base_denom
 		30	30		1
 		29.97	30000		1001
 		23.976	24000		1001
+		sample_rate	sample_rate_mul	time_base_nom	time_base_denom
+		44100		1		44100		1
+		44100		64		11025		16 
+		48000		1024		375		8  
+		Note: the advantage to using a large sample_rate_mul is that the
+		      timestamps need fewer bits
 
-lsb_timestamp_length
-	length in bits of the lsb_timestamp
+msb_timestamp_shift
+	amount of bits msb_timestamp is shifted left before adding lsb_timestamp
 	MUST be <16
 
 fixed_fps
@@ -284,11 +303,12 @@ msb_timestamp_flag
 	MUST be 1 for keyframes
         
 subpacket_type
-	00	1		subpacket per packet (video, ...)
-	01	subpacket_count	fixed length subpackets per packet
-	10	subpacket_count	variable length subpackets per packet
-	11	reserved
-	the only legal subpacket_type for video streams is 00, so video streams
+		subpacket_count	subpacket_size	keyframe_flag
+	00	>1		constant	constant
+	01	1		NA		NA
+	10	>1		variable	constant
+	11	>1		variable	variable
+	the only legal subpacket_type for video streams is 01, so video streams
 	MUST NOT contain multiple subpackets per packet
 	Note, if there are multiple subpackets then the timestamp of the packet
 	is the timestamp of the first subpacket
@@ -296,28 +316,37 @@ subpacket_type
 	framesize SHOULD be < 16kbyte and not more then 0.5 sec of data SHOULD
 	be put in a single packet
 
-subpacket_base_size
-	an offset which should be added to the subpacket_size_diff of each 
-	subpacket to get the actual size, so its normally the size of the 
-	smallest subpacket
-	for fixed length subpackets, the size is calculated from the 
-	subpacket_count
-
 subpacket_count
 	the number of subpackets, if not pressent then 1
 
+keyframe_run[i]
+	the number of subpackets with an identical keyframe_flag
+	Note, the value of first flag is stored in the packet header
+	is equal to subpacket count if not coded
+
+timestamp_diff[i]
+	the difference from the last subpacket timestamp to the current one in
+	time_base precission
+	the lowwest bit is used to indicate if timestamp_diff_run[i] is coded
+
+timestamp_diff_run[i]
+	the number of subpackets which have the same timestamp_diff
+	if not coded than 1
+	0 is forbidden
+        
 subpacket_size_diff
-	the (allways positive) difference from the subpacket_base_size to the
-	actual size of the current subpacket, if its not coded 
-	(subpacket_type != 10) then its 0
+	the difference between the predicted size of this subpacket and the
+	actual size
+	the predicted size is 64 for the first subpacket in a packet
+	otherwise it is MAX(64, last_subpacket_size)
+	the size of the last subpacket is not coded and is simply the space left
 	Note a subpacket MUST be in exactly one packet, it cannot be split
        
 msb_timestamp
 	most significant bits of the timestamp, SHOULD be 0 for the first frame
  
 lsb_timestamp
-	most significant bits of the timestamp in time_base precission, with 
-	lsb_timestamp_length bits 
+	difference from the msb_timestamp in time_base precission
         Example: IBBP display order
 		keyframe msb_timestamp=0 lsb_timestamp=0 -> timestamp=0
 		frame                    lsb_timestamp=3 -> timestamp=3
@@ -325,8 +354,8 @@ lsb_timestamp
 		frame                    lsb_timestamp=2 -> timestamp=2
 		...
 		keyframe msb_timestamp=1 lsb_timestamp=1 -> timestamp=257
-		frame msb_timestamp=0    lsb_timestamp=255->timestamp=255
-		frame msb_timestamp=1    lsb_timestamp=0 -> timestamp=256
+		frame                    lsb_timestamp=-1-> timestamp=255
+		frame                    lsb_timestamp=0 -> timestamp=256
 		frame                    lsb_timestamp=4 -> timestamp=260
 		frame                    lsb_timestamp=2 -> timestamp=258
 		frame                    lsb_timestamp=3 -> timestamp=259
@@ -341,6 +370,10 @@ sample_width/sample_height (aspect ratio)
         
 depth
 	for compatibility with some win32 codecs
+        
+samplerate_mul
+	the number of samples per second in one time_base unit
+	samplerate = time_base*samplerate_mul
 
 zero_bit
 	MUST be 0, its there to distinguish non keyframes from other packets,
@@ -377,20 +410,21 @@ index_position
 	position in bytes of the first byte of the keyframe header, relative
 	to the last index_position
 
-start_time, stop_time
-	the time range in msecs to which the info applies
-	Note: can be used to mark chapters
-
-start_stream_id / end_stream_id
-	the stream(s) to which the info packet applies
-        
+id
+	the id of the type/name pair, so its more compact
+	0 means end
+                
 type
-	the fourcc of the type
 	for example: "UTF8" -> String or "JPEG" -> jpeg image
-	0 length means end
+	Note: nonstandard fields should be prefixed by "X-"
+	Note: MUST be less than 6 byte long (might be increased to 64 later)
 
 name
 	the name of the info entry, valid names are
+	"StreamId"	the stream(s) to which the info packet applies
+	"StartTimestamp" 
+	"EndTimestamp" 	the time range in msecs to which the info applies
+	"SegmentId"	a unique id for the streams + time specified
 	"Author"
 	"Description"
 	"Copyright"
@@ -408,11 +442,34 @@ name
 	Note: if someone needs some others, please tell us about them, so we can
 	      add them to the official standard (if they are sane)
 	Note: nonstandard fields should be prefixed by "X-"
+	Note: MUST be less than 64 bytes long
 
 value
+	value of this name/type pair
 	
 stuffing
-	0xFF
+        0x80 can be placed infront of any type v entry for stuffing
+	      purposes
+
+info_table[][2]={
+	{NULL			,  NULL }, // end
+	{NULL			,  NULL },
+	{NULL			, "UTF8"},
+	{NULL			, "v"},
+	{NULL			, "s"},
+	{"StreamId"		, "v"},
+	{"SegmentId"		, "v"},
+	{"StartTimestamp"	, "v"},
+	{"EndTimestamp"		, "v"},
+	{"Author"		, "UTF8"},
+	{"Titel"		, "UTF8"},
+	{"Description"		, "UTF8"},
+	{"Copyright"		, "UTF8"},
+	{"Encoder"		, "UTF8"},
+	{"Keyword"		, "UTF8"},
+	{"Cover"		, "JPEG"},
+	{"Cover"		, "PNG"},
+};
 
 			Structure:
 
@@ -481,31 +538,47 @@ static inline void put_bytes(BufferContext *bc, int count, uint64_t val){
 	return val;
 }
 
-static inline uint64_t get_v(BufferContext *bc){
+static inline uint64_t get_v(ByteStream *bc){
 	uint64_t val= 0;
 
-	for(;;){
+	for(; spaceLeft(bc) > 0; ){
 		int tmp= *(bc->buf_ptr++);
 		if(tmp&0x80)
 			val= (val<<7) + tmp - 0x80;
 		else
 			return (val<<7) + tmp;
 	}
+        
+	return -1;
 }
 
-static inline void put_v(BufferContext *bc, uint64_t val){
+static inline int put_v(ByteStream *bc, uint64_t val){
 	int i;
         
-	assert(val);
+	if(spaceLeft(bc) < 9) return -1;
 
-	for(i=56;; i-=8){
-		if(val>>i) break;
+	val &= 0x7FFFFFFFFFFFFFFFULL; // FIXME can only encode upto 63 bits currently
+	for(i=7; ; i+=7){
+		if(val>>i == 0) break;
 	}
 
-	for(;i>0; i-=8){
+	for(i-=7; i>0; i-=8){
 		*(bc->buf_ptr++)= 0x80 | (val>>i);
 	}
 	*(bc->buf_ptr++)= val&0x7F;
+        
+	return 0;
+}
+
+static inline int put_s(ByteStream *bc, uint64_t val){
+	if(val<=0) return put_v(bc, -2*val  );
+	else       return put_v(bc,  2*val-1);
+}
+
+static inline int64_t get_s(ByteStream *bc){
+	int64_t v= get_v(bc) + 1;
+	if(v&1) return -(v>>1);
+	else    return  (v>>1);
 }
 
                 
