@@ -208,7 +208,7 @@ void seek_cdda(stream_t* s) {
 //printf("sector: %d  new: %d\n", p->sector, sec );
  
   for(i=0;i<p->cd->tracks;i++){
-        printf("trk #%d: %d .. %d\n",i,p->cd->disc_toc[i].dwStartSector,p->cd->disc_toc[i+1].dwStartSector);
+//        printf("trk #%d: %d .. %d\n",i,p->cd->disc_toc[i].dwStartSector,p->cd->disc_toc[i+1].dwStartSector);
 	if( p->sector>=p->cd->disc_toc[i].dwStartSector && p->sector<p->cd->disc_toc[i+1].dwStartSector ) {
 		current_track = i;
 	}
