@@ -47,7 +47,7 @@ extern int verbose;
 #ifdef CONFIG_VIDIX
 /* Name of VIDIX driver */
 static const char *vidix_name = NULL;
-static int pre_init_err = 0;
+static int pre_init_err = 0xFFFFFFFEUL;
 #endif
 /******************************
 *	fb.modes support      *
@@ -907,8 +907,13 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	fs = fullscreen & 0x01;
 	flip = fullscreen & 0x08;
 
-	if (!fb_preinit())
-		return 1;
+	if(pre_init_err == 0xFFFFFFFEUL)
+	{
+	    printf(FBDEV "Internal fatal error: init() was called before preinit()\n");
+	    return -1;
+	}
+
+	if (pre_init_err) return 1;
 
 	if (zoom
 #ifdef CONFIG_VIDIX
@@ -1153,26 +1158,10 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
 static uint32_t query_format(uint32_t format)
 {
-#ifdef CONFIG_VIDIX
-  static int first = 1;
-#endif
 	int ret = 0x4; /* osd/sub is supported on every bpp */
 
 	if (!fb_preinit())
 		return 0;
-#ifdef CONFIG_VIDIX
-	if(first)
-	{
-	    first = 1;
-	    if(vo_subdevice) parseSubDevice(vo_subdevice);
-	    if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_fbdev);
-	    if(verbose > 2)
-		printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
-	}
-	if(!pre_init_err)
-	    if(vidix_name)
-		return vidix_query_fourcc(format);
-#endif
 	if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
 		int bpp = format & 0xff;
 
@@ -1340,7 +1329,14 @@ static void uninit(void)
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+    pre_init_err = 0;
+#ifdef CONFIG_VIDIX
+    if(vo_subdevice) parseSubDevice(vo_subdevice);
+    if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_fbdev);
+    if(verbose > 2)
+	printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
+#endif
+    if(!pre_init_err) return (pre_init_err=(fb_preinit()?0:-1));
 }
 
 static void query_vaa(vo_vaa_t *vaa)
