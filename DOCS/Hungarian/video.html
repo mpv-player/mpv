@@ -891,7 +891,7 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <H4><A NAME=mpegdec>2.3.1.3 MPEG dekóderek kártyák</A></H4>
 
-<H4><A NAME=mpegdec>2.3.1.3.1 DVB</A></H4>
+<H4><A NAME=dvb>2.3.1.3.1 DVB</A></H4>
 
 <P>Az MPlayer támogatja a Siemens, Technotrend, Galaxis, Hauppage és hasonló
   gyártóktól származó Siemens DVB chipsetet. A legújabb DVB meghajtók a
@@ -1000,6 +1000,9 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <H4><A NAME="dxr2">2.3.1.3.2 DXR2</A></H4>
 
+<P>Kosz hogy ilyen sokan irtatok ide..</P>
+
+
 <H4><A NAME="dxr3">2.3.1.3.3 DXR3/Hollywood+</A></H4>
 
 <P>Az MPlayer támogatja a hardveresen gyorsított lejátszást az olyan
@@ -1018,35 +1021,63 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 <DL>
   <DT><CODE>-vo dxr3:prebuf:sync:norm=x:&lt;device&gt;</CODE></DT>
   <DD>Az <CODE>overlay</CODE> opció megadása esetén a TV kimenet helyett az
-  overlay mód kerül bekapcsolásra. Ehhez egy megfelelõen konfigurált overlay
-  beállítás szükséges. A konfigurálás legegyszerübben az autocal nevû
-  program futtatásával történik. Ezután futtasd az MPlayer-t a dxr3 kimenettel
-  de egyelõre overlay nélkül. Indítsd el a dxr3view-et. Ebben a programban
-  valós idõben lehet finomhangolni az overlay beállításait. Miután az overlay
-  konfigurálása megtörtént, már nem szükséges a dxr3view használata.<BR>
-  A <CODE>prebuf</CODE> opció bekapcsolja a prebufferelést. Ez a feature
-  az em8300 chip sajátja, mellyel lehetséges egynél több video frame-t
-  (elõre) tárolni. Ez annyit tesz hogy az opció megadása esetén az MPlayer
-  mindig arra törekszik hogy a buffer tele legyen. Ha a géped lassú, az MPlayer
-  processzorhasználata ebben az esetben közelíti, vagy el is éri a 100%-ot.
-  Prebuffering használata esetén a lejátszás sokkal kevésbé lesz érzékeny
-  egyéb processz-ek CPU használatára.<BR>
-  Amennyiben nem használod ezt az opciót, mindenképpen ajánlott a
-  <CODE>-framedrop</CODE> opció használata, a további A/V szinkron csúszás
-  elkerülésére.<BR>
-  A <CODE>sync</CODE> opció az új szinkronizáció engine-t kapcsolja be.
-  Ez annyit tesz hogy az em8300 órája folytonos figyelés alá kerül, és
-  amennyiben eltér az MPlayer órájától, elõbbit reseteljük.<BR>
-  A <CODE>norm=x</CODE> opcióval megadható a használt TV normája, külsõ
-  programok (mint például az em8300setup) használata nélkül. Használható
-  opciók: 5 = NTSC, 4 = PAL-60, 3 = PAL. Speciális értékek a 2 (automata
-  állítás PAL/PAL-60) és az 1 (automata állítás PAL/NTSC), mert ezek a
-  film framerátájának alapján döntenek a használandó normáról. Nyilván
-  egy épeszû ember se vesz 2 TV-t csak azért hogy a PAL-os videói is meg az
-  NTSC-sek is hûdefaszán menjenek, csak ez a Holm ír baromságokat az
-  angol doksiba. Majd jól leverem. Meg amúgyis szar drivereket ír.<BR>
-  Innen nem is fordítom 1nlõre mert látom át kell írnom az englis
-  doxot is. picsába</DD>
+    overlay mód kerül bekapcsolásra. Ehhez egy megfelelõen konfigurált overlay
+    beállítás szükséges. A konfigurálás legegyszerübben az autocal nevû
+    program futtatásával történik. Ezután futtasd az MPlayer-t a dxr3 kimenettel
+    de egyelõre overlay nélkül. Indítsd el a dxr3view-et. Ebben a programban
+    valós idõben lehet finomhangolni az overlay beállításait. Miután az overlay
+    konfigurálása megtörtént, már nem szükséges a dxr3view használata.<BR>
+    A <CODE>prebuf</CODE> opció bekapcsolja a prebufferelést. Ez a feature
+    az em8300 chip sajátja, mellyel lehetséges egynél több video frame-t
+    (elõre) tárolni. Ez annyit tesz hogy az opció megadása esetén az MPlayer
+    mindig arra törekszik hogy a buffer tele legyen. Ha a géped lassú, az MPlayer
+    processzorhasználata ebben az esetben közelíti, vagy el is éri a 100%-ot.
+    Prebuffering használata esetén a lejátszás sokkal kevésbé lesz érzékeny
+    egyéb processz-ek CPU használatára.<BR>
+    Amennyiben nem használod ezt az opciót, mindenképpen ajánlott a
+    <CODE>-framedrop</CODE> opció használata, a további A/V szinkron csúszás
+    elkerülésére.<BR>
+    A <CODE>sync</CODE> opció az új szinkronizáció engine-t kapcsolja be.
+    Ez annyit tesz hogy az em8300 órája folytonos figyelés alá kerül, és
+    amennyiben eltér az MPlayer órájától, elõbbit reseteljük.<BR>
+    A <CODE>norm=x</CODE> opcióval megadható a használt TV normája, külsõ
+    programok (mint például az em8300setup) használata nélkül. Használható
+    opciók: 5 = NTSC, 4 = PAL-60, 3 = PAL. Speciális értékek a 2 (automata
+    állítás PAL/PAL-60) és az 1 (automata állítás PAL/NTSC), mert ezek a
+    film framerátájának alapján döntenek a használandó normáról. A 0
+    ertek (alapallapot) nem valtoztat a norman.<BR>
+    <CODE>&lt;egysegnev&gt;</CODE> - ha tobb em8300 kartyad van, itt
+    megadhatod hogy melyiket akarod hasznalni.
+    <BR>
+    Mindegyik opcio opcionalis. Jo mi?<BR>
+    <CODE>:prebuf:sync</CODE> kombinacio a legmegfelelobb a DivX filmek
+    lejatszasara. Nehanyak szerint a <CODE>prebuf</CODE> opcio problemakat
+    okozhat MPEG1/2 lejatszasanal. A <CODE>sync</CODE> opcio akkor hasznalando,
+    ha valamilyen problema adodik az opciok nelkuli lejatszasnal, peldaul
+    nem megjeleno DVD feliratok, stb.</DD>
+
+  <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
+  <DD>Ezzel az opcioval az em8300 kartyan keresztul lesz lejatszva a
+    hang (a hasznalando ertek egy kartya eseten 0).</DD>
+
+  <DT><CODE>-aop list=resample:fout=xxxxx</CODE></DT>
+  <DD>Az em8300 nem tud 44100Hz-nel alacsonyabb frekvencian lejatszani.
+  Ha ilyen audioval van dolgod, a fenti opcioba irj 44100-at vagy 48000-at
+  annak megfeleloen hogy az eredeti ertek melyikhez van kozelebb. Tehat
+  22050Hz eseten 44100, 24000Hz eseten 48000. Ez az opcio termeszetesen
+  nem mukodik digitalis AC3 eseten (<CODE>-ac hwac3</CODE>).</DD>
+
+  <DT><CODE>-vop lavc</CODE></DT>
+  <DD>Ez elvileg mar szuksegtelen.. TODO: tesztelni</DD>
+
+  <DT><CODE>-vop lavc,expand=-1:-1:-1:-1:1</CODE></DT>
+  <DD>Detto</DD>
+
+  <DT><CODE>-ac hwac3</CODE></DT>
+  <DD>Az em8300 kepes a rajta athalado dekodolatlan AC3 adatot a digitalis
+    kimeneten egy erositonek tovabbadni. Ebben az esetben meg kell adni
+    a fenti <CODE>-ao oss:...</CODE> opciot, hogy a hangkartya helyett
+    a DXR3-on keresztul menjen a hang.</DD>
 </DL>
 
 
