@@ -2696,6 +2696,12 @@ static int WINAPI expGetEnvironmentVariableA(const char* name, char* field, int 
     return strlen(field);
 }
 
+static int WINAPI expSetEnvironmentVariableA(const char *name, const char *value)
+{
+    dbgprintf("SetEnvironmentVariableA(%s, %s)\n", name, value);
+    return 0;
+}
+
 static void* WINAPI expCoTaskMemAlloc(ULONG cb)
 {
     return my_mreq(cb, 0);
@@ -3835,6 +3841,7 @@ struct exports exp_kernel32[]=
     FF(GetLocalTime, -1)
     FF(GetSystemTime, -1)
     FF(GetEnvironmentVariableA, -1)
+    FF(SetEnvironmentVariableA, -1)
     FF(RtlZeroMemory,-1)
     FF(RtlMoveMemory,-1)
     FF(RtlFillMemory,-1)
