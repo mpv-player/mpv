@@ -756,13 +756,12 @@ current_module = NULL;
 
 play_next_file:
 
-// We can enable getch2 *either* here *or* on a per-file basis, but NOT both!!!
-// Doing it both places causes the saved terminal state to get trashed!!
-// Maybe this can be renabled at a later date if it's useful...
-//if(!use_stdin && !slave_mode){
-//  getch2_enable();  // prepare stdin for hotkeys...
-//  inited_flags|=INITED_GETCH2;
-//}
+// We must enable getch2 here to be able to interrupt network connection
+// or cache filling
+if(!use_stdin && !slave_mode){
+  getch2_enable();  // prepare stdin for hotkeys...
+  inited_flags|=INITED_GETCH2;
+}
 
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
@@ -1554,11 +1553,6 @@ if(force_fps){
 //==================== START PLAYING =======================
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
-
-if(!use_stdin && !slave_mode){
-  getch2_enable();  // prepare stdin for hotkeys...
-  inited_flags|=INITED_GETCH2;
-}
 
 InitTimer();
 
