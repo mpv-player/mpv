@@ -328,7 +328,8 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
 	    case AFMT_MPEG:
 	    case AFMT_AC3:
 	    default:
-		mp_msg(MSGT_TV, MSGL_ERR, "Audio type '%s' unsupported!\n", audio_out_format_name(audio_format));
+		mp_msg(MSGT_TV, MSGL_ERR, "Audio type '%s (%x)' unsupported!\n",
+		    audio_out_format_name(audio_format), audio_format);
 		goto no_audio;
 	}
 	
@@ -371,17 +372,21 @@ no_audio:
 }
 
 /* ================== STREAM_TV ===================== */
+tvi_handle_t *tvi_init_dummy(char *device);
+tvi_handle_t *tvi_init_v4l(char *device);
+tvi_handle_t *tvi_init_bsdbt848(char *device);
+
 tvi_handle_t *tv_begin(void)
 {
     if (!strcmp(tv_param_driver, "dummy"))
-	return (tvi_handle_t *)tvi_init_dummy(tv_param_device);
+	return tvi_init_dummy(tv_param_device);
 #ifdef HAVE_TV_V4L
     if (!strcmp(tv_param_driver, "v4l"))
-	return (tvi_handle_t *)tvi_init_v4l(tv_param_device);
+	return tvi_init_v4l(tv_param_device);
 #endif
 #ifdef HAVE_TV_BSDBT848
     if (!strcmp(tv_param_driver, "bsdbt848"))
-	return (tvi_handle_t *)tvi_init_bsdbt848(tv_param_device);
+	return tvi_init_bsdbt848(tv_param_device);
 #endif
 
     mp_msg(MSGT_TV, MSGL_ERR, "No such driver: %s\n", tv_param_driver); 
