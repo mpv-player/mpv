@@ -1,0 +1,67 @@
+MPlayer TV-out with G400
+~~~~~~~~~~~~~~~~~~~~~~~~
+(this was a reply at the mplayer-matrox list)
+
+> What I'd love to see in mplayer is the the same feature that I see in my
+> windows box. When I start a movie in windows (in a window or in full screen)
+> the movie is also redirected to the tv-out and I can also see it full screen
+> on my tv. I love this feature and was wondering how hard it would be to add
+> such a feature to mplayer.
+
+It's a driver limitation. BES (Back-End Scaler, it's the overlay generator
+and YUV scaling engine of G200/G400/G450 cards) works only with CRTC1.
+Normally, CRTC1 (textmode, every bpp gfx and BES) is routed to HEAD1,
+and CRTC2 (only 16/32bpp gfx) is routed to HEAD2 (TV-out).
+
+Under linux, you have two choices to get TV-out working:
+
+1. Using X 4.0.x + the HAL driver from matrox, so you'll get dual-head
+   support, and you'll be able to redirect second output to the TV.
+   Unfortunately it has Macrovision encryption enabled, so it will
+   only work on directly-connected TV, no through VCR.
+   Other problem is that Xv doesn't work on the second head.
+   (I don't know how Windows solve it, maybe it swaps the CRTCs between
+   the heads, or just uses YUV framebuffer of second DAC with some trick)
+
+2. Using matroxfb with dual-head support enabled (2.4.x kernels).
+   You'll be able to get a framebuffer console (using CRTC2, so it's
+   slow), and TV-out (using CRTC1, with BES support).
+   You have to forget X while using this kind of TV-out! :(
+
+   How to enable?
+
+-  Compile all the matrox-related things to modules in the kernel.
+   (you MUST compile them to modules, at least I couldn't get them
+   working built-in yet)
+   [reboot to new kernel & install modules, but don't load them yet!]
+
+-  Run the 'modules' script from the TV-out directory of mplayer.
+   It will switch your console to framebuffer.
+   Change to tty1 (ALT+F1)!
+   Now run the script 'independent', it will set up your tty's:
+     tty 1,2:      fb console, CRTC2, head 1 (monitor)
+     tty 3,4,5...: framebuffer+BES, CRTC1, head 2 (TV-out)
+   You should run the scripts TV-* and Mon-* to set up resolutions:
+     change to tty1 (ALT+F1), and run Mon-* (one of them)
+     change to tty3 (ALT+F3) and then back to tty1 (ALT+F1)
+       (this change will select tty3 on /dev/fb1 - tricky)
+     run TV-* (one of them)
+       (now you'll get a console on your PAL TV - don't know about NTSC)
+
+   Now if you start mplayer (on tty1), the picture will show up on
+   the tty3, so you'll see it on your TV or second monitor.
+
+Yes, it is a bit 'hack' now. But I'm waiting for the marvel
+project to be finished, it will provide real TV-out drivers, I hope.
+
+My current problem is that BES is working only with CRTC1. So picture
+will always shown up on head routed to CRTC1 (normaly the monitor),
+so i have to swap CRTC's, but this way your console will framebuffer
+(CRTC2 can't do text-mode) and a bit slow (no acceleration). :(
+
+
+> anyway i also just get monochrome output on the tv ...
+Maybe you have NTSC TV? Or just didn't run one of TV-* scripts.
+
+
+A'rpi / Astral & ESP-team
