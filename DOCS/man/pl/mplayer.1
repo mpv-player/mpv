@@ -1,4 +1,4 @@
-.\" synced with 1.897
+.\" synced with 1.907
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -494,7 +494,8 @@ winvidix, xmga, xvidix, xover i directx.
 .B \-nocolorkey
 Wy³±cza kolor kluczowy.
 Obs³ugiwane tylko przez sterowniki wyj¶cia video cvidix, fbdev, svga, vesa,
-winvidix, xmga, xvidix i xover.
+winvidix, xmga, xvidix, xv (sprawd¼ równie¿ -vo xv:ck), xvmc
+(sprawd¼ równie¿ -vo xv:ck) i xover.
 .
 .TP
 .B \-crash-debug (kod do debugowania)
@@ -1139,15 +1140,12 @@ pocz±tku.
 .
 .TP
 .B \-srate <Hz>
-Wybiera czêstotliwo¶æ próbkowania, któr± bêdzie wykorzystana przez
-kartê d¼wiêkow± (oczywi¶cie karty maj± te¿ swoje ograniczenia).
-Je¿eli czêstotliwo¶æ próbkowania Twojej karty jest inna ni¿ w obecnie
-przetwarzanym strumieniu, do wartwy d¼wiêkowej zastosowany zostanie filtr zmieniaj±cy
-czêstotliwo¶æ próbkowania, aby zniwelowaæ ró¿nicê.
-Opcja \-af-adv steruje typem przepróbkowywania.
+Wybiera czêstotliwo¶æ próbkowania, która bêdzie dalej wykorzystywana
+(oczywi¶cie karty maj± te¿ swoje ograniczenia).
+Je¿eli wybrana czêstotliwo¶æ jest inna ni¿ w obecnie przetwarzanym strumieniu,
+do wartwy d¼wiêkowej zastosowany zostanie filtr resample lub lavcresample,
+aby zniwelowaæ ró¿nicê. Opcja \-af-adv steruje typem przepróbkowywania.
 Domy¶lne jest szybkie przepróbkowywanie, które mo¿e zniekszta³ciæ d¼wiêk.
-.br
-MEncoder przekazuje tê warto¶æ do LAME przy przepróbkowywaniu.
 .
 .TP
 .B \-ss <czas> (patrz te¿ opcja \-sb)
@@ -2083,10 +2081,6 @@ Bufor ramek VESA nie obs³uguje zmieniania trybu.
 U¿ywa podanego zbioru konfiguracyjnego (domy¶lnie: /etc/\:fb.modes).
 .
 .TP
-.B \-forcexv (tylko \-vo sdl)
-Wymusza u¿ywanie XVideo poprzez sterownik wyj¶cia video sdl.
-.
-.TP
 .B \-fs (patrz te¿ \-zoom)
 Odtwarzanie pe³noekranowe (film w centrum i czarne obramowanie wokó³ niego).
 Nie wszystkie sterowniki wyj¶cia video to obs³uguj±.
@@ -2224,10 +2218,6 @@ Nie utrzymuje proporcji, gdy zmieniany jest rozmiar okna.
 Dzia³a obecnie tylko ze sterownikami wyj¶cia video x11, xv, xmga, xvidix oraz
 directx.
 Dodatkowo, pod X11 Twój manager okien musi rozumieæ zalecenia proporcji okna.
-.
-.TP
-.B \-noxv (tylko \-vo sdl)
-Wy³±cza u¿ywanie XVideo poprzez sterownik wyj¶cia video sdl.
 .
 .TP
 .B \-ontop\ 
@@ -2391,10 +2381,33 @@ Wykorzystuje rozszerzenie XVideo oferowane przez XFree86 4.x, aby w³±czyæ
 sprzêtow± akceleracjê odtwarzania.
 Je¿eli nie mo¿esz skorzystaæ ze sterownika napisanego specjalnie dla Twojego sprzêtu,
 to prawdopodobnie jest najlepsza opcja.
+Informacje po co wykorzystywany jest kolorkluczowy i jak jest rysowany uruchom MPlayera
+z opcj± -v, i poszukaj linii na pocz±tku opisanych [xv common].
 .PD 0
 .RSs
 .IPs port=<numer>
 Okre¶la port XVideo.
+.IPs ck=cur|use|set
+Okre¶la ¼ród³o, z którego pobierany jest kolor kluczowy (domy¶lnie: cur).
+.RSss
+.IPs cur
+Opcja domy¶lna, pobiera kolor kluczowy ustawiony w Xv.
+.IPs use
+Wykorzystuje, ale nie ustawia koloru kluczowego z MPlayera (podaj opcjê -colorkey,
+aby to zmieniæ).
+.IPs set
+Podobjie jak use, ale ustawia równie¿ dostarczony kolor kluczowy.
+.RE
+.IPs ck-method=man|bg|auto
+Ustawia metodê rysowania koloru kluczowego (domy¶lnie: man).
+.RSss
+.IPs man
+Rêcznie rysuje kolor kluczowy (ogranicza, w niektórych przypadkach, migotanie).
+.IPs bg
+Ustawia kolor kluczowy jako t³o.
+.IPs auto
+Pozwala rysowaæ kolor kluczowy przez Xv.
+.RE
 .RE
 .PD 1
 .
@@ -2421,20 +2434,20 @@ Compensation) oferowanego przez XFree86 4.x, aby przyspieszyæ dekodowanie
 MPEG-1/\:2 i VCR2.
 .PD 0
 .RSs
-.IPs benchmark
+.IPs port=<numer>
+Okre¶la port XVideo.
+.IPs (no)benchmark
 Nie wy¶wietla obrazów.
 Konieczne dla prawid³owego testowania wydajno¶ci dla sterowników, które
 zmieniaj± bufor obrazu tylko przy przerysowywaniu monitoru (nVidia).
-.IPs queue
+Domy¶lnie nie wy³±cza wy¶wietlania obrazu (nobenchmark).
+.IPs (no)queue
 Kolejkuje klatki do wy¶wietlenia, aby umo¿liwiæ bardziej równoleg³± pracê
 urz±dzenia video.
-Mo¿e spowodowaæ ma³± (nie zauwa¿aln±) sta³± desynchronizacjê A/\:V.
-.IPs sleep
+Mo¿e spowodowaæ ma³± (nie zauwa¿aln±) sta³± desynchronizacjê A/\:V (domy¶lnie: noqueue).
+.IPs (no)sleep
 Wykorzystuje funkcjê sleep podczas czekania na zakoñczenie renderowania
-(niezalecane na Linuksie).
-.IPs wait\ 
-Nie korzysta z funkcji sleep podczas czekania na zakoñczenie renderowania
-(domy¶lne).
+(niezalecane na Linuksie). Domy¶lnie nie u¿ywa funkcji sleep (nosleep).
 .RE
 .PD 1
 .
@@ -2444,15 +2457,20 @@ Odtwarza video korzystaj±c z rozszerzenia XFree86 Direct Graphics Access.
 Uwa¿any za prze¿ytek.
 .
 .TP
-.B sdl (patrz te¿ \-forcexc, \-noxv) (tylko SDL)
+.B sdl (tylko SDL)
 Sterownik wyj¶cia oparty na wysoce niezale¿nej od platformy bibliotece SDL
 (Simple Directmedia Layer).
 Poniewa¿ SDL u¿ywa w³asnej warstwy X11, opcje MPlayera dotycz±ce X11 nie maj±
 tu ¿adnego wp³ywu.
 .PD 0
 .RSs
-.IPs <sterownik>
-Wybiera u¿ywany sterownik SDL.
+.IPs driver=<sterownik>
+Wybiera sterownik SDL, który bêdzie u¿ywany do wy¶wietlania.
+.IPs (no)forcexv
+Wykorzystuje rozszerzenie XVideo przy odtwarzaniu przez sterownik wyj¶cia video sdl
+(domy¶lnie: forcexv).
+.IPs (no)hwaccel
+Wykorzystuje sprzêtowo wspomagany skalator (domy¶lnie: hwaccel).
 .RE
 .PD 1
 .
@@ -3545,7 +3563,9 @@ Zmienia czêstotliwo¶æ próbkowania strumienia audio.
 Mo¿e byæ przydatny, je¶li masz kartê o sta³ej sta³ej, ustalonej
 czêstotliwo¶ci próbkowania lub je¶li posiadasz wy³±cznie star± kartê,
 która obs³u¿y max 44.1kHz.
-Filtr ten jest automatycznie w³±czany, je¶li zajdzie taka potrzebamienia czêstotliwo¶æ próbkowania strumienia audio na podan± w Hz liczbê.
+Filtr ten jest automatycznie w³±czany, je¶li zajdzie taka potrzeba.
+Obs³uguje on 16-bitowy ca³kowitoliczbowy lub rzeczywisty, natywny format endian
+jako dane wej¶ciowe.
 .br
 .I INFORMACJA:
 Z MEncoderem musisz te¿ u¿yæ opcji \-srate <czprób>.
@@ -3590,7 +3610,7 @@ z dok³adnego skalowania i interpolacji liniowej.
 .TP
 .B lavcresample[=czprób[:d³ug[:lin[:liczba[:obcinanie]]]]]
 Zmienia czêstotliwo¶æ próbkowania strumienia audio na ca³kowit± liczbê <czprób> wyra¿on±
-w Hz. Obs³uguje tylko format 16-bit little-endian.
+w Hz. Obs³uguje tylko 16-bitowy natywny format endian.
 .br
 .I INFORMACJA:
 Z MEncoderem musisz te¿ u¿yæ opcji \-srate <czprób>.
@@ -7978,16 +7998,12 @@ Bêdzie zaktualizowane, je¶li to konieczne, w przypadku "format=mpeg1" lub "mpeg2
 Ustawia, je¶li to mo¿liwe, znaczniki czasu w ka¿dej ramce.
 .
 .TP
-.B reorder
+.B (no)reorder
 W³±cza kod przestawiania ramek, który przechowuje ramki w kolejno¶ci
 dekodowania (a nie wy¶wietlania) (domy¶lnie: wy³±czone).
 U¿ywaj tylko, je¶li uwa¿asz, ¿e klatki w oryginalnym strumieniu by³y
 b³êdnie zapisane.
 Dzia³a tylko z filmami MPEG-1/2.
-.
-.TP
-.B noreorder
-Wy³±cza wspomniany wy¿ej kod przestawiania ramek.
 .
 .TP
 .B init_vpts=<100\-700>
@@ -8027,6 +8043,11 @@ Ustawia bitrate video w kbit/s dla filmów MPEG-1/2.
 .B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
 Ustawia ilo¶æ klatek na sekundê dla filmów MPEG-1/2.
 .
+.TP
+.B telecine
+W³±cza tryb miêkkiego telecine: muxer oszukuje strumieñ obrazu tak, aby wygl±da³
+jak kodowany przy 29.97 lub 30 fps; dzia³a to tylko z filmami MPEG-2, kiedy
+ilo¶æ klatek na sekundê wynosi 23.976 lub 24.
 .
 .\" --------------------------------------------------------------------------
 .\" Pliki
