@@ -75,7 +75,7 @@ static int *sty;
 double accum;
 
 /* our version of the playmodes :) */
-static char * osdmodes[] ={ "|>", "||", ">>", "[]" , ">>" };
+static char * osdmodes[] ={ "|>", "||", "[]", "<<" , ">>" };
 
 extern void mplayer_put_key(int code);
 
@@ -277,7 +277,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 		"\t6 : brightness -\n"
 		"\t7 : brightness +\n"
 		"\n"
-		"All other keys are MPlayer standart\n"
+		"All other keys are MPlayer defaults.\n"
 
 
 	  );
