@@ -357,6 +357,24 @@ switch(sh_video->codec->driver){
  case VFM_RLE: {
    int bpp=((out_fmt&255)+7)/8; // RGB only
    sh_video->our_out_buffer = memalign(64,sh_video->disp_w*sh_video->disp_h*bpp); // FIXME!!!
+   if(bpp==2){  // 15 or 16 bpp ==> palette conversion!
+     unsigned int* pal=(unsigned int*)(((char*)sh_video->bih)+40);
+     //int cols=(sh_video->bih->biSize-40)/4;
+     int cols=1<<(sh_video->bih->biBitCount);
+     int i;
+     if(cols>256) cols=256;
+     printf("RLE: converting palette for %d colors.\n",cols);
+     for(i=0;i<cols;i++){
+        unsigned int c=pal[i];
+	unsigned int b=c&255;
+	unsigned int g=(c>>8)&255;
+	unsigned int r=(c>>16)&255;
+	if((out_fmt&255)==15)
+	  pal[i]=((r>>3)<<10)|((g>>3)<<5)|((b>>3));
+	else
+	  pal[i]=((r>>3)<<11)|((g>>2)<<5)|((b>>3));
+     }
+   }
    break;
  }
 }
