@@ -9,9 +9,12 @@ outline=1.5
 
 make || exit
 
-./subfont --blur $blur --outline $outline "$encoding" $fontsize "$font" &>log || exit
+./subfont --blur $blur --outline $outline "$encoding" $fontsize "$font" &>log
+status=$?
 cat log
-./subfont --append --blur $blur --outline $outline encodings/osd-mplayer $symbolssize osd/osd.pfb
+[ $status == 0 ] || exit
+
+./subfont --append --blur $blur --outline $outline encodings/osd-mplayer $symbolssize osd/osd.pfb || exit
 
 #cp font.desc *.raw ~/.mplayer/font/
 

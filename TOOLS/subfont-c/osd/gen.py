@@ -375,7 +375,7 @@ print """\
 12 dict begin
 /FontInfo 9 dict dup begin
 /version (Version 1.00) readonly def
-/Notice () readonly def
+/Notice (This is generated file.) readonly def
 /FullName (OSD) readonly def
 /FamilyName (OSD) readonly def
 /Weight (Regular) readonly def
