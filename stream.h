@@ -1,3 +1,5 @@
+#ifndef __STREAM_H
+#define __STREAM_H
 
 #define STREAM_BUFFER_SIZE 2048
 
@@ -131,3 +133,5 @@ void stream_reset(stream_t *s);
 stream_t* new_stream(int fd,int type);
 void free_stream(stream_t *s);
 
+
+#endif // __STREAM_H
