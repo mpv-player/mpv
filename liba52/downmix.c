@@ -609,7 +609,7 @@ static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
 	break;
 
     case CONVERT (A52_3F1R, A52_3F2R):
-	memcpy (samples + 1027, samples + 768, 256 * sizeof (sample_t));
+	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
 	break;
     }
 }
@@ -1177,7 +1177,7 @@ static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bia
 	break;
 
     case CONVERT (A52_3F1R, A52_3F2R):
-	memcpy (samples + 1027, samples + 768, 256 * sizeof (sample_t));
+	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
 	break;
     }
 }
@@ -1806,7 +1806,7 @@ static void downmix_3dnow (sample_t * samples, int acmod, int output, sample_t b
 	break;
 
     case CONVERT (A52_3F1R, A52_3F2R):
-	memcpy (samples + 1027, samples + 768, 256 * sizeof (sample_t));
+	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
 	break;
     }
     __asm __volatile("femms":::"memory");
