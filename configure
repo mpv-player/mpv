@@ -1477,6 +1477,8 @@ if [ $_css = yes ]; then
    else
      _cssinc=""
    fi
+else
+   _css='#undef HAVE_LIBCSS'
 fi
 
 fi
