@@ -1997,17 +1997,14 @@ EOF
     if cc_check -ljpeg -lm ; then
       if "$TMPO" >> "$TMPLOG" ; then
         _jpg=yes
-        echores yes
       fi
-    else
-      echores no
     fi
-else
-  echores "$_jpg"
 fi
+echores "$_jpg"
+
 if test "$_jpg" = yes ; then
   _def_jpg='#define HAVE_JPEG 1'
-  _ld_jpg='-ljpeg'
+  _ld_jpg="-ljpeg"
   _mkf_jpg="yes"
 else
   _def_jpg='#undef HAVE_JPEG'
