@@ -1,4 +1,4 @@
-.\" synced with 1.859
+.\" synced with 1.860
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "16 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "20 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -406,7 +406,8 @@ vf=eq2=1.0:-0.8
 Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
 Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
 créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce
-fichier et placez-le dans ~/.mplayer ou dans le même répertoire que le fichier.
+fichier et placez-le dans ~/.mplayer/ ou dans le même répertoire que le
+fichier.
 .
 .
 .SH "OPTIONS GÉNÉRALES"
@@ -816,7 +817,8 @@ Particulièrement utile sur des médias lents.
 .
 .TP
 .B \-cache-min <pourcentage>
-Commence la lecture quand <pourcentage> du cache est rempli.
+La lecture commencera quand le cache sera rempli jusqu'à <pourcentage>
+du total.
 .
 .TP
 .B \-cache-prefill <pourcentage> (pas encore implémenté)
@@ -3232,9 +3234,8 @@ Essaie les codecs Win32 en premier.
 .
 .TP
 .B \-aspect <ratio> (voir aussi \-zoom)
-Force le rapport hauteur/\:largeur des films.
-Le rapport d'aspect des fichiers MPEG est autodétecté, mais ne peut l'être
-avec la plupart des fichiers AVI.
+Force le rapport hauteur/\:largeur du film, dans le cas où l'information de
+ration d'aspect est incorrecte ou manquante dans le fichier lu.
 .sp 1
 .I EXEMPLE:
 .PD 0
@@ -4442,7 +4443,7 @@ la trame.
 .
 .TP
 .B lavcdeint (OBSOLÈTE)
-filtre de désentrelacement de libavcodec, identique à \-vf pp=fd
+filtre de désentrelacement de FFmpeg, identique à \-vf pp=fd
 .
 .TP
 .B kerndeint[=seuil[:carte[:ordre[:netteté[:deuxsens]]]]]
@@ -7776,7 +7777,7 @@ cherche les les fichiers sub dans cet ordre\ :
 .\" Exemples
 .\" --------------------------------------------------------------------------
 .
-.SH EXEMPLES
+.SH EXEMPLES D'UTILISATIONS DE MPLAYER
 .
 .TP
 .B Lecture rapide de DVD\ :
@@ -7836,6 +7837,12 @@ mplayer \-vo zr \-vf scale=352:288 file.avi
 mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .
 .TP
+.B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
+mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
+.
+.SH EXEMPLES D'UTILISATIONS DE MENCODER
+.
+.TP
 .B Encode le titre #2 d'un DVD, uniquement les chapitres sélectionnés\ :
 mencoder dvd://2 \-chapter 10-15 \-o titre2.avi \-oac copy \-ovc divx4
 .
@@ -7870,10 +7877,6 @@ mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc rawrgb
 .TP
 .B Encode depuis un pipe
 rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
-.
- .TP
-.B Joue un fichier AAC 6 canaux avec seulement deux enceintes\ :
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1 adts_he-aac160_51.aac
 .
 .TP
 .B Encode de multiples fichiers *.vob
