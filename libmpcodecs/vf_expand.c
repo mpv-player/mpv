@@ -280,11 +280,12 @@ static int open(vf_instance_t *vf, char* args){
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
-    // TODO: parse args ->
     vf->priv->exp_x=
     vf->priv->exp_y=
     vf->priv->exp_w=
     vf->priv->exp_h=-1;
+    vf->priv->osd=0;
+    //  parse args ->
     if(args) sscanf(args, "%d:%d:%d:%d:%d", 
     &vf->priv->exp_w,
     &vf->priv->exp_h,
