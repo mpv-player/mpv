@@ -174,7 +174,7 @@ Option descriptions:
     - Obsolete options are followed by (OBSOLETE), beta options by
       (BETA CODE), etc.
     - MPlayer only options in a section which isn't marked this way
-      are followed by (MPLAYER only).
+      are followed by (MPlayer only).
     - Add references to other options if they belong to each other, e.g.
       '(\-vo zr only)' or '(also see \-alang)' or are commonly used together.
     - If a nontrivial default parameter exists, mention it, e.g. (default: 24).
@@ -258,7 +258,7 @@ Options, suboptions, examples structure:
     - Examples:
 
       [...]
-      
+
       .I EXAMPLE:
       .PD 0
       .RSs
