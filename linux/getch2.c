@@ -3,7 +3,9 @@
 #include "../config.h"
 
 //#define USE_TERMCAP
+#ifndef __OS2__
 #define USE_IOCTL
+#endif
 
 #define MAX_KEYS 64
 #define BUF_LEN 256
@@ -215,7 +217,7 @@ static int getch2_status=0;
 void getch2_enable(){
 #ifdef HAVE_TERMIOS
 struct termios tio_new;
-#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
+#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__) || defined(__OS2__)
     tcgetattr(0,&tio_orig);
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
     ioctl(0,TIOCGETA,&tio_orig);
