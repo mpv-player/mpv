@@ -103,59 +103,18 @@ inline int wsSearch( Window win );
 
 void wsWindowDecoration( wsTWindow * win,long d )
 {
-#if 0
- MotifWmHints *hints = &wsMotifWmHints;
- Atom type;
- int format;
- unsigned long nitems;
- unsigned long bytes_after;
-#endif
-
  wsMotifHints=XInternAtom( wsDisplay,"_MOTIF_WM_HINTS",0 );
  if ( wsMotifHints == None ) return;
 
-#if 1
  memset( &wsMotifWmHints,0,sizeof( MotifWmHints ) );
- wsMotifWmHints.flags=( d?0:MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS );
- wsMotifWmHints.functions=( d?0:MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE );
- wsMotifWmHints.decorations=( d?MWM_DECOR_ALL:0 );
+ wsMotifWmHints.flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS; 
+ if ( d )
+  {
+   wsMotifWmHints.functions=MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE;
+   wsMotifWmHints.decorations=MWM_DECOR_ALL;
+  }
  XChangeProperty( wsDisplay,win->WindowID,wsMotifHints,wsMotifHints,32,
                   PropModeReplace,(unsigned char *)&wsMotifWmHints,5 );
-#else
-  XGetWindowProperty( wsDisplay,win->WindowID,
-                      wsMotifHints,0,5,
-                      False,AnyPropertyType,&type,&format,&nitems,
-                      &bytes_after,(unsigned char **)&hints );
-
-  if ( type != None )
-   {
-    fprintf( stderr,"[ws] set valid mwm hints.\n" );
-    hints->flags=MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS;
-    if ( d )
-     {
-      hints->functions|=( MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE );
-      hints->decorations|=MWM_DECOR_ALL;
-     }
-     else
-      {
-      hints->functions|=~( MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE );
-      hints->decorations|=~MWM_DECOR_ALL;
-      }
-   }
-   else
-    {
-     fprintf( stderr,"[ws] set my mwm hints.\n" );
-     memset( &wsMotifWmHints,0,sizeof( MotifWmHints ) );
-     hints=&wsMotifWmHints;
-     hints->flags=( d?MWM_HINTS_FUNCTIONS | MWM_HINTS_DECORATIONS:0 );
-     hints->functions=( d?MWM_FUNC_MOVE | MWM_FUNC_CLOSE | MWM_FUNC_MINIMIZE | MWM_FUNC_MAXIMIZE | MWM_FUNC_RESIZE:0 );
-     hints->decorations=( d?MWM_DECOR_ALL:0 );
-    }
-
- XChangeProperty( wsDisplay,win->WindowID,wsMotifHints,wsMotifHints,32,
-                  PropModeReplace,&wsMotifWmHints,5 );
- if ( hints != &wsMotifWmHints ) XFree( hints );
-#endif
 }
 
 // ----------------------------------------------------------------------------------------------
