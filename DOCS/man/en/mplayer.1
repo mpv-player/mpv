@@ -534,11 +534,12 @@ Disable mouse button press/release input (mozplayerxp's context menu relies
 on this option).
 .TP
 .B \-nortc (RTC only)
-Turns off usage of the Linux RTC (real-time clock \- /dev/\:rtc) as timing
+Turns off usage of the Linux RTC (realtime clock \- /dev/\:rtc) as timing
 mechanism.
 .TP
 .B \-playlist <file>
-Play files according to a playlist file (1 file per line, Winamp or ASX format).
+Play files according to a playlist file (ASX, Winamp, SMIL, or
+one-file-per-line format).
 .br
 .I NOTE:
 This option is considered an entry so options found after it will apply
@@ -570,8 +571,7 @@ and afterwards ~/.mplayer/Skin/fittyfene.
 .
 .TP
 .B \-slave (also see \-input)
-This option switches on slave mode.
-The aim is being able to use MPlayer as a backend for other programs.
+Switches on slave mode in which MPlayer works as a backend for other programs.
 Instead of intercepting keyboard events, MPlayer will read commands from stdin.
 See DOCS/tech/slave.txt and \-input cmdlist for a list of slave commands.
 .TP

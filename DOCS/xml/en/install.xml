@@ -913,7 +913,7 @@ There are three timing methods in <application>MPlayer</application>.
   tuned even finer.
   </simpara></listitem>
 <listitem><para>
-<emphasis role="bold">The new timer</emphasis> code uses PC's RTC (Real Time Clock)
+<emphasis role="bold">The new timer</emphasis> code uses PC's RTC (RealTime Clock)
   for this task, because it has precise 1ms timers. It is automagically enabled
   when available, but requires root privileges, a <emphasis>setuid root</emphasis>
   <application>MPlayer</application> binary or a properly set up kernel.
