@@ -15,6 +15,39 @@ int             boxMoved = 0;
 int             sx = 0,sy = 0;
 int             i,pot = 0;
 
+inline void TranslateFilename( int c,char * tmp )
+{
+ int i;
+ switch ( mplShMem->StreamType )
+  {
+   case STREAMTYPE_FILE:
+          if ( gtkShMem->fs.filename[0] )
+           {
+            strcpy( tmp,gtkShMem->fs.filename );
+            if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
+            if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
+           } else strcpy( tmp,"no file loaded" );
+          break;
+#ifdef USE_DVDREAD		     
+   case STREAMTYPE_DVD:
+          if ( mplShMem->DVD.current_chapter ) sprintf( tmp,"chapter %d",mplShMem->DVD.current_chapter );
+            else strcat( tmp,"no chapter" );
+          break;
+#endif
+   default: strcpy( tmp,"no media opened" );
+  }
+ if ( c )
+  {
+   for ( i=0;i < strlen( tmp );i++ )
+    {
+     int t=0;
+     if ( c == 1 ) { if ( ( tmp[i] >= 'A' )&&( tmp[i] <= 'Z' ) ) t=32; }
+     if ( c == 2 ) { if ( ( tmp[i] >= 'a' )&&( tmp[i] <= 'z' ) ) t=-32; }
+     tmp[i]=(char)( tmp[i] + t );
+    }
+  }
+}
+
 char * Translate( char * str )
 {
  static char   trbuf[512];
@@ -30,49 +63,10 @@ char * Translate( char * str )
     {
      switch ( str[++i] )
       {
-       case 't':
-            sprintf( tmp,"%02d",mplShMem->Track ); strcat( trbuf,tmp );
-            break;
-       case 'f':
-            if ( strlen( gtkShMem->fs.filename ) )
-             {
-              int i;
-              strcpy( tmp,gtkShMem->fs.filename );
-              for ( i=0;i < strlen( tmp );i++ )
-               {
-                t=0;
-                if ( ( tmp[i] >= 'A' )&&( tmp[i] <= 'Z' ) ) t=32;
-                tmp[i]=(char)( tmp[i] + t );
-               }
-              if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
-              if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
-             } else strcpy( tmp,"no file loaded" );
-            strcat( trbuf,tmp );
-            break;
-       case 'F':
-            if ( strlen( gtkShMem->fs.filename ) )
-             {
-              int i;
-              strcpy( tmp,gtkShMem->fs.filename );
-              for ( i=0;i < strlen( tmp );i++ )
-               {
-                char t = 0;
-                if ( ( tmp[i] >= 'a' )&&( tmp[i] <= 'z' ) ) t=32;
-                tmp[i]=tmp[i] - t;
-               }
-              if ( tmp[strlen( tmp ) - 4] == '.' ) tmp[strlen( tmp ) - 4]=0;
-              if ( tmp[strlen( tmp ) - 5] == '.' ) tmp[strlen( tmp ) - 5]=0;
-             } else strcpy( tmp,"NO FILE LOADED" );
-            strcat( trbuf,tmp );
-            break;
-       case 'o':
-            if ( strlen( gtkShMem->fs.filename ) )
-             {
-              strcat( trbuf,gtkShMem->fs.filename );
-              if ( trbuf[strlen( trbuf ) - 4] == '.' ) trbuf[strlen( trbuf ) - 4]=0;
-              if ( trbuf[strlen( trbuf ) - 5] == '.' ) trbuf[strlen( trbuf ) - 5]=0;
-             } else strcat( trbuf,"no file loaded" );
-            break;
+       case 't': sprintf( tmp,"%02d",mplShMem->Track ); strcat( trbuf,tmp ); break;
+       case 'o': TranslateFilename( 0,tmp ); strcat( trbuf,tmp ); break;
+       case 'f': TranslateFilename( 1,tmp ); strcat( trbuf,tmp ); break;
+       case 'F': TranslateFilename( 2,tmp ); strcat( trbuf,tmp ); break;
        case '6': t=mplShMem->LengthInSec; goto calclengthhhmmss;
        case '1': t=mplShMem->TimeSec;
 calclengthhhmmss:
@@ -109,7 +103,9 @@ calclengthmmmmss:
              case STREAMTYPE_FILE:   strcat( trbuf,"f" ); break;
              case STREAMTYPE_VCD:    strcat( trbuf,"v" ); break;
              case STREAMTYPE_STREAM: strcat( trbuf,"u" ); break;
+#ifdef USE_DVDREAD		     
              case STREAMTYPE_DVD:    strcat( trbuf,"d" ); break;
+#endif
              default:                strcat( trbuf," " ); break;
             }
            break;
@@ -122,7 +118,7 @@ calclengthmmmmss:
  return trbuf;
 }
 
-void PutImage( txSample * bf,int x,int y,int max,int ofs )
+inline void PutImage( txSample * bf,int x,int y,int max,int ofs )
 {
  int i=0,ix,iy;
  unsigned long * buf = NULL;
@@ -156,21 +152,6 @@ void mplMainDraw( wsParamDisplay )
 
  btnModify( evSetMoviePosition,mplShMem->Position );
  btnModify( evSetVolume,mplShMem->Volume );
-
- switch ( mplShMem->Playing )
-  {
-   case 2:
-   case 0:
-        btnModify( evPlaySwitchToPause,btnReleased );
-        btnModify( evPauseSwitchToPlay,btnDisabled );
-        break;
-   case 1:
-        if ( mplShMem->Filename[0] != 0 )
-         {
-          btnModify( evPlaySwitchToPause,btnDisabled );
-          btnModify( evPauseSwitchToPlay,btnReleased );
-         }
-  }
 
  if ( mplMainRender )
   {
@@ -229,8 +210,10 @@ void mplMsgHandle( int msg,float param )
         exit_player( "Exit" );
         break;
 
+#ifdef USE_DVDREAD
    case evPlayDVD:
         mplShMem->StreamType=STREAMTYPE_DVD;
+#endif
 	
    case evPlay:
    case evPlaySwitchToPause:
@@ -246,21 +229,20 @@ void mplMsgHandle( int msg,float param )
           case STREAMTYPE_FILE:   
 	       dvd_title=0;
 	       break;
+#ifdef USE_DVDREAD
           case STREAMTYPE_DVD:    
 	       dvd_title=1; 
 	       dvd_chapter=1; 
 	       dvd_angle=1; 
 	       strcpy( mplShMem->Filename,"/dev/dvd" );
 	       break;
+#endif
          }
         mplPlay();
         break;
-	
-//        break;
 
    case evPause:
    case evPauseSwitchToPlay:
-Pause:
         btnModify( evPlaySwitchToPause,btnReleased );
         btnModify( evPauseSwitchToPlay,btnDisabled );
 NoPause:
@@ -397,7 +379,7 @@ NoPause:
 	if ( mplMiddleMenu )
 	 {
 	  mplMiddleMenu=0;
-	  mplMsgHandle( gtkShMem->popupmenu,0 );
+	  mplMsgHandle( gtkShMem->popupmenu,gtkShMem->popupmenuparam );
 	 }
         break;
 // --- system events
@@ -488,6 +470,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           break;
 	  
    case wsPMMouseButton:
+	memcpy( &gtkShMem->DVD,&mplShMem->DVD,sizeof( mplDVDStruct ) );
         gtkSendMessage( evShowPopUpMenu );
 	break;	  
 

@@ -850,6 +850,25 @@ if(stream_dump_type){
 sh_audio=d_audio->sh;
 sh_video=d_video->sh;
 
+#ifdef HAVE_NEW_GUI
+#ifdef USE_DVDREAD
+if ( use_gui && stream->type == STREAMTYPE_DVD )
+ {
+  dvd_priv_t * dvdp = stream->priv;
+  mplShMem->DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
+  mplShMem->DVD.chapters=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_ptts;
+  mplShMem->DVD.angles=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
+  mplShMem->DVD.nr_of_audio_channels=dvdp->nr_of_channels;
+  memcpy( mplShMem->DVD.audio_streams,dvdp->audio_streams,sizeof( dvdp->audio_streams ) );
+  mplShMem->DVD.nr_of_subtitles=dvdp->nr_of_subtitles;
+  memcpy( mplShMem->DVD.subtitles,dvdp->subtitles,sizeof( dvdp->subtitles ) );
+  mplShMem->DVD.current_title=dvd_title + 1;
+  mplShMem->DVD.current_chapter=dvd_chapter + 1;
+  mplShMem->Track=dvd_title + 1;
+ } 
+#endif
+#endif
+
 current_module="video_read_properties";
 
 if(sh_video){
@@ -1970,6 +1989,13 @@ if(rel_seek_secs || abs_seek_pos){
 #endif
 	 } 
 	mplShMem->Volume=(float)mixer_getbothvolume();
+#ifdef USE_DVDREAD
+        if ( stream->type == STREAMTYPE_DVD )
+	 {
+	  dvd_priv_t * dvdp = stream->priv;
+	  mplShMem->DVD.current_chapter=dvdp->cur_cell + 1;
+	 }
+#endif
       }
 #endif
 

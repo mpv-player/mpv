@@ -2,8 +2,14 @@
 #ifndef __GUI_PLAY_H
 #define __GUI_PLAY_H
 
+#include "../../config.h"
+
 #include "./psignal.h"
 #include "./mplayer.h"
+
+#ifdef USE_DVDREAD
+ #include "../../libmpdemux/stream.h"
+#endif
 
 typedef struct
 {
@@ -28,12 +34,30 @@ typedef struct
  char codecdll[128];
 } mplVideoStruct;
 
+#ifdef USE_DVDREAD
+typedef struct
+{
+ int titles;
+ int chapters;
+ int angles;
+ int current_chapter;
+ int current_title;
+ int nr_of_audio_channels;
+ audio_stream_t audio_streams[8];
+ int nr_of_subtitles;
+ subtitle_t subtitles[32]; 
+} mplDVDStruct;
+#endif
+
 typedef struct
 {
  int message;
    mplResizeStruct      resize;
    mplVideoStruct       videodata;
    mplUnknowErrorStruct error;
+#ifdef USE_DVDREAD
+   mplDVDStruct         DVD;
+#endif
 
    int    Playing;
    float  Position;

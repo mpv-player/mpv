@@ -127,7 +127,7 @@ void gtkSigHandler( int s )
 	gtk_main_quit();
         break;
    case evShowPopUpMenu:
-        gtkShMem->popupmenu=evNone;
+        gtkShMem->popupmenu=evNone; gtkShMem->popupmenuparam=0;
 	if ( gtkShMem->visiblepopupmenu ) gtk_widget_hide_on_delete( PopUpMenu );
         PopUpMenu=create_PopUpMenu();
         gtk_menu_popup( GTK_MENU( PopUpMenu ),NULL,NULL,NULL,NULL,0,0 );
@@ -190,7 +190,7 @@ void mplMainSigHandler( int s )
         if ( mplMainAutoPlay ) mplGeneralTimer=1;
         break;
    case evShowPopUpMenu:
-        fprintf( stderr,"[psignal] PopUpMenu: %d\n",gtkShMem->popupmenu );
+        fprintf( stderr,"[psignal] PopUpMenu: %d param: %d\n",gtkShMem->popupmenu,gtkShMem->popupmenuparam );
 	mplMiddleMenu=1; mplGeneralTimer=1; 
 	break;
    case evMessageBox:

@@ -1,16 +1,21 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+#include "../../../config.h"
 
 #include "../../events.h"
+
 #include "menu.h"
 #include "../widgets.h"
 
 void ActivateMenuItem( int Item )
 {
 // fprintf( stderr,"[menu] item: %d\n",Item );
- gtkShMem->popupmenu=Item;
- gtkShMem->visiblepopupmenu=0; 
+ gtkShMem->popupmenu=Item & 0x0000ffff;
+ gtkShMem->popupmenuparam=Item >> 16;
+ gtkShMem->visiblepopupmenu=0;
  gtkSendMessage( evShowPopUpMenu );
 }
 
@@ -52,8 +57,199 @@ GtkWidget * AddSeparator( GtkWidget * Menu )
  return Item;
 }
 
+typedef struct
+{
+ int id;
+ char * name;
+} Languages_t;
+
+#define lng( a,b ) ( (int)(a) * 256 + b )
+Languages_t Languages[] =
+         {
+           { lng( 'a','b' ), "Abkhazian"                  },
+           { lng( 'a','a' ), "Afar"                       },
+           { lng( 'a','f' ), "Afrikaans"                  },
+           { lng( 's','q' ), "Albanian"                   },
+           { lng( 'a','m' ), "Amharic"                    },
+           { lng( 'a','r' ), "Arabic"                     },
+           { lng( 'h','y' ), "Armenian"                   },
+           { lng( 'a','s' ), "Assamese"                   },
+           { lng( 'a','e' ), "Avestan"                    },
+           { lng( 'a','y' ), "Aymara"                     },
+           { lng( 'a','z' ), "Azerbaijani"                },
+           { lng( 'b','a' ), "Bashkir"                    },
+           { lng( 'e','u' ), "Basque"                     },
+           { lng( 'b','e' ), "Belarusian"                 },
+           { lng( 'b','n' ), "Bengali"                    },
+           { lng( 'b','h' ), "Bihari"                     },
+           { lng( 'b','i' ), "Bislama"                    },
+           { lng( 'b','s' ), "Bosnian"                    },
+           { lng( 'b','r' ), "Breton"                     },
+           { lng( 'b','g' ), "Bulgarian"                  },
+           { lng( 'm','y' ), "Burmese"                    },
+           { lng( 'c','a' ), "Catalan"                    },
+           { lng( 'c','h' ), "Chamorro"                   },
+           { lng( 'c','e' ), "Chechen"                    },
+           { lng( 'n','y' ), "Chichewa;Nyanja"            },
+           { lng( 'z','h' ), "Chinese"                    },
+           { lng( 'c','u' ), "ChurchSlavic"               },
+           { lng( 'c','v' ), "Chuvash"                    },
+           { lng( 'k','w' ), "Cornish"                    },
+           { lng( 'c','o' ), "Corsican"                   },
+           { lng( 'h','r' ), "Croatian"                   },
+           { lng( 'c','s' ), "Czech"                      },
+           { lng( 'd','a' ), "Danish"                     },
+           { lng( 'n','l' ), "Dutch"                      },
+           { lng( 'd','z' ), "Dzongkha"                   },
+           { lng( 'e','n' ), "English"                    },
+           { lng( 'e','o' ), "Esperanto"                  },
+           { lng( 'e','t' ), "Estonian"                   },
+           { lng( 'f','o' ), "Faroese"                    },
+           { lng( 'f','j' ), "Fijian"                     },
+           { lng( 'f','i' ), "Finnish"                    },
+           { lng( 'f','r' ), "French"                     },
+           { lng( 'f','y' ), "Frisian"                    },
+           { lng( 'g','d' ), "Gaelic(Scots"               },
+           { lng( 'g','l' ), "Gallegan"                   },
+           { lng( 'k','a' ), "Georgian"                   },
+           { lng( 'd','e' ), "German"                     },
+           { lng( 'e','l' ), "Greek"                      },
+           { lng( 'g','n' ), "Guarani"                    },
+           { lng( 'g','u' ), "Gujarati"                   },
+           { lng( 'h','a' ), "Hausa"                      },
+           { lng( 'h','e' ), "Hebrew"                     },
+           { lng( 'i','w' ), "Hebrew"                     },
+           { lng( 'h','z' ), "Herero"                     },
+           { lng( 'h','i' ), "Hindi"                      },
+           { lng( 'h','o' ), "HiriMotu"                   },
+           { lng( 'h','u' ), "Hungarian"                  },
+           { lng( 'i','s' ), "Icelandic"                  },
+           { lng( 'i','d' ), "Indonesian"                 },
+           { lng( 'i','n' ), "Indonesian"                 },
+           { lng( 'i','a' ), "Interlingua"                },
+           { lng( 'i','e' ), "Interlingue"                },
+           { lng( 'i','u' ), "Inuktitut"                  },
+           { lng( 'i','k' ), "Inupiaq"                    },
+           { lng( 'g','a' ), "Irish"                      },
+           { lng( 'i','t' ), "Italian"                    },
+           { lng( 'j','a' ), "Japanese"                   },
+           { lng( 'j','v' ), "Javanese"                   },
+           { lng( 'j','w' ), "Javanese"                   },
+           { lng( 'k','l' ), "Kalaallisut"                },
+           { lng( 'k','n' ), "Kannada"                    },
+           { lng( 'k','s' ), "Kashmiri"                   },
+           { lng( 'k','k' ), "Kazakh"                     },
+           { lng( 'k','m' ), "Khmer"                      },
+           { lng( 'k','i' ), "Kikuyu"                     },
+           { lng( 'r','w' ), "Kinyarwanda"                },
+           { lng( 'k','y' ), "Kirghiz"                    },
+           { lng( 'k','v' ), "Komi"                       },
+           { lng( 'k','o' ), "Korean"                     },
+           { lng( 'k','j' ), "Kuanyama"                   },
+           { lng( 'k','u' ), "Kurdish"                    },
+           { lng( 'l','o' ), "Lao"                        },
+           { lng( 'l','a' ), "Latin"                      },
+           { lng( 'l','v' ), "Latvian"                    },
+           { lng( 'l','b' ), "Letzeburgesch"              },
+           { lng( 'l','n' ), "Lingala"                    },
+           { lng( 'l','t' ), "Lithuanian"                 },
+           { lng( 'm','k' ), "Macedonian"                 },
+           { lng( 'm','g' ), "Malagasy"                   },
+           { lng( 'm','s' ), "Malay"                      },
+           { lng( 'm','l' ), "Malayalam"                  },
+           { lng( 'm','t' ), "Maltese"                    },
+           { lng( 'g','v' ), "Manx"                       },
+           { lng( 'm','i' ), "Maori"                      },
+           { lng( 'm','r' ), "Marathi"                    },
+           { lng( 'm','h' ), "Marshall"                   },
+           { lng( 'm','o' ), "Moldavian"                  },
+           { lng( 'm','n' ), "Mongolian"                  },
+           { lng( 'n','a' ), "Nauru"                      },
+           { lng( 'n','v' ), "Navajo"                     },
+           { lng( 'n','d' ), "North Ndebele"              },
+           { lng( 'n','r' ), "South Ndebele"              },
+           { lng( 'n','g' ), "Ndonga"                     },
+           { lng( 'n','e' ), "Nepali"                     },
+           { lng( 's','e' ), "NorthernSami"               },
+           { lng( 'n','o' ), "Norwegian"                  },
+           { lng( 'n','b' ), "NorwegianBokmål"            },
+           { lng( 'n','n' ), "NorwegianNynorsk"           },
+           { lng( 'n','y' ), "Nyanja;Chichewa"            },
+           { lng( 'o','c' ), "Occitan(post1500;Provençal" },
+           { lng( 'o','r' ), "Oriya"                      },
+           { lng( 'o','m' ), "Oromo"                      },
+           { lng( 'o','s' ), "Ossetian;Ossetic"           },
+           { lng( 'p','i' ), "Pali"                       },
+           { lng( 'p','a' ), "Panjabi"                    },
+           { lng( 'f','a' ), "Persian"                    },
+           { lng( 'p','l' ), "Polish"                     },
+           { lng( 'p','t' ), "Portuguese"                 },
+           { lng( 'o','c' ), "Provençal;Occitan(post1500" },
+           { lng( 'p','s' ), "Pushto"                     },
+           { lng( 'q','u' ), "Quechua"                    },
+           { lng( 'r','m' ), "Raeto-Romance"              },
+           { lng( 'r','o' ), "Romanian"                   },
+           { lng( 'r','n' ), "Rundi"                      },
+           { lng( 'r','u' ), "Russian"                    },
+           { lng( 's','m' ), "Samoan"                     },
+           { lng( 's','g' ), "Sango"                      },
+           { lng( 's','a' ), "Sanskrit"                   },
+           { lng( 's','c' ), "Sardinian"                  },
+           { lng( 's','r' ), "Serbian"                    },
+           { lng( 's','n' ), "Shona"                      },
+           { lng( 's','d' ), "Sindhi"                     },
+           { lng( 's','i' ), "Sinhalese"                  },
+           { lng( 's','k' ), "Slovak"                     },
+           { lng( 's','l' ), "Slovenian"                  },
+           { lng( 's','o' ), "Somali"                     },
+           { lng( 's','t' ), "Sotho"                      },
+           { lng( 'e','s' ), "Spanish"                    },
+           { lng( 's','u' ), "Sundanese"                  },
+           { lng( 's','w' ), "Swahili"                    },
+           { lng( 's','s' ), "Swati"                      },
+           { lng( 's','v' ), "Swedish"                    },
+           { lng( 't','l' ), "Tagalog"                    },
+           { lng( 't','y' ), "Tahitian"                   },
+           { lng( 't','g' ), "Tajik"                      },
+           { lng( 't','a' ), "Tamil"                      },
+           { lng( 't','t' ), "Tatar"                      },
+           { lng( 't','e' ), "Telugu"                     },
+           { lng( 't','h' ), "Thai"                       },
+           { lng( 'b','o' ), "Tibetan"                    },
+           { lng( 't','i' ), "Tigrinya"                   },
+           { lng( 't','o' ), "Tonga"                      },
+           { lng( 't','s' ), "Tsonga"                     },
+           { lng( 't','n' ), "Tswana"                     },
+           { lng( 't','r' ), "Turkish"                    },
+           { lng( 't','k' ), "Turkmen"                    },
+           { lng( 't','w' ), "Twi"                        },
+           { lng( 'u','g' ), "Uighur"                     },
+           { lng( 'u','k' ), "Ukrainian"                  },
+           { lng( 'u','r' ), "Urdu"                       },
+           { lng( 'u','z' ), "Uzbek"                      },
+           { lng( 'v','i' ), "Vietnamese"                 },
+           { lng( 'v','o' ), "Volapük"                    },
+           { lng( 'c','y' ), "Welsh"                      },
+           { lng( 'w','o' ), "Wolof"                      },
+           { lng( 'x','h' ), "Xhosa"                      },
+           { lng( 'y','i' ), "Yiddish"                    },
+           { lng( 'j','i' ), "Yiddish"                    },
+           { lng( 'y','o' ), "Yoruba"                     },
+           { lng( 'z','a' ), "Zhuang"                     },
+           { lng( 'z','u' ), "Zulu"                       },
+         };
+#undef lng
+
+char * GetLanguage( int language )
+{
+ int i;
+ for ( i=0;i<sizeof( Languages ) / sizeof( Languages_t );i++ )
+  if ( Languages[i].id == language ) return Languages[i].name;
+}
+
 GtkWidget * DVDSubMenu;
 GtkWidget * DVDTitleMenu;
+GtkWidget * DVDChapterMenu;
 GtkWidget * DVDAudioLanguageMenu;
 GtkWidget * DVDSubtitleLanguageMenu;
 
@@ -61,7 +257,6 @@ GtkWidget * create_PopUpMenu( void )
 {
  GtkWidget * Menu = NULL;
  GtkWidget * SubMenu = NULL;
- GtkWidget * SubMenuItem = NULL;
 
  Menu=gtk_menu_new();
 
@@ -70,7 +265,9 @@ GtkWidget * create_PopUpMenu( void )
    SubMenu=AddSubMenu( Menu,"Open ..." );
     AddMenuItem( SubMenu,"Play file ...""    ", evLoadPlay );
     AddMenuItem( SubMenu,"Play VCD ...", evNone );
+#ifdef USE_DVDREAD
     AddMenuItem( SubMenu,"Play DVD ...", evPlayDVD );
+#endif
     AddMenuItem( SubMenu,"Play URL ...", evNone );
     AddMenuItem( SubMenu,"Load subtitle ...   ", evLoadSubtitle );
    SubMenu=AddSubMenu( Menu,"Playing" );
@@ -79,24 +276,65 @@ GtkWidget * create_PopUpMenu( void )
     AddMenuItem( SubMenu,"Stop", evStop );
     AddMenuItem( SubMenu,"Prev stream", evPrev );
     AddMenuItem( SubMenu,"Next stream", evNext );
-    AddSeparator( SubMenu );
-    AddMenuItem( SubMenu,"Back 10 sec", evBackward10sec );
-    AddMenuItem( SubMenu,"Fwd 10 sec", evForward10sec );
-    AddMenuItem( SubMenu,"Back 1 min", evBackward1min );
-    AddMenuItem( SubMenu,"Fwd 1 min", evForward1min );
-    AddMenuItem( SubMenu,"Back 10 min", evBackward10min );
-    AddMenuItem( SubMenu,"Fwk 10 min", evForward10min );
+//    AddSeparator( SubMenu );
+//    AddMenuItem( SubMenu,"Back 10 sec", evBackward10sec );
+//    AddMenuItem( SubMenu,"Fwd 10 sec", evForward10sec );
+//    AddMenuItem( SubMenu,"Back 1 min", evBackward1min );
+//    AddMenuItem( SubMenu,"Fwd 1 min", evForward1min );
    SubMenu=AddSubMenu( Menu,"Size" );
     AddMenuItem( SubMenu,"Normal size""      ", evNormalSize );
     AddMenuItem( SubMenu,"Double size", evDoubleSize );
     AddMenuItem( SubMenu,"Fullscreen", evFullScreen );
+#ifdef USE_DVDREAD
    DVDSubMenu=AddSubMenu( Menu,"DVD" );
     AddMenuItem( DVDSubMenu,"Play disc ...""    ", evPlayDVD );
     AddMenuItem( DVDSubMenu,"Show DVD Menu", evNone );
     AddSeparator( DVDSubMenu );
     DVDTitleMenu=AddSubMenu( DVDSubMenu,"Titles" );
+     if ( gtkShMem->DVD.titles )
+      {
+       char tmp[32]; int i;
+       for ( i=0;i<gtkShMem->DVD.titles;i++ )
+        {
+         sprintf( tmp,"Title %2d",i+1 );
+         AddMenuItem( DVDTitleMenu,tmp,( (i+1) << 16 ) + evSetDVDTitle );
+        }
+      }
+      else AddMenuItem( DVDTitleMenu,"(none)",evNone );
+    DVDChapterMenu=AddSubMenu( DVDSubMenu,"Chapter" );
+     if ( gtkShMem->DVD.chapters )
+      {
+       char tmp[32]; int i;
+       for ( i=0;i<gtkShMem->DVD.chapters;i++ )
+        {
+         sprintf( tmp,"Chapter %2d",i+1 );
+         AddMenuItem( DVDChapterMenu,tmp,( (i+1) << 16 ) + evSetDVDChapter );
+        }
+      }
+      else DVDChapterMenu=AddMenuItem( DVDChapterMenu,"(none)",evNone );
     DVDAudioLanguageMenu=AddSubMenu( DVDSubMenu,"Audio language" );
+     if ( gtkShMem->DVD.nr_of_audio_channels )
+      {
+       char tmp[64]; int i;
+       for ( i=0;i<gtkShMem->DVD.nr_of_audio_channels;i++ )
+        {
+         strcpy( tmp,GetLanguage( gtkShMem->DVD.audio_streams[i].language ) );
+         AddMenuItem( DVDAudioLanguageMenu,tmp,( gtkShMem->DVD.audio_streams[i].id << 16 ) + evSetDVDAudio );
+        }
+      }
+      else DVDChapterMenu=AddMenuItem( DVDAudioLanguageMenu,"(none)",evNone );
     DVDSubtitleLanguageMenu=AddSubMenu( DVDSubMenu,"Subtitle language" );
+     if ( gtkShMem->DVD.nr_of_subtitles )
+      {
+       char tmp[64]; int i;
+       for ( i=0;i<gtkShMem->DVD.nr_of_subtitles;i++ )
+        {
+         strcpy( tmp,GetLanguage( gtkShMem->DVD.subtitles[i].language ) );
+         AddMenuItem( DVDSubtitleLanguageMenu,tmp,( gtkShMem->DVD.subtitles[i].id << 16 ) + evSetDVDSubtitle );
+        }
+      }
+      else DVDChapterMenu=AddMenuItem( DVDSubtitleLanguageMenu,"(none)",evNone );
+#endif
   AddSeparator( Menu );
   AddMenuItem( Menu,"Playlist", evPlayList );
   AddMenuItem( Menu,"Skin browser", evSkinBrowser );

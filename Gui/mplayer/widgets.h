@@ -5,7 +5,9 @@
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
+#include "../../config.h"
 #include "../../linux/shmem.h"
+#include "play.h"
 
 #define GTK_MB_SIMPLE 0
 #define GTK_MB_MODAL 1
@@ -52,8 +54,13 @@ typedef struct
  gtkSkinStruct         sb;
  gtkVisibleStruct      vs;
  gtkOptionsStruct      op;
+
+#ifdef USE_DVDREAD 
+ mplDVDStruct          DVD;
+#endif
  
  int		       popupmenu;
+ int		       popupmenuparam;
  int		       visiblepopupmenu;
 } gtkCommStruct;
 

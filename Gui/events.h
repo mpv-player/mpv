@@ -60,6 +60,10 @@
 #define evGtkIsOk         5004
 #define evShowPopUpMenu   5005
 #define evHidePopUpMenu   5006
+#define evSetDVDAudio     5007
+#define evSetDVDSubtitle  5008
+#define evSetDVDTitle     5009
+#define evSetDVDChapter   5010
 
 #define evFName           7000
 #define evMovieTime       7001
