@@ -21,6 +21,9 @@
  */
 
 #include <sys/types.h>
+#ifdef __MINGW32__
+typedef long ssize_t;
+#endif
 
 /**
  * The length of one Logical Block of a DVD Video.

@@ -31,7 +31,9 @@
 #include <stdlib.h>
 #include <string.h>
 //#include <assert.h>
+#ifndef __MINGW32__
 #include <sys/ioctl.h>
+#endif
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
