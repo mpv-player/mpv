@@ -14,7 +14,6 @@ extern char ** audio_fm_list;
 extern char ** video_fm_list;
 extern char * video_driver;
 extern char * audio_driver;
-extern int    has_audio;
 extern float  audio_delay;
 
 extern int osd_level;

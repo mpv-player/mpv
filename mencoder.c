@@ -91,12 +91,9 @@ char* audio_lang=NULL;
 char* dvdsub_lang=NULL;
 static char* spudec_ifo=NULL;
 
-static int has_audio=1;
-char *audio_codec=NULL; // override audio codec
-char *video_codec=NULL; // override video codec
-char **audio_codec_list=NULL; // override video codec
-char **video_codec_list=NULL; // override video codec
-char** audio_fm_list=NULL;     // override video codec family 
+char** audio_codec_list=NULL;  // override audio codec
+char** video_codec_list=NULL;  // override video codec
+char** audio_fm_list=NULL;     // override audio codec family 
 char** video_fm_list=NULL;     // override video codec family 
 
 int out_audio_codec=-1;
@@ -451,7 +448,7 @@ if(stream->type==STREAMTYPE_DVD){
 
   if(stream_cache_size) stream_enable_cache(stream,stream_cache_size*1024,0,0);
 
-  if(!has_audio || demuxer2) audio_id=-2; /* do NOT read audio packets... */
+  if(demuxer2) audio_id=-2; /* do NOT read audio packets... */
 
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
   demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);

@@ -100,8 +100,8 @@
 #endif
 
 	// disable audio
-	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"sound", &audio_id, CONF_TYPE_FLAG, 0, -2, -1, NULL},
+	{"nosound", &audio_id, CONF_TYPE_FLAG, 0, -1, -2, NULL},
 
 	// select audio/video codec (by name) or codec family (by number):
 //	{"afm", &audio_family, CONF_TYPE_INT, CONF_MIN, 0, 22, NULL}, // keep ranges in sync

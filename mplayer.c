@@ -174,13 +174,9 @@ float rel_seek_secs=0;
 int abs_seek_pos=0;
 
 // codecs:
-int has_audio=1;
-int has_video=1;
-char *audio_codec=NULL; // override audio codec
-char *video_codec=NULL; // override video codec
-char **audio_codec_list=NULL; // override video codec
+char **audio_codec_list=NULL; // override audio codec
 char **video_codec_list=NULL; // override video codec
-char **audio_fm_list=NULL;    // override video codec family 
+char **audio_fm_list=NULL;    // override audio codec family 
 char **video_fm_list=NULL;    // override video codec family 
 
 // streaming:
@@ -1057,8 +1053,6 @@ if(stream_cache_size){
 }
 
 //============ Open DEMUXERS --- DETECT file type =======================
-
-if(!has_audio) audio_id=-2; // do NOT read audio packets...
 
 current_module="demux_open";
 
