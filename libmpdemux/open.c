@@ -345,7 +345,8 @@ if(dvd_title){
 //    return NULL;
   stream=new_stream(-1,STREAMTYPE_DVD);
   stream->start_pos=(off_t)d->cur_pack*2048;
-  //stream->end_pos=0;
+  stream->end_pos=(off_t)(d->cur_pgc->cell_playback[d->last_cell-1].last_sector)*2048;
+  printf("DVD start=%d end=%d  \n",d->cur_pack,d->cur_pgc->cell_playback[d->last_cell-1].last_sector);
   stream->priv=(void*)d;
   return stream;
 }
