@@ -2532,7 +2532,7 @@ if(rel_seek_secs || abs_seek_pos){
 #ifdef HAVE_NEW_GUI
       if(use_gui){
         guiEventHandling();
-	if(demuxer->file_format==DEMUXER_TYPE_AVI && sh_video->video.dwLength>2){
+	if(demuxer->file_format==DEMUXER_TYPE_AVI && sh_video && sh_video->video.dwLength>2){
 	  // get pos from frame number / total frames
 	  guiIntfStruct.Position=(float)d_video->pack_no*100.0f/sh_video->video.dwLength;
 	} else {

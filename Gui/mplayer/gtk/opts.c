@@ -364,6 +364,7 @@ void ShowPreferences( void )
  gtk_signal_connect( GTK_OBJECT( HSFontOSDScale ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)9 );
  gtk_signal_connect( GTK_OBJECT( EFontEncoding ),"changed",GTK_SIGNAL_FUNC( prEntry ),NULL );
 #endif
+ gtk_signal_connect( GTK_OBJECT( HSPPQuality ),"motion_notify_event",GTK_SIGNAL_FUNC( prHScaler ),(void*)10 );
  
  gtk_signal_connect( GTK_OBJECT( CLADrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)0 );
  gtk_signal_connect( GTK_OBJECT( CLVDrivers ),"select_row",GTK_SIGNAL_FUNC( prCListRow ),(void*)1 );
@@ -557,6 +558,9 @@ static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer u
         gtkSet( gtkSetFontOSDScale,HSFontOSDScaleadj->value,NULL );
 	break;
 #endif
+   case 10: // auto quality
+	gtkSet( gtkSetAutoq,HSPPQualityadj->value,NULL );
+	break;
   }
  return FALSE;
 }
@@ -1638,7 +1642,8 @@ GtkWidget * create_Preferences( void )
   gtk_misc_set_alignment( GTK_MISC( label14 ),7.45058e-09,0.5 );
   gtk_misc_set_padding( GTK_MISC( label14 ),4,0 );
 
-  HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0,0,0 ) );
+  if ( guiIntfStruct.sh_video && guiIntfStruct.Playing ) HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,get_video_quality_max( guiIntfStruct.sh_video ),0,0,0 ) );
+   else HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0,0,0 ) );
   HSPPQuality=gtk_hscale_new( HSPPQualityadj );
   gtk_widget_set_name( HSPPQuality,"HSPPQuality" );
   gtk_widget_ref( HSPPQuality );
