@@ -2364,18 +2364,28 @@ if(step_sec>0) {
     } break;
     case MP_CMD_PLAY_TREE_STEP : {
       int n = cmd->args[0].v.i > 0 ? 1 : -1;
-      play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
-      
-      if(play_tree_iter_step(i,n,0) == PLAY_TREE_ITER_ENTRY)
+      int force = cmd->args[1].v.i;
+
+      if(!force) {
+	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
+	
+	if(play_tree_iter_step(i,n,0) == PLAY_TREE_ITER_ENTRY)
+	  eof = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
+	play_tree_iter_free(i);
+      } else
 	eof = (n > 0) ? PT_NEXT_ENTRY : PT_PREV_ENTRY;
-      play_tree_iter_free(i);
     } break;
     case MP_CMD_PLAY_TREE_UP_STEP : {
       int n = cmd->args[0].v.i > 0 ? 1 : -1;
-      play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
-      if(play_tree_iter_up_step(i,n,0) == PLAY_TREE_ITER_ENTRY)
+      int force = cmd->args[1].v.i;
+
+      if(!force) {
+	play_tree_iter_t* i = play_tree_iter_new_copy(playtree_iter);
+	if(play_tree_iter_up_step(i,n,0) == PLAY_TREE_ITER_ENTRY)
+	  eof = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
+	play_tree_iter_free(i);
+      } else
 	eof = (n > 0) ? PT_UP_NEXT : PT_UP_PREV;
-      play_tree_iter_free(i);
     } break;
     case MP_CMD_PLAY_ALT_SRC_STEP : {
       if(playtree_iter->num_files > 1) {

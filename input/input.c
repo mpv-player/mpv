@@ -37,8 +37,8 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_QUIT, "quit", 0, { {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
   { MP_CMD_GRAB_FRAMES, "grab_frames",0, { {-1,{0}} }  },
-  { MP_CMD_PLAY_TREE_STEP, "pt_step",1, { { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
-  { MP_CMD_PLAY_TREE_UP_STEP, "pt_up_step",1,  { { MP_CMD_ARG_INT,{0} }, {-1,{0}} } },
+  { MP_CMD_PLAY_TREE_STEP, "pt_step",1, { { MP_CMD_ARG_INT ,{0}}, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
+  { MP_CMD_PLAY_TREE_UP_STEP, "pt_up_step",1,  { { MP_CMD_ARG_INT,{0} }, { MP_CMD_ARG_INT ,{0}}, {-1,{0}} } },
   { MP_CMD_PLAY_ALT_SRC_STEP, "alt_src_step",1, { { MP_CMD_ARG_INT,{0} }, {-1,{0}} } },
   { MP_CMD_SUB_DELAY, "sub_delay",1,  { {MP_CMD_ARG_FLOAT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_OSD, "osd",0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
@@ -157,12 +157,16 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { 'q', 0 }, "quit" },
   { { KEY_ESC, 0 }, "quit" },
   { { KEY_ENTER, 0 }, "quit" },
-//  { { 'p', 0 }, "pause" },
+#ifndef HAVE_NEW_GUI
+  { { 'p', 0 }, "pause" },
+#endif
   { { ' ', 0 }, "pause" },
   { { KEY_HOME, 0 }, "pt_up_step 1" },
   { { KEY_END, 0 }, "pt_up_step -1" },
   { { '>', 0 }, "pt_step 1" },
-//  { { KEY_ENTER, 0 }, "pt_step 1" },
+#ifndef HAVE_NEW_GUI
+  { { KEY_ENTER, 0 }, "pt_step 1 1" },
+#endif
   { { '<', 0 }, "pt_step -1" },
   { { KEY_INS, 0 }, "alt_src_step 1" },
   { { KEY_DEL, 0 }, "alt_src_step -1" },
