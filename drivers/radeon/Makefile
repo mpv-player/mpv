@@ -1,5 +1,10 @@
 KERNEL_INCLUDES = /usr/src/linux/include
 INCLUDES = -I$(KERNEL_INCLUDES)
+# auto install
+CONFIG_SHELL=/bin/sh -c
+KERNEL_VERSION=$(shell $(CONFIG_SHELL) 'uname -r')
+MOD_PATH_PREFIX=
+MOD_PATH=$(MOD_PATH_PREFIX)/lib/modules/$(KERNEL_VERSION)/kernel/drivers/video/
 
 #
 # standard CFLAGS
@@ -28,5 +33,11 @@ clean:
 	rm -f *.o *~
 
 install:
-	@echo Please copy *.o files to '/lib/modules/LINUX_VER/kernel/drivers/video' folder
+	mkdir -p $(MOD_PATH)
+	cp radeonfb.o $(MOD_PATH)
+	cp radeon_vid.o $(MOD_PATH)
+	cp rage128_vid.o $(MOD_PATH)
+	depmod -a
+	mknod /dev/radeon_vid c 178 0
+	mknod /dev/rage128_vid c 178 0
 
