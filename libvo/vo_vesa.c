@@ -424,7 +424,7 @@ static uint32_t query_format(uint32_t format)
         printf("vo_vesa: subdevice %s have been initialized\n",vo_subdevice);
       if(vo_subdevice) parseSubDevice(vo_subdevice);
       if(lvo_name) pre_init_err = vlvo_preinit(lvo_name);
-      else if(vidix_name) pre_init_err = vidix_preinit(vidix_name);
+      else if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_vesa);
       if(verbose > 2)
         printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
       first = 0;
@@ -887,10 +887,10 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  {
 		    printf("vo_vesa: Can't initialize VIDIX driver\n");
 		    vidix_name = NULL;
-		    vesa_term();
+		    vidix_term();
 		    return -1;
 		  }
-		  else printf("vo_vesa: Using VIDIX\n",lvo_name);
+		  else printf("vo_vesa: Using VIDIX\n");
 		}
 	}
 	else
