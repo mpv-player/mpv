@@ -440,12 +440,12 @@ int mov_read_header(demuxer_t* demuxer){
     if(!stream_seek(demuxer->stream,priv->moov_start)) return 0; // ???
     lschunks(demuxer, 0, priv->moov_end, NULL);
 
-    // Build tables:
-    // ...
-    
-    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVnotyetsupp);
-
+#if 1    
     return 1;
+#else
+    mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVnotyetsupp);
+    return 0;
+#endif
 }
 
 // return value:

@@ -455,9 +455,9 @@ demuxer->file_format=file_format;
 
 switch(file_format){
  case DEMUXER_TYPE_MOV: {
-  mov_read_header(demuxer);
-  sh_video=d_video->sh;if(sh_video) sh_video->ds=d_video;
-  sh_audio=d_audio->sh;if(sh_audio) sh_audio->ds=d_audio;
+  if(!mov_read_header(demuxer)) return NULL;
+//  sh_video=d_video->sh;if(sh_video) sh_video->ds=d_video;
+//  sh_audio=d_audio->sh;if(sh_audio) sh_audio->ds=d_audio;
   break;
  }
  case DEMUXER_TYPE_AVI: {
