@@ -1,12 +1,5 @@
 // AVI & MPEG Player    v0.11   (C) 2000-2001. by A'rpi/ESP-team
 
-// Enable ALSA emulation (using 32kB audio buffer) - timer testing only
-//#define SIMULATE_ALSA
-
-#define RESET_AUDIO(audio_fd) ioctl(audio_fd, SNDCTL_DSP_RESET, NULL)
-//#define PAUSE_AUDIO(audio_fd) ioctl(audio_fd, SNDCTL_DSP_POST, NULL)
-//#define RESET_AUDIO(audio_fd)
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,6 +35,8 @@
 
 #include "libvo/video_out.h"
 #include "libvo/sub.h"
+
+#include "libao2/audio_out.h"
 
 // CODECS:
 #include "mp3lib/mp3.h"
@@ -293,54 +288,6 @@ void convert_linux(unsigned char *puc_y, int stride_y,
 #endif
 
 //**************************************************************************//
-
-#ifdef SIMULATE_ALSA
-// Simulate ALSA buffering on OSS device :)  (for testing...)
-
-#define fake_ALSA_size 32768
-char fake_ALSA_buffer[fake_ALSA_size];
-int fake_ALSA_len=0;
-
-void fake_ALSA_write(int audio_fd,char* a_buffer,int len){
-while(len>0){
-  int x=fake_ALSA_size-fake_ALSA_len;
-  if(x>0){
-    if(x>len) x=len;
-    memcpy(&fake_ALSA_buffer[fake_ALSA_len],a_buffer,x);
-    fake_ALSA_len+=x;len-=x;
-  }
-  if(fake_ALSA_len>=fake_ALSA_size){
-    write(audio_fd,fake_ALSA_buffer,fake_ALSA_len);
-    fake_ALSA_len=0;
-  }
-}
-}
-#endif
-
-//**************************************************************************//
-
-int audio_delay_method=2;
-int audio_buffer_size=-1;
-
-int get_audio_delay(int audio_fd){
-  if(audio_delay_method==2){
-      // 
-      int r=0;
-      if(ioctl(audio_fd, SNDCTL_DSP_GETODELAY, &r)!=-1)
-         return r;
-      audio_delay_method=1; // fallback if not supported
-  }
-  if(audio_delay_method==1){
-      // SNDCTL_DSP_GETOSPACE
-      audio_buf_info zz;
-      if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)!=-1)
-         return audio_buffer_size-zz.bytes;
-      audio_delay_method=0; // fallback if not supported
-  }
-  return audio_buffer_size;
-}
-
-
 //**************************************************************************//
 
 // AVI file header reader/parser/writer:
@@ -360,6 +307,7 @@ int get_audio_delay(int audio_fd){
 //**************************************************************************//
 
 static vo_functions_t *video_out=NULL;
+static ao_functions_t *audio_out=NULL;
 
 static int play_in_bg=0;
 
@@ -599,6 +547,9 @@ if(!filename){
     printf("Invalid video output driver name: %s\n",video_driver);
     return 0;
   }
+
+// check audio_out
+audio_out=audio_out_drivers[0];
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
@@ -948,7 +899,6 @@ switch(file_format){
 // DUMP STREAMS:
 if(stream_dump_type){
   FILE *f;
-  int len;
   demux_stream_t *ds=NULL;
   // select stream to dump
   switch(stream_dump_type){
@@ -1378,9 +1328,7 @@ if(verbose) printf("vo_debug3: out_fmt=0x%08X\n",out_fmt);
    
 //================== MAIN: ==========================
 {
-int audio_fd=-1;
-int outburst=OUTBURST;
-float audio_buffer_delay=0;
+//float audio_buffer_delay=0;
 
 //float buffer_delay=0;
 float frame_correction=0; // A-V timestamp kulonbseg atlagolas
@@ -1435,92 +1383,13 @@ int drop_frame_cnt=0;
   current_module="setup_audio";
 
 if(has_audio){
-#ifdef USE_XMMP_AUDIO
-  xmm_Init( &xmm );
-  xmm.cSound = (XMM_PluginSound *)xmm_PluginRegister( XMMP_AUDIO_DRIVER );
-  if( xmm.cSound ){
-    pSound = xmm.cSound->Init( &xmm );
-    if( pSound && pSound->Start( pSound, sh_audio->samplerate, sh_audio->channels,
-                ( sh_audio->samplesize == 2 ) ?  XMM_SOUND_FMT_S16LE : XMM_SOUND_FMT_U8 )){
-        printf("XMM: audio setup ok\n");
-    } else {
-      has_audio=0;
-    }
-  } else has_audio=0;
-#else
-  audio_fd=open(dsp, O_WRONLY);
-  if(audio_fd<0){
-    printf("Can't open audio device %s  -> nosound\n",dsp);
+
+  if(!audio_out->init(sh_audio->samplerate,sh_audio->channels,sh_audio->sample_format,0)){
+    printf("couldn't open/init audio device -> NOSOUND\n");
     has_audio=0;
   }
-#endif
-}
 
-if(has_audio){
-#ifdef USE_XMMP_AUDIO
-  if(audio_buffer_size==-1){
-    // Measuring buffer size:
-    audio_buffer_delay=pSound->QueryDelay(pSound, 0);
-  } else {
-    // -abs commandline option
-    audio_buffer_delay=audio_buffer_size/(float)(sh_audio->o_bps);
-  }
-#else
-  int r;
-  audio_buf_info zz;
-
-  r=sh_audio->sample_format;
-//  (sh_audio->samplesize==2)?AFMT_S16_LE:AFMT_U8;
-  ioctl (audio_fd, SNDCTL_DSP_SETFMT, &r);
-  printf("audio_setup: sample format: 0x%X  (requested: 0x%X)\n",r,sh_audio->sample_format);
-  
-  r=sh_audio->channels-1; ioctl (audio_fd, SNDCTL_DSP_STEREO, &r);
-  
-  r=sh_audio->samplerate; if(ioctl (audio_fd, SNDCTL_DSP_SPEED, &r)==-1){
-      printf("audio_setup: your card doesn't support %d Hz samplerate => nosound\n",r);
-      has_audio=0;
-  } else
-      printf("audio_setup: using %d Hz samplerate (requested: %d)\n",r,sh_audio->samplerate);
-
-  if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)==-1){
-      printf("audio_setup: driver doesn't support SNDCTL_DSP_GETOSPACE :-(\n");
-      r=0;
-      if(ioctl(audio_fd, SNDCTL_DSP_GETBLKSIZE, &r)==-1){
-          printf("audio_setup: %d bytes/frag (config.h)\n",outburst);
-      } else {
-          outburst=r;
-          printf("audio_setup: %d bytes/frag (GETBLKSIZE)\n",outburst);
-      }
-  } else {
-      printf("audio_setup: frags: %3d/%d  (%d bytes/frag)  free: %6d\n",
-          zz.fragments, zz.fragstotal, zz.fragsize, zz.bytes);
-      if(audio_buffer_size==-1) audio_buffer_size=zz.bytes;
-      outburst=zz.fragsize;
-  }
-
-  if(audio_buffer_size==-1){
-    // Measuring buffer size:
-    audio_buffer_size=0;
-#ifdef HAVE_AUDIO_SELECT
-    while(audio_buffer_size<0x40000){
-      fd_set rfds;
-      struct timeval tv;
-      FD_ZERO(&rfds); FD_SET(audio_fd,&rfds);
-      tv.tv_sec=0; tv.tv_usec = 0;
-      if(!select(audio_fd+1, NULL, &rfds, NULL, &tv)) break;
-      write(audio_fd,&sh_audio->a_buffer[sh_audio->a_buffer_len],outburst);
-      audio_buffer_size+=outburst;
-    }
-    if(audio_buffer_size==0){
-        printf("\n   ***  Your audio driver DOES NOT support select()  ***\n");
-          printf("Recompile mplayer with #undef HAVE_AUDIO_SELECT in config.h !\n\n");
-        exit_player("audio_init");
-    }
-#endif
-  }
-  audio_buffer_delay=audio_buffer_size/(float)(sh_audio->o_bps);
-#endif
-  printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
+//  printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
 
   // fixup audio buffer size:
 //  if(outburst<MAX_OUTBURST){
@@ -1529,10 +1398,9 @@ if(has_audio){
 //  }
 
 //  a_frame=-(audio_buffer_delay);
-  a_frame=0;
-//  RESET_AUDIO(audio_fd);
 }
 
+  a_frame=0;
 
 if(!has_audio){
   printf("Audio: no sound\n");
@@ -1558,7 +1426,7 @@ if(!has_audio){
 
 if(file_format==DEMUXER_TYPE_AVI && has_audio){
   //a_pts=d_audio->pts;
-  printf("Initial frame delay  A: %d  V: %d\n",sh_audio->audio.dwInitialFrames,sh_video->video.dwInitialFrames);
+  printf("Initial frame delay  A: %d  V: %d\n",(int)sh_audio->audio.dwInitialFrames,(int)sh_video->video.dwInitialFrames);
   if(!pts_from_bps){
     float x=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)*sh_video->frametime;
     audio_delay-=x;
@@ -1577,7 +1445,7 @@ if(file_format==DEMUXER_TYPE_AVI && has_audio){
 if(force_fps){
   sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
-  printf("FPS forced to be %5.3  (ftime: %5.3f)\n",sh_video->fps,sh_video->frametime);
+  printf("FPS forced to be %5.3f  (ftime: %5.3f)\n",sh_video->fps,sh_video->frametime);
 }
 
 printf("Start playing...\n");fflush(stdout);
@@ -1595,16 +1463,9 @@ while(!eof){
 //} else
 while(has_audio){
   unsigned int t;
-  int playsize=outburst;
-  audio_buf_info zz;
-  int use_select=1;
+  int playsize=audio_out->get_space();
   
-  if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)!=-1){
-      // calculate exact buffer space:
-      playsize=zz.fragments*zz.fragsize;
-      if(!playsize) break; // buffer is full, do not block here!!!
-      use_select=0;
-  }
+  if(!playsize) break; // buffer is full, do not block here!!!
   
   if(playsize>MAX_OUTBURST) playsize=MAX_OUTBURST; // we shouldn't exceed it!
   //if(playsize>outburst) playsize=outburst;
@@ -1621,51 +1482,15 @@ while(has_audio){
   t=GetTimer()-t;audio_time_usage+=t*0.000001;
   
   if(playsize>sh_audio->a_buffer_len) playsize=sh_audio->a_buffer_len;
-  playsize/=outburst; playsize*=outburst; // rounding to fragment boundary
   
-//  printf("play %d bytes of %d [max: %d]\n",playsize,sh_audio->a_buffer_len,sh_audio->a_buffer_size);
+  playsize=audio_out->play(sh_audio->a_buffer,playsize,0);
 
-  // Play sound from the buffer:
-  if(playsize>0){ // if not EOF
-#ifdef USE_XMMP_AUDIO
-    pSound->Write( pSound, sh_audio->a_buffer, playsize );
-#else
-#ifdef SIMULATE_ALSA
-    fake_ALSA_write(audio_fd,sh_audio->a_buffer,playsize); // for testing purposes
-#else
-    playsize=write(audio_fd,sh_audio->a_buffer,playsize);
-#endif
-#endif
-    if(playsize>0){
+  if(playsize>0){
       sh_audio->a_buffer_len-=playsize;
       memcpy(sh_audio->a_buffer,&sh_audio->a_buffer[playsize],sh_audio->a_buffer_len);
       a_frame+=playsize/(float)(sh_audio->o_bps);
       //a_pts+=playsize/(float)(sh_audio->o_bps);
 //      time_frame+=playsize/(float)(sh_audio->o_bps);
-    }
-#ifndef USE_XMMP_AUDIO
-#ifndef SIMULATE_ALSA
-    // check buffer
-#ifdef HAVE_AUDIO_SELECT
-    if(use_select){  // do not use this code if SNDCTL_DSP_GETOSPACE works
-       fd_set rfds;
-       struct timeval tv;
-       FD_ZERO(&rfds);
-       FD_SET(audio_fd, &rfds);
-       tv.tv_sec = 0;
-       tv.tv_usec = 0;
-       if(select(audio_fd+1, NULL, &rfds, NULL, &tv)){
-         a_frame+=OUTBURST/(float)(sh_audio->o_bps);
-//         a_pts+=OUTBURST/(float)(sh_audio->o_bps);
-//         printf("Filling audio buffer...\n");
-         continue;
-//       } else {
-//         printf("audio buffer full...\n");
-       }
-    }
-#endif
-#endif
-#endif
   }
 
   break;
@@ -1907,7 +1732,7 @@ switch(sh_video->codec->driver){
     if(drop_frame){
 
       if(has_audio){
-          int delay=get_audio_delay(audio_fd);
+          int delay=audio_out->get_delay();
           if(verbose>1)printf("delay=%d\n",delay);
           time_frame=v_frame;
           time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
@@ -1921,7 +1746,7 @@ switch(sh_video->codec->driver){
       time_frame-=GetRelativeTime(); // reset timer
 
       if(has_audio){
-          int delay=get_audio_delay(audio_fd);
+          int delay=audio_out->get_delay();
           if(verbose>1)printf("delay=%d\n",delay);
           time_frame=v_frame;
           time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
@@ -1969,7 +1794,7 @@ switch(sh_video->codec->driver){
     float v_pts=0;
 
     // unplayed bytes in our and soundcard/dma buffer:
-    int delay_bytes=get_audio_delay(audio_fd)+sh_audio->a_buffer_len;
+    int delay_bytes=audio_out->get_delay()+sh_audio->a_buffer_len;
     float delay=(float)delay_bytes/(float)sh_audio->o_bps;
 
     if(pts_from_bps){
@@ -2030,7 +1855,7 @@ switch(sh_video->codec->driver){
   } else {
     // No audio:
     //if(d_video->pts)
-    int v_pts=d_video->pts;
+    float v_pts=d_video->pts;
     if(frame_corr_num==5){
 //      printf("A: ---   V:%6.1f   \r",v_pts);
       printf("V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",v_pts,
@@ -2055,7 +1880,7 @@ switch(sh_video->codec->driver){
 
   if(osd_function==OSD_PAUSE){
       printf("\n------ PAUSED -------\r");fflush(stdout);
-      RESET_AUDIO(audio_fd); // stop audio
+      audio_out->reset(); // stop audio
 #ifdef HAVE_GUI
       if ( nogui )
         {
@@ -2410,7 +2235,7 @@ switch(file_format){
 
         current_module=NULL;
 
-        RESET_AUDIO(audio_fd);
+        audio_out->reset(); // stop audio
 
         c_total=0; // kell ez?
         printf("A:%6.1f  V:%6.1f  A-V:%7.3f",d_audio->pts,d_video->pts,0.0f);
@@ -2433,8 +2258,7 @@ switch(file_format){
 } // keyboard event handler
 
 //================= Update OSD ====================
-{ int i;
-  if(osd_level>=2){
+{ if(osd_level>=2){
       int pts=d_video->pts;
       if(pts==osd_last_pts-1) ++pts; else osd_last_pts=pts;
       vo_osd_text=osd_text_buffer;

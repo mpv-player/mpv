@@ -74,7 +74,7 @@ struct config conf[]={
 	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0},
 	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0},
-	{"abs", &audio_buffer_size, CONF_TYPE_INT, CONF_MIN, 0, 0},
+	{"abs", &ao_buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0},
 	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0},
 	{"bps", &pts_from_bps, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nobps", &pts_from_bps, CONF_TYPE_FLAG, 0, 1, 0},
