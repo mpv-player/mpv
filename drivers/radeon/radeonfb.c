@@ -102,7 +102,9 @@ enum radeon_chips {
 	RADEON_QZ,
 	RADEON_LY,
 	RADEON_LZ,
-	RADEON_LW
+	RADEON_LW,
+	R200_QL,
+	RV200_QW
 };
 
 enum radeon_montype
@@ -143,6 +145,8 @@ static struct pci_device_id radeonfb_pci_table[] __devinitdata = {
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_LY, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_LY},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_LZ, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_LZ},
 	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RADEON_LW, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RADEON_LW},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_R200_QL, PCI_ANY_ID, PCI_ANY_ID, 0, 0, R200_QL},
+	{ PCI_VENDOR_ID_ATI, PCI_DEVICE_ID_RV200_QW, PCI_ANY_ID, PCI_ANY_ID, 0, 0, RV200_QW},
 	{ 0, }
 };
 MODULE_DEVICE_TABLE(pci, radeonfb_pci_table);
@@ -248,7 +252,7 @@ struct radeonfb_info {
 	struct radeon_regs state;
 	struct radeon_regs init_state;
 
-	char name[14];
+	char name[17];
 	char ram_type[12];
 
 	int hasCRTC2;
@@ -256,6 +260,7 @@ struct radeonfb_info {
 	int dviDispType;
 	int hasTVout;
 	int isM7;
+	int isR200;
 
 	u32 mmio_base_phys;
 	u32 fb_base_phys;
@@ -793,6 +798,16 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 			rinfo->hasCRTC2 = 1;
 			rinfo->isM7 = 1;
 			strcpy(rinfo->name, "Radeon M7 LW ");
+			break;
+		case PCI_DEVICE_ID_R200_QL:
+			rinfo->hasCRTC2 = 1;
+			rinfo->isR200 = 1;
+			strcpy(rinfo->name, "Radeon2 8500 LW ");
+			break;
+		case PCI_DEVICE_ID_RV200_QW:
+			rinfo->hasCRTC2 = 1;
+			rinfo->isM7 = 1;
+			strcpy(rinfo->name, "Radeon2 7500 QW ");
 			break;
 		default:
 			release_mem_region (rinfo->mmio_base_phys,
