@@ -707,13 +707,11 @@ static uint32_t get_image(mp_image_t *mpi){
     return VO_FALSE;
 }
 
-
 static uint32_t query_format(uint32_t format)
 {
-    int flag=1;
+    int flag=3|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN|VFCAP_OSD; // FIXME! check for DOWN
    /* check image formats */
-     fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
-     if(format==IMGFMT_BGR24){ format=IMGFMT_YV12;flag|=2;} // conversion!
+     if(format==IMGFMT_BGR24){ format=IMGFMT_YV12;flag&=~2;flag|=VFCAP_FLIP;} // conversion!
      for(i = 0; i < formats; i++){
 //       printf("Xvideo image format: 0x%x (%4.4s) %s\n", fo[i].id,(char*)&fo[i].id, (fo[i].format == XvPacked) ? "packed" : "planar");
        if (fo[i].id == format) return flag; //xv_format = fo[i].id;
@@ -791,6 +789,8 @@ static uint32_t preinit(const char *arg)
 	printf("Couldn't find free Xvideo port - maybe other applications keep open it\n");
 	return -1;
     }
+
+    fo = XvListImageFormats(mDisplay, xv_port, (int*)&formats);
 
     return 0;
 }

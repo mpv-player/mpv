@@ -223,7 +223,7 @@ query_format(uint32_t format)
     case IMGFMT_UYVY:
 //    case IMGFMT_RGB|24:
 //    case IMGFMT_BGR|24:
-        return 1;
+        return 3 | VFCAP_OSD|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
     }
     return 0;
 }

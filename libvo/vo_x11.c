@@ -569,9 +569,9 @@ static uint32_t query_format( uint32_t format )
     if (IMGFMT_IS_BGR(format))
     {
 	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
-	    return 0x1|0x2|0x4;
+	    return 3|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
 	else
-	    return 0x1|0x4;
+	    return 1|VFCAP_OSD|VFCAP_SWSCALE|VFCAP_FLIP;
     }
 
  switch( format )
@@ -585,7 +585,7 @@ static uint32_t query_format( uint32_t format )
    case IMGFMT_I420:
    case IMGFMT_IYUV:
    case IMGFMT_YV12:
-    return 0x1|0x4;
+    return 1|VFCAP_OSD|VFCAP_SWSCALE;
   }
  return 0;
 }

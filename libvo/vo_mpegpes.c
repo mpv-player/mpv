@@ -496,9 +496,9 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x0,i
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 1|256;
+    if(format==IMGFMT_MPEGPES) return 3|VFCAP_TIMER;
 #ifdef USE_LIBFAME
-    if(format==IMGFMT_YV12) return 1|256;
+    if(format==IMGFMT_YV12) return 1|VFCAP_TIMER|VFCAP_OSD;
 #endif
     return 0;
 }

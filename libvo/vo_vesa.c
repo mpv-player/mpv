@@ -445,7 +445,7 @@ static uint32_t query_format(uint32_t format)
 {
     if(verbose > 2)
         printf("vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
-    return 1; /* due new SwScale code */
+    return 1 | VFCAP_OSD | VFCAP_SWSCALE; /* due new SwScale code */
 }
 
 static void paintBkGnd( void )

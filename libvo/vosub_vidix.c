@@ -31,6 +31,7 @@
 #include "video_out.h"
 #include "../mp_image.h"
 
+#include "../libmpcodecs/vfcap.h"
 
 #define NUM_FRAMES VID_PLAY_MAXFRAMES /* Temporary: driver will overwrite it */
 #define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
@@ -361,12 +362,12 @@ uint32_t vidix_query_fourcc(uint32_t format)
 	    vo_server->draw_slice = vidix_draw_slice_swYV12;
 	    forced_fourcc=IMGFMT_YUY2;
 	    printf("vosub_vidix: WARNING!!! Using YV12 to YUY2 SW convertion\n");
-	    return 0x02;
+	    return VFCAP_CSP_SUPPORTED|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
 	}
     }
-    return 0 ;
+    return 0;
   }
-  return 0x2; /* hw support without conversion */
+  return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_HWSCALE_UP|VFCAP_HWSCALE_DOWN;
 }
 
 int vidix_grkey_support(void)

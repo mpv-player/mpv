@@ -21,6 +21,8 @@
  *
  */
 
+#include "../libmpcodecs/vfcap.h"
+
 static uint32_t control(uint32_t request, void *data, ...);
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		     uint32_t d_height, uint32_t fullscreen, char *title,
