@@ -262,7 +262,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
     dstStride[1]=
     dstStride[2]=dstStride[0]>>1;
     if(HAS_DGA()) dst[0] += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
-    (*swScale)(sws,image,stride,y,h,dst,dstStride);
+    sws->swScale(sws,image,stride,y,h,dst,dstStride);
     flip_trigger = 1;
     return 0;
 }
@@ -371,7 +371,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	else
 	    srcStride[0] = srcW*2;
 	if(HAS_DGA()) dst[0] += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
-	(*swScale)(sws,src,srcStride,0,srcH,dst,dstStride);
+	sws->swScale(sws,src,srcStride,0,srcH,dst,dstStride);
 	flip_trigger=1;
     }
     else if(!HAS_DGA()) __vbeCopyData(src[0]);

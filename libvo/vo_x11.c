@@ -501,7 +501,7 @@ if(swsContext){
   dst[1]=
   dst[2]=NULL;
 
-  swScale(swsContext,src,stride,y,h,dst, dstStride);
+  swsContext->swScale(swsContext,src,stride,y,h,dst, dstStride);
 } else {
  uint8_t *dst=ImageData + ( image_width * y + x ) * ( bpp/8 );
  if(image_format==IMGFMT_YV12)
