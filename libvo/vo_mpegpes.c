@@ -1,4 +1,4 @@
-//#define HAVE_DVB
+#define HAVE_DVB
 #define PES_MAX_SIZE 2048
 /* 
  * Based on:
@@ -47,6 +47,24 @@ LIBVO_EXTERN (mpegpes)
 int vo_mpegpes_fd=-1;
 int vo_mpegpes_fd2=-1;
 
+#ifdef USE_LIBAVCODEC
+
+#include "../libavcodec/avcodec.h"
+
+static unsigned char *picture_buf=NULL;
+static unsigned char *outbuf=NULL;
+static int outbuf_size = 100000;
+
+static int s_pos_x,s_pos_y;
+static int d_pos_x,d_pos_y;
+
+static AVPicture picture;
+static AVCodec *codec=NULL;
+static AVCodecContext codec_context;
+extern int avcodec_inited;
+
+#endif
+
 static vo_info_t vo_info = 
 {
 #ifdef HAVE_DVB
@@ -60,7 +78,7 @@ static vo_info_t vo_info =
 };
 
 static uint32_t
-init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+init(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
 {
 #ifdef HAVE_DVB
     //|O_NONBLOCK
@@ -115,6 +133,92 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	return -1;
     }
 #endif
+
+#ifdef USE_LIBAVCODEC
+    picture_buf=NULL;
+if(format==IMGFMT_YV12){
+    int size;
+
+    if(!avcodec_inited){
+      avcodec_init();
+      avcodec_register_all();
+      avcodec_inited=1;
+    }
+
+    /* find the mpeg1 video encoder */
+    codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
+    if (!codec) {
+        fprintf(stderr, "mpeg1 codec not found\n");
+        return -1;
+    }
+    memset(&codec_context,0,sizeof(codec_context));
+    codec_context.bit_rate=100000; // not used
+    codec_context.frame_rate=25*FRAME_RATE_BASE; // !!!!!
+    codec_context.gop_size=0; // I frames only
+    codec_context.flags=CODEC_FLAG_QSCALE;
+    codec_context.quality=2; // quality!  1..31  (1=best,slowest)
+
+#if 0
+    codec_context.width=width;
+    codec_context.height=height;
+#else  
+    if(width<=352 && height<=288){
+      codec_context.width=352;
+      codec_context.height=288;
+    } else
+    if(width<=352 && height<=576){
+      codec_context.width=352;
+      codec_context.height=576;
+    } else
+    if(width<=480 && height<=576){
+      codec_context.width=480;
+      codec_context.height=576;
+    } else
+    if(width<=544 && height<=576){
+      codec_context.width=544;
+      codec_context.height=576;
+    } else {
+      codec_context.width=704;
+      codec_context.height=576;
+    }
+#endif
+
+    d_pos_x=(codec_context.width-(int)s_width)/2;
+    if(d_pos_x<0){
+      s_pos_x=-d_pos_x;d_pos_x=0;
+    } else s_pos_x=0;
+
+    d_pos_y=(codec_context.height-(int)s_height)/2;
+    if(d_pos_y<0){
+      s_pos_y=-d_pos_y;d_pos_y=0;
+    } else s_pos_y=0;
+    
+    printf("[vo] position mapping: %d;%d => %d;%d\n",s_pos_x,s_pos_y,d_pos_x,d_pos_y);
+
+    /* open it */
+    if (avcodec_open(&codec_context, codec) < 0) {
+        fprintf(stderr, "could not open codec\n");
+        return -1;
+    }
+    
+    outbuf_size=10000+width*height;  // must be enough!
+    outbuf = malloc(outbuf_size);
+
+    size = codec_context.width*codec_context.height;
+    picture_buf = malloc((size * 3) / 2); /* size for YUV 420 */
+
+    memset(picture_buf,0,size); // clear Y
+    memset(picture_buf+size,128,size/2); // clear UV
+    
+    picture.data[0] = picture_buf;
+    picture.data[1] = picture.data[0] + size;
+    picture.data[2] = picture.data[1] + size / 4;
+    picture.linesize[0] = codec_context.width;
+    picture.linesize[1] = codec_context.width / 2;
+    picture.linesize[2] = codec_context.width / 2;
+
+}
+#endif
     return 0;
 }
 
@@ -126,15 +230,6 @@ get_info(void)
 
 static void draw_osd(void)
 {
-}
-
-static void flip_page (void)
-{
-}
-
-static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
-{
-    return 0;
 }
 
 #define NFD   2
@@ -215,16 +310,83 @@ static uint32_t draw_frame(uint8_t * src[])
     return 0;
 }
 
+static void flip_page (void)
+{
+#ifdef USE_LIBAVCODEC
+  if(picture_buf){ // YV12 only:
+    int out_size;
+    static int fno=0;
+    /* encode the image */
+    out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
+    send_pes_packet(outbuf,out_size,0x1E0,fno*(90000/25));++fno;
+//    printf("frame size: %d  \n",out_size);
+  }
+#endif
+}
+
+static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x0,int y0)
+{
+#ifdef USE_LIBAVCODEC
+    int y;
+    unsigned char* s;
+    unsigned char* d;
+    
+    x0+=d_pos_x;
+    y0+=d_pos_y;
+    if(w>picture.linesize[0]) w=picture.linesize[0]; // !!
+
+    // Y
+    s=srcimg[0]+s_pos_x+s_pos_y*stride[0];
+    d=picture.data[0]+x0+y0*picture.linesize[0];
+    for(y=0;y<h;y++){
+	memcpy(d,s,w);
+	s+=stride[0];
+	d+=picture.linesize[0];
+    }
+    
+    w/=2;h/=2;x0/=2;y0/=2;
+
+    // U
+    s=srcimg[1]+(s_pos_x/2)+(s_pos_y/2)*stride[1];
+    d=picture.data[1]+x0+y0*picture.linesize[1];
+    for(y=0;y<h;y++){
+	memcpy(d,s,w);
+	s+=stride[1];
+	d+=picture.linesize[1];
+    }
+
+    // V
+    s=srcimg[2]+(s_pos_x/2)+(s_pos_y/2)*stride[2];
+    d=picture.data[2]+x0+y0*picture.linesize[2];
+    for(y=0;y<h;y++){
+	memcpy(d,s,w);
+	s+=stride[2];
+	d+=picture.linesize[2];
+    }
+#endif
+    return 0;
+}
+
+
 static uint32_t
 query_format(uint32_t format)
 {
     if(format==IMGFMT_MPEGPES) return 1;
+#ifdef USE_LIBAVCODEC
+    if(format==IMGFMT_YV12) return 1;
+#endif
     return 0;
 }
 
 static void
 uninit(void)
 {
+#ifdef USE_LIBAVCODEC
+  if(picture_buf){ // YV12 only:
+    free(outbuf);
+    free(picture_buf);
+  }
+#endif
     if(vo_mpegpes_fd>=0){ close(vo_mpegpes_fd);vo_mpegpes_fd=-1;}
     if(vo_mpegpes_fd2>=0){ close(vo_mpegpes_fd2);vo_mpegpes_fd2=-1;}
 }
