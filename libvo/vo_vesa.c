@@ -1025,6 +1025,8 @@ static uint32_t preinit(const char *arg)
   fd = open("/dev/mem", O_RDWR);
   if (fd < 0)
   	return -1;
+  else
+  	close(fd);
   if(verbose > 2)
         printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
   return pre_init_err;
