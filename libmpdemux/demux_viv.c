@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <string.h> /* strtok */
 
 #include "config.h"
 #include "mp_msg.h"
@@ -80,7 +81,8 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	if (!strcmp(opt, "Version"))
 	{
 	    mp_msg(MSGT_DEMUX, MSGL_DBG2, "Version: %s\n", param);
-	    if (atoi(param) == 1 || atoi(param) == 2)
+	    if (!strncmp(param, "Vivo/1", 6) || !strncmp(param, "Vivo/2", 6))
+//	    if (atoi(param) == 1 || atoi(param) == 2)
 		priv->supported = 1;
 	}
 
@@ -183,26 +185,25 @@ int vivo_check_file(demuxer_t* demuxer){
     len+=c;
     printf("header block 1 size: %d\n",len);
     //stream_skip(demuxer->stream,len);
-    stream_read(demuxer->stream,buf,len);
-    buf[len]=0;
-//    printf("VIVO header: '%s'\n",buf);
+
+    priv=malloc(sizeof(vivo_priv_t));
+    memset(priv,0,sizeof(vivo_priv_t));
+    demuxer->priv=priv;
 
 #if 0
     vivo_parse_text_header(demuxer, len);
     if (priv->supported == 0)
 	return 0;
 #else
+    /* this is enought for check (for now) */
+    stream_read(demuxer->stream,buf,len);
+    buf[len]=0;
+//    printf("VIVO header: '%s'\n",buf);
+
     // parse header:
     i=0;
     while(i<len && buf[i]==0x0D && buf[i+1]==0x0A) i+=2; // skip empty lines
     if(strncmp(buf+i,"Version:Vivo/",13)) return 0; // bad version/type!
-
-    priv=malloc(sizeof(vivo_priv_t));
-    memset(priv,0,sizeof(vivo_priv_t));
-    demuxer->priv=priv;
-
-    // TODO: parse FPS and other info (display title/author etc)
-    priv->fps=10.0; // FIXME (parse from header)
 #endif
 
 #if 0
@@ -360,7 +361,7 @@ static unsigned int x_get_bits(int n){
 /* most is hardcoded. should extend to handle all h263 streams */
 static int h263_decode_picture_header(unsigned char *b_ptr)
 {
-    int i;
+//    int i;
         
 //    for(i=0;i<16;i++) printf(" %02X",b_ptr[i]); printf("\n");
     
@@ -467,10 +468,12 @@ void demux_open_vivo(demuxer_t* demuxer){
     
 		sh->format=0x6f766976; // "vivo"
 		if(!sh->fps)
+		{
 		    if (priv->fps)
 			sh->fps=priv->fps;
 		    else
 			sh->fps=15.0f;
+		}
 		sh->frametime=1.0f/sh->fps;
 
 #warning "FIXME! we can't scale"
@@ -504,8 +507,10 @@ void demux_open_vivo(demuxer_t* demuxer){
 		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight*3;
 		demuxer->video->sh=sh; sh->ds=demuxer->video;
 		demuxer->video->id=0;
+		
+		demuxer->seekable = 0;
 
-		printf("VIVO Video stream %d size: display: %dx%d, codec: %dx%d\n",
+		printf("VIVO Video stream %d size: display: %dx%d, codec: %lux%lu\n",
 		    demuxer->video->id, sh->disp_w, sh->disp_h, sh->bih->biWidth,
 		    sh->bih->biHeight);
 }
