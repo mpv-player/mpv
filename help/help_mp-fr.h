@@ -1,6 +1,6 @@
 // sync'ed with help_mp-en.h 1.77
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
-// Original transation by Firebird <firebird@chez.com>
+// Original translation by Firebird <firebird@chez.com>
 
 // ========================= Aide MPlayer ===========================
 
@@ -43,7 +43,7 @@ static char help_text[]=
 " PgUp ou PgDown   + / - de 10 minutes\n"
 " < ou >           fichier suivant / précédent dans la playlist\n"
 " p ou ESPACE      pause (presser n'importe quelle touche pour continuer)\n"
-" q ou ESC         arrète la lecture et quitte le programme\n"
+" q ou ESC         arrête la lecture et quitte le programme\n"
 " + ou -           synchro audio / vidéo: +/- 0.1 seconde\n"
 " o                change l'OSD: rien / barre de recherche / barre rech. + temps\n"
 " * ou /           augmente/diminue le volume PCM\n"
@@ -135,19 +135,19 @@ static char help_text[]=
 #define MSGTR_Paused "\n================= PAUSE =================\r"
 #define MSGTR_PlaylistLoadUnable "\nNe peut pas charger la liste de lecture %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPlayer à planté à cause d'une 'Instruction Illegale'.\n"\
+"- MPlayer a planté à cause d'une 'Instruction Illégale'.\n"\
 "  Il y a peut-être un bogue dans notre nouveau code de détection CPU...\n"\
-"  veuillez lire DOCS/bugreports.html\n"
+"  Veuillez lire DOCS/bugreports.html\n"
 #define MSGTR_Exit_SIGILL \
-"- MPlayer à planté à cause d'une 'Instruction Illegale'.\n"\
+"- MPlayer a planté à cause d'une 'Instruction Illégale'.\n"\
 "  Cela se produit généralement quand vous le lancez sur un CPU différent\n"\
-"  de celui pour lequel il a été compilé/optimisé.\n Verifiez cela!\n"
+"  de celui pour lequel il a été compilé/optimisé.\n Vérifiez cela!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-"- MPlayer à planté à cause d'une mauvaise utilisation de CPU/FPU/RAM.\n"\
+"- MPlayer a planté à cause d'une mauvaise utilisation de CPU/FPU/RAM.\n"\
 "  Recompilez MPlayer avec --enable-debug et faites un backtrace 'gdb'\n"\
-"  et desassemblez. Pour les détails, voir DOCS/bugreports.html section 5.b.\n"
+"  et désassemblez. Pour les détails, voir DOCS/bugreports.html section 5.b.\n"
 #define MSGTR_Exit_SIGCRASH \
-"- MPlayer à planté. Cela n'aurait pas dù arriver.\n"\
+"- MPlayer a planté. Cela n'aurait pas dû arriver.\n"\
 "  Il y a peut-être un bogue dans le code de MPlayer _ou_ dans vos pilotes _ou_ dans votre\n"\
 "  version de gcc. Si vous pensez que c'est la faute de MPlayer, merci de lire DOCS/bugreports.html\n"\
 "  et d'en suivre les instructions. Nous ne pourrons et ne voudrons pas vous aider à moins que vous\n"\
@@ -180,10 +180,10 @@ static char help_text[]=
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\
-" vbr=<0-4>     méthode variable bitrate\n"\
+" vbr=<0-4>     méthode à bitrate variable\n"\
 "                0: cbr\n"\
 "                1: mt\n"\
-"                2: rh(par défaut)\n"\
+"                2: rh (par défaut)\n"\
 "                3: abr\n"\
 "                4: mtrh\n"\
 "\n"\
@@ -192,7 +192,7 @@ static char help_text[]=
 " cbr           bitrate constant\n"\
 "               Force également l'encodage en mode CBR sur les modes ABR présélectionnés suivants\n"\
 "\n"\
-" br=<0-1024>   specifie le bitrate en kBit (CBR et ABR uniquement)\n"\
+" br=<0-1024>   spécifie le bitrate en kbits (CBR et ABR uniquement)\n"\
 "\n"\
 " q=<0-9>       qualité (0-plus haut, 9-plus bas) (uniquement pour VBR)\n"\
 "\n"\
@@ -200,7 +200,7 @@ static char help_text[]=
 "\n"\
 " ratio=<1-100> rapport de compression\n"\
 "\n"\
-" vol=<0-10>    définie le gain d'entrée audio\n"\
+" vol=<0-10>    définit le gain d'entrée audio\n"\
 "\n"\
 " mode=<0-3>    (par défaut: auto)\n"\
 "                0: stereo\n"\
@@ -214,7 +214,7 @@ static char help_text[]=
 "                2: ajuste\n"\
 "\n"\
 " fast          accélère l'encodage pour les modes VBR préselectionnés suivants,\n"\
-"               qualité légèrement inférieure et plus hauts bitrates.\n"\
+"               qualité légèrement inférieure et bitrates plus élevés.\n"\
 "\n"\
 " preset=<valeur> fournit les plus hauts paramètres de qualité possibles.\n"\
 "                 medium: encodage VBR, bonne qualité\n"\
@@ -256,9 +256,9 @@ static char help_text[]=
 #define MSGTR_VideoStreamRedefined "ATTENTION: Entête du flux vidéo %d redéfini.\n"
 #define MSGTR_TooManyAudioInBuffer "\nDEMUXER: Trop (%d dans %d octets) de paquets audio dans le tampon!\n"
 #define MSGTR_TooManyVideoInBuffer "\nDEMUXER: Trop (%d dans %d octets) de paquets vidéo dans le tampon!\n"
-#define MSGTR_MaybeNI "Peut-être que vous jouez un flux/fichier mal multiplexé, ou qu le codec a échoué?\n"\
-                      "Pour les fichier .AVI, essayez de forcer le mode non-entrelaçé avec l'option -ni.\n"
-#define MSGTR_SwitchToNi "\nFichier .AVI non entrelaçé - passage en mode -ni...\n"
+#define MSGTR_MaybeNI "Peut-être que vous jouez un flux/fichier mal multiplexé, ou que le codec a échoué?\n"\
+                      "Pour les fichier .AVI, essayez de forcer le mode non-entrelacé avec l'option -ni.\n"
+#define MSGTR_SwitchToNi "\nFichier .AVI non entrelacé - passage en mode -ni...\n"
 #define MSGTR_Detected_XXX_FileFormat "Fichier de type %s détecté.\n"
 #define MSGTR_DetectedAudiofile "Fichier audio détecté.\n"
 #define MSGTR_NotSystemStream "Pas un flux de type MPEG System... (peut-être un Flux de Transport?)\n"
@@ -283,7 +283,7 @@ static char help_text[]=
 #define MSGTR_EncryptedVOB "Fichier VOB crypté (support libcss non compilé!) Lire DOCS/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Flux crypté mais vous n'avez pas demandé d'authentification!!\n"
 
-#define MSGTR_MOVcomprhdr "MOV: Les entêtes compressées ne sont pas (encore) supportées!\n"
+#define MSGTR_MOVcomprhdr "MOV: Les entêtes compressés ne sont pas (encore) supportés!\n"
 #define MSGTR_MOVvariableFourCC "MOV: ATTENTION: Variable FOURCC détectée!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: ATTENTION: Trop de pistes!"
 #define MSGTR_FoundAudioStream "==> Flux audio trouvé: %d\n"
