@@ -1,0 +1,1383 @@
+.\" MPlayer (C) 2000-2002 Arpad Gereoffy <sendmail@to.mplayer-users>
+.\" This manpage was/is done by Gabucino <sendmail@to.mplayer-users>
+.\" (Patches done by Jonas Jermann <sendmail@to.mplayer-users>)
+.\" T³umaczenie na jêzyk polski: imoteph (imoteph@wp.pl)& Zorg (kmaterka@wp.pl)  
+.\" 
+.TH "MPlayer" "1" "2002-05-13"
+
+.SH "NAZWA"
+mplayer \- Movie Player dla Linuksa
+.br
+mencoder \- Enkoder (Koder) Filmów dla Linuksa
+
+.SH "SK£ADNIA"
+.B mplayer
+.RB [opcje]\ [\fIplik\fP\ |\ \fIURL\fP\ |\ \fIplaylista\fP\ |\ \-\ ]
+.br
+.B mplayer
+.RB [opcje\ globalne]\ \fIplik1\fP\ [opcje\ specyficzne]\ [plik2]\ [opcje\ specyficzne]
+.br
+.B mplayer
+.RB [opcje\ globalne]\ {\fIgrupa\ plików\ i\ opcji\fP}\ [grupa\ specyficznych\ opcji]
+.br
+.B mplayer
+.RB [dvd|vcd|tv]://[tytu³]\ [opcje]
+.br
+.B mplayer
+.RB [mms|http|http_proxy|rtp]://URL[:port]\ [opcje]
+.br
+.B mencoder
+.RB [opcje]\ [\fIplik\fP\ |\ \fIURL\fP\ |\ \-\ ]\ [\-o\ plik]
+.br
+.B gmplayer
+.RB [options]\ [\-skin\ nazwa\ skórki]
+
+.SH "OPIS"
+.B mplayer
+to odtwarzacz filmów dla LINUKSA (dzia³a w wielu innych Uniksach, i na  nie\-x86
+CPU, patrz dokumentacja). Odtwarza wiêkszo¶æ plików MPEG, VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV,
+FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, oparty na oryginalnych XAnim i
+Win32 DLL kodekach. Mo¿esz odtwarzaæ VideoCD, SVCD, DVD, 3ivx, DivX 3/4/5, a nawet filmy WMV
+(i w ogóle nie potrzebujesz bibliotek avifile!).
+
+Kolejn± du¿± cech± mplayera jest szeroki wybór wspieranych sterowników wyj¶cia.
+Pracuje z X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, ale mo¿esz u¿ywaæ
+GGI, SDL (i w tym przypadku wszystkich ich sterowników), VESA (we wszystkich kartach kompatybilnych z VESA, nawet 
+bez X!) i niektóre niskopoziomowe specyficzne dla kart sterowniki (dla Matrox, 3Dfx i Radeon)!
+.br
+Wiêkszo¶æ z nich wspiera programowe lub sprzêtowe skalowanie, wiêc bêdziesz móg³ ogl±daæ filmy na pe³nym ekranie.
+MPlayer wspiera wy¶wietlanie przez niektóre sprzêtowe dekodery MPEG, takie jak Siemens
+DVB, DXR2 i DXR3/Hollywood+!
+
+£adne wyg³adzane cieniowanie napisów z europejskimi/ISO 8859-1,2 (polskie, wêgierskie, angielskie 
+itp.), cyrylica, koreañskie czcionki s± wspierane (10 wspieranych formatów napisów: VobSub, MicroDVD,
+SubRip, SubViewer, Sami, VPlayer, RT, SSA, AQTitle i nasz: MPsub).
+
+.B mencoder
+(Koder Filmów MPlayera) jest to prosty koder (kompresor) filmów, projektowany do
+kodowania filmów otwieranych MPlayerem (AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET)
+do innych wspieranych formatów (patrz poni¿ej).  Potrafi kodowaæ do DivX4 
+(1, 2 lub 3 krokowo), XviD, kodeki libavcodec, PCM/MP3/VBRMP3 audio. 
+Potrafi równie¿ kopiowaæ strumieniowo, posiada potê¿ny system pluginów
+(przycinanie, powiêkszanie, odwracanie, postprocesing, obracanie, skalowanie, konwersja rgb/yuv) i inne.
+
+.B gmplayer
+to MPlayer z graficznym interfejsem u¿ytkownika.
+Posiada te same opcje co MPlayer.
+
+.SH OGÓLNE INFORMACJE
+Ka¿da "flaga" opcji ma "przeciwflagê" do pary, np. \-fs przeciwn± jest \-nofs.
+.br
+.B Sprawd¼ te¿ dokumentacjê html!
+
+.SH "OPCJE DEMUXERA/STRUMIENI"
+.TP
+.B \-aid <id>
+Wybierz kana³ audio [MPG: 0\-31 AVI: 1\-99 ASF: 0\-127 VOB: 128\-...]
+.br
+.I INFORMACJE:
+U¿yj \-alang dla zdefiniowania jêzyka poprzez parametr.
+.TP
+.B \-alang <jêzyk\ strumienia\ audio>
+U¿yteczne gdy odtwarzasz dyski DVD. Przypuszczalnie dwuliterowy kod(y) kraju w
+parametrze i zawsze próbuje odtwarzaæ strumieñ audio w tym jêzyku,
+je¿eli taki istnieje. Dla przyk³adu: \-alang pl,en bêdzie zawsze próbowa³ odtworzyæ
+polski lub je¿eli nie istnieje wtedy angielski strumieñ audio je¿eli siê jakie¶ znajduj±.
+.TP
+.B \-audio\-demuxer <numer>
+Zmusza audio demuxera do typu \-audiofile. 
+Podaj ID demuxera które s± zdefiniowane w demuxers.h.
+Mo¿esz u¿yæ \-audio\-demuxer 17 by wymusiæ wykrywanie .mp3!
+.TP
+.B \-audiofile <nazwa\ pliku>
+Otwórz audio z zewnêtrznego pliku (WAV, MP3 lub OggVorbis)
+.TP
+.B \-cdrom\-device <¶cie¿ka\ do\ urz±dzenia>
+Zmieñ ¶cie¿kê do urz±dzenia CDROM ze standardowego /dev/cdrom
+.TP
+.B \-cache <kbajty>
+Ta opcja okre¶la ile pamiêci (w kilobajtach) ma byæ u¿yte do precachingu pliku/URL.
+Szczególnie u¿yteczne w powolnych mediach (standardowo jest \-nocache).
+.TP
+.B \-chapter <id\ rozdzia³u[-<id koñcowego rozdzia³u>]
+Od którego rozdzia³u rozpoczyna odtwarzanie. Opcjonalnie okre¶la w którym rozdziale
+koñczy odtwarzanie. Przyk³ad mo¿na znale¼æ poni¿ej.
+.TP
+.B \-csslib <nazwa\ pliku>
+(opcja starego stylu DVD) Ta opcje jest u¿ywana do zmiany standardowej lokalizacji libcss.so
+.TP
+.B \-demuxer <numer>
+Wymuszenie typu demuxera. Podaj ID demuxera zdefiniowane w demuxers.h.
+.TP
+.B \-dumpaudio (tylko MPLAYER)
+Zrzucanie surowego skompresowanego strumienia audio do ./stream.dump (przydatny z mpeg/ac3)
+.TP
+.B \-dumpfile <nazwa\ pliku> (tylko MPLAYER)
+Ustal plik który powinien byæ zrzucony. Powinien byæ u¿yty razem
+z \-dumpaudio/\-dumpvideo/\-dumpstream.
+.TP
+.B \-dumpstream (tylko MPLAYER)
+Zrzuca surowy strumieñ do ./stream.dump . Przydatny dla przyk³adu
+gdy rippujesz z DVD lub sieci.
+.TP
+.B \-dumpsub (tylko MPLAYER)
+Zrzuca strumieñ napisów ze strumienia VOB.
+.TP
+.B \-dumpvideo (tylko MPLAYER)
+Zrzuca surowy skompresowany strumieñ video do ./stream.dump (nie bardzo u¿yteczny)
+.TP
+.B \-dvd <id\ tytu³u>
+Powiedz MPlayerowi które filmy (okre¶lone przez id tytu³u) ma odtwarzaæ. Dla przyk³adu
+czasem '1' to trailery, a '2' to prawdziwy film. Czasami deinterlacing 
+jest wymagany dla playbacku DVD: zobacz te¿ opcje '\-pp 0x20000' lub '\-npp lb'. 
+.TP
+.B \-dvd\-device <¶cie¿ka\ do\ urz±dzenia>
+Zmieñ ¶cie¿kê do urz±dzenia DVD ze standardowego /dev/dvd
+.TP
+.B \-dvdangle <id\ ujêcia>
+Niektóre dyski DVD zawieraj± sceny które mog± byæ ogl±dane z ró¿nych k±tów.
+Tutaj mo¿esz podaæ MPlayer które ujêcia ma u¿ywaæ. Przyk³ad mo¿na znale¼æ poni¿ej.
+.TP
+.B \-dvdauth <urz±dzenie\ DVD>
+(opcja starego stylu DVD) W³±cz w DVD autentyfikacjê korzystaj±c z podanego urz±dzenia.
+.TP
+.B \-dvdkey <klucz\ CSS>
+(opcja starego stylu DVD) Gdy dekodujesz z nie DVD, ta opcja przekazuje klucz CSS potrzebny 
+do kackowania DVD (klucz jest wy¶wietlany podczas autentyfikacji DVD).
+.TP
+.B \-dvdnav (KOD BETA) 
+Wymuszaj u¿ycie libdvdnav.
+.TP
+.B \-forceidx
+Wymuszaj przebudowanie INDEXu. U¿yteczny dla plików z uszkodzonym indeksem (niesynchroniczny, itp.).
+Przeszuka plik je¶li to mo¿liwe. Mo¿esz ustaliæ index na sta³e korzystaj±c z
+MEncoder (patrz dokumentacja).
+.TP
+.B \-fps <warto¶æ>
+Zmieñ tempo klatek video (je¿eli warto¶æ jest z³a/zaginiona w nag³ówku) (numer float)
+.TP
+.B \-frames <numer>
+Odtwórz/konwertuj tylko pierwsze <numer> klatek, potem wy³±cz.
+.TP
+.B \-hr\-mp3\-seek (tylko .MP3)
+Dok³adne przeszukiwanie mp3. Standardowo jest: w³±czone gdy odtwarza z zewnêtrznego pliku mp3,
+gdy potrzebujemy znale¼æ bardzo dok³adn± pozycjê do zatrzymania synchronizacji A/V. Potrafi to byæ powolne
+szczególnie gdy szukamy do ty³u \- jest to przewijanie z samego pocz±tku by znale¼æ
+dok³adn± klatkê.
+.TP
+.B \-idx (zobacz te¿ opcjê \-forceidx !)
+Przebuduj INDEX AVI je¿eli INDEX nie zostanie znaleziony, 
+ten sposób pozwala przeszukaæ plik. U¿yteczny przy uszkodzonych/niekompletnych
+przesy³kach, lub ¼le stworzonych AVI.
+.TP
+.B \-mc <sekundy/klatki>
+Maksymalna korekcja synchronizacji A-V na klatkê (w sekundach)
+.TP
+.B \-mf <opcja1:opcja2:...>
+U¿ywany gdy dekodujemy z wielokrotnego pliku PNG lub JPEG.
+(patrz dokumentacja). Opcje to:
+
+    on              w³±cz wspieranie multiplików
+    w=<warto¶æ>     szeroko¶æ danych wyj¶ciowych (autodetekcja)
+    h=<warto¶æ>     wysoko¶æ danych wyj¶ciowych (autodetekcja)
+    fps=<warto¶æ>   fps danych wyj¶ciowych (standardowo: 25)
+    type=<warto¶æ>  typ pliku danych wej¶ciowych (dostêpne typy : jpeg, png)
+.TP
+.B \-ni (tylko .AVI)
+Wymu¶ u¿ycie non\-interleaved AVI parser (ustala odtwarzanie
+w niektórych uszkodzonych plikach AVI).
+.TP
+.B \-nobps (tylko .AVI)
+Nie u¿ywaj warto¶ci avg. bajtów/sek dla synchronizacji A\-V (AVI).
+Pomaga w niektórych plikach AVI z uszkodzonym nag³ówkiem.
+.TP
+.B \-skipopening
+Pomiñ pocz±tek dvd (tylko dvdnav).
+.TP
+.B \-sb <pozycja\ w\ bajtach> (patrz te¿ opcjê \-ss !)
+Szukaj do pozycji w bajtach. Przydatne dla playbacku z obrazu 
+cdromu / pliku vob ze ¶mieciami na pocz±tku.
+.TP
+.B \-srate <Hz>
+Okre¶l Hz dla playbacku audio. Zmienia prêdko¶æ playbacku!
+.TP
+.B \-ss <czas> (patrz te¿ opcjê \-sb !)
+Przeszukuje do podanej pozycji. Dla przyk³adu:
+
+    \-ss 56         przeszukuje do 56 sekundy
+    \-ss 01:10:00   przeszukuje do 1 godziny 10 minut
+.TP
+.B \-tv <opcja1:opcja2:...>
+Ta opcja umo¿liwia przechwytywanie TV MPlayerem (patrz dokumentacja). 
+Dostêpne opcje to:
+
+    on                  u¿ywaj danych wej¶ciowych TV
+    noaudio             bez d¼wiêku
+    driver=<warto¶æ>    dostêpne: dummy, v4l
+    device=<warto¶æ>    wyszczególnij inne urz±dzenia ni¿ standardowy /dev/video0
+    input=<warto¶æ>     dostêpne: television, s-video, composite, itp.
+    freq=<warto¶æ>      wyszczególnij czêstotliwo¶ci dla tunera (np. 511.250)
+    outfmt=<warto¶æ>    format danych wyj¶ciowych dla tunera(rgb32, rgb24, yv12, uyvy, i420)
+    width=<warto¶æ>     szeroko¶æ okna danych wyj¶ciowych
+    height=<warto¶æ>    wysoko¶æ okna danych wyj¶ciowych
+    norm=<warto¶æ>      dostêpne: PAL, SECAM, NTSC
+    channel=<warto¶æ>   ustaw tuner by przekazywa³ kana³ (chennel)
+    chanlist=<warto¶æ>  dostêpne: us-bcast, us-cable, europe-west, europe-east, itp.
+.TP
+.B \-vcd <¶cie¿ka>
+Odtwarzaj ¶cie¿kê video cd z urz±dzenia zamiast po prostu z pliku
+.TP
+.B \-vid <id>
+Wybierz kana³ video [MPG: 0\-15  ASF:  0\-255 ]
+.TP
+.B \-vivo <sub\-opcje> (KOD DEBUGOWANY)
+Wymu¶ parametry audio dla .vivo demuxer (by usun±æ b³êdy)
+
+
+.SH "OPCJE DEKODOWANIA/FILTROWANIA"
+.TP
+.B \-ac <nazwa\ kodeka>
+Wymu¶ u¿ycie specyficznego kodeka audio, wed³ug nazw w codecs.conf,
+dla przyk³adu:
+
+    \-ac mp3        u¿yj kodeka MP3 libmp3
+    \-ac mp3acm     u¿yj kodeka MP3 l3codeca.acm
+    \-ac ac3        u¿yj kodeka AC3
+    \-ac hwac3      w³±cz Hardware AC3 passthrough (patrz dokumentacja)
+    \-ac vorbis     u¿yj libvorbis
+    \-ac ffmp3      u¿yj kodeka MP3 ffmpeg's (WOLNY)
+
+U¿yj '\-ac help' by zobaczyæ PE£N¡ listê!
+.TP
+.B \-afm <1\-12> (PRZESTARZA£Y)
+Wymu¶ u¿ycie specyficznego formatu audio. Dla przyk³adu:
+
+    \-afm 1         u¿yj libmp3 (mp2/mp3, ale nie mp1)
+    \-afm 2         przypuszczalnie raw PCM audio
+    \-afm 3         u¿yj libac3
+    \-afm 4         u¿yj dobrze dobranego kodeka Win32
+    \-afm 5         u¿yj sterownika aLaw/uLaw
+    \-afm 10        u¿yj libvorbis
+    \-afm 11        u¿yj dekodera MP3 ffmpeg (nawet mp1)
+
+U¿yj '\-ac help' by zobaczyæ pe³n± listê!
+.TP
+.B \-aspect <stosunek>
+Zmieñ stosunek rozmiaru filmu. Jest automatycznie wykrywany w MPEG, ale nie mo¿e
+byæ automatycznie wykryty w wiêkszo¶ci plików AVI. Przyk³ad:
+
+    \-aspect 4:3  lub \-aspect 1.3333
+    \-aspect 16:9 lub \-aspect 1.7777
+.TP
+.B \-flip
+Odwróæ obraz do góry do³em.
+.TP
+.B \-nosound
+Nie odtwarzaj/koduj d¼wiêku.
+.TP
+.B \-npp <opcja1,opcja2,...>
+Ta opcja daje mo¿liwo¶æ przekazania literowych opcji postprocessingu 
+i jest innym sposobem na ich przekazanie (bez \-pp).
+.br
+INFORMACJA: -npp tylko kontroluje zewnêtrzny filter postprocessingu, a ty MUSISZ
+za³adowaæ go rêcznie u¿ywaj±c '-vop pp', on nie jest automatycznie ³adowany!
+.br
+Wiêc, u¿ywaj: -vop pp -npp <opcje>
+
+.I PRZYK£AD:
+    '\-pp 0x2007f' <=> '\-npp hb,vb,dr,al,lb'
+    '\-pp 0x7f'    <=> '\-npp hb,vb,dr,al'
+
+Mo¿esz pobraæ listê opcji dla \-npp wywo³uj±c
+.I mplayer \-npp help
+.br
+Te klucze akceptuj± prefix '\-' do wy³±czania opcji.
+
+.I PRZYK£AD:
+    '\-npp de,\-al' oznacza 'standardowy filtr bez korekcji jasno¶ci/kontrastu'
+
+Nastêpuj±cy ':' mo¿e byæ do³±czony do opcji by wskazywaæ jej mo¿liwo¶ci:
+    a : automatycznie wy³±cza filtr gdy procesor jest za wolny
+    c : wykonuje te¿ filtr 'chrominance'
+    y : nie wykonuje filtrowania chrominance (tylko korekcja o¶wietlenia)
+
+Ka¿dy filtr standardowo ustawiony jest na 'c' (chrominance).
+
+.I PRZYK£AD:
+    '\-npp de,tn:1:2:3' oznacza 'w³±czony standardowy filtr & tymczasowe usuwanie szumów'
+    '\-npp hb:y,vb:a \-autoq 6' oznacza 'odblokowana korekcja o¶wietlenia poziomego
+    i automatyczne prze³±czanie odblokowania na on/off zale¿nie, czy jest dostêpny 
+    czas procesora'
+.TP
+.B \-pp <jako¶æ> (patrz te¿ opcjê \-npp !)
+Zastosuj filtr posprocesingu do dekodowania obrazu
+
+Warto¶æ podana przez -pp jest wysy³ana do kodeka, je¿eli kodek ma wbudowany filtr
+postprocessingu (najnowsze win32 DShow DLLs, divx4linux), w przeciwnym wypadku zewnêtrzny
+plugin postprocessingu (-vop pp) bêdzie automatycznie za³adowany i u¿yty.
+Informacja, je¿eli mo¿esz u¿ywaæ jednocze¶nie wbudowanego i zewnêtrznego pp,
+u¿yj -pp by w³±czyæ pp, a -vop pp=warto¶æ by w³±czyæ zewnêtrzny pp!
+
+Wa¿n± warto¶ci± -pp dla wbudowanych filtrów pp urozmaicaj±c± kodeki jest przewa¿nie
+0-6, gdzie 0=wy³±czony 6=najwolniejszy/najlepszy.
+
+Dla zewnêtrznych filtrów pp, jest to tryb numeryczny u¿ywany w postprocessingu. 
+Opcja '\-npp' opisana powy¿ej posiada te same efekty, ale z literami. By mieæ kilka 
+filtrów w tym samym czasie, po prostu dodaj warto¶ci hexadecymalne.
+
+.I PRZYK£AD:
+Nastêpuj±ce warto¶ci s± znane z tego, ¿e daj± dobre efekty:
+    \-pp 0x20000 <=> \-npp lb (deinterlacing \- np. dla playbacku DVD/MPEG2)
+    \-pp 0x7f    <=> \-npp hb,vb,dr,al (odblokowanie filtrów - dla DivX)
+.TP
+.B \-ssf <tryb> (KOD BETA)
+Okre¶la parametry SwScaler. Dostêpne opcje to:
+
+    lgb=[0..100]   filtr rozmycia gaussowego (luma) 
+    cgb=[0..100]   filtr rozmycia gaussowego (chroma)
+    ls=[0..100]    filtr wyostrzaj±cy (luma)
+    cs=[0..100]    filtr wyostrzaj±cy (chroma)
+    cvs=x          zmiana 'chroma' w pionie 
+    chs=x          zmiana 'chroma' w poziomie
+.TP
+.B \-stereo <tryb>
+Wybierz typ dla MP2/MP3 wyj¶cia stereo.
+
+    Stereo          0
+    lewy kana³      1
+    Prawy kana³     2
+.TP
+.B \-sws <typ\ oprogramowania\ skaluj±cego>
+Ta opcja okre¶la jako¶æ (i odpowiednio prêdko¶æ) skalowania programowego,
+dla opcji \-zoom. Dla przyk³adu z x11 lub z innym wyj¶ciem sprzêtowej
+akceleracji. Mo¿liwe ustawienia to:
+
+    0   szybki bilinear (standardowo)
+    1   bilinear
+    2   bicubic (najlepsza jako¶æ)
+    3   ?
+    4   najbli¿szy s±siad (z³a jako¶æ)
+    5   obszar ¶rednio wspieranego skalowania
+.TP
+.B \-vc <nazwa kodeka>
+Wymu¶ u¿ycie specyficznego kodeka video, wed³ug nazw w codecs.conf,
+dla przyk³adu:
+
+    \-vc divx       u¿yj kodeka VFW DivX
+    \-vc divxds     u¿yj kodeka DirectShow DivX
+    \-vc ffdivx     u¿yj kodeka libavcodec's DivX
+    \-vc ffmpeg12   u¿yj kodeka libavcodec's MPEG1/2
+    \-vc divx4      u¿yj kodeka ProjectMayo's DivX
+
+Patrz '\-vc help' po PE£N¡ listê!
+.TP
+.B \-vfm <1\-12> (PRZESTARZA£Y)
+Wymu¶ u¿ycie specyficznej RODZINY kodeków i ODWROTU do podstawowego w razie niepowodzenia.
+Dla przyk³adu:
+
+    \-vfm 2         u¿yj kodeka  VFW (Win32)
+    \-vfm 3         u¿yj kodeka  OpenDivX/DivX4 (YV12)
+                   (ten sam co \-vc odivx ale z odwrotem)
+    \-vfm 4         u¿yj kodeka  DirectShow (Win32)
+    \-vfm 5         u¿yj kodeka  libavcodec
+    \-vfm 7         u¿yj kodeka DivX4 codec (YUY2)
+                   (ten sam co \-vc divx4 ale z odwrotem)
+    \-vfm 10        u¿yj kodeka XAnim
+
+Patrz '\-vc help' po pe³n± listê!
+
+.I INFORMACJE:
+Je¿eli wsparcie dla libdivxdecore zosta³o wkompilowane, wówczas typ 3 i 7 teraz 
+zawiera ten sam kodek DivX4, ale inne API do kontaktowania siê. Po ró¿nice
+miêdzy nimi i kiedy u¿ywaæ który, sprawd¼ sekcje DivX4 w dokumentacji.
+.TP
+.B \-vop <plugin3[=opcje], plugin2, plugin1, ...>
+Uruchom osobn± listê filtrów video (patrz dokumentacja!).
+Dostêpne pluginy to:
+
+ crop[=w:h:x:y]     przycinanie
+ expand[=w:h:x:y:o] rozszerzanie obrazu i OSD
+ flip               lustrzane odbicie pionowe
+ mirror             lustrzane odbicie i poziome
+ rotate[=<0-3>]     obracanie obrazu +- 90 stopni
+ scale[=w:h]        skalowanie programowe
+ yuy2               YV12/I420 \-> YUY2
+ rgb2bgr[=swap]     RGB 24/32 <\-> BGR 24/32
+ palette            RGB/BGR 8 \-> 15/16/24/32 bpp
+ format[=fourcc]    ograniczanie przestrzeni kolorów
+ pp[=flags]         postprocessing (patrz \-pp)
+ lavc[=quality:fps] YV12\->MPEG1 (libavcodec)
+ fame               YV12\->MPEG1 (libfame)
+ dvbscale[=aspect]  optymalne skalowanie dla kart DVB
+                    (aspect=DVB_HEIGHT*ASPECTRATIO)
+ cropdetect         wykrywanie czarnych obramowañ
+                    (wy¶wietl przyciête warto¶ci do stdout)
+
+.I parametry:
+.br
+ w,h     miejsce przeznaczenia szeroko¶ci/wysoko¶ci
+         value   : w/h = warto¶æ
+         \-1     : w/h = oryginalny (standardowo)
+         0       : w/h = skalowanie (stosunek) szer/wys
+         \-value : w/h = oryginalny+warto¶æ
+ x,y     pozycja x/y pod obrazem
+         value   : x/y = warto¶æ
+         \-1     : x/y = wy¶rodkuj obraz (standardowo)
+ o       w³±cz/wy³±czone renderowanie OSD/SUB
+         0       : wy³±czone (standardowo)
+         1       : w³±czone
+
+.TP
+.B \-x <x> (tylko MPLAYER)
+Skaluj obraz do x szeroko¶ci (je¿eli jest dostêpne skalowanie sw/hw). Wy³±czone obliczanie stosunku.
+.TP
+.B \-xy <x>
+    x<=8   Skaluj obraz wspó³czynnikiem <x>
+    x>8    Ustaw szeroko¶æ na <x> i wylicz wysoko¶æ by zachowaæ poprawny stosunek.
+.TP
+.B \-y <y> (tylko MPLAYER)
+Skaluj obraz do wysoko¶ci y (je¿eli jest dostêpne skalowanie sw/hw). Wy³±czone obliczanie stosunku.
+.TP
+.B \-zoom
+Pozwalaj na programowe skalowanie, gdy jest dostêpne. Mo¿esz u¿yæ wymuszonego skalowania opcj± -vop
+(skalowanie -vop ZIGNORUJE opcje -x/-y/-xy/-fs/-aspect bez -zoom)
+
+
+.SH "OPCJE OSD/SUB"
+.I INFORMACJE:
+Zobacz tak¿e rozszerzenie -vop.
+.TP
+.B \-dumpmpsub (tylko MPLAYER)
+Konwertuj dane napisy (okre¶lone prze³±cznikiem \-sub) do formatu napisów
+MPlayera, MPsub. Stworzony zostanie plik dump.mpsub w obecnym katalogu.
+.TP
+.B \-ifo <plik\ vobsub\ ifo>
+Wska¿ plik który bêdzie u¿yty do za³adowania palety i rozmiaru klatek dla 
+VOBSUB.
+.TP
+.B \-ffactor <numer>
+Wypróbuj czcionki alphamap. Mo¿e byæ:
+
+    0    po postu bia³a czcionka
+    0.75 bardzo w±ski czarny zarys [standardowo]
+    1    w±ski czarny zarys
+    10   pogrubiony czarny zarys
+.TP
+.B \-font <¶cie¿ka\ do\ pliku\ font.desc>
+Szukaj czcionki dla OSD/SUB w alternatywnym katalogu (standardowo:
+~/.mplayer/font/font.desc). Dla przyk³adu:
+
+    \-font ~/.mplayer/arial\-14/font.desc
+.TP
+.B \-noautosub
+Wy³±cz automatyczne ³adowanie napisów
+.TP
+.B \-osdlevel <0\-2> (tylko MPLAYER)
+Okre¶l w którym trybie powinien w³±czyæ siê OSD (0: brak, 1: szukanie, 2: szukanie+czas)
+(standardowo = 2)
+.TP
+.B \-sid <id>
+W³±cz wy¶wietlanie napisów DVD. Poza tym, MUSISZ podaæ numer który
+pokrywa siê z jêzykiem napisów DVD (0\-31). Po listê dostêpnych jêzyków
+dla napisów, u¿yj prze³±cznika \-v i patrz na dane wyj¶ciowe.
+.br
+.I INFORMACJA:
+U¿yje \-slang by zdefiniowaæ jêzyk napisów wed³ug nazwy.
+.TP
+.B \-slang <jêzyk\ napisów>
+Patrz opcjê \-sid, ale ta potrzebuje dwu\-literowego parametru, kodu kraju.
+Przyk³ad: \-slang pl, en bêdzie zawsze wybiera³o polski lub je¿eli taki nie istnieje,
+wtedy angielski napisy, je¿eli takie s±. Po listê dostêpnych jêzyków
+dla napisów, u¿yj prze³±cznika \-v i patrz na dane wyj¶ciowe.
+.TP
+.B \-sub <plik\ napisów>
+U¿yj/wy¶wietl ten plik napisów
+.TP
+.B \-subcp\ strona\ kodowa
+Je¿eli masz w systemie iconv(3), mo¿esz u¿yæ tej opcji do
+okre¶lenia strony kodowej napisów. Przyk³ad:
+
+    \-subcp   latin2
+    \-subcp   cp1250
+.TP
+.B \-sub\-demuxer <numer> (KOD BETA)
+Wymu¶ tym demuxera napisów dla \-subfile.
+.TP
+.B \-subdelay <sek>
+Opó¼nienie napisów w <sek> sekundach. Mo¿e byæ ujemne.
+.TP
+.B \-subfps <tempo>
+Okre¶l tempo klatek/sek pliku napisów (numer float)
+(TYLKO dla plików SUB opartych na klatkach tj. NIE format MicroDVD!)
+(standardowo: ten sam fps co w filmie)
+.TP
+.B \-subfile <filename> (KOD BETA)
+Obecnie nieprzydatny. Ten sam co \-audiofile, ale dla strumieni napisów. (OggDS?)
+.TP
+.B \-subpos <0 \- 100> (u¿yteczny z rozszerzeniem -vop)
+Okre¶l pozycje napisów na ekranie
+.TP
+.B \-unicode
+Powiedz MPlayerowi by przetwarza³ plik napisów jako UNICODE.
+.TP
+.B \-utf8
+Powiedz MPlayer'owi by przetwarza³ plik napisów jako UTF8.
+.TP
+.B \-vobsub <plik\ vobsub\ bez\ rozszerzenia>
+Okre¶l plik VobSub które bêd± u¿yte jako napisy. Jest to pe³na
+¶cie¿ka do pliku bez rozszerzenia, tj. bez ".idx", ".ifo"
+lub ".sub".
+.TP
+.B \-vobsubid <id\ napisów\ vobsub>
+Okre¶l id napisów VobSub. Poprawne warto¶ci mieszcz± siê w zakresie od 0 do 31.
+
+
+.SH "OPCJE WYJ¦CIA AUDIO (TYLKO MPLAYER)"
+.TP
+.B \-abs <warto¶æ>  (PRZESTARZA£E)
+Zmieñ wykryty bufor audio urz±dzenia/karty, tylko -ao oss
+.TP
+.B \-ao <sterownik>[:<urz±dzenie>]
+Wybierz wyj¶ciowy sterownik audio i dodatkowe urz±dzenia. "urz±dzenie" jest te¿ poprawne
+z SDL, wtedy oznacza pod\-sterownik (dla przyk³adu: \-vo sdl:esd).
+Je¶li u¿ywasz OSS, mo¿esz okre¶liæ które urz±dzenie d¼wiêkowe chcesz u¿ywaæ:
+
+    \-ao oss:/dev/dsp1     (zast±piona stara opcja \-dsp )
+
+Mo¿esz pobraæ listê dostêpnych sterowników
+.I mplayer \-ao help
+.TP
+.B \-aofile <nazwa\ pliku>
+Nazwa pliku dla \-ao pcm.
+.TP
+.B \-aop <plugin1:plugin2:...>
+Okre¶l plugin(y) audio i ich opcje (patrz dokumentacja!!).
+Dostêpne pod\-opcje to:
+
+    list=[pluginy]  oddzielona przecinkami lista pluginów
+                    (resample, format, surround, format, volume, extrastereo, volnorm)
+    delay=<sek>     przyk³adowy plugin, nie u¿ywaj go!
+    format=<format> format danych wyj¶ciowych (tylko format pluginów)
+    fout=<Hz>       czêstotliwo¶æ danych wyj¶ciowych (tylko próbkowanie pluginów)
+    volume=<0-255>  g³o¶no¶æ (tylko g³o¶no¶æ pluginów)
+    mul=<warto¶æ>   ustawienia stereo, standardowy to 1 (tylko extrastereo plugin)
+    softclip        zdolno¶æ kompresowania "programowego\-wycinania" (tylko plugin g³o¶no¶ci)
+.TP
+.B \-channels <n>
+Wybierz numer kana³ów wyj¶cia audio, które bêd± u¿yte
+
+    Stereo         2
+    Surround       4
+    Full 5.1       6
+
+Aktualnie ta opcja jest tylko uhonorowaniem dla AC3 audio, i/lub plugina surround.
+.TP
+.B \-delay <sekundy>
+Opó¼nienie audio w sekundach (mog± byæ +/\- warto¶ci float)
+.TP
+.B \-mixer <urz±dzenie>
+Ta opcja mówi MPlayerowi, by u¿ywa³ innego urz±dzenia do miksowania ni¿
+/dev/mixer.
+.TP
+.B \-nowaveheader  (tylko -ao pcm)
+Nie zawieraj nag³ówków wave. U¿yteczny dla RAW PCM.
+
+
+.SH "OPCJE WYJ¦CIA WIDEO (TYLKO MPLAYER)"
+.TP
+.B \-aa*
+U¿yte dla \-vo aa. Mo¿esz uzyskaæ listê i wyja¶nienia dostêpnych opcji wykonania 
+.I mplayer \-aahelp
+.TP
+.B \-blue_intensity <\-1000\ \-\ 1000>
+Modyfikowanie nasilenia niebieskich sk³adników sygna³u wideo (domy¶lnie 0).
+.TP
+.B \-bpp <g³êbia>
+U¿ywaj innych kolorów g³êbi ni¿ autodetekcja. Nie wszystkie sterowniki wspieraj± \-vo 
+jak (fbdev, dga2, svga, vesa).
+.TP
+.B \-brightness <\-1000\ \-\ 1000>
+Modyfikuj jasno¶æ wyj¶cia wideo (domy¶lne 0). Zmienia to intensywno¶æ 
+RGB sk³adników sygna³u wideo od czerni do bia³o¶ci ekranu.
+.TP
+.B \-contrast <\-1000\ \-\ 1000>
+Modyfikuj kontrast wyj¶cia wideo (domy¶lnie 0). Dzia³a w podobny sposób jak jasno¶æ.
+.TP
+.B \-display <nazwa>
+Wyszczególnij nazwê hostu i poka¿ liczbê X serwerów na których chcesz wy¶wietlaæ.
+Na przyk³ad: \-display xtest.localdomain:0
+.TP
+.B \-double
+Umo¿liw podwójne buforowanie. Sta³e migotanie przez przechowywanie dwóch ramek w pamiêci 
+i wy¶wietlanie jednej, podczas, gdy inna jest dekodowana. Dzia³a z OSD. Potrzebna jest 
+dwukrotnie wiêksza pamiêæ, ni¿ pojedynczy bufor, wiêc nie bêdzie pracowa³ na kartach 
+z bardzo ma³± pamiêci± wideo.
+.TP
+.B \-dr
+W³±cz bezpo¶rednie renderowanie (nie wspierane przez wszystkie kodeki i wyj¶cia wideo)
+(domy¶lnie jest wy³±czone).
+.TP
+.B \-fb <urz±dzenie> (FBdev lub tylko DirectFB)
+Okre¶lenie buforu klatki u¿ywanego urz±dzenia. Domy¶lnie u¿ywany przez /dev/fb0.
+.TP
+.B \-fbmode <nazwa trybu> (tylko FBdev)
+Zmieñ tryb wideo etykiet± <nazwa trybu> okre¶lon± w /etc/fb.modes.
+.br
+.I INFORMACJA:
+Bufor klatki VESA nie wspiera trybu zmieniaj±cego siê.
+.TP
+.B \-fbmodeconfig <nazwa pliku> (tylko FBdev)
+U¿ywaj tego pliku konfiguracyjnego zamiast domy¶lnego /etc/fb.modes.
+Poprawne tylko dla sterowników fbdev.
+.TP
+.B \-forcexv (tylko SDL)
+Wymu¶ u¿ywanie XVideo
+.TP
+.B \-fs
+Odtwarzanie pe³noekranowe (film w centrum i czarne obramowanie wokó³ niego). 
+Prze³±cz go klawiszem 'f' (nie wszystkie wyj¶cia wideo go wspieraj±).
+.TP
+.B \-fsmode-dontuse <0-31> (PRZESTARZA£A) (u¿ywaj opcji -fs)
+Wypróbuj t± opcjê, je¿eli masz problemy z trybem pe³noekranowym.
+.TP
+.B \-green_intensity <\-1000\ \-\ 1000>
+Modyfikuj intensywno¶æ zielonych sk³adników sygna³u wideo (domy¶lnie 0).
+.TP
+.B \-hue <\-1000\ \-\ 1000>
+Modyfikuj barwê sygna³u wideo (domy¶lnie 0). Mo¿esz otrzymaæ dziêki tej opcji kolorowy 
+negatyw obrazu.
+.TP
+.B \-jpeg <sub\-opcje> 
+Wyszczególnij opcje dla JPEG (-vo jpeg), oddzielaj poprzez ":" (patrz dokumentacja!).
+Udostêpniane sub\-opcje s± [no]progressiv ([nie]postêpowy), [no]baseline, 
+optimize (optymizowanie), smooth (rozmycie), quality (jako¶æ) i outdir (katalog wyj¶ciowy).
+.TP
+.B \-monitor_dotclock <zakres\ dotclock\ (lub\ pixelclock)>  (tylko FBdev)
+Zajrzyj do etc/example.conf aby uzyskaæ dalsze informacje, a tak¿e do DOCS/video.html.
+.TP
+.B \-monitor_hfreq <czêstotliwo¶æ pozioma>  (tylko FBdev)
+.TP
+.B \-monitor_vfreq <czêstotliwo¶æ pionowa>  (tylko FBdev)
+.TP
+.B \-monitoraspect <stosunek>
+Ustaw stosunek twojego ekranu. Na przyk³ad:
+
+    \-monitoraspect 4:3  lub 1.3333
+    \-monitoraspect 16:9 lub 1.7777
+.TP
+.B \-noslices
+Wy³±cz rysowanie przez 16-pikselow± wysoko¶æ slices/bands, zamiast tego
+rysuj dopóki klatka jest w pojedynczym ruchu. Mo¿liwe, ¿e bêdzie szybkie, lub wolne - w zale¿no¶ci 
+od karty/pamiêci.
+Bêdzie to mia³o efekt tylko z kodekami libmpeg2 i libavcodec.
+.TP
+.B \-panscan
+W³±cz  Pan & Scan functionality, tj. w poleceniu wy¶wietlania filmu 16:9 
+na ekranie 4:3, boki filmu bêd± przyciête, wiec dostajemy obraz 4:3 
+który pasuje doskonale. Ta opcja dzia³a tylko z xv, (x)mga, oraz vidix.
+.TP
+.B \-red_intensity <\-1000\ \-\ 1000>
+Modyfikuj intensywno¶æ czerwonych sk³adników sygna³u wideo (domy¶lnie 0).
+.TP
+.B \-saturation <\-1000\ \-\ 1000>
+Modyfikuj nasycenie wyj¶cia wideo (domy¶lnie 0). Dziêki tej opcji mo¿esz uzyskaæ obraz w skali 
+szaro¶ci.
+.TP
+.B \-rootwin
+Odtwarzaj film w oknie roota (t³o pulpitu) zamiast odtwarzania w nowym oknie. 
+Pracuje tylko ze sterownikami x11, xv, xmga, xvidix.
+.TP
+.B \-screenw <piksele> \-screenh <piksele>
+Je¿eli u¿ywasz sterowników wyj¶cia, które nie mog± rozpoznaæ rozdzielczo¶ci ekranu 
+(fbdev/x11 i/lub TVout) tutaj mo¿esz okre¶liæ pionow± i poziom± rozdzielczo¶æ.
+.TP
+.B \-vm
+Wypróbuj, ¿eby uzyskaæ lepszy tryb wideo. Sterowniki wyj¶cia dga, x11/xv (XF86VidMode) i sdl
+wspieraj± to.
+.TP
+.B \-vo <sterownik>[:<urz±dzenie>]
+Wybierz sterowniki wyj¶cia wideo i optymalne urz±dzenie. "Urz±dzenie" jest zgodne 
+z SDL i tak¿e GGI, co oznacza wówczas sub\-driver (na przyk³ad: \-vo sdl:aalib).
+
+Mo¿esz otrzymaæ listê dostêpnych sterowników wykonania.
+.I mplayer \-vo help
+.TP
+.B \-vsync
+W³±cz VBI dla vesa
+.TP
+.B \-wid <id\ okna>]
+To przeka¿e MPlayer'owi, ¿eby u¿y³ okna X11, które jest u¿yteczne, aby osadziæ MPlayer'a 
+w przegl±darce (z wtyczk± dla tego przypadku).
+.TP
+.B \-xineramascreen <numer\ ekranu>
+W konfiguracjach Xinerama (tzn. odtwarzanie pojedynczego pulpitu rozci±gniêtego w poprzek) 
+Ta opcja przeka¿e MPlayer'owi, w którym ekranie ma wy¶wietliæ film. £añcuch 0 \- ...
+.TP
+.B \-z <0\-9>
+Okre¶l poziom kompresji dla wyj¶cia PNG (-vo png)
+    0   bez kompresji
+    9   maksymalna kompresja
+.TP
+.B \-zr*
+U¿ywany dla \-vo zr. Mo¿esz otrzymaæ listê i wyja¶nienia dotycz±ce dostêpnych opcji wykonawczych.
+.I mplayer \-zrhelp
+
+
+.SH "OPCJE ODTWARZACZA (TYLKO MPLAYER)"
+.TP
+.B \-autoq <jako¶æ> (u¿ywaj z -vop pp!)
+Dynamiczna zmiana poziomu zwlekania, w zale¿no¶ci od wolnego czasu procesora. 
+Numer, który wyszczególnisz bêdzie maksymalnym poziomem. Zazwyczaj mo¿esz u¿ywaæ 
+trochê wiêkszych liczb. Mo¿liwe, ¿e nie bêdziesz u¿ywa³ z \-pp ale wszystko bêdzie w porz±dku 
+z \-npp!
+.TP
+.B \-benchmark
+Poka¿ statystyki u¿ycia procesora i przesuwania klatek na koñcu. 
+U¿ywaj w kombinacji z \-nosound i \-vo niewa¿ne dla kryterium, tylko kodeków wideo.
+.TP
+.B \-dapsync (PRZESTARZA£Y)
+U¿ywaj alternatywnej metody synchronizacji.
+.TP
+.B \-framedrop (zobacz tak¿e opcjê \-hardframedrop !)
+Przeci±ganie klatki: dekoduj wszystkie (oprócz B) klatki, wideo mo¿na pomin±æ. U¿yteczne do 
+odtwarzania w ty³ na wolnych kartach VGA.
+.TP
+.B \-gui (KOD BETA)
+Wystartuj MPlayer'a w trybie GUI - graficznym interfejsie u¿ytkownika.
+.TP
+.B \-h, \-\-help
+Zobacz ma³e streszczenie opcji
+.TP
+.B \-hardframedrop
+Wiêksza intensywno¶æ przesuwania klatek (dekodowanie przerywane). Prowadzi do zaburzeñ obrazu!
+.TP
+.B \-input <komenda>
+Ta opcja mo¿e byæ u¿ywana do konfiguracji pewnych czê¶ci systemu wej¶ciowego.
+Podstawowa ¶cie¿ka to $HOME/.mplayer.
+
+    conf=<plik>    czytaj alternatywny input.conf.
+			 Je¿eli podany by³ bez ¶cie¿ki, 
+                   wybierany jest $HOME/.mplayer.
+    ar\-delay      zwlekaj w msek przed tym, jak wystartujemy, 
+                   ¿eby automatycznie powtórzyæ klucz
+                   (0 ¿eby wy³±czyæ)
+    ar\-rate       jak czêsto ma byæ naciskany klawisz/sek. 
+                   kiedy powtarzamy
+    keylist        poka¿ wszystkie klawisze, którymi mo¿na 
+			 przeskakiwaæ do...
+    cmdlist        poka¿ wszystkie komendy, którymi mo¿na 
+			 przeskakiwaæ                   
+    js\-dev        okre¶l urz±dzenie steruj±ce do u¿ytku
+                   (domy¶lnie jest to /dev/input/js0)
+
+.I INFORMACJA:
+Autopowtarzanie jest obecnie tylko wspierane przez d¿ojstiki
+.TP
+.B \-lircconf <plik\ konfiguracyjny>
+Okre¶l plik konfiguracyjny dla LIRC (zobacz http://www.lirc.org), je¿eli nie odpowiada ci 
+domy¶lne ~/.lircrc
+.TP
+.B \-loop <num>
+Ilo¶æ <num> powtarzania siê playbacku filmu. 0 oznacza zawsze
+.TP
+.B \-nojoystick
+Wy³±cz wspieranie przez d¿ojstik. Domy¶lnie jest w³±czone, je¿eli j± wkompilowa³e¶
+.TP
+.B \-nolirc
+Wy³±cz wspieranie lirc
+.TP
+.B \-nortc
+Wy³±cz u¿ywanie /dev/rtc (real-time clock)
+.TP
+.B \-playlist <plik>
+Odtwarzaj pliki wed³ug tej listy (1 plik/rz±d, lub Winamp, lub format ASX).
+.TP
+.B \-quiet
+Wy¶wietlaj mniej komunikatów statusu.
+.TP
+.B \-skin <katalog\ skórki> (KOD BETA)
+Za³aduj skórkê z tego katalogu (BEZ nazwy). Na przyk³ad: '\-skin fittyfene' np.:
+
+    /usr/local/share/mplayer/Skin/fittyfene
+    ~/.mplayer/Skin/fittyfene
+.TP
+.B \-slave
+Ta opcja prze³±cza w tryb slave. Jest to zamierzone dla u¿ytku MPlayer'a
+jako sponsora innych programów. Zamiast przechwytywania wci¶niêtych klawiszy klawiatury, 
+MPlayer bêdzie czyta³ proste komendy.
+Zobacz sekcje
+.B PROTOKÓ£ TRYBU SLAVE
+Dla sk³adni.
+.TP
+.B \-softsleep
+U¿ywaj wysokiej jako¶ci oprogramowania zegarów. Sprawnie dzia³aj±cy jako RTC, nie potrzebuje root'a, 
+ale wymaga szybszego CPU.
+.TP
+.B \-sstep <sek>
+Okre¶l ilo¶æ sekund, miêdzy wy¶wietlonymi klatkami. U¿yteczny do pokazu slajdów.
+.TP
+.B \-use-stdin
+
+
+.SH "OPCJE KODUJ¡CE (TYLKO MENCODER)"
+.TP
+.B \-divx4opts <opcja>
+Je¿eli kodowanie jest do DivX4, mo¿esz okre¶liæ jego parametry tutaj:
+
+  -divx4opts br=1800:deinterlace:key=250
+
+Dostêpne opcje:
+
+  help               uzyskaj pomoc
+  br=<warto¶æ>       okre¶l  bitrate 
+			   w kbit <4\-16000>, lub
+                     bit  <16001\-24000000>
+  key=<warto¶æ>      maksymalna  przerwa keyframe
+                     (w klatkach)
+  deinterlace        w³±cz deinterlacing
+                     (nie u¿ywaj, DivX4 zawiera b³êdy!)
+  q=<1\-5>            jako¶æ (1\-szybka, 5\-najlepsza)
+  min_quant=<1\-31>   minimalny quantizer
+  max_quant=<1\-31>   maksymalny quantizer
+  rc_period=<value>   wspó³czynnik kontroli okresu
+  rc_reaction_period=<warto¶æ> 
+                     wspó³czynnik kontroli reakcji okresu
+  rc_reaction_ratio=<warto¶æ> 
+                     wspó³czynnik kontroli reakcji
+  crispness=<0\-100>  wyszczególnienie chropowato¶ci/g³adko¶ci
+.TP
+.B \-endpos <pozycja\ czas|bajt>
+Zatrzymaj kodowanie w podanym czasie, lub pozycji bajta. Mo¿liwe jest wyszczególnienie 
+na ró¿ne sposoby:
+
+    -endpos 56       koduje tylko 56 sekund
+    -endpos 01:10:00 koduje tylko 1 godzinê
+    -endpos 100mb    koduje tylko 100 mbajtów
+
+Mo¿e byæ u¿ywane w parze z -ss lub -sb!
+.br
+.I INFORMACJA:
+Pozycja bajta nie bêdzie dok³adna, bêdzie zatrzymana na granicy klatki.
+.TP
+.B \-ffourcc <fourcc>
+Mo¿na u¿ywaæ do wy³±czenia wideo fourcc pliku wyj¶ciowego. Na przyk³ad -ffourcc
+div3 da plik wyj¶ciowy zawieraj±cy "div3" jako wideo fourcc.
+.TP
+.B \-include <plik\ konfiguracji>
+Wyszczególnij plik konfiguracyjny, który bêdzie u¿ywany po domy¶lnym
+.TP
+.B \-lameopts <opcja>
+Je¿eli kodowanie jest do MP3 z libmp3lame, mo¿esz wyszczególniæ jego parametry tutaj:
+
+  -lameopts br=192:cbr
+
+Dostêpne opcje:
+
+    help            poka¿ pomoc
+    vbr=<warto¶æ>   regulacja bitrate metod±
+                      0=cbr
+                      1=mt
+                      2=rh(domy¶lne)
+                      3=abr
+                      4=mtrh
+    abr             ¶rednie bitrate
+    cbr             sta³e bitrate
+    br=<warto¶æ>    wska¿ bitrate w
+                    kbitach <0-1024>
+                    (tylko dla CBR i ABR)
+    q=<warto¶æ      Jako¶æ
+                    (0-wysoka, 9-niska)
+                    (dla VBR)
+    aq=<warto¶æ>    ?
+    ratio=<warto¶æ> stosunek kompresji <1-100>
+    vol=<warto¶æ>   ustaw wej¶ciowy przyrost audio <0-10>
+    mode=<warto¶æ>  0=stereo
+                    1=z³±cze-stereo
+                    2=dualchannel
+                    3=mono
+                    (domy¶lnie: auto)
+    padding=<warto¶æ> 0=nie
+                      1=wszystko
+                      2=modyfikuj
+.TP
+.B \-lavcopts <opcja>
+Je¿eli koduje z kodekami pochodz±cymi z libavcodec, mo¿esz wyszczególniæ jego parametry 
+tutaj:
+
+  -lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
+
+Dostêpne opcje:
+
+  help             poka¿ pomoc
+
+  vcodec=<warto¶æ>   u¿ywaj okre¶lonych kodeków:
+                     mjpeg - Motion JPEG
+                     h263 - H263
+                     h263p - H263 Plus
+                     mpeg4 - DivX 4/5
+                     msmpeg4 - DivX 3
+                     rv10 - stary kodek RealVideo
+                     mpeg1video - MPEG1 wideo :)
+                     Domy¶lnie nie jest ustawione nic
+                     i musisz to okre¶liæ.
+
+  vbitrate=<warto¶æ> okre¶l bitrate w
+                     kbitach <4-16000>, lub
+                     bitach  <16001-24000000>
+                     (ostrze¿enie: 1kbit = 1000 bitów)
+                     domy¶lnie = 800k
+
+  vratetol=<warto¶æ> przybli¿ona tolerancja *rozmiar pliku* 
+                     w kbitach.
+                     (ostrze¿enie: 1kbit = 1000 bitów)
+                     domy¶lnie = 1024*8 kbitów = 1MBajt
+
+  keyint=<warto¶æ>  przerwa przed keyframes
+                    (okre¶lona w klatkach, >300 nie s± wskazane)
+                    domy¶lnie = 250 (jedna key frame na ka¿de
+                    dziesiêæ sekund filmu w 25 fps)
+
+  vhq              tryb wysokiej jako¶ci, makro bloki
+                   bêd± kodowane trybem wysokiej jako¶ci, macro bloki
+                   bêd± kodowane zbiorowo i zostanie u¿yty.
+                   domy¶lnie = HQ wy³±czone
+
+  vme=<0\-5>      metoda szacunkowego obliczenia ruchu:
+                     0 - no ME at all
+                     1 - ME_FULL
+                     2 - ME_LOG
+                     3 - ME_PHODS
+                     4 - ME_EPZS
+                     5 - ME_X1
+                   EPZS czêsto dajê najlepsze wyniki,
+                   ale mo¿esz tak¿e próbowaæ X1. FULL jest
+                   bardzo wolne, a inne s± eksperymentalne.
+                   domy¶lne = EPZS
+
+  vqcomp=<warto¶æ> je¿eli warto¶æ jest ustawiona na 1.0,
+                   quantizer zostanie prawie sta³y 
+                   (szybki sceny bêd± wygl±da³y nie najlepiej). 
+                   Je¿eli warto¶æ wynosi 0.0,
+                   quantizer bêdzie zmienia³ siê,  
+                   by wszystkie klatki robiæ w przybli¿onym rozmiarze
+                   (wolne sceny bêd± wygl±da³y nie najlepiej).
+                   domy¶lne = 0.5
+
+  vqblur=<0\-1>    rozmywanie wykresu quantizera co 
+                   pewien czas.
+                   
+                      0.0 : bez rozmywania
+                      1.0 : ¶rednia wszystkich 
+                            quantizerów
+                   domy¶lne = 0.5
+
+  vqscale=<2\-31>  daje ka¿dej klatce ten sam 
+                   quantizer (wybiera tryb sta³y
+                   quantizera).
+                   domy¶lne = 0 (tryb sta³y quantizer
+                   zablokowany).
+
+  vrc_strategy=<0\-2>
+                   ró¿ne strategie rozstrzygania, które klatki, 
+                   który quantizer powinien otrzymywaæ.
+                   domy¶lne = 2
+
+  v4mv             4 ruchy wektorów na makroblok,
+                   mo¿e daæ odrobinê lepsz± jako¶æ,
+                   mo¿e byæ u¿ywane tylko w trybie HQ
+                   i obecnie jest "dziurawe" z Klatkami B.
+                   domy¶lnie = disabled (wy³±czone}
+
+  vpass=<1/2>      wybierz pierwszy krok 
+                   lub drugi krok w trybie 2-krokowym.
+                   domy¶lne = 0 (tryb 1-krokowy)
+
+Nastêpne 3 opcje stosuje siê tylko do klatek I i P:
+
+  vqmin=<1\-31>    minimalny quantizer,
+                   domy¶lne = 3
+
+  vqmax=<1\-31>    maksymalny quantizer
+                   domy¶lne = 15
+
+  vqdiff=<1\-31>   ró¿nica quantizer'a.
+                   Limit maksymalnego quantizer'a
+                   ró¿nicy miêdzy klatkami.
+                   domy¶lne = 3
+
+Nastêpuj±ce opcje stosuje siê tylko do klatek B:
+
+  vmax_b_frames=<0\-4>
+                   maksymalna liczna klatek
+                   pomiêdzy ka¿d± klatk± I/P.
+                   domy¶lne = 0 (generacja klatek-B 
+                   wy³±czona)
+
+  vb_strategy=<warto¶æ>
+                   strategia wybierania pomiêdzy 
+                   klatkami I/P/B:
+                     0 zawsze u¿ywa maks B
+                     1 unikanie klatek B w wysokim
+                       ruchu / zmianie scen (mo¿e 
+                       prowadziæ do nieprzewidywania rozmiaru pliku)
+                   domy¶lne = 0
+
+  vb_qfactor=<warto¶æ>
+                   wspó³czynnik quantizer'a pomiêdzy 
+                   klatkami b i i/p (wiêksza ocena 
+                   wysoko¶ci quantizer'a dla klatek b)
+                   domy¶lne = 2.0
+
+W trybie sta³ym quantizer'a mo¿esz u¿ywaæ tych opcji:
+  vqscale, vmax_b_frames, vhq, vme, keyint
+
+Mo¿esz u¿ywaæ nastêpuj±cych opcji tylko w trybie 1-krokowym 2-krokowego lub 1-krokowego:
+  vqblur, vqdiff
+
+Mo¿esz u¿ywaæ nastêpuj±cych opcji tylko w 2 kroku trybu 2-krokowego:
+  vrc_strategy, vb_strategy
+
+Wszystkie inne opcje mog± byæ wykorzystane we wszystkich trybach.
+.TP
+.B \-noskip
+Nie pomijaj klatek
+.TP
+.B \-o <nazwa pliku>
+Dane wyj¶ciowe przekazywane do <nazwa pliku>, zamiast domy¶lnego 'test.avi'.
+.TP
+.B \-oac <nazwa kodeka>
+Koduj z podanym kodekiem (nazwa kodeka z codecs.conf,
+u¿yj -ovc help, aby otrzymaæ listê dostêpnych kodeków).
+Przyk³ady:
+
+  -oac copy      nie kodowanie, tylko kopiowanie strumienia
+  -oac pcm       kodowanie do to odkompresowanego PCM
+  -oac mp3lame   kodowanie do MP3 (u¿ywa Lame)
+.TP
+.B \-ofps <fps>
+Plik wyj¶ciowy bêdzie mia³ ró¿ne klatki/sekundê, ni¿ ¼ród³o.
+MUSISZ ustawiæ go dla zmiennych fps (asf, wiêkszo¶æ mov) i postêpowych 
+(29.97fps telecined mpeg) plików.
+.TP
+.B \-ovc <nazwa kodeka>
+Koduje z podanym kodekiem (nazwy kodeków pochodz± z codecs.conf, 
+u¿ywaj -ovc help, aby otrzymaæ listê dostêpnych kodeków).
+Przyk³ady:
+
+  -ovc copy      nie koduj, tylko kopiuj strumieñ
+  -ovc divx4     koduj do DivX4/DivX5, lub XviD
+  -ovc rawrgb    koduj do odkompesowanego RGB24
+  -ovc lavc      koduj z kodekami libavcodec
+.TP
+.B \-pass <1/2>
+Z tym mo¿esz kodowaæ pliki 2-krokowo DivX4. Najpierw koduje z -pass 1, pó¼niej
+z tym samym parametrem, koduje z -pass 2.
+INFORMACJA: dla libavcodec 2-krokowego u¿ywaj -lavcopts vpass=1/2 zamiast -pass 1/2
+.TP
+.B \-passlogfile <nazwa pliku>
+Kiedy koduje w trybie 2-krokowym, MEncoder zrzuca najpierw pierwszy krok informacji
+aby podaæ plik zamiast domy¶lnego divx2pass.log.
+.TP
+.B \-skiplimit <warto¶æ>
+
+Maksymalne pomijanie klatek po nie-porzuconej 
+(-noskiplimit dla nieograniczonej liczby)
+.TP
+.B \-v, \-\-verbose
+W³±cza rozwlek³e dane wyj¶ciowe (wiêksze \-v oznacza wiêksz± rozwlek³o¶æ)
+
+
+.SH "KONTROLA KLAWIATÓRY"
+.I INFORMACJA:
+MPlayer ma w pe³ni konfiguralne sterowanie komendami, kontrolê warstw, 
+którymi pozwala Ci na kontrolowanie nim. MPlayer u¿ywa klawiatury, myszy, d¿ojstika, 
+lub zdaln± kontrolê (u¿ywa lirc).
+.B Patrz dokumentacja!
+.br
+.I INFORMACJA:
+Domy¶lny plik konfiguracyjny do systemu wej¶ciowego, to:
+$HOME/.mplayer/input.conf, lecz mo¿esz go uniewa¿niæ 
+u¿ywaj±c opcji -input conf .
+.br
+.I INFORMACJA:
+Te klawisze mog± nie dzia³aæ, zale¿y to od Twoich sterowników wyj¶cia wideo.
+.TP
+.B kontrola generalna
+<\-  i  \->     szukaj (skocz) w ty³/w przód o 10 sekund
+.br
+góra i dó³      szukaj (skocz) w ty³/w przód o 1 minutê
+.br
+pgup i pgdown   szukaj (skocz) w ty³/w przód o 10 minut
+.br
+< i >		    w przód/w ty³ w playli¶cie
+.br
+HOME i END      id¼ do nastêpnego/poprzedniego play-drzewa pochodz±cego 
+                z g³ównej listy.
+.br
+INS i DEL       id¼ do nastêpnego/poprzedniego alternatywnego ¼ród³a (tylko playlista asx)
+.br
+p / SPACE       pause'uj film (naci¶nij dowolny klawisz)
+.br
+q / ESC         zatrzymaj odtwarzanie i wyjd¼ z programu
+.br
++ i \-          modyfikuj zwlekanie audio przez +/\- 0.1 sekund
+.br
+/ i *           zmniejszenie/zwiêkszenie g³o¶no¶ci
+.br
+f               prze³±cz w pe³ny ekran
+.br
+o               prze³±cz OSD: ¿aden / szukaj / szukaj+timer
+.br
+d               prze³±cz przesuwanie klatki
+.br
+z i x           modyfikuj zwlekanie napisów przez by +/\- 0.1 sekund
+.br
+r i t           modyfikuj pozycjê napisów
+
+(Nastêpuj±ce klawisze s± wa¿ne tylko, kiedy u¿ywamy \-vo xv lub \-vo [vesa|fbdev]:vidix, 
+lub \-vo xvidix, lub \-vc divxds (wolne).
+
+1 i 2         modyfikacja kontrastu
+.br
+3 i 4         modyfikacja jasno¶ci
+.br
+5 i 6         modyfikacja barwy
+.br
+7 i 8         modyfikacja nasycenie
+.TP
+.B Kontrola klawiatury GUI
+, i .           poprzedni/nastêpny plik
+.br
+gray \- i +     zmniejszenie/zwiêkszenie g³o¶no¶ci
+.br
+ENTER           zacznij odtwarzaæ
+.br
+s               zatrzymaj odtwarzanie
+.br
+a               o programie...
+.br
+l               wczytaj plik
+.br
+b               przegl±darka skórek
+.br
+e               prze³±cz equalizer
+.br
+p               prze³±cz playlistê
+.TP
+.B Kontrola wej¶cia TV
+h i l           wybierz poprzedni/nastêpny kana³
+.br
+n               zmiana normy
+.br
+b               zmiana listy kana³ów
+.TP
+.B Kontrola wej¶cia DVDNAV
+K,J,H,L         przejrzyj góra/dó³/lewo/prawo
+.br
+M               skocz do g³ównego menu
+.br
+S               wybierz
+
+
+.SH "PROTOKÓ£ TRYBU SLAVE"
+Je¿eli prze³±cznik \-slave jest podany, playback jest kontrolowany 
+protokó³ line\-based. Je¿eli nowe wej¶cie jest w³±czone (domy¶lnie)
+ka¿da linia musi zawieraæ jedn± komendê w przeciwnym razie jeden 
+z podanych symboli:
+.TP
+.B Komendy
+.br
+.br
+seek <warto¶æ> [type=<0/1>]
+                Skocz do dowolnego miejsca w filmie.
+                Typ 0 jest skokiem wzglêdnym przez +/-
+                <warto¶æ> sekund. Typ 1 - skok do 
+                <warto¶æ> % w filmie.
+
+audio_delay <warto¶æ>
+                Modyfikuj zwlekanie audio w sekundach
+
+quit            Opu¶æ MPlayer'a
+
+pause           Pause/odpause'owanie playbacku
+
+grap_frames     Wie kto¶?
+
+pt_step <warto¶æ> [force=<wart¶æ>]
+                Id¼ do nastêpnego/poprzedniego wej¶cia w play-drzewie. 
+
+pt_up_step <warto¶æ> [force=<warto¶æ>]
+                Tak jak pt_step ale skacze do nastêpnego/poprzedniego 
+                w g³ównej li¶cie.
+
+alt_src_step <warto¶æ>
+                Kiedy wiêcej ni¿ jedno ¼ród³o jest dostêpne, 
+                to wybiera nastêpne/poprzednie (tylko wspierane 
+                przez palylistê asx).
+
+sub_delay <warto¶æ> [abs=<warto¶æ>]
+                Modyfikuj zwlekanie napisów przez +/- <wartoæ> 
+                sekund, albo ustaw to do <warto¶ci> w sekundach, kiedy  
+                abs nie jest zerowe.
+
+osd [level=<warto¶æ>]
+                Prze³±cz tryb osd, lub ustaw jego poziom, 
+                kiedy poziom jest > 0.
+
+volume <dir>    zwiêkszenie/zmniejszenie g³o¶no¶ci 
+
+contrast <warto¶æ> [abs=<warto¶æ>]
+.br
+brightness <warto¶æ> [abs=<warto¶æ>]
+.br
+hue <warto¶æ> [abs=<warto¶æ>]
+.br
+saturation <warto¶æ> [abs=<warto¶æ>]
+                Ustaw/modyfikuj parametry wideo.
+                <warto¶æ> ³añcuch od -100 do 100.
+
+frame_drop [type=<warto¶æ>]
+                Prze³±cz/Ustaw tryb przesuwania klatek.
+
+sub_pos <warto¶æ> Modyfikuj po³o¿enie napisów.
+
+vo_fullscreen   Prze³±cz w tryb pe³noekranowy.
+
+tv_step_channel <dir>
+                Wybierz nastêpny/poprzedni kana³ tv.
+
+tv_step_norm    Zmieñ normê TV.
+
+tv_step_chanlist 
+                Zmieñ listê kana³ów.
+
+gui_loadfile   
+.br
+gui_loadsubtitle
+.br
+gui_about
+.br
+gui_play
+.br
+gui_stop
+                Akcje GUI
+
+
+.SH "PLIKI"
+.BR /etc/mplayer.conf\ \ \ \ \ 
+Ustawienia system\-wide
+.br
+.BR ~/.mplayer/config\ \ \ \ \ 
+Ustawienia u¿ytkownika
+.br
+.BR ~/.mplayer/input.conf\ 
+Ustawienia wej¶cia. Zobacz '\-input keylist' dla listy wszystkich klawiszy!
+.br
+.BR ~/.mplayer/font/\ \ \ \ \ \ 
+Katalog czcionki. Musi znajdowaæ siê tutaj plik font.desc i plik z rozszerzeniem .RAW.
+.br
+.BR ~/.mplayer/DVDkeys/\ \ \ 
+Zkrakowane klucze CSS
+.br
+
+.I NAPISY
+(utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
+.br
+Napisy s± szukane w katalogu filmu (dla przyk³adu /mnt/movie/movie.avi):
+.br
+    /mnt/cdrom/movie.sub
+.br
+    ~/.mplayer/sub/movie.sub 
+.br
+    ~/.mplayer/default.sub
+
+
+.SH "PRZYK£ADY"
+.TP
+.B Szybki start odtwarzania DVD
+mplayer \-dvd 1
+.TP
+.B Odtwarzaj tylko rozdzia³y 5, 6, 7
+mplayer \-dvd 1 \-chapter 5\-7
+.TP
+.B Odtwarzanie DVD z ró¿nych ujêæ
+mplayer \-dvd 1 \-dvdangle 2
+.TP
+.B Odtwarzanie z innego urz±dzenia DVD
+mplayer \-dvd 1 \-dvd\-device /dev/dvd2
+.TP
+.B Odtwarzanie starego stylu DVD (VOB)
+mplayer \-dvdauth /dev/dvd /mnt/dvd/VIDEO_TS/VTS_02_4.VOB
+.TP
+.B Strumieñ z HTTP
+mplayer http://mplayer.hq/example.avi
+.TP
+.B Konwertuj napisy do MPsub (do ./dump.mpsub)
+mplayer dummy.avi \-sub source.sub \-dumpmpsub
+.TP
+.B Wej¶cie z standardowego V4L
+mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
+.TP
+.B Kodowanie tytu³u #2 DVD, tylko wybranych rozdzia³ów
+mencoder -dvd 2 -chapter 10-15 -o title2.avi
+.TP
+.B Kodowanie tytu³u #2 DVD, zmieniaj±c rozmiar do 640x480
+mencoder -dvd 2 -vop scale=640:480 -o title2.avi
+.TP
+.B Kodowanie tytu³u #2 DVD, zmieniaj±c rozmiar do 512xHHH (zachowaj stosunek obrazu)
+mencoder -dvd 2 -vop scale -zoom -xy 512 -o title2.avi
+.TP
+.B To samo, ale z rodzin± kodeków libavcodec, kompresja MPEG4 (Divx5)
+mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=1800
+.TP
+.B Kodowanie wszystkich plików *.jpg w aktualnym katalogu
+mencoder \*.jpg -mf on:fps=25 -o output.avi
+.TP
+.B Kodowanie z tunera (patrz dokumentacja!)
+mencoder -tv on:driver=v4l:width=640:height=480 -o tv.avi
+.TP
+.B Kodowanie z archiwum
+rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -
+.TP
+.B Kodowanie zborowych plików *.vob
+cat *.vob | mencoder <opcje> -
+
+
+.SH "B£ÊDY"
+Prawdopodobne. PROSIMY, podwójnie sprawd¼ dokumentacjê (zw³aszcza bugreports.html),
+FAQ i archiwum grupy mailingowej, przed wys³aniem zg³oszenia!
+
+Wy¶lij kompletny raport o b³êdzie do grupy mailingowej MPlayer-users na 
+<mplayer-users@mplayerhq.hu>. Kochamy kompletne raporty:)
+
+
+.SH "AUTORZY"
+Sprawd¼ dokumentacjê!
+
+MPlayer jest (C) 2000\-2002
+.I Arpad Gereoffy <sendmail@to.mplayer\-users>
+
+Ta strona manualna jest napisana i utrzymywana przez
+.I Gabucino <sendmail@to.mplayer\-users>.
+
+(Poprawkiona przez
+.I Jonas Jermann <sendmail@to.mplayer\-users>
+)
+
+Strona przet³umaczona przez:
+.I Adriana Pawlika <imoteph@wp.pl>
+.I Konrada Materkê <kmaterka@wp.pl>.
+
+
+.SH "STANDARDOWY ADNOTACJA"
+U¿ywaj tylko na w³asn± odpowiedzialno¶æ! Mog± znajdowaæ siê tu b³êdy i nie¶cis³o¶ci, które mog³yby 
+uszkodziæ Twój system, lub Twoje oczy. U¿ywaj z ostro¿no¶ci± i choæ jest to ma³o prawdopodobne, 
+autor nie bierze jakiejkolwiek odpowiedzialno¶ci za to!
+
+.SH "OD T£UMACZY"
+T³umaczenie mo¿e zawieraæ pewne b³êdy, je¿eli czego¶ nie rozumiesz, przeczytaj to jeszcze raz, 
+mimo to je¶li dalej nie rozumiesz, zajrzyj do anglojêzycznej wersji manuala. Ewentualne b³êdy 
+prosimy zg³aszaæ t³umaczom.
+
+
+.\" end of file
