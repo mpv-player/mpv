@@ -370,7 +370,7 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 		: "%esi"
 	);
 
-    
+/* C version of the following asm loop 
     for (m=3; m < 7; m++) {
 	two_m = (1 << m);
 
@@ -391,6 +391,41 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 	    }
 	}
     }
+*/
+    for (m=3; m < 7; m++) {
+	two_m = (1 << m);
+	two_m_plus_one = two_m<<1;
+	asm volatile(
+		"movl %0, %%esi				\n\t"
+		".balign 16				\n\t"
+		"1:					\n\t"
+		"xorl %%edi, %%edi			\n\t" // k
+		"leal (%%esi, %3), %%edx		\n\t"
+		"2:					\n\t"
+		"movaps (%%edx, %%edi), %%xmm1		\n\t"
+		"movaps (%4, %%edi, 2), %%xmm2		\n\t"
+		"mulps %%xmm1, %%xmm2			\n\t"
+		"shufps $0xB1, %%xmm1, %%xmm1		\n\t"
+		"mulps 16(%4, %%edi, 2), %%xmm1		\n\t"
+		"movaps (%%esi, %%edi), %%xmm0		\n\t"
+		"addps %%xmm2, %%xmm1			\n\t"
+		"movaps %%xmm1, %%xmm2			\n\t"
+		"addps %%xmm0, %%xmm1			\n\t"
+		"subps %%xmm2, %%xmm0			\n\t"
+		"movaps %%xmm1, (%%esi, %%edi)		\n\t"
+		"movaps %%xmm0, (%%edx, %%edi)		\n\t"
+		"addl $16, %%edi			\n\t"
+		"cmpl %3, %%edi				\n\t" //FIXME (opt) count against 0 
+		" jb 2b					\n\t"
+		"addl %2, %%esi				\n\t"
+		"cmpl %1, %%esi				\n\t"
+		" jb 1b					\n\t"
+		:: "g" (buf), "m" (buf+128), "m" (two_m_plus_one<<3), "r" (two_m<<3),
+		   "r" (sseW[m])
+		: "%esi", "%edi", "%edx"
+	);
+    }
+
 #else
 /* unoptimized variant
     for (m=1; m < 7; m++) {
