@@ -143,7 +143,7 @@ GtkWidget * create_About( void )
 	"     * Gabor Berczi (Gabucino)\n" \
 	"     * Alex Beregszaszi (al3x)\n" \
 	"     * Gabor Lenart (LGB)\n" \
-	"     * Felix Bunemann (Atmos)\n" \
+	"     * Felix Buenemann (Atmos)\n" \
 	"     * Alban Bedel (Albeu)\n" \
 	"     * pl\n" \
 	"     * Michael Niedermayer\n" \
