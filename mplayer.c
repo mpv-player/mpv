@@ -1,6 +1,10 @@
 // AVI & MPEG Player    v0.11   (C) 2000-2001. by A'rpi/ESP-team
 
+// Enable ALSA emulation (using 32kB audio buffer) - timer testing only
 //#define SIMULATE_ALSA
+
+// Define, if you want to run libmpeg2 in a new process (using codec-ctrl)
+//#define HAVE_CODECCTRL
 
 #ifdef USE_XMMP_AUDIO
 #define OUTBURST 4096
@@ -145,6 +149,11 @@ demux_stream_t *d_video=NULL;
 // MPEG video stream parser:
 #include "parse_es.c"
 
+static const int frameratecode2framerate[16] = {
+   0, 24000*10000/1001, 24*10000,25*10000, 30000*10000/1001, 30*10000,50*10000,60000*10000/1001,
+  60*10000, 0,0,0,0,0,0,0
+};
+
 //**************************************************************************//
 //             Audio codecs:
 //**************************************************************************//
@@ -229,8 +238,13 @@ while(len>0){
 // DLL codecs init routines
 #include "dll_init.c"
 
+// Common FIFO functions, and keyboard/event FIFO code
+#include "fifo.c"
+
 // MPEG video codec process controller:
+#ifdef HAVE_CODECCTRL
 #include "codecctrl.c"
+#endif
 
 //**************************************************************************//
 
@@ -243,6 +257,7 @@ void exit_player(char* how){
   printf("max framesize was %d bytes\n",max_framesize);
   // restore terminal:
   getch2_disable();
+#ifdef HAVE_CODECCTRL
   if(child_pid){
     // MPEG
       // printf("\n\n");
@@ -256,7 +271,9 @@ void exit_player(char* how){
     DEBUG_SIG { printf("Freeing shmem...\n");DEBUG_SIGNALS_SLEEP}
       if(videobuffer) shmem_free(videobuffer);
     DEBUG_SIG { printf("Exiting...\n");DEBUG_SIGNALS_SLEEP}
-  } else {
+  } else
+#endif
+  {
   	// AVI
 	video_out->uninit();
   }
@@ -1774,8 +1791,10 @@ switch(has_video){
     case 'q': exit_player("Quit");
     case 'g': grab_frames=2;break;
     // restart codec
+#ifdef HAVE_CODECCTRL
     case 'k': kill(codec_pid,SIGKILL);break;
 //    case 'k': kill(child_pid,SIGKILL);break;
+#endif
     // pause
     case 'p':
     case ' ':
