@@ -29,6 +29,12 @@ vqmax 1-31 (maximum quantizer) for pass1/2
 	31 default
 	10-31 should be a sane range
 
+mbqmin 1-31 (minimum macroblock quantizer) for pass1/2
+	2 default
+
+mbqmax 1-31 (maximum macroblock quantizer) for pass1/2
+	31 default
+        
 vqdiff  1-31 (maximum quantizer difference between I or P frames) for pass1/2
 	3 default
 
@@ -265,7 +271,7 @@ pred (for huffyuv)
 	0 left prediction
         1 plane/gradient prediction
         2 median prediction
-
+ 
 lavdopts: (decoder options)
 ---------------------------
 

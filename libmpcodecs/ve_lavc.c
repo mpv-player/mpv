@@ -62,6 +62,8 @@ static int lavc_param_vme = 4;
 static int lavc_param_vqscale = 0;
 static int lavc_param_vqmin = 2;
 static int lavc_param_vqmax = 31;
+static int lavc_param_mb_qmin = 2;
+static int lavc_param_mb_qmax = 31;
 static int lavc_param_vqdiff = 3;
 static float lavc_param_vqcompress = 0.5;
 static float lavc_param_vqblur = 0.5;
@@ -119,6 +121,8 @@ struct config lavcopts_conf[]={
 	{"vqscale", &lavc_param_vqscale, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"vqmin", &lavc_param_vqmin, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"vqmax", &lavc_param_vqmax, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
+	{"mbqmin", &lavc_param_mb_qmin, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
+	{"mbqmax", &lavc_param_mb_qmax, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"vqdiff", &lavc_param_vqdiff, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"vqcomp", &lavc_param_vqcompress, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
 	{"vqblur", &lavc_param_vqblur, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
@@ -208,6 +212,10 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->frame_rate = (float)mux_v->h.dwRate/mux_v->h.dwScale * FRAME_RATE_BASE;
     lavc_venc_context->qmin= lavc_param_vqmin;
     lavc_venc_context->qmax= lavc_param_vqmax;
+#if LIBAVCODEC_BUILD >= 4646
+    lavc_venc_context->mb_qmin= lavc_param_mb_qmin;
+    lavc_venc_context->mb_qmax= lavc_param_mb_qmax;
+#endif
     lavc_venc_context->max_qdiff= lavc_param_vqdiff;
     lavc_venc_context->qcompress= lavc_param_vqcompress;
     lavc_venc_context->qblur= lavc_param_vqblur;
