@@ -196,7 +196,18 @@ Abteilung.</LI>
 Diese Karten findet man in vielen Laptops. Unglücklicherweise unterstützt der Treiber
 in X 4.2.0 kein Xv. Wir bieten jedoch einen modifizierten, 
 <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">Xv-fähigen Treiber</A> 
-an. Der Treiber wurde von Atmosfear zur Verfügung gestellt.</P>
+an. Der Treiber wurde von Stefan Seyfried zur Verfügung gestellt.</P>
+<P>Um die Wiedergabe von Inhalt mit DVD-Grösse zu erlauben sollte die XF86Config 
+wie folgt aussehen:</P>
+
+<P>
+Section "Device"<BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+&nbsp; &nbsp; Driver "neomagic"<BR>
+&nbsp; &nbsp; <B>Option "OverlayMem" "829440"</B><BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+EndSection
+</P>
 
 
 <P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Trident Karten</A></B></P>

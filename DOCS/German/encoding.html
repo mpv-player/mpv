@@ -257,6 +257,10 @@ durch eine einfache Kopierung der Frames kann es MJPEG (Motion JPEG) oder MPNG
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
   ausgabe.avi</CODE></P>
 
+<P><I>Erstellung einer DivX4-Datei aus einigen JPEG-Dateien im momentanen Verzeichnis :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  ausgabe.avi</CODE></P>
+
 <P><I>Erstellung einer Motion JPEG (MJPEG) Datei aus allen JPEG-Dateien im momentanen Verzeichnis :</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc copy
   -o ausgabe.avi</CODE></P>

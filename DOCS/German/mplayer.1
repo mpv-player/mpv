@@ -43,6 +43,7 @@ mplayer \- Movie Player für Linux
 .RB [ \-subdelay\ <Sekunden> ]
 .RB [ \-vobsub\ <vobsub-Datei\ ohne\ Endung> ]
 .RB [ \-vobsubid\ <vobsub\ Untertitel\ id> ]
+.RB [ \-ifo\ <vobsub\ ifo\ Datei> ]
 .RB [ \-z\ <0-9> ]
 .RB [ \-idx ]
 .RB [ \-noidx ]
@@ -233,7 +234,7 @@ Film)
 .TP                                                                                                            
 .B \-dr
 aktiviert "direct rendering" (nicht von allen Codecs und Videoausgaben unterstützt).
-Standardmässig an.
+Standardmässig ab.
 .TP
 .B \-vm
 versucht zu einem anderen Videomodus zu wechseln. dga2, x11 (XF86VidMode) und sdl
@@ -298,6 +299,10 @@ der volle Pfadname ohne Endung, das heisst ohne ".idx", ".ifo" oder ".sub".
 .TP
 .B \-vobsubid\ <vobsub\ Untertitel\ id>
 gibt die VobSub Untertitel id an. Gültige Werte liegen im Bereich von 0 bis 31.
+.TP
+.B \-ifo\ <vobsub\ ifo\ Datei>
+gibt die Datei an, die verwendet werden soll, um die Palette und Framegrösse 
+für VOBSUB-Untertitel zu laden.
 .TP
 .B \-osdlevel\ <Stufe>
 gibt an, in welchem Modus das OSD starten soll (0 : aus, 1 : Suche, 2: Suche+Spielzeit)
@@ -730,8 +735,9 @@ erzwingt den Audio demuxer Typ für -audiofile. Es muss eine Demuxer ID, welche i
 angegeben werden.
 .TP
 .B \-hr-mp3-seek
-MP3 Suche (seeking) mit hoher Auflösung. Normalerweise: aktiviert für die MP3 Wiedergabe. Er sucht genau die Stelle,
-an der er sein soll. Dies kann jedoch langsam sein, vor allem beim Rückwärtssuchen - er muss nämlich bis zum Beginn
+MP3 Suche (seeking) mit hoher Auflösung. Normalerweise: aktiviert, wenn eine externe MP3-Datei
+wiedergegeben wird, da die exakte Position gesucht werden muss um die A/V-Synchronisation zu bewahren.
+Dies kann jedoch langsam sein, vor allem beim Rückwärtssuchen - er muss bis zum Beginn
 zurückgehen, um das exakte Frame zu finden.
 .IP
 .SH "ALPHA/BETA CODE"
