@@ -25,6 +25,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-fps\ <ráta> ]
 .RB [ \-mc\ <másodperc/5kocka> ]
 .RB [ \-fs ]
+.RB [ \-dr ]
 .RB [ \-vm ]
 .RB [ \-zoom ]
 .RB [ \-x\ <x> ]
@@ -224,6 +225,10 @@ audio film melletti lejátszása külsõ fileból (MP3, AC3, Vorbis, stb)
 teljesképernyõs lejátszás (középre helyezi a filmet, és fekete sávokat
 tesz köré). Ki/bekapcsolható az 'f' billentyûvel (nem mindegyik video
 kimenet támogatja).
+.TP
+.B \-dr
+direct rendering bekapcsolása (nem minden codec illetve video kimenet
+támogatja). Alapállapotban be van kapcsolva.
 .TP
 .B \-vm
 megpróbál videomódot váltani. A dga2, x11 (XF86VidMode) és sdl meghajtóknál

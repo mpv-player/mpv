@@ -26,6 +26,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-fps\ <rate> ]
 .RB [ \-mc\ <seconds/5f> ]
 .RB [ \-fs ]
+.RB [ \-dr ]
 .RB [ \-vm ]
 .RB [ \-zoom ]
 .RB [ \-x\ <x> ]
@@ -223,6 +224,10 @@ play audio from an external file (MP3, AC3, Vorbis, etc)
 fullscreen playing (centers movie, and makes black
 bands around it). Toggle it with the 'f' key (not all video
 outputs support it).
+.TP
+.B \-dr
+turns on direct rendering (not supported by all codecs and video outputs).
+Default is on.
 .TP
 .B \-vm
 try to change to a different video mode. dga2, x11 (XF86VidMode) and sdl
