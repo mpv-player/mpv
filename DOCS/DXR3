@@ -7,8 +7,10 @@ harddisk.
 1. Requirements
 
  * First of all you will need the DXR3/H+ drivers properly installed.
-   Version 0.10.0 or later. You can find it at
+   Version 0.12.0 or later. You can find it at
    http://dxr3.sourceforge.net/
+   (you only need to run "make install devices" in em8300-x.y.z/modules
+    not in the root dir)
 
  * Run <mplayerdir>/configure and make sure that DXR3/H+ support = yes
    if you want to play files other than mpeg libmp1e should be = yes as well
@@ -19,57 +21,40 @@ harddisk.
 
 
 2. Usage
-
-     -vo dxr3:<devicenum>		For video output :<devicenum> is not
-    					needed unless you have more than one
-					em8300 device in your computer
-     -vo dxr3:noprebuf			Turn of prebuffering. This is only
-    					needed if you are having sync issues
-					with normal playback, this will make
-					playback appear less smooth and will
-					not use all available cpu power when
-					playing non-mpeg content.
- 					 * With prebuffering A-V: should be
-					   negative, if it's nonnegative your
-					   computer is too slow to properly
-					   play the video and you should
-					   disble prebuffering if you have
-					   sync issues.
- 					   Without prebuffering this value
-					   should stay close to 0 at all
-					   times.
- 					 * Some very fast computers seems to
-					   have issues with prebuffering.
-					   Blame Sigma for that ;).
- 					   You can safely use :noprebuf since
-					   your machines are fast enough to give
-					   you smooth playback anyway.
-					 * If you plan to do other stuff that
-					   uses resources simultaneously with
-					   watching video, this options is
-					   probably preffered as it is much less
-					   sensitive to syncloss.
-					 * If you loose sync do a small seek
-					   (using left/right arrow, it will
-					   resync)
-    -ao oss:<devicefile>		For audio output
+    -vo dxr3:<noprebuf>:<codec>:<device>Where noprebuf specifies to turn off
+					prebuffering. This is done automatically
+					on athlons. If playback is out of sync
+					try disabling prebuffering. If noprebuf
+					is left out prebuffering is enabled
+					(except on athlons).
+					
+					<codec> = fame/avcodec, avcodec produces
+					better quality output, but fame is
+					faster for those of you with slow
+					machines. The default is to use
+					libavcodec. Note that you need
+					libavcodec properly installed (read
+					DOCS/codecs.html)
+					
+					<device> = device number to use in case
+					you have more than one em8300 card
+					
+					Any of these options may be left out,
+					but they must be specified in this order
+					i.e. dxr3:fame works, dxr3:1 works but
+					dxr3:1:avcodec will not.
+					These new features were added by XorA,
+					he usually hangs out in #dxr3 on
+					irc.openprojects.net, let him know
+					you like it...
+    -ao oss:/dev/em8300_ma-X		For audio output, where X is the device
+					number (0 if one card)
     -ac hwac3				For digital audio output instead of
 					analog
-    -vc mpegpes				For mpeg playback
+    -vc mpegpes				For hardware accelerated mpeg playback
     -aop list=resample:fout=48000	If samplerate is below 44100Hz
  					This does not work with digital audio
 					output (-ac hwac3)
-    <devicenum>				Number of device to use for playback
-				        (if you	have more than one card.).
-					This can usually be left out (-vo dxr3).
-					Mandrake 8.1 uses devfs by default. If
-					you are running mandrake 8.1 please use
-					-vo dxr3:0
-    <devicefile>			Normally /dev/em8300_ma or
-					/dev/em8300_ma-<devicenum>
-					(-ao dxr3:/dev/em8300_ma). If left out
-					the default oss device will be used
-					(normally soundcard).
 
 MPEG-1, MPEG-2, VCD and DVD Notes
 There are some important notes to take into account here for optimum playback.
@@ -79,14 +64,6 @@ you are using a hardware accelerator. Otherwise mplayer will decode the movie
 in software, which is much slower.
 Note that you cannot use -vc mpegpes with movies that aren't mpeg 1 or 2 or
 you will get an error message saying "Can't find codec for video format...".
-
-* If you run mplayer as root, or set userid root it will use your pc's internal
-  realtime clockgenerator for syncing. (If your kernel supports it (It's
-  located in character devices and called "Enhanced realtime clock support")).
-  Some people report that this has improved playback (which it should), but
-  others have had problems with it. You will have to experiment yourself with
-  this to find your optimum setup.
-
 
 
 3. Contacting me
