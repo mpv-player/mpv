@@ -183,7 +183,7 @@ while(1){
         stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
 	le2me_BITMAPINFOHEADER(sh_video->bih);  // swap to machine endian
 	// fixup MS-RLE header (seems to be broken for <256 color files)
-	if(sh_video->bih->biCompression==1 && sh_video->bih->biSize==40)
+	if(sh_video->bih->biCompression<=1 && sh_video->bih->biSize==40)
 	    sh_video->bih->biSize=chunksize;
         if(verbose>=1) print_video_header(sh_video->bih);
         chunksize=0;
