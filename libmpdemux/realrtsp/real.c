@@ -542,8 +542,10 @@ rmff_header_t *real_parse_sdp(char *data, char **stream_rules, uint32_t bandwidt
       *stream_rules = xbuffer_strcat(*stream_rules, b);
     }
 
-    if (!desc->stream[i]->mlti_data) return NULL;
-
+    if (!desc->stream[i]->mlti_data) {
+	len = 0;
+	buf = NULL;
+    } else
     len=select_mlti_data(desc->stream[i]->mlti_data, desc->stream[i]->mlti_data_size, rulematches[0], &buf);
     
     header->streams[i]=rmff_new_mdpr(
