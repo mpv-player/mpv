@@ -293,6 +293,7 @@ static int control(priv_t *priv, int cmd, void *arg)
     case TVI_CONTROL_TUN_SET_NORM:
         {
         int req_mode = (int)*(void **)arg;
+	u_short tmp_fps;
 
         priv->iformat = METEOR_FMT_AUTOMODE;
 
@@ -357,7 +358,8 @@ static int control(priv_t *priv, int cmd, void *arg)
             return(0);
             }
 
-        if(ioctl(priv->btfd, METEORSFPS, &priv->fps) < 0) 
+	tmp_fps = priv->fps;
+        if(ioctl(priv->btfd, METEORSFPS, &tmp_fps) < 0) 
             {
             perror("fps:ioctl");
             return(0);
@@ -466,6 +468,7 @@ static int init(priv_t *priv)
 {
 int marg;
 int count;
+u_short tmp_fps;
 
 G_private = priv; /* Oooh, sick */
 
@@ -510,8 +513,9 @@ if(priv->videoready == TRUE &&
     perror("SINPUT:ioctl");
     }
 
+tmp_fps = priv->fps;
 if(priv->videoready == TRUE &&
-   ioctl(priv->btfd, METEORSFPS, &priv->fps) < 0) 
+   ioctl(priv->btfd, METEORSFPS, &tmp_fps) < 0) 
     {
     perror("SFPS:ioctl");
     }
