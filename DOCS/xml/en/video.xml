@@ -195,7 +195,7 @@ xv support, but the card itself is very slow, so you better sell it.
 <para>
 It's currently unclear which Savage models lack YV12 support, and convert by
 driver (slow). If you suspect your card, get a newer driver, or ask politely
-on the mplayer-users mailing list for an MMX/3DNow! enabled driver.
+on the MPlayer-users mailing list for an MMX/3DNow! enabled driver.
 </para>
 </note>
 </sect4>

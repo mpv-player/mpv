@@ -414,7 +414,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   It does not have a GUI yet, but the command line version is almost completely
   functional. <ulink url="../../tech/patches.txt">Patches</ulink> are always welcome.
   You should check out the
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
+  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
   mailing list for help and latest information.</para>
 
 <para>Best results are achieved with the native DirectX video output driver

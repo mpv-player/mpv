@@ -18,7 +18,7 @@ If you feel have the necessary skills you are invited to have a go at fixing the
 bug yourself. Or maybe you already did that? Please read
 <ulink url="../../tech/patches.txt">this short document</ulink> to find out how to
 get your code included in <application>MPlayer</application>. The people on the
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 mailing list will assist you if you have questions.
 </para>
 </sect1>
@@ -73,7 +73,7 @@ or even an answer.
 <sect1 id="bugreports_where">
 <title>Where to report bugs</title>
 <para>
-Subscribe to the mplayer-users mailing list:
+Subscribe to the MPlayer-users mailing list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 and send your bug report to
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/> where you can discuss it.
@@ -316,7 +316,7 @@ Then simply execute this command:
 If you created a proper bug report following the steps above and you are confident
 it is a bug in <application>MPlayer</application>, not a compiler problem or broken
 file, you have already read the documentation and you could not find a solution,
-your sound drivers are OK, then you might want to subscribe to the mplayer-advusers
+your sound drivers are OK, then you might want to subscribe to the MPlayer-advusers
 list and send your bug report there to get a better and faster answer.
 </para>
 
