@@ -241,10 +241,13 @@ static uint32_t init( uint32_t width,  uint32_t height,
   int bank, ram;
   int x_off, y_off;
 
+#ifdef HAVE_DGA2
 // needed to change DGA video mode
-  int modecount,mX, mY, X, Y, i,j;
+  int modecount,mX, mY, i,j;
+  int X,Y;
   XDGAMode *modelines=NULL;
   XDGADevice *dgadevice;
+#endif
 
   if( vo_dga_is_running )return -1;
 
@@ -259,6 +262,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
     return 1;
   } 
 
+#ifdef HAVE_DGA2
 // Code to change the video mode added by Michael Graffam
 // mgraffam@idsi.net
   if (modelines==NULL)
@@ -285,6 +289,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
    }
   X=(modelines[j].imageWidth-mX)/2;
   Y=(modelines[j].imageHeight-mY)/2;
+  printf("vo_dga: Using DGA 2.0 mode changing support\n");
   printf("vo_dga: Selected video mode %dx%d for image size %dx%d.\n", mX, mY,width, height);  
 
   XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), X,Y);
@@ -293,15 +298,22 @@ static uint32_t init( uint32_t width,  uint32_t height,
 
   XFree(modelines);
   XFree(dgadevice);
+  // end mode change code
+#else
+printf("vo_dga: DGA 1.0 compatibility code\n");
+#endif
 
-// end mode change code
+XF86DGAGetViewPortSize(vo_dga_dpy,XDefaultScreen(vo_dga_dpy),
+			&vo_dga_vp_width,
+			&vo_dga_vp_height); 
 
-  XF86DGAGetVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
-                  (char **)&vo_dga_base, &vo_dga_width, &bank, &ram);
+XF86DGAGetVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 
+                (char **)&vo_dga_base, &vo_dga_width, &bank, &ram);
 
-  vo_dga_vp_width=modelines[j].viewportWidth;
-  vo_dga_vp_height=modelines[j].viewportHeight;
-  
+#ifndef HAVE_DGA2
+XF86DGASetViewPort (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0, 0);
+#endif
+
   // do some more checkings here ...
   if( format==IMGFMT_YV12 ) 
     yuv2rgb_init( vo_depthonscreen, MODE_RGB );

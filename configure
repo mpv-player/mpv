@@ -167,6 +167,7 @@ _mlib=no
 _mpg123=no
 _xmga=no
 _dga=no
+_dga2=no
 _fbdev=no
 _lirc=no
 
@@ -393,6 +394,18 @@ $_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXx
 
 # ---
 
+# Check if DGA is 2.0 or greater
+cat > $TMPC << EOF
+#include <stdio.h>
+#include <X11/Xlib.h>
+#include <X11/extensions/xf86dga.h>
+int main (void) { XDGAMode mode; XDGADevice device; return 0;}
+EOF
+
+_dga2=no
+$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm &> /dev/null && _dga2=yes
+
+
 cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
@@ -443,7 +456,10 @@ do
         ;;	
   --enable-dga)
         _dga=yes
-        ;;	
+        ;;
+  --enable-dga2)
+        _dga2=yes
+        ;;
   --enable-xv)
         _xv=yes
         ;;
@@ -513,6 +529,9 @@ do
   --disable-dga)
 	_dga=no
 	;;
+  --disable-dga2)
+        _dga2=no
+        ;;
   --disable-fbdev)
   	_fbdev=no
 	;;
@@ -555,6 +574,7 @@ echo "Checking for OpenGL ... $_gl"
 echo "Checking for Xv ... $_xv"
 echo "Checking for X11 ... $_x11"
 echo "Checking for DGA ... $_dga"
+echo "Checking for DGA 2.0 .. $_dga2"
 echo "Checking for Xf86VM ... $_vm"
 echo "Checking for FBDev ... $_fbdev"
 # write conf files.
@@ -727,6 +747,13 @@ else
  _dga='#undef HAVE_DGA'
 fi
 
+if [ $_dga2 = yes ]; then
+ _dga2='#define HAVE_DGA2'
+ _vosrc=$_vosrc' vo_dga.c vo_fsdga.c'
+else
+ _dga2='#undef HAVE_DGA2'
+fi
+
 if [ $_fbdev = yes ]; then
  _fbdev='#define HAVE_FBDEV'
  _vosrc=$_vosrc' vo_fbdev.c'
@@ -807,6 +834,7 @@ $_xv
 $_vm
 $_gl
 $_dga
+$_dga2
 $_sdldef
 $_3dfx
 $_mga
