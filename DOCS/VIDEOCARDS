@@ -17,7 +17,7 @@ V.   Not really acceleration, but...
 Now, let's see them in details:
 
 But before reading this, read DOCS/MTRR, and check your /proc/mtrr.
-Believe me, it does worth! Speed up things 5x on P3!!!
+Believe me, it's worth it! Speeds things up more than 5 times on P3!!!
 
 I. Under XFree86 4.0.2 or newer, using the XVideo extension:
    this is what the option '-vo xv' uses.
@@ -127,7 +127,7 @@ using the DGA driver:
 3. If the driver couldn't switch to a smaller resolution, experiment with
    switches -vm (only with X 3.0.x), -fs, -bpp, -zoom to find a video mode that
    the movie fits in. There is no converter right now.. :(
-4. Became ROOT. DGA needs root access to be able to write directly video memory.
+4. Become ROOT. DGA needs root access to be able to write directly video memory.
    If you want to run it as user, then install MPlayer SUID root:
    'chown root /usr/local/bin/mplayer'
    'chmod 750 /usr/local/bin/mplayer' 
@@ -139,6 +139,7 @@ using the DGA driver:
    privilegies through suid root mplayer.
    !!!! SO YOU HAVE BEEN WARNED ... !!!!
 5. Use '-vo dga' option, and there you go! (hope so:)
+6. Try if the '-vo sdl -sdl dga' options work for you! It's much faster!!!
 
 If you have fast enough CPU (P3 800 for example) you can try fsdga for
 fullscreen mpeg playing (using software YUV->RGB scaling):

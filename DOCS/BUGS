@@ -3,12 +3,12 @@ Known bugs:
 
 Special system/cpu-specific bugs/problems:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-1. SIGILL (signal 4) in draw_frame, on P3 (mostly 2.2.x kernels):
+1. SIGILL (signal 4) in draw_frame, on P3 (mostly with 2.2.x kernels):
   Problem: movups is crashing in libvo/fastmemcpy.h
   Workaround:  ./configure --disable-fastmemcpy
 
 2. No image (black image) in RGB 16bpp (x11,dga,fbdev,svga) playing
-   MPEG files on SMP machine:
+  MPEG files on SMP machine:
   Problem: bug(?) in MMX YV12->RGB16 converter code
   Workaround: ./configure --disable-mmx
 
@@ -19,8 +19,8 @@ Special system/cpu-specific bugs/problems:
 Please contact me if you experienced any of the above problems. We need
 people to test fixes and send us as many system details information as
 possible (kernel+libc+gcc+binutils version, test results, /proc/cpuinfo etc)
-because they are system-dependent problems and aren't reproducable here.
-Please tell me if you can fix them or you are only user.
+because these are system-dependent problems and aren't reproducable here.
+Please tell me if you can fix them or you are only a user.
 Unfortunately we can't reproduce these here, so it's very hard to fix.
 
 Various A-V sync and other audio problems:
@@ -31,14 +31,14 @@ General audio delay or jerky sound (exists with all or many files):
 - audio buffer problems
   Workaround:  mplayer -abs option
 - slow machine (cpu or vga)
-  try with -vo null, if it plays well, then you has slow VGA card/driver:
+  try with -vo null, if it plays well, then you have slow VGA card/driver:
   Workaround: buy a faster card or read DOCS/VIDEOCARDS about how to speed up
 
 Audio delay specific to one or a few files:
 - bad file (pleae upload the file, so we can check & fix)
   Workaround: -ni and/or -bps options
               -delay option or +/- keys at runtime to adjuts delay
-- your soundcard doesn't support 48khz playback
+- your soundcard doesn't support 48Khz playback
   Workaround: buy a better soundcard...
 - file has VBR mp3 audio
   Workaround: mplayer -mc 0
@@ -53,7 +53,7 @@ Signal 11 in decode_audio:
 - if it's still bad, try with -nosound  [and report the bug, see BUGREPORTS]
 
 No sound at all:
-- your file uses a not supported codec
+- your file uses an unsupported codec
   Workaround: read DOCS/CODECS, and help us adding support for it
 
 Video-out problems:

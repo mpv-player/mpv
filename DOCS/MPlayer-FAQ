@@ -39,7 +39,8 @@ Q: -xy option doesn't work with x11 driver (-vo x11)
 A: x11 driver doesn't support scaling, but XF86VidMode support is now
    used: you must specify the -vm and the -fs switch, and you're done.
    Make sure you have the right Modelines in your XF86Config file, and
-   try if the DGA driver works for you. It's much faster.
+   try if the DGA driver (and SDL's DGA driver, see VIDEOCARDS) works for you.
+   It's much faster. If even SDL's DGA works, it'll be EVEN more faster!
 
 Q: audio goes out of sync playing .avi file
 A: try with -bps or -nobps option
