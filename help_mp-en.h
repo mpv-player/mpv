@@ -112,7 +112,7 @@ static char help_text[]=
 "  with -framedrop !  Read DOCS/video.html for video tuning/speedup tips.\n"\
 "- Slow cpu. don't try to playback big dvd/divx on slow cpu! try -hardframedrop\n"\
 "- Broken file. try various combinations of these: -nobps  -ni  -mc 0  -forceidx\n"\
-"- You're using -cache to play a non-interleaved file? try with no cache...\n"\
+"- You're using -cache to play a non-interleaved file? try with -nocache\n"\
 "If none of these apply, then read DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer was compiled WITHOUT GUI support!\n"
