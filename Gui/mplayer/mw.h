@@ -222,8 +222,8 @@ play_dvd_2:
 #endif
    case evPlay:
    case evPlaySwitchToPause:
-        btnModify( evPlaySwitchToPause,btnDisabled );
-        btnModify( evPauseSwitchToPlay,btnReleased );
+//        btnModify( evPlaySwitchToPause,btnDisabled );
+//        btnModify( evPauseSwitchToPlay,btnReleased );
         if ( ( msg == evPlaySwitchToPause )&( mplShMem->Playing == 1 ) ) goto NoPause;
         mplMainRender=1;
 
@@ -241,6 +241,7 @@ play_dvd_2:
 #endif
          }
         mplPlay();
+	mplState();
         break;
    case evSetDVDSubtitle:
 #ifdef USE_DVDREAD
@@ -292,10 +293,11 @@ NoPause:
 
    case evStop:
         IZE("evStop");
-        btnModify( evPlaySwitchToPause,btnReleased );
-        btnModify( evPauseSwitchToPlay,btnDisabled );
+//        btnModify( evPlaySwitchToPause,btnReleased );
+//        btnModify( evPauseSwitchToPlay,btnDisabled );
         mplMainRender=1;
         mplStop();
+	mplState();
         break;
 
    case evLoadPlay:

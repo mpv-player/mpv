@@ -11,7 +11,7 @@ void mplMenuDraw( wsParamDisplay )
 {
  unsigned long * buf = NULL;
  unsigned long * drw = NULL;
- unsigned long   x,y,tmp;
+ int             x,y,tmp;
 
  if ( !appMPlayer.menuBase.Bitmap.Image ) return;
  if ( !mplMenuRender && !appMPlayer.menuWindow.Visible ) return;

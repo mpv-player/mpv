@@ -161,8 +161,8 @@ typedef struct
  XColor               wsColor;
 } wsTWindow;
 
-extern unsigned int         wsMaxX;
-extern unsigned int         wsMaxY;
+extern int                  wsMaxX;
+extern int                  wsMaxY;
 
 extern Display            * wsDisplay;
 extern int                  wsScreen;

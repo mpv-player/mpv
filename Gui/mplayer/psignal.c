@@ -4,6 +4,7 @@
 #include <string.h>
 #include <signal.h>
 #include <unistd.h>
+#include <inttypes.h>
 
 #include "widgets.h"
 #include "gtk/menu.h"

@@ -97,16 +97,31 @@ void mplPause( void )
   {
    case 1: // playing
         mplShMem->Playing=2;
-	btnModify( evPlaySwitchToPause,btnReleased );
-	btnModify( evPauseSwitchToPlay,btnDisabled );
+//	btnModify( evPlaySwitchToPause,btnReleased );
+//	btnModify( evPauseSwitchToPlay,btnDisabled );
 	break;
-    case 2: // paused
+   case 2: // paused
 	mplShMem->Playing=1;
-	btnModify( evPlaySwitchToPause,btnDisabled );
-	btnModify( evPauseSwitchToPlay,btnReleased );
+//	btnModify( evPlaySwitchToPause,btnDisabled );
+//	btnModify( evPauseSwitchToPlay,btnReleased );
 	break;
   }
+ mplState();
  mplSubRender=0;
+}
+
+void mplState( void )
+{
+ if ( ( mplShMem->Playing == 0 )||( mplShMem->Playing == 2 ) )
+  {
+   btnModify( evPlaySwitchToPause,btnReleased );
+   btnModify( evPauseSwitchToPlay,btnDisabled );
+  }
+  else 
+   {
+    btnModify( evPlaySwitchToPause,btnDisabled );
+    btnModify( evPauseSwitchToPlay,btnReleased );
+   }
 }
 
 void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height )

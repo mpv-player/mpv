@@ -42,8 +42,8 @@ typedef struct
 
 Atom                 wsMotifHints;
 
-unsigned int         wsMaxX         = 0; // Screen width.
-unsigned int         wsMaxY         = 0; // Screen height.
+int                  wsMaxX         = 0; // Screen width.
+int                  wsMaxY         = 0; // Screen height.
 
 Display            * wsDisplay;
 int                  wsScreen;
@@ -103,11 +103,13 @@ inline int wsSearch( Window win );
 
 void wsWindowDecoration( wsTWindow * win,long d )
 {
+#if 0
  MotifWmHints *hints = &wsMotifWmHints;
  Atom type;
  int format;
  unsigned long nitems;
  unsigned long bytes_after;
+#endif
 
  wsMotifHints=XInternAtom( wsDisplay,"_MOTIF_WM_HINTS",0 );
  if ( wsMotifHints == None ) return;
