@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.83
+// sync'ed with help_mp-en.h 1.87
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original translation by Firebird <firebird@chez.com>
 
@@ -482,6 +482,12 @@ static char help_text[]=
 #define MSGTR_EQU_Center "Centre"
 #define MSGTR_EQU_Bass "Basses"
 #define MSGTR_EQU_All "Tout"
+#define MSGTR_EQU_Channel1 "Canal 1:"
+#define MSGTR_EQU_Channel2 "Canal 2:"
+#define MSGTR_EQU_Channel3 "Canal 3:"
+#define MSGTR_EQU_Channel4 "Canal 4:"
+#define MSGTR_EQU_Channel5 "Canal 5:"
+#define MSGTR_EQU_Channel6 "Canal 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Chemin"
@@ -493,6 +499,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Audio "Audio"
 #define MSGTR_PREFERENCES_Video "Vidéo"
 #define MSGTR_PREFERENCES_SubtitleOSD "Sous-titre & OSD"
+#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Divers"
 
 #define MSGTR_PREFERENCES_None "Aucun"
@@ -522,8 +529,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_SRT "Convertit le sous-titre vers le format SubViewer (SRT) basé sur le temps"
 #define MSGTR_PREFERENCES_SUB_Overlap "Bascule le recouvrement des sous-titres"
 #define MSGTR_PREFERENCES_Font "Police:"
-#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
-#define MSGTR_PREFERENCES_FontFactor "Font factor:"
+#define MSGTR_PREFERENCES_FontFactor "Facteur de la police:"
 #define MSGTR_PREFERENCES_PostProcess "Activer le postprocessing"
 #define MSGTR_PREFERENCES_AutoQuality "Qualité auto.: "
 #define MSGTR_PREFERENCES_NI "Utiliser le parseur d'AVI mal multiplexés"
@@ -584,8 +590,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_CDROMDevice "Périphérique CD-ROM:"
 #define MSGTR_PREFERENCES_DVDDevice "Périphérique DVD:"
 #define MSGTR_PREFERENCES_FPS "FPS du film:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Affiche la fenêtre vidéo inactive"
 
-#define MSGTR_ABOUT_UHU "Développement de la GUI sponsorisé par UHU Linux\n"
+#define MSGTR_ABOUT_UHU "Développement GUI sponsorisé par UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   Equipe principale MPlayer:\n"
 #define MSGTR_ABOUT_AdditionalCoders "   Programmeurs additionnels:\n"
 #define MSGTR_ABOUT_MainTesters "   Principaux testeurs:\n"
