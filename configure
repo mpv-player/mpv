@@ -2680,7 +2680,13 @@ echocheck "aRts"
 if test "$_arts" = auto ; then
   _arts=no
   if ( artsc-config --version ) >> "$TMPLOG" 2>&1 ; then
-    _arts=yes
+
+cat > $TMPC << EOF
+#include <artsc.h>
+int main(void) { return 0; }
+EOF
+cc_check `artsc-config --libs` `artsc-config --cflags` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _arts=yes
+
   fi
 fi
 
