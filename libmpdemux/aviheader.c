@@ -193,7 +193,13 @@ while(1){
         // IdxFix:
         idxfix_videostream=stream_id;
         switch(sh_video->bih->biCompression){
-	case mmioFOURCC('D', 'I', 'V', '3'):
+	case mmioFOURCC('M', 'P', 'G', '4'):
+	case mmioFOURCC('m', 'p', 'g', '4'):
+	case mmioFOURCC('D', 'I', 'V', '1'):
+          idxfix_divx=3; // we can fix keyframes only for divx coded files!
+	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for M$ mpg4v1 video\n");
+	  break;
+        case mmioFOURCC('D', 'I', 'V', '3'):
 	case mmioFOURCC('d', 'i', 'v', '3'):
 	case mmioFOURCC('D', 'I', 'V', '4'):
         case mmioFOURCC('d', 'i', 'v', '4'):
@@ -336,6 +342,7 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
     if(idxfix_divx)
       if(avi_stream_id(id)==idxfix_videostream){
         switch(idxfix_divx){
+    	    case 3: c=stream_read_dword(demuxer->stream)<<5; //skip 32+5 bits for m$mpeg4v1
     	    case 1: if(c&0x40000000) idx->dwFlags=0;break; // divx 3
 	    case 2: if(c==0x1B6) idx->dwFlags=0;break; // divx 4
 	}
