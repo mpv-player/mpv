@@ -587,7 +587,9 @@
 #define	OV0_P23_BLANK_LINES_AT_TOP		0x0434
 #	define P23_BLNK_LN_AT_TOP_M1_MASK	0x000007ffL
 #	define P23_ACTIVE_LINES_M1		0x07ff0000L
+#ifndef RAGE28
 #define	OV0_BASE_ADDR				0x043C
+#endif
 #define	OV0_VID_BUF0_BASE_ADRS			0x0440
 #	define VIF_BUF0_PITCH_SEL		0x00000001L
 #	define VIF_BUF0_TILE_ADRS		0x00000002L
@@ -641,17 +643,7 @@
 #define	OV0_P2_X_START_END			0x0498
 #define	OV0_P3_X_START_END			0x049C
 #define	OV0_FILTER_CNTL				0x04A0
-/*
-  radeon notes:
-  value	0x0 makes green	background only
-  value	0x1 passes only	green colors (probably U or V)
-  value	0x2 passes only	red colors   (probably U or V)
-  value	0x3 makes full colored output
-  value	0x4 ???
-  value	0x8 ???
-  value	0xffffffff doesn't make	any visible effects
-*/
-
+#	define FILTER_HARDCODED_COEF		0x0000000F
 /*
    Top quality 4x4-tap filtered vertical and horizontal scaler.
    It allows up to 64:1 upscaling and downscaling without
@@ -718,6 +710,15 @@
 #define IDCT_AUTH				0x1F8C
 #define IDCT_CONTROL				0x1FBC
 
+#define SE_MC_SRC2_CNTL				0x19D4
+#define SE_MC_SRC1_CNTL				0x19D8
+#define SE_MC_DST_CNTL				0x19DC
+#define SE_MC_CNTL_START			0x19E0
+#ifndef RAGE128
+#define SE_MC_BUF_BASE				0x19E4
+#define PP_MC_CONTEXT				0x19E8
+#define PP_MISC					0x1C14
+#endif
 /*
    SUBPICTURE UNIT:
    Decompressing, scaling and alpha blending the compressed bitmap on the fly.

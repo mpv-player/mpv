@@ -200,7 +200,9 @@ static video_registers_t vregs[] =
   DECLARE_VREG(OV0_P23_V_ACCUM_INIT),
   DECLARE_VREG(OV0_P1_BLANK_LINES_AT_TOP),
   DECLARE_VREG(OV0_P23_BLANK_LINES_AT_TOP),
+#ifdef RADEON
   DECLARE_VREG(OV0_BASE_ADDR),
+#endif
   DECLARE_VREG(OV0_VID_BUF0_BASE_ADRS),
   DECLARE_VREG(OV0_VID_BUF1_BASE_ADRS),
   DECLARE_VREG(OV0_VID_BUF2_BASE_ADRS),
@@ -398,7 +400,7 @@ static void radeon_vid_stop_video( void )
     OUTREG(OV0_SCALE_CNTL, SCALER_SOFT_RESET);
     OUTREG(OV0_EXCLUSIVE_HORZ, 0);
     OUTREG(OV0_AUTO_FLIP_CNTL, 0);   /* maybe */
-    OUTREG(OV0_FILTER_CNTL, 0x0000000f);
+    OUTREG(OV0_FILTER_CNTL, FILTER_HARDCODED_COEF);
     OUTREG(OV0_KEY_CNTL, GRAPHIC_KEY_FN_NE);
     OUTREG(OV0_TEST, 0);
 }
@@ -444,7 +446,7 @@ static void radeon_vid_display_video( void )
     OUTREG(OV0_P1_X_START_END,		besr.p1_x_start_end);
     OUTREG(OV0_P2_X_START_END,		besr.p2_x_start_end);
     OUTREG(OV0_P3_X_START_END,		besr.p3_x_start_end);
-#if 0
+#ifdef RADEON
     OUTREG(OV0_BASE_ADDR,		besr.base_addr);
 #endif
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	besr.vid_buf0_base_adrs);
