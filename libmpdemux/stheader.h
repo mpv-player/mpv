@@ -78,6 +78,7 @@ typedef struct {
   void* context; // codec-specific stuff (usually HANDLE or struct pointer)
   HIC hic;  // handle
   void* video_out;
+  void* vfilter;
 } sh_video_t;
 
 sh_audio_t* get_sh_audio(demuxer_t *demuxer,int id);
