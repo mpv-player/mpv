@@ -53,8 +53,8 @@ uint64_t mmx_grnmask = 0xfcfcfcfcfcfcfcfc;
 uint64_t mmx_grnshift = 0x03;
 uint64_t mmx_blueshift = 0x03;
 
-#if defined (HAVE_SSE) || defined (HAVE_3DNOW)
-#define movntq "movntq" // use this for processors that have SSE or 3Dnow
+#ifdef HAVE_MMX2
+#define movntq "movntq" // use this for K7 and p3 only
 #else
 #define movntq "movq" // for MMX-only processors
 #endif
