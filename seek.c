@@ -1,9 +1,52 @@
+#include <stdio.h>
+#include <stdlib.h>
 
-  if(file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
-    printf("Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
-  } else {
+extern int verbose; // defined in mplayer.c
+
+#include "config.h"
+
+#include "stream.h"
+#include "demuxer.h"
+#include "parse_es.h"
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+#include "codec-cfg.h"
+#include "stheader.h"
+
+extern void resync_audio_stream(sh_audio_t *sh_audio);
+extern void skip_audio_frame(sh_audio_t *sh_audio);
+
+extern int asf_packetsize; // for seeking
+
+extern float avi_audio_pts;
+extern float avi_video_pts;
+extern float avi_video_ftime;
+extern int skip_video_frames;
+extern float initial_pts_delay;
+extern int seek_to_byte;
+extern char* current_module; // for debugging
+
+// flags:
+//   0x1 - absolute/relative
+//   0x2 - keyframe/hard
+
+int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+    demux_stream_t *d_audio=demuxer->audio;
+    demux_stream_t *d_video=demuxer->video;
+    sh_audio_t *sh_audio=d_audio->sh;
+    sh_video_t *sh_video=d_video->sh;
     int skip_audio_bytes=0;
     float skip_audio_secs=0;
+
+if(demuxer->file_format==DEMUXER_TYPE_AVI && demuxer->idx_size<=0){
+    printf("Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n");
+    return 0;
+}
+
+    current_module="seek";
 
     // clear demux buffers:
     if(sh_audio){ ds_free_packs(d_audio);sh_audio->a_buffer_len=0;}
@@ -12,7 +55,7 @@
 //    printf("sh_audio->a_buffer_len=%d  \n",sh_audio->a_buffer_len);
     
 
-switch(file_format){
+switch(demuxer->file_format){
 
   case DEMUXER_TYPE_AVI: {
   //================= seek in AVI ==========================
@@ -20,6 +63,7 @@ switch(file_format){
     int curr_audio_pos=0;
     int audio_chunk_pos=-1;
     int video_chunk_pos=d_video->pos;
+    int i;
     
       skip_video_frames=0;
       avi_audio_pts=0;
@@ -185,12 +229,12 @@ switch(file_format){
         while(1){
           int i=sync_video_packet(d_video);
           if(i==0x1B3 || i==0x1B8) break; // found it!
-          if(!i || !skip_video_packet(d_video)){ eof=1; break;} // EOF
+          if(!i || !skip_video_packet(d_video)) break; // EOF?
         }
   }
   break;
 
-} // switch(file_format)
+} // switch(demuxer->file_format)
 
       //====================== re-sync audio: =====================
       if(sh_audio){
@@ -204,7 +248,7 @@ switch(file_format){
 	resync_audio_stream(sh_audio);
 
         // re-sync PTS (MPEG-PS only!!!)
-        if(file_format==DEMUXER_TYPE_MPEG_PS)
+        if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS)
         if(d_video->pts && d_audio->pts){
           if (d_video->pts < d_audio->pts){
           
@@ -215,34 +259,14 @@ switch(file_format){
           }
         }
 
-        current_module="audio_reset";
-        audio_out->reset(); // stop audio, throwing away buffered data
-        current_module=NULL;
-
-        c_total=0; // kell ez?
-        printf("A:%6.1f  V:%6.1f  A-V:%7.3f",d_audio->pts,d_video->pts,0.0f);
-        printf("  ct:%7.3f   \r",c_total);fflush(stdout);
+        printf("A:%6.1f  V:%6.1f  A-V:%7.3f  ct: ?   \r",d_audio->pts,d_video->pts,0.0f);
       } else {
-        printf("A: ---   V:%6.1f   \r",d_video->pts);fflush(stdout);
+        printf("A: ---   V:%6.1f   \r",d_video->pts);
       }
+      fflush(stdout);
 
-        // Set OSD:
-      if(osd_level){
-        int len=((demuxer->movi_end-demuxer->movi_start)>>8);
-        if(len>0){
-          osd_visible=sh_video->fps; // 1 sec
-          vo_osd_progbar_type=0;
-          vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
-        }
-      }
-
-      max_pts_correction=0.1;
-      frame_corr_num=0; // -5
-      frame_correction=0;
-      force_redraw=5;
       if(sh_audio) sh_audio->timer=-skip_audio_secs;
       sh_video->timer=0; // !!!!!!
-      audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 
-  }
- rel_seek_secs=0;
+return 1;
+}
