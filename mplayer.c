@@ -49,6 +49,10 @@
 #include "libvo/font_load.h"
 #include "libvo/sub.h"
 
+#ifdef HAVE_X11
+#include "libvo/x11_common.h"
+#endif
+
 #include "libao2/audio_out.h"
 #include "libao2/audio_plugin.h"
 
@@ -107,6 +111,12 @@ dvb_history_t *dvb_history;
 //             Playtree
 //**************************************************************************//
 #include "playtree.h"
+#include "playtreeparser.h"
+
+#ifdef HAVE_NEW_GUI
+extern int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* config);
+extern int import_initial_playtree_into_gui(play_tree_t* my_playtree, m_config_t* config, int enqueue);
+#endif
 
 play_tree_t* playtree;
 play_tree_iter_t* playtree_iter = NULL;
@@ -3292,7 +3302,7 @@ if(rel_seek_secs || abs_seek_pos){
       if (osd_show_sub_changed) {
 	  char *tmp2;
           tmp = subdata->filename;
-	  if (tmp2 = strrchr(tmp, '/')) {
+	  if ((tmp2 = strrchr(tmp, '/'))) {
 	      tmp = tmp2+1;
 	  }
 	  snprintf(osd_text_tmp, 63, "Sub: (%d) %s%s", 

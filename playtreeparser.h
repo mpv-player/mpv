@@ -21,4 +21,7 @@ play_tree_parser_free(play_tree_parser_t* p);
 play_tree_t*
 play_tree_parser_get_play_tree(play_tree_parser_t* p, int forced);
 
+void
+play_tree_add_bpf(play_tree_t* pt, char* filename);
+
 #endif
