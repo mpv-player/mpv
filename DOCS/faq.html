@@ -259,15 +259,16 @@ It's much faster. If SDL's DGA works, use that, it'll be EVEN faster!
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 What is the meaning of the numbers on the status line?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Example: <CODE><FONT CLASS="text">A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 4 49%</CODE><BR>
+Example: <CODE><FONT CLASS="text">A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57/57  41%   0%  2.6% 0 4 49%</CODE><BR>
 <UL>
 <LI>A: audio position in seconds
 <LI>V: video position in seconds
 <LI>A-V: audio-video difference in seconds (delay)
 <LI>ct: total A-V sync correction done
 <LI>frames played (counting from last seek)
-<LI>video codec cpu usage in percent (for mpeg this includes video_out)
-<LI>video_out cpu usage for AVI, 0 for MPG (see above)
+<LI>frames decoded (counting from last seek)
+<LI>video codec cpu usage in percent (for slices and DR this includes video_out)
+<LI>video_out cpu usage
 <LI>audio codec cpu usage in percent
 <LI>frames needed to drop to maintain A-V sync
 <LI>current level of image postprocessing (when using <CODE>-autoq</CODE>)
@@ -283,17 +284,11 @@ Use the <CODE>-quiet</CODE> option and read the man page.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Why is video_out cpu usage zero (0%) for mpeg files?
+Why is video_out cpu usage zero (0%) for some files?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It's not zero, but it's built into the codec and thus cannot be measured
+It's not zero, but it's called from the codec and thus cannot be measured
 separately. You should try to play the file using <CODE>-vo null</CODE> and then
 <CODE>-vo ...</CODE> and check the difference to see the video_out speed.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What's XMMP? (Is it XMMS or XMPS misspelled?)
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It's a new project, see <A HREF="http://frozenproductions.com">Frozen Productions</A> for details.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -347,7 +342,9 @@ the perverted minds of the MPlayer developers.
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 LIRC doesn't work, because ...
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Are you sure you are using <CODE>mplayer_lirc</CODE> instead of <CODE>mplayer</CODE>?
+Are you sure you are using <CODE>mplayer</CODE> instead of <CODE>mplayer_lirc</CODE>?
+Note that it was <CODE>mplayer_lirc</CODE> for long time, including the 0.60 release, but recently
+changed back to <CODE>mplayer</CODE>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -362,7 +359,7 @@ After running <CODE>./configure</CODE> , edit <CODE>config.h</CODE> and replace
 The OSD is flickering!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 You use a vo driver with single buffering (x11,xv). With xv,
-use the <CODE>-double</CODE> option.
+use the <CODE>-double</CODE> option. Also try <CODE>-vop expand</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -424,19 +421,6 @@ read <A HREF="bugreports.html">this</A> and upload the file to FTP.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Indeo 3.x/4.x movies are viewed upside-down!!!?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It's a known bug/limitation of the DLL codec.
-The <CODE>-flip</CODE> switch may help if your vo driver supports it.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Indeo 3.x,4.x video doesn't work at 32bpp resolutions (16,24 bpp are OK).
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It's a known bug/limitation of the DLL codec.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 MPlayer exits with some error when using l3codeca.acm.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 Check <CODE>ldd /usr/local/bin/mplayer</CODE> output. If it contains<BR>
@@ -455,7 +439,7 @@ or use <B>MPlayer</B>'s <CODE>-afm 1</CODE> option to disable using l3codeca.acm
 My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
 sound too slow. When I use -nosound switch, everything is OK (but quiet).
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Your machine is too slow. Consult the documentation to see if you can improve
+Your machine is too slow or your soundcard driver is broken. Consult the documentation to see if you can improve
 performance.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -556,8 +540,7 @@ I have A/V sync problems. Some of my AVIs play fine, but some play with
 double speed!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and
-you try to play a file which has 22050Hz audio. Try the <CODE>-ao sdl</CODE>
-driver.
+you try to play a file which has 22050Hz audio. Try the resample audio plugin.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -652,7 +635,7 @@ right under the movie! Whose fault is this?
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 This is a bug of nVidia's binary X driver. These bugs appear ONLY with the
 TNT/TNT2 cards, and we can't do anything about it. To fix the problem, upgrade
-to the latest nVidia binary driver version.
+to the latest nVidia binary driver version. If still bad, complain to nVidia!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -679,7 +662,7 @@ Oh the world is cruel ...! SDL has only <CODE>x11</CODE> target, but not
 Try that <CODE>x11</CODE> target again. Now try <CODE>-vo x11 -fs -zoom</CODE>.
 See the difference? No?! OK, here comes the enlightenment: SDL's
 <CODE>x11</CODE> target uses xv when available, you don't have to worry about
-it ...
+it ... Note: you can force/disable Xv via SDL using <CODE>-forcexv<CODE> and <CODE>-noxv</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
@@ -693,12 +676,6 @@ There's no way to do it. Therefore this format deserves to die in flames.
 Theoretically you can reverse engineer Real codecs built for Linux (they
 are available as .so files), but in practice that's really difficult, even
 if you know how the compiler used by Real is making assembler code.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When will be &lt;your favorite video feature&gt; (like subtitle placement) implemented?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Wait for libvo2.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -776,30 +753,30 @@ or less advanced driver support:<BR><BR>
 <td>&nbsp;</td>
 
 <td>
-<center>Matrox</center>
+<center>Matrox Gxxx</center>
 </td>
 
 <td>
-<center>ATI</center>
+<center>ATI m64/r128/radeon</center>
 </td>
 
 <td>
-<center>nVidia</center>
+<center>nVidia tnt/geforce</center>
 </td>
 
 <td>
-<center>S3 Savage</center>
+<center>S3 Virge/Savage</center>
 </td>
 </tr>
 
 <tr>
 <td>Driver's provider</td>
 
-<td>enthusiasts</td>
+<td>OEM and enthusiasts</td>
 
-<td>enthusiasts</td>
+<td>OEM and enthusiasts</td>
 
-<td>OEM + enthusiasts</td>
+<td>OEM or enthusiasts</td>
 
 <td>enthusiasts</td>
 </tr>
@@ -811,9 +788,9 @@ or less advanced driver support:<BR><BR>
 
 <td>best (X11,GATOS,kernel)</td>
 
-<td>buggy (X11 only)</td>
+<td>buggy/unstable (X11 only)</td>
 
-<td>best (X11 only)</td>
+<td>slow (X11 only)</td>
 </tr>
 
 <tr>
@@ -855,7 +832,7 @@ or less advanced driver support:<BR><BR>
 <tr>
 <td>adaptive deinterlace</td>
 
-<td>NO</td>
+<td>N/A</td>
 
 <td>YES</td>
 
@@ -867,11 +844,11 @@ or less advanced driver support:<BR><BR>
 <tr>
 <td>Video equalizer (hue, contrast, saturation, color correction)</td>
 
-<td>N/A</td>
+<td>YES</td>
 
-<td>PARTIAL (under development)</td>
+<td>YES</td>
 
-<td>N/A</td>
+<td>GeForce only</td>
 
 <td>N/A</td>
 </tr>
@@ -891,7 +868,7 @@ or less advanced driver support:<BR><BR>
 <tr>
 <td>Video capture</td>
 
-<td>N/A</td>
+<td>YES (Marvel)</td>
 
 <td>YES (GATOS)</td>
 
@@ -903,7 +880,7 @@ or less advanced driver support:<BR><BR>
 <tr>
 <td>TV-out</td>
 
-<td>YES</td>
+<td>G400 only</td>
 
 <td>YES</td>
 
