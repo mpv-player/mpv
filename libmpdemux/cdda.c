@@ -204,14 +204,15 @@ void seek_cdda(stream_t* s) {
   int i;
 
   sec = s->pos/CD_FRAMESIZE_RAW;
-//printf("pos: %d, sec: %d ## %d\n", s->pos, sec, s->pos/CD_FRAMESIZE_RAW);
-//printf("sector: %d\n", p->sector );
+//printf("pos: %d, sec: %d ## %d\n", (int)s->pos, (int)sec, CD_FRAMESIZE_RAW);
+//printf("sector: %d  new: %d\n", p->sector, sec );
  
   for(i=0;i<p->cd->tracks;i++){
-	if( p->sector>p->cd->disc_toc[i].dwStartSector && p->sector<p->cd->disc_toc[i+1].dwStartSector ) {
+        printf("trk #%d: %d .. %d\n",i,p->cd->disc_toc[i].dwStartSector,p->cd->disc_toc[i+1].dwStartSector);
+	if( p->sector>=p->cd->disc_toc[i].dwStartSector && p->sector<p->cd->disc_toc[i+1].dwStartSector ) {
 		current_track = i;
 	}
-	if( sec>p->cd->disc_toc[i].dwStartSector && sec<p->cd->disc_toc[i+1].dwStartSector ) {
+	if( sec>=p->cd->disc_toc[i].dwStartSector && sec<p->cd->disc_toc[i+1].dwStartSector ) {
 		seeked_track = i;
 	}
   }
@@ -224,16 +225,17 @@ void seek_cdda(stream_t* s) {
 		  }
 
 	}
- 
+#if 0
   if(sec < p->start_sector)
     sec = p->start_sector;
   else if(sec > p->end_sector)
     sec = p->end_sector;
+#endif
 
   p->sector = sec;
 //  s->pos = sec*CD_FRAMESIZE_RAW;
 
-//printf("seek: %d, sec: %d\n", s->pos, sec);
+//printf("seek: %d, sec: %d\n", (int)s->pos, sec);
   paranoia_seek(p->cdp,sec,SEEK_SET);
 
 }

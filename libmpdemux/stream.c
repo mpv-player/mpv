@@ -130,6 +130,10 @@ off_t newpos=0;
     newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
   case STREAMTYPE_DVD:
     newpos=pos/2048; newpos*=2048; break;
+#ifdef HAVE_CDDA
+  case STREAMTYPE_CDDA:
+    newpos=(pos/VCD_SECTOR_SIZE)*VCD_SECTOR_SIZE;break;
+#endif
   }
 
 if(verbose>=3){
