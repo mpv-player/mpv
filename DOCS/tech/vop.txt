@@ -41,14 +41,19 @@ Current plugins:
 	     mencoder uses (autoload) it to render SUB/OSD
 
 -vop flip
-    Flips image upside-down.
+    Flips image upside-down (vertical mirroring)
     No parameters.
     MPI: DR (if possible) or EXPORT, using stride manipulation
     Special: dec_video autoloads it when flipping is required and libvo can't do
 
--vop rotate[=mirror]
+-vop mirror
+    Horizontal mirroring
+    No parameters.
+    MPI: TEMP
+
+-vop rotate[=x]
     Rotate image +/- 90 degrees
-    Optional mirror parameter (0..3) controls horizontal and vertical mirroring
+    Optional 'x' parameter (0..3) controls horizontal and vertical mirroring
     MPI: TEMP
 
 -vop scale[=w:h]
@@ -68,6 +73,10 @@ Current plugins:
     RGB 24/32 <-> BGR 24/32 colorspace conversion (default) or
     RGB 24/32 <-> RGB 24/32 conversion with R<->B swapping ('swap' option)
     MPI: TEMP, accepts stride
+
+-vop palette
+    RGB/BGR 8 -> RGB/BGR 15/16/24/32 colorspace conversion using palette
+    MPI: TEMP, accepts stride
     
 -vop format[=fourcc]
     _restrict_ the list of supported colorspaces (query-format()) to a single,
@@ -85,7 +94,13 @@ Current plugins:
     MPI: DR (if possible) or TEMP
     Special: dec_video autoloads it if -pp option used but codec can't do pp.
 
+-vop lavc
+    Fast software YV12->MPEG1 conversion, usefull for dxr3/dvb drivers
+    It uses libavcodec. Currently faster and better quality than -vop fame!
+    MPI: EXPORT special
+
 -vop fame
     Fast software YV12->MPEG1 conversion, usefull for dxr3/dvb drivers
+    It uses libfame.
     MPI: EXPORT special
 
