@@ -598,7 +598,7 @@ demuxer_t* demux_open_avi(demuxer_t* demuxer){
     sh_video->i_bps=(float)vsize/(sh_video->frametime*priv->numberofframes);
   }
 
-  mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+  mp_msg(MSGT_DEMUX,MSGL_INFO,"VIDEO:  [%.4s]  %ldx%ld  %dbpp  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     (char *)&sh_video->bih->biCompression,
     sh_video->bih->biWidth,
     sh_video->bih->biHeight,

@@ -270,7 +270,7 @@ switch(d_video->demuxer->file_format){
        sh_video->i_bps=picture.bitrate * 400 / 8;
    // info:
    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"mpeg bitrate: %d (%X)\n",picture.bitrate,picture.bitrate);
-   mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
+   mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VIDEO:  %s  %dx%d  (aspect %d)  %5.3f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     picture.mpeg1?"MPEG1":"MPEG2",
     sh_video->disp_w,sh_video->disp_h,
     picture.aspect_ratio_information,
