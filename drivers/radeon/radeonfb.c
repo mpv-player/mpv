@@ -1188,7 +1188,7 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
      theatre_read(rinfo,VIP_VIP_REVISION_ID, &tmp);
      printk("radeonfb: Detected Rage Theatre revision %8.8X\n", tmp);
    }
-   else printk("radeonfb: Rage Theatre not detected\n");
+   else printk("radeonfb: Rage Theatre was not detected\n");
    return 0;
 }
 
