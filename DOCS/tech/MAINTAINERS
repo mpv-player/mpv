@@ -47,7 +47,7 @@ Platforms/ports: (see also DOCS/tech/porting-status.txt)
 
 MPlayer code:
     * A-V sync code, mplayer/mencoder core: A'rpi
-    * libmpdemux, libmpcodecs: A'rpi
+    * libmpdemux, libmpcodecs: A'rpi (sometimes Alex too)
     * TV input/capture: Alex, Jindrich Makovicka
     * DVD support (experimental - dvdnav): -
     * DVD support (new - dvdread/dvdcss): A'rpi
@@ -98,16 +98,16 @@ libvo drivers:
     * vo_zr.c - Rik Snel <rsnel@cube.dyndns.org>
 
 VIDIX drivers:
-    * genfb_vid - al3x
+    * genfb_vid - Alex
     * mach64_vid - Michael Niedermayer, A'rpi
-    * mga_vid - al3x ?
-    * nvidia_vid - pontscho, al3x (development stopped - don't expect it)
-    * radeon_vid - al3x, Nick Kurshev @ mplayerxp
+    * mga_vid - Alex
+    * nvidia_vid - Pontscho, Alex (development stopped - don't expect it)
+    * radeon_vid - Alex, Nick Kurshev @ mplayerxp
     * rage128_vid - ? , Nick Kurshev @ mplayerxp
 
 libao2 drivers:
-    * ao_alsa5.c - al3x
-    * ao_alsa9.c - joy_ping <joy@pingfm.org>
+    * ao_alsa5.c - Alex
+    * ao_alsa9.c - joy_ping <joy@pingfm.org>, Alex
     * ao_arts.c - ?
     * ao_dxr2.c - Albeu
     * ao_mpegpes.c - A'rpi
