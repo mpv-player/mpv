@@ -50,6 +50,8 @@ int WinID=-1;
 
 void vo_hidecursor ( Display *disp , Window win )
 {
+	if(WinID==0) return;	// do not hide, if we're playing at rootwin
+
 	Cursor no_ptr;
 	Pixmap bm_no;
 	XColor black,dummy;
