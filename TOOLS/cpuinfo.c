@@ -1,3 +1,6 @@
+/* small utility to extract CPU information
+ Used by configure to set CPU optimization levels on some operating
+ systems where /proc/cpuinfo is non-existent or unreliable. */
 
 #include <stdio.h>
 #include <sys/time.h>
