@@ -159,6 +159,7 @@ int demux_avi_fill_buffer(demuxer_t *demux);
 int demux_avi_fill_buffer_ni(demuxer_t *demux,demux_stream_t *ds);
 int demux_avi_fill_buffer_nini(demuxer_t *demux,demux_stream_t *ds);
 int demux_asf_fill_buffer(demuxer_t *demux);
+int demux_mov_fill_buffer(demuxer_t *demux,demux_stream_t* ds);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -170,6 +171,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_AVI_NI: return demux_avi_fill_buffer_ni(demux,ds);
     case DEMUXER_TYPE_AVI_NINI: return demux_avi_fill_buffer_nini(demux,ds);
     case DEMUXER_TYPE_ASF: return demux_asf_fill_buffer(demux);
+    case DEMUXER_TYPE_MOV: return demux_mov_fill_buffer(demux,ds);
   }
   return 0;
 }
@@ -454,6 +456,8 @@ demuxer->file_format=file_format;
 switch(file_format){
  case DEMUXER_TYPE_MOV: {
   mov_read_header(demuxer);
+  sh_video=d_video->sh;if(sh_video) sh_video->ds=d_video;
+  sh_audio=d_audio->sh;if(sh_audio) sh_audio->ds=d_audio;
   break;
  }
  case DEMUXER_TYPE_AVI: {
