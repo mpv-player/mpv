@@ -944,7 +944,7 @@ static uint32_t preinit(const char *arg)
     wc.lpszMenuName  =  NULL;
     RegisterClass(&wc);
     hWnd = CreateWindowEx(vidmode?WS_EX_TOPMOST:0,
-        "MPlayer - Movieplayer for Linux","",(vidmode)?WS_POPUP:WS_OVERLAPPEDWINDOW| WS_SIZEBOX,
+        "MPlayer - The Movie Player","",(vidmode)?WS_POPUP:WS_OVERLAPPEDWINDOW| WS_SIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT, 100, 100,NULL,NULL,hInstance,NULL);
 	wc.hbrBackground = CreateSolidBrush(RGB(0,0,0));                     
     wc.lpszClassName = "MPlayer - Fullscreen";

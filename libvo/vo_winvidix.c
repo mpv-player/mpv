@@ -208,7 +208,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,uint32_
     wc.lpszClassName = "MPlayer - The Movie Player";
     wc.lpszMenuName = NULL;
     RegisterClass(&wc);
-    hWnd = CreateWindow("MPlayer - Movieplayer for Linux",
+    hWnd = CreateWindow("MPlayer - The Movie Player",
                         title,
                         WS_OVERLAPPEDWINDOW| WS_SIZEBOX,
                         rd.left,              
