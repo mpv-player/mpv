@@ -3135,6 +3135,66 @@ telecined, inserting this filter before them should make them more reliable.
 Currently only libmpeg2 exports the needed flags.
 If used on material that does not set them, the filter does nothing.
 .TP
+.B divtc[=options]
+Inverse telecine for deinterlaced video.
+If 3:2-pulldown telecined video has lost one of the fields or is deinterlaced
+using a method that keeps one field and interpolates the other, the result is
+a juddering video that has every fourth frame duplicated.
+This filter is intended to find and drop those duplicates and restore the
+original film frame rate.
+When using this filter, you must specify \-ofps that is 4/5 of the fps of the
+input file (23.976 if the input is 29.97fps).
+The options are:
+.RSs
+.IPs pass=1|2
+Use two-pass mode.
+This produces best results.
+Pass 1 analyzes the video and writes the results to a log file.
+Pass 2 then reads this log file and uses the information to do the actual work.
+Note that these passes do NOT correspond to pass 1 and 2 of the encoding
+process.
+In order to use divtc two-pass with two-pass video encoding, you must perform
+three passes: first divtc pass 1 and encoder pass 1, then divtc pass 2 and
+encoder pass 1, and finally divtc pass 2 and encoder pass 2.
+.IPs file=filename
+Set the 2-pass log file name (default: "framediff.log").
+.IPs threshold=value
+Set the minimum strength the telecine pattern must have for the filter to
+believe in it (default: 0.5).
+This is used to avoid recognizing false pattern from the parts of the video
+that are very dark or very still.
+.IPs window=numframes 
+Set the number of past frames to look at when searching for pattern
+(default: 30).
+Longer window improves the reliability of the pattern search, but shorter
+window improves the reaction time to the changes in the telecine phase.
+This only affects the one-pass mode.
+The two-pass mode currently uses fixed window that extends to both future
+and past.
+.IPs phase=0|1|2|3|4
+Sets the initial telecine phase for one-pass mode (default: 0).
+The two-pass mode can see the future, so it is able to use the correct
+phase from the beginning, but one-pass mode can only guess.
+It catches the correct phase when it finds it, but this option can be used
+to fix the possible juddering at the beginning.
+The first pass of the two-pass mode also uses this, so if you save the output
+from the first pass, you get constant phase result.
+.IPs deghost=value
+Set the deghosting threshold (0\-255 for one-pass mode, -255\-255 for two-pass
+mode, default 0).
+If nonzero, deghosting mode is used.
+This is for video that has been deinterlaced by blending the fields
+together instead of dropping one of the fields.
+Deghosting amplifies any compression artifacts in the blended frames, so the
+parameter value is used as a threshold to exclude those pixels from
+deghosting that differ from the previous frame less than specified value.
+If two-pass mode is used, then negative value can be used to make the
+filter analyze the whole video in the beginning of pass-2 to determine
+whether it needs deghosting or not and then select either zero or the
+absolute value of the parameter.
+Specify this option for pass-2, it makes no difference on pass-1.
+.RE
+.TP
 .B phase=[t|b|p|a|u|T|B|A|U][:v]
 Delay interlaced video by one field time so that the field order
 changes.

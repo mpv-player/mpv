@@ -88,6 +88,7 @@ extern vf_info_t vf_info_kerndeint;
 extern vf_info_t vf_info_rgbtest;
 extern vf_info_t vf_info_qp;
 extern vf_info_t vf_info_phase;
+extern vf_info_t vf_info_divtc;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -169,6 +170,7 @@ static vf_info_t* filter_list[]={
     &vf_info_qp,
 #endif
     &vf_info_phase,
+    &vf_info_divtc,
     NULL
 };
 
