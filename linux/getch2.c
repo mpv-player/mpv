@@ -228,7 +228,7 @@ struct termios tio_new;
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
-#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
+#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__) || defined(__OS2__)
     tcsetattr(0,TCSANOW,&tio_new);
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
     ioctl(0,TIOCSETA,&tio_new);
@@ -242,7 +242,7 @@ struct termios tio_new;
 void getch2_disable(){
     if(!getch2_status) return; // already disabled / never enabled
 #ifdef HAVE_TERMIOS
-#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__)
+#if defined(__NetBSD__) || defined(__svr4__) || defined(__CYGWIN__) || defined(__OS2__)
     tcsetattr(0,TCSANOW,&tio_orig);
 #elif defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__)
     ioctl(0,TIOCSETA,&tio_orig);
