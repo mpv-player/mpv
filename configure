@@ -5978,7 +5978,7 @@ $_live_libs_def
 
 MPLAYER_NETWORK = $_network
 STREAMING_LIVE_DOT_COM = $_live
-MPLAYER_NETWORK_LIB = $_ld_network $_ld_live
+MPLAYER_NETWORK_LIB = $_ld_live $_ld_network
 DVBIN = $_dvbin
 VIDIX = $_vidix
 SHARED_PP = $_shared_pp
