@@ -1,11 +1,14 @@
 Sending patches:
 ~~~~~~~~~~~~~~~~
-Note: We know these rules are hard, but it's hard to maintain such a
-big and complex project, so you should accept our rules. We have no
-time for fixing buggy, broken or old patches!
 
-1. Always make patches for the CVS version.
-   We do not accept patches for old versions or releases.
+Note: We know our rules place a burden on you, but rest assured that
+maintaining a big and complex software project is even harder, so please
+accept our rules. We cannot afford to spend our time fixing buggy, broken or
+outdated patches.
+
+1. Always make patches for the CVS version. The README describes how to check
+   out CVS and daily CVS snapshots are available from our download page.
+   We do not accept patches for releases or outdated CVS versions.
 
 2. Make unified diffs ('diff -Naur' or 'cvs diff -u').
 
@@ -18,21 +21,24 @@ time for fixing buggy, broken or old patches!
 5. Comment parts that really need it (tricky side-effects etc).
    Commenting trivial code not required. Comments must be English!
    
-6. Do not ask for CVS write access at first time. If you contributed
-   1 or more nice, acceptable patches and they need maintaining or
-   you want to be an mplayer developer, you'll get CVS write access.
-   
-7. Subscribe to the mplayer-dev-eng list (don't worry, it's low traffic)
-   and send your patch there as base64-encoded attachment (use gzip or
-   bzip2 *only* if it's really big or if you know that your mailer messes
-   up (reformats) text attachments).
-   Subject line should be: '[PATCH] very short description of the patch'.
+6. Send your patch to the mplayer-dev-eng mailing list as a base64-encoded
+   attachment (use gzip or bzip2 *only* if it's bigger than 80k or if you know
+   that your mailer messes up (reformats) text attachments) with the subject
+   line: '[PATCH] very short description of the patch'.
    In the mail, describe in a few sentences what you change and why.
    If you made independent changes, try to send them as separate patches.
    The subject line is very important if you do not want your patch to get
    lost in the noise. We need the uppercase [PATCH] to be able to search
    for unapplied patches, so please use it.
+   You have to subscribe to mplayer-dev-eng since we blocked postings from
+   non-subscribers after spam problems and because patches get reviewed by the
+   developers on the list. We want you to be available for discussing your
+   code, you might be asked to make modifications before we accept it. Don't
+   worry, mplayer-dev-eng is not high traffic and you can subscribe with the
+   nomail option if you do not wish to receive all the mails.
 
+7. Do not immediately ask for CVS write access. If you contributed one or more
+   nice, acceptable patches and they need maintaining or you want to be an
+   MPlayer developer, you'll get CVS write access.
+   
 Thank you!
-
-A'rpi
