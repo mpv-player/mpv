@@ -61,9 +61,14 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 extern int divx_quality;
 
 static int open(vf_instance_t *vf, char* args){
+    char *endptr;
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
+    if(args){
+	vf->priv->pp=strtol(args, &endptr, 0);
+	if(!(*endptr)) return 1;
+    }
     vf->priv->pp=divx_quality;
     return 1;
 }
