@@ -1,0 +1,6 @@
+HOW TO get these capturers/wrappers to work:
+
+- set the path to the codecs in the C file
+- compile it with the script
+- the orig. codecs are prepended by a "real" -> e.g. realcook.so.6.0
+- the capturer get the old name, e.g. cook.so.6.0
