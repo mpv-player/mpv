@@ -238,12 +238,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     long flags=0;
     int ret;
 //    flip_upside_down(vo_image_ptr,vo_image_ptr,3*vo_w,vo_h); // dirty hack
     ret=vfw_encode_frame(mux_v->bih, mux_v->buffer, vfw_bih, mpi->planes[0], &flags, 10000);
     mencoder_write_chunk(mux_v,mux_v->bih->biSizeImage,flags);
+    return 1;
 }
 
 //===========================================================================//

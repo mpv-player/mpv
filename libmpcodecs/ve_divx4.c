@@ -223,7 +223,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     ENC_RESULT enc_result;
     vf->priv->enc_frame.image=mpi->planes[0];
     vf->priv->enc_frame.bitstream=mux_v->buffer;
@@ -273,6 +273,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	}
     }
     mencoder_write_chunk(mux_v,vf->priv->enc_frame.length,enc_result.is_key_frame?0x10:0);
+    return 1;
 }
 
 //===========================================================================//

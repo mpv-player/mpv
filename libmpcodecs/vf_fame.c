@@ -45,7 +45,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,IMGFMT_MPEGPES);
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     fame_yuv_t yuv;
     mp_image_t *dmpi;
     int out_size;
@@ -62,7 +62,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     out_size = fame_encode_slice(vf->priv->ctx);
     fame_end_frame(vf->priv->ctx, NULL);
     
-    if(out_size<=0) return;
+    if(out_size<=0) return 1;
 
     dmpi=vf_get_image(vf->next,IMGFMT_MPEGPES,
 	MP_IMGTYPE_EXPORT, 0,
@@ -75,7 +75,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     
     dmpi->planes[0]=&vf->priv->pes;
     
-    vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi);
 }
 
 //===========================================================================//

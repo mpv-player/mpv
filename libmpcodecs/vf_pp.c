@@ -67,7 +67,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// no DR, so get a new image! hope we'll get DR buffer:
 	vf->priv->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
@@ -87,7 +87,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		    vf->priv->pp);
     }
     
-    vf_next_put_image(vf,vf->priv->dmpi);
+    return vf_next_put_image(vf,vf->priv->dmpi);
 }
 
 //===========================================================================//

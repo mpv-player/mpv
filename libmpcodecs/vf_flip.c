@@ -44,10 +44,10 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     }
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT){
-	vf_next_put_image(vf,vf->priv->dmpi);
-	return; // we've used DR, so we're ready...
+	// we've used DR, so we're ready...
+	return vf_next_put_image(vf,vf->priv->dmpi);
     }
 
     vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
@@ -68,7 +68,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     } else
 	vf->priv->dmpi->planes[1]=mpi->planes[1]; // passthru bgr8 palette!!!
     
-    vf_next_put_image(vf,vf->priv->dmpi);
+    return vf_next_put_image(vf,vf->priv->dmpi);
 }
 
 //===========================================================================//

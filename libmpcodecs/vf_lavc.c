@@ -78,7 +78,7 @@ static int config(struct vf_instance_s* vf,
     return vf_next_config(vf,width,height,d_width,d_height,flags,IMGFMT_MPEGPES);
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mp_image_t* dmpi;
     int out_size;
     AVPicture lavc_venc_picture;
@@ -93,7 +93,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     out_size = avcodec_encode_video(&lavc_venc_context, 
 	vf->priv->outbuf, vf->priv->outbuf_size, &lavc_venc_picture);
 
-    if(out_size<=0) return;
+    if(out_size<=0) return 1;
 
     dmpi=vf_get_image(vf->next,IMGFMT_MPEGPES,
 	MP_IMGTYPE_EXPORT, 0,
@@ -106,7 +106,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     
     dmpi->planes[0]=(unsigned char*)&vf->priv->pes;
     
-    vf_next_put_image(vf,dmpi);
+    return vf_next_put_image(vf,dmpi);
 }
 
 //===========================================================================//

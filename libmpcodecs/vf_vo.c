@@ -87,11 +87,11 @@ static void get_image(struct vf_instance_s* vf,
 	video_out->control(VOCTRL_GET_IMAGE,mpi);
 }
 
-static void put_image(struct vf_instance_s* vf,
+static int put_image(struct vf_instance_s* vf,
         mp_image_t *mpi){
-  if(!vo_config_count) return; // vo not configured?
+  if(!vo_config_count) return 0; // vo not configured?
   // first check, maybe the vo/vf plugin implements draw_image using mpi:
-  if(video_out->control(VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return; // done.
+  if(video_out->control(VOCTRL_DRAW_IMAGE,mpi)==VO_TRUE) return 1; // done.
   // nope, fallback to old draw_frame/draw_slice:
   if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))){
     // blit frame:
@@ -100,6 +100,7 @@ static void put_image(struct vf_instance_s* vf,
     else
         video_out->draw_frame(mpi->planes);
   }
+  return 1;
 }
 
 static void draw_slice(struct vf_instance_s* vf,

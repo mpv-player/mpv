@@ -29,7 +29,7 @@ typedef struct vf_instance_s {
         unsigned int fmt);
     void (*get_image)(struct vf_instance_s* vf,
         mp_image_t *mpi);
-    void (*put_image)(struct vf_instance_s* vf,
+    int (*put_image)(struct vf_instance_s* vf,
         mp_image_t *mpi);
     void (*draw_slice)(struct vf_instance_s* vf,
         unsigned char** src, int* stride, int w,int h, int x, int y);
@@ -77,7 +77,7 @@ int vf_next_config(struct vf_instance_s* vf,
 	unsigned int flags, unsigned int outfmt);
 int vf_next_control(struct vf_instance_s* vf, int request, void* data);
 int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt);
-void vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi);
+int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi);
 
 vf_instance_t* append_filters(vf_instance_t* last);
 

@@ -46,9 +46,10 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mux_v->buffer=mpi->planes[0];
     mencoder_write_chunk(mux_v, mpi->width*mpi->height*3, 0x10);
+    return 1;
 }
 
 //===========================================================================//

@@ -140,7 +140,7 @@ static void (*halfpack)(unsigned char *dst, unsigned char *src[3],
 	unsigned int dststride, unsigned int srcstride[3], int w, int h);
 
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi)
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 {
 	mp_image_t *dmpi;
 
@@ -153,7 +153,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		 dmpi->stride[0], mpi->stride,
 		 mpi->w, mpi->h);
 
-	vf_next_put_image(vf,dmpi);
+	return vf_next_put_image(vf,dmpi);
 }
 
 static int config(struct vf_instance_s* vf,

@@ -62,7 +62,7 @@ control(struct vf_instance_s* vf, int request, void *data)
     return vf_next_control(vf, request, data);
     return 0;
 }
-static void
+static int
 put_image(struct vf_instance_s* vf, mp_image_t* mpi){
     mp_image_t* dmpi;
     unsigned int bpp;
@@ -136,7 +136,7 @@ put_image(struct vf_instance_s* vf, mp_image_t* mpi){
 	    p += dmpi->stride[0];
 	}
     }
-    vf_next_put_image(vf, dmpi);
+    return vf_next_put_image(vf, dmpi);
 }
 
 static int

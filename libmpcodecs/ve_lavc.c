@@ -387,7 +387,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     int out_size;
     AVPicture lavc_venc_picture;
 
@@ -431,6 +431,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(lavc_venc_context.stats_out && stats_file) 
         fprintf(stats_file, "%s", lavc_venc_context.stats_out);
 #endif
+    return 1;
 }
 
 static void uninit(struct vf_instance_s* vf){

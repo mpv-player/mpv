@@ -221,14 +221,14 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     }
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT){
 	vf->priv->dmpi=mpi->priv;
 #ifdef OSD_SUPPORT
 	if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
-	vf_next_put_image(vf,vf->priv->dmpi);
-	return; // we've used DR, so we're ready...
+	// we've used DR, so we're ready...
+	return vf_next_put_image(vf,vf->priv->dmpi);
     }
 
     // hope we'll get DR buffer:
@@ -259,7 +259,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 #ifdef OSD_SUPPORT
     if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
 #endif
-    vf_next_put_image(vf,vf->priv->dmpi);
+    return vf_next_put_image(vf,vf->priv->dmpi);
 }
 
 //===========================================================================//

@@ -334,7 +334,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
 
-static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	mp_image_t *dmpi;
 
 	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
@@ -361,7 +361,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	if(gCpuCaps.hasMMX2) asm volatile ("sfence\n\t");
 #endif
 
-	vf_next_put_image(vf,dmpi);
+	return vf_next_put_image(vf,dmpi);
 }
 
 static void uninit(struct vf_instance_s* vf){

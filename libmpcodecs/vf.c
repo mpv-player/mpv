@@ -347,8 +347,8 @@ int vf_next_query_format(struct vf_instance_s* vf, unsigned int fmt){
     return flags;
 }
 
-void vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){
-    vf->next->put_image(vf->next,mpi);
+int vf_next_put_image(struct vf_instance_s* vf,mp_image_t *mpi){
+    return vf->next->put_image(vf->next,mpi);
 }
 
 //============================================================================

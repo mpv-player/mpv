@@ -107,7 +107,7 @@ config (struct vf_instance_s* vf,
 			flags, outfmt);
 }
 
-static void 
+static int 
 put_image (struct vf_instance_s* vf, mp_image_t *mpi)
 {
   struct vf_priv_s *priv = vf->priv;
@@ -137,10 +137,10 @@ put_image (struct vf_instance_s* vf, mp_image_t *mpi)
 			    priv->pix_fmt, priv->width, priv->height) < 0)
     {
       /* This should not happen -- see config() */
-      return;
+      return 0;
     }
   
-  vf_next_put_image(vf, dmpi);
+  return vf_next_put_image(vf, dmpi);
 }
 
 

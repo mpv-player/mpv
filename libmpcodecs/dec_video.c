@@ -212,6 +212,7 @@ mp_image_t *mpi=NULL;
 unsigned int t=GetTimer();
 unsigned int t2;
 double tt;
+int ret;
 
 //if(!(sh_video->ds->flags&1) || sh_video->ds->pack_no<5)
 mpi=mpvdec->decode(sh_video, start, in_size, drop_frame);
@@ -237,12 +238,12 @@ if(!mpi || drop_frame) return 0; // error / skipped frame
 
 //vo_draw_image(video_out,mpi);
 vf=sh_video->vfilter;
-vf->put_image(vf,mpi);
-vf->control(vf,VFCTRL_DRAW_OSD,NULL);
+ret = vf->put_image(vf,mpi); // apply video filters and call the leaf vo/ve
+if(ret>0) vf->control(vf,VFCTRL_DRAW_OSD,NULL);
 
     t2=GetTimer()-t2;
     tt=t2*0.000001f;
     vout_time_usage+=tt;
 
-  return 1;
+return ret;
 }
