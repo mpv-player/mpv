@@ -51,6 +51,7 @@ static GLuint osdatex[MAX_OSD_PARTS];
 static GLuint osdDispList[MAX_OSD_PARTS];
 static int osdtexCnt = 0;
 
+static int use_aspect;
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_bytes;
@@ -72,6 +73,17 @@ static void resize(int x,int y){
 
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
+  if (vo_fs && use_aspect) {
+    int new_w, new_h;
+    GLdouble scale_x, scale_y;
+    aspect(&new_w, &new_h, A_ZOOM);
+    panscan_calc();
+    new_w += vo_panscan_x;
+    new_h += vo_panscan_y;
+    scale_x = (GLdouble) new_w / (GLdouble) x;
+    scale_y = (GLdouble) new_h / (GLdouble) y;
+    glScaled(scale_x, scale_y, 1);
+  }
   glOrtho(0, image_width, image_height, 0, -1,1);
 
   glMatrixMode(GL_MODELVIEW);
@@ -181,6 +193,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   sub_bg_alpha = 255; // We need alpha = 255 for invisible part of the OSD
 	int_pause = 0;
 
+	panscan_init();
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
@@ -257,7 +270,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   texture_height=texture_width;
 
   ImageData=malloc(texture_width*texture_height*image_bytes);
-  memset(ImageData,128,texture_width*texture_height*image_bytes);
+  memset(ImageData,0,texture_width*texture_height*image_bytes);
 
   glDisable(GL_BLEND); 
   glDisable(GL_DEPTH_TEST);
@@ -291,7 +304,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   resize(d_width,d_height);
 
-  glClearColor( 1.0f,0.0f,1.0f,0.0f );
+  glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
 
 //  printf("OpenGL setup OK!\n");
@@ -448,6 +461,8 @@ flip_page(void)
   glFinish();
   glXSwapBuffers( mDisplay,vo_window );
  
+  if (vo_fs && use_aspect)
+    glClear(GL_COLOR_BUFFER_BIT);
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
@@ -510,6 +525,7 @@ static uint32_t preinit(const char *arg)
     unsigned int parse_pos = 0;
     many_fmts = 0;
     use_osd = 1;
+    use_aspect = 1;
     slice_height = 4;
     if(arg) 
     {
@@ -526,6 +542,12 @@ static uint32_t preinit(const char *arg)
             } else if (strncmp (&arg[parse_pos], "noosd", 5) == 0) {
                 parse_pos += 5;
                 use_osd = 0;
+            } else if (strncmp (&arg[parse_pos], "aspect", 6) == 0) {
+                parse_pos += 6;
+                use_aspect = 1;
+            } else if (strncmp (&arg[parse_pos], "noaspect", 8) == 0) {
+                parse_pos += 8;
+                use_aspect = 0;
             } else if (strncmp (&arg[parse_pos], "slice-height=", 13) == 0) {
                 int val;
                 char *end;
@@ -557,6 +579,8 @@ static uint32_t preinit(const char *arg)
               "    Slice size for texture transfer, 0 for whole image\n"
               "  noosd\n"
               "    Do not use OpenGL OSD code\n"
+              "  noaspect\n"
+              "    Do not do aspect scaling\n"
               "\n" );
       return -1;
     }
@@ -583,6 +607,13 @@ static uint32_t control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
     vo_x11_fullscreen();
+    return VO_TRUE;
+  case VOCTRL_GET_PANSCAN:
+    if (!use_aspect) return VO_NOTIMPL;
+    return VO_TRUE;
+  case VOCTRL_SET_PANSCAN:
+    if (!use_aspect) return VO_NOTIMPL;
+    resize (vo_dwidth, vo_dheight);
     return VO_TRUE;
   }
   return VO_NOTIMPL;
