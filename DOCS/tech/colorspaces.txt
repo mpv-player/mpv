@@ -120,6 +120,12 @@ most significant .. least significant bit
 5B6G5R                  IMGFMT_RGB16
 1A5R5G5B                IMGFMT_BGR15
 1A5B5G5R                IMGFMT_RGB15
+
+The following are palettized formats, the palette is in the second plane.
+When they come out of the swscaler (this can be different when they
+come from a codec!), their palette is organized in such a way,
+that you actually get:
+
 3R3G2B                  IMGFMT_BGR8
 2B3G3R                  IMGFMT_RGB8
 1R2G1B                  IMGFMT_BGR4_CHAR
