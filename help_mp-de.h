@@ -1,5 +1,5 @@
 // Transated by: Johannes Feigl, johannes.feigl@mcse.at
-
+// Overworked by Klaus Umbach, klaus.umbach@gmx.net
 
 // ========================= MPlayer help ===========================
 
@@ -26,7 +26,7 @@ static char help_text[]=
 #ifdef USE_DVDREAD
 " -dvd <titlenr>  Spiele DVD Titel/Track von Gerät anstelle eines Dateinames\n"
 #endif
-" -ss <timepos>   Starte abspielen ab Position (Sekunden oder hh:mm:ss)\n"
+" -ss <timepos>   Starte Abspielen ab Position (Sekunden oder hh:mm:ss)\n"
 " -nosound        Spiele keinen Sound\n"
 #ifdef USE_FAKE_MONO
 " -stereo <mode>  Auswahl der MPEG1-Stereoausgabe (0:stereo 1:links 2:rechts)\n"
@@ -83,11 +83,11 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Erzwinge Audiocodecgruppe %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Kann keinen Audiocodec für gewünschte Gruppe finden, verwende anderen.\n"
 #define MSGTR_CantFindAudioCodec "Kann Codec für Audioformat 0x%X nicht finden!\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Versuche %s mit etc/codecs.conf zu erneuern\n*** Sollte es weiterhin nicht gehen, dann lese DOCS/CODECS!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Versuche %s mit etc/codecs.conf zu erneuern\n*** Sollte es weiterhin nicht gehen, dann lies DOCS/CODECS!\n"
 #define MSGTR_CouldntInitAudioCodec "Kann Audiocodec nicht finden! -> Kein Ton\n"
 #define MSGTR_TryForceVideoFmt "Erzwinge Videocodecgruppe %d ...\n"
 #define MSGTR_CantFindVfmtFallback "Kann keinen Videocodec für gewünschte Gruppe finden, verwende anderen.\n"
-#define MSGTR_CantFindVideoCodec "Kann keinen Codec passend zum gewältem -vo und Videoformat 0x%X finden!\n"
+#define MSGTR_CantFindVideoCodec "Kann keinen Codec passend zum gewählten -vo und Videoformat 0x%X finden!\n"
 #define MSGTR_VOincompCodec "Sorry, der ausgewählte Videoausgabetreiber ist nicht kompatibel mit diesem Codec.\n"
 #define MSGTR_CouldntInitVideoCodec "FATAL: Kann Videocodec nicht initialisieren :(\n"
 #define MSGTR_EncodeFileExists "Datei existiert: %s (überschreibe nicht deine schönsten AVI's!)\n"
@@ -105,8 +105,8 @@ static char help_text[]=
 "- Langsame Videoausgabe. Versuche einen anderen -vo Treiber (Liste: -vo help)\n"\
 "  oder versuche es mit -framedrop ! Lese DOCS/video.html für Tipps.\n"\
 "- Langsame CPU. Keine DVD/DIVX auf einer langsamen CPU. Versuche -hardframedrop\n"\
-"- Defekte Datei. Versuche verschiede Kombinatationen: -nobps  -ni  -mc 0  -forceidx\n"\
-"Wenn nichts davon hilft, lese DOCS/bugreports.html !\n\n"
+"- Defekte Datei. Versuche verschiede Kombinationen: -nobps  -ni  -mc 0  -forceidx\n"\
+"Wenn nichts davon hilft, lies DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer wurde OHNE GUI-Unterstützung kompiliert!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI erfordert X11!\n"
@@ -159,19 +159,19 @@ static char help_text[]=
 #define MSGTR_MissingAudioStream "kann keinen Audiostream finden...  -> kein Ton\n"
 #define MSGTR_MissingVideoStreamBug "Vermisse Videostream!? Kontaktiere den Author, möglicherweise ein Bug :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "Demux: Datei enthält den gewählen Audio- oder Videostream nicht\n"
+#define MSGTR_DoesntContainSelectedStream "Demux: Datei enthält nicht den gewählen Audio- oder Videostream\n"
 
 #define MSGTR_NI_Forced "Erzwungen"
 #define MSGTR_NI_Detected "Erkannt"
 #define MSGTR_NI_Message "%s NON-INTERLEAVED AVI Dateiformat!\n"
 
-#define MSGTR_UsingNINI "Verwende NON-INTERLEAVED defektes AVI Dateiformat!\n"
+#define MSGTR_UsingNINI "Verwende defektes NON-INTERLEAVED AVI Dateiformat!\n"
 #define MSGTR_CouldntDetFNo "Konnte die Anzahl der Frames (für absulute Suche) nicht finden  \n"
 #define MSGTR_CantSeekRawAVI "Kann keine RAW .AVI-Streams durchsuchen! (Index erforderlich, versuche es mit der -idx Option!)  \n"
 #define MSGTR_CantSeekFile "Kann diese Datei nicht durchsuchen!  \n"
 
 #define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei (wurde ohne libcss Unterstützung kompiliert)! Lese DOCS\n"
-#define MSGTR_EncryptedVOBauth "Verschlüsselter Stream, jedoch wurde die Authentifizierung nicht von dir gefordert!!\n"
+#define MSGTR_EncryptedVOBauth "Verschlüsselter Stream, jedoch wurde die Authentifizierung nicht von Dir gefordert!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Komprimierte Header werden (zur Zeit) nicht unterstützt!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Warnung! Variable FOURCC erkannt!?\n"
@@ -195,7 +195,7 @@ static char help_text[]=
 #define MSGTR_NoOggVorbis "OggVorbis Audiocodec ausgeschaltet -> erzwinge -nosound :(\n"
 
 #define MSGTR_MpegPPhint "WARNUNG! Du hast Bild-Postprocessing erbeten für ein MPEG 1/2 Video,\n" \
-			 "         aber hast MPlayer ohne MPEG 1/2 Postprocessing-Support kompiliert!\n" \
+			 "         aber Du hast MPlayer ohne MPEG 1/2 Postprocessing-Support kompiliert!\n" \
 			 "         #define MPEG12_POSTPROC in config.h und kompiliere libmpeg2 neu!\n"
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: Ende der Datei während der Suche für Sequenzheader\n"
 #define MSGTR_CannotReadMpegSequHdr "FATAL: Kann Sequenzheader nicht lesen!\n"
@@ -203,7 +203,7 @@ static char help_text[]=
 #define MSGTR_BadMpegSequHdr "MPEG: Schlechte Sequenzheader!\n"
 #define MSGTR_BadMpegSequHdrEx "MPEG: Schlechte Sequenzheader-Erweiterung!\n"
 
-#define MSGTR_ShMemAllocFail "Kann keine gemeinsamen Speicher zuweisen\n"
+#define MSGTR_ShMemAllocFail "Kann keinen gemeinsamen Speicher zuweisen\n"
 #define MSGTR_CantAllocAudioBuf "Kann keinen Audioausgabe-Puffer zuweisen\n"
 #define MSGTR_NoMemForDecodedImage "nicht genug Speicher für den Puffer der dekodierten Bilder (%ld Bytes)\n"
 
@@ -212,7 +212,7 @@ static char help_text[]=
 #define MSGTR_UnknownAudio "Unbekanntes/fehlendes Audioformat -> kein Ton\n"
 
 // LIRC:
-#define MSGTR_SettingUpLIRC "Initialisiere Lirc Unterstützung...\n"
+#define MSGTR_SettingUpLIRC "Initialisiere LIRC Unterstützung...\n"
 #define MSGTR_LIRCdisabled "Verwenden der Fernbedienung nicht möglich\n"
 #define MSGTR_LIRCopenfailed "Fehler beim Öffnen der LIRC Unterstützung!\n"
 #define MSGTR_LIRCsocketerr "Fehler im LIRC Socket: %s\n"
@@ -247,12 +247,12 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[Skin] Fehler in Skin-Konfigurationsdatei in Zeile %d: %s" 
 #define MSGTR_SKIN_WARNING1 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d: Widget gefunden, aber davor wurde \"section\" nicht gefunden ( %s )"
 #define MSGTR_SKIN_WARNING2 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d: Widget gefunden, aber davor wurde \"subsection\" nicht gefunden (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "Bitmaps mit 16 Bits oder wenige sind nicht unterstützt ( %s ).\n"
+#define MSGTR_SKIN_BITMAP_16bit  "Bitmaps mit 16 Bits oder weniger werden nicht unterstützt ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Datei nicht gefunden ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP Lesefehler ( %s )\n"
 #define MSGTR_SKIN_BITMAP_TGAReadError "TGA Lesefehler ( %s )\n"
 #define MSGTR_SKIN_BITMAP_PNGReadError "PNG Lesefehler ( %s )\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE gepackte TGA sind nicht unterstützt ( %s )\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE gepackte TGA werden nicht unterstützt ( %s )\n"
 #define MSGTR_SKIN_BITMAP_UnknownFileType "unbekanntes Dateiformat ( %s )\n"
 #define MSGTR_SKIN_BITMAP_ConvertError "Konvertierungsfehler von 24 Bit auf 32 Bit ( %s )\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "unbekannte Nachricht: %s\n"
@@ -288,10 +288,10 @@ static char help_text[]=
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_PlayDisc "Spiele Disk ..."
 #define MSGTR_MENU_ShowDVDMenu "Zeige DVD Menü"
-#define MSGTR_MENU_Titles "Titeln"
+#define MSGTR_MENU_Titles "Titel"
 #define MSGTR_MENU_Title "Titel %2d"
 #define MSGTR_MENU_None "(nichts)"
-#define MSGTR_MENU_Chapters "Kapiteln"
+#define MSGTR_MENU_Chapters "Kapitel"
 #define MSGTR_MENU_Chapter "Kapitel %2d"
 #define MSGTR_MENU_AudioLanguages "Audio-Sprachen"
 #define MSGTR_MENU_SubtitleLanguages "Untertitel-Sprachen"
