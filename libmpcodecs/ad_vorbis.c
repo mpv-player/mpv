@@ -43,7 +43,12 @@ static int init(sh_audio_t *sh)
   ogg_packet op;
   vorbis_comment vc;
   struct ov_struct_st *ov;
-
+  int error(void) {
+    vorbis_comment_clear(&vc);
+    vorbis_info_clear(&ov->vi);
+    free(ov);
+    return 0;
+  }
   /// Init the decoder with the 3 header packets
   ov = (struct ov_struct_st*)malloc(sizeof(struct ov_struct_st));
   vorbis_info_init(&ov->vi);
@@ -53,23 +58,20 @@ static int init(sh_audio_t *sh)
   /// Header
   if(vorbis_synthesis_headerin(&ov->vi,&vc,&op) <0) {
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis: initial (identification) header broken!\n");
-    free(ov);
-    return 0;
+    return error();
   }
   op.bytes = ds_get_packet(sh->ds,&op.packet);
   op.b_o_s  = 0;
   /// Comments
   if(vorbis_synthesis_headerin(&ov->vi,&vc,&op) <0) {
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis: comment header broken!\n");
-    free(ov);
-    return 0;
+    return error();
   }
   op.bytes = ds_get_packet(sh->ds,&op.packet);
   //// Codebook
   if(vorbis_synthesis_headerin(&ov->vi,&vc,&op)<0) {
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"OggVorbis: codebook header broken!\n");
-    free(ov);
-    return 0;
+    return error();;
   } else { /// Print the infos
     char **ptr=vc.user_comments;
     while(*ptr){
@@ -80,6 +82,7 @@ static int init(sh_audio_t *sh)
 	(ov->vi.bitrate_lower!=ov->vi.bitrate_nominal)||(ov->vi.bitrate_upper!=ov->vi.bitrate_nominal)?'V':'C');
     mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Encoded by: %s\n",vc.vendor);
   }
+  vorbis_comment_clear(&vc);
 
 //  printf("lower=%d  upper=%d  \n",(int)ov->vi.bitrate_lower,(int)ov->vi.bitrate_upper);
 
@@ -100,6 +103,10 @@ static int init(sh_audio_t *sh)
 
 static void uninit(sh_audio_t *sh)
 {
+  struct ov_struct_st *ov = sh->context;
+  vorbis_block_clear(&ov->vb);
+  vorbis_info_clear(&ov->vi);
+  free(ov);
 }
 
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
@@ -122,7 +129,6 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
         int samples;
         float **pcm;
         ogg_packet op;
-        char* np;
         struct ov_struct_st *ov = sh->context;
         op.b_o_s =  op.e_o_s = 0;
 	while(len < minlen) {
