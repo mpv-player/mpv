@@ -69,8 +69,8 @@
 	    <LI><A HREF="video.html#2.2.1.10">2.2.1.10 OpenGL Ausgabe</A></LI>
 	    <LI><A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - Textmodus-Anzeige</A></LI>
 	    <LI><A HREF="video.html#2.2.1.A">2.2.1.A TVout</A>
-		<UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox Dualhead</A>
-		</UL>
+	    	<UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox Karten</A></LI></UL>
+		<UL><LI><A HREF="video.html#2.2.1.A.2">2.2.1.A.2 ATI Karten</A></LI></UL>
 	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Audio Ausgabe-Geräte</A>
 	    <UL><LI><A HREF="sound.html#2.2.2.1">2.2.2.1 Soundkarten Erfahrungen, Empfehlungen</A></LI>
 	    </UL>
@@ -131,8 +131,8 @@ funktioniert mit X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, aber du kannst SDL
 verwenden (und dadurch alle SDL-Treiber) und auch einigen Low-Level grafikkartenabhängige
 Treiber (für Matrox, 3Dfx und Radeon). Die meinsten von ihnen unterstützen
 Software oder Hardware-Scaling, also kannst du die Videos in Vollbild geniesen.
-Und was meinst du über die großen, antialiase schattierten Untertitel (8
-unterstützte Typen!!!) mit europäischen/ISO 8859-1,2 (ungarische, englische,
+Und was meinst du über die großen, antialiase schattierten Untertitel (<B>8
+unterstützte Typen!!!</B>) mit europäischen/ISO 8859-1,2 (ungarische, englische,
 tschechische, usw.), kyrillischen und koreanischen Schriften und OSD?</P>
 
 <P>MPlayer ist grundsätzlich <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A>, enthält
@@ -187,7 +187,7 @@ So beschloss ich einen zu schreiben/zu modifizieren...</P>
     2 Monate seit 0.17 und hier ist die neue Release.. Komplette ASF-Unterstützung,
     mehr Untertitel-Formate, libao wurde eingeführt (wie libvo, aber für Audio),
     stabiler den je, und so weiter. Es ist ein MUSS !
-<LI><B>MPlayer 0.50pre "The Faszom(C)ounter"</B><BR>
+<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
     Hmmm. Wieder eine Release. Tonen von neuen Featues, beta GUI Version, Fehler
     beseitigt, neue vo und ao Treiber, Ports zu vielen Systemen inklusive OpenSource
     DivX Codecs und vieles mehr. Probier's!
@@ -296,8 +296,35 @@ der Konfigurationsdatei den Skin <CODE>*/Skin/newskin</CODE> auswählen.
 <P><B><A NAME=1.5>1.5. Untertitel und OSD</A></B></P>
 
 <P>Ja, <B>MPlayer</B> unterstützt auch mehrere Arten von Untertiteln. Zur Zeit
-können vom Subreader-Code 7 Arten von Untertitel verarbeitet werden. Um zu sehen
-welche diese Untertitelformate sind, siehe subreader.c, etwa Zeile 20.</P>
+können vom Subreader-Code 8 Arten von Untertitel verarbeitet werden. Um zu sehen
+welche diese Untertitelformate sind, siehe subreader.c, etwa Zeile 30.</P>
+
+<P><B>MPlayer</B> unterstützt ein neues Untertitel-Format, genannt <B><I>MPsub</I></B>.
+Es wurde von mir (Gabucino) entwickelt. Das Haupt-Feature ist grundsätzlich <I>dynamisch</I>
+zeitabhängig (obwohl es auch einen Frame-Basierende Modus besitzt). Ein Beispiel (von
+<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>) :
+</P>
+
+<P><CODE><I>
+# first number  : wait this much after previous subtitle disappeared<BR>
+# second number : display the current subtitle for this many seconds<BR>
+<BR>
+15 3<BR>
+A long, long time ago...<BR>
+<BR>
+0 3<BR>
+in a galaxy far away...<BR>
+<BR>
+0 3<BR>
+Naboo was under an attack.<BR>
+</I></CODE></P>
+
+<P>Wie man erkennen war das Hauptziel <B>Untertitel bearbeiten/Timing/Joining/Schneiden
+einfach zu machen</B>. Und wenn du mal angenommen einen SSA Untertitel bekommst und
+er ist er ist schlecht zeitlich abgestimmt zu deinem Film, kannst du einfach <I>mplayer
+dummy.avi -sub source.ssa -dumpmpsub</I> ausführen. Es wird eine <CODE>dump.mpsub</CODE>-Datei
+im aktuellen Verzeichnis erzeugt, die den Quell-Untertitel-Text enthält, jedoch in
+<B>MPsub</B>-Format. Dann kannst du dem Untertitel einfach Sekunden hinzufügen usw.</P>
 
 <P>Untertitel werden mit einer Technik - genannt <B>'OSD', On Screen Display</B> -
 angezeigt. OSD wird verwendet, um die aktuelle Zeit, die Lautstärken- und Such-Leisten
@@ -661,13 +688,14 @@ Autoren!</P>
 
 </LI><LI>Gábor Bérczi (Gabucino):  &lt;gabucino@k2.jozsef.kando.hu&gt;
 <UL><LI>documentation maintainer
-</LI><LI>hungarian translation of documentation
+</LI><LI>hungarian translation of documentation and homepage
 </LI><LI>second webpage design&amp;gfx
 </LI><LI>webpage maintainer
 </LI><LI>testing, codecs quality &amp; speed comparsions
 </LI><LI>IRC channels operator
 (#MPlayer is user channel)
 </LI><LI>experimental MINIX port :)
+</LI><LI>MPsub subtitle format design
 </LI></UL>
 
 </LI><LI>Szabolcs Berecz (Szabi): &lt;szabi@inf.elte.hu&gt;
@@ -712,6 +740,7 @@ Autoren!</P>
 </LI><LI>RAW PCM/WAVE file writer for libao2
 </LI><LI>OggVorbis audio support
 </LI><LI>Various aspect code
+</LI><LI>Win32 port
 </LI></UL>
 
 </LI><LI>TeLeNiEkO: &lt;telenieko@telenieko.com&gt;
@@ -784,6 +813,18 @@ Autoren!</P>
 
 </LI><LI>Kamil Toman &lt;ktoman@email.cz&gt;
 <UL><LI>czech fonts
+</LI></UL>
+
+</LI><LI>Ivan Kalvatchev &lt;iive@yahoo.com&gt;
+<UL><LI>interlaced MPEG2 support
+</LI></UL>
+
+</LI><LI>pl (?) &lt;p_l@gmx.fr&gt;
+<UL><LI>./configure fixes
+</LI></UL>
+
+</LI><LI>Michael Niedermayer &lt;michaelni@gmx.at&gt;
+<UL><LI>postprocessing support
 </LI></UL>
 
 </LI></UL></P>
