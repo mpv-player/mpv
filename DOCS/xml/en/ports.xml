@@ -294,12 +294,12 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
 <para><link linkend="vidix">VIDIX</link> now works under Windows as
   <option>-vo winvidix</option>, although it is still experimental
-	and needs a bit of manual setup. Download
+  and needs a bit of manual setup. Download
   <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>
   and copy it to the
   <filename class="directory">libdha/dhahelperwin</filename> directory in your
-	<application>MPlayer</application> source tree.
-	Open a console and change to that directory. Then type
+  <application>MPlayer</application> source tree.
+  Open a console and change to that directory. Then type
 
   <screen>gcc -o dhasetup.exe dhasetup.c</screen>
 
@@ -307,25 +307,25 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
   <screen>dhasetup.exe install</screen>
 
-  as Administrator.  After that you will have to reboot.  When you are
+  as Administrator. After that you will have to reboot. When you are
   done, copy the <systemitem class="library">.so</systemitem> files from
-	<filename class="directory">vidix/drivers</filename> to the
-	<filename class="directory">mplayer/vidix</filename> directory
+  <filename class="directory">vidix/drivers</filename> to the
+  <filename class="directory">mplayer/vidix</filename> directory
   relative to your <filename>mplayer.exe</filename>.</para>
 
 <para>For best results <application>MPlayer</application> should use a
-  colorspace that your video card supports in hardware.  Unfortunately many
+  colorspace that your video card supports in hardware. Unfortunately many
   Windows graphics drivers wrongly report some colorspaces as supported in
   hardware. To find out which, try
 
   <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>colorspace</replaceable> <replaceable>movie</replaceable></screen>
 
   where <replaceable>colorspace</replaceable> can be any colorspace
-  printed by the <option>-vf format=fmt=help</option> option.  If you
+  printed by the <option>-vf format=fmt=help</option> option. If you
   find a colorspace your card handles particularly bad
   <option>-vf noformat=<replaceable>colorspace</replaceable></option>
   will keep it from being used. Add this to your config file to permanently
-	keep it from being used.</para>
+  keep it from being used.</para>
 
 <para>You can use Win32 codecs and Real Win32 codecs (not Real Linux codecs)
   if you want to. Put the codecs somewhere in your path or pass
@@ -341,7 +341,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <application>MPlayer</application>.</para>
 
 <para>You can play VCDs by playing the <filename>.DAT</filename> or <filename>.MPG</filename> files
-  that Windows exposes on VCDs.  It works like this (adjust for the drive letter
+  that Windows exposes on VCDs. It works like this (adjust for the drive letter
   of your CD-ROM):</para>
 
 <screen>mplayer <replaceable>d:/mpegav/avseq01.dat</replaceable></screen>
