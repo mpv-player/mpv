@@ -179,7 +179,10 @@ static int open(vf_instance_t *vf, char* args){
     if(p_quality<32){
 	// fixed qscale
 	lavc_venc_context.flags = CODEC_FLAG_QSCALE;
-	vf->priv->pic->quality = (p_quality<1) ? 1 : p_quality;
+#if LIBAVCODEC_BUILD >= 4668
+	lavc_venc_context.global_quality =
+#endif
+	vf->priv->pic->quality = (int)(FF_QP2LAMBDA * ((p_quality<1) ? 1 : p_quality) + 0.5);
     } else {
 	// fixed bitrate (in kbits)
 	lavc_venc_context.bit_rate = 1000*p_quality;
