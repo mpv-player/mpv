@@ -67,12 +67,36 @@ there were laid off by VA!), the Wine, avifile. Even if we are arrogant,
 are we not the same as the previously listed ones? Why do <B>we</B> have
 to suffer from your unrightful wrath?</P>
 
-<P>I'm closing this topic. Think over it please. I (Gabucino) personally begun
-with <A HREF="http://www.redhat.com">RedHat</A>, then used Mandrake (sorry I
-don't know their URL), now I have <A
-HREF="http://www.linuxfromscratch.com">LFS</A>. Never held a grudge against
-RedHat or RedHat users, and I still don't. Hate is only comfortable. It
-won't bring you anywhere.</P>
+<P><A HREF="mailto:willis_matthew@yahoo.com">Matt Willis</A> kindly submitted
+  a simple GCC-3.0.3 compiling howto, I'm copying it here:</P>
+
+<P>
+<UL>
+ <LI>Download gcc. Go to the <A
+  HREF="http://gcc.gnu.org/mirrors.html">http://gcc.gnu.org/mirrors.html</A>
+  page.
+   I downloaded the following, but you don't need everything:<BR>
+    <CODE>gcc-g++-3.0.3.tar.gz<BR>
+    gcc-objc-3.0.3.tar.gz<BR>
+    gcc-3.0.3.tar.gz<BR>
+    gcc-g77-3.0.3.tar.gz<BR>
+    gcc-testsuite-3.0.3.tar.gz<BR>
+    gcc-core-3.0.3.tar.gz<BR>
+    gcc-java-3.0.3.tar.gz</CODE>
+  </LI>
+
+  <LI>Unpack the files, make a build directory, and build<CODE><PRE>
+     tar xvzf gcc-*3.0.3.tar.gz
+     mkdir gcc-build; cd gcc-build
+     ../gcc-3.0.3/configure --prefix=/opt --program-suffix=-3.0.3
+     make bootstrap; mkdir -p /opt; make install</PRE></CODE>
+
+  <LI>Set your path to include /opt/bin<BR>
+     <CODE>export PATH=/opt/bin:${PATH}</CODE>
+
+  <LI>Now you can build MPlayer.</LI>
+</UL>
+</P>
 
 <A NAME=binary><P><B><I>Binary distribution of MPlayer</I></B></P>
 
