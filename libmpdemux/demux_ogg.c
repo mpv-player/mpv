@@ -478,7 +478,7 @@ void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
   while(1) {
     np = ogg_sync_pageseek(sync,page);
     if(np < 0) { // We had to skip some bytes
-      mp_msg(MSGT_DEMUX,MSGL_ERR,"Bad page sync while building syncpoints table (%ld)\n",-np);
+      mp_msg(MSGT_DEMUX,MSGL_ERR,"Bad page sync while building syncpoints table (%d)\n",-np);
       pos += -np;
       continue;
     }
@@ -517,7 +517,7 @@ void demux_ogg_build_syncpoints_table(demuxer_t* demuxer) {
     if(p > 1 || (p == 1 && ! ogg_page_continued(page)))
       last_pos = pos;
     pos += np;
-    mp_msg(MSGT_DEMUX,MSGL_INFO,"Building syncpoint table %d%\r",pos*100/s->end_pos);
+    mp_msg(MSGT_DEMUX,MSGL_INFO,"Building syncpoint table %d%%\r",(int)(pos*100/s->end_pos));
   }
   mp_msg(MSGT_DEMUX,MSGL_INFO,"\n");
 
