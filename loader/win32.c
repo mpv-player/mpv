@@ -966,6 +966,7 @@ void* WINAPI expHeapReAlloc(HANDLE heap,int flags,void *lpMem,int size)
   dbgprintf("HeapReAlloc() Size %ld org %d\n",orgsize,size);
   if (size < orgsize) 
     return lpMem;
+
   newp=my_mreq(size, flags & 8);
   memcpy(newp, lpMem, orgsize);
   my_release(lpMem);
@@ -991,6 +992,8 @@ int WINAPI expVirtualFree(void* v1, int v2, int v3)
     dbgprintf("VirtualFree(0x%x, %d, %d) => %d\n",v1,v2,v3, result);
     return result;
 }    
+
+/* -- critical sections -- */
 struct CRITSECT 
 {
     pthread_t id;
@@ -998,9 +1001,55 @@ struct CRITSECT
     int locked;
 };
 
+/* we're building a table of critical sections. cs_win pointer uses the DLL
+   cs_unix is the real structure, we're using cs_win only to identifying cs_unix */
+struct critsecs_list_t
+{
+    CRITICAL_SECTION *cs_win;
+    struct CRITSECT *cs_unix;
+};
+
+#define CRITSECS_LIST_MAX 20
+static struct critsecs_list_t critsecs_list[CRITSECS_LIST_MAX];
+
+int critsecs_get_pos(CRITICAL_SECTION *cs_win)
+{
+    int i;
+    
+    for (i=0; i < CRITSECS_LIST_MAX; i++)
+	if (critsecs_list[i].cs_win == cs_win)
+	    return(i);
+    return(-1);
+}
+
+int critsecs_get_unused(void)
+{
+    int i;
+    
+    for (i=0; i < CRITSECS_LIST_MAX; i++)
+	if (critsecs_list[i].cs_win == NULL)
+	    return(i);
+    return(-1);
+}
+
+#if 0
+#define critsecs_get_unix(cs_win) (critsecs_list[critsecs_get_pos(cs_win)].cs_win)
+#else
+struct CRITSECT *critsecs_get_unix(CRITICAL_SECTION *cs_win)
+{
+    int i;
+    
+    for (i=0; i < CRITSECS_LIST_MAX; i++)
+	if (critsecs_list[i].cs_win == cs_win)
+	    return(critsecs_list[i].cs_unix);
+    return(NULL);
+}
+#endif
+
+#define CRITSECS_NEWTYPE 1
+
 void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 {
-    struct CRITSECT cs;
     dbgprintf("InitializeCriticalSection(0x%x)\n", c);
 /*    if(sizeof(pthread_mutex_t)>sizeof(CRITICAL_SECTION))
     {
@@ -1009,20 +1058,52 @@ void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 	return;
     }*/
 /*    pthread_mutex_init((pthread_mutex_t*)c, NULL);   */
-    pthread_mutex_init(&cs.mutex, NULL);   
+#ifdef CRITSECS_NEWTYPE
+{
+    struct CRITSECT *cs;
+    int i = critsecs_get_unused();
+
+    if (i < 0)
+    {
+	printf("InitializeCriticalSection(%p) - no more space in list\n", c);
+	return;
+    }
+    cs = malloc(sizeof(struct CRITSECT));
+    pthread_mutex_init(&cs->mutex, NULL);
+    cs->locked = 0;
+    critsecs_list[i].cs_win = c;
+    critsecs_list[i].cs_unix = cs;
+    dbgprintf("InitializeCriticalSection -> itemno=%d, cs_win=%p, cs_unix=%p\n",
+	i, c, cs);
+}
+#else
+{
+    struct CRITSECT cs;
+    pthread_mutex_init(&cs.mutex, NULL);
     cs.locked=0;
     *(void**)c=malloc(sizeof cs);
     memcpy(*(void**)c, &cs, sizeof cs);
+}
+#endif
     return;
-}          
+}
+
 void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
 {
+#ifdef CRITSECS_NEWTYPE
+    struct CRITSECT* cs = critsecs_get_unix(c);
+#else
     struct CRITSECT* cs=*(struct CRITSECT**)c;
+#endif
     dbgprintf("EnterCriticalSection(0x%x)\n",c);
     if (!cs)
     {
 	expInitializeCriticalSection(c);
+#ifdef CRITSECS_NEWTYPE
+	cs=critsecs_get_unix(c);
+#else
 	cs=*(struct CRITSECT**)c;
+#endif
 	printf("Win32 Warning: Accessed uninitialized Critical Section (%p)!\n", c);
     }
 //    cs.id=pthread_self();
@@ -1036,7 +1117,11 @@ void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
 }          
 void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
 {
+#ifdef CRITSECS_NEWTYPE
+    struct CRITSECT* cs = critsecs_get_unix(c);
+#else
     struct CRITSECT* cs=*(struct CRITSECT**)c;
+#endif
 //    struct CRITSECT* cs=(struct CRITSECT*)c;
     dbgprintf("LeaveCriticalSection(0x%x)\n",c);
     if (!cs)
@@ -1050,11 +1135,31 @@ void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
 }
 void WINAPI expDeleteCriticalSection(CRITICAL_SECTION *c)
 {
+#ifdef CRITSECS_NEWTYPE
+    struct CRITSECT* cs = critsecs_get_unix(c);
+#else
     struct CRITSECT* cs=*(struct CRITSECT**)c;
+#endif
 //    struct CRITSECT* cs=(struct CRITSECT*)c;
     dbgprintf("DeleteCriticalSection(0x%x)\n",c);
     pthread_mutex_destroy(&(cs->mutex));
-    free(cs);
+//    free(cs);
+#ifdef CRITSECS_NEWTYPE
+{
+    int i = critsecs_get_pos(c);
+     
+    if (i < 0)
+    {
+        printf("DeleteCriticalSection(%p) error (critsec not found)\n", c);
+        return;
+    }
+     
+    critsecs_list[i].cs_win = NULL;
+    free(critsecs_list[i].cs_unix);
+    critsecs_list[i].cs_unix = NULL;
+    dbgprintf("DeleteCriticalSection -> itemno=%d\n", i);
+}
+#endif
     return;
 }
 int WINAPI expGetCurrentThreadId()
@@ -2994,7 +3099,7 @@ void* LookupExternal(const char* library, int ordinal)
 	{
 	    if(ordinal!=libraries[i].exps[j].id)
 		continue;
-	    printf("Hit: 0x%p\n", libraries[i].exps[j].func);
+	    printf("Hit: %p\n", libraries[i].exps[j].func);
 	    return libraries[i].exps[j].func;
 	}
     }
