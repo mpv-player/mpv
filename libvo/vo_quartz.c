@@ -1014,7 +1014,7 @@ static uint32_t preinit(const char *arg)
         }
     }
 	
-#ifndef MACOSX_FINDER_SUPPORT
+#if !defined (MACOSX_FINDER_SUPPORT) || !defined (HAVE_SDL)
 	//this chunk of code is heavily based off SDL_macosx.m from SDL 
 	//it uses an Apple private function to request foreground operation
 
