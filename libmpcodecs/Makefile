@@ -8,6 +8,7 @@ AUDIO_SRCS=dec_audio.c ad.c ad_a52.c ad_acm.c ad_alaw.c ad_dk3adpcm.c ad_dk4adpc
 VIDEO_SRCS=dec_video.c vd.c vd_null.c vd_cinepak.c vd_qtrpza.c vd_ffmpeg.c vd_dshow.c vd_vfw.c vd_odivx.c vd_divx4.c vd_raw.c vd_xanim.c vd_msvidc.c vd_fli.c vd_qtrle.c vd_qtsmc.c vd_roqvideo.c vd_cyuv.c vd_nuv.c vd_libmpeg2.c vd_msrle.c vd_huffyuv.c vd_zlib.c vd_mpegpes.c
 VFILTER_SRCS=vf.c vf_vo.c vf_crop.c vf_expand.c vf_pp.c vf_scale.c vf_fame.c vf_format.c vf_yuy2.c vf_flip.c vf_rgb2bgr.c
 ENCODER_SRCS=ve.c ve_divx4.c ve_lavc.c ve_vfw.c ve_rawrgb.c ve_libdv.c
+NATIVE_SRCS=native/RTjpegN.c native/cinepak.c native/cyuv.c native/fli.c native/minilzo.c native/msvidc.c native/nuppelvideo.c native/qtrle.c native/qtrpza.c native/qtsmc.c native/roqav.c native/xa_gsm.c
 
 ifeq ($(PNG),yes)
 VIDEO_SRCS += vd_mpng.c
@@ -17,13 +18,13 @@ ifeq ($(JPEG),yes)
 VIDEO_SRCS += vd_ijpg.c
 endif
 
-SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS)
+SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS) $(NATIVE_SRCS)
 OBJS=$(SRCS:.c=.o)
 
 SRCS2=$(ENCODER_SRCS)
 OBJS2=$(SRCS2:.c=.o)
 
-CFLAGS  = -Wall $(OPTFLAGS) -I. -I.. -I../libmpdemux -I../loader $(EXTRA_INC)
+CFLAGS  = -Wall $(OPTFLAGS) -I. -Inative -I.. -I../libmpdemux -I../loader $(EXTRA_INC)
 
 .SUFFIXES: .c .o
 
@@ -44,7 +45,7 @@ clean:
 	rm -f *.o *.a *~
 
 distclean:
-	rm -f Makefile.bak *.o *.a *~ .depend
+	rm -f Makefile.bak $(OBJS) $(OBJS2) $(LIBNAME) $(LIBNAME2) *~ .depend
 
 dep:    depend
 

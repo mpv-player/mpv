@@ -4,7 +4,7 @@
 
 #include "config.h"
 #include "ad_internal.h"
-#include "../roqav.h"
+#include "roqav.h"
 
 static ad_info_t info = 
 {
