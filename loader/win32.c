@@ -3735,6 +3735,18 @@ static WINAPI inline unsigned long int expntohl(unsigned long int netlong)
     return ntohl(netlong);
 }
 
+int expRegisterClassA(const void/*WNDCLASSA*/ *wc)
+{
+    dbgprintf("RegisterClassA(%p) => random id\n", wc);
+    return time(NULL); /* be precise ! */
+}
+
+int expUnregisterClassA(const char *className, HINSTANCE hInstance)
+{
+    dbgprintf("UnregisterClassA(%s, %p) => 0\n", className, hInstance);
+    return 0;
+}
+
 struct exports
 {
     char name[64];
@@ -3955,6 +3967,8 @@ struct exports exp_user32[]={
     FF(GetWindowDC, -1)
     FF(DrawTextA, -1)
     FF(MessageBoxA, -1)
+    FF(RegisterClassA, -1)
+    FF(UnregisterClassA, -1)
 };
 struct exports exp_advapi32[]={
     FF(RegCloseKey, -1)
