@@ -885,7 +885,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		stream->streaming_ctrl = NULL;
 	} else if( stream->streaming_ctrl->buffering ) {
 		int cache_size = stream_cache_size; 
-		if(!stream_cache_size) {
+		if(stream_cache_size<0) {
 			// cache option not set, will use our computed value.
 			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
 			stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;

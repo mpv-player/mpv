@@ -194,7 +194,7 @@ int vcd_track=0;
 char* filename=NULL; //"MI2-Trailer.avi";
 
 // cache2:
-       int stream_cache_size=0;
+       int stream_cache_size=-1;
 #ifdef USE_STREAM_CACHE
 extern int cache_fill_status;
 #else
@@ -977,7 +977,7 @@ if(stream->type==STREAMTYPE_DVD){
 #endif
 
 // CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
-if(stream_cache_size){
+if(stream_cache_size>0){
   current_module="enable_cache";
   if(!stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20))
     if((eof = libmpdemux_was_interrupted(PT_NEXT_ENTRY))) goto goto_next_file;
