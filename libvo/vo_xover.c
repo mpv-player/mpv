@@ -1,4 +1,5 @@
 /*
+  XOver a general x11 vo for mplayer overlay drivers based on :
     VIDIX accelerated overlay in a X window
     
     (C) Alex Beregszaszi & Zoltan Ponekker & Nick Kurshev
