@@ -1,5 +1,7 @@
 
-int mp_decode_mp3_header(unsigned char* hbuf);
+int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* freq);
+
+#define mp_decode_mp3_header(hbuf)  mp_get_mp3_header(hbuf,NULL,NULL)
 
 static inline int mp_check_mp3_header(unsigned int head){
     if( (head & 0x0000e0ff) != 0x0000e0ff ||  

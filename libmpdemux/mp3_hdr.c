@@ -31,7 +31,7 @@ int mp_mp3_get_lsf(unsigned char* hbuf){
 /*
  * return frame size or -1 (bad frame)
  */
-int mp_decode_mp3_header(unsigned char* hbuf){
+int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
     int stereo,ssize,crc,lsf,mpeg25,framesize,padding,bitrate_index,sampling_frequency;
     unsigned long newhead = 
       hbuf[0] << 24 |
@@ -101,6 +101,8 @@ int mp_decode_mp3_header(unsigned char* hbuf){
     framesize += padding;
 
 //    if(framesize<=0 || framesize>MAXFRAMESIZE) return FALSE;
+    if(srate) *srate = freqs[sampling_frequency];
+    if(chans) *chans = stereo;
 
     return framesize;
 }

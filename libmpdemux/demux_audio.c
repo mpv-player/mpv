@@ -8,6 +8,7 @@
 #include "demuxer.h"
 #include "stheader.h"
 #include "genres.h"
+#include "mp3_hdr.h"
 
 #include <string.h>
 #ifdef MP_DEBUG
@@ -25,7 +26,6 @@ typedef struct da_priv {
   float last_pts;
 } da_priv_t;
 
-extern int mp_decode_mp3_header(unsigned char* hbuf);
 extern void free_sh_audio(sh_audio_t* sh);
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 
@@ -35,7 +35,7 @@ int demux_audio_open(demuxer_t* demuxer) {
   stream_t *s;
   sh_audio_t* sh_audio;
   uint8_t hdr[HDR_SIZE];
-  int st_pos = 0,frmt = 0, n = 0, pos = 0, step;
+  int st_pos = 0,frmt = 0, n = 0, pos = 0, step, mp3_freq,mp3_chans;
   da_priv_t* priv;
 #ifdef MP_DEBUG
   assert(demuxer != NULL);
@@ -68,7 +68,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     } else if( hdr[0] == 'f' && hdr[1] == 'm' && hdr[2] == 't' && hdr[3] == ' ' ) {
       frmt = WAV;
       break;      
-    } else if((n = mp_decode_mp3_header(hdr)) > 0) {
+    } else if((n = mp_get_mp3_header(hdr,&mp3_chans,&mp3_freq)) > 0) {
       frmt = MP3;
       break;
     }
@@ -87,6 +87,16 @@ int demux_audio_open(demuxer_t* demuxer) {
   case MP3:
     sh_audio->format = 0x55;
     demuxer->movi_start = st_pos-HDR_SIZE+n;
+    sh_audio->audio.dwSampleSize= 0;
+    sh_audio->audio.dwScale = 1152;
+    sh_audio->audio.dwRate = mp3_freq;
+    sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
+    sh_audio->wf->wFormatTag = sh_audio->format;
+    sh_audio->wf->nChannels = mp3_chans;
+    sh_audio->wf->nSamplesPerSec = mp3_freq;
+    sh_audio->wf->nBlockAlign = 1;
+    sh_audio->wf->wBitsPerSample = 16;
+    sh_audio->wf->cbSize = 0;    
     for(n = 0; n < 5 ; n++) {
       pos = mp_decode_mp3_header(hdr);
       if(pos < 0)
