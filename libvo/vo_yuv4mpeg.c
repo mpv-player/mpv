@@ -8,6 +8,11 @@
  *
  * This is undoubtedly incomplete, inaccurate, or just plain wrong. :-)
  *
+ *
+ * 2002/04/17 Juergen Hammelmann <juergen.hammelmann@gmx.de>
+ *            - added support for output of subtitles
+ *              best, if you give option '-osdlevel 0' to mplayer for 
+ *              no watching the seek+timer
  */
 
 #include <stdio.h>
@@ -20,6 +25,8 @@
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
+
+#include "sub.h"
 
 #include "fastmemcpy.h"
 #include "../postproc/rgb2rgb.h"
@@ -81,8 +88,18 @@ static const vo_info_t* get_info(void)
     return &vo_info;
 }
 
+static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
+                       unsigned char *srca, int stride) {
+    if(using_format == IMGFMT_YV12)
+	{
+	    vo_draw_alpha_yv12(w, h, src, srca, stride, 
+			       image+(y0*image_width+x0), image_width);
+	}
+}
+
 static void draw_osd(void)
 {
+    vo_draw_text(image_width, image_height, draw_alpha);
 }
 
 static void flip_page (void)
