@@ -76,6 +76,7 @@ static char* dup_printf(const char *fmt, ...) {
 static int parse_flag(m_option_t* opt,char *name, char *param, void* dst, int src) {
   if (src == M_CONFIG_FILE) {
     if (!strcasecmp(param, "yes") ||	/* any other language? */
+	!strcasecmp(param, "on") ||
 	!strcasecmp(param, "ja") ||
 	!strcasecmp(param, "si") ||
 	!strcasecmp(param, "igen") ||
@@ -85,6 +86,7 @@ static int parse_flag(m_option_t* opt,char *name, char *param, void* dst, int sr
 	!strcmp(param, "1")) {
       if(dst) VAL(dst) = opt->max;
     } else if (!strcasecmp(param, "no") ||
+	       !strcasecmp(param, "off") ||
 	       !strcasecmp(param, "nein") ||
 	       !strcasecmp(param, "nicht") ||
 	       !strcasecmp(param, "nem") ||
@@ -797,7 +799,7 @@ static int parse_print(m_option_t* opt,char *name, char *param, void* dst, int s
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "%s", (char *) opt->p);
 
   if(opt->priv == NULL)
-    exit(1); // Call something else instead ??
+    return M_OPT_EXIT;
   return 1;
 }
 
@@ -959,7 +961,7 @@ static int parse_imgfmt(m_option_t* opt,char *name, char *param, void* dst, int 
     for(i = 0 ; mp_imgfmt_list[i].name ; i++)
       mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s",mp_imgfmt_list[i].name);
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
-    exit(0);
+    return M_OPT_EXIT;
   }
 
   for(i = 0 ; mp_imgfmt_list[i].name ; i++) {
@@ -991,115 +993,6 @@ m_option_type_t m_option_type_imgfmt = {
   NULL,
   NULL
 };
-
-/// Span stuff : Not finished
-static int parse_play_pos(m_play_pos_t* pos,char* opt, char *s) {
-  char *ep;
-  long tmp;
-  int i;
-
-  memset(pos,0,sizeof(m_play_pos_t));
-
-  if(!s || s[0] == '\0')
-    return M_OPT_MISSING_PARAM;
-
-  // Track index
-  tmp = strtol(s, &ep, 0);
-  if(ep != s) {
-    if(tmp < 1) {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: Track/Chapter index must be > 0\n", opt);
-      return M_OPT_OUT_OF_RANGE;
-    }
-    pos->idx = tmp;
-    if(ep[0] == '\0')
-      return 1;
-    s = ep;
-  }
-
-  // Span
-  tmp = strlen(s);
-  if(s[0] != '[' || s[tmp-1] != ']') {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid argument ?\n", opt);
-    return M_OPT_INVALID;
-  }
-  s[tmp-1] = '\0';
-  s++;
-
-  // hh:mm:ss
-  for( i = 2 ; i >= 0 && s[0] != 0 ; i--) {
-    if(s[0] == ':') {
-      tmp = 0;
-      s++;
-    } else {
-      tmp = strtol(s, &ep, 0);
-      if(tmp < 0 || (ep[0] != '\0' && ep[0] != (i > 0 ? ':' : '.') )) {
-	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid argument ?\n", opt);
-	return M_OPT_INVALID;
-      }
-      pos->seconds += tmp * pow(60,i);
-      s = ep;
-      if(s[0] != '\0')
-	s++;
-
-    }
-  }
-
-  // sectors
-  if(s[0]) {
-    tmp = strtol(s, &ep, 0);
-    if(tmp < 0 || ep[0] != '\0') {
-      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid argument ?\n", opt);
-      return M_OPT_INVALID;
-    }
-    pos->sectors = tmp;
-  }
-
-  return 1;
-}
-
-
-static int parse_span(m_option_t* opt,char *name, char *param, void* dst, int src) {
-  m_span_t* span = dst;
-  char *s = param,*e = NULL;
-  int r = M_OPT_INVALID;
-
-  if(param == NULL)
-    return M_OPT_MISSING_PARAM;
-
-  e = strchr(param,'-');
-  if(e) {
-    e[0] = '\0';
-    e++;
-  }
-
-  if(s[0] == '\0' && e[0] == '\0') {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: invalid argument\n");
-    return M_OPT_INVALID;
-  }
-
-  if(s[0]) {
-    r = parse_play_pos(&span->start,name,s);
-    if(r < 0) return r;
-  }
-  if(e && e[0] != '\0')
-    r = parse_play_pos(&span->end,name,s);
-  
-  return r;  
-}
-
-m_option_type_t m_option_type_span = {
-  "Span",
-  "The syntax is 1[hh:mm:ss.zz]-5[hh:mm:ss.zz]",
-  sizeof(m_span_t),
-  0,
-  parse_span,
-  NULL,
-  copy_opt,
-  copy_opt,
-  NULL,
-  NULL
-};
-
 
 //// Objects (ie filters, etc) settings
 
@@ -1174,7 +1067,7 @@ static int get_obj_param(char* opt_name,char* obj_name, m_struct_t* desc,
 }
 
 static int get_obj_params(char* opt_name, char* name,char* params,
-			  m_struct_t* desc,char*** _ret) {
+			  m_struct_t* desc,char separator, char*** _ret) {
   int n = 0,nold = 0, nopts,r;
   char* ptr,*last_ptr = params,*eq;
   char** ret;
@@ -1183,8 +1076,7 @@ static int get_obj_params(char* opt_name, char* name,char* params,
     char min[50],max[50];
     if(!desc->fields) {
       printf("%s doesn't have any options\n\n",name);
-      //exit_player();
-      exit(0);
+      return M_OPT_EXIT;
     }
     printf("\n Name                 Type            Min        Max\n\n");
     for(n = 0 ; desc->fields[n].name ; n++) {
@@ -1205,8 +1097,7 @@ static int get_obj_params(char* opt_name, char* name,char* params,
 	     max);
     }
     printf("\n");
-    //exit_player() isn't avaible in mencoder
-    exit(0);
+    return M_OPT_EXIT;
   }
 
   for(nopts = 0 ; desc->fields[nopts].name ; nopts++)
@@ -1215,15 +1106,20 @@ static int get_obj_params(char* opt_name, char* name,char* params,
   // TODO : Check that each opt can be parsed
   r = 1;
   while(last_ptr && last_ptr[0] != '\0') {
-    ptr = strchr(last_ptr,':');
+    ptr = strchr(last_ptr,separator);
     if(!ptr) {
       r = get_obj_param(opt_name,name,desc,last_ptr,&nold,nopts,NULL);
       n++;
       break;
     }
+    if(ptr == last_ptr) { // Empty field, count it and go on
+      nold++;
+      last_ptr = ptr+1;
+      continue;
+    }
     ptr[0] = '\0';
     r = get_obj_param(opt_name,name,desc,last_ptr,&nold,nopts,NULL);
-    ptr[0] = ':';
+    ptr[0] = separator;
     if(r < 0) break;
     n++;
     last_ptr = ptr+1;
@@ -1237,11 +1133,16 @@ static int get_obj_params(char* opt_name, char* name,char* params,
   last_ptr = params;
   
   while(last_ptr && last_ptr[0] != '\0') {
-    ptr = strchr(last_ptr,':');
+    ptr = strchr(last_ptr,separator);
     if(!ptr) {
       get_obj_param(opt_name,name,desc,last_ptr,&nold,nopts,&ret[n*2]);
       n++;
       break;
+    }
+    if(ptr == last_ptr) { // Empty field, count it and go on
+      last_ptr = ptr+1;
+      nold++;
+      continue;
     }
     ptr[0] = '\0';
     get_obj_param(opt_name,name,desc,last_ptr,&nold,nopts,&ret[n*2]);
@@ -1254,6 +1155,64 @@ static int get_obj_params(char* opt_name, char* name,char* params,
   return 1;
 }
 
+static int parse_obj_params(m_option_t* opt,char *name,
+			    char *param, void* dst, int src) {
+  char** opts;
+  int r;
+  m_obj_params_t* p = opt->priv;
+  m_struct_t* desc = p->desc;
+  char* cpy = strdup(param);
+  
+  // We need the object desc
+  if(!p)
+    return M_OPT_INVALID;
+  
+  r = get_obj_params(name,desc->name,cpy,desc,p->separator,&opts);
+  free(cpy);
+  if(r < 0)
+    return r;
+  if(!dst)
+    return 1;
+
+  for(r = 0 ; opts[r] ; r += 2)
+    m_struct_set(desc,dst,opts[r],opts[r+1]);
+
+  return 1;     
+}
+
+
+m_option_type_t m_option_type_obj_params = {
+  "Object params",
+  "",
+  0,
+  0,
+  parse_obj_params,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};
+
+/// Some predefined types as a definition is quiet lenthy
+
+/// Span arguments
+static m_span_t m_span_params_dflts = { -1, -1 };
+static m_option_t m_span_params_fields[] = {
+  {"start", M_ST_OFF(m_span_t,start), CONF_TYPE_INT, M_OPT_MIN, 1 ,0, NULL},
+  {"end", M_ST_OFF(m_span_t,end), CONF_TYPE_INT, M_OPT_MIN , 1 ,0, NULL},
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+static struct m_struct_st m_span_opts = {
+  "m_span",
+  sizeof(m_span_t),
+  &m_span_params_dflts,
+  m_span_params_fields
+};
+m_obj_params_t m_span_params_def = {
+  &m_span_opts,
+  '-'
+};
 
 static int parse_obj_settings(char* opt,char* str,m_obj_list_t* list,
 			      m_obj_settings_t **_ret, int ret_n) {
@@ -1284,7 +1243,7 @@ static int parse_obj_settings(char* opt,char* str,m_obj_list_t* list,
       plist[0] = strdup("_oldargs_");
       plist[1] = strdup(param);
     } else if(desc) {
-      r = get_obj_params(opt,str,param,desc,_ret ? &plist : NULL);
+      r = get_obj_params(opt,str,param,desc,':',_ret ? &plist : NULL);
       if(r < 0)
 	return r;
     }
@@ -1322,7 +1281,7 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
       mp_msg(MSGT_VFILTER,MSGL_INFO,"  %-15s: %s\n",
 	     M_ST_MB(char*,ol->list[n],ol->name_off),
 	     M_ST_MB(char*,ol->list[n],ol->info_off));
-    exit(0);
+    return M_OPT_EXIT;
   }
   ptr = str = strdup(param);
 
@@ -1446,7 +1405,7 @@ static int parse_obj_presets(m_option_t* opt,char *name,
 	pre +=  s) 
       mp_msg(MSGT_CFGPARSER, MSGL_ERR, " %s",pre_name);
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "\n");
-    exit(0);
+    return M_OPT_EXIT;
   }
 
   for(pre_name = M_ST_MB(char*,pre,obj_p->name_off) ; pre_name ;
@@ -1490,5 +1449,198 @@ m_option_type_t m_option_type_obj_presets = {
   NULL,
   NULL
 };
+
+static int parse_custom_url(m_option_t* opt,char *name,
+			    char *url, void* dst, int src) {
+  int pos1, pos2, r;
+  char *ptr1=NULL, *ptr2=NULL, *ptr3=NULL;
+  m_struct_t* desc = opt->priv;
+  
+  if(!desc) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: customs url need a pointer to a m_struct_t in the priv field\n",name);
+    return M_OPT_PARSER_ERR;
+  }
+
+  // extract the protocol
+  ptr1 = strstr(url, "://");
+  if( ptr1==NULL ) {
+    // Filename only
+    if(m_option_list_find(desc->fields,"filename")) {
+      m_struct_set(desc,dst,"filename",url);
+      return 1;
+    }
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Option %s: url doesn't have a valid protocol!\n",name);
+    return M_OPT_INVALID;
+  }
+  pos1 = ptr1-url;
+  if(dst && m_option_list_find(desc->fields,"protocol")) {
+    ptr1[0] = '\0';
+    r = m_struct_set(desc,dst,"protocol",url);
+    ptr1[0] = ':';
+    if(r < 0) {
+      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting protocol\n",name);
+      return r;
+    }
+  }
+
+  // jump the "://"
+  ptr1 += 3;
+  pos1 += 3;
+
+  // check if a username:password is given
+  ptr2 = strstr(ptr1, "@");
+  ptr3 = strstr(ptr1, "/");
+  if( ptr3!=NULL && ptr3<ptr2 ) {
+    // it isn't really a username but rather a part of the path
+    ptr2 = NULL;
+  }
+  if( ptr2!=NULL ) {
+    
+    // We got something, at least a username...
+    int len = ptr2-ptr1;
+    if(!m_option_list_find(desc->fields,"username")) {
+      mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: this url doesn't have a username part\n",name);
+      // skip
+    } else {
+      ptr3 = strstr(ptr1, ":");
+      if( ptr3!=NULL && ptr3<ptr2 ) {
+	// We also have a password
+	int len2 = ptr2-ptr3-1;
+	if(!m_option_list_find(desc->fields,"password")) {
+	  mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: this url doesn't have a password part part\n",name);
+	  // skip
+	} else { // Username and password   
+	  if(dst) {
+	    ptr3[0] = '\0';
+	    r = m_struct_set(desc,dst,"username",ptr1);
+	    ptr3[0] = ':';
+	    if(r < 0) {
+	      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting username\n",name);
+	      return r;
+	    }
+	    ptr2[0] = '\0';
+	    r = m_struct_set(desc,dst,"password",ptr3+1);
+	    ptr2[0] = '@';
+	    if(r < 0) {
+	      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting password\n",name);
+	      return r;
+	    }
+	  }
+	}
+      } else { // User name only
+	ptr2[0] = '\0';
+	r = m_struct_set(desc,dst,"username",ptr1);
+	ptr2[0] = '@';
+	if(r < 0) {
+	  mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting username\n",name);
+	  return r;
+	}
+      }
+    }
+  }
+
+  // before looking for a port number check if we have an IPv6 type numeric address
+  // in IPv6 URL the numeric address should be inside square braces.
+  ptr2 = strstr(ptr1, "[");
+  ptr3 = strstr(ptr1, "]");
+  if( ptr2!=NULL && ptr3!=NULL ) {
+    // we have an IPv6 numeric address
+    ptr1++;
+    pos1++;
+    ptr2 = ptr3;
+  } else {
+    ptr2 = ptr1;  
+  }
+
+  // look if the port is given
+  ptr2 = strstr(ptr2, ":");
+  // If the : is after the first / it isn't the port
+  ptr3 = strstr(ptr1, "/");
+  if(ptr3 && ptr3 - ptr2 < 0) ptr2 = NULL;
+  if( ptr2==NULL ) {
+    // No port is given
+    // Look if a path is given
+    if( ptr3==NULL ) {
+      // No path/filename
+      // So we have an URL like http://www.hostname.com
+      pos2 = strlen(url);
+    } else {
+      // We have an URL like http://www.hostname.com/file.txt
+      pos2 = ptr3-url;
+    }
+  } else {
+    // We have an URL beginning like http://www.hostname.com:1212
+    // Get the port number
+    if(!m_option_list_find(desc->fields,"port")) {
+      mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: this url doesn't have a port part part\n",name);
+      // skip
+    } else {
+      if(dst) {
+	int p = atoi(ptr2+1);
+	char tmp[100];
+	snprintf(tmp,99,"%d",p);
+	r = m_struct_set(desc,dst,"port",tmp);
+	if(r < 0) {
+	  mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting port\n",name);
+	  return r;
+	}
+      }
+    }
+    pos2 = ptr2-url;
+  }
+  if( strstr(ptr1, "]")!=NULL ) pos2--;
+  // Get the hostname
+  if(pos2-pos1 > 0) {
+    if(!m_option_list_find(desc->fields,"hostname")) {
+      mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: this url doesn't have a hostname part\n",name);
+      // skip
+    } else {
+      char tmp[pos2-pos1+1];
+      strncpy(tmp,ptr1, pos2-pos1);
+      tmp[pos2-pos1] = '\0';
+      r = m_struct_set(desc,dst,"hostname",tmp);
+      if(r < 0) {
+	mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting hostname\n",name);
+	return r;
+      }
+    }
+  }
+  // Look if a path is given
+  ptr2 = strstr(ptr1, "/");
+  if( ptr2!=NULL ) {
+    // A path/filename is given
+    // check if it's not a trailing '/'
+    if( strlen(ptr2)>1 ) {
+      // copy the path/filename in the URL container
+      if(!m_option_list_find(desc->fields,"filename")) {
+	mp_msg(MSGT_CFGPARSER, MSGL_WARN, "Option %s: this url doesn't have a hostname part part\n");
+	// skip
+      } else {
+	if(dst) {
+	  r = m_struct_set(desc,dst,"filename",ptr2);
+	  if(r < 0) {
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting filename\n");
+	    return r;
+	  }
+	}
+      }
+    }
+  }
+  return 1;
+}
+
+/// TODO : Write the other needed funcs for 'normal' options
+m_option_type_t m_option_type_custom_url = {
+  "Custom URL",
+  "",
+  0,
+  0,
+  parse_custom_url,
+  NULL,
+  NULL,
+  NULL,
+  NULL,
+  NULL
+};	
 
 #endif

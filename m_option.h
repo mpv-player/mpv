@@ -37,22 +37,6 @@ typedef m_opt_func_full_t cfg_func_arg_param_t;
 typedef m_opt_func_param_t cfg_func_param_t;
 typedef m_opt_func_t cfg_func_t;
 
-// Track/Chapter range
-// accept range in the form 1[hh:mm:ss.zz]-5[hh:mm:ss.zz]
-// ommited fields are assumed to be 0
-// Not finished !!!!
-typedef struct {
-  int idx; // in the e.g 1 or 5
-  unsigned int seconds; // hh:mm:ss converted in seconds
-  unsigned int sectors; // zz
-} m_play_pos_t;
-
-typedef struct {
-  m_play_pos_t start;
-  m_play_pos_t end;
-} m_span_t;
-extern m_option_type_t m_option_type_span;
-
 typedef struct {
   void** list;
   void* name_off;
@@ -70,12 +54,27 @@ extern m_option_type_t m_option_type_obj_settings_list;
 
 
 typedef struct {
-  struct m_struct* in_desc;
-  struct m_struct* out_desc;
+  struct m_struct_st* in_desc;
+  struct m_struct_st* out_desc;
   void* presets; // Pointer to an arry of struct defined by in_desc
   void* name_off; // Offset of the preset name inside the in_struct
 } m_obj_presets_t;
 extern m_option_type_t m_option_type_obj_presets;
+
+extern m_option_type_t m_option_type_custom_url;
+
+typedef struct {
+  struct m_struct_st* desc; // Fields description
+  char separator; // Field separator to use
+} m_obj_params_t;
+extern m_option_type_t m_option_type_obj_params;
+
+typedef struct {
+  int start;
+  int end;
+} m_span_t;
+extern m_obj_params_t m_span_params_def;
+
 
 // Don't be stupid keep tho old names ;-)
 #define CONF_TYPE_FLAG		(&m_option_type_flag)
@@ -94,6 +93,8 @@ extern m_option_type_t m_option_type_obj_presets;
 #define CONF_TYPE_SPAN		(&m_option_type_span)
 #define CONF_TYPE_OBJ_SETTINGS_LIST (&m_option_type_obj_settings_list)
 #define CONF_TYPE_OBJ_PRESETS (&m_option_type_obj_presets)
+#define CONF_TYPE_CUSTOM_URL  (&m_option_type_custom_url)
+#define CONF_TYPE_OBJ_PARAMS  (&m_option_type_obj_params)
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -206,6 +207,7 @@ struct m_option {
 #define M_OPT_INVALID		-3
 #define M_OPT_OUT_OF_RANGE	-4
 #define M_OPT_PARSER_ERR		-5
+#define M_OPT_EXIT              -6
 
 m_option_t* m_option_list_find(m_option_t* list,char* name);
 
