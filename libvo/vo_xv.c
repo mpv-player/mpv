@@ -181,7 +181,7 @@ static int __xv_set_video_eq( const vidix_video_eq_t *info,int use_reset)
 		    else continue;
 		    /* means that user has untouched this parameter since
 		       NVidia driver has default == min for XV_HUE but not mid */
-		    if(!port_value) continue;
+		    if(!port_value && use_reset) continue;
 		    port_min = xv_min;
 		    port_max = xv_max;
 		    port_mid = (port_min + port_max) / 2;
