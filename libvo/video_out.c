@@ -125,6 +125,7 @@ extern vo_functions_t video_out_tga;
 extern vo_functions_t video_out_quartz;
 #endif
 extern vo_functions_t video_out_pnm;
+extern vo_functions_t video_out_md5sum;
 
 vo_functions_t* video_out_drivers[] =
 {
@@ -242,6 +243,7 @@ vo_functions_t* video_out_drivers[] =
         &video_out_tga,
 #endif
     &video_out_pnm,
+    &video_out_md5sum,
         NULL
 };
 
