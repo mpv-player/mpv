@@ -1,6 +1,11 @@
 SLAVE MODE PROTOCOL
 -------------------
 
+FIXME: Some of these options are still not documented, patches welcome.
+
+Most slave mode commands are equivalent to command line options.
+Have a look at the man page for more detailed descriptions.
+
 If the -slave option is given, playback is controlled by a line-based protocol.
 Each line must contain one of the following commands:
 
@@ -26,7 +31,7 @@ grab_frames
     ???
 
 pt_step <value> [<force>]
-    Go to next/previous entry in the playtree.
+    Go to the next/previous entry in the playtree.
 
 pt_up_step <value> [<force>]
     Like pt_step but it jumps to next/previous in the parent list.
@@ -36,13 +41,17 @@ alt_src_step <value>
     (only supported by ASX playlist).
 
 sub_delay <value> [<abs>]
-    Adjust the subtitles delay of +/- <value> seconds or set it to <value>
-    seconds when abs is nonzero.
+    Adjust the subtitle delay by +/- <value> seconds or set it to <value>
+    seconds when <abs> is nonzero.
+
+sub_step
+    ???
 
 osd [<level>]
-    Toggle OSD mode or set it to level when level >= 0.
+    Toggle OSD mode or set it to level when <level> >= 0.
 
 osd_show_text <value>
+    ???
 
 volume <value>
     Increase/decrease volume.
@@ -54,13 +63,13 @@ mute
     Mute/unmute sound output.
 
 [contrast|gamma|brightness|hue|saturation] <-100 - 100> [<abs>]
-    Set/Adjust video parameters.
+    Set/adjust video parameters.
 
 frame_drop [<value>]
-    Toggle/Set frame dropping mode.
+    Toggle/set frame dropping mode.
 
 sub_pos <value>
-    Adjust subtitles position.
+    Adjust subtitle position.
 
 sub_alignment <value>
     Set subtitle alignment.
@@ -72,15 +81,15 @@ get_sub_visibility
     Print out subtitle visibility (1 == on, 0 == off).
 
 sub_select
-    Cycle through the subtitle set.  Supported subtitle sources are -sub
-    options on the command line, VOBSubs, DVD subtitles, and OGG text
+    Cycle through the available subtitles. Supported subtitle sources are
+    -sub options on the command line, VOBsubs, DVD subtitles, and Ogg text
     streams.
 
 vobsub_lang
     This is a stub linked to sub_select for backwards compatibility.
 
 get_percent_pos
-    Print out the current position in the file, in integer percentage [0-100).
+    Print out the current position in the file, as integer percentage [0-100).
 
 get_time_length
     Print out the length of the current file in seconds.
@@ -92,18 +101,16 @@ get_vo_fullscreen
     Print out fullscreen status (1 == fullscreened, 0 == windowed).
 
 vo_ontop
-	Toggle stay-on-top. Supported by drivers which use X11, except SDL,
-	as well as directx and gl2 under Windows.
+	Toggle stay-on-top.
 
 vo_rootwin
-	Toggle playback on the root window. This runtime toggle is only
-	supported by the directx driver at the moment.
+	Toggle playback on the root window.
 
 panscan <value> [value2]
     ???
 
 loadfile <file|url>
-    Load the given file/url.
+    Load the given file/URL.
 
 loadlist <file>
     Load the given playlist file.
@@ -117,11 +124,11 @@ change_rectangle <val1> <val2>
                2 = x position
                3 = y position
        <val2>
-           For values of 0 or 1 for <val1>:
+           If <val1> is 0 or 1:
                Integer amount to add/subtract from the width/height.
                Positive values add to width/height and negative values
                subtract from it.
-           For values of 2 or 3 for <val1>:
+           If <val1> is 2 or 3:
                Relative integer amount by which to move the upper left corner
                of the rectangle. Positive values move the rectangle right/down
                and negative values move the rectangle left/up.
@@ -139,7 +146,7 @@ dvdnav_event <value>
     ???
 
 tv_step_channel <channel>
-    Select next/previous tv channel.
+    Select next/previous TV channel.
 
 tv_step_norm
     Change TV norm.
@@ -154,22 +161,22 @@ tv_last_channel
     Set the current TV channel to the last one.
 
 tv_set_freq <frequency in MHz>
-    Set the tv tuner frequency.
+    Set the TV tuner frequency.
 
 tv_set_norm <norm>
-    Set the tv tuner norm. PAL, SECAM, NTSC and so on..
+    Set the TV tuner norm (PAL, SECAM, NTSC, ...).
 
 tv_set_brightness <-100 - 100>
-    Set tv tuner brightness.
+    Set TV tuner brightness.
 
 tv_set_contrast <-100 -100>
-    Set tv tuner contrast.
+    Set TV tuner contrast.
 
 tv_set_hue <-100 - 100>
-    Set tv tuner hue.
+    Set TV tuner hue.
 
 tv_set_saturation <-100 - 100>
-    Set tv tuner saturation.
+    Set TV tuner saturation.
 
 gui_[loadfile|loadsubtitle|about|play|stop|gui_playlist|gui_preferences|skinbrowser]
     GUI actions
