@@ -11,6 +11,12 @@ PRG_FIBMAP = fibmap_mplayer
 PRG_CFG = codec-cfg
 PRG_MENCODER = mencoder
 
+# Do not strip the binaries at installation
+ifeq ($(STRIPBINARIES),yes)
+INSTALLSTRIP = -s
+endif
+
+
 # these subdirectories required installation due binaries within them
 ifeq ($(VIDIX),yes)
 SUBDIRS += libdha vidix
@@ -221,14 +227,14 @@ ifeq ($(VIDIX),yes)
 	$(DO_MAKE)
 endif
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
-	$(INSTALL) -m 755 -s $(PRG) $(BINDIR)/$(PRG)
+	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG) $(BINDIR)/$(PRG)
 ifeq ($(GUI),yes)
 	-ln -sf $(PRG) $(BINDIR)/gmplayer
 endif
 	if test ! -d $(MANDIR)/man1 ; then mkdir -p $(MANDIR)/man1; fi
 	$(INSTALL) -c -m 644 DOCS/mplayer.1 $(MANDIR)/man1/mplayer.1
 ifeq ($(MENCODER),yes)
-	$(INSTALL) -m 755 -s $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
+	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
 	-ln -sf mplayer.1 $(MANDIR)/man1/mencoder.1
 endif
 	@if test ! -d $(DATADIR) ; then mkdir -p $(DATADIR) ; fi
@@ -249,7 +255,7 @@ endif
 ifeq ($(DVDKIT),yes)
 ifeq ($(DVDKIT_SHARED),yes)
 	if test ! -d $(LIBDIR) ; then mkdir -p $(LIBDIR) ; fi
-	$(INSTALL) -m 755 -s libmpdvdkit/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
+	$(INSTALL) -m 755 $(INSTALLSTRIP) libmpdvdkit/libmpdvdkit.so $(LIBDIR)/libmpdvdkit.so
 endif
 endif
 ifeq ($(CSS_USE),yes)
@@ -257,7 +263,7 @@ ifeq ($(CSS_USE),yes)
 	@echo "however it means you can't use fibmap_mplayer."
 	@echo "Without this (or without running mplayer as root) you won't be"
 	@echo "able to play encrypted DVDs."
-	-$(INSTALL) -o 0 -g 0 -m 4755 -s $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
+	-$(INSTALL) -o 0 -g 0 -m 4755 $(INSTALLSTRIP) $(PRG_FIBMAP) $(BINDIR)/$(PRG_FIBMAP)
 endif
 
 uninstall:

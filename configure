@@ -3639,8 +3639,10 @@ fi
 #############################################################################
 
 # Checking for CFLAGS
+_stripbinaries=yes
 if test "$_profile" || test "$_debug" ; then
   CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
+  _stripbinaries=no
 elif test -z "$CFLAGS" ; then
   if test "$host_arch" != "mips" ; then
     CFLAGS="-O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer"
@@ -3650,6 +3652,7 @@ elif test -z "$CFLAGS" ; then
   # always compile with '-g' if .developer:
   if test -f ".developer" ; then
     CFLAGS="-g $CFLAGS"
+    _stripbinaries=no
   fi
 else
   cat <<EOF
@@ -3796,6 +3799,7 @@ AWK = $_awk
 OPTFLAGS = $CFLAGS
 EXTRA_INC = $_inc_extra $_inc_gtk
 WIN32_PATH = -DWIN32_PATH=\\"$_win32libdir\\"
+STRIPBINARIES = $_stripbinaries
 
 STREAMING = $_streaming
 STREAMING_LIB = $_ld_streaming
