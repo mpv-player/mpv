@@ -109,8 +109,8 @@
 #define MP_INPUT_NOTHING -3
 
 // For the key's drivers, if possible you can send key up and key down
-// events. Key up is the default, to send a key down you must or the key
-// code with MP_KEY_DOWN.
+// events. Key up is the default, to send a key down you must use the 
+// OR operator between the key code and MP_KEY_DOWN.
 #define MP_KEY_DOWN (1<<29)
 // Use this when the key shouldn't be auto-repeated (like mouse buttons)
 #define MP_NO_REPEAT_KEY (1<<28)
