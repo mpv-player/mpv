@@ -1849,9 +1849,10 @@ otherwise.  Please do not send messages using other language!</P>
   Workaround: ./configure --disable-sse etc. options</LI>
 
 <LI>"Internal buffer inconsistency" during MEncoder run:<BR>
-  Problem: known gcc 2.96 bug, no fix yet. If you have gcc 2.95, you
-  have a libmp3lame library that was compiled with gcc 2.96 (installed from
-  a deb/rpm package?). Check which lib does MEncoder found : ldd mencoder.</LI>
+  Problem: known problem when lame was compiled with gcc 2.96 or 3.x, no fix
+  yet.<BR>
+  Workaround: compile lame with gcc 2.95. Be sure to remove any installed
+  lame packages, they may have been compiled with gcc 2.96 .</LI>
 
 <LI>Messed up MP2/MP3 sound on PPC:<BR>
   Problem: known GCC miscompilation bug on PPC platforms, no fix yet.<BR>
