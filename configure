@@ -162,6 +162,7 @@ Optional features:
   --disable-dvdnav       Disable dvdnav support [autodetect]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit support [autodetect]
+  --disable-cdparanoia   Disable cdparanoia support [autodetect]
   
 Video:
   --enable-gl            build with OpenGL render support [autodetect]
@@ -904,6 +905,7 @@ _linux_devfs=no
 _i18n=no
 _sighandler=yes
 _libdv=auto
+_cdparanoia=auto
 
 for ac_option do
   case "$ac_option" in
@@ -1058,6 +1060,8 @@ for ac_option do
   --disable-select)	_select=no	;;
   --enable-linux-devfs)	_linux_devfs=yes	;;
   --disable-linux-devfs)	_linux_devfs=no	;;
+  --enable-cdparanoia)	_cdparanoia=yes	;;
+  --disable-cdparanoia)	_cdparanoia=no	;;
 
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
   --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
@@ -1146,6 +1150,12 @@ for ac_option do
     ;;
   --with-madlibdir=*)
     _ld_mad=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --with-cdparanoiaincdir=*)
+    _inc_cdparanoia=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
+    ;;
+  --with-cdparanoialibdir=*)
+    _ld_cdparanoia=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
 
   --prefix=*)
@@ -3005,6 +3015,25 @@ else
   echores "no"
 fi
 
+echocheck "cdparanoia"
+if test "$_cdparanoia" = auto ; then
+    cat > $TMPC <<EOF
+#include <cdda_interface.h>
+#include <cdda_paranoia.h>
+// This need a better test. How ?
+int main(void) { return 1; }
+EOF
+    _cdparanoia=no
+    cc_check $_inc_cdparnoia $_ld_cdparanoia -lcdda_interface -lcdda_paranoia && _cdparanoia=yes
+fi
+if test "$_cdparanoia" = yes ; then
+    _def_cdparanoia='#define HAVE_CDDA'
+    _ld_cdparanoia="$_ld_cdparanoia -lcdda_interface -lcdda_paranoia"
+else
+    _def_cdparanoia='#undef HAVE_CDDA'
+fi
+echores "$_cdparanoia"
+
 echocheck "zlib"
 cat > $TMPC << EOF
 #include <zlib.h>
@@ -3966,6 +3995,8 @@ ENCORE_LIB =  $_ld_encore $_ld_mp3lame $_ld_libdv
 DIRECTFB_INC = $_inc_directfb
 DIRECTFB_LIB = $_ld_directfb
 NEW_INPUT_LIB = $_ld_new_input
+CDPARANOIA_INC = $_inc_cdparnoia
+CDPARANOIA_LIB = $_ld_cdparanoia
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -4282,6 +4313,9 @@ $_def_faad
 
 /* enable streaming */
 $_def_streaming
+
+/* enables / disables cdparanoia support */
+$_def_cdparanoia
 
 /* enables / disables vidix usage */
 $_def_vidix

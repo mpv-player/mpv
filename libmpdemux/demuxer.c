@@ -260,6 +260,7 @@ int demux_y4m_fill_buffer(demuxer_t *demux);
 int demux_audio_fill_buffer(demux_stream_t *ds);
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
+extern int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -287,6 +288,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_AUDIO: return demux_audio_fill_buffer(ds);
     case DEMUXER_TYPE_DEMUXERS: return demux_demuxers_fill_buffer(demux,ds);
     case DEMUXER_TYPE_OGG: return demux_ogg_fill_buffer(demux);
+    case DEMUXER_TYPE_RAWAUDIO: return demux_rawaudio_fill_buffer(demux,ds);
   }
   return 0;
 }
@@ -501,8 +503,11 @@ extern int nuv_check_file(demuxer_t *demuxer);
 extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
 extern int demux_ogg_open(demuxer_t* demuxer);
+extern int demux_rawaudio_open(demuxer_t* demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
+
+extern int use_rawaudio;
 
 
 static demuxer_t* demux_open_stream(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
@@ -524,6 +529,11 @@ if ( mf_support )
   mp_msg(MSGT_DEMUXER,MSGL_INFO,"forced mf.\n");
   file_format=DEMUXER_TYPE_MF;
  }
+
+if(stream->type == STREAMTYPE_CDDA || use_rawaudio) {
+  demuxer = new_demuxer(stream,DEMUXER_TYPE_RAWAUDIO,audio_id,video_id,dvdsub_id);
+  file_format = DEMUXER_TYPE_RAWAUDIO;
+}
 
 #ifdef USE_TV
 //=============== Try to open as TV-input: =================
@@ -789,6 +799,10 @@ d_video=demuxer->video;
 demuxer->file_format=file_format;
 
 switch(file_format){
+ case DEMUXER_TYPE_RAWAUDIO: {
+   demux_rawaudio_open(demuxer);
+   break;
+ }
  case DEMUXER_TYPE_MF: {
   if (!demux_open_mf(demuxer)) return NULL;
   break;
@@ -999,6 +1013,7 @@ extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags
 #ifdef HAVE_OGGVORBIS
 extern void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 #endif
+extern void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -1071,6 +1086,8 @@ switch(demuxer->file_format){
  case DEMUXER_TYPE_OGG:
       demux_ogg_seek(demuxer,rel_seek_secs,flags);  break;
 #endif
+ case DEMUXER_TYPE_RAWAUDIO:
+      demux_rawaudio_seek(demuxer,rel_seek_secs,flags);  break;
 
 
 } // switch(demuxer->file_format)

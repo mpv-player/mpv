@@ -17,6 +17,7 @@
 #define STREAMTYPE_MF   7
 #define STREAMTYPE_DS   8
 #define STREAMTYPE_DVDNAV 9   // we cannot safely "seek" in this...
+#define STREAMTYPE_CDDA 10
 
 #define VCD_SECTOR_SIZE 2352
 #define VCD_SECTOR_OFFS 24

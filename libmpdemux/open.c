@@ -67,6 +67,10 @@ tvi_handle_t *tv_handler;
 extern int stream_open_tv(stream_t *stream, tvi_handle_t *tvh);
 #endif
 
+#ifdef HAVE_CDDA
+stream_t* open_cdda(char* dev,char* track);
+#endif
+
 // Open a new stream  (stdin/file/vcd/url)
 
 stream_t* open_stream(char* filename,int vcd_track,int* file_format){
@@ -78,6 +82,11 @@ int vcd_cache_size=128;
 #endif
 #ifdef __FreeBSD__
 int bsize = VCD_SECTOR_SIZE;
+#endif
+
+#ifdef HAVE_CDDA
+if(strncmp("cdda://",filename,7) == 0)
+  return open_cdda(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
 #endif
 
 //============ Open VideoCD track ==============

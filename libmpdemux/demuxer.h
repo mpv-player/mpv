@@ -28,10 +28,11 @@
 #define DEMUXER_TYPE_AUDIO 17
 #define DEMUXER_TYPE_OGG 18
 #define DEMUXER_TYPE_BMP 19
+#define DEMUXER_TYPE_RAWAUDIO 20
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 19
+#define DEMUXER_TYPE_MAX 20
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code

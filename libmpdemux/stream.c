@@ -35,6 +35,12 @@ int dvd_read_sector(void* d,void* p2);
 void dvd_seek(void* d,off_t pos);
 #endif
 
+#ifdef HAVE_CDDA
+int read_cdda(stream_t* s);
+void seek_cdda(stream_t* s);
+void close_cdda(stream_t* s);
+#endif
+
 //=================== STREAMER =========================
 
 int stream_fill_buffer(stream_t *s){
@@ -52,6 +58,11 @@ int stream_fill_buffer(stream_t *s){
     }
 #else
     len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
+#endif
+#ifdef HAVE_CDDA
+  case STREAMTYPE_CDDA:
+    len = read_cdda(s);
+    break;
 #endif
 #ifdef HAVE_VCD
   case STREAMTYPE_VCD:
@@ -146,6 +157,13 @@ if(newpos==0 || newpos!=s->pos){
     vcd_set_msf(s->pos/VCD_SECTOR_DATA);
 #endif
     break;
+#endif
+#ifdef HAVE_CDDA
+  case STREAMTYPE_CDDA: {
+    s->pos=newpos;
+    seek_cdda(s);
+    break;
+  }
 #endif
 #ifdef USE_DVDNAV
   case STREAMTYPE_DVDNAV: {
@@ -260,6 +278,10 @@ void free_stream(stream_t *s){
     waitpid(s->cache_pid,NULL,0);
   }
   if(s->fd>0) close(s->fd);
+#ifdef HAVE_CDDA
+  if(s->type == STREAMTYPE_CDDA)
+    close_cdda(s);
+#endif
   if(s->priv) free(s->priv);
   free(s);
 }
