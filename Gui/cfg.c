@@ -106,9 +106,22 @@ static config_t gui_opts[] =
  { NULL, NULL, 0, 0, 0, 0, NULL }
 };
 
+char * gfgets( char * str, int size, FILE * f )
+{
+ char * s = fgets( str,size,f );
+ char   c;
+ if ( s )
+  {
+   c=s[ strlen( s ) - 1 ]; if ( c == '\n' || c == '\r' ) s[ strlen( s ) - 1 ]=0;
+   c=s[ strlen( s ) - 1 ]; if ( c == '\n' || c == '\r' ) s[ strlen( s ) - 1 ]=0;
+  }
+ return s;
+}
+
 int cfg_read( void )
 {
  char * cfg = get_path( "gui.conf" );
+ FILE * f;
 
 // -- read configuration
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[cfg] read config file: %s\n",cfg );
@@ -122,26 +135,39 @@ int cfg_read( void )
  free( cfg );
 
 // -- read pl
- {
-  FILE * f;
-  cfg=get_path( "gui.pl" );
-  if ( (f=fopen( cfg,"rt" )) == NULL ) return 1;
-  while ( !feof( f ) )
-   {
-    char tmp[512]; plItem * item = calloc( 1,sizeof( plItem ) ); char c;
-    if ( fgets( tmp,512,f ) == NULL ) continue;
-    c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;
-    c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;
-    item->path=strdup( tmp );
-    fgets( tmp,512,f );
-    c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;
-    c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;
-    item->name=strdup( tmp );
-    gtkSet( gtkAddPlItem,0,(void*)item );
-   }
-  fclose( f );
-  free( cfg );
- }
+ cfg=get_path( "gui.pl" );
+ if ( (f=fopen( cfg,"rt" )) )
+  {
+   while ( !feof( f ) )
+    {
+     char tmp[512]; plItem * item;
+     if ( gfgets( tmp,512,f ) == NULL ) continue;
+     item=calloc( 1,sizeof( plItem ) );
+     item->path=strdup( tmp );
+     gfgets( tmp,512,f );
+     item->name=strdup( tmp );
+     gtkSet( gtkAddPlItem,0,(void*)item );
+    }
+   fclose( f );
+  }
+ free( cfg );
+
+  //-- read previously visited urls
+ cfg=get_path( "gui.url" );
+ if ( (f=fopen( cfg,"rt" )) )
+  {
+   while ( !feof( f ) )
+    {
+     char tmp[512]; URLItem * item;
+     if ( gfgets( tmp,512,f ) == NULL ) continue;
+     item=calloc( 1,sizeof( URLItem ) );
+     item->url=strdup( tmp );
+     gtkSet( gtkAddURLItem,0,(void*)item );
+    }
+   fclose( f );
+  }
+ free( cfg );
+
  return 0;
 }
 
@@ -190,6 +216,19 @@ int cfg_write( void )
        fprintf( f,"%s\n",plCurrent->name );
       }
      plCurrent=plCurrent->next;
+    }
+   fclose( f );
+  }
+ free( cfg );
+
+// -- save URL's
+ cfg=get_path( "gui.url" );
+ if ( (f=fopen( cfg,"wt+" )) )
+  {
+   while ( URLList )
+    {
+     if ( URLList->url ) fprintf( f,"%s\n",URLList->url );
+     URLList=URLList->next;
     }
    fclose( f );
   }

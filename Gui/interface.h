@@ -144,9 +144,17 @@ typedef struct _plItem
  char    * name;
 } plItem;
 
+typedef struct _urlItem
+{
+ struct _urlItem *next;
+ char    * url;
+} URLItem;
+
 extern plItem * plList;
 extern plItem * plCurrent;
 extern plItem * plLastPlayed;
+
+extern URLItem * URLList;
 
 #define gtkSetContrast     0
 #define gtkSetBrightness   1
@@ -168,6 +176,7 @@ extern plItem * plLastPlayed;
 #define gtkSetFontFactor  17
 #define gtkSetAutoq       18
 #define gtkClearStruct    19
+#define gtkAddURLItem     20
 
 extern float gtkEquChannels[6][10];
 

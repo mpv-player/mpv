@@ -13,6 +13,8 @@
 #include "mplayer/mplayer.h"
 #include "interface.h"
 
+extern char *get_path(char *);
+
 listItems   appMPlayer;
 
 char      * skinDirInHome=NULL;

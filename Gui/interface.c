@@ -555,6 +555,8 @@ plItem * plCurrent = NULL;
 plItem * plList = NULL;
 plItem * plLastPlayed = NULL;
 
+URLItem *URLList = NULL;
+
 #if defined( MP_DEBUG ) && 0
 void list( void )
 {
@@ -577,6 +579,9 @@ void * gtkSet( int cmd,float fparam, void * vparam )
  equalizer_t * eq = (equalizer_t *)vparam;
  plItem      * item = (plItem *)vparam;
  
+ URLItem     * url_item = (URLItem *)vparam;
+ int           is_added = True;
+
  switch ( cmd )
   {
 // --- handle playlist
@@ -586,8 +591,7 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	  plItem * next = plList;
 	  while ( next->next ) { /*printf( "%s\n",next->name );*/ next=next->next; }
 	  next->next=item; item->prev=next;
-	 }
-	 else { item->prev=item->next=NULL; plCurrent=plList=item; }
+	 } else { item->prev=item->next=NULL; plCurrent=plList=item; }
         list();
         return NULL;
    case gtkGetNextPlItem: // get current item from playlist
@@ -637,6 +641,24 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	   }
 	  plList=NULL; plCurrent=NULL;
 	}
+        return NULL;
+   // ----- Handle url
+   case gtkAddURLItem:
+        if ( URLList )
+	 {
+          URLItem * next_url = URLList;
+          is_added = False;
+          while ( next_url->next )
+           {
+            if ( !gstrcmp( next_url->url,url_item->url ) )
+             {
+              is_added=True;
+              break;
+             }
+            next_url=next_url->next;
+           }
+          if ( ( !is_added )&&( gstrcmp( next_url->url,url_item->url ) ) ) next_url->next=url_item;
+         } else { url_item->next=NULL; URLList=url_item; }
         return NULL;
 // --- subtitle
    case gtkSetSubAuto:

@@ -126,6 +126,7 @@ wsXDNDProcessSelection(wsTWindow* wnd, XEvent *event)
     }
 
     free(delme);
+    return True;
 }
 
 Bool
@@ -153,10 +154,11 @@ wsXDNDProcessClientMessage(wsTWindow* wnd, XClientMessageEvent *event)
       }
     } else {
       /* need to check the whole list here */
-      int ret_left = 1;
+      unsigned long ret_left = 1;
       int offset = 0;
       Atom* ret_buff;
-      int ret_type,ret_format,ret_items;
+      Atom ret_type;
+      unsigned long ret_format,ret_items;
       /* while there is data left...*/
       while(ret_left){
 	XGetWindowProperty(wsDisplay,event->data.l[0],_XA_XdndTypeList,

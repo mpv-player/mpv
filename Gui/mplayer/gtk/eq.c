@@ -233,7 +233,6 @@ static void eqShow( GtkWidget * widget,gpointer user_data )
 
 static void eqSelectChannelsListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data )
 {
- char * tmp;
  Channel=row - 1;
  eqSetBands( Channel );
  if ( Channel == -1 )

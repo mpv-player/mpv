@@ -27,6 +27,18 @@ void ShowURLDialogBox( void )
  if ( gtkVURLDialogBox ) gtkActive( URL );
    else URL=create_URL();
    
+ if ( URLList )
+  {
+   URLItem * item = URLList;
+   g_list_free( URLComboEntrys );
+   URLComboEntrys=NULL;
+   while( item )
+    {
+     URLComboEntrys=g_list_append( URLComboEntrys,(gchar *)item->url );
+     item=item->next;
+    }
+  }
+   
  if ( URLComboEntrys )
   {
    gtk_entry_set_text( GTK_ENTRY( URLEntry ),URLComboEntrys->data );
@@ -53,6 +65,8 @@ static gboolean on_URL_destroy_event( GtkWidget * widget,GdkEvent * event,gpoint
 
 static void on_Button_pressed( GtkButton * button,gpointer user_data )
 { 
+ URLItem * item;
+
  if ( (int)user_data )
   {
    gchar * str= strdup( gtk_entry_get_text( GTK_ENTRY( URLEntry ) ) );
@@ -67,6 +81,10 @@ static void on_Button_pressed( GtkButton * button,gpointer user_data )
        free( str ); str=tmp;
       }
      URLComboEntrys=g_list_prepend( URLComboEntrys,(gchar *)str );
+     
+     item=calloc( 1,sizeof( URLItem ) );
+     item->url=gstrdup( str );
+     gtkSet( gtkAddURLItem,0,(void *)item );
 
      guiSetFilename( guiIntfStruct.Filename,str ); guiIntfStruct.FilenameChanged=1;
      mplEventHandling( evPlayNetwork,0 );

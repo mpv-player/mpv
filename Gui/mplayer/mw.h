@@ -646,7 +646,7 @@ void mplMainKeyHandle( int KeyCode,int Type,int Key )
 }
 
 /* this will be used to handle Drag&Drop files */
-void mplDandDHandler(int num,const char** files)
+void mplDandDHandler(int num,char** files)
 {
   struct stat buf;
   int f = 0;

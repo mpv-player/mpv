@@ -1,6 +1,8 @@
+
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
 #include <unistd.h>
 #include <signal.h>
@@ -33,9 +35,8 @@ static int mplGotoTheNext = 1;
 
 void mplFullScreen( void )
 {
- static int sx,sy;
-
 #if 0
+ static int sx,sy;
 // if ( !guiIntfStruct.Playing )
   {
    wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );

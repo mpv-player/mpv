@@ -266,7 +266,7 @@ static void plButtonReleased( GtkButton * button,gpointer user_data )
          {
           if ( CLFileSelected[i] )
            {
-	    gtk_clist_get_text( GTK_CLIST( CLFiles ),i,0,&itext );
+	    gtk_clist_get_text( GTK_CLIST( CLFiles ),i,0,(char **)&itext );
 	    text[0][0]=itext[0][0]; text[0][1]=current_path;
 	    gtk_clist_append( GTK_CLIST( CLSelected ),text[0] );
 	    NrOfSelected++;
