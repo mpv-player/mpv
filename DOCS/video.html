@@ -24,6 +24,7 @@
 &nbsp;&nbsp;<CODE>1.2.0:</CODE> supports AAlib (-vo aa is very recommended, see below!)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ggi</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>similar to SDL</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aa</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>textmode rendering with AAlib</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><a href="video.html#2.2.1.12">vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Output to VESA BIOS.</TD><TR>
 
 <TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Card specific:</B></P></TD><TR>
 
@@ -194,7 +195,7 @@ Complain to NVidia.</UL></P>
 disabling VSYNC somehow, or set refresh rate to n*(fps of the movie) Hz.</LI>
 
 <LI>Radeon VE - currently only XFree86 CVS has driver for this card, version
-4.1.0 doesn't. No TV-out support.</LI>
+4.1.0 doesn't. No TV-out support. (But see <a href="video.html#2.2.1.12">VESA</a> sections).</LI>
 </P>
 
 
@@ -263,7 +264,7 @@ the movie fits in. There is no converter right now.. :(</P>
 If you want to run it as user, then install <B>MPlayer</B> SUID root:</P>
 
 <P><CODE>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer<BR>
+&nbsp;&nbsp;&nbsp;&nbsp;chown root /usr/local/bin/mplayer<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;chmod 750 /usr/local/bin/mplayer<BR> 
 &nbsp;&nbsp;&nbsp;&nbsp;chmod +s /usr/local/bin/mplayer</CODE></P>
 
@@ -617,6 +618,90 @@ curses (-aadriver linux). But therefore you need write access on /dev/vcsa&lt;te
 That isn't autodetected by aalib, bu vo_aa tries to find the best mode.
 See <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourceforge.net/tune/</A> for further tuning issues.</P>
 
+<P><B><A NAME=2.2.1.12>2.2.1.12. VESA - output to VESA BIOS</B></P>
+<P>
+This driver was designed and introduced as <b>generic driver</b> for any video
+card which has VESA VBE 2.0 compatible BIOS. But exists still one reason of
+developing of this driver - it's multiple troubles with displaying movie on TV.<BR>
+<b>VESA BIOS EXTENSION (VBE) Version 3.0 Date: September 16, 1998</b> (Page 70)
+says:
+</P>
+
+<P>
+<code><i>
+<b>Dual-Controller Designs</b><br>
+VBE 3.0 supports the dual-controller design by assuming that since both
+controllers are typically provided by the same OEM, under control of a
+single BIOS ROM on the same graphics card, it is possible to hide the fact
+that two controllers are indeed present from the application. This has the
+limitation of preventing simultaneous use of the independent controllers,
+but allows applications released before VBE 3.0 to operate normally. The
+VBE Function 00h (Return Controller Information) returns the combined
+information of both controllers, including the combined list of available modes.
+When the application selects a mode, the appropriate controller is activated.
+Each of the remaining VBE functions then operates on the active controller.
+</i></code>
+</P>
+
+<P>
+So you have chances to get working tv-out by using this driver.
+<br>(I guess that TV-out frequently is standalone head or standalone output
+at least.)
+</P>
+
+<P>
+<b>What are pluses:</b><BR>
+ - You have chances to watch movies <b>if Linux even doesn't know</b> your video hardware.<BR>
+ - You don't need to have installed any graphics' related things on your Linux
+(like X11 (aka XFree86), fbdev and so on). This driver can be run from
+<b>text-mode</b>.<BR>
+ - You have chances to get <b>working TV-out</b>. (It's known at least for ATI's cards).<BR>
+ - This driver calls <b>int 10h</b> handler thus it's not an emulator - it
+calls <b>real</b> things of <b>real</b> BIOS in <b>real</b>-mode. (Finely -
+in vm86 mode).<BR>
+ - Most important :) You can watch <b>DVD at 320x200</b> if you don't have a powerful CPU.<BR>
+</P>
+
+<P>
+<b>What are minuses:</b><BR>
+ - It works only on <b>x86 systems</b>.<BR>
+ - <b>It's the slowest driver</b> from all the available ones for MPlayer.<BR>
+ - It can be used only by <b>ROOT</b>.<BR>
+ - Currently it's available only for <b>Linux</b>.<BR>
+ - It <b>doesn't use</b> any <b>hardware accelerations</b> (like YUV overlay or hw scaling).<BR>
+</P>
+
+<P>
+<TABLE BORDER=0>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>These switches of command line currently are available for VESA:</B></P></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vo vesa:opts</TD><TD>&nbsp;&nbsp;</TD><TD>
+<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>will be implemented soon. (Will specify mode parameters such as refresh rate, interlacing, doublescan and so on. Samples: i43,  85,  d100)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-screenw, -screenh, -bpp</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>force userdefined mode</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-x, -y</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>set userdefined prescaling</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>enables userdefined prescaling</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>scales image to fullscreen</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-fs -zoom</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>scales userdefined prescaling to fullscreen</TD><TR>
+</TABLE>
+</P>
+
+<P>
+<b>Known problems and workaround:</b><br>
+ - If you have installed <b>NLS</b> font on your Linux box and run VESA driver
+from text-mode then after terminating mplayer you will have <b>ROM font</b> loaded instead
+of national. You can load national font again by using <b><i>setsysfont</i></b> utility
+from for example Mandrake distribution.<br>
+(<b>Hint</b>: The same utility is used for localizating fbdev).<br>
+ - Some <b>Linux graphics drivers</b> don't update active <b>BIOS mode</b> in DOS memory. So if you have such
+problem - always use VESA driver only from <b>text-mode</b>. Otherwise text-mode (#03) will be
+activated anyway and you will need restart your computer.<br>
+ - Often after terminating VESA driver you get <b>black screen</b>. To return your screen
+to original state - simply switch to other console (by pressing <b>Alt-Fx</b>) then switch
+to your previous console by the same way.<br>
+ - To get <b>working TV-out</b> you need have plugged tv-connector in before booting
+your PC since video BIOS initializes itself only once during POST procedure.
+</P>
+
+
 <P><B><A NAME=2.2.1.A>2.2.1.A. TV-out support</A></B></P>
 
 <P><B><A NAME=2.2.1.A.1>2.2.1.A.1. Matrox cards</A></B></P>
@@ -762,13 +847,29 @@ we have no chance to get working TV-out on ATI.</P>
 <LI><b>Radeon VE</b> and <b>Rage PRO LT</b> have <i>ImpacTV2+</i> which is not supported under Linux.</P>
 
 <P>
-From other side - we could have a chance to have TV-out support through
-<b>VESA drivers</b> on x86 systems but since Linux has too limited <i>vm86 syscall</i>
-- it's unreachable on practice. Finely every access to IO space causes exception
-and driver attempts to emulate even VESA calls instead passing them to native
-int_10h handler.
+Fortunately, owners of fast enough CPUs (Duron, Celeron2 and better) <b>can watch
+movies on their TV</b> through <a href="video.html#2.2.1.12">VESA drivers</a>.
 </P>
 
+<P>
+I should say good words into address of ATI Inc. too:<br>
+<b>it produces top quality BIOSes.</b>
+</P>
+
+<P>
+<b>VESA drivers</b> don't use any hardware acceleration but it simulates
+<b>DGA</b> through 64K window, which is configured through 32-bit mode
+functions of BIOS. ATI cards have enough <b>fast video memory</b> (DIMM or DDR
+chips with 64 - 128-bit access) so it's not bottleneck for them. There are no
+limitations on which video mode can be displayed on your TV (like on other
+cards) so you can use <b>any video mode</b> on your <b>TV</b> (from
+<b>320x200</b> up to <b>1024x768</b>). <br>Only thing you need to do - <b>have
+plugged tv-connector in before booting your PC</b> since video BIOS initializes
+itself only once during POST procedure.
+</P>
+
+<P>
+For detail see <a href="video.html#2.2.1.12">VESA</a> sections of this documentation.
 </P>
 
 </BODY>
