@@ -159,6 +159,16 @@ static int CSSDVDAuthTitlePath(DVDHandle hdl,unsigned char *key_title,char *path
 
 static void reset_agids ( DVDHandle dvd )
 {
+#if !defined(DVD_AUTH) && defined(DVDIOCREPORTKEY)
+	struct dvd_authinfo ai;
+	int i;
+	for (i = 0; i < 4; i++) {
+		memset(&ai, 0, sizeof(ai));
+		ai.format = DVD_INVALIDATE_AGID;
+		ai.agid = i;
+		ioctl(dvd, DVDIOCREPORTKEY, &ai);
+	}
+#else
         dvd_authinfo ai;
         int i;
         for (i = 0; i < 4; i++) {
@@ -167,6 +177,7 @@ static void reset_agids ( DVDHandle dvd )
 	        ai.lsa.agid = i;
 		DVDAuth(dvd, &ai);
 	}
+#endif
 }
 
 
