@@ -327,7 +327,7 @@ query_format(uint32_t format) {
 	case IMGFMT_RGB24:
 	case IMGFMT_Y8:
 	case IMGFMT_Y800:
-	    return VFCAP_CSP_SUPPORTED
+	    return VFCAP_CSP_SUPPORTED|VFCAP_SWSCALE
 #ifdef USE_OSD
 	    | VFCAP_OSD
 #endif
