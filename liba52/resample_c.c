@@ -226,13 +226,57 @@ int a52_resample_MMX(float * _f, int16_t * s16)
 		:"%esi", "memory"
 	);
 	break;
-    case A52_3F: //FIXME Optimize
-	for (i = 0; i < 256; i++) {
-	    s16[5*i] = convert (f[i]);
-	    s16[5*i+1] = convert (f[i+512]);
-	    s16[5*i+2] = s16[5*i+3] = 0;
-	    s16[5*i+4] = convert (f[i+256]);
-	}
+    case A52_3F: 
+	asm volatile(
+		"movl $-1024, %%esi		\n\t"
+		"movq magicF2W, %%mm7		\n\t"
+		"pxor %%mm6, %%mm6		\n\t"
+		"movq %%mm7, %%mm5		\n\t"
+		"punpckldq %%mm6, %%mm5		\n\t"
+		"1:				\n\t"
+		"movd (%1, %%esi), %%mm0	\n\t"
+		"punpckldq 2048(%1, %%esi), %%mm0\n\t"
+		"movd 1024(%1, %%esi), %%mm1	\n\t"
+		"punpckldq 4(%1, %%esi), %%mm1	\n\t"
+		"movd 2052(%1, %%esi), %%mm2	\n\t"
+		"movq %%mm7, %%mm3		\n\t"
+		"punpckldq 1028(%1, %%esi), %%mm3\n\t"
+		"movd 8(%1, %%esi), %%mm4	\n\t"
+		"punpckldq 2056(%1, %%esi), %%mm4\n\t"
+		"leal (%%esi, %%esi, 4), %%edi	\n\t"
+		"sarl $1, %%edi			\n\t"
+		"psubd %%mm7, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"psubd %%mm5, %%mm2		\n\t"
+		"psubd %%mm7, %%mm3		\n\t"
+		"psubd %%mm7, %%mm4		\n\t"
+		"packssdw %%mm6, %%mm0		\n\t"
+		"packssdw %%mm2, %%mm1		\n\t"
+		"packssdw %%mm4, %%mm3		\n\t"
+		"movq %%mm0, (%0, %%edi)	\n\t"
+		"movq %%mm1, 8(%0, %%edi)	\n\t"
+		"movq %%mm3, 16(%0, %%edi)	\n\t"
+		
+		"movd 1032(%1, %%esi), %%mm1	\n\t"
+		"punpckldq 12(%1, %%esi), %%mm1\n\t"
+		"movd 2060(%1, %%esi), %%mm2	\n\t"
+		"movq %%mm7, %%mm3		\n\t"
+		"punpckldq 1036(%1, %%esi), %%mm3\n\t"
+		"pxor %%mm0, %%mm0		\n\t"
+		"psubd %%mm7, %%mm1		\n\t"
+		"psubd %%mm5, %%mm2		\n\t"
+		"psubd %%mm7, %%mm3		\n\t"
+		"packssdw %%mm1, %%mm0		\n\t"
+		"packssdw %%mm3, %%mm2		\n\t"
+		"movq %%mm0, 24(%0, %%edi)	\n\t"
+		"movq %%mm2, 32(%0, %%edi)	\n\t"
+				
+		"addl $16, %%esi		\n\t"
+		" jnz 1b			\n\t"
+		"emms				\n\t"
+		:: "r" (s16+1280), "r" (f+256)
+		:"%esi", "%edi", "memory"
+	);
 	break;
     case A52_2F2R:
 	asm volatile(
@@ -328,10 +372,8 @@ int a52_resample_MMX(float * _f, int16_t * s16)
 		"psubd %%mm7, %%mm3		\n\t"
 		"packssdw %%mm1, %%mm0		\n\t"
 		"packssdw %%mm3, %%mm2		\n\t"
-		"packssdw %%mm5, %%mm4		\n\t"
 		"movq %%mm0, 24(%0, %%edi)	\n\t"
 		"movq %%mm2, 32(%0, %%edi)	\n\t"
-		"movq %%mm4, 40(%0, %%edi)	\n\t"
 				
 		"addl $16, %%esi		\n\t"
 		" jnz 1b			\n\t"
