@@ -991,6 +991,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 static void
 uninit(void)
 {
+    // not inited
+    if (!init_state) return;
     vesa_term();
     if(verbose > 2)
         printf("vo_vesa: uninit was called\n");
