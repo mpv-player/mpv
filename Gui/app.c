@@ -38,7 +38,6 @@ void appClearItem( wItem * item )
  item->fontid=0;
  if ( item->label ) free( item->label ); item->label=NULL;
  item->event=0;
- item->used=0;
 }
 
 void appCopy( listItems * dest,listItems * source )

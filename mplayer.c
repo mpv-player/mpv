@@ -769,17 +769,8 @@ if(!use_stdin && !slave_mode){
 #ifdef HAVE_NEW_GUI
     if ( use_gui ) {
 
-#ifdef USE_DVDREAD 
-     if ( guiIntfStruct.DVDChanged ) 
-      {
-       guiIntfStruct.DVDChanged=0;
-       guiGetEvent( guiCEvent,(char *)guiSetPlay );
-       filename="/dev/dvd";
-       goto play_dvd;
-      }
-#endif
-
-      while(guiIntfStruct.Playing!=1){
+      while ( guiIntfStruct.Playing != 1 )
+       {
 #ifdef HAVE_NEW_INPUT
         mp_cmd_t* cmd;                                                                                   
 #endif
@@ -788,9 +779,16 @@ if(!use_stdin && !slave_mode){
 #ifdef HAVE_NEW_INPUT
 	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
 #endif
-      }
+       } 
 
-play_dvd:
+#ifdef USE_DVDREAD 
+     if ( guiIntfStruct.DVDChanged )
+      {
+       guiIntfStruct.DVDChanged=0;
+       guiGetEvent( guiCEvent,(char *)guiSetPlay );
+       filename=DEFAULT_DVD_DEVICE;
+      }
+#endif
 
 #ifdef USE_SUB
       if ( guiIntfStruct.SubtitleChanged || !guiIntfStruct.FilenameChanged )
@@ -799,7 +797,11 @@ play_dvd:
         guiIntfStruct.SubtitleChanged=0;
        }
 #endif
-      if ( guiIntfStruct.FilenameChanged || !filename )
+      if ( ( guiIntfStruct.FilenameChanged || !filename )
+#ifdef USE_DVDREAD
+           && ( guiIntfStruct.StreamType != STREAMTYPE_DVD )
+#endif
+       )      
        {
         play_tree_t * entry = play_tree_new();
         play_tree_add_file( entry,guiIntfStruct.Filename );
@@ -819,7 +821,6 @@ play_dvd:
 	    filename = play_tree_iter_get_file(playtree_iter,1);
 	   }
          }
-//	filename=playtree->child->files[0]; 
    	guiIntfStruct.FilenameChanged=0;
        } 
     }
@@ -1284,25 +1285,11 @@ if(auto_quality>0){
      guiIntfStruct.MovieWidth=sh_video->disp_w;
      guiIntfStruct.MovieHeight=sh_video->disp_h;
      guiIntfStruct.StreamType=stream->type;
-     guiSetFilename( guiIntfStruct.Filename,filename );
+     guiGetEvent( guiSetFileName,filename );
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels;
       else guiIntfStruct.AudioType=0;
 #ifdef USE_DVDREAD
-     if ( stream->type == STREAMTYPE_DVD )
-      {
-       dvd_priv_t * dvdp = stream->priv;
-       guiIntfStruct.DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
-       guiIntfStruct.DVD.chapters=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_ptts;
-       guiIntfStruct.DVD.angles=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
-       guiIntfStruct.DVD.nr_of_audio_channels=dvdp->nr_of_channels;
-       memcpy( guiIntfStruct.DVD.audio_streams,dvdp->audio_streams,sizeof( dvdp->audio_streams ) );
-       guiIntfStruct.DVD.nr_of_subtitles=dvdp->nr_of_subtitles;
-       memcpy( guiIntfStruct.DVD.subtitles,dvdp->subtitles,sizeof( dvdp->subtitles ) );
-       guiIntfStruct.DVD.current_title=dvd_title + 1;
-       guiIntfStruct.DVD.current_chapter=dvd_chapter + 1;
-       guiIntfStruct.DVD.current_angle=dvd_angle + 1;
-       guiIntfStruct.Track=dvd_title + 1;
-      } 
+     if ( stream->type == STREAMTYPE_DVD ) guiGetEvent( guiSetDVD,(char *)stream->priv );
 #endif
     }
 #endif

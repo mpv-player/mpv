@@ -648,7 +648,6 @@ void btnModify( int event,float state )
  for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
   if ( appMPlayer.Items[j].msg == event )
    {
-    if ( appMPlayer.Items[j].used ) continue;
     switch ( appMPlayer.Items[j].type )
      {
       case itButton:

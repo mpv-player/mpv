@@ -200,6 +200,7 @@ drawrenderedtext:
 extern void exit_player(char* how);
 extern int audio_id;
 extern int dvdsub_id;
+extern char * dvd_device;
 
 void mplEventHandling( int msg,float param )
 {
@@ -214,16 +215,16 @@ void mplEventHandling( int msg,float param )
 
 #ifdef USE_DVDREAD
    case evPlayDVD:
-        dvd_title=1;
-        dvd_chapter=1;
-        dvd_angle=1;
+        guiIntfStruct.DVD.current_title=1;
+        guiIntfStruct.DVD.current_chapter=1;
+        guiIntfStruct.DVD.current_angle=1;
 play_dvd_2:
         guiIntfStruct.StreamType=STREAMTYPE_DVD;
 #endif
    case evPlay:
    case evPlaySwitchToPause:
         mplMainAutoPlay=0;
-        if ( ( msg == evPlaySwitchToPause )&( guiIntfStruct.Playing == 1 ) ) goto NoPause;
+        if ( ( msg == evPlaySwitchToPause )&&( guiIntfStruct.Playing == 1 ) ) goto NoPause;
 
         switch ( guiIntfStruct.StreamType )
          {
@@ -234,7 +235,12 @@ play_dvd_2:
                break;
 #ifdef USE_DVDREAD
           case STREAMTYPE_DVD:
-               guiSetFilename( guiIntfStruct.Filename,"/dev/dvd" );
+	       if ( !dvd_device ) dvd_device=DEFAULT_DVD_DEVICE;
+               guiSetFilename( guiIntfStruct.Filename,dvd_device );
+	       dvd_title=guiIntfStruct.DVD.current_title;
+	       dvd_angle=guiIntfStruct.DVD.current_angle;
+               dvd_chapter=guiIntfStruct.DVD.current_chapter;
+               guiIntfStruct.DVDChanged=1;
                break;
 #endif
          }
@@ -244,32 +250,20 @@ play_dvd_2:
 #ifdef USE_DVDREAD
    case evSetDVDSubtitle:
         dvdsub_id=(int)param;
-        dvd_title=guiIntfStruct.DVD.current_title;
-        dvd_angle=guiIntfStruct.DVD.current_angle;
-        dvd_chapter=guiIntfStruct.DVD.current_chapter;
-        guiIntfStruct.DVDChanged=1;
         goto play_dvd_2;
         break;
    case evSetDVDAudio:
         audio_id=(int)param;
-        dvd_title=guiIntfStruct.DVD.current_title;
-        dvd_angle=guiIntfStruct.DVD.current_angle;
-        dvd_chapter=guiIntfStruct.DVD.current_chapter;
-        guiIntfStruct.DVDChanged=1;
         goto play_dvd_2;
         break;
    case evSetDVDChapter:
-        dvd_title=guiIntfStruct.DVD.current_title;
-        dvd_angle=guiIntfStruct.DVD.current_angle;
-        dvd_chapter=(int)param;
-        guiIntfStruct.DVDChanged=1;
+        guiIntfStruct.DVD.current_chapter=(int)param;
         goto play_dvd_2;
         break;
    case evSetDVDTitle:
-        dvd_title=(int)param;
-        dvd_chapter=1;
-        dvd_angle=1;
-        guiIntfStruct.DVDChanged=1;
+        guiIntfStruct.DVD.current_title=(int)param;
+	guiIntfStruct.DVD.current_chapter=1;
+	guiIntfStruct.DVD.current_angle=1;
         goto play_dvd_2;
         break;
 #endif
@@ -439,7 +433,6 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
           item=&appMPlayer.Items[SelectedItem];
           itemtype=item->type;
           item->pressed=btnPressed;
-          item->used=1;
           switch( item->type )
            {
             case itButton:
@@ -461,7 +454,6 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
            {
             case itPotmeter:
             case itHPotmeter:
-                 item->used=0;
                  btnModify( item->msg,(float)( X - item->x ) / item->width * 100.0f );
                  switch ( item->msg )
                   {
@@ -489,7 +481,6 @@ rollerhandled:
           item=&appMPlayer.Items[currentselected];
           if ( ( item->type == itHPotmeter )||( item->type == itVPotmeter )||( item->type == itPotmeter ) )
            {
-            item->used=0;
             item->value+=value;
             btnModify( item->msg,item->value );
             switch ( item->msg )

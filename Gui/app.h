@@ -34,7 +34,6 @@ typedef struct
  int        pressed,disabled,tmp;
  int        key,key2;
  int        phases;
- int        used;
  float      value;
  txSample   Bitmap;
  txSample   Mask;

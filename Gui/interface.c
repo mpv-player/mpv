@@ -14,6 +14,7 @@
 #include "app.h"
 #include "../libvo/x11_common.h"
 #include "../input/input.h"
+#include "../libmpdemux/stream.h"
 
 guiInterface_t guiIntfStruct;
 
@@ -46,6 +47,7 @@ int guiCMDArray[] =
 
 void guiGetEvent( int type,char * arg )
 {
+ dvd_priv_t * dvdp = (dvd_priv_t *) arg;
  switch ( type )
   {
    case guiXEvent:
@@ -60,6 +62,27 @@ void guiGetEvent( int type,char * arg )
           case guiSetPause: guiIntfStruct.Playing=2; mplState(); break;
 	 }
         break;
+   case guiSetState:
+	mplState();
+        break;
+   case guiSetFileName:
+        if ( arg ) guiSetFilename( guiIntfStruct.Filename,arg );
+        break;
+#ifdef USE_DVDREAD
+   case guiSetDVD:
+        guiIntfStruct.DVD.titles=dvdp->vmg_file->tt_srpt->nr_of_srpts;
+        guiIntfStruct.DVD.chapters=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_ptts;
+        guiIntfStruct.DVD.angles=dvdp->vmg_file->tt_srpt->title[dvd_title].nr_of_angles;
+        guiIntfStruct.DVD.nr_of_audio_channels=dvdp->nr_of_channels;
+        memcpy( guiIntfStruct.DVD.audio_streams,dvdp->audio_streams,sizeof( dvdp->audio_streams ) );
+        guiIntfStruct.DVD.nr_of_subtitles=dvdp->nr_of_subtitles;
+        memcpy( guiIntfStruct.DVD.subtitles,dvdp->subtitles,sizeof( dvdp->subtitles ) );
+        guiIntfStruct.DVD.current_title=dvd_title + 1;
+        guiIntfStruct.DVD.current_chapter=dvd_chapter + 1;
+        guiIntfStruct.DVD.current_angle=dvd_angle + 1;
+        guiIntfStruct.Track=dvd_title + 1;
+        break;
+#endif
 #ifdef HAVE_NEW_INPUT
    case guiIEvent:
         printf( "cmd: %d\n",(int)arg );

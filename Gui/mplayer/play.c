@@ -9,6 +9,7 @@
 #include "../../config.h"
 #include "../../help_mp.h"
 #include "../../libvo/x11_common.h"
+#include "../../input/input.h"
 
 #include "../app.h"
 
@@ -65,13 +66,13 @@ void mplStop()
  guiIntfStruct.TimeSec=0;
  guiIntfStruct.Position=0;
  guiIntfStruct.AudioType=0;
+ mplState();
 // if ( !guiIntfStruct.Playing ) return;
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsResizeWindow( &appMPlayer.subWindow,appMPlayer.sub.width,appMPlayer.sub.height );
    wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
   }
- guiGetEvent( guiCEvent,guiSetStop );
  mplSubRender=1;
  wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
  wsClearWindow( appMPlayer.subWindow );
@@ -93,16 +94,10 @@ void mplPlay( void )
 
 void mplPause( void )
 {
- switch( guiIntfStruct.Playing )
-  {
-   case 1: // playing
-        guiIntfStruct.Playing=2;
-        break;
-   case 2: // paused
-        guiIntfStruct.Playing=1;
-        break;
-  }
- mplState();
+ mp_cmd_t * cmd = (mp_cmd_t *)calloc( 1,sizeof( *cmd ) );
+ cmd->id=MP_CMD_PAUSE;
+ cmd->name=strdup("pause");
+ mp_input_queue_cmd(cmd);
  mplSubRender=0;
 }
 
