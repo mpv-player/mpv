@@ -416,6 +416,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
     /// Error
     if(np < 0) {
       mp_msg(MSGT_DEMUX,MSGL_DBG2,"OGG demuxer : Bad page sync\n");
+      free(ogg_d);
       return 0;
     }
     /// Need some more data
