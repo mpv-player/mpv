@@ -846,8 +846,10 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_RAWDV)
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"RAWDV");
       file_format=DEMUXER_TYPE_RAWDV;
    }
-   else
+   else {
       free_demuxer(demuxer);
+      demuxer=NULL;
+   }
 }
 #endif
 //=============== Try to open as audio file: =================
