@@ -1,7 +1,7 @@
 .\" MPlayer (C) 2000-2003 Arpad Gereoffy
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" 
-.\" Run this to get a html version of the man page:
+.\" Run this to get a HTML version of the man page:
 .\"   cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
 .\" Run this to get a text version of the man page:
 .\"   groff -m man -Tascii mplayer.1 | col -bx > manpage.txt
@@ -798,16 +798,16 @@ from the decimation value (see below).
 choose the size of the picture that will be compressed by hardware
 mjpeg compression:
 .RSss
-1: full size 
-    704x576    PAL 
+1: full size
+    704x576    PAL
     704x480    NTSC
 .br
-2: medium size 
+2: medium size
     352x288    PAL
     352x240    NTSC
 .br
-4: small size 
-    176x144    PAL 
+4: small size
+    176x144    PAL
     176x120    NTSC
 .REss
 .IPs quality=<0-100>
@@ -1984,7 +1984,7 @@ Activate a comma separated list of video filters and their options.
 .br
 The parameters are optional and if omitted, some of them are set to default
 values.
-Use -1 to keep the default value.
+Use '-1' to keep the default value.
 Parameters w:h means width x height in pixels, x:y means x;y position counted
 from the upper left corner of the bigger image.
 .br
@@ -1996,6 +1996,11 @@ Available filters are:
 .IPs crop[=w:h:x:y]
 Crops the given part of the image and discards the rest.
 Useful to remove black bands from widescreen movies.
+.RSss
+w,h: Cropped width and height, defaults to original width and height.
+.br
+x,y: Position of the cropped picture, defaults to center.
+.REss
 .IPs cropdetect[=0\-255]
 Calculates necessary cropping parameters and prints the recommended parameters
 to stdout.
@@ -2004,43 +2009,87 @@ The threshold can be optionally specified from nothing (0) to everything
 (default: 24)
 .IPs rectangle[=w:h:x:y]
 Draws a rectangle of the requested width and height at the specified
-coordinates over the image (used to test crop).
-(default: maximum w/\:h, upper left x/\:y position)
+coordinates over the image (useful for testing crop parameters).
+.RSss
+w,h: width and height (default: -1, maximum possible width where boundaries
+are still visible.
+.br
+x,y: top left corner position (default: -1, uppermost leftmost)
+.REss
+.IPs
+The plugin responds to the input.conf directive 'change_rectangle'
+that takes two parameters.
+The first parameter can be 0 for w, 1 for h, 2 for x or 3 for y.
+The second parameter is the amount of pixels by which to change the
+designated rectangle boundary.
 .IPs expand[=w:h:x:y:o]
 Expands (not scales) movie resolution to the given value and places the
-unscaled original at coordinates x y. Negative values for w and h are
-treated as offsets to the original size. For example, expand=0:-50:0:0
-adds a 50 pixel border to the bottom of the picture.
-Can be used for placing subtitles/\:OSD in the resulting black bands (default:
-original w/\:h, centered x/\:y).
-The last parameter (de)activates OSD rendering (default: 0=disabled).
+unscaled original at coordinates x, y.
+Can be used for placing subtitles/\:OSD in the resulting black bands.
+.RSss
+w,h: expanded width,height (default: original width,height)
+.br
+x,y: position of original image on the expanded image (default: center)
+.br
+o:   OSD/subtitle rendering
+    0: disable (default)
+    1: enable
+.REss
+.IPs
+Negative values for w and h are treated as offsets to the original size, e.g.
+expand=0:-50:0:0 adds a 50 pixel border to the bottom of the picture.
 .IPs flip
 Flips the image upside down.
 See also option \-flip.
 .IPs mirror
-Flips the image on Y axis.
+Mirrors the image on the Y axis.
 .IPs rotate[=<0-7>]
 Rotates and flips (optional) the image +/\:\- 90 degrees.
 For parameters between 4-7 rotation is only done if the movie's geometry is
 portrait and not landscape.
 .IPs scale[=w:h[:c[:p]]]
 Scales the image with the software scaler (slow) and performs a YUV<\->RGB
-colorspace conversion (see \-sws option too).
+colorspace conversion (also see \-sws option).
+.RSss
+w,h: new width/height after scaling (default: original width,height)
+    Note: If -zoom is used, and underlying filters (including libvo) are
+    incapable of scaling, then it defaults to d_width/\:d_height!
+    -1: original width/\:height
+    0:  scaled d_width/\:d_height
+    -2: Calculate w/\:h using the other dimension and the prescaled aspect ratio.
+    -3: Calculate w/\:h using the other dimension and the original aspect ratio.
+.br
+c:   chroma skipping
+    0: use all available input lines for chroma
+    1: use only every 2. input line for chroma
+    2: use only every 4. input line for chroma
+    3: use only every 8. input line for chroma
+.br
+p:  scaling parameter (depends upon the scaling method used)
+    for -sws 2 (bicubic)  it is sharpness (0 (soft) - 100 (sharp))
+    for -sws 7 (gaussian) it is sharpness (0 (soft) - 100 (sharp))
+    for -sws 9 (lanczos)  it is filter length (1 - 10)
 The value 0 is used for scaled (aspect) destination w/\:h.
-(default: original w/\:h, destination w/\:h with \-zoom) Optionaly chroma
+(default: original w/\:h, destination w/\:h with \-zoom) Optionally chroma
 skipping (c from 0\-3) and scaling parameters can be specified.
 (see the \-sws option for details)
+.REss
 .IPs yuy2
 Forces software YV12/\:I420 or 422P to YUY2 conversion.
+Useful for video cards/\:drivers with slow YV12 but fast YUY2 support.
 .IPs rgb2bgr[=swap]
-RGB 24/\:32 <\-> BGR 24/\:32 colorspace conversion with optional R <\-> B
-swapping.
+RGB 24/\:32 <\-> BGR 24/\:32 colorspace conversion.
+.RSss
+swap: Also perform  R <\-> B swapping.
+.REss
 .IPs palette
 RGB/\:BGR 8 \-> 15/\:16/\:24/\:32bpp colorspace conversion using palette.
 .IPs format[=fourcc]
-Restricts the colorspace for next filter.
-It does not do any conversion.
+Restricts the colorspace for the next filter without doing any conversion.
 Use together with the scale filter for a real conversion.
+.RSss
+fourcc: format name like rgb15, bgr24, yv12, etc (default: yuy2)
+.REss
 .IPs pp[=filter1[:option1[:option2...]]/[-]filter2...] (see \-pphelp too)
 This option enables usage of MPlayer's internal postprocessing filter,
 and also gives an interface where you can pass options to the named filter.
@@ -2084,27 +2133,44 @@ off automatically depending on available CPU time:
 .br
 \-vf pp=hb:y/vb:a \-autoq 6
 .REss
+.IPs test
+Generate various test patterns.
 .IPs lavc[=quality:fps]
-Realtime MPEG1 encoder for use with DVB/\:DXR3 (libavcodec)
+Fast software YV12 to MPEG1 conversion with libavcodec for use with DVB/\:DXR3.
+Faster and of better quality than \-vf fame.
+.RSss
+quality:
+    1 \- 31 fixed qscale
+    32 \-   fixed bitrate in kBits
+.br
+fps: force output fps (float value) (default: 0, autodetect based on height)
+.REss
 .IPs fame
-Realtime MPEG1 encoder for use with DVB/\:DXR3 (libfame)
+Fast software YV12 to MPEG1 conversion with libfame for use with DVB/\:DXR3.
 .IPs dvbscale[=aspect]
-Set up optimal scaling for DVB cards.
-(aspect = DVB_HEIGHT*ASPECTRATIO, default: 768)
+Set up optimal scaling for DVB cards, scaling the X axis in hardware and
+calculating the Y axis scaling in software to keep aspect.
+.RSss
+aspect: control aspect ratio, calculate as DVB_HEIGHT*ASPECTRATIO (default:
+576*4/3=768), set it to 576*(16/9)=1024 for a 16:9 TV.
+.REss
+.IPs
+Only useful together with expand+scale:
+\-vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1,lavc
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
-Adds noise
+Adds noise.
 .RSss
 <0\-100>: luma noise
 .br
 <0\-100>: chroma noise
 .br
-u: uniform noise
+u: uniform noise (gaussian otherwise)
 .br
-t: temporal noise
+t: temporal noise (noise pattern changes between frames)
 .br
-a: averaged temporal noise
+a: averaged temporal noise (smoother, but a lot slower)
 .br
-h: high quality
+h: high quality (slightly better looking, slightly slower)
 .br
 p: mix random noise with a (semi)regular pattern
 .REss
@@ -2121,20 +2187,24 @@ chroma:	spatial chroma strength (default = 3)
 time:	temporal strength (default = 6)
 .REss
 .IPs eq[=bright:cont]
-Activates the software equalizer with interactive controls like the hardware
-eq controls.
-The values can be from -100 to 100.
+Software equalizer with interactive controls just like the hardware
+equalizer, for cards/\:drivers that do not support brightness and
+contrast controls in hardware.
+Might also be useful with MEncoder, either for fixing poorly captured
+movies, or for slightly reducing contrast to mask artifacts and get by
+with lower bitrates.
+Initial values in the range -100 \- 100 may be given on the command line.
 .IPs eq2[=gamma:contrast:brightness:saturation:rg:gg:bg]
 Alternative software equalizer that uses lookup tables (very slow),
 allowing gamma correction in addition to simple brightness,
 contrast and saturation adjustment. Note that it uses the same MMX
-optimized code as -vf eq if all gamma values are 1.0!
+optimized code as \-vf eq if all gamma values are 1.0.
 The parameters are given as floating point values.
-Defaults are gamma=1.0, contrast=1.0, brightness=0.0 and saturation=1.0.
 Parameters rg, gg, bg are the independent gamma values for the Red, Green
-and Blue components, all default to 1.0.
-The values are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
-in negative image) -1\-1 for brightness and 0\-3 for saturation.
+and Blue components.
+Defaults are 1.0, brightness=0.0.
+Value ranges are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
+in a negative image), -1\-1 for brightness and 0\-3 for saturation.
 .IPs halfpack[=f]
 Convert planar YUV 4:2:0 to half-height packed 4:2:2, downsampling luma but
 keeping all chroma samples.
@@ -2156,27 +2226,28 @@ Use libavcodec's deinterlace filter.
 .IPs "unsharp=l|cWxH:amount[:l|cWxH:amount]"
 Unsharp mask / gaussian blur.
 .RSss
-l: apply effect on luma component
+l: Apply effect on luma component.
 .br
-c: apply effect on chroma components
+c: Apply effect on chroma components.
 .br
 WxH: width and height of the matrix, odd sized in both directions
 (min = 3x3, max = 13x11 or 11x13, usually something between 3x3 and 7x7)
 .br
-amount: relative amount of sharpness / blur to add to the image
-(amount < 0 = blur, amount > 0 = sharpen, usually something between -1.5 and
-1.5)
+amount: Relative amount of sharpness/\:blur to add to the image
+(a sane range should be -1.5 \- 1.5).
+    <0: blur
+    >0: sharpen
 .REss
 .IPs swapuv
 Swap U & V plane.
 .IPs "il=[d|i][s][:[d|i][s]]"
 (de)interleaves lines.
-The goal of this filter is to add ability of processing interlaced images
-pre-field without deinterlacing it.
-You can filter your interlaced dvd and playback on TV without breaking the
+The goal of this filter is to add the ability to process interlaced images
+pre-field without deinterlacing them.
+You can filter your interlaced DVD and play it on a TV without breaking the
 interlacing.
-While deinterlacing (with the post processing filter) removes the interlacing
-permamently (by smoothing averaging etc) deinterleaving splits the frame into
+While deinterlacing (with the postprocessing filter) removes interlacing
+permanently (by smoothing, averaging, etc) deinterleaving splits the frame into
 2 fields (so called half pictures), so you can process (filter) them
 independently and then re-interleave them.
 .RSss
@@ -2187,7 +2258,7 @@ i: interleave
 s: swap fields (exchange even & odd lines)
 .REss
 .IPs "field[=n]"
-Extracts a single field from interlaced image using stride arithmetic
+Extracts a single field from an interlaced image using stride arithmetic
 to avoid wasting CPU time. The optional argument n specifies whether
 to extract the even or the odd field (depending on whether n is even
 or odd).
@@ -2235,16 +2306,16 @@ box blur
 .RSss
 radius: size of the filter
 .br
-power: how often the filter should be applied
+power: How often the filter should be applied.
 .REss
-.IPs "sab=rad:pfilter:cDiff[:rad:pfilter:cDiff]"
+.IPs "sab=rad:pf:colorDiff[:rad:pf:colorDiff]"
 shape adaptive blur
 .RSss
 rad: blur filter strength (~0.1\-4.0) (slower if larger)
 .br
-pfilter: prefilter strength (~0.1\-2.0)
+pf: prefilter strength (~0.1\-2.0)
 .br
-cDiff: how different the pixels are allowed to be to be considered
+colorDiff: How different the pixels are allowed to be considered.
 (~0.1-100.0)
 .REss
 .IPs "smartblur=rad:strength:thresh[:rad:strength:thresh]"
@@ -2257,7 +2328,7 @@ strength: blur (0.0\-1.0) or sharpen (-1.0\-0.0)
 thresh: filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
 .REss
 .IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
-perspective correcture
+perspective correction
 .RSss
 x0,y0,...: coordinates of the top left, top right, bottom left, bottom right
 corners
@@ -2269,7 +2340,7 @@ Use the 2x scale and interpolate algorithm for scaling and smoothing images.
 .IPs 1bpp
 1bpp bitmap to YUV/BGR 8/15/16/32 conversion
 .IPs "bmovl=hidden:opaque:<fifo>"
-Read bitmaps from a FIFO and display them in window.
+Read bitmaps from a FIFO and display them in a window.
 .
 .RSss
 hidden: sets the default value of the 'hidden' flag (boolean)
