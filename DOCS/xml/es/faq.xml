@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.26 -->
+<!-- synced with 1.28 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Preguntas de Usuario Frecuentes</title>
 
@@ -15,6 +15,17 @@
 <answer><para>
 Hemos hecho<ulink url="../../tech/patches.txt">un pequeño documento</ulink>
 describiendo todos los detalles necesarios. Por favor siga las instrucciones.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+¿Cómo puedo traducir <application>MPlayer</application> a un nuevo idioma?
+</para></question>
+<answer><para>
+Lea el <ulink url="../../tech/translations.txt">COMO sobre traducciones</ulink>,
+ahí debe estar todo explicado. Puede obtener más ayuda en la lista de correo
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -40,7 +51,9 @@ Siempre son bienvenidos codeadores y documentadores. Lea la
 para obtener una primera impresión. Deberá suscribirse a la lista
 de correo 
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
-y comenzar a escribir código.
+y comenzar a escribir código. Si quiere ayudar con la documentación,
+únase a la lista de correo
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -540,10 +553,11 @@ Está usando el controlador vo con un solo buffer (x11,xv). Con xv, use la opción
 
 <qandaentry>
 <question><para>
-¿Qué es exactamente libavcodec?
+¿Qué es exactamente <systemitem class="library">libavcodec</systemitem>?
 </para></question>
 <answer><para>
-Consulte la sección <link linkend="ffmpeg">libavcodec</link>.
+Consulte la sección
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para></answer>
 </qandaentry>
 
@@ -552,8 +566,9 @@ Consulte la sección <link linkend="ffmpeg">libavcodec</link>.
 ¡Pero configure me dice <screen>Checking for libavcodec ... no</screen>!
 </para></question>
 <answer><para>
-Necesita obtener libavcodec del CVS de FFmpeg. Lea las instrucciones en la
-sección <link linkend="ffmpeg">libavcodec</link>.
+Necesita obtener <systemitem class="library">libavcodec</systemitem> del CVS de FFmpeg.
+Lea las instrucciones en la sección
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para></answer>
 </qandaentry>
 

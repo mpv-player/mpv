@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.10 -->
 <sect1 id="tv-input" xreflabel="Entrada de TV">
 <title>Entrada de TV</title>
 
@@ -110,7 +110,8 @@ YV12). En las versiones viejas de <application>MPlayer</application>/<applicatio
 MEncoder</application> era necesario especificar el formato de salida. Este
 problema se debería estar resuelto en las versiones actuales y la opción <option>outfmt</option>
 no se requiere más, ya que la opción por omisión sirve para la mayoría de los propósitos. Por
-ejemplo si está capturando en DivX usando libavcodec y especifica <option>outfmt=RGB24</option>
+ejemplo si está capturando en DivX usando
+<systemitem class="library">libavcodec</systemitem> y especifica <option>outfmt=RGB24</option>
 para incrementar la calidad de las imágenes capturadas, las imágenes capturadas serán
 realmente convertidas nuevamente a YV12 por lo que lo único que logra es un desperdicio
 masivo de ciclos de CPU.

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.33 -->
+<!-- synced with 1.34 -->
 <sect1 id="codecs">
 <title>Codecs soportados</title>
 
@@ -54,7 +54,8 @@ Los más importantes por encima de todo son:
   FLI/FLC
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> de libavcodec, y
+  <emphasis role="bold">RealVideo 1.0 &amp; 2.0</emphasis> de
+  <systemitem class="library">libavcodec</systemitem>, y
   <emphasis role="bold">RealVideo 3.0 &amp; 4.0</emphasis> usando
   bibliotecas RealPlayer
   </simpara></listitem>
@@ -62,7 +63,7 @@ Los más importantes por encima de todo son:
   decodificador nativo para HuffYUV
   </simpara></listitem>
 <listitem><simpara>
-  Varios formatos antiguos simples como-RLE
+  Varios formatos antiguos simples tipo-RLE
   </simpara></listitem>
 </itemizedlist>
 
@@ -91,7 +92,7 @@ La nueva generación de este codec se llama DivX4 y puede incluso decodificar
 películas hechas con el infame codec DivX! Además es mucho más rápido
 que las DLLs nativas Win32 DivX pero más lento que
 <systemitem class="library">libavcodec</systemitem>. Por eso su uso como
-decodificador es <emphasis role="bold">NO RECOMENDADO</emphasis>. Sin
+decodificador <emphasis role="bold">no se recomienda</emphasis>. Sin
 embargo, es útil para codificar. Una desventaja de este codec es que no está
 disponible bajo una licencia de Código Abierto.
 </para>
@@ -221,9 +222,11 @@ y de <ulink url="http://www.ffmpeg.org/ffmpeg-doc.html#SEC20">audio</ulink>.
 </para>
 
 <para>
-Si usa una liberación de <application>MPlayer</application> que tiene libavcodec
+Si usa una liberación de <application>MPlayer</application> que tiene
+<systemitem class="library">libavcodec</systemitem>
 dentro del paquete, constrúyalo de la manera habitual. Si usa
-<application>MPlayer</application> desde CVS debe extraer libavcodec desde
+<application>MPlayer</application> desde CVS debe extraer
+<systemitem class="library">libavcodec</systemitem> desde
 el árbol CVS de FFmpeg ya que las liberaciones de FFmpeg son raras. El CVS es bastante
 estable y ofrece muchas características. Para ello haga lo siguiente:
 </para>
@@ -246,8 +249,9 @@ estable y ofrece muchas características. Para ello haga lo siguiente:
   ¡debe copiarlo/moverlo!
   </para></step>
 <step><para>
-  Si prefiere tener libavcodec actualizado al mismo tiempo que actualiza
-  el CVS de <application>MPlayer</application>, ponga la siguiente línea en
+  Si prefiere tener <systemitem class="library">libavcodec</systemitem>
+  actualizado al mismo tiempo que actualiza el CVS de
+  <application>MPlayer</application>, ponga la siguiente línea en
   su archivo <filename>main/CVS/Entries</filename>:
   <screen>D/libavcodec////</screen>
   </para></step>
@@ -261,7 +265,7 @@ estable y ofrece muchas características. Para ello haga lo siguiente:
 <para>
 <application>MPlayer</application> desde CVS contiene un subdirectorio
 <filename>libavcodec</filename> pero éste ¡<emphasis role="bold">no</emphasis>
-contiene el código para libavcodec!
+contiene el código para <systemitem class="library">libavcodec</systemitem>!
 Debe seguir los pasos anteriores para obtener el código para esta biblioteca.
 </para>
 </note>
@@ -455,7 +459,8 @@ tengan el mismo origen.
 <title>DESVENTAJAS</title>
 <listitem><simpara>
   actualmente no <emphasis role="bold">decodifica</emphasis> bien todos los
-  archivos DivX/DivX4 (no hay problema porque <link linkend="ffmpeg">libavcodec</link>
+  archivos DivX/DivX4 (no hay problema porque
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   puede reproducirlos)
   </simpara></listitem>
 <listitem><simpara>
@@ -517,12 +522,12 @@ video Sorenson con los siguientes decodificadores:
 <listitem><simpara>
   Sorenson Video v1 (fourcc <emphasis>SVQ1</emphasis>) - decodificación soportada
   por <emphasis role="bold">codec nativo</emphasis>
-  (<link linkend="ffmpeg">libavcodec</link>)
+  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
   Sorenson Video v3 (fourcc <emphasis>SVQ3</emphasis>) - decodificación soportada
   por <emphasis role="bold">codec nativo</emphasis>
-  (<link linkend="ffmpeg">libavcodec</link>)
+  (<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 </itemizedlist>
 
@@ -554,8 +559,9 @@ video Sorenson con los siguientes decodificadores:
   con optimización MMX/SSE/3DNow!)
   </simpara></listitem>
 <listitem><simpara>
-  Windows Media Audio 7 y 8 (aka WMAv1 y WMAv2) (código <emphasis role="bold">nativo</emphasis>,
-  con <link linkend="ffmpeg">libavcodec</link>)
+  Windows Media Audio 7 y 8 (aka WMAv1 y WMAv2) (código
+  <emphasis role="bold">nativo</emphasis>, con
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (usando DMO DLL)

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.17 -->
 <chapter id="mencoder">
 <title>Codificando con MEncoder</title>
 
@@ -81,8 +81,7 @@ primera pasada.
 <step><para>
   <emphasis>Tercera pasada:</emphasis>
 <screen>
-mencoder <replaceable>file/DVD</replaceable> -oac copy -pass 2 \
-         -ovc divx4 -divx4opts br=<replaceable>bitrate</replaceable>
+mencoder <replaceable>file/DVD</replaceable> -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=<replaceable>bitrate</replaceable>
 </screen>
 Esta es la segunda pasada de la codificación del video. Especifique la
 misma tasa de bits que en la pasada anterior a menos que sepa realmente
@@ -111,9 +110,9 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <para>
 <application>MEncoder</application> puede crear archivos con formato de salida
 MPEG (MPEG-PS). Probablemente esto sea util con el codec <emphasis>mpeg1video</emphasis>
-de <link linkend="ffmpeg">libavcodec</link>, porque los reproductores - excepto
-<application>MPlayer</application> - esperan video MPEG1, y audio en MPEG1 layer 2
-(MP2) en los archivos MPEG.
+de <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>,
+porque los reproductores - excepto <application>MPlayer</application> - esperan
+video MPEG1, y audio en MPEG1 layer 2 (MP2) en los archivos MPEG.
 </para>
 
 <para>
@@ -233,12 +232,14 @@ se describe <link linkend="menc-feat-fix-avi">más arriba</link>.
 </sect1>
 
 <sect1 id="menc-feat-enc-libavcodec">
-<title>Codificando con la familia de codecs de libavcodec</title>
+<title>Codificando con la familia de codecs de
+<systemitem class="library">libavcodec</systemitem></title>
 
 <para>
-<link linkend="ffmpeg">libavcodec</link> provee un montón de interesantes
-formatos de video y audio (actualmente sus codecs de audio no están soportados).
-Puede codificar con los siguientes codecs (más o menos actualizado):
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
+provee un montón de interesantes formatos de video y audio (actualmente sus codecs
+de audio no están soportados). Puede codificar con los siguientes codecs
+(más o menos actualizado):
 
 <informaltable frame="all">
 <tgroup cols="2">
@@ -489,7 +490,8 @@ ahí fuera que soporten esta característica de MPEG4, excepto <application>MPlaye
 
 <para>
 Esta característica puede ser usada solo con el codec
-<systemitem>mpeg4</systemitem> de <link linkend="ffmpeg">libavcodec</link>.
+<systemitem>mpeg4</systemitem> de
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 Tenga en mente: aunque <application>MPlayer</application> puede reproducir
 correctamente el archivo creado, otros reproductores pueden usar una razón
 de aspecto incorrecta.
@@ -511,7 +513,8 @@ Uso
 <sect1 id="custommatrices"><title>Matrices inter/intra personalizadas</title>
 
 <para>
-Con ésta característica de <link linkend="ffmpeg">libavcodec</link> puede
+Con ésta característica de
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> puede
 personalizar las matrices inter (marcos-I/marcos clave) e intra (marcos-P/marcos
 de predicción). Está soportado por muchos codecs:
 <systemitem>mpeg1video</systemitem> y <systemitem>mpeg2video</systemitem>
@@ -646,7 +649,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <link linkend="menc-feat-divx4">codificación en 2 pasadas</link>.
   Como va a copiar la pista de audio como está y conoce por eso
   su tasa de bits, y además sabe la duración de la película, puede
-  calcular la tasa de bits requerida para dar a la opción
+  calcular la tasa de bits de video requerida para dar a la opción
   <option>-lavcopts vbitrate=<replaceable>bitrate</replaceable></option>
   sin usar
   <link linkend="menc-feat-divx4">codificación en 3 pasadas</link>.
@@ -677,7 +680,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   del DVD. Si el DVD está hecho desde una película, y tiene 24 fps,
   puede desentrelazar durante el ripeo. Si, sin embargo, el original
   es un video a 50/60 fps, convertirlo en un video desentrelazado
-  a 23.976/25 fps puede perder información. Si decide entrelazar, puede
+  a 23.976/25 fps puede perder información. Si decide desentrelazar, puede
   experimentar con distintos filtros de desentrelazado después. Vea
   <ulink url="http://www.wieser-web.de/MPlayer/">http://www.wieser-web.de/MPlayer/</ulink>
   para ejemplos. Un buen punto de partida es <option>-vf pp=fd</option>.
@@ -687,7 +690,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Si está haciendo las dos cosas, recortando y desentrelazando, desentrelace
   <emphasis>antes</emphasis> de recortar. Actualmente, no es necesario
   si el desplazamiento de recorte es vertical y múltiplo de 2 pixels. Sin
-  embatgo con algunos otros filtros como dering deberá siempre hacer el recorte
+  embargo con algunos otros filtros, como dering, deberá siempre hacer el recorte
   lo último, es un buen hábito poner el filtro de recortado el último.
 </para></sect2>
 

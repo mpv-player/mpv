@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.10 -->
 
 <bookinfo id="toc">
 <title>MPlayer - El reproductor de Películas para LINUX</title>
@@ -92,7 +92,8 @@ codificador de películas simple, diseñado para codificar películas que MPlayer p
 reproducir (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG//MOV/VIV/FLI/RM/NUV/NET/PVA
 </emphasis>) a otros formatos también reproducibles por MPlayer (ver más abajo). Puede
 codificar con varios codecs, como <emphasis role="bold">DivX4</emphasis> (1 o 2 pasadas),
-libavcodec, audio <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>. Además posee un poderoso
+<systemitem class="library">libavcodec</systemitem>, audio
+<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>. Además posee un poderoso
 sistema de plugin para la manipulación de vídeo.
 </para>
 
@@ -104,8 +105,8 @@ sistema de plugin para la manipulación de vídeo.
   <application>MPlayer</application>
   </simpara></listitem>
 <listitem><simpara>
-  Codificación a todos los codecs soportados por ffmpeg <link
-  linkend="ffmpeg">libavcodec</link>
+  Codificación a todos los codecs soportados por ffmpeg
+  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
   </simpara></listitem>
 <listitem><simpara>
   Codificación de vídeo desde un <emphasis role="bold">sintonizador de TV compatible con V4L</emphasis>

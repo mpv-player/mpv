@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.34 -->
+<!-- synced with 1.36 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Adaptaciones</title>
 
@@ -56,11 +56,12 @@ MPlayer funciona en PDAs con Linux en CPU ARM p.e. Sharp Zaurus, Compaq Ipaq. La
 manera más facil de obtener MPlayer es bajarlo desde uno de los sitios de paquetes de
 <ulink url="http://www.openzaurus.org">OpenZaurus</ulink>. Si desea compilarlo usted
 mismo, debe mirar en
-<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">MPlayer</ulink>
+<ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</ulink>
 y el directorio 
 <ulink url="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</ulink>
 en el raiz de la distribución de OpenZaurus. Ahí siempre tienen los Makefile y parches
-más recientes usados para construir un MPlayer desde CVS con libavcodec.
+más recientes usados para construir un MPlayer desde CVS con
+<systemitem class="library">libavcodec</systemitem>.
 Si necesita un entorno GUI, puede usar xmms-embebido.
 </para>
 </sect2>
@@ -128,10 +129,14 @@ Vea la sección <link linkend="macos">Mac OS</link>.
 <para>
 En <emphasis role="bold">UltraSPARCs</emphasis>, MPlayer tiene la ventaja de
 las extensiones <emphasis role="bold">VIS</emphasis> (equivalentes a MMX), actualmente
-solo en <emphasis>libmpeg2</emphasis>, <emphasis>libvo</emphasis> y
-<emphasis>libavcodec</emphasis>, pero no en mp3lib. Puede ver un archivo VOB en una
-CPU a 400MHz. Necesita
-<ulink url="http://www.sun.com/sparc/vis/mediaLib.html">mLib</ulink> instalado.
+solo en
+<systemitem class="library">libmpeg2</systemitem>,
+<systemitem class="library">libvo</systemitem> y
+<systemitem class="library">libavcodec</systemitem>, pero no en
+<systemitem class="library">mp3lib</systemitem>. Puede ver un archivo VOB en una
+CPU a 400MHz. Necesita tener
+<ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>
+instalado.
 </para>
 
 <para>
@@ -394,7 +399,8 @@ para versiones más antiguas de Mac OS y envíe parches!
 
 <para>
 El GCC 3.x modificado por Apple es el preferido para compilar
-<application>MPlayer</application> especialmente usando libavcodec ya que
+<application>MPlayer</application> especialmente usando
+<systemitem class="library">libavcodec</systemitem> ya que
 el GCC 2.95.x modificado por Apple no soporta bien la sintaxis C99.
 </para>
 

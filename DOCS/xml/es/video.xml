@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.45 -->
+<!-- synced with 1.47 -->
 <sect2 id="video-dev">
 <title>Dispositivos de salida de video</title>
 
@@ -1547,10 +1547,11 @@ con otros.
 <listitem><para>
   Actualmente solo los codecs que tienen salida en el espacio de color UYVY son los
   que funcionan junto con este controlador. Desafortunadamente, esto excluye
-  todo decodificador simple de la familia libavcodec. Esto nos deja con los
-  siguientes codecs populares usables: <systemitem>cvid, divxds, xvid, divx4,
-  wmv7, wmv8</systemitem> y algunos otros. Por favor tenga en cuenta que esto
-  es solo algo temporal. La sintaxis de uso es la siguiente:
+  todo decodificador simple de la familia <systemitem class="library">libavcodec</systemitem>.
+  Esto nos deja con los siguientes codecs populares usables:
+  <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem> y algunos otros.
+  Por favor tenga en cuenta que esto es solo algo temporal.
+  La sintaxis de uso es la siguiente:
   <screen>
     mplayer -vf format=uyvy -vc divxds <replaceable>archivodivx3.avi</replaceable>
   </screen>
@@ -1618,21 +1619,23 @@ La capa de selección puede hacerse con el método de subdispositivo, p.e.:
 <sect4 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
-Lea por favor la sección <link linkend="directfb">principal de DirectFB</link> o
-la información general.
-</para>
-
-<para>Este controlador de salida de video activa CRTC2 (en un segundo monitor) en la
-tarjeta G400/G450/G550, mostrando video <emphasis role="bold">independientemente</emphasis>
-del monitor primario.
+Lea por favor la sección <link linkend="directfb">principal de DirectFB</link> para 
+información general.
 </para>
 
 <para>
-Instrucciones sobre cómo hacer que esto funcione se pueden encontrar en la
-sección <ulink url="../../tech/directfb.txt">tech</ulink>
-o directamente en la
-<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">web personal</ulink>
-de Ville Syrjala.
+Este controlador de salida de video activa CRTC2 (en un segundo monitor) en la
+tarjeta G400/G450/G550, mostrando video <emphasis role="bold">independiente</emphasis>
+en el monitor principal.
+</para>
+
+<para>
+Ville Syrjala tiene un 
+<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">LEAME</ulink>
+y un
+<ulink url="http://www.sci.fi/~syrjala/directfb/matrox_tv-out_howto">COMO</ulink>
+en su página web que explica cómo sacar salida de TV con DirectFB en tarjetas
+Matrox.
 </para>
 
 <note><para>
@@ -1994,8 +1997,9 @@ digital (<option>-ac hwac3</option>).
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
 Para ver contenido no-MPEG en el em8300 (p.e. DivX o RealVideo) deberá especificar
-un filtro de video MPEG1 como libavcodec (lavc) o libfame (fame). Actualmente
-lavc es más rápido y da mejor calidad de imagen, por lo que le sugerimos que lo
+un filtro de video MPEG1 como <systemitem class="library">libavcodec</systemitem>
+(lavc) o libfame (fame).
+Actualmente lavc es más rápido y da mejor calidad de imagen, por lo que le sugerimos que lo
 use a menos que tenga algún problema con él. Vea la página de manual para más
 información acerca de <option>-vf lavc/fame</option>.
 El uso de lavc es altamente recomendado. Actualmente no hay manera de establecer
@@ -2046,7 +2050,7 @@ Se trata de un controlador de pantalla (<option>-vo zr</option>) para un número
 de tarjetas de captura/reproducción de MJPEG (probado con DC10+ y Buz, y también
 debe funcionar con LML33, el DC10). El controlador funciona codificando el marco
 a JPEG y enviándolo luego a la tarjeta. Para la codificación JPEG se usa
-<systemitem>libavcodec</systemitem>, y además es obligatorio usarlo. Con el modo
+<systemitem class="library">libavcodec</systemitem>, y además es obligatorio usarlo. Con el modo
 especial <emphasis>cinerama</emphasis>, puede ver películas en wide screen real
 suponiendo que tiene dos proyectores y dos tarjetas MJPEG. Dependiendo de la
 configuración de resolución y calidad, este controlador puede requerir una gran

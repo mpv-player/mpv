@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.35 -->
+<!-- synced with 1.36 -->
 <sect1 id="install">
 <title>Instalación</title>
 
@@ -123,8 +123,8 @@ núcleo 2.4.x es recomendado.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">libavcodec</emphasis>: Este paquete de codecs es capaz de
-  decodificar flujos de vídeo codificado en 
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>:
+  Este paquete de codecs es capaz de decodificar flujos de vídeo codificado en 
   H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
   y decodificar flujo de audio WMA (Windows Media Audio) v1/v2, en múltiples
   plataformas. Es también reconocido como el más rápido para esta tarea. Vea
@@ -168,8 +168,9 @@ núcleo 2.4.x es recomendado.
   <listitem><simpara>
     No es necesaria para el viejo formato AFS con vídeo MP41 o MP42 (aunque el
     audio VoxWare es frecuente en éstos archivos - que usa un codec de Win32), o
-    WMV7. Tampoco se necesita para WMA (Windows Media Audio), libavcodec tiene
-    un decodificador de fuente abierta para eso.
+    WMV7. Tampoco se necesita para WMA (Windows Media Audio),
+    <systemitem class="library">libavcodec</systemitem> tiene un decodificador
+    de fuente abierta para eso.
     </simpara></listitem>
   </itemizedlist>
   </para></listitem>
@@ -182,7 +183,8 @@ núcleo 2.4.x es recomendado.
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: información acerca de este codec
   está disponible en la sección <link linkend="divx4-5">DivX4/DivX5</link>. 
-  Posiblemente no quiera este codec ya que <emphasis role="bold">libavcodec</emphasis>
+  Posiblemente no quiera este codec ya que
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>
   (ver más arriba) es más rápido y tiene mejor calidad que este, tanto para codificar
   como para decodificar. Características:
   <itemizedlist>
@@ -193,7 +195,7 @@ núcleo 2.4.x es recomendado.
   <listitem><simpara>
     puede reproducir películas viejas en <emphasis role="bold">DivX3</emphasis>
     mucho más rápido que la DLL de Win32 ¡pero más lento que <emphasis role="bold">
-    libavcodec</emphasis>!
+    <systemitem class="library">libavcodec</systemitem></emphasis>!
     </simpara></listitem>
   <listitem><simpara>
     es de código cerrado, y solo la versión para x86 esta disponible.
