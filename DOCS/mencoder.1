@@ -36,8 +36,6 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-ofps\ <fps> ]
 .RB [ \-o\ <filename> ]
 .RB [ \-frames\ <number> ]
-.RB [ \-x\ <rescale\ width> ]
-.RB [ \-y\ <rescale\ height> ]
 .RB [ \-sws\ <0-2> ]
 .RB [ \-ffourcc\ fourcc ]
 .RB [ \-ss\ <time> ]
@@ -50,10 +48,11 @@ mencoder \- Movie Encoder for Linux
 .I mencoder
 MEncoder (MPlayer's Movie Encoder) is a simple movie encoder, designed to
 encode MPlayer-playable movies (AVI/DVD/VCD/VOB/MPG/MOV/VIV/NET) to other
-MPlayer-playable formats (see below). Currently it's in beta stage, and encodes
-only to DivX4 (1 or 2 passes) video, PCM/MP3/VBRMP3 audio. Also has stream
-copying abilities. In the future, there will be cropping, resizing filters, and
-other interesting stuff.
+MPlayer-playable formats (see below). Currently it and encodes to divx4/xvid
+(using divx4linux/xvid core), libavcodec formats (including divx3 and mpeg4),
+raw uncompressed rgb (usable with virtualdub etc), PCM/MP3/VBRMP3 audio.
+Also has stream copying abilities. 
+You can use MPlayer's video filters, so scale, crop, expand, flip, etc.
 .LP
 .SH "GENERAL OPTIONS"
 .TP
@@ -119,8 +118,8 @@ if failed.  For examples see MPlayer manpage.
 .B \-include
 specify config file to be parsed after the default
 .TP
-.B \-mc\ seconds/5frame
-maximum sync correction per 5 frames (in seconds).
+.B \-mc\ seconds/frame
+maximum sync correction per frame (in seconds).
 Use -mc 0 to disable input A/V sync.
 .TP
 .B \-v
@@ -132,7 +131,8 @@ Examples:
 
   -ovc help      get help
   -ovc copy      no encoding, just streamcopy
-  -ovc divx4     encode to DivX4
+  -ovc divx4     encode to DivX4/DivX5 or XviD
+  -ovc rawrgb    encode to uncompressed RGB24
   -ovc lavc      encode with a libavcodec codec
 .TP
 .B \-oac <codecname>
@@ -155,9 +155,9 @@ Used when encoding from multiple JPEG files.
 Its sub-options are:
 
   on             turns on multifile support
-  w=<value>      width of the output file
-  h=<value>      height of the output file
-  fps=<value>    fps of the output file
+  w=<value>      width of the output file [autodetected]
+  h=<value>      height of the output file [autodetected]
+  fps=<value>    fps of the output file [default: 25fps]
   type=<value>   type of input files (jpeg, png)
 .TP
 .B \-divx4opts
@@ -366,6 +366,8 @@ to the given file instead of the default divx2pass.log .
 .TP
 .B \-ofps <fps>
 The output file will have different frame/sec than the source.
+You MUST set it for variable fps (asf, some mov) and progressive
+(29.97fps telecined mpeg) files.
 .TP
 .B \-o <filename>
 Outputs to the given filename, instead of the default 'test.avi' .
@@ -393,14 +395,8 @@ stop encoding at given time. Can be specified in many was :
 
 Can be used in conjuction with -ss !
 .TP
-.B \-x <rescale width>
-Rescale output movie to given pixels wide.
-.TP
-.B \-y <rescale height>
-Rescale output movie to given pixels tall.
-.TP
 .B \-sws <0-2>
-Type of scaling method
+Type of scaling method (use with -vop scale=w:h)
 
     0            fast bilinear (default)
     1            bilinear
