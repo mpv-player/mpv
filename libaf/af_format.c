@@ -12,6 +12,13 @@
 
 #include "af.h"
 
+// Integer to float conversion through lrintf()
+#ifdef HAVE_LRINTF
+#define __USE_ISOC99 1
+#include <math.h>
+#else
+#define lrintf(x) ((int)(x))
+#endif
 
 /* Functions used by play to convert the input audio to the correct
    format */
@@ -119,6 +126,27 @@ static char* fmt2str(int format, char* str, size_t size)
   return str;
 }
 
+// Helper function to check sanity for input arguments
+int check_sanity(af_data_t* data)
+{
+  char buf[256];
+  // Sanity check for bytes per sample
+  if(data->bps != 4 && data->bps != 2 && data->bps != 1){
+    af_msg(AF_MSG_ERROR,"[format] The number of bytes per sample must be 1, 2 or 4. Current value is %i \n",data->bps);
+    return AF_ERROR;
+  }
+
+  // Check for unsupported formats
+  switch(data->format & AF_FORMAT_SPECIAL_MASK){
+  case(AF_FORMAT_MPEG2): 
+  case(AF_FORMAT_AC3):
+    af_msg(AF_MSG_ERROR,"[format] Sample format %s not yet supported \n",
+	 fmt2str(data->format,buf,255)); 
+    return AF_ERROR;
+  }
+  return AF_OK;
+}	
+
 // Initialization and runtime control
 static int control(struct af_instance_s* af, int cmd, void* arg)
 {
@@ -131,24 +159,14 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
        af->data->bps == ((af_data_t*)arg)->bps)
       return AF_DETACH;
     
-    // Sanity check for bytes per sample
-    if(((af_data_t*)arg)->bps != 4 && ((af_data_t*)arg)->bps != 2 && 
-       ((af_data_t*)arg)->bps != 1){
-      af_msg(AF_MSG_ERROR,"[format] The number of output bytes per sample must be 1, 2 or 4. Current value is %i \n",((af_data_t*)arg)->bps);
+    // Check for errors in configuraton
+    if(AF_OK != check_sanity((af_data_t*)arg) || 
+       AF_OK != check_sanity(af->data))
       return AF_ERROR;
-    }
-
-    // Check for unsupported formats
-    switch(((af_data_t*)arg)->format & AF_FORMAT_SPECIAL_MASK){
-    case(AF_FORMAT_MPEG2): 
-    case(AF_FORMAT_AC3):
-      af_msg(AF_MSG_ERROR,"[format] Sample format not yet supported \n"); 
-      return AF_ERROR;
-    }
 
     af_msg(AF_MSG_VERBOSE,"[format] Changing sample format from %ibit %sto %ibit %s \n",
-	   ((af_data_t*)arg)->bps*8,fmt2str(((af_data_t*)arg)->format,buf1,256),
-	   af->data->bps*8,fmt2str(af->data->format,buf2,256));
+	   ((af_data_t*)arg)->bps*8,fmt2str(((af_data_t*)arg)->format,buf1,255),
+	   af->data->bps*8,fmt2str(af->data->format,buf2,255));
 
     af->data->rate = ((af_data_t*)arg)->rate;
     af->data->nch  = ((af_data_t*)arg)->nch;
@@ -159,9 +177,11 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_COMMAND_LINE:{
     af_data_t d={NULL,0,0,0,0,2};
     char str[256];
+    str[0] = '\0';
     sscanf((char*)arg,"%i:%s",&(d.bps),str);
     // Convert string to format
     d.format = str2fmt(str);
+    
     // Automatic correction of errors
     switch(d.format & AF_FORMAT_SPECIAL_MASK){
     case(AF_FORMAT_A_LAW):
@@ -178,13 +198,9 @@ static int control(struct af_instance_s* af, int cmd, void* arg)
   case AF_CONTROL_FORMAT:
     // Reinit must be called after this function has been called
     
-    // Check for unsupported formats
-    switch(((af_data_t*)arg)->format & AF_FORMAT_SPECIAL_MASK){
-    case(AF_FORMAT_MPEG2): 
-    case(AF_FORMAT_AC3):
-      af_msg(AF_MSG_ERROR,"[format] Sample format not yet supported \n"); 
+    // Check for errors in configuraton
+    if(AF_OK != check_sanity((af_data_t*)arg))
       return AF_ERROR;
-    }
 
     af->data->format = ((af_data_t*)arg)->format;
     af->data->bps=((af_data_t*)arg)->bps; 
@@ -232,7 +248,6 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
       si2us(l->audio,l->audio,len,l->bps);
     break;
   case(AF_FORMAT_F):
-    float2int(c->audio, l->audio, len, l->bps);
     switch(l->format&AF_FORMAT_SPECIAL_MASK){
     case(AF_FORMAT_MU_LAW):
       to_ulaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
@@ -240,9 +255,12 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
     case(AF_FORMAT_A_LAW):
       to_alaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
       break;
+    default:
+      float2int(c->audio, l->audio, len, l->bps);
+      if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
+	si2us(l->audio,l->audio,len,l->bps);
+      break;
     }
-    if((l->format&AF_FORMAT_SIGN_MASK) == AF_FORMAT_US)
-      si2us(l->audio,l->audio,len,l->bps);
     break;
   default:
     // Input must be int
@@ -255,26 +273,25 @@ static af_data_t* play(struct af_instance_s* af, af_data_t* data)
 	si2us(c->audio,c->audio,len,c->bps); 
     }
     // Convert to special formats
-    switch(l->format&AF_FORMAT_SPECIAL_MASK){
+    switch(l->format&(AF_FORMAT_SPECIAL_MASK|AF_FORMAT_POINT_MASK)){
     case(AF_FORMAT_MU_LAW):
       to_ulaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
       break;
     case(AF_FORMAT_A_LAW):
       to_alaw(c->audio, l->audio, len, c->bps, c->format&AF_FORMAT_POINT_MASK);
       break;
+    case(AF_FORMAT_F):
+      int2float(c->audio, l->audio, len, c->bps);
+      break;
     default:
-      // Change to float
-      if(AF_FORMAT_F == (l->format&AF_FORMAT_POINT_MASK))
-	int2float(c->audio, l->audio, len, c->bps);
-      else{
-	// Change the number of bits
-	if(c->bps != l->bps)
-	  change_bps(c->audio,l->audio,len,c->bps,l->bps);
-	else
-	  c->audio = l->audio;
-      }
+      // Change the number of bits
+      if(c->bps != l->bps)
+	change_bps(c->audio,l->audio,len,c->bps,l->bps);
+      else
+	memcpy(l->audio,c->audio,len*c->len);
       break;
     }
+    break;
   }
 
   // Switch from cpu native endian to the correct endianess 
@@ -299,7 +316,6 @@ static int open(af_instance_t* af){
   af->data=calloc(1,sizeof(af_data_t));
   if(af->data == NULL)
     return AF_ERROR;
-  (int)af->setup = 0;  
   return AF_OK;
 }
 
@@ -427,15 +443,15 @@ static void float2int(void* in, void* out, int len, int bps)
   switch(bps){
   case(1):
     for(i=0;i<len;i++)
-      ((int8_t*)out)[i]=(int8_t)(SCHAR_MAX*((float*)in)[i]);
+      ((int8_t*)out)[i]=(int8_t)lrintf(SCHAR_MAX*((float*)in)[i]);
     break;
   case(2): 
     for(i=0;i<len;i++)
-      ((int16_t*)out)[i]=(int16_t)(SHRT_MAX*((float*)in)[i]);
+      ((int16_t*)out)[i]=(int16_t)lrintf(SHRT_MAX*((float*)in)[i]);
     break;
   case(4):
     for(i=0;i<len;i++)
-      ((int32_t*)out)[i]=(int32_t)(INT_MAX*((float*)in)[i]);
+      ((int32_t*)out)[i]=(int32_t)lrintf(INT_MAX*((float*)in)[i]);
     break;
   }	
 }

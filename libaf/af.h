@@ -1,9 +1,9 @@
 #include <stdio.h>
 
+#include "af_mp.h"
 #include "config.h"
 #include "control.h"
 #include "af_format.h"
-#include "af_mp.h"
 
 #ifndef __aop_h__
 #define __aop_h__
