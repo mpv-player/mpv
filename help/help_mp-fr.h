@@ -1,4 +1,4 @@
-// Last sync on 2003-10-18 with help_mp-en.h 1.108
+// Last sync on 2003-10-19 with help_mp-en.h 1.111
 // Updates & fixes by pl <p_l@gmx.fr> & n.le gaillart <n@tourmentine.com>
 // Original translation by Firebird <firebird@chez.com>
 
