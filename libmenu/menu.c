@@ -116,8 +116,10 @@ static int menu_parse_config(char* buffer) {
 int menu_init(char* cfg_file) {
   char* buffer = NULL;
   int bl = BUF_STEP, br = 0;
-  int f;
-  int fd = open(cfg_file, O_RDONLY);
+  int f, fd;
+  if(vo_font == NULL)
+    return 0;
+  fd = open(cfg_file, O_RDONLY);
   if(fd < 0) {
     printf("Can't open menu config file: %s\n",cfg_file);
     return 0;
