@@ -21,7 +21,7 @@ long VFWAPI VideoForWindowsVersion(void);
 
 extern void* my_mreq(int size, int to_zero);
 extern      void DrvClose(HDRVR hdrvr);
-extern int my_release(char* memory);
+extern int my_release(void* memory);
 
 long VFWAPIV ICDecompress(HIC hic,long dwFlags,LPBITMAPINFOHEADER lpbiFormat,void* lpData,LPBITMAPINFOHEADER lpbi,void* lpBits);
 

@@ -17,10 +17,10 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <errno.h>
+#include <ctype.h>
+#include <stdlib.h>
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
-#else
-#include <stdlib.h>
 #endif
 #include <time.h>
 #include <unistd.h>
@@ -223,7 +223,7 @@ void* my_mreq(int size, int to_zero)
     heap_counter+=size;
     return heap+heap_counter-size;	
 }
-int my_release(char* memory)
+int my_release(void* memory)
 {
 //    test_heap();
     if(memory==NULL)
@@ -247,12 +247,12 @@ int my_release(char* memory)
 struct alc_list_t;
 typedef struct alc_list_t {
   int size;
-  int addr;
+  void *addr;
   struct alc_list_t *prev;
   struct alc_list_t *next;
 }alc_list;
 static alc_list *alclist=NULL;
-static alccnt=0;
+static int alccnt=0;
 #endif
 
 void* my_mreq(int size, int to_zero)
@@ -280,7 +280,7 @@ void* my_mreq(int size, int to_zero)
 #endif
     return (int*)((int)answer+sizeof(int));
 }	
-int my_release(char* memory)
+int my_release(void* memory)
 {
 #ifdef GARBAGE
     alc_list* pp;
@@ -307,7 +307,7 @@ int my_release(char* memory)
 			}
 		}
         	if (pp == NULL) {
-			printf("Not Found %x %d\n",memory-4,alccnt);
+			printf("Not Found %p %d\n",memory-4,alccnt);
 			return 0;
 		}
 	}
@@ -435,7 +435,7 @@ void* WINAPI expGetModuleHandleA(const char* name)
 	if(!result)
 	{
 	    if(strcasecmp(name, "kernel32")==0)
-		result=0x120;
+		result=(void *) 0x120;
 	}	
          dbgprintf("GetModuleHandleA('%s') => 0x%x\n", name, result);
 	return result;
@@ -515,7 +515,7 @@ void* WINAPI expCreateEventA(void* pSecAttr, char bManualReset,
 		    pSecAttr, bManualReset, bInitialState, name, name, pp->pm);
 		return pp->pm;
 	    }
-	}while(pp=pp->prev);
+	}while((pp=pp->prev));
     }	
     pm=my_mreq(sizeof(pthread_mutex_t), 0);
     pthread_mutex_init(pm, NULL);
@@ -591,7 +591,7 @@ void* WINAPI expWaitForSingleObject(void* object, int duration)
 	if (pp == NULL) dbgprintf("WaitForSingleObject: NotFound\n");
 	if((pp->pm, mlist->pm)==0)
 		break;;
-     }while(pp=pp->prev);
+     }while((pp=pp->prev));
     
 
     pthread_mutex_lock(ml->pm);
@@ -1165,7 +1165,7 @@ HANDLE WINAPI expCreateSemaphoreA(char* v1, long init_count, long max_count, cha
 		    v1, init_count, max_count, name, name, mlist);
 		return (HANDLE)mlist;
 	    }
-	}while(pp=pp->prev);
+	}while((pp=pp->prev));
     }	
     pm=my_mreq(sizeof(pthread_mutex_t), 0);
     pthread_mutex_init(pm, NULL);
@@ -1600,9 +1600,10 @@ int WINAPI expFreeLibrary(int module)
     dbgprintf("FreeLibrary(0x%x) => %d\n", module, result);
     return result;
 }   
+void* LookupExternalByName(const char* library, const char* name);
 void* WINAPI expGetProcAddress(HMODULE mod, char* name)
 {
-    int result;
+    void *result;
     if(mod!=0x120)
 	result=GetProcAddress(mod, name);
     else
@@ -1847,10 +1848,10 @@ int expstrlen(char* str)
     dbgprintf("strlen(0x%x='%s') => %d\n", str, str, result);
     return result; 
 }
-int expstrcpy(char* str1, const char* str2) 
+void *expstrcpy(char* str1, const char* str2) 
 {
-    int result=strcpy(str1, str2);
-    dbgprintf("strcpy(0x%x, 0x%x='%s') => %d\n", str1, str2, str2, result);
+    void *result=strcpy(str1, str2);
+    dbgprintf("strcpy(0x%x, 0x%x='%s') => %p\n", str1, str2, str2, result);
     return result;
 }
 int expstrcmp(const char* str1, const char* str2)
@@ -1859,16 +1860,16 @@ int expstrcmp(const char* str1, const char* str2)
     dbgprintf("strcmp(0x%x='%s', 0x%x='%s') => %d\n", str1, str1, str2, str2, result);
     return result;
 }
-int expstrcat(char* str1, const char* str2) 
+void *expstrcat(char* str1, const char* str2)
 {
-    int result=strcat(str1, str2);
-    dbgprintf("strcat(0x%x='%s', 0x%x='%s') => %d\n", str1, str1, str2, str2, result);
+    void *result=strcat(str1, str2);
+    dbgprintf("strcat(0x%x='%s', 0x%x='%s') => %p\n", str1, str1, str2, str2, result);
     return result;    
 }
-int expmemmove(void* dest, void* src, int n) 
+void *expmemmove(void* dest, void* src, int n) 
 {
-    int result=memmove(dest, src, n);
-    dbgprintf("memmove(0x%x, 0x%x, %d) => %d\n", dest, src, n, result);
+    void *result=memmove(dest, src, n);
+    dbgprintf("memmove(0x%x, 0x%x, %d) => %p\n", dest, src, n, result);
     return memmove;
 }
 int expmemcmp(void* dest, void* src, int n) 
@@ -1877,10 +1878,10 @@ int expmemcmp(void* dest, void* src, int n)
     dbgprintf("memcmp(0x%x, 0x%x, %d) => %d\n", dest, src, n, result);
     return result;
 }
-int expmemcpy(void* dest, void* src, int n) 
+void *expmemcpy(void* dest, void* src, int n) 
 {
-    int result=memcpy(dest, src, n);
-    dbgprintf("memcpy(0x%x, 0x%x, %d) => %x\n", dest, src, n, result);
+    void *result=memcpy(dest, src, n);
+    dbgprintf("memcpy(0x%x, 0x%x, %d) => %p\n", dest, src, n, result);
     return result;
 }
 time_t exptime(time_t* t)
@@ -1892,7 +1893,7 @@ time_t exptime(time_t* t)
 
 int WINAPI expStringFromGUID2(GUID* guid, char* str, int cbMax)
 {
-    int result=snprintf(str, cbMax, "%.8x-%.4x-%.4x-%.2x%.2x%.2x%.2x%.2x%.2x%.2x%.2x",
+    int result=snprintf(str, cbMax, "%.8lx-%.4x-%.4x-%.2x%.2x%.2x%.2x%.2x%.2x%.2x%.2x",
      guid->f1, guid->f2, guid->f3,
      (unsigned char)guid->f4[0], (unsigned char)guid->f4[1], (unsigned char)guid->f4[2], (unsigned char)guid->f4[3], 
      (unsigned char)guid->f4[4], (unsigned char)guid->f4[5], (unsigned char)guid->f4[6], (unsigned char)guid->f4[7]);
@@ -2699,6 +2700,6 @@ int my_garbagecollection()
 		free(ppsv);
 		alccnt--;
 	} 
-   printf("Total Unfree %d bytes cnt %d [%x,%d]\n",unfree,unfreecnt,alclist,alccnt);
+   printf("Total Unfree %d bytes cnt %d [%p,%d]\n",unfree,unfreecnt,alclist,alccnt);
 #endif
 }
