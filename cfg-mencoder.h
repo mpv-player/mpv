@@ -161,6 +161,7 @@ m_option_t of_conf[]={
 };
 
 extern float avi_aspect_override; /* defined in libmpdemux/muxer_avi.c */
+extern int write_odml; /* defined in libmpdemux/muxer_avi.c */
 
 m_option_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
@@ -209,6 +210,9 @@ m_option_t mencoder_opts[]={
 	
 	{"encodedups", &encode_duplicates, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noencodedups", &encode_duplicates, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	
+	{"odml", &write_odml, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noodml", &write_odml, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	
 	// info header strings
 	{"info", info_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},

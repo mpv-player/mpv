@@ -33,6 +33,7 @@ extern char *info_comment;
 #define MOVIALIGN        0x00001000
 
 float avi_aspect_override = -1.0;
+int write_odml = 1;
 
 struct avi_odmlidx_entry {
 	uint64_t ofs;
@@ -159,7 +160,7 @@ if(len>0){
 }
 
 static void write_avi_list(FILE *f,unsigned int id,int len);
-static void avifile_write_index(muxer_t *muxer);
+static void avifile_write_standard_index(muxer_t *muxer);
 
 static void avifile_odml_new_riff(muxer_t *muxer)
 {
@@ -198,9 +199,9 @@ static void avifile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags)
     if (vsi->riffofspos == 0) {
 	rifflen += 8+muxer->idx_pos*sizeof(AVIINDEXENTRY);
     }
-    if (rifflen + paddedlen > ODML_CHUNKLEN) {
+    if (rifflen + paddedlen > ODML_CHUNKLEN && write_odml == 1) {
 	if (vsi->riffofspos == 0) {
-            avifile_write_index(muxer);
+            avifile_write_standard_index(muxer);
 	}
 	avifile_odml_new_riff(muxer);
     }
@@ -624,13 +625,7 @@ static void avifile_odml_write_index(muxer_t *muxer){
   muxer->file_end=ftello(muxer->file);
 }
 
-static void avifile_write_index(muxer_t *muxer){
-
-  if(muxer->file_end > ODML_CHUNKLEN &&
-     muxer->idx && muxer->idx_pos>0) {
-    avifile_odml_write_index(muxer);
-    return;
-  }
+static void avifile_write_standard_index(muxer_t *muxer){
 
   muxer->movi_end=ftello(muxer->file);
   if(muxer->idx && muxer->idx_pos>0){
@@ -644,6 +639,16 @@ static void avifile_write_index(muxer_t *muxer){
       muxer->avih.dwFlags|=AVIF_HASINDEX;
   }
   muxer->file_end=ftello(muxer->file);
+}
+
+static void avifile_write_index(muxer_t *muxer){
+  struct avi_stream_info *vsi = muxer->def_v->priv;
+
+  if (vsi->riffofspos > 0){
+    avifile_odml_write_index(muxer);
+  } else {
+    avifile_write_standard_index(muxer);
+  }
 }
 
 void muxer_init_muxer_avi(muxer_t *muxer){
