@@ -268,7 +268,7 @@ play:
 	vcd_track=0;
 	dvd_title=0;
 
-	if ( gtkSet( gtkGetCurrPlItem,0,NULL ) )
+	if ( gtkSet( gtkGetCurrPlItem,0,NULL ) &&( guiIntfStruct.StreamType == STREAMTYPE_FILE ) )
 	 {
 	  plItem * next = gtkSet( gtkGetCurrPlItem,0,NULL );
 	  plLastPlayed=next;
