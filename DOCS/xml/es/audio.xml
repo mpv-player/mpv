@@ -3,7 +3,7 @@
 <sect2 id="audio-dev">
 <title>Dispositivos de salida de audio</title>
 <sect3 id="sync">
-<title>Sincronizaci√≥n de Audio/Video</title>
+<title>SincronizaciÛn de Audio/Video</title>
 
 <para>
 La interfaz de audio de <application>MPlayer</application> se llama
@@ -55,11 +55,11 @@ controladores:
 <para>
 Los controladores para tarjetas de sonido en Linux tienen problemas
 de compatibilidad. Por ese motivo <application>MPlayer</application>
-tiene la caracter√≠stica de tener <emphasis>propiamente</emphasis>
+tiene la caracterÌstica de tener <emphasis>propiamente</emphasis>
 codificados los controladores de sonido que lo habilitan para
-mantener una sincronizaci√≥n audio/video correcta. Desgraciadamente,
+mantener una sincronizaciÛn audio/video correcta. Desgraciadamente,
 algunos autores de controladores no tienen cuidado en codificar esta
-caracter√≠stica debido a que no es necesaria para reproducir MP3s o
+caracterÌstica debido a que no es necesaria para reproducir MP3s o
 efectos de sonido.
 </para>
 
@@ -68,22 +68,22 @@ Otros reproductores de medios como
 <ulink url="http://avifile.sourceforge.net">aviplay</ulink>
 o <ulink url="http://xine.sourceforge.net">xine</ulink> 
 posiblemente funcionen out-of-the-box con estos controladores porque
-usan m√©todos simples con temporizaci√≥n interna. Las mediciones muestran
-que sus m√©todos no son tan eficientes como el de
+usan mÈtodos simples con temporizaciÛn interna. Las mediciones muestran
+que sus mÈtodos no son tan eficientes como el de
 <application>MPlayer</application>.
 </para>
 
 <para>
 Usando <application>MPlayer</application> con un controlador de sonido
-correctamente escrito nunca debe resultar en p√©rdida de sincronizaci√≥n
+correctamente escrito nunca debe resultar en pÈrdida de sincronizaciÛn
 de A/V relacionada con el audio, excepto con archivos muy mal creados
-(consulte la p√°gina de manual para solucionar el problema si ocurre).
+(consulte la p·gina de manual para solucionar el problema si ocurre).
 </para>
 
 <para>
 Si piensa que tiene un controlador de audio en mal estado, pruebe la
-opci√≥n <option>-autosync</option>, lo que debe solucionar sus problemas.
-Vea la p√°gina de manual para informaci√≥n detallada.
+opciÛn <option>-autosync</option>, lo que debe solucionar sus problemas.
+Vea la p·gina de manual para informaciÛn detallada.
 </para>
 
 <itemizedlist>
@@ -93,12 +93,12 @@ Vea la p√°gina de manual para informaci√≥n detallada.
   es el que se usa por defecto). Si experimenta cortes, tirones o algo fuera
   de lo normal, pruebe <option>-ao sdl</option> (NOTA: necesita tener las
   bibliotecas SDL y los archivos de cabecera instalados). El controlador
-  de audio SDL le ayudar√° en muchos casos y tambi√©n soporta ESD (GNOME) y
+  de audio SDL le ayudar· en muchos casos y tambiÈn soporta ESD (GNOME) y
   ARTS (KDE).
   </para></listitem>
 <listitem><para>
-  Si tiene la versi√≥n 0.5 de ALSA, entonces casi siempre tendr√° que usar
-  <option>-ao alsa5</option>, porque ALSA 0.5 tiene un c√≥digo de emulaci√≥n
+  Si tiene la versiÛn 0.5 de ALSA, entonces casi siempre tendr· que usar
+  <option>-ao alsa5</option>, porque ALSA 0.5 tiene un cÛdigo de emulaciÛn
   de OSS que falla, y puede <emphasis role="bold">hacer fallar
   <application>MPlayer</application></emphasis> con un mensaje como este:
   <screen>
@@ -106,14 +106,14 @@ DEMUXER: Demasiados (945 en 8390980 bytes) paquetes de video en el buffer!<!--
 --></screen>
   </para></listitem>
 <listitem><para>
-  En Solaris, use el controlador de audio de SUN con la opci√≥n <option>-ao sun</option>,
-  si no lo hace no funcionar√° ni el video ni el audio.
+  En Solaris, use el controlador de audio de SUN con la opciÛn <option>-ao sun</option>,
+  si no lo hace no funcionar· ni el video ni el audio.
   </para></listitem>
 <listitem><para>
   Si el sonido se entrecorta mientras se reproduce desde un CD-ROM, active
   el enmascaramiento de IRQ, e.g. <command>hdparm -u1 /dev/cdrom</command>
   (<command>man hdparm</command>). Normalmente siempre es buena idea y se
-  describe con m√°s detalle en la <link linkend="drives">secci√≥n de CD-ROM</link>.
+  describe con m·s detalle en la <link linkend="drives">secciÛn de CD-ROM</link>.
  </para></listitem>
 </itemizedlist>
 </sect3>
@@ -127,16 +127,16 @@ no ha sido probado.
 
 <para>
 Los controladores de sonido de Linux son principalmente proporcionados
-mediante una versi√≥n libre de OSS. Estos controladores han sido reemplazados
+mediante una versiÛn libre de OSS. Estos controladores han sido reemplazados
 por <ulink url="http://www.alsa-project.org">ALSA</ulink> (Advanced Linux Sound
 Architecture (Arquitectura Avanzada de Sonido en Linux)) en las series de
-desarrollo de 2.5. Si su distribuci√≥n no tiene ALSA puede que quiera
+desarrollo de 2.5. Si su distribuciÛn no tiene ALSA puede que quiera
 probar esos controladores si tiene problemas con el sonido. Los controladores
 ALSA son generalmente superiores a OSS en compatibilidad, rendimiento y
-caracter√≠sticas. Pero algunas tarjetas de sonido solo est√°n soportadas
+caracterÌsticas. Pero algunas tarjetas de sonido solo est·n soportadas
 por los controladores de sonido comerciales OSS de
 <ulink url="http://www.opensound.com/">4Front Technologies</ulink>.
-Estos tambi√©n tienen soporte para varios sistemas no-Linux.
+Estos tambiÈn tienen soporte para varios sistemas no-Linux.
 </para>
 
 <informaltable>
@@ -162,7 +162,7 @@ Estos tambi√©n tienen soporte para varios sistemas no-Linux.
     <entry morerows="2" valign="middle">Max Canales</entry>
     <entry morerows="2" valign="middle">Max Opens
       <footnote id="maxopens">
-        <para>el n√∫mero de aplicaciones que pueden usar el dispositivo
+        <para>el n˙mero de aplicaciones que pueden usar el dispositivo
           <emphasis>a la vez</emphasis>.</para>
       </footnote>
     </entry>
@@ -197,7 +197,7 @@ Estos tambi√©n tienen soporte para varios sistemas no-Linux.
     <entry>OK</entry>
     <entry>
       <ulink url="http://aureal.sourceforge.net">Linux Aureal Drivers</ulink>
-      <ulink url="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">tama√±o del buffer incrementado a 32k</ulink>
+      <ulink url="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">tamaÒo del buffer incrementado a 32k</ulink>
     </entry>
     <entry>48</entry>
     <entry>4.1</entry>
@@ -284,7 +284,7 @@ Estos tambi√©n tienen soporte para varios sistemas no-Linux.
   </row>
 
   <row>
-    <entry>C-Media cards (¬øcu√°les?)</entry>
+    <entry>C-Media cards (øcu·les?)</entry>
     <entry>no OK (silbido) (?)</entry>
     <entry>Tarjetas C-Media (CMI8338/8738)</entry>
     <entry>OK</entry>
@@ -295,14 +295,14 @@ Estos tambi√©n tienen soporte para varios sistemas no-Linux.
     <entry></entry>
     <entry></entry>
     <entry>44</entry>
-    <entry>est√©reo</entry>
+    <entry>estÈreo</entry>
     <entry>1</entry>
   </row>
 
   <row>
     <entry>Tarjetas Yamaha (*ymf*)</entry>
-    <entry>no OK (?) (quiz√° <option>-ao sdl</option>)</entry>
-    <entry>OK solo con ALSA 0.5 con emulaci√≥n OSS
+    <entry>no OK (?) (quiz· <option>-ao sdl</option>)</entry>
+    <entry>OK solo con ALSA 0.5 con emulaciÛn OSS
       <emphasis role="bold">Y</emphasis> <option>-ao sdl</option> (!) (?)</entry>
     <entry></entry>
     <entry></entry>
@@ -330,7 +330,7 @@ Estos tambi√©n tienen soporte para varios sistemas no-Linux.
     <entry>
       <ulink url="http://www.geocities.com/stssppnn/pcsp.html">Linux PC speaker OSS driver</ulink>
     </entry>
-    <entry>El controlador emula 44.1, quiz√° m√°s.</entry>
+    <entry>El controlador emula 44.1, quiz· m·s.</entry>
     <entry>mono</entry>
     <entry>1</entry>
   </row>
@@ -340,8 +340,8 @@ Estos tambi√©n tienen soporte para varios sistemas no-Linux.
 </informaltable>
 
 <para>
-La realimentaci√≥n sobre este documento siempre es bienvenida. Por favor
-d√≠ganos como funcionan juntos <application>MPlayer</application> y su(s)
+La realimentaciÛn sobre este documento siempre es bienvenida. Por favor
+dÌganos como funcionan juntos <application>MPlayer</application> y su(s)
 tarjeta(s) de sonido.
 </para>
 </sect3>
@@ -352,28 +352,28 @@ tarjeta(s) de sonido.
   Los plugions de audio viejos han sido reemplazados por una nueva capa de
   filtros de audio. Los filtros de audio son usados para cambiar propiedades
   de los datos de audio antes de que el sonido alcance la tarjeta de sonido.
-  La activaci√≥n y desactivaci√≥n de los filtros normalmente se hace de manera
-  autom√°tica pero puede tambi√©n forzarse. Los filtros son activados cuando
+  La activaciÛn y desactivaciÛn de los filtros normalmente se hace de manera
+  autom·tica pero puede tambiÈn forzarse. Los filtros son activados cuando
   las propiedades de los datos de audio difieren de los requeridos por la
-  tarjeta de sonido y desactivados si no son necesarios. La opci√≥n
-  <option>-af filtro1,filtro2,...</option> se usa para forzar la activaci√≥n
-  autom√°tica de filtros o para insertar filtros que no se activan de manera
-  autom√°tica. Los filtros son ejecutados en el orden en el que aparecen en
+  tarjeta de sonido y desactivados si no son necesarios. La opciÛn
+  <option>-af filtro1,filtro2,...</option> se usa para forzar la activaciÛn
+  autom·tica de filtros o para insertar filtros que no se activan de manera
+  autom·tica. Los filtros son ejecutados en el orden en el que aparecen en
   la lista separados por comas.
 </para>
 
 <para>
 Ejemplo:
 <screen>mplayer -af resample,pan movie.avi</screen>
-debe enviar el sonido a trav√©s del filtro de muestreo seguido del filtro pan.
-Observe que la lista no debe contener espacios, si no fallar√°.
+debe enviar el sonido a travÈs del filtro de muestreo seguido del filtro pan.
+Observe que la lista no debe contener espacios, si no fallar·.
 </para>
 
 <para>
-Los filtros tambi√©n tienen opciones que cambian su comportamiento. Estas opciones
-son explicadas en detalle en las secciones siguientes. Un filtro se ejecutar√°
-usando la configuraci√≥n por defecto si se omiten las opciones. Aqu√≠ hay un ejemplo
-de c√≥mo usar los filtros en combinaci√≥n con las opciones espec√≠ficas del filtro:
+Los filtros tambiÈn tienen opciones que cambian su comportamiento. Estas opciones
+son explicadas en detalle en las secciones siguientes. Un filtro se ejecutar·
+usando la configuraciÛn por defecto si se omiten las opciones. AquÌ hay un ejemplo
+de cÛmo usar los filtros en combinaciÛn con las opciones especÌficas del filtro:
 <screen>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1 -srate 11025 media.avi</screen>
 debe establecer la frecuencia de salida mediante el filtro de muestreo a 11025Hz y
 reducir el audio a 1 canal usando el filtro pan.
@@ -381,28 +381,28 @@ reducir el audio a 1 canal usando el filtro pan.
 
 
 <para>
-La ejecuci√≥n general de la capa de filtros es controlada usando la
-opci√≥n <option>-af-adv</option>. Esta opci√≥n tiene dos subopciones:
+La ejecuciÛn general de la capa de filtros es controlada usando la
+opciÛn <option>-af-adv</option>. Esta opciÛn tiene dos subopciones:
 </para>
 
 <para>
-<option>force</option> es un peque√±o campo que controla c√≥mo los filtros
-se insertan y que optimizaciones de velocidad/precisi√≥n se usar√°n:
+<option>force</option> es un pequeÒo campo que controla cÛmo los filtros
+se insertan y que optimizaciones de velocidad/precisiÛn se usar·n:
 </para>
 
 <variablelist>
 <varlistentry>
 <term><option>0</option></term>
 <listitem><para>
-Usa inserci√≥n autom√°tica de filtros y optimiza de acuerdo a la velocidad de la CPU.
+Usa inserciÛn autom·tica de filtros y optimiza de acuerdo a la velocidad de la CPU.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>1</option></term>
 <listitem><para>
-Usa inserci√≥n autom√°tica de filtros y optimiza para la velocidad m√°s alta.
-<emphasis>Advertencia:</emphasis> Algunas caracter√≠sticas en los filtros de
+Usa inserciÛn autom·tica de filtros y optimiza para la velocidad m·s alta.
+<emphasis>Advertencia:</emphasis> Algunas caracterÌsticas en los filtros de
 audio pueden fallar sin avisar, y la calidad del sonido puede verse afectada.
 </para></listitem>
 </varlistentry>
@@ -410,15 +410,15 @@ audio pueden fallar sin avisar, y la calidad del sonido puede verse afectada.
 <varlistentry>
 <term><option>2</option></term>
 <listitem><para>
-Usa inserci√≥n autom√°tica de filtros y optimiza para calidad.
+Usa inserciÛn autom·tica de filtros y optimiza para calidad.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>3</option></term>
 <listitem><para>
-No usa inserci√≥n autom√°tica de filtros ni optimizaci√≥n.
-<emphasis>Advertencia:</emphasis> Posiblemente esto har√° fallar
+No usa inserciÛn autom·tica de filtros ni optimizaciÛn.
+<emphasis>Advertencia:</emphasis> Posiblemente esto har· fallar
 a MPlayer.
 </para></listitem>
 </varlistentry>
@@ -426,7 +426,7 @@ a MPlayer.
 <varlistentry>
 <term><option>4</option></term>
 <listitem><para>
-Usa inserci√≥n autom√°tica de filtros igual que el 0 de m√°s arriba,
+Usa inserciÛn autom·tica de filtros igual que el 0 de m·s arriba,
 pero usa procesamiento en coma flotante cuando es posible.
 </para></listitem>
 </varlistentry>
@@ -434,7 +434,7 @@ pero usa procesamiento en coma flotante cuando es posible.
 <varlistentry>
 <term><option>5</option></term>
 <listitem><para>
-Usa inserci√≥n autom√°tica de filtros como el 1 de m√°s arriba,
+Usa inserciÛn autom·tica de filtros como el 1 de m·s arriba,
 pero usa procesamiento en coma flotante cuando es posible.
 </para></listitem>
 </varlistentry>
@@ -442,7 +442,7 @@ pero usa procesamiento en coma flotante cuando es posible.
 <varlistentry>
 <term><option>6</option></term>
 <listitem><para>
-Usa inserci√≥n autom√°tica de filtros como el 2 de m√°s arriba,
+Usa inserciÛn autom·tica de filtros como el 2 de m·s arriba,
 pero usa procesamiento en coma flotante cuando es posible.
 </para></listitem>
 </varlistentry>
@@ -450,18 +450,18 @@ pero usa procesamiento en coma flotante cuando es posible.
 <varlistentry>
 <term><option>7</option></term>
 <listitem><para>
-No usa inserci√≥n autom√°tica de filtros como el 3 de m√°s arriba,
+No usa inserciÛn autom·tica de filtros como el 3 de m·s arriba,
 y usa procesamiento en coma flotante cuando es posible.
 </para></listitem>
 </varlistentry>
 </variablelist>
 
 <para>
-<option>list</option> es un alias de la opci√≥n -af.
+<option>list</option> es un alias de la opciÛn -af.
 </para>
 
 <para>
-La capa de filtros tambi√©n se ve afectada por las siguientes opciones
+La capa de filtros tambiÈn se ve afectada por las siguientes opciones
 generales:
 </para>
 
@@ -469,7 +469,7 @@ generales:
 <varlistentry>
 <term><option>-v</option></term>
 <listitem><para>
-Incrementa el nivel de informaci√≥n mostrada y hace que la mayor√≠a de
+Incrementa el nivel de informaciÛn mostrada y hace que la mayorÌa de
 los filtros impriman mensajes de estado extras.
 </para></listitem>
 </varlistentry>
@@ -477,11 +477,11 @@ los filtros impriman mensajes de estado extras.
 <varlistentry>
 <term><option>-channels</option></term>
 <listitem><para>
-Esta opci√≥n establece el n√∫mero de canales de salida que desea que
-use su tarjeta de sonido. Esto tambi√©n afecta al n√∫mero de canales
+Esta opciÛn establece el n˙mero de canales de salida que desea que
+use su tarjeta de sonido. Esto tambiÈn afecta al n˙mero de canales
 que se decodifican desde el medio. Si el medio contiene menos canales
-de los que se solicitan desde los filtros de canales (vea m√°s abajo)
-autom√°ticamente ser√°n insertados. La ruta ser√° la ruta por defecto para
+de los que se solicitan desde los filtros de canales (vea m·s abajo)
+autom·ticamente ser·n insertados. La ruta ser· la ruta por defecto para
 el filtro de canales.
 </para></listitem>
 </varlistentry>
@@ -489,20 +489,20 @@ el filtro de canales.
 <varlistentry>
 <term><option>-srate</option></term>
 <listitem><para>
-Esta opci√≥n selecciona la tasa de muestreo que quiere que use su tarjeta
-de sonido (por supuesto las tarjetas tienen l√≠mites en este aspecto). Si
+Esta opciÛn selecciona la tasa de muestreo que quiere que use su tarjeta
+de sonido (por supuesto las tarjetas tienen lÌmites en este aspecto). Si
 la frecuencia de muestreo de su tarjeta de sonido es diferente de la que
-tiene el medio actual, el filtro de muestreo (vea m√°s abajo) debe ser insertado
+tiene el medio actual, el filtro de muestreo (vea m·s abajo) debe ser insertado
 en la capa de filtros de audio para compensar la diferencia.
 </para></listitem>
 </varlistentry>
 <varlistentry>
 <term><option>-format</option></term>
 <listitem><para>
-Esta opci√≥n establece el formato de muestreo entre la capa de filtros de
+Esta opciÛn establece el formato de muestreo entre la capa de filtros de
 audio y la tarjeta de sonido. Si el formato de muestreo solicitado de su
 tarjeta de sonido es diferente del que tiene el medio actual, un filtro de
-formato (vea m√°s abajo) ser√° insertado para rectificar la diferencia.
+formato (vea m·s abajo) ser· insertado para rectificar la diferencia.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -511,12 +511,12 @@ formato (vea m√°s abajo) ser√° insertado para rectificar la diferencia.
 <title>Super/Submuestreo</title>
 
 <para>
-MPlayer soporta completamente super/sub-muestreo de sonido a trav√©s
+MPlayer soporta completamente super/sub-muestreo de sonido a travÈs
 del filtro <option>resample</option>. Puede ser usado si
 tiene una frecuencia fija para la tarjeta de sonido o si tiene una tarjeta
-de sonido antigua que solo tiene como capacidad m√°xima 44.1kHz. Este filtro
-es activado autom√°ticamente si es necesario, pero tambi√©n puede ser habilitado
-expl√≠citamente en la l√≠nea de √≥rdenes. Tiene tres opciones:
+de sonido antigua que solo tiene como capacidad m·xima 44.1kHz. Este filtro
+es activado autom·ticamente si es necesario, pero tambiÈn puede ser habilitado
+explÌcitamente en la lÌnea de Ûrdenes. Tiene tres opciones:
 </para>
 
 <variablelist>
@@ -524,21 +524,21 @@ expl√≠citamente en la l√≠nea de √≥rdenes. Tiene tres opciones:
 <term><option>srate &lt;8000-192000&gt;</option></term>
 <listitem><para>
     es un entero usado para establecer la frecuencia de muestreo de salida
-    en Hz. El rango v√°lido para √©ste par√°metro es de 8kHz a 192kHz. Si
+    en Hz. El rango v·lido para Èste par·metro es de 8kHz a 192kHz. Si
     la frecuencia de muestreo de entrada y de salida son la misma o si
-    este par√°metro es omitido el filtro autom√°ticamente es descargado. Una
+    este par·metro es omitido el filtro autom·ticamente es descargado. Una
     frecuencia de muestreo alta normalmente mejora la calidad el audio,
-    especialmente usada en combinaci√≥n con otros filtros.
+    especialmente usada en combinaciÛn con otros filtros.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>sloppy</option></term>
 <listitem><para>
-    es un par√°metro binario opcional que permite que la frecuencia de salida
+    es un par·metro binario opcional que permite que la frecuencia de salida
     sea ligeramente diferente que la frecuencia dada por <option>srate</option>.
-    Esta opci√≥n puede ser usada si el inicio de la reproducci√≥n es extremadamente
-    lento. Est√° activado por defecto.
+    Esta opciÛn puede ser usada si el inicio de la reproducciÛn es extremadamente
+    lento. Est· activado por defecto.
 </para></listitem>
 </varlistentry>
 
@@ -546,14 +546,14 @@ expl√≠citamente en la l√≠nea de √≥rdenes. Tiene tres opciones:
 <term><option>type &lt;0-2&gt;</option></term>
 <listitem><para>
     es un entero opcional entre <literal>0</literal> y <literal>2</literal> que
-    elije el m√©todo de muestreo a usar. Aqu√≠ <literal>0</literal> representa
-    interpolaci√≥n lineal como m√©todo de muestreo, <literal>1</literal> representa
+    elije el mÈtodo de muestreo a usar. AquÌ <literal>0</literal> representa
+    interpolaciÛn lineal como mÈtodo de muestreo, <literal>1</literal> representa
     muestreo usando un banco de filtros de poli-fase y procesamiento con enteros y
     <literal>2</literal> representa muestreo usando un banco de filtro de poli-fase
-    y procesamiento en coma flotante. La interpolaci√≥n lineal es extremadamente
-    r√°pida, pero sufre de peor calidad de sonido especialmente cuando se usa
+    y procesamiento en coma flotante. La interpolaciÛn lineal es extremadamente
+    r·pida, pero sufre de peor calidad de sonido especialmente cuando se usa
     para sobre-muestreo. La mejor calidad se obtiene con <literal>2</literal>
-    pero este m√©todo tambi√©n sufre de una gran carga de la CPU.
+    pero este mÈtodo tambiÈn sufre de una gran carga de la CPU.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -561,18 +561,18 @@ expl√≠citamente en la l√≠nea de √≥rdenes. Tiene tres opciones:
 <para>Ejemplo:
 <screen>mplayer -af resample=44100:0:0</screen>
 debe establecer la frecuencia de salida del filtro de muestreo a 44100Hz usando
-escalado exacto de la frecuencia de salida y la interpolaci√≥n lineal.
+escalado exacto de la frecuencia de salida y la interpolaciÛn lineal.
 </para>
 </sect4>
 
 <sect4 id="af_channels">
-<title>Cambiando el n√∫mero de canales</title>
+<title>Cambiando el n˙mero de canales</title>
 <para>
-El filtro <option>channels</option> puede ser usado para a√±adir y quitar
-canales, tambi√©n puede usarse para enrutar o copiar canales. Es activado
-autom√°ticamente cuando la salida de la capa de filtro de audio difiere de
+El filtro <option>channels</option> puede ser usado para aÒadir y quitar
+canales, tambiÈn puede usarse para enrutar o copiar canales. Es activado
+autom·ticamente cuando la salida de la capa de filtro de audio difiere de
 la capa de entrada o cuando es pedido por otro filtro. Este filtro se descarga
-a s√≠ mismo si no es necesario. El n√∫mero de opciones es din√°mico:
+a sÌ mismo si no es necesario. El n˙mero de opciones es din·mico:
 </para>
 
 <variablelist>
@@ -580,8 +580,8 @@ a s√≠ mismo si no es necesario. El n√∫mero de opciones es din√°mico:
 <term><option>nch &lt;1-6&gt;</option></term>
 <listitem><para>
   es un entero entre <literal>1</literal> y <literal>6</literal> que es usado
-  para establecer el n√∫mero de canales de salida. Esta opci√≥n es requerida, dejarla
-  vac√≠a resultar√° en un error en tiempo de ejecuci√≥n.
+  para establecer el n˙mero de canales de salida. Esta opciÛn es requerida, dejarla
+  vacÌa resultar· en un error en tiempo de ejecuciÛn.
 </para></listitem>
 </varlistentry>
 
@@ -589,15 +589,15 @@ a s√≠ mismo si no es necesario. El n√∫mero de opciones es din√°mico:
 <term><option>nr &lt;1-6&gt;</option></term>
 <listitem><para>
   es un entero entre <literal>1</literal> y <literal>6</literal> que es usada para
-  especificar el n√∫mero de enrutamientos. Este par√°metro es opcional, Si se omite
-  se usar√° el enrutamiento por defecto.
+  especificar el n˙mero de enrutamientos. Este par·metro es opcional, Si se omite
+  se usar· el enrutamiento por defecto.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>from1:to1:from2:to2:from3:to3...</option></term>
 <listitem><para>
-  son pares de n√∫meros entre <literal>0</literal> y <literal>5</literal>
+  son pares de n˙meros entre <literal>0</literal> y <literal>5</literal>
   que definen donde debe ser enrutado cada canal.
 </para></listitem>
 </varlistentry>
@@ -605,27 +605,27 @@ a s√≠ mismo si no es necesario. El n√∫mero de opciones es din√°mico:
 
 <para>
   Si solo se da <option>nch</option> se usa el enrutado por defecto, funciona
-  de la siguiente manera: Si el n√∫mero de canales de salida es mayor que el
-  n√∫mero de canales d eentrada se insertar√°n canales vac√≠os (excepto al mezclar
-  de mono a est√©reo, entonces el canal mono es repetido en ambos canales de salida).
-  Si el n√∫mero de canales de salida es menor que el n√∫mero de canales de entrada
-  los canales sobrantes ser√°n truncados.
+  de la siguiente manera: Si el n˙mero de canales de salida es mayor que el
+  n˙mero de canales d eentrada se insertar·n canales vacÌos (excepto al mezclar
+  de mono a estÈreo, entonces el canal mono es repetido en ambos canales de salida).
+  Si el n˙mero de canales de salida es menor que el n˙mero de canales de entrada
+  los canales sobrantes ser·n truncados.
 </para>
 
 <para>
 Ejemplo 1:
 <screen>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi</screen>
-cambiar√° el n√∫mero de canales a 4 y establecer√° 4 rutas que cambian
+cambiar· el n˙mero de canales a 4 y establecer· 4 rutas que cambian
 el canal 0 y el canal 1 y dejan el canal 2 y 3 intactos. Observe que
-si el medio contiene dos canales ser√°n reproducidos, canales 2 y 3
+si el medio contiene dos canales ser·n reproducidos, canales 2 y 3
 deben contener silencio pero 0 y 1 pueden seguir siendo intercambiados.
 </para>
 
 <para>
 Ejemplo 2:
 <screen>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi</screen>
-cambiar√° el n√∫mero de canales a 6 y establecer√° 4 rutas que copian
-el canal 0 a los canales 0 a 3. CAnal 4 y 5 contendr√°n silencio.
+cambiar· el n˙mero de canales a 6 y establecer· 4 rutas que copian
+el canal 0 a los canales 0 a 3. CAnal 4 y 5 contendr·n silencio.
 </para>
 </sect4>
 
@@ -633,7 +633,7 @@ el canal 0 a los canales 0 a 3. CAnal 4 y 5 contendr√°n silencio.
 <title>Conversor del formato de muestreo</title>
 <para>
 El filtro <option>format</option> convierte entre diferentes formatos de muestreo.
-  Se activa autom√°ticamente cuando es necesario por la tarjeta de sonido u otro
+  Se activa autom·ticamente cuando es necesario por la tarjeta de sonido u otro
   filtro.
 </para>
 
@@ -642,8 +642,8 @@ El filtro <option>format</option> convierte entre diferentes formatos de muestre
 <term><option>bps &lt;number&gt;</option></term>
 <listitem><para>
     puede ser <literal>1</literal>, <literal>2</literal> o <literal>4</literal> y
-    denota el n√∫mero de bytes por muestra. Esta opci√≥n es requerida, dejarla vac√≠a
-    resulta en un error en tiempo de ejecuci√≥n.
+    denota el n˙mero de bytes por muestra. Esta opciÛn es requerida, dejarla vacÌa
+    resulta en un error en tiempo de ejecuciÛn.
 </para></listitem>
 </varlistentry>
 
@@ -651,11 +651,11 @@ El filtro <option>format</option> convierte entre diferentes formatos de muestre
 <term><option>f &lt;format&gt;</option></term>
 <listitem><para>
     es una cadena de texto que describe el formato de muestreo. La cadena es
-    una concatenaci√≥n de: <option>alaw</option>, <option>mulaw</option> o
+    una concatenaciÛn de: <option>alaw</option>, <option>mulaw</option> o
     <option>imaadpcm</option>, <option>float</option> o <option>int</option>,
     <option>unsigned</option> o <option>signed</option>, <option>le</option> o
-    <option>be</option> (little o big endian). Esta opci√≥n es requerida,
-    dejarla vac√≠a resultar√° en un error en tiempo de ejecuci√≥n.
+    <option>be</option> (little o big endian). Esta opciÛn es requerida,
+    dejarla vacÌa resultar· en un error en tiempo de ejecuciÛn.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -663,7 +663,7 @@ El filtro <option>format</option> convierte entre diferentes formatos de muestre
 <para>
 Ejemplo:
 <screen>mplayer -af format=4:float media.avi</screen>
-establecer√° el formato de salida a 4 bytes por muestra en datos en coma flotante.
+establecer· el formato de salida a 4 bytes por muestra en datos en coma flotante.
 </para>
 </sect4>
 
@@ -671,18 +671,18 @@ establecer√° el formato de salida a 4 bytes por muestra en datos en coma flotant
 <title>Retardo</title>
 <para>
 El filtro <option>delay</option> retarda el sonido en los loudspeakers de manera
-que el sonido de diferentes canales llega a la posici√≥n del oyente simult√°neamente.
-Esto solo es √∫til si tiene m√°s de 2 loudspeakers. Este filtro tiene un n√∫mero
-variable de par√°metros:
+que el sonido de diferentes canales llega a la posiciÛn del oyente simult·neamente.
+Esto solo es ˙til si tiene m·s de 2 loudspeakers. Este filtro tiene un n˙mero
+variable de par·metros:
 </para>
 
 <variablelist>
 <varlistentry>
 <term><option>d1:d2:d3...</option></term>
 <listitem><para>
-    son n√∫meros en coma flotante que representan retardos en ms que deben
-    ser impuestos en los diferentes canales. El retardo m√≠nimo es 0ms y el
-    m√°ximo es 1000ms.
+    son n˙meros en coma flotante que representan retardos en ms que deben
+    ser impuestos en los diferentes canales. El retardo mÌnimo es 0ms y el
+    m·ximo es 1000ms.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -693,13 +693,13 @@ Para calcular el retardo requerido para los diferentes canales haga lo siguiente
 
 <orderedlist>
 <listitem><para>
-    Mida la distancia a los loudspeakers en metros en relaci√≥n con la posici√≥n
+    Mida la distancia a los loudspeakers en metros en relaciÛn con la posiciÛn
     del oyente, dando las distancias de s1 a s5 (para un sistema 5.1).
-    No hay punto en compensaci√≥n para el sub-woofer (no debe oir la diferencia
-    de ning√∫n modo).
+    No hay punto en compensaciÛn para el sub-woofer (no debe oir la diferencia
+    de ning˙n modo).
 </para></listitem>
 <listitem><para>
-Reste las distancias s1 a s5 de la m√°xima distancia p.e.
+Reste las distancias s1 a s5 de la m·xima distancia p.e.
     s[i] = max(s) - s[i]; i = 1...5
 </para></listitem>
 <listitem><para>
@@ -711,7 +711,7 @@ Calcule el retardo requerido en ms como
 <para>
 Ejemplo:
 <screen>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</screen>
-retardar√° delantero izquierdo y derecho en 10.5ms, los dos canales traseros
+retardar· delantero izquierdo y derecho en 10.5ms, los dos canales traseros
 y el sub en 0ms y el canal central en 7ms.
 </para>
 
@@ -719,14 +719,14 @@ y el sub en 0ms y el canal central en 7ms.
 
 <sect4 id="af_volume">
 <title>Control de volumen por software</title>
-<para>El control de volumen de software est√° implementado mediante el
-filtro de audio <option>volume</option>. Use este filtro con precauci√≥n
-porque puede reducir la relaci√≥n se√±al ruido para el sonido. En la mayor√≠a
-de los casos es mejor establecer el nivel para el sonido PCM al m√°ximo, dejar
+<para>El control de volumen de software est· implementado mediante el
+filtro de audio <option>volume</option>. Use este filtro con precauciÛn
+porque puede reducir la relaciÛn seÒal ruido para el sonido. En la mayorÌa
+de los casos es mejor establecer el nivel para el sonido PCM al m·ximo, dejar
 este filtro sin usar y controlar el nivel de salida de sus altavoces con el
 control de volumen master del mezclador. En el caso de que su tarjeta
-de sonido tenga un mezclador PCM digital en lugar de anal√≥gico, y oiga
-distorsi√≥n, use el mezclador MASTER en su lugar. Si hay un amplificador externo
+de sonido tenga un mezclador PCM digital en lugar de analÛgico, y oiga
+distorsiÛn, use el mezclador MASTER en su lugar. Si hay un amplificador externo
 conectado al ordenador (este es casi siempre el caso), el nivel de ruido puede
 minimizarse ajustando el nivel del master y el volumen knob del amplificador
 hasta que desaparezca el sonido de silbido de fondo. Este filtro tiene dos
@@ -737,7 +737,7 @@ opciones:
 <varlistentry>
 <term><option>v &lt;-200 - +60&gt;</option></term>
 <listitem><para>
-    es un n√∫mero en coma flotante entre <literal>-200</literal> and <literal>+60</literal>
+    es un n˙mero en coma flotante entre <literal>-200</literal> and <literal>+60</literal>
     que representa el nivel de volumen en dB. El valor por defecto es 0dB.
 </para></listitem>
 </varlistentry>
@@ -746,10 +746,10 @@ opciones:
 <term><option>c</option></term>
 <listitem><para>
     es un control binario que cambia clipping por soft activado y desactivado.
-    Soft-clipping puede hacer el sonido mucho m√°s suave si se usan altos niveles
-    de volumen. Active esta opci√≥n si el rango din√°mico de los loudspeakers es
-    muy bajo. Tenga cuidado ya que esta caracter√≠stica crea distorsi√≥n y debe
-    ser considerada como √∫ltima opci√≥n.
+    Soft-clipping puede hacer el sonido mucho m·s suave si se usan altos niveles
+    de volumen. Active esta opciÛn si el rango din·mico de los loudspeakers es
+    muy bajo. Tenga cuidado ya que esta caracterÌstica crea distorsiÛn y debe
+    ser considerada como ˙ltima opciÛn.
 </para></listitem>
 </varlistentry>
 </variablelist>
@@ -757,14 +757,14 @@ opciones:
 <para>
 Ejemplo:
 <screen>mplayer -af volume=10.1:0 media.avi</screen>
-amplificar√° el sonido por 10.1dB y hard-clip si el nivl de sonido es demasiado alto.
+amplificar· el sonido por 10.1dB y hard-clip si el nivl de sonido es demasiado alto.
 </para>
 
 <para>
-Este filtro tiene una segunda caracter√≠stica: Mides el nivel de sonido m√°ximo
-y lo muestra, despu√©s MPlayer termina. Esta estimaci√≥nd el volumen puede
+Este filtro tiene una segunda caracterÌstica: Mides el nivel de sonido m·ximo
+y lo muestra, despuÈs MPlayer termina. Esta estimaciÛnd el volumen puede
 usarse para establecer el nivel de sonido en MEncoder de manera que el rango
-din√°mico m√°ximo sea utilizado.
+din·mico m·ximo sea utilizado.
 </para>
 </sect4>
 
@@ -772,8 +772,8 @@ din√°mico m√°ximo sea utilizado.
 <title>Ecualizador</title>
 <para>
 El filtro <option>equalizer</option> representa un ecualizador de 10 bandas
-gr√°ficas en octavas, implementado usando filtros paso banda IIR de orden 10.
-Esto significa que funciona sin importar el tipo de audio que est√° siendo
+gr·ficas en octavas, implementado usando filtros paso banda IIR de orden 10.
+Esto significa que funciona sin importar el tipo de audio que est· siendo
 reproducido. Las frecuencias centrales para las 10 bandas son:
 </para>
 
@@ -800,24 +800,24 @@ reproducido. Las frecuencias centrales para las 10 bandas son:
 </informaltable>
 
 <para>
-Si la tasa de muestreo de sonido que est√° siendo reproducido es menor que
+Si la tasa de muestreo de sonido que est· siendo reproducido es menor que
 la frecuencia central para una banda de frecuencia, entonces esta banda
-es deshabilitada. Un fallo conocido con este filtro es que las caracter√≠sticas
-para la banda m√°s alta no son completamente sim√©tricas si la tasa de muestreo
+es deshabilitada. Un fallo conocido con este filtro es que las caracterÌsticas
+para la banda m·s alta no son completamente simÈtricas si la tasa de muestreo
 es cercana a la frecuencia dentral de la banda. Este problema puede ser 
 solucionado sobre-muestreando el sonido usando el filtro de remuestreo
 antes de que se use este filtro.
 </para>
 
 <para>
-Este filtro tiene 10 par√°metros:
+Este filtro tiene 10 par·metros:
 </para>
 
 <variablelist>
 <varlistentry>
 <term><option>g1:g2:g3...g10</option></term>
 <listitem><para>
-son n√∫meros en coma flotante entre <literal>-12</literal> y <literal>+12</literal>
+son n˙meros en coma flotante entre <literal>-12</literal> y <literal>+12</literal>
 representando la ganancia en dB para cada banda de frecuencia.
 </para></listitem>
 </varlistentry>
@@ -826,7 +826,7 @@ representando la ganancia en dB para cada banda de frecuencia.
 <para>
 Ejemplo:
 <screen>mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi</screen>
-amplificar√° el sonido en la regi√≥n superior e inferior de frecuencia mientras
+amplificar· el sonido en la regiÛn superior e inferior de frecuencia mientras
 cancela casi por completo alrededor de 1kHz.
 </para>
 </sect4>
@@ -835,13 +835,13 @@ cancela casi por completo alrededor de 1kHz.
 <title>Filtro de panning</title>
 <para>
 Use el filtro <option>pan</option> para mezclar canales arbitrariamente.
-B√°sicamente se trata de una combinaci√≥n del conrol de volumen y el filtro
+B·sicamente se trata de una combinaciÛn del conrol de volumen y el filtro
 de canales. Hay dos usos principalmente para este filtro:
 </para>
 
 <orderedlist>
 <listitem><para>
-Mezclando varios canales a solo unos pocos, est√©reo a mono por ejemplo.
+Mezclando varios canales a solo unos pocos, estÈreo a mono por ejemplo.
 </para></listitem>
 <listitem><para>
 Variando el &quot;ancho&quot; del altavoz central en un sistema de sonido surround.
@@ -850,8 +850,8 @@ Variando el &quot;ancho&quot; del altavoz central en un sistema de sonido surrou
 
 <para>
 Este filtro es dificil de usar, y requiere algunos arreglos antes de
-obtener los resultados deseados. El n√∫mero de opciones para este filtro
-depende el n√∫mero de canales de salida:
+obtener los resultados deseados. El n˙mero de opciones para este filtro
+depende el n˙mero de canales de salida:
 </para>
 
 <variablelist>
@@ -859,15 +859,15 @@ depende el n√∫mero de canales de salida:
 <term><option>nch &lt;1-6&gt;</option></term>
 <listitem><para>
 es un entero entre <literal>1</literal> and <literal>6</literal> y es usado
-para establecer el n√∫mero de canales de salida. Esta opci√≥n es requerida, dejarla
-vac√≠a resultar√° en un error en tiempo de ejecuci√≥n.
+para establecer el n˙mero de canales de salida. Esta opciÛn es requerida, dejarla
+vacÌa resultar· en un error en tiempo de ejecuciÛn.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</option></term>
 <listitem><para>
-son n√∫meros en coma flotante entre <literal>0</literal> y <literal>1</literal>.
+son n˙meros en coma flotante entre <literal>0</literal> y <literal>1</literal>.
 <option>l[i][j]</option> determina cuantos de los canales de entrada j son
 mezclados en el canal de salida i.
 </para></listitem>
@@ -877,13 +877,13 @@ mezclados en el canal de salida i.
 <para>
 Ejemplo 1:
 <screen>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</screen>
-mezclar√° de est√©reo a mono.
+mezclar· de estÈreo a mono.
 </para>
 
 <para>
 Ejemplo 2:
 <screen>mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi</screen>
-dar√° 3 canales de salida dejando canales 0 y 1 intactos, y mezclando
+dar· 3 canales de salida dejando canales 0 y 1 intactos, y mezclando
 canales 0 y 1 en un canal de salida 2 (que puede ser enviado a un
 sub-woofer por ejemplo).
 </para>
@@ -892,24 +892,24 @@ sub-woofer por ejemplo).
 <sect4 id="af_sub">
 <title>Sub-woofer</title>
 <para>
-El filtro <option>sub</option> a√±ade un canal de sub woofer al flujo de
+El filtro <option>sub</option> aÒade un canal de sub woofer al flujo de
 audio. Los datos de audio usados para crear el canal de sub-woofer son
 una media del sonido en el canal 0 y el canal 1. El sonido resultante es
-entonces filtrado paso-baja por un filtro de Butterworth de 4¬∫ orden con
-una frecuencia de corte por defecto de 60Hz y a√±adido a un canal separado
+entonces filtrado paso-baja por un filtro de Butterworth de 4∫ orden con
+una frecuencia de corte por defecto de 60Hz y aÒadido a un canal separado
 en el flujo de audio. Advertencia: Desactive este filtro cuando reproduzca
 DVDs con sonido Dolby Digital 5.1, de otro modo este filtro puede estropear
-el sonido del sub-woofer. Este filtro tiene dos par√°metros:
+el sonido del sub-woofer. Este filtro tiene dos par·metros:
 </para>
 
 <variablelist>
 <varlistentry>
 <term><option>fc &lt;20-300&gt;</option></term>
 <listitem><para>
-    es un n√∫mero opcional en coma flotante usado para establecer la frecuencia
-    de corte del filtro en Hz. El rango v√°lido es 20Hz a 300Hz. Para el mejor
+    es un n˙mero opcional en coma flotante usado para establecer la frecuencia
+    de corte del filtro en Hz. El rango v·lido es 20Hz a 300Hz. Para el mejor
     resultado pruebe la frecuencia de corte tan baja como sea posible. Esto 
-    mejorar√° la experiencia de sonido est√©reo o surround. La frecuencia de
+    mejorar· la experiencia de sonido estÈreo o surround. La frecuencia de
     corte por defecto es 60Hz.
 </para></listitem>
 </varlistentry>
@@ -918,9 +918,9 @@ el sonido del sub-woofer. Este filtro tiene dos par√°metros:
 <term><option>ch &lt;0-5&gt;</option></term>
 <listitem><para>
     es un entero opcional entre <literal>0</literal> y <literal>5</literal>
-    que determina el n√∫mero de canal en el que insertera el sub-canal de audio.
-    Por defecto el n√∫mero de canales es <literal>5</literal>. Observe que el
-    n√∫mero de canales autom√°ticamente ser√° incrementado a
+    que determina el n˙mero de canal en el que insertera el sub-canal de audio.
+    Por defecto el n˙mero de canales es <literal>5</literal>. Observe que el
+    n˙mero de canales autom·ticamente ser· incrementado a
     <replaceable>ch</replaceable> si es necesario.
 </para></listitem>
 </varlistentry>
@@ -929,7 +929,7 @@ el sonido del sub-woofer. Este filtro tiene dos par√°metros:
 <para>
 Ejemplo:
 <screen>mplayer -af sub=100:4 -channels 5 media.avi</screen>
-a√±adir√° un canal de sub-woofer con una frecuencia de corte de
+aÒadir· un canal de sub-woofer con una frecuencia de corte de
 100Hz al canal de salida 4.
 </para>
 </sect4>
@@ -937,23 +937,23 @@ a√±adir√° un canal de sub-woofer con una frecuencia de corte de
 <sect4 id="af_surround">
 <title>Decodificador de Surround-sound</title>
 <para>
-Sonido codificado con matriz de codificaci√≥n de surround puede ser
+Sonido codificado con matriz de codificaciÛn de surround puede ser
 decodificado con el filtro <option>surround</option>. Dolby Surround es
 un ejemplo de formato codificado en matriz. Algunos archivos con audio
 en 2 canales actualmente contienen audio surround en matrices. Para usar
-esta caracter√≠stica necesita una tarjeta de sonido que soporte al menos
-4 canales. Este filtro tiene un par√°metro:
+esta caracterÌstica necesita una tarjeta de sonido que soporte al menos
+4 canales. Este filtro tiene un par·metro:
 </para>
 
 <variablelist>
 <varlistentry>
 <term><option>d &lt;0-1000&gt;</option></term>
 <listitem><para>
-es un n√∫mero en coma flotante opcional entre <literal>0</literal> y
+es un n˙mero en coma flotante opcional entre <literal>0</literal> y
 <literal>1000</literal> usado para establecer el tiempo de retardo en ms
 para los altavoces traseros. Este retardo debe se establecido de la siguiente
-manera: si d1 es la distandia desde la posici√≥n del oyente hasta los altavoces
-frontales y d2 es la distancia desde la posici√≥n del oyente hasta los
+manera: si d1 es la distandia desde la posiciÛn del oyente hasta los altavoces
+frontales y d2 es la distancia desde la posiciÛn del oyente hasta los
 altavoces traseros, entonces el retardo d debe ser de 15ms si &lt;= d2 y
 a 15 + 5*(d1-d2) si d1 &gt; d2. El valor por defecto para d es 20ms.
 </para></listitem>
@@ -963,7 +963,7 @@ a 15 + 5*(d1-d2) si d1 &gt; d2. El valor por defecto para d es 20ms.
 <para>
 Ejemplo:
 <screen>mplayer -af surround=15 -channels 4 media.avi</screen>
-a√±adir√° decodificaci√≥n de sonido surround con 15ms de retardo para el
+aÒadir· decodificaciÛn de sonido surround con 15ms de retardo para el
 sonido de los altavoces traseros.
 </para>
 </sect4>
@@ -972,7 +972,7 @@ sonido de los altavoces traseros.
 <sect3 id="audio-plugins">
 <title>Plugins de audio (desaprobado)</title>
 <note><para><emphasis role="bold">Los plugins de audio han sido desaprobados
-por los filtros de audio y ser√°n eliminados pronto.</emphasis></para></note>
+por los filtros de audio y ser·n eliminados pronto.</emphasis></para></note>
 
 <para>
 <application>MPlayer</application> tiene soporte para plugins de audio. Los
@@ -980,23 +980,23 @@ plugins de audio pueden usarse para cambiar las propiedades de los datos de
 audio antes de que alcancen la tarjeta de sonido. Se activan usando el
 conmutador <option>-aop</option> que toma el argumento
 <option>list=plugin1,plugin2,...</option>. El argumento <option>list</option>
-es requerido y determina qu√© plugins deben usarse y en qu√© orden deben ser
+es requerido y determina quÈ plugins deben usarse y en quÈ orden deben ser
 ejecutados. Ejemplo:
 
 <screen>mplayer media.avi -aop list=resample,format</screen>
-enviar√° el sonido a trav√©s del plugin de remuestreo seguido por el plugin
+enviar· el sonido a travÈs del plugin de remuestreo seguido por el plugin
 de formato.
 </para>
 
 <para>
-Los plugins tambi√©n pueden tener conmutadores que cambian su comportamiento.
+Los plugins tambiÈn pueden tener conmutadores que cambian su comportamiento.
 Estos conmutadores son explicados en detalle en las secciones siguientes. Un
-plugin se ejecutar√° usando la configuraci√≥n por defecto si se omiten los
-conmutadores. Aqu√≠ hay un ejemplo de c√≥mo usar los plugins en combinaci√≥n con
-conmutadores espec√≠ficos del plugin:
+plugin se ejecutar· usando la configuraciÛn por defecto si se omiten los
+conmutadores. AquÌ hay un ejemplo de cÛmo usar los plugins en combinaciÛn con
+conmutadores especÌficos del plugin:
 
 <screen>mplayer media.avi -aop list=resample,format:fout=44100:format=0x8</screen>
-establecer√° la frecuencia de salida del plugin de remuestreo a 44100Hz y el
+establecer· la frecuencia de salida del plugin de remuestreo a 44100Hz y el
 formato de salida del plugin de formato a AFMT_U8.
 </para>
 
@@ -1012,9 +1012,9 @@ Actualmente los plugins de audio no pueden usarse en
 <para>
 <application>MPlayer</application> soporta por completo sobre/submuestreo del sonido.
 Este plugin puede usarse si tiene una tarjeta de sonido con una frecuencia fija o si
-tiene una tarjeta de sonido antigua que solo es capaz como m√°ximo de usar 44.1 kHz.
+tiene una tarjeta de sonido antigua que solo es capaz como m·ximo de usar 44.1 kHz.
 Las limitaciones en su hardware no son detectadas, por lo que debe especificar la
-frecuencia de muestreo expl√≠citamente. Este plugin tiene un conmutador: <option>fout</option>
+frecuencia de muestreo explÌcitamente. Este plugin tiene un conmutador: <option>fout</option>
 que se usa para establecer la frecuencia de muestreo de salida deseada. Por defecto es
 48 kHz, y viene dada en Hz.
 </para>
@@ -1033,20 +1033,20 @@ en Hz, como <literal>44100</literal>.
 <para>
 La frecuencia de salida no debe ser escalada por encima del valor por defecto.
 Escalar por encima de este valor puede causar que los flujos de audio y video
-sean reproducidos en movimiento lento adem√°s de distorsi√≥n del audio.
+sean reproducidos en movimiento lento adem·s de distorsiÛn del audio.
 </para>
 </note>
 </sect4>
 
 
 <sect4 id="surround-decode">
-<title>Decodificaci√≥n de Sonido Surround</title>
+<title>DecodificaciÛn de Sonido Surround</title>
 
 <para>
 <application>MPlayer</application> tiene un plugin de audio que puede decodificar
 sonido codificado con matriz de sonido surround. Dolby Surround es un ejemplo de un
 formato codificado en matriz. Algunos archivos con 2 canales de audio actualmente
-contienen sonido surround en matriz. Para usar esta caracter√≠stica necesita una
+contienen sonido surround en matriz. Para usar esta caracterÌstica necesita una
 tarjeta de sonido que soporte al menos 4 canales.
 </para>
 
@@ -1064,11 +1064,11 @@ Uso:
 Si su controlador de la tarjeta de sonido no soporta tipos de datos
 enteros de 16-bit con signo, este plugin puede usarse para cambiar el formato
 a uno que su tarjeta de sonido pueda entender. Tiene un conmutador,
-<option>format</option>, que puede establecer a uno de los n√∫meros encontrados
+<option>format</option>, que puede establecer a uno de los n˙meros encontrados
 en <filename>libao2/afmt.h</filename>. Este plugin puede ser complicado, es dificil
 que sea necesario usarlo y se supone que es para usuarios avanzados. Tenga en mente
 que este plugin solo cambia el formato de muestreo y no la frecuencia de muestreo
-o el n√∫mero de canales.
+o el n˙mero de canales.
 </para>
 
 <para>
@@ -1086,9 +1086,9 @@ formato de salida requerido.
 <sect4 id="audio-delay">
 <title>Retardo</title>
 <para>
-Este plugin retarda el sonido y est√° hecho como un ejemplo de c√≥mo
-se pueden desarrollar nuevos plugins. No puede ser usado para nada √∫til
-desde el punto de vista de los usuarios y se menciona aqu√≠ √∫nicamente por
+Este plugin retarda el sonido y est· hecho como un ejemplo de cÛmo
+se pueden desarrollar nuevos plugins. No puede ser usado para nada ˙til
+desde el punto de vista de los usuarios y se menciona aquÌ ˙nicamente por
 completitud. No use este plugin a menos que sea un desarrollador.
 </para>
 </sect4>
@@ -1099,15 +1099,15 @@ completitud. No use este plugin a menos que sea un desarrollador.
 
 <para>
 Este plugin es un reemplazo de sofware para el control de volumen, y puede
-ser usado en m√°quinas con un dispositivo mezclador en mal estado. Tambi√©n
+ser usado en m·quinas con un dispositivo mezclador en mal estado. TambiÈn
 puede usarse si se quiere cambiar el volumen de salida de
-<application>MPlayer</application> sin cambiar la configuraci√≥n de volumen
+<application>MPlayer</application> sin cambiar la configuraciÛn de volumen
 PCM en el mezclador. Tiene un conmutador <option>volume</option> que se usa
 para establecer el nivel inicial de sonido. El nivel inicial de sonido puede
 ser establecido con valores entre 0 y 255 y por defecto toma 101 que es igual
-a 0dB de amplificaci√≥n. Use este plugin con cuidado porque puede reducir la
-relaci√≥n se√±al ruido para el sonido. En la mayor√≠a de los caos es mejor
-establecer el nivel para el PCM al valor m√°ximo, dejar este plugin sin usar
+a 0dB de amplificaciÛn. Use este plugin con cuidado porque puede reducir la
+relaciÛn seÒal ruido para el sonido. En la mayorÌa de los caos es mejor
+establecer el nivel para el PCM al valor m·ximo, dejar este plugin sin usar
 y controlar el nivel de salida de sus altavoces con el control de volumen
 principal del mezclador. Si hay un amplificador externo conectado al ordenador
 (lo que casi siempre es el caso), el nivel de ruido puede minimizarse ajustando
@@ -1122,10 +1122,10 @@ mplayer <replaceable>media.avi</replaceable> -aop list=volume:volume=<replaceabl
 </para>
 
 <para>
-Este plugin tiene tambi√©n capacidades de compresor o "recortador-software".
-La compresi√≥n puede usarse si el rango din√°migo del sonido es muy alto
-o si el rango din√°mico de los loudspeakers es muy bajo. Queda avisado de que
-esta caracter√≠stica crea distorsi√≥n y debe ser considerada como √∫ltimo
+Este plugin tiene tambiÈn capacidades de compresor o "recortador-software".
+La compresiÛn puede usarse si el rango din·migo del sonido es muy alto
+o si el rango din·mico de los loudspeakers es muy bajo. Queda avisado de que
+esta caracterÌstica crea distorsiÛn y debe ser considerada como ˙ltimo
 recurso.
 </para>
 
@@ -1142,7 +1142,7 @@ mplayer <replaceable>media.avi</replaceable> -aop list=volume:softclip</screen>
 <para>
 Este plugin (linealmente) incrementa la diferencia entre los canales izquierdo y
 derecho (como el plugin extraestereo de <application>XMMS</application>) lo que
-es algunas veces una especie de efecto "live" durante la reproducci√≥n.
+es algunas veces una especie de efecto "live" durante la reproducciÛn.
 </para>
 
 <para>
@@ -1152,11 +1152,11 @@ mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo
 mplayer <replaceable>media.avi</replaceable> -aop list=extrastereo:mul=3.45<!--
 --></screen>
 
-El coeficiente por defecto (<option>mul</option>) es un n√∫mero en coma flotante
-que por defecto vale 2.5. Si lo establece en <literal>0.0</literal>, obtendr√°
+El coeficiente por defecto (<option>mul</option>) es un n˙mero en coma flotante
+que por defecto vale 2.5. Si lo establece en <literal>0.0</literal>, obtendr·
 sonido mono (la media de ambos canales). Si lo establece en <literal>1.0</literal>,
-el sonido no tendr√° cambios, si lo establece a <literal>-1.0</literal>, los canales
-izquierdo y derecho ser√°n intercambiados.
+el sonido no tendr· cambios, si lo establece a <literal>-1.0</literal>, los canales
+izquierdo y derecho ser·n intercambiados.
 </para>
 </sect4>
 
