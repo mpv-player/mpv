@@ -182,7 +182,7 @@
   <LI>Radeon VE - currently only XFree86 CVS has driver for this card, version
     4.1.0 doesn't. And no TV out support. Of course with MPlayer you can
     happily get <B>accelerated</B> display, with or without <B>TV output</B>, and
-    no libraries or X are needed. Read <A HREF="#vidix">Vidix</A> section.</LI>
+    no libraries or X are needed. Read <A HREF="#vidix">VIDIX</A> section.</LI>
 </UL>
 
 
@@ -220,14 +220,13 @@
 <H4><A NAME="dga">2.3.1.2.2 DGA</A></H4>
 
 
-<H4><A NAME="dga_summary">2.3.1.2.2.1 Summary</A></H4>
+<H5>PREAMBLE</H4>
 
-<P>This document tries to explain in some words what DGA is in general and what
-  the DGA video output driver for MPlayer can do (and what it
-  can't).</P>
+<P>This section tries to explain in some words what DGA is in general and what
+  the DGA video output driver for MPlayer can do (and what it can't).</P>
 
 
-<H4><A NAME="dga_whatis">2.3.1.2.2.2 What is DGA</A></H4>
+<H5>WHAT IS DGA</H5>
 
 <P>DGA is short for Direct Graphics Access and is a means for a program to
   bypass the X-Server and directly modifying the framebuffer memory.
@@ -251,10 +250,10 @@
 
 <P>However DGA has some drawbacks. It seems it is somewhat dependent on the
   graphics chip you use and on the implementation of the X server's video
-  driver that controls this chip. So it does not work on every system ...</P>
+  driver that controls this chip. So it does not work on every system.</P>
 
 
-<H4><A NAME="dga_installation">2.3.1.2.2.3 Installing DGA support for MPlayer</A></H4>
+<H5>INSTALLING DGA SUPPORT FOR MPLAYER</H5>
 
 <P>First make sure X loads the DGA extension, see in /var/log/XFree86.0.log:</P>
 
@@ -291,7 +290,7 @@
   much faster.</P>
 
 
-<H4><A NAME="dga_resolution">2.3.1.2.2.4 Resolution switching</A></H4>
+<H5>RESOLUTION SWITCHING</H5>
 
 <P>The DGA driver allows for switching the resolution of the output signal. 
   This avoids the need for doing (slow) software scaling and at the same time
@@ -306,10 +305,10 @@
   be found at:
   <CODE>/var/log/XFree86.0.log</CODE>.</P>
 
-<P>See appendix A for some sample modeline definitions.</P>
+<P>See some working modeline definitions <A HREF="#dga_modelines">here</A>.</P>
 
 
-<H4><A NAME="dga_mplayer">2.3.1.2.2.5 DGA &amp; MPlayer</A></H4>
+<H5>DGA &amp; MPLAYER</H5>
 
 <P>DGA is used in two places with MPlayer: The SDL driver can be made to
   make use of it (-vo sdl:dga) and within the DGA driver (-vo dga). The above
@@ -317,7 +316,7 @@
   driver for MPlayer works.</P>
 
 
-<H4><A NAME="dga_features">2.3.1.2.2.6 Features of the DGA driver</A></H4>
+<H5>FEATURES</H5>
 
 <P>The DGA driver is invoked by specifying -vo dga at the command line.
   The default behavior is to switch to a resolution matching the original
@@ -356,7 +355,7 @@
   CPU time!) depending on the implementation of DGA for your hardware.</P>
 
 
-<H4><A NAME="dga_speed">2.3.1.2.2.7 Speed issues</A></H4>
+<H5>SPEED ISSUES</H5>
 
 <P>Generally spoken, DGA framebuffer access should be at least as fast as using
   the X11 driver with the additional benefit of getting a fullscreen image. 
@@ -364,7 +363,7 @@
   with some care, as for example, with the X11 driver they do not include the
   time used by the X-Server needed for the actual drawing. Hook a terminal to a
   serial line of your box and start top to see what is really going on in your
-  box...</P>
+  box.</P>
 
 <P>Generally spoken, the speedup done by using DGA against 'normal' use of X11
   highly depends on your graphics card and how well the X-Server module for it
@@ -381,7 +380,7 @@
   CPUs might work at 400 MHZ and above.</P>
 
 
-<H4><A NAME="dga_bugs">2.3.1.2.2.8 Known bugs</A></H4>
+<H5>KNOWN BUGS</H5>
 
 <P>Well, according to some developers of XFree, DGA is quite a beast. They
   tell you better not to use it. Its implementation is not always flawless
@@ -397,14 +396,14 @@
   <LI>Some drivers simply display strange colors.</LI>
   <LI>Some drivers lie about the amount of memory they map into the process's
     address space, thus vo_dga won't use doublebuffering (SIS?).</LI>
-  <LI>some drivers seem to fail to report even a single valid mode. In this
+  <LI>Some drivers seem to fail to report even a single valid mode. In this
     case the DGA driver will crash telling you about a nonsense mode of
-    100000x100000 or the like ...</LI>
-   <LI>OSD only works with doublebuffering enabled.</LI>
+    100000x100000 or someathing like that.</LI>
+   <LI>OSD only works with doublebuffering enabled (else it flickers).</LI>
 </UL>
 
 
-<H4><A NAME="dga_modelines">2.3.1.2.2.A Some modelines</A></H4>
+<H5><A NAME="dga_modelines">SOME MODELINES</A></H5>
 
 <PRE>
   Section "Modes"
@@ -419,22 +418,8 @@
   EndSection
 </PRE>
 
-<P>These entries work fine with my Riva128 chip, using nv.o X server driver
+<P>These entries work fine with authors (Acki) Riva128 chip, using nv.o X server driver
   module.</P>
-
-
-<H4><A NAME="dga_bug_reports">2.3.1.2.2.B Bug Reports</A></H4>
-
-<P>If you experience troubles with the DGA driver please feel free to file
-  a bug report to me (e-mail address below). Please start MPlayer with
-  the -v option and include all lines in the bug report that start with
-  vo_dga:</P>
-
-<P>Please do also include the version of X11 you are using, the graphics card
-  and your CPU type. The X11 driver module (defined in XF86-Config) might
-  also help. Thanks!</P>
-
-<P><I>Acki (acki@acki-netz.de, www.acki-netz.de)</I></P>
 
 
 <H4><A NAME="sdl">2.3.1.2.3 SDL</A></H4>
@@ -480,7 +465,7 @@
   <TR><TD></TD><TD><CODE>W/S</CODE></TD><TD></TD><TD>mappings for * and / (mixer control)</TD></TR>
 </TABLE>
 
-<H4>Known bugs:</H4>
+<H5>KNOWN BUGS</H5>
 
 <UL>
   <LI>Keys pressed under sdl:aalib console driver repeat forever. (use -vo aa!)
@@ -491,20 +476,20 @@
 
 <H4><A NAME="svgalib">2.3.1.2.4 SVGAlib</A></H4>
 
-<H4>Installation</H4>
+<H5>INSTALLATION</H5>
 
 <P>You'll have to install svgalib and its development package in order for
   MPlayer build its SVGAlib driver (autodetected, but can be forced),
   and don't forget to edit /etc/vga/libvga.config to suit your card &amp;
   monitor.</P>
 
-<H4>Notes</H4>
+<H5>NOTES</H5>
 
 <P>Be sure not to use the -fs option, since it toggles the usage of the software
   scaler, and it's slow. If you really need it, use the <CODE>-sws 4</CODE>
   option which will produce bad quality, but is somewhat faster.</P>
 
-<H4>EGA (4bpp) support</H4>
+<H5>EGA (4BPP) SUPPORT</H5>
 
 <P>SVGAlib incorporates EGAlib, and MPlayer has the possibility to
   display any movie in 16 colors, thus usable in the following sets:</P>
@@ -589,7 +574,7 @@
 <H4><A NAME="mga_vid">2.3.1.2.6 Matrox framebuffer (mga_vid)</A></H4>
 
 <P>This section is about the Matrox G200/G400/G450/G550 BES (Back-End Scaler)
-  support, the mga_vid kernel driver. It's active developed by me (A'rpi), and
+  support, the mga_vid kernel driver. It's active developed by A'rpi, and
   it has hardware VSYNC support with triple buffering. It works on both
   framebuffer console and under X.</P>
 
@@ -745,7 +730,7 @@
   (I guess that TV-out frequently is standalone head or standalone output
   at least.)</P>
 
-<H4>Advantages:</H4>
+<H5>ADVANTAGES</H5>
 
 <UL>
   <LI>You have the possibility to watch movies <B>even if Linux doesn't know</B>
@@ -758,7 +743,7 @@
   <LI>This driver calls <B>int 10h</B> handler thus it's not an emulator - it
     calls <B>real</B> things of <B>real</B> BIOS in <B>real</B>-mode. (Finely -
     in vm86 mode).</LI>
-  <LI>You can use Vidix with it, thus getting accelerated video display
+  <LI>You can use VIDIX with it, thus getting accelerated video display
     <B>AND</B> TV output at the same time! (recommended for ATI cards)</LI>
   <LI>If you have VESA VBE 3.0+, and you had specified <CODE>monitor_hfreq</CODE>,
     <CODE>monitor_vfreq</CODE>, <CODE>monitor_dotclock</CODE> somewhere (config
@@ -767,7 +752,7 @@
     <B>all</B> your monitor options.</LI>
 </UL>
 
-<H4>Disadvantages:</H4>
+<H5>DISADVANTAGES</H5>
 
 <UL>
   <LI>It works only on <B>x86 systems</B>.</LI>
@@ -777,7 +762,7 @@
 
 <P>Don't use this driver with <B>GCC 2.96</B>! It won't work!</P>
 
-<P><B>Command line options available for VESA:</B></P>
+<H5>COMMAND LINE OPTIONS AVAILABLE FOR VESA</H5>
 <DL>
   <DT><CODE>-vo vesa:opts</CODE></DT>
   <DD>currently recognized: <B>dga</B> to force dga mode and <B>nodga</B> to
@@ -786,7 +771,7 @@
     <B>autodetection</B> of dga mode.</DD>
 </DL>
 
-<H4>Known problems and workaround:</H4>
+<H5>KNOWN PROBLEMS AND WORKAROUNDS</H5>
 
 <UL>
   <LI>If you have installed <B>NLS</B> font on your Linux box and run VESA
@@ -840,11 +825,12 @@
 
 <H4><A NAME="vidix">2.3.1.2.12 VIDIX</A></H4>
 
-<P>VIDIX is the abbreviation for <B>VID</B>eo <B>I</B>nterface for
-  *ni<B>X</B>.<BR>
-  VIDIX was designed and introduced as an interface for fast user-space drivers
-  providing such video performance as mga_vid does for Matrox cards. It's
-  also very portable.</P>
+<H5>PREAMBLE</H5>
+
+<P>VIDIX is the abbreviation for <B>VID</B>eo <B>I</B>nterface for *ni<B>X</B>.
+  It was designed and introduced as an interface for fast user-space drivers
+  providing such video performance as mga_vid does for Matrox cards. It's also
+  very portable.</P>
 
 <P>This interface was designed as an attempt to fit existing video acceleration
   interfaces (known as mga_vid, rage128_vid, radeon_vid, pm3_vid) into a fixed scheme. It
@@ -854,7 +840,7 @@
   team in graphics mode switching). I.e. main goal of this interface is to
   maximize the speed of video playback.</P>
 
-<H4>USAGE</H4>
+<H5>USAGE</H5>
 
 <UL>
   <LI>You can use standalone video output driver: <CODE>-vo xvidix</CODE><BR>
@@ -874,7 +860,7 @@
 
 Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
 
-<H4>REQUIREMENTS</H4>
+<H5>REQUIREMENTS</H5>
 
 <UL>
   <LI>video card should be in graphics mode (I write <B>should</B> simply
@@ -886,14 +872,14 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
     able to tell to VIDIX subdevice some video characteristics of server.</LI>
 </UL>
 
-<H4>USAGE METHODS</H4>
+<H5>USAGE METHODS</H5>
 
 <P>When VIDIX is used as <B>subdevice</B> (<CODE>-vo vesa:vidix</CODE>) then
   video mode configuration is performed by video output device
   (<B>vo_server</B> in short). Therefore you can pass into command line of
   MPlayer the same keys as for vo_server. In addition it understands
   <CODE>-double</CODE> key as globally visible parameter. (I recommend using
-  this key with VIDIX at least for ATI's card).<BR>
+  this key with VIDIX at least for ATI cards).<BR>
   As for <CODE>-vo xvidix</CODE>: currently it recognizes the following
   options: <CODE>-fs -zoom -x -y -double</CODE>.</P>
 
@@ -913,10 +899,10 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   developers. The Right Way is to use VIDIX without arguments to enable driver
   autodetection.</P>
 
-<P>VIDIX is very new technology and it's extremely possible that on your system
-  (OS=abc CPU=xyz) it won't work. In this case the only solution for you is
-  porting (mainly libdha) it. But there is a hope, that it will work on those
-  systems where X11 does.</P>
+<P>VIDIX is a new technology and it's extremely possible that on your system
+  it won't work. In this case the only solution for you is porting (mainly
+  libdha) it. But there is a hope, that it will work on those systems where X11
+  does.</P>
 
 <P>Since VIDIX requires direct hardware access you can either run it as root or
   set the SUID bit on the MPlayer binary (<B>Warning: This is a security
@@ -926,10 +912,18 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
   <LI>Download the
     <A HREF="http://www.arava.co.il/matan/svgalib/">development version</A>
     of svgalib (for example 1.9.17).</LI>
-  <LI>Move the <CODE>svgalib-1.9.17/kernel/svgalib_helper</CODE> directory to
+  <LI><B>OR</B> download a version made by Alex especially for usage with
+    MPlayer (it doesn't need the svgalib source to compile) from
+    <A HREF="http://www.mplayerhq.hu/~alex/svgalib_helper-1.9.17-mplayer.tar.bz2">
+    here</A>.
+  <LI>Compile the module in the <CODE>svgalib_helper</CODE> directory (it can
+    be found inside the <CODE>svgalib-1.9.17/kernel/</CODE> directory if you've
+    downloaded the source from the svgalib site) and insmod it.</LI>
+  <LI>Move the <CODE>svgalib_helper</CODE> directory to
     <CODE>mplayer/main/libdha/svgalib_helper</CODE>.</LI>
-  <LI>Compile the module in the <CODE> svgalib_helper</CODE> directory and
-    insmod it.</LI>
+  <LI>Required if you download the source from the svgalib site: remove the
+    comment before the CFLAGS line containing "svgalib_helper" string from the
+    <CODE>libdha/Makefile</CODE>.</LI>
   <LI>Recompile and install libdha.</LI>
 </OL>
 
@@ -1030,7 +1024,7 @@ Indeed it doesn't matter which video output driver is used with <B>VIDIX</B>.
 
 <P>Then compile and install as usual.</P>
 
-<H4>USAGE</H4>
+<H5>USAGE</H5>
 
 <P>Hardware decoding (playing standard MPEG1/2 files) can be done with this
   command:</P>
@@ -1099,7 +1093,7 @@ for  3:4 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
 for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 </PRE>
 
-<H4>FUTURE</H4>
+<H5>FUTURE</H5>
 
 <P>If you have questions or want to hear feature announcements and take part in
   discussions on this subject, join our
@@ -1129,7 +1123,7 @@ for 16:9 TV: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
   Linux</A> site. Configure should detect your card automatically, compilation
   should go without problems.</P>
 
-<H4>Usage:</H4>
+<H5>USAGE</H5>
 <DL>
   <DT><CODE>-vo dxr3:prebuf:sync:norm=x:&lt;device&gt;</CODE></DT>
   <DD><CODE>overlay</CODE> activates the overlay instead of TVOut. It requires
