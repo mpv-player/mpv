@@ -4,16 +4,19 @@
 # divx2svcd for MPlayer
 # distributed under GPL License
 
-# A simple utility that creates SvcD from a video which uses avi container
+# simple utility that creates a SVCD from a video in an AVI container
 
 # The newest version of this utility can be found at
 # http://vmiklos.uw.hu/divx2svcd/divx2svcd
-# MPlayer avariable at
-# http://www1.mplayerhq.hu/MPlayer/releases/MPlayer-1.0pre3.tar.bz2
+# MPlayer available at
+# http://www.mplayerhq.hu/MPlayer/releases/MPlayer-1.0pre3try2.tar.bz2
 
 ###changelog###
 #nobody cares about it :-)
 cat >/dev/null <<EOF
+0.5.1
+- faster code by not re-mplexing one-cd-size or smaller videos
+
 0.5.0
 - needless for dumpvideo patch ;-)
 
@@ -82,7 +85,7 @@ function usage()
 Usage: `basename $0` input_avi [options]
 
 Options:
--b|--bitrate xx	bitrate of mp2 video stream [1600]
+-b|--bitrate xx	bitrate of mp2 video stream [1375]
 -s|--cdsize xx	size of the cd we split the video to [795]
 -w|--writecd	enables burning [disable]
 -d|--device xx	scsi cd-recording device if you are using linux 2.4.x [0,0,0]
@@ -93,7 +96,7 @@ EOF
 }
 
 #initializating constants
-version='0.5.0'
+version='0.5.1'
 bitrate=1375
 cdsize=795
 burning=0
@@ -107,6 +110,9 @@ paraopts='vrc_override=1,10,708:vqcomp=0.1:vratetol=10000000:vrc_buf_size=917:vr
 #header
 echo "DivX2SvcD $version (C) 2003-2004 Vajna Miklos"
 echo
+
+#checking for ls
+ls=`which ls`
 
 #checking for bc
 which bc >/dev/null 2>&1
@@ -321,14 +327,20 @@ fi
 #encoding
 mencoder -ofps 25 -oac lavc "$input" -ovc lavc -lavcopts vcodec=mpeg2video:vbitrate=$bitrate:acodec=mp2:abitrate=128:keyint=25:aspect=4/3:$paraopts -o "${nev}2.avi" -srate 44100 -of mpeg -channels 2 $vfopts $subs "$subopts"
 
-#splitting
-mplayer -dumpvideo -dumpfile "$nev.m2v" "${nev}2.avi"
-mplayer -dumpaudio -dumpfile "$nev.mp2" "${nev}2.avi"
-rm "${nev}2.avi"
-echo "maxFileSize = $cdsize" > template
-$tcbin -i "$nev.m2v" $tcopt "$nev.mp2" -o "$nev.mpg" -m s -F template
-rm template
-rm "$nev.m2v" "$nev.mp2"
+videosize=`$ls -l "${nev}2.avi"|tr -s ' '|cut -d ' ' -f5`
+if ! [ `echo $(( $cdsize*1048576 < $videosize ))` == "1" ]; then
+	#video is smaller, than $cdsize
+	mv ${nev}2.avi ${nev}00.mpg
+else
+	#splitting
+	mplayer -dumpvideo -dumpfile "$nev.m2v" "${nev}2.avi"
+	mplayer -dumpaudio -dumpfile "$nev.mp2" "${nev}2.avi"
+	rm "${nev}2.avi"
+	echo "maxFileSize = $cdsize" > template
+	$tcbin -i "$nev.m2v" $tcopt "$nev.mp2" -o "$nev.mpg" -m s -F template
+	rm template
+	rm "$nev.m2v" "$nev.mp2"
+fi
 
 for i in *mpg
 do
