@@ -162,6 +162,7 @@ static int output_quality=0;
 int use_gui=0;
 
 int osd_level=1;
+int osd_level_saved=-1;
 int osd_visible=100;
 
 // seek:
@@ -1288,7 +1289,16 @@ current_module="init_vo";
 main:
 current_module="main";
 
-if(!sh_video) osd_level = 0;
+// If there is no video OSD has to be disabled.
+// In case of playing a playtree we have to restore the
+// old OSD level after playing one or more audio-only files.
+if(!sh_video && osd_level > 0) { // save OSD level only once
+    osd_level_saved = osd_level;
+    osd_level = 0;
+} else if (osd_level_saved > -1) { // if there is a saved OSD level, restore it
+    osd_level = osd_level_saved;
+    osd_level_saved = -1;
+}
 
 fflush(stdout);
 
