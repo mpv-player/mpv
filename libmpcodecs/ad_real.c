@@ -43,6 +43,7 @@ static unsigned long (*raInitDecoder)(unsigned long,unsigned long);
 static unsigned long (*raOpenCodec2)(unsigned long);
 static unsigned long (*raSetFlavor)(unsigned long,unsigned long);
 static void  (*raSetDLLAccessPath)(unsigned long);
+static void  (*raSetPwd)(char*,char*);
 
 typedef struct {
     int samplerate;
@@ -78,6 +79,7 @@ static int preinit(sh_audio_t *sh){
     raInitDecoder = dlsym(handle, "RAInitDecoder");
     raSetFlavor = dlsym(handle, "RASetFlavor");
     raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
+    raSetPwd = dlsym(handle, "RASetPwd"); // optional, used by SIPR
     
   if(!raCloseCodec || !raDecode || !raFlush || !raFreeDecoder ||
      !raGetFlavorProperty || !raOpenCodec2 || !raSetFlavor ||
@@ -112,6 +114,11 @@ static int preinit(sh_audio_t *sh){
       return 0;
     }
   }
+
+    if(raSetPwd){
+	// used by 'SIPR'
+	raSetPwd(sh->context,"Ardubancel Quazanga"); // set password... lol.
+    }
   
     result=raSetFlavor(sh->context,((short*)(sh->wf+1))[2]);
     if(result){
@@ -155,8 +162,10 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   int result;
   int len=-1;
   int sps=((short*)(sh->wf+1))[0];
-  int w=sh->wf->nBlockAlign/sps; // 5
+  int w=sh->wf->nBlockAlign; // 5
   int h=((short*)(sh->wf+1))[1];
+  
+  if(sps) w/=sps; else sps=1;
   
 //  printf("bs=%d  sps=%d  w=%d h=%d \n",sh->wf->nBlockAlign,sps,w,h);
 
