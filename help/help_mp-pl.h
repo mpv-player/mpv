@@ -69,7 +69,7 @@ static char help_text[]=
 #define MSGTR_CantLoadSub "Nie mogê za³adowaæ napisów: %s\n"
 #define MSGTR_DumpSelectedStreamMissing "dump: B£¡D KRYTYCZNY: Brak wybranego strumienia\n"
 #define MSGTR_CantOpenDumpfile "Nie mogê otworzyæ pliku dump.\n"
-#define MSGTR_CoreDumped "Core dumped (Zrzut pamiêci)\n"
+#define MSGTR_CoreDumped "Zrzut pamiêci ;)\n"
 #define MSGTR_FPSnotspecified "Warto¶æ FPS nie podana (lub b³êdna) w nag³ówku, u¿yj opcji -fps <ilo¶æ_ramek_na_sekundê>.\n"
 #define MSGTR_TryForceAudioFmtStr "Wymuszam zastosowanie kodeka audio z rodziny %s...\n"
 #define MSGTR_CantFindAudioCodec "Nie mogê znale¼æ kodeka dla formatu audio 0x%X.\n"
@@ -210,7 +210,7 @@ static char help_text[]=
 #define MSGTR_ForcingOutputFourcc "Wymuszam wyj¶ciowe fourcc na %x [%.4s]\n"
 #define MSGTR_WritingAVIHeader "Zapisujê nag³ówek AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d powtórzona(e) ramka(i)!\n"
-#define MSGTR_SkipFrame "\nOpuszczam ramkê!"
+#define MSGTR_SkipFrame "\nOpuszczam ramkê!\n"
 #define MSGTR_ErrorWritingFile "%s B³±d przy zapisie pliku.\n"
 #define MSGTR_WritingAVIIndex "\nZapisujê indeks AVI...\n"
 #define MSGTR_FixupAVIHeader "Naprawiam nag³ówek AVI...\n"
@@ -518,7 +518,7 @@ static char help_text[]=
 #define MSGTR_ClipInfo "Informacje o klipie:\n"
 
 #define MSGTR_LeaveTelecineMode "\ndemux_mpg: Wykryto zawarto¶æ 30fps NTSC, zmieniam liczbê ramek na sekundê.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: Wykryto progresywn± zawarto¶æ 24fps NTSC, zmieniam liczbê ramek na sekundê"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: Wykryto progresywn± zawarto¶æ 24fps NTSC, zmieniam liczbê ramek na sekundê.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nie mogê otworzyæ kodeka.\n"
