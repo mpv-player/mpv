@@ -6,10 +6,7 @@ int             SubVisible = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
- if ( appMPlayer.subWindow.State == wsFocused ||
-      appMPlayer.subWindow.State ==
- 
- ) SubVisible=0;
+ if ( appMPlayer.subWindow.State == wsWindowFocusIn ) SubVisible=0;
  
  if ( !appMPlayer.subWindow.Mapped ||
       appMPlayer.subWindow.Visible == wsWindowNotVisible ) return;
@@ -72,7 +69,7 @@ void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )
            }
           break;
    case wsRLMouseButton:
-          if ( ( !mplSubMoved )&&( !( SubVisible++%2 ) ) ) wsMoveTopWindow( &appMPlayer.mainWindow );
+          if ( ( !mplSubMoved )&&( ( SubVisible++%2 ) ) ) wsMoveTopWindow( &appMPlayer.mainWindow );
           msButton=0;
           mplSubMoved=0;
           break;
