@@ -1,4 +1,4 @@
-
+ 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -682,6 +682,7 @@ void btnModify( int event,float state )
  for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )
   if ( appMPlayer.Items[j].msg == event )
    {
+    if ( appMPlayer.Items[j].used ) continue;
     switch ( appMPlayer.Items[j].type )
      {
       case itButton:
@@ -697,7 +698,7 @@ void btnModify( int event,float state )
    }
 }
 
-int btnGetValue( int event )
+float btnGetValue( int event )
 {
  int j;
  for ( j=0;j<appMPlayer.NumberOfItems + 1;j++ )

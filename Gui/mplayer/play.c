@@ -7,9 +7,9 @@
 
 int    mplParent = 1;
 
-int    mplx,mply,mplwidth,mplheight;
-
 float gui_position=-1;
+
+int    mplx,mply,mplwidth,mplheight;
 
 #include "../app.h"
 
@@ -100,7 +100,11 @@ printf("mplResize(%d,%d,%d,%d)  \n",X,Y,width,height);
 
 void mplMPlayerInit( int argc,char* argv[], char *envp[] )
 {
+#if 0
  mplShMem=shmem_alloc( ShMemSize );
+#else
+ mplShMem=calloc( 1,ShMemSize );
+#endif
  signal( SIGTYPE,mplMainSigHandler );
  signal( SIGCHLD,SIG_IGN );
 
@@ -120,7 +124,8 @@ void mplMPlayerInit( int argc,char* argv[], char *envp[] )
 
 float mplGetPosition( void )
 { // return 0.0 ... 100.0
- return (gui_position<0)?(mplShMem->Position):(gui_position*100.0);
+// return (gui_position<0)?(mplShMem->Position):(gui_position*100.0);
+ return mplShMem->Position;
 }
 
 void mplRelSeek( float s )
@@ -128,7 +133,6 @@ void mplRelSeek( float s )
 // ---
 printf("%%%%%% RelSEEK=%5.3f  \n",s);
 // ---
- mplShMem->Position=mplGetPosition() + s;
  rel_seek_secs=s; abs_seek_pos=0;
 }
 
@@ -138,8 +142,6 @@ void mplAbsSeek( float s )
 printf("%%%%%% AbsSEEK=%5.3f  \n",s);
  rel_seek_secs=0.01*s; abs_seek_pos=3;
 // ---
- mplShMem->Position=s;
- mplShMem->TimeSec=s;
 }
 
 void mplIncAudioBufDelay( void )

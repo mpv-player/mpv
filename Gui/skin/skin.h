@@ -12,7 +12,7 @@ extern int skinRead( char * dname  );
 extern int skinBPRead( char * fname, txSample * bf );
 
 extern void btnModify( int event,float state );
-extern int btnGetValue( int event );
+extern float btnGetValue( int event );
 
 // ---
 

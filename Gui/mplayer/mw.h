@@ -125,6 +125,8 @@ void PutImage( txSample * bf,int x,int y,int max,int ofs )
    }
 }
 
+extern float gui_position;
+
 void mplMainDraw( wsParamDisplay )
 {
  wItem    * item;
@@ -133,8 +135,11 @@ void mplMainDraw( wsParamDisplay )
  char     * tmp;
 
  if ( appMPlayer.mainWindow.Visible == wsWindowNotVisible ||
-      !mainVisible ||
-      !appMPlayer.mainWindow.Mapped ) return;
+      !mainVisible ) return;
+//      !appMPlayer.mainWindow.Mapped ) return;
+
+ btnModify( evSetMoviePosition,mplShMem->Position );
+ btnModify( evSetVolume,mplShMem->Volume );
 
  if ( mplMainRender )
   {
@@ -147,20 +152,19 @@ void mplMainDraw( wsParamDisplay )
        case itButton:
             PutImage( &item->Bitmap,item->x,item->y,3,item->pressed );
             break;
+       case itPotmeter:
+            PutImage( &item->Bitmap,item->x,item->y,item->phases,item->phases * ( item->value / 100.0f ) );
+	    break;
        case itHPotmeter:
             PutImage( &item->Bitmap,item->x,item->y,item->phases,item->phases * ( item->value / 100.0f ) );
             PutImage( &item->Mask,item->x + (int)( ( item->width - item->psx ) * item->value / 100.0f ),item->y,3,item->pressed );
-            break;
-       case itPotmeter:
-            PutImage( &item->Bitmap,item->x,item->y,item->phases,
-             item->phases * ( item->value / 100.0f ) );
-            break;
+	    break;
        case itSLabel:
             image=fntRender( item->fontid,0,item->width,"%s",item->label );
             goto drawrenderedtext;
        case itDLabel:
-//            image=fntRender( item->fontid,( mplTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
-            image=fntRender( item->fontid,( mplRedrawTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
+            image=fntRender( item->fontid,mplTimer%item->width,item->width,"%s",Translate( item->label ) );
+//            image=fntRender( item->fontid,( mplRedrawTimer / 10 )%item->width,item->width,"%s",Translate( item->label ) );
 drawrenderedtext:
             PutImage( image,item->x,item->y,1,0 );
             if ( image )
@@ -180,6 +184,8 @@ drawrenderedtext:
 
 #define IZE(x) printf("@@@ " x " @@@\n");
 
+extern void exit_player(char* how);
+
 void mplMsgHandle( int msg,float param )
 {
  int j;
@@ -188,8 +194,9 @@ void mplMsgHandle( int msg,float param )
   {
 // --- user events
    case evExit:
-        IZE("evExit");
+//        IZE("evExit");
         wsDoExit();  // sets wsTrue=False;
+	exit_player( "Exit" );
         break;
    case evIconify:
         IZE("evIcon");
@@ -312,9 +319,10 @@ NoPause:
    case evRedraw:
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
-        if ( !mplShMem->Playing ) wsPostRedisplay( &appMPlayer.subWindow );
+//        if ( !mplShMem->Playing ) 
+	wsPostRedisplay( &appMPlayer.subWindow );
         XFlush( wsDisplay );
-        mplRedrawTimer=mplRedrawTimerConst;
+	mplRedrawTimer=mplRedrawTimerConst;
         break;
    case evGeneralTimer:
         if ( mplMainAutoPlay )
@@ -389,6 +397,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                           item->x+item->width,item->y+item->height ) )
                       {
                        item->pressed=btnPressed;
+		       item->used=1;
                        mplMainRender=1;
                        SelectedButton=i;
                        boxMoved=0;
@@ -402,6 +411,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                           item->x+item->width,item->y+item->height ) )
                       {
                        item->pressed=btnPressed;
+		       item->used=1;
                        mplMainRender=1;
                        SelectedButton=i;
                        boxMoved=0;
@@ -425,12 +435,12 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
                  mplMenuMouseHandle( X,Y,RX,RY );
                  break;
             case itPotmeter:
-                 value=(float)( X - item->x ) / item->width * 100.0f;
+                 item->value=(float)( X - item->x ) / item->width * 100.0f;
                  goto potihandled;
             case itHPotmeter:
-                 value=(float)( X - item->x ) / item->width * 100.0f;
+                 item->value=(float)( X - item->x ) / item->width * 100.0f;
 potihandled:
-                 btnModify( item->msg,value );
+                 btnModify( item->msg,item->value );
                  if ( ( item->msg == evSetVolume )||( item->msg == evSetBalance ) ) mplMsgHandle( item->msg,item->value );
                  mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
                  break;
@@ -450,8 +460,9 @@ potihandled:
                   break;
             case itPotmeter:
             case itHPotmeter:
+		 item->used=0;
                  btnModify( item->msg,(float)( X - item->x ) / item->width * 100.0f );
-                 value=item->value;
+		 value=item->value;
                  break;
            }
           if ( SelectedButton != -1 ) mplMsgHandle( item->msg,value );

@@ -6,11 +6,7 @@ int             mplSubMoved = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
- if ( !appMPlayer.subWindow.Visible || mplShMem->Playing )
-  {
-   mplSendMessage( mplExposeEvent );
-   return;
-  }
+ if ( !appMPlayer.subWindow.Visible || mplShMem->Playing ) return;
 
  if ( mplSubRender )
   {
@@ -19,9 +15,8 @@ void mplSubDraw( wsParamDisplay )
    if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
    mplSubRender=0;
    if ( appMPlayer.sub.Bitmap.Image ) wsPutImage( &appMPlayer.subWindow );
+   XFlush( wsDisplay );
   }
- XFlush( wsDisplay );
- XSync( wsDisplay,False );
 }
 
 void mplSubMouseHandle( int Button,int X,int Y,int RX,int RY )

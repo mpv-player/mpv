@@ -66,11 +66,11 @@ void* mDisplay; // Display* mDisplay;
 #include "lirc_mp.h"
 #endif
 
+#ifdef HAVE_NEW_GUI
+#include "Gui/mplayer/play.h"
+#endif
 
 #define DEBUG if(0)
-#ifdef HAVE_GUI
- int nogui=1;
-#endif
 int verbose=0;
 int quiet=0;
 
@@ -190,13 +190,6 @@ extern float gui_position;
 
 extern void avi_fixate();
 
-#ifdef HAVE_GUI
- #include "../Gui/mplayer/psignal.h"
- #define GUI_MSG(x) if ( !nogui ) { mplSendMessage( x ); usec_sleep( 10000 ); }
-#else
- #define GUI_MSG(x)
-#endif
-
 // options:
 
 int divx_quality=0;
@@ -289,10 +282,12 @@ void exit_player(char* how){
  total_time_usage_start=GetTimer()-total_time_usage_start;
 
   // restore terminal:
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
-     getch2_disable();
+#ifdef HAVE_NEW_GUI
+   if ( !use_gui ) getch2_disable();
+#else
+   getch2_disable();
+#endif
+     
 
 #ifdef USE_LIBVO2
   if(video_out) vo2_close(video_out);
@@ -308,9 +303,6 @@ void exit_player(char* how){
 
   if(encode_name) avi_fixate();
 #ifdef HAVE_LIRC
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
   lirc_mp_cleanup();
 #endif
 
@@ -347,13 +339,6 @@ void exit_sighandler(int x){
   mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_IntBySignal,x,
       current_module?current_module:"unknown"
   );
-  #ifdef HAVE_GUI
-   if ( !nogui )
-    {
-     mplShMem->items.error.signal=x;
-     strcpy( mplShMem->items.error.module,current_module?current_module:"unknown" );
-    }
-  #endif
   exit_player(NULL);
 }
 
@@ -408,11 +393,11 @@ if ((conffile = get_path("")) == NULL) {
 }
 }
 
-#ifndef HAVE_GUI
+//ifndef HAVE_GUI
  int main(int argc,char* argv[], char *envp[]){
-#else
- int mplayer(int argc,char* argv[], char *envp[]){
-#endif
+//else
+// int mplayer(int argc,char* argv[], char *envp[]){
+//endif
 
 #ifdef USE_SUB
 static subtitle* subtitles=NULL;
@@ -565,14 +550,11 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
 #endif
 
 #ifdef HAVE_LIRC
- #ifdef HAVE_GUI
-  if ( nogui )
- #endif
   lirc_mp_setup();
 #endif
 
 #ifdef USE_TERMCAP
-  load_termcap(NULL); // load key-codes
+  if ( !use_gui ) load_termcap(NULL); // load key-codes
 #endif
 
 
@@ -581,10 +563,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   signal(SIGTERM,exit_sighandler); // kill
   signal(SIGHUP,exit_sighandler);  // kill -HUP  /  xterm closed
 
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
-     signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
+  signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
 
   signal(SIGQUIT,exit_sighandler); // Quit from keyboard
   // fatal errors:
@@ -985,15 +964,6 @@ current_module="init_libvo";
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt);
 
-   #ifdef HAVE_GUI
-    if ( !nogui )
-     {
-      mplShMem->items.videodata.width=sh_video->disp_w;
-      mplShMem->items.videodata.height=sh_video->disp_h;
-      mplSendMessage( mplSetVideoData );
-     }
-   #endif
-
 #ifdef USE_LIBVO2
    if(!vo2_start(video_out,
                sh_video->disp_w,sh_video->disp_h,out_fmt,0,
@@ -1294,12 +1264,12 @@ if(1)
 	      mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nstill dropping, %.2f\n", time_frame);
 	  }
       }
-      video_out->check_events(); // check events AST
 #ifdef HAVE_NEW_GUI
       if(use_gui){
         wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
       }
 #endif
+      video_out->check_events(); // check events AST
     } else {
       // It's time to sleep...
       current_module="sleep";
@@ -1504,10 +1474,6 @@ if(auto_quality>0){
       mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");fflush(stdout);
       if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
-#ifdef HAVE_GUI
-      if ( nogui )
-        {
-#endif
          while(
 #ifdef HAVE_LIRC
              lirc_mp_getinput()<=0 &&
@@ -1524,9 +1490,6 @@ if(auto_quality>0){
              if(use_stdin) usec_sleep(1000); // do not eat the CPU
          }
          osd_function=OSD_PLAY;
-#ifdef HAVE_GUI
-        } else while( osd_function != OSD_PLAY ) usec_sleep( 1000 );
-#endif
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
   }
@@ -1781,11 +1744,14 @@ if(rel_seek_secs || abs_seek_pos){
 
 #ifdef HAVE_NEW_GUI
       if(use_gui){
-        int len=((demuxer->movi_end-demuxer->movi_start)>>8);
-        if(len>0)
-          gui_position=(demuxer->filepos-demuxer->movi_start)/len;
-        else
-	  gui_position=-1;
+        int len=((demuxer->movi_end-demuxer->movi_start));
+//        if(len>0)
+//          gui_position=(float)(demuxer->filepos-demuxer->movi_start)/len;
+//        else
+//	  gui_position=-1;
+	if ( len > 0 ) mplShMem->Position=(float)(demuxer->filepos-demuxer->movi_start) / len * 100.0f;
+	 else mplShMem->Position=0;
+	mplShMem->TimeSec=d_video->pts; 
       }
 #endif
 
@@ -1842,10 +1808,11 @@ if(curr_filename+1<num_filenames){
     // partial uninit:
 
   // restore terminal:
-  #ifdef HAVE_GUI
-   if ( nogui )
-  #endif
-     getch2_disable();
+#ifdef HAVE_NEW_GUI
+   if ( !use_gui ) getch2_disable();
+#else
+   getch2_disable();
+#endif
 
   current_module="uninit_vo";
 
