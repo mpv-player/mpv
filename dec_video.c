@@ -1,4 +1,7 @@
 
+// This file is OBSOLETED. DO not modify, stuff moved to libmpcodecs/ from here
+#error OBSOLETED
+
 #define USE_MP_IMAGE
 
 #include "config.h"
