@@ -10,19 +10,67 @@ mplayer (1.0)
 
     Codecs and demuxers:
     * improved FLAC configure detection
+    * better support for (buggy) MEncoder created streams in libmpeg2
+    * better AC3 detection in Matroska
+    * fixed compilation of matroska on mingw32/cygwin
+    * support for (uncompressed) VobSubs inside Matroska
+    * support for MP2 inside Matroska
+    * MPEG-TS demuxer updates
     
     Filters:
     * some fixes in the delogo filter 
+    * optimized eq2 filter
+    * weighted gamma support in the eq2 filter
     
     FFmpeg/libavcodec:
     * Lagrange multipliers instead of qscale, encoding quality much improved
+    * fixed an old bug fixed in MPlayer's support code
+    * support wider range of VOLs in h263
+    * direct rendering support in MJPEG
+    * massive MLib optimization support
+    * more VQA files supported
+    * Theora support
+    * Sunplus JPEG (SP5X) support
+    * h263 GOB fixes
+    * massive cleanups
+    * reduced memory footprint (!)
+    * fixed decoding if aspect ratio changes
+    * MMX2 optimizations in HuffYUV
+    * lot of bugs squashed in HuffYUV
+    * fixed the long standing decoding errors after 'first frame is not keyframe'
+    * CRI ADX support
+    * XA ADPCM support
+    * fixed files with odd dimensions on PPC
+    * optimized MPEG2 bitstream parsing
+    * better interlacing framework
+    * support for IBM's XLC compiler
+    * support for SAR (sample aspect ratio)
     
     Drivers:
     * VIDIX equalizer support in fbdev
+    * VIDIX colorkeying support in fbdev, svga and vesa
+    * obsoleted option: -fb
     * new SiS 650/651/740/etc VIDIX driver
+    * safer vo_directx directrendering
+    * massive nvidia_vid updates
+    * gl2 updates
+    * ggi now supports non-directbuffer rendering and slices
+    * tdfxfb fixed on gcc 3.x
+    * dfbmga updated, g200 support
+    * colorkeying can be disabled
+    
+    SWScaler:
+    * updated MLib (Sun VIS) support
+    * more accurate filters (rounding fixes)
+    * MMX optimized UYVY output
     
     Others:
-    * swscaler fixed on mlib
+    * sub autoloading under Windows
+    * Darwin xmms libs supported
+    * support newer Darwin versions in Altivec detection code
+    * fixed aspecting and geometry
+    * fixed compilation when libavcodec is missing (altought it's a bad choice)
+    * support for newer Apple GCC's
 
 
   pre2:
