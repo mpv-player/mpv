@@ -71,6 +71,7 @@ int vidix_preinit(const char *drvname)
 		printf("vosub_vidix: Couldn't get capability: %s\n",strerror(err));
 		return -1;
 	}
+	printf("vosub_vidix: Using: %s\n",vidix_cap.name);
 	/* we are able to tune up this stuff depend on fourcc format */
 	video_out_vesa.draw_slice=vidix_draw_slice;
 	video_out_vesa.draw_frame=vidix_draw_frame;
