@@ -228,14 +228,15 @@ sound.</p>
   without changing the PCM volume setting in the mixer. It has one
   switch <CODE>volume</CODE> that is used for setting the initial
   sound level. The initial sound level can be set to values between 0
-  and 255 and defaults to 255. Use this plugin with caution since it
-  can reduce the signal to noise ratio of the sound. In most cases it
-  is best to set the level for the PCM sound to max, leave this plugin
-  out and control the output level to your speakers with the mixers
-  master volume control. If there is an external amplifier connected
-  to the computer (this is almost always the case), the noise level
-  can be minimized by adjusting the master level and the volume knob
-  on the amplifier until the hissing noise in the background is gone.
+  and 255 and defaults to 101 which equals 0dB amplification. Use this
+  plugin with caution since it can reduce the signal to noise ratio of
+  the sound. In most cases it is best to set the level for the PCM
+  sound to max, leave this plugin out and control the output level to
+  your speakers with the mixers master volume control. If there is an
+  external amplifier connected to the computer (this is almost always
+  the case), the noise level can be minimized by adjusting the master
+  level and the volume knob on the amplifier until the hissing noise
+  in the background is gone.
 </P>
 
 <P>Usage :<BR>
@@ -243,6 +244,17 @@ sound.</p>
   list=volume:volume=&lt;0-255&gt;</CODE>
 </P>
 
+<P>This plugin also have a compressor or "soft-clipping" capabilities.
+  Compression can be used if the dynamic range of the sound is very
+  high or if the dynamic range of the loudspeakers is very
+  low. Observe that this feature creates distortion and should be
+  considered a last resort.
+</P>
+
+<P>Usage :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop
+  list=volume:softclip</CODE>
+</P>
 
 <P><B><A NAME=2.3.2.2.6>2.3.2.2.6. Extrastereo</A></B></P>
 

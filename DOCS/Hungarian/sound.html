@@ -221,7 +221,8 @@ hangkártyára+meghajtóra van szükség.</P>
   is használható, ahol a hardveres mixer eszköz nem mûködik. Használható
   továbbá olyan esetekben, amikor a PCM hangerõ megváltoztatása nélkül
   akarod a hangerõt megváltoztatni. Egyetlen opciója van, a <CODE>volume</CODE>
-  ami 0 és 255 közötti értékeket vehet fel (az alapértelmezett érték a 255).
+  ami 0 és 255 közötti értékeket vehet fel (az alapértelmezett érték a 101 -
+  ez 0dB-nyi erõsítést jelent).
   Óvatosan használd ezt a plugint. A legtöbb esetben sokkal célravezetõbb a
   hardveres mixeren a PCM csatorna maximálisra állítása, ezen plugin
   kihagyása, és a hangerõ "mester" csatornával történõ állítása. Ha külsõ
@@ -231,9 +232,16 @@ hangkártyára+meghajtóra van szükség.</P>
   elenyészik.
 </P>
 
-<P>Használat :<BR>
+<P>Használata :<BR>
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop
   list=volume:volume=&lt;0-255&gt;</CODE> 
+</P>
+
+<P>A pluginnek van úgynevezett "compressor" vagy "soft-clipping" képessége.
+  Lásd az angol dokumentációt...</P>
+
+<P>Használata :<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=volume:softclip</CODE>
 </P>
 
 
