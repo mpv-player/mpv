@@ -63,8 +63,8 @@ verwenden. Ein Nachteil diese Codecs ist, dass er zur Zeit Closed-Source ist. </
 
 <P>Hinweis: vergiss NICHT <CODE>/usr/local/lib</CODE> deiner <CODE>/etc/ld.so.conf</CODE> hinzuzufügen!</P>
 
-<P><B>MPlayer</B> erkennt automatisch, wenn DivX4/DivX5 korrekt installiert ist und kompiliert
-wie gewöhnlich. Wenn nichts erkannt wird, wurde es nicht korrekt installiert 
+<P><B>MPlayer</B> erkennt automatisch, ob DivX4/DivX5 korrekt installiert ist und kompiliert
+wie gewöhnlich. Wenn es nicht erkannt wird, wurde es nicht korrekt installiert 
 oder konfiguriert.</P>
 
 <P>DivX4Linux steht in Konflikt mit derm alten OpenDivX, da die APIs von
@@ -87,7 +87,7 @@ In diesem Fall kannst du auch YUY2/UYVY verwenden.</FONT></TD><TR>
 <P>Die <CODE>-vc odivx</CODE> Methode ist normalerweise schneller, da es die Daten in einem YV12
 (Planar YUV 4:2:0) Format übermittelt, was weniger Bandbreite für den Bus bedeutet.
 Für gepackte YUV Formate (YUY2, UYVY) verwende die <CODE>-vc divx4</CODE> Methode. 
-Für RGB-Modus ist die Geschwindigkeit gleich, am esten hängt sie noch
+Für RGB-Modus ist die Geschwindigkeit gleich, am ehesten hängt sie noch
 von deiner momentanen Farbtiefe ab.</P>
 
 <P>HINWEIS: Wenn der -vo driver "direct rendering" unterstützt, ist 
@@ -132,13 +132,13 @@ Um dies zu erreichen, sollten folgende Schritte vollzogen werden:</P>
     Hauptverzeichnis des <B>MPlayer</B> CVS-Baums bewegt werden. Es sollte etwa
     so aussehen:
     <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
-    Symlinken ist <B>nicht</B> genug, es muss kopiert/bewegt werden!!!</LI>
+    Symlinken ist <B>nicht</B> genug, es muss kopiert/verschoben werden!!!</LI>
   <LI>Es folgt die Kompilierung. Configure sollte allfällige Probleme vor der
     Kompilierung erkennen.</LI>
 </OL>
 
 <P><B>HINWEIS:</B> <B>MPlayer</B> über CVS enthält ein libavcodec
-Unterverzeichnis, dieses enthält jedoch NICHT den Quellcode von libavcodec!
+Unterverzeichnis, es enthält jedoch NICHT den Quellcode von libavcodec!
 Es muss der obrigen Anleitung gefolgt werden, um den Quellcode für diese
 Bibliothek (library) zu erhalten.</P>
 
@@ -146,7 +146,6 @@ Bibliothek (library) zu erhalten.</P>
 
 <P>Mit FFmpeg und meiner Matrox G400 kann ich sogar DivX-Filme in hoher 
 Auflösung auf meinem K6/2 500 ohne Framedrops betrachten.</P>
-
 
 <P><B><A NAME=2.2.1.3>2.2.1.3. XAnim Codecs</A></B></P>
 
@@ -191,8 +190,8 @@ Option verwendet werden, um <B>MPlayer</B> zu sagen, dass er sie, wenn möglich, 
 Option aufrufen (standard) (benötigt die neuesten libavcodecs). Für 2.0-Dateien verwende
 die <CODE>ivvideo.dll</CODE> DLL-Datei (von <A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">
 hier</A>) und installiere sie unter <CODE>/usr/lib/win32</CODE> oder wo du deine Win32 Codecs speicherst.
-Der letztgenannte Codec unterstützt weder YV12 noch YUY2, nur BGR-Modie, 
-was die Ausgabe auf X11 und OpenGL beschränkt. ffh263 wird in Zukunft 
+Der letztgenannte Codec unterstützt weder YV12 noch YUY2, nur BGR-Modus,
+was die Ausgabe auf X11 und OpenGL beschränkt. ffh263 wird in Zukunft
 hoffentlich VIVO 2.0 unterstützen.</P>
 
 
@@ -212,21 +211,21 @@ wurde es mit dem <CODE>msvidc32.dll</CODE> Win32-Codec decodiert, aber nun haben
 Open-Source-Codec (von <A HREF="mailto:melanson@pcisys.net">Mike Melanson</A>) eingebaut.</P>
 
 
-<P><B><A NAME=2.2.1.7>2.2.1.7.  Cinepak CVID</A></B></P>
+<P><B><A NAME=2.2.1.7>2.2.1.7. Cinepak CVID</A></B></P>
 
 <P><B>MPlayer</B> verwendet normalerweise einen eigenen, Open-Source, multiplatformfähigen 
 Cinepak-Decoder. Er unterstützt YUV Ausgabe, dies ermöglicht Hardwarescaling, wenn dies vom
 Videoausgabetreiber unterstützt wird.</P>
 
 
-<P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
+<P><B><A NAME=2.2.1.8>2.2.1.8. RealVideo</A></B></P>
 
 <P>Momentan ist <B>nur</B> der RealVideo 1.0 (fourcc RV10) Codec unterstützt, durch
 FFmpeg. Dummerweise, kommen die neuen RealMedia-Dateien mit dem neueren und 
 closed source RV20- und RV30-Codecs. Deren zukünftige Unterstützung ist 
 unwahrscheinlich :(</P>
 
-<P><B><A NAME=2.2.1.9>2.2.1.9.  XViD</A></B></P>
+<P><B><A NAME=2.2.1.9>2.2.1.9. XViD</A></B></P>
 
 <P><B>XViD</B> ist eine weitere Entwicklung von der OpenDivX-Gruppe
 (deren erste Entwicklung war DivX4).</P>
@@ -235,7 +234,7 @@ unwahrscheinlich :(</P>
   <UL>
     <LI>Open source</LI>
     <LI>Die API ist kompatibel mit DivX4, so dass es leicht ist Unterstützung dafür einzubauen.</LI>
-    <LI>2-Schritt Encodierungs-Unterstützung</LI>
+    <LI>2-Pass Encodierungs-Unterstützung</LI>
     <LI>gute Encodierungsqualität, höhere Geschwindigkeit als DivX4 (man kann es, während dem 
     Kompilieren, spezifisch für den jeweiligen Rechner optimieren)</LI>
   </UL>
