@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.17 -->
 <chapter id="mencoder">
 <title>Encodage avec MEncoder</title>
 
@@ -80,8 +80,7 @@ vidéo que MEncoder a affiché à la fin de la passe précédente.
 <step><para>
   <emphasis>Troisième passe:</emphasis>
 <screen>
-mencoder <replaceable>fichier/DVD</replaceable> -oac copy -pass 2 \
-         -ovc divx4 -divx4opts br=<replaceable>bitrate</replaceable>
+mencoder <replaceable>fichier/DVD</replaceable> -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=<replaceable>bitrate</replaceable>
 </screen>
 Ceci est la seconde passe de l'encodage vidéo. Spécifiez le même bitrate vidéo que
 celui de la passe précédente à moins que vous ne sachiez réellement ce que vous faites.
@@ -110,7 +109,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <para>
 <application>MEncoder</application> peut créer des fichier au format MPEG (MPEG-PS).
 Ceci n'est probablement utile qu'avec le codec <emphasis>mpeg1video</emphasis>
-de libavcodec, car les lecteurs - excepté <application>MPlayer</application>
+de <systemitem class="library">libavcodec</systemitem>, car les lecteurs - excepté <application>MPlayer</application>
 - attendent de la vidéo MPEG1, et de l'audio MPEG1 layer 2 (MP2) dans les fichiers MPEG.
 </para>
 
@@ -231,12 +230,11 @@ d'abord, comme décrit <link linkend="menc-feat-fix-avi">çi-dessus</link>.
 </sect1>
 
 <sect1 id="menc-feat-enc-libavcodec">
-<title>Encodage avec la famille de codecs libavcodec</title>
+<title>Encodage avec la famille de codecs <systemitem class="library">libavcodec</systemitem></title>
 
 <para>
-<link linkend="ffmpeg">libavcodec</link> permet un encodage simple dans de nombreux
-formats audio et vidéo intéressants (actuellement ses codecs audio ne sont pas
-supportés). Vous pouvez encoder avec les codecs suivants (plus ou moins à jour):
+<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> permet un encodage simple dans de nombreux formats audio et vidéo intéressants. 
+Vous pouvez encoder avec les codecs suivants (plus ou moins à jour):
 
 <informaltable frame="all">
 <tgroup cols="2">
@@ -474,7 +472,7 @@ attribut. Excepté <application>MPlayer</application>.
 
 <para>
 Cette fonction ne peut être utilisé qu'avec le codec <systemitem>mpeg4</systemitem> de
-<emphasis role="bold">libavcodec</emphasis>. Gardez à l'esprit: bien que
+<emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>. Gardez à l'esprit: bien que
 <application>MPlayer</application> lise correctement le fichier créé, les autres lecteurs
 utiliseront un mauvais aspect ratio.
 </para>
@@ -497,7 +495,7 @@ crop=714:548:0:14 -oac copy -o <replaceable>sortie.avi</replaceable></screen>
 <sect1 id="custommatrices"><title>Inter/intra matrices personnalisées</title>
 
 <para>
-Avec cette fonction de <link linkend="ffmpeg">libavcodec</link> vous pouvez
+Avec cette fonction de <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> vous pouvez
 initialiser des matrices personnalisées inter (I-frames/trames-clé) et intra
 (P-frames/trames prévues). Elle est supportée par de nombreux codecs:
 <systemitem>mpeg1video</systemitem> et <systemitem>mpeg2video</systemitem>
@@ -623,7 +621,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  Il y a deux façons d'éviter cela. Vous pouvez essayer de réencoder en utilisant
+  Il y a trois façons d'éviter cela. Vous pouvez essayer de réencoder en utilisant
   <option>vqscale=4</option> et voir si la taille et la qualité sont toutes deux
   acceptables. Vous pouvez aussi utiliser
   <link linkend="menc-feat-divx4">l'encodage 2 passes</link>.
@@ -632,6 +630,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   le débit requis à passer à l'option
   <option>-lavcopts vbitrate=<replaceable>bitrate</replaceable></option>
   en utilisant <link linkend="menc-feat-divx4">l'encodage 3 passes</link>.
+</para>
+
+<para>
+  La troisième et peut-être la meilleure option serait de légèrement diminuer
+  la résolution. Le 'softening' léger et la perte de détails est visuellement
+  préférable à la pixélisation et autres artéfacts de la compression MPEG.
+  Diminuer la résolution réduit le bruit de l'image, ce qui est bénéfique, car
+  le bruit est difficile à compresser.
 </para></sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-deinterlacing">
@@ -648,8 +654,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Savoir si on désentrelace durant l'étape du rip dépends du DVD. Si le DVD est
   un film, qui a été tourné en 24 fps, vous pouvez très bien désentrelacer pendant
   le rip. Si, par contre, la vidéo originale est en 50/60 fps, la convertir en
-  vidéo 23.976/25 fps désentrelaçé perdra des informations. Si vous décidez de
-  désentrelacer, vous pouvez essayer avec différents filtres de désentrelacement, voir
+  vidéo 23.976/25 fps désentrelaçé perdra des informations. Si vous décidez tout de même de désentrelacer, vous pouvez essayer avec différents filtres de désentrelacement, voir
   <ulink url="http://www.wieser-web.de/MPlayer/">http://www.wieser-web.de/MPlayer/</ulink>
   pour des exemples. Un bon point de départ est <option>-vf pp=fd</option>.
 </para>

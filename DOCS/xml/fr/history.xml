@@ -1,16 +1,19 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.10 -->
 <!-- FIXME: history really should be in the appendix -->
 <sect1 id="history">
 <title>Histoire</title>
  
 <blockquote><para>
 Cela a commenc&eacute; un an auparavant...
-J'ai essay&eacute; de nombreux lecteurs de vid&eacute;os sous GNU/Linux (mtv,xmps,dvdview,livid/oms,VideoLAN,
-xine,xanim,avifile,xmmp) mais ils pr&eacute;sentaient tous des d&eacute;fauts, particuli&egrave;rement sur
-certains fichiers ou avec la synchronisation audio/video. La plupart &eacute;taient incapables de lire &agrave;
-la fois les fichiers MPEG1, MPEG2 et AVI (DivX). De plus ils avaient des probl&egrave;mes de vitesse/qualit&eacute;
-d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
+J'ai essay&eacute; de nombreux lecteurs de vid&eacute;os sous GNU/Linux (<application>mtv</application>, <application>xmps</application>,
+<application>dvdview</application>, <application>livid/oms</application>,
+<application>videolan</application>, <application>xine</application>,
+<application>xanim</application>, <application>avifile</application>,
+<application>xmmp</application>) mais ils présentaient tous des défauts, particulièrement sur
+certains fichiers ou avec la synchronisation audio/video. La plupart étaient incapables de lire à
+la fois les fichiers MPEG1, MPEG2 et AVI (DivX). De plus ils avaient des problèmes de vitesse/qualité
+d'images. J'ai donc décidé d'en écrire/modifier un...
 </para></blockquote><para>A'rpi, 2001</para>
 
 <para>
@@ -25,12 +28,12 @@ d'images. J'ai donc d&eacute;cid&eacute; d'en &eacute;crire/modifier un...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.5-v0.87</emphasis>: 28 Sep-20 Oct 2000
-  </para><para>Le codec Mpeg a &eacute;t&eacute; remplac&eacute; par DVDview de Dirk Farin, du bon boulot,
-    mais c'&eacute;tait lent et &eacute;crit en C++ (A'rpi d&eacute;teste le C++!!!)
+  </para><para>Le codec MPEG a été remplacé par DVDview de Dirk Farin, du bon boulot,
+    mais c'était lent et écrit en C++ (A'rpi déteste le C++!!!)
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">mpg12play v0.9-v0.95pre5</emphasis>: 21 Oct-2 Nov 2000
-  </para><para>Le codec mpeg &eacute;tait libmpeg2 (mpeg2dec) par Aaron Holtzman &amp; Michel Lespinasse.
+  </para><para>Le codec MPEG était libmpeg2 (mpeg2dec) par Aaron Holtzman &amp; Michel Lespinasse.
     Il est excellent, un code C rapide et bien optimis&eacute; avec une qualit&eacute; d'image parfaite
     et 100% compatible avec les standards MPEG.
   </para></listitem>

@@ -1,4 +1,4 @@
-.\" synced with 1.514
+.\" synced with 1.524
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas@legaillart.com >
@@ -34,7 +34,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "3 Janvier 2004"
+.TH MPlayer 1 "25 Janvier 2004" "The MPlayer Project" "Le Lecteur Vidéo Pour Linux"
 .
 .SH NAME
 mplayer  \- Lecteur Vidéo pour Linux
@@ -193,7 +193,7 @@ Il possède les mêmes options que MPlayer.
 .SH "NOTES GÉNÉRALES"
 .B Regardez également la documentation HTML !
 .PP
-Chaque option a son opposé, par exemple\& l'inverse de l'option
+Chaque option a son opposé, par ex.\& l'inverse de l'option
 \-fs est \-nofs.
 .PP
 Vous pouvez placer toutes les options dans un fichier de configuration qui sera
@@ -211,7 +211,7 @@ Les options qui nécessitent des valeurs peuvent être activés en les
 initialisant à 'yes' ou '1' ou désactivés en les initialisant à 'no'
 ou '0'.
 Ceci est même applicable aux sous-options.
-
+.PP
 .I EXEMPLE:
 .br
 # Utilise les pilotes Matrox par défaut.
@@ -227,7 +227,11 @@ flip=yes
 # démarre avec mf://filemask
 .br
 mf=type=png:fps=25
-
+.br
+# Les images en eerie negative, c'est cool.
+.br
+vf=eq2=1.0:-0.8
+.PP
 Vous pouvez également écrire des fichiers de config spécifiques à un fichier.
 Si vous souhaitez avoir un fichier de config pour un fichier nommé 'film.avi',
 créez un fichier nommé 'film.avi.conf' contenant les options spécifiques à ce 
@@ -1190,9 +1194,6 @@ polices FreeType:
 .I NOTE:
 Avec FreeType, cette option détermine le chemin vers le fichier de polices.
 .br
-Les options \-subfont-* ne sont disponibles que si le support de FreeType a été
-activé lors de la compilation.
-.br
 Avec Fontconfig, cette option détermine le nom de police fontconfig.
 
 .I EXEMPLE:
@@ -1375,7 +1376,7 @@ Peut être négatif.
 Inutile actuellement.
 Identique à \-audiofile, mais pour les flux de sous-titres (OggDS ?).
 .TP
-.B \-subfont-autoscale <0\-3>
+.B \-subfont-autoscale <0\-3> (FreeType uniquement)
 Sélectionne le mode de redimensionnement automatique.
 .br
 .I NOTE:
@@ -1398,7 +1399,7 @@ proportionnel à la diagonale du film (par défaut)
 .PD 1
 .
 .TP
-.B \-subfont-blur <0\-8>
+.B \-subfont-blur <0\-8> (FreeType uniquement)
 Fixe le rayon de flou (blur) sur les polices (par défaut: 2).
 .TP
 .B \-subfont-encoding <valeur>
@@ -1406,14 +1407,14 @@ Fixe l'encodage de la police.
 Avec 'unicode', tous les signes du fichier de police seront affichés et unicode
 sera utilisé (par défaut: unicode).
 .TP
-.B \-subfont-osd-scale <0\-100>
+.B \-subfont-osd-scale <0\-100> (FreeType uniquement)
 Fixe le coefficient de mise à l'échelle automatique des éléments OSD 
 (par défaut: 6).
 .TP
-.B \-subfont-outline <0\-8>
+.B \-subfont-outline <0\-8> (FreeType uniquement)
 Fixe l'épaisseur de la bordure de police (par défaut: 2).
 .TP
-.B \-subfont-text-scale <0\-100>
+.B \-subfont-text-scale <0\-100> (FreeType uniquement)
 Fixe le coefficient de mise à l'échelle automatique (en pourcentage de la taille
 de l'écran) (par défaut: 5).
 .TP
@@ -1549,6 +1550,14 @@ AC3
 .B \-mixer <périph.>
 Cette option indique à MPlayer d'utiliser un autre périphérique de mixage que
 /dev/\:mixer.
+.TP
+.B \-mixer-channel <mixer line> (-ao oss uniquement)
+Cette option dit à MPlayer d'utiliser un canal différent du PCM par défaut pour 
+controller le volume. 
+Les options incluent
+.B vol, pcm, line.
+Pour une liste complète des options, cherchez SOUND_DEVICE_NAMES dans
+/usr/include/linux/soundcard.h.
 .TP
 .B \-nowaveheader (\-ao pcm uniquement)
 N'inclus pas l'entête wave.
@@ -1883,28 +1892,6 @@ Désactive xscreensaver au lancement et le réactive à la sortie.
 Essaie de changer vers un meilleur mode vidéo.
 Les pilotes de sortie dga, x11/\:xv (XF86VidMode) et sdl le supportent.
 .TP
-.B \-vo <driver1[:device],driver2,...[,]>
-Spécifie une liste de priorité des pilotes (éventuellement avec un
-périphérique) de sortie audio à utiliser.
-\'périphérique' est valide également avec SDL et GGI, en tant que sous-pilote.
-.br
-.I NOTE:
-Pour obtenir la liste complète des pilotes disponibles, voir \-vo help.
-.br
-Si la liste finit par ',', les autres pilotes seront essayés en cas d'échec.
-
-.I EXEMPLE:
-.PD 0
-.RSs
-.IPs "\-vo xmga,xv,"
-Essaie le pilote noyau Matrox, puis le pilote Xv, puis les autres
-.br
-.IPs "\-vo sdl:aalib"
-Spécifie le sous-pilote SDL
-.RE
-.PD 1
-.
-.TP
 .B \-vsync \ \
 Active VBI pour vesa.
 .TP
@@ -2135,6 +2122,11 @@ des fichiers AVI.
 .RE
 .PD 1
 .
+.TP
+.B \-codecs-file <nom>
+Utilise le fichier spécifique au lieu de celui du système ou celui du 
+codecs.conf intégré.
+Voir aussi  \-afm, \-ac, \-vfm et \-vc.
 .TP
 .B \-flip
 Inverse l'image de haut en bas.
@@ -2477,22 +2469,51 @@ Les filtres vidéo sont des plugins qui permettent de modifier le flux vidéo et
 ses propriétés.
 La syntaxe est:
 .TP
-.B \-vf <filtre1[=options],filtre2,...>
+.B \-vf <filtre1[=paramètres],filtre2,...>
 Initialise une chaine de filtres vidéo.
 .TP
-.B \-vop <...,filtre3[=options],filtre2,filtre1> (OBSOLÈTE)
+.B \-vop <...,filtre3[=paramètres],filtre2,filtre1> (OBSOLÈTE)
 Initialise une chaine de filtres vidéo, à appliquer en ordre
-.B inverse.
+.B ordre inverse.
 Utilisez de préférence \-vf.
-.RE
 .PP
 Les paramètres sont optionnels et si omis, certains d'entre eux s'initialiseront
 avec des valeurs par défaut.
 Utilisez '-1' pour garder la valeur par défaut.
 Les paramètres l:h signifient largeur x hauteur en pixels, x:y signifient
 position x;y à partir de du coin supérieur gauche de la plus grande image.
+.br
+.I NOTE:
 Pour avoir une liste complète des filtres disponibles, voir \-vf help.
 
+Les filtres sont gérés en listes.
+Il y a quelques commandes pour gérer la liste de filtres.
+.TP
+.B \-vf-add <filtre1[,filtre2,...]>
+Ajoute le filtre donné en argument à la fin de la liste de filtres.
+.TP
+.B \-vf-pre <filtre1[,filtre2,...]>
+Ajoute le filtre donné en argument au début de la liste de filtres.
+.TP
+.B \-vf-del <index1[,index2,...]>
+Supprime le filtre à l'index indiqué.
+Les numéros d'index commencent à 0, les nombres négatifs indiquent la fin
+de la liste (-1 pour le dernier).
+.TP
+.B \-vf-clr
+Vide complètement la liste de filtres.
+.PP
+Avec les filtres qui le supporte, vous pouvez accéder à leur paramètres via 
+noms.
+.TP
+.B \-vf <filtre>=help
+Affiche les noms des paramètres et leur intervalle de valeurs pour un filtre
+particulier.
+.TP
+.B \-vf <filtre=paramètre_nommé=valeur1[:paramètre_nommé2=valeur2:...]>
+Fait correspondre un paramètre nommé à une valeur donnée.
+Utilisez on et off ou yes et no pour positionner les flags des paramètres.
+.PP
 Les filtres disponibles sont:
 .
 .TP
@@ -3350,36 +3371,297 @@ x,y,l,h.
 .TP
 .B zrmjpeg[=options]
 Encodeur logiciel YV12 vers MJPEG pour utilisation avec le périphérique zr2.
-De multiples options puvent être spécifiées, vous devez alors les séparer
-par ':'.
 .RSs
 .IPs maxheight=h|maxwidth=l
 Ces options initialisent les largeur et hauteur maximum que la carte zr peut
 gérer. (la couche de filtres de MPlayer ne peut actuellement pas les deviner)
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
 Utilisez ces options pour initialiser maxwidth et maxheight automatiquement
-avec les valeurs connues de combinaisons carte/mode. Par exemple, voici des
-options valides: dc10-PAL et buz-NTSC. Les options par défaut sont dc10+PAL.
+avec les valeurs connues de combinaisons carte/mode. 
+Par exemple, voici des options valides: dc10-PAL et buz-NTSC (par défaut:
+ dc10+PAL).
 .IPs color|bw
-Sélectionne l'encodage couleur ou noir et blanc. L'encodage N&B est plus
-rapide. L'encodage couleur est utilisé par défaut.
+Sélectionne l'encodage couleur ou noir et blanc. 
+L'encodage N&B est plus rapide. 
+L'encodage couleur est utilisé par défaut.
 .IPs hdec={1,2,4}
 Décimation horizontale 1, 2 ou 4.
 .IPs vdec={1,2,4}
 Décimation verticale 1, 2 ou 4.
 .IPs quality=1-20
-Définie la qualité de la compression JPEG [MEILLEUR] 1 - 20 [TRÈS MAUVAIS]
+Définie la qualité de la compression JPEG [MEILLEUR] 1 - 20 [TRÈS MAUVAIS].
 .IPs fd|nofd
 Par défaut, la décimation n'est appliquée que si le matériel zoran peut
-agrandir les images MJPEG à leur taille originale. L'option fd dit au filtre de
-toujours appliquer la décimation demandée (sale).
-By default, decimation is only performed if the zoran hardware
-can upscale the resulting MJPEG images to the original size. The option
-fd instructs the filter to always perform the requested decimation (ugly).
+agrandir les images MJPEG à leur taille originale. 
+L'option fd dit au filtre de toujours appliquer la décimation demandée (sale).
 .RE
 .
 .
-.SH "OPTIONS D'ENCODAGE (MENCODER UNIQUEMENT)"
+.SH "PILOTES DE SORTIE VIDÉO  (MPLAYER UNIQUEMENT)"
+Les pilotes de sortie vidéo sont des interfaces pour accéder aux
+fonctions de sortie.
+La syntaxe est:
+.TP
+.B \-vo <pilote1[:option],pilote2,...[,]>
+Spécifie une liste des priorités pour les pilotes de sortie à utiliser. 
+.PP
+Si la liste ce termine par ';'   les autres pilotes seront essayés en cas d'échec.
+Les sous-options sont optionnelles et peuvent être omises pour la plupart.
+.br
+.I NOTE:
+Voir \-vo help pour la liste des pilotes incorporés.
+
+.I EXEMPLE:
+.PD 0
+.RSs
+.IPs "\-vo xmga,xv,"
+Essaie le pilote noyau Matrox, puis le pilote Xv, puis les autres.
+.br
+.IPs "\-vo directx:noaccel"
+Utilise le pilote DirectX en désactivant les fonctions d'accélération.
+.RE
+.PD 1
+.
+
+Les pilotes de sortie disponibles sont:
+.
+.TP
+.B xv (X11 uniquement)
+Utilise l'extension XVideo de XFree86 4.x pour permettre la
+lecture avec accélération matérielle.
+Si vous ne pouvez pas utiliser un pilote spécifique a votre matériel,
+ceci est probablement la meilleur option.
+.PD 0
+.RSs
+.IPs port=<nombre>
+Sélectionne un port XVideo spécifique. 
+.RE
+.PD 1
+.TP
+.B x11 (X11 uniquement)
+Pilote de sortie en mémoire partagée sans accélération matérielle qui
+fonctionne dès que X11 est présent.
+.TP
+.B xover (X11 uniquement)
+Ajoute le support X11 à tous les pilotes de sortie vidéo basés sur l'overlay.
+Actuellement uniquement utilisé par tdfx_vid.
+.TP
+.B xvmc (X11 uniquement)
+Ce pilote emploie l'extension XvMC (X Video Motion Compensation) de 
+XFree86 4.x.
+.TP
+.B dga (X11 uniquement)
+Sortie vidéo par l'extension Direct Graphics Access de XFree86.
+Considéré comme obsolète.
+.TP
+.B sdl\ \ \ \ 
+Pilote de sortie de la librairie multi-plateforme SDL (Simple Directmedia 
+Layer).
+.TP
+.B vidix\ \ 
+VIDIX (VIDeo Interface for *niX) est une interface pour les fonctionnalités
+d'accélération vido des différentes cartes graphiques.
+Pilote de sortie vidéo très rapide sur les cartes le supportant.
+.TP
+.B xvidix (X11 uniquement)
+VIDIX tournant sous X11.
+.TP
+.B cvidix\ 
+VIDIX tournant dans une console.
+.TP
+.B winvidix (Windows uniquement)
+Version Windows du pilote VIDIX.
+.TP
+.B directx (Windows uniquement)
+Pilote de sortie qui utilise l'interface DirectX.
+.PD 0
+.RSs
+.IPs noaccel
+Désactive l'accélération matérielle.
+Essayez cette option si vous avez des problèmes d'affichage.
+.RE
+.PD 1
+.TP
+.B fbdev (Linux uniquement)
+Utilise le framebuffer du noyau pour la sortie vidéo.
+.TP
+.B fbdev2 (Linux uniquement)
+Utilise le framebuffer du noyau pour la sortie vidéo,
+implémentation différente.
+.TP
+.B vesa\ \ \ 
+Pilote de sortie générique qui devrait fonctionner sur n'imorte quelle
+carte compatible VESA VBE 2.0.
+.PD 0
+.RSs
+.IPs dga\ \ 
+Active le mode DGA.
+.IPs nodga
+Désactive le mode DGA.
+.IPs vidix
+FIXME: documenter cela
+.IPs lvo\ \ 
+FIXME: documenter cela
+.RE
+.PD 1
+.TP
+.B svga\ \ \ 
+Sortie vidéo en utilisant la librairie SVGA.
+.TP
+.B gl\ \ \ \ \ 
+Pilote de sortie OpenGL.
+.TP
+.B gl2\ \ \ \ 
+Pilote de sortie OpenGL, seconde génération.
+.TP
+.B null\ \ \ 
+Pas de sortie vidéo.
+Utile pour les benchmarks.
+.TP
+.B aa\ \ \ \ \ 
+Pilote de sortie art ASCII qui fonctionne dans une console texte.
+.TP
+.B bl\ \ \ \ \ 
+Lecture vidéo en utilisant le protocole UDP  Blinkenlights.
+Ce pilote est hautement spécifique à certains matériels.
+.TP
+.B ggi\ \ \ \ 
+Pilote de sortie pour le système graphique GGI.
+.TP
+.B directfb
+Joue la vidéo en utilisant la librairie DirectFB.
+.PD 0
+.RSs
+.IPs number
+Selectionne une couche.
+.RE
+.PD 1
+.TP
+.B directfb2
+Joue la vidéo en utilisant la librairie DirectFB, seconde génération.
+.TP
+.B dfbmga\ 
+Pilote de sortie spécifique Matrox G400/G450/G550 utilisant la librairie 
+DirectFB.
+Active CRTC2 (seconde tête), affichant la vidéo indépendemment de la première
+tête. 
+.TP
+.B mga (Linux uniquement)
+Pilote de sortie spécifique Matrox qui utilise le YUV back end scaler sur les 
+cartes Gxxx au moyen d'un module noyau.
+Si vous avez une carte Matrox, c'est l'option la plus rapide.
+.TP
+.B xmga (Linux, X11 uniquement)
+Le pilote de sortie MGA, tournant dans une fenêtre X11.
+.TP
+.B syncfb\ 
+Pilote de sortie vidéo du module noyau SyncFB, qui permet de gérer
+les capacités matérielles des cartes Matrox Gxxx comme le désentrelacement
+matériel, ou le redimensionnement et la synchronisation de votre sortie vidéo
+avec la fréquence de rafraichissement verticale de votre moniteur. 
+.TP
+.B 3dfx (Linux uniquement)
+Ce pilote utilise le pilote framebuffer tdfx pour jouer les films avec
+accélération YUV.
+.TP
+.B tdfx_vid (Linux uniquement)
+Pilote de sortie spécifique 3Dfx.
+Fonctionne en conjonction avec un module noyau.
+.TP
+.B dxr2\ \ \ 
+Pilote de sortie spécifique DXR2.
+Voir aussi l'option -dxr2.
+.PD 0
+.RSs
+.IPs x11
+Active l'overlay.
+.IPs xv
+Active l'overlay.
+.RE
+.PD 1
+.TP
+.B dxr3\ \ \ 
+Pilote de sortie spécifique pour le chipset de décodage MPEG Sigma Designs 
+em8300 (Creative DXR3, Sigma Designs Hollywood Plus).
+Voir aussi le filtre vidéo lavc.
+.PD 0
+.RSs
+.IPs overlay
+Active l'overlay au lieu de TVOut.
+.IPs prebuf
+Active le pré-buffering.
+.IPs sync
+Active le nouveau moteur de synchro.
+.IPs norm=<norm>
+Spécifie la norme TV.
+.RSss
+0: Ne change pas la norme actuelle (par défaut).
+.br
+1: Ajuste automatiquement en utilisant PAL/NTSC.
+.br
+2: Ajuste automatiquement en utilisant PAL/PAL-60.
+.br
+3: PAL
+.br
+4: PAL-60
+.br
+5: NTSC
+.REss
+.IPs device=<nombre>
+Spécifie le numéro de périphérique à utiliser si vous avez plus d'une carte em8300.
+.RE
+.PD 1
+.TP
+.B mpegpes
+Pilote de sortie spécifique DVB. 
+.TP
+.B zr\ \ \ \ \ 
+Pilote de sortie pour un certain nombre de cartes de capture/lecture MJPEG.
+Voir également les options -zr* et -zrhelp.
+.TP
+.B zr2\ \ \ \ 
+Pilote de sortie pour un certain nombre de cartes de capture/lecture MJPEG,
+seconde génération.
+Voir aussi le filtre vidéo zrmjpeg.
+.TP
+.B md5\ \ \ \ 
+Ecrit la somme md5 (md5sums) de chaque trame dans un fichier nommé 'md5'
+dans le répertoire courant.
+Utile pour débogage. 
+Useful for debugging.
+.TP
+.B yuv4mpeg
+Transforme le flux vidéo en une séquence d'images YUV 4:2:0 et les stocke
+dans un fichier nommé 'stream.yuv' dans le répertoire courant.
+Utile si vous voulez traiter la vidéo avec la suite mjpegtools.
+.TP
+.B gif89a\ 
+sépare chaque trame dans un fichier GIF du réperoire courant.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
+zéros.
+.TP
+.B jpeg\ \ \ 
+sépare chaque trame dans un fichier JPEG du réperoire courant.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
+zéros.
+.TP
+.B pgm\ \ \ \
+sépare chaque trame dans un fichier PGM du réperoire courant.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
+zéros. 
+.TP
+.B png\ \ \ \ 
+sépare chaque trame dans un fichier PNG du réperoire courant.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
+zéros.
+.TP
+.B tga\ \ \ \ 
+sépare chaque trame dans un fichier Targa du réperoire courant.
+Le nom de chaque fichier contient le numéro de trame, précédé au besoin par des 
+zéros.
+.
+.
+.SH "OPTIONS GÉNÉRALES D'ENCODAGE (MENCODER UNIQUEMENT)"
 .TP
 .B \-audio-delay <0.0\-...>
 Initialise le champs de décalage audio dans l'entête.
@@ -4475,10 +4757,12 @@ grand modèle contextuel
 .RE
 .PD 1
 .TP
-.B qpel
-utilise la compensation par quarter pel motion
+.B qpel\ \ \
+utilise la compensation 'un quart par mouvement'
 Astuce: Cela semble utile uniquement pour les encodages à haut débit.
 .TP
+.B ildctcmp=<0\-2000>
+fonction de comparaison pour la décision dct entrelacé
 .B precmp=<0\-2000>
 pré-passe pour fonction de comparaison de l'estimation de mouvement
 .TP
@@ -4509,6 +4793,10 @@ nombre de bits requis pour le bloc
 taux de distortion optimal, lent
 .IPs 7 (ZERO)
 0
+.IPs "8 (VSAD)"
+somme des différences verticales absolues
+.IPs "9 (VSSE)"
+somme des différences verticales absolues au carré
 .IPs +256\
 utilise également chroma, ne fonctionne pas (correctement) avec les trames B
 actuellement
@@ -4988,7 +5276,7 @@ MPlayer était écrit à l'origine par Arpad Gereoffy.
 Voir le fichier AUTHORS pour la liste de certains des nombreux autres
 contributeurs.
 .TP
-MPlayer est (C) 2000\-2003
+MPlayer est (C) 2000\-2004
 .B The MPlayer Team
 .TP
 Cette page de man est écrite et maintenue par

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!--synced with 1.25 -->
+<!--synced with 1.28 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Foire Aux Questions</title>
 
@@ -20,12 +20,24 @@ décrivant tous les détails nécessaires. Merci de suivre les instructions.
 
 <qandaentry>
 <question><para>
+Comment puis-je traduire <application>MPlayer</application> dans une nouvelle
+langue ?
+</para></question>
+<answer><para>
+Lisez le <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
+il devrait tout expliquer. Vous pouvez obtenir de l'aide supplémentaire sur la liste de diffusion 
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Comment puis-je supporter le développement de <application>MPlayer</application> ?
 </para></question>
 <answer><para>
 Nous sommes plus que contents d'accepter vos
 <ulink url="http://www.mplayerhq.hu/homepage/donations.html">dons</ulink>
-matériels et logiciels. Ils nous aident à améliorer continuellement MPlayer.
+matériels et logiciels. Ils nous aident à améliorer continuellement <application>MPlayer</application>.
 </para></answer>
 </qandaentry>
 
@@ -38,7 +50,7 @@ Nous accueillons toujours des codeurs et des &quot;documenteurs&quot;. Lisez la
 <ulink url="../../tech/">documentation technique</ulink>
 pour avoir un premier aperçu. Ensuite vous devriez vous inscrire à la liste de diffusion
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
-et commencer à coder.
+et commencer à coder. Si vous souhaitez apporter votre aide à la documentation, joignez la liste de diffusion <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -121,29 +133,6 @@ Génial, J'ai le gcc 3.0.1 fournit avec Red Hat/Mandrake, donc je suis tranquille
 Non, car il y a (eu) des problèmes avec ces compilateurs également. Pour vérifier
 l'état des compilateurs gcc pour MPlayer, voyez la section
 <link linkend="install">Installation</link>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-J'ai essayé de compiler MPlayer, mais j'obtiens ce résultat:
-<screen>
-    In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
-                     from /usr/include/g++-v3/bits/fpos.h:40,
-                     from /usr/include/g++-v3/bits/char_traits.h:40,
-                     from /usr/include/g++-v3/bits/std_string.h:41,
-                     from /usr/include/g++-v3/string:31,
-                     from libwin32.h:36,
-                     from DS_AudioDecoder.h:4,
-                     from DS_AudioDec.cpp:5:
-    /usr/include/wchar.h: In function Long long int wcstoq(const wchar_t*,
-       wchar_t**, int)':
-    /usr/include/wchar.h:514: cannot convert `const wchar_t* __restrict' to
-    `const
-</screen>
-</para></question>
-<answer><para>
-Upgradez votre glibc à la dernière version. Sur Mandrake, utilisez 2.2.4-8mdk.
 </para></answer>
 </qandaentry>
 
@@ -540,10 +529,10 @@ Vous utilisez le pilote vo avec un cache simple (x11,xv). Avec xv, utilisez l'op
 
 <qandaentry>
 <question><para>
-libavcodec, c'est quoi exactement ?
+<systemitem class="library">libavcodec</systemitem>, c'est quoi exactement ?
 </para></question>
 <answer><para>
-Voir la section <link linkend="ffmpeg">libavcodec</link>.
+Voir la section <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para></answer>
 </qandaentry>
 
@@ -553,7 +542,7 @@ Mais configure me dit
 <screen>Checking for libavcodec ... no</screen>
 </para></question>
 <answer><para>
-Vous avez besoin d'obtenir libavcodec depuis le CVS de FFmpeg. Lisez les
+Vous avez besoin d'obtenir <systemitem class="library">libavcodec</systemitem> depuis le CVS de FFmpeg. Lisez les
 instructions dans la section <link linkend="ffmpeg">libavcodec</link>.
 </para></answer>
 </qandaentry>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.33 -->
+<!-- synced with 1.36 -->
 <sect1 id="install">
 <title>Installation</title>
 
@@ -126,7 +126,7 @@ recommandés.
 
 <itemizedlist>
 <listitem><para>
-  <emphasis role="bold">libavcodec</emphasis>: Ce paquet de codecs est capable de
+  <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>: Ce paquet de codecs est capable de
   décoder les flux encodés en H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3
   et les flux audio WMA (Windows Media Audio) v1/v2, sur
   plusieurs plateformes. Il est également considéré comme le plus rapide pour cette
@@ -170,7 +170,7 @@ recommandés.
   <listitem><simpara>
   Non requis pour les vieux ASF avec vidéo MP41 ou MP42 (bien que VoxWare audio soit
   fréquent pour ces fichiers - ceci est géré par les codecs Win32), ou WMV7.
-  Requis également pour WMA (Windows Media Audio), libavcodec possède un décodeur
+  Requis également pour WMA (Windows Media Audio), <systemitem class="library">libavcodec</systemitem> possède un décodeur
   opensource pour cela.
     </simpara></listitem>
   </itemizedlist>
@@ -185,7 +185,7 @@ recommandés.
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: information sur ce codec disponible
   dans la section <link linkend="divx4-5">DivX4/DivX5</link>. Vous ne voudrez
-  probablement pas de ce codec car <emphasis role="bold">libavcodec</emphasis> (voir
+  probablement pas de ce codec car <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis> (voir
   plus haut) est bien plus rapide et de meilleur qualité, tant pour le décodage que
   l'encodage.
   Fonctionnalités:
@@ -196,7 +196,7 @@ recommandés.
   <listitem><simpara>
     peut lire les films au vieux format <emphasis role="bold">DivX3</emphasis>
     bien plus rapidement que les DLL Win32 mais plus lentement que
-    <emphasis role="bold">libavcodec</emphasis>!
+    <emphasis role="bold"><systemitem class="library">libavcodec</systemitem></emphasis>!
     </simpara></listitem>
   <listitem><simpara>
     les sources sont fermées, et seule une version x86 est disponible.
@@ -204,7 +204,7 @@ recommandés.
   </itemizedlist>
   </para></listitem>
 <listitem><para>
-  <emphasis role="bold">XviD</emphasis>: Encodage libre alternatif à Divx4Linux
+  <emphasis role="bold">XviD</emphasis>: Encodage libre alternatif à DivX4Linux
   Caractéristiques:
   <itemizedlist>
   <listitem><simpara>
@@ -553,7 +553,7 @@ sont supportés:
 <listitem><para>VPlayer</para></listitem>
 <listitem><para>RT</para></listitem>
 <listitem><para>SSA</para></listitem>
-<listitem><para>Inconnu</para></listitem>
+<listitem><para>PJS (Phoenix Japanimation Society)</para></listitem>
 <listitem><para><link linkend="mpsub">MPsub</link></para></listitem>
 <listitem><para>AQTitle</para></listitem>
 <listitem><para><ulink url="http://unicorn.us.com/jacosub/">JACOsub</ulink></para></listitem>

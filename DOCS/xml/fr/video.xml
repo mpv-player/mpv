@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.43 -->
+<!-- synced with 1.47 -->
 <sect2 id="video-dev">
 <title>Sorties vidéo</title>
 
@@ -1486,7 +1486,7 @@ Il y a un relativement nouveau pilote nVidia, il fonctionne avec les chipsets Ri
 <listitem><para>
   Actuellement seuls les codecs capables d'afficher une palette UYVY peuvent
   fonctionner en conjonction avec ce pilote. Malheureusement, cela exclu tous
-  les décodeurs de la famille libavcodec. Cela nous laisse les codecs utilisables
+  les décodeurs de la famille <systemitem class="library">libavcodec</systemitem>. Cela nous laisse les codecs utilisables
   suivants: <systemitem>cvid, divxds, xvid, divx4, wmv7, wmv8</systemitem>
   et quelques autres. Veuillez noter que ce n'est qu'un inconfort provisoire.
   La syntaxe est la suivante:
@@ -1567,15 +1567,15 @@ de la première tête.
 </para>
 
 <para>
-Les instructions pour le faire fonctionner peuvent être trouvées dans la section
-<ulink url="../../tech/directfb.txt">technique</ulink>
-ou directement sur la
-<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">page web</ulink>
-de Ville Syrjala.
+Ville Syrjala a un fichier
+<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">README</ulink>
+et un
+<ulink url="http://www.sci.fi/~syrjala/directfb/matrox_tv-out_howto">HOWTO</ulink>
+sur sa page web qui explique comment faire fonctionner la sortie TV DirectFB avec les cartes Matrox.
 </para>
 
 <note><para>
-La première version de DirectFB que nous aurions pu faire fonctionner était la
+La première version de DirectFB que nous avons pu faire fonctionner était la
 0.9.17. (elle est boguée, nécessite le patch <systemitem>surfacemanager</systemitem>
 disponible sur l'URL ci-dessus). De toutes façons, le
 portage du code CRTC2 dans <emphasis role="bold">mga_vid</emphasis> est prévu.
@@ -1931,7 +1931,7 @@ ainsi de suite. Cela ne fonctionne pas avec la sortie audio numérique
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
 Pour voir du contenu non-MPEG sur l'em8300 (c-a-d DivX ou RealVideo),
-vous devrez spécifier un filtre vidéo MPEG1 tel que libavcodec (lavc) ou libfame (fame).
+vous devrez spécifier un filtre vidéo MPEG1 tel que <systemitem class="library">libavcodec</systemitem> (lavc) ou <systemitem class="library">libfame</systemitem> (fame).
 Pour le moment lavc est à la fois plus rapide et donne une meilleur qualité, il est
 recommandé de l'utiliser à moins que vous ayez des problèmes avec. Voir la page de man
 pour de plus amples infos à propos de <option>-vf lavc/fame</option>. Utiliser lavc
@@ -1980,7 +1980,7 @@ numérique de la carte. Voir l'option <option>-ao oss</option> plus haut, elle do
 C'est un pilote d'affichage (<option>-vo zr</option>) pour certaines cartes de
 capture/lecture (testé pour DC10+ et Buz, et cela devrait fonctionner pour la LML33 et
 la DC10 originale). Ce pilote fonctionne en encodant la trame en JPEG et en l'envoyant
-à la carte. Pour l'encodage JPEG <systemitem>libavcodec</systemitem> est utilisé, et
+à la carte. Pour l'encodage JPEG <systemitem class="library">libavcodec</systemitem> est utilisé, et
 requis. Avec le mode spécial <emphasis>cinerama</emphasis>, vous pouvez voir les films
 en vrai écran large si vous avez deux moniteurs et deux cartes MJPEG. Selon la
 résolution et les réglages, ce pilote requiert beaucoup de puissance CPU, rappelez-vous

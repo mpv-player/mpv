@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.10 -->
 
 <bookinfo id="toc">
 <title>MPlayer - Le lecteur vidéo pour LINUX</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
-<date>24 Mars 2003</date>
+<date>25 Janvier 2004</date>
 <copyright>
   <year>2000</year>
   <year>2001</year>
@@ -90,7 +90,7 @@ qualité sont les choses les plus importantes, mais la vitesse est également form
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 dans d'autres formats jouables par MPlayer (voir plus bas). Il peut encoder avec
 des codecs variés comme <emphasis role="bold">DivX4</emphasis> (1 ou 2 passes),
-libavcodec, audio <emphasis role="bold">PCM</emphasis>/<emphasis role="bold">MP3</emphasis>/<emphasis role="bold">MP3 VBR</emphasis>.
+<systemitem class="library">libavcodec</systemitem>, audio <emphasis role="bold">PCM</emphasis>/<emphasis role="bold">MP3</emphasis>/<emphasis role="bold">MP3 VBR</emphasis>.
 Il possède également un puissant système de plugins pour la manipulation vidéo.
 </para>
 
@@ -102,7 +102,7 @@ Il possède également un puissant système de plugins pour la manipulation vidéo.
   <application>MPlayer</application>
   </simpara></listitem>
 <listitem><simpara>
-  Encodage dans tous les codecs <link linkend="ffmpeg">libavcodec</link> de ffmpeg
+  Encodage dans tous les codecs <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link> de ffmpeg
   </simpara></listitem>
 <listitem><simpara>
   Encodage vidéo depuis <emphasis role="bold">les tuners TV compatibles V4L</emphasis>

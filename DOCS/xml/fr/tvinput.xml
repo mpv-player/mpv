@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.9 -->
+<!-- synced with 1.10 -->
 <sect1 id="tv-input" xreflabel="TV input">
 <title>Entrée TV</title>
 
@@ -107,7 +107,7 @@ Dans les versions précédentes de  <application>MPlayer</application>/<applicatio
 il était nécessaire de spécifier le format de sortie. Ce problème devrait être résolu dans la version
 actuelle et <option>outfmt</option> n'est plus requis, et la valeur par défaut
 convient dans la plupart des cas. Par exemple, si vous capturez en DivX en utilisant
-libavcodec et que vous spécifiez <option>outfmt=RGB24</option> de façon à augmenter
+<systemitem class="library">libavcodec</systemitem> et que vous spécifiez <option>outfmt=RGB24</option> de façon à augmenter
 la qualité de l'image capturée, l'image capturée sera reconverti plus tard en YV12;
 donc la seule chose que vous obtiendrez est un gaspillage massif de puissance CPU.
 </para>
