@@ -26,7 +26,6 @@
 extern int streaming_start( stream_t *stream, int *demuxer_type, URL_t *url);
 #ifdef STREAMING_LIVE_DOT_COM
 #include "demux_rtp.h"
-int isSDPFile = 0;
 #endif
 static URL_t* url;
 #endif
@@ -76,8 +75,7 @@ extern int vcd_get_track_end(int fd,int track);
 
 #ifdef USE_TV
 #include "tv.h"
-
-extern int stream_open_tv(stream_t *stream, tvi_handle_t *tvh);
+extern char* tv_param_channel;
 #endif
 
 #ifdef HAS_DVBIN_SUPPORT
@@ -133,7 +131,7 @@ static void smb_auth_fn(const char *server, const char *share,
 
 // Open a new stream  (stdin/file/vcd/url)
 
-stream_t* open_stream(char* filename,int _remove_me_,int* file_format){
+stream_t* open_stream(char* filename,char** options, int* file_format){
 stream_t* stream=NULL;
 int f=-1;
 off_t len;
@@ -597,50 +595,42 @@ if(strncmp("dvbin://",filename,8) == 0)
         stream=new_stream(f,STREAMTYPE_STREAM);
 	if( streaming_start( stream, file_format, url )<0){
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);
-	  url_free(url);
-	  return NULL;
-	}
+	  //url_free(url);
+	  //return NULL;
+	} else {
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
 	url_free(url);
 	return stream;
   }
-#endif
+  }
 
 //============ Open STDIN or plain FILE ============
-    if(!strcmp(filename,"-")){
-	// read from stdin
-	mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
-	f=0; // 0=stdin
-    } else {
+#ifdef STREAMING_LIVE_DOT_COM
+  //  a SDP file: I hope the sdp protocol isn't really in use
+  if(strncmp("sdp://",filename,6) == 0) {
+       filename += 6;
 #if defined(__CYGWIN__) || defined(__MINGW32__)
        f=open(filename,O_RDONLY|O_BINARY);
 #else
        f=open(filename,O_RDONLY);
 #endif
        if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);return NULL; }
-    }
 
        len=lseek(f,0,SEEK_END); lseek(f,0,SEEK_SET);
        if (len == -1)
-           return new_stream(f,STREAMTYPE_STREAM); // open as stream
+           return NULL;
 
 #ifdef _LARGEFILE_SOURCE
 	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %lld bytes\n", (long long)len);
 #else
 	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %u bytes\n", (unsigned int)len);
 #endif
-
-#ifdef STREAMING_LIVE_DOT_COM
-	 // Check for a special case: a SDP file:
-	 if (isSDPFile) {
-	   return stream_open_sdp(f, len, file_format);
-	 }
+	 return stream_open_sdp(f, len, file_format);
+  }
+#endif
 #endif
 
-       stream=new_stream(f,STREAMTYPE_FILE);
-       stream->end_pos=len;
-       stream->url=filename?strdup(filename):NULL;
-       return stream;
+  return open_stream_full(filename,STREAM_READ,options,file_format);
 }
 
 int dvd_parse_chapter_range(struct config *conf, const char *range){
