@@ -753,7 +753,7 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 		    "       -zrdev /dev/video1 movie.avi\n\n"
 		    "Options appearing after the second -zrcrop apply to the second card, it is\n"
 		    "possible to dispay at a different jpeg quality or at different decimations.\n\n"
-		    "The paramerters -zrxdoff and -zrydoff can be used to align the two images.\n"
+		    "The parameters -zrxdoff and -zrydoff can be used to align the two images.\n"
 		    "The maximum number of zoran cards participating in cinerama is 4, so you can\n"
 		    "build a 2x2 vidiwall. (untested for obvious reasons, the setup wit a buz and\n"
 		    "a DC10+ (and no beamers) is tested, however)\n"
