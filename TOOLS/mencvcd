@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Version:          0.2
+# Version:          0.2.2
 #
 # Licence:          GPL
 #
@@ -22,7 +22,7 @@ for exe in mplayer mpeg2enc mp2enc mplex yuvscaler ; do
 		exit 1
 	fi
 done
-for exe in vcdimager lame cdrdao yuvdenoise sox toolame ; do
+for exe in vcdimager lame cdrdao yuvdenoise sox toolame normalize; do
         if [ -z "`which $exe`" ]; then
                 echo "WARNING: $exe is not found in your path $PATH!"
 	fi
@@ -68,6 +68,11 @@ done
 #                     - new options: "-sox", "-volume", "-toolame"
 #                     - renamed "-mpg" to "-mpegsrc"
 #                     - default cd size changed to 800mb
+# 2002/11/18        v0.2.1
+#                     - aspect ratio for vcd's, too
+#                     - pulldown mode...
+# 2002/12/01        v0.2.2
+#                     - -normalize
 #
 ################################################################################
 #
@@ -88,7 +93,9 @@ SVCDMODE=5
 ################################################################################
 
 function usage() {
-   echo "Usage: $HOWCALLED <name> [$HOWCALLED options] [mplayer options]"
+   echo "Usage: $HOWCALLED <basename> [$HOWCALLED options] [mplayer options]"
+   echo
+   echo "   <basename> is used as basename of the resulting mpg/bin files."
    echo
    echo "For mplayer options see mplayer help and manual."
    echo
@@ -111,6 +118,9 @@ function usage() {
    echo "                encoded mpg stream."
    echo "-mpgonly        do only encoding to mpeg 1/2 format."
    echo "-noburn         disables burning."
+   echo "-normalize      use 'normalize'."
+   echo "-overburn       enables overburning a cd."
+   echo "-pulldown       enable pulldown mode in output."
    echo "-ratio <s>      output ratio size of frames, see yuvscaler (1)."
    echo "-size <X>x<Y>   sets output size of frames."
    echo "-sox            use sox for audio resampling."
@@ -151,15 +161,28 @@ function usage() {
    echo "this encodes 1500 frames of dvd title 1 with subtitle 0 and audio stream"
    echo "128 starting from 3:00 with frame rate 29.97 fps and input video norm NTSC"
    echo "and output frame rate 23.98 fps because of the 3:2 pulldown method in NTSC."
+   echo
+   echo "'$HOWCALLED bj -size 640x272 -vop expand=640:480:0:104:0 \\"
+   echo "        -cdsize 645 -noburn bj.avi'"
+   echo "this example above shows you, how to deal with movies which are not"
+   echo "created with aspect ratios of 4:3 or 16:9."
 }
 
 HOWCALLED=`basename $0`
-NAME=$1
 if [ $# -le 1 ]; then
    usage 
    exit 1
 fi
-shift 1
+case $1 in
+   -*)
+      usage
+      exit 1
+   ;;
+   *)
+      NAME=$1
+      shift 1
+   ;;
+esac
 
 cd $TMPDIR
 rm -f $VIDEO
@@ -195,6 +218,9 @@ sync=""
 sox=0
 toolame=0
 volume="1.0"
+overburn=""
+pd=""
+norm=0
 
 while [ "$1"x != "x" ]; do
    case $1 in
@@ -232,6 +258,12 @@ while [ "$1"x != "x" ]; do
         burnonly=1
 	burn=1
 	;;
+      -overburn)
+      	overburn="--overburn"
+	;;
+      -pulldown)
+        pd="-p"
+        ;;
       -vfr)
         framerate="-F $2"
 	shift 1
@@ -244,6 +276,9 @@ while [ "$1"x != "x" ]; do
 	;;
       -mpgonly)
         mpgonly=1
+	;;
+      -normalize)
+        norm=1
 	;;
       -vnorm)
         yuvin="-n $2"
@@ -298,7 +333,7 @@ mpegnorm="-f $VCDMODE -b $vbr -B 260 -V 46"
 if [ "$norm" == "SVCD" ]; then
    [ $vbrset -eq 0 ] && vbr=2500
    mplexnorm="-f $SVCDMODE -m 2 -V -b 230"
-   mpegnorm="-f $SVCDMODE -b $vbr -B 260 -V 230 $aratio"
+   mpegnorm="-f $SVCDMODE -b $vbr -B 260 -V 230"
    imaget="-t svcd"
 fi
 
@@ -328,12 +363,15 @@ if [ $burnonly -eq 0 ]; then
       # mjpegtools
       ($denoise < $VIDEO | \
          yuvscaler -v 0 $wide -O $norm $size $yuvin | \
-         mpeg2enc -v 0 -s $mpegnorm -S $CDMAXSIZE -g 6 -G 15 -r 16 \
-	          $framerate $yuvin -4 2 -2 1 -o $NAME.mpv) &
+         mpeg2enc -v 0 -s $mpegnorm $aratio -S $CDMAXSIZE -g 6 -G 15 -r 16 \
+	          $pd $framerate $yuvin -4 2 -2 1 -o $NAME.mpv) &
    
       # wait for finishing the subprocesses
       wait
 
+      # normalize sound
+      [ $norm -eq 1 ] && (echo "normalizing sound..."; normalize $AUDIO)
+      
       # do resampling with sox
       if [ $sox -ne 0 ]; then
 	echo "wait, do resampling with sox..."
@@ -397,6 +435,6 @@ for cue in ${NAME}*.cue; do
    if [ $blank -eq 1 ]; then
       cdrdao blank --reload $CDDEV --driver $CDDRV --blank-mode minimal
    fi
-   cdrdao write --reload $CDDEV --driver $CDDRV $cue
+   cdrdao write $overburn --reload $CDDEV --driver $CDDRV $cue
 done
 exit 0
