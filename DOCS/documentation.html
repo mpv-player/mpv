@@ -1278,7 +1278,6 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 <TR><TD></TD><TD>o</TD><TD></TD><TD>toggle OSD: none / seek / seek+timer</TD></TR>
 <TR><TD></TD><TD>z or x</TD><TD></TD><TD>adjust subtitle delay by +/- 0.1 second</TD></TR>
 <TR><TD></TD><TD>r or t</TD><TD></TD><TD>adjust subtitle position</TD></TR>
-<TR><TD></TD><TD>&gt; or &lt;</TD><TD></TD><TD>go to next/previous playtree entry</TD></TR>
 <TR><TD></TD><TD>HOME or END</TD><TD></TD><TD>go to next/previous playtree entry in the parent list</TD></TR>
 <TR><TD></TD><TD>INSERT or DELETE</TD><TD></TD><TD>go to next/previous alternative source (only avaible in asx playlist)</TD></TR>
 
@@ -1317,10 +1316,15 @@ Xine does: <CODE>mplayer dvd://1</CODE> or <CODE>mplayer vcd://1</CODE>
 
 <P><B><A NAME=3.2.2>3.2.2. Controls configuration</A></B></P>
 
-<P><B>MPlayer</B> allow you to bind any key/button to any <B>MPlayer</B> command using a simple config file.
-The syntax consist of a key name followed by a command. The default config file location is 
-$HOME/.mplayer/input.conf but it can be overrided using the -input conf switch (relative path are relative to $HOME/.mplayer).
+<P><B>MPlayer</B> allows you bind any key/button to any <B>MPlayer</B> command
+  using a simple config file.  The syntax consist of a key name followed by a
+  command. The default config file location is
+  <CODE>$HOME/.mplayer/input.conf</CODE> but it can be overrided using the
+  <CODE>-input</CODE> conf switch (relative path are relative to
+  <CODE>$HOME/.mplayer</CODE>).
+
 <P>Example:</P>
+
 <PRE>
 ##
 ## MPlayer input control file
@@ -1339,7 +1343,7 @@ ENTER pt_step 1 1
 
 <P><B><A NAME=3.2.2.1>3.2.2.1. Key names</A></B></P>
 
-<P>You can have a full list by running "mplayer -input keylist"</P>
+<P>You can have a full list by running <CODE>mplayer -input keylist</CODE></P>
 
 <P><B>Keyboard</B></P>
 
@@ -1369,10 +1373,10 @@ ENTER pt_step 1 1
 
 <UL>
 <LI>MOUSE_BTN0 (Left button)</LI>
-<LI>MOUSE_BTN1 (Rigth button)</LI>
+<LI>MOUSE_BTN1 (Right button)</LI>
 <LI>MOUSE_BTN2 (Middle button)</LI>
-<LI>MOUSE_BTN3 (Whell)</LI>
-<LI>MOUSE_BTN4 (Whell)</LI>
+<LI>MOUSE_BTN3 (Wheel)</LI>
+<LI>MOUSE_BTN4 (Wheel)</LI>
 <LI>...</LI>
 <LI>MOUSE_BTN9</LI>
 </UL>
@@ -1396,7 +1400,7 @@ ENTER pt_step 1 1
 
 <P><B><A NAME=3.2.2.2>3.2.2.2. Commands</A></B></P>
 
-<P>You can have a full list of know commands by running "mplayer -input cmdlist"</P>
+<P>You can have a full list of known commands by running "mplayer -input cmdlist"</P>
 
 <UL>
   <LI><B>seek</B> (int) val [(int) type=0]
@@ -1521,9 +1525,13 @@ end
 <P>If you don't like the standard location for the lirc-config file (~/.lircrc)
 use the -lircconf &lt;filename&gt; switch to specify another file.</P>
 
+
 <P><B><A NAME=3.2.4>3.2.4. Slave mode</A></B></P>
 
-<P>The slave mode allow you to build simple frontend to <B>MPlayer</B>. When enabled (with the -slave switch) <B>MPlayer</B> will read commands separeted by new line (\n) from stdin.<P>
+<P>The slave mode allow you to build simple frontend to <B>MPlayer</B>. When
+  enabled (with the <CODE>-slave</CODE> switch) <B>MPlayer</B> will read
+  commands separeted by new line (\n) from stdin.</P>
+
 
 <P><B><A NAME=3.3>3.3. Streaming from network or pipes</A></B></P>
 
