@@ -1125,13 +1125,14 @@ struct CRITSECT *critsecs_get_unix(CRITICAL_SECTION *cs_win)
     int i;
     
     for (i=0; i < CRITSECS_LIST_MAX; i++)
-	if (critsecs_list[i].cs_win == cs_win)
+	if (critsecs_list[i].cs_win == cs_win && critsecs_list[i].cs_unix)
 	    return(critsecs_list[i].cs_unix);
     return(NULL);
 }
 #endif
 
-#define CRITSECS_NEWTYPE 1
+#undef CRITSECS_NEWTYPE
+//#define CRITSECS_NEWTYPE 1
 
 void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 {
@@ -1153,7 +1154,13 @@ void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
 	printf("InitializeCriticalSection(%p) - no more space in list\n", c);
 	return;
     }
-    cs = malloc(sizeof(struct CRITSECT));
+    printf("got unused space at %d\n", i);
+    cs = expmalloc(sizeof(struct CRITSECT));
+    if (!cs)
+    {
+	printf("InitializeCriticalSection(%p) - out of memory\n", c);
+	return;
+    }
     pthread_mutex_init(&cs->mutex, NULL);
     cs->locked = 0;
     critsecs_list[i].cs_win = c;
@@ -1183,6 +1190,7 @@ void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
     dbgprintf("EnterCriticalSection(0x%x)\n",c);
     if (!cs)
     {
+        printf("entered uninitialized critisec!\n");
 	expInitializeCriticalSection(c);
 #ifdef CRITSECS_NEWTYPE
 	cs=critsecs_get_unix(c);
@@ -1240,7 +1248,7 @@ void WINAPI expDeleteCriticalSection(CRITICAL_SECTION *c)
     }
      
     critsecs_list[i].cs_win = NULL;
-    free(critsecs_list[i].cs_unix);
+    expfree(critsecs_list[i].cs_unix);
     critsecs_list[i].cs_unix = NULL;
     dbgprintf("DeleteCriticalSection -> itemno=%d\n", i);
 }
@@ -1282,7 +1290,8 @@ void* WINAPI expTlsAlloc()
 	g_tls=g_tls->next;
     }
     dbgprintf("TlsAlloc() => 0x%x\n", g_tls);
-    g_tls->value=0; /* XXX For Divx.dll */
+    if (g_tls)
+	g_tls->value=0; /* XXX For Divx.dll */
     return g_tls;
 }
 
