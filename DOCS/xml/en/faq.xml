@@ -588,7 +588,9 @@ I cannot pinpoint the cause of some strange playback problem.
 <answer><para>
 Do you have a stray <filename>codecs.conf</filename> file in
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
-<filename>/usr/local/etc/</filename> or a similar location? Remove it.
+<filename>/usr/local/etc/</filename> or a similar location? Remove it,
+outdated <filename>codecs.conf</filename> files can cause obscure
+problems. MPlayer will use its builtin one instead.
 </para></answer>
 </qandaentry>
 
