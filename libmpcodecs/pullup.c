@@ -342,6 +342,7 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 	if (max_r > 3*max_l) f->affinity = -1;
 	else if (max_l > 3*max_r) f->affinity = 1;
 	else if (max_l + max_r > 2048) {
+		l = t = 0;
 		for (i = 0; i < c->metric_len; i++) {
 			l += f->licomb[i] - f->next->licomb[i];
 			t += ABS(f->licomb[i] - f->next->licomb[i]);
