@@ -158,7 +158,7 @@ Optional features:
   --enable-winsock2      enable winsock2 usage [autodetect]
   --enable-smb           enable Samba (SMB) input support [autodetect]
   --enable-live          enable LIVE.COM Streaming Media support [disable]
-  --enable-dvdnav        enable dvdnav support [disable]
+  --enable-dvdnav        enable dvdnav support (DOES NOT WORK!!!) [disable]
   --disable-dvdread      Disable libdvdread support [autodetect]
   --disable-mpdvdkit     Disable mpdvdkit/mpdvdkit2 support [autodetect]
   --disable-css          Disable old-style libcss DVD support [autodetect]
@@ -3923,6 +3923,14 @@ EOF
   cc_check $_inc_extra -I$_dvdnavdir $_legal_dvdnavdir -ldvdnav $_used_css $_ld_dl $_ld_pthread && _dvdnav=yes
 fi
 if test "$_dvdnav" = yes ; then
+  cat <<EOF
+
+!!! WARNING: DVDNAV DOES NOT WORK!
+!!! Do not send bugreports regarding dvdnav support!
+!!! If you want dvdnav, wait for MPlayer G2, send a PATCH,
+!!! or use a different movie player for DVDs.
+
+EOF
   _largefiles=yes
   _def_dvdnav='#define USE_DVDNAV 1'
   if test -n "$_legal_dvdnavdir" ; then
