@@ -208,6 +208,16 @@ Q: MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
 A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
    use MPlayer on different CPU than it was compiled on.
 
+Q: I have problems with WindowMaker and fullscreen xv/xmga/sdl/x11 modes..
+   It was OK before the ICCCM-compliance patch.
+A: Known problem, ICCCM sucks.
+
+Q: But it works with avifile !
+A: So what?
+
+Q: Then avifile is better !
+A: Then use avifile, it has nice GUI and nice C++ code :)
+
 Q: I got this playing mpeg files: Can't find codec for video format 0x10000001 !
 A: You have old version of codecs.conf at ~/.mplayer/. Upgrade it from DOCS/
 
