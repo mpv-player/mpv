@@ -199,16 +199,24 @@ static char help_text[]=
 #define MSGTR_DetectedMPEGPSfile "MPEG-PS Dateiformat erkannt!\n"
 #define MSGTR_DetectedMPEGESfile "MPEG-ES Dateiformat erkannt!\n"
 #define MSGTR_DetectedQTMOVfile "QuickTime/MOV Dateiformat erkannt!\n"
+#define MSGTR_DetectedYUV4MPEG2file "YUV4MPEG2 Dateiformat erkannt!\n"
+#define MSGTR_DetectedNuppelVideofile "NuppelVideo Dateiformat erkannt!\n"
+#define MSGTR_DetectedVIVOfile "VIVO Dateiformat erkannt!\n"
+#define MSGTR_DetectedBMPfile "BMP Dateiformat erkannt!\n"
+#define MSGTR_DetectedOGGfile "OGG Dateiformat erkannt!\n"
+#define MSGTR_DetectedRAWDVfile "RAWDV Dateiformat erkannt!\n"
+#define MSGTR_DetectedAudiofile "Audiodatei erkannt!\n"
+#define MSGTR_NotSystemStream "Kein MPEG System Stream ... (vielleicht Transport Stream?)\n"
 #define MSGTR_MissingMpegVideo "Vermisse MPEG Videostream!? Kontaktiere den Author, das könnte ein Bug sein :(\n"
 #define MSGTR_InvalidMPEGES "Ungültiger MPEG-ES Stream??? Kontaktiere den Author, das könnte ein Bug sein :(\n"
 #define MSGTR_FormatNotRecognized "=========== Sorry, das Dateiformat/Codec wird nicht unterstützt ==============\n"\
 				  "============== Sollte dies ein AVI, ASF oder MPEG Stream sein, ===============\n"\
 				  "================== dann kontaktiere bitte den Author =========================\n"
-#define MSGTR_MissingVideoStream "kann keinen Videostream finden!\n"
-#define MSGTR_MissingAudioStream "kann keinen Audiostream finden...  -> kein Ton\n"
+#define MSGTR_MissingVideoStream "Kann keinen Videostream finden!\n"
+#define MSGTR_MissingAudioStream "Kann keinen Audiostream finden...  -> kein Ton\n"
 #define MSGTR_MissingVideoStreamBug "Vermisse Videostream!? Kontaktiere den Author, möglicherweise ein Bug :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "Demux: Datei enthält nicht den gewählen Audio- oder Videostream\n"
+#define MSGTR_DoesntContainSelectedStream "Demuxer: Datei enthält nicht den gewählen Audio- oder Videostream\n"
 
 #define MSGTR_NI_Forced "Erzwungen"
 #define MSGTR_NI_Detected "Erkannt"
@@ -226,7 +234,20 @@ static char help_text[]=
 #define MSGTR_MOVvariableFourCC "MOV: Warnung! Variable FOURCC erkannt!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: Warnung! Zu viele Tracks!"
 #define MSGTR_MOVnotyetsupp "\n******** Quicktime MOV Format wird zu Zeit nicht unterstützt!!!!!!! *********\n"
+#define MSGTR_FoundAudioStream "==> Audiostream gefunden: %d\n"
+#define MSGTR_FoundVideoStream "==> Videostream gefunden: %d\n"
+#define MSGTR_DetectedTV "TV festgestellt! ;-)\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "Öffnen des OGG Demuxers fehlgeschlagen\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: Suche nach Audiostream (Id:%d)\n"
+#define MSGTR_CannotOpenAudioStream "Kann Audiostream nicht öffnen: %s\n"
+#define MSGTR_CannotOpenSubtitlesStream "Kann Untertitelstream nicht öffnen: %s\n"
+#define MSGTR_OpeningAudioDemuxerFailed "Öffnen des Audiodemuxers fehlgeschlagen: %s\n"
+#define MSGTR_OpeningSubtitlesDemuxerFailed "Öffnen des Untertiteldemuxers fehlgeschlagen: %s\n"
+#define MSGTR_TVInputNotSeekable "TV-Input ist nicht durchsuchbar! (möglicherweise änderst du damit den Kanal ;)\n"
+#define MSGTR_DemuxerInfoAlreadyPresent "Demuxerinfo %s existiert bereits\n!"
+#define MSGTR_ClipInfo "Clipinfo: \n"
 
+				  
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "kann Codec nicht öffnen\n"
 #define MSGTR_CantCloseCodec "kann Codec nicht schließen\n"

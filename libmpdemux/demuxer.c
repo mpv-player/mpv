@@ -92,7 +92,7 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     if(demuxer->a_streams[id]){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_AudioStreamRedefined,id);
     } else {
-        mp_msg(MSGT_DEMUXER,MSGL_V,"==> Found audio stream: %d\n",id);
+        mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundAudioStream,id);
         demuxer->a_streams[id]=malloc(sizeof(sh_audio_t));
         memset(demuxer->a_streams[id],0,sizeof(sh_audio_t));
     }
@@ -126,7 +126,7 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
     if(demuxer->v_streams[id]){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_VideoStreamRedefined,id);
     } else {
-        mp_msg(MSGT_DEMUXER,MSGL_V,"==> Found video stream: %d\n",id);
+        mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_FoundVideoStream,id);
         demuxer->v_streams[id]=malloc(sizeof(sh_video_t));
         memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
     }
@@ -571,7 +571,7 @@ if(stream->type == STREAMTYPE_CDDA || use_rawaudio) {
 if((tv_param_on == 1) &&
     (file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_TV)){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_TV,audio_id,video_id,dvdsub_id);
-  mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected TV! ;-)\n");
+  mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedTV);
   file_format=DEMUXER_TYPE_TV;
 }
 #endif
@@ -607,7 +607,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_Y4M){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_Y4M,audio_id,video_id,dvdsub_id);
   if(y4m_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected YUV4MPEG2 file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedYUV4MPEG2file);
       file_format=DEMUXER_TYPE_Y4M;
   } else {
       free_demuxer(demuxer);
@@ -629,7 +629,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_NUV,audio_id,video_id,dvdsub_id);
   if(nuv_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected NuppelVideo file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedNuppelVideofile);
       file_format=DEMUXER_TYPE_NUV;
   } else {
       free_demuxer(demuxer);
@@ -651,7 +651,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_VIVO,audio_id,video_id,dvdsub_id);
   if(vivo_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected VIVO file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedVIVOfile);
       file_format=DEMUXER_TYPE_VIVO;
   } else {
     free_demuxer(demuxer);
@@ -716,7 +716,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_BMP,audio_id,video_id,dvdsub_id);
   if(bmp_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"BMP file\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedBMPfile);
       file_format=DEMUXER_TYPE_BMP;
   } else {
       free_demuxer(demuxer);
@@ -727,7 +727,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_OGG,audio_id,video_id,dvdsub_id);
   if(demux_ogg_open(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected OGG format\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedOGGfile);
       file_format=DEMUXER_TYPE_OGG;
   } else {
       free_demuxer(demuxer);
@@ -783,7 +783,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
       if(demuxer->synced==2)
         mp_msg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
       else
-        mp_msg(MSGT_DEMUXER,MSGL_V,"Not MPEG System Stream format... (maybe Transport Stream?)\n");
+        mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_NotSystemStream);
       free_demuxer(demuxer);
       demuxer = NULL;
     }
@@ -810,7 +810,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_RAWDV)
    demuxer=new_demuxer(stream,DEMUXER_TYPE_RAWDV,audio_id,video_id,dvdsub_id);
    if(check_file_rawdv(demuxer))
    {
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected RAWDV file format!\n");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedRAWDVfile);
       file_format=DEMUXER_TYPE_RAWDV;
    }
    else
@@ -821,7 +821,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_RAWDV)
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_AUDIO,audio_id,video_id,dvdsub_id);
   if(demux_audio_open(demuxer)){
-    mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected audio file\n");
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedAudiofile);
     file_format=DEMUXER_TYPE_AUDIO;
   } else {
     free_demuxer(demuxer);
@@ -897,7 +897,7 @@ switch(file_format){
        s = new_ds_stream(demuxer->audio);
        od = new_demuxer(s,DEMUXER_TYPE_OGG,-1,-2,-2);
        if(!demux_ogg_open(od)) {
-	 mp_msg( MSGT_DEMUXER,MSGL_ERR,"Unable to open the ogg demuxer\n");
+	 mp_msg( MSGT_DEMUXER,MSGL_ERR,MSGTR_ErrorOpeningOGGDemuxer);
 	 free_stream(s);
 	 demuxer->audio->id = -2;
        } else
@@ -948,7 +948,7 @@ switch(file_format){
     }
   }
   if(d_audio->id!=-2){
-    mp_msg(MSGT_DEMUXER,MSGL_V,"ASF: Searching for audio stream (id:%d)\n",d_audio->id);
+    mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_ASFSearchingForAudioStream,d_audio->id);
     if(!ds_fill_buffer(d_audio)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"ASF: " MSGTR_MissingAudioStream);
       sh_audio=NULL;
@@ -1019,14 +1019,14 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
   if(audio_stream) {
     as = open_stream(audio_stream,0,&afmt);
     if(!as) {
-      mp_msg(MSGT_DEMUXER,MSGL_ERR,"Can't open audio stream: %s\n",audio_stream);
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_CannotOpenAudioStream,audio_stream);
       return NULL;
     }
   }
   if(sub_stream) {
     ss = open_stream(sub_stream,0,&sfmt);
     if(!ss) {
-      mp_msg(MSGT_DEMUXER,MSGL_ERR,"Can't open subtitles stream: %s\n",sub_stream);
+      mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_CannotOpenSubtitlesStream,sub_stream);
       return NULL;
     }
   }
@@ -1037,14 +1037,14 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
   if(as) {
     ad = demux_open_stream(as,audio_demuxer_type ? audio_demuxer_type : afmt,audio_id,-2,-2);
     if(!ad)
-      mp_msg(MSGT_DEMUXER,MSGL_WARN,"Failed to open audio demuxer: %s\n",audio_stream);
+      mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningAudioDemuxerFailed,audio_stream);
     else if(ad->audio->sh && ((sh_audio_t*)ad->audio->sh)->format == 0x55) // MP3
       m_config_set_flag(mconfig,"hr-mp3-seek",1); // Enable high res seeking
   }
   if(ss) {
     sd = demux_open_stream(ss,sub_demuxer_type ? sub_demuxer_type : sfmt,-2,-2,dvdsub_id);
     if(!sd)
-      mp_msg(MSGT_DEMUXER,MSGL_WARN,"Failed to open subtitles demuxer: %s\n",sub_stream);
+      mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningSubtitlesDemuxerFailed,sub_stream);
   }
 
   if(ad && sd)
@@ -1089,7 +1089,7 @@ if(!demuxer->seekable){
 	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekRawAVI);
 #ifdef USE_TV
     else if (demuxer->file_format==DEMUXER_TYPE_TV)
-	mp_msg(MSGT_SEEK,MSGL_WARN,"TV input isn't seekable! (probably seeking will be for changing channels ;)\n");
+	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_TVInputNotSeekable);
 #endif
     else
 	mp_msg(MSGT_SEEK,MSGL_WARN,MSGTR_CantSeekFile);
@@ -1172,7 +1172,7 @@ int demux_info_add(demuxer_t *demuxer, char *opt, char *param)
       {
 	if(!strcasecmp(opt,info[2*n]))
 	  {
-	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Demuxer info %s already present\n!",opt);
+	    mp_msg(MSGT_DEMUX, MSGL_WARN,MSGTR_DemuxerInfoAlreadyPresent,opt);
 	    return 0;
 	  }
       }
@@ -1193,7 +1193,7 @@ int demux_info_print(demuxer_t *demuxer)
     if(!info)
       return 0;
 
-    mp_msg(MSGT_DEMUX, MSGL_INFO, "Clip info: \n");
+    mp_msg(MSGT_DEMUX, MSGL_INFO,MSGTR_ClipInfo);
     for(n = 0; info[2*n] != NULL ; n++)
       mp_msg(MSGT_DEMUX, MSGL_INFO, " %s: %s\n",info[2*n],info[2*n+1]);
 
