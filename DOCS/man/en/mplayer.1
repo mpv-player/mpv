@@ -2347,7 +2347,7 @@ Play video through the XFree86 Direct Graphics Access extension.
 Considered obsolete.
 .
 .TP
-.B sdl (SDL only, also see \-forcexv, \-noxv)
+.B sdl (also see \-forcexv, \-noxv) (SDL only)
 Highly platform independent SDL (Simple Directmedia Layer) library
 video output driver.
 Since SDL uses its own X11 layer, MPlayer X11 options do not have
@@ -2434,8 +2434,8 @@ Uses the kernel framebuffer to play video.
 .RSs
 .IPs <device>
 Explicitly choose the fbdev device name to use (e.g.\& /dev/\:fb0) or the
-name of the vidix subdevice if the device name start with vidix (e.g.\&
-vidixsis_vid to enable the sis driver).
+name of the VIDIX subdevice if the device name starts with 'vidix'
+(e.g.\& 'vidixsis_vid' for the sis driver).
 .RE
 .PD 1
 .
@@ -2461,13 +2461,13 @@ Turns on DGA mode.
 .IPs nodga
 Turns off DGA mode.
 .IPs neotv_pal
-Activate the neomagic's TV out and set it to PAL norm.
+Activate the NeoMagic TV out and set it to PAL norm.
 .IPs neotv_ntsc
-Activate the neomagic's TV out and set it to NTSC norm.
+Activate the NeoMagic TV out and set it to NTSC norm.
 .IPs vidix
 Use the VIDIX driver.
 .IPs lvo:\ \ \ 
-Activate the Linux Video Overlay on top of vesa mode.
+Activate the Linux Video Overlay on top of VESA mode.
 .RE
 .PD 1
 .
@@ -2628,7 +2628,7 @@ If you have a Matrox card, this is the fastest option.
 .PD 0
 .RSs
 .IPs <device>
-Explicitly choose the matrox device name to use (default: /dev/\:mga_vid).
+Explicitly choose the Matrox device name to use (default: /dev/\:mga_vid).
 .RE
 .PD 1
 .
@@ -2638,7 +2638,7 @@ The mga video output driver, running in an X11 window.
 .PD 0
 .RSs
 .IPs <device>
-Explicitly choose the matrox device name to use (default: /dev/\:mga_vid).
+Explicitly choose the Matrox device name to use (default: /dev/\:mga_vid).
 .RE
 .PD 1
 .
@@ -2652,7 +2652,7 @@ the vertical retrace of your monitor.
 .TP
 .B 3dfx (Linux only)
 3Dfx specific video output driver.
-This driver uses directly the 3dfx hardware on top of X11.
+This driver directly uses the 3Dfx hardware on top of X11.
 Only 16 bpp are supported.
 FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
 .
@@ -2671,7 +2671,7 @@ Explicitly choose the fbdev device name to use (default: /dev/\:fb0).
 .TP
 .B tdfx_vid (Linux only)
 3Dfx specific video output driver.
-This driver use directly the tdfx_vid kernel module.
+This driver directly uses the tdfx_vid kernel module.
 FIXME: It' ok the difference between 3dfx, tdfxfb and tdfx_vid?
 .PD 0
 .RSs
@@ -2686,7 +2686,7 @@ Creative DXR2 specific video output driver.
 .PD 0
 .RSs
 .IPs <vo_driver>
-Output video sub driver to use as overlay (x11, xv).
+Output video subdriver to use as overlay (x11, xv).
 .RE
 .PD 1
 .
@@ -2701,7 +2701,7 @@ Also see the lavc video filter.
 Activates the overlay instead of TVOut.
 .IPs prebuf
 Turns on prebuffering.
-.IPs sync
+.IPs sync\ 
 Will turn on the new sync-engine.
 .IPs norm=<norm>
 Specifies the TV norm.
@@ -2718,44 +2718,43 @@ Specifies the TV norm.
 .br
 5: NTSC
 .REss
-.IPs 0\ 1\ 2\ 3\ 
+.IPs <0\-3>
 Specifies the device number to use if you have more than one em8300 card.
 .RE
 .PD 1
 .
 .TP
 .B mpegpes (DVB only)
-DVB specific video output driver or MPEG-PES format file writer.
+Video output driver for DVB cards that writes the output to an MPEG-PES file
+if no DVB card is installed.
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Specifies the device number to use if you have more than one DVB output card
 (V3 API only, such as 1.x.y series drivers).
 .IPs <filename>
-If you don't have a DVB card this video output driver writes a file in MPEG-PES
-format on the file you specify (default: ./grab.mpg).
+Allows specifying the output filename (default: ./grab.mpg).
 .RE
 .PD 1
 .
 .TP
-.B zr (also see \-zr* and \-zrhelp)
+.B zr (also see \-zr* and \-zrhelp, zrmjpeg video filter)
 Video output driver for a number of MJPEG capture/\:playback cards.
 .
 .TP
 .B zr2\ \ \ \ 
 Video output driver for a number of MJPEG capture/\:playback cards,
 second generation.
-Also see the zrmjpeg video filter.
 .PD 0
 .RSs
 .IPs dev=<device>
 Specifies the device to use.
-.IPs PAL\ \ \ 
-Activate pal video norm.
-.IPs SECAM
-Activate secam video norm.
-.IPs NTSC\ \ \ 
-Activate ntsc video norm.
+.IPs pal\ \ 
+Activate PAL video norm.
+.IPs secam
+Activate SECAM video norm.
+.IPs ntsc\ 
+Activate NTSC video norm.
 .IPs prebuf
 Activate prebuffering, not yet supported.
 .RE
@@ -2803,7 +2802,7 @@ It supports only RGB format with 24 bpp and the output is converted to 256
 colors.
 .PD 0
 .RSs
-.IPs <fps>\ \ \ 
+.IPs <fps>
 Float value to specify framerate (default: 5.0).
 .IPs <filename>
 Specify the output filename (default: ./out.gif).
@@ -3219,7 +3218,7 @@ Show a summary about the available postprocess filters and their usage.
 .
 .TP
 .B \-ssf <mode>
-Specifies SwScaler parameters.
+Specifies software scaler parameters.
 .sp 1
 .I EXAMPLE:
 .PD 0
