@@ -1,7 +1,7 @@
 /*
-   MPlayer video driver for DirectFB / Matrox G400
+   MPlayer video driver for DirectFB / Matrox G400/G450/G550
 
-   Copyright (C) 2002 Ville Syrjala <syrjala@sci.fi>
+   Copyright (C) 2002,2003 Ville Syrjala <syrjala@sci.fi>
 
    Originally based on vo_directfb.c by
    Jiri Svoboda <Jiri.Svoboda@seznam.cz>
@@ -29,31 +29,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <assert.h>
-
-#include <sys/mman.h>
-#include <sys/ioctl.h>
-#include <sys/kd.h>
-#include <linux/fb.h>
 
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "fastmemcpy.h"
 #include "sub.h"
-#include "../postproc/rgb2rgb.h"
-
+#include "mp_msg.h"
 #include "aspect.h"
 
-#ifndef min
-#define min(x,y) (((x)<(y))?(x):(y))
-#endif
-
 static vo_info_t info = {
-     "DirectFB / Matrox G400",
+     "DirectFB / Matrox G400/G450/G550",
      "dfbmga",
      "Ville Syrjala <syrjala@sci.fi>",
      ""
@@ -98,11 +84,13 @@ static unsigned int subframe_pixel_size;
 
 static int inited = 0;
 
-static int stretch = 0;
+static int blit_done;
+static int stretch;
 
-static int use_bes   = 0;
-static int use_crtc2 = 1;
-static int use_spic  = 1;
+static int use_bes;
+static int use_crtc2;
+static int use_spic;
+static int use_input;
 
 static int osd_changed;
 static int osd_dirty;
@@ -194,32 +182,88 @@ imgfmt_to_pixelformat( uint32_t format )
      }
 }
 
+struct layer_enum
+{
+     const char *name;
+     IDirectFBDisplayLayer **layer;
+     DFBResult res;
+};
+
+static DFBEnumerationResult
+get_layer_by_name( DFBDisplayLayerID id,
+                   DFBDisplayLayerDescription desc,
+                   void *data )
+{
+     struct layer_enum *l = (struct layer_enum *) data;
+
+#if DIRECTFBVERSION > 915
+     /* We have desc.name so use it */
+     if (!strcmp( l->name, desc.name ))
+          if ((l->res = dfb->GetDisplayLayer( dfb, id, l->layer )) == DFB_OK)
+               return DFENUM_CANCEL;
+#else
+     /* Fake it according to id */
+     if ((id == 1 && !strcmp( l->name, "Matrox Backend Scaler" )) ||
+         (id == 2 && !strcmp( l->name, "Matrox CRTC2" )) ||
+         (id == 3 && !strcmp( l->name, "Matrox CRTC2 Sub-Picture" )))
+          if ((l->res = dfb->GetDisplayLayer( dfb, id, l->layer )) == DFB_OK)
+               return DFENUM_CANCEL;
+#endif
+
+     return DFENUM_OK;
+}
+
 static uint32_t
 preinit( const char *arg )
 {
+     DFBResult res;
+
+     /* Some defaults */
+     use_bes = 0;
+     use_crtc2 = 1;
+     use_spic = 1;
+     use_input = 1;
+
      if (vo_subdevice) {
+          int opt_no = 0;
           while (*vo_subdevice != '\0') {
                if (!strncmp(vo_subdevice, "bes", 3)) {
-                    use_bes = 1;
+                    use_bes = !opt_no;
                     vo_subdevice += 3;
-               } else if (!strncmp(vo_subdevice, "nocrtc2", 7)) {
-                    use_crtc2 = 0;
-                    vo_subdevice += 7;
-               } else if (!strncmp(vo_subdevice, "nospic", 6)) {
-                    use_spic = 0;
-                    vo_subdevice += 6;
-               } else
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "crtc2", 5)) {
+                    use_crtc2 = !opt_no;
+                    vo_subdevice += 5;
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "spic", 4)) {
+                    use_spic = !opt_no;
+                    vo_subdevice += 4;
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "input", 5)) {
+                    use_spic = !opt_no;
+                    vo_subdevice += 5;
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "no", 2)) {
+                    vo_subdevice += 2;
+                    opt_no = 1;
+               } else {
                     vo_subdevice++;
+                    opt_no = 0;
+               }
           }
      }
      if (!use_bes && !use_crtc2) {
-	  fprintf( stderr, "vo_dfbmga: No output selected\n" );
+	  mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: No output selected\n" );
           return -1;
      }
 
      if (!inited) {
-          if (DirectFBInit( NULL, NULL ) != DFB_OK)
+          if ((res = DirectFBInit( NULL, NULL )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: DirectFBInit() failed - %s\n",
+                       DirectFBErrorString( res ) );
                return -1;
+          }
 
           if (!fb_dev_name && !(fb_dev_name = getenv( "FRAMEBUFFER" )))
                fb_dev_name = "/dev/fb0";
@@ -227,30 +271,60 @@ preinit( const char *arg )
           DirectFBSetOption( "no-cursor", "" );
           DirectFBSetOption( "bg-color", "00000000" );
 
-          if (DirectFBCreate( &dfb ) != DFB_OK)
+          if ((res = DirectFBCreate( &dfb )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: DirectFBCreate() failed - %s\n",
+                       DirectFBErrorString( res ) );
                return -1;
+          }
 
           inited = 1;
      }
 
      if (use_bes) {
-          if (dfb->GetDisplayLayer( dfb, 1, &bes ) != DFB_OK)
+          struct layer_enum l = {
+               "Matrox Backend Scaler",
+               &bes,
+               DFB_UNSUPPORTED
+          };
+
+          dfb->EnumDisplayLayers( dfb, get_layer_by_name, &l );
+          if (l.res != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR, "Can't get BES layer - %s\n",
+                       DirectFBErrorString( l.res ) );
                return -1;
+          }
           bes->SetCooperativeLevel( bes, DLSCL_EXCLUSIVE );
           bes->SetOpacity( bes, 0 );
      }
 
      if (use_crtc2) {
-          if (dfb->GetDisplayLayer( dfb, 2, &crtc2 ) != DFB_OK)
+          struct layer_enum l = {
+               "Matrox CRTC2",
+               &crtc2,
+               DFB_UNSUPPORTED
+          };
+
+          dfb->EnumDisplayLayers( dfb, get_layer_by_name, &l );
+          if (l.res != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR, "Can't get CRTC2 layer - %s\n",
+                       DirectFBErrorString( l.res ) );
                return -1;
+          }
           crtc2->SetCooperativeLevel( crtc2, DLSCL_EXCLUSIVE );
           crtc2->SetOpacity( crtc2, 0 );
      }
 
-     if (dfb->GetInputDevice( dfb, DIDID_KEYBOARD, &keyboard ) != DFB_OK)
-          return -1;
-     keyboard->CreateEventBuffer( keyboard, &buffer );
-     buffer->Reset( buffer );
+     if (use_input) {
+          if ((res = dfb->GetInputDevice( dfb, DIDID_KEYBOARD, &keyboard )) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Can't get keyboard - %s\n",
+                       DirectFBErrorString( res ) );
+               return -1;
+          }
+          keyboard->CreateEventBuffer( keyboard, &buffer );
+          buffer->Reset( buffer );
+     }
 
      return 0;
 }
@@ -262,12 +336,19 @@ config( uint32_t width, uint32_t height,
         char *title,
 	uint32_t format )
 {
+     DFBResult res;
+
      DFBDisplayLayerConfig      dlc;
      DFBDisplayLayerConfigFlags failed;
 
      uint32_t out_width;
      uint32_t out_height;
 
+     c2frame = NULL;
+     spic = NULL;
+     subframe = NULL;
+     bufs[0] = bufs[1] = bufs[2] = NULL;
+     
      in_width  = width;
      in_height = height;
 
@@ -283,8 +364,11 @@ config( uint32_t width, uint32_t height,
           dlc.height      = in_height;
           dlc.buffermode  = DLBM_BACKVIDEO;
 
-          if (bes->TestConfiguration( bes, &dlc, &failed ) != DFB_OK)
+          if (bes->TestConfiguration( bes, &dlc, &failed ) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Invalid BES configuration!\n" );
                return -1;
+          }
           bes->SetConfiguration( bes, &dlc );
           bes->GetSurface( bes, &frame );
 
@@ -308,9 +392,13 @@ config( uint32_t width, uint32_t height,
           dsc.pixelformat = dlc.pixelformat;
 
           for (num_bufs = 0; num_bufs < 3; num_bufs++) {
-               if (dfb->CreateSurface( dfb, &dsc, &bufs[num_bufs] ) != DFB_OK) {
-                    if (num_bufs == 0)
+               if ((res = dfb->CreateSurface( dfb, &dsc, &bufs[num_bufs] )) != DFB_OK) {
+                    if (num_bufs == 0) {
+                         mp_msg( MSGT_VO, MSGL_ERR,
+                                 "vo_dfbmga: Can't create surfaces - %s!\n",
+                                 DirectFBErrorString( res ) );
                          return -1;
+                    }
                }
           }
           frame = bufs[0];
@@ -339,8 +427,11 @@ config( uint32_t width, uint32_t height,
                use_spic = 0;
           }
 
-          if (crtc2->TestConfiguration( crtc2, &dlc, &failed ) != DFB_OK)
+          if (crtc2->TestConfiguration( crtc2, &dlc, &failed ) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Invalid CRTC2 configuration!\n" );
                return -1;
+          }
           crtc2->SetConfiguration( crtc2, &dlc );
           crtc2->GetSurface( crtc2, &c2frame );
 
@@ -372,11 +463,11 @@ config( uint32_t width, uint32_t height,
           drect.w = out_width;
           drect.h = out_height;
 
-          c2frame->Clear( c2frame, 0, 0, 0, 0 );
+          c2frame->Clear( c2frame, 0, 0, 0, 0xff );
           c2frame->Flip( c2frame, NULL, 0 );
-          c2frame->Clear( c2frame, 0, 0, 0, 0 );
+          c2frame->Clear( c2frame, 0, 0, 0, 0xff );
 
-          printf( "vo_dfbmga: CRTC2 surface %dx%d %s\n", dlc.width, dlc.height, pixelformat_name( dlc.pixelformat ) );
+          mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: CRTC2 surface %dx%d %s\n", dlc.width, dlc.height, pixelformat_name( dlc.pixelformat ) );
      } else {
           screen_width  = in_width;
           screen_height = in_height;
@@ -385,7 +476,7 @@ config( uint32_t width, uint32_t height,
 
      frame->GetPixelFormat( frame, &frame_format );
      frame_pixel_size = DFB_BYTES_PER_PIXEL( frame_format );
-     printf( "vo_dfbmga: Video surface %dx%d %s (%s)\n",
+     mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Video surface %dx%d %s (%s)\n",
              in_width, in_height,
              pixelformat_name( frame_format ),
              use_bes ? "BES" : "offscreen" );
@@ -395,23 +486,33 @@ config( uint32_t width, uint32_t height,
           IDirectFBPalette *palette;
           DFBColor          color;
           int               i;
-
-          if (dfb->GetDisplayLayer( dfb, 3, &spic ) != DFB_OK)
+          struct layer_enum l = {
+               "Matrox CRTC2 Sub-Picture",
+               &spic,
+               DFB_UNSUPPORTED
+          };
+          dfb->EnumDisplayLayers( dfb, get_layer_by_name, &l );
+          if (l.res != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR, "vo_dfbmga: Can't get sub-picture layer - %s\n", DirectFBErrorString( l.res ) );
                return -1;
+          }
           spic->SetCooperativeLevel( spic, DLSCL_EXCLUSIVE );
           spic->SetOpacity( spic, 0 );
 
           dlc.flags       = DLCONF_PIXELFORMAT | DLCONF_BUFFERMODE;
           dlc.pixelformat = DSPF_LUT8;
           dlc.buffermode  = DLBM_BACKVIDEO;
-          if (spic->TestConfiguration( spic, &dlc, &failed ) != DFB_OK)
+          if (spic->TestConfiguration( spic, &dlc, &failed ) != DFB_OK) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "vo_dfbmga: Invalid sub-picture configuration!\n" );
                return -1;
+          }
           spic->SetConfiguration( spic, &dlc );
 
           spic->GetSurface( spic, &subframe );
 
           subframe->GetPalette( subframe, &palette );
-          color.a = 0;
+          color.a = 0xff;
           for (i = 0; i < 16; i++) {
                color.r = i * 17;
                color.g = i * 17;
@@ -420,9 +521,9 @@ config( uint32_t width, uint32_t height,
           }
           palette->Release( palette );
 
-          subframe->Clear( subframe, 0, 0, 0, 0 );
+          subframe->Clear( subframe, 0, 0, 0, 0xff );
           subframe->Flip( subframe, NULL, 0 );
-          subframe->Clear( subframe, 0, 0, 0, 0 );
+          subframe->Clear( subframe, 0, 0, 0, 0xff );
      } else if (use_crtc2) {
           /* Draw OSD to CRTC2 surface */
           subframe = c2frame;
@@ -434,7 +535,7 @@ config( uint32_t width, uint32_t height,
      subframe->GetSize( subframe, &sub_width, &sub_height );
      subframe->GetPixelFormat( subframe, &subframe_format );
      subframe_pixel_size = DFB_BYTES_PER_PIXEL( subframe_format );
-     printf( "vo_dfbmga: Sub-picture surface %dx%d %s (%s)\n",
+     mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: Sub-picture surface %dx%d %s (%s)\n",
              sub_width, sub_height,
              pixelformat_name( subframe_format ),
              use_crtc2 ? (use_spic ? "Sub-picture layer" : "CRTC2") : "BES" );
@@ -449,6 +550,7 @@ config( uint32_t width, uint32_t height,
 
      osd_dirty = 0;
      osd_current = 1;
+     blit_done = 0;
 
      return 0;
 }
@@ -591,9 +693,6 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
      void *dst;
      int pitch;
 
-     if (vo_directrendering)
-          frame->Unlock( frame );
-
      if (frame->Lock( frame, DSLF_WRITE, &dst, &pitch ) != DFB_OK)
           return VO_FALSE;
 
@@ -628,19 +727,34 @@ draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
 }
 
 static void
+blit_to_screen( void )
+{
+     /* Flip BES */
+     if (use_bes)
+          frame->Flip( frame, NULL, 0 );
+
+     /* Blit from BES/temp to CRTC2 */
+     c2frame->SetBlittingFlags( c2frame, DSBLIT_NOFX );
+     if (stretch)
+          c2frame->StretchBlit( c2frame, frame, NULL, &drect );
+     else
+          c2frame->Blit( c2frame, frame, NULL, drect.x, drect.y );
+}
+
+static void
 draw_osd( void )
 {
-     if (vo_directrendering)
-          frame->Unlock( frame );
+     frame = bufs[current_buf];
+     frame->Unlock( frame );
 
      osd_changed = vo_osd_changed( 0 );
-
+     
      if (osd_dirty & osd_current) {
           if (use_spic) {
-               subframe->Clear( subframe, 0, 0, 0, 0 );
+               subframe->Clear( subframe, 0, 0, 0, 0xff );
           } else if (use_crtc2) {
                /* Clear black bars around the picture */
-               subframe->SetColor( subframe, 0, 0, 0, 0 );
+               subframe->SetColor( subframe, 0, 0, 0, 0xff );
                subframe->FillRectangle( subframe,
                                         0, 0,
                                         screen_width, drect.y );
@@ -658,16 +772,8 @@ draw_osd( void )
      }
 
      if (use_crtc2) {
-          /* Flip BES */
-          if (use_bes)
-               frame->Flip( frame, NULL, 0 );
-
-          /* Blit from BES/temp to CRTC2 */
-          c2frame->SetBlittingFlags( c2frame, DSBLIT_NOFX );
-          if (stretch)
-               c2frame->StretchBlit( c2frame, frame, NULL, &drect );
-          else
-               c2frame->Blit( c2frame, frame, NULL, drect.x, drect.y );
+          blit_to_screen();
+          blit_done = 1;
      }
 
      vo_draw_text( sub_width, sub_height, draw_alpha );
@@ -685,38 +791,51 @@ flip_page( void )
           /* Flip BES */
           frame->Flip( frame, NULL, vo_vsync ? DSFLIP_WAITFORSYNC : 0 );
      } else {
+          if (!blit_done)
+               blit_to_screen();
+
           /* Flip CRTC2 */
           c2frame->Flip( c2frame, NULL, vo_vsync ? DSFLIP_WAITFORSYNC : 0 );
           if (!use_spic)
                osd_current ^= 3;
+          blit_done = 0;
      }
 
-     current_buf = 0;
+     current_buf = vo_directrendering ? 0 : (current_buf + 1) % num_bufs;
 }
 
 static void
 uninit( void )
 {
-     buffer->Release( buffer );
-     keyboard->Release( keyboard );
+     if (use_input) {
+          buffer->Release( buffer );
+          keyboard->Release( keyboard );
+     }
 
      while (num_bufs--) {
           frame = bufs[num_bufs];
-          frame->Release( frame );
+          if (frame)
+               frame->Release( frame );
+          bufs[num_bufs] = NULL;
      }
      if (use_bes) {
           bes->SetOpacity( bes, 0 );
           bes->Release( bes );
      }
      if (use_crtc2) {
-          c2frame->Release( c2frame );
+          if (c2frame)
+               c2frame->Release( c2frame );
           crtc2->SetOpacity( crtc2, 0 );
           crtc2->Release( crtc2 );
+          c2frame = NULL;
      }
-     if (use_spic) {
-          subframe->Release( subframe );
+     if (use_spic && spic) {
+          if (subframe)
+               subframe->Release( subframe );
           spic->SetOpacity( spic, 0 );
           spic->Release( spic );
+          subframe = NULL;
+          spic = NULL;
      }
 
      /*
@@ -730,6 +849,7 @@ uninit( void )
 static uint32_t
 get_image( mp_image_t *mpi )
 {
+     int buf = current_buf;
      void *dst;
      int pitch;
 
@@ -740,8 +860,6 @@ get_image( mp_image_t *mpi )
 
      if (mpi->flags & MP_IMGFLAG_READABLE &&
          (mpi->type == MP_IMGTYPE_IPB || mpi->type == MP_IMGTYPE_IP)) {
-          int buf = current_buf;
-
           if (num_bufs < 2)
                return VO_FALSE;
 
@@ -754,12 +872,12 @@ get_image( mp_image_t *mpi )
 
           if (mpi->type == MP_IMGTYPE_IPB)
                buf++;
-
-          current_buf = buf;
-          frame = bufs[current_buf];
      }
+     frame = bufs[buf];
+     frame->Unlock( frame );
 
-     if (frame->Lock( frame, DSLF_WRITE | (mpi->flags & MP_IMGFLAG_READABLE ? DSLF_READ : 0),
+     /* Always use DSLF_READ to preserve system memory copy */
+     if (frame->Lock( frame, DSLF_WRITE | DSLF_READ,
                       &dst, &pitch ) != DFB_OK)
           return VO_FALSE;
 
@@ -783,6 +901,8 @@ get_image( mp_image_t *mpi )
           }
 
           mpi->flags |= MP_IMGFLAG_DIRECT;
+          mpi->priv = (void *) buf;
+          current_buf = buf;
 
           return VO_TRUE;
      }
@@ -797,7 +917,11 @@ get_image( mp_image_t *mpi )
 static uint32_t
 draw_image( mp_image_t *mpi )
 {
-     if (mpi->flags & (MP_IMGFLAG_DIRECT | MP_IMGFLAG_DRAW_CALLBACK))
+     if (mpi->flags & MP_IMGFLAG_DIRECT) {
+          current_buf = (int) mpi->priv;
+          return VO_TRUE;
+     }
+     if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
           return VO_TRUE;
 
      if (mpi->flags & MP_IMGFLAG_PLANAR)
@@ -892,6 +1016,10 @@ static uint32_t
 control( uint32_t request, void *data, ... )
 {
      switch (request) {
+     case VOCTRL_GUISUPPORT:
+     case VOCTRL_GUI_NOWINDOW:
+          return VO_TRUE;
+
      case VOCTRL_QUERY_FORMAT:
 	  return query_format( *((uint32_t *) data) );
 
@@ -936,6 +1064,9 @@ static void
 check_events( void )
 {
      DFBInputEvent event;
+
+     if (!use_input)
+          return;
 
      if (buffer->GetEvent( buffer, DFB_EVENT( &event )) == DFB_OK) {
           if (event.type == DIET_KEYPRESS) {
