@@ -135,7 +135,7 @@ static float audio_preload=0.5;
 static float audio_delay=0.0;
 static int audio_density=2;
 
-static float force_fps=0;
+float force_fps=0;
 static float force_ofps=0; // set to 24 for inverse telecine
 static int skip_limit=-1;
 
