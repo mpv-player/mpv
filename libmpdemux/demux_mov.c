@@ -747,9 +747,11 @@ if(trak->samplesize){
     while(trak->pos<trak->chunks_size && trak->chunks[trak->pos].sample<sample) ++trak->pos;
     pts=(float)(trak->chunks[trak->pos].sample*trak->duration)/(float)trak->timescale;
 } else {
-    unsigned int ipts=pts;
-//    printf("MOV track seek - sample: %d  \n",ipts);
-    if(!(flags&1)) ipts+=trak->samples[trak->pos].pts;
+    unsigned int ipts;
+    if(!(flags&1)) pts+=trak->samples[trak->pos].pts;
+    if(pts<0) pts=0;
+    ipts=pts;
+    //printf("MOV track seek - sample: %d  \n",ipts);
     for(trak->pos=0;trak->pos<trak->samples_size;++trak->pos){
 	if(trak->samples[trak->pos].pts>=ipts) break; // found it!
     }
