@@ -174,7 +174,7 @@ static void mad_sync(sh_audio_t* sh_audio, struct mad_stream* ms)
     }
     if (skipped)
     {
-	printf("Audio synced, skipped bytes: %d\n", skipped);
+	mp_msg(MSGT_DECAUDIO, MSGL_INFO, "mad: audio synced, skipped bytes: %d\n", skipped);
 //	ms->skiplen += skipped;
 //	printf("skiplen: %d (skipped: %d)\n", ms->skiplen, skipped);
 
@@ -199,7 +199,7 @@ static void mad_sync(sh_audio_t* sh_audio, struct mad_stream* ms)
     len = mad_stream_sync(&ms);
     if (len == -1)
     {
-	printf("Mad sync failed\n");
+	mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Mad sync failed\n");
     }
 #endif
 }
@@ -467,7 +467,7 @@ case AFM_FFMPEG:
 
 #ifdef USE_LIBMAD
  case AFM_MAD:
-   printf(__FILE__ ":%d:mad: setting minimum outputsize\n", __LINE__);
+   mp_msg(MSGT_DECVIDEO, MSGL_V, "mad: setting minimum outputsize\n");
    sh_audio->audio_out_minsize=4608;
    if(sh_audio->audio_in_minsize<MAD_SINGLE_BUFFER_SIZE) sh_audio->audio_in_minsize=MAD_SINGLE_BUFFER_SIZE;
    sh_audio->a_in_buffer_size=sh_audio->audio_in_minsize;
@@ -882,11 +882,11 @@ case AFM_VORBIS: {
    {
      printf("%s %s %s (%s)\n", mad_version, mad_copyright, mad_author, mad_build);
 
-     printf(__FILE__ ":%d:mad: initialising\n", __LINE__);
+     mp_msg(MSGT_DECVIDEO, MSGL_V, "mad: initialising\n");
      mad_frame_init(&mad_frame);
      mad_stream_init(&mad_stream);
 
-     printf(__FILE__ ":%d:mad: preparing buffer\n", __LINE__);
+     mp_msg(MSGT_DECVIDEO, MSGL_V, "mad: preparing buffer\n");
      mad_prepare_buffer(sh_audio, &mad_stream, sh_audio->a_in_buffer_size);
      mad_stream_buffer(&mad_stream, (unsigned char*)(sh_audio->a_in_buffer), sh_audio->a_in_buffer_len);
 //     mad_stream_sync(&mad_stream);
@@ -895,12 +895,12 @@ case AFM_VORBIS: {
 
      if(mad_frame_decode(&mad_frame, &mad_stream) == 0)
        {
-	 printf(__FILE__ ":%d:mad: post processing buffer\n", __LINE__);
+	 mp_msg(MSGT_DECVIDEO, MSGL_V, "mad: post processing buffer\n");
 	 mad_postprocess_buffer(sh_audio, &mad_stream);
        }
      else
        {
-	 printf(__FILE__ ":%d:mad: frame decoding failed\n", __LINE__);
+	 mp_msg(MSGT_DECVIDEO, MSGL_V, "mad: frame decoding failed\n");
 	 mad_print_error(&mad_stream);
        }
      
@@ -926,7 +926,7 @@ case AFM_VORBIS: {
      sh_audio->samplerate=mad_frame.header.sfreq;
 #endif
      sh_audio->i_bps=mad_frame.header.bitrate;
-     printf(__FILE__ ":%d:mad: continuing\n", __LINE__);
+     mp_msg(MSGT_DECVIDEO, MSGL_V, "mad: continuing\n");
      break;
    }
 #endif
@@ -1318,7 +1318,7 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 	  }
 	else
 	  {
-	    printf(__FILE__ ":%d:mad: frame decoding failed (error: %d)\n", __LINE__,
+	    mp_msg(MSGT_DECVIDEO, MSGL_ERR, "mad: frame decoding failed (error: %d)\n",
 		mad_stream.error);
 	    mad_print_error(&mad_stream);
 	  }
