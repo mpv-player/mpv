@@ -37,19 +37,12 @@ endif
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
-VO_LIBS = libvo/libvo.a
-VO_INC = -Ilibvo
-V_LIBS = $(SDL_LIB) $(GGI_LIB) $(AA_LIB) $(X_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) $(DIRECTX_LIB)
+VO_LIBS = $(SDL_LIB) $(GGI_LIB) $(AA_LIB) $(X_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) $(DIRECTX_LIB) $(GIF_LIB) 
+AO_LIBS = $(ARTS_LIB) $(NAS_LIB) $(SGIAUDIO_LIB)
+CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(LZO_LIB) $(XVID_LIB) $(DECORE_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) 
+COMMON_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libpostproc.a linux/libosdep.a $(CSS_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(STREAMING_LIB)
 
-AO_LIBS = libao2/libao2.a
-A_LIBS = $(ALSA_LIB) $(ARTS_LIB) $(NAS_LIB) $(MAD_LIB) $(VORBIS_LIB) $(FAAD_LIB) $(SGIAUDIO_LIB)
-
-CODEC_LIBS = libmpcodecs/libmpcodecs.a mp3lib/libMP3.a liba52/liba52.a libmpeg2/libmpeg2.a $(AV_LIB) $(FAME_LIB)
-COMMON_LIBS = $(CODEC_LIBS) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libpostproc.a linux/libosdep.a $(LIB_LOADER) $(FREETYPE_LIB) $(A_LIBS) $(CSS_LIB) $(XVID_LIB) $(DECORE_LIB) $(TERMCAP_LIB)  $(STREAMING_LIB) $(Z_LIB) $(GTK_LIBS) $(PNG_LIB) $(JPEG_LIB) $(LZO_LIB) $(GIF_LIB) $(CDPARANOIA_LIB) $(ARCH_LIB) -lm 
-ifeq ($(VIDIX),yes)
-MISC_LIBS += -Llibdha -ldha vidix/libvidix.a
-endif
-CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader $(VO_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) $(SDL_INC) # -Wall
+CFLAGS = $(OPTFLAGS) -Ilibmpdemux -Iloader -Ilibvo $(EXTRA_INC) $(CDPARANOIA_INC) $(FREETYPE_INC) $(SDL_INC) # -Wall
 
 PARTS = libmpdemux libmpcodecs mp3lib liba52 libmpeg2 libavcodec libao2 drivers linux postproc input libvo libaf
 ifeq ($(VIDIX),yes)
@@ -72,10 +65,6 @@ ifneq ($(W32_LIB),)
 PARTS += loader loader/dshow
 endif
 
-
-LOADER_DEP = $(W32_DEP) $(DS_DEP)
-LIB_LOADER = $(W32_LIB) $(DS_LIB)
-
 ALL_PRG = $(PRG)
 ifeq ($(MENCODER),yes)
 ALL_PRG += $(PRG_MENCODER)
@@ -84,7 +73,7 @@ ifeq ($(CSS_USE),yes)
 ALL_PRG += $(PRG_FIBMAP)
 endif
 
-COMMON_DEPS = $(LOADER_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a libvo/libvo.a libaf/libaf.a
+COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a liba52/liba52.a mp3lib/libMP3.a libmpeg2/libmpeg2.a linux/libosdep.a postproc/libpostproc.a input/libinput.a libvo/libvo.a libaf/libaf.a
 
 ifeq ($(VIDIX),yes)
 COMMON_DEPS += libdha/libdha.so vidix/libvidix.a
@@ -178,14 +167,15 @@ input/libinput.a:
 MPLAYER_DEP = $(OBJS_MPLAYER) $(COMMON_DEPS)
 MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS)
 
-VIDIX_LIBS =
 ifeq ($(VIDIX),yes)
-VIDIX_LIBS += vidix/libvidix.a
+VIDIX_LIBS = vidix/libvidix.a
+else
+VIDIX_LIBS =
 endif
 
 $(PRG):	$(MPLAYER_DEP)
 	./darwinfixlib.sh $(MPLAYER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(VO_LIBS) $(AO_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(V_LIBS) $(COMMON_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) 
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(STATIC_LIB) $(ARCH_LIB) -lm 
 
 $(PRG_FIBMAP): fibmap_mplayer.o
 	$(CC) -o $(PRG_FIBMAP) fibmap_mplayer.o
@@ -193,7 +183,7 @@ $(PRG_FIBMAP): fibmap_mplayer.o
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
 	./darwinfixlib.sh $(MENCODER_DEP) libmpcodecs/libmpencoders.a
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB) $(LIRC_LIB)
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB) $(LIRC_LIB) $(ARCH_LIB) -lm 
 endif
 
 # Every mplayer dependency depends on version.h, to force building version.h
