@@ -485,38 +485,11 @@ sh_video=d_video->sh;
 
 if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   // Go through the codec.conf and find the best codec...
-  sh_audio->codec=NULL;
-  if(audio_fm) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceAudioFmtStr,audio_fm);
-  while(1){
-    sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
-    if(!sh_audio->codec){
-      if(audio_fm) {
-        sh_audio->codec=NULL; /* re-search */
-        mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindAfmtFallback);
-        audio_fm=NULL;
-        continue;      
-      }
-      mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
-      mp_msg(MSGT_MENCODER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-      sh_audio=d_audio->sh=NULL;
-      break;
-    }
-    if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
-    else if(audio_fm && strcmp(sh_audio->codec->drv,audio_fm)) continue;
-    mp_msg(MSGT_MENCODER,MSGL_INFO,"%s audio codec: [%s] afm:%s (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
-    break;
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+  if(!init_best_audio_codec(sh_audio,audio_codec,audio_fm)){
+    sh_audio=d_audio->sh=NULL; // failed to init :(
   }
-}
-
-if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
-  mp_msg(MSGT_MENCODER,MSGL_V,MSGTR_InitializingAudioCodec);
-  if(!init_audio(sh_audio)){
-    mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
-    sh_audio=d_audio->sh=NULL;
-  } else {
-    mp_msg(MSGT_MENCODER,MSGL_INFO,"AUDIO: srate=%d  chans=%d  bps=%d  sfmt=0x%X  ratio: %d->%d\n",sh_audio->samplerate,sh_audio->channels,sh_audio->samplesize,
-        sh_audio->sample_format,sh_audio->i_bps,sh_audio->o_bps);
-  }
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 }
 
 // set up video encoder:
@@ -659,32 +632,10 @@ default:
     sh_video->vfilter=vf_open_filter(sh_video->vfilter,"expand","-1:-1:-1:-1:1");
     sh_video->vfilter=append_filters(sh_video->vfilter);
 
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-// Go through the codec.conf and find the best codec...
-sh_video->inited=0;
-codecs_reset_selection(0);
-if(video_codec){
-    // forced codec by name:
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ForcedVideoCodec,video_codec);
-    init_video(sh_video,video_codec,NULL,-1);
-} else {
-    int status;
-    // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
-    if(video_fm) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmtStr,video_fm);
-    for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status){
-	if(video_fm) // try first the preferred codec family:
-	    if(init_video(sh_video,NULL,video_fm,status)) break;
-	if(init_video(sh_video,NULL,NULL,status)) break;
-    }
-}
-if(!sh_video->inited){
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
-    mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-    mencoder_exit(1,NULL);
-}
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] vfm:%s (%s)\n",
-    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->drv,sh_video->codec->info);
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+    init_best_video_codec(sh_video,video_codec,video_fm);
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+    if(!sh_video->inited) mencoder_exit(1,NULL);
 
 }
 

@@ -204,6 +204,39 @@ int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
     return 0;
 }
 
+int init_best_video_codec(sh_video_t *sh_video,char* video_codec,char* video_fm){
+// Go through the codec.conf and find the best codec...
+sh_video->inited=0;
+codecs_reset_selection(0);
+if(video_codec){
+    // forced codec by name:
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_ForcedVideoCodec,video_codec);
+    init_video(sh_video,video_codec,NULL,-1);
+} else {
+    int status;
+    // try in stability order: UNTESTED, WORKING, BUGGY. never try CRASHING.
+    if(video_fm){
+	// try first the preferred codec family:
+	mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_TryForceVideoFmtStr,video_fm);
+	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
+	    if(init_video(sh_video,NULL,video_fm,status)) break;
+    }
+    if(!sh_video->inited)
+	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
+	    if(init_video(sh_video,NULL,NULL,status)) break;
+}
+
+if(!sh_video->inited){
+    mp_msg(MSGT_DECVIDEO,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
+    mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
+    return 0; // failed
+}
+
+mp_msg(MSGT_DECVIDEO,MSGL_INFO,"%s video codec: [%s] vfm:%s (%s)\n",
+    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->drv,sh_video->codec->info);
+return 1; // success
+}
+
 extern int vo_directrendering;
 
 int decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame){

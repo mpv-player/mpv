@@ -1200,54 +1200,19 @@ if(sh_video) {
 #endif
 
 //================== Init AUDIO (codec) ==========================
-current_module="find_audio_codec";
-
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
-  sh_audio->codec=NULL;
+  current_module="init_audio_codec";
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
-  if(audio_fm) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceAudioFmtStr,audio_fm);
-  while(1){
-    sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
-    if(!sh_audio->codec){
-      if(audio_fm) {
-        sh_audio->codec=NULL; /* re-search */
-        mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAfmtFallback);
-        audio_fm=NULL;
-        continue;
-      }
-      mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
-      mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-      sh_audio=d_audio->sh=NULL;
-      break;
-    }
-    if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
-    if(audio_fm && strcmp(sh_audio->codec->drv,audio_fm)) continue;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] afm:%s (%s)\n",
-	audio_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
-    break;
+  if(!init_best_audio_codec(sh_audio,audio_codec,audio_fm)){
+    sh_audio=d_audio->sh=NULL; // failed to init :(
   }
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 }
 
-current_module="init_audio_codec";
-
-if(sh_audio){
-  mp_msg(MSGT_CPLAYER,MSGL_V,MSGTR_InitializingAudioCodec);
-  if(!init_audio(sh_audio)){
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
-    sh_audio=d_audio->sh=NULL;
-  } else {
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AUDIO: %d Hz, %d ch, sfmt: 0x%X (%d bps), ratio: %d->%d (%3.1f kbit)\n",
-	sh_audio->samplerate,sh_audio->channels,
-	sh_audio->sample_format,sh_audio->samplesize,
-        sh_audio->i_bps,sh_audio->o_bps,sh_audio->i_bps*8*0.001);
-  }
-}
+if(!sh_video) goto main; // audio-only
 
 //================== Init VIDEO (codec & libvo) ==========================
-if(!sh_video)
-   goto main;
-
 current_module="preinit_libvo";
 
 vo_config_count=0;
@@ -1269,39 +1234,14 @@ sh_video->vfilter=append_filters(sh_video->vfilter);
 current_module="init_video_codec";
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
+init_best_video_codec(sh_video,video_codec,video_fm);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
-// Go through the codec.conf and find the best codec...
-sh_video->inited=0;
-codecs_reset_selection(0);
-if(video_codec){
-    // forced codec by name:
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_ForcedVideoCodec,video_codec);
-    init_video(sh_video,video_codec,NULL,-1);
-} else {
-    int status;
-    // try in stability order: UNTESTED, WORKING, BUGGY. never try CRASHING.
-    if(video_fm){
-	// try first the preferred codec family:
-	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmtStr,video_fm);
-	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
-	    if(init_video(sh_video,NULL,video_fm,status)) break;
-    }
-    if(!sh_video->inited)
-	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
-	    if(init_video(sh_video,NULL,NULL,status)) break;
-}
 if(!sh_video->inited){
-    mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
-    mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
     if(!sh_audio) goto goto_next_file;
     sh_video = d_video->sh = NULL;
     goto main; // exit_player(MSGTR_Exit_error);
 }
-
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] vfm:%s (%s)\n",
-    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->drv,sh_video->codec->info);
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 if(auto_quality>0){
     // Auto quality option enabled
@@ -1335,7 +1275,9 @@ current_module="init_vo";
 #endif
 
 //================== MAIN: ==========================
-   main:
+main:
+current_module="main";
+
 if(!sh_video) osd_level = 0;
 
 fflush(stdout);
