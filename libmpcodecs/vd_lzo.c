@@ -6,7 +6,7 @@
 
 #include "vd_internal.h"
 
-#ifdef USE_LZO
+#ifdef USE_LIBLZO
 #include <lzo1x.h>
 #else
 #include "native/minilzo.h"
