@@ -2,7 +2,7 @@
  *		Dmitry Baryshkov <mitya@school.ioffe.ru>
 
    Reworked by Savchenko Andrew aka Bircoph <Bircoph[at]list[dot]ru>
-   Was synced with help_mp-en.h: rev 1.155
+   Was synced with help_mp-en.h: rev 1.157
  ========================= MPlayer help =========================== */
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -105,7 +105,7 @@ static char help_text[]=
 #define MSGTR_GuiNeedsX "MPlayer GUI требует X11!\n"
 #define MSGTR_Playing "Проигрывание %s.\n"
 #define MSGTR_NoSound "Аудио: без звука!!!\n"
-#define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (ftime: %5.3f).\n"
+#define MSGTR_FPSforced "Кадры/сек форсированы в %5.3f (время кадра: %5.3f).\n"
 #define MSGTR_CompiledWithRuntimeDetection "Скомпилировано для определения типа процессора во время выполнения - ПРЕДУПРЕЖДЕНИЕ - это \nне оптимально! Для получения максимальной производительности, перекомпилируйте MPlayer\nc --disable-runtime-cpudetection.\n"
 #define MSGTR_CompiledWithCPUExtensions "Скомпилировано для x86 CPU со следующими расширениями:"
 #define MSGTR_AvailableVideoOutputDrivers "Доступные драйвера вывода видео:\n"
@@ -131,7 +131,7 @@ static char help_text[]=
 "  Пожалуйста, читайте DOCS/HTML/ru/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer сломался из-за 'Неправильной Инструкции'.\n"\
-"  Обычно, это происходит когда вы его запускаете на CPU, отличном от того, для которого\n"\
+"  Обычно, это происходит когда Вы его запускаете на CPU, отличном от того, для которого\n"\
 "  он был скомпилирован/оптимизирован.\n"\
 "  Проверьте это!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
@@ -213,8 +213,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nПишу индекс AVI...\n"
 #define MSGTR_FixupAVIHeader "Подправляю заголовок AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Рекомендуемый битпоток для %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nПоток видео: %8.3f kbit/s  (%d bps)  размер: %d байт(а/ов)  %5.3f сек.  %d кадр(а/ов)\n"
-#define MSGTR_AudioStreamResult "\nПоток аудио: %8.3f kbit/s  (%d bps)  размер: %d байт(а/ов)  %5.3f сек.\n"
+#define MSGTR_VideoStreamResult "\nПоток видео: %8.3f кбит/с  (%d bps)  размер: %d байт(а/ов)  %5.3f сек.  %d кадр(а/ов)\n"
+#define MSGTR_AudioStreamResult "\nПоток аудио: %8.3f кбит/с  (%d bps)  размер: %d байт(а/ов)  %5.3f сек.\n"
 #define MSGTR_OpenedStream "успех: формат: %d  данные: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "видеокодек: копирование кадров (%dx%d %dbpp fourcc=%x)\n"
 #define MSGTR_ACodecFramecopy "аудиокодек: копирование кадров (формат=%x цепочек=%d скорость=%ld битов=%d bps=%ld образец=%ld)\n"
@@ -261,7 +261,7 @@ static char help_text[]=
 "двойного прослушивания для проверки и достижения этой цели.\n"\
 "\n"\
 "Ключи предустановок постоянно обновляются для соответсвия последним разработкам,\n"\
-"в результате чего вы должны получить практически наилучшее качество, \n"\
+"в результате чего Вы должны получить практически наилучшее качество, \n"\
 "возможное на текущий момент при использовании LAME.\n"\
 "\n"\
 "Чтобы использовать эти предустановки:\n"\
@@ -272,7 +272,7 @@ static char help_text[]=
 "                             для большинства людей и большиства музыки, и она\n"\
 "                             уже предоставляет достаточно высокое качество.\n"\
 "\n"\
-"     \"preset=extreme\" Если вы обладаете чрезвычайно хорошим слухом и\n"\
+"     \"preset=extreme\" Если Вы обладаете чрезвычайно хорошим слухом и\n"\
 "                             соответствующим оборудованием, эта предустановка,\n"\
 "                             как правило, предоставит несколько лучшее качество,\n"\
 "                             чем режим \"standard\".\n"\
@@ -281,7 +281,7 @@ static char help_text[]=
 "\n"\
 "     \"preset=insane\"  Использование этой установки является перебором для\n"\
 "                             большинства людей и большинства ситуаций, но если\n"\
-"                             вам необходимо максимально возможное качество,\n"\
+"                             Вам необходимо максимально возможное качество,\n"\
 "                             невзирая на размер файла - это способ сделать так.\n"\
 "\n"\
 "   Для ABR режимов (высокое качество для заданного битпотока, но не такое высокое, как VBR):\n"\
@@ -311,9 +311,9 @@ static char help_text[]=
 "Предупреждение: В текущей версии быстрые предустановки могут привести к слишком\n"\
 "                высокому битпотоку, по сравнению с обычными предустановками.\n"\
 "\n"\
-"   \"cbr\"  - Если вы используете режим ABR (см. выше) с таким \"кратным\""\
+"   \"cbr\"  - Если Вы используете режим ABR (см. выше) с таким \"кратным\""\
 "            битпотоком как 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
-"            вы можете использовать опцию \"cbr\" для форсирования кодирования\n"\
+"            Вы можете использовать опцию \"cbr\" для форсирования кодирования\n"\
 "            в режиме CBR вместо стандартного abr режима. ABR предоставляет\n"\
 "            более высокое качество, но CBR может быть полезным в таких\n"\
 "            ситуациях как передача потоков mp3 через интернет.\n"\
@@ -484,7 +484,7 @@ static char help_text[]=
 #define MSGTR_MissingAudioStream "Аудио поток не найден -> без звука\n"
 #define MSGTR_MissingVideoStreamBug "Видео поток потерян!? свяжитесь с автором, это может быть багом :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "demux: в файле  нет выбранного аудио или видео потока\n"
+#define MSGTR_DoesntContainSelectedStream "demux: в файле нет выбранного аудио или видео потока\n"
 
 #define MSGTR_NI_Forced "Форсирован"
 #define MSGTR_NI_Detected "Обнаружен"
@@ -537,7 +537,7 @@ static char help_text[]=
 
 #define MSGTR_UsingExternalPP "[PP] Использую внешний фильтр постобработки, max q = %d.\n"
 #define MSGTR_UsingCodecPP "[PP] Использую постобработку из кодека, max q = %d.\n"
-#define MSGTR_VideoAttributeNotSupportedByVO_VD "Видео атрибут '%s' не поддерживается выбранными vo & vd.\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Видео атрибут '%s' не поддерживается выбранными vo и vd.\n"
 #define MSGTR_VideoCodecFamilyNotAvailableStr "Запрошенное семейство видеокодеков [%s] (vfm=%s) не доступно.\nВключите его во время компиляции.\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Запрошенное семейство аудиокодеков [%s] (afm=%s) не доступно.\nВключите его во время компиляции.\n"
 #define MSGTR_OpeningVideoDecoder "Открываю декодер видео: [%s] %s\n"
@@ -560,7 +560,7 @@ static char help_text[]=
 #define MSGTR_CouldNotFindVideoFilter "Не могу найти видео фильтр '%s'.\n"
 #define MSGTR_CouldNotOpenVideoFilter "Не могу открыть видео фильтр '%s'.\n"
 #define MSGTR_OpeningVideoFilter "Открываю видео фильтр: "
-#define MSGTR_CannotFindColorspace "Не могу найти общее цветовое пространство, даже вставив 'scale' :(\n"
+#define MSGTR_CannotFindColorspace "Не могу найти подходящее цветовое пространство, даже вставив 'scale' :(\n"
 
 // vd.c
 #define MSGTR_CodecDidNotSet "VDec: Кодек не установил sh->disp_w и sh->disp_h, пытаюсь обойти.\n"
@@ -663,6 +663,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "След. поток"
 #define MSGTR_MENU_PrevStream "Пред. поток"
 #define MSGTR_MENU_Size "Размер"
+#define MSGTR_MENU_HalfSize   "Половинный размер"
 #define MSGTR_MENU_NormalSize "Нормальный размер"
 #define MSGTR_MENU_DoubleSize "Двойной размер"
 #define MSGTR_MENU_FullScreen "Полный экран"
@@ -767,7 +768,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Audio_Device "Устройство:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Микшер:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Канал микшера:"
-#define MSGTR_PREFERENCES_Message "Пожалуйста, запомните, что Вам нужно перезапустить проигрывание, чтобы некоторые изменения вступили в силу!"
+#define MSGTR_PREFERENCES_Message "Пожалуйста, запомните, что Вам нужно перезапустить проигрывание,\nчтобы некоторые изменения вступили в силу!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Видео кодировщик:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Использовать LAVC (FFmpeg)"
 #define MSGTR_PREFERENCES_DXR3_FAME "Использовать FAME"
@@ -833,7 +834,7 @@ static char help_text[]=
 // cfg.c
 
 #define MSGTR_ConfigFileReadError "[cfg] ошибка чтения конфигурационного файла...\n"
-#define MSGTR_UnableToSaveOption "Не могу сохранить опцию '%s'.\n"
+#define MSGTR_UnableToSaveOption "[cfg] Не могу сохранить опцию '%s'.\n"
 
 // interface.c
 
@@ -869,7 +870,7 @@ static char help_text[]=
 // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "Извините, выбранное устройство видеовывода не совместимо с этим кодеком.\n"
-#define MSGTR_VO_GenericError "Произошла эта ошибка"
+#define MSGTR_VO_GenericError "Произошла следующая ошибка"
 #define MSGTR_VO_UnableToAccess "Не могу получить доступ"
 #define MSGTR_VO_ExistsButNoDirectory "уже существует, но не является директорией."
 #define MSGTR_VO_DirExistsButNotWritable "Директория вывода уже существует, но не доступна для записи."
@@ -923,7 +924,7 @@ static char help_text[]=
 
 // ao_oss.c
 #define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] инициализация аудио: Не могу открыть устройство микшера %s: %s\n"
-#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] инициализация аудио: У микшера аудиокарты отсутствует канал '%s', использую канал по умолчанию.\n"
+#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] инициализация аудио: У микшера аудиокарты отсутствует канал '%s',\nиспользую канал по умолчанию.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] инициализация аудио: Не могу открыть аудиоустройство %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] инициализация аудио: Не могу заблокировать файловый описатель: %s\n"
 #define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Не могу установить аудиоустройство %s в режим AC3 вывода, пробую S16...\n"
@@ -988,7 +989,7 @@ static char help_text[]=
 #define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Не могу открыть аудиоустройство %s, %s -> нет звука.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] инициализация аудио: ваша карта не поддерживает канал %d, %s,\nчастоту воспроизведения %d Гц.\n"
 #define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Ваш аудиодрайвер НЕ поддерживает select()  ***\n Перекомпилируйте MPlayer с #undef HAVE_AUDIO_SELECT в config.h !\n\n"
-#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nFatal error: *** НЕ МОГУ ПОВТОРНО ОТКРЫТЬ / СБРОСИТЬ АУДИОУСТРОЙСТВО (%s) ***\n"
+#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nФатальная ошибка: *** НЕ МОГУ ПОВТОРНО ОТКРЫТЬ / СБРОСИТЬ АУДИОУСТРОЙСТВО (%s) ***\n"
 
 // ao_alsa5.c
 #define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] инициализация alsa: запрошенный формат: %d Гц, %d каналов, %s\n"
