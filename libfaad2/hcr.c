@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: hcr.c,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: hcr.c,v 1.4 2004/06/23 13:50:50 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -144,7 +144,7 @@ typedef struct
 
 #define segmentWidth( codebook )	min( maxCwLen[codebook], ics->length_of_longest_codeword )
      
-uint8_t reordered_spectral_data(faacDecHandle hDecoder, ic_stream *ics, bitfile *ld,
+uint8_t reordered_spectral_data(NeAACDecHandle hDecoder, ic_stream *ics, bitfile *ld,
                                 int16_t *spectral_data)
 {
     uint16_t sp_offset[8];

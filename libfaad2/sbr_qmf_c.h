@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Alex Beregszaszi on 2003/10/03
-** $Id: sbr_qmf_c.h,v 1.2 2004/06/02 22:59:03 diego Exp $
+** $Id: sbr_qmf_c.h,v 1.3 2004/06/23 13:50:52 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -201,7 +201,7 @@ ALIGN static const real_t qmf_c[640] = {
     FRAC_CONST(0.84803157770763), FRAC_CONST(0.84978051984268),
     FRAC_CONST(0.85119715249343), FRAC_CONST(0.85230470352147),
     FRAC_CONST(0.85310209497017), FRAC_CONST(0.85357205739107),
-    FRAC_CONST(0.85373856005937), FRAC_CONST(0.85357205739107),
+    FRAC_CONST(0.85373856005937 /*max*/), FRAC_CONST(0.85357205739107),
     FRAC_CONST(0.85310209497017), FRAC_CONST(0.85230470352147),
     FRAC_CONST(0.85119715249343), FRAC_CONST(0.84978051984268),
     FRAC_CONST(0.84803157770763), FRAC_CONST(0.84598184698206),

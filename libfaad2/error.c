@@ -23,19 +23,19 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: error.c,v 1.2 2004/06/02 22:59:02 diego Exp $
+** $Id: error.c,v 1.3 2004/06/23 13:50:49 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
 #include "common.h"
 #include "error.h"
 
-int8_t *err_msg[] = {
+char *err_msg[] = {
     "No error",
     "Gain control not yet implemented",
     "Pulse coding not allowed in short blocks",
     "Invalid huffman codebook",
-    "Negative scalefactor found, should be impossible",
+    "Scalefactor out of range",
     "Unable to find ADTS syncword",
     "Channel coupling not yet implemented",
     "Channel configuration not allowed in error resilient frame",
@@ -56,6 +56,8 @@ int8_t *err_msg[] = {
     "Error in program_config_element",
     "First SBR frame is not the same as first AAC frame",
     "Unexpected fill element with SBR data",
-    "Not all elements were provided with SBR data"
+    "Not all elements were provided with SBR data",
+    "LTP decoding not available",
+    "Output data buffer too small"
 };
 

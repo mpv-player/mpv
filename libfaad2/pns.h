@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: pns.h,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: pns.h,v 1.4 2004/06/23 13:50:51 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -33,8 +33,6 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-#include "common.h"
 
 #include "syntax.h"
 

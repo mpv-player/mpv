@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: sbr_hfadj.h,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: sbr_hfadj.h,v 1.4 2004/06/23 13:50:52 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -34,17 +34,11 @@
 extern "C" {
 #endif
 
-typedef struct {
-
-    real_t Q_mapped[64][5];
-
-    uint8_t S_index_mapped[64][5];
-    uint8_t S_mapped[64][5];
-
-    real_t G_lim_boost[5][64];
-    real_t Q_M_lim_boost[5][64];
-    real_t S_M_boost[5][64];
-
+typedef struct
+{
+    real_t G_lim_boost[MAX_L_E][MAX_M];
+    real_t Q_M_lim_boost[MAX_L_E][MAX_M];
+    real_t S_M_boost[MAX_L_E][MAX_M];
 } sbr_hfadj_info;
 
 

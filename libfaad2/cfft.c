@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: cfft.c,v 1.3 2004/06/02 22:59:02 diego Exp $
+** $Id: cfft.c,v 1.4 2004/06/23 13:50:49 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -1377,17 +1377,17 @@ cfft_info *cffti(uint16_t n)
 
     switch (n)
     {
-    case 64: cfft->tab = cfft_tab_64; break;
-    case 512: cfft->tab = cfft_tab_512; break;
+    case 64: cfft->tab = (complex_t*)cfft_tab_64; break;
+    case 512: cfft->tab = (complex_t*)cfft_tab_512; break;
 #ifdef LD_DEC
-    case 256: cfft->tab = cfft_tab_256; break;
+    case 256: cfft->tab = (complex_t*)cfft_tab_256; break;
 #endif
 
 #ifdef ALLOW_SMALL_FRAMELENGTH
-    case 60: cfft->tab = cfft_tab_60; break;
-    case 480: cfft->tab = cfft_tab_480; break;
+    case 60: cfft->tab = (complex_t*)cfft_tab_60; break;
+    case 480: cfft->tab = (complex_t*)cfft_tab_480; break;
 #ifdef LD_DEC
-    case 240: cfft->tab = cfft_tab_240; break;
+    case 240: cfft->tab = (complex_t*)cfft_tab_240; break;
 #endif
 #endif
     }

@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: tns.c,v 1.3 2004/06/02 22:59:04 diego Exp $
+** $Id: tns.c,v 1.4 2004/06/23 13:50:53 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -241,24 +241,32 @@ static void tns_ar_filter(real_t *spectrum, uint16_t size, int8_t inc, real_t *l
 
     uint8_t j;
     uint16_t i;
-    real_t y, state[TNS_MAX_ORDER];
-
-    for (i = 0; i < order; i++)
-        state[i] = 0;
+    real_t y;
+    /* state is stored as a double ringbuffer */
+    real_t state[2*TNS_MAX_ORDER] = {0};
+    int8_t state_index = 0;
 
     for (i = 0; i < size; i++)
     {
         y = *spectrum;
 
         for (j = 0; j < order; j++)
-            y -= MUL_C(state[j], lpc[j+1]);
+            y -= MUL_C(state[state_index+j], lpc[j+1]);
 
-        for (j = order-1; j > 0; j--)
-            state[j] = state[j-1];
+        /* double ringbuffer state */
+        state_index--;
+        if (state_index < 0)
+            state_index = order-1;
+        state[state_index] = state[state_index + order] = y;
 
-        state[0] = y;
         *spectrum = y;
         spectrum += inc;
+
+//#define TNS_PRINT
+#ifdef TNS_PRINT
+        //printf("%d\n", y);
+        printf("0x%.8X\n", y);
+#endif
     }
 }
 
@@ -276,10 +284,10 @@ static void tns_ma_filter(real_t *spectrum, uint16_t size, int8_t inc, real_t *l
 
     uint8_t j;
     uint16_t i;
-    real_t y, state[TNS_MAX_ORDER];
-
-    for (i = 0; i < order; i++)
-        state[i] = REAL_CONST(0.0);
+    real_t y;
+    /* state is stored as a double ringbuffer */
+    real_t state[2*TNS_MAX_ORDER] = {0};
+    int8_t state_index = 0;
 
     for (i = 0; i < size; i++)
     {
@@ -288,10 +296,12 @@ static void tns_ma_filter(real_t *spectrum, uint16_t size, int8_t inc, real_t *l
         for (j = 0; j < order; j++)
             y += MUL_C(state[j], lpc[j+1]);
 
-        for (j = order-1; j > 0; j--)
-            state[j] = state[j-1];
+        /* double ringbuffer state */
+        state_index--;
+        if (state_index < 0)
+            state_index = order-1;
+        state[state_index] = state[state_index + order] = *spectrum;
 
-        state[0] = *spectrum;
         *spectrum = y;
         spectrum += inc;
     }

@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: specrec.c,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: specrec.c,v 1.4 2004/06/23 13:50:52 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -40,6 +40,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "specrec.h"
+#include "filtbank.h"
 #include "syntax.h"
 #include "iq_table.h"
 #include "ms.h"
@@ -56,8 +57,9 @@
 
 
 /* static function declarations */
-static void quant_to_spec(ic_stream *ics, real_t *spec_data, uint16_t frame_len);
-static uint8_t inverse_quantization(real_t *x_invquant, const int16_t *x_quant, const uint16_t frame_len);
+static uint8_t quant_to_spec(NeAACDecHandle hDecoder,
+                             ic_stream *ics, int16_t *quant_data,
+                             real_t *spec_data, uint16_t frame_len);
 
 
 #ifdef LD_DEC
@@ -297,7 +299,7 @@ ALIGN static const  uint16_t *swb_offset_128_window[] =
     in section named section. This offset depends on window_sequence and
     scale_factor_grouping and is needed to decode the spectral_data().
 */
-uint8_t window_grouping_info(faacDecHandle hDecoder, ic_stream *ics)
+uint8_t window_grouping_info(NeAACDecHandle hDecoder, ic_stream *ics)
 {
     uint8_t i, g;
 
@@ -409,75 +411,24 @@ uint8_t window_grouping_info(faacDecHandle hDecoder, ic_stream *ics)
     }
 }
 
-/*
-  For ONLY_LONG_SEQUENCE windows (num_window_groups = 1,
-  window_group_length[0] = 1) the spectral data is in ascending spectral
-  order.
-  For the EIGHT_SHORT_SEQUENCE window, the spectral order depends on the
-  grouping in the following manner:
-  - Groups are ordered sequentially
-  - Within a group, a scalefactor band consists of the spectral data of all
-    grouped SHORT_WINDOWs for the associated scalefactor window band. To
-    clarify via example, the length of a group is in the range of one to eight
-    SHORT_WINDOWs.
-  - If there are eight groups each with length one (num_window_groups = 8,
-    window_group_length[0..7] = 1), the result is a sequence of eight spectra,
-    each in ascending spectral order.
-  - If there is only one group with length eight (num_window_groups = 1,
-    window_group_length[0] = 8), the result is that spectral data of all eight
-    SHORT_WINDOWs is interleaved by scalefactor window bands.
-  - Within a scalefactor window band, the coefficients are in ascending
-    spectral order.
-*/
-static void quant_to_spec(ic_stream *ics, real_t *spec_data, uint16_t frame_len)
-{
-    uint8_t g, sfb, win;
-    uint16_t width, bin, k, gindex;
-
-    ALIGN real_t tmp_spec[1024] = {0};
-
-    k = 0;
-    gindex = 0;
-
-    for (g = 0; g < ics->num_window_groups; g++)
-    {
-        uint16_t j = 0;
-        uint16_t gincrease = 0;
-        uint16_t win_inc = ics->swb_offset[ics->num_swb];
-
-        for (sfb = 0; sfb < ics->num_swb; sfb++)
-        {
-            width = ics->swb_offset[sfb+1] - ics->swb_offset[sfb];
-
-            for (win = 0; win < ics->window_group_length[g]; win++)
-            {
-                for (bin = 0; bin < width; bin += 4)
-                {
-                    tmp_spec[gindex+(win*win_inc)+j+bin+0] = spec_data[k+0];
-                    tmp_spec[gindex+(win*win_inc)+j+bin+1] = spec_data[k+1];
-                    tmp_spec[gindex+(win*win_inc)+j+bin+2] = spec_data[k+2];
-                    tmp_spec[gindex+(win*win_inc)+j+bin+3] = spec_data[k+3];
-                    gincrease += 4;
-                    k += 4;
-                }
-            }
-            j += width;
-        }
-        gindex += gincrease;
-    }
-
-    memcpy(spec_data, tmp_spec, frame_len*sizeof(real_t));
-}
-
+/* iquant() *
+/* output = sign(input)*abs(input)^(4/3) */
+/**/
 static INLINE real_t iquant(int16_t q, const real_t *tab, uint8_t *error)
 {
 #ifdef FIXED_POINT
+/* For FIXED_POINT the iq_table is prescaled by 3 bits (iq_table[]/8) */
+/* BIG_IQ_TABLE allows you to use the full 8192 value table, if this is not
+ * defined a 1026 value table and interpolation will be used
+ */
+#ifndef BIG_IQ_TABLE
     static const real_t errcorr[] = {
         REAL_CONST(0), REAL_CONST(1.0/8.0), REAL_CONST(2.0/8.0), REAL_CONST(3.0/8.0),
         REAL_CONST(4.0/8.0),  REAL_CONST(5.0/8.0), REAL_CONST(6.0/8.0), REAL_CONST(7.0/8.0),
         REAL_CONST(0)
     };
     real_t x1, x2;
+#endif
     int16_t sgn = 1;
 
     if (q < 0)
@@ -487,12 +438,31 @@ static INLINE real_t iquant(int16_t q, const real_t *tab, uint8_t *error)
     }
 
     if (q < IQ_TABLE_SIZE)
+    {
+//#define IQUANT_PRINT
+#ifdef IQUANT_PRINT
+        //printf("0x%.8X\n", sgn * tab[q]);
+        printf("%d\n", sgn * tab[q]);
+#endif
         return sgn * tab[q];
+    }
+
+#ifndef BIG_IQ_TABLE
+    if (q >= 8192)
+    {
+        *error = 17;
+        return 0;
+    }
 
     /* linear interpolation */
     x1 = tab[q>>3];
     x2 = tab[(q>>3) + 1];
     return sgn * 16 * (MUL_R(errcorr[q&7],(x2-x1)) + x1);
+#else
+    *error = 17;
+    return 0;
+#endif
+
 #else
     if (q < 0)
     {
@@ -511,23 +481,6 @@ static INLINE real_t iquant(int16_t q, const real_t *tab, uint8_t *error)
         return 0;
     }
 #endif
-}
-
-static uint8_t inverse_quantization(real_t *x_invquant, const int16_t *x_quant, const uint16_t frame_len)
-{
-    int16_t i;
-    uint8_t error = 0; /* Init error flag */
-    const real_t *tab = iq_table;
-
-    for (i = 0; i < frame_len; i+=4)
-    {
-        x_invquant[i] = iquant(x_quant[i], tab, &error);
-        x_invquant[i+1] = iquant(x_quant[i+1], tab, &error);
-        x_invquant[i+2] = iquant(x_quant[i+2], tab, &error);
-        x_invquant[i+3] = iquant(x_quant[i+3], tab, &error);
-    }
-
-    return error;
 }
 
 #ifndef FIXED_POINT
@@ -556,39 +509,61 @@ ALIGN static const real_t pow2sf_tab[] = {
 };
 #endif
 
-ALIGN static real_t pow2_table[] =
+/* quant_to_spec: perform dequantisation and scaling
+ * and in case of short block it also does the deinterleaving
+ */
+/*
+  For ONLY_LONG_SEQUENCE windows (num_window_groups = 1,
+  window_group_length[0] = 1) the spectral data is in ascending spectral
+  order.
+  For the EIGHT_SHORT_SEQUENCE window, the spectral order depends on the
+  grouping in the following manner:
+  - Groups are ordered sequentially
+  - Within a group, a scalefactor band consists of the spectral data of all
+    grouped SHORT_WINDOWs for the associated scalefactor window band. To
+    clarify via example, the length of a group is in the range of one to eight
+    SHORT_WINDOWs.
+  - If there are eight groups each with length one (num_window_groups = 8,
+    window_group_length[0..7] = 1), the result is a sequence of eight spectra,
+    each in ascending spectral order.
+  - If there is only one group with length eight (num_window_groups = 1,
+    window_group_length[0] = 8), the result is that spectral data of all eight
+    SHORT_WINDOWs is interleaved by scalefactor window bands.
+  - Within a scalefactor window band, the coefficients are in ascending
+    spectral order.
+*/
+static uint8_t quant_to_spec(NeAACDecHandle hDecoder,
+                             ic_stream *ics, int16_t *quant_data,
+                             real_t *spec_data, uint16_t frame_len)
 {
-#if 0
-    COEF_CONST(0.59460355750136053335874998528024), /* 2^-0.75 */
-    COEF_CONST(0.70710678118654752440084436210485), /* 2^-0.5 */
-    COEF_CONST(0.84089641525371454303112547623321), /* 2^-0.25 */
-#endif
-    COEF_CONST(1.0),
-    COEF_CONST(1.1892071150027210667174999705605), /* 2^0.25 */
-    COEF_CONST(1.4142135623730950488016887242097), /* 2^0.5 */
-    COEF_CONST(1.6817928305074290860622509524664) /* 2^0.75 */
-};
+    ALIGN static const real_t pow2_table[] =
+    {
+        COEF_CONST(1.0),
+        COEF_CONST(1.1892071150027210667174999705605), /* 2^0.25 */
+        COEF_CONST(1.4142135623730950488016887242097), /* 2^0.5 */
+        COEF_CONST(1.6817928305074290860622509524664) /* 2^0.75 */
+    };
+    const real_t *tab = iq_table;
 
-void apply_scalefactors(faacDecHandle hDecoder, ic_stream *ics,
-                        real_t *x_invquant, uint16_t frame_len)
-{
-    uint8_t g, sfb;
-    uint16_t top;
-    int32_t exp, frac;
-    uint8_t groups = 0;
-    uint16_t nshort = frame_len/8;
+    uint8_t g, sfb, win;
+    uint16_t width, bin, k, gindex;
+    uint8_t error = 0; /* Init error flag */
+
+
+    k = 0;
+    gindex = 0;
 
     for (g = 0; g < ics->num_window_groups; g++)
     {
-        uint16_t k = 0;
+        uint16_t j = 0;
+        uint16_t gincrease = 0;
+        uint16_t win_inc = ics->swb_offset[ics->num_swb];
 
-        /* using this nshort*groups doesn't hurt long blocks, because
-           long blocks only have 1 group, so that means 'groups' is
-           always 0 for long blocks
-        */
-        for (sfb = 0; sfb < ics->max_sfb; sfb++)
+        for (sfb = 0; sfb < ics->num_swb; sfb++)
         {
-            top = ics->sect_sfb_offset[g][sfb+1];
+            int32_t exp, frac;
+
+            width = ics->swb_offset[sfb+1] - ics->swb_offset[sfb];
 
             /* this could be scalefactor for IS or PNS, those can be negative or bigger then 255 */
             /* just ignore them */
@@ -599,6 +574,7 @@ void apply_scalefactors(faacDecHandle hDecoder, ic_stream *ics,
             } else {
                 /* ics->scale_factors[g][sfb] must be between 0 and 255 */
                 exp = (ics->scale_factors[g][sfb] /* - 100 */) >> 2;
+                /* frac must always be > 0 */
                 frac = (ics->scale_factors[g][sfb] /* - 100 */) & 3;
             }
 
@@ -616,81 +592,67 @@ void apply_scalefactors(faacDecHandle hDecoder, ic_stream *ics,
             }
 #endif
 
-            /* minimum size of a sf band is 4 and always a multiple of 4 */
-            for ( ; k < top; k += 4)
+            for (win = 0; win < ics->window_group_length[g]; win++)
             {
-#ifdef FIXED_POINT
-                if (exp < 0)
+                for (bin = 0; bin < width; bin += 4)
                 {
-                    x_invquant[k+(groups*nshort)] >>= -exp;
-                    x_invquant[k+(groups*nshort)+1] >>= -exp;
-                    x_invquant[k+(groups*nshort)+2] >>= -exp;
-                    x_invquant[k+(groups*nshort)+3] >>= -exp;
-                } else {
-                    x_invquant[k+(groups*nshort)] <<= exp;
-                    x_invquant[k+(groups*nshort)+1] <<= exp;
-                    x_invquant[k+(groups*nshort)+2] <<= exp;
-                    x_invquant[k+(groups*nshort)+3] <<= exp;
-                }
+#ifndef FIXED_POINT
+                    spec_data[gindex+(win*win_inc)+j+bin+0] = iquant(quant_data[k+0], tab, &error) *
+                        pow2sf_tab[exp/*+25*/] * pow2_table[frac];
+                    spec_data[gindex+(win*win_inc)+j+bin+1] = iquant(quant_data[k+1], tab, &error) *
+                        pow2sf_tab[exp/*+25*/] * pow2_table[frac];
+                    spec_data[gindex+(win*win_inc)+j+bin+2] = iquant(quant_data[k+2], tab, &error) *
+                        pow2sf_tab[exp/*+25*/] * pow2_table[frac];
+                    spec_data[gindex+(win*win_inc)+j+bin+3] = iquant(quant_data[k+3], tab, &error) *
+                        pow2sf_tab[exp/*+25*/] * pow2_table[frac];
 #else
-                x_invquant[k+(groups*nshort)]   = x_invquant[k+(groups*nshort)]   * pow2sf_tab[exp/*+25*/];
-                x_invquant[k+(groups*nshort)+1] = x_invquant[k+(groups*nshort)+1] * pow2sf_tab[exp/*+25*/];
-                x_invquant[k+(groups*nshort)+2] = x_invquant[k+(groups*nshort)+2] * pow2sf_tab[exp/*+25*/];
-                x_invquant[k+(groups*nshort)+3] = x_invquant[k+(groups*nshort)+3] * pow2sf_tab[exp/*+25*/];
+                    real_t iq0 = iquant(quant_data[k+0], tab, &error);
+                    real_t iq1 = iquant(quant_data[k+1], tab, &error);
+                    real_t iq2 = iquant(quant_data[k+2], tab, &error);
+                    real_t iq3 = iquant(quant_data[k+3], tab, &error);
+                    if (exp < 0)
+                    {
+                        spec_data[gindex+(win*win_inc)+j+bin+0] = iq0 >>= -exp;
+                        spec_data[gindex+(win*win_inc)+j+bin+1] = iq1 >>= -exp;
+                        spec_data[gindex+(win*win_inc)+j+bin+2] = iq2 >>= -exp;
+                        spec_data[gindex+(win*win_inc)+j+bin+3] = iq3 >>= -exp;
+                    } else {
+                        spec_data[gindex+(win*win_inc)+j+bin+0] = iq0 <<= exp;
+                        spec_data[gindex+(win*win_inc)+j+bin+1] = iq1 <<= exp;
+                        spec_data[gindex+(win*win_inc)+j+bin+2] = iq2 <<= exp;
+                        spec_data[gindex+(win*win_inc)+j+bin+3] = iq3 <<= exp;
+                    }
+                    spec_data[gindex+(win*win_inc)+j+bin+0] = MUL_C(spec_data[gindex+(win*win_inc)+j+bin+0],pow2_table[frac]);
+                    spec_data[gindex+(win*win_inc)+j+bin+1] = MUL_C(spec_data[gindex+(win*win_inc)+j+bin+1],pow2_table[frac]);
+                    spec_data[gindex+(win*win_inc)+j+bin+2] = MUL_C(spec_data[gindex+(win*win_inc)+j+bin+2],pow2_table[frac]);
+                    spec_data[gindex+(win*win_inc)+j+bin+3] = MUL_C(spec_data[gindex+(win*win_inc)+j+bin+3],pow2_table[frac]);
+
+//#define SCFS_PRINT
+#ifdef SCFS_PRINT
+                    //printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+0]);
+                    //printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+1]);
+                    //printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+2]);
+                    //printf("%d\n", spec_data[gindex+(win*win_inc)+j+bin+3]);
+                    printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+0]);
+                    printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+1]);
+                    printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+2]);
+                    printf("0x%.8X\n", spec_data[gindex+(win*win_inc)+j+bin+3]);
+#endif
 #endif
 
-                x_invquant[k+(groups*nshort)]   = MUL_C(x_invquant[k+(groups*nshort)],pow2_table[frac /* + 3*/]);
-                x_invquant[k+(groups*nshort)+1] = MUL_C(x_invquant[k+(groups*nshort)+1],pow2_table[frac /* + 3*/]);
-                x_invquant[k+(groups*nshort)+2] = MUL_C(x_invquant[k+(groups*nshort)+2],pow2_table[frac /* + 3*/]);
-                x_invquant[k+(groups*nshort)+3] = MUL_C(x_invquant[k+(groups*nshort)+3],pow2_table[frac /* + 3*/]);
+                    gincrease += 4;
+                    k += 4;
+                }
             }
+            j += width;
         }
-        groups += ics->window_group_length[g];
+        gindex += gincrease;
     }
+
+    return error;
 }
 
-#ifdef USE_SSE
-void apply_scalefactors_sse(faacDecHandle hDecoder, ic_stream *ics,
-                            real_t *x_invquant, uint16_t frame_len)
-{
-    uint8_t g, sfb;
-    uint16_t top;
-    int32_t exp, frac;
-    uint8_t groups = 0;
-    uint16_t nshort = frame_len/8;
-
-    for (g = 0; g < ics->num_window_groups; g++)
-    {
-        uint16_t k = 0;
-
-        /* using this nshort*groups doesn't hurt long blocks, because
-           long blocks only have 1 group, so that means 'groups' is
-           always 0 for long blocks
-        */
-        for (sfb = 0; sfb < ics->max_sfb; sfb++)
-        {
-            top = ics->sect_sfb_offset[g][sfb+1];
-
-            exp = (ics->scale_factors[g][sfb] /* - 100 */) >> 2;
-            frac = (ics->scale_factors[g][sfb] /* - 100 */) & 3;
-
-            /* minimum size of a sf band is 4 and always a multiple of 4 */
-            for ( ; k < top; k += 4)
-            {
-                __m128 m1 = _mm_load_ps(&x_invquant[k+(groups*nshort)]);
-                __m128 m2 = _mm_load_ps1(&pow2sf_tab[exp /*+25*/]);
-                __m128 m3 = _mm_load_ps1(&pow2_table[frac /* + 3*/]);
-                __m128 m4 = _mm_mul_ps(m1, m2);
-                __m128 m5 = _mm_mul_ps(m3, m4);
-                _mm_store_ps(&x_invquant[k+(groups*nshort)], m5);
-            }
-        }
-        groups += ics->window_group_length[g];
-    }
-}
-#endif
-
-static uint8_t allocate_single_channel(faacDecHandle hDecoder, uint8_t channel,
+static uint8_t allocate_single_channel(NeAACDecHandle hDecoder, uint8_t channel,
                                        uint8_t output_channels)
 {
     uint8_t mul = 1;
@@ -773,7 +735,7 @@ static uint8_t allocate_single_channel(faacDecHandle hDecoder, uint8_t channel,
     return 0;
 }
 
-static uint8_t allocate_channel_pair(faacDecHandle hDecoder,
+static uint8_t allocate_channel_pair(NeAACDecHandle hDecoder,
                                      uint8_t channel, uint8_t paired_channel)
 {
     uint8_t mul = 1;
@@ -878,7 +840,7 @@ static uint8_t allocate_channel_pair(faacDecHandle hDecoder,
     return 0;
 }
 
-uint8_t reconstruct_single_channel(faacDecHandle hDecoder, ic_stream *ics,
+uint8_t reconstruct_single_channel(NeAACDecHandle hDecoder, ic_stream *ics,
                                    element *sce, int16_t *spec_data)
 {
     uint8_t retval, output_channels;
@@ -895,6 +857,12 @@ uint8_t reconstruct_single_channel(faacDecHandle hDecoder, ic_stream *ics,
 #else
     output_channels = 1;
 #endif
+#ifdef DRM_PS
+    /* for DRM error recovery is crucial */
+    /* simply always allocate 2 channels, you never know when PS will pop up */
+    if (hDecoder->object_type == DRM_ER_LC)
+        output_channels = 2;
+#endif
     if (hDecoder->element_output_channels[hDecoder->fr_ch_ele] == 0)
     {
         /* element_output_channels not set yet */
@@ -903,7 +871,6 @@ uint8_t reconstruct_single_channel(faacDecHandle hDecoder, ic_stream *ics,
         /* element inconsistency */
         return 21;
     }
-
 
     if (hDecoder->element_alloced[hDecoder->fr_ch_ele] == 0)
     {
@@ -915,21 +882,10 @@ uint8_t reconstruct_single_channel(faacDecHandle hDecoder, ic_stream *ics,
     }
 
 
-    /* inverse quantization */
-    retval = inverse_quantization(spec_coef, spec_data, hDecoder->frameLength);
+    /* dequantisation and scaling */
+    retval = quant_to_spec(hDecoder, ics, spec_data, spec_coef, hDecoder->frameLength);
     if (retval > 0)
         return retval;
-
-    /* apply scalefactors */
-#ifndef USE_SSE
-    apply_scalefactors(hDecoder, ics, spec_coef, hDecoder->frameLength);
-#else
-    hDecoder->apply_sf_func(hDecoder, ics, spec_coef, hDecoder->frameLength);
-#endif
-
-    /* deinterleave short block grouping */
-    if (ics->window_sequence == EIGHT_SHORT_SEQUENCE)
-        quant_to_spec(ics, spec_coef, hDecoder->frameLength);
 
 #ifdef PROFILE
     count = faad_get_ts() - count;
@@ -989,7 +945,6 @@ uint8_t reconstruct_single_channel(faacDecHandle hDecoder, ic_stream *ics,
             drc_decode(hDecoder->drc, spec_coef);
     }
 
-
     /* filter bank */
 #ifdef SSR_DEC
     if (hDecoder->object_type != SSR)
@@ -1036,25 +991,31 @@ uint8_t reconstruct_single_channel(faacDecHandle hDecoder, ic_stream *ics,
         if (hDecoder->sbr[ele] == NULL)
         {
             hDecoder->sbr[ele] = sbrDecodeInit(hDecoder->frameLength,
-                sce->ele_id, 2*get_sample_rate(hDecoder->sf_index)
+                hDecoder->element_id[ele], 2*get_sample_rate(hDecoder->sf_index),
+                hDecoder->downSampledSBR
 #ifdef DRM
                 , 0
 #endif
                 );
         }
 
+        if (sce->ics1.window_sequence == EIGHT_SHORT_SEQUENCE)
+            hDecoder->sbr[ele]->maxAACLine = 8*sce->ics1.swb_offset[max(sce->ics1.max_sfb-1, 0)];
+        else
+            hDecoder->sbr[ele]->maxAACLine = sce->ics1.swb_offset[max(sce->ics1.max_sfb-1, 0)];
+
         /* check if any of the PS tools is used */
 #if (defined(PS_DEC) || defined(DRM_PS))
-        if (output_channels == 1)
+        if (hDecoder->ps_used[ele] == 0)
         {
 #endif
             retval = sbrDecodeSingleFrame(hDecoder->sbr[ele], hDecoder->time_out[ch],
-                hDecoder->postSeekResetFlag, hDecoder->forceUpSampling);
+                hDecoder->postSeekResetFlag, hDecoder->downSampledSBR);
 #if (defined(PS_DEC) || defined(DRM_PS))
         } else {
             retval = sbrDecodeSingleFramePS(hDecoder->sbr[ele], hDecoder->time_out[ch],
                 hDecoder->time_out[ch+1], hDecoder->postSeekResetFlag,
-                hDecoder->forceUpSampling);
+                hDecoder->downSampledSBR);
         }
 #endif
         if (retval > 0)
@@ -1066,10 +1027,24 @@ uint8_t reconstruct_single_channel(faacDecHandle hDecoder, ic_stream *ics,
     }
 #endif
 
+#ifdef DRM_PS
+    /* copy L to R for DRM when no PS is used */
+    if ((hDecoder->object_type == DRM_ER_LC) &&
+        (hDecoder->ps_used[hDecoder->fr_ch_ele] == 0))
+    {
+        uint8_t ele = hDecoder->fr_ch_ele;
+        uint8_t ch = sce->channel;
+        uint16_t frame_size = (hDecoder->sbr_alloced[ele]) ? 2 : 1;
+        frame_size *= hDecoder->frameLength*sizeof(real_t);
+
+        memcpy(hDecoder->time_out[ch+1], hDecoder->time_out[ch], frame_size);
+    }
+#endif
+
     return 0;
 }
 
-uint8_t reconstruct_channel_pair(faacDecHandle hDecoder, ic_stream *ics1, ic_stream *ics2,
+uint8_t reconstruct_channel_pair(NeAACDecHandle hDecoder, ic_stream *ics1, ic_stream *ics2,
                                  element *cpe, int16_t *spec_data1, int16_t *spec_data2)
 {
     uint8_t retval;
@@ -1081,36 +1056,20 @@ uint8_t reconstruct_channel_pair(faacDecHandle hDecoder, ic_stream *ics1, ic_str
 #endif
     if (hDecoder->element_alloced[hDecoder->fr_ch_ele] == 0)
     {
-        retval = allocate_channel_pair(hDecoder, cpe->channel, cpe->paired_channel);
+        retval = allocate_channel_pair(hDecoder, cpe->channel, (uint8_t)cpe->paired_channel);
         if (retval > 0)
             return retval;
 
         hDecoder->element_alloced[hDecoder->fr_ch_ele] = 1;
     }
 
-    /* inverse quantization */
-    retval = inverse_quantization(spec_coef1, spec_data1, hDecoder->frameLength);
+    /* dequantisation and scaling */
+    retval = quant_to_spec(hDecoder, ics1, spec_data1, spec_coef1, hDecoder->frameLength);
     if (retval > 0)
         return retval;
-
-    retval = inverse_quantization(spec_coef2, spec_data2, hDecoder->frameLength);
+    retval = quant_to_spec(hDecoder, ics2, spec_data2, spec_coef2, hDecoder->frameLength);
     if (retval > 0)
         return retval;
-
-    /* apply scalefactors */
-#ifndef USE_SSE
-    apply_scalefactors(hDecoder, ics1, spec_coef1, hDecoder->frameLength);
-    apply_scalefactors(hDecoder, ics2, spec_coef2, hDecoder->frameLength);
-#else
-    hDecoder->apply_sf_func(hDecoder, ics1, spec_coef1, hDecoder->frameLength);
-    hDecoder->apply_sf_func(hDecoder, ics2, spec_coef2, hDecoder->frameLength);
-#endif
-
-    /* deinterleave short block grouping */
-    if (ics1->window_sequence == EIGHT_SHORT_SEQUENCE)
-        quant_to_spec(ics1, spec_coef1, hDecoder->frameLength);
-    if (ics2->window_sequence == EIGHT_SHORT_SEQUENCE)
-        quant_to_spec(ics2, spec_coef2, hDecoder->frameLength);
 
 #ifdef PROFILE
     count = faad_get_ts() - count;
@@ -1261,16 +1220,22 @@ uint8_t reconstruct_channel_pair(faacDecHandle hDecoder, ic_stream *ics1, ic_str
         if (hDecoder->sbr[ele] == NULL)
         {
             hDecoder->sbr[ele] = sbrDecodeInit(hDecoder->frameLength,
-                cpe->ele_id, 2*get_sample_rate(hDecoder->sf_index)
+                hDecoder->element_id[ele], 2*get_sample_rate(hDecoder->sf_index),
+                hDecoder->downSampledSBR
 #ifdef DRM
                 , 0
 #endif
                 );
         }
 
+        if (cpe->ics1.window_sequence == EIGHT_SHORT_SEQUENCE)
+            hDecoder->sbr[ele]->maxAACLine = 8*cpe->ics1.swb_offset[max(cpe->ics1.max_sfb-1, 0)];
+        else
+            hDecoder->sbr[ele]->maxAACLine = cpe->ics1.swb_offset[max(cpe->ics1.max_sfb-1, 0)];
+
         retval = sbrDecodeCoupleFrame(hDecoder->sbr[ele],
             hDecoder->time_out[ch0], hDecoder->time_out[ch1],
-            hDecoder->postSeekResetFlag, hDecoder->forceUpSampling);
+            hDecoder->postSeekResetFlag, hDecoder->downSampledSBR);
         if (retval > 0)
             return retval;
     } else if (((hDecoder->sbr_present_flag == 1) || (hDecoder->forceUpSampling == 1))

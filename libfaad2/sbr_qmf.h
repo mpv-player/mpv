@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: sbr_qmf.h,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: sbr_qmf.h,v 1.4 2004/06/23 13:50:52 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -40,7 +40,9 @@ qmfs_info *qmfs_init(uint8_t channels);
 void qmfs_end(qmfs_info *qmfs);
 
 void sbr_qmf_analysis_32(sbr_info *sbr, qmfa_info *qmfa, const real_t *input,
-                         qmf_t X[MAX_NTSRHFG][32], uint8_t offset, uint8_t kx);
+                         qmf_t X[MAX_NTSRHFG][64], uint8_t offset, uint8_t kx);
+void sbr_qmf_synthesis_32(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHFG][64],
+                          real_t *output);
 void sbr_qmf_synthesis_64(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHFG][64],
                           real_t *output);
 #ifdef USE_SSE
@@ -53,4 +55,3 @@ void sbr_qmf_synthesis_64_sse(sbr_info *sbr, qmfs_info *qmfs, qmf_t X[MAX_NTSRHF
 }
 #endif
 #endif
-

@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: sbr_e_nf.h,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: sbr_e_nf.h,v 1.4 2004/06/23 13:50:51 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -35,23 +35,12 @@ extern "C" {
 #endif
 
 
-#ifndef FIXED_POINT
-#define P2_TABLE_OFFSET 35
-#define P2_TABLE_MAX 91
-#else
-#define P2Q_TABLE_OFFSET 24
-#define P2Q_TABLE_MAX 7
-#define P2_TABLE_OFFSET 0
-#define P2_TABLE_MAX 31
-#endif
-#define P2_TABLE_RCP_OFFSET 12
-#define P2_TABLE_RCP_MAX 21
-
-
 void extract_envelope_data(sbr_info *sbr, uint8_t ch);
 void extract_noise_floor_data(sbr_info *sbr, uint8_t ch);
+#ifndef FIXED_POINT
 void envelope_noise_dequantisation(sbr_info *sbr, uint8_t ch);
 void unmap_envelope_noise(sbr_info *sbr);
+#endif
 
 #ifdef __cplusplus
 }

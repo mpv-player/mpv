@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: mdct.c,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: mdct.c,v 1.4 2004/06/23 13:50:51 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -55,139 +55,40 @@
 
 #include "cfft.h"
 #include "mdct.h"
+#include "mdct_tab.h"
 
-/* const_tab[]:
-    0: sqrt(2 / N)
-    1: cos(2 * PI / N)
-    2: sin(2 * PI / N)
-    3: cos(2 * PI * (1/8) / N)
-    4: sin(2 * PI * (1/8) / N)
- */
-#ifdef FIXED_POINT
-real_t const_tab[][5] =
-{
-    {    /* 2048 */
-        COEF_CONST(1),
-        FRAC_CONST(0.99999529380957619),
-        FRAC_CONST(0.0030679567629659761),
-        FRAC_CONST(0.99999992646571789),
-        FRAC_CONST(0.00038349518757139556)
-    }, { /* 1920 */
-        COEF_CONST(/* sqrt(1024/960) */ 1.0327955589886444),
-        FRAC_CONST(0.99999464540169647),
-        FRAC_CONST(0.0032724865065266251),
-        FRAC_CONST(0.99999991633432805),
-        FRAC_CONST(0.00040906153202803459)
-    }, { /* 1024 */
-        COEF_CONST(1),
-        FRAC_CONST(0.99998117528260111),
-        FRAC_CONST(0.0061358846491544753),
-        FRAC_CONST(0.99999970586288223),
-        FRAC_CONST(0.00076699031874270449)
-    }, { /* 960 */
-        COEF_CONST(/* sqrt(512/480) */ 1.0327955589886444),
-        FRAC_CONST(0.99997858166412923),
-        FRAC_CONST(0.0065449379673518581),
-        FRAC_CONST(0.99999966533732598),
-        FRAC_CONST(0.00081812299560725323)
-    }, { /* 256 */
-        COEF_CONST(1),
-        FRAC_CONST(0.99969881869620425),
-        FRAC_CONST(0.024541228522912288),
-        FRAC_CONST(0.99999529380957619),
-        FRAC_CONST(0.0030679567629659761)
-    }, {  /* 240 */
-        COEF_CONST(/* sqrt(256/240) */ 1.0327955589886444),
-        FRAC_CONST(0.99965732497555726),
-        FRAC_CONST(0.026176948307873149),
-        FRAC_CONST(0.99999464540169647),
-        FRAC_CONST(0.0032724865065266251)
-    }
-#ifdef SSR_DEC
-    ,{   /* 512 */
-        COEF_CONST(1),
-        FRAC_CONST(0.9999247018391445),
-        FRAC_CONST(0.012271538285719925),
-        FRAC_CONST(0.99999882345170188),
-        FRAC_CONST(0.0015339801862847655)
-    }, { /* 64 */
-        COEF_CONST(1),
-        FRAC_CONST(0.99518472667219693),
-        FRAC_CONST(0.098017140329560604),
-        FRAC_CONST(0.9999247018391445),
-        FRAC_CONST(0.012271538285719925)
-    }
-#endif
-};
-#endif
-
-#ifdef FIXED_POINT
-static uint8_t map_N_to_idx(uint16_t N)
-{
-    /* gives an index into const_tab above */
-    /* for normal AAC deocding (eg. no scalable profile) only */
-    /* index 0 and 4 will be used */
-    switch(N)
-    {
-    case 2048: return 0;
-    case 1920: return 1;
-    case 1024: return 2;
-    case 960:  return 3;
-    case 256:  return 4;
-    case 240:  return 5;
-#ifdef SSR_DEC
-    case 512:  return 6;
-    case 64:   return 7;
-#endif
-    }
-    return 0;
-}
-#endif
 
 mdct_info *faad_mdct_init(uint16_t N)
 {
-    uint16_t k;
-#ifdef FIXED_POINT
-    uint16_t N_idx;
-    real_t cangle, sangle, c, s, cold;
-#endif
-	real_t scale;
-
     mdct_info *mdct = (mdct_info*)faad_malloc(sizeof(mdct_info));
 
     assert(N % 8 == 0);
 
     mdct->N = N;
-    mdct->sincos = (complex_t*)faad_malloc(N/4*sizeof(complex_t));
 
-#ifdef FIXED_POINT
-    N_idx = map_N_to_idx(N);
+    /* NOTE: For "small framelengths" in FIXED_POINT the coefficients need to be
+     * scaled by sqrt("(nearest power of 2) > N" / N) */
 
-    scale = const_tab[N_idx][0];
-    cangle = const_tab[N_idx][1];
-    sangle = const_tab[N_idx][2];
-    c = const_tab[N_idx][3];
-    s = const_tab[N_idx][4];
-#else
-    scale = (real_t)sqrt(2.0 / (real_t)N);
-#endif
-
-    /* (co)sine table build using recurrence relations */
-    /* this can also be done using static table lookup or */
-    /* some form of interpolation */
-    for (k = 0; k < N/4; k++)
+    /* RE(mdct->sincos[k]) = scale*(real_t)(cos(2.0*M_PI*(k+1./8.) / (real_t)N));
+     * IM(mdct->sincos[k]) = scale*(real_t)(sin(2.0*M_PI*(k+1./8.) / (real_t)N)); */
+    /* scale is 1 for fixed point, sqrt(N) for floating point */
+    switch (N)
     {
-#ifdef FIXED_POINT
-        RE(mdct->sincos[k]) = c; //MUL_C_C(c,scale);
-        IM(mdct->sincos[k]) = s; //MUL_C_C(s,scale);
-
-        cold = c;
-        c = MUL_F(c,cangle) - MUL_F(s,sangle);
-        s = MUL_F(s,cangle) + MUL_F(cold,sangle);
-#else
-        /* no recurrence, just sines */
-        RE(mdct->sincos[k]) = scale*(real_t)(cos(2.0*M_PI*(k+1./8.) / (real_t)N));
-        IM(mdct->sincos[k]) = scale*(real_t)(sin(2.0*M_PI*(k+1./8.) / (real_t)N));
+    case 2048: mdct->sincos = (complex_t*)mdct_tab_2048; break;
+    case 256:  mdct->sincos = (complex_t*)mdct_tab_256;  break;
+#ifdef LD_DEC
+    case 1024: mdct->sincos = (complex_t*)mdct_tab_1024; break;
+#endif
+#ifdef ALLOW_SMALL_FRAMELENGTH
+    case 1920: mdct->sincos = (complex_t*)mdct_tab_1920; break;
+    case 240:  mdct->sincos = (complex_t*)mdct_tab_240;  break;
+#ifdef LD_DEC
+    case 960:  mdct->sincos = (complex_t*)mdct_tab_960;  break;
+#endif
+#endif
+#ifdef SSR_DEC
+    case 512:  mdct->sincos = (complex_t*)mdct_tab_512;  break;
+    case 64:   mdct->sincos = (complex_t*)mdct_tab_64;   break;
 #endif
     }
 
@@ -213,8 +114,6 @@ void faad_mdct_end(mdct_info *mdct)
 
         cfftu(mdct->cfft);
 
-        if (mdct->sincos) faad_free(mdct->sincos);
-
         faad_free(mdct);
     }
 }
@@ -224,6 +123,11 @@ void faad_imdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
     uint16_t k;
 
     complex_t x;
+#ifdef ALLOW_SMALL_FRAMELENGTH
+#ifdef FIXED_POINT
+    real_t scale, b_scale = 0;
+#endif
+#endif
     ALIGN complex_t Z1[512];
     complex_t *sincos = mdct->sincos;
 
@@ -234,6 +138,19 @@ void faad_imdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
 
 #ifdef PROFILE
     int64_t count1, count2 = faad_get_ts();
+#endif
+
+#ifdef ALLOW_SMALL_FRAMELENGTH
+#ifdef FIXED_POINT
+    /* detect non-power of 2 */
+    if (N & (N-1))
+    {
+        /* adjust scale for non-power of 2 MDCT */
+        /* 2048/1920 */
+        b_scale = 1;
+        scale = COEF_CONST(1.0666666666666667);
+    }
+#endif
 #endif
 
     /* pre-IFFT complex multiplication */
@@ -261,6 +178,17 @@ void faad_imdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
         IM(x) = IM(Z1[k]);
         ComplexMult(&IM(Z1[k]), &RE(Z1[k]),
             IM(x), RE(x), RE(sincos[k]), IM(sincos[k]));
+
+#ifdef ALLOW_SMALL_FRAMELENGTH
+#ifdef FIXED_POINT
+        /* non-power of 2 MDCT scaling */
+        if (b_scale)
+        {
+            RE(Z1[k]) = MUL_C(RE(Z1[k]), scale);
+            IM(Z1[k]) = MUL_C(IM(Z1[k]), scale);
+        }
+#endif
+#endif
     }
 
     /* reordering */
@@ -298,166 +226,6 @@ void faad_imdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
 #endif
 }
 
-#ifdef USE_SSE
-void faad_imdct_sse(mdct_info *mdct, real_t *X_in, real_t *X_out)
-{
-    uint16_t k;
-
-    ALIGN complex_t Z1[512];
-    complex_t *sincos = mdct->sincos;
-
-    uint16_t N  = mdct->N;
-    uint16_t N2 = N >> 1;
-    uint16_t N4 = N >> 2;
-    uint16_t N8 = N >> 3;
-
-#ifdef PROFILE
-    int64_t count1, count2 = faad_get_ts();
-#endif
-
-    /* pre-IFFT complex multiplication */
-    for (k = 0; k < N4; k+=4)
-    {
-        __m128 m12, m13, m14, m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11;
-        __m128 n12, n13, n14, n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11;
-        n12 = _mm_load_ps(&X_in[N2 - 2*k - 8]);
-        m12 = _mm_load_ps(&X_in[N2 - 2*k - 4]);
-        m13 = _mm_load_ps(&X_in[2*k]);
-        n13 = _mm_load_ps(&X_in[2*k + 4]);
-        m1 = _mm_load_ps(&RE(sincos[k]));
-        n1 = _mm_load_ps(&RE(sincos[k+2]));
-
-        m0 = _mm_shuffle_ps(m12, m13, _MM_SHUFFLE(2,0,1,3));
-        m2 = _mm_shuffle_ps(m1, m1, _MM_SHUFFLE(2,3,0,1));
-        m14 = _mm_shuffle_ps(m0, m0, _MM_SHUFFLE(3,1,2,0));
-        n0 = _mm_shuffle_ps(n12, n13, _MM_SHUFFLE(2,0,1,3));
-        n2 = _mm_shuffle_ps(n1, n1, _MM_SHUFFLE(2,3,0,1));
-        n14 = _mm_shuffle_ps(n0, n0, _MM_SHUFFLE(3,1,2,0));
-
-        m3 = _mm_mul_ps(m14, m1);
-        n3 = _mm_mul_ps(n14, n1);
-        m4 = _mm_mul_ps(m14, m2);
-        n4 = _mm_mul_ps(n14, n2);
-
-        m5 = _mm_shuffle_ps(m3, m4, _MM_SHUFFLE(2,0,2,0));
-        n5 = _mm_shuffle_ps(n3, n4, _MM_SHUFFLE(2,0,2,0));
-        m6 = _mm_shuffle_ps(m3, m4, _MM_SHUFFLE(3,1,3,1));
-        n6 = _mm_shuffle_ps(n3, n4, _MM_SHUFFLE(3,1,3,1));
-
-        m7 = _mm_add_ps(m5, m6);
-        n7 = _mm_add_ps(n5, n6);
-        m8 = _mm_sub_ps(m5, m6);
-        n8 = _mm_sub_ps(n5, n6);
-
-        m9 = _mm_shuffle_ps(m7, m7, _MM_SHUFFLE(3,2,3,2));
-        n9 = _mm_shuffle_ps(n7, n7, _MM_SHUFFLE(3,2,3,2));
-        m10 = _mm_shuffle_ps(m8, m8, _MM_SHUFFLE(1,0,1,0));
-        n10 = _mm_shuffle_ps(n8, n8, _MM_SHUFFLE(1,0,1,0));
-
-        m11 = _mm_unpacklo_ps(m10, m9);
-        n11 = _mm_unpacklo_ps(n10, n9);
-
-        _mm_store_ps(&RE(Z1[k]), m11);
-        _mm_store_ps(&RE(Z1[k+2]), n11);
-    }
-
-#ifdef PROFILE
-    count1 = faad_get_ts();
-#endif
-
-    /* complex IFFT, any non-scaling FFT can be used here */
-    cfftb_sse(mdct->cfft, Z1);
-
-#ifdef PROFILE
-    count1 = faad_get_ts() - count1;
-#endif
-
-    /* post-IFFT complex multiplication */
-    for (k = 0; k < N4; k+=4)
-    {
-        __m128 m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11;
-        __m128 n0, n1, n2, n3, n4, n5, n6, n7, n8, n9, n10, n11;
-        m0 = _mm_load_ps(&RE(Z1[k]));
-        n0 = _mm_load_ps(&RE(Z1[k+2]));
-        m1 = _mm_load_ps(&RE(sincos[k]));
-        n1 = _mm_load_ps(&RE(sincos[k+2]));
-
-        m2 = _mm_shuffle_ps(m1, m1, _MM_SHUFFLE(2,3,0,1));
-        n2 = _mm_shuffle_ps(n1, n1, _MM_SHUFFLE(2,3,0,1));
-
-        m3 = _mm_mul_ps(m0, m1);
-        n3 = _mm_mul_ps(n0, n1);
-        m4 = _mm_mul_ps(m0, m2);
-        n4 = _mm_mul_ps(n0, n2);
-
-        m5 = _mm_shuffle_ps(m3, m4, _MM_SHUFFLE(2,0,2,0));
-        n5 = _mm_shuffle_ps(n3, n4, _MM_SHUFFLE(2,0,2,0));
-        m6 = _mm_shuffle_ps(m3, m4, _MM_SHUFFLE(3,1,3,1));
-        n6 = _mm_shuffle_ps(n3, n4, _MM_SHUFFLE(3,1,3,1));
-
-        m7 = _mm_add_ps(m5, m6);
-        n7 = _mm_add_ps(n5, n6);
-        m8 = _mm_sub_ps(m5, m6);
-        n8 = _mm_sub_ps(n5, n6);
-
-        m9 = _mm_shuffle_ps(m7, m7, _MM_SHUFFLE(3,2,3,2));
-        n9 = _mm_shuffle_ps(n7, n7, _MM_SHUFFLE(3,2,3,2));
-        m10 = _mm_shuffle_ps(m8, m8, _MM_SHUFFLE(1,0,1,0));
-        n10 = _mm_shuffle_ps(n8, n8, _MM_SHUFFLE(1,0,1,0));
-
-        m11 = _mm_unpacklo_ps(m10, m9);
-        n11 = _mm_unpacklo_ps(n10, n9);
-
-        _mm_store_ps(&RE(Z1[k]), m11);
-        _mm_store_ps(&RE(Z1[k+2]), n11);
-    }
-
-    /* reordering */
-    for (k = 0; k < N8; k+=2)
-    {
-        __m128 m0, m1, m2, m3, m4, m5, m6, m7, m8, m9, m10, m11, m13;
-        __m128 n4, n5, n6, n7, n8, n9;
-        __m128 neg1 = _mm_set_ps(-1.0,  1.0, -1.0,  1.0);
-        __m128 neg2 = _mm_set_ps(-1.0, -1.0, -1.0, -1.0);
-
-        m0 = _mm_load_ps(&RE(Z1[k]));
-        m1 = _mm_load_ps(&RE(Z1[N8 - 2 - k]));
-        m2 = _mm_load_ps(&RE(Z1[N8 + k]));
-        m3 = _mm_load_ps(&RE(Z1[N4 - 2 - k]));
-
-        m10 = _mm_mul_ps(m0, neg1);
-        m11 = _mm_mul_ps(m1, neg2);
-        m13 = _mm_mul_ps(m3, neg1);
-
-        m5 = _mm_shuffle_ps(m2, m2, _MM_SHUFFLE(3,1,2,0));
-        n4 = _mm_shuffle_ps(m10, m10, _MM_SHUFFLE(3,1,2,0));
-        m4 = _mm_shuffle_ps(m11, m11, _MM_SHUFFLE(3,1,2,0));
-        n5 = _mm_shuffle_ps(m13, m13, _MM_SHUFFLE(3,1,2,0));
-
-        m6 = _mm_shuffle_ps(m4, m5, _MM_SHUFFLE(3,2,1,0));
-        n6 = _mm_shuffle_ps(n4, n5, _MM_SHUFFLE(3,2,1,0));
-        m7 = _mm_shuffle_ps(m5, m4, _MM_SHUFFLE(3,2,1,0));
-        n7 = _mm_shuffle_ps(n5, n4, _MM_SHUFFLE(3,2,1,0));
-
-        m8 = _mm_shuffle_ps(m6, m6, _MM_SHUFFLE(0,3,1,2));
-        n8 = _mm_shuffle_ps(n6, n6, _MM_SHUFFLE(2,1,3,0));
-        m9 = _mm_shuffle_ps(m7, m7, _MM_SHUFFLE(2,1,3,0));
-        n9 = _mm_shuffle_ps(n7, n7, _MM_SHUFFLE(0,3,1,2));
-
-        _mm_store_ps(&X_out[2*k], m8);
-        _mm_store_ps(&X_out[N4 + 2*k], n8);
-        _mm_store_ps(&X_out[N2 + 2*k], m9);
-        _mm_store_ps(&X_out[N2 + N4 + 2*k], n9);
-    }
-
-#ifdef PROFILE
-    count2 = faad_get_ts() - count2;
-    mdct->fft_cycles += count1;
-    mdct->cycles += (count2 - count1);
-#endif
-}
-#endif
-
 #ifdef LTP_DEC
 void faad_mdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
 {
@@ -476,6 +244,18 @@ void faad_mdct(mdct_info *mdct, real_t *X_in, real_t *X_out)
 	real_t scale = REAL_CONST(N);
 #else
 	real_t scale = REAL_CONST(4.0/N);
+#endif
+
+#ifdef ALLOW_SMALL_FRAMELENGTH
+#ifdef FIXED_POINT
+    /* detect non-power of 2 */
+    if (N & (N-1))
+    {
+        /* adjust scale for non-power of 2 MDCT */
+        /* *= sqrt(2048/1920) */
+        scale = MUL_C(scale, COEF_CONST(1.0327955589886444));
+    }
+#endif
 #endif
 
     /* pre-FFT complex multiplication */

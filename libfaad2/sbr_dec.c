@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: sbr_dec.c,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: sbr_dec.c,v 1.4 2004/06/23 13:50:51 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -43,11 +43,14 @@
 #include "sbr_hfgen.h"
 #include "sbr_hfadj.h"
 
+
 /* static function declarations */
 static uint8_t sbr_save_prev_data(sbr_info *sbr, uint8_t ch);
+static void sbr_save_matrix(sbr_info *sbr, uint8_t ch);
+
 
 sbr_info *sbrDecodeInit(uint16_t framelength, uint8_t id_aac,
-                        uint32_t sample_rate
+                        uint32_t sample_rate, uint8_t downSampledSBR
 #ifdef DRM
 						, uint8_t IsDRM
 #endif
@@ -73,6 +76,7 @@ sbr_info *sbrDecodeInit(uint16_t framelength, uint8_t id_aac,
     sbr->prevEnvIsShort[0] = -1;
     sbr->prevEnvIsShort[1] = -1;
     sbr->header_count = 0;
+    sbr->Reset = 1;
 
 #ifdef DRM
     sbr->Is_DRM_SBR = IsDRM;
@@ -80,6 +84,11 @@ sbr_info *sbrDecodeInit(uint16_t framelength, uint8_t id_aac,
     sbr->bs_samplerate_mode = 1;
     sbr->tHFGen = T_HFGEN;
     sbr->tHFAdj = T_HFADJ;
+
+    sbr->bsco = 0;
+    sbr->bsco_prev = 0;
+    sbr->M_prev = 0;
+    sbr->frame_len = framelength;
 
     /* force sbr reset */
     sbr->bs_start_freq_prev = -1;
@@ -91,6 +100,44 @@ sbr_info *sbrDecodeInit(uint16_t framelength, uint8_t id_aac,
     } else {
         sbr->numTimeSlotsRate = RATE * NO_TIME_SLOTS;
         sbr->numTimeSlots = NO_TIME_SLOTS;
+    }
+
+    sbr->GQ_ringbuf_index[0] = 0;
+    sbr->GQ_ringbuf_index[1] = 0;
+
+    if (id_aac == ID_CPE)
+    {
+        /* stereo */
+        uint8_t j;
+        sbr->qmfa[0] = qmfa_init(32);
+        sbr->qmfa[1] = qmfa_init(32);
+        sbr->qmfs[0] = qmfs_init((downSampledSBR)?32:64);
+        sbr->qmfs[1] = qmfs_init((downSampledSBR)?32:64);
+
+        for (j = 0; j < 5; j++)
+        {
+            sbr->G_temp_prev[0][j] = faad_malloc(64*sizeof(real_t));
+            sbr->G_temp_prev[1][j] = faad_malloc(64*sizeof(real_t));
+            sbr->Q_temp_prev[0][j] = faad_malloc(64*sizeof(real_t));
+            sbr->Q_temp_prev[1][j] = faad_malloc(64*sizeof(real_t));
+        }
+
+        memset(sbr->Xsbr[0], 0, (sbr->numTimeSlotsRate+sbr->tHFGen)*64 * sizeof(qmf_t));
+        memset(sbr->Xsbr[1], 0, (sbr->numTimeSlotsRate+sbr->tHFGen)*64 * sizeof(qmf_t));
+    } else {
+        /* mono */
+        uint8_t j;
+        sbr->qmfa[0] = qmfa_init(32);
+        sbr->qmfs[0] = qmfs_init((downSampledSBR)?32:64);
+        sbr->qmfs[1] = NULL;
+
+        for (j = 0; j < 5; j++)
+        {
+            sbr->G_temp_prev[0][j] = faad_malloc(64*sizeof(real_t));
+            sbr->Q_temp_prev[0][j] = faad_malloc(64*sizeof(real_t));
+        }
+
+        memset(sbr->Xsbr[0], 0, (sbr->numTimeSlotsRate+sbr->tHFGen)*64 * sizeof(qmf_t));
     }
 
     return sbr;
@@ -118,6 +165,16 @@ void sbrDecodeEnd(sbr_info *sbr)
             if (sbr->Q_temp_prev[1][j]) faad_free(sbr->Q_temp_prev[1][j]);
         }
 
+#ifdef PS_DEC
+        if (sbr->ps != NULL) 
+            ps_free(sbr->ps);
+#endif
+
+#ifdef DRM_PS
+        if (sbr->drm_ps != NULL)
+            drm_ps_free(sbr->drm_ps);
+#endif
+
         faad_free(sbr);
     }
 }
@@ -128,6 +185,8 @@ static uint8_t sbr_save_prev_data(sbr_info *sbr, uint8_t ch)
 
     /* save data for next frame */
     sbr->kx_prev = sbr->kx;
+    sbr->M_prev = sbr->M;
+    sbr->bsco_prev = sbr->bsco;
 
     sbr->L_E_prev[ch] = sbr->L_E[ch];
 
@@ -136,13 +195,13 @@ static uint8_t sbr_save_prev_data(sbr_info *sbr, uint8_t ch)
         return 19;
 
     sbr->f_prev[ch] = sbr->f[ch][sbr->L_E[ch] - 1];
-    for (i = 0; i < 64; i++)
+    for (i = 0; i < MAX_M; i++)
     {
         sbr->E_prev[ch][i] = sbr->E[ch][i][sbr->L_E[ch] - 1];
         sbr->Q_prev[ch][i] = sbr->Q[ch][i][sbr->L_Q[ch] - 1];
     }
 
-    for (i = 0; i < 64; i++)
+    for (i = 0; i < MAX_M; i++)
     {
         sbr->bs_add_harmonic_prev[ch][i] = sbr->bs_add_harmonic[ch][i];
     }
@@ -156,43 +215,66 @@ static uint8_t sbr_save_prev_data(sbr_info *sbr, uint8_t ch)
     return 0;
 }
 
-static void sbr_process_channel(sbr_info *sbr, real_t *channel_buf, qmf_t X[MAX_NTSR][64],
-                                uint8_t ch, uint8_t dont_process)
+static void sbr_save_matrix(sbr_info *sbr, uint8_t ch)
 {
-    int16_t i, k, l;
+    uint8_t i;
+
+    for (i = 0; i < sbr->tHFGen; i++)
+    {
+        memmove(sbr->Xsbr[ch][i], sbr->Xsbr[ch][i+sbr->numTimeSlotsRate], 64 * sizeof(qmf_t));
+    }
+    for (i = sbr->tHFGen; i < MAX_NTSRHFG; i++)
+    {
+        memset(sbr->Xsbr[ch][i], 0, 64 * sizeof(qmf_t));
+    }
+}
+
+static void sbr_process_channel(sbr_info *sbr, real_t *channel_buf, qmf_t X[MAX_NTSR][64],
+                                uint8_t ch, uint8_t dont_process,
+                                const uint8_t downSampledSBR)
+{
+    int16_t k, l;
 
 #ifdef SBR_LOW_POWER
     ALIGN real_t deg[64];
 #endif
 
-    if (sbr->frame == 0)
+#ifdef DRM
+    if (sbr->Is_DRM_SBR)
     {
-        uint8_t j;
-        sbr->qmfa[ch] = qmfa_init(32);
-        sbr->qmfs[ch] = qmfs_init(64);
-
-        for (j = 0; j < 5; j++)
-        {
-            sbr->G_temp_prev[ch][j] = faad_malloc(64*sizeof(real_t));
-            sbr->Q_temp_prev[ch][j] = faad_malloc(64*sizeof(real_t));
-        }
-
-        memset(sbr->Xsbr[ch], 0, (sbr->numTimeSlotsRate+sbr->tHFGen)*64 * sizeof(qmf_t));
-        memset(sbr->Xcodec[ch], 0, (sbr->numTimeSlotsRate+sbr->tHFGen)*32 * sizeof(qmf_t));
+        sbr->bsco = max((int32_t)sbr->maxAACLine*32/(int32_t)sbr->frame_len - (int32_t)sbr->kx, 0);
+    } else {
+#endif
+        sbr->bsco = 0;
+#ifdef DRM
     }
+#endif
+
+
+//#define PRE_QMF_PRINT
+#ifdef PRE_QMF_PRINT
+    {
+        int i;
+        for (i = 0; i < 1024; i++)
+        {
+            printf("%d\n", channel_buf[i]);
+        }
+    }
+#endif
+
 
     /* subband analysis */
     if (dont_process)
-        sbr_qmf_analysis_32(sbr, sbr->qmfa[ch], channel_buf, sbr->Xcodec[ch], sbr->tHFGen, 32);
+        sbr_qmf_analysis_32(sbr, sbr->qmfa[ch], channel_buf, sbr->Xsbr[ch], sbr->tHFGen, 32);
     else
-        sbr_qmf_analysis_32(sbr, sbr->qmfa[ch], channel_buf, sbr->Xcodec[ch], sbr->tHFGen, sbr->kx);
+        sbr_qmf_analysis_32(sbr, sbr->qmfa[ch], channel_buf, sbr->Xsbr[ch], sbr->tHFGen, sbr->kx);
 
     if (!dont_process)
     {
 #if 1
         /* insert high frequencies here */
         /* hf generation using patching */
-        hf_generation(sbr, sbr->Xcodec[ch], sbr->Xsbr[ch]
+        hf_generation(sbr, sbr->Xsbr[ch], sbr->Xsbr[ch]
 #ifdef SBR_LOW_POWER
             ,deg
 #endif
@@ -225,9 +307,9 @@ static void sbr_process_channel(sbr_info *sbr, real_t *channel_buf, qmf_t X[MAX_
         {
             for (k = 0; k < 32; k++)
             {
-                QMF_RE(X[l][k]) = QMF_RE(sbr->Xcodec[ch][l + sbr->tHFAdj][k]);
+                QMF_RE(X[l][k]) = QMF_RE(sbr->Xsbr[ch][l + sbr->tHFAdj][k]);
 #ifndef SBR_LOW_POWER
-                QMF_IM(X[l][k]) = QMF_IM(sbr->Xcodec[ch][l + sbr->tHFAdj][k]);
+                QMF_IM(X[l][k]) = QMF_IM(sbr->Xsbr[ch][l + sbr->tHFAdj][k]);
 #endif
             }
             for (k = 32; k < 64; k++)
@@ -241,42 +323,57 @@ static void sbr_process_channel(sbr_info *sbr, real_t *channel_buf, qmf_t X[MAX_
     } else {
         for (l = 0; l < sbr->numTimeSlotsRate; l++)
         {
-            uint8_t xover_band;
+            uint8_t kx_band, M_band, bsco_band;
 
             if (l < sbr->t_E[ch][0])
-                xover_band = sbr->kx_prev;
-            else
-                xover_band = sbr->kx;
-
-            for (k = 0; k < xover_band; k++)
             {
-                QMF_RE(X[l][k]) = QMF_RE(sbr->Xcodec[ch][l + sbr->tHFAdj][k]);
-#ifndef SBR_LOW_POWER
-                QMF_IM(X[l][k]) = QMF_IM(sbr->Xcodec[ch][l + sbr->tHFAdj][k]);
-#endif
+                kx_band = sbr->kx_prev;
+                M_band = sbr->M_prev;
+                bsco_band = sbr->bsco_prev;
+            } else {
+                kx_band = sbr->kx;
+                M_band = sbr->M;
+                bsco_band = sbr->bsco;
             }
-            for (k = xover_band; k < 64; k++)
+
+#ifndef SBR_LOW_POWER
+            for (k = 0; k < kx_band + bsco_band; k++)
             {
                 QMF_RE(X[l][k]) = QMF_RE(sbr->Xsbr[ch][l + sbr->tHFAdj][k]);
-#ifndef SBR_LOW_POWER
                 QMF_IM(X[l][k]) = QMF_IM(sbr->Xsbr[ch][l + sbr->tHFAdj][k]);
-#endif
             }
-#ifdef SBR_LOW_POWER
-            QMF_RE(X[l][xover_band - 1]) += QMF_RE(sbr->Xsbr[ch][l + sbr->tHFAdj][xover_band - 1]);
+            for (k = kx_band + bsco_band; k < kx_band + M_band; k++)
+            {
+                QMF_RE(X[l][k]) = QMF_RE(sbr->Xsbr[ch][l + sbr->tHFAdj][k]);
+                QMF_IM(X[l][k]) = QMF_IM(sbr->Xsbr[ch][l + sbr->tHFAdj][k]);
+            }
+            for (k = max(kx_band + bsco_band, kx_band + M_band); k < 64; k++)
+            {
+                QMF_RE(X[l][k]) = 0;
+                QMF_IM(X[l][k]) = 0;
+            }
+#else
+            for (k = 0; k < kx_band + bsco_band; k++)
+            {
+                QMF_RE(X[l][k]) = QMF_RE(sbr->Xsbr[ch][l + sbr->tHFAdj][k]);
+            }
+            for (k = kx_band + bsco_band; k < min(kx_band + M_band, 63); k++)
+            {
+                QMF_RE(X[l][k]) = QMF_RE(sbr->Xsbr[ch][l + sbr->tHFAdj][k]);
+            }
+            for (k = max(kx_band + bsco_band, kx_band + M_band); k < 64; k++)
+            {
+                QMF_RE(X[l][k]) = 0;
+            }
+            QMF_RE(X[l][kx_band - 1 + bsco_band]) +=
+                QMF_RE(sbr->Xsbr[ch][l + sbr->tHFAdj][kx_band - 1 + bsco_band]);
 #endif
         }
-    }
-
-    for (i = 0; i < sbr->tHFGen; i++)
-    {
-        memmove(sbr->Xcodec[ch][i], sbr->Xcodec[ch][i+sbr->numTimeSlotsRate], 32 * sizeof(qmf_t));
-        memmove(sbr->Xsbr[ch][i], sbr->Xsbr[ch][i+sbr->numTimeSlotsRate], 64 * sizeof(qmf_t));
     }
 }
 
 uint8_t sbrDecodeCoupleFrame(sbr_info *sbr, real_t *left_chan, real_t *right_chan,
-                             const uint8_t just_seeked, const uint8_t upsample_only)
+                             const uint8_t just_seeked, const uint8_t downSampledSBR)
 {
     uint8_t dont_process = 0;
     uint8_t ret = 0;
@@ -306,21 +403,23 @@ uint8_t sbrDecodeCoupleFrame(sbr_info *sbr, real_t *left_chan, real_t *right_cha
         sbr->just_seeked = 0;
     }
 
-    sbr_process_channel(sbr, left_chan, X, 0, dont_process);
+    sbr_process_channel(sbr, left_chan, X, 0, dont_process, downSampledSBR);
     /* subband synthesis */
-#ifndef USE_SSE
-    sbr_qmf_synthesis_64(sbr, sbr->qmfs[0], X, left_chan);
-#else
-    sbr->qmfs[ch]->qmf_func(sbr, sbr->qmfs[0], X, left_chan);
-#endif
+    if (downSampledSBR)
+    {
+        sbr_qmf_synthesis_32(sbr, sbr->qmfs[0], X, left_chan);
+    } else {
+        sbr_qmf_synthesis_64(sbr, sbr->qmfs[0], X, left_chan);
+    }
 
-    sbr_process_channel(sbr, right_chan, X, 1, dont_process);
+    sbr_process_channel(sbr, right_chan, X, 1, dont_process, downSampledSBR);
     /* subband synthesis */
-#ifndef USE_SSE
-    sbr_qmf_synthesis_64(sbr, sbr->qmfs[1], X, right_chan);
-#else
-    sbr->qmfs[ch]->qmf_func(sbr, sbr->qmfs[1], X, right_chan);
-#endif
+    if (downSampledSBR)
+    {
+        sbr_qmf_synthesis_32(sbr, sbr->qmfs[1], X, right_chan);
+    } else {
+        sbr_qmf_synthesis_64(sbr, sbr->qmfs[1], X, right_chan);
+    }
 
     if (sbr->bs_header_flag)
         sbr->just_seeked = 0;
@@ -333,13 +432,31 @@ uint8_t sbrDecodeCoupleFrame(sbr_info *sbr, real_t *left_chan, real_t *right_cha
         if (ret) return ret;
     }
 
+    sbr_save_matrix(sbr, 0);
+    sbr_save_matrix(sbr, 1);
+
     sbr->frame++;
+
+//#define POST_QMF_PRINT
+#ifdef POST_QMF_PRINT
+    {
+        int i;
+        for (i = 0; i < 2048; i++)
+        {
+            printf("%d\n", left_chan[i]);
+        }
+        for (i = 0; i < 2048; i++)
+        {
+            printf("%d\n", right_chan[i]);
+        }
+    }
+#endif
 
     return 0;
 }
 
 uint8_t sbrDecodeSingleFrame(sbr_info *sbr, real_t *channel,
-                             const uint8_t just_seeked, const uint8_t upsample_only)
+                             const uint8_t just_seeked, const uint8_t downSampledSBR)
 {
     uint8_t dont_process = 0;
     uint8_t ret = 0;
@@ -369,13 +486,14 @@ uint8_t sbrDecodeSingleFrame(sbr_info *sbr, real_t *channel,
         sbr->just_seeked = 0;
     }
 
-    sbr_process_channel(sbr, channel, X, 0, dont_process);
+    sbr_process_channel(sbr, channel, X, 0, dont_process, downSampledSBR);
     /* subband synthesis */
-#ifndef USE_SSE
-    sbr_qmf_synthesis_64(sbr, sbr->qmfs[0], X, channel);
-#else
-    sbr->qmfs[ch]->qmf_func(sbr, sbr->qmfs[0], X, channel);
-#endif
+    if (downSampledSBR)
+    {
+        sbr_qmf_synthesis_32(sbr, sbr->qmfs[0], X, channel);
+    } else {
+        sbr_qmf_synthesis_64(sbr, sbr->qmfs[0], X, channel);
+    }
 
     if (sbr->bs_header_flag)
         sbr->just_seeked = 0;
@@ -386,39 +504,33 @@ uint8_t sbrDecodeSingleFrame(sbr_info *sbr, real_t *channel,
         if (ret) return ret;
     }
 
+    sbr_save_matrix(sbr, 0);
+
     sbr->frame++;
+
+//#define POST_QMF_PRINT
+#ifdef POST_QMF_PRINT
+    {
+        int i;
+        for (i = 0; i < 2048; i++)
+        {
+            printf("%d\n", channel[i]);
+        }
+    }
+#endif
 
     return 0;
 }
 
-static void ps_dummy_function(qmf_t X_mono[MAX_NTSR][64],
-                              qmf_t X_left[MAX_NTSR][64], qmf_t X_right[MAX_NTSR][64])
-{
-    uint8_t i, j;
-
-    for (i = 0; i < MAX_NTSR; i++)
-    {
-        for (j = 0; j < 64; j++)
-        {
-            QMF_RE(X_left[i][j]) = QMF_RE(X_mono[i][j]);
-            QMF_RE(X_right[i][j]) = QMF_RE(X_mono[i][j]);
-#ifndef SBR_LOW_POWER
-            QMF_IM(X_left[i][j]) = QMF_IM(X_mono[i][j]);
-            QMF_IM(X_right[i][j]) = QMF_IM(X_mono[i][j]);
-#endif
-        }
-    }
-}
-
 #if (defined(PS_DEC) || defined(DRM_PS))
 uint8_t sbrDecodeSingleFramePS(sbr_info *sbr, real_t *left_channel, real_t *right_channel,
-                               const uint8_t just_seeked, const uint8_t upsample_only)
+                               const uint8_t just_seeked, const uint8_t downSampledSBR)
 {
+    uint8_t l, k;
     uint8_t dont_process = 0;
     uint8_t ret = 0;
-    ALIGN qmf_t X_mono[MAX_NTSR][64];
-    ALIGN qmf_t X_left[MAX_NTSR][64];
-    ALIGN qmf_t X_right[MAX_NTSR][64];
+    ALIGN qmf_t X_left[38][64] = {{0}};
+    ALIGN qmf_t X_right[38][64] = {{0}}; /* must set this to 0 */
 
     if (sbr == NULL)
         return 20;
@@ -444,24 +556,46 @@ uint8_t sbrDecodeSingleFramePS(sbr_info *sbr, real_t *left_channel, real_t *righ
         sbr->just_seeked = 0;
     }
 
-    if (sbr->frame == 0)
+    if (sbr->qmfs[1] == NULL)
     {
-        sbr->qmfs[1] = qmfs_init(64);
+        sbr->qmfs[1] = qmfs_init((downSampledSBR)?32:64);
     }
 
-    sbr_process_channel(sbr, left_channel, X_mono, 0, dont_process);
+    sbr_process_channel(sbr, left_channel, X_left, 0, dont_process, downSampledSBR);
+
+    /* copy some extra data for PS */
+    for (l = 32; l < 38; l++)
+    {
+        for (k = 0; k < 5; k++)
+        {
+            QMF_RE(X_left[l][k]) = QMF_RE(sbr->Xsbr[0][sbr->tHFAdj+l][k]);
+            QMF_IM(X_left[l][k]) = QMF_IM(sbr->Xsbr[0][sbr->tHFAdj+l][k]);
+        }
+    }
 
     /* perform parametric stereo */
-    ps_dummy_function(X_mono, X_left, X_right);
+#ifdef DRM_PS
+    if (sbr->Is_DRM_SBR)
+    {
+        drm_ps_decode(sbr->drm_ps, sbr->sample_rate, X_left, X_right);
+    } else {
+#endif
+#ifdef PS_DEC
+        ps_decode(sbr->ps, X_left, X_right);
+#endif
+#ifdef DRM_PS
+    }
+#endif
 
     /* subband synthesis */
-#ifndef USE_SSE
-    sbr_qmf_synthesis_64(sbr, sbr->qmfs[0], X_left, left_channel);
-    sbr_qmf_synthesis_64(sbr, sbr->qmfs[1], X_right, right_channel);
-#else
-    sbr->qmfs[ch]->qmf_func(sbr, sbr->qmfs[0], X_left, left_channel);
-    sbr->qmfs[ch]->qmf_func(sbr, sbr->qmfs[1], X_right, right_channel);
-#endif
+    if (downSampledSBR)
+    {
+        sbr_qmf_synthesis_32(sbr, sbr->qmfs[0], X_left, left_channel);
+        sbr_qmf_synthesis_32(sbr, sbr->qmfs[1], X_right, right_channel);
+    } else {
+        sbr_qmf_synthesis_64(sbr, sbr->qmfs[0], X_left, left_channel);
+        sbr_qmf_synthesis_64(sbr, sbr->qmfs[1], X_right, right_channel);
+    }
 
     if (sbr->bs_header_flag)
         sbr->just_seeked = 0;
@@ -471,6 +605,8 @@ uint8_t sbrDecodeSingleFramePS(sbr_info *sbr, real_t *left_channel, real_t *righ
         ret = sbr_save_prev_data(sbr, 0);
         if (ret) return ret;
     }
+
+    sbr_save_matrix(sbr, 0);
 
     sbr->frame++;
 

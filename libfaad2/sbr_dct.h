@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: sbr_dct.h,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: sbr_dct.h,v 1.4 2004/06/23 13:50:51 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -34,11 +34,14 @@
 extern "C" {
 #endif
 
+void dct4_kernel(real_t * in_real, real_t * in_imag, real_t * out_real, real_t * out_imag);
+
 void DCT3_32_unscaled(real_t *y, real_t *x);
-void DCT2_64_unscaled(real_t *y, real_t *x);
-void DST2_64_unscaled(real_t *y, real_t *x);
-void DCT4_64(real_t *y, real_t *x);
-void DCT4_64_kernel(real_t *y, real_t *t2);
+void DCT4_32(real_t *y, real_t *x);
+void DST4_32(real_t *y, real_t *x);
+void DCT2_32_unscaled(real_t *y, real_t *x);
+void DCT4_16(real_t *y, real_t *x);
+void DCT2_16_unscaled(real_t *y, real_t *x);
 
 
 #ifdef __cplusplus

@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: filtbank.c,v 1.3 2004/06/02 22:59:02 diego Exp $
+** $Id: filtbank.c,v 1.4 2004/06/23 13:50:49 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -217,6 +217,7 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
     int64_t count = faad_get_ts();
 #endif
 
+    /* select windows of current frame and previous frame (Sine or KBD) */
 #ifdef LD_DEC
     if (object_type == LD)
     {
@@ -232,11 +233,24 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
     }
 #endif
 
+#if 0
+    for (i = 0; i < 1024; i++)
+    {
+        printf("%d\n", freq_in[i]);
+    }
+#endif
+
+#if 0
+    printf("%d %d\n", window_sequence, window_shape);
+#endif
 
     switch (window_sequence)
     {
     case ONLY_LONG_SEQUENCE:
+        /* perform iMDCT */
         imdct_long(fb, freq_in, transf_buf, 2*nlong);
+
+        /* add second half output of previous frame to windowed output of current frame */
         for (i = 0; i < nlong; i+=4)
         {
             time_out[i]   = overlap[i]   + MUL_F(transf_buf[i],window_long_prev[i]);
@@ -244,6 +258,8 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
             time_out[i+2] = overlap[i+2] + MUL_F(transf_buf[i+2],window_long_prev[i+2]);
             time_out[i+3] = overlap[i+3] + MUL_F(transf_buf[i+3],window_long_prev[i+3]);
         }
+
+        /* window the second half and save as overlap for next frame */
         for (i = 0; i < nlong; i+=4)
         {
             overlap[i]   = MUL_F(transf_buf[nlong+i],window_long[nlong-1-i]);
@@ -254,7 +270,10 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
         break;
 
     case LONG_START_SEQUENCE:
+        /* perform iMDCT */
         imdct_long(fb, freq_in, transf_buf, 2*nlong);
+
+        /* add second half output of previous frame to windowed output of current frame */
         for (i = 0; i < nlong; i+=4)
         {
             time_out[i]   = overlap[i]   + MUL_F(transf_buf[i],window_long_prev[i]);
@@ -262,6 +281,9 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
             time_out[i+2] = overlap[i+2] + MUL_F(transf_buf[i+2],window_long_prev[i+2]);
             time_out[i+3] = overlap[i+3] + MUL_F(transf_buf[i+3],window_long_prev[i+3]);
         }
+
+        /* window the second half and save as overlap for next frame */
+        /* construct second half window using padding with 1's and 0's */
         for (i = 0; i < nflat_ls; i++)
             overlap[i] = transf_buf[nlong+i];
         for (i = 0; i < nshort; i++)
@@ -271,6 +293,7 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
         break;
 
     case EIGHT_SHORT_SEQUENCE:
+        /* perform iMDCT for each short block */
         faad_imdct(fb->mdct256, freq_in+0*nshort, transf_buf+2*nshort*0);
         faad_imdct(fb->mdct256, freq_in+1*nshort, transf_buf+2*nshort*1);
         faad_imdct(fb->mdct256, freq_in+2*nshort, transf_buf+2*nshort*2);
@@ -279,6 +302,8 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
         faad_imdct(fb->mdct256, freq_in+5*nshort, transf_buf+2*nshort*5);
         faad_imdct(fb->mdct256, freq_in+6*nshort, transf_buf+2*nshort*6);
         faad_imdct(fb->mdct256, freq_in+7*nshort, transf_buf+2*nshort*7);
+
+        /* add second half output of previous frame to windowed output of current frame */
         for (i = 0; i < nflat_ls; i++)
             time_out[i] = overlap[i];
         for(i = 0; i < nshort; i++)
@@ -290,6 +315,8 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
             if (i < trans)
                 time_out[nflat_ls+4*nshort+i] = overlap[nflat_ls+nshort*4+i] + MUL_F(transf_buf[nshort*7+i],window_short[nshort-1-i]) + MUL_F(transf_buf[nshort*8+i],window_short[i]);
         }
+
+        /* window the second half and save as overlap for next frame */
         for(i = 0; i < nshort; i++)
         {
             if (i >= trans)
@@ -304,17 +331,32 @@ void ifilter_bank(fb_info *fb, uint8_t window_sequence, uint8_t window_shape,
         break;
 
     case LONG_STOP_SEQUENCE:
+        /* perform iMDCT */
         imdct_long(fb, freq_in, transf_buf, 2*nlong);
+
+        /* add second half output of previous frame to windowed output of current frame */
+        /* construct first half window using padding with 1's and 0's */
         for (i = 0; i < nflat_ls; i++)
             time_out[i] = overlap[i];
         for (i = 0; i < nshort; i++)
             time_out[nflat_ls+i] = overlap[nflat_ls+i] + MUL_F(transf_buf[nflat_ls+i],window_short_prev[i]);
         for (i = 0; i < nflat_ls; i++)
             time_out[nflat_ls+nshort+i] = overlap[nflat_ls+nshort+i] + transf_buf[nflat_ls+nshort+i];
+
+        /* window the second half and save as overlap for next frame */
         for (i = 0; i < nlong; i++)
             overlap[i] = MUL_F(transf_buf[nlong+i],window_long[nlong-1-i]);
 		break;
     }
+
+#if 0
+    for (i = 0; i < 1024; i++)
+    {
+        //printf("%d\n", time_out[i]);
+        printf("0x%.8X\n", time_out[i]);
+    }
+#endif
+
 
 #ifdef PROFILE
     count = faad_get_ts() - count;

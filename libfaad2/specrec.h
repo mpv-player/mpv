@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: specrec.h,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: specrec.h,v 1.4 2004/06/23 13:50:52 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -36,16 +36,10 @@ extern "C" {
 
 #include "syntax.h"
 
-uint8_t window_grouping_info(faacDecHandle hDecoder, ic_stream *ics);
-void apply_scalefactors(faacDecHandle hDecoder, ic_stream *ics, real_t *x_invquant,
-                        uint16_t frame_len);
-#ifdef USE_SSE
-void apply_scalefactors_sse(faacDecHandle hDecoder, ic_stream *ics, real_t *x_invquant,
-                            uint16_t frame_len);
-#endif
-uint8_t reconstruct_channel_pair(faacDecHandle hDecoder, ic_stream *ics1, ic_stream *ics2,
+uint8_t window_grouping_info(NeAACDecHandle hDecoder, ic_stream *ics);
+uint8_t reconstruct_channel_pair(NeAACDecHandle hDecoder, ic_stream *ics1, ic_stream *ics2,
                                  element *cpe, int16_t *spec_data1, int16_t *spec_data2);
-uint8_t reconstruct_single_channel(faacDecHandle hDecoder, ic_stream *ics, element *sce,
+uint8_t reconstruct_single_channel(NeAACDecHandle hDecoder, ic_stream *ics, element *sce,
                                 int16_t *spec_data);
 
 #ifdef __cplusplus

@@ -86,7 +86,7 @@ if (sample >= 0.0f)            \
 
 #define CONV(a,b) ((a<<1)|(b&0x1))
 
-static void to_PCM_16bit(faacDecHandle hDecoder, real_t **input,
+static void to_PCM_16bit(NeAACDecHandle hDecoder, real_t **input,
                          uint8_t channels, uint16_t frame_len,
                          int16_t **sample_buffer)
 {
@@ -107,18 +107,32 @@ static void to_PCM_16bit(faacDecHandle hDecoder, real_t **input,
         }
         break;
     case CONV(2,0):
-        ch  = hDecoder->internal_channel[0];
-        ch1 = hDecoder->internal_channel[1];
-        for(i = 0; i < frame_len; i++)
+        if (hDecoder->upMatrix)
         {
-            real_t inp0 = input[ch ][i];
-            real_t inp1 = input[ch1][i];
+            ch  = hDecoder->internal_channel[0];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch][i];
 
-            CLIP(inp0, 32767.0f, -32768.0f);
-            CLIP(inp1, 32767.0f, -32768.0f);
+                CLIP(inp0, 32767.0f, -32768.0f);
 
-            (*sample_buffer)[(i*2)+0] = (int16_t)lrintf(inp0);
-            (*sample_buffer)[(i*2)+1] = (int16_t)lrintf(inp1);
+                (*sample_buffer)[(i*2)+0] = (int16_t)lrintf(inp0);
+                (*sample_buffer)[(i*2)+1] = (int16_t)lrintf(inp0);
+            }
+        } else {
+            ch  = hDecoder->internal_channel[0];
+            ch1 = hDecoder->internal_channel[1];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch ][i];
+                real_t inp1 = input[ch1][i];
+
+                CLIP(inp0, 32767.0f, -32768.0f);
+                CLIP(inp1, 32767.0f, -32768.0f);
+
+                (*sample_buffer)[(i*2)+0] = (int16_t)lrintf(inp0);
+                (*sample_buffer)[(i*2)+1] = (int16_t)lrintf(inp1);
+            }
         }
         break;
     default:
@@ -137,7 +151,7 @@ static void to_PCM_16bit(faacDecHandle hDecoder, real_t **input,
     }
 }
 
-static void to_PCM_24bit(faacDecHandle hDecoder, real_t **input,
+static void to_PCM_24bit(NeAACDecHandle hDecoder, real_t **input,
                          uint8_t channels, uint16_t frame_len,
                          int32_t **sample_buffer)
 {
@@ -159,20 +173,35 @@ static void to_PCM_24bit(faacDecHandle hDecoder, real_t **input,
         }
         break;
     case CONV(2,0):
-        ch  = hDecoder->internal_channel[0];
-        ch1 = hDecoder->internal_channel[1];
-        for(i = 0; i < frame_len; i++)
+        if (hDecoder->upMatrix)
         {
-            real_t inp0 = input[ch ][i];
-            real_t inp1 = input[ch1][i];
+            ch = hDecoder->internal_channel[0];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch][i];
 
-            inp0 *= 256.0f;
-            inp1 *= 256.0f;
-            CLIP(inp0, 8388607.0f, -8388608.0f);
-            CLIP(inp1, 8388607.0f, -8388608.0f);
+                inp0 *= 256.0f;
+                CLIP(inp0, 8388607.0f, -8388608.0f);
 
-            (*sample_buffer)[(i*2)+0] = (int32_t)lrintf(inp0);
-            (*sample_buffer)[(i*2)+1] = (int32_t)lrintf(inp1);
+                (*sample_buffer)[(i*2)+0] = (int32_t)lrintf(inp0);
+                (*sample_buffer)[(i*2)+1] = (int32_t)lrintf(inp0);
+            }
+        } else {
+            ch  = hDecoder->internal_channel[0];
+            ch1 = hDecoder->internal_channel[1];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch ][i];
+                real_t inp1 = input[ch1][i];
+
+                inp0 *= 256.0f;
+                inp1 *= 256.0f;
+                CLIP(inp0, 8388607.0f, -8388608.0f);
+                CLIP(inp1, 8388607.0f, -8388608.0f);
+
+                (*sample_buffer)[(i*2)+0] = (int32_t)lrintf(inp0);
+                (*sample_buffer)[(i*2)+1] = (int32_t)lrintf(inp1);
+            }
         }
         break;
     default:
@@ -192,7 +221,7 @@ static void to_PCM_24bit(faacDecHandle hDecoder, real_t **input,
     }
 }
 
-static void to_PCM_32bit(faacDecHandle hDecoder, real_t **input,
+static void to_PCM_32bit(NeAACDecHandle hDecoder, real_t **input,
                          uint8_t channels, uint16_t frame_len,
                          int32_t **sample_buffer)
 {
@@ -214,20 +243,35 @@ static void to_PCM_32bit(faacDecHandle hDecoder, real_t **input,
         }
         break;
     case CONV(2,0):
-        ch  = hDecoder->internal_channel[0];
-        ch1 = hDecoder->internal_channel[1];
-        for(i = 0; i < frame_len; i++)
+        if (hDecoder->upMatrix)
         {
-            real_t inp0 = input[ch ][i];
-            real_t inp1 = input[ch1][i];
+            ch = hDecoder->internal_channel[0];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch][i];
 
-            inp0 *= 65536.0f;
-            inp1 *= 65536.0f;
-            CLIP(inp0, 2147483647.0f, -2147483648.0f);
-            CLIP(inp1, 2147483647.0f, -2147483648.0f);
+                inp0 *= 65536.0f;
+                CLIP(inp0, 2147483647.0f, -2147483648.0f);
 
-            (*sample_buffer)[(i*2)+0] = (int32_t)lrintf(inp0);
-            (*sample_buffer)[(i*2)+1] = (int32_t)lrintf(inp1);
+                (*sample_buffer)[(i*2)+0] = (int32_t)lrintf(inp0);
+                (*sample_buffer)[(i*2)+1] = (int32_t)lrintf(inp0);
+            }
+        } else {
+            ch  = hDecoder->internal_channel[0];
+            ch1 = hDecoder->internal_channel[1];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch ][i];
+                real_t inp1 = input[ch1][i];
+
+                inp0 *= 65536.0f;
+                inp1 *= 65536.0f;
+                CLIP(inp0, 2147483647.0f, -2147483648.0f);
+                CLIP(inp1, 2147483647.0f, -2147483648.0f);
+
+                (*sample_buffer)[(i*2)+0] = (int32_t)lrintf(inp0);
+                (*sample_buffer)[(i*2)+1] = (int32_t)lrintf(inp1);
+            }
         }
         break;
     default:
@@ -247,7 +291,7 @@ static void to_PCM_32bit(faacDecHandle hDecoder, real_t **input,
     }
 }
 
-static void to_PCM_float(faacDecHandle hDecoder, real_t **input,
+static void to_PCM_float(NeAACDecHandle hDecoder, real_t **input,
                          uint8_t channels, uint16_t frame_len,
                          float32_t **sample_buffer)
 {
@@ -265,14 +309,25 @@ static void to_PCM_float(faacDecHandle hDecoder, real_t **input,
         }
         break;
     case CONV(2,0):
-        ch  = hDecoder->internal_channel[0];
-        ch1 = hDecoder->internal_channel[1];
-        for(i = 0; i < frame_len; i++)
+        if (hDecoder->upMatrix)
         {
-            real_t inp0 = input[ch ][i];
-            real_t inp1 = input[ch1][i];
-            (*sample_buffer)[(i*2)+0] = inp0*FLOAT_SCALE;
-            (*sample_buffer)[(i*2)+1] = inp1*FLOAT_SCALE;
+            ch = hDecoder->internal_channel[0];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch][i];
+                (*sample_buffer)[(i*2)+0] = inp0*FLOAT_SCALE;
+                (*sample_buffer)[(i*2)+1] = inp0*FLOAT_SCALE;
+            }
+        } else {
+            ch  = hDecoder->internal_channel[0];
+            ch1 = hDecoder->internal_channel[1];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch ][i];
+                real_t inp1 = input[ch1][i];
+                (*sample_buffer)[(i*2)+0] = inp0*FLOAT_SCALE;
+                (*sample_buffer)[(i*2)+1] = inp1*FLOAT_SCALE;
+            }
         }
         break;
     default:
@@ -288,7 +343,7 @@ static void to_PCM_float(faacDecHandle hDecoder, real_t **input,
     }
 }
 
-static void to_PCM_double(faacDecHandle hDecoder, real_t **input,
+static void to_PCM_double(NeAACDecHandle hDecoder, real_t **input,
                           uint8_t channels, uint16_t frame_len,
                           double **sample_buffer)
 {
@@ -306,14 +361,25 @@ static void to_PCM_double(faacDecHandle hDecoder, real_t **input,
         }
         break;
     case CONV(2,0):
-        ch  = hDecoder->internal_channel[0];
-        ch1 = hDecoder->internal_channel[1];
-        for(i = 0; i < frame_len; i++)
+        if (hDecoder->upMatrix)
         {
-            real_t inp0 = input[ch ][i];
-            real_t inp1 = input[ch1][i];
-            (*sample_buffer)[(i*2)+0] = (double)inp0*FLOAT_SCALE;
-            (*sample_buffer)[(i*2)+1] = (double)inp1*FLOAT_SCALE;
+            ch = hDecoder->internal_channel[0];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch][i];
+                (*sample_buffer)[(i*2)+0] = (double)inp0*FLOAT_SCALE;
+                (*sample_buffer)[(i*2)+1] = (double)inp0*FLOAT_SCALE;
+            }
+        } else {
+            ch  = hDecoder->internal_channel[0];
+            ch1 = hDecoder->internal_channel[1];
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t inp0 = input[ch ][i];
+                real_t inp1 = input[ch1][i];
+                (*sample_buffer)[(i*2)+0] = (double)inp0*FLOAT_SCALE;
+                (*sample_buffer)[(i*2)+1] = (double)inp1*FLOAT_SCALE;
+            }
         }
         break;
     default:
@@ -329,7 +395,7 @@ static void to_PCM_double(faacDecHandle hDecoder, real_t **input,
     }
 }
 
-void *output_to_PCM(faacDecHandle hDecoder,
+void *output_to_PCM(NeAACDecHandle hDecoder,
                     real_t **input, void *sample_buffer, uint8_t channels,
                     uint16_t frame_len, uint8_t format)
 {
@@ -376,8 +442,12 @@ void *output_to_PCM(faacDecHandle hDecoder,
 #define RSQRT2 FRAC_CONST(0.7071067811865475244) // 1/sqrt(2)
 
 static INLINE real_t get_sample(real_t **input, uint8_t channel, uint16_t sample,
-                                uint8_t down_matrix, uint8_t *internal_channel)
+                                uint8_t down_matrix, uint8_t up_matrix,
+                                uint8_t *internal_channel)
 {
+    if (up_matrix == 1)
+        return input[internal_channel[0]][sample];
+
     if (!down_matrix)
         return input[internal_channel[channel]][sample];
 
@@ -395,7 +465,7 @@ static INLINE real_t get_sample(real_t **input, uint8_t channel, uint16_t sample
     }
 }
 
-void* output_to_PCM(faacDecHandle hDecoder,
+void* output_to_PCM(NeAACDecHandle hDecoder,
                     real_t **input, void *sample_buffer, uint8_t channels,
                     uint16_t frame_len, uint8_t format)
 {
@@ -412,8 +482,8 @@ void* output_to_PCM(faacDecHandle hDecoder,
         case FAAD_FMT_16BIT:
             for(i = 0; i < frame_len; i++)
             {
-                //int32_t tmp = input[ch][i];
-                int32_t tmp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
+                int32_t tmp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->upMatrix,
+                    hDecoder->internal_channel);
                 if (tmp >= 0)
                 {
                     tmp += (1 << (REAL_BITS-1));
@@ -435,8 +505,8 @@ void* output_to_PCM(faacDecHandle hDecoder,
         case FAAD_FMT_24BIT:
             for(i = 0; i < frame_len; i++)
             {
-                //int32_t tmp = input[ch][i];
-                int32_t tmp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
+                int32_t tmp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->upMatrix,
+                    hDecoder->internal_channel);
                 if (tmp >= 0)
                 {
                     tmp += (1 << (REAL_BITS-9));
@@ -459,8 +529,8 @@ void* output_to_PCM(faacDecHandle hDecoder,
         case FAAD_FMT_32BIT:
             for(i = 0; i < frame_len; i++)
             {
-                //int32_t tmp = input[ch][i];
-                int32_t tmp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->internal_channel);
+                int32_t tmp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->upMatrix,
+                    hDecoder->internal_channel);
                 if (tmp >= 0)
                 {
                     tmp += (1 << (16-REAL_BITS-1));
@@ -469,6 +539,14 @@ void* output_to_PCM(faacDecHandle hDecoder,
                     tmp += -(1 << (16-REAL_BITS-1));
                     tmp <<= (16-REAL_BITS);
                 }
+                int_sample_buffer[(i*channels)+ch] = (int32_t)tmp;
+            }
+            break;
+        case FAAD_FMT_FIXED:
+            for(i = 0; i < frame_len; i++)
+            {
+                real_t tmp = get_sample(input, ch, i, hDecoder->downMatrix, hDecoder->upMatrix,
+                    hDecoder->internal_channel);
                 int_sample_buffer[(i*channels)+ch] = (int32_t)tmp;
             }
             break;

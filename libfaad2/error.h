@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: error.h,v 1.2 2004/06/02 22:59:02 diego Exp $
+** $Id: error.h,v 1.3 2004/06/23 13:50:49 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -34,8 +34,8 @@
 extern "C" {
 #endif
 
-#define NUM_ERROR_MESSAGES 26
-extern int8_t *err_msg[];
+#define NUM_ERROR_MESSAGES 28
+extern char *err_msg[];
 
 #ifdef __cplusplus
 }

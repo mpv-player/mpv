@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: sbr_huff.c,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: sbr_huff.c,v 1.4 2004/06/23 13:50:52 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -192,7 +192,6 @@ static const int8_t f_huffman_env_bal_3_0dB[24][2] = {
     { -57, -56 },    {  22,  23 },    { -55, -54 },    { -53, -52 }
 };
 
-
 static const int8_t t_huffman_noise_3_0dB[62][2] = {
     { -64,   1 },    { -63,   2 },    { -65,   3 },    { -66,   4 },
     { -62,   5 },    { -67,   6 },    {   7,   8 },    { -61, -68 },
@@ -229,7 +228,7 @@ static INLINE int16_t sbr_huff_dec(bitfile *ld, sbr_huff_tab t_huff)
 
     while (index >= 0)
     {
-        bit = (uint8_t)faad_getbits(ld, 1);
+        bit = (uint8_t)faad_get1bit(ld);
         index = t_huff[index][bit];
     }
 

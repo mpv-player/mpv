@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Alex Beregszaszi on 2003/10/03
-** $Id: huffman.c,v 1.2 2004/06/02 22:59:03 diego Exp $
+** $Id: huffman.c,v 1.3 2004/06/23 13:50:50 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -122,8 +122,8 @@ static INLINE void huffman_sign_bits(bitfile *ld, int16_t *sp, uint8_t len)
 static INLINE int16_t huffman_getescape(bitfile *ld, int16_t sp)
 {
     uint8_t neg, i;
-    int32_t j;
-	int32_t off;
+    int16_t j;
+	int16_t off;
 
     if (sp < 0)
     {
@@ -145,7 +145,7 @@ static INLINE int16_t huffman_getescape(bitfile *ld, int16_t sp)
         }
     }
 
-    off = faad_getbits(ld, i
+    off = (int16_t)faad_getbits(ld, i
         DEBUGVAR(1,9,"huffman_getescape(): escape"));
 
     j = off | (1<<i);

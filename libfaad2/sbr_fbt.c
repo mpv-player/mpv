@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: sbr_fbt.c,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: sbr_fbt.c,v 1.4 2004/06/23 13:50:51 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -226,7 +226,7 @@ uint8_t master_frequency_table_fs0(sbr_info *sbr, uint8_t k0, uint8_t k2,
     if (k2Diff)
     {
         incr = (k2Diff > 0) ? -1 : 1;
-        k = (k2Diff > 0) ? (nrBands-1) : 0;
+        k = (uint8_t) ((k2Diff > 0) ? (nrBands-1) : 0);
 
         while (k2Diff != 0)
         {
@@ -238,10 +238,10 @@ uint8_t master_frequency_table_fs0(sbr_info *sbr, uint8_t k0, uint8_t k2,
 
     sbr->f_master[0] = k0;
     for (k = 1; k <= nrBands; k++)
-        sbr->f_master[k] = sbr->f_master[k-1] + vDk[k-1];
+        sbr->f_master[k] = (uint8_t)(sbr->f_master[k-1] + vDk[k-1]);
 
-    sbr->N_master = nrBands;
-    sbr->N_master = min(sbr->N_master, 64);
+    sbr->N_master = (uint8_t)nrBands;
+    sbr->N_master = (min(sbr->N_master, 64));
 
 #if 0
     printf("f_master[%d]: ", nrBands);
@@ -357,6 +357,9 @@ uint8_t master_frequency_table(sbr_info *sbr, uint8_t k0, uint8_t k2,
     uint8_t temp1[] = { 6, 5, 4 };
     real_t q, qk;
     int32_t A_1;
+#ifdef FIXED_POINT
+    real_t rk2, rk0;
+#endif
 
     /* mft only defined for k2 > k0 */
     if (k2 <= k0)
@@ -368,7 +371,9 @@ uint8_t master_frequency_table(sbr_info *sbr, uint8_t k0, uint8_t k2,
     bands = temp1[bs_freq_scale-1];
 
 #ifdef FIXED_POINT
-    if (REAL_CONST(k2) > MUL_R(REAL_CONST(k0),REAL_CONST(2.2449)))
+    rk0 = (real_t)k0 << REAL_BITS;
+    rk2 = (real_t)k2 << REAL_BITS;
+    if (rk2 > MUL_C(rk0, COEF_CONST(2.2449)))
 #else
     if ((float)k2/(float)k0 > 2.2449)
 #endif
@@ -380,16 +385,18 @@ uint8_t master_frequency_table(sbr_info *sbr, uint8_t k0, uint8_t k2,
         k1 = k2;
     }
 
-    nrBand0 = 2 * find_bands(0, bands, k0, k1);
+    nrBand0 = (uint8_t)(2 * find_bands(0, bands, k0, k1));
     nrBand0 = min(nrBand0, 63);
     if (nrBand0 <= 0)
         return 1;
 
     q = find_initial_power(nrBand0, k0, k1);
-    qk = REAL_CONST(k0);
 #ifdef FIXED_POINT
-    A_1 = (int32_t)((qk + REAL_CONST(0.5)) >> REAL_BITS);
+    qk = (real_t)k0 << REAL_BITS;
+    //A_1 = (int32_t)((qk + REAL_CONST(0.5)) >> REAL_BITS);
+    A_1 = k0;
 #else
+    qk = REAL_CONST(k0);
     A_1 = (int32_t)(qk + .5);
 #endif
     for (k = 0; k <= nrBand0; k++)
@@ -419,21 +426,23 @@ uint8_t master_frequency_table(sbr_info *sbr, uint8_t k0, uint8_t k2,
     if (!twoRegions)
     {
         for (k = 0; k <= nrBand0; k++)
-            sbr->f_master[k] = vk0[k];
+            sbr->f_master[k] = (uint8_t) vk0[k];
 
         sbr->N_master = nrBand0;
         sbr->N_master = min(sbr->N_master, 64);
         return 0;
     }
 
-    nrBand1 = 2 * find_bands(1 /* warped */, bands, k1, k2);
+    nrBand1 = (uint8_t)(2 * find_bands(1 /* warped */, bands, k1, k2));
     nrBand1 = min(nrBand1, 63);
 
     q = find_initial_power(nrBand1, k1, k2);
-    qk = REAL_CONST(k1);
 #ifdef FIXED_POINT
-    A_1 = (int32_t)((qk + REAL_CONST(0.5)) >> REAL_BITS);
+    qk = (real_t)k1 << REAL_BITS;
+    //A_1 = (int32_t)((qk + REAL_CONST(0.5)) >> REAL_BITS);
+    A_1 = k1;
 #else
+    qk = REAL_CONST(k1);
     A_1 = (int32_t)(qk + .5);
 #endif
     for (k = 0; k <= nrBand1 - 1; k++)
@@ -474,11 +483,11 @@ uint8_t master_frequency_table(sbr_info *sbr, uint8_t k0, uint8_t k2,
     sbr->N_master = min(sbr->N_master, 64);
     for (k = 0; k <= nrBand0; k++)
     {
-        sbr->f_master[k] = vk0[k];
+        sbr->f_master[k] =  (uint8_t) vk0[k];
     }
     for (k = nrBand0 + 1; k <= sbr->N_master; k++)
     {
-        sbr->f_master[k] = vk1[k - nrBand0];
+        sbr->f_master[k] = (uint8_t) vk1[k - nrBand0];
     }
 
 #if 0
@@ -529,11 +538,13 @@ uint8_t derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
         if (k == 0)
             i = 0;
         else
-            i = 2*k - minus;
+            i = (uint8_t)(2*k - minus);
         sbr->f_table_res[LO_RES][k] = sbr->f_table_res[HI_RES][i];
     }
 
 #if 0
+    printf("bs_freq_scale: %d\n", sbr->bs_freq_scale);
+    printf("bs_limiter_bands: %d\n", sbr->bs_limiter_bands);
     printf("f_table_res[HI_RES][%d]: ", sbr->N_high);
     for (k = 0; k <= sbr->N_high; k++)
     {
@@ -558,7 +569,7 @@ uint8_t derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
 #if 0
         sbr->N_Q = max(1, (int32_t)(sbr->bs_noise_bands*(log(k2/(float)sbr->kx)/log(2.0)) + 0.5));
 #else
-        sbr->N_Q = max(1, find_bands(0, sbr->bs_noise_bands, sbr->kx, k2));
+        sbr->N_Q = (uint8_t)(max(1, find_bands(0, sbr->bs_noise_bands, sbr->kx, k2)));
 #endif
         sbr->N_Q = min(5, sbr->N_Q);
     }
@@ -594,7 +605,7 @@ uint8_t derived_frequency_table(sbr_info *sbr, uint8_t bs_xover_band,
     printf("f_table_noise[%d]: ", sbr->N_Q);
     for (k = 0; k <= sbr->N_Q; k++)
     {
-        printf("%d ", sbr->f_table_noise[k]);
+        printf("%d ", sbr->f_table_noise[k] - sbr->kx);
     }
     printf("\n");
 #endif
@@ -613,8 +624,8 @@ void limiter_frequency_table(sbr_info *sbr)
     static const real_t limiterBandsPerOctave[] = { REAL_CONST(1.2),
         REAL_CONST(2), REAL_CONST(3) };
 #else
-    static const real_t limiterBandsCompare[] = { REAL_CONST(1.328125),
-        REAL_CONST(1.1875), REAL_CONST(1.125) };
+    static const real_t limiterBandsCompare[] = { REAL_CONST(1.327152),
+        REAL_CONST(1.185093), REAL_CONST(1.119872) };
 #endif
     uint8_t k, s;
     int8_t nrLim;
@@ -625,6 +636,15 @@ void limiter_frequency_table(sbr_info *sbr)
     sbr->f_table_lim[0][0] = sbr->f_table_res[LO_RES][0] - sbr->kx;
     sbr->f_table_lim[0][1] = sbr->f_table_res[LO_RES][sbr->N_low] - sbr->kx;
     sbr->N_L[0] = 1;
+
+#if 0
+    printf("f_table_lim[%d][%d]: ", 0, sbr->N_L[0]);
+    for (k = 0; k <= sbr->N_L[0]; k++)
+    {
+        printf("%d ", sbr->f_table_lim[0][k]);
+    }
+    printf("\n");
+#endif
 
     for (s = 1; s < 4; s++)
     {
@@ -666,17 +686,18 @@ restart:
             if (limTable[k-1] != 0)
 #if 0
                 nOctaves = REAL_CONST(log((float)limTable[k]/(float)limTable[k-1])/log(2.0));
-#endif
+#else
 #ifdef FIXED_POINT
-                nOctaves = SBR_DIV(REAL_CONST(limTable[k]),REAL_CONST(limTable[k-1]));
+                nOctaves = DIV_R((limTable[k]<<REAL_BITS),REAL_CONST(limTable[k-1]));
 #else
                 nOctaves = (real_t)limTable[k]/(real_t)limTable[k-1];
+#endif
 #endif
             else
                 nOctaves = 0;
 
 #if 0
-            if ((MUL(nOctaves,limBands)) < REAL_CONST(0.49))
+            if ((MUL_R(nOctaves,limBands)) < REAL_CONST(0.49))
 #else
             if (nOctaves < limiterBandsCompare[s - 1])
 #endif

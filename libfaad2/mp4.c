@@ -23,7 +23,7 @@
 ** For more info contact Ahead Software through Mpeg4AAClicense@nero.com.
 **
 ** Initially modified for use with MPlayer by Arpad Gereöffy on 2003/08/30
-** $Id: mp4.c,v 1.3 2004/06/02 22:59:03 diego Exp $
+** $Id: mp4.c,v 1.4 2004/06/23 13:50:51 diego Exp $
 ** detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
 **/
 
@@ -121,17 +121,17 @@ static uint8_t ObjectTypesTable[32] = {
 };
 
 /* Table 1.6.1 */
-int8_t FAADAPI AudioSpecificConfig(uint8_t *pBuffer,
-                                   uint32_t buffer_size,
-                                   mp4AudioSpecificConfig *mp4ASC)
+int8_t NEAACDECAPI NeAACDecAudioSpecificConfig(uint8_t *pBuffer,
+                                               uint32_t buffer_size,
+                                               mp4AudioSpecificConfig *mp4ASC)
 {
     return AudioSpecificConfig2(pBuffer, buffer_size, mp4ASC, NULL);
 }
 
-int8_t FAADAPI AudioSpecificConfig2(uint8_t *pBuffer,
-                                    uint32_t buffer_size,
-                                    mp4AudioSpecificConfig *mp4ASC,
-                                    program_config *pce)
+int8_t AudioSpecificConfig2(uint8_t *pBuffer,
+                            uint32_t buffer_size,
+                            mp4AudioSpecificConfig *mp4ASC,
+                            program_config *pce)
 {
     bitfile ld;
     int8_t result = 0;
@@ -178,13 +178,28 @@ int8_t FAADAPI AudioSpecificConfig2(uint8_t *pBuffer,
         return -3;
     }
 
+#if (defined(PS_DEC) || defined(DRM_PS))
+    /* check if we have a mono file */
+    if (mp4ASC->channelsConfiguration == 1)
+    {
+        /* upMatrix to 2 channels for implicit signalling of PS */
+        mp4ASC->channelsConfiguration = 2;
+    }
+#endif
+
 #ifdef SBR_DEC
     mp4ASC->sbr_present_flag = -1;
     if (mp4ASC->objectTypeIndex == 5)
     {
+        uint8_t tmp;
+
         mp4ASC->sbr_present_flag = 1;
-        mp4ASC->samplingFrequencyIndex = (uint8_t)faad_getbits(&ld, 4
+        tmp = (uint8_t)faad_getbits(&ld, 4
             DEBUGVAR(1,5,"parse_audio_decoder_specific_info(): extensionSamplingFrequencyIndex"));
+        /* check for downsampled SBR */
+        if (tmp == mp4ASC->samplingFrequencyIndex)
+            mp4ASC->downSampledSBR = 1;
+        mp4ASC->samplingFrequencyIndex = tmp;
         if (mp4ASC->samplingFrequencyIndex == 15)
         {
             mp4ASC->samplingFrequency = (uint32_t)faad_getbits(&ld, 24
@@ -245,8 +260,15 @@ int8_t FAADAPI AudioSpecificConfig2(uint8_t *pBuffer,
 
                 if (mp4ASC->sbr_present_flag)
                 {
-                    mp4ASC->samplingFrequencyIndex = (uint8_t)faad_getbits(&ld, 4
+                    uint8_t tmp;
+                    tmp = (uint8_t)faad_getbits(&ld, 4
                         DEBUGVAR(1,12,"parse_audio_decoder_specific_info(): extensionSamplingFrequencyIndex"));
+
+                    /* check for downsampled SBR */
+                    if (tmp == mp4ASC->samplingFrequencyIndex)
+                        mp4ASC->downSampledSBR = 1;
+                    mp4ASC->samplingFrequencyIndex = tmp;
+
                     if (mp4ASC->samplingFrequencyIndex == 15)
                     {
                         mp4ASC->samplingFrequency = (uint32_t)faad_getbits(&ld, 24
@@ -267,6 +289,8 @@ int8_t FAADAPI AudioSpecificConfig2(uint8_t *pBuffer,
         {
             mp4ASC->samplingFrequency *= 2;
             mp4ASC->forceUpSampling = 1;
+        } else /* > 24000*/ {
+            mp4ASC->downSampledSBR = 1;
         }
     }
 #endif
