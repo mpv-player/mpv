@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced to 1.10 -->
+<?xml version="1.0" encoding="iso-8859-2"?>
+<!-- synced to 1.12 -->
 <appendix id="bugs">
 <title>Ismert hibák</title>
 <sect1 id="bugs-special">
@@ -17,7 +17,10 @@
 fordítottad és futtattad (például P3-on fordítottad és Celeron futtattad)</para>
 <para>Megoldás: ugyan azon a gépen fordítsd le az <application>MPlayer</application>t,
 amelyiken futtatni fogod!</para>
-<para>Tüneti kezelés: <command>./configure --disable-sse</command> stb. kapcsolók</para>
+<para>Tüneti kezelés: Ezt az egészet elfelejtheted, ha a
+<option>--enable-runtime-cpudetection</option> kapcsolót használod a konfigurálásnál
+vagy az egyes CPU utasítás készleteket letilthatod külön-külön a megfelelõ
+kapcsolókkal (úgy mint <option>--disable-mmx</option>, <option>--disable-3dnow</option>, stb).
 </listitem>
 <listitem>
 <para>&quot;Internal buffer inconsistency&quot; (Belsõ buffer inkonzisztencia) a <application>MEncoder</application> futása közben:</para>
