@@ -1625,7 +1625,7 @@ echores "$_setlocale"
 echocheck "language"
 test -z "$_language" && _language=$LINGUAS
 _language=`echo $_language | sed 's/,/ /g'`
-echo $_language | grep all > /dev/null || LANGUAGES=$_language
+echo $_language | grep all > /dev/null || LANGUAGES="$_language en"
 for i in $_language ; do
   test "$i" = all && i=en
   if test -f "help/help_mp-${i}.h" ; then
@@ -1644,7 +1644,6 @@ for i in $LANGUAGES ; do
     LANGUAGES=`echo $LANGUAGES | sed "s/$i *//g" | sed 's/ *$//'`
   fi
 done
-test -z "$LANGUAGES" && LANGUAGES=en
 echores "using $_language (man pages: $LANGUAGES)"
 _mp_help="help/help_mp-${_language}.h"
 test -f $_mp_help || die "$_mp_help not found"
