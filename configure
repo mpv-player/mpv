@@ -566,7 +566,9 @@ fi
 
 # XXX: this should be ok..
 _cpuinfo="echo"
-if test -r /proc/cpuinfo ; then
+# Cygwin has /proc/cpuinfo, but only supports Intel CPUs
+# FIXME: Remove the cygwin check once AMD CPUs are supported
+if test -r /proc/cpuinfo && not cygwin; then
   # Linux with /proc mounted, extract CPU information from it
   _cpuinfo="cat /proc/cpuinfo"
 elif test -r /compat/linux/proc/cpuinfo ; then
