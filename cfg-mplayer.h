@@ -37,6 +37,9 @@ extern int vo_dbpp;
 #ifdef USE_SUB
 extern int sub_unicode;
 extern int sub_utf8;
+#ifdef USE_ICONV
+extern char *sub_cp;
+#endif
 #endif
 
 #ifdef USE_OSD
@@ -119,6 +122,9 @@ struct config conf[]={
 	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
 #ifdef USE_SUB
 	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
+#ifdef USE_ICONV
+	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0},
+#endif	
 	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
 	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
         {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0},

@@ -12,10 +12,15 @@
 #include <string.h>
 #include <ctype.h>
 
+#include "config.h"
 #include "subreader.h"
 
 #define ERR (void *)-1
 
+#ifdef USE_ICONV
+#include <iconv.h>
+char *sub_cp=NULL;
+#endif
 
 int sub_uses_time=0;
 int sub_errs=0;
@@ -399,7 +404,73 @@ int sub_autodetect (FILE *fd) {
 
     return -1;  // too many bad lines
 }
+	
+extern int sub_utf8;
 
+#ifdef USE_ICONV
+static iconv_t icdsc;
+
+void	subcp_open (void)
+{
+	char *tocp = "UTF-8";
+	icdsc = (iconv_t)(-1);
+	if (sub_cp){
+		if ((icdsc = iconv_open (tocp, sub_cp)) != (iconv_t)(-1)){
+			printf ("SUB: opened iconv descriptor.\n");
+			sub_utf8 = 2;
+		} else
+			printf ("SUB: error opening iconv descriptor.\n");
+	}
+}
+
+void	subcp_close (void)
+{
+	if (icdsc != (iconv_t)(-1)){
+		(void) iconv_close (icdsc);
+	   	printf ("SUB: closed iconv descriptor.\n");
+	}
+}
+
+#define ICBUFFSIZE 512
+static char icbuffer[ICBUFFSIZE];
+
+subtitle* subcp_recode (subtitle *sub)
+{
+	int l=sub->lines;
+	size_t ileft, oleft, otlen;
+	char *op, *ip, *ot;
+
+	while (l){
+		op = icbuffer;
+		ip = sub->text[--l];
+		ileft = strlen(ip);
+		oleft = ICBUFFSIZE - 1;
+		
+		if (iconv(icdsc, (const char **) &ip, &ileft,
+			  &op, &oleft) == (size_t)(-1)) {
+			printf ("SUB: error recoding line.\n");
+			l++;
+			break;
+		}
+		if (!(ot = (char *)malloc(op - icbuffer + 1))){
+			printf ("SUB: error allocating mem.\n");
+			l++;
+		   	break;
+		}
+		*op='\0' ;
+		strcpy (ot, icbuffer);
+		free (sub->text[l]);
+		sub->text[l] = ot;
+	}
+	if (l){
+		for (l = sub->lines; l;)
+			free (sub->text[--l]);
+		return ERR;
+	}
+	return sub;
+}
+
+#endif
 
 subtitle* sub_read_file (char *filename) {
     FILE *fd;
@@ -425,6 +496,10 @@ subtitle* sub_read_file (char *filename) {
     
     rewind (fd);
 
+#ifdef USE_ICONV
+    subcp_open();
+#endif
+
     sub_num=0;n_max=32;
     first=(subtitle *)malloc(n_max*sizeof(subtitle));
     if(!first) return NULL;
@@ -437,10 +512,17 @@ subtitle* sub_read_file (char *filename) {
         }
         sub=func[sub_format](fd,&first[sub_num]);
         if(!sub) break;   // EOF
+#ifdef USE_ICONV
+	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
+#endif
         if(sub==ERR) ++sub_errs; else ++sub_num; // Error vs. Valid
     }
     
     fclose(fd);
+
+#ifdef USE_ICONV
+    subcp_close();
+#endif
 
 //    printf ("SUB: Subtitle format %s time.\n", sub_uses_time?"uses":"doesn't use");
     printf ("SUB: Read %i subtitles", sub_num);
@@ -465,7 +547,6 @@ char * strreplace( char * in,char * what,char * whereof )
 
 char * sub_filename(char* path,  char * fname )
 {
- extern int sub_utf8;
  char * sub_name1;
  char * sub_name2;
  char * aviptr1, * aviptr2, * tmp;
@@ -509,7 +590,11 @@ char * sub_filename(char* path,  char * fname )
  
  for(j=0;j<=1;j++){
   char* sub_name=j?sub_name1:sub_name2;
+#ifdef USE_ICONV
+  for ( i=(sub_cp?2:0);i<(sizeof(sub_exts)/sizeof(char*));i++ ) {
+#else
   for ( i=0;i<(sizeof(sub_exts)/sizeof(char*));i++ ) {
+#endif	  
    strcpy(j?aviptr1:aviptr2,sub_exts[i]);
 //   printf("trying: '%s'\n",sub_name);
    if((f=fopen( sub_name,"rt" ))) {

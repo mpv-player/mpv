@@ -160,6 +160,7 @@ params:
 	--enable-xmmp	        use XMMP audio drivers
 	--enable-lirc	        enable LIRC (remote control) support
 
+	--disable-iconv		do not use iconv(3) function [autodetect]	
         --disable-ossaudio      disable OSS sound support [autodetect]
         --disable-alsa          disable alsa sound support [autodetect]
 	--disable-esd           disable esd sound support [autodetect]
@@ -903,6 +904,42 @@ $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -lm $_socklib > /dev/null 2>&1
 fi
 
 cat > $TMPC << EOF
+#include <stdio.h>
+#include <unistd.h>
+#include <iconv.h>
+
+#define INBUFSIZE 1024
+#define OUTBUFSIZE 4096
+
+char inbuffer[INBUFSIZE];
+char outbuffer[OUTBUFSIZE];
+
+main()
+{       ssize_t numread;
+        iconv_t icdsc;
+        char *tocode="UTF-8";
+        char *fromcode="cp1250";
+        if ((icdsc = iconv_open (tocode, fromcode)) != (iconv_t)(-1)){
+                while ((numread = read (0, inbuffer, INBUFSIZE))){
+                        char *iptr=inbuffer;
+                        char *optr=outbuffer;
+                        size_t inleft=numread;
+                        size_t outleft=OUTBUFSIZE;
+                        if (iconv (icdsc, 
+		(const char **)&iptr, &inleft, &optr, &outleft)
+                            !=(size_t)(-1)){
+                                write (1, outbuffer, OUTBUFSIZE - outleft);
+                        }
+                }
+                if (iconv_close (icdsc) == -1) ;
+        }
+}
+
+EOF
+_iconv=yes
+$_cc $TMPC -o $TMPO -lm > /dev/null 2>&1 || \
+ { _iconv=no ; echo "iconv(3) function not detected!" ;}
+cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
 EOF
@@ -1216,6 +1253,9 @@ for ac_option do
   --enable-fbdev)
   	_fbdev=yes
 	;;
+  --enable-iconv)
+  	_iconv=yes
+	;;
   --enable-mlib)
 	_mlib=yes
 	;;
@@ -1325,6 +1365,9 @@ for ac_option do
         ;;
   --disable-fbdev)
   	_fbdev=no
+	;;
+  --disable-iconv)
+  	_iconv=no
 	;;
   --disable-termcap)
 	_termcap=no
@@ -1585,6 +1628,7 @@ echo "Checking for PNG support ... $_png"
 echo "Checking for OggVorbis support ... $_vorbis"
 echo "Checking for Win32 DLL support ... $_win32dll"
 echo "Checking for DirectShow ... $_dshow"
+echo "Checking for iconv function ... $_iconv"
 
 # check if compiler supports C++ and C++-libs are installed correctly
 if [ $_win32dll = yes -a $_dshow = yes ] ; then
@@ -1842,6 +1886,12 @@ if [ "$_xmmp" = "yes" ]; then
  _xmmplibs='-Llibxmm -lxmm'
 else
  _xmmpaudio='#undef USE_XMMP_AUDIO'
+fi
+
+if [ "$_iconv" = "yes" ]; then
+_iconv='#define USE_ICONV'
+else
+_iconv='#undef USE_ICONV'
 fi
 
 if [ "$_lirc" = "yes" ]; then
@@ -2278,6 +2328,9 @@ $_divx4def
    If you have kernel Oops, player hangups, or just no audio, you should
    try to recompile MPlayer with this option disabled! */
 $_select
+
+/* define this to use iconv(3) function to codepage conversions */
+$_iconv
 
 /* XMMP support: (test code) */
 $_xmmpaudio
