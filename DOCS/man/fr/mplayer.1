@@ -1,4 +1,4 @@
-.\" synced with 1.823
+.\" synced with 1.825
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "17 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "18 Décembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -3486,7 +3486,7 @@ décodage en niveaux de gris uniquement (un peu plus rapide qu'en couleur)
 Pour obtenir la meilleure qualité d'encodage utilisez le même algorithme IDCT
 pour le décodage et l'encodage.
 Cela dit, vous pourriez y perdre en terme de précision.
-.IPs lowres=<valeur>
+.IPs lowres=<valeur>[,<l>]
 Décodage en résolution réduite.
 Le décodage en résolution basse n'est pas géré par tous les codecs, et risque
 de produire des artefacts disgracieux.
@@ -3502,6 +3502,10 @@ réduite.
 .br
 3: 1/8 résolution
 .REss
+.RS
+Si <l> est définit, les décodage en résolution réduite sera effectué uniquement
+si la largeur de la vidéo est plus grande ou égale à <l>.
+.RE
 .IPs "sb=<valeur> (MPEG-2 uniquement)"
 Saute <valeur> lignes de macro-blocs au bas de l'image.
 .IPs "st=<valeur> (MPEG-2 uniquement)"
@@ -7230,10 +7234,11 @@ comme ci-dessus (N'oubliez pas de donner le ratio exact.)
 Permet de définir un PAR particulier avec les options par_width et par_height.
 .RE
 .PD 1
-.br
+.RS
 .I NOTE\ :
 Généralement, on peut se contenter d'utiliser les options aspect et
 autoaspect.
+.RE
 .
 .TP
 .B par_width=<1\-255> (par=ext uniquement)
