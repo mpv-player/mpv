@@ -34,7 +34,7 @@ Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - IRC channel #MPlayer operator
 
 Szabolcs Berecz: <szabi@inf.elte.hu>
-- config file and command line parser (coming soon)
+- codecs file, config file and command line parser
 - mga_vid fixes, module option stc.
 - fbdev support in libvo
 
