@@ -190,7 +190,8 @@ void ShowPreferences( void )
    case 1: gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFramedrop ),TRUE );
   }
 
- gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFlip ),flip );
+ if (flip != -1)
+    gtk_toggle_button_set_active( GTK_TOGGLE_BUTTON( CBFlip ),flip );
  gtk_adjustment_set_value( HSPanscanadj,vo_panscan );
  {
   int i = 0, c = 0;
