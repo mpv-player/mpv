@@ -383,11 +383,11 @@ int _has_mmx = 0;  // used by layer2.c, layer3.c to pre-scale coeffs
 /******************************************************************************/
 
 /* It's hidden from gcc in assembler */
-extern void __attribute__((__stdcall__)) dct64_MMX(real *, real *, real *);
-extern void __attribute__((__stdcall__)) dct64_MMX_3dnow(real *, real *, real *);
-extern void __attribute__((__stdcall__)) dct64_MMX_3dnowex(real *, real *, real *);
-extern void __attribute__((__stdcall__)) dct64_MMX_sse(real *, real *, real *);
-void __attribute__((__stdcall__)) (*dct64_MMX_func)(real *, real *, real *);
+extern void dct64_MMX(real *, real *, real *);
+extern void dct64_MMX_3dnow(real *, real *, real *);
+extern void dct64_MMX_3dnowex(real *, real *, real *);
+extern void dct64_MMX_sse(real *, real *, real *);
+void (*dct64_MMX_func)(real *, real *, real *);
 
 #include "../cpudetect.h"
 

@@ -6,7 +6,7 @@
 #include "../mangle.h"
 #define real float /* ugly - but only way */
 
-void __attribute__ (( __stdcall__ )) dct64_MMX(real *a,real *b,real *c)
+void dct64_MMX(real *a,real *b,real *c)
 {
     char tmp[256];
     __asm __volatile(

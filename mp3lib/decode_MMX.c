@@ -69,7 +69,6 @@ __asm __volatile(
         "leal (%%esi,%%eax,2),%%edx\n\t"
         "movl %%eax,%5\n\t"
         "incl %%eax\n\t"
-        "pushl %0\n\t"
         "andl %%ebx,%%eax\n\t"
         "leal 544(%%esi,%%eax,2),%%ecx\n\t"
 	"incl %%ebx\n\t"
@@ -80,9 +79,11 @@ __asm __volatile(
         "leal 544(%%esi),%%esi\n\t"
 ".L02:\n\t"
 	"emms\n\t"
+        "pushl %0\n\t"
         "pushl %%edx\n\t"
         "pushl %%ecx\n\t"
         "call *"MANGLE(dct64_MMX_func)"\n\t"
+	"addl $12, %%esp\n\t"
 	"leal 1(%%ebx), %%ecx\n\t"
         "subl %5,%%ebx\n\t"
 	"pushl %%ecx\n\t"
@@ -241,5 +242,5 @@ __asm __volatile(
 	"emms\n\t"
         :
 	:"m"(bandPtr),"m"(channel),"m"(samples),"m"(buffs),"m"(bo), "m"(temp)
-	:"memory","%edi","%esi","%ebx");
+	:"memory","%edi","%esi","%ebx","%esp");
 }
