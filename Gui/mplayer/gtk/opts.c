@@ -164,7 +164,7 @@ static int    old_video_driver = 0;
 static gboolean prHScaler( GtkWidget * widget,GdkEventMotion  * event,gpointer user_data );
 static void prToggled( GtkToggleButton * togglebutton,gpointer user_data );
 static void prCListRow( GtkCList * clist,gint row,gint column,GdkEvent * event,gpointer user_data );
-#ifdef HAVE_FREETYPE
+#if defined( HAVE_FREETYPE ) || defined( USE_ICONV )
 static void prEntry( GtkContainer * container,gpointer user_data );
 #endif
 
