@@ -154,11 +154,12 @@ Current plugins:
     generate various test patterns
     MPI: TEMP, accepts stride
 
--vop noise[=lumaNoise[u][t][h]:chromaNoise[u][t][h]
+-vop noise[=lumaNoise[u][t|a][h]:chromaNoise[u][t|a][h]
     add noise
     0<= lumaNoise, chromaNoise <=100
     u uniform noise (gaussian otherwise)
     t temporal noise (noise pattern changes between frames)
+    a averaged temporal (smoother, but a lot slower)
     h high quality (slightly better looking, slightly slower)
     MPI: DR (if possible) or TEMP, accepts stride
 

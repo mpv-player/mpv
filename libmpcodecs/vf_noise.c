@@ -42,14 +42,19 @@
 //===========================================================================//
 
 static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift);
+static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift);
+static inline void lineNoiseAvg_CX(uint8_t *dst, uint8_t *src, int len, int8_t **shift, int add);
 
 static void (*lineNoise)(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift)= lineNoise_C;
+static void (*lineNoiseAvg)(uint8_t *dst, uint8_t *src, int len, int8_t **shift)= lineNoiseAvg_C;
 
 typedef struct FilterParam{
 	int strength;
 	int uniform;
 	int temporal;
 	int quality;
+        int averaged;
+        int shiftptr;
 	int8_t *noise;
 }FilterParam;
 
@@ -61,21 +66,26 @@ struct vf_priv_s {
 };
 
 static int nonTempRandShift[MAX_RES]= {-1};
+static int8_t *prev_shift[MAX_RES][3];
 
 static int8_t *initNoise(FilterParam *fp){
 	int strength= fp->strength;
 	int uniform= fp->uniform;
+	int averaged= fp->averaged;
 	int8_t *noise= memalign(16, MAX_NOISE*sizeof(int8_t));
-	int i;
+	int i, j;
 
 	srand(123457);
 
 	for(i=0; i<MAX_NOISE; i++)
 	{
-		if(uniform)
-			noise[i]= ((rand()/11)%strength) - strength/2;
-		else
-		{
+	        if(uniform) {
+		        if (averaged) {
+			        noise[i]= (((rand()/11)%strength) - strength/2)/3;
+		        } else {
+			        noise[i]= ((rand()/11)%strength) - strength/2;
+		        }
+                } else {
 			double x1, x2, w, y1;
 			do {
 				x1 = 2.0 * rand()/(float)RAND_MAX - 1.0;
@@ -86,12 +96,18 @@ static int8_t *initNoise(FilterParam *fp){
 			w = sqrt( (-2.0 * log( w ) ) / w );
 			y1= x1 * w;
 
-			y1*= strength / sqrt(3.0); 
+			y1*= strength / sqrt(3.0);
 			if     (y1<-128) y1=-128;
 			else if(y1> 127) y1= 127;
+			if (averaged) y1 /= 3.0;
 			noise[i]= (int)y1;
 		}
 	}
+	
+
+	for (i = 0; i < MAX_RES; i++)
+	    for (j = 0; j < 3; j++)
+		prev_shift[i][j] = noise + (rand()&(MAX_SHIFT-1));
 
 	if(nonTempRandShift[0]==-1){
 		for(i=0; i<MAX_RES; i++){
@@ -100,8 +116,11 @@ static int8_t *initNoise(FilterParam *fp){
 	}
 
 	fp->noise= noise;
+	fp->shiftptr= 0;
 	return noise;
 }
+
+/***************************************************************************/
 
 #ifdef HAVE_MMX
 static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
@@ -172,6 +191,21 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 	}
 }
 
+/***************************************************************************/
+
+static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
+	int i, j, n, v;
+	
+	for(i=0; i<len; i++)
+	{
+	    for(j=0,n=0;j<3;j++)
+		n+=shift[j][i];
+	    dst[i]= src[i]+n*(128-abs(128-src[i]))/128;
+	}
+}
+
+/***************************************************************************/
+
 static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int width, int height, FilterParam *fp){
 	int8_t *noise= fp->noise;
 	int y;
@@ -200,10 +234,17 @@ static void noise(uint8_t *dst, uint8_t *src, int dstStride, int srcStride, int 
 		else			shift= nonTempRandShift[y];
 
 		if(fp->quality==0) shift&= ~7;
-		lineNoise(dst, src, noise, width, shift);
+		if (fp->averaged) {
+		    lineNoiseAvg(dst, src, width, prev_shift[y]);
+		    prev_shift[y][fp->shiftptr] = noise + shift;
+		} else {
+		    lineNoise(dst, src, noise, width, shift);
+		}
 		dst+= dstStride;
 		src+= srcStride;
 	}
+	fp->shiftptr++;
+	if (fp->shiftptr == 3) fp->shiftptr = 0;
 }
 
 static int config(struct vf_instance_s* vf,
@@ -300,6 +341,11 @@ static void parse(FilterParam *fp, char* args){
 	if(pos && pos<max) fp->temporal=1;
 	pos= strchr(args, 'h');
 	if(pos && pos<max) fp->quality=1;
+	pos= strchr(args, 'a');
+	if(pos && pos<max) {
+	    fp->temporal=1;
+	    fp->averaged=1;
+	}
 
 	if(fp->strength) initNoise(fp);
 }
@@ -337,9 +383,11 @@ static int open(vf_instance_t *vf, char* args){
  
 #ifdef HAVE_MMX
     if(gCpuCaps.hasMMX) lineNoise= lineNoise_MMX;
+//    if(gCpuCaps.hasMMX) lineNoiseAvg= lineNoiseAvg_MMX;
 #endif
 #ifdef HAVE_MMX2
     if(gCpuCaps.hasMMX2) lineNoise= lineNoise_MMX2;
+//    if(gCpuCaps.hasMMX) lineNoiseAvg= lineNoiseAvg_MMX2;
 #endif
     
     return 1;
