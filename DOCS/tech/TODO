@@ -6,9 +6,14 @@ FOR THE NEXT PRE_RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 - fix -vop expand=-50 + ffdivx
 - fix the commandline/configfile parser bug (-nosound vs vfm=...)
+- cleanup qtaudio/qtvideo (move globals to context)
+- cleanup DMO interfaces
+- fix/remove -vop lavcdeint
+- remove -vop yuy2, yvu9
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
+- re-design makefile dependency system
 - finish audio filter layer
 - new demuxer layer - at least modularized...
 - fix AVI index offset base position handling ('no video stream found' bug)
