@@ -38,6 +38,8 @@ mencoder \- Movie Encoder for Linux
 .RB [ \-y\ <rescale\ height> ]
 .RB [ \-sws\ <0-2> ]
 .RB [ \-ffourcc\ fourcc ]
+.RB [ \-ss\ <time> ]
+.RB [ \-endpos\ <time> ]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -230,6 +232,22 @@ Outputs to the given filename, instead of the default 'test.avi' .
 .TP
 .B \-frames <number>
 Encode only given number of frames.
+.TP
+.B \-ss <time>
+seek to given time position. For example :
+
+    -ss 56         seeks to 56 seconds
+    -ss 01:10:00   seeks to 1 hour 10 min
+
+Can start only from keyframes !
+.TP
+.B \-endpos <time>
+stop encoding at given time. Can be specified in many was :
+
+    -endpos 56       encode only 56 seconds
+    -endpos 01:10:00 encode only 1 hours
+
+Can be used in conjuction with -ss !
 .TP
 .B \-x <rescale width>
 Rescale output movie to given pixels wide.
