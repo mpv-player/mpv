@@ -101,10 +101,10 @@ get_vo_fullscreen
     Print out fullscreen status (1 == fullscreened, 0 == windowed).
 
 vo_ontop
-	Toggle stay-on-top.
+    Toggle stay-on-top.
 
 vo_rootwin
-	Toggle playback on the root window.
+    Toggle playback on the root window.
 
 panscan <value> [value2]
     ???
@@ -117,21 +117,21 @@ loadlist <file>
 
 change_rectangle <val1> <val2>
     Change the position of the rectangle filter rectangle.
-       <val1>
-           Must be one of the following:
-               0 = width
-               1 = height
-               2 = x position
-               3 = y position
-       <val2>
-           If <val1> is 0 or 1:
-               Integer amount to add/subtract from the width/height.
-               Positive values add to width/height and negative values
-               subtract from it.
-           If <val1> is 2 or 3:
-               Relative integer amount by which to move the upper left corner
-               of the rectangle. Positive values move the rectangle right/down
-               and negative values move the rectangle left/up.
+        <val1>
+            Must be one of the following:
+                0 = width
+                1 = height
+                2 = x position
+                3 = y position
+        <val2>
+            If <val1> is 0 or 1:
+                Integer amount to add/subtract from the width/height.
+                Positive values add to width/height and negative values
+                subtract from it.
+            If <val1> is 2 or 3:
+                Relative integer amount by which to move the upper left
+                rectangle corner. Positive values move the rectangle
+                right/down and negative values move the rectangle left/up.
 
 dvdnav <button>
     Press the given dvdnav button.
