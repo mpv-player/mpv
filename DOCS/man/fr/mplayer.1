@@ -1,4 +1,4 @@
-.\" synced with 1.850
+.\" synced with 1.853
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "11 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "12 Janvier 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -1888,7 +1888,7 @@ Les pilotes de sorties audio sont\ :
 .
 .TP
 .B alsa\ \ \ 
-Pilote de sortie audio ALSA 0.9/\:1.x.
+Pilote de sortie audio ALSA 0.9/\:1.x
 .PD 0
 .RSs
 .IPs mmap\ \ \ 
@@ -1907,7 +1907,7 @@ le configurer.
 .
 .TP
 .B alsa5\ \ 
-Pilote de sortie audio ALSA 0.5.
+Pilote de sortie audio ALSA 0.5
 .TP
 .B oss\ \ \ \ 
 Pilote de sortie audio OSS.
@@ -1933,11 +1933,11 @@ tout seul).
 .
 .TP
 .B arts\ \ \ 
-Sortie audio par le démon Arts.
+sortie audio par le démon Arts
 .
 .TP
 .B esd\ \ \ \ 
-Sortie audio par le démon ESD.
+sortie audio par le démon ESD
 .PD 0
 .RSs
 .IPs <serveur>
@@ -1947,19 +1947,19 @@ Choisit explicitement le serveur ESD à utiliser (par défaut\ : localhost).
 .
 .TP
 .B jack\ \ \ \ 
-Sortie audio par JACK (Jack Audio Connection Kit).
+sortie audio par JACK (Jack Audio Connection Kit)
 .
 .TP
 .B nas\ \ \ \ 
-Sortie audio par NAS.
+sortie audio par NAS
 .
 .TP
 .B macosx (Mac OS X uniquement)
-Pilote de sortie audio natif de Mac OS X.
+pilote de sortie audio natif de Mac OS X
 .
 .TP
 .B sgi (SGI uniquement)
-Pilote de sortie audio natif de SGI.
+pilote de sortie audio natif de SGI
 .
 .TP
 .B sun (Sun uniquement)
@@ -1974,11 +1974,11 @@ Choisit explicitement le périphérique audio à utiliser (par défaut\ :
 .
 .TP
 .B win32 (Windows uniquement)
-Pilote de sortie audio waveout natif de Windows.
+pilote de sortie audio waveout natif de Windows
 .
 .TP
 .B dsound (Windows only)
-Pilote de sortie audio DirectX DirectSound.
+pilote de sortie audio DirectX DirectSound
 .PD 0
 .RSs
 .IPs device=<num_périph>
@@ -1990,7 +1990,7 @@ disponibles.
 .
 .TP
 .B dxr2 (also see \-dxr2) (DXR2 uniquement)
-Pilote de sortie de la Creative DXR2.
+pilote de sortie de la Creative DXR2
 .
 .TP
 .B mpegpes (DVB uniquement)
@@ -2003,7 +2003,7 @@ Utilisez \-nosound pour des mesures (benchmarking).
 .
 .TP
 .B pcm
-Extrait le son PCM/\:wave brut.
+extracteur de son PCM/\:wave brut
 .PD 0
 .RSs
 .IPs (no)waveheader
@@ -2018,7 +2018,7 @@ est ./audiodump.pcm.
 .
 .TP
 .B plugin\ \ 
-Pilote de plugin de sortie audio.
+pilote de plugin de sortie audio
 .
 .
 .SH "OPTIONS DE SORTIE VIDÉO (MPLAYER UNIQUEMENT)"
@@ -2408,11 +2408,6 @@ par exemple).
 .B \-xineramascreen <0\-...>
 Dans les configurations xinerama (c'est à dire un bureau unique s'étendant sur
 plusieurs écrans, cette option dit à MPlayer sur quel écran afficher le film.
-.
-.TP
-.B \-z <0\-9> (\-vo png uniquement)
-Définit le taux de compression du pilote de sortie vidéo png
-0 équivaut à pas de compression et 9 à la compression maximale.
 .
 .TP
 .B \-zrbw (\-vo zr uniquement)
@@ -3138,11 +3133,18 @@ Doit être plus grand ou égal à 1 (par défaut\ : 1000).
 .PD 1
 .
 .TP
-.B png (voir aussi \-z)
+.B png\ \ 
 Sépare chaque trame dans un fichier PNG du répertoire courant.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 Ne gère que les formats RGB et BGR 24 bits/pixel.
+.PD 0
+.RSs
+.IPs z=<0\-9>
+Définit le taux de compression.
+0 équivaut à pas de compression et 9 à la compression maximale.
+.RE
+.PD 1
 .
 .TP
 .B tga\ \ \ \ 
@@ -3229,7 +3231,7 @@ Essaie les codecs Win32 en premier.
 .PD 1
 .
 .TP
-.B \-aspect <ratio>
+.B \-aspect <ratio> (voir aussi \-zoom)
 Force le rapport hauteur/\:largeur des films.
 Autodétecté dans les fichiers MPEG, mais ne peut l'être avec la plupart
 des fichiers AVI.
@@ -3570,7 +3572,7 @@ Essaie les codecs XAnim en premier.
 .PD 1
 .
 .TP
-.B \-x <x> (MPlayer uniquement)
+.B \-x <x> (voir aussi \-zoom) (MPlayer uniquement)
 Zoome l'image à la largeur <x> (si un zoom logiciel ou matériel est
 disponible).
 Désactive les calculs de rapport hauteur/\:largeur.
@@ -3609,7 +3611,7 @@ Désactive la méthode 2 de rendu direct.
 .PD 1
 .
 .TP
-.B \-xy <valeur>
+.B \-xy <valeur> (voir aussi \-zoom)
 .PD 0
 .RSs
 .IPs valeur<=8
@@ -3621,19 +3623,17 @@ rapport hauteur/\:largeur.
 .PD 1
 .
 .TP
-.B \-y <y> (MPlayer uniquement)
+.B \-y <y> (voir aussi \-zoom) (MPlayer uniquement)
 Zoome l'image à la hauteur <y> (si un zoom logiciel ou matériel est
 disponible).
 Désactive les calculs de rapport hauteur/\:largeur.
 .
 .TP
-.B \-zoom \ \ 
+.B \-zoom\ \ 
 Permet le zoom logiciel, si disponible.
-Peut être utilisé pour forcer le zoom avec \-vf scale.
-.br
-.I NOTE:
-\-vf scale ignorera les options \-x / \-y / \-xy / \-fs / \-aspect sans
-\-zoom.
+Ceci permettra le redimensionnement avec les pilotes de sortie qui ne le
+gèrent pas matériellement (comme x11, fbdev) pour lesquels MPlayer désactive
+le redimensionnement pour des raisons de performances.
 .
 .
 .SH "FILTRES AUDIO"
@@ -3984,7 +3984,7 @@ Pour les valeurs entre 4\-7 la rotation n'est faite que si la géométrie
 du film est en mode portrait et non en paysage.
 .RSs
 .IPs 0
-Retourne de 90 degrés dans le sens horaire et retourne.
+Retourne de 90 degrés dans le sens horaire et retourne (par défaut).
 .IPs 1
 Retourne de 90 degrés dans le sens horaire.
 .IPs 2
@@ -4073,7 +4073,7 @@ spal:    768x576 (PAL à pixels carrés)
 .RE
 .
 .TP
-.B dsize={aspect|l:h}
+.B dsize[=aspect|l:h]
 Change la taille ou le rapport hauteur/\:largeur de l'affichage à un point
 arbitraire de la chaine de fitres.
 "aspect" peut être donné en tant que fraction (4/\:3) ou que nombre flottant
@@ -4465,7 +4465,7 @@ Autorise l'augmentation de la netteté (sharpening) dans les deux sens
 .PD 1
 .
 .TP
-.B "unsharp=l|cLxH:quantité[:l|cLxH:quantité]"
+.B unsharp[=l|cLxH:quantité[:l|cLxH:quantité]]
 masque unsharp / flou gaussien
 .RSs
 .IPs l\ \ \ \
@@ -4490,7 +4490,7 @@ taux relatif de dureté / flou à ajouter à l'image
 Echange les plans U & V.
 .
 .TP
-.B "il=[d|i][s][:[d|i][s]]"
+.B il[=[d|i][s][:[d|i][s]]]
 (Dés)entrelace les lignes.
 Le but de ce filtre est d'ajouter la possibilité de traiter le pré-champ
 d'images entrelacées sans les désentrelacer.
@@ -4513,7 +4513,7 @@ multiplexe
 .PD 1
 .
 .TP
-.B "fil=[i|d]"
+.B fil[=i|d]
 (dé)multiplexe les lignes.
 Ce filtre est très proche du filtre il mais bien plus rapide, son principal
 inconvénient est qu'il ne fonctionne pas toujours.
@@ -4778,7 +4778,7 @@ passe.
 .RE
 .
 .TP
-.B phase=[t|b|p|a|u|T|B|A|U][:v]
+.B phase[=t|b|p|a|u|T|B|A|U][:v]
 .I NOTE\ :
 Si vous avez des connaissances audiovisuelles, veuillez indiquez au traducteur
 si cette option -très technique- est correctement décrite, en vous aidant de
@@ -7381,12 +7381,12 @@ Définit le quantum à utiliser.
 Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
-Notez que la quantification dans H.264 fonctionne différemment de MPEG-[124].
+Notez que la quantification dans H.264 fonctionne différemment de MPEG-1/2/4.
 L'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
 Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
 facteur 10.
-Les quantum utiles ont tendance à être bien plus importants avec H.264,
-comparés à MPEG-[124].
+Les quantum utiles ont tendance à être bien plus grands avec H.264,
+comparés à MPEG-1/2/4.
 .
 .TP
 .B pass=<1\-2>
@@ -7436,13 +7436,18 @@ produisant des images de qualité.
 .
 .TP
 .B keyint=<valeur>
-Définit l'intervalle maximum autorisé entre trames-I.
+Définit l'intervalle maximum autorisé entre trames-IDR (par défaut\ : 250).
 Un intervalle plus grand fait économiser des bits, et donc améliore la
-qualité, mais rend la navigation moins précise (par défaut\ : 250).
+qualité, mais rend la navigation moins précise.
+Contrairement à MPEG-1/2/4, H.264 ne souffre d'aucune dérive DCT avec des
+grandes valeurs de keyint.
 .
 .TP
-.B idrint=<valeur>
-Faire qu'une trame sur <valeur> trames-I soit une trame-IDR (par défaut\ : 2).
+.B keyint_min=<1\-keyint/2>
+Définit l'intervalle minimum entre chaque trame-IDR
+(par défaut\ : keyint * 0.4).
+Si des changements de scène apparaissent dans cet intervalle, ils seront
+quand même encodés en trame-I, mais n'initient pas un nouveau GOP.
 En H.264, les trames-I n'encadrent pas nécessairement un groupe fermé de
 trames prédites (closed GOP) car une trame-P peut aussi être prédite
 à partir d'autres trames que celles la précédant (voir aussi frameref).
@@ -7631,10 +7636,20 @@ i16x16, i4x4, b16x16, skip, direct.
 Voir 4x4mv pour plus de détails.
 .
 .TP
+.B (no)8x8mv
+Utilise en plus les types de macro-blocs p16x8, p8x16, p8x8
+(par défaut\ : activé).
+Sans cette option, les trames-P n'utiliseront que les types
+i16x16, i4x4, p16x16, skip.
+Cette option c'est fournie à titre expérimental.
+Il n'est guère recommandé de désactiver 8x8mv lors d'un vrai encodage.
+.
+.TP
 .B (no)4x4mv
 Utilise en plus les types de macro-blocs p8x4, p4x8, p4x4.
 Sans cette option, les trames-P n'utiliseront que les types
 i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
+Requière 8x8mv.
 .br
 L'idée est de trouver le type et la taille des macro-blocs qui décrit le
 mieux une certaine région de l'image.
@@ -7895,5 +7910,6 @@ jusqu'à février 2004.
 .B Guillaume Poirier < guillaume POINT poirier AT etudiant.univ-rennes1.fr >
 depuis Août 2004.
 .PP
-Merci d'envoyer les mails la concernant sur la liste de diffusion MPlayer-DOCS.
+Merci d'envoyer les mails la concernant sur la liste de diffusion
+MPlayer-translations.
 .\" end of file
