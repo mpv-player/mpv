@@ -1575,13 +1575,10 @@ static void
 uninit(void)
 {
 #ifdef HAVE_X11
-	static Display *XDisplay;
-    XDisplay = XOpenDisplay(NULL);
-    if(XDisplay) {
+    struct sdl_priv_s *priv = &sdl_priv;
+    if(priv->X) {
 		if(verbose) printf("SDL: activating XScreensaver/DPMS\n");
-
-		saver_on(XDisplay);
-		XCloseDisplay(XDisplay);
+		vo_x11_uninit();
 	}
 #endif
 	sdl_close();
@@ -1597,10 +1594,6 @@ uninit(void)
 static uint32_t preinit(const char *arg)
 {
     struct sdl_priv_s *priv = &sdl_priv;
-#ifdef HAVE_X11	
-    static Display *XDisplay;
-    static int XScreen;
-#endif
 
     priv->rgbsurface = NULL;
     priv->overlay = NULL;
@@ -1635,16 +1628,12 @@ static uint32_t preinit(const char *arg)
 
     priv->X = 0;
 #ifdef HAVE_X11
-    XDisplay = XOpenDisplay(NULL);
-    if(XDisplay) {
+    if(vo_init()) {
 		if(verbose) printf("SDL: deactivating XScreensaver/DPMS\n");
-		XScreen = DefaultScreen(XDisplay);
-		priv->XWidth = DisplayWidth(XDisplay, XScreen);
-		priv->XHeight = DisplayHeight(XDisplay, XScreen);
+		priv->XWidth = vo_screenwidth;
+		priv->XHeight = vo_screenheight;
 		priv->X = 1;
 		if(verbose) printf("SDL: X11 Resolution %ix%i\n", priv->XWidth, priv->XHeight);
-		saver_off(XDisplay);
-		XCloseDisplay(XDisplay);
 	}
 #endif
 
