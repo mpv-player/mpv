@@ -836,7 +836,7 @@ Usando <application>Microsoft GraphEdit</application> (rápido)
 </para>
 <step><para>
   Obtenga <application>GraphEdit</application> desde el SDK DirectX SDK o
-  <ulink url="http://doom9.org">doom9</ulink>
+  <ulink url="http://doom9.net">doom9</ulink>
   </para></step>
 <step><para>
   Inicie <command>graphedit.exe</command>.

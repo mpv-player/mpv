@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.51 -->
+<!-- synced with 1.52 -->
 <sect1 id="codecs">
 <title>Obsługiwane kodeki</title>
 
@@ -844,7 +844,7 @@ Używając <application>Microsoft GraphEdit</application> (szybki sposób)
 </para>
 <step><para>
   Pobierz <application>GraphEdit</application> z dowolnego DirectX SDK, albo z
-  <ulink url="http://doom9.org">doom9</ulink>
+  <ulink url="http://doom9.net">doom9</ulink>
   </para></step>
 <step><para>
   Uruchom <command>graphedit.exe</command>.
