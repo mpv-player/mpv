@@ -27,7 +27,7 @@ all:    $(LIBNAME) $(SHORTNAME)
 
 pci_names.c:
 	gzip -d -c oth/pci.db.gz >pci.db
-	gawk -f pci_db2c.awk pci.db
+	awk -f pci_db2c.awk pci.db
 
 test:
 	$(CC) test.c -o test $(SHORTNAME)
