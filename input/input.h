@@ -171,3 +171,8 @@ mp_input_init(void);
 
 void
 mp_input_uninit(void);
+
+// Interruptible usleep:  (used by libmpdemux)
+int
+mp_input_check_interrupt(int time);
+

@@ -19,7 +19,6 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "../cfgparser.h"
-#include "mpdemux.h"
 
 #include "network.h"
 #include "http.h"
@@ -33,6 +32,8 @@
 
 extern int verbose;
 extern m_config_t *mconfig;
+
+extern int mp_input_check_interrupt(int time);
 
 /* Variables for the command line option -user, -passwd & -bandwidth */
 char *network_username;
@@ -193,7 +194,7 @@ connect2Server(char *host, int port) {
 	while((ret = select(socket_server_fd+1, NULL, &set, NULL, &tv)) == 0) {
 	      if( ret<0 ) mp_msg(MSGT_NETWORK,MSGL_ERR,"select failed\n");
 	      else if(ret > 0) break;
-	      else if(count > 30 || mpdemux_check_interrupt(500)) {
+	      else if(count > 30 || mp_input_check_interrupt(500)) {
 		if(count > 30)
 		  mp_msg(MSGT_NETWORK,MSGL_ERR,"Connection timeout\n");
 		else

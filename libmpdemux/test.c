@@ -19,6 +19,11 @@ void skip_audio_frame(sh_audio_t *sh_audio){
 void resync_audio_stream(sh_audio_t *sh_audio){
 }
 
+int mp_input_check_interrupt(int time){
+    if(time) usec_sleep(time);
+    return 0;
+}
+
 // for libmpdvdkit2:
 #include "../get_path.c"
 

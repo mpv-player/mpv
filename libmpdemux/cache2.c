@@ -26,6 +26,7 @@
 int stream_fill_buffer(stream_t *s);
 int stream_seek_long(stream_t *s,off_t pos);
 
+extern int mp_input_check_interrupt(int time);
 
 typedef struct {
   // constats:
@@ -221,7 +222,7 @@ int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
 	    s->max_filepos-s->read_filepos
 	);
 	if(s->eof) break; // file is smaller than prefill size
-	if(mpdemux_check_interrupt(PREFILL_SLEEP_TIME))
+	if(mp_input_check_interrupt(PREFILL_SLEEP_TIME))
 	  return 0;
     }
     return 1; // parent exits
