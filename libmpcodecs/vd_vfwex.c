@@ -11,16 +11,16 @@
 
 #include "dll_init.h"
 
-static vd_info_t info_vfw = {
-	"Win32/VfW video codecs",
-	"vfw",
-	VFM_VFW,
+static vd_info_t info_vfwex = {
+	"Win32/VfWex video codecs",
+	"vfwex",
+	VFM_VFWEX,
 	"A'rpi",
 	"based on http://avifile.sf.net",
 	"win32 codecs"
 };
 
-LIBVD_EXTERN(vfw)
+LIBVD_EXTERN(vfwex)
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -37,15 +37,17 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     if(!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YUY2)) return 0;
-    if(!init_vfw_video_codec(sh,0)) return 0;
+    if(!init_vfw_video_codec(sh,1)) return 0;
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
     return 1;
 }
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-    vfw_close_video_codec(sh, 0);
+    vfw_close_video_codec(sh, 1);
 }
+
+//mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
@@ -69,7 +71,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     sh->bih->biWidth=mpi->width; //mpi->stride[0]/(mpi->bpp/8);
     sh->o_bih.biWidth=mpi->width; //mpi->stride[0]/(mpi->bpp/8);
 
-    if((ret=vfw_decode_video(sh,data,len,flags&3,0))){
+    if((ret=vfw_decode_video(sh,data,len,flags&3,1))){
       mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Error decompressing frame, err=%d\n",ret);
       return NULL;
     }
