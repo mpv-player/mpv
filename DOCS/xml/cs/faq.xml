@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.64  -->
+<!-- Synced with: 1.65  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -1341,20 +1341,17 @@ nebo jiné filmy do VCD nebo SVCD formátu a dokonce je vypálit přímo na CD.
 Jak spojím dva video soubory?
 </para></question>
 <answer><para>
-Tohle bylo ze všech stran diskutováno na mplayer-users. Prohledejte
-<ulink url="http://mplayerhq.hu/cgi-bin/s-arch.cgi?sbm=mplayer-users">archivy</ulink>
-pro úplnou odpověď. Je to komplikovaná záležitost a postup velmi závisí na druhu
-souborů, které chcete spojit. MPEGy mohou být s trochou štěstí jednoduše
-spojeny do jednoho souboru. Pro AVI máte k dispozici dva nástroje,
+MPEGy mohou být spojeny do jediného souboru s trochou štěstí.
+Pro AVI soubory můžete využít podporu pro více souborů
+v <application>MEncoder</application>u takto:
+<screen>
+mencoder -ovc copy -oac copy -o výstupní.avi -forceidx soubor1.avi soubor2.avi
+</screen>
+To však bude pracovat pouze tehdy, mají-li soubory stejné rozlišení a kodek.
+Také můžete zkusit
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> a
 <application>avimerge</application> (součást sady nástrojů
-<ulink url="http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/">transcode</ulink>).
-Můžete také zkusit <application>MEncoder</application>, pokud máte dva soubory
-sdílející stejné rozměry a kodek. Zkuste:
-<screen>
-     cat soubor1 soubor2 > soubor3
-     mencoder -ovc copy -oac copy -o out.avi -forceidx soubor3.avi
-</screen>
+<ulink url="http://www.transcoding.org/">transcode</ulink>).
 </para></answer>
 </qandaentry>
 
