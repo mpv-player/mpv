@@ -688,6 +688,12 @@ static int vf_open(vf_instance_t *vf, char* args){
 	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+8);
 	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+8;
     }
+    else if (lavc_param_vcodec && !strcasecmp(lavc_param_vcodec, "asv2"))
+    {
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER)+8);
+	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+8);
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+8;
+    }
     else if (lavc_param_vcodec && !strcasecmp(lavc_param_vcodec, "wmv2"))
     {
 	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER)+4);
@@ -736,6 +742,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('H', 'F', 'Y', 'U');
     else if (!strcasecmp(lavc_param_vcodec, "asv1"))
 	mux_v->bih->biCompression = mmioFOURCC('A', 'S', 'V', '1');
+    else if (!strcasecmp(lavc_param_vcodec, "asv2"))
+	mux_v->bih->biCompression = mmioFOURCC('A', 'S', 'V', '2');
     else if (!strcasecmp(lavc_param_vcodec, "ffv1"))
 	mux_v->bih->biCompression = mmioFOURCC('F', 'F', 'V', '1');
     else
