@@ -3,3 +3,4 @@ config.mak
 mplayer
 .depend
 version.h
+help_mp.h
