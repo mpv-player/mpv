@@ -343,12 +343,16 @@ tv_err:
           url_free(url);
           return NULL;
         }
-        f=streaming_start( &url, f, *file_format );
-//printf("streaming_start(%d) returned %d\n",*file_format,f);
-        if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, url->url); return NULL; }
+        //if(f<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, url->url); return NULL; }
         mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ConnToServer, url->hostname );
         stream=new_stream(f,STREAMTYPE_STREAM);
-//	return NULL;
+	if( streaming_start( stream , url, *file_format )<0){
+          mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);
+          url_free(url);
+	  return NULL;
+	}
+	stream_enable_cache(stream,2048*1024);
+	url_free(url);
 	return stream;
   }
 #endif
