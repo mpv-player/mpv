@@ -156,6 +156,7 @@ int demux_avi_fill_buffer_ni(demuxer_t *demux,demux_stream_t *ds);
 int demux_avi_fill_buffer_nini(demuxer_t *demux,demux_stream_t *ds);
 int demux_asf_fill_buffer(demuxer_t *demux);
 int demux_mov_fill_buffer(demuxer_t *demux,demux_stream_t* ds);
+int demux_vivo_fill_buffer(demuxer_t *demux);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -168,6 +169,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_AVI_NINI: return demux_avi_fill_buffer_nini(demux,ds);
     case DEMUXER_TYPE_ASF: return demux_asf_fill_buffer(demux);
     case DEMUXER_TYPE_MOV: return demux_mov_fill_buffer(demux,ds);
+    case DEMUXER_TYPE_VIVO: return demux_vivo_fill_buffer(demux);
   }
   return 0;
 }
@@ -425,8 +427,15 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
   }
 }
+//=============== Try to open as VIVO file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_VIVO,audio_id,video_id,dvdsub_id);
+  if(vivo_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected VIVO file format!\n");
+      file_format=DEMUXER_TYPE_VIVO;
+  }
+}
 //=============== Try to open as MOV file: =================
-#if 1
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
   if(mov_check_file(demuxer)){
@@ -434,7 +443,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
       file_format=DEMUXER_TYPE_MOV;
   }
 }
-#endif
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN){
   mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
@@ -458,6 +466,10 @@ switch(file_format){
  case DEMUXER_TYPE_AVI: {
   return (demuxer_t*) demux_open_avi(demuxer);
 //  break;
+ }
+ case DEMUXER_TYPE_VIVO: {
+  demux_open_vivo(demuxer);
+  break;
  }
  case DEMUXER_TYPE_ASF: {
   //---- ASF header:
