@@ -51,7 +51,7 @@ typedef struct {
 typedef struct {
     int id;
     int type;
-    int pos;
+    off_t pos;
     //
     int timescale;
     unsigned int length;
@@ -198,21 +198,34 @@ int mov_check_file(demuxer_t* demuxer){
     demuxer->priv=priv;
     
     while(1){
+	int skipped=8;
 	off_t len=stream_read_dword(demuxer->stream);
 	unsigned int id=stream_read_dword(demuxer->stream);
 	if(stream_eof(demuxer->stream)) break; // EOF
-	if(len<8) break; // invalid chunk
+	if (len == 1) /* real size is 64bits - cjb */
+	{
+#ifndef _LARGEFILE_SOURCE
+	    if (stream_read_dword(demuxer->stream) != 0)
+		mp_msg(MSGT_DEMUX, MSGL_WARN, "64bit file, but you've MPlayer compiled without LARGEFILE support!\n");
+	    len = stream_read_dword(demuxer->stream);
+#else
+	    len = stream_read_qword(demuxer->stream);
+#endif
+	    skipped += 8;
+	}
+	else if(len<8) break; // invalid chunk
+
 	switch(id){
 	case MOV_FOURCC('m','o','o','v'):
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie header found!\n");
 	  priv->moov_start=stream_tell(demuxer->stream);
-	  priv->moov_end=priv->moov_start+len-8;
+	  priv->moov_end=priv->moov_start+len-skipped;
 	  flags|=1;
 	  break;
 	case MOV_FOURCC('m','d','a','t'):
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie DATA found!\n");
 	  priv->mdat_start=stream_tell(demuxer->stream);
-	  priv->mdat_end=priv->mdat_start+len-8;
+	  priv->mdat_end=priv->mdat_start+len-skipped;
 	  flags|=2;
 	  break;
 	case MOV_FOURCC('f','r','e','e'):
@@ -226,7 +239,7 @@ int mov_check_file(demuxer_t* demuxer){
 	  id = bswap_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	}
-	if(!stream_skip(demuxer->stream,len-8)) break;
+	if(!stream_skip(demuxer->stream,len-skipped)) break;
 	++no;
     }
     
@@ -429,17 +442,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		// read elements:
 		for(i=0;i<len;i++)
 		{
-		    int len1=stream_read_dword(demuxer->stream);
-		    int len2=stream_read_dword(demuxer->stream);
-		    
-		    mp_msg(MSGT_DEMUX, MSGL_DBG3, "Chunk #%d: len1=%d, len2=%d\n", i, len1, len2);
-
-#ifndef _LARGEFILE_SOURCE /* is this right ?! -- alex */
-		    if (len1)
+#ifndef	_LARGEFILE_SOURCE
+		    if (stream_read_dword(demuxer->stream) != 0)
 			mp_msg(MSGT_DEMUX, MSGL_WARN, "Chunk %d has got 64bit address, but you've MPlayer compiled without LARGEFILE support!\n", i);
-		    trak->chunks[i].pos = len2;
+		    trak->chunks[i].pos = stream_read_dword(demuxer->stream);
 #else
-		    trak->chunks[i].pos = len1+len2; /* also off_t pos -> on 64bit platform off_t MUST be 64bit */
+		    trak->chunks[i].pos = stream_read_qword(demuxer->stream);
 #endif
 		}
 		break;
