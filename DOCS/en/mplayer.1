@@ -1935,7 +1935,7 @@ channel is repeated in both of the output channels).
 If the number of output channels is smaller than the number of input channels
 the exceeding channels are truncated.
 .IPs format[=bps,f]
-Select the format f and bits per sample bps used for output from the
+Select the format f and bytes per sample bps used for output from the
 filter layer.
 The option bps is an integer and denotes Bytes per sample.
 The format f is a string containing a concatenated mix of:
@@ -2526,15 +2526,19 @@ Do not do chrominance filtering (only luminance filtering).
 .RE
 .PD 0
 .RSs
+.IPs "\-vf pp=hb/vb/dr/al"
+horizontal and vertical deblocking, deringing and automatic
+brightness/\:contrast
 .IPs "\-vf pp=hb/vb/dr/al/lb"
-.IPs "\-vf pp=hb/vb/dr/al/lb"
+horizontal and vertical deblocking, deringing, automatic
+brightness/\:contrast and linear blend deinterlacer
 .IPs "\-vf pp=de/\-al"
 default filters without brightness/\:contrast correction
 .IPs "\-vf pp=de/tn:1:2:3"
-enable default filters & temporal denoiser
+Enable default filters & temporal denoiser.
 .IPs "\-vf pp=hb:y/vb:a \-autoq 6"
-deblock horizontal only luminance and switch vertical deblocking on or
-off automatically depending on available CPU time
+Deblock horizontal only luminance and switch vertical deblocking on or
+off automatically depending on available CPU time.
 .RE
 .PD 1
 .TP
