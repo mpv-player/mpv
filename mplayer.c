@@ -1341,8 +1341,9 @@ float time_frame=0; // Timer
 //float num_frames=0;      // number of frames played
 int grab_frames=0;
 char osd_text_buffer[64];
-int drop_frame=0;
-int drop_frame_cnt=0;
+int drop_frame=0;     // current dropping status
+int dropped_frames=0; // how many frames dropped since last non-dropped frame
+int drop_frame_cnt=0; // total number of dropped frames
 int too_slow_frame_cnt=0;
 int too_fast_frame_cnt=0;
 // for auto-quality:
@@ -1506,6 +1507,22 @@ if(!sh_video) {
         in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
 	if(in_size<0){ eof=1; break; }
 	if(in_size>max_framesize) max_framesize=in_size; // stats
+	sh_video->timer+=frame_time;
+	time_frame+=frame_time;  // for nosound
+	// check for frame-drop:
+	if(sh_audio && !d_audio->eof){
+	    float delay=audio_out->get_delay();
+	    float d=(sh_video->timer)-(sh_audio->timer-delay);
+	    // we should avoid dropping to many frames in sequence unless we
+	    // are too late. and we allow 100ms A-V delay here:
+	    if(d<-dropped_frames*frame_time-0.100){
+		drop_frame=frame_dropping;
+		++drop_frame_cnt;
+		++dropped_frames;
+	    } else {
+		drop_frame=dropped_frames=0;
+	    }
+	}
 	// decode:
 	current_module="decode_video";
 //	printf("Decode! %p  %d  \n",start,in_size);
@@ -1515,8 +1532,6 @@ if(!sh_video) {
     //------------------------ frame decoded. --------------------
 
     mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"*** ftime=%5.3f ***\n",frame_time);
-    sh_video->timer+=frame_time;
-    time_frame+=frame_time;  // for nosound
 
 // ==========================================================================
     
@@ -1529,29 +1544,25 @@ if(!sh_video) {
 
     current_module="calc_sleep_time";
 
-    if(drop_frame){
-
-      if(sh_audio && !d_audio->eof){
+#if 0
+{	// debug frame dropping code
 	  float delay=audio_out->get_delay();
-          mp_dbg(MSGT_AVSYNC,MSGL_DBG2,"delay=%f\n",delay);
-          time_frame=sh_video->timer;
-          time_frame-=sh_audio->timer-delay;
-	  if(time_frame>-2*frame_time) {
-	    drop_frame=0; // stop dropping frames
-	    mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nstop frame drop %.2f\n", time_frame);
-	  }else{
-	    ++drop_frame_cnt;
-	    if (verbose > 0 && drop_frame_cnt%10 == 0)
-	      mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nstill dropping, %.2f\n", time_frame);
-	  }
-      }
+	  mp_msg(MSGT_AVSYNC,MSGL_V,"\r[V] %5.3f [A] %5.3f => {%5.3f}  (%5.3f) [%d]   \n",
+	      sh_video->timer,sh_audio->timer-delay,
+	      sh_video->timer-(sh_audio->timer-delay),
+	      delay,drop_frame);
+}
+#endif
+
+    if(drop_frame){
 
       time_frame=0;	// don't sleep!
       blit_frame=0;	// don't display!
       
     } else {
-      // It's time to sleep...
 
+      // It's time to sleep...
+      
       time_frame-=GetRelativeTime(); // reset timer
 
       if(sh_audio && !d_audio->eof){
@@ -1564,18 +1575,6 @@ if(!sh_video) {
 
           time_frame=sh_video->timer;
           time_frame-=sh_audio->timer-delay;
-
-          // we are out of time... drop next frame!
-	  if(time_frame<-2*frame_time){
-	      static int drop_message=0;
-	      drop_frame=frame_dropping; // tricky!
-	      ++drop_frame_cnt;
-	      if(drop_frame_cnt>50 && AV_delay>0.5 && !drop_message){
-	          drop_message=1;
-	          mp_msg(MSGT_AVSYNC,MSGL_WARN,MSGTR_SystemTooSlow);
-	      }
-	      mp_msg(MSGT_AVSYNC,MSGL_DBG2,"\nframe drop %d, %.2f\n", drop_frame, time_frame);
-	  }
 
 	} else {  // if(!dapsync)
 
