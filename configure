@@ -235,7 +235,9 @@ Use these options if autodetection fails:
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-csslibdir=DIR     'libcss.so' (libcss shared lib.) in DIR
   --with-cssincdir=DIR     'css.h' (libcss header file) in DIR
-  --with-sdl-config=PATH   path to 'sdl-config'
+  --with-sdl-config=PATH   path to sdl*-config (e.g.: /opt/bin/sdl-config)
+  --with-gtk-config=PATH   path to gtk*-config (e.g.: /opt/bin/gtk-config)
+  --with-glib-config=PATH  path to glib*-config (e.g.: /opt/bin/glib-config)
   --with-extralibdir=DIR   extra library files (png, SDL, ...) in DIR
   --with-extraincdir=DIR   extra headers (png, SDL) are in DIR
   --with-madlibdir=DIR     'libmad.so' (libmad shared lib.) in DIR
@@ -251,6 +253,9 @@ test "$CC" && _cc="$CC"
 
 _as=auto
 _x11=auto
+_sdlconfig=
+_gtkconfig=
+_glibconfig=
 
 for ac_option do
  case "$ac_option" in
@@ -286,6 +291,12 @@ for ac_option do
         ;;
   --with-sdl-config=*)
         _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --with-gtk-config=*)
+        _gtkconfig=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --with-glib-config=*)
+        _glibconfig=`echo $ac_option | cut -d '=' -f 2`
         ;;
   --with-extralibdir=*)
         _extralibdir=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
@@ -879,13 +890,15 @@ else
 fi
 
 
-# Checking for SDL ...
-if ( sdl-config --version ) >/dev/null 2>&1 ; then
-  _sdlconfig="sdl-config"
-elif ( sdl11-config --version ) >/dev/null 2>&1 ; then
-  _sdlconfig="sdl11-config"
-else
-  _sdlconfig=false
+# Trying to find a sdl*-config if user did not specify one
+if test -z "$_sdlconfig" ; then
+  if ( sdl-config --version ) >/dev/null 2>&1 ; then
+    _sdlconfig="sdl-config"
+  elif ( sdl11-config --version ) >/dev/null 2>&1 ; then
+    _sdlconfig="sdl11-config"
+  else
+    _sdlconfig=false
+  fi
 fi
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
@@ -1737,7 +1750,7 @@ echo "Checking for X11 libs ... $_x11libdir"
 echo "Checking for X11 headers ... $_x11incdir"
 echo "Checking mga_vid device ... $_mga"
 echo "Checking for xmga ... $_xmga" 
-echo "Checking for SDL ... $_sdl"
+echo "Checking for SDL ... $_sdl (with $_sdlconfig)"
 echo "Checking for AA ... $_aa"
 echo "Checking for GGI ... $_ggi"
 echo "Checking for OpenGL ... $_gl"
@@ -1833,37 +1846,40 @@ echo "Extra headers : $_extraincdir"
 if test "$_gui" = yes ; then
 # --------------- GUI begin -------------------
 
+echo
 
 # Check for GTK:
-echo
 echo $_echo_n "Checking for gtk version ... $_echo_c"
-if ( gtk-config --version ) >/dev/null 2>&1 ; then
-	_gtkconfig="gtk-config"
-elif ( gtk12-config --version ) >/dev/null 2>&1 ; then
-	_gtkconfig="gtk12-config"
-else
-	die "gtk not found (check for gtk-config or gtk12-config)"
+if test -z "$_gtkconfig" ; then
+  if ( gtk-config --version ) >/dev/null 2>&1 ; then
+    _gtkconfig="gtk-config"
+  elif ( gtk12-config --version ) >/dev/null 2>&1 ; then
+    _gtkconfig="gtk12-config"
+  else
+    die "gtk not found"
+  fi
 fi
 _gtk=`$_gtkconfig --version 2>&1`
-echo "$_gtk"
 _gtkinc=`$_gtkconfig --cflags 2>&1`
 _gtklib=`$_gtkconfig --libs 2>&1`
+echo "$_gtk (with $_gtkconfig)"
 
 
 # Check for GLIB
-echo
 echo $_echo_n "Checking for glib version ... $_echo_c"
-if ( glib-config --version ) >/dev/null 2>&1 ; then
-	_glibconfig="glib-config"
-elif ( glib12-config --version ) >/dev/null 2>&1 ; then
-	_glibconfig="glib12-config"
-else
-	die "glib not found (check for glib-config or glib12-config)"
+if test -z "$_glibconfig" ; then
+  if ( glib-config --version ) >/dev/null 2>&1 ; then
+    _glibconfig="glib-config"
+  elif ( glib12-config --version ) >/dev/null 2>&1 ; then
+    _glibconfig="glib12-config"
+  else
+    die "glib not found"
+  fi
 fi
 _glib=`$_glibconfig --version 2>&1`
-echo "$_glib"
 _glibinc=`$_glibconfig --cflags 2>&1`
 _gliblib=`$_glibconfig --libs 2>&1`
+echo "$_glib (with $_glibconfig)"
 
 cat > Gui/config.mak << EOF
 
