@@ -498,6 +498,10 @@ Melanson, Mike (tmmm) <melanson@pcisys.net>
 von Merkatz, Arwed <v.merkatz@gmx.net>
     * fontconfig font lookup support
 
+Merritt, Loren <lorenm@u.washington.edu>
+    * x264 encoding support
+    * some libavcodec documentation
+
 Mierzejewski, Dominik (Rathann) <dominik@rangers.eu.org>
     * compiler warning fixes
     * official Red Hat RPM packages
