@@ -92,7 +92,7 @@ static int play(void* data,int len,int flags){
 	int i;
 	unsigned short *s=data;
 //	if(len>2000) len=2000;
-	printf("ao_mpegpes: len=%d  \n",len);
+//	printf("ao_mpegpes: len=%d  \n",len);
 	for(i=0;i<len/2;i++) s[i]=(s[i]>>8)|(s[i]<<8); // le<->be
 	send_lpcm_packet(data,len,0xA0,ao_data.pts,freq_id);
     }
