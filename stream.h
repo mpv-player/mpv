@@ -6,6 +6,7 @@
 #define STREAMTYPE_FILE 0
 #define STREAMTYPE_VCD  1
 #define STREAMTYPE_STREAM 2    // same as FILE but no seeking (for stdin)
+#define STREAMTYPE_DVD  3
 
 #define VCD_SECTOR_SIZE 2352
 #define VCD_SECTOR_OFFS 24
@@ -26,6 +27,7 @@ typedef struct {
   unsigned int buf_pos,buf_len;
   off_t start_pos,end_pos;
   unsigned char buffer[STREAM_BUFFER_SIZE>VCD_SECTOR_SIZE?STREAM_BUFFER_SIZE:VCD_SECTOR_SIZE];
+  void* priv; // used for DVD
 } stream_t;
 
 int stream_fill_buffer(stream_t *s);
