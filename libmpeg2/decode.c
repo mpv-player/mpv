@@ -198,7 +198,7 @@ static int parse_chunk (vo_functions_t * output, int code, uint8_t * buffer)
 #ifdef ARCH_X86
 	if (config.flags & MM_ACCEL_X86_MMX) emms();
 #endif
-	output->flip_page();
+//	output->flip_page();
     }
 
     switch (code) {
