@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.54 -->
+<!-- synced with 1.55 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -452,14 +452,9 @@ melyet egy előre lefordított lejátszó binárissal együtt tölthetünk le az
 <sect1 id="hpux">
 <title>HP UX</title>
 <para>
-Martin Gansser írt és karbantart egy
-<ulink url="http://cloud.prohosting.com/patos/docs/mplayer_on_hpux11.htm">HOGYAN</ulink>-t
-az <application>MPlayer</application> HP-UX alatti használatáról. 
-</para>
-
-<para>
-Mindenesetre a hivatalos <application>MPlayer</application> forrás is képes
-lefordulni HP-UX alatt.
+Joe Page ad helyet a weboldalán a Martin Gansser által készített HP-UX <application>MPlayer</application>
+<ulink url="http://users.rcn.com/joepage/mplayer_on_hpux11.htm">HOGYAN</ulink>-nak.
+Ezen leírás alapján a fordítást elvileg vígan el tudod intézni.
 </para>
 </sect1>
 
