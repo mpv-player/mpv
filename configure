@@ -3745,6 +3745,7 @@ echores "$_ftello"
 if cygwin ; then
   _confcygwin='TARGET_CYGWIN = yes'
   _def_confwin32='#define WIN32'
+  CFLAGS="$CFLAGS -D__CYGWIN__ -D__CYGWIN_USE_BIG_TYPES__"
 else
   _confcygwin="TARGET_CYGWIN = no"
 fi

@@ -127,18 +127,24 @@ extern "C" {
 #define PASCAL      __stdcall
 #define pascal      __stdcall
 #define _pascal     __stdcall
+#if !defined(__CYGWIN__)
 #define _stdcall    __stdcall
+#endif
 #define _fastcall   __stdcall
 #define __fastcall  __stdcall
 #define __export    __stdcall
 #define CDECL       __cdecl
 #define _CDECL      __cdecl
 #define cdecl       __cdecl
+#if !defined(__CYGWIN__)
 #define _cdecl      __cdecl
+#endif
 #define WINAPIV     __cdecl
 #define APIENTRY    WINAPI
 
+#if !defined(__CYGWIN__)
 #define __declspec(x)
+#endif
 #define dllimport
 #define dllexport
 
