@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.58 -->
+<!-- synced with 1.59 -->
 <sect1 id="codecs">
 <title>Obsługiwane kodeki</title>
 
@@ -749,8 +749,7 @@ plików AAC. Wystarczy użyć samej biblioteki libfaad. Zbudujesz ją w następujący
 sposób
 <screen>
 cd faad2/
-chmod +x bootstrap
-./bootstrap
+sh bootstrap
 ./configure
 cd libfaad
 make
