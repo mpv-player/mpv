@@ -392,10 +392,10 @@ if(2*gr_info->big_values > bandInfo[sfreq].shortIdx[12])
        }
        else {
          int i,r0c,r1c;
-//#ifdef L3_DEBUG
+#ifdef L3_DEBUG
 if(2*gr_info->big_values > bandInfo[sfreq].longIdx[21])
   fprintf(stderr,"L3: BigValues too large, doesn't make sense %d %d\n",2*gr_info->big_values,bandInfo[sfreq].longIdx[21]);
-//#endif
+#endif
          for (i=0; i<3; i++)
            gr_info->table_select[i] = getbits_fast(5);
          r0c = getbits_fast(4);
