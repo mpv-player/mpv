@@ -633,6 +633,7 @@ mp_input_parse_cmd(char* str) {
       cmd->args[i].v.s = (char*)malloc((l+1)*sizeof(char));
       strncpy(cmd->args[i].v.s,start,l);
       cmd->args[i].v.s[l] = '\0';
+      if(term != ' ') ptr += l+2;
     } break;
     case -1:
       ptr = NULL;
