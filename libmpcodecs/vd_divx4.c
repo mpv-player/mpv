@@ -60,12 +60,12 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 	value=va_arg(ap, int);
 	va_end(ap);
 
-        if(!strcmp(arg,"Brightness")) option=DEC_GAMMA_BRIGHTNESS;
-        else if(!strcmp(arg, "Contrast")) option=DEC_GAMMA_CONTRAST;
-        else if(!strcmp(arg,"Saturation")) option=DEC_GAMMA_SATURATION;
+        if(!strcasecmp(arg,"Brightness")) option=DEC_GAMMA_BRIGHTNESS;
+        else if(!strcasecmp(arg, "Contrast")) option=DEC_GAMMA_CONTRAST;
+        else if(!strcasecmp(arg,"Saturation")) option=DEC_GAMMA_SATURATION;
         else return CONTROL_FALSE;
 	
-        value = (value * 256) / 100 - 128;
+        value = (value * 128) / 100;
         decore(0x123, DEC_OPT_GAMMA, (void *)option, (void *) value);
 	return CONTROL_OK;
     }
