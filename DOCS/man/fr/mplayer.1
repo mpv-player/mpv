@@ -254,7 +254,7 @@ Le premier appui mettra le film en pause, et chaque appui suivant jouera
 juste une trame et remettra le film en pause (toute autre touche arrête la
 pause).
 .IPs "q / ESC"
-Stoppe la lecture est quitte.
+Stoppe la lecture et quitte.
 .IPs "+ et -"
 Ajuste le décalage audio de +/\:- 0.1 secondes.
 .IPs "/ et *"
@@ -399,7 +399,7 @@ flip=yes
 # Décode/\:encode des fichiers png,
 # démarre avec mf://filemask
 mf=type=png:fps=25
-# Les images en negatif, c'est cool.
+# Les images en négatif, c'est cool.
 vf=eq2=1.0:-0.8
 .fi
 .PP
@@ -439,10 +439,10 @@ uniquement quelques sorties informelles (par défaut)
 quelques infos basiques de débogage, entête avi, valeurs des fonctions
 (débogage de l'initialisation)
 .IPs 2
-affiche les indexes avi, entrées de tronquage, plus d'infos de débogage
+affiche les index avi, entrées de tronquage, plus d'infos de débogage
 (débogage du lecteur)
 .IPs 3
-affiche tout ce qui est relatif aux parseurs d'entrée (pour le déboguage des
+affiche tout ce qui est relatif aux parseurs d'entrée (pour le débogage des
 parsers)
 .RE
 .PD 1
@@ -465,7 +465,7 @@ Ajuste graduellement la synchro A/\:V en fonction de la mesure du décalage
 audio.
 En spécifiant \-autosync\ 0, valeur par défaut, la synchronisation des trames
 sera entièrement basée sur la mesure du décalage audio.
-En spécifiant \-autosync\ 1 ce fera la même chose, mais cela changera
+En spécifiant \-autosync\ 1 la même chose sera faite, mais en changeant
 légèrement l'algorithme de correction A/\:V utilisé.
 On peut souvent améliorer la lecture d'une vidéo possédant un débit binaire
 vidéo irrégulier, mais qui peut-être lue avec \-nosound, en initialisant
@@ -503,7 +503,7 @@ Géré par les pilotes vidéo cvidix, fbdev, svga, vesa, winvidix, xmga,
 xvidix et xover uniquement.
 .
 .TP
-.B \-crash-debug (CODE DE DÉBOGUAGE)
+.B \-crash-debug (CODE DE DÉBOGAGE)
 Attache gdb automatiquement lors d'un crash ou d'un SIGTRAP.
 N'est géré que si MPlayer a été compilé avec l'option de
 configuration \--enable-crash-debug ou si un fichier .developer était
@@ -787,7 +787,7 @@ la quantité demandée de mémoire.
 .B \-bandwidth <valeur> (réseau uniquement)
 Spécifie la bande passante maximum pour le streaming par le réseau (pour les
 serveurs capables d'envoyer du contenu à différents débits).
-Utile si vous voulez voir en direct avec une connexion lente des média
+Utile si vous voulez voir en direct avec une connexion lente des médias
 streamés.
 .
 .TP
@@ -811,7 +811,7 @@ Si le cache se trouve vidé, MPlayer marquera une pose tant que
 .
 .TP
 .B \-cdda <option1:option2>
-Cette option est utilisé pour régler les capacités de lecture de CD Audio
+Cette option est utilisée pour régler les capacités de lecture de CD Audio
 de MPlayer.
 .sp 1
 Les options disponibles sont:
@@ -924,7 +924,7 @@ Décharge le flux vidéo brut dans ./stream.dump (pas très utilisable).
 .
 .TP
 .B \-dvbin <options> (DVB uniquement)
-Passe les paramètres suivant au module d'entrée DVB, de façon à
+Passe les paramètres suivants au module d'entrée DVB, de façon à
 outrepasser ceux par défaut\ :
 .sp 1
 .PD 0
@@ -3344,7 +3344,7 @@ Désactive la compensation automatique du rapport hauteur/\:largeur.
 Renverse l'image de haut en bas.
 .
 .TP
-.B \-lavdopts <option1:option2:...> (CODE DE DÉBOGUAGE)
+.B \-lavdopts <option1:option2:...> (CODE DE DÉBOGAGE)
 Définit les paramètres de décodage de libavcodec.
 .sp 1
 .I EXEMPLE:
@@ -4552,7 +4552,7 @@ utilisés pour trouver les changements de trames, mais risque de prendre les
 détails verticaux pour une vidéo entrelacé.
 .IPs verbose=n
 Si n est non-nul, affiche les métriques détaillés pour chaque trame.
-Utile pour déboguage.
+Utile pour débogage.
 .IPs dint_thres=n
 Seuil de désentrelacement.
 Utilisé pour désentrelacer les trames sans correspondance.
