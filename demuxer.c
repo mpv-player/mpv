@@ -98,8 +98,8 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
 }
 
 void free_sh_video(sh_video_t* sh){
-//    if(sh->our_out_buffer) free(sh->our_out_buffer);
-//    if(sh->bih) free(sh->bih);
+    if(sh->our_out_buffer) free(sh->our_out_buffer);
+    if(sh->bih) free(sh->bih);
     free(sh);
 }
 
