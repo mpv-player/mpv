@@ -369,7 +369,8 @@ occurred.  This recovery technique has no measurable speed penalty.
 <sect3 id="avicodecs">
 <title>MS Video1, Cinepak CVID, and other older codecs</title>
 <para>
-MPlayer is able to play most of the older codecs used in AVI and MOV files.
+<application>MPlayer</application> is able to play most of the older codecs
+used in AVI and MOV files.
 In the past they were decoded with binary Win32 codecs, but now we have
 <emphasis role="bold">native codecs</emphasis> for most of them using
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
@@ -398,7 +399,7 @@ RealVideo:
 
 <para>
 Download Real codecs from
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>.
+<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</ulink>
 and extract them to the
 <filename class="directory">/usr/local/lib/codecs</filename> directory.
 If you want to store them in a different location, pass the
