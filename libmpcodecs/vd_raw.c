@@ -21,7 +21,7 @@ LIBVD_EXTERN(raw)
 static int control(sh_video_t *sh,int cmd,void* arg,...){
     switch(cmd){
     case VDCTRL_QUERY_FORMAT:
-	if( (*((int*)arg)) == sh->format ) return CONTROL_TRUE;
+	if( (*((int*)arg)) == sh->bih->biCompression ) return CONTROL_TRUE;
 	return CONTROL_FALSE;
     }
     return CONTROL_UNKNOWN;
@@ -29,19 +29,21 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
+    if(!sh->bih) return 0; // bih is required
     // set format fourcc for raw RGB:
-    if(sh->format==0){
+    if(sh->bih->biCompression==0){	// set based on bit depth
 	switch(sh->bih->biBitCount){
-	case 8:  sh->format=IMGFMT_BGR8; break;
-	case 15: 
-	case 16: sh->format=IMGFMT_BGR15; break;
-	case 24: sh->format=IMGFMT_BGR24; break;
-	case 32: sh->format=IMGFMT_BGR32; break;
+	case 8:  sh->bih->biCompression=IMGFMT_BGR8; break;
+	case 15: sh->bih->biCompression=IMGFMT_BGR15; break;
+	// workaround bitcount==16 => bgr15 case for avi files:
+	case 16: sh->bih->biCompression=(sh->format)?IMGFMT_BGR16:IMGFMT_BGR15; break;
+	case 24: sh->bih->biCompression=IMGFMT_BGR24; break;
+	case 32: sh->bih->biCompression=IMGFMT_BGR32; break;
 	default:
 	    mp_msg(MSGT_DECVIDEO,MSGL_WARN,"RAW: depth %d not supported\n",sh->bih->biBitCount);
 	}
     }
-    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,sh->format);
+    return mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,sh->bih->biCompression);
 }
 
 // uninit driver
@@ -77,6 +79,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     } else {
 	mpi->planes[0]=data;
 	mpi->stride[0]=mpi->width*(mpi->bpp/8);
+	// .AVI files has uncompressed lines 4-byte aligned:
+	if(sh->format==0 || sh->format==3) mpi->stride[0]=(mpi->stride[0]+3)&(~3);
 	if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
 	    // export palette:
 	    mpi->planes[1]=((unsigned char*)&sh->bih)+40;
