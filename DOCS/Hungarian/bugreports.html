@@ -9,9 +9,17 @@
 <BODY>
 
 
-<P><B><A NAME=C>C függelék - Hogyan jelezd a hibákat</A></B></P>
+<H1><A NAME=B>B függelék - Hogyan jelezd a hibákat</A></H1>
 
-<P><B>Hogyan küldj bugreport-ot?</B></P>
+<P>Egy jó bugreport nagyon hasznosan járul hozzá a szoftver fejlõdéséhez.
+  Ennek megfelelõen mindkettejük elkészítése is bizonyos idõt igényel.
+  Kérlek vedd figyelembe hogy a legtöbb feljesztõ elfoglalt, és emellett
+  még vad mennyiségû e-mailt is el kell olvasnia. Tehát, - bár a
+  visszajelzésed nagyon fontos - meg kell értened hogy az összes általunk
+  kért információt meg kell adnod, és lépésrõl-lépésre követned kell
+  az itt leírtakat.</P>
+
+<H2>Hogyan javítsak egy bugot?</H2>
 
 <P>Ha elég tudást érzel magadban, próbáld kijavítani a hibát saját magad.
   Vagy talán már meg is tetted? Olvasd el ezt a
@@ -20,13 +28,17 @@
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
   listán lévõk segítenek ha kérdésed van.</P>
 
-<P><B>Hogyan jelents be hibát?</B></P>
+
+<H2>Hogyan jelents be hibát?</H2>
 
 <P>Elõször is nézd meg a CVS verziót, mert lehet hogy az általad talált hibát
-  már kijavítottuk. A CVS letöltésére vonatkozó utasításokat
+  már kijavítottuk. A fejlesztés nagyon gyors ütemben zajlik, a "hivatalosan"
+  kiadott <B>MPlayerben</B> lévõ hibákat napokon vagy akár órákon belül
+  kijavítjuk. Éppen ezért csak a CVS verziót használd hibák bejelentésére.
+  A CVS letöltésére vonatkozó utasításokat
   <A HREF="http://www.mplayerhq.hu/homepage/dload-hu.html">ezen a lapon</A>
   találhatod meg. Ha ez nem segített a probléma megoldásában, akkor olvasd el az
-  <A HREF="../documentation.html#known_bugs">ismert hibák fejezetet</A>, és és a
+  <A HREF="../documentation.html#known_bugs">ismert hibák fejezetet</A>, és a
   dokumentáció többi részét. Ha a problémád nem ismert, vagy a mi tanácsaink
   alapján nem oldódik meg, akkor kérjük jelentsd be.</P>
 
@@ -44,6 +56,14 @@
   az összes, lejjebb felsorolt információt, különben valószínûleg nem fogunk
   sikerrel járni.</P>
 
+<P>A nyilvános fórumokon történõ kérdésfeltevéshez egy nagyszerû és jól megírt
+  útmutató a <A HREF="http://www.tuxedo.org/~est/faqs/smart-questions.html">Hogyan
+  tegyünk fel hasznos kérdéseket</A>, Eric S. Raymond-tõl. Ha ezt követed,
+  biztonságban vagy. Más részrõl viszont mivel mindannyiónk szabad idejében
+  és nem kötelezõen követi a listák forgalmát, így nem következik hogy
+  mindig ráérünk, és/vagy azonnal szolgáltatjuk a probléma megoldását.</P>
+
+
 <P><B>Hol jelentheted be?</B></P>
 
 <P>Iratkozz fel az mplayer-users levelezési listára:<BR>
@@ -56,12 +76,14 @@
   <A HREF="http://www.ietf.org/rfc/rfc1855.txt">Netikettet</A>, és
   <B>ne küldj HTML formátumú levelet</B> egyik listánkra se, különben
   vagy nem fog senkit se érdekelni a leveled, vagy ki leszel tiltva.
+  Ha nem tudod mi az a HTML formátumú levél, olvasd el
+  <A HREF="http://expita.com/nomime.html">ezt a leírást</A>.
   Megjegyzendõ továbbá, hogy nem fogunk CC-zni (carbon copy) mindenkinek,
   így jó ötlet feliratkozni a listára mielõtt elküldöd a leveled.</P>
 
-<P><B>Mit tartalmazzon a bugreport?</B></P>
+<H3>Mit tartalmazzon a bugreport?</H3>
 
-<P><B>Rendszer információ</B></P>
+<H4>Rendszer információ</H4>
 
 <UL>
   <LI>milyen disztribúciót használsz?<BR>
@@ -141,17 +163,17 @@
 
 <P><B>Lejátszási problémákhoz</B></P>
 
-<P>Kérjük mellékeld az <B>MPlayer</B> kimenetét legalább egyes bõségi
+<P>Kérjük mellékeld az <B>MPlayer</B> kimenetét legalább 1-es bõségi
   (verbosity) szinten, de <B>ne töröld ki sorokat a kimenetbõl</B>, mikor
   a levélbe másolod. A fejlesztõknek az összes üzenetre szükségük van.
   A következõképpen tudod file-ba irányítani a kimenetet:</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [options] filenév &amp;&gt; mplayer.log</CODE></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [opciók] filenév &amp;&gt; mplayer.log</CODE></P>
 
 <P>Ha a probléma csak egy, vagy néhány file-nál jelentkezik,
   töltsd fel a file-t (file-okat) ide:</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;<A HREF="ftp://mplayerhq.hu/MPlayer/incoming/">ftp://mplayerhq.hu/MPlayer/incoming/</A></P>
 
 <P>Tölts fel egy (a fájloddal azonos nevû) kis .txt fájlt, amiben leírod hogy
   mi a baj, plusz egy mplayer -v kimenet, és az email címed!<BR>
@@ -167,56 +189,60 @@
   el! Ha a file a neten hozzaférhetõ, akkor a <B>pontos</B> URL elküldése is
   elég!
 
-<P><B>Összeomlás (Michael Douglas) esetén</B></P>
+<H4>Összeomlás (Michael Douglas) esetén</H4>
 
 <P>Ha keletkezett coredump, akkor lásd a következõ bekezdést, máskülönben
   hagyd ki.</P>
 
-<P><B>Hogyan nyerjünk ki értelmes tartalmat a coredump-ból</B></P>
+<H4>Hogyan nyerjünk ki értelmes tartalmat a coredump-ból</H4>
 
 <P>Hozd létre a következõ parancs file-t:</P>
 
 <P><CODE>disass $eip-32 $eip+32<BR>
-printf "eax=%08lX\n",$eax<BR>
-printf "ebx=%08lX\n",$ebx<BR>
-printf "ecx=%08lX\n",$ecx<BR>
-printf "edx=%08lX\n",$edx<BR>
-printf "esp=%08lX\n",$esp<BR>
-printf "ebp=%08lX\n",$ebp<BR>
-printf "edi=%08lX\n",$edi<BR>
-printf "esi=%08lX\n",$esi<BR>
-</CODE></P>
+  printf "eax=%08lX\n",$eax<BR>
+  printf "ebx=%08lX\n",$ebx<BR>
+  printf "ecx=%08lX\n",$ecx<BR>
+  printf "edx=%08lX\n",$edx<BR>
+  printf "esp=%08lX\n",$esp<BR>
+  printf "ebp=%08lX\n",$ebp<BR>
+  printf "edi=%08lX\n",$edi<BR>
+  printf "esi=%08lX\n",$esi<BR></CODE></P>
 
 <P>Aztán írd be a következõt:</P>
+
 <P>&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=parancs_file >mplayer.bug</CODE></P>
 
-<P><B><I>5.b.: futtasd <B>MPlayert</B> gdb-n keresztül:</I></B></P>
+<H4>Hogyan nyerj ki információt egy reprodukálható összeomlásból</H4>
 
-<P>Fordítsd újra az <B>MPlayer</B>-t engedélyezve a hibakeresõ módot:<BR>
+Fordítsd újra az <B>MPlayer</B>-t engedélyezve a hibakeresõ módot:
 
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-debug=3<BR>
   &nbsp;&nbsp;&nbsp;&nbsp;make</CODE></P>
 
 majd futtasd az <B>MPlayer-t</B> gdb-bõl:
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb mplayer</CODE></P>
+<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;gdb ./mplayer</CODE></P>
 
-<P>Most a gdb-n belül vagy. Írd be a következõket:</P>
+Most a gdb-n belül vagy. Írd be a következõket:
+
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;run -v [mplayer-opciók] filenév</CODE></P>
 
 és reprodukáld a hibát. Amint megtörtént, a gdb visszaadja a promptot, ahova
 a következõket kell beírnod
+
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;bt<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE></P>
+  &nbsp;&nbsp;&nbsp;&nbsp;disass $eip-32 $eip+32</CODE></P>
+
 és a kimenetet elküldeni nekünk.
 
-<P><B>Általánosan:</B></P>
+<H3>Általánosan:</H3>
 
 <P>Ha valami nagy reportot akarsz küldeni (pl.: log-ok, stb.), akkor jobb ha
-  FTP-re töltöd fel (gzip -9 ..), és csak a file nevét, elérhetõségét írod bele
-  a bugreportba!</P>
+  FTP-re töltöd fel (gzip és bzip2 elõnyben ..), és csak a file nevét,
+  elérhetõségét írod bele a bugreportba!</P>
 
-<P><B>Tudom hogy mit csinálok...</B></P>
+
+<H2>Tudom hogy mit csinálok...</H2>
 
 <P>Ha a fentieket követve csináltál egy megfelelõ bugreportot, biztos
   vagy benne hogy <B>MPlayer</B>, nem pedig fordító, file, hang-meghajtó
@@ -230,8 +256,7 @@ a következõket kell beírnod
   Ne flamelj minket, és csak akkor iratkozz fel az advusers listára ha
   tényleg tudod hogy mit csinálsz, és/vagy hozzáértõ <B>MPlayer</B>
   felhasználónak/fejlesztõnek érzed magad. Ha ez mind rád illik, nem lesz
-  nehéz kitalálni a feliratkozás módját...
-</P>
+  nehéz kitalálni a feliratkozás módját...</P>
 
 </BODY>
 </HTML>

@@ -51,13 +51,18 @@
 
 <P>Az <B>MPlayer</B> a <CODE>libdvdread</CODE> és <CODE>libdvdcss</CODE>
   néven ismert könyvtárakat használja a DVD dekódolásához és lejátszásához.
-  Ez a két program a <CODE>libmpdvdkit/</CODE> alkönyvtárban található, így
+  Ez a két program a <CODE>libmpdvdkit2/</CODE> alkönyvtárban található, így
   külön installálásuk szükségtelen és felesleges. Azért használjuk ezt a
   módszert mert így lehetõségünk nyílt kijavítani egy <CODE>libdvdread</CODE>
   bugot, és megpatchelni a <CODE>libdvdcss-t</CODE> olyan módon hogy a
   feltört CSS kulcsokat mentse el a <CODE>$HOME/.mplayer/DVDKeys</CODE>
   könyvtárba, így a következõ lejátszásnál nem lesz szükség ezek újabb
   feltörésére.</P>
+
+<P>Az <B>MPlayer</B> képes a rendszerben már jelenlevõ libdvdread és libdvdcss
+  könyvtárakat is használni, de ez a megoldás <B>nem</B> ajánlott,
+  hibákat eredményezhet, könyvtár-inkompatibilitást, és alacsonyabb
+  sebességet.</P>
 
 <P>A <CODE>libdvdnav</CODE> támogatásának készítése folyamatban van, jelenleg
   nem használható.</P>

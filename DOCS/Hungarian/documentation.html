@@ -8,19 +8,22 @@
 
 <BODY>
 
-<CENTER><B>MPlayer - Movie Player for LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
-  <BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
+<H1 ALIGN="center"><B>MPlayer - Movie Player for LINUX</H1>
+
+<H2 ALIGN="center">&copy; 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)<BR>
+  <A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></H2>
+
+<P ALIGN="center">
   <A HREF="../documentation.html">[ Angol ]</A>
   [ Magyar ]
   <A HREF="../German/documentation.html">[ Német ]</A>
   <A HREF="../French/documentation.html">[ Francia ]</A>
   <A HREF="../Polish/documentation.html">[ Lengyel ]</A>
-  <A HREF="../Italian/documentation.html">[ Olasz ]</A>
-</CENTER>
+  <A HREF="../Italian/documentation.html">[ Olasz ]</A></P>
 
 <HR>
 
-<P>Tartalomjegyzék</P>
+<H2>Tartalomjegyzék</H2>
 
 <HR>
 
@@ -33,6 +36,10 @@
     <LI><A HREF="#1.3">1.3 Installálás / Tippek</A></LI>
     <LI><A HREF="#1.4">1.4 És a grafikus felület?</A></LI>
     <LI><A HREF="#1.5">1.5 Feliratok és OSD</A></LI>
+      <UL>
+        <LI><A HREF="#mpsub">1.4.1 Az MPlayer saját feliratformátuma (MPsub)</A></LI>
+        <LI><A HREF="#install_osd">1.4.2 OSD és feliratok installálása</A></LI>
+      </UL>
     <LI><A HREF="#1.6">1.6 RTC</A></LI>
   </UL>
   <LI><A HREF="#2">2. Funkciók</A></LI>
@@ -132,13 +139,14 @@
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
 	<LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
 	<LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (néhány MJPEG dekóder kártyához)</A></LI>
-	<LI><A HREF="video.html#dvb">2.3.1.17 DVB (untrans)</A></LI>
-	<LI><A HREF="video.html#dxr3">2.3.1.18 DXR3 (untrans)</A></LI>
+	<LI><A HREF="../video.html#dvb">2.3.1.17 DVB (untrans)</A></LI>
+	<LI><A HREF="../video.html#dxr3">2.3.1.18 DXR3 (untrans)</A></LI>
 	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TV kimenet</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox G400</A></LI>
-	  <LI><A HREF="video.html#2.3.1.A.2">2.3.1.A.2 ATI</A></LI>
-	  <LI><A HREF="video.html#2.3.1.A.3">2.3.1.A.3 Voodoo 3/Banshee</A></LI>
+	  <LI><A HREF="video.html#2.3.1.A.2">2.3.1.A.2 Matrox G450/G550</A></LI>
+	  <LI><A HREF="video.html#2.3.1.A.3">2.3.1.A.3 ATI</A></LI>
+	  <LI><A HREF="video.html#2.3.1.A.4">2.3.1.A.4 Voodoo 3/Banshee</A></LI>
 	</UL>
       </UL>
       <LI><A HREF="sound.html#2.3.2">2.3.2 Hangkártyák, audio kimenetek</A></LI>
@@ -180,25 +188,6 @@
       <LI><A HREF=#2.5.3>2.5.3 Opciók</A></LI> 
       <LI><A HREF=#2.5.4>2.5.4 Irányítás billentyûzetrõl</A></LI>
       <LI><A HREF=#2.5.5>2.5.5 Példák</A></LI>
-    </UL>
-    <LI><A HREF=#2.6>2.6 Video filterek</A></LI>
-    <UL>
-      <LI><A HREF=#2.6.1>2.6.1 Áttekintés</A></LI>
-      <LI><A HREF=#2.6.2>2.6.2 Használat</A></LI>
-      <LI><A HREF=#2.6.3>2.6.3 Crop</A></LI> 
-      <LI><A HREF=#2.6.4>2.6.4 Expand</A></LI>
-      <LI><A HREF=#2.6.5>2.6.5 Fame/Lavc</A></LI>
-      <LI><A HREF=#2.6.6>2.6.6 Flip</A></LI>
-      <LI><A HREF=#2.6.7>2.6.7 Format</A></LI>
-      <LI><A HREF=#2.6.8>2.6.8 Postprocess</A></LI>
-      <LI><A HREF=#2.6.9>2.6.9 RGB2BGR</A></LI>    
-      <LI><A HREF=#2.6.10>2.6.10 Rotate</A></LI>
-      <LI><A HREF=#2.6.11>2.6.11 Scale</A></LI> 
-      <LI><A HREF=#2.6.12>2.6.12 YUY2</A></LI>  
-      <LI><A HREF=#2.6.13>2.6.13 Mirror</A></LI>  
-      <LI><A HREF=#2.6.14>2.6.14 DVBscale</A></LI>  
-      <LI><A HREF=#2.6.15>2.6.15 Cropdetect</A></LI>  
-      <LI><A HREF=#filters_rectangle>2.6.16 Rectangle</A></LI>  
     </UL>
   </UL>
   <LI><A HREF="#3">3. Használat</A></LI>
@@ -246,32 +235,25 @@
       <LI><A HREF="#6.7">6.7 OpenBSD</A></LI>
       <LI><A HREF="#6.8">6.8 Cygwin</A></LI>
     </UL>
-  <LI><A HREF="../documentation.html#A">A fuggelék - Készítõk</A></LI>
+  <LI><A HREF="#mailing_lists">A függelék - Levelezési listák</A></LI>
+  <LI><A HREF="bugreports.html">B függelék - Hogyan jelents be hibát</A></LI>
   <UL>
-    <LI><A HREF="../documentation.html#A2">A/2 függelék - Maintainerek</A></LI>
+    <LI><A HREF="../tech/patches.txt">B/2 függelék - Hogyan küldj patch-et</A></LI>
   </UL>
-  <LI><A HREF="#B">B függelék - Levelezési listák</A></LI>
-  <LI><A HREF="bugreports.html">C függelék - Hogyan jelents be hibát</A></LI>
+  <LI><A HREF="../documentation.html#known_bugs">C függelék - Ismert hibák</A></LI>
+  <LI><A HREF="skin-hu.html">D függelék - MPlayer skin formátum</A></LI>
+  <LI><A HREF="../users_against_developers.html">E függelék - Fejlesztõi sirámok</A></LI>
   <UL>
-    <LI><A HREF="../tech/patches.txt">C/2 függelék - Hogyan küldj patch-et</A></LI>
+    <LI><A HREF="../users_against_developers.html#gcc">GCC 2.96</A></LI>
+    <LI><A HREF="../users_against_developers.html#binary">Bináris terjesztés</A></LI>
+    <LI><A HREF="../users_against_developers.html#nvidia">nVidia</A></LI
+    <LI><A HREF="../users_against_developers.html#barr">Joe Barr</A></LI>
   </UL>
-  <LI><A HREF="../documentation.html#D">D függelék - Ismert hibák</A></LI>
-  <LI><A HREF="skin-hu.html">X függelék - Hogyan Legyél Világhírû SkinKészítõ 5 Perc Alatt!</A></LI>
-</UL>
-
-<HR>
-A fejlesztõk sirámai
-<HR>
-
-<UL>
-  <LI><A HREF="../users_against_developers.html#gcc">1. GCC 2.96</A></LI>
-  <LI><A HREF="../users_against_developers.html#nvidia">2. NVidia</A></LI
-  <LI><A HREF="../users_against_developers.html#barr">3. Joe Barr</A></LI>
 </UL>
 
 <HR>
 
-<P><B><A NAME=0>0. Hogyan olvasd ezt a dokumentációt</A></B></P>
+<H1><A NAME=0>0. Hogyan olvasd ezt a dokumentációt</A></H1>
 
 <P>Ha ez az elsõ találkozásod az <B>MPlayer</B>-rel, olvass el mindent
   innentõl egészen az Installálás fejezet végéig, közben kövesd a linkeket.
@@ -284,28 +266,29 @@ A fejlesztõk sirámai
   készség viszont jól jön. Sok szerencsét. Szükséged lesz rá :)</P>
 
 
-<P><B><A NAME=1>1.  Bevezetés</A></B></P>
+<H1><A NAME=1>1. Bevezetés</A></H1>
 
-<P><B><A NAME=1.1>1.1.  Röviden</A></B></P>
+<A NAME=1.1></A>
 
 <P>Az <B>MPlayer</B> egy LINUXON mûködõ videolejátszó (fut sok más Unix-on és
-  akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>).  Le
+  akár nem-x86 processzorokon is. Lásd a <A HREF="#6">6-os fejezetet</A>). Le
   tudja játszani a legtöbb
   MPEG, VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg,
   FILM, RoQ, PVA file-t,
-  és ezekhez felsorakoztat jónéhány natív, XAnim, RealPlayer, és Win32 codecet.  Nézhetsz
+  és ezekhez felsorakoztat jónéhány natív, XAnim, RealPlayer, és Win32 codecet. Nézhetsz
   vele <B>VideoCD</B>-t, <B>SVCD</B>-t, <B>DVD</B>-t, <B>3ivx</B>-et,
   <B>RealMedia-t</B>, és <B>DivX</B>-et is (és ezekhez egyáltalán nincs
-  szüksége az avifile csomagra).  Az MPlayer másik óriási tulajdonsága a
+  szüksége az avifile csomagra). Az MPlayer másik óriási tulajdonsága a
   megjelenítési módok
   széles választéka. Mûködik X11, Xv, DGA, OpenGL, SVGAlib, fbdev, aalib,
-  DirectFb, sõt SDL-lel vagy GGI-vel is (beleértve ezáltal az SDL/GGI drivereit
-  is), és néhány alacsonyszintû kártyaspecifikus driver (Matrox/3dfx/Radeon, Mach64, Permedia3) is
-  használható! Legtöbbjük támogat szoftveres vagy hardveres skálázást, így a
-  teljesképernyõs mód is elérhetõ.  Az <B>MPlayer</B> támogat továbbá hardveres
+  DirectFB, sõt SDL-lel vagy GGI-vel is (beleértve ezáltal az SDL/GGI drivereit
+  is), és néhány alacsonyszintû kártyaspecifikus driver (Matrox, 3dfx, Radeon,
+  Mach64, Permedia3) is
+  használható! Legtöbbjük támogat szoftveres vagy hardveres nagyítást, így a
+  teljesképernyõs mód is elérhetõ. Az <B>MPlayer</B> támogat továbbá hardveres
   MPEG kártyákkal történõ dekódolást/megjelenítést, így például a<B>
-  <A HREF="video.html#dvb">DVB</A></B> és <B>
-  <A HREF="video.html#dxr3">DXR3/Hollywood+</A></B> kártyákon!
+  <A HREF="../video.html#dvb">DVB</A></B> és <B>
+  <A HREF="../video.html#dxr3">DXR3/Hollywood+</A></B> kártyákon!
   És még nem is szóltam a szép, élsímított, árnyékolt feliratozásról (<B>10
   támogatott típus!</B>), ami támogat európai/ISO 8859-1,2 (magyar, angol,
   cseh, stb), cirill és koreai fontokat, valamint OSD-t!</P>
@@ -314,14 +297,14 @@ A fejlesztõk sirámai
 
 <P>A lejátszó sziklaszilárdan játszik le hibás MPEG file-okat (hasznos néhány
   VCD-nél), és lejátszik minden olyan hibás AVI-t, amit a csodás windows media
-  player nem.  Még az index chunk nélküli AVI-k is lejátszhatók, sõt az indexet
+  player nem. Még az index chunk nélküli AVI-k is lejátszhatók, sõt az indexet
   ideiglenesen fel is lehet építeni az -idx opcióval (vagy véglegesen a
   <B>MEncoder</B>-rel), így tekerni is lehet bennük! Amint az látszik, a
   stabilitás és a minõség a legfontosabbak, és a sebesség is
   számít.</P>
 
 
-<B><P><A NAME=1.2>1.2.  Történelem</A></B></P>
+<H2><A NAME=1.2>1.2 Történelem</A></H2>
 
 <P>Egy éve kezdõdött...
   Nagyon sok lejátszót kipróbáltam Linux alatt (mtv,xmps,dvdview,livid/oms,
@@ -359,7 +342,7 @@ A fejlesztõk sirámai
 <LI><B>MPlayer 0.18 "The BugCounter"</B> Jul 9, 2001<BR>
     2 hónap telt el a 0.17 óta, és itt az újabb release... Teljes ASF támogatás,
     még több subtitle formátum, libao (mint libvo, csak ez audio-ra), és még
-    stabilabb, mint eddig! KÖTELEZÕ !</LI>
+    stabilabb, mint eddig! KÖTELEZÕ!</LI>
 <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B> Okt 8, 2001<BR>
     Hmm. Újra release. Néhány tonna új feature, béta verziójú GUI,
     hibajavítások, új vo és ao meghajtók, Linuxon kívül sok más támogatott
@@ -373,7 +356,7 @@ A fejlesztõk sirámai
     </LI>
 </UL>
 
-<P><B><A NAME=1.3>1.3. Installálás</A></B></P>
+<H2><A NAME=1.3>1.3. Installálás</A></H2>
 
 <P>Ez a fejezet arra szolgál hogy segítsen véghezvinni az <B>MPlayer</B>
   fordítását és konfigurálását. Nem könnyû, de nem is szükségszerûen nehéz. Ha
@@ -411,7 +394,7 @@ A fejlesztõk sirámai
     a benne levõ <A HREF="video.html#2.3.1.2">XVideo</A> kiterjesztés révén 
     (<B>Xv</B>-ként is fogok majd hivatkozni rá). <A HREF="video.html#2.3.1.2">Részletes
     információ.</A><BR>
-    Bizonyosodj meg róla hogy fennvan a <B>devel</B> csomagja is !<BR>
+    Bizonyosodj meg róla hogy fennvan a <B>devel</B> csomagja is!<BR>
     Néhány kártyához az <B>MPlayer</B> különleges meghajtókat tartalmaz
     amik XFree86 nélkül is hardveresen gyorsított lejátszást tesznek
     lehetõvé. Listát lásd lejjebb.</LI>
@@ -422,10 +405,13 @@ A fejlesztõk sirámai
     történõ lejátszás során furcsa a lejátszás képe). Ajánlott
     mindig a legújabbat használni.</LI>
   <LI><B>libjpeg</B> - opciónális (M)JPEG dekóder. Az -mf opció és néhány
-    QT file használja.  Hasznos mind az <B>MPlayer</B>hez, mind a
+    QT file használja. Hasznos mind az <B>MPlayer</B>hez, mind a
     <B>MEncoder</B>hez, ha JPEG file-okkal is akarsz dolgozni.</LI>
   <LI><B>libpng</B> - opcionális (M)PNG dekóder. Kell a GUI-hoz is. Hasznos
     mind az <B>MPlayer</B>hez, mind a <B>MEncoder</B>hez.</LI>
+  <LI><B>lame</B> - ajánlott, szükséges ahhoz, hogy MP3 audiót tudj
+    enkódolni a MEncoderrel. Mindig a legújabbat ajánlott használni
+    (minimum 3.90)</LI>
   <LI><B>libogg</B> - opcionális, szükséges az OGG fileformátum
     lejátszásához.</LI>
   <LI><B>libvorbis</B> - opcionális, szükséges az OGG Vorbis formátumú audio
@@ -435,51 +421,54 @@ A fejlesztõk sirámai
 <P><B><I>CODECEK</I></B></P>
 
 <UL>
-<LI><B>libavcodec</B> : ha ezt a DivX3/DivX4/DivX5/MP42-t (is) dekódolni tudó
+<LI><B>libavcodec</B>: ha ezt a
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1-et
+  (is) dekódolni tudó
   codecet akarod használni, tekintsd meg a
   <A HREF="codecs.html#2.2.1.2">2.2.1.2</A>-es fejezetet még fordítás
   elõtt.<BR>
   <UL>
-    <LI>szükséged lesz erre a codecre ha <B><I>DivX/DivX4/DivX5/MP42</I></B>
-    filmeket akarsz nem-x86 gépen lejátszani</LI>
-    <LI>RealVideo 1.0/VIVO/MJPEG/h263 és még sok más codec, mind lejátszáshoz,
-    mind enkódoláshoz!</LI>
-    <LI>ezzel a codec-kel értheted el a DivX/DivX4/DivX5 filmek <B>leggyorsabb
-    dekódolását</B> (még az eredeti DivX4-nél is gyorsabb) !</LI>
+    <LI>szükséged lesz erre a codecre ha fent említett tipusú videókat
+      akarsz nem-x86 gépen lejátszani</LI>
+    <LI>enkódolási lehetõség a codec-ekkel</LI>
+    <LI>ez a codec a leggyorsabb a DivX3, 4, 5 és egyéb MPEG4 videók
+      lejátszására. Ajánlott!</LI>
   </UL>
 </LI>
 
-<LI><B>Win32 codecek</B> : ha az <B>MPlayer</B>-t x86-os gépen fogod
+<LI><B>Win32 codecek</B>: ha az <B>MPlayer</B>-t x86-os gépen fogod
   használni, valószínûleg használni akarod õket. Töltsd le és tömörítsd ki a
   w32codecs.zip-et az /usr/lib/win32 könyvtárba <B>MIELÕTT</B> még az
   <B>MPlayer-t</B> lefordítanád, különben nem lesz Win32 támogatás
   befordítva.<BR>
-  Megj.: az avifile project hasonló csomagot használ, de különbözik a miénktõl,
+  <B>Megj.:</B> az avifile project hasonló csomagot használ, de különbözik a miénktõl,
   ígyhát ezt használd! A mi csomagunk egyébként használható az avifile-vel.<BR>
   <UL>
     <LI>Ha valamilyen hardveres tömörítõ eszközzel, digitális kamerával (pl.
     DV, ATI VCR, MJPEG) felvett filmeket is le akarsz játszani, akkor muszáj
     ezeket feltenned.</LI>
-    <LI><B>WMV</B> vagy régi ASF (MP42) filmek lejátszásához is szükséges</LI>
+    <LI><B>WMV8</B> filmek lejátszásához is szükséges. Régebbi ASF-ek
+      lejátszásához nem, bár ezek között gyakori a VoxWare audio-val
+      ellátott file - amihez viszont szükség van a Win32 codecekre.</LI>
   </UL>
 </LI>
 
-<LI><B>DivX4/DivX5</B> : errõl a codecrõl a
+<LI><B>DivX4/DivX5</B>: errõl a codecrõl a
   <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>-es fejezetben található információ.
-  Ha nem áll szándékodban enkódolni akkor ez a codec eléggé szükségtelen,
-  tekintve hogy a <B>libavcodec</B> (lásd fent) sokkal gyorsabb nála.<BR>
-  A DivX4 tulajdonságai :
+  Semmiképpen nem lehet szükséged erre a codec-re, mert a libavcodec
+  mind dekódolásban mind enkódolásban sokkal gyorsabb nála.<BR>
+  A DivX4 tulajdonságai:
   <UL>
     <LI>1 vagy 2 menetes enkódolás lehetõsége a
       <A HREF="encoding.html">MEncoder-rel</A></LI>
     <LI>gyorsabban játszik le <B>DivX3</B> filmeket mint a Win32-es DLL-ek,
-      de lassabban mint a <B>libavcodec</B> !</LI>
+      de lassabban mint a <B>libavcodec</B>!</LI>
     <LI>A codec maga zárt forráskódú, és egyelõre csak x86-os
       gépeken futtatható.</LI>
   </UL>
 </LI>
 
-<LI><B>XViD</B> : A DivX4Linux nyílt forráskódú alternatívája.
+<LI><B>XViD</B>: A DivX4Linux nyílt forráskódú alternatívája.
   <UL>
     <LI>1 vagy 2 menetes enkódolás a <A HREF="encoding.html">MEncoderrel</A></LI>
     <LI>nyílt forráskód, így nem csak x86 gépeken lehet használni</LI>
@@ -494,70 +483,76 @@ A fejlesztõk sirámai
   hozzáférhetõk, ez az egyetlen lehetõség Indeo (stb) filmek lejátszására
   nem-x86-os gépeken (mármint az Xanim használatán kívûl persze;). Viszont
   például a Cinepak filmekhez ajánlott az <B>MPlayer</B> saját codec-ét
-  használni !</LI>
+  használni!</LI>
 
 <LI><B>Ogg Vorbis</B> codec-kel tömörített hangot tartalmazó file-okhoz
   szükséges egy megfelelõen felinstallált <CODE>libvorbis</CODE>, akár
   deb/rpm-bõl, akár
   <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">forrásból</A>.</LI>
 
+<LI>Az <B>MPlayer</B> képes a RealPlayer 8 és a RealONE könyvtárait
+  használni RealVideo 2.0 - 4.0 videoval és Cook/Sipro audioval ellátott
+  file-ok lejátszására. Lásd <A HREF="formats.html#2.1.1.7">itt</A>.</LI>
+
 </UL>
 
-<P><B><I>VIDEOKÁRTYÁK</I></B></P>
+<H4>Videokártyák</H4>
 
 <P>Itt kétféle videokártyát különböztetünk meg. Az egyik fajta (az újabbak)
-rendelkezik <B>hardveres YUV gyorsítással és nagyítással</B>, a másik pedig
-nem.</P>
+  rendelkezik <B>hardveres YUV gyorsítással és nagyítással</B>, a másik pedig
+  nem.</P>
 
-<P>
-<B><I>YUV kártyák</I></B></P>
+<H4>YUV kártyák</H4>
 
-<P>
-<B>Kevés CPU idõ felhasználásával</B> tudják
-megjeleníteni vagy nagyítani a képet. Itt a nagyítás <B>ugyanannyi</B>
-CPU idõt használ mint a síma megjelenítés, tekintve hogy a videokártya
-végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.</P>
+<P><B>Kevés CPU idõ felhasználásával</B> tudják
+  megjeleníteni vagy nagyítani a képet. Itt a nagyítás <B>ugyanannyi</B>
+  CPU idõt használ mint a síma megjelenítés, tekintve hogy a videokártya
+  végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.</P>
 
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 kártyák</B> : a speciális <B>mga_vid</B>
+
+<LI><B>Matrox G200/G400/G450/G550 kártyák</B>: a speciális <B>mga_vid</B>
   meghajtó lehetõvé teszi az Xv-nél sokkal gyorsabb megjelenítést, TV
   kimenetet G400-on, mindezt akár XFree86 nélkül. Lásd a
   <A HREF="video.html#2.3.1.7">2.3.1.7</A>-es fejezetet. Ezeket a lépéseket
   fordítás <I>elõtt</I> kell megtenni, különben nem épül be Matrox támogatás az
   <B>MPlayer</B>-be. Olvasd el továbbá a <A HREF="video.html#2.3.1.A.1">Matrox
   TV kimenet</A> fejezetet. <U><B>Ha nem Linux-ot használsz</B></U>, olvasd el
-  a <A HREF="video.html#2.3.1.15">Vidix</A> fejezetet !</LI>
+  a <A HREF="video.html#2.3.1.15">Vidix</A> fejezetet!</LI>
 
-<LI><B>3Dfx Voodoo3/Banshee kártyák</B> : nézd meg a <A
-  HREF="video.html#2.3.1.9">2.3.1.9</A>-es fejezetet.  Ezeket a lépéseket
+<LI><B>3Dfx Voodoo3/Banshee kártyák</B>: nézd meg a <A
+  HREF="video.html#2.3.1.9">2.3.1.9</A>-es fejezetet. Ezeket a lépéseket
   fordítás <I>elõtt</I> kell megcsinálni, különben nem épül be 3Dfx támogatás
-  az <B>MPlayer</B>-be. Nézd meg a <A HREF="video.html#2.3.1.A.3">3dfx TV
+  az <B>MPlayer</B>-be. Nézd meg a <A HREF="video.html#2.3.1.A.4">3dfx TV
   kimenet</A> fejezetet is. Ha X-et fogsz használni, legalább 4.2.0-ás
   legyen mert a korábbiak 3dfx támogatása bugos.</LI>
 
-<LI><B>ATI kártyák</B> : amennyiben valamilyen ATI kártyád van, a <A HREF="video.html#2.3.1.A.2">
-  2.3.1.A.2 fejezetben</A> megtalálod a kártyád támogatottságára vonatkozó
+<LI><B>ATI kártyák</B>: amennyiben valamilyen ATI kártyád van, a <A HREF="video.html#2.3.1.A.3">
+  2.3.1.A.3 fejezetben</A> megtalálod a kártyád támogatottságára vonatkozó
   információkat. Ha <B>Radeon</B>, <B>Rage128</B> vagy <B>Mach64</B> kártyád
-  van, van neked egy <B>Vidix</B> meghajtónk, TV kimenettel ! Lásd
-  <A HREF="video.html#2.3.1.14">ezt</A> a fejezetet ! <U><B>Ha nem Linux-ot
+  van, van neked egy <B>Vidix</B> meghajtónk, TV kimenettel! Lásd
+  <A HREF="video.html#2.3.1.14">ezt</A> a fejezetet! <U><B>Ha nem Linux-ot
   használsz</B></U>, olvasd el a <A HREF="video.html#2.3.1.15">Vidix</A>
-  fejezetet !</LI>
+  fejezetet!</LI>
 
-<LI><B>S3 kártyák</B> : a Savage és a Virge/DX chip-ek és az XFree86 meghajtó
+<LI><B>S3 kártyák</B>: a Savage és a Virge/DX chip-ek és az XFree86 meghajtó
   hozzájuk támogatja a hardveres gyorsítást. A lehetõ legújabb XFree86
   ajánlott, a régebbi meghajtók hibásak. A Savage kártyáknak problémáik vannak
   az YV12 megjelenítéssel. Lásd az <A HREF="video.html#2.3.1.2.2">S3 Xv
-  fejezetet</A>.  Régi, Trio chip-es kártyáknak nincs, vagy lassú a
+  fejezetet</A>. Régi, Trio chip-es kártyáknak nincs, vagy lassú a
   hardveres támogatásuk.</LI>
 
-<LI><B>Nvidia kártyák</B> : nagyon rossz választás videolejátszásra. Ezek
+<LI><B>Nvidia kártyák</B>: nagyon rossz választás videolejátszásra. Ezek
   a kártyák olcsó távolkeleti alkatrészekbõl készülnek, amik rossz képminõséget
   adnak más kártyákhoz képest. Továbbá az <U>XFree86-ban található Nvidia
   meghajtó nem tartalmaz hardveres YUV gyorsítást!</U> Ehhez le kell töltened
   az Nvidia zárt forráskódú meghajtóját az nvidia.com-rõl. Részleteket
   lásd az <A HREF="video.html#2.3.1.2.3">Nvidia Xv meghajtó</A> fejezetben.</LI>
 
-<LI><B>más kártyák</B> : a fentiek közül egyik se?
+<LI><B>3DLabs GLINT R3 és Permedia3: egy VIDIX driver áll rendelkezésre
+  (pm3_vid). Lásd <A HREF="video.html#2.3.1.15">itt</A>.</LI>
+
+<LI><B>más kártyák</B>: a fentiek közül egyik se?
   <UL>
     <LI>Próbáld ki hátha a kártyád, és az XFree86 drivere támogatja a
       hardveres gyorsítást. Lásd az <A HREF="video#2.3.1.2">Xv fejezetet</A>
@@ -573,61 +568,86 @@ végzi. Így a teljes képernyõs lejátszás szép és gyors lesz.</P>
 
 </UL>
 
-<P><B><I>YUV gyorsítással nem rendelkezõ kártyák</I></B></P>
+<H4>YUV gyorsítással nem rendelkezõ kártyák</H4>
 
-<P>
-Ezeknél vagy szoftveresen kell
-nagyítani a képet (ez nagyon lassú), vagy le kell váltani egy kisebb
-videomódba hogy pont akkora legyen a kép (pl 352x288). Ha nincs YUV
-gyorsításod, az utóbbi módszer a célravezetõbb. Az <B>MPlayerben</B>
-<U>ez a <CODE>-vm</CODE> opcióval kapcsolható be</U>. A következõ
-meghajtókat érdemes kipróbálni :</P>
+<P>Ezeknél vagy szoftveresen kell
+  nagyítani a képet (ez nagyon lassú), vagy le kell váltani egy kisebb
+  videomódba hogy pont akkora legyen a kép (pl 352x288). Ha nincs YUV
+  gyorsításod, az utóbbi módszer a célravezetõbb. Az <B>MPlayerben</B>
+  <U>ez a <CODE>-vm</CODE> opcióval kapcsolható be</U>. A következõ
+  meghajtókat érdemes kipróbálni:</P>
 
 <UL>
-  <LI>XFree86 <B>használatával</B> : lásd a
-   <A HREF="video.html#2.3.1.3">DGA</A> és az
-   <A HREF="video.html#2.3.1.13">X11</A> meghajtók fejezeteit. A DGA
-   használata ajánlott! Kipróbálhatod SDL-en keresztül is, hátha jobb lesz.</LI>
-  <LI>XFree86 <B>nélkül</B> : próbáld ki ezeket a meghajtókat, ebben a
-    sorrendben :
+  <LI>XFree86 <B>használatával</B>: lásd a
+    <A HREF="video.html#2.3.1.3">DGA</A> és az
+    <A HREF="video.html#2.3.1.13">X11</A> meghajtók fejezeteit. A DGA
+      használata ajánlott! Kipróbálhatod SDL-en keresztül is, hátha jobb lesz.</LI>
+  <LI>XFree86 <B>nélkül</B>: próbáld ki ezeket a meghajtókat, ebben a
+    sorrendben:
     <A HREF="video.html#2.3.1.12">vesa</A>,
     <A HREF="video.html#2.3.1.6">fbdev</A>,
     <A HREF="video.html#2.3.1.5">svgalib</A>,
     <A HREF="video.html#2.3.1.11">aalib</A>.</LI>
 </UL>
 
-<P><B><I>HANGKÁRTYÁK</I></B></P>
+<H4>Néhány kártya:</H4>
+
+<UL>
+  <LI><B>Cirrus Logic kártyák</B>:
+    <UL>
+      <LI>GD 7548: beépítve található a Compaq Armada 41xx notebook
+        családban.</LI>
+        <UL>
+          <LI>XFree86 3: 8 és 16bpp üzemmódokban mûködik, bár 800x600@16bpp
+            felbontásban nagyon bugos és lassú.
+            <B>Ajánlott: 640x480@16bpp</B></LI>
+          <LI>XFree86 4: az X szerver röviddel indulás után megfagy, kivéve
+            ha kikapcsolod a rajzolás gyorsítását (nem Xv!), de ezután az
+            egész dolog lassabb lesz mint a 3-as X. Nincs Xvideo.</LI>
+          <LI>FBdev: a kernelben található <CODE>clgenfb</CODE> meghajtóval
+            mûködésre lehet bírni a framebuffert, de nekem csak 8bpp-vel
+            volt kép, ergo használhatatlan. A clgenfb forrásába fordítás
+            elõtt kézzel kell beírni a 7548 ID-t.</LI>
+          <LI>VESA: a kártya csak 1.2-es VBE-t tud, így a VESA kimenet
+            nem lehetséges. UniVBE-vel nem lehet megkerülni.</LI>
+          <LI>SVGAlib: egy régebbi Cirrus CHIP-et detektál. Használható, de
+            lassú, és csak 8bpp-ben megy. <CODE>-bpp 8</CODE>.</LI>
+        </UL>
+      </LI>
+    </UL>
+  </LI>
+</UL>
+
+
+<H4>Hangkártyák</H4>
 
 <UL>
 
-<LI><B>Soundblaster Live!</B> : ezzel a kártyával lehetõséged van az
+<LI><B>Soundblaster Live!</B>: ezzel a kártyával lehetõséged van az
   alapértelmezett 2 helyett 4 vagy 6 (<B>5.1</B>) csatornás AC3 kimenetre.
   Olvasd el a <A HREF="codecs.html#2.2.2.1">Szoftveres AC3 dekódolás</A>
   fejezetet. Hardveres AC3 dekódoláshoz MUSZÁJ 0.9-es ALSA-t használnod,
   OSS emulációval!</LI>
 
-<LI><B>SP/DIF kimenettel rendelkezõ C-Media kártyák</B> : ha van hardveres
+<LI><B>SP/DIF kimenettel rendelkezõ C-Media kártyák</B>: ha van hardveres
   AC3 dekódered, ezekkel a kártyákkal át lehet adni annak a bigyónak a
   kérdéses AC3-at, lásd a <A HREF="codecs.html#2.2.2.2">hardveres AC3
   dekódolás fejezetet</A>.</LI>
 
 <LI><B>más kártyák</B> speciális funkcióihoz az <B>MPlayer</B> nem tartalmaz
   támogatást. <U>Ajánlott a <A HREF="sound.html#2.3.2">hangkártyák fejezetének</A>
-  elolvasása !</LI></U>
+  elolvasása!</LI></U>
 </UL>
 
-<P><B><I>EGYÉB FUNKCIÓK</I></B></P>
+<H4>EGYÉB FUNKCIÓK</H4>
 
 <UL>
-<LI>Kell grafikus felület? Ha igen, olvasd el az <A HREF=#1.4>1.4-es fejezetet</A>
-  mielõtt még belekezdenél a fordításba.</LI>
-
-<LI>Ha fel akar installálni a nagyszerû <B>MEncodert</B> is, nézd meg a
-  <A HREF=encoding.html#2.4">MEncoder fejezetet</A> is.</LI>
-
-<LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#2.5>TV bemenet</A>
-  fejezetet.</LI>
-
+  <LI>Kell grafikus felület? Ha igen, olvasd el az <A HREF=#1.4>1.4-es fejezetet</A>
+    mielõtt még belekezdenél a fordításba.</LI>
+  <LI>Ha fel akar installálni a nagyszerû <B>MEncodert</B> is, nézd meg a
+    <A HREF=encoding.html#2.4">MEncoder fejezetet</A> is.</LI>
+  <LI>Ha van V4L kompatibilis <B>TV tunered</B>, nézd meg a <A HREF=#2.5>TV bemenet</A>
+    fejezetet.</LI>
 </UL>
 
 <P>Ezután fordítsd le az <B>MPlayer</B>-t:</P>
@@ -637,16 +657,16 @@ meghajtókat érdemes kipróbálni :</P>
 	make install</PRE>
 
 <P>Innentõl használatra kész állapotban van az <B>MPlayer</B>. Az
-<CODE>$PREFIX/share/mplayer</CODE> könyvtár tartalmazza a
-<CODE>codecs.conf</CODE> file-t, ami megmondja a programnak a használható
-codec-eket és azok tulajdonságait. Ezt a file-t mindig az <B>MPlayer</B>-rel
-együtt kell frissíteni ! Ha a home könyvtáradban van egy régi codecs.conf
-file, azt töröld !</P>
+  <CODE>$PREFIX/share/mplayer</CODE> könyvtár tartalmazza a
+  <CODE>codecs.conf</CODE> file-t, ami megmondja a programnak a használható
+  codec-eket és azok tulajdonságait. Ezt a file-t mindig az <B>MPlayer</B>-rel
+  együtt kell frissíteni! Ha a home könyvtáradban van egy régi codecs.conf
+  file, azt töröld!</P>
 
 <P><B>Debian felhasználók</B> egyszerûen készíthetnek .deb csomagot maguknak,
-csak a <CODE>fakeroot debian/rules binary</CODE> parancsot kell beírniuk az
-<B>MPlayer</B> forrás gyökérkönyvtárában. Részletes információ <A
-HREF="documentation.html#6.1">itt</A>.</P>
+  csak a <CODE>fakeroot debian/rules binary</CODE> parancsot kell beírniuk az
+  <B>MPlayer</B> forrás gyökérkönyvtárában. Részletes információ
+  <A HREF="documentation.html#6.1">itt</A>.</P>
 
 <P>Ajánlott átnézni a ./configure kimenetét valamint a
   <CODE>configure.log</CODE> file-t, fontos információkat tartalmaznak arra
@@ -660,23 +680,23 @@ HREF="documentation.html#6.1">itt</A>.</P>
   (és/vagy opcionálisan nyelvi kiegészítõket). Részletekért olvasd el az
   <A HREF=#1.5>1.5-ös</A> fejezetet.</P>
 
-<PRE>	mkdir ~/.mplayer/font
-	cd ~/.mplayer/font
+<PRE>	mkdir ~/.mplayer
+	cd ~/.mplayer
 	unzip mp-arial-iso-8859-2.zip
-	ln -s ~/.mplayer/font/arial-24 font</PRE>
+	ln -s ~/.mplayer/arial-24 font</PRE>
 
 <P>Már csak egy dolog maradt hátra: másold át a <B>codecs.conf</B> file-t
-az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mplayer/codecs.conf-ba.
-Ajánlatos továbbá az <CODE>example.conf</CODE> és a manpage átnézése, hogy
-képet kapj az opciókról.</P>
+  az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mplayer/codecs.conf-ba.
+  Ajánlatos továbbá az <CODE>example.conf</CODE> és a manpage átnézése, hogy
+  képet kapj az opciókról.</P>
 
 
-<P><B><A NAME=1.4>1.4. És a grafikus felület ?</A></B></P>
+<H2><A NAME=1.4>1.4. És a grafikus felület?</A></H2>
 
 <P>A grafikus felület GTK-t használ (de alapban nem épül rá), így a gtk-t (és a
-hozzávaló fejlesztõi csomagokat) fel kell installálni. A lefordításhoz meg kell
-adni a <CODE>--enable-gui</CODE> opciót a ./configure-nak. Ezután, a GUI mód
-bekapcsolásához :</P>
+  hozzávaló fejlesztõi csomagokat) fel kell installálni. A lefordításhoz meg
+  kell adni a <CODE>--enable-gui</CODE> opciót a ./configure-nak. Ezután, a GUI
+  mód bekapcsolásához:</P>
 
 <UL>
   <LI>írd be a <CODE>gui=yes</CODE> sort a konfigurációs file-ba</LI>
@@ -688,60 +708,61 @@ bekapcsolásához :</P>
 <P>Jelenleg nem használható GUI indítására a <CODE>-gui</CODE> parancssori
   opció, technikai okok miatt.</P>
 
-<P>TIPP: az egér középsõ gombjának megnyomása (2 gombos egereken a bal és
-jobb gombok együttes megnyomása) egy GTK-s menût hoz elõ, amiben megtalálható
-a DVD lejátszás is.</P>
-
 <P>Mivel az <B>MPlayer</B> alapban nem tartalmaz skineket, ezeket külön kell
-letöltened. Lásd <A HREF="http://www.mplayerhq.hu/homepage/dload.html">itt</A>.
-Ezeket a szokásos <CODE>$PREFIX/share/mplayer/Skin</CODE> vagy <CODE>$HOME/.mplayer/Skin</CODE>
-könyvtárak egyikébe kell kicsomagolni. Az <B>MPlayer</B> egy '<I>default</I>'
-nevû könyvtárat keres alapállapotban, de a <I>-skin newskin</I> opcióval, vagy
-a konfigurációs file-ba a <I>skin=newskin</I> sor beírásával meg lehet adni
-ehelyett másik alapban betöltendõ skin-t. Ilyenkor a <CODE>*/Skin/newskin</CODE>
-könyvtárban lévõ skin kerül betöltésre.</P>
+  letöltened. Lásd <A HREF="http://www.mplayerhq.hu/homepage/dload.html">itt</A>.
+  Ezeket a szokásos <CODE>$PREFIX/share/mplayer/Skin</CODE> vagy
+  <CODE>$HOME/.mplayer/Skin</CODE> könyvtárak egyikébe kell kicsomagolni. Az
+  <B>MPlayer</B> egy '<I>default</I>' nevû könyvtárat keres alapállapotban, de
+  a <I>-skin newskin</I> opcióval, vagy a konfigurációs file-ba a
+  <I>skin=newskin</I> sor beírásával meg lehet adni ehelyett másik alapban
+  betöltendõ skin-t. Ilyenkor a <CODE>*/Skin/newskin</CODE> könyvtárban lévõ
+  skin kerül betöltésre.</P>
 
-<P><B><A NAME=1.5>1.5. Feliratok és OSD</A></B></P>
+<H2><A NAME=1.5>1.5. Feliratok és OSD</A></H2>
 
 <P>Az <B>MPlayer</B> képes lejátszás közben feliratozás megjelenítésére.
-  Jelenleg a következõ felirattipusok támogatottak:
-  <UL>
-    <LI>VobSub</LI>
-    <LI>Microdvd</LI>
-    <LI>SubRip</LI>
-    <LI>SubViewer</LI>
-    <LI>Sami</LI>
-    <LI>VPlayer</LI>
-    <LI>RT</LI>
-    <LI>SSA</LI>
-    <LI>MPsub</LI>
-    <LI>AQTitle</LI>
-  </UL>
+  Jelenleg a következõ felirattipusok támogatottak:</P>
+
+<UL>
+  <LI>VobSub</LI>
+  <LI>Microdvd</LI>
+  <LI>SubRip</LI>
+  <LI>SubViewer</LI>
+  <LI>Sami</LI>
+  <LI>VPlayer</LI>
+  <LI>RT</LI>
+  <LI>SSA</LI>
+  <LI>MPsub</LI>
+  <LI>AQTitle</LI>
+</UL>
 
 <P>A következõ formátumokra más opciók érvényesek mint egyébként:</P>
 
-<P><B>VobSub feliratok</B><BR>
-Ezek a feliratok több fileból állnak: mindig van egy nagy méretû .SUB file,
-továbbá opcionálisan egy .IDX és/vagy .IFO file.
-Használatuk : például <CODE>sample.sub</CODE>,
-<CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> file-ok esetén a
-<CODE>-vobsub sample -vobsubid &lt;id&gt;</CODE> opciókat kell megadni
-(opcionálisan természetesen az útvonalat is). A <CODE>-vobsubid</CODE> opció a
-DVD-knél használható <CODE>-sid</CODE> opció VobSub-os megfelelõje, azaz a
-rendelkezésre álló nyelvek közül lehet vele választani.</P>
+<H4>VobSub feliratok</H4>
 
-<P><B>Egyéb feliratok</B><BR>
-Egy-egy szöveges fileból állnak, melyek idõzítési, szöveghelyezési és
-szöveges információt tartalmaznak.<BR>
-Használatuk: ha van pl. egy <CODE>példa.txt</CODE> nevû feliratod, add meg
-a <CODE>-sub példa.txt</CODE> opciót.</P>
+<P>Ezek a feliratok több fileból állnak: mindig van egy nagy méretû .SUB file,
+  továbbá opcionálisan egy .IDX és/vagy .IFO file.
+  Használatuk: például <CODE>sample.sub</CODE>,
+  <CODE>sample.ifo</CODE>, <CODE>sample.idx</CODE> file-ok esetén a
+  <CODE>-vobsub sample -vobsubid &lt;id&gt;</CODE> opciókat kell megadni
+  (opcionálisan természetesen az útvonalat is). A <CODE>-vobsubid</CODE> opció a
+  DVD-knél használható <CODE>-sid</CODE> opció VobSub-os megfelelõje, azaz a
+  rendelkezésre álló nyelvek közül lehet vele választani.</P>
 
-<P><B>Feliratok idõzítésének és elhelyezésének megváltoztatása</B><BR>
-<CODE>-subdelay &lt;mp&gt;</CODE> : feliratok idõzítésének befolyásolása
-  &lt;sec&gt; másodperccel. Lehet negatív szám is.<BR>
-<CODE>-subfps &lt;ráta&gt;</CODE> : feliratok képkocka/másodperc értékének
-  megadása (törtszám)<BR>
-<CODE>-subpos &lt;0 - 100&gt;</CODE> : feliratok pozicionálása.<BR>
+<H4>Egyéb feliratok</H4>
+
+<P>Egy-egy szöveges fileból állnak, melyek idõzítési, szöveghelyezési és
+  szöveges információt tartalmaznak.<BR>
+  Használatuk: ha van pl. egy <CODE>példa.txt</CODE> nevû feliratod, add meg
+  a <CODE>-sub példa.txt</CODE> opciót.</P>
+
+<H4>Feliratok idõzítésének és elhelyezésének megváltoztatása</H4>
+
+<P><CODE>-subdelay &lt;mp&gt;</CODE>: feliratok idõzítésének befolyásolása
+    &lt;sec&gt; másodperccel. Lehet negatív szám is.<BR>
+  <CODE>-subfps &lt;ráta&gt;</CODE>: feliratok képkocka/másodperc értékének
+    megadása (törtszám)<BR>
+  <CODE>-subpos &lt;0 - 100&gt;</CODE>: feliratok pozicionálása.<BR>
 </P>
 
 <P>Ha MicroDVD formátumú felirat file használata esetén növekszik a szinkron
@@ -751,12 +772,14 @@ a <CODE>-sub példa.txt</CODE> opciót.</P>
   van egy egyszerû perl script az FPS konverzió elvégzéséhez.</P>
 
 <P>A DVD feliratok használatához olvasd el a <A HREF="cd-dvd.html#4.2">DVD
-fejezetet.</A></P>
+  fejezetet.</A></P>
+
+<H3><A NAME="mpsub">1.4.1 Az MPlayer saját feliratformátuma (MPsub)</A></H3>
 
 <P>Az <B>MPlayer</B> tartalmaz egy új, <B><I>MPsub</I></B> nevû feliratformátumot.
-A tervezés az én (Gabucino) kezem munkáját dicséri. A legfõbb újítása hogy
-<I>dinamikusan</I> idõ alapú (bár van képkocka alapú módja is). Példa (a
-<A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A> file-ból) :
+  A tervezés az én (Gabucino) kezem munkáját dicséri. A legfõbb újítása hogy
+  <I>dinamikusan</I> idõ alapú (bár van képkocka alapú módja is). Példa (a
+  <A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A> file-ból):
 </P>
 
 <P><CODE><I>
@@ -774,55 +797,56 @@ Naboo was under an attack.<BR>
 </I></CODE></P>
 
 <P>Tehát a fõ cél a <B>felirat szerkesztés/idõzítés/összeillesztés/szétvágás
-megkönnyítése</B>. Valamint, ha - tegyük fel - szerzel egy SSA feliratot,
-de a te filmedhez képest rosszul van idõzítve, egyszerûen végrehajtasz egy
-<I>mplayer semmi.avi -sub forras.ssa -dumpmpsub</I> parancsot. Ekkor egy
-<CODE>dump.mpsub</CODE> file jön létre a jelenlegi könyvtárban, a
-forrás feliratfile szövegével, de <B>MPsub</B> formátumban. Ezekután
-szabadon, röviden, gyorsan idõzítheted.</P>
+  megkönnyítése</B>. Valamint, ha - tegyük fel - szerzel egy SSA feliratot,
+  de a te filmedhez képest rosszul van idõzítve, egyszerûen végrehajtasz egy
+  <I>mplayer semmi.avi -sub forras.ssa -dumpmpsub</I> parancsot. Ekkor egy
+  <CODE>dump.mpsub</CODE> file jön létre a jelenlegi könyvtárban, a
+  forrás feliratfile szövegével, de <B>MPsub</B> formátumban. Ezekután
+  szabadon, röviden, gyorsan idõzítheted.</P>
 
 <P>A feliratok egy <B>'OSD', On Screen Display</B> nevu módszerrel vannak
-megjelenítve. Ez az OSD használatos az idõ, hangerõ, stb megjelenítésére is.</P>
+  megjelenítve. Ez az OSD használatos az idõ, hangerõ, stb megjelenítésére is.</P>
 
-<P><B>OSD és feliratok installálása</B></P>
+<H3><A NAME="install_osd">1.4.2 OSD és feliratok installálása</A></H3>
 
 <P>Elõszöris, egy <B>MPlayer</B> betûtipus csomag kell. Sok módszer van a
-megszerzésére:</P>
+  megszerzésére:</P>
 
 <UL>
 
 <LI>kész csomag letöltése, az <B>MPlayer</B> honlapról.
-Megjegyzés: a jelenleg rendelkezésre álló csomagok csak ISO 8859-1/2-t
-tudnak, és van néhány speciális verzió koreai, orosz, stb kódlapokhoz.
-A font mellett kell egy font.desc file, ami hozzárendeli az unicode
-font pozíciókat a felirat tényleges kódlapjához. Másik megoldás lehet
-a felirat UTF8 formátummá alakítása, és az -utf8 opció használata, avagy
-a felirat file kiterjesztésének megváltoztatása .utf-re. Ezt az
-átalakítást a konwert (debian) vagy iconv (RedHat) programokkal lehet
-elvégezni.<BR>
-<UL>
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO betûtipusok
-  <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - felhasználók által készített betûtipusok
-  <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreai betûtipus, RAW plugin
-</UL>
+  Megjegyzés: a jelenleg rendelkezésre álló csomagok csak ISO 8859-1/2-t
+  tudnak, és van néhány speciális verzió koreai, orosz, stb kódlapokhoz.
+  A font mellett kell egy font.desc file, ami hozzárendeli az unicode
+  font pozíciókat a felirat tényleges kódlapjához. Másik megoldás lehet
+  a felirat UTF8 formátummá alakítása, és az -utf8 opció használata, avagy
+  a felirat file kiterjesztésének megváltoztatása .utf-re. Ezt az
+  átalakítást a konwert (debian) vagy iconv (RedHat) programokkal lehet
+  elvégezni.<BR>
+  <UL>
+    <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO betûtipusok
+    <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - felhasználók által készített betûtipusok
+    <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreai betûtipus, RAW plugin
+  </UL>
 </LI>
 
 <LI>a TOOLS/subfont-c könyvtárban található betûtipusgenerátor. Teljesértékû
-program TTF/Type1/stb betûtipusok MPlayer tipussá alakítására. Olvasd el a
-TOOLS/subfont-c/README file-t a részletekért)</LI>
+  program TTF/Type1/stb betûtipusok MPlayer tipussá alakítására. Olvasd el a
+  TOOLS/subfont-c/README file-t a részletekért)</LI>
 
 <LI>a betûtipus generáló GIMP plugin használata, ami a TOOLS/subfont-GIMP
-könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.</LI>
+  könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.</LI>
 
 </UL>
 
 <P>Ezután, tömörítsd ki a letöltött file-t a <CODE>~/.mplayer</CODE> vagy a
-<CODE>$PREFIX/share/mplayer</CODE> könyvtárba. Ezután hozz létre egy symlink-et
-a kívánt betûméretre, pl így : <CODE>ln -s ~/.mplayer/arial-24
-~/.mplayer/font</CODE>. Ha most elindítod a lejátszást, egy órát láthatsz a
-film bal felsõ sarkában (kikapcsolás az 'o' billentyûvel).</P>
+  <CODE>$PREFIX/share/mplayer</CODE> könyvtárba. Ezután hozz létre egy
+  symlink-et a kívánt betûméretre, pl így: <CODE>ln -s ~/.mplayer/arial-24
+  ~/.mplayer/font</CODE>. Ha most elindítod a lejátszást, egy órát láthatsz a
+  film bal felsõ sarkában (kikapcsolás az 'o' billentyûvel).</P>
 
-<P>Az OSD-nek 3 állása van: ('o' billentyûvel lehet váltani)<BR>
+<P>Az OSD-nek 3 állása van: ('o' billentyûvel lehet váltani)</P>
+
 <UL>
   <LI>timer + hangerõ + keresõ + feliratok</LI>
   <LI>hangerõ + keresõ + feliratok (alapállapot)</LI>
@@ -833,7 +857,7 @@ film bal felsõ sarkában (kikapcsolás az 'o' billentyûvel).</P>
   konfigurációs file-ban.</P>
 
 
-<P><B><A NAME="rtc">1.6 RTC</A></B></P>               
+<H2><A NAME="rtc">1.6 RTC</H2>
 
 Három idõzítõ kód van az <B>MPlayerben</B>.
 
@@ -866,7 +890,7 @@ Három idõzítõ kód van az <B>MPlayerben</B>.
     funkciói összeakadhatnak az RTC-vel, ilyenkor az audio és a video lejátszás
     nem lesz szinkronban. Az ilyen notebookokat indítás elõtt csatlakoztatni
     kell az elektronikus hálózatba. Az RTC használatát bármikor ki lehet
-    kapcsolni a <CODE>-nortc</CODE> opcióval.  Néhány hardware kombinációban
+    kapcsolni a <CODE>-nortc</CODE> opcióval. Néhány hardware kombinációban
     (ellenõrizve egy DMA nélküli DVD drive használatakor egy ALi1541 alaplapon)
     az RTC használata szaggatott lejátszáshoz vezet. Ilyenkor a következõ
     módszer használata javallott.</LI>
@@ -880,7 +904,7 @@ Három idõzítõ kód van az <B>MPlayerben</B>.
 
 
 
-<P><B><A NAME=2>2.  Funkciók</A></B></P>
+<H1><A NAME=2>2.  Funkciók</A></H1>
 
 
 <P><A NAME=2.1>2.1. <A HREF="formats.html">Támogatott formátumok</A></P>
@@ -896,19 +920,19 @@ kimeneti eszközök</P>
 <P><A NAME=2.4>2.4. <A HREF="encoding.html">MEncoder</A></P>
 
 
-<P><A NAME=2.5><B>2.5. TV bemenet</B></P>
+<H2><A NAME=2.5>2.5. TV bemenet</H2>
 
 
-<A NAME=2.5.1><P><B><I>2.5.1.  Áttekintés</I></B></P>
+<H3><A NAME=2.5.1>2.5.1 Áttekintés</H3>
 
 <P>Ez a fejezet elmagyarázza hogy tudsz <B>nézni/grabbelni egy V4L kompatibilis
-TV tuner-rõl</B>.</P>
+  TV tuner-rõl</B>.</P>
 
 <P>EZ A KÓDRÉSZLET JELENLEG NINCS FEJLESZTÉS ALATT! Ne várd hogy hosszadalmas
   kísérletezés nélkül majd hirtelen menni fog!</P>
 
 
-<P><A NAME=2.5.2><B><I>2.5.2.  Fordítás</I></B></P>
+<H3><A NAME=2.5.2>2.5.2 Fordítás</H3>
 
 <UL>
   <LI>elõszöris, újra kell fordítanod az <B>MPlayer</B>-t. A <CODE>configure</CODE>
@@ -919,13 +943,13 @@ TV tuner-rõl</B>.</P>
     alatt, mint például az xawtv.</LI>
 </UL>
 
-<P><B>Tipp</B> : rosszak a színek? Ezekszerint a tunered nem tudja a képet
+<P><B>Tipp</B>: rosszak a színek? Ezekszerint a tunered nem tudja a képet
   YV12 colorspace-ben grabbelni. Próbáld az I420-as colorspace-t (ennél meg
   kell adni a <CODE>-vc rawi420</CODE> opciót is), vagy az YUY2, UYVY, RGB32
   colorspace-eket (ezutóbbit <CODE>-vo sdl</CODE>-el). Ezeket a
   <CODE>outfmt=YV12</CODE> opcióval lehet megadni, lásd lent.</P>
 
-<A NAME=2.5.3><P><B><I>2.5.3.  Rendelkezésre álló opciók</I></B><BR>
+<H3><A NAME=2.5.3>2.5.3 Rendelkezésre álló opciók</H3>
 
 <TABLE BORDER=0>
 <TR>
@@ -946,7 +970,7 @@ TV tuner-rõl</B>.</P>
   <TD></TD>
   <TD>    <B>dummy</B> - NULL TV bemenet :) Csak tesztelésre, hamis TV bemenetet
     generál.<BR>
-    <B>v4l</B> - tényleges képgrabbelés V4L interface-rõl (alapértelmezett :
+    <B>v4l</B> - tényleges képgrabbelés V4L interface-rõl (alapértelmezett:
     <CODE>/dev/video0</CODE>)</TD>
 </TR>
 <TR>
@@ -1012,7 +1036,7 @@ TV tuner-rõl</B>.</P>
 </TABLE>
 </P>
 
-<A NAME=2.5.4><P><B><I>2.5.4.  Irányítás a billentyûzetrõl</I></B></P>
+<H3><A NAME=2.5.4>2.5.4 Irányítás a billentyûzetrõl</H3>
 
 <TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD>elõzõ/következõ csatorna</TD><TR>
@@ -1020,7 +1044,7 @@ TV tuner-rõl</B>.</P>
 <TD></TD><TD>b</TD><TD></TD><TD>csatornalista váltása</TD><TR>
 </TABLE>
 
-<A NAME=2.5.5><P><B><I>2.5.5.  Példák</I></B></P>
+<H3><A NAME=2.5.5>2.5.5 Példák</H3>
 
 <P>
 Teszt kimenet, AAlib-re :)<BR>
@@ -1031,258 +1055,30 @@ Szabványos V4L-rõl bemenet<BR>
 </P>
 
 
-<A NAME=2.6><P><B><I>2.6.  Video filterek</I></B></P>
+<H1><A NAME=3>3.  Használat</A></H1>
 
-
-<A NAME=2.6.1><P><B><I>2.6.1.  Áttekintés</I></B></P>
-
-<P>Mind az <B>MPlayer</B>, mind a <B>MEncoder</B> támogatja a nemrég
-  elkészült univerzális video filter réteg használatát, ami számos pluginból
-  áll - lásd lent. Ezek a pluginek sokféle mûveletet tudnak a képpel
-  elvégezni, mint például a szoftveres nagyítás, a fekete sávok levágása vagy
-  éppen hozzátétele (a levágás nemcsak enkódolásnál, hanem a buszra nehezedõ
-  átvitelmennyiség csökkentésénél is fontos lehet).</P>
-
-<P>Ezzel a filter réteggel lehetõvé vált a gyors képformátum konverzió az
-  RGB és a YUV módok között. Például RGB kimenetû codec-ek mostmár
-  használhatóak az <CODE>xv</CODE> és az <CODE>xmga</CODE> kimeneteken is
-  (lásd a <A HREF=#2.6.11>Scale</A> filtert).</P>
-
-<P>A layer <B>Direct Rendert</B> használ a pluginek között, ezzel is
-  növelve a sebességet.</P>
-
-<P>Megjegyzendõ hogy mostantól a postprocess kód is a filter réteg egyik
-  pluginje. Lásd alant.</P>
-
-
-<A NAME=2.6.2><P><B><I>2.6.2.  Használat</I></B></P>
-
-<P><CODE>&nbsp;&nbsp;mplayer/mencoder -vop filter1,filter2,filter3,...</CODE>
-  </P>
-
-<P>Ez felállítja a használni kívánt filterek sorrendjét (természetesen
-  bármilyen számú filter használható). A paramétereik opcionálisak, és ha
-  nincsenek megadva, alapértelmezett értékre állnak. Például <I>x és y</I>
-  a kép közepére, <I>szélesség és magasság</I> a film szélességére és
-  magasságára.</P>
-
-<P>A filterek megadott sorrendje a libvo után teendõ, tehát a filter1 lesz
-  az utolsó filter, utána már a libvo következik, illetve <B>MEncoder</B>
-  esetén az enkódolás.</P>
-
-<P>A rendelkezésre álló video filterek listája a
-  <CODE>mplayer -vop help</CODE> paranccsal kérhetõ le.</P>
-
-
-<A NAME=2.6.3><P><B><I>2.6.3.  Crop</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>A kép megadott részén kívüli részeket eldobja. Szélesvásznú filmek
-  szélein lévõ fekete sávok levágására használható.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop crop[=szélesség:magasság:x:y]</CODE></P>
-
-
-<A NAME=2.6.4><P><B><I>2.6.4.  Expand</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Megnöveli (NEM nagyítja) a film felbontását a megadott értékre, és
-  a nagyítatlan eredeti képet az <I>x</I> és <I>y</I> koordinátákra
-  helyezi. Használható fekete sávok létrehozásához, melyek például SVCD-knél
-  szükségesek, vagy <B>MPlayer</B>-rrel és az <A HREF="video.html#2.3.1.4">SDL
-  video kimenettel</A>, amely a fekete sávokon is képes feliratot
-  megjeleníteni.
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop expand[=szélesség:magasság:x:y]</CODE></P>
-
-
-<A NAME=2.6.5><P><B><I>2.6.5.  Fame/Lavc</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Valósidejû MPEG1 enkóder (DVB és DXR3 kártyákhoz), libfame vagy libavcodec
-  használatával.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop fame</CODE></P>
-
-<P><CODE>&nbsp;&nbsp;-vop lavc</CODE></P>
-
-
-<A NAME=2.6.6><P><B><I>2.6.6.  Flip</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Y tengely mentén megfordítja a képet. Hasznos az olyan régi codec-eknél
-  melyek csak fejjel lefele képet tudnak kiadni (ezek autodetektálva
-  vannak).</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop flip</CODE></P>
-
-
-<A NAME=2.6.7><P><B><I>2.6.7.  Format</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Ez a filter NEM képformátum koverter. Egyetlen feladata hogy kényszeríti
-  a következõ filtert (vagy a libvo-t) a megadott formátum használatára.
-  Hasznos a lassú YV12-vel rendelkezõ kártyák használatakor, mint
-  például a tdfx és a Savage4. Az igazi konverzióhoz a <I>Scale</I> filtert
-  kell használni.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop format[=formátum]</CODE> (ahol a
-  <CODE>formátum</CODE> lehet például: rgb32, yuy2, stb...)</P>
-
-
-<A NAME=2.6.8><P><B><I>2.6.8.  Postprocess</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Ez a régi jó postprocess (minõségjavító), csak éppen át lett rakva a
-  filter layerhez. Javítja a kockásodást, deinterlace-el, stb, lásd az
-  <CODE>-npp help</CODE> opciót.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop pp[=postprocess opciók/kulcsszavak]</CODE></P>
-
-
-<A NAME=2.6.9><P><B><I>2.6.9.  RGB2BGR</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>RGB 24/32 <-> BGR 24/32 képformátum konverziót végez (alapértelmezés),
-  vagy RGB 24/32 <-> RGB 24/32 konverziót az R és B megcserélésével ('swap'
-  opció)</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop rgb2bgr[=swap]</CODE></P>
-
-
-<A NAME=2.6.10><P><B><I>2.6.10.  Rotate</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Kép elforgatása (tükrözése). 'x' paraméter (lehetséges értékei: 0-3) a
-  horizontális és vertikális tükrözést szabályozzák.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop rotate[=x]</CODE></P>
-
-<A NAME=2.6.11><P><B><I>2.6.11.  Scale</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>A kép nagyítását vagy kicsinyítését végzi (hasznos olyan kártyák
-  használatakor, melyek nem tudnak hardveresen kicsinyíteni), szoftveresen
-  (lassú). A minõsége állítható az <CODE>-sws</CODE> opcióval, lásd a
-  manpage-t. Természetesen a szebb minõség lassabb sebességet eredményez.</P>
-
-<P><B>MEGJEGYZÉS</B>: opciók nélkül (is) meghívva <B>képformátum
-  konvertálást</B> eredményez! Ez olyan codeceknél nagy segítség, amelyek
-  nem tudnak a kívánt video kimeneti eszköznek megfelelõ formátumban
-  dekódolni. Az ilyenek (remélhetõleg) autodetektálva vannak, és a scale
-  filter a helyzetnek megfelelõen konvertálást végez. Más esetekben
-  meghívható manuálisan is.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop scale[=szélesség:magasság]</CODE></P>
-
-
-<A NAME=2.6.12><P><B><I>2.6.12.  YUY2</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>YV12/I420 --> YUY2 konverzió kényszerítése.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop yuy2</CODE></P>
-
-
-<A NAME=2.6.13><P><B><I>2.6.13.  Mirror</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Kép tükrözése Y tengelyen.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop mirror</CODE></P>
-
-
-<A NAME=2.6.14><P><B><I>2.6.14.  DVBscale</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Y tengely nagyítását számítja ki, DVB kártyákhoz.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop dvbscale</CODE></P>
-
-
-<A NAME=2.6.15><P><B><I>2.6.15.  Cropdetect</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Kiszámítja a megfelelõ vágáshoz szükséges paramétereket, és stdout-ra
-  kiírja.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop cropdetect</CODE></P>
-
-
-<A NAME=filters_rectangle><P><B><I>2.6.16.  Rectangle</I></B></P>
-
-<P><B><U>Leírás</U></B>:</P>
-
-<P>Rajzol egy inverz négyszöget a kép megadott pontjai szerint. Hasznos
-  a crop paramétereinek tesztelésére, használatuk elõtt.</P>
-
-<P><B><U>Használat</U></B>:</P>
-
-<P><CODE>&nbsp;&nbsp;-vop rectangle[=szélesség:magasság:x:y]</CODE></P>
-
-
-<P><B><A NAME=3>3.  Használat</A></B></P>
-
-<P><B><A NAME=3.1>3.1.  Parancssor</A></B></P>
+<H2><A NAME=3.1>3.1 Parancssor</A></H2>
 
 <P>Az <B>MPlayer</B> képes "playtree" stílusban is kezelni az opcióit.
   Ez abból áll hogy meg lehet adni opciókat amik globálisnak fognak
   számítani (például <CODE>mplayer -vfm 5</CODE>), valamint egyes filenevekre
   vonatkoztatva olyan opciókat amelyek ezeket felülbírálják (az elõbbi
-  példát folytatva : <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).
+  példát folytatva: <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).
   Lehet csoportokat is kialakítani a { és } karakterekkel. Ez a -loop opcióval
   hasznos: <CODE>>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE> ebben a
   sorrendben fog lejátszani: 1 1 2 1 1 2 1 1 2
 </P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [opciók] [útvonal/]filenév1 [filenév1 opciói] filenév2 [filenév2 opciói] ...</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [opciók] [útvonal/]filenév</CODE></TD><TR>
+<TD></TD><TD>file-ok</TD><TD></TD><TD><CODE>mplayer [opciók] [útvonal/]filenév1 [filenév1 opciói] filenév2 [filenév2 opciói] ...</CODE></TD><TR>
 <TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [opciók] -vcd trackszám [-cdrom-device /dev/cdrom]</CODE></TD><TR>
 <TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [opciók] -dvd titleno [-dvd device /dev/dvd]</CODE></TD><TR>
-<TD></TD><TD>net</TD><TD></TD><TD><CODE>mplayer [opciók] http://site.com/file.[mpg|avi|asf]</CODE></TD><TR>
+<TD></TD><TD>net</TD><TD></TD><TD><CODE>mplayer [opciók] http://site.com/file.[mpg|avi|asf] (lejátszási listák is használhatóak)</CODE></TD><TR>
 </TABLE></P>
 
 <P>Az <B>MPlayer</B> új verzióinak URL stílusban is meg lehet adni a VCD
-  illetve DVD lemezeket, mint a Xine-nak : <CODE>mplayer dvd://1</CODE> vagy
+  illetve DVD lemezeket, mint a Xine-nak: <CODE>mplayer dvd://1</CODE> vagy
   <CODE>mplayer vcd://1</CODE>
 </P>
 
@@ -1293,12 +1089,17 @@ Szabványos V4L-rõl bemenet<BR>
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
 
 
-<P><B><A NAME=3.2>3.2.  Irányítás</A></B></P>
+<H2><A NAME=3.2>3.2 Irányítás</A></H2>
 
+<P>Az <B>MPlayer</B> egy teljesen átkonfigurálható, parancsvezérelt irányító
+  nyelvet tartalmaz, aminek a segítségével billentyûzetrõl, egerrél,
+  joystick-kal és távirányítóval is lehet írányítani.</P>
 
-<P><B><A NAME=3.2.1>3.2.1.  Irányítás billentyûzetrõl</A></B></P>
+<H3><A NAME=3.2.1>3.2.1 Alapértelmezett irányítás</A></H3>
 
-<P><TABLE BORDER=0>
+<H4>Irányítás a billentyûzettel, terminálról:</H4>
+
+<TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>&lt;-  és  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>hátra/elõre seek, 10 másodpercnyi</TD><TR>
 <TD></TD><TD>fel vagy le</TD><TD></TD><TD>hátra/elõre seek, 1 percnyi</TD><TR>
 <TD></TD><TD>pgup/pgdown</TD><TD></TD><TD>hátra/elõre seek, 10 percnyi</TD><TR>
@@ -1308,7 +1109,7 @@ Szabványos V4L-rõl bemenet<BR>
 <TD></TD><TD>+ vagy -</TD><TD></TD><TD>audio késleltetése +/- 0.1 másodperccel</TD><TR>
 <TD></TD><TD>/ vagy *</TD><TD></TD><TD>hangerõ csökkentése/növelése</TD><TR>
 <TD></TD><TD>f</TD><TD></TD><TD>teljes képernyõs mód ki/bekapcsolása</TD><TR>
-<TD></TD><TD>o</TD><TD></TD><TD>OSD funkciók : nincs / seek / seek+idõ</TD><TR>
+<TD></TD><TD>o</TD><TD></TD><TD>OSD funkciók: nincs / seek / seek+idõ</TD><TR>
 <TD></TD><TD>z vagy x</TD><TD></TD><TD>feliratok késleltetése +/- 0.1 másodperccel</TD><TR>
 <TD></TD><TD>r vagy t</TD><TD></TD><TD>feliratok pozíciója</TD><TR>
 <TD></TD><TD>HOME vagy END</TD><TD></TD><TD>következõ / elõzõ playtree bejegyzés a parent listában</TD><TR>
@@ -1320,9 +1121,9 @@ Szabványos V4L-rõl bemenet<BR>
 <TD></TD><TD>3 vagy 4</TD><TD></TD><TD>fényerõ beállítása</TD><TR>
 <TD></TD><TD>5 vagy 6</TD><TD></TD><TD>hue állítása</TD><TR>
 <TD></TD><TD>7 vagy 8</TD><TD></TD><TD>szaturáció állítása</TD><TR>
-</TABLE></P>
+</TABLE>
 
-<P><B>Grafikus felület billentyûi</B></P>
+<H4>Grafikus felület billentyûi</H4>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>, és .</TD><TD>&nbsp;&nbsp;</TD><TD>elõzõ / következõ file</TD><TR>
@@ -1339,7 +1140,7 @@ Szabványos V4L-rõl bemenet<BR>
 <TD></TD><TD>m</TD><TD></TD><TD>hang ki/be</TD><TR>
 </TABLE></P>
 
-<P><B>TV interface irányítása</B></P>
+<H4>TV interface irányítása</H4>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>h  or  l</TD><TD>&nbsp;&nbsp;</TD><TD>elõzõ/következõ csatorna</TD><TR>
@@ -1348,7 +1149,7 @@ Szabványos V4L-rõl bemenet<BR>
 </TABLE></P>
 
 
-<P><B><A NAME=3.2.2>3.2.2. Irányítás konfigurálása</A></B></P>
+<H3><A NAME=3.2.2>3.2.2. Irányítás konfigurálása</A></H3>
 
 <P>Az <B>MPlayerrel</B> lehetséges bármely <B>MPlayer</B> parancs bármely
   billentyûre történõ illesztése, egy egyszerû konfigurációs file
@@ -1376,7 +1177,7 @@ ENTER pt_step 1 1
 </PRE>
 
 
-<P><B><A NAME=3.2.2.1>3.2.2.1. Billentyûk nevei</A></B></P>
+<H4><A NAME=3.2.2.1>3.2.2.1. Billentyûk nevei</A></H4>
 
 <P>A teljes listát a <CODE>mplayer -input keylist</CODE> paranccsal
   lehet lekérni.</P>
@@ -1434,7 +1235,7 @@ ENTER pt_step 1 1
 </UL>
 
 
-<P><B><A NAME=3.2.2.2>3.2.2.2. Parancsok</A></B></P>
+<H4><A NAME=3.2.2.2>3.2.2.2. Parancsok</A></H4>
 
 <P>Az ismert parancsok teljes listáját az <CODE>mplayer -input cmdlist</CODE>
   paranccsal lehet lekérni.</P>
@@ -1442,7 +1243,7 @@ ENTER pt_step 1 1
 <P><I>A parancsok magyarázatát lásd az angol nyelvû dokumentációban!</I></P>
 
 
-<P><B><A NAME=3.2.3>3.2.3.  Irányítás LIRC-cel</A></B></P>
+<H3><A NAME=3.2.3>3.2.3 Irányítás LIRC-cel</A></H3>
 
 <P>Linux Infrared Remote Control - használj egy otthon is könnyen elkészíthetõ
   infravörös távirányítót, hogy irányítsd vele a géped!
@@ -1494,7 +1295,7 @@ end
   a -lircconf &lt;filenév&gt; kapcsolót.</P>
 
 
-<P><B><A NAME=3.2.4>3.2.4.  Slave mód</A></B></P>
+<H3><A NAME=3.2.4>3.2.4 Slave mód</A></H3>
 
 <P>A slave móddal lehetséges egyszerû frontendek írása az <B>MPlayerhez</B>.
   A bekapcsolása (a <CODE>-slave</CODE> opcióval) után az <B>MPlayer</B> a
@@ -1502,40 +1303,40 @@ end
   melyeket sorvége (\n) jellel kell elválasztani.</P>
 
 
-<P><B><A NAME=3.3>3.3.  Lejátszás hálózatról, vagy pipe-on keresztül</A></B></P>
+<H2><A NAME=3.3>3.3 Lejátszás hálózatról, vagy pipe-on keresztül</A></H2>
 
 <P>Az <B>MPlayer</B> a HTTP vagy MMS protokollal tud lejátszani hálózaton
   keresztül.</P>
 
 <P>A lejátszás maga egyszerûen az URL megadásával történik. Az <B>MPlayer</B>
   automatikusan kezelni tudja továbbá a http_proxy környezeti változót.
-  A proxy használatának kényszerítése :</P>
+  A proxy használatának kényszerítése:</P>
 
 <P><CODE>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
 
 <P><B>MPlayer</B> tud a standard bemenetrõl (NEM named pipe-okról) beolvasni.
-  Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével :</P>
+  Itt egy példa az FTP-n keresztüli lejátszásra ennek segítségével:</P>
 
 <P><CODE>wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
 
 <P>Ajánlott a <CODE>-cache</CODE> opció használata hálozatról történõ
-  lejátszásnál :</P>
+  lejátszásnál:</P>
 
 <P><CODE>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192
   -</CODE></P>
 
 
 
-<P><B><A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A></A></B></P>
+<H1><A NAME=4>4.  <A HREF="faq.html">FAQ fejezet</A></A></H1>
 
-<P><B><A NAME=5>5.  <A HREF="cd-dvd.html">CD/DVD fejezet</A></A></B></P>
+<H1><A NAME=5>5.  <A HREF="cd-dvd.html">CD/DVD fejezet</A></A></H1>
 
-<P><B><A NAME=6>6.  Különbözõ operációs rendszerek</A></B></P>
+<H1><A NAME=6>6.  Különbözõ operációs rendszerek</A></H1>
 
-<P><B><A NAME=6.1>6.1.  Debian csomagolás</A></B></P>
+<H2><A NAME=6.1>6.1 Debian csomagolás</A></H2>
 
 <P>A csomag felépítéséhez töltsd le a cvs verziót vagy .tgz-t, tömörítsd ki,
-  majd lépj bele :</P>
+  majd lépj bele:</P>
 
 <P><PRE>     cd main
     fakeroot debian/rules binary</PRE></P>
@@ -1545,7 +1346,7 @@ end
 
 <P><PRE>    dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.</PRE></P>
 
-<P>Most root-ként add ki a következõ parancsot :</P>
+<P>Most root-ként add ki a következõ parancsot:</P>
 
 <P><PRE>   dpkg -i ../mplayer_0.18-1_i386.deb</PRE></P>
 
@@ -1559,7 +1360,7 @@ end
 	Setting up mplayer (0.18-1) ...</PRE></P>
 
 
-<P><B><A NAME=6.2>6.2.  FreeBSD</A></B></P>
+<H2><A NAME=6.2>6.2 FreeBSD</A></H2>
 
 <P>A fordításhoz szükséged lesz GNU make-re (gmake, /usr/ports/devel/gmake),
   natív BSD make nem jó.</P>
@@ -1570,11 +1371,11 @@ end
   CPU_ENABLE_SSE"-t is. FreeBSD-STABLE kell, vagy kernel patch-ek.</P>
 
 <P>Ha az <B>MPlayer</B> azt mondja hogy "CD-ROM Device '/dev/cdrom' not found!",
-  csinálj egy linket : <CODE>ln -s /dev/(meghajtó) /dev/cdrom</CODE></P>
+  csinálj egy linket: <CODE>ln -s /dev/(meghajtó) /dev/cdrom</CODE></P>
 
 <P>Egyelõre nincs DVD támogatás FreeBSD-hez.</P>
 
-<P><B><A NAME=6.3>6.3.  Solaris</A></B></P>
+<H2><A NAME=6.3>6.3 Solaris</A></H2>
 
 <P>Az AVI file-ok lejátszása legjobban Solarix x86-on mûködik, mert itt
   megteheted hogy win32-es codec-eket használsz, az x86-os platform miatt.
@@ -1590,7 +1391,7 @@ felinstallált <A HREF="http://www.sun.com/sparc/vis/mediaLib.html">mLib</A>-re
 is.</P>
 
 <P>A fordításhoz GNU make-re lesz szükséged (gmake, /opt/sfw/gmake), natív
-  Solaris make nem jo. Egy tipikus hiba ha mégis azzal próbálkozol :</P>
+  Solaris make nem jo. Egy tipikus hiba ha mégis azzal próbálkozol:</P>
 
 <P><PRE>   % /usr/ccs/bin/make
    make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen</PRE></P>
@@ -1607,7 +1408,7 @@ is.</P>
   melyik assemblert indítja (ha nem sikerül neki, használd a
   "--as=/ahova/installáltad/gnu-as" parancsot).</P>
 
-<P>GNU assembler nélküli GCC ilyet ír ki Solaris x86-on :</P>
+<P>GNU assembler nélküli GCC ilyet ír ki Solaris x86-on:</P>
 
 <P><PRE>   % configure
    ...
@@ -1627,15 +1428,15 @@ is.</P>
    "(stdin)", line 3567 : Syntax error
    ... more "Illegal mnemonic" and "Syntax error" errors ...</PRE></P>
 
-<P>DVD támogatáshoz patchelt libcss szükséges. Patch :
+<P>DVD támogatáshoz patchelt libcss szükséges. Patch:
   <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A></P>
 
 <P>2 hiba miatt nem tudsz megbízhatóan DVD-t lejátszani Solaris 8 x86-on,
-  ha annak kapacitása nagyobb mint 4 GB :</P>
+  ha annak kapacitása nagyobb mint 4 GB:</P>
 
 <P><UL><LI>The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
      disk block >4GB on a device using a logical blocksize != DEV_BSIZE
-     (i.e. CDROM and DVD media).  Due to a 32bit int overflow, a disk
+     (i.e. CDROM and DVD media). Due to a 32bit int overflow, a disk
      address modulo 4GB is accessed.
      (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
 
@@ -1653,23 +1454,23 @@ is.</P>
 <P>VIS accelerated operations from mediaLib are used for mpeg2 video
   decoding and for color space conversion in the video output drivers.</P>
 
-<P><B><A NAME=6.4>6.4.  StrongARM</A></B></P>
+<H2><A NAME=6.4>6.4 StrongARM</A></H2>
 
 <P>Az <B>MPlayer</B> állítólag lefordul StrongARM-on. A következõ opciókat
-  használd :</P>
+  használd:</P>
 
 
 <P><PRE>  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
 	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking</PRE></P>
 
 
-<P><B><A NAME=6.5>6.5. Silicon Graphics Indigo / IRIX</A></B></P>
+<H2><A NAME=6.5>6.5. Silicon Graphics Indigo / IRIX</A></H2>
 
 <P>Azt mondják mûxik. Használd az <I>sgi</I> ao meghajtót és jók leszünk.
 Közelebbi információ valakinél?</P>
 
 
-<P><B><A NAME=6.6>6.6. QNX</A></B></P>
+<H2><A NAME=6.6>6.6. QNX</A></H2>
 
 <P>Mûködik. Töltsd le és installáld az SDL-t, és add meg az <B>MPlayer</B>-nek
   a <CODE>-vo sdl:photon</CODE> és <CODE>-ao sdl:nto</CODE> opciókat.</P>
@@ -1679,7 +1480,7 @@ Közelebbi információ valakinél?</P>
   SDL-t.</P>
 
 
-<P><B><A NAME=6.7>6.7. OpenBSD</A></B></P>
+<H2><A NAME=6.7>6.7. OpenBSD</A></H2>
 
 <P>A forditáshoz GNU make szükséges (gmake, /usr/ports/devel/gmake), a natív
   BSD make nem jó. Szükséges továbbá egy friss binutils (objcopy-val).</P>
@@ -1693,11 +1494,11 @@ Közelebbi információ valakinél?</P>
   fordítani.</P>
 
 <P>Ha az <B>MPlayer</B> a <CODE>/dev/cdrom</CODE> vagy <CODE>/dev/dvd</CODE>
-  hiányára panaszkodik, csinálj egy szimbolikus linket :<BR>
+  hiányára panaszkodik, csinálj egy szimbolikus linket:<BR>
   <CODE>ln -s /dev/(cdrom egység) /dev/cdrom</CODE></P>
 
 
-<P><B><A NAME=6.8>6.8. Cygwin</A></B></P>
+<H2><A NAME=6.8>6.8. Cygwin</A></H2>
 
 <P>Be kell lépned az <B>MPlayer</B> könyvtárába és át kell másolnod az
   <CODE>etc/cygwin_inttypes.h</CODE> file-t az
@@ -1706,13 +1507,7 @@ Közelebbi információ valakinél?</P>
   hiányára.</P>
 
 
-<P><B><A NAME=A>A függelék - Készítõk</A></B></P>
-
-
-<P><B><A NAME=A>A2 függelék - Maintainerek</A></B></P>
-
-
-<P><B><A NAME=B>B függelék - Levelezési listák</A></B></P>
+<H1><A NAME="mailing_lists">A függelék - Levelezési listák</A></H1>
 
 <P>Jónéhány <B>MPlayer</B> lista van. A következõ címeken lehet feliratkozni:</P>
 
@@ -1771,8 +1566,13 @@ Más nyelven ne írj!</P>
 <P>Megj.: a kereshetõ archivum <A HREF="http://www.MPlayerHQ.hu/cgi-bin/htsearch">itt</A>
 található.</P>
 
+<H1><A NAME=B><A HREF="bugreports.html">B függelék</A> - Hogyan jelents be hibát</A></H1>
 
-<P><B><A NAME=C><A HREF="bugreports.html">C függelék</A> - Hogyan jelents be hibát</A></B></P>
+<H1><A NAME="known_bugs"><A HREF="../documentation.html#known_bugs">C függelék</A> - Ismert hibák</A></H1>
+
+<H1><A NAME="skin"><A HREF="skin-hu.html">D függelék</A> - Az MPlayer skin formátum</A></H1>
+
+<H1><A NAME="flame_wars"><A HREF="../users_against_developers.html">E függelék</A> - Fejlesztõi sirámok</A></H1>
 
 </BODY>
 
