@@ -7,6 +7,7 @@ MPlayer (1.0)
     * man page completely reviewed for spelling, wording and clarity
     * all audio output driver suboptions documented
     * all video output driver suboptions documented
+    * audio filters section added to the man page
     * XviD documentation completed
     * French man page in sync again
     * German man page updated
@@ -29,7 +30,7 @@ MPlayer (1.0)
     * mouse support in Windows
 
     Drivers:
-    * fixes in the VESA video output driver
+    * fixes in the VESA and GGI video output driver
     * JPEG video output driver suboptions
     * improvements for Blinkenlights ;-)
     * JACK audio output driver updated to bio2jack API changes
@@ -78,7 +79,7 @@ MPlayer (1.0)
     * improved seeking precision in MPEG files
     * better subtitle language code handling for MKV files
     * support DVHS files and H.264 over MPEG-TS
-    * display length and position (in the seekbar) for mov files
+    * display length and position (in the seekbar) for MOV files
 
     Streaming:
     * -cache-min and -cache-prefill options added
