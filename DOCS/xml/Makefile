@@ -25,7 +25,7 @@ build-html: xsltproc.sh
 	for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
 		(test -d $(HTML_TOP)/$$dir || mkdir $(HTML_TOP)/$$dir) &&\
-		if $(MAKE) HTMLDIR=../$(HTML_TOP)/$$dir -C $$dir; then :; else exit 1; fi;
+		if $(MAKE) HTMLDIR=../$(HTML_TOP)/$$dir -C $$dir; then :; else exit 1; fi;\
 	done
 
 .PHONY: clean-html
@@ -36,7 +36,7 @@ clean-html:
 distclean: clean-html
 	for dir in $(SUBDIRS); do\
 		test -f $$dir/Makefile &&\
-		if $(MAKE) HTMLDIR=../$(HTML_TOP)/$$dir -C $$dir distclean ; then :; else exit 1; fi;
+		if $(MAKE) HTMLDIR=../$(HTML_TOP)/$$dir -C $$dir distclean ; then :; else exit 1; fi;\
 	done
 	-rm -f html.xsl xsltproc.sh xmllint.sh
 
