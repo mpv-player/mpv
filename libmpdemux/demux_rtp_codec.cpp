@@ -196,7 +196,7 @@ static void needVideoFrameRate(demuxer_t* demuxer,
   extern float force_fps; if (force_fps != 0.0) return; // user used "-fps"
 
   demux_stream_t* d_video = demuxer->video;
-  sh_video_t* sh_video = (sh_video_t*)(demuxer->video->sh);
+  sh_video_t* sh_video = (sh_video_t*)(d_video->sh);
 
   // If we already know the subsession's video frame rate, use it:
   int fps = (int)(subsession->videoFPS());
@@ -211,8 +211,9 @@ static void needVideoFrameRate(demuxer_t* demuxer,
   float lastPTS = 0.0, curPTS;
   unsigned const maxNumFramesToWaitFor = 100;
   for (unsigned i = 0; i < maxNumFramesToWaitFor; ++i) {
-    if (!awaitRTPPacket(demuxer, demuxer->video,
-			packetData, packetDataLen, curPTS)) break;
+    if (!awaitRTPPacket(demuxer, d_video, packetData, packetDataLen, curPTS)) {
+      break;
+    }
 
     if (curPTS > lastPTS && lastPTS != 0.0) {
       // Use the difference between these two "pts"s to guess the frame rate.
