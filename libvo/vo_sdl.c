@@ -495,7 +495,7 @@ static void check_events (void)
 			/* graphics mode selection shortcuts */
 			case SDL_KEYDOWN:
 				keypressed = event.key.keysym.sym;
-				
+
 				/* plus key pressed. plus cycles through available fullscreenmodes, if we have some */
 				if ( ((keypressed == SDLK_PLUS) || (keypressed == SDLK_KP_PLUS)) && (priv->fullmodes) ) {
 					/* select next fullscreen mode */
@@ -508,7 +508,7 @@ static void check_events (void)
 
 				/* return or escape key pressed toggles/exits fullscreenmode */
 				else if ( (keypressed == SDLK_RETURN) || (keypressed == SDLK_ESCAPE) ) {
-				 	if (priv->surface->flags & SDL_FULLSCREEN) {
+					if (priv->surface->flags & SDL_FULLSCREEN) {
 						priv->surface = SDL_SetVideoMode(priv->windowsize.w, priv->windowsize.h, priv->bpp, priv->sdlflags);
 						SDL_ShowCursor(1);
 //						LOG (LOG_DEBUG, "SDL video out: Windowed mode");
@@ -523,8 +523,8 @@ static void check_events (void)
                                 else switch(keypressed){
 //                                case SDLK_q: if(!(priv->surface->flags & SDL_FULLSCREEN))mplayer_put_key('q');break;
                                 case SDLK_q: SDL_ShowCursor(1); mplayer_put_key('q');break; //F.B.: added ShowCursor
-//                                case SDLK_p: mplayer_put_key('p');break;
-//                                case SDLK_SPACE: mplayer_put_key(' ');break;
+                                case SDLK_p: mplayer_put_key('p');break;
+                                case SDLK_SPACE: mplayer_put_key(' ');break;
                                 case SDLK_UP: mplayer_put_key(KEY_UP);break;
                                 case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
                                 case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
