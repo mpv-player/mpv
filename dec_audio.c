@@ -25,7 +25,8 @@ int fakemono=0;
 #include "mp3lib/mp3.h"
 #include "libac3/ac3.h"
 
-#include "alaw.c"
+#include "alaw.h"
+
 #include "xa/xa_gsm.h"
 
 #include "loader/DirectShow/DS_AudioDec.h"
@@ -202,10 +203,6 @@ case 3: {
 }
 case 5: {
   // aLaw audio codec:
-  if(sh_audio->format==6)
-    Gen_aLaw_2_Signed(); // init table
-  else
-    Gen_uLaw_2_Signed(); // init table
   sh_audio->channels=sh_audio->wf->nChannels;
   sh_audio->samplerate=sh_audio->wf->nSamplesPerSec;
   sh_audio->i_bps=sh_audio->channels*sh_audio->samplerate;
@@ -290,10 +287,10 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
         len=2*l;
         if(sh_audio->format==6){
         // aLaw
-          while(l>0){ --l; d[l]=xa_alaw_2_sign[s[l]]; }
+          while(l>0){ --l; d[l]=alaw2short[s[l]]; }
         } else {
         // uLaw
-          while(l>0){ --l; d[l]=xa_ulaw_2_sign[s[l]]; }
+          while(l>0){ --l; d[l]=ulaw2short[s[l]]; }
         }
         break;
       }
