@@ -73,6 +73,7 @@ extern void* mDisplay; // Display* mDisplay;
 #include "Gui/mplayer/play.h"
 #endif
 
+int slave_mode=0;
 int verbose=0;
 int quiet=0;
 
@@ -1245,7 +1246,7 @@ if(force_fps){
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
 
-if(!use_stdin){
+if(!use_stdin && !slave_mode){
   getch2_enable();  // prepare stdin for hotkeys...
   inited_flags|=INITED_GETCH2;
 }
@@ -1682,7 +1683,23 @@ if(auto_quality>0){
 #endif
       if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
-         while(
+
+      if(slave_mode) {
+        fd_set set;
+        struct timeval timeout;
+        while (1) {
+          usec_sleep(1000);
+          FD_ZERO (&set);
+          FD_SET (STDIN_FILENO, &set);
+          timeout.tv_sec = 0;
+          timeout.tv_usec = 1000;
+          if(1==select(FD_SETSIZE, &set, NULL, NULL, &timeout)) {
+            break;
+          }
+        }
+      } else {
+
+        while(
 #ifdef HAVE_LIRC
              lirc_mp_getinput()<=0 &&
 #endif
@@ -1699,6 +1716,7 @@ if(auto_quality>0){
 #endif
              if(use_stdin) usec_sleep(1000); // do not eat the CPU
          }
+      }
          osd_function=OSD_PLAY;
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
@@ -1721,6 +1739,39 @@ if(step_sec>0) {
 
 //================= Keyboard events, SEEKing ====================
 
+/* slave mode */ 
+ if(slave_mode) {
+   char buffer[1024];
+   fd_set set;
+   struct timeval timeout;
+   int arg;
+   
+   FD_ZERO (&set);
+   FD_SET (STDIN_FILENO, &set);
+   timeout.tv_sec = 0;
+   timeout.tv_usec = 1000;
+  
+   if(1 == select (FD_SETSIZE, &set, NULL, NULL, &timeout)) {
+     fgets(buffer, 1024, stdin);
+     if(!strcmp("play\n", buffer)) {
+       osd_function=OSD_PLAY;
+     } else if(!strcmp("stop\n", buffer)) {
+       osd_function=OSD_PAUSE;
+     } else if(!strncmp("seek ", buffer, 5)) {
+       sscanf(buffer+5, "%d", &arg);
+       rel_seek_secs = arg-d_video->pts;
+     } else if(!strncmp("skip ", buffer, 5)) {
+       sscanf(buffer+5, "%d", &arg);
+       rel_seek_secs = arg;
+     } else if(!strcmp("quit\n", buffer)) {
+       exit_player(MSGTR_Exit_quit);
+     } 
+   } else {
+     osd_function=OSD_PLAY;
+   }
+ } else
+ 
+/* interactive mode */
 { int c;
   while(
 #ifdef HAVE_LIRC

@@ -244,6 +244,8 @@ struct config conf[]={
 	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0},
 	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1},
 
+	{"slave", &slave_mode, CONF_TYPE_FLAG, 0, 0, 1},
+
 
 #define MAIN_CONF
 #include "cfg-common.h"
