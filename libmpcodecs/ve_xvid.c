@@ -2,6 +2,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <math.h>
+
+#if !defined(INFINITY) && defined(HUGE_VAL)
+#define INFINITY HUGE_VAL
+#endif
 
 #include "../config.h"
 #include "../mp_msg.h"
@@ -96,10 +101,11 @@ static int xvidenc_bquant_offset = 100;
 static int xvidenc_gmc = 0;
 static int xvidenc_chroma_me = 0;
 static int xvidenc_reduced = 0;
-static int xvidenc_xstat=0;
 static int xvidenc_hqac=0;
 static int xvidenc_vhq=0;
 static int xvidenc_pref=0;
+static int xvidenc_psnr=0;
+static uint64_t xvid_error[3];
 #endif
 
 struct config xvidencopts_conf[] = {
@@ -127,7 +133,7 @@ struct config xvidencopts_conf[] = {
     { "packed", &xvidenc_packed, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "divx5bvop", &xvidenc_divx5bvop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     //{ "lumi_mask", &xvidenc_lumi_mask, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-    { "extrastat", &xvidenc_xstat, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    { "psnr", &xvidenc_psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "qpel", &xvidenc_qpel, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     { "max_bframes", &xvidenc_max_bframes, CONF_TYPE_INT, CONF_RANGE, 0, 4, NULL},
     { "bquant_ratio", &xvidenc_bquant_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 1000, NULL},
@@ -147,6 +153,8 @@ struct vf_priv_s {
     XVID_ENC_FRAME enc_frame;
     void* enc_handle;
     vbr_control_t vbr_state;
+    int pixels;
+    int nb_frames;
 };
 
 static int
@@ -224,8 +232,12 @@ config(struct vf_instance_s* vf,
 	enc_param.global |= XVID_GLOBAL_PACKED;
     if (xvidenc_reduced)
 	enc_param.global |= XVID_GLOBAL_REDUCED;
-    if (xvidenc_xstat)
+    if (xvidenc_psnr) {
 	enc_param.global |= XVID_GLOBAL_EXTRASTATS;
+	fp->pixels = width * height;
+	fp->nb_frames = 0;
+	xvid_error[0] = xvid_error[1] = xvid_error[2] = 0;
+    }
 #endif
     if (xvidenc_greyscale)
 	enc_param.global |= XVID_GREYSCALE;
@@ -269,7 +281,7 @@ config(struct vf_instance_s* vf,
 	fp->enc_frame.general |= XVID_MODEDECISION_BITS;
     if (xvidenc_gmc)
 	fp->enc_frame.general |= XVID_GMC;
-    if (xvidenc_xstat)
+    if (xvidenc_psnr)
 	fp->enc_frame.general |= XVID_EXTRASTATS;
     if (xvidenc_chroma_me)
 	fp->enc_frame.motion |= PMV_CHROMA16 | PMV_CHROMA8;
@@ -350,11 +362,27 @@ config(struct vf_instance_s* vf,
     return 1;
 }
 
+static double
+sse_to_PSNR(double sse, double pixels)
+{
+    return sse == 0 ? INFINITY : 4.34294481903251827652 * (11.08252709031685229249 - log(sse/pixels));
+    // 4.34294481903251827652 = 10/log(10)
+    // 11.08252709031685229249 = log(255*255)
+}
+
 static void
 uninit(struct vf_instance_s* vf)
 {
     struct vf_priv_s *fp = vf->priv;
 
+    if (xvidenc_psnr) {
+	double p = (double)fp->pixels * (double)fp->nb_frames;
+        printf ("PSNR: Y:%2.2f, Cb:%2.2f, Cr:%2.2f, All:%2.2f\n", 
+		sse_to_PSNR(xvid_error[0], p), 
+		sse_to_PSNR(xvid_error[1], p/4), 
+		sse_to_PSNR(xvid_error[2], p/4), 
+		sse_to_PSNR(xvid_error[0] + xvid_error[1] + xvid_error[2], p*1.5));
+    }
     vbrFinish(&fp->vbr_state);
 }
 
@@ -432,6 +460,41 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     default:
 	mp_msg(MSGT_MENCODER, MSGL_ERR, "xvid: failure\n");
 	break;
+    }
+
+    if (xvidenc_psnr) {
+        static FILE *fvstats = NULL;
+        char filename[20];
+
+        if (!fvstats) {
+            time_t today2;
+            struct tm *today;
+            today2 = time (NULL);
+            today = localtime (&today2);
+            sprintf (filename, "psnr_%02d%02d%02d.log", today->tm_hour, today->tm_min, today->tm_sec);
+            fvstats = fopen (filename,"w");
+            if (!fvstats) {
+                perror ("fopen");
+                xvidenc_psnr = 0; // disable block
+            }
+        }
+
+	xvid_error[0] += enc_stats.sse_y;
+	xvid_error[1] += enc_stats.sse_u;
+	xvid_error[2] += enc_stats.sse_v;
+
+        fprintf (fvstats, "%6d, %2d, %6d, %2.2f, %2.2f, %2.2f, %2.2f %c\n",
+		 fp->nb_frames,
+		 enc_stats.quant,
+		 fp->enc_frame.length,
+		 sse_to_PSNR (enc_stats.sse_y, fp->pixels),
+		 sse_to_PSNR (enc_stats.sse_u, fp->pixels / 4),
+		 sse_to_PSNR (enc_stats.sse_v, fp->pixels / 4),
+		 sse_to_PSNR (enc_stats.sse_y + enc_stats.sse_u + enc_stats.sse_v, (double)fp->pixels * 1.5),
+		 fp->enc_frame.intra == 0 ? 'P' : fp->enc_frame.intra == 1 ? 'I' : 'B'
+		 );
+
+	fp->nb_frames++;
     }
     
     // write output

@@ -3243,8 +3243,8 @@ subpel refinement quality (for qpel) (default: 8).
 Note: This has a significant effect on the speed.
 .IPs psnr
 print the psnr (peak signal to noise ratio) for the whole video after encoding
-and store the per frame psnr in a file with a name like 'psnr_012345.log'.
-Return values are in dB (decibel), the higher the better.
+and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
+Returned values are in dB (decibel), the higher the better.
 .IPs mpeg_quant
 use MPEG quantizers instead of H.263.
 (default: disabled) (i.e.\& use H.263 quantizers)
@@ -3463,6 +3463,10 @@ maximum number of B frames to put between I/P frames (default=0)
 quantizer ratio between B and non B frames, 150=1.50 (default=150)
 .IPs bquant_offset=<-1000\-1000>
 quantizer offset between B and non B frames, 100=1.00 (default=100)
+.IPs psnr
+print the psnr (peak signal to noise ratio) for the whole video after encoding
+and store the per frame psnr in a file with a name like 'psnr_hhmmss.log'.
+Returned values are in dB (decibel), the higher the better.
 .RE
 
 
