@@ -19,7 +19,9 @@
 #include "ldt_keeper.h"
 #endif
 #include "driver.h"
+#ifndef __MINGW32__
 #include "ext.h"
+#endif
 
 #ifndef WIN32_LOADER
 char* def_path=WIN32_PATH;

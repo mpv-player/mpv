@@ -13,7 +13,7 @@
  * Internal functions and structures for COM emulation code.
  */
 
-#if !defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32)
+#if !defined(WIN32) || defined(__CYGWIN__) || defined(__MINGW32__)
 
 #ifdef __cplusplus
 extern "C" {

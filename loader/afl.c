@@ -31,7 +31,9 @@
 #include "wine/msacm.h"
 #include "wine/msacmdrv.h"
 #include "wineacm.h"
+#ifndef __MINGW32__
 #include "ext.h"
+#endif
 #include "driver.h"
 
 #include <stdio.h>

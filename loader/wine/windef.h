@@ -127,7 +127,7 @@ extern "C" {
 #define PASCAL      __stdcall
 #define pascal      __stdcall
 #define _pascal     __stdcall
-#if !defined(__CYGWIN__)
+#if !defined(__CYGWIN__) && !defined(__MINGW32__)
 #define _stdcall    __stdcall
 #define _fastcall   __stdcall
 #define __fastcall  __stdcall
@@ -136,13 +136,13 @@ extern "C" {
 #define CDECL       __cdecl
 #define _CDECL      __cdecl
 #define cdecl       __cdecl
-#if !defined(__CYGWIN__)
+#if !defined(__CYGWIN__) && !defined(__MINGW32__)
 #define _cdecl      __cdecl
 #endif
 #define WINAPIV     __cdecl
 #define APIENTRY    WINAPI
 
-#if !defined(__CYGWIN__)
+#if !defined(__CYGWIN__) && !defined(__MINGW32__)
 #define __declspec(x)
 #endif
 #define dllimport
@@ -570,12 +570,24 @@ typedef LRESULT CALLBACK (*WNDPROC16)(HWND16,UINT16,WPARAM16,LPARAM);
 #define min(a,b)   (((a) < (b)) ? (a) : (b))
 #endif
 
+#ifndef _MAX_PATH
 #define _MAX_PATH  260
+#endif
+#ifndef MAX_PATH
 #define MAX_PATH   260
+#endif
+#ifndef _MAX_DRIVE
 #define _MAX_DRIVE 3
+#endif
+#ifndef _MAX_DIR
 #define _MAX_DIR   256
+#endif
+#ifndef _MAX_FNAME
 #define _MAX_FNAME 255
+#endif
+#ifndef _MAX_EXT
 #define _MAX_EXT   256
+#endif
 
 #define HFILE_ERROR16   ((HFILE16)-1)
 #define HFILE_ERROR     ((HFILE)-1)

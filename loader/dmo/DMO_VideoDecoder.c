@@ -49,7 +49,9 @@ struct _DMO_VideoDecoder
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/types.h>
+#ifndef __MINGW32__
 #include <sys/mman.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>  // labs
 
