@@ -193,10 +193,11 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 		 l=0;
 		 break;
 	      } else if(l || j<len){ // not last line or there is no eol
-		 y=vo_font->height;
+		 y=0;
 		 xsize=lastxsize=-vo_font->charspace;
-	      } 
-	      memy-=y;    // according to max of vo_font->pic_a[font]->h 
+		 memy -=vo_font->height;
+	      } else
+	         memy-=y; // according to max of vo_font->pic_a[font]->h 
 	  }		  // in last line
       }
    }
