@@ -6489,9 +6489,8 @@ I frame frequency (default: 60)
 .TP
 .B frameref=<value>
 Number of previous frames used as predictors in a P-frame (default: 1).
-.br
-.I NOTE:
-As of x264 r38 this feature is not implemented yet.
+This may cause tiny changes in bitrate and PSNR.
+Some decoders are unable to deal with large frameref values.
 .
 .TP
 .B idrframe=<value>
@@ -6527,7 +6526,7 @@ Beta parameter of deblocking filter (default: 0).
 Affects the maximum allowed gradient within two adjacent blocks.
 .
 .TP
-.B cabac
+.B cabac\ \ \ 
 Use CABAC (Context-Adaptive Binary Arithmetic Coding).
 .
 .TP
@@ -6558,18 +6557,14 @@ As an example, the bitrate difference between QP=20 and QP=40
 is about a factor of 10.
 Useful quantizers in H.264 tend to be very large compared to MPEG[124].
 .br
-.I NOTE:
-This option takes effect even if you specify a CBR encode.
-In such a case, the first encoded frame will use the quantization factor you
-specified, but in later frames, the ratecontrol decides what quants to use.
 .
 .TP
 .B qp_min=<2-51> (CBR only)
-Minimum quantizer, 20-40 seems to be a useful range (default: 2).
+Minimum quantizer, 15-35 seems to be a useful range (default: 10).
 .
 .TP
 .B qp_max=<2-51>  (CBR only)
-Maximum quantizer
+maximum quantizer (default: 51)
 .
 .TP
 .B qp_step=<value>
@@ -6587,7 +6582,7 @@ Set the initial ratecontrol buffer (default: 1/4 of rc_buffer_size)
 .
 .TP
 .B rc_sens=<0-100>
-ratecontrol sensitivity (default: 100)
+ratecontrol sensitivity (default: 4)
 .
 .TP
 .B ip_factor=<value>
@@ -6610,7 +6605,7 @@ bitrate more constant, while a higher value makes the quantization parameter
 more constant.
 .
 .TP
-.B qblur=<0-1>
+.B qblur=<0-99>
 Temporal blur of the quantization parameter (default: 0.5).
 Lower values allow the quantizer value to jump around more,
 higher values force it to vary more smoothly.
@@ -6626,17 +6621,18 @@ Adjust the amount of logging info printed to the screen.
 .RSs
 -1: none
 .br
- 0: errors (for debugging x264)
+ 0: Print errors only.
 .br
  1: warnings
 .br
- 2: PSNR and other analysis stats when the encode finishes (default)
+ 2: PSNR, encoding times, and other analysis stats when the encode finishes
+(default)
 .br
  3: PSNR, QP, frametype, size, and other stats for every frame
 .REss
 .
 .TP
-.B psnr
+.B psnr\ \ \ 
 Print signal-to-noise ratio statistics.
 .
 .

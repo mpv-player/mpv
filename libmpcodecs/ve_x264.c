@@ -133,43 +133,55 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_deblocking_filter_beta = deblockbeta;
     mod->param.b_cabac = cabac;
     mod->param.i_cabac_init_idc = cabacidc;
-    mod->param.i_qp_constant = qp_constant;
+
+    mod->param.rc.i_qp_constant = qp_constant;
     if(qp_min > qp_constant)
         qp_min = qp_constant;
     if(qp_max < qp_constant)
         qp_max = qp_constant;
-    mod->param.i_qp_min = qp_min;
-    mod->param.i_qp_max = qp_max;
-    mod->param.i_qp_step = qp_step;
-#if 0
-    mod->param.i_pass = pass;
-    mod->param.s_rc_eq = rc_eq;
-    mod->param.f_qcompress = qcomp;
-    mod->param.f_qblur = qblur;
-    mod->param.s_2pass_file_out = passtmpfile;
-    mod->param.s_2pass_file_in = passtmpfile;
+    mod->param.rc.i_qp_min = qp_min;
+    mod->param.rc.i_qp_max = qp_max;
+    mod->param.rc.i_qp_step = qp_step;
+    mod->param.rc.psz_rc_eq = rc_eq;
+    mod->param.rc.f_qcompress = qcomp;
+    mod->param.rc.f_qblur = qblur;
+    mod->param.rc.psz_stat_out = passtmpfile;
+    mod->param.rc.psz_stat_in = passtmpfile;
     if((pass & 2) && bitrate <= 0)
     {
         mp_msg(MSGT_MENCODER, MSGL_ERR,
                "2 pass encoding enabled, but no bitrate specified.\n");
         return 0;
     }
-#endif
+    switch(pass) {
+    case 0:
+        mod->param.rc.b_stat_write = 0;
+        mod->param.rc.b_stat_read = 0;
+        break;
+    case 1:
+        mod->param.rc.b_stat_write = 1;
+        mod->param.rc.b_stat_read = 0;
+        break;
+    case 2:
+        mod->param.rc.b_stat_write = 0;
+        mod->param.rc.b_stat_read = 1;
+        break;
+    }
     if(bitrate > 0) {
         if(rc_buffer_size <= 0)
             rc_buffer_size = bitrate;
         if(rc_init_buffer < 0)
             rc_init_buffer = rc_buffer_size/4;
-        mod->param.b_cbr = 1;
-        mod->param.i_bitrate = bitrate;
-        mod->param.i_rc_buffer_size = rc_buffer_size;
-        mod->param.i_rc_init_buffer = rc_init_buffer;
-        mod->param.i_rc_sens = rc_sens;
+        mod->param.rc.b_cbr = 1;
+        mod->param.rc.i_bitrate = bitrate;
+        mod->param.rc.i_rc_buffer_size = rc_buffer_size;
+        mod->param.rc.i_rc_init_buffer = rc_init_buffer;
+        mod->param.rc.i_rc_sens = rc_sens;
     }
     if(fullinter)
         mod->param.analyse.inter = X264_ANALYSE_I4x4 | X264_ANALYSE_PSUB16x16 | X264_ANALYSE_PSUB8x8;
-    mod->param.f_ip_factor = ip_factor;
-    mod->param.f_pb_factor = pb_factor;
+    mod->param.rc.f_ip_factor = ip_factor;
+    mod->param.rc.f_pb_factor = pb_factor;
 
     mod->param.i_width = width;
     mod->param.i_height = height;
