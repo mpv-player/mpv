@@ -64,7 +64,7 @@ LIBAO_EXTERN(macosx)
 
 /* This is large, but best (maybe it should be even larger).
  * CoreAudio supposedly has an internal latency in the order of 2ms */
-#define NUM_BUFS 128
+#define NUM_BUFS 16
 
 typedef struct ao_macosx_s
 {
@@ -243,19 +243,7 @@ static int init(int rate,int channels,int format,int flags)
     }
     ao_msg(MSGT_AO,MSGL_V, "%5d ao->buffer_len\n", (int)ao->buffer_len);
 
-    /* FIXME:
-     *
-     * Resampling of 32-bit float audio is broken in MPlayer. Refuse to 
-     * handle anything other than the native format until this is fixed
-     * or this module is rewritten, whichever comes first.
-     */
-    if (ao_data.samplerate == ao->outputStreamBasicDescription.mSampleRate) {
-      ao_data.samplerate = (int)ao->outputStreamBasicDescription.mSampleRate;
-    } else {
-      ao_msg(MSGT_AO,MSGL_WARN, "Resampling not supported yet.\n");
-      return 0;
-    }
-
+    ao_data.samplerate = ao->outputStreamBasicDescription.mSampleRate;
     ao_data.channels = ao->outputStreamBasicDescription.mChannelsPerFrame;
     ao_data.outburst = ao_data.buffersize = ao->buffer_len;
     ao_data.bps = 
