@@ -325,7 +325,7 @@ static int open(vf_instance_t *vf, char* args)
 	vf->default_reqs = VFCAP_ACCEPT_STRIDE;
 	vf->priv = p = calloc(1, sizeof(struct vf_priv_s));
 	p->ctx = c = pullup_alloc_context();
-	p->fakecount = 2;
+	p->fakecount = 1;
 	c->verbose = verbose;
 	c->junk_left = c->junk_right = 1;
 	c->junk_top = c->junk_bottom = 4;

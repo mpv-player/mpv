@@ -492,7 +492,7 @@ static int decide_frame_length(struct pullup_context *c)
 	struct pullup_field *f3 = f2->next;
 	int l;
 	
-	if (queue_length(c->first, c->last) < 6) return 0;
+	if (queue_length(c->first, c->last) < 4) return 0;
 	foo(c);
 
 	if (f0->affinity == -1) return 1;
@@ -536,13 +536,13 @@ static void print_aff_and_breaks(struct pullup_context *c, struct pullup_field *
 	struct pullup_field *f0 = f;
 	const char aff_l[] = "+..", aff_r[] = "..+";
 	printf("\naffinity: ");
-	for (i = 0; i < 6; i++) {
+	for (i = 0; i < 4; i++) {
 		printf("%c%d%c", aff_l[1+f->affinity], i, aff_r[1+f->affinity]);
 		f = f->next;
 	}
 	f = f0;
 	printf("\nbreaks:   ");
-	for (i=0; i<6; i++) {
+	for (i=0; i<4; i++) {
 		printf("%c%d%c", f->breaks & BREAK_LEFT ? '|' : '.', i, f->breaks & BREAK_RIGHT ? '|' : '.');
 		f = f->next;
 	}
