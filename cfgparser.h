@@ -99,6 +99,12 @@ int m_config_set_option(m_config_t *config,char *opt, char *param);
 
 config_t* m_config_get_option(m_config_t *config, char* arg);
 
+int m_config_switch_flag(m_config_t *config, char* opt);
+
+void m_config_set_flag(m_config_t *config, char* opt, int max);
+
+void* m_config_get_option_ptr(m_config_t *config, char* arg);
+
 m_config_t* m_config_new(play_tree_t* pt);
 
 void m_config_free(m_config_t* config);

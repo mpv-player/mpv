@@ -89,7 +89,8 @@ m_config_save_option(m_config_t* config, config_t* conf,char* opt, char *param) 
   case CONF_TYPE_FUNC_FULL :
     if(strcasecmp(conf->name,opt) != 0) save->opt_name = strdup(opt);
   case CONF_TYPE_FUNC_PARAM :
-    save->param.as_pointer = strdup(param);
+    if(param)
+      save->param.as_pointer = strdup(param);
   case CONF_TYPE_FUNC :    
     break;
   default :
@@ -137,7 +138,7 @@ m_config_revert_option(m_config_t* config, config_save_t* save) {
 	if(config->config_stack[i] == NULL) continue;
 	for(iter = config->config_stack[i]; iter != NULL && iter->opt != NULL ; iter++) {
 	  if(iter->opt == save->opt && 
-	     strcasecmp(save->param.as_pointer,iter->param.as_pointer) == 0 && 
+	     ((save->param.as_pointer == NULL || iter->param.as_pointer == NULL) || strcasecmp(save->param.as_pointer,iter->param.as_pointer) == 0) && 
 	     (save->opt_name == NULL || 
 	      (iter->opt_name && strcasecmp(save->opt_name,iter->opt_name)))) break;
 	}
@@ -308,17 +309,16 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			namelength=strlen(conf[i].name);
 			if ( (conf[i].name[namelength-1]=='*') && 
 				    !memcmp(opt, conf[i].name, namelength-1))
-			        break;
+			  goto option_found;
 			if (!strcasecmp(opt, conf[i].name))
-			break;
+			  goto option_found;
 		}
 	}
-	if (conf[i].name == NULL) {
-		if (config->parser_mode == CONFIG_FILE)
-			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid option:\n");
-		ret = ERR_NOT_AN_OPTION;
-		goto out;
-	}
+	if (config->parser_mode == CONFIG_FILE)
+		mp_msg(MSGT_CFGPARSER, MSGL_ERR, "invalid option:\n");
+	ret = ERR_NOT_AN_OPTION;
+	goto out;	
+	option_found :
 	mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "read_option: name='%s' p=%p type=%d\n",
 	    conf[i].name, conf[i].p, conf[i].type);
 
@@ -927,7 +927,7 @@ m_config_register_options(m_config_t *config,config_t *args) {
 
 config_t*
 m_config_get_option(m_config_t *config, char* arg) {
-  int i;
+  int i,j;
   config_t *conf;
   config_t **conf_list;
 
@@ -938,7 +938,8 @@ m_config_get_option(m_config_t *config, char* arg) {
 
   conf_list = config->opt_list;
   if(conf_list) {
-    for(conf = conf_list[0]; conf != NULL ; conf ++) {
+    for(j = 0 ; conf_list[j] != NULL ; j++) {
+      conf = conf_list[j];
       for(i=0; conf[i].name != NULL; i++) {
 	if(strcasecmp(conf[i].name,arg) == 0)
 	  return &conf[i];
@@ -948,4 +949,35 @@ m_config_get_option(m_config_t *config, char* arg) {
   return NULL;
 }
 
+void*
+m_config_get_option_ptr(m_config_t *config, char* arg) {
+  config_t* conf = m_config_get_option(config,arg);
+  if(!conf) return NULL;
+  return conf->p;
+}
 
+#define AS_INT(c) (*((int*)c->p))
+
+int
+m_config_switch_flag(m_config_t *config, char* opt) {
+  config_t *conf;
+  
+  conf = m_config_get_option(config,opt);
+  if(!conf) return 0;
+  if(conf->type != CONF_TYPE_FLAG) return 0;
+  if( AS_INT(conf) == conf->min) AS_INT(conf) = conf->max;
+  else if(AS_INT(conf) == conf->max) AS_INT(conf) = conf->min;
+  else return 0;
+
+  return 1;
+}
+    
+void
+m_config_set_flag(m_config_t *config, char* opt, int max) {
+  config_t *conf;
+  conf = m_config_get_option(config,opt);
+  if(!conf) return;
+  if(conf->type != CONF_TYPE_FLAG) return 0;
+  if(max) AS_INT(conf) = conf->max;
+  else AS_INT(conf) = conf->min;
+}

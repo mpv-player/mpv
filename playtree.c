@@ -335,11 +335,13 @@ play_tree_set_param(play_tree_t* pt, char* name, char* val) {
 
   if(ni > 0) {
     if(pt->params[n].value != NULL) free(pt->params[n].value);
-    pt->params[n].value = val;
+    pt->params[n].value = val != NULL ? strdup(val) : NULL;
     return;
   }
 
   pt->params = (play_tree_param_t*)realloc(pt->params,(n+2)*sizeof(play_tree_param_t));
+  if(pt->params == NULL)
+    printf("Can't realloc params\n");
   pt->params[n].name = strdup(name);
   pt->params[n].value = val != NULL ? strdup(val) : NULL;
   memset(&pt->params[n+1],0,sizeof(play_tree_param_t));
