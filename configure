@@ -136,6 +136,7 @@ Optional features:
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
   --disable-mp1e         disable libmp1e support
                          (use this option if it does not compile) [enable] 
+  --disable-libdv        disable libdv 0.9.5 support [autodetect]
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
   --disable-vidix        disable VIDIX stuff [enable]
@@ -828,6 +829,7 @@ _shm=auto
 _linux_devfs=no
 _i18n=no
 _sighandler=yes
+_libdv=auto
 
 for ac_option do
   case "$ac_option" in
@@ -884,6 +886,8 @@ for ac_option do
   --disable-rtc)	_rtc=no	        ;;
   --enable-mp1e)	_mp1e=yes	;;
   --disable-mp1e)	_mp1e=no	;;
+  --enable-libdv)	_libdv=yes	;;
+  --disable-libdv)	_libdv=no	;;
   --enable-ossaudio)	_ossaudio=yes	;;
   --disable-ossaudio)	_ossaudio=no	;;
   --enable-mad)		_mad=yes	;;
@@ -2846,6 +2850,22 @@ else
   _nocodecmodules="libavcodec $_nocodecmodules"
 fi
 
+echocheck "libdv-0.9.5 (for mencoder)"
+if test "$_libdv" = auto ; then
+  _libdv=no
+  cat > $TMPC <<EOF
+#include <libdv/dv.h>
+int main(void) { dv_encoder_t* enc=dv_encoder_new(1,1,1); return 0; }
+EOF
+  cc_check -ldv -lm && _libdv=yes
+fi
+if test "$_libdv" = yes ; then
+  _def_libdv='#define HAVE_LIBDV095 1'
+  _ld_libdv="-ldv"
+else
+  _def_libdv='#undef HAVE_LIBDV095'
+fi
+echores "$_libdv"
 
 echocheck "zr"
 if test "$_zr" = yes ; then
@@ -2982,15 +3002,15 @@ int main(void) { (void) encore(0, 0, 0, 0); return 0; }
 EOF
   if test "$_xvid" != no && test "$_xvidcore" && cc_check -lm "$_xvidcore" ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore="-lm $_xvidcore"
+    _ld_encore="$_xvidcore"
     echores "XviD (with $_xvidcore)"
   elif test "$_xvid" != no && cc_check -lm -lxvidcore ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore='-lm -lxvidcore'
+    _ld_encore='-lxvidcore'
     echores "XviD (with libxvidcore.so)"
   elif test "$_divx4linux" != no && cc_check -lm -ldivxencore ; then
     _def_encore='#define HAVE_DIVX4ENCORE 1'
-    _ld_encore='-lm -ldivxencore'
+    _ld_encore='-ldivxencore'
     echores "DivX4linux (with libdivxencore.so)"
   else
     _def_encore='#undef HAVE_DIVX4ENCORE'
@@ -3399,7 +3419,7 @@ DIVX4LINUX = $_divx4linux
 XVID = $_xvid
 DECORE_LIB = $_ld_decore
 MENCODER = $_mencoder
-ENCORE_LIB =  $_ld_encore $_ld_mp3lame
+ENCORE_LIB =  $_ld_encore $_ld_mp3lame $_ld_libdv
 DIRECTFB_LIB = $_ld_directfb
 NEW_INPUT_LIB = $_ld_new_input
 
@@ -3475,6 +3495,9 @@ $_def_decore
 
 /* Define if you are using DivX5Linux Decore library */
 $_def_divx5
+
+/* Define to include support for libdv-0.9.5 */
+$_def_libdv
 
 /* If build mencoder */
 $_mencoder_flag
