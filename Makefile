@@ -277,7 +277,7 @@ distclean:
 dep:	depend
 
 depend:
-	./version.sh `$(CC) --version`
+	./version.sh `$(CC) -dumpversion`
 	$(CC) -MM $(CFLAGS) mplayer.c mencoder.c $(SRCS_MPLAYER) $(SRCS_MENCODER) 1>.depend
 	@for a in $(PARTS); do $(MAKE) -C $$a dep; done
 
@@ -285,7 +285,7 @@ depend:
 
 # rebuild at every config.h/config.mak change:
 version.h:
-	./version.sh `$(CC) --version`
+	./version.sh `$(CC) -dumpversion`
 ifeq ($(wildcard .developer),)
 	$(MAKE) distclean
 endif
