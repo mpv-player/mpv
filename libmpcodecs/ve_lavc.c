@@ -55,7 +55,7 @@ extern int avcodec_inited;
 static char *lavc_param_vcodec = "mpeg4";
 static int lavc_param_vbitrate = -1;
 static int lavc_param_vrate_tolerance = 1000*8;
-static int lavc_param_vhq = 0; /* default is realtime encoding */
+static int lavc_param_mb_decision = 0; /* default is realtime encoding */
 static int lavc_param_v4mv = 0;
 static int lavc_param_vme = 4;
 static int lavc_param_vqscale = 0;
@@ -135,7 +135,8 @@ struct config lavcopts_conf[]={
 	{"vcodec", &lavc_param_vcodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vbitrate", &lavc_param_vbitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
 	{"vratetol", &lavc_param_vrate_tolerance, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
-	{"vhq", &lavc_param_vhq, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"vhq", &lavc_param_mb_decision, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"mbd", &lavc_param_mb_decision, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{"v4mv", &lavc_param_v4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"vme", &lavc_param_vme, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
 	{"vqscale", &lavc_param_vqscale, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
@@ -386,13 +387,16 @@ static int config(struct vf_instance_s* vf,
     else
 	lavc_venc_context->gop_size = 250; /* default */
 
-    if (lavc_param_vhq)
+    lavc_venc_context->flags = 0;
+    if (lavc_param_mb_decision)
     {
 	printf("High quality encoding selected (non real time)!\n");
-	lavc_venc_context->flags = CODEC_FLAG_HQ;
+#if LIBAVCODEC_BUILD < 4673
+        lavc_venc_context->flags = CODEC_FLAG_HQ;
+#else
+        lavc_venc_context->mb_decision= lavc_param_mb_decision;
+#endif
     }
-    else
-	lavc_venc_context->flags = 0;
 
 #if LIBAVCODEC_BUILD >= 4647
     lavc_venc_context->me_cmp= lavc_param_me_cmp;

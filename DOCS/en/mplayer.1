@@ -3358,10 +3358,19 @@ X1 (experimental)
 .RE
 .PD 1
 .TP
-.B vhq\ \ \ \ 
-high quality mode, encode each macro block in all modes and choose the best.
+.B mbd=<0\-2>
+macoblock decision algo (high quality mode), encode each macro block in all modes and choose the best.
 This is slow but results in better quality and file size.
-(default: disabled)
+.PD 0
+.RSs
+.IPs 0
+use mbcmp (default)
+.IPs 1
+select the MB mode which needs the fewest bits (=vhq)
+.IPs 2
+select the MB mode which has the best rate distortion
+.RE
+.PD 1
 .TP
 .B v4mv\ \ \ 
 Allow 4 motion vectors per macroblock (slightly better quality).
