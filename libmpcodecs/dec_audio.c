@@ -328,7 +328,7 @@ int init_audio_filters(sh_audio_t *sh_audio,
 	int out_minsize, int out_maxsize){
   af_stream_t* afs=sh_audio->afilter;
   if(!afs){
-    malloc(sizeof(af_stream_t));
+    afs = (af_stream_t*)malloc(sizeof(af_stream_t));
     memset(afs,0,sizeof(af_stream_t));
   }
 
