@@ -13,9 +13,9 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "afmt.h"
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #define OBTAIN_BITRATE(a) (((a != AFMT_U8) && (a != AFMT_S8)) ? 16 : 8)
 

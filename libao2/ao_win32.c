@@ -26,8 +26,8 @@
 #include "afmt.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "../mp_msg.h"
-#include "../libvo/fastmemcpy.h"
+#include "mp_msg.h"
+#include "libvo/fastmemcpy.h"
 #include "osdep/timer.h"
 
 #define WAVE_FORMAT_DOLBY_AC3_SPDIF 0x0092

@@ -1,6 +1,6 @@
 #include <assert.h>
 
-#include "../config.h"
+#include "config.h"
 
 #include <polyp/polyplib.h>
 #include <polyp/polyplib-error.h>
@@ -9,8 +9,8 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "afmt.h"
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 #define	POLYP_CLIENT_NAME "MPlayer"
 

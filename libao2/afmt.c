@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../config.h"
+#include "config.h"
 #include "afmt.h"
 
 char *audio_out_format_name(int format)

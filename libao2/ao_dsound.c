@@ -31,8 +31,8 @@
 #include "afmt.h"
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "../mp_msg.h"
-#include "../libvo/fastmemcpy.h"
+#include "mp_msg.h"
+#include "libvo/fastmemcpy.h"
 #include "osdep/timer.h"
 
 

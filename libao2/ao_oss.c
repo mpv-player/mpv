@@ -11,10 +11,10 @@
 #include <string.h>
 //#include <sys/soundcard.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../mixer.h"
-#include "../help_mp.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "mixer.h"
+#include "help_mp.h"
 
 #include "afmt.h"
 

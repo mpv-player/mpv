@@ -11,8 +11,8 @@
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 static ao_info_t info = 
 {

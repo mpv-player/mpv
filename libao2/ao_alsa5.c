@@ -9,14 +9,14 @@
 #include <errno.h>
 #include <sys/asoundlib.h>
 
-#include "../config.h"
+#include "config.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "afmt.h"
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 static ao_info_t info = 
 {

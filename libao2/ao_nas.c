@@ -33,7 +33,7 @@
 #include <pthread.h>
 #include <audio/audiolib.h>
 
-#include "../mp_msg.h"
+#include "mp_msg.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"

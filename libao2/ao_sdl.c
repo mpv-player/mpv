@@ -14,9 +14,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "config.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -24,7 +24,7 @@
 #include <SDL.h>
 #include "osdep/timer.h"
 
-#include "../libvo/fastmemcpy.h"
+#include "libvo/fastmemcpy.h"
 
 static ao_info_t info = 
 {

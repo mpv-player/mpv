@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
+#include "config.h"
 
 #ifdef HAVE_DVB_HEAD
 #define HAVE_DVB 1
@@ -17,8 +17,8 @@
 
 #include "afmt.h"
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 #ifdef HAVE_DVB
 #ifndef HAVE_DVB_HEAD

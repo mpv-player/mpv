@@ -15,8 +15,8 @@
 #include "audio_out.h"
 #include "audio_out_internal.h"
 #include "afmt.h"
-#include "../config.h"
-#include "../mp_msg.h"
+#include "config.h"
+#include "mp_msg.h"
 
 //#include "bio2jack.h"
 

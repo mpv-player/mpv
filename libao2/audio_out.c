@@ -2,12 +2,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../config.h"
+#include "config.h"
 #include "audio_out.h"
 #include "afmt.h"
 
-#include "../mp_msg.h"
-#include "../help_mp.h"
+#include "mp_msg.h"
+#include "help_mp.h"
 
 // there are some globals:
 ao_data_t ao_data={0,0,0,0,OUTBURST,-1,0};
