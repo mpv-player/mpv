@@ -1520,7 +1520,6 @@ if(identify) {
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_NCH=%d\n", sh_audio->channels);
   }
   mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_LENGTH=%ld\n", demuxer_get_time_length(demuxer));
-  goto goto_next_file;
 }
 
 if(!sh_video) goto main; // audio-only
