@@ -226,8 +226,8 @@ static config_t mplayer_opts[]={
 	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	// set fullscreen switch method (workaround for buggy WMs)
-	{"fsmode", "option 'fsmode' is obsolete, avoid using it! if you really want it, try -fsmode-dontuse, but don't report bugs with this option used!", CONF_TYPE_PRINT, CONF_RANGE, 0, 15, NULL},
-	{"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 15, NULL},
+	{"fsmode", "option 'fsmode' is obsolete, avoid using it! if you really want it, try -fsmode-dontuse, but don't report bugs with this option used!", CONF_TYPE_PRINT, CONF_RANGE, 0, 31, NULL},
+	{"fsmode-dontuse", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 	// set bpp (x11+vm, dga, fbdev, vesa, svga?)
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
 	// double buffering:  (mga/xmga, xv, vidix, vesa, fbdev)
