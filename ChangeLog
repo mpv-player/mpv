@@ -151,7 +151,8 @@ MPlayer (1.0)
     * MPlayer -af help
     * also support Windows path separator '\'
     * lavc "turbo mode" to speed up 2-pass encoding
-    * XviD encoder frontend updated to XviD 1.1 + API 4.1
+    * support for 3-pass encode for lavc and x264
+    * XviD encoder and decoder frontend updated to API-4.1 (XviD-1.1.x)
     * flush remainig frames at end of encoding process
     * VIDIX Cyberblade TV-out fixed
     * VIDIX I420 support for Cyberblade and mga
