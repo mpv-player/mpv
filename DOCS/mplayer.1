@@ -6,23 +6,23 @@
 mplayer \- Movie Player for Linux
 .SH SYNOPSIS
 .B mplayer
-.RB [ \-v\ ]
-.RB [ \-quiet\ ]
-.RB [ \-vo\ <driver>[:<device>]\ ]
-.RB [ \-ao\ <driver>[:<device>]\ ]
+.RB [ \-v ]
+.RB [ \-quiet ]
+.RB [ \-vo\ <driver>[:<device>] ]
+.RB [ \-ao\ <driver>[:<device>] ]
 .RB [ \-vcd\ track\ number ]
 .RB [ \-sb\ byte\ position ]
-.RB [ \-nosound\ ]
+.RB [ \-nosound ]
 .RB [ \-abs\ seconds ]
 .RB [ \-delay\ secs ]
-.RB [ \-bps\ ]
+.RB [ \-bps ]
 .RB [ \-aid\ id ]
 .RB [ \-vid\ id ]
 .RB [ \-fps\ rate ]
 .RB [ \-mc\ seconds/5f ]
-.RB [ \-fs\ ]
-.RB [ \-vm\ ]
-.RB [ \-zoom\ ]
+.RB [ \-fs ]
+.RB [ \-vm ]
+.RB [ \-zoom ]
 .RB [ \-x\ x ]
 .RB [ \-y\ y ]
 .RB [ \-xy\ factor ]
@@ -33,40 +33,42 @@ mplayer \- Movie Player for Linux
 .RB [ \-sub\ file ]
 .RB [ \-subfps\ rate ]
 .RB [ \-subdelay\ sec ]
-.RB [ \-dvdauth\ device ]
 .RB [ \-z\ <0-8> ]
 .RB [ \-idx ]
 .RB [ \-forceidx ]
 .RB [ \-nodshow ]
 .RB [ \-noxv ]
 .RB [ \-forcexv ]
-.RB [ \-ss\ sec ]
-.RB [ \-dumpaudio ]
-.RB [ \-dumpvideo ]
-.RB [ \-noframedrop ]
-.RB [ \-framedrop ]
-.RB [ \-nodouble ]
-.RB [ \-double ]
-.RB [ \-dvdkey\ key ]
-.RB [ \-stereo\ mode ]
-.RB [ \-srate\ Hz ]
-.RB [ \-osdlevel\ level ]
-.RB [ \-config\ file ]
-.RB [ \-display\ name ]
-.RB [ \-unicode ]
-.RB [ \-utf8 ]
-.RB [ \-fsmode\ mode ]
-.RB [ \-vc\ video\ codec\ name ]
-.RB [ \-ac\ audio\ codec\ name ]
-.RB [ \-vfm\ video\ codec\ family ]
-.RB [ \-afm\ audio\ codec\ family ]
-.RB [ \-frames\ number ]
-.RB [ \-autoq\ quality ]
-.RB [ \-fb\ device ]
-.RB [ \-fbmode\ modename ]
-.RB [ \-fbmodeconfig filename ]
-.RB [ \-benchmark ]
-.I - or file
+.RB [ \-ss\ sec\]
+.RB [ \-dumpaudio]
+.RB [ \-dumpvideo]
+.RB [ \-noframedrop]
+.RB [ \-framedrop]
+.RB [ \-nodouble]
+.RB [ \-double]
+.RB [ \-stereo\ mode]
+.RB [ \-srate\ Hz]
+.RB [ \-osdlevel\ level]
+.RB [ \-config\ file]
+.RB [ \-display\ name]
+.RB [ \-unicode]
+.RB [ \-utf8]
+.RB [ \-fsmode\ mode]
+.RB [ \-vc\ video\ codec\ name]
+.RB [ \-ac\ audio\ codec\ name]
+.RB [ \-vfm\ video\ codec\ family]
+.RB [ \-afm\ audio\ codec\ family]
+.RB [ \-frames\ number]
+.RB [ \-autoq\ quality]
+.RB [ \-fb\ device]
+.RB [ \-fbmode\ modename]
+.RB [ \-fbmodeconfig\ filename]
+.RB [ \-benchmark]
+.RB [ \-dvd\ titleid]
+.RB [ \-chapter\ chapterid]
+.RB [ \-dvdangle\ angleid]
+.RB [ \-dvdkey\ key]
+.I - or file or device
 .PP
 .SH DESCRIPTION
 .I mplayer
@@ -86,6 +88,17 @@ any options.
 .TP
 .I NOTE
 Every "flag" option has "noflag" pair, e.g. -fs opposite is -nofs
+.TP
+.B \-dvd\ titleid
+tell MPlayer which movies (marked with titleid) to play. For example
+sometimes '1' are trailers, and '2' is the real movie.
+.TP
+.B \-chapter\ chapterid
+specify which chapter to start playing at. Examples can be found below.
+.TP
+.B \-dvdangle\ angleid
+some DVD discs contain scenes that can be viewed from multiple angles.
+Here you can tell MPlayer which angels to use. Examples can be found below.
 .TP
 .B \-vo\ <driver>[:<device>]
 select video output driver and optinaly device. "device" is valid with
@@ -108,10 +121,6 @@ you can get the list of available drivers executing
 .TP
 .B \-vcd\ track
 play video cd track from device instead of plain file
-.TP
-.B \-dvdauth\ device
-specify DVD-ROM drive to use for MPEG2 decoding.
-(use *_only_* when playing from DVD!)
 .TP
 .B \-nosound
 don't play sound
@@ -152,7 +161,7 @@ Maybe less/more.
 dynamically changes the level of postprocess, depending on spare CPU
 time available. Uses the same value ranges as -pp . The number you
 specify will be the maximum level used. Usually you can use some big
-number.
+number. You don't have to (and don't) use together with -pp !
 .TP
 .B \-ffactor\ number
 resample alphamap of the font. Can be:
@@ -192,7 +201,8 @@ used in combination with -nosound and -vo null for benchmarking.
 .SH "ADVANCED OPTIONS"
 .TP
 .I NOTE
-These options can help you solve your particular problem.. Also, see the DOCS!
+These options can help you solve your particular problem.. Also, see the
+documentation !
 .TP
 .B \-vc <name>
 force usage of a specific video codec, according to its name in codecs.conf,
@@ -201,6 +211,7 @@ for example :
     -vc divx       use VFW DivX codec
     -vc divxds     use DirectShow DivX codec
     -vc ffdivx     use libavcodec's DivX codec
+    -vc ffmpeg12   use libavcodec's MPEG1/2 codec
     -vc divx4      use ProjectMayo's DivX codec
 .TP
 .B \-ac <name>
@@ -210,27 +221,31 @@ for example :
     -ac mp3        use libmp3 MP3 codec
     -ac mp3acm     use l3codeca.acm MP3 codec
     -ac ac3        use AC3 codec
+    -ac hwac3      enable Hardware AC3 passthrough
+                   (see documentation)
 .TP
 .B \-vfm <1-5>
 force usage of a specific codec FAMILY, and FALLBACK to default if failed.
 For example:
 
     -vfm 2         use VFW (Win32) codecs
-    -vfm 3         use OpenDivX codec (YV12)
+    -vfm 3         use OpenDivX/DivX4 codec (YV12)
                    (same as -vc odivx but fallback)
     -vfm 4         use DirectShow (Win32) codecs
     -vfm 5         use libavcodec codecs
-    -vfm 7         use DivX4Linux codec (YUY2)
+    -vfm 7         use DivX4 codec (YUY2)
                    (same as -vc divx4 but fallback)
 
-NOTE : type 3 and 7 now contains just the one same codec, then OpenDivX 4.0
-beta. For difference between them and when to use which, check the OpenDivX
-section in the documentation.
+NOTE : if libdivxdecore support was compiled in, then type 3 and 7 now contains
+just the same DivX4 codec, but different APIs to reach it. For difference
+between them and when to use which, check the DivX4 section in the
+documentation.
 .TP
 .B \-afm <1-5>
 force usage of a specific audio format. For example:
 
-    -afm 1         use libmp3 (mp1/mp2/mp3)
+    -afm 1         use libmp3 (mp2/mp3,
+                   but not mp1)
     -afm 2         suppose raw PCM audio
     -afm 3         use libac3
     -afm 4         use a matching Win32 codec
@@ -311,10 +326,10 @@ enable doublebuffering. Currently this is only honoured by the DGA driver.
 .TP
 .B \-dvdkey key
 key to decrypt stream encrypted with CSS. For example : -dvdkey F169072699
-(this is NOT for DVD playing! For DVD use the -dvdauth option!)
+(this is NOT for DVD playing! For DVD use the -dvd option!)
 .TP
 .B \-stereo mode
-select type of MPEG1 stereo output. Mode may be 0:stereo 1:left 2:right
+select type of MPEG1 stereo output.
 
         Stereo         0
         Left channel   1
@@ -343,10 +358,12 @@ This option workarounds some problems when using specific windowmanagers and
 fullscreen mode. If you experience fullscreen problems, try changing this
 value between 0 and 7.
 
-        -fsmode 0      new method (since 0.18pre3)
-        -fsmode 1      ICCCWM patch (for KDE2/icewm)
-        -fsmode 2      old method (0.17a)
-	-fsmode 3      ICCCWM patch + Motif method
+        -fsmode 0      new method
+        -fsmode 1      ICCCWM patch
+                       (for KDE2/icewm)
+        -fsmode 2      old method
+        -fsmode 3      ICCCWM patch
+                       plus Motif method
 .TP
 .B \-frames\ number
 MPlayer plays <number> frames, then quits.
@@ -370,7 +387,8 @@ Only valid for the fbdev driver.
 .TP
 .I NOTE
 These are included in this manpage just for completeness! If you don't
-know what are these, you DON'T need these! In either case, double-check DOCS!
+know what are these, you DON'T need these! In either case, double-check the
+documentation !
 .TP
 .B \-br\ rate
 used with '-vo odivx' .
@@ -383,6 +401,9 @@ Specifies the output OpenDivX file. Won't overwrite.
 .TP
 .B \-dumpvideo
 dump video stream to ./stream.dump (only with MPEG-PS) (not very usable)
+.TP
+.B \-sid
+specify DVD subtitle (?)
 .IP
 .SH KEYBOARD CONTROL
 .TP
@@ -436,31 +457,41 @@ MPlayer currently supports 6 subtitle formats : MicroDVD, SubRip, unnamed,
 SAMI (smi), vplayer, RealMedia RT, ssa (Sub Station Alpha).
 Sub files are searched in this priority : (for example /mnt/cdrom/movie.avi)
     /mnt/cdrom/movie.sub
-        (SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT)
+     (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
     $HOME/.mplayer/sub/movie.sub
-        (SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT)
+     (utf/UTF/sub/SUB/srt/SRT/smi/SMI/rt/RT/txt/TXT/ssa/SSA)
     $HOME/.mplayer/default.sub
 .IP
 .SH "EXAMPLES"
-Just launch it! :)
+.B Quickstart DVD playing
+mplayer -dvd 1
+.TP
+.B Multiangle DVD playing
+mplayer -dvd 1 -dvdangle 2
+.TP
+.B Playing from a different DVD device
+mplayer -dvd 1 /dev/dvd2
+.TP
+.B Stream from HTTP
+mplayer http://mplayer.hq/example.avi
 .LP
 .SH BUGS
-Probably. Check DOCS.
+Probably. Check the documentation.
 
 Bugreports should be addressed to the MPlayer-users mailing list
 (mplayer-users@lists.sourceforge.net) ! If you want to submit a bugreport
-(which we love to receive!), please double-check the DOCS/BUGREPORTS, and
+(which we love to receive!), please double-check the bugreports.html, and
 tell us all that we need to know to identify your problem.
 
 .LP
 .SH AUTHORS
-Check DOCS/AUTHORS !
+Check documentation !
 
 MPlayer is (C) 2000-2001
 .I Arpad Gereoffy <arpi@thot.banki.hu>
 
 This manpage is maintained by
-.I Gabucino.
+.I Gabucino .
 .LP
 .SH STANDARD DISCLAIMER
 Use only at your own risk! There may be errors and inaccuracies that could 
