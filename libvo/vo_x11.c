@@ -553,6 +553,8 @@ static uint32_t get_image(mp_image_t *mpi)
 
 static uint32_t query_format( uint32_t format )
 {
+    if(verbose > 2)
+        printf("vo_x11: query_format was called: %x (%s)\n",format,vo_format_name(format));
     if (IMGFMT_IS_BGR(format))
     {
 	if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
