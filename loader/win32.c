@@ -335,6 +335,7 @@ struct CRITSECT
     pthread_t id;
     pthread_mutex_t mutex;
     int locked;
+    long deadbeef;
 };
 
 void* mreq_private(int size, int to_zero, int type);
@@ -1232,10 +1233,12 @@ static void WINAPI expInitializeCriticalSection(CRITICAL_SECTION* c)
     }
 #else
     {
-	struct CRITSECT* cs = mreq_private(sizeof(struct CRITSECT), 0, AREATYPE_CRITSECT);
+	struct CRITSECT* cs = mreq_private(sizeof(struct CRITSECT) + sizeof(CRITICAL_SECTION),
+					   0, AREATYPE_CRITSECT);
 	pthread_mutex_init(&cs->mutex, NULL);
 	cs->locked=0;
-	*(void**)c = cs;
+        cs->deadbeef = 0xdeadbeef;
+	*(void**)c = cs + 1;
     }
 #endif
     return;
@@ -1246,9 +1249,10 @@ static void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
 #ifdef CRITSECS_NEWTYPE
     struct CRITSECT* cs = critsecs_get_unix(c);
 #else
-    struct CRITSECT* cs=*(struct CRITSECT**)c;
+    struct CRITSECT* cs = (*(struct CRITSECT**)c) - 1;
+
 #endif
-    dbgprintf("EnterCriticalSection(0x%x)\n",c);
+    dbgprintf("EnterCriticalSection(0x%x) %p maso:0x%x\n",c, cs, cs->deadbeef);
     if (!cs)
     {
 	dbgprintf("entered uninitialized critisec!\n");
@@ -1256,7 +1260,7 @@ static void WINAPI expEnterCriticalSection(CRITICAL_SECTION* c)
 #ifdef CRITSECS_NEWTYPE
 	cs=critsecs_get_unix(c);
 #else
-	cs=*(struct CRITSECT**)c;
+	cs = (*(struct CRITSECT**)c) - 1;
 #endif
 	printf("Win32 Warning: Accessed uninitialized Critical Section (%p)!\n", c);
     }
@@ -1273,10 +1277,10 @@ static void WINAPI expLeaveCriticalSection(CRITICAL_SECTION* c)
 #ifdef CRITSECS_NEWTYPE
     struct CRITSECT* cs = critsecs_get_unix(c);
 #else
-    struct CRITSECT* cs=*(struct CRITSECT**)c;
+    struct CRITSECT* cs = (*(struct CRITSECT**)c) - 1;
 #endif
     //    struct CRITSECT* cs=(struct CRITSECT*)c;
-    dbgprintf("LeaveCriticalSection(0x%x)\n",c);
+    dbgprintf("LeaveCriticalSection(0x%x) 0x%x\n",c, cs->deadbeef);
     if (!cs)
     {
 	printf("Win32 Warning: Leaving uninitialized Critical Section %p!!\n", c);
@@ -1291,7 +1295,7 @@ static void WINAPI expDeleteCriticalSection(CRITICAL_SECTION *c)
 #ifdef CRITSECS_NEWTYPE
     struct CRITSECT* cs = critsecs_get_unix(c);
 #else
-    struct CRITSECT* cs=*(struct CRITSECT**)c;
+    struct CRITSECT* cs= (*(struct CRITSECT**)c) - 1;
 #endif
     //    struct CRITSECT* cs=(struct CRITSECT*)c;
     dbgprintf("DeleteCriticalSection(0x%x)\n",c);
