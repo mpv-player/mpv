@@ -1,21 +1,37 @@
 
-// set if it's internal buffer of the codec, and shouldn't be modified:
-#define MP_IMGFLAG_READONLY 0x01
+// set if buffer content shouldn't be modified:
+#define MP_IMGFLAG_PRESERVE 0x01
+// set if buffer content will be READED for next frame's MC: (I/P mpeg frames)
+#define MP_IMGFLAG_READABLE 0x02
 // set if buffer is allocated (used in destination images):
-#define MP_IMGFLAG_ALLOCATED 0x02
+#define MP_IMGFLAG_ALLOCATED 0x04
 // set if it's in video buffer/memory:
-#define MP_IMGFLAG_DIRECT 0x04
+#define MP_IMGFLAG_DIRECT 0x08
+// codec accept any stride (>=width):
+#define MP_IMGFLAG_ACCEPT_STRIDE 0x10
+// stride should be aligned to 16-byte (MB) boundary:
+#define MP_IMGFLAG_ALIGNED_STRIDE 0x20
+// codec uses drawing/rendering callbacks (draw_slice()-like thing, DR method 2)
+#define MP_IMGFLAG_DRAW_CALBACK 0x40
 
 // set if number of planes > 1
-#define MP_IMGFLAG_PLANAR 0x10
+#define MP_IMGFLAG_PLANAR 0x100
 // set if it's YUV colorspace
-#define MP_IMGFLAG_YUV 0x20
+#define MP_IMGFLAG_YUV 0x200
 // set if it's swapped plane/byteorder
-#define MP_IMGFLAG_SWAPPED 0x40
+#define MP_IMGFLAG_SWAPPED 0x400
 
+// codec doesn't support any form of direct rendering - it has own buffer
+// allocation. so we just export its buffer pointers:
 #define MP_IMGTYPE_EXPORT 0
+// codec requires a static WO buffer, but it does only partial updates later:
 #define MP_IMGTYPE_STATIC 1
+// codec just needs some WO memory, where it writes/copies the whole frame to:
 #define MP_IMGTYPE_TEMP 2
+// I+P type, requires 2+ independent static R/W buffers
+#define MP_IMGTYPE_IP 3
+// I+P+B type, requires 2+ independent static R/W and 1+ temp WO buffers
+#define MP_IMGTYPE_IPB 4
 
 typedef struct mp_image_s {
     unsigned short flags;
