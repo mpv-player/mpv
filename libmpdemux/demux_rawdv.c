@@ -108,8 +108,8 @@ int demux_rawdv_fill_buffer(demuxer_t *demuxer)
    dp_video->pos=frames->current_filepos;
    dp_video->flags=0;
 
-   if (demuxer->audio && demuxer->audio->id!=-2)
-	{
+   if (demuxer->audio && demuxer->audio->id>=-1)
+   {
       demux_packet_t* dp_audio=clone_demux_packet(dp_video);
       ds_add_packet(demuxer->audio,dp_audio);
    }
@@ -185,7 +185,7 @@ demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
    frames->frame_number=demuxer->stream->end_pos/frames->frame_size;
 
    mp_msg(MSGT_DEMUXER,MSGL_V,"demux_open_rawdv() seek to %d, size: %d, dv_dec->frame_size: %d\n",frames->current_filepos,frames->frame_size, dv_decoder->frame_size);
-    if (dv_decoder->audio != NULL){
+    if (dv_decoder->audio != NULL && demuxer->audio->id>=-1){
        sh_audio_t *sh_audio =  new_sh_audio(demuxer, 0);
 	    demuxer->audio->sh = sh_audio;
 	    sh_audio->ds = demuxer->audio;
