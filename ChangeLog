@@ -14,15 +14,15 @@ MPlayer (1.0)
     * XviD documentation completed
     * French man page in sync again
     * German man page updated
-    * new Czech man page translation
+    * new Czech and Swedish man page translations
     * fixes and updates in various places
 
     Ports:
     * full x86_64 support
     * -rootwin, -panscan support in the quartz video output driver
     * key repetition and aspect fixed in the quartz video output driver
-    * new "Movie" menu for quartz video output driver added with zoom options & preset
-    * fs_res sub option let you choose the fullscreen resolution for the quartz video output driver
+    * "Movie" menu for quartz video output driver with zoom options & preset
+    * fs_res quartz video output driver suboption chooses fullscreen resolution
     * VCD support for Darwin (Mac OS X)
     * fix for stdin input and slave mode on MinGW
     * support for -rootwin in the DirectX video output driver
@@ -132,8 +132,8 @@ MPlayer (1.0)
     * high-quality audio resampling with -af lavcresample
     * cropdetect rounding parameter
     * missing audio plugins (extrastereo, volnorm) converted to audio filters
-    * sine sweep generator
-    * bigendian fixes in rgb2rgb converter
+    * sine sweep generator audio filter
+    * big-endian fixes in rgb2rgb converter
     * yuv2rgb Altivec optimization fixes
 
     Others:
@@ -160,8 +160,8 @@ MPlayer (1.0)
     * -jpeg removed in favor of -vo jpeg suboptions
     * FriBiDi fixes for comma handling in Hebrew subtitles
     * -crash-debug option to attach gdb automatically after crashes
-    * gcc-4 compiler fixes
-    * compilation fixes for many files in TOOLS directory
+    * gcc 4 compilation fixes
+    * compilation fixes for many files in the TOOLS directory
 
 
   pre5: "LinuxTag release" July 15, 2004
