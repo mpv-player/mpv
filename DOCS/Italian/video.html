@@ -1,114 +1,15 @@
 <HTML>
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
 
 <P><B><A NAME=2.3.1>2.3.1. Dispositivi di output video</A></B></P>
-
-<TABLE BORDER=0>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Generale:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2><A HREF=#2.3.1.13>x11</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT
-  face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 con l'opzionale estensione SHM
-  </TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.2>xv</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>X11 usando i livelli con l'estensione Xvideo
-  (YUV hardware YUV e ridimensionamento)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.10>gl</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>renderer OpenGL, per ora funziona solo con:
-<UL><LI>tutte le schede con Utah-GLX
-<LI>schede Matrox con X/DRI >=4.0.3
-<LI>Radeon con il CVS di X/DRI</UL></TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.10>gl2</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>renderer OpenGL, versione a texture multiple</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.3>dga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>estensione X11 DGA</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.6>fbdev</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output fremebuffer in generale</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.5>svga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output SVGAlib</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.4>sdl</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>
-&nbsp;&nbsp;<CODE>1.1.7:</CODE> supporta il ridimensionamento software<BR>
-&nbsp;&nbsp;<CODE>1.1.8:</CODE> supporta Xvideo (ridimensionamento hardware e schermo pieno)<BR>
-&nbsp;&nbsp;<CODE>1.2.0:</CODE> supporta AAlib (-vo aa è caldamente consigliato, vedi sotto!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.14-TODO>ggi</A></TD><TD></TD><TD><FONT face="Verdana,
-  Arial, Helvetica, sans-serif" size=2>simile a SDL</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.11>aa</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>rendering in modalità testo con AAlib</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.12>vesa</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Output a BIOS VESA.</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.15>vidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>VIDeo Interface for *niX (Interfaccia Video per *nix, ndt; questo non
-  è un vero driver, ma un'espansione di VIDIX)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><a href=#2.3.1.15>xvidix</a></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>VIDIX in una finesta X</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>directfb</TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Direttamente al dispositivo framebuffer</TD><TR>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Specifici per alcune schede:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2><A HREF=#2.3.1.7>mga</A></TD><TD>&nbsp;&nbsp;</TD><TD><FONT
-  face="Verdana, Arial, Helvetica, sans-serif" size=2>Livello YUV hardware di Matrox G200/G400
-  tramite il dispositivo mga_vid</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.7>xmga</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Livello mga_vid di Matrox G200/G400 in una finesta X11<BR>
-(<I>emulazione Xv con X 3.3.x!</I>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>supporto YUV Matrox G400 su framebuffer (obsoleto, usa
-  mga/xmga)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>supporto YUV hardware per Voodoo3/Banshee (/dev/3dfx, non ancora testato, forse
-  difettoso)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.9>tdfxfb</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>supporto YUV hardware per Voodoo3/Banshee su framebuffer tdfx
-  (funziona!)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2><A HREF=#2.3.1.16>zr</A></TD><TD></TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>Visualizzazione su schede MJPEG basate su ZR360[56]7
-  (DC10(+), LML33, Buz)</TD><TR>
-
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>Speciali:</B></P></TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
-  sans-serif" size=2>png</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial,
-  Helvetica, sans-serif" size=2>output in file PNG (usa l'opzione -z per regolare
-  la compressione)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>pgm</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>output in file PGM (per test o codifica ffmpeg)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>md5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>output MD5sum (per prove di conformità MPEG)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif"
-  size=2>output nullo (per test di velocità)</TD><TR>
-</TABLE>
-
-<P>NOTA: <I>guarda le prossime sezioni per dettagli e requisiti!</I></P>
-
 
 <P><B><A NAME=2.3.1.1>2.3.1.1.  Configurare l' MTRR</A></B></P>
 
@@ -229,9 +130,8 @@ utilizzabile con <B>MPlayer</B>.</P>
 
 <P>I vecchi driver 3dfx avevano problemi con l'accelerazione XVideo,
 non supportavano ne YUY2 ne YV12, e cose del genere. Verifica di possedere
-XFree86 versione 4.1.0 o maggiore, funziona bene con YUY2, ma va in <B>crash
-con YV12</B>! Quindi, o aspetta il 4.2.0 o usa il cvs di
-<A HREF="http://dri.sourceforge.net">DRI</A> .
+XFree86 versione 4.2.0 o maggiore, funziona bene con YV12 e YUY2. Le versioni
+precedenti, inclusa la 4.1.0 <B>vanno in crash con YV12</B>!
 Se hai strani effetti con -vo xv, prova SDL (ha anche XVideo)
 e guarda se aiuta. Controlla la <A HREF="#2.3.1.4">sezione SDL</A> per dettagli.</P>
 
@@ -279,8 +179,7 @@ a n*(fps del filmato) Hz.</LI>
 <LI>Radeon VE - attualmente solo il CVS di XFree86 ha un driver per questa scheda, la versione
 4.1.0 no. E nessun supporto TV out. Naturalmente con <B>MPlayer</B> puoi felicemente
 ottenere una visualizzazione <B>accelerata</B>, con o senza <B>output TV</B>, e
-non servono librerie o X. Leggi le sezioni <a href=#2.3.1.15>Vidix</a> e <A
-HREF=#2.3.1.14>livello video Radeon</A>).</LI> </P>
+non servono librerie o X. Leggi le sezioni <a href=#2.3.1.15>Vidix</a>.
 
 
 <P><B><A NAME=2.3.1.2.5>2.3.1.2.5. Schede NeoMagic</A></B></P>
@@ -289,7 +188,18 @@ HREF=#2.3.1.14>livello video Radeon</A>).</LI> </P>
 Queste schede possono essere trovate su molti laptop. Sfortunatamente, il driver in
   X 4.2.0 non può usare Xv, ma abbiamo un driver modificato, capace di Xv, per te.
   <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">Scaricalo da qui</A>.
-  Driver fornito da Atmosfear.</P>
+  Driver fornito da Stefan Seyfried.</P>
+
+<P>Per permettere la riproduzione di DVD cambia il tuo XF86Config così:</P>
+
+<P>
+Section "Device"<BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+&nbsp; &nbsp; Driver "neomagic"<BR>
+&nbsp; &nbsp; <B>Option "OverlayMem" "829440"</B><BR>
+&nbsp; &nbsp; <I>[...]</I><BR>
+EndSection
+</P>
 
 <P><B><A NAME=2.3.1.2.6>2.3.1.2.6. Schede Trident</A></B></P>
 
@@ -531,6 +441,9 @@ aiutare. Grazie!</P>
 <P>Aiuta anche con alcuni driver/schede difettosi se il video o l'audio sono a scatti
   (non un problema di sistema lento).</P>
 
+<P>Il video output SDL supporta la visualizzazione dei sottotitoli sotto al filmato, sulla (se
+  presente) barra nera.</P>
+
 <P>Ecco alcune note sull'output SDL in <B>MPlayer</B>.</P>
 
 
@@ -742,7 +655,7 @@ Vedi <A HREF="http://aa-project.sourceforge.net/tune/">http://aa-project.sourcef
 <P>
 Questo driver è stato pensato e introdotto come un <b>driver generico</b> per qualsiasi scheda video
 con un BIOS VESA VBE 2.0 compatibile. Ma c'è ancora una ragione per lo sviluppo di
-questo driver - le suoe molte possibilità di visualizzazione sulla TV.<BR>
+questo driver - le sue molte possibilità di visualizzazione sulla TV.<BR>
 <b>VESA BIOS EXTENSION (VBE) Versione 3.0 Data: 16 Settembre 1998</b> (Pagina 70)
 dice:
 </P>
@@ -857,53 +770,8 @@ risoluzione.</P>
 
 
 <P><B><A NAME=2.3.1.14>2.3.1.14. Livello video Rage128 (pro) / Radeon (radeon_vid)</A></B></P>
-<P>
-<b>radeon_vid</b> e <B>rage128_vid</B> forniscono supporto per il <b>BackEnd Scaler</b> su chipset ATI <b>Radeon</b> e Rage128 (Pro).
-Sono stati studiati e introdotti come analoghi del driver <a href="video.html#2.3.1.7">mga_vid</a>, quindi puoi usarli nello stesso modo!<br>
-Ma l'obbiettivo principale dell'uso di questi driver è il driver <a href="video.html#2.3.1.12">VESA</a>.<br>
-Semplicemente perchè VESA abilita il TV-out sulle schede ATI ma il Backend scaler è usato dopo
-il cambiamento di modalità. Questa implementazione da il flusso video su entrambi: <b>schermo TV</b> e monitor <b>CRTC</b>
-simultaneamente. (Diminuisce leggermente la qualità dell'output video, ma è meglio
-che niente).
-Spiacente! Non sono riuscito a trovare nessuna informazione sul livello video sulle
-pagine di ATI. (ho deciso di implementarlo attraverso chiamate <b>int 10h</b>). Ma è stato
-molto facile implementare queste cose attraverso le porte di lettura/scrittura di Radeon.
-<br><b>NOTA</b>: la tecnologia XXX_VID è assolutamente non documentata e probabilmente in futuro
-queste cose saranno completamente riscritte. Questo è il primo rilascio pubblico dei
-driver.</P>
 
-<P><B>Installazione</B></P>
-
-<P>
-<UL>
-  <LI>
-    <CODE>cd drivers/radeon<BR>
-    make<BR>
-    make install<BR>
-    make nodes</CODE></LI>
-  <LI>aggiungi uno dei seguenti alla fine del file <CODE>/etc/modules.conf</CODE> :<BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE><BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 rage128_vid</CODE></LI>
-  <LI>run <CODE>depmod -a</CODE></LI>
-</UL>
-</P>
-
-<P>
-<br><b>Utilizzo:</b><BR>
-&nbsp;&nbsp;<CODE>mplayer -vo vesa:vidix &lt;le tue opzioni&gt; nomefile</CODE>
-</P>
-
-<P>Più esempi (per il deinterlacing hardware, ecc) si possono trovare
-  <A HREF="../drivers/radeon/README">qui</A>.</P>
-
-<P><B>NOTA</B>: non usare nessun framebuffer se intendi usare questi driver ! Usalo
-solo da una console in modalità testo.</P>
-
-<P>
-<b>Conclusioni:</b> So che ci sono molte cose che mancano e molti bug. Quindi se sei in grado di migliorare
-qualcosa mandami semplicemente le tue patch.
-</P>
-
+<P>Questa sezione è OBSOLETA ! Usa Vidix !</P>
 
 <P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
 
@@ -1091,9 +959,11 @@ devi far funzionare questo prima. Poi ricompila <B>MPlayer</B> con
 
 <P><B><A NAME=2.3.1.A>2.3.1.A. Supporto TV-out</A></B></P>
 
-<P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Schede Matrox</A></B></P>
+<P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Schede Matrox G400</A></B></P>
 
-<P>Sotto Linux hai due modi per far funzionare l'output TV :</P>
+<P>Sotto Linux hai due modi per far funzionare l'output TV delle G400 :</P>
+
+<P><B>IMPORTANTE:</B> Solo le Matrox G400DH/G400MAX hanno il supporto TV-out sotto Linux, le altre (G450, G550) <B>NON l'hanno!</B></P>
 
 <P>
 <UL>

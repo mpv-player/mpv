@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=WHITE>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.2>2.2.  Codec supportati</A></B></P>
 
@@ -11,43 +20,40 @@
 <P>Vedi <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> per la lista completa,
 generata giornalmente!!!</P>
 
-<P>I più importanti tra tutti:<BR>
+<P>I più importanti tra tutti:</P>
 <UL>
 <LI>MPEG1 (VCD) e MPEG2 (DVD)</LI>
-<LI>DivX ;-), OpenDivX (DivX4), 3ivx e altre varianti MPEG4</LI>
+<LI>DivX ;-), OpenDivX (DivX4), DivX 5.00, 3ivx e altre varianti MPEG4</LI>
 <LI>Windows Media Video 7 (WMV1) e 8 (WMV2) usato nei file .wmv</LI>
-<LI>Intel Indeo (3.1,3.2,4.1,5.0)</LI>
-<LI>MJPEG, ASV2 e altri formati hardware</LI>
-<LI>Codec di XAnim</LI>
-<LI>VIVO</LI>
-<LI>FLI</LI>
+<LI>Cinepak e Intel Indeo (3.1,3.2,4.1,5.0)</LI>
+<LI>MJPEG, AVID, VCR2, ASV2 e altri formati hardware</LI>
+<LI>VIVO 1.0, 2.0, I263 e altre varianti h263(+)</LI>
+<LI>FLI//FLC</LI>
 <LI>RealVideo 1.0</LI>
-</UL></P>
+<LI>Vari vecchi semplici formati tipo RLE</LI>
+</UL>
 
-<P>Se hai un codec Win32 non presente qui, e non ancora supportato, basta leggere <A
-HREF="#2.2.3">importare i codec</A> per avere informazioni su come aiutarci ad aggiungerne il
+<P>Se hai un codec Win32 non presente qui, e non ancora supportato, per favore leggi <A
+HREF="#2.2.3">come importare i codec</A> aiutaci ad aggiungerne il
 supporto!</P>
 
-<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4</A></B></P>
+<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4/DivX5</A></B></P>
 
 <P>Questa sezione contiene informazioni sul codec DivX4 di
-<A HREF="http://www.projectmayo.com">ProjectMayo</A>. La loro prima versione alpha disponibile era la OpenDivX 4.0
+<A HREF="http://www.projectmayo.com">Project Mayo</A>. La loro prima versione alpha disponibile era la OpenDivX 4.0
 alpha 47 e 48. Il supporto per questa era/è incluso in <B>MPlayer</B>, e compilato di
 default. Usavamo il suo codice di postprocessing per migliorare opzionalmente la
 qualità visiva dei filmati MPEG1/2. Ora usiamo il nostro.</P>
 
-<P>La nuova generazione di questo codec può anche decodificare i filmati fatti con
-l'infame codec DivX! E non è tutto, è MOLTO più veloce della
-tradizionale DLL DivX Win32 (nota che libavcodec è ANCORA PIU' VELOCE :).
-Vedi sotto per la configurazione. L'unico svantaggio di questo codec è che è
-attualmente a sorgenti chiusi. :(</P>
+<P>La nuova generazione di questo codec è chiamata DivX4Linux e può anche decodificare i filmati fatti con
+l'infame codec DivX! Inoltre è molto più veloce della
+DLL DivX nativa di Win32, ma più lento di libavcodec.
+Quindi l'utilizzo di questo codec per la decodifica è <B>SCORAGGIATO</B>. Comunque è utile per
+l'encoding. Uno svantaggio di questo codec è che è attualmente a sorgenti chiusi.</P>
 
-<P>Il codec può essere scaricato dalla seguente URL:</P>
+<P>Il codec può essere scaricato da una di queste URL:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://avifile.sourceforge.net">http://avifile.sourceforge.net</A></P>
-
-<P>Se non va, prova :</P>
-
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://divx.com">http://divx.com</A></P>
 
 <P>Scompattalo, ed esegui <CODE>./install.sh</CODE> da root.</P>
@@ -55,135 +61,119 @@ attualmente a sorgenti chiusi. :(</P>
 <P>Nota: NON dimenticare di aggiungere <CODE>/usr/local/lib</CODE> a
 <CODE>/etc/ld.so.conf</CODE> e di eseguire <CODE>ldconfig</CODE> !</P>
 
-<P><B>MPlayer</B> riconosce automaticamente se DivX4 è (propriamente) installato, basta compilare
-come sempre. Se non lo trova, non lo hai installato esattamente come sopra,
-e/o ha una configurazione sbagliata (vedi l'ultima domanda della sezione 5.1).</P>
+<P><B>MPlayer</B> riconosce automaticamente se DivX4/DivX5 è (propriamente) installato, basta compilare
+come sempre. Se non lo trova, non lo hai installato o configurato
+correttamente.</P>
 
-<P>Usarlo è un po' macchinoso. Dato che va in conflitto col vecchio OpenDivX (la sua API è
-molto simile a quella di OpenDivX), il codice OpenDivX è disabilitato, e anche il driver OpenDivX
-chiama questa libreria.</P>
+<P>DivX4Linux va in conflitto col vecchio OpenDivX e la sua API è
+simile a quella di OpenDivX, ma non compatibile. Quindi puoi avere solo uno di questi
+compilato in <B>MPlayer</B> alla volta.</P>
 
-<P>Generalmente possiamo indicare la questione col fatto che hai due opzioni per usare
-questo codec:</P>
+<P>DivX4Linux offre una modalità compatibile con OpenDivX come quella che puoi scegliere con le seguenti
+opzioni quando usi questo codec:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>usare il codec divx4 come una nuova versione di OpenDivX.
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">Usa il codec alla maniera di OpenDivX.
 in questo caso produce immagini YV12 nel suo proprio buffer,
-e <B>MPlayer</B> (libvo) fa la conversione dello spazio dei colori. (<B>RACCOMANDATO!</B>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>usare la conversione dello spazio dei colori del codec divx4.
+e <B>MPlayer</B> fa la conversione dello spazio dei colori tramite libvo. (<B>RACCOMANDATO!</B>)</TD><TR>
+<TD></TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;divx4</TD><TD></TD>
+<TD><FONT CLASS="text">Usa la conversione dello spazio dei colori del codec.
 in questa modalità, puoi usare anche YUY2/UYVY.</TD></TR>
 </TABLE></P>
 
-<P>Il metodo 'odivx' è solitamente più veloce, dovuto al fatto che trasferisce
+<P>Il metodo <CODE>-vc odivx</CODE> è solitamente più veloce, dovuto al fatto che trasferisce
 i dati dell'immagine in formato YV12 (planar YUV 4:2:0), richiedendo così molta meno
-larghezza di banda sul bus. Per le modalità YUV (YUY2, UYVY) usa il metodo 'divx4'.
-Per le modalità RGB puoi scegliere liberamente, la loro velocità è la stessa, forse
-differisce a seconda dell'attuale bpp.</P>
+larghezza di banda sul bus. Per le modalità YUV (YUY2, UYVY) usa il metodo <CODE>-vc divx4</CODE>.
+Per le modalità RGB la velocità è la stessa, al massimo
+differisce a seconda della profondità di colore attuale.</P>
 
-<P>Nota: supporta anche il postprocessing (usa l'opzione <CODE>-oldpp</CODE> per
-abilitarlo), ma il campo dei valori è strano: </P>
+<P>NOTA: se il tuo driver -vo supporta il direct rendering, allora <CODE>-vc divx4</CODE> può
+essere una soluzione più veloce, o perfino la più veloce.</P>
 
-<P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>nessun postproc</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 .. 20</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>postprocessing, normale (come il livello 2 con divxds)</TD><TR>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>30 .. 60</TD>
-<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alto prostprocessing, divora molta CPU (come il livello 4 con divxds</TD><TR>
-</TABLE></P>
+<P>Nota: il <B>VECCHIO</B> OpenDivX supporta anche il postprocessing tramite <CODE>-oldpp</CODE>,
+ma il campo dei valori è strano: </P>
+
+<TABLE BORDER=0>
+<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">0</TD><TD>&nbsp;&nbsp;</TD>
+<TD><FONT CLASS="text">nessun postprocessing</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">10 .. 20</TD>
+<TD></TD><TD><FONT CLASS="text">postprocessing normale (come il livello 2 con divxds)</TD></TR>
+<TR><TD></TD><TD><FONT CLASS="text">30 .. 60</TD>
+<TD></TD><TD><FONT CLASS="text">alto prostprocessing, divora molta CPU (come il livello 4 con divxds</TD></TR>
+</TABLE>
 
 <P><B><A NAME=2.2.1.2>2.2.1.2. DivX/libavcodec di ffmpeg</A></B></P>
 
-<P>Dalla versione 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contiene un codec DivX <B>opensource</B>,
-che è compatibile con il tradizionale DivX. <B>MPlayer</B> supporta questo codec,
-e questo rende possibile <B>vedere filmati DivX/DivX4 su piattaforme non-x86</B>,
-ed avere una decodifica <B>DivX/DivX4</B> molto più veloce di quella dei codec Win32 e
-dell'originale libreria DivX4!</P>
+<P>Dalla versione 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contiene
+un codec DivX <B>opensource</B>,che è compatibile con il tradizionale DivX.
+<B>MPlayer</B> supporta questo codec,e questo rende possibile <B>vedere filmati
+DivX/DivX4/DivX5 su piattaforme non-x86</B>,
+ed avere una decodifica <B>DivX/DivX4/DivX5</B> molto più veloce di quella dei
+codec Win32 e dell'originale libreria DivX4!</P>
 
 <P>Contiene anche molti bei codec, come RealVideo 1.0, MJPEG, h263,
 h263+, ecc.</P>
 
-<P>Se usi MPlayer
+<P>Se usi una release di <B>MPlayer</B> allora hai libavcodec proprio nel pacchetto, basta
+    compilare come al solito.Se usi <B>MPlayer</B> dal CVS devi prendere libavcodec direttamente dall'albero CVS di FFmpeg
+    dato che la versione 0.4.5 di Ffmpeg <B>non</B> funzionerà con <B>MPlayer</B>. Fai così:</P>
 
-<UL>
-  <LI>dalla release : allora hai libavcodec proprio nel pacchetto, basta
-    compilare <B>MPlayer</B> come al solito.</LI>
-  <LI>dal CVS : devi scaricarlo manualmente direttamente dall'albero di <B>FFmpeg</B>
-    :
-
-<P><CODE>
-  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
-  cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg
-</CODE></P>
-
-<P>Nota: <I>se fai la copia delle sottodirettori con CVS, la prossima volta basta fare
-'cvs update'.</I></P>
-<P>Ora, sposta la directory dei sorgenti di <B>libavcodec</B> appena scaricata,
-(con tutte le sue sottodirectory) nell'albero di <B>MPlayer</B>, quindi risulterà così
-:</P>
-
+<OL>
+<LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login</CODE></LI>
+<LI><CODE>cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg co ffmpeg</CODE></LI>
+<LI>Sposta la directory dei sorgenti di <B>libavcodec</B>
+nell'albero di <B>MPlayer</B>, quindi risulterà così:
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>main/libavcodec</CODE></P>
+Fare un link simbolico <B>non</B> è abbastanza, devi copiarlo/spostarlo!!!</LI>
+<LI>Compila. Configure controlla che non ci siano problemi prima di compilare.</LI>
+</OL>
 
-<P>Fare un link simbolico NON è abbastanza, devi copiarlo/spostarlo!!!</P>
+<P>Il codec supporta anche il <B>postprocessing!</B></P>
 
-  </LI>
-</UL>
-</P>
-
-<P>Quindi compila. configure controlla che tutto sia a posto, e può essere compilato. Il
-codec supporta anche il <B>postprocessing!</B></P>
-
-<P>Per usarlo, aggiorna il tuo file codecs.conf, e modificalo come dicono la pagina di man,
-o il file example.conf (l'opzione -vfm).</P>
-
-<P>Per raggiungere la <B>velocità massima</B> sul mio K6, rimuovo la sezione
-<CODE>ffmpeg12</CODE> da codecs.conf (questo codec non è ottimizzato, e
-libmpeg2 è due volte più veloce), e metto <CODE>vfm=5</CODE> nel mio file di configurazione.
-Quindi <B>MPlayer</B> usa sempre <B>ffdivx/ffodivx</B> per decodificare i file
-<B>DivX/DivX4</B>, e libmpeg2 per MPEG1/2 . Con questo e la mia Matrox G400, posso vedere anche
-i filmati DivX/DivX4 con la più alta risoluzione sul mio K6/2 500, senza framedrop.</P>
-
+<P>Con ffmpeg e la mia Matrox G400, riesco a vedere filmati DivX anche alla più alta risoluzione
+  sul mio K6/2 500, senza frame scartati.</P>
 
 <P><B><A NAME=2.2.1.3>2.2.1.3.  I codec di XAnim</A></B></P>
 
-<P>Introduzione: usare (alcuni) codec XAnim con altri programmi che XAnim, è
-<B><I>ILLEGALE</I></B>. E' <B>TUA</B> responsibilità leggere la sua licenza,
-e comportarti di conseguenza. Gli autori di <B>MPlayer</B> non possono ritenersi responsabili
-per qualunque atto illegale dell'utente.</P>
+<P>Introduzione:<BR>
+Ti avvertiamo che i codec binari di XAnim sono impacchettati con un pezzo di testo
+che afferma di essere una legale licenza software che, tra altre restrizioni,
+proibisce all'utente di usare i codec in congiunzione con qualunque
+programma diverso da XAnim. Comunque l'autore di XAnim non ha ancora condotto
+alcuna azione legale contro chicchessia per questioni relarive ai codec.
+</P>
 
-<P>Quindi si, <B>MPlayer</B> può usare i codec di XAnim per la decodifica. E' molto facile
+<P><B>MPlayer</B> può usare i codec di XAnim per la decodifica. Segui le istruzioni per
 abilitarli:</P>
 
-<P>
 <UL>
-  <LI>scarica i codec che vorresti usare dal
+  <LI>Scarica i codec che vorresti usare dal
   <A HREF="http://xanim.va.pubnix.com">sito di XAnim</A>. Il codec <B>3ivx</B>
-  non è lì, quindi scaricalo dal <A HREF="http://www.3ivx.com">sito 3ivx</A>.</LI>
+  non è lì, ma sul <A HREF="http://www.3ivx.com">sito 3ivx</A>.</LI>
 
-  <LI>usa l'opzione <CODE>--with-xanimlibdir</CODE> per dire a configure dove
-  può trovare i codec xanim. Di default, li cerca in <CODE>/</CODE> (...) .
-  Alternativamente puoi impostare la variabile d'ambiente <I>XANIM_MOD_DIR</I> alla
+  <LI>Usa l'opzione <CODE>--with-xanimlibdir</CODE> per dire a configure dove
+  può trovare i codec xanim. Di default, li cerca in <CODE>/usr/local/lib/xanim/mods,
+  /usr/lib/xanim/mods e /usr/lib/xanim</CODE>.
+  Oppure puoi impostare la variabile d'ambiente <I>XANIM_MOD_DIR</I> alla
   directory dei codec XAnim.</LI>
 
-  <LI>rinomina i file tagliando la parte relativa all'architettura, quindi avranno dei
+  <LI>Rinomina/crea un symlink ai file tagliando la parte relativa all'architettura, quindi avranno dei
   nomi come questi : <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>
 
 </UL>
-</P>
 
-<P>Sono la famiglia di codec numero 10, quindi puoi voler usare l'opzione <CODE>-vfm 10</CODE>
+<P>XAnim è la famiglia di codec numero 10, quindi puoi usare l'opzione <CODE>-vfm 10</CODE>
 per dire a <B>MPlayer</B> di usarli se possibile.</P>
 
-<P>I codec testati sono: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
+<P>I codec testati includono: <B>Indeo 3.2</B>, <B>4.1</B>, <B>5.0</B>, <B>CVID</B>, <B>3ivX</B>, <B>h263</B>.</P>
 
 
 <P><B><A NAME=2.2.1.4>2.2.1.4.  Video VIVO</A></B></P>
 
 <P><B>MPlayer</B> può leggere i video Vivo (1.0 e 2.0). Il codec più adatto
 per i file 1.0 è il decoder H263 di FFmpeg, puoi usarlo con l'opzione <CODE>-vc
-ffh263</CODE> (default) (devi avere il più recente libavcodec !). Per i file 2.0, usa
+ffh263</CODE> (default) (richiede libavcodec aggiornato). Per i file 2.0, usa
 il file dll <CODE>ivvideo.dll</CODE> di Win32 (da <A
 HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">qui</A>),
 e installalo in <CODE>/usr/lib/win32</CODE> o dovunque metti i codec
@@ -194,12 +184,12 @@ i file VIVO 2.0 in futuro.</P>
 
 <P><B><A NAME=2.2.1.5>2.2.1.5.  Video MPEG 1/2</A></B></P>
 
-<P>MPEG1 e MPEG2 sono decodificati con la libreria nativa <B>libmpeg2</B>.
-Il suo codice sorgente è incluso in <B>MPlayer</B>, e naturalmente è multi-piattaforma.
+<P>MPEG1 e MPEG2 sono decodificati con la libreria nativa <B>libmpeg2</B> multipiattaforma,
+il suo codice sorgente è incluso in <B>MPlayer</B>.
 Gestiamo i file video MPEG1/2 difettosi controllando quale firma ritorna
 libmpeg2, e quando da sig11 (segmentation fault), rapidamente
 reinizializziamo il codec, e continuiamo esattamente da dove avviene l'errore.
-Nessuna diminuzione di velocità misurabile.</P>
+Questo metodo non implica nessuna diminuzione di velocità misurabile.</P>
 
 
 <P><B><A NAME=2.2.1.6>2.2.1.6.  MS Video1</A></B></P>
@@ -212,32 +202,71 @@ Melanson</A>).</P>
 
 <P><B><A NAME=2.2.1.7>2.2.1.7.  Cinepak CVID</A></B></P>
 
-<P><B>MPlayer</B> ora ha il suo decoder opensource, multi-piattaforma per Cinepak.
-Supporta output YUV, così permette il ridimensionamento hardware se lo consente il driver di output video.
-Usato di default.</P>
+<P><B>MPlayer</B> usa di default il suo decoder opensource, multi-piattaforma per Cinepak.
+Supporta output YUV, così permette il ridimensionamento hardware se lo consente
+il driver di output video.</P>
 
 
 <P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
 
 <P>Attualmente è supportato SOLO il codec RealVideo 1.0 (fourcc RV10), per mezzo di
-ffmpeg. Purtroppo, nessun nuovo file RealMedia ha questo, solo i nuovi codec
+ffmpeg. Purtroppo i nuovi file RealMedia usano i nuovi codec
 RV20 e RV30 che sono closed-source. Il loro supporto futuro è
 improbabile :(</P>
 
 
+<P><B><A NAME=2.2.1.9>2.2.1.9.  XViD</A></B></P>
+
+<P><B>XViD</B> è un altro sviluppo del gruppo OpenDivX (il loro primo sviluppo
+fu DivX4).</P>
+
+<P><B>Vantaggi:</B></P>
+  <UL>
+    <LI>opensource</LI>
+    <LI>la sua API è compatibile con DivX4 quindi è facile aggiungerne il
+      supporto</LI>
+    <LI>supporto codifica in 2 passaggi</LI>
+    <LI>buona qualità di codifica, velocità maggiore del DivX4 (puoi ottimizzalo per la tua
+      box durante la compilazione)</LI>
+  </UL>
+
+<P><B>Svantaggi:</B></P>
+  <UL>
+    <LI>attualmente non <B>decodifica</B> propriamente tutti i file DivX/DivX4 (nessun problema, libavcodec può leggerli)</LI>
+    <LI>devi scegliere tra il supporto DivX4 <B>O</B> XViD quando
+      compili</LI>
+    <LI>in sviluppo</LI>
+  </UL>
+
+<P><B>Installazione</B> : è attualmente disponibile solo in CVS. Ecco le istruzioni
+  per scaricarlo e compilarlo :</P>
+<OL>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid
+    login</CODE></LI>
+  <LI><CODE>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid co
+    xvidcore</CODE></LI>
+  <LI><CODE>cd xvidcore/build/generic</CODE></LI>
+  <LI><CODE>Cambia Makefile.linux a seconda di ciò che ti serve</CODE></LI>
+  <LI><CODE>make -f Makefile.linux</CODE></LI>
+  <LI>Prendi encore2.h e decore.h dal pacchetto Divx4linux, e copiali in <CODE>/usr/local/include/</CODE></LI>
+  <LI><CODE>recompila <B>MPlayer</B> con
+    --with-xvidcore=/path/to/libcore.a</CODE></LI>
+</OL>
+
+
 <P><B><A NAME=2.2.2>2.2.2.  Codec audio</A></B></P>
 
-<P>I più importanti tra tutti :<BR>
+<P>I più importanti tra tutti :<BR></P>
 <UL>
 <LI>MPEG layer 2, e layer 3 (MP3) (codice <B>nativo</B>, con ottimizzazioni MMX/SSE/3DNow!)</LI>
 <LI>MPEG layer 1 (codice <B>nativo</B>, con libavcodec)</LI>
-<LI>AC3 Dolby (codice <B>nativo</B>, con ottimizzazioni SSE/3DNow!)</LI>
+<LI>AC3 Dolby (codice <B>nativo</B>, con ottimizzazioni MMX/SSE/3DNow!)</LI>
 <LI>Ogg Vorbis (libreria <B>nativa</B>)</LI>
 <LI>Voxware (usando la DLL DirectShow)</LI>
 <LI>alaw, msgsm, pcm e altri semplici vecchi formati audio</LI>
 <LI>VIVO (g723, Vivo Siren)</LI>
 <LI>RealAudio: DNET (AC3 a basso bitrate)</LI>
-</UL></P>
+</UL>
 
 
 <P><B><A NAME=2.2.2.1>2.2.2.1.  Decodifica software AC3</A></B></P>
@@ -246,14 +275,14 @@ improbabile :(</P>
 
 <P>Il decoder AC3 può creare mix audio in output per 2, 4, o 6
 altoparlanti.  Quando configurato per 6, questo decoder fornisce
-output separato per tutti i canali AC3 al driver della scheda sonora,
+output separato per tutti i canali AC3 al driver sonoro,
 consentendo il pieno "suono surround" senza il decoder AC3 esterno
 necessario per il codec hwac3.</P>
 
 <P>Usa l'opzione <CODE>-channels</CODE> per selezionare il numero di canali output.
 Usa <CODE>-channels 2</CODE> per lo stereo.  Per 4 canali (Sinistro Avanti,
 Destro Avanti, Surround Sinistro e Surround Destro), usa
-<CODE>-channels 4</CODE>.  In questo caso, qualsiasi canale Centrale sarà mixato ugualmente
+<CODE>-channels 4</CODE>.  In questo caso, qualsiasi canale centrale sarà mixato ugualmente
 ai canali frontali.  In ultimo, "-channels 6" darà in output tutti i canali AC3
 come sono stati codificati - nell'ordine Sinistro, Destro, Surround Sinistro,
 Surround Destro, Centro e LFE.</P>
@@ -264,22 +293,23 @@ Surround Destro, Centro e LFE.</P>
 ed avere un driver della scheda sonora che supporta il numero appropriato di
 canali output tramite l' ioctl SNDCTL_DSP_CHANNELS.  Per esempio, una
 versione del driver emu10k1 (usato con le schede SB Live) più recente dell'agosto
-2001 dovrebbe andare bene (ho sentito che anche il più nuovo CVS di ALSA lo supporta).</P>
+2001 dovrebbe andare bene (pare che anche il più nuovo CVS di ALSA lo supporti).</P>
 
 
 <P><B><A NAME=2.2.2.2>2.2.2.2.  Decodifica hardware AC3</A></B></P>
 
 <P>Devi avere una scheda sonora capace di decodificare AC3, con l'uscita digitale (SP/DIF). Il
-driver della scheda deve supportare il formato AFMT_AC3 (come fanno SB Live! o C-Media).
+driver della scheda deve supportare il formato AFMT_AC3 (come fa la C-Media).
 Connetti il tuo decoder AC3 all'uscita SP/DIF, e usa l'opzione '-ac hwac3'.
-Può funzionare oppure no (sperimentale). (probabilmente funzionerà solo
-con schede C-Media attualmente, sentiti libero di correggerlo per la SB Live)</P>
+Può funzionare oppure no (sperimentale). Funzionerà solo con schede C-Media
+e schede SB Live! + driver ALSA. Non funzionerà con i driver OSS della
+Live!.</P>
 
 
 <P><B><A NAME=2.2.2.3>2.2.2.3.  Supporto libmad</A></B></P>
 
 <P><A HREF="http://mad.sourceforge.net">libmad</A> è una libreria di decodifica audio MPEG
-multi-piattaforma. Se non sai a cosa serve, probabilmente non ne hai bisogno.</P>
+multi-piattaforma. Non gestisce bene i file difettosi, e a volte ha dei problemi con la ricerca.</P>
 
 <P>Per abilitare il supporto, compila con l'opzione di configure <CODE>--enable-mad</CODE>.
 </P>
@@ -308,7 +338,7 @@ che nei nuovi filmati RealMedia.</P>
 
 <P>VfW (Video for Windows) è la vecchia API video per Windows. I suoi codec hanno l'estensione
 .DLL o (raramente) .DRV.
-Se <B>MPlayer</B> fallisce col tuo AVI dicendo:</P>
+Se <B>MPlayer</B> fallisce nel leggere il tuo AVI con questo tipo di messaggio:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>UNKNOWN video codec: HFYU (0x55594648)</CODE></P>
 
@@ -335,14 +365,14 @@ la tua richiesta di supporto codec via mail, e carica questi file all' FTP:</P>
 <P><B><A NAME=2.2.3.2>2.2.3.2. Codec DirectShow</A></B></P>
 
 <P>DirectShow è la nuova API video, che è anche peggiore della precedente.
-Le cose sono più difficili con DirectShow, infatti
+Le cose sono più difficili con DirectShow, infatti</P>
 <UL>
 <LI>system.ini non contiene le informazioni necessarie, ma sono scritte nel
 registro :(
 <LI>abbiamo bisogno del GUID del codec.
 </UL></P>
 
-<P>Quindi cerchiamo nel dannato registro..
+<P>Fai un bel respiro e comincia a cercare nel registro...</P>
 <UL>
 <LI>Esegui 'regedit'
 <LI>premi ctrl-f, disabilita i primi due checkbox, e abilita il terzo. Scrivi
@@ -360,8 +390,6 @@ Scriviti quei 16 byte di CLSID, questo è il GUID che ci serve.
 
 <P>NOTA: se la ricerca fallisce, prova ad abilitare tutte le checkbox.. potrai avere
 falsi risultati, ma forse avrai quello giusto, anche...</P>
-<P>NOTA: butta quella merda di M$.</P>
-
 
 <P>Quindi, ora abbiamo tutte le informazioni (fourcc, GUID, file del codec, AVI di esempio),
 manda la tua richiesta di supporto codec via mail, e carica questi file all' FTP:<BR>

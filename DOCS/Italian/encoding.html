@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=2.4>2.4.  Codificare con MEncoder</A></B></P>
 
@@ -20,10 +29,13 @@ capacità di copiare da stream e di ridimensionare i video.</P>
   <UL>
     <LI><B>OPZIONALE</B> - leggi le istruzioni di compilazione di <B>MPlayer</B>, contengono informazioni
       su come installare <I>libdvdread</I> per il supporto <B>DVD</B>, ecc.</LI>
-    <LI><B>OPZIONALE</B> - scarica le librerie <B>DivX4linux</B> più recenti
+    <LI><B>OPZIONALE (SOLO PER LINUX)</B> - scarica le librerie <B>DivX4linux</B> più recenti
       da <A HREF="http://avifile.sourceforge.net/download.htm">avifile.sourceforge.net</A>,
       e installale CORRETTAMENTE. Ti servono se vuoi codificare in DivX4
       (1/2 passaggi).</LI>
+    <LI><B>OPTIONAL</B> - <A HREF="codecs.html#2.2.1.9">scarica e installa
+      <B>XViD</B></A>. Molto utile su sistemi non-Linux, e/o se hai bisogno
+      di una codifica più veloce del DivX4, con approssimativamente la stessa qualità.</LI>
     <LI><B>OPZIONALE</B> - per il supporto libavcodec, installa libavcodec come
       descritto nella <A HREF="codecs.html#2.2.1.2">sezione libavcodec</A>.</LI>
     <LI><B>OPZIONALE</B> - scarica e compila <B>libmp3lame</B> (da lame 3.89beta o lame CVS).<BR>
@@ -38,6 +50,9 @@ capacità di copiare da stream e di ridimensionare i video.</P>
       se è <B>400</B> o comunque alto, non dovresti sentire una diminuzione di
       qualità. Oh, e se il tuo compilatore non esegue nemmeno <CODE>make test</CODE> ...
       Bhe, cancella quel <B>GCC 2.96</B>.</LI>
+      <LI><B>OPZIONALE</B> - <CODE>libjpeg</CODE> e <CODE>libpng</CODE> -
+      come descritto nella sezione <A HREF="documentation.html#1.3">Installazione</A>
+      </LI>
   </UL>
 </P>
 
@@ -53,6 +68,7 @@ la libreria <I>avifile</I>. <B>MEncoder</B> non ne ha per niente bisogno.</P>
       <A HREF=codecs.html#2.2.1.2>libavcodec</A> di ffmpeg</LI>
     <LI>codifica video da <B>sintonizzatori TV compatibili con V4L</B></LI>
     <LI>codifica/multiplexing a file AVI intervallati con un indice corretto</LI>
+    <LI>creazione di file da flusso audio esterno</LI>
     <LI>1, 2 o 3 passaggi video <B>DivX4</B></LI>
     <LI>Audio MP3 <B>VBR</B> - <B>NOTA IMPORTANTE</B> : l'audio MP3 VBR non sempre
       viene letto bene da i lettori di windows! Se hai intenzione di codificare AVI
@@ -68,7 +84,6 @@ la libreria <I>avifile</I>. <B>MEncoder</B> non ne ha per niente bisogno.</P>
 
 <P><B><I>Caratteristiche programmate</I></B> :
   <UL>
-    <LI>usare audio da un file separato (AC3, MP3, OGG)</LI>
     <LI>ancora più ampia scelta disponibile di formati/codec di (de)codifica
     (creare file VOB con flussi DivX4/Indeo5/VIVO :)</LI>
     <LI>codifica audio da v4l</LI>
@@ -100,16 +115,16 @@ due comandi :<BR>
 <P>
   <TABLE>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>rm frameno.avi</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B>rimuovi il file temporaneo che va in conflitto</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
         frameno.avi</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>Primo passaggio</U> : sarà creato un file avi di solo audio, contenente SOLO
       il flusso audio richiesto. Non dimenticare <CODE>-lameopts</CODE>, se ne
       hai bisogno. Se stai codificando un filmato lungo, MEncoder da
@@ -117,19 +132,19 @@ due comandi :<BR>
       dopo la fine di questo passaggio.</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
         -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>Secondo passaggio</U> : cioè il primo passaggio della codifica del video DivX4.
       Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
       passaggio.</B></TD>
   </TR>
   <TR>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
         -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <TD><FONT CLASS="text">
       <B><U>Terzo passaggio</U> : cioè il secondo passaggio della codifica video DivX4.
       Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
       passaggio. In questo passaggio, l'audio da <CODE>frameno.avi</CODE> sarà inserito
@@ -188,7 +203,10 @@ due comandi :<BR>
   quando si vuole codificare solo il flusso audio (come, PCM non compresso
   in MP3).</LI>
 
-  <LI><B>Flusso audio</B> (opzione <CODE>-oac copy</CODE>) : inutile spiegare.</LI>
+  <LI><B>Flusso audio</B> (opzione <CODE>-oac copy</CODE>) : semplice da capire.
+  E' possibile prendere un file audio esterno (MP3, AC3, Vorbis) e mixarlo
+  nel flusso di output. Usa l'opzione <CODE>-audiofile &lt;filename&gt;</CODE>
+  per farlo.</LI>
 </UL>
 </P>
 
@@ -237,16 +255,7 @@ supportati). Puoi codificare i seguenti codec :</P>
 <P><B><I>Spiegazione del processo</I></B></P>
 
 <P><B>MEncoder</B> <I>decodifica</I> le immagini in input con un codec video MJPEG
-  disponibile (per i PNG, usa il decoder PNG interno). Di
-  default usa <CODE>ffmjpeg</CODE>, quindi devi compilare con il supporto libavcodec
-  (cosa che è raccomandata comunque). Lo svantaggio è che non può gestire
-  alcuni tipi di JPEG (al posto di questi verrà codificata un'immagine verde). Usa dei
-  programmi esterni per convertire quelle immagini in un formato adatto.<BR> Si può
-  liberamente scegliere qualunque altro decoder MJPEG, come <CODE>mcmjpg32.dll</CODE>
-  (MainConcept Motion JPEG) se installato, e dopo aver controllato
-  <CODE>codecs.conf</CODE> e la linea di <CODE>videocodec</CODE> che fa riferimento
-  a questo file, saprai che devi usare l'opzione <CODE>-vc mjpeg</CODE>
-  per ottenere questo.
+  disponibile (per i PNG, usa <B>libpng</B>).
 </P>
 
 <P><B>MEncoder</B> quindi passa l' immagine decodificata al compressore video scelto
@@ -261,6 +270,10 @@ supportati). Puoi codificare i seguenti codec :</P>
 
 <P><I>Creare un file DivX4 da tutti i file JPEG presenti nella directory attuale :</I><BR>
   &nbsp;&nbsp;<CODE>mencoder \*.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
+  output.avi</CODE></P>
+
+<P><I>Creare un file DivX4 da alcuni dei file JPEG presenti nella directory attuale :</I><BR>
+  &nbsp;&nbsp;<CODE>mencoder frame001.jpg,frame002.jpg -mf on:w=800:h=600:fps=25 -ovc divx4 -o
   output.avi</CODE></P>
 
 <P><I>Creare un file Motion JPEG (MJPEG) da tutti i file JPEG presenti nella directory attuale :</I><BR>
@@ -294,44 +307,44 @@ supportati). Puoi codificare i seguenti codec :</P>
 
 <TABLE BORDER=1>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-ss</I> tempo</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     comincia a codificare dal tempo dato (può partire solo dai frame chiave !)
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-endpos</I> tempo</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     smetti di codificare al tempo dato. Vedi la pagina di man per esempi !
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-o</I> nomefile</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     specifica il nome del file di output
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-x</I> larghezza in pixel</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     ridimensiona l'output alla data larghezza in pixel
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-y</I> altezza in pixel</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     ridimensiona l'output alla data altezza in pixel
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-sws</I> 0-2</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     metodo di ridimensionamento<BR>
     &nbsp;&nbsp;0 - bilineare veloce<BR>
     &nbsp;&nbsp;1 - bilineare<BR>
@@ -339,9 +352,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-ovc</I> nomecodec</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Codifica col codec dato (i nomi dei codec sono quelli presenti in codecs.conf). Esempi:<BR>
     &nbsp;&nbsp;<B>help</B> - ottieni una lista dei codec disponibili<BR>
     &nbsp;&nbsp;<B>null</B> - non creare un flusso video nell'AVI di output<BR>
@@ -354,9 +367,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-oac</I> nomecodec</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Codifica col codec dato (i nomi dei codec sono quelli presenti in codecs.conf). Esempi:<BR>
     &nbsp;&nbsp;<B>help</B> - ottieni una lista dei codec disponibili<BR>
     &nbsp;&nbsp;<B>copy</B> - nessuna codifica, copia il flusso (solo da AVI/ASF per ora)<BR>
@@ -365,9 +378,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
   <I>-mf</I> opzioni multifile</TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Usate per codificare da file JPEG multipli. Le sue sotto-opzioni sono:<BR>
     &nbsp;&nbsp;<B>on</B> - abilita il supporto multifile<BR>
     &nbsp;&nbsp;<B>w</B>=&lt;valore&gt; - larghezza del file di output<BR>
@@ -378,9 +391,9 @@ supportati). Puoi codificare i seguenti codec :</P>
 </TR>
 
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-divx4opts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Se codifichi in DivX4, puoi specificare i sui parametri qui, come:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
@@ -391,9 +404,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-lavcopts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Se codifichi in libavcodec, puoi specificare i sui parametri qui, come:<BR>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
     Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
@@ -405,9 +418,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     <I>-lameopts</I></TD>
-  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <TD><FONT CLASS="text">
     Se codifichi in MP3 con libmp3lame, puoi specificare i sui parametri qui, come:<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
     &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>

@@ -1,46 +1,48 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><A NAME=5>5. Sezione FAQ (Domande frequenti)</A></B></P>
 
 <TABLE BORDER=0 WIDTH=100% ALIGN=left>
 
-<TD COLSPAN=3><P><B><A NAME=5.1><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>5.1 Compilazione</A></B></P>
+<TD COLSPAN=3><P><B><A NAME=5.1><FONT CLASS="text">5.1 Compilazione</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial,
- Helvetica, sans-serif" size="2">
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 configure finisce con questo testo, e MPlayer non compila !<BR>
 <CODE>Your gcc does not support even i386 for '-march' and '-mcpu'.</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Il tuo gcc non è installato correttamente, controlla il file
  <CODE>config.log</CODE>
 per dettagli.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial,
- Helvetica, sans-serif" size="2">
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Cosa significa "No such file or directory" ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Probabilmente non c'è quel file o directory.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial,
- Helvetica, sans-serif" size="2">
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Qual'è il problema col gcc 2.96 ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Per essere breve: <B><I>NON USARE il gcc 2.96 !!!</I></B><BR>
 Leggi <A HREF="gcc-2.96-3.0.html">questo</A> e <A
  HREF="users_against_developers.html">questo</A> testo!
@@ -49,22 +51,19 @@ Se ancora vuoi veramente-veramente usarlo, assicurati di usare l'ultima versione
 <BR>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Bene, ho il gcc 3.0.1 di RedHat/Mandrake, quindi sono a posto--!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 No, ci sono questioni anche con quei compilatori.<BR>
 Usa la serie 2.95.x per l'affidabilità (non <A
  HREF="gcc-2.96-3.0.html">2.96</A>).
 Usa l'ultimo gcc 3.0.x (a partire dal 3.0.2) se vuoi usare una versione 3.0.x.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Ho provato a compilare MPlayer, ma ho ottenuto questo output:<BR>
 <PRE>
 In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
@@ -80,19 +79,16 @@ In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
 /usr/include/wchar.h:514: cannot convert `const wchar_t* __restrict' to
 `const
 </PRE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Aggiorna glibc al più recente. Su Mandrake, usa 2.2.4-8mdk .
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 ...gcc 2.96... (si, alcune persone stanno ANCORA discutendo del loro gcc 2.96!!)
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 <P>Ma noi abbiamo ideg (la parola 'ideg' è descritta oltre nelle FAQ). E i
  nostri
 contatori di ideg vanno in overflow ancora e ancora.</P>
@@ -133,83 +129,69 @@ casa, ecc ecc. Volete proprio questo? Sembra.</P>
 <P ALIGN=RIGHT>Arpi (una mail sulla lista mplayer-users)</P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Dove trovo informazioni sui bug del gcc 2.96 ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 In <A HREF="gcc-2.96-3.0.html">questa</A> documentazione. E <A
  HREF="users_against_developers.html">questa</A>
 documentazione dice perchè RedHat ha rilasciato il 2.96 e altre cose
  interessanti.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 L'output SDL non funziona o compila. Il Problema è ....
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 E' stato testato con le versioni SDL più recenti (probabilmente funziona su 1.1.7+).
 NON funziona con nessuna versione precedente, quindi non chiedete.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ho ancora dei problemi a compilare col supporto SDL. Gcc dice qualcosa
 a proposito di "undefined reference to `SDL_EnableKeyRepeat'"   Che c'è?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Dove hai installato la libreria SDL? Se l'hai installata in /usr/local
 (il default) allora modifica il config.mak di primo livello e aggiungi
 "-L/usr/local/lib " dopo "X_LIBS=" Ora scrivi make. Fatto!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Non compila, e mancano uint64_t inttypes.h e cose simili...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 copia etc/inttypes.h nella directory di <B>MPlayer</B> (cp etc/inttypes.h .)
 riprova...
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Ho un Pentium III ma ./configure non rileva l'SSE
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Solo le versioni del kernel 2.4.x supportano SSE (o prova l'ultimo 2.2.19 o più
  recente, ma
 preparati a dei problemi)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Ho la G200/G400, come compilare/usare il driver mga_vid?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Leggi tutta questa documentazione.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Ci sono pacchetti rpm/deb/... di <B>MPlayer</B>?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Puoi farti un pacchetto .deb, guarda la sezione <A
  HREF="documentation.html#6.1">6.1</A>.
 E' _FORTEMENTE_ scoraggiato l'uso di pacchetti precompilati
@@ -219,14 +201,12 @@ I Pacchetti precompilati sono COMPLETAMENTE non-supportati dal team
  <B>MPlayer</B>!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Durante il 'make', MPlayer si lamenta circa le librerie X11. Non capisco,
 io HO X installato!?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 ...ma non hai il pacchetto di sviluppo di X. O non è
 installato correttamente. Si chiama XFree86-devel* sotto RedHat, e xlib6g-dev*
  sotto
@@ -240,50 +220,42 @@ Controlla anche il link /usr/include/X11 :<BR>
 La tua distribuzione potrebbe differire dal Linux Filesystem Standard.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 E il driver DGA? Non riesco a trovarlo!!!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 ./configure rileva automaticamente il tuo driver DGA. Se -vo help non mostra
 DGA, allora c'è un problema con la tua installazione X.
 Prova ./configure --enable-dga (e leggi la documentazione)
 In alternativa, prova il driver DGA di SDL con l'opzione '-vo sdl:dga'.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Non riesco a compilare SVGAlib.. uso il kernel 2.3/2.4.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Devi modificare il file Makefile.cfg di SVGAlib commentare "BACKGROUND = y".
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Ho compilato MPlayer col supporto libdvdcss/libdivxdecore, ma quando tento di
 farlo partire, dice:<BR>
 <CODE>&gt; error while loading shared libraries: lib*.so.0: cannot load
 shared object file: No such file or directory</CODE><BR>
 Ho controllato il file e C'E', in /usr/local/lib.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Aggiungi /usr/local/lib a <B>/etc/ld.so.conf</B> e  esegui <B>ldconfig</B> .
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Sembra che MPlayer non trovi la mia libcss. Cosa sbaglio ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 E' normale. <B>MPlayer</B> non utilizza più libcss per leggere i DVD.  Devi
 installare <B>libdvdread</B> e <B>libdvdcss</B>. Leggi la sezione
 sui DVD <A HREF="cd-dvd.html">qui</A>. libcss deve essere usato per esempio se
@@ -292,65 +264,54 @@ leggere file VOB criptati dall'hard disk (non per la maggior parte degli
  utenti).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Hmm, strano. Quando carico il modulo del kernel mga_vid.o, trovo questo nei
  log:<BR>
 <CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Gli ultimi moduli del kernel necessitano dell'indicazione della loro license
  (principalmente
 per evitare che i kernel hacker "debugghino" driver closed source).
 Aggiorna il kernel le modutils e <B>MPlayer</B>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Quando compilo <B>MEncoder</B>, va in segfault al momento del linking !!!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD>
+<FONT CLASS="text">
 Non so, aggiornare le binutils dovrebbe aiutare (2.11.92.* o superiori
  dovrebbero andar bene).
 Non è un nostro errore, NON segnalatecelo!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Mi piacerebbe compilare <B>MPlayer</B> su Minix !
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Anche a me. :)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD COLSPAN=3><B><A NAME=5.2><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>5.2. Domande generali</A></B>
+<TD COLSPAN=3><B><A NAME=5.2><FONT CLASS="text">5.2. Domande generali</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 E i DVD ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Leggi la sezione CD/DVD a <A HREF="cd-dvd.html">questa pagina</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-L'opzione -xy o -fs non funziona col driver x11 (-vo x11)
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
+ L'opzione -xy o -fs non funziona col driver x11 (-vo x11)
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Funziona, ma devi specificare esplicitamente il ridimensionamento software (è
  LENTO!) con
 l'opzione <CODE>-zoom</CODE>. Faresti meglio ad usare il supporto XF86VidMode:
@@ -361,17 +322,15 @@ E' molto più veloce. Se funziona anche il DGA di SDL, usa quello, sarà ancora
  PIU' veloce!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Qual'è il significato dei numeri nella linea di stato?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Vedi: <CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:   2.1
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
+Vedi: <CODE><FONT CLASS="text">A:   2.1
  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 4 49%</CODE><BR>
 <UL>
-<LI><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A: posizione audio
+<LI><FONT CLASS="text">A: posizione audio
  in secondi
 <LI>V: posizione video in secondi
 <LI>A-V: differenza audio-video in secondi (ritardo)
@@ -389,79 +348,65 @@ Vedi: <CODE><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:   2.1
  presto.</I>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 E se non volessi farli apparire?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Allora usa l'opzione -quiet, e leggi la pagina di man.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Perchè l'utilizzo per video_out della cpu è zero (0%) coi file mpeg?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Non è zero, ma è interno al codec, quindi non può essere misurato separatamente.
 Dovresti provare a leggere il file usando -vo null e poi -vo ... e guardare
 la differenza per vedere la velocità del video_out...
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Cos'è XMMP? (è XMMS o XMPS ma scritto male?)
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 E' un nuovo progetto, vedi http://frozenproductions.com per dettagli.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Ci sono messaggi d'errore circa un file non trovato /usr/lib/win32/....
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Scarica <A
- HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec.zip">w32codec.zip</A>
+ HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.60.tar.bz2">w32codec-0.60.tar.bz2</A>
 dal *nostro* FTP (il pacchetto di codec di avifile ha un differente set di DLL).
 Installalo.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ci sono mailing list su MPlayer?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Si! Vedi questa documentazione su come iscriverti!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Ho trovato un brutto bug quando ho provato a leggere il mio video preferito!!
 Chi dovrei informare?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Vedi l'Appendice <A HREF="bugreports.html">C</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ho problemi a leggere file col codec ... Posso usarli?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Controlla <A
  HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/
 DOCS/codecs-status.html</A>,
@@ -469,92 +414,77 @@ se non c'è il tuo codec, leggi la
 <A HREF="codecs.html#2.1.3">sezione 2.1.3</A>, e contattaci.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%>
+<B><FONT CLASS="text">
 Umm, cos'è "IdegCounter"?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Un mix di una parola ungara e una inglese. In inglese, "Ideg" significa
 "nervo", ed è pronunciato qualcosa come "ydaegh" . Era all'inizio usato
 per misurare il nervosismo di A'rpi, dopo alcune (umm) "mistiche" sparizioni
 del codice CVS ;)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 E cos'è il "Faszom(C)ounter" ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 "Fasz" è una parola ungara che non vuoi sapere, le altre sono da frutto
 delle menti perverse degli sviluppatori di MPlayer.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 LIRC non funziona, perchè ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Sei sicuro di usare "mplayer_lirc" invece di "mplayer"?
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 I sottotitoli sono molto belli, i più belli che ho mai visto, ma rallentano la
-riproduzione! Lo so è strano...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Dopo il ./configure , modifica config.h e sostituisci <CODE>#undef
- FAST_OSD</CODE> con
+riproduzione! Lo so è strano...</B></TD><TR><TD></TD>
+<TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
+Dopo il ./configure , modifica config.h e sostituisci
+<CODE>#undef FAST_OSD</CODE> con
 <CODE>#define FAST_OSD</CODE>. Quindi ricompila.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 OSD scatta!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Usi un driver vo con buffering singolo (x11,xv). Con xv,
 usa l'opzione -double.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Cosè esattamente libavcodec?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Vedi la <A HREF="codecs.html#2.1.2.2">sezione 2.1.2.2</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ma configure mi dice "Checking for libavcodec ... no"!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Devi prendere libavcodec dal CVS di FFmpeg. Leggi le istruzioni nella
 <A HREF="codecs.html#2.1.2.2">sezione ffmpeg</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 La GUI non è utilizzabile con icewm, alcuni pannelli sono sopra al filmato!!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top>
+<FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Si sa, icewm è dittatoriale. Irrisolvibile. In dettaglio:
 La sua taskbar tralascia le richieste di ridimensionamento della finestra della
  GUI. Se questa chiede
@@ -563,37 +493,33 @@ La sua taskbar tralascia le richieste di ridimensionamento della finestra della
 Molto male.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Non riesco ad accedere al menu della GUI. Premo il tasto destro, ma non accedo a
  nessuna
 voce del menu !
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Usi FVWM ? prova questo :<BR>
 Start -&gt; Settings -&gt; Configuration -&gt; Base Configuration<BR>
 <BR>
 Setta "Use Applications position hints" a Yes.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Come posso eseguire MPlayer in background ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD><FONT CLASS="text">
 Usa : <CODE>mplayer &lt;opzioni&gt; &lt;nomefile&gt; &lt; /dev/null &
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 <TD COLSPAN=3>
-<B><A NAME=5.3><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.3.
+<B><A NAME=5.3><FONT CLASS="text">5.3.
  Problemi di lettura file</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 ...... funziona con avifile/aviplay ma non con MPlayer.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 <B>MPlayer</B> != avifile
 La sola cosa in comune con questi lettori è il caricatore delle DLL Win32.
 I set di codec (dll), sincronizzazione, demultiplexing ecc sono del tutto
@@ -602,46 +528,38 @@ Se qualcosa funziona con aviplay non significa che lo faccia in <B>MPlayer</B>
 e vice versa.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 L'audio va fuori sincronia coi file .avi.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Prova con le opzioni -bps o -nobps
 se ancora non va, mandami (upload in ftp) quel file, controllerò.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 I video Indeo 3.x/4.x si vedono sotto-sopra!!!?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 E' un bug conosciuto (veramente è un bug/limitazione del codec della DLL)
 Vedi se il tuo driver vo supporta l'opzione -flip.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Il video Indeo 3.x,4.x non funziona alla risoluzione di 32bpp (16,24 bpp sono
  ok).
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 E' un bug conosciuto (veramente è un bug/limitazione del codec della DLL).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 MPlayer esce con con degli errori usando l3codeca.acm.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Controlla l'output di 'ldd /usr/local/bin/mplayer'. Se contiene<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 => /lib/libc.so.6
  (0x4???????)</CODE><BR>
@@ -657,83 +575,69 @@ o usare l'opzione di <B>MPlayer</B> -afm 1 per disabilitare l'uso di
  l3codeca.acm.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Il mio computer legge gli AVI M$ DivX con risoluzione ~ 640x300 e il suono mp3
  stereo
 troppo lentamente. Quando uso l'opzione -nosound, tutto è ok (ma silenzioso).
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Ok bimbo, la tua macchina è troppo lenta. Leggi questa documentazione.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 MPlayer muore con "MPlayer interrupted by signal 4 in module: decode_video".
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Prova a eseguire <B>MPlayer</B> sulla macchina dove l'hai compilato. O
  ricompila. Non
 usare <B>MPlayer</B> su CPU diverse da quella su cui hai compilato.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ho problemi con [il tuo window manager] e le modalità a pieno schermo in
  xv/xmga/sdl/x11
  ..
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Usa l'opzione -fsmode. Vedi example.conf o le pagine di man.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ma funziona con avifile!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-E allora?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
+ E allora?
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Allora avifile è migliore!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Allora usa avifile, ha una bella GUI e un bel codice C++ :)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ottengo questo leggendo file mpeg: Can't find codec for video format 0x10000001!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Hai una versione vecchia di codecs.conf in ~/.mplayer/. Aggiornala con quella in
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
+ Hai una versione vecchia di codecs.conf in ~/.mplayer/. Aggiornala con quella in
  etc/<BR>
 <B>O</B> hai l'opzione <CODE>vc=</CODE> o simili, nel/nei file
 di configurazione.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Eseguendo mplayer sotto KDE(1/2) ottengo solo uno schermo nero e non succede
 niente, dopo circa un minuto il video comincia.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Il demone del suono arts di KDE blocca il dispositivo del suono, o aspetta
 finchè parte il video o disabilita il demone arts in kontrollcenter.
 Se vuoi usare il suono arts, specifica l'output audio SDL (ao=sdl), e
@@ -742,28 +646,24 @@ assicurati che il tuo SDL possa gestire il suono arts. Un'altra opzione è far
 mplayer con artsdsp.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ho un AVI che mostra lo schermo grigio con -vc odivx, e verde con -vc
  divx4 .
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Non è un file DivX, ma un M$ MPEG4v3 . Aggiorna codecs.conf.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Quando leggo un certo filmato avviene una desincronizzazione video-audio e/o
  MPlayer
  muore in questo modo:<BR>
 <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the
  buffer!</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Questo può avere molte ragioni.<BR>
   <LI>la CPU <B>e/o</B> la scheda video <B>e/o</B> il bus è troppo LENTO.
  <B>MPlayer</B>
@@ -777,58 +677,50 @@ Questo può avere molte ragioni.<BR>
  0</I> .</LI>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ho un file MJPEG che funziona con altri lettori ma mostra solo uno schermo nero
  con
 con MPlayer.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Disabilita le DLL di Windows in <CODE>codecs.conf</CODE>, o usa l'opzione
  <CODE>-vc
  ffmjpeg</CODE> (devi compilare
 MPlayer con libavcodec).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Quando tento di catturare dal mio sintonizzatore TV, funziona, ma i colori sono
  strani. E' ok
 con altre applicazioni.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 La tua scheda probabilmente riporta male le sue capacità sullo spazio dei
  colori. Prova con YUY2 invece
 del default YV12 (vedi la documentazione sull'input TV).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Quando cerco di cominciare la riproduzione, ottengo questo messaggio, ma la
  riproduzione è buona :<BR>
 <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Vedi la <A HREF="documentation.html#1.3">Sezione sull'installazione</A>. La
  parte
 sul nuovo codice di sincronia.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ho problemi di sincronia A/V. Alcuni dei miei AVI vanno bene, ma altri vanno a
  velocità
 doppia !
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Hai una scheda sonora/driver difettosi. Molto probabilmente è fissata a 44100Hz,
  e
 stai provando a leggere un file con l'audio a 22050Hz. Prova il driver <CODE>-ao
@@ -836,34 +728,45 @@ stai provando a leggere un file con l'audio a 22050Hz. Prova il driver <CODE>-ao
 
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Tutti i file WMV (o altri..) che leggo danno una finestra verde/grigia e c'è
  solo
 il suono! Dice:<BR>
 <CODE>Detected video codec: [null] drv:0 (NULL codec (no decoding))</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Aggiorna il tuo <CODE>codecs.conf</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Ottengo delle percentuali molto strane (troppo grandi) leggendo dei filmati sul mio notebook ?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD><FONT CLASS="text">
+E' un effetto del sistema di gestione/risparmio energetico del tuo notebook
+(bios, non kernel). Collega l'alimentazione esterna <b>prima</b> di accendere il
+notebook.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+L' audio/video va totalmente fuori sincronia quando eseguo MPlayer come root. Funziona
+normalmente se lo eseguo come utente.
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD><FONT CLASS="text">
+Questo è ancora un effetto della gestione energetica (vedi sopra). Collega l'alimentazione esterna
+<b>prima</b> di accendere il notebook.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.4><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.4.
+<B><A NAME=5.4><FONT CLASS="text">5.4.
  Problemi driver video/audio (vo/ao)</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ok, -vo help mostra il driver DGA, ma si lamenta dei permessi!
 Aiutatemi!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Funziona solo se eseguito da root! E' una limitazione del DGA.
 Dovresti diventare root (su -), e riprovare.
 Un'altra soluzione è di rendere mplayer SUID root, ma NON E' CONSIGLIATO!<BR>
@@ -878,9 +781,8 @@ attraverso l'mplayer suid root!!!<BR>
 <B>!!!! QUINDI SEI STATO AVVISATO ... !!!!</B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Quando uso Xvideo, la mia Voodoo 3/Banshee dice:<BR>
 <CODE>X Error of failed request:  BadAccess (attempt to access private resource
  denied)<BR>
@@ -888,42 +790,36 @@ Quando uso Xvideo, la mia Voodoo 3/Banshee dice:<BR>
 &nbsp;&nbsp;Minor opcode of failed request:  1 (X_ShmAttach)<BR>
 &nbsp;&nbsp;Serial number of failed request:  26<BR>
 &nbsp;&nbsp;Current serial number in output stream:27</CODE><BR>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Il tuo driver è vecchio, aggiornalo. O scarica (almeno) la versione DRI 0.6
 da <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>,
 o usa il cvs DRI.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Quando uso Xvideo, non riesco a leggere i DivX con la mia Voodoo 3/Banshee!
 Dice:<BR>
 ...<BR>
 <CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
 Xvideo image format: 0x30323449 (I420) planar<BR></CODE>
 ...
-</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">R1:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R1:</TD>
+<TD><FONT CLASS="text">
 Vedi la risposta precedente.
-</TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">R2:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R2:</TD>
+<TD><FONT CLASS="text">
 Dalla 0.18pre4 supportiamo libavcodec dal pacchetto ffmpeg. Contiene
 un decoder DivX e OpenDivX in linguaggio C. Il decoder DivX usa il formato YV12
 per l'output, quindi dovrebbe funzionare per te. Compila il supporto libavcodec.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 L'output OpenGL (-vo gl) non funziona (blocco/finestra nera/errori X11/...).
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Il tuo driver opengl non supporta i cambiamenti dinamici delle texture
  (glTexSubImage)
 Si sa che non funziona con i binari incasinati di nVidia.
@@ -933,29 +829,25 @@ Non funzionerà con schede 3DFX per il limite di 256x256 della grandezza delle
  texture.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ho una scheda nVidia TNT/TNT2, e ottengo una banda con strani colori,
 proprio sotto il filmato! Di chi è la colpa di questo?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 E' del driver X di nVidia. Questi bug ci sono SOLO con schede TNT/TNT2,
 e non possiamo farci niente, non è un nostro bug. AGGIORNAMENTO : é stato
  corretto
 nei nuovi driver, alle fine..
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Ho una scheda nVidia XYZ, e quando clicco sulla finestra della GUI,
 appare un quadrato nero dove ho cliccato. Ho i driver
 più recenti.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Si, nvidia ha corretto un bug precedente (sopra), e ne ha inserito uno nuovo.
  Congratuliamoci con loro.
 AGGIORNAMENTO : secondo
@@ -963,29 +855,34 @@ AGGIORNAMENTO : secondo
 corretto.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Quando uso la GUI con l'output video SDL, viene creata una seconda finestra
  video.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Sappiamo, non usare l'SDL per la GUI ancora.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+Oh il mondo è crudele..! l'SDL ha solo il target <CODE>x11</CODE>, ma non
+<CODE>xv</CODE>!
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD><FONT CLASS="text">
+Prova ancora il target <CODE>x11</CODE>. Ora prova <CODE>-vo x11 -fs -zoom</CODE>.
+Vedi la differenza? No?! Ok, ecco l'illuminazione: il target
+<CODE>x11</CODE> di SDL usa xv quando disponibile, tu non devi preoccupartene...
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
 <TD COLSPAN=3>
-<B><A NAME=5.5><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.5.
+<B><A NAME=5.5><FONT CLASS="text">5.5.
  Richieste di caratteristiche</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 C'è la possibilità di vedere filmati RealMedia in MPlayer?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Non c'è modo di farlo. Quindi questo formato merita di morire tra le fiamme.
 Teoricamente si può operare un reverse engineer sui codec Real fatti per Linux
  (sono
@@ -993,51 +890,32 @@ disponibili come file .so), ma in pratica è veramente difficile, anche se
 si conoscesse con che compilatore Real ha fatto il codice assembler.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Quando sarà implementato &lt;la tua caratteristica preferita&gt; (come il
  posizionamento dei sottotitoli)?
 
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Aspetta libvo2.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Voglio leggere file MP3 con MPlayer !
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Questa caratteristica non è in programma. Ci sono lettori molto migliori
- (mpg123, 3pm, xmms)
-per questo compito, usa quelli. Comunque, MPlayer sta per Movie Player(Lettore
- Filmati, ndt).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Mi piacerebbe  ricercare con la sensibilità di +/- 1 frame, invece di 10
  secondi.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Questo non lo faremo. Era così, ma poi mandava a rotoli la sincronia A/V.
  Sentiti libero di
 implementarlo, e manda una patch. Non chiederlo.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
   Dov'è la versione per Windows ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
   Non è rilasciata, e non lo sarà. Guarda la scena windows (parser ASF
  opensource,
   encoder ASF opensource, ecc) e saprai il perchè. Non vogliamo
@@ -1045,96 +923,90 @@ implementarlo, e manda una patch. Non chiederlo.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Quale scheda mi consigliate di comprare?</font></font></b></td>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R0:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Sta a te, ma le nostre conclusioni sono:</font></font>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R1:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Velocità:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Questo
-parametro può essere calcolato molto facilmente:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>a)</b>
-che filmati hai intenzione di vedere:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
-MPEG1:</b> 320x200@32=256000</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>quindi
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
+Quale scheda mi consigliate di comprare?</b></td>
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R0:</TD>
+<TD><FONT CLASS="text">
+Sta a te, ma le nostre conclusioni sono:
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R1:</TD>
+<TD><FONT CLASS="text">
+Velocità:
+<br>Questo
+parametro può essere calcolato molto facilmente:
+<br><b>a)</b>
+che filmati hai intenzione di vedere:
+<br><b>-
+MPEG1:</b> 320x200@32=256000
+<br>quindi
 hai bisogno di una larghezza di banda di soli 256*25fps=6.4Mb/sec (Questo
  formato può essere letto
-in real-time su qualunque PC dal P-100 + S3Virge)</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
-MPEG4:</b> 640x480@32=1228800</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+in real-time su qualunque PC dal P-100 + S3Virge)
+<br><b>-
+MPEG4:</b> 640x480@32=1228800
+<br>
 hai bisogno di una larghezza di banda di 1.2*25fps=30Mb/sec. Per vedere questi
  filmati in real-time
 serve un PC abbastanza potente: (Celeron-450+scheda video basata su
- DIMM)</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
-MPEG2 (cioè DVD o SDTV):</b> 1024x768@32=3145728</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+ DIMM)
+<br><b>-
+MPEG2 (cioè DVD o SDTV):</b> 1024x768@32=3145728
+<br>
 hai bisogno di una larghezza di banda di 3*30fps=90Mb/sec. Nei casi estremi (se
  la tua scheda video
 supporta il decoding IDCT) questo può essere visto sullo stesso PC
- dell'MPEG4</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>-
-HDTV (HighData TeleVision):</b> 2000x2000@32=16000000</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>
+ dell'MPEG4
+<br><b>-
+HDTV (HighData TeleVision):</b> 2000x2000@32=16000000
+<br>
 larghezza di banda = 16*30fps=480Mb/sec (Questo significa che hai bisogno almeno
 32Mb di memoria video: 16Mb per l'area RGB e 16Mb per
-l'area YUV)</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>b)</b>
+l'area YUV)
+<br><b>b)</b>
 La larghezza di banda dello slot PCI è: 33Mhz*32bit=132Mb/sec e PCI2.1 ha
  66MHz*32bit=265Mb/sec
 che è largamente sufficiente per leggere ogni filmato (eccetto HDTV che
  necessita
-il bus AGP).</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>c)</b>
-Che tipo di memoria dovrebbe essere installata sulla scheda video:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>SIMM</b>
-- evitala</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>DIMM</b>
-- buona se la scheda ha l'accesso alla memoria a 128-bit.</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>DDR</b>
-- è largamente sufficiente per tutti i tipi.</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Nota:
+il bus AGP).
+<br><b>c)</b>
+Che tipo di memoria dovrebbe essere installata sulla scheda video:
+<br><b>SIMM</b>
+- evitala
+<br><b>DIMM</b>
+- buona se la scheda ha l'accesso alla memoria a 128-bit.
+<br><b>DDR</b>
+- è largamente sufficiente per tutti i tipi.
+<br>Nota:
 Da confronti DGA - non c'è nessuna visibile differenza tra schede video che
  hanno
-installato lo stesso tipo di memoria video.</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font
- size=-1><b>Riassunto:</b>
+installato lo stesso tipo di memoria video.
+<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>Riassunto:</b>
 Se hai abbastanza potenza di CPU (Celeron-450 o K6-2-500) dovrebbe essere
  sufficiente
 comprare una qualsiasi scheda video con almeno 8Mb di memoria DIMM o DDR.
-</font></font>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R2:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Qualità:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>La
+
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R2:</TD>
+<TD><FONT CLASS="text">
+Qualità:
+<br>La
  questione
-è stata sviscerata a:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><a
+è stata sviscerata a:
+<br><a
  href="http://www.anandtech.com">http://www.anadtech.com</a>
 AnandTech - Raduno di Schede Video - Qualità DVD, Caratteristiche e Performance
-(Ottobre 2000)</font></font>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R3:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-Caratteristiche che FUNZIONANO sotto Linux:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Se
+(Ottobre 2000)
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R3:</TD>
+<TD><FONT CLASS="text">
+Caratteristiche che FUNZIONANO sotto Linux:
+<br>Se
 sei un utente win32 allora probabilmente hai il supporto (da parte dei driver e
  del DirectX8)
-per ogni caratteristica introdotta nel tuo chip.</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Ma
-per gli utenti <b>linux </b>:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Attualmente
+per ogni caratteristica introdotta nel tuo chip.
+<br>Ma
+per gli utenti <b>linux </b>:
+<br>Attualmente
 conosco solo alcune ditte che hanno un supporto più o meno avanzato sotto
-Linux:</font></font>
+Linux:
 <br>&nbsp;
 <table BORDER COLS=5 WIDTH="100%" NOSAVE >
 <tr>
@@ -1278,97 +1150,88 @@ Linux:</font></font>
 </tr>
 </table>
 
-<p><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Bhe
+<p>Bhe
 - è molto grossolano l'esame delle schede video. In verità dovremmo fare
  attenzione
-ai modelli di schede:</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Per
+ai modelli di schede:
+<br>Per
 esempio anche se i driver della MatroxG400 supportano il TV-out non è così
  per la G450 e la G550.
-</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>Altro
+
+<br>Altro
 esempio: Il deinterlacing adattativo esiste solo dal chip Rage128 e non è
 presente sui Mach64+. Lo stesso per le caratteristiche 3D che differiscono molto
  dal Mach64
-al Radeon2 8500 con possibilità di trueform.</font></font>
-<p><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>COMUNQUE
-- IL TEAM DI MPLAYER NON ACCETTA LAMENTELE SE DOPO</font></font></b>
-<br><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>LA
+al Radeon2 8500 con possibilità di trueform.
+<p><b>COMUNQUE
+- IL TEAM DI MPLAYER NON ACCETTA LAMENTELE SE DOPO</b>
+<br><b>LA
  LETTURA
 DI QUESTO MATERIALE ACQUISTI UNA SCHEDA CHE È PER TE
- INUTILIZZABILE!!!</font></font></b>
-<br><b><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>QUESTO
-MATERIALE E' SOLO UNA NOSTRA VISIONE.</font></font></b>
-<p><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>D:</b>
+ INUTILIZZABILE!!!</b>
+<br><b>QUESTO
+MATERIALE E' SOLO UNA NOSTRA VISIONE.</b>
+<p><b>D:</b>
 Se lo slot PCI è abbastanza per tutti i tipi di filmati allora perchè la S3
- Virge</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1>è
-troppo lenta per leggerli?</font></font>
-<br><font face="Verdana, Arial, Helvetica, sans-serif"><font size=-1><b>R:</b>
-A causa della sua memoria SIMM.</font></font>
+ Virge
+<br>è
+troppo lenta per leggerli?
+<br><b>R:</b>
+A causa della sua memoria SIMM.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.6><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.6.
+<B><A NAME=5.6><FONT CLASS="text">5.6.
  Encoding</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Come codifico ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Leggi <A HREF="encoding.html">questa documentazione</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Il mio sintonizzatore TV funziona, con MPlayer sento il sonoro e vedo le
  immagini, ma
 MEncoder non codifica l'audio !
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
-l' encoding audio TV non è attualmente implementato, ci stiamo lavorando.
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
+l' encoding audio TV per Linux non è attualmente implementato, ci stiamo lavorando.
+Attualmente funziona solo per BSD.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Non riesco a codificare i sottotitoli del DVD nel file AVI !
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Devi specificare l'opzione <CODE>-sid</CODE> correttamente!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 MEncoder va in segfault all'avvio !
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Aggiorna DivX4Linux.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif"
- size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD>
+<TD WIDTH=100%><B><FONT CLASS="text">
 Come posso codificare solo determinati capitoli dal DVD ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica,
- sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica,
- sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD>
+<TD><FONT CLASS="text">
 Usa l'opzione <CODE>-chapter</CODE> correttamente, come : <CODE>-chapter
  5-7</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>D:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT CLASS="text">D:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 Sto cercando di leggere file da 2Gb+ su un filesystem VFAT. Funziona?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>R:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">R:</TD><TD><FONT CLASS="text">
 No, VFAT non supporta file da 2Gb+.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 

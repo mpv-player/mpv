@@ -1,48 +1,32 @@
 <HTML>
 <BODY BGCOLOR=WHITE>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
 
 <P><B><A NAME=2.1>2.1. Formati supportati</A></B></P>
 
-<P><B>MPlayer</B> può leggere i seguenti dispositivi/formati:<BR>
-<UL>
-<LI> <A HREF="#2.1.1.1">VCD</A> (Video CD) direttamente dal CD-ROM o dal file immagine .bin di CDRwin
-<LI> <A HREF="#2.1.1.1">DVD</A>, direttamente dal lettore DVD, usando libdvdread per la decrittazione
-<LI> <A HREF="#2.1.1.1">MPEG 1/2</A> file di tipo System Stream (PS/PES/VOB) e Elementary Stream (ES)
-<LI> <A HREF="#2.1.1.2">RIFF AVI</A>, formato file
-<LI> <A HREF="#2.1.1.3">ASF/WMV</A> 1.0, formato file
-<LI> <A HREF="#2.1.1.4">QT/MOV</A>, formato file con intestazione compressa e non
-<LI> <A HREF="#2.1.1.5">VIVO</A> , formato file (.viv)
-<LI> <A HREF="#2.1.1.6">FLI</A>, formato file
-<LI> <A HREF="#2.1.1.7">RealMedia</A>, formato file (.rm)
-<LI> <A HREF="#2.1.1.8">NuppelVideo</A>, formato file (.nuv)
-<LI> <A HREF="#2.1.1.9">yuv4mpeg</A>, formato file
-<LI> <A HREF="#2.1.1.10">FILM</A>, formato file (.cpk)
-<LI> <A HREF="#2.1.1.11">RoQ</A>, formato file
-<LI> supporta la <A HREF="documentation.html#3.3">lettura da stdin</A>, o rete tramite HTTP
-</UL></P>
-
 <P>E' importante fare chiarezza su un errore comune. Quando la gente vede un file con estensione
 <B>.AVI</B>, dice subito che non è un file MPEG.
-Questo non è vero. Almeno non del tutto. Se gli dici che quel file può contenere
-un video MPEG1, ti ridono dietro. Sentiti libero di prenderli a calci
-e poi digli di documentarsi.</P>
+Questo non è vero. Almeno non del tutto. Contrariamente alla credenza popolare
+quel file <B>può</B> contenere del video MPEG1.</P>
 
 <P>Vedi, un <B>codec</B> non è la stessa cosa di un <B>formato file</B>.<BR>
-<B>Codec</B> video sono: MPEG1, MPEG2, DivX, Indeo5, 3ivx.<BR>
-<B>Formati</B> video sono: MPG, AVI, ASF.<BR>
+Esempi di <B>codec</B> video sono: MPEG1, MPEG2, DivX, Indeo5, 3ivx.<BR>
+Esempi di <B>formati</B> video sono: MPG, AVI, ASF.<BR>
 </P>
 
 <P>In teoria, si può mettere un video OpenDivX con audio in MP3
-in un file di formato <B>.MPG</B>. Sebbene la maggior parte dei lettori non lo leggerà, perchè
+in un file di formato <B>MPG</B>. Sebbene la maggior parte dei lettori non lo leggerà, perchè
 si aspettano video MPEG1 e audio MP2 (<B>.MPG</B> non ha i campi
 necessari per descrivere i suoi flussi video e audio, come invece fa <B>.AVI</B>).
-O mettere video MPEG1 in un .AVI. Per esempio <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A>
+O si può mettere video MPEG1 in un .AVI. Per esempio <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A>
 e <A HREF="encoding.html">MEncoder</A> possono creare questi file.</P>
-
-<P><B>Codec</B> e <B>formati</B> audio sono essenzialmente la stessa cosa.</P>
 
 
 <P><B><A NAME=2.1.1>2.1.1. Formati video</A></B></P>
@@ -50,7 +34,8 @@ e <A HREF="encoding.html">MEncoder</A> possono creare questi file.</P>
 
 <P><B><A NAME=2.1.1.1>2.1.1.1. File MPEG</A></B></P>
 
-<P>
+<P>I file MPEG si presentano in diverse forme:</P>
+<UL>
 <LI>MPG : questa è la forma <B>base</B> del formato file MPEG. Contiene
 video MPEG1, e audio MP2 (MPEG-1 layer 2), o raramente MP1.</LI>
 <LI>DAT : questo è assolutamente lo stesso formato dell' MPG, solo diversa estensione. Usato
@@ -59,19 +44,19 @@ i file DAT non possono essere letti o copiati dai VCD. Devi usare l'opzione
 <CODE>-vcd</CODE> per vedere i VideoCD.</LI>
 <LI>VOB : questo è il formato file MPEG dei <B>DVD</B>. Come MPG, più
 la possibilità di contenere sottotitoli, o audio non-MPEG (AC3). Contiene video MPEG2,
-e di solito audio AC3, ma è permesso anche l'MP2.<BR>
+e di solito audio AC3, ma è permesso anche l'MP2 e LPCM non compresso.<BR>
 <B>Leggi la <A HREF="cd-dvd.html#4.2">sezione DVD</A> !</B></LI>
-</P>
+</UL>
 
-<P>Nei file MPEG, serie di frame sono raggruppate insieme, e sono indipendenti
-dagli altri gruppi. Questo significa che si può tagliare/unire un file MPEG con
+<P>Serie di frame formano gruppi indipendenti nei file MPEG.
+Questo significa che si può tagliare/unire un file MPEG con
 normali strumenti per i file (come dd, cut), e il risultato sarà totalmente funzionante.</P>
 
 <P>Una caratteristica importante degli MPG è che hanno un campo per descrivere
 le proporzioni del flusso video che contengono. Per esempio gli SVCD hanno una risoluzione video di
 480x480, e nell'intestazione quel campo ha il valore 4:3, quindi
 è riprodotto in 640x480. I file AVI non hanno questo campo, quindi bisogna
-ridimensionarlo durante la codifica.</P>
+ridimensionarlo durante la codifica o usa l'opzione -aspect alla lettura.</P>
 
 
 <P><B><A NAME=2.1.1.2>2.1.1.2. File AVI</A></B></P>
@@ -79,30 +64,34 @@ ridimensionarlo durante la codifica.</P>
 <P>Introdotti dalla Micro$oft, l'<B>AVI (Audio Video Interleaved, Audio Video Intervallato ndt)</B> è un
 formato diffuso e multipurpose, attualmente usato soprattutto per i video DivX e DivX4.
 Ha molti svantaggi conosciuti, e incapacità (per esempio nello streaming).
-Supporta un flusso video, e 99 flussi audio. Può essere grande fino a
+Supporta un flusso video, e da 0 a 99 flussi audio. Può essere grande fino a
 2Gb. C'è un'estensione per renderlo più grande, chiamata <B>OpenDMS</B>.
 M$ attualmente scoraggia il suo uso e propaganda ASF/WMV. Non che
 a qualcuno importi.<BR>
-<B>NOTA</B> : le videocamere DV possono creare due tipi di formato AVI, uno è usuale e
+
+<P>Esiste un trucco per i file AVI che permette di usare un flusso audio Ogg Vorbis,
+   ma li rende incompatibili con gli standard AVI. <B>MPlayer</B>
+   supporta la lettura di questi file, sebbene la ricerca non sia ancora implementata.</P>
+
+<B>NOTA:</B> le videocamere DV possono creare due tipi di formato AVI, uno è usuale e
 leggibile, l'altro no.</P>
 
-<P>Ci sono due tipi di file AVI:
+<P>Ci sono due tipi di file AVI:</P>
 <UL>
-  <LI><B>Intervallato</B> : i contenuti audio e video sono intervallati. Questo è l'utilizzo
+  <LI><B>Intervallato:</B> i contenuti audio e video sono intervallati. Questo è l'utilizzo
     standard. Raccomandato e più usato. Alcune applicazioni creano
     AVI intervallati con sincronia difettosa. <B>MPlayer</B> li riconosce come interleaved, e questo
     provoca la perdita della sincronia A/V, probabilmente nella ricerca. Questi file dovrebbero essere
     letti come non-intervallati (con l'opzione <CODE>-ni</CODE>).</LI>
-  <LI><B>Non-intervallato</B> : cattivo. Prima viene l'intero flusso video, poi l'intero
+  <LI><B>Non-intervallato:</B> prima viene l'intero flusso video, poi l'intero
     flusso audio, così richiede un sacco di ricerca. E' pessimo quando lo si legge da
     rete o CDROM.</LI>
 </UL>
-</P>
 
-<P>MPlayer supporta 2 tipi di timing per i file AVI:
+<P>MPlayer supporta 2 tipi di timing per i file AVI:</P>
 <UL>
   <LI><B>basato su bps</B> : è basato sul bitrate/samplerate del flusso video/audio. Questo
-    metodo è usato dalla maggior parte dei lettori, incluso avifile e windows media player.
+    metodo è usato dalla maggior parte dei lettori, incluso <A HREF="http://avifile.sourceforge.net">avifile</A> e windows media player.
     File con intestazione danneggiata, e file creati con codificatori audio VBR ma non aderenti
     agli standard VBR produrranno desincronia A/V con questo metodo (soprattutto
     nelle ricerche).</LI>
@@ -110,7 +99,6 @@ leggibile, l'altro no.</P>
     la posizione relativa dei segmenti audio e video. Rende leggibili
     alcuni file malamente codificati con audio VBR.</LI>
 </UL>
-</P>
 
 <P>Qualsiasi codec audio e video è permesso, ma nota che l'audio VBR non è ben
 supportato da molti lettori. Il formato file rende possibile usare audio VBR,
@@ -127,22 +115,22 @@ varianti di ASF, v1.0 e v2.0. La v1.0 è usata dai loro programmi multimediali (w
 media player e windows media encoder) ed è molto segreta. La v2.0 è pubblica
 e registrata :). Naturalmente sono differenti, non c'è nessuna compatibilità (è solo
 un altro gioco legale). <B>MPlayer</B> supporta solo la v1.0, in quanto nessuno ha mai visto
-file v2.0 :) . Nota, che i file .ASF oggigiorno hanno l'estensione .WMA o
+file v2.0 :) . Nota che i file .ASF oggigiorno hanno l'estensione .WMA o
 .WMV.</P>
 
 
 <P><B><A NAME=2.1.1.4>2.1.1.4. File QuickTime/MOV</A></B></P>
 
-<P>Questi sono di Macintosh. Di solito hanno estensioni .QT o .MOV . Nota
+<P>Questi formati sono stati creati dalla Apple. Di solito hanno estensioni .QT o .MOV . Nota
 che da quando il Gruppo MPEG4 ha scelto QuickTime come formato file raccomandato
 per MPEG4, i loro file .MOV hanno estensione .MPG o .MP4 (interessante il fatto
-che in questi file il flusso video è un vero file .MPG. Con l'opzione
-<CODE>-dumpvideo</CODE> puoi perfino estrarlo).</P>
+che in questi file il flusso video è un vero file MPG o ACC. Con le opzioni
+<CODE>-dumpvideo</CODE> e <CODE>-dumpaudio</CODE> puoi perfino estrarlo!).</P>
 
 <P><B>Codec</B>: qualsiasi codec è permesso, sia CBR che VBR. Nota: la maggior parte dei nuovi file mov usano
-video <B>Sorenson</B> e audio QDesign Music. Questo formati sono totalmente
-segreti, e solo il lettore quicktime di Apple è in grado di leggerli (solo su
-win/mac).</P>
+video <B>Sorenson</B> e audio QDesign Music. Questi formati non sono stati diffusi
+e probabilmente così rimmarrà in futuro e quindi solo il lettore Quicktime di Apple è in grado di leggerli (solo su
+Windows/Mac OS).</P>
 
 
 <P><B><A NAME=2.1.1.5>2.1.1.5. File VIV</A></B></P>
@@ -155,8 +143,8 @@ e a molti file mancano anche i frame chiave, quindi dimenticati la funzionalità 
 è un <B>h.263</B> modificato, non standard. L'audio è lo stesso,
 può essere <B>g.723</B> (standard), o <B>Vivo Siren</B> .</P>
 
-<P>Vedi le sezioni <A HREF=codecs.html#2.2.1.4>codec video VIVO</A>
-e <A HREF=codecs.html#2.2.2.4>codec audio VIVO</A> per istruzioni
+<P>Vedi le sezioni <A HREF="codecs.html#2.2.1.4">codec video VIVO</A>
+e <A HREF="codecs.html#2.2.2.4">codec audio VIVO</A> per istruzioni
 sull'installazione.</P>
 
 
@@ -172,7 +160,7 @@ sarà confusa per breve tempo dopo una ricerca.</P>
 <P><B><A NAME=2.1.1.7>2.1.1.7. File RealMedia (RM)</A></B></P>
 
 <P>Si, <B>MPlayer</B> può leggere (demux) file RealMedia (.rm). La ricerca
-è in sviluppo, e RM ha i frame chiave, quindi non dovrebbero esserci problemi.
+funziona (il formato supporta i frame chiave).
 Qui c'è la lista dei codec supportati: <A HREF="codecs.html#2.2.1.8">RealVideo</A>
 e <A HREF="codecs.html#2.2.2.5">RealAudio</A> .
 
@@ -180,7 +168,7 @@ e <A HREF="codecs.html#2.2.2.5">RealAudio</A> .
 <P><B><A NAME=2.1.1.8>2.1.1.8. File NuppelVideo</A></B></P>
 
 <P><A HREF="http://mars.tuwien.ac.at/~roman/nuppelvideo">NuppelVideo</A>
-è uno strumento per catturare da TV (AFAIK:). <B>MPlayer</B> può leggere i suoi file <CODE>.nuv</CODE>
+è uno strumento per catturare da TV (AFAIK:). <B>MPlayer</B> può leggere i suoi file .NUV
 (solo di NuppelVideo 5.0). Questi file possono contenere frame YV12 non compressi,
 YV12+RTJpeg compressi, YV12 RTJpeg+lzo compressi, e YV12+lzo compressi,
 <B>MPlayer</B> li decodifica (e anche li <B>codifica</B> con MEncoder a
@@ -190,8 +178,10 @@ DivX/etc!) tutti quanti. La ricerca è in implementazione.</P>
 <P><B><A NAME=2.1.1.9>2.1.1.9. File yuv4mpeg</A></B></P>
 
 <P><A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> è
-anche un formato file per la cattura da TV, credo :) So solo una cosa:
-lo supportiamo.</P>
+un formato file usato dai <A HREF="http://mjpeg.sf.net">programmi mjpegtools</A>.
+Si può catturare, produrre, filtrare o codificare video in questo formato usandoli.
+Questi file sono in realtà una sequenza di immagini YUV 4:2:0 non compresse.
+</P>
 
 
 <P><B><A NAME=2.1.1.10>2.1.1.10. File FILM</A></B></P>
@@ -208,9 +198,27 @@ lo supportiamo.</P>
 <P><B><A NAME=2.1.2>2.1.2. Formati audio</A></B></P>
 
 <P>Attualmente <B>MPlayer</B> è ancora un "<B>Movie</B> Player" e non un "<B>Media</B>
-Player", quindi i formati audio puri (per esempio MP3, WAV, audio ASF) non sono
-leggibili. Usa <A HREF="http://www.xmms.org">xmms</A>, <A HREF="http://www.mpg123.de">mpg123</A>
-o altro.</P>
+Player". Questo sta lentamente cambiando e attualmente sono supportati MP3, OGG VORBIS, WMA, MP4 e WAV.
+Ciò nonostante l'obbiettivo principale è ancora il video, quindi potresti preferire usare alternative come
+<A HREF="http://www.xmms.org">xmms</A>, <A HREF="http://www.mpg123.de">mpg123</A>.</P>
+
+<P><B><A NAME=2.1.2.1>2.1.2.1. File MP3</A></B></P>
+
+<P>Potresti avere dei problemi con certi file MP3 che <B>MPlayer</B> riconosce
+come mpegs e non legge correttamente o non legge del tutto. Questo comportamento non
+può essere corretto senza abbandonare il supporto per certi file mpeg corrotti, quindi
+rimmarrà così per il prossimo futuro. L'opzione <CODE>-demuxer</CODE> descritta nella pagina di man
+può esserti d'aiuto in questi casi.</P>
+
+<P><B><A NAME=2.1.2.2>2.1.2.2. WAV files</A></B></P>
+
+<P><B><A NAME=2.1.2.3>2.1.2.3. OGG files (Vorbis)</A></B></P>
+
+<P>Richiede <CODE>libvorbis</CODE> corretamente installato.</P>
+
+<P><B><A NAME=2.1.2.4>2.1.2.4. WMA/ASF files</A></B></P>
+
+<P><B><A NAME=2.1.2.5>2.1.2.5. MP4 files</A></B></P>
 
 </BODY>
 </HTML>

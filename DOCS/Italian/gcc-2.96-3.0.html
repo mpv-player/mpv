@@ -1,6 +1,15 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=WHITE>
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P>
 <B>Domanda:</B> Cos'è il GCC 2.96 ? Non riesco a trovarlo sul sito GNU.
@@ -59,8 +68,9 @@ perchè gcc <I>silenziosamente</I>, senza alcun avvertimento, ha ignorato l'inter
 
 <P>
 Altri problemi col gcc 3.x provengono dall'istallazione di libstdc++ difettoso o un header glibc (std_*.h).
-Non sono un nostro errore. MPlayer compila e funziona bene con le versioni di
-gcc 3.x. <B>Solo il 2.96 è difettoso</B>, ma dipende da molti elementi d'ambiente,
+Non sono un nostro errore. MPlayer compila e funziona bene con la versione di
+gcc 2.95.3(<B>MEncoder</B> non funziona col 2.95.2 perchè questo compila male
+alcune istruzioni MMX). <B>Il 2.96 e il 3.0.x sono difettosi</B>, ma dipende da molti elementi d'ambiente,
 incluso il numero di release del gcc 2.96, le caratteristiche di mplayer abilitate, ecc.
 <I>Se per te funziona usando il gcc 2.96, non significa che funzionerà per tutti.</I>
 </P>
@@ -71,7 +81,7 @@ incluso il numero di release del gcc 2.96, le caratteristiche di mplayer abilita
 Leggi anche <A HREF="users_against_developers.html">questo</A> testo !!!</P>
 
 <P>
-<B>Domanda:</B> No! Sbagli! Funziona tutto col gcc 2.96 <I>tranne</I> MPlayer
+<B>Domanda:</B> No! Sbagli! Funziona tutto col gcc 2.96 <I>tranne</I> MPlayer !
 </P>
 
 <P>
@@ -81,13 +91,13 @@ Leggi anche <A HREF="users_against_developers.html">questo</A> testo !!!</P>
 <P>
 No. Tu sbagli!
 Molti progetti (soprattutto quelli che hanno nei sorgenti codice asm altamente ottimizzato)
-hanno avuto problemi col gcc 2.96. Per esempio: avifile, MESA / DRI, Wine, ffmpeg, lame, NuppelVideo.
+hanno avuto problemi col gcc 2.96. Per esempio: avifile, MESA / DRI, Wine, ffmpeg, lame, NuppelVideo, MySQL.
 Ma altri progetti hanno già aggirato i bug gcc (hanno cambiato il codice che
 scatenava i bug del compilatore) così per ora funzionano.
 </P>
 
 <P>
-<B>Domanda:</B> No! Sbagli! Funziona tutto col gcc 2.96 <I>incluso</I> MPlayer
+<B>Domanda:</B> No! Sbagli! Funziona tutto col gcc 2.96 <I>incluso</I> MPlayer .
 </P>
 
 <P>
@@ -98,7 +108,7 @@ Bene. Sii felice. Ma sappi, dipende da molti elementi d'ambiente,
 incluso il numero di release del gcc 2.96, le caratteristiche di mplayer abilitate, ecc.
 <I>Se per te funziona usando il gcc 2.96, non significa che funzionerà per tutti!</I>
 Significa solo che sei fortunato, finchè non scopri un problema. Ma non dimenticare la
-<B>regola No.1 degli utenti gcc 2.96: MAI SEGNALARE BUG O PROBLEMI SE STAI USANDO IL GCC 2.96</B>
+<B>regola No.1 degli utenti gcc 2.96: MAI SEGNALARE BUG O PROBLEMI SE STAI USANDO IL GCC 2.96</B> !
 
 <P>
 <B>Domanda:</B> Ok. Capito. Ma voglio provarlo... come posso compilare col gcc 2.96?

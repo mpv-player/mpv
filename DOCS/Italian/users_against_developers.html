@@ -1,7 +1,16 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+<FONT CLASS="text">
 
 <P><B><I>In medias res</I></B></P>
 
@@ -16,15 +25,14 @@ Il numero uno è naturalmente l'argomento</P>
 <P>Il <I>retroscena</I> : C'erano/ci sono le serie GCC <B>2.95</B>. Il migliore
 era il 2.95.3 . Per favore nota lo stile di numerazione delle versioni.
 Così è come il team GCC numera i loro compilatori. Quelli della serie 2.95 sono buoni.
-Non abbiamo mai visto nulla compilato male a causa di errori del 2.95.</P>
+Non abbiamo mai visto nulla compilato male a causa di errori del 2.95.3.</P>
 
 <P>L' <I>atto</I> : <B>RedHat</B> cominciò ad includere una versione <B>2.96</B> di GCC
 con le loro distribuzioni. Nota il numero di versione. Questo dovrebbe essere una versione del
 team GCC. Hanno modificato la versione CVS di GCC (qualcosa tre 2.95 e 3.0)
 L'hanno modificata profondamente, e hanno usato questa versione nella distribuzione perchè il 3.0
 non era uscito a quel tempo, e vollero che IA64 supportasse ASAP (ragioni di mercato).
-Oh, e GCC 2.95 compila male bash sull'architettura s390 (non esiste nessuna
-distribuzione RedHat per s390..) .</P>
+Oh, e GCC 2.95 compila male bash sull'architettura s390...</P>
 
 <P>I <I>fatti</I> : Per compilare <B>MPlayer</B> necessita l'opzione
 <CODE>--disable-gcc-checking</CODE> per procedere dopo l'aver trovato la versione 2.96 di GCC
@@ -140,6 +148,12 @@ messi in blacklist.</P>
     si, facciamo 30 versioni di binari scaricabili! Noi no. Inseriremo
     queste cose come plugin nel futuro.</LI>
 </UL>
+
+<P>Risolveremo (almeno vorremmo) 2 di questi problemi nel prossimo rilascio :
+i problemi legali (stiamo rimuovendo tutto il codice non-GPL e convincendo altri a
+cambiare la loro licenza in GPL) e il riconoscimento della CPU a runtime. Comunque, la dipendenza
+da varie librerie, versioni e parametri ambientali rimarrà.</P>
+
 
 <A NAME=nvidia><P><B><I>NVidia</I></B></P>
 
