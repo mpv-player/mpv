@@ -111,7 +111,7 @@
 #define SAVE_QUE(x)
 #define UPDATE_QUE(inm) \
   xi=(--xi)&(L-1);     \
-  x[xi]=x[xi+L]=*inm;
+  x[xi]=x[xi+L]=*(inm);
 
 #ifdef L4
 #define FIR(x,w,y) \

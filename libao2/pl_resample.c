@@ -24,7 +24,7 @@
 #include "audio_plugin.h"
 #include "audio_plugin_internal.h"
 #include "afmt.h"
-//#include "../config.h"
+// #include "../config.h"
 
 static ao_info_t info =
 {
@@ -46,15 +46,16 @@ LIBAO_PLUGIN_EXTERN(resample)
    memory usage. For now the filterlenght is choosen to 4 and without
    assembly optimization if no SSE is present.
 */
-#ifdef HAVE_SSE
+
+// #ifdef HAVE_SSE
 #define L8    	1	// Filter bank type
 #define W 	W8	// Filter bank parameters
 #define L   	8	// Filter length
-#else	
-#define L4	1
-#define W 	W4
-#define L   	4
-#endif
+// #else	
+// #define L4	1
+// #define W 	W4
+// #define L   	4
+// #endif
 
 #define CH  6	// Max number of channels
 #define UP  128  /* Up sampling factor. Increasing this value will
@@ -73,12 +74,11 @@ typedef struct pl_resample_s
   uint16_t	up;		// Up sampling factor 
   int 		channels;	// Number of channels
   int 		len;		// Lenght of buffer
-  int 		bypass;		// Bypass this plugin
   int16_t	ws[UP*L];	// List of all available filters	
   int16_t 	xs[CH][L*2]; 	// Circular buffers
 } pl_resample_t;
 
-static pl_resample_t 	pl_resample	= {NULL,NULL,1,1,1,0,0,W};
+static pl_resample_t 	pl_resample	= {NULL,NULL,1,1,1,0,W};
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -117,11 +117,7 @@ static int init(){
     return 0;
   }
   pl_resample.dn=(int)(0.5+((float)(fin*pl_resample.up))/((float)fout));
-  if(pl_resample.dn == pl_resample.up){
-    fprintf(stderr,"[pl_resample] Fin is too close to fout no conversion is needed.\n");
-    pl_resample.bypass=1;
-    return 1;
-  }
+
   pl_resample.channels=ao_plugin_data.channels;
   if(ao_plugin_data.channels>CH){
      fprintf(stderr,"[pl_resample] Too many channels, max is 6.\n");
@@ -155,12 +151,79 @@ static void reset(){
 // called for every block of data
 // FIXME: this routine needs to be optimized (it is probably possible to do a lot here)
 static int play(){
+  if(pl_resample.up==pl_resample.dn){
+    register int16_t*	in    = ((int16_t*)ao_plugin_data.data);
+    register int16_t* 	end   = in+ao_plugin_data.len/2;
+    while(in < end) *in=(*in++)>>1;
+    return 1;
+  }
+  if(pl_resample.up>pl_resample.dn)
+    return upsample();
+  if(pl_resample.up<pl_resample.dn)
+    return downsample();
+}
+
+int upsample(){
+  static uint16_t	pwi = 0; // Index for w
+  static uint16_t	pxi = 0; // Index for circular queue
+
+  uint16_t		ci    = pl_resample.channels; 	// Index for channels
+  uint16_t		nch   = pl_resample.channels;   // Number of channels
+  uint16_t		len   = 0; 			// Number of input samples
+  uint16_t		inc   = pl_resample.up/pl_resample.dn; 
+  uint16_t		level = pl_resample.up%pl_resample.dn; 
+  uint16_t		up    = pl_resample.up;
+  uint16_t		dn    = pl_resample.dn;
+
+  register int16_t*	w     = pl_resample.w;
+  register uint16_t	wi,xi; // Temporary indexes
+
+  // Index current channel
+  while(ci--){
+    // Temporary pointers
+    register int16_t*	x     = pl_resample.xs[ci];
+    register int16_t*	in    = ((int16_t*)ao_plugin_data.data)+ci;
+    register int16_t*	out   = pl_resample.data+ci;
+    int16_t* 		end   = in+ao_plugin_data.len/2; // Block loop end
+
+    wi = pwi; xi = pxi;
+
+    LOAD_QUE(x);
+    while(in < end){
+      register uint16_t	i = inc;
+      if(wi<level) i++;
+
+      UPDATE_QUE(in);
+      in+=nch;
+      
+      while(i--){
+	// Run the FIR filter
+	FIR((&x[xi]),(&w[wi*L]),out);
+	len++; out+=nch;
+	// Update wi to point at the correct polyphase component
+	wi=(wi+dn)%up;
+      }
+    }
+    SAVE_QUE(x);
+  }
+
+  // Save values that needs to be kept for next time
+  pwi = wi;
+  pxi = xi;
+
+  // Set new data
+  ao_plugin_data.len=len*2;
+  ao_plugin_data.data=pl_resample.data;
+  return 1;
+}
+
+int downsample(){
   static uint16_t	pwi = 0; // Index for w
   static uint16_t	pxi = 0; // Index for circular queue
   static uint16_t	pi =  1; // Number of new samples to put in x queue
 
   uint16_t		ci    = pl_resample.channels; 	// Index for channels
-  uint16_t		len   = 0; 			// Number of output samples
+  uint16_t		len   = 0; 			// Number of input samples
   uint16_t		nch   = pl_resample.channels;   // Number of channels
   uint16_t		inc   = pl_resample.dn/pl_resample.up; 
   uint16_t		level = pl_resample.dn%pl_resample.up; 
@@ -169,8 +232,6 @@ static int play(){
 
   register uint16_t	i,wi,xi; // Temporary indexes
 
-  if(pl_resample.bypass)
-    return 1;
   
   // Index current channel
   while(ci--){
@@ -183,33 +244,26 @@ static int play(){
     i = pi; wi = pwi; xi = pxi;
 
     LOAD_QUE(x);
-    if(0!=i) goto L1; 
     while(in < end){
-      // Update wi to point at the correct polyphase component
-      wi=(wi+dn)%up;  
 
-      /* Update circular buffer x. This loop will be updated 0 or 1 time
-	 for upsamling and inc or inc + 1 times for downsampling */
-      if(wi<level) goto L3;
-      if(0==i) goto L2;
-  L1:   i--;
-  L3:  	UPDATE_QUE(in);
-        in+=nch;
-	if(in >= end) goto L2;
-      if(i) goto L1;
-  L2: if(i) goto L5;
-      i=inc;
+      UPDATE_QUE(in);
+      in+=nch;
+      
+      if(!--i){
+	// Run the FIR filter
+	FIR((&x[xi]),(&pl_resample.w[wi*L]),out);
+	len++;	out+=nch;
 
-      /* Get the correct polyphase component and the correct startpoint
-	 in the circular bufer and run the FIR filter */
-      FIR((&x[xi]),(&pl_resample.w[wi*L]),out);
-      len++;
-      out+=nch;
+	// Update wi to point at the correct polyphase component
+	wi=(wi+dn)%up;  
+
+	// Insert i number of new samples in queue
+	i = inc;
+	if(wi<level) i++;
+      }
     }
-L5:
     SAVE_QUE(x);
   }
-
   // Save values that needs to be kept for next time
   pwi = wi;
   pxi = xi;
@@ -219,8 +273,3 @@ L5:
   ao_plugin_data.data=pl_resample.data;
   return 1;
 }
-
-
-
-
-
