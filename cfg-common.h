@@ -158,7 +158,7 @@
 	{"divxq", "Option -divxq has been renamed to -pp (postprocessing), use -pp !\n",
             CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #ifdef USE_LIBAVCODEC
-	{"pp", readPPOpt, CONF_TYPE_FUNC_PARAM, 0, 0, 0, (cfg_default_func_t)&revertPPOpt},
+	{"pp", &divx_quality, CONF_TYPE_INT, 0, 0, 0, NULL},
 #endif
 #ifdef HAVE_ODIVX_POSTPROCESS
         {"oldpp", &use_old_pp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -260,6 +260,7 @@ extern float movie_aspect;
 extern int softzoom;
 extern int flip;
 extern int vd_use_slices;
+extern int divx_quality;
 
 /* from dec_audio, currently used for ac3surround decoder only */
 extern int audio_output_channels;

@@ -210,31 +210,8 @@ static int open(vf_instance_t *vf, char* args){
     }
 #endif
     
-    vf->priv->pp=PP_QUALITY_MAX; //divx_quality;
+    vf->priv->pp=PP_QUALITY_MAX;
     return 1;
-}
-
-int readPPOpt(void *conf, char *arg)
-{
-  int val;
-
-  if(arg == NULL)
-    return -2; // ERR_MISSING_PARAM
-  errno = 0;
-  val = (int)strtol(arg,NULL,0);
-  if(errno != 0)
-    return -4;  // What about include cfgparser.h and use ERR_* defines */
-  if(val < 0)
-    return -3; // ERR_OUT_OF_RANGE
-
-  divx_quality = val;
-
-  return 1;
-}
-  
-void revertPPOpt(void *conf, char* opt) 
-{
-  divx_quality=0;
 }
 
 vf_info_t vf_info_pp = {
