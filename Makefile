@@ -154,11 +154,13 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 install: $(ALL_PRG)
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
 	$(INSTALL) -m 755 -s $(PRG) $(BINDIR)/$(PRG)
+	if test -x $(PRG_MENCODER) ; then $(INSTALL) -m 755 -s $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER) ; fi
 ifeq ($(GUI),yes)
 	-ln -sf $(BINDIR)/$(PRG) $(BINDIR)/gmplayer
 endif
 	if test ! -d $(prefix)/man/man1 ; then mkdir -p $(prefix)/man/man1; fi
 	$(INSTALL) -c -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
+	if test -x $(PRG_MENCODER) ; then $(INSTALL) -c -m 644 DOCS/mencoder.1 $(prefix)/man/man1/mencoder.1 ; fi
 ifeq ($(CSS_USE),yes)
 	@echo "Following task requires root privs. If it fails don't panic"
 	@echo "however it means you can't use fibmap_mplayer."
