@@ -1170,9 +1170,10 @@ if(!has_audio){
   if(verbose) printf("Freeing %d unused audio chunks\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
-  if(sh_audio->a_buffer) free(sh_audio->a_buffer);
+  if(sh_audio) if(sh_audio->a_buffer) free(sh_audio->a_buffer);
   alsa=1;
   // fake, required for timer:
+  sh_audio=new_sh_audio(255); // FIXME!!!!!!!!!!
   sh_audio->samplerate=76800;
   sh_audio->samplesize=sh_audio->channels=2;
   sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
