@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.18 -->
+<!-- synced with 1.19 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Odtwarzacz filmów</title>
@@ -63,7 +63,7 @@ VIVO, ASF/WMA/WMV, QT/MOV/MP4, FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ, PVA,
 zbiory Matroska, obsługiwanych przez wiele rdzennych kodeków, XAnim,
 RealPlayer, i Win32 DLL. Możesz w nim także oglądać filmy
 <emphasis role="bold">VideoCD, SVCD, DVD, 3ivx, RealMedia, Sorenson,
-Theora</emphasis> i <emphasis role="bold">DivX</emphasis>
+Theora</emphasis> i <emphasis role="bold">MPEG4 (DivX)</emphasis>
 Inną wielką zaletą MPlayera jest
 szeroki zakres obsługiwanych sterowników wyjściowych. Działa on z X11, Xv, DGA,
 OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, ale możesz też używać GGI
@@ -83,11 +83,11 @@ czeskimi, itp.), cyrylicą, koreańskimi i wyświetlaniem na ekranie (OSD)!
 <para>
 <application>MPlayer</application> jest doskonały do odczytywania uszkodzonych
 plików MPEG (przydatne przy niektórych VCD), odtwarza również błędne pliki AVI,
-których nie można odczytać za pomocą znanego odtwarzacza multimedialnego pod
+których nie można odczytać za pomocą wiodącego odtwarzacza multimedialnego pod
 Windows. Nawet zbiory AVI bez bloku indeksowego można odtworzyć i można
 zrekonstruować ich indeks tymczasowo, używając opcji <option>-idx</option>, albo
 trwale dzięki <application>MEncoderowi</application>, w ten sposób umożliwiając
-sobie przeszukiwanie! Jak widać najważniejsza jest tu stabilność i jakość, ale
+sobie przewijanie! Jak widać najważniejsza jest tu stabilność i jakość, ale
 szybkość również jest zadziwiająca. Ma też potężny system wtyczek do
 manipulacji obrazem i dźwiękiem.
 </para>
@@ -99,9 +99,9 @@ zaprojektowany do kodowania odczytywalnych przez
 <application>MPlayera</application> filmów
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 na inne odczytywalne formaty (patrz niżej). Może kodować rozmaitymi kodekami
-video, takimi jak <emphasis role="bold">DivX4</emphasis> (1 i 2 przebiegowy),
-<systemitem class="library">libavcodec</systemitem> oraz audio 
-<emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
+video, takimi jak <emphasis role="bold">MPEG4 (DivX4)</emphasis>
+(1 i 2 przebiegowy), <systemitem class="library">libavcodec</systemitem> oraz
+audio <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
 </para>
 
 
@@ -127,7 +127,7 @@ video, takimi jak <emphasis role="bold">DivX4</emphasis> (1 i 2 przebiegowy),
   Tworzenie zbiorów z zewnętrznego strumienia audio
   </simpara></listitem>
 <listitem><simpara>
-  Kodowanie 1, 2 lub 3-przejściowe
+  Kodowanie 1, 2 lub 3-przebiegowe
   </simpara></listitem>
 <listitem><para>
   Dźwięk MP3 <emphasis role="bold">VBR</emphasis>
