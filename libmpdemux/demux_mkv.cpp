@@ -211,6 +211,8 @@ typedef struct mkv_track {
   uint32_t a_channels, a_bps;
   float a_sfreq;
 
+  float default_duration;
+
   int default_track;
 
   void *private_data;
@@ -981,13 +983,14 @@ static int check_track_information(mkv_demuxer_t *d) {
                    !strcmp(t->codec_id, MKV_A_PCM_BE))
             t->a_formattag = 0x0001;
           else if (!strcmp(t->codec_id, MKV_A_AAC_2MAIN) ||
-                   !strcmp(t->codec_id, MKV_A_AAC_2LC) ||
+                   !strncmp(t->codec_id, MKV_A_AAC_2LC,
+                            strlen(MKV_A_AAC_2LC)) ||
                    !strcmp(t->codec_id, MKV_A_AAC_2SSR) ||
                    !strcmp(t->codec_id, MKV_A_AAC_4MAIN) ||
-                   !strcmp(t->codec_id, MKV_A_AAC_4LC) ||
+                   !strncmp(t->codec_id, MKV_A_AAC_4LC,
+                            strlen(MKV_A_AAC_4LC)) ||
                    !strcmp(t->codec_id, MKV_A_AAC_4SSR) ||
-                   !strcmp(t->codec_id, MKV_A_AAC_4LTP) ||
-                   !strcmp(t->codec_id, MKV_A_AAC_4SBR))
+                   !strcmp(t->codec_id, MKV_A_AAC_4LTP))
             t->a_formattag = mmioFOURCC('M', 'P', '4', 'A');
           else if (!strcmp(t->codec_id, MKV_A_VORBIS)) {
             if (t->private_data == NULL) {
@@ -1486,6 +1489,34 @@ static void parse_seekhead(mkv_demuxer_t *mkv_d, uint64_t pos) {
   mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] \\---- [ parsing seek head ] ---------\n");
 }
 
+#define AAC_SYNC_EXTENSION_TYPE 0x02b7
+static int aac_get_sample_rate_index(uint32_t sample_rate) {
+  if (92017 <= sample_rate)
+    return 0;
+  else if (75132 <= sample_rate)
+    return 1;
+  else if (55426 <= sample_rate)
+    return 2;
+  else if (46009 <= sample_rate)
+    return 3;
+  else if (37566 <= sample_rate)
+    return 4;
+  else if (27713 <= sample_rate)
+    return 5;
+  else if (23004 <= sample_rate)
+    return 6;
+  else if (18783 <= sample_rate)
+    return 7;
+  else if (13856 <= sample_rate)
+    return 8;
+  else if (11502 <= sample_rate)
+    return 9;
+  else if (9391 <= sample_rate)
+    return 10;
+  else
+    return 11;
+}
+
 extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
                                int flags);
 
@@ -1664,6 +1695,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                      "%.3fms ( = %.3f fps)\n",
                      (float)uint64(*kdefdur) / 1000000.0, track->v_frate);
             }
+            track->default_duration = (float)uint64(*kdefdur) / 1000000000.0;
           }
 
           kttype = FINDFIRST(ktentry, KaxTrackType);
@@ -2265,45 +2297,36 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_a->samplesize = 0;
 
       // Recreate the 'private data' which faad2 uses in its initialization.
-      // A_AAC/MPEG2/MAIN
-      // 0123456789012345
-      if (!strcmp(&track->codec_id[12], "MAIN"))
+      srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
+      if (!strncmp(&track->codec_id[12], "MAIN", 4))
         profile = 0;
-      else if (!strcmp(&track->codec_id[12], "LC"))
+      else if (!strncmp(&track->codec_id[12], "LC", 2))
         profile = 1;
-      else if (!strcmp(&track->codec_id[12], "SSR"))
+      else if (!strncmp(&track->codec_id[12], "SSR", 3))
         profile = 2;
       else
         profile = 3;
-      if (92017 <= sh_a->samplerate)
-        srate_idx = 0;
-      else if (75132 <= sh_a->samplerate)
-        srate_idx = 1;
-      else if (55426 <= sh_a->samplerate)
-        srate_idx = 2;
-      else if (46009 <= sh_a->samplerate)
-        srate_idx = 3;
-      else if (37566 <= sh_a->samplerate)
-        srate_idx = 4;
-      else if (27713 <= sh_a->samplerate)
-        srate_idx = 5;
-      else if (23004 <= sh_a->samplerate)
-        srate_idx = 6;
-      else if (18783 <= sh_a->samplerate)
-        srate_idx = 7;
-      else if (13856 <= sh_a->samplerate)
-        srate_idx = 8;
-      else if (11502 <= sh_a->samplerate)
-        srate_idx = 9;
-      else if (9391 <= sh_a->samplerate)
-        srate_idx = 10;
-      else
-        srate_idx = 11;
-
-      sh_a->codecdata = (unsigned char *)safemalloc(2);
-      sh_a->codecdata_len = 2;
+      sh_a->codecdata = (unsigned char *)safemalloc(5);
       sh_a->codecdata[0] = ((profile + 1) << 3) | ((srate_idx & 0xe) >> 1);
-      sh_a->codecdata[1] = ((srate_idx & 0x1) << 7) | (track->a_channels << 3);
+      sh_a->codecdata[1] = ((srate_idx & 0x1) << 7) |
+        (track->a_channels << 3);
+
+      if (strstr(track->codec_id, "SBR") != NULL) {
+        // HE-AAC (aka SBR AAC)
+        sh_a->codecdata_len = 5;
+
+        sh_a->samplerate *= 2;
+        sh_a->wf->nSamplesPerSec *= 2;
+        srate_idx = aac_get_sample_rate_index(sh_a->samplerate);
+        sh_a->codecdata[2] = AAC_SYNC_EXTENSION_TYPE >> 3;
+        sh_a->codecdata[3] = ((AAC_SYNC_EXTENSION_TYPE & 0x07) << 5) | 5;
+        sh_a->codecdata[4] = (1 << 7) | (srate_idx << 3);
+        track->default_duration = 1024.0 / (float)(sh_a->samplerate / 2);
+
+      } else {
+        sh_a->codecdata_len = 2;
+        track->default_duration = 1024.0 / (float)sh_a->samplerate;
+      }
 
     } else if (!strcmp(track->codec_id, MKV_A_VORBIS)) {
       for (i = 0; i < 3; i++) {
@@ -2590,7 +2613,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
   demux_packet_t *dp;
   demux_stream_t *ds;
   mkv_demuxer_t *mkv_d;
-  mkv_track_t *t;
+  mkv_track_t *t = NULL;
   int upper_lvl_el, exit_loop, found_data, i, linei, sl;
   char *texttmp;
   // Elements for different levels
@@ -2792,6 +2815,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
 
               if (use_this_block) {
                 mkv_d->last_pts = current_pts;
+                ds->pts = current_pts;
                 d->filepos = mkv_d->in->getFilePointer();
                 mkv_d->last_filepos = d->filepos;
 
@@ -2817,7 +2841,7 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
                     dp = new_demux_packet(re_size);
                     memcpy(dp->buffer, re_buffer, re_size);
                     dp->flags = block_bref == 0 ? 1 : 0;
-                    dp->pts = mkv_d->last_pts;
+                    dp->pts = mkv_d->last_pts + i * t->default_duration;
                     ds_add_packet(ds, dp);
                     found_data++;
                   }
