@@ -38,7 +38,7 @@ Balatoni, Dénes <pnis@coder.hu>
 Barat, Zsolt (joyping) <joy@streamminister.de>
     * ao_alsa9 fixes, AC3 passthrough support
 
-Baryshkov, Dmitry <mitya@school.ioffe.ru>
+Baryshkov, Dmitry (lumag) <mitya@school.ioffe.ru>
     * Russian documentation translation
     * FLAC decoding support
     * XML build system
@@ -154,7 +154,7 @@ Davies, Stephen <steve@daviesfam.org>
     * support for large video files (>2^32 bytes in size)
     * surround sound aop plugin
 
-Diedrich, Tobias <ranma@gmx.at>
+Diedrich, Tobias (ranma) <ranma@gmx.at>
     * NAS audio output driver
     * DXR2 driver
     * softpulldown video filter
@@ -181,7 +181,7 @@ Falco, Salvatore <sfalco@studenti.ing.uniroma1.it>
     * overlapping subtitles & sub sorting support
     * SAMI subtitles dump support
 
-Feigl, Johannes <johannes.feigl@aon.at>
+Feigl, Johannes (jaf) <johannes.feigl@aon.at>
     * original German docs translation (outdated)
     * some improvements in configure, small patches
     * found somebody (Thilo Wunderlich) who sent a DVB card
@@ -245,7 +245,7 @@ Gritsenko, Andriy N. (AG_LS) <andrej@lucky.net>
     * skip-deinterlace video filter
     * MUXER layer, and new MPEG-PS muxer
 
-Guyomarch, Rémi <rguyom@pobox.com>
+Guyomarch, Rémi (rguyom) <rguyom@pobox.com>
     * various fixes
     * 'unsharp' video filter
     * XviD encoding support
@@ -267,7 +267,7 @@ Hoffmann, Jens <hoffmajs@gmx.de>
     * additional YUV formats support
     * found the big BITMAPINFOHEADER problem -> solved ASV2 pixelization
 
-Holm, David (dholm) <dholm@telia.com>
+Holm, David (dholm, mswitch) <dholm@telia.com>
     * DXR3 support
 
 Horst, Bohdan (Nexus) <nexus@irc.pl>
@@ -286,7 +286,7 @@ Isani, Sidik <lksi@cfht.hawaii.edu>
     * RTC initialization fixes
     * various small fixes
 
-Issaris, Panagiotis <takis@lumumba.luc.ac.be>
+Issaris, Panagiotis (takis) <takis@lumumba.luc.ac.be>
     * -playlist option
     * NuppelVideo support
     * various fixes
@@ -301,7 +301,7 @@ Johansson, Anders <ajh@atri.curtin.edu.au>
     * old audio plugin system, some effect plugins
     * new libaf interface design, implementation, plugins
 
-Kalinski, Filip <filon@pld.org.pl>
+Kalinski, Filip (filon) <filon@pld.org.pl>
     * X11 fulscreen switching fixes/cleanup
 
 Kalvachev, Ivan (iive) <iive@yahoo.com>
@@ -344,7 +344,7 @@ Kovriga, Gregory <gkovriga@techunix.technion.ac.il>
 Kühling, David <dvdkhlng@gmx.de>
     * libtheora support, ogg/theora demuxing changes
 
-Kuivinen, Fredrik <freku045@student.liu.se>
+Kuivinen, Fredrik (ksorim) <freku045@student.liu.se>
     * OSD/subtitles outside a movie for SDL
     * video filter layer draft, first implementation
     * virtualdub filter support (not yet finished/committed)
@@ -416,7 +416,7 @@ Makovicka, Jindrich (henry) <makovick@KMLinux.fjfi.cvut.cz>
 Marek, Rudolf <MAREKR2@cs.felk.cvut.cz>
     * gtf code for -vo vesa
 
-Martin, Juan <nauj27@teleline.es>
+Martin, Juan (nauj27) <nauj27@teleline.es>
     * Spanish man page translation
     * Spanish documentation translation
 
@@ -545,7 +545,7 @@ Sommer, Sascha (Faust3) <saschasommer@freenet.de>
     * nvidia_vid driver
     * dhahelperwin for direct hardware access under Windows NT/2000/XP
 
-Svoboda, Jiri <Jiri.Svoboda@seznam.cz>
+Svoboda, Jiri (zar) <Jiri.Svoboda@seznam.cz>
     * AQT type subtitles support
     * CRTC2 YUV support in mga_vid
     * DirectFB video output driver
@@ -633,7 +633,7 @@ Holtzman, Aaron <aholtzma@engr.uvic.ca>
 Janovetz, Jake
     * remez.c author [Used to calculate audio filter coefficients]
 
-Kabelac, Zdenek <kabi@informatics.muni.cz>
+Kabelac, Zdenek (kabi) <kabi@informatics.muni.cz>
     * current avifile maintainer
     * some technical help about the Win32 stuff, ASF formats and timers
 
