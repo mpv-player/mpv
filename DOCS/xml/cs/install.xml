@@ -236,7 +236,7 @@ Budete potøebovat pomìrnì zánovní systém. Na Linuxu doporuèujeme jádro øady 2.4.
 <listitem><para>
   Pro dekódování <emphasis role="bold">Ogg Vorbis</emphasis> audia musíte správnì
   nainstalovat <systemitem class="library">libvorbis</systemitem>.
-  Binární balíèky a zdrojové kódy naleznete na 
+  Binární balíèky a zdrojové kódy naleznete na
   <ulink url="http://www.vorbis.com/download.psp">stránkách Ogg Vorbis</ulink>.
   </para></listitem>
 <listitem><para>
