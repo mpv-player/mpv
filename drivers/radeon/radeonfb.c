@@ -32,6 +32,7 @@
  *			propertly (by NK)
  *			0.1.0-ve.1
  *	2001-09-25	MTRR support (by NK)
+ *			0.1.0-ve.2
  *	Special thanks to ATI DevRel team for their hardware donations.
  *
  * LIMITATIONS: on dualhead Radeons (VE, M6, M7) driver doesn't work in
@@ -49,7 +50,7 @@
  *
 */
 
-#define RADEON_VERSION	"0.1.0-ve.1"
+#define RADEON_VERSION	"0.1.0-ve.2"
 
 #include <linux/config.h>
 #include <linux/module.h>
@@ -58,7 +59,7 @@
 #include <linux/string.h>
 #include <linux/mm.h>
 #include <linux/tty.h>
-#include <linux/malloc.h>
+#include <linux/slab.h>
 #include <linux/delay.h>
 #include <linux/fb.h>
 #include <linux/console.h>
