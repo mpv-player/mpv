@@ -1,4 +1,4 @@
-.\" synced with 1.723
+.\" synced with 1.728
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-08-27" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2004-09-19" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -2814,6 +2814,18 @@ Pozwala podaæ nazwê zbioru wyj¶ciowego (domy¶lnie ./md5)
 .PD 1
 .
 .TP
+.B md5sum\ \ \ \ 
+Oblicza sumê md5 ka¿dej klatki i zapisuje je wszystkie do pliku.
+Obs³uguje przestrzenie kolorów RGB24 i YV12.
+Przydatne przy debugowaniu.
+.PD 0
+.RSs
+.IPs outfile=<warto¶æ>
+Okre¶la nazwê pliku wyj¶ciowego (domy¶lnie: ./md5sums).
+.RE
+.PD 1
+.
+.TP
 .B yuv4mpeg
 Zmienia strumieñ video na nieskompresowan± sekwencjê obrazów YUV 4:2:0
 i przechowuje j± w pliku "stream.yuv" w bie¿±cym katalogu.
@@ -2889,6 +2901,45 @@ pliki JPEG bêd± zapisane do tego samego katalogu.
 Maksymalna ilo¶æ zapisanych w podkatalogach plików JPEG (je¿eli podana
 jest opcja subdirs).
 Warto¶æ musi byæ równa lub wiêksza ni¿ 1 (domy¶lnie: 1000).
+.RE
+.PD 1
+.
+.TP
+.B pnm\ \ \ \ 
+Zapisuje ka¿d± ramkê do pliku PNM w bie¿±cym katalogu.
+Ka¿dy plik dostaje jako nazwê numer ramki poprzedzony zerami.
+Obs³uguje pliki PPM, PGM i PGMYUV w trybie surowym (raw) i ASCII. Zobacz równie¿ 
+.BR pnm (5),
+.BR ppm (5)
+i
+.BR pgm (5).
+.PD 0
+.RSs
+.IPs ppm
+Zapisuje pliki PPM (domy¶lnie).
+.IPs pgm
+Zapisuje pliki PGM.
+.IPs pgmyuv
+Zapisuje pliki PGMYUV.
+PGMYUV jest podobny do PGM, ale zawiera równie¿ przestrzeñ U i V umieszczone
+na dole obrazu.
+.IPs raw
+Zapisuje pliki PNM w trybie surowym (raw) (domy¶lnie).
+.IPs ascii
+Zapisuje pliki PNM w trybie ASCII.
+.IPs outdir=<warto¶æ>
+Okre¶la katalog, w którym bêd± zachowane pliki PNM.
+Je¿eli parametr nie zosta³ podany, wszystkie pliki PNM zostan± zapisane do
+bie¿±cego katalogu.
+.IPs subdirs=<warto¶æ>
+Je¿eli parametr zostal okreslony, MPlayer utworzy ponumerowane podkatalogi
+z podanym prefiksem.
+Je¿eli opcja zosta³a pominiêta, ¿adne podkatalogi nie zostan± stworzone
+a wsztstkie pliki PNM zostan± zapisane w tym samym katalogu.
+.IPs maxfiles=<warto¶æ>
+Maksymalna ilo¶æ plików PNM jakie bêd± zachowane w ka¿dym podkatalogu
+(je¶li opcja subdirs zosta³a okreslona).
+Warto¶æ musi byæ wiêksza lub równa 1 (domy¶lnie: 1000).
 .RE
 .PD 1
 .
@@ -3734,12 +3785,12 @@ nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yv12)
 .B pp[=filtr1[:opcja1[:opcja2...]]/\:[-]filtr2...] (zobacz tak¿e \-pphelp)
 Ta opcja uruchamia okre¶lony ³añcuch podfiltrów postprocessingu.
 Podfiltry musz± byæ oddzielone znakiem "/" i mog± byæ wy³±czone przez
-poprzedzenie ich kombinacj± "'\-".
-Dodanie ":" i "a", "c" lub "y" okre¶la zakres ³añcucha (domy¶lnie: c):
+poprzedzenie ich kombinacj± "'\-". Zakres podfiltru mo¿e zostaæ okre¶lony przez
+dodanie ":" i "a", "c" lub "y" (domy¶lnie: c):
 .PD 0
 .RSs
 .IPs a
-Wy³±cza filtr, je¶li procesor jest zbyt wolny.
+Automatycznie wy³±cza filtr, je¶li procesor jest zbyt wolny.
 .IPs c
 Filtruje te¿ kolory.
 .IPs y
@@ -3987,7 +4038,7 @@ naprawy filmów w których nieprawid³owo odwrócono telecine.
 .
 .TP
 .B dint[=czu³o¶æ:poziom]
-Wykrywa i usuwa pierwsz± klatkê z przeplotem w strumieniu video.
+Wykrywa i usuwa pierwsz± z szerego klatek z przeplotem w strumieniu video.
 Warto¶ci mog± byæ z zakresu 0.0 do 1.0 \- pierwszy (domy¶lnie 0.1) jest wzglêdn±
 ró¿nic± pomiêdzy s±siaduj±cymi pikselami, drugi (domy¶lnie 0.15) okre¶la w
 jakiej czê¶ci klatki musi byæ wykryty przeplot, aby j± usun±æ.
@@ -5360,15 +5411,39 @@ przewidziany)
 .RE
 .
 .TP
-.B vpass=<1\-2>
-W³±cza wewnêtrzny tryb dwuprzej¶ciowy, podawaj tylko, je¿eli chcesz
-korzystaæ z kodowania dwuprzej¶ciowego (domy¶lnie: wy³±czony).
+.B vpass=<1\-3>
+W³±cza wewnêtrzny tryb dwu- lub trójprzej¶ciowy, podawaj tylko, je¿eli chcesz
+korzystaæ z kodowania dwu- lub trójprzej¶ciowego (domy¶lnie: wy³±czony).
 .PD 0
 .RSs
 .IPs 1
-pierwsze przej¶cie
+pierwsze przej¶cie (sprawd¼ te¿ opcjê turbo)
 .IPs 2
 drugie przej¶cie
+.IPs 3
+n-te przej¶cie (drugie i trzecie przej¶cie kodowania trójprzej¶ciowego)
+.RE
+.RS 
+Jak to dzia³a i jak tego u¿ywaæ:
+.br
+Pierwsze przej¶cie (vpass=1) zapisuje plik ze statystykami.
+Mo¿e bêdziesz chcia³ wy³±czyæ niektóre opcje znacznie obci±¿aj±ce procesor,
+podobnie jak tryb "turbo".
+.br
+W trybie dwuprzej¶ciowym drugie przej¶cie (vpass=2) czyta plik ze statystykami
+i opiera decyzje o kontroli tempa na nim.
+.br
+W trybie trójprzej¶ciowym drugie przej¶cie (vpass=3, to nie b³±d ;-) )
+robi obie rzeczy: Najpierw czyta statystyki z pliku, pó¼niej je nadpisuje.
+(Mo¿e bêdziesz chcia³ zachowaæ kopiê pliku divx2pass.log zanim to siê stanie,
+je¶li istnieje mo¿liwo¶æ, ¿e bêdiesz musia³ przerwaæ dzia³anie MEncodera).
+Mo¿esz u¿ywaæ wszystkich opcji kodowania, poza tymi obci±¿aj±cymi procesor
+w znacznym stopniu (jak "qns").
+.br
+Trzecie przej¶cie (vpass=3) jest takie samo jak drugie, poza tym ¿e korzysta
+z statystyk zebranych podczas drugiego przej¶cia.
+Mo¿esz u¿ywaæ wszystkich opcji kodowania, nawet tych bardzo obci±¿aj±cych
+procesor.
 .RE
 .PD 1
 .sp 1
@@ -5383,6 +5458,13 @@ Zachowuje statystyki.
 Koduje z optymaln± tablic± Huffmana opart± o wyniki pierwszego przej¶cia.
 .RE
 .PD 1
+.
+.TP
+.B turbo (tylko tryb dwuprzej¶ciowy)
+Znacznie zwiêksza szybko¶æ pierwszego przej¶cia u¿ywaj±c szybszych algorytmów
+i wy³±czaj±c opcje obci±¿aj±ce w znacznym stopniu procesor.
+Prawdopodobnie zmniejszy to trochê globalny wspó³czynnik PSNR (o oko³o 0.01dB) i
+zmieni typy pojedynczych klatek i trochê PSNR (do 0.03dB).
 .
 .TP
 .B aspect=<x/\:y>
@@ -6130,8 +6212,11 @@ redukcja szumów, 0 oznacza wy³±czon±
 .
 .TP
 .B qns=<0\-3>
-Kszta³towanie szumu kwantyzatora, ogranicza d¼wiêcz±ce pozosta³o¶ci, wiêksze
-warto¶ci s± wolniejsze, ale nie koniecznie wp³yn± na polepszenie jako¶ci.
+Kszta³towanie szumu kwantyzatora.
+Zamiast wybieraæ kwantyzacjê jak najbli¿sz± ¼ród³owemu plikowi video (w sensie
+PSNR), wybiera tak±, ¿e szum (zazwyczaj d¼wiêcz±cy) bêdzie
+zamaskowany przez zawarto¶æ obrazu o podobnej czêstosliwo¶ci.
+Wiêksze warto¶ci s± wolniejsze, ale nie koniecznie wp³yn± na polepszenie jako¶ci.
 Opcja mo¿e i powinna byæ u¿ywana razem z kwantyzacj± kratow±, w takim przypadku
 kwantyzacja kratowa (optymalna dla sta³ej wagi) bêdzie wykorzystana jako
 punkt startowy dla przeszukiwania iteracyjnego.
@@ -6720,6 +6805,7 @@ Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .TP
 .B cabac\ \ \ 
 Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding).
+Spowalnia kodowania ale oszczêdza okolo 10-15% bitów.
 .
 .TP
 .B cabacidc=<warto¶æ>
@@ -6804,7 +6890,9 @@ wy¿sze zmuszaj± go do delikatniejszych zmian.
 .B fullinter
 Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
 (i16x16, i4x4, p16x16-4x4)
-(domy¶lnie: i16x16, i2x4, p16x16-8x8).
+Idea polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
+okre¶lony obszar obrazu, np.\& bardzo dore rezultaty dla Anime, które zazwyczaj
+zawieraj± du¿e obszary tego samego koloru (domy¶lnie: i16x16, i2x4, p16x16-8x8).
 .
 .TP
 .B log=<-1\-3>
