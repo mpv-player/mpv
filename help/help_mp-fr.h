@@ -224,11 +224,11 @@ static char help_text[]=
 "\n"\
 " preset=<valeur> fournit les plus hauts paramètres de qualité possibles.\n"\
 "                 medium: encodage VBR, bonne qualité\n"\
-"                 (interval de bitrate 150-180 kbps)\n"\
+"                 (intervalle de bitrate 150-180 kbps)\n"\
 "                 standard: encodage VBR, haute qualité\n"\
-"                 (interval de bitrate 170-210 kbps)\n"\
+"                 (intervalle de bitrate 170-210 kbps)\n"\
 "                 extreme: encodage VBR, très haute qualité\n"\
-"                 (interval de bitrate 200-240 kbps)\n"\
+"                 (intervalle de bitrate 200-240 kbps)\n"\
 "                 insane: encodage CBR, plus haute qualité préselectionnée\n"\
 "                 (bitrate 320 kbps)\n"\
 "                 <8-320>: encodage ABR au bitrate moyen indiqué en kbps.\n\n"
