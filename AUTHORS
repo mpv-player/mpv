@@ -380,7 +380,7 @@ Uwe Reder <Uwe.Reder@3SOFT.de>
     * various x11/vm/fs fixes
     * subtitle/OSD control fixes
 
-Andriy N. Gritsenko <andrej@lucky.net>
+Andriy N. Gritsenko (AG_LS) <andrej@lucky.net>
     * skip-deinterlace video filter
     * MUXER layer, and new MPEG-PS muxer
 
@@ -587,7 +587,7 @@ Florian Dietrich <flodt8@yahoo.de>
 Nehal Mistry <nehalmistry@gmx.net>
     * various audio driver fixes
     
-Reimar Döffinger <reimar.doeffinger@stud.uni-karlsruhe.de>
+Reimar Döffinger (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
     * GL code fixes
 
 Rune <runner@mail.tele.dk>
@@ -600,7 +600,7 @@ adland <adland123@yahoo.com>
 Tilmann Bitterberg
     * AVI OpenDML read support
 
-Reza Jelveh <reza.jelveh@tu-harburg.de>
+Reza Jelveh (timebomb) <reza.jelveh@tu-harburg.de>
     * NSV demuxer
 
 
