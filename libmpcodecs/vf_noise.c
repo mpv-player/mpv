@@ -62,7 +62,6 @@ typedef struct FilterParam{
 struct vf_priv_s {
 	FilterParam lumaParam;
 	FilterParam chromaParam;
-	mp_image_t *dmpi;
 	unsigned int outfmt;
 };
 
@@ -320,16 +319,16 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
     if(mpi->imgfmt!=vf->priv->outfmt) return; // colorspace differ
     // ok, we can do pp in-place (or pp disabled):
-    vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
         mpi->type, mpi->flags, mpi->w, mpi->h);
-    mpi->planes[0]=vf->priv->dmpi->planes[0];
-    mpi->stride[0]=vf->priv->dmpi->stride[0];
-    mpi->width=vf->priv->dmpi->width;
+    mpi->planes[0]=vf->dmpi->planes[0];
+    mpi->stride[0]=vf->dmpi->stride[0];
+    mpi->width=vf->dmpi->width;
     if(mpi->flags&MP_IMGFLAG_PLANAR){
-        mpi->planes[1]=vf->priv->dmpi->planes[1];
-        mpi->planes[2]=vf->priv->dmpi->planes[2];
-	mpi->stride[1]=vf->priv->dmpi->stride[1];
-	mpi->stride[2]=vf->priv->dmpi->stride[2];
+        mpi->planes[1]=vf->dmpi->planes[1];
+        mpi->planes[2]=vf->dmpi->planes[2];
+	mpi->stride[1]=vf->dmpi->stride[1];
+	mpi->stride[2]=vf->dmpi->stride[2];
     }
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
@@ -339,13 +338,13 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 	if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 		// no DR, so get a new image! hope we'll get DR buffer:
-		vf->priv->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
+		vf->dmpi=vf_get_image(vf->next,vf->priv->outfmt,
 		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 		mpi->w,mpi->h);
 //printf("nodr\n");
 	}
 //else printf("dr\n");
-	dmpi= vf->priv->dmpi;
+	dmpi= vf->dmpi;
 
 	noise(dmpi->planes[0], mpi->planes[0], dmpi->stride[0], mpi->stride[0], mpi->w, mpi->h, &vf->priv->lumaParam);
 	noise(dmpi->planes[1], mpi->planes[1], dmpi->stride[1], mpi->stride[1], mpi->w/2, mpi->h/2, &vf->priv->chromaParam);

@@ -30,7 +30,6 @@ struct vf_priv_s {
     int pp;
     pp_mode_t *ppMode[PP_QUALITY_MAX+1];
     void *context;
-    mp_image_t *dmpi;
     unsigned int outfmt;
 };
 
@@ -97,16 +96,16 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(!(mpi->flags&MP_IMGFLAG_ACCEPT_STRIDE) && mpi->imgfmt!=vf->priv->outfmt)
 	return; // colorspace differ
     // ok, we can do pp in-place (or pp disabled):
-    vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+    vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
         mpi->type, mpi->flags, mpi->w, mpi->h);
-    mpi->planes[0]=vf->priv->dmpi->planes[0];
-    mpi->stride[0]=vf->priv->dmpi->stride[0];
-    mpi->width=vf->priv->dmpi->width;
+    mpi->planes[0]=vf->dmpi->planes[0];
+    mpi->stride[0]=vf->dmpi->stride[0];
+    mpi->width=vf->dmpi->width;
     if(mpi->flags&MP_IMGFLAG_PLANAR){
-        mpi->planes[1]=vf->priv->dmpi->planes[1];
-        mpi->planes[2]=vf->priv->dmpi->planes[2];
-	mpi->stride[1]=vf->priv->dmpi->stride[1];
-	mpi->stride[2]=vf->priv->dmpi->stride[2];
+        mpi->planes[1]=vf->dmpi->planes[1];
+        mpi->planes[2]=vf->dmpi->planes[2];
+	mpi->stride[1]=vf->dmpi->stride[1];
+	mpi->stride[2]=vf->dmpi->stride[2];
     }
     mpi->flags|=MP_IMGFLAG_DIRECT;
 }
@@ -114,18 +113,18 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(!(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// no DR, so get a new image! hope we'll get DR buffer:
-	vf->priv->dmpi=vf_get_image(vf->next,mpi->imgfmt,
+	vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 //	    MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
 //	    mpi->w,mpi->h);
 	    (mpi->w+7)&(~7),(mpi->h+7)&(~7));
-	vf->priv->dmpi->w=mpi->w; vf->priv->dmpi->h=mpi->h; // display w;h
+	vf->dmpi->w=mpi->w; vf->dmpi->h=mpi->h; // display w;h
     }
     
     if(vf->priv->pp || !(mpi->flags&MP_IMGFLAG_DIRECT)){
 	// do the postprocessing! (or copy if no DR)
 	pp_postprocess(mpi->planes           ,mpi->stride,
-		    vf->priv->dmpi->planes,vf->priv->dmpi->stride,
+		    vf->dmpi->planes,vf->dmpi->stride,
 		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
 		    vf->priv->ppMode[ vf->priv->pp ], vf->priv->context,
@@ -135,7 +134,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		    mpi->pict_type);
 #endif
     }
-    return vf_next_put_image(vf,vf->priv->dmpi);
+    return vf_next_put_image(vf,vf->dmpi);
 }
 
 //===========================================================================//
