@@ -156,8 +156,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 	return(0);
     }
 
-    if (ao_data.subdevice != NULL)
-	alsa_device = ao_data.subdevice;
+    if (ao_subdevice != NULL)
+	alsa_device = ao_subdevice;
 
     if (alsa_device == NULL)
     {
