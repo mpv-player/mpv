@@ -348,10 +348,10 @@ jpeg_enc_t *jpeg_enc_init(int w, int h, int y_psize, int y_rsize,
 	j->s->mb_height = j->s->height/8;
 	j->s->mb_intra = 1;
 
-	j->s->intra_matrix[0] = default_intra_matrix[0];
+	j->s->intra_matrix[0] = ff_mpeg1_default_intra_matrix[0];
 	for (i = 1; i < 64; i++) 
 		j->s->intra_matrix[i] = 
-			(default_intra_matrix[i]*j->s->qscale) >> 3;
+			(ff_mpeg1_default_intra_matrix[i]*j->s->qscale) >> 3;
 	convert_matrix(j->s->q_intra_matrix, j->s->q_intra_matrix16, 
 			j->s->q_intra_matrix16_bias, 
 			j->s->intra_matrix, j->s->intra_quant_bias);
