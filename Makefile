@@ -6,23 +6,11 @@
 
 include config.mak
 
-ifeq ($(ENABLE_XP),yes)
-PRG = mplayerxp
-PRG_HQ = mplayerHQxp
-PRG_AVIP = aviparsexp
-PRG_FIBMAP = fibmap_mplayerxp
-PRG_TV = tvisionxp
-PRG_CFG = codec-cfg-xp
-PRG_MENCODER = mencoderxp
-else
 PRG = mplayer
-PRG_HQ = mplayerHQ
-PRG_AVIP = aviparse
 PRG_FIBMAP = fibmap_mplayer
-PRG_TV = tvision
 PRG_CFG = codec-cfg
 PRG_MENCODER = mencoder
-endif
+
 # these subdirectories required installation due binaries within them
 ifeq ($(VIDIX),yes)
 SUBDIRS += libdha vidix
@@ -99,8 +87,6 @@ endif
 # .PHONY: all clean
 
 all:	$(ALL_PRG)
-
-# $(PRG_AVIP)
 
 .c.o:
 	$(CC) -c $(CFLAGS) -o $@ $<
@@ -261,7 +247,7 @@ clean:
 	-rm -f *.o *~ $(OBJS)
 
 distclean:
-	-rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_HQ) $(PRG_AVIP) $(PRG_TV) $(OBJS) $(PRG_MENCODER)
+	-rm -f *~ $(PRG) $(PRG_FIBMAP) $(PRG_MENCODER) $(OBJS)
 	-rm -f *.o *.a .depend configure.log
 	@for a in $(PARTS); do $(MAKE) -C $$a distclean; done
 
