@@ -28,6 +28,7 @@
 #include "rtp.h"
 #endif
 #include "pnm.h"
+#include "realrtsp/rtsp_session.h"
 
 #include "../version.h"
 
@@ -582,6 +583,20 @@ extension=NULL;
 		
 		// Checking for RTSP
 		if( !strcasecmp(url->protocol, "rtsp") ) {
+			// Checking for Real rtsp://
+			// Extension based detection, should be replaced with something based on server answer
+			extension = NULL;
+			if( url->file!=NULL )
+				for( i=strlen(url->file) ; i>0 ; i-- )
+					if( url->file[i]=='.' ) {
+						extension=(url->file)+i+1;
+						break;
+			}
+			if (!strcasecmp(extension, "rm")) {
+				*file_format = DEMUXER_TYPE_REAL;
+				return 0;
+			}
+			mp_msg(MSGT_NETWORK,MSGL_INFO,"Not a Realmedia rtsp url. Trying standard rtsp protocol.\n");
 #ifdef STREAMING_LIVE_DOT_COM
 			*file_format = DEMUXER_TYPE_RTP;
 			return 0;
@@ -864,6 +879,48 @@ pnm_streaming_start( stream_t *stream ) {
 }
 
 
+int
+realrtsp_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl ) {
+	return rtsp_session_read(stream_ctrl->data, buffer, size);
+}
+
+
+int
+realrtsp_streaming_start( stream_t *stream ) {
+	int fd;
+	rtsp_session_t *rtsp;
+	char *mrl;
+	int port;
+	char aport[10];
+	if( stream==NULL ) return -1;
+
+	fd = connect2Server( stream->streaming_ctrl->url->hostname,
+		port = (stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 554) );
+	printf("rtsp:// fd=%d\n",fd);
+	if(fd<0) return -1;
+	
+	sprintf(aport,"%d",port);
+	mrl = (char *)malloc(strlen(stream->streaming_ctrl->url->url)+1+10+1);
+	strcpy(mrl,stream->streaming_ctrl->url->url);
+	strcat(mrl,":");
+	strcat(mrl,aport);
+	rtsp = rtsp_session_start(fd,mrl, stream->streaming_ctrl->url->file,
+		stream->streaming_ctrl->url->hostname, port);
+	free(mrl);
+	if(!rtsp) return -1;
+
+	stream->fd=fd;
+	stream->streaming_ctrl->data=rtsp;
+
+	stream->streaming_ctrl->streaming_read = realrtsp_streaming_read;
+//	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
+	stream->streaming_ctrl->prebuffer_size = 128*1024;  // 8 KBytes
+	stream->streaming_ctrl->buffering = 1;
+	stream->streaming_ctrl->status = streaming_playing_e;
+	return 0;
+}
+
+
 #ifndef STREAMING_LIVE_DOT_COM
 // Start listening on a UDP port. If multicast, join the group.
 int
@@ -1008,6 +1065,12 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		ret = pnm_streaming_start( stream );
 	} else
 	
+	if( (!strcasecmp( stream->streaming_ctrl->url->protocol, "rtsp")) &&
+			(*demuxer_type == DEMUXER_TYPE_REAL)) {
+		stream->fd = -1;
+		ret = realrtsp_streaming_start( stream );
+	} else
+
 	// For connection-oriented streams, we can usually determine the streaming type.
 	switch( *demuxer_type ) {
 		case DEMUXER_TYPE_ASF:
