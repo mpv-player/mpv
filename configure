@@ -206,12 +206,15 @@ for i in `echo $pparam`; do
         ;;
   xmm)
         _sse=yes
+        _mmx2=yes
         ;;
   sse)
         _sse=yes
+        _mmx2=yes
         ;;
   kni)
         _sse=yes
+        _mmx2=yes
         ;;
  esac
 
