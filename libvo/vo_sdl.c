@@ -1188,7 +1188,7 @@ static void check_events (void)
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Event event;
 	SDLKey keypressed = 0;
-	static int firstcheck = 0, modifiers = 0;
+	static int modifiers = 0;
 	
 	/* Poll the waiting SDL Events */
 	while ( SDL_PollEvent(&event) ) {
@@ -1308,7 +1308,9 @@ static void check_events (void)
 
                                 else switch(keypressed){
 				case SDLK_RETURN:
-					if (!firstcheck) { firstcheck = 1; break; }
+					SDL_ShowCursor(1);
+					mplayer_put_key(KEY_ENTER);
+				break;
                                 case SDLK_ESCAPE:
 				case SDLK_q:
 					SDL_ShowCursor(1);
@@ -1579,8 +1581,9 @@ query_format(uint32_t format)
 {
     switch(format){
     case IMGFMT_YV12:
-    case IMGFMT_I420:
-    case IMGFMT_IYUV:
+// it seems buggy (not hw accelerated), so just use YV12 instead!
+//    case IMGFMT_I420:
+//    case IMGFMT_IYUV:
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
     case IMGFMT_YVYU:
