@@ -618,6 +618,10 @@ int real_get_rdt_chunk(rtsp_t *rtsp_session, char **buffer) {
 #ifdef LOG
     printf("got flags1: 0x%02x\n",flags1);
 #endif
+    if(header[6] == 0x06) {
+      printf("Stream EOF detected\n");
+      return -1;
+    }
     header[0]=header[5];
     header[1]=header[6];
     header[2]=header[7];
