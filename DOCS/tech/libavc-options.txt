@@ -323,6 +323,11 @@ last_pred	(0-99) amount of motion predictors from the previous frame
 	0 (default)
 	a -> will use 2a+1 x 2a+1 MB square of MV predictors from the previous frame
 
+preme	(0-2) Motion estimation pre-pass
+	0 disabled
+	1 only after I frames (default)
+	2 allways
+
 lavdopts: (decoder options)
 ---------------------------
 
