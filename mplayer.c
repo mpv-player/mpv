@@ -84,19 +84,6 @@ int quiet=0;
 void find_sub(subtitle* subtitles,int key);
 #endif
 
-static int
-usec_sleep(int usec_delay)
-{
-#if	1
-    struct timespec ts;
-    ts.tv_sec  =  usec_delay / 1000000;
-    ts.tv_nsec = (usec_delay % 1000000) * 1000;
-    return nanosleep(&ts, NULL);
-#else
-    return usleep(usec_delay);
-#endif
-}
-
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
