@@ -477,7 +477,125 @@ in der Konfigurationsdatei einstellen.</P>
 
 <P><A NAME=2.5><B>2.5. TV input</B></P>
 
-Coming soon.
+<P>Dieser Teil der Docs zeigt wie man <B>das Sehen/Grabben über einen V4L-kompatiblen
+TV-Tuner ermöglicht</B>.</P>
+
+<P><B><I>Kompilierung</I></B></P>
+
+<P>
+<UL>
+  <LI>als erstes musst du die <CODE>--enable-tv</CODE> Option bei <CODE>./configure</CODE>
+    eingaben und MPlayer neu kompilieren.</LI>
+  <LI>stelle sicher, dass dein Tuner mit anderer TV-Software unter Linux funktioniert,
+    zum Beispiel xawtv.</LI>
+</UL>
+</P>
+	    
+<P><B><I>Verfügbare Optionen</I></B><BR>
+<TABLE BORDER=0>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>on</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>verwenden des TV-Inputs</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>driver</I></TD>
+  <TD></TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <B>dummy</B> - NULL TV-Input :) Nur zum Testen, erzeugt Dummy-Input.<BR>
+    <B>v4l</B> - nimmt Bilder vom Standard-V4L-Interface (normalerweise
+    <CODE>/dev/video0</CODE>)</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>device</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt einen anderen
+  Treiber als <CODE>/dev/video0</CODE></TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>input</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>welcher Eingang
+    des TV-Tuners verwendet werden soll (z.B. <B>television</B>, <B>s-video</B>, 
+    <B>composite</B>, ...)<BR>
+    Beim Inizialisieren werden die verfügbaren Eingänge angezeigt.</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>freq</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt die Frequenz
+  für den Tuner (z.B. <B>511.250</B>)</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>outfmt</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Format, mit
+    dem ausgegeben werden soll (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>)<BR>
+    Die folgende Option muss die selbe Einstellung sein !</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>width</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <B>VERWENDEN!</B> - die Breite des Ausgabe-Fensters, in Pixel</TD>
+</TR>
+  <TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>height</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <B>VERWENDEN!</B> - die Höhe des Ausgabe-Fensters, in Pixel</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>norm</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  verfügbare Normen: PAL, SECAM, NTSC</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>channel</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  Tuner auf eingestellen Kanal setzen</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>chanlist</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  verfügbar: <CODE>us-bcast, us-cable, europe-west, europe-east, usw</CODE></TD>
+</TR>
+</TABLE>
+</P>
+
+<P><B><I>Keyboard-Tasten</I></B></P>
+
+<TABLE BORDER=0>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>h oder l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>wählt
+vorherigen/nächsten Kanal</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>n</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Norm</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ändern der Kanalliste</TD><TR>
+</TABLE>
+
+<P><B><I>Beispiele</I></B></P>
+
+<P>
+Dummy Ausgabe zu AAlib :)<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
+<BR>
+Eingabe von Standard-V4L<BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=800:height=600:device=/dev/video0:input=television:outfmt=yv12 -vc rawyv12 -vo xv</CODE><BR>
+</P>
+
 
 <P><B><A NAME=3>3. Verwendung</A></P></B>
 
@@ -1127,10 +1245,10 @@ other technical help from:</P>
 <UL>
   <LI><B>Ungarisch</B>: Gabucino
   <LI><B>Deutsch</B>: <A HREF="mailto:johannes.feigl@mcse.at">Johannes Feigl</A>
-  <LI><B>Französisch</B>: <A HREF="mailto:smarteau@eso.org">Stephane Marteau</A>
+  <LI><B>Französisch</B>: <A HREF="mailto:smarteau@eso.org">Stephane Marteau</A> (veraltet)
   <LI><B>Spanisch</B>: TeLeNiEkO (veraltet)
   <LI><B>Russisch</B>: Nick Kurshev (veraltet)
-  <LI><B>Polnisch</B>: Dariush Pietrzak (veraltet)
+  <LI><B>Polnisch</B>: Dariush Pietrzak, danach Justyna Biala (veraltet)
 </UL></P>
 
 <P>Platformen/Portierungen
