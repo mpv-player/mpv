@@ -80,26 +80,6 @@
     -lavcopts vcodec=mpeg4:vbitrate=1100 -oac copy -o movie.avi -pass 2</CODE>
 </P>
 
-<P><U><B>2, vagy 3 menetes enkódolás a libavcodec 2 menetes kódjával:</B></U>
-  Használata esetén elképzelhetõ, hogy az átlagos bitráta jobban fog
-  közelíteni a megadotthoz, mint a DivX4-es módszer esetén.</P>
-
-<UL>
-  <LI><B>2 menetes enkódolás:</B><BR>
-    <CODE>rm -f lavc_stats.txt<BR>
-    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 (audio-opciók) -o
-      movie.avi<BR>
-    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 (audio-opciók) -o
-      movie.avi</CODE></LI>
-  <LI><B>3 menetes enkódolás:</B><BR>
-    <CODE>rm -f frameno.avi lavc_stats.txt<BR>
-    mencoder -dvd 2 -ovc frameno (audio-opciók) -o frameno.avi<BR>
-    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o
-      movie.avi<BR>
-    mencoder -dvd 2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o
-      movie.avi</CODE></LI>
-</UL>
-
 
 <H3><A NAME=rescaling>2.4.2 Filmek átméretezése</A></H3>
 
