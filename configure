@@ -1605,9 +1605,9 @@ fi
 echores "$_dvd"
 
 
-echocheck "extras/BSDI_dvdioctl/dvd.h"
+echocheck "BSDI dvd.h"
 cat > $TMPC << EOF
-#include <extras/BSDI_dvdioctl/dvd.h>
+#include <dvd.h>
 int main(void) { return 0; }
 EOF
 _bsdi_dvd=no
