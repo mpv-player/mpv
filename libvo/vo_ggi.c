@@ -25,6 +25,11 @@
 
 #undef GGI_OST
 #define GII_BUGGY_KEYCODES
+#define GGI_OSD
+
+#ifdef GGI_OSD
+#warning "GGI_OSD is bugging!"
+#endif
 
 LIBVO_EXTERN (ggi)
 
@@ -43,6 +48,7 @@ static ggi_visual_t ggi_vis;
 static ggi_directbuffer *ggi_buffer;
 static int ggi_format = 0;
 static int ggi_bpp = 0;
+static int ggi_bppmul = 0;
 static uint32_t virt_width;
 static uint32_t virt_height;
 #ifdef GGI_OST
@@ -137,6 +143,8 @@ static int ggi_setmode(uint32_t d_width, uint32_t d_height, int d_depth, int for
 	    vo_screenwidth, vo_screenheight, virt_width, virt_height,
 	    vo_depthonscreen, ggi_bpp, vo_format_name(ggi_format));
 
+    ggi_bppmul = ggi_bpp/8;
+
     return(0);
 }
 
@@ -146,7 +154,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 {
     vo_depthonscreen = 32;
 
-    printf("\nggi-init: THIS DRIVER IS IN PRE-ALPHA PHASE, DO NOT USE!\n\n");
+    printf("ggi-init: This driver has got bugs, if you can, fix them.\n");
 
     if (ggiInit() != 0)
     {
@@ -165,9 +173,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     printf("ggi-init: using %s GGI output\n",
 	(ggi_output_name == NULL) ? "default" : ggi_output_name);
 
-    ggi_format = format;
-
-    switch(ggi_format)
+    switch(format)
     {
 	case IMGFMT_RGB8:
 	    ggi_bpp = 8;
@@ -204,9 +210,11 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	    yuv2rgb_init(vo_depthonscreen, MODE_RGB);
 	    break;
 	default:
-	    printf("ggi-init: no suitable image format found\n");
+	    printf("ggi-init: no suitable image format found (requested: %s)\n",
+		vo_format_name(format));
 	    return(-1);
     }
+    ggi_format = format;
 
     ggiSetFlags(ggi_vis, GGIFLAG_ASYNC);
 
@@ -271,7 +279,7 @@ static uint32_t draw_frame(uint8_t *src[])
     ggiSetDisplayFrame(ggi_vis, ggi_buffer->frame);
     ggiSetWriteFrame(ggi_vis, ggi_buffer->frame);
     
-    memcpy(ggi_buffer->write, src[0], virt_width*virt_height*(ggi_bpp/8));
+    memcpy(ggi_buffer->write, src[0], virt_width*virt_height*ggi_bppmul);
 
 #ifdef GGI_OST
     ggiPuts(ggi_vis, virt_width/2, virt_height-10, "MPlayer GGI");
@@ -281,46 +289,74 @@ static uint32_t draw_frame(uint8_t *src[])
     return(0);
 }
 
+#ifdef GGI_OSD
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
     unsigned char *srca, int stride)
 {
 #warning "draw_alpha needs to be fixed!"
     switch(ggi_format)
     {
+	case IMGFMT_YV12:
+	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+	    vo_draw_alpha_yv12(w, h, src, srca, stride,
+		((uint8_t *) ggi_buffer->write)+(virt_width*y0+x0)*ggi_bppmul,
+		virt_width*ggi_bppmul);
+	    break;
+	case IMGFMT_YUY2:
+	case IMGFMT_YVYU:
+	    vo_draw_alpha_yuy2(w, h, src, srca, stride,
+		((uint8_t *) ggi_buffer->write)+2*(virt_width*y0+x0)*ggi_bppmul,
+		2*virt_width*ggi_bppmul);
+	    break;
+	case IMGFMT_UYVY:
+	    vo_draw_alpha_yuy2(w, h, src, srca, stride,
+		((uint8_t *) ggi_buffer->write)+2*(virt_width*y0+x0)*ggi_bppmul+1,
+		2*virt_width*ggi_bppmul);
+	    break;
 	case IMGFMT_RGB15:
         case IMGFMT_BGR15:
-            vo_draw_alpha_rgb15(w, h, src, srca, stride, 0, 2*virt_width);
+            vo_draw_alpha_rgb15(w, h, src, srca, stride, 
+		((uint8_t *) ggi_buffer->write)+2*(virt_width*y0+x0)*ggi_bppmul,
+		2*virt_width*ggi_bppmul);
             break;
         case IMGFMT_RGB16:
         case IMGFMT_BGR16:
-            vo_draw_alpha_rgb16(w, h, src, srca, stride, 0, 2*virt_width);
+            vo_draw_alpha_rgb16(w, h, src, srca, stride, 
+		((uint8_t *) ggi_buffer->write)+2*(virt_width*y0+x0)*ggi_bppmul,
+		2*virt_width*ggi_bppmul);
             break;
         case IMGFMT_RGB24:
         case IMGFMT_BGR24:
-            vo_draw_alpha_rgb24(w, h, src, srca, stride, 0, 3*virt_width);
+            vo_draw_alpha_rgb24(w, h, src, srca, stride, 
+		((uint8_t *) ggi_buffer->write)+3*(virt_width*y0+x0)*ggi_bppmul,
+		3*virt_width*ggi_bppmul);
             break;
         case IMGFMT_RGB32:
         case IMGFMT_BGR32:
-            vo_draw_alpha_rgb32(w, h, src, srca, stride, 0, 4*virt_width);
+            vo_draw_alpha_rgb32(w, h, src, srca, stride, 
+		((uint8_t *) ggi_buffer->write)+4*(virt_width*y0+x0)*ggi_bppmul,
+		4*virt_width*ggi_bppmul);
 	    break;
     }
 }
+#endif
 
 static void flip_page(void)
 {
     check_events();
+#ifdef GGI_OSD
     vo_draw_text(virt_width, virt_height, draw_alpha);
+#endif
     ggiFlush(ggi_vis);
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h,
     int x, int y)
 {
-    register uint8_t *dst;
-
-    dst = ggi_buffer->write + (virt_width * y + x) * (ggi_bpp/8);
-    yuv2rgb(dst, src[0], src[1], src[2], w, h, virt_width*(ggi_bpp/8),
-	stride[0], stride[1]);
+    yuv2rgb(((uint8_t *) ggi_buffer->write)+(virt_width*y+x)*ggi_bppmul,
+	src[0], src[1], src[2], w, h, virt_width*ggi_bppmul, stride[0],
+	stride[1]);
 
     return(0);
 }
@@ -330,6 +366,11 @@ static uint32_t query_format(uint32_t format)
     switch(format)
     {
 	case IMGFMT_YV12:
+/*	case IMGFMT_I420:
+	case IMGFMT_IYUV:
+	case IMGFMT_YUY2:
+	case IMGFMT_YVYU:
+	case IMGFMT_UYVY:*/
 	    return(1);
 	case IMGFMT_RGB8:
 	case IMGFMT_RGB15:
