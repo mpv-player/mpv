@@ -499,7 +499,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	buffer[4] = '\0';
 	sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
 	sh_a->wf = (WAVEFORMATEX*)calloc(1,sizeof(WAVEFORMATEX)+extra_size);
-	sh_a->format =  sh_a->wf->wFormatTag = atoi(buffer);
+	sh_a->format =  sh_a->wf->wFormatTag = strtol(buffer, NULL, 16);
 	sh_a->channels = sh_a->wf->nChannels = st->sh.audio.channels;
 	sh_a->samplerate = sh_a->wf->nSamplesPerSec = st->samples_per_unit;
 	sh_a->wf->nAvgBytesPerSec = st->sh.audio.avgbytespersec;
