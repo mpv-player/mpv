@@ -35,6 +35,7 @@
 #include <stdarg.h>
 //#include <string>
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef unsigned int uint_t;    // use as generic type -
 
