@@ -6,8 +6,25 @@
 extern int verbose; // defined in mplayer.c
 
 #include "stream.h"
+#include "asf.h"
 #include "demuxer.h"
 
+
+/*
+ * Load 16/32-bit values in little endian byte order
+ * from an unaligned address
+ */
+#ifdef ARCH_X86
+#define	LOAD_LE32(p)	(*(unsigned int*)(p))
+#define	LOAD_LE16(p)	(*(unsigned short*)(p))
+#else
+#define	LOAD_LE32(p)	(((unsigned char*)(p))[0]     | \
+ 			 ((unsigned char*)(p))[1]<< 8 | \
+ 			 ((unsigned char*)(p))[2]<<16 | \
+ 			 ((unsigned char*)(p))[3]<<24 )
+#define	LOAD_LE16(p)	(((unsigned char*)(p))[0]     | \
+			 ((unsigned char*)(p))[1]<<8)
+#endif
 
 // defined at asfheader.c:
 extern unsigned char* asf_packet;
@@ -25,18 +42,6 @@ extern int asf_packetsize;
 
 //static int skip_video_frames=0;
 
-//BB: Moved to asf.h --------- FROM HERE --------
-#ifndef STREAMING
-typedef struct __attribute__((packed)) {
-  unsigned char streamno;
-  unsigned char seq;
-  unsigned long x;
-  unsigned char flag;
-} ASF_segmhdr_t;
-#else
-#include "asf.h"
-#endif
-//BB: Moved to asf.h --------- TO HERE --------
 
 static void asf_descrambling(unsigned char *src,int len){
   unsigned char *dst=malloc(len);
@@ -172,7 +177,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
             // Calculate packet size (plen):
             if(flags&0x40){
               // Explicit (absoulte) packet size
-              plen=p[0]|(p[1]<<8); p+=2;
+              plen=LOAD_LE16(p); p+=2;
               if(verbose>1)printf("Explicit packet size specified: %d  \n",plen);
               if(plen>asf_packetsize) printf("Warning! plen>packetsize! (%d>%d)  \n",plen,asf_packetsize);
               if(flags&(8|16)){
@@ -186,13 +191,13 @@ int demux_asf_fill_buffer(demuxer_t *demux){
                 padding=p[0];++p;
               } else
               if(flags&16){
-                padding=p[0]|(p[1]<<8);p+=2;
+                padding=LOAD_LE16(p);p+=2;
               }
               plen=asf_packetsize-padding;
             }
 
-            time=*((unsigned long*)p);p+=4;
-            duration=*((unsigned short*)p);p+=2;
+	    time = LOAD_LE32(p); p+=4;
+	    duration = LOAD_LE16(p); p+=2;
             if(flags&1){
               segsizetype=p[0] & 0xC0;
               segs=p[0] & 0x3F;
@@ -230,11 +235,11 @@ int demux_asf_fill_buffer(demuxer_t *demux){
                  p++;
                  break;
               case 0x59:
-                 x=*((unsigned short*)p);
+                 x=LOAD_LE16(p);
                  p+=2;
                  break;
               case 0x5D:
-                 x=*((unsigned long*)p);
+		 x=LOAD_LE32(p);
                  p+=4;
                  break;
               default:
@@ -252,7 +257,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               case 0x08:
                 //printf("!!! obj_length = %d\n",*((unsigned long*)p));
                 p+=4;
-                time2=*((unsigned long*)p);p+=4;
+                time2=LOAD_LE32(p);p+=4;
                 break;
               default:
                 printf("unknown segment type: 0x%02X  \n",type);
@@ -261,9 +266,9 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               if(flags&1){
                 // multiple segments
                 if(segsizetype==0x40){
-                  len=*((unsigned char*)p);p++;        // 1 byte
+                  len=*((unsigned char*)p);p++;		// 1 byte
                 } else {
-                  len=*((unsigned short*)p);p+=2;      // 2 byte
+                  len=LOAD_LE16(p);p+=2;		// 2 byte
                 }
               } else {
                 // single segment

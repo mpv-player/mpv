@@ -1,9 +1,12 @@
 #ifndef __ASF_H
 #define __ASF_H
 
+#include "config.h"	/* for WORDS_BIGENDIAN */
 #include <inttypes.h>
-
+#include "bswap.h"
+#ifdef	STREAMING
 #include "network.h"
+#endif
 
 #ifndef MIN
 #define MIN(a,b) ((a<b)?a:b)
@@ -114,10 +117,60 @@ typedef enum {
 } ASF_StreamType_e;
 
 
+/*
+ * Some macros to swap little endian structures read from an ASF file
+ * into machine endian format
+ */
+#ifdef WORDS_BIGENDIAN
+#define	le2me_ASF_obj_header_t(h) {					\
+    (h)->size = le2me_64((h)->size);					\
+}
+#define	le2me_ASF_header_t(h) {						\
+    le2me_ASF_obj_header_t(&(h)->objh);					\
+    (h)->cno = le2me_32((h)->cno);					\
+}
+#define le2me_ASF_stream_header_t(h) {					\
+    (h)->unk1 = le2me_64((h)->unk1);					\
+    (h)->type_size = le2me_32((h)->type_size);				\
+    (h)->stream_size = le2me_32((h)->stream_size);			\
+    (h)->stream_no = le2me_16((h)->stream_no);				\
+    (h)->unk2 = le2me_32((h)->unk2);					\
+}
+#define le2me_ASF_file_header_t(h) {					\
+    (h)->file_size = le2me_64((h)->file_size);				\
+    (h)->creat_time = le2me_64((h)->creat_time);			\
+    (h)->packets = le2me_64((h)->packets);				\
+    (h)->end_timestamp = le2me_64((h)->end_timestamp);			\
+    (h)->duration = le2me_64((h)->duration);				\
+    (h)->start_timestamp = le2me_32((h)->start_timestamp);		\
+    (h)->unk1 = le2me_32((h)->unk1);					\
+    (h)->flags = le2me_32((h)->flags);					\
+    (h)->packetsize = le2me_32((h)->packetsize);			\
+    (h)->packetsize2 = le2me_32((h)->packetsize2);			\
+    (h)->frame_size = le2me_32((h)->frame_size);			\
+}
+#define le2me_ASF_content_description_t(h) {				\
+    (h)->title_size = le2me_16((h)->title_size);			\
+    (h)->author_size = le2me_16((h)->author_size);			\
+    (h)->copyright_size = le2me_16((h)->copyright_size);		\
+    (h)->comment_size = le2me_16((h)->comment_size);			\
+    (h)->rating_size = le2me_16((h)->rating_size);			\
+}
+#else
+#define	le2me_ASF_obj_header_t(h)	/**/
+#define	le2me_ASF_header_t(h)		/**/
+#define le2me_ASF_stream_header_t(h)	/**/
+#define le2me_ASF_file_header_t(h)	/**/
+#define le2me_ASF_content_description_t(h) /**/
+#endif
+
+
+#ifdef	STREAMING
 int asf_http_streaming_type(char *content_type, char *features);
 int asf_http_streaming_start( streaming_ctrl_t *streaming_ctrl );
 int asf_http_streaming_read( streaming_ctrl_t *streaming_ctrl );
 
 int asf_streaming(char *data, int length, int *drop_packet );
+#endif
 
 #endif
