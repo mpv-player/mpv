@@ -200,7 +200,7 @@ Cada opción 'etiqueta' tiene su contrapartida 'noetiqueta', es decir, \& el
 opuesto a la opción \-fs es \-nofs.
 .PP
 Puede escribir todas sus opciones en un fichero de configuración que será
-leído cada vez que se ejecute mplayer.
+leído cada vez que se ejecute MPlayer.
 El fichero de configuración del sistema global 'mplayer.conf' está en su
 directorio de configueración (p.e.\& /etc/\:mplayer o /usr/\:local/\:etc/\:mplayer),
 el específico de usuario es '~/\:.mplayer/\:config'.
@@ -438,8 +438,8 @@ Salto mayor de imágenes (puede romper la decodificación).
 .TP
 .B \-identify
 Muestra parámetros del fichero en un formato analizable.
-El script wrapper TOOLS/midentify suprime todas las otras salidad de mplayer y
-(con suerte) muestra los nombres de fichero.
+El script wrapper TOOLS/midentify suprime todas las otras salidas de MPlayer y
+(con suerte) muestra los nombres de archivo.
 .TP
 .B \-input <comandos>
 Esta opción puede usarse para configurar algunas partes del sistema de entrada.
@@ -999,8 +999,8 @@ Estas opciones establecen los parámetros del mezclador en la tarjeta
 de captura de vídeo. No tiene efecto si la tarjeta no tiene mezclador.
 .IPs immediatemode=<bool>
 Un valor de 0 significa captura y buffer de audio y video juntos (por
-defecto para mencoder).
-Un valor de 1 (por defecto para mplayer) significa que la captura de video
+defecto para MEncoder).
+Un valor de 1 (por defecto para MPlayer) significa que la captura de video
 va sola y deja la captura de audio a través del cable de realimentación que
 se conecta desde la tarjeta de TV a la tarjeta de sonido.
 .IPs mjpeg
@@ -1656,14 +1656,14 @@ Coloca la ventana en la esquina inferior izquierda de la pantalla
 .B \-guiwid <id\ de\ ventana>
 Esto le dice al GUI que use una ventana X11 y se pegue debajo del video,
 lo cual es útil para embebir en un navegador un mini-GUI (con
-mplayerplug-in por ejemplo).
+el plugin MPlayer por ejemplo).
 .TP
 .B \-hue <\-100\-100>
 Ajusta hue de la señal de video (por defecto: 0).
 Puede obtener negativos coloreados de la imagen con esta opción.
 .TP
 .B \-icelayer <0\-15> (icewm solamente)
-Establece la capa de la ventana de pantalla completa de mplayer para icewm.
+Establece la capa de la ventana de pantalla completa de MPlayer para icewm.
 
 .PD 0
 .RSs
@@ -2759,13 +2759,22 @@ Esto da resultados mucho mejores para material que ha sido mal editado
 después de aplicar telecine, además de para resultados que tienen
 ruido de entrada, por ejemplo captura de TV.
 El parámetro opcional (ivtc=1) corresonde a la opción dr=1 para el filtro
-detc, y debe ser usado con mencoder pero no con mplayer. Como con detc,
-debe especificar la relación de imágenes por segundo correcta (-ofps 25.976)
-cuando use mencoder.
+detc, y debe ser usado con MEncoder pero no con mplayer. Como con detc,
+debe especificar la relación de imágenes por segundo correcta (-ofps 23.976)
+cuando use MEncoder.
+.B "softpulldown"
+Este filtro funciona correctamente solo con MEncoder y actúa en las marcas
+MPEG2 usadas para bajada 3:2 por software (telecine por software).
+Si desea usar el filtro ivtc o detc en películas que estén parcialmente
+con telecine por software, insertando este filtro antes el proceso se hace
+de manera más fiable.
+Actualmente solo libmpeg2 exporta las marcas necesarias.
+Si se usa en material donde esto no se haya establecido o si se usa ffmpeg12,
+el filtro no hará nada.
 .TP
 .B "telecine[=inicio]"
 Aplica proceso de "telecine" 3:2 para incrementar las imágenes por segundo
-en un 20%. Esto la mayoría de las veces no funciona correctamente con mplayer,
+en un 20%. Esto la mayoría de las veces no funciona correctamente con MPlayer,
 pero puede usarse con 'mencoder -fps 29.97 -ofps 29.97 -vf telecine'. ¡Ambas
 opciones son esenciales! (la sincronización A/V puede romperse si se ponen
 mal). El parámetro opcional inicio le dice al filtro donde iniciar el 
