@@ -1,0 +1,91 @@
+
+About CVS write access:      by A'rpi
+~~~~~~~~~~~~~~~~~~~~~~~
+
+I. TECH SIDE:
+=============
+1. Changing password:
+
+  As you probably got a restricted CVS-only shell, it's not trivial:
+
+  ssh LOGIN@mplayerhq.hu passwd
+  
+  (replace LOGIN with your loginname. leave 'passwd' unchanged, it's command)
+  
+  Note: if you need real shell for something, tell me.
+
+2. Checkout devel. source tree:
+  
+  export CVS_RSH=ssh
+  cvs -z3 -d:ext:LOGIN@mplayerhq.hu:/cvsroot/mplayer co main
+  
+3. Commiting changes:
+
+  cvs -z3 commit -m "comment - what and why did you change" filename(s)
+  
+4. Adding new files/dirs:
+
+  cvs add filename/dirname
+  
+5. Removing files:
+
+  rm filename
+  cvs remove filename
+  
+6. Check changes:
+  
+  cvs -z3 diff -u filename(s)
+  
+7. Check changelog:
+
+  cvs -z3 log filename(s)
+  
+8. Rename/move files:
+
+  you can't do that. ask CVS server admin (A'rpi) to do it.
+  (do not remove & re-add file - it will kill changelog!)
+
+If you have any tech problems with cvs server, contact me:
+A'rpi <arpi@thot.banki.hu>
+
+
+II. POLICY / RULES:
+===================
+
+1. You shouldn't commit code which makes cvs broken!
+   (i mean unfinished but enabled code which break
+    compiling or compiles but does not work)
+
+2. You don't have over-test things. if it works for you,
+   and you think it should work for others too, then commit.
+   If it has problems (portability, exploits compiler bugs,
+   unusual environment etc) they will be reported, it's ok.
+
+3. You can commit unfinished stuff (for testing etc), but it
+   must be disabled (#ifdef etc) by default.
+
+4. Do not change behaviour of the program (renaming options etc)
+   without discussing first at the MPlayer-dev-eng list.
+
+5. Source indenting and other cosmetical changes are refused.
+   I'll remove those commits...
+   Every developer has its own indenting style, you shouldn't
+   change it. Of course if you (re)write something then you can
+   use your own style...
+   (Many projects forces a given indenting style - we don't)
+
+6. Always fill out the comment at commiting (-m switch of cvs, or
+   in the editor if you left -m).
+   It shouldn't be such lines: "fixed!" or "Changed it."
+   Describe in a few lines (usually 1 line is enough) what did
+   you changed and why did you that. You can refer mails if bugfix.
+
+7. If you apply patch by someone else, include his name and email
+   in the cvs comment!
+
+8. I've developed something called CVS-Backup. It archives CVS
+   repository after each commit - so I can reverse your commits
+   (without messing up changelog) if they are bad.
+   
+   
+I think our rules aren't too hard. If you have comments, contact me.
