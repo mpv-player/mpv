@@ -123,9 +123,13 @@ subtitle *sub_read_line_sami(FILE *fd, subtitle *current) {
 	}
 
 	/* read next line */
-	if (state != 99 && !(s = fgets (line, LINE_LEN, fd)))
-	    if (current->start > 0) break; // if it is the last subtitle
-	    else return 0;
+	if (state != 99 && !(s = fgets (line, LINE_LEN, fd))) {
+	    if (current->start > 0) {
+		break; // if it is the last subtitle
+	    } else {
+		return 0;
+	    }
+	}
 	    
     } while (state != 99);
 
@@ -253,7 +257,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	char line[LINE_LEN+1];
 	char line2[LINE_LEN+1];
 	int a1,a2,a3,b1,b2,b3;
-	char *p=NULL, *next,*separator;
+	char *p=NULL, *next,separator;
 	int i,len,len2,plen;
 
 	memset(current, '\0', sizeof(subtitle));
@@ -365,7 +369,7 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
 	current->end   = 360000*hour2 + 6000*min2 + 100*sec2 + hunsec2;
 	
-	while (tmp=strstr(line2, "\\n")) {
+	while ((tmp=strstr(line2, "\\n")) != NULL) {
 		current->text[num]=(char *)malloc(tmp-line2+1);
 		strncpy (current->text[num], line2, tmp-line2);
 		current->text[num][tmp-line2]='\0';
@@ -432,6 +436,7 @@ subtitle *sub_read_line_mpsub(FILE *fd, subtitle *current) {
 			else return NULL;
 		}
 	}
+	return NULL; // we should have returned before if it's OK
 }
 
 subtitle *previous_aqt_sub = NULL;
