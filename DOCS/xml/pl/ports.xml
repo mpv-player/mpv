@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.38 -->
+<!-- synced with 1.39 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -301,6 +301,22 @@ wolna. Używaj SDL.
   wyłączyć sprzętową akcelerację przez opcję <option>-vo directx:noaccel</option>. Ściągnij
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">pliki nagłówkowe DirectX 7</ulink>,
   żeby skompilować sterownik do wyjścia video DirectX.</para>
+
+<para>Dla osiągnięcia najlepszych wyników <application>MPlayer</application> powinien
+  korzystać z przestrzeni kolorów, którą Twoja karta wspiera sprzętowo. Niestety
+  wiele sterowników graficznych Windowsa źle informuje o wspieranych przez kartę 
+  przestrzeniach. Aby sprawdzić które są źle obsługiwane, wykonaj poniższą komendę:
+
+  <screen>mplayer -benchmark -nosound -frames 100 -vf format=<replaceable>przestrzeń</replaceable> \
+	<replaceable>film</replaceable></screen>
+
+  gdzie <replaceable>przestrzeń</replaceable> może być jakąkolwiek
+  wartością spośród tych uzyskanych przez opcję <option>-vf format=fmt=help</option>.
+  Jeśli, któraś z nich działa szczególnie źle, opcja
+  <option>-vf noformat=<replaceable>przestrzeń</replaceable></option>
+  zapobiegnie jej używaniu. Możesz to na stałe dodać do Twojego pliku konfiguracyjnego.</para>
+
+
 
 <para>Możesz wykorzystać kodeki Win32 i Real dla Win32 (nie kodeki Real dla Linuksa),
   jeżeli chcesz. Umieść je gdzieś w swojej 
