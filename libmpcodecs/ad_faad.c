@@ -47,11 +47,30 @@ static int preinit(sh_audio_t *sh)
   return 1;
 }
 
+static int aac_probe(unsigned char *buffer, int len)
+{
+  int i = 0, pos = 0;
+  mp_msg(MSGT_DECAUDIO,MSGL_V, "\nAAC_PROBE: %d bytes\n", len);
+  while(i <= len-4) {
+    if(
+       ((buffer[i] == 0xff) && ((buffer[i+1] & 0xfe) == 0xf8)) ||
+       (buffer[i] == 'A' && buffer[i+1] == 'D' && buffer[i+2] == 'I' && buffer[i+3] == 'F')
+    ) {
+      pos = i;
+      break;
+    }
+    mp_msg(MSGT_DECAUDIO,MSGL_V, "AUDIO PAYLOAD: %x %x %x %x\n", buffer[i], buffer[i+1], buffer[i+2], buffer[i+3]);
+    i++;
+  }
+  mp_msg(MSGT_DECAUDIO,MSGL_V, "\nAAC_PROBE: ret %d\n", pos);
+  return pos;
+}
+	
 static int init(sh_audio_t *sh)
 {
   unsigned long faac_samplerate;
   unsigned char faac_channels;
-  int faac_init;
+  int faac_init, pos = 0;
   faac_hdec = faacDecOpen();
 
   // If we don't get the ES descriptor, try manual config
@@ -92,6 +111,15 @@ static int init(sh_audio_t *sh)
 #endif
 
     sh->a_in_buffer_len = demux_read_data(sh->ds, sh->a_in_buffer, sh->a_in_buffer_size);
+    pos = aac_probe(sh->a_in_buffer, sh->a_in_buffer_len);
+    if(pos) {
+      sh->a_in_buffer_len -= pos;
+      memmove(sh->a_in_buffer, &(sh->a_in_buffer[pos]), sh->a_in_buffer_len);
+      sh->a_in_buffer_len +=
+	demux_read_data(sh->ds,&(sh->a_in_buffer[sh->a_in_buffer_len]),
+	sh->a_in_buffer_size - sh->a_in_buffer_len);
+      pos = 0;
+    }
 
     /* init the codec */
 #if (FAADVERSION <= 11)
@@ -140,13 +168,33 @@ static void uninit(sh_audio_t *sh)
   faacDecClose(faac_hdec);
 }
 
+static int aac_sync(sh_audio_t *sh)
+{
+  int pos = 0;
+  if(!sh->codecdata_len) {
+    if(sh->a_in_buffer_len < sh->a_in_buffer_size){
+      sh->a_in_buffer_len +=
+	demux_read_data(sh->ds,&sh->a_in_buffer[sh->a_in_buffer_len],
+	sh->a_in_buffer_size - sh->a_in_buffer_len);
+    }
+    pos = aac_probe(sh->a_in_buffer, sh->a_in_buffer_len);
+    if(pos) {
+      sh->a_in_buffer_len -= pos;
+      memmove(sh->a_in_buffer, &(sh->a_in_buffer[pos]), sh->a_in_buffer_len);
+      mp_msg(MSGT_DECAUDIO,MSGL_V, "\nAAC SYNC AFTER %d bytes\n", pos);
+    }
+  }
+  return pos;
+}
+
 static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 {
     switch(cmd)
     {
-#if 0      
       case ADCTRL_RESYNC_STREAM:
-	  return CONTROL_TRUE;
+         aac_sync(sh);
+	 return CONTROL_TRUE;
+#if 0      
       case ADCTRL_SKIP_FRAME:
 	  return CONTROL_TRUE;
 #endif
