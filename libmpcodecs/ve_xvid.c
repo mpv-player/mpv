@@ -65,7 +65,6 @@ static int const motion_presets[7] = {
 };
 
 extern char* passtmpfile;
-extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
 
 static int xvidenc_pass = 0;
 static int xvidenc_quality = 4;
@@ -454,7 +453,7 @@ put_image(struct vf_instance_s* vf, mp_image_t *mpi)
     }
     
     // write output
-    mencoder_write_chunk(fp->mux, fp->enc_frame.length, fp->enc_frame.intra==1 ? 0x10 : 0);
+    muxer_write_chunk(fp->mux, fp->enc_frame.length, fp->enc_frame.intra==1 ? 0x10 : 0);
 
     // update the VBR engine
     vbrUpdate(&fp->vbr_state, enc_stats.quant, fp->enc_frame.intra,

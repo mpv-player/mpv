@@ -16,8 +16,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
-
 //===========================================================================//
 
 struct vf_priv_s {
@@ -48,7 +46,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     mux_v->buffer=mpi->planes[0];
-    mencoder_write_chunk(mux_v, mpi->width*mpi->height*3, 0x10);
+    muxer_write_chunk(mux_v, mpi->width*mpi->height*3, 0x10);
     return 1;
 }
 

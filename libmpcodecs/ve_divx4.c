@@ -44,7 +44,6 @@
 
 static int pass;
 extern char* passtmpfile;
-extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
 
 #include <encore2.h>
 
@@ -273,7 +272,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 					       enc_result.quantizer);
 	}
     }
-    mencoder_write_chunk(mux_v,vf->priv->enc_frame.length,enc_result.is_key_frame?0x10:0);
+    muxer_write_chunk(mux_v,vf->priv->enc_frame.length,enc_result.is_key_frame?0x10:0);
     return 1;
 }
 

@@ -90,8 +90,6 @@ static    long (*CountComponents)(ComponentDescription* desc);
 static    OSErr (*GetComponentInfo)(Component prev,ComponentDescription* desc,Handle h1,Handle h2,Handle h3);
 
 
-extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
-
 
 //static int format=mmioFOURCC('S','V','Q','1');
 static int format=mmioFOURCC('S','V','Q','3');
@@ -260,7 +258,7 @@ if(!codec_inited){
     printf("Size %i->%i   \n",stride*height,compressedsize);
     printf("Ratio: %i:1\n",(stride*height)/compressedsize);
 #endif
-    mencoder_write_chunk(mux_v, compressedsize , similarity?0:0x10);
+    muxer_write_chunk(mux_v, compressedsize , similarity?0:0x10);
 
     if(((*desc)->idSize)>MAX_IDSIZE){
 	printf("FATAL! idSize=%d too big, increase MAX_IDSIZE in ve_qtvideo.c!\n",((*desc)->idSize));

@@ -27,7 +27,6 @@
 #include "vf.h"
 
 extern char* passtmpfile;
-extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
 
 //===========================================================================//
 
@@ -486,7 +485,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	out_size = avcodec_encode_video(lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    pic);
 
-    mencoder_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0);
+    muxer_write_chunk(mux_v,out_size,lavc_venc_context->coded_frame->key_frame?0x10:0);
         
 #if LIBAVCODEC_BUILD >= 4643
     /* store psnr / pict size / type / qscale */

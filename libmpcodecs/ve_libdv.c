@@ -23,8 +23,6 @@
 
 #include <libdv/dv.h>
 
-extern void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags);
-
 #ifndef DV_WIDTH
 #define DV_WIDTH       720
 #define DV_PAL_HEIGHT  576
@@ -78,7 +76,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	(mpi->flags&MP_IMGFLAG_YUV) ? e_dv_color_yuv : e_dv_color_rgb,
 	mux_v->buffer);
 
-    mencoder_write_chunk(mux_v, 480 * (vf->priv->enc->isPAL ? 300 : 250) , 0x10);
+    muxer_write_chunk(mux_v, 480 * (vf->priv->enc->isPAL ? 300 : 250) , 0x10);
     return 1;
 }
 

@@ -149,7 +149,7 @@ int pos=0;
 int frames=0;
 FILE *f=fopen("paulvandykforanangel.viv","rb");
 FILE *f2=fopen("GB1.avi","wb");
-muxer_t* avi=muxer_new_muxer(MUXER_TYPE_AVI);
+muxer_t* avi=muxer_new_muxer(MUXER_TYPE_AVI,f2);
 muxer_stream_t* mux=muxer_new_stream(avi,MUXER_TYPE_VIDEO);
 //unsigned char* buffer=malloc(0x200000);
 int i,len;
@@ -169,7 +169,7 @@ mux->bih->biSize=sizeof(BITMAPINFOHEADER);
 mux->bih->biPlanes=1;
 mux->bih->biBitCount=24;
 mux->bih->biCompression=0x6f766976;//      7669766f;
-muxer_write_header(avi,f2);
+muxer_write_header(avi);
 
 /*
 c=fgetc(f); if(c) printf("error! not vivo file?\n");
@@ -222,7 +222,7 @@ while((c=fgetc(f))>=0){
 	// end of frame:
 	printf("Frame size: %d\n",mux->buffer_len);
 	h263_decode_picture_header(mux->buffer);
-	muxer_write_chunk(avi,mux,f2,mux->buffer_len,0x10);
+	muxer_write_chunk(mux,mux->buffer_len,0x10);
 	mux->buffer_len=0;
 	
 	if((v_id&0xF0)==0x10) fprintf(stderr,"hmm. last video packet %02X\n",v_id);
@@ -258,8 +258,8 @@ mux->bih->biWidth=width;
 mux->bih->biHeight=height;
 mux->bih->biSizeImage=3*width*height;
 
-muxer_write_index(avi,f2);
+muxer_write_index(avi);
 fseek(f2,0,SEEK_SET);
-muxer_write_header(avi,f2);
+muxer_write_header(avi);
 
 }

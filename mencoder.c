@@ -306,11 +306,6 @@ static void exit_sighandler(int x){
 static muxer_t* muxer=NULL;
 static FILE* muxer_f=NULL;
 
-// callback for ve_*.c:
-void mencoder_write_chunk(muxer_stream_t *s,int len,unsigned int flags){
-    muxer_write_chunk(muxer,s,muxer_f,len,flags);
-}
-
 extern void print_wave_header(WAVEFORMATEX *h);
 
 int main(int argc,char* argv[]){
@@ -606,7 +601,7 @@ if(!muxer_f) {
   mencoder_exit(1,NULL);
 }
 
-muxer=muxer_new_muxer(out_file_format);
+muxer=muxer_new_muxer(out_file_format,muxer_f);
 
 // ============= VIDEO ===============
 
@@ -815,7 +810,7 @@ if(audio_delay!=0.0){
 } // if(sh_audio)
 
 printf(MSGTR_WritingAVIHeader);
-muxer_write_header(muxer,muxer_f);
+muxer_write_header(muxer);
 
 decoded_frameno=0;
 
@@ -1001,7 +996,7 @@ if(sh_audio){
 	    }
 	}
 	if(len<=0) break; // EOF?
-	muxer_write_chunk(muxer,mux_a,muxer_f,len,0x10);
+	muxer_write_chunk(mux_a,len,0x10);
 	if(!mux_a->h.dwSampleSize && mux_a->timer>0)
 	    mux_a->wf->nAvgBytesPerSec=0.5f+(double)mux_a->size/mux_a->timer; // avg bps (VBR)
 	if(mux_a->buffer_len>=len){
@@ -1081,11 +1076,11 @@ ptimer_start = GetTimerMS();
 switch(mux_v->codec){
 case VCODEC_COPY:
     mux_v->buffer=start;
-    if(skip_flag<=0) muxer_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
+    if(skip_flag<=0) muxer_write_chunk(mux_v,in_size,(sh_video->ds->flags&1)?0x10:0);
     break;
 case VCODEC_FRAMENO:
     mux_v->buffer=(unsigned char *)&decoded_frameno; // tricky
-    if(skip_flag<=0) muxer_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0x10);
+    if(skip_flag<=0) muxer_write_chunk(mux_v,sizeof(int),0x10);
     break;
 default:
     // decode_video will callback down to ve_*.c encoders, through the video filters
@@ -1096,7 +1091,7 @@ default:
 	// unwanted skipping of a frame, what to do?
 	if(skip_limit==0){
 	    // skipping not allowed -> write empty frame:
-	    muxer_write_chunk(muxer,mux_v,muxer_f,0,0);
+	    muxer_write_chunk(mux_v,0,0);
 	} else {
 	    // skipping allowed -> skip it and distriubute timer error:
 	    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
@@ -1113,7 +1108,7 @@ if(skip_flag<0){
 	if(!tv_param_on && !verbose) printf(MSGTR_DuplicateFrames,-skip_flag);
     while(skip_flag<0){
 	duplicatedframes++;
-	muxer_write_chunk(muxer,mux_v,muxer_f,0,0);
+	muxer_write_chunk(mux_v,0,0);
 	++skip_flag;
     }
 } else
@@ -1272,11 +1267,11 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
 #endif
 
 printf(MSGTR_WritingAVIIndex);
-muxer_write_index(muxer,muxer_f);
+muxer_write_index(muxer);
 muxer_f_size=ftello(muxer_f);
 printf(MSGTR_FixupAVIHeader);
 fseek(muxer_f,0,SEEK_SET);
-muxer_write_header(muxer,muxer_f); // update header
+muxer_write_header(muxer); // update header
 if(ferror(muxer_f) || fclose(muxer_f) != 0) {
     mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_ErrorWritingFile, out_filename);
     mencoder_exit(1, NULL);
