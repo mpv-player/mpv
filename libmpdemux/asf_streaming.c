@@ -56,18 +56,21 @@ asf_streaming_start( stream_t *stream ) {
 		fd = asf_http_streaming_start( stream );
 		if( fd!=-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/HTTP failed\n");
+		if( fd==-2 ) return -1;
 	}
 	if( !strncasecmp( proto_s, "mms", 3) && strncasecmp( proto_s, "mmst", 4) ) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/UDP...\n");
 		//fd = asf_mmsu_streaming_start( stream );
 		if( fd!=-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/UDP failed\n");
+		if( fd==-2 ) return -1;
 	}
 	if( !strncasecmp( proto_s, "mms", 3) ) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/TCP...\n");
 		fd = asf_mmst_streaming_start( stream );
 		if( fd!=-1 ) return fd;
 		mp_msg(MSGT_NETWORK,MSGL_V,"  ===> ASF/TCP failed\n");
+		if( fd==-2 ) return -1;
 	}
 
 	mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown protocol: %s\n", proto_s );
@@ -400,7 +403,10 @@ asf_header_check( HTTP_header_t *http_hdr ) {
 int
 asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_hdr ) {
 	if( content_type==NULL ) return ASF_Unknown_e;
-	if( !strcasecmp(content_type, "application/octet-stream") ) {
+	if( 	!strcasecmp(content_type, "application/octet-stream") ||
+		!strcasecmp(content_type, "application/vnd.ms.wms-hdr.asfv1") ||        // New in Corona, first request
+		!strcasecmp(content_type, "application/x-mms-framed") ) {               // New in Corana, second request
+
 		if( features==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_V,"=====> ASF Prerecorded\n");
 			return ASF_Prerecorded_e;
@@ -637,7 +643,7 @@ asf_http_streaming_start( stream_t *stream ) {
 			if( url->port==0 ) url->port = 80;
 		}
 		fd = connect2Server( url->hostname, url->port );
-		if( fd<0 ) return -1;
+		if( fd<0 ) return fd;
 
 		http_hdr = asf_http_request( stream->streaming_ctrl );
 		mp_msg(MSGT_NETWORK,MSGL_DBG2,"Request [%s]\n", http_hdr->buffer );
