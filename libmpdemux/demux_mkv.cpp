@@ -2426,9 +2426,28 @@ extern "C" void demux_mkv_seek(demuxer_t *demuxer, float rel_seek_secs,
           if (!index->entries[k].is_key)
             continue;
           diff = target_timecode - (int64_t)index->entries[k].timecode;
-          if ((diff > 0) && (diff < min_diff)) {
+          if ((target_timecode <= (mkv_d->last_pts * 1000)) &&
+              (diff >= 0) && (diff < min_diff)) {
             min_diff = diff;
-            entry = & index->entries[k];
+            entry = &index->entries[k];
+            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek BACK, solution: last_pts: "
+                   "%d, target: %d, diff: %d, entry->timecode: %d, PREV diff: "
+                   "%d, k: %d\n", (int)(mkv_d->last_pts * 1000),
+                   (int)target_timecode, (int)diff, (int)entry->timecode,
+                   k > 0 ? (int)(index->entries[k - 1].timecode -
+                                 target_timecode) : 0, k);
+                   
+          } else if ((target_timecode > (mkv_d->last_pts * 1000)) &&
+                     (diff < 0) && (-diff < min_diff)) {
+            min_diff = -diff;
+            entry = &index->entries[k];
+            mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] seek FORW, solution: last_pts: "
+                   "%d, target: %d, diff: %d, entry->timecode: %d, NEXT diff: "
+                   "%d, k: %d\n", (int)(mkv_d->last_pts * 1000),
+                   (int)target_timecode, (int)diff, (int)entry->timecode,
+                   k < index->num_entries ?
+                   (int)(index->entries[k + 1].timecode - target_timecode) :
+                   0, k);
           }
         }
         break;
