@@ -1100,6 +1100,10 @@ if(sh_audio && !demuxer2){
  }
 #endif
 
+ if(ferror(muxer_f)) {
+     mp_msg(MSGT_MENCODER,MSGL_FATAL,"%s: error writing file.\n", out_filename);
+     mencoder_exit(1, NULL);
+ }
 
 } // while(!eof)
 
@@ -1124,7 +1128,10 @@ muxer_f_size=ftello(muxer_f);
 printf("Fixup AVI header...\n");
 fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
-fclose(muxer_f);
+if(ferror(muxer_f) || fclose(muxer_f) != 0) {
+    mp_msg(MSGT_MENCODER,MSGL_FATAL,"%s: error writing file.\n", out_filename);
+    mencoder_exit(1, NULL);
+}
 
 if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
     printf("Recommended video bitrate for 650MB CD: %d\n",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
