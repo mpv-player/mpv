@@ -34,7 +34,11 @@
 
 #include <machine/ioctl_meteor.h>
 #include <machine/ioctl_bt848.h>
+#ifdef HAVE_SYS_SOUNDCARD_H
+#include <sys/soundcard.h>
+#else
 #include <machine/soundcard.h>
+#endif
 
 #include "../libvo/img_format.h"
 #include "tv.h"
