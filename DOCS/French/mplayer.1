@@ -5,7 +5,7 @@
 .\" Lancez ça pour obtenir une version html de la page de man:
 .\"   cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
 .\" Lancez ça pour obtenir une version texte de la page de man:
-.\"   groff -m man -Tascii mplayer.1 | col -bx > manpage.txt
+.\"   groff -m man -Tascii8 mplayer.1 | col -bx > manpage.txt
 .\"
 .
 .\" --------------------------------------------------------------------------
@@ -1082,6 +1082,11 @@ capacités de compression/\:'soft\-clipping' (plugin volume uniquement)
 .B \-delay <sec>
 Décalage audio en secondes (peut être +/\:\-nombre à virgule).
 .TP
+.B \-format <0\-8192>
+Selectionne le format utilisé pour la sortie à partir de la couche filtre. Le format est sélectionné
+suivant les définitions de libao2/afmt.h.
+A FAIRE: lister les formats ici
+.TP
 .B \-mixer <device>
 Cette option indique à MPlayer d'utiliser un autre périphérique de mixage que
 /dev/\:mixer.
@@ -1332,7 +1337,7 @@ Cette option n'a d'effet que sur les codecs libmpeg2 et libavcodec.
 Active la fonctionnalité Pan & Scan; par exemple pour afficher un film 16/\:9
 sur un affichage 4/\:3, les bords du film sont coupés pour obtenir une image
 4/\:3 plein-écran.
-Cette option ne fonctionne qu'avec les pilotes xv, xmga et xvidix.
+Cette option ne fonctionne qu'avec les pilotes de sortie xv, xmga, mga et xvidix.
 .br
 L'intervalle définit à quel point l'image sera coupée.
 .TP
@@ -1795,6 +1800,11 @@ Les filtres disponibles sont:
 .IPs crop[=w:h:x:y]
 Découpe la partie donnée de l'image et jette le reste.
 Utile pour enlever les bandes noires d'un film écran large.
+.IPs cropdetect[=0\-255]
+Calcule les paramètres nécessaires de coupe et les affiche sur stdout.
+Le seuil peut éventuellement être spécifié de rien (0) à tout
+(255).
+(par défaut: 24)
 .IPs rectangle[=w:h:x:y]
 Dessine un rectangle de la largeur et auteur demandées aux coordonnées 
 spécifiées sur l'image (utilisé pour testé le découpage).
@@ -1842,11 +1852,6 @@ Encodeur MPEG1 temps-réel à utiliser avec DVB/\:DXR3 (libfame)
 .IPs dvbscale[=aspect]
 Fixe le zoom optimum pour les cartes DVB.
 (aspect=DVB_HAUTEUR*ASPECTRATIO, par défaut: 768)
-.IPs cropdetect[=0\-255]
-Calcule les paramètres de découpage nécessaires et affiche les paramètres
-recommandé sur stdout.
-Le seuil peut être éventuellement spécifié de rien (0) à tout (255).
-(par défaut: 24)
 .IPs "noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]"
 Ajoute du bruit
 .RSss
@@ -1909,17 +1914,17 @@ rayon: taille du filtre
 .br
 puissance: comment le filtre devrait être appliqué
 .REss
-
-
-
-!!! .IPs 1bpp
-!!! .IPs 2xsai
-!!! .IPs eq2
-!!! .IPs yvu9
-!!! plus (AMHA tout -vop help devrait être documenté),
-!!! surtout bmovl (voir fichier .c), ajouter vo/test?
-
-
+.IPs 2xsai
+Utilise le zoom x2 et l'algorithme d'interpolation pour dimensionner et lisser les 
+images.
+.IPs 1bpp
+A FAIRE: documenter ça
+.IPs eq2
+A FAIRE: documenter ça
+.IPs yvu9
+A FAIRE: documenter ça
+.IPs bmovl
+A FAIRE: documenter ça
 
 
 .RE
