@@ -160,6 +160,9 @@ static int read_option(char *opt, char *param)
 				return ERR_FUNC_ERR;
 			need_param = 0;
 			break;
+		case CONF_TYPE_PRINT:
+			printf("%s", (char *) config[i].p);
+			exit(1);
 		default:
 			printf("picsaba\n");
 			break;

@@ -11,6 +11,7 @@
 #define CONF_TYPE_STRING	3
 #define CONF_TYPE_FUNC		4
 #define CONF_TYPE_FUNC_PARAM	5
+#define CONF_TYPE_PRINT		6
 
 #define CONF_CHK_MIN		(1<<0)
 #define CONF_CHK_MAX		(1<<1)
