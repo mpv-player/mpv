@@ -309,9 +309,16 @@ version.h: config.h config.mak Makefile
 endif
 
 #
+# include dependencies to get make to recurse into lib dirs,
+# if the user desires such behavior
+#
+ifneq ($(wildcard .libdeps))
+include .libdeps
+endif
+
+#
 # include dependency files if they exist
 #
 ifneq ($(wildcard .depend),)
 include .depend
 endif
-include libdeps
