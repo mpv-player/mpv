@@ -20,23 +20,9 @@
 #include "Gui/interface.h"
 #endif
 
-#include <GL/gl.h>
-#ifdef GL_WIN32
-    #include <windows.h>
-    #include <GL/glext.h>
-#else
-    #include <X11/Xlib.h>
-    #include <X11/Xutil.h>
-    #include <GL/glx.h>
-#endif
 #include <errno.h>
 
 #include "gl_common.h"
-#ifdef GL_WIN32
-    #include "w32_common.h"
-#else
-    #include "x11_common.h"
-#endif
 #include "aspect.h"
 
 #define NDEBUG
@@ -632,7 +618,6 @@ static int config_w32(uint32_t width, uint32_t height, uint32_t d_width, uint32_
     vo_dwidth = d_width;
     vo_dheight = d_height;
 
-    destroyRenderingContext();
     if (!createRenderingContext())
 	return -1;
 

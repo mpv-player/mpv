@@ -12,16 +12,9 @@
 #include "font_load.h"
 #include "sub.h"
 
-#include <X11/Xlib.h>
-#include <X11/Xutil.h>
-//#include <X11/keysym.h>
-#include <GL/glx.h>
 #include <errno.h>
 
-#include <GL/gl.h>
-
 #include "gl_common.h"
-#include "x11_common.h"
 #include "aspect.h"
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"

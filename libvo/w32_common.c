@@ -106,6 +106,22 @@ int vo_w32_check_events(void) {
     return r;
 }
 
+static void updateScreenProperties() {
+    DEVMODE dm;
+    dm.dmSize = sizeof dm;
+    dm.dmDriverExtra = 0;
+    dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
+    if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm)) {
+	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to enumerate display settings!\n");
+	return;
+    }
+
+    vo_screenwidth = dm.dmPelsWidth;
+    vo_screenheight = dm.dmPelsHeight;
+    vo_depthonscreen = dm.dmBitsPerPel;
+    aspect_save_screenres(vo_screenwidth, vo_screenheight);
+}
+
 static void changeMode(void) {
     DEVMODE dm;
     dm.dmSize = sizeof dm;
@@ -134,38 +150,14 @@ static void changeMode(void) {
 
 	if (bestMode != -1)
 	    EnumDisplaySettings(0, bestMode, &dm);
-    }
 
-    vo_screenwidth = dm.dmPelsWidth;
-    vo_screenheight = dm.dmPelsHeight;
-    aspect_save_screenres(vo_screenwidth, vo_screenheight);
-    vo_dwidth = vo_screenwidth;
-    vo_dheight = vo_screenheight;
-
-    if (vo_vm)
     ChangeDisplaySettings(&dm, CDS_FULLSCREEN);
+    }
 }
 
 static void resetMode(void) {
     if (vo_vm)
     ChangeDisplaySettings(0, 0);
-
-    DEVMODE dm;
-    dm.dmSize = sizeof dm;
-    dm.dmDriverExtra = 0;
-    dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-    if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm)) {
-	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to enumerate display settings!\n");
-	return;
-    }
-
-    vo_screenwidth = dm.dmPelsWidth;
-    vo_screenheight = dm.dmPelsHeight;
-    vo_depthonscreen = dm.dmBitsPerPel;
-    aspect_save_screenres(vo_screenwidth, vo_screenheight);
-
-    vo_dwidth = o_dwidth;
-    vo_dheight = o_dheight;
 }
 
 int createRenderingContext(void) {
@@ -174,19 +166,21 @@ int createRenderingContext(void) {
     if (vo_fs || vo_ontop) layer = HWND_TOPMOST;
     if (vo_fs) {
 	changeMode();
-	SetWindowPos(vo_window, layer, 0, 0, vo_screenwidth, vo_screenheight, SWP_SHOWWINDOW);
 	if (cursor) {
 	    ShowCursor(0);
 	    cursor = 0;
 	}
     } else {
 	resetMode();
-	SetWindowPos(vo_window, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
 	if (!cursor) {
 	    ShowCursor(1);
 	    cursor = 1;
 	}
     }
+    updateScreenProperties();
+    vo_dwidth = vo_fs ? vo_screenwidth : o_dwidth;
+    vo_dheight = vo_fs ? vo_screenheight : o_dheight;
+    SetWindowPos(vo_window, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
 
     PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof pfd);
@@ -209,14 +203,9 @@ int createRenderingContext(void) {
     return 1;
 }
 
-void destroyRenderingContext(void) {
-	resetMode();
-}
-
 int vo_init(void) {
     HICON 	mplayerIcon = 0;
     char 	exedir[MAX_PATH];
-    DEVMODE	dm;
 
     if (vo_window)
 	return 1;
@@ -243,16 +232,7 @@ int vo_init(void) {
 
     vo_hdc = GetDC(vo_window);
 
-    dm.dmSize = sizeof dm;
-    dm.dmDriverExtra = 0;
-    dm.dmFields = DM_BITSPERPEL | DM_PELSWIDTH | DM_PELSHEIGHT;
-    if (!EnumDisplaySettings(0, ENUM_CURRENT_SETTINGS, &dm)) {
-	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to enumerate display settings!\n");
-	return 0;
-    }
-    vo_screenwidth = dm.dmPelsWidth;
-    vo_screenheight = dm.dmPelsHeight;
-    vo_depthonscreen = dm.dmBitsPerPel;
+    updateScreenProperties();
 
     return 1;
 }
@@ -260,7 +240,6 @@ int vo_init(void) {
 void vo_w32_fullscreen(void) {
     vo_fs = !vo_fs;
 
-    destroyRenderingContext();
     createRenderingContext();
 }
 
@@ -279,7 +258,6 @@ void vo_w32_uninit() {
     resetMode();
     ShowCursor(1);
     vo_depthonscreen = 0;
-    destroyRenderingContext();
     DestroyWindow(vo_window);
     vo_window = 0;
     UnregisterClass(classname, 0);
