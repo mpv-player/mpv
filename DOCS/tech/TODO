@@ -19,6 +19,7 @@ demuxer:
 - implement mpeg-TS demuxer
 
 URGENT:
+- fix libmpeg2 sig11, when the stream starts with non-I frame
 - finish mencoder -ovc vfw (bitrate setting, codec selection etc)
 - codec priority option
 - mencoder: move encoders from mencoder.c to libmpcodecs
