@@ -442,16 +442,18 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
  int tmp;
+ off_t tmppos;
  while(pes>=0){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   
   // try to pre-detect PES:
+  tmppos=stream_tell(demuxer->stream);
   tmp=stream_read_dword(demuxer->stream);
   if(tmp==0x1E0 || tmp==0x1C0){
       tmp=stream_read_word(demuxer->stream);
       if(tmp>1 && tmp<=2048) pes=0; // demuxer->synced=3; // PES...
   }
-  stream_seek(demuxer->stream,0);
+  stream_seek(demuxer->stream,tmppos);
   
   if(!pes) demuxer->synced=3; // hack!
 
