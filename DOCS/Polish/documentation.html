@@ -276,16 +276,16 @@ jest aktualnie niemo¿liwe, zarówno ze wzglêdów <B>technicznych</B>, jak i
 zalecane, w drugiej czê¶ci <A HREF="users_against_developers.html#binary">tego
 pliku</A>.</P>
 
-<P>Nie napisa³em ¿adnych kodeków, tylko kilka odgrywarek. Spêdzi³em wiele
-czasu poszukuj±c najlepszego sposobu, aby rozkodowaæ z³e, uszkodzone pliki
-wej¶ciowe (zarówno MPEG jak i AVI) oraz by zrobiæ perfekcyjn± synchronizacjê
-A-V z mo¿liwo¶ci± przeszukiwania. Moja odgrywarka jest wybitnie dobra w
-odgrywaniu uszkodzonych plików MPEG (co jest u¿yteczne w pewnych VCD), a tak¿e
-odgrywa z³e pliki AVI, których nie potrafi odtworzyæ s³ynny windows media
-player. Nawet pliki AVI bez indeksowania s± odgrywane i mo¿esz dodatkowo
-przebudowaæ ich indeksowanie za pomoc± opcji -idx, co umo¿lliwia przeszukiwanie.
-Jak widzisz, stabilno¶æ i jako¶æ, to rzeczy dla mnie najwa¿niejsze, ale
-prêdko¶æ jest równie¿ zadziwiaj±ca.</P>
+<P>Nie napisa³em ¿adnych kodeków, tylko kilka odgrywarek. Spêdzi³em wiele czasu
+poszukuj±c najlepszego sposobu, aby rozkodowaæ z³e, uszkodzone pliki wej¶ciowe
+(zarówno MPEG jak i AVI) oraz by zrobiæ perfekcyjn± synchronizacjê A-V z
+mo¿liwo¶ci± przeszukiwania. Moja odgrywarka jest wybitnie dobra w odgrywaniu
+uszkodzonych plików MPEG (co jest u¿yteczne w pewnych VCD), a tak¿e odgrywa z³e
+pliki AVI, których nie potrafi odtworzyæ s³ynny windows media player. Nawet
+pliki AVI bez indeksowania s± odgrywane i mo¿esz tymczasowo przebudowaæ ich
+indeksy za pomoc± opcji -idx, albo na sta³e, za pomoc± <B>MEncoder</B>, co
+umo¿lliwia przeszukiwanie.  Jak widzisz, stabilno¶æ i jako¶æ, to rzeczy dla
+mnie najwa¿niejsze, ale prêdko¶æ jest równie¿ zadziwiaj±ca.</P>
 
 <P><B><A NAME=1.2>1.2. Historia</A></B></P>
 
@@ -457,7 +457,8 @@ zwieksza go!), dziêki czemu masz bardzo szybkie pe³noekranowe odtwarzanie.</P>
 zwiêkszenia prêdko¶ci, zobacz sekcjê <A HREF="video.html#2.3.1.7">mga_vid</A>.
 Wa¿ne jest, aby wykonaæ te kroki <I>zanim</I> skompilujesz <B>MPlayera</B>, w
 przeciwnym razie ¿adne specjalne wsparcie dla Matroxa nie zostanie zbudowane.
-Zobacz równie¿ sekcjê <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A>.</LI>
+Zobacz równie¿ sekcjê <A HREF="video.html#2.3.1.A.1">Matrox TV-out</A>.
+<U><B>Je¿eli nie jeste¶ u¿ytkownikiem Linuksa</B></U>, przeczytaj dokumentacjê <A HREF="video.html#2.3.1.15">Vidix</A>!</LI>
 
 <LI><B>Karty 3Dfx Voodoo3/Banshee</B>: w celu uzyskania du¿ego zwiêkszenia
 prêdko¶ci, zobacz sekcjê <A HREF="video.html#2.3.1.9">2.3.1.9</A>. Wa¿ne jest,
@@ -470,6 +471,8 @@ ATI</A> z dokukmentacji TV-out, aby siê dowiedzieæ, jakie w³a¶ciwo¶ci twojej
 karty s± obs³ugiwane pod Linuksem/MPlayerem. Je¿eli masz kartê <B>Radeon</B>
 lub <B>Rage128</B>, mamy dla ciebie sterownik <B>XXX_vid</B>, z wyj¶ciem TV!
 Sprawd¼ <A HREF="video.html#2.3.1.14">t±</A> sekcjê!</LI>
+<U><B>Je¿eli nie jeste¶ u¿ytkownikiem Linuksa</B></U>, przeczytaj dokumentacjê
+<A HREF="video.html#2.3.1.15">Vidix</A>!</LI>
 
 <LI><B>Karty S3</B>: chipy Savage posiadaj± akceleracjê sprzêtow±. U¿ywaj tak
 nowej wersji XFree86, jak to tylko mo¿liwe. Starsze sterowniki zawieraj± b³êdy.
@@ -815,7 +818,7 @@ zastosuj opcjê <CODE>-vo sdl</CODE>). Mo¿esz to wyspecyfikowaæ za pomoc± opcji
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>w jakim
   formacie wyj¶ciowym tuner powinien przetransportowaæ obrazy do nas
   (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>, <B>uyvy</B>, <B>i420</B> (dla i420
-  musisz podaæ opcjê <CODE>-vc i420</CODE>, z powodu konfliktu fourcc))</TD>
+  musisz podaæ opcjê <CODE>-vc rawi420</CODE>, z powodu konfliktu fourcc))</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -1627,6 +1630,11 @@ u¿ytkowników Mplayera</P>
 <UL>
   <LI>Dekoder open source QT RPZA</LI>
 </UL></LI>  
+<LI><B><A HREF="mailto:wojtekka@bydg.pdi.net">Wojtek Kaniewski</A></B>
+<UL>
+  <LI>Obs³uga kó³ka myszki</LI>
+</UL></LI>
+
 </UL></P>
 
 <P>G³ówni testerzy:</P>
@@ -1671,7 +1679,8 @@ uzyskanie YUV za pomoc± VfW...
 <UL><LI>autorzy kodeków OpenDivX</LI></UL>
 
 </LI><LI>Michael Hipp:
-<UL><LI>autor mpglib  [nie jest uzywany wprost, ael w pewnych czê¶ciach w mp3lib]
+<UL><LI>autor mpglib  [nie jest u¿ywany wprost, ale w pewnych czê¶ciach w
+mp3lib]
 </LI></UL>
 
 </LI><LI>Mark Podlipec:
@@ -1684,8 +1693,8 @@ uzyskanie YUV za pomoc± VfW...
 </LI></UL>
 </LI></UL></P>
 
-<P>Ich kod nie jest u¿ywany w obecnej wersji odgrywarki, ale otrzymujê pewne pomys³y
-i techniczne wsparcie z ich strony: </P>
+<P>Ich kod nie jest u¿ywany w obecnej wersji odgrywarki, ale otrzymujê pewne
+pomys³y i techniczne wsparcie z ich strony: </P>
 
 <P><UL>
 <LI>John F. McGowan   http://www.jmcgowan.com/
@@ -1829,7 +1838,7 @@ HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/ma
 <LI>raporty o b³êdach (ale po przeczytaniu sekcji <A HREF="#D">Znane b³êdy</A>
 i Dodatku <A HREF="#C">C</A>)</LI>
 <LI>¿±dania na przysz³o¶æ (po przeczytaniu CA£EJ tej dokumentacji)</LI>
-<LI>w³asne pytania (po przeczytaniu ca³ej tej dokumentacji)</LI>
+<LI>w³asne pytania (po przeczytaniu CA£EJ tej dokumentacji)</LI>
 </UL></P>
 
 </LI><LI>Wêgierska lista u¿ytkowników MPlayera:<BR>

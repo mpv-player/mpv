@@ -42,10 +42,11 @@ MPEG1/2. Teraz ju¿ stosujemy w³asny.</P>
 
 <P>Nowa generacja tych kodeków potrafi nawet dekodowaæ filmy zrobione z u¿yciem
 nies³awnych kodeków DivX! Ale to jeszcze nie wszystko! S± one DU¯O szybsze, ni¿
-tradycyjne DLLe Win32 DivX. Zobacz poni¿ej opis konfiguracji. Jedyn± wad± tych
-kodeków jest fakt, ¿e aktualnie s± one closed-source. :(</P>
+tradycyjne DLLe Win32 DivX (zauwa¿, ¿e dekoder libavcodec jest JESZCZE SZYBSZY
+:). Zobacz poni¿ej opis konfiguracji. Jedyn± wad± tych kodeków jest fakt, ¿e
+aktualnie s± one closed-source. :(</P>
 
-<P>Kodeki mo¿na ¶ci±gn±æ z nastêpuj±cego URL:</P>
+<P>Kodek mo¿na ¶ci±gn±æ z nastêpuj±cego URL:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://avifile.sourceforge.net">http://avifile.sourceforge.net</A></P>
 
@@ -55,7 +56,7 @@ kodeków jest fakt, ¿e aktualnie s± one closed-source. :(</P>
 
 <P>Rozpakuj je i uruchom, jako root, polecenie: <CODE>./install.sh</CODE> .</P>
 
-<P>Uwaga: NIE zapomnij dodaæ /usr/local/lib do /etc/ld.so.conf !</P>
+<P>Uwaga: NIE zapomnij dodaæ <CODE>/usr/local/lib</CODE> do <CODE>/etc/ld.so.conf</CODE> i uruchomiæ <CODE>ldconfig</CODE>!</P>
 
 <P><B>MPlayer</B> automatycznie wykrywa czy DivX4 jest (w³a¶ciwie)
 zainstalowany, wystarczy go, tak jak zawsze, skompilowaæ. Je¶li mplayer nie
@@ -88,8 +89,8 @@ pasma przenoszenia na szynie. W trybie spakowanego YUV (YUY2, UYVY) stosuj
 metodê 'divx4'. W trybie RGB mo¿esz dowolnie wybieraæ, poniewa¿ prêdko¶ci ich
 s± takie same, ró¿ni± siê byæ mo¿e tylko w odniesieniu do aktualnego bpp.</P>
 
-<P>Uwaga: ten kodek wspiera równie¿ postprocessing, ale zakres warto¶ci jest
-dziwny: (UAKTUALNIÆ)</P>
+<P>Uwaga: ten kodek wspiera równie¿ postprocessing (u¿yj opcji
+<CODE>-oldpp</CODE>, aby to w³±czyæ), ale zakres warto¶ci jest dziwny: </P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>0</TD><TD>&nbsp;&nbsp;</TD>
@@ -163,7 +164,9 @@ W³±czenie ich jest bardzo proste:</P>
 
   <LI>U¿yj opcji <CODE>--with-xanimlibdir</CODE>, aby podaæ dla configure,
 gdzie znajduj± siê kodeki xanim. Domy¶lnie s± one szukane w katalogu
-<CODE>/</CODE> (...) .</LI>
+<CODE>/</CODE> (...). 
+  Alternatyw± jest ustawienie w zmiennej ¶rodowiskowej <I>XANIM_MOD_DIR</I>
+  ¶cie¿ki do katalogu z kodekami XAnim.</LI>
 
   <LI>Zmieñ nazwy plików, obcinaj±c czê¶æ dotycz±c± architektury tak, aby
 wygl±da³y one nastêpuj±co: <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>
@@ -262,7 +265,8 @@ prawy, lewy-tylny, prawy-tylny, centralny oraz LFE.</P>
 posiadaæ sterownik dla karty d¼wiêkowej, który obs³uguje odpowiedni± liczbê
 kana³ów wyj¶ciowych przez SNDCTL_DSP_CHANNELS ioctl. Na przyk³ad wersja
 sterownika emu10k1 (u¿ywanego z kartami SB Live), nowsza ni¿ z sierpnia 2001,
-powinna byæ odpowiednia.</P>
+powinna byæ odpowiednia (s³ysza³em, ¿e najnowszy ALSA CVS obs³uguje to tak¿e)
+.</P>
 
 <P>Miksowanie na wyj¶ciu wiêcej ni¿ dwóch kana³ów powinno byæ traktowane jako
 eksperymentalne.</P>
@@ -271,9 +275,10 @@ eksperymentalne.</P>
 
 <P>Potrzebna ci bêdzie karta d¼wiêkowa, zdolna do obs³ugi AC3, z cyfrowym
 wyj¶ciem (SP/DIF). Sterownik karty d¼wiêkowej musi obs³ugiwaæ format AFMT_AC3
-(tak, jak to jest w SB Live!). Po³±cz swój dekoder AC3 do wyj¶cia SP/DIF oraz
-u¿yj opcji '-ac hwac3'. To mo¿e zadzia³aæ, b±d¼ nie (status eksperymentalny -
-najprawdopodobniej nie zadzia³a).</P>
+(tak, jak to robi SB Live, albo C-Media!). Po³±cz swój dekoder AC3 do wyj¶cia
+SP/DIF oraz u¿yj opcji '-ac hwac3'. To mo¿e zadzia³aæ, b±d¼ nie (status
+eksperymentalny - najprawdopodobniej aktualnie bêdzie dzia³aæ tylko z kartami
+C-Media, masz woln± rêkê w naprawieniu tego dla SB Live).</P>
 
 
 <P><B><A NAME=2.2.2.3>2.2.2.3. Obs³uga libmad</A></B></P>

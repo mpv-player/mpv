@@ -1,115 +1,87 @@
-DXR3/H+ video/audio output plugins manual by David Holm
-=======================================================
+Jak u¿ywaæ Sigma Designs Hollywood Plus i/lub Creative DXR3 autorstwa Davida
+============================================================================
+Holma
+=====
 
-2001-12-28: There is a whole bunch of updates since the
-            last time. For one thing, digital audio now
-	    works thanks to Steven Brookes.
-	    This is the first version to exclusively
-	    use the dxr3's hardware sync. It seems as if
-	    there are some bugs in the driver, so bugreports
-	    will be appreciated.
-	    Also, you will need to get the em8300 drivers
-	    from cvs unless a version newer than 0.9.0 has
-	    been released.
-	    Note1: Seeking won't work with -vc mpegpes!
-	    Note2: You now MUST use -ao dxr3 for proper
-	    a/v sync!
-	    
-2001-12-04: Thanks to Inaki Garci'a Etxebarria of
-	    zapping.sourceforge.net we have now
-	    abandoned rte since it caused problems for
-	    users who didn't rtfm and compiled it with
-	    ffmpeg support. Instead we are now using
-	    libmp1e which is a modified version of mp1e.
-	    
-2001-11-29: Thanks to Felix Buenemann I managed to
-	    optimize the odivx playback as well as add
-	    support for the rest of the codecs!
-	    
-1. Introduction
+Podziêkowania dla Daniela Bella za podarowanie ca³kowicie nowego 20GB dysku IBM.
 
-The DXR3 and Hollywood+ are two not too different mpeg-(1/2) and ac3
-hardware playback cards that came at about the same time as the first
-dvd-rom drives hit the market. At that time most computers weren't
-powerful enough for synced software dvd playback. And even the faster
-(intel-based) computers had troubles with artifacts.
-Sigma Designs came up with the great idea to create a hardware
-mpeg-(1/2), ac3 decoder. Sigma Designs are known for their realmagic
-hardware (or they bought the company who came up with the first
-realmagic boards, I don't know which).
-Later Creative Labs thought, hey, we also wan't this product, and to
-distribute it with our dvd-drives (the DVD Encore packages if I recall
-correctly). So they bought the designs for the Hollywood plus and
-replaced the circuit used to produce a proper video feed for tv's
-called adv7170 or adv7175a depending on which h+ board you own with
-a bt865. The reason for this is beyond my understanding as this seems
-complete illogical to me, but I have had great experiences with
-bt(brooktree) circuits in the past, so I don't mind.
-Well, nowadays most people have no use for a mpeg-(1/2) or ac3
-hardware decoder since most computers these days have no problem doing
-this in software and have cycles left for posprocessing (removing of
-artefacts and other garbage produced by compression).
-These days, you have two uses for this card:
-1. You have a slow computer which you use for vcd/dvd playback
-2. You discover what I have done with the implementation of this as
-   an audio/video output device for mplayer (read on and you'll find
-   out).
+1. Wymagania
 
+ * Przede wszystkim potrzebne ci bêd± w³a¶ciwie zainstalowane sterowniki
+   DXR3/H+.
+   Versja 0.10.0 albo pó¼niejsza. Znajdziesz to na:
+   http://dxr3.sourceforge.net/
 
-
-2. Requirements
-
- * First of all you will need the DXR3/H+ drivers properly installed.
-   Version 0.9.0 or later
-
- * Run <mplayerdir>/configure and make sure that DXR3/H+ support = yes
+ * Uruchom <mplayerdir>/configure i upewnij siê, ¿e: 
+   DXR3/H+ support = yes
+   je¶li chcesz odgrywaæ pliki inne ni¿ mpeg, równiez to powinno byæ: 
+   libmp1e = yes 
    
- From here on compilation (of at least my code ;) should go without any
- problems.
+ Teraz ju¿ kompilacja (przynajmniej mojego kodu ;) powninna pój¶æ bez
+ problemów.
 
 
 
-3. Usage
 
-After installation you will have two new outdevices in mplayer:
-    -vo dxr3	For video output
-    -ao dxr3	For audio output 
+2. U¿ywanie
 
-MPEG-1, MPEG-2, VCD and DVD Notes
-There are some notes to take into account here for optimum playback.
-When playing any mpeg-(1/2) file, this including usage of the "-dvd"
-and "-vcd" options you must either add the "-vc mpegpes" or edit
-codecs.conf and make sure videocodec mpegpes is listed above mpeg12.
-If you fail to do this you will only get software playback which kinda
-spoils most of the useful features of this card except for tv-out ;).
-Remember that if you edit the codecs.conf file and move the mpegpes
-section will have to specify "-vc mpeg12" if you want to playback
-any of these video types _without_ "-vo dxr3"!
-Use -ac hwac3 if you want AC3 audio to be handled by hardware (please
-send some feedback on this).
-
-DIVX Notes
-When playing divx's add "-vc odivx" for maximum performance.
-I've switched to mp1e from ffmpeg so it should be lightning fast now.
-libmp1e currently does not work on nonx86 processor and nonmmx processors.
-I'm in the process of fixing this.
-
-Other codecs:
-No "-vc <codec>" switches should be required as mplayer will autodetect.
-If you find an unsupported codec please contact me!
-
-* Avoid running mplayer as root or setuid root as rtc timing seems to
-  slow down playback on the dxr3 for some users. I will look into this
-  at a later point as this hardly qualifies as a severe bug *
-
-
- 
-4. Contacting me
-
-You can contact me either by e-mailing me, <dholm@iname.com> or by using
-icq: 798427
-Feedback, bugreports and general suggestions are appreciated (preferably
-by e-mail). My name is David Holm for those of you who are incapable of 
-reading a heading. ;)
+     -vo dxr3:<devicenum>		Dla wyj¶cia wideo: <devicenum> nie jest
+	potrzebne, o ile masz nie wiêcej ni¿ jedno urz±dzenie em8300 w swoim
+	komputerze.
+     -vo dxr3:noprebuf			Wy³±cza prebuffering. To jest potrzebne
+	tylko wtedy, gdy masz problemy z synchronizacj± w normalnym odgrywaniu,
+	wówczas zmniejszy siê g³adko¶æ odtwarzania i nie bêdzie u¿ywana ca³a
+	dostêpna moc procesora podczas odgrywania zawarto¶ci nie mpeg.  Uwaga:
+	z prebufferingiem A-V: powinno byæ negatywne, je¶li nie jest negatywne,
+	twój komputer jest zbyt wolny, aby w³a¶ciwie odtwarzaæ wideo i
+	powiniene¶ wy³±czyæ prebuffering, jesli masz problemy z synchronizacj±.
+	Bez prebufferingu ta warto¶æ powinna byæ bliska 0 za ka¿dym razem.
+	Uwaga2: pewne bardzo szybkie komputery zdaj± siê mieæ problemy z
+	prebufferingiem. Nale¿y winiæ za to Sigma ;). Mo¿esz bezpiecznie
+	u¿ywaæ: noprebuf je¶li twoja maszyna jest wystarczaj±co szybka, aby w
+	g³adki sposób odgrywaæ wideo. 
+     -ao oss:<devicefile>		Dla wyj¶cia d¼wiêku.
+     -ac hwac3				Dla cyfrowego wyj¶cia d¼wiêku zamiast
+   	analogowego.
+     -vc mpegpes			Dla odgrywania mpeg
+     -aop list=resample:fout=48000	Je¶li czêstotliwo¶æ próbkowania jest
+     	mniejsza, ni¿ 44100Hz. To nie dzia³a przy cyfrowym wyj¶ciu d¼wiêku 
+    	(-ac hwac3).
+     <devicenum>			Ilo¶æ urz±dzeñ do urzycia podczas
+	odtwarzania (je¶li masz kilka kart). To mo¿e zazwyczaj byæ pominiête
+	(-vo dxr3). Mandrake 8.1 u¿ywa domy¶lnie devfs. Je¶li u¿ywasz mandrake
+	8.1, zastosuj -vo dxr3:0
+     <devicefile>			Normalnie /dev/em8300_ma albo
+	/dev/em8300_ma-<devicenum> (-ao dxr3:/dev/em8300_ma). Je¶li pominiemy
+	t± opcjê, domy¶lne u¿ywane bêdzie urz±dzenie oss (normalnie karta
+	d¼wiêkowa).
 
 
+Uwagi do MPEG-1, MPEG-2, VCD i DVD 
+
+Jest kilka wa¿nych spraw, które warto tu wzi±æ pod uwagê, dla uzyskania
+optymalnego odgrywania. MPlayer obecnie nie wykrywa automatycznie, ¿e dxr3 mo¿e
+odgrywaæ mpegi. Tak wiêc dla plików mpeg, dvd i vcd musisz dodaæ opcjê -vc
+mpegpes, aby powiedzieæ Mplayerowi, ¿e u¿ywasz akceleracji sprzêtowej. W
+przeciwnym razie Mplayer bêdzie dekodowa³ film programowo, co jest znacznie
+wolniejsze.  Zauwa¿, ¿e nie mo¿esz u¿ywaæ opcji -vc mpegpes z filmami, które
+nie s± mpeg 1 lub 2, dostaniesz bowiem komunikat o b³êdzie takiej oto tre¶ci:
+"Can't find codec for video format..." ("Nie mo¿na znale¼æ kodeka dla formatu
+wideo").
+
+* Je¶li uruchamiasz Mplayera jako root, albo set userid root, do synchronizacji
+  u¿ywany bêdzie wewnêtrzny realtime clockgenerator twojego komputera. 
+  (je¶li twoje j±dro ma wkompilowan± obs³ugê tego - jest to umieszczone 
+  w sekcji character devices i nazywa siê "Enhanced realtime clock support").
+  Niektórzy mówi±, ¿e to daje poprawê odgrywania (tak te¿ powinno  byæ), ale
+  inni mieli z tym problemy. Bêdziesz musia³ sam poeksperymentowaæ, aby 
+  ustaliæ optymalne ustawienia dla siebie.
+
+
+
+3. Kontakt ze mn±
+
+Mo¿esz siê ze mn± skontaktowaæ albo pisz±c e-mail do mnie: <dholm@iname.com>,
+albo u¿ywaj±c icq: 798427.
+Odzew od u¿ytkowników, raporty o b³êdach i ogólne sugestie s± mile widziane
+(najchêtniej przez e-mail).
