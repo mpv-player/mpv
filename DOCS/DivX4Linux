@@ -1,0 +1,27 @@
+
+How to enable DivX4Linux support?
+=================================
+
+1. Download the codec:
+  http://download.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip
+  
+2. Unpack it, and copy files to their place:
+ cp libdivxdecore.so.0.0.0 /usr/local/lib/
+ ln -s /usr/local/lib/libdivxdecore.so.0.0.0 /usr/local/lib/libdivxdecore.so.0
+ ln -s /usr/local/lib/libdivxdecore.so.0 /usr/local/lib/libdivxdecore.so
+ ldconfig
+ cp decore.h /usr/local/include/
+
+3. Run mplayer's ./configure
+   Change #undef NEW_DECORE to #define NEW_DECORE in config.h
+   Change #define MPEG12_POSTPROC to #undef MPEG12_POSTPROC in config.h
+   Change DECORE_LIBS in config.mak to be:
+      DECORE_LIBS=-L/usr/local/lib -ldivxdecore
+
+4. Compile mplayer
+
+5. Enjoy it: mplayer -vc divx4 file.avi ...
+   Note: it supports postprocessing, but range of values is strange:
+      0  = no postproc
+      10 .. 20 = postproc, normal (like level 2 with divxds)
+      30 .. 60 = hard postproc, eats many cpu.  (like level 4 with divxds)
