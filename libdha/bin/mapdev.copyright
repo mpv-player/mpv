@@ -1,0 +1,70 @@
+From khazzah@melita.com  Mon Jun 23 21:48:19 1997
+Return-Path: <khazzah@melita.com>
+Received: from melita.melita.com by max4.rrze.uni-erlangen.de; Mon, 23 Jun 1997 21:48:16 +0200
+Received: from mailgate.melita.com ([192.68.22.8]) by melita.melita.com (8.6.12/8.6.9) with SMTP id QAA29292 for <Stefan.Dirsch@stud.uni-erlangen.de>; Mon, 23 Jun 1997 16:17:55 -0400
+Received: by mailgate.melita.com with Microsoft Mail
+	id <33AEFD34@mailgate.melita.com>; Mon, 23 Jun 97 15:48:20 PDT
+From: Karen Hazzah <khazzah@melita.com>
+To: "'Stefan.Dirsch@stud.uni-erlangen.de'" <Stefan.Dirsch@stud.uni-erlangen.de>
+Subject: Your post to vxd newsgroup
+Date: Sun, 22 Jun 97 20:51:00 PDT
+Message-ID: <33AEFD34@mailgate.melita.com>
+Encoding: 22 TEXT
+X-Mailer: Microsoft Mail V3.0
+
+
+I posted an answer to your question in the newsgroup. I also have
+additional information for you.
+
+I can email you the binary for VxD which does exactly what you need:
+given a physical address, returns a pointer that can be used by a
+Win32 application. I'll also give you source for a Win32 app which
+uses the VxD to read an area of physical memory.
+
+I don't offer this solution to everyone, since in most cases the
+proper solution is for them to write a VxD which interacts with their
+hardware, rather than simply getting a pointer to the hardware and
+interacting with it from an application.
+
+However, in your case, you're just using a VxD as a tool to get your
+Linux driver working...you shouldn't have to write a VxD for this :-)
+
+Let me know if you're interested.
+===============================================================================
+Hello Karen
+
+A long time ago, you sent me your VXD for reading an area of physical
+memory under Win32, so I could make register dumps of the graphic
+chip. Did I ever mention, that it works perfectly for me?
+
+Why I contact you is, that I really would like to offer this solution
+to all XFree86 members, so that it will be much easier in the future
+for XFree86 to develop drivers for graphic boards.
+
+Can I count with your agreement? Would you like to add a special
+copyright to your software?
+
+Stefan
+===============================================================================
+From KHazzah@melita.com  Wed Mar  4 00:00:28 1998
+Return-Path: <KHazzah@melita.com>
+Received: from melita.melita.com (melita.com [192.68.22.2])
+	by Galois.suse.de (8.8.8/8.8.8) with SMTP id AAA03709
+	for <sndirsch@suse.de>; Wed, 4 Mar 1998 00:00:26 +0100
+Received: from norcross.melita.com (norcross.melita.com [192.68.22.10]) by melita.melita.com (8.6.12/8.6.9) with ESMTP id TAA31217 for <sndirsch@suse.de>; Tue, 3 Mar 1998 19:48:10 -0500
+Received: by zippy.melita.com with Internet Mail Service (5.5.1960.3)
+	id <F5X7MBSS>; Tue, 3 Mar 1998 18:00:26 -0500
+Message-ID: <D8EE8292EB83D111A15E00805FA67447166532@zippy.melita.com>
+From: "Hazzah, Karen" <KHazzah@melita.com>
+To: Stefan Dirsch <sndirsch@suse.de>
+Subject: RE: VXD binary for Win32 for reading an area of physical memory
+Date: Tue, 3 Mar 1998 18:00:25 -0500 
+MIME-Version: 1.0
+X-Mailer: Internet Mail Service (5.5.1960.3)
+Content-Type: text/plain
+Status: ROr
+
+OK, you have my permission to make it publicly available, as is. 
+
+If you make it available on the web (ftp, etc.), please give me the
+URL so I can refer others to it.

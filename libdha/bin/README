@@ -1,0 +1,6 @@
+mapdev.vxd
+~~~~~~~~~~
+mapdev.vxd - provides direct hardware access under Win9x.
+install: Just copy it into %WINDOWS%\system folder and reboot.
+note: This driver won't work under NT-based systems
+(like WinNT, Win2000 and even WinME and WinXP due importing NT things).
