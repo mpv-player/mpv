@@ -84,5 +84,34 @@ void spudec_process_control(unsigned char *control, int size, int* d1, int* d2)
   } while(off < size);
 }
 
+// SPU packet format:  (guess only, by A'rpi)
+//    0  word   whole packet size
+//    2  word   x0 sub-packet size
+//    4  x0-2   pixel data
+// x0+2  word   x1 sub-packet size
+// x0+4  x1-x0-2   process control data
+//   x1  word   lifetime
+// x1+2  word   x1 sub-packet size again
 
+void spudec_decode(unsigned char *packet,int len){
+  int x0, x1;
+  int d1, d2;
+  int lifetime;
+  x0 = (packet[2] << 8) + packet[3];
+  x1 = (packet[x0+2] << 8) + packet[x0+3];
+
+  /* /Another/ sanity check. */
+  if((packet[x1+2]<<8) + packet[x1+3] != x1) {
+    printf("spudec: Incorrect packet.\n");
+    return;
+  }
+  lifetime= ((packet[x1]<<8) + packet[x1+1]);
+  printf("lifetime=%d\n",lifetime);
+
+  d1 = d2 = -1;
+  spudec_process_control(packet + x0 + 2, x1-x0-2, &d1, &d2);
+//  if((d1 != -1) && (d2 != -1)) {
+//    spudec_process_data(packet, x0, d1, d2);
+//  }
+}
 

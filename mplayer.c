@@ -2065,32 +2065,11 @@ switch(file_format){
     if(len>=2){
       int len2;
       len2=(packet[0]<<8)+packet[1];
-      printf("\rDVD sub: %d / %d  \n",len,len2);
-      if(len==len2){
-
-//-----------------------------------------------------
-  int x0, x1;
-  int d1, d2;
-  int lifetime;
-  x0 = (packet[2] << 8) + packet[3];
-  x1 = (packet[x0+2] << 8) + packet[x0+3];
-
-  /* /Another/ sanity check. */
-  if((packet[x1+2]<<8) + packet[x1+3] != x1) {
-    printf("spudec: Incorrect packet.\n");
-    return;
-  }
-  lifetime= ((packet[x1]<<8) + packet[x1+1]);
-  printf("lifetime=%d\n",lifetime);
-
-  d1 = d2 = -1;
-  spudec_process_control(packet + x0 + 2, x1-x0-2, &d1, &d2);
-//  if((d1 != -1) && (d2 != -1)) {
-//    spudec_process_data(packet, x0, d1, d2);
-//  }
-//-----------------------------------------------------
-
-      } else printf("fragmented dvd-subs not yet supported!!!\n");
+      if(verbose) printf("\rDVD sub: %d / %d  \n",len,len2);
+      if(len==len2)
+        spudec_decode(packet,len);
+      else
+        printf("fragmented dvd-subs not yet supported!!!\n");
     } else if(len>=0) {
       printf("invalud dvd sub\n");
     }
