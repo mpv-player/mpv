@@ -631,7 +631,7 @@ TV tuner</B>.</P>
 <P>
 <UL>
   <LI>first, you have to recompile. <CODE>./configure</CODE> will autodetect kernel headers
-    from bttv stuff, and the existence of /dev/video* entries. If they exist,
+    of v4l stuff, and the existence of /dev/video* entries. If they exist,
     TV support will be built (see configure's output!).</LI>
   <LI>make sure your tuner works with another TV softwares in Linux, for example
     xawtv.</LI>
@@ -1581,6 +1581,11 @@ otherwise.  Please do not send messages using other language!</P>
   (for example compiled on P3 and running on celeron)<BR>
   Solution: compile MPlayer on the same machine where you will use it!<BR>
   Workaround: ./configure --disable-sse etc. options</LI>
+
+<LI>"Internal buffer inconsistency" during MEncoder run:<BR>
+  Problem: known gcc 2.96 bug, no fix yet. If you have gcc 2.95, you
+  have a libmp3lame library that was compiled with gcc 2.96 (installed from
+  a deb/rpm package?). Check which lib does MEncoder found : ldd mencoder.</LI>
 </UL>
 
 <P>Various A-V sync and other audio problems:</P>
