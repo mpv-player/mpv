@@ -2203,10 +2203,6 @@ Outrepasse le fichier de configuration du mode du framebuffer
 (par défaut\ : /etc/\:fb.modes).
 .
 .TP
-.B \-forcexv (\-vo sdl uniquement)
-Force l'utilisation de XVideo à travers le pilote de sortie viéo sdl.
-.
-.TP
 .B \-fs (voir aussi \-zoom)
 Affichage plein-écran (centre le film, et dessine des bandes noires autour).
 Tous les pilotes de sortie vidéo ne le permettent pas.
@@ -2355,10 +2351,6 @@ Ne fonctionne actuellement qu'avec les pilotes de sortie vidéo x11, xv, xmga
 et xvidix.
 De plus, votre gestionnaire de fenêtres doit comprendre les astuces de rapport
 hauteur/\:largeur de fenêtres.
-.
-.TP
-.B \-noxv (\-vo sdl uniquement)
-Désactive l'utilisation de XVideo au travers du pilote de sortie vidéo SDL.
 .
 .TP
 .B \-ontop\ 
@@ -2588,15 +2580,19 @@ XFree86.
 Considéré comme obsolète.
 .
 .TP
-.B sdl (voir aussi \-forcexv, \-noxv) (SDL uniquement)
+.B sdl (SDL uniquement)
 Pilote de sortie vidéo de la librairie multi-plateforme SDL (Simple
 Directmedia Layer).
 Étant donné que SDL dispose de sa propre couche X11, les options X11 de
 MPlayer n'ont aucun effet sur SDL.
 .PD 0
 .RSs
-.IPs <pilote>
-Choisit explicitement le pilote SDL à utiliser.
+.IPs driver=<pilote>
+Choisit explicitement le pilote SDL à utiliser (par défaut\ : x11).
+.IPs (no)forcexv
+Utilise XVideo à travers le pilote de sortie viéo sdl (par défaut\ : forcexv).
+.IPs (no)hwaccel
+Utilise le redimensionnement matériel (par défaut\ : hwaccel).
 .RE
 .PD 1
 .
