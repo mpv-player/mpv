@@ -87,7 +87,7 @@ static unsigned video_mode; /* selected video mode for playback */
 static struct VesaModeInfoBlock video_mode_info;
 static int flip_trigger = 0;
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
-static void (*rgb2rgb_fnc)(uint8_t *src,uint8_t *dst,uint32_t src_size);
+static void (*rgb2rgb_fnc)(const uint8_t *src,uint8_t *dst,uint32_t src_size);
 
 /* multibuffering */
 uint8_t*  video_base; /* should be never changed */
@@ -165,7 +165,8 @@ static void __vbeSetPixel(int x, int y, int r, int g, int b)
 	int shift_b = video_mode_info.BlueFieldPosition;
 	int pixel_size = (video_mode_info.BitsPerPixel+7)/8;
 	int bpl = video_mode_info.BytesPerScanLine;
-	int color, offset;
+	int color;
+	unsigned offset;
 
 	if (x < 0 || x >= x_res || y < 0 || y >= y_res)	return;
 	r >>= 8 - video_mode_info.RedMaskSize;
@@ -206,8 +207,8 @@ static void __vbeCopyBlock(unsigned long offset,uint8_t *image,unsigned long siz
 */
 
 #define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
-#define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*pixel_size) 
-#define IMAGE_LINE_SIZE(pixel_size) (image_width*pixel_size)
+#define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
+#define IMAGE_LINE_SIZE(pixel_size) (image_width*(pixel_size))
 
 static void __vbeCopyData(uint8_t *image)
 {
@@ -343,11 +344,12 @@ static uint32_t draw_frame(uint8_t *src[])
       if(HAS_DGA()) 
       {
 	size_t i, psize, ssize, dsize;
-	uint8_t *dest, *sptr;
+	uint8_t *dest;
+	const uint8_t *sptr;
 	psize = PIXEL_SIZE();
 	dsize = SCREEN_LINE_SIZE(psize);
-	ssize = IMAGE_LINE_SIZE(image_bpp);
-	dest = dga_buffer/* + y_offset*dsize + x_offset*psize*/;
+	ssize = IMAGE_LINE_SIZE((image_bpp+7)/8);
+	dest = dga_buffer + y_offset*dsize + x_offset*psize;
 	sptr = src[0];
 	for(i=0;i<image_height;i++)
 	{
