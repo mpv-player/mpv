@@ -15,9 +15,9 @@ as working' list (these platforms are used daily):
  Linux/PPC
 
 There are different ways to access the hardware, normally only ROOT can do that.
-With root privileges libdha will finely run, but there are some others ways
+With root privileges libdha will run fine, but there are some others ways
 to use it as a normal user:
-1, set the SUID bit on the binary (in this way it runs with root priviliges)
+1, set the SUID bit on the binary (in this way it runs with root privileges)
 2, use svgalib kernel helper
 3, use dhahelper (not yet finished)
 
