@@ -233,10 +233,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
 	if (ioval == EM8300_VIDEOMODE_NTSC) {
 		printf("VO: [dxr3] Setting up for NTSC.\n");
-		aspect_save_screenres((352 * 2), 240);
+		aspect_save_screenres(352, 240);
 	} else {
 		printf("VO: [dxr3] Setting up for PAL/SECAM.\n");
-		aspect_save_screenres((352 * 2), 288);
+		aspect_save_screenres(352, 288);
 	}
 	aspect(&s_width, &s_height, A_ZOOM);
 	s_width -= s_width % 16;
