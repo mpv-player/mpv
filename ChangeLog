@@ -36,7 +36,7 @@ MPlayer (1.0)
     * jpeg video output driver now supports output to multiple directories
     * improvements for the Blinkenlights video output driver ;-)
     * OpenGL video output driver colorformat fixes (with manyfmts suboption)
-    * aspect, panscan, Hardware OSD support in the OpenGL video output driver
+    * aspect, panscan, hardware OSD support in the OpenGL video output driver
     * new pnm and md5sum video output drivers, replacing pgm and md5
     * yuv4mpeg video output now has a file= suboption, can be used with
       -fixed-vo to concatenate files having same width, height and fps
@@ -97,7 +97,7 @@ MPlayer (1.0)
     * EOF detected in Real RTSP streams
 
     FFmpeg/libavcodec:
-    * reduced resolution decoding
+    * reduced resolution decoding with the lowres option
     * new experimental wavelet-based snow video codec
     * new sonic audio codec
     * TechSmith Camtasia video decoder
@@ -159,7 +159,6 @@ MPlayer (1.0)
     * unified audio options dialog, also for ALSA
     * redrawing limited, decreases CPU usage in audio-only case
     * icons for the context menu
-    * speedup especially for audio only case
     * doublesize bug fixed
     * slowdown after opening the preferences panel bug fixed
     * remaining messages moved to help file for translation
