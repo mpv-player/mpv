@@ -68,6 +68,14 @@ void print_wave_header(WAVEFORMATEX *h){
       printf("mp3.nFramesPerBlock=%d\n",h2->nFramesPerBlock);
       printf("mp3.nCodecDelay=%d\n",h2->nCodecDelay);
   }
+  else if (h->cbSize > 0)
+  {
+    int i;
+    printf("Unknown extra header dump: ");
+    for (i = 0; i < h->cbSize; i++)
+	printf("[%x] ", *(h+i));
+    printf("\n");
+  }
 }
 
 
