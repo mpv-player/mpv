@@ -618,6 +618,7 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
   tdfx_outl(VIDPROCCFG,vidcfg);
 
   // Start coord
+  //printk(KERN_DEBUG "tdfx_vid: start %dx%d\n",ov.dst_x & 0xFFF,ov.dst_y & 0xFFF);
   tdfx_outl(VIDOVRSTARTCRD,(ov.dst_x & 0xFFF)|((ov.dst_y & 0xFFF)<<12));
   // End coord
   tdfx_outl(VIDOVRENDCRD, ((ov.dst_x + disp_w) & 0xFFF)|
@@ -645,8 +646,8 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
     tdfx_outl(SWAPPENDING,0);
     tdfx_outl(SWAPBUFCMD, 1);
   }
-  printk(KERN_DEBUG "tdfx_vid: Buf0=0x%x Buf1=0x%x Current=0x%x\n",
-	 ov.src[0],ov.src[1],tdfx_inl(VIDCUROVRSTART));
+  //printk(KERN_DEBUG "tdfx_vid: Buf0=0x%x Buf1=0x%x Current=0x%x\n",
+  //	 ov.src[0],ov.src[1],tdfx_inl(VIDCUROVRSTART));
   // Colorkey
   if(ov.use_colorkey) {
     tdfx_outl(VIDCHRMIN,ov.colorkey[0]);
@@ -660,7 +661,7 @@ static int tdfx_vid_overlay_on(void) {
   uint32_t vidcfg = tdfx_inl(VIDPROCCFG);
   //return 0;
   if(vidcfg & (1<<8)) { // Overlay is alredy on
-    printk(KERN_DEBUG "tdfx_vid: Overlay is alredy on\n");
+    //printk(KERN_DEBUG "tdfx_vid: Overlay is alredy on\n");
     return (-EFAULT); 
   }
   vidcfg |= (1<<8);
