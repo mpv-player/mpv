@@ -15,7 +15,7 @@ CpuCaps gCpuCaps;
 #include <string.h>
 #include "osdep/timer.h"
 
-#ifdef __NetBSD__
+#if defined (__NetBSD__) || defined(__OpenBSD__)
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <machine/cpu.h>
@@ -170,7 +170,7 @@ void GetCpuCaps( CpuCaps *caps)
 #endif
 
 		/* FIXME: Does SSE2 need more OS support, too? */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__CYGWIN__) || defined(__MINGW32__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__CYGWIN__) || defined(__MINGW32__) || defined(__OpenBSD__)
 		if (caps->hasSSE)
 			check_os_katmai_support();
 		if (!caps->hasSSE)
@@ -366,8 +366,8 @@ static void check_os_katmai_support( void )
    if (ret || !has_sse)
       gCpuCaps.hasSSE=0;
 
-#elif defined(__NetBSD__)
-#if __NetBSD_Version__ >= 105250000
+#elif defined(__NetBSD__) || defined (__OpenBSD__)
+#if __NetBSD_Version__ >= 105250000 || (defined __OpenBSD__)
    int has_sse, has_sse2, ret, mib[2];
    size_t varlen;
 
