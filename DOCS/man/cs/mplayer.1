@@ -1,4 +1,4 @@
-.\" synced with 1.903
+.\" synced with 1.921
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -159,14 +159,25 @@ mencoder \- filmový enkodér
 .br
 .in
 .B gmplayer
+'in +\n[.k]u
 [volby]
 [\-skin\ skin]
 .
 .br
+.in
 .B mencoder
+'in +\n[.k]u
 [volby]
 .RI [ \ soubor\  | \ URL\  | \ \-\  ]
 [\-o\ soubor]
+.
+.br
+.in
+.B mencoder
+'in +\n[.k]u
+[globální volby]
+.I soubor1
+[volby pro soubor1] [soubor2] [volby pro soubor2]
 .ad
 .hy
 .
@@ -484,13 +495,13 @@ rychlost (mù¾ete to brát jako nekoneèné fps).
 Zmìní klíèovací barvu na RGB hodnotu podle va¹eho uvá¾ení.
 0x000000 je èerná a 0xffffff je bílá.
 Podporováno pouze cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
-xover a directx video výstupy.
+xover, xv (viz \-vo xv:ck), xvmc (viz \-vo xv:ck) a directx video výstupy.
 .
 .TP
 .B \-nocolorkey
 Zaká¾e klíèování.
-Podporováno pouze cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix a
-xover video výstupy.
+Podporováno pouze cvidix, fbdev, svga, vesa, winvidix, xmga, xvidix,
+xover, xv (viz \-vo xv:ck) a xvmc (viz \-vo xv:ck) video výstupy.
 .
 .TP
 .B \-crash-debug (DEBUG KÓD)
@@ -577,8 +588,8 @@ Vypí¹e v¹echny klávesy, kterým mohou být pøiøazeny pøíkazy.
 Vypí¹e v¹echny pøíkazy, které lze pøiøadit klávesám.
 .IPs js-dev
 Nastaví zadaný joystik pro pou¾ití (výchozí: /dev/\:input/\:js0).
-.IPs file\ 
-Ète pøíkazy ze zadaného souboru.
+.IPs file=<soubor>
+Ète pøíkazy ze zadaného <souboru>.
 Nejpou¾itelnìj¹í s FIFO (pojmenovaná roura).
 .br
 .I POZNÁMKA:
@@ -592,7 +603,7 @@ nìkolik 'echo "seek 10" > mp_pipe' a roura bude stále platná.
 Nastavuje velikost vyrovnávací pamìti FIFO pro události klávesnice (výchozí: 10).
 FIFO velikosti n mù¾e uchovat (n-1) událostí.
 Pokud je pamì» pøíli¹ malá, nìkteré události mohou být ztraceny
-(to vede k "zaseklým tlaèítkùm my¹i" a podobným efektùm).
+(to vede k "zaseknutým tlaèítkùm my¹i" a podobným efektùm).
 Pokud je pøíli¹ velká, mù¾e se zdát ¾e MPlayer zatuhnul zatímco zpracovává
 nastøádané události.
 Chcete-li dosáhnout stejného chování jako v dobì pøed existencí této volby,
@@ -707,10 +718,6 @@ pro jejich popis.
 Pou¾ije kvalitní softwarové èasovaèe místo hodin reálného èasu (RTC).
 Za cenu vìt¹í zátì¾e CPU poskytují stejnì precizní èasování jako RTC bez nárokù na
 zvlá¹tní pøístupová práva.
-.
-.TP
-.B \-speed <0.01\-100>
-Zpomalí nebo zrychlí pøehrávání násobkem zadaným jako parametr.
 .
 .TP
 .B \-sstep <sek>
@@ -1115,6 +1122,11 @@ MPlayer má ji¾ podporu OpenDML, co¾ èiní tuto volbu zastaralou.
 .B \-sb <bajtová\ pozice> (viz té¾ volbu \-ss)
 Pøevine na zadanou bajtovou pozici.
 Pou¾itelné pøi pøehrávání z CD-ROM obrazù nebo .VOB souborù s bincem na zaèátku.
+.
+.TP
+.B \-speed <0.01\-100>
+Zpomalí nebo zrychlí pøehrávání násobkem zadaným jako parametr.
+V kombinaci s \-oac copy není zaruèena správná funkènost.
 .
 .TP
 .B \-srate <Hz>
@@ -1729,7 +1741,7 @@ V pøípadì ALSA mù¾ete pou¾ít jména která zobrazí alsamixer, jako
 .br
 .I POZNÁMKA:
 Jména kanálù ALSA smì¹ovaèe následovaná èíslem musí být zadána ve formátu <jméno,èíslo>,
-napø.\& jméno kanálu 'PCM 1' v alsasmì¹ovaèe musí být pøevedeno na
+napø.\& jméno kanálu 'PCM 1' ALSA smì¹ovaèe musí být pøevedeno na
 .BR PCM,1
 .
 .TP
@@ -1912,11 +1924,6 @@ Plugin audio výstup.
 .SH "VOLBY PRO VIDEO VÝSTUP (POUZE MPLAYER)"
 .
 .TP
-.B \-aa* (pouze \-vo aa)
-Seznam a vysvìtlení jednotlivých voleb dostanete pøíkazem
-.I mplayer \-aahelp
-.
-.TP
 .B \-adapter <hodnota>
 Nastaví grafickou kartu na kterou se bude posílat obrázek.
 K\ zprovoznìní potøebuje volbu \-vm.
@@ -2060,10 +2067,6 @@ VESA framebuffer nepodporuje zmìny re¾imu.
 Pøenastaví konfiguraèní soubor pro re¾im framebufferu (výchozí: /etc/\:fb.modes).
 .
 .TP
-.B \-forcexv (pouze \-vo sdl)
-Vynutí pou¾ití XVideo prostøednictvím video rozhraní sdl.
-.
-.TP
 .B \-fs (viz také volbu \-zoom)
 Pøehrávání na celé obrazovce (vycentruje film a vytvoøí kolem nìj èerný okraj).
 Funkce není podporována v¹emi video rozhraními.
@@ -2197,10 +2200,6 @@ To je pou¾itelné pro vícehlavièkové nastavení.
 Nedodr¾ovat pomìr stran okna bìhem zmìny velikosti.
 Pracuje pouze s video rozhraními x11, xv, xmga, xvidix, directx.
 Navíc pod X11 vá¹ okenní mana¾er musí rozumìt pokynùm pro pomìr stran okna.
-.
-.TP
-.B \-noxv (pouze SDL)
-Zaká¾e pou¾ití XVideo pøes sdl video rozhraní.
 .
 .TP
 .B \-ontop
@@ -2365,10 +2364,33 @@ Pou¾ije roz¹íøení XVideo z XFree86 4.x umo¾òující hardwarovì akcelerované
 pøehrávání.
 Pokud nemù¾ete pou¾ít nativní hardwarové rozhraní, je toto patrnì nejlep¹í
 volba.
+Pro informaci jaký barevný klíè je pou¾itý a jak je to vykreslováno, spus»te
+MPlayer s volbou \-v a sledujte øádky zaèínající [xv common].
 .PD 0
 .RSs
 .IPs port=<èíslo>
 Zvolí konkrétní XVideo port.
+.IPs ck=cur|use|set
+Vybere zdroj pro získání barevného klíèe (výchozí: cur).
+.RSss
+.IPs cur
+Výchozí volba pøebírá barevný klíè aktuálnì nastavený v Xv.
+.IPs use
+Pou¾ije, ale nenastaví barevný klíè z MPlayeru (pro jeho zmìnu pou¾ijte volbu
+\-colorkey).
+.IPs set
+Shodné s use, ale dodaný barevný klíè rovnì¾ nastaví.
+.RE
+.IPs ck-method=man|bg|auto
+Nastaví metodu vykreslování barevného klíèe (výchozí: man).
+.RSss
+.IPs man
+Vykreslí barevný klíè manuálnì (v nìkterých pøípadech omezí blikání).
+.IPs bg
+Nastaví barevný klíè jako pozadí okna.
+.IPs auto
+Nechá Xv vykreslit barevný klíè.
+.RE
 .RE
 .PD 1
 .
@@ -2394,20 +2416,25 @@ Výstupní video rozhraní vyu¾ívající XvMC (X Video Motion Compensation)
 roz¹íøení z XFree86 4.x ke zrychlení MPEG-1/2 a VCR2 dekódování.
 .PD 0
 .RSs
-.IPs benchmark
+.IPs port=<èíslo>
+Zvolí konkrétní XVideo port.
+.IPs (no)benchmark
 Vypne zobrazování.
 Nutné pro správné benchmarkování (test výkonu) rozhraní která mìní obrazové
 buffery pouze pøi zpìtném bìhu monitoru (nVidia).
-.IPs queue
+Výchozím je nepotlaèovat zobrazování (nobenchmark).
+.IPs (no)queue
 Skládá obrázky k zobrazení do fronty aby se více vyu¾ila paralelní práce video
 hardwaru.
-Mù¾e pøidat malou (nepostøehnutelnou) stálou odchylku v A/V synchronizaci.
-.IPs sleep
+Mù¾e pøidat malou (nepostøehnutelnou) stálou odchylku v A/V synchronizaci
+(výchozí: noqueue).
+.IPs (no)sleep
 Pou¾ije funkci sleep pøi èekání na dokonèení renderování
-(na Linuxu se toto nedoporuèuje).
-.IPs wait\ 
-Nepou¾ívat funkci sleep pøi èekání na dokonèení renderování
-(výchozí).
+(na Linuxu se toto nedoporuèuje). Výchozím je neèekat (nosleep).
+.IPs ck=cur|use|set
+Stejné jako \-vo xv:ck (viz \-vo xv).
+.IPs ck-method=man|bg|auto
+Stejné jako \-vo xv:ck-method (viz \-vo xv).
 .RE
 .PD 1
 .
@@ -2417,14 +2444,18 @@ Zobrazuje video pøes XFree86 roz¹íøení: Direct Graphics Access.
 Pova¾ujeme za zastaralé.
 .
 .TP
-.B sdl (viz také volby \-forcexv, \-noxv) (pouze SDL)
+.B sdl (pouze SDL)
 Video rozhraní platformnì nezávislé knihovny SDL (Simple Directmedia Layer).
 Vzhledem k tomu, ¾e SDL má vlastní X11 vrstvu, nemají X11 volby MPlayeru
 na SDL ¾ádný vliv.
 .PD 0
 .RSs
-.IPs <ovladaè>
+.IPs driver=<ovladaè>
 Explicitnì vybere SDL ovladaè k pou¾ití.
+.IPs (no)forcexv
+Pou¾ije XVideo pøes sdl výstupní video rozhraní (výchozí: forcexv).
+.IPs (no)hwaccel
+Pou¾ije hardwarovì akcelerovaný ¹kálovaè (výchozí: hwaccel).
 .RE
 .PD 1
 .
@@ -2607,8 +2638,10 @@ Neprodukuje ¾ádné video.
 Pou¾itelné pro testy výkonu.
 .
 .TP
-.B aa (viz také volby \-aa*)
+.B aa\ \ \ \ \ 
 Výstupní video rozhraní do ASCII art pracující v textové konzoli.
+Seznam a vysvìtlivky dostupných podvoleb dostanete spu¹tìním
+.I mplayer \-vo aa:help
 .
 .TP
 .B caca\ \ \ 
@@ -3519,7 +3552,7 @@ Umo¾ní (1) nebo znemo¾ní (0) aby se výstupní kmitoèet mírnì odli¹oval
 od kmitoètu zadaného hodnotou <vzorkovací_kmitoèet> (výchozí: 1).
 Mù¾ete to pou¾ít, pokud je start pøehrávání extrémnì pomalý.
 .IPs <typ>
-Vybere metodu resamplování.
+Vybere metodu pøevzorkování.
 .RSss
 0: lineární interpolace (rychlá, ¹patná kvalita zvlá¹» pøi zvy¹ování kmitoètu)
 .br
@@ -4095,6 +4128,8 @@ Pou¾ijete-li \-zoom, a podkladové filtry (vèetnì libvo) nejsou schopny
 -2:   Vypoèítá ¹/\:v pomocí druhého rozmìru a pøed¹kálovaného pomìru stran.
 .br
 -3:   Vypoèítá ¹/\:v pomocí druhého rozmìru a pùvodního pomìru stran.
+.br
+-(n+8): Jako vý¹e uvedené -n, ale zaokrouhlí rozmìr na nejbli¾¹í násobek 16.
 .REss
 .IPs <prokládané>
 Pøepíná prokládané ¹kálování.
@@ -4789,15 +4824,15 @@ z televize.
 Volitelný parametr (ivtc=1) odpovídá volbì dr=1 z detc filtru, a mù¾e být
 pou¾itý v MEncoderu ale ne v MPlayeru.
 Stejnì jako u detc, musíte zadat správnou výstupní rychlost snímkování (\-ofps
-23.976) pou¾íváte-li MEncoder.
+24000/1001) pou¾íváte-li MEncoder.
 Dal¹í vývoj ivtc byl zastaven, jeliko¾ se filtry pullup a filmdint
 zdají být mnohem preciznìj¹í.
 .
 .TP
 .B pullup[=jl:jr:jt:jb:sb:mp]\ 
 Tøetí generace pùlsnímky spojujícího (inverse telecine) filtru.
-Je schopný si poradit s kombinovaným hard-telecine, 24 fps progresivním, a 30
-fps progresivním obsahem.
+Je schopný si poradit s kombinovaným hard-telecine, 24000/1001 fps
+progresivním, a 30000/1001 fps progresivním obsahem.
 Filtr pullup má mnohem robustnìj¹í návrh ne¾ detc nebo ivtc, proto¾e pøi
 rozhodování bere v potaz následující obsah.
 Stejnì jako ivtc je pullup mezinárodní v tom smyslu, ¾e se nefixuje na
@@ -4843,7 +4878,7 @@ snímkovým flagùm nastavovaným MPEG-2 dekodérem.
 V závislosti na zdrojovém MPEG pak mù¾ete ignorovat tato doporuèení,
 alespoò pokud nebudete dostávat mnoho "Bottom-first field" varování.
 Bez parametrù provádí bì¾né inverse telecine a mìl by být pou¾íván v MEncoderu
-s \-fps a \-ofps: mencoder \-fps 29.97 \-ofps 23.976.
+s \-fps a \-ofps: mencoder \-fps 30000/1001 \-ofps 24000/1001.
 Pokud tento filtr pou¾ijete v Mplayeru, budete mít nerovnomìrné snímkování
 bìhem pøehrávání, ale je to poøád lep¹í ne¾ pou¾ít pp=lb nebo neodstraòovat
 proklad vùbec.
@@ -4919,7 +4954,7 @@ duplicitním.
 Tento filtr má za úkol nalézt tyto duplikáty a obnovit pùvodní snímkovou
 rychlost snímkování filmu.
 Pou¾íváte-li tento filtr, musíte nastavit \-ofps na 4/\:5 snímkové rychlosti
-vstupního souboru (23.976 pokud je vstup 29.97fps).
+vstupního souboru (24000/1001 pokud je vstup 30000/1001 fps).
 Dostupné volby jsou:
 .RSs
 .IPs pass=1|2
@@ -5019,8 +5054,8 @@ pro t, b, a p alternativy.
 .TP
 .B telecine[=start]
 Aplikuje 3:2 'telecine' proces pro zvý¹ení snímkové rychlosti o 20%.
-Toto nejspí¹ nebude správnì fungovat v MPlayeru, ale mù¾e být pou¾ito napø.
-takto: 'mencoder \-fps 29.97 \-ofps 29.97 \-vf telecine'.
+Nejspí¹ to nebude správnì fungovat v MPlayeru, ale mù¾e být pou¾ito
+takto: 'mencoder \-fps 30000/1001 \-ofps 30000/1001 \-vf telecine'.
 Obì fps volby jsou nezbytné!
 (A/\:V synchronizace se rozpadne, pokud budou ¹patné.)
 Volitelný parametr start nastaví filtru kde v telecine vzoru se má zaèít (0\-3).
@@ -5467,7 +5502,8 @@ surový video proud (¾ádný multiplex \- pouze jeden video proud)
 Nastavuje snímkovou rychlost ve snímcích za sekundu (fps) výstupního
 souboru, která mù¾e být odli¹ná od rychlosti zdroje.
 Volbu musíte nastavit pro soubory s promìnnou snímkovou  rychlostí
- (ASF, nìkteré MOV) a progresivní (29.97fps telecined mpeg) soubory.
+(ASF, nìkteré MOV) a progresivní
+(30000/1001 fps telecined mpeg) soubory.
 .
 .TP
 .B \-ovc <jméno kodeku>
@@ -7551,7 +7587,7 @@ Vypnutí nedoporuèujeme. Plýtvá datovým tokem, proto¾e P-snímky pøi zmìnì
 scény jsou stejnì velké jako I-snímky, av¹ak nevynulují "poèítadlo keyint".
 .
 .TP
-.B frameref=<1\-15>
+.B frameref=<1\-16>
 Poèet pøedchozích snímkù pou¾itých pro predikce v P-snímku (výchozí: 1).
 Filtr je efektivní na animovaných filmech, ale na hrané filmy, zdá se,
 má jen malý vliv.
@@ -7570,7 +7606,21 @@ Pokud je tato volba vypnuta, je pou¾ito maximum B-snímkù.
 .TP
 .B b_bias=<-100\-100>
 Ovládá rozhodovací proces provádìný b_adapt.
-Vy¹¹í b_bias produkuje více B-snímkù. (výchozí: 0)
+Vy¹¹í b_bias produkuje více B-snímkù (výchozí: 0).
+.
+.TP
+.B (no)b_pyramid
+Umo¾ní pou¾ití B-snímkù jako reference pro predikci ostatních snímkù.
+Napøíklad uva¾ujme tøi po sobì jdoucí B-snímky: I0 B1 B2 B3 P4.
+Bez této volby následují B-snímky stejný vzor jako MPEG-[124].
+Èili jsou kódovány v poøadí I0 P4 B1 B2 B3, a v¹echny B-snímky
+jsou predikovány z I0 a P4.
+S touto volbou jsou snímky kódovány v poøadí I0 P4 B2 B1 B3.
+B2 je stejný jako vý¹e, ale B1 je predikován z I0 a B2 a
+B3 je predikován z B2 a P4.
+To vede k mírnému zvý¹ení komprese bez vlivu na rychlost.
+Vy¾aduje bframes >= 2.
+Nevýhoda: zvý¹í zpo¾dìní dekódování na 2 snímky.
 .
 .TP
 .B (no)deblock
@@ -7764,6 +7814,17 @@ Vý¹e uvedený pojem "v¹echny kandidátské typy" neznamená v¹echny povolené typy:
 4x4, 4x8, 8x4 jsou zkou¹eny pouze pokud je 8x8 lep¹í ne¾ 16x16.
 .
 .TP
+.B (no)chroma_me
+Bere v potaz barvu bìhem vyhledávání pohybu subpixelu
+(výchozí: zapnuto).
+Vy¾aduje subq=5.
+.
+.TP
+.B chroma_qp_offset=<-12\-12>
+Pou¾ije odli¹ný kvantizer pro barvu vzta¾ený k jasu.
+Pou¾itelné hodnoty jsou v rozsahu <-2\-2> (výchozí: 0).
+.
+.TP
 .B level_idc=<10\-51>
 Nastavuje Level bitového proudu tak jak je definován v Annex A
 standardu H.264 (výchozí: 40 - Level 4.0).
@@ -7867,8 +7928,17 @@ Nastavuje pomìr stran pro MPEG-1/2 video.
 Nastaví datový tok videa v kbitech/s pro MPEG-1/2 video.
 .
 .TP
-.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
+.B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
 Nastaví snímkovou rychlost pro MPEG-1/2 video.
+Tato volba bude ignorována, je-li pou¾ita v kombinaci s telecine.
+.
+.TP
+.B telecine
+Zapne soft telecine re¾im: muxer upraví video proud tak, aby vypadal jako
+enkódovaný se snímkovou rychlostí 29.97 nebo 30 fps; pracuje pouze s MPEG-2 
+videem pokud výstupní snímková rychlost, kterou je mo¾né zkonvertovat pomocí
+volby \-ofps, je buï 23.976 anebo 24 fps.
+Jakákoli jiná snímková rychlost je nekompatibilní s touto volbou.
 .
 .
 .\" --------------------------------------------------------------------------
@@ -7989,6 +8059,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Pøehrávání ¹estikanálového AAC souboru, máte-li jen dva reproduktory:
 mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+.br
 Musíte si pohrát s hodnotami "pan" (tedy násobte hodnotou) pro
 zvý¹ení hlasitosti nebo potlaèení omezení.
 .
@@ -8052,7 +8123,7 @@ MPlayer (C) 2000\-2005 The MPlayer Team
 Tuto manuálovou stránku pøevá¾nì pí¹í: Gabucino, Jonas Jermann a Diego Biurrun.
 Spravuje ji: Diego Biurrun
 Prosíme zasílejte pøipomínky k ní do MPlayer-DOCS mailing listu.
-Podnìty a pøipomínky k pøekladu posílejte do MPlayer-translations mailing listu.
+Podnìty a pøipomínky k pøekladu posílejte do konference MPlayer-translations.
 .PP
 Pøeklad: Jiøí Heryán
 .
@@ -8060,5 +8131,5 @@ Pøeklad: Jiøí Heryán
 Pøekladem mohlo dojít k zanesení následných chyb a nepøesností. Nepracuje-li
 nìkterá vlastnost jak je popisováno, nebo je nìkterá èást nepochopitelná,
 nahlédnìte nejprve do anglického originálu a pøípadné pøipomínky za¹lete
-do MPlayer-translations mailing listu.
+do konference MPlayer-translations.
 .\" end of file
