@@ -71,6 +71,10 @@
 #define PCI_DEVICE_ID_MATROX_G400 0x0525
 #endif
 
+#ifndef PCI_DEVICE_ID_MATROX_G550 
+#define PCI_DEVICE_ID_MATROX_G550 0x2527
+#endif
+
 MODULE_AUTHOR("Aaron Holtzman <aholtzma@engr.uvic.ca>");
 
 
@@ -726,7 +730,12 @@ static int mga_vid_find_card(void)
 	struct pci_dev *dev = NULL;
 	unsigned int card_option;
 
-	if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G400, NULL)))
+	if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G550, NULL)))
+	{
+		is_g400 = 1;
+		printk(KERN_INFO "mga_vid: Found MGA G550\n");
+	}
+	else if((dev = pci_find_device(PCI_VENDOR_ID_MATROX, PCI_DEVICE_ID_MATROX_G400, NULL)))
 	{
 		is_g400 = 1;
 		printk(KERN_INFO "mga_vid: Found MGA G400/G450\n");
