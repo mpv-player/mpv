@@ -17,6 +17,43 @@ used it (version 6.4.4) for a while. To enable it change USE_SAXON to 1 in
 the Makefile.
 
 
+Installing the required tools from source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+1) Download libxslt AND libxml2 packages from
+   http://xmlsoft.org/XSLT/downloads.html
+
+   Installing them should be straightforward, executing the usual "./configure"
+   and "make" then "make install" commands.
+
+
+2) Download the docbook-xml package from http://www.oasis-open.org/docbook/xml/
+   Use the newest version. The URL will be something like this:
+
+	http://www.oasis-open.org/docbook/xml/4.2/docbook-xml-4.2.zip
+
+   Extract this package into a directory, enter it, and execute the following
+   commands:
+
+	mkdir -p /usr/share/sgml/docbook/dtd/xml/4.2/
+	cp -r * /usr/share/sgml/docbook/dtd/xml/4.2/
+
+
+3) Download the docbook-xsl package from
+   http://prdownloads.sourceforge.net/docbook/
+
+   Use the newest version. The URL will be something like this:
+
+	http://prdownloads.sourceforge.net/docbook/docbook-xsl-1.62.0.tar.gz
+
+   Extract this package into a directory, enter it, and execute the following
+   commands:
+
+	mkdir -p /usr/share/sgml/docbook/stylesheet/xsl/nwalsh
+	cp -r VERSION common html lib \
+		/usr/share/sgml/docbook/stylesheet/xsl/nwalsh
+
+
 Building the documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
