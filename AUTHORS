@@ -191,7 +191,7 @@ Ivan Kalvatchev <iive@yahoo.com>
     * libvo2 draft
     * configfile parser fixes
 
-pl <p_l@gmx.fr>
+Pierre Lombard (pl) <p_l@gmx.fr>
     * new configure script
     * general code maintaining, fixes, patch committing
 
