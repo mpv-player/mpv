@@ -51,8 +51,9 @@ static vo_info_t info =
 
 LIBVO_EXTERN (yuv4mpeg)
 
-static int image_width;
-static int image_height;
+static int image_width = 0;
+static int image_height = 0;
+static float image_fps = 0;
 
 static uint8_t *image = NULL;
 static uint8_t *image_y = NULL;
@@ -80,8 +81,19 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
        uint32_t d_height, uint32_t fullscreen, char *title, 
        uint32_t format)
 {
+	if (image_width == width && image_height == height &&
+	     image_fps == vo_fps && vo_config_count)
+	  return 0;
+	if (vo_config_count) {
+	  mp_msg(MSGT_VO, MSGL_WARN,
+	    "Video formats differ (w:%i=>%i, h:%i=>%i, fps:%f=>%f), "
+	    "restarting output.\n",
+	    image_width, width, image_height, height, image_fps, vo_fps);
+	  uninit();
+	}
 	image_height = height;
 	image_width = width;
+	image_fps = vo_fps;
 	using_format = format;
 
 	if (Y4M_IS_INTERLACED)
@@ -146,7 +158,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
 	/* At least the interlacing is ok now */
 	fprintf(yuv_out, "YUV4MPEG2 W%d H%d F%ld:%ld I%c A0:0\n", 
-			image_width, image_height, (long)(vo_fps * 1000000.0), 
+			image_width, image_height, (long)(image_fps * 1000000.0), 
 			(long)1000000, config_interlace);
 
 	fflush(yuv_out);
@@ -448,6 +460,7 @@ static uint32_t query_format(uint32_t format)
 	return 0;
 }
 
+// WARNING: config(...) also uses this
 static void uninit(void)
 {
     if(image)
@@ -469,6 +482,9 @@ static void uninit(void)
 	if (yuv_filename)
 		free(yuv_filename);
 	yuv_filename = NULL;
+	image_width = 0;
+	image_height = 0;
+	image_fps = 0;
 }
 
 
