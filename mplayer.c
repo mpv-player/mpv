@@ -976,6 +976,7 @@ switch(sh_video->codec->driver){
 #else
    sh_video->our_out_buffer=NULL;
    if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, &sh_video->our_out_buffer)){
+//   if(DS_VideoDecoder_Open(sh_video->codec->dll,&sh_video->codec->guid, sh_video->bih, 0, NULL)){
         printf("ERROR: Couldn't open required DirectShow codec: %s\n",sh_video->codec->dll);
         printf("Maybe you forget to upgrade your win32 codecs?? It's time to download the new\n");
         printf("package from:  ftp://thot.banki.hu/esp-team/linux/MPlayer/w32codec.zip  !\n");
@@ -1156,6 +1157,8 @@ char osd_text_buffer[64];
 int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
+int drop_frame=0;
+int drop_frame_cnt=0;
 
 #ifdef HAVE_LIRC
   lirc_mp_setup();
@@ -1385,6 +1388,9 @@ if(1)
     float pts1=d_video->pts;
 
     current_module="decode_video";
+    
+    if(!force_redraw && v_frame+0.1<a_frame) drop_frame=1; else drop_frame=0;
+    drop_frame_cnt+=drop_frame;
 
   //--------------------  Decode a frame: -----------------------
 switch(sh_video->codec->driver){
@@ -1422,9 +1428,10 @@ switch(sh_video->codec->driver){
     if(in_size<0){ eof=1;break;}
     if(in_size>max_framesize) max_framesize=in_size;
 
-    DS_VideoDecoder_DecodeFrame(start, in_size, 0, 1);
+    DS_VideoDecoder_DecodeFrame(start, in_size, 0, !drop_frame);
     current_module="draw_frame";
 
+    if(!drop_frame){
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
       if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
         uint8_t* dst[3];
@@ -1438,6 +1445,7 @@ switch(sh_video->codec->driver){
       } else
         video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
+    }
     break;
   }
 #endif
@@ -1453,12 +1461,16 @@ switch(sh_video->codec->driver){
     if(in_size){
       sh_video->bih->biSizeImage = in_size;
 //      ret = ICDecompress(avi_header.hic, ICDECOMPRESS_NOTKEYFRAME|(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL), 
-      ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME, 
+      ret = ICDecompress(sh_video->hic, ICDECOMPRESS_NOTKEYFRAME |
+                        ( drop_frame?(ICDECOMPRESS_HURRYUP|ICDECOMPRESS_PREROL):0 ) , 
                          sh_video->bih,   start,
-                        &sh_video->o_bih, sh_video->our_out_buffer);
+                        &sh_video->o_bih,
+                        drop_frame ? 0 : sh_video->our_out_buffer);
+
       if(ret){ printf("Error decompressing frame, err=%d\n",(int)ret);break; }
     }
     current_module="draw_frame";
+    if(!drop_frame){
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
 //      if(out_fmt==IMGFMT_YV12){
       if(out_fmt==IMGFMT_YV12||out_fmt==IMGFMT_IYUV||out_fmt==IMGFMT_I420){
@@ -1473,7 +1485,7 @@ switch(sh_video->codec->driver){
       } else
         video_out->draw_frame((uint8_t **)&sh_video->our_out_buffer);
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
-
+    }
     break;
   }
   case 1: {
@@ -1551,10 +1563,13 @@ switch(sh_video->codec->driver){
     v_frame+=frame_time;
     v_pts+=frame_time;
 
-    current_module="flip_page";
-    video_out->flip_page();
-    current_module=NULL;
-
+    if(!drop_frame){
+        current_module="flip_page";
+        video_out->flip_page();
+        current_module=NULL;
+//        usleep(50000); // test only!
+    }
+    
     if(eof) break;
     if(force_redraw){
       --force_redraw;
@@ -1600,11 +1615,12 @@ switch(sh_video->codec->driver){
         if(x> max_pts_correction) x= max_pts_correction;
         max_pts_correction=default_max_pts_correction;
         a_frame+=x; c_total+=x;
-        printf("  ct:%7.3f  %3d  %2d%%  %2d%%  %3.1f%% \r",c_total,
+        printf("  ct:%7.3f  %3d  %2d%%  %2d%%  %3.1f%% %d \r",c_total,
         (int)num_frames,
         (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0
+        ,drop_frame_cnt
 //        dbg_es_sent-dbg_es_rcvd 
         );
         fflush(stdout);
@@ -1726,6 +1742,10 @@ switch(sh_video->codec->driver){
       break; 
     case 'm':
       mixer_usemaster=!mixer_usemaster;
+      break;
+    case 'd':
+      drop_frame=!drop_frame;
+      printf("== drop: %d ==  \n",drop_frame);
       break;
   }
   if (seek_to_sec) {
