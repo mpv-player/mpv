@@ -1169,7 +1169,7 @@ Available options are:
                     and the smallest will be used.
                     default = HQ disabled
 
-  vme=<0\-5>        motion estimation method:
+  vme=<0\-5>         motion estimation method:
                       0  no ME at all
                       1  ME_FULL
                       2  ME_LOG
@@ -1222,6 +1222,14 @@ Available options are:
                     or second pass of 2-pass mode.
                     default = 0 (1-pass mode)
 
+  gray              encode in grayscale mode.
+                    default = disabled
+
+  mpeg_quant        use MPEG quantizers instead
+                    of H.263.
+                    default = disabled
+                    (i.e. use H.263 quantizers)
+
 The next 3 options apply only to I & P frames:
 
   vqmin=<1\-31>      minimum quantizer
@@ -1259,11 +1267,14 @@ The following options apply only to B frames:
                     higher quantizer for B frames)
                     default = 2.0
 
-  vb_qfactor=<value>
-                    quantizer factor between b
+  vb_qoffset=<value>
+                    quantizer offset between B
                     and I/P frames (larger means
                     higher quantizer for B frames)
-                    default = 2.0
+                    default = 0.0
+
+The actual quantizer for a given B frame is computed in pass 1 as shown below:
+    prev_IorP_quantizer * vb_qfactor + vb_qoffset
 
 In fixed quantizer mode you can use those options:
     vqscale, vmax_b_frames, vhq, vme, keyint
