@@ -1,943 +1,820 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+  <TITLE>FAQ - MPlayer - Odtwarzacz Filmów dla Linuksa</TITLE>
+  <LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-2">
+  <STYLE TYPE="text/css">
+      dt	{
+	font-weight : bold;
+      }
+  </STYLE>
 </HEAD>
 
-<BODY BGCOLOR=white>
-
-<FONT CLASS="text">
-
-<P><B><A NAME=5>5. FAQ section</A></B></P>
-
-<TABLE BORDER=0 WIDTH=100% ALIGN=left>
-
-<TR><TD COLSPAN=3><P><B><A NAME=5.1><FONT CLASS="text">5.1 Compilation</A></B></P>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Configure ends with this text, and MPlayer won't compile!<BR>
-<CODE>"Your gcc does not support even i386 for '-march' and '-mcpu'."</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Your gcc isn't installed correctly, check the <CODE>config.log</CODE> file
-for details.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What does "No such file or directory" mean?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Probably there is no such file or directory.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What's the problem with gcc 2.96?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-<B><I>We strongly discourage the use of gcc 2.96!!!</I></B><BR>
-Read <A HREF="gcc-2.96-3.0.html">this</A> and <A HREF="users_against_developers.html">this</A>
-document for details. If you still really really want to use it, be sure to get
-the latest release, but remember that  you are on your own. Do <B>not</B> report
-bugs or ask for help on the mailing lists. We will <B>not</B> provide any support
-in case you run into problems.
-<BR>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Great, I have gcc 3.0.1 from Red Hat/Mandrake, then I'm fine--!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-No, since there have been/are issues with these compilers as well.<BR>
-Use the 2.95.x series for reliability (not <A HREF="gcc-2.96-3.0.html">2.96</A>).
-Use the latest gcc 3.0.x (starting at 3.0.2) if you want to use a 3.0.x version.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I tried to compile MPlayer, but I got this output:
-<PRE>
-In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
-                 from /usr/include/g++-v3/bits/fpos.h:40,
-                 from /usr/include/g++-v3/bits/char_traits.h:40,
-                 from /usr/include/g++-v3/bits/std_string.h:41,
-                 from /usr/include/g++-v3/string:31,
-                 from libwin32.h:36,
-                 from DS_AudioDecoder.h:4,
-                 from DS_AudioDec.cpp:5:
-/usr/include/wchar.h: In function Long long int wcstoq(const wchar_t*,
-   wchar_t**, int)':
-/usr/include/wchar.h:514: cannot convert `const wchar_t* __restrict' to
-`const
-</PRE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Upgrade your glibc to the latest release. On Mandrake, use 2.2.4-8mdk.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-... gcc 2.96 ... (Yes, some people are STILL flaming about their gcc 2.96!!)
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Quoted from a <A HREF="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">mail</A> A'rpi sent to the mplayer-users list (the word 'ideg' is described below):
-<BLOCKQUOTE>
-<P>And we have idegs. And our idegcounter overflowed again and again.</P>
-
-<P>Unfortunately MPlayer is out of our control. It's used by lamers, Linux users
-who can't even use Windows, and never tried to compile a kernel. They installed
-(with default options) Mandrake or Red Hat or SuSE, and without RTFM'ing they
-send messages saying 'it doesn't work! help me! please! i'm new to Linux!
-help! oh! help me!'. We can't stop them, but at least we try to force them to
-RTFM and to read messages of ./configure and MPlayer.</P>
-
-<P>And you clever guys come and flame us with gcc 2.96 and binary packages.
-Instead of helping users or making patches to help solve problems.</P>
-
-<P>Half of our spare/free time is spent by answering silly mails here and
-making newer tricks and checks to configure to avoid such mails.</P>
-
-<P>And there is a balance. On the one side are you, clever guys, saying we are
-very bad because we don't like buggy gcc 2.96, and on the other side there are
-the 'new to Linux' guys who are showing us gcc 2.96 is buggy.</P>
-
-<P>Conclusion: We can't be good. Half the people always will say we are bad.</P>
-
-<P>Maybe we should close the project, make it closed source, commercial, and
-provide install support for it. then we could leave current work, so
-development could go faster, and we could earn lots of money with it and buy a
-big house, etc etc. Do you really want it? It seems.</P>
-</BLOCKQUOTE>
-
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Where can I find information about gcc 2.96 bugs?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-In <A HREF="gcc-2.96-3.0.html">this</A> document. And <A HREF="users_against_developers.html">this</A>
-document describes why Red Hat released 2.96 and other interesting things.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-SDL output doesn't work or compile. The problem is ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It was tested to work with SDL 1.2.x and may run on SDL 1.1.7+.
-It does <B>not</B> work with any previous version. So if you choose to use such
-a version, you are on your own.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I am still having trouble compiling with SDL support. gcc says something
-about "undefined reference to `SDL_EnableKeyRepeat'".  What now?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Where did you install the SDL library? If you installed in /usr/local
-(the default) then edit the top level config.mak and add
-"-L/usr/local/lib" after "X_LIBS=". Now type make. You're done!
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-It doesn't compile, and it misses uint64_t inttypes.h and similar things ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Copy etc/inttypes.h to the <B>MPlayer</B> directory (<CODE>cp etc/inttypes.h .</CODE>)
-and try again ...
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have Linux running on a Pentium III but <CODE>./configure</CODE> doesn't detect
-SSE ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Only kernel versions 2.4.x support SSE (or try 2.2.19 or newer, but
-be prepared for problems).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have a G200/G400, how do I compile/use the mga_vid driver?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Read the <A HREF="video.html#2.3.1.7">documentation</A>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Are there rpm/deb/... packages of <B>MPlayer</B>?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-You can make a .deb package for yourself, check the <A HREF="documentation.html#6.1">Debian packaging</A> section.
-There are RPM packages available on our homepage, don't use other sources!
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-During 'make', MPlayer complains about X11 libraries. I don't understand,
-I DO have X installed!?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-... but you don't have the X development package installed. Or not
-correctly. It's called XFree86-devel* under Red Hat, and xlib6g-dev* under
-Debian.  Also check if the <CODE>/usr/X11</CODE> and <CODE>/usr/include/X11</CODE>
-symlinks exist (this can be a problem on Mandrake systems). They can be created
-with these commands:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>$ ln -sf /usr/X11R6 /usr/X11</CODE><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>$ ln -sf /usr/X11R6/include/X11 /usr/include/X11</CODE><BR>
-Your distribution may differ from the
-<A HREF="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</A>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What about the DGA driver? I can't find it!!!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-<CODE>./configure</CODE> autodetects your DGA driver. If <CODE>-vo help</CODE> doesn't show
-DGA, then there's a problem with your X installation.
-Try <CODE>./configure --enable-dga</CODE> and read the
-<A HREF="video.html#2.3.1.3">documentation</A>.
-Alternatively, try SDL's DGA driver with the <CODE>-vo sdl:dga</CODE> option.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I can't compile SVGAlib. I'm using kernel 2.3/2.4 ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-You have to edit SVGAlib's Makefile.cfg and comment <CODE>BACKGROUND = y</CODE> out.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I compiled MPlayer with libdvdcss/libdivxdecore support, but when
-I try to start it, it says:<BR>
-<CODE>&gt; error while loading shared libraries: lib*.so.0: cannot load
-shared object file: No such file or directory</CODE><BR>
-I checked up on the file and it IS there in <CODE>/usr/local/lib</CODE> ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Add <CODE>/usr/local/lib</CODE> to <CODE>/etc/ld.so.conf</CODE> and run <CODE>ldconfig</CODE>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Hmm, strange. When loading the mga_vid.o kernel module, I found this in the logs:<BR>
-<CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-The latest kernel modutils require a flag indicating the license (mainly
-to avoid kernel hackers debugging closed source drivers).
-Upgrade your kernel, modutils and <B>MPlayer</B>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When compiling <B>MEncoder</B>, it segfaults at linking!!!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-This is a linker problem. Upgrading binutils should help (2.11.92.* or newer
-should be good). Since it is not our fault, please do <B>not</B> report!
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I'd like to compile <B>MPlayer</B> on Minix!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Me too. :)
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+<BODY>
 
 
-<TD COLSPAN=3><B><A NAME=5.2><FONT CLASS="text">5.2. General questions</A></B>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+<H1><A NAME="faq">5. FAQ</A></H1>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What about DVD playing?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Read the CD/DVD section in <A HREF="cd-dvd.html">this document</A>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-The <CODE>-xy</CODE> or <CODE>-fs</CODE> option doesn't work with the x11 driver (<CODE>-vo x11</CODE>) ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It does, but you have to explicitly specify software scaling (it's SLOW!) with
-the <CODE>-zoom</CODE> option. You better use XF86VidMode support:
-you must specify the <CODE>-vm</CODE> and the <CODE>-fs</CODE> switch, and
-you're done. Make sure you have the right modelines in your XF86Config file, and
-try to make the <A HREF="video.html#2.3.1.3">DGA driver</A> and
-<A HREF="video.html#2.3.1.4">SDL's DGA driver</A> work for you.
-It's much faster. If SDL's DGA works, use that, it'll be EVEN faster!
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What is the meaning of the numbers on the status line?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Example: <CODE><FONT CLASS="text">A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57/57  41%   0%  2.6% 0 4 49%</CODE><BR>
 <UL>
-<LI>A: audio position in seconds
-<LI>V: video position in seconds
-<LI>A-V: audio-video difference in seconds (delay)
-<LI>ct: total A-V sync correction done
-<LI>frames played (counting from last seek)
-<LI>frames decoded (counting from last seek)
-<LI>video codec cpu usage in percent (for slices and DR this includes video_out)
-<LI>video_out cpu usage
-<LI>audio codec cpu usage in percent
-<LI>frames needed to drop to maintain A-V sync
-<LI>current level of image postprocessing (when using <CODE>-autoq</CODE>)
-<LI>current cache size used (around 50% is normal)
+  <LI><A HREF="#compilation">5.1 Kompilacja</A></LI>
+  <LI><A HREF="#general">5.2 Pytania ogólne</A></LI>
+  <LI><A HREF="#playback">5.3 Problemy z odtwarzaniem</A></LI>
+  <LI><A HREF="#driver">5.4 Problemy ze sterownikiem video/audio (vo/ao)</A></LI>
+  <LI><A HREF="#dvd">5.5 Odtwarzanie DVD</A></LI>
+  <LI><A HREF="#features">5.6 Proźby o nowe funkcje</A></LI>
+  <LI><A HREF="#encoding">5.7 Kodowanie</A></LI>
 </UL>
-Most of them are for debug purposes and will be removed soon.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What if I don't want them to appear?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Use the <CODE>-quiet</CODE> option and read the man page.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Why is video_out cpu usage zero (0%) for some files?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It's not zero, but it's called from the codec and thus cannot be measured
-separately. You should try to play the file using <CODE>-vo null</CODE> and then
-<CODE>-vo ...</CODE> and check the difference to see the video_out speed.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-There are error messages about file not found <CODE>/usr/lib/win32/</CODE> ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Download the <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.60.tar.bz2">Win32 codecs</A>
-from <B>our</B> FTP site (avifile's codec package has a different DLL set) and
-install it.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Are there any mailing lists on MPlayer?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Yes! See the bottom of the info page on
-<A HREF="http://www.mplayerhq.hu/homepage/info.html">our homepage</A> to subscribe!
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I've found a nasty bug when I tried to play my favorite video!!
-Who should I inform?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Please read the <A HREF="bugreports.html">bug reporting guidelines</A> and follow
-the instructions.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have problems playing files with the ... codec. Can I use them?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Check the <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status</A>,
-if it doesn't contain your codec, read the
-<A HREF="codecs.html#2.1.3">codec documentation</A>, especially the
-<A HREF="codecs.html#2.2.3">codec importing HOWTO</A> and contact us.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Umm, what is "IdegCounter"?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-A combination of a Hungarian and an English word. "Ideg" in Hungarian means
-the same as "nerve" in English, and is pronounced as something like "ydaegh".
-It was first used to measure the nervousness of A'rpi, after some (umm) "mystic"
-disappearance of CVS code ;)
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-And what is "Faszom(C)ounter"?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-"Fasz" is a Hungarian word you don't want to know, the others are connected to
-the perverted minds of the MPlayer developers.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-LIRC doesn't work, because ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Are you sure you are using <CODE>mplayer</CODE> instead of <CODE>mplayer_lirc</CODE>?
-Note that it was <CODE>mplayer_lirc</CODE> for long time, including the 0.60 release, but recently
-changed back to <CODE>mplayer</CODE>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Subtitles are very nice, the most beautiful I've ever seen, but they slow
-down playing! I know it's unlikely ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-After running <CODE>./configure</CODE> , edit <CODE>config.h</CODE> and replace
-<CODE>#undef FAST_OSD</CODE> with <CODE>#define FAST_OSD</CODE>. Then recompile.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-The OSD is flickering!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-You use a vo driver with single buffering (x11,xv). With xv,
-use the <CODE>-double</CODE> option. Also try <CODE>-vf expand</CODE>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What exactly is this libavcodec thing?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-See the <A HREF="codecs.html#2.2.1.2">FFmpeg section</A>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-But configure tells me "Checking for libavcodec ... no"!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-You need to get libavcodec from FFmpeg's CVS. Read the instructions in
-the <A HREF="codecs.html#2.2.1.2">FFmpeg section</A>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-The GUI isn't usable with icewm, because a panel is over the movie!!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Known problem with icewm. It is unsolvable from our side. In detail:
-Icewm's taskbar overrides the GUI's window resize queries. If asked for a
-resize to 800x600, icewm resizes the window to 800x(600-taskbar_size).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I can't access the GUI menu. I press right click, but I can't access any
-menu items!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Are you using FVWM? Try the following:<BR>
-Start -&gt; Settings -&gt; Configuration -&gt; Base Configuration<BR>
-Set "Use Applications position hints" to "Yes".
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-How can I run MPlayer in the background?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Use: <CODE>mplayer &lt;options&gt; &lt;filename&gt; &lt; /dev/null &</CODE>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD COLSPAN=3>
-<B><A NAME=5.3><FONT CLASS="text">5.3. File playing problems</A></B>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-... works with avifile/aviplay but doesn't with MPlayer.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-<B>MPlayer</B> != avifile.
-The only common thing between these players is the Win32 DLL loader.
-The codecs (DLL) set, synchronization, demultiplexing etc is totally
-different and shouldn't be compared.
-If something works with aviplay it doesn't mean that <B>MPlayer</B> will work
-and vice versa.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Audio goes out of sync playing a .avi file.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Try the <CODE>-bps</CODE> or <CODE>-nobps</CODE> option. If it does not improve,
-read <A HREF="bugreports.html">this</A> and upload the file to FTP.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-MPlayer exits with some error when using l3codeca.acm.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Check <CODE>ldd /usr/local/bin/mplayer</CODE> output. If it contains<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 => /lib/libc.so.6 (0x4???????)</CODE><BR>
-where "?" is any number then it's OK, the error is not here. If it is:<BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 => /lib/libc.so.6 (0x00??????)</CODE><BR>
-then there is a problem with your kernel/libc. Maybe you are using some
-security patches (for example Solar Designer's OpenWall patch) which
-forces loading libraries to very low addresses.
-Because l3codeca.acm is a non-relocatable DLL, it must be loaded to
-0x00400000, we can't change this. You should use a non-patched kernel,
-or use <B>MPlayer</B>'s <CODE>-afm 1</CODE> option to disable using l3codeca.acm.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
-sound too slow. When I use -nosound switch, everything is OK (but quiet).
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Your machine is too slow or your soundcard driver is broken. Consult the documentation to see if you can improve
-performance.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Try running <B>MPlayer</B> on the machine you compiled on. Or recompile. Don't
-use <B>MPlayer</B> on a CPU different from the one it was compiled on.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have problems with [your window manager] and fullscreen xv/xmga/sdl/x11 modes ...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Use the <CODE>-fsmode</CODE> switch. See example.conf or the man page.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-But it works with avifile!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-So what?
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Then avifile is better!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Then use avifile, it has a nice GUI and nice C++ code :)
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I got this playing mpeg files: Can't find codec for video format 0x10000001!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-You have an old version of codecs.conf at <CODE>~/.mplayer/</CODE>. Upgrade it
-from <CODE>/etc/</CODE>.<BR>
-<B>OR</B> you have the <CODE>vc=</CODE> option or something similar in your
-config file(s).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-After starting MPlayer under KDE(1/2) I just get a black screen and nothing
-happens, after about one minute the video starts playing.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-The KDE arts sound daemon is blocking the sound device, either wait the time
-until video starts or you disable the arts-daemon in kontrol center. If you want
-to use arts sound, specify audio output via SDL (<CODE>ao=sdl</CODE>), and
-make sure your SDL can handle arts sound. Yet another option is to start
-<B>MPlayer</B> with artsdsp.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have an AVI that produces a gray screen when played with <CODE>-vc odivx</CODE>
-and a green one with <CODE>-vc divx4</CODE>.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It's not a DivX file, but an M$ MPEG4v3 . Update your codecs.conf.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When I play this movie I get video-audio desync and/or MPlayer crashes with the following message:<BR>
-<CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-This can have multiple reasons.<BR>
-<UL>
-  <LI>Your CPU <B>and/or</B> video card <B>and/or</B> bus is too SLOW. <B>MPlayer</B>
-  displays a message if this is the case (and the dropped frames counter goes up fast).</LI>
-  <LI>If it is an AVI, maybe it has bad interleaving. Try the <CODE>-ni</CODE> option.</LI>
-  <LI>Your sound driver is buggy, or you use ALSA 0.5 with <CODE>-ao oss</CODE>.
-  See the <A HREF="sound.html">sound card section</A>.</LI>
-  <LI>The AVI has a bad header, try the <CODE>-nobps</CODE> option, and/or
-  <CODE>-mc 0</CODE>.</LI>
-</UL>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have an MJPEG file which works with other players but displays only a black
-image in MPlayer.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Disable the Windows DLL in <CODE>codecs.conf</CODE>, or use the
-<CODE>-vc ffmjpeg</CODE> option (compile MPlayer with libavcodec for this to work).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When I try to grab from my tuner, it works, but colors are strange. It's OK
-with other applications.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Your card probably misreports its colorspace capacity. Try with YUY2 instead
-of default YV12 (see the <A HREF="documentation.html#2.5">TV input documentation</A>).
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When I start playing, I get this message but everything seems fine:<BR>
-<CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-You need root privileges to use the new timing code. For details see the
-<A HREF="documentation.html#1.3">installation section</A> of the documentation.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have A/V sync problems. Some of my AVIs play fine, but some play with
-double speed!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and
-you try to play a file which has 22050Hz audio. Try the resample audio plugin.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-All the WMV (or other..) files I play create a green/gray window and there is
-only sound! MPlayer prints:<BR>
-<CODE>Detected video codec: [null] drv:0 (NULL codec (no decoding))</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Update your <CODE>codecs.conf</CODE>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I get very strange percentage values (way too big) while playing files on my notebook.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It's an effect of the power management / power saving system of your notebook
-(BIOS, not kernel). Plug the external power connector in <b>before</b> you power on your
-notebook.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-The audio/video gets totally out of sync when I run MPlayer as root on my notebook.
-It works normal when i run it as a user.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-This is again a power management effect (see above). Plug the external power connector
-in <b>before</b> you power on your notebook.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD COLSPAN=3>
-<B><A NAME=5.4><FONT CLASS="text">5.4. Video/audio driver problems (vo/ao)</A></B>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-OK, <CODE>-vo help</CODE> shows DGA driver, but it complains about permissions!
-Help me!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-It works only if running as root! It's a DGA limitation.
-You should become root (<CODE>su -</CODE>), and try again.
-Another solution is making <B>MPlayer</B> SUID root, but it's <B>NOT RECOMMENDED!</B><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer</CODE><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod 755 /usr/local/bin/mplayer</CODE><BR>
-&nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod +s /usr/local/bin/mplayer</CODE><BR>
-<B>!!!! BUT STAY TUNED !!!!</B><BR>
-This is a *BIG* security risk! *NEVER* do this on a server or on a computer
-that you do not control completely because other users can gain root
-privileges through SUID root MPlayer!!!<BR>
-<B>!!!! SO YOU HAVE BEEN WARNED ... !!!!</B>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+<H2><A NAME="compilation">5.1 Kompilacja</A></H2>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When using Xvideo, my Voodoo 3/Banshee says:<BR>
-<CODE>X Error of failed request:  BadAccess (attempt to access private resource denied)<BR>
-&nbsp;&nbsp;Major opcode of failed request:  147 (MIT-SHM)<BR>
-&nbsp;&nbsp;Minor opcode of failed request:  1 (X_ShmAttach)<BR>
-&nbsp;&nbsp;Serial number of failed request:  26<BR>
-&nbsp;&nbsp;Current serial number in output stream:27</CODE><BR>
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-The "tdfx" driver in XFree86 4.0.2/4.0.3 had this bug. This was solved by
-<A HREF="http://www.xfree86.org/cvs/changes_4_1.html">bugfix #621 of the XFree86 4.1.0 CVS log</A>.
-So upgrade to XFree86 4.1.0 or later. Alternatively, either download (at least)
-DRI version 0.6 from the <A HREF="http://dri.sourceforge.net">DRI homepage</A>,
-or use CVS DRI.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+<DL>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When using Xvideo, I can't play DivX AVIs with my Voodoo 3/Banshee!
-It says:<BR>
-...<BR>
-<CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
-Xvideo image format: 0x30323449 (I420) planar<BR></CODE>
-...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A1:</TD><TD><FONT CLASS="text">
-See the previous answer.
-</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A2:</TD><TD><FONT CLASS="text">
-Since 0.18pre4 we support libavcodec from the FFmpeg package. It contains
-a C language DivX and OpenDivX decoder. The DivX decoder uses YV12 format
-for output, thus it should work for you. Compile in libavcodec support.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+  <DT>Q: Kompilacja zatrzymuje się z błędem podobnym do tego:
+    <PRE>
+    In file included from mplayer.c:34:
+    mw.h: In function `mplMainDraw':
+    mw.h:209: Internal compiler error in print_rtl_and_abort, at flow.c:6458
+    Please submit a full bug report,
+    with preprocessed source if appropriate.
+    </PRE>
+  </DT>
+  <DD>A: Jest to znany problem gcc 3.0.4, zrób upgrade do wersji 3.1 by rozwiązać
+    problem. Jakzainstalować gcc jest opisane w sekcji
+    <A HREF="users_against_developers.html#gcc">gcc 2.96</A>.</DD>
+  <DD>&nbsp;</DD>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-OpenGL (<CODE>-vo gl</CODE>) output doesn't work (hang/black window/X11 errors/...).
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Your OpenGL driver doesn't support dynamic texture changes (glTexSubImage).
-It's known not to work with nVidia's binary mess.
-It's known to work with Utah-GLX/DRI and Matrox G400 cards. Also with
-DRI and Radeon cards. It won't work with DRI and other cards.
-it will not work with 3DFX cards because of the 256x256 texture size limit.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+  <DT>Q: Skrypt configure zakańcza swoje działanie z tym tekstem i MPlayer nie
+     chce się skompilować!<BR>
+    <CODE>"Your gcc does not support even i386 for '-march' and '-mcpu'."</CODE><BR>
+    <CODE>"Twoje gcc nie wspiera nawet i386 dla '-march' i '-mcpu'."</CODE>
+    </DT>
+  <DD>A: Twoje gcc nie jest zainstalowane poprawnie, sprawdź plik <CODE>config.log</CODE>
+    po więcej szczegółów.</DD>
+  <DD>&nbsp;</DD>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have an nVidia TNT/TNT2 card, and I have a band with strange colors,
-right under the movie! Whose fault is this?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-This is a bug of nVidia's binary X driver. These bugs appear ONLY with the
-TNT/TNT2 cards, and we can't do anything about it. To fix the problem, upgrade
-to the latest nVidia binary driver version. If still bad, complain to nVidia!
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+  <DT>Q: Co oznacza "No such file or directory" ("Nie ma takiego pliku ani katalogu")?</DT>
+  <DD>A: Prawdopodobnie, jest tam nie taki plik lub katalog.</DD>
+  <DD>&nbsp;</DD>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I have an nVidia XYZ card, and when I click on the GUI's display window to toggle
-displaying the GUI panel, a black square appears where I clicked. I have
-the newest driver.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Yes, nVidia corrected a previous bug (above), and introduced a new one. Let's
-congratulate them. UPDATE: According to
-<A HREF="users_against_developers.html#nvidia">nVidia</A>, this has already been
-fixed.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+  <DT>Q: Jaki jest problem z gcc 2.96?</DT>
+  <DD>A: <B>Bardzo odradzamy używanie gcc 2.96!</B><BR>
+    Przeczytaj <A HREF="users_against_developers.html#gcc">ten</A> dokument po
+    więcej szczegółów a tym, dlaczego Red Hat wypuścił gcc 2.96 i jakie są z nim
+    problemy. Jeżeli nadal naprawdę chcesz używać go, upewnij się, że pobrałeś
+    najnowszą wersję i dod tego momentu jesteś zdany na własne siły. <B>Nie</B>
+    zgłaszaj błędów, <B>nie</B> proś o pomoc na grupie dyskusyjnej. <B>Nie</B>
+    będziemy dostarczać żadnej pomocy w przypadku gdy wystąpią jakieś problemy.</DD>
+  <DD>&nbsp;</DD>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When I use the GUI with SDL video output, a second video window is created.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Known, don't use SDL for the GUI yet.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+  <DT>Q: Świętnie, mam gcc 3.0.1 z Red Hata/Mandrake'a, więc jestem w porządku!</DT>
+  <DD>A: Nie, ponieważ były/są również problemy z tymi kompilatorami.
+    Sprawdź status aktualnie wspieranych prze MPlayera kompilatorów, zobacz sekcję
+    <A HREF="documentation.html#installation">Instalacja</A>.</DD>
+  <DD>&nbsp;</DD>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Oh the world is cruel ...! SDL has only <CODE>x11</CODE> target, but not
-<CODE>xv</CODE>!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Try that <CODE>x11</CODE> target again. Now try <CODE>-vo x11 -fs -zoom</CODE>.
-See the difference? No?! OK, here comes the enlightenment: SDL's
-<CODE>x11</CODE> target uses xv when available, you don't have to worry about
-it ... Note: you can force/disable Xv via SDL using <CODE>-forcexv<CODE> and <CODE>-noxv</CODE>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+  <DT>Q: Próbowałem skompilować MPlayera,ale dostaję te komunikaty:
+    <PRE>
+    In file included from /usr/include/g++-v3/bits/std_cwchar.h:42,
+                     from /usr/include/g++-v3/bits/fpos.h:40,
+                     from /usr/include/g++-v3/bits/char_traits.h:40,
+                     from /usr/include/g++-v3/bits/std_string.h:41,
+                     from /usr/include/g++-v3/string:31,
+                     from libwin32.h:36,
+                     from DS_AudioDecoder.h:4,
+                     from DS_AudioDec.cpp:5:
+    /usr/include/wchar.h: In function Long long int wcstoq(const wchar_t*,
+       wchar_t**, int)':
+    /usr/include/wchar.h:514: cannot convert `const wchar_t* __restrict' to
+    `const
+    </PRE>
+  </DT>
+  <DD>A: Zrób upgrade glibc do najnowszej wersji. w Mandrake'u, użyj 2.2.4-8mdk.</DD>
+  <DD>&nbsp;</DD>
 
-<TD COLSPAN=3>
-<B><A NAME=5.5><FONT CLASS="text">5.5. Feature requests</A></B>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+  <DT>Q: ... gcc 2.96 ... (Tak, niektórzy ludzie NADAL wykłucają się o gcc 2.96!)</DT>
+  <DD>A: Cytat z 
+    <A HREF="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">listu</A>
+    A'rpi wysłał na grupę
+    <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>
+    (słowo 'ideg' jest oppisane poniżej):
+    <BLOCKQUOTE>
+    <P>No i mamy ideg'i. I nasz licznik ideg przepełnia się raz za razem.</P>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Is there a hint on how to watch RealMedia movies in MPlayer?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-There's no way to do it. Therefore this format deserves to die in flames.
-Theoretically you can reverse engineer Real codecs built for Linux (they
-are available as .so files), but in practice that's really difficult, even
-if you know how the compiler used by Real is making assembler code.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+    <P>Niestety MPlayer jest poza naszą kontrolą. Jest używany przez lamerów,
+    użytkowników Linuksa którzy nie potrafią korzystać nawet z Windowsa, i nigdy
+    nie próbowali skompilować jądra. Zainstalowują oni (ze standardowymi opcjami)
+    Mandrake'a lub Red Hata lub SuSE, i bez RTFM'owania wysyłają wiadomości
+    mówiące 'to ne działa! pomóżcie mi! proszę! jestem nowy w Linuksie! pomóżcie!
+    oh! pomóżcie mi!'. Nie możemy ich zatrzymać, ale ostatnio próbujemy zmusić
+    ich do RTFM i do czytania komunikatów ./configure i MPlayera.</P>
+  
+    <P>I wy sprytni goście przychodzący i obrażający nas z gcc 2.96 i binarnymi
+    pakietami. Zamiast pomagać użytkownikom lub tworzyć poprawki, które rozwiązałyby
+    problemy.</P>
+  
+    <P>Połowa naszego dodatkowego/wolnego czasujest poświęcana na odpowiadanie na
+    głupie listy tutaj i tworzenie nowych sztuczek i kontroli w konfiguracji by
+    uniknąć takich listów.</P>
+  
+    <P>I tu jest równowaga. Po jednej stronie wy, sprytni goście, mówiący że jesteś
+    bardzo źli, bo nie lubimy zapluskwionego gcc 2.96, a po drugiej stronie
+    są ci 'nowi w Linuksie', którzy pokazują nam, że gcc 2.96 ma błędy.</P>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I'd like to seek +/- 1 frames instead of 10 seconds.
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-This won't be done. It was, but then it messed up A/V sync. Feel free to
-implement it, and send a patch. Don't ask for it.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+    <P>Wniosek: Nie możemy być dobrzy. Połowa ludzi zawsze będzie mówiła, że
+    jesteśmy źli.</P>
+  
+    <P>Może powinniśmy zakończyć projekt, zrobić go zamknięto-źródłowym, komercyjnym
+    i dostarczać pomoc do instalacji. Potem mogliśmy porzucić aktualne prace, no coż,
+    programiści mogli być szybsi, i mogliśmy zarobić dużo pieniędzy i kupić
+    duży dom, itd. itp. Naprawdę tego chcecie? Wydaję się że tak.</P>
+    </BLOCKQUOTE>
+  </DD>
+  <DD>&nbsp;</DD>
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-  Where is the Windows version?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-  It's not released, and won't be. Look around the Windows scene (open source
-  ASF parsers, open source ASF encoders, etc) and you'll know why. We don't
-  want to go to jail.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+  <DT>Q: Wyjście SDL nie działa lub nie kompiluje się. Problemem jest ...</DT>
+  <DD>A: Było to testowane by działało z SDL 1.2.x i może się uruchomić z SDL 1.1.7+.
+    To <B>nie</B> działa z jakąkolwiek wcześniejszą wersją. Tak więc, jeżeli wybierzesz
+    taką wersję, jesteś zdany na własne siły..</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Ciągle mam kłopoty z obsługą SDL. gcc mówi coś o "undefined reference to
+    `SDL_EnableKeyRepeat'". Co teraz?</DT>
+  <DD>A: Gdzie zainstalowałeś biblioteki SDL? Jeżli zainstalowałeś w /usr/local
+    (domyślnie) wtedy zedytuj początek pliku config.mak i dodaj
+    "-L/usr/local/lib" po "X_LIBS=". Teraz make. I gotowe!</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: To się nie kompiluje, brakuje uint64_t inttypes.h i podobnychrzeczy...</DT>
+  <DD>A: Skopiuj etc/inttypes.h do katalogu MPlayera
+    (<CODE>cp etc/inttypes.h .</CODE>) i spróbuj ponowie...</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam Linuksa uruchomionego na Pentium III, ale <CODE>./configure</CODE>
+    nie wykrywa SSE...</DT>
+  <DD>A: Tylko jądro w wersji 2.4.x wspiera SSE (lub spróbuj 2.2.19 lub nowszego, ale
+    bądź przygotowany na problemy).</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam G200/G400, jak skompilować/używać sterownika mga_vid?</DT>
+  <DD>A: Przeczytaj <A HREF="video.html#mga_vid">dokumentację mga_vid</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Czy są pakiety rpm/deb/... MPlayera?</DT>
+  <DD>A: Możesz zrobić pakiet .deb samodzielnie, sprawdź sekcję
+    <A HREF="documentation.html#debian">pakietów Debiana</A>.
+    Są linki do oficjalnych pakietów RPM Red Hata dostępne na naszej
+    <A HREF="http://www.mplayerhq.hu/homepage/dload.html">stronie download</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Podczas 'make', MPlayer narzeka na biblioteki X11. Nie rozumiem, przecież
+    MAM zainstalowane X!?</DT>
+  <DD>A: ... ale nie masz zainstalowanych pakietów deweloperskich X. Lub nie poprawnie.
+    Nazywają się XFree86-devel* w Red Hat, i xlibs-dev w Debianie. Ponad to sprawdź
+    czy  linki symboliczne <CODE>/usr/X11</CODE> i <CODE>/usr/include/X11</CODE>
+    są zrobione (to może być problemem w systemach Mandrake). Mogą one być stworzone
+    tymi komendami:<BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>$ ln -sf /usr/X11R6 /usr/X11</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>$ ln -sf /usr/X11R6/include/X11 /usr/include/X11</CODE><BR>
+    Twoja dystrybucja może się różnić od 
+    <A HREF="http://www.pathname.com/fhs/">Standardu Hirarchii Systemu Plików</A> (ang.
+    Filesystem Hierarchy Standard.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Nie mogę skompilować SVGAlib. Używam jądra 2.3/2.4 ...</DT>
+  <DD>A: Musisz zedytować plik Makefile.cfg SVGAliba i odkomentować
+    <CODE>BACKGROUND = y</CODE>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Skompilowałem MPlayera z wsparciem dla libdvdcss/libdivxdecore, ale gdy
+    próbowałem go uruchomić, powiedział:<BR>
+    <CODE>&gt; error while loading shared libraries: lib*.so.0: cannot load
+    shared object file: No such file or directory</CODE><BR>
+    <CODE>&gt; bład podczas ładowania biblioteki współdzielonej: lib*.so.0: nie można
+    załadować docelowego pliku: Nie ma takiego pliku ani katalogu</CODE><BR>
+    Sprawdziłem ten plik i JEST on w <CODE>/usr/local/lib</CODE>...</DT>
+  <DD>A: Dodaj <CODE>/usr/local/lib</CODE> do <CODE>/etc/ld.so.conf</CODE> i uruchom
+    <CODE>ldconfig</CODE>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Hmm, dziwne. Podczas ładowania modułu jądra mga_vid.o, Znalazłem to
+    w logach:<BR>
+    <CODE>Warning: loading mga_vid.o will taint the kernel: no license</CODE><BR>
+    <CODE>Warning: ładowanie mga_vid.o zanieczyści jądro: nie ma licencji</CODE></DT>
+  <DD>A: Najnowszy modutils (narzędzie do ładownie modułów do jądra - przyp. tłum.)
+    wymaga flagi wskazującej licencję equire a flag indicating the license
+    (głównie by uniknąć debugowania sterowników z zamkniętym kodem).
+    Zrób upgrade kernela, modutilsa i MPlayera.</DD>
+  <DD>&nbsp;</DD>
+
+    <DT>Q: Podczas kompilowania MEncodera, 'wywala się' (segfaults) podczas linkowania!</DT>
+    <DD>A: To problem linkera. Upgrade binutils spowinien pomóc (2.11.92.*
+      lub nowsze powinny być dobre). Ponieważ to nie jest nasza wina, prosimy, <B>nie</B>
+      zgłaszaj takich błędów!</DD>
+    <DD>&nbsp;</DD>
+
+    <DT>Q: MPlayer wywala (segmentation fault) podcas sprawdzania pthread!</DT>
+    <DD>A: chmod 644 /usr/lib/libc.so</DD>
+    <DD>&nbsp;</DD>
+
+    <DT>Q: Chciałbym skompilować MPlayera na Miniksie!</DT>
+    <DD>A: Ja też. :)</DD>
+
+</DL>
 
 
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-What card do you suggest me to buy?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A0:</TD><TD><FONT CLASS="text">
-It's for your information only but our criteria are:
-</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A1:</TD><TD><FONT CLASS="text">
-Speed:<BR>
-This parameter can be computed easily:
-<OL>
-  <LI>Which movies do you plan to watch?</LI>
+<H2><A NAME="general">5.2 Pytania ogólne</A></H2>
+
+<DL>
+
+  <DT>Q: Jak mam poptrawnie przygotować łatkę na MPlayera?</DT>
+  <DD>A: Stworzyliśmy <A HREF="../tech/patches.txt">krótki dokument</A> opisujący
+    wszystkie wymagane szczegóły. Prosimy, podążaj za tymi insrukcjami.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Jak mogę wewsprzeć programistów MPlayera?</DT>
+  <DD>A: Będziemy bardziej niż szczęśliwi przyjmując twóje
+    <A HREF="http://www.mplayerhq.hu/homepage/donations.html">dotacje</A>.
+    ze sprzęt i oprogramowanie. Pomogą one nam w ciągłym tworzeniu MPlayera.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Jak mogę stać się programistą MPlayera?</DT>
+  <DD>A: Zawsze mile widzimy koderów i ludzi tworzących dokumentację.  Przeczytaj
+    <A HREF="../tech/">dokumentację techniczną</A> by złapać pierwsze szlify. Potem
+    powinieneś zapisać się na grupę dyskusyjną
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</A>
+    i rozpocząc pisanie kodu.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Czy mogę uruchomć MPlayera kilka razy na raz?</DT>
+  <DD>A: Tak. Niektóre sterowniki wideo jak xv, dga lub (x)mga mogą być uruchomione
+    tylko raz w tym samym czasie, niektóre odpadają w kombinacjach z konkretnymi
+    kartami graficznymi i sterownikami. Z tymi sterownikami nie będziesz mógł
+    uruchomić MPlayera więcej niż jeden raz. W mniejszym stopniu, ale zależy to
+    również od sterownika audio. Nie wszystkie pozwalają na odtwarzanie wielu
+    strumieni na tym samym urządzeniu.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam licznik czasu w lewym górnym rogu. Jak mogę go wyłączyć?</DT>
+  <DD>A: Naciśnij <CODE>o</CODE> i spróbuj opcji <CODE>-osdlevel</CODE>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Opcje <CODE>-xy</CODE> lub <CODE>-fs</CODE> nie działają ze sterownikiem
+    x11 (<CODE>-vo x11</CODE>)...</DT>
+  <DD>A: Dziła, ale ty musisz wyraźnie wyszczególnić skalowanie programowe
+    (bardzo wolne) opcją <CODE>-zoom</CODE>. Lepiej użyj wsparcia dla XF86VidMode:
+    Musisz dodać opcje <CODE>-vm</CODE> i <CODE>-fs</CODE>, i zrobione. Upewnij się
+    czy masz poprawne modeline w pliku XF86Config i spróbuj zrobić by
+    <A HREF="video.html#dga">sterownika DGA</A>
+    <A HREF="video.html#sdl">steronika SDL z DGA</A> działały u ciebie.
+    To jest o wile szybsze. Jeżeli SDL z DGA działa, użyj go, to może działać jeszcze
+     szybciej.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Co oznaczają liczby w linii statusu?</DT>
+  <DD>A: Przykład:
+    <CODE>A: 2.1  V: 2.2  A-V: -0.167  ct: 0.042  57/57  41%  0%  2.6% 0 4 49%</CODE>
     <UL>
-      <LI><B>MPEG1:</B> 320x200@32=256000<BR>
-        You need only 256*25fps=6.4MB/sec of bandwidth (This format can be played
-        in real-time on any PC since the times of Pentium-100 + S3Virge).</LI>
-      <LI><B>MPEG4:</B> 640x480@32=1228800<BR>
-        You need a video bandwidth of 1.2*25fps=30MB/sec. To watch such a movie
-        in real-time you need a PC equivalent to a Celeron-450 and a DIMM based
-        video card.</LI>
-      <LI><B>MPEG2 (aka DVD or SDTV):</B> 1024x768@32=3145728<BR>
-        You need a video bandwidth of 3*30fps=90MB/sec. In extreme cases (if your
-        video card supports IDCT decoding) the hardware requirements are the same
-        as for MPEG4.</LI>
-      <LI><B>HDTV (High Definition TeleVision):</B> 2000x2000@32=16000000<BR>
-        You need a video bandwidth of 16*30fps=480MB/sec. You also need at least
-        32MB of video memory to watch this stream: 16MB for the RGB area and 16MB
-        for the YUV area.</LI>
+      <LI>A: pozycja dźwięku w sekundach</LI>
+      <LI>V: pozycja wideo w sekundach</LI>
+      <LI>A-V: różnica audio-video w sekundach (opóźnienie)</LI>
+      <LI>ct: całkowita dokonana korekcja synchronizacji A-V</LI>
+      <LI>odtworzone klatki (liczone od ostaniego przeszukiwania)</LI>
+      <LI>zdekodowane klatki (liczone od ostaniego przeszukiwania)</LI>
+      <LI>użycie procesora przez kodek wideo (dla slices i DR to zawiera
+        video_out)</LI>
+      <LI>użycie procesora przez video_out</LI>
+      <LI>użycie procesora w procentach przez kodek audio</LI>
+      <LI>klatki, które musiały być porzucone, by zachować synchronizację A-V</LI>
+      <LI>aktualne puziom postprocessingu obrazu (podczas używania <CODE>-autoq</CODE>)</LI>
+      <LI>aktualne zapełnienie bufora (w granicach 50% jest w normie)</LI>
     </UL>
-  <LI>The bandwidth of PCI slots is: 33MHz*32Bit=133MB/sec. PCI2.1 has
-    66MHz*32Bit=266MB/sec which is more than enough for playing any movie (except
-    HDTV streams which really require an AGP bus).</LI>
-  <LI>What memory type should be installed on the video card:
+    Większość z nich jest potrzebnych do debugowania i niektóre zostaną usunięte.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Co, jeżeli nie chcę żeby komunikaty się pojawiały?</DT>
+  <DD>A: Użuj opcji <CODE>-quiet</CODE> i przeczytaj stronę manuala.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Dlaczego użycie procesora przez video_out wskazuje zero (0%) dla
+    niektórych plików?</DT>
+  <DD>A1: Użycie nie jest zerowe, ale kodek już to wykonuje, tak więc
+    nie może być on wskazany osobno. Powinieneś odtworzyć plik używając
+    <CODE>-vo null</CODE> i potem <CODE>-vo ...</CODE> i sprawdzić różnice
+    prędkości video_out.</DD>
+  <DD>A2: Używasz Direct Rendering,
+    kiedu to procent użycia procesora na dekodowanie zawiera również procent 
+    użycia procesora na wyświetlanie.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Występują błędy, że plik nie został odnaleziony w
+    <CODE>/usr/lib/win32/</CODE> ...</DT>
+  <DD>A: Pobierz kodeki Win32 z naszej
+    <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">strony z kodekami</A>
+    (pakiet kodeków avifile zawiera inne pliki DLL) i zainstaluj je.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Czy jest jakaś grupa dyskusyjna MPlayera?</DT>
+  <DD>A: Tak. Dół strony informacyjnej na
+    <A HREF="http://www.mplayerhq.hu/homepage/info.html">naszej stronie domowej</A>
+    by się zapisać.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Znalazłem złosliwy błąd kiedy próbowałem odtworzyć mój ulubiony film!
+    Kogo powinienem powiadomić?</DT>
+  <DD>A: prosimy, przeczytaj <A HREF="bugreports.html">przewodnik zgłaszania będów</A>
+    i podążaj za instrukcjami.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam problem z odtworzeniem zakodowanego kodekiem ... . Czy mogę go użyć?</DT>
+  <DD>A: Sprawdź
+    <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">status wsparcia dla kodeków</A>,
+    jeżeli nie ma tam twojego kodeka przeczytaj
+    <A HREF="codecs.html">dokumentację kodeków</A>, zwłaszcza
+    <A HREF="codecs.html#importing">HOWTO importowania kodeków</A> i skontaktuj się z nami.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Umm, co to jest "IdegCounter" (wcześniej w tym tłumaczeniu użyte jako
+    "licznik ideg" - przyp. tłum.)?</DT>
+  <DD>A: Jest to kombinacja węgierskiego i angielskiego słowa. W węgierskim "Ideg"
+    oznacza to samoco w polskim "zdenervowany", i wymawia się tak jak się pisze
+    (tylko w języku polskim, oczywiście). Zostało pierwszy raz użyte, bu zmierzyć
+    stopień zdenerwowania A'rpiego po kilku (hmm) "tajemniczych" zniknięciach kodu
+    w CVSie ;)</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: I co to jest "Faszom(C)ounter"?</DT>
+  <DD>A: "Fasz" jest to węgierskie słowo, którego nie chcesz znać, inne to 
+    połączenie zboczonych myśli programistów MPlayera.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: LIRC nie działa, ponieważ...</DT>
+  <DD>A: Czy jesteś pewny, że używasz <CODE>mplayer</CODE> zamiast
+    <CODE>mplayer_lirc</CODE>? Zauważ, że <CODE>mplayer_lirc</CODE> było dawno
+    temu, jeszcze za wersji 0.60, ale ostatnio zostało przeniesione do
+    <CODE>mplayera</CODE>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Napisy są bardzo ładne, najładniejsze jakie do tej pory widziałem, ale
+    spowalniają odtwarzanie! Wiem, że to mało prawdopodobne...</DT>
+  <DD>A: Po uruchomieniu <CODE>./configure</CODE>, zedytuj <CODE>config.h</CODE>
+    i zastąp <CODE>#undef FAST_OSD</CODE> na <CODE>#define FAST_OSD</CODE>.
+    Potem przekompiluj.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Wyświetlanie na ekranie (OSD) migocze!</DT>
+  <DD>A: Używasz sterownika vo z pojedynczym buforowaniem (x11,xv). Z xv,
+    użyj opcji <CODE>-double</CODE>. Spróbuj także <CODE>-vf expand</CODE></DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Co to jest dokładnie to libavcodec?</DT>
+  <DD>A: Zobacz <A HREF="codecs.html#libavcodec">sekcję o libavcodec</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Ale configure mówi mi "Checking for libavcodec ... no"!</DT>
+  <DD>A: Musisz pobrać libavcodec z CVSa FFmpeg. Przeczytaj instrukcję
+    w <A HREF="codecs.html#libavcodec">sekcji o libavcodec</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Taskbar Icewma zakrywa film podczas odtwarzania pełnoekranowego!</DT>
+  <DD>A: To nie powinno się więcej zdarzyć, jeżeli dalej zasłania, użyj opcji
+    <CODE>-fstype layer</CODE> i zgłoś to na grupę dyskusyjną
+    <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Nie mogę używać GUI menu. Poprawnie klikam, ale nie mogę dostać się do
+    żadnej pozycji!</DT>
+  <DD>A: Używasz FVWM? Spróbuj poniższego:<BR>
+    Start -&gt; Settings -&gt; Configuration -&gt; Base Configuration<BR>
+    Ustaw "Use Applications position hints" na "Yes".</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Jak mogę uruchomić MPlayera w tle?</DT>
+  <DD>A: Użyj: <CODE>mplayer &lt;opcje&gt; &lt;nazwa pliku&gt; &lt; /dev/null &amp;</CODE></DD>
+
+</DL>
+
+
+<H2><A NAME="playback">5.3 Problemy z odtwarzaniem</A></H2>
+
+<DL>
+
+  <DT>Q: Mogę odtwarzać konkretne pliki AVI lae nie mam dźwiękui błąd typu:
+    <PRE>
+    Detected audio codec: [divx] afm:4 (DivX audio (WMA))
+    Requested audio codec family [divx] (afm=4) not available (enable it at
+    compile time!)
+    
+    Wykryty kodek audio: [divx] afm:4 (DivX audio (WMA))
+    Wymagana rodzina kodeków audio [divx] (afm=4) nie jest dostępna (włącz je
+    podczas kompilacji!)
+    </PRE>
+  </DT>
+  <DD>A: Prawdopodobnie dźwięk korzysta z kodeka niewspieranego bezpośrednio
+    przez MPlayera. Zainstaluj pakiet kodeków Win32 jak opisano w README
+    lub w sekcji <A HREF="documentation.html#installation">Instalacja</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: ... działa z avifile/aviplay ale nie z MPlayer.</DT>
+  <DD>A: MPlayer to nie avifile.
+    W tych odtwarzaczach wspólny jest tylko mechanizm ładowania bibliotek Win32.
+    Kodeki (DLL), synchronizacja, selektor etc są całkowicie rózne
+    i nie powinny być porównywane.
+    Jeżeli coś działa z aviplay to nie oznacza że będzie dziłać z MPlayer
+    i vice versa.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Dźwięk jesr rozsynchronizowany podczas odtwarzania pliku AVI.</DT>
+  <DD>A: Spróbuj opcji <CODE>-bps</CODE> lub <CODE>-nobps</CODE>. Jeżli to nie pomoże
+    przeczytaj <A HREF="bugreports.html">to</A> i wyślij plik na FTP.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: MPlayer wyłącza się z błędami podczas używania l3codeca.acm.</DT>
+  <DD>A: Sprawdź wyjście z <CODE>ldd /usr/local/bin/mplayer</CODE>. Jeżeli zawiera<BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 =&gt; /lib/libc.so.6 (0x4???????)</CODE><BR>
+    gdzie "?" jest liczbą, to wtedy wszystko jest w porządku, nie tu trzeba szukać powodu
+    błędu. Jeżeli jest to:<BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 =&gt; /lib/libc.so.6 (0x00??????)</CODE><BR>
+    to wtedy jest to problem z twoim jądrem/libc. Może jakiś łatek wzmacniających
+    bezpieczeństwo (dla przykładu łatka OpenWall Solar Designera) które
+    wymuszają ładowanie bibliotek na bardzo niskie adresy. Ponieważ l3codeca.acm
+    jest nie-przemieszczalnym DLLem, musi być załadowany na 0x00400000, nie możemy
+    tego zmienić. Powinieneś używać niepołatanego jądra, lub użyć opcji MPlayera
+    <CODE>-afm 1</CODE> by wyłączyć użycie l3codeca.acm.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mój komputer odtwarza pliki M$ DivX AVI w rozdzielczości ~ 640x300
+    z dźwiękiem mp3 stereo zbyt wolno. Gdy używam opcji -nosound, wszystko jest
+    wporządku (ale cicho).</DT>
+  <DD>A: Twój komputer jest za wolny lub twój sterownik dźwięku jest popsuty.
+    Przejrzyj dokumentację, by zobaczyć czy możesz poprawić wydajność.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: MPlayer wyłącz się z "MPlayer interrupted by signal 4 in module:
+    decode_video" ("MPlayer przerwany sygnałem 4 w module: decode_video") .</DT>
+  <DD>A: Spróbuj uruchomić MPlayera na komputerze, na którym go kompilowałeś.
+    Możesz też przekompilować go z dynamicznym wykrywaniem procesora.
+    (<CODE>./configure --enable-runtime-cpudetection</CODE>). Nie używaj
+    MPlayera na procesorach innym od tego, na którym był kompilowany,
+    chyba że z funkcją o której przed chwilą wspomniano.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam proble z [twój menadżer okna] i trybem pełnoekranowym z
+    xv/xmga/sdl/x11...</DT>
+  <DD>A: Przeczytaj <A HREF="bugreports.html">przewodnik zgłaszania błędów</A>
+    i wyślij nam poprawny raport o błędzie.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Dostaje ten błąd podczas odtwarzaniaplików MPEG:
+    Nie mogę znaleźć kodeka dla formatu wideo 0x10000001!
+    Can't find codec for video format 0x10000001!
+    </DT>
+  <DD>A: Masz starą wesję codecs.conf at <CODE>~/.mplayer/</CODE>.
+    Zrób jego upgrade z <CODE>/etc/</CODE>.<BR>
+    <B>LUB</B> musisz użyć opcji <CODE>vc=</CODE> lub czegoś podobnego
+    w twoim pliku(ach) konfiguracyjnym(nych).</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Podczas uruchamiania MPlayera w KDE wyświetla się po prostu czarny ekran, 
+    i nic się nie dzieje. Po około jednej minucie film zaczyna być odtwarzany.</DT>
+  <DD>A: Demon dźwięku KDE - arts blokuje urządzenie dźwiękowe. Możesz czekać, aż
+    film się włączy lub wyłączyć demona arts w Centrum sterowania. Jeżeli chcesz
+    używać dźwięku poprzez artsa, określ wyjście audio na nasz wbudowany sterownik
+    dźwięku arts (<CODE>-ao arts</CODE>). Jeżli to nie zadziała, lub nie jest
+    wkompilowane, wypróbuj SDL (<CODE>-ao sdl</CODE>) i upewnij się, że twój SDL może
+    przechwytywać dźwięk arts. Są jeszcze inne opcje, by uruchomić MPlayera z 
+    artsdsp.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam AVI które daje szary ekraz podczas odtwarzania z <CODE>-vc odivx</CODE>
+    i zielony z <CODE>-vc divx4</CODE>.</DT>
+  <DD>A: To nie jest plik DivX, ale M$ MPEG4v3. Zrób update twojego codecs.conf.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdy odtwarzam film dźwięk nie jest zsynchronizowany z obrazem i/lub MPlayer
+    "wywala się" z tym komunikatem:<BR>
+    <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></DT>
+  <DD>A: Może być tego kilka powodów.
     <UL>
-      <LI><B>SIMM</B> - Avoid that.</LI>
-      <LI><B>DIMM</B> - Good if your video card has 128-bit memory access.</LI>
-      <LI><B>DDR</B> - Is fast enough for all types.</LI>
-    </UL>
-</OL>
-Note: DGA comparison shows that there is no visible difference between video
-cards which have the same type of video memory installed.<BR>
-<B>Conclusion:</B> If you have enough CPU power (Celeron-450 or K6-2-500) it
-should be enough to buy any video card which has at least 8MB of DIMM or DDR
-memory.
-</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A2:</TD><TD><FONT CLASS="text">
-Quality:<BR>
-This question was investigated in depth at:
-<br><a href="http://www.anandtech.com/showdoc.html?i=1332&rndr=04132002115140">
-AnandTech</a> - Video Card Roundup - DVD Quality, Features &amp; Performance
-(October 2000)
-</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A3:</TD><TD><FONT CLASS="text">
-<B>Working</B> features under Linux:<BR>
-If you are a Win32 user then probably you have support (from driver and DirectX8
-side) for any feature your chip has.<BR>
-But for <B>Linux</B> users there are currently only a few vendors which have more
-or less advanced driver support:<BR><BR>
-
-<table BORDER=1 COLS=5 WIDTH="100%">
-<tr>
-<td>&nbsp;</td>
-
-<td>
-<center>Matrox Gxxx</center>
-</td>
-
-<td>
-<center>ATI m64/r128/radeon</center>
-</td>
-
-<td>
-<center>nVidia tnt/geforce</center>
-</td>
-
-<td>
-<center>S3 Virge/Savage</center>
-</td>
-</tr>
-
-<tr>
-<td>Driver's provider</td>
-
-<td>OEM and enthusiasts</td>
-
-<td>OEM and enthusiasts</td>
-
-<td>OEM or enthusiasts</td>
-
-<td>enthusiasts</td>
-</tr>
-
-<tr>
-<td>Driver's quality</td>
-
-<td>best (X11,kernel)</td>
-
-<td>best (X11,GATOS,kernel)</td>
-
-<td>buggy/unstable (X11 only)</td>
-
-<td>slow (X11 only)</td>
-</tr>
-
-<tr>
-<td>VIDEO OVERLAY</td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-
-<td></td>
-</tr>
-
-<tr>
-<td>BES and YV2RGB</td>
-
-<td>YES</td>
-
-<td>YES</td>
-
-<td>YES</td>
-
-<td>YES</td>
-</tr>
-
-<tr>
-<td>scaling filters</td>
-
-<td>N/A</td>
-
-<td>YES</td>
-
-<td>N/A</td>
-
-<td>N/A</td>
-</tr>
-
-<tr>
-<td>adaptive deinterlace</td>
-
-<td>N/A</td>
-
-<td>YES</td>
-
-<td>N/A</td>
-
-<td>N/A</td>
-</tr>
-
-<tr>
-<td>Video equalizer (hue, contrast, saturation, color correction)</td>
-
-<td>YES</td>
-
-<td>YES</td>
-
-<td>GeForce only</td>
-
-<td>N/A</td>
-</tr>
-
-<tr>
-<td>Alpha blending, color and video keys</td>
-
-<td>PARTIAL</td>
-
-<td>PARTIAL (under development)</td>
-
-<td>N/A</td>
-
-<td>N/A</td>
-</tr>
-
-<tr>
-<td>Video capture</td>
-
-<td>YES (Marvel)</td>
-
-<td>YES (GATOS)</td>
-
-<td>N/A</td>
-
-<td>N/A</td>
-</tr>
-
-<tr>
-<td>TV-out</td>
-
-<td>G400 only</td>
-
-<td>YES</td>
-
-<td>N/A</td>
-
-<td>N/A</td>
-</tr>
-</table>
-
-<P>It's a very rough overview of video cards. We should pay attention to video
-card models. If for example Matrox G400 drivers support TV-out then G450 and
-G550 do not necessarily have this feature.<BR>
-Another example: Adaptive deinterlacing exists only for the Rage128 chip and
-isn't present on Mach64+ ones. The same goes for 3D features. They are different
-from Mach64 to the Radeon 8500 with TRUFORM technology.</P>
-
-<P><B>ANYWAY - THE MPLAYER TEAM DOESN'T ACCEPT ANY CLAIMS IF AFTER READING THIS
-MATERIAL YOU BUY A CARD WHICH IS UNSATISFACTORY FOR YOU!!! THIS IS ONLY OUR
-POINT OF VIEW.</B></P>
-
-<P><B>Q:</B> If a PCI slot is fast enough for most types of movies then why is
-the S3 Virge too slow for them?<BR>
-<B>A:</B> Due to its SIMM memory.</P>
-
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD COLSPAN=3>
-<B><A NAME=5.6><FONT CLASS="text">5.6. Encoding</A></B>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-How can I encode?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Read the <B>MEncoder</B> <A HREF="encoding.html">documentation</A>.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-My tuner works, I can hear the sound and watch the video with MPlayer, but
-MEncoder doesn't encode audio!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-TV audio encoding for Linux is currently unimplemented, we're working on it.
-At the moment it works only on BSD.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I can't encode DVD subtitles into the AVI!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-You have to specify the <CODE>-sid</CODE> option correctly!
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-MEncoder segfaults on startup!
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Upgrade DivX4Linux.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-How can I encode only selected chapters from a DVD?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Use the <CODE>-chapter</CODE> option correctly, like: <CODE>-chapter 5-7</CODE>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-I'm trying to work with 2GB+ files on a VFAT file system. Does it work?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-No, VFAT doesn't support 2GB+ files.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD>
-
-</TABLE>
+      <LI>Twój procesor <B>i/lub</B> karta wideo <B>i/lub</B> magistrala są za wolne.
+        Jeżeli to jest powód, to MPlayer wyświetla ten komunikat (a licznik porzuconych
+        klatek szybko idzie w górę).</LI>
+      <LI>Jeżli to AVI, możliwe że ma złe przeplatanie (interleaving). Spróbuj
+        opcji <CODE>-ni</CODE>.</LI>
+      <LI>Twój sterownik dźwięku ma błędy, lub używasz ALSA 0.5 z <CODE>-ao oss</CODE>.
+        Zobacz <A HREF="sound.html">sekcję o kartach dźwiękowych</A>.</LI>
+      <LI>AVI ma uszkodzony nagłówek, spróbuj opcji <CODE>-nobps</CODE>, i/lub
+        <CODE>-mc 0</CODE>.</LI>
+    </UL></DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam plik MJPEG który działa z innymi odtwarzaczami, a MPlayer wyświetla
+    tylko czarny ekran.</DT>
+  <DD>A: Wyłącz DLLe Windowsa <CODE>codecs.conf</CODE>, lub użyj opcji opcji
+    <CODE>-vc ffmjpeg</CODE> (aby to zadziałalo skompiluj MPlayer z libavcodec).</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdy próbuje zgrywać z mojego tunera, to działa, ale kolory są dziwne.
+    Z innymi programami wszystko jest w porządku.</DT>
+  <DD>A: Twoja karta prawdopodobnie źle zgłasza przestrzeń kolorów. Spróbuj z YUY2
+    zamiast domyślnego (zobacz <A HREF="documentation.html#tv">dkomentacje wekścia
+    TV</A>).</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdy rozpocząłem odtwarzanie, dostałem ten komunikat, ale wygląda na to, że
+    wszystko jest w porządku:<BR>
+    <CODE>Linux RTC init: ioctl (rtc_pie_on): Permission denied</CODE></DT>
+  <DD>A: Potrzebujesz uprawnień roota lub specjalnych ustawień jądra, by móc
+    korzystać z nowego kodu odmierzania czasu. Po szczegóły zobacz
+    <A HREF="documentation.html#rtc">sekcję o RTC</A> dokumentacji.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam problemy z synchronizacją A/V. Niektóre pliki AVI są odtwarzane dobrze, 
+    ale niektóre odtwarzane są z podwójną prędkością!</DT>
+  <DD>A: Toja karta/sterownik dźwięku jest uszkodzony. Najbardziej prawdopodobne,
+    że są one ustawione na 44100Hz, a ty próbujesz odtworzyć plik z dźwiękiem
+    22050Hz. Spróbuj przepróbkować plugin audio.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Wszystkie pliki WMV (lub inne..) są ostwarzane dając tylko zielone/szare
+    okno, a jest tylko dźwięk! MPlayer wyświetla:<BR>
+    <CODE>Detected video codec: [null] drv:0 (NULL codec (no decoding))</CODE></DT>
+  <DD>A: Zrób update twojego <CODE>codecs.conf</CODE>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Dostaje zbyt duże wartości procentowe (zbyt duże) podczas odtwarzania plików
+    na moim laptopie.</DT>
+  <DD>A: To efekt systemu power management / power saving w twoim laptopie
+    (BIOS, nie jądro). Podłącz zewnętrzne źródło energii <B>przed</B> włączeniem
+    laptopa. Możesz także sprawdzić czy <A HREF="http://www.brodo.de/cpufreq/">cpufreq</A>
+    (interface SpeedStep dla Linuks) ci pomoże.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Dźwięk/obraz śa całkowicie rozsynchronizowane gdy uruchamiam MPlayera jako
+    root na moim laptopie. wszystko działa normalnie, gdy uruchamiam go ze zwykłego
+    użytkownika.</DT>
+  <DD>A: To znowu skutek power managementa (patrz powyżej).  Podłącz zewnętrzne
+    źródło energii <B>przed</B> włączeniem laptopa lub użyj opcji
+    <CODE>-nortc</CODE>.</DD>
+
+</DL>
+
+
+<H2><A NAME="driver">5.4 Problemy ze sterownikiem video/audio (vo/ao)</A></H2>
+
+<DL>
+
+  <DT>Q: Nie mam dźwięku gdy odtwarzam wideo i dostaję komunikaty o błędzie
+    podobne do tego:
+    <PRE>
+    AO: [oss] 44100Hz 2ch Signed 16-bit (Little-Endian)
+    audio_setup: Can't open audio device /dev/dsp: Device or resource busy
+    couldn't open/init audio device -&gt; NOSOUND
+    Audio: no sound!!!
+    Start playing...
+    </PRE>
+  </DT>
+  <DD>A: Czy używasz KDE lub GNOME z demonem dźwięku ARTS lub ESD? Spróbuj
+    wyłączyć demona dźwięku lub użyj opcji <CODE>-ao arts</CODE> lub
+    <CODE>-ao esd</CODE>, by MPlayer używał ARTS lub ESD.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: A co ze strownikiem DGA? Nie mogę go znaleźć!</DT>
+  <DD>A: <CODE>./configure</CODE> automatycznie wykrywa sterownik DGA. Jeżeli
+    <CODE>-vo help</CODE> nie pokazuje DGA, wtedy to problem z instalacją X.
+    <CODE>./configure --enable-dga</CODE> i przeczytaj
+    <A HREF="video.html#dga">dokumentację</A>. Alternatywnie, wypróbuj steronik
+    DGA SDLa opcją <CODE>-vo sdl:dga</CODE>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: OK, <CODE>-vo help</CODE> pokazuje sterownik DGA, ale skarży się
+    na uprawnienia. Pomóżcie mi!</DT>
+  <DD>A: To działa tylko, jeżeli jest uruchomione jako root! To ograniczenie
+    DGA. Powinieneś przełączyć na roota (<CODE>su -</CODE>), i spróbować ponownie.
+    Innym rozwiązaniem jest nadanie MPlayerowi SUIDa roota, ale to
+    <B>nie jest zalecane!</B><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chown root /usr/local/bin/mplayer</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod 755 /usr/local/bin/mplayer</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>chmod +s /usr/local/bin/mplayer</CODE><BR>
+    <BLOCKQUOTE>
+      <B>Ostrzeżenie: zagrożenie dla bezpieczeństwa</B><BR>
+      Jest to <B>dużym</B> zagrożeniem dla bezpieczeństwa! <B>Nigdy</B> nie rób
+      tego na serwerach lub na komputerach, nad którymi nie masz całkowitej
+      kontroli, ponieważ inni użytkownicy uzyskają uprawnienia przez MPlayera
+      z SUIDem roota. <B>Zostałeś ostrzzeżony.</B>
+    </BLOCKQUOTE>
+  </DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdy używam Xvideo, moje Voodoo 3/Banshee pokazuje:<BR>
+    <CODE>X Error of failed request:  BadAccess (attempt to access private
+    resource denied)<BR>
+    &nbsp;&nbsp;Major opcode of failed request:  147 (MIT-SHM)<BR>
+    &nbsp;&nbsp;Minor opcode of failed request:  1 (X_ShmAttach)<BR>
+    &nbsp;&nbsp;Serial number of failed request:  26<BR>
+    &nbsp;&nbsp;Current serial number in output stream:27</CODE></DT>
+  <DD>A: Sterownik "tdfx" w XFree86 4.0.2/4.0.3 ma ten błąd. Zostało to naprawione
+    w związku z <A HREF="http://www.xfree86.org/cvs/changes_4_1.html">bugfix #621
+    XFree86 4.1.0 CVS log</A>. Więc zrób upgrade do XFree86 4.1.0 lub późniejszego.
+    Alternatywnie, najpierw pobierz (conajniej) DRI w wersji 0.6 ze
+    <A HREF="http://dri.sourceforge.net">strony domowej DRI</A>, lub użyj DRI z CVSa.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Wyjście OpenGL (<CODE>-vo gl</CODE>) nie działa (zwis/czarny ekran/błędy
+    X11/...).</DT>
+  <DD>A: Twój sterownik OpenGL  nie wspera dynamicznej zmiany tekstury
+    (glTexSubImage). Wiadomo, że to nie działa z binarnymi steronikami nVidii.
+    Działa z Utah-GLX/DRI i kartami Matrox G400. Działa również z DRI i kartami
+    Radeon. Nie chce działać z DRI i innymi kartami. Nie będzie działać z kartami
+    3DFX, z powodu ograniczenia rozmiaru tekstury do 256x256.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam kartę nVidia TNT/TNT2 i dokładnie pod filmem mam pasek z dziwnymi
+    kolorami! Czyja to wina?</DT>
+  <DD>A: To błąd binarnych sterowników X nVidii. Ten błąd pojawia się TYLKO
+    z kartami TNT/TNT2 i nie możemy z tym nic zrobić. By naprawić problem, zrób
+    upgrade do najnowszej wersji sterowników binarnych nVidii. Jeżeli nadal jest
+    źle, skarż się do nVidii!</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mam kartę nVidia XYZ i gdy klikam w oknie filmu w GUI by przełączyć się
+    na panel GUI, pojawia się czarny kwadrat, tam gdzie kliknąłem.
+    Mam najnowsze sterowniki.</DT>
+  <DD>A: Tak, nVidia poprawiła pprzedni błąd (powyżej), a wprowadziła nowy.
+    Pozostaje tylko pogratulować. UPDATE: Według
+    <A HREF="users_against_developers.html#nvidia">nVidii</A>, to zostało już
+    naprawione.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdy używam GUI z wyjściem wideo SDL, tworzone jest drugie okno</DT>
+  <DD>A: Wiemy o tym, na razie nie używaj SDL dla GUI.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Oh, świat jest okrutny  ...! Jedynym podsterownikiem SDL jest <CODE>x11</CODE>,
+    ale nie <CODE>xv</CODE>!</DT>
+  <DD>A: Więc wypróbuj jeszcze raz <CODE>x11</CODE>. Teraz wypróbuj
+    <CODE>-vo x11 -fs -zoom</CODE>. Widzisz różnice? Nie?! OK, tutej przychodzi
+    oświecenie: podsterownik SDLa <CODE>x11</CODE> używa xv gdy jest dostępne,
+    nie musisz się o to martwić ... Informacja: możesz wymusić/wyłączyć używanie
+    Xv przez SDL using <CODE>-forcexv</CODE> i <CODE>-noxv</CODE></DD>
+
+</DL>
+
+
+<H2><A NAME="dvd">5.5 Odtwarzanie DVD</A></H2>
+
+<DL>
+
+  <DT>Q: Co jest z nawigacją DVD (DVD navigation)?</DT>
+  <DD>A: Wsparcie dla dvdnav w MPlayer jest aktualnie nieukończone, jednak normalne
+    odtwarzanie działa. Jeżeli chcesz mieć wymarzone menu, musisz użyć innego
+    odtwarzacza, takiego jak <A HREF="http://xine.sourceforge.net">xine</A> lub
+    <A HREF="http://www.dtek.chalmers.se/groups/dvd/">Ogle</A>. Jeżeli zależy ci
+    na nawigacji DVD, wyślij <A HREF="../tech/patches.txt">łatkę</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdy odtwarzam DVD, napotykam na ten błąd:<BR>
+    <CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion
+    nfo_length / sizeof(cell_adr_t) &gt;= c_adt-&gt;nr_of_vobs' failed.</CODE></DT>
+  <DD>A: To znany błąd libdvdread 0.9.1/0.9.2. Użyj <B>libmpdvdkit2</B>,
+    który jest obecny w źródłach MPlayera i jest używany domyślnie.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Czy mogę skompilować libdvdread i libdvdcss na moim kochanym SPARCu na
+    Solarisie?</DT>
+  <DD>A: Kto wie... Powinno działać, więc prosimy przetestuj to i wyślij nam
+    reakcję. Najlepiej zgodnie z dokumentacją libdvdread i jego stroną domową.
+    Nie jesteśmy autorami libdvdread. Użyj <B>libmpdvdkit2</B>, który jest obecny
+    w źródłach MPlayera i jest używany domyślnie.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: A co z napisami? Czy MPlayer może je wyświetlić?</DT>
+  <DD>A: Tak. Zobacz <A HREF="cd-dvd.html#dvd">rozdział o DVD</A> w dokumentacji.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Jak mam ustawić kod regionu mojego napędu DVD? Nie mam
+    Windowsa!</DT>
+  <DD>A: Użyj
+    <A HREF="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset tool</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Czy muszę być (setuid) rootem/setuid fibmap_mplayer by muc odtwarzać
+     DVD?</DT>
+  <DD>A: Nie, tylko dla wsparcia starego stylu DVD. Jednak musisz mieć poprawne
+    uprawnienia na urządzenie DVD (w <CODE>/dev/</CODE>).</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdzie mogę pobrać pakiety libdvdread i libdvdcss?</DT>
+  <DD>A: Nie musisz. Użyj <B>libmpdvdkit2</B>, który jest obecny w źródłach
+    MPlayera i jest używany domyślnie. Możesz pobrać wymienione pakiety
+    ze <A HREF="http://www.dtek.chalmers.se/groups/dvd/">strony Ogle</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: ICzy jest możliwe odtworzyć/skodować tylko określone rozdziały?</DT>
+  <DD>A: Tak, spróbuj opcji <CODE>-chapter</CODE>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Odtwarzanie mojego DVD jest powolne!</DT>
+  <DD>A: Użyj opcji <CODE>-cache</CODE> (opisano w stronie manuala)
+    i spróbuj włączyć DMA w napędzie DVD narzędziem hdparm (opisano
+    w <A HREF="cd-dvd.html#cd">rozdziale o CD</A> w dokumentacji).</DD>
+
+</DL>
+
+
+<H2><A NAME="features">5.6 Proźby o nowe funkcje</A></H2>
+
+<DL>
+
+  <DT>Q: Jeżli MPlayer jest zapauzowany i próbuje przeszukać lub w ogóle naciskam
+    jakikolwiek przycisk, MPlayer przestaje być zapauzowany. Chciałbym móc przeszukiwać
+    w zapauzowanym filmie.</DT>
+  <DD>A: Jest bardzo skomplikowne, by zaimpletować to bez utraty synchronizacji A/V.
+    Do tej pory wszystkie próby zawiodły, ale łatki są mile widziane.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Chciałbym przeszukiwać o +/- 1 klatkę zamiast o 10 sekund.</DT>
+  <DD>A: To nie może być zrobione. Było, ale potem traciliśmy synchronizację A/V
+    Czuj się wolnym do napisania i wysłania łatki. Nie pytaj nas o to.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Gdzie jest wersja dla Windows?</DT>
+  <DD>A: Nie została wydana i nie będzie. Rozejrzyj się po świecie Windowsa
+    (parsery ASF z otwartym kodem, kodery ASF z otwartym kodem, itp.)
+    i zrozumiesz dlaczego. Nie chcemy iść do więzienia. BTW możesz
+    skompilować go włąsnoręcznie, na
+    <A HREF="documentation.html#cygwin">Cygwinie</A>.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Jak mogę zrobić, MPlayer zapamiętywał MPlayer opcje, które używam
+    dla konkretnego pliku?</DT>
+  <DD>A: Stwórz plik o nazwie <CODE>film.avi.conf</CODE> w którym umieścisz
+    specyficzne dla pliku opcje i umieścisz go w <CODE>~/.mplayer</CODE> lub
+    w katalogu tym samym co film.</DD>
+  <DD>&nbsp;</DD>
+
+</DL>
+
+
+<H2><A NAME="encoding">5.7 Kodowanie</A></H2>
+
+<DL>
+
+  <DT>Q: Jak mogę kodować?</DT>
+  <DD>A: Przeczytaj <A HREF="encoding.html">dokumentację</A> MEncodera.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Jak moge stworzyć płyty VCD?</DT>
+  <DD>A: Wypróbuj skryptu <CODE>mencvcd</CODE> z podkatalogu <CODE>TOOLS</CODE>.
+    Możesz nim zakodować płyty DVD lub inne filmy do formatu VCD lub SVCD,
+    a nawet wypalić je bezpośrednio na płytę CD.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Jak mogę połączyć dwa pliki wideo?</DT>
+  <DD>A: Było to dyskutowane bez końca na mplayer-users. Przeszukaj
+    <A HREF="http://mplayerhq.hu/cgi-bin/htsearch?restrict=/mplayer-users/">archiwa</A>
+    po kompletną odpowiedź. To skomplikowany temat, a rozwiązanie może zależeć
+    od wielu czynników, jak rodzaj plików, które chcesz połączyć. Przy szczęściu
+    pliki MPEG połączone w jeden plik. Do plików AVI są dwa narzędzia,
+    <A HREF="http://fixounet.free.fr/avidemux/">avidemux</A>
+    i avimerge (cześć pakietu narzędzi
+    <A HREF="http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/">transcode</A>),
+    którymi możesz to zrobić. Możesz także spróbować MEncoder jeżeli
+    masz dwa pliki zakodowane tym samym kodekiem i o tych samych wymiarach. Spróbuj<BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>cat file1 file2 &gt; file3</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>mencoder -ovc copy -oac copy -o out.avi -forceidx file3.avi</CODE></DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Mój tuner działa, szłyszę dźwięk i widzę obraz w MPlayerze,
+    ale MEncoder nie koduje dźwięku!</DT>
+  <DD>A: Kodowanie dźwięku TV w Linuksie jest aktualnie nieukończone, pracujemy
+    nad tym. W tej chwili działa to tylko w BSD.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Nie moge zakodować napisów DVD do pliku AVI!</DT>
+  <DD>A: Musisz poprawnie określić opcję <CODE>-sid</CODE>!</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: MEncoder "wywala się" przy starcie!</DT>
+  <DD>A: Zrób upgrade DivX4Linux.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Jak mogę skodować tylko wybrane rozdziały z DVD?</DT>
+  <DD>A: Użyj poprawnie opcji <CODE>-chapter</CODE>, np.:
+    <CODE>-chapter 5-7</CODE></DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Próbuje pracować z plikami 2GB+ na systemie plików VFAT. Czy to działa?</DT>
+  <DD>A: Nie, VFAT nie wspiera plików większych niż 2GB.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: Dlaczego zalecany bitrate wyświetlany przez MEncodera jest ujemny?</DT>
+  <DD>A: Ponieważ bitrate skodowanego przez ciebie dźwięku jest zbyt duży by
+    zmieścić film na płycie CD. Sprawdź czy masz poprawnie zainstalowny libmp3lame.</DD>
+
+</DL>
 
 </BODY>
 </HTML>
