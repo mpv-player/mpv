@@ -3,7 +3,7 @@
 
 ====================== The MPlayer project: ===========================
 
-Arpád Gereöffy (A'rpi/ESP-team):  <arpi@thot.banki.hu>
+Árpád Gereöffy (A'rpi/ESP-team):  <arpi@thot.banki.hu>
 - player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
 - mp3lib, based on mpg123 sources  [MP3 audio decoder]
 - getch2  [keyboard handler]
@@ -26,18 +26,18 @@ Gábor Lénárt (LGB): <lgb@supervisor.hu>
 - testing and some improvements in mpeg player's user interface (options)
 - ./configure script improvements
 
-Gabucino:  <gabucino@k2.jozsef.kando.hu>
+Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - documentation maintainer, hun-eng translator
 - web design
 - testing, codecs quality & speed comparsions
 - IRC channel #MPlayer operator
 
-BERECZ Szabolcs: <szabi@inf.elte.hu>
+Szabolcs Berecz: <szabi@inf.elte.hu>
 - config file and command line parser (coming soon)
 - mga_vid fixes, module option stc.
 - fbdev support in libvo
 
-Megyer Laszlo (Lez, Laaz): <lez@sch.bme.hu>
+László Megyer (Lez, Laaz): <lez@sch.bme.hu>
 - SUB reader
 
 Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
@@ -56,8 +56,8 @@ Michael Graffam: <mgraffam@idsi.net>
 - Video mode switching code to vo_dga
 
 Main testers:
-  Balazs Tibor (Tibcu)
-  Sasi Peter (SaPe)
+  Tibor Balázs (Tibcu)
+  Péter Sasi (SaPe)
   Christoph H. Lampert
   Dirk Vornheder
   Attila Kinali
