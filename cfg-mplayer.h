@@ -57,6 +57,7 @@ extern int sub_utf8;
 #ifdef USE_ICONV
 extern char *sub_cp;
 #endif
+extern int sub_pos;
 #endif
 
 #ifdef USE_OSD
@@ -174,6 +175,7 @@ static config_t mplayer_opts[]={
 	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noutf8", &sub_utf8, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+ 	{"subpos",&sub_pos,  CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 #endif
 #ifdef USE_OSD
 	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},

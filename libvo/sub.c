@@ -27,6 +27,7 @@ font_desc_t* vo_font=NULL;
 unsigned char* vo_osd_text=NULL;
 int sub_unicode=0;
 int sub_utf8=0;
+int sub_pos=100;
 
 inline static void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
 	unsigned char *cp=vo_osd_text;
@@ -252,7 +253,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
       }
    }
    
-   y = memy;
+   if (memy < (dys * sub_pos / 100)) { y = memy; } else { y = dys * sub_pos /100;};
    
 //   printf("lines=%d  y=%d\n",lines,y);
 
