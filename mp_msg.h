@@ -68,13 +68,15 @@ extern int verbose; // defined in mplayer.c
 
 #define MSGT_MAX 64
 
-void mp_msg_init(int verbose);
+void mp_msg_init();
+void mp_msg_set_level(int verbose);
 void mp_msg_c( int x, const char *format, ... );
 
 #include "config.h"
 
 #ifdef USE_I18N
 #include <libintl.h>
+#include <locale.h>
 #define mp_gettext(String) gettext(String)
 #else
 #define mp_gettext(String) String
