@@ -1,4 +1,4 @@
-.\" synced with 1.467
+.\" synced with 1.480
 .\" MPlayer (C) 2000-2003 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun, Jonas Jermann
 .\" y traducida al español por Juan Martín López <nauj27@teleline.es>
@@ -388,6 +388,11 @@ Cambia el colorkey a un valor RGB de su elección.
 Solo soportado por los controladores de salida de video cvidix, fbdev, svga,
 vesa, winvidix, xmga, xvidix y xover.
 .TP
+.B \-nocolorkey
+Deshabilita el colorkeying.
+Solo soportado por los controladores de salida de video cvidix, fbdev, svga, vesa,
+winvidix, xmga, xvidix y xover.
+.TP
 .B \-edl <nombredearchivo>
 Habilita acciones de edición de lista de decisión (EDL)  durante la reproducción.
 El video puede ser saltado y el audio silenciado y activado de acuerdo a unas
@@ -486,11 +491,6 @@ Usa un menu.conf alternativo.
 .TP
 .B \-menu-root <valor> (CÓDIGO BETA)
 Especifica el menú principal.
-.TP
-.B \-nocolorkey
-Deshabilita el colorkeying.
-Solo soportado por los controladores de salida de video cvidix, fbdev, svga,
-vesa, winvidix, xvidix y xover.
 .TP
 .B \-nojoystick
 Desactiva el soporte de joystick.
@@ -786,7 +786,8 @@ Se salta el proxy para direcciones IPv6.
 Sigue siendo usado para conexiones IPv4.
 .TP
 .B \-loadidx <nombrearchivo>
-El nombre del archivo desde el que se leerán los datos INDEX del video.
+El nombre del archivo desde el que se leerán los datos INDEX del video, como
+se guardó con \-saveidx.
 MPlayer leerá el índice desde nombrearchivo y usará estos datos para las
 búsquedas. Estos datos pueden usarse en lugar del índice contenido dentro
 del AVI. Es más, MPlayer no le avisará si carga un archivo índice generado
@@ -832,9 +833,6 @@ Siempre se intenta comprobar la selección por el contenido del archivo.
 .TP
 .B \-passwd <contraseña> (vea también la opción \-user)
 Especifica una contraseña para autenticación http.
-.TP
-.B \-user-agent <texto>
-Usa texto como el agente de usuario (User-Agent) para el flujo HTTP.
 .TP
 .B \-prefer-ipv4
 Usa IPv4 en las conexiones de red.
@@ -905,7 +903,10 @@ no acepta paquetes UDP entrantes (vea http://www.live.com/mplayer/).
 Fuerza la reconstrucción del INDEX y da la salida en un archivo especificado
 en el nombre de archivo que tiene como argumento. Actualmente solo funciona
 con archivos AVI. Aunque puede usar MEncoder para arreglar archivos sin
-índice, MPlayer no soporta búsquedas en archivos mayores que 2GB.
+índice, el formato contenedor AVI está limitado para indexar archivos de hasta
+2GB en tamaño. Sin embargo es posible guardar el índice en un archivo por
+separado y usarlo posteriormente con \-loadidx, que es mucho más rápido que
+reconstruir el índice (con \-idx o \-forceidx) cada vez que se abre la película.
 (Esta es una limitación del formato AVI, y aunque existen extensiones para
 indexar más allá de 2GB, MPlayer no tiene aún soporte para esas extensiones.)
 Después que el archivo de índice ha sido creado, MPlayer comienza la reproducción
@@ -989,8 +990,10 @@ la salida para obtener una lista)
 Especifica la frecuencia a establecer en el sintonizador (p.e.\& 511.250).
 No compatible con parámetros de canales.
 .IPs outfmt=<valor>
-formato de salida del sintonizador (yv12, rgb32, rgb24, rgb16, rgb15,
-uyvy, yuy2,i420)
+Especifica el formato de salida del sintonizador con un valor preestablecido
+soportado por el controlador V4L (yv12, rgb32, rgb24, rgb16, rgb15, uyvy, yuy2,
+i420) o un formato arbitrario dado como valor hex.
+Pruebe outfmt=help para una lista de todos los formatos disponibles.
 .IPs width=<valor>
 anchura de la ventana de salida
 .IPs height=<valor>
@@ -1057,7 +1060,7 @@ de una.
 .IPs [volume|bass|treble|balance]=<0\-100>
 Estas opciones establecen los parámetros del mezclador en la tarjeta
 de captura de vídeo. No tiene efecto si la tarjeta no tiene mezclador.
-Para v4l1, 0-65535 es un rango válido.
+Para v4l1, 0\-65535 es un rango válido.
 Para v4l2, el rango válido es 0 a 100, y 50 mapean el valor por defecto
 de control, como es reportado por el controlador.
 .IPs immediatemode=<bool>
@@ -1067,7 +1070,7 @@ Un valor de 1 (por defecto para MPlayer) significa que la captura de video
 va sola y deja la captura de audio a través del cable de realimentación que
 se conecta desde la tarjeta de TV a la tarjeta de sonido.
 .IPs mjpeg
-Usa compresión mjpeg por hardwaer (si la tarjeta lo soporta).
+Usa compresión mjpeg por hardware (si la tarjeta lo soporta).
 Usando esta opción, no necesita especificar la anchura y altura de la
 ventana de salida, porque mplayer la determinará automáticamente desde
 el valor de decimación (vea más abajo).
@@ -1097,6 +1100,8 @@ elije la calidad de la compresió jpeg
 .B \-user <nombre\ de\ usuario> (vea también la opción \-passwd)
 Especifica un nombre de usuario para autenticación http.
 .TP
+.B \-user-agent <cadena>
+Usa la cadena como User-Agent para el flujo HTTP.
 .B \-vid <id>
 Selecciona el canal de video [MPG: 0\-15 ASF: 0\-255 MPEG-TS: 17\-8190].
 Cuando se reproducen flujos MPEG-TS, MPlayer/Mencoder usará el primer
@@ -2047,6 +2052,13 @@ son 15ms.
 Retarda la salida de sonido.
 Especifica el retardo separadamente para cada canal en milisegundos (número real
 entre 0 y 1000).
+.IPs export[=mmapped_file[:nsamples]]
+Exporta la señal entrante a otro proceso usando mapeado de memoria (mmap()).
+.RSss
+mmapped_file: Archivo con los datos a mapear (por defecto: ~/.mplayer/mplayer-af_export).
+.br
+nsamples: número de muestras por canal (por defecto: 512)
+.REss
 .RE
 .
 .TP
@@ -2151,6 +2163,38 @@ elasticidad de errores:
 para flujos válidos)
 .br
 4: muy agresivo
+.REss
+.IPs debug=<valor>
+debug:
+.RSss
+.br
+0: desactivado
+.br
+1: información de imagen
+.br
+2: control de tasa
+.br
+4: bitstream
+.br
+8: tipo de MB
+.br
+16: QP
+.br
+32: vector de movimiento
+.br
+0x0040: Visualización de vector de movimiento (use -noslices)
+.br
+0x0080: salto de MB
+.br
+0x0100: startcode
+.br
+0x0200: PTS
+.br
+0x0400: error resilience
+.br
+0x0800: operaciones de control de manejo de memoria (H264)
+.br
+0x1000: fallos
 .REss
 .IPs bug=<valor>
 corrige manualmente errores en el codificador:
@@ -2576,6 +2620,7 @@ Conversión usando paleta en el espacio de color RGB/\:BGR 8 \-> 15/\:16/\:24/\:3
 Restringe el espacio de color al siguiente filtro sin realizar ninguna
 conversión.
 Usar junto con el filtro de escalado para una conversión real.
+Para obtener una lista de los formatos disponibles vea formar=fmt=help.
 .PD 0
 .RSs
 .IPs fourcc
@@ -2627,6 +2672,15 @@ Elimina bloques de luminancia solo horizontal y cambia a vertical o se
 desactiva dependiendo de la disponibiblidad del tiempo de CPU.
 .RE
 .PD 1
+.TP
+.B spp[=quality[:qp]]\ \ \ 
+filtro de postprocesado simple
+.RSs
+.IPs quality
+0\-6
+.OPs qp\ \ \ 
+parámetro para forzar la cuantización
+.RE
 .TP
 .B test\ \ \ 
 Genera varios patrones de test.
@@ -2725,6 +2779,11 @@ Los valores por defecto son 1.0, brillo=0.0.
 El rango es 0.1\-10 para gammas, -2\-2 para contraste (valores negativos resultan
 en imagen en negativo), -1\-1 para brillo y 0\-3 para saturación.
 .TP
+.B hue[=matiz:saturación]
+Por defecto es matiz=0.0, saturación=1.0.
+Los rangos de valores son -180\-180 para matiz, -2\-2 para saturación (valores negativos
+resultan en croma negativa).
+.TP
 .B halfpack[=f]
 Convierte YUV 4:2:0 planar a empaquetado 4:2:2 altura-media, rebajando la
 luminancia pero manteniendo todas las muestras de crominancia.
@@ -2808,7 +2867,7 @@ que pueda procesarlo (filtrarlo) después independientemente y re-entrelazarlo.
 .PD 0
 .RSs
 .IPs d
-desentrelaza
+desentrelaza (colocando uno encima del otro)
 .IPs i
 entrelaza
 .IPs s
@@ -2818,13 +2877,19 @@ intercambia campos (cambia entre líneas par e impar)
 .TP
 .B "fil=[i|d]"
 (des)interpolación de líneas.
-fil=d desinterpola los campos y los coloca izquierdo-derecho
-fil=i los interpola de nuevo (invierte el efecto de fil=d)
-este filtro es similar al filtro il pero mucho más rápido, la principal
-desventaja es que no siempre funciona. Especialmente si se combina
-con otros filtros puede producir imágenes aleatoriamente mezcladas, por ello
-alégrese si funciona pero no venga con quejas si no lo hace para su combinación
-de filtros.
+Este filtro es muy similar al filtro il pero mucho más rápido, la principal
+desventaja es que no siempre funciona. Especialmente si es combinado con
+otros filtros puede producir efectos extraños en las imágenes, de modo que
+alégrese si le funciona pero no se nos queje si no funciona para su
+combinación de filtros.
+.PD 0
+.RSs
+.IPs d
+Desinterpola campos, colocandolos uno al lado de otro.
+.IPs i
+Interpola campos de nuevo (invirtiendo el efecto de fil=d).
+.RE
+.PD 1
 .TP
 .B "field[=n]"
 Extrae un campo simple de una imagen entrelazada usando aritmética a saltos
@@ -3253,6 +3318,8 @@ no codifica, solo copia el flujo
 codifica en PCM sin comprimir
 .IPs "\-oac mp3lame"
 codifica a MP3 (usando Lame)
+.IPs "\-oac lavc"
+codifica con codecs libavcodec
 .RE
 .PD 1
 .
@@ -3535,8 +3602,29 @@ Para una lista de detalles completa lea el código.
 .PD 1
 
 .TP
-.B vcodec=<value>
-usa el codec especificado (no hay ninguno por defecto, debe especificarlo):
+.B acodec=<valor>
+Codec de audio (por defecto: mp2):
+.PD 0
+.RSs
+.IPs mp2
+MPEG Layer 2
+.IPs mp3
+MPEG Layer 3
+.IPs ac3
+AC3
+.IPs adpcm_ima_wav
+PCM IMA Adaptativo (4bits por muestra, compresión 4:1)
+.RE
+.PD 1
+.TP
+.B abitrate=<valor>
+Tasa de bits de audio en kBit (por defecto 224).
+.TP
+.B atag=<valor>
+Usa la etiqueta de formato de audio de windows especificada (e.g. atag=0x55).
+.TP
+.B vcodec=<valor>
+usa el codec especificado (por defecto: mpeg4):
 .PD 0
 .RSs
 .IPs mjpeg
@@ -3579,6 +3667,15 @@ Recomendado para h263(p)/msmpeg4. La razón para preferir 3 sobre 2 es que
 2 puede dar overflows (esto será corregido para h263(p) cambiando el cuantizador
 por MB en el futuro, msmpeg4 no puede corregirlo porque no tiene soporte para
 ello).
+.RE
+.TP
+.B lmin=<0.01\-255.0>
+Multiplicador de lagrange mínimo para control de tasa de bits, probablemente desee
+usar un valor igual o menor que vqmin. (por defecto: 2.0)
+.RE
+.TP
+.B lmax=<0.01\-255.0>
+Multiplicador de lagrange máximo para control de tasa de bits. (por defecto: 31.0)
 .RE
 .TP
 .B vqscale=<1\-31>
@@ -3631,6 +3728,10 @@ EPZS (por defecto)
 X1 (experimental)
 .RE
 .PD 1
+.TP
+.B me_range=<0\-9999>
+rango de búsqueda de estimación de movimiento, nota, 0 es sin límite y es el
+valor por defecto.
 .TP
 .B mbd=<0\-2>
 algoritmo de decisión de macrobloque (modo alta calidad), codifica cada macro
@@ -3743,7 +3844,9 @@ bitrate mínimo en kbit/\:seg (pasada\ 1/\:2)
 .TP
 .B vrc_buf_size=<valor>
 tamaño del buffer en kbit (pasada\ 1/\:2).
-Nota: vrateto1 no debe se demasiado grande durante la segunda pasada o puede
+Para MPEG1/2 también establece el tamaño del buffer vbv, use 327 para VCD,
+917 para SVCD y 1835 para DVD.
+Nota: vratetol no debe se demasiado grande durante la segunda pasada o puede
 haber problemas si vrc_(min|max)rate es usado.
 .TP
 .B vb_qfactor=<-31.0\-31.0>
@@ -4058,6 +4161,9 @@ desactivado (por defecto)
 rango correcto
 .RE
 .TP
+.B p_mask=<0.0\-1.0>
+inter MB máscara (por defecto: 0.0 (deshabilitado))
+.TP
 .B naq\ \ \ \  
 Cuantización adaptativa normalizada (experimental).
 Cuando se usa cuantización adaptativa (*_mask), la media por-MB del cuantizador
@@ -4075,6 +4181,10 @@ por defecto
 para huffyuv or jpeg sin pérdida
 .IPs 411P,410P,BGR32
 para jpeg sin pérdidas
+.IPs 411P,YVU9
+para jpeg sin pérdidas y ffv1
+.IPs BGR32
+para jpeg sin pérdidas y ffv1
 .RE
 .TP
 .B pred
@@ -4118,6 +4228,17 @@ codificación aritmética (cabac)
 .RE
 .PD 1
 .TP
+.B context
+(para ffv1)
+.PD 0
+.RSs
+.IPs 0
+modelo de contexto pequeño
+.IPs 1
+modelo de contexto grande
+.RE
+.PD 1
+.TP
 .B qpel\ \ \ 
 usa compensación de movimiento quarter pel
 Consejo: Esto es útil solamente para codificaciones con tasa de bits alta.
@@ -4130,6 +4251,10 @@ función de comparación para la estimación de movimiento full pel
 .TP
 .B subcmp=<0\-2000>
 función de comparación para la estimación de movimiento sub pel
+.TP
+.B mbcmp=<0\-2000>
+función de comparación para la decisión de macrobloque, solo usado
+si mbd=0
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -4282,6 +4407,9 @@ Nota: el cuantizador h263 MMX no puede manejar uniones positivas (establece vfdc
       el cuantizador mpeg MMX no puede manejar uniones negativas (establece vfdct=1ó2)
 .br
 Consejo: una unión más positiva (-32 \- -16 en lugar de -64) parece mejorar la PSNR
+.TP
+.B nr=<0\-100000>
+reducción de ruido, 0 es deshabilitado
 .RE
 
 .SS nuv (\-nuvopts)
