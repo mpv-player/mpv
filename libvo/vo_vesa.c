@@ -98,7 +98,7 @@ static uint32_t dstBpp,dstW, dstH,dstFourcc; /* destinition image description */
 static SwsContext * sws = NULL;
 
 static int32_t x_offset,y_offset; /* to center image on screen */
-static unsigned init_mode; /* mode before run of mplayer */
+static unsigned init_mode=0; /* mode before run of mplayer */
 static void *init_state = NULL; /* state before run of mplayer */
 static struct win_frame win; /* real-mode window to video memory */
 static uint8_t *dga_buffer = NULL; /* for yuv2rgb and sw_scaling */
@@ -154,12 +154,15 @@ static void vesa_term( void )
 #ifdef CONFIG_VIDIX
   else if(vidix_name) vidix_term();
 #endif
-  if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
-  if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
+  if(init_state) if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
+  init_state=NULL;
+  if(init_mode) if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
+  init_mode=0;
   if(HAS_DGA()) vbeUnmapVideoBuffer((unsigned long)win.ptr,win.high);
   if(dga_buffer && !HAS_DGA()) free(dga_buffer);
   vbeDestroy();
   if(sws) freeSwsContext(sws);
+  sws=NULL;
 }
 
 #define VALID_WIN_FRAME(offset) (offset >= win.low && offset < win.high)
@@ -993,7 +996,6 @@ static void
 uninit(void)
 {
     // not inited
-    if (!init_state) return;
     vesa_term();
     if(verbose > 2)
         printf("vo_vesa: uninit was called\n");
