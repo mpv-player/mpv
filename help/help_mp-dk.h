@@ -118,6 +118,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "Tilgængelige videocodecs:\n"
 #define MSGTR_AvailableAudioFm "\nTilgængelige (prækompilerede) lyd-codec familier/drivere:\n"
 #define MSGTR_AvailableVideoFm "\nTilgængelige (prækompilerede) video-codec familier/drivere:\n"
+#define MSGTR_AvailableFsType "Tilgængelige fuldskærms modes:\n"
 #define MSGTR_UsingRTCTiming "Benytter Linux's hardware RTC timing (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Video: kan ikke læse egenskaber\n"
 #define MSGTR_NoStreamFound "Ingen stream fundet\n"
@@ -131,6 +132,24 @@ static char help_text[]=
 #define MSGTR_NotInitializeVOPorVO "\nFATAL: Kunne ikke initialisere video filtre (-vop) eller video udgang (-vo) !\n"
 #define MSGTR_Paused "\n------ PAUSE -------\r"
 #define MSGTR_PlaylistLoadUnable "\nKunne ikke indlæse afspilningslisten %s\n"
+#define MSGTR_Exit_SIGILL_RTCpuSel \
+"- MPlayer fejlede ved en 'ulovlig instruktion'.\n"\
+"  Det kan være en fejl i den nye kørselstids cpu-detekteringskode...\n"\
+"  Læs venligst DOCS/bugreports.html.\n"
+#define MSGTR_Exit_SIGILL \
+"- MPlayer fejlede ved en 'ulovlig instruktion'.\n"\
+" Dette sker oftest kun hvis du kører på en cpu forskellig fra den\n"\
+" mplayer var kompileret til.\n Undersøg venligst dette!\n"
+#define MSGTR_Exit_SIGSEGV_SIGFPE \
+"- MPlayer fejlede pga. ulovlig brug af CPU/FPU/RAM.\n"\
+"  Rekompiler MPlayer med --enable-debug og lav en 'gdb' backtrace og\n"\
+"  disassemling. For detaljer læs venligst DOCS/bugreports.html#crash.b.\n"
+#define MSGTR_Exit_SIGCRASH \
+"- MPlayer fejlede. Dette skulle ikke ske.\n"\
+"  Det kan være en fejl i MPlayer koden _eller_ i andre drivere _ eller_ i \n"\
+"  den version af gcc du kører. Hvis du tror det er en fejl i MPlayer læs da \n"\
+"  venligst DOCS/bugreports.html og følg instruktionerne der. Vi kan ikke \n"
+"  og vil ikke hjælpe medmindre du følger instruktionerne når du rapporterer en mulig fejl.\n"
 
 // mencoder.c:
 
@@ -155,6 +174,56 @@ static char help_text[]=
 #define MSGTR_RecommendedVideoBitrate "Anbefalet video bitrate for %s CD: %d\n"
 #define MSGTR_VideoStreamResult "\nVideo stream: %8.3f kbit/s  (%d bps)  størrelse: %d bytes  %5.3f sek.  %d billeder\n"
 #define MSGTR_AudioStreamResult "\nAudio stream: %8.3f kbit/s  (%d bps)  størrelse: %d bytes  %5.3f sek.\n"
+
+// cfg-mencoder.h:
+
+#define MSGTR_MEncoderMP3LameHelp "\n\n"\
+" vbr=<0-4>     variabel bitrate metode\n"\
+"                0: cbr\n"\
+"                1: mt\n"\
+"                2: rh(default)\n"\
+"                3: abr\n"\
+"                4: mtrh\n"\
+"\n"\
+" abr           middel bitrate\n"\
+"\n"\
+" cbr           konstant bitrate\n"\
+"               Tvinger også CBR mode enkoding på efterfølgende ABR præset modes\n"\
+"\n"\
+" br=<0-1024>   specificerer bitrate i kBit (kun CBR og ABR)\n"\
+"\n"\
+" q=<0-9>       kvalitet (0-højest, 9-lavest) (kun til VBR)\n"\
+"\n"\
+" aq=<0-9>      algoritmisk kvalitet (0-bedst/langsomst, 9-værst/hurtigst)\n"\
+"\n"\
+" ratio=<1-100> kompressionsrate\n"\
+"\n"\
+" vol=<0-10>    sæt lyd input forstærkning\n"\
+"\n"\
+" mode=<0-3>    (standard: auto)\n"\
+"                0: stereo\n"\
+"                1: joint-stereo\n"\
+"                2: flere kanals\n"\
+"                3: mono\n"\
+"\n"\
+" padding=<0-2>\n"\
+"                0: nej\n"\
+"                1: alle\n"\
+"                2: justeret\n"\
+"\n"\
+" fast          skift til hurtigere enkodning af efterfølgende VBR præset modes,\n"\
+"               svagt lavere kvalitet og højere bitrate.\n"\
+"\n"\
+" preset=<value> tilbyder de bedste kvalitets indstillinger.\n"\
+"                 medium: VBR  enkodning,  god  kvalitet\n"\
+"                 (150-180 kbps bitrate interval)\n"\
+"                 standard:  VBR enkodning, høj kvalitet\n"\
+"                 (170-210 kbps bitrate interval)\n"\
+"                 extreme: VBR enkodning, meget høj kvalitet\n"\
+"                 (200-240 kbps bitrate interval)\n"\
+"                 insane:  CBR  enkodning, højeste præsets kvalitet\n"\
+"                 (320 kbps bitrate)\n"\
+"                 <8-320>: ABR enkodning ved middel kbps bitrate.\n\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Drev '%s' ikke fundet!\n"
@@ -224,6 +293,8 @@ static char help_text[]=
 #define MSGTR_TVInputNotSeekable "TV input er ikke søgebart! (kan være du skulle skifte kanal ;))\n"
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s allerede tilstede\n!"
 #define MSGTR_ClipInfo "Klip info: \n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Progressiv følge detekteret, forbliver i 3:2 TELECINE mode\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 3:2 TELECINE detekteret, benytter inverse telecine fx. FPS ændret til %5.3f!  \n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "kunne ikke åbne codec\n"
@@ -291,10 +362,11 @@ static char help_text[]=
 #define MSGTR_FontSelect "Vælg font ..."
 #define MSGTR_PlayList "PlayList"
 #define MSGTR_Equalizer "Equalizer"
-#define MSGTR_SkinBrowser "Vælg udseende"
+#define MSGTR_SkinBrowser "Vælg tema"
 #define MSGTR_Network "Netværksstreaming ..."
 #define MSGTR_Preferences "Indstillinger"
-#define MSGTR_OSSPreferences "OSS driverkonfiguration"
+#define MSGTR_OSSPreferences "OSS driver konfiguration"
+#define MSGTR_SDLPreferences "SDL driver konfiguration"
 #define MSGTR_NoMediaOpened "medie ikke åbnet"
 #define MSGTR_VCDTrack "VCD nummer %d"
 #define MSGTR_NoChapter "ingen kapitel"
@@ -319,8 +391,9 @@ static char help_text[]=
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[tema] fejl i konfigurationsfilen til temaet på linje %d: %s" 
-#define MSGTR_SKIN_WARNING1 "[tema] advarsel i  konfigurationsfilen til temaet på linje %d: widget fundet men før \"section\" ikke fundet ( %s )"
-#define MSGTR_SKIN_WARNING2 "[tema] advarsel i  konfigurationsfilen til temaet på linje %d: widget fundet men før \"subsection\" ikke fundet (%s)"
+#define MSGTR_SKIN_WARNING1 "[tema] advarsel i konfigurationsfilen til temaet på linje %d: widget fundet men før \"section\" ikke fundet ( %s )"
+#define MSGTR_SKIN_WARNING2 "[tema] advarsel i konfigurationsfilen til temaet på linje %d: widget fundet men før \"subsection\" ikke fundet (%s)"
+#define MSGTR_SKIN_WARNING3 "[tema] advarsel i konfigurationsfilen til temaet på linje %d: denne undersektion er ikke understøttet af dette widget (%s)"
 #define MSGTR_SKIN_BITMAP_16bit  "16 bits eller mindre ikke understøttet ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "filen ikke fundet ( %s )\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "bmp læse fejl ( %s )\n"
@@ -397,6 +470,12 @@ static char help_text[]=
 #define MSGTR_EQU_Center "Center"
 #define MSGTR_EQU_Bass "Bass"
 #define MSGTR_EQU_All "Alle"
+#define MSGTR_EQU_Channel1 "Kanal 1:"
+#define MSGTR_EQU_Channel2 "Kanal 2:"
+#define MSGTR_EQU_Channel3 "Kanal 3:"
+#define MSGTR_EQU_Channel4 "Kanal 4:"
+#define MSGTR_EQU_Channel5 "Kanal 5:"
+#define MSGTR_EQU_Channel6 "Kanal 6:"
 
 // --- playlist
 #define MSGTR_PLAYLIST_Path "Sti"
@@ -408,6 +487,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Audio "Lyd"
 #define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "undertekster og OSD"
+#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Misc"
 
 #define MSGTR_PREFERENCES_None "Ingen"
@@ -428,6 +508,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_OSDTimer "Statuslinje og indikator"
 #define MSGTR_PREFERENCES_OSDProgress "Kun statuslinje"
+#define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Timer, procent og total tid"
 #define MSGTR_PREFERENCES_Subtitle "Undertekst:"
 #define MSGTR_PREFERENCES_SUB_Delay "Forsinkelse: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
@@ -436,6 +517,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_Unicode "Unicode undertekst"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Konverter en given undertekst til MPlayer's undertekst format"
 #define MSGTR_PREFERENCES_SUB_SRT "Konverter den angivne undertekst til et tidsbaseret SubViewer (SRT) format"
+#define MSGTR_PREFERENCES_SUB_Overlap "slå (til/fra) undertekst overlapning"
 #define MSGTR_PREFERENCES_Font "Font:"
 #define MSGTR_PREFERENCES_FontFactor "Font factor:"
 #define MSGTR_PREFERENCES_PostProcess "Anvend efterprocesseringsfilter"
@@ -453,6 +535,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_OSS_Device "Enhed:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mixer:"
+#define MSGTR_PREFERENCES_SDL_Driver "Driver:"
 #define MSGTR_PREFERENCES_Message "Husk, nogle funktioner kræver at MPlayer bliver genstartet for at de virker."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video enkoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Brug LAVC (ffmpeg)"
@@ -490,9 +573,20 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Cache "Cache på/af"
 #define MSGTR_PREFERENCES_LoadFullscreen "Start i fullskærm"
 #define MSGTR_PREFERENCES_CacheSize "Cache størrelse: "
+#define MSGTR_PREFERENCES_SaveWinPos "Gem vinduets position"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Stop XScreenSaver"
+#define MSGTR_PREFERENCES_PlayBar "Anvend afspilningsbar"
 #define MSGTR_PREFERENCES_AutoSync "AutoSynk. på/af"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosynk.: "
+#define MSGTR_PREFERENCES_CDROMDevice "CD-ROM enhed:"
+#define MSGTR_PREFERENCES_DVDDevice "DVD enhed:"
+#define MSGTR_PREFERENCES_FPS "Film FPS:"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Vis video vindue når inaktiv"
+
+#define MSGTR_ABOUT_UHU "GUI udvikling sponsereret af UHU Linux\n"
+#define MSGTR_ABOUT_CoreTeam "   MPlayer kernen:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   Yderligere kodere:\n"
+#define MSGTR_ABOUT_MainTesters "   Hovedtestere:\n"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "fatal fejl ..."
