@@ -394,17 +394,23 @@ May be negative.
 .
 .TP
 .B \-channels <number>
-Change the number of playback channels.
+Change the number of playback channels, defaults to '2' if not specified.
 If the number of output channels is bigger than the number of input channels
-empty channels are inserted (except mixing from mono to stereo, then the mono
-channel is repeated in both of the output channels).
-If the number of output channels is smaller than the number of input channels
-the exceeding channels are truncated.
+empty channels are inserted (unless mixing from mono to stereo, then the mono
+channel is repeated in both output channels).
+If the number of output channels is smaller than the number of input channels,
+results depend on the audio decoder (\-afm).
+Mplayer asks the decoder to decode the audio into as many channels as
+specified. Now it's up to the decoder to fulfill the requirement. If the
+decoder outputs more channels than requested, the exceeding channels are
+truncated. This is usually only important when playing videos with AC3 audio
+(like DVDs). In that case liba52 does the decoding by default and correctly
+downmixes the audio into the requested number of channels.
 
 .I NOTE:
 .br
-This option is honored by codecs (ac3 only) filters (surround) and ao drivers
-(oss at least).
+This option is honored by codecs (AC3 only) filters (surround) and ao drivers
+(OSS at least).
 .br
 Available options are:
 
