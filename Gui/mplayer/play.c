@@ -46,11 +46,13 @@ extern int mplSubRender;
 
 void mplStop()
 {
- if ( !mplShMem->Playing ) return;
  mplShMem->Playing=0;
  mplShMem->TimeSec=0;
  mplShMem->Position=0;
  mplShMem->AudioType=0;
+ mplSubRender=1;
+ wsPostRedisplay( &appMPlayer.subWindow );
+ if ( !mplShMem->Playing ) return;
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
@@ -196,4 +198,10 @@ void EventHandling( void )
 {
  wsHandleEvents();mplTimerHandler(0); // handle GUI timer events
  if ( mplShMem->SkinChange ) { ChangeSkin(); mplShMem->SkinChange=0;  }
+}
+
+void mplResizeToMovieSize( unsigned int width,unsigned int height )
+{
+ if ( !appMPlayer.subWindow.isFullScreen )
+   wsResizeWindow( &appMPlayer.subWindow,width,height );
 }

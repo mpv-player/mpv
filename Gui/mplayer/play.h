@@ -4,8 +4,6 @@
 
 #include "./psignal.h"
 #include "./mplayer.h"
-#include "../wm/ws.h"
-#include "../app.h"
 
 typedef struct
 {
@@ -77,6 +75,7 @@ extern void mplFullScreen( void );
 extern void mplPlay( void );
 extern void mplPause( void );
 extern void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int height );
+extern void mplResizeToMovieSize( unsigned int width,unsigned int height );
 
 extern void mplIncAudioBufDelay( void );
 extern void mplDecAudioBufDelay( void );

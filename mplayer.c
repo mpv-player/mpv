@@ -1026,9 +1026,11 @@ current_module="init_libvo";
 #ifdef HAVE_NEW_GUI
    if ( use_gui )
     {
-     if ( !appMPlayer.subWindow.isFullScreen ) wsResizeWindow( &appMPlayer.subWindow,sh_video->disp_w,sh_video->disp_h );
-     moviewidth=screen_size_x=appMPlayer.subWindow.Width;
-     movieheight=screen_size_y=appMPlayer.subWindow.Height;
+//     if ( !appMPlayer.subWindow.isFullScreen ) 
+//     wsResizeWindow( &appMPlayer.subWindow,sh_video->disp_w,sh_video->disp_h );
+     mplResizeToMovieSize( sh_video->disp_w,sh_video->disp_h );
+     moviewidth=screen_size_x=sh_video->disp_w;
+     movieheight=screen_size_y=sh_video->disp_h;
     }
 #endif
 
@@ -1921,11 +1923,11 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
       if(use_gui) 
        {
         mplStop();
-        mplSubRender=1;
-        wsPostRedisplay( &appMPlayer.subWindow );
-        mplShMem->TimeSec=0;
-        mplShMem->Position=0;       
-	mplShMem->FrameDrop=0;
+//        mplSubRender=1;
+//        wsPostRedisplay( &appMPlayer.subWindow );
+//        mplShMem->TimeSec=0;
+//        mplShMem->Position=0;       
+//	mplShMem->FrameDrop=0;
        }	
 #endif
 
