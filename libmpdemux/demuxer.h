@@ -130,13 +130,14 @@ typedef struct demuxer_st {
 inline static demux_packet_t* new_demux_packet(int len){
   demux_packet_t* dp=(demux_packet_t*)malloc(sizeof(demux_packet_t));
   dp->len=len;
-  dp->buffer=len?(unsigned char*)malloc(len+8):NULL;
   dp->next=NULL;
   dp->pts=0;
   dp->pos=0;
   dp->flags=0;
   dp->refcount=1;
   dp->master=NULL;
+  dp->buffer=len?(unsigned char*)malloc(len+8):NULL;
+  if(len) memset(dp->buffer+len,0,8);
   return dp;
 }
 
