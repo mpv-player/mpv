@@ -51,6 +51,9 @@ Michael Graffam: <mgraffam@idsi.net>
 - XF86VidMode support to vo_x11
 - Video mode switching code to vo_dga
 
+Megyer Laszlo (Lez, Laaz): <lez@sch.bme.hu>
+- SUB reader
+
 Main testers:
   Balazs Tibor (Tibcu)
   Sasi Peter (SaPe)
