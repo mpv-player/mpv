@@ -729,6 +729,7 @@ cat > $MCONF << EOF
 
 AR=ar
 CC=$_cc
+X11DIR=$_x11libdir
 # OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -fomit-frame-pointer -ffast-math
 OPTFLAGS=-O4 -march=$proc -mcpu=$proc -pipe -ffast-math
 # LIBS=-L/usr/lib -L/usr/local/lib $_x11libdir $_gllib $_sdllib $_dgalib $_x11lib $_xvlib
