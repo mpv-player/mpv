@@ -60,7 +60,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
     
     qt_decode_rpza(data, len, mpi->planes[0], sh->disp_w, sh->disp_h,
-	((mpi->imgfmt&255)+7)/8);
+	mpi->bpp/8);
     
     return mpi;
 }
