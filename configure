@@ -151,7 +151,7 @@ Optional features:
   --disable-cdparanoia   Disable cdparanoia support [autodetect]
   --enable-freetype      Enable freetype2 font rendering support [disabled]
   --disable-unrarlib     Disable Unique RAR File Library [enabled]
-  --enable-new-conf      Enable new config stuff [disabled]
+  --disable-new-conf     Disable new experimental config parser code [enabled]
   --enable-menu          Enable osd menu support (need new config) [disabled]
   --disable-sortsub      Disable subtitles sorting [enabled]
 
@@ -1027,7 +1027,7 @@ _cdparanoia=auto
 _big_endian=auto
 _freetype=no
 _shared_pp=no
-_new_conf=no
+_new_conf=yes
 _menu=no
 _qtx_codecs=auto
 _sortsub=yes
