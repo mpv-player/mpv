@@ -287,7 +287,7 @@ static char help_text[]=
 
 #define MSGTR_UsingExternalPP "[PP] U¿ywam zewnêtrznego filtra postprocessingu, max q = %d\n"
 #define MSGTR_UsingCodecPP "[PP] U¿ywam postprocessingu w kodeku, max q = %d\n"
-#define MSGTR_VideoAttributeNotSupportedByVO_VD "Atrubut video '%s' nie jest obs³ugiwany przez wybrane vo & vd!\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Atrybut video '%s' nie jest obs³ugiwany przez wybrane vo & vd!\n"
 #define MSGTR_VideoCodecFamilyNotAvailableStr "Wybrana rodzina kodeków video [%s] (vfm=%d) niedostêpna (w³±cz j± w czasie kompilacji!)\n"
 #define MSGTR_AudioCodecFamilyNotAvailableStr "Wybrana rodzina kodeków audio [%s] (afm=%d) niedostêpna (w³±cz j± w czasie kompilacji!)\n"
 #define MSGTR_OpeningVideoDecoder "Otwieram dekoder video: [%s] %s\n"
