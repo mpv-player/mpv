@@ -40,9 +40,15 @@ Using with mplayer:
 ~~~~~~~~~~~~~~~~~~~
 
 Currently there is only way to use ATI's drivers:
-mplayer -vo vesa:lvo:/dev/radeon_vid -<your options> filename
+mplayer -vo vesa:lvo:/dev/radeon_vid -<your vesa's options> filename
 or
-mplayer -vo vesa:lvo:/dev/rage128_vid -<your options> filename
+mplayer -vo vesa:lvo:/dev/rage128_vid -<your vesa's options> filename
+
+For YV12 formats you can use also:
+mplayer -vo mga:/dev/radeon_vid -<your mga's option> filename
+
+but in this case you should load at least radeonfb driver from
+this package.
 
 Configuring:
 ~~~~~~~~~~~~
