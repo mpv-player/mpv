@@ -793,7 +793,8 @@ OSD/SUB feature. There are many ways to get it:
 If you chose non-TTF fonts, UNZIP the file you downloaded to <filename
 class="directory">~/.mplayer</filename> or <filename
 class="directory">$PREFIX/share/mplayer</filename>. Then rename or symlink
-one of the extracted directories to <filename>font</filename>, for example:
+one of the extracted directories to <filename class="directory">font</filename>,
+for example:
 
 <screen>ln -s ~/.mplayer/arial-24 ~/.mplayer/font</screen>
 
