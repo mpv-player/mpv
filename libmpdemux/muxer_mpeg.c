@@ -167,7 +167,7 @@ m_option_t mpegopts_conf[] = {
 	{"vbitrate", &(conf_vbitrate), CONF_TYPE_INT, CONF_RANGE, 1, 104857599, NULL},
 	{"init_vpts", &(conf_init_vpts), CONF_TYPE_INT, CONF_RANGE, 100, 700, NULL},		//2*frametime at 60fps
 	{"init_apts", &(conf_init_apts), CONF_TYPE_INT, CONF_RANGE, 100, 700, NULL},
-	{"init_adelay", &conf_init_adelay, CONF_TYPE_INT, CONF_RANGE, -32760, -1, NULL},
+	{"vdelay", &conf_init_adelay, CONF_TYPE_INT, CONF_RANGE, 1, 32760, NULL},
 	{"drop", &conf_drop, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"tsaf", &conf_ts_allframes, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"skip_padding", &conf_skip_padding, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -2418,7 +2418,7 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   priv->scr = muxer->file_end = 0;
   
   if(conf_init_adelay)
-  	priv->init_adelay = (double) conf_init_adelay / (double) 1000.0;
+  	priv->init_adelay = - (double) conf_init_adelay / (double) 1000.0;
   
   priv->drop = conf_drop;
   
