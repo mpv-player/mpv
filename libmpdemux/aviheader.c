@@ -306,6 +306,8 @@ while(1){
         case mmioFOURCC('D', 'I', 'V', 'X'):
         case mmioFOURCC('d', 'i', 'v', 'x'):
         case mmioFOURCC('D', 'X', '5', '0'):
+        case mmioFOURCC('X', 'V', 'I', 'D'):
+        case mmioFOURCC('x', 'v', 'i', 'd'):
           idxfix_divx=2; // we can fix keyframes only for divx coded files!
 	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for DIVX 4 video\n");
 	  break;
