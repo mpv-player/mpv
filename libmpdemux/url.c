@@ -33,7 +33,7 @@ url_new(char* url) {
 	Curl->url = strdup(url);
 	if( Curl->url==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-		free(Curl);
+		url_free(Curl);
 		return NULL;
 	}
 
@@ -41,7 +41,7 @@ url_new(char* url) {
 	ptr1 = strstr(url, "://");
 	if( ptr1==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Not an URL!\n");
-		free(Curl->url);free(Curl);
+		url_free(Curl);
 		return NULL;
 	}
 	pos1 = ptr1-url;
@@ -49,7 +49,7 @@ url_new(char* url) {
 	strncpy(Curl->protocol, url, pos1);
 	if( Curl->protocol==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
-		free(Curl->protocol);free(Curl->url);free(Curl);
+		url_free(Curl);
 		return NULL;
 	}
 	Curl->protocol[pos1] = '\0';
@@ -71,6 +71,7 @@ url_new(char* url) {
 		Curl->username = (char*)malloc(len+1);
 		if( Curl->username==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+			url_free(Curl);
 			return NULL;
 		}
 		strncpy(Curl->username, ptr1, len);
@@ -84,6 +85,7 @@ url_new(char* url) {
 			Curl->password = (char*)malloc(len2+1);
 			if( Curl->password==NULL ) {
 				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+				url_free(Curl);
 				return NULL;
 			}
 			strncpy( Curl->password, ptr3+1, len2);
@@ -120,6 +122,7 @@ url_new(char* url) {
 	Curl->hostname = (char*)malloc(pos2-pos1+1);
 	if( Curl->hostname==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+		url_free(Curl);
 		return NULL;
 	}
 	strncpy(Curl->hostname, ptr1, pos2-pos1);
@@ -135,6 +138,7 @@ url_new(char* url) {
 			Curl->file = strdup(ptr2);
 			if( Curl->file==NULL ) {
 				mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+				url_free(Curl);
 				return NULL;
 			}
 		}
@@ -144,6 +148,7 @@ url_new(char* url) {
 		Curl->file = (char*)malloc(2);
 		if( Curl->file==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+			url_free(Curl);
 			return NULL;
 		}
 		strcpy(Curl->file, "/");
