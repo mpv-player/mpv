@@ -50,6 +50,13 @@
  *    - Minor bugfix to aspect-ratio vor non-4:3-resolutions (like 1280x1024)
  *    - Bugfix to check_events() to reveal mouse cursor after 'q'-quit in
  *       fullscreen-mode
+ *    Felix Buenemann <Atmosfear@users.sourceforge.net> - March 12, 2001
+ *    - Changed keypress-detection from keydown to keyup, seems to fix keyrepeat
+ *       bug (key had to be pressed twice to be detected)
+ *    - Changed key-handling: 'f' cycles fullscreen/windowed, ESC/RETURN/'q' quits
+ *    - Bugfix which avoids exit, because return is passed to sdl-output on startup,
+ *       which caused the player to exit (keyboard-buffer problem? better solution
+ *       recommed)
  */
 
 #include <stdio.h>
@@ -135,13 +142,13 @@ static inline int findArrayEnd (SDL_Rect **array)
  *             *name == 
  *   returns : 0 on success, -1 on failure
  **/
-
+  
 static int sdl_open (void *plugin, void *name)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	const SDL_VideoInfo *vidInfo = NULL;
 	static int opened = 0;
-
+	
 	if (opened)
 	    return 0;
 	opened = 1;
@@ -209,7 +216,8 @@ increase your display's color depth, if possible", priv->bpp);
 	
 	/* We dont want those in out event queue */
 	SDL_EventState(SDL_ACTIVEEVENT, SDL_IGNORE);
-	SDL_EventState(SDL_KEYUP, SDL_IGNORE);
+	//SDL_EventState(SDL_KEYUP, SDL_IGNORE);
+	SDL_EventState(SDL_KEYDOWN, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEMOTION, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONDOWN, SDL_IGNORE);
 	SDL_EventState(SDL_MOUSEBUTTONUP, SDL_IGNORE);
@@ -473,7 +481,8 @@ static void check_events (void)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	SDL_Event event;
-	SDLKey keypressed;
+	SDLKey keypressed = 0;
+	static int firstcheck = 0;
 	
 	/* Poll the waiting SDL Events */
 	while ( SDL_PollEvent(&event) ) {
@@ -493,7 +502,7 @@ static void check_events (void)
 			
 			
 			/* graphics mode selection shortcuts */
-			case SDL_KEYDOWN:
+			case SDL_KEYUP:
 				keypressed = event.key.keysym.sym;
 
 				/* plus key pressed. plus cycles through available fullscreenmodes, if we have some */
@@ -506,8 +515,8 @@ static void check_events (void)
 //					LOG (LOG_DEBUG, "SDL video out: Set next available fullscreen mode.");
 				}
 
-				/* return or escape key pressed toggles/exits fullscreenmode */
-				else if ( (keypressed == SDLK_RETURN) || (keypressed == SDLK_ESCAPE) ) {
+				/* f key pressed toggles/exits fullscreenmode */
+				else if ( keypressed == SDLK_f ) {
 					if (priv->surface->flags & SDL_FULLSCREEN) {
 						priv->surface = SDL_SetVideoMode(priv->windowsize.w, priv->windowsize.h, priv->bpp, priv->sdlflags);
 						SDL_ShowCursor(1);
@@ -522,7 +531,13 @@ static void check_events (void)
                                 
                                 else switch(keypressed){
 //                                case SDLK_q: if(!(priv->surface->flags & SDL_FULLSCREEN))mplayer_put_key('q');break;
-                                case SDLK_q: SDL_ShowCursor(1); mplayer_put_key('q');break; //F.B.: added ShowCursor
+				case SDLK_RETURN:
+					if (!firstcheck) { firstcheck = 1; break; }
+                                case SDLK_ESCAPE:
+				case SDLK_q:
+					SDL_ShowCursor(1);
+					mplayer_put_key('q');
+				break;
                                 case SDLK_p: mplayer_put_key('p');break;
                                 case SDLK_SPACE: mplayer_put_key(' ');break;
                                 case SDLK_UP: mplayer_put_key(KEY_UP);break;
