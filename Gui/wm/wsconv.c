@@ -18,7 +18,7 @@ wsTConvFunc wsConvFunc = NULL;
 
 #define SWAP_RGB_24(src,dst) dst[1]=src[0];dst[1]=src[1];dst[2]=src[0]
 
-void BGR8880_to_RGB555_c( unsigned char * in_pixels, unsigned char * out_pixels, int num_pixels)
+void BGR8880_to_RGB555_c( const unsigned char * in_pixels, unsigned char * out_pixels, unsigned num_pixels)
 {
  unsigned short pixel;
  int i;
@@ -31,7 +31,7 @@ void BGR8880_to_RGB555_c( unsigned char * in_pixels, unsigned char * out_pixels,
   }
 }
 
-void BGR8880_to_BGR555_c( unsigned char * in_pixels, unsigned char * out_pixels, int num_pixels)
+void BGR8880_to_BGR555_c( const unsigned char * in_pixels, unsigned char * out_pixels, unsigned num_pixels)
 {
  unsigned short pixel;
  int i;
@@ -44,7 +44,7 @@ void BGR8880_to_BGR555_c( unsigned char * in_pixels, unsigned char * out_pixels,
   }
 }
 
-void BGR8880_to_RGB565_c( unsigned char * in_pixels, unsigned char * out_pixels, int num_pixels)
+void BGR8880_to_RGB565_c( const unsigned char * in_pixels, unsigned char * out_pixels, unsigned num_pixels)
 {
  unsigned short pixel;
  int i;
@@ -57,7 +57,7 @@ void BGR8880_to_RGB565_c( unsigned char * in_pixels, unsigned char * out_pixels,
   }
 }
 
-void BGR8880_to_BGR565_c( unsigned char * in_pixels, unsigned char * out_pixels, int num_pixels)
+void BGR8880_to_BGR565_c( const unsigned char * in_pixels, unsigned char * out_pixels, unsigned num_pixels)
 {
  unsigned short pixel;
  int i;
@@ -70,7 +70,7 @@ void BGR8880_to_BGR565_c( unsigned char * in_pixels, unsigned char * out_pixels,
   }
 }
 
-void BGR8880_to_RGB888_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels )
+void BGR8880_to_RGB888_c( const unsigned char * in_pixels, unsigned char * out_pixels,unsigned num_pixels )
 {
  int i;
  for(i = 0; i < num_pixels / 4; i++)
@@ -81,7 +81,7 @@ void BGR8880_to_RGB888_c( unsigned char * in_pixels, unsigned char * out_pixels,
   }
 }
 
-void BGR8880_to_BGR888_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels )
+void BGR8880_to_BGR888_c( const unsigned char * in_pixels, unsigned char * out_pixels,unsigned num_pixels )
 {
  int i;
  for(i = 0; i < num_pixels / 4; i++)
@@ -92,7 +92,7 @@ void BGR8880_to_BGR888_c( unsigned char * in_pixels, unsigned char * out_pixels,
   }
 }
 
-void BGR8880_to_BGR8880_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels )
+void BGR8880_to_BGR8880_c( const unsigned char * in_pixels, unsigned char * out_pixels,unsigned num_pixels )
 {
  int i;
  for(i = 0; i < num_pixels / 4; i++)
@@ -103,7 +103,7 @@ void BGR8880_to_BGR8880_c( unsigned char * in_pixels, unsigned char * out_pixels
   }
 }
 
-void BGR8880_to_RGB8880_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels )
+void BGR8880_to_RGB8880_c( const unsigned char * in_pixels, unsigned char * out_pixels,unsigned num_pixels )
 { memcpy( out_pixels,in_pixels,num_pixels ); }
 
 /*
@@ -119,7 +119,7 @@ unsigned char * map_6_to_8[64];
 #define RGB16_MIDDLE_MASK 0x07e0
 #define RGB16_UPPER_MASK  0xf800
 
-void RGB565_to_RGB888_c( unsigned char * in_pixels, unsigned char * out_pixels,int num_pixels)
+void RGB565_to_RGB888_c( const unsigned char * in_pixels, unsigned char * out_pixels,unsigned num_pixels)
 {
  unsigned short in_pixel;
  int i;
@@ -169,7 +169,7 @@ static mmx_t rgb32_b_mask; // Mask for the blues  of 2 RGB32 pixels
 static mmx_t lower_dword_mask; // Mask for the lower doublewords
 static mmx_t upper_dword_mask; // Mask for the upper doublewords
 
-void BGR8880_to_RGB888_mmx(unsigned char * in_pixels,unsigned char * out_pixels,int num_pixels)
+void BGR8880_to_RGB888_mmx(unsigned char * in_pixels,unsigned char * out_pixels,unsigned num_pixels)
 {
  int imax = num_pixels/4;
  int i;

@@ -245,7 +245,8 @@ if(mDisplay){
      #ifdef DEBUG
       fprintf( stderr,"rgb32 to bgr32\n" );
      #endif
-     wsConvFunc=BGR8880_to_BGR8880_c;
+//     wsConvFunc=BGR8880_to_BGR8880_c;
+     wsConvFunc=rgb32tobgr32;
      break;
    case wsRGB24:
      #ifdef DEBUG
