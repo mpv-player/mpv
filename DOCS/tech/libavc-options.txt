@@ -72,6 +72,7 @@ vpass
 	1 first pass
         2 second pass
           (only need to specify if two-pass encoding is used)
+        Tip: u can try to use constant quantizer mode for pass1 (vqscale=<quantizer>)
 
 vbitrate (kbits per second) for pass1/2
 	800 is default
@@ -201,6 +202,34 @@ vfdct	(0-99) dct algorithm
         2 accurate integer
         3 mmx
         4 mlib
+
+lumi_mask	(0.0-1.0) luminance masking
+	0.0 disabled (default)
+        0.0-0.5 should be a sane range
+        warning: be carefull, too large values can cause disasterous things
+        warning2: large values might look good on some monitors but may look horrible
+        on other monitors
+
+dark_mask	(0.0-1.0) darkness masking
+	0.0 disabled (default)
+        0.0-0.3 should be a sane range
+        warning: be carefull, too large values can cause disasterous things
+        warning2: large values might look good on some monitors but may look horrible
+        on other monitors / TV / TFT
+        
+tcplx_mask	(0.0-1.0) temporal complexity masking
+	0.0 disabled (default)
+
+scplx_mask	(0.0-1.0) spatial complexity masking
+	0.0 disabled (default)
+        0.0-0.5 should be a sane range
+        larger values help against blockiness, if no deblocking filter is used
+        for decoding
+        Tip: crop any black borders completly away as they will reduce the quality
+        of the MBs there, this is true if scplx_mask isnt used at all too
+
+naq	normalize adaptive quantization
+	experimental
 
 lavdopts: (decoder options)
 ---------------------------

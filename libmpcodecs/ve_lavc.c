@@ -90,6 +90,7 @@ static int lavc_param_fdct=0;
 static float lavc_param_aspect=0.0;
 #endif
 static float lavc_param_lumi_masking= 0.0;
+static float lavc_param_dark_masking= 0.0;
 static float lavc_param_temporal_cplx_masking= 0.0;
 static float lavc_param_spatial_cplx_masking= 0.0;
 static float lavc_param_p_masking= 0.0;
@@ -159,6 +160,9 @@ struct config lavcopts_conf[]={
 	{"scplx_mask", &lavc_param_spatial_cplx_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
 	{"p_mask", &lavc_param_p_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
 	{"naq", &lavc_param_normalize_aqp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4626
+	{"dark_mask", &lavc_param_dark_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -268,6 +272,9 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->temporal_cplx_masking= lavc_param_temporal_cplx_masking;
     lavc_venc_context->spatial_cplx_masking= lavc_param_spatial_cplx_masking;
     lavc_venc_context->p_masking= lavc_param_p_masking;
+#endif
+#if LIBAVCODEC_BUILD >= 4626
+    lavc_venc_context->dark_masking= lavc_param_dark_masking;
 #endif
 
 #if LIBAVCODEC_BUILD >= 4623
