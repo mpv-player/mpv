@@ -2529,14 +2529,15 @@ Activates internal 2pass mode (default: disabled):
 .br
 2: second pass
 .REss
-.IPs aspect=<x.x/y.y>
+.IPs aspect=<x/y>
 Store movie aspect internally, just like MPEG files.
 Much nicer solution than rescaling, because quality isn't decreased.
-Only MPlayer will play these files back correctly, other players will display
+Only MPlayer will play these files correctly, other players will display
 them with wrong aspect.
+The aspect parameter can be given as a ratio or a floating point number.
 Example:
 .RSss
-aspect=16.0/9.0
+aspect=16/9, aspect=1.78
 .REss
 .IPs vbitrate=<value>
 specify bitrate (pass\ 1/\:2) in
