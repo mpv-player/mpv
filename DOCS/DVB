@@ -59,6 +59,16 @@ Software decoding/transcoding anything to mpeg1:
 
 To play non-25fps movies on PAL TV, or with slow CPU, add option:  -framedrop
 
+How to keep aspect ratio for DivX files?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To get the optimal scaling parameters (use hardware for X scaling, and
+scale Y by software, keeping the right aspect ratio), use the new 'dvbscale'
+plugin:
+
+for  3:4 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+
 Mailing list:
 ~~~~~~~~~~~~~
   http://mplayerhq.hu/mailman/listinfo/mplayer-dvb
