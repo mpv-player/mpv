@@ -31,9 +31,6 @@
 //#include "mp_msg.h"
 #include "stream.h"
 
-#ifdef __MINGW32__
-typedef long ssize_t;
-#endif
 
 
 /************************************************************************
