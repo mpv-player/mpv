@@ -1,0 +1,3023 @@
+--- include/a52.h	2005-03-22 19:58:53.000000000 +0100
++++ a52.h	2004-03-19 01:15:49.000000000 +0100
+@@ -19,6 +25,9 @@
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ 
++#ifndef A52_H
++#define A52_H
++
+ #ifndef LIBA52_DOUBLE
+ typedef float sample_t;
+ #else
+@@ -113,3 +122,10 @@
+ void a52_dynrng (a52_state_t * state,
+ 		 sample_t (* call) (sample_t, void *), void * data);
+ int a52_block (a52_state_t * state, sample_t * samples);
++
++void* a52_resample_init(uint32_t mm_accel,int flags,int chans);
++extern int (* a52_resample) (float * _f, int16_t * s16);
++
++uint16_t crc16_block(uint8_t *data,uint32_t num_bytes);
++
++#endif /* A52_H */
+--- liba52/a52_internal.h	2005-03-22 19:59:35.000000000 +0100
++++ a52_internal.h	2004-03-19 01:15:49.000000000 +0100
+@@ -41,11 +43,12 @@
+ 
+ int downmix_init (int input, int flags, sample_t * level,
+ 		  sample_t clev, sample_t slev);
++void downmix_accel_init(uint32_t mm_accel);
+ int downmix_coeff (sample_t * coeff, int acmod, int output, sample_t level,
+ 		   sample_t clev, sample_t slev);
+-void downmix (sample_t * samples, int acmod, int output, sample_t bias,
++extern void (*downmix) (sample_t * samples, int acmod, int output, sample_t bias,
+ 	      sample_t clev, sample_t slev);
+-void upmix (sample_t * samples, int acmod, int output);
++extern void (*upmix) (sample_t * samples, int acmod, int output);
+ 
+ void imdct_init (uint32_t mm_accel);
+ extern void (* imdct_256) (sample_t * data, sample_t * delay, sample_t bias);
+--- liba52/bitstream.c	2005-03-22 19:59:35.000000000 +0100
++++ bitstream.c	2004-03-19 01:15:49.000000000 +0100
+@@ -29,7 +35,12 @@
+ 
+ #define BUFFER_SIZE 4096
+ 
++#ifdef ALT_BITSTREAM_READER
++int indx=0;
++uint32_t * buffer_start;
++#else
+ static uint32_t * buffer_start;
++#endif
+ 
+ uint32_t bits_left;
+ uint32_t current_word;
+@@ -41,6 +52,9 @@
+     align = (int)buf & 3;
+     buffer_start = (uint32_t *) (buf - align);
+     bits_left = 0;
++#ifdef ALT_BITSTREAM_READER
++    indx=0;
++#endif
+     bitstream_get (align * 8);
+ }
+ 
+--- liba52/bitstream.h	2005-03-22 19:59:35.000000000 +0100
++++ bitstream.h	2004-03-19 01:15:49.000000000 +0100
+@@ -19,6 +25,48 @@
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ 
++/* code from ffmpeg/libavcodec */
++#if defined(__GNUC__) && (__GNUC__ > 3 || __GNUC_ == 3 && __GNUC_MINOR__ > 0)
++#    define always_inline __attribute__((always_inline)) inline
++#else
++#    define always_inline inline
++#endif
++
++#if defined(__sparc__) || defined(hpux)
++/*
++ * the alt bitstream reader performs unaligned memory accesses; that doesn't work
++ * on sparc/hpux.  For now, disable ALT_BITSTREAM_READER.
++ */
++#undef	ALT_BITSTREAM_READER
++#else
++// alternative (faster) bitstram reader (reades upto 3 bytes over the end of the input)
++#define ALT_BITSTREAM_READER
++
++/* used to avoid missaligned exceptions on some archs (alpha, ...) */
++#if defined (ARCH_X86) || defined(ARCH_ARMV4L)
++#    define unaligned32(a) (*(uint32_t*)(a))
++#else
++#    ifdef __GNUC__
++static always_inline uint32_t unaligned32(const void *v) {
++    struct Unaligned {
++	uint32_t i;
++    } __attribute__((packed));
++
++    return ((const struct Unaligned *) v)->i;
++}
++#    elif defined(__DECC)
++static inline uint32_t unaligned32(const void *v) {
++    return *(const __unaligned uint32_t *) v;
++}
++#    else
++static inline uint32_t unaligned32(const void *v) {
++    return *(const uint32_t *) v;
++}
++#    endif
++#endif //!ARCH_X86
++
++#endif
++ 
+ /* (stolen from the kernel) */
+ #ifdef WORDS_BIGENDIAN
+ 
+@@ -29,7 +77,7 @@
+ #	if defined (__i386__)
+ 
+ #	define swab32(x) __i386_swab32(x)
+-	static inline const uint32_t __i386_swab32(uint32_t x)
++	static always_inline const uint32_t __i386_swab32(uint32_t x)
+ 	{
+ 		__asm__("bswap %0" : "=r" (x) : "0" (x));
+ 		return x;
+@@ -37,25 +85,42 @@
+ 
+ #	else
+ 
+-#	define swab32(x)\
+-((((uint8_t*)&x)[0] << 24) | (((uint8_t*)&x)[1] << 16) |  \
+- (((uint8_t*)&x)[2] << 8)  | (((uint8_t*)&x)[3]))
+-
++#	define swab32(x) __generic_swab32(x)
++	static always_inline const uint32_t __generic_swab32(uint32_t x)
++	{
++		return ((((uint8_t*)&x)[0] << 24) | (((uint8_t*)&x)[1] << 16) |
++		 (((uint8_t*)&x)[2] << 8)  | (((uint8_t*)&x)[3]));
++	}
+ #	endif
+ #endif
+ 
++#ifdef ALT_BITSTREAM_READER
++extern uint32_t *buffer_start; 
++extern int indx;
++#else
+ extern uint32_t bits_left;
+ extern uint32_t current_word;
++#endif
+ 
+ void bitstream_set_ptr (uint8_t * buf);
+ uint32_t bitstream_get_bh(uint32_t num_bits);
+ int32_t bitstream_get_bh_2(uint32_t num_bits);
+ 
++
+ static inline uint32_t 
+-bitstream_get(uint32_t num_bits)
++bitstream_get(uint32_t num_bits) // note num_bits is practically a constant due to inlineing
+ {
++#ifdef ALT_BITSTREAM_READER
++    uint32_t result= swab32( unaligned32(((uint8_t *)buffer_start)+(indx>>3)) );
++
++    result<<= (indx&0x07);
++    result>>= 32 - num_bits;
++    indx+= num_bits;
++    
++    return result;
++#else
+     uint32_t result;
+-	
++    
+     if(num_bits < bits_left) {
+ 	result = (current_word << (32 - bits_left)) >> (32 - num_bits);
+ 	bits_left -= num_bits;
+@@ -63,11 +128,30 @@
+     }
+ 
+     return bitstream_get_bh(num_bits);
++#endif
++}
++
++static inline void bitstream_skip(int num_bits)
++{
++#ifdef ALT_BITSTREAM_READER
++	indx+= num_bits;
++#else
++	bitstream_get(num_bits);
++#endif
+ }
+ 
+ static inline int32_t 
+ bitstream_get_2(uint32_t num_bits)
+ {
++#ifdef ALT_BITSTREAM_READER
++    int32_t result= swab32( unaligned32(((uint8_t *)buffer_start)+(indx>>3)) );
++
++    result<<= (indx&0x07);
++    result>>= 32 - num_bits;
++    indx+= num_bits;
++        
++    return result;
++#else
+     int32_t result;
+ 	
+     if(num_bits < bits_left) {
+@@ -77,4 +161,5 @@
+     }
+ 
+     return bitstream_get_bh_2(num_bits);
++#endif
+ }
+--- liba52/downmix.c	2005-03-22 19:59:35.000000000 +0100
++++ downmix.c	2004-04-12 18:42:14.000000000 +0200
+@@ -17,18 +23,46 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ *
++ * SSE optimizations from Michael Niedermayer (michaelni@gmx.at)
+  */
+ 
+ #include "config.h"
+ 
+-#include <inttypes.h>
+ #include <string.h>
++#include <inttypes.h>
+ 
+ #include "a52.h"
+ #include "a52_internal.h"
++#include "mm_accel.h"
+ 
+ #define CONVERT(acmod,output) (((output) << 3) + (acmod))
+ 
++
++void (*downmix)(sample_t * samples, int acmod, int output, sample_t bias,
++	      sample_t clev, sample_t slev)= NULL;
++void (*upmix)(sample_t * samples, int acmod, int output)= NULL;
++
++static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,
++	      sample_t clev, sample_t slev);
++static void downmix_3dnow (sample_t * samples, int acmod, int output, sample_t bias,
++	      sample_t clev, sample_t slev);
++static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
++	      sample_t clev, sample_t slev);
++static void upmix_MMX (sample_t * samples, int acmod, int output);
++static void upmix_C (sample_t * samples, int acmod, int output);
++
++void downmix_accel_init(uint32_t mm_accel)
++{
++    upmix= upmix_C;
++    downmix= downmix_C;
++#ifdef ARCH_X86    
++    if(mm_accel & MM_ACCEL_X86_MMX) upmix= upmix_MMX;
++    if(mm_accel & MM_ACCEL_X86_SSE) downmix= downmix_SSE;
++    if(mm_accel & MM_ACCEL_X86_3DNOW) downmix= downmix_3dnow;
++#endif
++}
++   
+ int downmix_init (int input, int flags, sample_t * level,
+ 		  sample_t clev, sample_t slev)
+ {
+@@ -61,7 +95,7 @@
+     output = flags & A52_CHANNEL_MASK;
+     if (output > A52_DOLBY)
+ 	return -1;
+-
++    
+     output = table[output][input & 7];
+ 
+     if ((output == A52_STEREO) &&
+@@ -145,7 +179,6 @@
+ 	    *level *= 1 / (1 + 3 * LEVEL_3DB);
+ 	    break;
+ 	}
+-
+     return output;
+ }
+ 
+@@ -440,12 +473,11 @@
+ static void zero (sample_t * samples)
+ {
+     int i;
+-
+     for (i = 0; i < 256; i++)
+ 	samples[i] = 0;
+ }
+ 
+-void downmix (sample_t * samples, int acmod, int output, sample_t bias,
++static void downmix_C (sample_t * samples, int acmod, int output, sample_t bias,
+ 	      sample_t clev, sample_t slev)
+ {
+     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
+@@ -557,7 +589,7 @@
+ 	break;
+ 
+     case CONVERT (A52_3F2R, A52_2F1R):
+-	mix3to2 (samples, bias);
++	mix3to2 (samples, bias); //FIXME possible bug? (output doesnt seem to be used)
+ 	move2to1 (samples + 768, samples + 512, bias);
+ 	break;
+ 
+@@ -581,12 +613,12 @@
+ 	break;
+ 
+     case CONVERT (A52_3F1R, A52_3F2R):
+-	memcpy (samples + 1027, samples + 768, 256 * sizeof (sample_t));
++	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
+ 	break;
+     }
+ }
+ 
+-void upmix (sample_t * samples, int acmod, int output)
++static void upmix_C (sample_t * samples, int acmod, int output)
+ {
+     switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
+ 
+@@ -651,3 +683,1137 @@
+ 	goto mix_31to21;
+     }
+ }
++
++#ifdef ARCH_X86
++static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
++{
++	asm volatile(
++	"movlps %2, %%xmm7		\n\t"
++	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++	"movl $-1024, %%esi		\n\t"
++	".balign 16\n\t"
++	"1:				\n\t"
++	"movaps (%0, %%esi), %%xmm0	\n\t" 
++	"movaps 16(%0, %%esi), %%xmm1	\n\t" 
++	"addps (%1, %%esi), %%xmm0	\n\t" 
++	"addps 16(%1, %%esi), %%xmm1	\n\t" 
++	"addps %%xmm7, %%xmm0		\n\t"
++	"addps %%xmm7, %%xmm1		\n\t"
++	"movaps %%xmm0, (%1, %%esi)	\n\t"
++	"movaps %%xmm1, 16(%1, %%esi)	\n\t"
++	"addl $32, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (src+256), "r" (dest+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix3to1_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movlps %1, %%xmm7		\n\t"
++	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++	"movl $-1024, %%esi		\n\t"
++	".balign 16\n\t"
++	"1:				\n\t"
++	"movaps (%0, %%esi), %%xmm0	\n\t" 
++	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
++	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
++	"addps %%xmm7, %%xmm1		\n\t"
++	"addps %%xmm1, %%xmm0		\n\t"
++	"movaps %%xmm0, (%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix4to1_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movlps %1, %%xmm7		\n\t"
++	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++	"movl $-1024, %%esi		\n\t"
++	".balign 16\n\t"
++	"1:				\n\t"
++	"movaps (%0, %%esi), %%xmm0	\n\t" 
++	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
++	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
++	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
++	"addps %%xmm7, %%xmm0		\n\t"
++	"addps %%xmm1, %%xmm0		\n\t"
++	"movaps %%xmm0, (%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix5to1_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movlps %1, %%xmm7		\n\t"
++	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++	"movl $-1024, %%esi		\n\t"
++	".balign 16\n\t"
++	"1:				\n\t"
++	"movaps (%0, %%esi), %%xmm0	\n\t" 
++	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
++	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
++	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
++	"addps %%xmm7, %%xmm0		\n\t"
++	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
++	"addps %%xmm1, %%xmm0		\n\t"
++	"movaps %%xmm0, (%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix3to2_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movlps %1, %%xmm7		\n\t"
++	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++	"movl $-1024, %%esi		\n\t"
++	".balign 16\n\t"
++	"1:				\n\t"
++	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
++	"addps %%xmm7, %%xmm0		\n\t" //common
++	"movaps (%0, %%esi), %%xmm1	\n\t" 
++	"movaps 2048(%0, %%esi), %%xmm2	\n\t"
++	"addps %%xmm0, %%xmm1		\n\t"
++	"addps %%xmm0, %%xmm2		\n\t"
++	"movaps %%xmm1, (%0, %%esi)	\n\t"
++	"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix21to2_SSE (sample_t * left, sample_t * right, sample_t bias)
++{
++	asm volatile(
++		"movlps %2, %%xmm7		\n\t"
++		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++		"movl $-1024, %%esi		\n\t"
++		".balign 16\n\t"
++		"1:				\n\t"
++		"movaps 1024(%1, %%esi), %%xmm0	\n\t" 
++		"addps %%xmm7, %%xmm0		\n\t" //common
++		"movaps (%0, %%esi), %%xmm1	\n\t" 
++		"movaps (%1, %%esi), %%xmm2	\n\t"
++		"addps %%xmm0, %%xmm1		\n\t"
++		"addps %%xmm0, %%xmm2		\n\t"
++		"movaps %%xmm1, (%0, %%esi)	\n\t"
++		"movaps %%xmm2, (%1, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (left+256), "r" (right+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix21toS_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++		"movlps %1, %%xmm7		\n\t"
++		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++		"movl $-1024, %%esi		\n\t"
++		".balign 16\n\t"
++		"1:				\n\t"
++		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  // surround
++		"movaps (%0, %%esi), %%xmm1	\n\t" 
++		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
++		"addps %%xmm7, %%xmm1		\n\t"
++		"addps %%xmm7, %%xmm2		\n\t"
++		"subps %%xmm0, %%xmm1		\n\t"
++		"addps %%xmm0, %%xmm2		\n\t"
++		"movaps %%xmm1, (%0, %%esi)	\n\t"
++		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix31to2_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++		"movlps %1, %%xmm7		\n\t"
++		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++		"movl $-1024, %%esi		\n\t"
++		".balign 16\n\t"
++		"1:				\n\t"
++		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
++		"addps 3072(%0, %%esi), %%xmm0	\n\t"  
++		"addps %%xmm7, %%xmm0		\n\t" // common
++		"movaps (%0, %%esi), %%xmm1	\n\t" 
++		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
++		"addps %%xmm0, %%xmm1		\n\t"
++		"addps %%xmm0, %%xmm2		\n\t"
++		"movaps %%xmm1, (%0, %%esi)	\n\t"
++		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix31toS_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++		"movlps %1, %%xmm7		\n\t"
++		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++		"movl $-1024, %%esi		\n\t"
++		".balign 16\n\t"
++		"1:				\n\t"
++		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
++		"movaps 3072(%0, %%esi), %%xmm3	\n\t" // surround
++		"addps %%xmm7, %%xmm0		\n\t" // common
++		"movaps (%0, %%esi), %%xmm1	\n\t" 
++		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
++		"addps %%xmm0, %%xmm1		\n\t"
++		"addps %%xmm0, %%xmm2		\n\t"
++		"subps %%xmm3, %%xmm1		\n\t"
++		"addps %%xmm3, %%xmm2		\n\t"
++		"movaps %%xmm1, (%0, %%esi)	\n\t"
++		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix22toS_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++		"movlps %1, %%xmm7		\n\t"
++		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++		"movl $-1024, %%esi		\n\t"
++		".balign 16\n\t"
++		"1:				\n\t"
++		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  
++		"addps 3072(%0, %%esi), %%xmm0	\n\t" // surround
++		"movaps (%0, %%esi), %%xmm1	\n\t" 
++		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
++		"addps %%xmm7, %%xmm1		\n\t"
++		"addps %%xmm7, %%xmm2		\n\t"
++		"subps %%xmm0, %%xmm1		\n\t"
++		"addps %%xmm0, %%xmm2		\n\t"
++		"movaps %%xmm1, (%0, %%esi)	\n\t"
++		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix32to2_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movlps %1, %%xmm7		\n\t"
++	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++	"movl $-1024, %%esi		\n\t"
++	".balign 16\n\t"
++	"1:				\n\t"
++	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
++	"addps %%xmm7, %%xmm0		\n\t" // common
++	"movaps %%xmm0, %%xmm1		\n\t" // common
++	"addps (%0, %%esi), %%xmm0	\n\t" 
++	"addps 2048(%0, %%esi), %%xmm1	\n\t" 
++	"addps 3072(%0, %%esi), %%xmm0	\n\t" 
++	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
++	"movaps %%xmm0, (%0, %%esi)	\n\t"
++	"movaps %%xmm1, 1024(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix32toS_SSE (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movlps %1, %%xmm7		\n\t"
++	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++	"movl $-1024, %%esi		\n\t"
++	".balign 16\n\t"
++	"1:				\n\t"
++	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
++	"movaps 3072(%0, %%esi), %%xmm2	\n\t" 
++	"addps %%xmm7, %%xmm0		\n\t" // common
++	"addps 4096(%0, %%esi), %%xmm2	\n\t" // surround	
++	"movaps (%0, %%esi), %%xmm1	\n\t" 
++	"movaps 2048(%0, %%esi), %%xmm3	\n\t" 
++	"subps %%xmm2, %%xmm1		\n\t"	
++	"addps %%xmm2, %%xmm3		\n\t"	
++	"addps %%xmm0, %%xmm1		\n\t"	
++	"addps %%xmm0, %%xmm3		\n\t"	
++	"movaps %%xmm1, (%0, %%esi)	\n\t"
++	"movaps %%xmm3, 1024(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void move2to1_SSE (sample_t * src, sample_t * dest, sample_t bias)
++{
++	asm volatile(
++		"movlps %2, %%xmm7		\n\t"
++		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
++		"movl $-1024, %%esi		\n\t"
++		".balign 16\n\t"
++		"1:				\n\t"
++		"movaps (%0, %%esi), %%xmm0	\n\t"  
++		"movaps 16(%0, %%esi), %%xmm1	\n\t"  
++		"addps 1024(%0, %%esi), %%xmm0	\n\t"
++		"addps 1040(%0, %%esi), %%xmm1	\n\t"
++		"addps %%xmm7, %%xmm0		\n\t"
++		"addps %%xmm7, %%xmm1		\n\t"
++		"movaps %%xmm0, (%1, %%esi)	\n\t"
++		"movaps %%xmm1, 16(%1, %%esi)	\n\t"
++		"addl $32, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (src+256), "r" (dest+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void zero_MMX(sample_t * samples)
++{
++	asm volatile(
++		"movl $-1024, %%esi		\n\t"
++		"pxor %%mm0, %%mm0		\n\t"
++		".balign 16\n\t"
++		"1:				\n\t"
++		"movq %%mm0, (%0, %%esi)	\n\t"
++		"movq %%mm0, 8(%0, %%esi)	\n\t"
++		"movq %%mm0, 16(%0, %%esi)	\n\t"
++		"movq %%mm0, 24(%0, %%esi)	\n\t"
++		"addl $32, %%esi		\n\t"
++		" jnz 1b			\n\t"
++		"emms"
++	:: "r" (samples+256)
++	: "%esi"
++	);
++}
++
++/*
++ I hope dest and src will be at least 8 byte aligned and size
++ will devide on 8 without remain
++ Note: untested and unused.
++*/
++static void copy_MMX(void *dest,const void *src,unsigned size)
++{
++  unsigned i;
++  size /= 64;
++	for(i=0;i<size;i++)
++	{
++	    __asm __volatile(
++		"movq	%0,   %%mm0\n\t"
++		"movq	8%0,  %%mm1\n\t"
++		"movq	16%0, %%mm2\n\t"
++		"movq	24%0, %%mm3\n\t"
++		"movq	32%0, %%mm4\n\t"
++		"movq	40%0, %%mm5\n\t"
++		"movq	48%0, %%mm6\n\t"
++		"movq	56%0, %%mm7\n\t"
++		"movq	%%mm0, %1\n\t"
++		"movq	%%mm1, 8%1\n\t"
++		"movq	%%mm2, 16%1\n\t"
++		"movq	%%mm3, 24%1\n\t"
++		"movq	%%mm4, 32%1\n\t"
++		"movq	%%mm5, 40%1\n\t"
++		"movq	%%mm6, 48%1\n\t"
++		"movq	%%mm7, 56%1\n\t"
++		:
++		:"m"(src),"m"(dest));
++	}
++}
++
++static void downmix_SSE (sample_t * samples, int acmod, int output, sample_t bias,
++	      sample_t clev, sample_t slev)
++{
++    switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
++
++    case CONVERT (A52_CHANNEL, A52_CHANNEL2):
++	memcpy (samples, samples + 256, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_CHANNEL, A52_MONO):
++    case CONVERT (A52_STEREO, A52_MONO):
++    mix_2to1_SSE:
++	mix2to1_SSE (samples, samples + 256, bias);
++	break;
++
++    case CONVERT (A52_2F1R, A52_MONO):
++	if (slev == 0)
++	    goto mix_2to1_SSE;
++    case CONVERT (A52_3F, A52_MONO):
++    mix_3to1_SSE:
++	mix3to1_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_MONO):
++	if (slev == 0)
++	    goto mix_3to1_SSE;
++    case CONVERT (A52_2F2R, A52_MONO):
++	if (slev == 0)
++	    goto mix_2to1_SSE;
++	mix4to1_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_MONO):
++	if (slev == 0)
++	    goto mix_3to1_SSE;
++	mix5to1_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_MONO, A52_DOLBY):
++	memcpy (samples + 256, samples, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F, A52_STEREO):
++    case CONVERT (A52_3F, A52_DOLBY):
++    mix_3to2_SSE:
++	mix3to2_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_2F1R, A52_STEREO):
++	if (slev == 0)
++	    break;
++	mix21to2_SSE (samples, samples + 256, bias);
++	break;
++
++    case CONVERT (A52_2F1R, A52_DOLBY):
++	mix21toS_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_STEREO):
++	if (slev == 0)
++	    goto mix_3to2_SSE;
++	mix31to2_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_DOLBY):
++	mix31toS_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_2F2R, A52_STEREO):
++	if (slev == 0)
++	    break;
++	mix2to1_SSE (samples, samples + 512, bias);
++	mix2to1_SSE (samples + 256, samples + 768, bias);
++	break;
++
++    case CONVERT (A52_2F2R, A52_DOLBY):
++	mix22toS_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_STEREO):
++	if (slev == 0)
++	    goto mix_3to2_SSE;
++	mix32to2_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_DOLBY):
++	mix32toS_SSE (samples, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_3F):
++	if (slev == 0)
++	    break;
++	mix21to2_SSE (samples, samples + 512, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_3F):
++	if (slev == 0)
++	    break;
++	mix2to1_SSE (samples, samples + 768, bias);
++	mix2to1_SSE (samples + 512, samples + 1024, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_2F1R):
++	mix3to2_SSE (samples, bias);
++	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_2F2R, A52_2F1R):
++	mix2to1_SSE (samples + 512, samples + 768, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_2F1R):
++	mix3to2_SSE (samples, bias); //FIXME possible bug? (output doesnt seem to be used)
++	move2to1_SSE (samples + 768, samples + 512, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_3F1R):
++	mix2to1_SSE (samples + 768, samples + 1024, bias);
++	break;
++
++    case CONVERT (A52_2F1R, A52_2F2R):
++	memcpy (samples + 768, samples + 512, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F1R, A52_2F2R):
++	mix3to2_SSE (samples, bias);
++	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F2R, A52_2F2R):
++	mix3to2_SSE (samples, bias);
++	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
++	memcpy (samples + 768, samples + 1024, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F1R, A52_3F2R):
++	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
++	break;
++    }
++}
++
++static void upmix_MMX (sample_t * samples, int acmod, int output)
++{
++    switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
++
++    case CONVERT (A52_CHANNEL, A52_CHANNEL2):
++	memcpy (samples + 256, samples, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F2R, A52_MONO):
++	zero_MMX (samples + 1024);
++    case CONVERT (A52_3F1R, A52_MONO):
++    case CONVERT (A52_2F2R, A52_MONO):
++	zero_MMX (samples + 768);
++    case CONVERT (A52_3F, A52_MONO):
++    case CONVERT (A52_2F1R, A52_MONO):
++	zero_MMX (samples + 512);
++    case CONVERT (A52_CHANNEL, A52_MONO):
++    case CONVERT (A52_STEREO, A52_MONO):
++	zero_MMX (samples + 256);
++	break;
++
++    case CONVERT (A52_3F2R, A52_STEREO):
++    case CONVERT (A52_3F2R, A52_DOLBY):
++	zero_MMX (samples + 1024);
++    case CONVERT (A52_3F1R, A52_STEREO):
++    case CONVERT (A52_3F1R, A52_DOLBY):
++	zero_MMX (samples + 768);
++    case CONVERT (A52_3F, A52_STEREO):
++    case CONVERT (A52_3F, A52_DOLBY):
++    mix_3to2_MMX:
++	memcpy (samples + 512, samples + 256, 256 * sizeof (sample_t));
++	zero_MMX (samples + 256);
++	break;
++
++    case CONVERT (A52_2F2R, A52_STEREO):
++    case CONVERT (A52_2F2R, A52_DOLBY):
++	zero_MMX (samples + 768);
++    case CONVERT (A52_2F1R, A52_STEREO):
++    case CONVERT (A52_2F1R, A52_DOLBY):
++	zero_MMX (samples + 512);
++	break;
++
++    case CONVERT (A52_3F2R, A52_3F):
++	zero_MMX (samples + 1024);
++    case CONVERT (A52_3F1R, A52_3F):
++    case CONVERT (A52_2F2R, A52_2F1R):
++	zero_MMX (samples + 768);
++	break;
++
++    case CONVERT (A52_3F2R, A52_3F1R):
++	zero_MMX (samples + 1024);
++	break;
++
++    case CONVERT (A52_3F2R, A52_2F1R):
++	zero_MMX (samples + 1024);
++    case CONVERT (A52_3F1R, A52_2F1R):
++    mix_31to21_MMX:
++	memcpy (samples + 768, samples + 512, 256 * sizeof (sample_t));
++	goto mix_3to2_MMX;
++
++    case CONVERT (A52_3F2R, A52_2F2R):
++	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
++	goto mix_31to21_MMX;
++    }
++}
++
++static void mix2to1_3dnow (sample_t * dest, sample_t * src, sample_t bias)
++{
++	asm volatile(
++	"movd  %2, %%mm7	\n\t"
++	"punpckldq %2, %%mm7	\n\t"
++	"movl  $-1024, %%esi	\n\t"
++	".balign 16\n\t"
++	"1:			\n\t"
++	"movq  (%0, %%esi), %%mm0	\n\t" 
++	"movq  8(%0, %%esi), %%mm1	\n\t"
++	"movq  16(%0, %%esi), %%mm2	\n\t" 
++	"movq  24(%0, %%esi), %%mm3	\n\t"
++	"pfadd (%1, %%esi), %%mm0	\n\t" 
++	"pfadd 8(%1, %%esi), %%mm1	\n\t"
++	"pfadd 16(%1, %%esi), %%mm2	\n\t" 
++	"pfadd 24(%1, %%esi), %%mm3	\n\t"
++	"pfadd %%mm7, %%mm0		\n\t"
++	"pfadd %%mm7, %%mm1		\n\t"
++	"pfadd %%mm7, %%mm2		\n\t"
++	"pfadd %%mm7, %%mm3		\n\t"
++	"movq  %%mm0, (%1, %%esi)	\n\t"
++	"movq  %%mm1, 8(%1, %%esi)	\n\t"
++	"movq  %%mm2, 16(%1, %%esi)	\n\t"
++	"movq  %%mm3, 24(%1, %%esi)	\n\t"
++	"addl $32, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (src+256), "r" (dest+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix3to1_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movd  %1, %%mm7	\n\t"
++	"punpckldq %1, %%mm7	\n\t"
++	"movl $-1024, %%esi	\n\t"
++	".balign 16\n\t"
++	"1:			\n\t"
++	"movq  (%0, %%esi), %%mm0	\n\t" 
++	"movq  8(%0, %%esi), %%mm1	\n\t"
++	"movq  1024(%0, %%esi), %%mm2	\n\t" 
++	"movq  1032(%0, %%esi), %%mm3	\n\t"
++	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
++	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
++	"pfadd %%mm7, %%mm0		\n\t"
++	"pfadd %%mm7, %%mm1		\n\t"
++	"pfadd %%mm2, %%mm0		\n\t"
++	"pfadd %%mm3, %%mm1		\n\t"
++	"movq  %%mm0, (%0, %%esi)	\n\t"
++	"movq  %%mm1, 8(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix4to1_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movd  %1, %%mm7	\n\t"
++	"punpckldq %1, %%mm7	\n\t"
++	"movl $-1024, %%esi	\n\t"
++	".balign 16\n\t"
++	"1:			\n\t"
++	"movq  (%0, %%esi), %%mm0	\n\t" 
++	"movq  8(%0, %%esi), %%mm1	\n\t"
++	"movq  1024(%0, %%esi), %%mm2	\n\t" 
++	"movq  1032(%0, %%esi), %%mm3	\n\t"
++	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
++	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
++	"pfadd 3072(%0, %%esi), %%mm2	\n\t" 
++	"pfadd 3080(%0, %%esi), %%mm3	\n\t"
++	"pfadd %%mm7, %%mm0		\n\t"
++	"pfadd %%mm7, %%mm1		\n\t"
++	"pfadd %%mm2, %%mm0		\n\t"
++	"pfadd %%mm3, %%mm1		\n\t"
++	"movq  %%mm0, (%0, %%esi)	\n\t"
++	"movq  %%mm1, 8(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix5to1_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movd  %1, %%mm7	\n\t"
++	"punpckldq %1, %%mm7	\n\t"
++	"movl $-1024, %%esi	\n\t"
++	".balign 16\n\t"
++	"1:			\n\t"
++	"movq  (%0, %%esi), %%mm0	\n\t" 
++	"movq  8(%0, %%esi), %%mm1	\n\t"
++	"movq  1024(%0, %%esi), %%mm2	\n\t" 
++	"movq  1032(%0, %%esi), %%mm3	\n\t"
++	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
++	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
++	"pfadd 3072(%0, %%esi), %%mm2	\n\t" 
++	"pfadd 3080(%0, %%esi), %%mm3	\n\t"
++	"pfadd %%mm7, %%mm0		\n\t"
++	"pfadd %%mm7, %%mm1		\n\t"
++	"pfadd 4096(%0, %%esi), %%mm2	\n\t" 
++	"pfadd 4104(%0, %%esi), %%mm3	\n\t"
++	"pfadd %%mm2, %%mm0		\n\t"
++	"pfadd %%mm3, %%mm1		\n\t"
++	"movq  %%mm0, (%0, %%esi)	\n\t"
++	"movq  %%mm1, 8(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix3to2_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movd  %1, %%mm7	\n\t"
++	"punpckldq %1, %%mm7	\n\t"
++	"movl $-1024, %%esi	\n\t"
++	".balign 16\n\t"
++	"1:			\n\t"
++	"movq   1024(%0, %%esi), %%mm0	\n\t" 
++	"movq   1032(%0, %%esi), %%mm1	\n\t"
++	"pfadd  %%mm7, %%mm0		\n\t" //common
++	"pfadd  %%mm7, %%mm1		\n\t" //common
++	"movq   (%0, %%esi), %%mm2	\n\t" 
++	"movq   8(%0, %%esi), %%mm3	\n\t"
++	"movq   2048(%0, %%esi), %%mm4	\n\t"
++	"movq   2056(%0, %%esi), %%mm5	\n\t"
++	"pfadd  %%mm0, %%mm2		\n\t"
++	"pfadd  %%mm1, %%mm3		\n\t"
++	"pfadd  %%mm0, %%mm4		\n\t"
++	"pfadd  %%mm1, %%mm5		\n\t"
++	"movq   %%mm2, (%0, %%esi)	\n\t"
++	"movq   %%mm3, 8(%0, %%esi)	\n\t"
++	"movq   %%mm4, 1024(%0, %%esi)	\n\t"
++	"movq   %%mm5, 1032(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix21to2_3dnow (sample_t * left, sample_t * right, sample_t bias)
++{
++	asm volatile(
++		"movd  %2, %%mm7	\n\t"
++		"punpckldq %2, %%mm7	\n\t"
++		"movl $-1024, %%esi	\n\t"
++		".balign 16\n\t"
++		"1:			\n\t"
++		"movq  1024(%1, %%esi), %%mm0	\n\t" 
++		"movq  1032(%1, %%esi), %%mm1	\n\t"
++		"pfadd %%mm7, %%mm0		\n\t" //common
++		"pfadd %%mm7, %%mm1		\n\t" //common
++		"movq  (%0, %%esi), %%mm2	\n\t" 
++		"movq  8(%0, %%esi), %%mm3	\n\t"
++		"movq  (%1, %%esi), %%mm4	\n\t"
++		"movq  8(%1, %%esi), %%mm5	\n\t"
++		"pfadd %%mm0, %%mm2		\n\t"
++		"pfadd %%mm1, %%mm3		\n\t"
++		"pfadd %%mm0, %%mm4		\n\t"
++		"pfadd %%mm1, %%mm5		\n\t"
++		"movq  %%mm2, (%0, %%esi)	\n\t"
++		"movq  %%mm3, 8(%0, %%esi)	\n\t"
++		"movq  %%mm4, (%1, %%esi)	\n\t"
++		"movq  %%mm5, 8(%1, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (left+256), "r" (right+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix21toS_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++		"movd  %1, %%mm7	\n\t"
++		"punpckldq %1, %%mm7	\n\t"
++		"movl $-1024, %%esi	\n\t"
++		".balign 16\n\t"
++		"1:			\n\t"
++		"movq  2048(%0, %%esi), %%mm0	\n\t"  // surround
++		"movq  2056(%0, %%esi), %%mm1	\n\t"  // surround
++		"movq  (%0, %%esi), %%mm2	\n\t" 
++		"movq  8(%0, %%esi), %%mm3	\n\t"
++		"movq  1024(%0, %%esi), %%mm4	\n\t"
++		"movq  1032(%0, %%esi), %%mm5	\n\t"
++		"pfadd %%mm7, %%mm2		\n\t"
++		"pfadd %%mm7, %%mm3		\n\t"
++		"pfadd %%mm7, %%mm4		\n\t"
++		"pfadd %%mm7, %%mm5		\n\t"
++		"pfsub %%mm0, %%mm2		\n\t"
++		"pfsub %%mm1, %%mm3		\n\t"
++		"pfadd %%mm0, %%mm4		\n\t"
++		"pfadd %%mm1, %%mm5		\n\t"
++		"movq  %%mm2, (%0, %%esi)	\n\t"
++		"movq  %%mm3, 8(%0, %%esi)	\n\t"
++		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
++		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix31to2_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++		"movd  %1, %%mm7	\n\t"
++		"punpckldq %1, %%mm7	\n\t"
++		"movl $-1024, %%esi	\n\t"
++		".balign 16\n\t"
++		"1:			\n\t"
++		"movq  1024(%0, %%esi), %%mm0	\n\t"  
++		"movq  1032(%0, %%esi), %%mm1	\n\t"
++		"pfadd 3072(%0, %%esi), %%mm0	\n\t"  
++		"pfadd 3080(%0, %%esi), %%mm1	\n\t"
++		"pfadd %%mm7, %%mm0		\n\t" // common
++		"pfadd %%mm7, %%mm1		\n\t" // common
++		"movq  (%0, %%esi), %%mm2	\n\t" 
++		"movq  8(%0, %%esi), %%mm3	\n\t"
++		"movq  2048(%0, %%esi), %%mm4	\n\t"
++		"movq  2056(%0, %%esi), %%mm5	\n\t"
++		"pfadd %%mm0, %%mm2		\n\t"
++		"pfadd %%mm1, %%mm3		\n\t"
++		"pfadd %%mm0, %%mm4		\n\t"
++		"pfadd %%mm1, %%mm5		\n\t"
++		"movq  %%mm2, (%0, %%esi)	\n\t"
++		"movq  %%mm3, 8(%0, %%esi)	\n\t"
++		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
++		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix31toS_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++		"movd  %1, %%mm7	\n\t"
++		"punpckldq %1, %%mm7	\n\t"
++		"movl $-1024, %%esi	\n\t"
++		".balign 16\n\t"
++		"1:			\n\t"
++		"movq   1024(%0, %%esi), %%mm0	\n\t"  
++		"movq   1032(%0, %%esi), %%mm1	\n\t"
++		"pfadd  %%mm7, %%mm0		\n\t" // common
++		"pfadd  %%mm7, %%mm1		\n\t" // common
++		"movq   (%0, %%esi), %%mm2	\n\t" 
++		"movq   8(%0, %%esi), %%mm3	\n\t"
++		"movq   2048(%0, %%esi), %%mm4	\n\t"
++		"movq   2056(%0, %%esi), %%mm5	\n\t"
++		"pfadd  %%mm0, %%mm2		\n\t"
++		"pfadd  %%mm1, %%mm3		\n\t"
++		"pfadd  %%mm0, %%mm4		\n\t"
++		"pfadd  %%mm1, %%mm5		\n\t"
++		"movq   3072(%0, %%esi), %%mm0	\n\t" // surround
++		"movq   3080(%0, %%esi), %%mm1	\n\t" // surround
++		"pfsub  %%mm0, %%mm2		\n\t"
++		"pfsub  %%mm1, %%mm3		\n\t"
++		"pfadd  %%mm0, %%mm4		\n\t"
++		"pfadd  %%mm1, %%mm5		\n\t"
++		"movq   %%mm2, (%0, %%esi)	\n\t"
++		"movq   %%mm3, 8(%0, %%esi)	\n\t"
++		"movq   %%mm4, 1024(%0, %%esi)	\n\t"
++		"movq   %%mm5, 1032(%0, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix22toS_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++		"movd  %1, %%mm7	\n\t"
++		"punpckldq %1, %%mm7	\n\t"
++		"movl $-1024, %%esi	\n\t"
++		".balign 16\n\t"
++		"1:			\n\t"
++		"movq  2048(%0, %%esi), %%mm0	\n\t"  
++		"movq  2056(%0, %%esi), %%mm1	\n\t"
++		"pfadd 3072(%0, %%esi), %%mm0	\n\t" // surround
++		"pfadd 3080(%0, %%esi), %%mm1	\n\t" // surround
++		"movq  (%0, %%esi), %%mm2	\n\t" 
++		"movq  8(%0, %%esi), %%mm3	\n\t"
++		"movq  1024(%0, %%esi), %%mm4	\n\t"
++		"movq  1032(%0, %%esi), %%mm5	\n\t"
++		"pfadd %%mm7, %%mm2		\n\t"
++		"pfadd %%mm7, %%mm3		\n\t"
++		"pfadd %%mm7, %%mm4		\n\t"
++		"pfadd %%mm7, %%mm5		\n\t"
++		"pfsub %%mm0, %%mm2		\n\t"
++		"pfsub %%mm1, %%mm3		\n\t"
++		"pfadd %%mm0, %%mm4		\n\t"
++		"pfadd %%mm1, %%mm5		\n\t"
++		"movq  %%mm2, (%0, %%esi)	\n\t"
++		"movq  %%mm3, 8(%0, %%esi)	\n\t"
++		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
++		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
++		"addl $16, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void mix32to2_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movd  %1, %%mm7	\n\t"
++	"punpckldq %1, %%mm7	\n\t"
++	"movl $-1024, %%esi	\n\t"
++	".balign 16\n\t"
++	"1:			\n\t"
++	"movq   1024(%0, %%esi), %%mm0	\n\t" 
++	"movq   1032(%0, %%esi), %%mm1	\n\t"
++	"pfadd  %%mm7, %%mm0		\n\t" // common
++	"pfadd  %%mm7, %%mm1		\n\t" // common
++	"movq   %%mm0, %%mm2		\n\t" // common
++	"movq   %%mm1, %%mm3		\n\t" // common
++	"pfadd  (%0, %%esi), %%mm0	\n\t" 
++	"pfadd  8(%0, %%esi), %%mm1	\n\t"
++	"pfadd  2048(%0, %%esi), %%mm2	\n\t" 
++	"pfadd  2056(%0, %%esi), %%mm3	\n\t"
++	"pfadd  3072(%0, %%esi), %%mm0	\n\t" 
++	"pfadd  3080(%0, %%esi), %%mm1	\n\t"
++	"pfadd  4096(%0, %%esi), %%mm2	\n\t" 
++	"pfadd  4104(%0, %%esi), %%mm3	\n\t"
++	"movq   %%mm0, (%0, %%esi)	\n\t"
++	"movq   %%mm1, 8(%0, %%esi)	\n\t"
++	"movq   %%mm2, 1024(%0, %%esi)	\n\t"
++	"movq   %%mm3, 1032(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++/* todo: should be optimized better */
++static void mix32toS_3dnow (sample_t * samples, sample_t bias)
++{
++	asm volatile(
++	"movl $-1024, %%esi	\n\t"
++	".balign 16\n\t"
++	"1:			\n\t"
++	"movd  %1, %%mm7		\n\t"
++	"punpckldq %1, %%mm7		\n\t"
++	"movq  1024(%0, %%esi), %%mm0	\n\t" 
++	"movq  1032(%0, %%esi), %%mm1	\n\t"
++	"movq  3072(%0, %%esi), %%mm4	\n\t" 
++	"movq  3080(%0, %%esi), %%mm5	\n\t"
++	"pfadd %%mm7, %%mm0		\n\t" // common
++	"pfadd %%mm7, %%mm1		\n\t" // common
++	"pfadd 4096(%0, %%esi), %%mm4	\n\t" // surround	
++	"pfadd 4104(%0, %%esi), %%mm5	\n\t" // surround
++	"movq  (%0, %%esi), %%mm2	\n\t" 
++	"movq  8(%0, %%esi), %%mm3	\n\t"
++	"movq  2048(%0, %%esi), %%mm6	\n\t" 
++	"movq  2056(%0, %%esi), %%mm7	\n\t"
++	"pfsub %%mm4, %%mm2		\n\t"	
++	"pfsub %%mm5, %%mm3		\n\t"
++	"pfadd %%mm4, %%mm6		\n\t"	
++	"pfadd %%mm5, %%mm7		\n\t"
++	"pfadd %%mm0, %%mm2		\n\t"	
++	"pfadd %%mm1, %%mm3		\n\t"
++	"pfadd %%mm0, %%mm6		\n\t"	
++	"pfadd %%mm1, %%mm7		\n\t"
++	"movq  %%mm2, (%0, %%esi)	\n\t"
++	"movq  %%mm3, 8(%0, %%esi)	\n\t"
++	"movq  %%mm6, 1024(%0, %%esi)	\n\t"
++	"movq  %%mm7, 1032(%0, %%esi)	\n\t"
++	"addl $16, %%esi		\n\t"
++	" jnz 1b			\n\t"
++	:: "r" (samples+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void move2to1_3dnow (sample_t * src, sample_t * dest, sample_t bias)
++{
++	asm volatile(
++		"movd  %2, %%mm7	\n\t"
++		"punpckldq %2, %%mm7	\n\t"
++		"movl $-1024, %%esi	\n\t"
++		".balign 16\n\t"
++		"1:			\n\t"
++		"movq  (%0, %%esi), %%mm0	\n\t"  
++		"movq  8(%0, %%esi), %%mm1	\n\t"
++		"movq  16(%0, %%esi), %%mm2	\n\t"  
++		"movq  24(%0, %%esi), %%mm3	\n\t"
++		"pfadd 1024(%0, %%esi), %%mm0	\n\t"
++		"pfadd 1032(%0, %%esi), %%mm1	\n\t"
++		"pfadd 1040(%0, %%esi), %%mm2	\n\t"
++		"pfadd 1048(%0, %%esi), %%mm3	\n\t"
++		"pfadd %%mm7, %%mm0		\n\t"
++		"pfadd %%mm7, %%mm1		\n\t"
++		"pfadd %%mm7, %%mm2		\n\t"
++		"pfadd %%mm7, %%mm3		\n\t"
++		"movq  %%mm0, (%1, %%esi)	\n\t"
++		"movq  %%mm1, 8(%1, %%esi)	\n\t"
++		"movq  %%mm2, 16(%1, %%esi)	\n\t"
++		"movq  %%mm3, 24(%1, %%esi)	\n\t"
++		"addl $32, %%esi		\n\t"
++		" jnz 1b			\n\t"
++	:: "r" (src+256), "r" (dest+256), "m" (bias)
++	: "%esi"
++	);
++}
++
++static void downmix_3dnow (sample_t * samples, int acmod, int output, sample_t bias,
++	      sample_t clev, sample_t slev)
++{
++    switch (CONVERT (acmod, output & A52_CHANNEL_MASK)) {
++
++    case CONVERT (A52_CHANNEL, A52_CHANNEL2):
++	memcpy (samples, samples + 256, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_CHANNEL, A52_MONO):
++    case CONVERT (A52_STEREO, A52_MONO):
++    mix_2to1_3dnow:
++	mix2to1_3dnow (samples, samples + 256, bias);
++	break;
++
++    case CONVERT (A52_2F1R, A52_MONO):
++	if (slev == 0)
++	    goto mix_2to1_3dnow;
++    case CONVERT (A52_3F, A52_MONO):
++    mix_3to1_3dnow:
++	mix3to1_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_MONO):
++	if (slev == 0)
++	    goto mix_3to1_3dnow;
++    case CONVERT (A52_2F2R, A52_MONO):
++	if (slev == 0)
++	    goto mix_2to1_3dnow;
++	mix4to1_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_MONO):
++	if (slev == 0)
++	    goto mix_3to1_3dnow;
++	mix5to1_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_MONO, A52_DOLBY):
++	memcpy (samples + 256, samples, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F, A52_STEREO):
++    case CONVERT (A52_3F, A52_DOLBY):
++    mix_3to2_3dnow:
++	mix3to2_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_2F1R, A52_STEREO):
++	if (slev == 0)
++	    break;
++	mix21to2_3dnow (samples, samples + 256, bias);
++	break;
++
++    case CONVERT (A52_2F1R, A52_DOLBY):
++	mix21toS_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_STEREO):
++	if (slev == 0)
++	    goto mix_3to2_3dnow;
++	mix31to2_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_DOLBY):
++	mix31toS_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_2F2R, A52_STEREO):
++	if (slev == 0)
++	    break;
++	mix2to1_3dnow (samples, samples + 512, bias);
++	mix2to1_3dnow (samples + 256, samples + 768, bias);
++	break;
++
++    case CONVERT (A52_2F2R, A52_DOLBY):
++	mix22toS_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_STEREO):
++	if (slev == 0)
++	    goto mix_3to2_3dnow;
++	mix32to2_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_DOLBY):
++	mix32toS_3dnow (samples, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_3F):
++	if (slev == 0)
++	    break;
++	mix21to2_3dnow (samples, samples + 512, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_3F):
++	if (slev == 0)
++	    break;
++	mix2to1_3dnow (samples, samples + 768, bias);
++	mix2to1_3dnow (samples + 512, samples + 1024, bias);
++	break;
++
++    case CONVERT (A52_3F1R, A52_2F1R):
++	mix3to2_3dnow (samples, bias);
++	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_2F2R, A52_2F1R):
++	mix2to1_3dnow (samples + 512, samples + 768, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_2F1R):
++	mix3to2_3dnow (samples, bias); //FIXME possible bug? (output doesnt seem to be used)
++	move2to1_3dnow (samples + 768, samples + 512, bias);
++	break;
++
++    case CONVERT (A52_3F2R, A52_3F1R):
++	mix2to1_3dnow (samples + 768, samples + 1024, bias);
++	break;
++
++    case CONVERT (A52_2F1R, A52_2F2R):
++	memcpy (samples + 768, samples + 512, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F1R, A52_2F2R):
++	mix3to2_3dnow (samples, bias);
++	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F2R, A52_2F2R):
++	mix3to2_3dnow (samples, bias);
++	memcpy (samples + 512, samples + 768, 256 * sizeof (sample_t));
++	memcpy (samples + 768, samples + 1024, 256 * sizeof (sample_t));
++	break;
++
++    case CONVERT (A52_3F1R, A52_3F2R):
++	memcpy (samples + 1024, samples + 768, 256 * sizeof (sample_t));
++	break;
++    }
++    __asm __volatile("femms":::"memory");
++}
++
++#endif //ARCH_X86
+--- liba52/imdct.c	2005-03-22 19:59:35.000000000 +0100
++++ imdct.c	2004-04-26 22:00:57.000000000 +0200
+@@ -17,17 +23,32 @@
+  * You should have received a copy of the GNU General Public License
+  * along with this program; if not, write to the Free Software
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
++ *
++ * SSE optimizations from Michael Niedermayer (michaelni@gmx.at)
++ * 3DNOW optimizations from Nick Kurshev <nickols_k@mail.ru>
++ *   michael did port them from libac3 (untested, perhaps totally broken)
++ * AltiVec optimizations from Romain Dolbeau (romain@dolbeau.org)
+  */
+ 
+ #include "config.h"
+ 
+-#include <inttypes.h>
+ #include <math.h>
+ #include <stdio.h>
++#ifndef M_PI
++#define M_PI 3.1415926535897932384626433832795029
++#endif
++#include <inttypes.h>
+ 
+ #include "a52.h"
+ #include "a52_internal.h"
+ #include "mm_accel.h"
++#include "mangle.h"
++
++#ifdef RUNTIME_CPUDETECT
++#undef HAVE_3DNOWEX
++#endif
++
++#define USE_AC3_C
+ 
+ void (* imdct_256) (sample_t data[], sample_t delay[], sample_t bias);
+ void (* imdct_512) (sample_t data[], sample_t delay[], sample_t bias);
+@@ -37,9 +58,22 @@
+     sample_t imag;
+ } complex_t;
+ 
++static void fft_128p(complex_t *a);
++
++static const int pm128[128] attribute_used __attribute__((aligned(16))) =
++{
++	0, 16, 32, 48, 64, 80,  96, 112,  8, 40, 72, 104, 24, 56,  88, 120,
++	4, 20, 36, 52, 68, 84, 100, 116, 12, 28, 44,  60, 76, 92, 108, 124,
++	2, 18, 34, 50, 66, 82,  98, 114, 10, 42, 74, 106, 26, 58,  90, 122,
++	6, 22, 38, 54, 70, 86, 102, 118, 14, 46, 78, 110, 30, 62,  94, 126,
++	1, 17, 33, 49, 65, 81,  97, 113,  9, 41, 73, 105, 25, 57,  89, 121,
++	5, 21, 37, 53, 69, 85, 101, 117, 13, 29, 45,  61, 77, 93, 109, 125,
++	3, 19, 35, 51, 67, 83,  99, 115, 11, 43, 75, 107, 27, 59,  91, 123,
++	7, 23, 39, 55, 71, 87, 103, 119, 15, 31, 47,  63, 79, 95, 111, 127
++}; 
+ 
+ /* 128 point bit-reverse LUT */
+-static uint8_t bit_reverse_512[] = {
++static uint8_t attribute_used bit_reverse_512[] = {
+ 	0x00, 0x40, 0x20, 0x60, 0x10, 0x50, 0x30, 0x70, 
+ 	0x08, 0x48, 0x28, 0x68, 0x18, 0x58, 0x38, 0x78, 
+ 	0x04, 0x44, 0x24, 0x64, 0x14, 0x54, 0x34, 0x74, 
+@@ -67,23 +101,42 @@
+ 	0x03, 0x23, 0x13, 0x33, 0x0b, 0x2b, 0x1b, 0x3b, 
+ 	0x07, 0x27, 0x17, 0x37, 0x0f, 0x2f, 0x1f, 0x3f};
+ 
+-static complex_t buf[128];
++#ifdef ARCH_X86
++// NOTE: SSE needs 16byte alignment or it will segfault 
++// 
++static complex_t __attribute__((aligned(16))) buf[128];
++static float __attribute__((aligned(16))) sseSinCos1c[256];
++static float __attribute__((aligned(16))) sseSinCos1d[256];
++static float attribute_used __attribute__((aligned(16))) ps111_1[4]={1,1,1,-1};
++//static float __attribute__((aligned(16))) sseW0[4];
++static float __attribute__((aligned(16))) sseW1[8];
++static float __attribute__((aligned(16))) sseW2[16];
++static float __attribute__((aligned(16))) sseW3[32];
++static float __attribute__((aligned(16))) sseW4[64];
++static float __attribute__((aligned(16))) sseW5[128];
++static float __attribute__((aligned(16))) sseW6[256];
++static float __attribute__((aligned(16))) *sseW[7]=
++	{NULL /*sseW0*/,sseW1,sseW2,sseW3,sseW4,sseW5,sseW6};
++static float __attribute__((aligned(16))) sseWindow[512];
++#else
++static complex_t  __attribute__((aligned(16))) buf[128];
++#endif
+ 
+ /* Twiddle factor LUT */
+-static complex_t w_1[1];
+-static complex_t w_2[2];
+-static complex_t w_4[4];
+-static complex_t w_8[8];
+-static complex_t w_16[16];
+-static complex_t w_32[32];
+-static complex_t w_64[64];
+-static complex_t * w[7] = {w_1, w_2, w_4, w_8, w_16, w_32, w_64};
++static complex_t __attribute__((aligned(16))) w_1[1];
++static complex_t __attribute__((aligned(16))) w_2[2];
++static complex_t __attribute__((aligned(16))) w_4[4];
++static complex_t __attribute__((aligned(16))) w_8[8];
++static complex_t __attribute__((aligned(16))) w_16[16];
++static complex_t __attribute__((aligned(16))) w_32[32];
++static complex_t __attribute__((aligned(16))) w_64[64];
++static complex_t __attribute__((aligned(16))) * w[7] = {w_1, w_2, w_4, w_8, w_16, w_32, w_64};
+ 
+ /* Twiddle factors for IMDCT */
+-static sample_t xcos1[128];
+-static sample_t xsin1[128];
+-static sample_t xcos2[64];
+-static sample_t xsin2[64];
++static sample_t __attribute__((aligned(16))) xcos1[128];
++static sample_t __attribute__((aligned(16))) xsin1[128];
++static sample_t __attribute__((aligned(16))) xcos2[64];
++static sample_t __attribute__((aligned(16))) xsin2[64];
+ 
+ /* Windowing function for Modified DCT - Thank you acroread */
+ sample_t imdct_window[] = {
+@@ -145,16 +198,19 @@
+ void
+ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
+ {
+-    int i,k;
++    int i;
++#ifndef USE_AC3_C
++	int k;
+     int p,q;
+     int m;
+     int two_m;
+     int two_m_plus_one;
+ 
+-    sample_t tmp_a_i;
+-    sample_t tmp_a_r;
+     sample_t tmp_b_i;
+     sample_t tmp_b_r;
++#endif
++    sample_t tmp_a_i;
++    sample_t tmp_a_r;
+ 
+     sample_t *data_ptr;
+     sample_t *delay_ptr;
+@@ -162,22 +218,21 @@
+ 	
+     /* 512 IMDCT with source and dest data in 'data' */
+ 	
+-    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
++    /* Pre IFFT complex multiply plus IFFT cmplx conjugate & reordering*/
+     for( i=0; i < 128; i++) {
+ 	/* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
+-	buf[i].real =         (data[256-2*i-1] * xcos1[i])  -  (data[2*i]       * xsin1[i]);
+-	buf[i].imag = -1.0 * ((data[2*i]       * xcos1[i])  +  (data[256-2*i-1] * xsin1[i]));
+-    }
+-
+-    /* Bit reversed shuffling */
+-    for(i=0; i<128; i++) {
+-	k = bit_reverse_512[i];
+-	if (k < i)
+-	    swap_cmplx(&buf[i],&buf[k]);
++#ifdef USE_AC3_C
++	int j= pm128[i];
++#else
++	int j= bit_reverse_512[i];
++#endif	
++	buf[i].real =         (data[256-2*j-1] * xcos1[j])  -  (data[2*j]       * xsin1[j]);
++	buf[i].imag = -1.0 * ((data[2*j]       * xcos1[j])  +  (data[256-2*j-1] * xsin1[j]));
+     }
+ 
+     /* FFT Merge */
+-    for (m=0; m < 7; m++) {
++/* unoptimized variant
++    for (m=1; m < 7; m++) {
+ 	if(m)
+ 	    two_m = (1 << m);
+ 	else
+@@ -185,8 +240,8 @@
+ 
+ 	two_m_plus_one = (1 << (m+1));
+ 
+-	for(k = 0; k < two_m; k++) {
+-	    for(i = 0; i < 128; i += two_m_plus_one) {
++	for(i = 0; i < 128; i += two_m_plus_one) {
++	    for(k = 0; k < two_m; k++) {
+ 		p = k + i;
+ 		q = p + two_m;
+ 		tmp_a_r = buf[p].real;
+@@ -200,7 +255,102 @@
+ 	    }
+ 	}
+     }
++*/
++#ifdef USE_AC3_C
++	fft_128p (&buf[0]);
++#else
++
++    /* 1. iteration */
++    for(i = 0; i < 128; i += 2) {
++	tmp_a_r = buf[i].real;
++	tmp_a_i = buf[i].imag;
++	tmp_b_r = buf[i+1].real;
++	tmp_b_i = buf[i+1].imag;
++	buf[i].real = tmp_a_r + tmp_b_r;
++	buf[i].imag =  tmp_a_i + tmp_b_i;
++	buf[i+1].real = tmp_a_r - tmp_b_r;
++	buf[i+1].imag =  tmp_a_i - tmp_b_i;
++    }
++        
++    /* 2. iteration */
++	// Note w[1]={{1,0}, {0,-1}}
++    for(i = 0; i < 128; i += 4) {
++	tmp_a_r = buf[i].real;
++	tmp_a_i = buf[i].imag;
++	tmp_b_r = buf[i+2].real;
++	tmp_b_i = buf[i+2].imag;
++	buf[i].real = tmp_a_r + tmp_b_r;
++	buf[i].imag =  tmp_a_i + tmp_b_i;
++	buf[i+2].real = tmp_a_r - tmp_b_r;
++	buf[i+2].imag =  tmp_a_i - tmp_b_i;
++	tmp_a_r = buf[i+1].real;
++	tmp_a_i = buf[i+1].imag;
++	tmp_b_r = buf[i+3].imag;
++	tmp_b_i = buf[i+3].real;
++	buf[i+1].real = tmp_a_r + tmp_b_r;
++	buf[i+1].imag =  tmp_a_i - tmp_b_i;
++	buf[i+3].real = tmp_a_r - tmp_b_r;
++	buf[i+3].imag =  tmp_a_i + tmp_b_i;
++    }
+ 
++    /* 3. iteration */
++    for(i = 0; i < 128; i += 8) {
++		tmp_a_r = buf[i].real;
++		tmp_a_i = buf[i].imag;
++		tmp_b_r = buf[i+4].real;
++		tmp_b_i = buf[i+4].imag;
++		buf[i].real = tmp_a_r + tmp_b_r;
++		buf[i].imag =  tmp_a_i + tmp_b_i;
++		buf[i+4].real = tmp_a_r - tmp_b_r;
++		buf[i+4].imag =  tmp_a_i - tmp_b_i;
++		tmp_a_r = buf[1+i].real;
++		tmp_a_i = buf[1+i].imag;
++		tmp_b_r = (buf[i+5].real + buf[i+5].imag) * w[2][1].real;
++		tmp_b_i = (buf[i+5].imag - buf[i+5].real) * w[2][1].real;
++		buf[1+i].real = tmp_a_r + tmp_b_r;
++		buf[1+i].imag =  tmp_a_i + tmp_b_i;
++		buf[i+5].real = tmp_a_r - tmp_b_r;
++		buf[i+5].imag =  tmp_a_i - tmp_b_i;
++		tmp_a_r = buf[i+2].real;
++		tmp_a_i = buf[i+2].imag;
++		tmp_b_r = buf[i+6].imag;
++		tmp_b_i = - buf[i+6].real;
++		buf[i+2].real = tmp_a_r + tmp_b_r;
++		buf[i+2].imag =  tmp_a_i + tmp_b_i;
++		buf[i+6].real = tmp_a_r - tmp_b_r;
++		buf[i+6].imag =  tmp_a_i - tmp_b_i;
++		tmp_a_r = buf[i+3].real;
++		tmp_a_i = buf[i+3].imag;
++		tmp_b_r = (buf[i+7].real - buf[i+7].imag) * w[2][3].imag;
++		tmp_b_i = (buf[i+7].imag + buf[i+7].real) * w[2][3].imag;
++		buf[i+3].real = tmp_a_r + tmp_b_r;
++		buf[i+3].imag =  tmp_a_i + tmp_b_i;
++		buf[i+7].real = tmp_a_r - tmp_b_r;
++		buf[i+7].imag =  tmp_a_i - tmp_b_i;
++     }
++    
++    /* 4-7. iterations */
++    for (m=3; m < 7; m++) {
++        two_m = (1 << m);
++
++	two_m_plus_one = two_m<<1;
++
++	for(i = 0; i < 128; i += two_m_plus_one) {
++	    for(k = 0; k < two_m; k++) {
++		int p = k + i;
++		int q = p + two_m;
++		tmp_a_r = buf[p].real;
++		tmp_a_i = buf[p].imag;
++		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
++		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
++		buf[p].real = tmp_a_r + tmp_b_r;
++		buf[p].imag =  tmp_a_i + tmp_b_i;
++		buf[q].real = tmp_a_r - tmp_b_r;
++		buf[q].imag =  tmp_a_i - tmp_b_i;
++	    }
++	}
++    }
++#endif    
+     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
+     for( i=0; i < 128; i++) {
+ 	/* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
+@@ -219,12 +369,12 @@
+ 	*data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
+ 	*data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
+     }
+-
++    
+     for(i=0; i< 64; i++) { 
+ 	*data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
+ 	*data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
+     }
+-
++    
+     /* The trailing edge of the window goes into the delay line */
+     delay_ptr = delay;
+ 
+@@ -232,13 +382,717 @@
+ 	*delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
+ 	*delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
+     }
+-
++    
+     for(i=0; i<64; i++) {
+ 	*delay_ptr++  =  buf[i].imag       * *--window_ptr; 
+ 	*delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
+     }
+ }
+ 
++#ifdef HAVE_ALTIVEC
++
++#ifndef SYS_DARWIN
++#include <altivec.h>
++#endif
++
++// used to build registers permutation vectors (vcprm)
++// the 's' are for words in the _s_econd vector
++#define WORD_0 0x00,0x01,0x02,0x03
++#define WORD_1 0x04,0x05,0x06,0x07
++#define WORD_2 0x08,0x09,0x0a,0x0b
++#define WORD_3 0x0c,0x0d,0x0e,0x0f
++#define WORD_s0 0x10,0x11,0x12,0x13
++#define WORD_s1 0x14,0x15,0x16,0x17
++#define WORD_s2 0x18,0x19,0x1a,0x1b
++#define WORD_s3 0x1c,0x1d,0x1e,0x1f
++
++#ifdef SYS_DARWIN
++#define vcprm(a,b,c,d) (const vector unsigned char)(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
++#else
++#define vcprm(a,b,c,d) (const vector unsigned char){WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d}
++#endif
++
++// vcprmle is used to keep the same index as in the SSE version.
++// it's the same as vcprm, with the index inversed
++// ('le' is Little Endian)
++#define vcprmle(a,b,c,d) vcprm(d,c,b,a)
++
++// used to build inverse/identity vectors (vcii)
++// n is _n_egative, p is _p_ositive
++#define FLOAT_n -1.
++#define FLOAT_p 1.
++
++#ifdef SYS_DARWIN
++#define vcii(a,b,c,d) (const vector float)(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
++#else
++#define vcii(a,b,c,d) (const vector float){FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d}
++#endif
++
++#ifdef SYS_DARWIN
++#define FOUROF(a) (a)
++#else
++#define FOUROF(a) {a,a,a,a}
++#endif
++
++
++void
++imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
++{
++  int i;
++  int k;
++  int p,q;
++  int m;
++  int two_m;
++  int two_m_plus_one;
++
++  sample_t tmp_b_i;
++  sample_t tmp_b_r;
++  sample_t tmp_a_i;
++  sample_t tmp_a_r;
++
++  sample_t *data_ptr;
++  sample_t *delay_ptr;
++  sample_t *window_ptr;
++	
++  /* 512 IMDCT with source and dest data in 'data' */
++	
++  /* Pre IFFT complex multiply plus IFFT cmplx conjugate & reordering*/
++  for( i=0; i < 128; i++) {
++    /* z[i] = (X[256-2*i-1] + j * X[2*i]) * (xcos1[i] + j * xsin1[i]) ; */ 
++    int j= bit_reverse_512[i];
++    buf[i].real =         (data[256-2*j-1] * xcos1[j])  -  (data[2*j]       * xsin1[j]);
++    buf[i].imag = -1.0 * ((data[2*j]       * xcos1[j])  +  (data[256-2*j-1] * xsin1[j]));
++  }
++  
++  /* 1. iteration */
++  for(i = 0; i < 128; i += 2) {
++#if 0
++    tmp_a_r = buf[i].real;
++    tmp_a_i = buf[i].imag;
++    tmp_b_r = buf[i+1].real;
++    tmp_b_i = buf[i+1].imag;
++    buf[i].real = tmp_a_r + tmp_b_r;
++    buf[i].imag =  tmp_a_i + tmp_b_i;
++    buf[i+1].real = tmp_a_r - tmp_b_r;
++    buf[i+1].imag =  tmp_a_i - tmp_b_i;
++#else
++    vector float temp, bufv; 
++
++    bufv = vec_ld(i << 3, (float*)buf);
++    temp = vec_perm(bufv, bufv, vcprm(2,3,0,1));
++    bufv = vec_madd(bufv, vcii(p,p,n,n), temp);
++    vec_st(bufv, i << 3, (float*)buf);
++#endif
++  }
++        
++  /* 2. iteration */
++  // Note w[1]={{1,0}, {0,-1}}
++  for(i = 0; i < 128; i += 4) {
++#if 0
++    tmp_a_r = buf[i].real;
++    tmp_a_i = buf[i].imag;
++    tmp_b_r = buf[i+2].real;
++    tmp_b_i = buf[i+2].imag;
++    buf[i].real = tmp_a_r + tmp_b_r;
++    buf[i].imag =  tmp_a_i + tmp_b_i;
++    buf[i+2].real = tmp_a_r - tmp_b_r;
++    buf[i+2].imag =  tmp_a_i - tmp_b_i;
++    tmp_a_r = buf[i+1].real;
++    tmp_a_i = buf[i+1].imag;
++    /* WARNING: im <-> re here ! */
++    tmp_b_r = buf[i+3].imag;
++    tmp_b_i = buf[i+3].real;
++    buf[i+1].real = tmp_a_r + tmp_b_r;
++    buf[i+1].imag =  tmp_a_i - tmp_b_i;
++    buf[i+3].real = tmp_a_r - tmp_b_r;
++    buf[i+3].imag =  tmp_a_i + tmp_b_i;
++#else
++    vector float buf01, buf23, temp1, temp2;
++	
++    buf01 = vec_ld((i + 0) << 3, (float*)buf);
++    buf23 = vec_ld((i + 2) << 3, (float*)buf);
++    buf23 = vec_perm(buf23,buf23,vcprm(0,1,3,2));
++
++    temp1 = vec_madd(buf23, vcii(p,p,p,n), buf01);
++    temp2 = vec_madd(buf23, vcii(n,n,n,p), buf01);
++
++    vec_st(temp1, (i + 0) << 3, (float*)buf);
++    vec_st(temp2, (i + 2) << 3, (float*)buf);
++#endif
++  }
++
++  /* 3. iteration */
++  for(i = 0; i < 128; i += 8) {
++#if 0
++    tmp_a_r = buf[i].real;
++    tmp_a_i = buf[i].imag;
++    tmp_b_r = buf[i+4].real;
++    tmp_b_i = buf[i+4].imag;
++    buf[i].real = tmp_a_r + tmp_b_r;
++    buf[i].imag =  tmp_a_i + tmp_b_i;
++    buf[i+4].real = tmp_a_r - tmp_b_r;
++    buf[i+4].imag =  tmp_a_i - tmp_b_i;
++    tmp_a_r = buf[1+i].real;
++    tmp_a_i = buf[1+i].imag;
++    tmp_b_r = (buf[i+5].real + buf[i+5].imag) * w[2][1].real;
++    tmp_b_i = (buf[i+5].imag - buf[i+5].real) * w[2][1].real;
++    buf[1+i].real = tmp_a_r + tmp_b_r;
++    buf[1+i].imag =  tmp_a_i + tmp_b_i;
++    buf[i+5].real = tmp_a_r - tmp_b_r;
++    buf[i+5].imag =  tmp_a_i - tmp_b_i;
++    tmp_a_r = buf[i+2].real;
++    tmp_a_i = buf[i+2].imag;
++    /* WARNING re <-> im & sign */
++    tmp_b_r = buf[i+6].imag;
++    tmp_b_i = - buf[i+6].real;
++    buf[i+2].real = tmp_a_r + tmp_b_r;
++    buf[i+2].imag =  tmp_a_i + tmp_b_i;
++    buf[i+6].real = tmp_a_r - tmp_b_r;
++    buf[i+6].imag =  tmp_a_i - tmp_b_i;
++    tmp_a_r = buf[i+3].real;
++    tmp_a_i = buf[i+3].imag;
++    tmp_b_r = (buf[i+7].real - buf[i+7].imag) * w[2][3].imag;
++    tmp_b_i = (buf[i+7].imag + buf[i+7].real) * w[2][3].imag;
++    buf[i+3].real = tmp_a_r + tmp_b_r;
++    buf[i+3].imag =  tmp_a_i + tmp_b_i;
++    buf[i+7].real = tmp_a_r - tmp_b_r;
++    buf[i+7].imag =  tmp_a_i - tmp_b_i;
++#else
++    vector float buf01, buf23, buf45, buf67;
++
++    buf01 = vec_ld((i + 0) << 3, (float*)buf);
++    buf23 = vec_ld((i + 2) << 3, (float*)buf);
++
++    tmp_b_r = (buf[i+5].real + buf[i+5].imag) * w[2][1].real;
++    tmp_b_i = (buf[i+5].imag - buf[i+5].real) * w[2][1].real;
++    buf[i+5].real = tmp_b_r;
++    buf[i+5].imag = tmp_b_i;
++    tmp_b_r = (buf[i+7].real - buf[i+7].imag) * w[2][3].imag;
++    tmp_b_i = (buf[i+7].imag + buf[i+7].real) * w[2][3].imag;
++    buf[i+7].real = tmp_b_r;
++    buf[i+7].imag = tmp_b_i;
++
++    buf23 = vec_ld((i + 2) << 3, (float*)buf);
++    buf45 = vec_ld((i + 4) << 3, (float*)buf);
++    buf67 = vec_ld((i + 6) << 3, (float*)buf);
++    buf67 = vec_perm(buf67, buf67, vcprm(1,0,2,3));
++	
++    vec_st(vec_add(buf01, buf45), (i + 0) << 3, (float*)buf);
++    vec_st(vec_madd(buf67, vcii(p,n,p,p), buf23), (i + 2) << 3, (float*)buf);
++    vec_st(vec_sub(buf01, buf45), (i + 4) << 3, (float*)buf);
++    vec_st(vec_nmsub(buf67, vcii(p,n,p,p), buf23), (i + 6) << 3, (float*)buf);
++#endif
++  }
++    
++  /* 4-7. iterations */
++  for (m=3; m < 7; m++) {
++    two_m = (1 << m);
++
++    two_m_plus_one = two_m<<1;
++
++    for(i = 0; i < 128; i += two_m_plus_one) {
++      for(k = 0; k < two_m; k+=2) {
++#if 0
++        int p = k + i;
++        int q = p + two_m;
++        tmp_a_r = buf[p].real;
++        tmp_a_i = buf[p].imag;
++        tmp_b_r =
++          buf[q].real * w[m][k].real -
++          buf[q].imag * w[m][k].imag;
++        tmp_b_i =
++          buf[q].imag * w[m][k].real +
++          buf[q].real * w[m][k].imag;
++        buf[p].real = tmp_a_r + tmp_b_r;
++        buf[p].imag =  tmp_a_i + tmp_b_i;
++        buf[q].real = tmp_a_r - tmp_b_r;
++        buf[q].imag =  tmp_a_i - tmp_b_i;
++
++        tmp_a_r = buf[(p + 1)].real;
++        tmp_a_i = buf[(p + 1)].imag;
++        tmp_b_r =
++          buf[(q + 1)].real * w[m][(k + 1)].real -
++          buf[(q + 1)].imag * w[m][(k + 1)].imag;
++        tmp_b_i =
++          buf[(q + 1)].imag * w[m][(k + 1)].real +
++          buf[(q + 1)].real * w[m][(k + 1)].imag;
++        buf[(p + 1)].real = tmp_a_r + tmp_b_r;
++        buf[(p + 1)].imag =  tmp_a_i + tmp_b_i;
++        buf[(q + 1)].real = tmp_a_r - tmp_b_r;
++        buf[(q + 1)].imag =  tmp_a_i - tmp_b_i;
++#else
++        int p = k + i;
++        int q = p + two_m;
++        vector float vecp, vecq, vecw, temp1, temp2, temp3, temp4;
++        const vector float vczero = (const vector float)FOUROF(0.);
++        // first compute buf[q] and buf[q+1]
++        vecq = vec_ld(q << 3, (float*)buf);
++        vecw = vec_ld(0, (float*)&(w[m][k]));
++        temp1 = vec_madd(vecq, vecw, vczero);
++        temp2 = vec_perm(vecq, vecq, vcprm(1,0,3,2));
++        temp2 = vec_madd(temp2, vecw, vczero);
++        temp3 = vec_perm(temp1, temp2, vcprm(0,s0,2,s2));
++        temp4 = vec_perm(temp1, temp2, vcprm(1,s1,3,s3));
++        vecq = vec_madd(temp4, vcii(n,p,n,p), temp3);
++        // then butterfly with buf[p] and buf[p+1]
++        vecp = vec_ld(p << 3, (float*)buf);
++        
++        temp1 = vec_add(vecp, vecq);
++        temp2 = vec_sub(vecp, vecq);
++                
++        vec_st(temp1, p << 3, (float*)buf);
++        vec_st(temp2, q << 3, (float*)buf);
++#endif
++      }
++    }
++  }
++
++  /* Post IFFT complex multiply  plus IFFT complex conjugate*/
++  for( i=0; i < 128; i+=4) {
++    /* y[n] = z[n] * (xcos1[n] + j * xsin1[n]) ; */
++#if 0
++    tmp_a_r =        buf[(i + 0)].real;
++    tmp_a_i = -1.0 * buf[(i + 0)].imag;
++    buf[(i + 0)].real =
++      (tmp_a_r * xcos1[(i + 0)])  -  (tmp_a_i  * xsin1[(i + 0)]);
++    buf[(i + 0)].imag =
++      (tmp_a_r * xsin1[(i + 0)])  +  (tmp_a_i  * xcos1[(i + 0)]);
++
++    tmp_a_r =        buf[(i + 1)].real;
++    tmp_a_i = -1.0 * buf[(i + 1)].imag;
++    buf[(i + 1)].real =
++      (tmp_a_r * xcos1[(i + 1)])  -  (tmp_a_i  * xsin1[(i + 1)]);
++    buf[(i + 1)].imag =
++      (tmp_a_r * xsin1[(i + 1)])  +  (tmp_a_i  * xcos1[(i + 1)]);
++
++    tmp_a_r =        buf[(i + 2)].real;
++    tmp_a_i = -1.0 * buf[(i + 2)].imag;
++    buf[(i + 2)].real =
++      (tmp_a_r * xcos1[(i + 2)])  -  (tmp_a_i  * xsin1[(i + 2)]);
++    buf[(i + 2)].imag =
++      (tmp_a_r * xsin1[(i + 2)])  +  (tmp_a_i  * xcos1[(i + 2)]);
++
++    tmp_a_r =        buf[(i + 3)].real;
++    tmp_a_i = -1.0 * buf[(i + 3)].imag;
++    buf[(i + 3)].real =
++      (tmp_a_r * xcos1[(i + 3)])  -  (tmp_a_i  * xsin1[(i + 3)]);
++    buf[(i + 3)].imag =
++      (tmp_a_r * xsin1[(i + 3)])  +  (tmp_a_i  * xcos1[(i + 3)]);
++#else
++    vector float bufv_0, bufv_2, cosv, sinv, temp1, temp2;
++    vector float temp0022, temp1133, tempCS01;
++    const vector float vczero = (const vector float)FOUROF(0.);
++
++    bufv_0 = vec_ld((i + 0) << 3, (float*)buf);
++    bufv_2 = vec_ld((i + 2) << 3, (float*)buf);
++
++    cosv = vec_ld(i << 2, xcos1);
++    sinv = vec_ld(i << 2, xsin1);
++
++    temp0022 = vec_perm(bufv_0, bufv_0, vcprm(0,0,2,2));
++    temp1133 = vec_perm(bufv_0, bufv_0, vcprm(1,1,3,3));
++    tempCS01 = vec_perm(cosv, sinv, vcprm(0,s0,1,s1));
++    temp1 = vec_madd(temp0022, tempCS01, vczero);
++    tempCS01 = vec_perm(cosv, sinv, vcprm(s0,0,s1,1));
++    temp2 = vec_madd(temp1133, tempCS01, vczero);
++    bufv_0 = vec_madd(temp2, vcii(p,n,p,n), temp1);
++    
++    vec_st(bufv_0, (i + 0) << 3, (float*)buf);
++
++    /* idem with bufv_2 and high-order cosv/sinv */
++
++    temp0022 = vec_perm(bufv_2, bufv_2, vcprm(0,0,2,2));
++    temp1133 = vec_perm(bufv_2, bufv_2, vcprm(1,1,3,3));
++    tempCS01 = vec_perm(cosv, sinv, vcprm(2,s2,3,s3));
++    temp1 = vec_madd(temp0022, tempCS01, vczero);
++    tempCS01 = vec_perm(cosv, sinv, vcprm(s2,2,s3,3));
++    temp2 = vec_madd(temp1133, tempCS01, vczero);
++    bufv_2 = vec_madd(temp2, vcii(p,n,p,n), temp1);
++
++    vec_st(bufv_2, (i + 2) << 3, (float*)buf);
++    
++#endif
++  }
++  
++  data_ptr = data;
++  delay_ptr = delay;
++  window_ptr = imdct_window;
++
++  /* Window and convert to real valued signal */
++  for(i=0; i< 64; i++) { 
++    *data_ptr++   = -buf[64+i].imag   * *window_ptr++ + *delay_ptr++ + bias; 
++    *data_ptr++   =  buf[64-i-1].real * *window_ptr++ + *delay_ptr++ + bias; 
++  }
++    
++  for(i=0; i< 64; i++) { 
++    *data_ptr++  = -buf[i].real       * *window_ptr++ + *delay_ptr++ + bias; 
++    *data_ptr++  =  buf[128-i-1].imag * *window_ptr++ + *delay_ptr++ + bias; 
++  }
++    
++  /* The trailing edge of the window goes into the delay line */
++  delay_ptr = delay;
++
++  for(i=0; i< 64; i++) { 
++    *delay_ptr++  = -buf[64+i].real   * *--window_ptr; 
++    *delay_ptr++  =  buf[64-i-1].imag * *--window_ptr; 
++  }
++    
++  for(i=0; i<64; i++) {
++    *delay_ptr++  =  buf[i].imag       * *--window_ptr; 
++    *delay_ptr++  = -buf[128-i-1].real * *--window_ptr; 
++  }
++}
++#endif
++
++
++// Stuff below this line is borrowed from libac3
++#include "srfftp.h"
++#ifdef ARCH_X86
++#ifndef HAVE_3DNOW
++#define HAVE_3DNOW 1
++#endif
++#include "srfftp_3dnow.h"
++
++const i_cmplx_t x_plus_minus_3dnow __attribute__ ((aligned (8))) = {{ 0x00000000UL, 0x80000000UL }}; 
++const i_cmplx_t x_minus_plus_3dnow __attribute__ ((aligned (8))) = {{ 0x80000000UL, 0x00000000UL }}; 
++const complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 0.707106781188 };
++
++#undef HAVE_3DNOWEX
++#include "imdct_3dnow.h"
++#define HAVE_3DNOWEX
++#include "imdct_3dnow.h"
++
++void
++imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
++{
++/*	int i,k;
++    int p,q;*/
++    int m;
++    int two_m;
++    int two_m_plus_one;
++
++/*  sample_t tmp_a_i;
++    sample_t tmp_a_r;
++    sample_t tmp_b_i;
++    sample_t tmp_b_r;*/
++
++    sample_t *data_ptr;
++    sample_t *delay_ptr;
++    sample_t *window_ptr;
++	
++    /* 512 IMDCT with source and dest data in 'data' */
++    /* see the c version (dct_do_512()), its allmost identical, just in C */ 
++
++    /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
++    /* Bit reversed shuffling */
++	asm volatile(
++		"xorl %%esi, %%esi			\n\t"
++		"leal "MANGLE(bit_reverse_512)", %%eax	\n\t"
++		"movl $1008, %%edi			\n\t"
++		"pushl %%ebp				\n\t" //use ebp without telling gcc
++		".balign 16				\n\t"
++		"1:					\n\t"
++		"movlps (%0, %%esi), %%xmm0		\n\t" // XXXI
++		"movhps 8(%0, %%edi), %%xmm0		\n\t" // RXXI
++		"movlps 8(%0, %%esi), %%xmm1		\n\t" // XXXi
++		"movhps (%0, %%edi), %%xmm1		\n\t" // rXXi
++		"shufps $0x33, %%xmm1, %%xmm0		\n\t" // irIR
++		"movaps "MANGLE(sseSinCos1c)"(%%esi), %%xmm2\n\t"
++		"mulps %%xmm0, %%xmm2			\n\t"
++		"shufps $0xB1, %%xmm0, %%xmm0		\n\t" // riRI
++		"mulps "MANGLE(sseSinCos1d)"(%%esi), %%xmm0\n\t"
++		"subps %%xmm0, %%xmm2			\n\t"
++		"movzbl (%%eax), %%edx			\n\t"
++		"movzbl 1(%%eax), %%ebp			\n\t"
++		"movlps %%xmm2, (%1, %%edx,8)		\n\t"
++		"movhps %%xmm2, (%1, %%ebp,8)		\n\t"
++		"addl $16, %%esi			\n\t"
++		"addl $2, %%eax				\n\t" // avoid complex addressing for P4 crap
++		"subl $16, %%edi			\n\t"
++		" jnc 1b				\n\t"
++		"popl %%ebp				\n\t"//no we didnt touch ebp *g*
++		:: "b" (data), "c" (buf)
++		: "%esi", "%edi", "%eax", "%edx"
++	);
++
++
++    /* FFT Merge */
++/* unoptimized variant
++    for (m=1; m < 7; m++) {
++	if(m)
++	    two_m = (1 << m);
++	else
++	    two_m = 1;
++
++	two_m_plus_one = (1 << (m+1));
++
++	for(i = 0; i < 128; i += two_m_plus_one) {
++	    for(k = 0; k < two_m; k++) {
++		p = k + i;
++		q = p + two_m;
++		tmp_a_r = buf[p].real;
++		tmp_a_i = buf[p].imag;
++		tmp_b_r = buf[q].real * w[m][k].real - buf[q].imag * w[m][k].imag;
++		tmp_b_i = buf[q].imag * w[m][k].real + buf[q].real * w[m][k].imag;
++		buf[p].real = tmp_a_r + tmp_b_r;
++		buf[p].imag =  tmp_a_i + tmp_b_i;
++		buf[q].real = tmp_a_r - tmp_b_r;
++		buf[q].imag =  tmp_a_i - tmp_b_i;
++	    }
++	}
++    }
++*/
++    
++    /* 1. iteration */
++	// Note w[0][0]={1,0}
++	asm volatile(
++		"xorps %%xmm1, %%xmm1	\n\t"
++		"xorps %%xmm2, %%xmm2	\n\t"
++		"movl %0, %%esi		\n\t"
++		".balign 16				\n\t"
++		"1:			\n\t"
++		"movlps (%%esi), %%xmm0	\n\t" //buf[p]
++		"movlps 8(%%esi), %%xmm1\n\t" //buf[q]
++		"movhps (%%esi), %%xmm0	\n\t" //buf[p]
++		"movhps 8(%%esi), %%xmm2\n\t" //buf[q]
++		"addps %%xmm1, %%xmm0	\n\t"
++		"subps %%xmm2, %%xmm0	\n\t"
++		"movaps %%xmm0, (%%esi)	\n\t"
++		"addl $16, %%esi	\n\t"
++		"cmpl %1, %%esi		\n\t"
++		" jb 1b			\n\t"
++		:: "g" (buf), "r" (buf + 128)
++		: "%esi"
++	);
++        
++    /* 2. iteration */
++	// Note w[1]={{1,0}, {0,-1}}
++	asm volatile(
++		"movaps "MANGLE(ps111_1)", %%xmm7\n\t" // 1,1,1,-1
++		"movl %0, %%esi			\n\t"
++		".balign 16				\n\t"
++		"1:				\n\t"
++		"movaps 16(%%esi), %%xmm2	\n\t" //r2,i2,r3,i3
++		"shufps $0xB4, %%xmm2, %%xmm2	\n\t" //r2,i2,i3,r3
++		"mulps %%xmm7, %%xmm2		\n\t" //r2,i2,i3,-r3
++		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
++		"movaps (%%esi), %%xmm1		\n\t" //r0,i0,r1,i1
++		"addps %%xmm2, %%xmm0		\n\t"
++		"subps %%xmm2, %%xmm1		\n\t"
++		"movaps %%xmm0, (%%esi)		\n\t"
++		"movaps %%xmm1, 16(%%esi)	\n\t"
++		"addl $32, %%esi	\n\t"
++		"cmpl %1, %%esi		\n\t"
++		" jb 1b			\n\t"
++		:: "g" (buf), "r" (buf + 128)
++		: "%esi"
++	);
++
++    /* 3. iteration */
++/*
++ Note sseW2+0={1,1,sqrt(2),sqrt(2))
++ Note sseW2+16={0,0,sqrt(2),-sqrt(2))
++ Note sseW2+32={0,0,-sqrt(2),-sqrt(2))
++ Note sseW2+48={1,-1,sqrt(2),-sqrt(2))
++*/
++	asm volatile(
++		"movaps 48+"MANGLE(sseW2)", %%xmm6\n\t" 
++		"movaps 16+"MANGLE(sseW2)", %%xmm7\n\t" 
++		"xorps %%xmm5, %%xmm5		\n\t"
++		"xorps %%xmm2, %%xmm2		\n\t"
++		"movl %0, %%esi			\n\t"
++		".balign 16			\n\t"
++		"1:				\n\t"
++		"movaps 32(%%esi), %%xmm2	\n\t" //r4,i4,r5,i5
++		"movaps 48(%%esi), %%xmm3	\n\t" //r6,i6,r7,i7
++		"movaps "MANGLE(sseW2)", %%xmm4	\n\t" //r4,i4,r5,i5
++		"movaps 32+"MANGLE(sseW2)", %%xmm5\n\t" //r6,i6,r7,i7
++		"mulps %%xmm2, %%xmm4		\n\t"
++		"mulps %%xmm3, %%xmm5		\n\t"
++		"shufps $0xB1, %%xmm2, %%xmm2	\n\t" //i4,r4,i5,r5
++		"shufps $0xB1, %%xmm3, %%xmm3	\n\t" //i6,r6,i7,r7
++		"mulps %%xmm6, %%xmm3		\n\t"
++		"mulps %%xmm7, %%xmm2		\n\t"
++		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
++		"movaps 16(%%esi), %%xmm1	\n\t" //r2,i2,r3,i3
++		"addps %%xmm4, %%xmm2		\n\t"
++		"addps %%xmm5, %%xmm3		\n\t"
++		"movaps %%xmm2, %%xmm4		\n\t"
++		"movaps %%xmm3, %%xmm5		\n\t"
++		"addps %%xmm0, %%xmm2		\n\t"
++		"addps %%xmm1, %%xmm3		\n\t"
++		"subps %%xmm4, %%xmm0		\n\t"
++		"subps %%xmm5, %%xmm1		\n\t"
++		"movaps %%xmm2, (%%esi)		\n\t" 
++		"movaps %%xmm3, 16(%%esi)	\n\t" 
++		"movaps %%xmm0, 32(%%esi)	\n\t" 
++		"movaps %%xmm1, 48(%%esi)	\n\t" 
++		"addl $64, %%esi	\n\t"
++		"cmpl %1, %%esi		\n\t"
++		" jb 1b			\n\t"
++		:: "g" (buf), "r" (buf + 128)
++		: "%esi"
++	);
++
++    /* 4-7. iterations */
++    for (m=3; m < 7; m++) {
++	two_m = (1 << m);
++	two_m_plus_one = two_m<<1;
++	asm volatile(
++		"movl %0, %%esi				\n\t"
++		".balign 16				\n\t"
++		"1:					\n\t"
++		"xorl %%edi, %%edi			\n\t" // k
++		"leal (%%esi, %3), %%edx		\n\t"
++		"2:					\n\t"
++		"movaps (%%edx, %%edi), %%xmm1		\n\t"
++		"movaps (%4, %%edi, 2), %%xmm2		\n\t"
++		"mulps %%xmm1, %%xmm2			\n\t"
++		"shufps $0xB1, %%xmm1, %%xmm1		\n\t"
++		"mulps 16(%4, %%edi, 2), %%xmm1		\n\t"
++		"movaps (%%esi, %%edi), %%xmm0		\n\t"
++		"addps %%xmm2, %%xmm1			\n\t"
++		"movaps %%xmm1, %%xmm2			\n\t"
++		"addps %%xmm0, %%xmm1			\n\t"
++		"subps %%xmm2, %%xmm0			\n\t"
++		"movaps %%xmm1, (%%esi, %%edi)		\n\t"
++		"movaps %%xmm0, (%%edx, %%edi)		\n\t"
++		"addl $16, %%edi			\n\t"
++		"cmpl %3, %%edi				\n\t" //FIXME (opt) count against 0 
++		" jb 2b					\n\t"
++		"addl %2, %%esi				\n\t"
++		"cmpl %1, %%esi				\n\t"
++		" jb 1b					\n\t"
++		:: "g" (buf), "m" (buf+128), "m" (two_m_plus_one<<3), "r" (two_m<<3),
++		   "r" (sseW[m])
++		: "%esi", "%edi", "%edx"
++	);
++    }
++
++    /* Post IFFT complex multiply  plus IFFT complex conjugate*/
++	asm volatile(
++		"movl $-1024, %%esi			\n\t"
++		".balign 16				\n\t"
++		"1:					\n\t"
++		"movaps (%0, %%esi), %%xmm0		\n\t"
++		"movaps (%0, %%esi), %%xmm1		\n\t"
++		"shufps $0xB1, %%xmm0, %%xmm0		\n\t"
++		"mulps 1024+"MANGLE(sseSinCos1c)"(%%esi), %%xmm1\n\t"
++		"mulps 1024+"MANGLE(sseSinCos1d)"(%%esi), %%xmm0\n\t"
++		"addps %%xmm1, %%xmm0			\n\t"
++		"movaps %%xmm0, (%0, %%esi)		\n\t"
++		"addl $16, %%esi			\n\t"
++		" jnz 1b				\n\t"
++		:: "r" (buf+128)
++		: "%esi"
++	);   
++
++	
++    data_ptr = data;
++    delay_ptr = delay;
++    window_ptr = imdct_window;
++
++    /* Window and convert to real valued signal */
++	asm volatile(
++		"xorl %%edi, %%edi			\n\t"  // 0
++		"xorl %%esi, %%esi			\n\t"  // 0
++		"movss %3, %%xmm2			\n\t"  // bias
++		"shufps $0x00, %%xmm2, %%xmm2		\n\t"  // bias, bias, ...
++		".balign 16				\n\t"
++		"1:					\n\t"
++		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? A ?
++		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? C ?
++		"movhps -16(%0, %%edi), %%xmm1		\n\t" // ? D C ?
++		"movhps -8(%0, %%edi), %%xmm0		\n\t" // ? B A ?
++		"shufps $0x99, %%xmm1, %%xmm0		\n\t" // D C B A
++		"mulps "MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
++		"addps (%2, %%esi), %%xmm0		\n\t"
++		"addps %%xmm2, %%xmm0			\n\t"
++		"movaps %%xmm0, (%1, %%esi)		\n\t"
++		"addl $16, %%esi			\n\t"
++		"subl $16, %%edi			\n\t"
++		"cmpl $512, %%esi			\n\t" 
++		" jb 1b					\n\t"
++		:: "r" (buf+64), "r" (data_ptr), "r" (delay_ptr), "m" (bias)
++		: "%esi", "%edi"
++	);
++	data_ptr+=128;
++	delay_ptr+=128;
++//	window_ptr+=128;
++	
++	asm volatile(
++		"movl $1024, %%edi			\n\t"  // 512
++		"xorl %%esi, %%esi			\n\t"  // 0
++		"movss %3, %%xmm2			\n\t"  // bias
++		"shufps $0x00, %%xmm2, %%xmm2		\n\t"  // bias, bias, ...
++		".balign 16				\n\t"
++		"1:					\n\t"
++		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? ? A
++		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? ? C
++		"movhps -16(%0, %%edi), %%xmm1		\n\t" // D ? ? C
++		"movhps -8(%0, %%edi), %%xmm0		\n\t" // B ? ? A
++		"shufps $0xCC, %%xmm1, %%xmm0		\n\t" // D C B A
++		"mulps 512+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
++		"addps (%2, %%esi), %%xmm0		\n\t"
++		"addps %%xmm2, %%xmm0			\n\t"
++		"movaps %%xmm0, (%1, %%esi)		\n\t"
++		"addl $16, %%esi			\n\t"
++		"subl $16, %%edi			\n\t"
++		"cmpl $512, %%esi			\n\t" 
++		" jb 1b					\n\t"
++		:: "r" (buf), "r" (data_ptr), "r" (delay_ptr), "m" (bias)
++		: "%esi", "%edi"
++	);
++	data_ptr+=128;
++//	window_ptr+=128;
++
++    /* The trailing edge of the window goes into the delay line */
++    delay_ptr = delay;
++
++	asm volatile(
++		"xorl %%edi, %%edi			\n\t"  // 0
++		"xorl %%esi, %%esi			\n\t"  // 0
++		".balign 16				\n\t"
++		"1:					\n\t"
++		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? ? A
++		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? ? C
++		"movhps -16(%0, %%edi), %%xmm1		\n\t" // D ? ? C 
++		"movhps -8(%0, %%edi), %%xmm0		\n\t" // B ? ? A 
++		"shufps $0xCC, %%xmm1, %%xmm0		\n\t" // D C B A
++		"mulps 1024+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
++		"movaps %%xmm0, (%1, %%esi)		\n\t"
++		"addl $16, %%esi			\n\t"
++		"subl $16, %%edi			\n\t"
++		"cmpl $512, %%esi			\n\t" 
++		" jb 1b					\n\t"
++		:: "r" (buf+64), "r" (delay_ptr)
++		: "%esi", "%edi"
++	);
++	delay_ptr+=128;
++//	window_ptr-=128;
++	
++	asm volatile(
++		"movl $1024, %%edi			\n\t"  // 1024
++		"xorl %%esi, %%esi			\n\t"  // 0
++		".balign 16				\n\t"
++		"1:					\n\t"
++		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? A ?
++		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? C ?
++		"movhps -16(%0, %%edi), %%xmm1		\n\t" // ? D C ? 
++		"movhps -8(%0, %%edi), %%xmm0		\n\t" // ? B A ? 
++		"shufps $0x99, %%xmm1, %%xmm0		\n\t" // D C B A
++		"mulps 1536+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
++		"movaps %%xmm0, (%1, %%esi)		\n\t"
++		"addl $16, %%esi			\n\t"
++		"subl $16, %%edi			\n\t"
++		"cmpl $512, %%esi			\n\t" 
++		" jb 1b					\n\t"
++		:: "r" (buf), "r" (delay_ptr)
++		: "%esi", "%edi"
++	);
++}
++#endif //arch_x86
++
+ void
+ imdct_do_256(sample_t data[],sample_t delay[],sample_t bias)
+ {
+@@ -379,13 +1233,19 @@
+     {
+ 	int i, j, k;
+ 
+-	fprintf (stderr, "No accelerated IMDCT transform found\n");
+-
+ 	/* Twiddle factors to turn IFFT into IMDCT */
+ 	for (i = 0; i < 128; i++) {
+ 	    xcos1[i] = -cos ((M_PI / 2048) * (8 * i + 1));
+ 	    xsin1[i] = -sin ((M_PI / 2048) * (8 * i + 1));
+ 	}
++#ifdef ARCH_X86
++	for (i = 0; i < 128; i++) {
++	    sseSinCos1c[2*i+0]= xcos1[i];
++	    sseSinCos1c[2*i+1]= -xcos1[i];
++	    sseSinCos1d[2*i+0]= xsin1[i];
++	    sseSinCos1d[2*i+1]= xsin1[i];	
++	}
++#endif
+ 
+ 	/* More twiddle factors to turn IFFT into IMDCT */
+ 	for (i = 0; i < 64; i++) {
+@@ -400,7 +1260,334 @@
+ 		w[i][k].imag = sin (-M_PI * k / j);
+ 	    }
+ 	}
++#ifdef ARCH_X86
++	for (i = 1; i < 7; i++) {
++	    j = 1 << i;
++	    for (k = 0; k < j; k+=2) {
++	    
++	    	sseW[i][4*k + 0] = w[i][k+0].real;
++	    	sseW[i][4*k + 1] = w[i][k+0].real;
++	    	sseW[i][4*k + 2] = w[i][k+1].real;
++	    	sseW[i][4*k + 3] = w[i][k+1].real;
++
++	    	sseW[i][4*k + 4] = -w[i][k+0].imag;
++	    	sseW[i][4*k + 5] = w[i][k+0].imag;
++	    	sseW[i][4*k + 6] = -w[i][k+1].imag;
++	    	sseW[i][4*k + 7] = w[i][k+1].imag;	    
++	    	
++	//we multiply more or less uninitalized numbers so we need to use exactly 0.0
++		if(k==0)
++		{
++//			sseW[i][4*k + 0]= sseW[i][4*k + 1]= 1.0;
++			sseW[i][4*k + 4]= sseW[i][4*k + 5]= 0.0;
++		}
++		
++		if(2*k == j)
++		{
++			sseW[i][4*k + 0]= sseW[i][4*k + 1]= 0.0;
++//			sseW[i][4*k + 4]= -(sseW[i][4*k + 5]= -1.0);
++		}
++	    }
++	}
++
++	for(i=0; i<128; i++)
++	{
++		sseWindow[2*i+0]= -imdct_window[2*i+0];
++		sseWindow[2*i+1]=  imdct_window[2*i+1];	
++	}
++	
++	for(i=0; i<64; i++)
++	{
++		sseWindow[256 + 2*i+0]= -imdct_window[254 - 2*i+1];
++		sseWindow[256 + 2*i+1]=  imdct_window[254 - 2*i+0];
++		sseWindow[384 + 2*i+0]=  imdct_window[126 - 2*i+1];
++		sseWindow[384 + 2*i+1]= -imdct_window[126 - 2*i+0];
++	}
++#endif // arch_x86
++
+ 	imdct_512 = imdct_do_512;
++#ifdef ARCH_X86
++	if(mm_accel & MM_ACCEL_X86_SSE)
++	{
++	  fprintf (stderr, "Using SSE optimized IMDCT transform\n");
++	  imdct_512 = imdct_do_512_sse;
++	}  
++	else
++	if(mm_accel & MM_ACCEL_X86_3DNOWEXT)
++	{
++	  fprintf (stderr, "Using 3DNowEx optimized IMDCT transform\n");
++	  imdct_512 = imdct_do_512_3dnowex;
++	}
++	else
++	if(mm_accel & MM_ACCEL_X86_3DNOW)
++	{
++	  fprintf (stderr, "Using 3DNow optimized IMDCT transform\n");
++	  imdct_512 = imdct_do_512_3dnow;
++	}
++	else
++#endif // arch_x86
++#ifdef HAVE_ALTIVEC
++        if (mm_accel & MM_ACCEL_PPC_ALTIVEC)
++	{
++	  fprintf(stderr, "Using AltiVec optimized IMDCT transform\n");
++          imdct_512 = imdct_do_512_altivec;
++	}
++        else
++#endif
++	fprintf (stderr, "No accelerated IMDCT transform found\n");
+ 	imdct_256 = imdct_do_256;
+     }
+ }
++
++static void fft_asmb(int k, complex_t *x, complex_t *wTB,
++	     const complex_t *d, const complex_t *d_3)
++{
++  register complex_t  *x2k, *x3k, *x4k, *wB;
++  register float a_r, a_i, a1_r, a1_i, u_r, u_i, v_r, v_i;
++
++  x2k = x + 2 * k;
++  x3k = x2k + 2 * k;
++  x4k = x3k + 2 * k;
++  wB = wTB + 2 * k;
++  
++  TRANSZERO(x[0],x2k[0],x3k[0],x4k[0]);
++  TRANS(x[1],x2k[1],x3k[1],x4k[1],wTB[1],wB[1],d[1],d_3[1]);
++  
++  --k;
++  for(;;) {
++     TRANS(x[2],x2k[2],x3k[2],x4k[2],wTB[2],wB[2],d[2],d_3[2]);
++     TRANS(x[3],x2k[3],x3k[3],x4k[3],wTB[3],wB[3],d[3],d_3[3]);
++     if (!--k) break;
++     x += 2;
++     x2k += 2;
++     x3k += 2;
++     x4k += 2;
++     d += 2;
++     d_3 += 2;
++     wTB += 2;
++     wB += 2;
++  }
++ 
++}
++
++static void fft_asmb16(complex_t *x, complex_t *wTB)
++{
++  register float a_r, a_i, a1_r, a1_i, u_r, u_i, v_r, v_i;
++  int k = 2;
++
++  /* transform x[0], x[8], x[4], x[12] */
++  TRANSZERO(x[0],x[4],x[8],x[12]);
++
++  /* transform x[1], x[9], x[5], x[13] */
++  TRANS(x[1],x[5],x[9],x[13],wTB[1],wTB[5],delta16[1],delta16_3[1]);
++
++  /* transform x[2], x[10], x[6], x[14] */
++  TRANSHALF_16(x[2],x[6],x[10],x[14]);
++
++  /* transform x[3], x[11], x[7], x[15] */
++  TRANS(x[3],x[7],x[11],x[15],wTB[3],wTB[7],delta16[3],delta16_3[3]);
++
++} 
++
++static void fft_4(complex_t *x)
++{
++  /* delta_p = 1 here */
++  /* x[k] = sum_{i=0..3} x[i] * w^{i*k}, w=e^{-2*pi/4} 
++   */
++
++  register float yt_r, yt_i, yb_r, yb_i, u_r, u_i, vi_r, vi_i;
++  
++  yt_r = x[0].real;
++  yb_r = yt_r - x[2].real;
++  yt_r += x[2].real;
++
++  u_r = x[1].real;
++  vi_i = x[3].real - u_r;
++  u_r += x[3].real;
++  
++  u_i = x[1].imag;
++  vi_r = u_i - x[3].imag;
++  u_i += x[3].imag;
++
++  yt_i = yt_r;
++  yt_i += u_r;
++  x[0].real = yt_i;
++  yt_r -= u_r;
++  x[2].real = yt_r;
++  yt_i = yb_r;
++  yt_i += vi_r;
++  x[1].real = yt_i;
++  yb_r -= vi_r;
++  x[3].real = yb_r;
++
++  yt_i = x[0].imag;
++  yb_i = yt_i - x[2].imag;
++  yt_i += x[2].imag;
++
++  yt_r = yt_i;
++  yt_r += u_i;
++  x[0].imag = yt_r;
++  yt_i -= u_i;
++  x[2].imag = yt_i;
++  yt_r = yb_i;
++  yt_r += vi_i;
++  x[1].imag = yt_r;
++  yb_i -= vi_i;
++  x[3].imag = yb_i;
++}
++
++
++static void fft_8(complex_t *x)
++{
++  /* delta_p = diag{1, sqrt(i)} here */
++  /* x[k] = sum_{i=0..7} x[i] * w^{i*k}, w=e^{-2*pi/8} 
++   */
++  register float wT1_r, wT1_i, wB1_r, wB1_i, wT2_r, wT2_i, wB2_r, wB2_i;
++  
++  wT1_r = x[1].real;
++  wT1_i = x[1].imag;
++  wB1_r = x[3].real;
++  wB1_i = x[3].imag;
++
++  x[1] = x[2];
++  x[2] = x[4];
++  x[3] = x[6];
++  fft_4(&x[0]);
++
++  
++  /* x[0] x[4] */
++  wT2_r = x[5].real;
++  wT2_r += x[7].real;
++  wT2_r += wT1_r;
++  wT2_r += wB1_r;
++  wT2_i = wT2_r;
++  wT2_r += x[0].real;
++  wT2_i = x[0].real - wT2_i;
++  x[0].real = wT2_r;
++  x[4].real = wT2_i;
++
++  wT2_i = x[5].imag;
++  wT2_i += x[7].imag;
++  wT2_i += wT1_i;
++  wT2_i += wB1_i;
++  wT2_r = wT2_i;
++  wT2_r += x[0].imag;
++  wT2_i = x[0].imag - wT2_i;
++  x[0].imag = wT2_r;
++  x[4].imag = wT2_i;
++  
++  /* x[2] x[6] */
++  wT2_r = x[5].imag;
++  wT2_r -= x[7].imag;
++  wT2_r += wT1_i;
++  wT2_r -= wB1_i;
++  wT2_i = wT2_r;
++  wT2_r += x[2].real;
++  wT2_i = x[2].real - wT2_i;
++  x[2].real = wT2_r;
++  x[6].real = wT2_i;
++
++  wT2_i = x[5].real;
++  wT2_i -= x[7].real;
++  wT2_i += wT1_r;
++  wT2_i -= wB1_r;
++  wT2_r = wT2_i;
++  wT2_r += x[2].imag;
++  wT2_i = x[2].imag - wT2_i;
++  x[2].imag = wT2_i;
++  x[6].imag = wT2_r;
++  
++
++  /* x[1] x[5] */
++  wT2_r = wT1_r;
++  wT2_r += wB1_i;
++  wT2_r -= x[5].real;
++  wT2_r -= x[7].imag;
++  wT2_i = wT1_i;
++  wT2_i -= wB1_r;
++  wT2_i -= x[5].imag;
++  wT2_i += x[7].real;
++
++  wB2_r = wT2_r;
++  wB2_r += wT2_i;
++  wT2_i -= wT2_r;
++  wB2_r *= HSQRT2;
++  wT2_i *= HSQRT2;
++  wT2_r = wB2_r;
++  wB2_r += x[1].real;
++  wT2_r =  x[1].real - wT2_r;
++
++  wB2_i = x[5].real;
++  x[1].real = wB2_r;
++  x[5].real = wT2_r;
++
++  wT2_r = wT2_i;
++  wT2_r += x[1].imag;
++  wT2_i = x[1].imag - wT2_i;
++  wB2_r = x[5].imag;
++  x[1].imag = wT2_r;
++  x[5].imag = wT2_i;
++
++  /* x[3] x[7] */
++  wT1_r -= wB1_i;
++  wT1_i += wB1_r;
++  wB1_r = wB2_i - x[7].imag;
++  wB1_i = wB2_r + x[7].real;
++  wT1_r -= wB1_r;
++  wT1_i -= wB1_i;
++  wB1_r = wT1_r + wT1_i;
++  wB1_r *= HSQRT2;
++  wT1_i -= wT1_r;
++  wT1_i *= HSQRT2;
++  wB2_r = x[3].real;
++  wB2_i = wB2_r + wT1_i;
++  wB2_r -= wT1_i;
++  x[3].real = wB2_i;
++  x[7].real = wB2_r;
++  wB2_i = x[3].imag;
++  wB2_r = wB2_i + wB1_r;
++  wB2_i -= wB1_r;
++  x[3].imag = wB2_i;
++  x[7].imag = wB2_r;
++}
++
++
++static void fft_128p(complex_t *a)
++{
++  fft_8(&a[0]); fft_4(&a[8]); fft_4(&a[12]);
++  fft_asmb16(&a[0], &a[8]);
++  
++  fft_8(&a[16]), fft_8(&a[24]);
++  fft_asmb(4, &a[0], &a[16],&delta32[0], &delta32_3[0]);
++
++  fft_8(&a[32]); fft_4(&a[40]); fft_4(&a[44]);
++  fft_asmb16(&a[32], &a[40]);
++
++  fft_8(&a[48]); fft_4(&a[56]); fft_4(&a[60]);
++  fft_asmb16(&a[48], &a[56]);
++
++  fft_asmb(8, &a[0], &a[32],&delta64[0], &delta64_3[0]);
++
++  fft_8(&a[64]); fft_4(&a[72]); fft_4(&a[76]);
++  /* fft_16(&a[64]); */
++  fft_asmb16(&a[64], &a[72]);
++
++  fft_8(&a[80]); fft_8(&a[88]);
++  
++  /* fft_32(&a[64]); */
++  fft_asmb(4, &a[64], &a[80],&delta32[0], &delta32_3[0]);
++
++  fft_8(&a[96]); fft_4(&a[104]), fft_4(&a[108]);
++  /* fft_16(&a[96]); */
++  fft_asmb16(&a[96], &a[104]);
++
++  fft_8(&a[112]), fft_8(&a[120]);
++  /* fft_32(&a[96]); */
++  fft_asmb(4, &a[96], &a[112], &delta32[0], &delta32_3[0]);
++  
++  /* fft_128(&a[0]); */
++  fft_asmb(16, &a[0], &a[64], &delta128[0], &delta128_3[0]);
++}
++
++
++
+--- liba52/imdct_mlib.c	2005-03-22 19:59:35.000000000 +0100
++++ imdct_mlib.c	2004-03-19 01:15:51.000000000 +0100
+@@ -23,11 +29,11 @@
+ 
+ #ifdef LIBA52_MLIB
+ 
+-#include <inttypes.h>
+-#include <string.h>
+ #include <mlib_types.h>
+ #include <mlib_status.h>
+ #include <mlib_signal.h>
++#include <string.h>
++#include <inttypes.h>
+ 
+ #include "a52.h"
+ #include "a52_internal.h"
+@@ -42,7 +48,7 @@
+ 	sample_t *data_ptr;
+ 	sample_t *delay_ptr;
+ 	sample_t *window_ptr;
+-	sample_t tmp[256] __attribute__ ((__aligned__ (16)));
++	sample_t tmp[256] __attribute__((aligned(16)));
+ 	int i;
+ 	
+ 	memcpy(tmp, data, 256 * sizeof(sample_t));
+@@ -91,7 +97,7 @@
+ 	sample_t *data_ptr;
+ 	sample_t *delay_ptr;
+ 	sample_t *window_ptr;
+-	sample_t tmp[256] __attribute__ ((__aligned__ (16)));
++	sample_t tmp[256] __attribute__((aligned(16)));
+ 	int i;
+ 	
+ 	memcpy(tmp, data, 256 * sizeof(sample_t));
+--- include/mm_accel.h	2005-03-22 19:58:53.000000000 +0100
++++ mm_accel.h	2004-03-19 01:15:52.000000000 +0100
+@@ -19,12 +25,22 @@
+  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+  */
+ 
++#ifndef MM_ACCEL_H
++#define MM_ACCEL_H
++
+ /* generic accelerations */
+ #define MM_ACCEL_MLIB		0x00000001
+ 
+ /* x86 accelerations */
+ #define MM_ACCEL_X86_MMX	0x80000000
+ #define MM_ACCEL_X86_3DNOW	0x40000000
++#define MM_ACCEL_X86_3DNOWEXT	0x08000000
+ #define MM_ACCEL_X86_MMXEXT	0x20000000
++#define MM_ACCEL_X86_SSE	0x10000000
++
++/* PPC accelerations */
++#define MM_ACCEL_PPC_ALTIVEC	0x00010000
+ 
+ uint32_t mm_accel (void);
++
++#endif /* MM_ACCEL_H */
+--- liba52/parse.c	2005-03-22 19:59:35.000000000 +0100
++++ parse.c	2004-04-01 15:41:29.000000000 +0200
+@@ -21,21 +27,19 @@
+ 
+ #include "config.h"
+ 
+-#include <inttypes.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <inttypes.h>
+ 
+ #include "a52.h"
+ #include "a52_internal.h"
+ #include "bitstream.h"
+ #include "tables.h"
++#include "mm_accel.h"
+ 
+ #ifdef HAVE_MEMALIGN
+ /* some systems have memalign() but no declaration for it */
+ void * memalign (size_t align, size_t size);
+-#else
+-/* assume malloc alignment is sufficient */
+-#define memalign(align,size) malloc (size)
+ #endif
+ 
+ typedef struct {
+@@ -54,12 +58,28 @@
+     sample_t * samples;
+     int i;
+ 
+-    imdct_init (mm_accel);
+-
+     samples = memalign (16, 256 * 12 * sizeof (sample_t));
++#if defined(__MINGW32__) && defined(HAVE_SSE) 
++    for(i=0;i<10;i++){
++      if((int)samples%16){
++        sample_t* samplestmp=malloc(256 * 12 * sizeof (sample_t));   
++        free(samples);
++        samples = samplestmp;    
++      }
++      else break;
++    }
++#endif
++    if(((int)samples%16) && (mm_accel&MM_ACCEL_X86_SSE)){
++      mm_accel &=~MM_ACCEL_X86_SSE;
++      printf("liba52: unable to get 16 byte aligned memory disabling usage of SSE instructions\n");
++    }   
++    
+     if (samples == NULL)
+-	return NULL;
+-
++	return NULL;    
++    
++    imdct_init (mm_accel);
++    downmix_accel_init(mm_accel);
++    
+     for (i = 0; i < 256 * 12; i++)
+ 	samples[i] = 0;
+ 
+@@ -124,7 +144,7 @@
+     state->acmod = acmod = buf[6] >> 5;
+ 
+     bitstream_set_ptr (buf + 6);
+-    bitstream_get (3);	/* skip acmod we already parsed */
++    bitstream_skip (3);	/* skip acmod we already parsed */
+ 
+     if ((acmod == 2) && (bitstream_get (2) == 2))	/* dsurmod */
+ 	acmod = A52_DOLBY;
+@@ -144,7 +164,7 @@
+     if (state->lfeon && (*flags & A52_LFE))
+ 	state->output |= A52_LFE;
+     *flags = state->output;
+-    // the 2* compensates for differences in imdct
++    /* the 2* compensates for differences in imdct */
+     state->dynrng = state->level = 2 * *level;
+     state->bias = bias;
+     state->dynrnge = 1;
+@@ -152,28 +172,28 @@
+ 
+     chaninfo = !acmod;
+     do {
+-	bitstream_get (5);	/* dialnorm */
++	bitstream_skip (5);	/* dialnorm */
+ 	if (bitstream_get (1))	/* compre */
+-	    bitstream_get (8);	/* compr */
++	    bitstream_skip (8);	/* compr */
+ 	if (bitstream_get (1))	/* langcode */
+-	    bitstream_get (8);	/* langcod */
++	    bitstream_skip (8);	/* langcod */
+ 	if (bitstream_get (1))	/* audprodie */
+-	    bitstream_get (7);	/* mixlevel + roomtyp */
++	    bitstream_skip (7);	/* mixlevel + roomtyp */
+     } while (chaninfo--);
+ 
+-    bitstream_get (2);		/* copyrightb + origbs */
++    bitstream_skip (2);		/* copyrightb + origbs */
+ 
+     if (bitstream_get (1))	/* timecod1e */
+-	bitstream_get (14);	/* timecod1 */
++	bitstream_skip (14);	/* timecod1 */
+     if (bitstream_get (1))	/* timecod2e */
+-	bitstream_get (14);	/* timecod2 */
++	bitstream_skip (14);	/* timecod2 */
+ 
+     if (bitstream_get (1)) {	/* addbsie */
+ 	int addbsil;
+ 
+ 	addbsil = bitstream_get (6);
+ 	do {
+-	    bitstream_get (8);	/* addbsi */
++	    bitstream_skip (8);	/* addbsi */
+ 	} while (addbsil--);
+     }
+ 
+@@ -647,7 +667,7 @@
+ 	    if (parse_exponents (chexpstr[i], nchgrps, state->fbw_exp[i][0],
+ 				 state->fbw_exp[i] + 1))
+ 		return 1;
+-	    bitstream_get (2);	/* gainrng */
++	    bitstream_skip (2);	/* gainrng */
+ 	}
+     if (lfeexpstr != EXP_REUSE) {
+ 	do_bit_alloc |= 32;
+@@ -729,7 +749,7 @@
+     if (bitstream_get (1)) {	/* skiple */
+ 	i = bitstream_get (9);	/* skipl */
+ 	while (i--)
+-	    bitstream_get (8);
++	    bitstream_skip (8);
+     }
+ 
+     if (state->output & A52_LFE)
+
