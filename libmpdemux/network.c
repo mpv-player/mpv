@@ -92,7 +92,9 @@ static struct {
 	// Real Media
 	{ "audio/x-pn-realaudio", DEMUXER_TYPE_REAL },
 	// OGG Streaming
-	{ "application/x-ogg", DEMUXER_TYPE_OGG }
+	{ "application/x-ogg", DEMUXER_TYPE_OGG },
+	// NullSoft Streaming Video
+	{ "video/nsv", DEMUXER_TYPE_NSV}
 
 };
 
@@ -778,8 +780,14 @@ extension=NULL;
 							mp_msg(MSGT_NETWORK,MSGL_INFO,"Public : %s\n", atoi(field_data)?"yes":"no"); field_data = NULL;
 						if( (field_data = http_get_field(http_hdr, "icy-br")) != NULL )
 							mp_msg(MSGT_NETWORK,MSGL_INFO,"Bitrate: %skbit/s\n", field_data); field_data = NULL;
-						// Ok, we have detected an mp3 stream
-						*file_format = DEMUXER_TYPE_AUDIO;
+						
+						// If content-type == video/nsv we most likely have a winamp video stream 
+						// otherwise it should be mp3. if there are more types consider adding mime type 
+						// handling like later
+						if( !strcmp((field_data = http_get_field(http_hdr, "content-type")),"video/nsv"))
+							*file_format = DEMUXER_TYPE_NSV;
+						else
+							*file_format = DEMUXER_TYPE_AUDIO;
 						return 0;
 					}
 					case 400: // Server Full
@@ -1248,6 +1256,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		case DEMUXER_TYPE_OGG:
 		case DEMUXER_TYPE_PLAYLIST:
 		case DEMUXER_TYPE_UNKNOWN:
+		case DEMUXER_TYPE_NSV: 
 			// Generic start, doesn't need to filter
 			// the network stream, it's a raw stream
 			ret = nop_streaming_start( stream );

@@ -123,6 +123,7 @@ extern void demux_close_roq(demuxer_t* demuxer);
 extern void demux_close_film(demuxer_t* demuxer);
 extern void demux_close_bmp(demuxer_t* demuxer);
 extern void demux_close_fli(demuxer_t* demuxer);
+extern void demux_close_nsv(demuxer_t* demuxer);
 extern void demux_close_nuv(demuxer_t* demuxer);
 extern void demux_close_audio(demuxer_t* demuxer);
 extern void demux_close_ogg(demuxer_t* demuxer);
@@ -175,6 +176,8 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_bmp(demuxer); break;
     case DEMUXER_TYPE_FLI:
       demux_close_fli(demuxer); break;
+    case DEMUXER_TYPE_NSV:
+      demux_close_nsv(demuxer); break;
     case DEMUXER_TYPE_NUV:
       demux_close_nuv(demuxer); break;
     case DEMUXER_TYPE_MPEG_TY:
@@ -299,6 +302,7 @@ int demux_asf_fill_buffer(demuxer_t *demux);
 int demux_mov_fill_buffer(demuxer_t *demux,demux_stream_t* ds);
 int demux_vivo_fill_buffer(demuxer_t *demux);
 int demux_real_fill_buffer(demuxer_t *demuxer);
+int demux_nsv_fill_buffer(demuxer_t *demux);
 int demux_nuv_fill_buffer(demuxer_t *demux);
 int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
 int demux_rawdv_fill_buffer(demuxer_t *demuxer);
@@ -344,6 +348,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_RAWDV: return demux_rawdv_fill_buffer(demux);
 #endif
     case DEMUXER_TYPE_REAL: return demux_real_fill_buffer(demux);
+    case DEMUXER_TYPE_NSV: return demux_nsv_fill_buffer(demux);
     case DEMUXER_TYPE_NUV: return demux_nuv_fill_buffer(demux);
 #ifdef USE_TV
     case DEMUXER_TYPE_TV: return demux_tv_fill_buffer(demux, ds);
@@ -598,7 +603,9 @@ extern int pva_check_file(demuxer_t * demuxer);
 extern demuxer_t * demux_open_pva(demuxer_t * demuxer);
 extern int real_check_file(demuxer_t *demuxer);
 extern void demux_open_real(demuxer_t *demuxer);
+extern int nsv_check_file(demuxer_t *demuxer);
 extern int nuv_check_file(demuxer_t *demuxer);
+extern void demux_open_nsv(demuxer_t *demuxer);
 extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
 extern int demux_ogg_open(demuxer_t* demuxer);
@@ -710,6 +717,17 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
   if(asf_check_header(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"ASF");
       file_format=DEMUXER_TYPE_ASF;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
+//=============== Try to open as NSV file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NSV){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_NSV,audio_id,video_id,dvdsub_id);
+  if(file_format==DEMUXER_TYPE_NSV||nsv_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"Nullsoft Streaming Video");
+      file_format=DEMUXER_TYPE_NSV;
   } else {
       free_demuxer(demuxer);
       demuxer = NULL;
@@ -1191,6 +1209,10 @@ switch(file_format){
    }       
    return demuxer;
 //  break;
+ }
+ case DEMUXER_TYPE_NSV: {
+  demux_open_nsv(demuxer);
+  break;
  }
  case DEMUXER_TYPE_NUV: {
   demux_open_nuv(demuxer);
