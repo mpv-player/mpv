@@ -7,7 +7,7 @@ include config.mak
 INCDIR  = -I. -I../loader -I./wm -I./skin $(FREETYPE_INC) $(GTKINC) $(EXTRA_INC) 
 
 OPTIMIZE =  $(OPTFLAGS) -fomit-frame-pointer \
-            -fexpensive-optimizations -fschedule-insns2
+            -fexpensive-optimizations -fschedule-insns2 -Wall
 ifeq ($(TARGET_ARCH_X86),yes)
 OPTIMIZE += -malign-double
 endif
