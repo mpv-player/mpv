@@ -79,6 +79,9 @@ static inline void mp_image_setfmt(mp_image_t* mpi,unsigned int out_fmt){
     case IMGFMT_YUY2:
 	mpi->bpp=16;
 	return;
+    case IMGFMT_MPEGPES:
+	mpi->bpp=0;
+	return;
     }
     printf("mp_image: Unknown out_fmt: 0x%X\n",out_fmt);
     mpi->bpp=0;
