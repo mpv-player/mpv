@@ -238,3 +238,4 @@ extern void wsScreenSaverOn( Display *mDisplay );
 extern void wsScreenSaverOff( Display * mDisplay );
 
 #endif
+

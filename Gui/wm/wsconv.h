@@ -37,3 +37,4 @@ extern void RGB565_to_RGB888_c( unsigned char * in_pixels, unsigned char * out_p
 extern void initConverter( void );
 
 #endif
+

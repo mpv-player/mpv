@@ -29,3 +29,4 @@ extern int        fntRead( char * path,char * fname,int id );
 extern txSample * fntRender( int id,int px,int sx,char * fmt,... );
 
 #endif
+

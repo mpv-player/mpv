@@ -1,6 +1,7 @@
 
-#include <stdlib.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #include "../../config.h"
 #ifdef xHAVE_MMX
@@ -202,3 +203,4 @@ void initConverter( void )
  rgb32_b_mask.q = 0x00FF000000FF0000LL; // Mask for the blues  of 2 RGB32 pixels
 #endif
 }
+

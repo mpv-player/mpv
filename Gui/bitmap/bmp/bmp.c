@@ -112,3 +112,4 @@ int bmpRead( unsigned char * fname,txSample * bF )
 }
 
 #endif
+

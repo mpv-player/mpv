@@ -187,3 +187,4 @@ void tgaWriteBuffer( char * fname,unsigned char * Buffer,int sx,int sy,int BPP )
  tmp.Image=Buffer;
  tgaWriteTexture( fname,&tmp );
 }
+
