@@ -3611,6 +3611,7 @@ if(rel_seek_secs || abs_seek_pos){
 	      else
 		snprintf(osd_text_tmp, 63, "Subtitles: (%d)", dvdsub_id);
 	  }
+#ifdef USE_DVDREAD
 	  if (vo_spudec) {
 	      char lang[5] = "none";
 	      int code = 0;
@@ -3622,6 +3623,7 @@ if(rel_seek_secs || abs_seek_pos){
 	      }
 	      snprintf(osd_text_tmp, 63, "Subtitles: (%d) %s", dvdsub_id, lang);
 	  }
+#endif
 	  osd_show_vobsub_changed--;
       } else
 #ifdef USE_SUB
