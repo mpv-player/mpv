@@ -242,7 +242,7 @@ static int play(void* data,int len,int flags)
 {
 	return write_waveOutBuffer(data,len);
 }
-int previous = 0;
+
 // return: delay in seconds between first and last sample in buffer
 static float get_delay()
 {
