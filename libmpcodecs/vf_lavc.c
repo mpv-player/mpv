@@ -34,6 +34,10 @@
 #define coded_frame coded_picture
 #endif
 
+#if LIBAVCODEC_BUILD < 4684
+#define FF_QP2LAMBDA 1
+#endif
+
 extern int avcodec_inited;
 
 struct vf_priv_s {
