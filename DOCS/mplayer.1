@@ -270,6 +270,9 @@ explains the syntax.
 Uses high quality software timers. As precise as the RTC without requiring
 special privileges. Comes at the price of higher CPU consumption.
 .TP
+.B \-speed <0.01\-100>
+Set playback speed rate.
+.TP
 .B \-sstep <sec>
 Specifies seconds between displayed frames. Useful for slideshows.
 .TP
@@ -346,6 +349,28 @@ negative.
 .RE
 .
 .TP
+.B \-channels <number>
+Select number of audio output channels to be used.
+
+.I NOTE:
+.br
+This option is honored by codecs (ac3 only) filters (surround) and ao drivers
+(oss at least).
+.br
+Available options are:
+
+.PD 0
+.RSs
+.IPs 2
+Stereo
+.IPs 4
+Surround
+.IPs 6
+Full 5.1
+.RE
+.PD 1
+.
+.TP
 .B \-chapter <chapter\ id>[-<end\ chapter\ id>]
 Specify which chapter to start playing at. Optionally specify which chapter to
 end playing at (default: 1). Examples can be found below.
@@ -368,9 +393,6 @@ with \-dumpaudio/\-dumpvideo/\-dumpstream.
 .B \-dumpstream (MPLAYER only)
 Dumps the raw stream to ./stream.dump. Useful when ripping from
 DVD or network.
-.TP
-.B \-dumpsub (MPLAYER only)
-Dumps the subtitle substream from VOB streams.
 .TP
 .B \-dumpvideo (MPLAYER only)
 Dump raw compressed video stream to ./stream.dump (not very usable).
@@ -609,6 +631,10 @@ Convert the given subtitle (specified with the \-sub switch) to the time-based
 SubViewer (SRT) subtitle format. Creates a dumpsub.srt file in current
 directory.
 .TP
+.B \-dumpsub (MPLAYER only) (BETA CODE)
+Dumps the subtitle substream from VOB streams.
+See -dump*sub and -vobsubout* options too.
+.TP
 .B \-dumpmicrodvdsub (MPLAYER only)
 Convert the given subtitle (specified with the \-sub switch) to the
 MicroDVD subtitle format. Creates a dumpsub.sub file in current directory.
@@ -831,28 +857,6 @@ stereo coefficient (default: 2.5) (extrastereo plugin only)
 .IPs softclip
 compressor/"soft\-clipping" capabilities (volume plugin only)
 .RE
-.
-.TP
-.B \-channels <number>
-Select number of audio output channels to be used.
-
-.I NOTE:
-.br
-Currently this option is only honored for AC3 audio, and/or the surround
-plugin.
-.br
-Available options are:
-
-.PD 0
-.RSs
-.IPs 2
-Stereo
-.IPs 4
-Surround
-.IPs 6
-Full 5.1
-.RE
-.PD 1
 .
 .TP
 .B \-delay <sec>
@@ -1218,28 +1222,49 @@ If decoding with a codec from libavcodec, you can specify its parameters here.
 .RE
 .PD 1
 
-Available options are:
+.I NOTE:
+.br
+Just add the values of the things you want to enable. Available options are:
 .
 .RSs
-.IPs ver=<value>
+.IPs ec
+error concealment:
+.RSss
+1: use strong deblock filter for damaged MBs
+.br
+2: iterative MV search (slow)
+.br
+3: all (default)
+.REss
+.IPs er=<value>
 error resilience:
 .RSss
--1: needed for some very broken encoders
+0: disabled
 .br
- 0: default
+1: carefull (should work with broken encoders)
 .br
- 1: more aggressive error detection
+2: normal (default) (works with compliant encoders)
+.br
+3: agressive (more checks but might cause problems even for valid bitstreams)
+.br
+4: very agressive
 .REss
 .IPs bug=<value>
 manually work around encoder bugs:
 .RSss
-0: default
+0: nothing
 .br
-1: workaround for some old lavc generated msmpeg4v3 and some opendivx files
+1: autodetect bugs (default)
 .br
-2: workaround old XviD interlacing bug
+2 (msmpeg4v3): some old lavc generated msmpeg4v3 files (no autodetect)
 .br
-3: workaround UMP4 bugs
+4 (mpeg4): xvid interlacing bug (autodetected if fourcc==XVIX) 
+.br
+8 (mpeg4): UMP4 (autodetected if fourcc==UMP4)
+.br
+16 (mpeg4): padding bug
+.br
+32 (mpeg4): illegal vlc bug (autodetected per fourcc)
 .REss
 .IPs gray
 grayscale only decoding (a bit faster than with color)
@@ -1260,6 +1285,12 @@ and is another way of calling it (not with \-pp).
 .br
 See \-npp help for a full list of available options.
 .br
+Each filter defaults to 'c' (chrominance).
+.br
+\-npp only controls the external postprocess filter, and you HAVE TO
+load it manually by \-vop pp (Usage: \-vop pp \-npp <options>),
+it is not auto-loaded!
+.br
 The keywords accept a '\-' prefix to disable the option.
 .br
 A ':' followed by a letter may be appended to the option to indicate its
@@ -1271,14 +1302,10 @@ c: Do chrominance filtering, too.
 .br
 y: Do not do chrominance filtering (only luminance filtering).
 .RE
-.br
-Each filter defaults to 'c' (chrominance).
-.br
-\-npp only controls the external postprocess filter, and you HAVE TO
-load it manually by \-vop pp (Usage: \-vop pp \-npp <options>),
-it is not auto-loaded!
 
+.RS 7
 .I EXAMPLE:
+.RE
 .PD 0
 .RSs
 .IPs "\-npp hb,vb,dr,al,lb"
@@ -1557,7 +1584,7 @@ interlaced to drop the frame.
 .B \-x <x> (MPLAYER only)
 Scale image to x width (if sw/hw scaling available). Disables aspect calcs.
 .TP
-.B \-xvidopts <option>
+.B \-xvidopts <option1:option2:...>
 Specify additional parameters when decoding with XviD.
 
 .PD 0
@@ -1681,6 +1708,29 @@ will have the output file contain "div3" as video fourcc.
 .B \-include <config\ file>
 Specify config file to be parsed after the default
 .TP
+.B \-info <option1:option2:...> (.AVI only)
+Specify the info header of the resulting .AVI file. Available options are:
+.
+.RSs
+.IPs help
+show this description
+.IPs name=<value>
+title of the subject of the file
+.IPs artist=<value>
+artist or author of the original subject of the file
+.IPs genre=<value>
+original work category
+.IPs subject=<value>
+contents of the file
+.IPs copyright=<value>
+copyright information for the file
+.IPs srcform=<value>
+original form of the material that was digitized
+.IPs comment=<value>
+general comments about the file or the subject of the file
+.RE
+.
+.TP
 .B \-lameopts <option1:option2:...>
 If encoding to MP3 with libmp3lame, you can specify its parameters here.
 Available options are:
@@ -1749,8 +1799,6 @@ Available options are:
 .RE
 .
 .RSs
-.IPs help
-get help
 .IPs vcodec=<value>
 use the specified codec (there is no default, you must specify it):
 .RSss
@@ -1768,8 +1816,63 @@ rv10: an old RealVideo codec
 .br
 mpeg1video: MPEG1 video :)
 .REss
+.IPs vqmin=<2\-31>
+minimum quantizer (pass 1/2) (default: 3)
+.IPs vqscale=<2\-31>
+constant quantizer (selects fixed quantizer mode) (default: 0 (disabled))
+.IPs vqmax=<1\-31>
+maximum quantizer (pass 1/2) (default: 15)
+.IPs vqdiff=<1\-31>
+maximum quantizer difference between I or P frames (pass 1/2) (default: 3)
+.IPs vmax_b_frames=<0\-4>
+maximum number of B frames between non B frames:
+.RSss
+0: no B frames (default)
+.br
+0\-2: sane range
+.REss
+.IPs vme=<0\-5>
+motion estimation method:
+.RSss
+0: none (very lq)
+.br
+1: full (slow)
+.br
+2: log (lq)
+.br
+3: phods (lq)
+.br
+4: EPZS (default)
+.br
+5: X1
+.REss
+.IPs vhq
+high quality mode, encode each macro block in all modes an choose the
+smallest (slow). (default: HQ disabled)
+.IPs v4mv
+4 motion vectors per macroblock (slightly better quality), cannot be
+used with B frames. (default: disabled)
+.IPs keyint=<0\-300>
+interval between keyframes in frames. Larger numbers mean slightly smaller
+files, but less precise seeking, 0 means no key frames and values >300 aren't
+recommended. For a strict mpeg1/2/4 compliance this would have to be <=132.
+(default: 250 or one key frame every ten seconds in a 25fps movie)
+.IPs vb_strategy=<0\-1>
+strategy to choose between I/P/B frames (pass 2):
+.RSss
+0: always use the maximum number of B frames (default)
+.br
+1: avoid B frames in high motion scenes (bitrate mispredictions)
+.REss
+.IPs vpass=<1\-2>
+Activates internal 2pass mode (default: disabled):
+.RSss
+1: first pass
+.br
+2: second pass
+.REss
 .IPs vbitrate=<value>
-specify bitrate in
+specify bitrate (pass 1/2) in
 .RSss
 kBit <4\-16000> or
 .br
@@ -1777,123 +1880,223 @@ Bit  <16001\-24000000>
 .br
 (warning: 1kBit = 1000 Bits)
 .br
-default = 800k
+(default: 800)
 .REss
 .IPs vratetol=<value>
-approximated *filesize* tolerance in kBits. (warning: 1kBit = 1000 Bits)
-default = 1024*8 kBits = 1MByte
-.IPs keyint=<value>
-interval between keyframes (specify in frames, >300 are not recommended)
-default = 250 (one key frame every ten seconds in a 25fps movie)
-.IPs vhq
-high quality mode, macro blocks will be encoded multiple times and the
-smallest will be used. (default: HQ disabled)
-.IPs vme=<0\-5>
-motion estimation method (EPZS usually gives best results, but you can try X1,
-too. FULL is very slow and the others are experimental):
+approximated filesize tolerance in kbit. (warning: 1kBit = 1000 Bits)
+(default: 8000)
+.IPs vrc_maxrate=<value>
+maximum bitrate in kbit/sec (pass 1/2)
+.IPs vrc_minrate=<value>
+minimum bitrate in kbit/sec (pass 1/2)
+.IPs vrc_buf_size=<value>
+buffer size in kbit (pass 1/2). Note: vratetol should not be too large during
+the second pass or there might be problems if vrc_(min|max)rate is used.
+.IPs vb_qfactor=<-31.0\-31.0>
+quantizer factor between B and non B frames (pass 1/2) (default: 1.25)
+.IPs vi_qfactor=<-31.0\-31.0>
+(pass 1/2) (default: 0.8)
+.IPs vb_qoffset=<-31.0\-31.0>
+quantizer offset between B and non B frames (pass 1/2) (default: 1.25)
+.IPs vi_qoffset=<-31.0\-31.0>
+(pass 1/2) (default: 0.0)
+.br
+if v{b|i}_qfactor > 0
+.br
+I/B-Frame quantizer = P-Frame quantizer * v{b|i}_qfactor + v{b|i}_qoffset
+br
+else
+.br
+do normal ratecontrol (dont lock to next P frame quantizer) and set
+q= -q * v{b|i}_qfactor + v{b|i}_qoffset
+.IPs vqblur=<0.0\-1.0>
+quantizer blur (pass1):
 .RSss
-0: no ME at all
+0.0: qblur disabled
 .br
-1: ME_FULL
+0.5 (default)
 .br
-2: ME_LOG
-.br
-3: ME_PHODS
-.br
-4: ME_EPZS (default)
-.br
-5: ME_X1
+1.0: average the quantizer over all previous frames, larger values will
+ average the quantizer more over time (slower change)
 .REss
+.IPs vqblur=<0.0\-99.0>
+quantizer gaussian blur, larger values will average the quantizer more over
+time (slower change) (pass2) (default: 0.5)
 .IPs vqcomp=<value>
-If the value is set to 1.0, the quantizer will stay nearly constant (high
-motion scenes will look bad). If it's 0.0, the quantizer will be changed to
-make all frames approximately equally sized (low motion scenes will look bad).
-(default: 0.5)
-.IPs vqblur=<0\-1>
-blurs the quantizer graph over time:
+quantizer compression, depends upon vrc_eq (pass 1/2) (default: 0.5)
+.IPs vrc_eq=<equation>
+main ratecontrol equation (pass 1/2):
+
+1: constant bitrate
+.br
+tex: constant quality
+.br
+1+(tex/avgTex-1)*qComp: approximately the equation of the old ratecontrol code
+.br
+tex^qComp: with qcomp 0.5 or something like that (default)
+
+infix operators: +,-,*,/,^
+.br
+variables:
+.br
+tex: texture complexity
+.br
+iTex,pTex: intra, non intra texture complexity
+.br
+avgTex: average texture complexity
+.br
+avgIITexaverage: intra texture complexity in I frames
+.br
+avgPITexaverage: intra texture complexity in P frames
+.br
+avgPPTexaverage: non intra texture complexity in P frames
+.br
+avgBPTexaverage: non intra texture complexity in B frames
+.br
+mv: bits used for MVs
+.br
+fCode: maximum length of MV in log2 scale
+.br
+iCount: number of intra MBs / number of MBs
+.br
+var: spatial complexity
+.br
+mcVar: temporal complexity
+.br
+qComp: qcomp from the command line
+.br
+isI, isP, isB: is 1 if picture type is I/P/B else 0
+.br
+Pi,E: see your favorite math book
+
+functions:
+.br
+max(a,b),min(a,b): maximum / minimum
+.br
+gt(a,b): is 1 if a>b, 0 otherwise
+.br
+lt(a,b): is 1 if a<b, 0 otherwise
+.br
+eq(a,b): is 1 if a==b,0 otherwise
+.br
+sin,cos,tan,sinh,cosh,tanh,exp,log,abs
+.
+.IPs vrc_override=<start-frame,end-frame,quality[/start-frame,end-frame,quality[/...]]>
+user specified quality for specific parts (pass 1/2):
 .RSss
-0.0: no blur
+quality 2\-31: quantizer
 .br
-1.0: average all past quantizers
-.br
-(default: 0.5)
+quality \-500\-0: quality correcture in %
 .REss
-.IPs vqscale=<2\-31>
-gives each frame the same quantizer (selects fixed quantizer mode).
-(default: 0 (fixed quantizer mode disabled))
-.IPs vrc_strategy=<0\-2>
-different strategies to decide which frames should get which quantizer.
-(default: 2)
-.IPs v4mv
-4 motion vectors per macroblock, may give you slightly better quality, can
-only be used in HQ mode and is buggy with B frames currently.
-(default: disabled)
-.IPs vpass=<1/2>
-select internal first pass or second pass of 2-pass mode.
-(default: 0 (1-pass mode))
+.IPs vrc_init_cplx=<0\-1000>
+initial complexity (pass 1)
+.IPs vqsquish=<0\-1>
+specify how to keep the quantizer between qmin and qmax (pass 1/2):
+.RSss
+0: use cliping
+.br
+1: use a nice differentiable function (default)
+.REss
+.IPs vlelim=<-1000\-1000>
+single coefficient elimination threshold for luminance. Negative values will
+also consider the dc coefficient (should be at least -4 or lower for encoding
+at quant=1):
+.RSss
+0: disabled (default)
+.br
+-4 (JVT recommendation)
+.REss
+.IPs vcelim=<-1000\-1000>
+single coefficient elimination threshold for chrominance. Negative values will
+also consider the dc coefficient (should be at least -4 or lower for encoding
+at quant=1):
+.RSss
+0 disabled (default)
+.br
+7 (JVT recommendation)
+.REss
+.IPs vstrict
+strict standard compliance. Only recommended if you want to feed the output
+into the mpeg4 reference decoder.
+.IPs vdpart
+data partitioning. Adds 2 byte per video packet, improves error-resistance
+when transfering over unreliable channels (eg. streaming over the internet)
+.IPs vpsize=<0\-10000>
+video packet size, improves error-resistance (see \-vdpart option too):
+.RSss
+0: disabled (default)
+.br
+100-1000: good choice
+.REss
 .IPs gray
-encode in grayscale mode. (default: disabled)
+grayscale only encoding (faster) (default: disabled)
+.IPs vfdct=<0\-99>
+dct algorithm:
+.RSss
+0: automatically select a good one (default)
+.br
+1: fast integer
+.br
+2: accurate integer
+.br
+3: mmx
+.br
+4: mlib
+.REss
+.IPs idct=<0\-99>
+idct algorithm. Note: all these IDCTs do pass the IEEE1180 tests afaik:
+.RSss
+0: automatically select a good one (default)
+.br
+1: jpeg reference integer
+.br
+2: simple
+.br
+3: simplemmx
+.br
+4: libmpeg2mmx (inaccurate, DONT USE for encoding with keyint >100)
+.br
+5: ps2
+.br
+6: mlib
+.br
+7: arm
+.REss
+.IPs lumi_mask=<0.0\-1.0>
+luminance masking. Warning: be carefull, too large values can cause
+disasterous things. Warning2: large values might look good on some monitors but
+may look horrible on other monitors:
+.RSss
+0.0: disabled (default)
+.br
+0.0\-0.3: sane range
+.REss
+.IPs dark_mask=<0.0\-1.0>
+darkness masking. Warning: be carefull, too large values can cause
+disasterous things. Warning2: large values might look good on some monitors
+but may look horrible on other monitors / TV / TFT:
+.RSss
+0.0: disabled (default)
+0.0\-0.3: sane range
+.REss
+.IPs tcplx_mask=<0.0\-1.0>
+temporal complexity masking (default: 0.0 (disabled))
+.IPs scplx_mask=<0.0\-1.0>
+spatial complexity masking. Larger values help against blockiness, if no
+deblocking filter is used for decoding. Crop any black borders to get
+better quality:
+.RSss
+0.0: disabled (default)
+.br
+0.0\-0.5: sane range
+.REss
+.IPs naq
+normalize adaptive quantization (experimental)
+.IPs ildct
+use interlaced dct
 .IPs mpeg_quant
 use MPEG quantizers instead of H.263. (default: disabled) (i.e. use H.263
 quantizers)
-
-.PP
-The next 3 options apply only to I & P frames:
-.IPs vqmin=<1\-31>
-minimum quantizer (default: 3)
-.IPs vqmax=<1\-31>
-maximum quantizer (default: 15)
-.IPs vqdiff=<1\-31>
-quantizer difference. Limits the maximum quantizer difference between frames.
-(default: 3)
-
-.PP
-The following options apply only to B frames:
-.IPs vmax_b_frames=<0\-4>
-maximum number of frames between each I/P frame. (default: 0 (B-frames
-generation disabled))
-.IPs vb_strategy=<0/1>
-strategy to choose between I/P/B frames:
-.RSss
-0: always use max B
-.br
-1: avoid B frames in high motion / scene change (can lead to misprediction of
-   file size) (default: 0)
-.REss
-.IPs vb_qfactor=<value>
-quantizer factor between B and I/P frames (larger means higher quantizer for B
-frames) (default: 2.0)
-.IPs vb_qoffset=<value>
-quantizer offset between B and I/P frames (larger means higher quantizer for B
-frames) (default: 0.0)
-
-.PP
-The actual quantizer for a given B frame is computed in pass 1 as shown below:
-.RSss
-prev_IorP_quantizer * vb_qfactor + vb_qoffset
-.REss
-
-.PP
-In fixed quantizer mode you can use those options:
-.RSss
-vqscale, vmax_b_frames, vhq, vme, keyint
-.REss
-
-.PP
-You can use the following options only in pass 1 of 2-pass mode or in 1-pass
-mode:
-.RSss
-vqblur, vqdiff
-.REss
-
-.PP
-You can use the following options only in pass 2 of 2-pass mode:
-.RSss
-vrc_strategy, vb_strategy
-.REss
-
-.PP
-All other options can be used in all modes.
 .RE
 .
 .TP
@@ -1974,6 +2177,56 @@ Specify the index of the subtitles in the output files. (default: 0)
 .B \-vobsuboutid <langid>
 Specify the language two letter code for the subtitles. This
 overrides what is read from the DVD or the .ifo file.
+.TP
+.B \-xvidencopts <option1:option2:...>
+If encoding to XviD, you can specify its parameters here.
+Available options are:
+.
+.RSs
+.IPs mode=<mode>
+specify the mode to be used for encoding
+.RSss
+help: show this help
+.br
+cbr: constant bit rate (default)
+.br
+2pass-1: first pass of two pass mode
+.br
+2pass-2: second pass of two pass mode
+.br
+fixedquant: fixed quantizer mode
+.REss
+.IPs quality=<0\-6>
+specify the encoding quality
+.IPs br=<value>
+sets the bitrate to be used in bits/seconds
+.IPs rc_reaction_delay_factor=<value>
+specify how fast the rate control reacts, lower values are faster
+.IPs rc_averaging_period=<value>
+period to reach the required average
+.IPs rc_buffer=<value>
+size of the rate control buffer
+.IPs max_quantizer=<value>
+maximum quantizer
+.IPs min_quantizer=<value>
+minimum quantizer
+.IPs min_key_interval=<value>
+minimum interval between key frames (2pass only)
+.IPs max_key_interval=<value>
+maximum interval between key frames
+.IPs (no)debug
+show or don't show debug messages (default: on)
+.IPs statsfile=<filename>
+filename for the statistics of the first pass (1/2pass mode only)
+.IPs keyframe_boost=<value>
+(2pass mode only)
+.IPs kfthreshold=<value>
+(2pass mode only)
+.IPs kfreduction=<value>
+(2pass mode only)
+.IPs fixed_quant=<1\-31>
+specify the quantizer (fixed quantizer mode only)
+.RE
 
 
 .\" --------------------------------------------------------------------------
