@@ -206,7 +206,6 @@ Codecs:
   --enable-vorbis        build with OggVorbis support [autodetect]
   --enable-tremor        build with integer-only OggVorbis support [disabled]
   --enable-theora        build with OggTheora support [autodetect]
-  --enable-external-matroska  build with external Matroska support [autodetect]
   --disable-internal-matroska disable internal Matroska support [enabled]
   --enable-external-faad build with external FAAD2 (AAC) support [autodetect]
   --disable-internal-faad disable internal FAAD2 (AAC) support [autodetect]
@@ -1220,7 +1219,6 @@ _mp3lib=yes
 _liba52=yes
 _libmpeg2=yes
 _matroska_internal=yes
-_matroska_external=auto
 _tremor=no
 _faad_internal=auto
 _faad_external=auto
@@ -1400,8 +1398,6 @@ for ac_option do
   --disable-libmpeg2)	_libmpeg2=no	;;
   --enable-internal-matroska)  _matroska_internal=yes _matroska_external=no ;;
   --disable-internal-matroska) _matroska_internal=no ;;
-  --enable-external-matroska)  _matroska_internal=no  _matroska_external=yes ;;
-  --disable-external-matroska) _matroska_external=no ;;
   --enable-internal-faad)	_faad_internal=yes	_faad_external=no	;;
   --disable-internal-faad)	_faad_internal=no	;;
   --enable-external-faad)	_faad_external=yes	_faad_internal=no	;;
@@ -4867,54 +4863,13 @@ else
   _nocodecmodules="libmpeg2 $_nocodecmodules"
 fi
 echores "$_libmpeg2"
-echocheck "Matroska support (external 0.6.0 or later OR internal)"
-_matroska_result="no"
+echocheck "Matroska support"
 if test "$_matroska_internal" = yes ; then
-  _matroska_external=no
-  _inputmodules="matroska(internal) $_inputmodules"
-  _matroska_result="yes, internal"
-fi
-if test "$_matroska_external" != no ; then
-  _matroska_external=no
-  _TMPC=$TMPC
-  TMPC=${TMPC}pp
-  cat > $TMPC << EOF
-#include <ebml/EbmlVersion.h>
-#include <matroska/KaxVersion.h>
-
-#if LIBEBML_VERSION < 000600
-#error libebml is too old
-#endif
-
-#if LIBMATROSKA_VERSION < 000600
-#error libmatroska is too old
-#endif
-
-int main(void) { return 0; }
-EOF
-  cc_check -lmatroska -lebml -lstdc++ && _matroska_external=yes
-  if test "$_matroska_external" = no ; then
-    _saved_inc_extra=$_inc_extra
-    _inc_extra="$_inc_extra -I/usr/local/include"
-    cc_check -lmatroska -lebml -lstdc++ && _matroska_external=yes
-    if test "$_matroska_external" = no ; then
-      _inc_extra=$_saved_inc_extra
-    fi
-  fi
-  rm ${TMPC} > /dev/null 2> /dev/null
-  TMPC=$_TMPC
-  if test "$_matroska_external" = yes ; then
-    _ld_matroska="-lmatroska -lebml -lstdc++"
-    _inputmodules="matroska(external) $_inputmodules"
-    _matroska_result="yes, external"
-  fi
-fi
-echores "$_matroska_result"
-if test "$_matroska_internal" != no -o "$_matroska_external" != no ; then
+  _inputmodules="matroska $_inputmodules"
   _def_matroska='#define HAVE_MATROSKA 1'
 else
-  _def_matroska='#undef HAVE_MATROSKA'
   _noinputmodules="matroska $_noinputmodules"
+  _def_matroska='#undef HAVE_MATROSKA'
 fi
 
 
@@ -6147,9 +6102,7 @@ CONFIG_RISKY = yes
 CONFIG_MP3LAME = $_mp3lame
 LIBMENU = $_menu
 I18NLIBS = $_i18n_libs
-MATROSKA_INTERNAL = $_matroska_internal
-MATROSKA_EXTERNAL = $_matroska_external
-MATROSKA_LIB = $_ld_matroska
+MATROSKA = $_matroska_internal
 
 OPENDIVX = $_opendivx
 

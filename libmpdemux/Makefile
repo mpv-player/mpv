@@ -24,11 +24,8 @@ SRCS += dvbin.c
 SRCS += dvb_tune.c
 endif
 
-ifeq ($(MATROSKA_INTERNAL),yes)
+ifeq ($(MATROSKA),yes)
 SRCS += demux_mkv.c ebml.c
-endif
-ifeq ($(MATROSKA_EXTERNAL),yes)
-CPLUSPLUSSRCS += demux_mkv_old.cpp
 endif
 
 ifeq ($(CONFIG_LIBAVFORMAT),yes)
