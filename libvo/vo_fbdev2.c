@@ -191,8 +191,13 @@ err_out:
 	return -1;
 }
 
-static uint32_t preinit(const char *ignore)
+static uint32_t preinit(const char *subdevice)
 {
+	if (subdevice)
+	{
+	    if (fb_dev_name) free(fb_dev_name);
+	    fb_dev_name = strdup(subdevice);
+	}
 	return fb_preinit(0);
 }
 

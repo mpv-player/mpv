@@ -639,14 +639,6 @@ static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   return cmap;
 }
 
-#ifdef CONFIG_VIDIX
-static uint32_t parseSubDevice(const char *sd)
-{
-   if(memcmp(sd,"vidix",5) == 0) vidix_name = &sd[5]; /* vidix_name will be valid within init() */
-   else { mp_msg(MSGT_VO, MSGL_WARN, "Unknown subdevice: '%s'\n", sd); return -1; }
-   return 0;
-}
-#endif
 
 static int fb_preinit(int reset)
 {
@@ -1114,11 +1106,21 @@ static void uninit(void)
 static uint32_t preinit(const char *vo_subdevice)
 {
     pre_init_err = 0;
+
+    if(vo_subdevice)
+    {
 #ifdef CONFIG_VIDIX
-    if(vo_subdevice) parseSubDevice(vo_subdevice);
-    if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_fbdev);
-    mp_msg(MSGT_VO, MSGL_DBG3, "vo_subdevice: initialization returns: %i\n",pre_init_err);
+	if (memcmp(vo_subdevice, "vidix", 5) == 0)
+	    vidix_name = &vo_subdevice[5];
+	if(vidix_name)
+	    pre_init_err = vidix_preinit(vidix_name,&video_out_fbdev);
+	else
 #endif
+	{
+	    if (fb_dev_name) free(fb_dev_name);
+	    fb_dev_name = strdup(vo_subdevice);
+	}
+    }
     if(!pre_init_err) return (pre_init_err=(fb_preinit(0)?0:-1));
     return(-1);
 }
