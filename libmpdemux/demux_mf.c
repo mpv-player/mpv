@@ -22,6 +22,15 @@ typedef struct
 } demuxer_mf_t;
 
 void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags){
+  demuxer_mf_t * mf = (demuxer_mf_t *)demuxer->priv;
+  sh_video_t   * sh_video = demuxer->video->sh;
+  int newpos = (flags & 1)?0:mf->curr_frame;
+  
+  if ( flags & 2 ) newpos+=rel_seek_secs*mf->nr_of_frames;
+   else newpos+=rel_seek_secs * sh_video->fps;
+  if ( newpos < 0 ) newpos=0;
+  if( newpos > mf->nr_of_frames) newpos=mf->nr_of_frames;
+  mf->curr_frame=newpos;
 }
 
 // return value:
@@ -38,14 +47,13 @@ int demux_mf_fill_buffer(demuxer_t *demuxer){
   mf=(mf_t*)demuxer->stream->priv;
 
   stat( mf->names[dmf->curr_frame],&fs );
-  printf( "[demux_mf] frame: %d (%s,%d)\n",dmf->curr_frame,mf->names[dmf->curr_frame],fs.st_size );
+//  printf( "[demux_mf] frame: %d (%s,%d)\n",dmf->curr_frame,mf->names[dmf->curr_frame],fs.st_size );
 
   if ( !( f=fopen( mf->names[dmf->curr_frame],"r" ) ) ) return 0;
   {
    sh_video_t     * sh_video = demuxer->video->sh;
    demux_packet_t * dp = new_demux_packet( fs.st_size );
-//    stream_read(stream,dp->buffer,len);
-   if ( !fread( dp->buffer,1,fs.st_size,f ) ) return 0;
+   if ( !fread( dp->buffer,fs.st_size,1,f ) ) return 0;
    dp->pts=dmf->curr_frame / sh_video->fps;
    dp->pos=dmf->curr_frame;
    dp->flags=0;
@@ -63,7 +71,6 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   mf_t         *mf = NULL;
   demuxer_mf_t *dmf = NULL;
 
-  mp_msg( MSGT_DEMUX,MSGL_V,"[demux_mf] mf demuxer opened.\n" );
   mf=(mf_t*)demuxer->stream->priv;
   dmf=calloc( 1,sizeof( demuxer_mf_t ) );
 
@@ -106,7 +113,7 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video->bih->biSizeImage=sh_video->bih->biWidth*sh_video->bih->biHeight*3;
 
   /* disable seeking */
-  demuxer->seekable = 0;
+//  demuxer->seekable = 0;
 
   demuxer->priv=(void*)dmf;
 

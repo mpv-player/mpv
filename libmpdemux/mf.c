@@ -31,44 +31,62 @@ int stream_open_mf(char * filename,stream_t * stream)
  int           i;
  char        * fname;
  mf_t        * mf;
+ int           error_count = 0;
+ int	       count = 0;
 
- fname=malloc( strlen( filename ) + 2 );
- strcpy( fname,filename ); strcat( fname,"*" );
-
- if ( glob( fname,0,NULL,&gg ) )
-  { free( fname ); return 0; }
-
- printf( "[mf] search expr: %s\n",fname );
-
- mf=malloc( sizeof( mf_t ) );
- mf->nr_of_files=gg.gl_pathc;
- mf->names=malloc( gg.gl_pathc * sizeof( char* ) );
-
- printf( "[mf] number of files: %d (%d)\n",mf->nr_of_files, gg.gl_pathc * sizeof( char* ) );
-
- for( i=0;i < gg.gl_pathc;i++ )
+ fname=malloc( strlen( filename ) + 32 );
+ mf=calloc( 1,sizeof( mf_t ) );
+ 
+ if ( !strchr( filename,'%' ) )
   {
-   stat( gg.gl_pathv[i],&fs );
-   if( S_ISDIR( fs.st_mode ) ) continue;
-   mf->names[i]=strdup( gg.gl_pathv[i] );
-//   printf( "[mf] added file %d.: %s\n",i,mf->names[i] );
-  }
- globfree( &gg );
+   strcpy( fname,filename ); 
+   if ( !strchr( filename,'*' ) ) strcat( fname,"*" );
 
+   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] search expr: %s\n",fname );
+
+   if ( glob( fname,0,NULL,&gg ) )
+    { free( mf ); free( fname ); return 0; }
+
+   mf->nr_of_files=gg.gl_pathc;
+   mf->names=malloc( gg.gl_pathc * sizeof( char* ) );
+
+   mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d (%d)\n",mf->nr_of_files, gg.gl_pathc * sizeof( char* ) );
+
+   for( i=0;i < gg.gl_pathc;i++ )
+    {
+     stat( gg.gl_pathv[i],&fs );
+     if( S_ISDIR( fs.st_mode ) ) continue;
+     mf->names[i]=strdup( gg.gl_pathv[i] );
+//     mp_msg( MSGT_STREAM,MSGL_DBG2,"[mf] added file %d.: %s\n",i,mf->names[i] );
+    }
+   globfree( &gg );
+   goto exit_mf;
+  }
+
+ mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] search expr: %s\n",filename );
+ 
+ while ( error_count < 5 )
+  {
+   sprintf( fname,filename,count++ );
+   if ( stat( fname,&fs ) ) 
+    {
+     error_count++;
+     mp_msg( MSGT_STREAM,MSGL_V,"[mf] file not found: '%s'\n",fname );
+    }
+    else
+    {
+     mf->names=realloc( mf->names,( mf->nr_of_files + 1 ) * sizeof( char* ) );
+     mf->names[mf->nr_of_files]=strdup( fname );
+//     mp_msg( MSGT_STREAM,MSGL_V,"[mf] added file %d.: %s\n",mf->nr_of_files,mf->names[mf->nr_of_files] );
+     mf->nr_of_files++;
+    }
+  }
+
+ mp_msg( MSGT_STREAM,MSGL_INFO,"[mf] number of files: %d\n",mf->nr_of_files );
+
+exit_mf:
  free( fname );
  stream->priv=(void*)mf;
-
  return 1;
 }
 
-#if 0
-
-stream_t stream;
-
-int main( void )
-{
- stream_open_mf( "tmp/a",&stream );
- return 0;
-}
-
-#endif

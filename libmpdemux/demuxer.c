@@ -776,6 +776,9 @@ switch(demuxer->file_format){
   case DEMUXER_TYPE_Y4M:
       demux_seek_y4m(demuxer,rel_seek_secs,flags);  break;
 
+  case DEMUXER_TYPE_MF:
+      demux_seek_mf(demuxer,rel_seek_secs,flags);  break;
+      
   case DEMUXER_TYPE_FLI:
       demux_seek_fli(demuxer,rel_seek_secs,flags);  break;
   case DEMUXER_TYPE_NUV:
