@@ -135,7 +135,7 @@ typedef struct mkv_track {
   char type; // 'v' = video, 'a' = audio, 's' = subs
   
   char v_fourcc[5];
-  uint32_t v_width, v_height;
+  uint32_t v_width, v_height, v_dwidth, v_dheight;
   float v_frate;
 
   uint16_t a_formattag;
@@ -392,6 +392,11 @@ static int check_track_information(mkv_demuxer_t *d) {
                  "not set.\n", t->tnum);
           continue;
         }
+
+        if (t->v_dwidth == 0)
+          t->v_dwidth = t->v_width;
+        if (t->v_dheight == 0)
+          t->v_dheight = t->v_height;
 
         // This track seems to be ok.
         t->ok = 1;
@@ -1132,6 +1137,24 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                            "%u\n", track->v_height);
 
                   } else if (EbmlId(*l4) ==
+                             KaxVideoDisplayWidth::ClassInfos.GlobalId) {
+                    KaxVideoDisplayWidth &width =
+                      *static_cast<KaxVideoDisplayWidth *>(l4);
+                    width.ReadData(es->I_O());
+                    track->v_dwidth = uint16(width);
+                    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Display width: "
+                           "%u\n", track->v_dwidth);
+
+                  } else if (EbmlId(*l4) ==
+                             KaxVideoDisplayHeight::ClassInfos.GlobalId) {
+                    KaxVideoDisplayHeight &height =
+                      *static_cast<KaxVideoDisplayHeight *>(l4);
+                    height.ReadData(es->I_O());
+                    track->v_dheight = uint16(height);
+                    mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |   + Display height: "
+                           "%u\n", track->v_dheight);
+
+                  } else if (EbmlId(*l4) ==
                              KaxVideoFrameRate::ClassInfos.GlobalId) {
                     KaxVideoFrameRate &framerate =
                       *static_cast<KaxVideoFrameRate *>(l4);
@@ -1423,8 +1446,10 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
       sh_v->format = sh_v->bih->biCompression;
       sh_v->fps = track->v_frate;
       sh_v->frametime = 1 / track->v_frate;
-      sh_v->disp_w = sh_v->bih->biWidth;
-      sh_v->disp_h = sh_v->bih->biHeight;
+      sh_v->disp_w = track->v_width;
+      sh_v->disp_h = track->v_height;
+      sh_v->aspect = (float)track->v_dwidth / (float)track->v_dheight;
+      mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] Aspect: %f\n", sh_v->aspect);
 
       demuxer->video->id = track->tnum;
       demuxer->video->sh = sh_v;
