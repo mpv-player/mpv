@@ -55,7 +55,20 @@ struct config ovc_conf[]={
 	{"rawrgb", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAWRGB, NULL},
 	{"vfw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_VFW, NULL},
 	{"libdv", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBDV, NULL},
-	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   divx4\n   raw\n   lavc\n   rawrgb\n   vfw\n   null\n\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"help", "\nAvailable codecs:\n   copy\n   frameno\n   rawrgb\n"
+#ifdef HAVE_DIVX4ENCORE
+	"   divx4\n"
+#endif
+#ifdef USE_LIBAVCODEC
+	"   lavc\n"
+#endif
+#ifdef USE_WIN32DLL
+	"   vfw\n"
+#endif
+#ifdef HAVE_LIBDV095
+	"   libdv\n"
+#endif
+	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
