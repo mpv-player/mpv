@@ -1,4 +1,4 @@
-#undef HAVE_DVB
+#define HAVE_DVB
 #define PES_MAX_SIZE 2048
 /* 
  * Based on:
@@ -291,7 +291,7 @@ static void my_write(unsigned char* data,int len){
 
 static unsigned char pes_header[PES_MAX_SIZE];
 
-static void send_pes_packet(unsigned char* data,int len,int id,int timestamp){
+void send_pes_packet(unsigned char* data,int len,int id,int timestamp){
     int x;
 
 	      pes_header[0]=pes_header[1]=0;
@@ -326,6 +326,69 @@ static void send_pes_packet(unsigned char* data,int len,int id,int timestamp){
 //    printf("PES: draw frame!  pts=%d   size=%d  \n",timestamp,len);
 
 }
+
+void send_lpcm_packet(unsigned char* data,int len,int id,int timestamp){
+    int x;
+
+	      pes_header[0]=pes_header[1]=0;
+	      pes_header[2]=1; pes_header[3]=0xBD;
+    
+    while(len>=4){
+	    int payload_size;
+	    
+	    payload_size=PES_MAX_SIZE-6-20; // max possible data len
+	    if(payload_size>len) payload_size=len;
+	    payload_size&=(~3); // align!
+
+	    payload_size+=20;  //  PTS+headers
+	    
+	    //if(6+payload_size>PES_MAX_SIZE) payload_size=PES_MAX_SIZE-6;
+	    
+    // construct PES header:  (code from ffmpeg's libav)
+	      // startcode:
+	      // packetsize:
+	      pes_header[4]=(payload_size)>>8;
+	      pes_header[5]=(payload_size)&255;
+	      // stuffing:
+	      pes_header[6]=0x81;
+	      pes_header[7]=0x80;
+	      pes_header[8]=10; // hdrlen
+	      // presentation time stamp:
+	      x=(0x02 << 4) | (((timestamp >> 30) & 0x07) << 1) | 1;
+	      pes_header[9]=x;
+	      x=((((timestamp >> 15) & 0x7fff) << 1) | 1);
+	      pes_header[10]=x>>8; pes_header[11]=x&255;
+	      x=((((timestamp) & 0x7fff) << 1) | 1);
+	      pes_header[12]=x>>8; pes_header[13]=x&255;
+	      
+	      pes_header[14]=
+	      pes_header[15]=
+	      pes_header[16]=
+	      pes_header[17]=
+	      pes_header[18]=0xFF; // stuffing
+	      
+	      pes_header[19]=id;
+	      
+	      pes_header[20]=0x07; // dunnowhat
+	      pes_header[21]=0x00;
+	      pes_header[22]=0x04;
+	      pes_header[23]=0x0C;
+	      
+	      pes_header[24]=0x01; // LPCM id
+	      pes_header[25]=0x80;
+	      
+	payload_size-=20;
+	memcpy(&pes_header[6+20],data,payload_size);
+	my_write(pes_header,6+20+payload_size);
+
+	len-=payload_size; data+=payload_size;
+	if(len<=0) break;
+    }
+
+//    printf("PES: draw frame!  pts=%d   size=%d  \n",timestamp,len);
+
+}
+
 
 static uint32_t draw_frame(uint8_t * src[])
 {
@@ -400,9 +463,9 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x0,i
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 1;
+    if(format==IMGFMT_MPEGPES) return 1|256;
 #ifdef USE_LIBAVCODEC
-    if(format==IMGFMT_YV12) return 1;
+    if(format==IMGFMT_YV12) return 1|256;
 #endif
     return 0;
 }
