@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.12 -->
+<!-- synced with 1.14 -->
 <chapter id="usage">
 <title>Использование</title>
 
@@ -299,6 +299,11 @@ ENTER pt_step 1 1<!--
 <listitem><para><literal>vo_fullscreen</literal></para>
   <para>
   Переключить полноэкранность режима.
+  </para></listitem>
+<listitem><para><literal>vo_ontop</literal></para>
+  <para>
+  Переключает stay-on-top(оставаться на поверхности). Поддерживается всеми
+  драйверами, использующими X11, кроме SDL, и directx, и gl2 под Windows.
   </para></listitem>
 <listitem><para><literal>tv_step_channel</literal> (int) dir</para>
   <para>
