@@ -1497,6 +1497,9 @@ if(auto_quality>0){
 
   if(osd_function==OSD_PAUSE){
       mp_msg(MSGT_CPLAYER,MSGL_STATUS,"\n------ PAUSED -------\r");fflush(stdout);
+#ifdef HAVE_NEW_GUI
+      if(use_gui) mplShMem->Playing=2;
+#endif
       if (audio_out && sh_audio)
          audio_out->pause();	// pause audio, keep data if possible
          while(
@@ -1518,6 +1521,9 @@ if(auto_quality>0){
          osd_function=OSD_PLAY;
       if (audio_out && sh_audio)
         audio_out->resume();	// resume audio
+#ifdef HAVE_NEW_GUI
+      if(use_gui) if(mplShMem->Playing==2) mplShMem->Playing=1;
+#endif
   }
 
 
@@ -1834,6 +1840,9 @@ mp_msg(MSGT_GLOBAL,MSGL_V,"EOF code: %d  \n",eof);
 
 }
 
+#ifdef HAVE_NEW_GUI
+      if(use_gui) mplShMem->Playing=0;
+#endif
 
 if(curr_filename+1<num_filenames || use_gui){
     // partial uninit:
