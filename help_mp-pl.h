@@ -30,6 +30,7 @@ static char help_text[]=
 #ifdef USE_FAKE_MONO
 " -stereo <mode>  wybór trybu stereo dla MPEG1 (0:stereo 1:lewo 2:prawo)\n"
 #endif
+" -channels <n>   docelowa liczba kana³ów audio\n"
 " -fs -vm -zoom   opcje pe³noekranowe (pe³en ekran,zmiana trybu,skalowanie)\n"
 " -x <x> -y <y>   skalowanie do rozdzielczo¶ci <x>*<y> [je¶li -vo pozwala!]\n"
 " -sub <file>     wybór pliku z napisami (zobacz tak¿e -subfps, -subdelay)\n"
@@ -85,7 +86,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Wymuszam zastosowanie kodeka audio z rodziny %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Nie mogê znale¼æ kodeka audio dla wymuszonej rodziny, wracam do standardowych.\n"
 #define MSGTR_CantFindAudioCodec "Nie mogê znale¼æ kodeka dla formatu audio 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Sprobuj uaktualniæ %s etc/codecs.conf\n*** Je¶li to nie pomaga, przeczytaj DOCS/codecs.html !\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Spróbuj uaktualniæ %s etc/codecs.conf\n*** Je¶li to nie pomaga, przeczytaj DOCS/codecs.html !\n"
 #define MSGTR_CouldntInitAudioCodec "Nie moge zainicjowaæ sterownika audio! -> nosound\n"
 #define MSGTR_TryForceVideoFmt "Wymuszam zastosowanie kodeka video z rodziny %d ...\n"
 #define MSGTR_CantFindVfmtFallback "Nie mogê znale¼æ kodeka video dla wymuszonej rodziny, wracam do standardowych..\n"
@@ -97,9 +98,19 @@ static char help_text[]=
 #define MSGTR_CannotInitVO "FATAL: Nie mogê zainicjowaæ sterownika video!\n"
 #define MSGTR_CannotInitAO "Nie mogê otworzyæ/zainicjowaæ urz±dzenia audio -> NOSOUND\n"
 #define MSGTR_StartPlaying "Pocz±tek odtwarzania...\n"
-#define MSGTR_SystemTooSlow "\n*************************************************************************"\
-			    "\n*** Twój system jest zbyt wolny! Sprobuj z opcj± -framedrop lub RTFM! ***"\
-			    "\n*************************************************************************\n"
+#define MSGTR_SystemTooSlow "\n\n"\
+"         ************************************\n"\
+"         *** Twój system jest zbyt wolny! ***\n"\
+"         ************************************\n"\
+"- Najczêstsza przyczyna: uszkodzony/obarczony b³edami sterownik _audio_.\n"\
+"  Rozwi±zanie: spróbuj -ao sdl lub u¿yj ALSA 0.5 lub emulacjê OSS w ALSA 0.9\n"\
+"  Przeczytaj DOCS/sound.html!\n"\
+"- Wolny sterownik video. Spróbuj z inny sterownikiem -vo (lista: -vo help)\n"\
+"  lub odtwarzaj z opcj± -framedrop ! Przeczytaj DOCS/video.html!\n"\
+"- Wolny procesor. Nie odtwarzaj du¿ych dvd/divx na wolnych procesorach!\n"\
+"  Spróbuj z opcj± -hardframedrop\n"\
+"- Uszkodzony plik. Spróbuj ró¿nych kombinacji: -nobps -ni -mc 0 -forceidx\n"\
+"- Je¶li nic z powy¿szego nie pomaga, przeczytaj DOCS/bugreports.html !\n\n"
 
 #define MSGTR_NoGui "MPlayer zosta³ skompilowany BEZ obs³ugi GUI!\n"
 #define MSGTR_GuiNeedsX "GUI MPlayera wymaga X11!\n"
