@@ -40,6 +40,9 @@ extern int opt_screen_size_y;
 
 //===========================================================================//
 
+void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, SwsFilter **dstFilterParam);
+struct SwsContext *sws_getContextFromCmdLine(int srcW, int srcH, int srcFormat, int dstW, int dstH, int dstFormat);
+
 static unsigned int outfmt_list[]={
 // RGB:
     IMGFMT_BGR32,
@@ -384,7 +387,7 @@ static int open(vf_instance_t *vf, char* args){
 int sws_flags=2;
 
 //global srcFilter
-SwsFilter src_filter= {NULL, NULL, NULL, NULL};
+static SwsFilter *src_filter= NULL;
 
 float sws_lum_gblur= 0.0;
 float sws_chr_gblur= 0.0;
@@ -442,63 +445,13 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, Sw
 	}
 	else if(verbose>1) *flags= SWS_PRINT_INFO;
 
-	if(src_filter.lumH) sws_freeVec(src_filter.lumH);
-	if(src_filter.lumV) sws_freeVec(src_filter.lumV);
-	if(src_filter.chrH) sws_freeVec(src_filter.chrH);
-	if(src_filter.chrV) sws_freeVec(src_filter.chrV);
+	if(src_filter) sws_freeFilter(src_filter);
 
-	if(sws_lum_gblur!=0.0){
-		src_filter.lumH= sws_getGaussianVec(sws_lum_gblur, 3.0);
-		src_filter.lumV= sws_getGaussianVec(sws_lum_gblur, 3.0);
-	}else{
-		src_filter.lumH= sws_getIdentityVec();
-		src_filter.lumV= sws_getIdentityVec();
-	}
-
-	if(sws_chr_gblur!=0.0){
-		src_filter.chrH= sws_getGaussianVec(sws_chr_gblur, 3.0);
-		src_filter.chrV= sws_getGaussianVec(sws_chr_gblur, 3.0);
-	}else{
-		src_filter.chrH= sws_getIdentityVec();
-		src_filter.chrV= sws_getIdentityVec();
-	}
-
-	if(sws_chr_sharpen!=0.0){
-		SwsVector *g= sws_getConstVec(-1.0, 3);
-		SwsVector *id= sws_getConstVec(10.0/sws_chr_sharpen, 1);
-		g->coeff[1]=2.0;
-		sws_addVec(id, g);
-		sws_convVec(src_filter.chrH, id);
-		sws_convVec(src_filter.chrV, id);
-		sws_freeVec(g);
-		sws_freeVec(id);
-	}
-
-	if(sws_lum_sharpen!=0.0){
-		SwsVector *g= sws_getConstVec(-1.0, 3);
-		SwsVector *id= sws_getConstVec(10.0/sws_lum_sharpen, 1);
-		g->coeff[1]=2.0;
-		sws_addVec(id, g);
-		sws_convVec(src_filter.lumH, id);
-		sws_convVec(src_filter.lumV, id);
-		sws_freeVec(g);
-		sws_freeVec(id);
-	}
-
-	if(sws_chr_hshift)
-		sws_shiftVec(src_filter.chrH, sws_chr_hshift);
-
-	if(sws_chr_vshift)
-		sws_shiftVec(src_filter.chrV, sws_chr_vshift);
-
-	sws_normalizeVec(src_filter.chrH, 1.0);
-	sws_normalizeVec(src_filter.chrV, 1.0);
-	sws_normalizeVec(src_filter.lumH, 1.0);
-	sws_normalizeVec(src_filter.lumV, 1.0);
-
-	if(verbose > 1) sws_printVec(src_filter.chrH);
-	if(verbose > 1) sws_printVec(src_filter.lumH);
-
+	src_filter= sws_getDefaultFilter(
+		sws_lum_gblur, sws_chr_gblur,
+		sws_lum_sharpen, sws_chr_sharpen,
+		sws_chr_vshift, sws_chr_hshift, verbose>1);
+        
 	switch(sws_flags)
 	{
 		case 0: *flags|= SWS_FAST_BILINEAR; break;
@@ -515,7 +468,7 @@ void sws_getFlagsAndFilterFromCmdLine(int *flags, SwsFilter **srcFilterParam, Sw
 		default:*flags|= SWS_BILINEAR; break;
 	}
 	
-	*srcFilterParam= &src_filter;
+	*srcFilterParam= src_filter;
 	*dstFilterParam= NULL;
 }
 
