@@ -415,20 +415,20 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
     }
   }
 }
-//=============== Try to open as ASF file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
-  if(asf_check_header(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedASFfile);
-      file_format=DEMUXER_TYPE_ASF;
-  }
-}
 //=============== Try to open as Y4M file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_Y4M){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_Y4M,audio_id,video_id,dvdsub_id);
   if(y4m_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected YUV4MPEG2 file format!\n");
       file_format=DEMUXER_TYPE_Y4M;
+  }
+}
+//=============== Try to open as ASF file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
+  if(asf_check_header(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedASFfile);
+      file_format=DEMUXER_TYPE_ASF;
   }
 }
 //=============== Try to open as NUV file: =================
