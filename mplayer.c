@@ -654,7 +654,6 @@ if(vcd_track){
 if(!has_audio) audio_id=-2; // do NOT read audio packets...
 
 //=============== Try to open as AVI file: =================
-#ifdef STREAMING
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
@@ -672,29 +671,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
     }
   }
 }
-#else
-stream_reset(stream);
-demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
-stream_seek(demuxer->stream,seek_to_byte);
-//printf("stream3=0x%X vs. 0x%X\n",demuxer->stream,stream);
-{ //---- RIFF header:
-  int id=stream_read_dword_le(demuxer->stream); // "RIFF"
-  if(id==mmioFOURCC('R','I','F','F')){
-    stream_read_dword_le(demuxer->stream); //filesize
-    id=stream_read_dword_le(demuxer->stream); // "AVI "
-    if(id==formtypeAVI){ 
-      printf("Detected AVI file format!\n");
-      file_format=DEMUXER_TYPE_AVI;
-    }
-  }
-}
-#endif
 //=============== Try to open as ASF file: =================
-#ifdef STREAMING
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ASF){
-#else
-if(file_format==DEMUXER_TYPE_UNKNOWN){
-#endif
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_ASF,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
@@ -704,11 +682,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN){
   }
 }
 //=============== Try to open as MPEG-PS file: =================
-#ifdef STREAMING
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
-#else
-if(file_format==DEMUXER_TYPE_UNKNOWN){
-#endif
   stream_reset(stream);
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_PS,audio_id,video_id,dvdsub_id);
   stream_seek(demuxer->stream,seek_to_byte);
