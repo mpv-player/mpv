@@ -30,7 +30,6 @@ LIBVO_EXTERN(xv)
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/extensions/XShm.h>
 #include <errno.h>
 
 #include "x11_common.h"
@@ -55,9 +54,6 @@ static vo_info_t vo_info =
 
 extern int verbose;
 
-/* since it doesn't seem to be defined on some platforms */
-int XShmGetEventBase(Display*);
-
 /* local data */
 static unsigned char *ImageData;
 
@@ -80,12 +76,17 @@ static int num_buffers=1; // default
 static XvImage* xvimage[NUM_BUFFERS];
 
 #include <sys/ipc.h>
+#ifdef HAVE_SHM
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
 
-static int Shmem_Flag;
-//static int Quiet_Flag; <-- What is that for ? Albeu.
+/* since it doesn't seem to be defined on some platforms */
+int XShmGetEventBase(Display*);
+
 static XShmSegmentInfo Shminfo[NUM_BUFFERS];
+#endif
+
+//static int Quiet_Flag; <-- What is that for ? Albeu.
 static int gXErrorFlag;
 static int CompletionType = -1;
 
@@ -515,8 +516,9 @@ static void allocate_xvimage(int foo)
 {
  /*
   * allocate XvImages.  FIXME: no error checking, without
-  * mit-shm this will bomb...
+  * mit-shm this will bomb... trzing to fix ::atmos
   */
+#ifdef HAVE_SHM
  if ( mLocalDisplay && XShmQueryExtension( mDisplay ) ) Shmem_Flag = 1;
  else
   {
@@ -537,6 +539,7 @@ static void allocate_xvimage(int foo)
    shmctl(Shminfo[foo].shmid, IPC_RMID, 0);
   }
  else
+#endif
   {
     xvimage[foo] = XvCreateImage(mDisplay, xv_port, xv_format, 0, image_width, image_height);
     xvimage[foo]->data = malloc(xvimage[foo]->data_size);
@@ -548,12 +551,14 @@ static void allocate_xvimage(int foo)
 
 static void deallocate_xvimage(int foo)
 {
+#ifdef HAVE_SHM
  if ( Shmem_Flag )
   {
    XShmDetach( mDisplay,&Shminfo[foo] );
    shmdt( Shminfo[foo].shmaddr );
   }
  else
+#endif
   {
    free(xvimage[foo]->data);
   }
@@ -586,12 +591,14 @@ static void check_events(void)
   }
  if ( e & VO_EVENT_EXPOSE )
   {
+#ifdef HAVE_SHM
    if ( Shmem_Flag )
     {
      XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1, False);
      XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight), False);
     }
    else
+#endif
     {
      XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX, drwY, 1, 1);
      XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf], 0, 0,  image_width, image_height, drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight));
@@ -605,6 +612,7 @@ static void draw_osd(void)
 static void flip_page(void)
 {
 
+#ifdef HAVE_SHM
  if ( Shmem_Flag )
   {
    XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
@@ -613,6 +621,7 @@ static void flip_page(void)
          False);
   }
  else
+#endif
   {
    XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
          0, 0,  image_width, image_height,
