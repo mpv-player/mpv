@@ -93,6 +93,8 @@ int verbose=0;
 static subtitle* subtitles=NULL;
 void find_sub(subtitle* subtitles,int key);
 
+int osd_level=2;
+
 //**************************************************************************//
 //             Config file
 //**************************************************************************//
@@ -1144,7 +1146,6 @@ double vout_time_usage=0;
 double audio_time_usage=0;
 int grab_frames=0;
 char osd_text_buffer[64];
-int osd_level=2;
 int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;

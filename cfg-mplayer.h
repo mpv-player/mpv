@@ -20,6 +20,7 @@ extern int sdl_forcexv;
 #endif
 
 extern int vo_dbpp;
+extern int osd_level;
 
 struct config conf[]={
 	/* name, pointer, type, flags, min, max */
@@ -30,6 +31,7 @@ struct config conf[]={
 	{"dsp", &dsp, CONF_TYPE_STRING, 0, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},
         {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
+	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 },
 #ifdef HAVE_LIBCSS
         {"dvd", &dvd_device, CONF_TYPE_STRING, 0, 0, 0},
         {"dvdkey", &dvdimportkey, CONF_TYPE_STRING, 0, 0, 0},
