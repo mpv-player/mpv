@@ -596,6 +596,13 @@ of some bad AVI files).
 Do not use average byte/\:sec value for A\-V sync (AVI).
 Helps with some AVI files with broken header.
 .TP
+.B \-noextbased
+Disables filename-extension based demuxer selection.
+By default, when file type (demuxer) cannot be detected reliably
+(the file has no header or it is not reliable enough), the filename
+extension is used to select demuxer. It always falls back to content-based
+demuxer selection.
+.TP
 .B \-passwd <password> (see \-user option too)
 Specify password for http authentication.
 .TP

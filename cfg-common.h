@@ -83,6 +83,8 @@
 	{ "demuxer", &demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
 	{ "audio-demuxer", &audio_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
 	{ "sub-demuxer", &sub_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
+	{ "extbased", &extension_parsing, CONF_TYPE_FLAG, 0, 0, 1, NULL },
+	{ "noextbased", &extension_parsing, CONF_TYPE_FLAG, 0, 1, 0, NULL },
 
         {"mf", mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef USE_TV

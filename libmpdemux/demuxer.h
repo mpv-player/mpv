@@ -231,7 +231,7 @@ static inline int avi_stream_id(unsigned int id){
   return a*10+b;
 }
 
-demuxer_t* demux_open(stream_t *stream,int file_format,int aid,int vid,int sid);
+demuxer_t* demux_open(stream_t *stream,int file_format,int aid,int vid,int sid,char* filename);
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd);
 
@@ -239,6 +239,8 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd);
 extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
 extern int force_ni;
 extern int pts_from_bps;
+
+extern int extension_parsing;
 
 int demux_info_add(demuxer_t *demuxer, char *opt, char *param);
 char* demux_info_get(demuxer_t *demuxer, char *opt);
@@ -249,3 +251,5 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg);
 
 extern unsigned long demuxer_get_time_length(demuxer_t *demuxer);
 extern int demuxer_get_percent_pos(demuxer_t *demuxer);
+
+extern int demuxer_type_by_filename(char* filename);

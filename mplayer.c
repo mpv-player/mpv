@@ -1227,7 +1227,7 @@ if(stream_cache_size>0){
 
 current_module="demux_open";
 
-demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
+demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id,filename);
 
 // HACK to get MOV Reference Files working
 

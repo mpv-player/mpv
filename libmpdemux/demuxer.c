@@ -549,8 +549,9 @@ extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
 extern int use_rawaudio;
 
+int extension_parsing=1; // 0=off 1=mixed (used only for unstable formats)
 
-static demuxer_t* demux_open_stream(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
+static demuxer_t* demux_open_stream(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id,char* filename){
 
 //int file_format=(*file_format_ptr);
 
@@ -645,6 +646,43 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_NUV){
       demuxer = NULL;
   }
 }
+//=============== Try to open as REAL file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REAL){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_REAL,audio_id,video_id,dvdsub_id);
+  if(real_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"REAL");
+      file_format=DEMUXER_TYPE_REAL;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
+//=============== Try to open as SMJPEG file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_SMJPEG){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_SMJPEG,audio_id,video_id,dvdsub_id);
+  if(smjpeg_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"SMJPEG");
+      file_format=DEMUXER_TYPE_SMJPEG;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
+
+//=============== Try based on filename EXTENSION: =================
+// Ok. We're over the stable detectable fileformats, the next ones are a bit
+// fuzzy. So by default (extension_parsing==1) try extension-based detection
+// first:
+if(file_format==DEMUXER_TYPE_UNKNOWN && filename && extension_parsing==1){
+  file_format=demuxer_type_by_filename(filename);
+  if(file_format!=DEMUXER_TYPE_UNKNOWN){
+    // we like recursion :)
+    demuxer=demux_open_stream(stream,file_format,audio_id,video_id,dvdsub_id,NULL);
+    if(demuxer) return demuxer; // done!
+    file_format=DEMUXER_TYPE_UNKNOWN; // continue fuzzy guessing...
+  }
+}
+
 //=============== Try to open as MOV file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MOV,audio_id,video_id,dvdsub_id);
@@ -665,17 +703,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
   } else {
     free_demuxer(demuxer);
     demuxer = NULL;
-  }
-}
-//=============== Try to open as REAL file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_REAL){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_REAL,audio_id,video_id,dvdsub_id);
-  if(real_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"REAL");
-      file_format=DEMUXER_TYPE_REAL;
-  } else {
-      free_demuxer(demuxer);
-      demuxer = NULL;
   }
 }
 //=============== Try to open as FLI file: =================
@@ -727,17 +754,6 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_BMP){
   if(bmp_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"BMP");
       file_format=DEMUXER_TYPE_BMP;
-  } else {
-      free_demuxer(demuxer);
-      demuxer = NULL;
-  }
-}
-//=============== Try to open as SMJPEG file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_SMJPEG){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_SMJPEG,audio_id,video_id,dvdsub_id);
-  if(smjpeg_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"SMJPEG");
-      file_format=DEMUXER_TYPE_SMJPEG;
   } else {
       free_demuxer(demuxer);
       demuxer = NULL;
@@ -1065,7 +1081,7 @@ int demuxer_type = 0, audio_demuxer_type = 0, sub_demuxer_type = 0;
 
 extern int hr_mp3_seek;
 
-demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int dvdsub_id){
+demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int dvdsub_id,char* filename){
   stream_t *as = NULL,*ss = NULL;
   demuxer_t *vd,*ad = NULL,*sd = NULL;
   int afmt = 0,sfmt = 0;
@@ -1085,18 +1101,18 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
     }
   }
 
-  vd = demux_open_stream(vs,demuxer_type ? demuxer_type : file_format,audio_stream ? -2 : audio_id,video_id, sub_stream ? -2 : dvdsub_id);
+  vd = demux_open_stream(vs,demuxer_type ? demuxer_type : file_format,audio_stream ? -2 : audio_id,video_id, sub_stream ? -2 : dvdsub_id, filename);
   if(!vd)
     return NULL;
   if(as) {
-    ad = demux_open_stream(as,audio_demuxer_type ? audio_demuxer_type : afmt,audio_id,-2,-2);
+    ad = demux_open_stream(as,audio_demuxer_type ? audio_demuxer_type : afmt,audio_id,-2,-2, audio_stream);
     if(!ad)
       mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningAudioDemuxerFailed,audio_stream);
     else if(ad->audio->sh && ((sh_audio_t*)ad->audio->sh)->format == 0x55) // MP3
       hr_mp3_seek=1; // Enable high res seeking
   }
   if(ss) {
-    sd = demux_open_stream(ss,sub_demuxer_type ? sub_demuxer_type : sfmt,-2,-2,dvdsub_id);
+    sd = demux_open_stream(ss,sub_demuxer_type ? sub_demuxer_type : sfmt,-2,-2,dvdsub_id, sub_stream);
     if(!sd)
       mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningSubtitlesDemuxerFailed,sub_stream);
   }

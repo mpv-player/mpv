@@ -389,7 +389,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   // FIXME: get rid of -dvd and other tricky options
   stream2=open_stream(frameno_filename,0,&i);
   if(stream2){
-    demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2);
+    demuxer2=demux_open(stream2,DEMUXER_TYPE_AVI,-1,-1,-2,NULL);
     if(demuxer2) printf(MSGTR_UsingPass3ControllFile,frameno_filename);
     else mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
   }
@@ -492,7 +492,7 @@ if(stream->type==STREAMTYPE_DVD){
   if(demuxer2) audio_id=-2; /* do NOT read audio packets... */
 
   //demuxer=demux_open(stream,file_format,video_id,audio_id,dvdsub_id);
-  demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id);
+  demuxer=demux_open(stream,file_format,audio_id,video_id,dvdsub_id,filename);
   if(!demuxer){
         mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized);
 	printf(MSGTR_CannotOpenDemuxer);
