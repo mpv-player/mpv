@@ -251,6 +251,7 @@ static demuxer_t *demuxer=NULL;
 
 char* current_module=NULL; // for debugging
 
+int vo_gamma_gamma = 1000;
 int vo_gamma_brightness = 1000;
 int vo_gamma_contrast = 1000;
 int vo_gamma_saturation = 1000;
@@ -1268,6 +1269,8 @@ if(auto_quality>0){
 current_module="init_vo";
     if (sh_video)
     {
+        if (vo_gamma_gamma != 1000)
+          set_video_colors (sh_video, "gamma", vo_gamma_gamma);
 	if (vo_gamma_brightness != 1000)
 	    set_video_colors(sh_video, "brightness", vo_gamma_brightness);
 	if (vo_gamma_contrast != 1000)
@@ -1984,6 +1987,37 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	play_tree_iter_step(playtree_iter,0,0);
 	eof = PT_NEXT_SRC;	
       }
+    } break;
+    case MP_CMD_GAMMA :  {
+      int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;
+
+      if (!sh_video)
+	break;
+
+      if (vo_gamma_gamma == 1000)
+      {
+	vo_gamma_gamma = 0;
+	get_video_colors (sh_video, "gamma", &vo_gamma_gamma);
+      }
+
+      if (abs)
+        vo_gamma_gamma = v;
+      else
+        vo_gamma_gamma += v;
+
+      if (vo_gamma_gamma > 100)
+        vo_gamma_gamma = 100;
+      else if (vo_gamma_gamma < -100)
+        vo_gamma_gamma = -100;
+      set_video_colors(sh_video, "gamma", vo_gamma_gamma);
+#ifdef USE_OSD
+       if(osd_level){
+	 osd_visible=sh_video->fps; // 1 sec
+	 vo_osd_progbar_type=OSD_BRIGHTNESS;
+	 vo_osd_progbar_value=(vo_gamma_gamma<<7)/100 + 128;
+	 vo_osd_changed(OSDTYPE_PROGBAR);
+       }
+#endif // USE_OSD
     } break;
     case MP_CMD_BRIGHTNESS :  {
       int v = cmd->args[0].v.i, abs = cmd->args[1].v.i;

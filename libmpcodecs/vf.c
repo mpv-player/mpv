@@ -39,6 +39,7 @@ extern vf_info_t vf_info_noise;
 extern vf_info_t vf_info_yvu9;
 extern vf_info_t vf_info_lavcdeint;
 extern vf_info_t vf_info_eq;
+extern vf_info_t vf_info_eq2;
 extern vf_info_t vf_info_halfpack;
 extern vf_info_t vf_info_dint;
 
@@ -73,6 +74,7 @@ static vf_info_t* filter_list[]={
     &vf_info_noise,
     &vf_info_yvu9,
     &vf_info_eq,
+    &vf_info_eq2,
     &vf_info_halfpack,
     &vf_info_dint,
     NULL
