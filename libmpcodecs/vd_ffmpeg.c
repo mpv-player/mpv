@@ -101,6 +101,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if ((ctx->width != sh->disp_w) ||
 	(ctx->height != sh->disp_h))
     {
+	/* and what about the sh->bih (BitmapInfoHeader) width/height values? */
+	sh->disp_w = ctx->width;
+	sh->disp_h = ctx->height;
 	if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
 	    return NULL;
     }	
