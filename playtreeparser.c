@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "m_config.h"
 #include "playtree.h"
 #include "playtreeparser.h"
@@ -545,7 +546,8 @@ embedded_playlist_parse(char *line) {
 play_tree_t*
 parse_textplain(play_tree_parser_t* p) {
   char* line;
-  int reflen;
+  char *c;
+  int embedded;
   play_tree_t *list = NULL, *entry = NULL, *last_entry = NULL;
 
   mp_msg(MSGT_PLAYTREE,MSGL_V,"Trying plaintext playlist...\n");
@@ -556,11 +558,19 @@ parse_textplain(play_tree_parser_t* p) {
     if(line[0] == '\0')
       continue;
 
-    //Special check for smil refernce in file
-    reflen=strlen(line);
-    if ( (reflen>5) && (strncasecmp(line+(reflen-5),".smil",5)==0) ) { //embedded playlist link
-      entry=embedded_playlist_parse(line);
-    } else {      //regular file link
+    //Special check for smil reference in file
+    embedded = 0;
+    if (strlen(line) > 5)
+      for(c = line; c[0]; c++ )
+        if((c[0] == '.') && (tolower(c[1]) == 's') && (tolower(c[2])== 'm') && 
+           (tolower(c[3]) == 'i') && (tolower(c[4]) == 'l') &&
+           (!c[5] || c[5] == '?' || c[5] == '&')) {
+          entry=embedded_playlist_parse(line);
+          embedded = 1;
+          break;
+        }
+
+    if (!embedded) {      //regular file link
       entry = play_tree_new();
       play_tree_add_file(entry,line);
     }
