@@ -6,9 +6,8 @@ FOR THE RELEASE:
 ~~~~~~~~~~~~~~~~
 
 demuxer:
-- .VDR files from stdinput (DONE)
+- prebuffering to cache2 (req. for MMS)
 - test and cleanup FLI/FLC support (and implement seek)
-- check dvdread/dvdcss version problems -- .so ?
 
 decoders:
 - finish native g72x audio decoder
@@ -19,7 +18,6 @@ mencoder:
 - add win32 encoders support
 - add raw video out
 - check/fix frame copy
-- implement CBR mp3 encoding
 - implement VBR audio copy
 - Estimated Size and Time
 - image cut/crop filter
@@ -35,6 +33,7 @@ FUTURE:
 
 demuxer:
 - implement forward seeking in indexed avi streams
+- implement brute-force broken avi fixer
 
 decoders:
 - check and import videodecoding.de stuff
