@@ -873,11 +873,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			mp4_free_esds(&esds); // freeup esds mem
 		      }	      
 		      break;
+		    case 0:
+		      break;
 		    default:
 	      	      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown movie atom %c%c%c%c (%d)!\n",
 	      		  trak->stdata[pos+4],trak->stdata[pos+5],trak->stdata[pos+6],trak->stdata[pos+7],
 	      		  atom_len);
 		   }
+		   if(atom_len<8) break;
 		   pos+=atom_len;
 //		   printf("pos=%d max=%d\n",pos,trak->stdata_len);
 		  }
@@ -1302,8 +1305,8 @@ if(trak->samplesize){
       if(trak->stdata_len>=44 && trak->stdata[9]>=1){
         // stsd version 1 - we have audio compression ratio info:
 	x/=char2int(trak->stdata,28); // samples/packet
-	x*=char2int(trak->stdata,32); // bytes/packet
-//	x*=char2int(trak->stdata,36); // bytes/frame
+//	x*=char2int(trak->stdata,32); // bytes/packet
+	x*=char2int(trak->stdata,36); // bytes/frame
       } else {
 	if(ds->ss_div!=1 || ds->ss_mul!=1){
 	    // workaround for buggy files like 7up-high-traffic-areas.mov,
