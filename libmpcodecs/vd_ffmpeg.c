@@ -619,16 +619,9 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
     
 /* to comfirm with newer lavc style */
-#if !defined(FF_POSTPROCESS) && (LIBAVCODEC_BUILD > 4612)
-    mpi->qscale=avctx->quant_store;
-#if LIBAVCODEC_BUILD > 4613
+#if LIBAVCODEC_BUILD >= 4633
+    mpi->qscale=avctx->display_qscale_table;
     mpi->qstride=avctx->qstride;
-#else
-    mpi->qstride=MBC+1;
-#endif
-#elif defined(FF_POSTPROCESS)
-    mpi->qscale=&quant_store[0][0];
-    mpi->qstride=MBC+1;
 #endif
 
     {

@@ -59,7 +59,7 @@ typedef struct vo_frame_s {
 #ifdef MPEG12_POSTPROC
 #define MPEG2_MBC 120
 #define MPEG2_MBR 72
-    int quant_store[MPEG2_MBR+1][MPEG2_MBC+1];
+    int8_t quant_store[MPEG2_MBR+1][MPEG2_MBC+1];
 #endif
 
 //    int slice;
