@@ -22,6 +22,8 @@ send us a patch :)
 On Red Hat systems you need the following packages:
 libxml2, libxslt, docbook-dtds, docbook-style-xsl
 
+On Debian Sarge you will need these packages:
+libxml2, libxml2-utils, docbook-xsl, libxslt1.1, docbook, docbook-utils
 
 
 Installing the required tools from source
