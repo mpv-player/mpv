@@ -24,8 +24,11 @@ static ad_info_t info =
 
 LIBAD_EXTERN(faad)
 
-//#include <faad.h>
+#ifndef USE_INTERNAL_FAAD
+#include <faad.h>
+#else
 #include "../libfaad2/faad.h"
+#endif
 
 /* configure maximum supported channels, *
  * this is theoretically max. 64 chans   */

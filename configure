@@ -4301,6 +4301,7 @@ fi
 echores "$_matroska"
 
 echocheck "faad2 (AAC) support"
+_def_faad_internal="#undef USE_INTERNAL_FAAD"
 if test "$_faad" = no ; then
   echores "no (disabled)"
 else
@@ -4330,8 +4331,10 @@ else
   echo "$_cc -c -O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $CFLAGS $_inc_faad $_inc_extra `pwd`/libfaad2/cfft.c -o $TMPO" >> "$TMPLOG"
   if ( $_cc -c -O4 $_march $_mcpu -pipe -ffast-math -fomit-frame-pointer $CFLAGS $_inc_faad $_inc_extra "`pwd`/libfaad2/cfft.c" -o "$TMPO" ) >> "$TMPLOG" 2>&1 ; then
     echores "$_faad (internal)"
+    _def_faad_internal="#define USE_INTERNAL_FAAD 1"
   else
     _faad=no
+    _faad_local=no
     echores "no (broken gcc)"
   fi
   # remove a temporarily config.h, which was needed for the faad compile check
@@ -5589,6 +5592,7 @@ MAD_LIB = $_ld_mad
 VORBIS_LIB = $_ld_vorbis $_ld_libdv
 THEORA_LIB = $_ld_theora
 FAAD_LIB = $_ld_faad
+INTERNAL_FAAD = $_faad_local
 SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
@@ -6036,6 +6040,7 @@ $_def_matroska
 
 /* enable FAAD (AAC) support */
 $_def_faad
+$_def_faad_internal
 $_def_faad_version
 
 /* enable network */
