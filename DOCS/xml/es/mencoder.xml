@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.17 -->
+<!-- synced with 1.18 -->
 <chapter id="mencoder">
 <title>Codificando con MEncoder</title>
 
@@ -766,6 +766,558 @@ mencoder dvd://1 -aid 128 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vqscale=3:v
   por ejemplo <option>-vf pp=fd,crop=720:364:0:56</option> (en ese orden). 
   Si no necesita invertir el telecine, quite <option>-ofps 23.976</option>.
 </para>
+</sect2>
+
+</sect1>
+
+<sect1 id="menc-feat-telecine">
+<title>Cómo tratar con telecine y entrelazado con DVDs NTSC</title>
+
+<formalpara>
+<title>Introducción</title>
+<para>
+  Le sugiero que visite esta página si no entiende mucho lo que está
+  escrito en este documento:
+  <ulink url="http://www.divx.com/support/guides/guide.php?gid=10">http://www.divx.com/support/guides/guide.php?gid=10</ulink>
+  Esta URL enlaza a una descripción de lo que es telecine inteligible y
+  razonablemente comprensible.
+</para></formalpara>
+
+<para>
+  Por razones técnicas pertinentes a las limitaciones de reciente
+  hardware de televisión, todos los videos que están pensados para ser
+  reproducidos en una televisión NTSC deben tener 59.94 campos por segundo.
+  Las películas hechas-para-TV y los espectáculos son grabados
+  directamente a 24 o 23.976 marcos por segundo. Cuando una película
+  para cine DVD es masterizada, el video es entonces convertido para la
+  televisión usando un proceso llamado telecine.
+</para>
+
+<para>
+  En un DVD, el video nunca se almacena como 59.94 campos por segundo.
+  Para video que es originalmente a 59.94, cada par de campos es
+  combinado para formar un marco de imagen, resultando en 29.97 marcos
+  por segundo. Los reproductores de DVD por hardware entonces leen un
+  indicador embebido en el flujo de video para determinar si son las
+  líneas pares o las impares las que deben formar el primer campo.
+</para>
+
+<para>
+  Normalmente, 23.976 marcos de imagen por segundo se mantienen así
+  cuando son codificados en un DVD, y el reproductor de DVD debe
+  realizar el telecine sobre la marcha. Algunas veces, sin embargo,
+  el video es pasado por el proceso de telecine <emphasis>antes</emphasis>
+  de ser almacenado en el DVD; incluso aunque tenga originalmente
+  23.976 marcos de imagen por segundo, se hace que tenga 59.94 campos
+  por segundo, y es almacenado en disco como 29.97 marcos de imagen
+  por segundo.
+</para>
+
+<para>
+  Cuando se observan como marcos individuales formados por 59.94 campos
+  por segundo de video, telecine o viceversa, el entrelazado es claramente
+  visible en cuanto hay movimiento, porque un campo (digamos, las líneas
+  numeradas pares) representa un momento en el tiempo 1/59.94 de un
+  segundo después de otro. Al reproducir video entrelazado en un
+  ordenador se ve mal porque el monitor tiene una resolución mayor
+  y porque el video es mostrado marco-tras-marco en lugar de 
+  campo-tras-campo.
+</para>
+
+<para>
+Notas:
+</para>
+<itemizedlist>
+<listitem><para>
+  Esta sección solo se aplica a DVDs NTSC, y no a PAL.
+  </para></listitem>
+<listitem><para>
+  El ejemplo <application>MEncoder</application> que hay a lo largo del
+  documento <emphasis role="bold">no</emphasis> está comprendido para
+  uso normal. Símplemente tiene lo mínimo requerido para codificar la
+  categoría de video pertinente. Cómo hacer ripeados de DVD buenos o
+  ajuste fino de <systemitem class="library">libavcodec</systemitem>
+  para máxima calidad no es el objetivo de este documento.
+  </para></listitem>
+<listitem><para>
+  Hay un montón de notas a pie de página específicas en esta guia, enlazadas
+  como esto:
+  <link linkend="menc-feat-telecine-footnotes">[1]</link>
+  </para></listitem>
+</itemizedlist>
+
+<sect2 id="menc-feat-telecine-ident">
+<title>Cómo decir el tipo de video que tiene</title>
+
+<sect3 id="menc-feat-telecine-ident-progressive">
+<title>Progresivo</title>
+<para>
+  Video progresivo fue grabado originalmente a 23.976 fps, y almacenado
+  en el DVD sin alteración.
+</para>
+
+<para>
+  Cuando reproduce un DVD progresivo en <application>MPlayer</application>,
+  <application>MPlayer</application> mostrará la siguiente línea tan pronto
+  como comience la película:
+
+  <screen> demux_mpg: 24fps progressive NTSC content detected, switching framerate.</screen>
+
+  Desde este punto de vista, demux_mpg nunca debe decir que encuentra
+  &quot;contenido a 30fps NTSC.&quot;
+</para>
+
+<para>
+  Cuando vea video progresivo, nunca debe ver ningún entrelazado. Tenga
+  cuidado, sin embargo, porque algunas veces hay un poco de telecine
+  mezclado, donde no se lo espera. He encontrado DVDs de espectáculos de
+  TV que tienen un segundo de telecine en cada cambio de escena, o
+  en lugares aleatorios incluso. Una vez vi un DVD que tenía el primer
+  campo progresivo, y el segundo campo era telecine. Si quiere
+  <emphasis>realmente</emphasis> saberlo, puede escanear la película
+  entera:
+
+  <screen>mplayer dvd://1 -nosound -vo null -benchmark</screen>
+
+  Usando <option>-benchmark</option> hace que
+  <application>MPlayer</application> reproduzca la película tan rápido
+  como pueda; tenga en cuenta, dependiendo de su hardware, puede tardar
+  bastante. Cada vez que demux_mpg informa de un cambio de tasa de bits,
+  la línea inmediatamente por encima le dirá el tiempo en el que el
+  cambio ha ocurrido.
+</para>
+
+<para>
+  Algunas veces el video progresivo es referido como &quot;soft-telecine&quot;
+  porque está pensado para ser procesado en telecine por el reproductor de DVD.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-ident-telecined">
+<title>Telecine</title>
+<para>
+  Video con telecine fue grabado originalmente a 23.976 fps, pero fue
+  pasado por proceso de telecine <emphasis>antes</emphasis> de ser
+  escrito en el DVD.
+</para>
+
+<para>
+  <application>MPlayer</application> no (nunca) informa de cambios
+  en la tasa de bits cuando reproduce video con telecine.
+</para>
+
+<para>
+  Al ver video con telecine, verá artefactos de entrelazado, que parecen
+  &quot;parpadear&quot;: repetidamente aparecen y desaparecen.
+  Puede verlo de cerca con
+  <orderedlist>
+  <listitem>
+    <screen>mplayer dvd://1 -speed 0.1</screen>
+    </listitem>
+  <listitem><para>
+    Busque una parte con movimiento.
+    </para></listitem>
+  <listitem><para>
+    Localice un patrón de búsqueda-entrelazada y búsqueda-progresiva
+    en marcos de imagen. Si el patrón que ve es PPPII,PPPII,PPPII,...
+    entonces el video es con telecine. Si ve algún otro patrón, entonces
+    el video puede que esté con telecine usando algún método no estándar
+    y <application>MEncoder</application> no puede convertirlo sin pérdidas
+    en progresivo. Si no ve ningún patrón, entonces lo más seguro es que
+    sea entrelazado.
+    </para></listitem>
+  </orderedlist>
+</para>
+
+<para>
+  Algunas veces el video telecine es referido como &quot;hard-telecine&quot;.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-ident-interlaced">
+<title>Entrelazado</title>
+<para>
+  El video entrelazado fue originalmente grabado a 59.94 campos por segundo,
+  y almacenado en el DVD como 29.97 marcos por segundo. El entreñazado
+  es el resultado de combinar pares de campos en marcos, porque en cada
+  marco de imagen, cada campo ocupa 1/59.94 segundos.
+</para>
+
+<para>
+  Como en el video en telecine, <application>MPlayer</application> nunca
+  debe informar de ningún cambio en la tasa de bits mientras reproduce
+  contenido entrelazado.
+</para>
+
+<para>
+  Cuando ve video entrelazado de cerca con <option>-speed 0.1</option>,
+  puede ver que cada marco simple es entrelazado.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-ident-mixedpt">
+<title>Mezcla progresiva y telecine</title>
+<para>
+  Todo video &quot;mezcla progresivo y telecine&quot; originalmente es a
+  23.976 marcos por segundo, pero algunas partes de él terminan siendo en
+  telecine.
+</para>
+
+<para>
+  Cuando <application>MPlayer</application> reproduce esta categoria,
+  (a menudo de forma repetida) cambia entre &quot;30fps NTSC&quot; y
+  &quot;24fps progresivo NTSC&quot;. Consulte la parte de abajo de
+  la salida de <application>MPlayer</application> para ver estos
+  mensajes.
+</para>
+
+<para>
+  Deberá consultar las secciones de &quot;30fps NTSC&quot; para
+  asegurarse de que es telecine, y no simplemente entrelazado.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-ident-mixedpi">
+<title>Mezcla de progresivo y entrelazado</title>
+<para>
+  En el contenido &quot;mezcla de progresivo y entrelazado&quot;, el
+  video progresivo y entrelazado se colocan juntos.
+</para>
+
+<para>
+  Esta categoría es similar a &quot;mezcla progresivo y telecine&quot;,
+  hasta que examine las secciones de 30fps y vea que no tiene el patrón
+  de telecine.
+</para>
+</sect3>
+
+</sect2>
+
+<sect2 id="menc-feat-telecine-encode">
+<title>Cómo codificar cada categoría</title>
+<para>
+  Como dije antes al principio, las líneas de ejemplo de
+  <application>MEncoder</application> de más abajo <emphasis role="bold">no</emphasis>
+  son para ser usadas; solo son para demostrar los parámetros mínimos para codificar
+  en cada categoría.
+</para>
+
+<sect3 id="menc-feat-telecine-encode-progressive">
+<title>Progresivo</title>
+<para>
+  El video progresivo no requiere un filtrado especial para codificarlo. El
+  único parámetro que seguramente necesita usar es <option>-ofps 23.976</option>.
+  Si no lo hace, <application>MEncoder</application> intentará codificar a
+  29.97 fps y marcos duplicados.
+</para>
+
+<para>
+  <screen>mencoder dvd://1 -nosound -ovc lavc -ofps 23.976</screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-encode-telecined">
+<title>Telecine</title>
+<para>
+  Telecine puede ser invertido para obtener el contenido 23.976 original,
+  usando un proceso llamado telecine-inverso.
+  <application>MPlayer</application> contiene dos filtros para
+  conseguir esto: <option>detc</option> y <option>ivtc</option>. Puede leer
+  la página de manual para ver las diferencias, pero para DVDs nunca he tenido
+  problemas con <option>ivtc</option>. Note que
+  <emphasis role="bold">siempre</emphasis> deberá hacer telecine-inverso
+  antes de cualquier reescalado; a menos que realmente sepa lo que está haciendo,
+  telecine-inverso antes de recortar también
+  <link linkend="menc-feat-telecine-footnotes">[1]</link>. De nuevo,
+  necesitará <option>-ofps 23.976</option> también.
+</para>
+
+<para>
+  <screen>mencoder dvd://1 -nosound -vf ivtc=1 -ovc lavc -ofps 23.976</screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-encode-interlaced">
+<title>Entrelazado</title>
+<para>
+  Para la mayor parte de los casos prácticos no es posible obtener un
+  video progresivo completo de un contenido entrelazado. La única manera
+  de hacerlo sin perder la mitad de la resolución vertical es doblar la
+  tasa de imágenes por segundo e intentar &quot;adivinar&quot; como se
+  obtienen las correspondientes líneas para cada campo (esto ocasiona
+  problemas - vea el método 3).
+</para>
+
+<orderedlist>
+<listitem><para>
+
+  Codifique el video en formato entrelazado. Normalmente, el entrelazado
+  permite al codificador comprimir bien, pero
+  <systemitem class="library">libavcodec</systemitem> tiene dos
+  parámetros específicos para jugar con video entrelazado un poco mejor:
+  <option> ildct</option> y <option>ilme</option>. Además, es
+  altamente recomendable usar <option>mbd=2</option>
+  <link linkend="menc-feat-telecine-footnotes">[2] </link> porque codifica
+  los macrobloques como no entrelazados en lugares donde no hay movimiento.
+  Note que <option>-ofps</option> NO es necesario aquí.
+
+  <screen>mencoder dvd://1 -nosound -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
+  </para></listitem>
+<listitem><para> 
+  Use un filtro de desentrelazado antes de codificar. Hay varios
+  filtros disponibles para elegir, cada uno con sus ventajas y sus
+  desventajas. Consulte <option>mplayer -pphelp</option> para ver
+  qué hay disponible (grep &quot;deint&quot;), y busque en las
+  <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
+  listas de correo MPlayer</ulink> para encontrar discusiones acerca
+  de varios filtros. De nuevo, la tasa de bits por segundo no cambia, nada de
+  <option>-ofps</option>. Además, el desentrelazado debe hacerse después
+  del recortado <link linkend="menc-feat-telecine-footnotes">[1]</link> y
+  antes del escalado.
+
+  <screen>mencoder dvd://1 -nosound -vf pp=lb -ovc lavc</screen>
+  </para></listitem>
+<listitem><para>
+  Desafortunadamente, esta opción tiene fallos con
+  <application>MEncoder</application>; funcionará bien con
+  <application>MEncoder G2</application>, pero todavía no está disponible.
+  Puede experimentar cuelgues del sistema. De todos modos, el propósito
+  de <option>-vf tfields</option> es crear una tasa de bits completa por
+  campo, que haga que la tasa completa sea de 59.94. La ventaja de esta
+  aproximación es que no hay pérdida de datos; sin embargo, como cada marco
+  viene solo con un campo, las líneas que faltan tienen que se interpoladas
+  de alguna manera. No hay buenos métodos para generar estos datos
+  que faltan, y el resultado será un poco similar al que se obtiene cuando
+  se usan algunos filtros de desentrelazado. La generación de las líneas
+  que faltan crean otros problemas, símplemente porque se dobla la cantidad
+  de datos. Por eso, tasas de bits más altas para la codificación son
+  requeridas para mantener la calidad, y se usa más potencia de CPU para
+  la codificación y la decodificación. tfields tiene varias opciones
+  distintas para crear las líneas que faltan en cada marco. Si usa
+  este método, refiérase al manual, y elija la opción que mejor se ajuste
+  para su material. Note que cuando use <option>tfields</option>
+  <emphasis role="bold">tiene que</emphasis> especificar <option>-fps</option>
+  y <option>-ofps</option> para doblar la tasa de bits de su fuente
+  original.
+
+  <screen>mencoder dvd://1 -nosound -vf tfields=2 -ovc lavc -fps 59.94 -ofps 59.94</screen>
+  </para></listitem>
+<listitem><para>
+  Si planea subescalar dramáticamente, puede codificar solo uno de los
+  dos campos. Por supuesto, perderá la mitad de la resolución vertical,
+  pero si planea subescalar a al menos 1/2 del original, la pérdida no
+  importa mucho. El resultado será un archivo progresivo de 29.97 marcos
+  por segundo. El procedimiento es usar <option>-vf field</option>, entonces
+  recortar <link linkend="menc-feat-telecine-footnotes">[1]</link> y
+  escalar apropiadamente. Recuerde que tiene que ajustar la escala para
+  compensar la resolución vertical que está siendo perdida.
+  <screen>mencoder dvd://1 -nosound -vf field=0 -ovc lavc</screen>
+  </para></listitem>
+</orderedlist>
+</sect3>
+
+<sect3 id="menc-feat-telecine-encode-mixedpt">
+<title>Mezcla de progresivo y telecine</title>
+<para>
+  Para mezclar video progresivo y telecine en un video completamente
+  progresivo, las partes en telecine tienen que pasar por el proceso
+  de telecine-inverso. Hay dos filtros que realizan esto nativamente, pero
+  una solución mejor casi siempre es usar dos filtros conjuntamente
+  (lea más adelante para más detalles).
+</para>
+
+<itemizedlist>
+<listitem><para>
+  Actualmente el método más fiable para tratar este tipo de video
+  es, en lugar de hacer telecine-inverso con las partes en telecine,
+  pasar a telecine las partes que no lo son y luego hacer telecine-inverso
+  del video completo. ¿Suena confuso? softpulldown es un filtro que
+  hadce que el video se haga completamente en telecine. Si se sigue
+  softpulldown con alguno de entre <option>detc</option> o
+  <option>ivtc</option>, el resultado final será completamente progresivo.
+  El recortado y el escalado debe hacerse después de las operaciones de
+  telecine-inverso, y <option>-ofps 23.976</option> es necesario.
+
+  <screen>mencoder dvd://1 -nosound -vf softpulldown,ivtc=1 -ovc lavc -ofps 23.976</screen>
+  </para>
+  </listitem>
+<listitem><para>
+  <option>-vf pullup</option> está diseñado para hacer telecine-inverso
+  con material en telecine mientras que deja el video progresivo como
+  datos aislados. Pullup no funciona muy bien con el
+  <application>MEncoder</application> actual, realmente está hecho
+  para ser usado con <application>MEncoder G2</application> (cuando esté
+  listo). Funciona bien sin <option>-ofps</option>, pero
+  <option>-ofps</option> se necesita para prevenir salida con saltos.
+  Con <option>-ofps</option>, algunas veces falla. Los problemas vienen
+  de mantener la sincronización entre el audio y el video: elimina
+  marcos antes de enviarlos a la cadena de filtros, en lugar de después.
+  Como resultado, <option>pullup</option> algunas veces pierde los
+  datos que necesita.
+  </para>
+
+  <para>
+  Si <application>MEncoder</application> descarta demasiados marcos de
+  imagen en una fila, se carga los buffers <option>pullup</option> y
+  causa el fallo del programa.
+  </para>
+
+  <para>
+  Incluso si <application>MEncoder</application> solo descarta un marco,
+  <option>pullup</option> sigue sin verse bien, y puede resultar en
+  una secuencia incorrecta de marcos de imagen. Incluso si no causa
+  un fallo del sistema, <option>pullup</option> es capaz de hacer decisión
+  de correcciones sobre como reensamblar los marcos progresivos, y
+  hacer coincidir campos juntos de manera incorrecta o descargar
+  algunos campos para compensar.
+  </para>
+  </listitem>
+
+<listitem><para>
+  Recientemente he usado <option>-vf filmdint</option> yo mismo, pero
+  esto es lo que dice D Richard Felker III:
+
+  <blockquote><para>Está bien, pero IMO (en mi opinión) intenta
+    densentrelazar en lugar de hacer inversión del telecine
+    demasiado a menudo (muy similar a los reproductores de sobremesa
+    de DVD y TVs progresivas) que causan parpadeos que afean y
+    otros artefactos. Si está haciendo uso de esto, necesita por lo
+    menos perder algún tiempo haciendo un ajuste fino de las opciones
+    y viendo la salida para asegurarse de que no está haciendolo mal.
+    </para></blockquote>
+  </para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3 id="menc-feat-telecine-encode-mixedpi">
+<title>Mezcla de progresivo y entrelazado</title>
+<para>
+  Hay dos opciones para tratar esta categoría, cada una con sus
+  compromisos. Debe decidir si se quiere basar en la duración
+  o localización de cada tipo.
+</para>
+
+<itemizedlist>
+<listitem><para>
+  Trátelo como progresivo. Las partes entrelazadas parecen entrelazadas,
+  y algunos campos entrelazados son descartados, resultando en un
+  poco dispares y con saltos. Puede usar un filtro de postprocesado
+  si quiere, pero degradará ligeramente las partes progresivas.
+  </para>
+
+  <para>
+  Definitivamente esta opción no debe ser usada si quiere eventualmente
+  mostrar el video en un dispositivo entrelazado (con una tarjeta de TV,
+  por ejemplo). Si tiene marcos entrelazados en un video de 23.976 marcos
+  por segundo, deben ponerse en telecine junto con los marcos
+  progresivos. La mitad de los "marcos" entrelazados serán mostrados
+  en duración de tres campos (3/59.94 segundos), resultando en un
+  efecto de parpadeo &quot;con salto atrás en el tiempo&quot; lo que hace
+  que se vea bastante mal. Si quiere intentarlo,
+  <emphasis role="bold">debe</emphasis> usar un filtro de desentrelazado
+  como <option>lb</option> o <option>l5</option>.
+  </para>
+
+  <para>
+  También puede ser una mala idea para una pantalla progresiva.
+  Descartará pares de campos consecutivos entrelazados, resultando
+  en una discontinuidad que puede ser más visible que con el segundo
+  método, el cual muestra algunos marcos progresivos dos veces. El
+  video entrelazado a 29.97 marcos por segundo ya se ve realmente con
+  saltitos porque debe ser mostrado a 59.94 campos por segundo, lo que
+  hace que los marcos duplicados no estén durante mucho tiempo en pantalla.
+  </para>
+  
+  <para>
+  En cualquier caso, es mejor considerar su contenido y cómo quiere
+  mostrarlo. Si su video es 90% progresivo y no tiene intención de
+  mostrarlo en una TV, debería usar una aproximación progresiva. Si
+  es solo la mitad progresivo, probablemente querrá codificarlo como
+  está si todo está entrelazado.
+  </para>
+  </listitem>
+  
+<listitem><para>
+  Trátelo como entrelazado. Algunas características de las partes
+  progresivas serán tratadas por duplicado, resultando en una imagen
+  a saltos. De nuevo, los filtros de desentrelazado pueden degradar
+  ligeramente las partes progresivas.
+  </para></listitem>
+
+</itemizedlist>
+</sect3>
+
+</sect2>
+
+<sect2 id="menc-feat-telecine-footnotes">
+<title>Notas a pie de página</title>
+<orderedlist>
+<listitem><formalpara>
+  <title>Acerca del recortado:</title>
+  <para>
+  Los datos de video de los DVDs son almacenados en un formato llamado
+  YUV 4:2:0. En video YUV, la luminancia (&quot;brillo&quot;) y la
+  crominancia (&quot;color&quot;) se almacenan por separado. Debido
+  a que el ojo humano es menos sensible al color que al brillo, en una
+  imagen YUV 4:2:0 hay solo un pixel de crominancia por cada cuatro de
+  luminancia (dos por lado) teniendo el pixel de crominancia común.
+  Debe recortar YUV progresivo 4:2:0 a resoluciones pares, e incluso usar
+  desplazamientos pares. Por ejemplo, <option>crop=716:380:2:26</option>
+  es CORRECTO pero <option>crop=716:380:3:26</option> no lo es.
+  </para>
+  </formalpara>
+
+  <para>
+  Cuando esté tratando con YUV 4:2:0 entrelazado, la situación es un
+  poco más complicada. En lugar de cada cuatro pixels de luminancia en
+  el <emphasis>marco</emphasis> compartiendo uno de crominancia, cada
+  cuatro de luminancia en cada <emphasis>campo</emphasis> comparten un
+  pixel de crominancia. Cuando los campos son entrelazados para formar
+  un marco, cada scanline es un pixel de alta. Ahora, en lugar de cada
+  cuatro pixels de luminancia en un cuadrado, hay dos pixels lado-a-lado,
+  y los otros dos pixels están lado-a-lado dos scanlines más abajo. Los dos
+  pixels de luminancia en la scanline intermedia son del otro campo, y
+  por eso comparten un pixel distinto de crominancia con dos pixels de
+  luminancia dos scanlines más allá. Toda esta confusión hace necesario
+  tener dimensiones y desplazamientos de recorte vertical en múltiplos
+  de cuatro. El horizontal puede quedarse igual.
+  </para>
+
+  <para>
+  Para video en telecine, recomiendo que se recorte después de hacer
+  la inversión del telecine. Una vez que el video es progresivo solo
+  necesita recortar con números pares. Si realmente quiere ganar algo
+  de velocidad más que lo que el primer recortado puede ofrecer, debe
+  recortar verticalmente en múltiplos de cuatro o bien usar el filtro
+  de telecine-inverso con los datos apropiados.
+  </para>
+
+  <para>
+  Para video entrelazado (no telecine), siempre debe recortar
+  verticalmente por múltiplos de cuatro a menos que use
+  <option>-vf field</option> antes de recortar.
+  </para>
+  </listitem>
+
+<listitem><formalpara>
+  <title>Acerca de los parámetros de codificado y la calidad:</title>
+  <para>
+  Solo porque yo recomiendo <option>mbd=2</option> aquí no significa que
+  deba ser usado siempre. Junto con <option>trell</option>,
+  <option>mbd=2</option> es una de las dos opciones de
+  <systemitem class="library">libavcodec</systemitem> que pueden
+  incrementar la calidad, y siempre debe usar al menos estos dos
+  a menos que la pérdida de velocidad sea prohibitiva (e.g. codificación
+  en tiempo real). Hay muchas otras opciones para
+  <systemitem class="library">libavcodec</systemitem> que incrementan
+  la calidad de la codificación (e incrementa la velocidad de la codificación)
+  pero eso queda más allá del objeto de este documento.
+  </para>
+  </formalpara>
+  </listitem>
+
+</orderedlist>
+
 </sect2>
 
 </sect1>
