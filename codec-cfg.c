@@ -490,8 +490,8 @@ int parse_codec_cfg(char *cfgfile)
 #else
 		video_codecs = builtin_video_codecs;
 		audio_codecs = builtin_audio_codecs;
-		nr_vcodecs = sizeof(builtin_video_codecs)/sizeof(codecs_t) - 1;
-		nr_acodecs = sizeof(builtin_audio_codecs)/sizeof(codecs_t) - 1;
+		nr_vcodecs = sizeof(builtin_video_codecs)/sizeof(codecs_t);
+		nr_acodecs = sizeof(builtin_audio_codecs)/sizeof(codecs_t);
 		return 1;
 #endif
 	}
@@ -989,7 +989,7 @@ int main(int argc, char* argv[])
 		
 		for (i=0; i<2; i++) {
 		  	printf("codecs_t %s[] = {\n", nm[i]);
-			for (j = 0; j <= nr[i]; j++) {
+			for (j = 0; j < nr[i]; j++) {
 			  	printf("{");
 
 				print_int_array(cod[i][j].fourcc, CODECS_MAX_FOURCC);
