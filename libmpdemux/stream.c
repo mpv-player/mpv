@@ -14,6 +14,7 @@
 #include "help_mp.h"
 
 #include "stream.h"
+#include "demuxer.h"
 
 extern int verbose; // defined in mplayer.c
 
@@ -75,6 +76,9 @@ int stream_fill_buffer(stream_t *s){
     break;
   }
 #endif
+  case STREAMTYPE_DS:
+    len = demux_read_data((demux_stream_t*)s->priv,s->buffer,STREAM_BUFFER_SIZE);
+    break;
   default: len=0;
   }
   if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; return 0; }
@@ -236,3 +240,8 @@ void free_stream(stream_t *s){
   free(s);
 }
 
+stream_t* new_ds_stream(demux_stream_t *ds) {
+  stream_t* s = new_stream(-1,STREAMTYPE_DS);
+  s->priv = ds;
+  return s;
+}

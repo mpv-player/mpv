@@ -22,9 +22,10 @@
 #define DEMUXER_TYPE_ROQ 15
 #define DEMUXER_TYPE_MF 16
 #define DEMUXER_TYPE_AUDIO 17
+#define DEMUXER_TYPE_OGG 18
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
-#define DEMUXER_TYPE_MAX 17
+#define DEMUXER_TYPE_MAX 18
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code
@@ -167,6 +168,8 @@ void ds_free_packs(demux_stream_t *ds);
 int ds_get_packet(demux_stream_t *ds,unsigned char **start);
 int ds_get_packet_sub(demux_stream_t *ds,unsigned char **start);
 
+// This is defined here because demux_stream_t ins't defined in stream.h
+stream_t* new_ds_stream(demux_stream_t *ds);
 
 static inline int avi_stream_id(unsigned int id){
   unsigned char *p=(unsigned char *)&id;

@@ -218,6 +218,7 @@ extern int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh);
 int demux_y4m_fill_buffer(demuxer_t *demux);
 int demux_audio_fill_buffer(demux_stream_t *ds);
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
+extern int demux_ogg_fill_buffer(demuxer_t *d);
 
 int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
   // Note: parameter 'ds' can be NULL!
@@ -243,6 +244,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
     case DEMUXER_TYPE_Y4M: return demux_y4m_fill_buffer(demux);
     case DEMUXER_TYPE_AUDIO: return demux_audio_fill_buffer(ds);
     case DEMUXER_TYPE_DEMUXERS: return demux_demuxers_fill_buffer(demux,ds);
+    case DEMUXER_TYPE_OGG: return demux_ogg_fill_buffer(demux);
   }
   return 0;
 }
@@ -434,6 +436,9 @@ extern void demux_open_real(demuxer_t *demuxer);
 extern int nuv_check_file(demuxer_t *demuxer);
 extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
+extern int demux_ogg_open(demuxer_t* demuxer);
+
+extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
 
 static demuxer_t* demux_open_stream(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id){
@@ -593,6 +598,17 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_ROQ){
       demuxer = NULL;
   }
 }
+//=============== Try to open as Ogg file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_OGG){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_OGG,audio_id,video_id,dvdsub_id);
+  if(demux_ogg_open(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected OGG format\n");
+      file_format=DEMUXER_TYPE_OGG;
+  } else {
+      free_demuxer(demuxer);
+      demuxer = NULL;
+  }
+}
 //=============== Try to open as MPEG-PS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_PS){
  int pes=1;
@@ -719,7 +735,12 @@ switch(file_format){
   break;
  }
  case DEMUXER_TYPE_AVI: {
-  return (demuxer_t*) demux_open_avi(demuxer);
+   sh_audio_t* sh_a;
+   demuxer = (demuxer_t*) demux_open_avi(demuxer);
+   sh_a = (sh_audio_t*)demuxer->audio->sh;
+   if(demuxer->audio->id != -2 && sh_a && sh_a->format == 0xFFFE)
+     demuxer = init_avi_with_ogg(demuxer);
+   return demuxer;
 //  break;
  }
  case DEMUXER_TYPE_NUV: {

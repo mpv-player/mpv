@@ -73,13 +73,8 @@ static DS_AudioDecoder* ds_adec=NULL;
 #include <math.h>
 #include <vorbis/codec.h>
 
+// This struct is also defined in demux_ogg.c => common header ?
 typedef struct ov_struct_st {
-  ogg_sync_state   oy; /* sync and verify incoming physical bitstream */
-  ogg_stream_state os; /* take physical pages, weld into a logical
-			  stream of packets */
-  ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
-  ogg_packet       op; /* one raw packet of data for decode */
-
   vorbis_info      vi; /* struct that stores all the static vorbis bitstream
 			  settings */
   vorbis_comment   vc; /* struct that stores all the bitstream user comments */
@@ -389,6 +384,7 @@ case AFM_VORBIS:
   driver=0;
 #else
   /* OggVorbis audio via libvorbis, compatible with files created by nandub and zorannt codec */
+  // Is there always 1024 samples/frame ? ***** Albeu
   sh_audio->audio_out_minsize=1024*4; // 1024 samples/frame
 #endif
   break;
@@ -759,124 +755,61 @@ case AFM_MPEG: {
 }
 #ifdef HAVE_OGGVORBIS
 case AFM_VORBIS: {
-  // OggVorbis Audio:
-#if 0 /* just here for reference - atmos */ 
-  ogg_sync_state   oy; /* sync and verify incoming physical bitstream */
-  ogg_stream_state os; /* take physical pages, weld into a logical
-			  stream of packets */
-  ogg_page         og; /* one Ogg bitstream page.  Vorbis packets are inside */
-  ogg_packet       op; /* one raw packet of data for decode */
-  
-  vorbis_info      vi; /* struct that stores all the static vorbis bitstream
-			  settings */
-  vorbis_comment   vc; /* struct that stores all the bitstream user comments */
-  vorbis_dsp_state vd; /* central working state for the packet->PCM decoder */
-  vorbis_block     vb; /* local working space for packet->PCM decode */
-#else
-  /* nix, nada, rien, nothing, nem, nüx */
-#endif
+  ogg_packet op;
+  vorbis_comment vc;
+  struct ov_struct_st *ov;
 
-  uint32_t hdrsizes[3];/* stores vorbis header sizes from AVI audio header,
-			  maybe use ogg_uint32_t */
-  //int i;
-  int ret;
-  char *buffer;
-  ogg_packet hdr;
-  //ov_struct_t *s=&sh_audio->ov;
-  sh_audio->ov=malloc(sizeof(ov_struct_t));
-  //s=&sh_audio->ov;
-
-  vorbis_info_init(&sh_audio->ov->vi);
-  vorbis_comment_init(&sh_audio->ov->vc);
-
-  mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"OggVorbis: cbsize: %i\n", sh_audio->wf->cbSize);
-  memcpy(hdrsizes, ((unsigned char*)sh_audio->wf)+2*sizeof(WAVEFORMATEX), 3*sizeof(uint32_t));
-  mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"OggVorbis: Read header sizes: initial: %i comment: %i codebook: %i\n", hdrsizes[0], hdrsizes[1], hdrsizes[2]);
-  /*for(i=12; i <= 40; i+=2) { // header bruteforce :)
-    memcpy(hdrsizes, ((unsigned char*)sh_audio->wf)+i, 3*sizeof(uint32_t));
-    printf("OggVorbis: Read header sizes (%i): %ld %ld %ld\n", i, hdrsizes[0], hdrsizes[1], hdrsizes[2]);
-  }*/
-
-  /* read headers */ // FIXME disable sound on errors here, we absolutely need this headers! - atmos
-  hdr.packet=NULL;
-  hdr.b_o_s  = 1; /* beginning of stream for first packet */  
-  hdr.bytes  = hdrsizes[0];
-  hdr.packet = realloc(hdr.packet,hdr.bytes);
-  memcpy(hdr.packet,((unsigned char*)sh_audio->wf)+2*sizeof(WAVEFORMATEX)+3*sizeof(uint32_t),hdr.bytes);
-  if(vorbis_synthesis_headerin(&sh_audio->ov->vi,&sh_audio->ov->vc,&hdr)<0)
-    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"OggVorbis: initial (identification) header broken!\n");
-  hdr.b_o_s  = 0;
-  hdr.bytes  = hdrsizes[1];
-  hdr.packet = realloc(hdr.packet,hdr.bytes);
-  memcpy(hdr.packet,((unsigned char*)sh_audio->wf)+2*sizeof(WAVEFORMATEX)+3*sizeof(uint32_t)+hdrsizes[0],hdr.bytes);
-  if(vorbis_synthesis_headerin(&sh_audio->ov->vi,&sh_audio->ov->vc,&hdr)<0)
-    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"OggVorbis: comment header broken!\n");
-  hdr.bytes  = hdrsizes[2];
-  hdr.packet = realloc(hdr.packet,hdr.bytes);
-  memcpy(hdr.packet,((unsigned char*)sh_audio->wf)+2*sizeof(WAVEFORMATEX)+3*sizeof(uint32_t)+hdrsizes[0]+hdrsizes[1],hdr.bytes);
-  if(vorbis_synthesis_headerin(&sh_audio->ov->vi,&sh_audio->ov->vc,&hdr)<0)
+  /// Init the decoder with the 3 header packets
+  ov = (struct ov_struct_st*)malloc(sizeof(struct ov_struct_st));
+  vorbis_info_init(&ov->vi);
+  vorbis_comment_init(&vc);
+  op.bytes = ds_get_packet(sh_audio->ds,&op.packet);
+  op.b_o_s  = 1;
+  /// Header
+  if(vorbis_synthesis_headerin(&ov->vi,&vc,&op) <0) {
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis: initial (identification) header broken!\n");
+    driver = 0;
+    free(ov);
+    break;
+  }
+  op.bytes = ds_get_packet(sh_audio->ds,&op.packet);
+  op.b_o_s  = 0;
+  /// Comments
+  if(vorbis_synthesis_headerin(&ov->vi,&vc,&op) <0) {
+    mp_msg(MSGT_DECAUDIO,MSGL_ERR,"OggVorbis: comment header broken!\n");
+    driver = 0;
+    free(ov);
+    break;
+  }
+  op.bytes = ds_get_packet(sh_audio->ds,&op.packet);
+  //// Codebook
+  if(vorbis_synthesis_headerin(&ov->vi,&vc,&op)<0) {
     mp_msg(MSGT_DECAUDIO,MSGL_WARN,"OggVorbis: codebook header broken!\n");
-  hdr.bytes=0;
-  hdr.packet = realloc(hdr.packet,hdr.bytes); /* free */
-  /* done with the headers */
-
-
-  /* Throw the comments plus a few lines about the bitstream we're
-     decoding */
-  {
-    char **ptr=sh_audio->ov->vc.user_comments;
+    driver = 0;
+    free(ov);
+    break;
+  } else { /// Print the infos
+    char **ptr=vc.user_comments;
     while(*ptr){
       mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbisComment: %s\n",*ptr);
       ++ptr;
     }
-      mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Bitstream is %d channel, %ldHz, %ldkbit/s %cBR\n",sh_audio->ov->vi.channels,sh_audio->ov->vi.rate,sh_audio->ov->vi.bitrate_nominal/1000, (sh_audio->ov->vi.bitrate_lower!=sh_audio->ov->vi.bitrate_nominal)||(sh_audio->ov->vi.bitrate_upper!=sh_audio->ov->vi.bitrate_nominal)?'V':'C');
-      mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Encoded by: %s\n",sh_audio->ov->vc.vendor);
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Bitstream is %d channel, %ldHz, %ldkbit/s %cBR\n",ov->vi.channels,ov->vi.rate,ov->vi.bitrate_nominal/1000, (ov->vi.bitrate_lower!=ov->vi.bitrate_nominal)||(ov->vi.bitrate_upper!=ov->vi.bitrate_nominal)?'V':'C');
+    mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Encoded by: %s\n",vc.vendor);
   }
-  sh_audio->channels=sh_audio->ov->vi.channels; 
-  sh_audio->samplerate=sh_audio->ov->vi.rate;
-  sh_audio->i_bps=sh_audio->ov->vi.bitrate_nominal/8;
-    
-//  printf("[\n");
-//  sh_audio->a_buffer_len=sh_audio->audio_out_minsize;///ov->vi.channels;
-//  printf("]\n");
 
-  /* OK, got and parsed all three headers. Initialize the Vorbis
-     packet->PCM decoder. */
-  vorbis_synthesis_init(&sh_audio->ov->vd,&sh_audio->ov->vi); /* central decode state */
-  vorbis_block_init(&sh_audio->ov->vd,&sh_audio->ov->vb);     /* local state for most of the decode
-								 so multiple block decodes can
-								 proceed in parallel.  We could init
-								 multiple vorbis_block structures
-								 for vd here */
-  //printf("OggVorbis: synthesis and block init done.\n"); 
-  ogg_sync_init(&sh_audio->ov->oy); /* Now we can read pages */
+  // Setup the decoder
+  sh_audio->channels=ov->vi.channels; 
+  sh_audio->samplerate=ov->vi.rate;
+  sh_audio->i_bps=ov->vi.bitrate_nominal/8;
+  sh_audio->context = ov;
 
-  while((ret = ogg_sync_pageout(&sh_audio->ov->oy,&sh_audio->ov->og))!=1) {
-    if(ret == -1)
-      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"OggVorbis: Pageout: not properly synced, had to skip some bytes.\n");
-    else
-    if(ret == 0) {
-      mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Pageout: need more data to verify page, reading more data.\n");
-      /* submit a a_buffer_len  block to libvorbis' Ogg layer */
-      buffer=ogg_sync_buffer(&sh_audio->ov->oy,256);
-      ogg_sync_wrote(&sh_audio->ov->oy,demux_read_data(sh_audio->ds,buffer,256));
-    }
-  }
-  mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Pageout: successfull.\n");
-  ogg_stream_pagein(&sh_audio->ov->os,&sh_audio->ov->og); /* we can ignore any errors here
-  					 as they'll also become apparent
-  					 at packetout */
-
-  /* Get the serial number and set up the rest of decode. */
-  /* serialno first; use it to set up a logical stream */
-  ogg_stream_init(&sh_audio->ov->os,ogg_page_serialno(&sh_audio->ov->og));
-  
+  /// Finish the decoder init
+  vorbis_synthesis_init(&ov->vd,&ov->vi);
+  vorbis_block_init(&ov->vd,&ov->vb);
   mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Init OK!\n");
-
-  break;
-}
+} break;
 #endif
-
 #ifdef USE_LIBMAD
  case AFM_MAD:
    {
@@ -982,117 +915,64 @@ int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen){
 //        len=MP3_DecodeFrame(buf,3);
         break;
 #ifdef HAVE_OGGVORBIS
-      case AFM_VORBIS: { // OggVorbis
-        /* note: good minlen would be 4k or 8k IMHO - atmos */
-        int ret;
-        char *buffer;
-        int bytes;
-	int samples;
-	float **pcm;
-        //ogg_int16_t convbuffer[4096];
-//        int convsize;
-        int readlen=1024;
-        len=0;
-//        convsize=minlen/sh_audio->ov->vi.channels;
-
-        while(len < minlen) { /* double loop allows for break in inner loop */
-        while(len < minlen) { /* without aborting the outer loop - atmos    */
-        ret=ogg_stream_packetout(&sh_audio->ov->os,&sh_audio->ov->op);
-        if(ret==0) {
-	  int xxx=0;
-          //printf("OggVorbis: Packetout: need more data, paging!\n");
-          while((ret = ogg_sync_pageout(&sh_audio->ov->oy,&sh_audio->ov->og))!=1) {
-            if(ret == -1)
-              mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Pageout: not properly synced, had to skip some bytes.\n");
-            else
-            if(ret == 0) {
-              //printf("OggVorbis: Pageout: need more data to verify page, reading more data.\n");
-              /* submit a readlen k block to libvorbis' Ogg layer */
-              buffer=ogg_sync_buffer(&sh_audio->ov->oy,readlen);
-              bytes=demux_read_data(sh_audio->ds,buffer,readlen);
-	      xxx+=bytes;
-              ogg_sync_wrote(&sh_audio->ov->oy,bytes);
-              if(bytes==0)
-                mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: 0Bytes written, possible End of Stream\n");
-            }
-          }
-	  mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"\n[sync: %d ]\n",xxx);
-          //printf("OggVorbis: Pageout: successfull, pagin in.\n");
-          if(ogg_stream_pagein(&sh_audio->ov->os,&sh_audio->ov->og)<0)
-            mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Pagein failed!\n");
-          break;
-        } else if(ret<0) {
-          mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: Packetout: missing or corrupt data, skipping packet!\n");
-          break;
-        } else {
-
-        /* we have a packet.  Decode it */
-	      
-	if(vorbis_synthesis(&sh_audio->ov->vb,&sh_audio->ov->op)==0) /* test for success! */
-	  vorbis_synthesis_blockin(&sh_audio->ov->vd,&sh_audio->ov->vb);
-	
-        /* **pcm is a multichannel float vector.  In stereo, for
-	   example, pcm[0] is left, and pcm[1] is right.  samples is
-	   the size of each channel.  Convert the float values
-	   (-1.<=range<=1.) to whatever PCM format and write it out */
-	      
-        while((samples=vorbis_synthesis_pcmout(&sh_audio->ov->vd,&pcm))>0){
-	  int i,j;
-	  int clipflag=0;
-	  int convsize=(maxlen-len)/(2*sh_audio->ov->vi.channels); // max size!
-	  int bout=(samples<convsize?samples:convsize);
+      case AFM_VORBIS: { // Vorbis
+        int samples;
+        float **pcm;
+        ogg_packet op;
+        char* np;
+        struct ov_struct_st *ov = sh_audio->context;
+        len = 0;
+        op.b_o_s =  op.e_o_s = 0;
+	while(len < minlen) {
+	  op.bytes = ds_get_packet(sh_audio->ds,&op.packet);
+	  if(!op.packet)
+	    break;
+	  if(vorbis_synthesis(&ov->vb,&op)==0) /* test for success! */
+	    vorbis_synthesis_blockin(&ov->vd,&ov->vb);
+	  while((samples=vorbis_synthesis_pcmout(&ov->vd,&pcm))>0){
+	    int i,j;
+	    int clipflag=0;
+	    int convsize=(maxlen-len)/(2*ov->vi.channels); // max size!
+	    int bout=(samples<convsize?samples:convsize);
 	  
-	  if(bout<=0) break;
+	    if(bout<=0) break;
 
-	  /* convert floats to 16 bit signed ints (host order) and
-	     interleave */
-	  for(i=0;i<sh_audio->ov->vi.channels;i++){
-    	    ogg_int16_t *convbuffer=(ogg_int16_t *)(&buf[len]);
-	    ogg_int16_t *ptr=convbuffer+i;
-	    float  *mono=pcm[i];
-	    for(j=0;j<bout;j++){
+	    /* convert floats to 16 bit signed ints (host order) and
+	       interleave */
+	    for(i=0;i<ov->vi.channels;i++){
+	      ogg_int16_t *convbuffer=(ogg_int16_t *)(&buf[len]);
+	      ogg_int16_t *ptr=convbuffer+i;
+	      float  *mono=pcm[i];
+	      for(j=0;j<bout;j++){
 #if 1
-	      int val=mono[j]*32767.f;
+		int val=mono[j]*32767.f;
 #else /* optional dither */
-	      int val=mono[j]*32767.f+drand48()-0.5f;
+		int val=mono[j]*32767.f+drand48()-0.5f;
 #endif
-	      /* might as well guard against clipping */
-	      if(val>32767){
-	        val=32767;
-	        clipflag=1;
+		/* might as well guard against clipping */
+		if(val>32767){
+		  val=32767;
+		  clipflag=1;
+		}
+		if(val<-32768){
+		  val=-32768;
+		  clipflag=1;
+		}
+		*ptr=val;
+		ptr+=ov->vi.channels;
 	      }
-	      if(val<-32768){
-	        val=-32768;
-	        clipflag=1;
-	      }
-	      *ptr=val;
-	      ptr+=sh_audio->ov->vi.channels;
 	    }
-	  }
 		
-	  if(clipflag)
-	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"Clipping in frame %ld\n",(long)(sh_audio->ov->vd.sequence));
-	
-	  //fwrite(convbuffer,2*sh_audio->ov->vi.channels,bout,stderr); //dump pcm to file for debugging
-	  //memcpy(buf+len,convbuffer,2*sh_audio->ov->vi.channels*bout);
-          len+=2*sh_audio->ov->vi.channels*bout;
-	  
-	  mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"\n[decoded: %d / %d ]\n",bout,samples);
-	  
-	  vorbis_synthesis_read(&sh_audio->ov->vd,bout); /* tell libvorbis how
-							    many samples we
-							    actually consumed */
-        }
-        } // from else, packetout ok
-        } // while len
-        } // outer while len
-	if(ogg_page_eos(&sh_audio->ov->og))
-          mp_msg(MSGT_DECAUDIO,MSGL_V,"OggVorbis: End of Stream reached!\n"); // FIXME clearup decoder, notify mplayer - atmos
-
-	mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"\n[len: %d ]\n",len);
-
-        break;
-      }
+	    if(clipflag)
+	      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"Clipping in frame %ld\n",(long)(ov->vd.sequence));
+	    len+=2*ov->vi.channels*bout;
+	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"\n[decoded: %d / %d ]\n",bout,samples);
+	    vorbis_synthesis_read(&ov->vd,bout); /* tell libvorbis how
+						    many samples we
+						    actually consumed */
+	  }
+	}
+      } break;
 #endif
       case AFM_PCM: // AVI PCM
         len=demux_read_data(sh_audio->ds,buf,minlen);
@@ -1337,13 +1217,6 @@ void resync_audio_stream(sh_audio_t *sh_audio){
           MP3_DecodeFrame(NULL,-2); // resync
           MP3_DecodeFrame(NULL,-2); // resync
           break;
-#ifdef HAVE_OGGVORBIS
-        case AFM_VORBIS:
-          //printf("OggVorbis: resetting stream.\n");
-          ogg_sync_reset(&sh_audio->ov->oy);
-          ogg_stream_reset(&sh_audio->ov->os);
-          break;
-#endif
 #ifdef USE_LIBAC3
         case AFM_AC3:
           ac3_bitstream_reset();    // reset AC3 bitstream buffer
