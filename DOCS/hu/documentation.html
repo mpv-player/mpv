@@ -320,8 +320,8 @@
 
 <P>Ezen dokumentáció legfõbb szabálya: ha nincs dokumentálva,
   <U>nem létezik</U>. Ha nincs leírva pl hogy tudsz a TV-rõl hangot enkódolni,
-  biztos lehetsz benne hogy nem tudsz. Egészséges mennyiségû kombinációs
-  készség viszont jól jön. Sok szerencsét. Szükséged lesz rá :)</P>
+  biztos lehetsz benne hogy nem tudsz (egyébként tudsz:). Egészséges mennyiségû
+  kombinációs készség viszont jól jön. Sok szerencsét. Szükséged lesz rá :)</P>
 
 
 <H1><A NAME=introduction>1. Bevezetés</A></H1>
@@ -330,12 +330,12 @@
   akár nem-x86 processzorokon is. Lásd a <A HREF="#ports">6-os fejezetet</A>). Le
   tudja játszani a legtöbb
   MPEG, VOB, AVI, OGG, VIVO, ASF/WMV, QT/MOV, FLI, RM, NuppelVideo, yuv4mpeg,
-  FILM, RoQ, PVA file-t,
+  FILM, RoQ, PVA, Matroska file-t,
   és ezekhez felsorakoztat jónéhány natív, XAnim, RealPlayer, és Win32 codecet. Nézhetsz
   vele <B>VideoCD</B>-t, <B>SVCD</B>-t, <B>DVD</B>-t, <B>3ivx</B>-et,
-  <B>RealMedia-t</B>, és <B>DivX</B>-et is (és ezekhez egyáltalán nincs
-  szüksége az avifile csomagra). Az MPlayer másik óriási tulajdonsága a
-  megjelenítési módok
+  <B>RealMedia-t</B>, <B>Sorenson-t</B>, <B>Theora-t</B> és <B>DivX</B>-et is
+  (és ezekhez egyáltalán nincs szüksége az avifile csomagra). Az MPlayer másik
+  óriási tulajdonsága a megjelenítési módok
   széles választéka. Mûködik X11, Xv, DGA, OpenGL, SVGAlib, fbdev, aalib,
   DirectFB, sõt SDL-lel vagy GGI-vel is (beleértve ezáltal az SDL/GGI drivereit
   is), és néhány alacsonyszintû kártyaspecifikus driver (Matrox, 3dfx, Radeon,
@@ -461,8 +461,11 @@
     Megintcsak nem release, de most hogy bekerült a Sorenson 3 (QuickTime) és
     a Windows Media 9 támogatás, az MPlayer a világ elsõ lejátszója mely
     egyszerre támogatja az összes videoformátumot!</LI>
-<LI><B>MPlayer 0.90 "???"</B> Dátum egyelõre ismeretlen<BR>
-    </LI>
+<LI><B>MPlayer 0.90 "The CounterCounter"</B> Ápr 6, 2003<BR>
+    1 év után megint úgy döntöttünk hogy a kód színvonala megint elegendõ egy
+    release-hez. Sajnálatos módon viszont még a verziószámot is elfelejtettük
+    átírni rc5-rõl, és egyéb idegesítõ hibákra is fény derült.</LI>
+<LI><B>MPlayer 0.91 "?"</B> dátum ismeretlen</LI>
 </UL>
 
 <H2><A NAME=installation>1.2. Installálás</A></H2>
@@ -485,20 +488,20 @@
   <LI><B>binutils</B> - <B>2.11.x</B> ajánlott. Ez a program felelõs az
     MMX/3DNow!/stb utasításokért, ezért igen fontos.</LI>
   <LI><B>gcc</B> - <B>2.95.3</B>-tól <B>2.95.4</B> verziók ajánlottak, végsõ
-    esetben pedig <B>3.2+</B>.
-    <B>SOHA</B> ne használj 2.96-ot vagy 3.x.x-et !!! Hibás kódot generálnak.
-    Ha úgy döntesz hogy 2.96 helyett mást használsz, NE a 3.0 mellett
+    esetben pedig <B>3.3+</B>.
+    <B>SOHA</B> ne használj 2.96-ot vagy 3.x-et !!! Hibás kódot generálnak.
+    Ha úgy döntesz hogy 2.96 helyett mást használsz, NE a 3.x mellett
     dönts, csak azért mert újabb! Sok tekintetben bugosabb is mint a 2.96.
     Ígyhát ha váltani akarsz, marad a 2.95.x (2.95-ös libstdc++ is szükséges!),
     vagy maradj a 2.96-nál (ebben az esetben viszont készülj fel a hibákra
     a futás közben).
     Ha mégis 3.x-et akarsz használni akkor használd a legújabbat (a 
-    3.1 mûködik), tekintve hogy az elõzõ verzióknak mindnek volt valami bugja.
+    3.3 mûködik), tekintve hogy az elõzõ verzióknak mindnek volt valami bugja.
     Ne használj RedHat-tól származó gcc 3.x-et, mert hibásak (a 3.0.4-RH
     reprodukálhatóan belsõ hibával áll le GUI fordításnál).
     A 2.96 "érdekességeirõl" <A HREF="../users_against_developers.html">itt</A> vagy a <A HREF="faq.html">FAQ-ban</A>
     találsz infot.</LI>
-  <LI><B>XFree86</B> - <B>mindig a legújabb (4.2.1)</B> ajánlott. Normális
+  <LI><B>XFree86</B> - <B>mindig a legújabb (4.3)</B> ajánlott. Normális
     esetben ez mindenképpen szükséges, tekintve hogy az újabb videokártyákban
     jelenlevõ hardveres YUV gyorsítás csak a 4.0.2-es verzió óta elérhetõ,
     a benne levõ <A HREF="video.html#xv">XVideo</A> kiterjesztés révén 
@@ -535,13 +538,14 @@
     Legalább 2.0.9-es verzió kell!</LI>
   <LI><B>libxmms</B> - opcionális, XMMS által olvasható formátumok
     támogatásához. Legalább 1.2.7-es verzió szükséges.</LI>
+  <LI><B>libsmb</B> - opcionális, Samba támogatáshoz szükséges.</LI>
 </UL>
 
 <P><B><I>CODECEK</I></B></P>
 
 <UL>
 <LI><B>libavcodec</B>: ha ezt a
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1 video és WMA
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3 video és WMA
   (Windows Media Audio) v1/v2 audio-t
   (is) dekódolni tudó
   codecet akarod használni, tekintsd meg a
@@ -568,7 +572,7 @@
     <LI>Ha valamilyen hardveres tömörítõ eszközzel, digitális kamerával (pl.
     DV, ATI VCR, MJPEG) felvett filmeket is le akarsz játszani, akkor muszáj
     ezeket feltenned.</LI>
-    <LI><B>WMV8, WMV9/WMA9</B> filmek lejátszásához is szükséges. Régebbi ASF-ek
+    <LI><B>WMV9/WMA9</B> filmek lejátszásához is szükséges. Régebbi ASF-ek
       lejátszásához nem, bár ezek között gyakori a VoxWare audio-val
       ellátott file - amihez viszont szükség van a Win32 codecekre.</LI>
     <LI>Nem szükséges WMA (Windows Media Audio) használatához, a libavcodec-nek
@@ -576,9 +580,10 @@
   </UL>
 </LI>
 
-<LI><B>QuickTime codecek</B>: x86 platformon a QuickTime könyvtárak
-  használatával le lehet játszani Sorenson v1/v3, Cinepak, RPZA és egyéb
-  QuickTime videókat, valamint a QDesign audiót.</LI>
+<LI><B>QuickTime codecek</B>: x86 platformon a QuickTime codec-ek
+  használatával le lehet játszani Cinepak, RPZA és egyéb QuickTime videókat,
+  valamint a QDesign audiót. Az installálást lásd a
+  <A HREF="codecs.html#sorenson">Sorenson video codec</A> fejezetben.</LI>
 
 <LI><B>DivX4/DivX5</B>: errõl a codecrõl a
   <A HREF="codecs.html#divx">2.2.1.1</A>-es fejezetben található információ.
@@ -791,9 +796,9 @@
 <P>Innentõl használatra kész állapotban van az <B>MPlayer</B>. Az
   <CODE>$PREFIX/etc/mplayer</CODE> könyvtár tartalmazza a
   <CODE>codecs.conf</CODE> file-t, ami megmondja a programnak a használható
-  codec-eket és azok tulajdonságait. Ezt a file-t mindig az <B>MPlayer</B>-rel
-  együtt kell frissíteni! Ha a home könyvtáradban van egy régi codecs.conf
-  file, azt töröld!</P>
+  codec-eket és azok tulajdonságait. Ez a file csak akkor kell, ha meg akarod
+  változtatni a codec-ek egyes tulajdonságait, mivel az MPlayer beépítve
+  tárolja ennek a file-nak egy másolatát.</P>
 
 <P><B>Debian felhasználók</B> egyszerûen készíthetnek .deb csomagot maguknak,
   csak a <CODE>fakeroot debian/rules binary</CODE> parancsot kell beírniuk az
@@ -874,6 +879,9 @@
   <LI>Sami: <CODE>-dumpsami</CODE></LI>
 </UL>
 
+<P>A MEncoder a DVD feliratokat ki tudja menteni
+  <A HREF="encoding.html#vobsub">VobSub</A> formátumba.</P>
+
 <P>A következõ formátumokra más opciók érvényesek mint egyébként:</P>
 
 <H4>VobSub feliratok</H4>
@@ -929,6 +937,7 @@
 </P>
 
 <P><CODE><I>
+FORMAT=TIME<BR>
 # elsõ szám    : ennyi másodpercnyi szünet miután az elõzõ felirat eltünt<BR>
 # második szám : a jelenlegi feliratot ennyi ideig jeleníti meg<BR>
 <BR>
@@ -959,6 +968,15 @@ Naboo was under an attack.<BR>
   megszerzésére:</P>
 
 <UL>
+  <LI>TTF font használata. Ehhez a freetype könyvtár legalább 2.0.9-es
+    verziója szükséges. Fordítsd le az MPlayert. Ezután két lehetõséged van:
+    <UL>
+      <LI>minden alkalommal megadod az MPlayer-nek a <CODE>-font /útvonal/arial.ttf</CODE>
+        opciót</LI>
+      <LI>vagypedig létrehozol egy symlink-et: <CODE>ln -s /útvonal/arial.ttf
+        ~/.mplayer/subfont.ttf</LI>
+    </UL>
+  </LI>
   <LI>kész csomag letöltése, az <B>MPlayer</B> honlapról.
     Megjegyzés: a jelenleg rendelkezésre álló csomagok csak ISO 8859-1/2-t
     tudnak, és van néhány speciális verzió koreai, orosz, stb kódlapokhoz.
@@ -979,15 +997,6 @@ Naboo was under an attack.<BR>
     TOOLS/subfont-c/README file-t a részletekért)</LI>
   <LI>a betûtipus generáló GIMP plugin használata, ami a TOOLS/subfont-GIMP
     könyvtárban található. Megjegyzés: kell hozzá a HSI RAW plugin, lásd fentebb.</LI>
-  <LI>TTF font használata. Ehhez a freetype könyvtár legalább 2.0.9-es
-    verziója szükséges. Fordítsd le az MPlayert. Ezután két lehetõséged van:
-    <UL>
-      <LI>minden alkalommal megadod az MPlayer-nek a <CODE>-font /útvonal/arial.ttf</CODE>
-        opciót</LI>
-      <LI>vagypedig létrehozol egy symlink-et: <CODE>ln -s /útvonal/arial.ttf
-        ~/.mplayer/subfont.ttf</LI>
-    </UL>
-  </LI>
 </UL>
 
 <P>Ha mégis bitmap fontot akarsz használni TrueType helyett, tömörítsd ki a
@@ -1137,7 +1146,7 @@ kimeneti eszközök</P>
 
 <UL>
   <LI>Használd a <CODE>channels</CODE> opciót. Egy példa:<BR>
-    <CODE>-tv on:channels=26-MTV1,23-TV2</CODE><BR>
+    <CODE>tv:// -tv channels=26-MTV1,23-TV2</CODE><BR>
     Magyarázat: a fenti opció használatakor csak a 26-os és 23-as csatornák
     között lehet majd váltani, valamint váltáskor egy OSD jön fel és írja ki
     a csatorna nevét. Amennyiben a csatornanév tartalmaz szóközt, azt
@@ -1197,10 +1206,10 @@ kimeneti eszközök</P>
 
 <P>
 Teszt kimenet, AAlib-re :)<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer tv:// -tv driver=dummy:width=640:height=480 -vo aa</CODE><BR>
 <BR>
 Szabványos V4L-rõl bemenet<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer tv:// -tv driver=v4l:width=640:height=480 -vo xv</CODE><BR>
 </P>
 
 

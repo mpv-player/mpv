@@ -24,8 +24,8 @@
     és más MPEG4 variánsokhoz</LI>
   <LI>natív dekóder Windows Media Video 7/8-hoz (WMV1/WMV2), és Win32 dekóder a
     Windows Media Video 9-hoz (WMV3), amik .wmv file-okban találhatóak</LI>
-  <LI><B>natív Sorenson 1 (SVQ1) dekóder</B></LI>
-  <LI><B>Win32/QT Sorenson 3 (SVQ3) dekóder</B></LI>
+  <LI>natív <B>Sorenson 1 (SVQ1) dekóder</B></LI>
+  <LI>natív <B>Win32/QT Sorenson 3 (SVQ3) dekóder</B></LI>
   <LI>3ivx v1, v2 dekóder</LI>
   <LI>Cinepak és Intel Indeo codecek (3.1, 3.2, 4.1, 5.0)</LI>
   <LI>MJPEG, AVID, VCR2, ASV2 és más hardware formátumok</LI>
@@ -129,15 +129,20 @@
 
 <P>Az <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> tartalmaz egy
   <B>nyitott forráskódú</B> codec csomagot, amely képes
-  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV
+  H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV/SVQ1/SVQ3
   codec-ekkel enkódolt videok, és WMA-val (Windows Media Audio) kódolt
   audiok lejátszására. Továbbá nemcsakhogy néhányukkal
   még enkódolni is lehet, de ezek sokkal szebbek és gyorsabbak mint a
   Win32-es codec-ek, vagy a DivX.com-féle DivX4 könyvtár.</P>
 
 <P>A leghasznosabb codecek az MPEG4 variánsok:
-  DivX 3, DivX 4, DivX 5, Windows Media Video 7 (WMV1). A WMA
+  DivX 3, DivX 4, DivX 5, Windows Media Video 7/8 (WMV1/WMV2). A WMA
   dekóder is igen figyelemreméltó.</P>
+
+<P>A legutóbbi, elismerést érdemlõ codec a <B>Sorenson 3</B> (SVQ3) dekóder.
+  Ez a világon a legelsõ, teljesen nyílt forráskódú implementáció. Ráadásul
+  sokkal gyorsabb mint az eredeti. Mindenképpen ezt használd, ne a bináris
+  codec-et!</P>
 
 <P>Ha egy <B>MPlayer</B> release-t használsz nem kell semmit tenned, a
   libavcodec már a csomagban van, csak fordítsd le az <B>MPlayer-t</B>
@@ -311,10 +316,9 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
     MPlayer része alapállapotban, míg a másik dekóder a libavcodec-ben
     található. Ezek a <CODE>-vc svq1</CODE> illetve <CODE>-vc ffsvq1</CODE>
     opciókkal használhatóak, ilyen sorrendben. Némely file-ok csak az egyikkel
-    mûködnek, így hiba esetén ajánlott mindkettõt kipróbálni. A dekódert a
-    Xine készítõi irták.</LI>
-  <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - dekódolás a <B>Win32 QuickTime
-    könyvtárral</B></LI>
+    mûködnek, így hiba esetén ajánlott mindkettõt kipróbálni.</LI>
+  <LI>Sorenson 3 (fourcc <I>SVQ3</I>) - dekódolás natív codec-kel</B>
+    (<A HREF="#libavcodec">libavcodec</A>)</LI>
 </UL>
 
 <H4>QuickTime támogatás belefordítása az MPlayer-be</H4>

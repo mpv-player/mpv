@@ -179,8 +179,9 @@
   kikapcsolni a VSYNC-et, vagy állítsd a képfrissítést n*(a film fps-e)
   Hz-re.</LI>
 
-<LI>Radeon VE - ehhez a kártyához jelenleg csak az XFree86 CVS-ében van
-  meghajtó, TV kimenet nélkül. Természetesen az <B>MPlayer</B>-rel teljeskörû
+<LI>Radeon VE - ha X-re van szükséged, használd az XFree86 4.2.0-át, vagy
+  újabbat. Nincs benne TV kimenet támogatás.
+  Természetesen az <B>MPlayer</B>-rel teljeskörû
   <B>hardveres gyorsítást</B> és <B>TV kimenetet</B> kapsz, és semmilyen
   könyvtár vagy X nem kell. Olvasd el a <A HREF=#2.3.1.15>Vidix</A>
   fejezetet.</LI>
@@ -190,12 +191,17 @@
 
 <H4><A NAME=xv_neomagic>2.3.1.2.1.5. NeoMagic kártyák</A></H4>
 
-<P>Ezek a kártyák sok laptopban megtalálhatók. Sajnos az alap 4.2.0-es X-ben
-  lévõ meghajtó nem tud Xv-t. Tölts le tõlünk egy módosított, Xv-t tudó
+<P>Ezek a kártyák sok laptopban megtalálhatók. XFree86 4.3.0-at vagy újabbat
+  kell használnod, régebbi verziókhoz tölts le tõlünk egy módosított, Xv-t tudó
   meghajtót
-  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neomagic_drv.o.4.2.0.bz2">innen</A>.
-  4.2.0 elõtti X-szel fölösleges próbálkozni...
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/">innen</A>.
 </P>
+
+<P>Az XFree86 4.3.0-os meghajtóhoz Bohdan Horst küldött egy
+  <A HREF="http://www.mplayerhq.hu/MPlayer/contrib/NeoMagic-driver/neo_driver.patch">patch-et</A>,
+  amivel az összes framebuffer hozzáférés (és így az XVideo) négyszeresére
+  gyorsul. A patch bekerült az XFree86 CVS-be, és a 4.3.0 után következõ
+  verzió tartalmazni is fogja.</P>
 
 <P>DVD méretû filmek lejátszásához írd át az XF86Config-ot a következõképp :</P>
 
@@ -532,9 +538,13 @@ a framebuffer egység megadása (/dev/fb0)</TD><TR>
     támogatott, ha a film pixelformátuma megegyezik a videomód formátumával.
     Figyelj a bpp értékére is, az fbdev meghajtó a jelenlegit próbálja
     használni, vagy ha a -bpp opciót használod, akkor azt.</LI>
-  <LI><B>-zoom</B> opció nem támogatott (a szoftveres nagyítás nagyon lassú).
-    Az -fs opciónak nincs jelentõsége. Továbbá nem használhatsz 8 vagy kisebb
-    bpp-s módokat.</LI>
+  <LI><B>-zoom</B> opció nem támogatott (használd a <CODE>-vf scale</CODE>
+    opciót). Nem használhatsz 8 vagy kisebb bpp-s módokat.</LI>
+  <LI>a kurzor kikapcsolása a <CODE>echo -e '\033[?25l'</CODE> vagy a
+    <CODE>setterm -cursor off</CODE> paranccsal történik, a képernyõkímélõ
+    pedig a <CODE>setterm -blank 0</CODE> utasítással taszítható a nemlétbe.
+    Kurzor visszakapcsolása: <CODE>echo -e '\033[?25h'</CODE> vagy
+    <CODE>setterm -cursor on</CODE></LI>
 </UL>
 
 <P>Megj: az FBdev módváltás _NEM_ mûködik a VESA framebufferrel, és ne is
@@ -929,6 +939,11 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <P>A mûködésre bírásához szükséges információ a következõ címen található:
   <A HREF="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt</A></P>
+
+<P>Megj.: az elsõ olyan DirectFB verzió amivel ez nekünk is mûködött, az a
+  0.9.17 (viszont ez is bugos, rá kell rakni a <CODE>surfacemanager</CODE>
+  patch-et a fenti címrõl). Egyébként folyamatban van a CRTC2 kód portolása
+  az <B>mga_vid</B>-be.</P>
 
 
 <H4><A NAME=mpegdec>2.3.1.3 MPEG dekóderek kártyák</A></H4>
