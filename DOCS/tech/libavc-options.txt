@@ -116,7 +116,7 @@ vstrict strict standard compliance
 vdpart	data partitioning
 	adds 2 byte per video packet
 	improves error-resistance when transfering over unreliable channels (eg.
-        streaming over the internet) -- CHECKME (atmos)
+        streaming over the internet)
 
 vpsize	(0-10000) video packet size
 	0 disabled (default)
@@ -128,7 +128,7 @@ lavdopts: (decoder options)
 
 ver	error resilience
 	-1 needed for some very broken, encoders which completly ignore the
-           standards -- FIXME: which are these? (atmos)
+           standards (one M4S2 asf sample know to need this)
 	0 (default)
 	1 more aggressive error detection, lavc might think that some correct
           streams contain errors
@@ -146,7 +146,9 @@ FAQ:	Q: Why is the filesize much too small?
 	A: Try to increase vqmin=2 or 1 (be carefull with 1, it could cause
            strange things to happen).
 	Q: Can I use -pass 1 & -pass 2 with vmax_b_frames>0 ?
-	A: Read DOCS/tech/patches.txt and send a patch ;) (XXX still not fixed?)
+	A: -pass x uses the divx4 twopass-encoding codem which is incompatible
+           with the libavcodec encode.
+           If you want to fix it read DOCS/tech/patches.txt and send a patch.
 	Q: What provides better error recovery while keeping the filesize low?
            Should I increase data partitioning or the number of video packets?
 	A: Data partitioning is better in this case.
@@ -161,3 +163,8 @@ JVT	Joint Video Team Standard -- http://www.itu.int/ITU-T/news/jvtpro.html
 Examples:
 mencoder foobar.avi -lavcopts vcodec=mpeg4:vhq:keyint=300:vqscale=2 -o new-foobar.avi
 mplayer  foobar.avi -lavdopts vbug=1
+
+--
+Written 2002 by Michael Niedermayer and reviewed by Felix Buenemann.
+Check the MPlayer documentation for contact-addresses.
+
