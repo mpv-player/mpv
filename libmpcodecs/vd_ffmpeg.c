@@ -31,6 +31,12 @@ LIBVD_EXTERN(ffmpeg)
 
 int avcodec_inited=0;
 
+typedef struct {
+    AVCodec *lavc_codec;
+    AVCodecContext *avctx;
+    int last_aspect;    
+} vd_ffmpeg_ctx;
+
 //#ifdef FF_POSTPROCESS
 //unsigned int lavc_pp=0;
 //#endif
@@ -42,31 +48,37 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 // init driver
 static int init(sh_video_t *sh){
-    AVCodec *lavc_codec;
-    AVCodecContext *ctx;
+    AVCodecContext *avctx;
+    vd_ffmpeg_ctx *ctx;
 
     if(!avcodec_inited){
       avcodec_init();
       avcodec_register_all();
       avcodec_inited=1;
     }
+
+    ctx = sh->context = malloc(sizeof(vd_ffmpeg_ctx));
+    if (!ctx)
+	return(0);
+    memset(ctx, 0, sizeof(vd_ffmpeg_ctx));
     
-    lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
-    if(!lavc_codec){
+    ctx->lavc_codec = (AVCodec *)avcodec_find_decoder_by_name(sh->codec->dll);
+    if(!ctx->lavc_codec){
 	mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingLAVCcodec,sh->codec->dll);
 	return 0;
     }
     
-    ctx = sh->context = malloc(sizeof(AVCodecContext));
-    memset(ctx, 0, sizeof(AVCodecContext));
+    ctx->avctx = malloc(sizeof(AVCodecContext));
+    memset(ctx->avctx, 0, sizeof(AVCodecContext));
+    avctx = ctx->avctx;
     
-    ctx->width = sh->disp_w;
-    ctx->height= sh->disp_h;
-    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",ctx->width,ctx->height);
+    avctx->width = sh->disp_w;
+    avctx->height= sh->disp_h;
+    mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     if (sh->format == mmioFOURCC('R', 'V', '1', '3'))
-	ctx->sub_id = 3;
+	avctx->sub_id = 3;
     /* open it */
-    if (avcodec_open(ctx, lavc_codec) < 0) {
+    if (avcodec_open(avctx, ctx->lavc_codec) < 0) {
         mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantOpenCodec);
         return 0;
     }
@@ -76,8 +88,15 @@ static int init(sh_video_t *sh){
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-    if (avcodec_close(sh->context) < 0)
+    vd_ffmpeg_ctx *ctx = sh->context;
+    AVCodecContext *avctx = ctx->avctx;
+
+    if (avcodec_close(avctx) < 0)
     	    mp_msg(MSGT_DECVIDEO,MSGL_ERR, MSGTR_CantCloseCodec);
+    if (avctx)
+	free(avctx);
+    if (ctx)
+	free(ctx);
 }
 
 //mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
@@ -87,29 +106,54 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     int got_picture=0;
     int ret;
     AVPicture lavc_picture;
-    AVCodecContext *ctx = sh->context;
+    vd_ffmpeg_ctx *ctx = sh->context;
+    AVCodecContext *avctx = ctx->avctx;
     mp_image_t* mpi;
 
     if(len<=0) return NULL; // skipped frame
     
-    ret = avcodec_decode_video(sh->context, &lavc_picture,
+    ret = avcodec_decode_video(avctx, &lavc_picture,
 	     &got_picture, data, len);
     
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
     if(!got_picture) return NULL;	// skipped image
+
+    if (avctx->aspect_ratio_info != ctx->last_aspect)
+    {
+	ctx->last_aspect = avctx->aspect_ratio_info;
+	switch(avctx->aspect_ratio_info)
+	{
+	    case FF_ASPECT_4_3_625:
+	    case FF_ASPECT_4_3_525:
+		sh->aspect = 4.0/3.0;
+		break;
+	    case FF_ASPECT_16_9_625:
+	    case FF_ASPECT_16_9_525:
+		sh->aspect = 16.0/9.0;
+		break;
+	    case FF_ASPECT_SQUARE:
+		sh->aspect = 1.0/1.0;
+		break;
+	    default:
+		sh->aspect = 0.0;
+		break;
+	}
+        if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
+    	    return NULL;
+    }
     
-    if ((ctx->width != sh->disp_w) ||
-	(ctx->height != sh->disp_h))
+    if ((avctx->width != sh->disp_w) ||
+	(avctx->height != sh->disp_h))
     {
 	/* and what about the sh->bih (BitmapInfoHeader) width/height values? */
-	sh->disp_w = ctx->width;
-	sh->disp_h = ctx->height;
+	sh->disp_w = avctx->width;
+	sh->disp_h = avctx->height;
 	if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
 	    return NULL;
-    }	
+    }
     
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE,
-	ctx->width, ctx->height);
+	avctx->width, avctx->height);
     if(!mpi){	// temporary!
 	printf("couldn't allocate image for codec\n");
 	return NULL;
@@ -122,7 +166,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mpi->stride[1]=lavc_picture.linesize[1];
     mpi->stride[2]=lavc_picture.linesize[2];
 
-    if(ctx->pix_fmt==PIX_FMT_YUV422P){
+    if(avctx->pix_fmt==PIX_FMT_YUV422P){
 	mpi->stride[1]*=2;
 	mpi->stride[2]*=2;
     }
