@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.52 -->
+<!-- synced with 1.53 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -289,14 +289,15 @@ Használj SDL-t.
   torzítja a hangot és a képet vagy összeomlik néhány rendszeren. Ha torz a kép,
   próbáld meg kikapcsolni a hardveres gyorsítást a
   <option>-vo directx:noaccel</option> kapcsolóval. Töltsd le a
-  <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 fejléc fájlokat</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/dx7headers.tgz">DirectX 7 fejléc fájlokat</ulink>
   a DirectX videó kimeneti vezérlő beforgatásához.</para>
 
 <para>A <link linkend="vidix">VIDIX</link> is működik már Windows alatt
   a <option>-vo winvidix</option> kapcsolóval, bár még kisérleti fázisban
   van és egy kis kézi állítgatás kell hozzá. Töltsd le a
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>-t
-  és másold be a <filename class="directory">libdha/dhahelperwin</filename> könyvtárba
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink>
+  vagy <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (MTRR támogatással)</ulink>
+  fájlt és másold be a <filename class="directory">libdha/dhahelperwin</filename> könyvtárba
   az <application>MPlayer</application> forrás fádban. Nyisd meg a konzolt és
   válts át erre a könyvtárra, majd írd be
 
@@ -362,18 +363,15 @@ Használj SDL-t.
 <para>Sascha Sommer hivatalos Windows binárisokat ad ki időről időre,
   Joey Parrish nem hivatalos Windows csomagokat készít telepítővel.
   Megtalálhatod ezeket a
-  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">projektek oldal</ulink>
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">projektek oldal</ulink>  
   Windows-os részében.</para>
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
 
-<para>A <application>Cygwin</application> 1.5.0 előtti verziói
-  nem tartalmazzák az <filename>inttypes.h</filename> fájlt. Másold be
-  az <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>-t
-  a <filename class="directory">/usr/include/</filename> könyvtárba,
-  így le tudod fordítani az <application>MPlayer</application>t.
-</para>
+<para>A <application>Cygwin</application> 1.5.0 vagy későbbi
+  verziójára lesz szükséged az <application>MPlayer</application>
+  lefordításához.</para>   
 
 <para>A DirectX fejléc fájlokat a <filename class="directory">/usr/include/</filename> vagy
   <filename class="directory">/usr/local/include/</filename> könyvtárba
@@ -396,11 +394,6 @@ Használj SDL-t.
   3.1.0 vagy későbbi és az MSYS 1.0.9 vagy későbbi verzóját és az MSYS telepítés utáni
   beállító programjának mondd meg, hogy telepítve van a <application>MinGW</application>.
 </para>
-
-<para>Ha a <application>MinGW</application> 3.1.0-nál korábbi verzióját,
-  használod, ki kell cserélned a <filename>/mingw/include/sys/types.h</filename>
-  fájlt ezzel:
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para>
 
 <para>A DirectX fejléc fájlokat a <filename class="directory">/mingw/include/</filename>
   könyvtárba kell kicsomagolni.</para>
