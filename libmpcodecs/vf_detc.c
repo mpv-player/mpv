@@ -154,7 +154,7 @@ static void diff_fields(struct metrics *metr, mp_image_t *old, mp_image_t *new)
 	*metr = m;
 }
 
-static status(int f, struct metrics *m)
+static void status(int f, struct metrics *m)
 {
 	mp_msg(MSGT_VFILTER, MSGL_V, "frame %d: e=%d o=%d n=%d t=%d\n",
 		f, m->even, m->odd, m->noise, m->temp);
