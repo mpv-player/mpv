@@ -368,8 +368,32 @@ unsigned int timer_start;
       gCpuCaps.cpuType,gCpuCaps.hasMMX,gCpuCaps.hasMMX2,
       gCpuCaps.has3DNow, gCpuCaps.has3DNowExt,
       gCpuCaps.hasSSE, gCpuCaps.hasSSE2);
+#ifdef RUNTIME_CPUDETECT
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithRuntimeDetection);
+#else
+  mp_msg(MSGT_CPLAYER,MSGL_INFO, MSGTR_CompiledWithCPUExtensions);
+#ifdef HAVE_MMX
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX");
 #endif
-
+#ifdef HAVE_MMX2
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," MMX2");
+#endif
+#ifdef HAVE_3DNOW
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNow");
+#endif
+#ifdef HAVE_3DNOWEX
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," 3DNowEx");
+#endif
+#ifdef HAVE_SSE
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE");
+#endif
+#ifdef HAVE_SSE2
+  mp_msg(MSGT_CPLAYER,MSGL_INFO," SSE2");
+#endif
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\n\n");
+#endif
+#endif
+  
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
   if(!parse_codec_cfg(MPLAYER_CONFDIR "/codecs.conf")){
