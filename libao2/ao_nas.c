@@ -311,23 +311,30 @@ static AuDeviceID nas_find_device(AuServer *aud, int nch)
 	return AuNone;
 }
 
-static unsigned char nas_aformat_to_auformat(unsigned int format)
+static unsigned int nas_aformat_to_auformat(unsigned int format)
 {
+	unsigned int res=format << 8;
 	switch (format) {
-	case	AFMT_U8:	return AuFormatLinearUnsigned8;
-	case	AFMT_S8:	return AuFormatLinearSigned8;
-	case	AFMT_U16_LE:	return AuFormatLinearUnsigned16LSB;
-	case	AFMT_U16_BE:	return AuFormatLinearUnsigned16MSB;
+	case	AFMT_U8:
+		return res + AuFormatLinearUnsigned8;
+	case	AFMT_S8:
+		return res + AuFormatLinearSigned8;
+	case	AFMT_U16_LE:
+		return res + AuFormatLinearUnsigned16LSB;
+	case	AFMT_U16_BE:
+		return res + AuFormatLinearUnsigned16MSB;
 #ifndef WORDS_BIGENDIAN
-	case AFMT_AC3:
+	default:
 #endif
-	case	AFMT_S16_LE:	return AuFormatLinearSigned16LSB;
+	case	AFMT_S16_LE:
+		return (AFMT_S16_LE << 8) + AuFormatLinearSigned16LSB;
 #ifdef WORDS_BIGENDIAN
-	case AFMT_AC3:
+	default:
 #endif
-	case	AFMT_S16_BE:	return AuFormatLinearSigned16MSB;
-	case	AFMT_MU_LAW:	return AuFormatULAW8;
-	default: return 0;
+	case	AFMT_S16_BE:
+		return (AFMT_S16_BE << 8) + AuFormatLinearSigned16MSB;
+	case	AFMT_MU_LAW:
+		return res + AuFormatULAW8;
 	}
 }
 
@@ -352,16 +359,12 @@ static int init(int rate,int channels,int format,int flags)
 	mp_msg(MSGT_AO, MSGL_V, "ao2: %d Hz  %d chans  %s\n",rate,channels,
 		audio_out_format_name(format));
 
-	if (!auformat) {
-		mp_msg(MSGT_AO, MSGL_ERR, "ao_nas: init(): Unsupported format -> nosound\n");
-		return 0;
-	}
-
 	nas_data->client_buffer_size = NAS_BUFFER_SIZE*2;
 	nas_data->client_buffer = malloc(nas_data->client_buffer_size);
 	nas_data->server_buffer_size = NAS_BUFFER_SIZE;
 	nas_data->server_buffer = malloc(nas_data->server_buffer_size);
 
+	ao_data.format = auformat >> 8;
 	ao_data.samplerate = rate;
 	ao_data.channels = channels;
 	ao_data.buffersize = NAS_BUFFER_SIZE * 2;
@@ -373,29 +376,36 @@ static int init(int rate,int channels,int format,int flags)
 		return 0;
 	}
 
-	if (!(server = getenv("AUDIOSERVER")))
-		server = getenv("DISPLAY");
-
-	if (!server) // default to tcp/localhost:8000
-		server = "tcp/localhost:8000";
+	if (!(server = getenv("AUDIOSERVER")) &&
+	    !(server = getenv("DISPLAY"))) {
+		mp_msg(MSGT_AO, MSGL_ERR, "ao_nas: init(): AUDIOSERVER environment variable not set -> nosound\n");
+		return 0;
+	}
 
 	mp_msg(MSGT_AO, MSGL_V, "ao_nas: init(): Using audioserver %s\n", server);
 
 	nas_data->aud = AuOpenServer(server, 0, NULL, 0, NULL, NULL);
-	if (!nas_data->aud){ 
+	if (!nas_data->aud) { 
 		mp_msg(MSGT_AO, MSGL_ERR, "ao_nas: init(): Can't open nas audio server -> nosound\n");
 		return 0;
 	}
 
-	nas_data->dev = nas_find_device(nas_data->aud, channels);
-	if ((nas_data->dev == AuNone) || (!(nas_data->flow = AuCreateFlow(nas_data->aud, NULL)))) {
-		mp_msg(MSGT_AO, MSGL_ERR, "ao_nas: init(): Can't find a device serving that many channels -> nosound\n");
+	while (channels>1) {
+		nas_data->dev = nas_find_device(nas_data->aud, channels);
+		if (nas_data->dev != AuNone &&
+		    (nas_data->flow = AuCreateFlow(nas_data->aud, NULL) != 0))
+			break;
+		channels--;
+	}
+
+	if (nas_data->flow == 0) {
+		mp_msg(MSGT_AO, MSGL_ERR, "ao_nas: init(): Can't find a suitable output device -> nosound\n");
 		AuCloseServer(nas_data->aud);
 		nas_data->aud = 0;
 		return 0;
 	}
 
-	AuMakeElementImportClient(elms, rate, auformat, channels, AuTrue,
+	AuMakeElementImportClient(elms, rate, auformat & 0xff, channels, AuTrue,
 				NAS_BUFFER_SIZE / bytes_per_sample,
 				(NAS_BUFFER_SIZE - NAS_FRAG_SIZE) / bytes_per_sample,
 				0, NULL);
