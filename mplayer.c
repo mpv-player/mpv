@@ -572,7 +572,9 @@ int gui_no_filename=0;
 
 #endif
 
+#ifdef USE_TV
   tv_param_immediate = 1;
+#endif
 
   if ( argv[0] )
     if(!strcmp(argv[0],"gmplayer") ||
