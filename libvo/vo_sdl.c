@@ -114,6 +114,7 @@
 #include "fastmemcpy.h"
 #include "sub.h"
 #include "aspect.h"
+#include "libmpcodecs/vfcap.h"
 
 #ifdef HAVE_X11
 #include <X11/Xlib.h>
@@ -1583,7 +1584,8 @@ query_format(uint32_t format)
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
     case IMGFMT_YVYU:
-    	return 0x6; // hw supported & osd
+        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD |
+            VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
     case IMGFMT_RGB15:
     case IMGFMT_BGR15:
     case IMGFMT_RGB16:
@@ -1592,7 +1594,7 @@ query_format(uint32_t format)
     case IMGFMT_BGR24:
     case IMGFMT_RGB32:
     case IMGFMT_BGR32:
-        return 0x5; // hw supported w/conversion & osd
+        return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_FLIP;
     }
     return 0;
 }
