@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 # Helper script to ease MEncoder two pass encoding
 # Copyleft 2001 by Felix Buenemann <atmosfear@users.sourceforge.net>
-# This files comes under GPL, see http://www.gnu.org/copyleft/gpl.html for more
+# This file comes under GPL, see http://www.gnu.org/copyleft/gpl.html for more
 # information on it's licensing.
 use strict;
 my $mencoder="mencoder"; # Path to MEncoder (including binary name)
