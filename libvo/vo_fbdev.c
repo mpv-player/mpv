@@ -47,8 +47,8 @@ extern int verbose;
 #ifdef CONFIG_VIDIX
 /* Name of VIDIX driver */
 static const char *vidix_name = NULL;
-static int pre_init_err = 0xFFFFFFFEUL;
 #endif
+static int pre_init_err = 0xFFFFFFFEUL;
 /******************************
 *	fb.modes support      *
 ******************************/
