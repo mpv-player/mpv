@@ -77,9 +77,7 @@ static int control(int cmd,int arg){
 static int init(int rate,int channels,int format,int flags){
 	int bits;
 	if(!ao_outputfilename) {
-		ao_outputfilename = (char *) malloc(sizeof(char) * 14);
-		strcpy(ao_outputfilename,
-		       (ao_pcm_waveheader ? "audiodump.wav" : "audiodump.pcm"));
+		ao_outputfilename = strdup(ao_pcm_waveheader ? "audiodump.wav" : "audiodump.pcm");
 	}
 
 	/* bits is only equal to format if (format == 8) or (format == 16);
@@ -138,7 +136,6 @@ static void uninit(){
 		fwrite(&wavhdr,sizeof(wavhdr),1,fp);
 	}
 	fclose(fp);
-	free(ao_outputfilename);
 }
 
 // stop playing and empty buffers (for seeking/pause)
