@@ -43,6 +43,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-subdelay\ <seconds> ]
 .RB [ \-vobsub\ <vobsub\ file\ without\ extention> ]
 .RB [ \-vobsubid\ <vobsub\ subtitle\ id> ]
+.RB [ \-ifo\ <vobsub\ ifo\ file> ]
 .RB [ \-z\ <0-9> ]
 .RB [ \-idx ]
 .RB [ \-noidx ]
@@ -302,6 +303,10 @@ or ".sub".
 .TP
 .B \-vobsubid\ <vobsub\ subtitle\ id>
 specify the VobSub subtitle id.  Valid values range from 0 to 31.
+.TP
+.B \-ifo <vobsub ifo file>
+indicate the file that will be used to load palette and frame size for VOBSUB
+subtitles.
 .TP
 .B \-osdlevel\ <level>
 specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)

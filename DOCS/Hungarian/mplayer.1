@@ -41,6 +41,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-subdelay\ <másodperc> ]
 .RB [ \-vobsub\ <vobsub\ file\ kiterjesztés\ nélkül> ]
 .RB [ \-vobsubid\ <vobsub\ felirat\ id> ]
+.RB [ \-ifo\ <vobsub\ ifo\ file> ]
 .RB [ \-z\ <0-8> ]
 .RB [ \-idx ]
 .RB [ \-noidx ]
@@ -304,6 +305,10 @@ file-ok. Kiterjesztések (.idx, .ifo, .sub) nélkül kell megadni !
 .B \-vobsub\ <vobsub\ felirat\ id>
 amennyiben a vobsub-ban több felirat is van, itt lehet kiválasztani hogy
 melyik legyen használva (0-31).
+.TP
+.B \-ifo <vobsub ifo file>
+az itt megadott file-ban találhatõ paletta és frameméret adatok lesznek
+használva a VOBSUB feliratok megjelenítésénél.
 .TP
 .B \-osdlevel\ <fokozat>
 megadja hogy az OSD milyen módban induljon (0 : nincs, 1 : keresõ, 2: keresõ+timer)
