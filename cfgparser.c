@@ -821,7 +821,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		mp_msg(MSGT_CFGPARSER,MSGL_INFO,"Reading config file: %s", conffile);
 
 	if (config->recursion_depth > MAX_RECURSION_DEPTH) {
-		mp_msg(MSGT_CFGPARSER,MSGL_INFO,": too deep 'include'. check your configfiles\n");
+		mp_msg(MSGT_CFGPARSER,MSGL_ERR,": too deep 'include'. check your configfiles\n");
 		ret = -1;
 		goto out;
 	}
@@ -832,14 +832,14 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 	}
 
 	if ((line = (char *) malloc(MAX_LINE_LEN + 1)) == NULL) {
-		mp_msg(MSGT_CFGPARSER,MSGL_INFO,"\ncan't get memory for 'line': %s", strerror(errno));
+		mp_msg(MSGT_CFGPARSER,MSGL_FATAL,"\ncan't get memory for 'line': %s", strerror(errno));
 		ret = -1;
 		goto out;
 	}
 
 	if ((fp = fopen(conffile, "r")) == NULL) {
 		if (config->recursion_depth > 1)
-			mp_msg(MSGT_CFGPARSER,MSGL_INFO,": %s\n", strerror(errno));
+			mp_msg(MSGT_CFGPARSER,MSGL_ERR,": %s\n", strerror(errno));
 		free(line);
 		ret = 0;
 		goto out;
@@ -849,7 +849,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 
 	while (fgets(line, MAX_LINE_LEN, fp)) {
 		if (errors >= 16) {
-			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"too many errors\n");
+			mp_msg(MSGT_CFGPARSER,MSGL_FATAL,"too many errors\n");
 			goto out;
 		}
 
@@ -872,7 +872,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 			opt[opt_pos++] = line[line_pos++];
 			if (opt_pos >= MAX_OPT_LEN) {
 				PRINT_LINENUM;
-				mp_msg(MSGT_CFGPARSER,MSGL_INFO,"too long option\n");
+				mp_msg(MSGT_CFGPARSER,MSGL_ERR,"too long option\n");
 				errors++;
 				ret = -1;
 				goto nextline;
@@ -880,7 +880,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		}
 		if (opt_pos == 0) {
 			PRINT_LINENUM;
-			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"parse error\n");
+			mp_msg(MSGT_CFGPARSER,MSGL_ERR,"parse error\n");
 			ret = -1;
 			errors++;
 			continue;
@@ -899,7 +899,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		/* check '=' */
 		if (line[line_pos++] != '=') {
 			PRINT_LINENUM;
-			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"option without parameter\n");
+			mp_msg(MSGT_CFGPARSER,MSGL_ERR,"option without parameter\n");
 			ret = -1;
 			errors++;
 			continue;
@@ -917,7 +917,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 				param[param_pos++] = line[line_pos++];
 				if (param_pos >= MAX_PARAM_LEN) {
 					PRINT_LINENUM;
-					mp_msg(MSGT_CFGPARSER,MSGL_INFO,"too long parameter\n");
+					mp_msg(MSGT_CFGPARSER,MSGL_ERR,"too long parameter\n");
 					ret = -1;
 					errors++;
 					goto nextline;
@@ -930,7 +930,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 				param[param_pos++] = line[line_pos++];
 				if (param_pos >= MAX_PARAM_LEN) {
 					PRINT_LINENUM;
-					mp_msg(MSGT_CFGPARSER,MSGL_INFO,"too long parameter\n");
+					mp_msg(MSGT_CFGPARSER,MSGL_ERR,"too long parameter\n");
 					ret = -1;
 					errors++;
 					goto nextline;
@@ -942,7 +942,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		/* did we read a parameter? */
 		if (param_pos == 0) {
 			PRINT_LINENUM;
-			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"option without parameter\n");
+			mp_msg(MSGT_CFGPARSER,MSGL_ERR,"option without parameter\n");
 			ret = -1;
 			errors++;
 			continue;
@@ -961,7 +961,7 @@ int m_config_parse_config_file(m_config_t *config, char *conffile)
 		/* EOL / comment */
 		if (line[line_pos] != '\0' && line[line_pos] != '#') {
 			PRINT_LINENUM;
-			mp_msg(MSGT_CFGPARSER,MSGL_INFO,"extra characters on line: %s\n", line+line_pos);
+			mp_msg(MSGT_CFGPARSER,MSGL_WARN,"extra characters on line: %s\n", line+line_pos);
 			ret = -1;
 		}
 
