@@ -425,6 +425,8 @@ tv_err:
 
 int dvd_parse_chapter_range(struct config *conf, const char *range){
   char *s, *t;
+  conf; /* prevent warning from GCC */
+  s = range;
   dvd_chapter = 1;
   dvd_last_chapter = 0;
   if (*range && isdigit(*range)) {
