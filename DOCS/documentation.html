@@ -114,6 +114,7 @@
       </UL>
     </UL>
     <LI><A HREF="encoding.html#2.4">2.4 MEncoder - An Encoder based on MPlayer</A></LI>
+    <LI><A HREF=#2.5>2.5 TV input</A></LI>
   </UL>
   <LI><A HREF="#3">3. Usage</A></LI>
     <UL>
@@ -457,6 +458,106 @@ Now you have to see a timer at the upper left corner of the movie
 
 
 <P><A NAME=2.4>2.4. <A HREF="encoding.html">MEncoder - An All-Purpose Encoder</P>
+
+
+<P><A NAME=2.5><B>2.4. TV input</B></P>
+
+<P>This section is about how to enable <B>watching/grabbing from V4L compatible
+TV tuner</B>.</P>
+
+<P>
+<UL>
+  <LI>first, you have to add the <CODE>--enable-tv</CODE> flag to <CODE>./configure</CODE>,
+    and recompile.</LI>
+  <LI>make sure your tuner works with another TV softwares in Linux, for example
+    xawtv.</LI>
+</UL>
+</P>
+
+<P><B><I>Available options</I></B><BR>
+<TABLE>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>on</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use TV
+  input</TD>
+</TR>
+<TR>
+  <TD></TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>driver</I></TD>
+  <TD></TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+    <B>dummy</B> - NULL TV input :) Used for testing only, generates dummy
+    input.<BR>
+    <B>v4l</B> - captures images from standard V4L interface (default
+    <CODE>/dev/video0</CODE>)</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>device</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specify other
+  device than the default <CODE>/dev/video0</CODE></TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>input</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>give from which
+  input of the TV tuner you which to grab from (e.g. <B>television</B>,
+  <B>s-video</B>, <B>composite</B>, ...)<BR>
+    Prints the available ones during init.</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>freq</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>specify the
+  frequency to set the tuner (e.g. <B>511.250</B>)</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>outfmt</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>in which output
+  format to display images (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
+  <B>uyvy</B>)<BR>
+    The following option must have the same setting !</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>vc</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>the same option
+  as before. You have to choose one, according to what you set the <CODE>outfmt</CODE>
+  option above : <B>rawrgb32</B>, <B>rawrgb24</B>, <B>rawyv12</B>, <B>rawuyvy</B></TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>width</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <B>MANDATORY</B> - the width of the output window, in pixels</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>height</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
+  <B>MANDATORY</B> - the height of the output window, in pixels</TD>
+</TR>
+</TABLE>
+</P>
+
+<P><B><I>Examples</I></B></P>
+
+<P>
+Dummy output, to AAlib :)<BR>
+<CODE>mplayer -tv on:driver=dummy:width=640:height=480</CODE><BR>
+Input from standard V4L<BR>
+<CODE>mplayer -tv on:driver=v4l:width=800:height=600:device=/dev/video0:input=television:outfmt=yv12 -vc rawyv12 -vo xv</CODE><BR>
+</P>
 
 
 <P><B><A NAME=3>3. Usage</A></B></P>
