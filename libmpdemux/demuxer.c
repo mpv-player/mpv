@@ -385,19 +385,6 @@ if((tv_param_on == 1) &&
   file_format=DEMUXER_TYPE_TV;
 }
 #endif
-//=============== Try to open as FLI file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_FLI,audio_id,video_id,dvdsub_id);
-  {
-    int size=stream_read_dword_le(demuxer->stream);
-    int id=stream_read_word_le(demuxer->stream);
-    // chech for the FLI file magic number
-    if((id==0xAF11) || (id==0xAF12)){ 
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFLIfile);
-      file_format=DEMUXER_TYPE_FLI;
-    }
-  }
-}
 
 //=============== Try to open as AVI file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
@@ -428,6 +415,27 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MOV){
   if(mov_check_file(demuxer)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedQTMOVfile);
       file_format=DEMUXER_TYPE_MOV;
+  }
+}
+//=============== Try to open as VIVO file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_VIVO,audio_id,video_id,dvdsub_id);
+  if(vivo_check_file(demuxer)){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected VIVO file format!\n");
+      file_format=DEMUXER_TYPE_VIVO;
+  }
+}
+//=============== Try to open as FLI file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_FLI){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_FLI,audio_id,video_id,dvdsub_id);
+  {
+    int size=stream_read_dword_le(demuxer->stream);
+    int id=stream_read_word_le(demuxer->stream);
+    // chech for the FLI file magic number
+    if((id==0xAF11) || (id==0xAF12)){ 
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedFLIfile);
+      file_format=DEMUXER_TYPE_FLI;
+    }
   }
 }
 //=============== Try to open as MPEG-PS file: =================
@@ -475,14 +483,6 @@ if(file_format==DEMUXER_TYPE_MPEG_ES){ // little hack, see above!
     file_format=DEMUXER_TYPE_UNKNOWN;
   } else {
     mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_DetectedMPEGESfile);
-  }
-}
-//=============== Try to open as VIVO file: =================
-if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_VIVO){
-  demuxer=new_demuxer(stream,DEMUXER_TYPE_VIVO,audio_id,video_id,dvdsub_id);
-  if(vivo_check_file(demuxer)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,"Detected VIVO file format!\n");
-      file_format=DEMUXER_TYPE_VIVO;
   }
 }
 //=============== Unknown, exiting... ===========================
