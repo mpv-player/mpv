@@ -6,8 +6,6 @@
   Uses libGGI - http://www.ggi-project.org/
 
   TODO:
-   * implement direct rendering support - NEEDS TESTING
-   * implement non-directbuffer support - NEEDS TESTING
    * check on many devices
    * implement gamma handling (VAA isn't obsoleted?)
  
@@ -38,8 +36,6 @@
 #include <ggi/ggi.h>
 
 /* maximum buffers */
-#define GGI_FRAMES 4
-
 #undef GGI_FLIP
 
 static vo_info_t info = 
@@ -47,7 +43,7 @@ static vo_info_t info =
 	"General Graphics Interface (GGI) output",
 	"ggi",
 	"Alex Beregszaszi",
-	"under developement"
+	"major"
 };
 
 LIBVO_EXTERN (ggi)
@@ -56,11 +52,7 @@ static struct ggi_conf_s {
     char *driver;
     
     ggi_visual_t vis;
-    ggi_directbuffer *buffer[GGI_FRAMES];
     ggi_mode gmode;
-    
-    int frames;
-    int currframe;
     
     /* source image format */
     int srcwidth;
@@ -74,21 +66,16 @@ static struct ggi_conf_s {
     int dstheight;
     
     int async;
-    int directbuffer;
     
     int voflags;
 } ggi_conf;
-
-static uint32_t draw_frame_directbuffer(uint8_t *src[]);
-static void draw_osd_directbuffer(void);
-static void flip_page_directbuffer(void);
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
     ggi_mode mode =
     {
-	GGI_FRAMES,		/* frames */
+	1,			/* frames */
 	{ width, height },	/* visible */
 	{ GGI_AUTO, GGI_AUTO },	/* virt */
 	{ GGI_AUTO, GGI_AUTO },	/* size */
@@ -96,8 +83,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	{ GGI_AUTO, GGI_AUTO }	/* dots per pixel */
     };
     int i;
-    ggi_directbuffer *DB;
-    
+
     switch(format)
     {
 	case IMGFMT_RGB|8:
@@ -190,80 +176,20 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     vo_dwidth = ggi_conf.dstwidth = ggi_conf.gmode.virt.x;
     vo_dheight = ggi_conf.dstheight = ggi_conf.gmode.virt.y;
 
-    ggi_conf.directbuffer = 1;
-
-    ggi_conf.frames = ggiDBGetNumBuffers(ggi_conf.vis);
-    if (ggi_conf.frames > GGI_FRAMES)
-	ggi_conf.frames = GGI_FRAMES;
-    
-    ggi_conf.currframe = 0;
-    if (!ggi_conf.frames)
-    {
-	goto db_err;
-    }
-
-    for (i = 0; i < ggi_conf.frames; i++)
-        ggi_conf.buffer[i] = NULL;
-
-    /* get available number of buffers */
-    for (i = 0; DB = (ggi_directbuffer *)ggiDBGetBuffer(ggi_conf.vis, i),
-	i < ggi_conf.frames; i++)
-    {
-        if (!(DB->type & GGI_DB_SIMPLE_PLB) ||
-    	    (DB->page_size != 0) ||
-    	    (DB->write == NULL) ||
-	    (DB->noaccess != 0) ||
-	    (DB->align != 0) ||
-	    (DB->layout != blPixelLinearBuffer))
-	    continue;
-	
-	ggi_conf.buffer[DB->frame] = DB;
-    }
-
-    if (ggi_conf.buffer[0] == NULL)
-    {
-	goto db_err;
-    }
-    
-    for (i = 0; i < ggi_conf.frames; i++)
-    {
-	if (ggi_conf.buffer[i] == NULL)
-	{
-	    ggi_conf.frames = i-1;
-	    break;
-	}
-    }
-    ggiSetDisplayFrame(ggi_conf.vis, ggi_conf.currframe);
-    ggiSetWriteFrame(ggi_conf.vis, ggi_conf.currframe);    
-
-    goto db_ok;
-
-db_err:
-    mp_msg(MSGT_VO, MSGL_ERR, "[ggi] direct buffer unavailable, using async mode\n");
-    ggi_conf.directbuffer = 0;
     ggiSetFlags(ggi_conf.vis, GGIFLAG_ASYNC);
 
-db_ok:
     if (GT_SCHEME(mode.graphtype) == GT_PALETTE)
 	ggiSetColorfulPalette(ggi_conf.vis);
 
     if (ggiGetFlags(ggi_conf.vis) & GGIFLAG_ASYNC)
 	ggi_conf.async = 1;
 
-    mp_msg(MSGT_VO, MSGL_INFO, "[ggi] input: %dx%dx%d, output: %dx%dx%d, frames: %d\n",
+    mp_msg(MSGT_VO, MSGL_INFO, "[ggi] input: %dx%dx%d, output: %dx%dx%d\n",
 	ggi_conf.srcwidth, ggi_conf.srcheight, ggi_conf.srcdepth, 
-	vo_dwidth, vo_dheight, vo_dbpp, ggi_conf.frames);
-    mp_msg(MSGT_VO, MSGL_INFO, "[ggi] directbuffer: %s, async mode: %s\n",
-	ggi_conf.directbuffer ? "yes" : "no",
+	vo_dwidth, vo_dheight, vo_dbpp);
+    mp_msg(MSGT_VO, MSGL_INFO, "[ggi] async mode: %s\n",
 	ggi_conf.async ? "yes" : "no");
 
-    if (ggi_conf.directbuffer)
-    {
-	video_out_ggi.draw_frame = draw_frame_directbuffer;
-	video_out_ggi.draw_osd = draw_osd_directbuffer;
-	video_out_ggi.flip_page = flip_page_directbuffer;
-    }
-    
     ggi_conf.srcbpp = (ggi_conf.srcdepth+7)/8;
 
     return(0);
@@ -272,7 +198,7 @@ db_ok:
 static uint32_t get_image(mp_image_t *mpi)
 {
     /* GGI DirectRendering supports (yet) only BGR/RGB modes */
-    if (!ggi_conf.directbuffer ||
+    if (
 #if 1
 	(IMGFMT_IS_RGB(mpi->imgfmt) &&
 	    (IMGFMT_RGB_DEPTH(mpi->imgfmt) != vo_dbpp)) ||
@@ -289,62 +215,21 @@ static uint32_t get_image(mp_image_t *mpi)
     )
 	return(VO_FALSE);
 
-    if (ggi_conf.frames > 1)
-    {
-	mp_msg(MSGT_VO, MSGL_WARN, "[ggi] doublebuffering disabled due to directrendering\n");
-	ggi_conf.currframe = 0;
-	ggi_conf.frames = 1;
-    }
-    
     mpi->planes[1] = mpi->planes[2] = NULL;
     mpi->stride[1] = mpi->stride[2] = 0;
     
     mpi->stride[0] = ggi_conf.srcwidth*ggi_conf.srcbpp;
-    mpi->planes[0] = ggi_conf.buffer[ggi_conf.currframe]->write;
+    mpi->planes[0] = NULL;
     mpi->flags |= MP_IMGFLAG_DIRECT;
 
 #ifdef GGI_FLIP
     if (ggi_conf.voflags & VOFLAG_FLIPPING)
     {
 	mpi->stride[0] = -mpi->stride[0];
-	mpi->planes[0] -= mpi->stride[0]*(ggi_conf.srcheight-1);
     }
 #endif
 
     return(VO_TRUE);
-}
-
-static uint32_t draw_frame_directbuffer(uint8_t *src[])
-{
-    unsigned char *dst_ptr;
-    int dst_stride, dst_bpp;
-
-    ggiResourceAcquire(ggi_conf.buffer[ggi_conf.currframe]->resource,
-	GGI_ACTYPE_WRITE);
-
-    ggiSetWriteFrame(ggi_conf.vis, ggi_conf.currframe);
-
-    dst_ptr = ggi_conf.buffer[ggi_conf.currframe]->write;
-    dst_stride = ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.stride;
-    dst_bpp = (ggi_conf.buffer[ggi_conf.currframe]->buffer.plb.pixelformat->size+7)/8;
-
-#ifdef GGI_FLIP
-    if (ggi_conf.voflags & VOFLAG_FLIPPING)
-    {
-	dst_stride = -dst_stride;
-	dst_ptr -= dst_stride*(ggi_conf.srcheight-1);
-    }
-#endif
-
-    /* memcpy_pic(dst, src, bytes per line, height, dst_stride, src_stride) */
-
-    memcpy_pic(dst_ptr, src[0], ggi_conf.srcwidth*dst_bpp, ggi_conf.srcheight,
-	dst_stride,
-	ggi_conf.srcwidth*ggi_conf.srcbpp);
-
-    ggiResourceRelease(ggi_conf.buffer[ggi_conf.currframe]->resource);
-
-    return(0);
 }
 
 
@@ -356,49 +241,9 @@ static uint32_t draw_frame(uint8_t *src[])
     return(0);
 }
 
-static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
-    unsigned char *srca, int stride)
-{
-    switch(vo_dbpp)
-    {
-    case 32:
-        vo_draw_alpha_rgb32(w, h, src, srca, stride, 
-    	    ggi_conf.buffer[ggi_conf.currframe]->write+4*(ggi_conf.dstwidth*y0+x0), 4*ggi_conf.dstwidth);
-	break;
-    case 24:
-        vo_draw_alpha_rgb24(w, h, src, srca, stride, 
-	    ggi_conf.buffer[ggi_conf.currframe]->write+3*(ggi_conf.dstwidth*y0+x0), 3*ggi_conf.dstwidth);
-	break;
-    case 16:
-	vo_draw_alpha_rgb16(w, h, src, srca, stride, 
-	    ggi_conf.buffer[ggi_conf.currframe]->write+2*(ggi_conf.dstwidth*y0+x0), 2*ggi_conf.dstwidth);
-	break;
-    case 15:
-	vo_draw_alpha_rgb15(w, h, src, srca, stride, 
-	    ggi_conf.buffer[ggi_conf.currframe]->write+2*(ggi_conf.dstwidth*y0+x0), 2*ggi_conf.dstwidth);
-	break;
-    }
-}
-
-static void draw_osd_directbuffer(void)
-{
-    vo_draw_text(ggi_conf.srcwidth, ggi_conf.srcheight, draw_alpha);
-}
-
 static void draw_osd(void)
 {
-}
 
-static void flip_page_directbuffer(void)
-{
-    ggiSetDisplayFrame(ggi_conf.vis, ggi_conf.currframe);
-    mp_dbg(MSGT_VO, MSGL_DBG2, "[ggi] flipping, current write frame: %d, display frame: %d\n",
-	ggiGetWriteFrame(ggi_conf.vis), ggiGetDisplayFrame(ggi_conf.vis));
-
-    ggi_conf.currframe = (ggi_conf.currframe+1) % ggi_conf.frames;
-    
-    if (ggi_conf.async)
-	ggiFlush(ggi_conf.vis);
 }
 
 static void flip_page(void)
@@ -429,14 +274,6 @@ static uint32_t query_format(uint32_t format)
     if ((IMGFMT_IS_BGR(format) && (IMGFMT_BGR_DEPTH(format) == vo_dbpp)) ||
 	(IMGFMT_IS_RGB(format) && (IMGFMT_RGB_DEPTH(format) == vo_dbpp)))
     {
-	if (ggi_conf.directbuffer)
-#ifdef GGI_FLIP
-	    return(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|
-		VFCAP_OSD|VFCAP_FLIP);
-#else
-	    return(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD);
-#endif
-	else
 	    return(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW);
     }
     
@@ -471,13 +308,6 @@ static uint32_t query_format(uint32_t format)
 	}
 	else
 	{
-	if (ggi_conf.directbuffer)
-#ifdef GGI_FLIP
-	    return(VFCAP_CSP_SUPPORTED|VFCAP_OSD|VFCAP_FLIP);
-#else
-	    return(VFCAP_CSP_SUPPORTED|VFCAP_OSD);
-#endif
-	else
 	    return(VFCAP_CSP_SUPPORTED);
 	}
     }
