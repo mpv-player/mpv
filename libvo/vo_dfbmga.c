@@ -118,13 +118,6 @@ static int is_g200 = 0;
  #define DSPF_ARGB1555 DSPF_RGB15
 #endif
 
-/* command line/config file options */
-#ifdef HAVE_FBDEV
- extern char *fb_dev_name;
-#else
- char *fb_dev_name;
-#endif
-
 static uint32_t in_width;
 static uint32_t in_height;
 static uint32_t screen_width;
@@ -383,12 +376,6 @@ preinit( const char *arg )
                        DirectFBErrorString( res ) );
                return -1;
           }
-
-          if (!fb_dev_name && !(fb_dev_name = getenv( "FRAMEBUFFER" )))
-               fb_dev_name = "/dev/fb0";
-          DirectFBSetOption( "fbdev", fb_dev_name );
-          DirectFBSetOption( "no-cursor", "" );
-          DirectFBSetOption( "bg-color", "00000000" );
 
           switch (tvnorm) {
           case 0:
