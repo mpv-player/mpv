@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2003 Rik Snel <snel@phys.uu.nl>, license GPL v2
+ * Copyright (C) 2005 Rik Snel <rsnel@cube.dyndns.org>, license GPL v2
  * - based on vd_lavc.c by A'rpi (C) 2002-2003 
  * - parts from ffmpeg Copyright (c) 2000-2003 Fabrice Bellard
  *

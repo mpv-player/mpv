@@ -4,7 +4,7 @@
  *  Copyright (C) 2001 Matthew J. Marjanovic <maddog@mir.com>
  *
  *  This file is ripped from the lavtools package (mjpeg.sourceforge.net)
- *  Ported to mplayer by Rik Snel <snel@phys.uu.nl>
+ *  Ported to mplayer by Rik Snel <rsnel@cube.dyndns.org>
  *
  *  This program is free software; you can redistribute it and/or
  *  modify it under the terms of the GNU General Public License

@@ -34,7 +34,7 @@ static vo_info_t info =
 {
 	"Zoran ZR360[56]7/ZR36060 Driver (DC10(+)/buz/lml33/MatroxRR)",
 	"zr",
-	"Rik Snel <snel@phys.uu.nl>",
+	"Rik Snel <rsnel@cube.dyndns.org>",
 	""
 };
 
