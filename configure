@@ -2324,27 +2324,24 @@ else
   _mkf_jpg="no"
 fi
 
+
 echocheck "GIF89a support"
 if test "$_gif" = auto ; then
   _gif=no
 cat > $TMPC << EOF
 #include <gif_lib.h>
 int main(void) {
-  EGifPutExtensionFirst(NULL,0xFF, 11, NULL);
+  EGifPutExtensionFirst(NULL, 0xFF, 11, NULL);
   return 0;
 }
 EOF
-    if cc_check -lungif ; then
-      if "$TMPO" >> "$TMPLOG" ; then
-        _gif=yes
-        _ld_gif="-lungif"
-      fi
-    elif cc_check -lgif ; then
-      if "$TMPO" >> "$TMPLOG" ; then
-        _gif=yes
-        _ld_gif="-lgif"
-      fi
-    fi
+  if cc_check -lungif ; then
+    _gif=yes
+    _ld_gif="-lungif"
+  elif cc_check -lgif ; then
+    _gif=yes
+    _ld_gif="-lgif"
+  fi
 fi
 echores "$_gif"
 
