@@ -4,7 +4,7 @@
  *	Copyright (C) Nick Kurshev <nickols_k@mail.ru> - Oct 2001
  *
  *  You can redistribute this file under terms and conditions
- *  GNU General Public licence v2.
+ *  of GNU General Public licence v2.
  *  This file is partly based on vbetest.c from lrmi distributive.
  */
 
@@ -12,6 +12,7 @@
   TODO:
   - hw YUV support (need volunteers who have corresponding hardware)
   - double (triple) buffering (if it will really speedup playback).
+    note: triple buffering requires VBE 3.0.
   - refresh rate support (need additional info from mplayer)
 */
 #include <stdio.h>
@@ -58,21 +59,17 @@ static vo_info_t vo_info =
 
 /* driver data */
 
-/*
-   TODO: for linear framebuffer mode:
-   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-   win.ptr = linear address of frame buffer;
-   win.low = 0;
-   win.high = vide_memory_size;
-*/
 struct win_frame
 {
   uint8_t   *ptr;   /* pointer to window's frame memory */
   uint32_t   low;   /* lowest boundary of frame */
   uint32_t   high;  /* highest boundary of frame */
   char       idx;   /* indicates index of relocatable frame (A=0 or B=1)
-                       special case for DGA: idx=-1 */
+                       special case for DGA: idx=-1
+		       idx=-2 indicates invalid frame, exists only in init() */
 };
+
+static void (*cpy_blk_fnc)(unsigned long,uint8_t *,unsigned long) = NULL;
 
 static int vesa_zoom=0; /* software scaling */
 static unsigned int scale_xinc=0;
@@ -83,12 +80,14 @@ static int32_t x_offset,y_offset; /* to center image on screen */
 static unsigned init_mode; /* mode before run of mplayer */
 static void *init_state = NULL; /* state before run of mplayer */
 static struct win_frame win; /* real-mode window to video memory */
-static uint8_t *yuv_buffer = NULL; /* for yuv2rgb and sw_scaling */
+static uint8_t *dga_buffer = NULL; /* for yuv2rgb and sw_scaling */
 static unsigned video_mode; /* selected video mode for playback */
 static struct VesaModeInfoBlock video_mode_info;
 static int flip_trigger = 0;
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 static void (*rgb2rgb_fnc)(uint8_t *src,uint8_t *dst,uint32_t src_size);
+
+#define HAS_DGA()  (win.idx == -1)
 
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
 #define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_READABLE | MODE_WIN_WRITEABLE)
@@ -109,7 +108,7 @@ static char * vbeErrToStr(int err)
     case VBE_OUT_OF_DOS_MEM: retval = "Out of DOS memory"; break;
     case VBE_OUT_OF_MEM: retval = "Out of memory"; break;
     case VBE_BROKEN_BIOS: retval = "Broken BIOS or DOS TSR"; break;
-    default: sprintf(sbuff,"Uknown error: %i",err); retval=sbuff; break;
+    default: sprintf(sbuff,"Unknown or internal error: %i",err); retval=sbuff; break;
   }
   return retval;
 }
@@ -121,8 +120,8 @@ static void vesa_term( void )
   int err;
   if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
   if((err=vbeSetMode(init_mode,NULL)) != VBE_OK) PRINT_VBE_ERR("vbeSetMode",err);
-  if(win.idx == -1) vbeUnmapVideoBuffer((unsigned long)win.ptr,win.high);
-  if(yuv_buffer) free(yuv_buffer);
+  if(HAS_DGA()) vbeUnmapVideoBuffer((unsigned long)win.ptr,win.high);
+  if(dga_buffer && !HAS_DGA()) free(dga_buffer);
   vbeDestroy();
 }
 
@@ -136,7 +135,7 @@ static inline void __vbeSwitchBank(unsigned long offset)
   int err;
   gran = video_mode_info.WinGranularity*1024;
   new_offset = offset / gran;
-  if(win.idx == -1) goto show_err;
+  if(HAS_DGA()) { err = -1; goto show_err; }
   if((err=vbeSetWindow(win.idx,new_offset)) != VBE_OK)
   {
     show_err:
@@ -171,9 +170,14 @@ static void __vbeSetPixel(int x, int y, int r, int g, int b)
 }
 
 /*
-  Copies line of frame to video memory. Data should be in the same format as video
-  memory.
+  Copies part of frame to video memory. Data should be in the same format
+  as video memory.
 */
+static void __vbeCopyBlockFast(unsigned long offset,uint8_t *image,unsigned long size)
+{
+  memcpy(&win.ptr[offset],image,size);
+}
+
 static void __vbeCopyBlock(unsigned long offset,uint8_t *image,unsigned long size)
 {
    unsigned long delta,src_idx = 0;
@@ -188,51 +192,26 @@ static void __vbeCopyBlock(unsigned long offset,uint8_t *image,unsigned long siz
    }
 }
 
-static void __vbeCopyBlockSwap(unsigned long offset,uint8_t *image,unsigned long size)
-{
-   unsigned byte_len;
-   uint8_t ch;
-   while(size)
-   {
-       switch(video_mode_info.BitsPerPixel)
-       {
-	case 8: byte_len = 1; break;
-	default:
-	case 15:
-		printf("vo_vesa: Can't swap non byte aligned data\n");
-		vesa_term();
-		exit(-1);
-	case 16: *(image + offset) = ByteSwap16(*(image + offset));
-		 byte_len = 2; break;
-	case 24: ch = *(image+offset);
-		 *(image+offset) = *(image+offset+3);
-                 *(image+offset+3) = ch;
-		 byte_len = 3; break;
-	case 32: *(image + offset) = ByteSwap32(*(image + offset));
-		 byte_len = 4; break;
-       }
-       __vbeCopyBlock(offset,image,byte_len);
-       size   -= byte_len;
-       image  += byte_len;
-       offset += byte_len;
-   }
-}
-
 /*
   Copies frame to video memory. Data should be in the same format as video
   memory.
 */
+
+#define PIXEL_SIZE() ((video_mode_info.BitsPerPixel+7)/8)
+#define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*pixel_size) 
+#define IMAGE_LINE_SIZE(pixel_size) (image_width*pixel_size)
+
 static void __vbeCopyData(uint8_t *image)
 {
    unsigned long i,j,image_offset,offset;
    unsigned pixel_size,image_line_size,screen_line_size,x_shift;
-   pixel_size = (video_mode_info.BitsPerPixel+7)/8;
-   screen_line_size = video_mode_info.XResolution*pixel_size;
-   image_line_size = image_width*pixel_size;
+   pixel_size = PIXEL_SIZE();
+   screen_line_size = SCREEN_LINE_SIZE(pixel_size);
+   image_line_size = IMAGE_LINE_SIZE(pixel_size);
    if(image_width == video_mode_info.XResolution)
    {
      /* Special case for zooming */
-     __vbeCopyBlock(y_offset*screen_line_size,image,image_line_size*image_height);
+     (*cpy_blk_fnc)(y_offset*screen_line_size,image,image_line_size*image_height);
    }
    else
    {
@@ -241,7 +220,7 @@ static void __vbeCopyData(uint8_t *image)
      {
        offset = i*screen_line_size+x_shift;
        image_offset = j*image_line_size;
-       __vbeCopyBlock(offset,&image[image_offset],image_line_size);
+       (*cpy_blk_fnc)(offset,&image[image_offset],image_line_size);
      }
    }
 }
@@ -253,39 +232,47 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
 	printf("vo_vesa: draw_slice was called: w=%u h=%u x=%u y=%u\n",w,h,x,y);
     if(vesa_zoom)
     {
-	 uint8_t *dst[3]= {yuv_buffer, NULL, NULL};
-	 SwScale_YV12slice(image,stride,y,h,
-	                     dst,
-			     image_width*((video_mode_info.BitsPerPixel+7)/8),
+	 uint8_t *dst[3]= {dga_buffer, NULL, NULL};
+	 int dst_stride;
+	 if(HAS_DGA()) dst[0] += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
+	 dst_stride = PIXEL_SIZE()*(HAS_DGA()?video_mode_info.XResolution:image_width);
+	 SwScale_YV12slice(image,stride,y,h,dst,dst_stride,
 			     image_width, video_mode_info.BitsPerPixel,
 	    		     scale_xinc, scale_yinc);
     }
     else
     {
 	uint8_t *yuv_slice;
-	yuv_slice=yuv_buffer+(image_width*y+x)*((video_mode_info.BitsPerPixel+7)/8);
+	int rgb_stride;
+	yuv_slice=dga_buffer;
+	if(HAS_DGA()) yuv_slice += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
+	rgb_stride = PIXEL_SIZE()*(HAS_DGA()?video_mode_info.XResolution:image_width);
+	yuv_slice+=(image_width*y+x)*PIXEL_SIZE();
 	yuv2rgb(yuv_slice, image[0], image[1], image[2], w, h,
-		image_width * ((video_mode_info.BitsPerPixel+7)/8),
-		stride[0], stride[1]);
+		rgb_stride, stride[0], stride[1]);
     }
     flip_trigger = 1;
     return 0;
 }
 
 static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   vo_draw_alpha_rgb32(w,h,src,srca,stride,yuv_buffer+4*(y0*image_width+x0),4*image_width);
+   unsigned int offset=HAS_DGA()?video_mode_info.XResolution:image_width;
+   vo_draw_alpha_rgb32(w,h,src,srca,stride,dga_buffer+4*(y0*offset+x0),4*offset);
 }
 
 static void draw_alpha_24(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   vo_draw_alpha_rgb24(w,h,src,srca,stride,yuv_buffer+3*(y0*image_width+x0),3*image_width);
+   unsigned int offset=HAS_DGA()?video_mode_info.XResolution:image_width;
+   vo_draw_alpha_rgb24(w,h,src,srca,stride,dga_buffer+3*(y0*offset+x0),3*offset);
 }
 
 static void draw_alpha_16(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   vo_draw_alpha_rgb16(w,h,src,srca,stride,yuv_buffer+2*(y0*image_width+x0),2*image_width);
+   unsigned int offset=HAS_DGA()?video_mode_info.XResolution:image_width;
+   vo_draw_alpha_rgb16(w,h,src,srca,stride,dga_buffer+2*(y0*offset+x0),2*offset);
 }
 
 static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   vo_draw_alpha_rgb15(w,h,src,srca,stride,yuv_buffer+2*(y0*image_width+x0),2*image_width);
+   unsigned int offset=HAS_DGA()?video_mode_info.XResolution:image_width;
+   vo_draw_alpha_rgb15(w,h,src,srca,stride,dga_buffer+2*(y0*offset+x0),2*offset);
 }
 
 static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
@@ -296,14 +283,18 @@ static void draw_osd(void)
 {
  if(verbose > 2)
 	printf("vo_vesa: draw_osd was called\n");
- if(yuv_buffer) vo_draw_text(image_width,image_height,draw_alpha_fnc);
+ if(dga_buffer) vo_draw_text(image_width,image_height,draw_alpha_fnc);
 }
 
 static void flip_page(void)
 {
   if(verbose > 2)
 	printf("vo_vesa: flip_page was called\n");
-  if(flip_trigger) { __vbeCopyData(yuv_buffer); flip_trigger = 0; }
+  if(flip_trigger) 
+  {
+    if(!HAS_DGA()) __vbeCopyData(dga_buffer);
+    flip_trigger = 0;
+  }
 }
 
 /* is called for rgb only */
@@ -314,13 +305,13 @@ static uint32_t draw_frame(uint8_t *src[])
         printf("vo_vesa: draw_frame was called\n");
     if(rgb2rgb_fnc)
     {
-      (*rgb2rgb_fnc)(src[0],yuv_buffer,image_width*image_height*image_bpp);
-      data = yuv_buffer;
+      (*rgb2rgb_fnc)(src[0],dga_buffer,image_width*image_height*image_bpp);
+      data = dga_buffer;
       if(verbose > 2)
           printf("vo_vesa: rgb2rgb_fnc was called\n");
     } 
     else data = src[0];
-    __vbeCopyData(data);
+    if(!rgb2rgb_fnc || !HAS_DGA()) __vbeCopyData(data);
     return 0;
 }
 
@@ -332,7 +323,7 @@ static uint32_t query_format(uint32_t format)
 	switch(format)
 	{
 		case IMGFMT_YV12:
-#if 0 /* Should be tested better */
+#if 1 /* Should be tested better */
 		case IMGFMT_I420:
 		case IMGFMT_IYUV:
 #endif
@@ -453,6 +444,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	num_modes = 0;
 	mode_ptr = vib.VideoModePtr;
 	while(*mode_ptr++ != 0xffff) num_modes++;
+	yuv_fmt = 0;
 	switch(format)
 	{
 		case IMGFMT_BGR8:
@@ -558,6 +550,10 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		printf("vo_vesa: Using VESA mode (%u) = %x [%ux%u@%u]\n"
 			,best_mode_idx,video_mode,video_mode_info.XResolution
 			,video_mode_info.YResolution,video_mode_info.BitsPerPixel);
+#if 0
+/* Redefine here any mode related parameters. It's for test purposes only */
+	        video_mode_info.PhysBasePtr = 0;
+#endif
 		if( vesa_zoom || fs_mode )
 		{
 		  if( format==IMGFMT_YV12 )
@@ -604,21 +600,45 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		else
 		if((video_mode_info.WinBAttributes & FRAME_MODE) == FRAME_MODE)
 		   win.idx = 1; /* frame B */
-		else 
+		else win.idx = -2;
+		/* Try use DGA instead */
+		if(video_mode_info.PhysBasePtr && vib.TotalMemory && (video_mode_info.ModeAttributes & MODE_ATTR_LINEAR))
 		{
-		  printf("vo_vesa: Can't find usable frame of window\n");
-		  return -1; 
+		    void *lfb;
+		    unsigned long vsize;
+		    vsize = vib.TotalMemory*64*1024;
+		    lfb = vbeMapVideoBuffer(video_mode_info.PhysBasePtr,vsize);
+		    if(lfb == NULL)
+		      printf("vo_vesa: Can't use DGA. Force bank switching mode. :(\n");
+		    else
+		    {
+		      win.ptr = lfb;
+		      win.low = 0UL;
+		      win.high = vsize;
+		      win.idx = -1; /* HAS_DGA() is on */
+		      video_mode |= VESA_MODE_USE_LINEAR;
+		      printf("vo_vesa: Using DGA (physical resources: %08lXh, %08lXh) at %08lXh\n"
+			     ,video_mode_info.PhysBasePtr
+			     ,vsize
+			     ,(unsigned long)lfb);
+		    }
 		}
-		if(!(win_seg = win.idx == 0 ? video_mode_info.WinASegment:video_mode_info.WinBSegment))
+		if(win.idx == -2)
 		{
-		  printf("vo_vesa: Can't find valid window address\n");
-		  if(video_mode_info.ModeAttributes & MODE_ATTR_LINEAR)
-		  	printf("vo_vesa: Your BIOS supports DGA access which is not implemented for now\n");
-		  return -1;
+		   printf("vo_vesa: Can't find neither DGA nor relocatable window's frame.\n");
+		   return -1;
 		}
-		win.ptr = PhysToVirtSO(win_seg,0);
-		win.low = 0L;
-		win.high= video_mode_info.WinSize*1024;
+		if(!HAS_DGA())
+		{
+		  if(!(win_seg = win.idx == 0 ? video_mode_info.WinASegment:video_mode_info.WinBSegment))
+		  {
+		    printf("vo_vesa: Can't find valid window address\n");
+		    return -1;
+		  }
+		  win.ptr = PhysToVirtSO(win_seg,0);
+		  win.low = 0L;
+		  win.high= video_mode_info.WinSize*1024;
+		}
 		if(video_mode_info.XResolution > image_width)
 		    x_offset = (video_mode_info.XResolution - image_width) / 2;
 		else x_offset = 0;
@@ -630,36 +650,27 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 			,image_width,image_height
 			,video_mode_info.XResolution,video_mode_info.YResolution
 			,x_offset,y_offset);
-		if(video_mode_info.PhysBasePtr && vib.TotalMemory && (video_mode_info.ModeAttributes & MODE_ATTR_LINEAR))
+		if(HAS_DGA())
 		{
-		    void *lfb;
-		    lfb = vbeMapVideoBuffer(video_mode_info.PhysBasePtr,vib.TotalMemory*64*1024);
-		    if(lfb == NULL)
-		    {
-		      printf("vo_vesa: can't use DGA. Force bank switching\n");
-		    }
-		    else
-		    {
-		      win.ptr = lfb;
-		      win.low = 0UL;
-		      win.high = vib.TotalMemory*64*1024;
-		      win.idx = -1;
-		      video_mode |= VESA_MODE_USE_LINEAR;
-		      printf("vo_vesa: Using DGA (%08lXh)\n",(unsigned long)lfb);
-		    }
+		  dga_buffer = win.ptr; /* Trickly ;) */
+		  cpy_blk_fnc = __vbeCopyBlockFast;
 		}
-		if(yuv_fmt || rgb2rgb_fnc)
+		else
 		{
-#ifdef HAVE_MEMALIGN
-		  if(!(yuv_buffer = memalign(64,video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
-#else
-		  if(!(yuv_buffer = malloc(video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
-#endif
+		  cpy_blk_fnc = __vbeCopyBlock;
+		  if(yuv_fmt || rgb2rgb_fnc)
 		  {
-		    printf("vo_vesa: Can't allocate temporary buffer\n");
-		    return -1;
+#ifdef HAVE_MEMALIGN
+		    if(!(dga_buffer = memalign(64,video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
+#else
+		    if(!(dga_buffer = malloc(video_mode_info.XResolution*video_mode_info.YResolution*video_mode_info.BitsPerPixel)))
+#endif
+		    {
+		      printf("vo_vesa: Can't allocate temporary buffer\n");
+		      return -1;
+		    }
+		    if(verbose) printf("vo_vesa: dga emulator was allocated = %p\n",dga_buffer);
 		  }
-		  if(verbose) printf("vo_vesa: yuv_buffer was allocated = %p\n",yuv_buffer);
 		}
 		if((err=vbeSaveState(&init_state)) != VBE_OK)
 		{
@@ -717,7 +728,15 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 				}
 			}
 	}
-	vbeWriteString(0,0,7,title);
+	/*if(1)*/
+	{
+	  int x;
+	  x = video_mode_info.XCharSize ?
+	      (video_mode_info.XResolution/video_mode_info.XCharSize)/2-strlen(title)/2 :
+	      0;
+	  if(x < 0) x = 0;
+	  vbeWriteString(x,0,7,title);
+	}
 	return 0;
 }
 
