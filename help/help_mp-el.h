@@ -12,11 +12,7 @@ static char* banner_text=
 "\n";
 
 static char help_text[]=
-#ifdef HAVE_NEW_GUI
-"Usage:   mplayer [-gui] [επιλογές] [διαδρομή/]όνομα_αρχείου\n"
-#else
-"Usage:   mplayer [επιλογές] [διαδρομή/]όνομα_αρχείου\n"
-#endif
+"Usage:   mplayer [επιλογές] [url|διαδρομή/]όνομα_αρχείου\n"
 "\n"
 "Βασικές επιλογές: (βλέπε manpage για ολοκληρωμένη λίστα για ΟΛΕΣ τις επιλογές!)\n"
 " -vo <drv[:dev]> επιλέξτε τον οδηγό εξόδου βίντεο και τη συσκευή (βλέπε '-vo help' για τη λίστα)\n"
@@ -102,10 +98,12 @@ static char help_text[]=
 "!!! Πιθανές αιτίες, προβλήματα, λύσεις: \n"\
 "- Συνήθη αιτία: πρόβλημα με τον οδηγό του ήχου. λύση: δοκιμάστε -ao sdl ή χρησιμοποιήστε\n"\
 "  ALSA 0.5 ή oss emulation του οδηγού ALSA 0.9. Διαβάστε DOCS/sound.html για περισσότερες λύσεις!\n"\
+"  Μπορείτε επίσης να πειραματηστείτε με -autosync 30 ή άλλες τιμές.\n"\
 "- Αργή έξοδος του βίντεο. Δοκιμάστε διαφορετικό -vo οδηγό (για λίστα: -vo help) ή δοκιμάστε\n"\
 "  με -framedrop !  Διαβάστε DOCS/video.html για ρύθμιση/επιτάχυνση του βίντεο.\n"\
 "- Αργός επεξεργαστής. Μην αναπαράγετε μεγάλα dvd/divx σε αργούς επεξεργαστές! δοοκιμάστε με -hardframedrop\n"\
-"- Broken file. δοκιμάστε με διάφορους συνδιασμούς από τα παρακάτω: -nobps  -ni  -mc 0  -forceidx\n"\
+"- Προβληματικό αρχείο. Δοκιμάστε με διάφορους συνδιασμούς από τα παρακάτω: -nobps  -ni  -mc 0  -forceidx\n"\
+"- Για την αναπαραγωγή από αργά μέσα (nfs/smb mounts, dvd, vcd κτλ) δοκιμάστε -cache 8192\n"\
 "- Μήπως χρησιμοποιείται -cache για την αναπαραγωγή ενός non-interleaved αρχείου? δοκιμάστε με -nocache\n"\
 "Αν κανένα από αυτά δεν βοηθάει, τότε διαβάστε DOCS/bugreports.html !\n\n"
 
@@ -129,6 +127,7 @@ static char help_text[]=
 #define MSGTR_InitializingAudioCodec "Αρχικοποίηση του codec ήχου...\n"
 #define MSGTR_ErrorInitializingVODevice "Σφάλμα κατά το άνοιγμα/αρχικοποίηση της επιλεγμένης video_out (-vo) συσκευή!\n"
 #define MSGTR_ForcedVideoCodec "Εξαναγκασμός χρήσης του βίντεο codec: %s\n"
+#define MSGTR_ForcedAudioCodec "Εξαναγκασμός χρήσης του codec ήχου: %s\n"
 #define MSGTR_AODescription_AOAuthor "AO: Περιγραφή: %s\nAO: Δημιουργός: %s\n"
 #define MSGTR_AOComment "AO: Σχόλιο: %s\n"
 #define MSGTR_Video_NoVideo "Βίντεο: δεν υπάρχει βίντεο!!!\n"
@@ -167,6 +166,10 @@ static char help_text[]=
 #define MSGTR_UnableOpenURL "Αδύνατο το άνοιγμα του URL: %s\n"
 #define MSGTR_ConnToServer "Πραγματοποιήθηκε σύνδεση με τον server: %s\n"
 #define MSGTR_FileNotFound "Το αρχείο: '%s' δεν βρέθηκε\n"
+
+#define MSGTR_SMBInitError "Αδύνατη η αρχικοποίηση της βιβλιοθύκης libsmbclient: %d\n"
+#define MSGTR_SMBFileNotFound "Δεν μπόρεσα να ανοίξω από το lan: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer δεν μεταφράσηκε με υποστήρηξη διαβάσματος SMB\n"
 
 #define MSGTR_CantOpenDVD "Δεν μπόρεσα να ανοίξω την DVD συσκευή: %s\n"
 #define MSGTR_DVDwait "Ανάγνωση δομής του δίσκου, παρακαλώ περιμένετε...\n"
@@ -312,7 +315,7 @@ static char help_text[]=
 #define MSGTR_Clear "Καθάρισμα"
 #define MSGTR_Config "Προτιμήσεις"
 #define MSGTR_ConfigDriver "Προτίμηση οδηγού"
-#define MSGTR_Browse "Κατάλογος"
+#define MSGTR_Browse "Αναζήτηση αρχείου"
 
 // --- error messages ---
 #define MSGTR_NEMDB "Λυπάμαι, δεν υπάρχει αρκετή μνήμη για γράψημο στον buffer."
@@ -379,6 +382,9 @@ static char help_text[]=
 #define MSGTR_MENU_SkinBrowser "Λίστα για τα skins"
 #define MSGTR_MENU_Preferences "Ρυθμίσεις"
 #define MSGTR_MENU_Exit "Έξοδος ..."
+#define MSGTR_MENU_Mute "Mute"
+#define MSGTR_MENU_Original "Original"
+#define MSGTR_MENU_AspectRatio "Aspect ratio"
 
 // --- equalizer
 #define MSGTR_EQU_Audio "Ήχος"
@@ -441,6 +447,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Font "Γραμματοσειρά"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Προεπεξεργασία"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec και demuxer"
+#define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_OSS_Device "Συσκευή:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Μίκτης:"
 #define MSGTR_PREFERENCES_Message "Προσοχή, μερικές λειτουργίες χρειάζονται επανεκκίνιση αναπαραγωγής."
@@ -467,6 +475,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding18 "Ιαπονέζικα (SHIFT-JIS)"
 #define MSGTR_PREFERENCES_FontEncoding19 "Κορεάτικα (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
+#define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "Όχι αυτόματη κλιμάκωση"
 #define MSGTR_PREFERENCES_FontPropWidth "Αναλογία με το πλάτος της ταινίας"
 #define MSGTR_PREFERENCES_FontPropHeight "Αναλογία με το ύψος της ταινίας"
@@ -477,6 +486,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontTextScale "Κλιμάκωση του Text:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSD κλιμάκωσηe:"
 #define MSGTR_PREFERENCES_SubtitleOSD "Υπότιτλοι και & OSD"
+#define MSGTR_PREFERENCES_Cache "Cache on/off"
+#define MSGTR_PREFERENCES_LoadFullscreen "Start in fullscreen"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "κρίσιμο σφάλμα ..."
