@@ -15,12 +15,6 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
-int vo_depthonscreen=0;
-int vo_screenwidth=0;
-int vo_screenheight=0;
-int vo_dwidth=0;
-int vo_dheight=0;
-
 static int dpms_disabled=0;
 static int timeout_save=0;
 

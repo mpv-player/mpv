@@ -105,4 +105,13 @@ typedef struct vo_functions_s
 // NULL terminated array of all drivers
 extern vo_functions_t* video_out_drivers[];
 
+// currect resolution/bpp on screen:  (should be autodetected by vo_init())
+extern int vo_depthonscreen;
+extern int vo_screenwidth;
+extern int vo_screenheight;
+
+// requested resolution/bpp:  (-x -y -bpp options)
+extern int vo_dwidth;
+extern int vo_dheight;
+extern int vo_dbpp;
 

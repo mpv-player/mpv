@@ -31,6 +31,17 @@
 
 #include "../linux/shmem.h"
 
+// currect resolution/bpp on screen:  (should be autodetected by vo_init())
+int vo_depthonscreen=0;
+int vo_screenwidth=0;
+int vo_screenheight=0;
+
+// requested resolution/bpp:  (-x -y -bpp options)
+int vo_dwidth=0;
+int vo_dheight=0;
+int vo_dbpp=0;
+
+
 //
 // Externally visible list of all vo drivers
 //

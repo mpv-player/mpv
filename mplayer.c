@@ -433,7 +433,7 @@ float font_factor=0.75;
 char *sub_name=NULL;
 float sub_delay=0;
 float sub_fps=0;
-int user_bpp=0;
+//int user_bpp=0;
 #include "cfg-mplayer.h"
 
   printf("%s",banner_text);
@@ -858,17 +858,17 @@ has_video=sh_video->codec->driver;
 
 printf("Found video codec: [%s] drv:%d (%s)\n",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
-if(user_bpp)printf("Trying user defined depth of %dbpp\n", user_bpp);
+//if(user_bpp)printf("Trying user defined depth of %dbpp\n", user_bpp);
 
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     out_fmt=sh_video->codec->outfmt[i];
-    if(user_bpp){
-        if( ((out_fmt & IMGFMT_BGR_MASK) == IMGFMT_BGR) && ((out_fmt & 0xff) == user_bpp) || (out_fmt & IMGFMT_BGR_MASK) != IMGFMT_BGR){
-	     if(video_out->query_format(out_fmt)) break;
-	}
-    }else{
+//    if(user_bpp){
+//        if( ((out_fmt & IMGFMT_BGR_MASK) == IMGFMT_BGR) && ((out_fmt & 0xff) == user_bpp) || (out_fmt & IMGFMT_BGR_MASK) != IMGFMT_BGR){
+//	     if(video_out->query_format(out_fmt)) break;
+//	}
+//    }else{
   	  if(video_out->query_format(out_fmt)) break;
-    }
+//    }
 }
 if(i>=CODECS_MAX_OUTFMT){
     printf("Sorry, selected video_out device is incompatible with this codec.\n");
