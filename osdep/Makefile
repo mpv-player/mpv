@@ -3,14 +3,21 @@ include ../config.mak
 
 LIBNAME = libosdep.a
 
-SRCS=getch2.c timer-lx.c shmem.c strsep.c vsscanf.c scandir.c # timer.c
-OBJS=$(SRCS:.c=.o)
+SRCS=getch2.c shmem.c strsep.c vsscanf.c scandir.c # timer.c
 
 ifeq ($(TARGET_ARCH_X86),yes)
 ifeq ($(TARGET_OS),Linux)
 SRCS += lrmi.c vbelib.c
 endif
 endif
+
+ifeq ($(MACOSX),yes)
+SRCS += timer-macosx.c
+else
+SRCS += timer-lx.c
+endif
+
+OBJS=$(SRCS:.c=.o)
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. $(EXTRA_INC)
 # -I/usr/X11R6/include/
