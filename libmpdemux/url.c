@@ -33,6 +33,7 @@ url_new(char* url) {
 	Curl->url = strdup(url);
 	if( Curl->url==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+		free(Curl);
 		return NULL;
 	}
 
@@ -40,6 +41,7 @@ url_new(char* url) {
 	ptr1 = strstr(url, "://");
 	if( ptr1==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Not an URL!\n");
+		free(Curl->url);free(Curl);
 		return NULL;
 	}
 	pos1 = ptr1-url;
@@ -47,6 +49,7 @@ url_new(char* url) {
 	strncpy(Curl->protocol, url, pos1);
 	if( Curl->protocol==NULL ) {
 		mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed!\n");
+		free(Curl->protocol);free(Curl->url);free(Curl);
 		return NULL;
 	}
 	Curl->protocol[pos1] = '\0';
