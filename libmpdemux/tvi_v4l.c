@@ -404,6 +404,18 @@ static void init_v4l_audio(priv_t *priv)
     }
 }
 
+struct v4l2_capability
+{
+        __u8    driver[16];     /* i.e. "bttv" */
+        __u8    card[32];       /* i.e. "Hauppauge WinTV" */
+        __u8    bus_info[32];   /* "PCI:" + pci_dev->slot_name */
+        __u32   version;        /* should use KERNEL_VERSION() */
+        __u32   capabilities;   /* Device capabilities */
+        __u32   reserved[4];
+};
+
+#define VIDIOC_QUERYCAP         _IOR  ('V',  0, struct v4l2_capability)
+
 static int init(priv_t *priv)
 {
     int i;
@@ -425,6 +437,16 @@ static int init(priv_t *priv)
 	mp_msg(MSGT_TV, MSGL_ERR, "unable to open '%s': %s\n",
 	    priv->video_device, strerror(errno));
 	goto err;
+    }
+    
+    /* check for v4l2 */
+    if (ioctl(priv->video_fd, VIDIOC_QUERYCAP, &priv->capability) == 0) {
+	mp_msg(MSGT_TV, MSGL_ERR, "=================================================================\n");
+	mp_msg(MSGT_TV, MSGL_ERR, " WARNING: YOU ARE USING V4L DEMUXER WITH V4L2 DRIVERS!!!\n");
+	mp_msg(MSGT_TV, MSGL_ERR, " As the V4L1 compatibility layer is broken, this may not work.\n");
+	mp_msg(MSGT_TV, MSGL_ERR, " If you encounter any problems, use driver=v4l2 instead.\n");
+	mp_msg(MSGT_TV, MSGL_ERR, " Bugreports on driver=v4l with v4l2 drivers will be ignored.\n");
+	mp_msg(MSGT_TV, MSGL_ERR, "=================================================================\n");
     }
     
     /* get capabilities (priv->capability is needed!) */
