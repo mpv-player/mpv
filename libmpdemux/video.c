@@ -60,7 +60,7 @@ switch(d_video->demuxer->file_format){
 	(sh_video->format == mmioFOURCC('m','p','g','2')) ||
 	(sh_video->format == mmioFOURCC('M','P','G','2')) ||
 	(sh_video->format == mmioFOURCC('m','p','e','g')) ||
-	(sh_video->format == mmioFOURCC('m','p','e','g')))
+	(sh_video->format == mmioFOURCC('M','P','E','G')))
     {
 	int saved_pos, saved_type;
 
