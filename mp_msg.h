@@ -49,6 +49,8 @@ extern int verbose; // defined in mplayer.c
 #define MSGT_STREAM 20  // stream.c
 #define MSGT_CACHE 21  // cache2.c
 
+#define MSGT_MENCODER 22
+
 #define MSGT_MAX 64
 
 void mp_msg_init(int verbose);
