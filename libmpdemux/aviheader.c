@@ -176,6 +176,9 @@ while(1){
         mp_msg(MSGT_HEADER,MSGL_V,"found 'bih', %d bytes of %d\n",chunksize,sizeof(BITMAPINFOHEADER));
         stream_read(demuxer->stream,(char*) sh_video->bih,chunksize);
 	le2me_BITMAPINFOHEADER(sh_video->bih);  // swap to machine endian
+	// fixup MS-RLE header (seems to be broken for <256 color files)
+	if(sh_video->bih->biCompression==1 && sh_video->bih->biSize==40)
+	    sh_video->bih->biSize=chunksize;
         if(verbose>=1) print_video_header(sh_video->bih);
         chunksize=0;
 //        sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
