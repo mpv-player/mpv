@@ -58,7 +58,7 @@ get_time_length
 vo_fullscreen
 	Switch to fullscreen mode.
 get_vo_Fullscreen
-	Print out fullscreen-ness (1 == fullscreened, 0 == windowed).
+	Print out fullscreen status (1 == fullscreened, 0 == windowed).
 panscan value [value2]
 	???
 loadfile url
