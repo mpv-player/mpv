@@ -308,8 +308,9 @@ Use these options if autodetection fails:
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
   --with-reallibdir=DIR    RealPlayer DLL files in DIR
   --with-xvmclib=PATH      path to adapter specific XvMCxxxxx.so (e.g. NVIDIA)
-  --with-xvidcore=PATH     path to XviD libxvidcore.a
-                           (e.g. /opt/lib/libxvidcore.a)
+  --with-xvidlibdir=DIR    libxvidcore (XviD) in DIR 
+  --with-xvidincdir=DIR    XviD header in DIR
+  
   --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
   --with-freetype-config=PATH  path to freetype-config
                                (e.g. /opt/bin/freetype-config)
@@ -1079,7 +1080,6 @@ fi
 
 _prefix="/usr/local"
 _xvmclib="XvMCNVIDIA"
-_xvidcore="xvidcore"
 
 # GOTCHA: the variables below defines the default behavior for autodetection
 # and have - unless stated otherwise - at least 2 states : yes no
@@ -1531,8 +1531,11 @@ for ac_option do
   --with-dvbincdir=*)
     _inc_dvb=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
-  --with-xvidcore=*)
-    _xvidcore=`echo $ac_option | cut -d '=' -f 2`
+  --with-xvidlibdir=*)
+    _ld_xvid=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --with-xvidincdir=*)
+    _inc_xvid=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-sdl-config=*)
     _sdlconfig=`echo $ac_option | cut -d '=' -f 2`
@@ -4964,9 +4967,9 @@ cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
-if test "$_xvid" != no && cc_check -l$_xvidcore -lm ; then
+_ld_xvid="$_ld_xvid -lxvidcore"
+if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid ; then
   _xvid=yes
-  _ld_xvid="-l$_xvidcore"
   _def_xvid3='#define HAVE_XVID3 1'
   _def_xvid4='#undef HAVE_XVID4'
   _codecmodules="xvid $_codecmodules"
@@ -4975,18 +4978,17 @@ cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_global(0, 0, 0, 0); return 0; }
 EOF
-  if test "$_xvid" != no && cc_check -l$_xvidcore -lm ; then
-  _xvid=yes
-    _ld_xvid="-l$_xvidcore"
+  if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid ; then
+    _xvid=yes
     _def_xvid3='#undef HAVE_XVID3'
     _def_xvid4='#define HAVE_XVID4 1'
-  _codecmodules="xvid $_codecmodules"
+    _codecmodules="xvid $_codecmodules"
   else
-  _xvid=no
-  _ld_xvid=''
+    _xvid=no
+    _ld_xvid=''
     _def_xvid3='#undef HAVE_XVID3'
     _def_xvid4='#undef HAVE_XVID4'
-  _nocodecmodules="xvid $_nocodecmodules"
+    _nocodecmodules="xvid $_nocodecmodules"
   fi
 fi
 echores "$_xvid"
@@ -5845,6 +5847,7 @@ MP1E_DEP = $_dep_mp1e
 MP1E_LIB = $_ld_mp1e
 ARCH_LIB =  $_ld_arch $_ld_iconv
 XVID = $_xvid
+XVID_INC = $_inc_xvid
 XVID_LIB = $_ld_xvid
 DECORE_LIB = $_ld_decore $_ld_mp3lame
 MENCODER = $_mencoder
