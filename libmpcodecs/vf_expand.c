@@ -1,3 +1,5 @@
+//#define OSD_SUPPORT
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -5,17 +7,105 @@
 #include "../config.h"
 #include "../mp_msg.h"
 
+#include "img_format.h"
 #include "mp_image.h"
 #include "vf.h"
 
 #include "../libvo/fastmemcpy.h"
 
+#ifdef OSD_SUPPORT
+#include "../libvo/sub.h"
+#include "../libvo/osd.h"
+#endif
+
 struct vf_priv_s {
     int exp_w,exp_h;
     int exp_x,exp_y;
     mp_image_t *dmpi;
+    int osd;
 };
 
+//===========================================================================//
+#ifdef OSD_SUPPORT
+
+static struct vf_instance_s* vf=NULL; // fixme (needs sub.c changes)
+static int orig_w,orig_h;
+
+static void remove_func_2(int x0,int y0, int w,int h){
+    // TODO: let's cleanup the place
+    printf("OSD clear: %d;%d %dx%d  \n",x0,y0,w,h);
+}
+
+static void remove_func(int x0,int y0, int w,int h){
+    if(!vo_osd_changed_flag) return;
+    // split it to 4 parts:
+    if(y0<vf->priv->exp_y){
+	// it has parts above the image:
+	int y=y0+h;
+	if(y>vf->priv->exp_y) y=vf->priv->exp_y;
+	remove_func_2(x0,y0,w,y-y0);
+	if(y0+h<=vf->priv->exp_y) return;
+	h-=y-y0;y0=y;
+    }
+    if(y0+h>vf->priv->exp_y+orig_h){
+	// it has parts under the image:
+	int y=y0;
+	if(y<vf->priv->exp_y+orig_h) y=vf->priv->exp_y+orig_h;
+	remove_func_2(x0,y,w,y0+h-y);
+	if(y0>=vf->priv->exp_y+orig_h) return;
+	h=y-y0;
+    }
+    if(x0>=vf->priv->exp_x || x0+w<=vf->priv->exp_x+orig_w) return;
+    // TODO  clear left and right side of the image if needed
+}
+
+static void draw_func(int x0,int y0, int w,int h,unsigned char* src, unsigned char *srca, int stride){
+    unsigned char* dst=vf->priv->dmpi->planes[0]+
+			vf->priv->dmpi->stride[0]*y0+
+			(vf->priv->dmpi->bpp>>3)*x0;
+    if(!vo_osd_changed_flag) return;
+    switch(vf->priv->dmpi->imgfmt){
+    case IMGFMT_BGR15:
+    case IMGFMT_RGB15:
+	vo_draw_alpha_rgb15(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	break;
+    case IMGFMT_BGR16:
+    case IMGFMT_RGB16:
+	vo_draw_alpha_rgb16(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	break;
+    case IMGFMT_BGR24:
+    case IMGFMT_RGB24:
+	vo_draw_alpha_rgb24(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	break;
+    case IMGFMT_BGR32:
+    case IMGFMT_RGB32:
+	vo_draw_alpha_rgb32(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	break;
+    case IMGFMT_YV12:
+    case IMGFMT_I420:
+    case IMGFMT_IYUV:
+	vo_draw_alpha_yv12(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	break;
+    case IMGFMT_YUY2:
+	vo_draw_alpha_yuy2(w,h,src,srca,stride,dst,vf->priv->dmpi->stride[0]);
+	break;
+    case IMGFMT_UYVY:
+	vo_draw_alpha_yuy2(w,h,src,srca,stride,dst+1,vf->priv->dmpi->stride[0]);
+	break;
+    }
+}
+
+static void draw_osd(struct vf_instance_s* vf_,int w,int h){
+    vf=vf_;orig_w=w;orig_h=h;
+    if(vf->priv->exp_w!=w || vf->priv->exp_h!=h ||
+       vf->priv->exp_x || vf->priv->exp_y){
+       // yep, we're expanding image, not just copy.
+       vo_remove_text(vf->priv->exp_w,vf->priv->exp_h,remove_func);
+    }
+    vo_draw_text(vf->priv->exp_w,vf->priv->exp_h,draw_func);
+}
+
+#endif
 //===========================================================================//
 
 static int config(struct vf_instance_s* vf,
@@ -41,6 +131,14 @@ static int config(struct vf_instance_s* vf,
 // codec -copy-> expand -copy-> vo (worst case)
 
 static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
+#ifdef OSD_SUPPORT
+    if(vf->priv->osd && (mpi->flags&MP_IMGFLAG_PRESERVE)){
+	// check if we have to render osd!
+	vo_update_osd(vf->priv->exp_w, vf->priv->exp_h);
+	if(vo_osd_check_range_update(vf->priv->exp_x,vf->priv->exp_y,
+	    vf->priv->exp_x+mpi->w,vf->priv->exp_y+mpi->h)) return;
+    }
+#endif
     if(vf->priv->exp_w==mpi->width ||
        (mpi->flags&(MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_ACCEPT_WIDTH)) ){
 	// try full DR !
@@ -70,6 +168,9 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_DIRECT){
 	vf_next_put_image(vf,vf->priv->dmpi);
+#ifdef OSD_SUPPORT
+	if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
+#endif
 	return; // we've used DR, so we're ready...
     }
 
@@ -98,13 +199,27 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		mpi->planes[0], mpi->w*(vf->priv->dmpi->bpp/8), mpi->h,
 		vf->priv->dmpi->stride[0],mpi->stride[0]);
     }
+#ifdef OSD_SUPPORT
+    if(vf->priv->osd) draw_osd(vf,mpi->w,mpi->h);
+#endif
     vf_next_put_image(vf,vf->priv->dmpi);
 }
 
 //===========================================================================//
 
+static int control(struct vf_instance_s* vf, int request, void* data){
+#ifdef OSD_SUPPORT
+    switch(request){
+    case VFCTRL_DRAW_OSD:
+	if(vf->priv->osd) return CONTROL_TRUE;
+    }
+#endif
+    return vf_next_control(vf,request,data);
+}
+
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
+    vf->control=control;
     vf->get_image=get_image;
     vf->put_image=put_image;
     vf->priv=malloc(sizeof(struct vf_priv_s));
@@ -113,21 +228,27 @@ static int open(vf_instance_t *vf, char* args){
     vf->priv->exp_y=
     vf->priv->exp_w=
     vf->priv->exp_h=-1;
-    if(args) sscanf(args, "%d:%d:%d:%d", 
+    if(args) sscanf(args, "%d:%d:%d:%d:%d", 
     &vf->priv->exp_w,
     &vf->priv->exp_h,
     &vf->priv->exp_x,
-    &vf->priv->exp_y);
-    printf("Expand: %d x %d, %d ; %d\n",
+    &vf->priv->exp_y,
+    &vf->priv->osd);
+    printf("Expand: %d x %d, %d ; %d  (-1=autodetect) osd: %d\n",
     vf->priv->exp_w,
     vf->priv->exp_h,
     vf->priv->exp_x,
-    vf->priv->exp_y);
+    vf->priv->exp_y,
+    vf->priv->osd);
     return 1;
 }
 
 vf_info_t vf_info_expand = {
+#ifdef OSD_SUPPORT
+    "expanding & osd",
+#else
     "expanding",
+#endif
     "expand",
     "A'rpi",
     "",
