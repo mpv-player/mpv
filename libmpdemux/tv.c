@@ -43,85 +43,40 @@ int tv_param_input = 0; /* used in v4l and bttv */
 int demux_tv_fill_buffer(demuxer_t *demux, tvi_handle_t *tvh)
 {
     int seq = tvh->seq++;
-    demux_stream_t *ds_video = NULL;
-    demux_packet_t *dp_video = NULL;
-    demux_stream_t *ds_audio = NULL;
-    demux_packet_t *dp_audio = NULL;
-    int len_video, len_audio;
+    demux_packet_t* dp;
+    int len;
 
     printf("demux_tv_fill_buffer(sequence:%d) called!\n", seq);
 
-    demux->filepos = -1;
+//    demux->filepos = -1;
 
 //    seq++;
 //    tvh->seq++;
 
     /* ================== ADD VIDEO PACKET =================== */
-    len_video = tvh->functions->get_video_framesize(tvh->priv);
-    ds_video = demux->video;
+    len = tvh->functions->get_video_framesize(tvh->priv);
 
-    if (!ds_video->asf_packet)
-    {
-	/* create new packet */
-	dp_video = new_demux_packet(len_video);
-//	printf("new dp_video->buffer: %p (%d bytes)\n", dp_video, len_video);
-	tvh->functions->grab_video_frame(tvh->priv, dp_video->buffer, len_video);
-	dp_video->pos = demux->filepos;
-	ds_video->asf_packet = dp_video;
-	ds_video->asf_seq = seq;
-    }
-    else if (ds_video->asf_packet)
-    {
-	if (ds_video->asf_seq != seq)
-	{
-	    /* close segment, finalize packet */
-	    ds_add_packet(ds_video, ds_video->asf_packet);
-	    ds_video->asf_packet = NULL;
-	}
-	else
-	{
-	    /* append data to segment */
-	    dp_video = ds_video->asf_packet;
-	    dp_video->buffer = realloc(dp_video->buffer, dp_video->len+len_video);
-//	    printf("dp_video->buffer: %p (%d bytes)\n", dp_video, dp_video->len+len_video);
-	    tvh->functions->grab_video_frame(tvh->priv, dp_video->buffer+dp_video->len, len_video);
-	    mp_dbg(MSGT_DEMUX,MSGL_DBG4, "video data appended %d+%d\n", dp_video->len, len_video);
-	    dp_video->len += len_video;
-	}
-    }
-    
+    dp=new_demux_packet(len);
+    tvh->functions->grab_video_frame(tvh->priv, dp->buffer, len);
+    dp->pts=seq/25.0; //(float)pts/90000.0f;
+    //dp->pos=pos;
+    //dp->flags=flags;
+    // append packet to DS stream:
+    ds_add_packet(demux->video,dp);
 
     /* ================== ADD AUDIO PACKET =================== */
     if (tvh->functions->control(tvh->priv, TVI_CONTROL_IS_AUDIO, 0) != TVI_CONTROL_TRUE)
 	return 1; /* no audio, only video */
 
-    len_audio = tvh->functions->get_audio_framesize(tvh->priv);
-    ds_audio = demux->audio;
-    
-    if (!ds_audio->asf_packet)
-    {
-	dp_audio = new_demux_packet(len_audio);
-	tvh->functions->grab_audio_frame(tvh->priv, dp_audio->buffer, len_audio);
-	dp_audio->pos = demux->filepos;
-	ds_audio->asf_packet = dp_audio;
-	ds_audio->asf_seq = seq;
-    }
-    else if (ds_audio->asf_packet)
-    {
-	if (ds_audio->asf_seq != seq)
-	{
-	    ds_add_packet(ds_audio, ds_audio->asf_packet);
-	    ds_audio->asf_packet = NULL;
-	}
-	else
-	{
-	    dp_audio = ds_audio->asf_packet;
-	    dp_audio->buffer = realloc(dp_audio->buffer, dp_audio->len+len_audio);
-	    tvh->functions->grab_audio_frame(tvh->priv, dp_audio->buffer+dp_audio->len, len_audio);
-	    mp_dbg(MSGT_DEMUX,MSGL_DBG4, "audio data appended %d+%d\n", dp_audio->len, len_audio);
-	    dp_audio->len += len_audio;
-	}
-    }
+    len = tvh->functions->get_audio_framesize(tvh->priv);
+
+    dp=new_demux_packet(len);
+    tvh->functions->grab_audio_frame(tvh->priv, dp->buffer, len);
+    //dp->pts=pts; //(float)pts/90000.0f;
+    //dp->pos=pos;
+    //dp->flags=flags;
+    // append packet to DS stream:
+    ds_add_packet(demux->audio,dp);
 
     return 1;
 }
@@ -141,7 +96,7 @@ int demux_open_tv(demuxer_t *demuxer, tvi_handle_t *tvh)
     sh_video = new_sh_video(demuxer, 0);
 
     /* hack to use YUV 4:2:0 format ;) */
-    sh_video->format = IMGFMT_YV12;
+    sh_video->format = IMGFMT_UYVY;
     funcs->control(tvh->priv, TVI_CONTROL_VID_SET_FORMAT, &sh_video->format);
 
     /* get IMGFMT_ */
