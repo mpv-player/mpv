@@ -244,7 +244,7 @@ Akkor használd a -quiet opciót, és olvasd el a manpage-t.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
  Pontosan mi is ez a libavcodec?
   </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
- Gerard Lantau ffmpeg programjábol van (http://ffmpeg.sourceforge.net).
+ Gerard Lantau ffmpeg programjábol van (<A HREF="http://ffmpeg.sourceforge.net">http://ffmpeg.sourceforge.net</A>).
      C nyelvû DivX ;-) és OpenDivX codec-et tartalmaz. A tesztek szerint gyorsabb
      mint a DirectShow codec (preprocessing nélkül), és csak pár százalékkal
      lassabb mint a ProjectMayo OpenDivX dekódere. YV12-es pixelformátumot   
@@ -372,7 +372,19 @@ Jah fiam, hát lassú a géped. Ez van.
  Az nem DivX file, hanem M$ MPEG4v3 . Frissítsd a codecs.conf-odat.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-  <TD COLSPAN=3><P><B><A NAME=5.4>5.4.  Video/audio driver problems (vo/ao)</A></B></P>
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Itt van ez a film, de amikor lejátszom, elmegy a kép-hang szinkron, és/vagy az MPlayer a következõ üzenettel lép ki :<BR>
+<CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Ennek több oka is lehet.<BR>
+  <LI>a CPU-d <B>és/vagy</B> a videokártyád <B>és/vagy</B> a rendszerbuszod túl LASSÚ. Az <B>MPlayer</B>
+  kiír egy üzenetet ha így van. (és az eldobott képkockák számlálója pörög felfele)</LI>
+  <LI>ha AVI-ról van szó, lehet hogy rosszul van interleave-elve. Próbáld meg a <I>-ni</I> opciót.</LI>
+  <LI>a hangkártyád meghajtója rossz, vagy ALSA 0.5-öt használsz <I>-ao oss</I>-sel. Lásd a <A HREF="sound.html">hangkártyák</A> fejezetet.</LI>
+  <LI>az AVI-nak rossz fejléce van, próbáld meg a <I>-nobps</I> és/vagy az <I>-mc 0</I> opcióval .</LI>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+  <TD COLSPAN=3><P><B><A NAME=5.4>5.4.  Video/audio meghajtó problémák (vo/ao)</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">

@@ -242,7 +242,7 @@ use -double option.
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 What exactly is this libavcodec?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
+It's from Gerard Lantau's ffmpeg package (<A HREF="http://ffmpeg.sourceforge.net">http://ffmpeg.sourceforge.net</A>).
 It has C language DivX ;-) and OpenDivX alpha 47 codec.  Some benchmarks
 showed that its DivX seems to be even faster than DirectShow codec without
 preprocessing, and only a few percent slower than ProjectMayo's DivX4
@@ -361,6 +361,18 @@ mplayer with artsdsp.
 I have an AVI that plays with grey screen with -vc odivx, and green with -vc divx4 .
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 It's not a DivX file, but an M$ MPEG4v3 . Update your codecs.conf.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+There this movie is, and when I play it I get video-audio desync and/or MPlayer crashes with the following:<BR>
+<CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE>
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+This can have multiple reasons.<BR>
+  <LI>your CPU <B>and/or</B> video card <B>and/or</B> bus is too SLOW. <B>MPlayer</B>
+  displays a message if this is the case. (and the dropped frames counter is going up fast)</LI>
+  <LI>if it is an AVI, maybe it has shit interleaving. Try the <I>-ni</I> option.</LI>
+  <LI>your sound driver is shit, or you use ALSA 0.5 with <I>-ao oss</I>. See the <A HREF="sound.html">soundcards section</A>.</LI>
+  <LI>the AVI has shit header, try with the <I>-nobps</I> option, and/or <I>-mc 0</I> .</LI>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>

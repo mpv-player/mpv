@@ -32,7 +32,6 @@
 	     <UL><LI><A HREF="codecs.html#2.1.4.1">2.1.4.1 VFW</A></LI>
 	     <LI><A HREF="codecs.html#2.1.4.2">2.1.4.2 DirectShow</A></LI>
 	     </UL>
-	</LI></UL>
     </LI><LI><A HREF="video.html">2.2 Video és audio kimeneti eszközök</A>
 	<UL><LI><A HREF="video.html#2.2.1">2.2.1 Video kimenetek</A>
 	     <UL><LI><A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A>
@@ -42,7 +41,7 @@
 		      </LI><LI><A HREF="video.html#2.2.1.2.3">2.2.1.2.3 nVidia kártyák</A>
 		      </LI><LI><A HREF="video.html#2.2.1.2.4">2.2.1.2.4 ATI kártyák</A>
 		      </LI></UL>
-	     </LI><LI><A HREF="video.html#2.2.1.3">2.2.3.2 DGA</A>
+	     </LI><LI><A HREF="video.html#2.2.1.3">2.2.1.3 DGA</A>
 		    <UL><LI><A HREF="video.html#2.2.1.3.1">2.2.1.3.1 Elõszó</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.2">2.2.1.3.2 Mi az a DGA</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.3">2.2.1.3.3 DGA támogatás telepítése MPlayer-be</A>
@@ -65,12 +64,11 @@
 	     </LI><LI><A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - szöveges módú megjelenítés</A>
 	     </LI><LI><A HREF="video.html#2.2.1.A">2.2.1.A TV kimenet</A>
 		     </LI><UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox TV kimenet</A>
-	     </UL></LI></UL>
-	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Audio kimenetek</A>
+	     </UL>
+	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Hangkártyák, audio kimenetek</A>
 	     <UL><LI><A HREF="sound.html#2.2.2.1">2.2.2.1 Ajánlott beállítások különféle hangkártyákhoz</A>
 	     </LI></UL>
-	</LI></UL>
-    </LI></UL>
+	</LI></LI>
 </LI><LI><A HREF="#3">3. Használat</A>
      <UL><LI><A HREF="#3.1">3.1 Irányítás billentyûzetrõl</A>
      </LI><LI><A HREF="#3.2">3.2 Irányítás LIRC-cel (Linux Infrared Remote Control)</A>
@@ -278,25 +276,42 @@ az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mp
 
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>&lt;-  és  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>hátra/elõre seek, 10 másodpercnyi</TD><TR>
-<TD></TD><TD>fel vagy le</TD><TD></TD><TD>hátra/elõre seek, 1 percnyi</TD><TR>
-<TD></TD><TD>pgup/pgdown</TD><TD></TD><TD>hátra/elõre seek, 10 percnyi</TD><TR>
-<TD></TD><TD>p vagy SPACE</TD><TD></TD><TD>pillanatállj, bármely billentyûre tovább</TD><TR>
-<TD></TD><TD>q vagy ESC</TD><TD></TD><TD>lejátszás leállítasa, kilépés</TD><TR>
-<TD></TD><TD>+ vagy -</TD><TD></TD><TD>audio késleltetése +/- 0.1 másodperccel</TD><TR>
-<TD></TD><TD>/ vagy *</TD><TD></TD><TD>hangerõ csökkentése/növelése</TD><TR>
-<TD></TD><TD>o</TD><TD></TD><TD>OSD funkciók : nincs / seek / seek+idõ</TD><TR>
-<TD></TD><TD>m</TD><TD></TD><TD>master/pcm csatorna használata hangerõhöz</TD><TR>
-<TD></TD><TD>z vagy x</TD><TD></TD><TD>feliratok késleltetése +/- 0.1 másodperccel</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  és  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hátra/elõre seek, 10 másodpercnyi</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fel vagy le</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hátra/elõre seek, 1 percnyi</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pgup/pgdown</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hátra/elõre seek, 10 percnyi</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p vagy SPACE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pillanatállj, bármely billentyûre tovább</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q vagy ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lejátszás leállítasa, kilépés</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ vagy -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>audio késleltetése +/- 0.1 másodperccel</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/ vagy *</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hangerõ csökkentése/növelése</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>o</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSD funkciók : nincs / seek / seek+idõ</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>master/pcm csatorna használata hangerõhöz</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z vagy x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>feliratok késleltetése +/- 0.1 másodperccel</TD><TR>
 
-<TD COLSPAN=4><P><I>(a következõk csak a DirectShow DivX codecre érvényesek)</I></P></TD><TR>
+<TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(a következõk csak a DirectShow DivX codecre érvényesek)</I></P></TD><TR>
 
-<TD></TD><TD>1 vagy 2</TD><TD></TD><TD>kontraszt beállítása</TD><TR>
-<TD></TD><TD>3 vagy 4</TD><TD></TD><TD>fényerõ beállítása</TD><TR>
-<TD></TD><TD>5 vagy 6</TD><TD></TD><TD>hue állítása</TD><TR>
-<TD></TD><TD>7 vagy 8</TD><TD></TD><TD>szaturáció állítása</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 vagy 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kontraszt beállítása</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 vagy 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fényerõ beállítása</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 vagy 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hue állítása</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 vagy 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>szaturáció állítása</TD><TR>
 </TABLE></P>
 
+<P><B>Grafikus felület billentyûi</B></P>
+
+<P><TABLE BORDER=0>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, és .</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>elõzõ / következõ file</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>numerikus - és +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hangerõ csökkentése / növelése</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lejátszás indítása</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>space</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pillanatállj</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>s</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stop</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>about</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>l</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>file betöltése</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skin böngészõ</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>e</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>equalizer ki/be</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lejátszási lista ki/be</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>f</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>teljesképernyõs mód ki/be</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hang ki/be</TD><TR>
+
+</TABLE></P>
 
 <P><B><A NAME=3.2>3.2.  Irányítás LIRC-cel</A></B></P>
 
@@ -316,16 +331,16 @@ az <CODE>etc</CODE> könyvtárból (az <B>MPlayer</B> könyvtáron belül) a $HOME/.mp
   A következõ parancsokat érti:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD>lejátszás megállítása. Bármely másik billentyû újraindítja.</TD><TR>
-<TD></TD><TD>QUIT</TD><TD></TD><TD>kilépés</TD><TR>
-<TD></TD><TD>RWND</TD><TD></TD><TD>10 másodperccel vissza</TD><TR>
-<TD></TD><TD>FRWND</TD><TD></TD><TD>60 másodperccel vissza</TD><TR>
-<TD></TD><TD>FWD</TD><TD></TD><TD>10 másodperccel elõre</TD><TR>  
-<TD></TD><TD>FFWD</TD><TD></TD><TD>60 másodperccel elõre</TD><TR> 
-<TD></TD><TD>INCVOL</TD><TD></TD><TD>hangerõ növelése 1 százalékkal</TD><TR>
-<TD></TD><TD>DECVOL</TD><TD></TD><TD>hangerõ csökkentése 1 százalékkal</TD><TR>
-<TD></TD><TD>MASTER</TD><TD></TD><TD>'master' mixer csatorna használata</TD><TR>   
-<TD></TD><TD>PCM</TD><TD></TD><TD>'pcm' mixer csatorna használata</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>lejátszás megállítása. Bármely másik billentyû újraindítja.</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>QUIT</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>kilépés</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>RWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 másodperccel vissza</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FRWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>60 másodperccel vissza</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 másodperccel elõre</TD><TR>  
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FFWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>60 másodperccel elõre</TD><TR> 
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>INCVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hangerõ növelése 1 százalékkal</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DECVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>hangerõ csökkentése 1 százalékkal</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>MASTER</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>'master' mixer csatorna használata</TD><TR>   
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PCM</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>'pcm' mixer csatorna használata</TD><TR>
 </TABLE></P>
 
 <P>Ne felejtsd bekapcsolni a repeat flag-et a RWND/FWD-hez a .lircrc-ben.

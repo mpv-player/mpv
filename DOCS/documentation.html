@@ -43,7 +43,7 @@
 		      </LI><LI><A HREF="video.html#2.2.1.2.3">2.2.1.2.3 nVidia cards</A>
 		      </LI><LI><A HREF="video.html#2.2.1.2.4">2.2.1.2.4 ATI cards</A>
 		      </LI></UL>
-	     </LI><LI><A HREF="video.html#2.2.1.3">2.2.3.2 DGA</A>
+	     </LI><LI><A HREF="video.html#2.2.1.3">2.2.1.3 DGA</A>
 		    <UL><LI><A HREF="video.html#2.2.1.3.1">2.2.1.3.1 Summary</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.2">2.2.1.3.2 What is DGA</A>
 		    </LI><LI><A HREF="video.html#2.2.1.3.3">2.2.1.3.3 Installing DGA support for MPlayer</A>
@@ -66,12 +66,11 @@
 	     </LI><LI><A HREF="video.html#2.2.1.11">2.2.1.11 AAlib - text mode displaying</A>
 	     </LI><LI><A HREF="video.html#2.2.1.A">2.2.1.A TVout</A>
 		     <UL><LI><A HREF="video.html#2.2.1.A.1">2.2.1.A.1 Matrox Dualhead</A>
-	     </UL></LI></LI>
-	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Audio output devices</A>
+	     </UL></LI>
+	</LI><LI><A HREF="sound.html#2.2.2">2.2.2 Soundcards, audio output devices</A>
 	     <UL><LI><A HREF="sound.html#2.2.2.1">2.2.2.1 Soundcard experiences, recommendations</A>
 	     </LI></UL>
-	</LI></UL>
-    </LI></UL>
+	</LI>
 </LI><LI><A HREF="#3">3. Usage</A>
      <UL><LI><A HREF="#3.1">3.1 Control from keyboard</A>
      </LI><LI><A HREF="#3.2">3.2 Control from LIRC (Linux Infrared Remote Control)</A>
@@ -325,23 +324,41 @@ Now you have to see a timer at the upper left corner of the movie
 <P><B><A NAME=3.1>3.1. Control from keyboard</A></B></P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>seek backward/forward  10 seconds</TD><TR>
-<TD></TD><TD>up or down</TD><TD></TD><TD>seek backward/forward   1 minute</TD><TR>
-<TD></TD><TD>pgup/pgdown</TD><TD></TD><TD>seek backward/forward  10 minutes</TD><TR>
-<TD></TD><TD>p or SPACE</TD><TD></TD><TD>pause movie (press any key)</TD><TR>
-<TD></TD><TD>q or ESC</TD><TD></TD><TD>stop playing and quit program</TD><TR>
-<TD></TD><TD>+ or -</TD><TD></TD><TD>adjust audio delay by +/- 0.1 second</TD><TR>
-<TD></TD><TD>/ or *</TD><TD></TD><TD>decrease/increase volume</TD><TR>
-<TD></TD><TD>o</TD><TD></TD><TD>toggle OSD: none / seek / seek+timer</TD><TR>
-<TD></TD><TD>m</TD><TD></TD><TD>toggle using master/pcm volume</TD><TR>
-<TD></TD><TD>z or x</TD><TD></TD><TD>adjust subtitle delay by +/- 0.1 second</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&lt;-  or  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  10 seconds</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>up or down</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward   1 minute</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pgup/pgdown</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>seek backward/forward  10 minutes</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p or SPACE</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pause movie (press any key)</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>q or ESC</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stop playing and quit program</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>+ or -</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust audio delay by +/- 0.1 second</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>/ or *</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease/increase volume</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>o</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle OSD: none / seek / seek+timer</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle using master/pcm volume</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>z or x</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust subtitle delay by +/- 0.1 second</TD><TR>
 
-<TD COLSPAN=4><P><I>(the following keys are valid only when using DirectShow DivX codec)</I></P></TD><TR>
+<TD COLSPAN=4><P><I><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>(the following keys are valid only when using DirectShow DivX codec)</I></P></TD><TR>
 
-<TD></TD><TD>1 or 2</TD><TD></TD><TD>adjust contrast</TD><TR>
-<TD></TD><TD>3 or 4</TD><TD></TD><TD>adjust brightness</TD><TR>
-<TD></TD><TD>5 or 6</TD><TD></TD><TD>adjust hue</TD><TR>
-<TD></TD><TD>7 or 8</TD><TD></TD><TD>adjust saturation</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>1 or 2</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust contrast</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3 or 4</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust brightness</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5 or 6</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust hue</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>7 or 8</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>adjust saturation</TD><TR>
+</TABLE></P>
+
+<P><B>GUI keyboard control</B></P>
+
+<P><TABLE BORDER=0>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>, and .</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>previous / next stream</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>gray - or +</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease / increase volume</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>enter</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>start playing</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>space</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pause</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>s</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>stop</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>a</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>about</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>l</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>load file</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>b</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skin browser</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>e</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle equalizer</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>p</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle playlist</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>f</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle fullscreen</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>m</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>toggle mute</TD><TR>
+
 </TABLE></P>
    
 <P><B><A NAME=3.2>3.2. Control from LIRC</A></B></P>
@@ -362,16 +379,16 @@ anything about LIRC there's no support compiled in. That's it :-)</P>
 It understands the following commands:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD>PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD>pause playing. Any other keystroke will continue replay.</TD><TR>
-<TD></TD><TD>QUIT</TD><TD></TD><TD>exit MPlayer</TD><TR>
-<TD></TD><TD>RWND</TD><TD></TD><TD>10 secs back</TD><TR>
-<TD></TD><TD>FRWND</TD><TD></TD><TD>60 secs back</TD><TR>
-<TD></TD><TD>FWD</TD><TD></TD><TD>skip 10 secs</TD><TR>
-<TD></TD><TD>FFWD</TD><TD></TD><TD>skip 60 secs</TD><TR>
-<TD></TD><TD>INCVOL</TD><TD></TD><TD>increase volume one percent</TD><TR>
-<TD></TD><TD>DECVOL</TD><TD></TD><TD>decrease volume one percent</TD><TR>
-<TD></TD><TD>MASTER</TD><TD></TD><TD>use master mixer channel</TD><TR>
-<TD></TD><TD>PCM</TD><TD></TD><TD>use pcm mixer channel</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PAUSE</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>pause playing. Any other keystroke will continue replay.</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>QUIT</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>exit MPlayer</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>RWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>10 secs back</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FRWND</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>60 secs back</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skip 10 secs</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>FFWD</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>skip 60 secs</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>INCVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>increase volume one percent</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>DECVOL</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>decrease volume one percent</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>MASTER</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use master mixer channel</TD><TR>
+<TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>PCM</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>use pcm mixer channel</TD><TR>
 </TABLE></P>
 
 <P> Don't forget to enable the repeat flag for RWND/FWD in .lircrc. Here's an
