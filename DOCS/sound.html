@@ -366,7 +366,7 @@
 </DL>
 
 
-<H5><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H5>
+<H4><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H4>
 
 <P>MPlayer fully supports sound up/down-sampling through the
   <CODE>resample</CODE> filter. It can be used if you
@@ -409,7 +409,7 @@
   output frequency scaling and linear interpolation.</P>
 
 
-<H5><A NAME="af_channels">2.3.2.3.2 Changing the number of channels</A></H5>
+<H4><A NAME="af_channels">2.3.2.3.2 Changing the number of channels</A></H4>
 
 <P>The <CODE>channels</CODE> filter can be used for adding and removing
   channels, it can also be used for routing or copying channels. It is
@@ -455,7 +455,7 @@
   channel 0 to channels 0 to 3. Channel 4 and 5 will contain silence.</P>
 
 
-<H5><A NAME="af_format">2.3.2.3.3 Sample format converter</A></H5>
+<H4><A NAME="af_format">2.3.2.3.3 Sample format converter</A></H4>
 
 <P>The <CODE>format</CODE> filter converts between different sample formats. It
   is automatically enabled when needed by the sound card or another filter.</P>
@@ -482,7 +482,7 @@
   data.</P>
 
 
-<H5><A NAME="af_delay">2.3.2.3.4 Delay</A></H5>
+<H4><A NAME="af_delay">2.3.2.3.4 Delay</A></H4>
 
 <P>The <CODE>delay</CODE> filter delays the sound to the loudspeakers such that
   the sound from the different channels arrives at the listening position
@@ -517,7 +517,7 @@
   by 0ms and the center channel by 7ms.</P>
 
 
-<H5><A NAME="af_volume">2.3.2.3.5 Software volume control</A></H5>
+<H4><A NAME="af_volume">2.3.2.3.5 Software volume control</A></H4>
 
 <P>Software volume control is implemented by the <CODE>volume</CODE> audio
   filter. Use this filter with caution since
@@ -555,7 +555,7 @@
   utilized.</P>
 
 
-<H5><A NAME="af_equalizer">2.3.2.3.6 Equalizer</A></H5>
+<H4><A NAME="af_equalizer">2.3.2.3.6 Equalizer</A></H4>
 
 <P>The <CODE>equalizer</CODE> filter represents a 10 octave band graphic
   equalizer, implemented using 10 IIR
@@ -598,7 +598,7 @@
   canceling it almost completely around 1kHz.</P>
 
 
-<H5><A NAME="af_panning">2.3.2.3.7 Panning filter</A></H5>
+<H4><A NAME="af_panning">2.3.2.3.7 Panning filter</A></H4>
 
 <P>Use the <CODE>pan</CODE> filter to mix channels arbitrarily. It is basically
   a combination of the volume control and the channels filter. There are two
@@ -638,7 +638,7 @@
   example).</P>
 
 
-<H5><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H5>
+<H4><A NAME="af_sub">2.3.2.3.8 Sub-woofer</A></H4>
 
 <P>The <CODE>sub</CODE> filter adds a sub woofer channel to the audio stream.
   The audio data
@@ -671,7 +671,7 @@
 <P>would add a sub-woofer channel with a cutoff frequency of 100Hz to output
   channel 4.</P>
 
-<H5><A NAME="af_surround">2.3.2.3.9 Surround-sound decoder</A></H5>
+<H4><A NAME="af_surround">2.3.2.3.9 Surround-sound decoder</A></H4>
 
 <P>Matrix encoded surround sound can be decoded by the <CODE>surround</CODE>
   filter. Dolby Surround is
@@ -728,7 +728,7 @@
 <P>Currently audio plugins cannot be used in MEncoder.</P>
 
 
-<H5><A NAME="resample">2.3.2.4.1 Up/Downsampling</A></H5>
+<H4><A NAME="resample">2.3.2.4.1 Up/Downsampling</A></H4>
 
 <P>MPlayer fully supports up/downsampling of the sound. This plugin can
   be used if you have a fixed frequency sound card or if you are
@@ -747,7 +747,7 @@
   and cause audio distortion.</P>
 
 
-<H5><A NAME="surround_decoding">2.3.2.4.2 Surround Sound decoding</A></H5>
+<H4><A NAME="surround_decoding">2.3.2.4.2 Surround Sound decoding</A></H4>
 
 <P>MPlayer has an audio plugin that can decode matrix encoded
   surround sound. Dolby Surround is an example of a matrix encoded format.
@@ -758,7 +758,7 @@
   &nbsp;&nbsp;<CODE>mplayer media.avi -aop list=surround</CODE></P>
 
 
-<H5><A NAME="format">2.3.2.3.3 Sample format converter</A></H5>
+<H4><A NAME="format">2.3.2.3.3 Sample format converter</A></H4>
 
 <P>If your sound card driver does not support signed 16bit <CODE>int</CODE> data type,
   this plugin can
@@ -773,7 +773,7 @@
   list=format:format=&lt;required output format&gt;</CODE></P>
 
 
-<H5><A NAME="delay">2.3.2.4.4 Delay</A></H5>
+<H4><A NAME="delay">2.3.2.4.4 Delay</A></H4>
 
 <P>This plugin delays the sound and is intended as an example of how to develop
   new plugins. It can not be used for anything useful from a users perspective
@@ -785,7 +785,7 @@
   to make this easier.</P>
 
 
-<H5><A NAME="volume">2.3.2.4.5 Software volume control</A></H5>
+<H4><A NAME="volume">2.3.2.4.5 Software volume control</A></H4>
 
 <P>This plugin is a software replacement for the volume control, and
   can be used on machines with a broken mixer device. It can also be
@@ -820,7 +820,7 @@
   list=volume:softclip</CODE></P>
 
 
-<H5><A NAME="extrastereo">2.3.2.4.6 Extrastereo</A></H5>
+<H4><A NAME="extrastereo">2.3.2.4.6 Extrastereo</A></H4>
 
 <P>This plugin (linearly) increases the difference between left and right
   channels (like the XMMS extrastereo plugin) which gives some sort of "live"
@@ -836,7 +836,7 @@
   -1.0, left and right channels will be swapped.</P>
 
 
-<H5><A NAME="normalizer">2.3.2.4.7 Volume normalizer</A></H5>
+<H4><A NAME="normalizer">2.3.2.4.7 Volume normalizer</A></H4>
 
 <P>This plugin maximizes the volume without distorting the sound.</P>
 
