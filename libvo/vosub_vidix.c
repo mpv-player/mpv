@@ -259,7 +259,7 @@ void vidix_term( void )
 	vdlClose(vidix_handler);
 }
 
-uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
@@ -313,7 +313,7 @@ uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h,int x,
     return 0;
 }
 
-uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
@@ -333,12 +333,57 @@ uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h,int x,
     return 0;
 }
 
+static uint32_t vidix_draw_slice_32(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    unsigned bespitch,apitch;
+    int i;
+    apitch = vidix_play.dest.pitch.y-1;
+    bespitch = (w*4 + apitch) & ~apitch;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += bespitch*y + x;
+    src = image[0];
+    for(i=0;i<h;i++){
+        memcpy(dest,src,w*4);
+        src+=stride[0];
+        dest += bespitch;
+    }
+
+    return 0;
+}
+
+static uint32_t vidix_draw_slice_24(uint8_t *image[], int stride[], int w,int h,int x,int y)
+{
+    uint8_t *src;
+    uint8_t *dest;
+    unsigned bespitch,apitch;
+    int i;
+    apitch = vidix_play.dest.pitch.y-1;
+    bespitch = (w*3 + apitch) & ~apitch;
+    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
+    dest += bespitch*y + x;
+    src = image[0];
+    for(i=0;i<h;i++){
+        memcpy(dest,src,w*3);
+        src+=stride[0];
+        dest += bespitch;
+    }
+
+    return 0;
+}
 
 uint32_t vidix_draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
  if(verbose > 1) printf("vosub_vidix: vidix_draw_slice() was called\n");
     if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
 	vidix_draw_slice_420(image,stride,w,h,x,y);
+    else
+    if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
+	vidix_draw_slice_32(image,stride,w,h,x,y);
+    else
+    if(src_format == IMGFMT_RGB24 || src_format == IMGFMT_BGR24)
+	vidix_draw_slice_24(image,stride,w,h,x,y);
     else
 	vidix_draw_slice_422(image,stride,w,h,x,y);
  return 0;
@@ -353,6 +398,22 @@ uint32_t vidix_draw_frame(uint8_t *image[])
 	printf("vosub_vidix: draw_frame for YUV420 called\nExiting...\n");
 	vidix_term();
 	exit( EXIT_FAILURE );
+    }
+    else
+    if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
+    {
+	int stride[1];
+	stride[0] = vidix_play.src.w*4;
+	vidix_draw_slice_32(image,stride,vidix_play.src.w,vidix_play.src.h,
+			     vidix_play.src.x,vidix_play.src.y);
+    }
+    else
+    if(src_format == IMGFMT_RGB24 || src_format == IMGFMT_BGR24)
+    {
+	int stride[1];
+	stride[0] = vidix_play.src.w*3;
+	vidix_draw_slice_24(image,stride,vidix_play.src.w,vidix_play.src.h,
+			     vidix_play.src.x,vidix_play.src.y);
     }
     else
     {
@@ -403,6 +464,22 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
         break;
     case IMGFMT_UYVY:
         vo_draw_alpha_yuy2(w,h,src,srca,stride,lvo_mem+2*(bespitch*y0+x0)+1,2*bespitch);
+        break;
+    case IMGFMT_RGB32:
+    case IMGFMT_BGR32:
+	vo_draw_alpha_rgb32(w,h,src,srca,stride,lvo_mem+4*(y0*bespitch+x0),4*bespitch);
+        break;
+    case IMGFMT_RGB24:
+    case IMGFMT_BGR24:
+	vo_draw_alpha_rgb24(w,h,src,srca,stride,lvo_mem+3*(y0*bespitch+x0),3*bespitch);
+        break;
+    case IMGFMT_RGB16:
+    case IMGFMT_BGR16:
+	vo_draw_alpha_rgb16(w,h,src,srca,stride,lvo_mem+2*(y0*bespitch+x0),2*bespitch);
+        break;
+    case IMGFMT_RGB15:
+    case IMGFMT_BGR15:
+	vo_draw_alpha_rgb15(w,h,src,srca,stride,lvo_mem+2*(y0*bespitch+x0),2*bespitch);
         break;
     default:
         draw_alpha_null(x0,y0,w,h,src,srca,stride);
