@@ -884,24 +884,35 @@ EOF
         echores "failed"
         echo "It seems that your kernel does not correctly support $2."
         echo "To use $2 extensions in MPlayer, you have to upgrade/recompile your kernel!"
-        return 1
+	return 1
       fi
     fi
-    return 1
+    return 0
   }
 
   extcheck $_mmx "mmx" "emms" || _mmx=no
   extcheck $_mmx2 "mmx2" "sfence" || _mmx2=no
   extcheck $_3dnow "3dnow" "femms" || _3dnow=no
   extcheck $_3dnowex "3dnowex" "pswapd %%mm0, %%mm0" || _3dnowex=no
-  extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" || _sse=no
-  extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" || _sse2=no
+  extcheck $_sse "sse" "xorps %%xmm0, %%xmm0" || _sse=no _gcc3_ext="$_gcc3_ext -mno-sse"
+  extcheck $_sse2 "sse2" "xorpd %%xmm0, %%xmm0" || _sse2=no _gcc3_ext="$_gcc3_ext -mno-sse2"
   echocheck "mtrr support"
   echores "$_mtrr"
 
   if test "$_mtrr" = yes ; then
     _optimizing="$_optimizing mtrr"
   fi
+
+  if test "$_gcc3_ext" != ""; then
+    # if we had to disable sse/sse2 because the active kernel does not
+    # support this instruction set extension, we also have to tell
+    # gcc3 to not generate sse/sse2 instructions for normal C code
+    cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+    cc_check $_march $_gcc3_ext && _march="$_march $_gcc3_ext"
+  fi
+
 fi
 
 
