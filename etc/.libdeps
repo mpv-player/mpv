@@ -26,6 +26,6 @@ postproc/libpostproc.a: $(wildcard postproc/*.[ch])
 input/libinput.a: $(wildcard input/*.[ch])
 libfaad2/libfaad2.a: $(wildcard libfaad2/*.[ch])
 libavformat/libavformat.a: $(wildcard libavformat/*.[ch])
-osdep/libosdep.a: $(wildcard libosdep/*.[ch])
+osdep/libosdep.a: $(wildcard osdep/*.[ch])
 libmenu/libmenu.a: $(wildcard libmenu/*.[ch])
 
