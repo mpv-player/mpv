@@ -35,7 +35,7 @@
   <UL>
     <LI><A HREF="#1.1">1.1 Übersicht</A></LI>
     <LI><A HREF="#1.2">1.2 Geschichte</A></LI>
-    <LI><A HREF="#1.3">1.3 Installation</A></LI>
+    <LI><A HREF="#1.3">1.3 Installation / Hinweise</A></LI>
     <LI><A HREF="#1.4">1.4 Was ist mit dem GUI?</A></LI>
     <LI><A HREF="#1.5">1.5 Untertitel und OSD</A></LI>
   </UL>
@@ -134,7 +134,7 @@
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
 	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon Videooverlay (VERALTET - siehe Vidix!)</A></LI>
         <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
-        <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (Für einige MJPEG Aufnahme/Wiedergabe Karten)</A></LI>
+        <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (Für einige MJPEG Aufnahme-/Wiedergabe-Karten)</A></LI>
        	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
 	<UL>
 	  <LI><A HREF="video.html#2.3.1.A.1">2.3.1.A.1 Matrox G400</A></LI>
@@ -147,8 +147,8 @@
         <LI><A HREF="sound.html#2.3.2.1">2.3.2.1 Soundkarten Erfahrungen, Empfehlungen</A></LI>
 	<LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Audio Plugins</A></LI>
           <UL>
-            <LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Summary</A></LI>
-            <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up/Downsampling</A></LI>
+            <LI><A HREF="sound.html#2.3.2.2">2.3.2.2 Zusammenfassung</A></LI>
+            <LI><A HREF="sound.html#2.3.2.2.1">2.3.2.2.1 Up-/Downsampling</A></LI>
             <LI><A HREF="sound.html#2.3.2.2.2">2.3.2.2.2 Surround Sound Decodierung</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.3">2.3.2.2.3 Beispiel Formats-Konvertierer</A></LI>
 	    <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Verzögerung</A></LI>
@@ -240,7 +240,7 @@ Entwicklerschreie (Englisch)
 <UL>
   <LI><A HREF="../users_against_developers.html#gcc">1. GCC 2.96</A></LI>
   <LI><A HREF="../users_against_developers.html#binary">2. Binary Pakete</A></LI>
-  <LI><A HREF="../users_against_developers.html#nvidia">3. Meinungen zu NVidia</A></LI>
+  <LI><A HREF="../users_against_developers.html#nvidia">3. Meinungen zu nVidia</A></LI>
   <LI><A HREF="../users_against_developers.html#kotsog">4. Über Joe Barr</A></LI>
 </UL>
 </P>
@@ -252,7 +252,7 @@ Entwicklerschreie (Englisch)
 <P>Wenn du die Installation zum ersten Mal durchführst: Pass auf, dass du 
   alles von hier bis zum Ende der Installationsanleitung durchliest, und 
   folge den entsprechenden Links. Wenn du immer noch Fragen hast, kehre zum
-  Inhaltsverzeichnis zurück und suche nach dem Begriff, lies die FAQ, oder
+  Inhaltsverzeichnis zurück und suche nach dem Begriff, lies die FAQ oder
   versuche mit Hilfe von grep die Dateien zu durchsuchen.</P>
       
 <P>Die Hauptregel dieser Dokumentation: Wenn es nicht dokumentiert ist, 
@@ -265,40 +265,40 @@ Entwicklerschreie (Englisch)
 
 <P><B><A NAME=1.1>1.1. Übersicht</A></B></P>
 
-<P><B>MPlayer</B> ist einen Video-Player für LINUX (er läuft auch auf vielen
+<P><B>MPlayer</B> ist ein Video-Player für LINUX (er läuft auch auf vielen
 anderen Unix-Systemen und <B>nicht-x86</B> CPUs, siehe <A HREF="#6">Sektion
-6</A>. Er spielt die meisten MPEG, VOB, AVI, VIVO, ASF/WMF, QT/MOV, FLI, RM, 
+6</A>). Er spielt die meisten MPEG, VOB, AVI, VIVO, ASF/WMF, QT/MOV, FLI, RM, 
 NuppelVideo, yuv4mpeg, FILM und RoQ Dateien ab, unterstützt von einigen
 eingebauten, Xanim und Win32 DLL Codecs. Du kannst <B>VideoCD</B>, <B>SVCD</B>,
 <B>DVD</B>, <B>3ivx</B> und auch <B>DivX</B> Filme sehen (und du brauchst die
 avifile-Bibliotek nicht einmal!). Ein weiteres großes Feature von <B>MPlayer</B>
 ist die große Weite von unterstützten Ausgabetreibern. Es funktioniert mit X11,
-Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib und DirectFB. Du kannst aber GGI und SDL 
-(und dadurch alle derren Treiber) verwenden und auch einigen Low-Level 
-grafikkartenabhängige Treiber (für Matrox, 3Dfx und Radeon). 
-Die meinsten von ihnen unterstützen Software- oder
-Hardware-Scaling, also kannst du die meinsten deiner Videos in Vollbild geniesen.
+Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib und DirectFB. Du kannst aber auch GGI und SDL 
+(und dadurch alle deren Treiber) und einigen Low-Level grafikkartenabhängige
+Treiber (für Matrox, 3Dfx und Radeon) verwenden. 
+Die meinsten von ihnen unterstützen Software- oder Hardware-Scaling, also kannst
+du die meinsten deiner Videos in Vollbild geniesen.
 <B>MPlayer</B> unterstützt auch die Wiedergabe via hardwarehäßiger MPEG-Decoder-Karten,
 wie <B><A HREF="DVB">DVB</A></B> und <B> <A HREF="DXR3">DXR3/Hollywood+</A></B> !
 Und was meinst du zu den großen, antialias-schattierten Untertiteln (<B>10
 unterstützte Typen!!!</B>) mit europäischen/ISO 8859-1,2 (ungarische, englische,
-tschechische, usw.), kyrillischen und koreanischen Schriften. Und der OSD?</P>
+tschechische, usw.), kyrillischen und koreanischen Schriften? Und der OSD?</P>
 
 <P>MPlayer ist grundsätzlich <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A>, enthält
 jedoch auch einige Nicht-GPL-Teile die das Verbeiten in binärer Form nicht erlauben.
 Es enthält ausserdem die OpenDivX-Bibliotek, die eine spezielle Lizenz besitzt.
 Wir entwickeln aber immer noch in Richung der GPL.</P>
 
-<P>Die Verteilung von <B>MPlayer</B> in der form eines Binarys und/oder Binary-Paketes
+<P>Die Verteilung von <B>MPlayer</B> in der Form eines Binarys und/oder Binary-Paketes
 ist momentan unmöglich, sowohl aus <B>technischen</B> als auch aus <B>rechtlichen</B> Gründen.
 Detailierte Informationen können im zweiten Teil von <A HREF="users_against_developers.html#binary">dieser</A>
 Datei gefunden werden. Es wird empfohlen diese zu lesen.</P>
 
 <P>Mein Player spielt felsenfest zerstörte MPEG Dateien (nützlich für einige VCDs) und
-spielt schlechte AVI-Dateien, welche auch mit dem bekannten Windows Media Player
-nicht mehr spielbar sind. Auch AVI-Dateien ohne Index-Chuck sind spielbar und du kannst ihr
-Index entweder kurzfristig mit der -idx Option wiederherstellen, oder permanent mit 
-dem <B>MEncoder</B>, diese ermöglichen die Suchfunktion!
+schlechte AVI-Dateien, welche auch mit dem bekannten Windows Media Player
+nicht mehr abspielbar sind, ab. Auch AVI-Dateien ohne Index-Chuck sind spielbar und du kannst ihr
+Index entweder kurzfristig mit der -idx Option wiederherstellen oder permanent mit
+<B>MEncoder</B>, diese ermöglichen die Suchfunktion!
 Also du siehst, Stabilität und Qualität sind die wichtigsten Dinge für mich,
 aber die Geschwindigkeit ist auch überraschend.</P>
 
@@ -336,7 +336,7 @@ So beschloss ich einen Player zu schreiben/zu modifizieren...</P>
     für en-/decoding.
 <LI><B>MPlayer v0.17 "The IdegCounter"</B> Apr 27, 2001<BR>
     Die Release-Version nach 0.11pre nach 4 Monaten schwerer Entwicklung!
-    Probiere es, und sei überrascht! Tausende von neuen Features hinzugefügt ...
+    Probiere es und sei überrascht! Tausende von neuen Features hinzugefügt ...
     und natürlich wurde auch der alte Code verbessert, Bugs entfernt usw.
 <LI><B>MPlayer 0.18 "The BugCounter"</B> Jul 9, 2001<BR>
     2 Monate seit 0.17 und hier ist die neue Release.. Komplette ASF-Unterstützung,
@@ -370,9 +370,9 @@ es zahlt sich aus.</P>
     verantwortlich für das Erzeugen von MMX/3DNow!/usw Befehlen, deshalb sehr wichtig.</LI>
   <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.3</B> bis <B>2.95.4</B>.
     Verwende <B>NIEMALS</B> 2.96 oder 3.x.x !!! Sie erzeugen fehlerhaften Code.</LI>
-    Wenn du dich unterscheidest von 2.96 zu wechseln entscheide dich nicht für 3.0 nur weil
+    Wenn du dich entscheidest von 2.96 zu wechseln entscheide dich nicht für 3.0 nur weil
     er neuer ist! In manchen Fällen ist er schlechter als 2.96, downgrade also zu 2.95.x
-    (downgrade auf die libstdc++ !) oder up/downgrade überhaupt nicht (sei aber in manchen
+    (downgrade auch die libstdc++ !) oder up-/downgrade überhaupt nicht (sei aber in manchen
     Fällen vorbereitet auf Laufzeitfehler). 
     Wenn der 3.x verwendet werden soll, sollte dies mit neuste Version versucht werden. 
     Ältere hatten verschiedene Fehler, es sollte also darauf geachtet werden, dass immerhin
@@ -381,18 +381,18 @@ es zahlt sich aus.</P>
     <A HREF="faq.html">FAQ</A> gefunden werden!</I></B></LI>
   <LI><B>XFree86</B> - vorgeschlagene Version ist <B>immer die neueste (4.2.0)</B>, aber
     normalerweise will das jeder. Seit XFree86 4.0.2 enthält es die <A HREF="video.html#2.3.1.2">XVideo</A>
-    Erweiterung (auch Bezeichnet als <B>Xv</B>) was benötigt wird, um Hardware YUV Bescheinigung
+    Erweiterung (auch bezeichnet als <B>Xv</B>) was benötigt wird, um Hardware YUV Beschleunigung
     (schnelle Bildanzeige) auf Karten die es unterstützen zu nutzen. <A HREF="video.html#2.3.1.2">Hier sind
     noch mehr Informationen verfügbar.</A><BR> Stelle sicher, dass die <B>Development-Pakete</B>
     installiert sind, sonst wird es nicht funktionieren.<BR>Einige Grafikkarten benötigen
-    auch gar keine XFree86. Für eine Liste siehe unten.</LI>			      
+    auch gar kein XFree86. Für eine Liste siehe unten.</LI>			      
   <LI><B>make</B> - vorgeschlagene Version ist <B>immer die neueste</B> (mindestens 3.79.x).
     Dies ist normalerweise nicht so wichtig.</LI>
   <LI><B>SDL</B> - es ist nicht vorgeschrieben, aber es ist hilfreich in einigen Fällen 
-    (schlechter Ton, Videokarten, welche mit Probleme mit dem Xv-Treiber haben).
-    Verwende immer das aktuellste Version (beginnend bei 1.2.x). Kann auch <B>Untertitel unter
-    dem Film (auf dem schwarzen Streifen)</B> darstellen</LI>
-  <LI><B>libjpeg</B> - optionaler (M)JPEG Decoder, benutzt bei -mf und einigern qt mov Dateien. 
+    (schlechter Ton oder Videokarten, welche mit Probleme mit dem Xv-Treiber haben).
+    Verwende immer die aktuellste Version (beginnend bei 1.2.x). Kann auch <B>Untertitel unter
+    dem Film (auf dem schwarzen Streifen)</B> darstellen.</LI>
+  <LI><B>libjpeg</B> - optionaler (M)JPEG Decoder, benutzt bei -mf und einigen qt mov Dateien. 
     Sowohl für <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
   <LI><B>libpng</B> - empfohlen und standard (M)PNG Decoder. Benötigt für das GUI.
     Sowohl für <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
@@ -401,11 +401,11 @@ es zahlt sich aus.</P>
 <P><B><I>CODECS</I></B></P>
 
 <UL>
-<LI><B>libavcodec</B> : Wenn die diese DivX3/DivX4/DivX5/usw Codecs verwenden willst schau die Sektion
+	<LI><B>libavcodec</B> : Wenn du diese DivX3/DivX4/DivX5/usw Codecs verwenden willst schau dir die Sektion
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> vor dem Kompilieren an. Features:<BR>
 <UL>
-  <LI>du kannst <B><I>DivX/DivX4/DivX5</I>-Wiedergabe auf nicht-x86 Maschinen ermöglichen</B></LI>
-  <LI>RealVideo 1.0/VIVO/MJPEG/h263/Andere Wiedergabe und Encodierung</LI>
+  <LI><B><I>DivX/DivX4/DivX5</I>-Wiedergabe auf nicht-x86 Maschinen</B></LI>
+  <LI>Wiedergabe von RealVideo 1.0/VIVO/MJPEG/h263/andere und Encodierung</LI>
   <LI>dieser Codec hat die <B>größte Geschwindigkeit beim Decodieren</B> von DivX/DivX4/DivX5
   Filmen (auch schneller als der originale DivX4-Codec) !</LI>
 </UL>
@@ -418,47 +418,47 @@ sich von unserem. Also wenn du alle unterstützten Codecs verwenden willst, verwe
 unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen. Features:<BR>
 <UL>
   <LI>du wirst sie möglicherweise brauchen um Video mit verschiedenen Hardware-Kompressoren, 
-  wie Tuner Karten und digitalen Kameras (z.B. DV, ATI VCR, MJPEG) abzuspielen oder zu encodieren</LI>
+  wie Tuner Karten und digitalen Kameras (z.B. DV, ATI VCR, MJPEG) abzuspielen oder zu enkodieren</LI>
   <LI>erforderlich um <B>WMV Filme</B> oder ältere (MP42) ASFs abzuspielen</LI>
 </UL>
 </LI>
 
 <LI><B>DivX4/DivX5</B> : Informationen zu diesem Codec sind in der Sektion <A HREF="codecs.html#2.2.1.1">2.2.1.1</A>
 erhältlich. Wenn du <B>MEncoder</B> nicht verwendest, kannst du auch <B>libavcodec</B> (siehe oben)
-verwenden, welcher schneller wäre.<BR>
+verwenden, was schneller wäre.<BR>
 Features:<UL>
-  <LI>1 Pass oder 2 Pass Encodierung mit <A HREF="encoding.html">MEncoder</A></LI>
-  <LI>du kannst alte <B>DivX3</B>-Film schneller als beim Win32-DLL-Codec betrachten aber langsamer
+  <LI>1 Pass oder 2 Pass Enkodierung mit <A HREF="encoding.html">MEncoder</A></LI>
+  <LI>du kannst alte <B>DivX3</B>-Film schneller als mit Win32-DLL-Codecs betrachten aber langsamer
   als <B>libavcodec</B></LI>
-  <LI>es ist Closed-Source und es ist nur in einer x86-Version verfügbar.</LI>
+  <LI>es ist Closed-Source und nur in einer x86-Version verfügbar.</LI>
 </UL>
 </LI>
 
-<LI><B>XviD</B> : Opensource Encodierungs-Alternative zu Divx4Linux<BR>
+<LI><B>XviD</B> : Opensource Enkodierungs-Alternative zu Divx4Linux<BR>
 Features :<UL>
   <LI>1 Pass oder 2 Pass Encodierung mit <A HREF="encoding.html">MEncoder</A></LI>
-  <LI>es ist open-source, also nicht nur als x86 Version verfügbar.</LI>
-  <LI>es ist ungefähr 2 mal schneller als divx4 bei der Encodierung - mit der annähernd gleichen Qualität.</LI>
+  <LI>es ist Open-Source, also nicht nur als x86 Version verfügbar.</LI>
+  <LI>es ist ungefähr 2 mal schneller als DivX4 bei der Enkodierung - mit der annähernd gleichen Qualität.</LI>
 </UL>
 </LI>
 
-<LI>Die <A HREF=codecs.html#2.2.1.3>XAnim Codecs</A> sind die Besten (Vollbild,
+<LI>Die <A HREF=codecs.html#2.2.1.3>XAnim Codecs</A> sind die besten (Vollbild,
 Hardwaremäßiger YUV Zoom) um <B>3ivx</B>, Indeo 3/4/5 Filme und einige alte Formate
 abzuspielen. Und sie sind multiplatform, also sind sie die einzige Möglichkeit um Indeo
-auf nicht-x86 Plattformen zu sehen (nun mal abgesehen von XAnim:). Aber z.B. Cinepak
+auf nicht-x86 Plattformen zu sehen (nun mal abgesehen von XAnim :). Aber z.B. Cinepak
 Filme werden mit dem <B>MPlayer</B> eigenen Cinepak-Decoder am besten wiedergegeben !</LI>
 
-<LI>Für <B>Ogg Vorbis</B> Audiodecodierung wird eine korrekte Installation von
+<LI>Für <B>Ogg Vorbis</B> Audiodekodierung wird eine korrekte Installation von
   <CODE>libvorbis</CODE> benötigt. Es sollten, falls vorhanden, deb/rpm-Pakete verwendet werden
   oder <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">diese Sourcen</A>
-  kompiliert werden (dies ist eine täglich erneuerter tarball des vorbis CVS).</LI>
+  kompiliert werden (dies ist eine täglich erneuerter tarball des Vorbis CVS).</LI>
 
 </UL>
 
 <P><B><I>VIDEOKARTEN</I></B></P>
 
 <P>Es gibt allgemein gesprochen zwei Arten von Grafikkarten. Die eine Art (und die neueren Karten) besitzen
-<B>Hardware Skallierung und YUV Beschleunigung</B>, die anderen nicht.</P>
+<B>Hardware Scaling und YUV Beschleunigung</B>, die anderen nicht.</P>
 
 <P>
 <B><I>YUV Karten</I></B></P>
@@ -470,38 +470,38 @@ auch ein nettes und sehr schnelle Vollbild.</P>
 
 <P>
 <UL>
-<LI><B>Matrox G200/G400/G450/G550 Karten</B> : <LI>Schau bitte auf die
-<A HREF="video.html#2.3.1.7">mga_vid</A> um einen großen Geschwindigkeitsvorteil
+<LI><B>Matrox G200/G400/G450/G550 Karten</B> : Schau bitte auf die
+<A HREF="video.html#2.3.1.7">mga_vid Sektion</A> um einen großen Geschwindigkeitsvorteil
 zu erhalten. Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
 machst, ansonsten wird die Matrox-spezifische Unterstützung nicht eingebaut.
 Schau dir auch die <A HREF="video.html#2.3.1.A.1">Matrox TV-Out</A> Sektion an.
-<U><B>Wenn du ein nicht-Linux User bist</B></U>, lies die <A HREF="video.html#2.3.1.15">Vidix</A> 
-Dokumentation !</LI>
+<U><B>Wenn du ein nicht-Linux User bist</B></U>, lies dir die <A HREF="video.html#2.3.1.15">Vidix</A> 
+Dokumentation durch.</LI>
 
-<LI><B>3Dfx Voodoo3/Banshee Karten</B> : <LI>schau bitte auf die
+
+<LI><B>3Dfx Voodoo3/Banshee Karten</B> : schau bitte auf die
 <A HREF="video.html#2.2.1.9">Sektion 2.2.1.9</A> um einen großen Geschwindigkeitsvorteil
 zu erhalten. Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
 machst, ansonsten wird die 3Dfx-Unterstützung nicht eingebaut. Lies auch in der
-<A HREF="video.html#2.3.1.A.3">3dfx TV out Sektion</A>. Wenn du X benutzt, benutze mindestens
+<A HREF="video.html#2.3.1.A.3">3dfx TV-Out Sektion</A>. Wenn du X benutzt, benutze mindestens
 4.2.0, da die 3dfx Xv Treiber in 4.1.0 und früheren Versionen kaputt waren.</LI>
 
-<LI><B>ATI Karten</B> : <LI>schau bitte auf die <A HREF="video.html#2.3.1.A.2">
+<LI><B>ATI Karten</B> : schau bitte auf die <A HREF="video.html#2.3.1.A.2">
 ATI-Karten Sektion</A> für Dokumentationen zum TV-Out und um zu erfahren, welches
-Features deiner Karte unter Linux/MPlayer unterstützt werden. Wenn du eine <B>Radeon</B>, <B>Rage 128</B>
+Features von deiner Karte unter Linux/MPlayer unterstützt werden. Wenn du eine <B>Radeon</B>, <B>Rage 128</B>
 oder <B>Mach64</B> (Rage XL/Mobility, Xpert98) Karte besitzt, haben wir einen <B>XXX_vid</B>-Treiber für 
 dich mit optionalem TV-Out ! Lies <AHREF="video.html#2.3.1.14">diese</A> Sektion!
 <U><B>Wenn du ein nicht-Linux User bist</B></U>, lies die <A HREF="video.html#2.3.1.15">Vidix</A>
 Dokumentation !</LI>
-</UL>
 
 <LI><B>S3 Karten</B> : Die Savage und Virge/DX Chips besitzen Hardwarebeschleunigung. Verwende
-die neueste XFree86 Version die möglich ist, ältere Treiber sind fehlerhaft. Savage Chips
+die neueste XFree86 Version, ältere Treiber sind fehlerhaft. Savage Chips
 machen Problem mit YV12 Anzeige, siehe <A HREF="video.html#2.3.1.2.2">S3 Xv Sektion</A>
-für Details. Ältere, Trio Karten haben keine oder langsamen Hardwaresupport.</LI>
+für Details. Ältere, Trio Karten haben keinen oder langsamen Hardwaresupport.</LI>
 
-<LI><B>Nvidia Karte</B> : sehr schlecht Wahl für Videowiedergabe. Nvidias Karten
+<LI><B>nVidia Karten</B> : sehr schlechte Wahl für Videowiedergabe. nVidias Karten
 werden im Fernen Osten erzeugt und haben sehr billige und qualitativ minderwertige Chips.
-<U>Der eingebaute Nvidia Treiber in XFree86 enthält keine Hardwareunterstützung
+<U>Der eingebaute nVidia Treiber in XFree86 enthält keine Hardwareunterstützung
 für YUV Beschleunigung!</U> Du musst dir die Closed-Source Treiber von nvidia.com downloaden.
 Für Details siehe <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.</LI>
 
@@ -509,9 +509,9 @@ Für Details siehe <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.<
   <UL>
     <LI>Schau ob dein XFree86 Treiber (und deine Karte) Hardwarebeschleunigung unterstützt.
       Siehe <A HREF="video.html#2.3.1.2">Xv Sektion</A> für Details.</LI>
-    <LI>Wenn nicht, sind die Features deiner Karte unter deinem OS nicht unterstützt :(<BR>
+    <LI>Wenn nicht, werden die Features deiner Karte unter deinem OS nicht unterstützt :(<BR>
       Wenn die Hardware Skalierung unter Windows läuft, bedeutet dies nicht, dass das auch unter
-      Linux oder anderen OS geht. Es hängt von den Treibern ab! Die meisten Hersteller erstellen weder
+      Linux oder anderen OS funktioniert. Es hängt von den Treibern ab! Die meisten Hersteller erstellen weder
       Linux Treiber, noch geben sie die Chip Spezifikationen frei - du bist also der Unglückliche, wenn
       du diese Karten verwendest. Lies die nächste Sektion:
     </LI>
@@ -549,12 +549,11 @@ der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werde
 
 <LI><B>Soundblaster Live!</B> : Diese Karte kann 4 oder 6 (<B>5.1</B>) Kanäle (von AC3)
 anstelle von 2 verwenden. Lies die <A HREF="codecs.html#2.2.2.1">Softwaremäßige AC3-Decodierung</A> Sektion.</LI>
-</UL>
 
 <LI><B>C-Media mit SP/DIF Ausgang</B> : Hardware AC3 Durchgabe ist möglich
   mit diesen Karten, siehe
   <A HREF="codecs.html#2.2.2.2">Hardware AC3 Decodierung</A> Sektion.
-  Für Hardware AC3 Durchgabe MUSS die ALSA 0.9 oss Emulation verwendet werden!</LI>
+  Für Hardware AC3 Durchgabe MUSS die ALSA 0.9 OSS Emulation verwendet werden!</LI>
     
 <LI>Die Features von <B>anderen Karten</B> werden von <B>MPlayer</B> nicht unterstützt.
   <U>Es ist sehr zu empfehlen die <A HREF="sound.html#2.3.2">Soundkarten Sektion</A> zu lesen !</U>
