@@ -122,6 +122,13 @@ while(1){
 	case mmioFOURCC('D', 'I', 'V', '2'):
         case mmioFOURCC('A', 'P', '4', '1'):
           idxfix_divx=1; // we can fix keyframes only for divx coded files!
+	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for DIVX 3 video\n");
+	  break;
+        case mmioFOURCC('D', 'I', 'V', 'X'):
+        case mmioFOURCC('d', 'i', 'v', 'x'):
+          idxfix_divx=2; // we can fix keyframes only for divx coded files!
+	  mp_msg(MSGT_HEADER,MSGL_V,"Regenerating keyframe table for DIVX 4 video\n");
+	  break;
         }
       } else
       if(last_fccType==streamtypeAUDIO){
@@ -181,9 +188,9 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
   while(1){
     int id,len,skip;
     AVIINDEXENTRY* idx;
-    unsigned char c;
+    unsigned int c;
     demuxer->filepos=stream_tell(demuxer->stream);
-    if(demuxer->filepos>=demuxer->movi_end) break;
+    if(demuxer->filepos>=demuxer->movi_end && demuxer->movi_start<demuxer->movi_end) break;
     id=stream_read_dword_le(demuxer->stream);
     len=stream_read_dword_le(demuxer->stream);
     if(id==mmioFOURCC('L','I','S','T')){
@@ -205,15 +212,17 @@ if(index_mode>=2 || (priv->idx_size==0 && index_mode==1)){
     idx->dwChunkOffset=demuxer->filepos;
     idx->dwChunkLength=len;
     
-    c=stream_read_char(demuxer->stream);
+    c=stream_read_dword(demuxer->stream);
 
     // Fix keyframes for DivX files:
     if(idxfix_divx)
       if(avi_stream_id(id)==idxfix_videostream){
-        if(c&0x40) idx->dwFlags=0;
+        switch(idxfix_divx){
+    	    case 1: if(c&0x40000000) idx->dwFlags=0;break; // divx 3
+	    case 2: if(c==0x1B6) idx->dwFlags=0;break; // divx 4
+	}
       }
-    
-    mp_dbg(MSGT_HEADER,MSGL_DBG2,"%08X %08X %.4s %02X %X\n",demuxer->filepos,id,(char *) &id,c,(unsigned int) idx->dwFlags);
+    mp_dbg(MSGT_HEADER,MSGL_DBG2,"%08X %08X %.4s %08X %X\n",(int)demuxer->filepos,id,(char *) &id,(int)c,(unsigned int) idx->dwFlags);
 #if 0
     { unsigned char tmp[64];
       int i;
