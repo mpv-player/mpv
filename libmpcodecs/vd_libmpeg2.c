@@ -97,6 +97,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     mp_image_t* mpi=NULL;
     int drop_frame, framedrop=flags&3;
 
+    if(len<=0) return NULL; // skipped null frame
+    
     // append extra 'end of frame' code:
     ((char*)data+len)[0]=0;
     ((char*)data+len)[1]=0;
