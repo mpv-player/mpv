@@ -98,10 +98,17 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
     if(!got_picture) return NULL;	// skipped image
     
+    if ((ctx->width != sh->disp_w) ||
+	(ctx->height != sh->disp_h))
+    {
+	if (mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_YV12))
+	    return NULL;
+    }	
+    
     mpi=mpcodecs_get_image(sh, MP_IMGTYPE_EXPORT, MP_IMGFLAG_PRESERVE,
 	ctx->width, ctx->height);
     if(!mpi){	// temporary!
-	printf("couldn't allocate image for cinepak codec\n");
+	printf("couldn't allocate image for codec\n");
 	return NULL;
     }
     
