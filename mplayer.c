@@ -1492,6 +1492,7 @@ if(!sh_video) {
 
     //--------------------  Decode a frame: -----------------------
     vdecode_time=video_time_usage;
+    while(1)
     {   unsigned char* start=NULL;
 	int in_size;
 	// get it!
@@ -1521,6 +1522,7 @@ if(!sh_video) {
 	current_module="decode_video";
 //	printf("Decode! %p  %d  \n",start,in_size);
 	blit_frame=decode_video(sh_video,start,in_size,drop_frame);
+	break;
     }
     vdecode_time=video_time_usage-vdecode_time;
     //------------------------ frame decoded. --------------------
