@@ -47,6 +47,9 @@ static int                  wsGLXAttrib[] = { GLX_RGBA,
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_bytes;
+static int many_fmts;
+static GLenum gl_format;
+static GLenum gl_type;
 
 static int int_pause;
 
@@ -67,6 +70,68 @@ static void resize(int x,int y){
   glLoadIdentity();
 }
 
+static int find_gl_format (uint32_t format)
+{
+  switch (format) {
+    case IMGFMT_RGB24:
+      gl_format = GL_RGB;
+      gl_type = GL_UNSIGNED_BYTE;
+      break;
+    case IMGFMT_RGB32:
+      gl_format = GL_RGBA;
+      gl_type = GL_UNSIGNED_BYTE;
+      break;
+    case IMGFMT_Y800:
+    case IMGFMT_Y8:
+      gl_format = GL_LUMINANCE;
+      gl_type = GL_UNSIGNED_BYTE;
+      break;
+#ifdef GL_VERSION_1_2
+    case IMGFMT_RGB8:
+      gl_format = GL_RGB;
+      gl_type = GL_UNSIGNED_BYTE_3_3_2;
+      break;
+    case IMGFMT_RGB15:
+      gl_format = GL_RGBA;
+      gl_type = GL_UNSIGNED_SHORT_5_5_5_1;
+      break;
+    case IMGFMT_RGB16:
+      gl_format = GL_RGB;
+      gl_type = GL_UNSIGNED_SHORT_5_6_5;
+      break;
+    case IMGFMT_BGR8:
+      // special case as red and blue have a differen number of bits.
+      // GL_BGR and GL_UNSIGNED_BYTE_3_3_2 isn't supported at least
+      // by nVidia drivers, and in addition would give more bits to
+      // blue than to red, which isn't wanted
+      gl_format = GL_RGB;
+      gl_type = GL_UNSIGNED_BYTE_2_3_3_REV;
+      break;
+    case IMGFMT_BGR15:
+      gl_format = GL_BGRA;
+      gl_type = GL_UNSIGNED_SHORT_5_5_5_1;
+      break;
+    case IMGFMT_BGR16:
+      gl_format = GL_RGB;
+      gl_type = GL_UNSIGNED_SHORT_5_6_5_REV;
+      break;
+    case IMGFMT_BGR24:
+      gl_format = GL_BGR;
+      gl_type = GL_UNSIGNED_BYTE;
+      break;
+    case IMGFMT_BGR32:
+      gl_format = GL_BGRA;
+      gl_type = GL_UNSIGNED_BYTE;
+      break;
+#endif
+    default:
+      gl_format = GL_RGBA;
+      gl_type = GL_UNSIGNED_BYTE;
+      return 0;
+  }
+  return 1;
+}
+
 /* connect to server, create and map window,
  * allocate colors and (shared) memory
  */
@@ -83,6 +148,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	image_height = height;
 	image_width = width;
+	find_gl_format (format);
     vo_dwidth = d_width;
     vo_dheight = d_height;
 
@@ -266,8 +332,8 @@ uint8_t *ImageData=src[0];
 		       i,  // y offset
 		       image_width,    // width
 		       (i+slice_height<=image_height)?slice_height:image_height-i,              // height
-		       (image_bytes==4)?GL_RGBA:GL_RGB,        // format
-		       GL_UNSIGNED_BYTE, // type
+		       gl_format,
+		       gl_type,
 		       ImageData+i*image_bytes*image_width );        // *pixels
     }
 
@@ -278,6 +344,8 @@ static uint32_t
 query_format(uint32_t format)
 {
     if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGB32))
+        return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+    if (many_fmts && find_gl_format(format))
         return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
     return 0;
 }
@@ -293,15 +361,20 @@ uninit(void)
 
 static uint32_t preinit(const char *arg)
 {
+    many_fmts = 0;
+    slice_height = 4;
     if(arg) 
     {
+	    if (strncmp (arg, "manyfmts", 8) == 0) {
+		    mp_msg (MSGT_VO, MSGL_WARN, "[gl] make sure you have OpenGL >= 1.2 and used corresponding headers for compiling!");
+		    many_fmts = 1;
+		    arg = &arg[8];
+	    }
+	    if (arg[0] != 0) {
 	    slice_height = atoi(arg);
 	    if (slice_height <= 0)
 		    slice_height = 65536;
-    }
-    else
-    {
-	    slice_height = 4;
+	    }
     }
     mp_msg(MSGT_VO, MSGL_INFO, "[vo_gl] Using %d as slice_height (0 means image_height).\n", slice_height);
 

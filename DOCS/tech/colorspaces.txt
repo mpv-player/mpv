@@ -103,5 +103,6 @@ OpenGL's GL_RGB on all platforms, and the same goes for BGR - GL_BGR.
 Unfortunately, most of the x86 codecs call our BGR to RGB, so it sometimes
 confuse developers.
 
-If you are unsure, try the OpenGL driver (-vo gl). There is at least software
-OpenGL implementation for all major platforms and OS's.
+If you are unsure, try the OpenGL driver (-vo gl:manyfmts). There is at least
+software OpenGL implementation for all major platforms and OS's, but you will
+need OpenGL version >= 1.2 for most formats.
