@@ -14,14 +14,14 @@
 #include "stheader.h"
 
 
-int use_rawaudio = 0;
+extern int demuxer_type;
 static int channels = 2;
 static int samplerate = 44100;
 static int samplesize = 2;
 static int format = 0x1; // Raw PCM
 
 config_t demux_rawaudio_opts[] = {
-  { "on", &use_rawaudio, CONF_TYPE_FLAG, 0,0, 1, NULL },
+  { "on", &demuxer_type, CONF_TYPE_FLAG, 0,0, DEMUXER_TYPE_RAWAUDIO, NULL },
   { "channels", &channels, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },
   { "rate", &samplerate, CONF_TYPE_INT,CONF_RANGE,1000,8*48000, NULL },
   { "samplesize", &samplesize, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },
