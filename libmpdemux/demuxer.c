@@ -134,6 +134,7 @@ extern void demux_close_pva(demuxer_t* demuxer);
 extern void demux_close_smjpeg(demuxer_t* demuxer);
 extern void demux_close_xmms(demuxer_t* demuxer);
 extern void demux_close_gif(demuxer_t* demuxer);
+extern void demux_close_ts(demuxer_t* demuxer);
 
 #ifdef USE_TV
 #include "tv.h"
@@ -204,6 +205,8 @@ void free_demuxer(demuxer_t *demuxer){
     case DEMUXER_TYPE_GIF:
       demux_close_gif(demuxer); break;
 #endif
+    case DEMUXER_TYPE_MPEG_TS:
+      demux_close_ts(demuxer); break;
 
     }
     // free streams:
@@ -282,6 +285,7 @@ int demux_audio_fill_buffer(demux_stream_t *ds);
 int demux_pva_fill_buffer(demuxer_t *demux);
 int demux_xmms_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 int demux_gif_fill_buffer(demuxer_t *demux);
+int demux_ts_fill_buffer(demuxer_t *demux);
 
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
@@ -334,6 +338,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 #ifdef HAVE_GIF
     case DEMUXER_TYPE_GIF: return demux_gif_fill_buffer(demux);
 #endif
+    case DEMUXER_TYPE_MPEG_TS: return demux_ts_fill_buffer(demux);
   }
   return 0;
 }
@@ -560,6 +565,7 @@ extern int bmp_check_file(demuxer_t *demuxer);
 extern int demux_xmms_open(demuxer_t* demuxer);
 extern int gif_check_file(demuxer_t *demuxer);
 extern int demux_open_gif(demuxer_t* demuxer);
+extern int ts_check_file(demuxer_t * demuxer);
 
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 
@@ -812,6 +818,17 @@ if(file_format == DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_PVA){
 	if(pva_check_file(demuxer)) {
 		mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"PVA");
 		file_format=DEMUXER_TYPE_PVA;
+	} else {
+		free_demuxer(demuxer);
+		demuxer=NULL;
+	}
+}
+//=============== Try to open as MPEG-TS file: =================
+if(file_format == DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_TS){
+	demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_TS,audio_id,video_id,dvdsub_id);
+	if(ts_check_file(demuxer)) {
+		mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"TS");
+		file_format=DEMUXER_TYPE_MPEG_TS;
 	} else {
 		free_demuxer(demuxer);
 		demuxer=NULL;
@@ -1127,6 +1144,10 @@ switch(file_format){
    break;
  }
 #endif
+ case DEMUXER_TYPE_MPEG_TS: {
+  demux_open_ts(demuxer);
+  break;
+ }
 } // switch(file_format)
 pts_from_bps=0; // !!!
 return demuxer;
@@ -1195,6 +1216,7 @@ int demux_seek_nuv(demuxer_t *demuxer,float rel_seek_secs,int flags);
 void demux_seek_mov(demuxer_t *demuxer,float pts,int flags);
 int demux_seek_real(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_pva(demuxer_t *demuxer,float rel_seek_secs,int flags);
+int demux_seek_ts(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 #ifdef HAVE_LIBDV095
 int demux_seek_rawdv(demuxer_t *demuxer, float pts, int flags);
@@ -1294,7 +1316,8 @@ switch(demuxer->file_format){
  case DEMUXER_TYPE_XMMS:
       demux_xmms_seek(demuxer,rel_seek_secs,flags); break;
 #endif
-
+ case DEMUXER_TYPE_MPEG_TS:
+      demux_seek_ts(demuxer,rel_seek_secs,flags); break;
 
 } // switch(demuxer->file_format)
 

@@ -18,6 +18,7 @@
 #define STREAMTYPE_CDDA 10     // raw audio CD reader
 #define STREAMTYPE_SMB 11      // smb:// url, using libsmbclient (samba)
 #define STREAMTYPE_VCDBINCUE 12      // vcd directly from bin/cue files
+#define STREAMTYPE_DVB 13
 
 #define STREAM_BUFFER_SIZE 2048
 

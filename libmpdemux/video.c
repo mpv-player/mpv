@@ -134,6 +134,7 @@ switch(d_video->demuxer->file_format){
    // otherwise fall through to...
 #endif
  case DEMUXER_TYPE_PVA:
+ case DEMUXER_TYPE_MPEG_TS:
  case DEMUXER_TYPE_MPEG_ES:
  case DEMUXER_TYPE_MPEG_PS: {
 //mpeg_header_parser:
@@ -270,7 +271,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     *start=NULL;
 
   if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || demuxer->file_format==DEMUXER_TYPE_MPEG_PS
-		  || demuxer->file_format==DEMUXER_TYPE_PVA
+		  || demuxer->file_format==DEMUXER_TYPE_PVA || demuxer->file_format==DEMUXER_TYPE_MPEG_TS
 #ifdef STREAMING_LIVE_DOT_COM
     || (demuxer->file_format==DEMUXER_TYPE_RTP && demux_is_mpeg_rtp_stream(demuxer))
 #endif
@@ -422,6 +423,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     }
     
     if(demuxer->file_format==DEMUXER_TYPE_MPEG_PS ||
+       demuxer->file_format==DEMUXER_TYPE_MPEG_TS ||
        demuxer->file_format==DEMUXER_TYPE_MPEG_ES){
 
 //	if(pts>0.0001) printf("\r!!! pts: %5.3f [%d] (%5.3f)   \n",pts,picture_coding_type,i_pts);

@@ -64,8 +64,8 @@
 	{"forceidx", &index_mode, CONF_TYPE_FLAG, 0, -1, 2, NULL},
 
 	// select audio/videosubtitle stream
-	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
-	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
+	{"aid", &audio_id, CONF_TYPE_INT, CONF_RANGE, 0, 8192, NULL},
+	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 8192, NULL},
 	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 
 	{ "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
@@ -94,6 +94,10 @@
 	{"tv", "MPlayer was compiled without TV Interface support\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 	{"vivo", vivoopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#ifdef HAS_DVBIN_SUPPORT
+	        {"dvbin", dvbin_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#endif
+
 
 // ------------------------- a-v sync options --------------------
 
@@ -164,6 +168,7 @@
 
         {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
+	{"tsfastparse", &ts_fastparse, CONF_TYPE_INT, 0, 0, 0, NULL},
 
 #ifdef USE_LIBAVCODEC
 	{"lavdopts", lavc_decode_opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -243,6 +248,7 @@ extern config_t cdda_opts[];
 extern char* audio_stream;
 extern char* sub_stream;
 extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
+extern int ts_fastparse;
 
 #include "libmpdemux/tv.h"
 
@@ -289,6 +295,12 @@ struct config tvopts_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
+
+#ifdef HAS_DVBIN_SUPPORT
+#include "libmpdemux/dvbin.h"
+extern struct config dvbin_opts_conf[];
+#endif
+
 
 extern int sws_chr_vshift;
 extern int sws_chr_hshift;

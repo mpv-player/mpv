@@ -422,7 +422,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   }
 #endif
 
-  if(!filename && !vcd_track && !dvd_title && !tv_param_on){
+  if(!filename && !vcd_track && !dvd_title && !tv_param_on && !dvbin_param_on){
 	printf(MSGTR_MissingFilename);
 	mencoder_exit(1,NULL);
   }

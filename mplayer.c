@@ -92,6 +92,13 @@ static int quiet=0;
 extern int tv_param_on;
 #endif
 
+#ifdef HAS_DVBIN_SUPPORT
+#include "libmpdemux/dvbin.h"
+extern dvb_history_t dvb_prev_next;
+dvb_history_t *dvb_history;
+#endif
+
+
 //**************************************************************************//
 //             Playtree
 //**************************************************************************//
@@ -661,6 +668,13 @@ int i;
 
 int gui_no_filename=0;
 
+#ifdef HAS_DVBIN_SUPPORT
+        dvb_prev_next.prev = dvb_prev_next.next = -1;
+	dvb_history = &dvb_prev_next;
+#endif
+
+
+
   srand((int) time(NULL)); 
 
   mp_msg_init();
@@ -928,7 +942,7 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
  }
 #endif
 
-    if(!filename && !vcd_track && !dvd_title && !dvd_nav && !tv_param_on){
+    if(!filename && !vcd_track && !dvd_title && !dvd_nav && !tv_param_on && !dvbin_param_on){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
@@ -2641,7 +2655,21 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif
 	}
       }
-    } break;
+    } 
+#ifdef HAS_DVBIN_SUPPORT
+	if(dvbin_param_on == 1)
+	{
+		int v = cmd->args[0].v.i;
+		if(v > 0)
+			dvb_history = dvb_step_channel((dvb_priv_t*)(demuxer->stream->priv), DVB_CHANNEL_HIGHER, dvb_history);
+		else
+			dvb_history = dvb_step_channel((dvb_priv_t*)(demuxer->stream->priv), DVB_CHANNEL_LOWER, dvb_history);
+		uninit_player(INITED_ALL);
+		goto goto_next_file;
+	}
+#endif
+
+    break;
     case MP_CMD_TV_SET_CHANNEL :  {
       if (tv_param_on == 1) {
 	tv_set_channel((tvi_handle_t*)(demuxer->priv), cmd->args[0].v.s);
@@ -3363,7 +3391,11 @@ while(playtree_iter != NULL) {
   }	
 #endif
 
-if(use_gui || playtree_iter != NULL){
+if(use_gui || playtree_iter != NULL
+#ifdef HAS_DVBIN_SUPPORT
+		    || dvbin_param_on
+#endif
+	){
 
   eof = 0;
   goto play_next_file;

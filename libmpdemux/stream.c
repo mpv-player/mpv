@@ -106,6 +106,15 @@ int stream_fill_buffer(stream_t *s){
   case STREAMTYPE_DS:
     len = demux_read_data((demux_stream_t*)s->priv,s->buffer,STREAM_BUFFER_SIZE);
     break;
+  
+#ifdef HAS_DVBIN_SUPPORT
+  case STREAMTYPE_DVB:
+   len = dvb_streaming_read(s->fd, s->buffer, STREAM_BUFFER_SIZE, s->priv);
+  break;
+#endif
+
+
+    
   default: len=0;
   }
   if(len<=0){ s->eof=1; s->buf_pos=s->buf_len=0; return 0; }
@@ -309,6 +318,12 @@ void free_stream(stream_t *s){
     close_cdda(s);
     break;
 #endif
+#ifdef HAS_DVBIN_SUPPORT
+  case STREAMTYPE_DVB:
+    dvbin_close(s->priv);
+  break;
+#endif
+
 #ifdef USE_DVDREAD
   case STREAMTYPE_DVD:
     dvd_close(s->priv);

@@ -30,6 +30,8 @@ int isSDPFile = 0;
 static URL_t* url;
 #endif
 
+int dvbin_param_on=0;
+
 int dvd_title=0;
 int dvd_chapter=1;
 int dvd_last_chapter=0;
@@ -75,6 +77,12 @@ extern int vcd_get_track_end(int fd,int track);
 
 extern int stream_open_tv(stream_t *stream, tvi_handle_t *tvh);
 #endif
+
+#ifdef HAS_DVBIN_SUPPORT
+#include "dvbin.h"
+#endif
+
+
 
 #ifdef HAVE_CDDA
 stream_t* open_cdda(char* dev,char* track);
@@ -477,6 +485,22 @@ if(dvd_title){
   return stream;
 }
 #endif
+
+#ifdef HAS_DVBIN_SUPPORT
+if(dvbin_param_on == 1)
+{
+	stream = new_stream(-1, STREAMTYPE_DVB);
+	if (!stream)
+	   return(NULL);
+       	if (!dvb_streaming_start(stream))
+	   return NULL;
+
+       	return stream;
+}
+#endif
+
+
+
 
 //============ Check for TV-input or multi-file input ====
   if( (mf_support == 1)
