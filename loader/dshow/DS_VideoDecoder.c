@@ -109,7 +109,7 @@ DS_VideoDecoder::DS_VideoDecoder(const CodecInfo& info, const BITMAPINFOHEADER& 
 	case fccMP42:
 	case fccWMV2:
 	    //YV12 seems to be broken for DivX :-) codec
-	case fccIV50:
+//	case fccIV50:
 	    //produces incorrect picture
 	    //m_Caps = (CAPS) (m_Caps & ~CAP_YV12);
 	    m_Caps = CAP_YUY2; // | CAP_I420;
