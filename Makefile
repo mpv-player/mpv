@@ -136,7 +136,7 @@ loader/dmo/libDMO_Filter.a:
 	$(MAKE) -C loader/dmo
 
 libavcodec/libavcodec.a:
-	$(MAKE) -C libavcodec
+	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a
 
 libmpeg2/libmpeg2.a:
 	$(MAKE) -C libmpeg2
