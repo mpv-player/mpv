@@ -425,7 +425,7 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	
 	char line[LINE_LEN+1],
 	     line3[LINE_LEN+1],
-	     *line2,*so,*de;
+	     *line2;
 	char *tmp;
 
 	do {
@@ -450,19 +450,6 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
         if(comma < max_comma)max_comma = comma;
 	/* eliminate the trailing comma */
 	if(*line2 == ',') line2++;
-	/* eliminate any text enclosed with {}, they are font and color settings */
-	so=de=line2;
-	while (*so) {
-		if(*so == '{') {
-			for (; *so && *so!='}'; so++);
-			if(*so) so++;
-		}
-		if(*so) {
-			*de=*so;
-			so++; de++;
-		}
-	}
-	*de=*so;
 
 	current->lines=0;num=0;
 	current->start = 360000*hour1 + 6000*min1 + 100*sec1 + hunsec1;
@@ -482,6 +469,27 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	current->lines++;
 
 	return current;
+}
+
+void sub_pp_ssa(subtitle *sub) {
+	int l=sub->lines;
+	char *so,*de,*start;
+
+	while (l){
+            	/* eliminate any text enclosed with {}, they are font and color settings */
+            	so=de=sub->text[--l];
+            	while (*so) {
+            		if(*so == '{' && so[1]=='\\') {
+            			for (start=so; *so && *so!='}'; so++);
+            			if(*so) so++; else so=start;
+            		}
+            		if(*so) {
+            			*de=*so;
+            			so++; de++;
+            		}
+            	}
+            	*de=*so;
+        }
 }
 
 subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
@@ -1045,35 +1053,41 @@ static void adjust_subs_time(subtitle* sub, float subtime, float fps, int block)
 	if (n) mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Adjusted %d subtitle(s).\n", n);
 }
 
+struct subreader {
+    subtitle * (*read)(FILE *fd,subtitle *dest);
+    void       (*post)(subtitle *dest);
+    const char *name;
+};
+
 subtitle* sub_read_file (char *filename, float fps) {
     FILE *fd;
     int n_max, n_first, i, j, sub_first, sub_orig;
     subtitle *first, *second, *sub;
-    char *fmtname[] = { "microdvd", "subrip", "subviewer", "sami", "vplayer",
-			"rt", "ssa", "dunnowhat", "mpsub", "aqt", "subviewer 2.0", "subrip 0.9", "jacosub" };
-    subtitle * (*func[])(FILE *fd,subtitle *dest)= 
+    struct subreader sr[]=
     {
-	    sub_read_line_microdvd,
-	    sub_read_line_subrip,
-	    sub_read_line_subviewer,
-	    sub_read_line_sami,
-	    sub_read_line_vplayer,
-	    sub_read_line_rt,
-	    sub_read_line_ssa,
-	    sub_read_line_dunnowhat,
-	    sub_read_line_mpsub,
-	    sub_read_line_aqt,
-	    sub_read_line_subviewer2,
-	    sub_read_line_subrip09,
-	    sub_read_line_jacosub
-	    
+	    { sub_read_line_microdvd, NULL, "microdvd" },
+	    { sub_read_line_subrip, NULL, "subrip" },
+	    { sub_read_line_subviewer, NULL, "subviewer" },
+	    { sub_read_line_sami, NULL, "sami" },
+	    { sub_read_line_vplayer, NULL, "vplayer" },
+	    { sub_read_line_rt, NULL, "rt" },
+	    { sub_read_line_ssa, sub_pp_ssa, "ssa" },
+	    { sub_read_line_dunnowhat, NULL, "dunnowhat" },
+	    { sub_read_line_mpsub, NULL, "mpsub" },
+	    { sub_read_line_aqt, NULL, "aqt" },
+	    { sub_read_line_subviewer2, NULL, "subviewer 2.0" },
+	    { sub_read_line_subrip09, NULL, "subrip 0.9" },
+	    { sub_read_line_jacosub, NULL, "jacosub" }
     };
+    struct subreader *srp;
+    
     if(filename==NULL) return NULL; //qnx segfault
     fd=fopen (filename, "r"); if (!fd) return NULL;
 
     sub_format=sub_autodetect (fd);
     if (sub_format==SUB_INVALID) {mp_msg(MSGT_SUBREADER,MSGL_WARN,"SUB: Could not determine file format\n");return NULL;}
-    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Detected subtitle file format: %s\n", fmtname[sub_format]);
+    srp=sr+sub_format;
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Detected subtitle file format: %s\n", srp->name);
     
     rewind (fd);
 
@@ -1100,11 +1114,13 @@ subtitle* sub_read_file (char *filename, float fps) {
 	sub = &first[sub_num];
 #endif	
 	memset(sub, '\0', sizeof(subtitle));
-        sub=func[sub_format](fd,sub);
+        sub=srp->read(fd,sub);
         if(!sub) break;   // EOF
 #ifdef USE_ICONV
 	if ((sub!=ERR) && (sub_utf8 & 2)) sub=subcp_recode(sub);
 #endif
+        // Apply any post processing that needs recoding first
+        if ((sub!=ERR) && srp->post) srp->post(sub);
 #ifdef USE_SORTSUB
 	if(!sub_num || (first[sub_num - 1].start <= sub->start)){
 	    first[sub_num].start = sub->start;
