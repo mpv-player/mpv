@@ -5,7 +5,8 @@
  * by Reza Jelveh <reza.jelveh@tuhh.de>
  * seeking and PCM audio not yet supported
  * PCM needs extra audio chunk "miniheader" parsing
- * Based on a'rpis g2 work
+ * Based on A'rpis G2 work
+ * Licence: GPL
  */
 
 #include <stdio.h>
@@ -138,9 +139,6 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
     sh_video_t *sh_video = NULL;
     sh_audio_t *sh_audio = NULL;
     
-    
-    // vp6x magic keyframe ee if no keyframe f0 if keyframe correct if theres a mistake
-//  unsigned char magic;
     
     nsv_priv_t * priv = malloc(sizeof(nsv_priv_t));
     demuxer->priv=priv;
