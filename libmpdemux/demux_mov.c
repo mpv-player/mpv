@@ -12,6 +12,8 @@
 //  aswell as .mov specific stuff.
 //  All sort of Stuff about MPEG4:
 //  http://www.cmlab.csie.ntu.edu.tw/~pkhsiao/thesis.html
+//  I really recommend N4270-1.doc and N4270-2.doc which are exact specs
+//  of the MP4-File Format and the MPEG4 Specific extensions. ::atmos
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -248,15 +250,35 @@ int mov_check_file(demuxer_t* demuxer){
 	else if(len<8) break; // invalid chunk
 
 	switch(id){
-	case MOV_FOURCC('f','t','y','p'):
-	  // skip over the file type chunk
-	  // Here are my guesses on it's format (atmos):
-	  // char[4]  majorBrand   (eg. 'isom')
-	  // int      minorVersion (eg. 0x00000000)
-	  // char[4]  mediaType(?) (eg. 'mp41')
-	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Skipping unsupported Filetype chunk (len: %d)!\n",
-	      len);
-	  break;
+	case MOV_FOURCC('f','t','y','p'): {
+	  int i;					      
+	  unsigned int tmp;
+	  // File Type Box (ftyp): 
+	  // char[4]  major_brand	   (eg. 'isom')
+	  // int      minor_version	   (eg. 0x00000000)
+	  // char[4]  compatible_brands[]  (eg. 'mp41')
+	  // compatible_brands list spans to the end of box
+#if 1
+	  tmp = stream_read_dword(demuxer->stream);
+	  switch(tmp) {
+	    case MOV_FOURCC('i','s','o','m'):
+	      mp_msg(MSGT_DEMUX,MSGL_V,"MOV: File-Type Major-Brand: ISO Media File\n");
+     	      break;
+	    default:
+	      tmp = be2me_32(tmp);  
+	      mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: File-Type unknown Major-Brand: %.4s\n",&tmp);
+	  }
+	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: File-Type Minor-Version: %d\n",
+	      stream_read_dword(demuxer->stream));
+	  skipped += 8;
+	  // List all compatible brands
+	  for(i = 0; i < ((len-16)/4); i++) {
+	    tmp = be2me_32(stream_read_dword(demuxer->stream));
+	    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: File-Type Compatible-Brands #%d: %.4s\n",i,&tmp);
+	    skipped += 4;
+	  }
+#endif	  
+	  } break;
 	case MOV_FOURCC('m','o','o','v'):
 //	case MOV_FOURCC('c','m','o','v'):
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie header found!\n");
