@@ -171,10 +171,14 @@ vo=xmga
 .br
 flip=yes
 .br
-# Decode/\:encode multiple files from png, start it with -mf on
+# Decode/\:encode multiple files from png, start with -mf on
 .br
 mf= type=png:fps=25
 
+You can also write file-specific configuration files.
+If you wish to have a config file for a file called 'movie.avi', create a file
+named 'movie.avi.conf' with the file-specific options in it and put it in
+~/.mplayer or in the same directory as the file.
 
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
@@ -262,7 +266,7 @@ Available commands are:
 .IPs conf=<file>
 Read alternative input.conf.
 If given without pathname, ~/\:.mplayer is assumed.
-.In ar\-delay
+.IPs ar\-delay
 Delay in msec before we start to autorepeat a key (0 to disable).
 .IPs ar\-rate
 How many key presses per second when we autorepeat.
@@ -790,7 +794,7 @@ Can be:
 .IPs 0\ \ \ \ 
 plain white fonts
 .IPs 0.75\ \ 
-very narrow black outline [default]
+very narrow black outline (default)
 .IPs 1\ \ \ \ 
 narrow black outline
 .IPs 10\ \ \ 
@@ -858,7 +862,7 @@ Use/\:display this subtitle file.
 .TP
 .B \-sub-bg-alpha <0\-255>
 Specify the alpha channel value for subtitles and OSD backgrounds.
-Big values means more transparent.
+Big values mean more transparency.
 The 0 value is an exception and means completly transparent.
 .TP
 .B \-sub-bg-color <0\-255>
@@ -1160,12 +1164,12 @@ You can get a list and an explanation of available options executing
 Use different color depth than autodetect.
 Not all \-vo drivers support it (fbdev, dga2, svga, vesa).
 .TP
-.B \-brightness <\-100\ \-\ 100>
+.B \-brightness <\-100\-100>
 Adjust brightness of video output (default 0).
 It changes intensity of RGB components of video signal from black to white
 screen.
 .TP
-.B \-contrast <\-100\ \-\ 100>
+.B \-contrast <\-100\-100>
 Adjust contrast of video output (default 0).
 Works in similar manner as brightness.
 .TP
@@ -1323,7 +1327,7 @@ Places the window at the bottom left corner of the screen
 .PD 1
 .
 .TP
-.B \-hue <\-100\ \-\ 100>
+.B \-hue <\-100\-100>
 Adjust hue of video signal (default: 0).
 You can get colored negative of image with this option.
 .TP
@@ -1383,8 +1387,9 @@ setup.
 
 .TP
 .B \-nokeepaspect
-Do not keep window aspect ratio when resizing X11 windows.
-(works currently only with \-vo x11, xv, xmga and xvidix)
+Do not keep window aspect ratio when resizing X11 windows (Works currently only
+with \-vo x11, xv, xmga and xvidix and your window manager needs to understand
+window aspect hints.).
 
 .TP
 .B \-noslices
@@ -1406,7 +1411,7 @@ Play movie in the root window (desktop background) instead of opening
 a new one.
 Works only with x11, xv, xmga and xvidix drivers.
 .TP
-.B \-saturation <\-100\ \-\ 100>
+.B \-saturation <\-100\-100>
 Adjust saturation of video output (default: 0).
 You can get grayscale output with this option.
 .TP
@@ -1657,7 +1662,7 @@ Do not play/\:encode sound.
 .B \-pp <quality> (see \-vop pp option too!)
 Set postprocess level of the DLL.
 This option is NO LONGER USABLE with MPlayer's postprocess filter, but only
-with Win32 DirectShow DLLs which have interal postprocessing routine.
+with Win32 DirectShow DLLs which have internal postprocessing routine.
 
 The valid range of \-pp value vary on codecs, mostly
 0\-6, where 0=disable 6=slowest/\:best.
@@ -1992,7 +1997,7 @@ thresh: filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
 .REss
 .IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
 .RSss
-x0,y0,...: coordinates of the topleft, topright, bottomleft, bottomright
+x0,y0,...: coordinates of the top left, top right, bottom left, bottom right
 corners
 .br
 t: linear (0) or cubic resampling (1)
@@ -2158,7 +2163,7 @@ will have the output file contain 'div3' as video fourcc.
 .
 .TP
 .B \-include <configuration\ file>
-Specify configuration file to be parsed after the default
+Specify configuration file to be parsed after the default ones.
 .TP
 .B \-info <option1:option2:...> (.AVI only)
 Specify the info header of the resulting .AVI file.
@@ -2665,7 +2670,7 @@ Do not skip frames.
 Outputs to the given filename, instead of the default 'test.avi'.
 .TP
 .B \-oac <codec name>
-Encode with the audio codec.
+Encode with the given audio codec.
 Use \-ovc help to get a list of available codecs.
 (no default set)
 
@@ -2984,7 +2989,7 @@ seconds when abs is non zero.
 Toggle osd mode or set it to level when level > 0.
 .IPs "volume <dir>"
 Increase/\:decrease volume
-.IPs "[contrast|brightness|hue|saturation] <\-100 \- 100> [abs=<value>]"
+.IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<value>]"
 Set/\:Adjust video parameters.
 .IPs "frame_drop [type=<value>]"
 Toggle/\:Set frame dropping mode.
