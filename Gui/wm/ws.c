@@ -38,6 +38,10 @@
 #include <X11/extensions/Xinerama.h>
 #endif
 
+#ifdef HAVE_XF86VM
+#include <X11/extensions/xf86vmode.h>
+#endif
+
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
@@ -249,9 +253,21 @@ wsXDNDInitialize();
   }
   else
 #endif
+#ifdef HAVE_XF86VM
+    {
+      int clock;
+      XF86VidModeModeLine modeline;
+
+      XF86VidModeGetModeLine( wsDisplay,wsScreen,&clock ,&modeline );
+      wsMaxX=modeline.hdisplay;
+      wsMaxY=modeline.vdisplay;
+    }
+#endif
  {
  wsOrgX = wsOrgY = 0;
+ if ( !wsMaxX )
  wsMaxX=DisplayWidth( wsDisplay,wsScreen );
+ if ( !wsMaxY )
  wsMaxY=DisplayHeight( wsDisplay,wsScreen );
  }
 
