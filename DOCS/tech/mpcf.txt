@@ -88,8 +88,6 @@ main header:
 	packet header
 	version					v
 	stream_count				v
-	file_size				v
-	length_in_msec				v
 	reserved_bytes
 	checksum				u(32)
 
@@ -434,6 +432,7 @@ type
 
 name
 	the name of the info entry, valid names are
+	"TotalTime"	total length of the stream in msecs
 	"StreamId"	the stream(s) to which the info packet applies
 	"StartTimestamp" 
 	"EndTimestamp" 	the time range in msecs to which the info applies
