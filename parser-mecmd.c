@@ -72,7 +72,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	no_more_opts = 1;
 	if (i+1 >= argc)
 	  {
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "You added '--' but no filenames presented!\n");
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "'--' indicates no more options, but no filename was given on the command line.\n");
 	    goto err_out;
 	  }
 	continue;
