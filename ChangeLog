@@ -29,6 +29,7 @@ MPlayer (1.0)
     * dropped support of old faad2 versions (<= 1.1)
     * support for Real 10 cook Linux binary codec (decodes cook5.1)
     * improved NV12/NV21 support
+    * support for multichannel WAV files
 
     Demuxers:
     * vqf demuxer
@@ -74,6 +75,7 @@ MPlayer (1.0)
     * icc fix in the Win32 loader
     * crash with Turkish locale fixed
     * several memleak fixes
+    * -aa* options are replaced by -vo aa suboptions
 
 
   pre6: "X-mas present" December 23, 2004
