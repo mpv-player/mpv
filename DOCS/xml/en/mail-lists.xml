@@ -96,7 +96,8 @@ fix or you have noticed a possible bug/problem in the commit).
 <listitem><para>
 <application>MPlayer</application> Cygwin-porting list:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin"/>
-List for discussion about <application>MPlayer's</application> Cygwin port.
+List for discussion about <application>MPlayer's</application>
+<application>Cygwin</application> and <application>MinGW</application> port.
 </para></listitem>
 <listitem><para>
 <application>MPlayer</application> OS/2-porting list:
