@@ -221,7 +221,7 @@ csp_again:
     // check source format aspect, calculate prescale ::atmos
     screen_size_x=sh->disp_w;
     screen_size_y=sh->disp_h;
-    if(screen_size_xy>0){
+    if(screen_size_xy>=0.001){
      if(screen_size_xy<=8){
        // -xy means x+y scale
        screen_size_x*=screen_size_xy;
