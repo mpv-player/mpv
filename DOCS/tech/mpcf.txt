@@ -357,11 +357,12 @@ name
 	"Author"
 	"Description"
 	"Copyright"
-	"Encoder"	the name& version of the software used for encoding
+	"Encoder"	the name & version of the software used for encoding
 	"Title"
 	"CDCover"	an image of the cd cover (preferable PNG or JPEG)
 	"Source"	"DVD", "VCD", "CD", "MD", "FM radio", "VHS", "TV", 
 			"LD"
+			Optional: appended PAL,NTSC,SECAM, ... int parentheses
 	"CaptureDevice"	"BT878", "BT848", "webcam", ... (more exact names are fine too)
 	"CreationTime"	"2003-01-20 20:13:15Z", ... 
 			(ISO 8601 format, see http://www.cl.cam.ac.uk/~mgk25/iso-time.html)
@@ -526,4 +527,3 @@ video_stream_header (stream 2  subtitle atde, timebase 30, lsb_timestamp_length=
 audio_stream_header (stream 3, audio    jpjp, timebase 1 , lsb_timestamp_length=8)
 audio_stream_header (stream 4, audio    usen, timebase 1 , lsb_timestamp_length=8)
 index (stream 0)
-
