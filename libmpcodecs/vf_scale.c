@@ -220,6 +220,59 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     return vf_next_put_image(vf,dmpi);
 }
 
+static int control(struct vf_instance_s* vf, int request, void* data){
+    int *table;
+    int *inv_table;
+    int r;
+    int brightness, contrast, saturation, srcRange, dstRange;
+    vf_equalizer_t *eq;
+
+    switch(request){
+    case VFCTRL_GET_EQUALIZER:
+	r= sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange, &table, &dstRange, &brightness, &contrast, &saturation);
+	if(r<0) break;
+
+	eq = data;
+	if (!strcmp(eq->item,"brightness")) {
+		eq->value =  ((brightness*100) + (1<<15))>>16;
+	}
+	else if (!strcmp(eq->item,"contrast")) {
+		eq->value = (((contrast  *100) + (1<<15))>>16) - 100;
+	}
+	else if (!strcmp(eq->item,"saturation")) {
+		eq->value = (((saturation*100) + (1<<15))>>16) - 100;
+	}
+	else
+		break;
+	return CONTROL_TRUE;
+    case VFCTRL_SET_EQUALIZER:
+	r= sws_getColorspaceDetails(vf->priv->ctx, &inv_table, &srcRange, &table, &dstRange, &brightness, &contrast, &saturation);
+	if(r<0) break;
+//printf("set %f %f %f\n", brightness/(float)(1<<16), contrast/(float)(1<<16), saturation/(float)(1<<16));
+	eq = data;
+
+	if (!strcmp(eq->item,"brightness")) {
+		brightness = (( eq->value     <<16) + 50)/100;
+	}
+	else if (!strcmp(eq->item,"contrast")) {
+		contrast   = (((eq->value+100)<<16) + 50)/100;
+	}
+	else if (!strcmp(eq->item,"saturation")) {
+		saturation = (((eq->value+100)<<16) + 50)/100;
+	}
+	else
+		break;
+
+	r= sws_setColorspaceDetails(vf->priv->ctx, inv_table, srcRange, table, dstRange, brightness, contrast, saturation);
+	if(r<0) break;
+
+	return CONTROL_TRUE;
+    default:
+    }
+    
+    return vf_next_control(vf,request,data);
+}
+
 //===========================================================================//
 
 //  supported Input formats: YV12, I420, IYUV, YUY2, UYVY, BGR32, BGR24, BGR16, BGR15, RGB32, RGB24, Y8, Y800
@@ -263,6 +316,7 @@ static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
     vf->query_format=query_format;
+    vf->control= control;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     // TODO: parse args ->
     vf->priv->ctx=NULL;
