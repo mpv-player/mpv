@@ -800,8 +800,22 @@ switch(file_format){
    demuxer = (demuxer_t*) demux_open_avi(demuxer);
    if(!demuxer) return NULL; // failed to open
    sh_a = (sh_audio_t*)demuxer->audio->sh;
-   if(demuxer->audio->id != -2 && sh_a && sh_a->format == 0xFFFE)
-     demuxer = init_avi_with_ogg(demuxer);
+   if(demuxer->audio->id != -2 && sh_a) {
+     if(sh_a->format == 0xFFFE)
+       demuxer = init_avi_with_ogg(demuxer);
+     else if(sh_a->format == 0x674F) {
+       stream_t* s;
+       demuxer_t  *od;
+       s = new_ds_stream(demuxer->audio);
+       od = new_demuxer(s,DEMUXER_TYPE_OGG,-1,-2,-2);
+       if(!demux_ogg_open(od)) {
+	 mp_msg( MSGT_DEMUXER,MSGL_ERR,"Unable to open the ogg demuxer\n");
+	 free_stream(s);
+	 demuxer->audio->id = -2;
+       } else
+	 demuxer = new_demuxers_demuxer(demuxer,od,demuxer);
+     }
+   }       
    return demuxer;
 //  break;
  }
