@@ -1037,9 +1037,9 @@ static void radeon_vid_display_video( void )
 
     if(besr.deinterlace_on) OUTREG(OV0_DEINTERLACE_PATTERN,besr.deinterlace_pattern);
 #ifdef RAGE128
-    OUTREG(OV0_COLOUR_CNTL, (besr.brightness & 0x7f) |
-			    (besr.saturation << 8) |
-			    (besr.saturation << 16));
+    OUTREG(OV0_COLOUR_CNTL, (((besr.brightness*64)/1000) & 0x7f) |
+                            (((besr.saturation*31+31000)/2000) << 8) |
+                            (((besr.saturation*31+31000)/2000) << 16));
 #endif
     radeon_fifo_wait(2);
     OUTREG(OV0_GRAPHICS_KEY_MSK, besr.graphics_key_msk);
