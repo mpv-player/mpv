@@ -20,10 +20,6 @@
 #include "mp_image.h"
 #include "vf.h"
 
-#ifdef HAVE_DIVX4ENCORE
-#include "divx4_vbr.h"
-#endif
-
 extern char* passtmpfile;
 extern void mencoder_write_chunk(aviwrite_stream_t *s,int len,unsigned int flags);
 
