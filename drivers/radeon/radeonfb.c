@@ -1108,6 +1108,16 @@ static int radeonfb_pci_register (struct pci_dev *pdev,
 	/* mem size is bits [28:0], mask off the rest */
 	rinfo->video_ram = tmp & CONFIG_MEMSIZE_MASK;
 
+	/* according to XFree86 4.2.0, some production M6's return
+	   0 for 8MB */
+	if (rinfo->video_ram == 0 && 
+	    (pdev->device == PCI_DEVICE_ID_RADEON_LY ||
+	     pdev->device == PCI_DEVICE_ID_RADEON_LZ))
+	{
+	    rinfo->video_ram = 8192*1024;
+	    printk("radeonfb: workarounding buggy Radeon M6 (0 vs 8MB memory)\n");
+	}
+
 	/* ram type */
 	rinfo->MemCntl = INREG(MEM_SDRAM_MODE_REG);
 	switch ((MEM_CFG_TYPE & rinfo->MemCntl) >> 30) {
