@@ -182,6 +182,7 @@ Optional features:
   --enable-fribidi       Enable using the FriBiDi libs [disabled]
   --disable-enca         Disable using ENCA charset oracle library [autodetect]
   --disable-macosx       Disable Mac OS X specific features [autodetect]
+  --enable-macosx-finder-support  Enable Mac OS X Finder invocation parameter parsing [disabled]
   --disable-inet6        Disable IPv6 support [autodetect]
   --disable-gethostbyname2  gethostbyname() function is not provided by the C
                             library [autodetect]
@@ -1381,6 +1382,7 @@ _shared_pp=no
 _menu=no
 _qtx=auto
 _macosx=auto
+_macosx_finder_support=no
 _sortsub=yes
 _freetypeconfig='freetype-config'
 _fribidi=no
@@ -1648,6 +1650,8 @@ for ac_option do
 
   --enable-macosx) _macosx=yes ;;
   --disable-macosx) _macosx=no ;;
+  --enable-macosx-finder-support) _macosx_finder_support=yes ;;
+  --disable-macosx-finder-support) _macosx_finder_support=no ;;
 
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
@@ -3140,6 +3144,18 @@ EOF
 fi
 echores "$_macosx"
 
+echocheck "Mac OS X Finder Support"
+if test "$_macosx_finder_support" = auto ; then
+  _macosx_finder_support=$_macosx
+fi
+if test "$_macosx_finder_support" = yes; then
+  _def_macosx_finder_support='#define MACOSX_FINDER_SUPPORT 1'
+  _macosx_finder_support=yes
+else
+  _def_macosx_finder_support='#undef MACOSX_FINDER_SUPPORT'
+  _macosx_finder_support=no
+fi 
+echores "$_macosx_finder_support"
 
 echocheck "Samba support (libsmbclient)"
 if test "$_smbsupport" = yes; then
@@ -6571,6 +6587,7 @@ SMBSUPPORT_LIB = $_ld_smb
 XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
 MACOSX = $_macosx
+MACOSX_FINDER_SUPPORT = $_macosx_finder_support
 MACOSX_FRAMEWORKS = $_macosx_frameworks
 TOOLAME=$_toolame
 TOOLAME_EXTRAFLAGS=$_toolame_extraflags
@@ -6874,6 +6891,7 @@ $_def_dshow
 
 /* Mac OS X specific features */
 $_def_macosx
+$_def_macosx_finder_support
 
 /* Build our Win32-loader */
 $_def_win32_loader

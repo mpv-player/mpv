@@ -1011,6 +1011,7 @@ static uint32_t preinit(const char *arg)
         }
     }
 	
+#ifndef MACOSX_FINDER_SUPPORT
 	//this chunk of code is heavily based off SDL_macosx.m from SDL 
 	//it uses an Apple private function to request foreground operation
 
@@ -1029,6 +1030,7 @@ static uint32_t preinit(const char *arg)
 			SetFrontProcess(&myProc);
 		}
 	}
+#endif
 
     return 0;
 }
