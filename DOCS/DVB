@@ -2,6 +2,8 @@
 Some words about Siemens-DVB card support.         by A'rpi
 ==========================================
 
+NOTE: this is very experimental!
+
 Requirements:
 ~~~~~~~~~~~~~
 - Siemens DVB-S card or compatible (technotrend,galaxis,hauppage etc)
@@ -15,7 +17,7 @@ How to enable/use?
 1. Edit libvo/vo_mpegpes.c, and change first #undef HAVE_DVB to:
     #define HAVE_DVB
 2. Download ffmpeg-CVS and copy libavcodec to mplayer (see DOC for details)
-   Move this line out of CONFIG_ENCODERS section:
+   Move this line out of CONFIG_ENCODERS section at libavcodec/utils.c:361 :
        register_avcodec(&mpeg1video_encoder);
    
 3. Compile mplayer
