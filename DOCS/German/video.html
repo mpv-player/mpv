@@ -16,7 +16,7 @@
 <LI>Matrox Karten mit X/DRI >=4.0.3
 <LI>Radeon mit X/DRI CVS</UL></TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>dga</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>X11 DGA Erweiterung</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fbdev</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Ausgabe zu allgemeinen Framebuffers</TD><TR>
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>fbdev</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Ausgabe zu allgemeinen Framebuffern</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>svga</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Ausgabe zu SVGAlib</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sdl</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 &nbsp;&nbsp;<CODE>1.1.7:</CODE> unterstützt Software-Scaling<BR>
@@ -25,13 +25,13 @@
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ggi</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>vergleichbar mit SDL</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>aa</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Textmodus-Rendering mit AAlib</TD><TR>
 
-<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Karten-spezifisch:</B></P></TD><TR>
+<TD COLSPAN=4><P><B><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Kartenspezifisch:</B></P></TD><TR>
 
 <TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>mga</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 Hardware-YUV-Overlay via mga_vid-Device</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>xmga</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G200/G400 Overlay (mga_vid) in X11 Fenster<BR>
 (<I>Xv Emulation auf X 3.3.x !</I>)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>syncfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Matrox G400 YUV Unterstützung auf Framebuffer (verwende besser mga/xmga)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo 3 / Banshee Hardware YUV (/dev/3dfx) Unterstützung (noch nicht getestet, möglicherweise keine Funktion)
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>3dfx</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo 3 / Banshee Hardware YUV (/dev/3dfx) Unterstützung (noch nicht getestet, möglicherweise keine Funktion)</TD><TR>
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>tdfxfb</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Voodoo 3 / Banshee Hardware YUV auf tdfx-Framebuffer (funkioniert!)
 </TD><TR>
 
@@ -44,12 +44,12 @@
 <TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>null</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Null Ausgabe (für Geschwindigkeitsmessungen/Benchmark)</TD><TR>
 </TABLE>
 
-<P>NOTE: <I>prüfe die folgende Untersektion für Details und Voraussetzungen!</I></P>
+<P>HINWEIS: <I>prüfe die folgende Untersektion für Details und Voraussetzungen!</I></P>
 
 
 <P><B><A NAME=2.2.1.1>2.2.1.1. MTRR</A></B></P>
 
-<P>Es ist SEHR zu empfehlen, dass man die MTRR Register aktivieren, denn sie
+<P>Es ist SEHR zu empfehlen, dass man die MTRR Register aktiviert, denn sie
 können eine großen Geschwindigkeits-Schub bringen.
 
 <P>Mache ein '<CODE>cat /proc/mtrr</CODE>' :</P>
@@ -60,7 +60,7 @@ reg00: base=0xe4000000 (3648MB), size=  16MB: write-combining, count=9<BR>
 reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<BR>
 </CODE></P>
 
-<P>Dies ist richtig, es zeigt meine Matrox G400 mit 16Mb Speicher. Ich habe das
+<P>Dies ist richtig, es zeigt meine Matrox G400 mit 16Mb Speicher. Ich habe die Einstellung
 von XFree 4.x.x, was die MTRR Register automatisch einstellt.</P>
 
 Wenn nichts funktioniert, muss du es manuell setzen. Als erstes musst du die
@@ -76,12 +76,12 @@ Du hast 3 Möglichkeiten um sie zu finden:</P>
 <TD VALIGN=top><CODE>01:00.0</CODE></TD><TD><CODE>VGA compatible controller: Matrox Graphics, Inc.: Unknown device 0525</CODE></TD><TR>
 <TD></TD><TD><CODE>Memory at d8000000 (32-bit, prefetchable)</CODE></TD><TR>
 </TABLE></P></CODE>
-<LI>von mga_vid Kerneltreiber-Meldungen (verwende dmesg):
+<LI>von den mga_vid Kerneltreiber-Meldungen (verwende dmesg):
 <P><CODE>mga_mem_base = d8000000</CODE></P>
 </UL></P>
 
-<P>So, nun lass und die Speichergröße finden. Dies ist sehr einfach, rechne
-einfach die Video-RAM-Größe in Hexdezimal, oder verwende diese Tabelle:</P>
+<P>So, nun gilt es die Speichergröße finden. Dies ist sehr einfach, rechne
+einfach die Video-RAM-Größe ins Hexdezimal oder verwende diese Tabelle:</P>
 
 <TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>1 MB</TD><TD WIDTH=10%></TD><TD>0x100000</TD><TR>
@@ -93,8 +93,7 @@ einfach die Video-RAM-Größe in Hexdezimal, oder verwende diese Tabelle:</P>
 </TABLE>
 
 
-<P>Du weisst die Base-Adresse und die Speichergröße? Lass uns die MTRR Regi-
-ster einstellen!
+<P>Du weisst die Base-Adresse und die Speichergröße? Lass uns die MTRR Register einstellen!
 Zum Beispiel für die Matrox Karte von oben (base=0xd8000000) mit 32MB RAM 
 (size=0x2000000) führe einfach das Folgende aus:</P>
 
@@ -102,7 +101,7 @@ Zum Beispiel für die Matrox Karte von oben (base=0xd8000000) mit 32MB RAM
 <P><CODE>&nbsp;&nbsp;echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</CODE></P>
 
 
-<P>Nicht alle CPUs unterstützen MTRRs. Zum Bespiel ältere K6-2's [etwas bei
+<P>Nicht alle CPUs unterstützen MTRRs. Zum Beispiel ältere K6-2's [etwas bei
 266Mhz, stepping 0] unterstützen kein MTRR, aber stepping 12 CPUs tuen es
 ('<CODE>cat /proc/cpuinfo</CODE>' um es zu überprüfen').</P>
 

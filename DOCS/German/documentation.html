@@ -39,8 +39,8 @@
 	</UL>
     <LI><A HREF="video.html">2.2 Video & Audio Ausgabe-Geräte</A>
 	<UL><LI><A HREF="video.html#2.2.1">2.2.1 Video Ausgabe-Geräte</A>
-	    <UL><LI><A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A></LI>
-	    </LI><A HREF="video.html#2.2.1.2">2.2.1.2 Xv</A>
+	    <UL><LI><A HREF="video.html#2.2.1.1">2.2.1.1 MTRR</A>
+	    </LI><LI><A HREF="video.html#2.2.1.2">2.2.1.2 Xv</A>
 		<UL><LI><A HREF="video.html#2.2.1.2.1">2.2.1.2.1 3dfx Karten</A></LI>
 		<LI><A HREF="video.html#2.2.1.2.2">2.2.1.2.2 S3 Karten</A></LI>
 		<LI><A HREF="video.html#2.2.1.2.3">2.2.1.2.3 nVidia Karten</A></LI>
@@ -124,47 +124,47 @@ anderen Unix-Systemen und <B>nicht-x86</B> CPU läuft, siehe <A HREF="#6">Sektion
 6</A>. Er spielt die meisten MPEG, AVI und ASF/WMF Dateien (auch einige
 QT/MOV-Dateien mit CVID, VP32 und Raw Audio-Format), unterstützt von einigen
 eingebauten und einigen Win32 DLL Codecs. Du kannst <B>VideoCD</B>, <B>SVCD</B>,
-<B>DVD</B> und auch <B>DivX</B> Filme sehen (und die braust die avifile Libraty nicht!).
+<B>DVD</B> und auch <B>DivX</B> Filme sehen (und du brauchst die avifile-Bibliotek nicht!).
 Ein anderes großes Feature von
 <B>MPlayer</B> ist die große Weite von unterstützten Ausgabetreibern. Es
 funktioniert mit X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, aber du kannst SDL
 verwenden (und dadurch alle SDL-Treiber) und auch einigen Low-Level grafikkartenabhängige
-Treiber (für Matrox, 3Dfx und Radeon). Die meinsten von ihnen unterstützen
-Software oder Hardware-Scaling, also kannst du die Videos in Vollbild geniesen.
-Und was meinst du über die großen, antialiase schattierten Untertitel (<B>8
+Treiber (für Matrox, 3Dfx und Radeon). Die meinsten von ihnen unterstützen Software
+oder Hardware-Scaling, also kannst du die meinsten von deinen Videos in Vollbild geniesen.
+Und was meinst du zu den großen, antialiase schattierten Untertiteln (<B>8
 unterstützte Typen!!!</B>) mit europäischen/ISO 8859-1,2 (ungarische, englische,
-tschechische, usw.), kyrillischen und koreanischen Schriften und OSD?</P>
+tschechische, usw.), kyrillischen und koreanischen Schriften und das OSD?</P>
 
 <P>MPlayer ist grundsätzlich <A HREF="http://www.gnu.org/licenses/gpl.html">GNU GPL</A>, enthält
-jedoch auch einige Nicht-GPL-Teile die es das Verbeiten in Binärer Form nicht erlauben.
+jedoch auch einige Nicht-GPL-Teile die das Verbeiten in binärer Form nicht erlauben.
 Es enthält ausserdem die OpenDivX-Bibliotek, die eine spezielle Lizenz besitzt.</P>
 
 <P>Ich schreibe keine Codecs, nur einen Player. Stattdessen verbringe ich eine
-menge Zeit mit dem Finden des besten Weges um zerstörte Input-Files (beides MPEG
+Menge Zeit mit dem Finden des besten Weges um zerstörte Input-Files (MPEG
 und AVI) zu spielen und um perfekte A-V Sync mit Suchfunktion zu erreichen. Mein
 Player spielt felsenfest zerstörte MPEG Dateien (nützlich für einige VCDs) und
-spielt schlechte AVI-Dateien, welche unspielbar mit dem bekannten Windows Media
-Player sind. Auch AVI-Dateien ohne Index-Chuck sind spielbar und du kannst ihr
+spielt schlechte AVI-Dateien, welche auch mit dem bekannten Windows Media Player
+nicht mehr spielbar sind. Auch AVI-Dateien ohne Index-Chuck sind spielbar und du kannst ihr
 Index mit der -idx Option wiederherstellen, dies ermöglicht die Suchfunktion!
 Also du siehst, Stabilität und Qualität sind die wichtigsten Dinge für mich,
 aber die Geschwindigkeit ist auch überraschend.</P>
 
-<P><B><A NAME=1.2>1.2. Geschichte</A>
+<P><B><A NAME=1.2>1.2. Geschichte</A></B></P>
 
 <P>Ich hatte eine eine Menge von Playern unter Linux probiert (mtv, xmps, dvdview,
-livid/oms,V ideoLAN, xine, xanim, avifile, xmmp) aber sie hatten alle ihre Probleme,
+livid/oms, VideoLAN, xine, xanim, avifile, xmmp) aber sie hatten alle ihre Probleme,
 meinst mit speziellen Dateien oder mit der Audio-Video-Synchronisation. Die
-meisten sind unfähig beides abzuspielen, MPEG1, MPEG2 and AVI (DivX) Dateien.
+meisten waren unfähig beides abzuspielen, MPEG1, MPEG2 und AVI (DivX) Dateien.
 Einige Player hatten auch Probleme mit der Bildqualität und der Geschwindkeit.
-So beschloss ich einen zu schreiben/zu modifizieren...</P>
+So beschloss ich einen Player zu schreiben/zu modifizieren...</P>
 
 <P><UL>
 <LI><B>mpg12play v0.1-v0.3:</B><BR>
-    Der erste Versuch, zuweit gehackt in einer halben Stunden! Ich verwendete
+    Der erste Versuch, zuzweit gehackt in einer halben Stunden! Ich verwendete
     libmpeg3 von www.heroinewarrior.com bis zu Version 0.3, aber es gab
     Bildqualitäts- und Geschwindigkeitsprobleme.
 <LI><B>mpg12play v0.5-v0.87:</B><BR>
-    MPEG Codec wurde ersetzt mit DVDview von Dirk Farin, es war ein großartiges
+    MPEG Codec wurde ersetzt durch DVDview von Dirk Farin, es war ein großartiges
     Programm, aber es war langsam und in C++ geschrieben (ich hasse C++!!!)
 <LI><B>mpg12play v0.9-v0.95pre5:</B><BR>
     MPEG Codec wurde libmpeg2 (mpeg2dec) von Aaron Holtzman & Michel Lespinasse.
@@ -188,7 +188,7 @@ So beschloss ich einen zu schreiben/zu modifizieren...</P>
     mehr Untertitel-Formate, libao wurde eingeführt (wie libvo, aber für Audio),
     stabiler den je, und so weiter. Es ist ein MUSS !
 <LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
-    Hmmm. Wieder eine Release. Tonen von neuen Featues, beta GUI Version, Fehler
+    Hmmm. Wieder eine Release. Tonnen von neuen Featues, beta GUI Version, Fehler
     beseitigt, neue vo und ao Treiber, Ports zu vielen Systemen inklusive OpenSource
     DivX Codecs und vieles mehr. Probier's!
 </UL></P></UL></P>
@@ -204,14 +204,14 @@ erleben willst:<BR>
     <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.2</B> bis <B>2.95.4</B>.
       Verwende <B>NIEMALS</B> 2.96 oder 3.x.x !!! Sie erzeugen fehlerhaften Code.</LI>
     <LI><B>XFree86</B> - vorgeschlagene Version ist <B>immer die neueste (4.1.0)</B>.
-      Normalerweise will das jeder. Wenn du auch nicht weisst warum, du <B>brauchst</B> es.</LI>
-    <LI><B>make</B> - vorgeschlagene Version ist <B>immer die neueste</B> (mindestens 3.79)
+      Normalerweise will das jeder. Auch wenn du nicht weisst warum, du <B>brauchst</B> es.</LI>
+    <LI><B>make</B> - vorgeschlagene Version ist <B>immer die neueste</B> (mindestens 3.79).
       Dies ist normalerweise nicht so wichtig.</LI>
     <LI><B>SDL</B> - es ist nicht vorgeschrieben, aber es ist hilfreich in vielen
-      Fällen. Verwende immer das aktuelleste (beginnend bei 1.2.x).</LI>
+      Fällen. Verwende immer das aktuelleste Version (beginnend bei 1.2.x).</LI>
 </UL></P>
 	  
-<P>Lese das folgende, bevor du versuchst <B>MPlayer</B> zu kompilieren:</P>
+<P>Lese das Folgende, bevor du versuchst <B>MPlayer</B> zu kompilieren:</P>
 
 <UL>
 <LI>Wenn du planst, <B>MPlayer</B> auf einer x86 Architektur zu verwenden, willst
@@ -234,12 +234,12 @@ machst, ansonsten wird die 3Dfx Unterstützung nicht eingebaut.</LI>
 <LI>Wenn du den ProjectMayos <B>DivX4</B> Codec verwenden willst, siehe
 <A HREF="codecs.html#2.1.2.1">Sektion 2.1.2.1</A> vor dem Kompilieren. Dieser Codec kann
 <B>DivX</B> Filme um einiges schneller als die Win32 DLLs und auch ffmpeg abspielen.
-Es ist closed-source und nur in einer x86 Version verfügbar.</LI>
+Es ist Closed-Source und nur in einer x86 Version verfügbar.</LI>
 
 <LI>Wenn du planst ffmpegs <B>libavcodec</B> zu verwenden, schaue vor dem Kompilieren
-auf die <A HREF="codecs.html#2.1.2.2">Sektion 2.1.2.2</A>. Du wirst dies brauchen
+auf die <A HREF="codecs.html#2.1.2.2">Sektion 2.1.2.2</A>. Du wirdst dies brauchen
 um <B>DivX</B> Unterstützung auf einer nicht-x86 Maschine zu gewinnen oder um sich
-einen Vorteil im Vergleich mit dem Win32 Codec in der Geschwingkeit zu schaffen.</LI>
+einen Vorteil im Vergleich gegenüber dem Win32 Codec in der Geschwingkeit zu schaffen.</LI>
 
 <LI>Für DVD-Unterstützung musst libdvdread und libdvdcss kompilieren. Lese dazu die
 <A HREF="cd-dvd.html#4.2">Sektion 4.2</A>.</LI>
@@ -262,46 +262,47 @@ Dateien ansehen.</P>
 
 <P>Wenn auch unwichtig sollten trotzdem die Schiften installiert werden um das OSD und die
 Untertitel-Unterstützung zu ermöglichen. Lade dir mp_arial-iso-8859-*.zip und optionale (fall
-sie existieren) Sprachupdates. Es ist SEHR ZU EMPFEHLEN für Details die <A HREF=#1.5>Sektion 1.5</A>zu lesen.</P>
+sie existieren) Sprachupdates. Es ist SEHR ZU EMPFEHLEN die <A HREF=#1.5>Sektion 1.5</A>
+für Details zu lesen.</P>
 
 <PRE>    mkdir ~/.mplayer/font
     cd ~/.mplayer/font
     unzip mp_arial-iso-8859-*.zip</PRE>
 
-<P>Jetzt bleibt nur mehr eins übrig: kompiere die <B>codecs.conf</B>-Datei vom
+<P>Jetzt bleibt nur mehr eins übrig: kopiere die <B>codecs.conf</B>-Datei vom
 <CODE>etc</CODE> Verzeichnis (im MPlayer-Hauptstamm) nach $HOME/.mplayer/codecs.conf.</P>
 
 <P><B><A NAME=1.4>1.4. Was ist mit dem GUI?</A></B></P>
 
 <P>Das GUI basiert auf GTK, also muss gtk (und die devel-Sachen) installiert sein.
-Du kannst es einbauen durch die Parameter <CODE>--enable-gui</CODE> bei ./configure .
+Du kannst es durch den Parameter <CODE>--enable-gui</CODE> bei ./configure einbauen.
 Um MPlayer im GUI-Modus zu betreiben kannst du entweder
 <UL>
   <LI>die <CODE>-gui</CODE> Option verwenden</LI>
   <LI><CODE>gui=yes</CODE> in deine Config-File eintragen</LI>
   <LI><CODE>ln -s /usr/local/bin/mplayer /usr/local/bin/gmplayer</CODE> und
-  <CODE>gmplayer</CODE> stattdessen aufrufen.
+  <CODE>gmplayer</CODE> aufrufen.
 </UL>
 </P>
 
 <P>Da <B>MPlayer</B> keine Skins enthält musst du dir welche downloaden, wenn du
 das GUI verwenden willst. Schau dazu auf die <A HREF="http://www.mplayerhq.hu/homepage/dload.html">Download-Seite</A>.
-Diese sollten in der normale systemweite Verzeichnis (<CODE>/usr/local/share/mplayer/Skin</CODE>)
+Diese sollten in das normale, systemweite Verzeichnis (<CODE>/usr/local/share/mplayer/Skin</CODE>)
 oder nach <CODE>$HOME/.mplayer/Skin</CODE> extrahiert werden. <B>Mplayer</B>
 sucht standardmäßig nach einem Verzeichnis namens <I>default</I>, aber du kannst
 mit der Option <I>-skin neuerskin</I> oder dem Eintrag <I>skin=neuerskin</I> in
-der Konfigurationsdatei den Skin <CODE>*/Skin/newskin</CODE> auswählen.
+der Konfigurationsdatei den Skin <CODE>*/Skin/neuerskin</CODE> auswählen.
   
 
 <P><B><A NAME=1.5>1.5. Untertitel und OSD</A></B></P>
 
-<P>Ja, <B>MPlayer</B> unterstützt auch mehrere Arten von Untertiteln. Zur Zeit
+<P><B>MPlayer</B> unterstützt mehrere Arten von Untertiteln. Zur Zeit
 können vom Subreader-Code 8 Arten von Untertitel verarbeitet werden. Um zu sehen
 welche diese Untertitelformate sind, siehe subreader.c, etwa Zeile 30.</P>
 
 <P><B>MPlayer</B> unterstützt ein neues Untertitel-Format, genannt <B><I>MPsub</I></B>.
 Es wurde von mir (Gabucino) entwickelt. Das Haupt-Feature ist grundsätzlich <I>dynamisch</I>
-zeitabhängig (obwohl es auch einen Frame-Basierende Modus besitzt). Ein Beispiel (von
+zeitabhängig (obwohl es auch einen Frame-basierende Modus besitzt). Ein Beispiel (von
 <A HREF="http://www.mplayerhq.hu/DOCS/tech/mpsub.sub">DOCS/tech/mpsub.sub</A>) :
 </P>
 
@@ -319,11 +320,11 @@ in a galaxy far away...<BR>
 Naboo was under an attack.<BR>
 </I></CODE></P>
 
-<P>Wie man erkennen war das Hauptziel <B>Untertitel bearbeiten/Timing/Joining/Schneiden
+<P>Wie man erkennen ist das Hauptziel <B>Untertitel bearbeiten/Timing/Joining/Schneiden
 einfach zu machen</B>. Und wenn du mal angenommen einen SSA Untertitel bekommst und
-er ist er ist schlecht zeitlich abgestimmt zu deinem Film, kannst du einfach <I>mplayer
+er ist er ist zeitlich schlecht abgestimmt zu deinem Video, kannst du einfach <I>mplayer
 dummy.avi -sub source.ssa -dumpmpsub</I> ausführen. Es wird eine <CODE>dump.mpsub</CODE>-Datei
-im aktuellen Verzeichnis erzeugt, die den Quell-Untertitel-Text enthält, jedoch in
+im aktuellen Verzeichnis erzeugt, die den Quell-Untertitel-Text enthält, jedoch im
 <B>MPsub</B>-Format. Dann kannst du dem Untertitel einfach Sekunden hinzufügen usw.</P>
 
 <P>Untertitel werden mit einer Technik - genannt <B>'OSD', On Screen Display</B> -
@@ -356,7 +357,7 @@ Einige URLs:
 Es ist ein komplettes Tool um TTF/Type1/usw. Schrifen zu einem <B>MPlayer</B>-Schriftpaket
 zu konvertieren (lese TOOLS/subfont-c/README für Details)
 
-<LI>verwende das Schrift-Erzeugungs GIMP-Plugin unter TOOLS/subfont-GIMP
+<LI>verwende das GIMP-Plugin für Schrift-Erzeugung unter TOOLS/subfont-GIMP
 (Hinweis: Du musst den HSI RAW Plugin auch haben, siehe URL unten)
 </UL>
 </P>
@@ -933,7 +934,7 @@ other technical help from:</P>
 <P>MPlayer Code:
 <UL>
   <LI><B>Dateiformat-Erkennung, Demuxer</B>: A'rpi
-  <LI><B>DVD-Untestützung</B>: (Alpha Version: LGB) jetzt: ?
+  <LI><B>DVD-Unterstützung</B>: (Alpha Version: LGB) jetzt: ?
   <LI><B>Netzwerk-Streaming</B>: Bertrand BAUDET
   <LI><B>A-V Sychronisations-Code</B>: A'rpi
   <LI><B>Untertitel Datei-Parser/Reader</B>: Lez (die meinsten davon)
