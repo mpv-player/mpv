@@ -20,6 +20,7 @@ mplayer (0.90)
     * major vo drivers are now -fixed-vo compliant: x11, xv, xvidix, xmga, gl2
     * cleanup of libmpdemux option handling - now it's mplayer-independent again
     * removed fork() from LIRC input module
+    * libfame removed from main tree/release - libavcodec is faster, better etc.
     
     Fixes:
     * Some fullscreen switching fixes, including Metacity vs KDE 3.1
@@ -34,7 +35,7 @@ mplayer (0.90)
     * demux_mov: fixed crash with MPEG4 on SPARC, decoding on big endian
     * various NAS ao fixes
     * libvo: optional stride support for packed YUV / RGB formats
-    * mencoder: set keyframe flags on audio packet, fixes Windows seeking problems
+    * mencoder: set keyframe flag on audio packets, fixes Windows seeking problems
     * loader: fixed 2 10l bugs, ATI VCR2 DLL now working. using new style CS code.
     * demux_avi: always use block counter, even if dwSampleSize!=0, fixes some files
     * SPU decoder (DVD/VOB subs): fixed 2 major bugs causing lost subtitles
