@@ -3229,6 +3229,11 @@ EOF
 	    if cc_check -lsmbclient $_ld_dl -lnsl ; then
 		_smbsupport=yes
 		_ld_smb="-lsmbclient $_ld_dl -lnsl"
+	    else
+	    if cc_check -lsmbclient $_ld_dl -lssl -lnsl ; then
+		_smbsupport=yes
+		_ld_smb="-lsmbclient $_ld_dl -lssl -lnsl"
+	    fi
 	    fi
 	fi
     fi
