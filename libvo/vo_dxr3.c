@@ -251,7 +251,7 @@ static uint32_t init(uint32_t scr_width, uint32_t scr_height, uint32_t width, ui
 	return 0;
     }
 
-    printf( "VO: [dxr3] Format: Unsuppomp1ed\n" );
+    printf( "VO: [dxr3] Format: Unsupported\n" );
     return -1;
 }
 
@@ -416,7 +416,7 @@ static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 0x2|0x4;
+    if(format==IMGFMT_MPEGPES) return 1|256;
 #ifdef USE_MP1E
     if(format==IMGFMT_YV12) return 0x1|0x4;
     if(format==IMGFMT_YUY2) return 0x1|0x4;
