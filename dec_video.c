@@ -410,11 +410,11 @@ switch(sh_video->codec->driver){
 #ifdef USE_LIBAVCODEC
   case VFM_FFMPEG: {        // libavcodec
     int got_picture=0;
-if(verbose) printf("Calling ffmpeg...\n");
+if(verbose>1) printf("Calling ffmpeg...\n");
     if(drop_frame<2 && in_size>0){
         int ret = avcodec_decode_video(&lavc_context, &lavc_picture,
 	     &got_picture, start, in_size);
-if(verbose){
+if(verbose>1){
      unsigned char *x="???";
      switch(lavc_context.pix_fmt){
      case PIX_FMT_YUV420P: x="YUV420P";break;
