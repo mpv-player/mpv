@@ -234,7 +234,7 @@ static void uninit(struct af_instance_s* af)
 {
   if(af->data)
     free(af->data);
-  (int)af->setup = 0;  
+  af->setup = 0;  
 }
 
 // Filter data through filter
