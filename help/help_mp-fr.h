@@ -1,4 +1,4 @@
-// sync'ed with help_mp-en.h 1.65
+// sync'ed with help_mp-en.h 1.66
 // Updates & fixes by pl <p_l@gmx.fr>
 // Original transation by Firebird <firebird@chez.com>
 
@@ -406,6 +406,11 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Hiérarchie des dossiers"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio "Audio"
+#define MSGTR_PREFERENCES_Video "Vidéo"
+#define MSGTR_PREFERENCES_SubtitleOSD "Sous-titre & OSD"
+#define MSGTR_PREFERENCES_Misc "Divers"
+
 #define MSGTR_PREFERENCES_None "Aucun"
 #define MSGTR_PREFERENCES_AvailableDrivers "Pilotes disponibles:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Ne pas jouer le son"
@@ -414,14 +419,12 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_ExtraStereo "Activer l'extra-stéréo"
 #define MSGTR_PREFERENCES_Coefficient "Coefficient:"
 #define MSGTR_PREFERENCES_AudioDelay "Retard audio"
-#define MSGTR_PREFERENCES_Audio "Audio"
 #define MSGTR_PREFERENCES_DoubleBuffer "Activer le double-buffering"
 #define MSGTR_PREFERENCES_DirectRender "Activer le rendu direct"
 #define MSGTR_PREFERENCES_FrameDrop "Activer le frame-dropping"
 #define MSGTR_PREFERENCES_HFrameDrop "Activer le frame-dropping VIOLENT (dangereux)"
 #define MSGTR_PREFERENCES_Flip "Mirroir vertical"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
-#define MSGTR_PREFERENCES_Video "Vidéo"
 #define MSGTR_PREFERENCES_OSDTimer "Minuteur et indicateurs"
 #define MSGTR_PREFERENCES_OSDProgress "Barres de progression seulement"
 #define MSGTR_PREFERENCES_Subtitle "Sous-titre:"
@@ -483,9 +486,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontOutLine "Contour:"
 #define MSGTR_PREFERENCES_FontTextScale "Echelle du texte:"
 #define MSGTR_PREFERENCES_FontOSDScale "Echelle de l'OSD:"
-#define MSGTR_PREFERENCES_SubtitleOSD "Sous-titre & OSD"
 #define MSGTR_PREFERENCES_Cache "Cache activé/désactivé"
 #define MSGTR_PREFERENCES_LoadFullscreen "Démarrer en plein écran"
+#define MSGTR_PREFERENCES_CacheSize "Taille du cache: "
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "Erreur fatale ..."
