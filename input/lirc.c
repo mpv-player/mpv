@@ -103,11 +103,11 @@ mp_input_lirc_process(int mp_fd) {
       strcpy(buf,cmd);
       buf[len-1] = '\n';
       while(w < len) {
-	int r = write(mp_fd,buf,len-w);
+	int r = write(mp_fd,buf+w,len-w);
 	if(r < 0) {
 	  if(errno == EINTR)
 	    continue;
-	  mp_msg(MSGT_LIRC,MSGL_V,"LIRC subprocess can't write in input pipe : %s\n",
+	  mp_msg(MSGT_LIRC,MSGL_ERR,"LIRC subprocess can't write in input pipe : %s\n",
 		 strerror(errno));
 	  mp_input_lirc_process_quit(-1);
 	}
@@ -126,13 +126,13 @@ mp_input_lirc_uninit(void) {
   if(child_pid <= 0)
     return;
   if( kill(child_pid,SIGQUIT) != 0) {
-    mp_msg(MSGT_LIRC,MSGL_V,"LIRC can't kill subprocess %d : %s\n",
+    mp_msg(MSGT_LIRC,MSGL_ERR,"LIRC can't kill subprocess %d : %s\n",
 	   child_pid,strerror(errno));
     return;
   }
 
   if(waitpid(child_pid,NULL,0) < 0)
-    mp_msg(MSGT_LIRC,MSGL_V,"LIRC error while waiting subprocess %d : %s\n",
+    mp_msg(MSGT_LIRC,MSGL_ERR,"LIRC error while waiting subprocess %d : %s\n",
 	   child_pid,strerror(errno));
 
 }
