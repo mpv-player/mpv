@@ -20,16 +20,30 @@
 #define CHUNK_FDSC mmioFOURCC('F', 'D', 'S', 'C')
 #define CHUNK_STAB mmioFOURCC('S', 'T', 'A', 'B')
 
-typedef struct _film_frames_t {
-  int num_frames;
-  int current_frame;
-  off_t *filepos;
-  unsigned int *frame_size;
-  unsigned int *flags1;
-  unsigned int *flags2;
-} film_frames_t;
+typedef struct _film_chunk_t
+{
+  off_t chunk_offset;
+  int chunk_size;
 
-void demux_seek_film(demuxer_t *demuxer,float rel_seek_secs,int flags){
+  unsigned int flags1;
+  unsigned int flags2;
+
+  unsigned int video_chunk_number;  // in the case of a video chunk
+  unsigned int running_audio_sample_count;  // for an audio chunk
+} film_chunk_t;
+
+typedef struct _film_data_t
+{
+  int total_chunks;
+  int current_chunk;
+  int total_video_chunks;
+  int total_audio_sample_count;
+  film_chunk_t *chunks;
+} film_data_t;
+
+#if 0
+void demux_seek_film(demuxer_t *demuxer,float rel_seek_secs,int flags)
+{
   film_frames_t *frames = (film_frames_t *)demuxer->priv;
   sh_video_t *sh_video = demuxer->video->sh;
   int newpos=(flags&1)?0:frames->current_frame;
@@ -44,48 +58,58 @@ void demux_seek_film(demuxer_t *demuxer,float rel_seek_secs,int flags){
   if(newpos>frames->num_frames) newpos=frames->num_frames;
   frames->current_frame=newpos;
 }
+#endif
 
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_film_fill_buffer(demuxer_t *demuxer){
-  film_frames_t *frames = (film_frames_t *)demuxer->priv;
+int demux_film_fill_buffer(demuxer_t *demuxer)
+{
   sh_video_t *sh_video = demuxer->video->sh;
+  film_data_t *film_data = (film_data_t *)demuxer->priv;
+  film_chunk_t film_chunk;
 
   // see if the end has been reached
-  if (frames->current_frame >= frames->num_frames)
+  if (film_data->current_chunk >= film_data->total_chunks)
     return 0;
 
-  // fetch the frame from the file
-  // first, position the file properly since ds_read_packet() doesn't
-  // seem to do it, even though it takes a file offset as a parameter
-  stream_seek(demuxer->stream, frames->filepos[frames->current_frame]);
-  ds_read_packet(demuxer->video,
-    demuxer->stream, 
-    frames->frame_size[frames->current_frame],
-    frames->current_frame/sh_video->fps,
-    frames->filepos[frames->current_frame],
-    0 /* what flags? -> demuxer.h (alex) */
-  );
+  film_chunk = film_data->chunks[film_data->current_chunk];
 
-  // get the next frame ready
-  frames->current_frame++;
+  // position stream and fetch chunk
+  stream_seek(demuxer->stream, film_chunk.chunk_offset);
+  if (film_chunk.flags1 == 0xFFFFFFFF)
+    ds_read_packet(demuxer->audio, demuxer->stream, film_chunk.chunk_size,
+      0,  /* pts */
+      film_chunk.chunk_offset, 0);
+  else
+    ds_read_packet(demuxer->video, demuxer->stream, film_chunk.chunk_size,
+      film_chunk.video_chunk_number / sh_video->fps,
+      film_chunk.chunk_offset, 0);
 
+  film_data->current_chunk++;
   return 1;
 }
 
-demuxer_t* demux_open_film(demuxer_t* demuxer){
+demuxer_t* demux_open_film(demuxer_t* demuxer)
+{
   sh_video_t *sh_video = NULL;
-  film_frames_t *frames = (film_frames_t *)malloc(sizeof(film_frames_t));
+  sh_audio_t *sh_audio = NULL;
+  film_data_t *film_data;
+  film_chunk_t film_chunk;
   int header_size;
   unsigned int chunk_type;
   unsigned int chunk_size;
   int i;
-  int frame_number;
+  unsigned int video_format;
 
+  int largest_audio_chunk = 0;
   int audio_channels;
-  int audio_bits;
-  int audio_frequency;
+
+  film_data = (film_data_t *)malloc(sizeof(film_data_t));
+  film_data->total_chunks = 0;
+  film_data->current_chunk = 0;
+  film_data->total_video_chunks = 0;
+  film_data->chunks = NULL;
 
   // go back to the beginning
   stream_reset(demuxer->stream);
@@ -110,17 +134,6 @@ demuxer_t* demux_open_film(demuxer_t* demuxer){
   // skip to where the next chunk should be
   stream_skip(demuxer->stream, 8);
 
-  // create a new video stream header
-  sh_video = new_sh_video(demuxer, 0);
-
-  // make sure the demuxer knows about the new video stream header
-  demuxer->video->sh = sh_video;
-
-  // make sure that the video demuxer stream header knows about its
-  // parent video demuxer stream, or else
-  // video_read_properties() will choke
-  sh_video->ds = demuxer->video;
-
   // traverse through the header
   while (header_size > 0)
   {
@@ -132,57 +145,98 @@ demuxer_t* demux_open_film(demuxer_t* demuxer){
     switch (chunk_type)
     {
     case CHUNK_FDSC:
-printf ("parsing FDSC chunk\n");
-      // fetch the video codec fourcc, height, then width
-      sh_video->format = stream_read_fourcc(demuxer->stream);
-      sh_video->disp_h = stream_read_dword(demuxer->stream);
-      sh_video->disp_w = stream_read_dword(demuxer->stream);
-      sh_video->fps = stream_read_char(demuxer->stream);
-      sh_video->frametime = 1/sh_video->fps;
-printf ("  FILM video: %d x %d, %f fps\n", sh_video->disp_w,
-  sh_video->disp_h, sh_video->fps);
+      mp_msg(MSGT_DECVIDEO, MSGL_V, "parsing FDSC chunk\n");
+      // fetch the video codec fourcc to see if there's any video
+      video_format = stream_read_fourcc(demuxer->stream);
+      if (video_format)
+      {
+        // create and initialize the video stream header
+        sh_video = new_sh_video(demuxer, 0);
+        demuxer->video->sh = sh_video;
+        sh_video->ds = demuxer->video;
 
-      // temporary: These will eventually go directly into an audio structure
-      //  of some sort
+        sh_video->format = video_format;
+        sh_video->disp_h = stream_read_dword(demuxer->stream);
+        sh_video->disp_w = stream_read_dword(demuxer->stream);
+        sh_video->fps = stream_read_char(demuxer->stream);
+        sh_video->frametime = 1/sh_video->fps;
+        mp_msg(MSGT_DECVIDEO, MSGL_V,
+          "  FILM video: %d x %d, %f fps\n", sh_video->disp_w,
+          sh_video->disp_h, sh_video->fps);
+      }
+      else
+        stream_skip(demuxer->stream, 9);
+
+      // fetch the audio channels to see if there's any audio
       audio_channels = stream_read_char(demuxer->stream);
-      audio_bits = stream_read_char(demuxer->stream);
-      stream_skip(demuxer->stream, 1);  // skip unknown byte
-      audio_frequency = stream_read_word(demuxer->stream);
-printf ("  FILM audio: %d channels, %d bits, %d Hz\n",
-  audio_channels, audio_bits, audio_frequency);
+      if (audio_channels > 0)
+      {
+        // create and initialize the audio stream header
+        sh_audio = new_sh_audio(demuxer, 0);
+        demuxer->audio->sh = sh_audio;
+        sh_audio->ds = demuxer->audio;
 
-      stream_skip(demuxer->stream, 6);
+        // go through the bother of making a WAVEFORMATEX structure
+        sh_audio->wf = (WAVEFORMATEX *)malloc(sizeof(WAVEFORMATEX));
+
+        // uncompressed PCM format
+        sh_audio->wf->wFormatTag = 1;
+        sh_audio->format = 1;
+        sh_audio->wf->nChannels = audio_channels;
+        sh_audio->wf->wBitsPerSample = stream_read_char(demuxer->stream);
+        stream_skip(demuxer->stream, 1);  // skip unknown byte
+        sh_audio->wf->nSamplesPerSec = stream_read_word(demuxer->stream);
+        sh_audio->wf->nAvgBytesPerSec = 
+          sh_audio->wf->nSamplesPerSec * sh_audio->wf->wBitsPerSample / 8;
+        stream_skip(demuxer->stream, 6);  // skip the rest of the unknown
+
+        mp_msg(MSGT_DECVIDEO, MSGL_V,
+          "  FILM audio: %d channels, %d bits, %d Hz\n",
+          sh_audio->wf->nChannels, 8 * sh_audio->wf->wBitsPerSample, 
+          sh_audio->wf->nSamplesPerSec);
+      }
+      else
+        stream_skip(demuxer->stream, 10);
       break;
 
     case CHUNK_STAB:
-printf ("parsing STAB chunk\n");
+      mp_msg(MSGT_DECVIDEO, MSGL_V, "parsing STAB chunk\n");
       // skip unknown dword
       stream_skip(demuxer->stream, 4);
 
-      // fetch the number of frames
-      frames->num_frames = stream_read_dword(demuxer->stream);
-      frames->current_frame = 0;
+      // fetch the number of chunks
+      film_data->total_chunks = stream_read_dword(demuxer->stream);
+      film_data->current_chunk = 0;
+      mp_msg(MSGT_DECVIDEO, MSGL_V,
+        "  STAB chunk contains %d chunks\n", film_data->total_chunks);
 
-      // allocate enough entries for the indices
-      frames->filepos = (off_t *)malloc(frames->num_frames * sizeof(off_t));
-      frames->frame_size = (int *)malloc(frames->num_frames * sizeof(int));
-      frames->flags1 = (int *)malloc(frames->num_frames * sizeof(int));
-      frames->flags2 = (int *)malloc(frames->num_frames * sizeof(int));
+      // allocate enough entries for the chunk
+      film_data->chunks = 
+        (film_chunk_t *)malloc(film_data->total_chunks * sizeof(film_chunk_t));
 
-      // build the frame index
-      frame_number = 0;
-      for (i = 0; i < frames->num_frames; i++)
+      // build the chunk index
+      for (i = 0; i < film_data->total_chunks; i++)
       {
-        if (frames->flags1[i] == 0)
-        {
-          frames->filepos[frame_number] = demuxer->movi_start + stream_read_dword(demuxer->stream);
-          frames->frame_size[frame_number] = stream_read_dword(demuxer->stream) - 8;
-          frames->flags1[frame_number] = stream_read_dword(demuxer->stream);
-          frames->flags2[frame_number] = stream_read_dword(demuxer->stream);
-          frame_number++;
-        }
+        film_chunk = film_data->chunks[i];
+        film_chunk.chunk_offset = 
+          demuxer->movi_start + stream_read_dword(demuxer->stream);
+        film_chunk.chunk_size = stream_read_dword(demuxer->stream) - 8;
+        film_chunk.flags1 = stream_read_dword(demuxer->stream);
+        film_chunk.flags2 = stream_read_dword(demuxer->stream);
+        film_data->chunks[i] = film_chunk;
+
+        // audio housekeeping
+        if ((film_chunk.flags1 == 0xFFFFFFFF) && 
+          (film_chunk.chunk_size > largest_audio_chunk))
+          largest_audio_chunk = film_chunk.chunk_size;
+        film_data->total_audio_sample_count +=
+          (chunk_size / sh_audio->wf->nChannels);
+
+        // video housekeeping
+        if (film_chunk.flags1 != 0xFFFFFFFF)
+          film_chunk.video_chunk_number =
+            film_data->total_video_chunks++;
       }
-      frames->num_frames = frame_number;
       break;
 
     default:
@@ -193,11 +247,7 @@ printf ("parsing STAB chunk\n");
     }
   }
 
-  // hard code the speed for now
-  sh_video->fps = 1;
-  sh_video->frametime = 1;
-
-  demuxer->priv = frames;
+  demuxer->priv = film_data;
 
   return demuxer;
 }
