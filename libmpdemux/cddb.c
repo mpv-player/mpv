@@ -180,7 +180,7 @@ cddb_discid(int tot_trks) {
 	unsigned int i, t = 0, n = 0;
 
 	i = 0;
-	while (i < tot_trks) {
+	while (i < (unsigned int)tot_trks) {
 		n = n + cddb_sum((cdtoc[i].min * 60) + cdtoc[i].sec);
 		i++;
 	}
@@ -290,7 +290,7 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 	struct stat file_stat;
 	char file_name[100];
 	int file_fd, ret;
-	size_t wrote=0;
+	int wrote=0;
 
 	if( cddb_data==NULL || cddb_data->cache_dir==NULL ) return -1;
 
@@ -320,7 +320,7 @@ cddb_write_cache(cddb_data_t *cddb_data) {
 		close(file_fd);
 		return -1;
 	}
-	if( wrote!=cddb_data->xmcd_file_size ) {
+	if( (unsigned int)wrote!=cddb_data->xmcd_file_size ) {
 		printf("Not all the xmcd file has been written\n");
 		close(file_fd);
 		return -1;
@@ -521,7 +521,7 @@ cddb_get_proto_level(cddb_data_t *cddb_data) {
 int
 cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 	int ret, status;
-	
+
 	ret = sscanf( http_hdr->body, "%d ", &status);
 	if( ret!=1 ) {
 		printf("Parse error\n");
@@ -530,7 +530,8 @@ cddb_freedb_sites_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 
 	switch(status) {
 		case 210:
-			// Parse the sites
+			// TODO: Parse the sites
+			ret = cddb_data->anonymous;	// For gcc complaining about unused parameter.
 			return 0;
 		case 401:
 			printf("No sites information available\n");
@@ -572,7 +573,8 @@ int
 cddb_retrieve(cddb_data_t *cddb_data) {
 	char offsets[1024], command[1024];
 	char *ptr;
-	int i, time_len;
+	unsigned int i, time_len;
+	int ret;
 
 	ptr = offsets;
 	for( i=0; i<cddb_data->tracks ; i++ ) {
@@ -593,8 +595,8 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 	//cddb_get_freedb_sites(&cddb_data);
 
 	sprintf(command, "cddb+query+%08lx+%d+%s%d", cddb_data->disc_id, cddb_data->tracks, offsets, time_len );
-	i = cddb_http_request(command, cddb_query_parse, cddb_data);
-	if( i<0 ) return -1;
+	ret = cddb_http_request(command, cddb_query_parse, cddb_data);
+	if( ret<0 ) return -1;
 
 	if( cddb_data->cache_dir!=NULL ) {
 		free(cddb_data->cache_dir);
@@ -611,6 +613,13 @@ cddb_resolve(char **xmcd_file) {
 	cddb_data.tracks = read_toc();
 	cddb_data.disc_id = cddb_discid(cddb_data.tracks);
 	cddb_data.anonymous = 1;	// Don't send user info by default
+
+	// Check if there is a CD in the drive
+	// FIXME: That's not really a good way to check
+	if( cddb_data.disc_id==8256 ) {
+		printf("No CD in the drive\n");
+		return -1;
+	}
 	
 	home_dir = getenv("HOME");
 	if( home_dir==NULL ) {
@@ -761,6 +770,9 @@ cddb_open(char *dev, char *track) {
 	int ret;
 	
 	ret = cddb_resolve(&xmcd_file);
+	if( ret<0 ) {
+		return NULL;
+	}
 	if( ret==0 ) {
 		cd_info = cddb_parse_xmcd(xmcd_file);
 		free(xmcd_file);
