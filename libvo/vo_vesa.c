@@ -78,7 +78,7 @@ static uint32_t x_offset,y_offset; /* to center image on screen */
 static unsigned init_mode; /* mode before run of mplayer */
 static void *init_state = NULL; /* state before run of mplayer */
 static struct win_frame win; /* real-mode window to video memory */
-static void *yuv_buffer = NULL; /* for yuv2rgb and sw_scaling */
+static uint8_t *yuv_buffer = NULL; /* for yuv2rgb and sw_scaling */
 static unsigned video_mode; /* selected video mode for playback */
 static struct VesaModeInfoBlock video_mode_info;
 
@@ -212,7 +212,7 @@ static void __vbeCopyBlockSwap(unsigned long offset,uint8_t *image,unsigned long
 */
 static void __vbeCopyData(uint8_t *image)
 {
-   unsigned long i,j,image_offset,offset,limit;
+   unsigned long i,j,image_offset,offset;
    unsigned pixel_size,image_line_size,screen_line_size,x_shift;
    pixel_size = (video_mode_info.BitsPerPixel+7)/8;
    screen_line_size = video_mode_info.XResolution*pixel_size;
@@ -225,8 +225,7 @@ static void __vbeCopyData(uint8_t *image)
    else
    {
      x_shift = x_offset*pixel_size;
-     limit = image_height+y_offset;
-     for(j=0,i=y_offset;i<limit;i++,j++)
+     for(j=0,i=y_offset;j<image_height;i++,j++)
      {
        offset = i*screen_line_size+x_shift;
        image_offset = j*image_line_size;
@@ -237,6 +236,7 @@ static void __vbeCopyData(uint8_t *image)
 /* is called for yuv only */
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
+    uint8_t *yuv_slice;
     if(vesa_zoom)
     {
 	 SwScale_YV12slice_brg24(image,stride,y,h,
@@ -247,13 +247,27 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
     }
     else
     {
-	uint8_t *yuv_slice;
 	yuv_slice=yuv_buffer+(image_width*y+x)*(video_mode_info.BitsPerPixel+7)/8;
 	yuv2rgb(yuv_slice, image[0], image[1], image[2], w, h,
 		image_width * ((video_mode_info.BitsPerPixel+7)/8),
 		stride[0], stride[1]);
     }
-    __vbeCopyData((uint8_t *)yuv_buffer);
+    if(y || x || w != image_width || h != image_height)
+    {
+	unsigned long i,j,image_offset,offset;
+	unsigned pixel_size,image_line_size,screen_line_size,x_shift;
+	pixel_size = (video_mode_info.BitsPerPixel+7)/8;
+	screen_line_size = video_mode_info.XResolution*pixel_size;
+	image_line_size = w*pixel_size;
+	x_shift = (x_offset+x)*pixel_size;
+	for(j=0,i=(y_offset+y);j<h;i++,j++)
+	{
+	    offset = i*screen_line_size+x_shift;
+	    image_offset = j*image_line_size;
+	    __vbeCopyBlock(offset,&yuv_slice[image_offset],image_line_size);
+	}
+    }
+    else __vbeCopyData((uint8_t *)yuv_buffer);
     return 0;
 }
 
@@ -355,7 +369,6 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
   int err;
 	image_width = width;
 	image_height = height;
-printf("subdevice: %s\n",vo_subdevice);
 	if(fullscreen & (0x1|0x8))
 	{
 	  printf("vo_vesa: switches: -fs, -flip are not supported\n");
