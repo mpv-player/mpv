@@ -286,6 +286,7 @@ void uninit_player(unsigned int mask){
 
   mp_msg(MSGT_CPLAYER,MSGL_DBG2,"\n*** uninit(0x%X)\n",mask);
 
+  // kill the cache process:
   if(mask&INITED_STREAM){
     inited_flags&=~INITED_STREAM;
     current_module="uninit_stream";
@@ -293,6 +294,14 @@ void uninit_player(unsigned int mask){
     stream=NULL;
   }
 
+  if(mask&INITED_VO){
+    inited_flags&=~INITED_VO;
+    current_module="uninit_vo";
+    video_out->uninit();
+    video_out=NULL;
+  }
+
+  // must be after libvo uninit, as few vo drivers (svgalib) has tty code
   if(mask&INITED_GETCH2){
     inited_flags&=~INITED_GETCH2;
     current_module="uninit_getch2";
@@ -306,13 +315,6 @@ void uninit_player(unsigned int mask){
     current_module="uninit_spudec";
     spudec_free(vo_spudec);
     vo_spudec=NULL;
-  }
-
-  if(mask&INITED_VO){
-    inited_flags&=~INITED_VO;
-    current_module="uninit_vo";
-    video_out->uninit();
-    video_out=NULL;
   }
 
   if(mask&INITED_AO){
@@ -329,20 +331,20 @@ void uninit_player(unsigned int mask){
   }
 #endif
 
-#if defined(HAVE_LIRC) && ! defined(HAVE_NEW_INPUT)
-  if(mask&INITED_LIRC){
-    inited_flags&=~INITED_LIRC;
-    current_module="uninit_lirc";
-    lirc_mp_cleanup();
-  }
-#endif
-
 #ifdef HAVE_NEW_INPUT
   if(mask&INITED_INPUT){
     inited_flags&=INITED_INPUT;
     current_module="uninit_input";
     mp_input_uninit();
   }
+#else
+#ifdef HAVE_LIRC
+  if(mask&INITED_LIRC){
+    inited_flags&=~INITED_LIRC;
+    current_module="uninit_lirc";
+    lirc_mp_cleanup();
+  }
+#endif
 #endif
 
   current_module=NULL;
@@ -364,14 +366,15 @@ void exit_player(char* how){
 void exit_sighandler(int x){
   static int sig_count=0;
   ++sig_count;
-  if(sig_count==2) exit(1);
-  if(sig_count>2){
+  if(sig_count==5 || (inited_flags==0 && sig_count>1)) exit(1);
+  if(sig_count>5){
     // can't stop :(
     kill(getpid(),SIGKILL);
   }
   mp_msg(MSGT_CPLAYER,MSGL_FATAL,"\n" MSGTR_IntBySignal,x,
       current_module?current_module:mp_gettext("unknown")
   );
+  if(sig_count==1)
   switch(x){
   case SIGINT:
   case SIGQUIT:
@@ -382,7 +385,7 @@ void exit_sighandler(int x){
 #ifdef RUNTIME_CPUDETECT
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,"- MPlayer crashed by 'Illegal Instruction'. It may be a bug in our new runtime cpu-detection code... please read DOCS/bugreports.html\n");
 #else
-      mp_msg(MSGT_CPLAYER,MSGL_FATAL,"- MPlayer crashed by 'Illegal Instruction'. It usually happens when you run it on different CPU than it was compiled for. Verify this!\n");
+      mp_msg(MSGT_CPLAYER,MSGL_FATAL,"- MPlayer crashed by 'Illegal Instruction'. It usually happens when you run it on different CPU than it was compiled/optimized for. Verify this!\n");
 #endif
   case SIGFPE:
   case SIGSEGV:
