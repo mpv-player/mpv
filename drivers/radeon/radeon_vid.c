@@ -783,9 +783,12 @@ static ssize_t radeon_vid_read(struct file *file, char *buf, size_t count, loff_
     brightness = besr.brightness;
     saturation = besr.saturation;
     len = 0;
+    len += sprintf(&buf[len],"Interface version: %04X\nDriver version: %s\n",MGA_VID_VERSION,RADEON_VID_VERSION);
     len += sprintf(&buf[len],"Chip: %s\n",ati_card_ids[detected_chip].name);
     len += sprintf(&buf[len],"Memory: %p:%x\n",radeon_mem_base,radeon_ram_size*0x100000);
-    len += sprintf(&buf[len],"MMIO: %p\n\n",radeon_mmio_base);
+    len += sprintf(&buf[len],"MMIO: %p\n",radeon_mmio_base);
+    len += sprintf(&buf[len],"Overlay offset: %p\n",radeon_overlay_off);
+    len += sprintf(&buf[len],"Last fourcc: %s\n\n",fourcc_format_name(besr.fourcc));
     len += sprintf(&buf[len],"Configurable stuff:\n");
     len += sprintf(&buf[len],"~~~~~~~~~~~~~~~~~~~\n");
     len += sprintf(&buf[len],PARAM_DOUBLE_BUFF"%s\n",besr.double_buff?"on":"off");
