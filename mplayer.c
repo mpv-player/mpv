@@ -20,11 +20,6 @@
 #include "version.h"
 #include "config.h"
 
-#if defined(USE_OSS_AUDIO)
-#include <sys/soundcard.h>
-#elif defined(USE_SUN_AUDIO)
-#endif
-
 #if	defined(sun)
 #define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
 #else
