@@ -437,6 +437,7 @@ if x86 ; then
     mmxext)       _mmx2=yes                ;;
     mtrr|k6_mtrr) _mtrr=yes                ;;
     xmm|sse|kni)  _sse=yes    _mmx2=yes	   ;;
+    sse2)         _sse2=yes                ;;
     esac
   done
 
@@ -474,7 +475,7 @@ case "$host_arch" in
     3) proc=i386 iproc=386 ;;
     4) proc=i486 iproc=486 ;;
     5) proc=pentium iproc=586 ;;
-    6) proc=i686 iproc=686 ;;
+    6|15) proc=i686 iproc=686 ;;
     *) proc=pentium iproc=586 ;;
     esac
     ;;
