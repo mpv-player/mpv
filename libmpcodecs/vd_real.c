@@ -30,10 +30,6 @@ ulong (*rvyuv_free)(ulong);
 ulong (*rvyuv_hive_message)(ulong,ulong);
 ulong (*rvyuv_init)(ulong,ulong);
 ulong (*rvyuv_transform)(ulong,ulong,ulong,ulong,ulong);
-ulong (*rvyuv_rnfru_free)(ulong);
-ulong (*rvyuv_rnfru_get_frame)(ulong,ulong,ulong);
-ulong (*rvyuv_rnfru_init)(ulong,ulong,ulong);
-ulong (*rvyuv_rnfru_setup)(ulong,ulong,ulong,ulong,ulong,ulong,ulong,ulong);
 
 void *rv_handle=NULL;
 
@@ -65,8 +61,6 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 
 /* exits program when failure */
 int load_syms(char *path) {
-	fputs("loadSyms()\n", stderr);
-	if (1) {
 		void *handle;
 		char *error;
 
@@ -103,28 +97,6 @@ int load_syms(char *path) {
 			fprintf (stderr, "dlsym(rvyuvTransform): %s\n", error);
 			return 0;
 		}
-		rvyuv_rnfru_free = dlsym(handle, "RV20toYUV420_RN_FRU_Free");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvRNFRUFree): %s\n", error);
-			return 0;
-		}
-		rvyuv_rnfru_get_frame = dlsym(handle, "RV20toYUV420_RN_FRU_GetFrame");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvRNFRUGetFrame): %s\n", error);
-			return 0;
-		}
-		rvyuv_rnfru_init = dlsym(handle, "RV20toYUV420_RN_FRU_Init");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvRNFRUInit): %s\n", error);
-			return 0;
-		}
-		rvyuv_rnfru_setup = dlsym(handle, "RV20toYUV420_RN_FRU_Setup");
-		if ((error = dlerror()) != NULL)  {
-			fprintf (stderr, "dlsym(rvyuvRNFRUSetup): %s\n", error);
-			return 0;
-		}
-
-	}
 	return 1;
 }
 
@@ -135,7 +107,7 @@ struct rv_init_t {
 	short h;
 	short unk3;
 	int unk2;
-	int unk4;
+	int subformat;
 	int unk5;
 	int format;
 } rv_init_t;
@@ -145,13 +117,13 @@ static int init(sh_video_t *sh){
 	//unsigned int out_fmt;
 	char path[4096];
 	int result;
-	ulong cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
-	ulong cmsg_data[3]={0x24,2,&cmsg24};
+	// we export codec id and sub-id from demuxer in bitmapinfohdr:
+	unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
 	struct rv_init_t init_data={
-//		11, sh->disp_w, sh->disp_h,0,0,0x01099030,
-		11, sh->disp_w, sh->disp_h,0,0,0x00099030,
-//		1,0x30202002};
-		1,0x30203002};
+		11, sh->disp_w, sh->disp_h,0,0,extrahdr[0],
+		1,extrahdr[1]}; // rv30
+
+	mp_msg(MSGT_DECVIDEO,MSGL_V,"realvideo codec id: 0x%08X  sub-id: 0x%08X\n",extrahdr[1],extrahdr[0]);
 
 	sprintf(path, LIBDIR "/real/%s", sh->codec->dll);
 	if(!load_syms(path)){
@@ -169,19 +141,21 @@ static int init(sh_video_t *sh){
 	    mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Couldn't open RealVideo codec, error code: 0x%X  \n",result);
 	    return 0;
 	}
-	// setup codec:
-//	realvid_hmsg(sh,0,2,0);
-	(*rvyuv_custom_message)(cmsg_data,sh->context);
+	// setup rv30 codec (codec sub-type and image dimensions):
+	if(extrahdr[1]>=0x30000000){
+	    ulong cmsg24[4]={sh->disp_w,sh->disp_h,sh->disp_w,sh->disp_h};
+	    ulong cmsg_data[3]={0x24,1+((extrahdr[0]>>16)&3),&cmsg24};
+	    (*rvyuv_custom_message)(cmsg_data,sh->context);
+	}
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: RealVideo codec init OK!\n");
 	return 1;
 }
 
 // uninit driver
 static void uninit(sh_video_t *sh){
-//	realvid_exit();
+	if(rv_handle) dlclose(rv_handle);
+	rv_handle=NULL;
 }
-
-//mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h);
 
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
