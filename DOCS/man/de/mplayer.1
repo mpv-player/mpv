@@ -1,4 +1,4 @@
-.\" MPlayer (C) 2000-2003 Arpad Gereöffy
+.\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Diese Man-Page wurde/wird von Gabucino, Diego Biurrun, Jonas Jermann,
 .\" Moritz Bunkus und Sebastian Krämer gepflegt.
 .\" 
@@ -605,7 +605,7 @@ Gibt die Größe des FIFO an, der Schlüsselevents zwischenspeichert (Standard:
 10).
 Ein FIFO der Größe n kann (n-1) Events zwischenspeichern.
 Wenn er zu klein ist, können manche Events verlorengehen (was zu
-"festgeklebten Mausbuttons" und ähnlichen Effekten führen kann).
+"hängenden Mausbuttons" und ähnlichen Effekten führen kann).
 Ist er zu groß, kann es zu einem scheinbar aufgehängten MPlayer führen,
 während die zwischengespeicherten Events abgearbeitet werden.
 Um ein Verhalten wie vor der Einführung dieser Option zu erhalten, setze den
@@ -4703,6 +4703,134 @@ erkennen.
 Standardwert ist 128.
 .IPs sad_thres=n
 Summe des "Absolute Difference"-Schwellenwerts, Standardwert ist 64.
+.RE
+.
+.TP
+.B softpulldown
+Dieser Filter arbeitet nur mit MEncoder korrekt und richtet sich nur nach den
+MPEG-2-Flags, die für soft 3:2-Pulldown (soft telecine) benutzt werden.
+Wenn du einen der Filter ivtc oder detc für Filme benutzen möchtest, die zum
+Teil 'soft telecined' sind, kann er durch das Einfügen dieses Filters
+zuverlässiger gemacht werden.
+.
+.TP
+.B divtc[=Optionen]
+Inverse telecine für Videos im deinterlaced-Format.
+Falls 3:2-pulldown telecined Videomaterial eins der Felder verloren hat oder
+deinterlaced ist durch ein Verfahren, das ein Feld beibehält und das andere
+interpoliert, ist das Ergebnis ein ruckelndes Video, das jeden vierten Frame
+doppelt enthält.
+Dieser Filter beabsichtigt, diese Duplikate zu finden und die ursprüngliche
+Framerate des Films wiederherzustellen.
+Bei Benutzung dieses Filters mußt du einen Wert für \-ofps angeben, der 4/\:5
+der Framerate der Eingabedatei entspricht (23.976 bei einer Eingabe von
+29.97fps).
+Die Optionen sind:
+.RSs
+.IPs pass=1|2
+Benutze das two-pass (zwei Durchläufe) Verfahren.
+Dies liefert die besten Resultate.
+Durchlauf 1 analysiert das Video und schreibt das Ergebnis in ein Logfile.
+Durchlauf 2 liest dann dieses Logfile und benutzt die Informationen für die
+eigentliche Arbeit.
+Beachte, dass diese Durchläufe
+.B nicht
+den Durchläufen 1 und 2 des Encodierung-Vorgangs entsprechen.
+Um divtc two-pass mit der two-pass-Videoencodierung zu benutzen, sind drei
+Schritte nötig: zuerst divtc Durchlauf 1 und Encoder Durchlauf 1, dann divtc
+Durchlauf 2 und Encoder Durchlauf 1, schließlich dann divtc
+Durchlauf 2 und Encoder Durchlauf 2.
+.IPs file=Dateiname
+Setzt den Dateinamen für das Logfile bei two-pass (Standard: "framediff.log").
+.IPs threshold=Wert
+Setzt die minimale Stärke, die das telecine-Muster haben muss, damit der Filter
+es als solches wahrnimmt (Standard: 0.5).
+Dies wird benutzt, um bei sehr dunklen oder fast still stehenden Videos die
+Erkennung von falschen Mustern zu vermeiden.
+.IPs window=numframes
+Setzt die Anzahl der vorangegangenenn Frames, die bei der Suche nach Mustern
+berücksichtigt werden (Standard: 30).
+Ein längeres Zeitfenster erhöht die Zuverlässigkeit der Mustsuche, ein kürzeres
+Zeitfenster jedoch verbessert die Reaktionszeit für Änderungen in der
+telecine-Phase.
+Dies betrifft nur den one-pass-Modus.
+Der two-pass-Modus benutzt zur Zeit ein festes Zeitfenster, das nach vorne und
+hinten gerichtet ist.
+.IPs phase=0|1|2|3|4
+Setzt die anfängliche telecine-Phase für den one-pass-Modus (Standard: 0).
+Der two-pass-Modus kann Zukünftiges sehen, so dass er von Anfang an die
+richtige Phase wählen kann, der one-pass-Modus kann jedoch nur raten.
+Er erkennt die richtige Phase, wenn er sie findet, aber diese Option kann
+genutzt werden, um ein mögliches Haken am Anfang zu korrigieren.
+Der erste Durchlauf des two-pass-Modus benutzt dies auch; wenn du also die
+Ausgabe des ersten Durchlaufs speicherst, bekommst du als Ergebnis eine
+konstante Phase.
+.IPs deghost=Wert
+Setzt den Schwellenwert für "Deghosting" (Entfernung von stark unscharfen
+Bildern) (0\-255 im one-pass-Modus, -255\-255 im two-pass-Modus, Standard: 0).
+Ist der Wert ungleich null, wird Deghosting benutzt.
+Dies ist für Videomaterial gedacht, das deinterlaced wurde in der Art, dass
+die Felder übereinandergelegt wurden anstatt eins von beiden wegzulassen.
+Deghosting erhöht Kompressionsartefakte in übereinandergelegten Frames, daher
+wird der Parameterwert als Schwellenwert benutzt, um diejenigen Pixel vom
+Deghosting auszuschließen, die sich vom vorigen in weniger als dem angegebenen
+Wert unterscheiden.
+Wird der two-pass-Modus verwendet, so kann ein negativer Wert benutzt werden,
+damit der Filter zu Beginn des zweiten Durchlaufs das ganze Video analysiert
+um zu entscheiden, ob Deghosting verwendet werden muss oder nicht.
+Der Filter wählt dann entweder null oder den absoluten Wert des Parameters.
+Gib diesen Parameter im zweiten Durchlauf an, im ersten bewirkt er keinen
+Unterschied.
+.RE
+.
+.TP
+.B phase=[t|b|p|a|u|T|B|A|U][:v]
+Verzögert interlaced Video um ein Feld, so dass sich die Reihenfolge der
+Felder ändert.
+Die Absicht ist, Videos im PAL-Format zu korrigieren, die bei der Umsetzung
+von Film zu Video mit umgekehrter Feldreihenfolge aufgenommen wurden.
+Die Optionen sind:
+.RSs
+.IPs t
+Nimm die Feldreihenfolge top-first, transferiere dabei bottom-first.
+Der Filter verzögert das untere (bottom) Feld.
+.IPs b
+Nimm die Feldreihenfolge bottom-first, transferiere dabei top-first.
+Der Filter verzögert das obere (top) Feld.
+.IPs p
+Nimm auf und transferiere mit derselben Feldreihenfolge.
+Dieser Modus existiert nur als Referenz zur Dokumentation anderer Optionen;
+falls du es trotzdem auswählst, wird der Filter treuevoll nichts tun ;-)
+.IPs a
+Nimm die Feldreihenfolge, die durch die Flags der Felder automatisch bestimmt
+werden und transferiere die andere.
+Der Filter wählt einen der Modi t und b Frame für Frame aus unter Zuhilfenahme
+der Feld-Flags.
+Ist keine Feldinformation verfügbar, arbeitet er wie wie Angabe von u.
+.IPs u
+Nimm unbekannte oder variable, transferiere die andere [Feldreihenfolge].
+Der Filter wählt einen der Modi t und b Frame für Frame aus durch Analyse der
+Bilder und sucht diejenige Alternative mit dem besten Treffer zwischen den
+Feldern aus.
+.IPs T
+Nimm die Feldreihenfolge top-first, transferiere unbekannte oder variable.
+Der Filter wählt einen der Modi t und p nach Analyse der Bilder.
+.IPs B
+Nimm die Feldreihenfolge bottom-first, transferiere unbekannte oder variable.
+Der Filter wählt einen der Modi b und p nach Analyse der Bilder.
+.IPs A
+Nimm die durch Feld-Flags bestimmte Feldreihenfolge, transferiere
+unbekannte oder variable.
+Der Filter wählt einen der Modi t und p nach Analyse der Bilder.
+Ist keine Feldinformation verfügbar, arbeitet der Filter wie Angabe von U.
+Dies ist der Standardmodus.
+.IPs U
+Nimm auf und transferiere unbekannte oder variable [Feldreihenfolge].
+Der Filter wählt einen der Modi t, b und p nur anhand der Bildanalyse.
+.IPs v
+Ausführliche Vorgehensweise.
+Gibt den ausgewählten Modus für jeden Frame sowie die gemittelte quadrierte
+Differenz der Felder für die Auswahlen von t, b und p aus.
 .RE
 .
 .\" manpage is synced from top down to this option.
