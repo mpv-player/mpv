@@ -106,12 +106,13 @@ z.B.:<UL>
 <P><B><I>4. Wenn das Problem spezifisch für eine oder einige wenige Dateien besteht,
   lade die Datei bitte auf:</I></B></P>
 <P><CODE>&nbsp;&nbsp;&nbsp;ftp://mplayerhq.hu/MPlayer/incoming/</CODE></P>
-  Uploade auch eine kleine .txt-Datei mit dem selben name wie die Datei,
-  die das Problem beschreibt!
+  Uploade auch eine kleine .txt-Datei mit dem selben name wie die Datei 
+  (+ .txt Endung), die eine Problembeschreibung, die <CODE>mplayer -v datei</CODE>
+  Ausgabe und deine email-Adresse enthält!
   Normalerweise reichen die ersten 1-5MB der Datei aus, um das Problem zu
   reproduzieren, aber als erstes solltest du das ausprobieren:
-<P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1k count=1024</CODE></P>
-  (kopiert das erste MB von 'deinedatei' in die Datei 'kleinedatei')
+<P><CODE>&nbsp;&nbsp;&nbsp;dd if=deinedatei of=kleinedatei bs=1024k count=5</CODE></P>
+  (kopiert die ersten 5 MB von 'deinedatei' in die Datei 'kleinedatei')
   Nun versuche es nochmals mit dieser kleinen Datei, wenn der Fehler
   immer noch auftritt reicht es die kleine Datei hochzuladen.<BR>
   Sende NIE solche Dateien via mail! Lade es herauf und schicke nur den Pfad/

@@ -23,14 +23,15 @@ täglich generierte Liste!!!</P>
 <P>Die wichtigsten Video-Codecs:<BR>
 <UL>
 <LI>MPEG1 (VCD) und MPEG2 (DVD) video</LI>
-<LI>DivX ;-), OpenDivX (DivX4), 3ivx und andere MPEG4 Varianten</LI>
+<LI>DivX ;-), OpenDivX (DivX4), DivX 5.00, 3ivx und andere MPEG4 Varianten</LI>
 <LI>Windows Media Video 7 (WMV1) und 8 (WMV2), verwendet in .wmv-Dateien</LI>
-<LI>Intel Indeo Codecs (3.1, 3.2, 4.1, 5.0)</LI>
-<LI>MJPEG, ASV2 und andere Hardwareformate</LI>
+<LI>Cinepak und Intel Indeo Codecs (3.1, 3.2, 4.1, 5.0)</LI>
+<LI>MJPEG, AVID, VCR2, ASV2 und andere Hardwareformate</LI>
 <LI>XAnim Codecs</LI>
-<LI>VIVO</LI>
-<LI>FLI</LI>
+<LI>VIVO 1.0, 2.0, I263 und andere h263(+) Varianten</LI>
+<LI>FLI/FLC</LI>
 <LI>RealVideo 1.0</LI>
+<LI>Verschiedene alte, einfache RLE-ähnliche Formate</LI>
 </UL></P>
 
 <P>Wenn du einen Codec hast, der nicht gelistet ist, und noch nicht unterstützt
@@ -91,8 +92,11 @@ Für gepackte YUV Formate (YUY2, UYVY) verwende die 'divx4'-Methode.
 Für RGB-Modus kannst du frei wählen, denn die Geschwindigkeit ist die selbe,
 möglicherweise ist sie jedoch unterschiedlich bei deiner Farbtiefe.</P>
 
-<P>Hinweis: Es unterstützt auch Postprocessing und die Reichweite der Einstellungen
-ist groß:</P>
+<P>HINWEIS: Wenn der -vo driver "direct rendering" unterstützt, ist -vc divx4 wahrscheinlich
+die schnellere oder sogar die schnellste Lösung.</P>
+
+<P>Hinweis: Es unterstützt auch Postprocessing (aktiviert durch die Option <CODE>-pp</CODE>), 
+aber der Bereich der Werte ist seltsam:</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>0</TD><TD><FONT CLASS="text">&nbsp;&nbsp;</TD>
@@ -119,7 +123,8 @@ h263+, etc.</P>
 <UL>
   <LI>Vom Release : dann hasst du die libavcodec gleich im Packet, kompliliere
     <B>MPlayer</B> wie gewöhnlich.</LI>
-  <LI>Vom CVS : du must sie manuell vom <B>FFmpeg</B>-Projekt herunterladen:
+  <LI>Vom CVS : du must sie manuell vom <B>FFmpeg</B> CVS-Server herunterladen
+    (ffmpeg 0.4.5 Version läuft NICHT mit mplayer!):
 
 <P><CODE>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
@@ -164,16 +169,17 @@ ist sehr einfach dies einzuschalten:</P>
 <P>
 <UL>
   <LI>Lade dir die Codecs dir dir will von der <A HREF="http://xanim.va.pubnix.com">XAnim Seite</A>
-  herunter. Den <B>3ivx</B> Codec kann man dort nicht finden, also lade ihn von der
+    herunter. Den <B>3ivx</B> Codec kann man dort nicht finden, also lade ihn von der
   <A HREF="http://www.3ivx.com">3ivx Seite</A>.</LI>
       
   <LI>verwende die <CODE>--with-xanimlibdir</CODE> Option um configure zu sagen, wo
-  es die XAnim-Codecs finden kann. Standardgemäß prüft es in <CODE>/</CODE> (...) .
-  Ansonsten kannst du auch die Umgebungsvariable <I>XANIM_MOD_DIR</I> zum Verzeichnis
-  der XAnim Codecs setzen.</LI>
+    es die XAnim-Codecs finden kann. Normalerweise werden diese in 
+    <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods/ und /usr/lib/xanim</CODE> gesucht.
+    Ansonsten kannst du auch die Umgebungsvariable <I>XANIM_MOD_DIR</I> zum Verzeichnis
+    der XAnim Codecs setzen.</LI>
 
-  <LI>Entferne das Architur-Zeug auf dem Dateinamen, dass die so aussehen:
-  <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.
+  <LI>Entferne/Symlinke die Dateinamen, indem du das Architektur-Zeugs löschst, so dass die 
+    Dateinamen etwa so aussehen: <CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>.
 
 </UL>
 </P>
@@ -199,10 +205,9 @@ nur mit X11 oder OpenGL Ausgabe funktioniert. ffh263 wird hoffentlich bald VIVO 
 
 <P>MPEG1 und MPEG2 werden von der eingebauten Bibliothek <B>libmpeg2</B> dekodiert.
 Der Sourcecode ist bei <B>MPlayer</B> enthalten und ist natürlich multiplatformfähig.
-Wir spielen fehlerhafte MPEG1/2 Videos durch das Checken der Signaturen die libmpeg2
-zurückgibt und wenn es mit sig11 (segmentation fault) abstützt initialisieren wir den
-Codec wieder schnell und setzen die Wiedergabe dort fort, wo der Fehler war. Kein
-Geschwindigkeitsverlust ist dabei messbar.</P>
+Wir spielen fehlerhafte MPEG1/2 Videos durch das Abfangen des sig11 (segmentation fault) 
+und die anschliessend schnelle neue Initialisierung des Codecs. Dadurch kann exakt an der
+Stelle des Fehlers fortgefahren werden. Es ist dabei Kein Geschwindigkeitsverlust messbar.</P>
 
 
 <P><B><A NAME=2.2.1.6>2.2.1.6. MS Video 1</A></B></P>
@@ -241,9 +246,10 @@ RV20 und RV30 Codecs, welche closed-source sind. Deren zukünftige Unterstützung 
 
 <P><B>Nachteile</B> :
   <UL>
-    <LI>Es decodiert momentan nicht alle DivX/DivX4-Dateien sauber</LI>
+    <LI>Es <B>decodiert</B> momentan nicht alle DivX/DivX4-Dateien sauber (wenn kümmerts,
+      man kann sie ja immer noch mit der libavcodec abspielen)</LI>
     <LI>Man muss sich beim Kompilieren für die DivX4 <B>ODER</B> 
-    XViD Unterstützung entscheiden.</LI>
+      XViD Unterstützung entscheiden.</LI>
     <LI>in der Entwicklung</LI>
   </UL>
 </P>
@@ -258,6 +264,8 @@ RV20 und RV30 Codecs, welche closed-source sind. Deren zukünftige Unterstützung 
   &nbsp;&nbsp;<CODE>bearbeite Makefile.linux deinen Bedürfnissen entsprechend</CODE><BR>
   &nbsp;&nbsp;<CODE>make -f Makefile.linux</CODE><BR>
   &nbsp;&nbsp;<CODE>kompiliere <B>MPlayer</B> neu mit --with-xvidcore=/pfad/zu/libcore.a</CODE><BR>
+  &nbsp;&nbsp;Nimm die encore2.h und decore.h vom Divx4linux-Packet und kopiere diese nach
+    <CODE>/usr/local/include/</CODE><BR>
 </P>
 
 
@@ -267,7 +275,7 @@ RV20 und RV30 Codecs, welche closed-source sind. Deren zukünftige Unterstützung 
 <UL>
 	<LI>MPEG layer 2 und layer 3 (MP3) Audio (<B>eingebauter</B> Code, mit MMX/SSE/3DNow! Optimierungen)</LI>
 	<LI>MPEG layer 1 Audio (<B>eingebauter</B> Code, mit libavcodec)</LI>
-	<LI>AC3 Dolby Audio (<B>eingebauter</B> Code, mit SSE/3DNow! Optimierungen)</LI>
+	<LI>AC3 Dolby Audio (<B>eingebauter</B> Code, mit MMX/SSE/3DNow! Optimierungen)</LI>
 	<LI>Ogg Vorbis Audiocodec (<B>eingebaute</B> lib)</LI>
 	<LI>Voxware Audio (Verwendung der DirectShow DLL)</LI>
 	<LI>alaw, MSGSM, PCM und andere einfache, alte Audioformate</LI>
@@ -276,7 +284,7 @@ RV20 und RV30 Codecs, welche closed-source sind. Deren zukünftige Unterstützung 
 </UL></P>
 
 
-<P><B><A NAME=2.2.2.1>2.2.2.1. Softwaremäßige AC3 Dekodierung</A></B></P>
+<P><B><A NAME=2.2.2.1>2.2.2.1. Software AC3 Dekodierung</A></B></P>
 
 <P>Dieser ist der standardgemäße Dekoder für Dateien mit AC3-Audio.</P>
 
@@ -300,10 +308,10 @@ besitzen, die die Anzahl der Ausgabekanäle via SNDCTL_DSP_CHANNELS ioctl unterst
 von August 2001 oder neuer vom emu10k1 Treiber (verwendet bei SB Live Karten) sollte das unterstützen.</P>
 
 
-<P><B><A NAME=2.2.2.2>2.2.2.2. Hardwaremäßige AC3 Dekodierung</A></B></P>
+<P><B><A NAME=2.2.2.2>2.2.2.2. Hardware AC3 Dekodierung</A></B></P>
 
 <P>Du wird eine AC3-fähige Soundkarte brauchen mit Digital-Out (SP/DIF). Der
-Treiber muss das AFMT_AC3 Format unterstützen (wie die SB Live!).
+Treiber muss das AFMT_AC3 Format richtig unterstützen (wie z.B. C-Media).
 Verbinde deinen AC3 Decoder am SP/DIF Ausgang und verwende die '-ac hwac3'
 Option. Es funktioniert möglichweise oder auch nicht (experimentel). Es läuft mit 
 C-Media Karten und SB Live! + ALSA Treiber, jedoch nicht mit den OSS-Treibern 
@@ -314,6 +322,8 @@ von SB Live!</P>
 <P><A HREF="http://mad.sourceforge.net">libmad</A> ist eine multiplatform Bibliothek für
 die Dekodierung von MPEG-Audio. Wenn du nicht weißt warum es so gut ist wirdst du es möglicherweise
 auch nicht brauchen.</P>
+
+<P>Sie verarbeitet kaputte Dateien nicht so gut und hat teilweise Probleme mit dem Suchen</P>
 
 <P>Um die Unterstützung zu aktivieren, verwende configure mit der Option <CODE>--enable-mad</CODE>.</P>
 

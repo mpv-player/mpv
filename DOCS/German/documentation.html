@@ -125,7 +125,7 @@
 	<LI><A HREF="video.html#2.3.1.11">2.3.1.11 AAlib - Textmodus-Anzeige</A></LI>
 	<LI><A HREF="video.html#2.3.1.12">2.3.1.12 VESA - zum VESA BIOS</A></LI>
 	<LI><A HREF="video.html#2.3.1.13">2.3.1.13 X11</A></LI>
-	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon Videooverlay (radeon_vid)</A></LI>
+	<LI><A HREF="video.html#2.3.1.14">2.3.1.14 Rage128 / Radeon Videooverlay (VERALTET - siehe Vidix!)</A></LI>
         <LI><A HREF="video.html#2.3.1.15">2.3.1.15 Vidix</A></LI>
         <LI><A HREF="video.html#2.3.1.16">2.3.1.16 Zr (Für einige MJPEG Aufnahme/Wiedergabe Karten)</A></LI>
        	<LI><A HREF="video.html#2.3.1.A">2.3.1.A TVout</A></LI>
@@ -147,7 +147,8 @@
 	    <LI><A HREF="sound.html#2.3.2.2.4">2.3.2.2.4 Verzögerung</A></LI>
             <LI><A HREF="sound.html#2.3.2.2.5">2.3.2.2.5 Software Lautstärkeregelung</A></LI>
             <LI><A HREF="sound.html#2.3.2.2.6">2.3.2.2.6 Extrastereo</A></LI>
-         </UL>
+            <LI><A HREF="sound.html#2.3.2.2.7">2.3.2.2.7 Lautstärke-Normalisierer</A>
+          </UL>
       </UL>
     </UL>
     <LI><A HREF="encoding.html#2.4">2.4 MEncoder - Ein Encoder basierend auf MPlayer</A></LI>
@@ -286,10 +287,7 @@ ist momentan unmöglich, sowohl aus <B>technischen</B> als auch aus <B>rechtliche
 Detailierte Informationen können im zweiten Teil von <A HREF="users_against_developers.html#binary">dieser</A>
 Datei gefunden werden. Es wird empfohlen diese zu lesen.</P>
 
-<P>Ich habe keine Codecs geschrieben, nur einen Player. Stattdessen verbringe ich eine
-Menge Zeit mit dem Finden des besten Weges um zerstörte Input-Files (MPEG
-und AVI) zu spielen und um perfekte A-V Sync mit Suchfunktion zu erreichen. Mein
-Player spielt felsenfest zerstörte MPEG Dateien (nützlich für einige VCDs) und
+<P>Mein Player spielt felsenfest zerstörte MPEG Dateien (nützlich für einige VCDs) und
 spielt schlechte AVI-Dateien, welche auch mit dem bekannten Windows Media Player
 nicht mehr spielbar sind. Auch AVI-Dateien ohne Index-Chuck sind spielbar und du kannst ihr
 Index entweder kurzfristig mit der -idx Option wiederherstellen, oder permanent mit 
@@ -301,47 +299,47 @@ aber die Geschwindigkeit ist auch überraschend.</P>
 <P><B><A NAME=1.2>1.2. Geschichte</A></B></P>
 
 <P>Es begann vor einem Jahr...
-Ich hatte eine eine Menge von Playern unter Linux probiert (mtv, xmps, dvdview,
-livid/oms, VideoLAN, xine, xanim, avifile, xmmp), aber sie hatten alle ihre Probleme.
+Ich (A'rpi) hatte eine eine Menge von Playern unter Linux probiert (mtv, xmps, dvdview,
+livid/oms, videolan, xine, xanim, avifile, xmmp), aber sie hatten alle ihre Probleme.
 Meist mit speziellen Dateien oder mit der Audio-Video-Synchronisation. Die
 meisten waren unfähig beides abzuspielen, MPEG1, MPEG2 und AVI (DivX) Dateien.
 Einige Player hatten auch Probleme mit der Bildqualität und der Geschwindkeit.
 So beschloss ich einen Player zu schreiben/zu modifizieren...</P>
 
 <P><UL>
-<LI><B>mpg12play v0.1-v0.3:</B><BR>
+<LI><B>mpg12play v0.1-v0.3:</B> Sep 22-25, 2000<BR>
     Der erste Versuch, zuzweit gehackt in einer halben Stunden! Ich verwendete
     libmpeg3 von www.heroinewarrior.com bis zu Version 0.3, aber es gab
     Bildqualitäts- und Geschwindigkeitsprobleme.
-<LI><B>mpg12play v0.5-v0.87:</B><BR>
+<LI><B>mpg12play v0.5-v0.87:</B> Sep 28-Oct 20, 2000<BR>
     MPEG Codec wurde ersetzt durch DVDview von Dirk Farin, es war ein großartiges
     Programm, aber es war langsam und in C++ geschrieben (ich hasse C++!!!)
-<LI><B>mpg12play v0.9-v0.95pre5:</B><BR>
+<LI><B>mpg12play v0.9-v0.95pre5:</B> Oct 21-Nov 2, 2000<BR>
     MPEG Codec wurde libmpeg2 (mpeg2dec) von Aaron Holtzman & Michel Lespinasse.
     Es ist großartig, optimiert und schneller C-Code mit perfekter Bildqualität
     und 100% MPEG Standard.
-<LI><B>MPlayer v0.3-v0.9:</B><BR>
-    Es war ein Paket aus 2 Programmen: mpg12playv0.95pre6 und mein neuer, einfacher
+<LI><B>MPlayer v0.3-v0.9:</B> Nov 18-Dec 4, 2000<BR>
+    Es war ein Paket aus 2 Programmen: mpg12play v0.95pre6 und mein neuer, einfacher
     AVI-Player 'avip' basierend auf Avifiles Win32 DLL Loader.
-<LI><B>MPlayer v0.10:</B><BR>
+<LI><B>MPlayer v0.10:</B> Jan 1, 2001<BR>
     Der MPEG und AVI Player in einer einizigen Binary!
-<LI><B>MPlayer v0.11:</B><BR>
+<LI><B>MPlayer v0.11pre Serien:</B><BR>
     Einigen neue Entwickler sind beigetreten und seit 0.11 war MPlayer Team-Arbeit!
     .ASF Datei-Unterstützung hinzugefügt und OpenDivX (siehe www.projectmayo.com)
     für en-/decoding.
-<LI><B>MPlayer v0.17 "The IdegCounter"</B><BR>
+<LI><B>MPlayer v0.17 "The IdegCounter"</B> Apr 27, 2001<BR>
     Die Release-Version nach 0.11pre nach 4 Monaten schwerer Entwicklung!
     Probiere es, und sei überrascht! Tausende von neuen Features hinzugefügt ...
     und natürlich wurde auch der alte Code verbessert, Bugs entfernt usw.
-<LI><B>MPlayer 0.18 "The BugCounter"</B><BR>
+<LI><B>MPlayer 0.18 "The BugCounter"</B> Jul 9, 2001<BR>
     2 Monate seit 0.17 und hier ist die neue Release.. Komplette ASF-Unterstützung,
     mehr Untertitel-Formate, libao wurde eingeführt (wie libvo, aber für Audio),
     stabiler den je, und so weiter. Es ist ein MUSS !
-<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B><BR>
+<LI><B>MPlayer 0.50 "The Faszom(C)ounter"</B> Oct 8, 2001<BR>
     Hmmm. Wieder eine Release. Tonnen von neuen Featues, beta GUI Version, Fehler
     beseitigt, neue vo und ao Treiber, Ports zu vielen Systemen inklusive OpenSource
     DivX Codecs und vieles mehr. Probier's!
-<LI><B>MPlayer 0.60 "The RTFMCounter"</B><BR>
+<LI><B>MPlayer 0.60 "The RTFMCounter"</B> Jan 3, 2002<BR>
     MOV/VIVO/RM/FLI/NUV Dateiformat-Unterstützung, native CRAM, Cinepak, ADPCM Codecs
     und Support für die Binary-Codecs von XAnim; DVD Untertitel-Unterstützung, erstes
     Release des MEncoders, TV-Grabbing, Cache, liba52, unzählbare Fehlerbehebungen.</LI>           
@@ -363,15 +361,18 @@ es zahlt sich aus.</P>
 <UL>
   <LI><B>binutils</B> - vorgeschlagene Version ist <B>2.11.x</B>. Diese Programm ist
     verantwortlich für das Erzeugen von MMX/3DNow!/usw Befehlen, deshalb sehr wichtig.</LI>
-  <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.2</B> bis <B>2.95.4</B>.
+  <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.3</B> bis <B>2.95.4</B>.
     Verwende <B>NIEMALS</B> 2.96 oder 3.x.x !!! Sie erzeugen fehlerhaften Code.</LI>
     Wenn du dich unterscheidest von 2.96 zu wechseln entscheide dich nicht für 3.0 nur weil
     er neuer ist! In manchen Fällen ist er schlechter als 2.96, downgrade also zu 2.95.x
     (downgrade auf die libstdc++ !) oder up/downgrade überhaupt nicht (sei aber in manchen
-    Fällen vorbereitet auf Laufzeitfehler). Detaillierte Information über die Bugs von gcc 2.96
-    können <A HREF="users_against_developers.html"><B><I>hier</I></B></A> und in den
+    Fällen vorbereitet auf Laufzeitfehler). 
+    Wenn der 3.x verwendet werden soll, sollte dies mit neuste Version versucht werden. 
+    Ältere hatten verschiedene Fehler, es sollte also darauf geachtet werden, dass immerhin
+    der 3.0.3 oder 3.1 verwendet wird. Detaillierte Information über die Bugs von gcc 2.96 können 
+    <A HREF="users_against_developers.html"><B><I>hier</I></B></A> und in den
     <A HREF="faq.html">FAQ</A> gefunden werden!</I></B></LI>
-  <LI><B>XFree86</B> - vorgeschlagene Version ist <B>immer die neueste (4.1.0)</B>, aber
+  <LI><B>XFree86</B> - vorgeschlagene Version ist <B>immer die neueste (4.2.0)</B>, aber
     normalerweise will das jeder. Seit XFree86 4.0.2 enthält es die <A HREF="video.html#2.3.1.2">XVideo</A>
     Erweiterung (auch Bezeichnet als <B>Xv</B>) was benötigt wird, um Hardware YUV Bescheinigung
     (schnelle Bildanzeige) auf Karten die es unterstützen zu nutzen. <A HREF="video.html#2.3.1.2">Hier sind
@@ -382,11 +383,12 @@ es zahlt sich aus.</P>
     Dies ist normalerweise nicht so wichtig.</LI>
   <LI><B>SDL</B> - es ist nicht vorgeschrieben, aber es ist hilfreich in einigen Fällen 
     (schlechter Ton, Videokarten, welche mit Probleme mit dem Xv-Treiber haben).
-    Verwende immer das aktuellste Version (beginnend bei 1.2.x).</LI>
-  <LI><B>libjpeg</B> - empfohlen und standard (M)JPEG Decoder. Sowohl für
-    <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
-  <LI><B>libpng</B> - empfohlen und standard (M)PNG Decoder. Sowohl für
-    <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
+    Verwende immer das aktuellste Version (beginnend bei 1.2.x). Kann auch <B>Untertitel unter
+    dem Film (auf dem schwarzen Streifen)</B> darstellen</LI>
+  <LI><B>libjpeg</B> - optionaler (M)JPEG Decoder, benutzt bei -mf und einigern qt mov Dateien. 
+    Sowohl für <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
+  <LI><B>libpng</B> - empfohlen und standard (M)PNG Decoder. Benötigt für das GUI.
+    Sowohl für <B>MPlayer</B> als auch für <B>MEncoder</B> nützlich.</LI>
 </UL>
 	  
 <P><B><I>CODECS</I></B></P>
@@ -408,9 +410,9 @@ nach /usr/lib/win32 . Hinweis: Das Avifile-Projekt hat ein ähnliches Codecs-Pake
 sich von unserem. Also wenn du alle unterstützten Codecs verwenden willst, verwende
 unser Paket! Wie auch immer, du kannst auch unserer Paket für avifile nutzen. Features:<BR>
 <UL>
-  <LI>du wirst sie möglicherweise brauchen um Video abzuspielen oder zu encodieren,
-  welche mit einer digitalen Kamera aufgezeichnet wurden (z.B. DV)</LI>
-  <LI>erforderlich um <B>WMV Filme</B> oder ältere ASFs abzuspielen</LI>
+  <LI>du wirst sie möglicherweise brauchen um Video mit verschiedenen Hardware-Kompressoren, 
+  wie Tuner Karten und digitalen Kameras (z.B. DV, ATI VCR, MJPEG) abzuspielen oder zu encodieren</LI>
+  <LI>erforderlich um <B>WMV Filme</B> oder ältere (MP42) ASFs abzuspielen</LI>
 </UL>
 </LI>
 
@@ -425,10 +427,16 @@ Features:<UL>
 </UL>
 </LI>
 
-<LI>Wenn du <B>3ivx</B> Filme abspiele willst lese die <A HREF=codecs.html#2.2.1.3>XAnim Codecs-Sektion</A>.</LI>
+<LI><B>XviD</B> : Opensource Encodierungs-Alternative zu Divx4Linux<BR>
+Features :<UL>
+  <LI>1 Pass oder 2 Pass Encodierung mit <A HREF="encoding.html">MEncoder</A></LI>
+  <LI>es ist open-source, also nicht nur als x86 Version verfügbar.</LI>
+  <LI>es ist ungefähr 2 mal schneller als divx4 bei der Encodierung - mit der annähernd gleichen Qualität.</LI>
+</UL>
+</LI>
 
 <LI>Die <A HREF=codecs.html#2.2.1.3>XAnim Codecs</A> sind die Besten (Vollbild,
-Hardwaremäßiger YUV Zoom) um alte Videos wie Indeo 3/4/5 und einige andere
+Hardwaremäßiger YUV Zoom) um <B>3ivx</B>, Indeo 3/4/5 Filme und einige alte Formate
 abzuspielen. Und sie sind multiplatform, also sind sie die einzige Möglichkeit um Indeo
 auf nicht-x86 Plattformen zu sehen (nun mal abgesehen von XAnim:). Aber z.B. Cinepak
 Filme werden mit dem <B>MPlayer</B> eigenen Cinepak-Decoder am besten wiedergegeben !</LI>
@@ -439,7 +447,7 @@ Filme werden mit dem <B>MPlayer</B> eigenen Cinepak-Decoder am besten wiedergege
 <P><B><I>VIDEOKARTEN</I></B></P>
 
 <P>Es gibt allgemein gesprochen zwei Arten von Grafikkarten. Die eine Art (und die neueren Karten) besitzen
-<B>hardwaremäßige YUV Beschleunigung</B>, die anderen nicht.</P>
+<B>Hardware Skallierung und YUV Beschleunigung</B>, die anderen nicht.</P>
 
 <P>
 <B><I>YUV Karten</I></B></P>
@@ -462,21 +470,23 @@ Dokumentation !</LI>
 <LI><B>3Dfx Voodoo3/Banshee Karten</B> : <LI>schau bitte auf die
 <A HREF="video.html#2.2.1.9">Sektion 2.2.1.9</A> um einen großen Geschwindigkeitsvorteil
 zu erhalten. Es ist wichtig, dass du diese Schritte <I>vor</I> dem Kompilieren von <B>MPlayer</B>
-machst, ansonsten wird die 3Dfx-Unterstützung nicht eingebaut.</LI>
+machst, ansonsten wird die 3Dfx-Unterstützung nicht eingebaut. Lies auch in der
+<A HREF="video.html#2.3.1.A.3">3dfx TV out Sektion</A>. Wenn du X benutzt, benutze mindestens
+4.2.0, da die 3dfx Xv Treiber in 4.1.0 und früheren Versionen kaputt waren.</LI>
 
 <LI><B>ATI Karten</B> : <LI>schau bitte auf die <A HREF="video.html#2.3.1.A.2">
 ATI-Karten Sektion</A> für Dokumentationen zum TV-Out und um zu erfahren, welches
-Features deiner Karte unter Linux/MPlayer unterstützt werden. Wenn du eine <B>Radeon</B> oder <B>Rage 128</B>
-Karte besitzt, wir haben einen <B>XXX_vid</B>-Treiber für dich mit TV-Out ! Siehe <A
-HREF="video.html#2.3.1.14">hier</A>!
+Features deiner Karte unter Linux/MPlayer unterstützt werden. Wenn du eine <B>Radeon</B>, <B>Rage 128</B>
+oder <B>Mach64</B> (Rage XL/Mobility, Xpert98) Karte besitzt, haben wir einen <B>XXX_vid</B>-Treiber für 
+dich mit optionalem TV-Out ! Lies <AHREF="video.html#2.3.1.14">diese</A> Sektion!
 <U><B>Wenn du ein nicht-Linux User bist</B></U>, lies die <A HREF="video.html#2.3.1.15">Vidix</A>
 Dokumentation !</LI>
 </UL>
 
-<LI><B>S3 Karten</B> : Die Savage Chips besitzen Hardwarebeschleunigung. Verwende
+<LI><B>S3 Karten</B> : Die Savage und Virge/DX Chips besitzen Hardwarebeschleunigung. Verwende
 die neueste XFree86 Version die möglich ist, ältere Treiber sind fehlerhaft. Savage Chips
 machen Problem mit YV12 Anzeige, siehe <A HREF="video.html#2.3.1.2.2">S3 Xv Sektion</A>
-für Details. Ältere, nicht-Savage Karten haben keine oder langsamen Hardwaresupport.</LI>
+für Details. Ältere, Trio Karten haben keine oder langsamen Hardwaresupport.</LI>
 
 <LI><B>Nvidia Karte</B> : sehr schlecht Wahl für Videowiedergabe. Nvidias Karten
 werden im Fernen Osten erzeugt und haben sehr billige und qualitativ minderwertige Chips.
@@ -486,9 +496,14 @@ Für Details siehe <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.<
 
 <LI><B>andere Karten</B> : keine oben genannte?
   <UL>
-  <LI>Schau ob dein XFree86 Treiber (und deine Karte) Hardwarebeschleunigung unterstützt.
-  Siehe <A HREF="video.html#2.3.1.2">Xv Sektion</A> für Details.</LI>
-  <LI>Wenn es Xv nicht unterstützt ist deine Karte eine von diesen:</LI>
+    <LI>Schau ob dein XFree86 Treiber (und deine Karte) Hardwarebeschleunigung unterstützt.
+      Siehe <A HREF="video.html#2.3.1.2">Xv Sektion</A> für Details.</LI>
+    <LI>Wenn nicht, sind die Features deiner Karte unter deinem OS nicht unterstützt :(<BR>
+      Wenn die Hardware Skalierung unter Windows läuft, bedeutet dies nicht, dass das auch unter
+      Linux oder anderen OS geht. Es hängt von den Treibern ab! Die meisten Hersteller erstellen weder
+      Linux Treiber, noch geben sie die Chip Spezifikationen frei - du bist also der Unglückliche, wenn
+      du diese Karten verwendest. Lies die nächste Sektion:
+    </LI>
   </UL>
 </LI>
 
@@ -499,14 +514,16 @@ Für Details siehe <A HREF="video.html#2.3.1.2.3">Nvidia Xv Treiber</A> Sektion.<
 <B><I>Nicht-YUV Karten</I></B></P>
 			
 <P>
-Vollbild kann durch Zoomen (<B>per Software</B>, dies ist langsam) erreicht werden oder durch
-das Wechseln in ein kleineres Videomodus, wie zum Beispiel. Wenn du keine YUV Beschleunigung hast
-ist das Letztgenannte zu empfehlen. Bei <B>MPlayer</B> <U>kann dieses Verhalten durch das Verwenden
+Vollbild kann durch Zoomen <B>per Software</B> (benutze die Option -zoom, aber sei gewarnt: Es ist laaaangsam!)
+oder durch den Wechsel in einen kleineren Videomodus erreicht werden, z.B. zu 352x288. Wenn du keine YUV Beschleunigung
+zur Verfügung hast, ist diese letztgenannte Methode zu empfehlen. 
+Bei <B>MPlayer</B> <U>kann dieses Verhalten durch das Verwenden
 der <CODE>-vm</CODE> Option</U> und mit den folgenden Treibern beeinflusst werden:
 <UL>
   <LI><B>Verwendung von</B> XFree86: siehe Details in der
   <A HREF="video.html#2.3.1.3">DGA Treiber</A> und der
-  <A HREF="video.html#2.3.1.13">X11 Treiber</A> Sektion. DGA ist empfohlen!</LI>
+  <A HREF="video.html#2.3.1.13">X11 Treiber</A> Sektion. DGA ist empfohlen!
+    Versuche auch DGA via SDL zu verwenden, manchmal ist es besser.</LI>
   <LI><B>Ohne</B> XFree86 : versuche die Treiber in folgender Reihenfolge:
     <A HREF="video.html#2.3.1.12">vesa</A>,
     <A HREF="video.html#2.3.1.6">fbdev</A>,
@@ -525,7 +542,8 @@ anstelle von 2 verwenden. Lies die <A HREF="codecs.html#2.2.2.1">Softwaremäßige 
 
 <LI><B>C-Media mit SP/DIF Ausgang</B> : Hardware AC3 Durchgabe ist möglich
   mit diesen Karten, siehe
-  <A HREF="codecs.html#2.2.2.2">Hardware AC3 Decodierung</A> Sektion.</LI>
+  <A HREF="codecs.html#2.2.2.2">Hardware AC3 Decodierung</A> Sektion.
+  Für Hardware AC3 Durchgabe MUSS die ALSA 0.9 oss Emulation verwendet werden!</LI>
     
 <LI>Die Features von <B>anderen Karten</B> werden von <B>MPlayer</B> nicht unterstützt.
   <U>Es ist sehr zu empfehlen die <A HREF="sound.html#2.3.2">Soundkarten Sektion</A> zu lesen !</U>
@@ -556,7 +574,7 @@ erzeugen kann. Dies erfordert Root-Privilegien oder <I>setuid root</I>-Binary vo
 <B>MPlayer</B> (oder ein wenig Kernel-Hacking). Du kannst die Effizienz des neuen
 Timers in der Status Leiste sehen. Der dritte Timercode wird mit der Option     
 <CODE>-softsleep</CODE> aktiviert. Er besitzt dieselbe Effizienz wie die RTC, 
-braucht jedoch keine Root-Rechte. Er braucht jedoch auch mehr CPU-Leistung. 
+braucht jedoch kein RTC. Er braucht jedoch auch mehr CPU-Leistung. 
 Hinweis: <B>Installiere NIE eine setuid-Binary von MPlayer auf einem Multiuser-System!</B>.
 Es wäre für jeden ein einfacher Weg Root zu werden.</LI>
 
@@ -572,7 +590,10 @@ Es wäre für jeden ein einfacher Weg Root zu werden.</LI>
 <P>Ab diesem Zeitpunkt ist <B>MPlayer</B> zur Benutzung bereit. Das Verzeichnis
 <CODE>/usr/local/share/mplayer</CODE> enthält die <CODE>codecs.conf</CODE>
 Datei, welche benutzt wird um dem Programm alle Codecs und deren Möglichkeiten zu sagen.
-Diese Datei sollte zusammen mit dem Hauptprogramm immer aktuell gehalten werden!</P>
+Diese Datei sollte zusammen mit dem Hauptprogramm immer aktuell gehalten werden!<BR>
+Es sollte ausserdem überprüft werden, ob eine codecs.conf in dem Home-Verzeichnis 
+(~/.mplayer/codecs.conf) von einer alten MPlayer Version vorhanden ist. Diese sollte
+gelöscht werden!</P>
 
 <P><B>Debian Benutzer</B> können ein .deb Packet für sich kompilieren, es ist sehr einfach. 
 Man muss bloss <CODE>fakeroot debian/rules binary</CODE> in <B>MPlayer</B>'s Basisverzeichnis 
@@ -581,7 +602,12 @@ ausführen. Genauere Anleitungen können <A HREF="documentation.html#6.1">hier</A>
 <P><B><I>Schau dir IMMER die Ausgabe von ./configure</I></B> und der
 <CODE>configure.log</CODE>-Datei an, es enthält Infos darüber,
 was eingebaut wird, und was nicht. Du kannst dir auch die config.h und config.mak
-Dateien ansehen.</P>
+Dateien ansehen.<BR>
+Wenn einige Bibliotheken installiert sind, jedoch nicht von ./configure erkannt werden, sollte 
+überprüft werden, ob auch die richtigen Header-Dateien installiert sind (normalerweise die -dev Packete)
+und ob deren Versionen stimmen. Das configure.log sagt die normalerweise, was fehlt.
+</P>
+
 
 <P>Wenn auch unwichtig sollten trotzdem die Schriften installiert werden um das OSD und die
 Untertitel-Unterstützung zu ermöglichen. Lade dir mp_arial-iso-8859-*.zip und optionale (fall
@@ -624,7 +650,7 @@ können vom Subreader-Code 10 Arten von Untertitel verarbeitet werden. Um zu sehe
 welche diese Untertitelformate sind, lies in der subreader.c (etwa Zeile 30).</P>
 
 <P><B>MPlayer</B> unterstützt VobSub Untertitel. VobSub Untertitel bestehen aus
-einer grossen .SUB Datei, einer .IDX Datei und/oder einer .IFO Datei.
+einer grossen .SUB Datei und optional .IDX und/oder .IFO Dateien.
 Benutzung : wenn du Dateien wie <CODE>beispiel.sub</CODE>, <CODE>beispiel.ifo</CODE>,
 <CODE>beispiel.idx</CODE> hast - musst du die Option <CODE>-vobsub beispiel -vobsubid
 0</CODE> mitgeben (optional mit Pfadangabe natürlich). Die
@@ -672,9 +698,10 @@ verwenden kannt. Es gibt mehrere Möglichkeiten um eines zu bekommen:
 
 <LI>downloade die fertigen Schiftpaketen von der <B>MPlayer</B> Seite.
 Hinweis: die aktuell verfügbaren Schriften sind beschränkt auf ISO 8859-1/2-Unterstützung,
-und es gibt noch einige spezielle Versionen für koreanische, russische und andere Codepages.
-Die Schriften sollte eine passende font.desc-Datei haben, welche die Unicode-Schrift
-an die aktuelle Codepage und den Untertitel-Text anpasst. Eine andere Lösung
+und es gibt noch einige andere (einschliesslich koreanische, russische, 8859-8 etc)
+Schriften in der contrib/font Sektion auf dem FTP-Server, von Benutzern gemacht.
+Die Schriften sollte eine passende font.desc-Datei haben, welche die 
+Unicode-Schrift an die aktuelle Codepage und den Untertitel-Text anpasst. Eine andere Lösung
 ist, dass man die Untertitel im UTF8 Format encodiert und die -utf8 Option verwendet
 oder die Untertitel-Datei in <video_name>.utf umbenennt. Das Neu-Kodieren von
 verschiedenen Codepages zu UTF8 kann mit dem konwert (debian) oder iconv (RedHat)
@@ -758,6 +785,12 @@ TV-Tuner ermöglicht</B>.</P>
   <TD><FONT CLASS="text"><I>on</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT CLASS="text">verwenden des TV-Inputs</TD>
+</TR>
+<TR>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT CLASS="text"><I>noaudio</I></TD>
+  <TD>&nbsp;&nbsp;</TD>
+  <TD><FONT CLASS="text">kein Ton</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -862,23 +895,32 @@ Eingabe von Standard-V4L<BR>
 
 <P><B><A NAME=3.1>3.1. Kommandozeile</A></B></P>
 
-<P><B>MPlayer</B> benützt einen komplexen playtree. Er besteht aus "standard" Optionen
-am Anfang (z.B. <CODE>mplayer -vfm 5</CODE>) und Optionen nach dem Dateiname, 
-welche nur für die jeweilige Datei/URL/etc gelten (z.B.
-<CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).</P>
+<P><B>MPlayer</B> benützt einen komplexen playtree. Er besteht aus globalen Optionen
+ am Anfang (z.B. <CODE>mplayer -vfm 5</CODE>) und Optionen nach dem Dateiname, 
+ welche nur für die jeweilige Datei/URL/etc gelten (z.B.
+ <CODE>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</CODE>).<BR>
+ Es können Dateinamen/URL Groupen mit { und } gebildet werden. Dies ist nützlich mit der Option
+ -loop: <CODE>mplayer { 1.avi -loop 2 2.avi } -loop 3</CODE> spielt die Dateien in dieser Reihenfolge:
+ 1 1 2 1 1 2 1 1 2<BR>
+</P>
       
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">Datei</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] [Pfad/]Dateiname</CODE></TD><TR>
 <TD></TD><TD><FONT CLASS="text">Datei</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [standard Optionen] [Pfad/]Dateiname [Optionen für datei1] datei2 datei3 [Optionen für datei3]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">VCD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] -vcd Tracknr -cdrom-device /dev/cdrom</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">VCD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] -vcd Tracknr [-cdrom-device /dev/cdrom]</CODE></TD><TR>
 <TD></TD><TD><FONT CLASS="text">DVD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] -dvd Titelnr [-dvd-device /dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Netz</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] http://site.com/datei.[mpg|avi]</CODE></TD><TR>
+<TD></TD><TD><FONT CLASS="text">Netz</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [Optionen] http://site.com/datei.asf (playlist kann auch benutzt werden)</CODE></TD><TR>
 </TABLE></P>
 
+<P>
+ Die neusten Versionen von MPlayer akkzeptieren auch VCD und DVD Tracks im URL-Style, wie z.B. auch
+ Xine: <CODE>mplayer dvd://1</CODE> oder <CODE>mplayer vcd://1</CODE>
+</P>
+
 <P><PRE>  mplayer -vo x11 /mnt/Filme/Contact/contact2.mpg
-  mplayer -vcd 2 -cdrom-device /dev/cdrom
+  mplayer -vcd 2
   mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
-  mplayer -dvd 1 -dvd-device /dev/dvd
+  mplayer -dvd 1
   mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi</PRE></P>
   
   
@@ -987,21 +1029,24 @@ anzugeben.</P>
 
 <P><B><A NAME=3.3>3.3. Streaming von Netzwerk oder Pipes</A></B></P>
 
-<P><B>MPlayer</B> kann Videos über Netzwerke, unter Verwendung des HTTP Protokoll.
-Die Konfigurierung ist einfach, kompiliere <B>MPlayer</B> neu mit</P>
-
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;./configure --enable-streaming</CODE></P>
+<P><B>MPlayer</B> kann Videos über Netzwerke, unter Verwendung des HTTP oder
+MMS Protokoll.</P>
 
 <P>Abspielen geht einfach durch die Hinzufügung der URL zu der Kommandozeile. <B>MPlayer</B>
 berücksichtigt auch die HTTP_PROXY Variable und benutzt einen Proxy, falls vorhanden.
 Der Proxygebrauch kann auch erzwungen werden :</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE></P>
+<P><CODE>mplayer 
+http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</CODE>
+</P>
 
 <P><B>MPlayer</B> kann auch von stdin lesen (NICHT benannte Pipes). Dies ist ein
 Beispiel für die Verwendung um von FTP zu spielen:</P>
 
-<P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;wget ftp://micorsops.com/something.avi -O - | mplayer -</CODE></P>
+<P><CODE>wget ftp://micorsops.com/etwas.avi -O - | mplayer -</CODE></P>
+<P>Hinweis: Bei der Wiedergabe übers Netzwerk empfiehlt sich, den CACHE zu 
+aktivieren:</P> 
+<P><CODE>wget ftp://micorsops.com/etwas.avi -O - | mplayer -cache 8192 -</CODE></P>
 
 <P><B><A NAME=4>4. <A HREF="faq.html">FAQ Sektion</A></A></B></P>
 
@@ -1172,8 +1217,8 @@ Anmelden kann man sich unter den folgenden Adressen:</P>
 <P>Diese Liste ist über MPlayer Entwicklung! Es wird über Interface/API
 Änderungen, neue Librarys, Code-Optimierungencode und ./configure Änderungen diskuttiert.
 Du kannst auch deine Patches hier herschicken.
-Sende KEINE Fehlerberichte, Anwenderfragen, Featurewünsche hierher!
-Diese Liste sollte wenig verwendet werden.</P>
+Sende KEINE Fehlerberichte, Anwenderfragen, Featurewünsche oder Beschwerden 
+hierher! Diese Liste sollte wenig verwendet werden.</P>
 
 </LI><LI>MPlayer Anwender (Users) Liste:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">http://mplayerhq.hu/mailman/listinfo/mplayer-users</A>
@@ -1187,7 +1232,7 @@ Diese Liste sollte wenig verwendet werden.</P>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok">http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok</A>
 <P><UL>
     <LI>Liste mit ungarischer Sprache</LI>
-    <LI>Inhalt? Wir werden sehen...</LI>
+    <LI>Inhalt? Wir werden sehen... hauptsächlich Beschwerden und RTFM-Fragen :(</LI>
 </UL></P>
 
 
@@ -1201,13 +1246,14 @@ Diese Liste sollte wenig verwendet werden.</P>
 
 </LI><LI>MPlayer &amp; DVB-Karten Anwender:<BR>
 <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">http://mplayerhq.hu/mailman/listinfo/mplayer-dvb</A>
-<P>Dinge im Bezug auf DVB-Hardwaredecoder Karten.</P>
+<P>Dinge im Bezug auf DVB-Hardwaredecoder Karten. (NICHT dxr3!)</P>
 
 </LI><LI>MPlayer CVS-log:<BR>
 <A HREF="http://mp.dev.hu/mailman/listinfo/mplayer-cvslog">http://mp.dev.hu/mailman/listinfo/mplayer-cvslog</A>
 <P>Sende hier nur Fragen über CVS-Änderungen. (wenn du nicht verstehst, warum
-eine Änderung erforderlich ist, oder du einen bessern Fix hast) Sei dir aber
-sicher, dass der Ziel-Entwickler diese Liste liest!</P>
+eine Änderung erforderlich ist, du eine bessere Lösung hast oder einen möblichen
+Fehler/Problem im Patch gefunden hast)
+Sei dir aber sicher, dass der Ziel-Entwickler diese Liste liest!</P>
 
 </LI></UL></P>
 
@@ -1220,22 +1266,6 @@ anders angeben ist. Bitte sende keine Nachrichten in andere Sprache!</P>
 
 <P>Spezielle System-/CPU-spezifische Bugs/Probleme:</P>
 <UL>
-<LI>SIGILL (signal 4) in draw_frame, auf einem P3 (meinst mit eine 2.2.x Kernel):<BR>
-  Problem: movups stützt ab in in libvo/fastmemcpy.h<BR>
-  Abhilfe: ./configure --disable-fastmemcpy<BR>
-  Lösung: Ausschalten des SSE-Codes in fastmemcpy.h ;-(</LI>
-
-<LI>Kein Bild (schwarzes Bild) beim Abspielen von MPEG oder OpenDivX-Dateien bei
-  RGB 15/16bpp (x11, dga, fbdev, svga)<BR>
-  Problem: gcc 2.96 Bug<BR>
-  Abhilfe: ./configure --disable-mmx oder verwende gcc 2.95.x<BR>
-  Lösung: Code korrigieren</LI>
-
-<LI>SIGILL (signal 4) oder anderer Fehler beim Laden von l3codeca.acm:<BR>
-  Problem: die Lib wurde nach 0x00xxxxxx anstatt von 0x40xxxxxx geladen<BR>
-  Abhilfe: mplayer -afm 1 ...<BR>
-  Lösung: du verwendest einen Kernel-Patch für die Sicherheit, wie z.B. OpenWall</LI>
-
 <LI>SIGILL (signal 4) auf einem P3 mit 2.2.x Kernel:<BR>
   Problem: Kernel 2.2.x hat keinen richtige SSE Unterstützung<BR>
   Endlösung: update den Kernel auf 2.4.x<BR>
@@ -1267,21 +1297,28 @@ ffmpeg</CODE>)</LI>
 
 Allgemein Audio-Abbruch und ruckartiger Sound (existiert mit allen oder einigen Dateien)<BR>
 <UL>
+<LI>am häufigsten: fehlerhafte Audio-Treiber! - es sollten unterschiedliche
+  Treiber getestet werden, so ALSA 0.9 OSS Emulation mit -ao oss und auch
+  -ao sdl hilft teilweise.
+  Wenn die Datei mit -nosound ohne Probleme wiedergegeben wird, ist das
+  höchstwahrscheinlich ein Soundkarten Treiber-Problem.</LI>
 <LI>Audio Pufferprobleme (Puffergröße schlecht erkannt)<BR>
   Abhilfe: mplayer -abs</LI>
+<LI>Samplerate Probleme - vielleicht wird die Samplerate in den benutzten Dateien
+  von der Karte nicht unterstützt - dazu sollte das Resampling Plugin (-aop) 
+  getestet werden</LI>
 <LI>Langsamer Rechner (CPU oder Grafik)<BR>
   versuche es mit -vo null, wenn es gut funktioniert hast du eine langsame
   VGA-Karte oder einen langsamen Treiber.<BR>
   Abhilfe: kaufe eine schneller Karte oder lese die Dokumentationen, wie man die
   Geschwingkeiten erhöht.<BR>
-  Lösung: versuche -framedrop</LI>
-<LI>Anfällige Audio Treiber</LI>
+  Versuche auch -framedrop</LI>
 </UL><BR>
 
 Audio (verschiebt sich / verliert die Synchronisation / bricht nach einer gewissen Zeit ab) 
 bei einer oder mehreren Dateien<BR>
 <UL>
-<LI>defekte Datei (bitten uploaden, das wir das prüfen und korrigieren können<BR>
+<LI>defekte Datei<BR>
 Abhilfe:
 <UL>
     <LI>-ni oder -nobps Option (für nicht-interlaced oder defekte Dateien)<BR></LI>
@@ -1290,8 +1327,11 @@ Abhilfe:
   und/oder
     <LI>-delay Option oder +/- Tasten bei Abspielen</LI>
 </UL>
+Wenn keine dieser Optionen hilft, kann die Datei auf den Server geladen werden.
+Wir werden sie untersuchen (und das Problem lösen).
 <LI>deine Soundkarte unterstützt keine 48KHz Wiedergabe<BR>
-Abhilfe: kaufe eine bessere Soundkarte... oder versuche die Bilder/Sekunde um 10% zu vermindern (verwende -fps 27 bei 30fps-Filmen)</LI>
+Abhilfe: kaufe eine bessere Soundkarte... versuche die Bilder/Sekunde um 10% zu vermindern 
+(verwende -fps 27 bei 30fps-Filmen) oder verwende das Resampler-Plugin</LI>
 <LI>langsamer Rechner<BR>
 (wenn A-V nicht etwa 0 ist und die letzte Nummer in der Status-Leiste steigt)<BR>
 Abhilfe: -framedrop</LI>
@@ -1299,10 +1339,20 @@ Abhilfe: -framedrop</LI>
 
 Überhaupt kein Ton:<BR>
 <UL>
-<LI>deine Datei verwendet eine nicht unterstützten Codec<BR>
+<LI>deine Datei verwendet eine nicht unterstützten Audio-Codec<BR>
 Abhilfe: lese die Dokumentationen und hilf uns, dass wir ihn in Zukunft unterstützen</LI>
 </UL>
   
+Überhaupt kein Bild (nur ein graues/grünes Fenster):<BR>
+<UL>
+<LI>deine Datei verwendet einen nicht unterstützten Videocodec<BR>
+  Abhilfe: lies die Dokumentation und hilf uns den Codec zu unterstützen</LI>
+<LI>der automatisch gewählte Codec kann die Datei nicht decodieren, versuche
+  einen anderen mit den -vc oder -vfm Optionen zu wählen.</LI>
+<LI>es wird versuchst eine DivX 3.x Datei mit dem opendivx oder XviD Decoder
+  (-vc odivx) abzuspielen - installiere Divx4Linux kompiliere MPlayer neu</LI>
+</UL>
+
 <P>Videoausgabe-Probleme:</P>
 
 <P>Erster Hinweis: Die Optionen -fs, -vm und -zoom sind nur Empfehlungen, sie
@@ -1311,9 +1361,13 @@ es nicht funktioniert. Nur einige Treiber unterstützten Scaling/Zooming,
 erwarte das nicht von x11 oder dga.</P>
 
 <P>Zucken des OSD/Untertiteln:<BR>
-- x11 Treiber: Sorry, es kann zur Zeit nicht gelöst werden (GEFIXT)<BR>
-- xv Treiber: verwende die -double Option (GEFIXT)</P>
+ - x11 Treiber: Sorry, es kann zur Zeit nicht gelöst werden (GEFIXT)<BR>
+ - xv Treiber: verwende die -double Option (GEFIXT)</P>
 
+<P>Grünes Bild bei der Verwendung von mga_vid (-vo mga / -vo xmga):<BR>
+ - mga_vid hat die Grösse des RAMs falsch erkannt, lade das Modul neu mit der
+ Option mga_ram_size<BR>
+</P>
 
 </BODY>
 </HTML>

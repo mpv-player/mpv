@@ -50,7 +50,8 @@ kann man die DAT-Dateien einer VCD weder abspielen noch kopieren. Du musst die
 <CODE>-vcd</CODE> Option zum Abspielen verwenden.</LI>
 <LI>VOB : VOB ist das MPEG Dateiformat das bei <B>DVD</B>s verwendet wird.
 Es ist das selbe wie MPG mit zusätzlicher Kapazität um Untertitel oder nicht-MPEG (AC3)
-Audio aufzunehmen. Es enthält MPEG2 Video und normalerweise AC3 Audio, aber MP2 ist auch erlaubt.<BR>
+Audio aufzunehmen. Es enthält MPEG2 Video und normalerweise AC3 Audio, aber DTS, MP2
+und unkomprimierte LPCMs sind auch erlaubt.<BR>
 <B>Lese die <A HREF="cd-dvd.html#4.2">DVD Sektion</A> !</B></LI>
 </P>
 
@@ -62,7 +63,8 @@ zu anderen Gruppen ist. Das bedeutet, dass du eine MPEG-Datei mit einem Standard
 Aspect Ratio des Video Streams angibt. SVCDs haben zum Beispiel Video mit
 480x480 Auflösung und im Header ist diese Feld auf 4:3 gesetzt, also wird es
 als 640x480 abgespielt. AVI-Dateien habe diese Feld nicht, darum müssen sie
-während des Encodings skaliert werden.</P>
+während des Encodings skaliert werden oder die Option -aspect bei der
+Wiedergabe verwendet werden.</P>
 
 
 <P><B><A NAME=2.1.1.2>2.1.1.2. AVI Dateien</A></B></P>
@@ -71,7 +73,7 @@ während des Encodings skaliert werden.</P>
 weitverbeitetes Multifunktionsformat, es wird zur Zeit hauptsächlich für
 DivX und DivX4 Videos verwendet. Es hat einige bekannte Nachteile und
 Unfähigkeiten (zum Beispiel Streaming). Es unterstützt einen Videostream
-und 99 Audiostreams und die Dateien können bis zu 2 GB groß sein. Es
+und 0 bis 99 Audiostreams. Die Dateien können bis zu 2 GB groß sein. Es
 existiert eine Erweiterung für größere Dateien, genannt <B>OpenDMS</B>.
 M$ versucht zur Zeit von der Verwendung stark abzuraten und propergiert
 ASF/WMV. Aber keiner achtet darauf.<BR>
@@ -160,10 +162,10 @@ Bildern kurz nach dem Suchen führt.</P>
 
 <P><B><A NAME=2.1.1.7>2.1.1.7. RealMedia (RM) Dateien</A></B></P>
 
-<P>Ja, <B>MPlayer</B> kann RealMedia (.rm) Dateien lesen (demuxen). Das Suchen
-wird gerade Implementiert und RM hat Keyframes, so dass es fehlerlos sein wird.
-Hier ist die Liste der unterstützten <A HREF="codecs.html#2.2.1.8">RealVideo</A>
-und <A HREF="codecs.html#2.2.2.5">RealAudio</A> Codecs.
+<P>Ja, <B>MPlayer</B> kann RealMedia (.rm) Dateien lesen (demuxen). Suchen (seeking)
+funktioniert (Das Format unterstüzt Keyframes). Hier ist die Liste der unterstützten 
+<A HREF="codecs.html#2.2.1.8">RealVideo</A> und 
+<A HREF="codecs.html#2.2.2.5">RealAudio</A> Codecs.
 
 
 <P><B><A NAME=2.1.1.8>2.1.1.8. NuppelVideo Dateien</A></B></P>
@@ -178,9 +180,11 @@ Eine Suchfunktion wird gerade implementiert.</P>
 
 <P><B><A NAME=2.1.1.9>2.1.1.9. yuv4mpeg Dateien</A></B></P>
 
-<P><A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> ist
-auch ein Fileformat für TV-Grabbing, oder so :) Ich weiss nur etwas dazu:
-Wir unterstützen es.</P>
+<P><A HREF="http://mjpeg.sourceforge.net">yuv4mpeg / yuv4mpeg2</A> ist ein Fileformat,
+das von <A HREF="http://mjpeg.sf.net">mjpegtools Programmen</A> verwendet wird. Du kannst damit
+Video in diesem Format einlesen, produzieren, filtern oder encodieren.
+Die Datei ist eigentlich eine Sequenz von unkomprimierten YUV 4:2:0 Bildern.
+</P>
 
 
 <P><B><A NAME=2.1.1.10>2.1.1.10. FILM Dateien</A></B></P>

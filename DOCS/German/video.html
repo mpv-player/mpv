@@ -135,13 +135,12 @@ hilfreich für <B>MPlayer</B> zu sein.</P>
 
 <P>Bei älteren 3dfx Treibern sind bekannt, dass sie Probleme mit der XVideo Beschleunigung
 machen und dass der Treiber unterstützt weder YUY2 noch YV12. Prüfe ob du XFree86
-Version 4.1.0 oder neuer hast, es funktioniert mit YUY2, <B>stürzt jedoch mit YV12 ab</B>! 
-Warte also entweder auf 4.2.0 oder benutze die <A HREF="http://dri.sourceforge.net">DRI</A> cvs.
+Version 4.2.0 oder neuer hast, es funktioniert mit YV12 und YUY2. Frühere Versionen, auch 4.1.0
+<B>stürzten mit YV12 ab</B>!
 Wenn du seltsame Effekte bei der Benutzung mit -vo xv bemerkst, probier SDL (es unterstützt auch XVideo)
 und prüfe ob es funkioniert. Siehe <A HREF="#2.3.1.4">SDL Sektion</A> für Details.</P>
 
-<P><B>Oder</B> versuche den NEUEN -vo tdfxfb -Treiber! Siehe <A HREF="#2.3.1.9">Sektion
-2.3.1.9</A>!</P>
+<P><B>Oder</B> versuche den NEUEN -vo tdfxfb -Treiber! Siehe <A HREF="#2.3.1.9">Sektion 2.3.1.9</A>!</P>
 
 <P><B><A NAME=2.3.1.2.2>2.3.1.2.2. S3 Karten</A></B></P>
 
@@ -175,6 +174,7 @@ Wende dich an NVidia.</UL></P>
 <P><B><A NAME=2.3.1.2.4>2.3.1.2.4. ATI Karten</A></B></P>
 
 <P>
+
 <LI>Beim <A HREF="http://www.linuxvideo.org/gatos">GATOS Treiber</A> (den du
 verwenden solltest) ist VSYNC standardgemäß eingeschaltet. Das bedeutet, dass
 die Dekodierungsgeschwindigkeit (!) synchron mit der Monitor-Refeshrate ist.
@@ -184,8 +184,10 @@ oder setze die Refreshrate auf n*(fps des Films) Hz.</LI>
 <LI>Radeon VE - zur Zeit hat nur die CVS-Versionen von XFree86 einen Treiber für
 diese Karte, Version 4.1.0 hat keinen. Natürlich kannst du mit <B>MPlayer</B> gut
 eine <B>beschleunigte</B> Anzeige erhalten, mit oder ohne <B>TV Ausgabe</B>. Es
-werden auch keine Bibliotheken oder X benötigt. Lies in der <a href=#2.3.1.15>Vidix</a> und <A
-HREF=#2.3.1.14>Radeon Video Overlay</A> Abteilung).</LI> </P>
+werden auch keine Bibliotheken oder X benötigt. Lies in der <a href=#2.3.1.15>Vidix</a> 
+Abteilung.</LI>
+
+</P>
 
 
 <P><B><A NAME=2.3.1.2.5>2.3.1.2.5. NeoMagic Karten</A></B></P>
@@ -431,6 +433,9 @@ auch möglicherweise. Danke!</P>
                   
 <P>Es hilft auch bei einigen anfälligen Treibern/Karten, wenn der Video ruckartig ist
   (kein Problem der Systemgeschwindigkeit) oder wenn der Ton verzögert ist.</P>
+
+<P>Die SDL Videoausgabe unterstützt die Darstellung von Untertitel unter dem Film, auf dem 
+  schwarzen Streifen (falls vorhanden).</P>
 
 <P>Hier findest du einige Hinweise über die SDL-Ausgabe in <B>MPlayer</B>.</P>
 
@@ -766,48 +771,8 @@ können keine tiefen pixelclocks verwenden, welche benötigt werden um einen tiefe
 
 
 <P><B><A NAME=2.3.1.14>2.3.1.14. Rage128 (Pro) / Radeon Video Overlay (radeon_vid)</A></B></P>
-<P>
-<b>radeon_vid</b> und <B>rage128_vid</B> bieten Unterstützung für den <b>BackEnd Skalierer</b> auf ATI <b>Radeon</b> und Rage128 (Pro) Chipsets.
-Er wurde analog zu dem <a href="video.html#2.3.1.7">mga_vid</a> Treiber entworfen und eingeführt. Du kannst ihn also auf die gleiche Art und Weise benützen!<br>
-Aber das Hauptziel des Treibergebrauchs ist sein <a href="video.html#2.3.1.12">VESA</a> Treiber.<br>
-Einfach, weil VESA die TV-Ausgabe auf ATI Karten erlaubt. Der Backend-Skalierer wird aber nach dem Moduswechsel
-benutzt. Diese Implementierung gibt Videostreams auf beiden gleichzeitig aus, dem <b>TV-Bildschirm</b> und dem <b>CRTC</b>.
-(Es vermindert die Qualität der Videoausgabe leicht ist jedoch viel besser als gar nichts).
-Sorry! Ich konnte keine Video Overlay Informationen dazu auf der ATI Seite finden. (Ich plante diese Dinge zu implementieren
-durch <b>int 10h</b> Aufrufe). Es war jedoch sehr einfach jene Dinge durch lesen/schreiben von Radeon Ports zu implementieren.<br>
-<b>HINWEIS</b>: XXX_VID Technologie ist praktisch undokumentiert und wird in Zukunft vielleicht 
-komplett neu geschrieben. Dies ist das erste öffentliche Release des Treibers.</P>
 
-<P><B>Installation</B></P>
-
-<P>
-<UL>
-  <LI>
-    <CODE>cd drivers/radeon<BR>
-     make<BR>
-     make install<BR>
-     make nodes</CODE></LI>
-  <LI>füge follgendes ans Ende der <CODE>/etc/modules.conf</CODE> Datei an :<BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 radeon_vid</CODE><BR>
-    <CODE>&nbsp;&nbsp;alias char-major-178 rage128_vid</CODE></LI>
-  <LI>führe <CODE>depmod -a</CODE> aus</LI>
-</UL>
-</P>
-
-<P>
-<br><b>Verwendung:</b><BR>
-&nbsp;&nbsp;<CODE>mplayer -vo vesa:vidix &lt;deine Optionen&gt; Dateiname</CODE>
-</P>
-
-<P>Mehr Beispiele (für Hardware Deinterlacing, etc) können <A HREF="../drivers/radeon/README">hier</A> gefunden werden.</P>
-
-<P><B>HINWEIS</B>: benutze keine Framebuffers wenn du planst diesen Treiber zu verwenden! Benutze
-ihn nur von einer Textmode-Konsole aus.</P>
-
-<P>
-<b>Schlüsse:</b> Ich weiss, dass da noch viele Fehler und Löcher sind. Wenn du also fähig bist etwas zu verbessern,
-dann sende mir einfach deine Patches.
-</P>
+<P>Diese Abteilung ist VERALTET ! Verwende Vidix !</P>
 
 
 <P><B><A NAME=2.3.1.15>2.3.1.15. VIDIX</A></B></P>
@@ -993,11 +958,15 @@ Du must diese also erst zum Laufen bringen. Kompiliere <B>MPlayer</B> danach neu
 
 <P><B><A NAME=2.3.1.A>2.3.1.A. TV-Out Unterstützung</A></B></P>
 
-<P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Matrox Karten</A></B></P>
+<P><B><A NAME=2.3.1.A.1>2.3.1.A.1. Matrox G400 Karten</A></B></P>
 
-<P>Unter Linux hast du 2 Methoden den TV Ausgang zum Laufen zu bringen :</P>
+<P>Unter Linux hast du 2 Methoden den G400 TV Ausgang zum Laufen zu bringen :</P>
 
-<P><UL>
+<P><B>WICHTIG:</B> Nur Matrox G400DH/G400MAX hat TV-out Unterstützung unter Linux, andere 
+(G450, G550) haben dies <B>NICHT!</B></P>
+
+<P>
+<UL>
   <LI><B>XFree86</B>: Verwende dazu den Treiber und das HAL-Module von <A HREF="http://www.matrox.com">Matrox</A>,
     so wirst du Dual-Head-Unterstützung erhalten und es wird möglich sein den 2. Ausgang am TV zu nutzen.<BR>
     <B>Diese Methode gibt dir keine beschleunigte Wiedergabe</B> wie unter Windows!
