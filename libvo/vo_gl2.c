@@ -948,15 +948,6 @@ get_info(void)
 	return &vo_info;
 }
 
-static void 
-Terminate_Display_Process(void) 
-{
-	getchar();	/* wait for enter to remove window */
-	XDestroyWindow(mDisplay, mywindow);
-	XCloseDisplay(mDisplay);
-	X_already_started = 0;
-}
-
 static int gl_handlekey(int key)
 {
 	if(key=='a'||key=='A')
@@ -1101,7 +1092,8 @@ static void
 uninit(void)
 {
   saver_on(mDisplay); // screen saver back on
-  XDestroyWindow( mDisplay,mywindow );
+
+  vo_x11_uninit(mDisplay, mywindow);
 }
 
 static uint32_t preinit(const char *arg)
