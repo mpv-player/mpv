@@ -6,6 +6,8 @@ extern "C" {
 #include "stheader.h"
 }
 
+static void
+needVideoFrameRate(demuxer_t* demuxer, MediaSubsession* subsession); // forward
 static Boolean
 parseQTState_video(QuickTimeGenericRTPSource::QTState const& qtState,
 		   unsigned& fourcc); // forward
@@ -27,35 +29,38 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
   demux_stream_t* d_video = demuxer->video;
   d_video->sh = sh_video; sh_video->ds = d_video;
   
-  // If we happen to know the subsession's video frame rate, set it,
-  // so that the user doesn't have to give the "-fps" option instead.
-  int fps = (int)(subsession->videoFPS());
-  if (fps != 0) sh_video->fps = fps;
-  
   // Map known video MIME types to the BITMAPINFOHEADER parameters
   // that this program uses.  (Note that not all types need all
   // of the parameters to be set.)
   if (strcmp(subsession->codecName(), "MPV") == 0 ||
       strcmp(subsession->codecName(), "MP1S") == 0 ||
       strcmp(subsession->codecName(), "MP2T") == 0) {
-    flags |= RTPSTATE_IS_MPEG;
+    flags |= RTPSTATE_IS_MPEG12_VIDEO;
   } else if (strcmp(subsession->codecName(), "H263") == 0 ||
 	     strcmp(subsession->codecName(), "H263-1998") == 0) {
     bih->biCompression = sh_video->format
       = mmioFOURCC('H','2','6','3');
+    needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "H261") == 0) {
     bih->biCompression = sh_video->format
       = mmioFOURCC('H','2','6','1');
+    needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "JPEG") == 0) {
     bih->biCompression = sh_video->format
       = mmioFOURCC('M','J','P','G');
-#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1044662400)
-    fprintf(stderr, "WARNING: This video stream might not play correctly.  Please upgrade to version \"2003.02.08\" or later of the \"LIVE.COM Streaming Media\" libraries.\n");
-#endif
+    needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "MP4V-ES") == 0) {
     bih->biCompression = sh_video->format
       = mmioFOURCC('m','p','4','v');
-    //flags |= RTPSTATE_IS_MPEG; // MPEG hdr checking in video.c doesn't work!
+    // For the codec to work correctly, it may need a 'VOL Header' to be
+    // inserted at the front of the data stream.  Construct this from the
+    // "config" MIME parameter, which was present (hopefully) in the
+    // session's SDP description:
+    unsigned configLen;
+    unsigned char* configData
+      = parseGeneralConfigStr(subsession->fmtp_config(), configLen);
+    insertRTPData(demuxer, demuxer->video, configData, configLen);
+    needVideoFrameRate(demuxer, subsession);
   } else if (strcmp(subsession->codecName(), "X-QT") == 0 ||
 	     strcmp(subsession->codecName(), "X-QUICKTIME") == 0) {
     // QuickTime generic RTP format, as described in
@@ -64,12 +69,13 @@ void rtpCodecInitialize_video(demuxer_t* demuxer,
     // We can't initialize this stream until we've received the first packet
     // that has QuickTime "sdAtom" information in the header.  So, keep
     // reading packets until we get one:
-    unsigned char* packetData; unsigned packetDataLen;
+    unsigned char* packetData; unsigned packetDataLen; float pts;
     QuickTimeGenericRTPSource* qtRTPSource
       = (QuickTimeGenericRTPSource*)(subsession->rtpSource());
     unsigned fourcc;
     do {
-      if (!awaitRTPPacket(demuxer, 0 /*video*/, packetData, packetDataLen)) {
+      if (!awaitRTPPacket(demuxer, demuxer->video,
+			  packetData, packetDataLen, pts)) {
 	return;
       }
     } while (!parseQTState_video(qtRTPSource->qtState, fourcc));
@@ -94,6 +100,8 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
   demux_stream_t* d_audio = demuxer->audio;
   d_audio->sh = sh_audio; sh_audio->ds = d_audio;
   
+  wf->nChannels = subsession->numChannels();
+
   // Map known audio MIME types to the WAVEFORMATEX parameters
   // that this program uses.  (Note that not all types need all
   // of the parameters to be set.)
@@ -105,44 +113,35 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
     wf->wFormatTag = sh_audio->format = 0x55;
     // Note: 0x55 is for layer III, but should work for I,II also
     wf->nSamplesPerSec = 0; // sample rate is deduced from the data
-    flags |= RTPSTATE_IS_MPEG;
   } else if (strcmp(subsession->codecName(), "AC3") == 0) {
     wf->wFormatTag = sh_audio->format = 0x2000;
     wf->nSamplesPerSec = 0; // sample rate is deduced from the data
   } else if (strcmp(subsession->codecName(), "PCMU") == 0) {
     wf->wFormatTag = sh_audio->format = 0x7;
-    wf->nChannels = 1;
     wf->nAvgBytesPerSec = 8000;
     wf->nBlockAlign = 1;
     wf->wBitsPerSample = 8;
     wf->cbSize = 0;
   } else if (strcmp(subsession->codecName(), "PCMA") == 0) {
     wf->wFormatTag = sh_audio->format = 0x6;
-    wf->nChannels = 1;
     wf->nAvgBytesPerSec = 8000;
     wf->nBlockAlign = 1;
     wf->wBitsPerSample = 8;
     wf->cbSize = 0;
   } else if (strcmp(subsession->codecName(), "GSM") == 0) {
     wf->wFormatTag = sh_audio->format = mmioFOURCC('a','g','s','m');
-    wf->nChannels = 1;
     wf->nAvgBytesPerSec = 1650;
     wf->nBlockAlign = 33;
     wf->wBitsPerSample = 16;
     wf->cbSize = 0;
   } else if (strcmp(subsession->codecName(), "QCELP") == 0) {
     wf->wFormatTag = sh_audio->format = mmioFOURCC('Q','c','l','p');
-    // The following settings for QCELP don't quite work right #####
-    wf->nChannels = 1;
     wf->nAvgBytesPerSec = 1750;
     wf->nBlockAlign = 35;
     wf->wBitsPerSample = 16;
     wf->cbSize = 0;
   } else if (strcmp(subsession->codecName(), "MP4A-LATM") == 0) {
     wf->wFormatTag = sh_audio->format = mmioFOURCC('m','p','4','a');
-#if (LIVEMEDIA_LIBRARY_VERSION_INT < 1042761600)
-    fprintf(stderr, "WARNING: This audio stream might not play correctly.  Please upgrade to version \"2003.01.17\" or later of the \"LIVE.COM Streaming Media\" libraries.\n");
-#else
     // For the codec to work correctly, it needs "AudioSpecificConfig"
     // data, which is parsed from the "StreamMuxConfig" string that
     // was present (hopefully) in the SDP description:
@@ -151,8 +150,15 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
       = parseStreamMuxConfigStr(subsession->fmtp_config(),
 				codecdata_len);
     sh_audio->codecdata_len = codecdata_len;
-#endif
-    flags |= RTPSTATE_IS_MPEG;
+  } else if (strcmp(subsession->codecName(), "MPEG4-GENERIC") == 0) {
+    wf->wFormatTag = sh_audio->format = mmioFOURCC('m','p','4','a');
+    // For the codec to work correctly, it needs "AudioSpecificConfig"
+    // data, which was present (hopefully) in the SDP description:
+    unsigned codecdata_len;
+    sh_audio->codecdata
+      = parseGeneralConfigStr(subsession->fmtp_config(),
+			      codecdata_len);
+    sh_audio->codecdata_len = codecdata_len;
   } else if (strcmp(subsession->codecName(), "X-QT") == 0 ||
 	     strcmp(subsession->codecName(), "X-QUICKTIME") == 0) {
     // QuickTime generic RTP format, as described in
@@ -161,12 +167,13 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
     // We can't initialize this stream until we've received the first packet
     // that has QuickTime "sdAtom" information in the header.  So, keep
     // reading packets until we get one:
-    unsigned char* packetData; unsigned packetDataLen;
+    unsigned char* packetData; unsigned packetDataLen; float pts;
     QuickTimeGenericRTPSource* qtRTPSource
       = (QuickTimeGenericRTPSource*)(subsession->rtpSource());
     unsigned fourcc, numChannels;
     do {
-      if (!awaitRTPPacket(demuxer, 1 /*audio*/, packetData, packetDataLen)) {
+      if (!awaitRTPPacket(demuxer, demuxer->audio,
+			  packetData, packetDataLen, pts)) {
 	return;
       }
     } while (!parseQTState_audio(qtRTPSource->qtState, fourcc, numChannels));
@@ -178,6 +185,47 @@ void rtpCodecInitialize_audio(demuxer_t* demuxer,
 	    "Unknown MPlayer format code for MIME type \"audio/%s\"\n",
 	    subsession->codecName());
   }
+}
+
+static void needVideoFrameRate(demuxer_t* demuxer,
+			       MediaSubsession* subsession) {
+  // For some codecs, MPlayer's decoding software can't (or refuses to :-)
+  // figure out the frame rate by itself, so (unless the user specifies
+  // it manually, using "-fps") we figure it out ourselves here, using the
+  // presentation timestamps in successive packets,
+  extern float force_fps; if (force_fps != 0.0) return; // user used "-fps"
+
+  demux_stream_t* d_video = demuxer->video;
+  sh_video_t* sh_video = (sh_video_t*)(demuxer->video->sh);
+
+  // If we already know the subsession's video frame rate, use it:
+  int fps = (int)(subsession->videoFPS());
+  if (fps != 0) {
+    sh_video->fps = fps;
+    return;
+  }
+  
+  // Keep looking at incoming frames until we see two with different,
+  // non-zero "pts" timestamps:
+  unsigned char* packetData; unsigned packetDataLen;
+  float lastPTS = 0.0, curPTS;
+  unsigned const maxNumFramesToWaitFor = 100;
+  for (unsigned i = 0; i < maxNumFramesToWaitFor; ++i) {
+    if (!awaitRTPPacket(demuxer, demuxer->video,
+			packetData, packetDataLen, curPTS)) break;
+
+    if (curPTS > lastPTS && lastPTS != 0.0) {
+      // Use the difference between these two "pts"s to guess the frame rate.
+      // (should really check that there were no missing frames inbetween)#####
+      // Guess the frame rate as an integer.  If it's not, use "-fps" instead.
+      fps = (int)(1/(curPTS-lastPTS) + 0.5); // rounding
+      fprintf(stderr, "demux_rtp: Guessed the video frame rate as %d frames-per-second.\n\t(If this is wrong, use the \"-fps <frame-rate>\" option instead.)\n", fps);
+      sh_video->fps = fps;
+      return;
+    }
+    lastPTS = curPTS;
+  }
+  fprintf(stderr, "demux_rtp: Failed to guess the video frame rate\n");
 }
 
 static Boolean
