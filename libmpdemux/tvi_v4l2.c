@@ -1547,6 +1547,8 @@ static void *audio_grabber(void *data)
 	pthread_mutex_lock(&priv->skew_mutex);
 	if (priv->first_frame == 0) {
 	    // there is no first frame yet (unlikely to happen)
+	    gettimeofday(&tv, NULL);
+	    priv->audio_start_time = (long long)1e6*tv.tv_sec + tv.tv_usec;
 //	    fprintf(stderr, "warning - first frame not yet available!\n");
 	    pthread_mutex_unlock(&priv->skew_mutex);
 	    continue;
@@ -1593,7 +1595,6 @@ static void *audio_grabber(void *data)
 	// now finally, priv->audio_skew contains fairly good approximation
 	// of the current value 
 
-//	fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
 	// current skew factor (assuming linearity)
 	// used for further interpolation in video_grabber
 	// probably overkill but seems to be necessary for
@@ -1610,6 +1611,8 @@ static void *audio_grabber(void *data)
 	prev_skew = priv->audio_skew;
 	priv->audio_skew -= priv->audio_start_time - priv->first_frame;
 	pthread_mutex_unlock(&priv->skew_mutex);
+
+//	fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
 	
 	if ((priv->audio_tail+1) % priv->audio_buffer_size == priv->audio_head) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "\ntoo bad - dropping audio frame !\n");
