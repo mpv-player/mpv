@@ -110,50 +110,36 @@ static void send_command (int s, int command, uint32_t switches,
 
 #ifdef USE_ICONV
 static iconv_t url_conv;
-
-static void string_utf16_open() {
-    setlocale(LC_CTYPE, "");
-    url_conv = iconv_open("UTF-16LE",setlocale(LC_CTYPE, NULL));
-}
-
-static void string_utf16_close() {
-
-    iconv_close(url_conv);
-}
+#endif
 
 static void string_utf16(char *dest, char *src, int len) {
+    int i;
+#ifdef USE_ICONV
     size_t len1, len2;
     char *ip, *op;
 
+    if (url_conv != -1)
+    {
     memset(dest, 0, 1000);
     len1 = len; len2 = 1000;
     ip = src; op = dest;
 
     iconv(url_conv, &ip, &len1, &op, &len2);
-}
-
-#else
-
-static void string_utf16_open() {
-}
-
-static void string_utf16_close() {
-}
-
-static void string_utf16(char *dest, char *src, int len) 
-{
-  int i;
-
-  for (i=0; i<len; i++) {
-    dest[i*2] = src[i];
-    dest[i*2+1] = 0;
-  }
-
-  /* trailing zeroes */
-  dest[i*2] = 0;
-  dest[i*2+1] = 0;
-}
+    }
+    else
+    {
 #endif
+	for (i=0; i<len; i++) {
+	    dest[i*2] = src[i];
+	    dest[i*2+1] = 0;
+        }
+	/* trailing zeroes */
+	dest[i*2] = 0;
+	dest[i*2+1] = 0;
+#ifdef USE_ICONV
+    }
+#endif
+}
 
 static void get_answer (int s) 
 {
@@ -501,7 +487,10 @@ int asf_mmst_streaming_start(stream_t *stream)
   * */
 
   /* prepare for the url encoding conversion */
-  string_utf16_open();
+#ifdef USE_ICONV
+  setlocale(LC_CTYPE, "");
+  url_conv = iconv_open("UTF-16LE",setlocale(LC_CTYPE, NULL));
+#endif
 
   snprintf (str, 1023, "\034\003NSPlayer/7.0.0.1956; {33715801-BAB3-9D85-24E9-03B90328270A}; Host: %s", url1->hostname);
   string_utf16 (data, str, strlen(str));
@@ -598,7 +587,10 @@ int asf_mmst_streaming_start(stream_t *stream)
   packet_length1 = packet_length;
   printf("mmst packet_length = %d\n",packet_length);
 
-  string_utf16_close();
+#ifdef USE_ICONV
+  if (url_conv != -1)
+    iconv_close(url_conv);
+#endif
 
   return 0;
 }
