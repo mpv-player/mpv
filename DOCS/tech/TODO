@@ -10,8 +10,32 @@ FOR THE NEXT PRE_RELEASE:
 - NEWSTRUCT DVB driver detection & support - DONE ?
 - fix locale problems (add common float parser / mp_sscanf())
 - apply the delayed patches - DONE ?
-- fix the known bugs: 
-   ... [Gabu: please list your bugs here...]
+- fix the known bugs: (Gabucino's list)
+   - strong testing (disable?) of postprocess code with (big?) JPEG files, -mf
+     also with -vop scale, expand
+   - what about -fixed-vo ? I have it as default, in _most_ cases it works.
+     _Strong_ testing and making it default?
+   - new-conf prints meaningless error messages of bad options (actually none)
+   - what about code freeze?
+   - menu.conf not searched in system-wide directories
+   - supporting Noir.rm? Garbled image now. Maybe codec scales?
+   - Nov 12: [BUG] G400 + DGA marginally works
+   - Nov 12: [BUG] bug (misfeature) in key caching part of mpdvdkit
+   - Nov 13: [BUG] sig11 while moving xmga window in Xinerama mode
+   - Nov 17: [BUG] -vc divx4vfw playing doesn't work, but who cares ;))
+   - Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
+   - Nov 25: [BUG] Re: [MPlayer-dev-eng] [PATCH] debian/ dir revisited
+     (-vo x11,xmga,xv doesn't work because MPlayer dies if can't find X)
+   - Nov 27: [BUG] mwallp doesn't compile :))
+   - Dec 17: [BUG] mencoder prints meaningless message
+   - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI
+     (<=22Khz support missing)
+   - Dec 24: [MPlayer-dev-eng] yuv2rgb.c ?
+     (implementing 8bpp support in vo_x11.c . Any volunteers?)
+   - Dec 28: [BUG] nice little bug somewhere (config/playtree)
+     (It's in new-conf. I can provide shell access...:)
+   - Dec 28: [BUG] sig11 again in reading a JPEG file
+   - Dec 29: [BUG] uninit vo_gif89a gives sig11 with -vop scale
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
