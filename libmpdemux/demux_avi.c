@@ -355,9 +355,20 @@ do{
 
 //extern int audio_id;
 //extern int video_id;
-extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
-extern int force_ni;
-extern int pts_from_bps;
+//extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
+//extern int force_ni;
+//extern int pts_from_bps;
+
+// AVI demuxer parameters:
+int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
+int force_ni=0;     // force non-interleaved AVI parsing
+
+// PTS:  0=interleaved  1=BPS-based
+#ifdef AVI_SYNC_BPS
+int pts_from_bps=1;
+#else
+int pts_from_bps=0;
+#endif
 
 void read_avi_header(demuxer_t *demuxer,int index_mode);
 
@@ -584,7 +595,6 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
                 len=((AVIINDEXENTRY *)priv->idx)[i].dwChunkLength;
                 audio_chunk_pos=i; ++d_audio->pack_no;
                 if(d_audio->dpos<=curr_audio_pos && curr_audio_pos<(d_audio->dpos+len)){
-                  //if(verbose)printf("break;\n");
                   break;
                 }
                 d_audio->dpos+=len;

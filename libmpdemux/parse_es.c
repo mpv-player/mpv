@@ -4,8 +4,6 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-extern int verbose; // defined in mplayer.c
-
 #include "config.h"
 #include "mp_msg.h"
 #include "help_mp.h"

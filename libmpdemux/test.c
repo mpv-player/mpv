@@ -23,13 +23,7 @@ void skip_audio_frame(sh_audio_t *sh_audio){
 void resync_audio_stream(sh_audio_t *sh_audio){
 }
 
-// some globals:
-int verbose=1;
-
-// AVI demuxer parameters:
-int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
-int force_ni=0;     // force non-interleaved AVI parsing
-int pts_from_bps=1; // PTS:  0=interleaved  1=BPS-based
+int verbose=1; // must be global!
 
 //---------------
 

@@ -224,16 +224,13 @@ static int stream_dump_type=0;
 
 extern int dvd_title;
 
-int index_mode=-1;  // -1=untouched  0=don't use index  1=use (geneate) index
-int force_ni=0;
+// AVI demuxer params:
+extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) index
+extern int force_ni;
+extern int pts_from_bps;
 
 static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
-#ifdef AVI_SYNC_BPS
-int pts_from_bps=1;
-#else
-int pts_from_bps=0;
-#endif
 
 float force_fps=0;
 int force_srate=0;

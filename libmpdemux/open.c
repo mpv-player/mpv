@@ -275,7 +275,6 @@ if(dvd_title){
        if (len == -1)
 	 perror("Error: lseek failed to obtain video file size");
        else
-        if(verbose)
 #ifdef _LARGEFILE_SOURCE
 	 mp_msg(MSGT_OPEN,MSGL_V,"File size is %lld bytes\n", (long long)len);
 #else

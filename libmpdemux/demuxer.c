@@ -339,7 +339,6 @@ extern int audio_id;
 extern int video_id;
 extern int dvdsub_id;
 
-void read_avi_header(demuxer_t *demuxer,int index_mode);
 int asf_check_header(demuxer_t *demuxer);
 int read_asf_header(demuxer_t *demuxer);
 demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id);
