@@ -15,6 +15,8 @@ typedef struct vd_functions_s
 // NULL terminated array of all drivers
 extern vd_functions_t* mpcodecs_vd_drivers[];
 
+extern int vd_use_slices;
+
 #define VDCTRL_QUERY_FORMAT 3 /* test for availabilty of a format */
 #define VDCTRL_QUERY_MAX_PP_LEVEL 4 /* test for postprocessing support (max level) */
 #define VDCTRL_SET_PP_LEVEL 5 /* set postprocessing level */

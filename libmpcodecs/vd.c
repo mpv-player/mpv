@@ -108,6 +108,7 @@ int opt_screen_size_y=0;
 int screen_size_xy=0;
 float movie_aspect=-1.0;
 int vo_flags=0;
+int vd_use_slices=1;
 
 static vo_tune_info_t vtune;
 
