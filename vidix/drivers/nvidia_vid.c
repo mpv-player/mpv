@@ -419,6 +419,7 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 
     /*update depth & dimensions here because it may change with vo vesa or vo fbdev*/
     info->chip.lock (&info->chip, 0);
+    do {
     switch (info->chip.arch) {
 	  case NV_ARCH_03:
         pitch0 = info->chip.PGRAPH[0x00000650/4];
@@ -430,6 +431,9 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
         pitch0 = info->chip.PGRAPH[0x00000670/4];
         break;
     }
+    if (pitch0 == 0)
+	    printf("[nvidia_vid]: pitch0 = 0!!! Rereading\n");
+    } while (pitch0 == 0);
     VID_WR08(info->chip.PCIO, 0x03D4, 0x28);
     bpp = VID_RD08(info->chip.PCIO,0x03D5);
     if(bpp==3)bpp = 4; //fixme do nvidia cards support 24bpp?
@@ -438,7 +442,7 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     if(!bpp)printf("[nvidia_vid] error invalid bpp\n");
     else
     {
-//	    printf("[nvidia_vid] video mode: %ux%u@%u\n",screen_x = pitch0/bpp,(pitch0/bpp*3)/4,info->depth);
+//	    printf("[nvidia_vid] video mode: %ux%u@%u\n",info->screen_x = pitch0/bpp,(pitch0/bpp*3)/4,info->depth);
 	    info->screen_x = pitch0/bpp;
     }
     
@@ -673,6 +677,7 @@ int vixInit(void){
   {
     uint32_t bpp=0,pitch0=0;
     info->chip.lock (&info->chip, 0);
+    do {
     switch (info->chip.arch) {
 	  case NV_ARCH_03:
         pitch0 = info->chip.PGRAPH[0x00000650/4];
@@ -684,6 +689,9 @@ int vixInit(void){
         pitch0 = info->chip.PGRAPH[0x00000670/4];
         break;
     }
+    if (pitch0 == 0)
+	    printf("[nvidia_vid]: pitch0 = 0!!! Rereading\n");
+    } while (pitch0 == 0);
     VID_WR08(info->chip.PCIO, 0x03D4, 0x28);
     bpp = VID_RD08(info->chip.PCIO,0x03D5);
     if(bpp==3)bpp = 4; //fixme do nvidia cards support 24bpp?
