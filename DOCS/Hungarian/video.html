@@ -926,7 +926,116 @@ A <B>VIDIX</B> számára mindez teljesen lényegtelen.
 
 <H4><A NAME=mpegdec>2.3.1.3 MPEG dekóderek kártyák</A></H4>
 
-<P>Ezeket kurvára le kéne már fordítani ;)</P>
+<H4><A NAME=mpegdec>2.3.1.3.1 DVB</A></H4>
+
+<P>Az MPlayer támogatja a Siemens, Technotrend, Galaxis, Hauppage és hasonló
+  gyártóktól származó Siemens DVB chipsetet. A legújabb DVB meghajtók a
+  <A HREF="http://www.linuxtv.org">Linux TV site</A>-ról tölhetõk le.
+  A szoftveres transzkódoláshoz legalább 1Ghz-es CPU ajánlott.</P>
+
+<P>A configure detektálja a DVB kártyát. Ha ez sikertelen volt, a detektálás
+  kényszerítése a következõ opcióval történik:</P>
+
+<PRE>
+  ./configure --enable-dvb
+</PRE>
+
+<P>Ha az ost fejlécek nem szabványos útvonalon találhatóak, az útvonal
+  megadására szolgáló opció:</P>
+
+<PRE>
+    ./configure --with-extraincdir=&lt;DVB forrás könyvtár&gt;/ost/include
+</PRE>
+
+<P>Ezután a fordítás és installálás a szokásos módszerrel történik.</P>
+
+<H4>HASZNÁLAT</H4>
+
+<P>A hardveres dekódolás (szabványos MPEG1/2 file-ok esetén) a következõ
+  paranccsal történik:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes file.mpg|vob
+</PRE>
+
+<P>A szoftveres dekódolás, illetõleg más formátumok MPEG1-é konvertálása
+  hasonlóképp történik:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc file.ext
+  mplayer -ao mpegpes -vo mpegpes -vop fame,expand file.ext
+</PRE>
+
+<P>Fontos megjegyezni hogy a DVB kártyák csak 288 és 576 pixel,
+  (PAL esetén), illetve 240 és 480 (NTSC) magasságú videókat támogatnak.
+  Más felbontású filmeket át <B>kell</B> méretezni a megfelelõ méretre,
+  a <CODE>scale=szélesség:magasság</CODE> szûrõ megadásával (<CODE>-vop</CODE>
+  opció). Szélességbõl többféle is használható, pl. 720, 704, 640, 512, 480,
+  352, továbbá a kártyák a horizontális átméretezést hardveresen is képesek
+  megoldani, ezért a horizontális nagyítás a legtöbb esetben szükségtelen.
+  Es 512x384-es felbontású (aspect 4:3) DivX lejátszása így történik:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
+</PRE>
+
+<P>Ha szélesvásznú filmrõl van szó és nem akarod teljes magasságra nagyítani,
+  az <CODE>expand=szélesség:magasság</CODE> szûrõvel fekete sávokat lehet a
+  kép köré rakni. Es 640x384-es DivX-hez a következõ opciók kellenek:</P>
+
+<PRE>
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
+</PRE>
+
+<P>Ha a CPU-d túl lassú egy 720x576-os DivX-hez, csökkentsd le a file
+  felbontását:</P>
+
+<PRE> 
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
+</PRE>
+
+<P>Ha ettõl se javul a sebesség, vertikálisan is csökkentheted a méretet:</P>
+
+<PRE>                                                           
+  mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi 
+</PRE>
+
+<P>OSD és/vagy feliratok megjelenítéséhez az expand szûrõ OSD részét kell
+  használni. Például, az <CODE>expand=sz:m</CODE> vagy <CODE>expand=sz:m:x:y</CODE>
+  opciók helyett a <CODE>expand=sz:m:x:y:1</CODE> paraméterezés a megfelelõ
+  (az 5.-ik paraméter kapcsolja be az OSD renderelést). Ha akarod, tedd
+  feljebb a képet hogy több helye legyen a feliratoknak. Ha a feliratok
+  kilógnak a TV képernyõjérõl, azokat is feljebb teheted: használd a
+  <CODE>-subpos &lt;0-100&gt;</CODE> opciót (a 80-as érték az esetek
+  többségében megfelelõ).</P>
+
+<P>A nem 25-ös fps-û filmek PAL szabványú TV-n történõ lejátszásához használd a
+  <CODE>-framedrop</CODE> opciót.</P>
+
+<P>A DivX filmek képarányának megtartásához, és emellett az optimális
+  nagyítási paraméterek kiszámításához használd a <CODE>dvbscale</CODE>
+  szûrõt:</P>
+
+<PRE>
+ 3:4-es TV-hez: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+16:9-es TV-hez: -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+</PRE>
+
+<H4>A JÖVÕ</H4>
+
+<P>Ha kérdésed van illetve szeretnél bekapcsolódni a DVB beszélgetésekbe,
+  csatlakozz az <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dvb">MPlayer-DVB</A>
+  listához. A lista nyelve angol.</P>
+
+<P>A jövõben várhatóan támogatni fogjuk az OSD hardveres megjelenítését a
+  DVB kártyák ezt támogató képességének felhasználásával, továbbá
+  nem 25fps-es filmek folyamatosabb lejátszását, illetve valós idejû
+  transzkódolást MPEG2 és MPEG4 között (részleget dekódolás).</P>
+
+
+<H4><A NAME="dxr2">2.3.1.3.2 DXR2</A></H4>
+
+<H4><A NAME="dxr3">2.3.1.3.3 DXR3/Hollywood+</A></H4>
 
 
 <H4><A NAME=other>2.3.1.4 Egyéb vizualizációs ketyerék</A></H4>

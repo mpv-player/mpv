@@ -149,9 +149,9 @@
         </UL>
 	<LI><A HREF="video.html#mpegdec">2.3.1.3 MPEG dekóder kártyák</A></LI>
         <UL>
-	  <LI><A HREF="../video.html#dvb">2.3.1.3.1 DVB (untrans)</A></LI>
-	  <LI><A HREF="../video.html#dxr2">2.3.1.3.2 DXR2</A></LI>
-	  <LI><A HREF="../video.html#dxr3">2.3.1.3.3 DXR3/Hollywood+ (untrans)</A></LI>
+	  <LI><A HREF="video.html#dvb">2.3.1.3.1 DVB</A></LI>
+	  <LI><A HREF="video.html#dxr2">2.3.1.3.2 DXR2</A></LI>
+	  <LI><A HREF="video.html#dxr3">2.3.1.3.3 DXR3/Hollywood+</A></LI>
         </UL>
 	<LI><A HREF="video.html#other">2.3.1.4 Egyéb vizualizációs ketyerék</A></LI>
         <UL>
@@ -1070,7 +1070,59 @@ kimeneti eszközök</P>
 
 <H3><A NAME=tv_tips>2.5.2 Tippek a használathoz</A></H3>
 
-<P>TODO</P>
+<P>A rendelkezésre álló opciók teljes listája a man page-ban található. Pár
+  hasznos tipp:</P>
+
+<UL>
+  <LI>Érdemes ésszerû képméretet választani. Nagyon ajánlott hogy a szélesség
+    és a magasság mérete 16-tal osztható legyen.</LI>
+  <LI>Ha a grabbelt kép vertikális felbontás több mint fele a teljes
+    felbontásnak (tehát PAL esetén 288, NTSC esetén 240), kapcsold be a
+    deinterlacing-et. Ha nem teszed, a keletkezõ film a gyors jeleneteknél
+    torz lesz, és mivel a váltott sorok kódolása a codec számára túl nagy
+    részletességet jelent, a felhasznált bitráta megnõ. A deinterlacing
+    bekapcsolása a <CODE>-vop pp=DEINT_TIPUS</CODE> opcióval történik.
+    Általában a <CODE>pp=lb</CODE> megfelelõ hatást ér el, de egyéni ízlés
+    szerint használható más opció is. A man page-ban megtalálod a deinterlacing
+    további opcióit.</LI>
+  <LI>A "nem használt" helyeket vágd ki. Amikor videot grabbelsz, a kép
+    a széleknél többnyire fekete, illetve színes pontokat tartalmaz. Ezek
+    is rossz hatással vannak a tömörítés hatásfokára. Pontosabban szólva,
+    nem is magukkal a fekete területekkel van a gond, hanem amikor ezek a
+    részek élesen elhatárolódnak világos területektõl. Mielõtt elkezded a
+    grabbelést, a <CODE>crop</CODE> szûrõ megfelelõ paraméterezésével
+    elérhetõ ezen részek kivágása. Itt is fontos, hogy a vágás után szabványos
+    legyen a kép felbontása.</LI>
+  <LI>Figyeld a CPU kihasználtságát. Az esetek többségében nem gyakori hogy
+    90%-nál magasabb legyen. Ha van elég memória, a MEncoder kibír pár
+    másodpercnyi túlterhelést, de semmi többet. Mindenképpen kapcsold ki a
+    3D-s képernyõvédõket, és hasonlókat.</LI>
+  <LI>Ne zavard össze a rendszerórát. A MEncoder az A/V szinkron megtartásához
+    az órát használja. Ha átállítod az órát (fõleg ha visszafelé), a MEncoder
+    összezavarodik, és eldob képkockákat. Ez akkor fontos ha hálózathoz
+    vagy kapcsolódva, és idõközönként futtatsz valamiféle idõ szinkronizáló
+    szoftvert (NTP). A grabbelés idõtartama alatt kapcsold ki az NTP-t.</LI>
+  <LI>Ne változtasd meg az <CODE>outfmt</CODE> opciót, kivéve ha pontosan
+    tudod hogy mit csinálsz, vagy a kártyád/meghajtód nem támogatja az
+    alapértelmezettet (YV12). Az MPlayer/MEncoder régebbi verzióiban
+    szükséges volt ezen opció megadása, mára ez szükségetelenné vált.
+    Például ha DivX-be kódolsz és az RGB24-et adod meg, hogy ezzel próbáld
+    növelni a képminõséget, csak a CPU használtságot növekedését fogod
+    elérni, tekintve hogy mindenképpen vissza lesz konvertálva YV12-vé.</LI>
+  <LI>Az I420 colorspace megadásához (<CODE>outfmt=i420</CODE>), meg kell
+    adnod a <CODE>-vc rawi420</CODE> opciót is, mivel ez a fourcc ütközik
+    egy Intel Indeo video codec-kel.</LI>
+  <LI>Az audio grabbelésnek számos módja van. Az egyik lehetõség hogy a
+    hangkártyán keresztül, és külsõ kábellel veszed fel, a másik pedig
+    hogy a tunerbe épitett ADC chip-et használod. Az utóbbi esetben be kell
+    töltened a <B>btaudio</B> kernel modult. Olvasd el a kernel fában
+    található <CODE>linux/Documentation/sound/btaudio</CODE> file-t.</LI>
+  <LI>Ha a MEncoder nem tudja megnyitni a hang egységet, bizonyosodj meg róla
+    hogy a file valóban létezik. Hiba lehet továbbá ha az arts (KDE) vagy
+    esd (GNOME) hang-szervereket használod. Ha full duplex hangkártyád van
+    (az összes modern kártya), és KDE-t használsz, kapcsold be a hang-szerver
+    beállításánál a "full duplex" opciót.</LI>
+</UL>
 
 
 <H3><A NAME=tv_examples>2.5.3 Példák</A></H3>
@@ -1080,7 +1132,7 @@ Teszt kimenet, AAlib-re :)<BR>
 <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
 <BR>
 Szabványos V4L-rõl bemenet<BR>
-<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
+<CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=v4l:width=640:height=480 -vo xv</CODE><BR>
 </P>
 
 
