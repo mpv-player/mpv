@@ -26,11 +26,17 @@
 # Prefer these macros to full length text !
 # These macros only return an error code - NO display is done
 cc_check() {
+  echo >> "$TMPLOG"
   cat "$TMPC" >> "$TMPLOG"
   echo >> "$TMPLOG"
-  echo "$_cc $TMPC -o $TMPO $@" >> "$TMPLOG"
-  ( "$_cc" $_inc_extra $_ld_extra "$TMPC" -o "$TMPO" "$@" ) >> "$TMPLOG" 2>&1
-  return "$?"
+  echo "$_cc $_inc_extra $_ld_static $_ld_extra $TMPC -o $TMPO $@" >> "$TMPLOG"
+  ( "$_cc" $_inc_extra $_ld_static $_ld_extra "$TMPC" -o "$TMPO" "$@" ) >> "$TMPLOG" 2>&1
+  TMP="$?"
+  echo >> "$TMPLOG"
+  echo "ldd $TMPO" >> "$TMPLOG"
+  ( ldd "$TMPO" ) >> "$TMPLOG" 2>&1
+  echo >> "$TMPLOG"
+  return "$TMP"
 }
 
 # Display error message, flushes tempfile, exit
@@ -162,13 +168,13 @@ Use these options if autodetection fails:
   --with-extralibdir=DIR   extra library files (png, SDL, ...) in DIR
   --with-x11incdir=DIR     X headers in DIR
   --with-x11libdir=DIR     X library files in DIR
+  --with-csslibdir=DIR     libcss in DIR
+  --with-madlibdir=DIR     libmad (libmad shared lib.) in DIR
   --with-win32libdir=DIR   W*ndows DLL files in DIR
   --with-xanimlibdir=DIR   XAnim DLL files in DIR
-  --with-csslibdir=DIR     'libcss.so' in DIR
   --with-sdl-config=PATH   path to sdl*-config (e.g.: /opt/bin/sdl-config)
   --with-gtk-config=PATH   path to gtk*-config (e.g.: /opt/bin/gtk-config)
   --with-glib-config=PATH  path to glib*-config (e.g.: /opt/bin/glib-config)
-  --with-madlibdir=DIR     'libmad.so' (libmad shared lib.) in DIR
 
 EOF
     exit 0
@@ -193,6 +199,15 @@ for ac_option do
     ;;
   --disable-gcc-checking)
     _skip_cc_check=yes
+    ;;
+  --enable-static)
+    _ld_static='-static'
+    ;;
+  --disable-static)
+    _ld_static=''
+    ;;
+  --enable-static=*)
+    _ld_static="-static `echo $ac_option | cut -d '=' -f 2`"
     ;;
   --with-extraincdir=*)
     _inc_extra=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
@@ -657,8 +672,11 @@ for ac_option do
   --cc=*) ;;
   --as=*) ;;
   --disable-gcc-checking) ;;
+  --enable-static) ;;
+  --disable-static*) ;;
   --with-extraincdir=*) ;;
   --with-extralibdir=*) ;;
+
 
   # Real 2nd pass
   --enable-x11)		_x11=yes	;;
@@ -745,11 +763,6 @@ for ac_option do
   --enable-select)	_def_select='#define HAVE_AUDIO_SELECT'	;;
   --disable-select)	_def_select='#undef HAVE_AUDIO_SELECT'	;;
 
-  --enable-static)	_ld_static='-static'	;;
-  --disable-static)	_ld_static=''		;;
-  --enable-static=*)
-    _ld_static="-static `echo $ac_option | cut -d '=' -f 2`"
-    ;;
 
   --language=*)
     LINGUAS=`echo $ac_option | cut -d '=' -f 2`
@@ -1188,7 +1201,7 @@ if test -z "$_x11libdir" ; then
   _x11=no
   echores "not found"
 fi
-_ld_x11="-L$_x11libdir -lX11 -lXext"
+_ld_x11="-L$_x11libdir -lX11 -lXext $_ld_sock"
 
 
 #########
@@ -1198,10 +1211,12 @@ _ld_x11="-L$_x11libdir -lX11 -lXext"
 echocheck "X11"
 if test "$_x11" = auto ; then
   cat > $TMPC <<EOF
-int main(void) { return 0; }
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+int main(void) { (void) XCreateWindow(0,0,0,0,0,0,0,0,0,0,0,0); return 0; }
 EOF
   _x11=no
-  cc_check $_inc_x11 $_ld_x11 -lXext $_ld_sock && _x11=yes
+  cc_check $_inc_x11 $_ld_x11 && _x11=yes
 fi
 if test "$_x11" = yes ; then
   _def_x11='#define HAVE_X11 1'
@@ -1223,7 +1238,7 @@ if test "$_x11" = yes ; then
 #include <X11/extensions/dpms.h>
 int main(void) { return 0; }
 EOF
-  cc_check $_inc_x11 $_ld_x11 -lXdpms $_ld_sock && _xdpms3=yes
+  cc_check $_inc_x11 $_ld_x11 -lXdpms && _xdpms3=yes
 fi
 _xdpms4=no
 if test "$_x11" = yes ; then
@@ -1259,7 +1274,7 @@ if test "$_x11" = yes && test "$_xv" = auto ; then
 int main(void) { return 0; }
 EOF
   _xv=no
-  cc_check $_inc_x11 $_ld_x11 -lXv $_ld_sock && _xv=yes
+  cc_check $_inc_x11 $_ld_x11 -lXv && _xv=yes
 else
   _xv=no
 fi
@@ -1279,7 +1294,7 @@ if test "$_x11" = yes && test "$_xinerama" = auto ; then
 int main(void) { return 0; }
 EOF
   _xinerama=no
-  cc_check $_inc_x11 $_ld_x11 -lXinerama $_ld_sock && _xinerama=yes
+  cc_check $_inc_x11 $_ld_x11 -lXinerama && _xinerama=yes
 else
   _xinerama=no
 fi
@@ -1303,7 +1318,7 @@ if test "$_x11" = yes && test "$_vm" = auto ; then
 int main(void) { return 0; }
 EOF
   _vm=no
-  cc_check $_inc_x11 $_ld_x11 -lXxf86vm $_ld_sock && _vm=yes
+  cc_check $_inc_x11 $_ld_x11 -lXxf86vm && _vm=yes
 else
   _vm=no
 fi
@@ -1348,7 +1363,7 @@ if test "$_x11" = yes && test "$_dga2" = auto ; then
 int main (void) { XDGAMode mode; XDGADevice device; return 0; }
 EOF
   _dga2=no
-  cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm $_ld_sock && _dga2=yes
+  cc_check $_inc_x11 $_ld_x11 -lXxf86dga -lXxf86vm && _dga2=yes
 else
   _dga2=no
 fi
@@ -1368,17 +1383,19 @@ if test "$_gl" = auto ; then
 int main(void) { return 0; }
 EOF
   _gl=no
-  if bsd ; then
-    cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_pthread $_ld_sock && _gl=yes
+  if cc_check $_inc_x11 $_ld_x11 -lGL -lm ; then
+    _gl=yes
+    _ld_gl="-lGL -lm"
+  elif cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_pthread ; then
+    _gl=yes
+    _ld_gl="-lGL -lm $_ld_pthread"
   else
-    cc_check $_inc_x11 $_ld_x11 -lGL -lm $_ld_sock && _gl=yes
+    _gl=no
+    cc_check $_inc_x11 $_ld_x11 -lGL -lm && _gl=yes
   fi
 fi
 if test "$_gl" = yes ; then
-  _ld_gl='-lGL'
-  # FIXME check this for OpenBSD & BSD/OS
-  # Under XFree86 4.x GL port is poorly designed
-  bsd && test -r /usr/X11R6/bin/XFree86 && _ld_gl="-lGL $_ld_pthread"
+  #FIXME ?? :  bsd && test -r /usr/X11R6/bin/XFree86 && _ld_gl="-lGL $_ld_pthread"
   _def_gl='#define HAVE_GL 1'
   _vosrc="$_vosrc vo_gl.c vo_gl2.c"
 else
@@ -1788,7 +1805,7 @@ if test "$_mad" = auto ; then
 #include <mad.h>
 int main(void) { return 0; }
 EOF
-  cc_check  $_madlibdir -lmad && _mad=yes
+  cc_check $_madlibdir -lmad && _mad=yes
 fi
 if test "$_mad" = yes ; then
   _def_mad='#define USE_LIBMAD 1'
@@ -1806,11 +1823,11 @@ if test "$_vorbis" = auto ; then
 #include <vorbis/codec.h>
 int main(void) { return 0; }
 EOF
-  cc_check  -lvorbis -lm && _vorbis=yes
+  cc_check -lvorbis -logg -lm && _vorbis=yes
 fi
 if test "$_vorbis" = yes ; then
   _def_vorbis='#define HAVE_OGGVORBIS 1'
-  _ld_vorbis='-lvorbis -lm'
+  _ld_vorbis='-lvorbis -logg -lm'
 else
   _def_vorbis='#undef HAVE_OGGVORBIS'
 fi
@@ -2125,7 +2142,7 @@ int main(void) {
   return exitvar;
 }
 EOF
-    cc_check $_inc_x11 $_ld_x11 $_ld_sock && _xshape=yes
+    cc_check $_inc_x11 $_ld_x11 && _xshape=yes
   fi
   if test "$_xshape" = yes ; then
     _def_xshape='#define HAVE_XSHAPE 1'
@@ -2268,29 +2285,29 @@ STREAMING = $_streaming
 VO2 = $_vo2
 
 X11_INC = $_inc_x11
-X11DIR = $_ld_x11
-X_LIBS = $_ld_x11 $_ld_extra $_ld_gl $_ld_ggi $_ld_dxr3 $_ld_sdl $_ld_dga $_ld_xv $_ld_vm $_ld_svga $_ld_png $_ld_sock $_ld_aa $_ld_vorbis $_ld_xinerama $_ld_mad $_ld_zlib
+X11DIR = $_ld_static $_ld_x11
+X_LIBS = $_ld_static $_ld_x11 $_ld_extra $_ld_gl $_ld_ggi $_ld_dxr3 $_ld_sdl $_ld_dga $_ld_xv $_ld_vm $_ld_svga $_ld_png $_ld_sock $_ld_aa $_ld_vorbis $_ld_xinerama $_ld_mad $_ld_zlib
 
-TERMCAP_LIB = $_ld_termcap
-LIRC_LIBS = $_ld_lirc
+TERMCAP_LIB = $_ld_static $_ld_termcap
+LIRC_LIBS = $_ld_static $_ld_lirc
 CSS_USE = $_css
-CSS_LIB = $_ld_css
+CSS_LIB = $_ld_static $_ld_css
 SDL_INC = $_inc_sdl
 W32_DEP = $_dep_win32
-W32_LIB = $_ld_win32
+W32_LIB = $_ld_static $_ld_win32
 DS_DEP = $_dep_dshow
-DS_LIB = $_ld_dshow
+DS_LIB = $_ld_static $_ld_dshow
 AV_DEP = $_dep_libavcodec
-AV_LIB = $_ld_libavcodec
+AV_LIB = $_ld_static $_ld_libavcodec
 ALSA_LIB = $ld__alsa
 SGI_AUDIO_LIB = $_ld_sgiaudio
-ARCH_LIBS = $_ld_arch $_ld_iconv
-DIVX4LINUX = $_divx4linux
-DECORE_LIBS = $_ld_decore
-ENCORE_LIBS = $_ld_encore
+ARCH_LIBS =  $_ld_static $_ld_arch $_ld_iconv
+DIVX4LINUX = $_ld_static  $_divx4linux
+DECORE_LIBS = $_ld_static $_ld_decore
+ENCORE_LIBS =  $_ld_static $_ld_encore
 HAVE_MLIB = $_mlib
 MLIB_INC = $_inc_mlib
-MLIB_LIB = $_ld_mlib
+MLIB_LIB =  $_ld_static $_ld_mlib
 MADLIB_LIB = $_madlibdir
 STATIC = $_ld_static
 
@@ -2307,9 +2324,9 @@ TARGET_SSE = $_sse
 BINUTILS = $_binutils
 
 # --- GUI stuff ---
-GTKLIB = $_ld_gtk
-GLIBLIB = $_ld_glib
-GUI_LIBS = $_ld_gui
+GTKLIB = $_ld_static $_ld_gtk
+GLIBLIB = $_ld_static  $_ld_glib
+GUI_LIBS =  $_ld_static $_ld_gui
 GUI = $_gui
 DEBUG = -DDEBUG
 
