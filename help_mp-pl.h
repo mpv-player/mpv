@@ -282,6 +282,21 @@ static char help_text[]=
 #define MSGTR_AC3only48k "Obs³ugiwane s± tylko strumienie 48000 Hz.\n"
 #define MSGTR_UnknownAudio "Nieznany/zgubiony format audio, nie u¿ywam d¼wiêku\n"
 
+#define MSGTR_UsingExternalPP "[PP] U¿ywam zewnêtrznego filtra postprocessingu, max q = %d\n"
+#define MSGTR_UsingCodecPP "[PP] U¿uwan postprocessingu w kodeku, max q = %d\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Atrubut video '%s' nie jest obs³ugiwany przez wybrane vo & vd!\n"
+#define MSGTR_VideoCodecFamilyNotAvailable "Wybrana rodzina kodeków video [%s] (vfm=%d) niedostêpna (w³±cz j± w czasie kompilacji!)\n"
+#define MSGTR_AudioCodecFamilyNotAvailable "Wybrana rodzina kodeków audio [%s] (afm=%d) niedostêpna (w³±cz j± w czasie kompilacji!)\n"
+#define MSGTR_OpeningVideoDecoder "Otwieram dekoder video: [%s] %s\n"
+#define MSGTR_OpeningAudioDecoder "Otwieram dekoder audio: [%s] %s\n"
+#define MSGTR_UninitVideo "uninit video: %d  \n"
+#define MSGTR_UninitAudio "uninit audio: %d  \n"
+#define MSGTR_VDecoderInitFailed "Nieudana inicjalizacja VDecodera :(\n"
+#define MSGTR_ADecoderInitFailed "Nieudana inicjalizacja ADecodera :(\n"
+#define MSGTR_ADecoderPreinitFailed "Nieudana preinicjalizacja ADecodera :(\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Przydzielam %d bajtów dla bufora wej¶ciowego\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Przydzielam %d + %d = %d bajtów dla bufora wyj¶ciowego\n"
+
 // LIRC:
 #define MSGTR_SettingUpLIRC "W³±czam obs³ugê lirc...\n"
 #define MSGTR_LIRCdisabled "Nie bêdziesz móg³ u¿ywaæ twojego pilota\n"
@@ -289,6 +304,18 @@ static char help_text[]=
 #define MSGTR_LIRCsocketerr "Co¶ jest nie tak z socketem lirc: %s\n"
 #define MSGTR_LIRCcfgerr "Nieudane odczytanie pliku konfiguracyjnego LIRC %s !\n"
 
+// vf.c
+#define MSGTR_CouldNotFindVideoFilter "Nie mogê znale¼æ filtra video '%s'\n"
+#define MSGTR_CouldNotOpenVideoFilter "Nie mogê otworzyæ filtra video '%s'\n"
+#define MSGTR_OpeningVideoFilter "Otwieram filtr video: "
+#define MSGTR_CannotFindColorspace "Cannot find common colorspace, even by inserting 'scale' :(\n"
+
+// vd.c
+#define MSGTR_CodecDidNotSet "VDec: kodek nie ustawia sh->disp_w i sh->disp_h, probujê to rozwi±zaæ!\n"
+#define MSGTR_VoConfigRequest "VDec: vo config request - %d x %d (preferred csp: %s)\n"
+#define MSGTR_CouldNotFindColorspace "Couldn't find matching colorspace - retrying with -vop scale...\n"
+#define MSGTR_MovieAspectIsSet "Movie-Aspect is %.2f:1 - prescaling to correct movie aspect.\n"
+#define MSGTR_MovieAspectUndefined "Movie-Aspect is undefined - no prescaling applied.\n"
 
 // ====================== GUI messages/buttons ========================
 
@@ -324,6 +351,7 @@ static char help_text[]=
 #define MSGTR_NEMFMR "Przykro mi, za ma³o pamiêci na renderowanie menu."
 #define MSGTR_NEMFMM "Przykro mi, za ma³o pamiêci na maskê kszta³tu g³ównego okna."
 #define MSGTR_IDFGCVD "Przykro mi, nie znalaz³em kompatybilnego sterownika video."
+#define MSGTR_NEEDLAVCFAME "Przykro mi, nie mo¿esz odtwarzaæ plików innych ni¿ mpeg za pomoc± twojego urz±dzenia DXR3/H+ bez przekodowania.\nProszê w³±cz lavc lub fame w konfigu DXR3/H+."
 
 // --- skin loader error messages
 #define MSGTR_SKIN_ERRORMESSAGE "[skin] b³±d w pliku konfiguracyjnym skórki w linii %d: %s"
@@ -454,6 +482,9 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_OSS_Device "Urz±dzenie:"
 #define MSGTR_PREFERENCES_OSS_Mixer "Mikser:"
 #define MSGTR_PREFERENCES_Message "Proszê pamiêtaæ, ¿e niektóre funkcje wymagaja restartowania odtwarzania."
+#define MSGTR_PREFERENCES_DXR3_VENC "Enkoder Video:"
+#define MSGTR_PREFERENCES_DXR3_LAVC "U¿yj LAVC (ffmpeg)"
+#define MSGTR_PREFERENCES_DXR3_FAME "U¿yj FAME"
 
 // --- messagebox
 #define MSGTR_MSGBOX_LABEL_FatalError "b³±d krytyczny ..."
