@@ -41,7 +41,7 @@ static void*         (*raGetFlavorProperty)(void*,unsigned long,unsigned long,in
 static unsigned long (*raInitDecoder)(void*, void*);
 static unsigned long (*raOpenCodec2)(void*);
 static unsigned long (*raSetFlavor)(void*,unsigned long);
-//static void  (*raSetDLLAccessPath)(unsigned long);
+static void  (*raSetDLLAccessPath)(char*);
 static void  (*raSetPwd)(char*,char*);
 
 typedef struct {
@@ -77,14 +77,24 @@ static int preinit(sh_audio_t *sh){
     raOpenCodec2 = dlsym(handle, "RAOpenCodec2");
     raInitDecoder = dlsym(handle, "RAInitDecoder");
     raSetFlavor = dlsym(handle, "RASetFlavor");
-//    raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
+    raSetDLLAccessPath = dlsym(handle, "SetDLLAccessPath");
     raSetPwd = dlsym(handle, "RASetPwd"); // optional, used by SIPR
     
   if(!raCloseCodec || !raDecode || !raFlush || !raFreeDecoder ||
      !raGetFlavorProperty || !raOpenCodec2 || !raSetFlavor ||
      /*!raSetDLLAccessPath ||*/ !raInitDecoder){
-      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot resolve symbols - incompatible dll\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"Cannot resolve symbols - incompatible dll: %s\n",path);
       return 0;
+  }
+
+  if(raSetDLLAccessPath){
+      sprintf(path, "DT_Codecs=" REALCODEC_PATH);
+      if(path[strlen(path)-1]!='/'){
+        path[strlen(path)+1]=0;
+        path[strlen(path)]='/';
+      }
+      path[strlen(path)+1]=0;
+      raSetDLLAccessPath(path);
   }
 
     result=raOpenCodec2(&sh->context);
