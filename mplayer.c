@@ -267,6 +267,7 @@ int mplayer_audio_read(char *buf,int size){
 
 //#include "dec_audio.c"
 
+#ifndef NEW_DECORE
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -289,6 +290,7 @@ void convert_linux(unsigned char *puc_y, int stride_y,
     opendivx_stride[1]=stride_uv;
     opendivx_stride[2]=stride_uv;
 }
+#endif
 
 //**************************************************************************//
 
@@ -1217,10 +1219,13 @@ switch(sh_video->codec->driver){
    if(verbose) printf("OpenDivX video codec\n");
    { DEC_PARAM dec_param;
      DEC_SET dec_set;
-//     DEC_MEM_REQS dec_mem;
+#ifdef NEW_DECORE
+     DEC_MEM_REQS dec_mem;
 	dec_param.x_dim = sh_video->bih->biWidth;
 	dec_param.y_dim = sh_video->bih->biHeight;
-#if 0
+        dec_param.output_format=DEC_USER;
+#endif
+#ifdef NEW_DECORE
         // 0.50-CVS
         decore(0x123, DEC_OPT_MEMORY_REQS, &dec_param, &dec_mem);
         dec_param.buffers.mp4_edged_ref_buffers=malloc(dec_mem.mp4_edged_ref_buffers_size);
@@ -1701,6 +1706,9 @@ switch(sh_video->codec->driver){
     unsigned int t=GetTimer();
     unsigned int t2;
     DEC_FRAME dec_frame;
+#ifdef NEW_DECORE
+    DEC_PICTURE dec_pic;
+#endif
     unsigned char* start=NULL;
     int in_size=ds_get_packet(d_video,&start);
     if(in_size<0){ eof=1;break;}
@@ -1709,14 +1717,32 @@ switch(sh_video->codec->driver){
         dec_frame.length = in_size;
 	dec_frame.bitstream = start;
 	dec_frame.render_flag = 1;
+#ifdef NEW_DECORE
+        dec_frame.bmp=&dec_pic;
+        dec_pic.y=dec_pic.u=dec_pic.v=NULL;
+#endif
 	decore(0x123, 0, &dec_frame, NULL);
       t2=GetTimer();t=t2-t;video_time_usage+=t*0.000001f;
 
+#ifdef NEW_DECORE
+      if(dec_pic.y){
+        void* src[3];
+        int stride[3];
+        src[0]=dec_pic.y;
+        src[1]=dec_pic.u;
+        src[2]=dec_pic.v;
+        stride[0]=dec_pic.stride_y;
+        stride[1]=stride[2]=dec_pic.stride_uv;
+        video_out->draw_slice(src,stride,
+                            sh_video->disp_w,sh_video->disp_h,0,0);
+      }
+#else
       if(opendivx_src[0]){
         video_out->draw_slice(opendivx_src,opendivx_stride,
                             sh_video->disp_w,sh_video->disp_h,0,0);
         opendivx_src[0]=NULL;
       }
+#endif
       t2=GetTimer()-t2;vout_time_usage+=t2*0.000001f;
 
     break;
