@@ -12,7 +12,6 @@ FOR THE v0.90 RELEASE:
 - fix the XineramaIsActive bug
 - better libwine build support / or fix loader to handle QT dll
 - NEWSTRUCT DVB driver support
-- update DOCS, manpage
 
 
 FOR THE v1.00 RELEASE:
@@ -36,9 +35,6 @@ mencoder:
 - add ogg/vorbis audio encoder
 - stop/resume
 
-docs:
-- migrate to XML/DocBook
-- restructuring?
 
 FUTURE:
 ~~~~~~~
@@ -59,3 +55,28 @@ other:
 - dvd server
 - mga_vid crtc2 fix
 - make nvidia_vid ;)
+
+
+
+DOCUMENTATION TODO:
+===================
+
+FOR THE v0.90 RELEASE:
+~~~~~~~~~~~~~~~~~~~~~~
+
+- update the man page with all current options
+- merge tech/vop.txt and tech/libavc-options.txt into the man page
+- finish reviewing all of the docs
+  - mplayer.1
+  - encoding.html
+  - video.html
+  - documentation.html
+- enhance the FAQ
+
+
+FUTURE:
+~~~~~~~
+
+- write a detailed encoding guide
+- convert the docs to SGML/XML
+- restructuring?
