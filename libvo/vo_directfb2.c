@@ -48,12 +48,12 @@
 #ifndef min
 #define min(x,y) (((x)<(y))?(x):(y))
 #endif
-/*
+
 #if DIRECTFBVERSION > 917
 // triple buffering
 #define TRIPLE 1
 #endif
-*/
+
 static vo_info_t info = {
 	"Direct Framebuffer Device",
 	"directfb",
@@ -132,7 +132,10 @@ extern char *fb_dev_name;
 char *fb_dev_name;
 #endif
 char *dfb_params;
-int layer_id = -1;
+static int layer_id = -1;
+static int buffer_mode = 1;
+static int use_input = 1;
+static int field_parity = -1;
 
 /******************************
 *	   implementation     *
@@ -146,18 +149,118 @@ if (primary && primarylocked) primary->Unlock(primary);
 
 static uint32_t preinit(const char *arg)
 {
+    DFBResult ret;
 
-DFBResult ret;
-	
-mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Preinit entered\n");
+    mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Preinit entered\n");
 
-	if (arg) {
-	    int tmp=-1;
-	    if (sscanf(arg,"%i",&tmp)) {
-		layer_id=tmp;
-		mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Layer id is forced to %i\n",layer_id);
-	    };
-	}
+    if (dfb) return 0; // we are already inited!
+
+    buffer_mode = 1 + vo_doublebuffering; // honor -double switch
+
+// config stuff - borrowed from dfbmga (to be as compatible as it could be :-)
+    
+     if (vo_subdevice) {
+          int show_help = 0;
+          int opt_no = 0;
+          while (*vo_subdevice != '\0') {
+               if (!strncmp(vo_subdevice, "input", 5)) {
+                    use_input = !opt_no;
+                    vo_subdevice += 5;
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "buffermode=", 11)) {
+                    if (opt_no) {
+                         show_help = 1;
+                         break;
+                    }
+                    vo_subdevice += 11;
+                    if (!strncmp(vo_subdevice, "single", 6)) {
+                         buffer_mode = 1;
+                         vo_subdevice += 6;
+                    } else if (!strncmp(vo_subdevice, "double", 6)) {
+                         buffer_mode = 2;
+                         vo_subdevice += 6;
+                    } else if (!strncmp(vo_subdevice, "triple", 6)) {
+                         buffer_mode = 3;
+                         vo_subdevice += 6;
+                    } else {
+                         show_help = 1;
+                         break;
+                    }
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "fieldparity=", 12)) {
+                    if (opt_no) {
+                         show_help = 1;
+                         break;
+                    }
+                    vo_subdevice += 12;
+                    if (!strncmp(vo_subdevice, "top", 3)) {
+                         field_parity = 0;
+                         vo_subdevice += 3;
+                    } else if (!strncmp(vo_subdevice, "bottom", 6)) {
+                         field_parity = 1;
+                         vo_subdevice += 6;
+                    } else {
+                         show_help = 1;
+                         break;
+                    }
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "layer=", 6)) {
+		    int tmp=-1;
+                    if (opt_no) {
+                         show_help = 1;
+                         break;
+                    }
+                    vo_subdevice += 6;
+		    if (sscanf(vo_subdevice,"%i",&tmp)) {
+			 layer_id=tmp;
+			 mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Layer id is forced to %i\n",layer_id);
+		    } else {
+                         show_help = 1;
+                         break;
+                    }
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "no", 2)) {
+                    if (opt_no) {
+                         show_help = 1;
+                         break;
+                    }
+                    vo_subdevice += 2;
+                    opt_no = 1;
+               } else if (*vo_subdevice == ':') {
+                    if (opt_no) {
+                         show_help = 1;
+                         break;
+                    }
+                    vo_subdevice++;
+                    opt_no = 0;
+               } else if (!strncmp(vo_subdevice, "help", 4)) {
+                    show_help = 1;
+                    vo_subdevice += 4;
+                    break;
+               }
+               }
+	       
+          if (show_help) {
+               mp_msg( MSGT_VO, MSGL_ERR,
+                       "\nvo_dfbmga command line help:\n"
+                       "Example: mplayer -vo directfb:layer=1:buffermode=single\n"
+                       "\nOptions (use 'no' prefix to disable):\n"
+                       "  input  Use DirectFB for keyboard input\n"
+                       "\nOther options:\n"
+                       "  layer=n\n"
+                       "    n=0..xx   Use layer with id n for output (0=primary)\n"
+                       "  buffermode=(single|double|triple)\n"
+                       "    single   Use single buffering\n"
+                       "    double   Use double buffering\n"
+                       "    triple   Use triple buffering\n"
+                       "  fieldparity=(top|bottom)\n"
+                       "    top      Top field first\n"
+                       "    bottom   Bottom field first\n"
+                       "\n" );
+               return -1;
+          }
+     }
+
 
 	if (dfb_params)
 	{
@@ -224,17 +327,17 @@ mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Preinit entered\n");
   /*
    * (Get keyboard)
    */
-
-  ret = dfb->GetInputDevice (dfb, DIDID_KEYBOARD, &keyboard);
-
-  if (ret==DFB_OK) {
-    if (verbose) {
-    mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Keyboard init OK\n");
+    
+  if (use_input) {
+    ret = dfb->GetInputDevice (dfb, DIDID_KEYBOARD, &keyboard);
+    if (ret==DFB_OK) {
+	mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Keyboard init OK\n");
+    } else {
+	keyboard = NULL;
+	mp_msg(MSGT_VO, MSGL_ERR,"DirectFB: Keyboard init FAILED\n");
     }
-  } else {
-    keyboard = NULL;
-    mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Keyboard init FAILED\n");
-  }
+  } 
+
 
   /*
    * Create an input buffer for the keyboard.
@@ -643,15 +746,20 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	};
 
 // flipping of layer
-// try triple, double... buffering
+// try triple, \double... buffering
 
 	dlc.flags = DLCONF_BUFFERMODE;
 #ifdef TRIPLE
-	dlc.buffermode = DLBM_TRIPLE;
-	ret = layer->SetConfiguration( layer, &dlc );
+	if (buffer_mode > 2) {
+	    dlc.buffermode = DLBM_TRIPLE;
+	    ret = layer->SetConfiguration( layer, &dlc );
+	} else { 
+	    ret=!DFB_OK;
+	}
+	
 	if (ret!=DFB_OK) {
 #endif
-	    if (vo_doublebuffering) {
+	    if (buffer_mode > 1) {
 		    dlc.buffermode = DLBM_BACKVIDEO;
     		    ret = layer->SetConfiguration( layer, &dlc );
     		if (ret!=DFB_OK) {
@@ -668,6 +776,21 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	}
 #endif
 
+#if DIRECTFBVERSION > 916
+        if (field_parity != -1) {
+	    dlc.flags = DLCONF_OPTIONS;
+	    ret = layer->GetConfiguration( layer, &dlc );
+	    if (ret==DFB_OK) {
+               dlc.options |= DLOP_FIELD_PARITY;
+	       ret = layer->SetConfiguration( layer, &dlc );
+		if (ret==DFB_OK) {
+            	    layer->SetFieldParity( layer, field_parity );
+		}
+	    }
+        }
+#endif
+
+
 // get layer surface
 	
 	ret = layer->GetSurface(layer,&primary);
@@ -683,7 +806,11 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 	primary->Clear(primary,0,0,0,0xff);
 #endif	
         flipping = 0;
-	if (caps & DSCAPS_FLIPPING) {
+	if (caps & (DSCAPS_FLIPPING
+#ifdef TRIPLE
+	| DSCAPS_TRIPLE
+#endif
+	)) {
 	    ret = primary->Flip(primary,NULL,0);
 	    if (ret==DFB_OK) { 
 #if DIRECTFBVERSION > 913
@@ -863,27 +990,38 @@ static void uninit(void)
   /*
    * (Release)
    */
+/*
   mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Releasing buffer\n");
   if (buffer) buffer->Release (buffer);
   mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Releasing keyboard\n");
   if (keyboard) keyboard->Release (keyboard);
+*/
   if (frame) {
     mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Releasing frame\n");
     frame->Release (frame);
+    frame = NULL;
   };
-
-  mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Releasing primary\n");
-  if (primary) primary->Release (primary);
 
 //  switch off BES
 //  if (layer) layer->SetOpacity(layer,0);
 
-  if (layer) layer->Release(layer);
+  if (layer) {
+   mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Releasing layer\n");
+   layer->Release(layer);
+   layer = NULL;
+  }
 
-  mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Releasing DirectFB library\n");
+  if (primary) {
+   mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Releasing primary\n");
+   primary->Release (primary);
+   primary = NULL;
+  }
+
+
+/*  mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Releasing DirectFB library\n");
 
   dfb->Release (dfb);
-
+*/
   mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Uninit done.\n");
 }
 
@@ -1015,7 +1153,7 @@ static uint32_t get_image(mp_image_t *mpi)
        // we're lucky or codec accepts stride => ok, let's go!
 
 	    if (frame) {
-		err = frame->Lock(frame,DSLF_WRITE,&dst,&pitch);
+		err = frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch);
 		framelocked=1;
 	    } else {
  		err = primary->Lock(primary,DSLF_WRITE,&dst,&pitch);
@@ -1066,7 +1204,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, in
 	unlock();
 
 	if (frame) {
-		DFBCHECK (frame->Lock(frame,DSLF_WRITE,&dst,&pitch));
+		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch));
 		framelocked = 1;
         } else {
 		DFBCHECK (primary->Lock(primary,DSLF_WRITE,&dst,&pitch));
@@ -1162,7 +1300,7 @@ static uint32_t put_image(mp_image_t *mpi){
 
 //        if (verbose) printf("DirectFB: Put_image - planar branch\n");
 	if (frame) {
-		DFBCHECK (frame->Lock(frame,DSLF_WRITE,&dst,&pitch));
+		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch));
 		framelocked = 1;
         } else {
 		DFBCHECK (primary->Lock(primary,DSLF_WRITE,&dst,&pitch));
@@ -1295,7 +1433,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	unlock(); // isnt it silly I have to unlock surface and than lock it again :-)
 	
 	if (frame) {
-		DFBCHECK (frame->Lock(frame,DSLF_WRITE,&dst,&pitch));
+		DFBCHECK (frame->Lock(frame,DSLF_WRITE|DSLF_READ,&dst,&pitch));
 		framelocked = 1;
         } else {
 		DFBCHECK (primary->Lock(primary,DSLF_WRITE,&dst,&pitch));
