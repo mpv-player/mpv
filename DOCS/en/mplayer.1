@@ -202,7 +202,7 @@ every time MPlayer is run.
 The system-wide configuration file 'mplayer.conf' is in your configuration
 directory (e.g.\& /etc/\:mplayer or /usr/\:local/\:etc/\:mplayer), the user
 specific one is '~/\:.mplayer/\:config'.
-User specific options override system\-wide options and options given on the
+User specific options override system-wide options and options given on the
 command line override either.
 The syntax of the configuration files is 'option=<value>', everything after
 a '#' is considered a comment.
@@ -268,8 +268,8 @@ go to next/\:previous alternative source (asx playlist only)
 pause movie (any key unpauses)
 .IPs "q / ESC"
 stop playing and quit
-.IPs "+ and \-"
-adjust audio delay by +/\:\- 0.1 second
+.IPs "+ and -"
+adjust audio delay by +/\:- 0.1 second
 .IPs "/ and *"
 decrease/\:increase volume
 .IPs "9 and 0"
@@ -293,7 +293,7 @@ toggle display of "forced subtitles"
 .IPs a\ \ \ \ 
 toggle subtitle aligment: top/middle/bottom
 .IPs "z and x"
-adjust subtitle delay by +/\:\- 0.1 second
+adjust subtitle delay by +/\:- 0.1 second
 .IPs "r and t"
 adjust subtitle position
 .IPs i\ \ \ \ 
@@ -1005,9 +1005,9 @@ choose an audio output of the capture card, if it has more of them
 .IPs [volume|bass|treble|balance]=<0\-100>
 These options set parameters of the mixer on the video capture card.
 They will have no effect, if your card doesn't have one.
-For v4l1, 0-65535 is a valid range. For v4l2, the valid range is
-0 to 100, and 50 maps to the default value of the control, as reported
-by the driver.
+For v4l1, 0-65535 is a valid range.
+For v4l2, the valid range is 0 to 100, and 50 maps to the default value of the
+control, as reported by the driver.
 .IPs immediatemode=<bool>
 A value of 0 means capture and buffer audio and video together
 (default for MEncoder).
@@ -1629,7 +1629,8 @@ Try this option if you still experience fullscreen problems.
 .TP
 .B \-fstype <type1,type2,...>
 Specify a priority list of fullscreen layer setting modes to be
-used. The available types are:
+used.
+The available types are:
 
 .PD 0
 .RSs
@@ -2341,7 +2342,8 @@ Could be used to force scaling with \-vf scale.
 
 .SH "VIDEO FILTERS"
 Video filter are plugins that allow you to modify the video stream and its
-properties.  The syntax is:
+properties.
+The syntax is:
 .TP
 .B \-vf <filter1[=options],filter2,...>
 Setup a chain of video filters.
@@ -2349,7 +2351,8 @@ Setup a chain of video filters.
 .B \-vop <...,filter3[=options],filter2,filter1> (OBSOLETE)
 Setup a chain of video filters, to be applied in
 .B reverse
-order.  Deprecated in favor of \-vf.
+order.
+Deprecated in favor of \-vf.
 .RE
 
 The parameters are optional and if omitted, some of them are set to default
