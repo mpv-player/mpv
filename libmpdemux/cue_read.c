@@ -7,8 +7,16 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <libgen.h>
 
+#include "config.h"
+#include "mp_msg.h"
+//#include "help_mp.h"
+
+#include "stream.h"
+
+#include "cue_read.h"
 
 #define byte    unsigned char
 #define SIZERAW 2352
@@ -241,7 +249,7 @@ static inline int cue_get_msf() {
                            cue_current_pos.frame);
 }
 
-static inline void cue_set_msf(unsigned int sect){
+inline void cue_set_msf(unsigned int sect){
   cue_current_pos.frame=sect%75;
   sect=sect/75;
   cue_current_pos.second=sect%60;
@@ -486,7 +494,7 @@ void cue_vcd_read_toc(){
 
 static char vcd_buf[VCD_SECTOR_SIZE];
 
-static int cue_vcd_read(char *mem){
+int cue_vcd_read(char *mem){
 
   if (cue_read_raw(vcd_buf)==-1) return 0; // EOF?
 

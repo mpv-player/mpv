@@ -20,6 +20,8 @@
 
 extern int verbose; // defined in mplayer.c
 
+#include "cue_read.h"
+
 #ifdef HAVE_VCD
 
 #ifdef __FreeBSD__
@@ -32,7 +34,7 @@ extern int verbose; // defined in mplayer.c
 
 #endif
 
-#include "vcd_read_bincue.h"
+//#include "vcd_read_bincue.h"
 
 #ifdef USE_DVDREAD
 int dvd_read_sector(dvd_priv_t *d,unsigned char* data);

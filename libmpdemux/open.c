@@ -67,10 +67,8 @@ char * dvd_audio_stream_channels[6] =
 #endif
 
 extern int vcd_get_track_end(int fd,int track);
-extern int cue_read_cue (const char *);
-extern int cue_vcd_seek_to_track (int track);
-extern int cue_vcd_get_track_end (int track);
-extern void cue_vcd_read_toc ();
+
+#include "cue_read.h"
 
 #ifdef USE_TV
 #include "tv.h"
