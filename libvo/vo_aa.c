@@ -240,10 +240,13 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 
     /* initializing of aalib */
     
-    hidis=aa_getfirst(&aa_displayrecommended);
-    if ( hidis==NULL || strcasecmp(hidis, "linux")){
+    /* why removes get after getting it the gotten value out of the list? :( */
+    //hidis=aa_getfirst(&aa_displayrecommended); 
+    if (aa_displayrecommended!=NULL)
+      hidis=aa_displayrecommended->text;
+    if ( hidis==NULL ){
 	/* check /dev/vcsa<vt> */
-	/* check only, if driver linux not explicit set */
+	/* check only, if no driver is explicit set */
 	fd = dup (fileno (stderr));
 	fstat (fd, &sbuf);
 	major = sbuf.st_rdev >> 8;
@@ -251,11 +254,9 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 	close (fd);
 	sprintf (fname, "/dev/vcsa%i", vt);
 	fp = fopen (fname, "w+");
-	fprintf(stderr,"X\n");
 	if (fp==NULL){
 	    fprintf(stderr,"VO: [aa] cannot open %s for writing, so we'll not use linux driver\n", fname);
-    	    aa_recommendhidisplay("curses");
-    	    aa_recommendhidisplay("X11");
+    	    aa_recommendlowdisplay("linux");
 	}else fclose(fp);
     }
     c = aa_autoinit(&aa_defparams);
@@ -629,12 +630,19 @@ draw_osd(void){
      * the osdbuffer is written the next show_image/flip_page
      * into aatextbuf
      */
+    char * vo_osd_text_save;
+    int vo_osd_progbar_type_save;
+
     memset(osdbuffer,0,aa_scrwidth(c)*aa_scrheight(c));
     printosdprogbar();
     /* let vo_draw_text only write subtitle */
-    vo_osd_text=0;
+    vo_osd_text_save=vo_osd_text; /* we have to save the osd_text */
+    vo_osd_text=NULL;
+    vo_osd_progbar_type_save=vo_osd_progbar_type;
     vo_osd_progbar_type=-1;
     vo_draw_text(aa_scrwidth(c), aa_scrheight(c), draw_alpha);
+    vo_osd_text=vo_osd_text_save;
+    vo_osd_progbar_type=vo_osd_progbar_type_save;
 #endif
 }
 
