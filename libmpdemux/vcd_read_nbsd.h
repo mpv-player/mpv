@@ -6,83 +6,85 @@
 
 #define	CDROM_LEADOUT	0xAA
 
-static struct ioc_read_toc_entry vcd_entry;
-static struct cd_toc_entry vcd_entry_data;
-static char     vcd_buf[VCD_SECTOR_SIZE];
+typedef struct mp_vcd_priv_st {
+  int fd;
+  struct ioc_read_toc_entry entry;
+  struct cd_toc_entry entry_data;
+} mp_vcd_priv_t;
 
 static inline void 
-vcd_set_msf(unsigned int sect)
+vcd_set_msf(mp_vcd_priv_t* vcd, unsigned int sect)
 {
-  unsigned int    s = sect;
-  vcd_entry_data.addr.msf.frame = sect % 75;
+  vcd->entry_data.addr.msf.frame = sect % 75;
   sect = sect / 75;
-  vcd_entry_data.addr.msf.second = sect % 60;
+  vcd->entry_data.addr.msf.second = sect % 60;
   sect = sect / 60;
-  vcd_entry_data.addr.msf.minute = sect;
+  vcd->entry_data.addr.msf.minute = sect;
 }
 
 static inline void
-vcd_inc_msf(void)
+vcd_inc_msf(mp_vcd_priv_t* vcd)
 {
-  vcd_entry_data.addr.msf.frame++;
-  if (vcd_entry_data.addr.msf.frame==75){
-    vcd_entry_data.addr.msf.frame=0;
-    vcd_entry_data.addr.msf.second++;
-    if (vcd_entry_data.addr.msf.second==60){
-      vcd_entry_data.addr.msf.second=0;
-      vcd_entry_data.addr.msf.minute++;
+  vcd->entry_data.addr.msf.frame++;
+  if (vcd->entry_data.addr.msf.frame==75){
+    vcd->entry_data.addr.msf.frame=0;
+    vcd->entry_data.addr.msf.second++;
+    if (vcd->entry_data.addr.msf.second==60){
+      vcd->entry_data.addr.msf.second=0;
+      vcd->entry_data.addr.msf.minute++;
     }
   }
 }
 
 static inline unsigned int 
-vcd_get_msf()
+vcd_get_msf(mp_vcd_priv_t* vcd)
 {
-  return vcd_entry_data.addr.msf.frame +
-  (vcd_entry_data.addr.msf.second +
-   vcd_entry_data.addr.msf.minute * 60) * 75;
+  return vcd->entry_data.addr.msf.frame +
+  (vcd->entry_data.addr.msf.second +
+   vcd->entry_data.addr.msf.minute * 60) * 75;
 }
 
 int 
-vcd_seek_to_track(int fd, int track)
+vcd_seek_to_track(mp_vcd_priv_t* vcd, int track)
 {
-  vcd_entry.address_format = CD_MSF_FORMAT;
-  vcd_entry.starting_track = track;
-  vcd_entry.data_len = sizeof(struct cd_toc_entry);
-  vcd_entry.data = &vcd_entry_data;
-  if (ioctl(fd, CDIOREADTOCENTRIES, &vcd_entry)) {
-    perror("ioctl dif1");
+  vcd->entry.address_format = CD_MSF_FORMAT;
+  vcd->entry.starting_track = track;
+  vcd->entry.data_len = sizeof(struct cd_toc_entry);
+  vcd->entry.data = &vcd->entry_data;
+  if (ioctl(vcd->fd, CDIOREADTOCENTRIES, &vcd->entry)) {
+    mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif1: %s\n",strerror(errno));
     return -1;
   }
-  return VCD_SECTOR_DATA * vcd_get_msf();
+  return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
 int 
-vcd_get_track_end(int fd, int track)
+vcd_get_track_end(mp_vcd_priv_t* vcd, int track)
 {
   struct ioc_toc_header tochdr;
-  if (ioctl(fd, CDIOREADTOCHEADER, &tochdr) == -1) {
-    perror("read CDROM toc header: ");
+  if (ioctl(vcd->fd, CDIOREADTOCHEADER, &tochdr) == -1) {
+    mp_msg(MSGT_STREAM,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return -1;
   }
-  vcd_entry.address_format = CD_MSF_FORMAT;
-  vcd_entry.starting_track = track < tochdr.ending_track ? (track + 1) : CDROM_LEADOUT;
-  vcd_entry.data_len = sizeof(struct cd_toc_entry);
-  vcd_entry.data = &vcd_entry_data;
-  if (ioctl(fd, CDIOREADTOCENTRYS, &vcd_entry)) {
-    perror("ioctl dif2");
+  vcd->entry.address_format = CD_MSF_FORMAT;
+  vcd->entry.starting_track = track < tochdr.ending_track ? (track + 1) : CDROM_LEADOUT;
+  vcd->entry.data_len = sizeof(struct cd_toc_entry);
+  vcd->entry.data = &vcd->entry_data;
+  if (ioctl(vcd->fd, CDIOREADTOCENTRYS, &vcd->entry)) {
+    mp_msg(MSGT_STREAM,MSGL_ERR,"ioctl dif2: %s\n",strerror(errno));
     return -1;
   }
-  return VCD_SECTOR_DATA * vcd_get_msf();
+  return VCD_SECTOR_DATA * vcd_get_msf(vcd);
 }
 
-void 
+mp_vcd_priv_t*
 vcd_read_toc(int fd)
 {
   struct ioc_toc_header tochdr;
+  mp_vcd_priv_t* vcd;
   int             i;
   if (ioctl(fd, CDIOREADTOCHEADER, &tochdr) == -1) {
-    perror("read CDROM toc header: ");
+    mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc header: %s\n",strerror(errno));
     return;
   }
   for (i = tochdr.starting_track; i <= tochdr.ending_track; i++) {
@@ -95,10 +97,10 @@ vcd_read_toc(int fd)
     tocentry.data = &tocentry_data;
 
     if (ioctl(fd, CDIOREADTOCENTRYS, &tocentry) == -1) {
-      perror("read CDROM toc entry: ");
-      return;
+      mp_msg(MSGT_OPEN,MSGL_ERR,"read CDROM toc entry: %s\n",strerror(errno));
+      return NULL;
     }
-    printf("track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
+    mp_msg(MSGT_OPEN,MSGL_INFO,"track %02d:  adr=%d  ctrl=%d  format=%d  %02d:%02d:%02d\n",
 	   (int) tocentry.starting_track,
 	   (int) tocentry.data->addr_type,
 	   (int) tocentry.data->control,
@@ -108,13 +110,16 @@ vcd_read_toc(int fd)
 	   (int) tocentry.data->addr.msf.frame
       );
   }
+  vcd = malloc(sizeof(mp_vcd_priv_t));
+  vcd->fd = fd;
+  return vcd;
 }
 
 static int 
-vcd_read(int fd, char *mem)
+vcd_read(mp_vcd_priv_t* vcd, char *mem)
 {
   struct scsireq  sc;
-  int             lba = vcd_get_msf();
+  int             lba = vcd_get_msf(vcd);
   int             blocks;
   int             sector_type;
   int             sync, header_code, user_data, edc_ecc, error_field;
@@ -149,17 +154,17 @@ vcd_read(int fd, char *mem)
   sc.senselen = sizeof(sc.sense);
   sc.flags = SCCMD_READ;
   sc.timeout = 10000;
-  rc = ioctl(fd, SCIOCCOMMAND, &sc);
+  rc = ioctl(vcd->fd, SCIOCCOMMAND, &sc);
   if (rc == -1) {
-    perror("SCIOCCOMMAND");
+    mp_msg(MSGT_STREAM,MSGL_ERR,"SCIOCCOMMAND: %s\n",strerror(errno));
     return -1;
   }
   if (sc.retsts || sc.error) {
-    fprintf(stderr, "scsi command failed: status %d error %d\n", sc.retsts,
-	    sc.error);
+    mp_msg(MSGT_STREAM,MSGL_ERR,"scsi command failed: status %d error %d\n",
+	   sc.retsts,sc.error);
     return -1;
   }
-  vcd_inc_msf();
+  vcd_inc_msf(vcd);
   return VCD_SECTOR_DATA;
 }
 
