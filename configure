@@ -3011,13 +3011,19 @@ echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
  if linux || freebsd || netbsd || darwin || cygwin; then
+  test -f "./libmpdvdkit2/Makefile" && _dvdkit=yes
   test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
 fi
 if test "$_dvdkit" = yes ; then
   if test "$_dvd" = yes || test "$_cdrom" = yes || test "$_cdio" = yes || test "$_dvdio" = yes || test "$_bdsi_dvd" = yes || cygwin; then
+   if test -f "./libmpdvdkit2/Makefile" ; then
+    _inputmodules="mpdvdkit2 $_inputmodules"
+    _dvdread=libmpdvdkit2
+   else
     _inputmodules="mpdvdkit $_inputmodules"
-    _dvdread=included
+    _dvdread=libmpdvdkit
+   fi
   else
     _noinputmodules="mpdvdkit $_noinputmodules"
   fi
@@ -3087,13 +3093,21 @@ case "$_dvdread" in
 	_noinputmodules="dvdread $_noinputmodules"
 	echores "no"
 	;;
-  included)
+  libmpdvdkit)
 	_largefiles=yes
 	_def_dvdread='#define USE_DVDREAD 1'
 	_ld_css='-Llibmpdvdkit -lmpdvdkit'
 	_noinputmodules="dvdread $_noinputmodules"
 	_def_mpdvdkit="#define USE_MPDVDKIT 1"
 	echores "disabled by libmpdvdkit"
+	;;
+  libmpdvdkit2)
+	_largefiles=yes
+	_def_dvdread='#define USE_DVDREAD 1'
+	_ld_css='-Llibmpdvdkit2 -lmpdvdkit'
+	_noinputmodules="dvdread $_noinputmodules"
+	_def_mpdvdkit="#define USE_MPDVDKIT 2"
+	echores "disabled by libmpdvdkit2"
 	;;
 esac
 
