@@ -11,7 +11,6 @@
 #else
 #include <stdlib.h>
 #endif
-#include <stdio.h>
 #include <unistd.h>
 #include <sys/mman.h>
 #include <errno.h>
@@ -47,7 +46,6 @@ int __vprintf( const char *format, ... )
     va_start(va, format);
     vprintf(format, va);
     va_end(va);
-    fflush(stdout);
 #endif
     return 0; 
 }
@@ -67,7 +65,7 @@ void* HeapAlloc(int heap, int flags, int size)
 
 int HeapFree(int heap, int flags, void* mem)
 {
-    free(mem);
+    if (mem) free(mem);
     return 1;
 }     	
 
@@ -517,9 +515,10 @@ int WideCharToMultiByte(unsigned int codepage, long flags, const short* src,
     int i;
     if(src==0)
 	return 0;
-    for(i=0; i<srclen; i++)
-	printf("%c", src[i]);
-    printf("\n");		
+    if(srclen==-1){srclen=0; while(src[srclen++]);}
+//    for(i=0; i<srclen; i++)
+//	printf("%c", src[i]);
+//    printf("\n");		
     if(dest==0)
     {
     for(i=0; i<srclen; i++)

@@ -1,7 +1,7 @@
 /********************************************************
 
 	Win32 binary loader interface
-	Copyright 2000 Eugene Smith (divx@euro.ru)
+	Copyright 2000 Eugene Kuznetsov (divx@euro.ru)
 	Shamelessly stolen from Wine project
 
 *********************************************************/
@@ -278,6 +278,8 @@ MMRESULT WINAPI acmStreamUnprepareHeader(
   HACMSTREAM has, PACMSTREAMHEADER pash, DWORD fdwUnprepare
 );
 void MSACM_RegisterAllDrivers(void);
+
+int WINAPI LoadStringA(long instance, long  id, void* buf, long size);
 
 #ifdef __cplusplus
 }

@@ -59,136 +59,6 @@ typedef struct modref_list_t
 }
 modref_list;
 
-
-/***********************************************************************
- *           LDT_EntryToBytes
- *
- * Convert an ldt_entry structure to the raw bytes of the descriptor.
- */
-/*static void LDT_EntryToBytes( unsigned long *buffer, const struct modify_ldt_ldt_s *content )
-{
-    *buffer++ = ((content->base_addr & 0x0000ffff) << 16) |
-                 (content->limit & 0x0ffff);
-    *buffer = (content->base_addr & 0xff000000) |
-              ((content->base_addr & 0x00ff0000)>>16) |
-              (content->limit & 0xf0000) |
-              (content->contents << 10) |
-              ((content->read_exec_only == 0) << 9) |
-              ((content->seg_32bit != 0) << 22) |
-              ((content->limit_in_pages != 0) << 23) |
-              0xf000;
-}
-*/
-
-//
-// funcs:
-//
-// 0 read LDT
-// 1 write old mode
-// 0x11 write
-//
-/*
-static int modify_ldt( int func, struct modify_ldt_ldt_s *ptr,
-                                  unsigned long count )
-{
-    int res;
-#ifdef __PIC__
-    __asm__ __volatile__( "pushl %%ebx\n\t"
-                          "movl %2,%%ebx\n\t"
-                          "int $0x80\n\t"
-                          "popl %%ebx"
-                          : "=a" (res)
-                          : "0" (__NR_modify_ldt),
-                            "r" (func),
-                            "c" (ptr),
-                            "d" (sizeof(struct modify_ldt_ldt_s)*count) );
-#else
-    __asm__ __volatile__("int $0x80"
-                         : "=a" (res)
-                         : "0" (__NR_modify_ldt),
-                           "b" (func),
-                           "c" (ptr),
-                           "d" (sizeof(struct modify_ldt_ldt_s)*count) );
-#endif  
-    if (res >= 0) return res;
-    errno = -res;
-    return -1;
-}
-static int fs_installed=0;
-static char* fs_seg=0;
-static int install_fs()
-{
-    struct modify_ldt_ldt_s array;
-    int fd;
-    int ret;
-    void* prev_struct;
-    
-    if(fs_installed)
-	return 0;
-
-    fd=open("/dev/zero", O_RDWR);
-    fs_seg=mmap((void*)0xbf000000, 0x30000, PROT_READ | PROT_WRITE, MAP_PRIVATE,
-	fd, 0);
-    if(fs_seg==0)
-    {
-	printf("ERROR: Couldn't allocate memory for fs segment\n");
-	return -1;
-    }	
-    array.base_addr=((int)fs_seg+0xffff) & 0xffff0000;
-    array.entry_number=0x1;
-    array.limit=array.base_addr+getpagesize()-1;
-    array.seg_32bit=1;
-    array.read_exec_only=0;
-    array.seg_not_present=0;
-    array.contents=MODIFY_LDT_CONTENTS_DATA;
-    array.limit_in_pages=0;
-#ifdef linux
-    ret=modify_ldt(0x1, &array, 1);
-    if(ret<0)
-    {
-	perror("install_fs");
-	MESSAGE("Couldn't install fs segment, expect segfault\n");
-    }	
-#endif 
-
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
-    {
-        long d[2];
-
-        LDT_EntryToBytes( d, &array );
-        ret = i386_set_ldt(0x1, (union descriptor *)d, 1);
-        if (ret < 0)
-        {
-            perror("install_fs");
-            MESSAGE("Did you reconfigure the kernel with \"options USER_LDT\"?\n");
-        }
-    }
-#endif 
-    __asm__
-    (
-    "movl $0xf,%eax\n\t"
-//    "pushw %ax\n\t"
-    "movw %ax, %fs\n\t"
-    );
-    prev_struct=malloc(8);
-    *(void**)array.base_addr=prev_struct;
-    printf("prev_struct: 0x%X\n", prev_struct);
-    close(fd);
-    
-    fs_installed=1;
-    return 0;
-};    	
-static int uninstall_fs()
-{
-    printf("Uninstalling FS segment\n");
-    if(fs_seg==0)
-	return -1;
-    munmap(fs_seg, 0x30000);
-    fs_installed=0;
-    return 0;
-}
-
-*/
 //WINE_MODREF *local_wm=NULL;
 modref_list* local_wm=NULL;
 
@@ -200,7 +70,7 @@ WINE_MODREF *MODULE_FindModule(LPCSTR m)
 	return NULL;
     while(strcmp(m, list->wm->filename))
     {
-//	printf("%s: %x\n", list->wm->filename, list->wm->module);
+	TRACE("%s: %x\n", list->wm->filename, list->wm->module);
 	list=list->prev;
 	if(list==NULL)
 	    return NULL;
@@ -513,6 +383,9 @@ WIN_BOOL WINAPI FreeLibrary(HINSTANCE hLibModule)
         retv = MODULE_FreeLibrary( wm );
     
     MODULE_RemoveFromList(wm);
+
+    /* garbage... */
+    if (local_wm == NULL) my_garbagecollection();
 
     return retv;
 }

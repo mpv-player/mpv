@@ -11,7 +11,8 @@
 #include <wine/winerror.h>
 
 #include <registry.h>
-
+//#undef TRACE
+//#define TRACE printf
 struct reg_value
 {
 	int type;
@@ -147,7 +148,6 @@ static void save_registry()
 static reg_handle_t* find_handle_by_name(const char* name)
 {
 	reg_handle_t* t;
-//        printf("REGISTRY: find_handle_by_name(%s)\n",name);
 	for(t=head; t; t=t->prev)
 	{
 		if(!strcmp(t->name, name))
@@ -160,7 +160,6 @@ static reg_handle_t* find_handle_by_name(const char* name)
 static struct reg_value* find_value_by_name(const char* name)
 {
 	int i;
-//        printf("REGISTRY: find_value_by_name(%s)\n",name);
 	for(i=0; i<reg_size; i++)
 		if(!strcmp(regs[i].name, name))
 			return regs+i;
@@ -169,7 +168,6 @@ static struct reg_value* find_value_by_name(const char* name)
 static reg_handle_t* find_handle(int handle)
 {
 	reg_handle_t* t;
-//        printf("REGISTRY: find_handle(%d)\n",handle);
 	for(t=head; t; t=t->prev)
 	{
 		if(t->handle==handle)
@@ -263,7 +261,7 @@ struct reg_value* insert_reg_value(int handle, const char* name, int type, const
 
 static void init_registry()
 {
-//	printf("Initializing registry\n");
+	printf("Initializing registry\n");
 	open_registry();
 	insert_handle(HKEY_LOCAL_MACHINE, "HKLM");
 	insert_handle(HKEY_CURRENT_USER, "HKCU");
@@ -393,11 +391,11 @@ long RegCreateKeyExA(long key, const char* name, long reserved,
 	{
 		int qw=45708;
 		v=insert_reg_value(key, name, DIR, &qw, 4);
-		*status=REG_CREATED_NEW_KEY;
+		if (status) *status=REG_CREATED_NEW_KEY;
 //		return 0;
 	}
 	else
-		*status=REG_OPENED_EXISTING_KEY;
+		if (status) *status=REG_OPENED_EXISTING_KEY;
 
 	t=insert_handle(generate_handle(), fullname);
 	*newkey=t->handle;

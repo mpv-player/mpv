@@ -670,7 +670,8 @@ HMODULE PE_LoadImage( int handle, LPCSTR filename, WORD *version )
 
 error:
     if (unix_handle != -1) close( unix_handle );
-    if (load_addr) VirtualFree( (LPVOID)load_addr, 0, MEM_RELEASE );
+    if (load_addr) 
+    VirtualFree( (LPVOID)load_addr, 0, MEM_RELEASE );
     UnmapViewOfFile( (LPVOID)hModule );
     return 0;
 }
@@ -870,6 +871,7 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
 
     HeapFree( GetProcessHeap(), 0, wm->filename );
     HeapFree( GetProcessHeap(), 0, wm->short_filename );
+    VirtualFree( (LPVOID)wm->module, 0, MEM_RELEASE );
     HeapFree( GetProcessHeap(), 0, wm );
 }
 
@@ -884,6 +886,12 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
  * DLL_PROCESS_ATTACH. Only new created threads do DLL_THREAD_ATTACH
  * (SDK)
  */
+extern void This_Is_Dirty_Hack()
+{
+    void* mem=alloca(0x20000);
+    *(int*)mem=0x1234;
+}
+
 WIN_BOOL PE_InitDLL( WINE_MODREF *wm, DWORD type, LPVOID lpReserved )
 {
     WIN_BOOL retv = TRUE;
@@ -900,23 +908,26 @@ WIN_BOOL PE_InitDLL( WINE_MODREF *wm, DWORD type, LPVOID lpReserved )
         
 	TRACE_(relay)("CallTo32(entryproc=%p,module=%08x,type=%ld,res=%p)\n",
                        entry, wm->module, type, lpReserved );
-	printf("Entering DllMain(");
+	
+	
+	TRACE("Entering DllMain(");
 	switch(type)
 	{
 	    case DLL_PROCESS_DETACH:
-	        printf("DLL_PROCESS_DETACH) ");
+	        TRACE("DLL_PROCESS_DETACH) ");
 		break;
 	    case DLL_PROCESS_ATTACH:
-	        printf("DLL_PROCESS_ATTACH) ");
+	        TRACE("DLL_PROCESS_ATTACH) ");
 		break;
 	    case DLL_THREAD_DETACH:
-	        printf("DLL_THREAD_DETACH) ");
+	        TRACE("DLL_THREAD_DETACH) ");
 		break;
 	    case DLL_THREAD_ATTACH:
-	        printf("DLL_THREAD_ATTACH) ");
+	        TRACE("DLL_THREAD_ATTACH) ");
 		break;
 	}	
-	printf("for %s\n", wm->filename);
+	TRACE("for %s\n", wm->filename);
+	This_Is_Dirty_Hack();
         retv = entry( wm->module, type, lpReserved );
     }
 

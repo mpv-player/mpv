@@ -15,6 +15,8 @@ typedef struct
     long   bfOffBits;
 } BITMAPFILEHEADER;
 
+#ifndef _BITMAPINFOHEADER_
+#define _BITMAPINFOHEADER_
 typedef struct
 {
     long 	biSize;
@@ -33,6 +35,8 @@ typedef struct {
 	BITMAPINFOHEADER bmiHeader;
 	int	bmiColors[1];
 } BITMAPINFO, *LPBITMAPINFO;
+#endif
+
 #endif
 #define VFWAPI	
 #define VFWAPIV	
