@@ -31,6 +31,7 @@ endif
 
 ifeq ($(CONFIG_LIBAVFORMAT),yes)
 LIBAV_INC = -I../libavcodec -I../libavformat
+SRCS += muxer_lavf.c
 endif
 
 OBJS	= $(SRCS:.c=.o)

@@ -73,6 +73,9 @@ extern m_option_t x264encopts_conf[];
 
 extern m_option_t nuvopts_conf[];
 extern m_option_t mpegopts_conf[];
+#ifdef USE_LIBAVFORMAT
+extern m_option_t lavfopts_conf[];
+#endif
 
 m_option_t ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY, NULL},
@@ -177,6 +180,9 @@ m_option_t info_conf[]={
 m_option_t of_conf[]={
 	{"avi", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_AVI, NULL},
 	{"mpeg", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_MPEG, NULL},
+#ifdef USE_LIBAVFORMAT
+	{"lavf", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_LAVF, NULL},
+#endif
 	{"rawvideo", &out_file_format, CONF_TYPE_FLAG, 0, 0, MUXER_TYPE_RAWVIDEO, NULL},
 	{"help", "\nAvailable output formats:\n"
 	"   avi      - Microsoft Audio/Video Interleaved\n"
@@ -271,6 +277,9 @@ m_option_t mencoder_opts[]={
 
 	{"nuvopts",  nuvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 	{"mpegopts",  mpegopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#ifdef USE_LIBAVFORMAT
+	{"lavfopts",  lavfopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#endif	
 
 #define MAIN_CONF
 #include "cfg-common.h"

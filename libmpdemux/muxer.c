@@ -31,6 +31,12 @@ muxer_t *muxer_new_muxer(int type,FILE *f){
         if(! muxer_init_muxer_rawvideo(muxer))
 	  return NULL;
 	break;
+#ifdef USE_LIBAVFORMAT
+      case MUXER_TYPE_LAVF:
+        if(! muxer_init_muxer_lavf(muxer))
+	  return NULL;
+        break;
+#endif
       case MUXER_TYPE_AVI:
       default:
 	if(! muxer_init_muxer_avi(muxer))

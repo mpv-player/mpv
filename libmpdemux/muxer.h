@@ -7,6 +7,7 @@
 #define MUXER_TYPE_AVI 0
 #define MUXER_TYPE_MPEG 1
 #define MUXER_TYPE_RAWVIDEO 2
+#define MUXER_TYPE_LAVF 3
 
 
 typedef struct {
