@@ -829,7 +829,7 @@ static void* WINAPI expWaitForMultipleObjects(int count, const void** objects,
 	object = objects[i];
 	ret = expWaitForSingleObject(object, duration);
 	if (WaitAll)
-	    dprintf("suck...\n");
+	    dbgprintf("WaitAll flag not yet supported...\n");
 	else
 	    return ret;
     }
@@ -3397,8 +3397,12 @@ static HANDLE WINAPI expCreateFileA(LPCSTR cs1,DWORD i1,DWORD i2,
     if(strstr(cs1, "QuickTimeEssentials.qtx"))
     {
 	int result;
-	char* tmp="/root/.wine/fake_windows/Windows/System/QuickTime/QuickTimeEssentials.qtx";
+	char* tmp=(char*)malloc(strlen(def_path)+50);
+	strcpy(tmp, def_path);
+	strcat(tmp, "/");
+	strcat(tmp, "QuickTimeEssentials.qtx");
 	result=open(tmp, O_RDONLY);
+	free(tmp);
 	return result;
     }
 #endif
