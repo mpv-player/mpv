@@ -151,18 +151,20 @@ int demux_asf_fill_buffer(demuxer_t *demux){
     stream_read(demux->stream,asf_packet,asf_packetsize);
     if(demux->stream->eof) return 0; // EOF
     
-    if(asf_packet[0]==0x82){
-            unsigned char flags=asf_packet[3];
-            unsigned char segtype=asf_packet[4];
-            unsigned char* p=&asf_packet[5];
+    {	    unsigned char ecc_flags=asf_packet[0];
+	    unsigned char* p=&asf_packet[1+(ecc_flags&15)];
             unsigned char* p_end=asf_packet+asf_packetsize;
-            unsigned long time;
-            unsigned short duration;
+            unsigned char flags=p[0];
+            unsigned char segtype=p[1];
+            int padding;
+            int plen;
+	    int sequence;
+            unsigned long time=0;
+            unsigned short duration=0;
+
             int segs=1;
             unsigned char segsizetype=0x80;
-            int seg;
-            int padding=0;
-            int plen;
+            int seg=-1;
             
             if(verbose>1){
                 int i;
@@ -172,45 +174,63 @@ int demux_asf_fill_buffer(demuxer_t *demux){
             
             //if(segtype!=0x5d) printf("Warning! packet[4] != 0x5d  \n");
 
-            // Calculate packet size (plen):
-            if(flags&0x40){
+	    p+=2; // skip flags & segtype
+
+            // Read packet size (plen):
+	    switch((flags>>5)&3){
+	    case 3: plen=LOAD_LE32(p);p+=4;break;	// dword
+	    case 2: plen=LOAD_LE16(p);p+=2;break;	// word
+	    case 1: plen=p[0];p++;break;		// byte
+	    }
+
+            // Read sequence:
+	    switch((flags>>1)&3){
+	    case 3: sequence=LOAD_LE32(p);p+=4;break;	// dword
+	    case 2: sequence=LOAD_LE16(p);p+=2;break;	// word
+	    case 1: sequence=p[0];p++;break;		// byte
+	    default: sequence=0;
+	    }
+
+            // Read padding size (padding):
+	    switch((flags>>3)&3){
+	    case 3: padding=LOAD_LE32(p);p+=4;break;	// dword
+	    case 2: padding=LOAD_LE16(p);p+=2;break;	// word
+	    case 1: padding=p[0];p++;break;		// byte
+	    default: padding=0;
+	    }
+	    
+	    if(((flags>>5)&3)!=0){
               // Explicit (absoulte) packet size
-              plen=LOAD_LE16(p); p+=2;
               mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Explicit packet size specified: %d  \n",plen);
               if(plen>asf_packetsize) mp_msg(MSGT_DEMUX,MSGL_V,"Warning! plen>packetsize! (%d>%d)  \n",plen,asf_packetsize);
-              if(flags&(8|16)){
-                padding=p[0];p++;
-                if(flags&16){ padding|=p[0]<<8; p++;}
-                mp_dbg(MSGT_DEMUX,MSGL_DBG2,"Warning! explicit=%d  padding=%d  \n",plen,asf_packetsize-padding);
-              }
-            } else {
+	    } else {
               // Padding (relative) size
-              if(flags&8){
-                padding=p[0];++p;
-              } else
-              if(flags&16){
-                padding=LOAD_LE16(p);p+=2;
-              }
               plen=asf_packetsize-padding;
-            }
+	    }
 
+	    // Read time & duration:
 	    time = LOAD_LE32(p); p+=4;
 	    duration = LOAD_LE16(p); p+=2;
+
+	    // Read payload flags:
             if(flags&1){
-              segsizetype=p[0] & 0xC0;
+	      // multiple sub-packets
+              segsizetype=p[0]>>6;
               segs=p[0] & 0x3F;
               ++p;
             }
-            mp_dbg(MSGT_DEMUX,MSGL_DBG4,"%08X:  flag=%02X  segs=%d  pad=%d  time=%ld  dur=%d\n",
-              demux->filepos,flags,segs,padding,time,duration);
+            mp_dbg(MSGT_DEMUX,MSGL_DBG4,"%08X:  flag=%02X  segs=%d  seq=%d  plen=%d  pad=%d  time=%ld  dur=%d\n",
+              demux->filepos,flags,segs,sequence,plen,padding,time,duration);
+
             for(seg=0;seg<segs;seg++){
               //ASF_segmhdr_t* sh;
               unsigned char streamno;
-              unsigned char seq;
+              unsigned int seq;
+              unsigned int x;	// offset or timestamp
+	      unsigned int rlen;
+	      //
               int len;
-              unsigned long x;
-              unsigned char type;
-              unsigned long time2;
+              unsigned int time2;
 	      int keyframe=0;
 
               if(p>=p_end) mp_msg(MSGT_DEMUX,MSGL_V,"Warning! invalid packet 1, sig11 coming soon...\n");
@@ -221,53 +241,61 @@ int demux_asf_fill_buffer(demuxer_t *demux){
                 for(i=0;i<16;i++) printf(" %02X",p[i]);
                 printf("\n");
               }
-              
+
               streamno=p[0]&0x7F;
 	      if(p[0]&0x80) keyframe=1;
-              seq=p[1];
-              p+=2;
+	      p++;
 
-              switch(segtype){
-              case 0x55:
-                 x=*((unsigned char*)p);
-                 p++;
-                 break;
-              case 0x59:
-                 x=LOAD_LE16(p);
-                 p+=2;
-                 break;
-              case 0x5D:
-		 x=LOAD_LE32(p);
-                 p+=4;
-                 break;
-              default:
-                 mp_msg(MSGT_DEMUX,MSGL_V,"Warning! unknown segtype == 0x%2X  \n",segtype);
-		 x=0;
-              }
+              // Read media object number (seq):
+	      switch((segtype>>4)&3){
+	      case 3: seq=LOAD_LE32(p);p+=4;break;	// dword
+	      case 2: seq=LOAD_LE16(p);p+=2;break;	// word
+	      case 1: seq=p[0];p++;break;		// byte
+	      default: seq=0;
+	      }
+	      
+              // Read offset or timestamp:
+	      switch((segtype>>2)&3){
+	      case 3: x=LOAD_LE32(p);p+=4;break;	// dword
+	      case 2: x=LOAD_LE16(p);p+=2;break;	// word
+	      case 1: x=p[0];p++;break;		// byte
+	      default: x=0;
+	      }
 
-              type=p[0]; p++;        // 0x01: grouping  0x08: single
-              
-              switch(type){
-              case 0x01:
+              // Read replic.data len:
+	      switch((segtype)&3){
+	      case 3: rlen=LOAD_LE32(p);p+=4;break;	// dword
+	      case 2: rlen=LOAD_LE16(p);p+=2;break;	// word
+	      case 1: rlen=p[0];p++;break;		// byte
+	      default: rlen=0;
+	      }
+	      
+//	      printf("### rlen=%d   \n",rlen);
+      
+              switch(rlen){
+              case 0x01: // 1 = special, means grouping
 	        //printf("grouping: %02X  \n",p[0]);
-                ++p; // skip unknown byte
-                break;
-              case 0x08:
-                //printf("!!! obj_length = %d\n",*((unsigned long*)p));
-                p+=4;
-                time2=LOAD_LE32(p);p+=4;
+                ++p; // skip PTS delta
                 break;
               default:
-                mp_msg(MSGT_DEMUX,MSGL_V,"unknown segment type: 0x%02X  \n",type);
+	        if(rlen>=8){
+            	    p+=4;	// skip object size
+            	    time2=LOAD_LE32(p); // read PTS
+		    p+=rlen-4;
+		} else {
+            	    mp_msg(MSGT_DEMUX,MSGL_V,"unknown segment type (rlen): 0x%02X  \n",rlen);
+		    p+=rlen;
+		}
               }
 
               if(flags&1){
                 // multiple segments
-                if(segsizetype==0x40){
-                  len=*((unsigned char*)p);p++;		// 1 byte
-                } else {
-                  len=LOAD_LE16(p);p+=2;		// 2 byte
-                }
+		switch(segsizetype){
+	          case 3: len=LOAD_LE32(p);p+=4;break;	// dword
+	          case 2: len=LOAD_LE16(p);p+=2;break;	// word
+	          case 1: len=p[0];p++;break;		// byte
+	          default: len=plen-(p-asf_packet); // ???
+		}
               } else {
                 // single segment
                 len=plen-(p-asf_packet);
@@ -275,9 +303,9 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               if(len<0 || (p+len)>p_end){
                 mp_msg(MSGT_DEMUX,MSGL_V,"ASF_parser: warning! segment len=%d\n",len);
               }
-              mp_dbg(MSGT_DEMUX,MSGL_DBG4,"  seg #%d: streamno=%d  seq=%d  type=%02X  len=%d\n",seg,streamno,seq,type,len);
+              mp_dbg(MSGT_DEMUX,MSGL_DBG4,"  seg #%d: streamno=%d  seq=%d  type=%02X  len=%d\n",seg,streamno,seq,rlen,len);
 
-              switch(type){
+              switch(rlen){
               case 0x01:
                 // GROUPING:
                 //printf("ASF_parser: warning! grouping (flag=1) not yet supported!\n",len);
@@ -294,7 +322,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
                   mp_msg(MSGT_DEMUX,MSGL_V,"ASF_parser: warning! groups total != len\n");
                 }
                 break;
-              case 0x08:
+              default:
                 // NO GROUPING:
                 //printf("fragment offset: %d  \n",sh->x);
                 demux_asf_read_packet(demux,p,len,streamno,seq,time2,duration,x,keyframe);
