@@ -961,6 +961,7 @@ printf("Found video codec: [%s] drv:%d (%s)\n",sh_video->codec->name,sh_video->c
 for(i=0;i<CODECS_MAX_OUTFMT;i++){
     int ret;
     out_fmt=sh_video->codec->outfmt[i];
+    if(out_fmt==0xFFFFFFFF) continue;
     ret=video_out->query_format(out_fmt);
     if(verbose) printf("vo_debug: query(0x%X) returned 0x%X\n",out_fmt,ret);
     if(ret) break;
