@@ -218,4 +218,10 @@ typedef struct af_control_ext_s{
 // ExtraStereo Multiplier
 #define AF_CONTROL_ES_MUL		0x00002100 | AF_CONTROL_FILTER_SPECIFIC
 
+
+// Center
+
+// Channel number which to inster the filtered data, arg in int*
+#define AF_CONTROL_CENTER_CH		0x00002200 | AF_CONTROL_FILTER_SPECIFIC
+
 #endif /*__af_control_h */
