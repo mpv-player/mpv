@@ -9,12 +9,10 @@
 //#include <config.h>
 
 //#include "DS_AudioDecoder.h"
-#include <string.h>
+//#include <string.h>
 #include <stdlib.h>
 #include <except.h>
 #define __MODULE__ "DirectShow_AudioDecoder"
-
-using namespace std;
 
 #include <errno.h>
 #ifdef HAVE_MALLOC_H

@@ -9,12 +9,11 @@
 //#include <config.h>
 
 //#include "DS_VideoDecoder.h"
-#include <string.h>
+//#include <string.h>
 #include <stdlib.h>
 #include <except.h>
 #define __MODULE__ "DirectShow_VideoDecoder"
 
-using namespace std;
 
 #include <errno.h>
 #ifdef HAVE_MALLOC_H
