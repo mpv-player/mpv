@@ -265,19 +265,19 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
                (priv->v_format==mmioFOURCC('V','P','6','2')) ||
                (priv->v_format==mmioFOURCC('V','P','3','1'))) {
                 stream_read(demuxer->stream,buf,10);
-                if (((((priv->v_format>>16) & 0xff) == '6') && ((buf[8]&0x0f)!=0x06)) ||
+                if (((((priv->v_format>>16) & 0xff) == '6') && ((buf[8]&0x0e)!=0x06)) ||
                     ((((priv->v_format>>16) & 0xff) == '3') && (buf[8]!=0x00 || buf[9]!=0x08))) {
                     mp_msg(MSGT_DEMUX,MSGL_V,"demux_nsv: searching %.4s keyframe...\n", (char*)&priv->v_format);
-                    while(((((priv->v_format>>16) & 0xff) == '6') && ((buf[8]&0x0f)!=0x06)) ||
+                    while(((((priv->v_format>>16) & 0xff) == '6') && ((buf[8]&0x0e)!=0x06)) ||
                           ((((priv->v_format>>16) & 0xff) == '3') && (buf[8]!=0x00 || buf[9]!=0x08))){
                         mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: %.4s block skip.\n", (char*)&priv->v_format);
                         videolen=(buf[2]>>4)|(buf[3]<<4)|(buf[4]<<0xC);
                         audiolen=(buf[5])|(buf[6]<<8);
                         stream_skip(demuxer->stream, videolen+audiolen-3);
                         stream_read(demuxer->stream,buf,10);
+                        if(stream_eof(demuxer->stream)) return 0;
                         if(buf[0]==0x4E){
                             mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_nsv: Got NSVs block.\n");
-                            if(stream_eof(demuxer->stream)) return 0;
                             stream_skip(demuxer->stream,7);
                             stream_read(demuxer->stream,buf,10);
                         }
