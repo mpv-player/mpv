@@ -125,7 +125,17 @@ int out_audio_codec=ACODEC_VBRMP3;
 int out_audio_codec=ACODEC_PCM;
 #endif
 
-int out_video_codec=VCODEC_DIVX4;
+int out_video_codec=
+#ifdef HAVE_DIVX4ENCORE
+    VCODEC_DIVX4;
+#else
+#ifdef USE_LIBAVCODEC
+    VCODEC_LIBAVCODEC;
+#else
+    VCODEC_RAW;
+#endif
+#endif
+
 
 // audio stream skip/resync functions requires only for seeking.
 // (they should be implemented in the audio codec layer)
@@ -197,6 +207,9 @@ static int cfg_inc_verbose(struct config *conf){ ++verbose; return 0;}
 static int cfg_include(struct config *conf, char *filename){
 	return m_config_parse_config_file(mconfig, filename);
 }
+
+static char *seek_to_sec=NULL;
+static off_t seek_to_byte=0;
 
 static int parse_end_at(struct config *conf, const char* param);
 static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
@@ -597,7 +610,7 @@ if(!init_video(sh_video,pitches)){
 
 } // if(out_video_codec)
 
-if(sh_audio && (out_audio_codec || !sh_audio->wf)){
+if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
   if(audio_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceAudioFmt,audio_family);
@@ -622,7 +635,7 @@ if(sh_audio && (out_audio_codec || !sh_audio->wf)){
   }
 }
 
-if(sh_audio && (out_audio_codec || !sh_audio->wf)){
+if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   mp_msg(MSGT_MENCODER,MSGL_V,"Initializing audio codec...\n");
   if(!init_audio(sh_audio)){
     mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CouldntInitAudioCodec);
@@ -1193,6 +1206,19 @@ signal(SIGQUIT,exit_sighandler); // Quit from keyboard
 signal(SIGTERM,exit_sighandler); // kill
 
 timer_start=GetTimerMS();
+
+if (seek_to_sec) {
+    int a,b; float d;
+
+    if (sscanf(seek_to_sec, "%d:%d:%f", &a,&b,&d)==3)
+        d += 3600*a + 60*b;
+    else if (sscanf(seek_to_sec, "%d:%f", &a, &d)==2)
+        d += 60*a;
+    else 
+        sscanf(seek_to_sec, "%f", &d);
+
+    demux_seek(demuxer, d, 1);
+}
 
 while(!eof){
 
