@@ -2640,6 +2640,19 @@ format name like rgb15, bgr24, yv12, etc (default: yuy2)
 .RE
 .PD 1
 .TP
+.B noformat[=fourcc]
+Restricts the colorspace for the next filter without doing any conversion.
+Unlike the format filter, this will allow any colorspace 
+.B except
+the one you specify.
+For a list of available formats see noformat=fmt=help.
+.PD 0
+.RSs
+.IPs fourcc
+format name like rgb15, bgr24, yv12, etc (default: yv12)
+.RE
+.PD 1
+.TP
 .B pp[=filter1[:option1[:option2...]]/[-]filter2...] (see \-pphelp too)
 This option enables usage of MPlayer's internal postprocessing filter,
 and also gives an interface where you can pass options to the named filter.
