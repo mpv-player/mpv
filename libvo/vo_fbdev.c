@@ -28,6 +28,7 @@
 #include "fastmemcpy.h"
 #include "sub.h"
 #include "../postproc/rgb2rgb.h"
+#include "../libmpcodecs/vf_scale.h"
 #ifdef CONFIG_VIDIX
 #include "vosub_vidix.h"
 #endif
@@ -576,7 +577,7 @@ static int fb_dev_fd;
 static int fb_tty_fd;
 static size_t fb_size;
 static uint8_t *frame_buffer;
-static uint8_t *L123123875;	/* thx .so :) */
+static uint8_t *center;	/* thx .so :) */
 static struct fb_fix_screeninfo fb_finfo;
 static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
@@ -609,7 +610,7 @@ static int flip;
  * Chris Lawrence's code.
  * (modified a bit to fit in my code...)
  */
-struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
+static struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
 {
   /* Hopefully any DIRECTCOLOR device will have a big enough palette
    * to handle mapping the full color depth.
@@ -684,10 +685,16 @@ static uint32_t parseSubDevice(const char *sd)
 }
 #endif
 
-static int fb_preinit(void)
+static int fb_preinit(int reset)
 {
 	static int fb_preinit_done = 0;
 	static int fb_works = 0;
+
+	if (reset)
+	{
+	    fb_preinit_done = 0;
+	    return 0;
+	}
 
 	if (fb_preinit_done)
 		return fb_works;
@@ -1075,14 +1082,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    //FIXME: update geometry code
 	    //geometry(&x_offset,&y_offset,fb_xres,fb_yres,out_width,out_height);
 
-	    L123123875 = frame_buffer + (out_width - in_width) * fb_pixel_size /
+	    center = frame_buffer + (out_width - in_width) * fb_pixel_size /
 		    2 + ( (out_height - in_height) / 2 ) * fb_line_len +
 		    x_offset * fb_pixel_size + y_offset * fb_line_len;
 
 	    if (verbose > 0) {
 		if (verbose > 1) {
 			printf(FBDEV "frame_buffer @ %p\n", frame_buffer);
-			printf(FBDEV "L123123875 @ %p\n", L123123875);
+			printf(FBDEV "center @ %p\n", center);
 		}
 		printf(FBDEV "pixel per line: %d\n", fb_line_len / fb_pixel_size);
 	    }
@@ -1093,9 +1100,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    }
 	    if (fs || vm)
 		memset(frame_buffer, '\0', fb_line_len * fb_yres);
-
-	    if (format == IMGFMT_YV12)
-		yuv2rgb_init(fb_bpp, MODE_RGB);
 	}
 	if (vt_doit && (vt_fd = open("/dev/tty", O_WRONLY)) == -1) {
 		printf(FBDEV "can't open /dev/tty: %s\n", strerror(errno));
@@ -1109,6 +1113,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	if (vt_doit)
 		vt_set_textarea(last_row, fb_yres);
 
+	sws_rgb2rgb_init(get_sws_cpuflags());
+
 	return 0;
 }
 
@@ -1116,7 +1122,7 @@ static uint32_t query_format(uint32_t format)
 {
 	int ret = VFCAP_OSD|VFCAP_CSP_SUPPORTED; /* osd/sub is supported on every bpp */
 
-	if (!fb_preinit())
+	if (!fb_preinit(0))
 		return 0;
 #ifdef CONFIG_VIDIX
 	if(vidix_name)
@@ -1132,8 +1138,6 @@ static uint32_t query_format(uint32_t format)
 		else if (bpp == 24 && fb_bpp == 32)
 			return ret;
 	}
-	//if (format == IMGFMT_YV12)
-	//	return ret;
 	return 0;
 }
 
@@ -1143,35 +1147,15 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	unsigned char *dst;
 	int dstride;
 
-#ifdef USE_CONVERT2FB
-	if (pixel_format == IMGFMT_YV12) {
-	  dst = L123123875 + (fb_xres * y0 + x0) * fb_pixel_size;
-	  dstride = fb_xres * fb_pixel_size;
-	}
-	else
-#endif
-	  {
 	    dst = next_frame + (in_width * y0 + x0) * fb_pixel_size;
 	    dstride = in_width * fb_pixel_size;
-	  }
 
 	(*draw_alpha_p)(w, h, src, srca, stride, dst, dstride);
 }
 
 static uint32_t draw_frame(uint8_t *src[])
 {
-	if (pixel_format == IMGFMT_YV12) {
-#ifdef USE_CONVERT2FB
-		yuv2rgb(L123123875, src[0], src[1], src[2], fb_xres,
-				fb_yres, fb_xres * fb_pixel_size,
-				in_width, in_width / 2);
-#else
-		yuv2rgb(next_frame, src[0], src[1], src[2], in_width,
-				in_height, in_width * fb_pixel_size,
-				in_width, in_width / 2);
-#endif
-
-	} else if (flip) {
+	if (flip) {
 		int h = in_height;
 		int len = in_width * fb_pixel_size;
 		char *d = next_frame + (in_height - 1) * len;
@@ -1198,48 +1182,11 @@ static uint32_t draw_frame(uint8_t *src[])
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 		int y)
 {
-	uint8_t *dest;
-
-#ifdef USE_CONVERT2FB
-	if (pixel_format == IMGFMT_YV12) {
-	  if(x < fb_xres && y < fb_yres) {
-	    if(x+w > fb_xres) w= fb_xres-x;
-	    if(y+h > fb_yres) h= fb_yres-y;
-
-	    dest = L123123875 + (fb_xres * y + x) * fb_pixel_size;
-	    yuv2rgb(dest, src[0], src[1], src[2], w, h, fb_xres * fb_pixel_size,
-		    stride[0], stride[1]);
-	  }
-
-	  return 0;
-	}
-#endif
-
-	dest = next_frame + (in_width * y + x) * fb_pixel_size;
-	yuv2rgb(dest, src[0], src[1], src[2], w, h, in_width * fb_pixel_size,
-			stride[0], stride[1]);
 	return 0;
 }
 
 static void check_events(void)
 {
-}
-
-static void put_frame(void)
-{
-	int i, out_offset = 0, in_offset = 0;
-
-#ifdef USE_CONVERT2FB
-	if(pixel_format == IMGFMT_YV12)
-	  return;
-#endif
-
-	for (i = 0; i < in_height; i++) {
-		memcpy(L123123875 + out_offset, next_frame + in_offset,
-				in_width * fb_pixel_size);
-		out_offset += fb_line_len;
-		in_offset += in_width * fb_pixel_size;
-	}
 }
 
 static void draw_osd(void)
@@ -1249,13 +1196,21 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
-	put_frame();
+	int i, out_offset = 0, in_offset = 0;
+
+	for (i = 0; i < in_height; i++) {
+		memcpy(center + out_offset, next_frame + in_offset,
+				in_width * fb_pixel_size);
+		out_offset += fb_line_len;
+		in_offset += in_width * fb_pixel_size;
+	}
 }
 
 static void uninit(void)
 {
 	if (verbose > 0)
 		printf(FBDEV "uninit\n");
+	fb_preinit(1);
 	if (fb_cmap_changed) {
 		if (ioctl(fb_dev_fd, FBIOPUTCMAP, &fb_oldcmap))
 			printf(FBDEV "Can't restore original cmap\n");
@@ -1291,7 +1246,7 @@ static uint32_t preinit(const char *vo_subdevice)
     if(verbose > 2)
 	printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
 #endif
-    if(!pre_init_err) return (pre_init_err=(fb_preinit()?0:-1));
+    if(!pre_init_err) return (pre_init_err=(fb_preinit(0)?0:-1));
     return(-1);
 }
 
