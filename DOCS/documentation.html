@@ -283,6 +283,7 @@
         <UL>
 	  <LI><A HREF="#debian">6.1.1 Debian packaging</A></LI>
 	  <LI><A HREF="#rpm">6.1.2 RPM packaging</A></LI>
+          <LI><A HREF="#arm">6.1.3 ARM</A></LI>
 	</UL>
       </LI>
       <LI><A HREF="#bsd">6.2 *BSD</A>
@@ -292,10 +293,9 @@
         </UL>
       </LI>
       <LI><A HREF="#solaris">6.3 Solaris</A></LI>
-      <LI><A HREF="#strongarm">6.4 StrongARM</A></LI>
-      <LI><A HREF="#sgi">6.5 Silicon Graphics / Irix</A></LI>
-      <LI><A HREF="#qnx">6.6 QNX</A></LI>
-      <LI><A HREF="#cygwin">6.7 Cygwin</A></LI>
+      <LI><A HREF="#sgi">6.4 Silicon Graphics / Irix</A></LI>
+      <LI><A HREF="#qnx">6.5 QNX</A></LI>
+      <LI><A HREF="#cygwin">6.6 Cygwin</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">Appendix A - Mailing lists</A></LI>
@@ -1607,6 +1607,20 @@ end
   officially supported.</P>
 
 
+<H3><A NAME="arm">6.1.3 ARM</A></H3>
+
+<P>MPlayer works on Linux PDAs with ARM CPU e.g. Sharp Zaurus, Compaq Ipaq.
+  The easiest way to obtain MPlayer is to get it from one of the
+  <A HREF="http://www.openzaurus.org">Openzaurus</A> package feeds.
+  If you want to compile it yourself, you should look at the
+  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</A>
+  and the
+  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</A>
+  directory in the OpenZaurus distribution buildroot. These always have the
+  latest Makefile and patches used for building a CVS MPlayer with libavcodec.
+  <BR>If you need a GUI frontend, you can use xmms-embedded.</P>
+
+
 <H2><A NAME="bsd">6.2 *BSD</A></H2>
 
 <P>MPlayer runs on FreeBSD, OpenBSD, NetBSD, BSD/OS and Darwin.  There are
@@ -1724,20 +1738,6 @@ end
 
 <P>VIS accelerated operations from mediaLib are used for mpeg2 video
   decoding and for color space conversion in the video output drivers.</P>
-
-
-<H2><A NAME="strongarm">6.4 StrongARM</A></H2>
-
-<P>MPlayer works on Linux PDAs with ARM CPU e.g. Sharp Zaurus, Compaq Ipaq.
-  The easiest way to obtain MPlayer is to get it from one of the
-  <A HREF="http://www.openzaurus.org">Openzaurus</A> package feeds.
-  If you want to compile it yourself, you should look at the
-  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</A>
-  and the
-  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</A>
-  directory in the OpenZaurus distribution buildroot. These always have the
-  latest Makefile and patches used for building a CVS MPlayer with libavcodec.
-  <BR>If you need a GUI frontend, you can use xmms-embedded.</P>
 
 
 <H2><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></H2>
