@@ -215,4 +215,7 @@ typedef struct af_control_ext_s{
 #define AF_CONTROL_SUB_FC		0x00001F00 | AF_CONTROL_FILTER_SPECIFIC
 
 
+// Export
+#define AF_CONTROL_EXPORT_SZ            0x00002000 | AF_CONTROL_FILTER_SPECIFIC
+
 #endif /*__af_control_h */

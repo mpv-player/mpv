@@ -21,6 +21,7 @@ extern af_info_t af_info_comp;
 extern af_info_t af_info_pan;
 extern af_info_t af_info_surround;
 extern af_info_t af_info_sub;
+extern af_info_t af_info_export;
 
 static af_info_t* filter_list[]={ \
    &af_info_dummy,\
@@ -35,6 +36,7 @@ static af_info_t* filter_list[]={ \
    &af_info_pan,\
    &af_info_surround,\
    &af_info_sub,\
+   &af_info_export,\
    NULL \
 };
 
