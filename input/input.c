@@ -1294,7 +1294,7 @@ mp_input_init(void) {
   if(use_lirc) {
     int fd = mp_input_lirc_init();
     if(fd > 0)
-      mp_input_add_cmd_fd(fd,1,NULL,(mp_close_func_t)close);
+      mp_input_add_cmd_fd(fd,0,mp_input_lirc_read,mp_input_lirc_close);
   }
 #endif
 
@@ -1327,12 +1327,6 @@ mp_input_uninit(void) {
       cmd_fds[i].close_func(cmd_fds[i].fd);
   }
   
-
-#ifdef HAVE_LIRC
-  if(use_lirc)
-    mp_input_lirc_uninit();
-#endif
-
 }
 
 void

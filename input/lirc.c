@@ -6,35 +6,24 @@
 #include <lirc/lirc_client.h>
 #include <errno.h>
 #include <stdio.h>
-#include <sys/ioctl.h>
 #include <string.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <signal.h>
 #include <sys/types.h>
-#include <sys/wait.h>
+#include <sys/time.h>
 #include <stdlib.h>
-
 
 #include "../mp_msg.h"
 #include "../help_mp.h"
+#include "input.h"
 
 static struct lirc_config *lirc_config;
 char *lirc_configfile;
 
-static int child_pid=0;
-
-static void
-mp_input_lirc_process_quit(int sig);
-
-static void
-mp_input_lirc_process(int mp_fd);
-
+static char* cmd_buf = NULL;
 
 int 
 mp_input_lirc_init(void) {
   int lirc_sock;
-  int p[2];
 
   mp_msg(MSGT_LIRC,MSGL_INFO,MSGTR_SettingUpLIRC);
   if((lirc_sock=lirc_init("mplayer",1))==-1){
@@ -49,92 +38,82 @@ mp_input_lirc_init(void) {
     return -1;
   }
 
-  if(pipe(p) != 0) {
-    mp_msg(MSGT_LIRC,MSGL_ERR,"Can't create lirc pipe : %s\n",strerror(errno));
-    lirc_deinit();
-  }
-
-  child_pid = fork();
-
-  if(child_pid < 0) {
-    mp_msg(MSGT_LIRC,MSGL_ERR,"Can't fork lirc subprocess : %s\n",strerror(errno));
-    lirc_deinit();
-    close(p[0]);
-    close(p[1]);
-    return -1;
-  } else if(child_pid == 0) {// setup child process
-    close(p[0]);
-    // put some signal handlers
-    signal(SIGINT,mp_input_lirc_process_quit);
-    signal(SIGHUP,mp_input_lirc_process_quit);
-    signal(SIGQUIT,mp_input_lirc_process_quit);
-    // start the process
-    mp_input_lirc_process(p[1]);
-  }
-
-  // free unuseful ressources in parent process
-  lirc_freeconfig(lirc_config);
-  close(p[1]);
-
-  mp_msg(MSGT_LIRC,MSGL_V,"NEW LIRC init was successful.\n");
-
-  return p[0];
+  return lirc_sock;
 }
 
-static void
-mp_input_lirc_process_quit(int sig) {
-  lirc_freeconfig(lirc_config);
-  lirc_deinit();
-  exit(sig > 0 ? 0 : -1);
-}
+int mp_input_lirc_read(int fd,char* dest, int s) {
+  fd_set fds;
+  struct timeval tv;
+  int r,cl = 0;
+  char *code = NULL,*c = NULL;
 
-static void
-mp_input_lirc_process(int mp_fd) {
-  char *cmd,*code;
-  int ret;
-
-  while(lirc_nextcode(&code)==0) {
-    if(code==NULL)
-      continue;
-    while((ret=lirc_code2char(lirc_config,code,&cmd))==0 && cmd!=NULL) {
-      int len = strlen(cmd)+1;
-      char buf[len];
-      int w=0;
-      strcpy(buf,cmd);
-      buf[len-1] = '\n';
-      while(w < len) {
-	int r = write(mp_fd,buf+w,len-w);
-	if(r < 0) {
-	  if(errno == EINTR)
-	    continue;
-	  mp_msg(MSGT_LIRC,MSGL_ERR,"LIRC subprocess can't write in input pipe : %s\n",
-		 strerror(errno));
-	  mp_input_lirc_process_quit(-1);
-	}
-	w += r;
-      }
+  // We have something in the buffer return it
+  if(cmd_buf != NULL) {
+    int l = strlen(cmd_buf), w = l > s ? s : l;
+    memcpy(dest,cmd_buf,w);
+    l -= w;
+    if(l > 0)
+      memmove(cmd_buf,&cmd_buf[w],l+1);
+    else {
+      free(cmd_buf);
+      cmd_buf = NULL;
     }
-    free(code);
-    if(ret==-1)
-      break;
+    return w;
   }
-  mp_input_lirc_process_quit(-1);
+      
+  // Nothing in the buffer, pool the lirc fd
+  FD_ZERO(&fds);
+  FD_SET(fd,&fds);
+  memset(&tv,0,sizeof(tv));
+  while((r = select(fd+1,&fds,NULL,NULL,&tv)) <= 0) {
+    if(r < 0) {
+      if(errno == EINTR)
+	continue;
+      mp_msg(MSGT_INPUT,MSGL_ERR,"Select error : %s\n",strerror(errno));
+      return MP_INPUT_ERROR;
+    } else
+      return MP_INPUT_NOTHING;
+  }
+  
+  // There's something to read
+  if(lirc_nextcode(&code) != 0) {
+    mp_msg(MSGT_INPUT,MSGL_ERR,"Lirc error :(\n");
+    return MP_INPUT_DEAD;
+  }
+
+  if(!code) return MP_INPUT_NOTHING;
+
+  // We put all cmds in a single buffer separated by \n
+  while((r = lirc_code2char(lirc_config,code,&c))==0 && c!=NULL) {
+    int l = strlen(c);
+    if(l <= 0)
+      continue;
+    cmd_buf = realloc(cmd_buf,cl+l+2);
+    memcpy(&cmd_buf[cl],c,l);
+    cl += l+1;
+    cmd_buf[cl-1] = '\n';
+    cmd_buf[cl] = '\0';
+  }
+
+  free(code);
+
+  if(r < 0)
+    return MP_INPUT_DEAD;
+  else if(cmd_buf) // return the first command in the buffer
+    return mp_input_lirc_read(fd,dest,s);
+  else
+    return MP_INPUT_NOTHING;
+
 }
 
 void
-mp_input_lirc_uninit(void) {
-  if(child_pid <= 0)
-    return;
-  if( kill(child_pid,SIGQUIT) != 0) {
-    mp_msg(MSGT_LIRC,MSGL_ERR,"LIRC can't kill subprocess %d : %s\n",
-	   child_pid,strerror(errno));
-    return;
+mp_input_lirc_close(int fd) {
+  if(cmd_buf) {
+    free(cmd_buf);
+    cmd_buf = NULL;
   }
-
-  if(waitpid(child_pid,NULL,0) < 0)
-    mp_msg(MSGT_LIRC,MSGL_ERR,"LIRC error while waiting subprocess %d : %s\n",
-	   child_pid,strerror(errno));
-
+  lirc_freeconfig(lirc_config);
+  lirc_deinit();
 }
 
 #endif
