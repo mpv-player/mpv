@@ -113,6 +113,10 @@
 #include "ioctl.h"
 #include "device.h"
 
+#ifdef __CYGWIN__
+#define SYS_CYGWIN
+#endif
+
 /**
  * \brief Symbol for version checks.
  *
