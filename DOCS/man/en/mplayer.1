@@ -3774,6 +3774,30 @@ will have the output file contain 'div3' as video fourcc.
 .PD 1
 .
 .TP
+.B \-aviaspect <w:h>
+Encode an additional AVI header with aspect ratio. This is a different
+method than the "aspect=..." option of libavcodec or xvid, and is
+prioritized over it during playback, because this header is processed
+first.
+
+This option is included for completeness. Some players can understand
+it, while they do not understand the aspect headers produced by the
+codec. If you wish to target such a player, use this
+option. Generally, encoding AVIs with square pixels is still the best
+choice, so aspect headers should be avoided. Use this option only if
+you know what you are doing. Avoid using it together with
+the aspect option of the codec, as it could bring unpredictable
+results.
+
+.I EXAMPLE:
+.PD 0
+.RSs
+.IPs "\-aviaspect 16:9"
+will add a header specifying 16:9 aspect ratio.
+.RE
+.PD 1
+.
+.TP
 .B \-info <option1:option2:...> (AVI only)
 Specify the info header of the resulting AVI file.
 .br

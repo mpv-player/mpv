@@ -34,6 +34,8 @@ extern char *info_comment;
 #define ODML_NOTKEYFRAME 0x80000000U
 #define MOVIALIGN        0x00001000
 
+float avi_prp_aspect = -1.0;
+
 struct avi_odmlidx_entry {
 	uint64_t ofs;
 	uint32_t len;
@@ -223,12 +225,8 @@ static void write_avi_list(FILE *f,unsigned int id,int len){
 
 #define WFSIZE(wf) (sizeof(WAVEFORMATEX)+(wf)->cbSize)
 
-static unsigned int avi_aspect(sh_video_t *sh_video)
+static unsigned int avi_aspect(float aspect)
 {
-    float aspect = sh_video->aspect;
-    if (aspect <= 0.0) {
-        aspect = (float)sh_video->disp_w/(float)sh_video->disp_h;
-    }
     if (aspect >= 3.99/3.0 &&
         aspect <= 4.01/3.0) return MAKE_AVI_ASPECT(4,3);
     if (aspect >= 15.99/9.0 &&
@@ -247,6 +245,7 @@ static void avifile_write_header(muxer_t *muxer){
   muxer_info_t info[16];
   FILE *f = muxer->file;
   VideoPropHeader vprp;
+
   off_t pos;
   int isodml = muxer->file_end > ODML_CHUNKLEN ? 1 : 0;
 
@@ -314,7 +313,9 @@ static void avifile_write_header(muxer_t *muxer){
       switch(muxer->streams[i]->type){
       case MUXER_TYPE_VIDEO:
           hdrsize+=muxer->streams[i]->bih->biSize+8; // strf
-	  hdrsize+=8+4*(9+8*1); // vprp
+	  if (avi_prp_aspect > 0) {
+	      hdrsize+=8+4*(9+8*1); // vprp
+	  }
 	  break;
       case MUXER_TYPE_AUDIO:
           hdrsize+=WFSIZE(muxer->streams[i]->wf)+8; // strf
@@ -347,20 +348,22 @@ static void avifile_write_header(muxer_t *muxer){
           s->h.fccHandler = s->bih->biCompression;
           s->h.rcFrame.right = s->bih->biWidth;
           s->h.rcFrame.bottom = s->bih->biHeight;
-	  // fill out vprp info
-	  memset(&vprp, 0, sizeof(vprp));
-	  vprp.dwVerticalRefreshRate = (s->h.dwRate+s->h.dwScale-1)/s->h.dwScale;
-	  vprp.dwHTotalInT = muxer->avih.dwWidth;
-	  vprp.dwVTotalInLines = muxer->avih.dwHeight;
-	  vprp.dwFrameAspectRatio = avi_aspect(s->source);
-	  vprp.dwFrameWidthInPixels = muxer->avih.dwWidth;
-	  vprp.dwFrameHeightInLines = muxer->avih.dwHeight;
-	  vprp.nbFieldPerFrame = 1;
-	  vprp.FieldInfo[0].CompressedBMHeight = muxer->avih.dwHeight;
-	  vprp.FieldInfo[0].CompressedBMWidth = muxer->avih.dwWidth;
-	  vprp.FieldInfo[0].ValidBMHeight = muxer->avih.dwHeight;
-	  vprp.FieldInfo[0].ValidBMWidth = muxer->avih.dwWidth;
-          hdrsize+=8+4*(9+8*1); // vprp
+	  if (avi_prp_aspect > 0) {
+	      // fill out vprp info
+	      memset(&vprp, 0, sizeof(vprp));
+	      vprp.dwVerticalRefreshRate = (s->h.dwRate+s->h.dwScale-1)/s->h.dwScale;
+	      vprp.dwHTotalInT = muxer->avih.dwWidth;
+	      vprp.dwVTotalInLines = muxer->avih.dwHeight;
+	      vprp.dwFrameAspectRatio = avi_aspect(avi_prp_aspect);
+	      vprp.dwFrameWidthInPixels = muxer->avih.dwWidth;
+	      vprp.dwFrameHeightInLines = muxer->avih.dwHeight;
+	      vprp.nbFieldPerFrame = 1;
+	      vprp.FieldInfo[0].CompressedBMHeight = muxer->avih.dwHeight;
+	      vprp.FieldInfo[0].CompressedBMWidth = muxer->avih.dwWidth;
+	      vprp.FieldInfo[0].ValidBMHeight = muxer->avih.dwHeight;
+	      vprp.FieldInfo[0].ValidBMWidth = muxer->avih.dwWidth;
+	      hdrsize+=8+4*(9+8*1); // vprp
+	  }
 	  break;
       case MUXER_TYPE_AUDIO:
           hdrsize+=WFSIZE(s->wf)+8; // strf
@@ -379,14 +382,16 @@ static void avifile_write_header(muxer_t *muxer){
           int biSize=s->bih->biSize;
           le2me_BITMAPINFOHEADER(s->bih);
           write_avi_chunk(f,ckidSTREAMFORMAT,biSize,s->bih); /* BITMAPINFOHEADER */
-          le2me_BITMAPINFOHEADER(s->bih);
-	  le2me_VideoPropHeader(&vprp);
-	  le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[0]);
-	  le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[1]);
-	  write_avi_chunk(f,mmioFOURCC('v','p','r','p'),
-	                  sizeof(VideoPropHeader) -
-	                  sizeof(VIDEO_FIELD_DESC)*(2-vprp.nbFieldPerFrame),
-	                  &vprp); /* Video Properties Header */
+	  if (avi_prp_aspect > 0) {
+	      le2me_BITMAPINFOHEADER(s->bih);
+	      le2me_VideoPropHeader(&vprp);
+	      le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[0]);
+	      le2me_VIDEO_FIELD_DESC(&vprp.FieldInfo[1]);
+	      write_avi_chunk(f,mmioFOURCC('v','p','r','p'),
+			      sizeof(VideoPropHeader) -
+			      sizeof(VIDEO_FIELD_DESC)*(2-vprp.nbFieldPerFrame),
+			      &vprp); /* Video Properties Header */
+	  }
 }
 	  break;
       case MUXER_TYPE_AUDIO:

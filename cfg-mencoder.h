@@ -58,6 +58,8 @@ extern m_option_t vfwopts_conf[];
 extern m_option_t xvidencopts_conf[];
 #endif
 
+extern float avi_prp_aspect;
+
 extern m_option_t nuvopts_conf[];
 
 m_option_t ovc_conf[]={
@@ -191,6 +193,9 @@ m_option_t mencoder_opts[]={
 
 	// override FOURCC in output file
 	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, 0, 4, 4, NULL},
+
+	// avi muxer - include prp header with aspect ratio
+	{"aviaspect", &avi_prp_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
 
 	{"pass", "The -pass option is obsolete. Use -lavcopts vpass=n or -divx4opts pass=n!\nRTFM!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
