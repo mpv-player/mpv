@@ -133,8 +133,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 
  if ( len <= 0 ) return NULL; // skipped frame
 
- cinfo.err=jpeg_std_error( &jerr.pub );
- jerr.pub.error_exit=my_error_exit;
  if( setjmp( jerr.setjmp_buffer ) )
   {
    mp_msg( MSGT_DECVIDEO,MSGL_ERR,"[ijpg] setjmp error ...\n" );
@@ -144,8 +142,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  jpeg_create_decompress( &cinfo );
  jpeg_buf_src( &cinfo,data,len );
  jpeg_read_header( &cinfo,TRUE );
- width=cinfo.image_width;
- height=cinfo.image_height;
+ sh->disp_w=width=cinfo.image_width;
+ sh->disp_h=height=cinfo.image_height;
  jpeg_start_decompress( &cinfo );
  depth=cinfo.output_components * 8;
 

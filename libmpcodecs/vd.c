@@ -123,6 +123,18 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
     int screen_size_y=0;//SCREEN_SIZE_Y;
     vo_functions_t* video_out=sh->video_out;
 
+#if 1
+    if(!(sh->disp_w && sh->disp_h))
+        mp_msg(MSGT_DECVIDEO,MSGL_WARN,
+            "VDec: codec didn't set sh->disp_w and sh->disp_h, trying to workaround!\n");
+    /* XXX: HACK, if sh->disp_* aren't set,
+     * but we have w and h, set them :: atmos */
+    if(!sh->disp_w && w)
+        sh->disp_w=w;
+    if(!sh->disp_h && h)
+        sh->disp_h=h;
+#endif
+
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,"VDec: vo config request - %d x %d, %s  \n",
 	w,h,vo_format_name(preferred_outfmt));
 
