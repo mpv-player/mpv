@@ -1481,8 +1481,25 @@ Menu (default)
 .B \-jpeg <option1:option2:...> (\-vo jpeg only)
 Specify options for the JPEG output.
 .br
-Available options are: [no]progressive, [no]baseline, optimize, smooth, quality
-and outdir.
+Available options are:
+
+.PD 0
+.RSs
+.IPs [no]progressive
+Specify standard or progressive JPEG.
+.IPs [no]baseline
+Specify use of baseline or not.
+.IPs optimize=<value>
+Optimization factor [0-100]
+.IPs smooth=<value>
+Smooth factor [0-100]
+.IPs quality=<value>
+Quality factor [0-100]
+.IPs outdir=<value>
+Directory to save the JPEG files
+.RE
+.PD 1
+.
 .TP
 .B \-monitor_dotclock <dotclock\ (or\ pixelclock) range> (fbdev and vesa only)
 Look into etc/\:example.conf for further information and in DOCS/\:video.html.
@@ -2080,12 +2097,12 @@ The values can be from -100 to 100.
 .IPs eq2[=gamma:contrast:brightness:saturation:rg:gg:bg]
 Alternative software equalizer that uses lookup tables (very slow),
 allowing gamma correction in addition to simple brightness,
-contrast and saturation adjustment. Note, that it uses the same MMX
+contrast and saturation adjustment. Note that it uses the same MMX
 optimized code as -vop eq if all gamma values are 1.0!
 The parameters are given as floating point values.
-Defaults are gamma=1.0, contrast=1.0, brightness=0.0 and stauration=1.0.
+Defaults are gamma=1.0, contrast=1.0, brightness=0.0 and saturation=1.0.
 Parameters rg, gg, bg are the independent gamma values for the Red, Green
-and Blue components, all defaults to 1.0
+and Blue components, all default to 1.0.
 The values are 0.1\-10 for gammas, -2\-2 for contrast (negative values result
 in negative image) -1\-1 for brightness and 0\-3 for saturation.
 .IPs halfpack[=f]
