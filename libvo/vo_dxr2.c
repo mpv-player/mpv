@@ -746,7 +746,7 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint
       oc.arg1 = 0x40;
       oc.arg2 = 0xff;
       oc.arg3 = 0x00;
-      oc.arg4 = 0x10;
+      oc.arg4 = 0x20;
       oc.arg5 = 0x40;
       oc.arg6 = 0xff;
       ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_COLOUR, &oc);
