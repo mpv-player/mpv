@@ -765,7 +765,7 @@ sh_video=NULL;
 switch(file_format){
  case DEMUXER_TYPE_AVI: {
   //---- AVI header:
-  read_avi_header(demuxer,f?index_mode:-2);
+  read_avi_header(demuxer,(stream->type!=STREAMTYPE_STREAM)?index_mode:-2);
   stream_reset(demuxer->stream);
   stream_seek(demuxer->stream,demuxer->movi_start);
   demuxer->idx_pos=0;
