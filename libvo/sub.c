@@ -37,7 +37,7 @@ unsigned char* vo_osd_text=NULL;
 int sub_unicode=0;
 int sub_utf8=0;
 int sub_pos=100;
-int sub_alignment=2; /* 0=top, 1=center, 2=bottom */
+int sub_alignment=0; /* 0=top, 1=center, 2=bottom */
 int sub_visibility=1;
 
 // return the real height of a char:
