@@ -326,6 +326,7 @@ static int init(sh_video_t *sh){
 	 sh->format == mmioFOURCC('H','F','Y','U') ||
 	 sh->format == mmioFOURCC('F','F','V','H') ||
 	 sh->format == mmioFOURCC('W','M','V','2') ||
+	 sh->format == mmioFOURCC('W','M','V','3') ||
 	 sh->format == mmioFOURCC('A','S','V','1') ||
 	 sh->format == mmioFOURCC('A','S','V','2') ||
 	 sh->format == mmioFOURCC('V','S','S','H') ||
