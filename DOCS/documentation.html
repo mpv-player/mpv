@@ -125,7 +125,7 @@ Table of Contents
 
   <A NAME=1.1>1.1.  Overview
 
-  MPlayer is a movie player for LINUX. It plays most MPEG, AVI and ASF files,
+  <B>MPlayer</B> is a movie player for LINUX. It plays most MPEG, AVI and ASF files,
   supported by many native and Win32 DLL codecs. You can watch VCD, DVD and
   even DivX movies too. The another big feature of mplayer is the wide range of
   supported output drivers. It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev,
@@ -166,19 +166,19 @@ Table of Contents
     Mpeg codec was libmpeg2 (mpeg2dec) by Aaron Holtzman & Michel Lespinasse.
     It's great, optimized very fast C code with perfect image quality and
     100% MPEG standard conformance.
-  - MPlayer v0.3-v0.9:
+  - <B>MPlayer</B> v0.3-v0.9:
     It was a pack of two programs: mpg12playv0.95pre6 and my new simple AVI
     player 'avip' based on avifile's Win32 DLL loader.
-  - MPlayer v0.10:
+  - <B>MPlayer</B> v0.10:
     The MPEG and AVI player in a single binary!
-  - MPlayer v0.11:
+  - <B>MPlayer</B> v0.11:
     Some new developers joined and from 0.11 the mplayer project is a team-work!
     Added .ASF file support, and OpenDivX (see www.projectmayo.com) en/decoding.
-  - MPlayer v0.17 "The IdegCounter"
+  - <B>MPlayer</B> v0.17 "The IdegCounter"
     The release version of the 0.11pre after 4 months of heavy development!
     Try it, and be amazed! Thousands of new features added... and of course
     old code was improved too, bugs removed etc.
-  - MPlayer 0.18 "The BugCounter"
+  - <B>MPlayer</B> 0.18 "The BugCounter"
     2 months since 0.17 and here's a new release.. Completed ASF support,
     more subtitle formats, introduced libao (similar to libvo but to audio),
     even more stable than ever, and so on. It's a MUST !  
@@ -186,7 +186,7 @@ Table of Contents
 
   <A NAME=1.3>1.3.  Installation
 
-  If you plan to use MPlayer on x86 architecture, you possibly want to use
+  If you plan to use <B>MPlayer</B> on x86 architecture, you possibly want to use
   Win32 codecs. Download and unzip w32codecs.zip to /usr/lib/win32 .
   Note: the avifile project has similar codecs package, but it differs
   from our, so if you want to use all supported codecs, then use
@@ -194,10 +194,10 @@ Table of Contents
 
   If you own a Matrox G200/G400/G450 card, then please see the <A HREF="#2.2.1.6">2.2.1.6</A>
   section in order to gain big speedup. It is important to do these steps
-  _before_ compiling MPlayer, otherwise no Matrox-specific support will be
+  _before_ compiling <B>MPlayer</B>, otherwise no Matrox-specific support will be
   built.
 
-  Then build MPlayer:
+  Then build <B>MPlayer</B>:
 
 
 	./configure
@@ -239,7 +239,7 @@ Table of Contents
 
   <A NAME=2.1.1>2.1.1.  Supported input formats
 
-  MPlayer can read/play from the following devices/formats:
+  <B>MPlayer</B> can read/play from the following devices/formats:
    - VCD (Video CD) directly from CD-ROM or from CDRwin's .bin image file     
    - DVD, directly from your DVD disk, using optional libcss for decryption
    - MPEG 1/2 System Stream (PS/PES/VOB) and Elementary Stream (ES) file
@@ -278,7 +278,7 @@ Table of Contents
 
   This section contains information about the DivX/OpenDivX codecs of
   <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Their first available alpha version was the OpenDivX 4.0
-  alpha 47 and 48. Support for this was/is included in MPlayer, and built by
+  alpha 47 and 48. Support for this was/is included in <B>MPlayer</B>, and built by
   default. We even used its postprocessing code to optionally enhance visual
   quality of MPEG1/2 movies.
 
@@ -304,7 +304,7 @@ Table of Contents
   cp decore.h /usr/local/include/
 
 
-  At the moment MPlayer doesn't contain autodetection for the codec, so you'll
+  At the moment <B>MPlayer</B> doesn't contain autodetection for the codec, so you'll
   have to edit config.h and config.mak manually. But first run ./configure .
   Change #undef NEW_DECORE to #define NEW_DECORE in config.h
   Change #define MPEG12_POSTPROC to #undef MPEG12_POSTPROC in config.h
@@ -314,7 +314,7 @@ Table of Contents
 	DECORE_LIBS=-L/usr/local/lib -ldivxdecore
 
 
-  Continue compiling MPlayer as usual.
+  Continue compiling <B>MPlayer</B> as usual.
 
   Using it is a bit tricky. As it conflicts with the old OpenDivX (it's API is
   very similar to OpenDivX's), OpenDivX code is disabled, and the OpenDivX
@@ -326,7 +326,7 @@ Table of Contents
 
 	-vc odivx : using divx4 codec as a new version of OpenDivX.
 		    in this case it produces YV12 image in its own buffer,
-		    and MPlayer (libvo) does colorspace conversion.
+		    and <B>MPlayer</B> (libvo) does colorspace conversion.
 
 	-vc divx4 : using divx4 codec's colorspace conversion.
 		    in this mode, you can use YUY2/UYVY too.
@@ -349,7 +349,7 @@ Table of Contents
   <A NAME=2.1.2.2>2.1.2.2.  ffmpeg's DivX/libavcodec
 
   Beginning with version 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contains an <B>opensource</B> DivX codec,
-  which is compatible with the traditional DivX. MPlayer supports this codec,
+  which is compatible with the traditional DivX. <B>MPlayer</B> supports this codec,
   and this makes it possible to <B>watch DivX movies on non-x86 platforms!</B>
   To get it compile, you'll need nasm, bison, and flex, above the other
   devel tools. No manual hacking is needed to build it, ./configure detects
@@ -370,7 +370,7 @@ Table of Contents
 
   VfW (Video for Windows) is the old Video API for Windows. Its codecs have
   the .DLL or (rarely) .DRV extension.
-  If MPlayer fails with your AVI:
+  If <B>MPlayer</B> fails with your AVI:
 
 
         UNKNOWN video codec: HFYU (0x55594648)
@@ -395,7 +395,7 @@ Table of Contents
   This is the MP3 codec.
   So, now we have all the info needed (fourcc, codec file, sample AVI), submit
   your codec support request in mail, and upload these files to the FTP:
-    ftp://thot.banki.hu/MPlayer/incoming/<codecname>/
+    ftp://mplayerhq.hu/MPlayer/incoming/<codecname>/
 
 
   <A NAME=2.1.4.2>2.1.4.2.  DirectShow codecs
@@ -428,7 +428,7 @@ Table of Contents
 
   So, now we have all the info needed (fourcc, GUID, codec file, sample AVI),
   submit your codec support request in mail, and upload these files to the FTP:
-      ftp://thot.banki.hu/MPlayer/incoming/<codecname>/
+      ftp://mplayerhq.hu/MPlayer/incoming/<codecname>/
 
 
   <A NAME=2.2>2.2.  Video & Audio output devices
@@ -520,9 +520,9 @@ Table of Contents
 
 
      It must support YUY2 packed, and YV12 planar pixel formats to be
-     usable with MPlayer.
+     usable with <B>MPlayer</B>.
 
-   - And finally, check if MPlayer was compiled with 'xv' support.
+   - And finally, check if <B>MPlayer</B> was compiled with 'xv' support.
      ./configure prints this.
 
 
@@ -592,7 +592,7 @@ Table of Contents
   driver that controls this chip. So it does not work on every system ...
 
 
-<A NAME=2.2.1.2.3>2.2.1.2.3.  Installing DGA support for MPlayer
+<A NAME=2.2.1.2.3>2.2.1.2.3.  Installing DGA support for <B>MPlayer</B>
 
   First make sure X loads the DGA extension, see in /var/log/XFree86.0.log :
 
@@ -601,7 +601,7 @@ Table of Contents
 
 
   See, XFree86 4.0.x or greater is VERY RECOMMENDED!
-  MPlayer's DGA driver is autodetected on ./configure, or you can force it
+  <B>MPlayer</B>'s DGA driver is autodetected on ./configure, or you can force it
   with --enable-dga.
 
   If the driver couldn't switch to a smaller resolution, experiment with
@@ -609,7 +609,7 @@ Table of Contents
   the movie fits in. There is no converter right now.. :(
 
   Become ROOT. DGA needs root access to be able to write directly video memory.
-  If you want to run it as user, then install MPlayer SUID root:
+  If you want to run it as user, then install <B>MPlayer</B> SUID root:
 
 
 		chown root /usr/local/bin/mplayer
@@ -648,12 +648,12 @@ Table of Contents
   See appendix A for some sample modeline definitions.
 
 
-  <A NAME=2.2.1.2.5>2.2.1.2.5.  DGA & MPlayer       
+  <A NAME=2.2.1.2.5>2.2.1.2.5.  DGA & <B>MPlayer</B>       
 
-  DGA is used in two places with MPlayer: The SDL driver can be made to make
+  DGA is used in two places with <B>MPlayer</B>: The SDL driver can be made to make
   use of it (-vo sdl:dga) and within the DGA driver (-vo dga).
   The above said is true for both; in the following sections I'll explain
-  how the DGA driver for MPlayer works.
+  how the DGA driver for <B>MPlayer</B> works.
 
 
   <A NAME=2.2.1.2.6>2.2.1.2.6.  Features of the DGA driver
@@ -779,7 +779,7 @@ Table of Contents
 
   <A NAME=2.2.1.3>2.2.1.3.  SDL
 
-  Here are some notes about SDL out in MPlayer.
+  Here are some notes about SDL out in <B>MPlayer</B>.
 
   There are several commandline switches for SDL:
 
@@ -808,7 +808,7 @@ Table of Contents
   SLOOOW now, unless you have a real fast CPU (and/or MTRR?). :(
 
   Of course you'll have to install svgalib and its development package in
-  order for MPlayer build its SVGAlib driver (autodetected, but can be
+  order for <B>MPlayer</B> build its SVGAlib driver (autodetected, but can be
   forced), and don't forget to edit /etc/vga/libvga.config to suit your
   card & monitor.
 
@@ -827,7 +827,7 @@ Table of Contents
 
 
   NOTE: FBdev video mode changing _does not work_ with the VESA framebuffer,
-	and don't ask for it, since it's not an MPlayer limitation.
+	and don't ask for it, since it's not an <B>MPlayer</B> limitation.
 
 
   <A NAME=2.2.1.6>2.2.1.6.  Matrox framebuffer (mga_vid)
@@ -877,13 +877,13 @@ Table of Contents
 		depmod -a
 
 
-  Now you have to (re)compile MPlayer, ./configure will detect /dev/mga_vid
-  and build the 'mga' driver. Using it from MPlayer goes by '-vo mga' if
+  Now you have to (re)compile <B>MPlayer</B>, ./configure will detect /dev/mga_vid
+  and build the 'mga' driver. Using it from <B>MPlayer</B> goes by '-vo mga' if
   you have matroxfb console, or '-vo xmga' under XFree86 3.x.x or 4.x.x .
 
   Note: '-vo xmga' works under XFree86 4.x.x, but it conflicts with the Xv
   driver, so avoid using both. If you messed up Xv with mga, try running
-  MPlayer with '-vo mga' . It should fix Xv.
+  <B>MPlayer</B> with '-vo mga' . It should fix Xv.
   
 
   <A NAME=2.2.1.7>2.2.1.7.  SiS 6326 framebuffer (sis_vid)
@@ -899,13 +899,13 @@ Table of Contents
 
   3dfx has native YUV+scaler support, using /dev/3dfx (tdfx.o driver?)
   The /dev/3dfx kernel driver exists only for 2.2.x kernels, for use with
-  Glide 2.x Linux ports. It's not tested with MPlayer, and so no more
+  Glide 2.x Linux ports. It's not tested with <B>MPlayer</B>, and so no more
   supported. Volunteers needed to test it and bring the code up-to-date.
 
 
   <A NAME=2.2.1.9>2.2.1.9.  OpenGL output
 
-  MPlayer support displaying movies using OpenGL. Unfortunately, not all
+  <B>MPlayer</B> support displaying movies using OpenGL. Unfortunately, not all
   drivers support this ability. For example the Utah-GLX drivers
   (for XFree86 3.3.6) have it, with all cards.
   See <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A> for details about how to install it.
@@ -957,15 +957,15 @@ Table of Contents
   an (almost) arbitrary remote control and control your linux box with it!
   More about it at www.lirc.org.
 
-  If you have installed the lirc-package, you can compile MPlayer with LIRC
+  If you have installed the lirc-package, you can compile <B>MPlayer</B> with LIRC
   support using  ./configure --enable-lirc
 
-  If everything went fine, MPlayer will print a message like 
+  If everything went fine, <B>MPlayer</B> will print a message like 
     LIRC init was successful.
   on startup. If an error occurs it will tell you. If it doens't tell you 
   anything about LIRC there's no support compiled in. That's it :-)
 
-  The application name for MPlayer is - oh wonder - mplayer_lirc.
+  The application name for <B>MPlayer</B> is - oh wonder - mplayer_lirc.
   It understands the following commands:
 
   PAUSE  - pause playing. Any other keystroke will continue replay.
@@ -1003,15 +1003,15 @@ Table of Contents
 
   <A NAME=3.3>3.3.  Streaming from network or pipes
 
-  MPlayer can play media from network, by using the HTTP protocol, and even
+  <B>MPlayer</B> can play media from network, by using the HTTP protocol, and even
   beta ASF streaming (FROM network) is available.
-  Configuring it is simple, just recompile MPlayer with
+  Configuring it is simple, just recompile <B>MPlayer</B> with
 
 
 	./configure --enable-streaming
 
 
-  MPlayer can read from stdin (NOT named pipes). This can be for example
+  <B>MPlayer</B> can read from stdin (NOT named pipes). This can be for example
   used to play from FTP :
 
 
@@ -1145,10 +1145,10 @@ Table of Contents
   This means current DVD functions are mainly for developers and not for users!
 
   First, you must compile and install libcss on your system.
-  Second, you have to recompile MPlayer with libcss support. There is
+  Second, you have to recompile <B>MPlayer</B> with libcss support. There is
   autodetection of libcss, but if it fails, see below :
 
-  Call ./configure script of MPlayer with these options:
+  Call ./configure script of <B>MPlayer</B> with these options:
 
   ./configure --enable-css --with-csslibdir=/usr/local/lib --with-cssincdir=/usr/local/include
 
@@ -1165,16 +1165,16 @@ Table of Contents
 
   where,
 
-	'-dvdauth /dev/dvd' tells MPlayer the device name of your DVD drive.
+	'-dvdauth /dev/dvd' tells <B>MPlayer</B> the device name of your DVD drive.
 	it's used in disc authentication process
 
 	the filename is simply a VOB file path on the disc
 
   Note that according to my experiences, disc authentication requires root
-  privileges so you must run MPlayer as root! (see section 'Problems').
+  privileges so you must run <B>MPlayer</B> as root! (see section 'Problems').
 
   NOTE about the sound:
-	It seems that MPlayer sometimes fails to find the first audio stream.
+	It seems that <B>MPlayer</B> sometimes fails to find the first audio stream.
 	You can specify it with the '-aid 128' option, for example.
 	Please experience with 128,129 and similar values. See section
 	'Problems'.
@@ -1202,7 +1202,7 @@ Table of Contents
 
   * disc authentication (the FIBMAP ioctl) requires root privilegies.
     this is strange since OMS can do it as user too.
-  * sound. I'm using my only DVD disc (The Matrix) to test MPlayer.
+  * sound. I'm using my only DVD disc (The Matrix) to test <B>MPlayer</B>.
     some VOB file have English sound, some have Spanish and some have
     no sound at all.
     IT SEEMS that if I give '-aid 128' everything works with English sound ...
@@ -1286,7 +1286,7 @@ Table of Contents
 
   <A NAME=6>6. FAQ section (TODO)
 
-Yes, this is the MPlayer FAQ.
+Yes, this is the <B>MPlayer</B> FAQ.
 =============================
 
 About:
@@ -1312,7 +1312,7 @@ A: Where did you install the SDL library? If you installed in /usr/local
    "-L/usr/local/lib " after "X_LIBS=" Now type make. You're done!
 
 Q: It doesn't compile, and it misses uint64_t inttypes.h and similar things...
-A: copy DOCS/inttypes.h to MPlayer directory (cp DOCS/inttypes.h .)
+A: copy DOCS/inttypes.h to <B>MPlayer</B> directory (cp DOCS/inttypes.h .)
    try again... if fail, contact us
 
 Q: I have Pentium III but ./configure doesn't detect SSE
@@ -1367,12 +1367,12 @@ Q: There are error messages about file not found /usr/lib/win32/....
 A: Download & install w32codec.zip from *our* FTP
    (avifile's codec package has different DLL set)
 
-Q: ...... works with avifile/aviplay while doesn't with MPlayer
-A: MPlayer != avifile
+Q: ...... works with avifile/aviplay while doesn't with <B>MPlayer</B>
+A: <B>MPlayer</B> != avifile
    The only common thing between these players is the Win32 DLL loader.
    The codecs (dll) sets, syncronization, demultiplexing etc is totaly
    different and shouldn't be compared.
-   If something works with aviplay it doesn't mean that MPlayer should do
+   If something works with aviplay it doesn't mean that <B>MPlayer</B> should do
    it and vice versa.
 
 Q: Indeo 3.x/4.x movies are viewed upside-down!!!?
@@ -1382,26 +1382,26 @@ A: It's a known bug (really it's a bug/limitation of the DLL codec)
 Q: Indeo 3.x,4.x video doesn't work at 32bpp resolutions (16,24 bpp are ok)
 A: It's a known bug (really it's a bug/limitation of the DLL codec)
 
-Q: I've got 'MPlayer interrupted by signal 11' in module audio_setup or
+Q: I've got '<B>MPlayer</B> interrupted by signal 11' in module audio_setup or
    decode_audio.
 A: This is highly unlikely, since the mp3lib rewrite. Contact us, it may be
    a bug. Possibly it's a damaged file, try with -afm 4 .
 
-Q: Are there rpm/deb/... packages of MPlayer?
+Q: Are there rpm/deb/... packages of <B>MPlayer</B>?
 A: You can make a .deb package for yourself, check DOCS/DEBIAN .
    It's _STRONGLY_ discouraged to use precompiled packages
-   of MPlayer, since it (currently) _highly_ depends on compile-time
+   of <B>MPlayer</B>, since it (currently) _highly_ depends on compile-time
    options and optimizations!
-   Precompiled packages are COMPLETELY unsupported by the MPlayer team!
+   Precompiled packages are COMPLETELY unsupported by the <B>MPlayer</B> team!
 
-Q: Are there any mailing lists on MPlayer?
+Q: Are there any mailing lists on <B>MPlayer</B>?
 A: Yes! See README on how to subscribe them!
 
 Q: I've found a nasty bug when I tried to play my favourite video!!
    Who should I inform?
 A: See DOCS/BUGREPORTS
 
-Q: During 'make', MPlayer complains about X11 libraries. I don't understand,
+Q: During 'make', <B>MPlayer</B> complains about X11 libraries. I don't understand,
    I DO have X installed!?
 A: ...but you don't have the X development package installed. Or not
    correctly. It's called XFree86-devel* under RedHat, and xlib6g-dev* under
@@ -1474,7 +1474,7 @@ A: You have to edit SVGAlib's Makefile.cfg and comment "BACKGROUND = y" out.
 Q: LIRC doesn't work, because ...
 A: Are you sure you use "mplayer_lirc" instead of "mplayer" ?
 
-Q: MPlayer exits with something error when using l3codeca.acm
+Q: <B>MPlayer</B> exits with something error when using l3codeca.acm
 A: Check 'ldd /usr/local/bin/mplayer' output. If it contains
         libc.so.6 => /lib/libc.so.6 (0x4???????)
    where "?" is any number then it's ok, the error is not here. If it is:
@@ -1484,16 +1484,16 @@ A: Check 'ldd /usr/local/bin/mplayer' output. If it contains
    forces loading libraries to very low addresses.
    Because l3codeca.acm is a non-relocatable DLL, it must be loaded to
    0x00400000, we can't change this. You should use non-patched kernel,
-   or use MPlayer's -afm 1 option to disable using l3codeca.acm.
+   or use <B>MPlayer</B>'s -afm 1 option to disable using l3codeca.acm.
 
 Q: My computer plays M$ DivX AVIs with resolutions ~ 640x300 and stereo mp3
    sound too slow. When I use -nosound switch, everything is ok (but quiet).
 A: Those files probably have 48Khz audio, and your soundcard/driver can't play
-   it correctly. Audio downsampling isn't implemented in MPlayer (yet).
+   it correctly. Audio downsampling isn't implemented in <B>MPlayer</B> (yet).
 
-Q: MPlayer dies with "MPlayer interrupted by signal 4 in module: decode_video".
-A: Try running MPlayer on the machine you compiled on. Or recompile. Don't
-   use MPlayer on different CPU than it was compiled on.
+Q: <B>MPlayer</B> dies with "<B>MPlayer</B> interrupted by signal 4 in module: decode_video".
+A: Try running <B>MPlayer</B> on the machine you compiled on. Or recompile. Don't
+   use <B>MPlayer</B> on different CPU than it was compiled on.
 
 Q: I have problems with <your window manager> and fullscreen xv/xmga/sdl/x11
    modes..
@@ -1526,8 +1526,8 @@ A: You use a vo driver with single buffering (x11,xv). With xv you can change
 Q: What's the problem with gcc 2.96 ?
 A: gcc 2.96 is RedHat's UNOFFICIAL (it can be found only on RedHat sites, or
    RedHat distributions) and BUGGY gcc release. gcc 2.96 is TOTALLY
-   unsupported by MPlayer, because it simply SKIPS MMX codes, it just does not
-   compile it. Important: this is NOT an MPlayer-specific problem, numerous
+   unsupported by <B>MPlayer</B>, because it simply SKIPS MMX codes, it just does not
+   compile it. Important: this is NOT an <B>MPlayer</B>-specific problem, numerous
    other projects (DRI, avifile, etc..) have problems with this shit too.
    ** DO NOT USE gcc 2.96 !!! **
 
@@ -1554,6 +1554,51 @@ A: It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
    decoder.  It uses YV12 pixel format, so old Voodoo users can use it for YUV.
    Also, open the possibility to play DivX on virtually every computer that
    has a C compiler. Kinda great stuff, isn't it?
+
+
+  <A NAME=6.10>6.10.  DVD FAQ
+
+Q: I have some problem not mentioned here ...
+A: Read file 'DVD' as well.
+
+Q: How can I actually watch DVD with MPlayer?
+A: Ehh. Go on reading this file as well as 'DVD' (hint: you must have libcss)
+
+Q: So MPlayer can play DVDs? Then it must use DeCSS! You are under arrest
+   under the XYZ#$ paragraph of the--
+A: Get back asshole, there is no DeCSS code in MPlayer. It links to libcss.
+
+Q: Seems to work but no sound.
+A: Use '-aid 128' (or try: 128,129,...) command line switch
+
+Q: I have got Spanish audio instead of English (or similar problems)
+A: See the last question/answer.
+
+Q: MPlayer complains about FIBMAP or something.
+A: Try to run MPlayer as root.
+
+Q: some strange effect (interlace like thing) especially when fast moving
+   objects are shown in the movie
+A: known problem, we try to fix it later
+
+Q: DVD support in MPlayer is a piece of shit!
+A: You're probably right :) However please contact us if you can improve it!
+
+Q: Where can I get libcss package from?
+A: Maybe from the source of OMS (www.linuxvideo.org).
+
+Q: How can I ... (insert some expectable DVD player feature here)
+A: The current implementation is only for viewing VOB files from DVD.
+   Nothing more, like subtitles, menus and so on.
+
+Q: How can I set the region code of my DVD-Drive ? I don't have windows!
+A: Use the 'regionset' tool :
+   http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz
+
+Q: MPlayer complains about some renamed option?
+A: For future development, old '-dvd' option was replaced by '-dvdauth'.
+   Option '-dvd' *WILL* do the 'full disk movie' mplaying mode.
+   But until that, '-dvd' does nothing only prints error message.
 
 
   <A NAME=7>7. Misc OS'es
@@ -1593,10 +1638,10 @@ A: It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
   To build the package you will need GNU make (gmake, /usr/ports/devel/gmake), 
   native BSD make will not work.
 
-  To run MPlayer you will need to re-compile the kernel with 
+  To run <B>MPlayer</B> you will need to re-compile the kernel with 
   "options USER_LDT" (unless you are running -CURRENT, where this is default).
 
-  If MPlayer complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
+  If <B>MPlayer</B> complains about "CD-ROM Device '/dev/cdrom' not found!" make a 
   symbolic link : ln -s /dev/<your_cdrom_device> /dev/cdrom 
 
   There's no DVD support for FreeBSD yet. 
@@ -1682,7 +1727,7 @@ A: It's from Gerard Lantau's ffmpeg package (http://ffmpeg.sourceforge.net).
 NOTE: Do *NOT* send bugreports, help & feature requests directly to the authors!
 ===== Read DOCS/BUGREPORTS and subscribe to mplayer-users mailing lists.
 
-========================== The MPlayer project: ===============================
+========================== The <B>MPlayer</B> project: ===============================
 
 Árpád Gereöffy (A'rpi/ESP-team):  <arpi@thot.banki.hu>
 - player code (mpeg stream demultiplexer and avi/asf parser, A-V sync, seek...)
@@ -1720,7 +1765,7 @@ Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - second webpage design&gfx
 - webpage maintainer
 - testing, codecs quality & speed comparsions
-- IRC channel #MPlayer operator
+- IRC channel #<B>MPlayer</B> operator
 - experimental MINIX port
 
 Szabolcs Berecz (Szabi): <szabi@inf.elte.hu>
@@ -1786,12 +1831,12 @@ Dariush Pietrzak (Eyck): <eyck@incubus.ar.lublin.pl>
 - prelimenary support for .RT subtitle format
 
 Jürgen Keil and Marcus Comstedt: <jk@tools.de> <marcus@idonex.se>
-- patched MPlayer to work on Solaris 8 x86
+- patched <B>MPlayer</B> to work on Solaris 8 x86
 - configure fixes
 - SUN audio driver in libao2
 
 Vladimir Kushnir: <vkushnir@Alfacom.net>
-- patched MPlayer to work on FreeBSD x86
+- patched <B>MPlayer</B> to work on FreeBSD x86
 
 Bertrand BAUDET: <bertrand_baudet@yahoo.com>
 - network streaming support
@@ -1850,17 +1895,17 @@ Adam Williams:   <broadcast@earthling.net>
 
   <A NAME=B>Appendix B - Mailing lists
 
-There are some public mailing lists on MPlayer. Subscribing can be achieved on
+There are some public mailing lists on <B>MPlayer</B>. Subscribing can be achieved on
 the following addresses:
 
-- MPlayer core/hungarian developers list:
+- <B>MPlayer</B> core/hungarian developers list:
 	http://mp.dev.hu/mailman/listinfo/mplayer-devel
 
 	I dunno, it is the FLAME list in hungarian language :)
 	Also some talking about mplayer core team internals, like mplayer
 	party, sponsors etc can be here.
 
-- MPlayer developers list:
+- <B>MPlayer</B> developers list:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-dev-eng
 
 	This list is about mplayer development! Talking about interface/API changes,
@@ -1868,14 +1913,14 @@ the following addresses:
 	Do NOT send bugreports, user questions, feature requests here!
 	This list should be kept low-traffic.
 
-- MPlayer users list:  
+- <B>MPlayer</B> users list:  
 	http://lists.sourceforge.net/lists/listinfo/mplayer-users
 
 	- send bugreports here (after reading DOCS/BUGS, BUGREPORTS)
 	- send feature requests here (after reading DOCS/TODO)
 	- send user questions here (after reading DOCS/README, INSTALL, FAQ etc)
 
-- MPlayer & Matrox G200/G400/G450 users:
+- <B>MPlayer</B> & Matrox G200/G400/G450 users:
 	http://lists.sourceforge.net/lists/listinfo/mplayer-matrox
 
 	Send matrox-related questions here,
@@ -1890,14 +1935,14 @@ the following addresses:
 	(IRIX, Solaris-SPARC, Alpha, Commodore64, Sharp Calculator,
 	Teapot etc...)
 
-- MPlayer announce:    
+- <B>MPlayer</B> announce:    
 	http://lists.sourceforge.net/lists/listinfo/mplayer-announce
 
 	Very low traffic list :)
 	And it's read-only. I'll post something shit there if a new release
 	is done.
 
-- MPlayer CVS-log:     
+- <B>MPlayer</B> CVS-log:     
 	http://mp.dev.hu/mailman/listinfo/mplayer-cvslog
 
 	Send only questions about CVS changes here.
@@ -1990,7 +2035,7 @@ For playback problems:
   
 4. If the problem is specific to one or a few files,
   then please upload that file to:
-    ftp://thot.banki.hu/MPlayer/incoming/
+    ftp://mplayerhq.hu/MPlayer/incoming/
   Usually first 1-5 MB of the file is enough to reproduce
   the problem, but first you should try it:
     dd if=yourfile of=smallfile bs=1k count=1024
@@ -2023,7 +2068,7 @@ printf "esi=%08lX\n",$esi
 Then simply execute following command line:
 gdb mplayer --core=core -batch --command=command_file >mplayer.bug
 
-5.b.: run MPlayer in gdb:
+5.b.: run <B>MPlayer</B> in gdb:
 [at root/user shell prompt:]
   # gdb mplayer
 [at gdb prompt:]
