@@ -544,8 +544,10 @@ void vo_x11_uninit()
 	if(vo_window!=None){
 	  XClearWindow( mDisplay,vo_window );
 	  if (WinID < 0){
+	    XEvent xev;
 	    XUnmapWindow( mDisplay,vo_window );
 	    XDestroyWindow(mDisplay, vo_window);
+	    do { XNextEvent( mDisplay,&xev ); } while ( xev.type != DestroyNotify || xev.xdestroywindow.event != vo_window );
 	  }
 	  vo_window=None;
 	}
