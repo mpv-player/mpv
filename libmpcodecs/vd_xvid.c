@@ -129,7 +129,7 @@ static int init(sh_video_t *sh){
 
   if(ini.api_version != API_VERSION) {
     if(ini.api_version < API_VERSION) {
-      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Too old version of xivd (min. %d)\n",API_VERSION);
+      mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Too old version of xvid (min. %d)\n",API_VERSION);
       return 0;
     }
     mp_msg(MSGT_DECVIDEO,MSGL_WARN,"Bad xvid version %d was compiled with %d\n",
