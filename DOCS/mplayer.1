@@ -57,7 +57,7 @@ SubRip, SubViewer, Sami, VPlayer, RT, SSA, AQTitle and our own: MPsub).
 encode MPlayer-playable movies (AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET)
 to other MPlayer-playable formats (see below).  It encodes to DivX4 
 (1, 2 or 3 passes), XviD, codecs of libavcodec, PCM/MP3/VBRMP3 audio. 
-Also has stream copying abilities, a powerfull plugin system
+Also has stream copying abilities, a powerful plugin system
 (crop, expand, flip, postprocess, rotate, scale, rgb/yuv conversion) and more.
 
 .B gmplayer
@@ -109,7 +109,7 @@ end playing at. Examples can be found below.
 Force demuxer type. Give the demuxer ID as defined in demuxers.h.
 .TP
 .B \-dumpaudio (MPLAYER only)
-Dumps raw compressed audio stream to ./stream.dump (usefull with mpeg/ac3)
+Dumps raw compressed audio stream to ./stream.dump (useful with mpeg/ac3)
 .TP
 .B \-dumpfile <filename> (MPLAYER only)
 Specify which file MPlayer should dump to. Should be used together
@@ -518,7 +518,7 @@ Specify frame/sec rate of subtitle file (float number)
 .B \-subfile <filename> (BETA CODE)
 Currently useless. Same as \-audiofile, but for subtitle streams. (OggDS?)
 .TP
-.B \-subpos <0 \- 100> (usefull with -vop expand)
+.B \-subpos <0 \- 100> (useful with -vop expand)
 Specify the position of subtitles on the screen. The value is the vertical
 position of the subtitle in % of the screen height.
 .TP
@@ -565,7 +565,7 @@ Available sub\-options are:
     format=<format> output format (format plugin only)
     fout=<Hz>       output frequency (resample plugin only)
     volume=<0-255>  volume (volume plugin only)
-    mul=<value>     stereo coefficient, defaults to 1 (extrastereo plugin only)
+    mul=<value>     stereo coefficient, defaults to 2.5 (extrastereo plugin only)
     softclip        compressor/"soft\-clipping" capabilities (volume plugin only)
 .TP
 .B \-channels <n>
@@ -752,7 +752,7 @@ Used in combination with \-nosound and \-vo null for benchmarking only video cod
 Use alternative A/V sync method.
 .TP
 .B \-framedrop (see \-hardframedrop option too!)
-Frame dropping: decode all (except B) frames, video may skip. Usefull for playback on slow VGA card/bus.
+Frame dropping: decode all (except B) frames, video may skip. Useful for playback on slow VGA card/bus.
 .TP
 .B \-gui (BETA CODE)
 Start MPlayer in GUI mode.
@@ -826,7 +826,7 @@ Uses high quality software timers. Efficient as the RTC, doesn't need root,
 but requires more CPU.
 .TP
 .B \-sstep <sec>
-Specifies seconds between displayed frames. Usefull for slideshows.
+Specifies seconds between displayed frames. Useful for slideshows.
 .TP
 .B \-stop_xscreensaver
 Turns off xscreensaver at startup and turns it on again on exit.
@@ -1160,7 +1160,7 @@ z and x         adjust subtitle delay by +/\- 0.1 second
 r and t         adjust subtitle position
 
 (The following keys are valid only when using \-vo xv or \-vo [vesa|fbdev]:vidix
-or \-vo xvidix or \-vc divxds (slow).)
+or \-vo xvidix \-vo (x)mga or \-vc divxds (slow).)
 
 1 and 2         adjust contrast
 .br
