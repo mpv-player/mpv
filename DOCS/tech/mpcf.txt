@@ -201,11 +201,31 @@ info_packet: (optional)
 	reserved_bytes
         checksum				u(32)
         
+file
+	file_id_string
+	while(!eof){
+		main_header
+		for(i=0; i<stream_count; i++){
+			if(next_packet==video_stream_header)
+				video_stream_header
+			else
+				audio_stream_header
+		}
+		while(next_packet != main_header){
+			if(next_packet == info_packet)
+				info_packet
+			else
+				frame
+		}
+//FIXME index
+	}
                 
 forward_ptr
 	size of the packet (exactly the distance from the first byte of the
 	startcode of the current packet to the first byte of the following packet
-	Note: a frame with 0 bytes means that its skiped
+
+file_id_string
+	"nut/multimedia container\0"
 
 *_startcode
         all startcodes start with 'N'
