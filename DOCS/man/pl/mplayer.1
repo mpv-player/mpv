@@ -1,4 +1,4 @@
-.\" synced with 1.860
+.\" synced with 1.867
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -728,18 +728,18 @@ o wymaganym zasiêgu kompresji.
 .B \-aid <ID> (przeczytaj te¿ \-alang)
 Wybiera kana³ audio (MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127,
 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190).
-MPlayer wy¶wietli dostêpne identyfikatory, je¶li jest uruchomiony w trybie
-gadatliwym (\-v).
+MPlayer wy¶wietli dostêpne identyfikatory audio,
+je¶li jest uruchomiony w trybie gadatliwym (\-v).
 Kiedy odtwarzany jest strumieñ MPEG-TS, MPlayer/\:MEncoder u¿yje pierwszego
 programu (je¿eli jest dostêpny) z wybranym strumieniem.
 .
 .TP
-.B \-alang <kod\ jêzyka> (sprawd¼ te¿ \-aid)
-Odtwarza ¶cie¿kê d¼wiêkow±, która odpowiada podanemu kodowi jêzyka.
+.B \-alang <kod\ jêzyka[,kod\ jêzyka,...]> (sprawd¼ te¿ \-aid)
+Okre¶la priorytetow± listê jêzyków, w których audio ma byæ odtwarzane.
 Ró¿ne formaty u¿ywaj± ró¿nych kodów.
 DVD korzysta z dwuliterowych w standardzie ISO 639-1, Matroska i NUT operuj± na
 trzyliterowych ISO 639-2, a OGM korzysta z dowolnego identyfikatora.
-MPlayer wy¶wietli listê dostêpnych jêzyków,
+MPlayer wy¶wietli dostêpne jêzyki,
 je¶li jest uruchomiony w trybie gatatliwym (\-v).
 .sp 1
 .I PRZYK£AD:
@@ -1434,22 +1434,26 @@ Pozwala na wy¶wietlenie nastêpnego napisu gdy poprzedni jest wci±¿ widoczny
 .
 .TP
 .B \-sid <ID> (patrz te¿ opcja \-slang)
-W³±cza wy¶wietlanie napisów DVD w jêzyku podanym przez <ID> (0\-31).
-MPlayer wy¶wietli dostêpne jêzyki, je¶li jest uruchomiony w trybie
+Wy¶wietla napisy ze strumienia okre¶longo przez <ID> (0\-31).
+MPlayer wy¶wietli dostêpne identyfikatory, je¶li jest uruchomiony w trybie
 gadatliwym (\-v).
 .
 .TP
-.B \-slang <kod\ kraju[,kod\ kraju,...]> (sprawd¼ te¼ opcjê \-sid)
-Okre¶la priorytetow± listê jêzyków napisów DVD do u¿ycia.
-Jêzyki musz± byæ podane jako dwuliterowe kody krajów.
-MPlayer wy¶wietli dostêpne jêzyki, je¶li jest uruchomiony w trybie
-gadatliwym (\-v).
+.B \-slang <kod\ jêzyka[,kod\ jêzyka,...]> (sprawd¼ te¿ opcjê \-sid)
+Okre¶la priorytetow± listê jêzyków, w których napisy maj± byæ wy¶wietlane.
+Ró¿ne formaty u¿ywaj± ró¿nych kodów.
+DVD korzysta z dwuliterowych w standardzie ISO 639-1, Matroska operuje na
+trzyliterowych ISO 639-2, a OGM korzysta z dowolnego identyfikatora.
+MPlayer wy¶wietli dostêpne jêzyki,
+je¶li jest uruchomiony w trybie gatatliwym (\-v).
 .sp 1
 .I PRZYK£AD:
 .PD 0
 .RSs
-.IPs "\-slang pl,en"
-Wybiera polskie napisy, a je¶li nie s± dostêpne to angielskie.
+.IPs "mplayer dvd://1 \-slang pl,en"
+Wybiera polskie napisy na DVD a je¶li nie s± dostêpne to angielskie.
+.IPs "mplayer \-slang jpn example.mkv"
+Odtwarza plik typu Matroska z japoñskimi napisami.
 .RE
 .PD 1
 .
@@ -1913,7 +1917,7 @@ Nie przekazuje d¼wiêku, ale utrzymuje prêdko¶æ odtwarzania video.
 Do testów wydajno¶ciowych u¿yj \-nosound.
 .
 .TP
-.B pcm
+.B pcm\ \ \ \ 
 sterownik wyj¶ciowy zapisuj±cy dane w surowych (raw) plikach PCM/\:wave
 .PD 0
 .RSs
