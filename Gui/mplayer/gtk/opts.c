@@ -431,7 +431,8 @@ void prButton( GtkButton * button,gpointer user_data )
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFramedrop ) ) == TRUE ) frame_dropping=1;
 	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBHFramedrop ) ) == TRUE ) frame_dropping=2;
 
-	flip=gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFlip ) );
+	flip=-1;
+	if ( gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBFlip ) ) ) flip=1;
 	
 	// -- 3. page
 	gtkSet( gtkSetSubAuto,!gtk_toggle_button_get_active( GTK_TOGGLE_BUTTON( CBNoAutoSub ) ),NULL );
