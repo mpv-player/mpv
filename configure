@@ -136,11 +136,11 @@ Video:
   --enable-xmga          build with mga_vid X Window support
                          (check for X & /dev/mga_vid) [autodetect]
   --enable-xv            build with Xv render support for X 4.x [autodetect]
-  --enable-vm            build with XF86VidMode support for x11 driver [disable]
+  --enable-vm            build with XF86VidMode support for x11 driver [autodetect]
   --enable-xinerama      build with Xinerama support for x11 driver [autodetect]
   --enable-x11           build with X11 render support [autodetect]
   --enable-fbdev         build with FBDev render support [disable]
-  --enable-mlib          build with MLIB support (Solaris only) [disable]
+  --enable-mlib          build with MLIB support (Solaris only) [auto]
   --enable-3dfx          build with 3dfx support [disable]
   --enable-tdfxfb        build with tdfxfb support [disable]
 
