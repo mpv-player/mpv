@@ -851,7 +851,7 @@ EOF
     _mcpu="-mcpu=$proc"
     ;;
 
-  arm)
+  arm|armv4l|armv5tel)
     _def_arch='#define ARCH_ARMV4L 1'
     _target_arch='TARGET_ARCH_ARMV4L = yes'
     iproc=arm
