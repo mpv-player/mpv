@@ -115,8 +115,10 @@ uint8_t   multi_idx=0; /* active buffer */
 
 /* Linux Video Overlay */
 static const char *lvo_name = NULL;
+static int lvo_opened = 0;
 #ifdef CONFIG_VIDIX
 static const char *vidix_name = NULL;
+static int vidix_opened = 0;
 #endif
 
 #define HAS_DGA()  (win.idx == -1)
@@ -150,9 +152,9 @@ static char * vbeErrToStr(int err)
 static void vesa_term( void )
 {
   int err;
-  if(lvo_name) vlvo_term();
+  if(lvo_opened) { vlvo_term();  lvo_opened = 0; }
 #ifdef CONFIG_VIDIX
-  else if(vidix_name) vidix_term();
+  else if(vidix_opened) { vidix_term();  vidix_opened = 0; }
 #endif
   if(init_state) if((err=vbeRestoreState(init_state)) != VBE_OK) PRINT_VBE_ERR("vbeRestoreState",err);
   init_state=NULL;
@@ -939,11 +941,11 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		  if(vlvo_init(width,height,x_offset,y_offset,dstW,dstH,format,dstBpp) != 0)
 		  {
 		    printf("vo_vesa: Can't initialize Linux Video Overlay\n");
-		    lvo_name = NULL;
 		    vesa_term();
 		    return -1;
 		  }
 		  else printf("vo_vesa: Using video overlay: %s\n",lvo_name);
+		  lvo_opened = 1;
 		}
 #ifdef CONFIG_VIDIX
 		else
@@ -954,12 +956,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 				video_mode_info.XResolution,video_mode_info.YResolution) != 0)
 		  {
 		    printf("vo_vesa: Can't initialize VIDIX driver\n");
-		    vidix_name = NULL;
 		    vesa_term();
 		    return -1;
 		  }
 		  else printf("vo_vesa: Using VIDIX\n");
 		  vidix_start();
+		  vidix_opened = 1;
 		}
 #endif
 	}
