@@ -85,7 +85,7 @@ struct config oac_conf[]={
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-static config_t mplayer_opts[]={
+static config_t mencoder_opts[]={
 	/* name, pointer, type, flags, min, max */
 	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, CONF_NOSAVE, 0, 0, NULL}, /* this must be the first!!! */
 
