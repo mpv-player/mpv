@@ -1117,14 +1117,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		      if(atom_len > 8) {
 		        int i, poffs, cnt;
 		        // Parse some parts of avcC, just for fun :)
-		        // avcC formatting happens in vd_ffmpeg, sps and pps are decoded in lavc
+		        // real parsing is done by avc1 decoder
 		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC version: %d\n", *(trak->stdata+pos+8));
 		        if (*(trak->stdata+pos+8) != 1)
 		          mp_msg(MSGT_DEMUX, MSGL_ERR, "MOV: unknown avcC version (%d). Expexct problems.\n", *(trak->stdata+pos+9));
 		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC profile: %d\n", *(trak->stdata+pos+9));
 		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC profile compatibility: %d\n", *(trak->stdata+pos+10));
 		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC level: %d\n", *(trak->stdata+pos+11));
-		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC nal length size: %d\n", (*(trak->stdata+pos+12))&0x03+1);
+		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC nal length size: %d\n", ((*(trak->stdata+pos+12))&0x03)+1);
 		        mp_msg(MSGT_DEMUX, MSGL_V, "MOV: avcC number of sequence param sets: %d\n", cnt = (*(trak->stdata+pos+13) & 0x1f));
 		        poffs = pos + 14;
 		        for (i = 0; i < cnt; i++) {
@@ -1138,7 +1138,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		          poffs += BE_16(trak->stdata+poffs) + 2;
 		        }
 		        // Copy avcC for the AVC decoder
-		        // This data will be sent to decoder with first frame, before frame data
+		        // This data will be put in extradata below, where BITMAPINFOHEADER is created
 		        trak->stream_header_len = atom_len-8;
 		        trak->stream_header = (unsigned char *)malloc(trak->stream_header_len);
 		        memcpy(trak->stream_header, trak->stdata+pos+8, trak->stream_header_len);
@@ -1269,9 +1269,19 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		}
 		else
 		{
+		 if (trak->fourcc == mmioFOURCC('a','v','c','1')) {
+		  sh->bih=malloc(sizeof(BITMAPINFOHEADER) + trak->stream_header_len);
+		  memset(sh->bih,0,sizeof(BITMAPINFOHEADER) + trak->stream_header_len);
+		  sh->bih->biSize=40  + trak->stream_header_len;
+		  memcpy(((unsigned char *)sh->bih)+40,  trak->stream_header, trak->stream_header_len);
+		  free (trak->stream_header);
+		  trak->stream_header_len = 0;
+		  trak->stream_header = NULL;
+		 } else {
 		  sh->bih=malloc(sizeof(BITMAPINFOHEADER));
 		  memset(sh->bih,0,sizeof(BITMAPINFOHEADER));
 		  sh->bih->biSize=40;
+		 }
 		}
 		sh->bih->biWidth=sh->disp_w;
 		sh->bih->biHeight=sh->disp_h;
