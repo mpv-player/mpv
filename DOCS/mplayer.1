@@ -68,6 +68,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-chapter\ chapterid]
 .RB [ \-dvdangle\ angleid]
 .RB [ \-dvdkey\ key]
+.RB [ \-skin\ skin]
 .I - or file or device
 .PP
 .SH DESCRIPTION
@@ -197,6 +198,12 @@ display less output, status messages.
 .TP
 .B \-benchmark
 used in combination with -nosound and -vo null for benchmarking.
+.TP
+.B \-skin skin directory
+load skin from this directory. For example '-skin fittyfene' tries these :
+
+    /usr/local/share/mplayer/Skin/fittyfene
+    ~/.mplayer/Skin/fittyfene
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
