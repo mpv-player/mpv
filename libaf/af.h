@@ -216,7 +216,7 @@ void af_help(void);
 
 /* Fill the missing parameters in the af_data_t structure.
    Used for stuffing bps with a value based on format. */
-void af_fix_paramaters(af_data_t *data);
+void af_fix_parameters(af_data_t *data);
 
 /* Memory reallocation macro: if a local buffer is used (i.e. if the
    filter doesn't operate on the incoming buffer this macro must be
