@@ -1,9 +1,19 @@
 <HTML>
+
+<HEAD>
+<STYLE>
+	.text
+		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
+		font-size	:	14px;}
+</STYLE>
+
 <META http-equiv="content-type" content="text/html; charset=iso-8859-2">
+
+</HEAD>
+
 <BODY BGCOLOR=white>
 
-<FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-
+<FONT CLASS="text">
 <P><B><A NAME=C>Dodatek C - Jak zgłaszać błędy</A></B></P>
 
 <P><B>Jak zgłaszać błędy?</B></P>
@@ -38,20 +48,41 @@ listy jest ANGIELSKI!</P>
 
 <UL>
 <LI>dystrybucja linuksa<BR>
-przykłady:<UL>
-    <LI>RedHat 7.1
-    <LI>Slackware 7.0 + pakiety developerskie z 7.1 ...</UL>
+    przykłady:
+ <UL>
+  <LI>RedHat 7.1 </LI>
+  <LI>Slackware 7.0 + pakiety developerskie z 7.1 ...</LI>
+ </UL>
+</LI>
 <LI>wersja jądra:<BR>
     <CODE>uname -a</CODE>
+</LI>    
 <LI>wersja libc:<BR>
     <CODE>ls -l /lib/libc[.-]*</CODE>
+</LI>    
 <LI>wersja X:<BR>
     <CODE>X -version</CODE>
+</LI>    
 <LI>wersja gcc i ld:<BR>
     <CODE>gcc -v<BR>
     ld -v</CODE>
+</LI>    
 <LI>wersja binutils:<BR>
     <CODE>as --version</CODE>
+</LI>    
+<LI>Jeśli masz probelmy z trybem pełnoekranowym:
+  <UL>
+    <LI>Typ i wersja manadżera okienek</LI>
+  </UL>  
+</LI> 
+<LI>tylko, gdy błędy ma GUI:
+  <UL> 
+   <LI>wersja GTK</LI>
+   <LI>wersja GLIB</LI>
+   <LI>wersja libpng</LI>
+   <LI>opis sytuacji, w której pojawiają się błędy w GUI</LI>
+ </UL>
+</LI> 
 </UL>
 
 <P><B><I>2. Sprzęt i sterowniki:</I></B></P>
@@ -59,31 +90,36 @@ przykłady:<UL>
 <UL>
 <LI>informacja o CPU:<BR>
     <CODE>cat /proc/cpuinfo</CODE>
-<LI>producent i model karty wideo:<BR>
-    przykłady:<BR><UL>
-    <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM
-    <LI>Matrox G400 DH 32MB SGRAM</UL>
-<LI>typ i wersja sterownika karty graficznej<BR>
-    przykłady:<UL>
-    <LI>wbudowany sterownik X-ów
-    <LI>nvidia 0.9.623
-    <LI>Utah-GLX CVS 2001-02-17
-    <LI>DRI z X 4.0.3</UL>
-<LI>typ i wersja sterownika karty dźwiękowej<BR>
-    przykłady:<BR><UL>
-    <LI>sterownik Creative SBLive! Gold z OSS ze strony oss.creative.com
-    <LI>sterowniki jądra dla Creative SB16 z OSS
-    <LI>GUS PnP z emulacją ALSA OSS</UL>
-<LI>jeśli nie jesteś pewien, dołącz wynik wykonania lspci -v
+<LI>producent i model karty wideo, przykłady:
+    <UL>
+     <LI>ASUS V3800U chip: nVidia TNT2 Ultra pro 32MB SDRAM</LI>
+     <LI>Matrox G400 DH 32MB SGRAM</LI>
+    </UL>
+<LI>typ i wersja sterownika karty graficznej, przykłady:
+    <UL>
+     <LI>wbudowany sterownik X-ów</LI>
+     <LI>nvidia 0.9.623</LI>
+     <LI>Utah-GLX CVS 2001-02-17</LI>
+     <LI>DRI z X 4.0.3</LI>
+    </UL>
+<LI>typ i wersja sterownika karty dźwiękowej, przykłady:
+    <UL>
+     <LI>sterownik Creative SBLive! Gold z OSS ze strony oss.creative.com</LI>
+     <LI>sterowniki jądra dla Creative SB16 z OSS</LI>
+     <LI>GUS PnP z emulacją ALSA OSS</LI>
+    </UL>
+<LI>jeśli nie jesteś pewien, dołącz (jeżeli pracujesz na systemie linuksowym)
+wynik wykonania <CODE>lspci -vv</CODE></LI>
 </UL>
 
 <P><B>Przy problemach i błędach kompilacji</B></P>
 
 <P><B><I>3. te pliki:</I></B></P>
-<UL><LI>configure.log
-<LI>config.h
-<LI>config.mak
-<LI>libvo/config.mak
+<UL>
+ <LI>configure.log</LI>
+ <LI>config.h</LI>
+ <LI>config.mak</LI>
+ <LI>libvo/config.mak</LI>
 </UL>
 
 <P><B>Przy problemach z odgrywaniem:</B></P>
