@@ -241,11 +241,11 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: Can I run multiple instances of <B>MPlayer</B>?</DT>
-  <DD>A: Yes. Some video out drivers like xv, dga or (x)mga are exclusive,
-    though, so you will not be able to run more than one instance of
-    <B>MPlayer</B> running such a video out driver. To a lesser degree this
-    also applies to audio drivers. Not all allow playback of multiple streams
-    on the same device.</DD>
+  <DD>A: Yes. Some video out drivers like xv, dga or (x)mga are exclusive, some
+    are exclusive in combination with certain graphics boards and drivers. You
+    will not be able to run more than one instance of MPlayer with one of those
+    video out drivers. To a lesser degree this also applies to audio drivers.
+    Not all allow playback of multiple streams on the same device.</DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: There is a timer in the upper left corner. How can I get rid of it?</DT>
@@ -650,10 +650,18 @@
 
 <DL>
 
+  <DT>Q: What about DVD navigation?</DT>
+  <DD>A: Support for dvdnav in MPlayer is currently broken, normal playback
+    does work, though. If you want to have fancy menus, you will have to use
+    another player like <A HREF="http://xine.sourceforge.net/">xine</A> or
+    <A HREF="http://www.dtek.chalmers.se/groups/dvd">Ogle</A>. If you care
+    about DVD navigation, send a <A HREF="tech/patches.txt">patch</A>.</DD>
+  <DD>&nbsp;</DD>
+
   <DT>Q: While playing a DVD, I encountered this error:<BR>
     <CODE>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion
     nfo_length / sizeof(cell_adr_t) &gt;= c_adt-&gt;nr_of_vobs' failed.</CODE></DT>
-  <DD>A: This is a known libdvdread 0.9.1/0.9.2 bug. Use <B>libmpdvdkit</B>,
+  <DD>A: This is a known libdvdread 0.9.1/0.9.2 bug. Use <B>libmpdvdkit2</B>,
     which is present in MPlayer source, and used by default.</DD>
   <DD>&nbsp;</DD>
 
@@ -661,7 +669,7 @@
     Solaris?</DT>
   <DD>A: Who knows ... It's said to work, so please test it and send feedback.
     Refer to the documentation of libdvdread and its homepage as well. We're not
-    the authors of libdvdread. Use <B>libmpdvdkit</B>, which is present in
+    the authors of libdvdread. Use <B>libmpdvdkit2</B>, which is present in
     <B>MPlayer</B> source, and used by default.</DD>
   <DD>&nbsp;</DD>
 
@@ -683,9 +691,9 @@
   <DD>&nbsp;</DD>
 
   <DT>Q: Where can I get libdvdread and libdvdcss packages?</DT>
-  <DD>A: You don't need to. Use <B>libmpdvdkit</B>, which is present in
-    <B>MPlayer</B> source, and used by default. Anyway, the packages mentioned
-    can be get from the
+  <DD>A: You don't need to. Use <B>libmpdvdkit2</B>, which is present in the
+    MPlayer source, and used by default. You can get the mentioned packages
+    from the
     <A HREF="http://www.dtek.chalmers.se/groups/dvd">Ogle site</A>.</DD>
   <DD>&nbsp;</DD>
 
@@ -739,6 +747,21 @@
   <DD>A: Try the <CODE>mencvcd</CODE> script from the <CODE>TOOLS</CODE>
     subdirectory. With it you can encode DVDs or other movies to VCD or SVCD
     format and even burn them directly to CD.</DD>
+  <DD>&nbsp;</DD>
+
+  <DT>Q: How can I join two video files?</DT>
+  <DD>A: This has been discussed to no end on mplayer-users. Go search the
+    <A HREF="http://mplayerhq.hu/cgi-bin/htsearch?restrict=/mplayer-users/">archives</A>
+    for a complete answer. This is a complicated topic and your mileage may
+    vary a lot depending on the kind of files you want to merge. MPEGs can be
+    concatenated into a single file with luck. For AVIs there are two tools,
+    <A HREF="http://fixounet.free.fr/avidemux/">avidemux</A>
+    and avimerge (part of the
+    <A HREF="http://www.theorie.physik.uni-goettingen.de/~ostreich/transcode/">transcode</A>
+    tool set), available that might do the job. You can also try MEncoder if
+    you have two files sharing the same dimensions and codec. Try<BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>cat file1 file2 &gt; file3</CODE><BR>
+    &nbsp;&nbsp;&nbsp;&nbsp;<CODE>mencoder -ovc copy -oac copy -o out.avi -forceidx file3.avi</CODE></DD>
   <DD>&nbsp;</DD>
 
   <DT>Q: My tuner works, I can hear the sound and watch the video with MPlayer,
