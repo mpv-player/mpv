@@ -3,52 +3,30 @@
 
 <FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
 
-<P><B><A NAME=2.1>2.1. Video Formate, Audio &amp; Video Codecs</A></B></P>
-
-<P><B><A NAME=2.1.1>2.1.1. Unterstützte Eingabe-Formate</A></B></P>
-
-<P><B>MPlayer</B> kann von den folgenden Formaten/Geräte lesen:<BR>
-<UL>
-<LI> VCD (Video CD) direkt vom CD-ROM oder von einer CDRwin-.bin-Image-Datei     
-<LI> DVD, direkt von der DVD-Disk, optionial mit libdvdread für Entschlüsselung
-<LI> MPEG 1/2 System Stream (PS/PES/VOB) und Elementary Stream (ES) Dateiformate
-<LI> RIFF AVI Dateiformat
-<LI> ASF/WMV 1.0 Dateiformat
-<LI> QT/MOV Dateiformat mit un- und komprimierten Headern (UNVOLLSTÄNDIG!)
-<LI> unterstützt lesen von Datei, stdin, DVD-Laufwerk oder Netzwerk via HTTP
-</UL></P>
-
-<P>Hinweis: zu Quicktime (.mov/.qt) und RealMedia (.ra/.rm) Support siehe FAQ!</P>
+<P><B><A NAME=2.2>2.2. Unterstützte Codecs</A></B></P>
 
 
-<P><B><A NAME=2.1.2>2.1.2. Unterstützte Audio &amp; Video Codecs</A></B></P>
+<P><B><A NAME=2.2.1>2.2.1. Video Codecs</A></B></P>
 
 <P>Siehe <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A> für die komplette,
 täglich generierte Liste!!!</P>
 
 <P>Die wichtigsten Video-Codecs:<BR>
 <UL>
-<LI>MPEG1 (VCD) und MPEG2 (DVD) Video
-<LI>DivX, OpenDivX und andere MPEG4 Varianten
-<LI>Windows Media Video 7 (WMV1) und 8 (WMV2), verwendet in .wmv-Dateien
-<LI>Intel Indeo Codecs (3.1, 3.2, 4.1, 5.0)
-<LI>MJPEG, ASV2 und andere Hardwareformate
-</UL></P>
-
-<P>Die wichtigsten Audio-Codecs:<BR>
-<UL>
-<LI>MPEG Layer 2, und Layer 3 (MP3) Audio (mit MMX/SSE/3DNow Optimierungen)
-<LI>AC3 Dolby Audio (eingebauter Code, mit 3DNow Optimierung)
-<LI>Ogg Vorbis Audio Codec
-<LI>Voxware Audio (verwendet DirectShow DLL)
-<LI>Alaw, MSGSM, PCM und andere einfache, alte Audio-Formate
+<LI>MPEG1 (VCD) und MPEG2 (DVD) video</LI>
+<LI>DivX ;-), OpenDivX (DivX4), 3ivx und andere MPEG4 Varianten</LI>
+<LI>Windows Media Video 7 (WMV1) und 8 (WMV2), verwendet in .wmv-Dateien</LI>
+<LI>Intel Indeo Codecs (3.1, 3.2, 4.1, 5.0)</LI>
+<LI>MJPEG, ASV2 und andere Hardwareformate</LI>
+<LI>XAnim Codecs</LI>
+<LI>VIVO</LI>
 </UL></P>
 
 <P>Wenn du einen Codec hast, der nicht gelistet ist, und noch nicht unterstützt
-ist, lese <A HREF="#2.1.4">Sektion 2.1.4</A> um Infos über den Status zu bekommen
+ist, lese <A HREF="#2.2.3">Sektion 2.2.3</A> um Infos über den Status zu bekommen
 und wie du uns helfen kannst, die Unterstützung hinzuzufügen!</P>
 
-<P><B><A NAME=2.1.2.1>2.1.2.1. DivX4</A></B></P>
+<P><B><A NAME=2.2.1.1>2.2.1.1. DivX4</A></B></P>
 
 <P>Diese Sektion enthält Informationen über den DivX4 Codec von
 <A HREF="http://www.projectmayo.com">ProjectMayo</A>. Ihre ersten verfügbaren alpha-Versionen
@@ -66,15 +44,7 @@ ist. :(</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip">http://download2.projectmayo.com/dnload/divx4linux/divx4linux-20010718.zip</A></P>
 
-<P>Zur Zeit ist noch keine automatische Installation verfügbar, als muss man
-es manuell installieren, GENAU wir hier beschrieben. Entpacke es und kopiere die
-Dateien an ihren Platz:</P>
-
-<P><CODE>cp libdivxdecore.so.0.0.0 /usr/local/lib/<BR>
-ln -s /usr/local/lib/libdivxdecore.so.0.0.0 /usr/local/lib/libdivxdecore.so.0<BR>
-ln -s /usr/local/lib/libdivxdecore.so.0 /usr/local/lib/libdivxdecore.so<BR>
-ldconfig<BR>
-cp decore.h /usr/local/include/</CODE></P>
+<P>Entpacke es und starte <CODE>./install.sh</CODE> als Root.</P>
 
 <P>Hinweis: vergiss NICHT /usr/local/lib deiner /etc/ld.so.conf hinzuzufügen!</P>
 
@@ -105,8 +75,8 @@ Für gepackte YUV Formate (YUY2, UYVY) verwende die 'divx4'-Methode.
 Für RGB-Modus kannst du frei wählen, denn die Geschwindigkeit ist die selbe,
 möglicherweise ist sie jedoch unterschiedlich bei deiner Farbtiefe.</P>
 
-<P>Hinweis: Es unterstützt auch Postprocessing und die Reichweite der Einstel-
-lungen ist groß:</P>
+<P>Hinweis: Es unterstützt auch Postprocessing und die Reichweite der Einstellungen
+ist groß:</P>
 
 <P><TABLE BORDER=0>
 <TD>&nbsp;&nbsp;</TD><TD>0</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>&nbsp;&nbsp;</TD>
@@ -121,9 +91,10 @@ lungen ist groß:</P>
 
 <P>Seit Beginn der Version 0.4.2 enthält <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> einen <B>Open-Source</B>
 DivX-Codec, welcher kompatibel mit dem traditionellen DivX ist. <B>MPlayer</B>
-unterstützt diesen Codec und er ermöglicht, <B>DivX auf nicht-x86 Platformen zu sehen!</B>
-Es wurde von <B>MPlayer</B>s CVS-Tree entfernt, du musst es manuel direkt von
-<B>FFmpeg</B>s Tree beziehen:</P>
+unterstützt diesen Codec und er ermöglicht, <B>DivX/DivX4 Filme auf nicht-x86
+Platformen zu sehen!</B> und es besitzt eine schnelle <B>DivX/DivX4</B> Dekodierung
+als der Win32 Codec oder die orginal DivX4 Codec. Es wurde von <B>MPlayer</B>s
+CVS-Tree entfernt, du musst es manuel direkt von <B>FFmpeg</B>s Tree beziehen:</P>
 
 <P><CODE>
   cvs -d:pserver:anonymous@cvs.ffmpeg.sourceforge.net:/cvsroot/ffmpeg login<BR>
@@ -139,15 +110,16 @@ ffmpeg-Quellen) in das <B>MPlayer</B> Verzeichnise, das es so aussieht:</P>
 
 <P>Symbolische Links sind NICHT genug, du musst es kopieren oder verschieben!!!</P>
 
-<P>./configure erkennt automatisch, ob es eingebaut werden kann. Zur Zeit
-unterstützt es kein Postprocessing und es ist bei der Optimierung (es ist
-bereits schneller als die DS/VfW DivX-Codecs).</P>
+<P>./configure erkennt automatisch, ob es eingebaut werden kann. Der Codec
+<B>unterstützt auch Postprocessing</B>!</P>
 
-<P>Um es zu verwenden ändere deine codecs.conf-Datei wie in der Manpage oder
-du stellst die example.conf ein (die -vfm Option).</P>
-
-<P>Hinweis: libavcodec enthält auch andere Codecs, aber zur Zeit sind wir
-auf ffdivx fixiert und es ist unwarscheindlich dass dich das ändern wird.</P>
+<P>Um die <B>gößtmögliche Geschwindigkeit</B> auf meinem K6 zu erreichen, habe ich
+die <CODE>ffmpeg12</CODE> Sektion von codecs.conf entfernt (dieser Codec ist
+nicht optimiert und libmpeg2 ist doppelt so schnell) und habe <CODE>vfm=5</CODE>
+in meiner config-Datei hinzugefügt. <B>MPlayer</B> hat nun immer <B>ffdivx/ffodivx</B>
+zum Dekodieren von <B>DivX/DivX4</B> verwendet und libmpeg2 für MPEG1/2. Mit diesen
+Einstellungen und meiner Matrox G400 kann ich auch DivX/DivX4-Filme mit hoher
+Auflösung ohne Framedrop sehen.</P>
 
 <P><B><A NAME=2.1.2.3>2.1.2.3.  Hardware AC3 decoding</A></B></P>
 
