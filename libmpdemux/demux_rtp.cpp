@@ -68,6 +68,7 @@ public:
   ReadBuffer* dequeue();
 
   FramedSource* readSource() const { return fReadSource; }
+  RTPSource* rtpSource() const { return fRTPSource; }
   demuxer_t* ourDemuxer() const { return fOurDemuxer; }
   char const* tag() const { return fTag; }
 
@@ -77,6 +78,7 @@ public:
   unsigned counter; // used for debugging
 private:
   FramedSource* fReadSource;
+  RTPSource* fRTPSource;
   demuxer_t* fOurDemuxer;
   char const* fTag; // used for debugging
 };
@@ -90,6 +92,7 @@ typedef struct RTPState {
   ReadBufferQueue* audioBufferQueue;
   ReadBufferQueue* videoBufferQueue;
   int isMPEG; // TRUE for MPEG audio, video, or transport streams
+  struct timeval firstSyncTime;
 };
 
 extern "C" void demux_open_rtp(demuxer_t* demuxer) {
@@ -252,6 +255,7 @@ extern "C" void demux_open_rtp(demuxer_t* demuxer) {
     rtpState->videoBufferQueue
       = new ReadBufferQueue(videoSubsession, demuxer, "video");
     rtpState->isMPEG = isMPEG;
+    rtpState->firstSyncTime.tv_sec = rtpState->firstSyncTime.tv_usec = 0;
 
     demuxer->priv = rtpState;
   } while (0);
@@ -368,16 +372,38 @@ static void scheduleNewBufferRead(ReadBufferQueue* bufferQueue) {
 }
 
 static void afterReading(void* clientData, unsigned frameSize,
-			 struct timeval /*presentationTime*/) {
+			 struct timeval presentationTime) {
   ReadBuffer* readBuffer = (ReadBuffer*)clientData;
   ReadBufferQueue* bufferQueue = readBuffer->ourQueue();
   demuxer_t* demuxer = bufferQueue->ourDemuxer();
+  RTPState* rtpState = (RTPState*)(demuxer->priv);
 
   if (frameSize > 0) demuxer->stream->eof = 0;
 
   demux_packet_t* dp = readBuffer->dp();
   dp->len = frameSize;
-  dp->pts = 0;
+
+  // Set the packet's presentation time stamp, depending on whether or
+  // not our RTP source's timestamps have been synchronized yet: 
+  {
+    Boolean hasBeenSynchronized
+      = bufferQueue->rtpSource()->hasBeenSynchronizedUsingRTCP();
+    if (hasBeenSynchronized) {
+      struct timeval* fst = &(rtpState->firstSyncTime); // abbrev
+      if (fst->tv_sec == 0 && fst->tv_usec == 0) {
+	*fst = presentationTime;
+      }
+
+      // For the "pts" field, use the time differential from the first
+      // synchronized time, rather than absolute time, in order to avoid
+      // round-off errors when converting to a float:
+      dp->pts = presentationTime.tv_sec - fst->tv_sec
+	+ (presentationTime.tv_usec - fst->tv_usec)/1000000.0;
+    } else {
+      dp->pts = 0.0;
+    }
+  }
+
   dp->pos = demuxer->filepos;
   demuxer->filepos += frameSize;
   if (!readBuffer->enqueue()) {
@@ -441,6 +467,7 @@ ReadBufferQueue::ReadBufferQueue(MediaSubsession* subsession,
 				 demuxer_t* demuxer, char const* tag)
   : head(NULL), tail(NULL), counter(0),
     fReadSource(subsession == NULL ? NULL : subsession->readSource()),
+    fRTPSource(subsession == NULL ? NULL : subsession->rtpSource()),
     fOurDemuxer(demuxer), fTag(strdup(tag)) {
 } 
 
