@@ -48,7 +48,8 @@ static long intwindiv = 0x47800000;
 
 void make_decode_tables_MMX(long scaleval)
 {
-  long intwinbase_step = 2;
+  long intwinbase_step;
+  intwinbase_step=2;
   scaleval =- scaleval;
     __asm __volatile(
 	"xorl %%ecx,%%ecx\n\t"
@@ -92,7 +93,7 @@ void make_decode_tables_MMX(long scaleval)
 ".L04:\n\t"
 	::"g"(intwinbase_MMX),"m"(decwin[0]),"m"(scaleval),"m"(intwinbase_step)
 	:"memory","%ebx","%esi","%edi");
-
+intwinbase_step=2;
   __asm __volatile(
 	"xorl %%ecx,%%ecx\n\t"
 	"xorl %%ebx,%%ebx\n\t"
