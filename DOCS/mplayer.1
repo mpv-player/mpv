@@ -605,7 +605,7 @@ Turns off automatic subtitles.
 .TP
 .B \-osdlevel <0\-2> (MPLAYER only)
 Specifies which mode the OSD should start in (0: none, 1: seek, 2: seek+timer,
-default is 2).
+default is 1).
 .TP
 .B \-sid <id> (also see -slang option)
 Turns on DVD subtitle displaying. Also, you MUST specify a number which
@@ -1268,8 +1268,7 @@ Do not skip frames.
 Outputs to the given filename, instead of the default 'test.avi'.
 .TP
 .B \-oac <codec name>
-Encode with the given codec (codec names are from codecs.conf,
-use -ovc help to get a list of available codecs).
+Encode with the given codec (use -ovc help to get a list of available codecs. no default is set).
 
 .I EXAMPLE:
     -oac copy     no encoding, just streamcopy
@@ -1282,14 +1281,13 @@ You MUST set it for variable fps (asf, some mov) and progressive
 (29.97fps telecined mpeg) files.
 .TP
 .B \-ovc <codec name>
-Encode with the given codec (codec names are from codecs.conf, 
-use -ovc help to get a list of available codecs).
+Encode with the given codec (use -ovc help to get a list of available codecs, no default).
 
 .I EXAMPLE:
     -ovc copy    no encoding, just streamcopy
     -ovc divx4   encode to DivX4/DivX5 or XviD
     -ovc rawrgb  encode to uncompressed RGB24
-    -ovc lavc    encode with a libavcodec codec
+    -ovc lavc    encode with a libavcodec codecs
 .TP
 .B \-pass <1/2>
 With this you can encode 2pass DivX4 files. First encode with -pass 1, then
@@ -1557,25 +1555,25 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420 \-vo xv
 .TP
 .B Encoding DVD title #2, only selected chapters
-mencoder -dvd 2 -chapter 10-15 -o title2.avi
+mencoder -dvd 2 -chapter 10-15 -o title2.avi -oac copy -ovc divx4
 .TP
 .B Encoding DVD title #2, resizing to 640x480
-mencoder -dvd 2 -vop scale=640:480 -o title2.avi
+mencoder -dvd 2 -vop scale=640:480 -o title2.avi -oac copy -ovc divx4
 .TP
 .B Encoding DVD title #2, resizing to 512xHHH (keep aspect ratio)
-mencoder -dvd 2 -vop scale -zoom -xy 512 -o title2.avi
+mencoder -dvd 2 -vop scale -zoom -xy 512 -o title2.avi -oac copy -ovc divx4
 .TP
 .B The same, but with libavcodec family, MPEG4 (Divx5) compression
-mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=1800
+mencoder -dvd 2 -o title2.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq:vbitrate=1800 -oac copy
 .TP
 .B Encoding all *.jpg files in the current dir
-mencoder \\*.jpg -mf on:fps=25 -o output.avi
+mencoder \\*.jpg -mf on:fps=25 -o output.avi -ovc divx4
 .TP
 .B Encoding from tuner (see documentation!)
-mencoder -tv on:driver=v4l:width=640:height=480 -o tv.avi
+mencoder -tv on:driver=v4l:width=640:height=480 -o tv.avi -ovc rawrgb
 .TP
 .B Encoding from a pipe
-rar p test-SVCD.rar | mencoder -divx4opts br=800 -ofps 24 -pass 1 -- -
+rar p test-SVCD.rar | mencoder -ovc divx4 -divx4opts br=800 -ofps 24 -pass 1 -- -
 .TP
 .B Encoding multiple *.vob files
 cat *.vob | mencoder <options> -
