@@ -2945,16 +2945,6 @@ if(eof == PT_NEXT_ENTRY || eof == PT_PREV_ENTRY) {
      eof = eof == PT_PREV_SRC ? -1 : 1;
 }
 
-#ifdef HAVE_NEW_GUI
- if( use_gui && !playtree_iter ) 
-  {
-#ifdef USE_DVDREAD
-   if ( !guiIntfStruct.DVDChanged ) 
-#endif
-   mplStop();
-  }	
-#endif
-
 if(eof == 0) eof = 1;
 
 while(playtree_iter != NULL) {
@@ -2967,6 +2957,16 @@ while(playtree_iter != NULL) {
   } else
     break;
 } 
+
+#ifdef HAVE_NEW_GUI
+ if( use_gui && !playtree_iter ) 
+  {
+#ifdef USE_DVDREAD
+   if ( !guiIntfStruct.DVDChanged ) 
+#endif
+   mplStop();
+  }	
+#endif
 
 if(use_gui || playtree_iter != NULL
 #if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )

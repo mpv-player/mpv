@@ -542,13 +542,18 @@ int vo_x11_check_events(Display *mydisplay){
            break;
 #endif
       case PropertyNotify: 
-	   if ( !strcmp( XGetAtomName( mydisplay,Event.xproperty.atom ),"_ICEWM_TRAY" ) ||
-		!strncmp( XGetAtomName( mydisplay,Event.xproperty.atom ),"_KDE_",5 ) ||
-	        !strcmp( XGetAtomName( mydisplay,Event.xproperty.atom ),"KWM_WIN_DESKTOP" ) ) vo_wm_type=0;
+    	   {
+	    char * name = XGetAtomName( mydisplay,Event.xproperty.atom );
+	    if ( !name ) break;
+	    if ( !strncmp( name,"_ICEWM_TRAY",11 ) ||
+		 !strncmp( name,"_KDE_",5 ) ||
+	         !strncmp( name,"KWM_WIN_DESKTOP",15 ) ) vo_wm_type=0;
 		
  	     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",
-	      vo_window,XGetAtomName( mydisplay,Event.xproperty.atom ),Event.xproperty.atom );
-
+	      vo_window,name,Event.xproperty.atom );
+	      
+	    XFree( name );
+	   }
 	   break;
      }
   }
@@ -589,7 +594,7 @@ void vo_x11_fullscreen( void )
  vo_x11_sizehint( vo_dx,vo_dy,vo_dwidth,vo_dheight,0 );
  XMoveResizeWindow( mDisplay,vo_window,vo_dx,vo_dy,vo_dwidth,vo_dheight );
  XMapRaised( mDisplay,vo_window );
- 
+
  XRaiseWindow( mDisplay,vo_window );
  XFlush( mDisplay );
 }

@@ -50,6 +50,7 @@ int                  wsScreen;
 Window               wsRootWin;
 XEvent               wsEvent;
 int                  wsWindowDepth;
+int		     wsWMType = 1;
 GC                   wsHGC;
 MotifWmHints         wsMotifWmHints;
 Atom                 wsTextProperlyAtom = None;
@@ -337,6 +338,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->AtomWMSizeHint=XInternAtom( wsDisplay,"WM_SIZE_HINT",False );
  win->AtomWMNormalHint=XInternAtom( wsDisplay,"WM_NORMAL_HINT",False );
  win->AtomProtocols=XInternAtom( wsDisplay,"WM_PROTOCOLS",False );
+#if 0
  {
   char buf[32]; int i;
   sprintf( buf,"_%s_REMOTE",label );
@@ -347,6 +349,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
   fprintf( stderr,"[ws] atomname: %s\n",buf );
   win->AtomRemote=XInternAtom( wsDisplay,buf,False );
  }
+#endif
  win->AtomsProtocols[0]=win->AtomDeleteWindow;
  win->AtomsProtocols[1]=win->AtomTakeFocus;
  win->AtomsProtocols[2]=win->AtomRolle;
@@ -442,10 +445,12 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  wsTextProperty.nitems=strlen( label );
  XSetWMIconName( wsDisplay,win->WindowID,&wsTextProperty );
 
+#if 0
  XChangeProperty( wsDisplay,win->WindowID,
                   win->AtomRemote,XA_STRING,
                   8,PropModeReplace,
                   "REALIZED",8 );
+#endif
 
 //  win->Font=XLoadQueryFont( wsDisplay,"-adobe-helvetica-bold-r-normal--14-140-75-75-p-77-iso8859-1" );
 //  -adobe-times-medium-r-normal--14-140-75-75-p-77-iso8859-1" );
@@ -647,10 +652,20 @@ buttonreleased:
 //        break;
 
    case PropertyNotify:
-//      break;
-//      #ifdef DEBUG
-//         fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",wsWindowList[l]->WindowID,XGetAtomName( wsDisplay,Event->xproperty.atom ),Event->xproperty.atom );
-//      #endif
+	{
+	 char * name = XGetAtomName( wsDisplay,Event->xproperty.atom );
+	 
+         if ( !name ) break;
+	 if ( !strncmp( name,"_ICEWM_TRAY",11 ) ||
+	      !strncmp( name,"_KDE_",5 ) ||
+	      !strncmp( name,"KWM_WIN_DESKTOP",15 ) ) wsWMType=0;
+							  
+//         fprintf(stderr,"[ws] PropertyNotify %s ( 0x%x )\n",name,Event->xproperty.atom );
+							  
+	 XFree( name );
+	 break;
+	}
+#if 0
         if ( Event->xproperty.atom == wsWindowList[l]->AtomRemote )
          {
           Atom            type;
@@ -677,6 +692,7 @@ buttonreleased:
             XFree( args );
            }
          }
+#endif
         break;
 
   }
@@ -741,8 +757,7 @@ while(wsTrue){
 void wsFullScreen( wsTWindow * win )
 {
  int decoration = 0;
- XUnmapWindow( wsDisplay,win->WindowID );
- win->SizeHint.flags=0;
+ if ( wsWMType ) XUnmapWindow( wsDisplay,win->WindowID );
  if ( win->isFullScreen )
   {
    win->X=win->OldX;
@@ -763,11 +778,11 @@ void wsFullScreen( wsTWindow * win )
     wsScreenSaverOff( wsDisplay );
    }
 
- win->SizeHint.flags|=PPosition | PSize;
- win->SizeHint.x=win->X;
- win->SizeHint.y=win->Y;
- win->SizeHint.width=win->Width;
- win->SizeHint.height=win->Height;
+ win->SizeHint.flags=PPosition | PSize | PWinGravity | PBaseSize;
+ win->SizeHint.x=win->X;              win->SizeHint.y=win->Y;
+ win->SizeHint.width=win->Width;      win->SizeHint.height=win->Height;
+ win->SizeHint.base_width=win->Width; win->SizeHint.base_height=win->Height;
+ win->SizeHint.win_gravity=StaticGravity;
  if ( win->Property & wsMaxSize )
   {
    win->SizeHint.flags|=PMaxSize;
@@ -784,8 +799,8 @@ void wsFullScreen( wsTWindow * win )
 
  XMoveResizeWindow( wsDisplay,win->WindowID,win->X,win->Y,win->Width,win->Height );
  wsWindowDecoration( win,decoration );
+ XMapRaised( wsDisplay,win->WindowID );
  XRaiseWindow( wsDisplay,win->WindowID );
- XMapWindow( wsDisplay,win->WindowID );
 }
 
 // ----------------------------------------------------------------------------------------------

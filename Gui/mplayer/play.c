@@ -31,6 +31,7 @@ void mplFullScreen( void )
 {
  static int sx,sy;
 
+#if 0
 // if ( !guiIntfStruct.Playing )
   {
    wsVisibleWindow( &appMPlayer.subWindow,wsHideWindow );
@@ -52,7 +53,10 @@ void mplFullScreen( void )
    vo_fs=appMPlayer.subWindow.isFullScreen;     
    wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
   }// else { vo_x11_fullscreen(); appMPlayer.subWindow.isFullScreen=vo_fs; }
-  
+#else
+  wsFullScreen( &appMPlayer.subWindow );
+#endif
+
  fullscreen=appMPlayer.subWindow.isFullScreen;
  if ( guiIntfStruct.Playing ) wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
   else wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
