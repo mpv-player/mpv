@@ -128,7 +128,7 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
         case IMGFMT_I420:
 	    // "converted" using pointer/stride modification
 	    if(avctx->pix_fmt==PIX_FMT_YUV420P) return CONTROL_TRUE;// u/v swap
-	    if(avctx->pix_fmt==PIX_FMT_YUV422P) return CONTROL_TRUE;// half stride
+	    if(avctx->pix_fmt==PIX_FMT_YUV422P && !ctx->do_dr1) return CONTROL_TRUE;// half stride
 	    break;
 #ifdef HAVE_XVMC
         case IMGFMT_XVMC_IDCT_MPEG2:
@@ -170,9 +170,6 @@ static int init(sh_video_t *sh){
  
     if(lavc_codec->capabilities&CODEC_CAP_DR1)
 	ctx->do_dr1=1;
-    //XXX:FIXME:HACK:UGLY 422P with direct rendering is buggy cuz of that chroma stride trick ...
-    if(sh->format == mmioFOURCC('H','F','Y','U'))
-        ctx->do_dr1=0;
     ctx->b_age= ctx->ip_age[0]= ctx->ip_age[1]= 256*256*256*64;
     ctx->ip_count= ctx->b_count= 0;
 
@@ -416,6 +413,7 @@ static int init_vo(sh_video_t *sh){
 	default:
 	    ctx->best_csp=0;
 	}
+
     	if (!mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h, ctx->best_csp))
     		return -1;
     }
