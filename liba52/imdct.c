@@ -387,6 +387,10 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 
 #ifdef HAVE_ALTIVEC
 
+#ifndef SYS_DARWIN
+#include <altivec.h>
+#endif
+
 // used to build registers permutation vectors (vcprm)
 // the 's' are for words in the _s_econd vector
 #define WORD_0 0x00,0x01,0x02,0x03
@@ -398,7 +402,11 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 #define WORD_s2 0x18,0x19,0x1a,0x1b
 #define WORD_s3 0x1c,0x1d,0x1e,0x1f
 
+#ifdef SYS_DARWIN
 #define vcprm(a,b,c,d) (const vector unsigned char)(WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d)
+#else
+#define vcprm(a,b,c,d) (const vector unsigned char){WORD_ ## a, WORD_ ## b, WORD_ ## c, WORD_ ## d}
+#endif
 
 // vcprmle is used to keep the same index as in the SSE version.
 // it's the same as vcprm, with the index inversed
@@ -410,7 +418,18 @@ imdct_do_512(sample_t data[],sample_t delay[], sample_t bias)
 #define FLOAT_n -1.
 #define FLOAT_p 1.
 
+#ifdef SYS_DARWIN
 #define vcii(a,b,c,d) (const vector float)(FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d)
+#else
+#define vcii(a,b,c,d) (const vector float){FLOAT_ ## a, FLOAT_ ## b, FLOAT_ ## c, FLOAT_ ## d}
+#endif
+
+#ifdef SYS_DARWIN
+#define FOUROF(a) (a)
+#else
+#define FOUROF(a) {a,a,a,a}
+#endif
+
 
 void
 imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
@@ -601,7 +620,7 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
         int p = k + i;
         int q = p + two_m;
         vector float vecp, vecq, vecw, temp1, temp2, temp3, temp4;
-        const vector float vczero = (const vector float)(0);
+        const vector float vczero = (const vector float)FOUROF(0.);
         // first compute buf[q] and buf[q+1]
         vecq = vec_ld(q << 3, (float*)buf);
         vecw = vec_ld(0, (float*)&(w[m][k]));
@@ -658,7 +677,7 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
 #else
     vector float bufv_0, bufv_2, cosv, sinv, temp1, temp2;
     vector float temp0022, temp1133, tempCS01;
-    const vector float vczero = (const vector float)(0);
+    const vector float vczero = (const vector float)FOUROF(0.);
 
     bufv_0 = vec_ld((i + 0) << 3, (float*)buf);
     bufv_2 = vec_ld((i + 2) << 3, (float*)buf);

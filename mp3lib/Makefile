@@ -26,7 +26,11 @@ ifeq ($(TARGET_ARCH_POWERPC),yes)
 ifeq ($(TARGET_ALTIVEC),yes)
 SRCS += dct64_altivec.c
 OBJS += dct64_altivec.o
+ifeq ($(TARGET_OS),Darwin)
 CFLAGS += -faltivec
+else
+CFLAGS += -maltivec -mabi=altivec
+endif
 endif
 endif
 

@@ -8,7 +8,11 @@ OBJS	= $(SRCS:.c=.o)
 
 CFLAGS  = $(MLIB_INC) $(OPTFLAGS) 
 ifeq ($(TARGET_ALTIVEC),yes)
+ifeq ($(TARGET_OS),Darwin)
     CFLAGS+= -faltivec
+else
+    CFLAGS+= -maltivec -mabi=altivec
+endif
 endif
 
 .SUFFIXES: .c .o
