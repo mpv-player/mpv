@@ -12,9 +12,15 @@
 <H2><A NAME=2.4>2.4 Enkódolás a MEncoderrel</A></H2>
 
 <P>A rendelkezésre álló opciók és példák teljes listáját lásd a man
-  page-ben.</P>
+  page-ben. Számos példa áll rendelkezésre a különbözõ opciókról a
+  <A HREF="../tech/encoding-tips.txt">tech/encoding-tips.txt</A> file-ban.
+  Ezek a példák az
+  <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-users">mplayer-users</A>
+  levelezési listáról lettek kigyûjtve, így érdemes lehet ezen lista
+  <A HREF="http://mplayerhq.hu/pipermail/mplayer-users/">archívumát</A>
+  böngészgetni infóért.</P>
 
-<H3><A NAME=2pass>2.4.1 2, 3 menetes DivX4 enkódolása</A></H3>
+<H3><A NAME=2pass>2.4.1 2, 3 menetes MPEG4 ("DivX") enkódolása</A></H3>
 
 <P><U><B>2 menetes enkódolás:</B></U> az elnevezés onnan jön, hogy ezzel a
   módszerrel a file <I>kétszer</I> lesz enkódolva. Az elsõ menet néhány pár
@@ -25,7 +31,7 @@
   minõséggel és kisebb mérettel bír. Ha most hallassz errõl elõször, jobb ha
   keresel a neten egy útmutatót.</P>
 
-<P>A következõ példa egy DVD 2 menetes DivX4 AVI-ba történõ enkódolását
+<P>A következõ példa egy DVD 2 menetes MPEG4 ("DivX") AVI-ba történõ enkódolását
   mutatja be. Csak két parancs szükséges:<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;rm frameno.avi</CODE> - töröld ezt a file-t,
     ami egy esetleges elõzõ 3 menetes enkódolásból származhat<BR>
@@ -56,13 +62,13 @@
   <LI>Második menet:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1 -ovc lavc -lavcopts
       vcodec=mpeg4:vbitrate=&lt;bitráta&gt;</CODE></P>
-    <P>Alias a DivX4 video enkódolás elsõ menete.  Opcionálisan megadhatod azt
+    <P>Alias az MPEG4 video enkódolás elsõ menete.  Opcionálisan megadhatod azt
       a bitrate-et amit a MEncoder az elõzõ menet végén kiírt, lásd
       feljebb.</P></LI>
   <LI>Harmadik menet:
     <P><CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2 -ovc lavc -lavcopts
       vcodec=mpeg4:vbitrate=&lt;bitráta&gt;</CODE></P>
-    <P>Alias a DivX4 video enkódolás második menete.  Opcionálisan megadhatod
+    <P>Alias az MPEG4 video enkódolás második menete. Add meg
       azt a bitrate-et amit a MEncoder az elõzõ menet végén kiírt, lásd
       feljebb. Ebben a menetben a <CODE>frameno.avi</CODE>-ban levõ audio
       belekerül a célfileba..  és kész is az egész!</P></LI>
@@ -139,11 +145,14 @@
   <LI>mjpeg - Motion JPEG</LI>
   <LI>h263 - H263</LI>
   <LI>h263p - H263 Plus</LI>
-  <LI>mpeg4 - DivX4</LI>
-  <LI>msmpeg4 - a régi DivX</LI>
-  <LI>msmpeg4v2 - Micro$oft MPEG4 v2 (a DivX alias MP43 elõdje)</LI>
+  <LI>mpeg4 - ISO szabványos MPEG4 (DivX5, XVID kompatibilis)</LI>
+  <LI>msmpeg4 - szabványosítás elõtti MPEG4 (Micro$oft), v3 (alias DivX3)</LI>
+  <LI>msmpeg4v2 - szabványosítás elõtti MPEG4 (Micro$oft), v2 (régi ASF
+    file-okban)</LI>
+  <LI>wmv1 - Windows Media Video, 1-es verzió (alias WMV7)</LI>
   <LI>rv10 - egy régi RealVideo codec</LI>
   <LI>mpeg1video - MPEG1 video :)</LI>
+  <LI>huffyuv - veszteségmentes tömörítés</LI>
 </UL>
 
 <P>Az elsõ oszlopban felsorolt codec-eket kell átadni a
@@ -167,10 +176,7 @@
 </P>
 
 <P>A <B>MEncoder</B> ezután a kiválasztott kimeneti codecnek adja a
-  dekódolt képet (pl DivX4, Xvid, ffmpeg msmpeg4, stb). Vigyázat: a PNG
-  dekóder jelenleg csak RGB formátumú képek kiadására képes, így nem
-  használható olyan codecekkel amelyek YUV formátumot várnak. Ilyen
-  például a DivX4, vagy az ffmpeg-beli msmpeg4.</P>
+  dekódolt képet (pl DivX4, Xvid, ffmpeg msmpeg4, stb).</P>
 
 <P><B><I>Példák</I></B></P>
 

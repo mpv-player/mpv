@@ -58,10 +58,17 @@
 
 <P>A nyilvános fórumokon történõ kérdésfeltevéshez egy nagyszerû és jól megírt
   útmutató a <A HREF="http://www.tuxedo.org/~est/faqs/smart-questions.html">Hogyan
-  tegyünk fel hasznos kérdéseket</A>, Eric S. Raymond-tõl. Ha ezt követed,
-  biztonságban vagy. Más részrõl viszont mivel mindannyiónk szabad idejében
-  és nem kötelezõen követi a listák forgalmát, így nem következik hogy
-  mindig ráérünk, és/vagy azonnal szolgáltatjuk a probléma megoldását.</P>
+  tegyünk fel hasznos kérdéseket</A>,
+  <A HREF="http://www.tuxedo.org/~esr/">Eric S. Raymond-tól</A>. Egy másik
+  hasznos írás a
+  <A HREF="http://www.chiark.greenend.org.uk/~sgtatham/bugs.html">Hatékony
+  Bugreportolás címû</A>, amit
+  <A HREF="http://www.chiark.greenend.org.uk/~sgtatham/">Simon Tatham</A>
+  követett el.
+  Ha ezeket követed, biztonságban vagy. Másrészrõl viszont mivel
+  mindannyiónk szabad idejében és nem kötelezõen követi a listák forgalmát,
+  így nem következik hogy mindig ráérünk, és/vagy azonnal szolgáltatjuk a
+  probléma megoldását.</P>
 
 
 <P><B>Hol jelentheted be?</B></P>
@@ -80,6 +87,15 @@
   <A HREF="http://expita.com/nomime.html">ezt a leírást</A>.
   Megjegyzendõ továbbá, hogy nem fogunk CC-zni (carbon copy) mindenkinek,
   így jó ötlet feliratkozni a listára mielõtt elküldöd a leveled.</P>
+
+<H3>Mibõl álljon a bugreport:</H3>
+
+<P>Szükség lehet naplófile-okra, konfigurációra, vagy egy minta file-ra a
+  bugreporthoz.Ha ezek közül valamelyik nagy méretû, akkor jobb ha
+  FTP-re töltöd fel (gzip és bzip2 elõnyben ..), és csak a file nevét,
+  elérhetõségét írod bele a bugreportba! A levelezési listáink 80k-ra vannak
+  korlátozva, így ha ennél nagyobb állományt akarsz küldeni tömörítsd,
+  vagy tedd letölthetõvé.</P>
 
 <H3>Mit tartalmazzon a bugreport?</H3>
 
@@ -106,6 +122,12 @@
   <LI>ha a probléma kapcsolódik a teljesképernyõs mód használatához:
     <UL>
       <LI>ablakkezelõ típusa, verziószáma</LI>
+    </UL>
+  </LI>
+  <LI>XVIDIX-szel kapcsolatos problémák esetén:
+    <UL>
+      <LI>X színmélysége:<BR>
+        <CODE>xdpyinfo | grep "depth of root"</CODE></LI>
     </UL>
   </LI>
   <LI>ha a GUI a bugos:
@@ -161,6 +183,19 @@
     <LI>libvo/config.mak</LI>
   </UL>
 
+Ha a fordítás az alább felsorolt könyvtárak egyikében áll le, a következõ
+file-okat is küldd el:
+
+<UL>
+  <LI><CODE>Gui/config.mak</CODE></LI>
+  <LI><CODE>libvo/config.mak</CODE></LI>
+  <LI><CODE>libao2/config.mak</CODE></LI>
+</UL>
+
+<H4>Configure problémákhoz</H4>
+
+A <CODE>configure.log</CODE>-ot.
+
 <P><B>Lejátszási problémákhoz</B></P>
 
 <P>Kérjük mellékeld az <B>MPlayer</B> kimenetét legalább 1-es bõségi
@@ -191,18 +226,10 @@
 
 <H4>Összeomlás (Michael Douglas) esetén</H4>
 
-<H4>Hogyan nyerjünk ki értelmes tartalmat a coredump-ból</H4>
+<P>Futtasd az MPlayer-t <CODE>gdb</CODE>-ben, és a kimenetét küldd el
+  nekünk, vagy coredump file esetén a következõk szerint járj el:</P>
 
-<P>Hozd létre a következõ parancs file-t:</P>
-
-<P><CODE>disass $eip-32 $eip+32<BR>
-  info all-registers<BR></CODE></P>
-
-<P>Aztán írd be a következõt:</P>
-
-<P>&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=parancs_file_neve &gt;mplayer.bug</CODE></P>
-
-<H4>Hogyan nyerj ki információt egy reprodukálható összeomlásból</H4>
+<H4>Hogyan nyerjünk ki értelmes tartalmat egy reprodukálható crash-bõl</H4>
 
 Fordítsd újra az <B>MPlayer</B>-t engedélyezve a hibakeresõ módot:
 
@@ -226,13 +253,17 @@ a következõket kell beírnod
 
 és a kimenetet elküldeni nekünk.
 
-<H3>Általánosan:</H3>
+<H4>Hogyan nyerjünk ki értelmes tartalmat a coredump-ból</H4>
 
-<P>Ha valami nagy reportot akarsz küldeni (pl.: log-ok, stb.), akkor jobb ha
-  FTP-re töltöd fel (gzip és bzip2 elõnyben ..), és csak a file nevét,
-  elérhetõségét írod bele a bugreportba! A levelezési listáink 80k-ra vannak
-  korlátozva, így ha ennél nagyobb állományt akarsz küldeni tömörítsd,
-  vagy tedd letölthetõvé.</P>
+<P>Hozz létre egy file-t (parancs_file) a következõ tartalommal:</P>
+
+<P><CODE>disass $pc-32 $pc+32<BR>
+  info all-registers</CODE></P>
+
+<P>Ezután írd be a következõ parancsot:</P>
+
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=parancs_file &gt; mplayer.bug</CODE></P>
+
 
 
 <H2>Tudom hogy mit csinálok...</H2>

@@ -72,6 +72,7 @@
         <LI><A HREF="formats.html#wma">2.1.2.4 WMA/ASF file-ok</A></LI>     
         <LI><A HREF="formats.html#mp4">2.1.2.5 MP4 file-ok</A></LI>
         <LI><A HREF="formats.html#cdda">2.1.2.6 CD audio</A></LI>
+        <LI><A HREF="formats.html#xmms">2.1.2.7 XMMS</A></LI>
       </UL>
     </UL>
     <LI><A HREF="codecs.html">2.2 Támogatott codec-ek</A></LI>
@@ -246,6 +247,7 @@
       <UL>
         <LI><A HREF="#debian">6.1.1 Debian csomagolás</A></LI>
         <LI><A HREF="#redhat">6.1.2 Redhat csomagolás</A></LI>
+        <LI><A HREF="#arm">6.1.3 ARM</A></LI>
       </UL>
       <LI><A HREF="#bsd">6.2 *BSD</A></LI>
         <UL>
@@ -253,10 +255,9 @@
 	  <LI><A HREF="#openbsd">6.2.2 OpenBSD</A></LI>
 	</UL>
       <LI><A HREF="#solaris">6.3 Solaris</A></LI>
-      <LI><A HREF="#strongarm">6.4 StrongARM</A></LI>
-      <LI><A HREF="#sgi">6.5 SGI/Irix</A></LI>
-      <LI><A HREF="#qnx">6.6 QNX</A></LI>
-      <LI><A HREF="#cygwin">6.7 Cygwin</A></LI>
+      <LI><A HREF="#sgi">6.4 SGI/Irix</A></LI>
+      <LI><A HREF="#qnx">6.5 QNX</A></LI>
+      <LI><A HREF="#cygwin">6.6 Cygwin</A></LI>
     </UL>
   <LI><A HREF="#mailing_lists">A függelék - Levelezési listák</A></LI>
   <LI><A HREF="bugreports.html">B függelék - Hogyan jelents be hibát</A></LI>
@@ -500,6 +501,8 @@
   <LI><B>cdparanoia</B> - opcionális, CDDA támogatáshoz szükséges.</LI>
   <LI><B>libfreetype</B> - opcionális, TTF betûtipusok használatához szükséges.
     Legalább 2.0.9-es verzió kell!</LI>
+  <LI><B>libxmms</B> - opcionális, XMMS által olvasható formátumok
+    támogatásához. Legalább 1.2.7-es verzió szükséges.</LI>
 </UL>
 
 <P><B><I>CODECEK</I></B></P>
@@ -1445,6 +1448,21 @@ end
   hivatalosan nem támogatottak.</P>
 
 
+<H2><A NAME=arm>6.1.3 ARM</A></H2>
+
+<P>Az MPlayer mûködik ARM CPU-val rendelkezõ Linux PDA-kon is, mint például
+  a Sharp Zaurus, vagy a Compaq Ipaq. Megszerzésének legegyszerûbb módja az
+  <A HREF="http://www.openzaurus.org">Openzaurus</A> webhelyérõl történõ
+  letöltés. Ha saját erõdbõl akarod lefordítani, érdemes az
+  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=inde+x.html|src/.|src/packages">mplayer</A>
+  és a
+  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=i+ndex.html|src/.|src/packages">libavcodec</A>
+  Openzaurus buildroot könyvtárakban, ezek ugyanis mindig tartalmazzák a
+  legújabb Makefile-okat és patcheket az MPlayer CVS verziójának
+  lefordításához.<BR>
+  GUI frontend használatához az xmms-embedded szükséges.</P>
+
+
 <H2><A NAME=bsd>6.2 *BSD</A></H2>
 
 <P>Az MPlayer fut FreeBSD, OpenBSD, NetBSD, BSD/OS és Darwin rendszereken.
@@ -1472,6 +1490,7 @@ end
   két lépésben kell fordítani: elõször legyen a nem-natív verzió a PATH-ban
   és add ki a <CODE>gmake -k</CODE> parancsot, aztán a natív verzióval
   <CODE>gmake</CODE>.</P>
+
 
 <H2><A NAME=solaris>6.3 Solaris</A></H2>
 
@@ -1520,23 +1539,27 @@ end
    "(stdin)", line 3567 : Syntax error
    ... more "Illegal mnemonic" and "Syntax error" errors ...</PRE></P>
 
-<P>DVD támogatáshoz patchelt libcss szükséges. Patch:
-  <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A></P>
-
 <P>2 hiba miatt nem tudsz megbízhatóan DVD-t lejátszani Solaris 8 x86-on,
   ha annak kapacitása nagyobb mint 4 GB:</P>
 
-<P><UL><LI>The sd(7D) driver on solaris 8 x86 driver has bug when accessing a
-     disk block &gt;4GB on a device using a logical blocksize != DEV_BSIZE
-     (i.e. CDROM and DVD media). Due to a 32bit int overflow, a disk
-     address modulo 4GB is accessed.
-     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
-
-<LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
-     ISO9660), hsfs currently does not support partitions/disks &gt;4GB,
-     all data is accessed modulo 4GB
-     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
-</UL></P>
+<P>
+  <UL>
+    <LI>The sd(7D) driver on solaris 8 x86 has bug when accessing a
+      disk block &gt;4GB on a device using a logical blocksize != DEV_BSIZE
+      (i.e. CDROM and DVD media). Due to a 32bit int overflow, a disk
+      address modulo 4GB is accessed.
+      (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
+      <P>Ez a probléma a SPARC gépeket nem érinti.</P>
+    </LI>
+    <LI>The similar bug is present in the hsfs(7FS) filesystem code (aka
+      ISO9660), hsfs currently does not support partitions/disks &gt;4GB,
+      all data is accessed modulo 4GB
+      (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
+      <P>Ez a hiba a 109764-04 (sparc) illetve 109765-04 (x86) jelzésû
+        patch-ek installálása után megszûnik.</P>
+    </LI>
+  </UL>
+</P>
 
 <P>On Solaris with an UltraSPARC CPU, you can get some extra speed by
   using the CPU's VIS instructions for certain time consuming operations. 
@@ -1545,15 +1568,6 @@ end
    
 <P>VIS accelerated operations from mediaLib are used for mpeg2 video
   decoding and for color space conversion in the video output drivers.</P>
-
-<H2><A NAME=strongarm>6.4 StrongARM</A></H2>
-
-<P>Az <B>MPlayer</B> állítólag lefordul StrongARM-on. A következõ opciókat
-  használd:</P>
-
-
-<P><PRE>  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
-	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking</PRE></P>
 
 
 <H2><A NAME=sgi>6.5. Silicon Graphics Indigo / IRIX</A></H2>

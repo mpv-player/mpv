@@ -16,19 +16,32 @@
 <P>Az <B>MPlayer</B> audio interfészének a neve <I>libao2</I>. Jelenleg
 a következõ meghajtókat tartalmazza :</P>
 
-<TABLE BORDER=0>
+<DL>
+  <DT>oss</DT>
+  <DD>OSS (ioctl) meghajtó (hardveres AC3 továbbítási támogatás)</DD>
 
-<TR><TD COLSPAN=4><B>Általános:</B></TD></TR>
+  <DT>sdl</DT>
+  <DD>SDL meghajtó (<B>ESD</B>, <B>ARTS</B>, stb)</DD>
 
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>OSS (ioctl) meghajtó</TD></TR>
-<TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>SDL meghajtó (<B>ESD</B>, <B>ARTS</B>, stb)</TD></TR>
-<TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>NAS (Network Audio System) meghajtó</TD></TR>
-<TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>natív ALSA 0.5 meghajtó</TD></TR>
-<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>natív ALSA 0.9 meghajtó (mûködik, de vannak vele problémák -&gt; használd az OSS meghajtót)</TD></TR>
-<TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>SUN audio meghajtó (/dev/audio) BSD-re és Solaris-ra</TD></TR>
-<TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>natív ARTS meghajtó (KDE lusereknek)</TD></TR>
+  <DT>nas</DT>
+  <DD>NAS (Network Audio System) meghajtó</DD>
 
-</TABLE>
+  <DT>alsa5</DT>
+  <DD>natív ALSA 0.5 meghajtó</DD>
+
+  <DT>alsa9</DT>
+  <DD>natív ALSA 0.9 meghajtó (hardveres AC3 továbbítási támogatás)</DD>
+
+  <DT>sun</DT>
+  <DD>SUN audio meghajtó (/dev/audio) BSD-re és Solaris-ra</DD>
+
+  <DT>arts</DT>
+  <DD>natív ARTS meghajtó (KDE lusereknek)</DD>
+
+  <DT>esd</DT>
+  <DD>natív ESD meghajtó (többnyire GNOME felhasználóknak)</DD>
+
+</DL>
 
 <P>A helyzet az, hogy a Linux hangkártyameghajtói nem túl jók. Az MPlayer
   a hangkártyameghajtók egyik olyan funkcióját használja a kép illetve a
@@ -79,7 +92,7 @@ a következõ meghajtókat tartalmazza :</P>
 <TR><TD></TD><TD>ALSA:</TD><TD>nincs</TD></TR>
 <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
 <TR><TD></TD><TD>Driver:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD></TR>
-<TR><TD></TD><TD>Driver2:</TD><TD> <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">innen</A><BR>
+<TR><TD></TD><TD>Driver2:</TD><TD> <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">innen</A>
 (<I>bufferméret megnövelve 32k-ra</I>)</TD></TR>
 
 <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
@@ -143,8 +156,6 @@ a következõ meghajtókat tartalmazza :</P>
        például "hdparm -u1 /dev/cdrom" (lásd "man hdparm" !!!)
        Ez amúgy is ajánlott... (for XMMS, etc...)
        Olvasd el a <A HREF="cd-dvd.html#drives">4.1</A>-es fejezetet.</LI>
-  <LI>ne foglald le a hangkártyád másik programmal (pl. XMMS) !
-       Ha ESD-t használsz, indítsd MPlayer-t az '-ao sdl:esd' opcióval!</LI>
   <LI>Írd meg nekünk, hogy mûködik együtt az MPlayer és a kartyád!</LI>
 </UL>
 
