@@ -6,6 +6,18 @@
     Based on FFmpeg's libav/rm.c.
 */
 
+/*
+Some codecs for Real (from Mike Melanson):
+
+RV10: As has been mentioned, H.263-based; not an unreasonable guess
+RV20: RealVideo 2.0, nothing known
+RV30: RealVideo 3.0,nothing known, but I don't believe I've ever seen any
+media encoded with it
+DNET: apparently one of their original audio codecs, to be used with music
+SIPR: SiprNet, based on ACELP, and is great for compressing voice
+COKR(?): Cooker, the fabled G2 audio codec
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -204,12 +216,54 @@ void demux_open_real(demuxer_t* demuxer)
 		stream_skip(demuxer->stream, 2); /* flags */
 		break;
 	    case MKTAG('C', 'O', 'N', 'T'):
+	    {
+		char *buf;
+		int len;
+
 		printf("Broadcasting informations (title, author, copyright, comment)\n");
-		skip_str(0, demuxer);	/* title */
-		skip_str(0, demuxer);	/* author */
-		skip_str(0, demuxer);	/* copyright */
-		skip_str(0, demuxer);	/* comment */
+
+		len = stream_read_word(demuxer->stream);
+		if (len > 0)
+		{
+		    buf = malloc(len+1);
+		    stream_read(demuxer->stream, buf, len);
+		    demux_info_add(demuxer, "name", buf);
+		    free(buf);
+		}
+
+		len = stream_read_word(demuxer->stream);
+		if (len > 0)
+		{
+		    buf = malloc(len+1);
+		    stream_read(demuxer->stream, buf, len);
+		    demux_info_add(demuxer, "author", buf);
+		    free(buf);
+		}
+
+		len = stream_read_word(demuxer->stream);
+		if (len > 0)
+		{
+		    buf = malloc(len+1);
+		    stream_read(demuxer->stream, buf, len);
+		    demux_info_add(demuxer, "copyright", buf);
+		    free(buf);
+		}
+
+		len = stream_read_word(demuxer->stream);
+		if (len > 0)
+		{
+		    buf = malloc(len+1);
+	    	    stream_read(demuxer->stream, buf, len);
+		    demux_info_add(demuxer, "comment", buf);
+		    free(buf);
+		}
+
+//		skip_str(0, demuxer);	/* title */
+//		skip_str(0, demuxer);	/* author */
+//		skip_str(0, demuxer);	/* copyright */
+//		skip_str(0, demuxer);	/* comment */
 		break;
+	    }
 	    case MKTAG('M', 'D', 'P', 'R'):
 	    {
 		/* new stream */
@@ -242,10 +296,12 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh_audio_t *sh = new_sh_audio(demuxer, stream_id);
 
 		    printf("Found audio stream!\n");
-		    stream_skip(demuxer->stream, 4); /* version */
-		    stream_skip(demuxer->stream, 4); /* .ra4 */
-		    stream_skip(demuxer->stream, 4);
+//		    printf("pos: %x\n", stream_tell(demuxer->stream));
+		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
 		    stream_skip(demuxer->stream, 2);
+		    stream_skip(demuxer->stream, 4); /* .ra4 or .ra5 */
+		    stream_skip(demuxer->stream, 4);
+		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
 		    stream_skip(demuxer->stream, 4); /* header size */
 		    stream_skip(demuxer->stream, 2); /* add codec info */
 		    stream_skip(demuxer->stream, 4); /* coded frame size */
@@ -263,15 +319,27 @@ void demux_open_real(demuxer_t* demuxer)
 		    {
 			char buf[128];
 			
-			get_str(1, demuxer, buf, sizeof(buf));
+			skip_str(1, demuxer);
+//			get_str(1, demuxer, buf, sizeof(buf));
 			get_str(1, demuxer, buf, sizeof(buf));
 
 			v = 0; /* not supported audio codec */
-			if (!strcmp(buf, "dnet"))
+			if (strstr(buf, "dnet"))
 			{
 			    printf("Found AC3 audio\n");
 			    sh->format = 0x2000; /* ac3 */
 			    v = 1;
+			}
+			if (strstr(buf, "sipr"))
+			{
+			    printf("Found SiproLab's ACELP\n");
+			    sh->format = 0x130;
+			    v = 1;
+			}
+			if (strstr(buf, "cook"))
+			{
+			    printf("Found Real's GeneralCooker (unsupported)\n");
+			    v = 0;
 			}
 		    }
 //		    skip_str(1, demuxer); /* desc */
@@ -283,7 +351,18 @@ void demux_open_real(demuxer_t* demuxer)
 
 		    if (v)
 		    {
-		    printf("Audio codec: 0x%x\n", sh->format);
+		    
+		    /* Emulate WAVEFORMATEX struct: */
+		    sh->wf = malloc(sizeof(WAVEFORMATEX));
+		    memset(sh->wf, 0, sizeof(WAVEFORMATEX));
+		    sh->wf->wFormatTag = sh->format;
+		    sh->wf->nChannels = sh->channels;
+		    sh->wf->wBitsPerSample = 16;
+		    sh->wf->nSamplesPerSec = sh->samplerate;
+		    sh->wf->nAvgBytesPerSec = bitrate;
+		    sh->wf->nBlockAlign = 19; /* 19 for acelp, pff */
+		    sh->wf->cbSize = 0;
+		    
 		    /* insert as stream */
 		    demuxer->audio->sh = sh;
 		    sh->ds = demuxer->audio;
@@ -345,10 +424,12 @@ void demux_open_real(demuxer_t* demuxer)
 			    /* codec id: rv10 */
 			    break;
 			case 0x20001000:
+			case 0x20100001:
 			    /* codec id: rv20 */
 			    break;
 			default:
 			    /* codec id: none */
+			    printf("unknown id: %x\n", v);
 		    }
 		        
 		    /* insert as stream */
