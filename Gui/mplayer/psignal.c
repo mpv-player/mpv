@@ -6,18 +6,20 @@
 #include <unistd.h>
 
 #include "widgets.h"
+#include "gtk/menu.h"
 #include "play.h"
 #include "gtk/fs.h"
 
 #include "../app.h"
 
+#include "../../config.h"
+#include "../../help_mp.h"
+#include "../../libvo/x11_common.h"
+#include "../../libmpdemux/stream.h"
+
 #include "../skin/skin.h"
 #include "../wm/ws.h"
 #include "../error.h"
-
-#include "../../config.h"
-#include "../../libvo/x11_common.h"
-#include "../../libmpdemux/stream.h"
 
 #include "./mplayer.h"
 
@@ -106,7 +108,7 @@ void gtkSigHandler( int s )
 //	gtkShow( evPlay );
         break;
    case evMessageBox:
-        gtk_label_set_text( gtkMessageBoxText,(char *)gtkShMem->mb.str );
+        gtk_label_set_text( GTK_LABEL( gtkMessageBoxText ),gtkShMem->mb.str );
         if( gtkVisibleMessageBox ) gtk_widget_hide( MessageBox ); 
         switch( gtkShMem->mb.type)
          {
