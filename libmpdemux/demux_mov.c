@@ -104,6 +104,9 @@ typedef struct {
     int type;
     off_t pos;
     //
+    unsigned int media_handler;
+    unsigned int data_handler;
+    //
     int timescale;
     unsigned int length;
     int samplesize;  // 0 = variable
@@ -187,7 +190,7 @@ void mov_build_index(mov_track_t* trak,int timescale){
     }
 
     // workaround for fixed-size video frames (dv and uncompressed)
-    if(!trak->samples_size && trak->type==MOV_TRAK_VIDEO){
+    if(!trak->samples_size && trak->type!=MOV_TRAK_AUDIO){
 	trak->samples_size=s;
 	trak->samples=malloc(sizeof(mov_sample_t)*s);
 	for(i=0;i<s;i++)
@@ -478,6 +481,29 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		trak->timescale=stream_read_dword(demuxer->stream);
 		// read length
 		trak->length=stream_read_dword(demuxer->stream);
+		break;
+	    }
+	    case MOV_FOURCC('h','d','l','r'): {
+		unsigned int tmp=stream_read_dword(demuxer->stream);
+		unsigned int type=stream_read_dword_le(demuxer->stream);
+		unsigned int subtype=stream_read_dword_le(demuxer->stream);
+		unsigned int manufact=stream_read_dword_le(demuxer->stream);
+		unsigned int comp_flags=stream_read_dword(demuxer->stream);
+		unsigned int comp_mask=stream_read_dword(demuxer->stream);
+		int len=stream_read_char(demuxer->stream);
+		char* str=malloc(len+1);
+		stream_read(demuxer->stream,str,len);
+		str[len]=0;
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sHandler header: %.4s/%.4s (%.4s) %s\n",level,"",&type,&subtype,&manufact,str);
+		free(str);
+		switch(bswap_32(type)){
+		case MOV_FOURCC('m','h','l','r'):
+		    trak->media_handler=bswap_32(subtype); break;
+		case MOV_FOURCC('d','h','l','r'):
+		    trak->data_handler=bswap_32(subtype); break;
+		default:
+		    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown handler class: 0x%X (%.4s)\n",bswap_32(type),&type);
+		}
 		break;
 	    }
 	    case MOV_FOURCC('v','m','h','d'): {
@@ -934,7 +960,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		memcpy(&id->name,trak->stdata+42,32);
 		id->depth=char2short(trak->stdata,74);
 		id->clutID=char2short(trak->stdata,76);
-		memcpy(((char*)&id->clutID)+2,trak->stdata+78,trak->stdata_len-78);
+		if(trak->stdata_len>78)	memcpy(((char*)&id->clutID)+2,trak->stdata+78,trak->stdata_len-78);
 		sh->ImageDesc=id;
 #if 0
 		{   FILE *f=fopen("ImageDescription","wb");
@@ -1123,14 +1149,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Generic track - not completly understood! (id: %d)\n",
 		    trak->id);
 		/* XXX: Also this contains the FLASH data */
+
 #if 0
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Extracting samples to files (possibly this is an flash anim)\n");
 	    {
 		int pos = stream_tell(demuxer->stream);
 		int i;
 		int fd;
 		char name[20];
-		
+	
 		for (i=0; i<trak->samples_size; i++)
 		{
 		    char buf[trak->samples[i].size];
@@ -1387,6 +1413,74 @@ int mov_read_header(demuxer_t* demuxer){
     }
     lschunks(demuxer, 0, priv->moov_end, NULL);
 //    mp_msg(MSGT_DEMUX, MSGL_INFO, "--------------\n");
+
+#if 1
+    if(verbose>2){
+	int t_no;
+	for(t_no=0;t_no<priv->track_db;t_no++){
+	    mov_track_t* trak=priv->tracks[t_no];
+	    if(trak->type==MOV_TRAK_GENERIC){
+		int i;
+		int fd;
+		char name[20];
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Track #%d: Extracting %d data chunks to files\n",t_no,trak->samples_size);
+		for (i=0; i<trak->samples_size; i++)
+		{
+		    int len=trak->samples[i].size;
+		    char buf[len];
+		    stream_seek(demuxer->stream, trak->samples[i].pos);
+		    snprintf(name, 20, "t%02d-s%03d.%s", t_no,i,
+			(trak->media_handler==MOV_FOURCC('f','l','s','h')) ?
+			    "swf":"dump");
+		    fd = open(name, O_CREAT|O_WRONLY);
+//		    { int j;
+//			for(j=0;j<trak->stdata_len-3; j++)
+//			    printf("stdata[%d]=0x%X ize=0x%X\n",j,char2int(trak->stdata,j),MOV_FOURCC('z','l','i','b'));
+//		    }
+		    if( //trak->media_handler==MOV_FOURCC('s','p','r','t') &&
+			trak->stdata_len>=16 &&
+			char2int(trak->stdata,12)==MOV_FOURCC('z','l','i','b') 
+		    ){
+			int newlen=stream_read_dword(demuxer->stream);
+#ifdef HAVE_ZLIB
+			// unzip:
+			z_stream zstrm;
+			int zret;
+			char buf2[newlen];
+
+			len-=4;
+			stream_read(demuxer->stream, buf, len);
+
+	                zstrm.zalloc          = (alloc_func)0;
+	                zstrm.zfree           = (free_func)0;
+	                zstrm.opaque          = (voidpf)0;
+	                zstrm.next_in         = buf;
+	                zstrm.avail_in        = len;
+	                zstrm.next_out        = buf2;
+	                zstrm.avail_out       = newlen;
+
+	                zret = inflateInit(&zstrm);
+			zret = inflate(&zstrm, Z_NO_FLUSH);
+			if(newlen != zstrm.total_out)
+	    		    mp_msg(MSGT_DEMUX, MSGL_WARN, "Warning! unzipped frame size differs hdr: %d  zlib: %d\n",newlen,zstrm.total_out);
+			
+			write(fd, buf2, newlen);
+		    } else {
+#else
+			len-=4;
+			printf("******* ZLIB COMPRESSED SAMPLE!!!!! (%d->%d bytes) *******\n",len,newlen);
+		    }
+		    {
+#endif
+			stream_read(demuxer->stream, buf, len);
+			write(fd, buf, len);
+		    }
+		    close(fd);
+		}
+	    }
+	}
+    }
+#endif
 
     return 1;
 }
