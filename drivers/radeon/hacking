@@ -279,6 +279,34 @@ Please compare:
               (is not MMX optimized that's gladly accepted, but probably
                will be never optimized due portability).
 
+hardware IDCT support diagram:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+                                      |
+[ Video parser ] <---------- [ Transport demuxing ] --> [ Audio ]
+       |                                |       |
+[ Variable length decoder]              |D      |
+       |                                |V      |
+[ Inverse quantization ]                |D      |
+       |                                |       |
+-------|---[ video card ]---------+     |s      |
+       |                          |     |u      |
+[ Run level decode & de-zigzag ]  |     |b      |
+       |                          |     |p      |
+[    IDCT   ]                     |     |i      |
+       |                          |     |c      |
+[  Motion compensation  ]         |     |t      |
+       |                          |     |u      |
+[ Advanced deinterlacing ]        |     |r      |
+       |                          |     |e      |
+[ Filtered X-Y scaling ] [SUBPIC]-|-----+s   [ OSD ]
+       |                     |    |     |       |
+[ 4-bit alpha blending ] <---+    |     +-------+
+       |                          |
+[ YUV to RGB conversion ]         |
+-------|--------------------------+
+TV-screen or CRT-display
+
+
 Conslusion:
 ~~~~~~~~~~~
 
