@@ -197,8 +197,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
   dec.length = len;
 #ifdef XVID_API_UNSTABLE
   dec.general |= XVID_DEC_LOWDELAY;
-  dec.general |= XVID_DEC_DEBLOCKY;
-  dec.general |= XVID_DEC_DEBLOCKUV;
 #endif
   switch(p->cs) {
   case XVID_CSP_USER:
