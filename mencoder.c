@@ -319,6 +319,7 @@ aviwrite_t* muxer=NULL;
 aviwrite_stream_t* mux_a=NULL;
 aviwrite_stream_t* mux_v=NULL;
 FILE* muxer_f=NULL;
+int muxer_f_size=0;
 
 #ifdef HAVE_DIVX4ENCORE
 ENC_FRAME enc_frame;
@@ -1432,16 +1433,17 @@ if(sh_audio && mux_a->codec==ACODEC_VBRMP3 && !lame_param_vbr){
 
 printf("\nWriting AVI index...\n");
 aviwrite_write_index(muxer,muxer_f);
+muxer_f_size=ftell(muxer_f);
 printf("Fixup AVI header...\n");
 fseek(muxer_f,0,SEEK_SET);
 aviwrite_write_header(muxer,muxer_f); // update header
+fclose(muxer_f);
 
 if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
-    printf("Suggested video bitrate for 650MB CD: %d\n",(int)((650*1024*1024-ftell(muxer_f))/mux_v->timer/125));
-    printf("Suggested video bitrate for 700MB CD: %d\n",(int)((700*1024*1024-ftell(muxer_f))/mux_v->timer/125));
+    printf("Suggested video bitrate for 650MB CD: %d\n",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));
+    printf("Suggested video bitrate for 700MB CD: %d\n",(int)((700*1024*1024-muxer_f_size)/mux_v->timer/125));
+    printf("Suggested video bitrate for 800MB CD: %d\n",(int)((800*1024*1024-muxer_f_size)/mux_v->timer/125));
 }
-
-fclose(muxer_f);
 
 printf("\nVideo stream: %8.3f kbit/s  (%d bps)  size: %d bytes  %5.3f secs  %d frames\n",
     (float)(mux_v->size/mux_v->timer*8.0f/1000.0f), (int)(mux_v->size/mux_v->timer), mux_v->size, (float)mux_v->timer, decoded_frameno);
