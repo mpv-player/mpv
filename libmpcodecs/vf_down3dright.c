@@ -21,7 +21,7 @@ struct vf_priv_s {
 };
 
 static void toright(unsigned char *dst[3], unsigned char *src[3],
-		    unsigned int dststride[3], unsigned int srcstride[3],
+		    int dststride[3], int srcstride[3],
 		    int w, int h, struct vf_priv_s* p)
 {
 	int k;
@@ -30,9 +30,9 @@ static void toright(unsigned char *dst[3], unsigned char *src[3],
 		unsigned char* fromL = src[k];
 		unsigned char* fromR = src[k];
 		unsigned char* to = dst[k];
-		unsigned int src = srcstride[k];
-                unsigned int dst = dststride[k];
-		unsigned int ss;
+		int src = srcstride[k];
+                int dst = dststride[k];
+		int ss;
 		unsigned int dd;
 		int i;
 
