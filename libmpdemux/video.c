@@ -116,6 +116,7 @@ switch(video_codec){
   break;
  }
  case VIDEO_MPEG4: {
+   int pos = 0, vop_cnt=0, units[3];
    videobuf_len=0; videobuf_code_len=0;
    mp_msg(MSGT_DECVIDEO,MSGL_V,"Searching for Video Object Start code... ");fflush(stdout);
    while(1){
@@ -142,7 +143,14 @@ switch(video_codec){
 	return 0;
       }
    }
-   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\nSearching for Video Object Plane Start code... ");fflush(stdout);
+   pos = videobuf_len+4;
+   if(!read_video_packet(d_video)){ 
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Can't read Video Object Layer Header\n");
+     return 0;
+   }
+   mp4_header_process_vol(&picture, &(videobuffer[pos]));
+   mp_msg(MSGT_DECVIDEO,MSGL_V,"OK! FPS SEEMS TO BE %.3f\nSearching for Video Object Plane Start code... ", sh_video->fps);fflush(stdout);
+ mp4_init: 
    while(1){
       int i=sync_video_packet(d_video);
       if(i==0x1B6) break; // found it!
@@ -150,6 +158,48 @@ switch(video_codec){
         mp_msg(MSGT_DECVIDEO,MSGL_V,"NONE :(\n");
 	return 0;
       }
+   }
+   pos = videobuf_len+4;
+   if(!read_video_packet(d_video)){ 
+     mp_msg(MSGT_DECVIDEO,MSGL_ERR,"Can't read Video Object Plane Header\n");
+     return 0;
+   }
+   mp4_header_process_vop(&picture, &(videobuffer[pos]));
+   units[vop_cnt] = picture.timeinc_unit;
+   vop_cnt++;
+   //mp_msg(MSGT_DECVIDEO,MSGL_V, "TYPE: %d, unit: %d\n", picture.picture_type, picture.timeinc_unit);
+   if(!picture.fps) {
+     int i, mn, md, mx, diff;
+     if(vop_cnt < 3)
+          goto mp4_init;
+
+     i=0;
+     mn = mx = units[0];  
+     for(i=0; i<3; i++) {
+       if(units[i] < mn)
+         mn = units[i];
+       if(units[i] > mx)
+         mx = units[i];
+     }
+     md = mn;
+     for(i=0; i<3; i++) {
+       if((units[i] > mn) && (units[i] < mx))
+         md = units[i];
+     }
+     mp_msg(MSGT_DECVIDEO,MSGL_V, "MIN: %d, mid: %d, max: %d\n", mn, md, mx);
+     if(mx - md > md - mn)
+       diff = md - mn;
+     else
+       diff = mx - md;
+     if(diff > 0){
+       picture.fps = (picture.timeinc_resolution * 10000) / diff;
+       mp_msg(MSGT_DECVIDEO,MSGL_V, "FPS seems to be: %d/10000, resolution: %d, delta_units: %d\n", picture.fps, picture.timeinc_resolution, diff);
+     }
+   }
+   if(picture.fps) {
+    sh_video->fps=picture.fps*0.0001f;
+    sh_video->frametime=10000.0f/(float)picture.fps;
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO, "FPS seems to be: %d/10000\n", picture.fps);
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
    sh_video->format=0x10000004;

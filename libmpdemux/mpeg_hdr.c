@@ -27,7 +27,7 @@ int mp_header_process_sequence_header (mp_mpeg_header_t * picture, unsigned char
     int width, height;
 
     if ((buffer[6] & 0x20) != 0x20){
-	printf("missing marker bit!\n");
+	fprintf(stderr, "missing marker bit!\n");
 	return 1;	/* missing marker_bit */
     }
 
@@ -101,3 +101,112 @@ int mp_header_process_extension (mp_mpeg_header_t * picture, unsigned char * buf
     return 0;
 }
 
+
+//MPEG4 HEADERS
+static unsigned char getbits(unsigned char *buffer, unsigned int from, unsigned char len)
+{
+    unsigned int n;
+    unsigned char m, u, l, y;
+    
+    n = from / 8;
+    m = from % 8;
+    u = 8 - m;
+    l = (len > u ? len - u : 0);
+    
+    y = (buffer[n] << m);
+    if(8 > len)
+    	y  >>= (8-len);
+    if(l)
+    	y |= (buffer[n+1] >> (8-l));
+	
+    //fprintf(stderr, "GETBITS(%d -> %d): bytes=0x%x 0x%x, n=%d, m=%d, l=%d, u=%d, Y=%d\n", 
+    //	from, (int) len, (int) buffer[n],(int) buffer[n+1], n, (int) m, (int) l, (int) u, (int) y);
+    return  y;
+}
+
+static int read_timeinc(mp_mpeg_header_t * picture, unsigned char * buffer, int n)
+{
+    if(picture->timeinc_bits > 8) {
+      picture->timeinc_unit = getbits(buffer, n, picture->timeinc_bits - 8) << 8;
+      n += picture->timeinc_bits - 8;
+      picture->timeinc_unit |= getbits(buffer, n, 8);
+      n += 8;
+    } else {
+      picture->timeinc_unit = getbits(buffer, n, picture->timeinc_bits);
+      n += picture->timeinc_bits;
+    }
+    //fprintf(stderr, "TIMEINC2: %d, bits: %d\n", picture->timeinc_unit, picture->timeinc_bits);
+    return n;
+}
+
+int mp4_header_process_vol(mp_mpeg_header_t * picture, unsigned char * buffer)
+{
+    unsigned int n, aspect=0, aspectw=0, aspecth=0,  x=1, v;
+    
+    //begins with 0x0000012x
+    picture->fps = 0;
+    picture->timeinc_bits = picture->timeinc_resolution = picture->timeinc_unit = 0;
+    n = 9;
+    if(getbits(buffer, n, 1))
+      n += 7;
+    n++;
+    aspect=getbits(buffer, n, 4);
+    n += 4;
+    if(aspect == 0x0f) {
+      aspectw = getbits(buffer, n, 8);
+      n += 8;
+      aspecth = getbits(buffer, n, 8);
+      n += 8;
+    }
+    
+    if(getbits(buffer, n, 1)) {
+      n += 4;
+      if(getbits(buffer, n, 1))
+        n += 79;
+      n++;
+    } else n++;
+    
+    n+=3;
+    
+    picture->timeinc_resolution = getbits(buffer, n, 8) << 8;
+    n += 8;
+    picture->timeinc_resolution |= getbits(buffer, n, 8);
+    n += 8;
+    
+    picture->timeinc_bits = 0;
+    v = picture->timeinc_resolution - 1;
+    while(v && (x<16)) {
+      v>>=1;
+      picture->timeinc_bits++;
+    }
+    picture->timeinc_bits = (picture->timeinc_bits > 1 ? picture->timeinc_bits : 1);
+    
+    n++; //marker bit
+    
+    if(getbits(buffer, n, 1)) {	//fixed_vop_timeinc
+      n++;
+      n = read_timeinc(picture, buffer, n);
+      
+      if(picture->timeinc_unit)
+        picture->fps = (picture->timeinc_resolution * 10000) / picture->timeinc_unit;
+    }
+    
+    //fprintf(stderr, "ASPECT: %d, PARW=%d, PARH=%d, TIMEINCRESOLUTION: %d, FIXED_TIMEINC: %d (number of bits: %d), FPS: %u\n", 
+    //	aspect, aspectw, aspecth, picture->timeinc_resolution, picture->timeinc_unit, picture->timeinc_bits, picture->fps);
+    
+    return 0;
+}
+
+int mp4_header_process_vop(mp_mpeg_header_t * picture, unsigned char * buffer)
+{
+  int n;
+  n = 0;
+  picture->picture_type = getbits(buffer, n, 2);
+  n += 2;
+  while(getbits(buffer, n, 1))
+    n++;
+  n++;
+  getbits(buffer, n, 1);
+  n++;
+  n = read_timeinc(picture, buffer, n);
+}
