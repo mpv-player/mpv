@@ -162,6 +162,7 @@ Video:
   --enable-sdl           build with SDL render support [autodetect]
   --enable-aa            build with AAlib render support [autodetect]
   --enable-ggi           build with GGI render support [autodetect]
+  --enable-dxr2          build with DXR2 render support [autodetect]
   --enable-dxr3          build with DXR3/H+ render support [autodetect]
   --enable-dvb           build with support for output via DVB-Card [autodetect]
   --enable-mga           build with mga_vid support
@@ -215,6 +216,7 @@ Use these options if autodetection fails:
   --with-extralibdir=DIR   extra library files (png, SDL, ...) in DIR
   --with-x11incdir=DIR     X headers in DIR
   --with-x11libdir=DIR     X library files in DIR
+  --with-dxr2incdir=DIR    DXR2 headers in DIR
   --with-csslibdir=DIR     libcss in DIR
   --with-madlibdir=DIR     libmad (libmad shared lib.) in DIR
   --with-mlibdir=DIR       libmlib (MLIB support) in DIR (Solaris only)
@@ -778,6 +780,7 @@ _vesa=auto
 _fbdev=auto
 _fbdev_nocopy=no
 _dvb=auto
+_dxr2=auto
 _dxr3=auto
 _iconv=auto
 _rtc=auto
@@ -878,6 +881,8 @@ for ac_option do
   --disable-fbdev)	_fbdev=no	;;
   --enable-dvb)		_dvb=yes	;;
   --disable-dvb)        _dvb=no		;;
+  --enable-dxr2)	_dxr2=yes	;;
+  --disable-dxr2)	_dxr2=no	;;
   --enable-dxr3)	_dxr3=yes	;;
   --disable-dxr3)	_dxr3=no	;;
   --enable-iconv)	_iconv=yes	;;
@@ -1046,6 +1051,9 @@ for ac_option do
     ;;
   --with-x11libdir=*)
     _ld_x11=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    ;;
+  --with-dxr2incdir=*)
+    _inc_dxr2=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-xvidcore=*)
     _xvidcore=`echo $ac_option | cut -d '=' -f 2`
@@ -2447,6 +2455,33 @@ else
 fi
 echores "$_nas"
 
+echocheck "DXR2"
+if test "$_dxr2" = auto; then
+  _dxr2=no
+  for _inc_dxr2 in "$_inc_dxr2" \
+		   "-I /usr/local/include/dxr2" \
+		   "-I /usr/include/dxr2"; do
+    cat > $TMPC << EOF
+#include <dxr2ioctl.h>
+int main(void) { return 0; }
+EOF
+    cc_check $_inc_dxr2 && _dxr2=yes && break
+  done
+fi
+if test "$_dxr2" = yes; then
+  _def_dxr2='#define HAVE_DXR2 1'
+  _vosrc="$_vosrc vo_dxr2.c"
+  _aosrc="$_aosrc ao_dxr2.c"
+  _aomodules="dxr2 $_aomodules"
+  _vomodules="dxr2 $_vomodules"
+  echores "yes (using $_inc_dxr2)"
+else
+  _def_dxr2='#undef HAVE_DXR2'
+  _noaomodules="dxr2 $_noaomodules"
+  _novomodules="dxr2 $_novomodules"
+  echores "no"
+fi
+
 echocheck "DXR3/H+"
 if test "$_dxr3" = auto ; then
   cat > $TMPC << EOF
@@ -2492,6 +2527,7 @@ echores "$_mp1e"
 echocheck "libfame"
 if test "$_fame" = auto ; then
   _fame=no
+  test "$_dxr2" = yes && _fame=auto
   test "$_dxr3" = yes && _fame=auto
   test "$_dvb" = yes && _fame=auto
 fi
@@ -3669,6 +3705,7 @@ X_LIB = $_ld_x11 $_ld_gl $_ld_dga $_ld_xv $_ld_vm $_ld_xinerama $_ld_mad $_ld_so
 GGI_LIB = $_ld_ggi
 MLIB_LIB =  $_ld_mlib
 MLIB_INC = $_inc_mlib
+DXR2_INC = $_inc_dxr2
 DVB_INC = $_inc_dvb
 PNG_LIB = $_ld_png
 JPEG_LIB = $_ld_jpg
@@ -4076,6 +4113,7 @@ $_def_xmga
 $_def_syncfb
 $_def_fbdev
 $_def_fbdev_nocopy
+$_def_dxr2
 $_def_dxr3
 $_def_dvb
 $_def_svga

@@ -99,6 +99,9 @@ extern vo_functions_t video_out_ggi;
 extern vo_functions_t video_out_aa;
 extern vo_functions_t video_out_mpegpes;
 extern vo_functions_t video_out_yuv4mpeg;
+#ifdef HAVE_DXR2
+extern vo_functions_t video_out_dxr2;
+#endif
 extern vo_functions_t video_out_dxr3;
 #ifdef HAVE_JPEG
 extern vo_functions_t video_out_jpeg;
@@ -160,6 +163,9 @@ vo_functions_t* video_out_drivers[] =
 #ifdef HAVE_AA
 	&video_out_aa,
 #endif
+#ifdef HAVE_DXR2
+	&video_out_dxr2,
+#endif
 #ifdef HAVE_DXR3
 	&video_out_dxr3,
 #endif
@@ -193,3 +199,13 @@ vo_functions_t* video_out_drivers[] =
 #endif
         NULL
 };
+
+#ifdef HAVE_DXR2
+extern void vo_dxr2_register_options(void*);
+#endif
+
+void libvo_register_options(void* cfg) {
+#ifdef HAVE_DXR2
+  vo_dxr2_register_options(cfg);
+#endif
+}
