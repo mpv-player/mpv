@@ -144,9 +144,15 @@ int vo_init( void )
   {
   XineramaScreenInfo *screens;
   int num_screens;
+  int disp_screen = mScreen;
+
   screens = XineramaQueryScreens(mDisplay, &num_screens);
-  vo_screenwidth=screens[0].width;
-  vo_screenheight=screens[0].height;
+  if (disp_screen > num_screens)
+    disp_screen = 0;
+  if (! vo_screenwidth)
+    vo_screenwidth=screens[disp_screen].width;
+  if (! vo_screenheight)
+    vo_screenheight=screens[disp_screen].height;
   }
  else
 #endif
