@@ -16,6 +16,7 @@
 #include <signal.h>
 
 #include "video_out.h"
+#include "aspect.h"
 #include "help_mp.h"
 
 #include <X11/Xmd.h>
@@ -699,6 +700,7 @@ int vo_x11_check_events(Display *mydisplay){
            if ( vo_window == None ) break;
            vo_dwidth=Event.xconfigure.width;
            vo_dheight=Event.xconfigure.height;
+	   if (vo_fs) aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
 #if 0
 	   /* when resizing, x and y are zero :( */
 	   vo_dx=Event.xconfigure.x;
