@@ -442,7 +442,7 @@ static int check_track_information(mkv_demuxer_t *d) {
             }
 
             u = get_uint16(&wfe->wBitsPerSample);
-            if (t->a_channels != u) {
+            if (t->a_bps != u) {
               mp_msg(MSGT_DEMUX, MSGL_WARN, "[mkv] WARNING: (MS "
                      "compatibility mode for track %u) "
                      "Matroska says that there are %u bits per sample, "
