@@ -14,6 +14,5 @@ extern int             mplMiddleMenu;
 
 extern void mplInit( void * disp );
 extern void mplEventHandling( int msg,float param );
-extern void mplTimerHandler( void );
 
 #endif

@@ -35,13 +35,6 @@ void mplEventHandling( int msg,float param );
 #include "sw.h"
 #include "widgets.h"
 
-void mplTimerHandler( void )
-{
- mplTimer++;
- mplRedrawTimer--;
- if ( mplRedrawTimer == 0 ) mplEventHandling( evRedraw,0 );
-}
-
 void mplInit( void * disp )
 {
  int i;

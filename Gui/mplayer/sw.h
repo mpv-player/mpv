@@ -18,7 +18,6 @@ void mplSubDraw( wsParamDisplay )
  if ( mplSubRender )
   {
    if ( appMPlayer.sub.Bitmap.Image ) wsPutImage( &appMPlayer.subWindow );
-//   XFlush( wsDisplay );
   }
  appMPlayer.subWindow.State=0;
 }

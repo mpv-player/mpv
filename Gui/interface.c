@@ -7,6 +7,7 @@
 #include "ws.h"
 #include "mplayer/play.h"
 #include "interface.h"
+#include "skin/skin.h"
 
 #include "../mplayer.h"
 #include "mplayer/widgets.h"
@@ -15,6 +16,7 @@
 #include "../libvo/x11_common.h"
 #include "../libvo/video_out.h"
 #include "../input/input.h"
+#include "../libao2/audio_out.h"
 
 #include <inttypes.h>
 #include <sys/types.h>
@@ -65,12 +67,15 @@ typedef struct
  int disp_w,disp_h;
 } tmp_sh_video_t;
 
+extern ao_functions_t * audio_out;
+
 void guiGetEvent( int type,char * arg )
 {
  stream_t * stream = (stream_t *) arg;
 #ifdef USE_DVDREAD
  dvd_priv_t * dvdp = (dvd_priv_t *) arg;
 #endif 
+
  switch ( type )
   {
    case guiXEvent:
@@ -172,12 +177,38 @@ void guiGetEvent( int type,char * arg )
 	if ( (unsigned int)arg & guiVCD ) guiIntfStruct.VCDTracks=0;
 #endif
 	break;
+   case guiReDraw:
+//        if ( audio_out )
+//         {
+//	  float l,r;
+ //	  mixer_getvolume( &l,&r );
+//	  guiIntfStruct.Volume=(r>l?r:l);
+//	  printf( "!!! guiIntfStruct.Volume: %.2f   \n",guiIntfStruct.Volume );
+//	 }
+	mplEventHandling( evRedraw,0 );
+	break;
+   case guiSetVolume:
+        if ( audio_out )
+	{
+	 float l,r;
+	 mixer_getvolume( &l,&r );
+	 guiIntfStruct.Volume=(r>l?r:l);
+	 if ( r != l ) guiIntfStruct.Balance=( ( r - l ) + 100 ) * 0.5f;
+	   else guiIntfStruct.Balance=0.0f;
+	 btnModify( evSetVolume,guiIntfStruct.Volume );
+	 btnModify( evSetBalance,guiIntfStruct.Balance );
+	}
+        break;
   }
 }
 
+extern unsigned int GetTimerMS( void );
+extern int mplTimer;
+
 void guiEventHandling( void )
 {
- if ( ( use_gui && !guiIntfStruct.Playing )||( guiIntfStruct.AudioOnly ) ) wsHandleEvents();
+ if ( !guiIntfStruct.Playing || guiIntfStruct.AudioOnly ) wsHandleEvents();
  gtkEventHandling();
- mplTimerHandler(); // handle GUI timer events
+ mplTimer=GetTimerMS() / 20;
+// if ( !( GetTimerMS()%2 ) ) 
 }

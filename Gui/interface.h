@@ -10,7 +10,6 @@
  #include "../libmpdemux/stream.h"
 #endif
 
-
 typedef struct
 {
  int x;
@@ -74,9 +73,7 @@ typedef struct
    int    MovieHeight;
 
    float  Volume;
-   int    VolumeChanged;
    float  Balance;
-   int    Mute;
 
    int    Track;
    int    AudioType;
@@ -111,6 +108,8 @@ extern guiInterface_t guiIntfStruct;
 #define guiSetShVideo       8
 #define guiSetStream        9
 #define guiClearStruct      10
+#define guiReDraw	    11
+#define guiSetVolume        12
 
 #define guiSetStop  0
 #define guiSetPlay  1

@@ -3,6 +3,8 @@
 
 #include "../../libmpdemux/stream.h"
 #include "../../mixer.h"
+#include "../../libvo/sub.h"
+#include "../../mplayer.h"
 
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
@@ -100,7 +102,7 @@ calclengthmmmmss:
        case 'l': if ( guiIntfStruct.Playing == 1 ) strcat( trbuf,"p" ); break;
        case 'e': if ( guiIntfStruct.Playing == 2 ) strcat( trbuf,"e" ); break;
        case 'a':
-//            if ( guiIntfStruct.Mute ) { strcat( trbuf,"n" ); break; }
+            if ( muted ) { strcat( trbuf,"n" ); break; }
             switch ( guiIntfStruct.AudioType )
              {
               case 0: strcat( trbuf,"n" ); break;
@@ -214,6 +216,7 @@ extern int dvdsub_id;
 extern char * dvd_device;
 extern int vcd_track;
 extern char * cdrom_device;
+extern int osd_visible;
 
 void mplEventHandling( int msg,float param )
 {
@@ -261,11 +264,11 @@ play:
          {
 	  case STREAMTYPE_STREAM:
 	  case STREAMTYPE_FILE:
-	       guiGetEvent( guiClearStruct,guiALL );
+	       guiGetEvent( guiClearStruct,(char *)guiALL );
 	       break;
 #ifdef HAVE_VCD
           case STREAMTYPE_VCD:
-	       guiGetEvent( guiClearStruct,guiALL - guiVCD );
+	       guiGetEvent( guiClearStruct,(char *)(guiALL - guiVCD ) );
 	       if ( !cdrom_device )
 	        {
 		 cdrom_device=DEFAULT_CDROM_DEVICE;
@@ -285,7 +288,7 @@ play:
 #endif
 #ifdef USE_DVDREAD
           case STREAMTYPE_DVD:
-	       guiGetEvent( guiClearStruct,guiALL - guiDVD );
+	       guiGetEvent( guiClearStruct,(char *)(guiALL - guiDVD ) );
 	       if ( !dvd_device ) 
 	        {
 	         dvd_device=DEFAULT_DVD_DEVICE;
@@ -375,9 +378,32 @@ NoPause:
 
    case evIncVolume:  vo_x11_putkey( wsGrayMul ); break;
    case evDecVolume:  vo_x11_putkey( wsGrayDiv ); break;
-   case evMute:       mixer_mute(); guiIntfStruct.Mute=muted; break;
+   case evMute:       mixer_mute(); break;
+
    case evSetVolume:
-   case evSetBalance: guiIntfStruct.VolumeChanged=1; break;
+        guiIntfStruct.Volume=param;
+	goto set_volume;
+   case evSetBalance: 
+        guiIntfStruct.Balance=param;
+set_volume:
+        {
+	 float l = guiIntfStruct.Volume * ( ( 100.0 - guiIntfStruct.Balance ) / 50.0 );
+	 float r = guiIntfStruct.Volume * ( ( guiIntfStruct.Balance ) / 50.0 );
+	 if ( l > guiIntfStruct.Volume ) l=guiIntfStruct.Volume;
+	 if ( r > guiIntfStruct.Volume ) r=guiIntfStruct.Volume;
+//	 printf( "!!! v: %.2f b: %.2f -> %.2f x %.2f\n",guiIntfStruct.Volume,guiIntfStruct.Balance,l,r );
+         mixer_setvolume( l,r );
+	}
+#ifdef USE_OSD
+	if ( osd_level )
+	 {
+	  osd_visible=vo_mouse_timer_const;
+	  vo_osd_progbar_type=OSD_VOLUME;
+	  vo_osd_progbar_value=( ( guiIntfStruct.Volume ) * 256.0 ) / 100.0;
+	  vo_osd_changed( OSDTYPE_PROGBAR );
+	 }
+#endif
+        break;
 
 
    case evIconify:
@@ -426,7 +452,6 @@ NoPause:
    case evRedraw:
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
-        XFlush( wsDisplay );
         mplRedrawTimer=mplRedrawTimerConst;
         break;
 // --- system events
@@ -499,13 +524,7 @@ void mplMainMouseHandle( int Button,int X,int Y,int RX,int RY )
             case itPotmeter:
             case itHPotmeter:
                  btnModify( item->msg,(float)( X - item->x ) / item->width * 100.0f );
-                 switch ( item->msg )
-                  {
-                   case evSetVolume:
-                        guiIntfStruct.VolumeChanged=1;
-                        guiIntfStruct.Volume=item->value;
-                        break;
-                  }
+		 mplEventHandling( item->msg,item->value );
                  value=item->value;
                  break;
            }
@@ -527,13 +546,6 @@ rollerhandled:
            {
             item->value+=value;
             btnModify( item->msg,item->value );
-            switch ( item->msg )
-             {
-              case evSetVolume:
-                   guiIntfStruct.VolumeChanged=1;
-                   guiIntfStruct.Volume=item->value;
-                   break;
-             }
             mplEventHandling( item->msg,item->value );
             mplMainRender=1;
            }
@@ -559,20 +571,12 @@ rollerhandled:
 potihandled:
                  if ( item->value > 100.0f ) item->value=100.0f;
                  if ( item->value < 0.0f ) item->value=0.0f;
-                 switch ( item->msg )
-                  {
-                   case evSetVolume:
-                        guiIntfStruct.VolumeChanged=1;
-                        guiIntfStruct.Volume=item->value;
-                        break;
-                  }
                  mplEventHandling( item->msg,item->value );
-                 mplMainRender=1; wsPostRedisplay( &appMPlayer.mainWindow );
                  break;
            }
           break;
   }
- if ( Button != wsMoveMouse ) wsPostRedisplay( &appMPlayer.mainWindow );
+// if ( Button != wsMoveMouse ) wsPostRedisplay( &appMPlayer.mainWindow );
 }
 
 int keyPressed = 0;

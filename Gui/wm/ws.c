@@ -699,8 +699,6 @@ void wsHandleEvents( void ){
  }
 }
 
-extern void mplTimerHandler( void );
-
 void wsMainLoop( void )
 {
  int delay=20;
@@ -718,7 +716,6 @@ while(wsTrue){
    wsEvents( wsDisplay,&wsEvent,NULL );
    delay=0;
  }
- mplTimerHandler(); // handle timer event
  usleep(delay*1000); // FIXME!
  if(delay<10*20) delay+=20; // pump up delay up to 0.2 sec (low activity)
 }

@@ -172,6 +172,7 @@ static int output_quality=0;
 int use_gui=0;
 
 int osd_level=2;
+int osd_visible=100;
 
 // seek:
 char *seek_to_sec=NULL;
@@ -501,7 +502,6 @@ int delay_corrected=1;
 int out_fmt=0;
 int eof=0;
 
-int osd_visible=100;
 int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
 int osd_show_av_delay = 0;
@@ -807,8 +807,9 @@ if(!use_stdin && !slave_mode){
 #ifdef HAVE_NEW_INPUT
         mp_cmd_t* cmd;                                                                                   
 #endif
-	usleep(40000);
+	usleep(20000);
 	guiEventHandling();
+	guiGetEvent( guiReDraw,NULL );
 #ifdef HAVE_NEW_INPUT
 	if ( (cmd = mp_input_get_cmd(0,0)) != NULL) guiGetEvent( guiIEvent,(char *)cmd->id );
 #endif
@@ -1392,6 +1393,7 @@ fflush(stdout);
      guiGetEvent( guiSetStream,(char *)stream );
      if ( sh_audio ) guiIntfStruct.AudioType=sh_audio->channels; else guiIntfStruct.AudioType=0;
      if ( !sh_video && sh_audio ) guiGetEvent( guiSetAudioOnly,1 ); else guiGetEvent( guiSetAudioOnly,0 );
+     guiGetEvent( guiSetVolume,NULL );
     }
 #endif
 
@@ -1953,6 +1955,7 @@ if(auto_quality>0){
 #ifdef HAVE_NEW_GUI
              if(use_gui){
 		guiEventHandling();
+		guiGetEvent( guiReDraw,NULL );
 		if(guiIntfStruct.Playing!=2 || (rel_seek_secs || abs_seek_pos)) break;
              }
 #endif
@@ -2905,23 +2908,9 @@ if(rel_seek_secs || abs_seek_pos){
 	}
 	if ( sh_video ) guiIntfStruct.TimeSec=d_video->pts;
 	  else if ( sh_audio ) guiIntfStruct.TimeSec=sh_audio->timer;
+	guiGetEvent( guiReDraw,NULL );
 	if(guiIntfStruct.Playing==0) break; // STOP
 	if(guiIntfStruct.Playing==2) osd_function=OSD_PAUSE;
-	if ( guiIntfStruct.VolumeChanged ) 
-	 {
-	  mixer_setvolume( guiIntfStruct.Volume,guiIntfStruct.Volume );
-	  guiIntfStruct.VolumeChanged=0;
-#ifdef USE_OSD
-          if ( osd_level )
-	   {
-            osd_visible=sh_video->fps; // 1 sec
-            vo_osd_progbar_type=OSD_VOLUME;
-            vo_osd_progbar_value=( ( guiIntfStruct.Volume ) * 256.0 ) / 100.0;
-	    vo_osd_changed(OSDTYPE_PROGBAR);
-           }
-#endif
-	 } 
-	guiIntfStruct.Volume=(float)mixer_getbothvolume();
         if ( guiIntfStruct.DiskChanged ) goto goto_next_file;
 #ifdef USE_DVDREAD
         if ( stream->type == STREAMTYPE_DVD )
@@ -3108,12 +3097,7 @@ while(playtree_iter != NULL) {
   }	
 #endif
 
-if(use_gui || playtree_iter != NULL
-// once use_gui is set, this won't be reached -> useless: --A'rpi
-//#if defined( HAVE_NEW_GUI ) && defined( USE_DVDREAD )
-// || ( guiIntfStruct.DVDChanged && use_gui )
-//#endif 
-){
+if(use_gui || playtree_iter != NULL){
 
   current_module="uninit_acodec";
   if(sh_audio) uninit_audio(sh_audio);
