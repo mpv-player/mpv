@@ -4,22 +4,15 @@ TODO:
 
 FOR THE LAST RC-RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~~~
-- Re: [Mplayer-cvslog] CVS: main/libvo vo_vesa.c,1.82,1.83
-  This patch makes mplayer unusable in console mode, always leaves the 
-  console in graphic mode.
-- fix iconv issues:
-   - ogm subtitles crash if compiled with libiconv - FIXED?
-   - -subcp has no effect - FIXED?
-- fix vo_svga vs. -vop scale
-- remove or fix -vop lavcdeint - WHAT TO DO?
-- Nov 23: [BUG] panscan doesn't work properly with -fixed-vo (Xv)
-  UPDATE: Actually -fixed-vo -vo xv doesn't work at all with 'f'...
-     no matter if panscan is used or not...
+- fix vo_svga vs. -vop scale - FIXED?
 
 FOR THE NEXT RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
-   - supporting Noir.rm? Garbled image now. Maybe codec scales?
-   - Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
+- Re: [Mplayer-cvslog] CVS: main/libvo vo_vesa.c,1.82,1.83
+  This patch makes mplayer unusable in console mode, always leaves the 
+  console in graphic mode.
+- supporting Noir.rm? Garbled image now. Maybe codec scales?
+- Dec 19: [BUG] mencoder+mp3lame creates desynced AVI (<=22Khz support missing)
 - check files at FTP/incoming/!to_be_fixed/*
 - fix locale problems (add common float parser / mp_sscanf())
 - fix partial -dr + ffmpeg + B frames (different stride per frame)
