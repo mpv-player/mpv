@@ -146,7 +146,7 @@ section.
 
 <para>
 The scaling process is handled by the <literal>scale</literal> video filter:
-<option>-vop scale=<replaceable>width</replaceable>:<replaceable>height</replaceable></option>.
+<option>-vf scale=<replaceable>width</replaceable>:<replaceable>height</replaceable></option>.
 Its quality can be set with the <option>-sws</option> option.
 If it's not specified, <application>MEncoder</application> will use 0: fast
 bilinear.
@@ -155,7 +155,7 @@ bilinear.
 <para>
 Usage:
 <screen>
-mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4 -vop scale=640:480-o <replaceable>output.avi</replaceable>
+mencoder <replaceable>input.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4 -vf scale=640:480-o <replaceable>output.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -480,7 +480,7 @@ See the manpage about the usage of the <systemitem>cropdetect</systemitem> and
 <formalpara>
 <title>Usage</title>
 <para>
-<screen>mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:aspect=16.0/9.0 -vop crop=714:548:0:14 -oac copy -o output.avi</screen>
+<screen>mencoder sample-svcd.mpg -ovc lavc -lavcopts vcodec=mpeg4:aspect=16.0/9.0 -vf crop=714:548:0:14 -oac copy -o output.avi</screen>
 </para>
 </formalpara>
 </sect1>

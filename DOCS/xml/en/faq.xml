@@ -519,7 +519,7 @@ The onscreen display (OSD) is flickering!
 </para></question>
 <answer><para>
 You use a vo driver with single buffering (x11,xv). With xv, use the
-<option>-double</option> option. Also try <option>-vop expand</option>.
+<option>-double</option> option. Also try <option>-vf expand</option>.
 </para></answer>
 </qandaentry>
 

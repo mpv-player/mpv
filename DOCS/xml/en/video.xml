@@ -715,9 +715,9 @@ The bpp (bits per pixel) value must be set to 4 by hand:
 
 <para>
 The movie probably must be scaled down to fit in EGA mode:
-<screen>-vop scale=640:350</screen>
+<screen>-vf scale=640:350</screen>
 or
-<screen>-vop scale=320:200</screen>
+<screen>-vf scale=320:200</screen>
 </para>
 
 <para>
@@ -733,7 +733,7 @@ Maybe automatic aspect correction has to be shut off:
 <note><para>
 according to my experience the best image quality on
 EGA screens can be achieved by decreasing the brightness a bit:
-<option>-vop eq=-20:0</option>. I also needed to lower the audio
+<option>-vf eq=-20:0</option>. I also needed to lower the audio
 samplerate on my box, because the sound was broken on 44kHz:
 <option>-srate 22050</option>.
 </para></note>
@@ -1064,7 +1064,7 @@ The rendering is very CPU intensive, especially when using AA-on-X
 (using aalib on X), and it's least CPU intensive on standard,
 non-framebuffer console. Use SVGATextMode to set up a big textmode,
 then enjoy! (secondary head Hercules cards rock :)) (but imho you
-can use -vop 1bpp option to get graphics on hgafb:)
+can use -vf 1bpp option to get graphics on hgafb:)
 </para>
 </note>
 
@@ -1482,7 +1482,7 @@ informations.
 </para>
 
 <para>This video output driver will enable CRTC2 (on the second head) on the
-Matrox G400 card, displaying video <emphasis role="bold">independently</emphasis>
+Matrox G400/G450/G500 card, displaying video <emphasis role="bold">independently</emphasis>
 of the first head.
 </para>
 
@@ -1490,7 +1490,7 @@ of the first head.
 Instructions on how to make it work can be found in the
 <ulink url="../../tech/directfb.txt">tech section</ulink>
 or directly on Ville Syrjala's
-<ulink url="http://www.sci.fi/~syrjala/directfb/readme.txt">home page</ulink>.
+<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">home page</ulink>.
 </para>
 
 <note><para>
@@ -1539,37 +1539,37 @@ a command like this:
 </para>
 <para><screen>
 mplayer -ao mpegpes -vo mpegpes yourfile.ext
-mplayer -ao mpegpes -vo mpegpes -vop expand yourfile.ext
+mplayer -ao mpegpes -vo mpegpes -vf expand yourfile.ext
 </screen></para>
 
 <para>
 Note that DVB cards only support heights 288 and 576 for PAL or 240 and 480 for
 NTSC. You <emphasis role="bold">must</emphasis> escale for other heights by adding
 <option>scale=width:height</option> with the width and height you want to the
-<option>-vop</option> option. DVB cards accept various widths, like 720, 704,
+<option>-vf</option> option. DVB cards accept various widths, like 720, 704,
 640, 512, 480, 352 etc and do hardware scaling in horizontal direction, so you
 do not need to scale horizontally in most cases. For a 512x384 (aspect 4:3)
 DivX try:
 </para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vop scale=512:576</screen></para>
+<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen></para>
 
 <para>If you have a widescreen movie and you do not want to scale it to full height,
 you can use the <option>expand=w:h</option> filter to add black bands. To view a
 640x384 DivX, try:
 </para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vop expand=640:576 file.avi
+<para><screen>mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 file.avi
 </screen></para>
 
 <para>If your CPU is too slow for a full size 720x576 DivX, try downscaling:</para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vop scale=352:576 file.avi
+<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 file.avi
 </screen></para>
 
 <para>If speed does not improve, try vertical downscaling, too:</para>
 
-<para><screen>mplayer -ao mpegpes -vo mpegpes -vop scale=352:288 file.avi
+<para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:288 file.avi
 </screen></para>
 
 <para>
@@ -1594,8 +1594,8 @@ while keeping the right aspect ratio), use the new dvbscale filter:
 </para>
 
 <para><screen>
-for  3:4 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
-for 16:9 TV: -vop expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
+for  3:4 TV: -vf expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
+for 16:9 TV: -vf expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 </screen></para>
 
 <formalpara>
@@ -1735,16 +1735,16 @@ This does not work with digital audio output (<option>-ac hwac3</option>).
 </varlistentry>
 
 <varlistentry>
-<term><option>-vop lavc/fame</option></term>
+<term><option>-vf lavc/fame</option></term>
 <listitem><para>
 To watch non-MPEG content on the em8300 (i.e. DivX or RealVideo) you have to
 specify an MPEG1 video filter such as libavcodec (lavc) or libfame (fame). At
 the moment lavc is both faster and gives better image quality, it is suggested
 that you use that unless you have problems with it. See the man page for further
-info about <option>-vop lavc/fame</option>.
+info about <option>-vf lavc/fame</option>.
 Using lavc is highly recommended. Currently there is no way of setting the fps
 of the em8300 which means that it is fixed to 29.97fps. Because of this it is
-highly recommended that you use <option>-vop lavc=&lt;quality&gt;:25</option>
+highly recommended that you use <option>-vf lavc=&lt;quality&gt;:25</option>
 especially if you are using prebuffering. Then why 25 and not 29.97? Well, the
 thing is that when you use 29.97 the picture becomes a bit jumpy. The reason for
 this is unknown to us. If you set it to somewhere between 25 and 27 the picture
@@ -1753,7 +1753,7 @@ becomes stable. For now all we can do is accept this for a fact.
 </varlistentry>
 
 <varlistentry>
-<term><option>-vop expand=-1:-1:-1:-1:1</option></term>
+<term><option>-vf expand=-1:-1:-1:-1:1</option></term>
 <listitem><para>
 Although the DXR3 driver can put some OSD onto the MPEG1/2/4 video, it has
 much lower quality than MPlayer's traditional OSD, and has several refresh
@@ -1819,7 +1819,7 @@ fullscreen on your DC10+. There are three main possibilities, you may scale
 the movie to a width of 768, 384 or 192. For performance and quality reasons,
 I would choose to scale the movie to 384x204 using the fast bilinear software
 scaler. The commandline is
-<screen>mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi</screen>
+<screen>mplayer -vo zr -sws 0 -vf scale=384:204 movie.avi</screen>
 </para>
 
 <para>
@@ -1832,7 +1832,7 @@ the you would issue the following command
 
 <para>
 if you want to use the <systemitem>crop</systemitem> filter, you would do
-<screen>mplayer -vo zr -vop crop=720:320:80:0 benhur.avi</screen>
+<screen>mplayer -vo zr -vf crop=720:320:80:0 benhur.avi</screen>
 </para>
 
 <para>
