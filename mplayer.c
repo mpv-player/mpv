@@ -1082,7 +1082,7 @@ if(!sh_video){
 if(has_audio){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
-  if(audio_family!=-1) printf("Trying to force audio codec driver family %d ...\n",video_family);
+  if(audio_family!=-1) printf("Trying to force audio codec driver family %d ...\n",audio_family);
   while(1){
     sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
     if(!sh_audio->codec){

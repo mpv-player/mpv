@@ -244,7 +244,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	if (myximage->byte_order != LSBFirst) 
 #endif
 	{
-		printf("[gl] no support fon non-native XImage byte order!\n");
+		printf("[gl] no support for non-native XImage byte order!\n");
 		return -1;
 	}
 
