@@ -958,6 +958,17 @@ XFree86(DRI) 4.0.3 or later supports OpenGL with Matrox and Radeon cards,
 See <ulink url="http://dri.sourceforge.net"/> for download and installation
 instructions.
 </para>
+
+<para>
+A hint from one of our users: the GL video output can be used to get
+vsynced TV output. You'll have to set an environment variable (at
+least on nVidia):
+</para>
+
+<para>
+<command>export $__GL_SYNC_TO_VBLANK=1</command>
+</para>
+
 </sect4>
 
 
