@@ -710,7 +710,7 @@ int vixGetCapability(vidix_capability_t *to)
 uint32_t supported_fourcc[] = 
 {
   IMGFMT_YV12, IMGFMT_I420, IMGFMT_IYUV, 
-  IMGFMT_UYVY, IMGFMT_YUY2,
+  IMGFMT_UYVY, IMGFMT_YUY2, IMGFMT_YVYU,
   IMGFMT_RGB15, IMGFMT_BGR15,
   IMGFMT_RGB16, IMGFMT_BGR16,
   IMGFMT_RGB32, IMGFMT_BGR32
@@ -860,6 +860,7 @@ static void radeon_vid_display_video( void )
 	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12;
 			   break;
         /* 4:2:2 */
+        case IMGFMT_YVYU:
 	case IMGFMT_UYVY:  bes_flags |= SCALER_SOURCE_YVYU422; break;
 	case IMGFMT_YUY2:
 	default:           bes_flags |= SCALER_SOURCE_VYUY422; break;
@@ -918,9 +919,7 @@ static int radeon_vid_init_video( vidix_playback_t *config )
 			  config->dest.pitch.v = best_pitch;
 			  break;
 	/* 4:2:2 */
-        default: /* RGB15, RGB16 */
-	case IMGFMT_UYVY:
-	case IMGFMT_YUY2:
+        default: /* RGB15, RGB16, YVYU, UYVY, YUY2 */
 			  pitch = ((src_w*2) + mpitch) & ~mpitch;
 			  config->dest.pitch.y =
 			  config->dest.pitch.u =
