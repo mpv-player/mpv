@@ -1601,7 +1601,7 @@ static uint32_t preinit(const char *arg)
 
     if(verbose > 2) printf("SDL: Opening Plugin\n");
 
-    if(vo_subdevice) setenv("SDL_VIDEODRIVER", vo_subdevice, 1);
+    if(arg) setenv("SDL_VIDEODRIVER", arg, 1);
 
     /* does the user want SDL to try and force Xv */
     if(sdl_forcexv)	setenv("SDL_VIDEO_X11_NODIRECTCOLOR", "1", 1);
