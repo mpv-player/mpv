@@ -27,6 +27,7 @@ extern "C" {
 #include "EbmlSubHead.h"
 #include "EbmlStream.h"
 #include "EbmlContexts.h"
+#include "EbmlVersion.h"
 #include "FileKax.h"
 
 #include "KaxAttachements.h"
@@ -52,6 +53,10 @@ extern "C" {
 
 using namespace LIBMATROSKA_NAMESPACE;
 using namespace std;
+
+#ifndef LIBEBML_VERSION
+#define LIBEBML_VERSION 000000
+#endif // LIBEBML_VERSION
 
 // for e.g. "-slang ger"
 extern char *dvdsub_lang;
@@ -1053,6 +1058,18 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Track UID: %u\n",
                        uint32(tuid));
 
+#if LIBEBML_VERSION >= 000404
+              } else if (EbmlId(*l3) ==
+                         KaxTrackDefaultDuration::ClassInfos.GlobalId) {
+                KaxTrackDefaultDuration &def_duration =
+                  *static_cast<KaxTrackDefaultDuration *>(l3);
+                def_duration.ReadData(es->I_O());
+                track->v_frate = 1000000000.0 / (float)uint64(def_duration);
+                fprintf(stdout, "[mkv] |  + Default duration: %.3fms ( = %.3f "
+                        "fps)\n", (float)uint64(def_duration) / 1000000.0,
+                        track->v_frate);
+#endif // LIBEBML_VERSION
+
               } else if (EbmlId(*l3) == KaxTrackType::ClassInfos.GlobalId) {
                 KaxTrackType &ttype = *static_cast<KaxTrackType *>(l3);
                 ttype.ReadData(es->I_O());
@@ -1168,6 +1185,7 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
                   } else if (EbmlId(*l4) ==
                              KaxVideoFrameRate::ClassInfos.GlobalId) {
+                    // For older files.
                     KaxVideoFrameRate &framerate =
                       *static_cast<KaxVideoFrameRate *>(l4);
                     framerate.ReadData(es->I_O());
@@ -1189,9 +1207,15 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
               } else if (EbmlId(*l3) == KaxCodecID::ClassInfos.GlobalId) {
                 KaxCodecID &codec_id = *static_cast<KaxCodecID*>(l3);
                 codec_id.ReadData(es->I_O());
+#if LIBEBML_VERSION >= 000404
+                mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
+                       string(codec_id).c_str());
+                track->codec_id = strdup(string(codec_id).c_str());
+#else
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Codec ID: %s\n",
                        &binary(codec_id));
                 track->codec_id = strdup((char *)&binary(codec_id));
+#endif // LIBEBML_VERSION
 
               } else if (EbmlId(*l3) == KaxCodecPrivate::ClassInfos.GlobalId) {
                 KaxCodecPrivate &c_priv = *static_cast<KaxCodecPrivate*>(l3);
@@ -1737,7 +1761,11 @@ extern "C" int demux_mkv_fill_buffer(demuxer_t *d) {
             KaxClusterTimecode &ctc = *static_cast<KaxClusterTimecode *>(l2);
             ctc.ReadData(es->I_O());
             mkv_d->cluster_tc = uint64(ctc);
+#if LIBEBML_VERSION >= 000404
+            mkv_d->cluster->InitTimecode(mkv_d->cluster_tc, mkv_d->tc_scale);
+#else
             mkv_d->cluster->InitTimecode(mkv_d->cluster_tc);
+#endif // LIBEBML_VERSION
 
           } else if (EbmlId(*l2) == KaxBlockGroup::ClassInfos.GlobalId) {
 
