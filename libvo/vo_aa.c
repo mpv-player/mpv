@@ -1,4 +1,24 @@
-/*
+/    /* configuration */
+    /*
+    if (osdcolor;
+    int  subcolor;
+    int  extended;
+    int  eight;
+    char *driver;
+    char *font;
+    int  dim;
+    int  bold;
+    int  reverse;
+    int  normal;
+    int  boldfont;
+
+    int  inverse;
+    int  bright;
+    int  contrast;
+    int  gamma;
+    int  dimmul;
+    int  boldmul;
+    */*
  * MPlayer
  * 
  * Video driver for AAlib - alpha version
@@ -27,6 +47,7 @@
 
 #include "linux/keycodes.h"
 #include <aalib.h>
+#include "cfgparser.h"
 
 #define RGB 0
 #define BGR 1
@@ -82,11 +103,12 @@ extern void mplayer_put_key(int code);
 /* to disable stdout outputs when curses/linux mode */
 extern int quiet;
 
-/* config options */
-int aaopt_extended = 0;
-int aaopt_eight = 0;
+/* configuration */
 int aaopt_osdcolor = AA_SPECIAL;
-char *aaopt_driver = NULL;
+int aaopt_subcolor = AA_SPECIAL;
+
+extern struct aa_hardware_params aa_defparams;
+extern struct aa_renderparams aa_defrenderparams;
 
 void
 resize(void){
@@ -202,19 +224,15 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
 	    return 1;     
     }
     bppmul=bpp/8;
+    
 
     /* initializing of aalib */
+    /*
+    TODO check /dev/vcsa
     aa_recommendhidisplay("curses");
     aa_recommendhidisplay("X11");
     aa_recommendlowdisplay("linux");
-    
-    /* options ? */
-    if (aaopt_eight) aa_defparams.supported|=AA_EIGHT;
-    if (aaopt_extended && !aaopt_eight) aa_defparams.supported|=AA_EXTENDED;
-    if (aaopt_driver!=NULL){
-	aa_recommendhidisplay(aaopt_driver);
-    }
-
+    */
     
     c = aa_autoinit(&aa_defparams);
     aa_resizehandler(c, (void *)resize);
@@ -257,16 +275,17 @@ init(uint32_t width, uint32_t height, uint32_t d_width,
     /* say hello */
     osdmessage(5, 1, "Welcome to ASCII ARTS MPlayer");  
 
-    printf("VO: screendriver:   %s\n", c->driver->name);
-    printf("VO: keyboarddriver: %s\n", c->kbddriver->name);
+    printf("VO: [aa] screendriver:   %s\n", c->driver->name);
+    printf("VO: [aa] keyboarddriver: %s\n", c->kbddriver->name);
     //printf("VO: mousedriver:    %s\n", c->mousedriver->name);
 
     printf(
 		"\n"
-		"Options\n"
-		"\t-aaosdfont   0=normal, 1=dark, 2=bold, 3-boldfont, 4=reverse, 5=special\n"
+		"Important Options\n"
 		"\t-aaextended  use use all 256 characters\n"
 		"\t-aaeight     use eight bit ascii\n"
+		"\t-aadriver    set recommended aalib driver (X11,curses,linux)\n"
+		"\t-aahelp      to see all options provided by aalib\n"
 		"\n"
 		"AA-MPlayer Keys:\n"
 		"\t1 : fast rendering\n"
@@ -535,4 +554,101 @@ uninit(void) {
 
 static void
 draw_osd(void){
+}
+
+int
+getcolor(char * s){
+    int i;
+    char * rest;
+    if  (s==NULL) return -1;
+    i=strtol(s, &rest, 10);
+    if ((rest==NULL || strlen(rest)==0) && i>=0 && i<=5) return i;
+    if (!strcasecmp(s, "normal")) return AA_NORMAL;
+    else if (!strcasecmp(s, "dim")) return AA_DIM;
+    else if (!strcasecmp(s, "bold")) return AA_BOLD;
+    else if (!strcasecmp(s, "boldfont")) return AA_BOLDFONT;
+    else if (!strcasecmp(s, "special")) return AA_SPECIAL;
+    else return -1;
+}
+
+int
+vo_aa_parseoption(struct config * conf, char *opt, char *param){
+    /* got an option starting with aa */
+    char *pseudoargv[3];
+    int pseudoargc;
+    char * x, *help;
+    int i;
+    /* do WE need it ? */
+    if (!strcasecmp(opt, "aaosdcolor")){
+	if (param==NULL) return ERR_MISSING_PARAM;
+	if ((i=getcolor(param))==-1) return ERR_OUT_OF_RANGE;
+	aaopt_osdcolor=i;
+	return 1;
+    }else if (!strcasecmp(opt, "aasubcolor")){
+	if ((i=getcolor(param))==-1) return ERR_OUT_OF_RANGE;
+	aaopt_subcolor=i;
+	return 1;
+    }else if (!strcasecmp(opt, "aahelp")){
+	printf("Here are the aalib options:\n");
+	help=strdup(aa_help); /* aa_help is const :( */
+	x=strtok(help,"-");
+	printf(x);
+	while (x=strtok(NULL, "-")){
+	    if (*(x-2)==' ') printf("-aa");
+	      else printf("-");
+	    printf("%s", x);
+	}
+	printf(
+		    "\n"
+		    "\n"
+		    "Additional options vo_aa provides:\n"
+		    "  -aaosdcolor    set osd color\n"
+		    "  -aasubcolor    set subtitle color\n"
+		    "        the color params are:\n"
+		    "           0 : normal\n"
+		    "           1 : dark\n"
+		    "           2 : bold\n"
+		    "           3 : boldfont\n"
+		    "           4 : reverse\n"
+		    "           6 : special\n"
+		    "\n\n"
+		    "           dT8  8Tb\n"
+                    "          dT 8  8 Tb\n"
+                    "         dT  8  8  Tb\n"
+                    "      <PROJECT><PROJECT>\n"
+                    "       dT    8  8    Tb\n"
+                    "      dT     8  8     Tb\n"
+		    "\n"
+
+	      );
+	exit(0);
+		
+    }else{
+	/* parse param to aalib */
+	pseudoargv[1]=malloc(strlen(opt));
+	pseudoargv[3]=NULL;
+	sprintf(pseudoargv[1], "-%s", opt+2);
+	if (param!=NULL){
+	    pseudoargv[2]=param;
+	    pseudoargc=3;
+	}else{
+	    pseudoargv[2]=NULL;
+	    pseudoargc=2;
+	}
+	fprintf(stderr,"VO: [aa] ");
+	i=aa_parseoptions(&aa_defparams, &aa_defrenderparams, &pseudoargc, pseudoargv);
+	if (i!=1){
+	    return ERR_MISSING_PARAM;
+	}
+	if (pseudoargv[1]!=NULL){
+	    /* aalib has given param back */
+	    fprintf(stderr," Parameter -%s accepted\n", opt, param);
+	    return 0; /* param could be the filename */
+	}
+	fprintf(stderr," Parameter -%s %s accepted\n", opt, param==NULL ? "" : param);
+	return 1; /* all opt & params accepted */
+
+    }
+    return ERR_NOT_AN_OPTION;
+		
 }
