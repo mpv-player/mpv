@@ -1,4 +1,4 @@
-		NUT Open Container Format DRAFT 20040330
+		NUT Open Container Format DRAFT 20040409
 		----------------------------------------
 
 
@@ -89,7 +89,6 @@ main header:
 	packet header
 	version					v
 	stream_count				v
-	checksum_threshold			v
 	for(i=0; i<256; ){
 		tmp_flag			v
 		tmp_stream			v
@@ -172,8 +171,6 @@ frame
 		data_size_msb			v
 	}
 	data
-	if(checksum_threshold < frame_type)
-		frame_checksum			u(32)
                 
 Index:
 	index_startcode				f(64)
@@ -329,9 +326,6 @@ flags[frame_code]
 	KK is the keyframe_type 
 		00-> no keyframe, 
 		01-> keyframe, 
-		10-> equal to last of the same stream, 
-		11-> opposite from last of the same stream
-		KK must be 00 or 01 if the packet_type is not 0
 	flags=1 can be used to mark illegal frame_code bytes
 	frame_code=78 must have flags=1
 
@@ -414,10 +408,6 @@ zero_bit
 checksum
 	adler32 checksum
 
-frame_checksum
-	identical to checksum, but instead of covering just the current 
-	packet, it covers all frames since the last frame_checksum
-        
 index_timestamp
 	value in time_base precission, relative to the last index_timestamp
 
