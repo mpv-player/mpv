@@ -928,12 +928,8 @@ case ACODEC_LAVC:
     case 0x11: /* imaadpcm */
 	mux_a->wf->wBitsPerSample = 4;
 	mux_a->wf->cbSize = 2;
-	/*
-	 * Magic imaadpcm values, currently probably only valid
-	 * for 48KHz Stereo
-	 */
-	((unsigned char*)mux_a->wf)[sizeof(WAVEFORMATEX)] = 0xf9;
-	((unsigned char*)mux_a->wf)[sizeof(WAVEFORMATEX)+1] = 0x07;
+	((uint16_t*)mux_a->wf)[sizeof(WAVEFORMATEX)] = 
+	    ((lavc_actx->block_align - 4 * lavc_actx->channels) / (4 * lavc_actx->channels)) * 8 + 1;
 	break;
     case 0x55: /* mp3 */
 	mux_a->wf->cbSize = 12;
