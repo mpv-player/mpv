@@ -421,12 +421,12 @@ static uint32_t draw_frame(uint8_t *src[]) {
     src[0] = scalebuf;
   }
   if (bpp_conv) {
-    uint16_t *source = (uint16_t *) src[0];
-    uint16_t *dest = (uint16_t *) bppbuf;
-    uint16_t *end;
-    
     switch(bpp) {
       case 32: {
+        uint16_t *source = (uint16_t *) src[0];
+        uint16_t *dest = (uint16_t *) bppbuf;
+        uint16_t *end;
+    
 	end = source + (maxw * maxh * 2);
         while (source < end) {
 	  *dest++ = *source++;
@@ -440,6 +440,9 @@ static uint32_t draw_frame(uint8_t *src[]) {
 #ifdef HAVE_MMX
         rgb15to16_mmx(src[0],bppbuf,maxw * maxh * 2);
 #else
+        uint16_t *source = (uint16_t *) src[0];
+        uint16_t *dest = (uint16_t *) bppbuf;
+        uint16_t *end;
 	register uint16_t srcdata;
 	
 	end = source + (maxw * maxh);
