@@ -956,15 +956,17 @@ int main(void)
                     case 0:
                     case 5:
                         if(cl[i].status==CODECS_STATUS_WORKING)
-                            if(!(!strcmp(cl[i].drv,"win32") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"win32ex")))
+//                            if(!(!strcmp(cl[i].drv,"vfw") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"vfwex") || !strcmp(cl[i].drv,"acm")))
                                 parsehtml(f1,f2,&cl[i],section,dshow);
                         break;
+#if 0
                     case 1:
                     case 6:
                         if(cl[i].status==CODECS_STATUS_WORKING)
-                            if((!strcmp(cl[i].drv,"win32") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"win32ex")))
+                            if((!strcmp(cl[i].drv,"vfw") || !strcmp(cl[i].drv,"dshow") || !strcmp(cl[i].drv,"vfwex") || !strcmp(cl[i].drv,"acm")))
                                 parsehtml(f1,f2,&cl[i],section,dshow);
                         break;
+#endif
                     case 2:
                     case 7:
                         if(cl[i].status==CODECS_STATUS_PROBLEMS)
