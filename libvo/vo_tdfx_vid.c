@@ -1,16 +1,16 @@
 /* 
- *  video_out_null.c
+ *  vo_tdfx_vid.c
  *
- *	Copyright (C) Aaron Holtzman - June 2000
+ *	Copyright (C) Alban Bedel - 03/2003
  *
- *  This file is part of mpeg2dec, a free MPEG-2 video stream decoder.
+ *  This file is part of MPlayer, a free movie player.
  *	
- *  mpeg2dec is free software; you can redistribute it and/or modify
+ *  MPlayer is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU General Public License as published by
  *  the Free Software Foundation; either version 2, or (at your option)
  *  any later version.
  *   
- *  mpeg2dec is distributed in the hope that it will be useful,
+ *  MPlayer is distributed in the hope that it will be useful,
  *  but WITHOUT ANY WARRANTY; without even the implied warranty of
  *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *  GNU General Public License for more details.
@@ -48,6 +48,8 @@ static vo_info_t info =
 	""
 };
 
+//#define VERBOSE
+
 LIBVO_EXTERN(tdfx_vid)
 
 static tdfx_vid_config_t tdfx_cfg;
@@ -62,15 +64,40 @@ static uint32_t dst_width, dst_height, dst_fmt, dst_bpp, dst_stride;
 static uint32_t tdfx_page;
 static uint32_t front_buffer;
 static uint32_t back_buffer;
+static uint8_t num_buffer = 3;
+static uint32_t buffer_size; // Max size
+static uint8_t current_buffer = 0;
+static uint8_t current_ip_buf = 0;
+static uint32_t buffer_stride[3];
 
+// FIXME
+static void clear_screen(void) {
+  tdfx_vid_agp_move_t mov;
+
+  memset(agp_mem,0,tdfx_cfg.screen_width*dst_bpp*tdfx_cfg.screen_height);
+  
+  mov.move2 = TDFX_VID_MOVE_2_PACKED;
+  mov.width = tdfx_cfg.screen_width*dst_bpp;
+  mov.height = tdfx_cfg.screen_height;
+  mov.src = 0;
+  mov.src_stride = tdfx_cfg.screen_width*dst_bpp;
+  mov.dst = front_buffer;
+  mov.dst_stride = tdfx_cfg.screen_stride;
+
+  printf("Move %d(%d) x %d => %d \n", mov.width,mov.src_stride,mov.height,mov.dst_stride);
+
+  if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov))
+    printf("tdfx_vid: AGP move failed to clear the screen\n");
+  
+}
 
 static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
-  tdfx_vid_agp_move_t mov;
-  tdfx_vid_yuv_t yuv;
-  int p;
   uint8_t* ptr[3];
 
+#ifdef VERBOSE
+  printf("Draw slices %d\n",current_buffer);
+#endif
   switch(img_fmt) {
   case IMGFMT_YUY2:
   case IMGFMT_UYVY:
@@ -80,77 +107,28 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
   case IMGFMT_BGR32:
     // copy :( to agp_mem
     // still faster than tdfxfb wich directly copy to the video mem :)
-    memcpy_pic(agp_mem,image[0],src_bpp*w,h,stride[0],stride[0]);
-  
-    mov.move2 = TDFX_VID_MOVE_2_PACKED;
-    mov.width = w*src_bpp;
-    mov.height = h;
-    mov.src = 0;
-    mov.src_stride = stride[0];
-  
-    mov.dst = back_buffer + y*src_stride + x * src_bpp;
-    mov.dst_stride = src_stride;
- 
-    if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
-      printf("tdfx_vid: AGP move failed\n");
-      return 1;
-    }
-    break;
+    mem2agpcpy_pic(agp_mem + current_buffer * buffer_size + 
+	       y*buffer_stride[0] + x * src_bpp,
+	       image[0],
+	       src_bpp*w,h,buffer_stride[0],stride[0]);
+    return 0;
+
   case IMGFMT_YV12:
   case IMGFMT_I420:
     // Copy to agp mem
-    ptr[0] = agp_mem;
-    memcpy_pic(ptr[0],image[0],w,h,stride[0],stride[0]);
-    ptr[1] = ptr[0] + (h*stride[0]);
-    memcpy_pic(ptr[1],image[1],w/2,h/2,stride[1],stride[1]);
-    ptr[2] = ptr[1] + (h/2*stride[1]);
-    memcpy_pic(ptr[2],image[2],w/2,h/2,stride[2],stride[2]);
-
-    // Setup the yuv thing
-    yuv.base = back_buffer + y*src_stride + x * src_bpp;
-    yuv.stride = src_stride;
-    if(ioctl(tdfx_fd,TDFX_VID_SET_YUV,&yuv)) {
-      printf("tdfx_vid: Set yuv failed\n");
-      return 1;
-    }
-
-    // Now agp move that
-    // Y
-    mov.move2 = TDFX_VID_MOVE_2_YUV;
-    mov.width = w;
-    mov.height = h;
-    mov.src = ptr[0] - agp_mem;
-    mov.src_stride =  stride[0];
-    mov.dst = 0x0;
-    mov.dst_stride = TDFX_VID_YUV_STRIDE;
-    if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
-      printf("tdfx_vid: AGP move failed on Y plane\n");
-      return 1;
-    }
-    //return 0;
-    // U
-    p = img_fmt == IMGFMT_YV12 ? 1 : 2;
-    mov.width = w/2;
-    mov.height = h/2;
-    mov.src = ptr[p] - agp_mem;
-    mov.src_stride = stride[p];
-    mov.dst += TDFX_VID_YUV_PLANE_SIZE;
-    if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
-      printf("tdfx_vid: AGP move failed on U plane\n");
-      return 1;
-    }
-    // V
-    p = img_fmt == IMGFMT_YV12 ? 2 : 1;
-    mov.src = ptr[p] - agp_mem;
-    mov.src_stride = stride[p];
-    mov.dst += TDFX_VID_YUV_PLANE_SIZE;
-    if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
-      printf("tdfx_vid: AGP move failed on U plane\n");
-      return 1;
-    }
+    ptr[0] = agp_mem + current_buffer * buffer_size;
+    mem2agpcpy_pic(ptr[0] + y * buffer_stride[0] + x,image[0],w,h,
+		   buffer_stride[0],stride[0]);
+    ptr[1] = ptr[0] + (src_height*src_width);
+    mem2agpcpy_pic(ptr[1] + y/2 * buffer_stride[1] + x/2,image[1],w/2,h/2,
+		   buffer_stride[1],stride[1]);
+    ptr[2] = ptr[1] + (src_height*src_width/4);
+    mem2agpcpy_pic(ptr[2] + y/2 * buffer_stride[2] + x/2,image[2],w/2,h/2,
+		   buffer_stride[2],stride[2]);
+    return 0;
   }
     
-  return 0;
+  return 1;
 }
 
 static void draw_osd(void)
@@ -163,6 +141,10 @@ flip_page(void)
   tdfx_vid_blit_t blit;
   //return;
   // Scale convert
+#ifdef VERBOSE
+  printf("Flip\n");
+#endif
+  memset(&blit,0,sizeof(tdfx_vid_blit_t));
   blit.src = back_buffer;
   blit.src_stride = src_stride;
   blit.src_x = 0;
@@ -194,14 +176,20 @@ static uint32_t
 query_format(uint32_t format)
 {
   switch(format) {
+  case IMGFMT_BGR8:
+    if(tdfx_cfg.screen_format == TDFX_VID_FORMAT_BGR8)
+      return 3 | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
+    return 0;
   case IMGFMT_YUY2:
   case IMGFMT_UYVY:
-  case IMGFMT_BGR8:
+  case IMGFMT_BGR15:
   case IMGFMT_BGR16:
   case IMGFMT_BGR24:
   case IMGFMT_BGR32:
   case IMGFMT_YV12:
   case IMGFMT_I420:
+    if(tdfx_cfg.screen_format == TDFX_VID_FORMAT_BGR8)
+      return 0;
     return 3 | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
   }
   return 0;
@@ -233,18 +221,25 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   src_width = width;
   src_height = height;
+  buffer_size = 0;
+  buffer_stride[0] = 0;
+  src_fmt = 0;
   switch(format) {
   case IMGFMT_BGR8:
+  case IMGFMT_BGR15:
   case IMGFMT_BGR16:
   case IMGFMT_BGR24:
   case IMGFMT_BGR32:
-    src_fmt = format;
     src_bpp = ((format & 0x3F)+7)/8; 
     break;
-  case IMGFMT_YUY2:
   case IMGFMT_YV12:
   case IMGFMT_I420:
+    buffer_size = src_width * src_height * 3 / 2;
+    buffer_stride[0] = ((src_width+1)/2)*2;
+    buffer_stride[1] = buffer_stride[2] = buffer_stride[0]/2;
     src_fmt = TDFX_VID_FORMAT_YUY2;
+  case IMGFMT_YUY2:
+  case IMGFMT_UYVY: 
     src_bpp = 2;
     break;
   default:
@@ -254,6 +249,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
   img_fmt = format;
   src_stride = src_width*src_bpp;
+  if(!src_fmt)
+    src_fmt = format;
+  if(!buffer_size)
+    buffer_size = src_stride*src_height;
+  if(!buffer_stride[0])
+    buffer_stride[0] = src_stride;
 
   dst_fmt = tdfx_cfg.screen_format;
   dst_bpp = ((dst_fmt & 0x3F)+7)/8;
@@ -317,32 +318,48 @@ static uint32_t preinit(const char *arg)
     printf("tdfx_vid: Memmap failed !!!!!\n");
     return 1;
   }
-
-  memset(agp_mem,0,1024*768*4);
   
+  memset(agp_mem,0,1024*768*4);
+
   return 0;
 }
 
 static uint32_t get_image(mp_image_t *mpi) {
+  int buf = 0;
 
-  if(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-    mpi->flags &= ~MP_IMGFLAG_DRAW_CALLBACK;
+#ifdef VERBOSE
+  printf("Get image %d\n",buf);
+#endif
 
-  if(mpi->type > MP_IMGTYPE_TEMP)
-    return VO_FALSE; // TODO ??
+  // Currently read are too slow bcs we read from the
+  // agp aperture and not the memory directly
+  //if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE;
+
+  if(mpi->flags&MP_IMGFLAG_READABLE &&
+     (mpi->type==MP_IMGTYPE_IPB || mpi->type==MP_IMGTYPE_IP)){
+    // reference (I/P) frame of IP or IPB:
+    if(num_buffer<2) return VO_FALSE; // not enough
+    current_ip_buf^=1;
+    // for IPB with 2 buffers we can DR only one of the 2 P frames:
+    if(mpi->type==MP_IMGTYPE_IPB && num_buffer<3 && current_ip_buf) return VO_FALSE;
+    buf=current_ip_buf;
+    if(mpi->type==MP_IMGTYPE_IPB) ++buf; // preserve space for B
+  }
 
   switch(mpi->imgfmt) {
   case IMGFMT_YUY2:
   case IMGFMT_UYVY:
-    //  case IMGFMT_BGR8:
+  case IMGFMT_BGR8:
+  case IMGFMT_BGR15:
   case IMGFMT_BGR16:
   case IMGFMT_BGR24:
   case IMGFMT_BGR32:
-    mpi->planes[0] = agp_mem;
+    mpi->planes[0] = agp_mem + buf * buffer_size;
     mpi->stride[0] = src_stride;
     break;
   case IMGFMT_YV12:
-    mpi->planes[0] = agp_mem;
+  case IMGFMT_I420:
+    mpi->planes[0] = agp_mem + buf * buffer_size;
     mpi->stride[0] = mpi->width;
     mpi->planes[1] = mpi->planes[0] + mpi->stride[0]*mpi->height;
     mpi->stride[1] = mpi->chroma_width;
@@ -354,42 +371,64 @@ static uint32_t get_image(mp_image_t *mpi) {
     return VO_FALSE;
   }
   mpi->flags |= MP_IMGFLAG_DIRECT;
+  mpi->priv = (void*)buf;
   
   return VO_TRUE;
 }
 
+static uint32_t start_slice(mp_image_t *mpi){
+  int buf = 0;
+
+#ifdef VERBOSE
+  printf("Start slices %d\n",buf);
+#endif
+
+  if(mpi->flags & MP_IMGFLAG_DIRECT)
+    buf = (int)mpi->priv;
+  current_buffer = buf;
+
+  return VO_TRUE;
+}
+
 static uint32_t draw_image(mp_image_t *mpi){
+  int buf = 0;
   tdfx_vid_agp_move_t mov;
   tdfx_vid_yuv_t yuv;
   int p;
   uint8_t* planes[3];
   int stride[3];
 
-  //printf("Draw image !!!!\n");
-  if(mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
-    return VO_TRUE;
+#ifdef VERBOSE
+  printf("Draw image %d\n",buf);
+#endif
+
+  if(mpi->flags & MP_IMGFLAG_DIRECT)
+    buf = (int)mpi->priv;
 
   switch(mpi->imgfmt) {
   case IMGFMT_YUY2:
   case IMGFMT_UYVY:
   case IMGFMT_BGR8:
+  case IMGFMT_BGR15:
   case IMGFMT_BGR16:
   case IMGFMT_BGR24:
   case IMGFMT_BGR32:
-    if(!(mpi->flags&MP_IMGFLAG_DIRECT)) {
-      // copy :( to agp_mem
-      // still faster than tdfxfb wich directly copy to the video mem :)
-      planes[0] = agp_mem;
-      memcpy_pic(agp_mem,mpi->planes[0],src_bpp*mpi->width,mpi->height,
-		 mpi->stride[0],mpi->stride[0]);
+    if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))) {
+      // copy to agp_mem
+#ifdef VERBOSE
+      printf("Memcpy\n");
+#endif
+      planes[0] = agp_mem + buf * buffer_size;
+      mem2agpcpy_pic(planes[0],mpi->planes[0],src_bpp*mpi->width,mpi->height,
+		     buffer_stride[0],mpi->stride[0]);
     } else
-      planes[0] = mpi->planes[0];
+      planes[0] = agp_mem + buf * buffer_size;
 
     mov.move2 = TDFX_VID_MOVE_2_PACKED;
     mov.width = mpi->width*((mpi->bpp+7)/8);
     mov.height = mpi->height;
     mov.src = planes[0] - agp_mem;
-    mov.src_stride = mpi->stride[0];
+    mov.src_stride = buffer_stride[0];
   
     mov.dst = back_buffer;
     mov.dst_stride = src_stride;
@@ -400,19 +439,25 @@ static uint32_t draw_image(mp_image_t *mpi){
 
   case IMGFMT_YV12:
   case IMGFMT_I420:
-    if(!(mpi->flags&MP_IMGFLAG_DIRECT)) {
+    if(!(mpi->flags&(MP_IMGFLAG_DIRECT|MP_IMGFLAG_DRAW_CALLBACK))) {
       // Copy to agp mem
-      planes[0] = agp_mem;
+#ifdef VERBOSE
+      printf("Memcpy\n");
+#endif
+      planes[0] = agp_mem + buf * buffer_size;
       memcpy_pic(planes[0],mpi->planes[0],mpi->width,mpi->height,
-		 mpi->stride[0],mpi->stride[0]);
+		 buffer_stride[0],mpi->stride[0]);
       planes[1] = planes[0] + (mpi->height*mpi->stride[0]);
       memcpy_pic(planes[1],mpi->planes[1],mpi->chroma_width,mpi->chroma_height,
-		 mpi->stride[1],mpi->stride[1]);
+		 buffer_stride[1],mpi->stride[1]);
       planes[2] = planes[1] + (mpi->chroma_height*mpi->stride[1]);
       memcpy_pic(planes[2],mpi->planes[2],mpi->chroma_width,mpi->chroma_height,
-		 mpi->stride[2],mpi->stride[2]);
-    } else
-      memcpy(planes,mpi->planes,3*sizeof(uint8_t*));
+		 buffer_stride[2],mpi->stride[2]);
+    } else {
+      planes[0] = agp_mem + buf * buffer_size;
+      planes[1] = planes[0] + buffer_stride[0] * src_height;
+      planes[2] = planes[1] + buffer_stride[1] * src_height/2;
+    }
 
     // Setup the yuv thing
     yuv.base = back_buffer;
@@ -421,14 +466,15 @@ static uint32_t draw_image(mp_image_t *mpi){
       printf("tdfx_vid: Set yuv failed\n");
       break;
     }
-    //return VO_FALSE;
+    
+
     // Now agp move that
     // Y
     mov.move2 = TDFX_VID_MOVE_2_YUV;
     mov.width = mpi->width;
     mov.height = mpi->height;
     mov.src = planes[0] - agp_mem;
-    mov.src_stride =  mpi->stride[0];
+    mov.src_stride =  buffer_stride[0];
     mov.dst = 0x0;
     mov.dst_stride = TDFX_VID_YUV_STRIDE;
 
@@ -442,7 +488,7 @@ static uint32_t draw_image(mp_image_t *mpi){
     mov.width = mpi->chroma_width;
     mov.height = mpi->chroma_height;
     mov.src = planes[p] - agp_mem;
-    mov.src_stride = mpi->stride[p];
+    mov.src_stride = buffer_stride[p];
     mov.dst += TDFX_VID_YUV_PLANE_SIZE;
     if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
       printf("tdfx_vid: AGP move failed on U plane\n");
@@ -451,7 +497,7 @@ static uint32_t draw_image(mp_image_t *mpi){
     // V
     p = mpi->imgfmt == IMGFMT_YV12 ? 2 : 1;
     mov.src = planes[p] - agp_mem;
-    mov.src_stride = mpi->stride[p];
+    mov.src_stride = buffer_stride[p];
     mov.dst += TDFX_VID_YUV_PLANE_SIZE;
     if(ioctl(tdfx_fd,TDFX_VID_AGP_MOVE,&mov)) {
       printf("tdfx_vid: AGP move failed on U plane\n");
@@ -462,7 +508,15 @@ static uint32_t draw_image(mp_image_t *mpi){
     printf("What's that for a format 0x%x\n",mpi->imgfmt);
     return VO_TRUE;
   }
-  printf("Draw image true !!!!!\n");
+
+  return VO_TRUE;
+}
+
+static uint32_t fullscreen(void) {
+  vo_fs ^= 1;
+  aspect(&dst_width,&dst_height,vo_fs ? A_ZOOM : A_NOZOOM);
+  // This does not work :((
+  //clear_screen();
   return VO_TRUE;
 }
 
@@ -476,6 +530,10 @@ static uint32_t control(uint32_t request, void *data, ...)
     return get_image(data);
   case VOCTRL_DRAW_IMAGE:
     return draw_image(data);
+  case VOCTRL_START_SLICE:
+    return start_slice(data);
+  case VOCTRL_FULLSCREEN:
+    return fullscreen();
   }
   return VO_NOTIMPL;
 }
