@@ -26,6 +26,15 @@ unsigned int GetTimer(){
 
 static unsigned char a_buffer[OUTBURST];
 
+void inline print_info(int audio_fd){
+#if 1
+  audio_buf_info zz;
+  ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz);
+  printf("Status: %3d/%d  (%d byte/frag)  free: %6d\n",
+      zz.fragments, zz.fragstotal, zz.fragsize, zz.bytes);
+#endif
+}
+
 int main(){
   int audio_buffer_size=0;
   int r;
@@ -39,11 +48,18 @@ int main(){
     printf("Can't open audio device %s\n",dsp);
     return 1;
   }
+
+//  ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
+//  print_info(audio_fd);
+
+  ioctl(audio_fd, SNDCTL_DSP_RESET, NULL);
   
   r=AFMT_S16_LE;ioctl (audio_fd, SNDCTL_DSP_SETFMT, &r);
   r=1; ioctl (audio_fd, SNDCTL_DSP_STEREO, &r);
   r=44100; if(ioctl (audio_fd, SNDCTL_DSP_SPEED, &r)==-1)
       printf("audio_setup: your card doesn't support %d Hz samplerate\n",r);
+
+//  print_info(audio_fd);
 
   t0=t1=GetTimer();
 
@@ -54,6 +70,8 @@ while(xxx-->0){
       FD_ZERO(&rfds); FD_SET(audio_fd,&rfds);
       tv.tv_sec=0; tv.tv_usec = 0;
       if(select(audio_fd+1, NULL, &rfds, NULL, &tv)) c=' ';
+
+//    print_info(audio_fd);
 
     r=write(audio_fd,a_buffer,OUTBURST);
     t2=GetTimer();
