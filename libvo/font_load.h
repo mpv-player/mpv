@@ -7,6 +7,7 @@ typedef struct {
 
 typedef struct {
     char *name;
+    char *fpath;
     int spacewidth;
     int charspace;
     int height;

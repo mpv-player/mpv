@@ -568,9 +568,11 @@ if(!filename){
 
 // check codec.conf
 if(!parse_codec_cfg(get_path("codecs.conf"))){
-    fprintf(stderr,"(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
+  if(!parse_codec_cfg(DATADIR"/codecs.conf")){
+    printf("(copy/link DOCS/codecs.conf to ~/.mplayer/codecs.conf)\n");
     GUI_MSG( mplCodecConfNotFound )
     exit(1);
+  }
 }
 
 // check font
@@ -580,6 +582,8 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   } else {
       // try default:
        vo_font=read_font_desc(get_path("font/font.desc"),font_factor,verbose>1);
+       if(!vo_font)
+       vo_font=read_font_desc(DATADIR"/font/font.desc",font_factor,verbose>1);
   }
 
 // check .sub
