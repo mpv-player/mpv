@@ -145,6 +145,7 @@ See the <link linkend="macos">Mac OS</link> section.
 <title>Sun Solaris</title>
 <para>
 <application>MPlayer</application> should work on Solaris 2.6 or newer.
+Use the SUN audio driver with the <option>-ao sun</option> option for sound.
 </para>
 
 <para>
