@@ -305,8 +305,8 @@ static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef
 static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus result = noErr;
-	UInt32_t d_width;
-	UInt32_t d_height;
+	uint32_t d_width;
+	uint32_t d_height;
 	UInt32 class = GetEventClass (event);
 	UInt32 kind = GetEventKind (event); 
 
