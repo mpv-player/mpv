@@ -1837,6 +1837,15 @@ static long WINAPI expRegQueryValueExA(long key, const char* value, int* reserve
     if(data && count)dbgprintf("  read %d bytes: '%s'\n", *count, data);
     return result;
 }
+
+//from wine source dlls/advapi32/registry.c
+static long WINAPI expRegCreateKeyA(long hkey, const char* name, int *retkey)
+{
+    dbgprintf("RegCreateKeyA(key 0x%x, name 0x%x='%s',newkey=0x%x)\n",hkey,name,retkey);
+    return RegCreateKeyExA( hkey, name, 0, NULL,REG_OPTION_NON_VOLATILE,
+                            KEY_ALL_ACCESS , NULL, retkey, NULL );
+}
+
 static long WINAPI expRegCreateKeyExA(long key, const char* name, long reserved,
 				      void* classs, long options, long security,
 				      void* sec_attr, int* newkey, int* status)
@@ -4914,6 +4923,7 @@ struct exports exp_user32[]={
 };
 struct exports exp_advapi32[]={
     FF(RegCloseKey, -1)
+    FF(RegCreateKeyA, -1)
     FF(RegCreateKeyExA, -1)
     FF(RegEnumKeyExA, -1)
     FF(RegEnumValueA, -1)
@@ -5149,7 +5159,7 @@ void* LookupExternal(const char* library, int ordinal)
 
 #ifndef LOADLIB_TRY_NATIVE
   /* hack for truespeech and vssh264*/
-  if (!strcmp(library, "tsd32.dll") || !strcmp(library,"vssh264dec.dll"))
+  if (!strcmp(library, "tsd32.dll") || !strcmp(library,"vssh264dec.dll") || !strcmp(library,"LCMW2.dll"))
 #endif
     /* ok, this is a hack, and a big memory leak. should be fixed. - alex */
     {
