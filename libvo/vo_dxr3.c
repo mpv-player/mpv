@@ -77,7 +77,7 @@ static int s_width, s_height;
 static int s_pos_x, s_pos_y;
 static int d_pos_x, d_pos_y;
 static int osd_w, osd_h;
-
+static int noprebuf = 0;
 static int img_format = 0;
 
 /* File descriptors */
@@ -102,11 +102,10 @@ uint32_t control(uint32_t request, void *data, ...)
 	uint32_t flag = 0;
 	switch (request) {
 	case VOCTRL_RESET:
-		/* Apparently the new em8300 flushing code is still not working.
-		 * I'll get on it, but this should be good enough for now
-		 */
-		close(fd_video);
-		fd_video = open(fdv_name, O_WRONLY);
+		if (!noprebuf) {
+			close(fd_video);
+			fd_video = open(fdv_name, O_WRONLY);
+		}
 		return VO_TRUE;
 	case VOCTRL_QUERY_FORMAT:
 		switch (*((uint32_t*)data)) {	
@@ -129,7 +128,11 @@ uint32_t control(uint32_t request, void *data, ...)
 			printf("VO: [dxr3] You have disabled libavcodec support (Read DOCS/codecs.html)!\n");
 #endif
 		}
-		return (flag | 0x100);
+		if (noprebuf) {
+			return flag;
+		} else {
+			return (flag | 0x100);
+		}
 	}
 	return VO_NOTIMPL;
 }
@@ -415,11 +418,18 @@ static void check_events(void)
 static uint32_t preinit(const char *arg)
 {
 	char devname[80];
-	int fdflags = O_WRONLY | O_NONBLOCK;
+	int fdflags = O_WRONLY;
 	
 	/* Open the control interface */
 	if (vo_subdevice) {
-		sprintf(devname, "/dev/em8300-%s", vo_subdevice);
+		if (!strcmp("noprebuf", vo_subdevice)) {
+			printf("VO: [dxr3] Disabling prebuffering.\n");
+			noprebuf = 1;
+			fdflags |= O_NONBLOCK;
+		} else {
+			printf("VO: [dxr3] Forcing use of device %s\n", vo_subdevice);
+			sprintf(devname, "/dev/em8300-%s", vo_subdevice);
+		}
 	} else {
 		/* Try new naming scheme by default */
 		sprintf(devname, "/dev/em8300-0");
