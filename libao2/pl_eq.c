@@ -94,11 +94,11 @@ void bp2(int16_t* a, int16_t* b, float fc, float q){
   double th=2*3.141592654*fc;
   double C=(1 - tan(th*q/2))/(1 + tan(th*q/2));
   
-  a[0] = (int16_t)lround( 16383.0 * (1 + C) * cos(th));
-  a[1] = (int16_t)lround(-16383.0 * C);
+  a[0] = (int16_t)( 16383.0 * (1 + C) * cos(th) + 0.5);
+  a[1] = (int16_t)(-16383.0 * C + 0.5);
   
-  b[0] = (int16_t)lround(-16383.0 * (C - 1)/2);
-  b[1] = (int16_t)lround(-16383.0 * 1.0050);
+  b[0] = (int16_t)(-16383.0 * (C - 1)/2 + 0.5);
+  b[1] = (int16_t)(-16383.0 * 1.0050 + 0.5);
 }
 
 // empty buffers
