@@ -13,24 +13,30 @@ struct vf_priv_s {
     int crop_x,crop_y;
 };
 
+extern int opt_screen_size_x;
+extern int opt_screen_size_y;
+
 //===========================================================================//
 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    int ret;
-    printf("crop->config() called\n");
     // calculate the missing parameters:
     if(vf->priv->crop_w<=0 || vf->priv->crop_w>width) vf->priv->crop_w=width;
     if(vf->priv->crop_h<=0 || vf->priv->crop_h>height) vf->priv->crop_h=height;
     if(vf->priv->crop_x<0) vf->priv->crop_x=(width-vf->priv->crop_w)/2;
     if(vf->priv->crop_y<0) vf->priv->crop_y=(height-vf->priv->crop_h)/2;
     // check:
-    if(vf->priv->crop_w+vf->priv->crop_x>width) return 0; // bad width
-    if(vf->priv->crop_h+vf->priv->crop_y>height) return 0; // bad height
-    ret=vf_next_config(vf,vf->priv->crop_w,vf->priv->crop_h,d_width,d_height,flags,outfmt);
-    printf("crop->config() return %d\n",ret);
-    return ret;
+    if(vf->priv->crop_w+vf->priv->crop_x>width ||
+       vf->priv->crop_h+vf->priv->crop_y>height){
+	printf("crop: bad position/width/height - cropped area is out of the original!\n");
+	return 0;
+    }
+    if(!opt_screen_size_x && !opt_screen_size_y){
+	d_width=d_width*vf->priv->crop_w/width;
+	d_height=d_height*vf->priv->crop_h/height;
+    }
+    return vf_next_config(vf,vf->priv->crop_w,vf->priv->crop_h,d_width,d_height,flags,outfmt);
 }
 
 static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){

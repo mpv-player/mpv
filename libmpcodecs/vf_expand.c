@@ -26,6 +26,9 @@ struct vf_priv_s {
     unsigned char* fb_ptr;
 };
 
+extern int opt_screen_size_x;
+extern int opt_screen_size_y;
+
 //===========================================================================//
 #ifdef OSD_SUPPORT
 
@@ -143,7 +146,6 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    int ret;
     // calculate the missing parameters:
 #if 0
     if(vf->priv->exp_w<width) vf->priv->exp_w=width;
@@ -159,8 +161,12 @@ static int config(struct vf_instance_s* vf,
     if(vf->priv->exp_x<0 || vf->priv->exp_x+width>vf->priv->exp_w) vf->priv->exp_x=(vf->priv->exp_w-width)/2;
     if(vf->priv->exp_y<0 || vf->priv->exp_y+height>vf->priv->exp_h) vf->priv->exp_y=(vf->priv->exp_h-height)/2;
     vf->priv->fb_ptr=NULL;
-    ret=vf_next_config(vf,vf->priv->exp_w,vf->priv->exp_h,d_width,d_height,flags,outfmt);
-    return ret;
+
+    if(!opt_screen_size_x && !opt_screen_size_y){
+	d_width=d_width*vf->priv->exp_w/width;
+	d_height=d_height*vf->priv->exp_h/height;
+    }
+    return vf_next_config(vf,vf->priv->exp_w,vf->priv->exp_h,d_width,d_height,flags,outfmt);
 }
 
 // there are 4 cases:

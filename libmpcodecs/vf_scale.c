@@ -19,6 +19,9 @@ struct vf_priv_s {
     SwsContext *ctx;
 };
 
+extern int opt_screen_size_x;
+extern int opt_screen_size_y;
+
 //===========================================================================//
 
 static unsigned int outfmt_list[]={
@@ -105,7 +108,11 @@ static int config(struct vf_instance_s* vf,
 	return 0;
     }
     vf->priv->fmt=best;
-    
+
+    if(!opt_screen_size_x && !opt_screen_size_y){
+	d_width=d_width*vf->priv->w/width;
+	d_height=d_height*vf->priv->h/height;
+    }
     return vf_next_config(vf,vf->priv->w,vf->priv->h,d_width,d_height,flags,best);
 }
 
