@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="koi8-r"?>
+<!-- synced with 1.9 -->
+<chapter id="usage">
+<title>Использование</title>
+
+<sect1 id="commandline">
+<title>Командная строка</title>
+
+<para>
+<application>MPlayer</application> использует составное дерево проигрывания.
+Оно состоит из глобальных опций, идущих первыми, например
+
+<screen>mplayer -vfm 5</screen>,
+
+и опций, идущих после имени файла, которые применяются только к данному
+файлу/URL/и т.п., например:
+
+<screen>mplayer -vfm 5 movie1.avi movie2.avi -vfm 4</screen>
+</para>
+
+<para>
+Вы можете группировать файлы/URL'ы вместе, используя <literal>{</literal> и
+<literal>}</literal>. Это полезно, например, с опцией <option>-loop</option>:
+
+<screen>mplayer { 1.avi -loop 2 2.avi } -loop 3</screen>
+
+Эта команда проиграет файлы в таком порядке: 1, 1, 2, 1, 1, 2, 1, 1, 2.
+</para>
+
+<para>
+Воспроизведение файла:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>опции</replaceable>]<!--
+--> [<replaceable>путь</replaceable>/]<replaceable>имя_файла</replaceable>
+</synopsis>
+</para>
+
+<para>
+Воспроизведение множества фалов:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>общие опции</replaceable>]<!--
+--> [<replaceable>путь</replaceable>/]<replaceable>имя_файла1</replaceable><!--
+--> [<replaceable>опции для имя_файла1</replaceable>]<!--
+--> <replaceable>имя_файла2</replaceable><!--
+--> [<replaceable>опции для имя_файла2</replaceable>] ...
+</synopsis>
+</para>
+
+<para>
+Воспроизведение VCD:
+<synopsis>
+<command>mplayer</command> [<replaceable>опции</replaceable>]<!--
+--> vcd://<replaceable>номер_дорожки</replaceable><!--
+--> [-cdrom-device <replaceable>/dev/cdrom</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Воспроизведение DVD:
+<synopsis>
+<command>mplayer</command> [<replaceable>опции</replaceable>]<!--
+--> dvd://<replaceable>имя_ролика</replaceable><!--
+--> [-dvd-device <replaceable>/dev/dvd</replaceable>]
+</synopsis>
+</para>
+
+<para>
+Воспроизведение из WWW:
+<synopsis>
+<command>mplayer</command> [<replaceable>опции</replaceable>]<!--
+--> http://<replaceable>site.com/file.asf</replaceable>
+</synopsis>
+(так же можно использовать и списки проигрывания (плейлист[playlist]) )
+</para>
+
+<para>
+Воспроизведение по RTSP:
+<synopsis>
+<command>mplayer</command> [<replaceable>опции</replaceable>]<!--
+--> rtsp://<replaceable>server.example.com/streamName</replaceable>
+</synopsis>
+</para>
+
+<para>
+Примеры:
+<screen>
+mplayer -vo x11 /mnt/Films/Contact/contact2.mpg
+mplayer vcd://2 -cd-rom-device /dev/hdc
+mplayer -afm 3 /mnt/DVDtrailers/alien4.vob
+mplayer dvd://1 -dvd-device /dev/hdc
+mplayer -abs 65536 -delay -0.4 -nobps ~/movies/test.avi<!--
+--></screen>
+</para>
+</sect1>
+
+
+<sect1 id="control">
+<title>Управление</title>
+
+<para>
+<application>MPlayer</application> использует полностью конфигурируемый,
+основанный на понятии команды, уровень управления, позволяющий манипулировать
+<application>MPlayer</application>'ом с клавиатуры, мышью, джойстиком или
+с пульта дистанционного управления (используя LIRC). Полный список кнопок
+для управления с клавиатуры см. на man-странице.
+</para>
+
+
+<sect2 id="ctrl-cfg">
+<title>Конфигурация управления</title>
+
+<para>
+<application>MPlayer</application> позволяет повесить любую MPlayer'овскую
+команду на любую кнопку, используя простой конфигурационный файл. Синтаксис
+файла состоит из имени кнопки, сопровождающегося командой. По умолчанию
+конфигурационный файл находится в <filename>$HOME/.mplayer/input.conf</filename>,
+но это можно изменить, указав опцию
+<option>-input <replaceable>conf</replaceable></option>
+(относительный путь указывается относительно <filename>$HOME/.mplayer</filename>).
+</para>
+
+<example>
+<title>Простой файл конфигурации ввода</title>
+<programlisting>
+##
+## MPlayer input control file
+##
+
+RIGHT seek +10
+LEFT seek -10
+- audio_delay 0.100
++ audio_delay -0.100
+q quit
+&gt; pt_step 1
+&lt; pt_step -1
+ENTER pt_step 1 1<!--
+--></programlisting>
+</example>
+
+
+<sect3 id="ctrl-cfg-keys">
+<title>Названия кнопок</title>
+
+<para>
+Вы можете получить полный список, запустив
+<command>mplayer -input keylist</command>.
+</para>
+
+<itemizedlist>
+<title>Клавиатура</title>
+<listitem><simpara>Все печатные символы</simpara></listitem>
+<listitem><simpara><literal>SPACE</literal></simpara></listitem>
+<listitem><simpara><literal>ENTER</literal></simpara></listitem>
+<listitem><simpara><literal>TAB</literal></simpara></listitem>
+<listitem><simpara><literal>CTRL</literal></simpara></listitem>
+<listitem><simpara><literal>BS</literal></simpara></listitem>
+<listitem><simpara><literal>DEL</literal></simpara></listitem>
+<listitem><simpara><literal>INS</literal></simpara></listitem>
+<listitem><simpara><literal>HOME</literal></simpara></listitem>
+<listitem><simpara><literal>END</literal></simpara></listitem>
+<listitem><simpara><literal>PGUP</literal></simpara></listitem>
+<listitem><simpara><literal>PGDWN</literal></simpara></listitem>
+<listitem><simpara><literal>ESC</literal></simpara></listitem>
+<listitem><simpara><literal>RIGHT</literal></simpara></listitem>
+<listitem><simpara><literal>LEFT</literal></simpara></listitem>
+<listitem><simpara><literal>UP</literal></simpara></listitem>
+<listitem><simpara><literal>DOWN</literal></simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Мышь (поддерживается только под X'ами)</title>
+<listitem><simpara>
+  <literal>MOUSE_BTN0</literal> (Левая кнопка)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN1</literal> (Правая кнопка)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN2</literal> (Средняя кнопка)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN3</literal> (Колёсико)</simpara></listitem>
+<listitem><simpara>
+  <literal>MOUSE_BTN4</literal> (Колёсико)</simpara></listitem>
+<listitem><simpara>...</simpara></listitem>
+<listitem><simpara><literal>MOUSE_BTN9</literal></simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Джойстик (поддержка должна быть включена при компиляции)</title>
+<listitem><simpara>
+  <literal>JOY_RIGHT</literal> или
+  <literal>JOY_AXIS0_PLUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_LEFT</literal> или
+  <literal>JOY_AXIS0_MINUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_UP</literal> или
+  <literal>JOY_AXIS1_MINUS</literal></simpara></listitem>
+<listitem><simpara>
+  <literal>JOY_DOWN</literal> или
+  <literal>JOY_AXIS1_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS2_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS2_MINUS</literal></simpara></listitem>
+<listitem><simpara>...</simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS9_PLUS</literal></simpara></listitem>
+<listitem><simpara><literal>JOY_AXIS9_MINUS</literal></simpara></listitem>
+</itemizedlist>
+</sect3>
+
+
+<sect3 id="ctrl-cfg-commands">
+<title>Команды</title>
+
+<para>
+Вы можете получить полный список известных команд, запустив
+<command>mplayer -input cmdlist</command>.
+</para>
+
+<itemizedlist>
+<listitem><para><literal>seek</literal> (int) val [(int) type=0]</para>
+  <para>
+  Переместиться в какое-то место фильма.
+  Type <literal>0</literal> &mdash; это относительное перемещение на
+    +/- величина секунд.
+  Type <literal>1</literal> &mdash; это перемещение к val, выраженному
+    в процентах от длины фильма.
+  </para></listitem>
+<listitem><para><literal>audio_delay</literal> (float) val</para>
+  <para>
+  Подстроить задержку звука на заданное количество секунд
+  </para></listitem>
+<listitem><para><literal>quit</literal></para>
+  <para>
+  Выйти из <application>MPlayer</application>'а
+  </para></listitem>
+<listitem><para><literal>pause</literal></para>
+  <para>
+  остановить/продолжить воспроизведение
+  </para></listitem>
+<listitem><para><literal>grap_frames</literal></para>
+  <para>
+  Кто-нибудь знает ?
+  </para></listitem>
+<listitem><para><literal>pt_step</literal> (int) val [(int) force=0]</para>
+  <para>
+  Перейти к следующему/предыдущему элементу дерева. Знак val указывает
+  направление. Если в этом направлении нет доступных элементов, то ничего
+  не произойдёт, если force равно нулю.
+  </para></listitem>
+<listitem><para><literal>pt_up_step</literal> (int) val [(int) force=0]</para>
+  <para>
+  Почти как pt_step, но перемещается на следующий/предыдущий элемент
+  в родительском списке. Полезно, чтобы выйти из внутреннего цикла в дереве.
+  </para></listitem>
+<listitem><para><literal>alt_src_step</literal> (int) val</para>
+  <para>
+  Если доступно более одного источника, выбирает следующий/предыдущий
+  (поддерживается только в asx списках проигрывания).
+  </para></listitem>
+<listitem><para><literal>sub_delay</literal> (float) val [(int) abs=0]</para>
+  <para>
+  Подстройка задержки субтитров на +/- val секунд или установить в val секунд,
+  если abs не ноль.
+  </para></listitem>
+<listitem><para><literal>osd</literal> [(int) level=-1]</para>
+  <para>
+  Переключить osd режим или установить его в level, если level &gt; 0.
+  </para></listitem>
+<listitem><para><literal>volume</literal> (int) dir</para>
+  <para>
+  Увеличить/уменьшить громкость.
+  </para></listitem>
+<listitem><simpara><literal>contrast</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><simpara><literal>brightness</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><simpara><literal>hue</literal> (int) val [(int) abs=0]
+  </simpara></listitem>
+<listitem><para><literal>saturation</literal> (int) val [(int) abs=0]</para>
+  <para>
+  Установить/подстроить параметры видео. Val изменяется от -100 до 100.
+  </para></listitem>
+<listitem><para><literal>frame_drop</literal> [(int) type=-1]</para>
+  <para>
+  Изменить/установить режим пропуска кадров.
+  </para></listitem>
+<listitem><para><literal>sub_visibility</literal></para>
+  <para>
+  Отрегулировать видимость субтитров.
+  </para></listitem>
+<listitem><para><literal>sub_pos</literal> (int) val</para>
+  <para>
+  Подстроить позицию субтитров.
+  </para></listitem>
+<listitem><para><literal>vobsub_lang</literal></para>
+  <para>
+  Изменить язык VobSub субтитров.
+  </para></listitem>
+<listitem><para><literal>vo_fullscreen</literal></para>
+  <para>
+  Переключить полноэкранность режима.
+  </para></listitem>
+<listitem><para><literal>tv_step_channel</literal> (int) dir</para>
+  <para>
+  Выбрать следующий/предыдущий канал.
+  </para></listitem>
+<listitem><para><literal>tv_step_norm</literal></para>
+  <para>
+  Изменить стандарт TV.
+  </para></listitem>
+<listitem><para><literal>tv_step_chanlist</literal></para>
+  <para>
+  Изменить список каналов.
+  </para></listitem>
+<listitem><simpara><literal>gui_loadfile</literal></simpara></listitem>
+<listitem><simpara><literal>gui_loadsubtitle</literal></simpara></listitem>
+<listitem><simpara><literal>gui_about</literal></simpara></listitem>
+<listitem><simpara><literal>gui_play</literal></simpara></listitem>
+<listitem><simpara><literal>gui_stop</literal></simpara></listitem>
+<listitem><simpara><literal>gui_playlist</literal></simpara></listitem>
+<listitem><simpara><literal>gui_preferences</literal></simpara></listitem>
+<listitem><para><literal>gui_skinbrowser</literal></para>
+  <para>
+  Действия с GUI
+  </para></listitem>
+</itemizedlist>
+</sect3>
+</sect2>
+
+
+<sect2 id="lirc">
+<title>Управление через LIRC</title>
+
+<para>
+Linux Infrared Remote Control[Инфракрасное Удалённое Управление Linux'ом]
+&mdash; используйте легко собираемый в домашних условиях IR-приёмник, (почти)
+любой пульт управления и управляйте с их помощью Вашей Linux машиной.
+Подробности на <ulink url="http://www.lirc.org">www.lirc.org</ulink>.
+</para>
+
+<para>
+Если у Вас установлен ракет lirc, configure само его обнаружит. Если Всё прошло
+хорошо, <application>MPlayer</application> при старте напечатает сообщение,
+похожее на "<computeroutput>Setting up lirc support...</computeroutput>".
+Если произошла ошибка, он Вам сообщит. Если он не говорит ничего про LIRC,
+то поддержка LIRC не была скомпилирована. Вот так :-)
+</para>
+
+<para>
+Имя приложения для <application>MPlayer</application> &mdash; угадайте &mdash;
+<filename>mplayer</filename>.  Вы можете использовать все команды mplayer'а и
+даже можете использовать более одной команды, разделив их символами
+<literal>\n</literal>. Не забудьте включить флаг repeat[повтор] в
+<filename>.lircrc</filename>, когда это имеет смысл (перемещение, громкость
+и т.п.). Вот выдержка из моего <filename>.lircrc</filename>:
+</para>
+
+<programlisting>
+begin
+     button = VOLUME_PLUS
+     prog = mplayer
+     config = volume 1
+     repeat = 1
+end
+
+begin
+    button = VOLUME_MINUS
+    prog = mplayer
+    config = volume -1
+    repeat = 1
+end
+
+begin
+    button = CD_PLAY
+    prog = mplayer
+    config = pause
+end
+
+begin
+    button = CD_STOP
+    prog = mplayer
+    config = seek 0 1\npause
+end<!--
+--></programlisting>
+
+<para>
+Если Вам не нравится стандартное место Вашего конфигурационного файла lirc
+(<filename>~/.lircrc</filename>), используйте опцию <option>-lircconf
+<replaceable>filename</replaceable></option>, чтобы указать другой файл.
+</para>
+</sect2>
+
+
+<sect2 id="slave-mode">
+<title>Подчинённый (&quot;рабский&quot;) режим</title>
+<para>
+Наличие подчинённого режима позволяет Вам создавать простые приложения к
+<application>MPlayer</application>'у. Когда режим включён (опцией
+<option>-slave</option>), <application>MPlayer</application> читает со
+стандартного входа команды, разделяемые символом конца строки (\n).
+</para>
+</sect2>
+</sect1>
+
+
+<sect1 id="streaming">
+<title>Сетевые потоки и каналы</title>
+
+<para>
+<application>MPlayer</application> может проигрывать файлы по сети, используя
+HTTP, FTP, MMS или RTSP/RTP протокол.
+</para>
+
+<para>
+Проигрывание включается добавлением URL'а в командную строку.
+Также, <application>MPlayer</application> учитывает переменную среды
+<envar>http_proxy</envar> и использует прокси[proxy], если это возможно.
+Также можно заставить использовать прокси:
+<screen>mplayer http_proxy://proxy.micorsops.com:3128/http://micorsops.com:80/stream.asf</screen>
+</para>
+
+<para>
+<application>MPlayer</application> может считывать данные со стандартного входа
+(а <emphasis>не</emphasis> из поименованных каналов). Это может, например,
+использоваться при проигрывании файлов по FTP:
+<screen>wget ftp://micorsops.com/something.avi -O - | mplayer -</screen>
+</para>
+
+<note><para>
+Мы рекомендуем использовать КЭШ при проигрывании из сети:
+<screen>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</screen>
+</para></note>
+</sect1>
+
+<sect1 id="mpst" xreflabel="Удалённые потоки">
+<title>Удалённые потоки</title>
+
+<para>
+Удалённые потоки позволяют получить доступ к большинству поддерживаемых
+<application>MPlayer</application>'ом типам потоков с удалённой машины.
+Основное предназначение этой возможности &mdash; это прямой  доступ
+к CD или DVD приводу другого компьютера по сети (предполагается, что пропускной
+способности сети будет достаточно). С другой стороны, некоторые типы потоков
+(в настоящий момент это TV и MF) не могут использоваться удалённо, поскольку
+они выполнены на уровне демуксера. Это печально для MF, а вот TV всё равно
+потребовал бы ужасной пропускной способности сети.
+</para>
+
+<sect2 id="compile_mpst_server">
+<title>Компиляция сервера</title>
+<para>
+После компиляции <application>MPlayer</application>'а, перейдите в каталог
+<filename>TOOLS/netstream</filename> и выполните
+<application>make</application>, чтобы собрать сервер.
+Затем Вы можете скопировать файл <application>netstream</application>
+в нужное место Вашей системы (обычно это
+<filename class="directory">/usr/local/bin</filename> на Linux).
+</para>
+</sect2>
+
+<sect2 id="use_mpst">
+<title>Использование удалённых потоков</title>
+<para>
+Сначала Вы должны запустить сервер на машине, к которой Вы хотите получить
+удалённый доступ. В настоящий момент сервер чрезвычайно прост и не использует
+никаких аргументов командной строки, поэтому просто запускайте
+<filename>netstream</filename>. Теперь, например, Вы можете проиграть
+вторую дорожку VCD'шника на сервере:
+<screen>
+mplayer -cache 5000 mpst://servername/vcd://2
+</screen>
+Вы можете получить доступ к файлам на сервере:
+<screen>
+mplayer -cache 5000 mpst://servername//usr/local/movies/lol.avi
+</screen>
+Обратите внимание, что пути не начинающиеся с / будут относительными к каталогу,
+в котором запущен сервер. Использование кэша не требуется, но он будет очень
+полезен.
+</para>
+
+<para>
+Обратите внимание, что в настоящий момент сервер вообще не является безопасным.
+поэтому, не сообщайте о многочисленных эксплоитах[exploit], которые его
+используют. Лучше пришлите несколько (хороших) патчей, чтобы сделать его лучше,
+или начните писать свой сервер.
+</para>
+
+</sect2>
+
+</sect1>
+</chapter>
