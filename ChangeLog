@@ -1,6 +1,22 @@
 MPlayer (1.0)
 
-  pre4: "YAML Counter" Apr 27, 2004
+  pre5: "Niu ririsu" Mai 22, 2004
+
+    DOCS:
+    * small additions, corrections, updates all over the place
+    * audio output driver section added to the man page
+    * several bug fixes and improvements in the MEncoder documentation
+    * -vo winvidix documented
+
+    Ports:
+    * encrypted DVD playback on Windows fixed (again)
+    * Cygwin and MinGW now accept the same  -dvd-device syntax
+
+    Drivers:
+    * support for more Radeons (9800 XT among them) in VIDIX
+
+
+  pre4: "YAML Counter" Apr 28, 2004
 
     Security:
     * HTTP parser remote heap overflow vulnerability fixed (from 1.0pre3try2)
@@ -16,7 +32,7 @@ MPlayer (1.0)
     * Italian man page translation
     * DVD ripping guide
     * telecine/interlacing guide
-    * video out driver section added to the man page
+    * video output driver section added to the man page
     * XML build system rewritten - now supports building individual languages
     * miscellaneous updates all over the place
 
@@ -962,7 +978,7 @@ MPlayer (0.90)
     * various networking and mms:// fixes, live.com support improved
     * various v4l video capturing and audio capturing fixes, audio input layer
     * libmpdvdkit2 - based on libdvdcss 1.2.2 + libdvdread 0.9.3 + key cache
-    * alsa: iec958-init completly rewritten - better SP/DIF AC3 support
+    * alsa: iec958-init completely rewritten - better SP/DIF AC3 support
 
     GUI:
     * gui.conf locale bug fixed (hopefully)
