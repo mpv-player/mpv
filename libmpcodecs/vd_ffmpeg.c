@@ -303,9 +303,9 @@ static int init(sh_video_t *sh){
         } else {
 	    /* has extra slice header (demux_rm or rm->avi streamcopy) */
 	    unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
-	    ((uint32_t*)avctx->extradata)[0] = extrahdr[0];
-	    avctx->sub_id=
-	    ((uint32_t*)avctx->extradata)[1] = extrahdr[1];
+	    ((uint32_t*)avctx->extradata)[0] = be2me_32(extrahdr[0]);
+	    avctx->sub_id= extrahdr[1];
+	    ((uint32_t*)avctx->extradata)[1] = be2me_32(extrahdr[1]);
 	}
 
 //        printf("%X %X %d %d\n", extrahdr[0], extrahdr[1]);
