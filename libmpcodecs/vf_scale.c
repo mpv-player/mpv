@@ -53,6 +53,7 @@ static unsigned int outfmt_list[]={
     IMGFMT_411P,
     IMGFMT_Y800,
     IMGFMT_Y8,
+    IMGFMT_YUY2,
     0
 };
 
@@ -176,7 +177,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
 	vf->priv->w, vf->priv->h);
     vf->priv->ctx->swScale(vf->priv->ctx,mpi->planes,mpi->stride,0,mpi->h,dmpi->planes,dmpi->stride);
-    
+
     if(vf->priv->w==mpi->w && vf->priv->h==mpi->h){
 	// just conversion, no scaling -> keep postprocessing data
 	// this way we can apply pp filter to non-yv12 source using scaler
