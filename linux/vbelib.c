@@ -386,3 +386,25 @@ int vbeGetProtModeInfo(struct VesaProtModeInterface *pm_info)
   }
   return retval;
 }
+/* --------- Standard VGA stuff -------------- */
+int vbeWriteString(int x, int y, int attr, char *str)
+{
+  struct LRMI_regs r;
+  void *rm_space = NULL;
+  int retval;
+  memset(&r,0,sizeof(struct LRMI_regs));
+  r.ecx = strlen(str);
+  r.edx = ((y<<8)&0xff00)|(x&0xff);
+  r.ebx = attr;
+  if(!(rm_space = LRMI_alloc_real(r.ecx))) return VBE_OUT_OF_DOS_MEM;
+  r.es  = VirtToPhysSeg(rm_space);
+  r.ebp = VirtToPhysOff(rm_space);
+  memcpy(rm_space,str,r.ecx);
+  r.eax = 0x1300;
+  retval = VBE_LRMI_int(0x10,&r);
+  if(rm_space) LRMI_free_real(rm_space);
+  if(!retval) return VBE_VM86_FAIL;
+  retval = r.eax & 0xffff;
+  if(retval == 0x4f) retval = VBE_OK;
+  return retval;
+}

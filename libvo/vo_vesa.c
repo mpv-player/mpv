@@ -648,6 +648,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 				}
 			}
 	}
+	vbeWriteString(0,0,7,title);
 	return 0;
 }
 

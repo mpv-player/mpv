@@ -220,4 +220,8 @@ extern int vbeSetWindow(unsigned win_num,unsigned win_gran);
    Support of palette currently is not implemented.
 */ 
 extern int vbeGetProtModeInfo(struct VesaProtModeInterface *);
+
+/* Standard VGA stuff */
+int vbeWriteString(int x, int y, int attr, char *str);
+
 #endif
