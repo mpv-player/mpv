@@ -83,6 +83,18 @@ section for details.
 
 <qandaentry>
 <question><para>
+How can I build a 32 bit <application>MPlayer</application> on 64 bit Athlon?
+</para></question>
+<answer><para>
+Try the following configure options:
+<screen>
+./configure --target=athlon_xp --cc="gcc -m32" --as="as --32" --with-extralibdir=/usr/lib
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Compilation stops with an error message similar to this one:
 <screen>
     cfft.c: In function`passf2':
