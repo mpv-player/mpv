@@ -1469,10 +1469,10 @@ if(has_audio){
   printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
 
   // fixup audio buffer size:
-  if(outburst<MAX_OUTBURST){
-    sh_audio->a_buffer_size=sh_audio->audio_out_minsize+outburst;
-    printf("Audio out buffer size reduced to %d bytes\n",sh_audio->a_buffer_size);
-  }
+//  if(outburst<MAX_OUTBURST){
+//    sh_audio->a_buffer_size=sh_audio->audio_out_minsize+outburst;
+//    printf("Audio out buffer size reduced to %d bytes\n",sh_audio->a_buffer_size);
+//  }
 
 //  a_frame=-(audio_buffer_delay);
   a_frame=0;
