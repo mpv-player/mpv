@@ -1,6 +1,6 @@
 /******************************************************************************
  * ao_win32.c: Windows waveOut interface for MPlayer
- * Copyright (c) 2002 Sascha Sommer <saschasommer@freenet.de>.
+ * Copyright (c) 2002 - 2004 Sascha Sommer <saschasommer@freenet.de>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -220,6 +220,7 @@ static int write_waveOutBuffer(unsigned char* data,int len){
 	x=BUFFER_SIZE-buf_write_pos;          
     if(x>len) x=len;                   
     memcpy(current->lpData+buf_write_pos,data+len2,x); 
+    if(buf_write_pos==0)full_buffers++;
     len2+=x; len-=x;                 
 	buffered_bytes+=x; buf_write_pos+=x; 
 	//prepare header and write data to device
@@ -230,7 +231,6 @@ static int write_waveOutBuffer(unsigned char* data,int len){
 	if(buf_write_pos>=BUFFER_SIZE){        //buffer is full find next
        // block is full, find next!
        buf_write=(buf_write+1)%BUFFER_COUNT;  
-       ++full_buffers;                
 	   buf_write_pos=0;                 
     }                                 
   }
@@ -242,6 +242,7 @@ static int write_waveOutBuffer(unsigned char* data,int len){
 // return: number of bytes played
 static int play(void* data,int len,int flags)
 {
+	len = (len/ao_data.outburst)*ao_data.outburst;
 	return write_waveOutBuffer(data,len);
 }
 

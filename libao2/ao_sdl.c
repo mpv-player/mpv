@@ -66,12 +66,13 @@ static int write_buffer(unsigned char* data,int len){
     x=BUFFSIZE-buf_write_pos;
     if(x>len) x=len;
     memcpy(buffer[buf_write]+buf_write_pos,data+len2,x);
+    if (buf_write_pos==0)
+	++full_buffers;
     len2+=x; len-=x;
     buffered_bytes+=x; buf_write_pos+=x;
     if(buf_write_pos>=BUFFSIZE){
        // block is full, find next!
        buf_write=(buf_write+1)%NUM_BUFS;
-       ++full_buffers;
        buf_write_pos=0;
     }
   }
@@ -316,6 +317,7 @@ static int get_space(){
 // return: number of bytes played
 static int play(void* data,int len,int flags){
 
+	len = (len/ao_data.outburst)*ao_data.outburst;
 #if 0	
 	int ret;
 
