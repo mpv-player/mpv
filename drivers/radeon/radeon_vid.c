@@ -84,6 +84,7 @@ typedef struct bes_registers_s
   uint32_t y_x_end;
   uint32_t v_inc;
   uint32_t p1_blank_lines_at_top;
+  uint32_t p23_blank_lines_at_top;
   uint32_t vid_buf_pitch0_value;
   uint32_t vid_buf_pitch1_value;
   uint32_t p1_x_start_end;
@@ -99,6 +100,7 @@ typedef struct bes_registers_s
 
   uint32_t p1_v_accum_init;
   uint32_t p1_h_accum_init;
+  uint32_t p23_v_accum_init;
   uint32_t p23_h_accum_init;
   uint32_t scale_cntl;
   uint32_t exclusive_horz;
@@ -127,6 +129,7 @@ static video_registers_t vregs[] =
   { OV0_Y_X_END, 0 },
   { OV0_V_INC, 0 },
   { OV0_P1_BLANK_LINES_AT_TOP, 0 },
+  { OV0_P23_BLANK_LINES_AT_TOP, 0 },
   { OV0_VID_BUF_PITCH0_VALUE, 0 },
   { OV0_VID_BUF_PITCH1_VALUE, 0 },
   { OV0_P1_X_START_END, 0 },
@@ -140,6 +143,7 @@ static video_registers_t vregs[] =
   { OV0_VID_BUF5_BASE_ADRS, 0 },
   { OV0_P1_V_ACCUM_INIT, 0 },
   { OV0_P1_H_ACCUM_INIT, 0 },
+  { OV0_P23_V_ACCUM_INIT, 0 },
   { OV0_P23_H_ACCUM_INIT, 0 },
   { OV0_SCALE_CNTL, 0 },
   { OV0_EXCLUSIVE_HORZ, 0 },
@@ -156,7 +160,7 @@ static uint32_t radeon_vid_in_use = 0;
 
 static uint8_t *radeon_mmio_base = 0;
 static uint32_t radeon_mem_base = 0; 
-#define RADEON_SRC_BASE 0x1000000ULL /* this driver uses all video memory */
+static int32_t radeon_overlay_off = 0;
 
 static uint32_t radeon_ram_size = 0;
 
@@ -273,8 +277,11 @@ RTRACE("radeon_vid: OV0: p1_v_accum_init=%x p1_h_accum_init=%x p23_h_accum_init=
         case IMGFMT_YVU9:  bes_flags |= SCALER_SOURCE_YUV9; break;
 	case IMGFMT_IYUV:  bes_flags |= SCALER_SOURCE_YUV12; break;
 
-	case IMGFMT_YV12:
 	case IMGFMT_I420:
+	case IMGFMT_YV12:  bes_flags |= SCALER_SOURCE_YUV12 |
+					SCALER_PIX_EXPAND |
+					SCALER_Y2R_TEMP;
+			   break;
 	case IMGFMT_YUY2:
 	default:           bes_flags |= SCALER_SOURCE_VYUY422; break;
     }
@@ -309,8 +316,8 @@ static void radeon_vid_start_video( void )
 
 static int radeon_vid_init_video( mga_vid_config_t *config )
 {
-    uint32_t tmp,src_w,pitch,h_inc,step_by,left,top;
-
+    uint32_t tmp,src_w,pitch,h_inc,step_by,left,leftUV,top;
+    int is_420;
 RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u) dest(%u:%ux%u:%u) frame_size=%u num_frames=%u\n"
 	,(uint32_t)config->version
 	,(uint32_t)config->format
@@ -348,6 +355,8 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
 		printk( "radeon_vid: Unsupported pixel format: 0x%X\n",config->format);
 		return -1;
     }
+    is_420 = 0;
+    if(config->format == IMGFMT_YV12 || config->format == IMGFMT_I420) is_420 = 1;
     switch(config->format)
     {
         default:
@@ -366,7 +375,6 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
         case IMGFMT_RGB32:
 	case IMGFMT_BGR32: pitch = ((XXX_WIDTH*4) + 15) & ~15; break;
     }
-    /*pitch 9c0 ->4e0 */
     
     left = XXX_SRC_X << 16;
     top = XXX_SRC_Y << 16;
@@ -384,13 +392,33 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
 
     /* keep everything in 16.16 */
 
-    besr.vid_buf0_base_adrs = RADEON_SRC_BASE; /* I guess that offset 0 is o'k */
-    besr.vid_buf0_base_adrs += ((left & ~7) << 1)&0xfffffff0;
-    besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
-    besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
-    besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
-    besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs;
-    besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
+    if(is_420)
+    {
+        uint32_t dstPitch,d1line,d2line,d3line;
+	dstPitch = (XXX_WIDTH + 31) & ~31;  /* of luma */
+	d1line = top * dstPitch;
+	d2line = (XXX_HEIGHT * dstPitch) + ((top >> 1) * (dstPitch >> 1));
+	d3line = d2line + ((XXX_HEIGHT >> 1) * (dstPitch >> 1));
+	d1line += (left >> 16) & ~15;
+	d2line += (left >> 17) & ~15;
+	d3line += (left >> 17) & ~15;
+        besr.vid_buf0_base_adrs = (radeon_overlay_off + d1line) & 0xfffffff0;
+        besr.vid_buf1_base_adrs = ((radeon_overlay_off + d2line) & 0xfffffff0) | 0x00000001;
+        besr.vid_buf2_base_adrs = ((radeon_overlay_off + d3line) & 0xfffffff0) | 0x00000001;
+        besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs;
+        besr.vid_buf4_base_adrs = besr.vid_buf1_base_adrs;
+        besr.vid_buf5_base_adrs = besr.vid_buf2_base_adrs;
+    }
+    else
+    {
+      besr.vid_buf0_base_adrs = radeon_overlay_off;
+      besr.vid_buf0_base_adrs += ((left & ~7) << 1)&0xfffffff0;
+      besr.vid_buf1_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
+      besr.vid_buf2_base_adrs = besr.vid_buf0_base_adrs;
+      besr.vid_buf3_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
+      besr.vid_buf4_base_adrs = besr.vid_buf0_base_adrs;
+      besr.vid_buf5_base_adrs = besr.vid_buf0_base_adrs + config->frame_size;
+    }
 
     tmp = (left & 0x0003ffff) + 0x00028000 + (h_inc << 3);
     besr.p1_h_accum_init = ((tmp <<  4) & 0x000f8000) |
@@ -403,21 +431,27 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
     tmp = (top & 0x0000ffff) + 0x00018000;
     besr.p1_v_accum_init = ((tmp << 4) & 0x03ff8000) | 0x00000001;
 
+
+    tmp = ((top >> 1) & 0x0000ffff) + 0x00018000;
+    besr.p23_v_accum_init = is_420 ? ((tmp << 4) & 0x01ff8000) | 0x00000001 : 0;
+
+    leftUV = (left >> 17) & 7;
     left = (left >> 16) & 7;
     besr.h_inc = h_inc | ((h_inc >> 1) << 16);
     besr.step_by = step_by | (step_by << 8);
     besr.y_x_start = (config->x_org+8) | (config->y_org << 16); /*5c008->5d009*/
     besr.y_x_end = (config->x_org + config->dest_width+8) | ((config->y_org + config->dest_height) << 16);
     besr.p1_blank_lines_at_top = 0x00000fff | ((config->src_height - 1) << 16);
+    besr.p23_blank_lines_at_top = is_420 ? 0x000007ff | ((((config->src_height+1)>>1) - 1) << 16) : 0;
     besr.vid_buf_pitch0_value = pitch;
-    besr.vid_buf_pitch1_value = pitch;
+    besr.vid_buf_pitch1_value = is_420 ? pitch/2 : pitch;
 RTRACE("radeon_vid: BES: v_inc=%x h_inc=%x step_by=%x\n",besr.v_inc,besr.h_inc,besr.step_by);
 RTRACE("radeon_vid: BES: vid_buf0_basey=%x\n",besr.vid_buf0_base_adrs);
 RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x\n"
 ,besr.y_x_start,besr.y_x_end,besr.p1_blank_lines_at_top,besr.vid_buf_pitch0_value);
     besr.p1_x_start_end = (config->src_width + left - 1) | (left << 16);
-    left >>= 1; src_w=config->src_width >> 1;
-    besr.p2_x_start_end = (src_w + left - 1) | (left << 16);
+    src_w=config->src_width >> 1;
+    besr.p2_x_start_end = (src_w + left - 1) | (leftUV << 16);
     besr.p3_x_start_end = besr.p2_x_start_end;
     return 0;
 }
@@ -429,17 +463,16 @@ static void radeon_vid_frame_sel(int frame)
     {
       default:
       case 0:  off = besr.vid_buf0_base_adrs; break;
-      case 1:  off = besr.vid_buf1_base_adrs; break;
-      case 2:  off = besr.vid_buf2_base_adrs; break;
+      case 1:  off = besr.vid_buf3_base_adrs; break;
+      case 2:  off = besr.vid_buf0_base_adrs; break;
       case 3:  off = besr.vid_buf3_base_adrs; break;
-      case 4:  off = besr.vid_buf4_base_adrs; break;
-      case 5:  off = besr.vid_buf5_base_adrs; break;
+      case 4:  off = besr.vid_buf0_base_adrs; break;
+      case 5:  off = besr.vid_buf3_base_adrs; break;
     }
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	off);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
-  
 }
 
 static int video_on = 0;
@@ -458,31 +491,37 @@ static int radeon_vid_ioctl(struct inode *inode, struct file *file, unsigned int
  			if(copy_from_user(&radeon_config,(mga_vid_config_t*) arg,sizeof(mga_vid_config_t)))
 			{
 				printk( "radeon_vid: failed copy from userspace\n");
-				return(-EFAULT);
+				return -EFAULT;
 			}
 			if(radeon_config.version != MGA_VID_VERSION){
 				printk( "radeon_vid: incompatible version! driver: %X  requested: %X\n",MGA_VID_VERSION,radeon_config.version);
-				return(-EFAULT);
+				return -EFAULT;
 			}
 
 			if(radeon_config.frame_size==0 || radeon_config.frame_size>1024*768*2){
 				printk( "radeon_vid: illegal frame_size: %d\n",radeon_config.frame_size);
-				return(-EFAULT);
+				return -EFAULT;
 			}
 
 			if(radeon_config.num_frames<1 || radeon_config.num_frames>4){
 				printk( "radeon_vid: illegal num_frames: %d\n",radeon_config.num_frames);
-				return(-EFAULT);
+				return -EFAULT;
 			}
 
                         /* FIXME: Fake of G400 ;) or would be better G200 ??? */
 			radeon_config.card_type = 0;
 			radeon_config.ram_size = radeon_ram_size;
-
+			radeon_overlay_off = radeon_ram_size*0x100000 - radeon_config.frame_size*radeon_config.num_frames;
+			radeon_overlay_off &= 0xffff0000;
+			if(radeon_overlay_off < 0){
+			    printk("radeon_vid: not enough video memory. Need: %u has: %u\n",radeon_config.frame_size*radeon_config.num_frames,radeon_ram_size*0x100000);
+			    return -EFAULT;
+			}
+			RTRACE("radeon_vid: using video overlay at offset %p\n",radeon_overlay_off);
 			if (copy_to_user((mga_vid_config_t *) arg, &radeon_config, sizeof(mga_vid_config_t)))
 			{
 				printk( "radeon_vid: failed copy to userspace\n");
-				return(-EFAULT);
+				return -EFAULT;
 			}
 			return radeon_vid_init_video(&radeon_config);
 		break;
@@ -577,7 +616,7 @@ static int radeon_vid_mmap(struct file *file, struct vm_area_struct *vma)
 {
 
 	RTRACE( "radeon_vid: mapping video memory into userspace\n");
-	if(remap_page_range(vma->vm_start, radeon_mem_base + RADEON_SRC_BASE,
+	if(remap_page_range(vma->vm_start, radeon_mem_base + radeon_overlay_off,
 		 vma->vm_end - vma->vm_start, vma->vm_page_prot)) 
 	{
 		printk( "radeon_vid: error mapping video memory\n");
