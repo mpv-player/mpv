@@ -301,9 +301,12 @@ while(!stream_eof(demuxer->stream)){
         for( i=0 ; i<stream_count && ptr<((char*)object+objh.size) ; i++ ) {
           stream_id = *(uint16_t*)ptr;
           ptr += sizeof(uint16_t);
-          printf("   stream id=[0x%x][%u]\n", stream_id, stream_id );
           max_bitrate = *(uint32_t*)ptr;
           ptr += sizeof(uint32_t);
+#ifdef WORDS_BIGENDIAN
+	  stream_id=bswap_16(stream_id); max_bitrate=bswap_32(max_bitrate);
+#endif
+          printf("   stream id=[0x%x][%u]\n", stream_id, stream_id );
           printf("   max bitrate=[0x%x][%u]\n", max_bitrate, max_bitrate );
           streams[2*i] = stream_id;
           streams[2*i+1] = max_bitrate;
