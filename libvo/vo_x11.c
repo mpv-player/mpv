@@ -27,7 +27,7 @@ LIBVO_EXTERN( x11 )
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
-#include <X11/extensions/XShm.h>
+//#include <X11/extensions/XShm.h>
 #ifdef HAVE_XF86VM
 #include <X11/extensions/xf86vmode.h>
 #endif
@@ -74,6 +74,8 @@ static int X_already_started=0;
 
 //static int vo_dwidth,vo_dheight;
 
+static int Flip_Flag;
+
 #define SH_MEM
 
 #ifdef SH_MEM
@@ -91,8 +93,6 @@ static int Quiet_Flag;
 static XShmSegmentInfo Shminfo[1];
 static int gXErrorFlag;
 static int CompletionType=-1;
-
-static int Flip_Flag;
 
 static void InstallXErrorHandler()
 {
