@@ -44,8 +44,7 @@
 #include <zlib.h>
 #endif
 
-// inclusion of fcntl.h cause cygwin gcc crash
-#ifndef __CYGWIN__
+#ifndef _FCNTL_H
 #include <fcntl.h>
 #endif
 
