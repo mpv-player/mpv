@@ -1,9 +1,12 @@
 mplayer (1.0)
 
-  pre4: "New Year Release"
+  pre4: "Niu ririsu"
 
     Security:
     * HTTP parser remote heap overflow vulnerability fixed
+    * Real RTSP boundary checks
+    * Matroska possible buffer overflow
+    * Malicious CD TOC oveerflow in CDDB code
 
     DOCS:
     * new Copyright file covers files from other projects and their licenses
@@ -30,6 +33,7 @@ mplayer (1.0)
     * enable SSE optimizations under MinGW
     * SSE support under OpenBSD
     * Altivec support under NetBSD
+    * GCC 3.4 support (due to changed behaviour in ASM code snippets)
 
     Demuxers:
     * Matroska containing RealVideo works better
