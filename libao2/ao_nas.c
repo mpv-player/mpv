@@ -320,6 +320,7 @@ static int init(int rate,int channels,int format,int flags)
 	char *server;
 
 	nas_data=malloc(sizeof(struct ao_nas_data));
+	memset(nas_data, 0, sizeof(struct ao_nas_data));
 
 	printf("ao2: %d Hz  %d chans  %s\n",rate,channels,
 		audio_out_format_name(format));
