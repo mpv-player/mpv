@@ -42,6 +42,8 @@ char *audio_out_format_name(int format)
 	case AFMT_S32_BE:
 	    return("Signed 32-bit (Big-Endian)");
 #endif
+	case AFMT_FLOAT:
+	    return("Floating Point");
     }
     return("Unknown");
 }
@@ -50,6 +52,12 @@ char *audio_out_format_name(int format)
 int audio_out_format_bits(int format){
     switch (format)
     {
+	case AFMT_S16_LE:
+	case AFMT_S16_BE:
+	case AFMT_U16_LE:
+	case AFMT_U16_BE: 
+	return 16;//16 bits
+
 /*
   the following two formats are not available with old linux kernel
   headers (e.g. in 2.2.16)
@@ -62,12 +70,8 @@ int audio_out_format_bits(int format){
 	case AFMT_S32_BE:
 	return 32;
 #endif
-
-	case AFMT_U16_LE:
-	case AFMT_U16_BE: 
-	case AFMT_S16_LE:
-	case AFMT_S16_BE:
-	return 16;//16 bits
+	case AFMT_FLOAT:
+	return 32;
 	
 	case AFMT_MU_LAW:
 	case AFMT_A_LAW:

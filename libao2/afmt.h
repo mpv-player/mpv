@@ -47,3 +47,7 @@
 #  define AFMT_S32_NE	AFMT_S32_LE
 # endif
 #endif
+
+#ifndef AFMT_FLOAT
+# define AFMT_FLOAT               0x00004000
+#endif
