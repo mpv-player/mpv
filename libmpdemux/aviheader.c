@@ -222,7 +222,7 @@ while(1){
       if(verbose>=1) print_strh(&h);
       break; }
     case mmioFOURCC('i', 'n', 'd', 'x'): {
-      DWORD i;
+      uint32_t i;
       unsigned msize = 0;
       avisuperindex_chunk *s;
       // FIXME: do not use odml index for files that don't need it.
@@ -334,7 +334,7 @@ while(1){
     }
     case mmioFOURCC('v', 'p', 'r', 'p'): {
 	VideoPropHeader *vprp = malloc(chunksize);
-	int i;
+	unsigned int i;
 	stream_read(demuxer->stream, (void*)vprp, chunksize);
 	le2me_VideoPropHeader(vprp);
 	chunksize -= sizeof(*vprp)-sizeof(vprp->FieldInfo);
