@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.31 -->
+<!-- synced with 1.32 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -435,12 +435,20 @@ Nicholas Det at Genesi stworzył potężny port <application>MPlayera
 
 <para>
 Pobierz go z <ulink url="http://www.morphzone.org/">MorphZone</ulink>:
+<itemizedlist>
+<listitem><para>
 <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=90">
 pakiet binarny <application>MPlayer</application> 0.91</ulink>
+</para></listitem>
+<listitem><para>
 <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=91">
 źródła <application>MPlayera</application> 0.91</ulink>
+</para></listitem>
+<listitem><para>
 <ulink url="http://www.morphzone.org/modules/mydownloads/singlefile.php?lid=912">
 pakiet binarny <application>MEncodera</application> 0.91</ulink>
+</para></listitem>
+</itemizedlist>
 </para>
 </sect1>
 
