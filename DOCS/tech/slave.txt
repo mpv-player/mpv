@@ -168,7 +168,7 @@ gui_[loadfile|loadsubtitle|about|play|stop|gui_playlist|gui_preferences|skinbrow
 forced_subs_only
     Display forced subtitles only.
 
-dvb_set_channel <value>
+dvb_set_channel <channel_number> <card_number>
     Set DVB channel.
 
 screenshot
