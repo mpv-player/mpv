@@ -304,6 +304,11 @@ Dominik Mierzejewski <dominik@rangers.eu.org>
     * compiler warning fixes
     * official RPM packages
 
+Diego Biurrun <diego@biurrun.de>
+    * documentation reviewer and co-maintainer
+    * README
+    * random trivial fixes
+
 Sascha Sommer <saschasommer@freenet.de>
     * directx VO driver
 
@@ -404,7 +409,7 @@ Vivien Chappelier, Damien Vincent
     * libFAME authors [fast mpeg-1 encoder, used by -vo mpegpes/-vo dxr3]
 
 _____________________________________________________
-Their code is not used in current the player version,
+Their code is not used in the current player version,
 but I've got some ideas or other technical help from:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
