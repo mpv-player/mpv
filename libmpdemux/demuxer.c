@@ -13,12 +13,6 @@
 
 #include "stream.h"
 #include "demuxer.h"
-
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-
-#include "codec-cfg.h"
 #include "stheader.h"
 
 void free_demuxer_stream(demux_stream_t *ds){

@@ -12,14 +12,8 @@ extern int verbose; // defined in mplayer.c
 
 #include "stream.h"
 #include "demuxer.h"
-
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-
-#include "codec-cfg.h"
 #include "stheader.h"
-//#include "aviheader.h"
+
 #include "asf.h"
 
 #ifdef ARCH_X86

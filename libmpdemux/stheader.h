@@ -1,11 +1,8 @@
 // Stream headers:
 
-/*
-typedef struct {
-  int driver;
-    // codec descriptor from codec.conf
-} codecinfo_t;
-*/
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
 
 #ifdef HAVE_OGGVORBIS
 #include <math.h>

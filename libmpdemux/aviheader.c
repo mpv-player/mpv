@@ -8,14 +8,9 @@
 
 #include "stream.h"
 #include "demuxer.h"
-
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-
-#include "codec-cfg.h"
-#include "bswap.h"
 #include "stheader.h"
+
+#include "bswap.h"
 #include "aviheader.h"
 
 #define MIN(a,b) (((a)<(b))?(a):(b))

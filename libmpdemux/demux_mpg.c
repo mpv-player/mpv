@@ -13,6 +13,7 @@
 #include "stream.h"
 #include "demuxer.h"
 #include "parse_es.h"
+#include "stheader.h"
 
 //#define MAX_PS_PACKETSIZE 2048
 #define MAX_PS_PACKETSIZE (224*1024)
@@ -32,17 +33,6 @@ static unsigned int read_mpeg_timestamp(stream_t *s,int c){
   mp_dbg(MSGT_DEMUX,MSGL_DBG3,"{%d}",pts);
   return pts;
 }
-
-//static unsigned int packet_start_pos=0;
-
-//extern void *new_sh_audio(demuxer_t *demux,int id);
-//extern void *new_sh_video(demuxer_t *demux,int id);
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-
-#include "codec-cfg.h"
-#include "stheader.h"
 
 static int demux_mpg_read_packet(demuxer_t *demux,int id){
   int d;

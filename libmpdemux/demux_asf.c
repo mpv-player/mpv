@@ -308,14 +308,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
     return 0;
 }
 
-
-#include "wine/mmreg.h"
-#include "wine/avifmt.h"
-#include "wine/vfw.h"
-
-#include "codec-cfg.h"
 #include "stheader.h"
-
 
 void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
