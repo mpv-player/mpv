@@ -83,6 +83,7 @@ struct config conf[]={
 	{"ovc", ovc_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2},
+	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0},
 	
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
 #ifdef HAVE_MP3LAME
