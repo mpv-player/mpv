@@ -237,6 +237,8 @@ static int init(int rate_hz, int channels, int format, int flags)
 /* close audio device */
 static void uninit()
 {
+    int err;
+
     if ((err = snd_pcm_playback_drain(alsa_handler)) < 0)
     {
 	printf("alsa-uninit: playback drain error: %s\n", snd_strerror(err));
@@ -301,6 +303,7 @@ static void audio_pause()
 /* resume playing, after audio_pause() */
 static void audio_resume()
 {
+    int err;
     if ((err = snd_pcm_channel_prepare(alsa_handler, SND_PCM_CHANNEL_PLAYBACK)) < 0)
     {
 	printf("alsa-resume: channel prepare error: %s\n", snd_strerror(err));
