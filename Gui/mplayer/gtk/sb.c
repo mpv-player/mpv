@@ -2,6 +2,8 @@
 #include <sys/stat.h>
 #include <glob.h>
 #include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include "sb.h"
 #include "../../events.h"
