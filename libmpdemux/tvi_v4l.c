@@ -492,7 +492,7 @@ static int init(priv_t *priv)
     /* init v4l audio even when we don't capture */
     init_v4l_audio(priv);
 
-    if (!priv->capability.audios) tv_param_noaudio = 1;
+    if (!priv->capability.audios && !tv_param_force_audio) tv_param_noaudio = 1;
 
     /* audio init */
     if (!tv_param_noaudio) {

@@ -227,6 +227,7 @@ struct config tvopts_conf[]={
 	{"treble", &tv_param_treble, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
 	{"balance", &tv_param_balance, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
 	{"forcechan", &tv_param_forcechan, CONF_TYPE_INT, CONF_RANGE, 1, 2, NULL},
+	{"forceaudio", &tv_param_force_audio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #ifdef HAVE_ALSA9
 	{"alsa", &tv_param_alsa, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif

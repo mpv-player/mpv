@@ -31,6 +31,7 @@ extern int tv_param_bass;
 extern int tv_param_treble;
 extern int tv_param_balance;
 extern int tv_param_forcechan;
+extern int tv_param_force_audio;
 #ifdef HAVE_ALSA9
 extern int tv_param_alsa;
 #endif
