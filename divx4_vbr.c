@@ -23,6 +23,9 @@
 
 #include "divx4_vbr.h"
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 //#include "transcode.h"
 
 #define FALSE 0
@@ -201,7 +204,7 @@ int VbrControl_init_2pass_vbr_encoding(const char *filename, int bitrate, double
 		
 		m_vFrames = (entry*)malloc(iNumFrames*sizeof(entry));
 		if (!m_vFrames) 
-		{	printf("out of memory");
+		{	mp_msg(MSGT_FIXME, MSGL_FIXME,MSGTR_OutOfMemory);
 			return -2; //TC_EXPORT_ERROR;
 		}
 			
@@ -228,9 +231,7 @@ int VbrControl_init_2pass_vbr_encoding(const char *filename, int bitrate, double
 	if(desired_bits<=non_text_bits)
 	{
 /*		char s[200];*/
-		printf("Specified bitrate is too low for this clip.\n"
-			"Minimum possible bitrate for the clip is %.0f kbps. Overriding\n"
-			"user-specified value.\n",
+		mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_OverridingTooLowBitrate,
 				(float)(non_text_bits*framerate/(int64_t)iNumFrames));
 
 		desired_bits=non_text_bits*3/2;

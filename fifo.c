@@ -7,7 +7,7 @@ static int keyb_fifo_get=-1;
 
 static void make_pipe(int* pr,int* pw){
   int temp[2];
-  if(pipe(temp)!=0) printf("Cannot make PIPE!\n");
+  if(pipe(temp)!=0) mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_CannotMakePipe);
   *pr=temp[0];
   *pw=temp[1];
 }

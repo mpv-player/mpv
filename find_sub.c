@@ -12,6 +12,9 @@
 #include "libvo/sub.h"
 #include "subreader.h"
 
+#include "mp_msg.h"
+#include "help_mp.h"
+
 static int current_sub=0;
 
 //static subtitle* subtitles=NULL;
@@ -144,7 +147,7 @@ void find_sub(sub_data* subd,int key){
       }
     }
     
-    printf("SUB ERROR:  %d  ?  %d --- %d  [%d]  \n",key,(int)vo_sub->start,(int)vo_sub->end,current_sub);
+    mp_msg(MSGT_FIXME,MSGL_FIXME,"SUB ERROR:  %d  ?  %d --- %d  [%d]  \n",key,(int)vo_sub->start,(int)vo_sub->end,current_sub);
 
     vo_sub=NULL; // no sub here
 }

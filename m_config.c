@@ -11,6 +11,7 @@
 #include "m_config.h"
 #include "m_option.h"
 #include "mp_msg.h"
+#include "help_mp.h"
 
 m_config_t*
 m_config_new(void) {
@@ -104,7 +105,7 @@ m_config_pop(m_config_t* config) {
     if(co->flags & M_CFG_OPT_ALIAS)
       continue;
     if(co->slots->lvl > config->lvl)
-      mp_msg(MSGT_CFGPARSER, MSGL_WARN,"Too old save slot found from lvl %d : %d !!!\n",config->lvl,co->slots->lvl);
+      mp_msg(MSGT_CFGPARSER, MSGL_WARN,MSGTR_SaveSlotTooOld,config->lvl,co->slots->lvl);
     
     while(co->slots->lvl >= config->lvl) {
       m_option_free(co->opt,co->slots->data);
@@ -239,11 +240,11 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 
   // Check if this option isn't forbiden in the current mode
   if((config->mode == M_CONFIG_FILE) && (co->opt->flags & M_OPT_NOCFG)) {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"The %s option can't be used in a config file\n",arg);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_InvalidCfgfileOption,arg);
     return M_OPT_INVALID;
   }
   if((config->mode == M_COMMAND_LINE) && (co->opt->flags & M_OPT_NOCMD)) {
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"The %s option can't be used on the command line\n",arg);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_InvalidCmdlineOption,arg);
     return M_OPT_INVALID;
   }
 
@@ -264,11 +265,11 @@ m_config_parse_option(m_config_t *config, char* arg, char* param,int set) {
 	sr = m_config_parse_option(config,n,lst[2*i+1],set);
 	if(sr < 0){
 	  if(sr == M_OPT_UNKNOWN){
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Error: option '%s' has no suboption '%s'\n",co->name,lst[2*i]);
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_InvalidSuboption,co->name,lst[2*i]);
 	    r = M_OPT_INVALID;
 	  } else
 	  if(sr == M_OPT_MISSING_PARAM){
-	    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Error: suboption '%s' of '%s' must have a parameter!\n",lst[2*i],co->name);
+	    mp_msg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_MissingSuboptionParameter,lst[2*i],co->name);
 	    r = M_OPT_INVALID;
 	  } else
 	    r = sr;
@@ -305,7 +306,7 @@ m_config_check_option(m_config_t *config, char* arg, char* param) {
   mp_msg(MSGT_CFGPARSER, MSGL_DBG2,"Checking %s=%s\n",arg,param);
   r=m_config_parse_option(config,arg,param,0);
   if(r==M_OPT_MISSING_PARAM){
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Error: option '%s' must have a parameter!\n",arg);
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,MSGTR_MissingOptionParameter,arg);
     return M_OPT_INVALID;
   }
   return r;
@@ -351,7 +352,7 @@ m_config_print_option_list(m_config_t *config) {
 
   if(!config->opts) return;
 
-  printf("\n Name                 Type            Min        Max      Global  CL    Cfg\n\n");
+  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_OptionListHeader);
   for(co = config->opts ; co ; co = co->next) {
     m_option_t* opt = co->opt;
     if(opt->type->flags & M_OPT_TYPE_HAS_CHILD) continue;
@@ -363,7 +364,7 @@ m_config_print_option_list(m_config_t *config) {
       sprintf(max,"%-8.0f",opt->max);
     else
       strcpy(max,"No");
-    printf(" %-20.20s %-15.15s %-10.10s %-10.10s %-3.3s   %-3.3s   %-3.3s\n",
+    mp_msg(MSGT_FIXME, MSGL_FIXME, " %-20.20s %-15.15s %-10.10s %-10.10s %-3.3s   %-3.3s   %-3.3s\n",
 	   co->name,
 	   co->opt->type->name,
 	   min,
@@ -373,5 +374,5 @@ m_config_print_option_list(m_config_t *config) {
 	   opt->flags & CONF_NOCFG ? "No" : "Yes");
     count++;
   }
-  printf("\nTotal: %d options\n",count);
+  mp_msg(MSGT_FIXME, MSGL_FIXME, MSGTR_TotalOptions,count);
 }

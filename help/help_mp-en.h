@@ -430,6 +430,25 @@ static char help_text[]=
 #define MSGTR_CodecDefinitionIncorrect "Codec is not defined correctly."
 #define MSGTR_OutdatedCodecsConf "This codecs.conf is too old and incompatible with this MPlayer release!"
 
+// divx4_vbr.c:
+#define MSGTR_OutOfMemory "out of memory"
+#define MSGTR_OverridingTooLowBitrate "Specified bitrate is too low for this clip.\n"\
+"Minimum possible bitrate for the clip is %.0f kbps. Overriding\n"\
+"user-specified value.\n"
+
+// fifo.c
+#define MSGTR_CannotMakePipe "Cannot make PIPE!\n"
+
+// m_config.c
+#define MSGTR_SaveSlotTooOld "Too old save slot found from lvl %d: %d !!!\n"
+#define MSGTR_InvalidCfgfileOption "The %s option can't be used in a config file\n"
+#define MSGTR_InvalidCmdlineOption "The %s option can't be used on the command line\n"
+#define MSGTR_InvalidSuboption "Error: option '%s' has no suboption '%s'\n"
+#define MSGTR_MissingSuboptionParameter "Error: suboption '%s' of '%s' must have a parameter!\n"
+#define MSGTR_MissingOptionParameter "Error: option '%s' must have a parameter!\n"
+#define MSGTR_OptionListHeader "\n Name                 Type            Min        Max      Global  CL    Cfg\n\n"
+#define MSGTR_TotalOptions "\nTotal: %d options\n"
+
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Device '%s' not found.\n"
 #define MSGTR_ErrTrackSelect "Error selecting VCD track."
