@@ -18,7 +18,6 @@ mplayer \- Movie Player for Linux
 .RB [ \-vid\ id ]
 .RB [ \-fps\ rate ]
 .RB [ \-mc\ seconds/5f ]
-.RB [ \-afm\ audio\ decoder ]
 .RB [ \-fs\ ]
 .RB [ \-vm\ ]
 .RB [ \-zoom\ ]
@@ -54,6 +53,10 @@ mplayer \- Movie Player for Linux
 .RB [ \-display\ name ]
 .RB [ \-unicode ]
 .RB [ \-fsmode\ mode ]
+.RB [ \-vc\ video\ codec\ name ]
+.RB [ \-ac\ audio\ codec\ name ]
+.RB [ \-vfm\ video\ codec\ family ]
+.RB [ \-afm\ audio\ codec\ family ]
 .I - or file
 .PP
 .SH DESCRIPTION
@@ -169,13 +172,36 @@ specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the 
 .I NOTE
 These options can help you solve your particular problem.. Also, see the DOCS!
 .TP
-.B \-afm <1-5>
-force audio format  1:MPEG 2:PCM 3:AC3 4:Win32 5:aLaw
+.B \-vc <name>
+force usage of a specific video codec, according to its name in codecs.conf,
+for example :
 
-.I NOTE
-With DivX AVIs with MP3 audio, you can choose whether to use MP3LIB (option 1),
-or Win32 DLL l3codeca.acm (option 4) (default). On CPUs with the 3DNow!
-instruction set, the first gives more performance. Your mileage may vary.
+    -vc divx       use VFW DivX codec
+    -vc divxds     use DirectShow DivX codec
+    -vc ffdivx     use libavcodec's DivX codec
+    -vc divx4      use ProjectMayo's DivX codec
+.TP
+.B \-ac <name>
+force usage of a specific audio codec, according to its name in codecs.conf,
+for example :
+
+    -ac mp3        use libmp3 MP3 codec
+    -ac mp3acm     use l3codeca.acm MP3 codec
+    -ac ac3        use AC3 codec
+.TP
+.B \-vfm <1-5>
+force usage of a specific codec FAMILY. For example:
+    2 : use VFW (Win32) codecs
+    4 : use DirectShow (Win32) codecs
+    5 : use libavcodec codecs
+.TP
+.B \-afm <1-5>
+force usage of a specific audio format. For example:
+    1 : MPEG
+    2 : PCM
+    3 : AC3
+    4 : Win32
+    5 : aLaw
 .TP
 .B \-sb\ position
 seek to byte position
@@ -275,9 +301,6 @@ to display on. For example : -display xtest.localdomain:0
 .B \-unicode
 tells MPlayer to handle the subtitle file (with -sub option) as UNICODE.
 Contrary: -nounicode
-.TP
-.B \-lircconf\ configfile
-specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc
 .TP
 .B \-fsmode\ mode
 This option workarounds some problems when using specific windowmanagers and
