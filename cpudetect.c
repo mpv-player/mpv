@@ -135,6 +135,7 @@ void GetCpuCaps( CpuCaps *caps)
             regs[3] == 0x69746e65 &&
             regs[2] == 0x444d4163) {
 		do_cpuid(0x80000000, regs);
+		printf("AMD cpuid-level: 0x%X\n",regs[0]);
 		if (regs[0]>=0x80000001) {
 			do_cpuid(0x80000001, regs2);
 			caps->hasMMX  = (regs2[3] & (1 << 23 )) >> 23; // 0x0800000
