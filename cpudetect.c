@@ -9,7 +9,7 @@ CpuCaps gCpuCaps;
 #endif
 #include <stdlib.h>
 
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 
 #include <stdio.h>
 #include <string.h>
@@ -47,25 +47,25 @@ static void check_os_katmai_support( void );
 // return TRUE if cpuid supported
 static int has_cpuid()
 {
-	int a, c;
+	long a, c;
 
 // code from libavcodec:
     __asm__ __volatile__ (
                           /* See if CPUID instruction is supported ... */
                           /* ... Get copies of EFLAGS into eax and ecx */
                           "pushf\n\t"
-                          "popl %0\n\t"
-                          "movl %0, %1\n\t"
+                          "pop %0\n\t"
+                          "mov %0, %1\n\t"
                           
                           /* ... Toggle the ID bit in one copy and store */
                           /*     to the EFLAGS reg */
-                          "xorl $0x200000, %0\n\t"
+                          "xor $0x200000, %0\n\t"
                           "push %0\n\t"
                           "popf\n\t"
                           
                           /* ... Get the (hopefully modified) EFLAGS */
                           "pushf\n\t"
-                          "popl %0\n\t"
+                          "pop %0\n\t"
                           : "=a" (a), "=c" (c)
                           :
                           : "cc" 
@@ -87,9 +87,9 @@ do_cpuid(unsigned int ax, unsigned int *p)
 #else
 // code from libavcodec:
     __asm __volatile
-	("movl %%ebx, %%esi\n\t"
+	("mov %%"REG_b", %%"REG_S"\n\t"
          "cpuid\n\t"
-         "xchgl %%ebx, %%esi"
+         "xchg %%"REG_b", %%"REG_S
          : "=a" (p[0]), "=S" (p[1]), 
            "=c" (p[2]), "=d" (p[3])
          : "0" (ax));
@@ -456,7 +456,7 @@ static void check_os_katmai_support( void )
    gCpuCaps.hasSSE=0;
 #endif /* __linux__ */
 }
-#else /* ARCH_X86 */
+#else /* ARCH_X86 || ARCH_X86_64 */
 
 #ifdef SYS_DARWIN
 #include <sys/sysctl.h>
@@ -534,10 +534,6 @@ void GetCpuCaps( CpuCaps *caps)
 
 #ifdef ARCH_IA64
 	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Intel Itanium\n");
-#endif
-
-#ifdef ARCH_X86_64
-	mp_msg(MSGT_CPUDETECT,MSGL_INFO,"CPU: Advanced Micro Devices 64-bit CPU\n");
 #endif
 
 #ifdef ARCH_SPARC

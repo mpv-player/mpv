@@ -14,7 +14,7 @@
 
 extern int verbose; // defined in mplayer.c
 
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 #define CAN_COMPILE_X86_ASM
 #endif
 
@@ -48,18 +48,18 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #undef HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
-#undef ARCH_X86
+
+#ifndef CAN_COMPILE_X86_ASM
 
 #ifdef COMPILE_C
 #undef HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
-#undef ARCH_X86
 #define RENAME(a) a ## _C
 #include "osd_template.c"
 #endif
 
-#ifdef CAN_COMPILE_X86_ASM
+#else
 
 //X86 noMMX versions
 #ifdef COMPILE_C
@@ -67,7 +67,6 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #undef HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
-#define ARCH_X86
 #define RENAME(a) a ## _X86
 #include "osd_template.c"
 #endif
@@ -78,7 +77,6 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #define HAVE_MMX
 #undef HAVE_MMX2
 #undef HAVE_3DNOW
-#define ARCH_X86
 #define RENAME(a) a ## _MMX
 #include "osd_template.c"
 #endif
@@ -89,7 +87,6 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #define HAVE_MMX
 #define HAVE_MMX2
 #undef HAVE_3DNOW
-#define ARCH_X86
 #define RENAME(a) a ## _MMX2
 #include "osd_template.c"
 #endif
@@ -100,7 +97,6 @@ static const unsigned long long mask24hl  __attribute__((aligned(8))) = 0x0000FF
 #define HAVE_MMX
 #undef HAVE_MMX2
 #define HAVE_3DNOW
-#define ARCH_X86
 #define RENAME(a) a ## _3DNow
 #include "osd_template.c"
 #endif
@@ -129,7 +125,7 @@ void vo_draw_alpha_yv12(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_yv12_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_yv12_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (ARCH_X86)
+#elif defined(ARCH_X86) || defined(ARCH_X86_64)
 		vo_draw_alpha_yv12_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_yv12_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -159,7 +155,7 @@ void vo_draw_alpha_yuy2(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_yuy2_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_yuy2_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (ARCH_X86)
+#elif defined(ARCH_X86) || defined(ARCH_X86_64)
 		vo_draw_alpha_yuy2_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_yuy2_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -189,7 +185,7 @@ void vo_draw_alpha_uyvy(int w,int h, unsigned char* src, unsigned char *srca, in
 		vo_draw_alpha_uyvy_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_uyvy_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (ARCH_X86)
+#elif defined(ARCH_X86) || defined(ARCH_X86_64)
 		vo_draw_alpha_uyvy_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_uyvy_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -219,7 +215,7 @@ void vo_draw_alpha_rgb24(int w,int h, unsigned char* src, unsigned char *srca, i
 		vo_draw_alpha_rgb24_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_rgb24_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (ARCH_X86)
+#elif defined(ARCH_X86) || defined(ARCH_X86_64)
 		vo_draw_alpha_rgb24_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_rgb24_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -249,7 +245,7 @@ void vo_draw_alpha_rgb32(int w,int h, unsigned char* src, unsigned char *srca, i
 		vo_draw_alpha_rgb32_3DNow(w, h, src, srca, srcstride, dstbase, dststride);
 #elif defined (HAVE_MMX)
 		vo_draw_alpha_rgb32_MMX(w, h, src, srca, srcstride, dstbase, dststride);
-#elif defined (ARCH_X86)
+#elif defined(ARCH_X86) || defined(ARCH_X86_64)
 		vo_draw_alpha_rgb32_X86(w, h, src, srca, srcstride, dstbase, dststride);
 #else
 		vo_draw_alpha_rgb32_C(w, h, src, srca, srcstride, dstbase, dststride);
@@ -294,7 +290,7 @@ void vo_draw_alpha_init(){
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX (with tiny bit 3DNow) Optimized OnScreenDisplay\n");
 #elif defined (HAVE_MMX)
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using MMX Optimized OnScreenDisplay\n");
-#elif defined (ARCH_X86)
+#elif defined(ARCH_X86) || defined(ARCH_X86_64)
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using X86 Optimized OnScreenDisplay\n");
 #else
 			mp_msg(MSGT_OSD,MSGL_INFO,"Using Unoptimized OnScreenDisplay\n");

@@ -17,7 +17,7 @@
 //Feel free to fine-tune the above 2, it might be possible to get some speedup with them :)
 
 //#define STATISTICS
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 #define CAN_COMPILE_X86_ASM
 #endif
 
@@ -50,7 +50,6 @@
 #undef HAVE_3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
-#undef ARCH_X86
 /*
 #ifdef COMPILE_C
 #undef HAVE_MMX
@@ -69,7 +68,6 @@
 #undef HAVE_3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
-#define ARCH_X86
 #define RENAME(a) a ## _MMX
 #include "aclib_template.c"
 #endif
@@ -82,7 +80,6 @@
 #undef HAVE_3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
-#define ARCH_X86
 #define RENAME(a) a ## _MMX2
 #include "aclib_template.c"
 #endif
@@ -95,7 +92,6 @@
 #define HAVE_3DNOW
 #undef HAVE_SSE
 #undef HAVE_SSE2
-#define ARCH_X86
 #define RENAME(a) a ## _3DNow
 #include "aclib_template.c"
 #endif
@@ -108,7 +104,6 @@
 #undef HAVE_3DNOW
 #define HAVE_SSE
 #define HAVE_SSE2
-#define ARCH_X86
 #define RENAME(a) a ## _SSE
 #include "aclib_template.c"
 #endif

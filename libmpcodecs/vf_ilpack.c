@@ -76,12 +76,12 @@ static void pack_nn_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
 		
-		"addl $8, %0 \n\t"
-		"addl $4, %1 \n\t"
-		"addl $4, %2 \n\t"
+		"add $8, %0 \n\t"
+		"add $4, %1 \n\t"
+		"add $4, %2 \n\t"
 		"movq %%mm1, (%3) \n\t"
 		"movq %%mm2, 8(%3) \n\t"
-		"addl $16, %3 \n\t"
+		"add $16, %3 \n\t"
 		"decl %4 \n\t"
 		"jnz 1b \n\t"
 		"emms \n\t"
@@ -96,22 +96,26 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w, int us, int vs)
 {
 	asm volatile (""
-		"pushl %%ebp \n\t"
-		"movl 4(%%edx), %%ebp \n\t"
-		"movl (%%edx), %%edx \n\t"
+		"push %%"REG_BP" \n\t"
+#ifdef ARCH_X86_64
+		"mov %6, %%"REG_BP" \n\t"
+#else
+		"movl 4(%%"REG_d"), %%"REG_BP" \n\t"
+		"movl (%%"REG_d"), %%"REG_d" \n\t"
+#endif
 		"pxor %%mm0, %%mm0 \n\t"
 		
 		".balign 16 \n\t"
 		".Lli0: \n\t"
-		"movq (%%esi), %%mm1 \n\t"
-		"movq (%%esi), %%mm2 \n\t"
+		"movq (%%"REG_S"), %%mm1 \n\t"
+		"movq (%%"REG_S"), %%mm2 \n\t"
 		
-		"movq (%%eax,%%edx,2), %%mm4 \n\t"
-		"movq (%%ebx,%%ebp,2), %%mm6 \n\t"
+		"movq (%%"REG_a",%%"REG_d",2), %%mm4 \n\t"
+		"movq (%%"REG_b",%%"REG_BP",2), %%mm6 \n\t"
 		"punpcklbw %%mm0, %%mm4 \n\t"
 		"punpcklbw %%mm0, %%mm6 \n\t"
-		"movq (%%eax), %%mm3 \n\t"
-		"movq (%%ebx), %%mm5 \n\t"
+		"movq (%%"REG_a"), %%mm3 \n\t"
+		"movq (%%"REG_b"), %%mm5 \n\t"
 		"punpcklbw %%mm0, %%mm3 \n\t"
 		"punpcklbw %%mm0, %%mm5 \n\t"
 		"paddw %%mm3, %%mm4 \n\t"
@@ -136,18 +140,18 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
 		
-		"movq %%mm1, (%%edi) \n\t"
-		"movq %%mm2, 8(%%edi) \n\t"
+		"movq %%mm1, (%%"REG_D") \n\t"
+		"movq %%mm2, 8(%%"REG_D") \n\t"
 		
-		"movq 8(%%esi), %%mm1 \n\t"
-		"movq 8(%%esi), %%mm2 \n\t"
+		"movq 8(%%"REG_S"), %%mm1 \n\t"
+		"movq 8(%%"REG_S"), %%mm2 \n\t"
 		
-		"movq (%%eax,%%edx,2), %%mm4 \n\t"
-		"movq (%%ebx,%%ebp,2), %%mm6 \n\t"
+		"movq (%%"REG_a",%%"REG_d",2), %%mm4 \n\t"
+		"movq (%%"REG_b",%%"REG_BP",2), %%mm6 \n\t"
 		"punpckhbw %%mm0, %%mm4 \n\t"
 		"punpckhbw %%mm0, %%mm6 \n\t"
-		"movq (%%eax), %%mm3 \n\t"
-		"movq (%%ebx), %%mm5 \n\t"
+		"movq (%%"REG_a"), %%mm3 \n\t"
+		"movq (%%"REG_b"), %%mm5 \n\t"
 		"punpckhbw %%mm0, %%mm3 \n\t"
 		"punpckhbw %%mm0, %%mm5 \n\t"
 		"paddw %%mm3, %%mm4 \n\t"
@@ -172,20 +176,25 @@ static void pack_li_0_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
 		
-		"addl $16, %%esi \n\t"
-		"addl $8, %%eax \n\t"
-		"addl $8, %%ebx \n\t"
+		"add $16, %%"REG_S" \n\t"
+		"add $8, %%"REG_a" \n\t"
+		"add $8, %%"REG_b" \n\t"
 		
-		"movq %%mm1, 16(%%edi) \n\t"
-		"movq %%mm2, 24(%%edi) \n\t"
-		"addl $32, %%edi \n\t"
+		"movq %%mm1, 16(%%"REG_D") \n\t"
+		"movq %%mm2, 24(%%"REG_D") \n\t"
+		"add $32, %%"REG_D" \n\t"
 		
 		"decl %%ecx \n\t"
 		"jnz .Lli0 \n\t"
 		"emms \n\t"
-		"popl %%ebp \n\t"
+		"pop %%"REG_BP" \n\t"
 		: 
-		: "S" (y), "D" (dst), "a" (u), "b" (v), "d" (&us), "c" (w/16)
+		: "S" (y), "D" (dst), "a" (u), "b" (v), "c" (w/16),
+#ifdef ARCH_X86_64
+		"d" ((long)us), "r" ((long)vs)
+#else
+		"d" (&us)
+#endif
 		: "memory"
 		);
 	pack_li_0_C(dst, y, u, v, (w&15), us, vs);
@@ -195,22 +204,26 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 	unsigned char *u, unsigned char *v, int w, int us, int vs)
 {
 	asm volatile (""
-		"pushl %%ebp \n\t"
-		"movl 4(%%edx), %%ebp \n\t"
-		"movl (%%edx), %%edx \n\t"
+		"push %%"REG_BP" \n\t"
+#ifdef ARCH_X86_64
+		"mov %6, %%"REG_BP" \n\t"
+#else
+		"movl 4(%%"REG_d"), %%"REG_BP" \n\t"
+		"movl (%%"REG_d"), %%"REG_d" \n\t"
+#endif
 		"pxor %%mm0, %%mm0 \n\t"
 		
 		".balign 16 \n\t"
 		".Lli1: \n\t"
-		"movq (%%esi), %%mm1 \n\t"
-		"movq (%%esi), %%mm2 \n\t"
+		"movq (%%"REG_S"), %%mm1 \n\t"
+		"movq (%%"REG_S"), %%mm2 \n\t"
 		
-		"movq (%%eax,%%edx,2), %%mm4 \n\t"
-		"movq (%%ebx,%%ebp,2), %%mm6 \n\t"
+		"movq (%%"REG_a",%%"REG_d",2), %%mm4 \n\t"
+		"movq (%%"REG_b",%%"REG_BP",2), %%mm6 \n\t"
 		"punpcklbw %%mm0, %%mm4 \n\t"
 		"punpcklbw %%mm0, %%mm6 \n\t"
-		"movq (%%eax), %%mm3 \n\t"
-		"movq (%%ebx), %%mm5 \n\t"
+		"movq (%%"REG_a"), %%mm3 \n\t"
+		"movq (%%"REG_b"), %%mm5 \n\t"
 		"punpcklbw %%mm0, %%mm3 \n\t"
 		"punpcklbw %%mm0, %%mm5 \n\t"
 		"movq %%mm4, %%mm7 \n\t"
@@ -237,18 +250,18 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
 		
-		"movq %%mm1, (%%edi) \n\t"
-		"movq %%mm2, 8(%%edi) \n\t"
+		"movq %%mm1, (%%"REG_D") \n\t"
+		"movq %%mm2, 8(%%"REG_D") \n\t"
 		
-		"movq 8(%%esi), %%mm1 \n\t"
-		"movq 8(%%esi), %%mm2 \n\t"
+		"movq 8(%%"REG_S"), %%mm1 \n\t"
+		"movq 8(%%"REG_S"), %%mm2 \n\t"
 		
-		"movq (%%eax,%%edx,2), %%mm4 \n\t"
-		"movq (%%ebx,%%ebp,2), %%mm6 \n\t"
+		"movq (%%"REG_a",%%"REG_d",2), %%mm4 \n\t"
+		"movq (%%"REG_b",%%"REG_BP",2), %%mm6 \n\t"
 		"punpckhbw %%mm0, %%mm4 \n\t"
 		"punpckhbw %%mm0, %%mm6 \n\t"
-		"movq (%%eax), %%mm3 \n\t"
-		"movq (%%ebx), %%mm5 \n\t"
+		"movq (%%"REG_a"), %%mm3 \n\t"
+		"movq (%%"REG_b"), %%mm5 \n\t"
 		"punpckhbw %%mm0, %%mm3 \n\t"
 		"punpckhbw %%mm0, %%mm5 \n\t"
 		"movq %%mm4, %%mm7 \n\t"
@@ -275,20 +288,25 @@ static void pack_li_1_MMX(unsigned char *dst, unsigned char *y,
 		"punpcklbw %%mm4, %%mm1 \n\t"
 		"punpckhbw %%mm4, %%mm2 \n\t"
 		
-		"addl $16, %%esi \n\t"
-		"addl $8, %%eax \n\t"
-		"addl $8, %%ebx \n\t"
+		"add $16, %%"REG_S" \n\t"
+		"add $8, %%"REG_a" \n\t"
+		"add $8, %%"REG_b" \n\t"
 		
-		"movq %%mm1, 16(%%edi) \n\t"
-		"movq %%mm2, 24(%%edi) \n\t"
-		"addl $32, %%edi \n\t"
+		"movq %%mm1, 16(%%"REG_D") \n\t"
+		"movq %%mm2, 24(%%"REG_D") \n\t"
+		"add $32, %%"REG_D" \n\t"
 		
 		"decl %%ecx \n\t"
 		"jnz .Lli1 \n\t"
 		"emms \n\t"
-		"popl %%ebp \n\t"
+		"pop %%"REG_BP" \n\t"
 		: 
-		: "S" (y), "D" (dst), "a" (u), "b" (v), "d" (&us), "c" (w/16)
+		: "S" (y), "D" (dst), "a" (u), "b" (v), "c" (w/16),
+#ifdef ARCH_X86_64
+		"d" ((long)us), "r" ((long)vs)
+#else
+		"d" (&us)
+#endif
 		: "memory"
 		);
 	pack_li_1_C(dst, y, u, v, (w&15), us, vs);

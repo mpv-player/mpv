@@ -75,13 +75,13 @@ static void halfpack_MMX(unsigned char *dst, unsigned char *src[3],
 			"por %%mm5, %%mm1 \n\t"
 			"por %%mm6, %%mm2 \n\t"
 
-			"addl $8, %0 \n\t"
-			"addl $8, %1 \n\t"
-			"addl $4, %2 \n\t"
-			"addl $4, %3 \n\t"
+			"add $8, %0 \n\t"
+			"add $8, %1 \n\t"
+			"add $4, %2 \n\t"
+			"add $4, %3 \n\t"
 			"movq %%mm1, (%8) \n\t"
 			"movq %%mm2, 8(%8) \n\t"
-			"addl $16, %8 \n\t"
+			"add $16, %8 \n\t"
 			"decl %9 \n\t"
 			"jnz 1b \n\t"
 			: "=r" (y1), "=r" (y2), "=r" (u), "=r" (v)

@@ -406,8 +406,8 @@ block_metrics_faster_c(unsigned char *a, unsigned char *b, int as, int bs,
 	    "psllq $16, %%mm0\n\t"					     \
 	    "paddusw %%mm0, %%mm7\n\t"					     \
 	    "movq (%1), %%mm4\n\t"					     \
-	    "leal (%0,%2,2), %0\n\t"					     \
-	    "leal (%1,%3,2), %1\n\t"					     \
+	    "lea (%0,%2,2), %0\n\t"					     \
+	    "lea (%1,%3,2), %1\n\t"					     \
 	    "psubusb %4, %%mm4\n\t"					     \
 	    PAVGB(%%mm2, %%mm4)						     \
 	    PAVGB(%%mm2, %%mm4)    /* mm4 = qup odd */			     \
@@ -440,7 +440,7 @@ block_metrics_faster_c(unsigned char *a, unsigned char *b, int as, int bs,
 	    "paddusw %%mm2, %%mm7\n\t"					     \
 	    "paddusw %%mm1, %%mm7\n\t"					     \
 	    : "=r" (a), "=r" (b)					     \
-	    : "r"(as), "r"(bs), "m" (ones), "0"(a), "1"(b), "X"(*a), "X"(*b) \
+	    : "r"((long)as), "r"((long)bs), "m" (ones), "0"(a), "1"(b), "X"(*a), "X"(*b) \
 	    );								     \
     } while (--lines);
 
@@ -650,7 +650,7 @@ dint_copy_line_mmx2(unsigned char *dst, unsigned char *a, long bos,
 	    "por %%mm3, %%mm1 \n\t"     /* avg if >= threshold */
 	    "movq %%mm1, (%2,%4) \n\t"
 	    : /* no output */
-	    : "r" (a), "r" (bos), "r" (dst), "r" (ss), "r" (ds), "r" (cos)
+	    : "r" (a), "r" (bos), "r" (dst), "r" ((long)ss), "r" ((long)ds), "r" (cos)
 	    );
 	a += 8;
 	dst += 8;

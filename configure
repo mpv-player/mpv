@@ -456,7 +456,14 @@ if test -z "$_target" ; then
       case "`( uname -m ) 2>&1`" in
       i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686|BePC) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
-      x86_64|amd64) host_arch=x86_64 ;;
+      x86_64|amd64)
+        if [ "`$_cc -dumpmachine | grep x86_64 | cut -d- -f1`" = "x86_64" -a \
+             -z "`echo $CFLAGS | grep -- -m32`"  ]; then
+          host_arch=x86_64
+        else
+          host_arch=i386
+        fi
+      ;;
       macppc|ppc) host_arch=ppc ;;
       alpha) host_arch=alpha ;;
       sparc) host_arch=sparc ;;
@@ -672,17 +679,8 @@ elif x86; then
   _cpuinfo="TOOLS/cpuinfo"
 fi
 
-case "$host_arch" in
-  i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
-  _def_arch="#define ARCH_X86 1"
-  _target_arch="TARGET_ARCH_X86 = yes"
-
-  pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2 | head -1`
-  pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | head -1`
-  pfamily=`$_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
-  pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
-  pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
-
+x86_exts_check()
+{
   pparam=`$_cpuinfo | grep 'features' | cut -d ':' -f 2 | head -1`
   if test -z "$pparam" ; then
     pparam=`$_cpuinfo | grep 'flags' | cut -d ':' -f 2 | head -1`
@@ -707,6 +705,20 @@ case "$host_arch" in
     sse2)         _sse2=yes                ;;
     esac
   done
+}
+
+case "$host_arch" in
+  i[3-9]86|x86|x86pc|k5|k6|k6-2|k6-3|pentium*|athlon*|i586-i686)
+  _def_arch="#define ARCH_X86 1"
+  _target_arch="TARGET_ARCH_X86 = yes"
+
+  pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2 | head -1`
+  pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2 | head -1`
+  pfamily=`$_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
+  pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
+  pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2 | head -1`
+
+  x86_exts_check
 
   echocheck "CPU vendor"
   echores "$pvendor ($pfamily:$pmodel:$pstepping)"
@@ -904,6 +916,7 @@ EOF
     _march=''
     _mcpu=''
     _optimizing=''
+    x86_exts_check
     ;;
 
   sparc)

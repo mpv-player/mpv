@@ -31,11 +31,11 @@ static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 		".balign 16 \n\t"
 		"1: \n\t"
 		
-		"movq (%%esi), %%mm0 \n\t"
-		"movq (%%esi), %%mm2 \n\t"
-		"addl %%eax, %%esi \n\t"
-		"movq (%%edi), %%mm1 \n\t"
-		"addl %%ebx, %%edi \n\t"
+		"movq (%%"REG_S"), %%mm0 \n\t"
+		"movq (%%"REG_S"), %%mm2 \n\t"
+		"add %%"REG_a", %%"REG_S" \n\t"
+		"movq (%%"REG_D"), %%mm1 \n\t"
+		"add %%"REG_b", %%"REG_D" \n\t"
 		"psubusb %%mm1, %%mm2 \n\t"
 		"psubusb %%mm0, %%mm1 \n\t"
 		"movq %%mm2, %%mm0 \n\t"
@@ -51,10 +51,10 @@ static int diff_MMX(unsigned char *old, unsigned char *new, int os, int ns)
 		
 		"decl %%ecx \n\t"
 		"jnz 1b \n\t"
-		"movq %%mm4, (%%edx) \n\t"
+		"movq %%mm4, (%%"REG_d") \n\t"
 		"emms \n\t"
 		: 
-		: "S" (old), "D" (new), "a" (os), "b" (ns), "d" (out)
+		: "S" (old), "D" (new), "a" ((long)os), "b" ((long)ns), "d" (out)
 		: "memory"
 		);
 	return out[0]+out[1]+out[2]+out[3];

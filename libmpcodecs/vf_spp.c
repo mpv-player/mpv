@@ -357,9 +357,9 @@ static void store_slice_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_
 			"psraw %%mm2, %%mm1	\n\t"
 			"packuswb %%mm1, %%mm0	\n\t"
 			"movq %%mm0, (%1) 	\n\t"
-			"addl $16, %0		\n\t"
-			"addl $8, %1		\n\t"
-			"cmpl %2, %1		\n\t"
+			"add $16, %0		\n\t"
+			"add $8, %1		\n\t"
+			"cmp %2, %1		\n\t"
 			" jb 1b			\n\t"
 			: "+r" (src1), "+r"(dst1)
 			: "r"(dst + width), "r"(dither[y]), "g"(log2_scale), "g"(6-log2_scale)

@@ -143,26 +143,26 @@ static int8_t *initNoise(FilterParam *fp){
 
 #ifdef HAVE_MMX
 static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-	int mmx_len= len&(~7);
+	long mmx_len= len&(~7);
 	noise+=shift;
 
 	asm volatile(
-		"movl %3, %%eax			\n\t"
+		"mov %3, %%"REG_a"		\n\t"
 		"pcmpeqb %%mm7, %%mm7		\n\t"
 		"psllw $15, %%mm7		\n\t"
 		"packsswb %%mm7, %%mm7		\n\t"
 		".balign 16			\n\t"
 		"1:				\n\t"
-		"movq (%0, %%eax), %%mm0	\n\t"
-		"movq (%1, %%eax), %%mm1	\n\t"
+		"movq (%0, %%"REG_a"), %%mm0	\n\t"
+		"movq (%1, %%"REG_a"), %%mm1	\n\t"
 		"pxor %%mm7, %%mm0		\n\t"
 		"paddsb %%mm1, %%mm0		\n\t"
 		"pxor %%mm7, %%mm0		\n\t"
-		"movq %%mm0, (%2, %%eax)	\n\t"
-		"addl $8, %%eax			\n\t"
+		"movq %%mm0, (%2, %%"REG_a")	\n\t"
+		"add $8, %%"REG_a"		\n\t"
 		" js 1b				\n\t"
 		:: "r" (src+mmx_len), "r" (noise+mmx_len), "r" (dst+mmx_len), "g" (-mmx_len)
-		: "%eax"
+		: "%"REG_a
 	);
 	if(mmx_len!=len)
 		lineNoise_C(dst+mmx_len, src+mmx_len, noise+mmx_len, len-mmx_len, 0);
@@ -172,26 +172,26 @@ static inline void lineNoise_MMX(uint8_t *dst, uint8_t *src, int8_t *noise, int 
 //duplicate of previous except movntq
 #ifdef HAVE_MMX2
 static inline void lineNoise_MMX2(uint8_t *dst, uint8_t *src, int8_t *noise, int len, int shift){
-	int mmx_len= len&(~7);
+	long mmx_len= len&(~7);
 	noise+=shift;
 
 	asm volatile(
-		"movl %3, %%eax			\n\t"
+		"mov %3, %%"REG_a"		\n\t"
 		"pcmpeqb %%mm7, %%mm7		\n\t"
 		"psllw $15, %%mm7		\n\t"
 		"packsswb %%mm7, %%mm7		\n\t"
 		".balign 16			\n\t"
 		"1:				\n\t"
-		"movq (%0, %%eax), %%mm0	\n\t"
-		"movq (%1, %%eax), %%mm1	\n\t"
+		"movq (%0, %%"REG_a"), %%mm0	\n\t"
+		"movq (%1, %%"REG_a"), %%mm1	\n\t"
 		"pxor %%mm7, %%mm0		\n\t"
 		"paddsb %%mm1, %%mm0		\n\t"
 		"pxor %%mm7, %%mm0		\n\t"
-		"movntq %%mm0, (%2, %%eax)	\n\t"
-		"addl $8, %%eax			\n\t"
+		"movntq %%mm0, (%2, %%"REG_a")	\n\t"
+		"add $8, %%"REG_a"		\n\t"
 		" js 1b				\n\t"
 		:: "r" (src+mmx_len), "r" (noise+mmx_len), "r" (dst+mmx_len), "g" (-mmx_len)
-		: "%eax"
+		: "%"REG_a
 	);
 	if(mmx_len!=len)
 		lineNoise_C(dst+mmx_len, src+mmx_len, noise+mmx_len, len-mmx_len, 0);
@@ -214,16 +214,16 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 
 #ifdef HAVE_MMX
 static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
-	int mmx_len= len&(~7);
+	long mmx_len= len&(~7);
 
 	asm volatile(
-		"movl %5, %%eax			\n\t"
+		"mov %5, %%"REG_a"		\n\t"
 		".balign 16			\n\t"
 		"1:				\n\t"
-		"movq (%1, %%eax), %%mm1	\n\t"
-		"movq (%0, %%eax), %%mm0	\n\t"
-		"paddb (%2, %%eax), %%mm1	\n\t"
-		"paddb (%3, %%eax), %%mm1	\n\t"
+		"movq (%1, %%"REG_a"), %%mm1	\n\t"
+		"movq (%0, %%"REG_a"), %%mm0	\n\t"
+		"paddb (%2, %%"REG_a"), %%mm1	\n\t"
+		"paddb (%3, %%"REG_a"), %%mm1	\n\t"
 		"movq %%mm0, %%mm2		\n\t"
 		"movq %%mm1, %%mm3		\n\t"
 		"punpcklbw %%mm0, %%mm0		\n\t"
@@ -239,12 +239,12 @@ static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t 
 		"psrlw $8, %%mm1		\n\t"
 		"psrlw $8, %%mm3		\n\t"
                 "packuswb %%mm3, %%mm1		\n\t"
-		"movq %%mm1, (%4, %%eax)	\n\t"
-		"addl $8, %%eax			\n\t"
+		"movq %%mm1, (%4, %%"REG_a")	\n\t"
+		"add $8, %%"REG_a"		\n\t"
 		" js 1b				\n\t"
 		:: "r" (src+mmx_len), "r" (shift[0]+mmx_len), "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len), 
                    "r" (dst+mmx_len), "g" (-mmx_len)
-		: "%eax"
+		: "%"REG_a
 	);
 
 	if(mmx_len!=len){

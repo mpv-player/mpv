@@ -8,6 +8,7 @@
 
 
 
+#ifdef ARCH_X86
 #ifdef HAVE_MMX
 static int diff_y_mmx(unsigned char *a, unsigned char *b, int s)
 {
@@ -146,6 +147,7 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		);
 	return ret;
 }
+#endif
 #endif
 
 #define ABS(a) (((a)^((a)>>31))-((a)>>31))
@@ -682,11 +684,13 @@ void pullup_init_context(struct pullup_context *c)
 	case PULLUP_FMT_Y:
 		c->diff = diff_y;
 		c->comb = licomb_y;
+#ifdef ARCH_X86
 #ifdef HAVE_MMX
 		if (c->cpu & PULLUP_CPU_MMX) {
 			c->diff = diff_y_mmx;
 			c->comb = licomb_y_mmx;
 		}
+#endif
 #endif
 		/* c->comb = qpcomb_y; */
 		break;

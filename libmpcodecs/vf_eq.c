@@ -64,9 +64,9 @@ static void process_MMX(unsigned char *dest, int dstride, unsigned char *src, in
 			"paddw %%mm3, %%mm1 \n\t"
 			"paddw %%mm3, %%mm2 \n\t"
 			"packuswb %%mm2, %%mm1 \n\t"
-			"addl $8, %0 \n\t"
+			"add $8, %0 \n\t"
 			"movq %%mm1, (%1) \n\t"
-			"addl $8, %1 \n\t"
+			"add $8, %1 \n\t"
 			"decl %%eax \n\t"
 			"jnz 1b \n\t"
 			: "=r" (src), "=r" (dest)

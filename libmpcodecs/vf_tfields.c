@@ -61,7 +61,7 @@ static void deint(unsigned char *dest, int ds, unsigned char *src, int ss, int w
 static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
 	int i, j, ssd=ss;
-	int crap1, crap2;
+	long crap1, crap2;
 	if (up) {
 		ssd = -ss;
 		memcpy(d, s, w);
@@ -71,17 +71,17 @@ static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int 
 	for (i=h-1; i; i--) {
 		asm volatile(
 			"1: \n\t"
-			"movq (%%esi), %%mm0 \n\t"
-			"movq (%%esi,%%eax), %%mm1 \n\t"
+			"movq (%%"REG_S"), %%mm0 \n\t"
+			"movq (%%"REG_S",%%"REG_a"), %%mm1 \n\t"
 			"pavgusb %%mm0, %%mm1 \n\t"
-			"addl $8, %%esi \n\t"
+			"add $8, %%"REG_S" \n\t"
 			"pavgusb %%mm0, %%mm1 \n\t"
-			"movq %%mm1, (%%edi) \n\t"
-			"addl $8, %%edi \n\t"
+			"movq %%mm1, (%%"REG_D") \n\t"
+			"add $8, %%"REG_D" \n\t"
 			"decl %%ecx \n\t"
 			"jnz 1b \n\t"
 			: "=S"(crap1), "=D"(crap2)
-			: "c"(w>>3), "S"(s), "D"(d), "a"(ssd)
+			: "c"(w>>3), "S"(s), "D"(d), "a"((long)ssd)
 		);
 		for (j=w-(w&7); j<w; j++)
 			d[j] = (s[j+ssd] + 3*s[j])>>2;
@@ -97,7 +97,7 @@ static void qpel_li_3DNOW(unsigned char *d, unsigned char *s, int w, int h, int 
 static void qpel_li_MMX2(unsigned char *d, unsigned char *s, int w, int h, int ds, int ss, int up)
 {
 	int i, j, ssd=ss;
-	int crap1, crap2;
+	long crap1, crap2;
 	if (up) {
 		ssd = -ss;
 		memcpy(d, s, w);
@@ -108,17 +108,17 @@ static void qpel_li_MMX2(unsigned char *d, unsigned char *s, int w, int h, int d
 		asm volatile(
 			"pxor %%mm7, %%mm7 \n\t"
 			"2: \n\t"
-			"movq (%%esi), %%mm0 \n\t"
-			"movq (%%esi,%%eax), %%mm1 \n\t"
+			"movq (%%"REG_S"), %%mm0 \n\t"
+			"movq (%%"REG_S",%%"REG_a"), %%mm1 \n\t"
 			"pavgb %%mm0, %%mm1 \n\t"
-			"addl $8, %%esi \n\t"
+			"add $8, %%"REG_S" \n\t"
 			"pavgb %%mm0, %%mm1 \n\t"
-			"movq %%mm1, (%%edi) \n\t"
-			"addl $8, %%edi \n\t"
+			"movq %%mm1, (%%"REG_D") \n\t"
+			"add $8, %%"REG_D" \n\t"
 			"decl %%ecx \n\t"
 			"jnz 2b \n\t"
 			: "=S"(crap1), "=D"(crap2)
-			: "c"(w>>3), "S"(s), "D"(d), "a"(ssd)
+			: "c"(w>>3), "S"(s), "D"(d), "a"((long)ssd)
 		);
 		for (j=w-(w&7); j<w; j++)
 			d[j] = (s[j+ssd] + 3*s[j])>>2;
@@ -145,11 +145,11 @@ static void qpel_li_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds
 		asm volatile(
 			"pxor %%mm7, %%mm7 \n\t"
 			"3: \n\t"
-			"movq (%%esi), %%mm0 \n\t"
-			"movq (%%esi), %%mm1 \n\t"
-			"movq (%%esi,%%eax), %%mm2 \n\t"
-			"movq (%%esi,%%eax), %%mm3 \n\t"
-			"addl $8, %%esi \n\t"
+			"movq (%%"REG_S"), %%mm0 \n\t"
+			"movq (%%"REG_S"), %%mm1 \n\t"
+			"movq (%%"REG_S",%%"REG_a"), %%mm2 \n\t"
+			"movq (%%"REG_S",%%"REG_a"), %%mm3 \n\t"
+			"add $8, %%"REG_S" \n\t"
 			"punpcklbw %%mm7, %%mm0 \n\t"
 			"punpckhbw %%mm7, %%mm1 \n\t"
 			"punpcklbw %%mm7, %%mm2 \n\t"
@@ -163,12 +163,12 @@ static void qpel_li_MMX(unsigned char *d, unsigned char *s, int w, int h, int ds
 			"psrlw $2, %%mm2 \n\t"
 			"psrlw $2, %%mm3 \n\t"
 			"packsswb %%mm3, %%mm2 \n\t"
-			"movq %%mm2, (%%edi) \n\t"
-			"addl $8, %%edi \n\t"
+			"movq %%mm2, (%%"REG_D") \n\t"
+			"add $8, %%"REG_D" \n\t"
 			"decl %%ecx \n\t"
 			"jnz 3b \n\t"
 			: "=S"(crap1), "=D"(crap2)
-			: "c"(w>>3), "S"(s), "D"(d), "a"(ssd)
+			: "c"(w>>3), "S"(s), "D"(d), "a"((long)ssd)
 		);
 		for (j=w-(w&7); j<w; j++)
 			d[j] = (s[j+ssd] + 3*s[j])>>2;
@@ -198,15 +198,15 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 	for (i=h-3; i; i--) {
 		asm volatile(
 			"pxor %%mm0, %%mm0 \n\t"
-			"movq (%%edx), %%mm4 \n\t"
-			"movq 8(%%edx), %%mm5 \n\t"
-			"movq 16(%%edx), %%mm6 \n\t"
-			"movq 24(%%edx), %%mm7 \n\t"
+			"movq (%%"REG_d"), %%mm4 \n\t"
+			"movq 8(%%"REG_d"), %%mm5 \n\t"
+			"movq 16(%%"REG_d"), %%mm6 \n\t"
+			"movq 24(%%"REG_d"), %%mm7 \n\t"
 			"4: \n\t"
 
-			"movq (%%esi,%%eax), %%mm1 \n\t"
-			"movq (%%esi), %%mm2 \n\t"
-			"movq (%%esi,%%ebx), %%mm3 \n\t"
+			"movq (%%"REG_S",%%"REG_a"), %%mm1 \n\t"
+			"movq (%%"REG_S"), %%mm2 \n\t"
+			"movq (%%"REG_S",%%"REG_b"), %%mm3 \n\t"
 			"punpcklbw %%mm0, %%mm1 \n\t"
 			"punpcklbw %%mm0, %%mm2 \n\t"
 			"pmullw %%mm4, %%mm1 \n\t"
@@ -214,38 +214,38 @@ static void qpel_4tap_MMX(unsigned char *d, unsigned char *s, int w, int h, int 
 			"pmullw %%mm5, %%mm2 \n\t"
 			"paddusw %%mm2, %%mm1 \n\t"
 			"pmullw %%mm6, %%mm3 \n\t"
-			"movq (%%esi,%%eax,2), %%mm2 \n\t"
+			"movq (%%"REG_S",%%"REG_a",2), %%mm2 \n\t"
 			"psubusw %%mm3, %%mm1 \n\t"
 			"punpcklbw %%mm0, %%mm2 \n\t"	
 			"pmullw %%mm7, %%mm2 \n\t"
 			"psubusw %%mm2, %%mm1 \n\t"
 			"psrlw $7, %%mm1 \n\t"
 
-			"movq (%%esi,%%eax), %%mm2 \n\t"
-			"movq (%%esi), %%mm3 \n\t"
+			"movq (%%"REG_S",%%"REG_a"), %%mm2 \n\t"
+			"movq (%%"REG_S"), %%mm3 \n\t"
 			"punpckhbw %%mm0, %%mm2 \n\t"
 			"punpckhbw %%mm0, %%mm3 \n\t"
 			"pmullw %%mm4, %%mm2 \n\t"
 			"pmullw %%mm5, %%mm3 \n\t"
 			"paddusw %%mm3, %%mm2 \n\t"
-			"movq (%%esi,%%ebx), %%mm3 \n\t"
+			"movq (%%"REG_S",%%"REG_b"), %%mm3 \n\t"
 			"punpckhbw %%mm0, %%mm3 \n\t"
 			"pmullw %%mm6, %%mm3 \n\t"
 			"psubusw %%mm3, %%mm2 \n\t"
-			"movq (%%esi,%%eax,2), %%mm3 \n\t"
+			"movq (%%"REG_S",%%"REG_a",2), %%mm3 \n\t"
 			"punpckhbw %%mm0, %%mm3 \n\t"	
-			"addl $8, %%esi \n\t"
+			"add $8, %%"REG_S" \n\t"
 			"pmullw %%mm7, %%mm3 \n\t"
 			"psubusw %%mm3, %%mm2 \n\t"
 			"psrlw $7, %%mm2 \n\t"
 			
 			"packuswb %%mm2, %%mm1 \n\t"
-			"movq %%mm1, (%%edi) \n\t"
-			"addl $8, %%edi \n\t"
+			"movq %%mm1, (%%"REG_D") \n\t"
+			"add $8, %%"REG_D" \n\t"
 			"decl %%ecx \n\t"
 			"jnz 4b \n\t"
 			: "=S"(crap1), "=D"(crap2)
-			: "c"(w>>3), "S"(s), "D"(d), "a"(ssd), "b"(-ssd), "d"(filter)
+			: "c"(w>>3), "S"(s), "D"(d), "a"((long)ssd), "b"((long)-ssd), "d"(filter)
 		);
 		for (j=w-(w&7); j<w; j++)
 			d[j] = (-9*s[j-ssd] + 111*s[j] + 29*s[j+ssd] - 3*s[j+ssd+ssd])>>7;

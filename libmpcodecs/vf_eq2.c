@@ -152,9 +152,9 @@ void affine_1d_MMX (eq2_param_t *par, unsigned char *dst, unsigned char *src,
       "paddw %%mm3, %%mm1 \n\t"
       "paddw %%mm3, %%mm2 \n\t"
       "packuswb %%mm2, %%mm1 \n\t"
-      "addl $8, %0 \n\t"
+      "add $8, %0 \n\t"
       "movq %%mm1, (%1) \n\t"
-      "addl $8, %1 \n\t"
+      "add $8, %1 \n\t"
       "decl %%eax \n\t"
       "jnz 1b \n\t"
       : "=r" (src), "=r" (dst)
