@@ -252,7 +252,7 @@ int demux_mpg_es_fill_buffer(demuxer_t *demux){
 int demux_mpg_fill_buffer(demuxer_t *demux){
 unsigned int head=0;
 int skipped=0;
-int max_packs=128;
+int max_packs=256; // 512kbyte
 int ret=0;
 
 // System stream
