@@ -46,7 +46,7 @@ static int control(int cmd,void *arg){
 	    dsp=(char*)arg;
 	    return CONTROL_OK;
 	case AOCONTROL_GET_DEVICE:
-	    (char*)arg=dsp;
+	    *(char**)arg=dsp;
 	    return CONTROL_OK;
 	case AOCONTROL_QUERY_FORMAT:
 	    return CONTROL_TRUE;
