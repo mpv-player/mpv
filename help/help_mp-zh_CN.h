@@ -1,5 +1,5 @@
 // Translated by Lu Ran <hephooey@fastmail.fm>
-// Synced with help_mp-en.h 1.105
+// Synced with help_mp-en.h 1.110
 
 // ========================= MPlayer help ===========================
 
@@ -63,7 +63,7 @@ static char help_text[]=
 #define MSGTR_InvalidVOdriver "无效的视频输出驱动: %s\n用'-vo help' t查看可用的视频驱动的列表"
 #define MSGTR_InvalidAOdriver "无效的视频输出驱动: %s\n用'-vo help' t查看可用的视频驱动的列表"
 #define MSGTR_CopyCodecsConf "(把etc/codecs.conf(从MPlayer的源代码中)复制/链接 ~/.mplayer/codecs.conf)\n"
-#define MSGTR_BuiltinCodecsConf "使用内建默认的codecs.conf\n"
+#define MSGTR_BuiltinCodecsConf "使用内建默认的codecs.conf.\n"
 #define MSGTR_CantLoadFont "无法加载字体: %s\n"
 #define MSGTR_CantLoadSub "无法加载字幕: %s\n"
 #define MSGTR_ErrorDVDkey "DVD KEY处理出错.\n"
@@ -107,10 +107,10 @@ static char help_text[]=
 
 #define MSGTR_NoGui "Mplayer没有编译GUI的支持!\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI需要X11!\n"
-#define MSGTR_Playing "播放 %s\n"
+#define MSGTR_Playing "播放 %s.\n"
 #define MSGTR_NoSound "音频: no sound\n"
-#define MSGTR_FPSforced "FPS指定为 %5.3f  (ftime: %5.3f)\n"
-#define MSGTR_CompiledWithRuntimeDetection "编译实时CPU检测 - 警告, 这不是最佳选择! 如果你想获得最佳的表现, 加上--disable-runtime-cpudetection选项重新编译mplayer\n"
+#define MSGTR_FPSforced "FPS指定为 %5.3f  (ftime: %5.3f).\n"
+#define MSGTR_CompiledWithRuntimeDetection "编译实时CPU检测 - 警告, 这不是最佳选择! 如果你想获得最佳的表现, 加上--disable-runtime-cpudetection选项重新编译mplayer.\n"
 #define MSGTR_CompiledWithCPUExtensions "针对有扩展指令集x86 CPU编译:"
 #define MSGTR_AvailableVideoOutputPlugins "可用的视频输出插件:\n"
 #define MSGTR_AvailableVideoOutputDrivers "可用的视频输出驱动:\n"
@@ -140,11 +140,12 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL \
 "- “非法指令”导致MPlayer崩溃。\n"\
 "  这通常发生在你在与编译/优化MPlayer不同的CPU上使用\n"\
-"  MPlayer造成的\n 检察一下!\n"
+"  MPlayer造成的\n"\
+"  检察一下!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- 过度使用CPU/FPU/RAM导致MPlayer崩溃.\n"\
 "  使用--enable-debug重新编译MPlayer用“gdb”backtrace和\n"\
-"  反汇编。具体细节看DOCS/zh/bugreports.html#crash\n"
+"  反汇编。具体细节看DOCS/zh/bugreports.html#crash.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer崩溃了。这不应该发生。\n"\
 "  这可能是MPlayer代码中的 _或者_ 你的驱动中的 _or_ 你的gcc的\n"\
@@ -160,8 +161,8 @@ static char help_text[]=
 #define MSGTR_CannotOpenFile_Device "无法打开文件/设备\n"
 #define MSGTR_ErrorDVDAuth "DVD授权错误...\n"
 #define MSGTR_CannotOpenDemuxer "无法打开demuxer\n"
-#define MSGTR_NoAudioEncoderSelected "\n没有选择音频编码器(-oac)! 选择一个或者使用-nosound. 使用-oac help!\n"
-#define MSGTR_NoVideoEncoderSelected "\nNo video encoder (-ovc) selected! Select one, use -ovc help!\n"
+#define MSGTR_NoAudioEncoderSelected "\n没有选择音频编码器(-oac)! 选择一个或者使用-nosound. 使用-oac help.\n"
+#define MSGTR_NoVideoEncoderSelected "\nNo video encoder (-ovc) selected! Select one, use -ovc help.\n"
 #define MSGTR_InitializingAudioCodec "初始化音频解码器...\n"
 #define MSGTR_CannotOpenOutputFile "无法打开输出文件 '%s'\n"
 #define MSGTR_EncoderOpenFailed "无法打开编码器\n"
@@ -188,7 +189,7 @@ static char help_text[]=
 " abr           平均比特率\n"\
 "\n"\
 " cbr           常比特率\n"\
-"               会在后继ABR预置模式中强制使用CBR模式\n"\
+"               也会在后继ABR预置模式中强制使用CBR模式.\n"\
 "\n"\
 " br=<0-1024>   以kBit为单位设置比特率 (仅用于CBR和ABR)\n"\
 "\n"\
@@ -235,7 +236,7 @@ static char help_text[]=
 
 #define MSGTR_SMBInitError "无法初始化libsmbclient库: %d\n"
 #define MSGTR_SMBFileNotFound "无法打开局域网内的: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer没有编译SMB读取的支持\n"
+#define MSGTR_SMBNotCompiled "MPlayer没有编译SMB读取的支持.\n"
 
 #define MSGTR_CantOpenDVD "无法打开DVD 设备: %s\n"
 #define MSGTR_DVDwait "读取光盘结构, 请等待...\n"
@@ -275,7 +276,7 @@ static char help_text[]=
 #define MSGTR_NI_Message "%s 非交错AVI文件模式!\n"
 
 #define MSGTR_UsingNINI "使用非交错的损坏的AVI文件格式!\n"
-#define MSGTR_CouldntDetFNo "无法决定帧数(用于绝对搜索)  \n"
+#define MSGTR_CouldntDetFNo "无法决定帧数(用于绝对搜索).\n"
 #define MSGTR_CantSeekRawAVI "无法在不完整的.AVI流中搜索. (需要索引, 尝试使用-idx 选项!)  \n"
 #define MSGTR_CantSeekFile "无法在这个文件中搜索.  \n"
 
@@ -298,8 +299,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxer info %s 已经显示\n!"
 #define MSGTR_ClipInfo "Clip info: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 检测到渐进序列, 离开3:2 TELECINE模式\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 检测到3:2 TELECINE, 启用反转telecine特效. FPS变为%5.3f!  \n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 检测到渐进序列, 离开3:2 TELECINE模式.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 检测到3:2 TELECINE, 启用反转telecine特效. FPS变为%5.3f!\n"
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "无法打开解码器\n"
 #define MSGTR_CantCloseCodec "无法关闭解码器\n"
@@ -314,16 +315,16 @@ static char help_text[]=
 #define MSGTR_BadMpegSequHdr "MPEG: 糟糕的序列头.\n"
 #define MSGTR_BadMpegSequHdrEx "MPEG: 糟糕的序列头扩展.\n"
 
-#define MSGTR_ShMemAllocFail "无法分配共享内存\n"
-#define MSGTR_CantAllocAudioBuf "无法分配音频输出buffer\n"
+#define MSGTR_ShMemAllocFail "无法分配共享内存.\n"
+#define MSGTR_CantAllocAudioBuf "无法分配音频输出buffer.\n"
 
 #define MSGTR_UnknownAudio "未知或缺少音频格式, 使用nosound\n"
 
 #define MSGTR_UsingExternalPP "[PP] 使用外部的后处理插件, max q = %d\n"
 #define MSGTR_UsingCodecPP "[PP] 使用解码器的后处理插件, max q = %d\n"
 #define MSGTR_VideoAttributeNotSupportedByVO_VD "所选的vo & vd不支持视频属性'%s'. \n"
-#define MSGTR_VideoCodecFamilyNotAvailableStr "要求的视频解码器族 [%s] (vfm=%s) 不可用 (在编译时开启它)\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "要求的音频解码器族 [%s] (afm=%s) 不可用 (在编译时开启它)\n"
+#define MSGTR_VideoCodecFamilyNotAvailableStr "要求的视频解码器族 [%s] (vfm=%s) 不可用 (在编译时开启它).\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "要求的音频解码器族 [%s] (afm=%s) 不可用 (在编译时开启它).\n"
 #define MSGTR_OpeningVideoDecoder "打开视频解码器: [%s] %s\n"
 #define MSGTR_OpeningAudioDecoder "打开音频解码器: [%s] %s\n"
 #define MSGTR_UninitVideoStr "关闭视频: %s  \n"
@@ -331,8 +332,8 @@ static char help_text[]=
 #define MSGTR_VDecoderInitFailed "VDecoder初始化失败 :(\n"
 #define MSGTR_ADecoderInitFailed "ADecoder初始化失败 :(\n"
 #define MSGTR_ADecoderPreinitFailed "ADecoder预初始化失败 :(\n"
-#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: 为输入缓冲分配 %d 字节\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: 为输出缓冲分配 %d + %d = %d 字节\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: 为输入缓冲分配 %d 字节.\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: 为输出缓冲分配 %d + %d = %d 字节.\n"
 
 // LIRC:
 #define MSGTR_SettingUpLIRC "起动红外遥控支持...\n"
@@ -341,8 +342,8 @@ static char help_text[]=
 #define MSGTR_LIRCcfgerr "读取LIRC配置文件 %s 失败!\n"
 
 // vf.c
-#define MSGTR_CouldNotFindVideoFilter "找不到视频滤镜 '%s'\n"
-#define MSGTR_CouldNotOpenVideoFilter "无法打开视频滤镜 '%s'\n"
+#define MSGTR_CouldNotFindVideoFilter "找不到视频滤镜 '%s'.\n"
+#define MSGTR_CouldNotOpenVideoFilter "无法打开视频滤镜 '%s'.\n"
 #define MSGTR_OpeningVideoFilter "打开视频滤镜: "
 #define MSGTR_CannotFindColorspace "无法找到公用的色彩空间, 甚至靠插入'scale'也不行 :(\n"
 
@@ -408,14 +409,14 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_ConvertError "24 bit到32 bit的转换发生错误(%s)\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "未知信息: %s\n"
 #define MSGTR_SKIN_FONT_NotEnoughtMemory "没有足够内存\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "声明了太多字体\n"
-#define MSGTR_SKIN_FONT_FontFileNotFound "找不到字体文件\n"
-#define MSGTR_SKIN_FONT_FontImageNotFound "找不到字体图像文件\n"
-#define MSGTR_SKIN_FONT_NonExistentFontID "不存在的字体标签(%s)\n"
-#define MSGTR_SKIN_UnknownParameter "未知参数(%s)\n"
-#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser]没有足够内存.\n"
-#define MSGTR_SKIN_SKINCFG_SkinNotFound "找不到Skin(%s).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin配置文件(%s)读取错误.\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "声明了太多字体.\n"
+#define MSGTR_SKIN_FONT_FontFileNotFound "找不到字体文件.\n"
+#define MSGTR_SKIN_FONT_FontImageNotFound "找不到字体图像文件.\n"
+#define MSGTR_SKIN_FONT_NonExistentFontID "不存在的字体标签( %s )\n"
+#define MSGTR_SKIN_UnknownParameter "未知参数( %s )\n"
+#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser]没有足够内存\n"
+#define MSGTR_SKIN_SKINCFG_SkinNotFound "找不到Skin( %s ).\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Skin配置文件( %s )读取错误.\n"
 #define MSGTR_SKIN_LABEL "Skins:"
 
 // --- gtk menus
