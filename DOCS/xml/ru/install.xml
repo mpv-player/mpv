@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.24 -->
 <sect1 id="install">
 <title>Установка</title>
 
@@ -130,7 +130,7 @@ libstdc++, это может потребоваться для других программ) или вообще ничего
 H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/SVQ1/SVQ3-кодированные видео потоки и
 WMA (Windows Media Audio) v1/v2 аудио потоки, на многих платформах.
 Он также известен как быстрейший кодек для этих задач.
-Подробности см. в <link linkend="ffmpeg">этой секции</link>.
+Подробности см. в разделе <link linkend="ffmpeg">FFmpeg</link>.
 Особенности:
   <itemizedlist>
   <listitem><simpara>
@@ -181,13 +181,14 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">DivX4/DivX5</emphasis>: информация об этом кодеке расположена в 
-<link linkend="divx4-5">секции DivX4/DivX5</link>. Вам, вероятно, не потребуется
+секции <link linkend="divx4-5">DivX4/DivX5</link>. Вам, вероятно, не потребуется
 этот кодек, поскольку <emphasis role="bold">libavcodec</emphasis> (см. выше)
 гораздо быстрее и выше качеством, чем этот кодек, как для кодирования, так и для
 декодирования. Особенности:
 <itemizedlist>
 <listitem><simpara>
-  кодирование в 1 или 2 прохода с<link linkend="mencoder">MEncoder'ом</link>
+  кодирование в 1 или 2 прохода
+  <link linkend="mencoder"><application>MEncoder</application>'ом</link>
   </simpara></listitem>
 <listitem><simpara>
   может проигрывать старые <emphasis role="bold">DivX3</emphasis> фильмы гораздо быстрее, чем Win32 DLL,
@@ -202,7 +203,8 @@ QDesign аудио потоков. Инструкции по установке могут быть найдены в секции
   <emphasis role="bold">XviD</emphasis>: кодирующая альтернатива для Divx4Linux с открытым исходным кодом. Особенности:
 <itemizedlist>
 <listitem><simpara>
-  кодирование в 1 или 2 прохода с <link linkend="mencoder">MEncoder'ом</link>
+  кодирование в 1 или 2 прохода
+  <link linkend="mencoder"><application>MEncoder</application>'ом</link>
   </simpara></listitem>
 <listitem><simpara>
   его исходный код открыт, поэтому он многоплатформенен.
@@ -276,15 +278,15 @@ mga_vid не будет собрана. Также см. секцию <link linkend="tvout-voodoo">3dfx TV-
 <listitem><para>
   <emphasis role="bold">ATI карты</emphasis>: существует <link linkend="vidix">VIDIX</link> драйвер
 для следующих карт: <emphasis role="bold">Radeon, Rage128, Mach64</emphasis>
-(Rage XL/Mobility, Xpert98).Также см. <link linkend="tvout-ati">секцию
+(Rage XL/Mobility, Xpert98).Также см. секцию <link linkend="tvout-ati">
 ATI карт</link> в документации TV-вывода, чтобы узнать, поддерживается ли TV-out
 Вашей карты под Linux/MPlayer.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">S3 карты</emphasis>: у Savage и Virge/DX чипов есть аппаратная акселерация.
 Используйте наиболее свежую версию XFree86, старые драйвера содержат ошибки.
-У Savage чипов проблемы с выводом YV12, см. <link linkend="s3">S3 Xv
-секцию</link> для подробностей. У более старых Trio карт нет аппаратной поддержки,
+У Savage чипов проблемы с выводом YV12, см. <link linkend="s3">S3 Xv</link>
+секцию для подробностей. У более старых Trio карт нет аппаратной поддержки,
 или она медленная.
   </para></listitem>
 <listitem><para>
@@ -293,8 +295,8 @@ ATI карт</link> в документации TV-вывода, чтобы узнать, поддерживается ли TV-out
 она будет работать без ошибок.
 <emphasis role="bold">Встроенные nVidia драйвера в XFree86 не поддерживают YUV акселерацию на всех
 nVidia картах.</emphasis> Вам необходимо скачать драйверы с закрытым исходным кодом
-с nVidia.com. См. секцию <link linkend="nvidia">nVidia Xv драйвера</link>
-для подробностей. Также посмотрите <link linkend="tvout-nvidia">секцию
+с <ulink url="http://nvidia.com">nVidia.com</ulink>. См. секцию <link linkend="nvidia">nVidia Xv драйвера</link>
+для подробностей. Также посмотрите секцию <link linkend="tvout-nvidia">
 nVidia TV-выход</link>, если Вы хотите использовать TV.
   </para></listitem>
 <listitem><para>
@@ -306,7 +308,7 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 <itemizedlist>
 <listitem><simpara>
   Проверьте, поддерживает ли XFree86 драйвер (и Ваша карта) аппаратную
-акселерацию. Подробности см. в <link linkend="xv">секции Xv</link>.
+акселерацию. Подробности см. в секции <link linkend="xv">Xv</link>.
   </simpara></listitem>
 <listitem><simpara>
   Если нет, то возможности Вашей видеокарты не поддерживаются под Вашей
@@ -421,11 +423,11 @@ nVidia TV-выход</link>, если Вы хотите использовать TV.
 <itemizedlist>
 <listitem><para>
   Решите, нужен ли Вам GUI. Если да, прочитайте до компиляции
-  <link linkend="gui">секцию GUI</link>.
+  секцию <link linkend="gui">GUI</link>.
   </para></listitem>
 <listitem><para>
   Если Вы хотите установить <application>MEncoder</application> (наш великолепный многоцелевой кодировщик),
-читайте <link linkend="mencoder">секцию MEncoder</link>.
+читайте <link linkend="mencoder">секцию <application>MEncoder</application></link>.
   </para></listitem>
 <listitem><para>
   Если у Вас есть V4L совместимый <emphasis role="bold">TV тюнер</emphasis>, и Вы хотите смотреть/захватывать
@@ -446,7 +448,7 @@ make install</screen>
 </para>
 
 <para>
-В этот момент, MPlayer готов к использованию. Каталог
+В этот момент, <application>MPlayer</application> готов к использованию. Каталог
 <filename class="directory">$PREFIX/share/mplayer</filename> содержит файл <filename>codecs.conf</filename>,
 который используется, чтобы сообщить программе обо всех кодеки и их возможности.
 Этот файл требуется только в том случае, если Вы хотите поменять их настройки,
@@ -461,7 +463,7 @@ make install</screen>
 Обратите внимание на то, что если у Вас в <filename>~/.mplayer/</filename> есть 
 файл <filename>codecs.conf</filename>, то встроенный и системный файлы
 <filename>codecs.conf</filename> будут полностью игнорированы. Не делайте
-этого, если только Вы не собираетесь развлекаться в внутренностями MPlayer'а,
+этого, если только Вы не собираетесь развлекаться в внутренностями <application>MPlayer</application>'а,
 поскольку это может вызвать множество проблем. Если Вы хотите поменять порядок
 подбора кодеков, используйте опции <option>-vc</option>, <option>-ac</option>,
 <option>-vfm</option>, и <option>-afm</option> либо в командной строке, либо
@@ -472,7 +474,8 @@ make install</screen>
 <para>
 Пользователи Debian могут сами создать .deb пакеты, это очень
 просто. Просто запустите <screen>fakeroot debian/rules binary</screen> в корневом
-каталоге <application>MPlayer'а</application>. См. <link linkend="debian">Создание Debian пакетов</link> для более подробных инструкций.
+каталоге <application>MPlayer'а</application>. Более подробные инструкции см.
+в разделе <link linkend="debian">Создание Debian пакетов</link>.
 </para>
 
 
@@ -491,7 +494,7 @@ make install</screen>
 <para>
 Хотя это не обязательно, но чтобы получить функционирующие OSD и субтитры,
 должны быть установлены шрифты. Рекомендуемый метод - установка TTF шрифта и
-указание MPlyer'у использовать его. Подробности, см. в  секции
+указание <application>MPlyer</application>'у использовать его. Подробности, см. в  секции
 <link linkend="subosd">Субтитры и OSD</link>.
 </para>
 
@@ -536,7 +539,7 @@ make install</screen>
 <title>Субтитры и OSD</title>
 
 <para>
-Вместе с фильмом MPlayer может показывать и субтитры. В настоящий момент
+Вместе с фильмом <application>MPlayer</application> может показывать и субтитры. В настоящий момент
 поддерживаются следующие форматы:
 <itemizedlist>
 <listitem><para>VobSub</para></listitem>
@@ -556,7 +559,7 @@ make install</screen>
 </para>
 
 <para>
-MPlayer может конвертировать вышеперечисленные форматы субтитров (<emphasis role="bold">кроме первых
+<application>MPlayer</application> может конвертировать вышеперечисленные форматы субтитров (<emphasis role="bold">кроме первых
 трёх</emphasis>) в следующие форматы с помощью соответствующих опций:
 <itemizedlist>
 <listitem><para>MPsub: <option>-dumpmpsub</option></para></listitem>
@@ -568,7 +571,7 @@ MPlayer может конвертировать вышеперечисленные форматы субтитров (<emphasis role
 </para>
 
 <para>
-MEncoder может выдавать DVD субтитры в <link linkend="menc-feat-extractsub">VobSub</link> формате.
+<application>MEncoder</application> может выдавать DVD субтитры в <link linkend="menc-feat-extractsub">VobSub</link> формате.
 </para>
 
 <para>
@@ -582,7 +585,7 @@ VobSub субтитры состоят из большого (несколько мегабайт) <filename>.SUB</filenam
 <filename>.IDX</filename> и/или <filename>.IFO</filename> файлов.
 Использование: если у Вас, например, есть файлы <filename>sample.sub</filename>,
 <filename>sample.ifo</filename> (необязательно), <filename>sample.idx</filename> - Вы должны указать
-MPlayer'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> (можно указать полный путь).
+<application>MPlayer</application>'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]</option> (можно указать полный путь).
 Опция <option>-vobsubid</option> похожа на <option>-sid</option>
 для DVD, с её помощью, Вы можете выбирать между дорожками субтитров (языками).
 В случае, если <option>-vobsubid</option> пропущена, MPlayer попытается использовать
@@ -633,17 +636,17 @@ MPlayer'у опции <option>-vobsub sample [-vobsubid <replaceable>id</replaceable>]
 <option>-subfps</option> не может использоваться с этим форматом. Поскольку
 <application>MPlayer</application>
 не может угадать частоту кадров для субтитров, Вы должны вручную конвертировать
-частоту кадров. В каталоге <filename class="directory">contrib</filename> MPlayer'овского FTP сайта есть
+частоту кадров. В каталоге <filename class="directory">contrib</filename> <application>MPlayer</application>'овского FTP сайта есть
 специальный Perl'овый скрипт для такой конверсии.
 </para>
 
 <para>
-О DVD субтитрах, читайте в <link linkend="dvd">секции DVD</link>.
+О DVD субтитрах, читайте в секции <link linkend="dvd">DVD</link>.
 </para>
 
 
 <sect2 id="mpsub">
-<title>MPlayer's own subtitle format (MPsub)</title>
+<title><application>MPlayer</application>'s own subtitle format (MPsub)</title>
 
 <para>
 <application>MPlayer</application> ввёл в употребление новый формат субтитров,
@@ -690,14 +693,25 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
 <title>Установка OSD и субтитров</title>
 
 <para>
-Вам нужен пакет шрифтов MPlayer'а, чтобы использовать возможности OSD/SUB.
+Чтобы использовать возможности OSD/SUB, Вам нужен пакет шрифтов <application>MPlayer</application>'а.
 Есть много способов их получить:
 </para>
 
 <itemizedlist>
 <listitem><para>
+  Использовать средство генерации шрифтов в <filename class="directory">
+  TOOLS/subfont-c</filename>. Это законченное средство для преобразования
+  из TTF/Type1/и т. п. шрифтов в mplayer'овские шрифтовые пакеты. 
+  (подробности читайте в <filename>TOOLS/subfont-c/README</filename>)
+  </para></listitem>
+<listitem><para>
+    используйте GIMP'овый плагин генерации шрифтов из <filename
+	class="directory">TOOLS/subfont-GIMP</filename> (замечание: также, у Вас
+	должен быть установлен HSI RAW плагин, см. <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" /> ).
+  </para></listitem>
+<listitem><para>
     используйте TrueType (TTF) шрифт, через библиотеку <emphasis role="bold">freetype</emphasis>.
-Обязательна версия 2.0.9 или выше! Тогда у Вас есть два метода:
+    Обязательна версия 2.0.9 или выше! Тогда у Вас есть два метода:
   <itemizedlist>
     <listitem><para>
 	  используйте опцию <option>-font /path/to/arial.ttf</option>, чтобы
@@ -707,6 +721,12 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
 	  создайте ссылку: <screen>ln -s /path/to/arial.ttf ~/.mplayer/subfont.ttf</screen>
       </para></listitem>
       </itemizedlist>
+  Если <application>MPlayer</application> был скомпилирован с поддержкой 
+  <systemitem class="library">fontconfig</systemitem>, эти методы не будут работать,
+  вместо этого, опция <option>-font</option> ожидает fontconfig'овское название
+  шрифта, и по умолчанию это фонт без засечек (sans-serif). Чтобы получить список
+  фриштов известных fontconfig'у, используйте <command>fc-list</command>.
+  Пример: <option>-font 'Bitstream Vera Sans'</option>
   </para></listitem>
 <listitem><para>
   Скачать готовый к употреблению пакет шрифтов с сайта MPlayer'а.
@@ -750,22 +770,8 @@ Display</emphasis>.  OSD используется для вывода текущего времени, полос громкос
   </tbody>
   </tgroup>
   </table>
-  
-  </para></listitem>
-<listitem><para>
-  Использовать средство генерации шрифтов в <filename class="directory">
-  TOOLS/subfont-c</filename>. Это законченное средство для преобразования
-  из TTF/Type1/и т. п. шрифтов в mplayer'овские шрифтовые пакеты. 
-  (подробности читайте в <filename>TOOLS/subfont-c/README</filename>)
-  </para></listitem>
-<listitem><para>
-    используйте GIMP'овый плагин генерации шрифтов из <filename
-	class="directory">TOOLS/subfont-GIMP</filename> (замечание: также, у Вас
-	должен быть установлен HSI RAW плагин, см. URL выше)
-  <!-- FIXME: where's that URL? -->
   </para></listitem>
 </itemizedlist>
-
 <para>
 Если Вы решите использовать не-TTF шрифты, UNZIP'ните скаченный файл в
 <filename class="directory">~/.mplayer</filename> или <filename
@@ -812,7 +818,7 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
 <title>OSD меню</title>
 
 <para>
-У MPlayer'а существует целиком определяемый пользователем интерфейс OSD меню.
+У <application>MPlayer</application>'а существует целиком определяемый пользователем интерфейс OSD меню.
 </para>
 
 <note><simpara>
@@ -835,7 +841,7 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
 <listitem><simpara>
   скопируйте <filename>etc/input.conf</filename> в Ваш каталог <filename
   class="directory">.mplayer</filename>, или в системный конфигурационный
-  каталог MPlayer'а (по умолчанию: <filename class="directory">
+  каталог <application>MPlayer</application>'а (по умолчанию: <filename class="directory">
   /usr/local/etc/mplayer</filename>)
    </simpara></listitem>
 <listitem><simpara>
@@ -859,12 +865,12 @@ class="directory">$PREFIX/share/mplayer</filename>. Затем переименуйте,
 <sect1 id="rtc">
 <title>RTC</title>
 <para>
-У MPlayer'а есть три метода синхронизации.
+У <application>MPlayer</application>'а есть три метода синхронизации.
 
 <itemizedlist>
 <listitem><simpara>
-<emphasis role="bold">Чтобы использовать старый метод синхронизации</emphasis>
-  , Вам ничего не надо делать. Он использует <systemitem>usleep()</systemitem>,
+<emphasis role="bold">Чтобы использовать старый метод синхронизации</emphasis>,
+  Вам ничего не надо делать. Он использует <systemitem>usleep()</systemitem>,
   чтобы подстроить A/V синхронизацию, с точностью +/- 10ms. Однако, иногда
   требуется даже большая точность синхронизации.
   </simpara></listitem>

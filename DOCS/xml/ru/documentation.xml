@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="KOI8-R" standalone="no"?>
-<!-- synced with 1.6 -->
+<!-- synced with 1.7 -->
 <!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.1.2//EN"
 	"/usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd"
 [
@@ -27,7 +27,7 @@
 ]>
 <book id="index" lang="ru">
 <bookinfo id="toc">
-<title>MPlayer - The Movie Player for LINUX</title>
+<title><application>MPlayer</application> - The Movie Player for LINUX</title>
 <subtitle><ulink url="http://www.mplayerhq.hu"></ulink></subtitle>
 <date>March 24, 2003</date>
 <copyright>
@@ -112,17 +112,18 @@ windows media player. Даже AVI файлы без индекса являются проигрываемыми, и
 </para>
 
 <para>
-MEncoder (Кодировщик фильмов MPlayer'a [MPlayer's Movie Encoder]) - это простой
+<application>MEncoder</application> (Кодировщик фильмов <application>MPlayer
+</application>'a [<application>MPlayer</application>'s Movie Encoder]) - это простой
 кодировщик фильмов предназначенный для кодирования фильмов, проигрываемых MPlayer'ом
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>) в другие
-проигрываемые MPlayer'ом форматы (см. ниже). Он может кодировать такими разными
+проигрываемые <application>MPlayer</application>'ом форматы (см. ниже). Он может кодировать такими разными
 кодеками, как <emphasis role="bold">DivX4</emphasis> (1 или 2 прохода), libavcodec,
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis> звук. Кроме того у него мощная система
 плагинов для манипуляции видео.
 </para>
 
 <itemizedlist>
-<title>Возможности MEncoder'а</title>
+<title>Возможности <application>MEncoder</application>'а</title>
 <listitem><simpara>
   кодирование из широкого спектра форматов файлов и декодеров
   <application>MPlayer'а</application>

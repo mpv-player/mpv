@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.7 -->
+<!-- synced with 1.9 -->
 <sect1 id="formats">
 <title>Поддерживаемые форматы</title>
 
@@ -26,7 +26,7 @@ MP2 аудио (в отличие от
 нет нужных полей для описания его видео и аудио потоков).
 Или Вы можете поместить MPEG1 видео в AVI файл.
 <ulink url="http://ffmpeg.sourceforge.net/">FFmpeg</ulink> и
-<link linkend="mencoder">MEncoder</link> могут создавать эти файлы.
+<link linkend="mencoder"><application>MEncoder</application></link> могут создавать эти файлы.
 </para>
 
 
@@ -58,7 +58,7 @@ MPEG файлы бывают различных разновидностей:
   Это такой же формат, как и MPG, плюс возможность содержать субтитры и
   не-MPEG (AC3) аудио. Он содержит кодированное MPEG2 видео и обычно AC3
   аудио, но DTS, MP2 и не запакованный LPCM тоже возможны. <emphasis role="bold">
-  Читайте <link linkend="dvd">секцию DVD</link></emphasis>!
+  Читайте секцию <link linkend="dvd">DVD</link></emphasis>!
   </simpara></listitem>
 </itemizedlist>
 
@@ -162,8 +162,8 @@ AVI файлов:
 выходят из строя с VBR. VBR редко встречается и Microsoft'овские AVI
 спецификации описывают только CBR аудио. Я также заметил, что большинство
 кодировщиков создают плохие файлы при использовании VBR аудио. Известно
-только два исключения:
-<application>NanDub</application> и <link linkend="mencoder">MEncoder</link>.
+только два исключения: <application>NanDub</application> и
+<link linkend="mencoder"><application>MEncoder</application></link>.
 </para>
 </sect3>
 
@@ -347,7 +347,7 @@ PVA - это похожий на MPEG формат, используемый в программах DVB TV карт (наприме
 <para>
 <emphasis role="bold">GIF</emphasis> формат - это типичный формат для сетевой
 графики. Существуют 2 версии спецификаций GIF, GIF87a и GIF89a. Основная
-разница заключается в том, что GIF89a допускает анимацию. MPlayer поддерживает
+разница заключается в том, что GIF89a допускает анимацию. <application>MPlayer</application> поддерживает
 оба формата, используя <systemitem class="library">libungif</systemitem> или
 другую libgif-совместимую библиотеку. Не анимированные GIF'ы будут показываться
 как однокадровое видео. (Используйте опции <option>-loop</option> и

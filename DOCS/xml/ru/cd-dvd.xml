@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.8 -->
+<!-- synced with 1.10 -->
 <chapter id="cd-dvd">
 <title>Использование CD/DVD</title>
 
@@ -98,9 +98,10 @@
 </systemitem> и <systemitem>libdvdcss</systemitem> для DVD расшифровки и
 воспроизведения. Эти две библиотеки содержатся в подкаталоге
 <filename class="directory">libmpdvdkit2/</filename> дерева исходного кода
-MPlayer'а, так что отдельно устанавливать их не нужно. Мы выбрали такое решение
-потому, что нам пришлось исправить ошибку в <systemitem>libdvdread</systemitem>
-и добавить патч к <systemitem>libdvdcss</systemitem> поддержку
+<application>MPlayer</application>'а, так что отдельно устанавливать их не нужно.
+Мы выбрали такое решение потому, что нам пришлось исправить ошибку
+в <systemitem>libdvdread</systemitem>
+и добавить патч к <systemitem>libdvdcss</systemitem>, включающий поддержку
 <emphasis role="bold">сохранения взломанных ключей CSS</emphasis>. Это
 предотвращает повторный взлом ключа при каждом просмотре, существенно увеличивая
 скорость.
@@ -118,20 +119,6 @@ MPlayer'а, так что отдельно устанавливать их не нужно. Мы выбрали такое решение
 В случае проблем с декодированием DVD, попробуйте отключить supermount или
 другие подобные удобства.
 </para></note>
-
-<formalpara>
-<title>Старая поддержка DVD - НЕ ОБЯЗАТЕЛЬНО</title>
-<para>
-Это может оказаться полезным, например, при просмотре зашифрованных VOB-файлов
-с <emphasis role="bold">жёсткого диска</emphasis>. Cкомпилируйте и установите
-<emphasis role="bold">libcss</emphasis> (версию 0.0.1, ни в коем случае не
-более позднюю). Если <emphasis role="bold">MPlayer</emphasis> её не
-обнаружит, добавьте <option>-csslib /path/to/libcss.so</option>. Для
-использования необходимы привилегии администратора или suid root на исполняемом
-файле MPlayer'а или позвольте MPlayer'у запустить suid root обработчик
-fibmap_mplayer.
-</para>
-</formalpara>
 
 <formalpara>
 <title>Структура DVD</title>
@@ -153,33 +140,16 @@ fibmap_mplayer.
 </para>
 
 <para>
-Из-за этого старая поддержка DVD c <systemitem>libcss</systemitem> нуждается в
-замонтированной файловой системе и посекторном доступе к устройству. К
-сожалению, для этого нужны привилегии администратора (под Linux). Проблема
-решается тремя способами:
-
-<itemizedlist>
-<listitem><para>
-Привилегированный доступ или исполняемый файл <application>MPlayer
-</application>'а с suid root.
-</para></listitem>
-
-<listitem><para>
-Позвольте <application>MPlayer</application>'у выполнять the suid-root
-обработчик fibmap_mplayer для доступа к DVD (используется в старом методе
-воспроизведения DVD через <systemitem>libcss</systemitem>).
-</para></listitem>
-
-<listitem><para>
-Не использовать драйвер файловой системы из ядра и все делать в пространстве
-пользователя. <systemitem>libdvdread</systemitem> 0.9.x и <systemitem>
-libmpdvdkit</systemitem> так и делают (новая поддержка DVD). Драйвер UDF
+Для поддержки DVD необходим прямой посекторный доступ к устройству. К сожалению,
+(под Linux) Вы должны быть root'ом, чтобы получить секторный адрес файла.
+Поэтому мы вообще не используем драйвер файловой системы из адра, а
+переписываем его для выполнения в пользовательсмком пространстве.
+<systemitem>libdvdread</systemitem> 0.9.x и <systemitem>
+libmpdvdkit</systemitem> так и делают. Драйвер UDF
 файловой системы не нужен, поскольку в этих библиотеках есть встроенные
 драйвера файловой системы
 UDF. Также DVD не обязан быть замонтированным, поскольку используется
 только прямой посекторный доступ.
-</para></listitem>
-</itemizedlist>
 </para>
 
 <para>

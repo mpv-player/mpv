@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="koi8-r"?>
-<!-- synced with 1.25 -->
+<!-- synced with 1.30 -->
 <sect1 id="codecs">
 <title>Поддерживаемые кодеки</title>
 
@@ -7,7 +7,7 @@
 <title>Видео кодеки</title>
 
 <para>
-См. <ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">таблицу статуса кодеков</ulink>
+См. <ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">таблицу статуса кодеков</ulink>
 для полного, ежедневно генерируемого списка. Несколько кодеков доступны для
 скачивания на нашей странице. Получите их со 
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">страницы кодеков</ulink>.
@@ -398,11 +398,11 @@ RealVideo:
 
 <itemizedlist>
 <listitem><simpara>
-  RealVideo 1.0 (fourcc RV10) - (де)кодирование поддерживается, используя
+  RealVideo 1.0, 2.0 (fourcc RV10, RV20) - (де)кодирование поддерживается, используя
   <systemitem class="library">libavcodec</systemitem>
   </simpara></listitem>
 <listitem><simpara>
-  RealVideo 2.0, 3.0, 4.0 (fourcc RV20, RV30, RV40) - декодирование
+  RealVideo 3.0, 4.0 (fourcc RV30, RV40) - декодирование
   поддерживается, используя <emphasis role="bold">библиотеки RealPlayer'а</emphasis>
   </simpara></listitem>
 </itemizedlist>
@@ -539,14 +539,14 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <title>КОМПИЛЯЦИЯ MPLAYER'А С ПОДДЕРЖКОЙ БИБЛИОТЕК QUICKTIME</title>
 <note><para>в настоящий момент поддерживаются только 32битовые Intel'евские
 платформы.</para></note>
-<step><para>скачайте MPlayer'овский CVS</para></step>
+<step><para>скачайте <application>MPlayer</application>'овский CVS</para></step>
 <step><para>скачайте пакет QuickTime DLL с
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/"/>
 </para></step>
 <step><para>распакуйте пакет QuickTime DLL в Ваш каталог Win32 кодеков
 (по умолчанию: <filename class="directory">/usr/local/lib/codecs</filename>)
 </para></step>
-<step><para>скомпилируйте MPlayer</para></step>
+<step><para>скомпилируйте <application>MPlayer</application></para></step>
 </procedure>
 
 </sect3>
@@ -560,15 +560,12 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <itemizedlist>
 <title>Наиболее важными аудио кодеками среди всех являются:</title>
 <listitem><simpara>
-  MPEG layer 2 (MP2), и layer 3 (MP3) аудио (<emphasis role="bold">"родной"</emphasis>
+  MPEG layer 1/2/3 (MP1/2/3) аудио (<emphasis role="bold">"родной"</emphasis>
   код, с MMX/SSE/3DNow! оптимизацией)
   </simpara></listitem>
 <listitem><simpara>
-  MPEG layer 1 аудио (<emphasis role="bold">"родной"</emphasis> код, с libavcodec)
-  </simpara></listitem>
-<listitem><simpara>
-  Windows Media Audio v1, v2 (<emphasis role="bold">"родной"</emphasis> код, с
-  libavcodec)
+  Windows Media Audio 7 и 8 (aka WMAv1 и WMAv2) (<emphasis role="bold">"родной"</emphasis> код, с
+  <link linkend="ffmpeg">libavcodec</link>)
   </simpara></listitem>
 <listitem><simpara>
   Windows Media Audio 9 (WMAv3) (используя DMO DLL)
@@ -579,6 +576,9 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
   </simpara></listitem>
 <listitem><simpara>
   AC3 проходящий через звуковое оборудование
+  </simpara></listitem>
+<listitem><simpara>
+  AAC
   </simpara></listitem>
 <listitem><simpara>
   Ogg Vorbis аудио кодек (<emphasis role="bold">родная</emphasis> библиотека)
@@ -598,9 +598,6 @@ Apple, которые распространяют его с <application>QuickTime Player</application>.
 <listitem><simpara>
   alaw и ulaw, различные gsm, adpcm и pcm форматы и другие простые старые аудио
   кодеки
-  </simpara></listitem>
-<listitem><simpara>
-  AAC
   </simpara></listitem>
 </itemizedlist>
 
@@ -662,7 +659,8 @@ C-Media картами и Soundblaster Live! + ALSA (но не OSS) драйверами и
 <title>Поддержка libmad</title>
 
 <para>
-<ulink url="http://mad.sourceforge.net">libmad</ulink> - это многоплатформенная
+<ulink url="http://mad.sourceforge.net">libmad</ulink> - это многоплатформенная,
+целочисленная (внутренне 24'битный PCM)
 библиотека декодирования MPEG аудио. Она не очень хорошо обрабатывает битые
 файлы и иногда у неё бывают проблемы с перемещением по файлу.
 </para>
@@ -736,7 +734,8 @@ QuickTime. Инструкции по установке см. в секции
 AAC (Advanced Audio Coding) - это кодек, иногда обнаруживаемый в MOV и MP4
 файлах. Декодер с открытым исходным кодом, называемый FAAD, доступен с
 <ulink url="http://www.audiocoding.com"/>.
-MPlayer включает в себя libfaad 2.0RC1, поэтому Вам ничего не нужно дополнительно скачивать.
+<application>MPlayer</application> включает в себя libfaad 2.0RC1, поэтому
+Вам ничего не нужно дополнительно скачивать.
 </para>
 
 <para>
