@@ -27,7 +27,7 @@ endif
 INSTALL = install
 
 SRCS_COMMON = cpudetect.c codec-cfg.c cfgparser.c my_profile.c spudec.c playtree.c playtreeparser.c asxparser.c vobsub.c subreader.c sub_cc.c find_sub.c
-SRCS_MENCODER = mencoder.c mp_msg-mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/osd.c libvo/sub.c libvo/font_load.c libvo/font_load_ft.c me-opt-reg.c
+SRCS_MENCODER = mencoder.c mp_msg-mencoder.c $(SRCS_COMMON) libao2/afmt.c divx4_vbr.c libvo/aclib.c libvo/osd.c libvo/sub.c libvo/font_load.c libvo/font_load_ft.c me-opt-reg.c xvid_vbr.c
 SRCS_MPLAYER = mplayer.c mp_msg.c $(SRCS_COMMON) mixer.c mp-opt-reg.c
 
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)

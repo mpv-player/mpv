@@ -1239,6 +1239,8 @@ if(sh_audio)
 printf(MSGTR_AudioStreamResult,
     (float)(mux_a->size/mux_a->timer*8.0f/1000.0f), (int)(mux_a->size/mux_a->timer), (int)mux_a->size, (float)mux_a->timer);
 
+if(sh_video) uninit_video(sh_video);
+sh_video=NULL;
 if(stream) free_stream(stream); // kill cache thread
 
 return interrupted;
