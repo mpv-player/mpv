@@ -645,7 +645,7 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 }
 
 void list_codecs(int audioflag){
-	int i, j;
+	int i;
 	codecs_t *c;
 
 		if (audioflag) {
@@ -657,7 +657,7 @@ void list_codecs(int audioflag){
 			c = video_codecs;
 			printf("vc:      vfm: status:   info:  [lib/dll]\n");
 		}
-		if(!i) return NULL;
+		if(!i) return;
 		for (/* NOTHING */; i--; c++) {
 			char* s="unknown ";
 			switch(c->status){

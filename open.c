@@ -113,7 +113,7 @@ if(vcd_track){
 //============ Open DVD title ==============
 #ifdef USE_DVDREAD
 if(dvd_title){
-  int ret,ret2;
+//  int ret,ret2;
   dvd_priv_t *d;
     int ttn,pgc_id,pgn;
     dvd_reader_t *dvd;
@@ -297,7 +297,6 @@ static int dvd_next_cell(dvd_priv_t *d){
     
     if( d->cur_pgc->cell_playback[ next_cell ].block_type
                                         == BLOCK_TYPE_ANGLE_BLOCK ) {
-	    int i;
 	    while(next_cell<d->cur_pgc->nr_of_cells){
                 if( d->cur_pgc->cell_playback[next_cell].block_mode
                                           == BLOCK_MODE_LAST_CELL ) break;

@@ -25,5 +25,6 @@ typedef struct {
 
 subtitle* sub_read_file (char *filename);
 char * sub_filename(char *path, char * fname );
+void list_sub_file(subtitle* subs);
 
 #endif

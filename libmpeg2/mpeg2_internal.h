@@ -214,6 +214,7 @@ int slice_process (picture_t *picture, uint8_t code, uint8_t * buffer);
 void stats_header (uint8_t code, uint8_t * buffer);
 
 void mpeg2_allocate_image_buffers(picture_t * picture);
+void mpeg2_free_image_buffers (picture_t * picture);
 
 
 #ifdef MPEG12_POSTPROC

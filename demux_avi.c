@@ -359,6 +359,8 @@ extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) inde
 extern int force_ni;
 extern int pts_from_bps;
 
+void read_avi_header(demuxer_t *demuxer,int index_mode);
+
 demuxer_t* demux_open_avi(demuxer_t* demuxer){
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;

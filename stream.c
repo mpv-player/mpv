@@ -67,16 +67,6 @@ off_t newpos;
 
 //  if(verbose>=3) printf("seek to 0x%X\n",(unsigned int)pos);
 
-if(verbose>=3){
-#ifdef _LARGEFILE_SOURCE
-  printf("s->pos=%llX  newpos=%llX  new_bufpos=%llX  buflen=%X  \n",
-    (long long)s->pos,(long long)newpos,(long long)pos,s->buf_len);
-#else
-  printf("s->pos=%X  newpos=%X  new_bufpos=%X  buflen=%X  \n",
-    (unsigned int)s->pos,newpos,pos,s->buf_len);
-#endif
-}
-
   s->buf_pos=s->buf_len=0;
 
   switch(s->type){
@@ -92,6 +82,16 @@ if(verbose>=3){
   case STREAMTYPE_DVD:
     newpos=pos/2048; newpos*=2048; break;
   }
+
+if(verbose>=3){
+#ifdef _LARGEFILE_SOURCE
+  printf("s->pos=%llX  newpos=%llX  new_bufpos=%llX  buflen=%X  \n",
+    (long long)s->pos,(long long)newpos,(long long)pos,s->buf_len);
+#else
+  printf("s->pos=%X  newpos=%X  new_bufpos=%X  buflen=%X  \n",
+    (unsigned int)s->pos,newpos,pos,s->buf_len);
+#endif
+}
 
   pos-=newpos;
 
