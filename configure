@@ -2522,7 +2522,7 @@ case "$_dvdread" in
 	;;
 esac
 
-echocheck "libdvdnav"
+echocheck "DVD support (libdvdnav)"
 if test "$_dvdnav" = yes ; then
   cat > $TMPC <<EOF
 #include <dvdnav.h>
@@ -2603,7 +2603,7 @@ if test "$_mad" = yes ; then
   _codecmodules="libmad $_codecmodules"
 else
   _def_mad='#undef USE_LIBMAD'
-  _nocodecmodules="libmad $_codecmodules"
+  _nocodecmodules="libmad $_nocodecmodules"
 fi
 echores "$_mad"
 
@@ -2623,7 +2623,7 @@ if test "$_vorbis" = yes ; then
   _codecmodules="libvorbis $_codecmodules"
 else
   _def_vorbis='#undef HAVE_OGGVORBIS'
-  _nocodecmodules="libvorbis $_codecmodules"
+  _nocodecmodules="libvorbis $_nocodecmodules"
 fi
 echores "$_vorbis"
 
