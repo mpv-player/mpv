@@ -32,9 +32,7 @@
 #include "cookies.h"
 #include "url.h"
 #include "asf.h"
-#ifndef STREAMING_LIVE_DOT_COM
 #include "rtp.h"
-#endif
 #include "pnm.h"
 #include "realrtsp/rtsp_session.h"
 
@@ -149,7 +147,6 @@ streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl ) {
 	free( streaming_ctrl );
 }
 
-#ifndef STREAMING_LIVE_DOT_COM
 int
 read_rtp_from_server(int fd, char *buffer, int length) {
 	struct rtpheader rh;
@@ -169,7 +166,6 @@ read_rtp_from_server(int fd, char *buffer, int length) {
 	memcpy(buffer, data, len);
 	return(len);
 }
-#endif
 
 
 // Converts an address family constant to a string
@@ -704,8 +700,7 @@ extension=NULL;
 #endif
 		}
 
-#ifndef STREAMING_LIVE_DOT_COM
-	// Old, hacked RTP support, which works for MPEG Program Streams
+	// Old, hacked RTP support, which works for MPEG Streams
 	//   RTP streams only:
 		// Checking for RTP
 		if( !strcasecmp(url->protocol, "rtp") ) {
@@ -715,7 +710,6 @@ extension=NULL;
 			}
 			return 0;
 		}
-#endif
 
 		// Checking for ASF
 		if( !strncasecmp(url->protocol, "mms", 3) ) {
@@ -1075,9 +1069,8 @@ realrtsp_streaming_start( stream_t *stream ) {
 }
 
 
-#ifndef STREAMING_LIVE_DOT_COM
 // Start listening on a UDP port. If multicast, join the group.
-int
+static int
 rtp_open_socket( URL_t *url ) {
 	int socket_server_fd, rxsockbufsz;
 	int err, err_len;
@@ -1181,12 +1174,12 @@ rtp_open_socket( URL_t *url ) {
 	return socket_server_fd;
 }
 
-int
+static int
 rtp_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
     return read_rtp_from_server( fd, buffer, size );
 }
 
-int
+static int
 rtp_streaming_start( stream_t *stream ) {
 	streaming_ctrl_t *streaming_ctrl;
 	int fd;
@@ -1208,7 +1201,6 @@ rtp_streaming_start( stream_t *stream ) {
 	streaming_ctrl->status = streaming_playing_e;
 	return 0;
 }
-#endif
 
 int
 streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
@@ -1240,7 +1232,6 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	// Get the bandwidth available
 	stream->streaming_ctrl->bandwidth = network_bandwidth;
 	
-#ifndef STREAMING_LIVE_DOT_COM
 	// For RTP streams, we usually don't know the stream type until we open it.
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "rtp")) {
 		if(stream->fd >= 0) {
@@ -1250,7 +1241,6 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		stream->fd = -1;
 		ret = rtp_streaming_start( stream );
 	} else
-#endif
 
 	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "pnm")) {
 		stream->fd = -1;

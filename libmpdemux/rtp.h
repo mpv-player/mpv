@@ -25,12 +25,6 @@ struct rtpheader {	/* in network byte order */
 };
 
 
-void initrtp(struct rtpheader *foo); /* fill in the MPEG-2 TS deefaults */
-int sendrtp(int fd, struct sockaddr_in *sSockAddr, struct rtpheader *foo, char *data, int len);
 int getrtp2(int fd, struct rtpheader *rh, char** data, int* lengthData);
-int sendrtp2(int fd, struct sockaddr_in *sSockAddr, struct rtpheader *foo, char *data, int len);
-int getrtp(int fd, struct rtpheader *rh, char** data, int* lengthData);
-int makesocket(char *szAddr,unsigned short port,int TTL,struct sockaddr_in *sSockAddr);
-int makeclientsocket(char *szAddr,unsigned short port,int TTL,struct sockaddr_in *sSockAddr);
 
 #endif
