@@ -228,8 +228,10 @@ static mp_cmd_t* ar_cmd = NULL;
 static unsigned int ar_delay = 100, ar_rate = 8, last_ar = 0;
 
 static int use_joystick = 1, use_lirc = 1;
+static char* config_file = "input.conf";
 
 static config_t input_conf[] = {
+  { "conf", &config_file, CONF_TYPE_STRING, CONF_GLOBAL, 0, 0, NULL },
   { "ar-delay", &ar_delay, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
   { "ar-rate", &ar_rate, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL },
   { NULL, NULL, 0, 0, 0, 0, NULL}
@@ -1081,7 +1083,7 @@ void
 mp_input_init(void) {
   char* file;
 
-  file = get_path("input.conf");
+  file = config_file[0] != '/' ? get_path(config_file) : config_file;
   if(!file)
     return;
   
