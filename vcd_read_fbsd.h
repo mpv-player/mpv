@@ -1,3 +1,6 @@
+#include <sys/cdio.h>
+#include <sys/cdrio.h>
+
 //=================== VideoCD ==========================
 #define	CDROM_LEADOUT	0xAA
 

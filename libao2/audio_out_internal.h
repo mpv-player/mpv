@@ -8,6 +8,8 @@ static void reset();
 static int get_space();
 static int play(void* data,int len,int flags);
 static int get_delay();
+static void audio_pause();
+static void audio_resume();
 
 #define LIBAO_EXTERN(x) ao_functions_t audio_out_##x =\
 {\
@@ -18,6 +20,8 @@ static int get_delay();
 	reset,\
 	get_space,\
 	play,\
-	get_delay\
+	get_delay,\
+	audio_pause,\
+	audio_resume\
 };
 

@@ -43,6 +43,14 @@ typedef struct ao_functions_s {
          */
         int (*get_delay)();
 
+        /*
+         */
+        void (*pause)();
+
+        /*
+         */
+        void (*resume)();
+
 } ao_functions_t;
 
 // NULL terminated array of all drivers

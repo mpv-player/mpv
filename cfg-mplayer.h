@@ -40,10 +40,10 @@ struct config conf[]={
 	{"ao", &audio_driver, CONF_TYPE_STRING, 0, 0, 0},
 	{"dsp", &dsp, CONF_TYPE_STRING, 0, 0, 0},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},
+        {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
 #ifdef HAVE_X11
 	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0},
 #endif
-        {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
 	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 },
 #ifdef HAVE_LIBCSS
         {"dvdauth", &dvd_auth_device, CONF_TYPE_STRING, 0, 0, 0},

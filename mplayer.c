@@ -16,14 +16,21 @@
 #include <sys/time.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#ifdef __sun
-#include <sys/audioio.h>
-#else
-#include <sys/soundcard.h>
-#endif
 
 #include "version.h"
 #include "config.h"
+
+#if defined(USE_OSS_AUDIO)
+#include <sys/soundcard.h>
+#elif defined(USE_SUN_AUDIO)
+#endif
+
+#if	defined(sun)
+#define	DEFAULT_CDROM_DEVICE	"/vol/dev/aliases/cdrom0"
+#else
+#define	DEFAULT_CDROM_DEVICE	"/dev/cdrom"
+#endif
+
 
 #ifndef MAX_OUTBURST
 #error "============================================="
@@ -65,6 +72,10 @@
 
 //extern int vo_screenwidth;
 
+int audio_fd=-1;
+
+extern int vo_screenwidth;
+
 extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
 
 extern int errno;
@@ -86,6 +97,7 @@ extern int errno;
 static URL_t* url;
 #endif
 
+
 #define DEBUG if(0)
 #ifdef HAVE_GUI
  int nogui=1;
@@ -96,6 +108,19 @@ int verbose=0;
 
 static subtitle* subtitles=NULL;
 void find_sub(subtitle* subtitles,int key);
+
+static int
+usec_sleep(int usec_delay)
+{
+#if	1
+    struct timespec ts;
+    ts.tv_sec  =  usec_delay / 1000000;
+    ts.tv_nsec = (usec_delay % 1000000) * 1000;
+    return nanosleep(&ts, NULL);
+#else
+    return usleep(usec_delay);
+#endif
+}
 
 //**************************************************************************//
 //             Config file
@@ -269,7 +294,7 @@ extern void avi_fixate();
 
 #ifdef HAVE_GUI
  #include "../Gui/mplayer/psignal.h"
- #define GUI_MSG(x) if ( !nogui ) { mplSendMessage( x ); usleep( 10000 ); }
+ #define GUI_MSG(x) if ( !nogui ) { mplSendMessage( x ); usec_sleep( 10000 ); }
 #else
  #define GUI_MSG(x)
 #endif
@@ -297,6 +322,8 @@ void exit_player(char* how){
   #endif
      getch2_disable();
   video_out->uninit();
+  audio_out->reset();
+  audio_out->uninit();
   if(encode_name) avi_fixate();
 #ifdef HAVE_LIRC
   #ifdef HAVE_GUI
@@ -403,6 +430,8 @@ int   sub_auto = 1;
 
 char *dsp=NULL;
 
+float rel_seek_secs=0;
+
 #include "mixer.h"
 #include "cfg-mplayer.h"
 
@@ -505,11 +534,7 @@ int f; // filedes
 #endif
 
 if(!filename){
-#ifdef __sun
-  if(vcd_track) filename="/vol/dev/aliases/cdrom0"; 
-#else
-  if(vcd_track) filename="/dev/cdrom"; 
-#endif
+  if(vcd_track) filename=DEFAULT_CDROM_DEVICE;
   else {
     printf("%s",help_text); exit(0);
   }
@@ -642,6 +667,7 @@ if(vcd_track){
   }
   if (dvd_auth_device) {
     if (dvd_auth(dvd_auth_device,f)) {
+//    if (dvd_auth(dvd_auth_device,filename)) {
         GUI_MSG( mplErrorDVDAuth )
         exit(0);
       } 
@@ -1073,7 +1099,7 @@ while(1){
       {
        mplShMem->items.videodata.format=sh_video->format;
        mplSendMessage( mplCantFindCodecForVideoFormat );
-       usleep( 10000 );
+       usec_sleep( 10000 );
       }
     #endif
     exit(1);
@@ -1137,7 +1163,7 @@ switch(sh_video->codec->driver){
           {
            strcpy(  mplShMem->items.videodata.codecdll,sh_video->codec->dll );
            mplSendMessage( mplDSCodecNotFound );
-           usleep( 10000 );
+           usec_sleep( 10000 );
           }
         #endif
         exit(1);
@@ -1508,11 +1534,11 @@ while(has_audio){
       time_frame=0;
     } else {
         while(time_frame>0.022){
-            usleep(time_frame-0.022);
+            usec_sleep(time_frame-0.022);
             time_frame-=GetRelativeTime();
         }
         while(time_frame>0.007){
-            usleep(0);
+            usec_sleep(1000);	// sleeps 1 clock tick (10ms)!
             time_frame-=GetRelativeTime();
         }
     }
@@ -1744,7 +1770,14 @@ switch(sh_video->codec->driver){
           if(verbose>1)printf("delay=%d\n",delay);
           time_frame=v_frame;
           time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
-	  if(time_frame>-2*frame_time) drop_frame=0; // stop dropping frames
+	  if(time_frame>-2*frame_time) {
+	    drop_frame=0; // stop dropping frames
+	    if (verbose>0) printf("\nstop frame drop %.2f\n", time_frame);
+	  }else{
+	    ++drop_frame_cnt;
+	    if (verbose > 0 && drop_frame_cnt%10 == 0)
+	      printf("\nstill dropping, %.2f\n", time_frame);
+	  }
       }
 
     } else {
@@ -1762,6 +1795,7 @@ switch(sh_video->codec->driver){
 	  if(time_frame<-2*frame_time){
 	      drop_frame=frame_dropping; // tricky!
 	      ++drop_frame_cnt;
+	      if (verbose>0) printf("\nframe drop %d, %.2f\n", drop_frame, time_frame);
 	  }
       } else {
           if(time_frame<-3*frame_time || time_frame>3*frame_time) time_frame=0;
@@ -1771,15 +1805,15 @@ switch(sh_video->codec->driver){
       
       while(time_frame>0.005){
           if(time_frame<=0.020)
-             usleep(0); // sleep 10ms
+             usec_sleep(10000); // sleeps 1 clock tick (10ms)!
           else
-             usleep(1000000*(time_frame-0.002));
+             usec_sleep(1000000*(time_frame-0.002));
           time_frame-=GetRelativeTime();
       }
 
         current_module="flip_page";
         video_out->flip_page();
-//        usleep(50000); // test only!
+//        usec_sleep(50000); // test only!
 
     }
 
@@ -1845,7 +1879,7 @@ switch(sh_video->codec->driver){
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         a_frame+=x; c_total+=x;
-        printf(" ct:%7.3f  %3d  %2d%% %2d%% %3.1f%% %d\r",c_total,
+        printf(" ct:%7.3f  %3d  %2d%% %2d%% %4.1f%% %d\r",c_total,
         (int)num_frames,
         (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
@@ -1886,7 +1920,7 @@ switch(sh_video->codec->driver){
 
   if(osd_function==OSD_PAUSE){
       printf("\n------ PAUSED -------\r");fflush(stdout);
-      audio_out->reset(); // stop audio
+      audio_out->pause();	// pause audio, keep data if possible
 #ifdef HAVE_GUI
       if ( nogui )
         {
@@ -1897,12 +1931,13 @@ switch(sh_video->codec->driver){
 #endif
              (!f || getch2(20)<=0) && mplayer_get_key()<=0){
 	     video_out->check_events();
-             if(!f) usleep(1000); // do not eat the CPU
+             if(!f) usec_sleep(1000); // do not eat the CPU
          }
          osd_function=OSD_PLAY;
 #ifdef HAVE_GUI
-        } else while( osd_function != OSD_PLAY ) usleep( 1000 );
+        } else while( osd_function != OSD_PLAY ) usec_sleep( 1000 );
 #endif
+      audio_out->resume();	// resume audio
   }
 
 
@@ -1967,14 +2002,14 @@ switch(sh_video->codec->driver){
       break;
     case '*':
     case '/': {
-        int mixer_l=0; int mixer_r=0;
+        float mixer_l, mixer_r;
         mixer_getvolume( &mixer_l,&mixer_r );
         if(c=='*'){
-            if ( mixer_l < 100 ) mixer_l++;
-            if ( mixer_r < 100 ) mixer_r++;
+            mixer_l++; if ( mixer_l > 100 ) mixer_l = 100;
+            mixer_r++; if ( mixer_r > 100 ) mixer_r = 100;
         } else {
-            if ( mixer_l > 0 ) mixer_l--;
-            if ( mixer_r > 0 ) mixer_r--;
+            mixer_l--; if ( mixer_l < 0 ) mixer_l = 0;
+            mixer_r--; if ( mixer_r < 0 ) mixer_r = 0;
         }
         mixer_setvolume( mixer_l,mixer_r );
 
@@ -2258,7 +2293,7 @@ switch(file_format){
 
         current_module=NULL;
 
-        audio_out->reset(); // stop audio
+        audio_out->reset(); // stop audio, throwing away buffered data
 
         c_total=0; // kell ez?
         printf("A:%6.1f  V:%6.1f  A-V:%7.3f",d_audio->pts,d_video->pts,0.0f);

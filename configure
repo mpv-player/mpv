@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 #
 # MPlayer configurator.   (C) 2000 Pontscho/fresh!mindworkz
@@ -82,6 +82,13 @@
 # --
 
 
+# Check how echo works in this /bin/sh
+case `echo -n` in
+-n)     _echo_n=   _echo_c='\c';;
+*)      _echo_n=-n _echo_c=;;
+esac
+
+
 # LGB: Help moved here.
 
 if [ "$1" = "--help" -o "$1" = "-help" -o "$1" = "-h" ]; then
@@ -117,8 +124,10 @@ params:
 	--enable-xmmp	        use XMMP audio drivers
 	--enable-lirc	        enable LIRC (remote control) support
 
-        --disable-alsa          disable alsa support [autodetect]
+        --disable-oss           disable OSS sound support [autodetect]
+        --disable-alsa          disable alsa sound support [autodetect]
 	--disable-esd           disable esd sound support [autodetect]
+        --disable-sun           disable Sun sound support [autodetect]
 		
 	--disable-gcc-checking  disable gcc version checking
 
@@ -179,6 +188,7 @@ MCONF='config.mak'
 # ---  Check for C compiler:
 
 _cc=gcc
+_as=as
 _x11=auto
 
 _x11libdir=
@@ -199,6 +209,9 @@ do
  case "$ac_option" in
   --cc=*)
         _cc=`echo $ac_option | cut -d '=' -f 2`
+        ;;
+  --as=*)
+        _as=`echo $ac_option | cut -d '=' -f 2`
         ;;
   --disable-gcc-checking)
         _skip_cc_check=yes
@@ -221,13 +234,15 @@ do
  esac
 done
 
+# ---
+
 # Checking CC version...
 # Q: what's with egcs, pgcc? - Atmos
 # A: same as with agcc! These compilers always were introduced as experimental
 # ones. Now gcc-3.0 should introduce all features of these compilers.
 # Since 3.0 is almost released we don't need to support them. - Nick 05 jun 2001
 if test "$_skip_cc_check" != "yes"; then
-echo -n "Checking version of $_cc ... "
+echo $_echo_n "Checking version of $_cc ... $_echo_c"
 cc_version=`$_cc -v 2>&1 | sed -n 's/^.*version \([aegcygnustp-]*[0-9.]*\).*$/\1/p'`
 case $cc_version in
     '') cc_version="v. ?.??, bad"; cc_verc_fail=yes;;
@@ -236,7 +251,7 @@ case $cc_version in
     *) cc_version="$cc_version, bad"; cc_verc_fail=yes;;
 esac
 echo "$cc_version"
-if ! test -z "$cc_verc_fail"; then
+if [ ! -z "$cc_verc_fail" ] ; then
 echo "Please downgrade(upgrade) gcc compiler to gcc-2.95.2+ or gcc-3.0+ version"
 exit
 fi
@@ -245,15 +260,26 @@ echo "YOU'VE SELECTED '--disable-gcc-checking'. PLEASE DON'T SEND US ANY BUGREPO
 fi
 # ---
 
-pname=`cat /proc/cpuinfo | grep 'model name' | cut -d ':' -f 2`
-pparam=`cat /proc/cpuinfo | grep 'features' | cut -d ':' -f 2`
-if [ -z "$pparam" ]; then
-  pparam=`cat /proc/cpuinfo | grep 'flags' | cut -d ':' -f 2`
+
+if [ -r /proc/cpuinfo ]; then
+	# linux with /proc mounted, extract cpu information from it
+	_cpuinfo="cat /proc/cpuinfo"
+else
+	# all other OS try to extract cpu information from a small helper
+	# program TOOLS/cpuinfo instead
+	$_cc -o TOOLS/cpuinfo TOOLS/cpuinfo.c
+	_cpuinfo="TOOLS/cpuinfo"
 fi
-pvendor=`cat /proc/cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2`
-pfamily=`cat /proc/cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2`
-pmodel=`cat /proc/cpuinfo |grep -v 'model name'| grep "model" | cut -d ':' -f 2 | cut -d ' ' -f 2`
-pstepping=`cat /proc/cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
+
+pname=`$_cpuinfo | grep 'model name' | cut -d ':' -f 2`
+pparam=`$_cpuinfo | grep 'features' | cut -d ':' -f 2`
+if [ -z "$pparam" ]; then
+  pparam=`$_cpuinfo | grep 'flags' | cut -d ':' -f 2`
+fi
+pvendor=`$_cpuinfo | grep 'vendor_id' | cut -d ':' -f 2  | cut -d ' ' -f 2`
+pfamily=`$_cpuinfo | grep 'cpu family' | cut -d ':' -f 2 | cut -d ' ' -f 2`
+pmodel=`$_cpuinfo | grep -v 'model name' | grep 'model' | cut -d ':' -f 2 | cut -d ' ' -f 2`
+pstepping=`$_cpuinfo | grep 'stepping' | cut -d ':' -f 2 | cut -d ' ' -f 2`
 
 _mmx=no
 _mmx2=no
@@ -276,7 +302,8 @@ _xmga=no
 _dga=no
 _dga2=no
 _svga=no
-_fbdev=yes
+_fbdev=no
+[ x`uname -s` = xLinux ] && _fbdev=yes
 _lirc=no
 _css=no
 _dshow=yes
@@ -287,6 +314,7 @@ _y=1
 
 _gllib=
 _sdllib=
+_sdlcflags=
 _xvlib=
 _x11lib=
 
@@ -448,39 +476,39 @@ EOF
 #echo -n "Checking your GCC CPU optimalization abilities: "
 if [ "$proc" = "k7" ]; then
 #	echo -n "trying k7  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=athlon
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=athlon
 fi
 if [ "$proc" = "athlon" ]; then
 #	echo -n "trying athlon  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=k6
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=k6
 fi
 if [ "$proc" = "k6" ]; then
 #	echo -n "trying k6  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=k5
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=k5
 fi
 if [ "$proc" = "k5" ]; then
 #	echo -n "trying k5  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentium
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentium
 fi
 if [ "$proc" = "i686" ]; then
 #	echo -n "trying i686  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentiumpro
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentiumpro
 fi
 if [ "$proc" = "pentiumpro" ]; then
 #	echo -n "trying pentiumpro  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=pentium
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=pentium
 fi
 if [ "$proc" = "pentium" ]; then
 #	echo -n "trying pentium  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=i486
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=i486
 fi
 if [ "$proc" = "i486" ]; then
 #	echo -n "trying i486  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=i386
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=i386
 fi
 if [ "$proc" = "i386" ]; then
 #	echo -n "trying i386  "
-	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc &> /dev/null || proc=error
+	$_cc $TMPC -o $TMPO -march=$proc -mcpu=$proc > /dev/null 2>&1 || proc=error
 fi
 if [ "$proc" = "error" ]; then
 	echo
@@ -491,16 +519,17 @@ fi
 #echo "DONE (${proc})."
 
 
-$_cc $TMPC -o $TMPO -lvgagl -lvga &> /dev/null && _svga=yes
+$_cc $TMPC -o $TMPO -lvgagl -lvga > /dev/null 2>&1 && _svga=yes
 
-$_cc $TMPC -o $TMPO -lpthread &> /dev/null || \
+$_cc $TMPC -o $TMPO -lpthread > /dev/null 2>&1 || \
  { echo "Lib pthread not found."; rm -f $TMPC $TMPO $TMPS ; exit 1; }
 
 # Atmosfear: added SDL versioncheck and autodetect; removed warnings.
 _sdl=no
-if $_cc $TMPC -o $TMPO `$_sdlconfig --libs` &> /dev/null ; then
-	if test `$_sdlconfig --version | sed s/[^0-9]//g` -gt 116 ; then
-		if test `$_sdlconfig --version | sed s/[^0-9]//g` -lt 121 ; then
+if $_cc `$_sdlconfig --cflags` $TMPC -o $TMPO `$_sdlconfig --libs` > /dev/null 2>&1 ; then
+	_sdlversion=`$_sdlconfig --version | sed 's/[^0-9]//g'`
+	if test "$_sdlversion" -gt 116 ; then
+		if test "$_sdlversion" -lt 121 ; then
 
 			_sdlbuggy='#define BUGGY_SDL'
 		else	
@@ -514,16 +543,16 @@ fi
 
 # Atmosfear: added libcss autodetect
 _css=no
-if test -e "/usr/local/lib/libcss.so" ; then
+if test -s "/usr/local/lib/libcss.so" ; then
 	_csslibdir="/usr/local/lib/"
-	if test -e "/usr/local/include/css.h" ; then
+	if test -s "/usr/local/include/css.h" ; then
 		_cssincdir="/usr/local/include"
 		_css=yes
 	fi	
 else
-	if test -e "/usr/lib/libcss.so" ; then
+	if test -s "/usr/lib/libcss.so" ; then
 		_csslibdir="/usr/lib/"
-		if test -e "/usr/include/css.h" ; then
+		if test -s "/usr/include/css.h" ; then
 			_cssincdir="/usr/include/"
 			_css=yes
 		fi	
@@ -531,15 +560,16 @@ else
 fi
 	
 _termcap=no
-$_cc $TMPC -o $TMPO -ltermcap &> /dev/null && _termcap=yes
+$_cc $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _termcap=yes
 
 _png=no
-$_cc $TMPC -o $TMPO -lpng -lz -lm &> /dev/null && _png=yes
+$_cc $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
 
 _binutils=no
-as libac3/downmix/downmix_i386.S -o $TMPO &> /dev/null && _binutils=yes
+$_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
 
 # echo binutils: $_binutils
+
 
 # ----------- Check X11 and related libs (GL, Xxf86vm, Xv, DGA) --------------
 
@@ -549,22 +579,22 @@ $_cc $TMPC -o $TMPO -lsocket >/dev/null 2>&1 && _socklib=-lsocket
 
 if [ $_x11 = auto ]; then
   _x11=no
-  $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext $_socklib &> /dev/null && _x11=yes
+  $_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext $_socklib > /dev/null 2>&1 && _x11=yes
 fi
 
 if [ $_x11 = yes ]; then
 
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib &> /dev/null && _xdpms=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib &> /dev/null && _xv=yes
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib &> /dev/null && _vm=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXdpms $_socklib > /dev/null 2>&1 && _xdpms=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXv $_socklib > /dev/null 2>&1 && _xv=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lXxf86vm $_socklib > /dev/null 2>&1 && _vm=yes
 
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib &> /dev/null && _gl=yes
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib > /dev/null 2>&1 && _gl=yes
 
 cat > $TMPC << EOF
 #include <GL/gl.h>
 int main( void ) { return 0; }
 EOF
-$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib &> /dev/null || \
+$_cc $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL $_socklib > /dev/null 2>&1 || \
  { _gl=no; echo "GL includes not found!";}
 
 cat > $TMPC << EOF
@@ -574,7 +604,7 @@ cat > $TMPC << EOF
 int main (void) { return 0;}
 EOF
 
-$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib &> /dev/null && _dga=yes
+$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga=yes
 # Note: the -lXxf86vm library is the VideoMode extension and though it's
 # not needed for DGA, AFAIK every distribution packages together with DGA
 # stuffs named 'X extensions' or something similar. This check can be usefull
@@ -590,11 +620,21 @@ int main (void) { XDGAMode mode; XDGADevice device; return 0;}
 EOF
 
 _dga2=no
-$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib &> /dev/null && _dga2=yes
+$_cc $TMPC -o $TMPO -L/usr/X11R6/lib -L/usr/X11/lib -lX11 -lXext -lXxf86dga -lXxf86vm $_socklib > /dev/null 2>&1 && _dga2=yes
 
 fi
 
 rm -f $TMPC $TMPO
+
+
+# ---
+# try to detect type of audio supported on this machine
+
+_oss_audio=no
+[ -c /dev/dsp ] && _oss_audio=yes
+
+_sun_audio=no
+[ -c /dev/audio -a -c /dev/audioctl ] && _sun_audio=yes
 
 # ---
 
@@ -606,9 +646,9 @@ EOF
 
 _alsaver='not found'
 $_cc -o $TMPO -lasound $TMPC 2> /dev/null || _alsa=no
-[ $_alsa == 'yes' ] && $TMPO && { _alsaver='0.5.x'; }
+[ $_alsa = 'yes' ] && $TMPO && { _alsaver='0.5.x'; }
 
-if [ "$_alsaver" == 'not found' ]; then
+if [ "$_alsaver" = 'not found' ]; then
 cat > $TMPC << EOF
 #include <sys/asoundlib.h>
 #include <sys/soundcard.h>
@@ -617,7 +657,7 @@ EOF
 
 _alsaver='not found'
 $_cc -o $TMPO -lasound $TMPC 2> /dev/null || _alsa=no
-[ $_alsa == 'yes' ] && $TMPO && { _alsaver='0.9.x'; }
+[ $_alsa = 'yes' ] && $TMPO && { _alsaver='0.9.x'; }
 fi
 
 # ---
@@ -645,7 +685,7 @@ do
   	_debug='-g'
 	;;
   --enable-debug=*)
-        _debug=`echo -n '-g'; echo $ac_option | cut -d '=' -f 2`
+        _debug=`echo '-g'; echo $ac_option | cut -d '=' -f 2`
 	;;
   --enable-css)
 	_css=yes
@@ -716,6 +756,12 @@ do
 	;;
   --enable-xmmp)
 	_xmmp=yes
+	;;
+  --enable-ossaudio)
+  	_oss_audio=yes
+	;;
+  --enable-sunaudio)
+  	_sun_audio=yes
 	;;
   --enable-lirc)
 	_lirc=yes
@@ -807,6 +853,12 @@ do
   --disable-esd)
         _esd=no
         ;;
+  --disable-ossaudio)
+  	_oss_audio=no
+	;;
+  --disable-sunaudio)
+  	_sun_audio=no
+	;;
   --with-win32libdir=*)
         _win32libdir=`echo $ac_option | cut -d '=' -f 2`
 	_win32libdirnotify=no
@@ -832,21 +884,27 @@ do
         ;;
   --cc=*)
 	;;
+  --as=*)
+	;;
  esac
 done
 
-# Checking assembler (as) compatibility...
-as_version=`as --version 2>&1 | sed -n 's/^.*assembler \([0-9.]*\).*$/\1/p'`
-echo -n "Checking assembler (as) ... $as_version, "
+# Checking assembler (_as) compatibility...
+as_version=`$_as --version 2>&1 | sed -n 's/^.*assembler \([0-9.]*\).*$/\1/p'`
+echo $_echo_n "Checking assembler (as) ... $as_version, $_echo_c"
 _pref_as_version='2.9.1'
 ### this test disabled, see _binutils test above!  --A'rpi
 # cat > astest.S <<EOF
 # filds -2(%ebp)
 # EOF
-# as astest.S -o astest.o &> /dev/null || as_verc_fail=yes
+# $_as astest.S -o astest.o > /dev/null 2>&1 || as_verc_fail=yes
+
+cat > $TMPS <<EOF
+nop
+EOF
 
 if [ $_mmx = 'yes' ]; then
-cat > $TMPS <<EOF
+cat >> $TMPS <<EOF
 emms
 EOF
 fi
@@ -885,7 +943,7 @@ fi
 #xorpd %xmm0, %xmm0
 #EOF
 #fi
-as $TMPS -o $TMPO &> /dev/null || as_verc_fail=yes
+$_as $TMPS -o $TMPO > /dev/null 2>&1 || as_verc_fail=yes
 rm -f $TMPS $TMPO $TMPC
 
 if test "$as_verc_fail" != "yes"; then
@@ -900,7 +958,7 @@ fi
 _k_verc_problem=no
 system_name=`uname -s 2>&1`
 kernel_version=`uname -r 2>&1`
-echo -n "Checking $system_name kernel version ... "
+echo $_echo_n "Checking $system_name kernel version ... $_echo_c"
 case $kernel_version in
     '') kernel_version="?.??"; _k_verc_fail=yes;;
     [0-1].[0-99].[0-99]|2.[0-3].[0-99])
@@ -909,7 +967,7 @@ esac
 if [ $_k_verc_problem = 'yes' ] && [ $_sse = 'yes' ]; then
 _k_verc_fail=yes
 fi
-if ! test -z "$_k_verc_fail"; then
+if [ ! -z "$_k_verc_fail" ]; then
 echo "$kernel_version, fail"
 echo "WARNING! You want to run mplayer on this system then be prepared for problems"
 else
@@ -946,12 +1004,14 @@ echo "Checking for DGA 2.0 .. $_dga2"
 echo "Checking for Xf86VM ... $_vm"
 echo "Checking for SVGAlib ... $_svga"
 echo "Checking for FBDev ... $_fbdev"
+echo "Checking for OSS Audio ... $_oss_audio"
+echo "Checking for ALSA Audio ... $_alsaver"
+echo "Checking for ESD Audio ... $_esd"
+echo "Checking for Sun Audio ... $_sun_audio"
 echo "Checking for DeCSS support ... $_css"
 echo "Checking for PNG support ... $_png"
 echo "Checking for DirectShow ... $_dshow"
 echo "Checking for fastmemcpy ... $_fastmemcpy"
-echo "Checking for alsa ... $_alsaver"
-echo "Checking for esd ... $_esd"
 # write conf files.
 
 if [ $_gl = yes ]; then
@@ -1006,6 +1066,7 @@ fi
 
 if [ $_sdl = yes ]; then
   _sdllib=`$_sdlconfig --libs` 
+  _sdlcflags=`$_sdlconfig --cflags` 
 fi
 
 if [ $_dga = yes ]; then
@@ -1051,17 +1112,31 @@ _aosrc=''
 
 _alsa5='#undef HAVE_ALSA5'
 _alsa9='#undef HAVE_ALSA9'
-if [ $_alsa == 'yes' ]; then
- [ $_alsaver == '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; _alsa5='#define HAVE_ALSA5'; _alsalib='-lasound'; }
- # [ $_alsaver == '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; _alsalib='-lasound'; }
+if [ $_alsa = 'yes' ]; then
+ [ $_alsaver = '0.5.x' ] && { _aosrc="$_aosrc ao_alsa5.c"; _alsa5='#define HAVE_ALSA5'; _alsalib='-lasound'; }
+ # [ $_alsaver = '0.9.x' ] && { _aosrc="$_aosrc ao_alsa9.c"; _alsa9='#define HAVE_ALSA9'; _alsalib='-lasound'; }
 fi
   
 _esdd='#undef HAVE_ESD'
-#if [ $_esd == 'yes' ]; then
+#if [ $_esd = 'yes' ]; then
 # _esdd='#define HAVE_ESD'
 # _aosrc="$_aosrc ao_esd.c"
 # _esdlib='-lesd'
 #fi
+
+if [ "$_oss_audio" = "yes" ]; then
+ _ossaudio='#define USE_OSS_AUDIO'
+ _aosrc="$_aosrc ao_oss.c"
+else
+ _ossaudio='#undef USE_OSS_AUDIO'
+fi
+
+if [ "$_sun_audio" = "yes" ]; then
+ _sunaudio='#define USE_SUN_AUDIO'
+ _aosrc="$_aosrc ao_sun.c"
+else
+ _sunaudio='#undef USE_SUN_AUDIO'
+fi
 
 # Checking for CFLAGS
 if [ "$_profile" != "" ] || [ "$_debug" != "" ]; then
@@ -1089,6 +1164,8 @@ XMM_LIBS = $_xmmplibs
 LIRC_LIBS = $_lirclibs
 CSS_LIB = $_csslib
 CSS_INC = $_cssinc
+SDL_LIB = $_sdllib
+SDL_INC = $_sdlcflags
 WIN32_PATH=-DWIN32_PATH=\"$_win32libdir\"
 DS_DEP = $_dshowdep
 DS_LIB = $_dshowlib
@@ -1287,6 +1364,10 @@ $_select
    (with mmx/sse optimizations)
    You can still change it runtime using -afm 1 (mpg123) or -afm 4 (l3codeca)*/
 $_mpg123
+
+/* AUDIO Support */
+$_ossaudio
+$_sunaudio
 
 /* XMMP support: (test code) */
 $_xmmpaudio

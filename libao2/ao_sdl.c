@@ -11,6 +11,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "audio_out.h"
 #include "audio_out_internal.h"
@@ -56,6 +57,7 @@ static unsigned int buf_write_pos=0;
 
 static int full_buffers=0;
 static int buffered_bytes=0;
+
 
 static int write_buffer(unsigned char* data,int len){
   int len2=0;
@@ -104,6 +106,23 @@ static int read_buffer(unsigned char* data,int len){
 #else
 #include <SDL/SDL.h>
 #endif
+
+#if	defined(sun) && defined(__svr4__)
+/* setenv is missing on solaris */
+static void setenv(const char *name, const char *val, int _xx)
+{
+  int len  = strlen(name) + strlen(val) + 2;
+  char *env = malloc(len);
+
+  if (env != NULL) {
+    strcpy(env, name);
+    strcat(env, "=");
+    strcat(env, val);
+    putenv(env);
+  }
+}
+#endif
+
 
 // to set/get/query special features/parameters
 static int control(int cmd,int arg){
@@ -195,6 +214,19 @@ static void reset(){
 	buffered_bytes=0;
 
 }
+
+// stop playing, keep buffers (for pause)
+static void audio_pause()
+{
+    // for now, just call reset();
+    reset();
+}
+
+// resume playing, after audio_pause()
+static void audio_resume()
+{
+}
+
 
 // return: how many bytes can be played without blocking
 static int get_space(){

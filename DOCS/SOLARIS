@@ -1,0 +1,5 @@
+Notes for Solaris users
+=======================
+
+1. To build the package you will need GNU make (gmake, /opt/sfw/gmake), 
+native Solaris make will not work.

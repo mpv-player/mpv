@@ -136,11 +136,30 @@ static vo_info_t vo_info =
 	""
 };
 
+
 #ifdef __FreeBSD__
 #include <SDL11/SDL.h>
 #else
 #include <SDL/SDL.h>
 #endif
+
+
+#if	defined(sun) && defined(__svr4__)
+/* setenv is missing on solaris */
+static void setenv(const char *name, const char *val, int _xx)
+{
+    int len  = strlen(name) + strlen(val) + 2;
+    char *env = malloc(len);
+
+    if (env != NULL) {
+	strcpy(env, name);
+	strcat(env, "=");
+	strcat(env, val);
+	putenv(env);
+    }
+}
+#endif
+
 
 #define FS 0x01
 #define VM 0x02

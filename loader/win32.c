@@ -702,12 +702,29 @@ void WINAPI expGetSystemInfo(SYSTEM_INFO* si)
 	cachedsi.wProcessorLevel		= 5; /* pentium */
 	cachedsi.wProcessorRevision		= 0x0101;
 	
-#if defined(__FreeBSD__) || defined(__NetBSD__)
-        cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
-        cachedsi.wProcessorLevel= 5;
-	PF[PF_COMPARE_EXCHANGE_DOUBLE] = TRUE;
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__svr4__)
 	do_cpuid(regs);
-	if (regs[3] & 0x00800000)
+	switch ((regs[0] >> 8) & 0xf) {			// cpu family
+	case 3: cachedsi.dwProcessorType = PROCESSOR_INTEL_386;
+		cachedsi.wProcessorLevel= 3;
+		break;
+	case 4: cachedsi.dwProcessorType = PROCESSOR_INTEL_486;
+		cachedsi.wProcessorLevel= 4;
+		break;
+	case 5: cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
+		cachedsi.wProcessorLevel= 5;
+		break;
+	case 6: cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
+		cachedsi.wProcessorLevel= 5;
+		break;
+	default:cachedsi.dwProcessorType = PROCESSOR_INTEL_PENTIUM;
+		cachedsi.wProcessorLevel= 5;
+		break;
+	}
+	cachedsi.wProcessorRevision = regs[0] & 0xf;	// stepping
+	if (regs[3] & (1 <<  8))
+	  PF[PF_COMPARE_EXCHANGE_DOUBLE] = TRUE;
+	if (regs[3] & (1 << 23))
           PF[PF_MMX_INSTRUCTIONS_AVAILABLE] = TRUE;
         cachedsi.dwNumberOfProcessors=1;
 #else

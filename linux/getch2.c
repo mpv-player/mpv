@@ -201,27 +201,33 @@ found:
 
 void getch2_enable(){
 struct termios tio_new;
-#ifdef __FreeBSD__
-    ioctl(0,TIOCGETA,&tio_orig); /*  tcgetattr(0,&tio_orig); */
+#if defined(__NetBSD__) || defined(__svr4__)
+    tcgetattr(0,&tio_orig);
+#elif defined(__FreeBSD__)
+    ioctl(0,TIOCGETA,&tio_orig);
 #else
-    ioctl(0,TCGETS,&tio_orig); /*  tcgetattr(0,&tio_orig); */
+    ioctl(0,TCGETS,&tio_orig);
 #endif
     tio_new=tio_orig;
     tio_new.c_lflag &= ~(ICANON|ECHO); /* Clear ICANON and ECHO. */
     tio_new.c_cc[VMIN] = 1;
     tio_new.c_cc[VTIME] = 0;
-#ifdef __FreeBSD__
-    ioctl(0,TIOCSETA,&tio_new); /*   tcsetattr(0,TCSANOW,&tio_new); */
+#if defined(__NetBSD__) || defined(__svr4__)
+    tcsetattr(0,TCSANOW,&tio_new);
+#elif defined(__FreeBSD__)
+    ioctl(0,TIOCSETA,&tio_new);
 #else
-    ioctl(0,TCSETS,&tio_new); /*   tcsetattr(0,TCSANOW,&tio_new); */
+    ioctl(0,TCSETS,&tio_new);
 #endif
 }
 
 void getch2_disable(){
-#ifdef __FreeBSD__
-    ioctl(0,TIOCSETA,&tio_orig); /*   tcsetattr(0,TCSANOW,&tio_orig); */
+#if defined(__NetBSD__) || defined(__svr4__)
+    tcsetattr(0,TCSANOW,&tio_orig);
+#elif defined(__FreeBSD__)
+    ioctl(0,TIOCSETA,&tio_orig);
 #else
-    ioctl(0,TCSETS,&tio_orig); /*   tcsetattr(0,TCSANOW,&tio_orig); */
+    ioctl(0,TCSETS,&tio_orig);
 #endif
 }
 

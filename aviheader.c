@@ -111,10 +111,15 @@ while(1){
         }
       } else
       if(last_fccType==streamtypeAUDIO){
-        sh_audio->wf=calloc((chunksize<sizeof(WAVEFORMATEX))?sizeof(WAVEFORMATEX):chunksize,1);
+	int wf_size = chunksize<sizeof(WAVEFORMATEX)?sizeof(WAVEFORMATEX):chunksize;
+        sh_audio->wf=calloc(wf_size,1);
 //        sh_audio->wf=malloc(chunksize); memset(sh_audio->wf,0,chunksize);
         if(verbose>=1) printf("found 'wf', %d bytes of %d\n",chunksize,sizeof(WAVEFORMATEX));
         stream_read(demuxer->stream,(char*) sh_audio->wf,chunksize);
+	if (sh_audio->wf->cbSize != 0 &&
+	    wf_size < sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize) {
+	    sh_audio->wf=realloc(sh_audio->wf, sizeof(WAVEFORMATEX)+sh_audio->wf->cbSize);
+	}
         chunksize=0;
         if(verbose>=1) print_wave_header(sh_audio->wf);
 //        if(demuxer->audio->id==-1) demuxer->audio->id=stream_id;

@@ -2,18 +2,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef __sun
+#include "config.h"
+
+#ifdef	USE_OSS_AUDIO
+#include <sys/soundcard.h>
+#endif
+#ifdef	USE_SUN_AUDIO
+#include <sys/types.h>
 #include <sys/audioio.h>
 #define AFMT_MU_LAW     AUDIO_ENCODING_ULAW
 #define AFMT_A_LAW      AUDIO_ENCODING_ALAW
 #define AFMT_S16_LE     AUDIO_ENCODING_LINEAR
 #define AFMT_IMA_ADPCM  AUDIO_ENCODING_DVI
 #define AFMT_U8         AUDIO_ENCODING_LINEAR8
-#else
-#include <sys/soundcard.h>
 #endif
-
-#include "config.h"
 
 extern int verbose; // defined in mplayer.c
 
@@ -39,6 +41,7 @@ int fakemono=0;
 #include "xa/xa_gsm.h"
 
 #include "loader/DirectShow/DS_AudioDec.h"
+
 
 static sh_audio_t* ac3_audio_sh=NULL;
 
@@ -169,8 +172,10 @@ case 2: {
     switch(sh_audio->format){ // hardware formats:
     case 0x6:  sh_audio->sample_format=AFMT_A_LAW;break;
     case 0x7:  sh_audio->sample_format=AFMT_MU_LAW;break;
+#if !defined(__NetBSD__)
     case 0x11: sh_audio->sample_format=AFMT_IMA_ADPCM;break;
-#ifndef __sun
+#endif
+#if !defined(__sun) && !defined(__NetBSD__)
     case 0x50: sh_audio->sample_format=AFMT_MPEG;break;
 #endif
 //    case 0x2000: sh_audio->sample_format=AFMT_AC3;

@@ -176,7 +176,7 @@ int vo_x11_check_events(Display *mydisplay){
  XEvent         Event;
  char           buf[100];
  KeySym         keySym;
- XComposeStatus stat;
+ static XComposeStatus stat;
 // unsigned long  vo_KeyTable[512];
 
 #ifdef HAVE_GUI

@@ -46,6 +46,18 @@ static void reset(){
 
 }
 
+// stop playing, keep buffers (for pause)
+static void audio_pause()
+{
+    // for now, just call reset();
+    reset();
+}
+
+// resume playing, after audio_pause()
+static void audio_resume()
+{
+}
+
 // return: how many bytes can be played without blocking
 static int get_space(){
 

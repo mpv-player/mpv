@@ -1,13 +1,7 @@
-	.file	"stubs.c"
-	.version  "01.01"
-gcc2_compiled.:
-.section	.rodata
-.LC0:
-	.string	"Called unk_%s\n"
-.data
+	.data
+.LC0:	.string	"Called unk_%s\n"
 	.align 4
 .globl unk_exp1
-	.type	 unk_exp1,@function
 unk_exp1:
 	pushl %ebp
 	movl %esp,%ebp
@@ -26,11 +20,5 @@ unk_exp1:
 	call printf
 	addl $8,%esp
 	xorl %eax,%eax
-	jmp .L1
-	.align 4
-.L1:
 	leave
 	ret
-.Lfe1:
-	.size	 unk_exp1,.Lfe1-unk_exp1
-	.ident	"GCC: (GNU) egcs-2.91.66 19990314/Linux (egcs-1.1.2 release)"

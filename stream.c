@@ -5,21 +5,6 @@
 #include <sys/ioctl.h>
 #include <unistd.h>
 
-//#include <sys/types.h>
-//#include <sys/stat.h>
-//#include <fcntl.h>
-
-#ifdef __FreeBSD__
-#include <sys/cdio.h>
-#include <sys/cdrio.h>
-#else
-#ifdef __sun
-#include <sys/cdio.h>
-#else
-#include <linux/cdrom.h>
-#endif
-#endif
-
 #include "stream.h"
 
 extern int verbose; // defined in mplayer.c
