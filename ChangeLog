@@ -60,6 +60,7 @@ mplayer (1.0)
     * alternative postprocessing filter (spp)
     * big scale filter updates
     * zrmjpeg filter, a kick-ass mjpeg encoder using FFmpeg/libavcodec
+    * filmdint: new inverse telecine filter, heavily mmx and 3dnow optimized
     
     FFmpeg/libavcodec:
     * Lagrange multipliers instead of qscale, encoding quality much improved
