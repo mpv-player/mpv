@@ -78,17 +78,6 @@ int demux_ra_fill_buffer(demuxer_t *demuxer)
 	dp = new_demux_packet(len);
 	stream_read(demuxer->stream, dp->buffer, len);
 
-	if (sh->format == 0x2000) {
-		// if DNET, swap bytes, as DNET is byte-swapped AC3:
-		char *ptr = dp->buffer;
-		int i;
-		for (i = 0; i < len; i += 2) {
-			const char tmp = ptr[0];
-			ptr[0] = ptr[1];
-			ptr[1] = tmp;
-			ptr += 2;
-		}
-	}
 	dp->pts = demuxer->filepos / ra_priv->data_size;
 	dp->pos = demuxer->filepos;
 	dp->flags = 0;
@@ -254,7 +243,6 @@ void demux_open_ra(demuxer_t* demuxer)
 			break;
 		case FOURCC_DNET:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: DNET -> AC3\n");
-			sh->format = 0x2000;
 			break;
 		default:
 			mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Unknown (%d)\n", sh->format);
