@@ -1,308 +1,325 @@
-// TODO sync
-// Last sync on 2004-11-10 with help_mp-en.h 1.147
-// Translated by:  Carl FÃ¼rstenberg <azatoth@gmail.com>
-// ========================= MPlayer hjÃ¤lp ===========================
+// Last sync on 2004-10-20 with help_mp-en.h 1.147
+// Translated by:  Carl Fürstenberg <azatoth@gmail.com>
+// ========================= MPlayer hjälp ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
 static char help_text[]=
-"AnvÃ¤ndning:   mplayer [argument] [url|sÃ¶kvÃ¤g/]filnamn\n"
+"Användning:   mplayer [argument] [url|sökväg/]filnamn\n"
 "\n"
-"GrundlÃ¤ggande argument: (komplett lista Ã¥terfinns i `man mplayer`)\n"
-" -vo <drv[:enhet]>   vÃ¤lj video-ut drivrutin & enhet ('-vo help' fÃ¶r lista)\n"
-" -ao <drv[:enhet]>   vÃ¤lj audio-ut drivrutin & enhet ('-ao help' fÃ¶r lista)\n"
+"Grundläggande argument: (komplett lista återfinns i `man mplayer`)\n"
+" -vo <drv[:enhet]>   välj video-ut drivrutin & enhet ('-vo help' för lista)\n"
+" -ao <drv[:enhet]>   välj audio-ut drivrutin & enhet ('-ao help' för lista)\n"
 #ifdef HAVE_VCD
-" vcd://<spÃ¥rnr>      spela (S)VCD (Super Video CD) spÃ¥r (rÃ¥ enhet, ingen montering)\n"
+" vcd://<spårnr>      spela (S)VCD (Super Video CD) spår (rå enhet, ingen montering)\n"
 #endif
 #ifdef USE_DVDREAD
-" dvd://<titlenr>     spela DVD titel frÃ¥n enhet istÃ¤llet fÃ¶r ifrÃ¥n en enkel fil\n"
-" -alang/-slang       vÃ¤lj DVD audio/textningssprÃ¥k (m.h.a. ett 2-teckens landskod)\n"
+" dvd://<titlenr>     spela DVD titel från enhet istället för ifrån en enkel fil\n"
+" -alang/-slang       välj DVD audio/textningsspråk (m.h.a. ett 2-teckens landskod)\n"
 #endif
-" -ss <tidpos>        sÃ¶k till given position (sekunder eller hh:mm:ss)\n"
+" -ss <tidpos>        sök till given position (sekunder eller hh:mm:ss)\n"
 " -nosound            spela inte upp ljud\n"
-" -fs                 fullskÃ¤rmsuppspelning (eller -vm, -zoom, detaljer pÃ¥ manualsidan)\n"
-" -x <x> -y <y>       sÃ¤tt skÃ¤rmupplÃ¶sning (fÃ¶r anvÃ¤ndning med -vm eller -zoom)\n"
-" -sub <fil>          specifiera textningsfil att anvÃ¤nda (se ocksÃ¥ -subfps, -subdelay)\n"
+" -fs                 fullskärmsuppspelning (eller -vm, -zoom, detaljer på manualsidan)\n"
+" -x <x> -y <y>       sätt skärmupplösning (för användning med -vm eller -zoom)\n"
+" -sub <fil>          specifiera textningsfil att använda (se också -subfps, -subdelay)\n"
 " -playlist <fil>     specifiera spellistefil\n"
-" -vid x -aid y       vÃ¤lj video (x) och audio (y) strÃ¶m att spela\n"
-" -fps x -srate y     Ã¤ndra video (x bps) och audio (y Hz) frekvens\n"
-" -pp <kvalitÃ©>       aktivera postredigeringsfilter (detaljer pÃ¥ manualsidan)\n"
-" -framedrop          aktivera reducering av antalet bildrutor (fÃ¶r lÃ¥ngsamma maskiner)\n" 
+" -vid x -aid y       välj video (x) och audio (y) ström att spela\n"
+" -fps x -srate y     ändra video (x bps) och audio (y Hz) frekvens\n"
+" -pp <kvalité>       aktivera postredigeringsfilter (detaljer på manualsidan)\n"
+" -framedrop          aktivera reducering av antalet bildrutor (för långsamma maskiner)\n" 
 "\n"
-"GrundlÃ¤ggande navigering: (komplett lista Ã¥terfinns pÃ¥ manualsidan, lÃ¤s Ã¤ven input.conf)\n"
-" <-  eller  ->       sÃ¶k bakÃ¥t/framÃ¥t 10 sekunder\n"
-" upp eller ner       sÃ¶k bakÃ¥t/framÃ¥t 1 minut\n"
-" pgup eller pgdown   sÃ¶k bakÃ¥t/framÃ¥t 10 minuter\n"
-" < eller >           stega bakÃ¥t/framÃ¥t i spellistan\n"
-" p eller SPACE       pausa filmen (tryck pÃ¥ valfri tagent fÃ¶r att fortsÃ¤tta)\n"
+"Grundläggande navigering: (komplett lista återfinns på manualsidan, läs även input.conf)\n"
+" <-  eller  ->       sök bakåt/framåt 10 sekunder\n"
+" upp eller ner       sök bakåt/framåt 1 minut\n"
+" pgup eller pgdown   sök bakåt/framåt 10 minuter\n"
+" < eller >           stega bakåt/framåt i spellistan\n"
+" p eller SPACE       pausa filmen (tryck på valfri tagent för att fortsätta)\n"
 " q eller ESC         stanna spelningen och avsluta programmet\n"
-" + eller -           stÃ¤ll in audiofÃ¶rdrÃ¶jning med Ã‚Â± 0.1 sekund\n"
-" o                   vÃ¤xla OSD lÃ¤ge:  ingen / lÃ¤gesindikator / lÃ¤gesindikator + tidtagare\n"
-" * eller /           Ã¶ka eller sÃ¤nk PCM-volym\n"
-" z eller x           stÃ¤ll in textningsfÃ¶rdrÃ¶jning med Ã‚Â± 0.1 sekund\n"
-" r or t              stÃ¤ll in textningsposition upp/ner, se ocksÃ¥ '-vf expand'\n"
+" + eller -           ställ in audiofördröjning med Â± 0.1 sekund\n"
+" o                   växla OSD läge:  ingen / lägesindikator / lägesindikator + tidtagare\n"
+" * eller /           öka eller sänk PCM-volym\n"
+" z eller x           ställ in textningsfördröjning med Â± 0.1 sekund\n"
+" r or t              ställ in textningsposition upp/ner, se också '-vf expand'\n"
 "\n"
-" * * * LÃ„S MANUALEN FÃ–R FLER DETALJER, MER AVANCERADE ARGUMENT OCH KOMMANDON * * *\n"
+" * * * LÄS MANUALEN FÖR FLER DETALJER, MER AVANCERADE ARGUMENT OCH KOMMANDON * * *\n"
 "\n";
 #endif
 
-#define MSGTR_SamplesWanted "Fler exempel pÃ¥ detta format behÃ¶vs fÃ¶r att vidare Ã¶ka support. Var vÃ¤nlig kontakta untecklarna.\n"
+#define MSGTR_SamplesWanted "Fler exempel på detta format behövs för att vidare öka support. Var vänlig kontakta untecklarna.\n"
 
 // ========================= MPlayer messages ===========================
 
 // mplayer.c:
 
-#define MSGTR_Exiting "\nStÃ¤nger ner...\n"
-#define MSGTR_ExitingHow "\nStÃ¤nger ner... (%s)\n"
+#define MSGTR_Exiting "\nStänger ner...\n"
+#define MSGTR_ExitingHow "\nStänger ner... (%s)\n"
 #define MSGTR_Exit_quit "Avsluta"
-#define MSGTR_Exit_eof "Slut pÃ¥ fil"
-#define MSGTR_Exit_error "OÃ¶verkomligt fel"
+#define MSGTR_Exit_eof "Slut på fil"
+#define MSGTR_Exit_error "Oöverkomligt fel"
 #define MSGTR_IntBySignal "\nMPlayer var avbruten av signal %d i modul: %s\n"
 #define MSGTR_NoHomeDir "Kan inte lokalisera $HOME-katalog.\n"
 #define MSGTR_GetpathProblem "get_path(\"config\") problem\n"
 #define MSGTR_CreatingCfgFile "Skapar konfigfil: %s\n"
-#define MSGTR_InvalidAOdriver "Ej godkÃ¤nd audio-ut-drivrutinsnamn: %s\n"\
-    "AnvÃ¤nd '-ao help' fÃ¥r att fÃ¥ en lista med tillgÃ¤ngliga audio-ut-drivrutiner.\n"
-#define MSGTR_CopyCodecsConf "(Kopiera/lÃ¤nka etc/codecs.conf frÃ¥n MPlayer's kÃ¤llkod till ~/.mplayer/codecs.conf)\n"
-#define MSGTR_BuiltinCodecsConf "AnvÃ¤nder standardinbyggd codecs.conf.\n"
+#define MSGTR_InvalidAOdriver "Ej godkänd audio-ut-drivrutinsnamn: %s\n"\
+    "Använd '-ao help' får att få en lista med tillgängliga audio-ut-drivrutiner.\n"
+#define MSGTR_CopyCodecsConf "(Kopiera/länka etc/codecs.conf från MPlayer's källkod till ~/.mplayer/codecs.conf)\n"
+#define MSGTR_BuiltinCodecsConf "Använder standardinbyggd codecs.conf.\n"
 #define MSGTR_CantLoadFont "Kan inte ladda font: %s\n"
 #define MSGTR_CantLoadSub "Kan inte ladda vald textning: %s\n"
-#define MSGTR_DumpSelectedStreamMissing "dump: FATALT: Vald strÃ¶m ej tillgÃ¤nglig!\n"
-#define MSGTR_CantOpenDumpfile "Kan inte Ã¶ppna dumpfil.\n"
+#define MSGTR_DumpSelectedStreamMissing "dump: FATALT: Vald ström ej tillgänglig!\n"
+#define MSGTR_CantOpenDumpfile "Kan inte öppna dumpfil.\n"
 #define MSGTR_CoreDumped "Core dumpad ;)\n"
-#define MSGTR_FPSnotspecified "FPS ej specifierad i filhuvudet eller Ã¤r icke godkÃ¤nd, anvÃ¤nd argument -fps.\n"
-#define MSGTR_TryForceAudioFmtStr "FÃ¶rsÃ¶ker att forcera audiocodecfamilj %s...\n"
-#define MSGTR_CantFindAudioCodec "Kan inte finna codec fÃ¶r audioformat 0x%X.\n"
-#define MSGTR_RTFMCodecs "LÃ¤s DOCS/HTML/en/codecs.html!\n"
-#define MSGTR_TryForceVideoFmtStr "FÃ¶rsÃ¶ker att forcera videocodecfamilj %s...\n"
-#define MSGTR_CantFindVideoCodec "Kan inte finna codec fÃ¶r vald -vo och videoformat 0x%X.\n"
+#define MSGTR_FPSnotspecified "FPS ej specifierad i filhuvudet eller är icke godkänd, använd argument -fps.\n"
+#define MSGTR_TryForceAudioFmtStr "Försöker att forcera audiocodecfamilj %s...\n"
+#define MSGTR_CantFindAudioCodec "Kan inte finna codec för audioformat 0x%X.\n"
+#define MSGTR_RTFMCodecs "Läs DOCS/HTML/en/codecs.html!\n"
+#define MSGTR_TryForceVideoFmtStr "Försöker att forcera videocodecfamilj %s...\n"
+#define MSGTR_CantFindVideoCodec "Kan inte finna codec för vald -vo och videoformat 0x%X.\n"
 #define MSGTR_CannotInitVO "FATALT: Kan inte initiera videodrivrutin.\n"
-#define MSGTR_CannotInitAO "Kan inte Ã¶ppna/initiera audioenhet -> inget ljud.\n"
-#define MSGTR_StartPlaying "PÃ¥bÃ¶rjar uppspelning...\n"
+#define MSGTR_CannotInitAO "Kan inte öppna/initiera audioenhet -> inget ljud.\n"
+#define MSGTR_StartPlaying "Påbörjar uppspelning...\n"
 
 #define MSGTR_SystemTooSlow "\n\n"\
     "           ***********************************************************\n"\
-"           **** Ditt system Ã¤r fÃ¶r slÃ¶tt fÃ¶r att spela upp detta! ****\n"\
+"           **** Ditt system är för slött för att spela upp detta! ****\n"\
 "           ***********************************************************\n\n"\
-"Troliga orsaker, problem, samt sÃ¤tt att fixa det:\n"\
+"Troliga orsaker, problem, samt sätt att fixa det:\n"\
 "- Troligast: trasig/buggig _audio_drivrutin\n"\
-"  - FÃ¶rsÃ¶k -ao sdl eller anvÃ¤nd OSS-emulatorn i ALSA.\n"\
-"  - Experimentera med olika vÃ¤rden fÃ¶r -autosync, 30 Ã¤r en bra start.\n"\
+"  - Försök -ao sdl eller använd OSS-emulatorn i ALSA.\n"\
+"  - Experimentera med olika värden för -autosync, 30 är en bra start.\n"\
 "- Seg video-ut\n"\
-"  - FÃ¶rsÃ¶k en annan -vo drivrutin (-vo help fÃ¶r en lista) eller fÃ¶rsÃ¶k -framedrop!\n"\
+"  - Försök en annan -vo drivrutin (-vo help för en lista) eller försök -framedrop!\n"\
 "- Seg CPU\n"\
-"  - FÃ¶rsÃ¶k att inte spela upp allt fÃ¶r stora DVD/DivX pÃ¥ en seg CPU! Testa med -hardframedrop.\n"\
+"  - Försök att inte spela upp allt för stora DVD/DivX på en seg CPU! Testa med -hardframedrop.\n"\
 "- Trasig fil\n"\
-"  - FÃ¶rsÃ¶k med olika kombinationer av -nobps -ni -forceidx -mc 0.\n"\
+"  - Försök med olika kombinationer av -nobps -ni -forceidx -mc 0.\n"\
 "- Segt media (NFS/SMB mounts, DVD, VCD etc.)\n"\
-"  - FÃ¶rsÃ¶k med -cache 8192.\n"\
-"- AnvÃ¤nder du -cache till att spela upp en ickeinterleaved AVIfil?\n"\
-"  - FÃ¶rsÃ¶k -nocache.\n"\
-"LÃ¤s DOCS/HTML/en/devices.html fÃ¶r optimeringstips.\n"\
-"Om inget av dessa hjÃ¤lper, lÃ¤s DOCS/HTML/en/bugreports.html.\n\n"
+"  - Försök med -cache 8192.\n"\
+"- Använder du -cache till att spela upp en ickeinterleaved AVIfil?\n"\
+"  - Försök -nocache.\n"\
+"Läs DOCS/HTML/en/devices.html för optimeringstips.\n"\
+"Om inget av dessa hjälper, läs DOCS/HTML/en/bugreports.html.\n\n"
 
 #define MSGTR_NoGui "MPlayer var kompilerad UTAN GUI-support.\n"
-#define MSGTR_GuiNeedsX "MPlayer GUI krÃ¤ver X11.\n"
+#define MSGTR_GuiNeedsX "MPlayer GUI kräver X11.\n"
 #define MSGTR_Playing "Spelar %s.\n"
 #define MSGTR_NoSound "Audio: inget ljud\n"
 #define MSGTR_FPSforced "FPS forcerad att vara %5.3f  (ftime: %5.3f).\n"
-#define MSGTR_CompiledWithRuntimeDetection "Kompilerad med \"runtime CPU detection\" - VARNING - detta Ã¤r inte optimalt!\n"\
-    "FÃ¶r att fÃ¥ bÃ¤st prestanda, omkompilera med '--disable-runtime-cpudetection'.\n"
-#define MSGTR_CompiledWithCPUExtensions "Kompilerad fÃ¶r x86 med tillÃ¤gg:"
-#define MSGTR_AvailableVideoOutputDrivers "TillgÃ¤ngliga video-ut-drivrutiner:\n"
-#define MSGTR_AvailableAudioOutputDrivers "TillgÃ¤ngliga audio-ut-drivrutiner:\n"
-#define MSGTR_AvailableAudioCodecs "TillgÃ¤ngliga audiocodec:\n"
-#define MSGTR_AvailableVideoCodecs "TillgÃ¤ngliga videocodec:\n"
-#define MSGTR_AvailableAudioFm "TillgÃ¤ngliga (inkompilerade) audiocodec familjer/drivrutiner:\n"
-#define MSGTR_AvailableVideoFm "TillgÃ¤ngliga (inkompilerade) videocodec familjer/drivrutiner:\n"
-#define MSGTR_AvailableFsType "TillgÃ¤ngliga lÃ¤gen fÃ¶r fullskÃ¤rmslager:\n"
-#define MSGTR_UsingRTCTiming "AnvÃ¤nder Linux's hÃ¥rdvaru-RTC-tidtagning (%ldHz).\n"
-#define MSGTR_CannotReadVideoProperties "Video: Kan inte lÃ¤sa instÃ¤llningar.\n"
-#define MSGTR_NoStreamFound "Ingen strÃ¶m funnen.\n"
-#define MSGTR_ErrorInitializingVODevice "Fel vid Ã¶ppning/initiering av vald video_out-enhet (-vo).\n"
+#define MSGTR_CompiledWithRuntimeDetection "Kompilerad med \"runtime CPU detection\" - VARNING - detta är inte optimalt!\n"\
+    "För att få bäst prestanda, omkompilera med '--disable-runtime-cpudetection'.\n"
+#define MSGTR_CompiledWithCPUExtensions "Kompilerad för x86 med tillägg:"
+#define MSGTR_AvailableVideoOutputDrivers "Tillgängliga video-ut-drivrutiner:\n"
+#define MSGTR_AvailableAudioOutputDrivers "Tillgängliga audio-ut-drivrutiner:\n"
+#define MSGTR_AvailableAudioCodecs "Tillgängliga audiocodec:\n"
+#define MSGTR_AvailableVideoCodecs "Tillgängliga videocodec:\n"
+#define MSGTR_AvailableAudioFm "Tillgängliga (inkompilerade) audiocodec familjer/drivrutiner:\n"
+#define MSGTR_AvailableVideoFm "Tillgängliga (inkompilerade) videocodec familjer/drivrutiner:\n"
+#define MSGTR_AvailableFsType "Tillgängliga lägen för fullskärmslager:\n"
+#define MSGTR_UsingRTCTiming "Använder Linux's hårdvaru-RTC-tidtagning (%ldHz).\n"
+#define MSGTR_CannotReadVideoProperties "Video: Kan inte läsa inställningar.\n"
+#define MSGTR_NoStreamFound "Ingen ström funnen.\n"
+#define MSGTR_ErrorInitializingVODevice "Fel vid öppning/initiering av vald video_out-enhet (-vo).\n"
 #define MSGTR_ForcedVideoCodec "Forcerad videocodec: %s\n"
 #define MSGTR_ForcedAudioCodec "Forcerad audiocodec: %s\n"
 #define MSGTR_Video_NoVideo "Video: ingen video\n"
 #define MSGTR_NotInitializeVOPorVO "\nFATALT: Kunde inte initiera videofilter (-vf) eller video-ut (-vo).\n"
 #define MSGTR_Paused "\n  =====  PAUSE  =====\r" // no more than 23 characters (status line for audio files)
-#define MSGTR_PlaylistLoadUnable "\nOfÃ¶rmÃ¶gen att ladda spellista %s.\n"
+#define MSGTR_PlaylistLoadUnable "\nOförmögen att ladda spellista %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
     "- MPlayer krachade av en 'Illegal Instruction'.\n"\
-"  Det kan vare en bugg i vÃ¥r nya \"runtime CPU-detection\" kod...\n"\
-"  Var god lÃ¤s DOCS/HTML/en/bugreports.html.\n"
+"  Det kan vare en bugg i vår nya \"runtime CPU-detection\" kod...\n"\
+"  Var god läs DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
     "- MPlayer krashade av en 'Illegal Instruction'.\n"\
-"  Detta hÃ¤nder vanligast om du kÃ¶r koden pÃ¥ en annan CPU Ã¤n den var\n"\
-"  kompilerad/optimerad fÃ¶r\n"\
+"  Detta händer vanligast om du kör koden på en annan CPU än den var\n"\
+"  kompilerad/optimerad för\n"\
 "  Verifiera detta!\n"
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
-    "- MPlayer krashade pÃ¥ grund utav dÃ¥lig anvÃ¤ndning av CPU/FPU/RAM.\n"\
-"  Omkompilera MPlayer med '--enable-debug' och kÃ¶r en \"'gdb' backtrace\" och\n"\
-"  deassemblera. Detaljer Ã¥terfinns i DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
+    "- MPlayer krashade på grund utav dålig användning av CPU/FPU/RAM.\n"\
+"  Omkompilera MPlayer med '--enable-debug' och kör en \"'gdb' backtrace\" och\n"\
+"  deassemblera. Detaljer återfinns i DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
-    "- MPlayer krashade. Detta borde inte intrÃ¤ffa.\n"\
+    "- MPlayer krashade. Detta borde inte inträffa.\n"\
 "  Det kan vara en bugg i MPlayers kod, eller i din drivrutin, eller i din\n"\
-"  gcc version. Om du tror det Ã¤r MPlayers fel, var vÃ¤nlig lÃ¤s\n"\
-"  DOCS/HTML/en/bugreports.html och fÃ¶lj instruktionerna dÃ¤r, Vi kan inte och\n"\
-"  kommer inte att hjÃ¤lpa dig, om du inte kan befodra denna information nÃ¤r \n"\
+"  gcc version. Om du tror det är MPlayers fel, var vänlig läs\n"\
+"  DOCS/HTML/en/bugreports.html och följ instruktionerna där, Vi kan inte och\n"\
+"  kommer inte att hjälpa dig, om du inte kan befodra denna information när \n"\
 "  du rapporterar en trolig bugg.\n"
 
 #define MSGTR_LoadingConfig "Laddar konfiguration '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: lade till textningsfil %d: %s \n"
-#define MSGTR_ErrorOpeningOutputFile "Fel vid Ã¶ppning av fil [%s] fÃ¶r skrivning!\n"
+#define MSGTR_ErrorOpeningOutputFile "Fel vid öppning av fil [%s] för skrivning!\n"
 #define MSGTR_CommandLine "Kommandorad:"
-#define MSGTR_RTCDeviceNotOpenable "Misslyckades att Ã¶ppna %s: %s (den borde vara lÃ¤sbar av anvÃ¤ndaren.)\n"
+#define MSGTR_RTCDeviceNotOpenable "Misslyckades att öppna %s: %s (den borde vara läsbar av användaren.)\n"
 #define MSGTR_LinuxRTCInitErrorIrqpSet "'Linux RTC' initieringsfel i 'ioctl' rtc_irqp_set %lu: %s\n"
-#define MSGTR_IncreaseRTCMaxUserFreq "FÃ¶rsÃ¶k lÃ¤gg till \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" till ditt systems uppstartningsscript.\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "Försök lägg till \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" till ditt systems uppstartningsscript.\n"
 #define MSGTR_LinuxRTCInitErrorPieOn "'Linux RTC init' fel i 'ioctl' [rtc_pie_on]: %s\n"
-#define MSGTR_UsingTimingType "AnvÃ¤nder %s tidtagning.\n"
+#define MSGTR_UsingTimingType "Använder %s tidtagning.\n"
 #define MSGTR_MenuInitialized "Meny initierad: %s\n"
 #define MSGTR_MenuInitFailed "Menyinitiering misslyckades.\n"
 #define MSGTR_Getch2InitializedTwice "VARNING: getch2_init anropad dubbelt!\n"
-#define MSGTR_DumpstreamFdUnavailable "Kan inte dumpa denna strÃ¶m - ingen 'fd' tillgÃ¤nglig.\n"
-#define MSGTR_FallingBackOnPlaylist "Faller tillbaka med att fÃ¶rsÃ¶ka tolka spellista %s...\n"
-#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Kan inte Ã¶ppna 'libmenu video filter' med rotmeny %s.\n"
-#define MSGTR_AudioFilterChainPreinitError "Fel vid fÃ¶rinitiering av audiofilter!\n"
-#define MSGTR_LinuxRTCReadError "'Linux RTC' lÃ¤sfel: %s\n"
+#define MSGTR_DumpstreamFdUnavailable "Kan inte dumpa denna ström - ingen 'fd' tillgänglig.\n"
+#define MSGTR_FallingBackOnPlaylist "Faller tillbaka med att försöka tolka spellista %s...\n"
+#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Kan inte öppna 'libmenu video filter' med rotmeny %s.\n"
+#define MSGTR_AudioFilterChainPreinitError "Fel vid förinitiering av audiofilter!\n"
+#define MSGTR_LinuxRTCReadError "'Linux RTC' läsfel: %s\n"
 #define MSGTR_SoftsleepUnderflow "Varning! Softsleep underflow!\n"
-#define MSGTR_EDLSKIPStartStopLength "\nEDL_SKIP: start [%f], stopp [%f], lÃ¤ngd [%f]\n"
+#define MSGTR_EDLSKIPStartStopLength "\nEDL_SKIP: start [%f], stopp [%f], längd [%f]\n"
 #define MSGTR_AnsSubVisibility "ANS_SUB_VISIBILITY=%ld\n"
 #define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
 #define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
 #define MSGTR_AnsPercentPos "ANS_PERCENT_POSITION=%ld\n" 
 #define MSGTR_MenuCall "Menyanrop\n"
-#define MSGTR_EdlCantUseBothModes "Kan inte anvÃ¤nda -edl och -edlout samtidigt.\n"
-#define MSGTR_EdlOutOfMem "Kan inte allokera tillrÃ¤ckligt med minne fÃ¶r att hÃ¥lla EDL-data.\n"
-#define MSGTR_EdlRecordsNo "LÃ¤st %d EDL-funtioner.\n"
-#define MSGTR_EdlQueueEmpty "Det Ã¤r inga EDL-funktioner att ta hand om.\n"
-#define MSGTR_EdlCantOpenForWrite "Kan inte Ã¶ppna EDL-fil [%s] fÃ¶r skrivning.\n"
-#define MSGTR_EdlCantOpenForRead "Kan inte Ã¶ppna EDL-fil [%s] fÃ¶r lÃ¤sning.\n"
-#define MSGTR_EdlNOsh_video "Kan inte anvÃ¤nda EDL utan video, inaktiverar.\n"
-#define MSGTR_EdlNOValidLine "Icke godkÃ¤nd EDL-rad: %s\n"
-#define MSGTR_EdlBadlyFormattedLine "DÃ¥ligt formaterad EDL-rad [%d]. Kastar bort.\n"
-#define MSGTR_EdlBadLineOverlap "Senaste stopposition var [%f] ; nÃ¤sta start Ã¤r [%f]. Noteringar mÃ¥ste vara i kronologisk ordning, kan inte lappa Ã¶ver. Kastar bort.\n"
-#define MSGTR_EdlBadLineBadStop "Stopptid mÃ¥ste vara efter starttid.\n"
+#define MSGTR_EdlCantUseBothModes "Kan inte använda -edl och -edlout samtidigt.\n"
+#define MSGTR_EdlOutOfMem "Kan inte allokera tillräckligt med minne för att hålla EDL-data.\n"
+#define MSGTR_EdlRecordsNo "Läst %d EDL-funtioner.\n"
+#define MSGTR_EdlQueueEmpty "Det är inga EDL-funktioner att ta hand om.\n"
+#define MSGTR_EdlCantOpenForWrite "Kan inte öppna EDL-fil [%s] för skrivning.\n"
+#define MSGTR_EdlCantOpenForRead "Kan inte öppna EDL-fil [%s] för läsning.\n"
+#define MSGTR_EdlNOsh_video "Kan inte använda EDL utan video, inaktiverar.\n"
+#define MSGTR_EdlNOValidLine "Icke godkänd EDL-rad: %s\n"
+#define MSGTR_EdlBadlyFormattedLine "Dåligt formaterad EDL-rad [%d]. Kastar bort.\n"
+#define MSGTR_EdlBadLineOverlap "Senaste stopposition var [%f] ; nästa start är [%f]. Noteringar måste vara i kronologisk ordning, kan inte lappa över. Kastar bort.\n"
+#define MSGTR_EdlBadLineBadStop "Stopptid måste vara efter starttid.\n"
+
+#define MSGTR_DvdnavNullEvent "DVDNAV-händelse NULL?!\n"
+#define MSGTR_DvdnavHighlightEventBroken "DVDNAV-händelse: Highlight-händelse trasig\n" // FIXME highlight
+#define MSGTR_DvdnavEvent "DVDNAV-händelse Event: %s\n"
+#define MSGTR_DvdnavHighlightHide "DVDNAV-händelse: Highlight gömd\n"
+#define MSGTR_DvdnavStillFrame "######################################## DVDNAV-händelse: Fortfarande bildruta: %d sekunder\n"
+#define MSGTR_DvdnavNavStop "DVDNAV-händelse: Nav Stop\n" // FIXME Nav Stop?
+#define MSGTR_DvdnavNavNOP "DVDNAV-händelse: Nav NOP\n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV-händelse: 'Nav SPU'-strömningsändring: fysisk: %d/%d/%d logisk: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV-händelse: 'Nav SPU'-strömningsändring: fysisk: %d logisk: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV-händelse: 'Nav Audio'-strömningsändring: fysisk: %d logisk: %d\n"
+#define MSGTR_DvdnavNavVTSChange "DVDNAV-händelse: 'Nav VTS' ändrad\n"
+#define MSGTR_DvdnavNavCellChange "DVDNAV-händelse: 'Nav Cell' ändrad\n"
+#define MSGTR_DvdnavNavSpuClutChange "DVDNAV-händelse: 'Nav SPU CLUT' ändrad\n"
+#define MSGTR_DvdnavNavSeekDone "DVDNAV-händelse: 'Nav Seek' ändrad\n"
+/*
+ * FIXME A lot of shorted words, not translating atm
+ */
 
 // mencoder.c:
 
-#define MSGTR_UsingPass3ControllFile "AnvÃ¤nder pass3-kontrollfil: %s\n"
+#define MSGTR_UsingPass3ControllFile "Använder pass3-kontrollfil: %s\n"
 #define MSGTR_MissingFilename "\nFilnamn saknas.\n\n"
-#define MSGTR_CannotOpenFile_Device "Kan inte Ã¶ppna fil/enhet.\n"
-#define MSGTR_CannotOpenDemuxer "Kan inte Ã¶ppna demuxer.\n"
-#define MSGTR_NoAudioEncoderSelected "\nIngen audioencoder (-oac) vald. VÃ¤lj en (se -oac help) eller anvÃ¤nd -nosound.\n"
-#define MSGTR_NoVideoEncoderSelected "\nIngen videoencoder (-ovc) vald. VÃ¤lj en (se -ovc help).\n"
-#define MSGTR_CannotOpenOutputFile "Kan inte Ã¶ppna utfil '%s'.\n"
-#define MSGTR_EncoderOpenFailed "Misslyckade att Ã¶ppna encodern.\n"
+#define MSGTR_CannotOpenFile_Device "Kan inte öppna fil/enhet.\n"
+#define MSGTR_CannotOpenDemuxer "Kan inte öppna demuxer.\n"
+#define MSGTR_NoAudioEncoderSelected "\nIngen audioencoder (-oac) vald. Välj en (se -oac help) eller använd -nosound.\n"
+#define MSGTR_NoVideoEncoderSelected "\nIngen videoencoder (-ovc) vald. Välj en (se -ovc help).\n"
+#define MSGTR_CannotOpenOutputFile "Kan inte öppna utfil '%s'.\n"
+#define MSGTR_EncoderOpenFailed "Misslyckade att öppna encodern.\n"
 #define MSGTR_ForcingOutputFourcc "Forcerar utmatning 'fourcc' till %x [%.4s]\n" // FIXME fourcc?
 #define MSGTR_WritingAVIHeader "Skriver AVI-filhuvud...\n"
 #define MSGTR_DuplicateFrames "\n%d duplicerad bildruta/or!\n"
-#define MSGTR_SkipFrame "\nHoppar Ã¶ver bildruta!\n"
+#define MSGTR_SkipFrame "\nHoppar över bildruta!\n"
 #define MSGTR_ErrorWritingFile "%s: Fel vid skrivning till fil.\n"
 #define MSGTR_WritingAVIIndex "\nSkriver AVI-index...\n"
 #define MSGTR_FixupAVIHeader "Fixering AVI-filhuvud...\n" // FIXME fixing?
-#define MSGTR_RecommendedVideoBitrate "Rekommenderad videobitrate fÃ¶r %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nVideostÃ¶m: %8.3f kbit/s  (%d bps)  storlek: %d byte  %5.3f sekunder  %d bildrutor\n"
-#define MSGTR_AudioStreamResult "\nAudiostÃ¶m: %8.3f kbit/s  (%d bps)  storlek: %d byte  %5.3f sekunder\n"
+#define MSGTR_RecommendedVideoBitrate "Rekommenderad videobitrate för %s CD: %d\n"
+#define MSGTR_VideoStreamResult "\nVideostöm: %8.3f kbit/s  (%d bps)  storlek: %d byte  %5.3f sekunder  %d bildrutor\n"
+#define MSGTR_AudioStreamResult "\nAudiostöm: %8.3f kbit/s  (%d bps)  storlek: %d byte  %5.3f sekunder\n"
 #define MSGTR_OpenedStream "klart: format: %d  data: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n" // FIXME translate?
 #define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d bps=%ld sample-%ld)\n" // -''-
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio valt\n"
 #define MSGTR_MP3AudioSelected "MP3 audio valt\n"
 #define MSGTR_CannotAllocateBytes "Kunde inte allokera %d byte\n"
-#define MSGTR_SettingAudioDelay "SÃ¤tter AUDIO DELAY till %5.3f\n"
-#define MSGTR_SettingAudioInputGain "SÃ¤tter 'audio input gain' till %f\n" // FIXME to translate?
+#define MSGTR_SettingAudioDelay "Sätter AUDIO DELAY till %5.3f\n"
+#define MSGTR_SettingAudioInputGain "Sätter 'audio input gain' till %f\n" // FIXME to translate?
 #define MSGTR_LamePresetEquals "\npreset=%s\n\n" // FIXME translate?
-#define MSGTR_LimitingAudioPreload "BegrÃ¤nsar audiofÃ¶rinladdning till 0.4s\n" // preload?
-#define MSGTR_IncreasingAudioDensity "HÃ¶jer audiodensitet till 4\n"
-#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forcerar audiofÃ¶rinladdning till 0, 'max pts correction' till 0\n"
+#define MSGTR_LimitingAudioPreload "Begränsar audioförinladdning till 0.4s\n" // preload?
+#define MSGTR_IncreasingAudioDensity "Höjer audiodensitet till 4\n"
+#define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forcerar audioförinladdning till 0, 'max pts correction' till 0\n"
 #define MSGTR_CBRAudioByterate "\n\nCBR audio: %ld byte/sec, %d byte/block\n"
 #define MSGTR_LameVersion "LAME version %s (%s)\n\n"
-#define MSGTR_InvalidBitrateForLamePreset "Fel: Angiven bitrate Ã¤r utanfÃ¶r godkÃ¤nd rymd fÃ¶r detta val\n"\
+#define MSGTR_InvalidBitrateForLamePreset "Fel: Angiven bitrate är utanför godkänd rymd för detta val\n"\
     "\n"\
-"Vid anvÃ¤ndning av detta val sÃ¥ mÃ¥ste du ange ett vÃ¤rde mellan \"8\" och \"320\"\n"\
+"Vid användning av detta val så måste du ange ett värde mellan \"8\" och \"320\"\n"\
 "\n"\
-"FÃ¶r vidare information testa: \"-lameopts preset=help\"\n"
-#define MSGTR_InvalidLamePresetOptions "Fel: du angav inte en godkÃ¤nd profil och/eller fÃ¶rinstÃ¤llda val\n"\
+"För vidare information testa: \"-lameopts preset=help\"\n"
+#define MSGTR_InvalidLamePresetOptions "Fel: du angav inte en godkänd profil och/eller förinställda val\n"\
     "\n"\
-"TillgÃ¤ngliga profiler Ã¤r:\n"\
+"Tillgängliga profiler är:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
 "                 insane\n"\
-"   <cbr> (ABR Mode) - ABR-mode Ã¤r underfÃ¶rstÃ¥tt. FÃ¶r att anvÃ¤nda det,,\n"\
-"                      helpt enkelt ange en bitrate. FÃ¶r exempel:\n"\
+"   <cbr> (ABR Mode) - ABR-mode är underförstått. För att använda det,,\n"\
+"                      helpt enkelt ange en bitrate. För exempel:\n"\
 "                      \"preset=185\" aktiverar detta\n"\
-"                      fÃ¶rinstÃ¤llda val, och anvÃ¤nder 185 som ett genomsnittlig kbps.\n"\
+"                      förinställda val, och använder 185 som ett genomsnittlig kbps.\n"\
 "\n"\
-"    NÃ¥gra exempel:\n"\
+"    Några exempel:\n"\
 "\n"\
 "       \"-lameopts fast:preset=standard  \"\n"\
 " eller \"-lameopts  cbr:preset=192       \"\n"\
 " eller \"-lameopts      preset=172       \"\n"\
 " eller \"-lameopts      preset=extreme   \"\n"\
 "\n"\
-"FÃ¶r vidare information, fÃ¶rsÃ¶k: \"-lameopts preset=help\"\n"
+"För vidare information, försök: \"-lameopts preset=help\"\n"
 #define MSGTR_LamePresetsLongInfo "\n"\
-    "De fÃ¶rinstÃ¤llda switcharna Ã¤r designade fÃ¶r att fÃ¶rsÃ¶rja den hÃ¶gsta mÃ¶jliga kvalitÃ©.\n"\
+    "De förinställda switcharna är designade för att försörja den högsta möjliga kvalité.\n"\
 "\n"\
-"De har fÃ¶r mestadels blivit utsatta fÃ¶r och instÃ¤mmnt via rigorÃ¶sa dubbelblindslystningstester\n"\
-"fÃ¶r att verifiera och Ã¥stakomma detta mÃ¥l.\n"\
+"De har för mestadels blivit utsatta för och instämmnt via rigorösa dubbelblindslystningstester\n"\
+"för att verifiera och åstakomma detta mål.\n"\
 "\n"\
-"Dessa Ã¤r ideligen uppdaterade fÃ¶r att sammantrÃ¤ffa med de senaste utveckling som\n"\
-"fÃ¶rekommer, och som result skulle fÃ¶rsÃ¶rja dig med bortÃ¥t den bÃ¤sta kvalitÃ©\n"\
-"fÃ¶r stunden mÃ¶jligt frÃ¥n LAME.\n"\
+"Dessa är ideligen uppdaterade för att sammanträffa med de senaste utveckling som\n"\
+"förekommer, och som result skulle försörja dig med bortåt den bästa kvalité\n"\
+"för stunden möjligt från LAME.\n"\
 "\n"\
-"FÃ¶r att aktivera dessa fÃ¶rinstÃ¤llda vÃ¤rden:\n"\
+"För att aktivera dessa förinställda värden:\n"\
 "\n"\
-"   FÃ¶r VBR-modes (generellt hÃ¶gsta kvalitÃ©) \b:\n"\
+"   För VBR-modes (generellt högsta kvalité) \b:\n"\
 "\n"\
-"     \"preset=standard\" Denna fÃ¶rinstÃ¤llning torde generellt vara transparent\n"\
-"                             fÃ¶r de flesta fÃ¶r den mesta musik och har redan\n"\
-"                             relativt hÃ¶g kvalitÃ©.\n"\
+"     \"preset=standard\" Denna förinställning torde generellt vara transparent\n"\
+"                             för de flesta för den mesta musik och har redan\n"\
+"                             relativt hög kvalité.\n"\
 "\n"\
-"     \"preset=extreme\" Om du har extremt god hÃ¶rsel och liknande utrustning,\n"\
-"                             dÃ¥ kommer denna instÃ¤llning generellt att tillgodose\n"\
-"                             nÃ¥got hÃ¶gre kvalitÃ© Ã¤n \"standard\"-instÃ¤llningen\n"\
+"     \"preset=extreme\" Om du har extremt god hörsel och liknande utrustning,\n"\
+"                             då kommer denna inställning generellt att tillgodose\n"\
+"                             något högre kvalité än \"standard\"-inställningen\n"\
 "\n"\
-"   FÃ¶r 'CBR 320kbps' (hÃ¶gsta mÃ¶jliga kvalitÃ© frÃ¥n fÃ¶rinstÃ¤llningsswitcharna):\n"\
+"   För 'CBR 320kbps' (högsta möjliga kvalité från förinställningsswitcharna):\n"\
                                                                                "\n"\
-"     \"preset=insane\"  Denna fÃ¶rinstÃ¤llning kommer troligen att vara fÃ¶r mycket fÃ¶r de\n"\
-"                             flesta och de flesta situationer, men om du mÃ¥ste absolut\n"\
-"                             ha den hÃ¶gsta mÃ¶jliga kvalitÃ© med inga invÃ¤ndningar om\n"\
-"                             filstorleken sÃ¥ Ã¤r detta den vÃ¤g att gÃ¥.\n"\
+"     \"preset=insane\"  Denna förinställning kommer troligen att vara för mycket för de\n"\
+"                             flesta och de flesta situationer, men om du måste absolut\n"\
+"                             ha den högsta möjliga kvalité med inga invändningar om\n"\
+"                             filstorleken så är detta den väg att gå.\n"\
 "\n"\
-"   FÃ¶r ABR-modes (hÃ¶g kvalitÃ© per given bitrate, men inte sÃ¥ hÃ¶g som fÃ¶r VBR) \b:\n"\
+"   För ABR-modes (hög kvalité per given bitrate, men inte så hög som för VBR) \b:\n"\
 "\n"\
-"     \"preset=<kbps>\"  AnvÃ¤ndning av denna instÃ¤llning vill fÃ¶r det mesta ge dig god\n"\
-"                             kvalitÃ© vid specifik bitrate, Beroende pÃ¥ angiven bitrate,\n"\
-"                             denna instÃ¤llning kommer att anta den mest optimala instÃ¤llning\n"\
-"                             fÃ¶r en optimal situation. Fast detta tillvÃ¤gagÃ¥ngssÃ¤tt fungerar,\n"\
-"                             sÃ¥ Ã¤r den inte tillnÃ¤rmandesvis sÃ¥ flexibelt som VBR, och fÃ¶r det\n"\
-"                             mesta sÃ¥ kommer den inte att komma Ã¥t samma nivÃ¥ av kvalitÃ© som\n"\
-"                             VBR vid hÃ¶gre bitrate.\n"\
+"     \"preset=<kbps>\"  Användning av denna inställning vill för det mesta ge dig god\n"\
+"                             kvalité vid specifik bitrate, Beroende på angiven bitrate,\n"\
+"                             denna inställning kommer att anta den mest optimala inställning\n"\
+"                             för en optimal situation. Fast detta tillvägagångssätt fungerar,\n"\
+"                             så är den inte tillnärmandesvis så flexibelt som VBR, och för det\n"\
+"                             mesta så kommer den inte att komma åt samma nivå av kvalité som\n"\
+"                             VBR vid högre bitrate.\n"\
 "\n"\
-"FÃ¶ljande instÃ¤llningar Ã¤r Ã¤ven tillgÃ¤ngliga fÃ¶r motsvarande profil:\n"\
+"Följande inställningar är även tillgängliga för motsvarande profil:\n"\
 "\n"\
 "   <fast>        standard\n"\
 "   <fast>        extreme\n"\
 "                 insane\n"\
-"   <cbr> (ABR Mode) - ABR-mode Ã¤r underfÃ¶rstÃ¥tt. FÃ¶r att anvÃ¤nda det,\n"\
-"                      helt enkelt ange en bitrate. FÃ¶r exempel:\n"\
-"                      \"preset=185\" aktiverar denna instÃ¤llning\n"\
-"                      och anvÃ¤nder 185 som ett genomsnittlig kbps.\n"\
+"   <cbr> (ABR Mode) - ABR-mode är underförstått. För att använda det,\n"\
+"                      helt enkelt ange en bitrate. För exempel:\n"\
+"                      \"preset=185\" aktiverar denna inställning\n"\
+"                      och använder 185 som ett genomsnittlig kbps.\n"\
 "\n"\
-"   \"fast\" - Aktiverar den nya snabba VBR fÃ¶e en speciell profil.\n"\
-"            Nackdel till snabbhetsswitchen Ã¤r att oftast kommer\n"\
-"            bitrate att vara nÃ¥got hÃ¶gre Ã¤n vid 'normal'-mode\n"\
-"            och kvalitÃ©n kan Ã¤ven bil nÃ¥got lÃ¤gre.\n"\
-"   Varning: Med aktuell version kan 'fast'-instÃ¤llningen resultera i\n"\
-"            fÃ¶r hÃ¶r bitrate i jÃ¤mfÃ¶relse med ordinarie instÃ¤llning.\n"\
+"   \"fast\" - Aktiverar den nya snabba VBR föe en speciell profil.\n"\
+"            Nackdel till snabbhetsswitchen är att oftast kommer\n"\
+"            bitrate att vara något högre än vid 'normal'-mode\n"\
+"            och kvalitén kan även bil något lägre.\n"\
+"   Varning: Med aktuell version kan 'fast'-inställningen resultera i\n"\
+"            för hör bitrate i jämförelse med ordinarie inställning.\n"\
 "\n"\
-"   \"cbr\"  - Om du anvÃ¤nder ABR-mode (lÃ¤s ovanstÃ¥ende) med en signifikant\n"\
-"            bitrate, sÃ¥som 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
-"            du kan anvÃ¤nda \"cbr\"-argument fÃ¶r att forcera CBR-modeskodning\n"\
-"            istÃ¤llet fÃ¶r som standard ABR-mode. ABR gÃ¶r hÃ¶gre kvalitÃ©\n"\
-"            men CBR kan vara anvÃ¤ndbar i situationer sÃ¥som vid strÃ¶mmande\n"\
-"            av mp3 Ã¶ver internet.\n"\
+"   \"cbr\"  - Om du använder ABR-mode (läs ovanstående) med en signifikant\n"\
+"            bitrate, såsom 80, 96, 112, 128, 160, 192, 224, 256, 320,\n"\
+"            du kan använda \"cbr\"-argument för att forcera CBR-modeskodning\n"\
+"            istället för som standard ABR-mode. ABR gör högre kvalité\n"\
+"            men CBR kan vara användbar i situationer såsom vid strömmande\n"\
+"            av mp3 över internet.\n"\
 "\n"\
 "    Till exempel:\n"\
 "\n"\
@@ -312,24 +329,24 @@ static char help_text[]=
 " or \"-lameopts      preset=extreme   \"\n"\
 "\n"\
 "\n"\
-"Ett par alias Ã¤r tillgÃ¤ngliga fÃ¶r ABR-mode:\n"\
+"Ett par alias är tillgängliga för ABR-mode:\n"\
 "phone => 16kbps/mono        phon+/lw/mw-eu/sw => 24kbps/mono\n"\
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
 #define MSGTR_ConfigfileError "konfigurationsfilsfel"
 #define MSGTR_ErrorParsingCommandLine "fel vid tolkning av cmdline"
-#define MSGTR_VideoStreamRequired "VideostrÃ¶m Ã¤r obligatoriskt!\n"
-#define MSGTR_ForcingInputFPS "'input fps' kommer att bli tolkad som %5.2f istÃ¤llet\n"
-#define MSGTR_RawvideoDoesNotSupportAudio "Ut-filformat RAWVIDEO stÃ¶djer inte audio - deaktiverar audio\n"
-#define MSGTR_DemuxerDoesntSupportNosound "Denna demuxer stÃ¶djer inte -nosound Ã¤nnu.\n"
+#define MSGTR_VideoStreamRequired "Videoström är obligatoriskt!\n"
+#define MSGTR_ForcingInputFPS "'input fps' kommer att bli tolkad som %5.2f istället\n"
+#define MSGTR_RawvideoDoesNotSupportAudio "Ut-filformat RAWVIDEO stödjer inte audio - deaktiverar audio\n"
+#define MSGTR_DemuxerDoesntSupportNosound "Denna demuxer stödjer inte -nosound ännu.\n"
 #define MSGTR_MemAllocFailed "minnesallokering misslyckades"
 #define MSGTR_NoMatchingFilter "Kunde inte finna matchande filter/ao-format!\n"
 #define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, kanske trasig C-kompilator?\n"
-#define MSGTR_NoLavcAudioCodecName "Audio LAVC, fÃ¶rkommet codecsnamn!\n"
-#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, kunde inte finna encoder fÃ¶r codec %s\n"
+#define MSGTR_NoLavcAudioCodecName "Audio LAVC, förkommet codecsnamn!\n"
+#define MSGTR_LavcAudioCodecNotFound "Audio LAVC, kunde inte finna encoder för codec %s\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, kunde inte allokera kontext!\n"
-#define MSGTR_CouldntOpenCodec "Kunde inte Ã¶ppna codec %s, br=%d\n"
+#define MSGTR_CouldntOpenCodec "Kunde inte öppna codec %s, br=%d\n"
 
 // cfg-mencoder.h:
 
@@ -344,17 +361,17 @@ static char help_text[]=
 " abr           medelbitrate\n"\
 "\n"\
 " cbr           konstant bitrate\n"\
-"               Ã„ven forcerar CBR-modeskodning pÃ¥ subsequentiellt ABR-instÃ¤llningslÃ¤ge.\n"\
+"               Även forcerar CBR-modeskodning på subsequentiellt ABR-inställningsläge.\n"\
 "\n"\
 " br=<0-1024>   specifierar bitrate i kBit (CBR och ABR endast)\n"\
 "\n"\
-" q=<0-9>       kvalitÃ© (0-hÃ¶gst, 9-lÃ¤gst) (endast fÃ¶r VBR)\n"\
+" q=<0-9>       kvalité (0-högst, 9-lägst) (endast för VBR)\n"\
 "\n"\
-" aq=<0-9>      algoritmiskt kvalitÃ© (0-bÃ¤st/segast, 9-sÃ¤mst/snabbast)\n"\
+" aq=<0-9>      algoritmiskt kvalité (0-bäst/segast, 9-sämst/snabbast)\n"\
 "\n"\
 " ratio=<1-100> kompressionsratio\n"\
 "\n"\
-" vol=<0-10>    sÃ¤tt audio-in-Ã¶kning\n"\
+" vol=<0-10>    sätt audio-in-ökning\n"\
 "\n"\
 " mode=<0-3>    (standard: auto)\n"\
 "                0: stereo\n"\
@@ -367,193 +384,193 @@ static char help_text[]=
 "                1: all\n"\
 "                2: adjust\n"\
 "\n"\
-" fast          Aktivera snabbare kodning pÃ¥ subsequentiellt VBR-instÃ¤llningslÃ¤ge,\n"\
-"               nÃ¥got lÃ¤gre kvalitÃ© och hÃ¶gre bitrate.\n"\
+" fast          Aktivera snabbare kodning på subsequentiellt VBR-inställningsläge,\n"\
+"               något lägre kvalité och högre bitrate.\n"\
 "\n"\
-" preset=<value> TillhandahÃ¥ller den hÃ¶gsta tillgÃ¤ngliga kvalitÃ©tsinstÃ¤llning.\n"\
-"                 medium: VBR  kodning, godkvalitÃ©\n"\
+" preset=<value> Tillhandahåller den högsta tillgängliga kvalitétsinställning.\n"\
+"                 medium: VBR  kodning, godkvalité\n"\
 "                 (150-180 kbps bitratesrymd)\n"\
-"                 standard:  VBR kodning, hÃ¶g kvalitÃ©\n"\
+"                 standard:  VBR kodning, hög kvalité\n"\
 "                 (170-210 kbps bitratesrymd)\n"\
-"                 extreme: VBR kodning, mycket hÃ¶g kvalitÃ©\n"\
+"                 extreme: VBR kodning, mycket hög kvalité\n"\
 "                 (200-240 kbps bitratesrymd)\n"\
-"                 insane:  CBR  kodning, hÃ¶gsta fÃ¶rinstÃ¤lld kvalitÃ©\n"\
+"                 insane:  CBR  kodning, högsta förinställd kvalité\n"\
 "                 (320 kbps bitrate)\n"\
 "                 <8-320>: ABR kodning vid i medeltal angiven bitrate (kbps).\n\n"
 
 //codec-cfg.c:
 
 #define MSGTR_DuplicateFourcc "duplicerad FourCC"
-#define MSGTR_TooManyFourccs "fÃ¶r mÃ¥nga FourCCs/format..."
+#define MSGTR_TooManyFourccs "för många FourCCs/format..."
 #define MSGTR_ParseError "tolkningsfel"
-#define MSGTR_ParseErrorFIDNotNumber "tolkningsfel (format-ID Ã¤r inget nummer?)"
-#define MSGTR_ParseErrorFIDAliasNotNumber "tolkningsfel (format-ID-alias Ã¤r inget nummer?)"
+#define MSGTR_ParseErrorFIDNotNumber "tolkningsfel (format-ID är inget nummer?)"
+#define MSGTR_ParseErrorFIDAliasNotNumber "tolkningsfel (format-ID-alias är inget nummer?)"
 #define MSGTR_DuplicateFID "duplicerade format-ID"
-#define MSGTR_TooManyOut "fÃ¶r mÃ¥nga ut..." //FIXME "to many out"?
-#define MSGTR_InvalidCodecName "\ncodec(%s) namn Ã¤r icke godkÃ¤nt!\n"
+#define MSGTR_TooManyOut "för många ut..." //FIXME "to many out"?
+#define MSGTR_InvalidCodecName "\ncodec(%s) namn är icke godkänt!\n"
 #define MSGTR_CodecLacksFourcc "\ncodec(%s) har inte FourCC/format!\n"
 #define MSGTR_CodecLacksDriver "\ncodec(%s) har ingen drivrutin!\n"
-#define MSGTR_CodecNeedsDLL "\ncodec(%s) behÃ¶ver en 'dll'!\n"
-#define MSGTR_CodecNeedsOutfmt "\ncodec(%s) behÃ¶ver en 'outfmt'!\n"
+#define MSGTR_CodecNeedsDLL "\ncodec(%s) behöver en 'dll'!\n"
+#define MSGTR_CodecNeedsOutfmt "\ncodec(%s) behöver en 'outfmt'!\n"
 #define MSGTR_CantAllocateComment "Kan inte allokera minne flr kommentar. "
 #define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token() \b: max >= MAX_MR_TOKEN!" //FIXME translate?
-#define MSGTR_ReadingFile "LÃ¤ser %s: "
-#define MSGTR_CantOpenFileError "Kan inte Ã¶ppna '%s': %s\n"
-#define MSGTR_CantGetMemoryForLine "Kan inte fÃ¥ minne fÃ¶r 'line': %s\n"
+#define MSGTR_ReadingFile "Läser %s: "
+#define MSGTR_CantOpenFileError "Kan inte öppna '%s': %s\n"
+#define MSGTR_CantGetMemoryForLine "Kan inte få minne för 'line': %s\n"
 #define MSGTR_CantReallocCodecsp "Kan inte realloc '*codecsp': %s\n"
-#define MSGTR_CodecNameNotUnique "Codec namn '%s' Ã¤r inte unikt."
+#define MSGTR_CodecNameNotUnique "Codec namn '%s' är inte unikt."
 #define MSGTR_CantStrdupName "Kan inte strdup -> 'name': %s\n"
 #define MSGTR_CantStrdupInfo "Kan inte strdup -> 'info': %s\n"
 #define MSGTR_CantStrdupDriver "Kan inte strdup -> 'driver': %s\n"
 #define MSGTR_CantStrdupDLL "Kan inte strdup -> 'dll': %s"
 #define MSGTR_AudioVideoCodecTotals "%d audio & %d video codecs\n"
-#define MSGTR_CodecDefinitionIncorrect "Codec Ã¤r inte definerad korrekt."
-#define MSGTR_OutdatedCodecsConf "Denna codecs.conf Ã¤r fÃ¶r gammal och inkompatibel med denna MPlayer version!" // release is more like 'slÃ¤pp', sounds wrong, using version instead
+#define MSGTR_CodecDefinitionIncorrect "Codec är inte definerad korrekt."
+#define MSGTR_OutdatedCodecsConf "Denna codecs.conf är för gammal och inkompatibel med denna MPlayer version!" // release is more like 'släpp', sounds wrong, using version instead
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM-enhet '%s' ej funnet.\n"
-#define MSGTR_ErrTrackSelect "Fel vid val av VCD-spÃ¥r."
-#define MSGTR_ReadSTDIN "LÃ¤ser frÃ¥n stdin...\n"
-#define MSGTR_UnableOpenURL "OfÃ¶rmÃ¶gen att Ã¶ppna URL: %s\n"
+#define MSGTR_ErrTrackSelect "Fel vid val av VCD-spår."
+#define MSGTR_ReadSTDIN "Läser från stdin...\n"
+#define MSGTR_UnableOpenURL "Oförmögen att öppna URL: %s\n"
 #define MSGTR_ConnToServer "Ansluten till server: %s\n"
 #define MSGTR_FileNotFound "Fil ej funnen: '%s'\n"
 
 #define MSGTR_SMBInitError "Kan inte initiera libsmbclient-bilioteket: %d\n"
-#define MSGTR_SMBFileNotFound "Kunde inte Ã¶ppna frÃ¥n LAN: '%s'\n"
-#define MSGTR_SMBNotCompiled "MPlayer var inte kompilerad med SMB-lÃ¤sstÃ¶d.\n"
+#define MSGTR_SMBFileNotFound "Kunde inte öppna från LAN: '%s'\n"
+#define MSGTR_SMBNotCompiled "MPlayer var inte kompilerad med SMB-lässtöd.\n"
 
-#define MSGTR_CantOpenDVD "Kunde inte Ã¶ppna DVD-enhet: %s\n"
-#define MSGTR_DVDwait "LÃ¤ser diskstruktur, var god drÃ¶j...\n"
-#define MSGTR_DVDnumTitles "Det Ã¤r %d titlar pÃ¥ denna DVD.\n"
-#define MSGTR_DVDinvalidTitle "Icke godkÃ¤nt DVD-titelnummer: %d\n"
-#define MSGTR_DVDnumChapters "Der Ã¤r %d kapitel pÃ¥ denna DVD-titel.\n"
-#define MSGTR_DVDinvalidChapter "Ej godkÃ¤nt DVD-kapitelnummer: %d\n"
-#define MSGTR_DVDnumAngles "Det Ã¤r %d vinkar pÃ¥ denna DVD-titel.\n"
-#define MSGTR_DVDinvalidAngle "Ej godkÃ¤nd DVD-vinkelsnummer: %d\n"
-#define MSGTR_DVDnoIFO "Kan inte Ã¶ppna IFO-fil fÃ¶r DVD-titel %d.\n"
-#define MSGTR_DVDnoVOBs "Kunde inte Ã¶ppna titel VOBS (VTS_%02d_1.VOB).\n"
-#define MSGTR_DVDopenOk "DVD Ã¶ppnades problemfritt.\n"
+#define MSGTR_CantOpenDVD "Kunde inte öppna DVD-enhet: %s\n"
+#define MSGTR_DVDwait "Läser diskstruktur, var god dröj...\n"
+#define MSGTR_DVDnumTitles "Det är %d titlar på denna DVD.\n"
+#define MSGTR_DVDinvalidTitle "Icke godkänt DVD-titelnummer: %d\n"
+#define MSGTR_DVDnumChapters "Der är %d kapitel på denna DVD-titel.\n"
+#define MSGTR_DVDinvalidChapter "Ej godkänt DVD-kapitelnummer: %d\n"
+#define MSGTR_DVDnumAngles "Det är %d vinkar på denna DVD-titel.\n"
+#define MSGTR_DVDinvalidAngle "Ej godkänd DVD-vinkelsnummer: %d\n"
+#define MSGTR_DVDnoIFO "Kan inte öppna IFO-fil för DVD-titel %d.\n"
+#define MSGTR_DVDnoVOBs "Kunde inte öppna titel VOBS (VTS_%02d_1.VOB).\n"
+#define MSGTR_DVDopenOk "DVD öppnades problemfritt.\n"
 
 // demuxer.c, demux_*.c:
 
-#define MSGTR_AudioStreamRedefined "VARNING: AudiostrÃ¶msfilhuvud %d omdefinerad.\n"
-#define MSGTR_VideoStreamRedefined "WARNING: VideostrÃ¶msfilhuvud %d omdefinerad.\n"
-#define MSGTR_TooManyAudioInBuffer "\nAllt fÃ¶r mÃ¥nga audiopaket i bufferten: (%d i %d byte).\n"
-#define MSGTR_TooManyVideoInBuffer "\nAllt fÃ¶r mÃ¥nga videopaket i bufferten: (%d i %d byte).\n"
-#define MSGTR_MaybeNI "Kanske fÃ¶rsÃ¶ker du spela upp en icke-interleaved strÃ¶m/fil, eller sÃ¥ har decodern falierat?\n" \
-    "FÃ¶r AVI-filer, fÃ¶rsÃ¶k med att forcera icke-interleaved-lÃ¤gen med -ni argumentet.\n" // FIXME non-interleaved
-#define MSGTR_SwitchToNi "\nSvÃ¥rt interleaved AVI-fil detekterad, gÃ¥r Ã¶ver till '-ni'-lÃ¤ge...\n"
+#define MSGTR_AudioStreamRedefined "VARNING: Audioströmsfilhuvud %d omdefinerad.\n"
+#define MSGTR_VideoStreamRedefined "WARNING: Videoströmsfilhuvud %d omdefinerad.\n"
+#define MSGTR_TooManyAudioInBuffer "\nAllt för många audiopaket i bufferten: (%d i %d byte).\n"
+#define MSGTR_TooManyVideoInBuffer "\nAllt för många videopaket i bufferten: (%d i %d byte).\n"
+#define MSGTR_MaybeNI "Kanske försöker du spela upp en icke-interleaved ström/fil, eller så har decodern falierat?\n" \
+    "För AVI-filer, försök med att forcera icke-interleaved-lägen med -ni argumentet.\n" // FIXME non-interleaved
+#define MSGTR_SwitchToNi "\nSvårt interleaved AVI-fil detekterad, går över till '-ni'-läge...\n"
 #define MSGTR_Detected_XXX_FileFormat "%s filformat detekterat.\n"
 #define MSGTR_DetectedAudiofile "Audiofilformat detekterat.\n"
 #define MSGTR_NotSystemStream "Icke 'MPEG System Stream'-format... (kanske Transport Stream?)\n"
-#define MSGTR_InvalidMPEGES "Icke godkÃ¤nd 'MPEG-ES'-strÃ¶m??? Kontakta upphovsmannen, det kanske Ã¤r en bugg :(\n" //FIXME author???
-#define MSGTR_FormatNotRecognized "================ TyvÃ¤rr, detta filformat Ã¤r inte rekogniserbart/stÃ¶tt ==================\n"\
-    "=== Om denna fil Ã¤r en AVi, ASF eller MPEG-strÃ¶m, var vÃ¤nlig kontakta upphovsmannen! ===\n" //FIXME author???
-#define MSGTR_MissingVideoStream "Ingen videostrÃ¶m funnen.\n"
-#define MSGTR_MissingAudioStream "Ingen audiostrÃ¶m funnen -> inget ljud.\n"
-#define MSGTR_MissingVideoStreamBug "Saknar videostrÃ¶m!? Kontakta upphovsmannen, det kan vara en bugg :(\n"
+#define MSGTR_InvalidMPEGES "Icke godkänd 'MPEG-ES'-ström??? Kontakta upphovsmannen, det kanske är en bugg :(\n" //FIXME author???
+#define MSGTR_FormatNotRecognized "================ Tyvärr, detta filformat är inte rekogniserbart/stött ==================\n"\
+    "=== Om denna fil är en AVi, ASF eller MPEG-ström, var vänlig kontakta upphovsmannen! ===\n" //FIXME author???
+#define MSGTR_MissingVideoStream "Ingen videoström funnen.\n"
+#define MSGTR_MissingAudioStream "Ingen audioström funnen -> inget ljud.\n"
+#define MSGTR_MissingVideoStreamBug "Saknar videoström!? Kontakta upphovsmannen, det kan vara en bugg :(\n"
 
-#define MSGTR_DoesntContainSelectedStream "demux: Fil innehÃ¥ller ej den valda audio- eller videostrÃ¶mmen.\n"
+#define MSGTR_DoesntContainSelectedStream "demux: Fil innehåller ej den valda audio- eller videoströmmen.\n"
 
 #define MSGTR_NI_Forced "Forcerad"
-#define MSGTR_NI_Detected "PÃ¥visad" // FIXME right to say?
+#define MSGTR_NI_Detected "Påvisad" // FIXME right to say?
 #define MSGTR_NI_Message "%s 'NON-INTERLEAVED AVI'-filformat.\n"
 
-#define MSGTR_UsingNINI "AnvÃ¤nder trasig 'NON-INTERLEAVED AVI'-filformat.\n"
-#define MSGTR_CouldntDetFNo "Kunde inte avgÃ¶ra antalet bildrutor (fÃ¶r absolut sÃ¶kning).\n"
-#define MSGTR_CantSeekRawAVI "Kan inte sÃ¶ka i rÃ¥a AVI-strÃ¶mmar. (Index krÃ¤vs, fÃ¶rsÃ¶k med '-idx'-switchen.)\n"
-#define MSGTR_CantSeekFile "Kan inte sÃ¶ka i denna fil.\n"
+#define MSGTR_UsingNINI "Använder trasig 'NON-INTERLEAVED AVI'-filformat.\n"
+#define MSGTR_CouldntDetFNo "Kunde inte avgöra antalet bildrutor (för absolut sökning).\n"
+#define MSGTR_CantSeekRawAVI "Kan inte söka i råa AVI-strömmar. (Index krävs, försök med '-idx'-switchen.)\n"
+#define MSGTR_CantSeekFile "Kan inte söka i denna fil.\n"
 
 #define MSGTR_EncryptedVOB "Krypterad VOB-fil! Read DOCS/HTML/en/dvd.html.\n"
 
-#define MSGTR_MOVcomprhdr "MOV: filhuvudkomprimeringssupport krÃ¤ver ZLIB!\n"
-#define MSGTR_MOVvariableFourCC "MOV: VARNING: Variabel FOURCC pÃ¥visad!?\n"
-#define MSGTR_MOVtooManyTrk "MOV: VARNING: allt fÃ¶rmÃ¥nga spÃ¥r"
-#define MSGTR_FoundAudioStream "==> Fann audiostrÃ¶m: %d\n"
-#define MSGTR_FoundVideoStream "==> Fann videostrÃ¶m: %d\n"
-#define MSGTR_DetectedTV "TV pÃ¥visad! ;-)\n"
-#define MSGTR_ErrorOpeningOGGDemuxer "OfÃ¶rmÃ¶gen att Ã¶ppna oggdemuxern.\n"
-#define MSGTR_ASFSearchingForAudioStream "ASF: SÃ¶ker efter audiostrÃ¶m (id:%d).\n"
-#define MSGTR_CannotOpenAudioStream "Kan inte Ã¶ppna audiostrÃ¶m: %s\n"
-#define MSGTR_CannotOpenSubtitlesStream "Kan inte Ã¶ppna textningsstrÃ¶m: %s\n"
-#define MSGTR_OpeningAudioDemuxerFailed "Misslyckades att Ã¶ppna audiodemuxern: %s\n"
-#define MSGTR_OpeningSubtitlesDemuxerFailed "Misslyckades att Ã¶ppna textningsdemuxern: %s\n"
-#define MSGTR_TVInputNotSeekable "TV-in Ã¤r inte sÃ¶kbar! (SÃ¶kning kommer troligen bli fÃ¶r att Ã¤ndra kanal ;)\n"
-#define MSGTR_DemuxerInfoAlreadyPresent "Demuxerinfo %s redan instÃ¤lld!\n"
+#define MSGTR_MOVcomprhdr "MOV: filhuvudkomprimeringssupport kräver ZLIB!\n"
+#define MSGTR_MOVvariableFourCC "MOV: VARNING: Variabel FOURCC påvisad!?\n"
+#define MSGTR_MOVtooManyTrk "MOV: VARNING: allt förmånga spår"
+#define MSGTR_FoundAudioStream "==> Fann audioström: %d\n"
+#define MSGTR_FoundVideoStream "==> Fann videoström: %d\n"
+#define MSGTR_DetectedTV "TV påvisad! ;-)\n"
+#define MSGTR_ErrorOpeningOGGDemuxer "Oförmögen att öppna oggdemuxern.\n"
+#define MSGTR_ASFSearchingForAudioStream "ASF: Söker efter audioström (id:%d).\n"
+#define MSGTR_CannotOpenAudioStream "Kan inte öppna audioström: %s\n"
+#define MSGTR_CannotOpenSubtitlesStream "Kan inte öppna textningsström: %s\n"
+#define MSGTR_OpeningAudioDemuxerFailed "Misslyckades att öppna audiodemuxern: %s\n"
+#define MSGTR_OpeningSubtitlesDemuxerFailed "Misslyckades att öppna textningsdemuxern: %s\n"
+#define MSGTR_TVInputNotSeekable "TV-in är inte sökbar! (Sökning kommer troligen bli för att ändra kanal ;)\n"
+#define MSGTR_DemuxerInfoAlreadyPresent "Demuxerinfo %s redan inställd!\n"
 #define MSGTR_ClipInfo "Clip-info:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: '30fps NTSC'-innehÃ¥ll upptÃ¤ckt, Ã¤ndrar framerate.\n" // FIXME framerate?
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: '24fps progressive NTSC'-innehÃ¥ll upptÃ¤ckt, Ã¤ndrar framerate.\n" // -''-
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: '30fps NTSC'-innehåll upptäckt, ändrar framerate.\n" // FIXME framerate?
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: '24fps progressive NTSC'-innehåll upptäckt, ändrar framerate.\n" // -''-
 
 // dec_video.c & dec_audio.c:
 
-#define MSGTR_CantOpenCodec "Kunde inte Ã¶ppna codec.\n"
-#define MSGTR_CantCloseCodec "Kunde inte stÃ¤nga codec\n"
+#define MSGTR_CantOpenCodec "Kunde inte öppna codec.\n"
+#define MSGTR_CantCloseCodec "Kunde inte stänga codec\n"
 
-#define MSGTR_MissingDLLcodec "FEL: Kunde inte Ã¶ppna obligatorisk DirecShow-codec %s.\n"
+#define MSGTR_MissingDLLcodec "FEL: Kunde inte öppna obligatorisk DirecShow-codec %s.\n"
 #define MSGTR_ACMiniterror "Kunde inte ladda/initiera 'Win32/ACM AUDIO'-codec (saknas Dll-fil?).\n"
 #define MSGTR_MissingLAVCcodec "Kunde inte finna codec '%s' i libavcodec...\n"
 
-#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF under sÃ¶kning efter sequencefilhuvuden\n" // FIXME sequence?
-#define MSGTR_CannotReadMpegSequHdr "FATAL: Kunde inte lÃ¤sa sequencefilhuvud\n"
-#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Kunde inte lÃ¤sa sequencefilhuvudstillÃ¤gg.\n"
-#define MSGTR_BadMpegSequHdr "MPEG: dÃ¥lig sequencefilhuvud\n"
-#define MSGTR_BadMpegSequHdrEx "MPEG: dÃ¥lig sequencefilhuvudstillÃ¤gg\n"
+#define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF under sökning efter sequencefilhuvuden\n" // FIXME sequence?
+#define MSGTR_CannotReadMpegSequHdr "FATAL: Kunde inte läsa sequencefilhuvud\n"
+#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Kunde inte läsa sequencefilhuvudstillägg.\n"
+#define MSGTR_BadMpegSequHdr "MPEG: dålig sequencefilhuvud\n"
+#define MSGTR_BadMpegSequHdrEx "MPEG: dålig sequencefilhuvudstillägg\n"
 
 #define MSGTR_ShMemAllocFail "Kunde inte allokera delat minne.\n"
 #define MSGTR_CantAllocAudioBuf "Kunde inte allokera audio-ut-buffert.\n"
 
-#define MSGTR_UnknownAudio "OkÃ¤nd/saknad audioformat -> inget ljud\n"
+#define MSGTR_UnknownAudio "Okänd/saknad audioformat -> inget ljud\n"
 
-#define MSGTR_UsingExternalPP "[PP] AnvÃ¤nder externt postprocesseringsfiler, max q = %d.\n"
-#define MSGTR_UsingCodecPP "[PP] AnvÃ¤nder codecens postprocessing, max q = %d.\n"
-#define MSGTR_VideoAttributeNotSupportedByVO_VD "Videoattribut '%s' har inget stÃ¶d hos vald vo & vd.\n" // FIXME more info? vo & vd
-#define MSGTR_VideoCodecFamilyNotAvailableStr "BegÃ¤rd videocodecfamilj [%s] (vfm=%s) Ã¤r ej tillgÃ¤nglig.\nAktivera det vil kompilation.\n"
-#define MSGTR_AudioCodecFamilyNotAvailableStr "BegÃ¤rd audiocodecfamilj [%s] (afm=%s) Ã¤r ej tillgÃ¤nglig.\nAktivera det vil kompilation.\n"
-#define MSGTR_OpeningVideoDecoder "Ã–ppnar videodecoder: [%s] %s\n"
-#define MSGTR_OpeningAudioDecoder "Ã–ppnar audiodecoder: [%s] %s\n"
+#define MSGTR_UsingExternalPP "[PP] Använder externt postprocesseringsfiler, max q = %d.\n"
+#define MSGTR_UsingCodecPP "[PP] Använder codecens postprocessing, max q = %d.\n"
+#define MSGTR_VideoAttributeNotSupportedByVO_VD "Videoattribut '%s' har inget stöd hos vald vo & vd.\n" // FIXME more info? vo & vd
+#define MSGTR_VideoCodecFamilyNotAvailableStr "Begärd videocodecfamilj [%s] (vfm=%s) är ej tillgänglig.\nAktivera det vil kompilation.\n"
+#define MSGTR_AudioCodecFamilyNotAvailableStr "Begärd audiocodecfamilj [%s] (afm=%s) är ej tillgänglig.\nAktivera det vil kompilation.\n"
+#define MSGTR_OpeningVideoDecoder "Öppnar videodecoder: [%s] %s\n"
+#define MSGTR_OpeningAudioDecoder "Öppnar audiodecoder: [%s] %s\n"
 #define MSGTR_UninitVideoStr "uninit video: %s\n" // FIXME translate?
 #define MSGTR_UninitAudioStr "uninit audio: %s\n" // -''-
 #define MSGTR_VDecoderInitFailed "VDecoder-initiering misslyckades :(\n" // FIXME VDecoder something special or just a shortcut?
 #define MSGTR_ADecoderInitFailed "ADecoder-initiering misslyckades :(\n" // -''-
 #define MSGTR_ADecoderPreinitFailed "ADecoder-preinitiering misslyckades :(\n" // -''-
-#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Allokerar %d byte fÃ¶r inbuffert.\n"
-#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allokerar %d + %d = %d byte fÃ¶r utbuffert.\n"
+#define MSGTR_AllocatingBytesForInputBuffer "dec_audio: Allokerar %d byte för inbuffert.\n"
+#define MSGTR_AllocatingBytesForOutputBuffer "dec_audio: Allokerar %d + %d = %d byte för utbuffert.\n"
 
 // LIRC:
 
-#define MSGTR_SettingUpLIRC "Aktiverar LIRC-stÃ¶d...\n"
-#define MSGTR_LIRCdisabled "Du kommer inte att kunna anvÃ¤nda din fjÃ¤rrkontroll.\n"
-#define MSGTR_LIRCopenfailed "Misslyckades med att aktivera LIRC-stÃ¶d.\n"
-#define MSGTR_LIRCcfgerr "Misslyckades med att lÃ¤sa LIRC-konfigurationsfil %s.\n"
+#define MSGTR_SettingUpLIRC "Aktiverar LIRC-stöd...\n"
+#define MSGTR_LIRCdisabled "Du kommer inte att kunna använda din fjärrkontroll.\n"
+#define MSGTR_LIRCopenfailed "Misslyckades med att aktivera LIRC-stöd.\n"
+#define MSGTR_LIRCcfgerr "Misslyckades med att läsa LIRC-konfigurationsfil %s.\n"
 
 // vf.c
 
 #define MSGTR_CouldNotFindVideoFilter "Kunde inte finna videofilter '%s'.\n"
-#define MSGTR_CouldNotOpenVideoFilter "Kunde inte Ã¶ppna videofilter '%s'.\n"
-#define MSGTR_OpeningVideoFilter "Ã–ppnar videofilter: "
-#define MSGTR_CannotFindColorspace "Kunde inte hitta matchande fÃ¤rgrymder, t.o.m. vid insÃ¤ttning av 'scale' :(\n" // FIXME colorspace
+#define MSGTR_CouldNotOpenVideoFilter "Kunde inte öppna videofilter '%s'.\n"
+#define MSGTR_OpeningVideoFilter "Öppnar videofilter: "
+#define MSGTR_CannotFindColorspace "Kunde inte hitta matchande färgrymder, t.o.m. vid insättning av 'scale' :(\n" // FIXME colorspace
 
 // vd.c
 
-#define MSGTR_CodecDidNotSet "VDec: Codec satt inte sh->disp_w samt sh->disp_h, fÃ¶rsÃ¶ker gÃ¥ runt problemet.\n"
-#define MSGTR_VoConfigRequest "VDec: vo-konfigurationsbegÃ¤ran - %d x %d (preferred csp: %s)\n"
-#define MSGTR_CouldNotFindColorspace "Kunde inte finna matchande fÃ¤rgrymder - fÃ¶rsÃ¶ker Ã¥ter med -vf scale...\n" // -''-
-#define MSGTR_MovieAspectIsSet "Movie-Aspect Ã¤r %.2f:1 - prescaling till korrekt film-aspect.\n"
-#define MSGTR_MovieAspectUndefined "Film-Aspect Ã¤r ej definerad - ingen prescaling kommer att Ã¤ga rum.\n"
+#define MSGTR_CodecDidNotSet "VDec: Codec satt inte sh->disp_w samt sh->disp_h, försöker gå runt problemet.\n"
+#define MSGTR_VoConfigRequest "VDec: vo-konfigurationsbegäran - %d x %d (preferred csp: %s)\n"
+#define MSGTR_CouldNotFindColorspace "Kunde inte finna matchande färgrymder - försöker åter med -vf scale...\n" // -''-
+#define MSGTR_MovieAspectIsSet "Movie-Aspect är %.2f:1 - prescaling till korrekt film-aspect.\n"
+#define MSGTR_MovieAspectUndefined "Film-Aspect är ej definerad - ingen prescaling kommer att äga rum.\n"
 
 // vd_dshow.c, vd_dmo.c
 
-#define MSGTR_DownloadCodecPackage "Du mÃ¥ste uppgradera/installera de binÃ¤ra codecspaketen.\nGÃ¥ till http://mplayerhq.hu/homepage/dload.html\n"
+#define MSGTR_DownloadCodecPackage "Du måste uppgradera/installera de binära codecspaketen.\nGå till http://mplayerhq.hu/homepage/dload.html\n"
 #define MSGTR_DShowInitOK "INFO: 'Win32/DShow'-videocodecinitiering: OK.\n"
 #define MSGTR_DMOInitOK "INFO: 'Win32/DMO'-videocodecinitiering: OK.\n"
 
 // x11_common.c
 
-#define MSGTR_EwmhFullscreenStateFailed "\nX11: Kunde inte sÃ¤nda EWMH-fullskÃ¤rmshÃ¤ndelse!\n"
+#define MSGTR_EwmhFullscreenStateFailed "\nX11: Kunde inte sända EWMH-fullskärmshändelse!\n"
 
-#define MSGTR_InsertingAfVolume "[Mixer] Ingen hÃ¥rdvarumixning, lÃ¤gger till volymfilter.\n"
-#define MSGTR_NoVolume "[Mixer] Ingen volymkontroll tillgÃ¤nglig.\n"
+#define MSGTR_InsertingAfVolume "[Mixer] Ingen hårdvarumixning, lägger till volymfilter.\n"
+#define MSGTR_NoVolume "[Mixer] Ingen volymkontroll tillgänglig.\n"
 
 
 // ====================== GUI messages/buttons ========================
@@ -562,19 +579,19 @@ static char help_text[]=
 
 // --- labels ---
 #define MSGTR_About "Om"
-#define MSGTR_FileSelect "VÃ¤lj fil..."
-#define MSGTR_SubtitleSelect "VÃ¤lj textning..."
-#define MSGTR_OtherSelect "VÃ¤lj..."
-#define MSGTR_AudioFileSelect "VÃ¤lj extern audiokanal..."
-#define MSGTR_FontSelect "VÃ¤lj font..."
+#define MSGTR_FileSelect "Välj fil..."
+#define MSGTR_SubtitleSelect "Välj textning..."
+#define MSGTR_OtherSelect "Välj..."
+#define MSGTR_AudioFileSelect "Välj extern audiokanal..."
+#define MSGTR_FontSelect "Välj font..."
 #define MSGTR_PlayList "Spellista"
 #define MSGTR_Equalizer "Equalizer" 
-#define MSGTR_SkinBrowser "SkinlÃ¤sare"
-#define MSGTR_Network "NÃ¤tverksstrÃ¶mning..."
-#define MSGTR_Preferences "InstÃ¤llningar"
+#define MSGTR_SkinBrowser "Skinläsare"
+#define MSGTR_Network "Nätverksströmning..."
+#define MSGTR_Preferences "Inställningar"
 #define MSGTR_AudioPreferences "Audiodirvrutinskonfiguration"
-#define MSGTR_NoMediaOpened "Inget media Ã¶ppnad"
-#define MSGTR_VCDTrack "VCD-spÃ¥r %d"
+#define MSGTR_NoMediaOpened "Inget media öppnad"
+#define MSGTR_VCDTrack "VCD-spår %d"
 #define MSGTR_NoChapter "Inget kapitel"
 #define MSGTR_Chapter "Kapitel %d"
 #define MSGTR_NoFileLoaded "Ingen fil laddad"
@@ -583,49 +600,49 @@ static char help_text[]=
 
 #define MSGTR_Ok "OK"
 #define MSGTR_Cancel "Avbryt"
-#define MSGTR_Add "LÃ¤gg till"
+#define MSGTR_Add "Lägg till"
 #define MSGTR_Remove "Radera"
 #define MSGTR_Clear "Rensa"
 #define MSGTR_Config "Konfiguration"
 #define MSGTR_ConfigDriver "Konfigurera drivrution"
-#define MSGTR_Browse "BlÃ¤ddra"
+#define MSGTR_Browse "Bläddra"
 
 // --- error messages ---
 
-#define MSGTR_NEMDB "TyvÃ¤rr, inte tillrÃ¤ckligt minne fÃ¶r ritbuffert."
-#define MSGTR_NEMFMR "TyvÃ¤rr, inte tillrÃ¤ckligt minne fÃ¶r menyrendering."
-#define MSGTR_IDFGCVD "TyvÃ¤rr, jag hittade inte en GUI-kompatibel video-ut-drivrutin."
-#define MSGTR_NEEDLAVCFAME "TyvÃ¤rr, du kan inte spela icke-MPEG-filer med ditt DXR3/H+-enhet utan omkodning.\nVar god aktivera lavc eller fame i 'DXR3/H+'-konfigurationsboxen."
+#define MSGTR_NEMDB "Tyvärr, inte tillräckligt minne för ritbuffert."
+#define MSGTR_NEMFMR "Tyvärr, inte tillräckligt minne för menyrendering."
+#define MSGTR_IDFGCVD "Tyvärr, jag hittade inte en GUI-kompatibel video-ut-drivrutin."
+#define MSGTR_NEEDLAVCFAME "Tyvärr, du kan inte spela icke-MPEG-filer med ditt DXR3/H+-enhet utan omkodning.\nVar god aktivera lavc eller fame i 'DXR3/H+'-konfigurationsboxen."
 
 // --- skin loader error messages
 
-#define MSGTR_SKIN_ERRORMESSAGE "[skin] fel i skinkonfigureringsfil pÃ¥ rad %d: %s"
-#define MSGTR_SKIN_WARNING1 "[skin] varning i konfigurationsfil pÃ¥ rad %d:\nwidget (%s) funnen, men ingen \"section\" funnen fÃ¶re"
-#define MSGTR_SKIN_WARNING2 "[skin] varning i konfigurationsfil pÃ¥ rad %d:\nwidget (%s) funnen, men ingen \"subsection\" funnen fÃ¶re"
-#define MSGTR_SKIN_WARNING3 "[skin] varning i konfigurationsfil pÃ¥ rad %d:\ndenna undersektion stÃ¶djs inte av widget (%s)"
-#define MSGTR_SKIN_BITMAP_16bit  "16-bitar eller lÃ¤gre bitmappar stÃ¶djs inte (%s).\n"
+#define MSGTR_SKIN_ERRORMESSAGE "[skin] fel i skinkonfigureringsfil på rad %d: %s"
+#define MSGTR_SKIN_WARNING1 "[skin] varning i konfigurationsfil på rad %d:\nwidget (%s) funnen, men ingen \"section\" funnen före"
+#define MSGTR_SKIN_WARNING2 "[skin] varning i konfigurationsfil på rad %d:\nwidget (%s) funnen, men ingen \"subsection\" funnen före"
+#define MSGTR_SKIN_WARNING3 "[skin] varning i konfigurationsfil på rad %d:\ndenna undersektion stödjs inte av widget (%s)"
+#define MSGTR_SKIN_BITMAP_16bit  "16-bitar eller lägre bitmappar stödjs inte (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "fil ej funnen (%s)\n"
-#define MSGTR_SKIN_BITMAP_BMPReadError "BMP lÃ¤sfel (%s)\n"
-#define MSGTR_SKIN_BITMAP_TGAReadError "TGA lÃ¤sfel (%s)\n"
-#define MSGTR_SKIN_BITMAP_PNGReadError "PNG lÃ¤sfel (%s)\n"
-#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE-packad TGA stÃ¶djs ej (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownFileType "okÃ¤nd filtyp (%s)\n"
+#define MSGTR_SKIN_BITMAP_BMPReadError "BMP läsfel (%s)\n"
+#define MSGTR_SKIN_BITMAP_TGAReadError "TGA läsfel (%s)\n"
+#define MSGTR_SKIN_BITMAP_PNGReadError "PNG läsfel (%s)\n"
+#define MSGTR_SKIN_BITMAP_RLENotSupported "RLE-packad TGA stödjs ej (%s)\n"
+#define MSGTR_SKIN_BITMAP_UnknownFileType "okänd filtyp (%s)\n"
 #define MSGTR_SKIN_BITMAP_ConvertError "24-bitars till 32-bitars konverteringsfel (%s)\n"
-#define MSGTR_SKIN_BITMAP_UnknownMessage "okÃ¤nt meddelande: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "ej tillrÃ¤ckligt minne\n"
-#define MSGTR_SKIN_FONT_TooManyFontsDeclared "Allt fÃ¶r mÃ¥nga fonter deklarerade.\n"
+#define MSGTR_SKIN_BITMAP_UnknownMessage "okänt meddelande: %s\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "ej tillräckligt minne\n"
+#define MSGTR_SKIN_FONT_TooManyFontsDeclared "Allt för många fonter deklarerade.\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "Fontfil ej funnen.\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "Fontbildsfil ej funnen.\n"
 #define MSGTR_SKIN_FONT_NonExistentFontID "icke-existerande fontidentifkator (%s)\n"
-#define MSGTR_SKIN_UnknownParameter "okÃ¤nd parameter (%s)\n"
+#define MSGTR_SKIN_UnknownParameter "okänd parameter (%s)\n"
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin ej funnen (%s).\n"
-#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "skinkonfigurationsfilslÃ¤sfel (%s)\n"
+#define MSGTR_SKIN_SKINCFG_SkinCfgReadError "skinkonfigurationsfilsläsfel (%s)\n"
 #define MSGTR_SKIN_LABEL "Skin:"
 
 // --- gtk menus
 
 #define MSGTR_MENU_AboutMPlayer "Om MPlayer"
-#define MSGTR_MENU_Open "Ã–ppna..."
+#define MSGTR_MENU_Open "Öppna..."
 #define MSGTR_MENU_PlayFile "Spela fil..."
 #define MSGTR_MENU_PlayVCD "Spela VCD..."
 #define MSGTR_MENU_PlayDVD "Spela DVD..."
@@ -637,33 +654,33 @@ static char help_text[]=
 #define MSGTR_MENU_Play "Spela"
 #define MSGTR_MENU_Pause "Pausa"
 #define MSGTR_MENU_Stop "Stopp"
-#define MSGTR_MENU_NextStream "NÃ¤sta strÃ¶m"
-#define MSGTR_MENU_PrevStream "FÃ¶regÃ¥ende strÃ¶m"
+#define MSGTR_MENU_NextStream "Nästa ström"
+#define MSGTR_MENU_PrevStream "Föregående ström"
 #define MSGTR_MENU_Size "Storlek"
 #define MSGTR_MENU_NormalSize "Normal storlek"
 #define MSGTR_MENU_DoubleSize "Dubbel storlek"
-#define MSGTR_MENU_FullScreen "FullskÃ¤rm"
+#define MSGTR_MENU_FullScreen "Fullskärm"
 #define MSGTR_MENU_DVD "DVD"
 #define MSGTR_MENU_VCD "VCD"
-#define MSGTR_MENU_PlayDisc "Ã–ppnar disk..." // FIXME to open or is opening?
+#define MSGTR_MENU_PlayDisc "Öppnar disk..." // FIXME to open or is opening?
 #define MSGTR_MENU_ShowDVDMenu "Visa DVD-meny"
 #define MSGTR_MENU_Titles "Titlar"
 #define MSGTR_MENU_Title "Titel %2d"
 #define MSGTR_MENU_None "(ingen)"
 #define MSGTR_MENU_Chapters "Kapitel"
 #define MSGTR_MENU_Chapter "Kapitel %2d"
-#define MSGTR_MENU_AudioLanguages "AudiosprÃ¥k"
-#define MSGTR_MENU_SubtitleLanguages "TextningssprÃ¥k"
+#define MSGTR_MENU_AudioLanguages "Audiospråk"
+#define MSGTR_MENU_SubtitleLanguages "Textningsspråk"
 #define MSGTR_MENU_PlayList "Spellista"
-#define MSGTR_MENU_SkinBrowser "SkinlÃ¤sare"
-#define MSGTR_MENU_Preferences "InstÃ¤llningar"
+#define MSGTR_MENU_SkinBrowser "Skinläsare"
+#define MSGTR_MENU_Preferences "Inställningar"
 #define MSGTR_MENU_Exit "Avsluta..."
-#define MSGTR_MENU_Mute "DÃ¤mpa"
+#define MSGTR_MENU_Mute "Dämpa"
 #define MSGTR_MENU_Original "Orginal"
 #define MSGTR_MENU_AspectRatio "Aspect ratio" // FIXME translate?
-#define MSGTR_MENU_AudioTrack "AudiospÃ¥r"
-#define MSGTR_MENU_Track "SpÃ¥r %d"
-#define MSGTR_MENU_VideoTrack "VideospÃ¥r"
+#define MSGTR_MENU_AudioTrack "Audiospår"
+#define MSGTR_MENU_Track "Spår %d"
+#define MSGTR_MENU_VideoTrack "Videospår"
 
 // --- equalizer
 
@@ -673,10 +690,10 @@ static char help_text[]=
 #define MSGTR_EQU_Brightness "Ljusstyrka: "
 #define MSGTR_EQU_Hue "Hue: "
 #define MSGTR_EQU_Saturation "Saturation: "
-#define MSGTR_EQU_Front_Left "VÃ¤nster fram"
-#define MSGTR_EQU_Front_Right "HÃ¶ger fram"
-#define MSGTR_EQU_Back_Left "VÃ¤nster bak"
-#define MSGTR_EQU_Back_Right "HÃ¶ger bak"
+#define MSGTR_EQU_Front_Left "Vänster fram"
+#define MSGTR_EQU_Front_Right "Höger fram"
+#define MSGTR_EQU_Back_Left "Vänster bak"
+#define MSGTR_EQU_Back_Right "Höger bak"
 #define MSGTR_EQU_Center "Center"
 #define MSGTR_EQU_Bass "Bass"
 #define MSGTR_EQU_All "Allt"
@@ -689,10 +706,10 @@ static char help_text[]=
 
 // --- playlist
 
-#define MSGTR_PLAYLIST_Path "SÃ¶kvÃ¤g"
+#define MSGTR_PLAYLIST_Path "Sökväg"
 #define MSGTR_PLAYLIST_Selected "Valda filer"
 #define MSGTR_PLAYLIST_Files "Filer"
-#define MSGTR_PLAYLIST_DirectoryTree "KatalogtrÃ¤d"
+#define MSGTR_PLAYLIST_DirectoryTree "Katalogträd"
 
 // --- preferences
 
@@ -704,40 +721,40 @@ static char help_text[]=
 
 #define MSGTR_PREFERENCES_None "Inget"
 #define MSGTR_PREFERENCES_DriverDefault "standarddrivrutin"
-#define MSGTR_PREFERENCES_AvailableDrivers "TillgÃ¤ngliga drivrutioner:"
+#define MSGTR_PREFERENCES_AvailableDrivers "Tillgängliga drivrutioner:"
 #define MSGTR_PREFERENCES_DoNotPlaySound "Spela inte upp ljud"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizera ljud"
 #define MSGTR_PREFERENCES_EnEqualizer "AKtivera equalizer"
 #define MSGTR_PREFERENCES_ExtraStereo "Aktivera extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Koefficient:"
-#define MSGTR_PREFERENCES_AudioDelay "AudiofÃ¶rdrÃ¶jning"
+#define MSGTR_PREFERENCES_AudioDelay "Audiofördröjning"
 #define MSGTR_PREFERENCES_DoubleBuffer "Aktivera double buffering"
 #define MSGTR_PREFERENCES_DirectRender "Aktivera direct rendering"
 #define MSGTR_PREFERENCES_FrameDrop "Aktivera frame dropping"
-#define MSGTR_PREFERENCES_HFrameDrop "Aktivera HÃ…RD frame dropping (dangerous)"
+#define MSGTR_PREFERENCES_HFrameDrop "Aktivera HÅRD frame dropping (dangerous)"
 #define MSGTR_PREFERENCES_Flip "Flippa bilden uppochner"
 #define MSGTR_PREFERENCES_Panscan "Panscan: "
 #define MSGTR_PREFERENCES_OSDTimer "Timers och indikatorer"
-#define MSGTR_PREFERENCES_OSDProgress "TillstÃ¥ndsrad endast"
+#define MSGTR_PREFERENCES_OSDProgress "Tillståndsrad endast"
 #define MSGTR_PREFERENCES_OSDTimerPercentageTotalTime "Timer, procent och total tid"
 #define MSGTR_PREFERENCES_Subtitle "Textning:"
-#define MSGTR_PREFERENCES_SUB_Delay "FÃ¶rdrÃ¶jning: "
+#define MSGTR_PREFERENCES_SUB_Delay "Fördröjning: "
 #define MSGTR_PREFERENCES_SUB_FPS "FPS:"
 #define MSGTR_PREFERENCES_SUB_POS "Position: "
 #define MSGTR_PREFERENCES_SUB_AutoLoad "Deaktivera automatisk laddning av textning"
 #define MSGTR_PREFERENCES_SUB_Unicode "Unicodetextning"
 #define MSGTR_PREFERENCES_SUB_MPSUB "Konvertera given text till MPlayers egna textningsformat"
 #define MSGTR_PREFERENCES_SUB_SRT "Konvertera given text till det tidbaserade SubViewer (SRT) formatet"
-#define MSGTR_PREFERENCES_SUB_Overlap "Aktivera textningsÃ¶verlappning"
+#define MSGTR_PREFERENCES_SUB_Overlap "Aktivera textningsöverlappning"
 #define MSGTR_PREFERENCES_Font "Font:"
 #define MSGTR_PREFERENCES_FontFactor "Fontfaktor:"
 #define MSGTR_PREFERENCES_PostProcess "Aktivera postprocessing"
-#define MSGTR_PREFERENCES_AutoQuality "AutokvalitÃ©: "
-#define MSGTR_PREFERENCES_NI "AnvÃ¤nd non-interleaved AVI tolk"
-#define MSGTR_PREFERENCES_IDX "Ã…terbygg indextabell, om sÃ¥ behÃ¶vs"
+#define MSGTR_PREFERENCES_AutoQuality "Autokvalité: "
+#define MSGTR_PREFERENCES_NI "Använd non-interleaved AVI tolk"
+#define MSGTR_PREFERENCES_IDX "Återbygg indextabell, om så behövs"
 #define MSGTR_PREFERENCES_VideoCodecFamily "Videocodecfamilj:"
 #define MSGTR_PREFERENCES_AudioCodecFamily "Audiocodecfamilj:"
-#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD-nivÃ¥"
+#define MSGTR_PREFERENCES_FRAME_OSD_Level "OSD-nivå"
 #define MSGTR_PREFERENCES_FRAME_Subtitle "Textning"
 #define MSGTR_PREFERENCES_FRAME_Font "Font"
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
@@ -747,64 +764,64 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_Audio_Device "Enhet:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Mixerkanal:"
-#define MSGTR_PREFERENCES_Message "Var god komihÃ¥g att du mÃ¥ste starta om uppspelning fÃ¶r att vissa Ã¤ndringar ska ta effekt!"
+#define MSGTR_PREFERENCES_Message "Var god komihåg att du måste starta om uppspelning för att vissa ändringar ska ta effekt!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Videoencoder:"
-#define MSGTR_PREFERENCES_DXR3_LAVC "ANvÃ¤nd LAVC (FFmpeg)"
-#define MSGTR_PREFERENCES_DXR3_FAME "AnvÃ¤nd FAME"
+#define MSGTR_PREFERENCES_DXR3_LAVC "ANvänd LAVC (FFmpeg)"
+#define MSGTR_PREFERENCES_DXR3_FAME "Använd FAME"
 
 #define MSGTR_PREFERENCES_FontEncoding1 "Unicode"
-#define MSGTR_PREFERENCES_FontEncoding2 "VÃ¤steuropeiska sprÃ¥k (ISO-8859-1)"
-#define MSGTR_PREFERENCES_FontEncoding3 "VÃ¤steuropeiska sprÃ¥k med Euro (ISO-8859-15)"
-#define MSGTR_PREFERENCES_FontEncoding4 "Slaviska/Centraleuropeiska sprÃ¥k (ISO-8859-2)"
+#define MSGTR_PREFERENCES_FontEncoding2 "Västeuropeiska språk (ISO-8859-1)"
+#define MSGTR_PREFERENCES_FontEncoding3 "Västeuropeiska språk med Euro (ISO-8859-15)"
+#define MSGTR_PREFERENCES_FontEncoding4 "Slaviska/Centraleuropeiska språk (ISO-8859-2)"
 #define MSGTR_PREFERENCES_FontEncoding5 "Esperanto, Galician, Maltese, Turkiska (ISO-8859-3)" // FIXME Galician, Maltese
-#define MSGTR_PREFERENCES_FontEncoding6 "Ã„ldre baltisk teckenuppsÃ¤ttning (ISO-8859-4)"
+#define MSGTR_PREFERENCES_FontEncoding6 "Äldre baltisk teckenuppsättning (ISO-8859-4)"
 #define MSGTR_PREFERENCES_FontEncoding7 "Kyrilliska (ISO-8859-5)"
 #define MSGTR_PREFERENCES_FontEncoding8 "Arabiska (ISO-8859-6)"
 #define MSGTR_PREFERENCES_FontEncoding9 "Modern grekiska (ISO-8859-7)"
 #define MSGTR_PREFERENCES_FontEncoding10 "Turkiska (ISO-8859-9)"
 #define MSGTR_PREFERENCES_FontEncoding11 "Baltiska (ISO-8859-13)"
 #define MSGTR_PREFERENCES_FontEncoding12 "Celtiska (ISO-8859-14)"
-#define MSGTR_PREFERENCES_FontEncoding13 "Hebrew teckenuppsÃ¤ttningar (ISO-8859-8)"
+#define MSGTR_PREFERENCES_FontEncoding13 "Hebrew teckenuppsättningar (ISO-8859-8)"
 #define MSGTR_PREFERENCES_FontEncoding14 "Ryska (KOI8-R)"
 #define MSGTR_PREFERENCES_FontEncoding15 "Ukrainska, Vitrysska (KOI8-U/RU)"
-#define MSGTR_PREFERENCES_FontEncoding16 "Enkel Kinesisk teckenuppsÃ¤ttning (CP936)"
-#define MSGTR_PREFERENCES_FontEncoding17 "Traditionell Kinesisk teckenuppsÃ¤ttning (BIG5)"
-#define MSGTR_PREFERENCES_FontEncoding18 "Japansk teckenuppsÃ¤ttning (SHIFT-JIS)"
-#define MSGTR_PREFERENCES_FontEncoding19 "Koreansk teckenuppsÃ¤ttning (CP949)"
-#define MSGTR_PREFERENCES_FontEncoding20 "ThailÃ¤nsk teckenuppsÃ¤ttning (CP874)"
+#define MSGTR_PREFERENCES_FontEncoding16 "Enkel Kinesisk teckenuppsättning (CP936)"
+#define MSGTR_PREFERENCES_FontEncoding17 "Traditionell Kinesisk teckenuppsättning (BIG5)"
+#define MSGTR_PREFERENCES_FontEncoding18 "Japansk teckenuppsättning (SHIFT-JIS)"
+#define MSGTR_PREFERENCES_FontEncoding19 "Koreansk teckenuppsättning (CP949)"
+#define MSGTR_PREFERENCES_FontEncoding20 "Thailänsk teckenuppsättning (CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Kyrilliska Windown (CP1251)"
 #define MSGTR_PREFERENCES_FontEncoding22 "Slaviska/Centraleuropeiska Windows (CP1250)"
 
 #define MSGTR_PREFERENCES_FontNoAutoScale "Ingen autoskalning"
 #define MSGTR_PREFERENCES_FontPropWidth "Propotionellt mot filmbredd"
-#define MSGTR_PREFERENCES_FontPropHeight "Propotionellt mot filmhÃ¶jd"
+#define MSGTR_PREFERENCES_FontPropHeight "Propotionellt mot filmhöjd"
 #define MSGTR_PREFERENCES_FontPropDiagonal "Propotionellt mot filmdiagonalen"
 #define MSGTR_PREFERENCES_FontEncoding "Kodning:"
 #define MSGTR_PREFERENCES_FontBlur "Blur:"
 #define MSGTR_PREFERENCES_FontOutLine "Outline:"
 #define MSGTR_PREFERENCES_FontTextScale "Textskalning:"
 #define MSGTR_PREFERENCES_FontOSDScale "OSDskalning:"
-#define MSGTR_PREFERENCES_Cache "Cache pÃ¥/av"
+#define MSGTR_PREFERENCES_Cache "Cache på/av"
 #define MSGTR_PREFERENCES_CacheSize "Cachestorlek: "
-#define MSGTR_PREFERENCES_LoadFullscreen "Starta i fullskÃ¤rm"
-#define MSGTR_PREFERENCES_SaveWinPos "Spara fÃ¶nsterposition"
+#define MSGTR_PREFERENCES_LoadFullscreen "Starta i fullskärm"
+#define MSGTR_PREFERENCES_SaveWinPos "Spara fönsterposition"
 #define MSGTR_PREFERENCES_XSCREENSAVER "Stoppa XScreenSaver"
 #define MSGTR_PREFERENCES_PlayBar "Aktivera spelindikator"
-#define MSGTR_PREFERENCES_AutoSync "AutoSync pÃ¥/av"
+#define MSGTR_PREFERENCES_AutoSync "AutoSync på/av"
 #define MSGTR_PREFERENCES_AutoSyncValue "Autosync: "
 #define MSGTR_PREFERENCES_CDROMDevice "CD-ROM-enhet:"
 #define MSGTR_PREFERENCES_DVDDevice "DVD-enhet:"
 #define MSGTR_PREFERENCES_FPS "Film-FPS:"
-#define MSGTR_PREFERENCES_ShowVideoWindow "Visa videofÃ¶nster nÃ¤r den Ã¤r inaktiv"
+#define MSGTR_PREFERENCES_ShowVideoWindow "Visa videofönster när den är inaktiv"
 
 #define MSGTR_ABOUT_UHU "GUI-utveckling sponstrat av UHU Linux\n"
-#define MSGTR_ABOUT_CoreTeam "   MPlayers kÃ¤rngrupp:\n"
-#define MSGTR_ABOUT_AdditionalCoders "   Ã–vriga kodare:\n"
+#define MSGTR_ABOUT_CoreTeam "   MPlayers kärngrupp:\n"
+#define MSGTR_ABOUT_AdditionalCoders "   Övriga kodare:\n"
 #define MSGTR_ABOUT_MainTesters "    Huvudsakliga testare:\n"
 
 // --- messagebox
 
-#define MSGTR_MSGBOX_LABEL_FatalError "OÃ¶verkomligt fel!"
+#define MSGTR_MSGBOX_LABEL_FatalError "Oöverkomligt fel!"
 #define MSGTR_MSGBOX_LABEL_Error "Fel!"
 #define MSGTR_MSGBOX_LABEL_Warning "Varning!"
 
@@ -812,20 +829,20 @@ static char help_text[]=
 
 // ======================= VO Video Output drivers ========================
 
-#define MSGTR_VOincompCodec "Vald video-ut-enhet Ã¤r inte kompatibel med denna codec.\n"
-#define MSGTR_VO_GenericError "Detta fel har intrÃ¤ffat"
+#define MSGTR_VOincompCodec "Vald video-ut-enhet är inte kompatibel med denna codec.\n"
+#define MSGTR_VO_GenericError "Detta fel har inträffat"
 #define MSGTR_VO_UnableToAccess "Kan inte accessa"
-#define MSGTR_VO_ExistsButNoDirectory "finns redan, men Ã¤r inte en katalog."
-#define MSGTR_VO_DirExistsButNotWritable "Ut-katalog finns redan, men Ã¤r inte skrivbar."
-#define MSGTR_VO_DirExistsAndIsWritable "Utkatalog finns redan och Ã¤r skrivbar."
-#define MSGTR_VO_CantCreateDirectory "OfÃ¶rmÃ¶gen att skapa ut-katalog."
-#define MSGTR_VO_CantCreateFile "OfÃ¶rmÃ¶gen att skapa utfil."
+#define MSGTR_VO_ExistsButNoDirectory "finns redan, men är inte en katalog."
+#define MSGTR_VO_DirExistsButNotWritable "Ut-katalog finns redan, men är inte skrivbar."
+#define MSGTR_VO_DirExistsAndIsWritable "Utkatalog finns redan och är skrivbar."
+#define MSGTR_VO_CantCreateDirectory "Oförmögen att skapa ut-katalog."
+#define MSGTR_VO_CantCreateFile "Oförmögen att skapa utfil."
 #define MSGTR_VO_DirectoryCreateSuccess "Ut-katalog skapad."
 #define MSGTR_VO_ParsingSuboptions "Tolkar suboptions." // FIXME suboptions?
 #define MSGTR_VO_SuboptionsParsedOK "Suboptions tolkad OK." // -''-
-#define MSGTR_VO_ValueOutOfRange "VÃ¤rden utanfÃ¶r godkÃ¤nd rymd"
-#define MSGTR_VO_NoValueSpecified "Inget vÃ¤rde angett."
-#define MSGTR_VO_UnknownSuboptions "OkÃ¤nd suboption" // -''-
+#define MSGTR_VO_ValueOutOfRange "Värden utanför godkänd rymd"
+#define MSGTR_VO_NoValueSpecified "Inget värde angett."
+#define MSGTR_VO_UnknownSuboptions "Okänd suboption" // -''-
 
 // vo_jpeg.c
 
@@ -837,25 +854,25 @@ static char help_text[]=
 // vo_pnm.c
 
 #define MSGTR_VO_PNM_ASCIIMode "ASCII-mode aktiverat."
-#define MSGTR_VO_PNM_RawMode "RÃ¥tt-mode aktiverat." // FIXME RÃ¥tt sounds strange
+#define MSGTR_VO_PNM_RawMode "Rått-mode aktiverat." // FIXME Rått sounds strange
 #define MSGTR_VO_PNM_PPMType "Kommer att skriva PPM-filer."
 #define MSGTR_VO_PNM_PGMType "Kommer att skriva PGM-filer."
 #define MSGTR_VO_PNM_PGMYUVType "Kommer att skriva PGMYUV-filer."
 
 // vo_yuv4mpeg.c
 
-#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "'Interlaced'-mode krÃ¤ver bildhÃ¶jd som Ã¤r delbar med 4." // FIXME interlaced?
-#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "OfÃ¶rmÃ¶gen att allokera linjebufferrt fÃ¶r interlaced-mode."
-#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "indata Ã¤r ej i RGB-format, kan inte separera 'chrominance' via fÃ¤lt!" // FIXME chrominance
-#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Bildbredd mÃ¥ste vara delbart med 2."
-#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Ej tillrÃ¤ckligt med minne fÃ¶r att allokera RGB-bildramsbuffert."
-#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Kan inte fÃ¥ minnes- eller filhanterare att skriva till \"stream.yuv\"!"
+#define MSGTR_VO_YUV4MPEG_InterlacedHeightDivisibleBy4 "'Interlaced'-mode kräver bildhöjd som är delbar med 4." // FIXME interlaced?
+#define MSGTR_VO_YUV4MPEG_InterlacedLineBufAllocFail "Oförmögen att allokera linjebufferrt för interlaced-mode."
+#define MSGTR_VO_YUV4MPEG_InterlacedInputNotRGB "indata är ej i RGB-format, kan inte separera 'chrominance' via fält!" // FIXME chrominance
+#define MSGTR_VO_YUV4MPEG_WidthDivisibleBy2 "Bildbredd måste vara delbart med 2."
+#define MSGTR_VO_YUV4MPEG_NoMemRGBFrameBuf "Ej tillräckligt med minne för att allokera RGB-bildramsbuffert."
+#define MSGTR_VO_YUV4MPEG_OutFileOpenError "Kan inte få minnes- eller filhanterare att skriva till \"stream.yuv\"!"
 #define MSGTR_VO_YUV4MPEG_OutFileWriteError "Fel vid skrivning av bild till ut!" // FIXME output here?
-#define MSGTR_VO_YUV4MPEG_UnknownSubDev "OkÃ¤nd subdevice: %s" // FIXME subdevice
-#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "AnvÃ¤nder 'interlaced output mode', Ã¶vre fÃ¤ltet fÃ¶rst." // FIXME top-field first? && 'interlaced output mode'
-#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "AnvÃ¤nder 'interlaced output mode',nedre fÃ¤ltet fÃ¶rst." // FIXME bottom-field first? && 'interlaced output mode'
+#define MSGTR_VO_YUV4MPEG_UnknownSubDev "Okänd subdevice: %s" // FIXME subdevice
+#define MSGTR_VO_YUV4MPEG_InterlacedTFFMode "Använder 'interlaced output mode', övre fältet först." // FIXME top-field first? && 'interlaced output mode'
+#define MSGTR_VO_YUV4MPEG_InterlacedBFFMode "Använder 'interlaced output mode',nedre fältet först." // FIXME bottom-field first? && 'interlaced output mode'
 
-#define MSGTR_VO_YUV4MPEG_ProgressiveMode "AnvÃ¤nder (som standard) progressiv bildramsinstÃ¤llning."
+#define MSGTR_VO_YUV4MPEG_ProgressiveMode "Använder (som standard) progressiv bildramsinställning."
 
 // Old vo drivers that have been replaced
 
@@ -869,43 +886,43 @@ static char help_text[]=
 
 // audio_out.c
 
-#define MSGTR_AO_ALSA9_1x_Removed "audio_out: alsa9- samt alsa1xmodulerna har blivit borttagna, anvÃ¤nd -ao istÃ¤llet.\n"
+#define MSGTR_AO_ALSA9_1x_Removed "audio_out: alsa9- samt alsa1xmodulerna har blivit borttagna, använd -ao istället.\n"
 
 // ao_oss.c
 
-#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Kan inte Ã¶ppna mixernehet %s: %s\n"
-#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Audiokortsmixer har inte kanal '%s' anvÃ¤nder standard.\n"
-#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Kan inte Ã¶ppna audioenhet %s: %s\n"
-#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Kan inte fÃ¥ till 'filedescriptor'sblockning: %s\n" // FIXME filedescriptor
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Kan inte sÃ¤tta audioenhet %s till AC3-ut, prÃ¶var S16...\n"
-#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Misslyckades att sÃ¤tta audioenhet till %d kanaler.\n"
+#define MSGTR_AO_OSS_CantOpenMixer "[AO OSS] audio_setup: Kan inte öppna mixernehet %s: %s\n"
+#define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Audiokortsmixer har inte kanal '%s' använder standard.\n"
+#define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Kan inte öppna audioenhet %s: %s\n"
+#define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Kan inte få till 'filedescriptor'sblockning: %s\n" // FIXME filedescriptor
+#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Kan inte sätta audioenhet %s till AC3-ut, prövar S16...\n"
+#define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Misslyckades att sätta audioenhet till %d kanaler.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: dirvrutin hanerar ej SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Din audiodrivrutin hanterar inte select()  ***\n Komplilera om med '#undef HAVE_AUDIO_SELECT' i config.h !\n\n" // TODO shoud be a better way to do this
-#define MSGTR_AO_OSS_CantReopen "[AO OSS]\nFatalt fel: *** CAN INTE BLI Ã…TERÃ–PPNAD / Ã…TERSTÃ„LLER AUDIOENHET *** %s\n"
+#define MSGTR_AO_OSS_CantReopen "[AO OSS]\nFatalt fel: *** CAN INTE BLI ÅTERÖPPNAD / ÅTERSTÄLLER AUDIOENHET *** %s\n"
 
 // ao_arts.c
 
 #define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n" // FIXME nothing?
 #define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Anslutet till ljudserver.\n"
-#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] OfÃ¶rmÃ¶gen att Ã¶ppna en strÃ¶m.\n" // FIXME 'strÃ¶m' or 'ljudstrÃ¶m'?
-#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] StrÃ¶m Ã¶ppnad.\n" // -''-
+#define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Oförmögen att öppna en ström.\n" // FIXME 'ström' or 'ljudström'?
+#define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] Ström öppnad.\n" // -''-
 #define MSGTR_AO_ARTS_BufferSize "[AO ARTS] buffertstorlek: %d\n"
 
 // ao_dxr2.c
 
-#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] SÃ¤ttning av volym till %d misslyckades.\n"
-#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz Ã¤r ej tillgÃ¤nglig, fÃ¶rsÃ¶k med \"-aop list=resample\"\n"
+#define MSGTR_AO_DXR2_SetVolFailed "[AO DXR2] Sättning av volym till %d misslyckades.\n"
+#define MSGTR_AO_DXR2_UnsupSamplerate "[AO DXR2] dxr2: %d Hz är ej tillgänglig, försök med \"-aop list=resample\"\n"
 
 // ao_esd.c
 
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound misslyckades: %s\n"
 #define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latency: [server: %0.2fs, net: %0.2fs] (adjust %0.2fs)\n" // FIXME translate?
-#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] misslyckades att Ã¶ppna uppspelningsstrÃ¶m: %s\n" 
+#define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] misslyckades att öppna uppspelningsström: %s\n" 
 
 // ao_mpegpes.c
 
-#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB-audio-sÃ¤ttningsmixer misslyckades: %s\n" // set ~= sÃ¤ttning?
-#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz ej tillgÃ¤nglig, fÃ¶rsÃ¶ker resampla...\n"
+#define MSGTR_AO_MPEGPES_CantSetMixer "[AO MPEGPES] DVB-audio-sättningsmixer misslyckades: %s\n" // set ~= sättning?
+#define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz ej tillgänglig, försöker resampla...\n"
 
 // ao_null.c
 // This one desn't even have any mp_msg nor printf's?? [CHECK]
@@ -913,28 +930,28 @@ static char help_text[]=
 // ao_pcm.c
 
 #define MSGTR_AO_PCM_FileInfo "[AO PCM] Fil: %s (%s)\nPCM: Samplerate: %iHz Kanaler: %s Format %s\n" // FIXME Samplerate?
-#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: snabbaste dumplning Ã¤r tillgÃ¤nglig via -vc dummy -vo null\nPCM: Info: fÃ¶r att skriva WAVE-filer anvÃ¤nd -waveheader (standard).\n"
-#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Misslyckades att Ã¶ppna %s fÃ¶r skrivning!\n"
+#define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: snabbaste dumplning är tillgänglig via -vc dummy -vo null\nPCM: Info: för att skriva WAVE-filer använd -waveheader (standard).\n"
+#define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Misslyckades att öppna %s för skrivning!\n"
 
 // ao_sdl.c
 
 #define MSGTR_AO_SDL_INFO "[AO SDL] Samplerate: %iHz Kanaler: %s Format %s\n" // -''-
-#define MSGTR_AO_SDL_DriverInfo "[AO SDL] anvÃ¤nder %s som audioenhet.\n"
-#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Icke tillgÃ¤ngligt audioformat: 0x%x.\n" // support?
+#define MSGTR_AO_SDL_DriverInfo "[AO SDL] använder %s som audioenhet.\n"
+#define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Icke tillgängligt audioformat: 0x%x.\n" // support?
 #define MSGTR_AO_SDL_CantInit "[AO SDL] Initialisering av 'SDL Audio' misslyckades: %s\n"
-#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] OfÃ¶rmÃ¶gen att Ã¶ppna audio: %s\n" // audio what?
+#define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Oförmögen att öppna audio: %s\n" // audio what?
 
 // ao_sgi.c
 
 #define MSGTR_AO_SGI_INFO "[AO SGI] kontroll.\n"
 #define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Samplerate: %iHz Kanaler: %s Format %s\n" // FIXME Samplerate
-#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: icke godkÃ¤nd enhet.\n"
-#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: setparams misslyckades: %s\nKunde inte sÃ¤tta Ã¶nskad samplerate.\n" // -''-
-#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE var inte accepterad pÃ¥ given resurs.\n"
+#define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: icke godkänd enhet.\n"
+#define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: setparams misslyckades: %s\nKunde inte sätta önskad samplerate.\n" // -''-
+#define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE var inte accepterad på given resurs.\n"
 #define MSGTR_AO_SGI_CantGetParms "[AO SGI] init: getparams misslyckades: %s\n"
-#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: samplerate Ã¤r nu %lf (Ã¶nskad rate var %lf)\n" // -''- also rate?
+#define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: samplerate är nu %lf (önskad rate var %lf)\n" // -''- also rate?
 #define MSGTR_AO_SGI_InitConfigError "[AO SGI] init: %s\n"
-#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: OfÃ¶rmÃ¶gen att Ã¶ppna audiokanal: %s\n"
+#define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: Oförmögen att öppna audiokanal: %s\n"
 #define MSGTR_AO_SGI_Uninit "[AO SGI] uninit: ...\n" // FIXME translate?
 #define MSGTR_AO_SGI_Reset "[AO SGI] reset: ...\n" // -''-
 #define MSGTR_AO_SGI_PauseInfo "[AO SGI] audio_pause: ...\n" // -''-
@@ -944,38 +961,38 @@ static char help_text[]=
 
 #define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO misslyckades.\n"
 #define MSGTR_AO_SUN_RtscWriteFailed "[AO SUN] rtsc: skrivning misslyckades."
-#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Kan inte Ã¶ppna audioenhet %s, %s  -> inget ljud.\n"
+#define MSGTR_AO_SUN_CantOpenAudioDev "[AO SUN] Kan inte öppna audioenhet %s, %s  -> inget ljud.\n"
 #define MSGTR_AO_SUN_UnsupSampleRate "[AO SUN] audio_setup: ditt kort hanterar inte %d kanaler, %s, %d Hz samplerate.\n" // FIXME samplerate
 #define MSGTR_AO_SUN_CantUseSelect "[AO SUN]\n   ***  Din ljudkortsenhet hanterar inte select()  ***\nKompilera om med '#undef HAVE_AUDIO_SELECT' i config.h !\n\n" // same as for MSGTR_AO_OSS_CantUseSelect
-#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nFatalt fel: *** KAN INTE Ã…TERÃ–PPNA / Ã…TERSTÃ„LLA AUDIOENHET (%s) ***\n"
+#define MSGTR_AO_SUN_CantReopenReset "[AO SUN]\nFatalt fel: *** KAN INTE ÅTERÖPPNA / ÅTERSTÄLLA AUDIOENHET (%s) ***\n"
 
 // ao_alsa5.c
 
-#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: Ã¶nskat format: %d Hz, %d kanaler, %s\n"
+#define MSGTR_AO_ALSA5_InitInfo "[AO ALSA5] alsa-init: önskat format: %d Hz, %d kanaler, %s\n"
 #define MSGTR_AO_ALSA5_SoundCardNotFound "[AO ALSA5] alsa-init: inga ljudkort funna.\n"
-#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: icke godkÃ¤nt format (%s) Ã¶nskat - ut deaktiverat.\n" // FIXME output -> ut here?
-#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: uppspelningsÃ¶ppningsfel: %s\n" 
+#define MSGTR_AO_ALSA5_InvalidFormatReq "[AO ALSA5] alsa-init: icke godkänt format (%s) önskat - ut deaktiverat.\n" // FIXME output -> ut here?
+#define MSGTR_AO_ALSA5_PlayBackError "[AO ALSA5] alsa-init: uppspelningsöppningsfel: %s\n" 
 #define MSGTR_AO_ALSA5_PcmInfoError "[AO ALSA5] alsa-init: pcm-infofel: %s\n"
-#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d ljurtkort funna, anvÃ¤nder: %s\n"
+#define MSGTR_AO_ALSA5_SoundcardsFound "[AO ALSA5] alsa-init: %d ljurtkort funna, använder: %s\n"
 #define MSGTR_AO_ALSA5_PcmChanInfoError "[AO ALSA5] alsa-init: pcm-kanalinfofel: %s\n"
-#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: fel vid sÃ¤ttning av parametrarna: %s\n" // FIXME setting?
+#define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: fel vid sättning av parametrarna: %s\n" // FIXME setting?
 #define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: fel vid initiering av kanal: %s\n"
 #define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: kanalprepareringsfel: %s\n"
-#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: uppspelningslÃ¤nsningsfel: %s\n" // FIXME drain -> lÃ¤nsning?
+#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: uppspelningslänsningsfel: %s\n" // FIXME drain -> länsning?
 #define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: uppspelningsspolningsfel: %s\n" // FIXME flush -> spolning?
-#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: pcm-stÃ¤ngningsfel: %s\n"
-#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: uppspelningslÃ¤nsningsfel: %s\n"
+#define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: pcm-stängningsfel: %s\n"
+#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: uppspelningslänsningsfel: %s\n"
 #define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: uppspelningsspolningsfel: %s\n"
 #define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: kanalprepareringsfel: %s\n"
-#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: uppspelningslÃ¤nsningsfel: %s\n"
+#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: uppspelningslänsningsfel: %s\n"
 #define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: uppspelningsspolningsfel: %s\n"
 #define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: kanalprepareringsfel: %s\n"
-#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: alsa underrun, Ã¥terstÃ¤ller strÃ¶m.\n" // FIXME underun - translate?
+#define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: alsa underrun, återställer ström.\n" // FIXME underun - translate?
 #define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: uppspelningsprepareringsfel: %s\n"
-#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: skrivfel efter Ã¥terstÃ¤llning: %s - ger upp.\n"
+#define MSGTR_AO_ALSA5_WriteErrorAfterReset "[AO ALSA5] alsa-play: skrivfel efter återställning: %s - ger upp.\n"
 #define MSGTR_AO_ALSA5_OutPutError "[AO ALSA5] alsa-play: utfel: %s\n" // FIXME output -> ut her?
 
 // ao_plugin.c
 
-#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] icke godkÃ¤nd plugin: %s\n" // FIXME plugin - translate?
+#define MSGTR_AO_PLUGIN_InvalidPlugin "[AO PLUGIN] icke godkänd plugin: %s\n" // FIXME plugin - translate?
 
