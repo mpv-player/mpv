@@ -19,5 +19,5 @@ typedef struct {
     short width[512];
 } font_desc_t;
 
-raw_file* load_raw(char *name);
-font_desc_t* read_font_desc(char* fname,float factor);
+raw_file* load_raw(char *name,int verbose);
+font_desc_t* read_font_desc(char* fname,float factor,int verbose);

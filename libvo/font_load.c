@@ -7,7 +7,7 @@
 
 char *get_path ( char * );
 
-raw_file* load_raw(char *name){
+raw_file* load_raw(char *name,int verbose){
     int bpp;
     raw_file* raw=malloc(sizeof(raw_file));
     unsigned char head[32];
@@ -19,7 +19,7 @@ raw_file* load_raw(char *name){
     raw->h=head[10]*256+head[11];
     raw->c=head[12]*256+head[13];
     if(raw->c>256) return NULL;                 // too many colors!?
-    printf("RAW: %s  %d x %d, %d colors\n",name,raw->w,raw->h,raw->c);
+    if(verbose) printf("RAW: %s  %d x %d, %d colors\n",name,raw->w,raw->h,raw->c);
     if(raw->c){
         raw->pal=malloc(raw->c*3);
         fread(raw->pal,3,raw->c,f);
@@ -34,7 +34,7 @@ raw_file* load_raw(char *name){
     return raw;
 }
 
-font_desc_t* read_font_desc(char* fname,float factor){
+font_desc_t* read_font_desc(char* fname,float factor,int verbose){
 unsigned char sor[1024];
 unsigned char sor2[1024];
 font_desc_t *desc;
@@ -98,7 +98,7 @@ while(fgets(sor,1020,f)){
       int len=strlen(p[0]);
       if(len && len<63 && p[0][len-1]==']'){
         strcpy(section,p[0]);
-        printf("font: Reading section: %s\n",section);
+        if(verbose) printf("font: Reading section: %s\n",section);
         if(strcmp(section,"[files]")==0){
             ++fontdb;
             if(fontdb>=16){ printf("font: Too many bitmaps defined!\n");return NULL;}
@@ -116,7 +116,7 @@ while(fgets(sor,1020,f)){
 		return NULL;
 	  }
 	  sprintf(cp2,"%s%s",cp,p[1]);
-          if(!((desc->pic_a[fontdb]=load_raw(cp2)))){
+          if(!((desc->pic_a[fontdb]=load_raw(cp2,verbose)))){
                 printf("Can't load font bitmap: %s\n",p[1]);
 		free(cp);
 		free(cp2);
@@ -134,7 +134,7 @@ while(fgets(sor,1020,f)){
 		return NULL;
 	  }
 	  sprintf(cp2,"%s%s",cp,p[1]);
-          if(!((desc->pic_b[fontdb]=load_raw(cp2)))){
+          if(!((desc->pic_b[fontdb]=load_raw(cp2,verbose)))){
                 printf("Can't load font bitmap: %s\n",p[1]);
 		free(cp);
 		free(cp2);
@@ -205,7 +205,7 @@ for(i=0;i<=fontdb;i++){
         int f=factor*256.0f;
         int size=desc->pic_a[i]->w*desc->pic_a[i]->h;
         int j;
-        printf("font: resampling alpha by factor %5.3f (%d) ",factor,f);fflush(stdout);
+        if(verbose) printf("font: resampling alpha by factor %5.3f (%d) ",factor,f);fflush(stdout);
         for(j=0;j<size;j++){
             int x=desc->pic_a[i]->bmp[j];
             int y=desc->pic_b[i]->bmp[j];
@@ -227,7 +227,7 @@ for(i=0;i<=fontdb;i++){
             desc->pic_a[i]->bmp[j]=x;
 //            desc->pic_b[i]->bmp[j]=0; // hack
         }
-        printf("DONE!\n");
+        if(verbose) printf("DONE!\n");
     }
     if(!desc->height) desc->height=desc->pic_a[i]->h;
 }
@@ -250,7 +250,7 @@ return desc;
 #if 0
 int main(){
 
-read_font_desc("high_arpi.desc");
+read_font_desc("high_arpi.desc",1);
 
 }
 #endif
