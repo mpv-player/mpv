@@ -1171,7 +1171,7 @@ if(d_dvdsub->id >= 0 && vo_spudec==NULL && sh_video){
 if (spudec_ifo) {
   unsigned int palette[16], width, height;
   current_module="spudec_init_vobsub";
-  if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1) >= 0)
+  if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
     vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
 }
 

@@ -144,6 +144,10 @@ static int skip_limit=-1;
 
 int force_srate=0;
 
+char *vobsub_out=NULL;
+unsigned int vobsub_out_index=0;
+char *vobsub_out_id=NULL;
+
 char* out_filename="test.avi";
 
 char *force_fourcc=NULL;
@@ -306,6 +310,9 @@ sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 int file_format=DEMUXER_TYPE_UNKNOWN;
 int i;
+void *vobsub_writer=NULL;
+double vobsubout_origin_pts=0.0;
+int vobsubout_origin_pts_set=0;
 
 uint32_t ptimer_start;
 uint32_t audiorate=0;
@@ -509,9 +516,36 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
 
 // set up video encoder:
 
+if (vobsub_out) {
+    unsigned int palette[16], width, height;
+    unsigned char tmp[3] = { 0, 0, 0 };
+    if (spudec_ifo && vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, dvdsub_id, tmp) >= 0)
+	vobsub_writer = vobsub_out_open(vobsub_out, palette, sh_video->disp_w, sh_video->disp_h,
+					vobsub_out_id?vobsub_out_id:tmp, vobsub_out_index);
+#ifdef USE_DVDREAD
+    if (vobsub_writer == NULL) {
+	char tmp[3];
+	if (vobsub_out_id == NULL && stream->type == STREAMTYPE_DVD) {
+	    int i;
+	    dvd_priv_t *dvd = (dvd_priv_t*)stream->priv;
+	    for (i = 0; i < dvd->nr_of_subtitles; ++i)
+		if (dvd->subtitles[i].id == dvdsub_id) {
+		    tmp[0] = (dvd->subtitles[i].language >> 8) & 0xff;
+		    tmp[1] = dvd->subtitles[i].language & 0xff;
+		    tmp[2] = 0;
+		    vobsub_out_id = tmp;
+		    break;
+		}
+	}
+	vobsub_writer=vobsub_out_open(vobsub_out, stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
+				      sh_video->disp_w, sh_video->disp_h, vobsub_out_id, vobsub_out_index);
+    }
+#endif
+}
+else {
 if (spudec_ifo) {
   unsigned int palette[16], width, height;
-  if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1) >= 0)
+  if (vobsub_parse_ifo(NULL,spudec_ifo, palette, &width, &height, 1, -1, NULL) >= 0)
     vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
 }
 #ifdef USE_DVDREAD
@@ -520,6 +554,7 @@ vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream-
 			    sh_video->disp_w, sh_video->disp_h);
 }
 #endif
+}
 
 #ifdef USE_SUB
 // after reading video params we should load subtitles because
@@ -1113,15 +1148,24 @@ if(sh_audio && !demuxer2){
 
 #ifdef USE_DVDREAD
 // DVD sub:
- if(vo_spudec){
+ if(vo_spudec||vobsub_writer){
      unsigned char* packet=NULL;
      int len;
+     if (vobsub_writer && !vobsubout_origin_pts_set) {
+	 vobsubout_origin_pts_set = 1;
+	 vobsubout_origin_pts = d_video->pts;
+     }
      while((len=ds_get_packet_sub(d_dvdsub,&packet))>0){
 	 mp_msg(MSGT_MENCODER,MSGL_V,"\rDVD sub: len=%d  v_pts=%5.3f  s_pts=%5.3f  \n",len,d_video->pts,d_dvdsub->pts);
+	 if (vo_spudec)
 	 spudec_assemble(vo_spudec,packet,len,90000*d_dvdsub->pts);
+	 if (vobsub_writer)
+	     vobsub_out_output(vobsub_writer,packet,len,d_dvdsub->pts-vobsubout_origin_pts);
      }
+     if (vo_spudec) {
      spudec_heartbeat(vo_spudec,90000*d_video->pts);
      vo_osd_changed(OSDTYPE_SPU);
+     }
  }
 #endif
 
@@ -1157,6 +1201,8 @@ if(ferror(muxer_f) || fclose(muxer_f) != 0) {
     mp_msg(MSGT_MENCODER,MSGL_FATAL,"%s: error writing file.\n", out_filename);
     mencoder_exit(1, NULL);
 }
+if(vobsub_writer)
+    vobsub_out_close(vobsub_writer);
 
 if(out_video_codec==VCODEC_FRAMENO && mux_v->timer>100){
     printf("Recommended video bitrate for 650MB CD: %d\n",(int)((650*1024*1024-muxer_f_size)/mux_v->timer/125));

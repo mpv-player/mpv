@@ -114,6 +114,10 @@ static config_t mencoder_opts[]={
 	{"pass", &pass, CONF_TYPE_INT, CONF_RANGE,0,2, NULL},
 	{"passlogfile", &passtmpfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	
+	{"vobsubout", &vobsub_out, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vobsuboutindex", &vobsub_out_index, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
+	{"vobsuboutid", &vobsub_out_id, CONF_TYPE_STRING, 0, 0, 0, NULL},
+
 #ifdef HAVE_DIVX4ENCORE
 	{"divx4opts", divx4opts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
