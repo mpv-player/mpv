@@ -60,7 +60,7 @@ char **tv_param_channels = NULL;
 int tv_param_audio_id = 0;
 #if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
 int tv_param_amode = -1;
-int tv_param_volume = 60000;
+int tv_param_volume = -1;
 int tv_param_bass = -1;
 int tv_param_treble = -1;
 int tv_param_balance = -1;

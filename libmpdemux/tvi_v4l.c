@@ -332,7 +332,6 @@ static void init_v4l_audio(priv_t *priv)
 	}
 
 	/* mute all channels */
-	priv->audio[i].volume = 0;
 	priv->audio[i].flags |= VIDEO_AUDIO_MUTE;
 	reqmode = -1;
 	if (tv_param_amode >= 0) {
@@ -696,7 +695,6 @@ static int uninit(priv_t *priv)
     mp_msg(MSGT_TV, MSGL_V, "done\n");
 
     if (priv->capability.audios) {
-	priv->audio[priv->audio_id].volume = 0;
 	priv->audio[priv->audio_id].flags |= VIDEO_AUDIO_MUTE;
 	ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
     }
@@ -1128,7 +1126,6 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    unsigned long freq = (unsigned long)*(void **)arg;
 	    
 	    if (priv->capability.audios) {
-		priv->audio[priv->audio_id].volume = 0;
 		priv->audio[priv->audio_id].flags |= VIDEO_AUDIO_MUTE;
 		ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
 	    }
@@ -1147,7 +1144,6 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    usleep(100000); // wait to supress noise during switching
 
 	    if (priv->capability.audios) {
-		priv->audio[priv->audio_id].volume = tv_param_volume;
 		priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
 		ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
 	    }
