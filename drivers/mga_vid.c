@@ -88,9 +88,8 @@ MODULE_AUTHOR("Aaron Holtzman <aholtzma@engr.uvic.ca>");
 MODULE_LICENSE("GPL");
 #endif
 
-// WARNING - eyck changes
 #define PARAM_BRIGHTNESS "brightness="
-#define PARAM_SATURATION "saturation="
+#define PARAM_CONTRAST "contrast="
 #define PARAM_BLACKIE "blackie="
 
 #define PARAM_BUFF_SIZE 4096
@@ -98,7 +97,44 @@ static uint8_t *mga_param_buff = NULL;
 static uint32_t mga_param_buff_size=0;
 static uint32_t mga_param_buff_len=0;
 
-// end eyck
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,4,0)
+#include <linux/ctype.h>
+
+#define min(x,y) (((x)<(y))?(x):(y))
+
+unsigned long simple_strtoul(const char *cp,char **endp,unsigned int base)
+{
+        unsigned long result = 0,value;
+
+        if (!base) {
+                base = 10;
+                if (*cp == '0') {
+                        base = 8;
+                        cp++;
+                        if ((*cp == 'x') && isxdigit(cp[1])) {
+                                cp++;
+                                base = 16;
+                        }
+                }
+        }
+        while (isxdigit(*cp) && (value = isdigit(*cp) ? *cp-'0' : (islower(*cp)
+            ? toupper(*cp) : *cp)-'A'+10) < base) {
+                result = result*base + value;
+                cp++;
+        }
+        if (endp)
+                *endp = (char *)cp;
+        return result;
+}
+
+long simple_strtol(const char *cp,char **endp,unsigned int base)
+{
+        if(*cp=='-')
+                return -simple_strtoul(cp+1,endp,base);
+        return simple_strtoul(cp,endp,base);
+}
+#endif
+
 
 typedef struct bes_registers_s
 {
@@ -167,6 +203,7 @@ typedef struct bes_registers_s
 
 	//configurable stuff
 	int brightness;
+	int contrast;
 	int blackie;
 
 } bes_registers_t;
@@ -706,7 +743,7 @@ switch(config->format){
 	// brightness ; default is 0x7f;
 	regs.beslumactl = (regs.brightness << 16);
 	// contrast:
-	regs.beslumactl|= (0x80<<0);
+	regs.beslumactl|= ((regs.contrast+0x80)<<0);
 
 	//Setup destination window boundaries
 	besleft = x > 0 ? x : 0;
@@ -1355,6 +1392,15 @@ static ssize_t mga_vid_write(struct file *file, const char *buf, size_t count, l
 //		printk(KERN_DEBUG "mga_vid: brightness modified ( %d ) \n",brightness);
 		regs.brightness=brightness;
 	} else 
+	if(memcmp(buf,PARAM_CONTRAST,min(count,strlen(PARAM_CONTRAST))) == 0)
+	{
+		short contrast;
+		contrast=simple_strtol(&buf[strlen(PARAM_CONTRAST)],NULL,10);
+		if (contrast>127 || contrast<-128) { contrast=0;} 
+//		printk(KERN_DEBUG "mga_vid: contrast modified ( %d ) \n",contrast);
+		regs.contrast=contrast;
+	} else 
+
         if(memcmp(buf,PARAM_BLACKIE,min(count,strlen(PARAM_BLACKIE))) == 0)
 	{
 		short blackie;
