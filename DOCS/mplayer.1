@@ -81,7 +81,7 @@ and options given on the command line override either. The syntax of the config
 files is 'option=<value>', everything after a '#' is considered a comment.
 Options that work without values can be enabled by setting them to 'yes' or '1'
 and disabled by setting them to 'no' or '0'. Even suboptions can be specified
-this way.
+in this way.
 
 .I EXAMPLE:
 .br
@@ -384,7 +384,7 @@ codecs.conf.
     \-ac hwac3   enable hardware AC3 passthrough
                 (see documentation)
     \-ac vorbis  use libvorbis
-    \-ac ffmp3   use ffmpeg's MP3 decoder (SLOW)
+    \-ac ffmp3   use FFmpeg's MP3 decoder (SLOW)
 
 See \-ac help for a full list of available codecs.
 .TP
@@ -393,7 +393,7 @@ Force usage of a specific audio codec family, according to its driver name
 in codecs.conf and fall back to default if it failed.
 
 .I EXAMPLE:
-    \-afm ffmpeg     use ffmpeg's libavcodec (mp1/2/3)
+    \-afm ffmpeg     use FFmpeg's libavcodec (mp1/2/3)
     \-afm acm        use a matching Win32 codec
 
 See \-afm help for a full list of available drivers.
@@ -1084,9 +1084,60 @@ Specifies compression level for PNG output (-vo png)
     9  max compression
 .TP
 .B \-zr* (\-vo zr only)
-You can get a list and an explanation of available options executing
-.I mplayer \-zrhelp
+All the options that start with \-zr are specific to the zr video output
+driver.
 
+.TP
+.B \-zrxdoff <x display offset>, \-zrydoff <y display offset>
+If the movie is smaller than the TV screen, these options control the position
+of the movie relative to the upper left corner of the screen. The movie
+is centered by default.
+
+.TP
+.B \-zrvdec 1,2,4 , \-zrhdec 1,2,4
+Vertical/horizontal decimation: Ask the driver to send only every 2nd or 4th
+line/pixel of the input image to the MJPEG card and use the scaler of the
+MJPEG card to strech the image to its original size.
+
+.TP
+.B \-zrfd
+Force decimation: Decimation, as specified by -zrhdec and -zrvdec, only happens
+if the hardware scaler can stretch the image to its original size. Use this
+option to force decimation.
+
+.TP
+.B \-zrbw
+Display in black and white (for optimal performance, this option can be
+combined with the 'decode only in black and white' option for codecs
+belonging to the FFmpeg family).
+
+.TP
+.B \-zrquality <1\-20>
+A number from 1 to 20 representing the jpeg encoding quality. 1 gives the best
+quality and 20 gives very bad quality.
+
+.TP
+.B \-zrdev <device>
+Specify the device special file that belongs to your MJPEG card, by default
+this driver takes the first v4l device it can find.
+
+.TP
+.B \-zrnorm PAL|NTSC
+Specify norm PAL/NTSC, the default is 'no change'.
+
+.TP
+.B \-zrhelp
+Display a list of all -zr* options, their default values and an example of
+cinerama mode.
+
+.TP
+.B \-zrcrop <width>x<height>+<x offset>+<y offset>
+Select a part of the input image for display, multiple occurences of this
+option switch on cinerama mode. In cinerama mode the movie is distributed
+over more than one TV (or beamer) to create a larger screen. Options appearing
+after the n-th -zrcrop apply to the n-th MJPEG card, each card should at least
+have a -zrdev in addition to the -zrcrop. For examples, see the output of
+-zrhelp and the Zr section of the documentation.
 
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP

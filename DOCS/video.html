@@ -993,34 +993,85 @@ recognize <CODE>:vidix</CODE> subdevice.
 
 <P>This is a display-driver (<CODE>-vo zr</CODE>) for a number of MJPEG
   capture/playback cards (tested for DC10+ and Buz, and it should work for the
-  LML33, the DC10). The driver works by encoding the frame to jpeg and then
-  sending it to the card. For the jpeg encoding <B>libavcodec</B> is
-  used, and required.</P>
+  LML33 and the original DC10). The driver works by encoding the frame to jpeg 
+  and then sending it to the card. For the jpeg encoding <B>libavcodec</B> is
+  used, and required. With the special <I>cinerama</I> mode, you can watch
+  movies in true wide screen provided that you have two beamers and two
+  MJPEG cards. Depending on resolution and quality settings, this driver
+  may require a lot of CPU power, remember to specify <CODE>-framedrop</CODE>
+  if your machine is too slow. Note: My AMD K6-2 350MHz is (with <CODE>
+  -framedrop</CODE>) quite adequate for watching VCD sized material and
+  downscaled movies.
 
 <P>This driver talks to the kernel driver available at
   <A HREF="http://mjpeg.sourceforge.net">http://mjpeg.sourceforge.net</A>, so
-  you must get it working first. Then recompile <B>MPlayer</B> with
-  <CODE>--enable-zr</CODE>.</P>
+  you must get it working first. The presence of an MJPEG card is autodetected
+  by the configure script, if autodetection fails, force detection with
 
-Some remarks:
-<UL>
-  <LI>don't start or stop XawTV on the playback device during playback, 
-    it will crash your computer. It is, however, fine to <B>FIRST</B> start 
-    XawTV, <B>THEN</B> start <B>MPlayer</B>, wait for <B>MPlayer</B> to finish 
-    and <B>THEN</B> stop XawTV.</LI>
-  <LI>this driver adds <CODE>-zr*</CODE> command line options. The explanation
-    of these options can be viewed with <CODE>-zrhelp</CODE>. It is possible to
-    crop the input frame (cut borders to make it fit or to enhance performance)
-    and to do other things.</LI>
-  <LI>the driver takes data in YV12 and YUY2 format, this means that some 
-    codecs won't work. Some old VfW (Video for Windows) codecs, for example,
-    are incompatible with this driver. The error message that you will see is: 
-    <CODE>Sorry, selected video_out device is incompatible with this codec.
-    </CODE></LI>
-  <LI>OSD is currently not supported, so you won't see
-    subtitles.</LI>
-</UL>
+<PRE>
+  ./configure --enable-zr
+</PRE>
 
+<P>The output can be controlled by several options, a long description of the
+  options can be found in the man page, a short list of options can be
+  viewed by running
+
+<PRE>
+  mplayer -zrhelp
+</PRE>
+
+<P>Things like scaling and the OSD (on screen display) are not handled by
+  this driver but can be done using the video filters. For example, 
+  suppose that you have a movie with a resolution of <CODE>512x272</CODE> and
+  you want to view it fullscreen on your DC10+. There are three main
+  possibilities, you may scale the movie to a width of <CODE>768</CODE>,
+  <CODE>384</CODE> or <CODE>192</CODE>. For performance and quality reasons,
+  I would choose to scale the movie to <CODE>384x204</CODE> using the fast
+  bilinear software scaler. The commandline is
+
+<PRE>
+  mplayer -vo zr -sws 0 -vop scale=384:204 movie.avi
+</PRE>
+
+<P>Cropping can be done by the <CODE>crop</CODE> filter and by
+  this driver itself. Suppose that a movie is too wide for display on your
+  Buz and that you want to use <CODE>-zrcrop</CODE> to make the movie less
+  wide, the you would issue the following command
+
+<PRE>
+  mplayer -vo zr -zrcrop 720x320+80+0 benhur.avi
+</PRE>
+
+  if you want to use the <CODE>crop</CODE> filter, you would do
+
+<PRE>
+  mplayer -vo zr -vop crop=720:320:80:0 benhur.avi
+</PRE>
+
+<P>Extra occurances of <CODE>-zrcrop</CODE> invoke <I>cinerama</I> mode, i.e.
+  you can distribute the movie over several TV's or beamers to create a larger
+  screen. Suppose you have two beamers. The left one is connected to your Buz
+  at <CODE>/dev/video1</CODE> and the right one is connected to your DC10+ at
+  <CODE>/dev/video0</CODE>. The movie has a resolution of <CODE>704x288</CODE>.
+  Suppose also that you want the right beamer in black and white and that
+  the right beamer should have jpeg frames at quality <CODE>10</CODE>,
+  then you would issue the following command
+
+<PRE>
+  mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
+          -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 movie.avi
+</PRE>
+
+<P>You see that the options appearing before the second <CODE>-zrcrop</CODE>
+  only apply to the DC10+ and that the options after the second 
+  <CODE>-zrcrop</CODE> apply to the Buz. The maximum number of MJPEG cards
+  participating in <I>cinerama</I> is four, so you can buid a <CODE>2x2</CODE>
+  vidiwall.</P>
+
+<P>Finally an important remark: Do not start or stop XawTV on the playback
+  device during playback, it will crash your computer. It is, however, fine to
+  <B>FIRST</B> start XawTV, <B>THEN</B> start <B>MPlayer</B>, wait for
+  <B>MPlayer</B> to finish and <B>THEN</B> stop XawTV.</P>
 
 <H4><A NAME="dvb">2.3.1.16 DVB</A></H4>
 
