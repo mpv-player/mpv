@@ -1,4 +1,4 @@
-.\" synced with 1.811
+.\" synced with 1.818
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -37,7 +37,7 @@
 .\" Název
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-11-17" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-11-30" "The MPlayer Project" "The Movie Player"
 .
 .SH NÁZEV
 mplayer  \- multimediální pøehrávaè
@@ -529,6 +529,8 @@ Vede ke zkreslení obrazu!
 .TP
 .B \-identify
 Vypí¹e parametry souboru ve snadno zpracovatelném formátu.
+Rovnì¾ vypí¹e mnohem podrobnìj¹í informace o titulcích, jazycích zvukových proudù
+a ID.
 Skript TOOLS/\:midentify potlaèí ostatní výstup MPlayeru a (s\ trochou ¹tìstí)
 upraví jména souborù pro shell.
 .
@@ -567,6 +569,17 @@ Pokud je zadaný soubor FIFO, MPlayer otevøe oba konce, tak¾e mù¾ete provést
 nìkolik 'echo "seek 10" > mp_pipe' a roura bude stále platná.
 .RE
 .PD 1
+.
+.TP
+.B \-key-fifo-size <2\-65000>
+Nastavuje velikost vyrovnávací pamìti FIFO pro události klávesnice (výchozí: 10).
+FIFO velikosi n mù¾e uchovat (n-1) událostí.
+Pokud je pamì» pøíli¾ malá, nìkteré události mohou být ztraceny
+(to vede k "zaseklým tlaèítkùm my¹i" a podobným efektùm).
+Pokud je pøíli¾ velká, mù¾e se zdát ¾e MPlayer zatuhnul zatímco zpracovává
+nastøádané události.
+Chcete-li dosáhnout stejného chování jako v dobì pøed existencí této volby,
+nastavte ji na 2 v Linuxu nebo 1024 ve Windows.
 .
 .TP
 .B \-lircconf <soubor> (Pouze LIRC)
@@ -686,6 +699,8 @@ Zpomalí nebo zrychlí pøehrávání násobkem zadaným jako parametr.
 .B \-sstep <sek>
 Zobrazí jeden snímek ka¾dých <sek> sekund.
 Pou¾itelné pro slideshow.
+Volba pou¾ívá bì¾né pøevíjení, proto je stejnì nepøesná (èili ve vìt¹inì formátù
+dostanete jeden ze snímkù mezi <sec> a <sec>+20 sekund). 
 .
 .
 .SH "VOLBY PRO DEMUXER/\:DATOVÝ PROUD"
@@ -1961,15 +1976,6 @@ Stanoví jméno serveru a èíslo displaye X serveru na který chcete zobrazovat.
 .PD 1
 .
 .TP
-.B \-double
-Zapne dvojitou vyrovnávací pamì» (double buffering).
-Odstraní tøepetání tím, ¾e dr¾í dva obrázky v pamìti a zobrazuje jeden, zatímco 
-druhý dekóduje.
-Mù¾e negativnì ovlivnit OSD, ale èasto naopak odstraní jeho problikávání.
-Potøebuje dvakrát tolik pamìti ne¾ jeden buffer, tak¾e nebude pracovat na kartách
-s velmi malou video pamìtí.
-.
-.TP
 .B \-dr \ \ \ 
 Zapne direct rendering (není podporováno v¹emi kodeky a video rozhraními).
 .br
@@ -2194,6 +2200,13 @@ Nastaví pomìr stran va¹eho monitoru nebo TV obrazovky.
 \-monitoraspect 16:9 nebo 1.7777
 .RE
 .PD 1
+.
+.TP
+.B \-nodouble
+Vypíná dvojitou vyrovnávací pamì», vìt¹inou pro úèely ladìní.
+Dvojitá vyrovnávací pamì» odstraòuje tøepotání ukládáním dvou snímkù v pamìti,
+kdy zobrazuje jeden snímek, zatímco zpracovává druhý.
+Mù¾e ovlivnit negativnì OSD, av¹ak v mnoha pøípadech odstraní jeho blikání.
 .
 .TP
 .B \-nograbpointer
@@ -2880,6 +2893,8 @@ Podporuje formáty: YV12, RGB (24 bpp) a BGR (24 bpp).
 Zapisuje výstup jako prokládané snímky, horní pùlsnímek napøed.
 .IPs interlaced_bf
 Zapisuje výstup jako prokládané snímky, dolní pùlsnímek napøed.
+.IPs file=<soubor>
+Zapí¹e výstup do <soubor>u namísto výchozího stream.yuv.
 .REss
 .PD 1
 .RS
