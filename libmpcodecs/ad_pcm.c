@@ -41,6 +41,10 @@ static int init(sh_audio_t *sh_audio)
     case 0x11: sh_audio->sample_format=AFMT_IMA_ADPCM;break;
     case 0x50: sh_audio->sample_format=AFMT_MPEG;break;
 /*    case 0x2000: sh_audio->sample_format=AFMT_AC3; */
+    case 0x20776172: // 'raw '
+       sh_audio->sample_format=AFMT_S16_BE;
+       if(sh_audio->samplesize==1) sh_audio->sample_format=AFMT_U8;
+       break;
     case 0x736F7774: // 'twos'
        sh_audio->sample_format=AFMT_S16_BE;
        // intended fall-through
