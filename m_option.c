@@ -1672,6 +1672,8 @@ static int parse_custom_url(m_option_t* opt,char *name,
 	}
       }
     }
+    ptr1 = ptr2+1;
+    pos1 = ptr1-url;
   }
 
   // before looking for a port number check if we have an IPv6 type numeric address
@@ -1752,7 +1754,15 @@ static int parse_custom_url(m_option_t* opt,char *name,
 	// skip
       } else {
 	if(dst) {
-	  r = m_struct_set(desc,dst,"filename",ptr2+1);
+	  int l = strlen(ptr2+1) + 1;
+	  char* fname = ptr2+1;
+	  if(l > 1) {
+	    fname = malloc(l);
+	    url_unescape_string(fname,ptr2+1);
+	  }
+	  r = m_struct_set(desc,dst,"filename",fname);
+	  if(fname != ptr2+1)
+	    free(fname);
 	  if(r < 0) {
 	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: error while setting filename\n",name);
 	    return r;
