@@ -1,85 +1,100 @@
-
 Some words about Siemens-DVB card support.         by A'rpi
 ==========================================
 
 Requirements:
 ~~~~~~~~~~~~~
-- Siemens DVB-S card or compatible (technotrend,galaxis,hauppage etc)
-  see www.linuxtv.org for details and download latest driver there.
-- MPlayer-CVS, ffmpeg-libavcodec CVS are recommended for speed & pp.
-- Fast CPU - 1GHz+ recommended at least for software transcoding (divx->mpeg)
+- Siemens DVB-S card or compatible (Technotrend, Galaxis, Hauppauge, etc)
+  See www.linuxtv.org for details and download latest driver there.
+- MPlayer-CVS, FFmpeg libavcodec CVS are recommended for speed & postprocessing.
+- Fast CPU - at least 1GHz recommended for software transcoding (DivX -> MPEG).
 
 
 How to enable?
 ~~~~~~~~~~~~~~
 
-    ./configure should detect it. If didn't, force with ./configure --enable-dvb
-        If you have ost headers at non-standard path, set it with:
-	--with-extraincdir=<your DVB source dir>/ost/include
+'./configure' should detect it. If it did not, force detection with
+
+    ./configure --enable-dvb
+
+If you have ost headers at a non-standard path, set the path with
+
+   ./configure --with-extraincdir=<your DVB source dir>/ost/include
+
+Then compile and install as usual:
+
     make
     make install
    
 
 How to use?
 ~~~~~~~~~~~
-Hardware decoding: (play standard mpeg 1/2 files)
+
+Hardware decoding: (play standard MPEG1/2 files)
 
   mplayer -ao mpegpes -vo mpegpes file.mpg|vob
 
-Software decoding/transcoding anything to mpeg1:
+Software decoding/transcoding anything to MPEG1:
 
   mplayer -ao mpegpes -vo mpegpes -vop lavc yourfile.ext
   mplayer -ao mpegpes -vo mpegpes -vop fame,expand yourfile.ext
   
-  Note: the DVB card only supports height 288 and 576 for PAL,
-  240 and 480 for NTSC. For other heights, you MUST rescale it,
-  by adding 'scale=w:h' to the -vop option, where w:h are width:height
-  you want. Note, that DVB card accepts various widths, like 720, 704, 640,
-  512, 480, 352 etc, so you don't need to scale horizontally in most cases!
-  (the card will do hardware scaling in horizontal direction!)
-  For example, for a 512x384 (aspect 4:3) divx try:
+Note: The DVB card only supports height 288 and 576 for PAL, 240 and 480 for
+NTSC. You MUST rescale for other heights by adding 'scale=w:h' to the '-vop'
+option, where 'w:h' are the width and height you want. Note that DVB cards accept
+various widths, like 720, 704, 640, 512, 480, 352 etc and do hardware scaling in
+horizontal direction, so you do not need to scale horizontally in most cases.
+For example, for a 512x384 (aspect 4:3) DivX try:
+
   mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=512:576
 
-  If you have widescreen movie, and you don't want to scale it to full
-  height, you can use the 'expand=w:h' plugin to add black bands.
-  For example, to view a 640x384 divx, try:
+If you have a widescreen movie and you do not want to scale it to full height,
+you can use the 'expand=w:h' plugin to add black bands.
+For example, to view a 640x384 DivX, try:
+
   mplayer -ao mpegpes -vo mpegpes -vop lavc,expand=640:576 file.avi
 
-  If you have slow cpu to view 720x576 divx in full size, try to downscale:
+If your CPU is too slow to view a 720x576 DivX in full size, try to downscale:
+
   mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:576 file.avi
-  Or if still slow, try to downscale vertically too:
+
+If it is still slow, try to downscale vertically, too:
+
   mplayer -ao mpegpes -vo mpegpes -vop lavc,scale=352:288 file.avi
 
-  Do you want osd, and subtitles? Use the expand plugin's osd feature!
-  So, instead of expand=w:h or expand=w:h:x:y, use expand=w:h:x:y:1
-  (the 5th parameter :1 at the end will enable osd rendering)
-  You may want to move image up a bit to get bigger black zone for subtitles.
-  And you may want to move subtitles up, if they're out of your TV screen,
-  use the -subpos <0-100> switch (-subpos 80 is perfect for me).
+Do you want OSD, and subtitles? Use the expand feature of the OSD plugin!
+So, instead of 'expand=w:h' or 'expand=w:h:x:y', use 'expand=w:h:x:y:1' (the 5th
+parameter ':1' at the end will enable OSD rendering). You may want to move the
+image up a bit to get bigger black zone for subtitles. And you may want to move
+subtitles up, if they are out of your TV screen, use the '-subpos <0-100>' switch
+('-subpos 80' is perfect for me).
 
-To play non-25fps movies on PAL TV, or with slow CPU, add option:  -framedrop
+In order to play non-25fps movies on a PAL TV or with a slow CPU, add the
+'-framedrop' option.
 
-How to keep aspect ratio for DivX files?
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To get the optimal scaling parameters (use hardware for X scaling, and
-scale Y by software, keeping the right aspect ratio), use the new 'dvbscale'
-plugin:
+How to keep the aspect ratio for DivX files?
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To get the optimal scaling parameters (hardware X scaling, software Y scaling,
+while keeping the right aspect ratio), use the new 'dvbscale' plugin:
 
 for  3:4 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale
 for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
+
 Mailing list:
 ~~~~~~~~~~~~~
+
   http://mplayerhq.hu/mailman/listinfo/mplayer-dvb
 
-List's language is ENGLISH. Please avoid using german or other languages!
-Subscribe, and ask/discuss your problems here.
-I'll also post feature announces to this list.
+List language is ENGLISH. Please avoid using German or other languages!
+Subscribe, and ask/discuss your problems there.
+I will also post feature announcements to this list.
+
 
 Future plans/TODO:
 ~~~~~~~~~~~~~~~~~~
 
-- display OSD and subtitles using DVB card's OSD feature
+- display OSD and subtitles using the OSD feature of DVB cards
 - better (more fluent) playback of non-25fps movies
 - realtime transcoding between mpeg2 <-> mpeg4 (partial decompression)
