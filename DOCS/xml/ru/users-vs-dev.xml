@@ -87,7 +87,7 @@ Red Hat заявляет, что GCC 2.96-85 и далее исправлены. Ситуация действительно
 <step><para>
   Пойдите на страницу
   <ulink url="http://gcc.gnu.org/mirrors.html">GCC зеркал</ulink>
-  и скачайте <filename>gcc-core-<replaceable>XXX</replaceable>.tar.gz</filename,
+  и скачайте <filename>gcc-core-<replaceable>XXX</replaceable>.tar.gz</filename>,
   где XXX &mdash; это
   номер версии. Этот файл включает полноценный компилятор C, которого достаточно
   для <application>MPlayer</application>'а. Если Вы также хотите C++, Java или
