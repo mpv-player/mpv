@@ -1042,7 +1042,7 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_TY)
 {
   demuxer=new_demuxer(stream,DEMUXER_TYPE_MPEG_TY,audio_id,video_id,dvdsub_id);
   if(ds_fill_buffer(demuxer->video)){
-      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"TiVo (DeMuxer By WyngNut)");
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"TiVo");
       file_format=DEMUXER_TYPE_MPEG_TY;
   } else {
       free_demuxer(demuxer);
