@@ -101,6 +101,8 @@ int lirc_mp_getinput(){
     {"INCVOL", '*'},
     {"DECVOL", '/'},
     {"MASTER", 'm'},
+    {"ASYNC-", '-'},
+    {"ASYNC+", '+'},
     {"OSD", 'o'}
   };
        
