@@ -19,10 +19,10 @@ libMP3.a:	.depend $(OBJS)
 	$(AR) r libMP3.a $(OBJS)
 
 test1:	libMP3.a test.c
-	$(CC) $(CFLAGS) test.c -o test1 -I.. -L. -lMP3
+	$(CC) $(CFLAGS) test.c -o test1 -I.. -L. -lMP3 -lm
 
 test2:	libMP3.a test2.c
-	$(CC) $(CFLAGS) test2.c -o test2 -I.. -L. -lMP3
+	$(CC) $(CFLAGS) test2.c -o test2 -I.. -L. -lMP3 -lm
 
 all:	libMP3.a
 

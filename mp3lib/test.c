@@ -1,7 +1,7 @@
 
 #define DUMP_PCM
 
-// gcc test.c -I.. -L. -lMP3 -o test -O4
+// gcc test.c -I.. -L. -lMP3 -lm -o test1 -O4
 
 #include <stdio.h>
 #include <stdlib.h>
