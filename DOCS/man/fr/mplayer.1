@@ -897,6 +897,10 @@ type de carte) ou ~/.mplayer/\:channels.conf en dernier recours.
 .TP
 .B \-dvd-device <périph> (DVD uniquement)
 Définit le nom du périphérique DVD (par défaut\ : /dev/\:dvd).
+Vous pouvez aussi donner un répertoire contenant l'arborescence complète
+d'un DVD (que vous auriez copié, par exemple, avec vobcopy).
+Notez que l'utilisation de \-dumpstream est souvent une meilleure solution
+pour copier des titres de DVD (voir les exemples).
 .
 .TP
 .B \-dvdangle <ID\ angle> (DVD uniquement)
@@ -2836,7 +2840,7 @@ Pilote de sortie vidéo spécifique aux cartes Creative DXR2.
 .PD 0
 .RSs
 .IPs <pilote_vo>
-Définit le sous-pilote à utiliser pour l'incrustation (x11, xv).
+Définit le sous-pilote à utiliser pour l'incrustation (overlay) (x11, xv).
 .RE
 .PD 1
 .
@@ -2848,7 +2852,7 @@ Voir aussi le filtre vidéo lavc.
 .PD 0
 .RSs
 .IPs overlay
-Active l'incrustation au lieu de TVOut.
+Active l'incrustation (overlay) au lieu de TVOut.
 .IPs prebuf
 Active le pré-buffering.
 .IPs sync\ 
@@ -4630,19 +4634,19 @@ qualité).
 Floute l'image.
 .PD 0
 .RSs
-.IPs rayon
-taille du filtre
-.IPs puissance
-À quelle fréquence le filtre devrait être appliqué.
+.IPs <rayon>
+force du filtre de floutage
+.IPs <puissance>
+nombre d'applications du filtre
 .RE
 .PD 1
 .
 .TP
-.B "sab=rad:pf:colorDiff[:rad:pf:colorDiff]"
+.B "sab=rayon:pf:colorDiff[:rad:pf:colorDiff]"
 flou de forme adaptative
 .PD 0
 .RSs
-.IPs <rad>
+.IPs <rayon>
 force du filtre de flou (~0.1\-4.0) (plus la valeur est
 grande, moins il est rapide)
 .IPs <pf>
@@ -4704,8 +4708,9 @@ nombre de lignes à sélectionner à partir du milieu de l'image (par défault: 12)
 .
 .TP
 .B "bmovl=hidden:opaque:fifo"
-Le filtre de superposition d'images lit depuis une FIFO des images (bitmaps)
-et les incruste dans la vidéo, après les avoir préalablement transformées.
+Le filtre de superposition d'images (bitmap overlay filter) lit depuis une
+FIFO des images (bitmaps) et les incruste dans la vidéo (overlay), après
+les avoir préalablement transformées.
 Voir aussi TOOLS/bmovl-test.c pour un programme de test simple de bmovl.
 .PD 0
 .RSs
@@ -7308,6 +7313,13 @@ mplayer dvd://1 \-dvdangle 2
 mplayer dvd://1 \-dvd-device /dev/\:dvd2
 .
 .TP
+.B Joue un DVD vidéo depuis un répertoire contenant des fichiers VOB\ :
+mplayer dvd://1 \-dvd-device /chemin/\:vers/\:répertoire/
+.
+.TP
+.B Copie le titre 1 du DVD sur le disque dur, sous le nom "title1.vob":
+mplayer dvd://1 \-dumpstream \-dumpfile title1.vob
+.
 .B Streaming depuis HTTP\ :
 mplayer http://mplayer.hq/\:exemple.avi
 .
