@@ -77,11 +77,9 @@ int ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
   int initial_predictor_r = 0;
   int initial_index_l = 0;
   int initial_index_r = 0;
-  int stream_ptr = 0;
   int i;
 
-  initial_predictor_l = BE_16(&input[stream_ptr]);
-  stream_ptr += 2;
+  initial_predictor_l = BE_16(&input[0]);
   initial_index_l = initial_predictor_l;
 
   // mask, sign-extend, and clamp the predictor portion
@@ -96,8 +94,7 @@ int ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
   // handle stereo
   if (channels > 1)
   {
-    initial_predictor_r = BE_16(&input[stream_ptr]);
-    stream_ptr += 2;
+    initial_predictor_r = BE_16(&input[IMA_ADPCM_BLOCK_SIZE]);
     initial_index_r = initial_predictor_r;
 
     // mask, sign-extend, and clamp the predictor portion
@@ -114,18 +111,16 @@ int ima_adpcm_decode_block(unsigned short *output, unsigned char *input,
   if (channels == 1)
     for (i = 0; i < IMA_ADPCM_SAMPLES_PER_BLOCK / 2; i++)
     {
-      output[i * 2 + 0] = input[stream_ptr] & 0x0F;
-      output[i * 2 + 1] = input[stream_ptr] >> 4;
-      stream_ptr++;
+      output[i * 2 + 0] = input[2 + i] & 0x0F;
+      output[i * 2 + 1] = input[2 + i] >> 4;
     }  
   else
     for (i = 0; i < IMA_ADPCM_SAMPLES_PER_BLOCK / 2 * 2; i++)
     {
-      output[i * 4 + 0] = input[stream_ptr] & 0x0F;
-      output[i * 4 + 1] = input[stream_ptr + 1] & 0x0F;
-      output[i * 4 + 2] = input[stream_ptr] >> 4;
-      output[i * 4 + 3] = input[stream_ptr + 1] >> 4;
-      stream_ptr++;
+      output[i * 4 + 0] = input[2 + i] & 0x0F;
+      output[i * 4 + 1] = input[2 + IMA_ADPCM_BLOCK_SIZE + i] & 0x0F;
+      output[i * 4 + 2] = input[2 + i] >> 4;
+      output[i * 4 + 3] = input[2 + IMA_ADPCM_BLOCK_SIZE + i] >> 4;
     }  
 
   ima_dvi_decode_nibbles(output, channels,
