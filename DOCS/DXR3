@@ -13,7 +13,8 @@ harddisk.
     not in the root dir)
 
  * Run <mplayerdir>/configure and make sure that DXR3/H+ support = yes
-   if you want to play files other than mpeg libmp1e should be = yes as well
+   if you want to play files other than mpeg I highly recommend you install
+   libavcodec as well (Read DOCS/codecs.html for more info).
    
  From here on compilation (of at least my code ;) should go without any
  problems.
@@ -51,20 +52,22 @@ harddisk.
 					number (0 if one card)
     -ac hwac3				For digital audio output instead of
 					analog
-    -vc mpegpes				For hardware accelerated mpeg playback
-    -aop list=resample:fout=48000	If samplerate is below 44100Hz
+    -vc mpegpes				Force hardware acceleration, only works
+					with mpeg1/2
+    -aop list=resample:fout=xxxxx	If samplerate is below 44100Hz, select
+					either 44100 or 48000 depending on
+					which which one matches closest. I.e.
+					if the movie uses 22050 use 44100 as
+					44100 / 2 = 22050, if it's 24000 use
+					48000 as 48000 / 2 = 24000 and so on.
  					This does not work with digital audio
 					output (-ac hwac3)
 
 MPEG-1, MPEG-2, VCD and DVD Notes
-There are some important notes to take into account here for optimum playback.
-MPlayer currently does not autodetect that the dxr3 can playback mpegs. So for
-mpeg files, dvd's and vcd's you have to add -vc mpegpes to tell mplayer that
-you are using a hardware accelerator. Otherwise mplayer will decode the movie
-in software, which is much slower.
-Note that you cannot use -vc mpegpes with movies that aren't mpeg 1 or 2 or
-you will get an error message saying "Can't find codec for video format...".
-
+MPEG 1/2 content should now automatically be detected by mplayer and it will
+use the hardware acceleration of the DXR3 to play it. If not, you can force
+it to hardware acceleration with -vc mpegpes. Also, if you plan to use any
+postprocessing filters you must use -vc mpeg12.
 
 3. Contacting me
 
