@@ -1495,12 +1495,9 @@ RTRACE("radeonfb: radeon_init_common_regs is called\n");
 	/*
 	* If bursts are enabled, turn on discards
 	* Radeon doesn't have write bursts
-	
-	* XXX: Disabled by NK since on Radeon VE it causes
-	*      mode corruption.
-	    if (save->bus_cntl & (BUS_READ_BURST))
-	    save->bus_cntl |= BUS_RD_DISCARD_EN;
 	*/
+	if (save->bus_cntl & (BUS_READ_BURST))
+	save->bus_cntl |= BUS_RD_DISCARD_EN;
 }
 
 static int radeon_init_crtc_regs(struct radeonfb_info *rinfo,
