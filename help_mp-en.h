@@ -505,6 +505,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding18 "Japanese charsets (SHIFT-JIS)"
 #define MSGTR_PREFERENCES_FontEncoding19 "Korean charset (CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "Thai charset (CP874)"
+#define MSGTR_PREFERENCES_FontEncoding21 "Cyrillic Windows (CP1251)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "No autoscale"
 #define MSGTR_PREFERENCES_FontPropWidth "Proportional to movie width"
 #define MSGTR_PREFERENCES_FontPropHeight "Proportional to movie height"
