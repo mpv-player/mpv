@@ -186,12 +186,12 @@ plik nazwany 'movie.avi.conf' z opcjami w nim i przenie¶ go do
 Czytaj dane z stdin.
 Opcja \-idx nie wspó³pracuje w po³±czeniu z tym.
 .TP
-.B \-autoq <jako¶æ> (u¿ywaj z \-vf pp)
+.B \-autoq <jako¶æ> (u¿ywaj z \-vop pp)
 Dynamiczne zmiany poziomu postprocesingu w zale¿no¶ci od dostêpnego wolnego
 czasu procesora.
 Numer, który wyszczególnisz, bêdzie najwy¿szym poziomem.
 Najczê¶ciej mo¿esz u¿ywaæ du¿ych liczb.
-Aby u¿yæ t± opcja musisz u¿yæ w komendzie \-vf pp bez parametrów.
+Aby u¿yæ t± opcja musisz u¿yæ w komendzie \-vop pp bez parametrów.
 .TP
 .B \-autosync <czynnik>
 Stopniowo dostosowuj synchronizacjê A/\:V bazuj±c na pomiarze opó¼nieñ audio.
@@ -811,7 +811,7 @@ Wymu¶ parametry audio dla demuxera .vivo (by usun±æ b³êdy).
 .SH "OPCJE OSD/SUB"
 .I INFORMACJE:
 .br
-Zobacz tak¿e rozszerzenie \-vf.
+Zobacz tak¿e rozszerzenie \-vop.
 .TP
 .B \-dumpmicrodvdsub (tylko MPLAYER)
 Konwertuj podane napisy (okre¶lone przez opcjê \-sub) do formatu napisów
@@ -1025,7 +1025,7 @@ TYLKO dla plików SUB opartych na klatkach tj.\& NIE format MicroDVD!
 Obecnie bezcelowe.
 To samo co \-audiofile, ale dla strumieni napisów (OggDS?).
 .TP
-.B \-subpos <0 \- 100> (u¿yteczny z rozszerzeniem -vf)
+.B \-subpos <0 \- 100> (u¿yteczny z rozszerzeniem -vop)
 Wybierz pozycje napisów na ekranie.
 Warto¶æ jest poziom± pozycj± napisów w % wysoko¶ci ekranu.
 .TP
@@ -1813,7 +1813,7 @@ Wy³±cz automatycznie wyrównywanie trybu wideo filmu.
 .B \-nosound
 Nie odtwarzaj/\:koduj d¼wiêku.
 .TP
-.B \-pp <jako¶æ> (zobacz tak¿e opcjê \-vf pp!)
+.B \-pp <jako¶æ> (zobacz tak¿e opcjê \-vop pp!)
 Ustaw poziom postprocessingu dla DLL.
 Ta opcja jest NIE JEST U?YTECZNA z filtrami postprocessingu MPlayera,
 ale tylko z Win32 DirectShow DLLs które maj? wewn?trzny postprocessing.
@@ -1821,7 +1821,7 @@ ale tylko z Win32 DirectShow DLLs które maj? wewn?trzny postprocessing.
 Poprawny zakres dla warto?ci \-pp ró?nie si? w kodekach, najcz??ciej
 0\-6, gdzie 0=wy??czony 6=powolny/\:najlepszy.
 .TP
-.B \-pphelp (zobacz tak¿e opcjê \-vf pp)
+.B \-pphelp (zobacz tak¿e opcjê \-vop pp)
 Poka¿ streszczenie dostêpnych filtrów postprocesu i ich u¿ycie.
 .TP
 .B \-ssf <tryb>
@@ -1830,7 +1830,7 @@ Okre¶la parametry SwScaler.
 .I PRZYK£AD:
 .PD 0
 .RSs
-\-vf scale -ssf lgb=3.0
+\-vop scale -ssf lgb=3.0
 .RE
 .PD 1
 
@@ -1867,7 +1867,7 @@ Prawy kana³
 .PD 1
 .
 .TP
-.B \-sws <typ\ oprogramowania\ skaluj±cego> (zobacz opcjê skaluj±c± \-vf)
+.B \-sws <typ\ oprogramowania\ skaluj±cego> (zobacz opcjê skaluj±c± \-vop)
 Ta opcja okre¶la jako¶æ (i odpowiednio prêdko¶æ) skalowania programowego,
 dla opcji \-zoom.
 Dla przyk³adu z x11 lub z innym wyj¶ciem sprzêtowej akceleracji. Mo¿liwe
@@ -1876,7 +1876,7 @@ ustawienia to:
 .I INFORMACJA:
 .br
 Dla \-sws\ 2 i 7, ostro¶æ mo¿e myæ ustawiona z parametrem skalowania (p)
-\-vf scale (0 (soft) \- 100 (sharp)), dla \-sws 9, jest okre¶lona d³ugo¶æ
+\-vop scale (0 (soft) \- 100 (sharp)), dla \-sws 9, jest okre¶lona d³ugo¶æ
 filtru (1 \- 10).
 
 .PD 0
@@ -1956,8 +1956,8 @@ próbuj najpierw kodek XAnim
 .PD 1
 .
 .TP
-.B \-vf <filter1[=options],filter2,...>
-Uruchom, rozdzielon± przecinkami, listê filtrów video.
+.B \-vop <...,filter3[=options],filter2,filter1>
+Uruchom, rozdzielon± przecinkami, listê filtrów video w odwrotnym porz±dku.
 
 .I INFORMACJA:
 .br
@@ -1967,7 +1967,7 @@ U¿yj -1 by zatrzymaæ domy¶lnie warto¶ci.
 Parametry w:h oznaczaj± szeroko¶æ x wysoko¶æ w pikselach, x:y oznacza x;y pozycjê
 od wy¿szego lewego rogu wiêkszego obrazu.
 .br
-By pobraæ listê dostêpnych pluginów patrz \-vf help.
+By pobraæ listê dostêpnych pluginów patrz \-vop help.
 .br
 Dostêpne filtry to:
 .
@@ -2043,22 +2043,22 @@ y: Nie wykonuje filtrowania chrominance (tylko korekcja o¶wietlenia).
 .RE
 .RSss
 .br
-\-vf pp=hb/vb/dr/al/lb
+\-vop pp=hb/vb/dr/al/lb
 .br
-\-vf pp=hb/vb/dr/al
+\-vop pp=hb/vb/dr/al
 .br
 domy¶lne filtry bez korekcji jasno¶ci/\:kontrastu
 .br
-.IPs "\-vf pp=de/\-al"
+.IPs "\-vop pp=de/\-al"
 .br
 W³±cz domy¶lne filtry i podrêczne odszumiacze:
 .br
-.IPs "\-vf pp=de/tn:1:2:3"
+.IPs "\-vop pp=de/tn:1:2:3"
 .br
 Odblokowana tylko korekcja o¶wietlenia w pionie i automatycznie odblokowywana
 korekcja pozioma, zale¿nie, czy jest dostêpny czas procesora.
 .br
-\-vf pp=hb:y/vb:a \-autoq 6
+\-vop pp=hb:y/vb:a \-autoq 6
 .REss
 .IPs lavc[=quality:fps]
 Koder realtime MPEG1 dla u¿ycia z DVB/\:DXR3 (libavcodec)
@@ -2108,7 +2108,7 @@ Warto¶æ mo¿e byæ z przedzia³u -100 do 100.
 Alternatywny programowy equalizer u¿ywaj±cy tabel (bardzo wolne),
 pozwala na dodatek na korekcjê gamma jasno¶ci, dostosowania kontrastu
 i nasycenia. Informujemy, ¿e wykorzystuje to kilka otymalizacji kodu dla MMX
-tak jak -vf eq, je¿eli wszystkie warto¶ci gamma s± 1.0!
+tak jak -vop eq, je¿eli wszystkie warto¶ci gamma s± 1.0!
 Parametry s± podane w warto¶ciach zmienno pozycyjnych.
 Domy¶lne to gama=1.0, kontrast=1.0, jasno¶æ=0.0 i nasycenie 1.0.
 Parametry rg, gg, bg s± niezale¿ne od warto¶ci gamma dla komponentów Red, Green
@@ -2166,13 +2166,52 @@ i: pomijanie
 s: zamieñ pola (wymiana parzystych i nieparzystych linii)
 .REss
 .IPs "field[=n]"
-Wyci±ga pojedyncze pola z przeplatanego obrazu u¿ywaj±c kroku arytmetycznego,
-aby unikaæ zu¿ywania czasu procesora). Opcjonalny argument n okre¶la, czy wyci±gaæ
-parzyste, czy nieprzyste pola (w zale¿no¶ci, czy n jest parzyste, czy nieparzyste).
+Wyci±ga pojedyncze pola z przeplatanego obrazu u¿ywaj±c kroku
+arytmetycznego, aby unikaæ zu¿ywania czasu procesora). Opcjonalny
+argument n okre¶la, czy wyci±gaæ parzyste, czy nieprzyste pola
+(w zale¿no¶ci, czy n jest parzyste, czy nieparzyste).
+.IPs "detc[=zmienna1=warto¶æ2:zmienna2=warto¶æ2:...]"
+Próbuje odwróciæ proces "telecine" by uzyskaæ strumieñ non-interleaved
+bez przeplatania przy prêdko¶ci klatek filmu. Ten filtr jet wci±¿ eksperymentalny,
+ale wydaje siê, ¿e jest ju¿ u¿yteczny. Poni¿sze argumenty (patrz
+wy¿ej po sk³adnie) mog± byæ u¿yte by kontrolowaæ jego dzia³anie:
+.RSss
+dr: Ustaw tryp porzucania klatek. 0 (domy¶lnie) oznacza, ¿e klatkie
+nie bêd± porzucane, by utrzymaæ ustalon± prêdko¶æ klatek danych
+wyj¶ciowych.1 oznacza, ¿e klatki bêd± zawsze porzucane gdy nie by³o
+jeszcze porzucania lub telecine znajduje siê w ostatnich 5 klatkach.
+2 oznacza, ¿e zawsze bêdzie utrzymywany dok³adny stosunek 5:4 klatek
+wej¶ciowych do wyj¶ciowych. (Informacja: z MEnkoderem u¿ywaj zawsze trybu 1!)
+.br
+am: Tryb analizy. Dostêpne warto¶c to 0 (ustalony wzorzec z numerem klatki
+inicjalizuj±cej okre¶lony przez fr=#) i 1 (agresywne szukanie wzorca telecine).
+Domy¶lnie jest 1.
+.br
+fr: Ustawia numer pocz±tkowej klatki w sekwencji. 0-2 to trzy
+nastêpuj±ce po sobie klatki bez przeplotu; 3 i 4 to dwie klatki
+z przeplotem. Domy¶lne -1 oznacza "bez sekwencji telecine". Liczba
+okre¶lona tutaj jest to wyimaginowana klatka przed pocz±tkiem filmu.
+tr0, tr1, tr2, tr3: Warto¶ci progu u¿ywane w trybach.
+.REss
+.IPs "telecine[=start]"
+Zastosuje proces "telecine" 3:2 "telecine" by zwiêkszyæ szybko¶æ klatek o 20%.
+Najprawdopodobniej ni bêdzie to dzia³a³o poprawnie z mplayerem, ale mo¿e byæ
+u¿yte z 'mencoder -fps 29.97 -ofps 29.97 -vop telecine'. Obie opcje fps
+s± niezbêdne! (Synchronizacja A/V bêdzie popsuta, je¿eli bêd± one ¼le podane.)
+Opcjonalny parametr start mówi filtrowi gdzie ma zacz±æ we wzorcu telecine.
+(0-3).
+.IPs "tfields[=tryb]"
+Tymczasowy seperator pola -- dzieli pola na klatki, podwajaj±c szybko¶æ
+klatek. W trybie 0, filtr pozostawi pola nie zmienione, co powoduje, ¿e
+dane wyj¶ciowe maj± po³owê wysoko¶ci. W trybie 1, przeplatane pola
+obrazu bêd± rekonstruowane by osi±gn±æ pe³n± wysoko¶æ klatek.
+Tak jak filtr telecine, "tfields" bêdzie poprawnie dzi³a³ tylko
+z menkoderem, i tylko jê¿eli oba -fps i -ofps bêd± ustawione na porz±dan±
+(podwójn±) szybko¶æ klatek!
 .IPs "boxblur=radius:power[:radius:power]"
 rozmycie
 .RSss
-radius: rozmiar do filtrowania
+radius: rozmiar (promieñ) filtrowania
 .br
 power: jak czêsto filtr powinien byæ stosowany
 .REss
@@ -2214,7 +2253,7 @@ hidden: ustawia domy¶ln± warto¶æ flagi 'hidden' (warto¶æ logiczna)
 opaque: flaga prze³±cza pomiêdzy prze¼roczystym i nieprze¼roczystym (szybki)
 trybem
 .br
-fifo: ¶cie¿ka/nazwa pliku dla FIFO (nazwane rór± ³±cz±c± mplayer -vf bmovl
+fifo: ¶cie¿ka/nazwa pliku dla FIFO (nazwane rór± ³±cz±c± mplayer -vop bmovl
 do aplikacji kontroluj±cej)
 .REss
 
@@ -2315,11 +2354,11 @@ Wy³±czone obliczanie stosunku.
 .TP
 .B \-zoom \
 Pozwalaj na programowe skalowanie, gdy jest dostêpne. Mo¿esz u¿yæ
-wymuszonego skalowania opcj± -vf scale
+wymuszonego skalowania opcj± -vop scale
 
 .I INFORMACJA:
 .br
-Skalowanie -vf ZIGNORUJE opcje \-x / \-y / \-xy / \-fs / \-aspect bez -zoom.
+Skalowanie -vop ZIGNORUJE opcje \-x / \-y / \-xy / \-fs / \-aspect bez -zoom.
 
 
 .SH "OPCJE KODUJ¡CE (TYLKO MENCODER)"
@@ -3000,8 +3039,9 @@ subpel udoskonala jako¶æ (dla qpel) (domy¶lnie: 8).
 Informacja: ma to znacz±cy efekt na prêdko¶ci
 .IPs psnr
 wy¶wietl psnr (peak signal to noise ratio - szczyt syga³u do stosunku szumu)
-dla ca³ego wideo po kodowaniu i przechowuj na klatkê psnr w pliku z nazw± w podobiu
-do 'psnr_012345.log'.
+dla ca³ego wideo po kodowaniu i przechowuj psnr na klatkê w pliku o nazwie
+podobnej do 'psnr_012345.log'.
+Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
 .IPs mpeg_quant
 u¿yj quantizers MPEG zamiast H.263.
 (domy¶lnie: wy³±czone) (tj.\& u¿yj quantizerów H.263)
@@ -3435,11 +3475,11 @@ mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Kodowanie tytu³u #2 DVD, zmieniaj±c rozmiar do 640x480
-mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder \-dvd 2 \-vop scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Kodowanie tytu³u #2 DVD, zmieniaj±c rozmiar do 512xHHH (zachowaj stosunek
 obrazu)
-mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder \-dvd 2 \-vop scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B To samo, ale z rodzin± kodeków libavcodec, kompresja MPEG4 (Divx5)
