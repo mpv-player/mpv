@@ -92,8 +92,6 @@ DOCUMENTATION TODO:
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
 
-- update the man page with all current options
-  - -vf down3dright, hqdn3d, yvu9
 - merge tech/encoding-tips.txt into encoding.html
 - finish reviewing all of the docs
   - mplayer.1
@@ -107,5 +105,4 @@ FUTURE:
 ~~~~~~~
 
 - write a detailed encoding guide
-- convert the docs to SGML/XML
 - restructuring?
