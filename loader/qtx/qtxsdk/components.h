@@ -733,14 +733,22 @@ static inline void dump_CodecDecompressParams(void* xxx){
 	cd->frameNumber, cd->startLine, cd->stopLine, cd->conditionFlags,cd->callerFlags);
 //    printf("maskBits=%p mattePixMap=%p\n",
 //	cd->maskBits,cd->mattePixMap);
-//    dump_PixMap(&cd->dstPixMap);
+    dump_PixMap(&cd->dstPixMap);
 //    if(cd->mattePixMap) dump_PixMap(cd->mattePixMap);
-//    dump_MatrixRecord("matrix",cd->matrix);
+    if(cd->matrix) dump_MatrixRecord("matrix",cd->matrix);
+    if(cd->capabilities) dump_CodecCapabilities(cd->capabilities);
     printf("accuracy=%d  transferMode=%d  matrixFlags=0x%X matrixType=%d\n",
 	(int)cd->accuracy, (int)cd->transferMode, (int)cd->matrixFlags, (int)cd->matrixType);
     printf("srcrect: %d;%d - %d;%d\n",cd->srcRect.top,cd->srcRect.left,cd->srcRect.bottom,cd->srcRect.right);
     printf("dstrect: %d;%d - %d;%d\n",cd->dstRect.top,cd->dstRect.left,cd->dstRect.bottom,cd->dstRect.right);
     printf("wantedDestinationPixelTypes=%p\n",cd->wantedDestinationPixelTypes);
+    if(cd->wantedDestinationPixelTypes){
+	unsigned int* p=cd->wantedDestinationPixelTypes;
+	while(p[0]){
+	    printf("  0x%08X %.4s\n",p[0],&p[0]);
+	    ++p;
+	}
+    }
     printf("screenFloodMethod=%d value=%d  preferredOffscreenPixelSize=%d\n",
 	cd->screenFloodMethod, cd->screenFloodValue, cd->preferredOffscreenPixelSize);
     printf("callbacks: progress=%p compl=%p data=%p ftime=%p srcdata=%p sync=%p\n",
