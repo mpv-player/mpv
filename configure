@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/07/04 by Juergen Keil
+#  - autodetect the assembler binary used by the GCC C compiler
+#
 # 2001/07/03 by Nick Kurshev
 # - added universal way of configuring SUBDIRS
 # - moved configurable stuff of depended SUBDIRS to SUBDIRS
@@ -19,8 +22,13 @@
 # 2001/06/04 by Nick Kurshev
 # - added hard checking of gcc and soft of assembler
 #
-# 2001/05/40 by LGB
+# 2001/05/30 by LGB
 #  - added --prefix support
+#
+# 2001/05/?? by Juergen Keil
+#  - autodetect OSS & Sun style audio
+#  - cpu feature detection for non-linux x86 systems
+#  - converted from bash to bourne shell script
 #
 # 2001/05/22 by Nick Kurshev
 #  - added definition of CPU clone
@@ -207,10 +215,7 @@ MCONF='config.mak'
 # ---  Check for C compiler:
 
 _cc=gcc
-_as=`gcc -print-prog-name=as`
-if [ x"_$as" = x ]; then
-  _as=as
-fi
+_as=auto
 _x11=auto
 
 _x11libdir=
@@ -308,6 +313,15 @@ else
 echo "YOU'VE SELECTED '--disable-gcc-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
 fi
 # ---
+
+# now that we know what compiler should be used for compilation, try to find
+# out which assembler is used by the $_cc compiler
+if [ "$_as" = auto ]; then
+  _as=`$_cc -print-prog-name=as`
+  if [ "_$as" = "" ]; then
+    _as=as
+  fi
+fi
 
 
 if [ -r /proc/cpuinfo ]; then
