@@ -1,0 +1,137 @@
+DVD support in MPlayer!
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Read file 'DVD-FAQ' as well (and try to avoid recursion by the redirector
+message there :).
+
+IMPORTANT NOTE: please _DO_NOT_ require further features for DVD playback. This
+is extremly experimental hack. Maybe it won't work for you. If you're
+capable of helping us do it now! First we would like to fix existing problems.
+Then we can start implementing advanced DVD playback functions of course.
+
+This means current DVD functions are mainly for developers and not for users!
+
+Building MPlayer with libcss support
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+First, you must compile and install libcss on your system.
+Second, you must call ./configure script of MPlayer with these options:
+
+./configure --enable-css --withcsslibdir=/usr/local/lib --withcssincidr=/usr/local/include
+
+(of course you can append your favourite options as well)
+
+--withcsslibdir=/usr/local/lib
+	Directory contains libcss.so shared library. This directory should
+	be in your /etc/ld.so.conf as well.
+	
+--withcssindfir=/usr/local/include
+	Directory contains header file 'css.h' of libcss.
+
+NOTE: There is no autodetection for libcss! You must require it with
+configure options.
+
+Viewing VOB files directly from DVD
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+mplayer -dvd /dev/dvd /mnt/cdrom/video_ts/vts_01_1.vob
+
+where,
+
+	'-dvd /dev/dvd' tells mplayer the device name of your DVD drive.
+	it's used in disc authentication process
+
+	the filename is simply a VOB file path on the disc
+
+Note that according my experiences disc authentication requires root
+privilegies so you must run mplayer as root! (see section 'Problems').
+
+NOTE about the sound:
+	It seems that mplayer sometimes fails to find the first audio stream.
+	You can specify it with using the '-aid 128' option, for example.
+	Please experience with 128,129 and similar values. See section
+	'Problems'.
+
+
+New source files
+~~~~~~~~~~~~~~~~
+dvdauth.c
+	Issues DVD disc and title authentication and fills key_disc and key_title
+	arraies.
+
+dvdauth.h
+	header file
+
+These files are embeded inside an '#ifdef ... #endif' block, so if libcss
+support was not requested, they do not produce any code and of course
+libcss is not linked against mplayer either.
+
+
+Modifications in the source
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+* (stream.c) STREAM_BUFFER_SIZE is set to 2048
+* (demux_mpg.c) the old message of 'encrypted VOB file is not supported'
+  was changed to set a flag to 1. After parsing the header, if this
+  flag is set, we call descramble function of libcss for decrypt.
+* (stream.c) on several points where the old 4096 length STREAM_BUFFER_SIZE was
+  hardcoded into the source, it was replaced with 'STREAM_BUFFER_SIZE'
+* (mplayer.c) calling dvd disc and title authentication and seek to sector
+  boundaries on seeking for mpegs
+              
+
+Performance
+~~~~~~~~~~~
+On my AMD K6-2 with using hw scaling and colorspace conversion
+capability of my G400 it's possible to watch DVD with about 70%
+CPU usage with '-nosound'. Unfortunately with sound my machine is
+not enough :( Maybe it can be improved somewhat ...
+Guess, it's not so bad ... According reports from my friends
+xine uses 80-90% CPU to play DVD on much more powerfull machines
+like 1GHz Athlon systems (as far as I know, it's said that about
+300MHz celeron is the minimum to watch DVDs ... using windows
+DVD viewers).
+
+Hint: I commented out downmix fountions from libac3 (of course in this way I
+can't get sound) and audio decoding CPU usage became 11% instead of 24 on
+my machine. This clearly indicates that we should optimize downmix functions
+(KNI code is no use for my k6-2).
+
+
+Problems (TODO)
+~~~~~~~~~~~~~~~
+* disc authentication (the FIBMAP ioctl) requires root privilegies.
+  this is strange since OMS can do it as user too.
+* sound. I'm using my only DVD disc (The Matrix) to test mplayer.
+  some VOB file has English sound, some has Spanish and some has
+  no sound at all.
+  IT SEEMS that if I give '-aid 128' everything works with English sound ...
+* strange effects but only with SOME vob
+  files (it looks like some interlacing effect, eg: every 2nd line
+  on the screen is from the last frame).
+
+
+feature TODO
+~~~~~~~~~~~~
+* chapter scanner
+* audio stream scanner and allow to select one on runtime as well
+  (in stage#1 it would be enough to select one on the startup, see
+  'Problems' above)
+* DVD menu
+  I found (at least on disc 'The Matrix') the menu VOB but I don't
+  know how can it be used.
+  (after some eyeballing on the source of OMS, it seems we would have to
+  parse *.ifo files)
+* subtitle support
+* OSD/GUI (?) support for select chapter, subtitle and audio stream
+* getting some documentation on DVD format, eg: which is the 'root' VOB
+  file on the disc in video_ts directory, which is the menu and so on.
+* improve performance (see 'Performance' above)
+
+
+No sound problem (from Matrix DVD, the menu VOB)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+End of packet while searching for PCM header
+
+DEMUXER: Too many (2048 in 4131540 bytes) video packets in the buffer!
+(maybe you play a non-interleaved stream/file or video codec failed)
+MPEG: No Audio stream found...  ->nosound
+
+However this does not occur if you specify '-aid 128'.

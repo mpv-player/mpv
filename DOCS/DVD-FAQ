@@ -1,0 +1,31 @@
+Q: I have some problem not mentioned here ...
+A: Read file 'DVD' as well.
+
+Q: How can I actually watch DVD with mplayer?
+A: Ehh. Goes on reading this file as well as 'DVD' (hint: you must have libcss)
+
+Q: Seems to work but no sound.
+A: Use '-aid 128' (or try: 128,129,...) mplayer command line switch
+
+Q: I have got Spanish audio instead of English (or similar problems)
+A: See the last question/answer.
+
+Q: mplayer complains about FIBMAP or something.
+A: Try to run mplayer as root.
+
+Q: some strange effect (interlace like thing) mainly when fast moving objects
+   are shown in the movie
+A: known problem, we try to fix it later
+
+Q: DVD support in mplayer is a piece of shit!
+A: You're probably right :) However please contact us if you can improve it!
+
+Q: How can I compile mplayer to be able to watch DVDs?
+A: Read file 'DVD' (as usuall).
+
+Q: Where can I get libcss package from?
+A: Maybe from the source of OMS (www.livid.org).
+
+Q: How can I ... (insert some expectable DVD player feature here)
+A: The current implementation is only for viewing VOB files from DVD.
+   Nothing more, like subtitles, menus and so on.
