@@ -1,6 +1,8 @@
 #define DISP
 
 /*
+ * $Id$
+ * 
  * video_out_dga.c, X11 interface
  *
  *
@@ -15,6 +17,14 @@
  * o this is alpha
  * o covers only common video card formats
  * o works only on intel architectures
+ *
+ * $Log$
+ * Revision 1.9  2001/04/01 08:07:14  acki2
+ * - added detection of memsize of graphics card to check if double buffering is possible
+ * - fixed resolution switching a little and added more debug output
+ * - resolution switching is still according to d_width and d_height which
+ *   is not always a good idea ...
+ *
  * 
  * 30/02/2001
  *
@@ -39,7 +49,7 @@
  * 
  */
 
-
+//#define VO_DGA_FORCE_DEPTH 32
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -79,6 +89,9 @@ static vo_info_t vo_info =
 static XF86VidModeModeInfo **vo_dga_vidmodes=NULL;
 #endif
 
+
+//extern int       verbose;           // shouldn't someone remove the static from 
+                                      // its definition in mplayer.c ???
 
 static int       vo_dga_width;           // bytes per line in framebuffer
 static int       vo_dga_vp_width;        // visible pixels per line in 
@@ -246,6 +259,14 @@ static uint32_t query_format( uint32_t format )
 	  )
 	)
         {
+          // this only for debug reasons ...
+	  if(modelines[i].bitsPerPixel == 15 || modelines[i].bitsPerPixel == 16){
+              printf("vo_dga: depth: %d, %08x, %08x, %08x\n",
+		       modelines[i].bitsPerPixel,
+		       modelines[i].redMask,
+		       modelines[i].greenMask,
+	               modelines[i].blueMask);			  
+          }
           for(k=0, dummy=1; k<modelines[i].bitsPerPixel-1; k++)dummy <<=1;
 	  dga_depths |= dummy;
         }
@@ -336,10 +357,13 @@ uninit(void)
 
 //----------------------------------------------------------
 
-int check_mode( int x, int y, 
+int check_mode( int num, int x, int y, int bpp,  
                 int new_x, int new_y, int new_vbi, 
                 int *old_x, int *old_y, int *old_vbi){
 
+  printf("vo_dga: (%3d) Trying %4d x %4d @ %3d Hz @ %2d bpp ..",
+          num, new_x, new_y, new_vbi, bpp );
+  printf("(old: %dx%d@%d).", *old_x, *old_y, *old_vbi);	
   if (
       (new_x >= x) && 
       (new_y >= y) &&
@@ -359,7 +383,7 @@ int check_mode( int x, int y,
 	 !(new_y > *old_y)) ||
 	((new_y < *old_y) &&
 	 !(new_x > *old_x)) 
-	) 
+       ) 
        // but if we get an identical resolution choose
        // the one with the lower refreshrate (saves bandwidth !!!)
        // as long as it's above 50 Hz (acki2 on 30/3/2001)
@@ -370,23 +394,25 @@ int check_mode( int x, int y,
 	(
 	 (
 	  new_vbi >= *old_vbi && *old_vbi < 50
-	  )  
+	 )  
 	 ||
 	 (
 	  *old_vbi >= 50 && 
 	  new_vbi < *old_vbi &&
 	  new_vbi >= 50
-	  )
 	 )
 	)
        )
-      )  
+      )
+     )  
     {
       *old_x = new_x;
       *old_y = new_y;
       *old_vbi = new_vbi;
+      printf(".ok!!\n");
       return 1;
     }else{
+      printf(".no\n");
       return 0;
     }
 }
@@ -404,16 +430,17 @@ static uint32_t init( uint32_t width,  uint32_t height,
 
 #ifdef HAVE_DGA2
   // needed to change DGA video mode
-  int modecount,mX, mY, mVBI, i,j;
+  int modecount, mX=100000, mY=100000 , mVBI=100000, i,j=0;
   int dga_modenum;
   XDGAMode   *modelines=NULL;
   XDGADevice *dgadevice;
+  int max_vpy_pos;
 #else
 #ifdef HAVE_XF86VM
   unsigned int vm_event, vm_error;
   unsigned int vm_ver, vm_rev;
-  int i,j,have_vm=0;
-  int modecount,mX, mY, mVBI, dga_modenum;  
+  int i, j=0, have_vm=0;
+  int modecount, mX=100000, mY=100000, mVBI=100000, dga_modenum;  
 #endif
   int bank, ram;
 #endif
@@ -465,36 +492,17 @@ static uint32_t init( uint32_t width,  uint32_t height,
   if (modelines==NULL)
     modelines=XDGAQueryModes(vo_dga_dpy, XDefaultScreen(vo_dga_dpy),&modecount);
   
-  mX=modelines[0].imageWidth;
-  mY=modelines[0].imageHeight;
-  mVBI = modelines[0].verticalRefresh;
-
-  
   printf("vo_dga: Using DGA 2.0 mode changing support\n");	
-  j=0; 
   // offbyone-error !!! i<=modecount is WRONG !!!
-  for (i=1; i<modecount; i++)
+  for (i=0; i<modecount; i++)
   {
      if( modelines[i].bitsPerPixel == vo_dga_planes)
      {
-       printf("vo_dga: (%3d) Trying %4d x %4d @ %3d Hz @ %2d bpp ..",
-		     i,
-		     modelines[i].viewportWidth, 
-		     modelines[i].viewportHeight,
-		     (unsigned int) modelines[i].verticalRefresh,
-		     modelines[i].bitsPerPixel );
-     
-       if ( check_mode(d_width, d_height, 
+       if ( check_mode(i, d_width, d_height, modelines[i].bitsPerPixel,  
                   modelines[i].viewportWidth, 
                   modelines[i].viewportHeight, 
                   (unsigned) modelines[i].verticalRefresh,
-                   &mX, &mY, &mVBI ))
-       {
-         j = i;
-	 printf(".ok!!\n");
-       }else{
-         printf(".no\n");
-       }
+                   &mX, &mY, &mVBI )) j = i;
      }
   }
   printf("vo_dga: Selected video mode %4d x %4d @ %3d Hz for image size %3d x %3d.\n", 
@@ -504,12 +512,12 @@ static uint32_t init( uint32_t width,  uint32_t height,
   vo_dga_vp_height = mY;
   vo_dga_width = modelines[j].bytesPerScanline / vo_dga_bpp;
   dga_modenum =  modelines[j].num;
+  max_vpy_pos = modelines[j].maxViewportY;
   
   XFree(modelines);
   modelines = NULL;
   
 #else
-
 
 #ifdef HAVE_XF86VM
 
@@ -520,7 +528,7 @@ static uint32_t init( uint32_t width,  uint32_t height,
     printf("vo_dga: XF86VidMode Extension v%i.%i\n", vm_ver, vm_rev);
     have_vm=1;
   } else {
-    printf("vo_dga: XF86VidMode Extention not available.\n");
+    printf("vo_dga: XF86VidMode Extension not available.\n");
   }
 
 #define GET_VREFRESH(dotclk, x, y)( (((dotclk)/(x))*1000)/(y) )
@@ -531,38 +539,14 @@ static uint32_t init( uint32_t width,  uint32_t height,
     XF86VidModeGetAllModeLines(vo_dga_dpy,screen,&modecount,&vo_dga_vidmodes);
 
     if(vo_dga_vidmodes != NULL ){
-   
-      mX=vo_dga_vidmodes[0]->hdisplay;
-      mY=vo_dga_vidmodes[0]->vdisplay;
-      
-      // TODO: calculate refreshrate from dotclock, hss, hstp, ...
-      mVBI = GET_VREFRESH(vo_dga_vidmodes[0]->dotclock, 
-	                  vo_dga_vidmodes[0]->htotal,
-			  vo_dga_vidmodes[0]->vtotal);                       
-      
-      j=0; 
-      for (i=1; i<modecount; i++){
-	printf("vo_dga: (%3d) Trying %4d x %4d @ %3d Hz @ %2d bpp ..",
-	       i,
-	       vo_dga_vidmodes[i]->hdisplay, 
-	       vo_dga_vidmodes[i]->vdisplay,
-               GET_VREFRESH(vo_dga_vidmodes[i]->dotclock, 
-	                    vo_dga_vidmodes[i]->htotal,
-			    vo_dga_vidmodes[i]->vtotal),
-	       vo_dga_planes );
-	
-	if ( check_mode(d_width, d_height, 
+      for (i=0; i<modecount; i++){
+	if ( check_mode(i, d_width, d_height, vo_dga_planes,  
 			vo_dga_vidmodes[i]->hdisplay, 
 			vo_dga_vidmodes[i]->vdisplay,
 			GET_VREFRESH(vo_dga_vidmodes[i]->dotclock, 
 				     vo_dga_vidmodes[i]->htotal,
 				     vo_dga_vidmodes[i]->vtotal),
-			&mX, &mY, &mVBI )){
-	  j = i;
-	  printf(".ok!!\n");
-	}else{
-	  printf(".no\n");
-	}
+			&mX, &mY, &mVBI )) j = i;
       }
     
       printf("vo_dga: Selected video mode %4d x %4d @ %3d Hz for image size %3d x %3d.\n", 
@@ -580,7 +564,6 @@ static uint32_t init( uint32_t width,  uint32_t height,
   printf("vo_dga: Only have DGA 1.0 extension and no XF86VidMode :-(\n");
 #endif
 #endif
-
 
   vo_dga_src_format = format;
   vo_dga_src_width = width;
@@ -686,7 +669,12 @@ static uint32_t init( uint32_t width,  uint32_t height,
   if(format ==IMGFMT_YV12 )vo_dga_dbf_mem_offset = 0;
   // disable doublebuffering for YV12
 
-  printf("vo_dga: Doublebuffering %s.\n", vo_dga_dbf_mem_offset ? "enabled" : "disabled");
+#ifdef HAVE_DGA2
+      if(vo_dga_vp_height>max_vpy_pos){
+        vo_dga_dbf_mem_offset = 0;
+	printf("vo_dga: Not enough memory for double buffering!\n");
+      }
+#endif  
   
   // now clear screen
   {
@@ -694,9 +682,21 @@ static uint32_t init( uint32_t width,  uint32_t height,
 	(vo_dga_vp_height + (vo_dga_dbf_mem_offset != 0 ?
 	(vo_dga_src_height+y_off) : 0)) *
 	vo_dga_bpp;
-   fprintf(stderr, "vo_dga: Before memset: %d. If mplayer exits here, you haven't enough memory for doublebuffering. I'll fix this in the future to check for amount of mem available... For now, select a lower resolution ...\n", size);   
-   memset(vo_dga_base, 0, size);  
+#ifndef HAVE_DGA2
+    printf("%d, %d\n", size, ram);
+    if(size>ram*1024){
+      vo_dga_dbf_mem_offset = 0;
+      printf("vo_dga: Not enough memory for double buffering!\n");
+      size -= (vo_dga_src_height+y_off) * vo_dga_width * vo_dga_bpp;
+    }				        
+#endif
+    
+    printf("vo_dga: Clearing framebuffer (%d bytes). If mplayer exits", size);
+    printf(" here, you haven't enough memory on your card.\n");   
+    fflush(stdout);
+    memset(vo_dga_base, 0, size);  
   }
+  printf("vo_dga: Doublebuffering %s.\n", vo_dga_dbf_mem_offset ? "enabled" : "disabled");
   vo_dga_is_running = 1;
   return 0;
 }
