@@ -30,7 +30,7 @@ typedef struct {
 } mov_sample_t;
 
 typedef struct {
-    unsigned int sample; // number of the first sample in teh chunk
+    unsigned int sample; // number of the first sample in the chunk
     unsigned int size;   // number of samples in the chunk
     int desc;            // for multiple codecs mode - not used
     off_t pos;
@@ -81,6 +81,7 @@ void mov_build_index(mov_track_t* trak){
     unsigned int pts=0;
     mp_msg(MSGT_DEMUX, MSGL_HINT, "MOV track: %d chunks, %d samples\n",trak->chunks_size,trak->samples_size);
     mp_msg(MSGT_DEMUX, MSGL_HINT, "pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
+
     // process chunkmap:
     i=trak->chunkmap_size;
     while(i>0){
@@ -150,6 +151,7 @@ typedef struct {
     mov_track_t* tracks[MOV_MAX_TRACKS];
 } mov_priv_t;
 
+#warning "FIXME - mov support is only working perfectly on Little Endian systems?!"
 #define MOV_FOURCC(a,b,c,d) ((a<<24)|(b<<16)|(c<<8)|(d))
 
 int mov_check_file(demuxer_t* demuxer){
@@ -180,6 +182,7 @@ int mov_check_file(demuxer_t* demuxer){
 	  flags|=2;
 	  break;
 	case MOV_FOURCC('f','r','e','e'):
+	  /* unused, if you edit a mov, you can use space provided by free atoms (redefining it) */
 	  break;
 	case MOV_FOURCC('w','i','d','e'):
 	default:
@@ -341,17 +344,22 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int ver = (temp << 24);
 		int flags = (temp << 16)|(temp<<8)|temp;
 		int entries=stream_read_dword(demuxer->stream);
+		int i;
+		
+		trak->samplesize=ss;
+		if (ss)
+		{
+		    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample size table! (fixed ss=%d) (ver:%d,flags:%ld)\n",
+			level,"",ss,ver,flags);
+		    break;
+		}
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample size table! (entries=%d ss=%d) (ver:%d,flags:%ld)\n",
 		    level,"",entries,ss,ver,flags);
-		trak->samplesize=ss;
-		if(!ss){
-		    // variable samplesize
-		    int i;
-		    trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*entries);
-		    trak->samples_size=entries;
-		    for(i=0;i<entries;i++)
-			trak->samples[i].size=stream_read_dword(demuxer->stream);
-		}
+		// variable samplesize
+		trak->samples=realloc(trak->samples,sizeof(mov_sample_t)*entries);
+		trak->samples_size=entries;
+		for(i=0;i<entries;i++)
+		    trak->samples[i].size=stream_read_dword(demuxer->stream);
 		break;
 	    }
 	    case MOV_FOURCC('s','t','c','o'): {
@@ -378,7 +386,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    level, "",entries, ver, flags);
 		trak->keyframes_size=entries;
 		trak->keyframes=malloc(sizeof(unsigned int)*entries);
-		for (i=0;i<entries;i++) trak->keyframes[i]=stream_read_dword(demuxer->stream)-1;
+		for (i=0;i<entries;i++)
+		    trak->keyframes[i]=stream_read_dword(demuxer->stream)-1;
 //		for (i=0;i<entries;i++) printf("%3d: %d\n",i,trak->keyframes[i]);
 		break;
 	    }
@@ -395,6 +404,31 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_FOURCC('s','t','b','l'): {
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sSample info!\n",level,"");
 		lschunks(demuxer,level+1,pos+len,trak);
+		break;
+	    }
+	    case MOV_FOURCC('e','d','t','s'): {
+		mp_msg(MSGT_DEMUX, MSGL_V, "MOV: %*sEdit atom!\n", level, "");
+		lschunks(demuxer,level+1,pos+len,trak);
+		break;
+	    }
+	    case MOV_FOURCC('e','l','s','t'): {
+		int temp=stream_read_dword(demuxer->stream);
+		int entries=stream_read_dword(demuxer->stream);
+		int ver = (temp << 24);
+		int flags = (temp << 16)|(temp<<8)|temp;
+		int i;
+	
+		mp_msg(MSGT_DEMUX, MSGL_V,"MOV: %*sEdit list table (%d entries) (ver:%d,flags:%ld)\n",
+		    level, "",entries, ver, flags);
+#if 0
+		for (i=0;i<entries;i++)
+		{
+		    printf("entry#%d: dur: %ld mtime: %ld mrate: %ld\n",
+			i, stream_read_dword(demuxer->stream),
+			stream_read_dword(demuxer->stream),
+			stream_read_dword(demuxer->stream));
+		}
+#endif
 		break;
 	    }
 	    default:
@@ -761,8 +795,8 @@ if(trak->samplesize){
 	for(i=0;i<trak->keyframes_size;i++){
 	    if(trak->keyframes[i]>=trak->pos) break;
 	}
-	if(i>0 && 
-	  (trak->keyframes[i]-trak->pos) > (trak->pos-trak->keyframes[i-1])) --i;
+	if(i>0 && (trak->keyframes[i]-trak->pos) > (trak->pos-trak->keyframes[i-1]))
+	  --i;
 	trak->pos=trak->keyframes[i];
 //	printf("nearest keyframe: %d  \n",trak->pos);
     }
