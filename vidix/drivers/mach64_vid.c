@@ -237,7 +237,7 @@ static uint32_t mach64_get_yres( void )
 static void mach64_vid_make_default()
 {
   mach64_fifo_wait(2);
-  OUTREG(SCALER_COLOUR_CNTL,0x0010103f);
+  OUTREG(SCALER_COLOUR_CNTL,0x00101000);
 }
 
 static void mach64_vid_dump_regs( void )
@@ -390,11 +390,11 @@ int vixInit(void)
   mach64_ram_size *= 0x400; /* KB -> bytes */
   if((mach64_mem_base = map_phys_mem(pci_info.base0,mach64_ram_size))==(void *)-1) return ENOMEM;
   memset(&besr,0,sizeof(bes_registers_t));
-  mach64_vid_make_default();
   printf("[mach64] Video memory = %uMb\n",mach64_ram_size/0x100000);
   err = mtrr_set_type(pci_info.base0,mach64_ram_size,MTRR_TYPE_WRCOMB);
   if(!err) printf("[mach64] Set write-combining type of video memory\n");
   reset_regs();
+  mach64_vid_make_default();
   if(__verbose > VERBOSE_LEVEL) mach64_vid_dump_regs();
   return 0;
 }
