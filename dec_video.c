@@ -532,8 +532,21 @@ else
   }
 #endif
   case VFM_MPEG:
-    mpeg2_decode_data(video_out, start, start+in_size,drop_frame);
-    if(!drop_frame) blit_frame=1;
+    if(out_fmt==IMGFMT_MPEGPES){
+	// hardware decoding:
+	static vo_mpegpes_t packet;
+	mpeg2_decode_data(video_out, start, start+in_size,3); // parse headers
+	packet.data=start;
+	packet.size=in_size-4;
+	packet.timestamp=sh_video->timer*90000.0;
+	packet.id=0x1E0; //+sh_video->ds->id;
+	planes[0]=&packet;
+	blit_frame=2;
+    } else {
+	// software decoding:
+	mpeg2_decode_data(video_out, start, start+in_size,drop_frame); // decode
+	if(!drop_frame) blit_frame=1;
+    }
     break;
   case VFM_RAW:
     planes[0]=start;
