@@ -371,68 +371,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	    mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: EnterMovies (%d)\n", qterr);
 	  }
 
-
-#if 0 // can be handy for developers, but useless for users
-	  {
-	    CodecNameSpecListPtr list;
-	    int index;
-	    qterr = GetCodecNameList(&list, 1);
-	    if (qterr) {
-	      mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: GetCodecNameList (%d)\n", qterr);
-	    }
-	    mp_msg(MSGT_VO, MSGL_ERR, "Quartz: found %d codec\n", list->count);
-
-	    for (index = 0; index < list->count; index++) {
-	      char name[32];
-	      CodecInfo ci;
-	      
-	      memcpy(name, &(list->list[index].typeName[1]), list->list[index].typeName[0]);
-	      name[list->list[index].typeName[0]]='\0';
-	      qterr = GetCodecInfo(&ci, list->list[index].cType, list->list[index].codec);
-	      if (qterr) {
-		mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: GetCodecInfo (%d)\n", qterr);
-	      }
-	      mp_msg(MSGT_VO, MSGL_INFO, "Quartz: QuickTimecodec %d:\n\tname: %s\n\ttype: %.4s\n\tvendor: %.4s\n\tversion/revision: %d/%d\n\tdecompressFlags: 0x%08x\n\tcompressFlags: 0x%08x\n\tformatFlags: 0x%08x\n", index, name, &list->list[index].cType, &ci.vendor, ci.version, ci.revisionLevel, ci.decompressFlags, ci.compressFlags, ci.formatFlags);
-	    }
-	  }
-	  {
-	    Component c = NULL;
-	    ComponentDescription cd;
-	    cd.componentType = 'imdc';
-	    cd.componentSubType = image_qtcodec;
-	    cd.componentManufacturer = 0;//'appx';
-	    cd.componentFlags = 0;
-	    cd.componentFlagsMask = 0;
-
-	    while (c = FindNextComponent(c, &cd)) {
-	      ComponentDescription cd2;
-	      Handle h1 = NewHandleClear(4);
-	      Handle h2 = NewHandleClear(4);
-	      char ch1[256], ch2[256];
-	      cd2.componentFlagsMask = 0;
-
-	      qterr = GetComponentInfo(c, &cd2, h1, h2, NULL);
-	      if (qterr) {
-		mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: GetComponentInfo (%d)\n", qterr);
-	      }
-	      memcpy(ch1, &((unsigned char*)(*h1))[1], ((unsigned char*)(*h1))[0]);
-	      ch1[((unsigned char*)(*h1))[0]] = '\0';
-	      memcpy(ch2, &((unsigned char*)(*h2))[1], ((unsigned char*)(*h2))[0]);
-	      ch2[((unsigned char*)(*h2))[0]] = '\0';
-	      DisposeHandle(h1);
-	      DisposeHandle(h2);
-
-	      mp_msg(MSGT_VO, MSGL_ERR, "QuickTime: component %.4s %.4s %.4s, %s, %s, [flags: 0x%08x, mask: 0x%08x]\n",
-		     &cd2.componentType,
-		     &cd2.componentSubType,
-		     &cd2.componentManufacturer,
-		     ch1,
-		     ch2,
-		     cd2.componentFlags,
-		     cd2.componentFlagsMask);
-	    }
-	  }
-#endif
 	  {
 	    ComponentDescription cd2;
 	    Handle h1 = NewHandleClear(4);
