@@ -166,6 +166,7 @@ if(dvd_title){
         DVDClose( dvd );
         return NULL;
     }
+    --dvd_angle; // remap 1.. -> 0..
     /**
      * Load the VTS information for the title set our title is in.
      */
