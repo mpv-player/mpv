@@ -218,8 +218,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	    break;
     }
 
-    if (X_already_started)
-        return(-1);
     if (!vo_init())
         return(-1);
 
@@ -236,8 +234,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 //    if (vo_fs)
 //     { vo_old_width=d_width; vo_old_height=d_height; }
 
-    X_already_started++;
-    
     /* from xmga.c */
     bgColor = 0x0L;
     switch(vo_depthonscreen)
