@@ -1,7 +1,11 @@
 
-global configuration 
+- global configuration 
  ( /etc/mplayer/mplayer.conf
   /etc/mplayer/codecs.conf
   /usr/lib/mplayer/font )
-enable rules to enforce configuration.
+- Add script for copying *.dlls from users windows directory,
+or figure out some other way of satisfying other dependencies
+like *.dlls and fonts.
+In other words - automate win32dll.zip installation.
+- check debhelper quirks and abilities for config files.
 

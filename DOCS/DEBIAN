@@ -5,14 +5,15 @@ eyck@incubus:~/src$ cd main
 eyck@incubus:~/src/main$ fakeroot debian/rules binary
  (... mplayer detects hardware/software, builds itself and.. )
  ..
- dpkg-deb: building package `mplayer' in `../mplayer_0.17a-1_i386.deb'.
+ dpkg-deb: building package `mplayer' in `../mplayer_0.18-1_i386.deb'.
 
-And now just dpkg -i ../mplayer_0.17a-1_i386.deb
+And now just dpkg -i ../mplayer_0.18-1_i386.deb as root.
+Here's how it looks like:
 
-eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.17a-1_i386.deb 
+eyck@incubus:/src/main$ sudo dpkg -i ../mplayer_0.18-1_i386.deb 
 Password:
 (Reading database ... 26946 files and directories currently installed.)
-Preparing to replace mplayer 0.11pre-1 (using ../mplayer_0.17a-1_i386.deb) ...
+Preparing to replace mplayer 0.17a-1 (using ../mplayer_0.18-1_i386.deb) ...
 Unpacking replacement mplayer ...
-Setting up mplayer (0.17a-1) ...
+Setting up mplayer (0.18-1) ...
 
