@@ -109,8 +109,12 @@ while(fgets(sor,1020,f)){
   
   if(strcmp(section,"[files]")==0){
       if(pdb==2 && strcmp(p[0],"alpha")==0){
-    	  char *cp=get_path("font/");
-	  char *cp2=malloc(strlen(cp)+strlen(p[1])+1);
+    	  char *cp,*cp2;
+	  if (!(cp=get_path("font/"))) return NULL;
+	  if (!(cp2=malloc(strlen(cp)+strlen(p[1])+1))) {
+		free(cp);
+		return NULL;
+	  }
 	  sprintf(cp2,"%s%s",cp,p[1]);
           if(!((desc->pic_a[fontdb]=load_raw(cp2)))){
                 printf("Can't load font bitmap: %s\n",p[1]);
@@ -123,8 +127,12 @@ while(fgets(sor,1020,f)){
           continue;
       }
       if(pdb==2 && strcmp(p[0],"bitmap")==0){
-    	  char *cp=get_path("font/");
-	  char *cp2=malloc(strlen(cp)+strlen(p[1])+1);
+    	  char *cp,*cp2;
+	  if (!(cp=get_path("font/"))) return NULL;
+	  if (!(cp2=malloc(strlen(cp)+strlen(p[1])+1))) {
+		free(cp);
+		return NULL;
+	  }
 	  sprintf(cp2,"%s%s",cp,p[1]);
           if(!((desc->pic_b[fontdb]=load_raw(cp2)))){
                 printf("Can't load font bitmap: %s\n",p[1]);
