@@ -852,7 +852,7 @@ fi
 
 cat > $TMPC << EOF
 #include <decore.h>
-int main( void ) { return 0; }
+int main( void ) { return DEC_OPT_FRAME_311; }
 EOF
 $_cc $_x11incdir $TMPC -o $TMPO $_x11libdir -lX11 -lXext -lGL -pthread $_socklib > /dev/null 2>&1 || \
  { _gl=no; echo "GL includes not found!";}
