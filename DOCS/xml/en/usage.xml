@@ -421,10 +421,10 @@ play from FTP:
 <screen>wget ftp://micorsops.com/something.avi -O - | mplayer -</screen>
 </para>
 
-<para>
+<note><para>
 Note: it's also recommended to enable CACHE when playback from network:
 <screen>wget ftp://micorsops.com/something.avi -O - | mplayer -cache 8192 -</screen>
-</para>
+</para></note>
 </sect1>
 
 <sect1 id="mpst" xreflabel="Remote streams">
