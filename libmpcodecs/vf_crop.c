@@ -44,15 +44,15 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	    (vf->priv->crop_y>>1)*mpi->stride[1]+(vf->priv->crop_x>>1);
 	dmpi->planes[2]=mpi->planes[2]+
 	    (vf->priv->crop_y>>1)*mpi->stride[2]+(vf->priv->crop_x>>1);
-	dmpi->stride[0]=mpi->stride[0];
 	dmpi->stride[1]=mpi->stride[1];
 	dmpi->stride[2]=mpi->stride[2];
     } else {
 	dmpi->planes[0]=mpi->planes[0]+
 	    vf->priv->crop_y*mpi->stride[0]+
 	    vf->priv->crop_x*(mpi->bpp/8);
-	dmpi->stride[0]=mpi->stride[0];
     }
+    dmpi->stride[0]=mpi->stride[0];
+    dmpi->width=mpi->width;
     vf_next_put_image(vf,dmpi);
 }
 
