@@ -36,6 +36,7 @@
 #define AFM_IMAADPCM 16
 #define AFM_FOX61ADPCM 17
 #define AFM_FOX62ADPCM 18
+#define AFM_ROQAUDIO 19
 
 #define VFM_MPEG 1
 #define VFM_VFW 2
@@ -55,6 +56,7 @@
 #define VFM_CYUV 16
 #define VFM_QTSMC 17
 #define VFM_DUCKTM1 18
+#define VFM_ROQVIDEO 19
 
 #ifndef GUID_TYPE
 #define GUID_TYPE

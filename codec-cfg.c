@@ -221,6 +221,7 @@ static short get_driver(char *s,int audioflag)
 		"imaadpcm",
 		"fox61adpcm",
 		"fox62adpcm",
+		"roqaudio",
 		NULL
 	};
 	static char *videodrv[] = {
@@ -243,6 +244,7 @@ static short get_driver(char *s,int audioflag)
 		"cyuv",
 		"qtsmc",
 		"ducktm1",
+		"roqvideo",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;
