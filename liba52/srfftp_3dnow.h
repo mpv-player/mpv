@@ -129,19 +129,19 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"pfmul	%%mm2, %%mm3\n\t" /* v *= HSQRT2_3DNOW; */\
 	"pfmul	%%mm2, %%mm0\n\t" /* u *= HSQRT2_3DNOW; */\
 	"movq	%6, %%mm1\n\t" /* a1 = A2;*/\
-	"movq	%%mm1, %%mm2\n\t"\
-	"pfadd	%%mm0, %%mm1\n\t" /*A2 = a1 + u;*/\
-	"pfsub	%%mm0, %%mm2\n\t" /*A2 = a1 - u;*/\
-	"movq	%%mm1, %0\n\t"\
-	"movq	%%mm2, %1\n\t"\
-	"movq	%7, %%mm1\n\t" /* a1 = A6;*/\
+	"movq	%7, %%mm5\n\t" /* a1 = A6;*/\
 	"movq	%%mm1, %%mm2\n\t"\
 	"movq	%%mm3, %%mm4\n\t"\
+	"pfadd	%%mm0, %%mm1\n\t" /*A2 = a1 + u;*/\
 	"pfmul	%%mm6, %%mm4\n\t"/*A6.re  = a1.re + v.re;*/\
-	"pfadd	%%mm4, %%mm1\n\t"/*A6.im  = a1.im - v.im;*/\
+	"pfsub	%%mm0, %%mm2\n\t" /*A2 = a1 - u;*/\
 	"pfmul	%%mm7, %%mm3\n\t"/*A14.re = a1.re - v.re;*/\
+	"movq	%%mm1, %0\n\t"\
+	"movq	%%mm2, %1\n\t"\
+	"movq	%%mm5, %%mm2\n\t"\
+	"pfadd	%%mm4, %%mm5\n\t"/*A6.im  = a1.im - v.im;*/\
 	"pfadd	%%mm3, %%mm2\n\t"/*A14.im = a1.im + v.im;*/\
-	"movq	%%mm1, %2\n\t"\
+	"movq	%%mm5, %2\n\t"\
 	"movq	%%mm2, %3"\
 	:"=m"(A2), "=m"(A10), "=m"(A6), "=m"(A14)\
 	:"m"(wTB[2]), "m"(wTB[6]), "0"(A2), "2"(A6), "m"(HSQRT2_3DNOW)\
@@ -169,11 +169,11 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	"pfmul	%3,	%%mm2\n\t"/* mm2 = v*/\
 	PFNACC_MM("%%mm2","%%mm3")\
 	"pfacc	%%mm0,	%%mm0\n\t"\
+	"movq	%%mm4,	%%mm5\n\t"\
 	"punpckldq %%mm0,%%mm2\n\t"/*mm2 = v.re | a.re*/\
+	"pfmul	%%mm6,	%%mm5\n\t"\
 	"movq	%%mm2,	%%mm3\n\t"\
 	"pfmul	%%mm7,	%%mm3\n\t"\
-	"movq	%%mm4,	%%mm5\n\t"\
-	"pfmul	%%mm6,	%%mm5\n\t"\
 	"pfadd	%%mm3,	%%mm5\n\t"\
 	PSWAP_MM("%%mm5","%%mm3")/* mm5 = v*/\
 	"pfadd	%%mm2,	%%mm4\n\t"\
@@ -182,19 +182,19 @@ static complex_t HSQRT2_3DNOW __attribute__ ((aligned (8))) = { 0.707106781188, 
 	:"memory");\
     __asm__ __volatile__(\
 	"movq	%4, %%mm0\n\t"/* a1 = A1*/\
+	"movq	%5, %%mm2\n\t"/* a1 = A5*/\
 	"movq	%%mm0, %%mm1\n\t"\
+	"movq	%%mm2, %%mm3\n\t"\
 	"pfadd	%%mm4, %%mm0\n\t"/*A1 = a1 + u*/\
+	"pfsub	%%mm5, %%mm2\n\t"/*A5 = a1 - v*/\
 	"pfsub	%%mm4, %%mm1\n\t"/*A9 = a1 - u*/\
+	"pfadd	%%mm5, %%mm3\n\t"/*A9 = a1 + v*/\
 	"movq	%%mm0, %0\n\t"\
 	"movq	%%mm1, %1\n\t"\
-	"movq	%5, %%mm2\n\t"/* a1 = A5*/\
-	"movq	%%mm2, %%mm3\n\t"\
-	"pfsub	%%mm5, %%mm2\n\t"/*A5 = a1 - v*/\
-	"pfadd	%%mm5, %%mm3\n\t"/*A9 = a1 + v*/\
 	"movq	%%mm2, %2\n\t"\
 	"movq	%%mm3, %3"\
 	:"=m"(A1), "=m"(A9), "=m"(A5), "=m"(A13)\
-	:"0"(A1), "2"(A5), "m"(u), "m"(v)\
+	:"0"(A1), "2"(A5)\
 	:"memory");\
 }
 
