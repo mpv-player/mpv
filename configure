@@ -6,6 +6,9 @@
 #
 # Changes in reversed order:
 #
+# 2001/05/22 by Nick Kurshev
+#  - added definition of CPU clone
+#
 # 2001/04/16 by LGB
 #  - added libcss stuffs
 #
@@ -293,15 +296,18 @@ if [ -e /dev/mga_vid ]; then
 fi
 
 proc=pentium
+iproc=586
 
 case "$pvendor" in
  AuthenticAMD)
    case "$pfamily" in
     3)
       proc=i386
+      iproc=386
       ;;
     4)
       proc=i486
+      iproc=486
       ;;
     5)
       if [ $pmodel -ge 6 ]; then	# LGB: models are: K5/SSA5 K5 K5 K5 ? ? K6 K6 K6-2 K6-3 
@@ -309,12 +315,15 @@ case "$pvendor" in
       else
     	    proc=k5
       fi
+      iproc=586
       ;;
     6|7)				# LGB: Though it seems Athlon CPUs returns with "6"
       proc=k7
+      iproc=686
       ;;
     *)
       proc=pentium
+      iproc=586
       ;;
    esac
    ;;
@@ -322,18 +331,23 @@ case "$pvendor" in
    case "$pfamily" in
     3)
       proc=i386
+      iproc=386
       ;;
     4)
       proc=i486
+      iproc=486
       ;;
     5)
       proc=pentium
+      iproc=586
       ;;
     6)
       proc=i686
+      iproc=686
       ;;
     *)
       proc=pentium
+      iproc=586
       ;;
    esac
    ;;
@@ -341,17 +355,21 @@ case "$pvendor" in
    case "$pfamily" in
     3)
       proc=i386
+      iproc=386
       ;;
     4)
       proc=i486
+      iproc=486
       ;;
     *)
       proc=pentium
+      iproc=586
       ;;
    esac
    ;;
  *)
    proc=pentium
+   iproc=586
    ;;
 esac
 
@@ -1091,12 +1109,16 @@ $_gui
 
 #define ARCH_X86
 
-/////////////////////////////////////////////////////////////////////////////
-//
-// NOTE: Instead of modifying these here, use the --enable/--disable options
-//       of the ./configure script! See ./configure --help for details.
-//
-/////////////////////////////////////////////////////////////////////////////
+/* Define this to any prefered value from 386 up to infinity with step 100 */
+#define __CPU__ $iproc
+
+/*----------------------------------------------------------------------------
+**
+** NOTE: Instead of modifying these definitions here, use the
+**       --enable/--disable options of the ./configure script!
+**       See ./configure --help for details.
+**
+*---------------------------------------------------------------------------*/
 
 /* termcap flag for getch2.c */
 $_termcap
