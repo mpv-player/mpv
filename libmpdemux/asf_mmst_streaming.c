@@ -425,7 +425,8 @@ asf_mmst_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
 	  if( ret<0 ) {
 		  printf("get_media_packet error : %s\n",strerror(errno));
 		  return -1;
-	  }
+	  } else if (ret==0) //EOF?
+		  return ret;
   }
   
 	  len = stream_ctrl->buffer_size-stream_ctrl->buffer_pos;
