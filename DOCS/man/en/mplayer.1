@@ -2111,7 +2111,7 @@ Uses the DirectX driver with acceleration features turned off.
 
 FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
 fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
-dxr2, dxr3, mpegpes, zr, zr2, md5, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
+dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
 
 Available video output drivers are:
 .
@@ -2430,9 +2430,14 @@ Output driver for a number of MJPEG capture/playback cards, second generation.
 Also see the zrmjpeg video filter.
 .TP
 .B md5\ \ \ \ 
-Writes md5sums for each frame into a file called 'md5' in the
-current directory.
+Generates PGM images from each frame and writes their MD5 sums into a file.
 Useful for debugging.
+.PD 0
+.RSs
+.IPs filename
+Allows specifying the output filename (default: ./md5).
+.RE
+.PD 1
 .TP
 .B yuv4mpeg
 Transforms the video stream into a sequence of uncompressed YUV 4:2:0
