@@ -734,7 +734,7 @@ LINGUAS="en"
 fi
 echo Checking for language ... "$LINGUAS"
 _mp_help="help_mp-"$LINGUAS".h"
-if test ! -e "$_mp_help"; then
+if test ! -f "$_mp_help"; then
 LINGUAS="en"
 _mp_help="help_mp-"$LINGUAS".h"
 fi
