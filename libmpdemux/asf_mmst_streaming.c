@@ -23,8 +23,11 @@
 #endif
 
 #ifdef USE_ICONV
-#include <locale.h>
 #include <iconv.h>
+#ifdef USE_LANGINFO
+#include <langinfo.h>
+#endif
+#include <locale.h>
 #endif
 
 #include "url.h"
@@ -490,7 +493,11 @@ int asf_mmst_streaming_start(stream_t *stream)
   /* prepare for the url encoding conversion */
 #ifdef USE_ICONV
   setlocale(LC_CTYPE, "");
+#ifdef USE_LANGINFO
+  url_conv = iconv_open("UTF-16LE",nl_langinfo(CODESET));
+#else
   url_conv = iconv_open("UTF-16LE",setlocale(LC_CTYPE, NULL));
+#endif
 #endif
 
   snprintf (str, 1023, "\034\003NSPlayer/7.0.0.1956; {33715801-BAB3-9D85-24E9-03B90328270A}; Host: %s", url1->hostname);

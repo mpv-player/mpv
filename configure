@@ -156,6 +156,7 @@ Optional features:
   --enable-termios       use termios database for key codes [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-setlocale    disable setlocale using in mplayer [autodetect]
+  --disable-langinfo     do not use langinfo [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-lircc         enable LIRCCD (LIRC client daemon) input [autodetect]
   --enable-joystick      enable joystick support [disable]
@@ -1177,6 +1178,7 @@ _dvbhead=auto
 _dxr2=auto
 _dxr3=auto
 _iconv=auto
+_langinfo=auto
 _rtc=auto
 _ossaudio=auto
 _arts=auto
@@ -1336,6 +1338,8 @@ for ac_option do
   --disable-dxr3)	_dxr3=no	;;
   --enable-iconv)	_iconv=yes	;;
   --disable-iconv)	_iconv=no	;;
+  --enable-langinfo)	_langinfo=yes	;;
+  --disable-langinfo)	_langinfo=no	;;
   --enable-rtc)	        _rtc=yes	;;
   --disable-rtc)	_rtc=no	        ;;
   --enable-mp1e)	_mp1e=yes	;;
@@ -2033,6 +2037,23 @@ else
   _def_iconv='#undef USE_ICONV'
 fi
 echores "$_iconv"
+
+
+echocheck "langinfo"
+if test "$_langinfo" = auto ; then
+  cat > $TMPC <<EOF
+#include <langinfo.h>
+int main(void) { nl_langinfo(CODESET); return 0; }
+EOF
+  _langinfo=no
+  cc_check && _langinfo=yes
+fi
+if test "$_langinfo" = yes ; then
+  _def_langinfo='#define USE_LANGINFO 1'
+else
+  _def_langinfo='#undef USE_LANGINFO'
+fi
+echores "$_langinfo"
 
 
 echocheck "language"
@@ -6352,6 +6373,9 @@ $_def_select
 
 /* define this to use iconv(3) function to codepage conversions */
 $_def_iconv
+
+/* define this to use nl_langinfo function */
+$_def_langinfo
 
 /* define this to use RTC (/dev/rtc) for video timers (LINUX only) */
 $_def_rtc
