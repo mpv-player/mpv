@@ -158,6 +158,8 @@ GtkWidget * create_MessageBox( int type )
  gtk_object_set_data_full (GTK_OBJECT (MessageBox), "hbuttonbox1", hbuttonbox1,
                            (GtkDestroyNotify) gtk_widget_unref);
  gtk_widget_show (hbuttonbox1);
+ gtk_widget_set_usize( hbuttonbox1,-2,25 );
+ gtk_button_box_set_child_size( GTK_BUTTON_BOX( hbuttonbox1 ),75,0 );
  gtk_box_pack_start (GTK_BOX (vbox1), hbuttonbox1, FALSE, FALSE, 0);
 
  Ok = gtk_button_new_with_label (MSGTR_Ok);
@@ -167,7 +169,6 @@ GtkWidget * create_MessageBox( int type )
                            (GtkDestroyNotify) gtk_widget_unref);
  gtk_widget_show (Ok);
  gtk_container_add (GTK_CONTAINER (hbuttonbox1), Ok);
- GTK_WIDGET_SET_FLAGS (Ok, GTK_CAN_DEFAULT);
  gtk_widget_add_accelerator (Ok, "released", accel_group,
                              GDK_Return, 0,
                              GTK_ACCEL_VISIBLE);
