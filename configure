@@ -2679,8 +2679,8 @@ echores "$_ossaudio"
 echocheck "aRts"
 if test "$_arts" = auto ; then
   _arts=no
-  if ( artsc-config --version >> /dev/null ) ; then
-  _arts=yes
+  if ( artsc-config --version ) >> "$TMPLOG" 2>&1 ; then
+    _arts=yes
   fi
 fi
 
