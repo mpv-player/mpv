@@ -168,6 +168,14 @@ void qt_decode_smc(
   unsigned char *palette_map,
   int bytes_per_pixel);
 
+void decode_duck_tm1(
+  unsigned char *encoded,
+  int encoded_size,
+  unsigned char *decoded,
+  int width,
+  int height,
+  int bytes_per_pixel);
+
 //**************************************************************************//
 //             The OpenDivX stuff:
 //**************************************************************************//
@@ -604,6 +612,7 @@ switch(sh_video->codec->driver){
  case VFM_MSVIDC:
  case VFM_FLI:
  case VFM_QTRLE:
+ case VFM_DUCKTM1:
    {
 #ifdef USE_MP_IMAGE
     sh_video->image->type=MP_IMGTYPE_STATIC;
@@ -974,6 +983,13 @@ if(verbose>1){
         start, in_size, sh_video->our_out_buffer,
         sh_video->disp_w, sh_video->disp_h,
         (unsigned char *)sh_video->bih+40,
+        ((out_fmt&255)+7)/8);
+    blit_frame = 3;
+    break;
+  case VFM_DUCKTM1:
+    decode_duck_tm1(
+        start, in_size, sh_video->our_out_buffer,
+        sh_video->disp_w, sh_video->disp_h,
         ((out_fmt&255)+7)/8);
     blit_frame = 3;
     break;

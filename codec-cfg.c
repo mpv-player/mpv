@@ -242,6 +242,7 @@ static short get_driver(char *s,int audioflag)
 		"nuv",
 		"cyuv",
 		"qtsmc",
+		"ducktm1",
 		NULL
 	};
         char **drv=audioflag?audiodrv:videodrv;
