@@ -80,6 +80,7 @@ MPlayer (1.0)
     * raw H.261 files via lavf
     * improved seeking precision in MPEG files
     * better subtitle language code handling for MKV files
+    * support DVHS files and H.264 over MPEG-TS
 
     Streaming:
     * -cache-min and -cache-prefill options added
