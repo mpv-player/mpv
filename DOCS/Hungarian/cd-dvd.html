@@ -8,10 +8,10 @@
 <P>Szabványos Video CD-k lejátszása a következõképpen lehetséges:</P>
 
 <P>
-mplayer -vcd <I>sáv száma</I> [eszköz]<BR><BR>
+mplayer -vcd <I>sáv száma</I> [-cdrom-device eszköz]<BR><BR>
 Néhány példa:<BR>
 mplayer -vcd 1<BR>
-mplayer -fs -vcd 2 /dev/hdc<BR>
+mplayer -fs -vcd 2 -cdrom-device /dev/hdc<BR>
 </P>
 
 <P>
@@ -167,10 +167,10 @@ nem kell újrafordítanod õket minden alkalommal mikor az <B>MPlayer</B>-t.</P>
 </TABLE>
 
 <P>Az egység alapbeállítás szerint <CODE>/dev/dvd</CODE>, ezt a config.h-ban
-változtathatod meg (fordításkor), van megadhatod filenévnek:</P>
+változtathatod meg (fordításkor), van megadhatod a -dvd-device opcióval :</P>
 
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 /dev/dvd</CODE></P>
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang hu /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -dvd-device /dev/dvd</CODE></P>
+<P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 1 -slang hu -dvd-device /dev/dvd</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang hu -chapter 5 -dvdangle 2</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvd 2 -alang hu -chapter 5-9 -dvdangle 2</CODE></P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>mplayer -dvdauth /dev/dvd /mnt/cd/video_ts/vts_03_1.vob</CODE></P>
