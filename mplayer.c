@@ -140,18 +140,6 @@ static int max_framesize=0;
 #include "dec_audio.h"
 #include "dec_video.h"
 
-#if 0
-extern picture_t *picture;	// exported from libmpeg2/decode.c
-
-int frameratecode2framerate[16] = {
-  0,
-  // Official mpeg1/2 framerates:
-  24000*10000/1001, 24*10000,25*10000, 30000*10000/1001, 30*10000,50*10000,60000*10000/1001, 60*10000,
-  // libmpeg3's "Unofficial economy rates":
-  1*10000,5*10000,10*10000,12*10000,15*10000,0,0
-};
-#endif
-
 //**************************************************************************//
 //**************************************************************************//
 
@@ -166,13 +154,7 @@ ao_functions_t *audio_out=NULL;
 // benchmark:
 double video_time_usage=0;
 double vout_time_usage=0;
-double max_video_time_usage=0;
-double max_vout_time_usage=0;
-double cur_video_time_usage=0;
-double cur_vout_time_usage=0;
 static double audio_time_usage=0;
-static double max_audio_time_usage=0;
-static double cur_audio_time_usage=0;
 static int total_time_usage_start=0;
 int benchmark=0;
 static unsigned bench_dropped_frames=0;
@@ -246,7 +228,6 @@ static float force_fps=0;
 static int force_srate=0;
 static int frame_dropping=0; // option  0=no drop  1= drop vo  2= drop decode
 static int play_n_frames=-1;
-static uint32_t our_n_frames=0;
 
 // screen info:
 char* video_driver=NULL; //"mga"; // default
@@ -846,31 +827,6 @@ play_dvd:
     if(vo_vobsub)
       sub_auto=0; // don't do autosub for textsubs if vobsub found
 
-#ifdef USE_SUB_OLD
-// check .sub
-  if(sub_name){
-#if 0
-       int l=strlen(sub_name);
-       if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
-		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
-	  sub_utf8=1;
-#endif  
-       subtitles=sub_read_file(sub_name);
-       if(!subtitles || sub_num == 0) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
-  }
-  if(!sub_name){
-      if(sub_auto && filename) { // auto load sub file ...
-         subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ) );
-      }
-#if 0
-      if(!subtitles) subtitles=sub_read_file(get_path("default.sub")); // try default
-#endif
-  }
-
-  if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
-  if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, fps);
-#endif
-
     stream=NULL;
     demuxer=NULL;
     d_audio=NULL;
@@ -952,6 +908,8 @@ play_dvd:
     }
   }
 
+//============ Open & Sync STREAM --- fork cache2 ====================
+
   current_module="open_stream";
   stream=open_stream(filename,vcd_track,&file_format);
   if(!stream) { // error...
@@ -959,9 +917,11 @@ play_dvd:
     goto goto_next_file;
   }
   inited_flags|=INITED_STREAM;
+
   if(stream->type == STREAMTYPE_PLAYLIST) {
     play_tree_t* entry;
     // Handle playlist
+    current_module="handle_playlist";
     mp_msg(MSGT_CPLAYER,MSGL_V,"Parsing playlist %s...\n",filename);
     entry = parse_playtree(stream);
     if(!entry) {      
@@ -992,11 +952,29 @@ play_dvd:
   }
   stream->start_pos+=seek_to_byte;
 
+#ifdef HAVE_LIBCSS
+  current_module="libcss";
+  if (dvdimportkey) {
+    if (dvd_import_key(dvdimportkey)) {
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDkey);
+	exit_player(MSGTR_Exit_error);
+    }
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CmdlineDVDkey);
+  }
+  if (dvd_auth_device) {
+    if (dvd_auth(dvd_auth_device,filename)) {
+	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error in DVD auth...\n");
+	exit_player(MSGTR_Exit_error);
+      } 
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
+  }
+#endif
+
 if(stream_dump_type==5){
   unsigned char buf[4096];
   int len;
   FILE *f;
-  current_module="dump";
+  current_module="dumpstream";
   stream_reset(stream);
   stream_seek(stream,stream->start_pos);
   f=fopen(stream_dump_name,"wb");
@@ -1020,34 +998,14 @@ if(dvdsub_lang && dvdsub_id==-1) dvdsub_id=dvd_sid_from_lang(stream,dvdsub_lang)
 current_module=NULL;
 #endif
 
-    // initial prefill: 20%  later: 5%  (should be set by -cacheopts)
- if(stream_cache_size && ! stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20)) {
-   eof = libmpdemux_was_interrupted(PT_NEXT_ENTRY);
-   if(eof)
-     goto goto_next_file;
- }
+// CACHE2: initial prefill: 20%  later: 5%  (should be set by -cacheopts)
+if(stream_cache_size){
+  current_module="enable_cache";
+  if(!stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024/5,stream_cache_size*1024/20))
+    if((eof = libmpdemux_was_interrupted(PT_NEXT_ENTRY))) goto goto_next_file;
+}
 
-#ifdef HAVE_LIBCSS
-  current_module="libcss";
-  if (dvdimportkey) {
-    if (dvd_import_key(dvdimportkey)) {
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_ErrorDVDkey);
-	exit_player(MSGTR_Exit_error);
-    }
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_CmdlineDVDkey);
-  }
-  if (dvd_auth_device) {
-//  if (dvd_auth(dvd_auth_device,f)) {
-    if (dvd_auth(dvd_auth_device,filename)) {
-	mp_msg(MSGT_CPLAYER,MSGL_FATAL,"Error in DVD auth...\n");
-	exit_player(MSGTR_Exit_error);
-      } 
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_DVDauthOk);
-  }
-#endif
-
-//============ Open & Sync stream and detect file format ===============
-
+//============ Open DEMUXERS --- DETECT file type =======================
 
 if(!has_audio) audio_id=-2; // do NOT read audio packets...
 
@@ -1102,10 +1060,9 @@ if((stream_dump_type)&&(stream_dump_type!=4)){
 sh_audio=d_audio->sh;
 sh_video=d_video->sh;
 
-current_module="video_read_properties";
-
 if(sh_video){
 
+  current_module="video_read_properties";
   if(!video_read_properties(sh_video)) {
     mp_msg(MSGT_CPLAYER,MSGL_ERR,"Video: can't read properties\n");
     sh_video=d_video->sh=NULL;
@@ -1138,53 +1095,40 @@ if(!sh_video && !sh_audio){
     goto goto_next_file; // exit_player(MSGTR_Exit_error);
 }
 
-if(!sh_video) goto init_audio;
+/* display clip info */
+demux_info_print(demuxer);
+
+//================== Read SUBTITLES (DVD & TEXT) ==========================
+if(sh_video){
 
 #ifdef USE_DVDREAD
-current_module="spudec";
+current_module="spudec_init";
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
 			    sh_video->disp_w, sh_video->disp_h);
 if (vo_spudec!=NULL)
   inited_flags|=INITED_SPUDEC;
-current_module=NULL;
 #endif
 
 #ifdef USE_SUB
 // after reading video params we should load subtitles because
 // we know fps so now we can adjust subtitles time to ~6 seconds AST
 // check .sub
-current_module="read_subtitles_file";
-if(sub_name){
-#if 0
-       int l=strlen(sub_name);
-       if ((l>4) && ((0==strcmp(&sub_name[l-4],".utf"))
-		   ||(0==strcmp(&sub_name[l-4],".UTF"))))
-	  sub_utf8=1;
-#endif  
-       subtitles=sub_read_file(sub_name, sh_video->fps);
-       if(!subtitles || sub_num == 0) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
+  current_module="read_subtitles_file";
+  if(sub_name){
+    subtitles=sub_read_file(sub_name, sh_video->fps);
+    if(!subtitles) mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantLoadSub,sub_name);
+  } else
+  if(sub_auto) { // auto load sub file ...
+    subtitles=sub_read_file( filename ? sub_filename( get_path("sub/"), filename )
+	                              : "default.sub", sh_video->fps );
   }
-  if(!sub_name){
-      if(sub_auto && filename) { // auto load sub file ...
-         subtitles=sub_read_file( sub_filename( get_path("sub/"), filename ), 
-				  sh_video->fps );
-      }
-#if 0
-      if(!subtitles) subtitles=sub_read_file(get_path("default.sub"),
-					     sh_video->fps); // try default
-#endif
-  }
-
   if(subtitles && stream_dump_type==3) list_sub_file(subtitles);
   if(subtitles && stream_dump_type==4) dump_mpsub(subtitles, sh_video->fps);
 #endif	
 
+}
 //================== Init AUDIO (codec) ==========================
-init_audio:
 current_module="init_audio_codec";
-
-/* display clip info */
-demux_info_print(demuxer);
 
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
@@ -1380,8 +1324,9 @@ current_module="init_libvo";
 //================== MAIN: ==========================
    main:
 if(!sh_video) osd_level = 0;
-{
 
+
+{
 //int frame_corr_num=0;   //
 //float v_frame=0;    // Video
 float time_frame=0; // Timer
@@ -1402,23 +1347,21 @@ unsigned int lastframeout_ts;
 float time_frame_corr_avg=0;
 
 //================ SETUP AUDIO ==========================
-  current_module="setup_audio";
 
 if(sh_audio){
-  
   const ao_info_t *info=audio_out->info;
+  current_module="setup_audio";
   mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %iHz %s %s\n",
       info->short_name,
       force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels>1?"Stereo":"Mono",
       audio_out_format_name(sh_audio->sample_format)
-   );
-   mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
-      info->name,
-      info->author	
-   );
-   if(strlen(info->comment) > 0)
+  );
+  mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Description: %s\nAO: Author: %s\n",
+      info->name, info->author);
+  if(strlen(info->comment) > 0)
       mp_msg(MSGT_CPLAYER,MSGL_V,"AO: Comment: %s\n", info->comment);
+
   if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
       sh_audio->channels,sh_audio->sample_format,0)){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
@@ -1428,20 +1371,12 @@ if(sh_audio){
   } else {
     inited_flags|=INITED_AO;
   }
-
-//  printf("Audio buffer size: %d bytes, delay: %5.3fs\n",audio_buffer_size,audio_buffer_delay);
-
-  // fixup audio buffer size:
-//  if(outburst<MAX_OUTBURST){
-//    sh_audio->a_buffer_size=sh_audio->audio_out_minsize+outburst;
-//    printf("Audio out buffer size reduced to %d bytes\n",sh_audio->a_buffer_size);
-//  }
-
-//  sh_audio->timer=-(audio_buffer_delay);
 }
 
-  if(sh_video) sh_video->timer=0;
-  if(sh_audio) sh_audio->timer=-audio_delay;
+current_module="av_init";
+
+if(sh_video) sh_video->timer=0;
+if(sh_audio) sh_audio->timer=-audio_delay;
 
 if(!sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
@@ -1450,14 +1385,13 @@ if(!sh_audio){
   d_audio->id=-2;         // do not read audio chunks
   if(audio_out) uninit_player(INITED_AO); // close device
 }
- if(!sh_video){
+if(!sh_video){
    mp_msg(MSGT_CPLAYER,MSGL_INFO,"Video: no video!!!\n");
    if(verbose) mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks\n",d_video->packs);
    ds_free_packs(d_video);
    d_video->id=-2;
    if(video_out) uninit_player(INITED_VO);
- }
-  current_module=NULL;
+}
 
 if(demuxer->file_format!=DEMUXER_TYPE_AVI) pts_from_bps=0; // it must be 0 for mpeg/asf!
 if(force_fps){
@@ -1474,10 +1408,6 @@ InitTimer();
 
 total_time_usage_start=GetTimer();
 audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
-if(benchmark) 
-{
-  max_audio_time_usage=0; max_video_time_usage=0; max_vout_time_usage=0;
-}
 while(!eof){
 //    unsigned int aq_total_time=GetTimer();
     float aq_sleep_time=0;
@@ -1523,11 +1453,6 @@ while(sh_audio){
   t=GetTimer()-t;
   tt = t*0.000001f;
   audio_time_usage+=tt;
-  if(benchmark)
-  {
-    if(tt > max_audio_time_usage) max_audio_time_usage = tt;
-    cur_audio_time_usage=tt;
-  }
   if(playsize>sh_audio->a_buffer_len) playsize=sh_audio->a_buffer_len;
   
   playsize=audio_out->play(sh_audio->a_buffer,playsize,0);
@@ -1772,21 +1697,9 @@ if(!(vo_flags&256)){ // flag 256 means: libvo driver does its timing (dvb card)
 	   t2=GetTimer()-t2;
 	   tt = t2*0.000001f;
 	   vout_time_usage+=tt;
-	   if(benchmark)
-	   {
-	    if(cur_vout_time_usage + tt > max_vout_time_usage)
-		    max_vout_time_usage = cur_vout_time_usage + tt;
-	    our_n_frames++;
-	   }
 	}
 //        usec_sleep(50000); // test only!
 
-    }
-/*  Compute total frame dropping here */
-    if(benchmark)
-    {
-	if((cur_video_time_usage + cur_vout_time_usage + cur_audio_time_usage)*vo_fps > 1)
-							bench_dropped_frames ++;
     }
     current_module=NULL;
     
@@ -2790,38 +2703,18 @@ goto_next_file:  // don't jump here after ao/vo/getch initialization!
 if(benchmark){
   double tot=video_time_usage+vout_time_usage+audio_time_usage;
   double total_time_usage;
-  max_video_time_usage *= our_n_frames;
-  max_vout_time_usage *= our_n_frames;
-  max_audio_time_usage *= our_n_frames;
   total_time_usage_start=GetTimer()-total_time_usage_start;
   total_time_usage = (float)total_time_usage_start*0.000001;
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nAVE BENCHMARKs: VC:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
+  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nBENCHMARKs: VC:%8.3fs VO:%8.3fs A:%8.3fs Sys:%8.3fs = %8.3fs\n",
 	 video_time_usage,vout_time_usage,audio_time_usage,
 	 total_time_usage-tot,total_time_usage);
   if(total_time_usage>0.0)
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AVE BENCHMARK%%: VC:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"BENCHMARK%%: VC:%8.4f%% VO:%8.4f%% A:%8.4f%% Sys:%8.4f%% = %8.4f%%\n",
 	   100.0*video_time_usage/total_time_usage,
 	   100.0*vout_time_usage/total_time_usage,
 	   100.0*audio_time_usage/total_time_usage,
 	   100.0*(total_time_usage-tot)/total_time_usage,
 	   100.0);
-  mp_msg(MSGT_CPLAYER,MSGL_INFO,"\nMAX BENCHMARKs: VC:%8.3fs VO:%8.3fs A:%8.3fs\n",
-	 max_video_time_usage,max_vout_time_usage,
-	 max_audio_time_usage);
-  if(total_time_usage>0.0)
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"MAX BENCHMARK%%: VC:%8.4f%% VO:%8.4f%% A:%8.4f%% = %8.4f%%\n",
-	   100.0*max_video_time_usage/total_time_usage,
-	   100.0*max_vout_time_usage/total_time_usage,
-	   100.0*max_audio_time_usage/total_time_usage,
-	   100.0*max_video_time_usage/total_time_usage+
-	   100.0*max_vout_time_usage/total_time_usage+
-	   100.0*max_audio_time_usage/total_time_usage
-	   );
-/* This code computes number of frame which should be dropped
-   in ideal case (without SYSTIME); i.e. when file is located
-   in RAM and kernel+other_tasks eat 0% of CPU. */
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"TOTAL BENCHMARK: from %u frames should be dropped: %u at least\n"
-	    ,our_n_frames,bench_dropped_frames);
 }
 
 #ifdef HAVE_NEW_GUI
