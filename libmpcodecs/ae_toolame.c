@@ -119,8 +119,8 @@ int mpae_encode_toolame(mpae_toolame_ctx *ctx, uint8_t *dest, int nsamples, void
 	buffer = (uint16_t *) src;
 	for(i = 0; i < nsamples; i++)
 	{
-	    ctx->left_pcm[i] = buffer[2 * i];
-	    ctx->right_pcm[i] = buffer[2 * i + (ctx->channels - 1)];
+	    ctx->left_pcm[i] = buffer[ctx->channels * i];
+	    ctx->right_pcm[i] = buffer[(ctx->channels * i) + (ctx->channels - 1)];
 	}
 	
 	toolame_encode_buffer(ctx->toolame_ctx, ctx->left_pcm, ctx->right_pcm, nsamples, dest, max_size, &ret_size);
