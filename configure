@@ -308,6 +308,7 @@ _lirc=no
 _css=no
 _dshow=yes
 _fastmemcpy=yes
+_streaming=no
 
 _x=1
 _y=1
@@ -573,9 +574,10 @@ $_as libac3/downmix/downmix_i386.S -o $TMPO > /dev/null 2>&1 && _binutils=yes
 
 # ----------- Check X11 and related libs (GL, Xxf86vm, Xv, DGA) --------------
 
-# for Solaris:
+# for Solaris (socket stuff is in -lsocket, gethostbyname and friends in -lnsl):
 _socklib=
-$_cc $TMPC -o $TMPO -lsocket >/dev/null 2>&1 && _socklib=-lsocket
+$_cc $TMPC -o $TMPO $_socklib -lsocket >/dev/null 2>&1 && _socklib="$_socklib -lsocket"
+$_cc $TMPC -o $TMPO $_socklib -lnsl >/dev/null 2>&1 && _socklib="$_socklib -lnsl"
 
 if [ $_x11 = auto ]; then
   _x11=no
@@ -632,6 +634,15 @@ rm -f $TMPC $TMPO
 
 cat > $TMPC << EOF
 #include <sys/soundcard.h>
+int main( void ) { return 0; }
+EOF
+
+_sys_soundcard_h=no
+$_cc -o $TMPO $TMPC 2> /dev/null && _sys_soundcard_h=yes
+
+
+cat > $TMPC << EOF
+#include <sys/soundcard.h>
 int main( void ) {  int arg = SNDCTL_DSP_SETFRAGMENT; }
 EOF
 
@@ -640,6 +651,7 @@ $_cc -o $TMPO $TMPC 2> /dev/null && _oss_audio=yes
 
 
 cat > $TMPC << EOF
+#include <sys/types.h>
 #include <sys/audioio.h>
 int main( void ) {  audio_info_t info; AUDIO_INITINFO(&info); }
 EOF
@@ -783,6 +795,9 @@ do
 	;;
   --enable-gui)
   	_gui=yes
+	;;
+  --enable-streaming)
+  	_streaming=yes
 	;;
   --disable-css)
 	_css=no
@@ -963,7 +978,11 @@ if test "$as_verc_fail" != "yes"; then
 else
   echo "failed"
   echo "Please upgrade(downgrade) binutils to "$_pref_as_version"..."
-  exit
+  if [ $_skip_as_check = 'no' ]; then
+    exit
+  else
+    echo "YOU'VE SELECTED '--disable-as-checking'. PLEASE DON'T SEND US ANY BUGREPORTS!"
+  fi
 fi
 
 # Checking kernel version...
@@ -1025,6 +1044,12 @@ echo "Checking for PNG support ... $_png"
 echo "Checking for DirectShow ... $_dshow"
 echo "Checking for fastmemcpy ... $_fastmemcpy"
 # write conf files.
+
+_streamingdef='#undef STREAMING'
+if [ $_streaming = yes ]; then
+   _streamingsrcs='asf_streaming.c network.c url.c http.c'
+   _streamingdef='#define STREAMING'
+fi
 
 if [ $_gl = yes ]; then
    _gllib='-lGL'
@@ -1150,6 +1175,13 @@ else
  _sunaudio='#undef USE_SUN_AUDIO'
 fi
 
+if [ "$_sys_soundcard_h" = "yes" ]; then
+ _have_soundcard_h='#define HAVE_SYS_SOUNDCARD_H 1'
+else
+ _have_soundcard_h='#undef  HAVE_SYS_SOUNDCARD_H'
+fi
+
+
 # Checking for CFLAGS
 if [ "$_profile" != "" ] || [ "$_debug" != "" ]; then
  CFLAGS="-O2 -march=$proc -mcpu=$proc $_debug $_profile"
@@ -1185,6 +1217,7 @@ ALSA_LIB = $_alsalib
 ESD_LIB = $_esdlib
 prefix = $_prefix
 ARCH_LIBS = -ldl -lpthread
+STREAM_SRCS = $_streamingsrcs
 
 EOF
 # echo 'CFLAGS=$(OPTFLAGS) -Wall -DMPG12PLAY' >> config.mak
@@ -1377,9 +1410,6 @@ $_select
    You can still change it runtime using -afm 1 (mpg123) or -afm 4 (l3codeca)*/
 $_mpg123
 
-/* AUDIO Support */
-$_ossaudio
-$_sunaudio
 
 /* XMMP support: (test code) */
 $_xmmpaudio
@@ -1397,6 +1427,10 @@ $_xmmpaudio
 //#define OUTBURST 1024
 #define OUTBURST 512
 #endif
+
+/* Define this if your system has the header file for the OSS sound interface */
+$_have_soundcard_h
+
 
 /* LIRC (remote control, see www.lirc.org) support: */
 $_lircdefs
@@ -1418,9 +1452,11 @@ $_gui
 #define PREFIX "$_prefix"
 
 /* Audio lib drivers */
+$_ossaudio
 $_alsa5
 $_alsa9
 $_esdd
+$_sunaudio
 
 /* Enable fast OSD/SUB renderer (looks ugly, but uses less CPU power) */
 #undef FAST_OSD
@@ -1445,7 +1481,10 @@ $_esdd
 
 /* termcap flag for getch2.c */
 $_termcap
+
 $_png
+
+$_streamingdef
 
 /* Extension defines */
 $_mlib     // available only on solaris
