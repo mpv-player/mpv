@@ -90,6 +90,11 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
       return NULL;
     }
     
+    if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
+	// export palette:
+	mpi->planes[1]=((unsigned char*)&sh->o_bih)+40;
+    }
+    
     return mpi;
 }
 
