@@ -271,9 +271,9 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 
 <H4><A NAME=sorenson>2.2.1.10  Sorenson</A></H4>
 
-<P>A <B>Sorenson</B> egy, az Apple által kifejlesztett video codec. Jelenleg
-  mindkét verzióját (SVQ1, SVQ3) képesek vagyok dekódolni, az alant felsorolt
-  dekóderekkel:</P>
+<P>A <B>Sorenson</B> egy, a Sorenson Media által kifejlesztett, és az Apple
+  által licenszelt video codec. Jelenleg mindkét verzióját (SVQ1, SVQ3)
+  képesek vagyok dekódolni, az alant felsorolt dekóderekkel:</P>
 
 <UL>
   <LI>Sorenson 1 (fourcc <I>SVQ1</I>) - dekódolás natív codec-kel</B><BR>
@@ -294,7 +294,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   <LI>töltsd le az MPlayer-t CVS-bõl</LI>
   <LI>fordítsd le az MPlayer-t a következõ parancssorral:<BR>
     <CODE>$ ./configure --enable-qtx-codecs</CODE></LI>
-  <LI>töltsd le a QuickTime DLL csomagot a <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs">http://www.mplayerhq.hu/MPlayer/releases/codecs</A>
+  <LI>töltsd le a QuickTime DLL csomagot a <A HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">http://www.mplayerhq.hu/MPlayer/releases/codecs/</A>
     címrõl</LI>
   <LI>tömörítsd ki a QuickTime DLL csomagot a Win32 codec-eket tartalmazó
     könyvtáradba (alapállapotban <CODE>/usr/lib/win32</CODE>)</LI>
@@ -305,7 +305,7 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 
 <P>A legfontosabb audio codecek:<BR></P>
 <UL>
-  <LI>MPEG layer 2, és layer 3 (MP3) audio (nativ kód, MMX/SSE/3DNow!
+  <LI>MPEG layer 2 (MP2), és layer 3 (MP3) audio (nativ kód, MMX/SSE/3DNow!
     optimalizációval)</LI>
   <LI>MPEG layer 1 audio (<B>natív</B> codec, libavcodec-kel)</LI>
   <LI>Windows Media Audio v1, v2 (<B>natív</B> codec, libavcodec-kel)</LI>
@@ -313,10 +313,11 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
   <LI>AC3 dolby audio (natív kód, MMX/SSE/3DNow! optimalizációval)</LI>
   <LI>AC3 továbbítás a hangkártya digitális kimenetén</LI>
   <LI>Ogg Vorbis audio codec (natív)</LI>
+  <LI>RealAudio: DNET (alacsony bitrátájú AC3), Cook, Sipro, Atrac</LI>
+  <LI>QuickTime: Qualcomm és QDesign audio codec-ek</LI>
+  <LI>VIVO audio (g723, Vivo Siren)</LI>
   <LI>VoxWare audio (DirectShow-os DLL használatával)</LI>
   <LI>alaw, msgsm, pcm és más régi formátumok</LI>
-  <LI>VIVO audio (g723, Vivo Siren)</LI>
-  <LI>RealAudio: DNET (alacsony bitrátájú AC3), Cook, Sipro, Atrac</LI>
 </UL>
 
 
@@ -380,19 +381,27 @@ Az <B>MPlayer</B> a RealVideo összes verziójának dekódolását támogatja:
 <P>Az <B>MPlayer</B> majdnem az összes RealAudio codec-et támogatja:
 <UL>
   <LI>RealAudio DNET - dekódolás <B>liba52-vel</B></LI>
-  <LI>RealAudio Cook, Sipro, Atrac - dekódolás <B>RealPlayer könyvtárakkal</B></LI>
+  <LI>RealAudio Cook, Sipro, ATRAC3 - dekódolás <B>RealPlayer könyvtárakkal</B></LI>
 </UL>
 
 <P>Az installálási procedúra leírásához lásd a
   <A HREF="#realvideo">RealVideo codec</A> fejezetet.</P>
 
 
-<H4><A NAME=qdesign>2.2.2.5. QDesign</A></H4>
+<H4><A NAME=qdesign>2.2.2.6. QDesign</A></H4>
 
 <P>QDesign audioval (fourcc-k: <I>QDMC</I>, <I>QDM2</I>) a MOV/QT file-okat
   látják el. Ezen codec mindkét verziója dekódolható Linux a QuickTime
   könyvtár használatával. Ennek installálási útmutatója a
   <A HREF="#sorenson">Sorenson video codec</A> fejezetben található.</P>
+
+
+<H4><A NAME=qclp>2.2.2.7. Qualcomm</A></H4>
+
+<P>A Qualcomm audio stream-ek (fourcc: <I>Qclp</I>) MOV/QT file-okban
+  találhatóak. A dekódolásuk a QuickTime könyvtárakkal lehetséges.
+  Ezek installálási leírása a <A HREF="#sorenson">Sorenson video codec</A>
+  fejezetben található.</P>
 
 
 <H3><A NAME=importing>2.2.3  Hogyan használj ismeretlen Win32 codec-et</A></H3>

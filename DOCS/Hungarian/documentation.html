@@ -97,6 +97,7 @@
         <LI><A HREF="codecs.html#vivo_audio">2.2.2.4 VIVO audio</A></LI>
         <LI><A HREF="codecs.html#realaudio">2.2.2.5 RealAudio</A></LI>
         <LI><A HREF="codecs.html#qdesign">2.2.2.6 QDesign codec-ek</A></LI>
+        <LI><A HREF="codecs.html#qclp">2.2.2.7 Qualcomm codec-ek</A></LI>
       </UL>
       <LI><A HREF="codecs.html#importing">2.2.3 Hogyan használj ismeretlen Win32 codec-et</A></LI>
       <UL>
@@ -911,7 +912,7 @@ Naboo was under an attack.<BR>
     átalakítást a konwert (debian) vagy iconv (RedHat) programokkal lehet
     elvégezni.<BR>
     <UL>
-      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/</A> - ISO betûtipusok
+      <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/">ftp://ftp.mplayerhq.hu/MPlayer/releases/fonts/</A> - ISO betûtipusok
       <LI><A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/">ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/</A> - felhasználók által készített betûtipusok
       <LI><A HREF="http://realtime.ssu.ac.kr/~lethean/mplayer">http://realtime.ssu.ac.kr/~lethean/mplayer</A> - koreai betûtipus, RAW plugin
     </UL>
@@ -1552,11 +1553,13 @@ end
   <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">levelezési listája</A>
   is.</P>
 
-<P>Natív DirectX video (<CODE>-vo directx</CODE>) használatához installáld
+<P>Natív DirectX video (<CODE>-vo directx</CODE>) használatához tömörítsd ki
   a <A HREF="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header
-  file-okat</A>, és fordítsd le az MPlayer-t. Ez, és az <CODE>-ao win32</CODE>
-  opció használata adja a legjobb eredményt. Ha a kép torz, próbáld kapcsold
-  ki a hardveres gyorsítást a <CODE>-vo directx:noaccel</CODE> opcióval.</P>
+  file-okat</A>, az <CODE>/usr/include</CODE> és
+  <CODE>/usr/local/include</CODE> könyvtárakba, és fordítsd le az MPlayer-t.
+  Ez, és az <CODE>-ao win32</CODE> opció használata adja a legjobb
+  eredményt. Ha a kép torz, próbáld kapcsold ki a hardveres gyorsítást a
+  <CODE>-vo directx:noaccel</CODE> opcióval.</P>
 
 <P>Be kell lépned az <B>MPlayer</B> könyvtárába és át kell másolnod az
   <CODE>etc/cygwin_inttypes.h</CODE> file-t az
@@ -1587,6 +1590,10 @@ end
 <P>A következõ címeken lehet feliratkozni:</P>
 
 <UL>
+  <LI>MPlayer announce list:
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-announce">http://mplayerhq.h+u/mailman/listinfo/mplayer-announce</A><BR>
+    MPlayer bejelentések listája.</LI>
+
   <LI>MPlayer fejlesztõk listája:<BR>
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng</A>
     <P>Ez az MPlayer fejlesztõi lista! Témák: interface/API változások, új
@@ -1637,9 +1644,19 @@ end
       Bizonyosodj meg róla, hogy a kívánt fejlesztõ is olvassa a listát!</P>
   </LI>
 
-  <LI>MPlayer Cygwin-portolási lista:
+  <LI>MPlayer Cygwin-port lista:
     <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin">http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin</A>
     <P>Az MPlayer Cygwin portjáról szóló megbeszélések helye.</P>
+  </LI>
+
+  <LI>MPlayer OS/2-port lista:
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-os2">http://mplayerhq.hu/mailman/listinfo/mplayer-os2</A><BR>
+    <P>Az MPlayer OS/2 portjáról szóló megbeszélések helye.</P>
+  </LI>
+
+  <LI>MPlayer Heti Hírek lista:
+    <A HREF="http://mplayerhq.hu/mailman/listinfo/mplayer-mwn">http://mplayerhq.hu/mailman/listinfo/mplayer-mwn</A><BR>
+    Az MPlayer Heti Hírekkel kapcsolatos témák.</P>
   </LI>
 
 </UL>
