@@ -1688,23 +1688,25 @@ end
    ... more "Illegal mnemonic" and "Syntax error" errors ...
 </PRE>
 
-<P>For DVD support you must have the patched libcss installed. Patch:
-  <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>.</P>
-
-<P>Due to two bugs in Solaris 8 x86, you cannot reliably play DVD discs larger
+<P>Due to bugs in Solaris 8, you may not be able to play DVD discs larger
   than 4 GB:</P>
 
 <UL>
-  <LI>The sd(7D) driver on Solaris 8 x86 driver has bug when accessing a disk
+  <LI>The sd(7D) driver on Solaris 8 x86 has a bug when accessing a disk
     block &gt;4GB on a device using a logical blocksize != DEV_BSIZE (i.e.  CD-ROM
     and DVD media).  Due to a 32Bit int overflow, a disk address modulo 4GB is
     accessed.
     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22516">http://groups.yahoo.com/group/solarisonintel/message/22516</A>)
+    <P>
+    This problem does not exist in the SPARC version of Solaris 8.
   </LI>
   <LI>A similar bug is present in the hsfs(7FS) filesystem code (aka
-    ISO9660), hsfs currently does not support partitions/disks larger than 4GB, all data
+    ISO9660), hsfs may not not support partitions/disks larger than 4GB, all data
     is accessed modulo 4GB.
-    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>)
+    (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>).
+    <P>
+    The hsfs problem can be fixed by installing patch 109764-04 (sparc) /
+    109765-04 (x86).
   </LI>
 </UL>
 
