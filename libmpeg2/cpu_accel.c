@@ -30,7 +30,7 @@
 #include "mpeg2_internal.h"
 
 #ifdef ACCEL_DETECT
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 static inline uint32_t arch_accel (void)
 {
     uint32_t eax, ebx, ecx, edx;
@@ -106,7 +106,7 @@ static inline uint32_t arch_accel (void)
 
     return caps;
 }
-#endif /* ARCH_X86 */
+#endif /* ARCH_X86 || ARCH_X86_64 */
 
 #if defined(ARCH_PPC) || (defined(ARCH_SPARC) && defined(HAVE_VIS))
 #include <signal.h>
@@ -216,7 +216,7 @@ uint32_t mpeg2_detect_accel (void)
 
     accel = 0;
 #ifdef ACCEL_DETECT
-#if defined (ARCH_X86) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
+#if defined (ARCH_X86) || defined (ARCH_X86_64) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
     accel = arch_accel ();
 #endif
 #endif

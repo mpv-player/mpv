@@ -23,7 +23,7 @@
 
 #include "config.h"
 
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 
 #include <inttypes.h>
 

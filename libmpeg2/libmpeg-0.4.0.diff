@@ -1,6 +1,6 @@
-diff -ur libmpeg2/attributes.h libmpeg2/attributes.h
---- libmpeg2/attributes.h	2003-01-09 08:48:40.000000000 +0100
-+++ libmpeg2/attributes.h	2004-08-25 20:59:47.000000000 +0200
+diff -Naur libmpeg2.orig/attributes.h libmpeg2/attributes.h
+--- libmpeg2.orig/attributes.h	2004-11-03 17:24:16.587788552 +0100
++++ libmpeg2/attributes.h	2004-11-03 17:24:03.014851952 +0100
 @@ -25,7 +25,7 @@
  #ifdef ATTRIBUTE_ALIGNED_MAX
  #define ATTR_ALIGN(align) __attribute__ ((__aligned__ ((ATTRIBUTE_ALIGNED_MAX < align) ? ATTRIBUTE_ALIGNED_MAX : align)))
@@ -10,12 +10,24 @@ diff -ur libmpeg2/attributes.h libmpeg2/attributes.h
  #endif
  
  #ifdef HAVE_BUILTIN_EXPECT
-diff -ur libmpeg2/cpu_accel.c libmpeg2/cpu_accel.c
---- libmpeg2/cpu_accel.c	2003-10-06 04:31:52.000000000 +0200
-+++ libmpeg2/cpu_accel.c	2004-08-15 15:37:41.000000000 +0200
-@@ -108,7 +108,7 @@
+diff -Naur libmpeg2.orig/cpu_accel.c libmpeg2/cpu_accel.c
+--- libmpeg2.orig/cpu_accel.c	2004-11-03 17:24:16.587788552 +0100
++++ libmpeg2/cpu_accel.c	2004-11-03 17:28:33.052799944 +0100
+@@ -30,7 +30,7 @@
+ #include "mpeg2_internal.h"
+ 
+ #ifdef ACCEL_DETECT
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ static inline uint32_t arch_accel (void)
+ {
+     uint32_t eax, ebx, ecx, edx;
+@@ -106,9 +106,9 @@
+ 
+     return caps;
  }
- #endif /* ARCH_X86 */
+-#endif /* ARCH_X86 */
++#endif /* ARCH_X86 || ARCH_X86_64 */
  
 -#if defined(ARCH_PPC) || defined(ARCH_SPARC)
 +#if defined(ARCH_PPC) || (defined(ARCH_SPARC) && defined(HAVE_VIS))
@@ -40,10 +52,42 @@ diff -ur libmpeg2/cpu_accel.c libmpeg2/cpu_accel.c
  }
  #endif /* ARCH_ALPHA */
  #endif /* ACCEL_DETECT */
-diff -ur libmpeg2/cpu_state.c libmpeg2/cpu_state.c
---- libmpeg2/cpu_state.c	2003-08-21 10:00:49.000000000 +0200
-+++ libmpeg2/cpu_state.c	2004-08-02 13:27:37.000000000 +0200
-@@ -120,7 +120,7 @@
+@@ -212,7 +216,7 @@
+ 
+     accel = 0;
+ #ifdef ACCEL_DETECT
+-#if defined (ARCH_X86) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
++#if defined (ARCH_X86) || defined (ARCH_X86_64) || defined (ARCH_PPC) || defined (ARCH_ALPHA) || defined (ARCH_SPARC)
+     accel = arch_accel ();
+ #endif
+ #endif
+diff -Naur libmpeg2.orig/cpu_state.c libmpeg2/cpu_state.c
+--- libmpeg2.orig/cpu_state.c	2004-11-03 17:24:16.587788552 +0100
++++ libmpeg2/cpu_state.c	2004-11-03 17:28:33.052799944 +0100
+@@ -29,14 +29,14 @@
+ #include "mpeg2.h"
+ #include "attributes.h"
+ #include "mpeg2_internal.h"
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ #include "mmx.h"
+ #endif
+ 
+ void (* mpeg2_cpu_state_save) (cpu_state_t * state) = NULL;
+ void (* mpeg2_cpu_state_restore) (cpu_state_t * state) = NULL;
+ 
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ static void state_restore_mmx (cpu_state_t * state)
+ {
+     emms ();
+@@ -115,12 +115,12 @@
+ 
+ void mpeg2_cpu_state_init (uint32_t accel)
+ {
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+     if (accel & MPEG2_ACCEL_X86_MMX) {
  	mpeg2_cpu_state_restore = state_restore_mmx;
      }
  #endif
@@ -52,9 +96,9 @@ diff -ur libmpeg2/cpu_state.c libmpeg2/cpu_state.c
      if (accel & MPEG2_ACCEL_PPC_ALTIVEC) {
  	mpeg2_cpu_state_save = state_save_altivec;
  	mpeg2_cpu_state_restore = state_restore_altivec;
-diff -ur libmpeg2/decode.c libmpeg2/decode.c
---- libmpeg2/decode.c	2003-12-22 12:59:34.000000000 +0100
-+++ libmpeg2/decode.c	2004-08-02 13:27:37.000000000 +0200
+diff -Naur libmpeg2.orig/decode.c libmpeg2/decode.c
+--- libmpeg2.orig/decode.c	2004-11-03 17:24:16.588788400 +0100
++++ libmpeg2/decode.c	2004-11-03 17:24:03.015851800 +0100
 @@ -351,6 +351,15 @@
      fbuf->buf[1] = buf[1];
      fbuf->buf[2] = buf[2];
@@ -71,9 +115,9 @@ diff -ur libmpeg2/decode.c libmpeg2/decode.c
  }
  
  void mpeg2_custom_fbuf (mpeg2dec_t * mpeg2dec, int custom_fbuf)
-diff -ur libmpeg2/header.c libmpeg2/header.c
---- libmpeg2/header.c	2003-12-22 12:24:02.000000000 +0100
-+++ libmpeg2/header.c	2004-08-24 22:25:07.000000000 +0200
+diff -Naur libmpeg2.orig/header.c libmpeg2/header.c
+--- libmpeg2.orig/header.c	2004-11-03 17:24:16.588788400 +0100
++++ libmpeg2/header.c	2004-11-03 17:24:03.015851800 +0100
 @@ -100,6 +100,9 @@
      mpeg2dec->decoder.convert = NULL;
      mpeg2dec->decoder.convert_id = NULL;
@@ -100,9 +144,55 @@ diff -ur libmpeg2/header.c libmpeg2/header.c
  	    for (j = 0; j < 64; j++)
  		decoder->quantizer_prescale[index][i][j] =
  		    k * mpeg2dec->quantizer_matrix[index][j];
-diff -ur libmpeg2/idct_alpha.c libmpeg2/idct_alpha.c
---- libmpeg2/idct_alpha.c	2003-09-19 11:26:42.000000000 +0200
-+++ libmpeg2/idct_alpha.c	2004-08-02 13:27:37.000000000 +0200
+diff -Naur libmpeg2.orig/idct.c libmpeg2/idct.c
+--- libmpeg2.orig/idct.c	2004-11-03 17:24:16.588788400 +0100
++++ libmpeg2/idct.c	2004-11-03 17:28:33.052799944 +0100
+@@ -66,7 +66,7 @@
+ } while (0)
+ #endif
+ 
+-static void inline idct_row (int16_t * const block)
++static inline void idct_row (int16_t * const block)
+ {
+     int d0, d1, d2, d3;
+     int a0, a1, a2, a3, b0, b1, b2, b3;
+@@ -119,7 +119,7 @@
+     block[7] = (a0 - b0) >> 12;
+ }
+ 
+-static void inline idct_col (int16_t * const block)
++static inline void idct_col (int16_t * const block)
+ {
+     int d0, d1, d2, d3;
+     int a0, a1, a2, a3, b0, b1, b2, b3;
+@@ -235,7 +235,7 @@
+ 
+ void mpeg2_idct_init (uint32_t accel)
+ {
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+     if (accel & MPEG2_ACCEL_X86_MMXEXT) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
+ 	mpeg2_idct_add = mpeg2_idct_add_mmxext;
+@@ -254,11 +254,14 @@
+     } else
+ #endif
+ #ifdef ARCH_ALPHA
++#ifdef CAN_COMPILE_ALPHA_MVI
+     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
+ 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
+ 	mpeg2_idct_add = mpeg2_idct_add_mvi;
+ 	mpeg2_idct_alpha_init ();
+-    } else if (accel & MPEG2_ACCEL_ALPHA) {
++    } else
++#endif
++    if (accel & MPEG2_ACCEL_ALPHA) {
+ 	int i;
+ 
+ 	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
+diff -Naur libmpeg2.orig/idct_alpha.c libmpeg2/idct_alpha.c
+--- libmpeg2.orig/idct_alpha.c	2004-11-03 17:24:16.588788400 +0100
++++ libmpeg2/idct_alpha.c	2004-11-03 17:24:03.015851800 +0100
 @@ -59,7 +59,7 @@
  } while (0)
  #endif
@@ -137,46 +227,30 @@ diff -ur libmpeg2/idct_alpha.c libmpeg2/idct_alpha.c
  
  void mpeg2_idct_copy_alpha (int16_t * block, uint8_t * dest, const int stride)
  {
-diff -ur libmpeg2/idct.c libmpeg2/idct.c
---- libmpeg2/idct.c	2003-09-19 11:26:42.000000000 +0200
-+++ libmpeg2/idct.c	2004-08-02 13:27:37.000000000 +0200
-@@ -66,7 +66,7 @@
- } while (0)
- #endif
+diff -Naur libmpeg2.orig/idct_mmx.c libmpeg2/idct_mmx.c
+--- libmpeg2.orig/idct_mmx.c	2004-11-03 17:23:30.029866432 +0100
++++ libmpeg2/idct_mmx.c	2004-11-03 17:28:33.052799944 +0100
+@@ -23,7 +23,7 @@
  
--static void inline idct_row (int16_t * const block)
-+static inline void idct_row (int16_t * const block)
+ #include "config.h"
+ 
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ 
+ #include <inttypes.h>
+ 
+diff -Naur libmpeg2.orig/motion_comp.c libmpeg2/motion_comp.c
+--- libmpeg2.orig/motion_comp.c	2004-11-03 17:26:19.828053184 +0100
++++ libmpeg2/motion_comp.c	2004-11-03 17:28:33.053799792 +0100
+@@ -33,7 +33,7 @@
+ 
+ void mpeg2_mc_init (uint32_t accel)
  {
-     int d0, d1, d2, d3;
-     int a0, a1, a2, a3, b0, b1, b2, b3;
-@@ -119,7 +119,7 @@
-     block[7] = (a0 - b0) >> 12;
- }
- 
--static void inline idct_col (int16_t * const block)
-+static inline void idct_col (int16_t * const block)
- {
-     int d0, d1, d2, d3;
-     int a0, a1, a2, a3, b0, b1, b2, b3;
-@@ -254,11 +254,14 @@
-     } else
- #endif
- #ifdef ARCH_ALPHA
-+#ifdef CAN_COMPILE_ALPHA_MVI
-     if (accel & MPEG2_ACCEL_ALPHA_MVI) {
- 	mpeg2_idct_copy = mpeg2_idct_copy_mvi;
- 	mpeg2_idct_add = mpeg2_idct_add_mvi;
- 	mpeg2_idct_alpha_init ();
--    } else if (accel & MPEG2_ACCEL_ALPHA) {
-+    } else
-+#endif
-+    if (accel & MPEG2_ACCEL_ALPHA) {
- 	int i;
- 
- 	mpeg2_idct_copy = mpeg2_idct_copy_alpha;
-diff -ur libmpeg2/motion_comp.c libmpeg2/motion_comp.c
---- libmpeg2/motion_comp.c	2003-10-06 04:31:52.000000000 +0200
-+++ libmpeg2/motion_comp.c	2004-08-15 15:37:41.000000000 +0200
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+     if (accel & MPEG2_ACCEL_X86_MMXEXT)
+ 	mpeg2_mc = mpeg2_mc_mmxext;
+     else if (accel & MPEG2_ACCEL_X86_3DNOW)
 @@ -43,20 +43,24 @@
      else
  #endif
@@ -202,9 +276,21 @@ diff -ur libmpeg2/motion_comp.c libmpeg2/motion_comp.c
  	mpeg2_mc = mpeg2_mc_c;
  }
  
-diff -ur libmpeg2/mpeg2.h libmpeg2/mpeg2.h
---- libmpeg2/mpeg2.h	2003-12-22 13:13:35.000000000 +0100
-+++ libmpeg2/mpeg2.h	2004-08-02 13:27:37.000000000 +0200
+diff -Naur libmpeg2.orig/motion_comp_mmx.c libmpeg2/motion_comp_mmx.c
+--- libmpeg2.orig/motion_comp_mmx.c	2004-11-03 17:23:30.032865976 +0100
++++ libmpeg2/motion_comp_mmx.c	2004-11-03 17:28:33.053799792 +0100
+@@ -23,7 +23,7 @@
+ 
+ #include "config.h"
+ 
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ 
+ #include <inttypes.h>
+ 
+diff -Naur libmpeg2.orig/mpeg2.h libmpeg2/mpeg2.h
+--- libmpeg2.orig/mpeg2.h	2004-11-03 17:24:16.589788248 +0100
++++ libmpeg2/mpeg2.h	2004-11-03 17:24:03.016851648 +0100
 @@ -82,6 +82,7 @@
  #define PIC_FLAG_COMPOSITE_DISPLAY 32
  #define PIC_FLAG_SKIP 64
@@ -213,9 +299,9 @@ diff -ur libmpeg2/mpeg2.h libmpeg2/mpeg2.h
  #define PIC_MASK_COMPOSITE_DISPLAY 0xfffff000
  
  typedef struct mpeg2_picture_s {
-diff -ur libmpeg2/mpeg2_internal.h libmpeg2/mpeg2_internal.h
---- libmpeg2/mpeg2_internal.h	2003-12-22 12:24:02.000000000 +0100
-+++ libmpeg2/mpeg2_internal.h	2004-08-24 22:25:07.000000000 +0200
+diff -Naur libmpeg2.orig/mpeg2_internal.h libmpeg2/mpeg2_internal.h
+--- libmpeg2.orig/mpeg2_internal.h	2004-11-03 17:24:16.590788096 +0100
++++ libmpeg2/mpeg2_internal.h	2004-11-03 17:24:03.016851648 +0100
 @@ -144,6 +144,12 @@
      int second_field;
  
@@ -240,9 +326,9 @@ diff -ur libmpeg2/mpeg2_internal.h libmpeg2/mpeg2_internal.h
  };
  
  typedef struct {
-diff -ur libmpeg2/slice.c libmpeg2/slice.c
---- libmpeg2/slice.c	2003-12-22 12:24:02.000000000 +0100
-+++ libmpeg2/slice.c	2004-08-24 22:25:07.000000000 +0200
+diff -Naur libmpeg2.orig/slice.c libmpeg2/slice.c
+--- libmpeg2.orig/slice.c	2004-11-03 17:24:16.591787944 +0100
++++ libmpeg2/slice.c	2004-11-03 17:24:03.016851648 +0100
 @@ -142,6 +142,7 @@
  
      quantizer_scale_code = UBITS (bit_buf, 5);

@@ -235,7 +235,7 @@ static void mpeg2_idct_add_c (const int last, int16_t * block,
 
 void mpeg2_idct_init (uint32_t accel)
 {
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
     if (accel & MPEG2_ACCEL_X86_MMXEXT) {
 	mpeg2_idct_copy = mpeg2_idct_copy_mmxext;
 	mpeg2_idct_add = mpeg2_idct_add_mmxext;
