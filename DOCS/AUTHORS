@@ -30,6 +30,10 @@ Gabucino:  <gabucino@k2.jozsef.kando.hu>
 - web design, docs improvements/updating
 - testing, (Open)DivX encoding, picture quality comparsions
 
+Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
+- LIRC support (see DOCS/LIRC)
+- DGA support in libvo (coming soon...)
+
 Dariusz Pietrzak: <dariush@ajax.umcs.lublin.pl>
 - mailing lists hosting (see README for details)
 
