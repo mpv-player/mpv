@@ -55,6 +55,9 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_EDL_MARK, "edl_mark", 0, { {-1,{0}} } },
 #endif
   { MP_CMD_AUDIO_DELAY, "audio_delay", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
+  { MP_CMD_SPEED_INCR, "speed_incr", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
+  { MP_CMD_SPEED_MULT, "speed_mult", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
+  { MP_CMD_SPEED_SET, "speed_set", 1, { {MP_CMD_ARG_FLOAT,{0}}, {-1,{0}} } },
   { MP_CMD_QUIT, "quit", 0, { {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_PAUSE, "pause", 0, { {-1,{0}} } },
   { MP_CMD_FRAME_STEP, "frame_step", 0, { {-1,{0}} } },
@@ -270,6 +273,11 @@ static mp_cmd_bind_t def_cmd_binds[] = {
   { { KEY_PAGE_DOWN, 0 }, "seek -600" },
   { { '-', 0 }, "audio_delay 0.100" },
   { { '+', 0 }, "audio_delay -0.100" },
+  { { '[', 0 }, "speed_mult 0.9091" },
+  { { ']', 0 }, "speed_mult 1.1" },
+  { { '{', 0 }, "speed_mult 0.5" },
+  { { '}', 0 }, "speed_mult 2.0" },
+  { { KEY_BACKSPACE, 0 }, "speed_set 1.0" },
   { { 'q', 0 }, "quit" },
   { { KEY_ESC, 0 }, "quit" },
 #ifndef HAVE_NEW_GUI

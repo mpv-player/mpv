@@ -194,6 +194,8 @@ Dobbelaere, Jeroen <jeroen.dobbelaere@acunia.com>
 
 Döffinger, Reimar (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
     * GL code fixes
+    * various fixes all over the place
+    * reworked live changing playback speed
 
 Dolbeau, Romain <romain@dolbeau.org>
     * random AltiVec (PowerPC multimedia extensions) stuff
@@ -523,6 +525,9 @@ Mohari, András <mayday@varoshaza.nagyatad.hu>
     * various docs updates and fixes
     * 1st half of the documentation HTML --> XML conversion
 
+Mueller, Steven <diffusor@ugcs.caltech.edu>
+    * first implementation of live changing playback speed
+
 MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
     * Waclaw Schiller (Torinthiel) <torinthiel@wp.pl>
     * Kuba Misiorny (Qba) <jim85@wp.pl>
@@ -619,6 +624,9 @@ Sandell, Björn <biorn@dce.chalmers.se>
 
 Sauerbeck, Tilman <tsauerbeck@users.sourceforge.net>
     * TGA decoder (RLE/uncomp), -mf tga support
+
+Scherthan, Frank <scherthan@uni-landau.de>
+    * added OSD handling for live changing playback speed
 
 Schneider, Florian <flo-mplayer-dev@gmx.net>
     * RealVideo codec libraries interface, .rm demuxer fixes

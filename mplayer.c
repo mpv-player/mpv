@@ -756,6 +756,31 @@ void update_set_of_subtitles()
 #include <SDL.h>
 #endif
 
+/**
+ * \brief build a chain of audio filters that converts the input format
+ * to the ao's format, taking into account the current playback_speed.
+ * \param sh_audio describes the requested input format of the chain.
+ * \param ao_data describes the requested output format of the chain.
+ */
+static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
+{
+  int new_srate = sh_audio->samplerate * playback_speed;
+  if (!sh_audio)
+    return 0;
+  if (new_srate != ao_data->samplerate) {
+    // limits are taken from libaf/af_resample.c
+    if (new_srate < 8000)
+      new_srate = 8000;
+    if (new_srate > 192000)
+      new_srate = 192000;
+    playback_speed = (float)new_srate / (float)sh_audio->samplerate;
+  }
+  return init_audio_filters(sh_audio, new_srate,
+           sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
+           ao_data->samplerate, ao_data->channels, ao_data->format,
+           audio_out_format_bits(ao_data->format) / 8, /* ao_data.bps, */
+           ao_data->outburst * 4, ao_data->buffersize);
+}
 
 int main(int argc,char* argv[]){
 
@@ -776,6 +801,7 @@ int osd_function=OSD_PLAY;
 int osd_last_pts=-303;
 int osd_show_av_delay = 0;
 int osd_show_text = 0;
+int osd_show_speed = 0;
 int osd_show_sub_delay = 0;
 int osd_show_sub_pos = 0;
 int osd_show_sub_visibility = 0;
@@ -1927,12 +1953,7 @@ if(sh_audio){
     // init audio filters:
 #if 1
     current_module="af_init";
-    if(!init_audio_filters(sh_audio, 
-        (int)(sh_audio->samplerate*playback_speed),
-	sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
-	ao_data.samplerate, ao_data.channels, ao_data.format,
-	audio_out_format_bits(ao_data.format)/8, /* ao_data.bps, */
-	ao_data.outburst*4, ao_data.buffersize)){
+    if(!build_afilter_chain(sh_audio, &ao_data)) {
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_NoMatchingFilter);
 //      mp_msg(MSGT_CPLAYER,MSGL_ERR,"Couldn't find matching filter / ao format! -> NOSOUND\n");
 //      uninit_player(INITED_ACODEC|INITED_AO); // close codec & ao
@@ -2085,7 +2106,7 @@ if(!sh_video) {
       if ((' ' == hhmmssf[6]) && (' ' != hhmmssf[5])) {
         hhmmssf[6] = '0';
       }
-             mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:  %s %4.1f%% %d%%   \r"
+             mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:  %s %4.1f%% %d%% %4.2fx  \r"
 		    ,hhmmssf
 		    ,(sh_audio->delay>0.5)?100.0*audio_time_usage/(double)sh_audio->delay:0
 		    ,cache_fill_status
@@ -2385,7 +2406,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
 	if(!frame_time_remaining){ sh_audio->delay+=x; c_total+=x;} // correction
-        if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",
+        if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f %3d/%3d %2d%% %2d%% %4.1f%% %d %d %d%% %4.2fx\r",
 	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
           (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
           (sh_video->timer>0.5)?(int)(100.0*video_time_usage*playback_speed/(double)sh_video->timer):0,
@@ -2394,6 +2415,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
           ,drop_frame_cnt
 	  ,output_quality
 	  ,cache_fill_status
+	  ,playback_speed
         );
         fflush(stdout);
       }
@@ -2596,6 +2618,24 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       audio_delay += v;
       osd_show_av_delay = 9;
       if(sh_audio) sh_audio->delay+= v;
+    } break;
+    case MP_CMD_SPEED_INCR : {
+      float v = cmd->args[0].v.f;
+      playback_speed += v;
+      osd_show_speed = sh_video->fps;
+      build_afilter_chain(sh_audio, &ao_data);
+    } break;
+    case MP_CMD_SPEED_MULT : {
+      float v = cmd->args[0].v.f;
+      playback_speed *= v;
+      osd_show_speed = sh_video->fps;
+      build_afilter_chain(sh_audio, &ao_data);
+    } break;
+    case MP_CMD_SPEED_SET : {
+      float v = cmd->args[0].v.f;
+      playback_speed = v;
+      osd_show_speed = sh_video->fps;
+      build_afilter_chain(sh_audio, &ao_data);
     } break;
     case MP_CMD_FRAME_STEP :
     case MP_CMD_PAUSE : {
@@ -3791,6 +3831,9 @@ while (next_edl_record)
       if (osd_show_av_delay) {
 	  snprintf(osd_text_tmp, 63, "A-V delay: %d ms", ROUND(audio_delay*1000));
 	  osd_show_av_delay--;
+      } else if (osd_show_speed) {
+	  snprintf(osd_text_tmp, 63, "Speed: x %6.2f", playback_speed);
+	  osd_show_speed--;
       } else if (osd_show_ontop) {
 	  snprintf(osd_text_tmp, 63, "Stay on top: %sabled", vo_ontop?"en":"dis");
 	  osd_show_ontop--;

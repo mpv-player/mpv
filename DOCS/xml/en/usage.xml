@@ -221,6 +221,18 @@ You can have a full list of known commands by running
   Type <literal>0</literal> is a relative seek of +/- val seconds.
   Type <literal>1</literal> seek to val % in the movie.
   </para></listitem>
+<listitem><para><literal>speed_mult</literal> (float) val</para>
+  <para>
+  Multiply the current speed with val.
+  </para></listitem>
+<listitem><para><literal>speed_incr</literal> (float) val</para>
+  <para>
+  Add val to the current playback speed.
+  </para></listitem>
+<listitem><para><literal>speed_set</literal> (float) val</para>
+  <para>
+  Set the speed to val.
+  </para></listitem>
 <listitem><para><literal>audio_delay</literal> (float) val</para>
   <para>
   Adjust the audio delay of val seconds

@@ -15,6 +15,15 @@ seek <value> [<type>]
         1 is a seek to <value> % in the movie.
         2 is a seek to an absolute position of <value> seconds.
 
+speed_set <value>
+    Set the speed to <value>.
+
+speed_incr <value>
+    Add <value> to the current playback speed.
+
+speed_mult <value>
+    Multiply the current speed with <value>.
+
 edl_mark
     ???
 
