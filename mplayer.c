@@ -524,7 +524,7 @@ if ((conffile = get_path("")) == NULL) {
 void load_per_file_config (m_config_t* conf, const char *const file)
 {
     char *confpath;
-    char cfg[PATH_MAX];
+    char cfg[strlen(file)+10];
     struct stat st;
     char *name;
 
