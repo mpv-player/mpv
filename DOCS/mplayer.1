@@ -386,17 +386,17 @@ seek to byte position
 use different color depth than autodetect. Not all -vo drivers support
 it (fbdev, dga2, svga, vesa).
 .TP
-.B \-pp\ quality
+.B \-pp\ <quality>
 apply postprocess filter on decoded image.
 Postprocessing effect depends on the codec and works only for MPEG, OpenDivX,
 DivX4, DivX. Quality is an hexadecimal number built as below:
-      
+
 0x 00 TX hv YZ
       ^^ ^^ ^^
       ||  | ||
       ||  | |\- postprocessing flag for luminance:
-      ||  | |   1/2: v/h deblock  4: dering  8: auto contrast/brightness
-correction
+      ||  | |   1/2: v/h deblock  4: dering
+      ||  | |   8: auto contrast/brightness correction
       ||  | |
       ||  | \-- postproc flags for color:
       ||  |     1/2: v/h deblock  4: dering
@@ -409,35 +409,62 @@ correction
       |         4: cubic interpolation   8: median
       |
       \-------- temporal denoise filter: 1 enabled
-      
+	
 .I HINT:
 0x2007f or 0x7f are known to give good results.
-
 .I NOTE:
 0x20000 (deinterlacing) may be required for DVD playback 
 .TP
-.B \-npp\ <options>
-Options is a comma separated list of the keywords below:
-    hb or hdeblock       : TODO
-    vb or vdeblock       : TODO
-    vr or rkvdeblock     : TODO
-    h1 or x1hdeblock     : TODO
-    v1 or x1vdeblock     : TODO
+.B \-npp\ <options> (EXPERIMENTAL)
+This option allows to give more litterate options for postprocessing, and is
+another way of calling it (not with -pp).
+
+.I EXAMPLE:
+    '-pp 0x2007f' <=> '-npp hb,vb,dr,al,lb'
+    '-pp 0x7f'    <=> '-npp hb,vb,dr,al'
+
+The options for -npp are a coma separated list of the keywords below:
+    de or default        : hdeblock:a,vdeblock:a,
+                           dering:a,autolevels,tmpnoise:a:150:200:400 (0xTODO)
+    fa or fast           : x1hdeblock:a,x1vdeblock:a,
+                           dering:a,autolevels,tmpnoise:a:150:200:400 (0xTODO)
+    hb or hdeblock       : horizontal deblocking filter (0xTODO)
+    vb or vdeblock       : vertical deblocking filter (0xTODO)
+    hr or rkhdeblock     : rk horizontal deblock filter (0xTODO)
+    vr or rkvdeblock     : rk vertical deblock filter (0xTODO)
+    h1 or x1hdeblock     : x1 horizontal deblock filter (0xTODO)
+    v1 or x1vdeblock     : y1 horizontal deblock filter (0xTODO)
     dr or dering         : TODO
-    al or autolevels     : TODO
+    al or autolevels     : brightness/contrast correction (0xTODO)
     lb or linblenddeint  : linear blend deinterlacing (0x20000)
     li or linipoldeint   : linear interpolation deinterlacing (0x10000)
     ci or cubicipoldeint : cubic interpolation deinterlacing (0x40000)
     md or mediandeint    : median deinterlacing (0x80000)
     tn or tmpnoise       : temporal denoise filter (0x100000)
 
-.I EXAMPLES:
- '-pp 0x2007f' <=> '-npp hb,vb,dr,al,lb'
- '-pp 0x7f'    <=> '-npp hb,vb,dr,al'
+These keywords accept a '-' prefix to disable the option.
+
+.I EXAMPLE:
+    '-npp de,-al' means 'default filters without brightness/contrast correction'
+
+A postfix letter, separated by ':' may be appended to the option to indicate
+its scope:
+    a : automatically switches the filter off if the cpu is too slow
+    c : do chrominance filtering too
+    y : do not do chrominance filtering (that is only luminance filtering)
+
+Each filter defaults to 'c' (chrominance).
+
+.I EXAMPLE:
+    '-npp de,tn:1:2:3' means 'enable default filters & temporal denoiser'
+    '-npp hb:y,vb:a -autoq 6' means 'deblock horizontal only luminance, and
+    automatically switch vertical deblocking on/off depending on available 
+    cpu time'
 
 .I HINT:
-the following values are known to give good results:
--npp default -autoq 6 and -npp tn:150:200:400 for the denoiser
+    the following values are known to give good results:
+    -npp default -autoq 6 and -npp tn:150:200:400 for the denoiser
+
 .TP
 .B \-slave
 This option switches on slave mode. This is intended for use
