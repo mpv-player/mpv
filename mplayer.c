@@ -1577,6 +1577,7 @@ if(file_format==DEMUXER_TYPE_AVI && has_audio){
 if(force_fps){
   sh_video->fps=force_fps;
   sh_video->frametime=1.0f/sh_video->fps;
+  printf("FPS forced to be %5.3  (ftime: %5.3f)\n",sh_video->fps,sh_video->frametime);
 }
 
 printf("Start playing...\n");fflush(stdout);
@@ -1900,6 +1901,8 @@ switch(sh_video->codec->driver){
     time_frame+=frame_time;  // for nosound
 
     if(file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
+    
+    if(verbose>1) printf("*** ftime=%5.3f ***\n",frame_time);
 
     if(drop_frame){
 
@@ -1908,7 +1911,7 @@ switch(sh_video->codec->driver){
           if(verbose>1)printf("delay=%d\n",delay);
           time_frame=v_frame;
           time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
-	  if(time_frame>-0.1) drop_frame=0; // stop dropping frames
+	  if(time_frame>-2*frame_time) drop_frame=0; // stop dropping frames
       }
 
     } else {
@@ -1923,12 +1926,12 @@ switch(sh_video->codec->driver){
           time_frame=v_frame;
           time_frame-=a_frame-(float)delay/(float)sh_audio->o_bps;
           // we are out of time... drop next frame!
-	  if(time_frame<-0.1){
+	  if(time_frame<-2*frame_time){
 	      drop_frame=frame_dropping; // tricky!
 	      ++drop_frame_cnt;
 	  }
       } else {
-          if(time_frame<-0.1 || time_frame>0.1) time_frame=0;
+          if(time_frame<-3*frame_time || time_frame>3*frame_time) time_frame=0;
       }
 
       if(verbose>1)printf("sleep: %5.3f  a:%6.3f  v:%6.3f  \n",time_frame,a_frame,v_frame);
@@ -2196,25 +2199,16 @@ switch(file_format){
     int audio_chunk_pos=-1;
     int video_chunk_pos=d_video->pos;
     
-    skip_video_frames=0;
-
-      // SEEK streams
-//      if(d_video->pts) avi_video_pts=d_video->pts;
+      skip_video_frames=0;
       avi_audio_pts=0;
-      
-      // Done by ds_free_packs():
-      //d_video->pts=0;
-      //d_audio->pts=0;
 
-      // find video chunk pos:
+      // find nearest video keyframe chunk pos:
       if(rel_seek_frames>0){
         // seek forward
         while(video_chunk_pos<demuxer->idx_size){
           int id=((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].ckid;
-//          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((--rel_seek_frames)<0 && ((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
-            //v_pts+=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             ++skip_audio_bytes;
           }
           ++video_chunk_pos;
@@ -2223,10 +2217,8 @@ switch(file_format){
         // seek backward
         while(video_chunk_pos>=0){
           int id=((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].ckid;
-//          if(LOWORD(id)==aviTWOCC('0','0')){ // video frame
           if(avi_stream_id(id)==d_video->id){  // video frame
             if((++rel_seek_frames)>0 && ((AVIINDEXENTRY *)demuxer->idx)[video_chunk_pos].dwFlags&AVIIF_KEYFRAME) break;
-            //v_pts-=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             --skip_audio_bytes;
           }
           --video_chunk_pos;
@@ -2235,7 +2227,6 @@ switch(file_format){
       demuxer->idx_pos_a=demuxer->idx_pos_v=demuxer->idx_pos=video_chunk_pos;
 //      printf("%d frames skipped\n",skip_audio_bytes);
 
-#if 1
       // re-calc video pts:
       d_video->pack_no=0;
       for(i=0;i<video_chunk_pos;i++){
@@ -2243,14 +2234,6 @@ switch(file_format){
           if(avi_stream_id(id)==d_video->id) ++d_video->pack_no;
       }
       avi_video_pts=d_video->pack_no*(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
-
-      //printf("v-pts recalc! %5.3f -> %5.3f  \n",v_pts,avi_video_pts);
-      //v_pts=avi_video_pts;
-//#else
-      //avi_video_pts=v_pts;
-#endif
-      //a_pts=avi_video_pts;
-      //a_pts=v_pts; //-(buffer_delay+audio_delay);
 
       if(has_audio){
         int i;
@@ -2441,7 +2424,6 @@ switch(file_format){
       frame_correction=0;
       force_redraw=5;
       a_frame=-skip_audio_secs;
-//      a_frame=-audio_delay-buffer_delay-skip_audio_secs;
       v_frame=0; // !!!!!!
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
 //      num_frames=real_num_frames=0;
@@ -2492,7 +2474,6 @@ switch(file_format){
 
 } // while(!eof)
 
-//printf("\nEnd of file.\n");
 exit_player("End of file");
 }
 return 1;
