@@ -185,6 +185,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	      }
 	      if (k==MAX_UCS){
 		 len=j; // end here
+		 printf ("\nMAX_UCS exceeded!\n");
 	      }
 	      if (!c) c++; // avoid UCS 0
 	      if (c==' '){
@@ -211,7 +212,7 @@ inline static void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,in
 	      } else if (j<len)
 		   continue;
 	      if (h>memy){ // out of the screen so end parsing
-		 h -=lasth - vo_font->height; // correct the y position
+		 memy -= lasth - vo_font->height; // correct the y position
 		 l=0;
 		 break;
 	      }
