@@ -196,6 +196,21 @@ ifeq ($(MENCODER),yes)
 	$(INSTALL) -m 755 -s $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
 	$(INSTALL) -c -m 644 DOCS/mencoder.1 $(MANDIR)/man1/mencoder.1
 endif
+	@if test ! -d $(DATADIR) ; then mkdir -p $(DATADIR) ; fi
+	@if test ! -d $(DATADIR)/font ; then mkdir -p $(DATADIR)/font ; fi
+	@if test ! -f $(DATADIR)/font/font.desc ; then \
+	echo "*** Download font at http://www.mplayerhq.hu/homepage/dload.html" ; \
+	echo "*** for OSD/Subtitles support and extract to $(DATADIR)/font/" ; \
+	fi
+ifeq ($(GUI),yes)
+	@if test ! -d $(DATADIR)/Skin ; then mkdir -p $(DATADIR)/Skin ; fi
+	@echo "*** Download skin(s) at http://www.mplayerhq.hu/homepage/dload.html"
+	@echo "*** for GUI, and extract to $(DATADIR)/Skin/"
+endif
+	@if test ! -d $(CONFDIR) ; then mkdir -p $(CONFDIR) ; fi
+	@if test -f $(CONFDIR)/codecs.conf.old ; then mv -f $(CONFDIR)/codecs.conf.old $(CONFDIR)/codecs.conf.older ; fi
+	@if test -f $(CONFDIR)/codecs.conf ; then mv -f $(CONFDIR)/codecs.conf $(CONFDIR)/codecs.conf.old ; fi
+	$(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 
 ifeq ($(CSS_USE),yes)
 	@echo "Following task requires root privs. If it fails don't panic"
