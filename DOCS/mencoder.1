@@ -100,16 +100,21 @@ If encoding to DivX4, you can specify its parameters here, like:
 
 Available options:
 
-  help               get help (TODO!)
-  br=XXX             specify bitrate in kbit <4-16000> or bit <16001-24000000>
-  key=XXX            maximum keyframe interval (in frames)
-  deinterlace        enable deinterlacing
-  q=XXXX             quality ( 1 - fastest, 5 - best )
-  min_quant=XXX      minimum quantizer (0-32)
-  max_quant=XXX      maximum quantizer (0-32)
-  rc_period=XXX      rate control period
-  rc_reaction_period=XXX rate control reaction period
-  rc_reaction_ratio=XXX  rate control reaction ratio
+  help           get help (TODO!)
+  br=XXX         specify bitrate in
+                 kbit <4-16000> or
+                 bit  <16001-24000000>
+  key=XXX        maximum keyframe interval
+                 (in frames)
+  deinterlace    enable deinterlacing
+  q=XXXX         quality (1-fastest, 5-best)
+  min_quant=XXX  minimum quantizer (0-32)
+  max_quant=XXX  maximum quantizer (0-32)
+  rc_period=XXX  rate control period
+  rc_reaction_period=XXX rate control
+                         reaction period
+  rc_reaction_ratio=XXX  rate control
+                         reaction ratio
 
 .TP
 .B \-lameopts
@@ -119,13 +124,25 @@ If encoding to MP3 with libmp3lame, you can specify its parameters here, like:
 
 Available options:
 
-  help               get help (TODO!)
-  br=XXX             specify bitrate in kbit <0-1024>
-  vbr=XXX            variable bitrate method 0=cbr 1=mt 2=rh(default) 3=abr 4=mtrh
-  cbr                constant bitrate
-  mode=XXX           0=stereo 1=joint-stereo 2=dualchannel 3=mono (dafeult: auto)
-  padding=XXX        0=no 1=all 2=adjust
-  ratio=XXX          compression ratio <1-100>
+    help         get help (TODO!)
+    br=XXX       specify bitrate in
+                 kbit <0-1024>
+    vbr=XXX      variable bitrate method
+                   0=cbr
+                   1=mt
+                   2=rh(default)
+                   3=abr
+                   4=mtrh
+    cbr          constant bitrate
+    mode=XXX     0=stereo
+                 1=joint-stereo
+                 2=dualchannel
+                 3=mono
+                 (default: auto)
+    padding=XXX  0=no
+                 1=all
+                 2=adjust
+    ratio=XXX    compression ratio <1-100>
 
 .TP
 .B \-OTHERS
