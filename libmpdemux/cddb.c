@@ -366,7 +366,7 @@ cddb_read_parse(HTTP_header_t *http_hdr, cddb_data_t *cddb_data) {
 				ptr2 = strstr(ptr, "\n.\n");
 				if( ptr2==NULL ) {
 					printf("Unable to find '.'\n");
-					return -1;
+					ptr2=ptr+strlen(ptr); //return -1;
 				}
 			}
 			// Ok found the end
@@ -580,8 +580,9 @@ cddb_retrieve(cddb_data_t *cddb_data) {
 	for( i=0; i<cddb_data->tracks ; i++ ) {
 		ptr += sprintf(ptr, "%d+", cdtoc[i].frame );
 	}
+	ptr[0]=0;
 	time_len = (cdtoc[cddb_data->tracks].frame)/75;
-
+	
 	cddb_data->freedb_server = DEFAULT_FREEDB_SERVER;
 	cddb_data->freedb_proto_level = 1;
 	cddb_data->xmcd_file = NULL;
