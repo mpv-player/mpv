@@ -79,6 +79,9 @@ static struct {
 
 };
 
+/*
+ * An autodetection based on the extension is not a good idea.
+ * 
 static struct {
 	char *extension;
 	int demuxer_type;
@@ -103,6 +106,7 @@ static struct {
 	{ "pls", DEMUXER_TYPE_PLAYLIST },
 	{ "m3u", DEMUXER_TYPE_PLAYLIST }
 };
+*/
 
 streaming_ctrl_t *
 streaming_ctrl_new( ) {
@@ -446,7 +450,10 @@ autodetectProtocol(streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_form
 			*file_format = DEMUXER_TYPE_REAL;
 			return 0;
 		}
-
+		
+/* 
+ * An autodetection based on the extension is not a good idea.
+ * 
 		// Get the extension of the file if present
 		if( url->file!=NULL ) {
 			for( i=strlen(url->file) ; i>0 ; i-- ) {
@@ -467,7 +474,8 @@ extension=NULL;
 				}
 			}
 		}
-
+*/
+		
 		// Checking for RTSP
 		if( !strcasecmp(url->protocol, "rtsp") ) {
 #ifdef STREAMING_LIVE_DOT_COM
