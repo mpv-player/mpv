@@ -146,7 +146,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 #ifdef NEW_DECORE
     dec_frame.bmp=&dec_pic;
     dec_pic.y=dec_pic.u=dec_pic.v=NULL;
-#ifdef DECORE_DIVX5
+#ifndef DEC_OPT_FRAME_311
     decore(0x123, DEC_OPT_FRAME, &dec_frame, NULL);
 #else
     decore(0x123, (sh->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);

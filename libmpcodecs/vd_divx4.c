@@ -132,7 +132,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     dec_frame.bmp=mpi->planes[0];
     dec_frame.stride=mpi->width;
     
-#ifdef DECORE_DIVX5
+#ifndef DEC_OPT_FRAME_311
     decore(0x123, DEC_OPT_FRAME, &dec_frame, NULL);
 #else
     decore(0x123, (sh->format==mmioFOURCC('D','I','V','3'))?DEC_OPT_FRAME_311:DEC_OPT_FRAME, &dec_frame, NULL);
