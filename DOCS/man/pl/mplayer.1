@@ -1,4 +1,4 @@
-.\" synced with 1.681
+.\" synced with 1.682
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -4356,7 +4356,7 @@ z poni¿szej sk³adni:
 .RE
 .br
 .PP
-Gdzie <codec> to: lavc, xvidenc, divx4 lub lame
+Gdzie <codec> to: lavc, xvidenc, divx4, lame lub x264
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5431,10 +5431,146 @@ jako¶æ udoskonalenia subpel (dla qpel) (domy¶lnie: 8).
 Ma to powa¿ny wp³yw na szybko¶æ.
 .TP
 .B psnr\ \ \ 
-Drukuje psnr (warto¶æ szczytowa proporcji sygna³u do szumu) dla ca³ego filmu
+Drukuje psnr (warto¶æ proporcji szczytowego sygna³u do szumu) dla ca³ego filmu
 po kodowaniu i przechowuje psnr dla ka¿dej klatki w pliku o nazwie
 typu "psnr_hhmmss.log".
 Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
+.SS x264enc (\-x264encopts)
+.TP
+.B bitrate=<warto¶æ>
+Ustawia u¿yty bitrate w kbit/\:sekunda (domy¶lnie: wy³±czone).
+Ta opcja jest konieczna, je¿eli chcesz kodowaæ z CBR (sta³y bitrate).
+.TP
+.B iframe=<warto¶æ>
+Czêstotliwo¶æ wystêpowania klatek I (domy¶lnie: 60)
+.TP
+.B frameref=<warto¶æ>
+Ilo¶æ poprzednich klatek wykorzystanych do przewidywania w klatkach P
+(domy¶lnie: 1)
+.br
+.I INFORMACJA:
+Obecna wersja x264 (r38) jeszcze nie obs³uguje tej opcji.
+.TP 
+.B idrframe=<warto¶æ>
+Ka¿de <warto¶æ> klatek I jest klatkami IDR.
+W H.264 klatki I niekoniecznie przeskakuj± zamkniêty GOP, poniewa¿ jest
+dozwolone dla klatki P, aby by³a przewidziana z wiêkszej liczby poprzedzaj±cych 
+j± klatek ni¿ tylko jedna (sprawd¼ opcjê frameref).
+Dlatego te¿ klatki I niekoniecznie musz± siê daæ przeszukiwaæ. Ramki IDR
+ograniczaj± odnoszenie siê klatki P do jakiejkolwiek ramki poprzedzaj±cej klatkê IDR
+(domy¶lnie: 2)
+.TP
+.B bframe=<warto¶æ>
+Liczba klatek B pomiêdzy klatkami I a P (domy¶lnie: 0)
+.TP
+.B deblock=<0|1>
+Wykorzystuje filtr deblocking (domy¶lnie: w³±czony)
+.TP 
+.B deblockalpha=<-6-6>
+Parametr AlphaC0 dla filtru deblocking.
+Opcja ta dostosowuje zakresy dla filtru deblocking H.264.
+Po pierwsze parametr ten okre¶la maksymaln± ilo¶æ zmian jak± filtr mo¿e
+nanie¶æ na pojedynczy piksel.
+Po drugie opcja ta ma wp³yw na próg filtrowanej ró¿nicy wystêpuj±cej na krawêdzi.
+Warto¶æ dodatnia ogranicza blokuj±ce szumy, ale rozmywa równie¿ detale
+(domy¶lnie: 0)
+.TP
+.B deblockbeta=<-6-6>
+Parametr Beta filtru deblocking.
+Ma wp³yw na maksymalny,dozwolony gradient miêdzy dwoma przylegaj±cymi blokami
+(domy¶lnie: 0)
+.TP
+.B cabac
+Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding)
+(domy¶lnie: wy³±czone)
+.TP 
+.B cabacidc=<warto¶æ>
+Warto¶æ pocz±tkowa CABAC IDC.
+Koder musi wybraæ kontekst dla ka¿dego bloku, który koduje, Jednak dla
+pierwszego bloku w klatce, nie ma ¿adnych poprzedzaj±cych go bloków.
+Dostosowanie tego parametru mo¿e mieæ wp³yw na bitrate o u³amek procenta,
+ale bezpo¶rednio nie wp³ywa na zniekszta³cenie.
+.RSs
+-1: Pozwala koderowi na wybór kontekstu (domy¶lnie) (zazwyczaj wybiera 0)
+.br
+0: niska kompleksowo¶æ
+.br
+1: ¶rednia kompleksowo¶æ
+.br
+2: wysoka kompleksowo¶æ
+.REss
+.TP
+.B qp_constant=<2-51>
+Okre¶la, który kwantyzator zostanie u¿yty.
+Ni¿sze warto¶ci to lepsze odwzorowanie, ale wiêksze parametry bitrate.
+Zauwa¿, ¿e kwantyzacja w H.264 dzia³a inaczej ni¿ w mpeg[124].
+QP H.264 jest w skali logarytmicznej. Dla przyk³adu, ró¿nica w bitrate pomiêdzy
+QP=20 a QP=40 to wspó³czynnik oko³o 10.
+Przydatne kwantyzatory w H.264 s± wiêksze w porownaniu z mpeg[124].
+20-40 to u¿yteczny zakres (domy¶lnie: 26)
+.br
+.I INFORMACJA:
+Ta opcja ma wp³yw nawet, je¿eli wybierzesz kodowanie w cbr.
+W takim wypadku, pierwsz klatka u¿yje wspó³czynnika kwantyzacji, jaki poda³es,
+ale w nastêpnych klatkach kontrola tempa zadecyduje jakie kwanty wybraæ.
+.TP
+.B qp_min=<2-51>
+Minimalny kwantyzator. Tylko CBR. 20-40 to u¿yteczny zakres (domy¶lnie: 2)
+.TP
+.B qp_max=<2-51>
+Maksymalny kwantyzator. Tylko CBR.
+.TP
+.B qp_step=<warto¶æ>
+Maksymalna warto¶æ o jak± kwantyzator mo¿e byæ zwiêkszony/zmniejszony
+pomiêdzy klatkami.
+.TP
+.B rc_buffer_size=<warto¶æ>
+Rozmiar bufora kontroli tempa. (domy¶lnie: 1 sekunda zysku okre¶lonego bitrate)
+.TP
+.B rc_init_buffer=<warto¶æ>
+Ustawia pocz±tkowy rozmiar bufora kontroli tempa (ddomy¶lnie: 1/4 rc_buffer_size)
+.B rc_sens=<0-100>
+Czu³o¶æ kontroli tempa (domy¶lnie: 100)
+.TP
+.B ip_factor=<warto¶æ>
+Wspó³czynnik kwantyzatora miêdzy klatkami I a P (domy¶lnie: 2.0)
+.TP
+.B pb_factor=<warto¶æ>
+Wspó³czynnik kwantyzatora miêdzy klatkami P a B (domy¶lnie: 2.0)
+.TP
+.B pass=<1|2>
+Dla trybu dwuprzej¶ciowego. Pierwsze przej¶cie zachowuje statystyki.
+.TP
+.B qcompress=<0-1>
+Kompresja kwantyzatora. Wp³ywa na kontrolê tempa: ni¿sza warto¶æ sprawia, ¿e bitrate
+jest bardziej sta³y, podczas gdy wy¿sza, sprawia, ¿e parametr kwantyzacji
+jest bardziej sta³y (domy¶lnie: 0.6)
+.TP
+.B qblur=<0-1>
+Tymczasowe rozmazanie parametru kwantyzacji. Ni¿sze warto¶ci pozwalaj± na wiêksze skoki
+warto¶ci kwantyzatora; wy¿sze zmuszaj± go do delikatniejszych zmian
+(domy¶lnie: 0.5)
+.TP
+.B fullinter
+Wykorzystyje wszystkie dostêpne metody analizy inter-klatek (i4x4, psub8x8, psub16x16)
+(domy¶lnie: 4x4, psub16x16)
+.TP
+.B log=<-1-3>
+Okre¶la ilo¶æ informacji drukowanych na ekranie.
+.RSs
+-1: ¿adne
+.br
+ 0: b³êdy (dla debugowania x264)
+.br
+ 1: ostrze¿enia
+.br
+ 2: PSNR i inne statystyki analiz po skoñczonym kodowaniu (domy¶lne)
+.br
+ 3: PSNR, qp, typ klatki, rozmiar i inne statystyki dla ka¿dej klatki
+.REss
+.TP
+.B psnr
+Drukuje statystyki proporcji sygna³u do szumu.
 .TP
 .B mpeg_quant
 Wykorzystuje kwantyzatory MPEG zamiast H.263.
@@ -5797,7 +5933,7 @@ pod uwagê wszystkie filtry dostrajaj±ce (crop/\:expand/\:scale/\:itp.) podane w
 ³añcuchu.
 .TP
 .B psnr\ \ \ 
-Drukuje psnr (warto¶æ szczytowa proporcji sygna³u do szumu) dla ca³ego filmu po
+Drukuje psnr (warto¶æ proporcji szczytowego sygna³u do szumu) dla ca³ego filmu po
 kodowaniu i przechowuje psnr dla ka¿dej klatki w pliku o nazwie typu
 "psnr_hhmmss.log" w bie¿±cym katalogu.
 Zwracane warto¶ci s± w dB (decybelach), im wy¿sze tym lepsze.
