@@ -103,36 +103,36 @@ void jpeg_mkdir(char *buf, int verbose) {
             case EEXIST:
                 if ( stat(buf, &stat_p ) < 0 ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
-                            MSGTR_VO_JPEG_GenericError, strerror(errno) );
+                            MSGTR_VO_GenericError, strerror(errno) );
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
-                            MSGTR_VO_JPEG_UnableToAccess,buf);
+                            MSGTR_VO_UnableToAccess,buf);
                     exit_player(MSGTR_Exit_error);
                 }
                 if ( !S_ISDIR(stat_p.st_mode) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %s\n", info.short_name,
-                            buf, MSGTR_VO_JPEG_ExistsButNoDirectory);
+                            buf, MSGTR_VO_ExistsButNoDirectory);
                     exit_player(MSGTR_Exit_error);
                 }
                 if ( !(stat_p.st_mode & S_IWUSR) ) {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
-                            buf, MSGTR_VO_JPEG_DirExistsButNotWritable);
+                            buf, MSGTR_VO_DirExistsButNotWritable);
                     exit_player(MSGTR_Exit_error);
                 }
                 
                 mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
-                        buf, MSGTR_VO_JPEG_DirExistsAndIsWritable);
+                        buf, MSGTR_VO_DirExistsAndIsWritable);
                 break;
 
             default:
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n", info.short_name,
-                        MSGTR_VO_JPEG_GenericError, strerror(errno) );
+                        MSGTR_VO_GenericError, strerror(errno) );
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n", info.short_name,
-                        buf, MSGTR_VO_JPEG_CantCreateDirectory);
+                        buf, MSGTR_VO_CantCreateDirectory);
                 exit_player(MSGTR_Exit_error);
         } /* end switch */
     } else if ( verbose ) {  
         mp_msg(MSGT_VO, MSGL_INFO, "%s: %s - %s\n", info.short_name,
-                buf, MSGTR_VO_JPEG_DirectoryCreateSuccess);
+                buf, MSGTR_VO_DirectoryCreateSuccess);
     } /* end if */
 }
 
@@ -170,9 +170,9 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
     if ( !buffer ) return 1; 
     if ( (outfile = fopen(name, "wb") ) == NULL ) {
         mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s\n", info.short_name,
-                MSGTR_VO_JPEG_CantCreateFile);
+                MSGTR_VO_CantCreateFile);
         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
-                info.short_name, MSGTR_VO_JPEG_GenericError,
+                info.short_name, MSGTR_VO_GenericError,
                 strerror(errno) );
         exit_player(MSGTR_Exit_error);
     }
@@ -298,7 +298,7 @@ static uint32_t preinit(const char *arg)
     int value;      /* storage for parsed integer values */
 
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                                            MSGTR_VO_JPEG_ParsingSuboptions);
+                                            MSGTR_VO_ParsingSuboptions);
     
     if (arg) {
 
@@ -332,7 +332,7 @@ static uint32_t preinit(const char *arg)
                     if ( (value < 0 ) || (value > 100) ) {
                         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
                                 info.short_name, "optimize",
-                                MSGTR_VO_JPEG_ValueOutOfRange, "[0-100]");
+                                MSGTR_VO_ValueOutOfRange, "[0-100]");
                         exit_player(MSGTR_Exit_error);
                     } else {
                         jpeg_optimize = value;
@@ -342,7 +342,7 @@ static uint32_t preinit(const char *arg)
                 } else {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
                             info.short_name, "optimize",
-                            MSGTR_VO_JPEG_NoValueSpecified);
+                            MSGTR_VO_NoValueSpecified);
                     exit_player(MSGTR_Exit_error);
                 }
                 /* only here if value is set and sane */
@@ -357,7 +357,7 @@ static uint32_t preinit(const char *arg)
                     if ( (value < 0) || (value > 100) ) {
                         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
                                 info.short_name, "smooth",
-                                MSGTR_VO_JPEG_ValueOutOfRange, "[0-100]");
+                                MSGTR_VO_ValueOutOfRange, "[0-100]");
                         exit_player(MSGTR_Exit_error);
                     } else {
                         jpeg_smooth = value;
@@ -367,7 +367,7 @@ static uint32_t preinit(const char *arg)
                 } else {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
                             info.short_name, "smooth",
-                            MSGTR_VO_JPEG_NoValueSpecified);
+                            MSGTR_VO_NoValueSpecified);
                     exit_player(MSGTR_Exit_error);
                 }
                 /* only here if value is set and sane */
@@ -382,7 +382,7 @@ static uint32_t preinit(const char *arg)
                     if ( (value < 0) || (value > 100) ) {
                         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
                                 info.short_name, "quality",
-                                MSGTR_VO_JPEG_ValueOutOfRange, "[0-100]");
+                                MSGTR_VO_ValueOutOfRange, "[0-100]");
                         exit_player(MSGTR_Exit_error);
                     } else {
                         jpeg_quality = value;
@@ -392,7 +392,7 @@ static uint32_t preinit(const char *arg)
                 } else {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
                             info.short_name, "quality",
-                            MSGTR_VO_JPEG_NoValueSpecified);
+                            MSGTR_VO_NoValueSpecified);
                     exit_player(MSGTR_Exit_error);
                 }
                 /* only here if value is set and sane */
@@ -420,7 +420,7 @@ static uint32_t preinit(const char *arg)
                 } else {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
                             info.short_name, "outdir",
-                            MSGTR_VO_JPEG_NoValueSpecified);
+                            MSGTR_VO_NoValueSpecified);
                     exit_player(MSGTR_Exit_error);
                 }
             } else if (!strncmp(arg, "subdirs=", 8)) {
@@ -442,7 +442,7 @@ static uint32_t preinit(const char *arg)
                 } else {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
                             info.short_name, "subdirs",
-                            MSGTR_VO_JPEG_NoValueSpecified);
+                            MSGTR_VO_NoValueSpecified);
                     exit_player(MSGTR_Exit_error);
                 }
             } else if (!strncmp(arg, "maxfiles=", 9)) {
@@ -451,7 +451,7 @@ static uint32_t preinit(const char *arg)
                     if (value < 1) {
                         mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s %s.\n",
                                 info.short_name, "maxfiles",
-                                MSGTR_VO_JPEG_ValueOutOfRange, ">=1");
+                                MSGTR_VO_ValueOutOfRange, ">=1");
                         exit_player(MSGTR_Exit_error);
                     } else {
                         jpeg_maxfiles = value;
@@ -461,7 +461,7 @@ static uint32_t preinit(const char *arg)
                 } else {
                     mp_msg(MSGT_VO, MSGL_ERR, "%s: %s - %s\n",
                             info.short_name, "maxfiles",
-                            MSGTR_VO_JPEG_NoValueSpecified);
+                            MSGTR_VO_NoValueSpecified);
                     exit_player(MSGTR_Exit_error);
                 }
                 /* only here if value is set and sane */
@@ -472,14 +472,14 @@ static uint32_t preinit(const char *arg)
                 }
             } else {
                 mp_msg(MSGT_VO, MSGL_ERR, "%s: %s %-20s...\n", info.short_name,
-                        MSGTR_VO_JPEG_UnknownOptions, arg);
+                        MSGTR_VO_UnknownSuboptions, arg);
                 exit_player(MSGTR_Exit_error);
             }
         } /* end while */
     } /* endif */
     
     mp_msg(MSGT_VO, MSGL_INFO, "%s: %s\n", info.short_name,
-                                            MSGTR_VO_JPEG_SuboptionsParsedOK);
+                                            MSGTR_VO_SuboptionsParsedOK);
     return 0;
 }
 

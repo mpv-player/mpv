@@ -759,12 +759,13 @@ static char help_text[]=
 // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "Disculpe, el dispositivo de salida de vídeo es incompatible con este codec.\n"
+#define MSGTR_VO_GenericError "Este error ha ocurrido"
+#define MSGTR_VO_UnableToAccess "No es posible acceder"
+#define MSGTR_VO_ExistsButNoDirectory "ya existe, pero no es un directorio."
+#define MSGTR_VO_DirExistsButNotWritable "El directorio ya existe, pero no se puede escribir en él."
+#define MSGTR_VO_DirExistsAndIsWritable "El directorio ya existe y se puede escribir en él."
+#define MSGTR_VO_CantCreateDirectory "No es posible crear el directorio de salida."
+#define MSGTR_VO_DirectoryCreateSuccess "Directorio de salida creado exitosamente."
 
 // vo_jpeg.c
-#define MSGTR_VO_JPEG_GenericError "Este error ha ocurrido"
-#define MSGTR_VO_JPEG_UnableToAccess "No es posible acceder"
-#define MSGTR_VO_JPEG_ExistsButNoDirectory "ya existe, pero no es un directorio."
-#define MSGTR_VO_JPEG_DirExistsButNotWritable "El directorio ya existe, pero no se puede escribir en él."
-#define MSGTR_VO_JPEG_DirExistsAndIsWritable "El directorio ya existe y se puede escribir en él."
-#define MSGTR_VO_JPEG_CantCreateDirectory "No es posible crear el directorio de salida."
-#define MSGTR_VO_JPEG_DirectoryCreateSuccess "Directorio de salida creado exitosamente."
+
