@@ -428,10 +428,11 @@ static void flip_page (void)
 #ifdef USE_LIBAVCODEC
   if(picture_buf){ // YV12 only:
     int out_size;
-    static int fno=0;
+//    static int fno=0;
     /* encode the image */
     out_size = avcodec_encode_video(&codec_context, outbuf, outbuf_size, &picture);
-    send_pes_packet(outbuf,out_size,0x1E0,fno*(90000/25));++fno;
+//    send_pes_packet(outbuf,out_size,0x1E0,fno*(90000/25));++fno;
+    send_pes_packet(outbuf,out_size,0x1E0,vo_pts);
 //    printf("frame size: %d  \n",out_size);
   }
 #endif
