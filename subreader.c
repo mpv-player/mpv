@@ -15,7 +15,7 @@
 #include "config.h"
 #include "subreader.h"
 
-#define ERR (void *)-1
+#define ERR ((void *) -1)
 
 #ifdef USE_ICONV
 #ifdef __FreeBSD__
@@ -39,13 +39,15 @@ int sub_slacktime=2000; // 20 seconds
 /* Use the SUB_* constant defined in the header file */
 int sub_format=SUB_INVALID;
 
-int eol(char p) {
+static int eol(char p) {
     return (p=='\r' || p=='\n' || p=='\0');
 }
 
-static inline void trail_space(char *s) {
-	int i;
-	while (isspace(*s)) strcpy(s, s + 1);
+/* Remove leading and trailing space */
+static void trail_space(char *s) {
+	int i = 0;
+	while (isspace(*s)) ++i;
+	if (i) strcpy(s, s + i);
 	i = strlen(s) - 1;
 	while (i > 0 && isspace(s[i])) s[i--] = '\0';
 }
@@ -165,7 +167,7 @@ subtitle *sub_read_line_microdvd(FILE *fd,subtitle *current) {
     char *p, *next;
     int i;
 
-    bzero (current, sizeof(subtitle));
+    memset(current, 0, sizeof(subtitle));
 
     do {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
@@ -190,7 +192,7 @@ subtitle *sub_read_line_subrip(FILE *fd, subtitle *current) {
     char *p=NULL, *q=NULL;
     int len;
     
-    bzero (current, sizeof(subtitle));
+    memset(current, 0, sizeof(subtitle));
     
     while (1) {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
@@ -221,7 +223,7 @@ subtitle *sub_read_line_subviewer(FILE *fd,subtitle *current) {
     char *p=NULL;
     int i,len;
     
-    bzero (current, sizeof(subtitle));
+    memset(current, '\0', sizeof(subtitle));
     
     while (!current->text[0]) {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
@@ -254,7 +256,7 @@ subtitle *sub_read_line_vplayer(FILE *fd,subtitle *current) {
 	char *p=NULL, *next;
 	int i,len,len2,plen;
 
-	bzero (current, sizeof(subtitle));
+	memset(current, '\0', sizeof(subtitle));
 
 	while (!current->text[0]) {
 		if (!fgets (line, LINE_LEN, fd)) return NULL;
@@ -306,7 +308,7 @@ subtitle *sub_read_line_rt(FILE *fd,subtitle *current) {
     char *p=NULL,*next=NULL;
     int i,len,plen;
     
-    bzero (current, sizeof(subtitle));
+    memset(current, '\0', sizeof(subtitle));
     
     while (!current->text[0]) {
 	if (!fgets (line, LINE_LEN, fd)) return NULL;
@@ -374,8 +376,7 @@ subtitle *sub_read_line_ssa(FILE *fd,subtitle *current) {
 	}
 
 
-	current->text[num]=(char *) malloc(strlen(line2)+1);
-	strcpy(current->text[num],line2);
+	current->text[num]=strdup(line2);
 
 	return current;
 }
@@ -384,7 +385,7 @@ subtitle *sub_read_line_dunnowhat(FILE *fd,subtitle *current) {
     char line[LINE_LEN+1];
     char text[LINE_LEN+1];
 
-    bzero (current, sizeof(subtitle));
+    memset(current, '\0', sizeof(subtitle));
 
     if (!fgets (line, LINE_LEN, fd))
 	return NULL;
@@ -438,7 +439,7 @@ subtitle *previous_aqt_sub = NULL;
 subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     char line[LINE_LEN+1];
 
-    bzero (current, sizeof(subtitle));
+    memset(current, '\0', sizeof(subtitle));
 
     while (1) {
     // try to locate next subtitle
