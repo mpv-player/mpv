@@ -470,6 +470,8 @@ subtitle *previous_aqt_sub = NULL;
 
 subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     char line[LINE_LEN+1];
+    char *next;
+    int i;
 
     while (1) {
     // try to locate next subtitle
@@ -494,8 +496,13 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
     if (!fgets (line, LINE_LEN, fd))
 	return current;;
 
-    sub_readtext((char *) &line,&current->text[1]);
-    current->lines = 2;
+    next = line,i=1;
+    while ((next =sub_readtext (next, &(current->text[i])))) {
+	if (current->text[i]==ERR) {return ERR;}
+	i++;
+	if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return current;}
+	}
+    current->lines=i+1;
 
     if ((current->text[0]=="") && (current->text[1]=="")) {
 	// void subtitle -> end of previous marked and exit
@@ -505,6 +512,53 @@ subtitle *sub_read_line_aqt(FILE *fd,subtitle *current) {
 
     return current;
 }
+
+subtitle *previous_subrip09_sub = NULL;
+
+subtitle *sub_read_line_subrip09(FILE *fd,subtitle *current) {
+    char line[LINE_LEN+1];
+    int a1,a2,a3;
+    char * next=NULL;
+    int i,len;
+   
+    while (1) {
+    // try to locate next subtitle
+        if (!fgets (line, LINE_LEN, fd))
+		return NULL;
+        if (!((len=sscanf (line, "[%d:%d:%d]",&a1,&a2,&a3)) < 3))
+		break;
+    }
+    
+    if (previous_subrip09_sub != NULL) 
+	previous_subrip09_sub->end = current->start-1;
+    
+    previous_subrip09_sub = current;
+
+    if (!fgets (line, LINE_LEN, fd))
+	return NULL;
+
+    current->start = a1*360000+a2*6000+a3*100;
+
+    next = line,i=0;
+    
+    current->text[0]==""; // just to be sure that string is clear
+    
+    while ((next =sub_readtext (next, &(current->text[i])))) {
+	if (current->text[i]==ERR) {return ERR;}
+	i++;
+	if (i>=SUB_MAX_TEXT) { printf ("Too many lines in a subtitle\n");current->lines=i;return current;}
+	}
+    current->lines=i+1;
+
+    if ((current->text[0]=="") && (i==0)) {
+	// void subtitle -> end of previous marked and exit
+	previous_subrip09_sub = NULL;
+	return NULL;
+	}
+
+    return current;
+}
+
 
 int sub_autodetect (FILE *fd) {
     char line[LINE_LEN+1];
@@ -548,7 +602,9 @@ int sub_autodetect (FILE *fd) {
 	if (sscanf (line, "FORMAT=TIM%c", &p)==1 && p=='E')
 		{sub_uses_time=1; return SUB_MPSUB;}
 	if (strstr (line, "-->>"))
-		{sub_uses_time=0; return SUB_MPSUB;}
+		{sub_uses_time=0; return SUB_AQTITLE;}
+	if (sscanf (line, "[%d:%d:%d]", &i, &i, &i)==3)
+		{sub_uses_time=1;return SUB_SUBRIP09;}
     }
 
     return SUB_INVALID;  // too many bad lines
@@ -661,7 +717,7 @@ subtitle* sub_read_file (char *filename, float fps) {
     int n_max;
     subtitle *first;
     char *fmtname[] = { "microdvd", "subrip", "subviewer", "sami", "vplayer",
-		        "rt", "ssa", "dunnowhat", "mpsub", "aqt", "subviewer 2.0" };
+		        "rt", "ssa", "dunnowhat", "mpsub", "aqt", "subviewer 2.0", "subrip 0.9" };
     subtitle * (*func[])(FILE *fd,subtitle *dest)=
     {
 	    sub_read_line_microdvd,
@@ -674,7 +730,8 @@ subtitle* sub_read_file (char *filename, float fps) {
 	    sub_read_line_dunnowhat,
 	    sub_read_line_mpsub,
 	    sub_read_line_aqt,
-	    sub_read_line_subviewer2
+	    sub_read_line_subviewer2,
+	    sub_read_line_subrip09
 
     };
     if(filename==NULL) return NULL; //qnx segfault
