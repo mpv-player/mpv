@@ -2938,9 +2938,8 @@ fi
 
 
 echocheck "OpenGL"
-cygwin && _gl=no
 #Note: this test is run even with --enable-gl since we autodetect $_ld_gl
-if (test "$_x11" = yes || mingw32) && test "$_gl" != no ; then
+if (test "$_x11" = yes || mingw32 || cygwin) && test "$_gl" != no ; then
   cat > $TMPC << EOF
 #include <GL/gl.h>
 int main(void) { return 0; }
