@@ -69,6 +69,7 @@ extern int stream_open_tv(stream_t *stream, tvi_handle_t *tvh);
 
 #ifdef HAVE_CDDA
 stream_t* open_cdda(char* dev,char* track);
+stream_t* cddb_open(char* dev,char* track);
 #endif
 
 // Open a new stream  (stdin/file/vcd/url)
@@ -87,6 +88,8 @@ int bsize = VCD_SECTOR_SIZE;
 #ifdef HAVE_CDDA
 if(strncmp("cdda://",filename,7) == 0)
   return open_cdda(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
+if(strncmp("cddb://",filename,7) == 0)
+  return cddb_open(cdrom_device ? cdrom_device : DEFAULT_CDROM_DEVICE,filename+7);
 #endif
 
 //============ Open VideoCD track ==============
