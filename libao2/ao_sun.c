@@ -42,7 +42,7 @@ LIBAO_EXTERN(sun)
 #endif
 
 
-static char *audio_dev = "/dev/audio";
+static char *audio_dev = NULL;
 static int queued_bursts = 0;
 static int queued_samples = 0;
 static int bytes_per_sample = 0;
@@ -224,6 +224,11 @@ static int init(int rate,int channels,int format,int flags){
 
     audio_info_t info;
     int ok;
+
+    if (audio_dev == NULL) {
+	if ((audio_dev = getenv("AUDIODEV")) == NULL)
+	    audio_dev = "/dev/audio";
+    }
 
     if (ao_subdevice) audio_dev = ao_subdevice;
 
