@@ -437,7 +437,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
    );
    XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
    XSetWMNormalHints( mDisplay,vo_window,&hint );
-//   if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
    XMapWindow(mDisplay, vo_window);
    if ( flags&1 ) vo_x11_fullscreen();
 #ifdef HAVE_XINERAMA

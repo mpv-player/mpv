@@ -292,8 +292,6 @@ static uint32_t config( uint32_t width, uint32_t height, uint32_t d_width, uint3
    vo_x11_classhint( mDisplay,vo_window,"xmga" );
    vo_hidecursor(mDisplay,vo_window);
 
-//   if ( vo_fs ) vo_x11_decoration( mDisplay,vo_window,0 );
-
    XStoreName( mDisplay,vo_window,mTitle );
    XMapWindow( mDisplay,vo_window );
 

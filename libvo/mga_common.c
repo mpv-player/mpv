@@ -276,6 +276,10 @@ static uint32_t control(uint32_t request, void *data, ...)
     mga_fullscreen();
 #endif
     return VO_TRUE;
+#if defined( VO_XMGA ) && defined( HAVE_NEW_GUI )
+  case VOCTRL_GUISUPPORT:
+    return VO_TRUE;
+#endif
   }
   return VO_NOTIMPL;
 }

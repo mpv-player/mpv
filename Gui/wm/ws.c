@@ -150,45 +150,58 @@ int wsWindowManagerType( void )
  unsigned long   nitems, bytesafter;
  unsigned char * args = NULL;
 
- mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is " );
-// --- icewm
-// type=XInternAtom( wsDisplay,"_ICEWM_TRAY",False ); 
-// if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
-//  {
-//   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"IceWM\n" );
-//   XFree( args );
-//   return wsWMIceWM;
-//  }
+ Window		 win;
+ XEvent          xev;
+ int		 c = 0;
+ int             wm = wsWMUnknown;
 
 // --- gnome
-// type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
-// if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
-//  {
-//   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"Gnome\n" );
-//   XFree( args );
-//   return wsWMGnome;
-//  }
- 
-// --- kde
-// type=XInternAtom( wsDisplay,"_KDE_NET_WM_FRAME_STRUT",False );
-//// type=XInternAtom( wsDisplay,"_KDE_NET_USER_TIME",False );
-// if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
-//  {
-//   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"KDE\n" );
-//   XFree( args );
-//   return wsWMKDE;
-//  }
+ type=XInternAtom( wsDisplay,"_WIN_SUPPORTING_WM_CHECK",False );
+ if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+  {
+   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is Gnome\n" );
+   XFree( args );
+   return wsWMGnome;
+  }
 
 // --- net wm
  type=XInternAtom( wsDisplay,"_NET_SUPPORTED",False );
  if ( Success == XGetWindowProperty( wsDisplay,wsRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
   {
-   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"NetWM\n" );
+   mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"[ws] Detected wm is NetWM\n" );
    XFree( args );
    return wsWMNetWM;
   }
- 
- mp_dbg( MSGT_GPLAYER,MSGL_STATUS,"Unknow\n" );
+
+// --- other wm
+ mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Create window for WM detect ...\n" );
+ win=XCreateSimpleWindow( wsDisplay,wsRootWin,wsMaxX,wsMaxY,1,1,0,0,0 );
+ XSelectInput( wsDisplay,win,PropertyChangeMask | StructureNotifyMask );
+ XMapWindow( wsDisplay,win );
+ XMoveWindow( wsDisplay,win,wsMaxX,wsMaxY );
+ do 
+  { 
+   XCheckWindowEvent( wsDisplay,win,PropertyChangeMask | StructureNotifyMask,&xev );
+
+   if ( xev.type == PropertyNotify )
+    {
+     char * name = XGetAtomName( wsDisplay,xev.xproperty.atom );
+     if ( !name ) break;
+
+     if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
+      { mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Detected wm is IceWM.\n" ); wm=wsWMIceWM; break; }
+     if ( !strncmp( name,"_KDE_",5 ) )
+      { mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Detected wm is KDE.\n" ); wm=wsWMKDE; break; }
+     if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
+      { mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Detected wm is WindowMaker style.\n" ); wm=wsWMWMaker; break; }
+//     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",win,name,xev.xproperty.atom );
+     XFree( name );
+    }
+ } while( c++ < 25 );
+ XDestroyWindow( wsDisplay,win );
+#ifdef MP_DEBUG
+ if ( wm == wsWMUnknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[ws] Unknown wm type...\n" );
+#endif
  return wsWMUnknown;
 }
 

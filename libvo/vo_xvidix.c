@@ -33,6 +33,10 @@
 #include "vosub_vidix.h"
 #include "../vidix/vidixlib.h"
 
+#ifdef HAVE_NEW_GUI
+#include "../Gui/interface.h"
+#endif
+
 LIBVO_EXTERN(xvidix)
 
 static vo_info_t vo_info = 
@@ -228,9 +232,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     window_width = d_width;
     window_height = d_height;
 
-    vo_fs = flags&0x01;
-    if (vo_fs)
-     { vo_old_width=d_width; vo_old_height=d_height; }
+//    vo_fs = flags&0x01;
+//    if (vo_fs)
+//     { vo_old_width=d_width; vo_old_height=d_height; }
 
     X_already_started++;
     
@@ -254,26 +258,29 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     }
 
     aspect(&d_width, &d_height, A_NOZOOM);
+    
+    vo_dwidth=d_width; vo_dheight=d_height;
 
 #ifdef HAVE_NEW_GUI
-if (vo_window == None)
+if(use_gui) guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
+else
 {
 #endif
 
 #ifdef X11_FULLSCREEN
-    if (vo_fs) /* fullscreen */
+    if ( flags&1 ) /* fullscreen */
     {
         if (flags & 0x04)
         {
     	    aspect(&d_width, &d_height, A_ZOOM);
         }
-    	else
-    	{
-	    d_width = vo_screenwidth;
-	    d_height = vo_screenheight;
-    	}
-	window_width = vo_screenwidth;
-	window_height = vo_screenheight;
+//    	else
+//    	{
+//	    d_width = vo_screenwidth;
+//	    d_height = vo_screenheight;
+//    	}
+//	window_width = vo_screenwidth;
+//	window_height = vo_screenheight;
     }
 #endif
     dwidth = d_width;
@@ -310,10 +317,10 @@ if (vo_window == None)
     vo_x11_classhint(mDisplay, vo_window, "xvidix");
     vo_hidecursor(mDisplay, vo_window);
 
-#ifdef X11_FULLSCREEN
-    if (vo_fs) /* fullscreen */
-	vo_x11_decoration(mDisplay, vo_window, 0);
-#endif
+//#ifdef X11_FULLSCREEN
+//    if (vo_fs && vo_wm_type == 0) /* fullscreen */
+//	vo_x11_decoration(mDisplay, vo_window, 0);
+//#endif
 
     XGetNormalHints(mDisplay, vo_window, &hint);
     hint.x = window_x;
@@ -327,13 +334,16 @@ if (vo_window == None)
     /* Map window. */
 
     XMapWindow(mDisplay, vo_window);
+    
+    if ( flags&1 ) vo_x11_fullscreen();
+    
 #ifdef HAVE_XINERAMA
     vo_x11_xinerama_move(mDisplay, vo_window);
 #endif
 
     vo_gc = XCreateGC(mDisplay, vo_window, GCForeground, &mGCV);
 
-    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask );
+//    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask );
 #ifdef HAVE_NEW_GUI
 }
 #endif

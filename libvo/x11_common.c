@@ -174,6 +174,59 @@ static void x11_errorhandler(Display *display, XErrorEvent *event)
 #undef MSGLEN
 }
 
+int vo_wm_detect( void )
+{
+ Atom            type;
+ Window		 win;
+ XEvent          xev;
+ int		 c = 0;
+ int             wm = vo_wm_Unknown;
+ int             format;
+ unsigned long   nitems, bytesafter;
+ unsigned char * args = NULL;
+#if 1
+// --- netwm 
+ type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
+ if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
+  {
+   mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is NetWM.\n" );
+   XFree( args );
+   return vo_wm_NetWM;
+  }
+#endif
+// --- other wm
+ mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Create window for WM detect ...\n" );
+ win=XCreateSimpleWindow( mDisplay,mRootWin,vo_screenwidth,vo_screenheight,1,1,0,0,0 );
+ XSelectInput( mDisplay,win,PropertyChangeMask | StructureNotifyMask );
+ XMapWindow( mDisplay,win );
+ XMoveWindow( mDisplay,win,vo_screenwidth,vo_screenheight );
+ do 
+  { 
+   XCheckWindowEvent( mDisplay,win,PropertyChangeMask | StructureNotifyMask,&xev );
+
+   if ( xev.type == PropertyNotify )
+    {
+     char * name = XGetAtomName( mDisplay,xev.xproperty.atom );
+     if ( !name ) break;
+
+     if ( !strncmp( name,"_ICEWM_TRAY",11 ) )
+      { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is IceWM.\n" ); wm=vo_wm_IceWM; break; }
+     if ( !strncmp( name,"_KDE_",5 ) )
+      { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is KDE.\n" ); wm=vo_wm_KDE; break; }
+     if ( !strncmp( name,"KWM_WIN_DESKTOP",15 ) )
+      { mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is WindowMaker style.\n" ); wm=vo_wm_WMakerStyle; break; }
+//     fprintf(stderr,"[ws] PropertyNotify ( 0x%x ) %s ( 0x%x )\n",win,name,xev.xproperty.atom );
+
+     XFree( name );
+    }
+ } while( c++ < 25 );
+ XDestroyWindow( mDisplay,win );
+#ifdef MP_DEBUG
+ if ( wm == vo_wm_Unknown ) mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Unknown wm type...\n" );
+#endif
+ return wm;
+}    
+
 int vo_init( void )
 {
 // int       mScreen;
@@ -297,19 +350,7 @@ int vo_init( void )
 	depth, vo_depthonscreen,
 	dispName,mLocalDisplay?"local":"remote");
 
- {
-  Atom            type;
-  int             format;
-  unsigned long   nitems, bytesafter;
-  unsigned char * args = NULL;
-  type=XInternAtom( mDisplay,"_NET_SUPPORTED",False );
-  if ( Success == XGetWindowProperty( mDisplay,mRootWin,type,0,65536 / sizeof( long ),False,AnyPropertyType,&type,&format,&nitems,&bytesafter,&args ) && nitems > 0 )
-   {
-    mp_dbg( MSGT_VO,MSGL_STATUS,"[x11] Detected wm is NetWM.\n" );
-    XFree( args );
-    vo_wm_type=vo_wm_NetWM;
-   }
- }    
+ vo_wm_type=vo_wm_detect();
 
  return 1;
 }
@@ -564,6 +605,7 @@ int vo_x11_check_events(Display *mydisplay){
            mplayer_put_key(MOUSE_BTN0+Event.xbutton.button-1);
            break;
 #endif
+#if 1
       case PropertyNotify: 
     	   {
 	    char * name = XGetAtomName( mydisplay,Event.xproperty.atom );
@@ -590,9 +632,9 @@ int vo_x11_check_events(Display *mydisplay){
 	    XFree( name );
 	   }
 	   break;
+#endif
      }
   }
-
   return ret;
 }
 
@@ -675,7 +717,11 @@ void vo_x11_fullscreen( void )
 
  switch ( vo_wm_type )
   {
+//   case vo_wm_WMakerStyle:
+//          vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
+	  break;
    case vo_wm_Unknown:
+          vo_x11_decoration( mDisplay,vo_window,(vo_fs) ? 1 : 0 );
 	  XUnmapWindow( mDisplay,vo_window );
 	  break;
    case vo_wm_IceWM:
