@@ -131,8 +131,7 @@ static double inline __FastCos(double x)
 #undef cos
 #define cos(x) __FastCos(x)
 #else
-#define AVOID_FPU
-#warning You have non x86 system. Please port MATH support.
+#include "generic_math.h"
 #endif /*__386__*/
 #endif /*RAGE128*/
 
