@@ -12,6 +12,7 @@
 
  */
 #include "config.h"
+#include "mp_msg.h"
 
 #ifdef USE_DVDREAD
 
@@ -66,7 +67,7 @@ static inline unsigned char get_nibble(spudec_handle_t *this)
   unsigned char nib;
   int *nibblep = this->current_nibble + this->deinterlace_oddness;
   if (*nibblep / 2 >= this->control_start) {
-    fprintf(stderr, "ERROR: get_nibble past end of packet\n");
+    mp_msg(MSGT_SPUDEC,MSGL_WARN, "SPUdec: ERROR: get_nibble past end of packet\n");
     return 0;
   }
   nib = this->packet[*nibblep / 2];
@@ -177,23 +178,23 @@ static void spudec_process_control(spudec_handle_t *this)
     start_off = next_off;
     date = get_be16(this->packet + start_off);
     next_off = get_be16(this->packet + start_off + 2);
-    printf("date=%d\n", date);
+    mp_msg(MSGT_SPUDEC,MSGL_DBG2, "date=%d\n", date);
     off = start_off + 4;
     for (type = this->packet[off++]; type != 0xff; type = this->packet[off++]) {
-      printf("cmd=%d  ",type);
+      mp_msg(MSGT_SPUDEC,MSGL_DBG2, "cmd=%d  ",type);
       switch(type) {
       case 0x00:
 	/* Menu ID, 1 byte */
-	printf("Menu ID\n");
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Menu ID\n");
 	break;
       case 0x01:
 	/* Start display */
-	printf("Start display!\n");
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Start display!\n");
 	this->start_pts = this->now_pts + date;
 	break;
       case 0x02:
 	/* Stop display */
-	printf("Stop display!\n");
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Stop display!\n");
 	this->end_pts = this->now_pts + date;
 	break;
       case 0x03:
@@ -202,7 +203,7 @@ static void spudec_process_control(spudec_handle_t *this)
 	this->palette[1] = this->packet[off] & 0xf;
 	this->palette[2] = this->packet[off + 1] >> 4;
 	this->palette[3] = this->packet[off + 1] & 0xf;
-	printf("Palette %d, %d, %d, %d\n",
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Palette %d, %d, %d, %d\n",
 	       this->palette[0], this->palette[1], this->palette[2], this->palette[3]);
 	off+=2;
 	break;
@@ -212,7 +213,7 @@ static void spudec_process_control(spudec_handle_t *this)
 	this->alpha[1] = this->packet[off] & 0xf;
 	this->alpha[2] = this->packet[off + 1] >> 4;
 	this->alpha[3] = this->packet[off + 1] & 0xf;
-	printf("Alpha %d, %d, %d, %d\n",
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Alpha %d, %d, %d, %d\n",
 	       this->alpha[0], this->alpha[1], this->alpha[2], this->alpha[3]);
 	off+=2;
 	break;
@@ -227,7 +228,7 @@ static void spudec_process_control(spudec_handle_t *this)
 	this->start_row = b >> 12;
 	this->end_row = b & 0xfff;
 	this->height = this->end_row - this->start_row /* + 1 */;
-	printf("Coords  col: %d - %d  row: %d - %d  (%dx%d)\n",
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Coords  col: %d - %d  row: %d - %d  (%dx%d)\n",
 	       this->start_col, this->end_col, this->start_row, this->end_row,
 	       this->width, this->height);
 	off+=6;
@@ -236,17 +237,17 @@ static void spudec_process_control(spudec_handle_t *this)
 	/* Graphic lines */
 	this->current_nibble[0] = 2 * get_be16(this->packet + off);
 	this->current_nibble[1] = 2 * get_be16(this->packet + off + 2);
-	printf("Graphic offset 1: %d  offset 2: %d\n",
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Graphic offset 1: %d  offset 2: %d\n",
 	       this->current_nibble[0] / 2, this->current_nibble[1] / 2);
 	off+=4;
 	break;
       case 0xff:
 	/* All done, bye-bye */
-	printf("Done!\n");
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"Done!\n");
 	return;
-	break;
+//	break;
       default:
-	printf("spudec: Error determining control type 0x%02x.  Skipping %d bytes.\n",
+	mp_msg(MSGT_SPUDEC,MSGL_WARN,"spudec: Error determining control type 0x%02x.  Skipping %d bytes.\n",
 	       type, next_off - off);
 	goto next_control;
       }
@@ -285,7 +286,7 @@ void spudec_assemble(void *this, unsigned char *packet, int len, int pts100)
   } else {
     // Continue current fragment
     if (spu->packet_size < spu->packet_offset + len){
-      fprintf(stderr,"invalid fragment\n");
+      mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUasm: invalid fragment\n");
       spu->packet_size = spu->packet_offset = 0;
     } else {
       memcpy(spu->packet + spu->packet_offset, packet, len);
@@ -299,16 +300,16 @@ void spudec_assemble(void *this, unsigned char *packet, int len, int pts100)
   { int x=0,y;
     while(x>=0 && x+4<=spu->packet_offset){
       y=get_be16(spu->packet+x+2); // next control pointer
-      printf("SPUtest: x=%d y=%d off=%d size=%d\n",x,y,spu->packet_offset,spu->packet_size);
+      mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPUtest: x=%d y=%d off=%d size=%d\n",x,y,spu->packet_offset,spu->packet_size);
       if(x>=4 && x==y){		// if it points to self - we're done!
         // we got it!
-	printf("SPUgot: off=%d  size=%d \n",spu->packet_offset,spu->packet_size);
+	mp_msg(MSGT_SPUDEC,MSGL_DBG2,"SPUgot: off=%d  size=%d \n",spu->packet_offset,spu->packet_size);
 	spudec_decode(spu);
 	spu->packet_offset = 0;
 	break;
       }
       if(y<=x || y>=spu->packet_size){ // invalid?
-	printf("SPUtest: broken packet!!!!! y=%d < x=%d\n",y,x);
+	mp_msg(MSGT_SPUDEC,MSGL_WARN,"SPUtest: broken packet!!!!! y=%d < x=%d\n",y,x);
         spu->packet_size = spu->packet_offset = 0;
         break;
       }
