@@ -56,7 +56,7 @@ Current plugins:
     Optional 'x' parameter (0..3) controls horizontal and vertical mirroring
     MPI: TEMP
 
--vop scale[=w:h]
+-vop scale[=w:h[:c[:p]]]
     Software scaling (zoom) _and_ yuv<->rgb colorspace conversion
     w,h (new width/height after scaling) defaults to original width,height
 	note: if -zoom is used, and underlaying filters (including libvo)
@@ -64,6 +64,15 @@ Current plugins:
 	note 2: w/h values -1 means original width/height, 0 means scaled
 	d_width/d_height. -2/-3 means calculating w or h using the other
 	dimension and the original (-3) or prescaled (-2) aspect ratio.
+    c   chroma skipping
+	0 -> use all available input lines for chroma
+	1 -> use only every 2. input line for chroma
+	2 -> use only every 4. input line for chroma
+	3 -> use only every 8. input line for chroma
+    p	scaling parameter (depends upon the used scaling method)
+	for -sws 2 (bicubic)  its sharpness (0 (soft) - 100 (sharp))
+	for -sws 7 (gaussian) its sharpness (0 (soft) - 100 (sharp))
+	for -sws 9 (lanczos)  its filter length (1  - 10)
     MPI: TEMP, accepts stride
     Special: dec_video and mpcodecs core autoloads it for colorspace conv.
 
