@@ -187,19 +187,18 @@ return 1;
 
 static void process_userdata(unsigned char* buf,int len){
     int i;
-    if(!memcmp(buf,"CC",2)) /* if the user data starts with "CC", assume it is a CC info packet */
-    {
-    	if(verbose)printf("video.c: process_userdata() detected Closed Captions!\n");
+    /* if the user data starts with "CC", assume it is a CC info packet */
+    if(len>2 && buf[0]=='C' && buf[1]=='C'){
+//    	mp_msg(MSGT_DECVIDEO,MSGL_DBG2,"video.c: process_userdata() detected Closed Captions!\n");
 	if(subcc_enabled) subcc_process_data(buf+2,len-2);
     }
-    if(verbose)
-    {
+    if(!verbose) return;
     printf( "user_data: len=%3d  %02X %02X %02X %02X '",
 	    len, buf[0], buf[1], buf[2], buf[3]);
     for(i=0;i<len;i++)
-	if(buf[i]>=32 && buf[i]<127) putchar(buf[i]);
+//	if(buf[i]>=32 && buf[i]<127) putchar(buf[i]);
+	if(buf[i]&0x60) putchar(buf[i]&0x7F);
     printf("'\n");
-    }
 }
 
 int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** start,int force_fps){

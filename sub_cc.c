@@ -16,6 +16,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sub_cc.h"
+
 #include "subreader.h"
 
 #include "libvo/video_out.h"
@@ -28,10 +30,8 @@
 
 static char chartbl[128];
 
-extern int subcc_enabled;
-
-subtitle buf1,buf2;
-subtitle *fb,*bb;
+static subtitle buf1,buf2;
+static subtitle *fb,*bb;
 
 static unsigned int cursor_pos=0;
 
@@ -58,7 +58,7 @@ static void build_char_table(void)
   chartbl[0x7f] = '¤';    /* FIXME: this should be a solid block */
 }
 
-void clear_buffer(subtitle *buf)
+static void clear_buffer(subtitle *buf)
 {
 	int i;
 	buf->lines=0;
@@ -184,7 +184,7 @@ static void cc_decode_EIA608(unsigned short int data)
   lastcode=data;  
 }
 
-void subcc_decode()
+static void subcc_decode()
 {
   /* The first number may denote a channel number. I don't have the
    * EIA-708 standard, so it is hard to say.
