@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2001 Nick Kurshev
  * 
- * BES YUV Framebuffer driver for Radeon cards
+ * BES YUV video overlay driver for Radeon cards
  * 
  * This software has been released under the terms of the GNU Public
  * license. See http://www.gnu.org/copyleft/gpl.html for details.
@@ -400,7 +400,7 @@ RTRACE("radeon_vid: usr_config: version = %x format=%x card=%x ram=%u src(%ux%u)
 	d1line = top * dstPitch;
 	d2line = (src_h * dstPitch) + ((top >> 1) * (dstPitch >> 1));
 	d3line = d2line + ((src_h >> 1) * (dstPitch >> 1));
-        besr.vid_buf0_base_adrs = ((radeon_overlay_off + d1line) & VIF_BUF0_BASE_ADRS_MASK) | VIF_BUF1_PITCH_SEL;
+        besr.vid_buf0_base_adrs = ((radeon_overlay_off + d1line) & VIF_BUF0_BASE_ADRS_MASK) | VIF_BUF0_PITCH_SEL;
         besr.vid_buf1_base_adrs = ((radeon_overlay_off + d2line) & VIF_BUF1_BASE_ADRS_MASK) | VIF_BUF1_PITCH_SEL;
         besr.vid_buf2_base_adrs = ((radeon_overlay_off + d3line) & VIF_BUF2_BASE_ADRS_MASK) | VIF_BUF2_PITCH_SEL;
     }
@@ -454,11 +454,24 @@ RTRACE("radeon_vid: BES: y_x_start=%x y_x_end=%x blank_at_top=%x pitch0_value=%x
 
 static void radeon_vid_frame_sel(int frame)
 {
-    uint32_t off;
-    off = frame%2?besr.vid_buf3_base_adrs:besr.vid_buf0_base_adrs;
+    uint32_t off0,off1,off2;
+    if(frame%2)
+    {
+      off0 = besr.vid_buf3_base_adrs;
+      off1 = besr.vid_buf4_base_adrs;
+      off2 = besr.vid_buf5_base_adrs;
+    }
+    else
+    {
+      off0 = besr.vid_buf0_base_adrs;
+      off1 = besr.vid_buf1_base_adrs;
+      off2 = besr.vid_buf2_base_adrs;
+    }
     OUTREG(OV0_REG_LOAD_CNTL,		REG_LD_CTL_LOCK);
     while(!(INREG(OV0_REG_LOAD_CNTL)&REG_LD_CTL_LOCK_READBACK));
-    OUTREG(OV0_VID_BUF0_BASE_ADRS,	off);
+    OUTREG(OV0_VID_BUF0_BASE_ADRS,	off0);
+    OUTREG(OV0_VID_BUF1_BASE_ADRS,	off1);
+    OUTREG(OV0_VID_BUF2_BASE_ADRS,	off2);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
 }
 
@@ -679,7 +692,7 @@ static int radeon_vid_initialize(void)
 {
 	radeon_vid_in_use = 0;
 
-	RTRACE( "Radeon BES YUV Video interface v0.01 (c) Nick Kurshev\n");
+	printk( "radeon_vid: Radeon video overlay driver v"RADEON_VID_VERSION" (C) Nick Kurshev\n");
 	if(register_chrdev(RADEON_VID_MAJOR, "radeon_vid", &radeon_vid_fops))
 	{
 		printk( "radeon_vid: unable to get major: %d\n", RADEON_VID_MAJOR);
