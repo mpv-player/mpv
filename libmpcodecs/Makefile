@@ -5,7 +5,7 @@ LIBNAME = libmpcodecs.a
 LIBNAME2 = libmpencoders.a
 
 AUDIO_SRCS=dec_audio.c ad.c ad_liba52.c ad_acm.c ad_alaw.c ad_dk3adpcm.c ad_dshow.c ad_dvdpcm.c ad_ffmpeg.c ad_hwac3.c ad_imaadpcm.c ad_mp3lib.c ad_msadpcm.c ad_pcm.c ad_roqaudio.c ad_msgsm.c ad_faad.c ad_libvorbis.c ad_libmad.c ad_realaud.c ad_libdv.c
-VIDEO_SRCS=dec_video.c vd.c vd_null.c vd_realvid.c vd_cinepak.c vd_qtrpza.c vd_ffmpeg.c vd_dshow.c vd_vfw.c vd_vfwex.c vd_odivx.c vd_divx4.c vd_raw.c vd_xanim.c vd_msvidc.c vd_fli.c vd_qtrle.c vd_qtsmc.c vd_roqvideo.c vd_cyuv.c vd_nuv.c vd_libmpeg2.c vd_msrle.c vd_huffyuv.c vd_zlib.c vd_mpegpes.c vd_svq1.c vd_xvid.c vd_libdv.c
+VIDEO_SRCS=dec_video.c vd.c vd_null.c vd_realvid.c vd_cinepak.c vd_qtrpza.c vd_ffmpeg.c vd_dshow.c vd_vfw.c vd_vfwex.c vd_odivx.c vd_divx4.c vd_raw.c vd_xanim.c vd_msvidc.c vd_fli.c vd_qtrle.c vd_qtsmc.c vd_roqvideo.c vd_cyuv.c vd_nuv.c vd_libmpeg2.c vd_msrle.c vd_huffyuv.c vd_mpegpes.c vd_svq1.c vd_xvid.c vd_libdv.c vd_lcl.c
 VFILTER_SRCS=vf.c vf_vo.c vf_crop.c vf_expand.c vf_pp.c vf_scale.c vf_format.c vf_yuy2.c vf_flip.c vf_rgb2bgr.c vf_rotate.c vf_mirror.c vf_palette.c vf_lavc.c vf_dvbscale.c vf_cropdetect.c vf_test.c vf_noise.c vf_yvu9.c vf_rectangle.c vf_lavcdeint.c vf_eq.c vf_halfpack.c
 ENCODER_SRCS=ve.c ve_divx4.c ve_lavc.c ve_vfw.c ve_rawrgb.c ve_libdv.c
 NATIVE_SRCS=native/RTjpegN.c native/cinepak.c native/cyuv.c native/fli.c native/minilzo.c native/msvidc.c native/nuppelvideo.c native/qtrle.c native/qtrpza.c native/qtsmc.c native/roqav.c native/xa_gsm.c native/svq1.c

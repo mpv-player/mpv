@@ -48,12 +48,12 @@ extern vd_functions_t mpcodecs_vd_mpng;
 extern vd_functions_t mpcodecs_vd_ijpg;
 extern vd_functions_t mpcodecs_vd_libmpeg2;
 extern vd_functions_t mpcodecs_vd_huffyuv;
-extern vd_functions_t mpcodecs_vd_zlib;
 extern vd_functions_t mpcodecs_vd_mpegpes;
 extern vd_functions_t mpcodecs_vd_realvid;
 extern vd_functions_t mpcodecs_vd_svq1;
 extern vd_functions_t mpcodecs_vd_xvid;
 extern vd_functions_t mpcodecs_vd_libdv;
+extern vd_functions_t mpcodecs_vd_lcl;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -95,9 +95,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #endif
         &mpcodecs_vd_libmpeg2,
         &mpcodecs_vd_huffyuv,
-#ifdef HAVE_ZLIB
-        &mpcodecs_vd_zlib,
-#endif
         &mpcodecs_vd_mpegpes,
 #ifdef USE_REALCODECS
 	&mpcodecs_vd_realvid,
@@ -107,8 +104,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 	&mpcodecs_vd_xvid,
 #endif
 #ifdef HAVE_LIBDV095
-  &mpcodecs_vd_libdv,
+	&mpcodecs_vd_libdv,
 #endif
+	&mpcodecs_vd_lcl,
 	NULL
 };
 
