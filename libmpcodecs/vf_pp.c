@@ -93,7 +93,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		    vf->priv->dmpi->planes,vf->priv->dmpi->stride,
 		    (mpi->w+7)&(~7),mpi->h,
 		    mpi->qscale, mpi->qstride,
-		    &vf->priv->ppMode[ vf->priv->pp ], vf->priv->context);
+		    &vf->priv->ppMode[ vf->priv->pp ], vf->priv->context,
+		    mpi->pict_type);
     }
     
     return vf_next_put_image(vf,vf->priv->dmpi);
@@ -161,7 +162,7 @@ static int open(vf_instance_t *vf, char* args){
 	    ppMode.maxTmpNoise[2]= 3000;
 	    ppMode.maxAllowedY= 234;
 	    ppMode.minAllowedY= 16;
-	    ppMode.maxDcDiff= 1;
+	    ppMode.baseDcDiff= 256/4;
 	    ppMode.flatnessThreshold=40;
     
             vf->priv->ppMode[i]= ppMode;
