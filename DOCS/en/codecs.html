@@ -363,6 +363,7 @@ MPlayer supports decoding all versions of RealVideo:
   <LI>Voxware audio (using DirectShow DLL)</LI>
   <LI>alaw and ulaw, various gsm, adpcm and pcm formats and other simple old
     audio codecs</LI>
+  <LI>AAC</LI>
 </UL>
 
 
@@ -446,6 +447,34 @@ MPlayer supports decoding nearly all versions of RealAudio:
 <P>Qualcomm audio stream (fourcc: <I>Qclp</I>) is found in MOV/QT files.
   It can be decoded with QuickTime libraries. For installation instructions
   please see the <A HREF="#sorenson">Sorenson video codec</A> section.</P>
+
+
+<H4><A NAME="aac">2.2.2.8 AAC codec</A></H4>
+
+<P>AAC (Advanced Audio Coding) is an audio codec sometimes found in MOV and MP4
+  files. An open source decoder called FAAD is available from
+  <A HREF="http://www.audiocoding.com/">AudioCoding.com</A>.
+  You can download the second generation codec FAAD2 at their
+  <A HREF="http://www.audiocoding.com/download.php">download page</A>.
+  Unfortunately FAAD2 1.1 does not compile under Linux, so you will have to use
+  the CVS version. Here's how:</P>
+
+<OL>
+  <LI>cvs -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac login</LI>
+  <LI>cvs -z3 -d:pserver:anonymous@cvs.audiocoding.com:/cvsroot/faac co faad2</LI>
+  <LI>cd faad2/</LI>
+  <LI>chmod +x bootstrap</LI>
+  <LI>./bootstrap</LI>
+  <LI>make</LI>
+  <LI>make install</LI>
+</OL>
+
+<P>Binaries are not available from audiocoding.com, but you can (apt-)get
+  Debian packages from
+  <A HREF="http://marillat.free.fr/">Christian Marillat's homepage</A>
+  and Mandrake RPMs from the
+  <A HREF="http://plf.zarb.org/">P.L.F</A>.</P>
+
 
 
 <H3><A NAME="importing">2.2.3 Win32 codec importing HOWTO</A></H3>
