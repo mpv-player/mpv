@@ -2467,6 +2467,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 
 #ifdef USE_EDL
  if( next_edl_record->next ) { // Are we (still?) doing EDL?
+  if ( !sh_video ) {
+    mp_msg( MSGT_CPLAYER, MSGL_ERR, "Cannot use edit list without video. EDL disabled.\n" );
+    next_edl_record->next = NULL;
+  } else {
    if( sh_video->pts >= next_edl_record->start_sec ) {
      if( next_edl_record->action == EDL_SKIP ) {
        osd_function = OSD_FFW;
@@ -2486,6 +2490,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
        next_edl_record = next_edl_record->next;
      }
    }
+  }
  }
 #endif
 
