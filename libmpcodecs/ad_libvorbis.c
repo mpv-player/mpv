@@ -188,22 +188,24 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
         int samples;
         float **pcm;
         float scale;
-        ogg_packet op;
         struct ov_struct_st *ov = sh->context;
-        op.b_o_s =  op.e_o_s = 0;
 	while(len < minlen) {
-	  op.bytes = ds_get_packet(sh->ds,&op.packet);
-	  if(!op.packet)
-	    break;
-	  if(vorbis_synthesis(&ov->vb,&op)==0) /* test for success! */
-	    vorbis_synthesis_blockin(&ov->vd,&ov->vb);
-	  while((samples=vorbis_synthesis_pcmout(&ov->vd,&pcm))>0){
+	  while((samples=vorbis_synthesis_pcmout(&ov->vd,&pcm))<=0){
+	    ogg_packet op;
+	    memset(&op,0,sizeof(op)); //op.b_o_s = op.e_o_s = 0;
+	    op.bytes = ds_get_packet(sh->ds,&op.packet);
+	    if(op.bytes<=0) break;
+	    if(vorbis_synthesis(&ov->vb,&op)==0) /* test for success! */
+	      vorbis_synthesis_blockin(&ov->vd,&ov->vb);
+	  }
+	  if(samples<=0) break; // error/EOF
+	  while(samples>0){
 	    int i,j;
 	    int clipflag=0;
 	    int convsize=(maxlen-len)/(2*ov->vi.channels); // max size!
-	    int bout=(samples<convsize?samples:convsize);
+	    int bout=((samples<convsize)?samples:convsize);
 	  
-	    if(bout<=0) break;
+	    if(bout<=0) break; // no buffer space
 
 	    /* convert floats to 16 bit signed ints (host order) and
 	       interleave */
@@ -265,10 +267,12 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 	      mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"Clipping in frame %ld\n",(long)(ov->vd.sequence));
 	    len+=2*ov->vi.channels*bout;
 	    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"\n[decoded: %d / %d ]\n",bout,samples);
+	    samples-=bout;
 	    vorbis_synthesis_read(&ov->vd,bout); /* tell libvorbis how
 						    many samples we
 						    actually consumed */
-	  }
+	  } //while(samples>0)
+//          if (!samples) break; // why? how?
 	}
 
 
