@@ -192,6 +192,7 @@ err_out_parse_error:
 static short get_driver(char *s,int audioflag)
 {
 	static char *audiodrv[] = {
+		"null",
 		"mp3lib",
 		"pcm",
 		"libac3",
@@ -203,6 +204,7 @@ static short get_driver(char *s,int audioflag)
 		NULL
 	};
 	static char *videodrv[] = {
+		"null",
 		"libmpeg2",
 		"vfw",
 		"odivx",
@@ -213,9 +215,9 @@ static short get_driver(char *s,int audioflag)
         char **drv=audioflag?audiodrv:videodrv;
         int i;
         
-        for(i=0;drv[i];i++) if(!strcmp(s,drv[i])) return i+1;
+        for(i=0;drv[i];i++) if(!strcmp(s,drv[i])) return i;
 
-	return 0;
+	return -1;
 }
 
 static int validate_codec(codecs_t *c, int type)
@@ -484,7 +486,7 @@ codecs_t **parse_codec_cfg(char *cfgfile)
 		} else if (!strcmp(token[0], "driver")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
-			if (!(codec->driver = get_driver(token[0],codec_type)))
+			if ((codec->driver = get_driver(token[0],codec_type))<0)
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "dll")) {
 			if (get_token(1, 1) < 0)
