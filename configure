@@ -1093,6 +1093,27 @@ else
 fi
 
 
+echocheck "inet_pton()"
+cat > $TMPC << EOF
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <arpa/inet.h>
+int main(void) { (void) inet_pton(0, 0, 0); return 0; }
+EOF
+if cc_check $_ld_sock ; then
+  # NOTE: Linux has libresolv but does not need it
+  :
+  echores "yes (using $_ld_sock)"
+elif cc_check $_ld_sock -lresolv ; then
+  # NOTE: needed for SunOS at least
+  _ld_sock="$_ld_sock -lresolv"
+  echores "yes (using $_ld_sock)"
+else
+  echores "no (=> streaming support disabled)"
+  _streaming=no
+fi
+
+
 echocheck "malloc.h"
 cat > $TMPC << EOF
 #include <malloc.h>
