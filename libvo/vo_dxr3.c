@@ -472,10 +472,6 @@ static void flip_page(void)
 			ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
 			pts_offset = 0;
 		} else if ((vo_pts - pts_offset) < (ioval - 7200) || (vo_pts - pts_offset) > (ioval + 7200)) {
-			if (prev_pts > vo_pts) {
-				printf(" !! Wrap !!\n");
-			}
-			printf("VO: [dxr3] Resync\n");
 			ioval = (vo_pts + pts_offset) >> 1;
 	    		ioctl(fd_control, EM8300_IOCTL_SCR_SET, &ioval);
 			ioctl(fd_control, EM8300_IOCTL_SCR_GET, &ioval);
