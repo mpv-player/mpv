@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.72 -->
+<!-- synced to 1.74 -->
 <sect1 id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -288,7 +288,7 @@ EndSection<!--
 <sect4 id="trident">
 <title>Trident kártyák</title>
 <para>
-Ha az xv-t Trident kártyával akarod használni, feltéve hogy nem megy 4.1.0-val,
+Ha az Xv-t Trident kártyával akarod használni, feltéve hogy nem megy 4.1.0-val,
 telepítsd fel az XFree 4.2.0-t. A 4.2.0-ban teljes képernyős Xv támogatás van
 a Cyberblade XP kártyával.
 </para>
