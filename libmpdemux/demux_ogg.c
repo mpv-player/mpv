@@ -901,7 +901,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   sh_audio_t* sh_audio = demuxer->audio->sh;
   ogg_packet op;
   float rate;
-  int i,sp;
+  int i,sp,first;
   vorbis_info* vi = NULL;
   int64_t gp = 0;
   off_t pos;
@@ -961,6 +961,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   ogg_d->pos = pos;
   ogg_d->last_size = 0;
 
+  first = 1;
   while(1) {
     int np;
     ogg_d->pos += ogg_d->last_size;
@@ -992,7 +993,13 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
 	continue;
       else if(np == 0)
 	break;
-
+      if (first) { /* Discard the first packet as it's probably broken,
+           and we don't have any other means to decide whether it is
+           complete or not. */
+        first = 0;
+        break;
+      }
+      
       if( ((*op.packet & PACKET_IS_SYNCPOINT)  || os->vorbis )  &&
 	  (!ogg_d->syncpoints || op.granulepos >= gp) ) {
 	demux_ogg_add_packet(ds,os,&op);
