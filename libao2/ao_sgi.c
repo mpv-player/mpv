@@ -18,7 +18,7 @@ static ao_info_t info =
 {
 	"sgi audio output",
 	"sgi",
-	"kopflos",
+	"Oliver Schoenbrunner",
 	""
 };
 

@@ -33,7 +33,7 @@ static ao_info_t info =
 {
     "Sun audio output",
     "sun",
-    "jk@tools.de",
+    "Juergen Keil",
     ""
 };
 
