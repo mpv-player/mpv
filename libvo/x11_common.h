@@ -1,4 +1,3 @@
-#include <X11/extensions/dpms.h>
 
 #ifdef X11_FULLSCREEN
 

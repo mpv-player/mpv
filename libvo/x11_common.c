@@ -15,6 +15,8 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 
+#include <X11/extensions/dpms.h>
+
 static int dpms_disabled=0;
 static int timeout_save=0;
 
