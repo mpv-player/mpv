@@ -71,25 +71,25 @@ na nezzuk tovabb:
 	 Akkor jon be a PTS correction. az input demuxer-ek olvassak a csomagokkal
 	 egyutt a hozzajuk tartozo PTS-t (presentation timestamp) is, ami alapjan
 	 eszreveheto ha el van csuszva a ketto. ilyenkor egy megadott maximalis
-	 hataron (alsd -mc opcio) belul kepes az mplayer korrigalni az a_frame 
+	 hataron (lasd -mc opcio) belul kepes az mplayer korrigalni az a_frame 
 	 erteket. a korrekciok osszege van a c_total-ban.
 	 
 	 persze ez meg nem minden szinkron ugyben, van meg nemi gaz.
 	 pl. az hogy a hangkartya eleg rendesen kesleltet, ezt az mplayernek
-	 korrigalnia kepp: ezert kell enki az audio buffer merete. amit a
-	 select()-e tud lemerni amit viszont nem tdu minden kartya...
+	 korrigalnia kell: ezert kell neki az audio buffer merete. amit a
+	 select()-e tud lemerni amit viszont nem tud minden kartya...
 	 ilyenkor kell a -abs opcioval megadni.
 	 
 	 aztan van olyan gond is, hogy pl. mpegnel nem framenkent van PTS
 	 hanem szektoronkent, ami tartalmazhat 10 framet is de 0.1-et is.
-	 hogy ez nem csessze el az idozitest, atlagoljuk 5 framenkent a 
+	 hogy ez ne csessze el az idozitest, atlagoljuk 5 framenkent a 
 	 PTS-t es ezt az atlag erteket vesszuk figyelembe korrekcional.
 	 
 	 avi-nal sem egyszeru az elet. ott a 'hivatalos' idozitesi mod a
-	 BPS-alapu, azaz a headerben le va tarolva hany tomoritett audio
+	 BPS-alapu, azaz a headerben le van tarolva hany tomoritett audio
 	 byte tartozik egy masodpercnyi (fps darab) kephez.
 	 ez persze nem mindig mukodik... miert is mukodne :)
-	 ezer en megcsinaltam hogy az mpeg-nel hasznalatos sectoronkenti
+	 ezert en megcsinaltam hogy az mpeg-nel hasznalatos sectoronkenti
 	 PTS erteket emulalom avi-ra is, azaz az AVI parser minden beolvasott
 	 chunk-nal szamol egy kamu PTS-t a framek tipusa alapjan. es ez
 	 alapjan idozitek. es van amikor ez mukodik jobban.
@@ -110,14 +110,14 @@ na nezzuk tovabb:
 4.a codec controller: na ez a legnagypbb gány az egeszben :)
 	 a libmpeg2 ugyanis annyira instabil hogy az mar hatareset.
 	 persze ezt nem ugy kell erteni hogy szar :) hanem ugy, hogy csak
-	 teljesen szabvanyos, hibatlan mpeg steramet eszik meg. ha hibat
-	 talal, egyszeruen segfault ;)  es enm rohogni, ez nagyon jo igy,
+	 teljesen szabvanyos, hibatlan mpeg streamet eszik meg. ha hibat
+	 talal, egyszeruen segfault ;)  es nem rohogni, ez nagyon jo igy,
 	 teljesitmeny szempontbol 50-100%-al lasabb lenne ha teleraknak
 	 ellenorzesekkel. ezert csinaltam azt a megoldast, hogy kulon
 	 processzben futtatom, es ha elszall, hat kit izgat, majd inditok
 	 egy masikat. ehhez azert kell par dolog:
 	 - codec controller process: egy kulon processz, ami sleep-el, de
-	   ha a gyereke (a libmpeg2 processze) meghal, akkor indit gyorsan
+	   ha a gyereke (a libmpeg2 processz) meghal, akkor indit gyorsan
 		 egy masikat. igy az mplayer-nek nem kell ezzel fogallkoznia, o
 		 csak pumpalja a gyerekbe a tomoritett adatot az meg rakja kifele.
 	 - shmem: a tomoritett adatok, es a kitomoritett framek is shared
@@ -130,7 +130,7 @@ na nezzuk tovabb:
 		 el az egesz meg zoldul be, mint a regi verzioban.
 	 hatranya ennek az egesznek, hogy a libvo-libmpeg2 szoros kapcsolodasa
 	 miatt a libvo is abban a processzben kell fusson, amiben a libmpeg2,
-	 tehat abban ami allandoan megdolgik-ujraszuletik, es nem abban amiben
+	 tehat abban ami allandoan megdoglik-ujraszuletik, es nem abban amiben
 	 a vezerlo processz, az mplayer fut. ez eleg sok gondot okozik, foleg
 	 a libvo ablakban tortent esemenyek (billentyunyomas pl) kezelesekor.
 	 erre mindenfele workaroundok vannak, FIFO-k minden mennyisegben, meg
