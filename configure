@@ -867,12 +867,14 @@ EOF
     proc=''
     _march=''
     _mcpu=''
+    # XXX: this should be removed imho...
     cpu750=`$_cpuinfo | grep "cpu.*750"`
     if test -n "$cpu750"; then
 	_march='-mcpu=750'
 	_mcpu='-mtune=750'
     fi
     if linux ; then
+	proc=`$_cpuinfo | grep 'cpu' | cut -d ':' -f 2 | cut -d ',' -f 1 | cut -b 2- | head -1`
 	if test -n "`$_cpuinfo | grep altivec`"; then
 	    _altivec=yes
 	fi
@@ -881,6 +883,25 @@ EOF
 	if [ `sysctl -n hw.vectorunit` -eq 1 ]; then
 	    _altivec=yes
  	fi
+    fi
+    if test -n "$proc"; then
+        case "$proc" in
+	    601) _march='-mcpu=601' _mcpu='-mtune=601' ;;
+	    603) _march='-mcpu=603' _mcpu='-mtune=603' ;;
+	    603e|603ev) _march='-mcpu=603e' _mcpu='-mtune=603e' ;;
+	    604|604e|604r|604ev) _march='-mcpu=604' _mcpu='-mtune=604' ;;
+	    740|740/750|745/755) _march='-mcpu=740' _mcpu='-mtune=740' ;;
+	    750|750CX) _march='-mcpu=750' _mcpu='-mtune=750' ;;
+    	    *) ;;
+        esac
+	# gcc 3.1(.1) and up supports 7400 and 7450
+	if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "1"; then
+	    case "$proc" in
+		7400*|7410*) _march='-mcpu=7400' _mcpu='-mtune=7400' ;;
+		7450*) _march='-mcpu=7450' _mcpu='-mtune=7450' ;;
+    		*) ;;
+    	    esac
+	fi
     fi
     ;;
 
