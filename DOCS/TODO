@@ -1,7 +1,8 @@
 TO DO:
 ~~~~~~
 For the Release:
-- finish ASF seeking (find next keyframe)
+- play_only_n_frames option (chl)
+- seek_to_frame and seek_to_index options
 
 DONE:
 - sub sync +/- keys - DONE (lez)
@@ -15,15 +16,13 @@ DONE:
 - RESET_AUDIO optional - DONE? - with libao2 it shouldn't be problem
 - support SSA subtitles : http://www.eswat.demon.co.uk - DONE???
 - fix X4.0.x/DRI OpenGL - DONE?  mga&radeon works with 4.0.3/DRI
+- finish ASF seeking (find next keyframe) - DONE?
+- show current frame number [Gabucino] - DONE! (for AVI)
 
 High Priority:
 - further optimizations - DONE?
 - support mpeg2 interlaced files (field pictures) - hacked
 - integrating the gui? - DONE?
-
-Medium Priority:
-- show current frame number [Gabucino]
-- seek_to_frame and seek_to_index options
 
 Low Priority:
 - support for MPEG TS (transport streams) - I need sample files!
