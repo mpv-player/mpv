@@ -3859,6 +3859,13 @@ decoder, encoder and luck.
 For a strict MPEG1/\:2/\:4 compliance this would have to be <=132.
 (default: 250 or one key frame every ten seconds in a 25fps movie)
 .TP
+.B sc_threshold=<-1000000\-1000000>
+Threshold for scene change detection.
+Libavcodec inserts a keyframe when it detects a scene change. 
+You can specify the sensitivity of the detection with this option.
+-1000000 means there is a scene change detected at every frame, 1000000 means
+no scene changes are detected (default 0).
+.TP
 .B vb_strategy=<0\-1>
 strategy to choose between I/\:P/\:B frames (pass\ 2):
 .RSs

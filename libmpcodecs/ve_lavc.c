@@ -139,6 +139,7 @@ static int lavc_param_mv0= 0;
 static int lavc_param_noise_reduction= 0;
 static int lavc_param_qp_rd= 0;
 static int lavc_param_inter_threshold= 0;
+static int lavc_param_sc_threshold= 0;
 static int lavc_param_ss= 0;
 static int lavc_param_top= -1;
 
@@ -269,6 +270,7 @@ m_option_t lavcopts_conf[]={
 	{"ss", &lavc_param_ss, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_H263P_SLICE_STRUCT, NULL},
 #endif
 	{"inter_threshold", &lavc_param_inter_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
+	{"sc_threshold", &lavc_param_sc_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
 	{"top", &lavc_param_top, CONF_TYPE_INT, CONF_RANGE, -1, 1, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -379,6 +381,9 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4669
     lavc_venc_context->coder_type= lavc_param_coder;
     lavc_venc_context->context_model= lavc_param_context;
+#endif
+#if LIBAVCODEC_BUILD >= 4680
+    lavc_venc_context->scenechange_threshold= lavc_param_sc_threshold;
 #endif
 #if LIBAVCODEC_BUILD >= 4690
     lavc_venc_context->noise_reduction= lavc_param_noise_reduction;
