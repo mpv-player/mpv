@@ -1,0 +1,1 @@
+shlibs:Depends=libc6 (>= 2.2.1-2), liblircclient0, libncurses5, xlibs (>= 4.0.1-11)

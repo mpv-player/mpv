@@ -1,0 +1,11 @@
+Source: mplayer
+Section: unknown
+Priority: optional
+Maintainer: * TeLeNiEkO * <telenieko@telenieko.com>
+Standards-Version: 3.2.1
+
+Package: mplayer
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: The Ultimate Movie Player For Linux
+ PoS Eso x"D
