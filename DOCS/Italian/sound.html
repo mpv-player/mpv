@@ -1,16 +1,13 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=white>
+<BODY>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.3.2>2.3.2. Dispositivi di output audio</A></B></P>
 
@@ -19,14 +16,14 @@ questi driver :</P>
 
 <TABLE BORDER=0>
 
-<TR><TD COLSPAN=4><P><B><FONT CLASS="text">Generale:</B></P></TD></TR>
+<TR><TD COLSPAN=4><P><B>Generale:</B></P></TD></TR>
 
-<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">driver OSS (ioctl)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sdl</TD><TD></TD><TD><FONT CLASS="text">driver SDL (supporta sopra/sottocampionamento, <B>ESD</B>, <B>ARTS</B> ecc)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">nas</TD><TD></TD><TD><FONT CLASS="text">driver NAS (Network Audio System, sistema audio per la rete, ndt)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">alsa5</TD><TD></TD><TD><FONT CLASS="text">driver nativo ALSA 0.5</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">alsa9</TD><TD></TD><TD><FONT CLASS="text">driver nativo ALSA 0.9 (funziona, ma ha dei problemi -> usa OSS)</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT CLASS="text">sun</TD><TD></TD><TD><FONT CLASS="text">driver audio SUN (/dev/audio) per utenti BSD e Solaris8</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>driver OSS (ioctl)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>driver SDL (supporta sopra/sottocampionamento, <B>ESD</B>, <B>ARTS</B> ecc)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>driver NAS (Network Audio System, sistema audio per la rete, ndt)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>driver nativo ALSA 0.5</TD></TR>
+<TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>driver nativo ALSA 0.9 (funziona, ma ha dei problemi -> usa OSS)</TD></TR>
+<TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>driver audio SUN (/dev/audio) per utenti BSD e Solaris8</TD></TR>
 
 </TABLE>
 
@@ -55,70 +52,70 @@ problemi (perde la sincronia, l'audio scompare, ecc).</LI>
 <P><B><A NAME=2.3.2.1>2.3.2.1. Esperienze con le schede sonore, raccomandazioni</A></B></P>
 
 <P><TABLE BORDER=0 WIDTH=100%>
-<TD COLSPAN=3><B><FONT CLASS="text">Chipset VIA integrato (via82cxxx) solo 48Khz</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"> prelevabile da <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&release_id=59602">qui</A></TD><TR>
+<TD COLSPAN=3><B>Chipset VIA integrato (via82cxxx) solo 48Khz</B></TD><TR>
+<TD></TD><TD>Driver:</TD><TD> prelevabile da <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&release_id=59602">qui</A></TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Aureal Vortex 2</B></TD><TR>
-<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">nessun driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">nessun driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD>48</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver2:</TD><TD><FONT CLASS="text"> prelevabile da <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">qui</A><BR>
+<TD COLSPAN=3><B>Aureal Vortex 2</B></TD><TR>
+<TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>nessun driver</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>nessun driver</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>48</TD><TR>
+<TD></TD><TD>Driver:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD><TR>
+<TD></TD><TD>Driver2:</TD><TD> prelevabile da <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">qui</A><BR>
 (<I>grandezza del buffer aumentata a 32k</I>)</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">GUS PnP</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">nessun driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>GUS PnP</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>nessun driver</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">SB Live!</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">L'analogico è OK, SP/DIF non funziona</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">Entrambi OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">192</TD><TR>
+<TD COLSPAN=3><B>SB Live!</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>L'analogico è OK, SP/DIF non funziona</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>Entrambi OK</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>192</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">SB AWE 64</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">massimo 44kHz</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">a 48kHz suona male</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>SB AWE 64</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>massimo 44kHz</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>a 48kHz suona male</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound ACE</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">non OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">44</TD><TR>
+<TD COLSPAN=3><B>Gravis UltraSound ACE</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>non OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>44</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Gravis UltraSound MAX</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>Gravis UltraSound MAX</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">ESS 688</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">48</TD><TR>
+<TD COLSPAN=3><B>ESS 688</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>48</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Schede C-Media (quali?)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">non OK (sibila) (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>Schede C-Media (quali?)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>non OK (sibila) (?)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK (?)</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Schede Yamaha (*ymf*)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">non OK (?) (forse -ao sdl)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">OK solo con ALSA 0.5 con emulazione OSS <B>E</B> <I>-ao sdl</I> (!) (?)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>Schede Yamaha (*ymf*)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>non OK (?) (forse -ao sdl)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>OK solo con ALSA 0.5 con emulazione OSS <B>E</B> <I>-ao sdl</I> (!) (?)</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">Schede con chip envy24 (come Terratec EWS88MT)</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">?</TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS/Pro:</TD><TD><FONT CLASS="text">OK</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">?</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">?</TD><TR>
+<TD COLSPAN=3><B>Schede con chip envy24 (come Terratec EWS88MT)</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>?</TD><TR>
+<TD></TD><TD>OSS/Pro:</TD><TD>OK</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>?</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>?</TD><TR>
 
-<TD COLSPAN=3><B><FONT CLASS="text">PC Speaker o DAC</B></TD><TR>
-<TD></TD><TD><FONT CLASS="text">OSS:</TD><TD><FONT CLASS="text">OK (<I>usa il driver SDL : -ao sdl</I>)</TD><TR>
-<TD></TD><TD><FONT CLASS="text">ALSA:</TD><TD><FONT CLASS="text">nessun driver</TD><TR>
-<TD></TD><TD><FONT CLASS="text">KHz massimi:</TD><TD><FONT CLASS="text">il driver emula 44.1 forse più</TD><TR>
-<TD></TD><TD><FONT CLASS="text">Driver:</TD><TD><FONT CLASS="text"><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
+<TD COLSPAN=3><B>PC Speaker o DAC</B></TD><TR>
+<TD></TD><TD>OSS:</TD><TD>OK (<I>usa il driver SDL : -ao sdl</I>)</TD><TR>
+<TD></TD><TD>ALSA:</TD><TD>nessun driver</TD><TR>
+<TD></TD><TD>KHz massimi:</TD><TD>il driver emula 44.1 forse più</TD><TR>
+<TD></TD><TD>Driver:</TD><TD><A HREF="ftp://ftp.infradead.org/pub/pcsp">ftp://ftp.infradead.org/pub/pcsp</A></TD><TR>
 </TABLE></P>
 
 <P><UL>

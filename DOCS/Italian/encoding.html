@@ -1,16 +1,11 @@
 <HTML>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
 <BODY BGCOLOR=white>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.4>2.4.  Codificare con MEncoder</A></B></P>
 
@@ -116,16 +111,16 @@ due comandi :<BR>
 <P>
   <TABLE>
   <TR>
-    <TD><FONT CLASS="text">
+    <TD>
       <CODE>rm frameno.avi</CODE></TD>
-    <TD><FONT CLASS="text">
+    <TD>
       <B>rimuovi il file temporaneo che va in conflitto</B></TD>
   </TR>
   <TR>
-    <TD><FONT CLASS="text">
+    <TD>
       <CODE>mencoder &lt;file/DVD&gt; -ovc frameno -o
         frameno.avi</CODE></TD>
-    <TD><FONT CLASS="text">
+    <TD>
       <B><U>Primo passaggio</U> : sarà creato un file avi di solo audio, contenente SOLO
       il flusso audio richiesto. Non dimenticare <CODE>-lameopts</CODE>, se ne
       hai bisogno. Se stai codificando un filmato lungo, MEncoder da
@@ -133,19 +128,19 @@ due comandi :<BR>
       dopo la fine di questo passaggio.</B></TD>
   </TR>
   <TR>
-    <TD><FONT CLASS="text">
+    <TD>
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 1
         -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT CLASS="text">
+    <TD>
       <B><U>Secondo passaggio</U> : cioè il primo passaggio della codifica del video DivX4.
       Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
       passaggio.</B></TD>
   </TR>
   <TR>
-    <TD><FONT CLASS="text">
+    <TD>
       <CODE>mencoder &lt;file/DVD&gt; -oac copy -pass 2
         -ovc divx4 -divx4opts br=&lt;bitrate&gt;</CODE></TD>
-    <TD><FONT CLASS="text">
+    <TD>
       <B><U>Terzo passaggio</U> : cioè il secondo passaggio della codifica video DivX4.
       Puoi specificare il bitrate video dato da MEncoder alla fine del precedente
       passaggio. In questo passaggio, l'audio da <CODE>frameno.avi</CODE> sarà inserito
@@ -324,30 +319,30 @@ supportati). Puoi codificare i seguenti codec :</P>
 
 <TABLE BORDER=1>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-ss</I> tempo</TD>
-  <TD><FONT CLASS="text">
+  <TD>
     comincia a codificare dal tempo dato (può partire solo dai frame chiave !)
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-endpos</I> tempo</TD>
-  <TD><FONT CLASS="text">
+  <TD>
     smetti di codificare al tempo dato. Vedi la pagina di man per esempi !
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-o</I> nomefile</TD>
-  <TD><FONT CLASS="text">
+  <TD>
     specifica il nome del file di output
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-sws</I> 0-2</TD>
-  <TD><FONT CLASS="text">
+  <TD>
     metodo di ridimensionamento<BR>
     &nbsp;&nbsp;0 - bilineare veloce<BR>
     &nbsp;&nbsp;1 - bilineare<BR>
@@ -355,9 +350,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-ovc</I> nomecodec</TD>
-  <TD><FONT CLASS="text">
+  <TD>
     Codifica col codec dato (i nomi dei codec sono quelli presenti in codecs.conf). Esempi:<BR>
     &nbsp;&nbsp;<B>help</B> - ottieni una lista dei codec disponibili<BR>
     &nbsp;&nbsp;<B>rawrgb</B> - ?<BR>
@@ -368,9 +363,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-oac</I> nomecodec</TD>
-  <TD><FONT CLASS="text">
+  <TD>
     Codifica col codec dato (i nomi dei codec sono quelli presenti in codecs.conf). Esempi:<BR>
     &nbsp;&nbsp;<B>help</B> - ottieni una lista dei codec disponibili<BR>
     &nbsp;&nbsp;<B>copy</B> - nessuna codifica, copia il flusso (solo da AVI/ASF per ora)<BR>
@@ -379,9 +374,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
   <I>-mf</I> opzioni multifile</TD>
-  <TD><FONT CLASS="text">
+  <TD>
     Usate per codificare da file JPEG multipli. Le sue sotto-opzioni sono:<BR>
     &nbsp;&nbsp;<B>on</B> - abilita il supporto multifile<BR>
     &nbsp;&nbsp;<B>w</B>=&lt;valore&gt; - larghezza del file di output<BR>
@@ -392,9 +387,9 @@ supportati). Puoi codificare i seguenti codec :</P>
 </TR>
 
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-divx4opts</I></TD>
-  <TD><FONT CLASS="text">
+  <TD>
     Se codifichi in DivX4, puoi specificare i sui parametri qui, come:<BR>
     &nbsp;&nbsp;<CODE>-divx4opts br=1800:deinterlace:key=250</CODE><BR>
     Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
@@ -405,9 +400,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-lavcopts</I></TD>
-  <TD><FONT CLASS="text">
+  <TD>
     Se codifichi in libavcodec, puoi specificare i sui parametri qui, come:<BR>
     &nbsp;&nbsp;<CODE>-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250</CODE><BR>
     Opzioni comuni: <B>(per la lista completa leggi la pagina di man!)</B><BR>
@@ -419,9 +414,9 @@ supportati). Puoi codificare i seguenti codec :</P>
   </TD>
 </TR>
 <TR>
-  <TD><FONT CLASS="text">
+  <TD>
     <I>-lameopts</I></TD>
-  <TD><FONT CLASS="text">
+  <TD>
     Se codifichi in MP3 con libmp3lame, puoi specificare i sui parametri qui, come:<BR>
     &nbsp;&nbsp;<CODE>-lameopts q=3</CODE><BR>
     &nbsp;&nbsp;<CODE>-lameopts br=192:cbr</CODE><BR>

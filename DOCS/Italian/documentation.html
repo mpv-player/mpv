@@ -1,15 +1,10 @@
 <HTML>
-<BODY BGCOLOR=WHITE>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
 
-<FONT CLASS="text">
+<BODY BGCOLOR=WHITE>
 
 <P><CENTER><B>MPlayer - Movie Player for LINUX (C) 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)</B><BR>
 <BR><A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A><BR><BR>
@@ -421,10 +416,10 @@ del tempo, ma ne vale sicuramente la pena.</P>
 <P><B><I>CODEC</I></B></P>
 
 <UL>
-<LI><B>libavcodec</B> : se volete usare questo codec DivX3/DivX4/DivX5/MP42/ecc, controllate la sezione
+<LI><B>libavcodec</B> : se volete usare questo codec DivX3/DivX4/DivX5/MP41/MP42/ecc, controllate la sezione
 <A HREF="codecs.html#2.2.1.2">2.2.1.2</A> prima di compilare. Caratteristiche :<BR>
 <UL>
-  <LI>si possono <B>vedere <I>DivX/DivX4/DivX5/MP42</I> su piattaforme non-x86</B></LI>
+  <LI>si possono <B>vedere <I>DivX/DivX4/DivX5/MP41/MP42</I> su piattaforme non-x86</B></LI>
   <LI>legge e codifica RealVideo 1.0/VIVO/MJPEG/h263/altri</LI>
   <LI>questo codec ha la <B>più alta velocità di decodifica</B> per filmati DivX e DivX4/DivX5
 (più veloce anche della stessa libreria DivX4 originale) ! Raccomandato!</LI>
@@ -441,7 +436,7 @@ pacchetto! Comunque, potete usare i nostri codec con avifile. Caratteristiche:<B
 <UL>
   <LI>ne avete bisogno se volete vedere o codificare ad esempio filmati registrati
    con vari compressori hardware, come schede tv, macchine fotografiche digitali (esempio: DV, ATI VCR, MJPEG)</LI>
-  <LI>ne avete bisogno se volete vedere <B>filmati WMV</B> o i più vecchi (MP42) ASF</LI>
+  <LI>ne avete bisogno se volete vedere <B>filmati WMV</B> o i più vecchi (MP41/MP42) ASF</LI>
 </UL>
 </LI>
 
@@ -477,6 +472,11 @@ vengono letti meglio dal codec Cinepak proprio di <B>MPlayer</B> !</LI>
   <A HREF="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">sorgenti</A>
   (questa è una tarball del CVS di vorbis aggiornata ogni notte).</LI>
 
+<LI><B>MPlayer</B> può usare le librerie di RealPlayer 8 o RealONE per riprodurre file
+  <B>RealVideo 2.0 and 3.0</B>. Vedi la sezione
+  <A HREF="formats.html#2.1.1.7">Formato file RealMedia</A> per le istruzioni
+  sull'installazione e maggiori informazioni!</LI>
+
 </UL>
 
 <P><B><I>SCHEDE VIDEO</I></B></P>
@@ -494,8 +494,11 @@ si ottiene un filmato a pieno schermo di buona qualità e molto veloce.</P>
 
 <P>
 <UL>
-<LI><B>Schede Matrox G200/G400/G450/G550</B> : per favore leggete la sezione <A HREF="video.html#2.3.1.7">mga_vid</A>
-per ottenere un grande miglioramento delle prestazioni. E' importante eseguire questi passi
+<LI><B>Schede Matrox G200/G400/G450/G550</B> : sebbene sia fornito un
+  <A HREF="video.html#2.3.1.9">driver Vidix</A>, si raccomanda di
+usare il vecchio modulo del kernel mga_vid al posto di questo, in quanto funziona molto meglio.
+  Vedi la sezione <A HREF="video.html#2.3.1.7">mga_vid</A> per l'installazione
+e l'utilizzo.  E' importante eseguire questi passi
 <I>prima</I> di compilare <B>MPlayer</B>, altrimenti non ci sarà nessun supporto specifico Matrox.
  Controllate anche la sezione <A HREF="video.html#2.3.1.A.1">TV-out Matrox</A>.
 <U><B>Se sei un utente non-Linux</B></U>, leggi la documentazione
@@ -529,6 +532,10 @@ Oltretutto, <U>il driver Nvidia di XFree86 non ha
 il supporto per l'accelerazione YUV hardware per tutte le schede NVidia !</U> Dovete scaricare
 i driver closed-source di Nvidia da nvidia.com . Leggete i dettagli nella sezione <A
 HREF="video.html#2.3.1.2.3">driver Xv Nvidia</A>.</LI>
+
+<LI><B>3DLabs GLINT R3 e Permedia3</B> : è fornito un driver Vidix
+  (pm3_vid). Vedi le <A HREF="video.html#2.3.1.15">istruzioni Vidix
+  </A>.</LI>
 
 <LI><B>altre schede</B> : nessuna di quelle sopra?
   <UL>
@@ -857,22 +864,22 @@ compatibile con V4L</B>.</P>
 <TABLE BORDER=0>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>on</I></TD>
+  <TD><I>on</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">usa l'input TV
+  <TD>usa l'input TV
   </TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>noaudio</I></TD>
+  <TD><I>noaudio</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">niente suono, grazie</TD>
+  <TD>niente suono, grazie</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>driver</I></TD>
+  <TD><I>driver</I></TD>
   <TD></TD>
-  <TD><FONT CLASS="text">
+  <TD>
     <B>dummy</B> - input TV NULL :) Usato solo per test, genera un input di tipo dummy.
       <BR>
     <B>v4l</B> - cattura immagini dall'interfaccia V4L standard (default
@@ -880,69 +887,69 @@ compatibile con V4L</B>.</P>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>device</I></TD>
+  <TD><I>device</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">specifica altri
+  <TD>specifica altri
   dispositivi al posto del default <CODE>/dev/video0</CODE></TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>input</I></TD>
+  <TD><I>input</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">dice da quale
+  <TD>dice da quale
   input del sintonizzatore TV si vogliono prelevare le immagini (es. <B>television</B>,
   <B>s-video</B>, <B>composite</B>, ...)<BR>
     Stampa quelli disponibili durante l'inizializzazione.</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>freq</I></TD>
+  <TD><I>freq</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">specifica la
+  <TD>specifica la
   frequenza alla quale settare il sintonizzatore (es. <B>511.250</B>)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>outfmt</I></TD>
+  <TD><I>outfmt</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">in quale formato output
+  <TD>in quale formato output
   vogliamo le immagini (<B>rgb32</B>, <B>rgb24</B>, <B>yv12</B>,
   <B>uyvy</B>, <B>i420</B> (per i420 devi passare l'opzione <CODE>-vc rawi420</CODE>,
    a causa di un conflitto fourcc)</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>width</I></TD>
+  <TD><I>width</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
+  <TD>
   la larghezza della finestra di output, in pixel</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>height</I></TD>
+  <TD><I>height</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
+  <TD>
   l'altezza della finestra di output, in pixel</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>norm</I></TD>
+  <TD><I>norm</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
+  <TD>
   disponibili: PAL, SECAM, NTSC</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>channel</I></TD>
+  <TD><I>channel</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
+  <TD>
   imposta il sintonizzatore al canale dato</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text"><I>chanlist</I></TD>
+  <TD><I>chanlist</I></TD>
   <TD>&nbsp;&nbsp;</TD>
-  <TD><FONT CLASS="text">
+  <TD>
   disponibili: <CODE>us-bcast, us-cable, europe-west, europe-east, ecc</CODE></TD>
 </TR>
 </TABLE>
@@ -951,9 +958,9 @@ compatibile con V4L</B>.</P>
 <A NAME=2.5.4><P><B><I>2.5.4.  Controllo da tastiera</I></B></P>
 
 <TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">h  o  l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">seleziona il precedente/prossimo canale</TD><TR>
-<TD></TD><TD><FONT CLASS="text">n</TD><TD></TD><TD><FONT CLASS="text"> cambia norm</TD><TR>
-<TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text"> cambia la lista dei canali</TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>h  o  l</TD><TD>&nbsp;&nbsp;</TD><TD>seleziona il precedente/prossimo canale</TD><TR>
+<TD></TD><TD>n</TD><TD></TD><TD> cambia norm</TD><TR>
+<TD></TD><TD>b</TD><TD></TD><TD> cambia la lista dei canali</TD><TR>
 </TABLE>
 
 <A NAME=2.5.5><P><B><I>2.5.5.  Esempi</I></B></P>
@@ -1187,11 +1194,11 @@ Input da standard V4L<BR>
   </P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE><FONT CLASS="text">mplayer [opzioni] [percorso/]nomefile</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">file</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opzioni di default] [percorso/]nomefile1 [opzioni per nomefile1] nomefile2 [opzioni per nomefile2] ...</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">VCD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opzioni] -vcd numtraccia [-cdrom-device /dev/cdrom]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">DVD</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opzioni] -dvd numtitolo [-dvd-device /dev/dvd]</CODE></TD><TR>
-<TD></TD><TD><FONT CLASS="text">rete</TD><TD></TD><TD><CODE><FONT CLASS="text">mplayer [opzioni] http://sito.com/file.[mpg|avi] (si possono usare anche playlist)</CODE></TD><TR>
+<TD>&nbsp;&nbsp;</TD><TD>file</TD><TD>&nbsp;&nbsp;</TD><TD><CODE>mplayer [opzioni] [percorso/]nomefile</CODE></TD><TR>
+<TD></TD><TD>file</TD><TD></TD><TD><CODE>mplayer [opzioni di default] [percorso/]nomefile1 [opzioni per nomefile1] nomefile2 [opzioni per nomefile2] ...</CODE></TD><TR>
+<TD></TD><TD>VCD</TD><TD></TD><TD><CODE>mplayer [opzioni] -vcd numtraccia [-cdrom-device /dev/cdrom]</CODE></TD><TR>
+<TD></TD><TD>DVD</TD><TD></TD><TD><CODE>mplayer [opzioni] -dvd numtitolo [-dvd-device /dev/dvd]</CODE></TD><TR>
+<TD></TD><TD>rete</TD><TD></TD><TD><CODE>mplayer [opzioni] http://sito.com/file.[mpg|avi] (si possono usare anche playlist)</CODE></TD><TR>
 </TABLE></P>
 
 <P>
@@ -1215,52 +1222,52 @@ di controllare <B>MPlayer</B> usando la tastiera, il mouse, il joystick o un tel
 <P><B>3.2. Tastiera</B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">&lt;-  o  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">cerca indietro/avanti 10 secondi</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">su o giu</TD><TD></TD><TD><FONT CLASS="text">va indietro/avanti 1 minuto</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">pgsu/pggiu</TD><TD></TD><TD><FONT CLASS="text">va indietro/avanti 10 minuti</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">&lt; o &gt;</TD><TD></TD><TD><FONT CLASS="text">va indietro/avanti nella playlist</TD><TR>
-<TR><TD></TD><TD><FONT CLASS="text">p o SPAZIO</TD><TD></TD><TD><FONT CLASS="text">pausa il filmato (premi un tasto)</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">q o ESC</TD><TD></TD><TD><FONT CLASS="text">ferma la riproduzione e chiude il programma</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">+ o -</TD><TD></TD><TD><FONT CLASS="text">regola il ritardo audio di +/- 0.1 secondi</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">/ o *</TD><TD></TD><TD><FONT CLASS="text">diminuisce/aumenta il volume</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">o</TD><TD></TD><TD><FONT CLASS="text">cambia l'OSD: nessuno / ricerca / ricerca+timer</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">z o x</TD><TD></TD><TD><FONT CLASS="text">regola il ritardo dei sottotitoli di +/- 0.1 secondi</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">r o t</TD><TD></TD><TD><FONT CLASS="text">regola la posizione dei sottotitoli</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">&gt; o &lt;</TD><TD></TD><TD><FONT CLASS="text">vai alla prossima/precedente voce lista dei file</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">HOME o END</TD><TD></TD><TD><FONT CLASS="text">vai alla prossima/precedente voce lista superiore dei file</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">INSERT o DELETE</TD><TD></TD><TD><FONT CLASS="text">vai alla prossima/precedente sorgente alternativa (disponibile solo nella playlist asx)</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD>&lt;-  o  -&gt;</TD><TD>&nbsp;&nbsp;</TD><TD>cerca indietro/avanti 10 secondi</TD></TR>
+<TR><TD></TD><TD>su o giu</TD><TD></TD><TD>va indietro/avanti 1 minuto</TD></TR>
+<TR><TD></TD><TD>pgsu/pggiu</TD><TD></TD><TD>va indietro/avanti 10 minuti</TD></TR>
+<TR><TD></TD><TD>&lt; o &gt;</TD><TD></TD><TD>va indietro/avanti nella playlist</TD><TR>
+<TR><TD></TD><TD>p o SPAZIO</TD><TD></TD><TD>pausa il filmato (premi un tasto)</TD></TR>
+<TR><TD></TD><TD>q o ESC</TD><TD></TD><TD>ferma la riproduzione e chiude il programma</TD></TR>
+<TR><TD></TD><TD>+ o -</TD><TD></TD><TD>regola il ritardo audio di +/- 0.1 secondi</TD></TR>
+<TR><TD></TD><TD>/ o *</TD><TD></TD><TD>diminuisce/aumenta il volume</TD></TR>
+<TR><TD></TD><TD>o</TD><TD></TD><TD>cambia l'OSD: nessuno / ricerca / ricerca+timer</TD></TR>
+<TR><TD></TD><TD>z o x</TD><TD></TD><TD>regola il ritardo dei sottotitoli di +/- 0.1 secondi</TD></TR>
+<TR><TD></TD><TD>r o t</TD><TD></TD><TD>regola la posizione dei sottotitoli</TD></TR>
+<TR><TD></TD><TD>&gt; o &lt;</TD><TD></TD><TD>vai alla prossima/precedente voce lista dei file</TD></TR>
+<TR><TD></TD><TD>HOME o END</TD><TD></TD><TD>vai alla prossima/precedente voce lista superiore dei file</TD></TR>
+<TR><TD></TD><TD>INSERT o DELETE</TD><TD></TD><TD>vai alla prossima/precedente sorgente alternativa (disponibile solo nella playlist asx)</TD></TR>
 
-<TR><TD COLSPAN=4><P><I><FONT CLASS="text">(i seguenti tasti sono disponibili solo con l'opzione <CODE>-vo xv</CODE>)</I></P></TD></TR>
+<TR><TD COLSPAN=4><P><I>(i seguenti tasti sono disponibili solo con l'opzione <CODE>-vo xv</CODE>)</I></P></TD></TR>
 
-<TR><TD></TD><TD><FONT CLASS="text">1 o 2</TD><TD></TD><TD><FONT CLASS="text">regola il contrasto</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">3 o 4</TD><TD></TD><TD><FONT CLASS="text">regola la luminosità</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">5 o 6</TD><TD></TD><TD><FONT CLASS="text">regola l'hue</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">7 o 8</TD><TD></TD><TD><FONT CLASS="text">regola la saturazione</TD></TR>
+<TR><TD></TD><TD>1 o 2</TD><TD></TD><TD>regola il contrasto</TD></TR>
+<TR><TD></TD><TD>3 o 4</TD><TD></TD><TD>regola la luminosità</TD></TR>
+<TR><TD></TD><TD>5 o 6</TD><TD></TD><TD>regola l'hue</TD></TR>
+<TR><TD></TD><TD>7 o 8</TD><TD></TD><TD>regola la saturazione</TD></TR>
 </TABLE></P>
 
 <P><B>GUI</B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">, e .</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">precedente / prossimo file</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">- o +</TD><TD></TD><TD><FONT CLASS="text">diminuisce / aumenta il volume</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">invio</TD><TD></TD><TD><FONT CLASS="text">inizia riproduzione</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">spazio</TD><TD></TD><TD><FONT CLASS="text">pausa</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">s</TD><TD></TD><TD><FONT CLASS="text">stop</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">a</TD><TD></TD><TD><FONT CLASS="text">about</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">l</TD><TD></TD><TD><FONT CLASS="text">carica file</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text">skin browser</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">e</TD><TD></TD><TD><FONT CLASS="text">mostra l'equalizzatore</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">p</TD><TD></TD><TD><FONT CLASS="text">mostra la playlist</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">f</TD><TD></TD><TD><FONT CLASS="text">modalità a pieno schermo</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">m</TD><TD></TD><TD><FONT CLASS="text">muto</TD>
+<TR><TD>&nbsp;&nbsp;</TD><TD>, e .</TD><TD>&nbsp;&nbsp;</TD><TD>precedente / prossimo file</TD></TR>
+<TR><TD></TD><TD>- o +</TD><TD></TD><TD>diminuisce / aumenta il volume</TD></TR>
+<TR><TD></TD><TD>invio</TD><TD></TD><TD>inizia riproduzione</TD></TR>
+<TR><TD></TD><TD>spazio</TD><TD></TD><TD>pausa</TD></TR>
+<TR><TD></TD><TD>s</TD><TD></TD><TD>stop</TD></TR>
+<TR><TD></TD><TD>a</TD><TD></TD><TD>about</TD></TR>
+<TR><TD></TD><TD>l</TD><TD></TD><TD>carica file</TD></TR>
+<TR><TD></TD><TD>b</TD><TD></TD><TD>skin browser</TD></TR>
+<TR><TD></TD><TD>e</TD><TD></TD><TD>mostra l'equalizzatore</TD></TR>
+<TR><TD></TD><TD>p</TD><TD></TD><TD>mostra la playlist</TD></TR>
+<TR><TD></TD><TD>f</TD><TD></TD><TD>modalità a pieno schermo</TD></TR>
+<TR><TD></TD><TD>m</TD><TD></TD><TD>muto</TD>
 </TABLE></P>
 
 <P><B>TV</B></P>
 
 <P><TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">h o l</TD><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">seleziona precedente/prossimo canale</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">n</TD><TD></TD><TD><FONT CLASS="text">cambia norm</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">b</TD><TD></TD><TD><FONT CLASS="text">cambia lista canali</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD>h o l</TD><TD>&nbsp;&nbsp;</TD><TD>seleziona precedente/prossimo canale</TD></TR>
+<TR><TD></TD><TD>n</TD><TD></TD><TD>cambia norm</TD></TR>
+<TR><TD></TD><TD>b</TD><TD></TD><TD>cambia lista canali</TD></TR>
 
 </TABLE></P>
 
@@ -1881,6 +1888,9 @@ ports (/usr/ports/x11/mplayer).</P>
   <LI>nuovo input</LI>
   <LI>supporto solo audio</LI>
   <LI>demuxer MP3, Wav e Ogg</LI>
+  <LI>supporto per audio da file esterno</LI>
+  <LI>driver DXR2</LI>
+  <LI>miglioramenti vo_aa</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:zybi@fanthom.irc.pl">Artur Zaprzala</A></B>
@@ -1991,7 +2001,8 @@ ports (/usr/ports/x11/mplayer).</P>
 
 <LI><B><A HREF="mailto:ranma@gmx.at">Tobias Diedrich</A></B>
 <UL>
-  <LI>driver output audio NASr</LI>
+  <LI>driver output audio NAS</LI>
+  <LI>driver DXR2</LI>
 </UL></LI>
 
 <LI><B><A HREF="mailto:foth@informatik.uni-hamburg.de">Kilian A. Foth</A></B>
@@ -2057,6 +2068,11 @@ ports (/usr/ports/x11/mplayer).</P>
 <LI><B><A HREF="mailto:freku045@student.liu.se">Fredrik Kuivinen</A></B>
 <UL>
   <LI>OSD/sottotitoli fuori dal filmato - per SDL</LI>
+</UL></LI>
+
+<LI><B><A HREF="mailto:flo-mplayer-dev@gmx.net">Florian Schneider</A></B>
+<UL>
+  <LI>Caricatore librerie RealVideo</LI>
 </UL></LI>
 
 </UL></P>
@@ -2199,6 +2215,7 @@ o aiuto tecnico da:</P>
   <LI><B>vo_aa.c</B> - Folke Ashberg
   <LI><B>vo_directfb.c</B> - <A HREF="mailto:Jiri.Svoboda@seznam.cz">Jiri Svoboda</A>
   <LI><B>vo_dga.c</B> - Acki (datato)
+  <LI><B>vo_dxr2.c</B> - Albeu
   <LI><B>vo_dxr3.c</B> - David Holm
   <LI><B>vo_fbdev.c</B> - Szabi
   <LI><B>vo_ggi.c</B> - al3x
@@ -2232,6 +2249,7 @@ o aiuto tecnico da:</P>
 <UL>
   <LI><B>ao_alsa5.c</B>  - al3x
   <LI><B>ao_alsa9.c</B>  - al3x (corretto da <A HREF="mailto:joy@pingfm.org">joy_ping</A>)
+  <LI><B>ao_dxr2.c</B>   - Albeu
   <LI><B>ao_null.c</B>   - A'rpi
   <LI><B>ao_oss.c</B>    - A'rpi
   <LI><B>ao_pcm.c</B>    - Atmos

@@ -1,17 +1,13 @@
-
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=white>
+<BODY>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=4.1>4.1. Lettori CD</A></B></P>
 
@@ -112,23 +108,23 @@ CDROM.</P>
 
 
 <TABLE BORDER=0 WIDTH=100%>
-<TD VALIGN=top><FONT CLASS="text">-dvd &lt;id_titolo&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Abilita il supporto DVD e seleziona il titolo.</TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-chapter &lt;id_capitolo&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Seleziona il capitolo del DVD da leggere (default: leggi dal capitolo 1).
+<TD VALIGN=top>-dvd &lt;id_titolo&gt;&nbsp;</TD>
+<TD>Abilita il supporto DVD e seleziona il titolo.</TD><TR>
+<TD VALIGN=top>-chapter &lt;id_capitolo&gt;&nbsp;</TD>
+<TD>Seleziona il capitolo del DVD da leggere (default: leggi dal capitolo 1).
   Esempio : <CODE>-chapter 5-10</CODE> o <CODE>-chapter -9</CODE></TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdangle &lt;id_angolo&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">Seleziona l'angolo della telecamera (default: 1)</TD><TR>
-<TD VALIGN=top><FONT CLASS="text">-alang &lt;codice paese&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
+<TD VALIGN=top>-dvdangle &lt;id_angolo&gt;&nbsp;</TD>
+<TD>Seleziona l'angolo della telecamera (default: 1)</TD><TR>
+<TD VALIGN=top>-alang &lt;codice paese&gt;&nbsp;</TD>
+<TD>
   Il <CODE>codice paese</CODE> dice a <B>MPlayer</B> quale lingua audio preferire.
   Per la lista delle lingue disponibili, aggiungi l'opzione <CODE>-v</CODE> dopo
   le tue opzioni DVD, e cerca nell'output.<BR>
   Per esempio :<BR>
   &nbsp;&nbsp;<CODE>-alang hu,en</CODE> - prima cerca di usare l'ungaro,
   e se non disponibile, usa l'audio inglese.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-slang &lt;codice paese&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
+<TD VALIGN=top>-slang &lt;codice paese&gt;&nbsp;</TD>
+<TD>
   Abilita i sottotitoli. Il <CODE>codice paese</CODE> dice a <B>MPlayer</B>
   quale lingua audio preferire.
   Per la lista delle lingue disponibili, aggiungi l'opzione <CODE>-v</CODE> dopo
@@ -136,22 +132,22 @@ CDROM.</P>
   Per esempio :<BR>
   &nbsp;&nbsp;<CODE>-slang hu,en</CODE> - prima cerca di mostrare i sottotitoli in ungaro,
   e se non trovati, mostra i sottotitoli in inglese.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-sid &lt;id_sottotitolo&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
+<TD VALIGN=top>-sid &lt;id_sottotitolo&gt;&nbsp;</TD>
+<TD>
   Mostra il canale del sottotitolo con il dato <CODE>id</CODE> (i valori possono essere
   0-31). Utile per esempio con DVD masterizzati male dove il codice paese
   seleziona il canale sbagliato.</TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-csslib &lt;path/nomefile&gt;</TD>
-<TD><FONT CLASS="text">
+<TD VALIGN=top>-csslib &lt;path/nomefile&gt;</TD>
+<TD>
   (opzione DVD vecchio stile) Questa opzione è usata per dare una locazione diversa da quella di default
   di <CODE>libcss.so</CODE>
   </TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdauth &lt;dispositivo DVD&gt;&nbsp;</TD>
-<TD><FONT CLASS="text">
+<TD VALIGN=top>-dvdauth &lt;dispositivo DVD&gt;&nbsp;</TD>
+<TD>
   (opzione DVD vecchio stile) Abilita l'autenticazione DVD usando il dispositivo dato.
   </TD></TR>
-<TD VALIGN=top><FONT CLASS="text">-dvdkey &lt;chiave CSS&gt;</TD>
-<TD><FONT CLASS="text">
+<TD VALIGN=top>-dvdkey &lt;chiave CSS&gt;</TD>
+<TD>
   (opzione DVD vecchio stile) Quando si decodifica non da DVD, questa opzione da la chiave
   CSS necessaria per "crackare" il DVD (la chiave è stampata al momento dell'autenticazione col
   DVD).

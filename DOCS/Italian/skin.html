@@ -1,14 +1,20 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=iso-8859-1">
+<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
 <title>MPlayer skin format</title>
 <style type="text/css">
-em.note {color: green}
-em.warn {color: red}
+body  {font-family      :       Verdana, Arial, Helvetica, sans-serif;
+      font-size         :       14px;
+      background        :       white;}
+em.note {color: green;
+         font-style: normal;}
+em.warn {color: red;
+         font-style: normal;}
 </style>
 </head>
 
-<body bgcolor=white text=black>
+<body>
 
 <h1 align="center">Formato skin di MPlayer</h1>
 
@@ -18,73 +24,76 @@ em.warn {color: red}
 
 <ul type=disc>
 <li><a href="#intro">1 Introduzione</a></li>
-<li><a href="#overview">2 Generale</a></li>
+<li><a href="#overview">2 Generale</a>
   <ul type=circle>
   <li><a href="#dirs">2.1 Directory</a></li>
   <li><a href="#images">2.2 Immagini</a></li>
   <li><a href="#parts">2.3 Parti di una skin</a></li>
   <li><a href="#files">2.4 File</a></li>
   </ul>
-<li><a href="#skin">3 Il file <code>skin</code></a></li>
+</li>
+<li><a href="#skin">3 Il file <code>skin</code></a>
   <ul type=circle>
   <li><a href="#mainwin">3.1 Finestra principale</a></li>
   <li><a href="#subwindow">3.2 Sotto finestra</a></li>
   <li><a href="#skinmenu">3.3 Menu della skin</a></li>
   </ul>
-<li><a href="#fonts">4 Font</a></li>
+</li>
+<li><a href="#fonts">4 Font</a>
   <ul type=circle>
   <li><a href="#symbols">4.1 Simboli</a></li>
   </ul>
-<li><a href="#guimsg">Appendice A: messaggi della GUI</a></li>
+</li>
+<li><a href="#guimsg">Appendice A: messaggi della GUI</a>
 </ul>
 
 <hr>
 
 <div align=center>
-Ultima modifica: Sep 10, 2001
+Ultima modifica: 2002/05/24
 </div>
 
 <hr>
 
 <h2><a name="intro">1 Introduzione</a></h2>
 
-Il proposito di questo documento è di descrivere il formato delle skin di MPlayer.
+Il proposito di questo documento è di descrivere il formato delle skin di <b>MPlayer</b>.
 Le informazioni qui contenute possono essere errate, in quanto <em>a)</em> non sono stato io
 a scrivere la GUI, <em>b)</em> la GUI non è finita, <em>c)</em> posso
 sbagliarmi. Quindi non sorprenderti se qualcosa non funziona come descritto qui.
 
 <p>
 Grazie a <em>Zoltán Ponekker</em> per il suo aiuto.
-
+</p>
 <p>
 <em>András Mohari &lt;mayday@freemail.hu&gt;</em>
-
+</p>
 
 <h2><a name="overview">2 Generale</a></h2>
 
 Non ha niente a che fare col formato delle skin, ma dovresti sapere
-che <em>MPlayer <b>non</b> include una skin, quindi <b>devi installare almeno
-una skin per poter usare la GUI.</b></em>
+che <b>MPlayer</b> <b>non</b> include una skin, quindi <b>devi installare almeno
+una skin per poter usare la GUI.</b>
 
 
 <h3><a name="dirs">2.1 Directory</a></h3>
 
 Le directory in cui si cerca per le skin sono (in ordine):
 <pre>
-    /usr/local/share/mplayer/Skin/
+    $(DATADIR)/Skin/
+    $(PREFIX)/share/mplayer/Skin/
     ~/.mplayer/Skin/
 </pre>
 
 <p>
-Nota che il primo path può variare a seconda di come è stato configurato MPlayer
-(vedi l'argomento <code>--datadir</code> dello script <code>configure</code>).
+Nota che il primo path può variare a seconda di come è stato configurato <b>MPlayer</b>
+(vedi gli argomenti <code>--datadir</code> e <code>--prefix</code> dello script <code>configure</code>).
+</p>
 
-
-<p>
 Ogni skin è installata in una sua propria directory sotto una delle directory
 elencate sopra, per esempio:
 <pre>
-    /usr/local/share/mplayer/Skin/default/
+    $(PREFIX)/share/mplayer/Skin/default/
 </pre>
 
 
@@ -97,9 +106,9 @@ BMP, PNG e TGA (nota che le immagini TGA devono essere non compresse).
 <p>
 Nella finestra principale (vedi sotto) puoi usare immagini con `trasparenze':
 regioni riempite col colore #FF00FF (<font color="#FF00FF">magenta</font>)
-sono del tutto trasparenti quando viste con MPlayer. Questo significa che puoi anche ottenere
+sono del tutto trasparenti quando viste con <b>MPlayer</b>. Questo significa che puoi anche ottenere
 finestre con una certa forma se il tuo server X ha l'estensione XShape.
-
+</p>
 
 <h3><a name="parts">2.3 Parti di una skin</a></h3>
 
@@ -111,10 +120,11 @@ Attualmente ci sono tre finestre da essere decorate: la
 <a href="#mainwin">finestra principale</a>, la <a href="#subwindow">sotto finestra</a> e
 il <a href="#skinmenu">menu della skin</a> (che può essere attivata con il tasto
 destro).
+</p>
 
 <ul>
 <li>
-La <b>finestra principale</b> è dove puoi controllare MPlayer. Lo sfondo della
+La <b>finestra principale</b> è dove puoi controllare <b>MPlayer</b>. Lo sfondo della
 finestra è un'immagine. Vari oggetti possono (e devono) essere
 piazzati nella finestra: <em>bottoni</em>, <em>slider</em> e <em>etichette</em>.
 Per ogni oggetto, devi
@@ -130,6 +140,7 @@ può avere qualsiasi numero di fasi dividendo la sua immagine in differenti parti
 una sotto l'altra.
 Vedi <a href="#main.hpotmeter">hslider</a> e
 <a href="#main.potmeter">slider</a> per dettagli.
+</p>
 
 <p>
 Le <b>etichette</b> sono un po' speciali: i caratteri necessari a disegnarli sono presi
@@ -140,12 +151,14 @@ la posizione x,y e la dimensione di ogni carattere nell'immagine. (Quindi
 il file d'immagine e il suo file di descrizione del font formano un font <em>insieme</em>.)
 Vedi <a href="#main.dlabel">dlabel</a> e <a href="#main.slabel">slabel</a>
 per dettagli.
+</p>
 
 <p>
 <em class=note>
 <b>Nota:</b> tutte le immagini possono avere la piena trasparenza come descritto nella
 sezione sui <a href="#images">formati immagine</a>.
 </em>
+</p>
 </li>
 
 <li>
@@ -157,31 +170,32 @@ se non c'è nessun video caricato (è noioso avere una finestra vuota
 </li>
 
 <li>
-Il <b>menu della skin</b> è solo un modo per controllare MPlayer per mezzo delle voci
+Il <b>menu della skin</b> è solo un modo per controllare <b>MPlayer</b> per mezzo delle voci
 del menu. Sono necessarie due immagini per il menu: una è l'immagine di base
 che mostra il menu nel suo stato normale, l'altra è usata per mostrare
 le voci selezionate. Quando attivi il menu, viene mostrata la prima immagine.
 Se muovi il mouse sulle voci del menu, la voce attualmente selezionata
-è copiata dalla seconda immagine sotto il puntatore del mouse.
-(Quindi la seconda immagine non è mai mostrata interamente.)
+è copiata dalla seconda immagine sotto il puntatore del mouse
+(la seconda immagine non è mai mostrata interamente).
 <p>
 Una voce del menu è definita dalla sua posizione e dimensione nell'immagine (vedi la
 sezione sul <a href="#skinmenu">menu della skin</a> per dettagli).
+</p>
 </li>
 </ul>
 
 <p>
 C'è una cosa importante non ancora menzionata: per far funzionare bottoni, slider e
-voci del menu, MPlayer deve sapere cosa fare se sono cliccati.
+voci del menu, <b>MPlayer</b> deve sapere cosa fare se sono cliccati.
 Questo è fatto tramite <a href="#guimsg">messaggi</a> (eventi). Per questi oggetti
 devi definire i messaggi che devono essere generati quando vengono attivati.
-
+</p>
 <h3><a name="files">2.4 File</a></h3>
 
-Devi avere i seguenti file per fare una skin.
+Devi avere i seguenti file per fare una skin:
 <ul>
 <li>
-Il file di configurazione chiamato <a href="#skin">skin</a> dice a MPlayer come
+Il file di configurazione chiamato <a href="#skin">skin</a> dice a <b>MPlayer</b> come
 mettere insieme le diverse parti della skin e cosa fare se si clicca
 da qualche parte nella finestra.
 </li>
@@ -190,7 +204,7 @@ da qualche parte nella finestra.
 necessari per disegnare le etichette).</li>
 <li>l'immagine da mostrare nella sotto finestra (opzionale).</li>
 <li>Due immagini per il menu della skin (ne hai bisogno solo se vuoi creare un
-menu).
+menu).</li>
 </ul>
 
 Con l'eccezione del file di configurazione della skin, puoi nominare gli altri file
@@ -198,17 +212,20 @@ come vuoi (ma nota che i file di descrizione dei font devono avere l'estensione
 .fnt).
 
 
-<h2><a name="skin">3 Il file <code><b>skin</b></code></a></h2>
+<h2><a name="skin">3 Il file <code>skin</code></a></h2>
 
 <p>
 Come menzionato sopra, questo è il file di configurazione della skin.
 E' orientato alla linea; le linee di commento iniziano col carattere '<code>;</code>'
 all'inizio della linea (solo spazi e tab sono permessi prima del
 '<code>;</code>').
+</p>
 
 <p>
 Il file è fatto di sezioni. Ogni sezione descrive la skin per un'applicazione e
 ha la seguente forma:
+</p>
+
 <table border=1 width="100%"><tr bgcolor=silver><td><pre>
 section = <i>nome sezione</i>
 .
@@ -220,9 +237,12 @@ end
 <p>
 Attualmente c'è solo una applicazione, quindi hai bisogno solo di una sezione:
 il suo nome è <b>movieplayer</b>.
+</p>
 
 <p>
 Dentro questa sezione ogni finestra è descritta da un blocco nella seguente forma:
+</p>
+
 <table border=1 width="100%"><tr bgcolor=silver><td><pre>
 window = <i>nome finestra</i>
 .
@@ -240,27 +260,28 @@ dove <i>nome finestra</i> può essere una di queste stringhe:
 <p>
 (I blocchi sub e menu sono opzionali---non devi per forza creare un menu o decorare
 la sotto finestra.)
+</p>
 
 <p>
 Dentro un blocco finestra, puoi definire ogni oggetto della finestra
 con una linea in questa forma:
 
-<blockquote>
-<pre>
-oggetto = parametro
-</pre>
-</blockquote>
+<dl>
+<dt>
+<b><code>oggetto = parametro</code></b>
+</dt>
+<dd>
 
-<p>
 dove <i>oggetto</i> è una stringa che identifica il tipo di oggetto della GUI,
 <i>parametro</i> è un valore numerico o testuale (o una lista di valori
 separati da virgole).
-</p>
+</dd>
+</dl>
 
 <p>
 mettendo insieme quanto sopra, l'intero file appare così:
+</p>
 
-<p>
 <table border=1 width="100%"><tr bgcolor=silver><td><pre>
 section = movieplayer
   window = main
@@ -275,19 +296,34 @@ section = movieplayer
   ; ... oggetti del menu della skin ...
   end
 end
-</pre></tr></td></table>
+</pre></td></tr></table>
 
 <p>
-In fine alcune parole su come specificare le immagini per i vari oggetti.
-<br>
 Il nome di un file immagine deve essere dato senza il percorso---
 le immagini vengono cercate nella directory della skin. Puoi (ma non è necessario)
-specificare l'estensione del file. Se il file non esiste, MPlayer cerca di
+specificare l'estensione del file. Se il file non esiste, <b>MPlayer</b> cerca di
 caricare il file <i>&lt;nomefile&gt;.&lt;est&gt;</i>, dove <i>tga</i>,
 <i>TGA</i>, <i>bmp</i>, <i>BMP</i>, <i>png</i> e <i>PNG</i> sono provati
 al posto di <i>&lt;est&gt;</i> (in questo ordine). Il primo file corrispondente sarà usato.
 
 <p>
+Infine qualche parola sul posizionamento. La finestra principale e la sottofinestra possono
+essere posizionate in diversi angoli dello schermo impostando le coordinate <code>X</code> e
+<code>Y</code>. <code>0</code> è in alto o sinistra, <code>-1</code> è
+centro e <code>-2</code> è destra o in basso, come mostrato qui:
+</p>
+
+<pre>
+
+(0, 0)----(-1, 0)----(-2, 0)
+  |          |          |
+  |          |          |
+(0,-1)----(-1,-1)----(-2,-1)
+  |          |          |
+  |          |          |
+(0,-2)----(-1,-2)----(-2,-2)
+
+</pre>
 
 <table border=1 cellpadding=5 width="100%"><tr bgcolor="#ffffcc"><td>
 Ecco un esempio per rendere le cose chiare. Supponi di avere un'immagine chiamata
@@ -298,7 +334,7 @@ Ecco un esempio per rendere le cose chiare. Supponi di avere un'immagine chiamat
 </pre>
 </blockquote>
 
-MPlayer cerca di caricare <i>main</i>, <i>main.tga</i>, <i>main.TGA</i>,
+<b>MPlayer</b> cerca di caricare <i>main</i>, <i>main.tga</i>, <i>main.TGA</i>,
 <i>main.bmp</i> ecc, quindi verrà trovata <i>main.png</i>.
 <br>
 Se (per sbaglio) scrivi
@@ -308,7 +344,7 @@ Se (per sbaglio) scrivi
 </pre>
 </blockquote>
 allora saranno cercati <i>main.bmp</i>, <i>main.bmp.tga</i>, <i>main.bmp.TGA</i>,
-<i>main.bmp.bmp</i> e MPlayer alla fine rinuncerà
+<i>main.bmp.bmp</i> e <b>MPlayer</b> alla fine rinuncerà
 perchè non c'è nessun <i>main.bmp</i> nella directory, ma <i>main.png</i>.
 </td></tr></table>
 
@@ -332,10 +368,9 @@ e -2 per destra (x) e in basso (y). La finestra sarà larga quanto l'immagine.
 <b>Avvertimento:</b> le zone trasparenti dell' immagine (colore #FF00FF) appaiono
 nere se il server X non supporta l'estensione XShape.
 </em>
+</div>
 </dd>
-</dl>
 
-<dl>
 <dt><a name="main.button">
 <b>button = <i>immagine, x, y, larghezza, altezza, messaggio</i></b></a></dt>
 <dd>
@@ -344,7 +379,7 @@ Posiziona un bottone di dimensioni <i>larghezza</i> * <i>altezza</i> alla posizi
 cliccato il bottone.
 L'immagine data da <i>immagine</i> deve avere tre parti una sotto l'altra
 (secondo i possibili stati del bottone), in questo modo:
-<div align=center><table><tr><td><pre><small>
+<pre>
 +------------+
 |  premuto   |
 +------------+
@@ -352,11 +387,9 @@ L'immagine data da <i>immagine</i> deve avere tre parti una sotto l'altra
 +------------+
 |disabilitato|
 +------------+
-</small></pre></td></tr></table></div>
+</pre>
 </dd>
-</dl>
 
-<dl>
 <dt><a name="main.decoration">
 <b>decoration = enable|disable</b>
 </a></dt>
@@ -364,18 +397,16 @@ L'immagine data da <i>immagine</i> deve avere tre parti una sotto l'altra
 Abilita o disabilita la decorazione della finestra principale. Il default
 è <b>disable</b>.
 </dd>
-</dl>
 
-<dl>
 <dt>
 <a name="main.hpotmeter">
 <b>
-hpotmeter = <i>bott, lb,ab, fasi, numfasi, default, x, y, l, a, msg</i>
+hpotmeter = <i>bott, lungb,altb, fasi, numfasi, default, x, y, lung, alt, msg</i>
 </b>
 </a>
 </dt>
 <dd>
-Inserisce uno slider orizzontale di dimensioni <i>l</i> * <i>a</i> alla posizione
+Inserisce uno slider orizzontale di dimensioni <i>lung</i> * <i>alt</i> alla posizione
 <i>x</i>,<i>y</i>. L'immagine può essere divisa in diverse parti
 per le diverse fasi dello slider (per esempio,
 puoi avere uno slider per il controllo volume che cambia da verde a rosso
@@ -417,10 +448,8 @@ L'immagine usata per le differenti fasi deve essere più o meno così:
 <b>Nota:</b> ci sarà anche un oggetto vpotmeter, ma non è ancora stato
 implementato.
 </em>
-</dd>	
-</dl>
+</dd>
 
-<dl>
 <dt><a name="main.potmeter">
 <b>potmeter = <i>fasi, numfasi, default, x, y, l, a, msg</i></b>
 </a></dt>
@@ -432,9 +461,7 @@ Per la descrizione dei parametri vedi
 <code>NULL</code>, ma è proprio inutile, infatti non puoi vedere dove
 è situato lo slider.
 </dd>
-</dl>
 
-<dl>
 <dt><a name="main.font">
 <b>font = <i>filefont, fontid</i></b>
 </a></dt>
@@ -446,9 +473,7 @@ qui).
 (vedi <a href="#main.dlabel">dlabel</a> e <a href="#main.slabel">slabel</a>).
 Possono essere definiti fino a 25 font.
 </dd>
-</dl>
 
-<dl>
 <dt><a name="main.dlabel">
 <b>dlabel = <i>x, y, lunghezza, allineamento, fontid, "testo"</i></b>
 </a></dt>

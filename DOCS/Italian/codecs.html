@@ -1,16 +1,13 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=WHITE>
+<BODY>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=2.2>2.2.  Codec supportati</A></B></P>
 
@@ -29,7 +26,7 @@ generata giornalmente!!!</P>
 <LI>MJPEG, AVID, VCR2, ASV2 e altri formati hardware</LI>
 <LI>VIVO 1.0, 2.0, I263 e altre varianti h263(+)</LI>
 <LI>FLI//FLC</LI>
-<LI>RealVideo 1.0</LI>
+<LI>RealVideo 1.0 da ffmpeg, e RealVideo 2.0, 3.0 usando le librerie di RealPlayer</LI>
 <LI>Vari vecchi semplici formati tipo RLE</LI>
 </UL>
 
@@ -73,12 +70,12 @@ compilato in <B>MPlayer</B> alla volta.</P>
 opzioni quando usi questo codec:</P>
 
 <P><TABLE BORDER=0>
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT CLASS="text">Usa il codec alla maniera di OpenDivX.
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>-vc&nbsp;odivx</TD><TD>&nbsp;&nbsp;</TD>
+<TD>Usa il codec alla maniera di OpenDivX.
 in questo caso produce immagini YV12 nel suo proprio buffer,
 e <B>MPlayer</B> fa la conversione dello spazio dei colori tramite libvo. (<B>RACCOMANDATO!</B>)</TD><TR>
-<TD></TD><TD VALIGN=top><FONT CLASS="text">-vc&nbsp;divx4</TD><TD></TD>
-<TD><FONT CLASS="text">Usa la conversione dello spazio dei colori del codec.
+<TD></TD><TD VALIGN=top>-vc&nbsp;divx4</TD><TD></TD>
+<TD>Usa la conversione dello spazio dei colori del codec.
 in questa modalità, puoi usare anche YUY2/UYVY.</TD></TR>
 </TABLE></P>
 
@@ -95,12 +92,12 @@ essere una soluzione più veloce, o perfino la più veloce.</P>
 ma il campo dei valori è strano: </P>
 
 <TABLE BORDER=0>
-<TR><TD>&nbsp;&nbsp;</TD><TD><FONT CLASS="text">0</TD><TD>&nbsp;&nbsp;</TD>
-<TD><FONT CLASS="text">nessun postprocessing</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">10 .. 20</TD>
-<TD></TD><TD><FONT CLASS="text">postprocessing normale (come il livello 2 con divxds)</TD></TR>
-<TR><TD></TD><TD><FONT CLASS="text">30 .. 60</TD>
-<TD></TD><TD><FONT CLASS="text">alto prostprocessing, divora molta CPU (come il livello 4 con divxds</TD></TR>
+<TR><TD>&nbsp;&nbsp;</TD><TD>0</TD><TD>&nbsp;&nbsp;</TD>
+<TD>nessun postprocessing</TD></TR>
+<TR><TD></TD><TD>10 .. 20</TD>
+<TD></TD><TD>postprocessing normale (come il livello 2 con divxds)</TD></TR>
+<TR><TD></TD><TD>30 .. 60</TD>
+<TD></TD><TD>alto prostprocessing, divora molta CPU (come il livello 4 con divxds</TD></TR>
 </TABLE>
 
 
@@ -109,7 +106,7 @@ ma il campo dei valori è strano: </P>
 <P>Dalla versione 0.4.2 , <A HREF="http://ffmpeg.sourceforge.net">ffmpeg</A> contiene
 un codec DivX <B>opensource</B>,che è compatibile con il tradizionale DivX.
 <B>MPlayer</B> supporta questo codec,e questo rende possibile <B>vedere filmati
-DivX/DivX4/DivX5/MP42 su piattaforme non-x86</B>,
+DivX/DivX4/DivX5/MP41/MP42 su piattaforme non-x86</B>,
 ed avere una decodifica molto più veloce di quella dei
 codec Win32 e dell'originale libreria DivX4!</P>
 
@@ -214,10 +211,15 @@ il driver di output video.</P>
 
 <P><B><A NAME=2.2.1.8>2.2.1.8.  RealVideo</A></B></P>
 
-<P>Attualmente è supportato SOLO il codec RealVideo 1.0 (fourcc RV10), per mezzo di
-ffmpeg. Purtroppo i nuovi file RealMedia usano i nuovi codec
-RV20 e RV30 che sono closed-source. Il loro supporto futuro è
-improbabile :(</P>
+<B>MPlayer</B> supporta tutte le versioni di RealVideo:
+<UL>
+  <LI>RealVideo 1.0 (fourcc RV10) - codifica e decodifica supportata da <B>libavcodec</B></LI>
+  <LI>RealVideo 2.0 (fourcc RV20) - decodifica supportata dalle <B>librerie RealPlayer</B></LI>
+  <LI>RealVideo 3.0 (fourcc RV30) - decodifica supportata dalle <B>librerie RealPlayer</B></LI>
+</UL>
+
+<P>Per sapere come installare le librerie RealPlayer, vedi la sezione
+  <A HREF="formats.html#2.1.1.7">Formato file RealMedia</A>.</P>
 
 
 <P><B><A NAME=2.2.1.9>2.2.1.9.  XViD</A></B></P>
@@ -332,9 +334,16 @@ quindi copiala nella directory <CODE>/usr/lib/win32</CODE>.</P>
 
 <P><B><A NAME=2.2.2.5>2.2.2.5.  RealAudio</A></B></P>
 
-<P>Attualmente il solo supportato è il codec DNET. In realtà è una
-versione a basso bitrate del famoso codec AC3. Si può trovare sia nei vecchi
-che nei nuovi filmati RealMedia.</P>
+<B>MPlayer</B> supporta tutte le versioni di RealAudio:
+<UL>
+  <LI>RealAudio DNET - decodifica supportata da <B>libavcodec</B></LI>
+  <LI>RealAudio Cook - decodifica supportata dalle <B>librerie RealPlayer</B></LI>
+  <LI>RealAudio Sipro - decodifica supportata dalle <B>librerie RealPlayer</B></LI>
+</UL>
+
+
+<P>Per sapere come installare le librerie RealPlayer, vedi la sezione
+  <A HREF="formats.html#2.1.1.7">Formato file RealMedia</A>.</P>
 
 
 <P><B><A NAME=2.2.3>2.2.3. Come importare i codec Win32</A></B></P>

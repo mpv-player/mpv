@@ -1,13 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
-<BODY BGCOLOR=WHITE>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
+
+<BODY>
 
 <P><B><A NAME=2.1>2.1. Formati supportati</A></B></P>
 
@@ -165,9 +164,23 @@ sarà confusa per breve tempo dopo una ricerca.</P>
 <P><B><A NAME=2.1.1.7>2.1.1.7. File RealMedia (RM)</A></B></P>
 
 <P>Si, <B>MPlayer</B> può leggere (demux) file RealMedia (.rm). La ricerca
-funziona (il formato supporta i frame chiave).
+funziona, ma devi specificare esplicitamente l'opzione <CODE>-forceidx</CODE> 
+(il formato supporta i frame chiave).
 Qui c'è la lista dei codec supportati: <A HREF="codecs.html#2.2.1.8">RealVideo</A>
-e <A HREF="codecs.html#2.2.2.5">RealAudio</A> .
+e <A HREF="codecs.html#2.2.2.5">RealAudio</A>.
+
+<P>Si raccomanda di scaricare e installare RealPlayer8 o RealONE, perchè
+  <B>MPlayer</B> può usare le loro librerie per decodificare file con video RealVideo 2.0 o
+  RealVideo 3.0! Tutto quello che devi fare è:</P>
+<P>
+  &nbsp;&nbsp;<CODE>ln -s /usr/local/RealPlayer8/Codecs $PREFIX/lib/real</CODE>
+</P>
+
+<P>NOTA: il path di installazione di RealPlayer può essere differente da quello sopra, per favore
+  controllalo.</P>
+
+<P>NOTA: le librerie RealPlayer attualmente <B>possono essere usate solo su piattaforme x86,
+  e Linux o FreeBSD</B>!</P>
 
 
 <P><B><A NAME=2.1.1.8>2.1.1.8. File NuppelVideo</A></B></P>

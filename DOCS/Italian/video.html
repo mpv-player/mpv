@@ -1,13 +1,10 @@
 <HTML>
-<BODY BGCOLOR=white>
 
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
 </HEAD>
+
+<BODY BGCOLOR=white>
 
 <P><B><A NAME=2.3.1>2.3.1. Dispositivi di output video</A></B></P>
 
@@ -594,13 +591,19 @@ accelerazione YUV. Devi avere un kernel col supporto tdfxfb, e ricompilare con
 
 <P><B><A NAME=2.3.1.10>2.3.1.10. Output in OpenGL</A></B></P>
 
-<P><B>MPlayer</B> supporta la visualizzazione dei filmati usando OpenGL. Sfortunatamente, non tutti
+<P><B>MPlayer</B> supporta la visualizzazione dei filmati usando OpenGL, ma se
+ la tua piattaforma/driver supporta xv come dovrebbe essere su un PC con Linux, usa xv
+ invece, le prestazioni di OpenGL sono peggiori. Se hai una implementazione X11
+ senza il supporto di xv, OpenGL è un' alternativa disponibile.</P>
+
+<P>Sfortunatamente, non tutti
 i driver hanno questa capacità. Per esempio i driver Utah-GLX
 (per XFree86 3.3.6) lo supportano, con tutte le schede.
 Vedi <A HREF="http://utah-glx.sourceforge.net">http://utah-glx.sourceforge.net</A>
 per dettagli su come installarlo.</P>
 
-<P>XFree86(DRI) >= 4.0.3 lo supporta solo con schede Matrox, e Radeon.
+<P>XFree86(DRI) >= 4.0.3 supporta OpenGL con schede Matrox, e Radeon, >= 4.2
+lo supporta anche per le Rage128.
 Vedi <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A> per scaricarlo,
 e per istruzioni sull'installazione.</P>
 

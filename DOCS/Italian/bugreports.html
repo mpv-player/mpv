@@ -1,15 +1,12 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <HTML>
 <HEAD>
-<STYLE>
-	.text
-		{font-family	:	Verdana, Arial, Helvetica, sans-serif;
-		font-size	:	14px;}
-</STYLE>
+<LINK REL="stylesheet" TYPE="text/css" HREF="default.css">
+  <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
 </HEAD>
 
-<BODY BGCOLOR=white>
+<BODY>
 
-<FONT CLASS="text">
 
 <P><B><A NAME=C>Appendice C - Come segnalare i bug</A></B></P>
 
@@ -41,7 +38,7 @@ queste importanti informazioni:</P>
 
 <P><B>Cosa segnalare?</B></P>
 
-<P><B><I>1. Informazioni sul sistema</I></B></P>
+<P><B>1. Informazioni sul sistema</B></P>
 
 <UL>
 <LI>La tua distribuzione Linux o il tuo sistema operativo es.:<BR>
@@ -76,7 +73,7 @@ queste importanti informazioni:</P>
 </LI>
 </UL>
 
-<P><B><I>2. Hardware &amp; driver:</I></B></P>
+<P><B>2. Hardware &amp; driver:</B></P>
 
 <UL>
 <LI>informazioni sulla CPU (questo funziona solo su Linux):<BR>
@@ -107,7 +104,7 @@ queste importanti informazioni:</P>
 
 <P><B>Per problemi/errori di compilazione</B></P>
 
-<P><B><I>Per favore includi questi file:</I></B></P>
+<P><B>Per favore includi questi file:</B></P>
 <UL>
 <LI>configure.log</LI>
 <LI>config.h</LI>
@@ -117,7 +114,10 @@ queste importanti informazioni:</P>
 
 <P><B>Per problemi di riproduzione:</B></P>
 
-<P><B><I>Per favore includi l'output di mplayer al livello di verbosità 1 (-v)</I></B></P>
+<P>Per favore includi l'output di mplayer al livello di verbosità 1 ma ricordati di
+<B>non tagliare l'output</B> quando lo incolli nella tua mail. Gli sviluppatori hanno
+bisogno di tutti i messaggi per scoprire il problema. Puoi ridirezionare l'output
+in un file in questo modo:</P>
 <P><CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -v [opzioni] nomefile &amp;&gt; mplayer.log</CODE></P>
   
 <P><B><I>Se il problema è specifico ad uno o più file,
@@ -136,11 +136,11 @@ queste importanti informazioni:</P>
   Se il file è presente sulla rete allora è sufficiente mandare l' URL
   <strong>esatta</strong>.
 
-<P><B><I>Per i crash</I></B></P>
+<P><B>Per i crash</B></P>
 
-<P><I>Se hai il coredump del crash continua a leggere il prossimo paragrafo, altrimenti saltalo:</I></P>
+<P>Se hai il coredump del crash continua a leggere il prossimo paragrafo, altrimenti saltalo:</P>
 
-<P><B><I>Come estrarre informazioni significative da un core dump.</I></B></P>
+<P><B>Come estrarre informazioni significative da un core dump.</B></P>
 
 <P>Per favore crea il seguente file di comandi:</P>
 
@@ -158,7 +158,7 @@ printf "esi=%08lX\n",$esi<BR>
 <P>Quindi semplicemente esegui la seguente linea di comando:</P>
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>gdb mplayer --core=core -batch --command=file_comandi &gt; mplayer.bug</CODE></P>
 
-<P><B><I>Come conservare informazioni su un crash riproducibile</I></B></P>
+<P><B>Come conservare informazioni su un crash riproducibile</B></P>
 <P>Ri-compila mplayer col codice di debug abilitato:<BR>
 ./configure --enable-debug=3<BR>
 make
