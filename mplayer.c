@@ -555,6 +555,8 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   if ( !use_gui ) load_termcap(NULL); // load key-codes
 #endif
 
+// ========== Init keyboard FIFO (connection to libvo) ============
+make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
   //========= Catch terminate signals: ================
   // terminate requests:
@@ -920,10 +922,6 @@ if(auto_quality>0){
      else encode_index_name=NULL;
      sh_audio=d_audio->sh=NULL;
    }
-
-// ========== Init keyboard FIFO (connection to libvo) ============
-
-make_pipe(&keyb_fifo_get,&keyb_fifo_put);
 
 // ========== Init display (sh_video->disp_w*sh_video->disp_h/out_fmt) ============
 
