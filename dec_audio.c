@@ -570,6 +570,7 @@ case AFM_A52: {
   if(gCpuCaps.hasMMX) a52_accel|=MM_ACCEL_X86_MMX;
   if(gCpuCaps.hasMMX2) a52_accel|=MM_ACCEL_X86_MMXEXT;
   if(gCpuCaps.has3DNow) a52_accel|=MM_ACCEL_X86_3DNOW;
+  if(gCpuCaps.has3DNowExt) a52_accel|=MM_ACCEL_X86_3DNOWEXT;
   a52_samples=a52_init (a52_accel);
   if (a52_samples == NULL) {
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 init failed\n");
