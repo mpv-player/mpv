@@ -408,7 +408,7 @@ static uint32_t parseSubDevice(const char *sd)
    if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
    else
    if(memcmp(sd,"lvo:",4) == 0) lvo_name = &sd[4]; /* lvo_name will be valid within init() */
-   else if(verbose) printf("vo_vesa: Unknown subcommand: %s\n", sd);
+   else { printf("vo_vesa: Unknown subdevice: %s\n", sd); return -1; }
    return flags;
 }
 
@@ -544,6 +544,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	rgb2rgb_fnc = NULL;
         sd_flags = 0;
         if(vo_subdevice) sd_flags = parseSubDevice(vo_subdevice);
+	if(sd_flags == -1) return -1;
 	if(flags & 0x8)
 	{
 	  printf("vo_vesa: switch -flip is not supported\n");
