@@ -7,14 +7,11 @@ FOR THE RELEASE:
 
 demuxer:
 - prebuffering to cache2 (req. for MMS) - URGENT!
-- implement seeking to FLI/FLC
-- test & fix -loop
 
 decoders:
 - getting mss1 (Windows Screen Video) DLL codec working... - kabi
 - getting PIM1 codec (DLL) working... - kabi
 - optimize (or port optimized code from libac3) liba52 (imdct.c, resample.c)
-- testing and commit non-16 width/height libavcodec patch
 
 mencoder:
 - add some kind of "-ss" option, to start at e.g. 1:0:0 at the video
