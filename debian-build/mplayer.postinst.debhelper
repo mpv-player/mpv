@@ -1,0 +1,10 @@
+# Automatically added by dh_installdocs
+if [ "$1" = "configure" ]; then
+	if [ -d /usr/doc -a ! -e /usr/doc/mplayer -a -d /usr/share/doc/mplayer ]; then
+		ln -sf ../share/doc/mplayer /usr/doc/mplayer
+	fi
+fi
+# End automatically added section
+# Automatically added by dh_installmenu
+if [ "$1" = "configure" -a -x /usr/bin/update-menus ]; then update-menus ; fi
+# End automatically added section

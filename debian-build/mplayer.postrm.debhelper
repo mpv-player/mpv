@@ -1,0 +1,9 @@
+# Automatically added by dh_installdebconf
+if [ "$1" = purge -a -e /usr/share/debconf/confmodule ]; then
+	. /usr/share/debconf/confmodule
+	db_purge
+fi
+# End automatically added section
+# Automatically added by dh_installmenu
+if [ -x /usr/bin/update-menus ]; then update-menus ; fi
+# End automatically added section

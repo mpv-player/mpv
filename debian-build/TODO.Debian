@@ -1,0 +1,12 @@
+- create packages of mp_font (TTF? BITMAP? AND HOW?), depend/recommend them.  
+- create package for win32codecs (WHY?)
+- global configuration 
+ ( /etc/mplayer/mplayer.conf
+  /etc/mplayer/codecs.conf
+  /usr/lib/mplayer/font )
+- OBSOLETED: fibmap_mplayer - figure out what to do with suid.
+- OBSOLETED: create package with odivx and make this one depend/recommend it
+- OBSOLETED: Add script for copying *.dlls from users windows directory,
+or figure out some other way of satisfying other dependencies
+like *.dlls and fonts.
+In other words - automate win32dll.zip installation.

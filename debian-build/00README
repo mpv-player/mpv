@@ -1,0 +1,5 @@
+This is the debian/ directory for building mplayer packages for binary
+binary distribution. It's based on the debian/ directory Dariush Pietrzak made.
+Replace the normal debian/ with this and run dpkg-buildpackage.
+
+IMPORTANT: THIS IS NOT YET FINISHED AND DOESNT WORK AT THE MOMENT

@@ -1,0 +1,3 @@
+misc:Depends=debconf (>= 0.5)
+perl:Depends=perl
+shlibs:Depends=aalib1 (>= 1.2), libaudiofile0 (>= 0.2.3-4), libc6 (>= 2.2.5-13), libesd0 (>= 0.2.23-1) | libesd-alsa0 (>= 0.2.23-1), libggi2 (>= 1:2.0.1-2), libglib1.2 (>= 1.2.0), libgtk1.2 (>= 1.2.10-4), libjpeg62, libmad0 (>= 0.14.2b), libncurses5 (>= 5.2.20020112a-1), libogg0 (>= 1.0.0), libpng2 (>=1.0.12), libsdl1.2debian (>> 1.2.3), libungif4g (>= 4.1.0b1), libvorbis0 (>= 1.0.0), svgalibg1, xlibmesa3 | libgl1, xlibs (>> 4.1.0), zlib1g (>= 1:1.1.4)

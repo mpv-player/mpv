@@ -1,0 +1,1 @@
+?package(mplayer):command=/usr/bin/gmplayer section="Apps/Viewers" needs=X11 title=gmplayer

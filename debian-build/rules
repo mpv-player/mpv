@@ -1,0 +1,172 @@
+#!/usr/bin/make -f
+# Made with the aid of debmake, by Christoph Lameter,
+# based on the sample debian/rules file for GNU hello by Ian Jackson.
+#export DH_VERBOSE=1
+# This is the debhelper compatability version to use.
+export DH_COMPAT=3
+
+package        := mplayer
+prefix := $(shell pwd)/debian/$(package)
+
+arch   := $(shell dpkg --print-architecture)
+  
+ifeq ($(arch),powerpc)
+  arch-conf += --disable-mp1e
+endif
+
+COMMON_CONFIG  = --prefix=/usr \
+                 --confdir=/etc/mplayer \
+                 --enable-runtime-cpudetection \
+                 --enable-termcap \
+                 --disable-iconv \
+                 --disable-setlocale \
+                 --disable-lirc \
+                 --disable-tv-v4l \
+                 --disable-tv-bsdbt848 \
+                 --enable-rtc \
+                 --disable-dvdnav \
+                 --disable-dvdread \
+                 --enable-mpdvdkit \
+                 --disable-css \
+                 --disable-cdparanoia \
+                 --disable-freetype \
+                 --disable-gif \
+                 --disable-png \
+                 --disable-jpeg \
+                 --disable-liblzo \
+                 --enable-win32 \
+                 --disable-xanim \
+                 --disable-xvid \
+                 --disable-divx4linux \
+                 --disable-libfame \
+                 --enable-vorbis \
+                 --disable-faad \
+                 --disable-libdv \
+                 --disable-mad \
+                 --disable-sdl \
+                 --disable-aa \
+                 --disable-ggi \
+                 --disable-directx \
+                 --disable-dvb \
+                 --disable-dxr2 \
+                 --disable-dxr3 \
+                 --disable-directfb \
+                 --disable-zr \
+                 --disable-real \
+                 --disable-arts \
+                 --disable-esd \
+                 --disable-alsa \
+                 --disable-mencoder
+
+VARIANTS = nongui-nonx-oss gui-x-oss
+
+CONFIG_nongui-nonx-oss = --disable-gui \
+                         --disable-gl \
+                         --disable-dga \
+                         --enable-vesa \
+                         --enable-svga \
+                         --enable-mga \
+                         --disable-xmga \
+                         --disable-xv \
+                         --disable-vm \
+                         --disable-xinerama \
+                         --disable-x11 \
+                         --enable-fbdev 
+                         
+CONFIG_gui-x-oss = --enable-gui \
+                         --enable-gl \
+                         --enable-dga \
+                         --enable-vesa \
+                         --disable-svga \
+                         --enable-mga \
+                         --enable-xmga \
+                         --enable-xv \
+                         --enable-vm \
+                         --enable-xinerama \
+                         --enable-x11 \
+                         --enable-fbdev 
+                          
+configure: configure-stamp
+configure-stamp: $(foreach v,$(VARIANTS),configure-stamp-$(v))
+
+configure-stamp-%:
+	dh_testdir
+	# Add here commands to configure the package.
+	$(checkdir)
+	./configure $(COMMON_CONIG) $(CONFIG_$(*)) $(DEB_BUILD_OPTIONS)
+	touch $@
+
+build: build-stamp
+build-stamp:
+	dh_testdir
+
+	# commands to compile the package.
+	${MAKE} 
+
+	touch build-stamp
+
+clean:
+	dh_testdir
+	dh_testroot
+	rm -f build-stamp configure-stamp
+
+	# commands to clean up after the build process.
+	-$(MAKE) distclean
+	dh_clean
+
+# Build architecture-independent files here.
+binary-indep: build
+# We have nothing to do by default.
+
+# Build architecture-dependent files here.
+binary-arch: build
+	dh_testdir
+	dh_testroot
+	dh_clean -k
+	dh_installdirs
+
+	# commands to install the package into debian/<packagename>
+	$(MAKE) prefix=$(prefix)/usr BINDIR=$(prefix)/usr/bin CONFDIR=$(prefix)/etc/mplayer LIBDIR=$(prefix)/usr/lib DATADIR=$(prefix)/usr/share/mplayer  MANDIR=$(prefix)/usr/share/man  install
+	dh_link usr/bin/mplayer usr/bin/gmplayer \
+		usr/share/man/man1/mplayer.1.gz usr/share/man/man1/gmplayer.1.gz
+
+
+	dh_installdebconf	
+	dh_installdocs --exclude=CVS DOCS/*
+	dh_installexamples etc/example.conf
+	dh_installmenu
+#	dh_installmime
+	dh_installinfo
+	dh_installchangelogs
+	dh_link
+	dh_strip
+	dh_compress
+	dh_fixperms
+#	dh_makeshlibs
+	dh_installdeb
+	dh_perl
+	dh_shlibdeps
+	dh_gencontrol
+	dh_md5sums
+	dh_builddeb
+
+
+
+#binary-arch: checkroot build
+#	$(checkdir)
+#	-rm -rf debian/tmp
+#	install -d debian/tmp
+#	cd debian/tmp && install -d `cat ../dirs`
+
+
+# Must have debmake installed for this to work. Otherwise please copy
+# /usr/bin/debstd into the debian directory and change debstd to debian/debstd
+#	debstd 
+#	dpkg-gencontrol -isp
+#	chown -R root.root debian/tmp
+#	chmod -R go=rX debian/tmp
+#	dpkg --build debian/tmp ..
+
+binary: binary-indep binary-arch
+
+.PHONY: binary binary-arch binary-indep clean checkroot

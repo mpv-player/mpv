@@ -1,0 +1,5 @@
+# Automatically added by dh_installdocs
+if [ \( "$1" = "upgrade" -o "$1" = "remove" \) -a -L /usr/doc/mplayer ]; then
+	rm -f /usr/doc/mplayer
+fi
+# End automatically added section

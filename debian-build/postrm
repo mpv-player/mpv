@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "purge" ]; then
+  if [ -d /etc/mplayer/ ]; then
+    rm -rf /etc/mplayer/
+  fi
+fi

@@ -1,0 +1,176 @@
+mplayer (0.90rc2-0) unstable; urgency=low
+
+  * new release.
+
+ -- Gabucino <gabucino@mplayerhq.hu>  Mon, 16 Dec 2002 22:03:55 +0100
+
+mplayer (0.90rc1-0) unstable; urgency=low
+
+  * new release.
+  * now compiled with --enable-runtime-cpudetection for safety reasons.
+    Disable it for slightly better performance, but the package will run only
+    on the CPU the build machine had.
+  * updated package description
+
+ -- Gabucino <gabucino@mplayerhq.hu>  Sun, 24 Nov 2002 17:01:12 +0100
+
+mplayer (0.90pre9-0) unstable; urgency=low
+
+  * new release.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Mon, 21 Oct 2002 22:30:06 +0200
+
+mplayer (0.90pre8-0) unstable; urgency=low
+
+  * new release, fix version, we are not at 0.90, we're still at preX
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Thu, 19 Sep 2002 09:50:43 +0200
+
+mplayer (0.90-4) unstable; urgency=low
+
+  * Fix package building by adding BINDIR.
+
+ -- Diego Biurrun <diego@biurrun.de>  Wed,  4 Sep 2002 00:49:03 +0200
+
+mplayer (0.90-3) unstable; urgency=low
+
+  * Remove configuration files on purge.
+
+ -- Diego Biurrun <diego@biurrun.de>  Sun,  1 Sep 2002 11:03:13 +0200
+
+mplayer (0.90-2) unstable; urgency=low
+
+  * Use the confdir we compile with in the helper scripts
+    (/etc/mplayer/mplayer.conf instead of /etc/mplayer).
+
+ -- Diego Biurrun <diego@biurrun.de>  Tue, 27 Aug 2002 11:18:50 +0200
+
+mplayer (0.90-1) unstable; urgency=low
+
+  * 0.90 release including latest alsa9 fixes
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Wed,  3 Jul 2002 23:32:49 +0200
+
+mplayer (0.90pre5-1) unstable; urgency=low
+
+  * rc1 to become 0.90
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Fri,  7 Jun 2002 15:31:20 +0200
+
+mplayer (0.90pre4-1) unstable; urgency=low
+
+  * new pre-release
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Mon, 13 May 2002 08:06:34 +0200
+
+mplayer (0.90pre3-1) unstable; urgency=low
+
+  * new pre-release
+  * gtk bug fixed.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Tue, 30 Apr 2002 11:32:43 +0200
+
+mplayer (0.90pre2-1) unstable; urgency=low
+
+  * new release.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Sun, 21 Apr 2002 12:49:35 +0200
+
+mplayer (0.60-3) unstable; urgency=low
+
+  * install xvidix correctly 
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Sun, 17 Mar 2002 16:38:54 +0100
+
+mplayer (0.60-2) unstable; urgency=low
+
+  * This is meaningless, just to mark that more then 2 months have passed
+    since last release and lots of thing in mplayer have changed. 
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Thu,  7 Mar 2002 00:34:20 +0100
+
+mplayer (0.60-1) unstable; urgency=low
+
+  * Post 0.60 release.
+  * Changed installation - make install now handles codecs.conf, manpages
+  *  and fontdir, so we now use make install for those.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Fri,  4 Jan 2002 11:28:54 +0100
+
+mplayer (0.60pre2-1) unstable; urgency=low
+
+  * 0.60 pre2 release
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Fri, 28 Dec 2001 22:12:54 +0100
+
+mplayer (0.60pre1-1) unstable; urgency=low
+
+  * 0.60 pre-release.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Tue, 25 Dec 2001 00:47:36 +0100
+
+mplayer (0.50-3) unstable; urgency=low
+
+  * debian/rules: improve install routine; will include mencore if it is
+    built
+  * debian/control: remove invalid source recommends
+  * debian/copyright: mention that binary distribution is not allowed
+  * debian/rules: install /usr/share/mplayer/codecs.conf; this should
+    probably be a config file
+  * turn on fbdev option
+
+ -- Adam Di Carlo <aph@debian.org>  Sat, 15 Dec 2001 03:33:44 -0500
+
+mplayer (0.50-2) unstable; urgency=low
+
+  * gui added to package/menu 
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Wed,  7 Nov 2001 11:31:46 +0100
+
+mplayer (0.50-1) unstable; urgency=low
+
+  * 0.50 released.
+
+ -- Dariush Pietrzak <eyck@ghost.anime.pl>  Fri, 12 Oct 2001 13:26:03 +0200
+
+mplayer (0.18-4) unstable; urgency=low
+
+  * Changes to debian packaging suggested Josip Rodin 
+
+ -- Dariush Pietrzak <eyck@ghost.forumakad.pl>  Wed, 22 Aug 2001 22:40:58 +0200
+
+mplayer (0.18-3) unstable; urgency=low
+
+  * fixed templates. 
+
+ -- Dariush Pietrzak <eyck@ghost.tinet.pl>  Sat, 28 Jul 2001 09:45:45 +0200
+
+mplayer (0.18-2) unstable; urgency=low
+
+  * modified debian scripts 
+
+ -- Dariush Pietrzak <eyck@ghost.tinet.pl>  Fri, 27 Jul 2001 09:25:52 +0200
+
+mplayer (0.18-1) unstable; urgency=low
+
+  * lots of changes in mplayer 
+
+ -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Mon, 25 Jun 2001 15:59:18 +0200
+
+mplayer (0.17a-2) unstable; urgency=low
+
+  * mplayer.conf file, automatic menu files update 
+
+ -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Sun, 20 May 2001 22:50:41 +0200
+
+mplayer (0.17a-1) unstable; urgency=low
+
+  * Version change, debian scripts update (rm), maintainer switch
+
+ -- Dariush Pietrzak <eyck@incubus.ar.lublin.pl>  Thu, 17 May 2001 13:25:12 +0200
+
+mplayer (0.11pre-1) unstable; urgency=low
+
+  * Initial release.
+
+ -- * TeLeNiEkO * <telenieko@telenieko.com>  Mon, 26 Feb 2001 12:24:04 +0100

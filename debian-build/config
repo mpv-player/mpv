@@ -1,0 +1,99 @@
+#!/usr/bin/perl -w
+
+# Script to configure mplayer 
+# based on etherconf by John Goerzen <jgoerzen@progenylinux.com>
+
+use Debconf::Client::ConfModule qw(:all);
+
+
+my $version = version(2.0);
+title('MPlayer Configuration');
+my $PRIORITY = 'high';
+#TODO: 'medium'
+my $next = 'mainmenu';
+my $isediting = 0;
+
+my @nextargs = ();
+
+checkupgrade();			# Find out if we have to upgrade.
+mainloop(letsgo());
+
+sub checkupgrade {
+  open(MCFG, "</etc/mplayer/mplayer.conf") || return 1;
+  my $line = <MCFG>;
+  return 1 if ($line =~ /mplayer DEBCONF AREA/);
+  exit(0) if (input($PRIORITY, 'mplayer/replace-existing-files') eq "question skipped");
+  go();
+  if (get('mplayer/replace-existing-files') eq 'false') {
+    input($PRIORITY, 'mplayer/replace-existing-files-bail');
+    go();
+    exit();
+  }
+  close MCFG;
+}
+
+sub mainloop {
+  $next = shift @_;
+  do {
+    my @retval = &$next(@nextargs);
+    #  if ($retval[0] eq 'BACK') {
+    #    $retval[0] = $backups{$next};
+    #  }
+    ($next, @nextargs) = @retval;
+  } while ($next ne 'Exit');
+}
+
+sub letsgo {
+#useless!
+  return "configure";
+}
+
+sub configure {
+  subst("mplayer/voutput", "vochoices", "xv, xmga, mga, x11, gl, sdl, xvidix");
+  # db_subst mplayer/output vo xc,xmga,mga,x11,gl,sdl
+  exit(0) if (input($PRIORITY, "mplayer/voutput") eq "question skipped");
+  go();
+  exit 0 unless (get("mplayer/voutput") eq 'true');
+  #return 'audioout';
+  return 'mainmenu';
+}
+
+sub mainmenu {
+  go();				# To catch spare things from before
+  my @choices = (
+    'Video Output: ' . scalar(get("mplayer/voutput")));
+    #,
+  $choices = join(', ', @choices);
+  $isediting = 1;
+  
+  subst('mplayer/mainmenu', 'choices', $choices);
+  input($PRIORITY, 'mplayer/mainmenu');
+  go();
+  
+  my $selection = get('mplayer/mainmenu');
+  if ($selection =~ /^Exit/) {
+    return 'Exit';
+  }
+
+  # Set to redisplay.
+  fset('mplayer/mainmenu', 'isdefault', 'true');
+
+  $_ = $selection;
+
+  return 'configure' if /^Video/;
+#  return 'aoutput' if /^Aoutput/;
+  return 'Exit';
+}
+      
+sub editreturn {
+  my @args = @_;
+  return 'mainmenu' if $isediting;
+  return @args;
+}
+
+sub editfix {
+  my $template = shift @_;
+  if ($isediting) {
+    fset($template, 'isdefault', 'true');
+  }
+}

@@ -1,0 +1,31 @@
+Template: mplayer/output
+Type: select
+Choices: ${vo}
+Default: xv 
+Description: Which Video Output driver would you like?
+ Mplayer can use very wide range of video output drivers:
+ ( order aproximately by speed: )
+	 * mga, xmga - direct hardware access on MGA cards (G200/400/450), needs /dev/mga_vid
+	   this driver can work without X and display video on secondary head of matrox cards
+	 * xv - XVideo extensions of X 4.x ( hardware scaling, bilinear filtering )
+	 * sdl - SDL library, it can also use hardware scaling, filtering etc 
+	 * dga, fsdga - DGA extension.
+	 * fsbdev - framebuffer device ( watching movies on text console )
+	 * x11 - simple x11 output.
+ Please choose carefully because it has tramendous effect on speed.
+
+Template: mplayer/overwrite
+Type: boolean
+Default: false
+Description: Overwrite /etc/mplayer/mplayer.conf ?
+ Should I overwrite your current /etc/mplayer/mplayer.conf with the one created on the fly based on your answers?
+
+Template: mplayer/cfgnote
+Type: note
+Description: Create your ~/.mplayer/conf file.
+	Remember to read documentation and edit your ~/.mplayer/conf
+	(or /etc/mplayer/mplayer.conf) file. This binary depends heavily on
+	your hardware - which means that it needs tweaking for every single
+	machine it's installed to. And it also it means that it will use
+	your setup very effectively. Look at /usr/share/doc/mplayer
+  end

@@ -1,0 +1,54 @@
+Template: mplayer/replace-existing-files
+Type: boolean
+Default: true
+Description: Upgrade existing system?
+ It looks like you've configured your mplayer already.
+ If you'd like to configure it with this program, I'll have
+ to delete the old configuration.  Do you want to continue
+ configuration with this program?  If you say "yes", I'll go ahead
+ and delete your old configuration and you can create it anew with
+ this program. 
+
+Template: mplayer/replace-existing-files-bail
+Type: note
+Description: Files not replaced
+ I'm going to exit now since you don't want me to replace your
+ existing files.  If you change your mind later, you can run
+ dpkg-reconfigure mplayer.
+
+Template: mplayer/mainmenu
+Type: select
+Choices: ${choices}, Exit
+Description: MPlayer Main Menu
+ From this menu, you can modify any of the settings for your device.
+ Simply select the item you'd like to change to modify it.
+ When you are done, select Exit.
+
+Template: mplayer/voutput
+Type: select
+Default: x11
+Choices: ${vochoices}
+Description: MPlayer Video Output
+  Mplayer can use very wide range of video output drivers:
+ ( order aproximately by speed: )
+ 	 * mga, xmga - direct hardware access on MGA cards (G200/400/450), needs /dev/mga_vid
+ 	   this driver can work without X and display video on secondary head of matrox cards
+ 	 * xv - XVideo extensions of X 4.x ( hardware scaling, bilinear filtering )
+ 	 * sdl - SDL library, it can also use hardware scaling, filtering etc 
+ 	 * ggi - GGI library, it can also use hardware scaling, filtering etc 
+ 	 * dga, fsdga - DGA extension.
+ 	 * fsbdev - framebuffer device ( watching movies on text console )
+ 	 * x11 - simple x11 output.
+ .	 
+ Please choose carefully because this will have a tremendous effect on speed.
+
+Template: mplayer/cfgnote
+Type: note
+Description: Create your ~/.mplayer/conf file.
+ Remember to read documentation and edit your ~/.mplayer/conf
+ (or /etc/mplayer.conf) file. This binary depends heavily on
+ your hardware - which means that it needs tweaking for every single
+ machine it's installed to. And it also it means that it will use
+ your setup very effectively. Look at /usr/share/doc/mplayer
+ end
+
