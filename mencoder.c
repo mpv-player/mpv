@@ -44,8 +44,10 @@ static char* banner_text=
 
 #include "libmpcodecs/dec_audio.h"
 #include "libmpcodecs/dec_video.h"
+#include "libmpcodecs/vf.h"
 
 #ifdef HAVE_MP3LAME
+#undef CDECL
 #include <lame/lame.h>
 #endif
 
@@ -596,15 +598,15 @@ default:
 
     switch(mux_v->codec){
     case VCODEC_DIVX4:
-	sh_video->vfilter=vf_open_encoder(NULL,"divx4",mux_v); break;
+	sh_video->vfilter=vf_open_encoder(NULL,"divx4",(char *)mux_v); break;
     case VCODEC_LIBAVCODEC:
-        sh_video->vfilter=vf_open_encoder(NULL,"lavc",mux_v); break;
+        sh_video->vfilter=vf_open_encoder(NULL,"lavc",(char *)mux_v); break;
     case VCODEC_RAWRGB:
-        sh_video->vfilter=vf_open_encoder(NULL,"rawrgb",mux_v); break;
+        sh_video->vfilter=vf_open_encoder(NULL,"rawrgb",(char *)mux_v); break;
     case VCODEC_VFW:
-        sh_video->vfilter=vf_open_encoder(NULL,"vfw",mux_v); break;
+        sh_video->vfilter=vf_open_encoder(NULL,"vfw",(char *)mux_v); break;
     case VCODEC_LIBDV:
-        sh_video->vfilter=vf_open_encoder(NULL,"libdv",mux_v); break;
+        sh_video->vfilter=vf_open_encoder(NULL,"libdv",(char *)mux_v); break;
     }
     if(!mux_v->bih || !sh_video->vfilter){
         mp_msg(MSGT_MENCODER,MSGL_FATAL,"Failed to open the encoder\n");
@@ -854,13 +856,13 @@ if(sh_audio){
 		  /* mono encoding, a bit tricky */
 		  if (mux_a->wf->nChannels == 1)
 		  {
-		    len = lame_encode_buffer(lame, tmp, tmp, len/2,
+		    len = lame_encode_buffer(lame, (short *)tmp, (short *)tmp, len/2,
 			mux_a->buffer+mux_a->buffer_len, mux_a->buffer_size-mux_a->buffer_len);
 		  }
 		  else
 		  {
 		    len=lame_encode_buffer_interleaved(lame,
-		      tmp,len/4,
+		      (short *)tmp,len/4,
 		      mux_a->buffer+mux_a->buffer_len,mux_a->buffer_size-mux_a->buffer_len);
 		  }
 		  if(len<0) break; // error
@@ -878,13 +880,13 @@ if(sh_audio){
 		  /* mono encoding, a bit tricky */
 		  if (mux_a->wf->nChannels == 1)
 		  {
-		    len = lame_encode_buffer(lame, tmp, tmp, len/2,
+		    len = lame_encode_buffer(lame, (short *)tmp, (short *)tmp, len/2,
 			mux_a->buffer+mux_a->buffer_len, mux_a->buffer_size-mux_a->buffer_len);
 		  }
 		  else
 		  {
 		    len=lame_encode_buffer_interleaved(lame,
-		      tmp,len/4,
+		      (short *)tmp,len/4,
 		      mux_a->buffer+mux_a->buffer_len,mux_a->buffer_size-mux_a->buffer_len);
 		  }
 		  if(len<0) break; // error
@@ -976,7 +978,7 @@ case VCODEC_COPY:
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,in_size,(sh_video->ds->flags&1)?0x10:0);
     break;
 case VCODEC_FRAMENO:
-    mux_v->buffer=&decoded_frameno; // tricky
+    mux_v->buffer=(unsigned char *)&decoded_frameno; // tricky
     if(skip_flag<=0) aviwrite_write_chunk(muxer,mux_v,muxer_f,sizeof(int),0x10);
     break;
 default:
