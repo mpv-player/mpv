@@ -29,4 +29,9 @@ uint32_t vidix_draw_frame(uint8_t *src[]);
 void     vidix_flip_page(void);
 void     vidix_draw_osd(void);
 
+#include "../vidix/vidix.h"
+/* graphic keys */
+int vidix_grkey_get(vidix_grkey_t *gr_key);
+int vidix_grkey_set(const vidix_grkey_t *gr_key);
+
 #endif

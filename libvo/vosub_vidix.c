@@ -45,8 +45,6 @@ static vidix_fourcc_t	  vidix_fourcc;
 #define SCREEN_LINE_SIZE(pixel_size) (video_mode_info.XResolution*(pixel_size) )
 #define IMAGE_LINE_SIZE(pixel_size) (image_width*(pixel_size))
 
-extern vo_functions_t video_out_vesa;
-
 int vidix_preinit(const char *drvname,void *server)
 {
   int err;
@@ -147,6 +145,8 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	}
 
 	next_frame = 0;
+	if(vo_doublebuffering)
+	    vdlPlaybackFrameSelect(vidix_handler,next_frame);
 	vidix_mem =vidix_play.dga_addr;
 
 	/*clear the buffer*/
@@ -162,7 +162,7 @@ extern int vo_gamma_red_intense;
 extern int vo_gamma_green_intense;
 extern int vo_gamma_blue_intense;
 
-vidix_video_eq_t vid_eq;
+static vidix_video_eq_t vid_eq;
 
 int vidix_start(void)
 {
@@ -216,7 +216,6 @@ int vidix_stop(void)
 void vidix_term( void )
 {
   if(verbose > 1) printf("vosub_vidix: vidix_term() was called\n");
-//	vdlPlaybackOff(vidix_handler);
 	vidix_stop();
 	vdlClose(vidix_handler);
 }
@@ -279,6 +278,8 @@ uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h,int x,
         src+=stride[0];
         dest += bespitch;
     }
+
+    return 0;
 }
 
 
@@ -298,7 +299,7 @@ uint32_t vidix_draw_frame(uint8_t *image[])
 /* Note it's very strange but sometime for YUY2 draw_frame is called */
     if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
     {
-	printf("vosub_vidix: draw_frame for i420 is called\nExiting...\n");
+	printf("vosub_vidix: draw_frame for YUV420 called\nExiting...\n");
 	vidix_term();
 	exit( EXIT_FAILURE );
     }
@@ -370,4 +371,14 @@ uint32_t vidix_query_fourcc(uint32_t format)
   vidix_fourcc.fourcc = format;
   vdlQueryFourcc(vidix_handler,&vidix_fourcc);
   return vidix_fourcc.depth != VID_DEPTH_NONE;
+}
+
+int vidix_grkey_get(vidix_grkey_t *gr_key)
+{
+    return(vdlGetGrKeys(vidix_handler, gr_key));
+}
+
+int vidix_grkey_set(const vidix_grkey_t *gr_key)
+{
+    return(vdlSetGrKeys(vidix_handler, gr_key));
 }
