@@ -77,7 +77,7 @@ for example), so it is up to you to create something great.
 </para>
 
 <para>
-Currently there are three windows to be decorated: the
+Currently there are four windows to be decorated: the
 <link linkend="skin-file-main">main window</link>, the
 <link linkend="skin-file-subwindow">subwindow</link>, the
 <link linkend="skin-file-main">playbar</link>, and the
