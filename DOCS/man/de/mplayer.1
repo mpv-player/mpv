@@ -5728,28 +5728,105 @@ Decoder außer libavcodec oder XviD dekodiert werden kann.
 Seit Version 1.0.x von XviD ist diese Version nicht länger verfügbar.
 .
 .TP
-.IPs lumi_mask
-Benutze einen Algorithmus zur Helligkeitsmaskierung (standardmäßig aus,
-scheint buggy zu sein)
-.IPs hintedme
-Speichert während des ersten Durchgangs die Motion-Vectors in einer Datei
-und benutzt diese Datei beim zweitn Durchgang (standardmä-ig aus, scheint
-buggy zu sein, nur beim Modus mit zwei Durchgängen).
-.IPs hintfile
-Gibt die temporäre Datei an, die bei 'hintedme' benutzt wird
-(Standard: ./xvid_hint_me.dat, nur beim Modus mit zwei Durchgängen)
-.IPs debug
-Speichert Bildstatistiken in xvid.dbg (standardmäßig aus).
+.B keyframe_boost=<0\-1000>
+Diese Option verlagert einige Bits aus dem Vorrat anderer Frametypen zu
+Intra-Frames, so dass die Qualität von Keyframes verbessert wird. (Standard: 0,
+nur im two-pass-Modus)
+.
+.TP
+.B kfthreshold=<Wert>
+(Standard: 10, nur im two-pass-Modus)
+.
+.TP
+.B kfreduction=<0-\100>
+Die oberen beiden Einstellungen können genutzt werden, um die Größe von
+Keyframes anzupassen, die du für zu nah (hintereinander) zum ersten hältst.
+Kfthreshold setzt den Bereich, in dem Keyframes reduziert werden, und
+kfreduction bestimmt die Reduktion der Bitrate, die angewendet wird.
+Der letzte Intra-Frame wird normal behandelt.
+(Standard: 30, nur im two-pass-Modus)
+.
+.TP
+.B divx5bvop
+Generiere DivX5-kompatible B-Frames (Standard: ein).
+Dies scheint für alte Versionen des DivX-Decoders notwendig zu sein.
 .br
-Hierbei handelt es sich NICHT um die Kontrolldatei für den Modus mit zwei
-Durchgängen.
-.IPs keyframe_boost=<0\-1000>
-(Standardwert 0, nur im Modus mit zwei Durchgängen)
-.IPs kfthreshold=<Wert>
-(Standardwert 10, nur im Modus mit zwei Durchgängen)
-.IPs kfreduction=<0-\100>
-(Standardwert 30, nur im Modus mit zwei Durchgängen)
+.I WARNUNG:
+Seit Version 1.0.x von XviD ist diese Option ersetzt durch die Option
+closed_gop.
+.
+.TP
+.B (no)greyscale
+Sorge dafür, dass XviD die Chrominanzebenen verwirft, so dass das encodierte
+Video schwarz/weiß wird.
+Beachte, dass dies den Encodierungsvorgang nicht beschleunigt, es werden in
+der letzten Stufe der Encodierung einfach keine Farbdaten geschrieben.
+.
+.TP
+.B debug\ \ 
+Speichert Statistiken für jeden einzelnen Frame in ./xvid.dbg.
+(Dies ist nicht das Logfile des two-pass-Modus.)
 .RE
+.
+.PP
+.sp 1
+Die folgenden Optionen sind nur für die neuesten stabilen Versionen von XviD
+1.0.x (api4) verfügbar.
+.
+.TP
+.B (no)packed
+Diese Option ist dazu gedacht, Probleme mit der Framereihenfolge zu lösen bei
+der Encodierung in Containerformate wie AVI, die mit out-of-order-Frames nicht
+umgehen können.
+In der Praxis können die meisten (sowohl Software- als auch Hardware-) Decoder
+die Framereihenfolge richtig handhaben, es kann sie sogar verwirren, wenn
+diese Option aktiviert ist.
+Du kannst sie also mit Sicherheit weglassen; aktiviere sie nur, wenn du genau
+weißt, was du tust.
+.br
+.I WARNUNG:
+Dies erzeugt einen unerlaubten Bitstream, der höchstwahrscheinlich von keinem
+Decoder außer DivX/\:libavcodec/\:XviD dekodiert werden kann.
+.br
+.I WARNUNG:
+Dies wird außerdem eine vorgetäuschte DivX-Version in der Datei speichern,
+welche die Fehlerkorrekturmechanismen mancher Decoder verwirren kann.
+.
+.TP
+.B max_bframes=<0\-4>
+Maximale Anzahl der B-Frames, die zwischen I- und P-Frames gesetzt wird
+(Standard: 0).
+.
+.TP
+.B bquant_ratio=<0\-1000>
+Verhältnis von B-Frames zu nicht-b-Frames bei der Quantisierung, 150=1.50
+(Standard: 150).
+.
+.TP
+.B bquant_offset=<-1000\-1000>
+Offset von B-Frames zu nicht-B-Frames bei der Quantisierung, 100=1.00
+(Standard: 100).
+.
+.TP
+.B bf_threshold=<-255\-255>
+Manchmal sehen B-Frames nicht gut aus und führen zu Artefakten, wenn der
+größte Teil des Bildes still steht und nur kleine Bereiche viel Bewegung
+beinhalten (in einer ruhigen Szene mit einem sprechenden Mann wird dessen Mund
+wahrscheinlich schlecht aussehen, wenn die Umgebung komplett still steht).
+Diese Option erlaubt dir, die Priorität für die Benutzung von
+B-Frames anzugeben.
+Je höher der Wert, desto wahrscheinlicher wird ein B-Frame benutzt.
+(Standard: 0)
+.
+.TP
+.B (no)closed_gop
+Diese Option weist XviD an, jede GOP (Group Of Pictures, Gruppe von Bildern,
+die von zwei I-Frames begrenzt sind) zu schließen, was die GOPs unabhängig
+voneinander macht.
+Dies bedeutet lediglich, dass der letzte Frame einer GOP entweder ein P- oder
+ein N-Frame ist, nicht aber ein B-Frame.
+Es ist normalerweise sinnvoll, diese Option zu aktivieren (Standard:
+aktiviert).
 .
 .
 .\" --------------------------------------------------------------------------
