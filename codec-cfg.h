@@ -1,7 +1,7 @@
 #ifndef __CODEC_CFG_H
 #define __CODEC_CFG_H
 
-#define CODEC_CFG_MIN	20020520
+#define CODEC_CFG_MIN	20020625
 
 #define CODECS_MAX_FOURCC	32
 #define CODECS_MAX_OUTFMT	16
