@@ -40,12 +40,16 @@ typedef struct {
 typedef struct {
     int id;
     int type;
+    int pos;
+    //
     int timescale;
     unsigned int length;
     int width,height; // for video
     unsigned int fourcc;
-    int data_len;
-    unsigned char* data;
+    int tkdata_len;  // track data 
+    unsigned char* tkdata;
+    int stdata_len;  // stream data
+    unsigned char* stdata;
     int samples_size;
     mov_sample_t* samples;
     int chunks_size;
@@ -162,7 +166,10 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	  switch(id){
 	    case MOV_FOURCC('t','k','h','d'): {
 		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*sTrack header!\n",level,"");
-		// read width x height
+		// read codec data
+		trak->tkdata_len=len;
+		trak->tkdata=malloc(trak->tkdata_len);
+		stream_read(demuxer->stream,trak->tkdata,trak->tkdata_len);
 		break;
 	    }
 	    case MOV_FOURCC('m','d','h','d'): {
@@ -214,11 +221,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    if(!i){
 			trak->fourcc=fourcc;
 			// read codec data
-			trak->data_len=len-8;
-			trak->data=malloc(trak->data_len);
-			stream_read(demuxer->stream,trak->data,trak->data_len);
-			if(trak->type==MOV_TRAK_VIDEO && trak->data_len>43){
-			    mp_msg(MSGT_DEMUX,MSGL_V," '%.*s'",trak->data_len-43,trak->data+43);
+			trak->stdata_len=len-8;
+			trak->stdata=malloc(trak->stdata_len);
+			stream_read(demuxer->stream,trak->stdata,trak->stdata_len);
+			if(trak->type==MOV_TRAK_VIDEO && trak->stdata_len>43){
+			    mp_msg(MSGT_DEMUX,MSGL_V," '%.*s'",trak->stdata_len-43,trak->stdata+43);
 			}
 		    }
 		    mp_msg(MSGT_DEMUX,MSGL_V,"\n");
@@ -334,7 +341,20 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_TRAK_AUDIO: {
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
-		sh->samplerate=trak->timescale;
+		printf("!!! audio bits: %d  chans: %d\n",trak->stdata[19],trak->stdata[17]);
+		// Emulate WAVEFORMATEX struct:
+		sh->wf=malloc(sizeof(WAVEFORMATEX));
+		memset(sh->wf,0,sizeof(WAVEFORMATEX));
+		sh->wf->nChannels=trak->stdata[17];
+		sh->wf->wBitsPerSample=trak->stdata[19];
+		sh->wf->nSamplesPerSec=trak->timescale;
+		sh->wf->nAvgBytesPerSec=sh->wf->nChannels*((sh->wf->wBitsPerSample+7)/8)*sh->wf->nSamplesPerSec;
+		// Selection:
+		if(demuxer->audio->id==-1 || demuxer->audio->id==priv->track_db){
+		    // (auto)selected audio track:
+		    demuxer->audio->id=priv->track_db;
+		    demuxer->audio->sh=sh; sh->ds=demuxer->audio;
+		}
 		break;
 	    }
 	    case MOV_TRAK_VIDEO: {
@@ -342,6 +362,26 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->format=trak->fourcc;
 		sh->fps=trak->timescale;
 		sh->frametime=1.0f/sh->fps;
+		sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
+		sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
+
+		// emulate BITMAPINFOHEADER:
+		sh->bih=malloc(sizeof(BITMAPINFOHEADER));
+		memset(sh->bih,0,sizeof(BITMAPINFOHEADER));
+		sh->bih->biSize=40;
+		sh->bih->biWidth=sh->disp_w;
+		sh->bih->biHeight=sh->disp_h;
+		sh->bih->biPlanes=0;
+		sh->bih->biBitCount=16;
+		sh->bih->biCompression=trak->fourcc;
+		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight;
+
+		printf("Image size: %d x %d\n",sh->disp_w,sh->disp_h);
+		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
+		    // (auto)selected video track:
+		    demuxer->video->id=priv->track_db;
+		    demuxer->video->sh=sh; sh->ds=demuxer->video;
+		}
 		break;
 	    }
 	    }
@@ -376,4 +416,26 @@ int mov_read_header(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX,MSGL_ERR,MSGTR_MOVnotyetsupp);
 
     return 1;
+}
+
+// return value:
+//     0 = EOF or no stream found
+//     1 = successfully read a packet
+int demux_mov_fill_buffer(demuxer_t *demuxer,demux_stream_t* ds){
+    mov_priv_t* priv=demuxer->priv;
+    mov_track_t* trak=NULL;
+    float pts;
+    
+    if(ds->id<0 || ds->id>=priv->track_db) return 0;
+    trak=priv->tracks[ds->id];
+
+    // read sample:
+    if(trak->pos>=trak->samples_size) return 0; // EOF
+    
+    stream_seek(demuxer->stream,trak->samples[trak->pos].pos);
+    pts=(float)trak->samples[trak->pos].pts/(float)trak->timescale;
+    ds_read_packet(ds,demuxer->stream,trak->samples[trak->pos].size,pts,trak->samples[trak->pos].pos,0);
+    ++trak->pos;
+    return 1;
+    
 }
