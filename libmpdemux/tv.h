@@ -148,6 +148,8 @@ int tv_step_channel(tvi_handle_t *tvh, int direction);
 #define TV_CHANNEL_LOWER	1
 #define TV_CHANNEL_HIGHER	2
 
+int tv_set_channel(tvi_handle_t *tvh, char *channel);
+
 int tv_step_norm(tvi_handle_t *tvh);
 int tv_step_chanlist(tvi_handle_t *tvh);
 

@@ -554,6 +554,27 @@ int tv_step_channel(tvi_handle_t *tvh, int direction)
     return(1);
 }
 
+int tv_set_channel(tvi_handle_t *tvh, char *channel)
+{
+	int i;
+	struct CHANLIST cl;
+
+	for (i = 0; i < chanlists[tvh->chanlist].count; i++)
+	{
+	    cl = tvh->chanlist_s[i];
+//	    printf("count%d: name: %s, freq: %d\n",
+//		i, cl.name, cl.freq);
+	    if (!strcasecmp(cl.name, channel))
+	    {
+		tvh->channel = i;
+		mp_msg(MSGT_TV, MSGL_INFO, "Selected channel: %s (freq: %.3f)\n",
+		    cl.name, (float)cl.freq/1000);
+		tv_set_freq(tvh, (unsigned long)(((float)cl.freq/1000)*16));
+		break;
+	    }
+	}
+}
+
 int tv_step_norm(tvi_handle_t *tvh)
 {
     return(1);

@@ -2288,6 +2288,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  tv_step_channel((tvi_handle_t*)(demuxer->priv), TV_CHANNEL_LOWER);
       }
     } break;
+    case MP_CMD_TV_SET_CHANNEL :  {
+      if (tv_param_on == 1)
+	tv_set_channel((tvi_handle_t*)(demuxer->priv), cmd->args[0].v.s);
+    } break;
     case MP_CMD_TV_STEP_NORM :  {
       if (tv_param_on == 1)
 	tv_step_norm((tvi_handle_t*)(demuxer->priv));
