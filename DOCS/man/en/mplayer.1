@@ -3614,6 +3614,7 @@ Setting the sb (strict breaks) option to 1 will reduce the chances of
 pullup generating an occasional mismatched frame, but it may also
 cause an excessive number of frames to be dropped during high motion
 sequences.
+.br
 .I NOTE:
 Always follow pullup with the softskip filter when encoding to ensure
 that pullup is able to see each frame.
@@ -4607,6 +4608,7 @@ sane range for MPEG4
 .TP
 .B vme=<0\-5>
 motion estimation method.
+.br
 .I NOTE:
 0\-3 currently ignores the amount of Bits spent,
 so quality may be low.
@@ -4750,6 +4752,7 @@ approximated filesize tolerance in kBit.
 1000\-100000 is a sane range.
 (warning: 1kBit = 1000 Bits)
 (default: 8000)
+.br
 .I NOTE:
 vratetol should not be too large during the second pass or there might
 be problems if vrc_(min|max)rate is used.
@@ -5012,6 +5015,7 @@ floating point AAN
 .TP
 .B idct=<0\-99>
 idct algorithm.
+.br
 .I NOTE:
 To the best of our knowledge all these IDCTs do pass the IEEE1180 tests.
 .PD 0
@@ -5240,6 +5244,7 @@ Diamond type and size for motion estimation pre pass
 .TP
 .B dia=<-99\-6>
 Diamond type & size for motion estimation.
+.br
 .I NOTE:
 The sizes of the normal diamonds and shape adaptive ones don't have
 the same meaning.
@@ -5329,6 +5334,7 @@ always
 .TP
 .B subq=<1\-8>
 subpel refinement quality (for qpel) (default: 8).
+.br
 .I NOTE:
 This has a significant effect on speed.
 .TP
@@ -5342,6 +5348,7 @@ Use MPEG quantizers instead of H.263.
 .TP
 .B aic\ \ \ \ 
 ac prediction (=advanced intra prediction for H.263+)
+.br
 .I NOTE:
 vqmin should be 8 or larger for AIC H.263+.
 .TP
