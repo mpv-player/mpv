@@ -1,4 +1,4 @@
-.\" synced with 1.898
+.\" synced with 1.903
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -138,6 +138,24 @@ mencoder \- filmový enkodér
 .I mpst://poèítaè[:port]/URL
 [volby]
 .
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I tivo://poèítaè/list
+[volby]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I tivo://poèítaè/llist
+[volby]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I tivo://poèítaè/fsid
+[volby]
 .br
 .in
 .B gmplayer
@@ -1100,14 +1118,13 @@ Pou¾itelné pøi pøehrávání z CD-ROM obrazù nebo .VOB souborù s bincem na zaèátku.
 .
 .TP
 .B \-srate <Hz>
-Vybere vzorkovací kmitoèet zvuku, který bude pou¾it zvukovou kartou
+Vybere vzorkovací kmitoèet zvuku, který bude pou¾it
 (zvukové karty zde samozøejmì mají své limity).
-Pokud se vzorkovací kmitoèet karty a zvuku li¹í, bude se rozdíl kompenzovat
-vlo¾ením zvukového filtru resample do vrstvy audio filtrù.
+Pokud je vybraný vzorkovací kmitoèet odli¹ný od zdrojového,
+bude se rozdíl kompenzovat vlo¾ením zvukového filtru resample nebo lavcresample
+do vrstvy audio filtrù.
 Zpùsob pøevzorkování je mo¾né nastavit pomocí volby \-af-adv.
 Jako výchozí se pou¾ívá rychlé pøevzorkování, které mù¾e zpùsobit zkreslení.
-.br
-MEncoder pøedá tuto hodnotu LAME pro pøevzorkování.
 .
 .TP
 .B \-ss <èas> (viz té¾ volbu \-sb)
@@ -1697,10 +1714,10 @@ format.
 .TP
 .B \-mixer <zaøízení>
 Pou¾ije jiné mixá¾ní zaøízení ne¾ je výchozí /dev/\:mixer.
-Pou¾íváte-li ALSA zadejte jméno mixeru.
+Pou¾íváte-li ALSA zadejte jméno smì¹ovaèe.
 .
 .TP
-.B \-mixer-channel <kanál mixeru>[,index mixeru] (pouze \-ao oss a \-ao alsa)
+.B \-mixer-channel <kanál smì¹ovaèe>[,index smì¹ovaèe] (pouze \-ao oss a \-ao alsa)
 Tato volba naøídí MPlayeru pou¾ít jiný kanál pro ovládání hlasitosti
 ne¾ výchozí PCM.
 Volby pro OSS zahrnují
@@ -1711,8 +1728,8 @@ V pøípadì ALSA mù¾ete pou¾ít jména která zobrazí alsamixer, jako
 .B Master, Line, PCM.
 .br
 .I POZNÁMKA:
-Jména kanálù ALSA mixeru následovaná èíslem musí být zadána ve formátu <jméno,èíslo>,
-napø.\& jméno kanálu 'PCM 1' v alsamixeru musí být pøevedeno na
+Jména kanálù ALSA smì¹ovaèe následovaná èíslem musí být zadána ve formátu <jméno,èíslo>,
+napø.\& jméno kanálu 'PCM 1' v alsasmì¹ovaèe musí být pøevedeno na
 .BR PCM,1
 .
 .TP
@@ -3483,7 +3500,8 @@ Mù¾ete to pou¾ít kdy¾ máte zvukovou kartu s pevným vzorkovacím kmitoètem,
 nebo jestli máte starou zvukovou kartu, která má maximální vzorkovací kmitoèet
 44.1 kHz.
 Tento filtr je aktivován automaticky podle potøeby.
-Podporován je pouze formát 16-bit little-endian.
+Podporován je pouze celoèíselný formát 16-bit a desetinný (float) s nativním
+øazením bajtù (endian).
 .br
 .I POZNÁMKA:
 V MEncoderu je nutné pou¾ít také volbu \-srate <Hz>.
@@ -3526,7 +3544,7 @@ pøesného ¹kálování výstupní frekvence a lineární interpolace.
 .TP
 .B lavcresample[=vkmitoèet[:délka[:lineár[:poèet[:støih]]]]]
 Zmìní vzorkovací kmitoèet zvukového proudu na celoèíselný <vkmitoèet> v Hz.
-Podporován je pouze formát 16-bitù little-endian.
+Podporován je pouze formát 16-bitù nativní-endian.
 .br
 .I POZNÁMKA:
 V MEncoderu je nutné pou¾ít také volbu \-srate <Hz>.
@@ -3665,9 +3683,9 @@ Implementuje softwarové ovládání hlasitosti.
 Tento filtr pou¾ívejte opatrnì, proto¾e mù¾e sní¾it odstup signál-¹um zvuku.
 Ve vìt¹inì pøípadù je nejlep¹í nastavit PCM zvuk na maximum, nechat tento
 filtr být a ovládat výstupní hlasitost do reproduktorù pomocí hlavního
-kanálu hlasitosti na mixeru.
-V pøípadì, ¾e má va¹e zvuková karta digitální PCM mixer místo analogového
-a sly¹íte oøezání, pou¾ijte místo nìj MASTER mixer.
+kanálu hlasitosti na smì¹ovaèe.
+V pøípadì, ¾e má va¹e zvuková karta digitální PCM smì¹ovaè místo analogového
+a sly¹íte oøezání, pou¾ijte místo nìj MASTER smì¹ovaè.
 Pokud je pøipojen k poèítaèi externí zesilovaè (takto je to témìø v¾dy),
 mù¾ete minimalizovat ¹um nastavováním hlavní hlasitosti a volièe
 hlasitosti na zesilovaèi tak dlouho, dokud nezmizí ¹umivý zvuk na pozadí.
