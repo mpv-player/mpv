@@ -497,6 +497,10 @@ MPlayerPL - Polish MPlayer Translation Team (http://mplayerpl.emdej.com)
     * Marek Jarycki (Emdej) <emdej@emdej.com>
     * Leszek Kaplita (Flex) <flex@tenbit.pl>
 
+Neundorf, Alexander <neundorf@kde.org>
+    * raw DV demuxer
+    * demuxer packet refcounting
+
 Niedermayer, Michael (michaelni) <michaelni@gmx.at>
     * new, GPL postprocessing code (with deinterlacing etc...)
     * software scaling with MMX/MMX2/3DNow support (swscale.c)
