@@ -27,3 +27,10 @@ easier now. If you find a bug in that, please contact us:
   cd TVout
   ./compile.sh
 
+4. Fonts:
+~~~~~~~~~
+  Get the .zip file from the DOWNLOAD section
+  cd ~/.mplayer
+  mkdir font
+  cd font
+  unzip mp_font1.zip
