@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.36 -->
+<!-- synced with 1.37 -->
 <sect1 id="install">
 <title>Instalacja</title>
 
@@ -420,7 +420,7 @@ działa ona z następującymi sterownikami:
   z emulacją OSS!
   </simpara></listitem>
 <listitem><simpara>
-  <emphasis role="bold">C-Media z wyjściem SP/DIF</emphasis>: Możliwa jest sprzętowa
+  <emphasis role="bold">C-Media z wyjściem S/PDIF</emphasis>: Możliwa jest sprzętowa
   obróbka AC3 z tymi kartami, przeczytaj rozdział
   <link linkend="hwac3">Sprzętowe dekodowanie AC3</link>.
   </simpara></listitem>

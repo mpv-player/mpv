@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.13  -->
+<!-- synced with 1.14  -->
 <sect2 id="audio-dev">
 <title>Urządzenia wyjściowe audio</title>
 <sect3 id="sync">
@@ -203,11 +203,11 @@ Obsługuje ona również kilka innych systemów poza Linuksem.
 
   <row>
     <entry>SB Live!</entry>
-    <entry>Wyjście analogowe-OK, SP/DIF nie działa</entry>
+    <entry>Wyjście analogowe-OK, S/PDIF nie działa</entry>
     <entry>Oba działają</entry>
     <entry>Oba działają</entry>
     <entry>
-      <ulink url="http://opensource.creative.com">Sterowniki OSS Creative'a (obsługa SP/DIF)</ulink>
+      <ulink url="http://opensource.creative.com">Sterowniki OSS Creative'a (obsługa S/PDIF)</ulink>
     </entry>
     <entry>192</entry>
     <entry>4.0/5.1</entry>
@@ -283,7 +283,7 @@ Obsługuje ona również kilka innych systemów poza Linuksem.
   <row>
     <entry>Karty C-Media (CMI8338/8738)</entry>
     <entry>OK</entry>
-    <entry>OK SP/DIF jest obsługiwane przez ALSA 0.9.x</entry>
+    <entry>OK S/PDIF jest obsługiwane przez ALSA 0.9.x</entry>
     <entry>?</entry>
     <entry></entry>
     <entry>44</entry>

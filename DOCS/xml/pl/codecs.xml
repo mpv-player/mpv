@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.35 -->
+<!-- synced with 1.36 -->
 <sect1 id="codecs">
 <title>Wspierane kodeki</title>
 
@@ -646,9 +646,9 @@ emu10k1 (używany przez karty Soundblaster Live!) z sierpnia 2001 roku, albo nows
 <sect3 id="hwac3">
 <title>Sprzętowe dekodowanie AC3</title>
 <para>
-Potrzebna jest karta obsługująca AC3, z cyfrowym wyjściem (SP/DIF). Sterownik
+Potrzebna jest karta obsługująca AC3, z cyfrowym wyjściem (S/PDIF). Sterownik
 musi prawidłowo obsługiwać format AFMT_AC3 (robi to C-Media). Podłącz swój
-dekoder AC3 do wyjścia SP/DIF i użyj opcji <option>-ac
+dekoder AC3 do wyjścia S/PDIF i użyj opcji <option>-ac
 hwac3</option>. Rozwiązanie to jest ciągle w fazie testów, ale wiadomo, że działa
 z kartami C-Media i Soundblaster Live! + sterowniki ALSA (ale nie z OSS) i kartami
 dekodującymi DXR3/Hollywood+ MPEG.
