@@ -240,7 +240,7 @@ int init_video_codec(){
 }
 #endif
 
-  sh_video->our_out_buffer = malloc(sh_video->o_bih.biSizeImage);
+  sh_video->our_out_buffer = shmem_alloc(sh_video->o_bih.biSizeImage);
   if(!sh_video->our_out_buffer){
     printf("not enough memory for decoded picture buffer (%d bytes)\n", sh_video->o_bih.biSizeImage);
     return 0;
