@@ -6,6 +6,9 @@
  */
 
 /* ChangeLog added 2002-01-10
+ * 2002-03-13:
+ *  Preliminary fame support added (it breaks after seeking, why?)
+ *
  * 2002-02-18:
  *  Fixed sync problems when pausing video (while using prebuffering)
  *
@@ -67,7 +70,14 @@
 #include "../postproc/rgb2rgb.h"
 #include "../postproc/swscale.h"
 
-#ifdef USE_LIBAVCODEC
+#undef USE_LIBFAME
+#ifdef USE_LIBFAME
+#include "../libfame/fame.h"
+static unsigned char *outbuf = NULL;
+static fame_parameters_t fame_params;
+static fame_yuv_t fame_yuv;
+static fame_context_t *fame_ctx=NULL;
+#elif USE_LIBAVCODEC
 #ifdef USE_LIBAVCODEC_SO
 #include <libffmpeg/avcodec.h>
 #else
@@ -79,7 +89,9 @@ static AVCodecContext *avc_context = NULL;
 static AVPicture avc_picture;
 int avc_outbuf_size = 100000;
 #endif
-char *picture_buf = NULL;
+
+char *picture_data[] = { NULL, NULL, NULL };
+int picture_linesize[] = { 0, 0, 0 };
 
 #ifdef HAVE_MMX
 #include "mmx.h"
@@ -90,8 +102,6 @@ LIBVO_EXTERN (dxr3)
 /* Resolutions and positions */
 static int v_width, v_height;
 static int s_width, s_height;
-static int s_pos_x, s_pos_y;
-static int d_pos_x, d_pos_y;
 static int osd_w, osd_h;
 static int noprebuf = 0;
 static int img_format = 0;
@@ -147,7 +157,7 @@ uint32_t control(uint32_t request, void *data, ...)
 			/* Hardware accelerated | Hardware supports subpics */
 			flag = 0x2 | 0x8;
 			break;
-#ifdef USE_LIBAVCODEC
+#if defined(USE_LIBFAME) || defined(USE_LIBAVCODEC)
 		case IMGFMT_YV12:
 		case IMGFMT_YUY2:
 		case IMGFMT_RGB24:
@@ -223,13 +233,15 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	ioctl(fd_control, EM8300_IOCTL_GET_VIDEOMODE, &ioval);
 	if (ioval == EM8300_VIDEOMODE_NTSC) {
 		printf("VO: [dxr3] Setting up for NTSC.\n");
-		aspect_save_screenres(352, 240);
+		aspect_save_screenres((352 * 2), 240);
 	} else {
 		printf("VO: [dxr3] Setting up for PAL/SECAM.\n");
-		aspect_save_screenres(352, 288);
+		aspect_save_screenres((352 * 2), 288);
 	}
 	aspect(&s_width, &s_height, A_ZOOM);
-    
+	s_width -= s_width % 16;
+	s_height -= s_height % 16;
+	
 	/* Try to figure out whether to use widescreen output or not */
 	/* Anamorphic widescreen modes makes this a pain in the ass */
 	tmp1 = abs(d_height - ((d_width / 4) * 3));
@@ -244,7 +256,44 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	ioctl(fd_control, EM8300_IOCTL_SET_ASPECTRATIO, &ioval);
 	
 	if (format != IMGFMT_MPEGPES) {
-#ifdef USE_LIBAVCODEC
+		size = s_width * s_height;
+		picture_data[0] = malloc((size * 3) / 2);
+		picture_data[1] = picture_data[0] + size;
+		picture_data[2] = picture_data[1] + size / 4;
+		
+		picture_linesize[0] = s_width;
+		picture_linesize[1] = s_width / 2;
+		picture_linesize[2] = s_width / 2;
+#ifdef USE_LIBFAME
+		fame_ctx = fame_open();
+		if (!fame_ctx) {
+			printf("VO: [dxr3] Cannot open libFAME!\n");
+			return -1;
+		}
+
+		fame_params.width = s_width;
+		fame_params.height = s_height;
+		fame_params.coding = "I";
+		fame_params.quality = 100;
+		fame_params.bitrate = 0;
+		fame_params.slices_per_frame = 1;
+		fame_params.frames_per_sequence = 0xffffffff;
+		fame_params.frame_rate_num = 60;
+		fame_params.frame_rate_den = 1;
+		fame_params.shape_quality = 100;
+		fame_params.search_range = 8;
+		fame_params.verbose = 0;
+		fame_params.profile = NULL;
+		
+		outbuf = malloc(100000);
+		fame_init(fame_ctx, &fame_params, outbuf, 100000);
+
+		fame_yuv.w = s_width;
+		fame_yuv.h = s_height;
+		fame_yuv.y = picture_data[0];
+		fame_yuv.u = picture_data[1];
+		fame_yuv.v = picture_data[2];
+#elif USE_LIBAVCODEC
 		avc_codec = avcodec_find_encoder(CODEC_ID_MPEG1VIDEO);
 		if (!avc_codec) {
 			printf("VO: [dxr3] Unable to find mpeg1video codec\n");
@@ -271,54 +320,32 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			uninit();
 			return -1;
 		}
+		/* Create a pixel buffer and set up pointers for color components */
+		memset(&avc_picture, 0, sizeof(avc_picture));
+		avc_picture.linesize[0] = picture_linesize[0];
+		avc_picture.linesize[1] = picture_linesize[1];
+		avc_picture.linesize[2] = picture_linesize[2];
 		
+		avc_picture.data[0] = picture_data[0];
+		avc_picture.data[1] = picture_data[1];
+		avc_picture.data[2] = picture_data[2];
+#endif
 		sws = getSwsContextFromCmdLine(v_width, v_height, img_format, s_width, s_height, IMGFMT_YV12);
-		if (!sws)
-		{
+		if (!sws) {
 			printf("vo_vesa: Can't initialize SwScaler\n");
 			return -1;
 		}
 	
-		/* This stuff calculations the relative position of video and osd on screen */
-		/* Old stuff taken from the dvb driver, should be removed when introducing spuenc */
+		/* This stuff calculations the relative position of the osd */
 		osd_w = s_width;
-		d_pos_x = (s_width - v_width) / 2;
-		if (d_pos_x < 0) {
-			s_pos_x = -d_pos_x;
-			d_pos_x = 0;
-			osd_w = s_width;
-		} else {
-			s_pos_x = 0;
-		}
 		osd_h = s_height;
-		d_pos_y = (s_height - v_width) / 2;
-		if (d_pos_y < 0) {
-			s_pos_y = -d_pos_y;
-			d_pos_y = 0;
-			osd_h = s_height;
-		} else {
-			s_pos_y = 0;
-		}
 
-		/* Create a pixel buffer and set up pointers for color components */
-		memset(&avc_picture, 0, sizeof(avc_picture));
-		avc_picture.linesize[0] = s_width;
-		avc_picture.linesize[1] = s_width / 2;
-		avc_picture.linesize[2] = s_width / 2;
-		size = s_width * s_height;
-		picture_buf = malloc((size * 3) / 2);
-		
-		avc_picture.data[0] = picture_buf;
-		avc_picture.data[1] = avc_picture.data[0] + size;
-		avc_picture.data[2] = avc_picture.data[1] + size / 4;
 		if (format == IMGFMT_BGR24) {
 			yuv2rgb_init(24, MODE_BGR);
 		} else {
 			yuv2rgb_init(24, MODE_RGB);
 		}
 		return 0;
-#endif
-		return -1;
 	} else if (format == IMGFMT_MPEGPES) {
 		printf("VO: [dxr3] Format: MPEG-PES (no conversion needed)\n");
 		return 0;
@@ -336,9 +363,9 @@ static const vo_info_t* get_info(void)
 
 static void draw_alpha(int x, int y, int w, int h, unsigned char* src, unsigned char *srca, int srcstride)
 {
-#ifdef USE_LIBAVCODEC
+#if defined(USE_LIBFAME) || defined(USE_LIBAVCODEC)
 	vo_draw_alpha_yv12(w, h, src, srca, srcstride,
-		avc_picture.data[0] + (x + d_pos_x) + (y + d_pos_y) * avc_picture.linesize[0], avc_picture.linesize[0]);
+		picture_data[0] + x + y * picture_linesize[0], picture_linesize[0]);
 #endif
 }
 
@@ -363,15 +390,18 @@ static uint32_t draw_frame(uint8_t * src[])
 			write(fd_video, p->data, p->size);
 		}
 		return 0;
-#ifdef USE_LIBAVCODEC
 	} else {
 		int size, srcStride = (img_format == IMGFMT_YUY2) ? (v_width * 2) : (v_width * 3);
-		sws->swScale(sws, src, &srcStride, 0, v_height, avc_picture.data, avc_picture.linesize);
+		sws->swScale(sws, src, &srcStride, 0, v_height, picture_data, picture_linesize);
 		draw_osd();
-		size = avcodec_encode_video(avc_context, picture_buf, avc_outbuf_size, &avc_picture);
-		write(fd_video, picture_buf, size);
-		return 0;
+#ifdef USE_LIBFAME
+		size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
+		write(fd_video, outbuf, size);
+#else USE_LIBAVCODEC
+		size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
+		write(fd_video, picture_data[0], size);
 #endif
+		return 0;
 	}
 	return -1;
 }
@@ -381,25 +411,26 @@ static void flip_page(void)
 	if (!noprebuf) {
 		ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 	}
-#ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
-		int size = avcodec_encode_video(avc_context, picture_buf, avc_outbuf_size, &avc_picture);
+#ifdef USE_LIBFAME
+		int size = fame_encode_frame(fame_ctx, &fame_yuv, NULL);
+		write(fd_video, outbuf, size);
+#elif USE_LIBAVCODEC
+		int size = avcodec_encode_video(avc_context, picture_data[0], avc_outbuf_size, &avc_picture);
 		if (!noprebuf) {
 			ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &vo_pts);
 		}
-		write(fd_video, picture_buf, size);
-	}
+		write(fd_video, picture_data[0], size);
 #endif
+	}
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
 {
-#ifdef USE_LIBAVCODEC
 	if (img_format == IMGFMT_YV12) {
-		sws->swScale(sws, srcimg, stride, y0, h, avc_picture.data, avc_picture.linesize);
+		sws->swScale(sws, srcimg, stride, y0, h, picture_data, picture_linesize);
 		return 0;
 	}
-#endif
 	return -1;
 }
 
@@ -409,14 +440,18 @@ static void uninit(void)
 	if (sws) {
 		freeSwsContext(sws);
 	}
-#ifdef USE_LIBAVCODEC
+#ifdef USE_LIBFAME
+	if (fame_ctx) {
+		fame_close(fame_ctx);
+	}
+#elif USE_LIBAVCODEC
 	if (avc_context) {
 		avcodec_close(avc_context);
 	}
-	if (picture_buf) {
-		free(picture_buf);
-	}
 #endif
+	if (picture_data[0]) {
+		free(picture_data[0]);
+	}
 	if (fd_video) {
 		close(fd_video);
 	}
@@ -506,7 +541,8 @@ static uint32_t preinit(const char *arg)
 		}
 	}
 
-#ifdef USE_LIBAVCODEC
+#ifdef USE_LIBFAME
+#elif USE_LIBAVCODEC
 	avcodec_init();
 	avcodec_register_all();
 #endif
