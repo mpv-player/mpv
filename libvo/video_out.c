@@ -56,6 +56,7 @@ int vo_doublebuffering = 0;
 int vo_vsync = 0;
 int vo_fs = 0;
 int vo_fsmode = 0;
+float vo_panscan = 0.0f;
 
 int vo_pts=0; // for hw decoding
 float vo_fps=0; // for mp1e rte

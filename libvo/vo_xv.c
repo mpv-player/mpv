@@ -94,6 +94,10 @@ static uint32_t image_height;
 static uint32_t image_format;
 static int flip_flag;
 
+static int panscan_x;
+static int panscan_y;
+static float panscan_amount;
+
 static Window                 mRoot;
 static uint32_t               drwX,drwY,drwBorderWidth,drwDepth;
 static uint32_t               dwidth,dheight;
@@ -333,6 +337,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
  static uint32_t vm_width;
  static uint32_t vm_height;
 #endif
+
+ panscan_x = 0;
+ panscan_y = 0;
+ panscan_amount = 0.0f;
 
  aspect_save_orig(width,height);
  aspect_save_prescale(d_width,d_height);
@@ -596,18 +604,31 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
+ if((vo_fs && (vo_panscan != panscan_amount)) || (!vo_fs && panscan_amount))
+  {
+   int panscan_area = (vo_screenheight-vo_dheight);
+
+   panscan_amount = vo_fs ? vo_panscan : 0;
+
+   panscan_x = panscan_area * panscan_amount * (image_width / (float)image_height);
+   panscan_y = panscan_area * panscan_amount;
+
+   XClearWindow(mDisplay, vo_window);
+   XFlush(mDisplay);
+  }
+
  if ( Shmem_Flag )
   {
    XvShmPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
          0, 0,  image_width, image_height,
-         drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight),
+         drwX-(panscan_x>>1),drwY-(panscan_y>>1),vo_dwidth+panscan_x,(vo_fs?vo_dheight - 1:vo_dheight)+panscan_y,
          False);
   }
  else
   {
    XvPutImage(mDisplay, xv_port, vo_window, vo_gc, xvimage[current_buf],
          0, 0,  image_width, image_height,
-         drwX,drwY,vo_dwidth,(vo_fs?vo_dheight - 1:vo_dheight));
+         drwX-(panscan_x>>1),drwY-(panscan_y>>1),vo_dwidth+panscan_x,(vo_fs?vo_dheight - 1:vo_dheight)+panscan_y);
   }
  if (num_buffers>1){
     current_buf=(current_buf+1)%num_buffers;

@@ -216,6 +216,7 @@ extern int vo_directrendering;
 extern int vo_vsync;
 extern int vo_fs;
 extern int vo_fsmode;
+extern float vo_panscan;
 
 extern int vo_mouse_timer_const;
 

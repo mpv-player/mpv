@@ -57,6 +57,7 @@ extern int vo_gamma_green_intensity;
 extern int vo_gamma_blue_intensity;
 extern int vo_directrendering;
 extern int vd_use_slices;
+extern float vo_panscan;
 
 #ifdef USE_OSD
 extern int osd_level;
@@ -238,6 +239,7 @@ static config_t mplayer_opts[]={
 	// wait for v-sync (vesa)
 	{"vsync", &vo_vsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"novsync", &vo_vsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"panscan", &vo_panscan, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
 
 #ifdef HAVE_X11
 	// x11,xv,xmga,xvidix
