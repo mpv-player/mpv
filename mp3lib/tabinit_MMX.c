@@ -5,10 +5,10 @@
 */
 #include "../mangle.h"
 
-long __attribute__((aligned(8))) decwins [544];
+long __attribute__((aligned(8))) mp3lib_decwins [544];
 
 #define real float
-extern real decwin[(512+32)];
+extern real mp3lib_decwin[(512+32)];
 // static long decwin [544];
 
 static short intwinbase_MMX[] = 
@@ -95,7 +95,7 @@ void make_decode_tables_MMX(long scaleval)
 	"negl %3\n\t"
 	"jmp .L00\n\t"
 ".L04:\n\t"
-	::"g"(intwinbase_MMX),"m"(decwin[0]),"m"(scaleval),"m"(intwinbase_step)
+	::"g"(intwinbase_MMX),"m"(mp3lib_decwin[0]),"m"(scaleval),"m"(intwinbase_step)
 	:"memory","%ebx","%esi","%edi");
 intwinbase_step=2;
   __asm __volatile(
@@ -154,6 +154,6 @@ intwinbase_step=2;
 	"negl %3\n\t"
 	"jmp .L05\n\t"
 ".L13:\n\t"
-	::"g"(intwinbase_MMX),"m"(decwins[0]),"m"(scaleval),"m"(intwinbase_step)
+	::"g"(intwinbase_MMX),"m"(mp3lib_decwins[0]),"m"(scaleval),"m"(intwinbase_step)
 	:"memory","%ebx","%esi","%edi");
 }

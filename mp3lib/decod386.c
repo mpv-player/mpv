@@ -202,7 +202,7 @@ static int synth_1to1(real *bandPtr,int channel,unsigned char *out,int *pnt)
 
   {
     register int j;
-    real *window = decwin + 16 - bo1;
+    real *window = mp3lib_decwin + 16 - bo1;
 
     for (j=16;j;j--,b0+=0x10,window+=0x20,samples+=step)
     {

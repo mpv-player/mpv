@@ -108,7 +108,7 @@ struct III_sideinfo
 };
 
 static long freqs[9];
-extern real decwin[(512+32)];
+extern real mp3lib_decwin[(512+32)];
 extern real *pnts[];
 
 static int do_layer2(struct frame *fr,int single);

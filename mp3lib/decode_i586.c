@@ -79,7 +79,7 @@ int synth_1to1_pent(real *bandPtr, int channel, short *samples)
 "        addl $12,%%esp\n\t"
 "        movl %4,%%edx\n\t"
 "        leal 0(,%%edx,4),%%edx\n\t"
-"        movl $"MANGLE(decwin)"+64,%%eax\n\t"
+"        movl $"MANGLE(mp3lib_decwin)"+64,%%eax\n\t"
 "        movl %%eax,%%ecx\n\t"
 "        subl %%edx,%%ecx\n\t"
 "        movl $16,%%ebp\n\t"

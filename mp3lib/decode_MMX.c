@@ -86,7 +86,7 @@ __asm __volatile(
 	"leal 1(%%ebx), %%ecx\n\t"
         "subl %5,%%ebx\n\t"
 	"pushl %%ecx\n\t"
-	"leal "MANGLE(decwins)"(%%ebx,%%ebx,1), %%edx\n\t"
+	"leal "MANGLE(mp3lib_decwins)"(%%ebx,%%ebx,1), %%edx\n\t"
 	"shrl $1, %%ecx\n\t"
 ".balign 16\n\t"
 ".L03:\n\t"
