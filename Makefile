@@ -103,7 +103,7 @@ endif
 
 .SUFFIXES: .cc .c .o
 
-.PHONY: $(COMMON_DEPS)
+#.PHONY: $(COMMON_DEPS)
 
 all:	version.h $(ALL_PRG)
 
@@ -195,7 +195,7 @@ else
 MENU_LIBS =
 endif
 
-MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS)
+MENCODER_DEP = $(OBJS_MENCODER) $(COMMON_DEPS) libmpcodecs/libmpencoders.a
 
 ifeq ($(VIDIX),yes)
 VIDIX_LIBS = vidix/libvidix.a
