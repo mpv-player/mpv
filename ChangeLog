@@ -144,6 +144,7 @@ MPlayer (1.0)
       for headphones, preserving the spatiality of the sound
     * big-endian fixes in rgb2rgb converter
     * yuv2rgb Altivec optimization fixes
+    * support for LADSPA plugins
 
     Others:
     * -loop and -shuffle now work together
