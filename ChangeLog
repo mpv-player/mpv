@@ -67,6 +67,7 @@ MPlayer (1.0)
     * icc fix in the Win32 loader
     * crash with Turkish locale fixed
     * several memleak fixes
+    * new experimental mpeg muxer, compatible with dvd and [s]vcd
 
 
   pre6: "X-mas present" December 23, 2004
