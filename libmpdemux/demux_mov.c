@@ -447,7 +447,7 @@ skip_chunk:
     }
     free(priv);
 
-    if (flags==5) // reference & header sent
+    if ((flags==5) || (flags==7)) // reference & header sent
         return 1;
 
     if(flags==1)
