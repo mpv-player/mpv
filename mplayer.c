@@ -2957,6 +2957,7 @@ if(vo_config_count && vo_spudec) {
   current_module="spudec";
   spudec_heartbeat(vo_spudec,90000*sh_video->timer);
   while(get_sub_packet()>0 && packet){
+      if(timestamp < 0) timestamp = 0;
       spudec_assemble(vo_spudec,packet,len,timestamp);
   }
   
