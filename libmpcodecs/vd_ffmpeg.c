@@ -501,6 +501,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     if(ret<0) mp_msg(MSGT_DECVIDEO,MSGL_WARN, "Error while decoding frame!\n");
 
 //-- vstats generation
+#if LIBAVCODEC_BUILD >= 4643
     while(lavc_param_vstats){ // always one time loop
         static FILE *fvstats=NULL;
         char filename[20];
@@ -533,21 +534,22 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
            all_frametime, (double)(len*8)/sh->frametime/1000.0,
            (double)(all_len*8)/all_frametime/1000.0);
 	switch(pic->pict_type){
-	case I_TYPE:
+	case FF_I_TYPE:
             fprintf(fvstats, "type= I\n");
 	    break;
-	case P_TYPE:
+	case FF_P_TYPE:
             fprintf(fvstats, "type= P\n");
 	    break;
-	case S_TYPE:
+	case FF_S_TYPE:
             fprintf(fvstats, "type= S\n");
 	    break;
-	case B_TYPE:
+	case FF_B_TYPE:
             fprintf(fvstats, "type= B\n");
 	    break;
 	}
         break;
     }
+#endif
 //--
 
     if(!got_picture) return NULL;	// skipped image

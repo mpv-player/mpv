@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #include "../config.h"
 
@@ -94,6 +95,7 @@ static int lavc_param_interlaced_dct= 0;
 static int lavc_param_prediction_method= FF_PRED_LEFT;
 static char *lavc_param_format="YV12";
 static int lavc_param_debug= 0;
+static int lavc_param_psnr= 0;
 
 #include "cfgparser.h"
 
@@ -151,6 +153,9 @@ struct config lavcopts_conf[]={
         {"format", &lavc_param_format, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #if LIBAVCODEC_BUILD >= 4642
         {"debug", &lavc_param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 100000000, NULL},
+#endif 
+#if LIBAVCODEC_BUILD >= 4643
+        {"psnr", &lavc_param_psnr, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PSNR, NULL},
 #endif 
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -306,6 +311,9 @@ static int config(struct vf_instance_s* vf,
 
     if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
     if(lavc_param_interlaced_dct) lavc_venc_context->flags|= CODEC_FLAG_INTERLACED_DCT;
+#if LIBAVCODEC_BUILD >= 4643
+    lavc_venc_context->flags|= lavc_param_psnr;
+#endif
     lavc_venc_context->prediction_method= lavc_param_prediction_method;
     if(!strcasecmp(lavc_param_format, "YV12"))
         lavc_venc_context->pix_fmt= PIX_FMT_YUV420P;
@@ -400,7 +408,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     return 0;
 }
 
+static double psnr(double d){
+    if(d==0) return INFINITY;
+    return -10.0*log(d)/log(10);
+}
+
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
+    const char pict_type_char[5]= {'?', 'I', 'P', 'B', 'S'};
     int out_size;
     AVVideoFrame *pic= vf->priv->pic;
 
@@ -416,6 +430,44 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
     mencoder_write_chunk(mux_v,out_size,lavc_venc_context->coded_picture->key_frame?0x10:0);
     
+#if LIBAVCODEC_BUILD >= 4643
+    /* store psnr / pict size / type / qscale */
+    if(lavc_param_psnr){
+        static FILE *fvstats=NULL;
+        char filename[20];
+        static long long int all_len=0;
+        static int frame_number=0;
+        static double all_frametime=0.0;
+        AVVideoFrame *pic= lavc_venc_context->coded_picture;
+        double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;
+
+        if(!fvstats) {
+            time_t today2;
+            struct tm *today;
+            today2 = time(NULL);
+            today = localtime(&today2);
+            sprintf(filename, "psnr_%02d%02d%02d.log", today->tm_hour,
+                today->tm_min, today->tm_sec);
+            fvstats = fopen(filename,"w");
+            if(!fvstats) {
+                perror("fopen");
+                lavc_param_psnr=0; // disable block
+                /*exit(1);*/
+            }
+        }
+
+        fprintf(fvstats, "%6d, %2.2f, %6d, %2.2f, %2.2f, %2.2f, %2.2f %c\n",
+            lavc_venc_context->coded_picture->coded_picture_number,
+            lavc_venc_context->coded_picture->quality,
+            out_size,
+            psnr(lavc_venc_context->coded_picture->error[0]/f),
+            psnr(lavc_venc_context->coded_picture->error[1]*4/f),
+            psnr(lavc_venc_context->coded_picture->error[2]*4/f),
+            psnr((lavc_venc_context->coded_picture->error[0]+lavc_venc_context->coded_picture->error[1]+lavc_venc_context->coded_picture->error[2])/(f*1.5)),
+            pict_type_char[lavc_venc_context->coded_picture->pict_type]
+            );
+    }
+#endif    
     /* store stats if there are any */
     if(lavc_venc_context->stats_out && stats_file) 
         fprintf(stats_file, "%s", lavc_venc_context->stats_out);
@@ -423,6 +475,23 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 }
 
 static void uninit(struct vf_instance_s* vf){
+    const char pict_type_char[5]= {'?', 'I', 'P', 'B', 'S'};
+    
+#if LIBAVCODEC_BUILD >= 4643
+    if(lavc_param_psnr){
+        double f= lavc_venc_context->width*lavc_venc_context->height*255.0*255.0;
+        
+        f*= lavc_venc_context->coded_picture->coded_picture_number;
+        
+        printf("PSNR: Y:%2.2f, Cb:%2.2f, Cr:%2.2f, All:%2.2f\n",
+            psnr(lavc_venc_context->error[0]/f),
+            psnr(lavc_venc_context->error[1]*4/f),
+            psnr(lavc_venc_context->error[2]*4/f),
+            psnr((lavc_venc_context->error[0]+lavc_venc_context->error[1]+lavc_venc_context->error[2])/(f*1.5))
+            );
+    }
+#endif
+
     avcodec_close(lavc_venc_context);
 
     if(stats_file) fclose(stats_file);
