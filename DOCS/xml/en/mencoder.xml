@@ -169,7 +169,8 @@ to append 2 (or more) AVI files:
 
 <para>
 Command:
-<screen>cat 1.avi 2.avi | mencoder -noidx -ovc copy -oac copy -o <replaceable>output.avi</replaceable> -</screen>
+<screen>cat <replaceable>1.avi</replaceable> <replaceable>2.avi</replaceable> &gt; <replaceable>3.avi</replaceable>
+mencoder -noidx -ovc copy -oac copy -o <replaceable>output.avi</replaceable> <replaceable>3.avi</replaceable></screen>
 </para>
 
 <note><para>
