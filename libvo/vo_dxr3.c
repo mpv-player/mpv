@@ -75,7 +75,6 @@ static int fd_spu = -1;
 
 /* Static variable used in ioctl's */
 static int ioval = 0;
-static int pts = 0;
 
 static vo_info_t vo_info = 
 {
@@ -382,21 +381,11 @@ static uint32_t draw_frame(uint8_t * src[])
 		size_t data_left = p->size;
 
 		if (p->id == 0x20) {
-			/* Set subpic timestamp */
-			if (ioctl(fd_spu, EM8300_IOCTL_SPU_SETPTS, &pts) < 0) {
-				printf("VO: [dxr3] Unable to set pts\n");
-			}
-
 			/* Force subpic data into buffer */
 			while (data_left) {
 				data_left -= write(fd_spu, (void*) (p->data + p->size-data_left), data_left);
 			}
 		} else {
-			/* Set frame timestamp */
-			if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts) < 0) {
-				printf("VO: [dxr3] Unable to set pts\n");
-			}
-
 			/* Force video data into buffer */
 			while (data_left) {
 				data_left -= write(fd_video, (void*) (p->data + p->size-data_left), data_left);
@@ -429,7 +418,7 @@ static uint32_t draw_frame(uint8_t * src[])
 		rgb24toyv12(s, dY, dU, dV, w, h, picture_linesize[0], picture_linesize[1], v_width * 3);
 	
 		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = pts / 90000.0;
+		mp1e_buffer.time = vo_pts / 90000.0;
 		mp1e_buffer.user_data = NULL;
 		vo_draw_text(osd_w, osd_h, draw_alpha);
 		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
@@ -443,33 +432,25 @@ static void flip_page(void)
 {
 	static int prev_pts = 0;
 	/* Flush the device if a seek occured */
-	if (prev_pts > pts) {
-		printf("Seek\n");
+	if (prev_pts > vo_pts) {
+		/* Flush video */
 		ioval = EM8300_SUBDEVICE_VIDEO;
 		ioctl(fd_control, EM8300_IOCTL_FLUSH, &ioval);
-		pts += 90000.0 / vo_fps;
-		if (img_format == IMGFMT_MPEGPES) {
-			ioctl(fd_control, EM8300_IOCTL_SCR_SET, &pts);
-			if (ioctl(fd_video, EM8300_IOCTL_VIDEO_SETPTS, &pts) < 0) {
-				printf("VO: [dxr3] Unable to set pts\n");
-			}
-		}
 	}
-	prev_pts = pts;
+	prev_pts = vo_pts;
 #ifdef USE_MP1E
 	if (img_format == IMGFMT_YV12) {
 		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = pts / 90000.0;
+		mp1e_buffer.time = vo_pts / 90000.0;
 		mp1e_buffer.user_data = NULL;
 		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
 	} else if (img_format == IMGFMT_YUY2) {
 		mp1e_buffer.data = picture_data[0];
-		mp1e_buffer.time = pts / 90000.0;
+		mp1e_buffer.time = vo_pts / 90000.0;
 		mp1e_buffer.user_data = NULL;
 		rte_push_video_buffer(mp1e_context, &mp1e_buffer);
 	}
 #endif
-	pts += 90000.0 / vo_fps;
 }
 
 static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
@@ -527,7 +508,7 @@ static uint32_t query_format(uint32_t format)
 	
 	if (format == IMGFMT_MPEGPES) {
 		/* Hardware accelerated | Hardware supports subpics | Hardware handles syncing */
-		flag = 0x2 | 0x8 | 0x100;
+		flag = 0x2 | 0x8;
 #ifdef USE_MP1E
 	} else if (format == IMGFMT_YV12) {
 		/* Conversion needed | OSD Supported */
