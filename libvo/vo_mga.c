@@ -56,11 +56,12 @@ static vo_info_t vo_info =
 static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
+char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 
-	f = open("/dev/mga_vid",O_RDWR);
+	f = open(devname,O_RDWR);
 	if(f == -1)
 	{
-		printf("Couldn't open /dev/mga_vid\n"); 
+		printf("Couldn't open %s\n",devname); 
 		return(-1);
 	}
 

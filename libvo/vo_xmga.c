@@ -191,12 +191,14 @@ static uint32_t init( uint32_t width, uint32_t height, uint32_t d_width, uint32_
  XGCValues              xgcv;
  unsigned long          xswamask;
 
- f=open( "/dev/mga_vid",O_RDWR );
- if ( f == -1 )
-  {
-   printf("Couldn't open /dev/mga_vid\n");
-   return(-1);
-  }
+  char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
+
+	f = open(devname,O_RDWR);
+	if(f == -1)
+	{
+		printf("Couldn't open %s\n",devname); 
+		return(-1);
+	}
 
  switch(format)
   {
