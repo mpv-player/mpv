@@ -190,7 +190,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
               segs=p[0] & 0x3F;
               ++p;
             }
-            if(verbose>=4) printf("%08X:  flag=%02X  segs=%d  pad=%d  time=%d  dur=%d\n",
+            if(verbose>=4) printf("%08X:  flag=%02X  segs=%d  pad=%d  time=%ld  dur=%d\n",
               demux->filepos,flags,segs,padding,time,duration);
             for(seg=0;seg<segs;seg++){
               //ASF_segmhdr_t* sh;

@@ -38,7 +38,7 @@ while(1){
   if(id==mmioFOURCC('L','I','S','T')){
     int len=stream_read_dword_le(demuxer->stream)-4; // list size
     id=stream_read_dword_le(demuxer->stream);        // list type
-    if(verbose>=2) printf("LIST %.4s  len=%d\n",&id,len);
+    if(verbose>=2) printf("LIST %.4s  len=%d\n",(char *) &id,len);
     if(id==listtypeAVIMOVIE){
       // found MOVI header
       demuxer->movi_start=stream_tell(demuxer->stream);
@@ -50,7 +50,7 @@ while(1){
     continue;
   }
   size2=stream_read_dword_le(demuxer->stream);
-  if(verbose>=2) printf("CHUNK %.4s  len=%d\n",&id,size2);
+  if(verbose>=2) printf("CHUNK %.4s  len=%d\n",(char *) &id,size2);
   chunksize=(size2+1)&(~1);
   switch(id){
     case ckidAVIMAINHDR:          // read 'avih'
@@ -116,7 +116,7 @@ while(1){
     }
     case ckidAVINEWINDEX: if(index_mode){
       demuxer->idx_size=size2>>4;
-      if(verbose>=1) printf("Reading INDEX block, %d chunks for %d frames\n",
+      if(verbose>=1) printf("Reading INDEX block, %d chunks for %ld frames\n",
         demuxer->idx_size,avih.dwTotalFrames);
       demuxer->idx=malloc(demuxer->idx_size<<4);
       stream_read(demuxer->stream,(char*)demuxer->idx,demuxer->idx_size<<4);
@@ -126,7 +126,7 @@ while(1){
     }
   }
   if(chunksize>0) stream_skip(demuxer->stream,chunksize); else
-  if(chunksize<0) printf("WARNING!!! chunksize=%d  (id=%.4s)\n",chunksize,&id);
+  if(chunksize<0) printf("WARNING!!! chunksize=%d  (id=%.4s)\n",chunksize,(char *) &id);
   
 }
 
@@ -170,7 +170,7 @@ if(index_mode>=2 || (demuxer->idx_size==0 && index_mode==1)){
         if(c&0x40) idx->dwFlags=0;
       }
     
-    if(verbose>=2) printf("%08X %08X %.4s %02X %X\n",demuxer->filepos,id,&id,c,idx->dwFlags);
+    if(verbose>=2) printf("%08X %08X %.4s %02X %X\n",demuxer->filepos,id,(char *) &id,c,(unsigned int) idx->dwFlags);
 #if 0
     { unsigned char tmp[64];
       int i;

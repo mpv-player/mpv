@@ -52,7 +52,7 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
   }
   if(id!=mmioFOURCC('J','U','N','K')){
      // unknown
-     if(verbose>=2) printf("Unknown chunk: %.4s (%X)\n",&id,id);
+     if(verbose>=2) printf("Unknown chunk: %.4s (%X)\n",(char *) &id,id);
   }
   return NULL;
 }
@@ -139,7 +139,7 @@ do{
       continue;
     }
     if(!demux_avi_select_stream(demux,idx->ckid)){
-      if(verbose>2) printf("Skip chunk %.4s (0x%X)  \n",&idx->ckid,idx->ckid);
+      if(verbose>2) printf("Skip chunk %.4s (0x%X)  \n",(char *)&idx->ckid,(unsigned int)idx->ckid);
       continue; // skip this chunk
     }
 
@@ -156,14 +156,14 @@ do{
     stream_seek(demux->stream,pos);
     id=stream_read_dword_le(demux->stream);
     if(id!=idx->ckid){
-      printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",&id,&idx->ckid);
+      printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
       continue;
     }
     len=stream_read_dword_le(demux->stream);
 //    if((len&(~1))!=(idx->dwChunkLength&(~1))){
 //    if((len)!=(idx->dwChunkLength)){
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
-      printf("ChunkSize mismatch! raw=%d idx=%d  \n",len,idx->dwChunkLength);
+      printf("ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
       continue;
     }
   } else {
@@ -214,7 +214,7 @@ do{
       continue;
     }
     if(ds && demux_avi_select_stream(demux,idx->ckid)!=ds){
-      if(verbose>2) printf("Skip chunk %.4s (0x%X)  \n",&idx->ckid,idx->ckid);
+      if(verbose>2) printf("Skip chunk %.4s (0x%X)  \n",(char *)&idx->ckid,(unsigned int)idx->ckid);
       continue; // skip this chunk
     }
 
@@ -235,14 +235,14 @@ do{
     if(stream_eof(demux->stream)) return 0;
 
     if(id!=idx->ckid){
-      printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",&id,&idx->ckid);
+      printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
       continue;
     }
     len=stream_read_dword_le(demux->stream);
 //    if((len&(~1))!=(idx->dwChunkLength&(~1))){
 //    if((len)!=(idx->dwChunkLength)){
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
-      printf("ChunkSize mismatch! raw=%d idx=%d  \n",len,idx->dwChunkLength);
+      printf("ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
       continue;
     }
   } else return 0;

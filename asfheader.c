@@ -120,7 +120,7 @@ if(verbose){
       printf("stream type: %s\n",asf_chunk_type(streamh.type));
       printf("stream concealment: %s\n",asf_chunk_type(streamh.concealment));
       printf("type: %d bytes,  stream: %d bytes  ID: %d\n",(int)streamh.type_size,(int)streamh.stream_size,(int)streamh.stream_no);
-      printf("unk1: %lX  unk2: %X\n",streamh.unk1,streamh.unk2);
+      printf("unk1: %lX  unk2: %X\n",(unsigned long)streamh.unk1,(unsigned int)streamh.unk2);
       printf("FILEPOS=0x%X\n",stream_tell(demuxer->stream));
 }
       // type-specific data:
