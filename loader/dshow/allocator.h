@@ -3,33 +3,30 @@
 
 #include "interfaces.h"
 #include "cmediasample.h"
-#include "iunk.h"
 
-#include <list>
-
-struct MemAllocator: public IMemAllocator
+typedef struct avm_list_t
 {
+    struct avm_list_t* next;
+    struct avm_list_t* prev;
+    void* member;
+} avm_list_t;
+
+typedef struct _MemAllocator MemAllocator;
+struct _MemAllocator
+{
+    IMemAllocator_vt* vt;
     ALLOCATOR_PROPERTIES props;
-    std::list<CMediaSample*> used_list;
-    std::list<CMediaSample*> free_list;
+    avm_list_t* used_list;
+    avm_list_t* free_list;
     char* new_pointer;
     CMediaSample* modified_sample;
-    static GUID interfaces[];
-    DECLARE_IUNKNOWN(MemAllocator)
+    GUID interfaces[2];
+    DECLARE_IUNKNOWN();
 
-    MemAllocator();
-    ~MemAllocator();
-    void SetPointer(char* pointer) { new_pointer=pointer; }
-    void ResetPointer() 
-    { 
-	if (modified_sample)
-	{
-	    modified_sample->ResetPointer(); 
-	    modified_sample=0;
-	}
-    }
-
-    static long CreateAllocator(GUID* clsid, GUID* iid, void** ppv);
+    void ( *SetPointer )(MemAllocator* This, char* pointer);
+    void ( *ResetPointer )(MemAllocator* This);
 };
+
+MemAllocator* MemAllocatorCreate();
 
 #endif /* DS_ALLOCATOR_H */

@@ -3,25 +3,22 @@
 
 #include "com.h"
 #include "wine/winbase.h"
-#include "wine/windef.h"
-#include "wine/winuser.h"
 #include "wine/vfw.h"
 
 extern int DSHOW_DEBUG;
 #define Debug if(DSHOW_DEBUG)
 
-struct IUnknown;
 typedef struct  _MediaType
 {
-    GUID      majortype;		//0x0
-    GUID      subtype;			//0x10
-    int      bFixedSizeSamples;		//0x20
-    int      bTemporalCompression;	//0x24
-    unsigned long     lSampleSize;	//0x28
-    GUID      formattype;		//0x2c
-    IUnknown  *pUnk;			//0x3c
-    unsigned long     cbFormat;		//0x40
-    char *pbFormat;			//0x44
+    GUID	majortype;		//0x0
+    GUID	subtype;		//0x10
+    int		bFixedSizeSamples;	//0x20
+    int		bTemporalCompression;	//0x24
+    unsigned long lSampleSize;		//0x28
+    GUID	formattype;		//0x2c
+    IUnknown*	pUnk;			//0x3c
+    unsigned long cbFormat;		//0x40
+    char	*pbFormat;		//0x44
 } AM_MEDIA_TYPE;
 
 typedef enum
@@ -32,10 +29,10 @@ typedef enum
 
 typedef long long REFERENCE_TIME;
 
-struct RECT32
+typedef struct RECT32
 {
     int left, top, right, bottom;
-};
+} RECT32;
 
 typedef struct tagVIDEOINFOHEADER {
 
@@ -55,14 +52,14 @@ typedef struct _AllocatorProperties
     long cbPrefix;
 } ALLOCATOR_PROPERTIES;
 
-struct IBaseFilter;
-
+typedef struct _IBaseFilter IBaseFilter;
 typedef struct _PinInfo
 {
-    IBaseFilter *pFilter;
+    IBaseFilter* pFilter;
     PIN_DIRECTION dir;
     unsigned short achName[128];
 } PIN_INFO;
+
 
 extern GUID IID_IBaseFilter;
 extern GUID IID_IEnumPins;
@@ -73,6 +70,7 @@ extern GUID IID_IMediaSample;
 extern GUID IID_DivxHidden;
 extern GUID IID_Iv50Hidden;
 extern GUID CLSID_DivxDecompressorCF;
+extern GUID IID_IDivxFilterInterface;
 extern GUID CLSID_IV50_Decoder;
 extern GUID CLSID_MemoryAllocator;
 extern GUID MEDIATYPE_Video;

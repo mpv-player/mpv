@@ -4,8 +4,10 @@
 #include "interfaces.h"
 #include "guids.h"
 
-struct CMediaSample: public IMediaSample
+typedef struct _CMediaSample CMediaSample;
+struct _CMediaSample
 {
+    IMediaSample_vt* vt;
     IMemAllocator* all;
     int size;
     int actual_size;
@@ -16,10 +18,12 @@ struct CMediaSample: public IMediaSample
     int isSyncPoint;
     AM_MEDIA_TYPE media_type;
     int type_valid;
-    CMediaSample(IMemAllocator* allocator, long _size);
-    ~CMediaSample();
-    void SetPointer(char* pointer) { block = pointer; }
-    void ResetPointer() { block = own_block; }
+    void ( *SetPointer) (CMediaSample* This,char* pointer);
+    void ( *ResetPointer) (CMediaSample* This); // FIXME replace with Set & 0
 };
+
+CMediaSample* CMediaSampleCreate(IMemAllocator* allocator, int _size);
+// called from allocator
+void CMediaSample_Destroy(CMediaSample* This);
 
 #endif /* DS_CMEDIASAMPLE_H */

@@ -9,100 +9,44 @@ Created using freely-available DirectX 8.0 SDK
 
 */
 
+#include "iunk.h"
 #include "com.h"
-#include "guids.h"
 
-#ifndef STDCALL
-#define STDCALL __attribute__((__stdcall__))
-#endif
-
-typedef GUID& REFIID;
+//typedef GUID& REFIID;
 typedef GUID CLSID;
 typedef GUID IID;
 
 /*    Sh*t. MSVC++ and g++ use different methods of storing vtables.    */
 
-struct IBaseFilter;
-struct IReferenceClock;
-struct IEnumPins;
-struct IEnumMediaTypes;
-struct IPin;
-struct IFilterGraph;
-struct IMemInputPin;
-struct IMemAllocator;
-struct IMediaSample;
-struct IHidden;
-struct IHidden2;
+typedef struct _IReferenceClock IReferenceClock;
+typedef struct _IFilterGraph IFilterGraph;
 
 enum PIN_DIRECTION;
 
-class IClassFactory2
+typedef struct _IEnumMediaTypes IEnumMediaTypes;
+typedef struct IEnumMediaTypes_vt
 {
-public:
-    virtual long STDCALL QueryInterface(GUID* iid, void** ppv) =0;
-    virtual long STDCALL AddRef() =0;
-    virtual long STDCALL Release() =0;
-    virtual long STDCALL CreateInstance(IUnknown* pUnkOuter, GUID* riid, void** ppvObject) =0;
-};
+    INHERIT_IUNKNOWN();
 
-struct IBaseFilter_vt: IUnknown_vt
+    HRESULT STDCALL ( *Next )(IEnumMediaTypes* This,
+			      /* [in] */ unsigned long cMediaTypes,
+			      /* [size_is][out] */ AM_MEDIA_TYPE** ppMediaTypes,
+			      /* [out] */ unsigned long* pcFetched);
+    HRESULT STDCALL ( *Skip )(IEnumMediaTypes* This,
+			      /* [in] */ unsigned long cMediaTypes);
+    HRESULT STDCALL ( *Reset )(IEnumMediaTypes* This);
+    HRESULT STDCALL ( *Clone )(IEnumMediaTypes* This,
+			       /* [out] */ IEnumMediaTypes** ppEnum);
+} IEnumMediaTypes_vt;
+struct _IEnumMediaTypes { IEnumMediaTypes_vt* vt; };
+
+
+
+typedef struct _IPin IPin;
+typedef struct IPin_vt
 {
-    HRESULT STDCALL ( *GetClassID )(IBaseFilter * This,
-				    /* [out] */ CLSID *pClassID);
-    HRESULT STDCALL ( *Stop )(IBaseFilter * This);
-    HRESULT STDCALL ( *Pause )(IBaseFilter * This);
-    HRESULT STDCALL ( *Run )(IBaseFilter * This,
-			     REFERENCE_TIME tStart);
-    HRESULT STDCALL ( *GetState )(IBaseFilter * This,
-				  /* [in] */ unsigned long dwMilliSecsTimeout,
-				  ///* [out] */ FILTER_STATE *State);
-				  void* State);
-    HRESULT STDCALL ( *SetSyncSource )(IBaseFilter * This,
-				       /* [in] */ IReferenceClock *pClock);
-    HRESULT STDCALL ( *GetSyncSource )(IBaseFilter * This,
-				       /* [out] */ IReferenceClock **pClock);
-    HRESULT STDCALL ( *EnumPins )(IBaseFilter * This,
-				  /* [out] */ IEnumPins **ppEnum);
-    HRESULT STDCALL ( *FindPin )(IBaseFilter * This,
-				 /* [string][in] */ const unsigned short* Id,
-				 /* [out] */ IPin **ppPin);
-    HRESULT STDCALL ( *QueryFilterInfo )(IBaseFilter * This,
-					 // /* [out] */ FILTER_INFO *pInfo);
-					 void* pInfo);
-    HRESULT STDCALL ( *JoinFilterGraph )(IBaseFilter * This,
-					 /* [in] */ IFilterGraph *pGraph,
-					 /* [string][in] */ const unsigned short* pName);
-    HRESULT STDCALL ( *QueryVendorInfo )(IBaseFilter * This,
-					 /* [string][out] */ unsigned short* *pVendorInfo);
-};
+    INHERIT_IUNKNOWN();
 
-struct IBaseFilter
-{
-    struct IBaseFilter_vt *vt;
-};
-
-
-struct IEnumPins_vt: IUnknown_vt
-{
-    HRESULT STDCALL ( *Next )(IEnumPins * This,
-			      /* [in] */ unsigned long cPins,
-			      /* [size_is][out] */ IPin **ppPins,
-			      /* [out] */ unsigned long *pcFetched);
-    HRESULT STDCALL ( *Skip )(IEnumPins * This,
-			      /* [in] */ unsigned long cPins);
-    HRESULT STDCALL ( *Reset )(IEnumPins * This);
-    HRESULT STDCALL ( *Clone )(IEnumPins * This,
-			       /* [out] */ IEnumPins **ppEnum);
-};
-
-struct IEnumPins
-{
-    struct IEnumPins_vt *vt;
-};
-
-
-struct IPin_vt: IUnknown_vt
-{
     HRESULT STDCALL ( *Connect )(IPin * This,
 				 /* [in] */ IPin *pReceivePin,
 				 /* [in] */ /*const*/ AM_MEDIA_TYPE *pmt);
@@ -131,35 +75,135 @@ struct IPin_vt: IUnknown_vt
 				    /* [in] */ REFERENCE_TIME tStart,
 				    /* [in] */ REFERENCE_TIME tStop,
 				    /* [in] */ double dRate);
-};
+} IPin_vt;
+struct _IPin { IPin_vt *vt; };
 
-struct IPin
+
+typedef struct _IEnumPins IEnumPins;
+typedef struct IEnumPins_vt
 {
-    IPin_vt *vt;
-};
+    INHERIT_IUNKNOWN();
+
+    HRESULT STDCALL ( *Next )(IEnumPins* This,
+			      /* [in] */ unsigned long cPins,
+			      /* [size_is][out] */ IPin** ppPins,
+			      /* [out] */ unsigned long* pcFetched);
+    HRESULT STDCALL ( *Skip )(IEnumPins* This,
+			      /* [in] */ unsigned long cPins);
+    HRESULT STDCALL ( *Reset )(IEnumPins* This);
+    HRESULT STDCALL ( *Clone )(IEnumPins* This,
+			       /* [out] */ IEnumPins** ppEnum);
+} IEnumPins_vt;
+struct _IEnumPins { struct IEnumPins_vt* vt; };
 
 
-struct IEnumMediaTypes_vt: IUnknown_vt
+typedef struct _IMediaSample IMediaSample;
+typedef struct IMediaSample_vt
 {
-    HRESULT STDCALL ( *Next )(IEnumMediaTypes * This,
-			      /* [in] */ unsigned long cMediaTypes,
-			      /* [size_is][out] */ AM_MEDIA_TYPE **ppMediaTypes,
-			      /* [out] */ unsigned long *pcFetched);
-    HRESULT STDCALL ( *Skip )(IEnumMediaTypes * This,
-			      /* [in] */ unsigned long cMediaTypes);
-    HRESULT STDCALL ( *Reset )(IEnumMediaTypes * This);
-    HRESULT STDCALL ( *Clone )(IEnumMediaTypes * This,
-			       /* [out] */ IEnumMediaTypes **ppEnum);
-};
+    INHERIT_IUNKNOWN();
 
-struct IEnumMediaTypes
+    HRESULT STDCALL ( *GetPointer )(IMediaSample* This,
+				    /* [out] */ unsigned char** ppBuffer);
+    LONG    STDCALL ( *GetSize )(IMediaSample* This);
+    HRESULT STDCALL ( *GetTime )(IMediaSample* This,
+				 /* [out] */ REFERENCE_TIME* pTimeStart,
+				 /* [out] */ REFERENCE_TIME* pTimeEnd);
+    HRESULT STDCALL ( *SetTime )(IMediaSample* This,
+				 /* [in] */ REFERENCE_TIME* pTimeStart,
+				 /* [in] */ REFERENCE_TIME* pTimeEnd);
+    HRESULT STDCALL ( *IsSyncPoint )(IMediaSample* This);
+    HRESULT STDCALL ( *SetSyncPoint )(IMediaSample* This,
+				      long bIsSyncPoint);
+    HRESULT STDCALL ( *IsPreroll )(IMediaSample* This);
+    HRESULT STDCALL ( *SetPreroll )(IMediaSample* This,
+				    long bIsPreroll);
+    LONG    STDCALL ( *GetActualDataLength )(IMediaSample* This);
+    HRESULT STDCALL ( *SetActualDataLength )(IMediaSample* This,
+					     long __MIDL_0010);
+    HRESULT STDCALL ( *GetMediaType )(IMediaSample* This,
+				      AM_MEDIA_TYPE** ppMediaType);
+    HRESULT STDCALL ( *SetMediaType )(IMediaSample* This,
+				      AM_MEDIA_TYPE* pMediaType);
+    HRESULT STDCALL ( *IsDiscontinuity )(IMediaSample* This);
+    HRESULT STDCALL ( *SetDiscontinuity )(IMediaSample* This,
+					  long bDiscontinuity);
+    HRESULT STDCALL ( *GetMediaTime )(IMediaSample* This,
+				      /* [out] */ long long* pTimeStart,
+				      /* [out] */ long long* pTimeEnd);
+    HRESULT STDCALL ( *SetMediaTime )(IMediaSample* This,
+				      /* [in] */ long long* pTimeStart,
+				      /* [in] */ long long* pTimeEnd);
+} IMediaSample_vt;
+struct _IMediaSample { struct IMediaSample_vt* vt; };
+
+
+
+//typedef struct _IBaseFilter IBaseFilter;
+typedef struct IBaseFilter_vt
 {
-    IEnumMediaTypes_vt *vt;
-};
+    INHERIT_IUNKNOWN();
+
+    HRESULT STDCALL ( *GetClassID )(IBaseFilter * This,
+				    /* [out] */ CLSID *pClassID);
+    HRESULT STDCALL ( *Stop )(IBaseFilter * This);
+    HRESULT STDCALL ( *Pause )(IBaseFilter * This);
+    HRESULT STDCALL ( *Run )(IBaseFilter * This,
+			     REFERENCE_TIME tStart);
+    HRESULT STDCALL ( *GetState )(IBaseFilter * This,
+				  /* [in] */ unsigned long dwMilliSecsTimeout,
+				  ///* [out] */ FILTER_STATE *State);
+				  void* State);
+    HRESULT STDCALL ( *SetSyncSource )(IBaseFilter* This,
+				       /* [in] */ IReferenceClock *pClock);
+    HRESULT STDCALL ( *GetSyncSource )(IBaseFilter* This,
+				       /* [out] */ IReferenceClock **pClock);
+    HRESULT STDCALL ( *EnumPins )(IBaseFilter* This,
+				  /* [out] */ IEnumPins **ppEnum);
+    HRESULT STDCALL ( *FindPin )(IBaseFilter* This,
+				 /* [string][in] */ const unsigned short* Id,
+				 /* [out] */ IPin** ppPin);
+    HRESULT STDCALL ( *QueryFilterInfo )(IBaseFilter* This,
+					 // /* [out] */ FILTER_INFO *pInfo);
+					 void* pInfo);
+    HRESULT STDCALL ( *JoinFilterGraph )(IBaseFilter* This,
+					 /* [in] */ IFilterGraph* pGraph,
+					 /* [string][in] */ const unsigned short* pName);
+    HRESULT STDCALL ( *QueryVendorInfo )(IBaseFilter* This,
+					 /* [string][out] */ unsigned short** pVendorInfo);
+} IBaseFilter_vt;
+struct _IBaseFilter { struct IBaseFilter_vt* vt; };
 
 
-struct IMemInputPin_vt: IUnknown_vt
+
+typedef struct _IMemAllocator IMemAllocator;
+typedef struct IMemAllocator_vt
 {
+    INHERIT_IUNKNOWN();
+
+    HRESULT STDCALL ( *SetProperties )(IMemAllocator* This,
+				       /* [in] */ ALLOCATOR_PROPERTIES *pRequest,
+				       /* [out] */ ALLOCATOR_PROPERTIES *pActual);
+    HRESULT STDCALL ( *GetProperties )(IMemAllocator* This,
+				       /* [out] */ ALLOCATOR_PROPERTIES *pProps);
+    HRESULT STDCALL ( *Commit )(IMemAllocator* This);
+    HRESULT STDCALL ( *Decommit )(IMemAllocator* This);
+    HRESULT STDCALL ( *GetBuffer )(IMemAllocator* This,
+				   /* [out] */ IMediaSample** ppBuffer,
+				   /* [in] */ REFERENCE_TIME* pStartTime,
+				   /* [in] */ REFERENCE_TIME* pEndTime,
+				   /* [in] */ unsigned long dwFlags);
+    HRESULT STDCALL ( *ReleaseBuffer )(IMemAllocator* This,
+				       /* [in] */ IMediaSample* pBuffer);
+} IMemAllocator_vt;
+struct _IMemAllocator { IMemAllocator_vt* vt; };
+
+
+
+typedef struct _IMemInputPin IMemInputPin;
+typedef struct IMemInputPin_vt
+{
+    INHERIT_IUNKNOWN();
+
     HRESULT STDCALL ( *GetAllocator )(IMemInputPin * This,
 				      /* [out] */ IMemAllocator **ppAllocator);
     HRESULT STDCALL ( *NotifyAllocator )(IMemInputPin * This,
@@ -174,114 +218,69 @@ struct IMemInputPin_vt: IUnknown_vt
 					 /* [in] */ long nSamples,
 					 /* [out] */ long *nSamplesProcessed);
     HRESULT STDCALL ( *ReceiveCanBlock )(IMemInputPin * This);
-};
+} IMemInputPin_vt;
+struct _IMemInputPin { IMemInputPin_vt* vt; };
 
-struct IMemInputPin
+
+typedef struct _IHidden IHidden;
+typedef struct IHidden_vt
 {
-    IMemInputPin_vt *vt;
-};
+    INHERIT_IUNKNOWN();
+
+    HRESULT STDCALL ( *GetSmth )(IHidden* This, int* pv);
+    HRESULT STDCALL ( *SetSmth )(IHidden* This, int v1, int v2);
+    HRESULT STDCALL ( *GetSmth2 )(IHidden* This, int* pv);
+    HRESULT STDCALL ( *SetSmth2 )(IHidden* This, int v1, int v2);
+    HRESULT STDCALL ( *GetSmth3 )(IHidden* This, int* pv);
+    HRESULT STDCALL ( *SetSmth3 )(IHidden* This, int v1, int v2);
+    HRESULT STDCALL ( *GetSmth4 )(IHidden* This, int* pv);
+    HRESULT STDCALL ( *SetSmth4 )(IHidden* This, int v1, int v2);
+    HRESULT STDCALL ( *GetSmth5 )(IHidden* This, int* pv);
+    HRESULT STDCALL ( *SetSmth5 )(IHidden* This, int v1, int v2);
+    HRESULT STDCALL ( *GetSmth6 )(IHidden* This, int* pv);
+} IHidden_vt;
+struct _IHidden { struct IHidden_vt* vt; };
 
 
-struct IMemAllocator_vt: IUnknown_vt
+typedef struct _IHidden2 IHidden2;
+typedef struct IHidden2_vt
 {
-    HRESULT STDCALL ( *SetProperties )(IMemAllocator * This,
-				       /* [in] */ ALLOCATOR_PROPERTIES *pRequest,
-				       /* [out] */ ALLOCATOR_PROPERTIES *pActual);
-    HRESULT STDCALL ( *GetProperties )(IMemAllocator * This,
-				       /* [out] */ ALLOCATOR_PROPERTIES *pProps);
-    HRESULT STDCALL ( *Commit )(IMemAllocator * This);
-    HRESULT STDCALL ( *Decommit )(IMemAllocator * This);
-    HRESULT STDCALL ( *GetBuffer )(IMemAllocator * This,
-				   /* [out] */ IMediaSample **ppBuffer,
-				   /* [in] */ REFERENCE_TIME *pStartTime,
-				   /* [in] */ REFERENCE_TIME *pEndTime,
-				   /* [in] */ unsigned long dwFlags);
-    HRESULT STDCALL ( *ReleaseBuffer )(IMemAllocator * This,
-				       /* [in] */ IMediaSample *pBuffer);
-};
+    INHERIT_IUNKNOWN();
 
-struct IMemAllocator
+    HRESULT STDCALL ( *unk1 )(void);
+    HRESULT STDCALL ( *unk2 )(void);
+    HRESULT STDCALL ( *unk3 )(void);
+    HRESULT STDCALL ( *DecodeGet )(IHidden2* This, int* region);
+    HRESULT STDCALL ( *unk5 )(void);
+    HRESULT STDCALL ( *DecodeSet )(IHidden2* This, int* region);
+    HRESULT STDCALL ( *unk7 )(void);
+    HRESULT STDCALL ( *unk8 )(void);
+} IHidden2_vt;
+struct _IHidden2 { struct IHidden2_vt* vt; };
+
+
+// fixme
+typedef struct IDivxFilterInterface {
+    struct IDivxFilterInterface_vt* vt;
+} IDivxFilterInterface;
+
+struct IDivxFilterInterface_vt
 {
-    IMemAllocator_vt *vt;
-};
+    INHERIT_IUNKNOWN();
 
-
-struct IMediaSample_vt: IUnknown_vt
-{
-    HRESULT STDCALL ( *GetPointer )(IMediaSample * This,
-				    /* [out] */ unsigned char **ppBuffer);
-    long STDCALL ( *GetSize )(IMediaSample * This);
-    HRESULT STDCALL ( *GetTime )(IMediaSample * This,
-				 /* [out] */ REFERENCE_TIME *pTimeStart,
-				 /* [out] */ REFERENCE_TIME *pTimeEnd);
-    HRESULT STDCALL ( *SetTime )(IMediaSample * This,
-				 /* [in] */ REFERENCE_TIME *pTimeStart,
-				 /* [in] */ REFERENCE_TIME *pTimeEnd);
-    HRESULT STDCALL ( *IsSyncPoint )(IMediaSample * This);
-    HRESULT STDCALL ( *SetSyncPoint )(IMediaSample * This,
-				      long bIsSyncPoint);
-    HRESULT STDCALL ( *IsPreroll )(IMediaSample * This);
-    HRESULT STDCALL ( *SetPreroll )(IMediaSample * This,
-				    long bIsPreroll);
-    long STDCALL ( *GetActualDataLength )(IMediaSample * This);
-    HRESULT STDCALL ( *SetActualDataLength )(IMediaSample * This,
-					     long __MIDL_0010);
-    HRESULT STDCALL ( *GetMediaType )(IMediaSample * This,
-				      AM_MEDIA_TYPE **ppMediaType);
-    HRESULT STDCALL ( *SetMediaType )(IMediaSample * This,
-				      AM_MEDIA_TYPE *pMediaType);
-    HRESULT STDCALL ( *IsDiscontinuity )(IMediaSample * This);
-    HRESULT STDCALL ( *SetDiscontinuity )(IMediaSample * This,
-					  long bDiscontinuity);
-    HRESULT STDCALL ( *GetMediaTime )(IMediaSample * This,
-				      /* [out] */ long long *pTimeStart,
-				      /* [out] */ long long *pTimeEnd);
-    HRESULT STDCALL ( *SetMediaTime )(IMediaSample * This,
-				      /* [in] */ long long *pTimeStart,
-				      /* [in] */ long long *pTimeEnd);
-};
-
-struct IMediaSample
-{
-    struct IMediaSample_vt *vt;
-};
-
-
-struct IHidden_vt: IUnknown_vt
-{
-    HRESULT STDCALL ( *GetSmth )(IHidden * This, int* pv);
-    HRESULT STDCALL ( *SetSmth )(IHidden * This, int v1, int v2);
-    HRESULT STDCALL ( *GetSmth2 )(IHidden * This, int* pv);
-    HRESULT STDCALL ( *SetSmth2 )(IHidden * This, int v1, int v2);
-    HRESULT STDCALL ( *GetSmth3 )(IHidden * This, int* pv);
-    HRESULT STDCALL ( *SetSmth3 )(IHidden * This, int v1, int v2);
-    HRESULT STDCALL ( *GetSmth4 )(IHidden * This, int* pv);
-    HRESULT STDCALL ( *SetSmth4 )(IHidden * This, int v1, int v2);
-    HRESULT STDCALL ( *GetSmth5 )(IHidden * This, int* pv);
-    HRESULT STDCALL ( *SetSmth5 )(IHidden * This, int v1, int v2);
-    HRESULT STDCALL ( *GetSmth6 )(IHidden * This, int* pv);
-};
-
-struct IHidden
-{
-    struct IHidden_vt *vt;
-};
-
-struct IHidden2_vt: IUnknown_vt
-{
-    HRESULT STDCALL (*unk1) ();
-    HRESULT STDCALL (*unk2) ();
-    HRESULT STDCALL (*unk3) ();
-    HRESULT STDCALL (*DecodeGet) (IHidden2* This, int* region);
-    HRESULT STDCALL (*unk5) ();
-    HRESULT STDCALL (*DecodeSet) (IHidden2* This, int* region);
-    HRESULT STDCALL (*unk7) ();
-    HRESULT STDCALL (*unk8) ();
-};
-
-struct IHidden2
-{
-    struct IHidden2_vt *vt;
+    HRESULT STDCALL ( *get_PPLevel )(IDivxFilterInterface* This, int* PPLevel); // current postprocessing level
+    HRESULT STDCALL ( *put_PPLevel )(IDivxFilterInterface* This, int PPLevel); // new postprocessing level
+    HRESULT STDCALL ( *put_DefaultPPLevel )(IDivxFilterInterface* This);
+    HRESULT STDCALL ( *put_MaxDelayAllowed )(IDivxFilterInterface* This, int maxdelayallowed);
+    HRESULT STDCALL ( *put_Brightness )(IDivxFilterInterface* This,  int brightness);
+    HRESULT STDCALL ( *put_Contrast )(IDivxFilterInterface* This,  int contrast);
+    HRESULT STDCALL ( *put_Saturation )(IDivxFilterInterface* This, int saturation);
+    HRESULT STDCALL ( *get_MaxDelayAllowed )(IDivxFilterInterface* This,  int* maxdelayallowed);
+    HRESULT STDCALL ( *get_Brightness)(IDivxFilterInterface* This, int* brightness);
+    HRESULT STDCALL ( *get_Contrast)(IDivxFilterInterface* This, int* contrast);
+    HRESULT STDCALL ( *get_Saturation )(IDivxFilterInterface* This, int* saturation);
+    HRESULT STDCALL ( *put_AspectRatio )(IDivxFilterInterface* This, int x, IDivxFilterInterface* Thisit, int y);
+    HRESULT STDCALL ( *get_AspectRatio )(IDivxFilterInterface* This, int* x, IDivxFilterInterface* Thisit, int* y);
 };
 
 #endif  /* DS_INTERFACES_H */
