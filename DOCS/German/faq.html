@@ -7,12 +7,12 @@
 
 <TABLE BORDER=0 WIDTH=100% ALIGN=left>
 
-<TD COLSPAN=3><P><B><A NAME=5.1>5.1 Kompilierung</A></B></P>
+<TD COLSPAN=3><P><B><A NAME=5.1><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>5.1 Kompilierung</A></B></P>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD>&nbsp;&nbsp;</TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was ist das Problem mit gcc 2.96 ?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 gcc 2.96 ist RedHats UNOFFIZIELLE (es kann nur auf RedHat Seiten oder bei
 RedHat Distributionen gefunden werden) und FEHLERHAFTE gcc Version. gcc 2.96
 ist ÜBERHAUPT NICHT unterstützt von <B>MPlayer</B>, denn es IRGNORIERT einfach
@@ -21,74 +21,54 @@ Problem, einige andere Projekte (DRI, avifile, usw..) haben auch
 Probleme mit dem Scheiß.<BR>** VERWENDE gcc 2.96 NICHT !!! **
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Großartig, ich habe gcc 3.0.1 von RedHat/Mandrake, dann ist alles fein!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Nein :) Deren gcc 3.0.1 wurde mit gcc 2.96 kompiliert, sind also auch fehlerhafte Scheiße. :)
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Nein. Auch damit gibt es Probleme. :( Verwende einen aus der 2.95.x Serie, diese sind
+zuverlässiger und schneller als 2.96 und 3.x.x .
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Nun. Ist MPlayer bereit für gcc 3.x.x ?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Ist gcc 3.x.x bereit für MPlayer, Linux Kernel und andere?
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Ich verwende gcc 3.x.x und bekomme eigenartige Kompilierungsfehler! Es
-funktioniert mit 2.95! Warum kann ich es nicht kompilieren? Ich liebe gcc 3.x.x,
-es ist ... hmmm ... (weiss nicht was ich sagen soll) ... also ich liebe es!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Keine Sorge, dies ist ein gcc 3.x.x Feature. Downgrade nicht auf gcc 2.95, denn
-es funktioniert möglichweise :))
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Nun dann. Was sollte ich verwenden?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Eines auf der gcc 2.95 Serie.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 SDL Ausgabe funktioniert nicht output doesn't work oder das Kompilierungsprob-
 lem ist ....
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es wurde mit dem neuesten SDL getestet (läuft auf 1.1.7+).
 Es funktioniert NICHT mit 1.1.6, 1.1.5 1.1.4 1.1.3 1.0.4 usw, frage nicht.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe immer noch Probleme mit dem SDL Support. gcc sagt etwas über
 "undefined reference to `SDL_EnableKeyRepeat'"   Was ist nun?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Wo hast du die SDL Library installiert? Wenn du es in /usr/local (Standard)
 installiert hat editiere config.mak und füge "-L/usr/local/lib " nach "X_LIBS="
 ein. Nun gib make ein. Es sollte funktionieren!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es wird nicht kompiliert und es vermisst uint64_t inttypes.h oder ähnliche
 Dinge...
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 kompiere etc/inttypes.h in das <B>MPlayer</B> Verzeichnis (cp etc/inttypes.h .)
 versuche es erneut...
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe einen Pentium III aber ./configure erkennt SSE nicht!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Nur Kernel mit der Version 2.4.x unterstützen SSE (oder versuche 2.2.19 oder
 neuer, aber sei auf Probleme vorbereitet)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe eine G200/G400, wie kompiliere/verwende ich den mga_vid-Treiber?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Lese die gesamte Dokumentation.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Gibt es rpm/deb/... Pakete von <B>MPlayer</B>?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Du kannst ein .deb Paket für dich selbst machen, lese Sektion <A HREF="documentation.html#6.1">6.1</A>.
 Es ist _EXTREM_ abzuraten vorkompiliete Pakete zu verwendenden für <B>MPlayer</B>,
 seit es (wie zur Zeit) _stark_ abhängt von den Kompilierungsoptionen und
@@ -96,9 +76,9 @@ Optimierungen!
 Vorkompilierte Paket sind ABSOLUT ohne Unterstützung von <B>MPlayer</B>-Team!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Während 'make', beschwert sich MPlayer über die X11 Librarys. Ich verstehe das nicht, ich habe X installiert!?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 ...aber du hast die X Development Pakete nicht installiert. Oder nicht richtig.
 Es wird mit XFree86-devel* unter RedHat und mit xlib6g-dev* unter Debian be-
 zeichnet. Prüfe auch, ob der symbolische Link /usr/X11 existiert (dies kann ein
@@ -109,9 +89,9 @@ Problem auf Mandrake-Systemen sein). Er kann mit dem <BR>
 Dein Distribution unterscheidet sich vielleicht vom Linux Dateisystem Standard.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was ist mit dem DGA-Treiber? Ich kann ihn nicht finden!!!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 ./configure erkennt den DGA-Treiber automatisch. Wenn -vo help DGA nicht an-
 zeigtm gibt es ein Problem mit deiner X Installation.
 Versuche ./configure --enable-dga (und RTFM)
@@ -119,20 +99,20 @@ Alternativ kannst du auch versuchen den SDL-DGA Treiber mit der '-vo sdl:dga'
 Option zu verwenden.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich kann SVGAlib nicht kompilieren.. Ich verwende eine 2.3/2.4 Kernel.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Du musst die Makefile.cfg von SVGAlib editieren und "BACKGROUND = y" aus-
 kommentieren.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Ich habe MPlayer mit libcss/libdivxdecore Unterstützung kompiliert, aber wenn
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Ich habe MPlayer mit libdvdcss/libdivxdecore Unterstützung kompiliert, aber wenn
 ich versuche es zu starten, meldet es:<BR>
-<CODE>&gt; error while loading shared libraries: libcss.so.0: cannot load
+<CODE>&gt; error while loading shared libraries: lib*.so.0: cannot load
 shared object file: No such file or directory</CODE><BR>
 I checked up on the file and it IS there in /usr/local/lib.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was tust du mit Linux? Kannst du keine Library installieren? Warum bekommen wir
 diese Fragen? Dies ist auf keinen Fall <B>MPlayer</B>-Spezifisch! Füge
 /usr/local/lib deiner <B>/etc/ld.so.conf</B> Datei hinzu und starte <B>ldconfig</B> .
@@ -140,18 +120,18 @@ Oder installiere es nach /usr/lib , denn wenn du das /usr/local Problem nicht
 lösen kannst, kannst du rücksichtslos genug sein, um solche Dinge zu machen.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD COLSPAN=3><B><A NAME=5.2>5.2. Allgemeine Fragen</A></B>
+<TD COLSPAN=3><B><A NAME=5.2><font face="Verdana, Arial, Helvetica, sans-serif" size="2">5.2. Allgemeine Fragen</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was ist mit der DVD-Wiedergabe ?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Lese die CD/DVD Sektion .
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Lese die CD/DVD Sektion.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Die -xy Option funktioniert nicht mit dem X11-Treiber (-vo x11)
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Der X11-Treiber unterstützt kein Scaling, aber XF86VidMode Unterstützung wird
 nun verwendet: du musst dazuen die -vm Option und die -fs Option verwenden.
 Stelle sicher, dass du die richtigen Modelines in deiner XF86Config-Datei hast
@@ -160,9 +140,9 @@ funktioniert. Es ist um einiges schneller. Wenn SDL-DGA auch funktioniert, ver-
 wende das, es ist auch NOCHMALS schneller!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was ist die Bedeutung der Nummern in der Statusleiste?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Siehe: <CODE>A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 4</CODE><BR>
 <UL>
 <LI>A: Audioposition in Sekunden
@@ -179,87 +159,87 @@ Siehe: <CODE>A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 
 <I>Die meisten sind für debugging-Zwecke und werden bald entfernt.</I>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was ist, wenn ich die nicht sehen will?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Dann verwende die -quiet Option und lese die Manpage.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Warum ist die Video-Ausgabe CPU-Auslastung null (0%) für MPEG Dateien?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es ist nicht null, aber ist in den Codec eingebaut, also kann es nicht extra ge-
 messen werden. Du solltest versuches die Datei mit -vo null und dann mit -vo ...
 zu spielen und die Geschwindigkeit ist die Video-Ausgabe...
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Was ist XMMP? (ist das XMMS oder XMPS, jedoch falschgeschrieben?)
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es ist ein neues Projekt, siehe http://frozenproductions.com für Details
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe Fehlermeldunge über "file not found /usr/lib/win32/...."
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Downloade & und installiere w32codec.zip von *unserem* FTP
 (avifiles Codec-Paket hat unterschiedliche DLLs)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Gibt es Mailing-Listen über MPlayer?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ja! Siehe RTFM, wie du dich anmelden kannst!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe einen bösen Fehler beim Abspielen meines Lieblingsvideos gefunden!!
 Wen soll ich informieren?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Siehe Anhang <A HREF="bugreports.html">C</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe Probleme beim Abspielen von Dateien mit dem ... Codec. Kann ich die verwenden?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Prüfe <A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">http://www.mplayerhq.hu/DOCS/codecs-status.html</A>,
 wenn es deinen Codec nicht enthält, lese die 
 <A HREF="codecs.html#2.1.4">Sektion 2.1.4</A> und kontaktiere uns.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Hmmm, was ist "IdegCounter"?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Eine Mischung eine ungarischen und eines englischen Wortes. Auf Deutsch bedeutet
 "Ideg" etwa "Nerv", und wird etwa so ausgesprochen "ydaegh". Es wurde benutzt,
 um die Nervösität von A'rpi nach eigenartigen, mystischen Verschwinden des CVS
 Codes auszudrücken ;)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 LIRC funktioniert nicht, weil ...
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Bist du sicher, dass du "mplayer_lirc" anstatt von "mplayer" verwendest?
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Die Untertitel sind sehr nett, die wunderschönsten die ich jemals gesehen habe,
 aber sie bremsen das abspielen! Ich weiss, es ist unmöglich...
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Nach dem Ablaufen von ./configure , editiere config.h und ändere #undef FAST_OSD
 auf <CODE>#define FAST_OSD</CODE>. Dann kompiliere neu.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Das OSD flackert!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Du verwendest einen vo-Treiber mit einfachem-Buffering (x11,xv). Bei xv,
 verwende die -double Option.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-Was genau ist dieser libavcodec?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Was genau ist diese libavcodec?
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es ist von Gerard Lantau's ffmpeg Paket (<A HREF="http://ffmpeg.sourceforge.net">http://ffmpeg.sourceforge.net</A>).
 Es beinhaltet einen in C entwickelten DivX ;-) und OpenDivX alpha 47 Codec.
 Einige Benchmarks zeigten, dass dieser Codes in jedem Fall schneller ist als
@@ -270,20 +250,20 @@ Es eröffnet auch die Möglichkeit DivX auf jedem Computer der einen C Compiler
 hat abzuspielen. Ein großartiges Ding, nicht wahr?
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Aber configure sagt mir "Checking for libavcodec ... no"!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Du brauchst libavcodec vom FFmpeg CVS. Lese die Anweisungen in der <A HREF="codecs.html#2.1.2.2">ffmpeg
 Sektion</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.3>5.3. Dateiwiedergabe-Probleme</A></B>
+<B><A NAME=5.3><font face="Verdana, Arial, Helvetica, sans-serif" size="2">5.3. Dateiwiedergabe-Probleme</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 ...... funktioniert mit avifile/aviplay während bei MPlayer nicht.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 <B>MPlayer</B> != avifile
 Das einzige allgemeine Teil zwischen diesen beiden Playern ist der Win32 DLL
 Loader. Die Codec (dll) Sets, Synchronisation, Demultiplexing usw sind total
@@ -292,31 +272,31 @@ Wenn etwas funktioniert mit aviplay bedeutet das nicht, dass bei <B>MPlayer</B>
 das auch funktionieren sollte.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Audio verliert die Synchronisation beim Spielen einer .avi-Datei.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Versuche mit der -bps oder -nobps Option
 Wenn es noch immer nicht passt, sende mir (upload zum FTP) die Datei, ich werde
 sie prüfen.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Indeo 3.x/4.x Filme werden gespiegelt gezeigt!!!?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es ist ein bekannter Fehler (wirklich ein Fehler / eine Begrenzung des DLL Codecs)
 Versuche ob dein vo-Treiber die -flip Option unterstützt.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Indeo 3.x,4.x Vides funktionieren nicht bei einer 32bpp Farbtiefe (16,24 bpp sind in Ordnung).
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Dies ist ein bekannter Fehler (wirklich ein Fehler / eine Begrenzung des DLL
 Codecs).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 MPlayer endet sich mit einem Fehler bei der Verwendung von l3codeca.acm.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Prüfe dir 'ldd /usr/local/bin/mplayer' Ausgabe. Wenn es<BR>
 &nbsp;&nbsp;&nbsp;&nbsp;<CODE>libc.so.6 => /lib/libc.so.6 (0x4???????)</CODE><BR>
 enthält, wobei "?" irgendeine Nummer ist, ist es ok und der Fehler liegt nicht
@@ -331,52 +311,52 @@ must sie auf den Speicherbereich 0x00400000 geladen werden, wir können das nicht
 -afm 1 Option verwenden um die l3codeca.acm auszuschalten.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Mein Computer spielt M$ DivX AVIs mit Auflösungen von ~ 640x300 und Stereo MP3
 Sound zu langsam. Wenn ich den -nosound Parameter verwende ist alles ok (aber
 kein Ton).
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Nunja, dein Computer ist zu langsam. RTFM oder irgendwas.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
  
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 MPlayer beendet sich mit "MPlayer interrupted by signal 4 in module: decode_video".
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Versuche <B>MPlayer</B> auf dem Computer zu starten, auf dem es kompiliert wurde.
 Oder Kompiliere es neu. Verwende <B>MPlayer</B> nicht auf einen anderen CPU
 als für die es kompiliert wurde.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe Probleme mit [dein Windows-Manager] und Vollbild xv/xmga/sdl/x11.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Verwend die -fsmode Option. Siehe example.conf oder Manpage.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Aber es funktioniert mit avifile!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Also was?
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Also ist avifile besser!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Dann verwende avifile, es hat einen nette GUI und netten C++ Code :)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich bekomme diese Meldung beim Abspielen von MPEG-Dateien:
 Can't find codec for video format 0x10000001!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Du verwenst eine alte Version von codecs.conf. Upgrade es von etc/
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Nach dem Starten von MPlayer unter KDE(1/2) bekomme ich einen schwarzen
 Bildschirm und es passiert nicht. Nach etwa einer Minute beginnt das Video
 anzuspielen.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Der KDE Arts Sound Daemon blockiert das Sound-Device, du kannst also die Zeit
 warten bis das Video startet oder den Arts-Daemin im Kontoll-Zentum ausschalten.
 Wenn du Arts verwenden willst, wähle die Audio-Ausgabe via SDL (ao=sdl) und
@@ -384,18 +364,18 @@ stelle sicht das dein SDL mit Arts umgehen kann. Eine andere Möglichkeit ist
 MPlayer mit Artsdsp zu starten.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe eine AVI welche mit -vc odivx mit einem grauen Bildschirm wiedergegeben
 wird und mit einem grünen bei -vc divx4.
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es ist keine DivX-Datei, aber eine M$ MPEG4v3 . Update deine codecs.conf.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Hier ist ein Video, wenn ich es abspiele verliere ich die
 Audio-Video-Synchronisation und/oder MPlayer stützt mit dem folgenden Fehler ab:
 <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE>
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Dies kann mehrere Gründe haben.<BR>
   <LI>Deine CPU <B>und/oder</B> deine Grafikkarte <B>und/oder</B> dein BUS ist/sind zu LANGSAM.</LI>
   <B>MPlayer</B> zeigt in diesem Fall eine Meldung (und der Zähler für die ausgelassenen
@@ -406,14 +386,14 @@ Dies kann mehrere Gründe haben.<BR>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.4>5.4. Video/Audio Treiber-Probleme</A></B>
+<B><A NAME=5.4><font face="Verdana, Arial, Helvetica, sans-serif" size="2">5.4. Video/Audio Treiber-Probleme</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ok, -vo help zeigt den DGA-Treiber, aber es beschwert sich über die Zugriffsrechte!
 Hilft mir!
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es funktioniert nur als Root! Dies ist eine DGA-Beschränkung.
 Du solltest Root werden (su -) und es erneut versuchen.
 Eine andere Lösung ist die MPlayer SUID auf Root zu stellen, aber es ist NICHT
@@ -428,38 +408,38 @@ dann durch <B>MPlayer</B> Root-Privilegien bekommen!!!<BR>
 !!!! DU WURDEST ALSO GEWARNT ... !!!!
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Wenn ich Xvideo verwende, meldet meine Voodoo 3/Banshee:<BR>
 X Error of failed request:  BadAccess (attempt to access private resource denied)<BR>
 &nbsp;&nbsp;Major opcode of failed request:  147 (MIT-SHM)<BR>
 &nbsp;&nbsp;Minor opcode of failed request:  1 (X_ShmAttach)<BR>
 &nbsp;&nbsp;Serial number of failed request:  26<BR>
 &nbsp;&nbsp;Current serial number in output stream:27<BR>
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Dein Treiber ist alt, update ihm. Oder downloade DRI Version 0.6 (oder neuer)
 von <A HREF="http://dri.sourceforge.net">http://dri.sourceforge.net</A>,
 oder verwendet DRI CVS.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Wenn ich Xvideo verwende kann ich keine DivX-AVIs mit meiner Voodoo 3/Banshee abspielen!
 MPlayer meldet:<BR>
 ...<BR>
 Xvideo image format: 0x32315659 (YV12) planar<BR>
 Xvideo image format: 0x30323449 (I420) planar<BR>
 ...
-</B></TD><TR><TD></TD><TD VALIGN=top>A1:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A1:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Siehe vorherige Antwort.
-</TD><TR><TD></TD><TD VALIGN=top>A2:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A2:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Seit 0.18pre4 unterstützet <B>MPlayer</B> libavcodec vom ffmpeg-Paket. Es enthält
 eine C-spachigen DivX und OpenDivX Dekoder. Der DivX Dekoder verwendet YV12
 Format für die Ausgabe, dies sollte also bei dir funktionieren.
 Kompliere als libavcodec in dein <B>MPlayer</B>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 OpenGL (-vo gl)-Ausgabe funktioniert nicht (aufhängen/schwarzes Fenster/X11-Fehler/...).
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Dein OpenGL-Treiber unterstützt keine "Dynamic Texture Changes" (glTexSubImage)
 Es ist bekannt, das es nicht mit nVidias Binären-Scheiß nicht funktioniert.
 Es ist bekannt das es funktioniert mit Utah-GLX/DRI und Matrox G400 Karten.
@@ -468,21 +448,21 @@ Es wird auch nicht mit 3DFX-Karten funktionieren, denn sie haben eine 256x256
 Texture-Größenbeschränkung.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Ich habe eine nVidia TNT/TNT2-Karte und ich habe Probleme mit eigenartigen
 Farben, rechts unter dem Film! Was ist das Auslöser?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es ist der nVidia X-Treiber. Dieser Bug ist NUR mit TNT/TNT2-Karten und wir
 können dafür nicht tun, es ist nicht unser Fehler.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3>
-<B><A NAME=5.5>5.5. Feature-Wünsche</A></B>
+<B><A NAME=5.5><font face="Verdana, Arial, Helvetica, sans-serif" size="2">5.5. Feature-Wünsche</A></B>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Gibt es eine Möglichkeit, QuickTime und RealMedia Filme in MPlayer?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Es gibt keine Weg, um das zu tun. Theoretisch kann du die Real-Codes für Linux
 (welche als .so-Dateien verfügbar sind) rückwertskompilieren aber in der Praxis
 ist es sehr schwierig, auch wenn du weisst, wie der Kompilier, der von Real
@@ -493,15 +473,15 @@ dieser Codec ist tief in die QT-Executable eingebaut, also hier ist keine
 Möglichkeit ihm zu verwenden.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Wann wird &lt;dein gewünschtes Video-Feature&gt; (wie Untertitel-Position) implementiert werden?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Warte auf libvo2.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
-<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+<TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Kann ich/Wann wird es möglich sein audio-Dateien mit <I>-vo odivx</I> zu encodieren?
-</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+</B></TD><TR><TD></TD><TD VALIGN=top><font face="Verdana, Arial, Helvetica, sans-serif" size="2">A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 Nein, es ist zur Zeit nicht möglich. Es ist geplant, also warte nur geduldig.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
