@@ -529,9 +529,31 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
     return(-EFAULT); 
   }
 
-  if(ov.dst_x < 0 || ov.dst_y < 0) {
-    printk(KERN_DEBUG "tdfx_vid: Negative x/y not yet supported\n");
-    return(-EFAULT);
+  if(ov.dst_y < 0) {
+    int shift;
+    if(-ov.dst_y >= ov.src_height) {
+      printk(KERN_DEBUG "tdfx_vid: Overlay outside of the screen ????\n");
+      return(-EFAULT);
+    }
+    shift = (-ov.dst_y)/(double)ov.dst_height*ov.src_height;
+    ov.src[0] += shift*ov.src_stride;
+    ov.src_height -= shift;
+    ov.dst_height += ov.dst_y;
+    ov.dst_y = 0;
+  }
+
+  if(ov.dst_x < 0) {
+    int shift;
+    if(-ov.dst_x >= ov.src_width) {
+      printk(KERN_DEBUG "tdfx_vid: Overlay outside of the screen ????\n");
+      return(-EFAULT);
+    }
+    shift = (-ov.dst_x)/(double)ov.dst_width*ov.src_width;
+    shift = ((shift+3)/2)*2;
+    ov.src[0] += shift*2;
+    ov.src_width -= shift;
+    ov.dst_width += ov.dst_x;
+    ov.dst_x = 0;
   }
 
   vidcfg = tdfx_inl(VIDPROCCFG);
@@ -574,9 +596,9 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
   screen_w = tdfx_inl(VIDSCREENSIZE);
   screen_h = (screen_w >> 12) & 0xFFF;
   screen_w &= 0xFFF;
-  disp_w =  ov.dst_x + ov.dst_width > screen_w ?
+  disp_w =  ov.dst_x + ov.dst_width >= screen_w ?
     screen_w - ov.dst_x : ov.dst_width;
-  disp_h =  ov.dst_y + ov.dst_height > screen_h ?
+  disp_h =  ov.dst_y + ov.dst_height >= screen_h ?
     screen_h - ov.dst_y : ov.dst_height;
 
   if(ov.dst_x >= screen_w || ov.dst_y >= screen_h ||
@@ -621,8 +643,8 @@ static int tdfx_vid_set_overlay(unsigned long arg) {
   //printk(KERN_DEBUG "tdfx_vid: start %dx%d\n",ov.dst_x & 0xFFF,ov.dst_y & 0xFFF);
   tdfx_outl(VIDOVRSTARTCRD,(ov.dst_x & 0xFFF)|((ov.dst_y & 0xFFF)<<12));
   // End coord
-  tdfx_outl(VIDOVRENDCRD, ((ov.dst_x + disp_w) & 0xFFF)|
-	    (((ov.dst_y + disp_h) & 0xFFF)<<12));
+  tdfx_outl(VIDOVRENDCRD, ((ov.dst_x + disp_w-1) & 0xFFF)|
+	    (((ov.dst_y + disp_h-1) & 0xFFF)<<12));
   // H Scaling
   tdfx_outl(VIDOVRDUDX,( ((u32)ov.src_width) << 20) / ov.dst_width);
   // Src offset and width (in bytes)
