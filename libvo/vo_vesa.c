@@ -105,7 +105,6 @@ static const char *lvo_name = NULL;
 #ifdef CONFIG_VIDIX
 static const char *vidix_name = NULL;
 #endif
-static int pre_init_err = 0;
 
 #define HAS_DGA()  (win.idx == -1)
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
@@ -411,6 +410,7 @@ static uint32_t draw_frame(uint8_t *src[])
 
 #define SUBDEV_NODGA     0x00000001UL
 #define SUBDEV_FORCEDGA  0x00000002UL
+static uint32_t subdev_flags = 0xFFFFFFFEUL;
 static uint32_t parseSubDevice(const char *sd)
 {
    uint32_t flags;
@@ -430,30 +430,9 @@ static uint32_t parseSubDevice(const char *sd)
 
 static uint32_t query_format(uint32_t format)
 {
-  static int first = 1;
   uint32_t retval;
     if(verbose > 2)
         printf("vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
-    if(first)
-    {
-      if(verbose > 2)
-        printf("vo_vesa: subdevice %s have been initialized\n",vo_subdevice);
-      if(vo_subdevice) parseSubDevice(vo_subdevice);
-      if(lvo_name) pre_init_err = vlvo_preinit(lvo_name);
-#ifdef CONFIG_VIDIX
-      else if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_vesa);
-#endif
-      if(verbose > 2)
-        printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
-      first = 0;
-    }
-    if(!pre_init_err) 
-    {
-      if(lvo_name) return vlvo_query_info(format);
-#ifdef CONFIG_VIDIX
-      else if(vidix_name) return vidix_query_fourcc(format);
-#endif
-    }
 	switch(format)
 	{
 		case IMGFMT_YV12:
@@ -568,7 +547,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
   struct VbeInfoBlock vib;
   struct VesaModeInfoBlock vmib;
   size_t i,num_modes;
-  uint32_t w,h, sd_flags;
+  uint32_t w,h;
   unsigned short *mode_ptr,win_seg;
   unsigned bpp,best_x = UINT_MAX,best_y=UINT_MAX,best_mode_idx = UINT_MAX;
   int err,fs_mode,yuv_fmt;
@@ -576,14 +555,12 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	image_height = height;
 	fs_mode = 0;
 	rgb2rgb_fnc = NULL;
-        sd_flags = 0;
-	if(pre_init_err)
+        if(subdev_flags == 0xFFFFFFFEUL)
 	{
-	  printf("vo_vesa: initialization have been terminated due wrong preinitialization\n");
+	  printf("vo_vesa: detected internal fatal error: init is called before preinit\n");
 	  return -1;
-	}  
-        if(vo_subdevice) sd_flags = parseSubDevice(vo_subdevice);
-	if(sd_flags == -1) return -1;
+	}
+	if(subdev_flags == -1) return -1;
 	if(flags & 0x8)
 	{
 	  printf("vo_vesa: switch -flip is not supported\n");
@@ -733,7 +710,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		printf("vo_vesa: Using VESA mode (%u) = %x [%ux%u@%u]\n"
 			,best_mode_idx,video_mode,video_mode_info.XResolution
 			,video_mode_info.YResolution,video_mode_info.BitsPerPixel);
-		if(sd_flags & SUBDEV_NODGA) video_mode_info.PhysBasePtr = 0;
+		if(subdev_flags & SUBDEV_NODGA) video_mode_info.PhysBasePtr = 0;
 		if( vesa_zoom || fs_mode )
 		{
 		  if(format==IMGFMT_YV12 || lvo_name
@@ -837,7 +814,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		}
 		if(!HAS_DGA())
 		{
-		  if(sd_flags & SUBDEV_FORCEDGA)
+		  if(subdev_flags & SUBDEV_FORCEDGA)
 		  {
 			printf("vo_vesa: you've forced DGA. Exiting\n");
 			return -1;
@@ -991,7 +968,19 @@ static void check_events(void)
 
 static uint32_t preinit(const char *arg)
 {
-  return 0;
+  int pre_init_err = 0;
+  if(verbose>1) printf("vo_vesa: preinit(%s) was called\n",arg);
+  if(verbose > 2)
+        printf("vo_vesa: subdevice %s is being initialized\n",arg);
+  subdev_flags = 0;
+  if(arg) subdev_flags = parseSubDevice(arg);
+  if(lvo_name) pre_init_err = vlvo_preinit(lvo_name);
+#ifdef CONFIG_VIDIX
+  else if(vidix_name) pre_init_err = vidix_preinit(vidix_name,&video_out_vesa);
+#endif
+  if(verbose > 2)
+        printf("vo_subdevice: initialization returns: %i\n",pre_init_err);
+  return pre_init_err;
 }
 
 static void query_vaa(vo_vaa_t *vaa)

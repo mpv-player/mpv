@@ -71,6 +71,7 @@ int vidix_preinit(const char *drvname,void *server)
 	((vo_functions_t *)server)->draw_frame=vidix_draw_frame;
 	((vo_functions_t *)server)->flip_page=vidix_flip_page;
 	((vo_functions_t *)server)->draw_osd=vidix_draw_osd;
+	((vo_functions_t *)server)->query_format=vidix_query_fourcc;
 	return 0;
 }
 
