@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mail@skraemer.de>
 
-// In synch with rev 1.126
+// In synch with rev 1.128
 
 // ========================= MPlayer help ===========================
 
@@ -763,4 +763,14 @@ static char help_text[]=
 #define MSGTR_VO_JPEG_DirExistsButNotWritable "Ausgabeverzeichnis existiert schon, ist aber nicht beschreibbar."
 #define MSGTR_VO_JPEG_DirExistsAndIsWritable "Ausgabeverzeichnis existiert schon und ist beschreibbar."
 #define MSGTR_VO_JPEG_CantCreateDirectory "Kann Ausgabeverzeichnis nicht erstellen."
+#define MSGTR_VO_JPEG_CantCreateFile "Kann Ausgabedatei nicht erstellen."
 #define MSGTR_VO_JPEG_DirectoryCreateSuccess "Ausgabeverzeichnis erfolgreich erstellt."
+#define MSGTR_VO_JPEG_ParsingSuboptions "Unteroptionen werden geparst."
+#define MSGTR_VO_JPEG_SuboptionsParsedOK "Parsen der Unteroptionen OK."
+#define MSGTR_VO_JPEG_ProgressiveJPEG "Progressives JPEG aktiviert."
+#define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG deaktiviert."
+#define MSGTR_VO_JPEG_BaselineJPEG "Baseline-JPEG aktiviert."
+#define MSGTR_VO_JPEG_NoBaselineJPEG "Baseline-JPEG deaktiviert."
+#define MSGTR_VO_JPEG_ValueOutOfRange "Wert außerhalb des gültigen Bereichs"
+#define MSGTR_VO_JPEG_NoValueSpecified "Kein Wert angegeben."
+#define MSGTR_VO_JPEG_UnknownOptions "Unbekannte Option(en)"
