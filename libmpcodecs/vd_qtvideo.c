@@ -206,9 +206,11 @@ static int init(sh_video_t *sh){
   fclose(f);
 }
 #else
+    if(!sh->ImageDesc) sh->ImageDesc=(sh->bih+1); // hack for SVQ3-in-AVI
     printf("ImageDescription size: %d\n",((ImageDescription*)(sh->ImageDesc))->idSize);
     framedescHandle=(ImageDescriptionHandle)NewHandleClear(((ImageDescription*)(sh->ImageDesc))->idSize);
     memcpy(*framedescHandle,sh->ImageDesc,((ImageDescription*)(sh->ImageDesc))->idSize);
+    dump_ImageDescription(*framedescHandle);
 #endif
 //Find codecscomponent for video decompression
 //    result = FindCodec ('SVQ1',anyCodec,&compressor,&decompressor );                 

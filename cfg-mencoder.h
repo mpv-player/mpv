@@ -59,6 +59,7 @@ struct config ovc_conf[]={
 	{"vfw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_VFW, NULL},
 	{"libdv", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBDV, NULL},
 	{"xvid", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_XVID, NULL},
+	{"qtvideo", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_QTVIDEO, NULL},
 	{"help", "\nAvailable codecs:\n"
 	"   copy     - frame copy, without re-encoding. doesn't work with filters!\n"
 	"   frameno  - special audio-only file for 3-pass encoding, see DOCS!\n"
@@ -71,6 +72,7 @@ struct config ovc_conf[]={
 #endif
 #ifdef USE_WIN32DLL
 	"   vfw      - using VfW DLLs, currently only AVID is supported\n"
+	"   qtvideo  - using Quickime DLLs, currently only SVQ1/3 are supported\n"
 #endif
 #ifdef HAVE_LIBDV095
 	"   libdv    - DV encoding using libdv v0.9.5\n"

@@ -7,6 +7,7 @@
 #define VCODEC_VFW 7
 #define VCODEC_LIBDV 8
 #define VCODEC_XVID 9
+#define VCODEC_QTVIDEO 10
 
 #define ACODEC_COPY 0
 #define ACODEC_PCM 1
@@ -659,6 +660,8 @@ default:
         sh_video->vfilter=vf_open_encoder(NULL,"libdv",(char *)mux_v); break;
     case VCODEC_XVID:
         sh_video->vfilter=vf_open_encoder(NULL,"xvid",(char *)mux_v); break;
+    case VCODEC_QTVIDEO:
+        sh_video->vfilter=vf_open_encoder(NULL,"qtvideo",(char *)mux_v); break;
     }
     if(!mux_v->bih || !sh_video->vfilter){
         mp_msg(MSGT_MENCODER,MSGL_FATAL,MSGTR_EncoderOpenFailed);
