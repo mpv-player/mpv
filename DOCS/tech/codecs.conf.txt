@@ -99,8 +99,38 @@ The "out" keyword identifies which output format that the decoder is known
 to output. Just like the fourcc line, there can be multiple out lines or
 multiple comma-separated output formats on the same line. The output
 formats should be listed in order of preference.
+
 The outfmt values can be followed by one or more flags, like flip, noflip,
-static, querty. TODO: describe tehse in detail.
+static, query. Describe these in detail:
+
+"flip":
+    If this flag is set for a given format, then o_bih->biHeight will NOT be
+    set to -bih->biHeight, ie image will be decoded upside-down.
+    Used only by vfw and vfwex codecs.
+
+"noflip":
+    This flag is ignored (no effect) without "flip" being set!
+    If this flag is set, it means the codec doesn't decode upside-down,
+    altought it's told to do so.
+    
+"yuvhack":
+    This flag is required for the old win32 ms-mpeg4 vfw codecs, including
+    MP42 and DIV3 (divx 3.11). These DLLs actually support YUV formats,
+    but the query/begin functions are buggy and don't accept YUV fourccs
+    (the decode func. accepts it and works well!)
+    If this flag is set, then o_bih->biCompression will be set to 0 for
+    the initialization for the YUV modes. Used only by vfw/vfwex codecs.
+    
+"query":
+    This flag is used to control VDCTRL_QUERY_FORMAT for vfw/vfewx codecs.
+    If thsi flag is set, the control() will query the codec for the csp
+    support, otherwise it will assume constant csp table. Required for
+    some DLLs (like huffyuv, CRAM).
+
+"static",
+    This flag forces STATIC (instead of TEMP) buffer allocation for the codec.
+    Used for some very old DLLs like Indeo 3 and for some xanim codecs like
+    cinepak. See dr-methods.txt for details on buffer types.
 
 Audio Codecs
 ------------
