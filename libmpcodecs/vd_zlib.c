@@ -26,7 +26,6 @@ typedef struct {
     int height;
     int depth;
     z_stream zstrm;
-    mp_image_t *mpi;
 } vd_zlib_ctx;
 
 // to set/get/query special features/parameters
@@ -92,6 +91,7 @@ static void uninit(sh_video_t *sh)
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 {
+    mp_image_t *mpi;
     vd_zlib_ctx *ctx = sh->context;
     int zret;
     int decomp_size = ctx->width*ctx->height*((ctx->depth+7)/8);
@@ -100,14 +100,12 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
     if (len <= 0)
 	return(NULL); // skipped frame
 
-    ctx->mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ALLOCATED,
-	ctx->width, ctx->height);
-    if (!ctx->mpi)
-	return(NULL);
+    mpi = mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0, ctx->width, ctx->height);
+    if (!mpi) return(NULL);
 
     zstrm->next_in = data;
     zstrm->avail_in = len;
-    zstrm->next_out = ctx->mpi->planes[0];
+    zstrm->next_out = mpi->planes[0];
     zstrm->avail_out = decomp_size;
 
     mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "[vd_zlib] input: %p (%d bytes), output: %p (%d bytes)\n",
@@ -128,6 +126,6 @@ static mp_image_t* decode(sh_video_t *sh, void* data, int len, int flags)
 	return(NULL);
     }
 
-    return(ctx->mpi);
+    return mpi;
 }
 #endif
