@@ -357,6 +357,11 @@ static void init_v4l_audio(priv_t *priv)
 	case VIDEO_SOUND_STEREO:
 	    priv->audio_channels[i] = 2;
 	    break;
+	default:
+	    mp_msg(MSGT_TV, MSGL_ERR, "Card reports an unknown audio mode !\n");
+	    mp_msg(MSGT_TV, MSGL_ERR, "Trying two channel audio. Use forcechan to override.\n");
+	    priv->audio_channels[i] = 2;
+	    break;
 	}
 
 	if (reqmode >= 0 && priv->audio[i].mode != reqmode) {
