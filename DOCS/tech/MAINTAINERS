@@ -102,7 +102,7 @@ libvo drivers:
 VIDIX drivers:
     * mach64_vid - Michael Niedermayer, A'rpi
     * mga_vid - Alex
-    * nvidia_vid - Sasha Sommer
+    * nvidia_vid - Sascha Sommer
     * radeon_vid - Alex, Nick Kurshev @ mplayerxp
     * rage128_vid - ? , Nick Kurshev @ mplayerxp
 
