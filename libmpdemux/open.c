@@ -543,10 +543,12 @@ if(strncmp("dvbin://",filename,8) == 0)
     if (!stream) return(NULL);
     if(strncmp("mf://",filename,5) == 0) {
       *file_format =  DEMUXER_TYPE_MF;
+#ifdef USE_TV
      } else {
       *file_format =  DEMUXER_TYPE_TV;
       if(filename[5] != '\0')
 	tv_param_channel = strdup(filename + 5);
+#endif
     }
     stream->url= filename[5] != '\0' ? strdup(filename + 5) : NULL;
     return(stream);
