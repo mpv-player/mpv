@@ -46,11 +46,18 @@ demux_stream_t* demux_avi_select_stream(demuxer_t *demux,unsigned int id){
 		priv->audio_block_size=sh->wf->nChannels*(sh->wf->wBitsPerSample/8);
 	    else
 		priv->audio_block_size=1; // hope the best...
+	  } else {
+	    // workaround old mencoder's bug:
+	    if(sh->audio.dwSampleSize==1 && sh->audio.dwScale==1 &&
+	       (sh->wf->nBlockAlign==1152 || sh->wf->nBlockAlign==576)){
+		mp_msg(MSGT_DEMUX,MSGL_WARN,"AVI: Workarounding CBR-MP3 nBlockAlign header bug!\n");
+		priv->audio_block_size=1;
+	    }
 	  }
 	} else {
 	  priv->audio_block_size=sh->audio.dwSampleSize;
 	}
-	//printf("&&&&& setting blocksize to %d &&&&&\n",demux->audio->block_size);
+//	printf("&&&&& setting blocksize to %d &&&&&\n",priv->audio_block_size);
       }
       return demux->audio;
   }
@@ -125,6 +132,7 @@ static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned in
       // update blockcount:
       priv->audio_block_no+=priv->audio_block_size ?
 	((len+priv->audio_block_size-1)/priv->audio_block_size) : 1;
+//      printf("\raudio_block_no=%d      \n",priv->audio_block_no);
   } else 
   if(ds==demux->video){
      // video
@@ -151,6 +159,7 @@ static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned in
   
   if(ds){
     mp_dbg(MSGT_DEMUX,MSGL_DBG2,"DEMUX_AVI: Read %d data bytes from packet %04X\n",len,id);
+//    printf("READ[%c] %5.3f  (%d)   \n",ds==demux->video?'V':'A',pts,len);
     ds_read_packet(ds,demux->stream,len,pts,idxpos,flags);
     skip-=len;
   }
