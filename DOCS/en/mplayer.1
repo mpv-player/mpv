@@ -1734,19 +1734,11 @@ See also \-aspect for movie aspect.
 .B \-nograbpointer
 Do not grab mouse pointer after VidMode change (\-vm), useful for multihead
 setup.
-
 .TP
 .B \-nokeepaspect
 Do not keep window aspect ratio when resizing X11 windows (Works currently only
 with \-vo x11, xv, xmga and xvidix and your window manager needs to understand
 window aspect hints.).
-
-.TP
-.B \-noslices
-Disable drawing video by 16-pixel height slices/\:bands, instead draws the
-whole frame in a single run.
-May be faster or slower, depending on card/\:cache.
-It has effect only with libmpeg2 and libavcodec codecs.
 .TP
 .B \-panscan <0.0\-1.0>
 Enables Pan & Scan functionality, i.e.\& in order to display a 16:9 movie
@@ -2102,6 +2094,12 @@ grayscale only decoding (a bit faster than with color)
 .TP
 .B \-noaspect
 Disable automatic movie aspect ratio compensation.
+.TP
+.B \-noslices
+Disable drawing video by 16-pixel height slices/\:bands, instead draws the
+whole frame in a single run.
+May be faster or slower, depending on card/\:cache.
+It has effect only with libmpeg2 and libavcodec codecs.
 .TP
 .B \-nosound
 Do not play/\:encode sound.
