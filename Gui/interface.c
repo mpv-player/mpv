@@ -27,8 +27,10 @@
 #include "../input/input.h"
 #include "../libao2/audio_out.h"
 #include "../mixer.h"
-#include "../libao2/audio_plugin.h"
+#include "../libaf/af.h"
 #include "../libao2/eq.h"
+
+extern af_cfg_t af_cfg;
 
 #ifdef USE_ICONV
 #include <iconv.h>
@@ -106,6 +108,9 @@ void gset( char ** str,char * what )
    else gstrcat( str,what );
 }
 
+/**
+ * \brief this actually creates a new list containing only one element...
+ */
 void gaddlist( char *** list,char * entry )
 {
  int i;
@@ -119,6 +124,32 @@ void gaddlist( char *** list,char * entry )
  (*list)=malloc( 2 * sizeof(char **) );
  (*list)[0]=gstrdup( entry );
  (*list)[1]=NULL;
+}
+
+/**
+ * \brief this replaces a string starting with search by replace.
+ * If not found, replace is appended.
+ */
+void greplace(char ***list, char *search, char *replace)
+{
+ int i = 0;
+ int len = (search) ? strlen(search) : 0;
+
+ if (*list) {
+   for (i = 0; (*list)[i]; i++) {
+     if (search && (strncmp((*list)[i], search, len) == 0)) {
+       free((*list)[i]);
+       (*list)[i] = gstrdup(replace);
+       return;
+     }
+   }
+   *list = realloc(*list, (i + 2) * sizeof(char *));
+ }
+ else
+   *list = malloc(2 * sizeof(char *));
+
+ (*list)[i] = gstrdup(replace);
+ (*list)[i + 1] = NULL;
 }
 
 #ifdef USE_ICONV
@@ -543,6 +574,9 @@ int guiGetEvent( int type,char * arg )
    case guiSetDemuxer:
 	guiIntfStruct.demuxer=(void *)arg;
 	break;
+   case guiSetAfilter:
+	guiIntfStruct.afilter=(void *)arg;
+	break;
    case guiSetShVideo:
 	 {
 	  if ( !appMPlayer.subWindow.isFullScreen )
@@ -786,12 +820,17 @@ int guiGetEvent( int type,char * arg )
 		 
 // --- audio opts
 //	if ( ao_plugin_cfg.plugin_list ) { free( ao_plugin_cfg.plugin_list ); ao_plugin_cfg.plugin_list=NULL; }
-	if ( gtkAONorm ) 	       gset( &ao_plugin_cfg.plugin_list,"volnorm" );
-	if ( gtkEnableAudioEqualizer ) gset( &ao_plugin_cfg.plugin_list,"eq" );
+	if (gtkAONorm)
+	  greplace(&af_cfg.list, "volnorm", "volnorm");
+	if (gtkEnableAudioEqualizer)
+	  greplace(&af_cfg.list, "equalizer", "equalizer");
 	if ( gtkAOExtraStereo )
 	 {
-	  gset( &ao_plugin_cfg.plugin_list,"extrastereo" );
-	  ao_plugin_cfg.pl_extrastereo_mul=gtkAOExtraStereoMul;
+	  char *name = malloc(12 + 20 + 1);
+	  snprintf(name, 12 + 20, "extrastereo=%f", gtkAOExtraStereoMul);
+	  name[12 + 20] = 0;
+	  greplace(&af_cfg.list, "extrastereo", name);
+	  free(name);
 	 }
 #ifdef USE_OSS_AUDIO
 	if ( audio_driver_list && !gstrncmp( audio_driver_list[0],"oss",3 ) )
@@ -1078,7 +1117,9 @@ void * gtkSet( int cmd,float fparam, void * vparam )
 	return NULL;
    case gtkSetExtraStereo:
         gtkAOExtraStereoMul=fparam;
-	audio_plugin_extrastereo.control( AOCONTROL_PLUGIN_ES_SET,(void *)&gtkAOExtraStereoMul );
+        if (guiIntfStruct.afilter)
+          af_control_any_rev(guiIntfStruct.afilter,
+             AF_CONTROL_ES_MUL | AF_CONTROL_SET, &gtkAOExtraStereoMul);
         return NULL;
    case gtkSetPanscan:
         {
@@ -1106,20 +1147,32 @@ void * gtkSet( int cmd,float fparam, void * vparam )
         if ( guiIntfStruct.sh_video ) set_video_colors( guiIntfStruct.sh_video,"saturation",(int)fparam );
 	return NULL;
    case gtkSetEqualizer:
+     {
+        af_control_ext_t tmp;
         if ( eq )
 	 {
           gtkEquChannels[eq->channel][eq->band]=eq->gain;
-	  audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(void *)eq );
+          tmp.ch = eq->channel;
+          tmp.arg = gtkEquChannels[eq->channel];
+          if (guiIntfStruct.afilter)
+            af_control_any_rev(guiIntfStruct.afilter,
+               AF_CONTROL_EQUALIZER_GAIN | AF_CONTROL_SET, &tmp);
 	 }
 	 else
 	  {
-	   int i,j; equalizer_t tmp; tmp.gain=0.0f;
+	   int i;
 	   memset( gtkEquChannels,0,sizeof( gtkEquChannels ) );
+	   if (guiIntfStruct.afilter)
 	   for ( i=0;i<6;i++ )
-	    for ( j=0;j<10;j++ )
-	     { tmp.channel=i; tmp.band=j; audio_plugin_eq.control( AOCONTROL_PLUGIN_EQ_SET_GAIN,(void *)&tmp ); }
+	    {
+	     tmp.ch = i;
+	     tmp.arg = gtkEquChannels[i];
+	     af_control_any_rev(guiIntfStruct.afilter,
+	        AF_CONTROL_EQUALIZER_GAIN | AF_CONTROL_SET, &tmp);
+	    }
 	  }
 	return NULL;
+     }
   }
  return NULL;
 }

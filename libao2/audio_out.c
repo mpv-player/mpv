@@ -64,7 +64,6 @@ extern ao_functions_t audio_out_dxr2;
 extern ao_functions_t audio_out_mpegpes;
 extern ao_functions_t audio_out_pcm;
 extern ao_functions_t audio_out_pss;
-extern ao_functions_t audio_out_plugin;
 
 ao_functions_t* audio_out_drivers[] =
 {
@@ -123,7 +122,6 @@ ao_functions_t* audio_out_drivers[] =
         &audio_out_null,
 // should not be auto-selected:
 	&audio_out_pcm,
-	&audio_out_plugin,
 	NULL
 };
 
@@ -163,10 +161,6 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
 	    ao_functions_t* audio_out=audio_out_drivers[i];
 	    if(!strncmp(audio_out->info->short_name,ao,ao_len)){
 		// name matches, try it
-		if(use_plugin){
-		    audio_out_plugin.control(AOCONTROL_SET_PLUGIN_DRIVER,audio_out);
-		    audio_out=&audio_out_plugin;
-		}
 		if(audio_out->init(rate,channels,format,flags))
 		    return audio_out; // success!
 	    }
@@ -182,10 +176,6 @@ ao_functions_t* init_best_audio_out(char** ao_list,int use_plugin,int rate,int c
     // now try the rest...
     for(i=0;audio_out_drivers[i];i++){
 	ao_functions_t* audio_out=audio_out_drivers[i];
-	if(use_plugin){
-	    audio_out_plugin.control(AOCONTROL_SET_PLUGIN_DRIVER,audio_out);
-	    audio_out=&audio_out_plugin;
-	}
 //	if(audio_out->control(AOCONTROL_QUERY_FORMAT, (int)format) == CONTROL_TRUE)
 	if(audio_out->init(rate,channels,format,flags))
 	    return audio_out; // success!

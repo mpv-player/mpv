@@ -122,18 +122,6 @@ extern int nortc;
 /* from libvo/aspect.c */
 extern float monitor_aspect;
 
-/* Options related to audio out plugins */
-m_option_t ao_plugin_conf[]={
-	{"list", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"delay", &ao_plugin_cfg.pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
-	{"format", &ao_plugin_cfg.pl_format_type, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
-	{"fout", &ao_plugin_cfg.pl_resample_fout, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
-	{"volume", &ao_plugin_cfg.pl_volume_volume, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
-	{"mul", &ao_plugin_cfg.pl_extrastereo_mul, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
-	{"softclip", &ao_plugin_cfg.pl_volume_softclip, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
-};
-
 extern int sws_flags;
 extern int readPPOpt(void *conf, char *arg);
 extern void revertPPOpt(void *conf, char* opt);
@@ -166,7 +154,7 @@ m_option_t mplayer_opts[]={
 	{"noontop", &vo_ontop, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"rootwin", &vo_rootwin, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
-	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+	{"aop", "-aop is deprecated, use -af instead.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"dsp", "Use -ao oss:dsp_path.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
         {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
         {"mixer-channel", &mixer_channel, CONF_TYPE_STRING, 0, 0, 0, NULL},

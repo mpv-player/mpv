@@ -58,7 +58,6 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 #endif
 
 #include "libao2/audio_out.h"
-#include "libao2/audio_plugin.h"
 
 #include "codec-cfg.h"
 
@@ -389,6 +388,9 @@ static void uninit_player(unsigned int mask){
     inited_flags&=~INITED_ACODEC;
     current_module="uninit_acodec";
     if(sh_audio) uninit_audio(sh_audio);
+#ifdef HAVE_NEW_GUI
+    guiGetEvent(guiSetAfilter, (char *)NULL);
+#endif
     sh_audio=NULL;
   }
 
@@ -927,6 +929,9 @@ static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
   int result;
   if (!sh_audio)
   {
+#ifdef HAVE_NEW_GUI
+    guiGetEvent(guiSetAfilter, (char *)NULL);
+#endif
     mixer.afilter = NULL;
     return 0;
   }
@@ -945,6 +950,9 @@ static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
            af_fmt2bits(ao_data->format) / 8, /* ao_data.bps, */
            ao_data->outburst * 4, ao_data->buffersize);
   mixer.afilter = sh_audio->afilter;
+#ifdef HAVE_NEW_GUI
+  guiGetEvent(guiSetAfilter, (char *)sh_audio->afilter);
+#endif
   return result;
 }
 
@@ -2105,7 +2113,7 @@ if(sh_audio){
 #endif  
   current_module="ao2_init";
   if(!(audio_out=init_best_audio_out(audio_driver_list,
-      (ao_plugin_cfg.plugin_list!=NULL), // plugin flag
+      0, // plugin flag
       force_srate?force_srate:ao_data.samplerate,
       audio_output_channels?audio_output_channels:ao_data.channels,
       audio_output_format?audio_output_format:ao_data.format,0))){
