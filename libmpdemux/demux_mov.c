@@ -237,7 +237,7 @@ int mov_check_file(demuxer_t* demuxer){
 	else if (len == 0) /* deleted chunk */
 	{
 	    /* XXX: CJB! is this right? - alex */
-	    break; // skip chunk
+	    goto skip_chunk;
 	}
 #endif
 	else if(len<8) break; // invalid chunk
@@ -281,6 +281,7 @@ int mov_check_file(demuxer_t* demuxer){
 	  id = be2me_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	}
+skip_chunk:
 	if(!stream_skip(demuxer->stream,len-skipped)) break;
 	++no;
     }
