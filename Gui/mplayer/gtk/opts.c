@@ -710,10 +710,12 @@ GtkWidget * create_Preferences( void )
   gtk_widget_show( notebook1 );
   gtk_box_pack_start( GTK_BOX( vbox1 ),notebook1,TRUE,TRUE,0 );
 
-  hbox1=AddHBox( notebook1,0 );
+  hbox1=AddVBox( notebook1,0 );
 
   frame=AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 );
   frame=AddFrame( NULL,GTK_SHADOW_NONE,frame,1 );
+
+// --- 1. panel
 
   vbox2=AddVBox( frame,0 );
 
@@ -747,15 +749,16 @@ GtkWidget * create_Preferences( void )
 #if 0
   CBSurround=AddCheckButton( "Enable surround",vbox3 );
 #endif
+
+  AddHSeparator( vbox3 );
   CBExtraStereo=AddCheckButton( MSGTR_PREFERENCES_ExtraStereo,vbox3 );
-
   hbox8=AddHBox( vbox3,1 );
-
   label=AddLabel( MSGTR_PREFERENCES_Coefficient,hbox8 );
-    gtk_misc_set_padding( GTK_MISC( label ),20,0 );
-
+//    gtk_misc_set_padding( GTK_MISC( label ),20,0 );
   HSExtraStereoMuladj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,-10,10,0.1,0,0 ) );
   HSExtraStereoMul=AddHScaler( HSExtraStereoMuladj,hbox8,1 );
+  AddHSeparator( vbox3 );
+
   hbox8=AddHBox( vbox3,1 );
   AddLabel( MSGTR_PREFERENCES_AudioDelay,hbox8 );
 
@@ -763,7 +766,10 @@ GtkWidget * create_Preferences( void )
   HSAudioDelay=AddHScaler( HSAudioDelayadj,hbox8,2 );
   label=AddLabel( MSGTR_PREFERENCES_Audio,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),0 ),label );
-  hbox2=AddHBox( notebook1,0 );
+
+// --- 2. panel
+
+  hbox2=AddVBox( notebook1,0 );
 
   vbox4=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
@@ -810,6 +816,8 @@ GtkWidget * create_Preferences( void )
 
   label=AddLabel( MSGTR_PREFERENCES_Video,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),1 ),label );
+
+// --- 3. panel
 
   vbox6=AddVBox( notebook1,0 );
 
@@ -962,6 +970,8 @@ GtkWidget * create_Preferences( void )
   label=AddLabel( MSGTR_PREFERENCES_SubtitleOSD,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),2 ),label );
   vbox601=AddVBox( notebook1,0 );
+  
+// --- 4. panel
 
   vbox602=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
@@ -1046,6 +1056,8 @@ GtkWidget * create_Preferences( void )
 
   label=AddLabel( MSGTR_PREFERENCES_Misc,NULL );
     gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label );
+
+// ---
 
   AddHSeparator( vbox1 );
 
