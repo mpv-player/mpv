@@ -1559,6 +1559,9 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
         case DEMUXER_TYPE_MATROSKA:
 	    return demux_mkv_control(demuxer,cmd,arg);
 #endif
+	case DEMUXER_TYPE_REAL:
+	    return demux_real_control(demuxer, cmd, arg);
+
 	default:
 	    return DEMUXER_CTRL_NOTIMPL;
     }
