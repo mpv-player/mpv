@@ -886,6 +886,46 @@ void list_sub_file(subtitle* subs){
     printf ("Read %i subtitles, %i errors.\n", sub_num, sub_errs);
 
 }
+void dump_srt(subtitle* subs){
+int i,j;
+int h,m,s,ms;
+FILE * fd;
+subtitle * onesub;
+unsigned long temp;
+
+    fd=fopen("dumpsub.srt","w");
+    if(!fd)
+    { 
+	perror("dump_srt: fopen");
+	return;
+    }
+    for(i=0;i<sub_num;i++)
+    {
+        onesub=subs+i;    //=&subs[i];
+	fprintf(fd,"%d\n",i+1);//line number
+
+	temp=onesub->start;
+	h=temp/360000;temp%=360000;	//h =1*100*60*60
+	m=temp/6000;  temp%=6000;	//m =1*100*60
+	s=temp/100;   temp%=100;	//s =1*100
+	ms=temp;       			//ms=1
+	fprintf(fd,"%02d:%02d:%02d,%03d --> ",h,m,s,ms);
+
+	temp=onesub->end;
+	h=temp/360000;temp%=360000;
+	m=temp/6000;  temp%=6000;
+	s=temp/100;   temp%=100;
+	ms=temp;       
+	fprintf(fd,"%02d:%02d:%02d,%03d\n",h,m,s,ms);
+	
+	for(j=0;j<onesub->lines;j++)
+	    fprintf(fd,"%s\n",onesub->text[j]);
+
+	fprintf(fd,"\n");
+    }
+    fclose(fd);
+    printf ("SUB: Subtitles dumped in \'dumpsub.srt\'.\n");
+}
 
 void dump_mpsub(subtitle* subs, float fps){
 	int i,j;
