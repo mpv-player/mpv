@@ -662,7 +662,7 @@ ungarische Audiospur vorhanden ist.
 .PD 1
 .
 .TP
-.B \-audio\-demuxer <Nummer> (nur mit \-audiofile)
+.B \-audio-demuxer <Nummer> (nur mit \-audiofile)
 Erzwingt den Audiodemuxertyp für \-audiofile.
 Alle in demuxers.h definierten Demuxer-IDs sind zulässig.
 Benutze \-audio\-demuxer 17, um eine Datei als MP3 abzuspielen.
@@ -815,50 +815,33 @@ oder ~/.mplayer/channels.conf als letzte Möglichkeit.
 .PD 1
 .
 .TP
-.B \dvd://<Titel\-ID>
-Gibt an, welche Filme (durch die Titel-ID spezifiziert) abgespielt werden
-sollen. Beispielsweise ist '1' eine Vorschau und '2' der tatsächliche Film.
-
-.I ANMERKUNG:
-.br
-Manchmal muss bei einer DVD Deinterlacing eingeschaltet werden. Siehe
-Option \-vf pp=0x20000.
+.B \-dvd\-device <Pfad\ zum\ Gerät> (nur bei DVD)
+Überschreibt den Standardwert für das CD-ROM-Gerät, /dev/\:dvd an.
 .TP
-.B \-dvd\-device <Pfad\ zum\ Gerät>
-Gibt ein anderes DVD-Gerät als das Standardgerät /dev/\:dvd an.
-.TP
-.B \-dvdangle <Winkel\-ID>
+.B \-dvdangle <Winkel\-ID> (nur bei DVD)
 Einige DVDs beinhalten Szenen, die aus verschiedenen Perspektiven/Winkeln
-betrachtet werden können. Mit dieser Option kannst du MPlayer sagen,
-welche Perspektive er wiedergeben soll (Standard: 1).
+betrachtet werden können. 
+Mit dieser Option kannst du MPlayer sagen, welche Perspektive er wiedergeben
+soll (Standard: 1).
 Unten stehen Beispiele.
-.TP
-.B \-dvdauth <DVD\-Gerät>
-(alter DVD-Zugriff) Schaltet die DVD-Authentifizierung mit dem angegebenen
-Gerät an.
-.TP
-.B \-dvdkey <CSS\-Schlüssel>
-(alter DVD-Zugriff) Wenn ein verschlüsseltes, von DVD auf Festplatte kopiertes
-VOB abgespielt werden soll, dann wird dieser Schlüssel benutzt, um das VOB
-zu entschlüsseln (der Schlüssel wird bei der DVD-Laufwerksauthentifizierung
-mit \-dvdauth ausgegeben).
-.TP
-.B \-dvdnav (BETA\-CODE!)
-Erzwingt die Benutzung von libdvdnav.
 .TP
 .B \-forceidx
 Erzwingt den Neubau des Index.
 Nützlich für Dateien mit defektem Index (Desynchronisation etc.).
 Spulen wird damit möglich.
 Mit MEncoder kann der Index permanent repariert werden (siehe Dokumentation).
+.br
+.I ANMERKUNG:
+Diese Option ist nur nutzbar, wenn das zugrundeliegende Medium spulen
+unterstützt (z.B.\& nicht bei Standardeingabe, Pipe usw.)
 .TP
 .B \-fps <Wert>
 Überschreibt die Videobildrate (falls diese falsch ist oder im Header fehlt)
 (Fließkommazahl).
 .TP
 .B \-frames <Anzahl>
-Gibt nur die ersten <Anzahl> Bilder wieder/encodiert nur die ersten <Anzahl>
-Bilder. Beedet sich danach.
+Nur die ersten <Anzahl> Bilder werden wiedergegeben/encodiert.
+Beedet sich danach.
 .TP
 .B \-hr\-mp3\-seek (nur bei .MP3)
 Hi\-res mp3-Spulen.
@@ -871,27 +854,32 @@ zum Anfang gespult wird, um die genaue Stelle zu finden.
 Erstellt den Index neu, wenn bei einem AVI kein Index gefunden wurde,
 und ermöglicht somit Spulen.
 Nützlich bei defekten/\:unvollständigen Downloads oder bei schlecht
-erstellten AVIs.
+erstellten Dateien.
+.br
+.I ANMERKUNG:
+Diese Option ist nur nutzbar, wenn das zugrundeliegende Medium spulen
+unterstützt (z.B.\& nicht bei Standardeingabe, Pipe usw.)
+.TP
+.B \-ipv4-only-proxy (nur bei Netzwerk)
+Überspringt Proxy-Server bei IPv6-Adressen.
+Für IPv4-Verbindungen wird er aber benutzt.
 .TP
 .B \-mc <Sekunden/Bild>
 Maximale A-V-Sync-Anpassung pro Bild (in Sekunden).
 .TP
 .B \-mf <option1:option2:...>
-Wird benutzt, wenn mehrer PNG- oder JPEG-Dateien decodiert werden.
-.br
+Wird benutzt, wenn mehrere PNG- oder JPEG-Dateien decodiert werden.
+
 Die verfügbaren Optionen lauten:
 
 .PD 0
 .RSs
-.IPs on\ \ \ 
-Aktiviert die Multidateiunterstützung
 .IPs w=<Wert>
-Ausgabebreite (automatisch erkannt)
+Ausgabebreite (automatische Erkennung)
 .IPs h=<Wert>
-Ausgabehöhe (automatisch erkannt)
-height of the output (autodetect)
+Ausgabehöhe (automatische Erkennung)
 .IPs fps=<Wert>
-FPS der Ausgabe (standardmäßig 25)
+Frames pro Sekunde bei der Ausgabe (Standard: 25)
 .IPs type=<Wert>
 Typ der Quelldateien (mögliche Typen sind jpeg, png, tga, sgi)
 .RE
@@ -903,7 +891,7 @@ Erzwingt die Benutzung des nicht\-interleaved-AVI-Parsers (was die
 Wiedergabe einiger schlecht erstellter AVIs ermöglicht).
 .TP
 .B \-nobps (nur bei .AVI)
-Benutze nicht die durchschnittlichen Bytes/\:Sekunde fuer A\-V-Sync (AVI).
+Benutze nicht die durchschnittlichen Bytes/\:Sekunde für A\-V-Sync (AVI).
 Hilft bei einigen AVIs mit defektem Header.
 .TP
 .B \-noextbased
@@ -914,26 +902,34 @@ oder dieser nicht eindeutig genug ist), dann wird normalerweise ein
 Demultiplexer anhand der Dateiendung gewählt. Die inhaltsbasierende
 Demultiplexerauswahl wird immer vorgenommen.
 .TP
-.B \-passwd <Passwort> (siehe ebenfalls bei \-user)
+.B \-passwd <Passwort> (siehe auch \-user) (nur bei Netzwerk)
 Gibt das Passwort für die HTTP-Authentifizierung an.
 .TP
+.B \-prefer-ipv4 (nur bei Netzwerk)
+Benutzt IPv4 bei Netzwerkverbindungen.
+Greift automatisch auf IPv6-Verbindungen zurück.
+.TP
+.B \-prefer-ipv6 (nur bei IPv6-Netzwerk)
+Benutzt IPv6 bei Netzwerkverbindungen.
+Greift automatisch auf IPv4-Verbindungen zurück.
+.TP
 .B \-rawaudio <option1:option2:...>
-Mit dieser Option können raw-Audiodateien abgespielt werden. Sie kann
-auch verwendet werden, um Audio-CDs abzuspielen, die nicht mit 44KHz
+Mit dieser Option können raw-Audiodateien abgespielt werden.
+Sie kann auch verwendet werden, um Audio-CDs abzuspielen, die nicht mit 44KHz
 16Bit stereo aufgenommen wurden.
-.br
+
 Verfügbare Optionen:
 
 .PD 0
 .RSs
 .IPs on\ \ \ 
-benutzt den Raw-Audiodemuxer
+benutzt den nur-Audio-Demuxer
 .IPs channels=<Wert>
 Anzahl der Kanäle
 .IPs rate=<Wert>
-Rate in Samplen pro Sekunde
+Rate in Samples pro Sekunde
 .IPs samplesize=<Wert>
-Samplegröße in Byte
+Sample-Größe in Byte
 .IPs format=<Wert>
 FourCC in Hexadezimal
 .RE
@@ -942,7 +938,7 @@ FourCC in Hexadezimal
 .TP
 .B \-rawvideo <option1:option2:...>
 Mit dieser Option kannst du Dateien abspielen, die nur aus Videodaten bestehen.
-.br
+
 Die verfügbaren Optionen lauten:
 
 .PD 0
@@ -3584,7 +3580,7 @@ Durchgängen.
 .br
 MPlayer verfügt über eine weitgehend konfigurierbare und ereignisgesteuerte
 Eingabeschicht, durch die MPlayer per Tastatur, Maus, Joystick oder
-Fernbedienung (mittels lirc) gesteuert werden kann.
+Fernbedienung (mittels LIRC) gesteuert werden kann.
 .br
 Die Standardkonfigurationsdatei für das Steuerungssystem ist
 ~/.mplayer/\:input.conf. Mit \-input kann aber auch eine andere Datei angegeben
@@ -3878,19 +3874,21 @@ cat *.vob | mencoder <options> \-
 .\" --------------------------------------------------------------------------
 .
 .SH FEHLER
-Gibt's wahrscheinlich. BITTE: Lies die Dokumentation (speziell bugreports.html),
-die FAQ und die Mailarchive mindestens zweimal!
-.br
-Schick deine vollständigen Fehlerberichte an die MPlayer\-users\-Mailingliste
-<mplayer-users@mplayerhq.hu>.
-Wir lieben vollständige Fehlerberichte :)
-
-
+Berichte uns davon, wenn du einen findest, sei aber sicher, daß Du vorher die
+ganze Dokumentation gelesen hast.
+Viele Fehler sind das Resultat eines fehlerhaften Setups oder falscher
+Benutzung der Parameter.
+Die Sektion über Fehlerberichterstattung in der Dokumentation
+(DOCS/de/bugreports.html) beschreibt, wie man nutzbringende Fehlerberichte
+erstellt.
+.
+.
 .SH AUTOREN
-Lies die Dokumentation.
+MPlayer wurde ursprünglich von Arpad Gereoffy geschrieben.
+Siehe Datei AUTHORS für eine Liste einiger der vielen anderer Beitragenden.
 .TP
-MPlayer is (C) 2000\-2003
-.B Arpad Gereoffy
+MPlayer is (C) 2000\-2004
+.B The MPlayer Team
 .TP
 Diese Manpage wurge geschrieben und wird gepflegt von
 .B Gabucino
@@ -3901,14 +3899,15 @@ Diese Manpage wurge geschrieben und wird gepflegt von
 .br
 .B Moritz Bunkus
 .PP
-Schicke Mails über die Page bitte an die MPlayer\-users\-Mailingliste.
-
-
+Schicke Mails die Page betreffend bitte an die MPlayer-DOCS-Mailingliste.
+.
+.
 .SH "STANDARD\-HAFTUNGSAUSSCHLUSS"
-Betnuze das Programm auf eigene Gefahr!
+Benutze das Programm auf eigene Gefahr!
 Es könnte Fehler und Ungenauigkeiten enthalten, die dein System oder deine
 Augen beschädigen können.
-Sehr also vorsichtig, und obwohl es sehr unwahrscheinlich ist, dass etwas
-passiert, übernehmen die Autoren keine Verantwortung dafür!
+Sei also vorsichtig.
+Obwohl es sehr unwahrscheinlich ist, dass etwas passiert, übernehmen die
+Autoren keine Verantwortung dafür!
 .\" Ende der Datei
 
