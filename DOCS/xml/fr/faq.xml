@@ -364,7 +364,7 @@ suivez les instructions.
 J'ai des problèmes pour lire les fichiers avec le codec ... . Puis-je l'utiliser?
 </para></question>
 <answer><para>
-Regardez l'<ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">état des codecs</ulink>,
+Regardez l'<ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">état des codecs</ulink>,
 si il ne contient pas votre codec, lisez la <link linkend="codecs">documentation des codecs</link>,
 surtout le <link linkend="win32-codecs">HOWTO importation des codecs</link> et contactez-nous.
 </para></answer>

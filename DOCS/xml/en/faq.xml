@@ -387,7 +387,7 @@ and follow the instructions.
 I have problems playing files with the ... codec. Can I use them?
 </para></question>
 <answer><para>
-Check the <ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status</ulink>,
+Check the <ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">codec status</ulink>,
 if it doesn't contain your codec, read the <link linkend="codecs">codec documentation</link>,
 especially the <link linkend="win32-codecs">codec importing HOWTO</link> and contact us.
 </para></answer>
