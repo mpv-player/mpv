@@ -71,14 +71,62 @@ mencoder \- Movie Encoder for Linux
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ dvd | vcd | cdda | cddb | tv ] ://title
+.RI [ mms[t] | http | http_proxy | rt[s]p ] ://
+[user:passwd@]\fIURL\fP[:port] [options]
+.br
+.in
+.B mplayer 
+'in +\n[.k]u
+.I dvd://title
 [options]
 .br
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p ] ://
-[user:passwd@]\fIURL\fP[:port] [options]
+.I vcd://track[/device]
+[options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I tv://[channel]
+[options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I mf://filemask
+[options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I [cdda|cddb]://track[:speed][/device]
+[options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I cue://file[:track]
+[options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I dvdnav://[device]
+[options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I sdp://file
+[options]
+.br
+.in
+.B mplayer
+'in +\n[.k]u
+.I mpst://host[:port]/URL
+[options]
 .br
 .in
 .B mencoder
@@ -171,9 +219,11 @@ vo=xmga
 .br
 flip=yes
 .br
-# Decode/\:encode multiple files from png, start with -mf on
+# Decode/\:encode multiple files from png,
 .br
-mf= type=png:fps=25
+# start with mf://filemask
+.br
+mf=type=png:fps=25
 
 You can also write file-specific configuration files.
 If you wish to have a config file for a file called 'movie.avi', create a file
@@ -183,8 +233,12 @@ named 'movie.avi.conf' with the file-specific options in it and put it in
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
 .B \-, \-use-stdin
-Read data from stdin.
-The \-idx option does not work in conjunction with this.
+The standard input (aka. stdin) will be used to read data instead of key
+events. If you open /dev/stdin (or the equivalent on your system), use stdin
+in a playlist or intend to read from stdin later on via the openfile or
+openlist commands you
+.B need
+this option.
 .TP
 .B \-autoq <quality> (use with \-vf pp)
 Dynamically changes the level of postprocessing depending on available spare
@@ -213,6 +267,10 @@ side-effect of turning this option on, for all sound drivers.
 Prints some statistics on CPU usage and dropped frames at the end.
 Use in combination with \-nosound and \-vo null for benchmarking only the
 video codec.
+.br
+.I NOTE:
+With this option MPlayer will also ignore frame duration when playing
+only video (you can think of that as infinite fps).
 .TP
 .B \-edl <filename>
 Enables edit decision list (EDL) actions during playback.
@@ -284,6 +342,10 @@ Specifies the joystick device to use (default is /dev/\:input/\:js0).
 .IPs file
 Read commands from the given file.
 Mostly useful with a fifo.
+.br
+.I NOTE:
+When the given file is a fifo MPlayer opens both ends so you can do several
+\'echo "seek 10" > mp_pipe\' and the pipe will stay valid.
 .RE
 .PD 1
 .
@@ -318,16 +380,19 @@ mechanism.
 .TP
 .B \-playlist <file>
 Play files according to a playlist (1 file per row or Winamp or ASX format).
+.br
+.I NOTE:
+This option is considered an entry so options found after it will apply
+only to the elements of this playlist.
 .TP
 .B \-quiet \ \ 
-Display less output and status messages.
+Don't display the status messages. With this option the status line
+(i.e. A:   0.7 V:   0.6 A-V:  0.068 ...) will not be displayed. It's
+particulary useful when your terminal does not understand carriage
+return (i.e. \\r) like the XEmacs one.
 .TP
 .B \-really\-quiet \ \ 
 Display even less output and status messages.
-.TP
-.B \-sdp
-Specifies that the input file is a SDP ('Session Description Protocol')
-file that describes an RTP session (see http://www.live.com/mplayer/).
 .TP
 .B \-shuffle \ \ 
 Play files in random order.
@@ -497,10 +562,6 @@ Examples can be found below.
 (old-style DVD option) This option is used to override the default location of
 libcss.so.
 .TP
-.B \-cuefile <filename> (see \-vcd too)
-Play (S)VCD from CDRwin's (bin/cue fileformat) disk image, described by the
-specified file.
-.TP
 .B \-demuxer <number>
 Force demuxer type.
 Give the demuxer ID as defined in demuxers.h.
@@ -520,15 +581,6 @@ Useful when ripping from DVD or network.
 .B \-dumpvideo (MPLAYER only)
 Dump raw compressed video stream to ./\:stream.dump (not very usable).
 .TP
-.B \-dvd <title\ id>
-Tell MPlayer which movies (specified by title id) to play.
-For example sometimes '1' is a trailer, and '2' is the real movie.
-
-.I NOTE:
-.br
-Sometimes deinterlacing is required for DVD playback,
-see the \-vf pp=0x20000 option.
-.TP
 .B \-dvd\-device <path\ to\ device>
 Override default DVD device name /dev/\:dvd.
 .TP
@@ -545,14 +597,15 @@ Examples can be found below.
 this option gives the CSS key needed to decrypt the VOB (the key is printed
 when authenticating with the DVD drive using \-dvdauth).
 .TP
-.B \-dvdnav (BETA CODE!)
-Force usage of libdvdnav.
-.TP
 .B \-forceidx
 Force rebuilding of INDEX.
 Useful for files with broken index (desyncs, etc).
 Seeking will be possible.
 You can fix the index permanently with MEncoder (see the documentation).
+.br
+.I NOTES:
+You can only use this option if the underlying media supports seeking
+(i.e. not with stdin, pipe, etc).
 .TP
 .B \-fps <value>
 Override video framerate (if value is wrong/\:missing in the header) (float
@@ -572,6 +625,10 @@ frame.
 Rebuilds INDEX of the AVI if no INDEX was found,
 thus allowing seeking.
 Useful with broken/\:incomplete downloads, or badly created AVIs.
+.br
+.I NOTES:
+You can only use this option if the underlying media supports seeking
+(i.e. not with stdin, pipe, etc).
 .TP
 .B \-mc <seconds/frame>
 Maximum A-V sync correction per frame (in seconds).
@@ -583,8 +640,6 @@ Available options are:
 
 .PD 0
 .RSs
-.IPs on\ \ \ 
-turns on multifile support
 .IPs w=<value>
 width of the output (autodetect)
 .IPs h=<value>
@@ -823,9 +878,6 @@ choose the quality of the jpeg compression
 .TP
 .B \-user <user name> (see \-passwd option too)
 Specify user name for http authentication.
-.TP
-.B \-vcd <track>
-Play video CD track from a device or image file (see \-cuefile).
 .TP
 .B \-vid <id>
 Select video channel [MPG: 0\-15 ASF: 0\-255].
@@ -3641,7 +3693,7 @@ select
 .SH "SLAVE MODE PROTOCOL"
 If the \-slave option is given, playback is controlled by a
 line\-based protocol.
-Each line must contain one command otherwise one of the following tokens:
+Each line must contain one of the following commands:
 .TP
 .B Commands
 .RSs
@@ -3650,6 +3702,8 @@ Seek to some place in the movie.
 Type 0 is a relative seek of +/\:- <value> seconds.
 Type 1 seek to <value> % in the movie.
 Type 2 is a seek to an absolute position of <value> seconds.
+.IPs "edl_mark"
+????
 .IPs "audio_delay <value>"
 Adjust the audio delay of value seconds
 .IPs quit
@@ -3669,25 +3723,53 @@ When more than one source is available it selects the next/\:previous one
 Adjust the subtitles delay of +/\:- <value> seconds or set it to <value>
 seconds when abs is non zero.
 .IPs "osd [level=<value>]"
-Toggle osd mode or set it to level when level > 0.
+Toggle OSD mode or set it to level when level >= 0.
 .IPs "volume <dir>"
 Increase/\:decrease volume
+.IPs "use_master"
+Switch volume control betwen master and pcm.
+.IPs "mute"
+Mute/\:unmute sound output.
 .IPs "[contrast|brightness|hue|saturation] <\-100\-100> [abs=<value>]"
 Set/\:Adjust video parameters.
 .IPs "frame_drop [type=<value>]"
 Toggle/\:Set frame dropping mode.
+.IPs "sub_alignment <value>"
+Set subtitle alignment.
 .IPs "sub_visibility"
 Toggle subtitle visibility.
 .IPs "sub_pos <value>"
 Adjust subtitles position.
-.IPs vo_fullscreen
+.IPs "vobsub_lang"
+Switch the subtitle language when using VOBSub subtitles.
+.IPs "get_percent_pos"
+???
+.IPs "get_time_length"
+???
+.IPs "vo_fullscreen"
 Switch to fullscreen mode.
+.IPs "panscan value [value2]"
+???
+.IPs "loadfile url"
+Load the given file/\:url.
+.IPs "loadlist file"
+Load the given playlist file.
+.IPs "change_rectangle val1 val2"
+??? used by the rectangle video filter.
+.IPs "dvdnav button"
+Press the given dvdnav button.
+.br
+1 is up, 2 is down, 3 is left, 4 is right, 5 is menu and 6 is select.
 .IPs "tv_step_channel <dir>"
 Select next/\:previous tv channel.
 .IPs "tv_step_norm"
 Change TV norm.
 .IPs "tv_step_chanlist"
 Change channel list.
+.IPs "tv_set_channel channel"
+Set the current TV channel.
+.IPs "tv_last_channel"
+Set the current TV channel to the last one.
 .IPs "gui_[loadsubtitle|about|play|stop]"
 GUI actions
 .RE
@@ -3740,19 +3822,19 @@ are searched for in this priority (for example /mnt/\:movie/\:movie.avi):
 .SH EXAMPLES
 .TP
 .B Quickstart DVD playing
-mplayer \-dvd 1
+mplayer dvd://1
 .TP
 .B Play in japanese with english subtitles
-mplayer \-dvd 1 \-alang ja \-slang en
+mplayer dvd://1 \-alang ja \-slang en
 .TP
 .B Play only chapters 5, 6, 7
-mplayer \-dvd 1 \-chapter 5\-7
+mplayer dvd://1 \-chapter 5\-7
 .TP
 .B Multiangle DVD playing
-mplayer \-dvd 1 \-dvdangle 2
+mplayer dvd://1 \-dvdangle 2
 .TP
 .B Playing from a different DVD device
-mplayer \-dvd 1 \-dvd\-device /dev/\:dvd2
+mplayer dvd://1 \-dvd\-device /dev/\:dvd2
 .TP
 .B Old style DVD (VOB) playing
 mplayer \-dvdauth /dev/\:dvd /mnt/\:dvd/\:VIDEO_TS/\:VTS_02_4.VOB
@@ -3766,37 +3848,40 @@ mplayer rtsp://server.example.com/\:streamName
 .B Convert subtitle to MPsub (to ./\:dump.mpsub)
 mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .TP
+.B Convert subtitle to MPsub without watching the movie
+mplayer /dev/zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
+\-benchmark \-sub source.sub \-dumpmpsub
+.TP
 .B Input from standard V4L
-mplayer \-tv on:driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
+mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
 .B Encoding DVD title #2, only selected chapters
-mencoder \-dvd 2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
+mencoder dvd://2 \-chapter 10-15 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Encoding DVD title #2, resizing to 640x480
-mencoder \-dvd 2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
+mencoder dvd://2 \-vf scale=640:480 \-o title2.avi \-oac copy \-ovc divx4
 .TP
 .B Encoding DVD title #2, resizing to 512xHHH (keep aspect ratio)
-mencoder \-dvd 2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
+mencoder dvd://2 \-vf scale \-zoom \-xy 512 \-o title2.avi \-oac copy
 \-ovc divx4
 .TP
 .B The same, but with libavcodec family, MPEG4 (Divx5) compression
-mencoder \-dvd 2 \-o title2.avi \-ovc lavc
+mencoder dvd://2 \-o title2.avi \-ovc lavc
 \-lavcopts vcodec=mpeg4:vhq:vbitrate=1800 \-oac copy
 .TP
 .B The same, but with libavcodec family, MJPEG compression
-mencoder \-dvd 2 \-o titel2.avi \-ovc lavc
+mencoder dvd://2 \-o titel2.avi \-ovc lavc
 \-lavcopts vcodec=mjpeg:vhq:vbitrate=1800 \-oac copy
 .TP
 .B Encoding all *.jpg files in the current dir
-mencoder \\*.jpg \-mf on:fps=25 \-o output.avi \-ovc divx4
+mencoder "mf://*.jpg" \-mf fps=25 \-o output.avi \-ovc divx4
 .TP
 .B Encoding from tuner
-mencoder \-tv on:driver=v4l:width=640:height=480 \-o tv.avi \-ovc rawrgb
+mencoder \-tv driver=v4l:width=640:height=480 tv:// \-o tv.avi \-ovc rawrgb
 .TP
 .B Encoding from a pipe
-rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24
-\-\- \-
+rar p test-SVCD.rar | mencoder \-ovc divx4 \-divx4opts br=800 \-ofps 24 \-
 .TP
 .B Encoding multiple *.vob files
 cat *.vob | mencoder <options> \-
