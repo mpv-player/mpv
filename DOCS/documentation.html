@@ -11,7 +11,7 @@
 
 <H1 ALIGN="center">MPlayer - The Movie Player for LINUX</H1>
 
-<H2 ALIGN="center">&copy; 2000-2002 Arpad Gereoffy (A'rpi/ESP-team)<BR>
+<H2 ALIGN="center">&copy; 2000-2003 Arpad Gereoffy (A'rpi/ESP-team)<BR>
   <A HREF="http://www.mplayerhq.hu">http://www.mplayerhq.hu</A></H2>
 
 <P ALIGN="center">[ English ]
@@ -993,16 +993,20 @@
   of the movie (switch it off with the "o" key).</P>
 
 
-<P>OSD has 3 states: (switch with 'o')</P>
+<P>OSD has 4 states: (switch with 'o')</P>
+
+<P>(subtitles are <I>always enabled</I>, for disabling them please read the man
+  page)</P>
 
 <UL>
-  <LI>timer + volume bar + seek bar + subtitles</LI>
-  <LI>volume bar + seek bar + subtitles (default)</LI>
+  <LI>volume bar + seek bar (default)</LI>
+  <LI>volume bar + seek bar + timer + file position percentage on seeking</LI>
+  <LI>volume bar + seek bar + timer + total duration of media</LI>
   <LI>subtitles only</LI>
 </UL>
 
 <P>You can change default behaviour by setting <CODE>osdlevel=</CODE> variable
-  in config file.</P>
+  in config file, or the <CODE>-osdlevel</CODE> command line option.</P>
 
 
 <H3><A NAME="menu">1.4.3 OSD menu</A></H3>
