@@ -1,6 +1,6 @@
 /******************************************************************************
  * vo_directx.c: Directx v2 or later DirectDraw interface for MPlayer
- * Copyright (c) 2002 Sascha Sommer <saschasommer@freenet.de>.
+ * Copyright (c) 2002 - 2004 Sascha Sommer <saschasommer@freenet.de>.
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -835,6 +835,8 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 {
 	switch (message)
     {
+        case WM_MOUSEACTIVATE:
+            return MA_ACTIVATEANDEAT;       
 	    case WM_NCACTIVATE:
         {
             if(vidmode && adapter_count > 2) //only disable if more than one adapter.
