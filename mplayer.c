@@ -59,14 +59,7 @@
 #include "opendivx/decore.h"
 
 
-#ifdef USE_XMMP_AUDIO
-#include "libxmm/xmmp.h"
-#include "libxmm/libxmm.h"
-XMM xmm;
-XMM_PluginSound *pSound=NULL;
-#endif
-
-extern int vo_screenwidth;
+//extern int vo_screenwidth;
 
 extern char* win32_codec_name;  // must be set before calling DrvOpen() !!!
 
@@ -99,8 +92,6 @@ int verbose=0;
 
 static subtitle* subtitles=NULL;
 void find_sub(subtitle* subtitles,int key);
-
-int osd_level=2;
 
 //**************************************************************************//
 //             Config file
@@ -139,9 +130,6 @@ char *get_path(char *filename){
 
 static int max_framesize=0;
 
-//static int dbg_es_sent=0;
-//static int dbg_es_rcvd=0;
-
 //static int show_packets=0;
 
 //**************************************************************************//
@@ -153,28 +141,6 @@ static int max_framesize=0;
 #include "demuxer.h"
 
 #include "stheader.h"
-
-#if 0
-
-typedef struct {
-  // file:
-//  MainAVIHeader avih;
-//  unsigned int movi_start;
-//  unsigned int movi_end;
-  // index:
-  AVIINDEXENTRY* idx;
-  int idx_size;
-  int idx_pos;
-  int idx_pos_a;
-  int idx_pos_v;
-  int idx_offset;  // ennyit kell hozzaadni az index offset ertekekhez
-  // video:
-  unsigned int bitrate;
-} avi_header_t;
-
-avi_header_t avi_header;
-
-#endif
 
 int avi_bitrate=0;
 
@@ -204,22 +170,18 @@ sh_video_t* new_sh_video(int id){
     return demuxer->v_streams[id];
 }
 
-
-//#include "demux_avi.c"
-//#include "demux_mpg.c"
-
 demux_stream_t *d_audio=NULL;
 demux_stream_t *d_video=NULL;
 demux_stream_t *d_dvdsub=NULL;
 
-sh_audio_t *sh_audio=NULL;//&sh_audio_i;
-sh_video_t *sh_video=NULL;//&sh_video_i;
+sh_audio_t *sh_audio=NULL;
+sh_video_t *sh_video=NULL;
 
 char* encode_name=NULL;
 char* encode_index_name=NULL;
 int encode_bitrate=0;
 
-extern int asf_packetsize;
+extern int asf_packetsize; // for seeking
 
 extern float avi_audio_pts;
 extern float avi_video_pts;
@@ -235,10 +197,10 @@ int read_asf_header(demuxer_t *demuxer);
 // MPEG video stream parser:
 #include "parse_es.c"
 
-extern int num_elementary_packets100;
+extern int num_elementary_packets100; // for MPEG-ES fileformat detection
 extern int num_elementary_packets101;
 
-extern picture_t *picture;
+extern picture_t *picture;	// exported from libmpeg2/decode.c
 
 static const int frameratecode2framerate[16] = {
   0,
@@ -289,17 +251,6 @@ void convert_linux(unsigned char *puc_y, int stride_y,
 //**************************************************************************//
 //**************************************************************************//
 
-// AVI file header reader/parser/writer:
-//#include "aviheader.c"
-//#include "aviwrite.c"
-
-// ASF headers:
-//#include "asfheader.c"
-//#include "demux_asf.c"
-
-// DLL codecs init routines
-//#include "dll_init.c"
-
 // Common FIFO functions, and keyboard/event FIFO code
 #include "fifo.c"
 
@@ -342,13 +293,6 @@ void exit_player(char* how){
   #endif
      getch2_disable();
   video_out->uninit();
-#ifdef USE_XMMP_AUDIO
-  if(verbose) printf("XMM: closing audio driver...\n");
-  if(pSound){
-    pSound->Exit( pSound );
-    xmm_Exit( &xmm );
-  }
-#endif
   if(encode_name) avi_fixate();
 #ifdef HAVE_LIRC
   #ifdef HAVE_GUI
@@ -392,6 +336,7 @@ extern int vo_init(void);
 extern int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen);
 
 // options:
+int osd_level=2;
 int divx_quality=0;
 char *seek_to_sec=NULL;
 int seek_to_byte=0;
@@ -1924,7 +1869,6 @@ switch(sh_video->codec->driver){
         (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0
         ,drop_frame_cnt
-//        dbg_es_sent-dbg_es_rcvd 
         );
         fflush(stdout);
       }
@@ -1944,7 +1888,6 @@ switch(sh_video->codec->driver){
         (v_frame>0.5)?(int)(100.0*video_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(int)(100.0*vout_time_usage/(double)v_frame):0,
         (v_frame>0.5)?(100.0*audio_time_usage/(double)v_frame):0
-//        dbg_es_sent-dbg_es_rcvd
         );
 
       fflush(stdout);
