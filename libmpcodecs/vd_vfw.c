@@ -317,6 +317,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     }
     
     // export palette:
+    if(mpi->imgfmt==IMGFMT_RGB8 || mpi->imgfmt==IMGFMT_BGR8){
 	if (priv->palette)
 	{
 	    mpi->planes[1] = priv->palette;
@@ -325,7 +326,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	}
 	else
 	    mpi->planes[1]=NULL;
-    
+    }
+        
     return mpi;
 }
 #endif
