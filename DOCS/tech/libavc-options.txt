@@ -287,6 +287,8 @@ subcmp	comparission function for sub pel motion estimation
         2 SATD (sum of absolute hadamard transformed differences)
         3 DCT (sum of absolute dct transformed differences)
         4 PSNR (sum of the squared quantization errors)
+        5 BIT (number of bits needed for the block)
+        6 RD (rate distoration optimal, slow)
         7 ZERO (0)
         +256 (use chroma too, doesnt work with b frames currently)
         Tip: SAD is fast, SATD is good
