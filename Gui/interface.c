@@ -39,6 +39,15 @@
 #include "../libmpdemux/stheader.h"
 #include "../libmpcodecs/dec_video.h"
 
+
+#ifdef NEW_CONFIG
+  #include "../m_option.h"
+  #include "../m_config.h"
+#else
+  #include "../cfgparser.h"
+#endif
+#include "../cfg-mplayer-def.h"
+
 guiInterface_t guiIntfStruct;
 int guiWinID=-1;
 
@@ -343,7 +352,7 @@ extern ao_functions_t * audio_out;
 extern vo_functions_t * video_out;
 extern int    		frame_dropping;
 extern int              stream_dump_type;
-extern char **          vo_plugin_args;
+extern m_obj_settings_t*vo_plugin_args;
 
 #if defined( USE_OSD ) || defined( USE_SUB )
 void guiLoadFont( void )
@@ -439,10 +448,10 @@ static void add_vop( char * str )
  if ( vo_plugin_args )
   {
    int i = 0;
-   while ( vo_plugin_args[i] ) if ( !gstrcmp( vo_plugin_args[i++],str ) ) { i=-1; break; }
+   while ( vo_plugin_args[i].name ) if ( !gstrcmp( vo_plugin_args[i++].name,str ) ) { i=-1; break; }
    if ( i != -1 )
-     { vo_plugin_args=realloc( vo_plugin_args,( i + 2 ) * sizeof( char * ) ); vo_plugin_args[i]=strdup( str ); vo_plugin_args[i+1]=NULL; }
-  } else { vo_plugin_args=malloc( 2 * sizeof( char * ) ); vo_plugin_args[0]=strdup( str ); vo_plugin_args[1]=NULL; }
+     { vo_plugin_args=realloc( vo_plugin_args,( i + 2 ) * sizeof( m_obj_settings_t ) ); vo_plugin_args[i].name=strdup( str );vo_plugin_args[i].attribs = NULL; vo_plugin_args[i+1].name=NULL; }
+  } else { vo_plugin_args=malloc( 2 * sizeof(  m_obj_settings_t ) ); vo_plugin_args[0].name=strdup( str );vo_plugin_args[0].attribs = NULL; vo_plugin_args[1].name=NULL; }
 }
 
 static void remove_vop( char * str )
@@ -453,16 +462,16 @@ static void remove_vop( char * str )
 
  mp_msg( MSGT_GPLAYER,MSGL_STATUS,"[gui] remove video filter: %s\n",str );
 
- while ( vo_plugin_args[n++] ); n--;
+ while ( vo_plugin_args[n++].name ); n--;
  if ( n > -1 )
   {
    int i = 0,m = -1;
-   while ( vo_plugin_args[i] ) if ( !gstrcmp( vo_plugin_args[i++],str ) ) { m=i - 1; break; }
+   while ( vo_plugin_args[i].name ) if ( !gstrcmp( vo_plugin_args[i++].name,str ) ) { m=i - 1; break; }
    i--;
    if ( m > -1 )
     {
-     if ( n == 1 ) { free( vo_plugin_args[0] ); free( vo_plugin_args ); vo_plugin_args=NULL; }
-      else memcpy( &vo_plugin_args[i],&vo_plugin_args[i + 1],( n - i ) * sizeof( char * ) );
+     if ( n == 1 ) { free( vo_plugin_args[0].name );free( vo_plugin_args[0].attribs ); free( vo_plugin_args ); vo_plugin_args=NULL; }
+     else { free( vo_plugin_args[i].name );free( vo_plugin_args[i].attribs ); memcpy( &vo_plugin_args[i],&vo_plugin_args[i + 1],( n - i ) * sizeof( m_obj_settings_t ) ); }
     }
   }
 }
@@ -1084,12 +1093,6 @@ int import_file_into_gui(char* temp, int insert)
   return 1;
 }
 
-#ifdef NEW_CONFIG
-  #include "../m_option.h"
-  #include "../m_config.h"
-#else
-  #include "../cfgparser.h"
-#endif
 
 // This function imports the initial playtree (based on cmd-line files) into the gui playlist
 // by either:
