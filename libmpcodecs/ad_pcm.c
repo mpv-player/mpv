@@ -28,12 +28,16 @@ static int init(sh_audio_t *sh_audio)
   switch(sh_audio->format){ /* hardware formats: */
     case 0x0:
     case 0x1: // Microsoft PCM
+    case 0xfffe: // Extended
        switch (sh_audio->samplesize) {
          case 1: sh_audio->sample_format=AF_FORMAT_U8; break;
          case 2: sh_audio->sample_format=AF_FORMAT_S16_LE; break;
          case 3: sh_audio->sample_format=AF_FORMAT_S24_LE; break;
          case 4: sh_audio->sample_format=AF_FORMAT_S32_LE; break;
        }
+       break;
+    case 0x3: // IEEE float
+       sh_audio->sample_format=AF_FORMAT_FLOAT_LE;
        break;
     case 0x6:  sh_audio->sample_format=AF_FORMAT_A_LAW;break;
     case 0x7:  sh_audio->sample_format=AF_FORMAT_MU_LAW;break;
