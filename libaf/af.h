@@ -1,12 +1,12 @@
+#ifndef __aop_h__
+#define __aop_h__
+
 #include <stdio.h>
 
 #include "af_mp.h"
 #include "config.h"
 #include "control.h"
 #include "af_format.h"
-
-#ifndef __aop_h__
-#define __aop_h__
 
 struct af_instance_s;
 
