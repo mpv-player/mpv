@@ -2,7 +2,7 @@
 #ifndef __APPS_H
 #define __APPS_H
 
-#include "bitmap/bitmap.h"
+#include "bitmap.h"
 #include "wm/ws.h"
 #include "wm/wskeys.h"
 

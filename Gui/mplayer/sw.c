@@ -13,11 +13,7 @@ extern int             boxMoved;
 extern int             sx,sy;
 extern int             i,pot;
 
-extern void mplHideMenu( int mx,int my,int w );
-extern void mplShowMenu( int mx,int my );
-extern void mplMenuMouseHandle( int X,int Y,int RX,int RY );
-
-void mplSubDraw( wsParamDisplay )
+void mplSubDraw( void )
 {
  if ( appMPlayer.subWindow.State == wsWindowClosed ) exit_player( MSGTR_Exit_quit );
  

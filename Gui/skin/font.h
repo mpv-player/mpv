@@ -2,7 +2,7 @@
 #ifndef _FONT_H
 #define _FONT_H
 
-#include "../bitmap/bitmap.h"
+#include "../bitmap.h"
 
 typedef struct
 {

@@ -1,4 +1,15 @@
 
+#include <stdlib.h>
+#include <stdio.h>
+#include <inttypes.h>
+
+#include "../app.h"
+#include "../../config.h"
+#include "../../help_mp.h"
+#include "../../mp_msg.h"
+
+#include "widgets.h"
+
 unsigned char * mplMenuDrawBuffer = NULL;
 int             mplMenuRender = 1;
 int             mplMenuItem = -1;
@@ -7,7 +18,7 @@ int             mplMenuX,mplMenuY;
 
 void mplHideMenu( int mx,int my,int w );
 
-void mplMenuDraw( wsParamDisplay )
+void mplMenuDraw( void )
 {
  uint32_t * buf = NULL;
  uint32_t * drw = NULL;

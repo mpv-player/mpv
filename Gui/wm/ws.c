@@ -609,12 +609,12 @@ Bool wsEvents( Display * display,XEvent * Event,XPointer arg )
          }
 expose:
         wsWindowList[l]->State=i;
-        if ( wsWindowList[l]->ReDraw ) wsWindowList[l]->ReDraw( wsDisplay,Event->xany.window );
+        if ( wsWindowList[l]->ReDraw ) wsWindowList[l]->ReDraw();
         break;
 
    case Expose:
         wsWindowList[l]->State=wsWindowExpose;
-        if ( ( wsWindowList[l]->ReDraw )&&( !Event->xexpose.count ) ) wsWindowList[l]->ReDraw( wsDisplay,Event->xany.window );
+        if ( ( wsWindowList[l]->ReDraw )&&( !Event->xexpose.count ) ) wsWindowList[l]->ReDraw();
         break;
 
    case ConfigureNotify:
@@ -915,7 +915,7 @@ void wsPostRedisplay( wsTWindow * win )
  if ( win->ReDraw )
   {
    win->State=wsWindowExpose;
-   win->ReDraw( wsDisplay,win->WindowID );
+   win->ReDraw();
    XFlush( wsDisplay );
   }
 }

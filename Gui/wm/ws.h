@@ -93,9 +93,7 @@
 #define wsWMIceWM    3
 #define wsWMWMaker   4
 
-#define wsParamDisplay Display *dpy,Window w
-
-typedef   void (*wsTReDraw)( wsParamDisplay );
+typedef   void (*wsTReDraw)( void );
 typedef   void (*wsTReSize)( unsigned int X,unsigned int Y,unsigned int width,unsigned int height );
 typedef   void (*wsTIdle)( void );
 typedef   void (*wsTKeyHandler)( int KeyCode,int Type,int Key );

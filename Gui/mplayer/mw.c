@@ -24,9 +24,6 @@
 #include "widgets.h"
 
 extern unsigned int GetTimerMS( void );
-extern void mplHideMenu( int mx,int my,int w );
-extern void mplShowMenu( int mx,int my );
-extern void mplMenuMouseHandle( int X,int Y,int RX,int RY );
 
 unsigned char * mplDrawBuffer = NULL;
 int             mplMainRender = 1;
@@ -177,7 +174,7 @@ inline void PutImage( txSample * bf,int x,int y,int max,int ofs )
    }
 }
 
-void mplMainDraw( wsParamDisplay )
+void mplMainDraw( void )
 {
  wItem    * item;
  txSample * image = NULL;

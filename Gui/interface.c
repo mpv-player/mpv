@@ -1,18 +1,20 @@
- 
+
 #include <inttypes.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <sys/types.h>
 
-#include "ws.h"
-#include "mplayer/play.h"
+#include "wm/ws.h"
+#include "wm/wsxdnd.h"
 #include "interface.h"
 #include "skin/skin.h"
-#include "mplayer/gtk/eq.h"
 
-#include "../mplayer.h"
+#include "mplayer/gtk/eq.h"
 #include "mplayer/widgets.h"
 #include "mplayer/mplayer.h"
+
+#include "../mplayer.h"
 #include "app.h"
 #include "cfg.h"
 #include "../help_mp.h"
@@ -26,9 +28,6 @@
 #include "../mixer.h"
 #include "../libao2/audio_plugin.h"
 #include "../libao2/eq.h"
-
-#include <inttypes.h>
-#include <sys/types.h>
 
 #ifdef USE_ICONV
 #include <iconv.h>
@@ -150,6 +149,8 @@ char * gconvert_uri_to_filename( char * str )
 							    
 void guiInit( void )
 {
+ int i;
+
  memset( &guiIntfStruct,0,sizeof( guiIntfStruct ) );
  guiIntfStruct.Balance=50.0f;
  guiIntfStruct.StreamType=-1;
@@ -165,7 +166,7 @@ void guiInit( void )
  gtkInit();
 // --- initialize X 
  wsXInit( (void *)mDisplay );
-// ---
+// --- load skin
  skinDirInHome=get_path("Skin");
  skinMPlayerDir=DATADIR "/Skin";
  printf("SKIN dir 1: '%s'\n",skinDirInHome);
@@ -176,7 +177,83 @@ void guiInit( void )
    case -1: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinNotFound,skinName ); exit( 0 );
    case -2: mp_msg( MSGT_GPLAYER,MSGL_ERR,MSGTR_SKIN_SKINCFG_SkinCfgReadError,skinName ); exit( 0 );
   }
- mplInit( (void *)mDisplay );
+// --- initialize windows
+ if ( ( mplDrawBuffer = (unsigned char *)calloc( 1,appMPlayer.main.Bitmap.ImageSize ) ) == NULL )
+  {
+   fprintf( stderr,MSGTR_NEMDB );
+   exit( 0 );
+  }
+
+ wsCreateWindow( &appMPlayer.subWindow,
+  appMPlayer.sub.x,appMPlayer.sub.y,appMPlayer.sub.width,appMPlayer.sub.height,
+  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,wsShowFrame|wsHideWindow,"ViDEO" );
+
+ wsDestroyImage( &appMPlayer.subWindow );
+ wsCreateImage( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Width,appMPlayer.sub.Bitmap.Height );
+ wsXDNDMakeAwareness(&appMPlayer.subWindow);
+
+ vo_setwindow( appMPlayer.subWindow.WindowID, appMPlayer.subWindow.wGC );
+
+// i=wsHideFrame|wsMaxSize|wsHideWindow;
+// if ( appMPlayer.mainDecoration ) i=wsShowFrame|wsMaxSize|wsHideWindow;
+ i=wsShowFrame|wsMaxSize|wsHideWindow;
+ wsCreateWindow( &appMPlayer.mainWindow,
+  appMPlayer.main.x,appMPlayer.main.y,appMPlayer.main.width,appMPlayer.main.height,
+  wsNoBorder,wsShowMouseCursor|wsHandleMouseButton|wsHandleMouseMove,i,"MPlayer" ); //wsMinSize|
+
+ wsSetShape( &appMPlayer.mainWindow,appMPlayer.main.Mask.Image );
+ wsXDNDMakeAwareness(&appMPlayer.mainWindow);
+
+ mplMenuInit();
+
+ #ifdef DEBUG
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] Depth on screen: %d\n",wsDepthOnScreen );
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] parent: 0x%x\n",(int)appMPlayer.mainWindow.WindowID );
+  mp_msg( MSGT_GPLAYER,MSGL_DBG2,"[main] sub: 0x%x\n",(int)appMPlayer.subWindow.WindowID );
+ #endif
+
+ appMPlayer.mainWindow.ReDraw=(void *)mplMainDraw;
+ appMPlayer.mainWindow.MouseHandler=mplMainMouseHandle;
+ appMPlayer.mainWindow.KeyHandler=mplMainKeyHandle;
+ appMPlayer.mainWindow.DandDHandler=mplDandDHandler;
+
+ appMPlayer.subWindow.ReDraw=(void *)mplSubDraw;
+ appMPlayer.subWindow.MouseHandler=mplSubMouseHandle;
+ appMPlayer.subWindow.KeyHandler=mplMainKeyHandle;
+ appMPlayer.subWindow.DandDHandler=mplDandDHandler;
+
+ wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
+ wsClearWindow( appMPlayer.subWindow );
+ if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
+
+ btnModify( evSetVolume,guiIntfStruct.Volume );
+ btnModify( evSetBalance,guiIntfStruct.Balance );
+ btnModify( evSetMoviePosition,guiIntfStruct.Position );
+
+ wsSetIcon( wsDisplay,appMPlayer.mainWindow.WindowID,guiIcon,guiIconMask );
+ wsSetIcon( wsDisplay,appMPlayer.subWindow.WindowID,guiIcon,guiIconMask );
+ 
+ guiIntfStruct.Playing=0;
+
+ if ( !appMPlayer.mainDecoration ) wsWindowDecoration( &appMPlayer.mainWindow,0 );
+ 
+ wsVisibleWindow( &appMPlayer.mainWindow,wsShowWindow );
+#if 1
+ wsVisibleWindow( &appMPlayer.subWindow,wsShowWindow );
+
+ {
+  XEvent xev;
+  do { XNextEvent( wsDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != appMPlayer.subWindow.WindowID );
+  appMPlayer.subWindow.Mapped=wsMapped;
+ }
+
+ if ( fullscreen )
+  {
+   mplFullScreen();
+   btnModify( evFullScreen,btnPressed );
+  }
+#endif
+ mplSubRender=1;
 // ---
 
  if ( plCurrent && !filename ) mplSetFileName( plCurrent->path,plCurrent->name,STREAMTYPE_FILE );
