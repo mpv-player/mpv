@@ -79,4 +79,10 @@
 // Turn probing on and off, arg is binary
 #define AF_CONTROL_VOLUME_PROBE_ON_OFF 	11 + AF_CONTROL_FILTER_SPECIFIC_BASE
 
+// Set equalizer gain, arg is an equalizer_t* 
+#define AF_CONTROL_EQUALIZER_SET_GAIN 	12 + AF_CONTROL_FILTER_SPECIFIC_BASE
+
+// Get equalizer gain, arg is an equalizer_t* 
+#define AF_CONTROL_EQUALIZER_GET_GAIN 	13 + AF_CONTROL_FILTER_SPECIFIC_BASE
+
 #endif /*__af_control_h */

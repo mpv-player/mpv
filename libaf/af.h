@@ -184,7 +184,11 @@ int af_lencalc(frac_t mul, af_data_t* data);
 #endif
 
 #ifndef sign
-#define sign(a) (((x)>0)?(1):(-1)) 
+#define sign(a) (((a)>0)?(1):(-1)) 
+#endif
+
+#ifndef lround
+#define lround(a,b) ((b)((a)>=0.0?(a)+0.5:(a)-0.5))
 #endif
 
 #endif
