@@ -55,6 +55,7 @@ using namespace std;
 
 // for e.g. "-slang ger"
 extern char *dvdsub_lang;
+extern char *audio_lang;
 
 // default values for Matroska elements
 #define MKVD_TIMECODESCALE 1000000 // 1000000 = 1ms
@@ -1503,13 +1504,19 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
 
   track = NULL;
   if (demuxer->audio->id == -1) { // Automatically select an audio track.
-    // Search for an audio track that has the 'default' flag set.
-    for (i = 0; i < mkv_d->num_tracks; i++)
-      if ((mkv_d->tracks[i]->type == 'a') && mkv_d->tracks[i]->ok &&
-          mkv_d->tracks[i]->default_track) {
-        track = mkv_d->tracks[i];
-        break;
-      }
+    // check if the user specified an audio language
+    if (audio_lang != NULL) {
+      track = find_track_by_language(mkv_d, audio_lang, NULL, 'a');
+    }
+    if (track == NULL)
+      // no audio language specified, or language not found
+      // Search for an audio track that has the 'default' flag set.
+      for (i = 0; i < mkv_d->num_tracks; i++)
+        if ((mkv_d->tracks[i]->type == 'a') && mkv_d->tracks[i]->ok &&
+            mkv_d->tracks[i]->default_track) {
+          track = mkv_d->tracks[i];
+          break;
+        }
 
     if (track == NULL)
       // No track has the 'default' flag set - let's take the first audio
