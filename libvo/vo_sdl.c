@@ -1342,9 +1342,9 @@ static void check_events (void)
                                 case SDLK_LESS: mplayer_put_key(shift_key?'>':'<'); break;
                                 case SDLK_GREATER: mplayer_put_key('>'); break;
                                 case SDLK_ASTERISK:
-				case SDLK_KP_MULTIPLY:
+				case SDLK_KP_MULTIPLY: mplayer_put_key('*'); break;
 				case SDLK_SLASH:
-				case SDLK_KP_DIVIDE:
+				case SDLK_KP_DIVIDE: mplayer_put_key('/'); break;
 #endif				
 				default:
 					//printf("got scancode: %d keysym: %d mod: %d %d\n", event.key.keysym.scancode, keypressed, event.key.keysym.mod);
