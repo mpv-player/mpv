@@ -4,6 +4,7 @@
 #include <inttypes.h>
 
 #include "config.h"
+#include "../mp_msg.h"
 
 #if defined(USE_QTX_CODECS) || defined(MACOSX)
 
@@ -92,67 +93,66 @@ static int loader_init()
     qtml_dll = LoadLibraryA("qtmlClient.dll");
     if( qtml_dll == NULL )
     {
-        printf("failed loading dll\n" );
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed loading dll\n" );
 	return 1;
     }
 #if 1
     InitializeQTML = (LPFUNC1)GetProcAddress(qtml_dll,"InitializeQTML");
 	if ( InitializeQTML == NULL )
     {
-        printf("failed geting proc address InitializeQTML\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed geting proc address InitializeQTML\n");
 		return 1;
     }
     SoundConverterOpen = (LPFUNC2)GetProcAddress(qtml_dll,"SoundConverterOpen");
 	if ( SoundConverterOpen == NULL )
     {
-        printf("failed getting proc address SoundConverterOpen\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address SoundConverterOpen\n");
 		return 1;
     }
 	SoundConverterClose = (LPFUNC3)GetProcAddress(qtml_dll,"SoundConverterClose");
 	if ( SoundConverterClose == NULL )
     {
-        printf("failed getting proc address SoundConverterClose\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address SoundConverterClose\n");
 		return 1;
     }
 	TerminateQTML = (LPFUNC4)GetProcAddress(qtml_dll,"TerminateQTML");
 	if ( TerminateQTML == NULL )
     {
-        printf("failed getting proc address TerminateQTML\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address TerminateQTML\n");
 		return 1;
     }
 	SoundConverterSetInfo = (LPFUNC5)GetProcAddress(qtml_dll,"SoundConverterSetInfo");
 	if ( SoundConverterSetInfo == NULL )
     {
-        printf("failed getting proc address SoundConverterSetInfo\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address SoundConverterSetInfo\n");
 		return 1;
     }
 	SoundConverterGetBufferSizes = (LPFUNC6)GetProcAddress(qtml_dll,"SoundConverterGetBufferSizes");
 	if ( SoundConverterGetBufferSizes == NULL )
     {
-        printf("failed getting proc address SoundConverterGetBufferSizes\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address SoundConverterGetBufferSizes\n");
 		return 1;
     }
 	SoundConverterConvertBuffer = (LPFUNC7)GetProcAddress(qtml_dll,"SoundConverterConvertBuffer");
 	if ( SoundConverterConvertBuffer == NULL )
     {
-        printf("failed getting proc address SoundConverterConvertBuffer1\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address SoundConverterConvertBuffer1\n");
 		return 1;
     }
 	SoundConverterEndConversion = (LPFUNC8)GetProcAddress(qtml_dll,"SoundConverterEndConversion");
 	if ( SoundConverterEndConversion == NULL )
     {
-        printf("failed getting proc address SoundConverterEndConversion\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address SoundConverterEndConversion\n");
 		return 1;
     }
 	SoundConverterBeginConversion = (LPFUNC9)GetProcAddress(qtml_dll,"SoundConverterBeginConversion");
 	if ( SoundConverterBeginConversion == NULL )
     {
-        printf("failed getting proc address SoundConverterBeginConversion\n");
+        mp_msg(MSGT_DECAUDIO,MSGL_ERR,"failed getting proc address SoundConverterBeginConversion\n");
 		return 1;
     }
-	printf("Standard init done you may now call supported functions\n");
 #endif
-    printf("loader_init DONE???\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"loader_init DONE???\n");
 	return 0;
 }
 #endif /* USE_QTX_CODECS */
@@ -170,17 +170,16 @@ static int preinit(sh_audio_t *sh){
     unsigned long OutputBufferSize=0; //size of the output buffer
     unsigned long WantedBufferSize=0; //the size you want your buffers to be
 
-    printf("win32 libquicktime loader (c) Sascha Sommer\n");
 
 #ifdef MACOSX
     EnterMovies();
 #else
     if(loader_init()) return 0; // failed to load DLL
     
-    printf("loader_init DONE!\n");
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"loader_init DONE!\n");
 
     error = InitializeQTML(6+16);
-    printf("InitializeQTML:%i\n",error);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"InitializeQTML:%i\n",error);
     if(error) return 0;
 #endif
     
@@ -197,31 +196,31 @@ static int preinit(sh_audio_t *sh){
 	OutputFormatInfo.format = 1313820229;// FOUR_CHAR_CODE('NONE');
 
     error = SoundConverterOpen(&InputFormatInfo, &OutputFormatInfo, &myConverter);
-    printf("SoundConverterOpen:%i\n",error);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterOpen:%i\n",error);
     if(error) return 0;
 
     if(sh->codecdata){
 	error = SoundConverterSetInfo(myConverter,siDecompressionParams,sh->codecdata);
-	printf("SoundConverterSetInfo:%i\n",error);
+	mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterSetInfo:%i\n",error);
 //	if(error) return 0;
     }
 
     WantedBufferSize=OutputFormatInfo.numChannels*OutputFormatInfo.sampleRate*2;
     error = SoundConverterGetBufferSizes(myConverter,
 	WantedBufferSize,&FramesToGet,&InputBufferSize,&OutputBufferSize);
-    printf("SoundConverterGetBufferSizes:%i\n",error);
-    printf("WantedBufferSize = %li\n",WantedBufferSize);
-    printf("InputBufferSize  = %li\n",InputBufferSize);
-    printf("OutputBufferSize = %li\n",OutputBufferSize);
-    printf("FramesToGet = %li\n",FramesToGet);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterGetBufferSizes:%i\n",error);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"WantedBufferSize = %li\n",WantedBufferSize);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"InputBufferSize  = %li\n",InputBufferSize);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"OutputBufferSize = %li\n",OutputBufferSize);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FramesToGet = %li\n",FramesToGet);
     
     InFrameSize=(InputBufferSize+FramesToGet-1)/FramesToGet;
     OutFrameSize=OutputBufferSize/FramesToGet;
 
-    printf("FrameSize: %i -> %i\n",InFrameSize,OutFrameSize);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FrameSize: %i -> %i\n",InFrameSize,OutFrameSize);
 
     error = SoundConverterBeginConversion(myConverter);
-    printf("SoundConverterBeginConversion:%i\n",error);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterBeginConversion:%i\n",error);
     if(error) return 0;
 
     sh->audio_out_minsize=OutputBufferSize;
@@ -260,9 +259,9 @@ static void uninit(sh_audio_t *sh){
     unsigned long ConvertedFrames=0;
     unsigned long ConvertedBytes=0;
     error=SoundConverterEndConversion(myConverter,NULL,&ConvertedFrames,&ConvertedBytes);
-    printf("SoundConverterEndConversion:%i\n",error);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterEndConversion:%i\n",error);
     error = SoundConverterClose(myConverter);
-    printf("SoundConverterClose:%i\n",error);
+    mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"SoundConverterClose:%i\n",error);
 //    error = TerminateQTML();
 //    printf("TerminateQTML:%i\n",error);
 //    FreeLibrary( qtml_dll );
