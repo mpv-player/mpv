@@ -85,11 +85,11 @@ extern int audio_output_channels;
 
 /* Options related to audio out plugins */
 struct config ao_plugin_conf[]={
-	{"list", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0},
-	{"delay", &ao_plugin_cfg.pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0},
-	{"format", &ao_plugin_cfg.pl_format_type, CONF_TYPE_INT, CONF_MIN, 0, 0},
-	{"fout", &ao_plugin_cfg.pl_resample_fout, CONF_TYPE_INT, CONF_MIN, 0, 0},
-	{NULL, NULL, 0, 0, 0, 0}
+	{"list", &ao_plugin_cfg.plugin_list, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"delay", &ao_plugin_cfg.pl_delay_len, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"format", &ao_plugin_cfg.pl_format_type, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"fout", &ao_plugin_cfg.pl_resample_fout, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
 extern int sws_flags;
@@ -109,177 +109,177 @@ extern int readPPOpt(void *conf, char *arg);
  * by Folke
  */
 
-struct config conf[]={
+struct config mplayer_opts[]={
 	/* name, pointer, type, flags, min, max */
-	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0}, /* this must be the first!!! */
+	{"include", cfg_include, CONF_TYPE_FUNC_PARAM, 0, 0, 0, NULL}, /* this must be the first!!! */
 
 //---------------------- libao/libvo/mplayer options ------------------------
 	{"o", "Option -o has been renamed to -vo (video-out), use -vo !\n",
-            CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0},
-	{"ao", &audio_driver, CONF_TYPE_STRING, 0, 0, 0},
-	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0},
-//	{"dsp", &dsp, CONF_TYPE_STRING, CONF_NOCFG, 0, 0},
-	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-        {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0},
-        {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1},
-	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 2, 6},
+            CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"vo", &video_driver, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"ao", &audio_driver, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"aop", ao_plugin_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+//	{"dsp", &dsp, CONF_TYPE_STRING, CONF_NOCFG, 0, 0, NULL},
+	{"dsp", "Use -ao oss:dsp_path!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+        {"mixer", &mixer_device, CONF_TYPE_STRING, 0, 0, 0, NULL},
+        {"master", &mixer_usemaster, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 2, 6, NULL},
 #ifdef HAVE_X11
-	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0},
+	{"display", &mDisplayName, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
-	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 },
+	{"osdlevel", &osd_level, CONF_TYPE_INT, CONF_RANGE, 0, 2 , NULL},
 
 #ifdef HAVE_FBDEV
-	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0},
-	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0},
-	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0},
-	{"monitor_hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0},
-	{"monitor_vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0},
-	{"monitor_dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0},
+	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"monitor_hfreq", &monitor_hfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"monitor_vfreq", &monitor_vfreq_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"monitor_dotclock", &monitor_dotclock_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #else
 #ifdef HAVE_DIRECTFB
-	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0},
+	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 #endif
-//	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0},
-	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0},
-	{"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31},
+//	{"encode", &encode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vobsub", &vobsub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vobsubid", &vobsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 #ifdef USE_SUB
-	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0},
+	{"sub", &sub_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #ifdef USE_ICONV
-	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0},
+	{"subcp", &sub_cp, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif	
-	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
-	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0},
-        {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0},
-	{"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0},
-	{"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1},
-	{"noutf8", &sub_utf8, CONF_TYPE_FLAG, 0, 1, 0},
+	{"subdelay", &sub_delay, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
+	{"subfps", &sub_fps, CONF_TYPE_FLOAT, 0, 0.0, 10.0, NULL},
+        {"noautosub", &sub_auto, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"unicode", &sub_unicode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nounicode", &sub_unicode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"utf8", &sub_utf8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"noutf8", &sub_utf8, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #endif
 #ifdef USE_OSD
-	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0},
-	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0},
+	{"font", &font_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"ffactor", &font_factor, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 10.0, NULL},
 #endif
-//	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1},
-//	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0},
-	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0},
-	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0},
-	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0},
-	{"noloop", &loop_times, CONF_TYPE_FLAG, 0, 0, -1},
-	{"loop", &loop_times, CONF_TYPE_INT, CONF_RANGE, -1, 10000},
-	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0},
-	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0},
-	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0},
+//	{"bg", &play_in_bg, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+//	{"nobg", &play_in_bg, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"sb", &seek_to_byte, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"ss", &seek_to_sec, CONF_TYPE_STRING, CONF_MIN, 0, 0, NULL},
+	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"noloop", &loop_times, CONF_TYPE_FLAG, 0, 0, -1, NULL},
+	{"loop", &loop_times, CONF_TYPE_INT, CONF_RANGE, -1, 10000, NULL},
+	{"sound", &has_audio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nosound", &has_audio, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"abs", &ao_data.buffersize, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
+	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -10.0, 10.0, NULL},
 
 	{"alsa", "Option -alsa has been removed, new audio code doesn't need it! Remove it from your config file!\n",
-            CONF_TYPE_PRINT, 0, 0, 0},
+            CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"noalsa", "Option -noalsa has been removed, new audio code doesn't need it! Remove it from your config file!\n",
-            CONF_TYPE_PRINT, 0, 0, 0},
+            CONF_TYPE_PRINT, 0, 0, 0, NULL},
 
-	{"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1},
-	{"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2},
-	{"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0},
+	{"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2, NULL},
+	{"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-	{"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100},
+	{"autoq", &auto_quality, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
 
-	{"benchmark", &benchmark, CONF_TYPE_FLAG, 0, 0, 1},
+	{"benchmark", &benchmark, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	
-	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0},
-	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1},
-	{"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2},
-	{"dumpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 3},
-	{"dumpmpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 4},
-	{"dumpstream", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 5},
+	{"dumpfile", &stream_dump_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"dumpaudio", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"dumpvideo", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 2, NULL},
+	{"dumpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 3, NULL},
+	{"dumpmpsub", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 4, NULL},
+	{"dumpstream", &stream_dump_type, CONF_TYPE_FLAG, 0, 0, 5, NULL},
 
-	{"aofile", &ao_outputfilename, CONF_TYPE_STRING, 0, 0, 0},
-	{"waveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nowaveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 1, 0},
+	{"aofile", &ao_outputfilename, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"waveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nowaveheader", &ao_pcm_waveheader, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
-	{"dshow", &allow_dshow, CONF_TYPE_FLAG, 0, 0, 1}, // Is this still needed? atmos ::
-	{"nodshow", &allow_dshow, CONF_TYPE_FLAG, 0, 1, 0},
+	{"dshow", &allow_dshow, CONF_TYPE_FLAG, 0, 0, 1, NULL}, // Is this still needed? atmos ::
+	{"nodshow", &allow_dshow, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
 #ifdef HAVE_PNG
-	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9},
+	{"z", &z_compression, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 #endif
 #ifdef HAVE_SDL
 	{"sdl", "Use -vo sdl:driver instead of -vo sdl -sdl driver\n",
-	    CONF_TYPE_PRINT, 0, 0, 0},
-	{"noxv", &sdl_noxv, CONF_TYPE_FLAG, 0, 0, 1},
-	{"forcexv", &sdl_forcexv, CONF_TYPE_FLAG, 0, 0, 1},
+	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
+	{"noxv", &sdl_noxv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"forcexv", &sdl_forcexv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"sdla", "Use -ao sdl:driver instead of -ao sdl -sdla driver\n",
-	    CONF_TYPE_PRINT, 0, 0, 0},
+	    CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif	
-	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
-	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
-	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
-	{"screenw", &vo_screenwidth, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
-	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE, 0, 4096},
-	{"aspect", &movie_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0},
-	{"noaspect", &movie_aspect, CONF_TYPE_FLAG, 0, 0, 0},
-	{"monitoraspect", &monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0},
-        {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1},
-        {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0},
-	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0},
-        {"zoom", &softzoom, CONF_TYPE_FLAG, 0, 0, 1},
-        {"nozoom", &softzoom, CONF_TYPE_FLAG, 0, 1, 0},
-        {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1},
-        {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0},
+	{"x", &screen_size_x, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"y", &screen_size_y, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"xy", &screen_size_xy, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"screenw", &vo_screenwidth, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"screenh", &vo_screenheight, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
+	{"aspect", &movie_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
+	{"noaspect", &movie_aspect, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"monitoraspect", &monitor_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
+        {"vm", &vidmode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"novm", &vidmode, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"fs", &fullscreen, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nofs", &fullscreen, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+        {"zoom", &softzoom, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+        {"nozoom", &softzoom, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+        {"flip", &flip, CONF_TYPE_FLAG, 0, -1, 1, NULL},
+        {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0, NULL},
        
 #ifndef USE_LIBVO2
-        {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32},
-	{"fsmode", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 15},
-	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0},
+        {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
+	{"fsmode", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 15, NULL},
+	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #endif
 
 #ifdef HAVE_AA
-	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 },
+	{"aa*",	vo_aa_parseoption,  CONF_TYPE_FUNC_FULL, 0, 0, 0 , NULL},
 #endif
 
 #ifdef HAVE_LIRC
-	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0}, 
+	{"lircconf", &lirc_configfile, CONF_TYPE_STRING, 0, 0, 0, NULL}, 
 #endif
 
 #ifdef USE_DVDREAD
-	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0},
-	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0},
+	{"alang", &audio_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"slang", &dvdsub_lang, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 
-	{"gui", &use_gui, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nogui", &use_gui, CONF_TYPE_FLAG, 0, 1, 0},
+	{"gui", &use_gui, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nogui", &use_gui, CONF_TYPE_FLAG, 0, 1, 0, NULL},
       
 #ifdef HAVE_NEW_GUI
-	{"skin", &skinName, CONF_TYPE_STRING, 0, 0, 0},
+	{"skin", &skinName, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 
-	{"playlist", &playlist_file, CONF_TYPE_STRING, 0, 0, 0},
-	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1},
-	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0},
-	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1},
+	{"playlist", &playlist_file, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"dapsync", &dapsync, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nodapsync", &dapsync, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"softsleep", &softsleep, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
-	{"slave", &slave_mode, CONF_TYPE_FLAG, 0, 0, 1},
+	{"slave", &slave_mode, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 
 #ifdef HAVE_X11
-	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0},
-	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0},
+	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 #endif
 
 #ifdef HAVE_XINERAMA
-	{"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, 0, 32},
+	{"xineramascreen", &xinerama_screen, CONF_TYPE_INT, CONF_RANGE, 0, 32, NULL},
 #endif
 
 #define MAIN_CONF
 #include "cfg-common.h"
 #undef MAIN_CONF
         
-	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1},
-	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100},
-	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, 0, 0, 0},
-	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0},
-	{NULL, NULL, 0, 0, 0, 0}
+	{"quiet", &quiet, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"verbose", &verbose, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
+	{"v", cfg_inc_verbose, CONF_TYPE_FUNC, 0, 0, 0, NULL},
+	{"-help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"help", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{"h", help_text, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
