@@ -316,7 +316,7 @@ static void store_slice_c(uint8_t *dst, int16_t *src, int dst_stride, int src_st
 	dst[x + y*dst_stride + pos]= temp;
 
 	for(y=0; y<height; y++){
-		uint8_t *d= dither[y];
+		const uint8_t *d= dither[y];
 		for(x=0; x<width; x+=8){
 			int temp;
 			STORE(0);
@@ -565,6 +565,9 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 }
 
 static int open(vf_instance_t *vf, char* args){
+
+    int log2c;
+    
     vf->config=config;
     vf->put_image=put_image;
     vf->get_image=get_image;
@@ -581,8 +584,18 @@ static int open(vf_instance_t *vf, char* args){
     
     vf->priv->log2_count= 3;
     
-    if (args) sscanf(args, "%d:%d:%d", &vf->priv->log2_count, &vf->priv->qp, &vf->priv->mode);
+    if (args) sscanf(args, "%d:%d:%d", &log2c, &vf->priv->qp, &vf->priv->mode);
+
+    if( log2c >=0 && log2c <=6 )
+        vf->priv->log2_count = log2c;
+
+    if(vf->priv->qp < 0)
+        vf->priv->qp = 0;
+    if(vf->priv->qp > 31 )
+        vf->priv->qp = 31;
+
     switch(vf->priv->mode){
+        default:
 	case 0: requantize= hardthresh_c; break;
 	case 1: requantize= softthresh_c; break;
     }
