@@ -35,9 +35,11 @@ unsigned char * fsThatDir = ".";
 gchar         * fsFilter = NULL;
 
 int             fsPressed = 0;
-int             fsLastFilterNames = 2;
+int             fsLastFilterNames = 4;
 unsigned char * fsFilterNames[3][2] = { { "MPEG files( *.mpg )", "*.mpg" },
+					{ "VOB files( *.vob )", "*.vob"  },
                                         { "AVI files( *.avi )",  "*.avi" },
+					{ "VIVO files( *.viv )", "*.viv" },
                                         { "All files( *)",       "*"     } };
 
 GtkWidget   * fsFileNamesList;
