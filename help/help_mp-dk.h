@@ -1,7 +1,7 @@
 // Translated by:  Anders Rune Jensen <anders@gnulinux.dk>
 // Særlig tak til: Tomas Groth <tomasgroth@hotmail.com>
 //                 Dan Christiansen <danchr@daimi.au.dk>
-// Sync'ed with help_mp-en.h 1.104
+// Sync'ed with help_mp-en.h 1.105
 
 
 // ========================= MPlayer help ===========================
