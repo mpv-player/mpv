@@ -647,6 +647,7 @@ mp_input_parse_cmd(char* str) {
     } break;
     case -1:
       ptr = NULL;
+      break;
     default :
       mp_msg(MSGT_INPUT,MSGL_ERR,"Unknown argument %d\n",i);
     }
