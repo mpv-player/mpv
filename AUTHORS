@@ -206,7 +206,9 @@ Michael Niedermayer <michaelni@gmx.at>
     * runtime CPU detection
     * SSE optimization of liba52
     * various encoder/decoder fixes, improvements in libavcodec, DR support
-    * various video filters, like il, swapuv, boxblur
+    * lrintf() bugs
+    * boxblur, fil, hue, il, noise, perspective, qp, rgbtest, sab, smartblur,
+      spp, swapuv, test video filters
 
 Sven Goethel <sgoethel@jausoft.com>
     * libvo driver: vo_gl2
