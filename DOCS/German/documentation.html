@@ -171,7 +171,7 @@
 
 <P><B>MPlayer</B> ist einen Video-Player für LINUX (er läuft auch auf vielen
 anderen Unix-Systemen und <B>nicht-x86</B> CPUs, siehe <A HREF="#6">Sektion
-6</A>. Er spielt die meisten MPEG, VOB, AVI, VIVO, ASF/WMF, unterstützt von einigen
+6</A>. Er spielt die meisten MPEG, VOB, AVI, VIVO, ASF/WMF, QT/MOV, FLI Dateien ab, unterstützt von einigen
 eingebauten, Xanim und Win32 DLL Codecs. Du kannst <B>VideoCD</B>, <B>SVCD</B>,
 <B>DVD</B>, <B>3ivx</B> und auch <B>DivX</B> Filme sehen (und du brauchst die
 avifile-Bibliotek nicht einmal!). Ein weiteres großes Feature von <B>MPlayer</B>
@@ -181,7 +181,7 @@ verwenden und auch einigen Low-Level grafikkartenabhängige Treiber (für Matrox,
 3Dfx und Radeon). Die meinsten von ihnen unterstützen Software- oder
 Hardware-Scaling, also kannst du die meinsten deiner Videos in Vollbild geniesen.
 <B>MPlayer</B> unterstützt auch die Wiedergabe via hardwarehäßiger MPEG-Decoder-Karten,
-wie <B><A HREF="DVB">DVB</A></B> and <B> <A HREF="DXR3">DXR3/Hollywood+</A></B> !
+wie <B><A HREF="DVB">DVB</A></B> und <B> <A HREF="DXR3">DXR3/Hollywood+</A></B> !
 Und was meinst du zu den großen, antialiase schattierten Untertiteln (<B>8
 unterstützte Typen!!!</B>) mit europäischen/ISO 8859-1,2 (ungarische, englische,
 tschechische, usw.), kyrillischen und koreanischen Schriften und das OSD?</P>
@@ -249,30 +249,44 @@ So beschloss ich einen Player zu schreiben/zu modifizieren...</P>
 
 <P><B><A NAME=1.3>1.3. Installation</A></B></P>
 
-<P><B><I>VORAUSSETZUNGEN</I></B><BR>
+<P>Dieses Kapitel wird versuchen dich auf dem Weg der Konfiguration und Kompilierung
+von <B>MPlayer</B> zu leiten. Es ist nicht einfach, aber auch nicht unnötig schwer.
+Wenn dir ein unterschiedliches Verhalten als here beschrieben auffällt, versuche bitte
+diese Dokumentation zu durchsuchen und du wirst eine Antwort erhalten. Wenn du Links
+sieht, bitte folge ihnen und lese was sie enthalten. Es ist einige Zeit benötigen, aber
+es zahlt sich aus.</P>
+
+<P>Du brauchst ermal ein gutes System. 2.4.x Kernel ist bei Linux erforderlich, aber mit
+2.4.10 und neuer wirst du möglicherweise Probleme bekommen (Lizenzierung, Kernelbugs, usw),
+sie sind nicht zu empfehlen.</P>
+
+
+<P><B><I>SOFTWARE VORAUSSETZUNGEN</I></B><BR>
 
 <UL>
   <LI><B>binutils</B> - vorgeschlagene Version ist <B>2.11.x</B>. Diese Programm ist
-  verantworlich für das Erzeugen von MMX/3DNow!/usw Befehlen, deshalb sehr wichtig.</LI>
+    verantworlich für das Erzeugen von MMX/3DNow!/usw Befehlen, deshalb sehr wichtig.</LI>
   <LI><B>gcc</B> - vorgeschlagene Version ist von <B>2.95.2</B> bis <B>2.95.4</B>.
-  Verwende <B>NIEMALS</B> 2.96 oder 3.x.x !!! Sie erzeugen fehlerhaften Code.</LI>
-  <LI><B>XFree86</B> - vorgeschlagene Version ist <B>immer die neueste (4.1.0)</B>.
-  Normalerweise will das jeder. Auch wenn du nicht weisst warum, du <B>brauchst</B> es.</LI>
+    Verwende <B>NIEMALS</B> 2.96 oder 3.x.x !!! Sie erzeugen fehlerhaften Code.</LI>
+    Wenn du dich unterscheidest von 2.96 zu wechseln entscheide dich nicht für 3.0 nur weil
+    es neuer ist! In manchen Fällen ist es schlechter als 2.96, also downgrade zu 2.95.x
+    (downgrade auf die libstdc++ !) oder up/downgrade überhaupt nicht (sei aber in manchen
+    Fällen verbereitet auf Laufzeitfehler. Detailierte Information über die Bugs von gcc 2.96
+    können <A HREF="users_against_developers.html"><B><I>hier</I></B></A> und in den
+    <A HREF="faq.html">FAQ</A> gefunden werden!</I></B></LI>
+  <LI><B>XFree86</B> - vorgeschlagene Version ist <B>immer die neueste (4.1.0)</B>, aber
+   normalerweise will das jeder. Seit XFree86 4.0.2 enthält es die <A HREF="video.html#2.3.1.2">XVideo</A>
+   Erweiterung (auch Bezeichnet als <B>Xv</B>) was benötigt wird, um Hardware YUV Bescheinigung
+   (schnelle Bildanzeige) (auf Karten die es unterstützen) zu nutzen. <A HREF="video.html#2.3.1.2">Hier sind
+   noch mehr Informationen verfügbar.</A><BR> Stelle sicher, dass die <B>Development-Pakete</B>
+   installiert sind, sonst wird es nicht funktionieren.<BR>Einige Grafikkarten benötigen
+   auch gar keine XFree86. Für eine Liste siehe unten.</LI>			      
   <LI><B>make</B> - vorgeschlagene Version ist <B>immer die neueste</B> (mindestens 3.79).
-  Dies ist normalerweise nicht so wichtig.</LI>
+    Dies ist normalerweise nicht so wichtig.</LI>
   <LI><B>SDL</B> - es ist nicht vorgeschrieben, aber es ist hilfreich in vielen
-  Fällen. Verwende immer das aktuelleste Version (beginnend bei 1.2.x).</LI>
+    Fällen. Verwende immer das aktuelleste Version (beginnend bei 1.2.x).</LI>
 </UL>
-</P>
 	  
-<P>Lese folgendes bevor du versuchst <B>MPlayer</B> zu kompilieren:</P>
-
-<UL>
-
-<LI>Wenn du <B>gcc 2.96</B> auf deinem System hast, <A HREF="../users_against_developers.html"><B><I>LESE HIER (Englisch)</A>
-und die <A HREF="faq.html">FAQ</A> !</I></B></LI>
-</UL>
-
 <P><B><I>CODECS</I></B></P>
 
 <UL>
@@ -310,8 +324,25 @@ Features:<UL>
 <LI>Wenn du <B>3ivx</B> Filme abspiele willst lese die <A HREF=codecs.html#2.2.1.3>XAnim Codecs-Sekion</A>.</LI>
 </UL>
 
+<LI>Die <A HREF=codecs.html#2.2.1.3>XAnim Codecs</A> sind die Besten (Vollbild,
+Hardwaremäßiger YUV Zoom) um alte Videos wie Indeo 3/4/5, Cinepak und einige andere
+abzuspielen. Und sie sind multiplatform, also sind sie die einzige Möglichkeit um Indeo
+auf nicht-x86 Platformen zu sehen (nun mal abgesehen von XAnim:).</LI>
+
+
 <P><B><I>VIDEOKARTEN</I></B></P>
 
+<P>Es gibt allgemein gesprochen zwei Arten von Grafikkarten. Die eine Art (und die neueren Karten) besitzen
+<B>hardwaremäßige YUV Bescheunigung</B>, die anderen nicht.</P>
+
+<P>
+<B><I>YUV Karten</I></B></P>
+
+<P>Sie können das Bild anzeigen und Scalen (Zoomen), in jeder Größe die in ihren Speicher passen und das
+auch noch mit <B>geringer CPU Auslastung</B> (Zoomen erhöht sie nicht!), darum bekommst du
+auch ein nettes und sehr schnelle Vollbild.</P>
+
+<P>
 <UL>
 <LI><B>Matrox G200/G400/G450/G550 Karten</B> : <LI>schau bitte auf die
 <A HREF="video.html#2.3.1.7">Sektion 2.3.1.7</A> um einen großen Geschwindigkeitsvorteil
@@ -574,14 +605,14 @@ TV-Tuner ermöglicht</B>.</P>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>width</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  <B>VERWENDEN!</B> - die Breite des Ausgabe-Fensters, in Pixel</TD>
+    die Breite des Ausgabe-Fensters, in Pixel</TD>
 </TR>
   <TR>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2><I>height</I></TD>
   <TD>&nbsp;&nbsp;</TD>
   <TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>
-  <B>VERWENDEN!</B> - die Höhe des Ausgabe-Fensters, in Pixel</TD>
+    die Höhe des Ausgabe-Fensters, in Pixel</TD>
 </TR>
 <TR>
   <TD>&nbsp;&nbsp;</TD>
@@ -1490,8 +1521,8 @@ es nicht funktioniert. Nur einige Treiber unterstützten Scaling/Zooming,
 erwarte das nicht von x11 oder dga.</P>
 
 <P>zucken des OSD/Untertiteln:<BR>
-- x11 Treiber: Sorry, es kann zur Zeit nicht gelöst werden<BR>
-- xv Treiber: verwende die -double Option</P>
+- x11 Treiber: Sorry, es kann zur Zeit nicht gelöst werden (GEFIXT)<BR>
+- xv Treiber: verwende die -double Option (GEFIXT)</P>
 
 
 </BODY>
