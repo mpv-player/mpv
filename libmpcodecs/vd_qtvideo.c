@@ -287,7 +287,7 @@ if(!codec_inited){
 #endif
 
     cres=ImageCodecBandDecompress(ci,&decpar);
-    printf("ImageCodecBandDecompress cres=0x%X (-0x%X) %d\n",cres,-cres,cres);
+    if(cres&0xFFFF) printf("ImageCodecBandDecompress cres=0x%X (-0x%X) %d\n",cres,-cres,cres);
 
     ++decpar.frameNumber;
     
