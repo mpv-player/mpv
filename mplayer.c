@@ -141,8 +141,6 @@ static int max_framesize=0;
 
 #include "stheader.h"
 
-//static int avi_bitrate=0;
-
 char* encode_name=NULL;
 char* encode_index_name=NULL;
 int encode_bitrate=0;
@@ -1699,10 +1697,10 @@ switch(file_format){
   case DEMUXER_TYPE_MPEG_PS: {
   //================= seek in MPEG ==========================
         int newpos;
-        if(picture->bitrate==0x3FFFF) // unspecified?
+        if(!sh_video->i_bps) // unspecified?
           newpos=demuxer->filepos+2324*75*rel_seek_secs; // 174.3 kbyte/sec
         else
-          newpos=demuxer->filepos+(picture->bitrate*1000/16)*rel_seek_secs;
+          newpos=demuxer->filepos+(sh_video->i_bps*1000/16)*rel_seek_secs;
 
         if(newpos<seek_to_byte) newpos=seek_to_byte;
         newpos&=~(STREAM_BUFFER_SIZE-1);  /* sector boundary */

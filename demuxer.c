@@ -313,8 +313,6 @@ demux_stream_t *d_video=NULL;
 sh_audio_t *sh_audio=NULL;
 sh_video_t *sh_video=NULL;
 
-int avi_bitrate=0;
-
 //=============== Try to open as AVI file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
   stream_reset(stream);
@@ -495,18 +493,18 @@ switch(file_format){
   sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
   sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
   // calculating video bitrate:
-  avi_bitrate=demuxer->movi_end-demuxer->movi_start-demuxer->idx_size*8;
-  if(sh_audio) avi_bitrate-=sh_audio->audio.dwLength;
-  if(verbose) printf("AVI video length=%d\n",avi_bitrate);
-  avi_bitrate=((float)avi_bitrate/(float)sh_video->video.dwLength)*sh_video->fps;
+  sh_video->i_bps=demuxer->movi_end-demuxer->movi_start-demuxer->idx_size*8;
+  if(sh_audio) sh_video->i_bps-=sh_audio->audio.dwLength;
+  if(verbose) printf("AVI video length=%d\n",sh_video->i_bps);
+  sh_video->i_bps=((float)sh_video->i_bps/(float)sh_video->video.dwLength)*sh_video->fps;
   printf("VIDEO:  [%.4s]  %ldx%ld  %dbpp  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
     (char *)&sh_video->bih->biCompression,
     sh_video->bih->biWidth,
     sh_video->bih->biHeight,
     sh_video->bih->biBitCount,
     sh_video->fps,
-    avi_bitrate*0.008f,
-    avi_bitrate/1024.0f );
+    sh_video->i_bps*0.008f,
+    sh_video->i_bps/1024.0f );
   break;
  }
  case DEMUXER_TYPE_ASF: {
@@ -530,6 +528,7 @@ switch(file_format){
       sh_video->bih->biWidth,
       sh_video->bih->biHeight,
       sh_video->bih->biBitCount);
+//      sh_video->i_bps=10*asf_packetsize; // FIXME!
   }
   if(audio_id!=-2){
     if(verbose) printf("ASF: Searching for audio stream (id:%d)\n",d_audio->id);

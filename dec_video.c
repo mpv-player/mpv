@@ -510,6 +510,9 @@ switch(d_video->demuxer->file_format){
    }
    sh_video->disp_w=picture->display_picture_width;
    sh_video->disp_h=picture->display_picture_height;
+   // bitrate:
+   if(picture->bitrate!=0x3FFFF) // unspecified/VBR ?
+       sh_video->i_bps=1000*picture->bitrate/16;
    // info:
    if(verbose) printf("mpeg bitrate: %d (%X)\n",picture->bitrate,picture->bitrate);
    printf("VIDEO:  %s  %dx%d  (aspect %d)  %4.2f fps  %5.1f kbps (%4.1f kbyte/s)\n",
