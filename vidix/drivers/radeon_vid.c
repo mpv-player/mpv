@@ -1078,9 +1078,9 @@ int vixPlaybackFrameSelect(unsigned frame)
     OUTREG(OV0_VID_BUF0_BASE_ADRS,	off[0]);
     OUTREG(OV0_VID_BUF1_BASE_ADRS,	off[1]);
     OUTREG(OV0_VID_BUF2_BASE_ADRS,	off[2]);
-    OUTREG(OV0_VID_BUF0_BASE_ADRS,	off[3]);
-    OUTREG(OV0_VID_BUF1_BASE_ADRS,	off[4]);
-    OUTREG(OV0_VID_BUF2_BASE_ADRS,	off[5]);
+    OUTREG(OV0_VID_BUF3_BASE_ADRS,	off[3]);
+    OUTREG(OV0_VID_BUF4_BASE_ADRS,	off[4]);
+    OUTREG(OV0_VID_BUF5_BASE_ADRS,	off[5]);
     OUTREG(OV0_REG_LOAD_CNTL,		0);
     if(__verbose > 1) radeon_vid_dump_regs();
     return 0;
