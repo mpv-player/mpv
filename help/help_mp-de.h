@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.150
+// In synch with rev 1.151
 
 // ========================= MPlayer help ===========================
 
@@ -154,6 +154,43 @@ static char help_text[]=
 "  lies DOCS/de/bugreports.html und folge den dortigen Anweisungen.\n"\
 "  Wir können und werden dir nicht helfen, wenn du nicht alle dort aufgeführten\n"\
 "  Informationen zur Verfügung stellst.\n"
+#define MSGTR_LoadingConfig "Lade Konfiguration '%s'\n"
+#define MSGTR_AddedSubtitleFile "SUB: Untertiteldatei (%d) hinzugefügt: %s\n"
+#define MSGTR_ErrorOpeningOutputFile "Fehler beim Öffnen von Datei [%s] zum Schreiben!\n"
+#define MSGTR_CommandLine "Kommandozeile:"
+#define MSGTR_RTCDeviceNotOpenable "Konnte %s nicht öffnen: %s (sollte für den Benutzer lesbar sein.)\n"
+#define MSGTR_LinuxRTCInitErrorIrqpSet "Linux RTC-Initialisierungsfehler in ioctl (rtc_irqp_set %lu): %s\n"
+#define MSGTR_IncreaseRTCMaxUserFreq "Versuche, \"echo %lu > /proc/sys/dev/rtc/max-user-freq\" zu deinen Systemstartskripten hinzuzufügen.\n"
+#define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC-Initialisierungsfehler in ioctl (rtc_pie_on): %s\n"
+#define MSGTR_UsingTimingType "Benutze %s-Zeitgeber.\n"
+#define MSGTR_MenuInitialized "Menü initialisiert: %s\n"
+#define MSGTR_MenuInitFailed "Initialisierung des Menüs fehlgeschlagen.\n"
+#define MSGTR_Getch2InitializedTwice "WARNUNG: getch2_init doppelt aufgerufen!\n"
+#define MSGTR_DumpstreamFdUnavailable "Kann Dump dieses Streams nicht anlegen - kein 'fd' verfügbar.\n"
+#define MSGTR_FallingBackOnPlaylist "Falle zurück auf den Versuch, Playlist %s einzulesen...\n"
+#define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Kann den libmenu-Videofilter nicht mit dem Ursprungsmenü %s öffnen.\n"
+#define MSGTR_AudioFilterChainPreinitError "Fehler bei der Vorinitialisierung der Audiofilterkette!\n"
+#define MSGTR_LinuxRTCReadError "Linux RTC-Lesefehler: %s\n"
+#define MSGTR_SoftsleepUnderflow "Warnung! Unterlauf des Softsleep!\n"
+#define MSGTR_AnsSubVisibility "ANS_SUB_VISIBILITY=%ld\n"
+#define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
+#define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
+#define MSGTR_AnsPercentPos "ANS_PERCENT_POSITION=%ld\n"
+#define MSGTR_DvdnavNullEvent "DVDNAV-Ereignis NULL?!\n"
+#define MSGTR_DvdnavHighlightEventBroken "DVDNAV-Ereignis: Hervorhebungs-Ereignis kaputt\n"
+#define MSGTR_DvdnavEvent "DVDNAV-Ereignis: %s\n"
+#define MSGTR_DvdnavHighlightHide "DVDNAV-Ereignis: Hervorhebung verbergen\n"
+#define MSGTR_DvdnavStillFrame "######################################## DVDNAV-Ereignis: Standbild: %d Sekunde(n)\n"
+#define MSGTR_DvdnavNavStop "DVDNAV-Ereignis: Nav Stop\n"
+#define MSGTR_DvdnavNavNOP "DVDNAV-Ereignis: Nav NOP\n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV-Ereignis: Nav SPU Stream Change: phys: %d/%d/%d logisch: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV-Ereignis: Nav SPU Stream-Änderung: phys: %d logisch: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV-Ereignis: Nav Audio Stream-Änderung: phys: %d logisch: %d\n"
+#define MSGTR_DvdnavNavVTSChange "DVDNAV-Ereignis: Nav VTS-Änderung\n"
+#define MSGTR_DvdnavNavCellChange "DVDNAV-Ereignis: Nav Cell-Änderung\n"
+#define MSGTR_DvdnavNavSpuClutChange "DVDNAV-Ereignis: Nav SPU CLUT-Änderung\n"
+#define MSGTR_DvdnavNavSeekDone "DVDNAV-Ereignis: Nav Suche beendet.\n"
+#define MSGTR_MenuCall "Menü-Aufruf\n"
 
 #define MSGTR_EdlCantUseBothModes "Kann -edl und -edlout nicht zur selben Zeit benutzen.\n"
 #define MSGTR_EdlOutOfMem "Kann nicht genug Speicher für EDL-Daten reservieren.\n"
