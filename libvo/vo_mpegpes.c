@@ -21,9 +21,10 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
-#include <sys/poll.h>
 
 #ifdef HAVE_DVB
+
+#include <sys/poll.h>
 
 #include <sys/ioctl.h>
 #include <stdio.h>
@@ -251,9 +252,10 @@ static void draw_osd(void)
 #endif
 }
 
-#define NFD   2
 
 static void my_write(unsigned char* data,int len){
+#ifdef HAVE_DVB
+#define NFD   2
     struct pollfd pfd[NFD];
 
 //    printf("write %d bytes  \n",len);
@@ -278,6 +280,10 @@ static void my_write(unsigned char* data,int len){
 	    } else usleep(1000);
 	}
     }
+
+#else
+    write(vo_mpegpes_fd,data,len); // write to file
+#endif
 }
 
 static unsigned char pes_header[PES_MAX_SIZE];
