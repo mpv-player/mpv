@@ -14,6 +14,8 @@ static ao_info_t info =
 
 LIBAO_EXTERN(pcm)
 
+extern int vo_pts;
+
 char *ao_outputfilename = NULL;
 int ao_pcm_waveheader = 1;
 
@@ -82,7 +84,7 @@ static int init(int rate,int channels,int format,int flags){
 	printf("PCM: Info - to write WAVE files use -waveheader (default), for RAW PCM -nowaveheader.\n");
 	fp = fopen(ao_outputfilename, "wb");
 
-	ao_data.outburst = 4096;
+	ao_data.outburst = 65536;
 
 
 	if(fp) {
@@ -98,7 +100,7 @@ static int init(int rate,int channels,int format,int flags){
 static void uninit(){
 	
 	if(ao_pcm_waveheader){ /* Write wave header */
-		wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr);
+		wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
 		fseek(fp, 0, SEEK_SET);
 		fwrite(&wavhdr,sizeof(wavhdr),1,fp);
 	}
@@ -126,7 +128,7 @@ static void audio_resume()
 // return: how many bytes can be played without blocking
 static int get_space(){
 
-    return ao_data.outburst;
+    return ao_data.pts < vo_pts ? ao_data.outburst : 0;
 }
 
 // plays 'len' bytes of 'data'
