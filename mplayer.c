@@ -185,6 +185,7 @@ int use_gui=0;
 int osd_level=2;
 char *seek_to_sec=NULL;
 off_t seek_to_byte=0;
+off_t step_sec=0;
 int has_audio=1;
 int loop_times=-1;
 
@@ -1656,6 +1657,12 @@ if(auto_quality>0){
     if(!force_redraw) break;
   } //  while(sh_video->timer<sh_audio->timer || force_redraw)
 
+// skip some seconds... added by fly
+
+if(step_sec>0) {
+	osd_function=OSD_FFW;
+	rel_seek_secs+=step_sec;
+}
 
 //================= Keyboard events, SEEKing ====================
 
