@@ -81,6 +81,10 @@ static config_t mencoder_opts[]={
 	{"ofps", &force_ofps, CONF_TYPE_FLOAT, CONF_MIN, 0, 0, NULL},
 	{"o", &out_filename, CONF_TYPE_STRING, 0, 0, 0, NULL},
 
+	{"skiplimit", &skip_limit, CONF_TYPE_INT, 0, 0, 0, NULL},
+	{"noskiplimit", &skip_limit, CONF_TYPE_FLAG, 0, 0, -1, NULL},
+	{"noskip", &skip_limit, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+
 	{"x", &vo_w, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 	{"y", &vo_h, CONF_TYPE_INT, CONF_RANGE, 0, 4096, NULL},
 

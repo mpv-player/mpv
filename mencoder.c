@@ -132,6 +132,7 @@ static float c_total=0;
 
 float force_fps=0;
 float force_ofps=0; // set to 24 for inverse telecine
+static int skip_limit=-1;
 
 int force_srate=0;
 
@@ -862,11 +863,13 @@ if(demuxer2){	// 3-pass encoding, read control file (frameno.avi)
 
 // check frame duplicate/drop:
 
-if(v_timer_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate){
+if(v_timer_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate &&
+    (skip_limit<0 || skip_flag<skip_limit) ){
     v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
     ++skip_flag; // skip
 } else
-while(v_timer_corr<=-(float)mux_v->h.dwScale/mux_v->h.dwRate){
+while(v_timer_corr<=-(float)mux_v->h.dwScale/mux_v->h.dwRate &&
+    (skip_limit<0 || (-skip_flag)<skip_limit) ){
     v_timer_corr+=(float)mux_v->h.dwScale/mux_v->h.dwRate;
     --skip_flag; // dup
 }
