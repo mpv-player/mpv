@@ -176,7 +176,7 @@ int vo_wm_detect( void )
        metacity_hack = 1;
    }
    XFree( args );
-   if (wm && !icewm_hack && metacity_hack)
+   if (wm && metacity_hack)
      return wm;
   }
 
