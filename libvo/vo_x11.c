@@ -313,7 +313,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 	hint.width=modeline_width;
 	hint.height=modeline_height;
    }
-    else
+//    else
 #endif
 //    if ( fullscreen )
 //     {
@@ -359,17 +359,11 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     XSelectInput( mDisplay,vo_window,StructureNotifyMask );
     XSetStandardProperties( mDisplay,vo_window,title,title,None,NULL,0,&hint );
     XMapWindow( mDisplay,vo_window );
-    if ( fullscreen ) vo_x11_fullscreen();
-#ifdef HAVE_XINERAMA
-   vo_x11_xinerama_move(mDisplay,vo_window);
-#endif
     if(WinID!=0)
     do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != vo_window );
     XSelectInput( mDisplay,vo_window,NoEventMask );
-
     XFlush( mDisplay );
     XSync( mDisplay,False );
-    vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
 
     // we cannot grab mouse events on root window :(
     XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask |
@@ -387,6 +381,12 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 #endif
    }
 
+   if ( fullscreen ) vo_x11_fullscreen();
+#ifdef HAVE_XINERAMA
+   vo_x11_xinerama_move(mDisplay,vo_window);
+#endif
+
+   vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
    getMyXImage();
 
   switch ((bpp=myximage->bits_per_pixel)){
