@@ -9,7 +9,10 @@
     32bpp support (c) alex
 */
 
-#define LE_16(x) *(unsigned short *)(x)
+#include "config.h"
+#include "bswap.h"
+
+#define LE_16(x) (le2me_16(*(unsigned short *)(x)))
 
 #define DECODE_BGR555_TO_BGR888(x) \
         x.c1_b = (x.c1 >> 7) & 0xF8; \
@@ -100,6 +103,7 @@ void AVI_Decode_Video1_16(
       {
         flags = (byte_b << 8) | byte_a;
 
+//        quad[0][0].c1 = LE_16(&encoded[stream_ptr]);
         quad[0][0].c1 = LE_16(&encoded[stream_ptr]);
         stream_ptr += 2;
         quad[0][0].c2 = LE_16(&encoded[stream_ptr]);

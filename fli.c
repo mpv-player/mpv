@@ -6,8 +6,11 @@
     32bpp support (c) alex
 */
 
-#define LE_16(x) *(unsigned short *)(x)
-#define LE_32(x) *(unsigned int *)(x)
+#include "config.h"
+#include "bswap.h"
+
+#define LE_16(x) (le2me_16(*(unsigned short *)(x)))
+#define LE_32(x) (le2me_32(*(unsigned int *)(x)))
 
 #define FLI_256_COLOR 4
 #define FLI_DELTA     7
@@ -99,6 +102,10 @@ void AVI_Decode_Fli(
           stream_ptr += 3;
         }
       }
+      // it seems that a color packet has to be an even number of bytes
+      // so account for a pad byte
+      if (stream_ptr & 0x01)
+        stream_ptr++;
       break;
 
     case FLI_DELTA:
@@ -270,9 +277,16 @@ void AVI_Decode_Fli(
       break;
 
     case FLI_COPY:
-// currently unimplemented
-printf ("FLI_COPY chunk (currently unimplemented)\n");
-stream_ptr += chunk_size - 6;
+      // copy the chunk (uncompressed frame)
+      for (pixel_ptr = 0; pixel_ptr < chunk_size - 6; pixel_ptr++)
+      {
+        palette_ptr1 = encoded[stream_ptr++] * 4;
+        decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
+        decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
+        decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
+        if (bytes_per_pixel == 4) /* 32bpp */
+          pixel_ptr++;
+      }
       break;
 
     case FLI_MINI:
