@@ -56,21 +56,8 @@
   créées avec le très mauvais codec DivX ! De plus il est plus rapide que les DLLs Win32
   DivX natives mais plus lent que libavcodec. Son utilisation en tant que décodeur est
   donc <B>DÉCOURAGÉ</B>. Cependant, il est utile pour l'encodage. Un désavantage de ce
-  codec est que ces sources sont actuellement fermées.</P>
-
-<P>Ce codec peut être téléchargé depuis les adresses suivantes:</P>
-
-<P>&nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://avifile.sourceforge.net">http://avifile.sourceforge.net</A><BR>
-  &nbsp;&nbsp;&nbsp;&nbsp;<A HREF="http://divx.com">http://divx.com</A></P>
-
-<P>Désarchivez-le, et lancez <CODE>./install.sh</CODE> en root.</P>
-
-<P><B>Note:</B> N'oubliez <B>pas</B> d'ajouter <CODE>/usr/local/lib</CODE> à votre
-  <CODE>/etc/ld.so.conf</CODE> et de lancer <CODE>ldconfig</CODE>!</P>
-
-<P>MPlayer détecte si DivX4/DivX5 est (correctement) installé, donc compilez le normalement. 
-  Si il ne détecte pas le codec, votre installation ou votre configuration n'est pas
-  correcte.</P>
+  codec est que ces sources sont ne sont pas disponibles sous une
+  licence Open source.</P>
 
 <P>DivX4Linux fonctionne dans deux modes:</P>
 
@@ -95,7 +82,51 @@
 <P><B>Note:</B> Si votre pilote <CODE>-vo</CODE> supporte le rendu direct, alors
   <CODE>-vc divx4</CODE> pourra être plus rapide voir même la solution la plus rapide.</P>
 
+<P>Ce codec peut être téléchargé depuis 
+  <A HREF="http://avifile.sourceforge.net">avifile.</A>
+  
+<P>Désarchivez-le, lancez <CODE>./install.sh</CODE> en root et
+  n'oubliez pas d'ajouter <CODE>/usr/local/lib</CODE> à votre
+  <CODE>/etc/ld.so.conf</CODE> et de lancer <CODE>ldconfig</CODE>.</P>
 
+<P>Récupérez la version CVS de la librairie principale comme ceci:</P>
+
+<OL>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot login</CODE></LI>
+  <LI><CODE>cvs -d:pserver:anonymous@cvs.projectmayo.com:/cvsroot co divxcore</CODE></LI>
+  <LI>Cette librairie principale est séparée en librairies d'encodage
+    et de décodage qui doivent être compilées séparément. Pour la
+    librairie de décodage, tapez simplement
+    <PRE>
+    cd divxcore/decore/build/linux
+    make
+    cp libdivxdecore.so /usr/local/lib 
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0 
+    cp ../../src/decore.h /usr/local/include
+    </PRE>
+    </LI>
+  <LI>Élas, pour la librairie d'encodage il n'y a pas de Makefile Linux
+    disponible, et le code optimisé pour MMX ne fonctionne que sous
+    Windows. Vous pouvez quand même le compiler en utilisant ce
+    <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</A>.
+    <PRE>
+    cd ../../../encore/build
+    mkdir linux
+    cd linux
+    cp path/Makefile .
+    make
+    cp libdivxencore.so /usr/local/lib
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
+    cp ../../src/encore.h /usr/local/include
+    </PRE>
+    </LI>
+</OL>
+
+<P>MPlayer détecte si DivX4/DivX5 est correctement installé, donc compilez le normalement. 
+  Si il ne détecte pas le codec, votre installation ou votre configuration n'est pas
+  correcte.</P>
+
+  
 <H4><A NAME="libavcodec">2.2.1.2 DivX/libavcodec de FFmpeg</A></H4>
 
 <P><A HREF="http://ffmpeg.sourceforge.net">FFmpeg</A> contient un codec
