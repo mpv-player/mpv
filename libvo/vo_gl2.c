@@ -640,6 +640,18 @@ static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 		w += val;
 		/* and finally, prefer DirectColor-ed visuals to allow color corrections */
 		if (vi_list[i].class != DirectColor) w += 100;
+
+		// avoid bad-looking visual with less that 8bit per color
+		res = glXGetConfig(dpy, vi_list + i, GLX_RED_SIZE, &val);
+		if (res) continue;
+		if (val < 8) w += 50;
+		res = glXGetConfig(dpy, vi_list + i, GLX_GREEN_SIZE, &val);
+		if (res) continue;
+		if (val < 8) w += 70;
+		res = glXGetConfig(dpy, vi_list + i, GLX_BLUE_SIZE, &val);
+		if (res) continue;
+		if (val < 8) w += 50;
+
 		if (w < best_weight) {
 			best_weight = w;
 			best_i = i;
