@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.28 -->
+<!-- synced with 1.30 -->
 <sect1 id="audio">
 <title>Audió kimeneti eszközök</title>
 <sect2 id="sync">
@@ -32,17 +32,13 @@ nagyon rosszul elkészített fájlok esetén (lásd a man oldalt a megkerüléshez).
 Ha neked rossz audió vezérlőd van, próbáld ki a <option>-autosync</option>
 kapcsolót, megszünteti a problémáidat. Lásd a man oldalt a bővebb információkért.
 </para>
+</sect2>
 
-<itemizedlist>
-<title>Néhány megjegyzés:</title>
-<listitem><para>
-  Ha OSS vezérlőd van, először próbáld meg a <option>-ao oss</option>-t (ez az
-  alapértelmezett). Ha hibát tapasztalsz, megállást vagy bármit, ami a megszokottól
-  eltér, próbáld ki a <option>-ao sdl</option> kapcsolót (MEGJEGYZÉS: szükséged
-  lesz telepített SDL függvénykönyvtárakra és fejléc fájlokra). Az SDL audió vezérlő
-  sok esetben segít és az ESD-t (GNOME) és az ARTS-ot (KDE) is támogatja.
-  </para></listitem>
-<listitem><para>
+<sect2 id="troubleshooting">
+<title>Problémamegoldás</title>
+
+<para>Néhány megjegyzés:</para>
+<para>
   Ha 0.5-ös ALSA-d van, akkor majdnem mindig a <option>-ao alsa5</option>-öt kell
   használnod, mivel az ALSA 0.5-nek hibás az OSS emulációs kódja,
   és <emphasis role="bold">össze fogja omlasztani az <application>MPlayer</application>t</emphasis>
@@ -50,238 +46,13 @@ kapcsolót, megszünteti a problémáidat. Lásd a man oldalt a bővebb információkért
   <screen>
 DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!<!--
 --></screen>
-  </para></listitem>
-<listitem><para>
-  Solaris-on használd a SUN audió verziót a <option>-ao sun</option> kapcsolóval,
-  különben sem a videó sem az audió nem fog működni.
-  </para></listitem>
-<listitem><para>
-  Ha a hang kattog CD-ROM lejátszása közben, kapcsold be az IRQ unmasking-ot, pl.
-  <command>hdparm -u1 /dev/cdrom</command> (<command>man hdparm</command>).
-  Ez általában jótékony hatású, bővebben a <link linkend="drives">CD-ROM</link>
-  részben van leírva.
- </para></listitem>
-</itemizedlist>
-</sect2>
-
-<sect2 id="experiences">
-<title>Hangkártya tapasztalatok, javaslatok</title>
-<para>
-Linuxon egy 2.4.x kernel nagyon javasolt. A 2.2-es kernelt nem teszteltük.
 </para>
-
 <para>
-A Linux hang vezérlőit első sorban az OSS szabad verziója biztosítja.
-Ezeket a vezérlőket az <ulink url="http://www.alsa-project.org">ALSA</ulink>
-(Advanced Linux Sound Architecture) váltotta fel a 2.5-ös fejlesztői sorozatban.
-Ha a disztribúciód még nem használja az ALSA-t, próbáld ki, ha hanggal
-kapcsolatos problémákat tapasztalsz. Az ALSA vezérlők általában
-jobbak az OSS-nél kompatibilításban, teljesítményben és tulajdonságokban
-egyaránt. De néhány hangkártyát csak a <ulink url="http://www.opensound.com/">4Front Technologies</ulink>
-által kiadott kereskedelmi OSS vezérlők támogatnak.
-Ráadásul elérhetőek számos nem-Linux rendszeren is.
-</para>
-
-<informaltable>
-<tgroup cols="8">
-  <colspec colname="c1"/>
-  <colspec colname="c2"/>
-  <colspec colname="c3"/>
-  <colspec colname="c4"/>
-  <colspec colname="c5"/>
-  <colspec colname="c6"/>
-  <colspec colname="c7"/>
-  <colspec colname="c8"/>
-  <spanspec spanname="driver" namest="c2" nameend="c5"/>
-  <spanspec spanname="ossfree" namest="c2" nameend="c2"/>
-  <spanspec spanname="alsa" namest="c3" nameend="c3"/>
-  <spanspec spanname="osspro" namest="c4" nameend="c4"/>
-  <spanspec spanname="others" namest="c5" nameend="c5"/>
-<thead>
-  <row>
-    <entry morerows="2" valign="middle">HANG KÁRTYA</entry>
-    <entry spanname="driver">VEZÉRLŐ</entry>
-    <entry morerows="2" valign="middle">Max kHz</entry>
-    <entry morerows="2" valign="middle">Max Csatornák</entry>
-    <entry morerows="2" valign="middle">Max Nyitások
-      <footnote id="maxopens">
-        <para>az eszközt <emphasis>egyidejűleg</emphasis> használni
-			  képes alkalmazások száma.</para>
-      </footnote>
-    </entry>
-  </row>
-
-  <row>
-    <entry spanname="ossfree">OSS/Szabad</entry>
-    <entry spanname="alsa">ALSA</entry>
-    <entry spanname="osspro">OSS/Pro</entry>
-    <entry spanname="others">egyéb</entry>
-  </row>
-</thead>
-
-<tbody>
-  <row>
-    <entry>VIA alaplapi (686/A/B, 8233, 8235)</entry>
-    <entry>
-      <ulink url="http://sf.net/project/showfiles.php?group_id=3242&amp;release_id=59602">via82cxxx_audio</ulink>
-    </entry>
-    <entry>snd-via82xx</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>4-48 kHz vagy csak 48 kHz, chipset-en múlik</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>Aureal Vortex 2</entry>
-    <entry>nincs</entry>
-    <entry>nincs</entry>
-    <entry>OK</entry>
-    <entry>
-      <ulink url="http://aureal.sf.net">Linux Aureal vezérlők</ulink>
-      <ulink url="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">32k-ra növelt buffer méret</ulink>
-    </entry>
-    <entry>48</entry>
-    <entry>4.1</entry>
-    <entry>5+</entry>
-  </row>
-
-  <row>
-    <entry>SB Live!</entry>
-    <entry>Analóg OK, S/PDIF nem működik</entry>
-    <entry>Mindkettő OK</entry>
-    <entry>Mindkettő OK</entry>
-    <entry>
-      <ulink url="http://opensource.creative.com">Creative OSS vezérlője (S/PDIF támogatás)</ulink>
-    </entry>
-    <entry>192</entry>
-    <entry>4.0/5.1</entry>
-    <entry>32</entry>
-  </row>
-
-  <row>
-    <entry>SB 128 PCI (es1371)</entry>
-    <entry>OK</entry>
-    <entry>?</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry>stereo</entry>
-    <entry>2</entry>
-  </row>
-
-  <row>
-    <entry>SB AWE 64</entry>
-    <entry>max 44kHz</entry>
-    <entry>48kHz rossz hangzású</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>GUS PnP</entry>
-    <entry>nincs</entry>
-    <entry>OK</entry>
-    <entry>OK</entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>Gravis UltraSound ACE</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>Gravis UltraSound MAX</entry>
-    <entry>OK</entry>
-    <entry>OK (?)</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>ESS 688</entry>
-    <entry>OK</entry>
-    <entry>OK (?)</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry>48</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>C-Media kártyák (CMI8338/8738)</entry>
-    <entry>OK</entry>
-    <entry>OK S/PDIF támogatott ALSA 0.9.x-szel</entry>
-    <entry>?</entry>
-    <entry></entry>
-    <entry>44</entry>
-    <entry>sztereo</entry>
-    <entry>1</entry>
-  </row>
-
-  <row>
-    <entry>Yamaha kártyák (*ymf*)</entry>
-    <entry>nem OK (?) (talán <option>-ao sdl</option>)</entry>
-    <entry>OK csak OSS emulációs ALSA 0.5-tel
-      <emphasis role="bold">ÉS</emphasis> <option>-ao sdl</option>-vel (!) (?)</entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>envy24 chip-ű kártyák (mint a Terratec EWS88MT)</entry>
-    <entry>?</entry>
-    <entry>?</entry>
-    <entry>OK</entry>
-    <entry></entry>
-    <entry>?</entry>
-    <entry></entry>
-    <entry></entry>
-  </row>
-
-  <row>
-    <entry>PC Speaker vagy DAC</entry>
-    <entry>OK</entry>
-    <entry>nincs</entry>
-    <entry></entry>
-    <entry>
-      <ulink url="http://www.geocities.com/stssppnn/pcsp.html">Linux PC speaker OSS vezérlő</ulink>
-    </entry>
-    <entry>A vezérlő 44.1-et emulál, talán többet.</entry>
-    <entry>mono</entry>
-    <entry>1</entry>
-  </row>
-
-</tbody>
-</tgroup>
-</informaltable>
-
-<para>
-Örömmel fogadjuk az ezen dokumentummal kapcsolatos visszajelzéseket. Kérjük írd meg,
-hogy hogyan működött együtt az <application>MPlayer</application> és a hang kártyá(i)d.
+  Ha a hang kattog CD-ROM-ról történő lejátszás közben, kapcsold be az IRQ
+  unmasking-ot, amint az a <link linkend="drives">CD-ROM</link> részben le van írva.
 </para>
 </sect2>
+
 
 </sect1>
 
