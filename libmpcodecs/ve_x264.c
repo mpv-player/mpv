@@ -90,7 +90,7 @@ static float qcomp = 0.6;
 static float qblur = 0.5;
 static float complexity_blur = 20;
 static char *rc_eq = "tex*blurTex^(qComp-1)";
-static int subq = 3;
+static int subq = 5;
 static int psnr = 0;
 static int log_level = 2;
 
@@ -127,7 +127,7 @@ m_option_t x264encopts_conf[] = {
     {"qcomp", &qcomp, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
     {"cplx_blur", &complexity_blur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 999, NULL},
-    {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
+    {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 1, 5, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nopsnr", &psnr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"log", &log_level, CONF_TYPE_INT, CONF_RANGE, -1, 3, NULL},

@@ -7283,15 +7283,15 @@ in B-frames.
 .IPs 0
 None: direct macroblocks are not used.
 .IPs 1
+Spatial: motion vectors are extrapolated from neighboring blocks.
+.IPs 2
 Temporal: motion vectors are interpolated from the following P-frame.
 (default)
-.IPs 2
-Spatial: motion vectors are extrapolated from neighboring blocks.
 .RE
 .PD 1
-Spatial and temporal are approximately the same speed, and neither is
-strictly better than the other.
 The best choice depends on the movie.
+Spatial and temporal are approximately the same speed and PSNR,
+but temporal often looks better.
 direct_pred=0 is usually both slower and lower quality.
 .
 .TP
@@ -7315,23 +7315,21 @@ small moving objects are better represented by smaller blocks.
 4x4mv is recommended only with subq >= 3.
 .
 .TP
-.B subq=<0\-5>
+.B subq=<1\-5>
 Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
 estimation decision process.
 It can improve quality significantly.
 .RSs
-0: halfpel only
+1: fullpixel mode decision, 1 iteration of qpel on the winner (fastest)
 .br
-1: 1 iteration of qpel on the winning candidate
+2: fullpixel mode decision, 2 iterations of qpel on the winner
 .br
-2: 2 iterations of qpel on the winning candidate
+3: halfpel mode decision, qpel on the winner
 .br
-3: halfpel on all MB types, qpel on the winner (default)
+4: qpel mode decision
 .br
-4: qpel on all
-.br
-5: more iterations of qpel
+5: qpel mode decision, more iterations (best, default)
 .REss
 .
 .TP
