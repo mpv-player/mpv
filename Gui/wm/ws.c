@@ -33,6 +33,8 @@
 #include <sys/ipc.h>
 #include <sys/shm.h>
 
+#define ENABLE_DPMS 0
+
 typedef struct
 {
  unsigned long flags;
@@ -869,7 +871,9 @@ void wsFullScreen( wsTWindow * win )
    win->Height=win->OldHeight;
    win->isFullScreen=False;
    decoration=win->Decorations;
+#ifdef ENABLE_DPMS
    wsScreenSaverOn( wsDisplay );
+#endif
   }
   else
    {
@@ -878,7 +882,9 @@ void wsFullScreen( wsTWindow * win )
     win->X=0; win->Y=0;
     win->Width=wsMaxX; win->Height=wsMaxY;
     win->isFullScreen=True;
+#ifdef ENABLE_DPMS
     wsScreenSaverOff( wsDisplay );
+#endif
    }
 
  win->SizeHint.flags=PPosition | PSize | PWinGravity;// | PBaseSize;
@@ -1280,6 +1286,7 @@ void wsSetTitle( wsTWindow * win,char * name )
 void wsSetMousePosition( wsTWindow * win,int x, int y )
 { XWarpPointer( wsDisplay,wsRootWin,win->WindowID,0,0,0,0,x,y ); }
 
+#ifdef ENABLE_DPMS
 static int dpms_disabled=0;
 static int timeout_save=0;
 
@@ -1335,6 +1342,7 @@ void wsScreenSaverOff( Display * mDisplay )
  XGetScreenSaver( mDisplay,&timeout_save,&interval,&prefer_blank,&allow_exp );
  if ( timeout_save ) XSetScreenSaver( mDisplay,0,interval,prefer_blank,allow_exp ); // turning off screensaver
 }
+#endif
 
 void wsSetShape( wsTWindow * win,char * data )
 {
