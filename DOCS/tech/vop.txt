@@ -199,3 +199,8 @@ Current plugins:
     radius size of the filter
     power  how often the filter should be applied
     MPI: TEMP, accepts stride
+
+-vop sab=radius:prefilter:colorDiff[:radius:prefilter:colorDiff]
+    radius	blur filter strength (~0.1-4.0) (slower if larger)
+    prefilter	prefilter strength (~0.1-2.0)
+    colorDiff	how different the pixels are allowed to be to be considered (~0.1-100.0)
