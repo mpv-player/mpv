@@ -147,8 +147,10 @@ ac3_retry:
   }
   mp_msg(MSGT_AO,MSGL_V,"audio_setup: sample format: %s (requested: %s)\n",
     audio_out_format_name(ao_data.format), audio_out_format_name(format));
+#if 0
   if(ao_data.format!=format)
 	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %s sample format! Broken audio or bad playback speed are possible! Try with '-aop list=format'\n",audio_out_format_name(format));
+#endif
 
   
   if(format != AFMT_AC3) {
@@ -173,8 +175,10 @@ ac3_retry:
     ao_data.samplerate=rate;
     ioctl (audio_fd, SNDCTL_DSP_SPEED, &ao_data.samplerate);
     mp_msg(MSGT_AO,MSGL_V,"audio_setup: using %d Hz samplerate (requested: %d)\n",ao_data.samplerate,rate);
+#if 0
     if(ao_data.samplerate!=rate)
 	mp_msg(MSGT_AO,MSGL_WARN,"WARNING! Your soundcard does NOT support %d Hz samplerate! A-V sync problems or wrong speed are possible! Try with '-aop list=resample:fout=%d'\n",rate,ao_data.samplerate);
+#endif
   }
 
   if(ioctl(audio_fd, SNDCTL_DSP_GETOSPACE, &zz)==-1){
