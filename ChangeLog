@@ -114,9 +114,11 @@ MPlayer (1.0)
     * many DV fixes, seek in raw DV files
     * support AAC in MOV files
     * RV10, RV20 fixes
+    * RV20 encoding
     * AVI demuxer cleanup, palette change support
     * iTunes metadata support
     * HuffYUV fixes (endianness, RGB32 predictor, median encoding, interlacing)
+    * ffvhuff (enhanced HuffYUV codec)
     * SSE optimizations for 4x4 compare function
     * epzs motion search enhancements
     * quad tree based motion compensation
@@ -139,6 +141,7 @@ MPlayer (1.0)
     * MJPEG-B fixes
     * range coder (arithmetic entropy coder) used by snow and ffv1
     * ffv1 enhancements: signed golomb, range codes
+    * multi slice support for main profile H.264 streams
     * as usual, lots of bug fixes and optimizations
 
     Filters:
