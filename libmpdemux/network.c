@@ -182,10 +182,12 @@ connect2Server(char *host, int port) {
 
 URL_t*
 check4proxies( URL_t *url ) {
+	URL_t *url_out = NULL;
 	if( url==NULL ) return NULL;
+	url_out = url_new( url->url );
 	if( !strcasecmp(url->protocol, "http_proxy") ) {
-			printf("Using HTTP proxy: http://%s:%d\n", url->hostname, url->port );
-			return url;
+		printf("Using HTTP proxy: http://%s:%d\n", url->hostname, url->port );
+		return url_out;
 	}
 	// Check if the http_proxy environment variable is set.
 	if( !strcasecmp(url->protocol, "http") ) {
@@ -200,7 +202,7 @@ check4proxies( URL_t *url ) {
 
 			if( proxy_url==NULL ) {
 				printf("Invalid proxy setting...Trying without proxy.\n");
-				return url;
+				return url_out;
 			}
 
 			printf("Using HTTP proxy: %s\n", proxy_url->url );
@@ -208,20 +210,20 @@ check4proxies( URL_t *url ) {
 			new_url = malloc( len+1 );
 			if( new_url==NULL ) {
 				printf("Memory allocation failed\n");
-				return url;
+				return url_out;
 			}
-			sprintf( new_url, "http_proxy://%s:%d/%s", proxy_url->hostname, proxy_url->port, url->url);
+			sprintf( new_url, "http_proxy://%s:%d/%s", proxy_url->hostname, proxy_url->port, url->url );
 			tmp_url = url_new( new_url );
 			if( tmp_url==NULL ) {
-				return url;
+				return url_out;
 			}
-			url_free( url );
-			url = tmp_url;
+			url_free( url_out );
+			url_out = tmp_url;
 			free( new_url );
 			url_free( proxy_url );
 		}
 	}
-	return url;
+	return url_out;
 }
 
 int
@@ -311,13 +313,12 @@ http_read_response( int fd ) {
 int
 autodetectProtocol(streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_format) {
 	HTTP_header_t *http_hdr;
+	unsigned int i;
 	int fd=-1;
-	int i;
 	int redirect;
 	char *extension;
 	char *content_type;
 	char *next_url;
-	char response[1024];
 
 	URL_t *url = streaming_ctrl->url;
 	*file_format = DEMUXER_TYPE_UNKNOWN;
@@ -665,7 +666,7 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 	if( stream->streaming_ctrl==NULL ) {
 		return -1;
 	}
-	stream->streaming_ctrl->url = check4proxies( url_copy(url) );
+	stream->streaming_ctrl->url = check4proxies( url );
 	ret = autodetectProtocol( stream->streaming_ctrl, &stream->fd, &demuxer_type );
 	if( ret<0 ) {
 		return -1;
@@ -712,7 +713,7 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 	if( ret<0 ) {
 		streaming_ctrl_free( stream->streaming_ctrl );
 		stream->streaming_ctrl = NULL;
-	} else if( stream->streaming_ctrl->buffering) {
+	} else if( stream->streaming_ctrl->buffering ) {
 		int cache_size = 0; 
 		int ret, val;
 		ret = m_config_is_option_set(mconfig,"cache");
@@ -722,6 +723,7 @@ streaming_start(stream_t *stream, int demuxer_type, URL_t *url) {
 			// cache option not set, will use the our computed value.
 			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
 			val = (stream->streaming_ctrl->prebuffer_size/1024)*5;
+			if( val<16 ) val = 16;	// 16KBytes min buffer
 			if( m_config_set_int( mconfig, "cache", val )<0 ) { 
 				printf("Unable to set the cache size option\n");
 			} else {
