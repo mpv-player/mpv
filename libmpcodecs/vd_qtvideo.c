@@ -266,6 +266,7 @@ static void uninit(sh_video_t *sh){
 // decode a frame
 static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     long result = 1;
+    int i;
     mp_image_t* mpi;
     ComponentResult cres;
 
@@ -347,10 +348,47 @@ if(!codec_inited){
 #endif
 
     cres=ImageCodecBandDecompress(ci,&decpar);
-    if(cres&0xFFFF) printf("ImageCodecBandDecompress cres=0x%X (-0x%X) %d\n",cres,-cres,cres);
 
     ++decpar.frameNumber;
+
+    if(cres&0xFFFF){
+	printf("ImageCodecBandDecompress cres=0x%X (-0x%X) %d\n",cres,-cres,cres);
+	return NULL;
+    }
     
+//    for(i=0;i<8;i++)
+//	printf("img_base[%d]=%p\n",i,((int*)decpar.dstPixMap.baseAddr)[i]);
+
+if((int)sh->context==0x73797639){	// Sorenson 16-bit YUV -> std YVU9
+
+    short *src0=((char*)decpar.dstPixMap.baseAddr+0x20);
+
+    for(i=0;i<mpi->h;i++){
+	int x;
+	unsigned char* dst=mpi->planes[0]+i*mpi->stride[0];
+	unsigned short* src=src0+i*((mpi->w+15)&(~15));
+	for(x=0;x<mpi->w;x++) dst[x]=src[x];
+    }
+    src0+=((mpi->w+15)&(~15))*((mpi->h+15)&(~15));
+    for(i=0;i<mpi->h/4;i++){
+	int x;
+	unsigned char* dst=mpi->planes[1]+i*mpi->stride[1];
+	unsigned short* src=src0+i*(((mpi->w+63)&(~63))/4);
+	for(x=0;x<mpi->w/4;x++) dst[x]=src[x];
+	src+=((mpi->w+63)&(~63))/4;
+    }
+    src0+=(((mpi->w+63)&(~63))/4)*(((mpi->h+63)&(~63))/4);
+    for(i=0;i<mpi->h/4;i++){
+	int x;
+	unsigned char* dst=mpi->planes[2]+i*mpi->stride[2];
+	unsigned short* src=src0+i*(((mpi->w+63)&(~63))/4);
+	for(x=0;x<mpi->w/4;x++) dst[x]=src[x];
+	src+=((mpi->w+63)&(~63))/4;
+    }
+    
+}
+
+
     return mpi;
 }
 #endif
