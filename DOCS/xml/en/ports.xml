@@ -309,7 +309,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
 <para>Cygwin versions prior to 1.5.0 do not include <filename>inttypes.h</filename>.
   Put this
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/inttypes.h">inttypes.h</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
   in <filename class="directory">/usr/include/</filename> in order to
   make MPlayer compile.</para>
 
