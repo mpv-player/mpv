@@ -1,4 +1,4 @@
-.\" synced with 1.669
+.\" synced with 1.671
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2035,7 +2035,7 @@ Je¿eli jest ona u¿yta ze sterownikiem wyj¶cia video directx, opcje \-screenw,
 \-screenh, \-bpp i \-refreshrate mog± ustawiæ nowy tryb wy¶wietlania.
 .TP
 .B \-vsync \ \ 
-W³±cza VBI dla sterowników wyj¶cia video vesa, dbfmga i svga.
+W³±cza VBI dla sterowników wyj¶cia video vesa, dfbmga i svga.
 .TP
 .B \-wid <id\ okna>] (tylko X11)
 Przekazuje MPlayerow, bt do³±czy³ siê do instniej±cego okna X11.
@@ -2147,8 +2147,8 @@ Okre¶la port XVideo.
 .PD 1
 .TP
 .B x11 (tylko X11)
-Sterownik wyj¶cia z pamiêci± dzielon±, bez sprzêtowej akceleracji, który dzia³a
-gdziekolwiek, je¿eli tylko obecne jest X11.
+Sterownik wyj¶cia video z pamiêci± dzielon±, bez sprzêtowej akceleracji,
+który dzia³a gdziekolwiek, je¿eli tylko obecne jest X11.
 .TP
 .B xover (tylko X11)
 Dodaje obs³ugê X11 dla wszystkich sterowników opartych o overlay.
@@ -2178,7 +2178,7 @@ Nie korzysta z funkcji sleep podczas czekania na zakoñczenie renderowania
 .PD 1
 .TP
 .B dga (tylko X11)
-Sterownik wyj¶cia korzystaj±cy z roszerzenia XFree86 Direct Graphics Access.
+Odtwarza video korzystaj±c z rozszerzenia XFree86 Direct Graphics Access.
 Uwa¿any za prze¿ytek.
 .TP
 .B sdl (tylko SDL)
@@ -2186,15 +2186,15 @@ Sterownik wyj¶cia oparty na wysoce niezale¿nej od platformy bibliotece SDL
 (Simple Directmedia Layer).
 .TP
 .B vidix\ \ 
-VIDIX (VIDeo Interface for *niX - interfejs video dla *niX) to interfejsc do
+VIDIX (VIDeo Interface for *niX - interfejs video dla *niX) to interfejs do
 mo¿liwo¶ci przyspieszaj±cych w ró¿nych kartach graficznych.
-Bardzo szybki na kartach, które go obs³uguj±.
+Bardzo szybki sterownik wyj¶cia video na kartach, które go obs³uguj±.
 .PD 0
 .RSs
 .IPs <podurz±dzenie>
 Precyzuje, który sterownik VIDIX ma byæ wykorzystany.
 Dostêpne s± cyberblade_vid, mach64_vid, mga_crtc2_vid,
-mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid, sis_vid.
+mga_vid, nvidia_vid, pm3_vid, radeon_vid, rage128_vid i sis_vid.
 .RE
 .PD 1
 .TP
@@ -2227,7 +2227,7 @@ jak dla vidix
 .PD 1
 .TP
 .B directx (tylko Windows)
-Sterownik wyj¶cia korzystaj±cy z interfejsu DirectX.
+Sterownik wyj¶cia video korzystaj±cy z interfejsu DirectX.
 .PD 0
 .RSs
 .IPs noaccel
@@ -2237,9 +2237,9 @@ Wypróbuj tê opcjê, je¿eli masz problemy z wy¶wietlaniem.
 .PD 1
 .TP
 .B quartz (tylko Mac OS X)
-Sterownik wyj¶cia Mac OS X Quartz.
+Sterownik wyj¶cia video Mac OS X Quartz.
 W pewnych przypadkach, wydajniejsze mo¿e siê okazaæ wymuszenie spakowanego
-formatu wyj¶ciowego YUV, podaj±c np.\& \-vf format=yuy2
+formatu wyj¶ciowego YUV, podaj±c np.\& \-vf format=yuy2.
 .PD 0
 .RSs
 .IPs device_id=<numer>
@@ -2255,8 +2255,8 @@ U¿ywa bufora ramki oferowanego przez j±dro do wy¶wietlania obrazu,
 alternatywna implementacja.
 .TP
 .B vesa\ \ \ 
-Bardzo ogólny sterownik wyj¶cia, który powinien dzia³aæ z wszystkimi kartami
-obs³uguj±cymi standard VESA VBE 2.0.
+Bardzo ogólny sterownik wyj¶cia video , który powinien dzia³aæ z wszystkimi
+kartami obs³uguj±cymi standard VESA VBE 2.0.
 .PD 0
 .RSs
 .IPs dga\ \ 
@@ -2271,10 +2271,10 @@ FIXME: udokumentowaæ
 .PD 1
 .TP
 .B svga\ \ \ 
-Sterownik wyj¶cia korzystaj±cy z biblioteki SVGA.
+Sterownik wyj¶cia video korzystaj±cy z biblioteki SVGA.
 .TP
 .B gl\ \ \ \ \ 
-Sterownik OpenGL.
+Sterownik wyj¶cia video OpenGL.
 Bardzo prosta wersja, nie obs³uguje OSD i obraz musi byæ mniejszy ni¿
 maksymalny rozmiar tekstury dostêpny w Twojej implementacji OpenGL.
 Zamiarem by³o dzia³anie na nawet najprostszych implementacjach OpenGL.
@@ -2290,7 +2290,7 @@ Ilo¶æ lini kopiowana do tekstury w jednym kawa³ku (domy¶lnie: 4).
 .PD 1
 .TP
 .B gl2\ \ \ \ 
-Sterownik OpenGL, druga generacja.
+Sterownik wyj¶cia video OpenGL, druga generacja.
 Obs³uguje OSD i obrazy wiêksze ni¿ maksymalny rozmiar tekstury.
 .TP
 .B null\ \ \ 
@@ -2298,17 +2298,17 @@ Nie tworzy danych wyj¶ciowych video.
 U¿yteczne dla testowania wydajno¶ci.
 .TP
 .B aa\ \ \ \ \ 
-Sterownik wyj¶cia ASCII art, który dzia³a na konsoli tekstowej.
+Sterownik wyj¶cia video ASCII art, który dzia³a na konsoli tekstowej.
 .TP
 .B caca\ \ \ 
-Sterownik Colour AsCii Art, który dzia³a na konsoli tekstowej.
+Sterownik wyj¶cia video Colour AsCii Art, który dzia³a na konsoli tekstowej.
 .TP
 .B bl\ \ \ \ \ 
 Odtwarzanie video przy u¿yciu protoko³u Blinkenlights UDP.
 Sterownik jest wysoce zale¿ny od sprzêtu.
 .TP
 .B ggi\ \ \ \ 
-Sterownik wyj¶cia dla systemu grafiki GGI.
+Sterownik wyj¶cia video dla systemu grafiki GGI.
 .TP
 .B directfb
 Odtwarza video korzystaj±c z biblioteki DirectFB.
@@ -2336,8 +2336,8 @@ Wymusi wybranie warstwy o id N do odtwarzania (domy¶lnie: -1 - auto).
 .PD 1
 .TP
 .B dfbmga\ 
-Sterownik przeznaczony dla kart Matrox G400/G450/G550, wykorzystuje bibliotekê
-DirectFB.
+Sterownik wyj¶cia video przeznaczony dla kart Matrox G400/G450/G550,
+wykorzystuj±cy bibliotekê DirectFB.
 W³±cza CRTC2 (drugi monitor), wy¶wietlaj±c obraz niezale¿nie od pierwszego.
 .PD 0
 .RSs
@@ -2381,12 +2381,12 @@ uwagê na ilo¶æ klatek na sekundê filmu.
 .PD 1
 .TP
 .B mga (tylko Linux)
-Sterownik przystosowany do kart Matrox, wykorzystuj±cy koñcowy
+Sterownik wyj¶cia video przystosowany do kart Matrox, wykorzystuj±cy koñcowy
 system skaluj±cy YUV na kartach z serii Gxxx poprzez modu³ j±dra.
 Je¿eli posiadasz tak± kartê, jest to wybór oferuj±cy najwiêksz± szybko¶æ.
 .TP
 .B xmga (tylko Linux, X11)
-Sterownik wyj¶ciowy mga dzia³aj±cy w oknie X11.
+Sterownik wyj¶cia video mga dzia³aj±cy w oknie X11.
 .TP
 .B syncfb\ 
 Sterownik wyj¶cia dla modu³u j±dra SyncFB, który umo¿liwia
@@ -2404,7 +2404,7 @@ akceleracj± YUV.
 FIXME: Jak jest ró¿nica miêdzy 3dfx, tdfxfb i tdfx_vid?
 .TP
 .B tdfx_vid (tylko Linux)
-Sterownik przeznaczony dla 3Dfx.
+Sterownik wyj¶cia video przeznaczony dla 3Dfx.
 Dzia³a w po³±czeniu z modu³em j±dra.
 FIXME: Jak jest ró¿nica miêdzy 3dfx, tdfxfb i tdfx_vid?
 .TP
@@ -2420,8 +2420,8 @@ W³±cza overlay.
 .PD 1
 .TP
 .B dxr3 (tylko DXR3)
-Sterownik przeznaczony dla chipu dekoduj±cego MPEG - Sigma Designs em8300
-(Creative DXR3, Sigma Designs Hollywood Plus).
+Sterownik wyj¶cia video przeznaczony dla chipu dekoduj±cego MPEG - Sigma
+Designs em8300 (Creative DXR3, Sigma Designs Hollywood Plus).
 Sprawd¼ równie¿ filtr video lavc.
 .PD 0
 .RSs
@@ -2453,7 +2453,7 @@ kartê em8300.
 .PD 1
 .TP
 .B mpegpes (tylko DVB)
-Sterownik przeznaczony dla DVB.
+Sterownik wyj¶cia video przeznaczony dla DVB.
 .PD 0
 .RSs
 .IPs card=<1\-4>
@@ -2463,10 +2463,11 @@ kartê DVB (tylko API V3, tak jak sterowniki z serii 1.x.y).
 .PD 1
 .TP
 .B zr (patrz te¿ \-zr* i \-zrhelp)
-Sterownik przeznaczony dla wielu kart przechwytuj±cych/odtwarzaj±cych MJPEG.
+Sterownik wyj¶cia video przeznaczony dla wielu kart
+przechwytuj±cych/odtwarzaj±cych MJPEG.
 .TP
 .B zr2\ \ \ \ 
-Sterownik drugiej generacji przeznaczony dla wielu kart
+Sterownik wyj¶cia video drugiej generacji przeznaczony dla wielu kart
 przechwytuj±cych/odtwarzaj±cych MJPEG.
 Zwróæ równie¿ uwagê na filtr video zrmjpeg.
 .TP
