@@ -8,6 +8,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#ifdef __FreeBSD__
+#include <unistd.h>
+#endif
+
 #include <dlfcn.h> /* dlsym, dlopen, dlclose */
 #include <stdarg.h> /* va_alist, va_start, va_end */
 #include <errno.h> /* strerror, errno */
