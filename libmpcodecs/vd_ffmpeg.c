@@ -55,11 +55,15 @@ typedef struct {
 
 static int lavc_param_workaround_bugs=0;
 static int lavc_param_error_resilience=0;
+static int lavc_param_gray=0;
 
 struct config lavc_decode_opts_conf[]={
 #if LIBAVCODEC_BUILD >= 4611
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, 0, 99, NULL},
 	{"ver", &lavc_param_error_resilience, CONF_TYPE_INT, CONF_RANGE, -1, 99, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4614
+	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -113,6 +117,9 @@ static int init(sh_video_t *sh){
 #if LIBAVCODEC_BUILD >= 4611
     avctx->workaround_bugs= lavc_param_workaround_bugs;
     avctx->error_resilience= lavc_param_error_resilience;
+#endif
+#if LIBAVCODEC_BUILD >= 4614
+    if(lavc_param_gray) avctx->flags|= CODEC_FLAG_GRAY;
 #endif
     
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
