@@ -924,8 +924,12 @@ static void print_status(float a_pos, float a_v, float corr)
 static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
 {
   int new_srate;
+  int result;
   if (!sh_audio)
+  {
+    mixer.afilter = NULL;
     return 0;
+  }
   new_srate = sh_audio->samplerate * playback_speed;
   if (new_srate != ao_data->samplerate) {
     // limits are taken from libaf/af_resample.c
@@ -935,11 +939,13 @@ static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
       new_srate = 192000;
     playback_speed = (float)new_srate / (float)sh_audio->samplerate;
   }
-  return init_audio_filters(sh_audio, new_srate,
+  result =  init_audio_filters(sh_audio, new_srate,
            sh_audio->channels, sh_audio->sample_format, sh_audio->samplesize,
            ao_data->samplerate, ao_data->channels, ao_data->format,
            audio_out_format_bits(ao_data->format) / 8, /* ao_data.bps, */
            ao_data->outburst * 4, ao_data->buffersize);
+  mixer.afilter = sh_audio->afilter;
+  return result;
 }
 
 int main(int argc,char* argv[]){
@@ -2128,7 +2134,6 @@ if(sh_audio){
 #endif
   }
   mixer.audio_out = audio_out;
-  mixer.afilter = sh_audio ? sh_audio->afilter : NULL;
   mixer.volstep = volstep;
 }
 
