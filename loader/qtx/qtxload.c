@@ -33,8 +33,14 @@ void* GetProcAddress(void* handle,char* func);
 
 unsigned int* x_table[0x00001837];
 
+static    OSErr (*InitializeQTML)(long flags);
+
 int main(int argc, char *argv[]){
     void *handler;
+    void *handler2;
+    void* theqtdp=NULL;
+    void* compcall=NULL;
+    void* compcallws=NULL;
     ComponentResult (*
 dispatcher)(ComponentParameters *params, Globals glob);
     ComponentResult ret;
@@ -44,14 +50,35 @@ dispatcher)(ComponentParameters *params, Globals glob);
     unsigned int esp=0;
     int i;
 
+    mp_msg_init();
+    mp_msg_set_level(10);
+
     Setup_LDT_Keeper();
-    handler = LoadLibraryA("/usr/lib/win32/QuickTime.qts");
-    dispatcher = GetProcAddress(handler, "SorensonYUV9Dispatcher");
+    printf("loading qts\n");
+//    handler = LoadLibraryA("/root/.wine/fake_windows/Windows/System/QuickTime.qts");
+    handler = LoadLibraryA("QuickTime.qts");
+    theqtdp = GetProcAddress(handler, "theQuickTimeDispatcher");
+    compcall = GetProcAddress(handler, "_CallComponent");
+    compcallws = GetProcAddress(handler, "_CallComponentFunctionWithStorage");
+
+    InitializeQTML = 0x6299e590;//GetProcAddress(handler, "InitializeQTML");
+    InitializeQTML(6+16);
+    
+    printf("loading svq3\n");
+    handler2= LoadLibraryA("/root/.wine/fake_windows/Windows/System/QuickTime/QuickTimeEssentials.qtx");
+    printf("done\n");
+    dispatcher = GetProcAddress(handler2, "SMD_ComponentDispatch");
 //    handler = expLoadLibraryA("/usr/lib/win32/On2_VP3.qtx");
 //    dispatcher = GetProcAddress(handler, "CDComponentDispatcher");
-    printf("handler: %p, dispatcher: %p\n", handler, dispatcher);
+    printf("handler: %p, dispatcher: %p  theqtdp: %p\n", handler, dispatcher, theqtdp);
 
-    printf("theQuickTimeDispatcher = %p\n",GetProcAddress(handler, "theQuickTimeDispatcher"));
+//    printf("theQuickTimeDispatcher = %p\n",GetProcAddress(handler, "theQuickTimeDispatcher"));
+
+    // patch svq3 dll:
+    *((void**)0x63214c98) = NULL;
+    *((void**)0x63214c9c) = theqtdp; // theQt...
+    *((void**)0x63214ca0) = compcall; //0xdeadbeef; //dispatcher; // CallCOmponent_ptr
+    *((void**)0x63214ca4) = compcallws; //0xdeadbef2; //dispatcher; // CallComponentWithStorage_ptr
 
     desc.componentType=0;
     desc.componentSubType=0;
@@ -62,21 +89,19 @@ dispatcher)(ComponentParameters *params, Globals glob);
     params = malloc(sizeof(ComponentParameters)+2048);
 
     params->flags = 0;
-    params->paramSize = 0;
-    params->what = kComponentRegisterSelect;
+    params->paramSize = 4;
+    params->what = kComponentOpenSelect;
+    params->params[0] = 0x830000; //0x820000|i; //(i<<16)|0x24; //0x820024;
     ret = dispatcher(params, &globals);
     printf("!!! CDComponentDispatch() => 0x%X  glob=%p\n",ret,globals);
 
 //    memset(x_table,12,4*0x00001837);
 
 //for(i=0;i<=255;i++){
-    params->flags = 0;
-    params->paramSize = 4; //sizeof(params->params[0]);
-    params->params[0] = 0x820000; //0x820000|i; //(i<<16)|0x24; //0x820024;
 
     // params->what = kComponentVersionSelect;
     // params->what = kComponentRegisterSelect;
-    params->what = kComponentOpenSelect;
+    // params->what = kComponentOpenSelect;
     // params->what = kComponentCanDoSelect;
 
     printf("params: flags: %d, paramSize: %d, what: %d, params[0] = %x\n",
