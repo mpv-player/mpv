@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 
 #include "../config.h"
 
@@ -83,7 +84,7 @@ static int lavc_param_mpeg_quant=0;
 static int lavc_param_fdct=0;
 static int lavc_param_idct=0;
 #if LIBAVCODEC_BUILD >= 4623
-static float lavc_param_aspect=0.0;
+static char* lavc_param_aspect = NULL;
 #endif
 static float lavc_param_lumi_masking= 0.0;
 static float lavc_param_dark_masking= 0.0;
@@ -151,7 +152,7 @@ struct config lavcopts_conf[]={
         {"vfdct", &lavc_param_fdct, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 #endif
 #if LIBAVCODEC_BUILD >= 4623
-	{"aspect", &lavc_param_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
+	{"aspect", &lavc_param_aspect, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 #if LIBAVCODEC_BUILD >= 4625
 	{"lumi_mask", &lavc_param_lumi_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
@@ -289,27 +290,27 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->dark_masking= lavc_param_dark_masking;
 #endif
 
-#if LIBAVCODEC_BUILD >= 4623
-    if (lavc_param_aspect != 0.0)
+#if LIBAVCODEC_BUILD >= 4640
+    if (lavc_param_aspect != NULL)
     {
-	/* 625 means CIF */
-	if (lavc_param_aspect == (float)(4.0/3.0))
-	    lavc_venc_context->aspect_ratio_info = FF_ASPECT_4_3_625;
-	else if (lavc_param_aspect == (float)(16.0/9.0))
-	    lavc_venc_context->aspect_ratio_info = FF_ASPECT_16_9_625;
-	else if (lavc_param_aspect == (float)(221.0/100.0))
-	{
-    	    lavc_venc_context->aspect_ratio_info = FF_ASPECT_EXTENDED;
-	    lavc_venc_context->aspected_width = 221;
-	    lavc_venc_context->aspected_height = 100;
+	int par_width, par_height, e;
+	float ratio=0;
+	
+	e= sscanf (lavc_param_aspect, "%d/%d", &par_width, &par_height);
+	if(e==2){
+            if(par_height)
+                ratio= (float)par_width / (float)par_height;
+        }else{
+	    e= sscanf (lavc_param_aspect, "%f", &ratio);
 	}
-	else
-	{
-	    printf("Unsupported aspect ratio (%f)\n", lavc_param_aspect);
+
+	if (e && ratio > 0.1 && ratio < 10.0) {
+	    lavc_venc_context->aspect_ratio= ratio;
+	    mp_dbg(MSGT_MENCODER, MSGL_DBG2, "aspect_ratio: %f\n", ratio);
+	} else {
+	    mp_dbg(MSGT_MENCODER, MSGL_ERR, "aspect ratio: cannot parse \"%s\"\n", lavc_param_aspect);
+	    return 0;
 	}
-	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "aspect_ratio_info: %d\n", lavc_venc_context->aspect_ratio_info);
-	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "par_width: %d\n", lavc_venc_context->aspected_width);
-	mp_dbg(MSGT_MENCODER, MSGL_DBG2, "par_height: %d\n", lavc_venc_context->aspected_height);
     }
 #endif
 

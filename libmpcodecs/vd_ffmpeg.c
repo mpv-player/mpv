@@ -40,7 +40,7 @@ int quant_store[MBR+1][MBC+1];
 
 typedef struct {
     AVCodecContext *avctx;
-    int last_aspect;
+    float last_aspect;
     int do_slices;
     int do_dr1;
     int vo_inited;
@@ -330,37 +330,16 @@ static int init_vo(sh_video_t *sh){
     vd_ffmpeg_ctx *ctx = sh->context;
     AVCodecContext *avctx = ctx->avctx;
 
-    if (avctx->aspect_ratio_info != ctx->last_aspect ||
+    if (avctx->aspect_ratio != ctx->last_aspect ||
 	avctx->width != sh->disp_w ||
 	avctx->height != sh->disp_h ||
 	!ctx->vo_inited)
     {
-#if LIBAVCODEC_BUILD >= 4623
-	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "aspect_ratio_info: %d\n", avctx->aspect_ratio_info);
-	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "par_width: %f\n", (float)avctx->aspected_width);
-	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "par_height: %f\n", (float)avctx->aspected_height);
+#if LIBAVCODEC_BUILD >= 4640
+	mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "aspect_ratio: %d\n", avctx->aspect_ratio);
+	sh->aspect = 
+        ctx->last_aspect = avctx->aspect_ratio;
 #endif
-	ctx->last_aspect = avctx->aspect_ratio_info;
-	switch(avctx->aspect_ratio_info)
-	{
-	    case FF_ASPECT_4_3_625:
-	    case FF_ASPECT_4_3_525:
-		sh->aspect = 4.0/3.0;
-		break;
-	    case FF_ASPECT_16_9_625:
-	    case FF_ASPECT_16_9_525:
-		sh->aspect = 16.0/9.0;
-		break;
-	    case FF_ASPECT_SQUARE:
-		sh->aspect = 0.0;
-		break;
-#if LIBAVCODEC_BUILD >= 4623
-	    case FF_ASPECT_EXTENDED:
-		if (avctx->aspected_width && avctx->aspected_height)
-		    sh->aspect = (float)avctx->aspected_width/(float)avctx->aspected_height;
-		break;
-#endif
-	}
 	sh->disp_w = avctx->width;
 	sh->disp_h = avctx->height;
 	ctx->vo_inited=1;
