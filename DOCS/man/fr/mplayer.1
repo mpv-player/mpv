@@ -1,4 +1,4 @@
-.\" synced with 1.742
+.\" synced with 1.744
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "25 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "26 Septembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -199,6 +199,9 @@ rotation, redimensionnement, bruit, conversion rgb/\:yuv) et bien plus.
 .B gmplayer
 est l'interface graphique de MPlayer.
 Il possède les mêmes options que MPlayer.
+.PP
+Des exemples d'usages pour vous familiariser rapidement dont disponibles
+à la fin de cette page de manuel.
 .PP
 .B Regardez également la documentation HTML !
 .
@@ -386,7 +389,7 @@ dans mplayer.
 Spécifie le fichier de configuration à analyser après ceux par défaut.
 .
 .TP
-.B \-quiet
+.B \-quiet\ \ 
 Avec cette option, la ligne d'état (c-a-d A:   0.7 V:   0.6 A-V:  0.068 ...) ne
 sera pas affichée.
 Cela est particulièrement utile sur les terminaux lents ou endommagés qui ne
@@ -1535,11 +1538,11 @@ Définit l'alignement des sous-titres alignés avec \-subpos.
 .PD 0
 .RSs
 .IPs 0
-aligner en haut (par défaut)
+Aligner en haut (par défaut)
 .IPs 1
-aligner au milieu
+Aligner au milieu
 .IPs 2
-aligner en bas
+Aligner en bas
 .RE
 .PD 1
 .
@@ -3016,16 +3019,12 @@ l'option subdirs est définie.
 .PD 1
 .
 .TP
-.B pnm
+.B pnm\ \ \ \ 
 Écrit, dans le répertoire courant, chaque trame dans un fichier PNM.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
 Gère les fichiers PPM, PGM et PGMYUB, en mode brut ou ASCII.
-Voir aussi les pages de manuel
-.BR pnm (5),
-.BR ppm (5)
-et
-.BR pgm (5)
+Voir aussi les pages de manuel pnm (5), ppm (5) et pgm (5).
 .PD 0
 .RSs
 .IPs ppm
@@ -3042,10 +3041,10 @@ en bas de l'image.
 Écrit les fichiers PNM en mode ASCII (par défaut).
 .IPs outdir=<nom_répertoire>
 Définit le répertoire où écrire les fichiers PNM.
-.IPs subdirs=<valeur>
+.IPs subdirs=<préfixe>
 Crée des sous-répertoires numérotés avec le préfixe donné
-Par défaut, aucun sous-répertoire n'est créé et tous les fichiers PNM
-sont écrits dans le même répertoire.
+pour y écrire les fichiers au lieu de les mettre tous dans le
+même répertoire.
 .IPs maxfiles=<1..> (subdir uniquement)
 Nombre de fichiers PNM maximum à écrire par sous-répertoire 
 .RE
@@ -3318,7 +3317,7 @@ débogage:
 .br
 8: type de macro-bloc (MB)
 .br
-16: paramètre de quantificateur (QP)
+16: paramètre de quantification (QP)
 .br
 32: vecteur de mouvement (MV)
 .br
@@ -3957,7 +3956,7 @@ filtre de postprocessing simple
 .IPs qualité
 0\-6 (par défaut\ : 3)
 .IPs qp\ \ \ 
-paramètre pour forcer la quantisation (par défaut\ : 0, utilise le QP de
+Paramètre pour forcer la quantisation (par défaut\ : 0, utilise le QP de
 la video)
 .IPs mode\ \ \ 
 0: fort seuillage (hard thresholding) (par défaut)
@@ -7103,7 +7102,7 @@ Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
 Notez que la quantification dans H.264 fonctionne différemment de MPEG[124].
-L'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
+L'échelle des paramètres de quantization (QP) de H.264 est logarithmique.
 Ainsi, la différence de débit binaire entre QP=20 et QP=40 est d'environ un
 facteur 10.
 Les quantificateurs utiles en H.264 ont tendance à être bien plus importants
