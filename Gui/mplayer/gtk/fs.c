@@ -32,32 +32,36 @@
 gchar         * fsSelectedFile = NULL;
 gchar         * fsSelectedDirectory = NULL;
 unsigned char * fsThatDir = ".";
-gchar           fsFilter[8] = "*";
+gchar           fsFilter[64] = "*";
 
 int             fsPressed = 0;
 int             fsMessage = -1;
 int             fsType    = 0;
 
-#define fsNumberOfVideoFilterNames 6
+#define fsNumberOfVideoFilterNames 9
 char * fsVideoFilterNames[fsNumberOfVideoFilterNames+1][2] =
-         { { "MPEG files ( *.mpg )", "*.mpg" },
-           { "VOB files ( *.vob )",  "*.vob" },
-           { "AVI files ( *.avi )",  "*.avi" },
-           { "QT files ( *.mov )",   "*.mov" },
-           { "ASF files ( *.asf )",  "*.asf" },
-           { "VIVO files ( *.viv )", "*.viv" },
-           { "All files ( * )",      "*"     } };
+         { { "MPEG files (*.mpg)",                                	"*.mpg" },
+           { "VOB files (*.vob)",  				  	"*.vob" },
+           { "AVI files (*.avi)",  				  	"*.avi" },
+           { "QT files (*.mov)",   				  	"*.mov" },
+           { "ASF files (*.asf)",  				  	"*.asf" },
+           { "VIVO files (*.viv)", 				  	"*.viv" },
+	   { "Windows Media Video (*.wmv)",			  	"*.wmv" },
+	   { "Audio files (*.mp2,*.mp3,*.wma)",			  	"*.mp2,*.mp3,*.wma" },
+	   { "Video files (*.mpg,*.vob,*.avi,*.mov,*.asf,*.viv,*.wmv)", "*.mpg,*.vob,*.avi,*.mov,*.asf,*.viv,*.wmv" },
+           { "All files (*)",      "*"     } };
 
-#define fsNumberOfSubtitleFilterNames 8
+#define fsNumberOfSubtitleFilterNames 9
 char * fsSubtitleFilterNames[fsNumberOfSubtitleFilterNames+1][2] =
-         { { "UTF ( *.utf )",   "*.utf" },
-           { "SUB ( *.sub )",   "*.sub" },
-           { "SRT ( *.srt )",   "*.str" },
-           { "SMI ( *.smi )",   "*.smi" },
-           { "RT ( *.rt )",     "*.rt"  },
-           { "TXT ( *.txt )",   "*.txt" },
-           { "SSA ( *.ssa )",   "*.ssa" },
-           { "AQT ( *.aqt )",   "*.aqt" },
+         { { "UTF (*.utf)",  						   "*.utf" },
+           { "SUB (*.sub)",   						   "*.sub" },
+           { "SRT (*.srt)",   						   "*.str" },
+           { "SMI (*.smi)",   						   "*.smi" },
+           { "RT  (*.rt) ",   						   "*.rt"  },
+           { "TXT (*.txt)",   						   "*.txt" },
+           { "SSA (*.ssa)",   						   "*.ssa" },
+           { "AQT (*.aqt)",   						   "*.aqt" },
+	   { "Subtitles (*.utf,*.sub,*.srt,*.smi,*.rt,*.txt,*.ssa,*.aqt)", "*.utf,*.sub,*.srt,*.smi,*.rt,*.txt,*.ssa,*.aqt" },
            { "All files ( * )", "*"     } };
 
 #define fsNumberOfOtherFilterNames 0
@@ -122,7 +126,24 @@ void CheckDir( GtkWidget * list,char * directory )
   }
  globfree( &gg );
 
- glob( fsFilter,0,NULL,&gg );
+//printf( "fsFiler: '%s'\n",fsFilter );
+ if ( strchr( fsFilter,',' ) )
+  {
+   char tmp[8];
+   int  i,c,glob_param = 0;
+//printf( "sub item detected.\n" );   
+   for ( i=0,c=0;i<(int)strlen( fsFilter ) + 1;i++,c++ )
+    {
+     tmp[c]=fsFilter[i];
+     if ( ( tmp[c] == ',' )||( tmp[c] == '\0' ) )
+      {
+       tmp[c]=0; c=-1;
+//       printf( "substr: %s\n",tmp );
+       glob( tmp,glob_param,NULL,&gg ); 
+       glob_param=GLOB_APPEND;
+      }
+    }
+  } else glob( fsFilter,0,NULL,&gg );
 
 #if 0
  if ( !strcmp( fsFilter,"*" ) )
@@ -175,7 +196,7 @@ void ShowFileSelect( int type )
           fsList_items=g_list_append( fsList_items,fsVideoFilterNames[i][0] );
         gtk_combo_set_popdown_strings( GTK_COMBO( List ),fsList_items );
         g_list_free( fsList_items );
-        gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsVideoFilterNames[fsNumberOfVideoFilterNames][0] );
+        gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsVideoFilterNames[fsNumberOfVideoFilterNames - 1][0] );
         break;
    case fsSubtitleSelector:
         gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_SubtitleSelect );
@@ -184,7 +205,7 @@ void ShowFileSelect( int type )
           fsList_items=g_list_append( fsList_items,fsSubtitleFilterNames[i][0] );
         gtk_combo_set_popdown_strings( GTK_COMBO( List ),fsList_items );
         g_list_free( fsList_items );
-        gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsSubtitleFilterNames[fsNumberOfSubtitleFilterNames][0] );
+        gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsSubtitleFilterNames[fsNumberOfSubtitleFilterNames - 1][0] );
         break;
    case fsOtherSelector:
         gtk_window_set_title( GTK_WINDOW( fsFileSelect ),MSGTR_OtherSelect );
@@ -596,7 +617,7 @@ GtkWidget * create_FileSelect( void )
                           ( GtkDestroyNotify ) gtk_widget_unref );
  gtk_widget_show( fsFilterCombo );
  gtk_entry_set_editable (GTK_ENTRY( fsFilterCombo ),FALSE );
- gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsVideoFilterNames[fsNumberOfVideoFilterNames][0] );
+ gtk_entry_set_text( GTK_ENTRY( fsFilterCombo ),fsVideoFilterNames[fsNumberOfVideoFilterNames - 1][0] );
 
  hseparator3=gtk_hseparator_new();
  gtk_widget_set_name( hseparator3,"hseparator3" );
