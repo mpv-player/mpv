@@ -1574,10 +1574,13 @@ typedef struct _subfn
 
 static int compare_sub_priority(const void *a, const void *b)
 {
-    int ret;
-    ret = ((subfn*)a)->priority < ((subfn*)b)->priority;
-    if (ret != 0) return ret;
-    return strcoll(((subfn*)a)->fname, ((subfn*)b)->fname);
+    if (((subfn*)a)->priority > ((subfn*)b)->priority) {
+	return -1;
+    } else if (((subfn*)a)->priority < ((subfn*)b)->priority) {
+	return 1;
+    } else {
+	return strcoll(((subfn*)a)->fname, ((subfn*)b)->fname);
+    }
 }
 
 char** sub_filenames(char* path, char *fname)
@@ -1666,59 +1669,46 @@ char** sub_filenames(char* path, char *fname)
  
 		// we have a (likely) subtitle file
 		if (found) {
-		    if (strcmp(tmp_fname_trim, f_fname_trim) == 0) {
-			// matches the movie name?
-			sprintf(tmpresult, "%s%s", f_dir, de->d_name);
-			if ((f = fopen(tmpresult, "rt"))) {
-			    fclose(f);
-			    result[subcnt].priority = 4;
-			    result[subcnt].fname = strdup(tmpresult);
-			    subcnt++;
-			}
+		    int prio = 0;
+		    sprintf(tmpresult, "%s %s", f_fname_trim, tmp_sub_id);
+		    if (strcmp(tmp_fname_trim, tmpresult) == 0 && sub_match_fuzziness >= 1) {
+			// matches the movie name + lang extension
+			prio = 5;
+		    } else if (strcmp(tmp_fname_trim, f_fname_trim) == 0) {
+			// matches the movie name
+			prio = 4;
 		    } else if ((tmp = strstr(tmp_fname_trim, f_fname_trim)) && (sub_match_fuzziness >= 1)) {
-			// does it contain the movie name?
+			// contains the movie name
 			tmp += strlen(f_fname_trim);
 			if (tmp_sub_id && strstr(tmp, tmp_sub_id)) {
 			    // with sub_id specified prefer localized subtitles
-			    sprintf(tmpresult, "%s%s", f_dir, de->d_name);
-			    if ((f = fopen(tmpresult, "rt"))) {
-				fclose(f);
-				result[subcnt].priority = 3;
-				result[subcnt].fname = strdup(tmpresult);
-				subcnt++;
-			    }
+			    prio = 3;
 			} else if ((tmp_sub_id == NULL) && whiteonly(tmp)) {
 			    // without sub_id prefer "plain" name
-			    sprintf(tmpresult, "%s%s", f_dir, de->d_name);
-			    if ((f = fopen(tmpresult, "rt"))) {
-				fclose(f);
-				result[subcnt].priority = 3;
-				result[subcnt].fname = strdup(tmpresult);
-				subcnt++;
-			    }
+			    prio = 3;
 			} else {
 			    // with no localized subs found, try any else instead
-			    sprintf(tmpresult, "%s%s", f_dir, de->d_name);
-			    if ((f = fopen(tmpresult, "rt"))) {
-				fclose(f);
-				result[subcnt].priority = 2;
-				result[subcnt].fname = strdup(tmpresult);
-				subcnt++;
-			    }
+			    prio = 2;
 			}
 		    } else {
 			// doesn't contain the movie name
 			// don't try in the mplayer subtitle directory
 			if ((j == 0) && (sub_match_fuzziness >= 2)) {
-			    sprintf(tmpresult, "%s%s", f_dir, de->d_name);
-			    if ((f = fopen(tmpresult, "rt"))) {
-				fclose(f);
-				result[subcnt].priority = 1;
-				result[subcnt].fname = strdup(tmpresult);
-				subcnt++;
-			    }
+			    prio = 1;
 			}
 		    }
+
+		    if (prio) {
+			sprintf(tmpresult, "%s%s", f_dir, de->d_name);
+//			fprintf(stderr, "%s priority %d\n", tmpresult, prio);
+			if ((f = fopen(tmpresult, "rt"))) {
+			    fclose(f);
+			    result[subcnt].priority = prio;
+			    result[subcnt].fname = strdup(tmpresult);
+			    subcnt++;
+			}
+		    }
+
 		}
 		if (subcnt >= MAX_SUBTITLE_FILES) break;
 	    }
