@@ -1845,7 +1845,7 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 	rff = (vpriv->trf & 0x1) ? 0x2 : 0;
 	mp_msg(MSGT_MUXER, MSGL_V, "\nTFF: %d, RFF: %d\n", tff >> 7, rff >> 1);
 	pce_ptr[3] = (pce_ptr[3] & 0xfd) | tff | rff;
-	pce_ptr[4] &= 0x80;	//sets progressive frame
+	pce_ptr[4] |= 0x80;	//sets progressive frame
 	
 	if(! vpriv->vframes)
 		mp_msg(MSGT_MUXER, MSGL_INFO, "\nENABLED SOFT TELECINING, FPS=%s, INITIAL PATTERN IS TFF:%d, RFF:%d\n", 
