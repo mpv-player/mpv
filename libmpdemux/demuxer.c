@@ -556,7 +556,11 @@ switch(file_format){
  }
 #ifdef USE_TV
  case DEMUXER_TYPE_TV: {
-    demux_open_tv(demuxer, tv_handler);
+    if (!demux_open_tv(demuxer, tv_handler))
+    {
+	tv_uninit(tv_handler);
+	return(NULL);
+    }
     break;
  }
 #endif

@@ -327,6 +327,7 @@ err:
 
 static int uninit(priv_t *priv)
 {
+    close(priv->fd);
 #warning "Implement uninit!"
 }
 
@@ -368,13 +369,31 @@ static int start(priv_t *priv)
 	priv->buf[i].height = priv->height;
 	mp_msg(MSGT_TV, MSGL_DBG2, "buffer: %d => %p\n", i, &priv->buf[i]);
     } 
-    
+
+
+#if 0
+    {
+	struct video_window win;
+
+	win.x = 0;
+	win.y = 0;
+	win.width = priv->width;
+	win.height = priv->height;
+	win.chromakey = -1;
+	win.flags = 0;
+	
+	ioctl(priv->fd, VIDIOCSWIN, &win);
+    }
+
     /* start capture */
     if (ioctl(priv->fd, VIDIOCCAPTURE, &one) == -1)
     {
 	mp_msg(MSGT_TV, MSGL_ERR, "ioctl capture failed: %s\n", strerror(errno));
 	return(0);
     }
+#endif
+
+    return(1);
 }
 
 static int control(priv_t *priv, int cmd, void *arg)
@@ -490,8 +509,8 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    }
 	    
 	    /* tuner uses khz not mhz ! */
-	    if (priv->tuner.flags & VIDEO_TUNER_LOW)
-	        freq /= 1000;
+//	    if (priv->tuner.flags & VIDEO_TUNER_LOW)
+//	        freq /= 1000;
 	    (unsigned long)*(void **)arg = freq;
 	    return(TVI_CONTROL_TRUE);
 	}
@@ -500,12 +519,12 @@ static int control(priv_t *priv, int cmd, void *arg)
 	    /* argument is in MHz ! */
 	    unsigned long freq = (unsigned long)*(void **)arg;
 	    
-	    mp_msg(MSGT_TV, MSGL_V, "requested frequency: %lu MHz\n", (float)freq/16);
+	    mp_msg(MSGT_TV, MSGL_V, "requested frequency: %.3f\n", (float)freq/16);
 	    
 	    /* tuner uses khz not mhz ! */
-	    if (priv->tuner.flags & VIDEO_TUNER_LOW)
-	        freq *= 1000;
-	    mp_msg(MSGT_TV, MSGL_V, " requesting from driver: freq=%.3f\n", (float)freq/16);
+//	    if (priv->tuner.flags & VIDEO_TUNER_LOW)
+//	        freq *= 1000;
+//	    mp_msg(MSGT_TV, MSGL_V, " requesting from driver: freq=%.3f\n", (float)freq/16);
 	    if (ioctl(priv->fd, VIDIOCSFREQ, &freq) == -1)
 	    {
 		mp_msg(MSGT_TV, MSGL_ERR, "ioctl set freq failed: %s\n", strerror(errno));

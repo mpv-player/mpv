@@ -7,7 +7,7 @@ extern int tv_param_on;
 //#include "../libvo/fastmemcpy.h"
 //#include "mp_msg.h"
 
-extern unsigned long tv_param_freq;
+extern char *tv_param_freq;
 extern char *tv_param_channel;
 extern char *tv_param_norm;
 extern char *tv_param_device;

@@ -29,18 +29,19 @@ typedef struct {
 /* handler creator - entry point ! */
 tvi_handle_t *tvi_init_dummy(char *device)
 {
-    return new_handle();
+    return(new_handle());
 }
 
 /* initialisation */
 static int init(priv_t *priv, tvi_param_t *params)
 {
-    return 1;
+    return(1);
 }
 
 /* that's the real start, we'got the format parameters (checked with control) */
 static int start(priv_t *priv)
 {
+    return(1);
 }
 
 static int uninit(priv_t *priv)
@@ -84,7 +85,7 @@ static int grab_video_frame(priv_t *priv, char *buffer, int len)
 static int get_video_framesize(priv_t *priv)
 {
     /* YV12 */
-    return priv->width*priv->height*12/8;
+    return(priv->width*priv->height*12/8);
 }
 
 static int grab_audio_frame(priv_t *priv, char *buffer, int len)
@@ -94,7 +95,7 @@ static int grab_audio_frame(priv_t *priv, char *buffer, int len)
 
 static int get_audio_framesize(priv_t *priv)
 {
-    return 1;
+    return(1);
 }
 
 #endif /* USE_TV */

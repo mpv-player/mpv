@@ -257,6 +257,7 @@ if(dvd_title){
 	return(NULL);
     if (tv_init(tv_handler) == 1)
 	return(stream);
+    tv_uninit(tv_handler);
     return(NULL);
   }
 #endif

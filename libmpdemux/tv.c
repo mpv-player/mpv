@@ -29,7 +29,7 @@ int tv_param_on = 0;
 #include "tv.h"
 
 /* some default values */
-unsigned long tv_param_freq = 0;
+char *tv_param_freq = NULL;
 char *tv_param_channel = "0";
 char *tv_param_norm = "pal";
 char *tv_param_device = NULL;
@@ -225,14 +225,23 @@ no_audio:
     /* set some params got from cmdline */
     funcs->control(tvh->priv, TVI_CONTROL_SPC_SET_INPUT, &tv_param_input);
 
-    /* set freq in MHz - change this to float ! */
-    funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &tv_param_freq);
+    /* we need to set frequency */
+    if (tv_param_freq)
+    {
+	unsigned long freq = atof(tv_param_freq)*16;
 
-    funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &tv_param_freq);
-    mp_msg(MSGT_TV, MSGL_INFO, "Setting to frequency: %lu\n", tv_param_freq);
+	printf("freq: %lu\n", freq);
+
+        /* set freq in MHz */
+	funcs->control(tvh->priv, TVI_CONTROL_TUN_SET_FREQ, &freq);
+
+	funcs->control(tvh->priv, TVI_CONTROL_TUN_GET_FREQ, &freq);
+	mp_msg(MSGT_TV, MSGL_INFO, "Current frequency: %lu (%.3f)\n",
+	    freq, (float)freq/16);
+    }
     
     /* also start device! */
-    funcs->start(tvh->priv);
+    return(funcs->start(tvh->priv));	
 }
 
 /* ================== STREAM_TV ===================== */
@@ -264,6 +273,11 @@ int tv_init(tvi_handle_t *tvh)
     (int)*(void **)params[0].value = tv_param_input;
     params[1].opt = params[1].value = NULL;
 
-    return tvh->functions->init(tvh->priv, params);
+    return(tvh->functions->init(tvh->priv, params));
+}
+
+int tv_uninit(tvi_handle_t *tvh)
+{
+    return(tvh->functions->uninit(tvh->priv));
 }
 #endif /* USE_TV */
