@@ -100,7 +100,6 @@ static Display *display;
 static Window mywindow;
 static int bpp;
 static XWindowAttributes attribs;
-static int X_already_started = 0;
 
 
 static void 
@@ -139,11 +138,10 @@ restore_regs(voodoo_2d_reg *regs)
 }
 
 static uint32_t 
-create_window(Display *display) 
+create_window(Display *display, char *title) 
 {
 	int screen;
 	unsigned int fg, bg;
-	char *hello = "I hate X11";
 	XSizeHints hint;
 	XVisualInfo vinfo;
 	XEvent xev;
@@ -151,9 +149,6 @@ create_window(Display *display)
 	Colormap theCmap;
 	XSetWindowAttributes xswa;
 	unsigned long xswamask;
-
-	if (X_already_started)
-		return -1;
 
 	screen = DefaultScreen(display);
 
@@ -194,7 +189,7 @@ create_window(Display *display)
 
 	/* Tell other applications about this window */
 
-	XSetStandardProperties(display, mywindow, hello, hello, None, NULL, 0, &hint);
+	XSetStandardProperties(display, mywindow, title, title, None, NULL, 0, &hint);
 
 	/* Map window. */
 
@@ -212,7 +207,6 @@ create_window(Display *display)
 	XFlush(display);
 	XSync(display, False);
 
-	X_already_started++;
 	return 0;
 }
 
@@ -347,7 +341,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	is_fullscreen = fullscreen = 0;
 	if (!is_fullscreen) 
-		create_window(display);
+		create_window(display, title);
 
 	// Ask 3dfx driver for base memory address 0
 	data.port = 0x10; // PCI_BASE_ADDRESS_0_LINUX;
