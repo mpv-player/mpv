@@ -90,9 +90,9 @@ static Window                 mRoot;
 static uint32_t               drwX,drwY,drwWidth,drwHeight,drwBorderWidth,drwDepth;
 static uint32_t               drwcX,drwcY,dwidth,dheight;
 
-#ifdef HAVE_NEW_GUI
+//#ifdef HAVE_NEW_GUI
  static uint32_t               mdwidth,mdheight;
-#endif
+//#endif
 
 static XSetWindowAttributes   xWAttribs;
 
