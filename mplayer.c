@@ -224,6 +224,13 @@ extern int index_mode;  // -1=untouched  0=don't use index  1=use (geneate) inde
 extern int force_ni;
 extern int pts_from_bps;
 
+// cache2:
+#ifdef USE_STREAM_CACHE
+extern int cache_fill_status;
+#else
+#define cache_fill_status 0
+#endif
+
 static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
 
@@ -1531,7 +1538,7 @@ if(1)
         else
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
         sh_audio->timer+=x; c_total+=x;
-        if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d\r",
+        if(!quiet) mp_msg(MSGT_AVSYNC,MSGL_STATUS,"A:%6.1f V:%6.1f A-V:%7.3f ct:%7.3f  %3d/%3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",
 	  a_pts-audio_delay-delay,v_pts,AV_delay,c_total,
           (int)sh_video->num_frames,(int)sh_video->num_frames_decoded,
           (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
@@ -1539,6 +1546,7 @@ if(1)
           (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
           ,drop_frame_cnt
 	  ,output_quality
+	  ,cache_fill_status
         );
         fflush(stdout);
       }
@@ -1547,11 +1555,14 @@ if(1)
     // No audio:
     
     if(!quiet)
-      mp_msg(MSGT_AVSYNC,MSGL_STATUS,"V:%6.1f  %3d  %2d%%  %2d%%  %3.1f%% \r",d_video->pts,
+      mp_msg(MSGT_AVSYNC,MSGL_STATUS,"V:%6.1f  %3d  %2d%% %2d%% %4.1f%% %d %d %d%%\r",d_video->pts,
         (int)sh_video->num_frames,
         (sh_video->timer>0.5)?(int)(100.0*video_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(int)(100.0*vout_time_usage/(double)sh_video->timer):0,
         (sh_video->timer>0.5)?(100.0*audio_time_usage/(double)sh_video->timer):0
+          ,drop_frame_cnt
+	  ,output_quality
+	  ,cache_fill_status
         );
 
       fflush(stdout);
