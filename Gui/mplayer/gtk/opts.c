@@ -733,7 +733,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_set_name( scrolledwindow3,"scrolledwindow3" );
   gtk_widget_show( scrolledwindow3 );
   gtk_box_pack_start( GTK_BOX( vbox2 ),scrolledwindow3,TRUE,TRUE,0 );
-  gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow3 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
+  gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow3 ),GTK_POLICY_NEVER,GTK_POLICY_AUTOMATIC );
 
   CLADrivers=gtk_clist_new( 2 );
   gtk_widget_set_name( CLADrivers,"CLADrivers" );
@@ -742,7 +742,7 @@ GtkWidget * create_Preferences( void )
   gtk_clist_set_column_width( GTK_CLIST( CLADrivers ),0,50 );
   gtk_clist_column_titles_show( GTK_CLIST( CLADrivers ) );
   gtk_clist_set_shadow_type( GTK_CLIST( CLADrivers ),GTK_SHADOW_NONE );
-  gtk_widget_set_usize( CLADrivers,200,-2 );
+  gtk_widget_set_usize( CLADrivers,250,-2 );
   gtk_clist_set_column_widget( GTK_CLIST( CLADrivers ),0,
     AddLabel( MSGTR_PREFERENCES_AvailableDrivers,NULL ) );
 
@@ -751,7 +751,7 @@ GtkWidget * create_Preferences( void )
 
   vbox3=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
-      AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,1 ),1 ),0 );
+      AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox1,0 ),1 ),0 );
     gtk_widget_set_usize( vbox3,250,-2 );
 
   CBNormalize=AddCheckButton( MSGTR_PREFERENCES_NormalizeSound,vbox3 );
@@ -789,7 +789,7 @@ GtkWidget * create_Preferences( void )
   gtk_widget_set_name( scrolledwindow2,"scrolledwindow2" );
   gtk_widget_show( scrolledwindow2 );
   gtk_box_pack_start( GTK_BOX( vbox4 ),scrolledwindow2,TRUE,TRUE,0 );
-  gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow2 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
+  gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow2 ),GTK_POLICY_NEVER,GTK_POLICY_AUTOMATIC );
 
   CLVDrivers=gtk_clist_new( 2 );
   gtk_widget_set_name( CLVDrivers,"CLVDrivers" );
@@ -798,7 +798,7 @@ GtkWidget * create_Preferences( void )
   gtk_clist_set_column_width( GTK_CLIST( CLVDrivers ),0,50 );
   gtk_clist_column_titles_show( GTK_CLIST( CLVDrivers ) );
   gtk_clist_set_shadow_type( GTK_CLIST( CLVDrivers ),GTK_SHADOW_NONE );
-  gtk_widget_set_usize( CLVDrivers,200,-2 );
+  gtk_widget_set_usize( CLVDrivers,250,-2 );
 
   label=AddLabel( MSGTR_PREFERENCES_AvailableDrivers,NULL );
     gtk_clist_set_column_widget( GTK_CLIST( CLVDrivers ),0,label );
@@ -808,7 +808,7 @@ GtkWidget * create_Preferences( void )
 
   vbox5=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
-      AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox2,1 ),1 ),0 );
+      AddFrame( NULL,GTK_SHADOW_ETCHED_OUT,hbox2,0 ),1 ),0 );
     gtk_widget_set_usize( vbox5,250,-2 );
 
   CBDoubleBuffer=AddCheckButton( MSGTR_PREFERENCES_DoubleBuffer,vbox5 );
@@ -833,7 +833,7 @@ GtkWidget * create_Preferences( void )
 
   vbox600=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
-      AddFrame( MSGTR_PREFERENCES_FRAME_OSD_Level,GTK_SHADOW_ETCHED_OUT,vbox6,1 ),1 ),0 );
+      AddFrame( MSGTR_PREFERENCES_FRAME_OSD_Level,GTK_SHADOW_ETCHED_OUT,vbox6,0 ),1 ),0 );
 
   RBOSDNone=AddRadioButton( MSGTR_PREFERENCES_None,&OSD_group,vbox600 );
   RBOSDTandP=AddRadioButton( MSGTR_PREFERENCES_OSDTimer,&OSD_group,vbox600 );
@@ -842,7 +842,7 @@ GtkWidget * create_Preferences( void )
 
   vbox7=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
-      AddFrame( MSGTR_PREFERENCES_FRAME_Subtitle,GTK_SHADOW_ETCHED_OUT,vbox6,1 ),1 ),0 );
+      AddFrame( MSGTR_PREFERENCES_FRAME_Subtitle,GTK_SHADOW_ETCHED_OUT,vbox6,0 ),1 ),0 );
 
 #if 0
   hbox4=AddHBox( vbox7,1 );
@@ -895,22 +895,16 @@ GtkWidget * create_Preferences( void )
   CBDumpMPSub=AddCheckButton( MSGTR_PREFERENCES_SUB_MPSUB,vbox9 );
   CBDumpSrt=AddCheckButton( MSGTR_PREFERENCES_SUB_SRT,vbox9 );
 
+  label=AddLabel( MSGTR_PREFERENCES_SubtitleOSD,NULL );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),2 ),label );
+  vbox601=AddVBox( notebook1,0 );
+
+// --- 4. panel
+
   vbox603=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
-      AddFrame( MSGTR_PREFERENCES_FRAME_Font,GTK_SHADOW_ETCHED_OUT,vbox6,1 ),1 ),0 );
+      AddFrame( MSGTR_PREFERENCES_FRAME_Font,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
 
-  hbox6=AddHBox( vbox603,1 );
-
-  AddLabel( MSGTR_PREFERENCES_Font,hbox6 );
-
-  prEFontName=gtk_entry_new();
-  gtk_widget_set_name( prEFontName,"prEFontName" );
-  gtk_widget_show( prEFontName );
-  gtk_box_pack_start( GTK_BOX( hbox6 ),prEFontName,TRUE,TRUE,0 );
-
-  hbuttonbox5=AddHButtonBox( hbox6 );
-    gtk_container_set_border_width( GTK_CONTAINER( hbuttonbox5 ),3 );
-  BLoadFont=AddButton( MSGTR_Browse,hbuttonbox5 );
 
 #ifndef HAVE_FREETYPE
   hbox7=AddHBox( vbox603,1 );
@@ -923,6 +917,16 @@ GtkWidget * create_Preferences( void )
   BRFontAutoScaleWidth=AddRadioButton( MSGTR_PREFERENCES_FontPropWidth,&Font_group,vbox603 );
   RBFontAutoScaleHeight=AddRadioButton( MSGTR_PREFERENCES_FontPropHeight,&Font_group,vbox603 );
   RBFontAutoScaleDiagonal=AddRadioButton( MSGTR_PREFERENCES_FontPropDiagonal,&Font_group,vbox603 );
+
+  hbox6=AddHBox( vbox603,1 );
+  AddLabel( MSGTR_PREFERENCES_Font,hbox6 );
+  prEFontName=gtk_entry_new();
+  gtk_widget_set_name( prEFontName,"prEFontName" );
+  gtk_widget_show( prEFontName );
+  gtk_box_pack_start( GTK_BOX( hbox6 ),prEFontName,TRUE,TRUE,0 );
+  hbuttonbox5=AddHButtonBox( hbox6 );
+    gtk_container_set_border_width( GTK_CONTAINER( hbuttonbox5 ),3 );
+  BLoadFont=AddButton( MSGTR_Browse,hbuttonbox5 );
 
   table1=gtk_table_new( 3,2,FALSE );
   gtk_widget_set_name( table1,"table1" );
@@ -977,25 +981,12 @@ GtkWidget * create_Preferences( void )
     gtk_table_attach( GTK_TABLE( table1 ),HSFontOSDScale,1,2,4,5,(GtkAttachOptions)( GTK_EXPAND | GTK_FILL ),(GtkAttachOptions)( 0 ),0,0 );
 #endif
 
-  label=AddLabel( MSGTR_PREFERENCES_SubtitleOSD,NULL );
-    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),2 ),label );
+  label=AddLabel( MSGTR_PREFERENCES_FRAME_Font,NULL );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label );
+
+// --- 5. panel
+
   vbox601=AddVBox( notebook1,0 );
-  
-// --- 4. panel
-
-  vbox602=AddVBox( 
-    AddFrame( NULL,GTK_SHADOW_NONE,
-      AddFrame( MSGTR_PREFERENCES_FRAME_PostProcess,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
-
-  CBPostprocess=AddCheckButton( MSGTR_PREFERENCES_PostProcess,vbox602 );
-
-  hbox5=AddHBox( vbox602,1 );
-
-  AddLabel( MSGTR_PREFERENCES_AutoQuality,hbox5 );
-
-  if ( guiIntfStruct.sh_video && guiIntfStruct.Playing ) HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,get_video_quality_max( guiIntfStruct.sh_video ),0,0,0 ) );
-   else HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0,0,0 ) );
-  HSPPQuality=AddHScaler( HSPPQualityadj,hbox5,0 );
 
   vbox602=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
@@ -1032,6 +1023,27 @@ GtkWidget * create_Preferences( void )
   gtk_entry_set_editable( GTK_ENTRY( EAFM ),FALSE );
   gtk_widget_show( EAFM );
 
+  label=AddLabel( MSGTR_PREFERENCES_Codecs,NULL );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),4 ),label );
+
+  vbox601=AddVBox( notebook1,0 );
+  
+// --- 6. panel
+
+  vbox602=AddVBox( 
+    AddFrame( NULL,GTK_SHADOW_NONE,
+      AddFrame( MSGTR_PREFERENCES_FRAME_PostProcess,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
+
+  CBPostprocess=AddCheckButton( MSGTR_PREFERENCES_PostProcess,vbox602 );
+
+  hbox5=AddHBox( vbox602,1 );
+
+  AddLabel( MSGTR_PREFERENCES_AutoQuality,hbox5 );
+
+  if ( guiIntfStruct.sh_video && guiIntfStruct.Playing ) HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,get_video_quality_max( guiIntfStruct.sh_video ),0,0,0 ) );
+   else HSPPQualityadj=GTK_ADJUSTMENT( gtk_adjustment_new( 0,0,100,0,0,0 ) );
+  HSPPQuality=AddHScaler( HSPPQualityadj,hbox5,0 );
+
   vbox602=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
       AddFrame( MSGTR_PREFERENCES_FRAME_Cache,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
@@ -1049,7 +1061,7 @@ GtkWidget * create_Preferences( void )
 
   vbox602=AddVBox( 
     AddFrame( NULL,GTK_SHADOW_NONE,
-      AddFrame( MSGTR_PREFERENCES_FRAME_Misc,GTK_SHADOW_ETCHED_OUT,vbox601,0 ),1 ),0 );
+      AddFrame( MSGTR_PREFERENCES_FRAME_Misc,GTK_SHADOW_ETCHED_OUT,vbox601,1 ),1 ),0 );
 
   CBLoadFullscreen=AddCheckButton( MSGTR_PREFERENCES_LoadFullscreen,vbox602 );
   CBStopXScreenSaver=AddCheckButton( MSGTR_PREFERENCES_XSCREENSAVER,vbox602 );
@@ -1088,7 +1100,7 @@ GtkWidget * create_Preferences( void )
 //  AddHSeparator( vbox602 );
 
   label=AddLabel( MSGTR_PREFERENCES_Misc,NULL );
-    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),3 ),label );
+    gtk_notebook_set_tab_label( GTK_NOTEBOOK( notebook1 ),gtk_notebook_get_nth_page( GTK_NOTEBOOK( notebook1 ),5 ),label );
 
 // ---
 

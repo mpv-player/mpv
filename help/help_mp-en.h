@@ -514,6 +514,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_SUB_SRT "Convert the given subtitle to the time based SubViewer (SRT) format"
 #define MSGTR_PREFERENCES_SUB_Overlap "Toggle subtitle overlapping"
 #define MSGTR_PREFERENCES_Font "Font:"
+#define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_FontFactor "Font factor:"
 #define MSGTR_PREFERENCES_PostProcess "Enable postprocessing"
 #define MSGTR_PREFERENCES_AutoQuality "Auto quality: "
