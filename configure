@@ -2297,9 +2297,11 @@ echores "$_vsscanf"
 
 echocheck "posix select()"
 cat > $TMPC << EOF
-#include <sys/select.h>
-#include <sys/time.h>
+#include <stdio.h>
+#include <stdlib.h>
 #include <sys/types.h>
+#include <string.h>
+#include <sys/time.h>
 #include <unistd.h>
 int main(void) {int nfds = 1; fd_set readfds; struct timeval timeout; select(nfds,&readfds,NULL,NULL,&timeout); return 0; }
 EOF
