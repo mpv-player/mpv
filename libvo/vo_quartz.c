@@ -12,6 +12,9 @@
 	todo:	-RGB32 color space support
 			-screen overlay output
 			-while mouse button down event mplayer is locked, fix that
+			-Enable live resize
+			-fix menu
+			-quit properly when using close button
 			-(add sugestion here)
  */
 
@@ -105,6 +108,62 @@ void window_resized();
 void window_ontop();
 void window_fullscreen();
 
+static inline int convert_key(UInt32 key, UInt32 charcode)
+{
+	switch(key)
+    {
+		case QZ_IBOOK_ENTER:
+		case QZ_RETURN: return KEY_ENTER;
+		case QZ_ESCAPE: return KEY_ESC;
+		case QZ_BACKSPACE: return KEY_BACKSPACE;
+		case QZ_LALT: return KEY_BACKSPACE;
+		case QZ_LCTRL: return KEY_BACKSPACE;
+		case QZ_LSHIFT: return KEY_BACKSPACE;
+		case QZ_F1: return KEY_F+1;
+		case QZ_F2: return KEY_F+2;
+		case QZ_F3: return KEY_F+3;
+		case QZ_F4: return KEY_F+4;
+		case QZ_F5: return KEY_F+5;
+		case QZ_F6: return KEY_F+6;
+		case QZ_F7: return KEY_F+7;
+		case QZ_F8: return KEY_F+8;
+		case QZ_F9: return KEY_F+9;
+		case QZ_F10: return KEY_F+10;
+		case QZ_F11: return KEY_F+11;
+		case QZ_F12: return KEY_F+12;
+		case QZ_INSERT: return KEY_INSERT;
+		case QZ_DELETE: return KEY_DELETE;
+		case QZ_HOME: return KEY_HOME;
+		case QZ_END: return KEY_END;
+		case QZ_KP_PLUS: return '+';
+		case QZ_KP_MINUS: return '-';
+		case QZ_TAB: return KEY_TAB;
+		case QZ_PAGEUP: return KEY_PAGE_UP;
+		case QZ_PAGEDOWN: return KEY_PAGE_DOWN;  
+		case QZ_UP: return KEY_UP;
+		case QZ_DOWN: return KEY_DOWN;
+		case QZ_LEFT: return KEY_LEFT;
+		case QZ_RIGHT: return KEY_RIGHT;
+		case QZ_KP_MULTIPLY: return '*';
+		case QZ_KP_DIVIDE: return '/';
+		case QZ_KP_ENTER: return KEY_BACKSPACE;
+		case QZ_KP_PERIOD: return KEY_KPDEC;
+		case QZ_KP0: return KEY_KP0;
+		case QZ_KP1: return KEY_KP1;
+		case QZ_KP2: return KEY_KP2;
+		case QZ_KP3: return KEY_KP3;
+		case QZ_KP4: return KEY_KP4;
+		case QZ_KP5: return KEY_KP5;
+		case QZ_KP6: return KEY_KP6;
+		case QZ_KP7: return KEY_KP7;
+		case QZ_KP8: return KEY_KP8;
+		case QZ_KP9: return KEY_KP9;
+		case QZ_LEFTBRACKET: SetWindowAlpha(theWindow, winAlpha-=0.05); return -1;
+		case QZ_RIGHTBRACKET: SetWindowAlpha(theWindow, winAlpha+=0.05); return -1;
+		default: return charcode;
+    }
+}
+
 static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
@@ -175,67 +234,14 @@ static OSStatus MainEventHandler(EventHandlerCallRef nextHandler, EventRef event
 		GetEventParameter(event, kEventParamKeyCode, typeUInt32, NULL, sizeof(macKeyCode), NULL, &macKeyCode);
 		GetEventParameter(event, kEventParamKeyModifiers, typeUInt32, NULL, sizeof(macKeyModifiers), NULL, &macKeyModifiers);
 	
-		switch (kind)
+		if (kind == kEventRawKeyRepeat || kind == kEventRawKeyDown)
 		{
-			case kEventRawKeyDown: 
-			{			
-				switch(macKeyCode)
-				{
-					case QZ_IBOOK_ENTER:
-					case QZ_RETURN: mplayer_put_key(KEY_ENTER);break;
-					case QZ_ESCAPE: mplayer_put_key(KEY_ESC);break;
-					case QZ_BACKSPACE: mplayer_put_key(KEY_BACKSPACE);break;
-					case QZ_LALT: mplayer_put_key(KEY_BACKSPACE);break;
-					case QZ_LCTRL: mplayer_put_key(KEY_BACKSPACE);break;
-					case QZ_LSHIFT: mplayer_put_key(KEY_BACKSPACE);break;
-					case QZ_F1: mplayer_put_key(KEY_F+1);break;
-					case QZ_F2: mplayer_put_key(KEY_F+2);break;
-					case QZ_F3: mplayer_put_key(KEY_F+3);break;
-					case QZ_F4: mplayer_put_key(KEY_F+4);break;
-					case QZ_F5: mplayer_put_key(KEY_F+5);break;
-					case QZ_F6: mplayer_put_key(KEY_F+6);break;
-					case QZ_F7: mplayer_put_key(KEY_F+7);break;
-					case QZ_F8: mplayer_put_key(KEY_F+8);break;
-					case QZ_F9: mplayer_put_key(KEY_F+9);break;
-					case QZ_F10: mplayer_put_key(KEY_F+10);break;
-					case QZ_F11: mplayer_put_key(KEY_F+11);break;
-					case QZ_F12: mplayer_put_key(KEY_F+12);break;
-					case QZ_INSERT: mplayer_put_key(KEY_INSERT);break;
-					case QZ_DELETE: mplayer_put_key(KEY_DELETE);break;
-					case QZ_HOME: mplayer_put_key(KEY_HOME);break;
-					case QZ_END: mplayer_put_key(KEY_END);break;
-					case QZ_KP_PLUS: mplayer_put_key('+');break;
-					case QZ_KP_MINUS: mplayer_put_key('-');break;
-					case QZ_TAB: mplayer_put_key(KEY_TAB);break;
-					case QZ_PAGEUP: mplayer_put_key(KEY_PAGE_UP);break;
-					case QZ_PAGEDOWN: mplayer_put_key(KEY_PAGE_DOWN);break;  
-					case QZ_UP: mplayer_put_key(KEY_UP);break;
-					case QZ_DOWN: mplayer_put_key(KEY_DOWN);break;
-					case QZ_LEFT: mplayer_put_key(KEY_LEFT);break;
-					case QZ_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-					case QZ_KP_MULTIPLY: mplayer_put_key('*');break;
-					case QZ_KP_DIVIDE: mplayer_put_key('/');break;
-					case QZ_KP_ENTER: mplayer_put_key(KEY_BACKSPACE);break;
-					case QZ_KP_PERIOD: mplayer_put_key(KEY_KPDEC); break;
-					case QZ_KP0: mplayer_put_key(KEY_KP0); break;
-					case QZ_KP1: mplayer_put_key(KEY_KP1); break;
-					case QZ_KP2: mplayer_put_key(KEY_KP2); break;
-					case QZ_KP3: mplayer_put_key(KEY_KP3); break;
-					case QZ_KP4: mplayer_put_key(KEY_KP4); break;
-					case QZ_KP5: mplayer_put_key(KEY_KP5); break;
-					case QZ_KP6: mplayer_put_key(KEY_KP6); break;
-					case QZ_KP7: mplayer_put_key(KEY_KP7); break;
-					case QZ_KP8: mplayer_put_key(KEY_KP8); break;
-					case QZ_KP9: mplayer_put_key(KEY_KP9); break;
-					case QZ_LEFTBRACKET: SetWindowAlpha(theWindow, winAlpha-=0.05);break;
-					case QZ_RIGHTBRACKET: SetWindowAlpha(theWindow, winAlpha+=0.05);break;
-
-					default:mplayer_put_key(macCharCodes);break;
-				}
-			}
-			
-			default:result = eventNotHandledErr;break;
+			int key = convert_key(macKeyCode, macCharCodes);
+			if(key != -1)
+				mplayer_put_key(key);
 		}
+		else
+			result = eventNotHandledErr;
 	}
 	else if(class == kEventClassMouse)
 	{
@@ -320,6 +326,7 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
   
 	//Install event handler
 	const EventTypeSpec winEvents[] = { { kEventClassKeyboard, kEventRawKeyDown },
+										{ kEventClassKeyboard, kEventRawKeyRepeat },
 										{ kEventClassMouse, kEventMouseDown },
 										{ kEventClassMouse, kEventMouseWheelMoved },
 										{ kEventClassWindow, kEventWindowClosed }, 
