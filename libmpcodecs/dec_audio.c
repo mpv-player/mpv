@@ -294,7 +294,7 @@ int preinit_audio_filters(sh_audio_t *sh_audio,
   // output format: same as ao driver's input format (if missing, fallback to input)
   afs->output.rate   = *out_samplerate ? *out_samplerate : afs->input.rate;
   afs->output.nch    = *out_channels ? *out_channels : afs->input.nch;
-  afs->output.format = af_format_decode(*out_format ? *out_format : afs->input.format);
+  afs->output.format = *out_format ? af_format_decode(*out_format) : afs->input.format;
   afs->output.bps    = out_bps ? out_bps : afs->input.bps;
 
   // filter config:  
