@@ -36,19 +36,19 @@ int geometryFull(int *pwidth, int *pheight, int *xpos, int *ypos, int scrw, int 
 		   sscanf(vo_geometry, "%i%%", &xper) != 1)
 			return geometry_error();
 
-	if(xper >= 0 && xper <= 100) xoff = (scrw - vidw) * ((float)xper / 100.0);
-	if(yper >= 0 && yper <= 100) yoff = (scrh - vidh) * ((float)yper / 100.0);
+		if(xper >= 0 && xper <= 100) xoff = (scrw - vidw) * ((float)xper / 100.0);
+		if(yper >= 0 && yper <= 100) yoff = (scrh - vidh) * ((float)yper / 100.0);
 
-	/* FIXME: better checking of bounds... */
-	if(width < 0 || width > scrw) width = vidw;
-	if(height < 0 || height > scrh) height = vidh;
-	if(xoff < 0 || xoff + vidw > scrw) xoff = 0;
-	if(yoff < 0 || yoff + vidh > scrh) yoff = 0;
+		/* FIXME: better checking of bounds... */
+		if(width < 0 || width > scrw) width = vidw;
+		if(height < 0 || height > scrh) height = vidh;
+		if(xoff < 0 || xoff + vidw > scrw) xoff = 0;
+		if(yoff < 0 || yoff + vidh > scrh) yoff = 0;
 
-	if(xpos) *xpos = xoff;
-	if(ypos) *ypos = yoff;
-	if(pwidth) *pwidth = width;
-	if(pheight) *pheight = height;
+		if(xpos) *xpos = xoff;
+		if(ypos) *ypos = yoff;
+		if(pwidth) *pwidth = width;
+		if(pheight) *pheight = height;
         }
 	return 1;
 }
