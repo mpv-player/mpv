@@ -99,7 +99,7 @@ section <link linkend="aspect">Préserver le ratio d'aspect</link>.
 Le processus de zoom est géré par le filtre vidéo <literal>scale</literal>:
 <option>-vf scale=<replaceable>largeur</replaceable>:<replaceable>hauteur</replaceable></option>.
 Sa qualité peut être réglée avec l'option <option>-sws</option>.
-Si elle n'est pas spécifiée, <application>MEncoder</application> utilisera 0: fast bilinear.
+Si elle n'est pas spécifiée, <application>MEncoder</application> utilisera 2: bicubique.
 </para>
 
 <para>
@@ -125,14 +125,14 @@ Cette section parle de la <emphasis role="bold">copie</emphasis>.
   <emphasis role="bold">Flux vidéo</emphasis> (option <option>-ovc copy</option>):
   on peut faire des choses sympa :) comme, placer (pas convertir) de la vidéo FLI
   ou VIVO ou MPEG1 dans un fichier AVI ! Bien sûr seul <application>MPlayer</application>
-  peut lire de tels fichiers :) et ça n'a probablement pas de valeur réelle du tout.
+  peut lire de tels fichiers :) et ça n'a probablement aucun intérêt.
   Concrètement: copier des flux vidéo peut être utile par exemple quand seul le flux
   audio doit être encodé (comme du PCM non-compressé en MP3).
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Flux audio</emphasis> (option <option>-oac copy</option>):
   très simple. Il est possible de prendre un fichier audio externe (MP3, WAV) et
-  de le muxer dans le flux sortant. Utilisez l'option
+  de le multiplexer dans le flux sortant. Utilisez l'option
   <option>-audiofile <replaceable>nomfichier</replaceable></option> pour cela.
   </para></listitem>
 </itemizedlist>
@@ -361,7 +361,7 @@ peut les lire avec les options <option>-vobsub</option> et <option>-vobsubid</op
 </para>
 
 <para>
-Vous spécifiez le nom de base (c-a-d. sans extension <filename>.idx</filename> ou
+Vous spécifiez le nom de base (c-à-d. sans extension <filename>.idx</filename> ou
 <filename>.sub</filename>) des fichiers de sortie avec <option>-vobsubout</option>
 et l'index pour ces sous-titres dans le fichier final avec <option>-vobsuboutindex</option>.
 </para>
@@ -404,7 +404,7 @@ mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replace
 <sect1 id="aspect">
 <title>Préserver le ratio d'aspect</title>
 <para>
-Les fichiers des DVDs et des SVCDs (c-a-d MPEG1/2) contiennent une valeur de ratio
+Les fichiers des DVDs et des SVCDs (c-à-d MPEG1/2) contiennent une valeur de ratio
 d'aspect, qui décrit comment le lecteur devrait dimensionner le flux vidéo, pour que les
 personnages n'aient pas des "têtes d'oeuf" (ex. 480x480 + 4:3 = 640x480). De toute façon,
 quand vous encodez un fichier AVI (DivX), vous devez être conscients que les entêtes
@@ -457,7 +457,7 @@ recommandées par les spécifications <ulink url="http://www.kvcd.net/">KVCD</ulin
 </para>
 
 <para>
-La <emphasis role="bold">matrice de quantisation &quot;Notch&quot; de KVCD:</emphasis>
+La <emphasis role="bold">matrice de quantification &quot;Notch&quot; de KVCD:</emphasis>
 </para>
 
 <para>
@@ -552,7 +552,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Quantiseur constant contre 2-passes</title>
 
 <para>
-  Il y a trois aproches possibles pour encoder une vidéo: débit constant
+  Il y a trois approches possibles pour encoder une vidéo: débit constant
   (CBR), quantiseur constant, et deux-passes (ABR, ou débit moyen). 
 </para>
 
@@ -560,7 +560,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Dans chacun de ces modes, <systemitem class="library">libavcodec</systemitem>
   sépare les trames vidéos en macroblocs de 16x16 pixels et applique ensuite
   un quantiseur sur chaque macrobloc. Plus le quantiseur est bas, plus la
-  qualité est bonne et le débit est haut. La méthode utilisée par
+  qualité est bonne et le débit est gros. La méthode utilisée par
   <systemitem class="library">libavcodec</systemitem> pour déterminer quel
   quantiseur utiliser varie et est très réglable (ceci est une simplification
   à l'extrème du processus, mais il est utile de comprendre le principe de base).
@@ -571,13 +571,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   class="library">libavcodec</systemitem> encodera la vidéo en éliminant juste assez
   de détails pour rester en dessous du débit demandé. Si vous ne vous souciez pas
   de la taille de fichier, vous pouvez utiliser le CBR est spécifier un débit
-  infini (en pratique, cela signifie une valeur suffisemment grande pour ne pas
-  avoir de limite, comme 10000Kbit). Sans réelle restriction de débit, le resultat
-  est que <systemitem class="library">libavcodec</systemitem> utilisera le plus
+  infini (en pratique, cela signifie une valeur suffisamment grande pour ne pas
+  avoir de limite, comme 10000Kbit). Sans réelle restriction de débit, en définitive
+  <systemitem class="library">libavcodec</systemitem> utilisera le plus
   bas quantiseur possible pour chaque macrobloc (tel que spécifié par
   <option>vqmin</option>, qui vaut 2 par défaut). Si vous spécifiez un débit si
   bas que <systemitem class="library">libavcodec</systemitem> soit forcé d'utiliser
-  un quantiseur plus haut, alors vous êtes certainement en train de ruiner la 
+  un quantiseur plus haut, alors vous êtes certainement en train de massacrer la 
   qualité de votre vidéo. En général, vous devriez éviter le CBR si vous vous
   souciez de la qualité.
 </para>
@@ -586,15 +586,15 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Avec un quantiseur constant <systemitem
   class="library">libavcodec</systemitem> utilise le même quantiseur, spécifié par
   l'option <option>vqscale</option>, sur chaque macrobloc. Si vous voulez un rip
-  de la meilleur qualité possible, là encore en ignorant le débit, vous pouvez
+  de la meilleure qualité possible, là encore en ignorant le débit, vous pouvez
   utiliser <option>vqscale=2</option>. Cela donnera le même débit et le même
-  PSNR (peak signal-to-noise ratio) que le CBR avec
+  PSNR (Peak Signal-to-Noise Ratio, rapport signal sur bruit de crête) que le CBR avec
   <option>vbitrate</option>=infini et la valeur de <option>vqmin</option> par 
   défaut (2).
 </para>
 
 <para>
-  Le problème de la quantisation constante est qu'elle utilise le quantiseur
+  Le problème de la quantification constante est qu'elle utilise le quantiseur
   demandé même si le macrobloc n'en a pas besoin. En fait, il doit être possible
   d'utiliser un quantiseur plus haut sur un macrobloc sans sacrifier de la qualité
   visuelle. Pourquoi gaspiller des bits avec un quantiseur inutilement bas ?
@@ -603,8 +603,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Avec l'encodage deux-passes, la première passe va ripper le film comme
   en CBR, mais va garder un log des propriétés de chaque trame. Ces données
-  sont ensuites utilisées pendant la seconde passe de façon à prendre des
-  décisions intelligentes sur les quantiseurs à utiliser. Pendant les scènes
+  sont ensuites utilisées pendant la seconde passe de façon à choisir intelligemment
+  quels quantiseurs utiliser. Lors des scènes
   d'action rapide ou celles ayant peu de détails, des quantiseurs plus haut
   seront utilisés, et durant les scènes avec peu de mouvements ou avec beaucoup
   de détails, des quantiseurs plus bas seront utilisés.
@@ -623,7 +623,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Maintenant que vous êtes convaincu que l'encodage 2-passes est la bonne méthode,
   la vraie question est maintenant de savoir quel débit utiliser. La réponse
-  est qu'il n'y a pas de réponse unique. Idéalement, vous voudrez choisir un
+  est qu'il n'y a pas de réponse unique. Idéalement, vous devriez choisir un
   débit offrant un compromis entre qualité et taille de fichier. Cela varie suivant
   la source vidéo.
 </para>
@@ -642,27 +642,27 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Découpage et Redimensionnement</title>
 <para>
   La résolution native des DVDs est de 720x480 pour NTSC, et 720x576 pour PAL,
-  mais il y a un flag d'aspect qui spécifie si il s'agit de plein-écran (4:3)
+  mais il y a un drapeau d'aspect qui spécifie si il s'agit de plein-écran (4:3)
   ou d'écran large (16:9). La plupart (si ce n'est tous) des DVDs écran large
   ne sont pas tout à fait 16:9, ils peuvent être soit en 1.85:1, soit en 2.35:1
-  (cinemascope). Cela signifie qu'il va y avoir des bandes noires qu'il va falloir
+  (cinémascope). Cela signifie qu'il va y avoir des bandes noires qu'il va falloir
   découper.
 </para>
 
 <para>
-  <application>MPlayer</application> fournit un filtre de détection de découpage
-  qui détermine le rectangle de découpage (<option>-vf cropdetect</option>).
+  <application>MPlayer</application> fournit un filtre de détection de bandes noires
+  qui détermine la zone à découper (<option>-vf cropdetect</option>).
   Puisque MPEG-4 utilise des macroblocs de 16x16, vous devez vous assurer
   que la vidéo que vous encodez est un multiple de 16, sinon la qualité sera
   dégradée, surtout en bas débit. Vous pouvez faire ceci en arrondissant la
   longueur et la largeur du rectangle de découpage au multiple de 16 le plus
-  proche. Pour le découpage, vous pouvez augmenter le y-offset de la moitié
+  proche. Pour le découpage, vous pouvez augmenter l'offset y de la moitié
   de la différence entre l'ancienne et la nouvelle hauteur de façon à ce que
   la vidéo obtenue soit prise à partir du centre de la trame. Et à cause de
   la façon dont est faite la vidéo des DVDs, assurez-vous que l'offset soit un
   nombre pair (en fait, en règle générale, n'utilisez jamais de nombres impairs
-  lorsque vous découpez et redimmensionnez une vidéo). Si perdre quelques pixels
-  ne vous arrange pas, vous pouvez préférer redimmensionner la vidéo. Nous allons
+  lorsque vous découpez et redimensionnez une vidéo). Si perdre quelques pixels
+  vous incommode, vous pouvez préférer redimensionner la vidéo. Nous allons
   voir cela dans l'exemple plus bas.
 </para>
 
