@@ -2422,6 +2422,7 @@ EOF
     _macosx=yes
     _macosx_frameworks="-framework Carbon -framework QuickTime -framework CoreAudio"
     _def_macosx='#define MACOSX 1'
+    _aosrc="$_aosrc ao_macosx.c"
     _aomodules="macosx $_aomodules"
   else
     _macosx=no
