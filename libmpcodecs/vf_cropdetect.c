@@ -16,6 +16,7 @@
 struct vf_priv_s {
     int x1,y1,x2,y2;
     int limit;
+    int fno;
 };
 
 static int checkline(unsigned char* src,int stride,int len,int bpp){
@@ -50,6 +51,7 @@ static int config(struct vf_instance_s* vf,
     vf->priv->y1=height;
     vf->priv->x2=0;
     vf->priv->y2=0;
+    vf->priv->fno=0;
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 
@@ -72,7 +74,7 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     dmpi->width=mpi->width;
     dmpi->height=mpi->height;
 
-//static int checkline(unsigned char* src,int stride,int len,int bpp){
+if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
     
     for(y=0;y<vf->priv->y1;y++){
 	if(checkline(mpi->planes[0]+mpi->stride[0]*y,bpp,mpi->w,bpp)>vf->priv->limit){
@@ -110,6 +112,8 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	vf->priv->y1,vf->priv->y2,
 	(vf->priv->x2+1-x)&(~1),(vf->priv->y2+1-y)&(~1),x,y
 	  );
+
+}
 
     vf_next_put_image(vf,dmpi);
 }
