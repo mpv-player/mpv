@@ -3803,10 +3803,10 @@ fi
 if test "$_libdv" = yes ; then
   _def_libdv='#define HAVE_LIBDV095 1'
   _ld_libdv="-ldv"
-  _inputmodules="libdv $_codecmodules"
+  _codecmodules="libdv $_codecmodules"
 else
   _def_libdv='#undef HAVE_LIBDV095'
-  _noinputmodules="libdv $_nocodecmodules"
+  _nocodecmodules="libdv $_nocodecmodules"
 fi
 echores "$_libdv"
 
