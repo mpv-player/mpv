@@ -29,7 +29,6 @@
 
 extern vd_functions_t mpcodecs_vd_null;
 extern vd_functions_t mpcodecs_vd_cinepak;
-extern vd_functions_t mpcodecs_vd_qtrpza;
 extern vd_functions_t mpcodecs_vd_ffmpeg;
 extern vd_functions_t mpcodecs_vd_theora;
 extern vd_functions_t mpcodecs_vd_dshow;
@@ -41,11 +40,8 @@ extern vd_functions_t mpcodecs_vd_divx4;
 extern vd_functions_t mpcodecs_vd_raw;
 extern vd_functions_t mpcodecs_vd_hmblck;
 extern vd_functions_t mpcodecs_vd_xanim;
-extern vd_functions_t mpcodecs_vd_msrle;
-extern vd_functions_t mpcodecs_vd_msvidc;
 extern vd_functions_t mpcodecs_vd_fli;
 extern vd_functions_t mpcodecs_vd_qtrle;
-extern vd_functions_t mpcodecs_vd_qtsmc;
 extern vd_functions_t mpcodecs_vd_roqvideo;
 extern vd_functions_t mpcodecs_vd_cyuv;
 extern vd_functions_t mpcodecs_vd_nuv;
@@ -62,12 +58,10 @@ extern vd_functions_t mpcodecs_vd_libdv;
 extern vd_functions_t mpcodecs_vd_lcl;
 extern vd_functions_t mpcodecs_vd_lzo;
 extern vd_functions_t mpcodecs_vd_qtvideo;
-extern vd_functions_t mpcodecs_vd_qt8bps;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
         &mpcodecs_vd_cinepak,
-        &mpcodecs_vd_qtrpza,
 #ifdef USE_LIBAVCODEC
         &mpcodecs_vd_ffmpeg,
 #endif
@@ -91,11 +85,8 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_lzo,
         &mpcodecs_vd_raw,
         &mpcodecs_vd_hmblck,
-        &mpcodecs_vd_msrle,
-        &mpcodecs_vd_msvidc,
         &mpcodecs_vd_fli,
         &mpcodecs_vd_qtrle,
-        &mpcodecs_vd_qtsmc,
         &mpcodecs_vd_roqvideo,
         &mpcodecs_vd_cyuv,
         &mpcodecs_vd_nuv,
@@ -130,7 +121,6 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #if defined(USE_QTX_CODECS) || defined(MACOSX)
 	&mpcodecs_vd_qtvideo,
 #endif
-	&mpcodecs_vd_qt8bps,
 	NULL
 };
 
