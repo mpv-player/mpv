@@ -287,12 +287,21 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">los archivos de cabecera de DirectX 7</ulink>
   para compilar el controlador de salida de video de DirectX.</para>
 
-<para>Las DLLs de QuickTime y Real Win32 (Real Linux no) también funcionan. Compile con
-  <option>--enable-qtx</option> y <option>--enable-real</option> y ponga los codecs en
-  el sitio de las DLL de Windows por defecto,
-  <filename class="directory">C:\WINNT\system32</filename> o
-  <filename class="directory">C:\Windows\system</filename> dependiendo de su versión
-  de Windows.</para>
+<para>Los codecs Win32, las DLLs de QuickTime y los codecs Win32 de Real (los Real
+  de Linux no) también funcionan. Ponga los codecs en algún lugar de su ruta/path o
+  pase la opción <option>--with-codecsdir=c:/ruta/a/sus/codecs</option> (alternativamente
+  <option>--with-codecsdir=/ruta/a/sus/codecs</option> solo en Cygwin) a
+  <filename>configure</filename>. Tenemos informes de que las DLLs de Real deben tener
+  permisos de escritura para el usuario que usa MPlayer, pero solo en algunos sistemas.
+  Pruebe ha dar permisos de escritura si tiene problemas.</para>
+
+<para>La consola de Cygwin/MinGW es extrañamente lenta. Redirigir la salida o usar
+  la opción <option>-quiet</option> se ha informado que mejora el rendimiento en algunos
+  sistemas. El renderizado directo (<option>-dr</option>) también puede ayudar.
+  Puede prevenir el parpadeo de OSD a través de doble buffer con la opción
+  <option>-double</option>. Si la reproducción va a saltos, pruebe
+  <option>-autosync 100</option>. Si alguna de estas opciones le ayuda, puede que
+  desee ponerlas en su archivo de configuración.</para>
 
 <para>Hay versiones binarias precompiladas hechas por Sascha Sommer disponibles para
   descarga desde
@@ -329,9 +338,6 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
   donde esté su dispositivo de CD-ROM:</para>
 
 <screen>mplayer dvd://&lt;title&gt; -dvd-device '\\.\d:'</screen>
-
-<para>La consola Cygwin es extrañamente lenta. Redireccionar la salida o usar la
-  opción <option>-quiet</option> ha sido reportado que mejora el rendimiento.</para>
 
 </sect2>
 
