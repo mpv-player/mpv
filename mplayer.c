@@ -360,6 +360,7 @@ edl_record_ptr edl_records = NULL; ///< EDL entries memory area
 edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_records
 int edl_memory_slots = 0; ///< number of EDL entries (1 for skip + 2 for each mute)
 int edl_operations = 0; ///< number of EDL operations, skip + mute
+short user_muted = 0; ///< Stores whether User wanted muted mode.
 short edl_decision = 0; ///< 1 when an EDL operation has been made
 FILE* edl_fd = NULL; ///< fd to write to when in -edlout mode
 int edl_mute_count = 0; ///< even number when mute and unmute has been matched
@@ -2647,10 +2648,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
        mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_SKIP: start [%f], stop [%f], length [%f]\n", next_edl_record->start_sec, next_edl_record->stop_sec, next_edl_record->length_sec );
        edl_decision = 1;
      } else if( next_edl_record->action == EDL_MUTE ) {
-       mixer_mute(&mixer);
        edl_mute_count++; // new EDL seek behavior needs this
+       if ((user_muted | (edl_mute_count & 1)) != mixer.muted) mixer_mute(&mixer);
        mp_msg(MSGT_CPLAYER, MSGL_DBG4, "EDL_MUTE: [%f]\n", next_edl_record->start_sec );
-       edl_decision = 1;
      }
      next_edl_record=next_edl_record->next;
    }
@@ -2842,6 +2842,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 		// start change for absolute volume value
 		int abs = (cmd->nargs > 1) ? cmd->args[1].v.i : 0;
 		
+#ifdef USE_EDL
+      if (edl_mute_count & 1) break;
+      user_muted = 0;
+#endif
 		if( abs )
 		{
 			mixer_setvolume(&mixer, (float)v, (float)v );
@@ -2864,6 +2868,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 #endif
     } break;
     case MP_CMD_MUTE:
+#ifdef USE_EDL
+      user_muted = user_muted ? 0 : 1;
+      if (((edl_mute_count & 1) | user_muted) != mixer.muted)
+#endif
       mixer_mute(&mixer);
       break;
     case MP_CMD_LOADFILE : {
@@ -3746,6 +3754,7 @@ if(rel_seek_secs || abs_seek_pos){
  * and find the next EDL action to take care of.
  */
 
+edl_mute_count = 0;
 next_edl_record = edl_records;
 
 while (next_edl_record)
@@ -3755,38 +3764,13 @@ while (next_edl_record)
      */
   
     if (next_edl_record->start_sec >= sh_video->pts)
-    {
-        if (edl_mute_count > 0)
-        {
-            if ((edl_mute_count % 2) == 0 &&
-                next_edl_record->mute_state == EDL_MUTE_END)
-            {
-                mixer_mute(&mixer);
-                edl_mute_count++;
-            }
-            if ((edl_mute_count % 2) != 0 &&
-                next_edl_record->mute_state == EDL_MUTE_START)
-            {
-                mixer_mute(&mixer);
-                edl_mute_count++;
-            }
-        } else if (next_edl_record->mute_state == EDL_MUTE_END)
-        {
-            mixer_mute(&mixer);
-            edl_mute_count++;
-        }
         break;
-    }
 
+    if (next_edl_record->action == EDL_MUTE) edl_mute_count++;
     next_edl_record = next_edl_record->next;
 
-    if (!next_edl_record && (edl_mute_count % 2) != 0
-        && edl_mute_count > 0)
-    {
-        mixer_mute(&mixer);
-        edl_mute_count++;
-    }
 }
+if ((user_muted | (edl_mute_count & 1)) != mixer.muted) mixer_mute(&mixer);
 #endif
   rel_seek_secs=0;
   abs_seek_pos=0;
