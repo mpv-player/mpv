@@ -52,6 +52,10 @@ binary-arch: build
 
 	# commands to install the package into debian/<packagename>
 	$(MAKE) prefix=$(prefix)/usr BINDIR=$(prefix)/usr/bin CONFDIR=$(prefix)/etc/mplayer LIBDIR=$(prefix)/usr/lib DATADIR=$(prefix)/usr/share/mplayer  MANDIR=$(prefix)/usr/share/man  install
+
+	install -m 644 -o 0 -g 0 etc/mplayer.desktop $(prefix)/usr/share/applications/mplayer.desktop
+	install -m 644 -o 0 -g 0 Gui/mplayer/pixmaps/MPlayer_mini.xpm  $(prefix)/usr/share/icons/MPlayer_mini.xpm
+	
 	dh_link usr/bin/mplayer usr/bin/gmplayer \
 		usr/share/man/man1/mplayer.1.gz usr/share/man/man1/gmplayer.1.gz
 
