@@ -114,6 +114,14 @@ erforderlich:<BR>
 </UL>
 </P>
 
+<A NAME=2.4.3.4><P><B><I>Reparieren von AVIs mit defektem Index</I></B></P>
+
+<P>Einfache Sache. Wir kopieren einfach die Video- und Audiostreams und
+<B>MEncoder</B> erzeugt das Index. Natürlich kann das keine Fehler in den
+Video- und/oder Audiostreams lösen.</P>
+
+<P>Befehl: <CODE>mencoder input.avi -ovc copy -oac copy -o output.avi</CODE></P>
+
 <A NAME=2.4.4><P><B><I>Syntax</I></B></P>
 
 <P>&nbsp;&nbsp;<CODE>mencoder [Optionen] [Eingangsdatei] [Optionen] ...</P>
