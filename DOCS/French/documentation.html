@@ -21,7 +21,7 @@
   [ Français ]
   <A HREF="../Polish/documentation.html">[ Polonais ]</A>
   <A HREF="../Italian/documentation.html">[ Italien ]</A>
-  <A HREF="../Chinese/documentation.html">[ Chinois ]</A></P></P>
+  <A HREF="../Chinese/documentation.html">[ Chinois ]</A></P>
 
 <HR>
 
@@ -64,7 +64,7 @@
               <LI><A HREF="formats.html#film">2.1.1.10 Fichiers FILM</A></LI>
               <LI><A HREF="formats.html#roq">2.1.1.11 Fichiers RoQ</A></LI>
               <LI><A HREF="formats.html#ogg">2.1.1.12 Fichiers OGG/OGM</A></LI>
-              <LI><A HREF="formats.html#sdp">2.1.1.12 Fichiers SDP</A></LI>
+              <LI><A HREF="formats.html#sdp">2.1.1.13 Fichiers SDP</A></LI>
 	      <LI><A HREF="formats.html#pva">2.1.1.14 Fichiers PVA</A></LI>
             </UL>
           </LI>
@@ -75,7 +75,8 @@
               <LI><A HREF="formats.html#ogg_vorbis">2.1.2.3 Fichiers OGG (Vorbis)</A></LI>
               <LI><A HREF="formats.html#wma">2.1.2.4 Fichiers WMA/ASF</A></LI>
               <LI><A HREF="formats.html#mp4">2.1.2.5 Fichiers MP4</A></LI>
-	      <LI><A HREF="formats.html#cdda">2.1.2.6 CD audio</A></LI>
+              <LI><A HREF="formats.html#cdda">2.1.2.6 CD audio</A></LI>
+              <LI><A HREF="formats.html#xmms">2.1.2.7 XMMS</A></LI>
             </UL>
           </LI>
         </UL>
@@ -120,7 +121,7 @@
           <LI><A HREF="video.html">2.3.1 Sorties vidéo </A>
             <UL>
               <LI><A HREF="video.html#mtrr">2.3.1.1 reglage MTRR</A></LI>
-              <LI><A HREF="video.html#xv">2.3.1.2.1 Xv</A>
+              <LI><A HREF="video.html#xv">2.3.1.2.1 Sorties vidéo pour cartes graphiques traditionnelles</A>
                 <UL>
                   <LI><A HREF="video.html#xv_3dfx">2.3.1.2.1.1 Cartes 3dfx</A></LI>
                   <LI><A HREF="video.html#xv_s3">2.3.1.2.1.2 Cartes S3</A></LI>
@@ -157,19 +158,21 @@
               <LI><A HREF="video.html#vidix">2.3.1.2.12 VIDIX</A></LI>
 	      <LI><A HREF="video.html#directfb">2.3.1.2.13 DirectFB</A></LI>
               <LI><A HREF="video.html#dfbmga">2.3.1.2.14 DirectFB/Matrox (dfbmga)</A></LI>
-	   </UL>
-           <LI><A HREF="video.html#mpegdec">2.3.1.3 décodeurs MPEG</A></LI>
-           <UL>
-                <LI><A HREF="video.html#dvb">2.3.1.3.1 DVB</A></LI>
-                <LI><A HREF="video.html#dxr2">2.3.1.3.2 DXR2</A></LI>
-                <LI><A HREF="video.html#dxr3">2.3.1.3.3 DXR3/Hollywood+</A></LI>
-              </UL>
-              <LI><A HREF="video.html#other">2.3.1.4 Autre matériel vidéo</A></LI>
+            </UL>
+          </LI>
+          <LI><A HREF="video.html#mpegdec">2.3.1.3 décodeurs MPEG</A>
+            <UL>
+              <LI><A HREF="video.html#dvb">2.3.1.3.1 DVB</A></LI>
+              <LI><A HREF="video.html#dxr2">2.3.1.3.2 DXR2</A></LI>
+              <LI><A HREF="video.html#dxr3">2.3.1.3.3 DXR3/Hollywood+</A></LI>
+            </UL>
+          </LI>
+          <LI><A HREF="video.html#other">2.3.1.4 Autre matériel vidéo</A>
               <UL>
                 <LI><A HREF="video.html#zr">2.3.1.4.1 Décodeurs JPEG Zoran</A></LI>
                 <LI><A HREF="video.html#blinken">2.3.1.4.2 Blinkenlights</A></LI>
               </UL>
-
+          </LI>
               <LI><A HREF="video.html#tv-out">2.3.1.5 TV-out</A>
                 <UL>
                   <LI><A HREF="video.html#tv-out_matrox">2.3.1.5.1 Cartes Matrox G400</A></LI>
@@ -178,8 +181,8 @@
                   <LI><A HREF="video.html#tv-out_voodoo">2.3.1.5.4 Voodoo 3</A></LI>
                   <LI><A HREF="video.html#tv-out_nvidia">2.3.1.5.5 nVidia</A></LI>
                 </UL>
-              </LI>
-            </UL>
+             </LI>
+            <!--</UL>-->
           <LI><A HREF="sound.html">2.3.2 Sorties audio</A>
             <UL>
               <LI><A HREF="sound.html#sync">2.3.2.1 Synchronisation audio/video</A></LI>
@@ -193,46 +196,36 @@
                   <LI><A HREF="sound.html#af_volume">2.3.2.3.5 Contrôle de volume logiciel</A></LI>
                   <LI><A HREF="sound.html#af_equalizer">2.3.2.3.6 Egualiseur</A></LI>
                   <LI><A HREF="sound.html#af_panning">2.3.2.3.7 Filtre panoramique</A></LI>
+                  <LI><A HREF="sound.html#af_sub">2.3.2.3.8 Sub-woofer</A></LI>
+                  <LI><A HREF="sound.html#af_surround">2.3.2.3.9 Décodeur de son surround</A></LI>
                 </UL>
               </LI>
               <LI><A HREF="sound.html#plugins">2.3.2.4 Plugins Audio (à ne plus utiliser)</A>
                 <UL>
-                  <LI><A HREF="sound.html#resample">2.3.2.2.1 Up/Downsampling</A></LI>
-                  <LI><A HREF="sound.html#surround_decoding">2.3.2.2.2 Surround Sound decoding</A></LI>
-                  <LI><A HREF="sound.html#format">2.3.2.2.3 Sample format converter</A></LI>
-                  <LI><A HREF="sound.html#delay">2.3.2.2.4 Delay</A></LI>
-                  <LI><A HREF="sound.html#volume">2.3.2.2.5 Software volume control</A></LI>
-                  <LI><A HREF="sound.html#extrastereo">2.3.2.2.6 Extrastereo</A></LI>
-                  <LI><A HREF="sound.html#normalizer">2.3.2.2.7 Volume Normalizer</A></LI>
+                  <LI><A HREF="sound.html#resample">2.3.2.4.1 Up/Downsampling</A></LI>
+                  <LI><A HREF="sound.html#surround_decoding">2.3.2.4.2 Surround Sound decoding</A></LI>
+                  <LI><A HREF="sound.html#format">2.3.2.4.3 Sample format converter</A></LI>
+                  <LI><A HREF="sound.html#delay">2.3.2.4.4 Delay</A></LI>
+                  <LI><A HREF="sound.html#volume">2.3.2.4.5 Software volume control</A></LI>
+                  <LI><A HREF="sound.html#extrastereo">2.3.2.4.6 Extrastereo</A></LI>
+                  <LI><A HREF="sound.html#normalizer">2.3.2.4.7 Volume Normalizer</A></LI>
                 </UL>
               </LI>
             </UL>
           </LI>
         </UL>
       </LI>
-      <LI><A HREF="encoding.html">2.4 Encodage avec MEncoder</A>
+      <LI><A HREF="#tv">2.4 Entrée TV</A>
         <UL>
-          <LI><A HREF="encoding.html#2pass">2.4.2.1 Encodage MPEG-4 (&quot;DIVX&quot;) 2 ou 3-passes</A></LI>
-          <LI><A HREF="encoding.html#rescaling">2.4.2.2 Redimensionnement du film</A></LI>
-          <LI><A HREF="encoding.html#copying">2.4.2.3 Copie de flux</A></LI>
-          <LI><A HREF="encoding.html#fixing">2.4.2.4 Réparer les fichiers AVIs ayant un index défectueux</A></LI>
-          <LI><A HREF="encoding.html#libavcodec">2.4.2.5 Encodage avec la famille de codecs libavcodec</A></LI>
-          <LI><A HREF="encoding.html#image_files">2.4.2.6 Encodage à partir de multiples fichiers image (JPEGs ou PNGs)</A></LI>
-          <LI><A HREF="encoding.html#vobsub">2.4.2.7 Extraction des sous-titres DVD dans un fichier Vobsub</A></LI>
-          <LI><A HREF="encoding.html#aspect">2.4.8 Préserver l'aspect ratio</A></LI>
-	</UL>
-      </LI>
-      <LI><A HREF="#tv">2.5 Entrée TV</A>
-        <UL>
-          <LI><A HREF="#tv_compilation">2.5.1 Compilation</A></LI>
-	  <LI><A HREF="#tv_tips">2.5.2 Astuces d'utilisation</A></LI>
-          <LI><A HREF="#tv_examples">2.5.2 Exemples</A></LI>
+          <LI><A HREF="#tv_compilation">2.4.1 Compilation</A></LI>
+          <LI><A HREF="#tv_tips">2.4.2 Astuces d'utilisation</A></LI>
+          <LI><A HREF="#tv_examples">2.4.3 Exemples</A></LI>
         </UL>
       </LI>
-      <LI><A HREF="#edl">2.6 Listes d'Edition de Décision (EDL)</A>
+      <LI><A HREF="#edl">2.5 Listes d'Edition de Décision (EDL)</A>
         <UL>
-          <LI><A HREF="#edl_using">2.6.1 Utiliser un fichier EDL</A></LI>
-          <LI><A HREF="#edl_making">2.6.2 Faire un fichier EDL</A></LI>
+          <LI><A HREF="#edl_using">2.5.1 Utiliser un fichier EDL</A></LI>
+          <LI><A HREF="#edl_making">2.5.2 Faire un fichier EDL</A></LI>
         </UL>
       </LI>
     </UL>
@@ -279,36 +272,67 @@
         <UL>
           <LI><A HREF="#debian">6.1.1 paquets Debian</A></LI>
           <LI><A HREF="#rpm">6.1.2 paquets RPM</A></LI>
+          <LI><A HREF="#arm">6.1.3 ARM</A></LI>
        </UL>
-      </LI>   
+      </LI>
       <LI><A HREF="#freebsd">6.2 *BSD</A></LI>
         <UL>
           <LI><A HREF="#freebsd">6.2.1 FreeBSD</A></LI>
           <LI><A HREF="#openbsd">6.2.2 OpenBSD</A></LI>
         </UL>
       <LI><A HREF="#solaris">6.3 Solaris</A></LI>
-      <LI><A HREF="#strongarm">6.4 StrongARM</A></LI>
-      <LI><A HREF="#sgi">6.5 Silicon Graphics / Irix</A></LI>
-      <LI><A HREF="#qnx">6.6 QNX</A></LI>
-      <LI><A HREF="#cygwin">6.7 Cygwin</A></LI>
+      <LI><A HREF="#sgi">6.4 Silicon Graphics / Irix</A></LI>
+      <LI><A HREF="#qnx">6.5 QNX</A></LI>
+      <LI><A HREF="#cygwin">6.6 Cygwin</A></LI>
+    </UL>
+  </LI>
+  <LI><A HREF="encoding.html">7. Encodage avec MEncoder</A>
+    <UL>
+      <LI><A HREF="encoding.html#2pass">7.1 Encodage MPEG-4 (&quot;DIVX&quot;) 2 ou 3-passes</A></LI>
+      <LI><A HREF="encoding.html#rescaling">7.2 Redimensionnement des films</A></LI>
+      <LI><A HREF="encoding.html#copying">7.3 Copie de flux</A></LI>
+      <LI><A HREF="encoding.html#fixing">7.4 Réparer les fichiers AVIs ayant un index défectueux</A></LI>
+      <LI><A HREF="encoding.html#libavcodec">7.5 Encodage avec la famille de codecs libavcodec</A></LI>
+      <LI><A HREF="encoding.html#image_files">7.6 Encodage à partir de multiples fichiers image (JPEGs ou PNGs)</A></LI>
+      <LI><A HREF="encoding.html#vobsub">7.7 Extraction des sous-titres DVD dans un fichier Vobsub</A></LI>
+      <LI><A HREF="encoding.html#aspect">7.8 Préserver l'aspect ratio</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#mailing_lists">Appendice A - Listes de diffusion</A></LI>
   <LI><A HREF="bugreports.html">Appendice B - Comment reporter un bogue</A>
     <UL>
-      <LI><A HREF="../tech/patches.txt">Appendice B2 - Comment envoyer des patches (en anglais)</A></LI>
+      <LI><A HREF="bugreports.html#fix">B.1 Comment réparer les bogues</A></LI>
+      <LI><A HREF="bugreports.html#report">B.2 Comment rapporter les bogues</A></LI>
+      <LI><A HREF="bugreports.html#where">B.3 Où rapporter les bogues</A></LI>
+      <LI><A HREF="bugreports.html#what">B.4 Que rapporter</A>
+        <UL>
+          <LI><A HREF="bugreports.html#system">B.4.1 Information Système</A></LI>
+          <LI><A HREF="bugreports.html#hardware">B.4.2 Matériel et pilotes</A></LI>
+          <LI><A HREF="bugreports.html#compilation">B.4.3 Problèmes de compilation</A></LI>
+          <LI><A HREF="bugreports.html#configure">B.4.4 Problèmes de configure</A></LI>
+          <LI><A HREF="bugreports.html#playback">B.4.5 Problèmes de lecture</A></LI>
+          <LI><A HREF="bugreports.html#crash">B.4.6 Plantages</A>
+            <UL>
+              <LI><A HREF="bugreports.html#debug">B.4.6.1 Comment conserver les informations avec un plantage reproduisible</A></LI>
+              <LI><A HREF="bugreports.html#core">B.4.6.2 Comment extraire les informations significatives d'un core dump</A></LI>
+            </UL>
+          </LI>
+        </UL>
+      </LI>
+      <LI><A HREF="bugreports.html#advusers">B.5 Je sais ce que je fait...</A></LI>
     </UL>
   </LI>
   <LI><A HREF="#known_bugs">Appendice C - Bogues connus</A></LI>
   <LI><A HREF="skin-fr.html">Appendice D - Format de skin de MPlayer</A></LI>
   <LI><A HREF="users_against_developers.html">Appendice E - Lamentations du Développeur</A>
     <UL>
-      <LI><A HREF="users_against_developers.html#gcc">GCC 2.96</A></LI>
-      <LI><A HREF="users_against_developers.html#binary">Distribution Binaire</A></LI>
-      <LI><A HREF="users_against_developers.html#nvidia">nVidia</A></LI>
-      <LI><A HREF="users_against_developers.html#barr">Joe Barr</A></LI>
+      <LI><A HREF="users_against_developers.html#gcc">E.1 GCC 2.96</A></LI>
+      <LI><A HREF="users_against_developers.html#binary">E.2 Distribution Binaire</A></LI>
+      <LI><A HREF="users_against_developers.html#nvidia">E.3 nVidia</A></LI>
+      <LI><A HREF="users_against_developers.html#barr">E.4 Joe Barr</A></LI>
     </UL>
   </LI>
+  <LI><A HREF="../tech/patches.txt">Appendice F - Comment envoyer des patches</A></LI>
 </UL>
 
 <HR>
@@ -534,6 +558,8 @@
     <A HREF="http://www.directfb.org">http://www.directfb.org</A></LI>
   <LI><B>cdparanoia</B> - optionnel, pour le support CDDA</LI>
   <LI><B>libfreetype</B> - optionnel, pour le support des fontes TTF. Au moins 2.0.9 est
+    requis.</LI>
+  <LI><B>libxmms</B> - optionnel, pour le support des plugins d'entrée de XMMS. Au moins 1.2.7 est
     requis.</LI>
 </UL>
 
@@ -1013,8 +1039,6 @@ par moi (Gabucino). Son principal avantage est de se baser
   <LI>pressez n'importe laquelle des touches menu que vous avez défini</LI>
 </OL>
 
-<P>
-
 
 <H2><A NAME="rtc">1.5 RTC</A></H2>
 
@@ -1079,26 +1103,23 @@ C'est une manière facile pour chacun de devenir root.
 <H2><A NAME="output">2.3</A> Périphériques de sortie <A HREF="video.html">Video</A> &amp; <A HREF="sound.html">Audio</A></H2>
 
 
-<H2><A NAME="encoding">2.4</A> <A HREF="encoding.html">MEncoder - Un encodeur multi-usages</A></H2>
-
-
-<H2><A NAME="tv"><B>2.5 Entrée TV</B></A></H2>
+<H2><A NAME="tv"><B>2.4 Entrée TV</B></A></H2>
 
 <P>Cette section concerne l'activation de la <B>lecture/enregistrement à partir d'un tuner TV compatible
 V4L</B>. Voir la page de man pour une description des options TV et des contrôles clavier.</P>
 
-<H3><A NAME="tv_compilation">2.5.1 Compilation</A></H3>
+<H3><A NAME="tv_compilation">2.4.1 Compilation</A></H3>
 
 <OL>
   <LI>D'abord, vous devez recompiler. <CODE>./configure</CODE> autodétectera
-    les entêtes v4l du noyau et l'existence des entrées <CODE>/dev/video*</CODE>. 
+    les entêtes v4l du noyau et l'existence des entrées <CODE>/dev/video*</CODE>.
     Si elles existent, le support TV sera activé (voir le résultat de
     <CODE>./configure</CODE>).</LI>
   <LI>Assurez-vous que votre tuner fonctionne avec d'autres logiciels TV pour Linux. par
       exemple xawtv.</LI>
 </OL>
 
-<H3><A NAME="tv_tips">2.5.2 Astuces d'utilisation</A></H3>
+<H3><A NAME="tv_tips">2.4.2 Astuces d'utilisation</A></H3>
 
 La liste complète des options est disponible sur la page de manuel. Voci juste quelques
 astuces:
@@ -1108,31 +1129,31 @@ astuces:
     <CODE>-tv on:channels=26-MTV1,23-TV2</CODE><BR>
     Explication: en utilisant cette option, seuls les canaux 26 et 23 seront utilisables,
     et il y a un joli texte OSD lors des changements de canal affichant le nom du nouveau.
-    Les espaces dans le nom du canal doivent être remplacés par le caractère 
+    Les espaces dans le nom du canal doivent être remplacés par le caractère
     &quot;_&quot;.</LI>
   <LI>Choisissez des dimensions d'image senssées. La dimension de l'image de destination
     devrait être divisible par 16.</LI>
   <LI>Si vous capturez la vidéo avec une résoltion verticale supérieure à la moitié
     de la pleine résolution (c-a-d. 288 pour PAL ou 240 pour NTSC, assurez-vous
     d'avoir désactivé l'entrelaçement. Sinon votre film sera distordu pendant les
-    scènes fast-motion et le contrôleur de bitrate ne sera probablement même pas 
+    scènes fast-motion et le contrôleur de bitrate ne sera probablement même pas
     capable de garder le bitrate demandé car l'artéfact de désentrelaçement produit
     un grand taux de détails et donc consomme plus de bande-passante. Vous pouvez
     désactiver l'entrelaçement avec <CODE>-vop pp=DEINT_TYPE</CODE>. Généralement
     <CODE>pp=lb</CODE> peut faire un bon travail, m'est c'est une histoire de préférence
-    personnelle. Voyez les autres alogrithmes de désentrelaçement dans le manuel et 
+    personnelle. Voyez les autres alogrithmes de désentrelaçement dans le manuel et
     essayez-les.</LI>
   <LI>Coupez les espaces morts. Quand vous capturez la vidéo, les bords sont
     généralement noirs ou contiennent du &quote;bruit&quote;. De nouveau cela
     consomme de la bande-passante inutilement. Plus précisément ce ne sont pas
     les zones noires elle-mêmes mais les transitions nettes entre le noir et la
     vidéo plus claire qui jouent, mais ce n'est pas très important pour le moment.
-    Avant que vous commenciez la capture, ajustez les arguments de l'option 
-    <CODE>crop</CODE> pour que toutes les saletées des bords soient coupées. 
+    Avant que vous commenciez la capture, ajustez les arguments de l'option
+    <CODE>crop</CODE> pour que toutes les saletées des bords soient coupées.
     De nouveau, n'oubliez pas de garder des dimensions sensées.</LI>
-  <LI>Regardez la charge CPU. Elle ne devrait pas dépasser la limite des 90% 
+  <LI>Regardez la charge CPU. Elle ne devrait pas dépasser la limite des 90%
     la plupart du temps. Si vous avez un gros tampon, MEncoder peut survivre à une
-    surcharge pendant quelques secondes mais pas plus. Il vaut mieux désactiver 
+    surcharge pendant quelques secondes mais pas plus. Il vaut mieux désactiver
     l'économiseur d'écran OpenGL et les trucs similaires.</LI>
   <LI>Ne jouez pas avec l'horloge système. MEncoder l'utilise pour la synchro
      A/V. Si vous réglez l'horloge système (surtout en arrière dans le temps),
@@ -1142,7 +1163,7 @@ astuces:
      de capture si vous voulez capturer correctement.</LI>
   <LI>Ne changez pas le <CODE>outfmt</CODE> à moins que vous sachiez ce que vous faites
      ou votre si votre carte/pilote ne supporte pas la valeur par défaut (palette YV12)
-     Dans les versions précédentes de MPlayer/MEncoder il était nécessaire de spécifier 
+     Dans les versions précédentes de MPlayer/MEncoder il était nécessaire de spécifier
      le format de sortie. Ce problème devrait-être résolue dans la version actuelle et
      <CODE>outfmt</CODE> n'est plus requis, et la valeur par défaut convient dans la
      plupart des cas. Par exemple, si vous capturez en DivX en utilisant libavcodec et
@@ -1165,13 +1186,13 @@ astuces:
     l'otpion "full duplex" deans le menu des préférences du serveur de son.</LI>
 </UL>
 
-<H3><A NAME="tv_examples">2.5.2 Exemples</A></H3>
+<H3><A NAME="tv_examples">2.4.3 Exemples</A></H3>
 
 <P>Sortie muette, vers AAlib :)<BR>
   <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv on:driver=dummy:width=640:height=480 -vo aa</CODE><BR>
   <BR>
   Entrée depuis V4L standard<BR>
-  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv 
+  <CODE>&nbsp;&nbsp;&nbsp;&nbsp;mplayer -tv
 on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
   <BR>
 
@@ -1207,31 +1228,31 @@ on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
   limitation matérielle.</P>
 
 
-<H2><A NAME="edl">2.6 Listes d'Edition de Décision (EDL)</A></H2>
+<H2><A NAME="edl">2.5 Listes d'Edition de Décision (EDL)</A></H2>
 
 <P>Le système de liste d'édition de décision (EDL) vous permet de sauter ou rendre muet
   des sections de videos pendant la lecture, basé sur un fichier de configuration EDL
   spécifique au film.</P>
 
-<P>Ceci est utile pour ceux qui veulent voir un film en mode "tout public". 
+<P>Ceci est utile pour ceux qui veulent voir un film en mode "tout public".
   Vous pouvez couper toutes violence, profanation, Jar-Jar Binks .. d'un film
-  suivant vos propres préférences personnelles. A part ça, il y a d'autres utilisations, comme 
+  suivant vos propres préférences personnelles. A part ça, il y a d'autres utilisations, comme
   sauter automatiquement les pubs dans les fichiers vidéos que vous regardez.</P>
 
 <P>Le format de fichier EDL est plutôt rudimentaire. Une fois que le système EDL aura atteinds
   un certain niveau de maturité, un format de fichier basé sur XML sera problablement implémenté
   (en gardant une compatiblité descendante avec les précédents formats EDL).</P>
-  
+
 <P>Le nombre maximum d'entrées EDL pour l'incarnation actuelle de EDL est 1000.
   Si vous avez besoin de plus, changez le <CODE>#define MAX_EDL_ENTRIES</CODE>
   dans le fichier <CODE>edl.h</CODE>.</P>
-  
-<H3><A NAME="edl_using">2.6.1 Utiliser un fichier EDL</A></H3>
+
+<H3><A NAME="edl_using">2.5.1 Utiliser un fichier EDL</A></H3>
 
 <P>Incluez l'option <CODE>-edl &lt;nomfichier&gt;</CODE> quand vous lancez MPlayer,
   avec le nom du fichier EDL que vous voulez appliquer à la video.</P>
 
-<H3><A NAME="edl_making">2.6.2 Faire un fichier EDL</A></H3>
+<H3><A NAME="edl_making">2.5.2 Faire un fichier EDL</A></H3>
 
 <P>Le format de fichier actuel EDL est:</P>
 
@@ -1250,14 +1271,14 @@ on:driver=v4l:width=640:height=480:outfmt=i420 -vc rawi420 -vo xv</CODE><BR>
   15 secondes, le remettre à 16.7 secondes et sauter de la seconde 420 à la seconde
   422 de la vidéo. Ces actions seront appliqués quand le temps de lecture atteind le temps
   induqyé dans le fichier.</P>
-  
+
 <P>Pour créer un fichier EDL à partir duquel travailler, utilisez l'option
   <CODE>-edlout &lt;nomfichier&gt;</CODE>. Durant la lecture, quand vous voulez marquer
   les deux secondes précédentes à sauter, tapez <CODE>i</CODE>. Une entrée correspondante
   sera écrite dans le fichier. Vous pouvez ensuite revenir et affiner le fichier EDL généré.</P>
-  
-  
-  
+
+
+
 <H1><A NAME="usage">3. Utilisation</A></H1>
 
 
@@ -1585,6 +1606,20 @@ end
   officiellement supporté.</P>
 
 
+<H3><A NAME="arm">6.1.3 ARM</A></H3>
+
+<P>MPlayer fonctionne sur les PDAs Linux avec un CPU ARM c-a-d Sharp Zaurus, Compaq Ipaq.
+  La manière la plus facile d'obtenir MPlayer est de récupérer un des paquets
+  <A HREF="http://www.openzaurus.org">Openzaurus</A>.
+  Si vous voulez le compiler vous-même, vous devriez regarder les répertoires
+  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/mplayer?nav=index.html|src/.|src/packages">mplayer</A>
+  et
+  <A HREF="http://openzaurus.bkbits.net:8080/buildroot/src/packages/libavcodec?nav=index.html|src/.|src/packages">libavcodec</A>
+  du répertoire raçine de la distribution OpenZaurus. Ils ont toujours les derniers
+  Makefile et patches utilisés pour contruire un MPlayer CVS avec libavcodec.
+  <BR>Si vous avez besoin d'une GUI, vous pouvez utiliser xmms-embedded.</P>
+
+
 <H2><A NAME="freebsd">6.2 *BSD</A></H2>
 
 <P>MPlayer fonctionne sur FreeBSD, OpenBSD, NetBSD, BSD/OS et Darwin. Il y a des versions
@@ -1675,7 +1710,7 @@ end
 <P>Pour le support DVD vous devez avoir libcss patché installé. Patch:
   <A HREF="http://www.tools.de/solaris/mplayer/">http://www.tools.de/solaris/mplayer/</A>.</P>
 
-<P>A cause de bogues dans Solaris 8, il se peut que vous ne pouviez pas lire de 
+<P>A cause de bogues dans Solaris 8, il se peut que vous ne pouviez pas lire de
   disques DVD plus gros que 4 Go:</P>
 
 <UL>
@@ -1690,7 +1725,7 @@ end
     donnés sont accédés modulo 4Go.
     (<A HREF="http://groups.yahoo.com/group/solarisonintel/message/22592">http://groups.yahoo.com/group/solarisonintel/message/22592</A>).
     <P>
-    Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc) / 
+    Le problème hsfs peut être résolu en installant le patch 109764-04 (sparc) /
     109765-04 (x86).
   </LI>
 </UL>
@@ -1706,23 +1741,15 @@ end
   pilotes de sortie vidéo.</P>
 
 
-<H2><A NAME="strongarm">6.4 StrongARM</A></H2>
-
-<P>MPlayer compile théoriquement sur StrongARM. Utilisez la commande suivante:</P>
-
-<PRE>
-  ./configure --target=arm-linux --disable-css --with-x11libdir=/usr/arm/lib
-	      --with-x11incdir=/usr/arm/lib --disable-gcc-checking
-</PRE>
-
-
-<H2><A NAME="sgi">6.5 Silicon Graphics / IRIX</A></H2>
+<H2><A NAME="sgi">6.4 Silicon Graphics / IRIX</A></H2>
 
 <P>Vous pouvez soit essayer d'installer le programme d'installation GNU, et (si vous ne l'avez
   pas mis dans votre chemin par défaut) précisez ensuite l'endroit où il est:</P>
+
 <PRE>
   ./configure --install-path=CHEMIN
 </PRE>
+
 <P>Soit vous pouvez utilisez l'installation par défaut livrée avec IRIX 6.5, auquel cas
   vous devrez éditer le Makefile manuellement. Changez les deux lignes
   suivantes:</P>
@@ -1731,20 +1758,24 @@ end
 
   $(INSTALL) -c -m 644 etc/codecs.conf $(CONFDIR)/codecs.conf
 </PRE>
+
 <P>par:</P>
+
 <PRE>
   $(INSTALL) -m 644 mplayer.1 $(MANDIR)/man1/
 
   $(INSTALL) -m 644 codecs.conf $(CONFDIR)/
 </PRE>
+
 <P>Et ensuite faites (depuis le rép. source de MPlayer):</P>
+
 <PRE>
   cp DOCS/mplayer.1 . ; cp etc/codecs.conf .
 </PRE>
 <P>finalement lancez la construction et l'installation.</P>
 
 
-<H2><A NAME="qnx">6.6 QNX</A></H2>
+<H2><A NAME="qnx">6.5 QNX</A></H2>
 
 <P>Fonctionne. Vous devrez télécharger SDL pour QNX, et l'installer. Ensuite lancez
   MPlayer avec les options <CODE>-vo sdl:photon</CODE> et <CODE>-ao sdl:nto</CODE>,
@@ -1754,7 +1785,7 @@ end
   QNX n'a que <I>émulation</I> X qui est TRES lente. Utilisez SDL.</P>
 
 
-<H2><A NAME="cygwin">6.7. Cygwin</A></H2>
+<H2><A NAME="cygwin">6.6. Cygwin</A></H2>
 
 <P>Le port Cygwin est toujours à ces débuts. Actuellement il n'y a aucun support pour
   les DLLs Win32, les VCDs ou OpenGL. SDL est connu pour distordre le son et l'image ou 
@@ -1776,6 +1807,10 @@ end
 
 <P>Les instructions et les fichiers pour faire tourner SDL sous Cygwin peuvent être trouvé sur le
   <A HREF="http://www.libsdl.org/extras/win32/cygwin/">site de libsdl</A>.</P>
+
+
+
+<H1><A NAME="encoding">7.</A> <A HREF="encoding.html">Encodage avec MEncoder</A></H1>
 
 
 
