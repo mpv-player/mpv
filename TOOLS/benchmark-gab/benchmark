@@ -79,13 +79,13 @@ fi
 if [ -e xmga ]; then
   if [ ! -e xmga_nodr ]; then
     wrtlog Starting XMGA \(no DR\) benchmark runs, with 3 tries...
-    DEFAULTOPTS="-quiet -nosound -benchmark -vo xmga -fs -dr -slices -vf-clr -autoq 0"
+    DEFAULTOPTS="-quiet -nosound -benchmark -vo xmga -fs -nodr -slices -vf-clr -autoq 0"
     benchsamples
   fi
 
   if [ ! -e xmga_nodr_noslices ]; then
     wrtlog Starting XMGA \(no DR\) \(no slices\) benchmark runs, with 3 tries...
-    DEFAULTOPTS="-quiet -nosound -benchmark -vo xmga -fs -dr -noslices -vf-clr -autoq 0"
+    DEFAULTOPTS="-quiet -nosound -benchmark -vo xmga -fs -nodr -noslices -vf-clr -autoq 0"
     benchsamples
   fi
 
@@ -95,7 +95,7 @@ if [ -e xmga ]; then
     benchsamples
   fi
 
-  if [ ! -e xmga_dr ]; then
+  if [ ! -e xmga_dri_noslices ]; then
     wrtlog Starting XMGA \(DR\) \(no slices\) benchmark runs, with 3 tries...
     DEFAULTOPTS="-quiet -nosound -benchmark -vo xmga -fs -dr -noslices -vf-clr -autoq 0"
     benchsamples
