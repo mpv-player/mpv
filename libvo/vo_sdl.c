@@ -68,6 +68,9 @@
  *    Felix Buenemann <Atmosfear@users.sourceforge.net> - April 13, 2001
  *    - added keymapping to toggle OSD ('o' key) 
  *    - added some defines to modify some sdl-out internas (see comments)
+ *
+ *    Felix Buenemann: further changes will be visible through cvs log, don't want
+ *     to update this all the time.
  */
 
 #include <stdio.h>
@@ -649,17 +652,19 @@ static void check_events (void)
 					SDL_ShowCursor(1);
 					mplayer_put_key('q');
 				break;
-                                case SDLK_o: mplayer_put_key('o');break;
+                                /*case SDLK_o: mplayer_put_key('o');break;
                                 case SDLK_p: mplayer_put_key('p');break;
-                                case SDLK_SPACE: mplayer_put_key(' ');break;
+                                case SDLK_SPACE: mplayer_put_key(' ');break;*/
                                 case SDLK_UP: mplayer_put_key(KEY_UP);break;
                                 case SDLK_DOWN: mplayer_put_key(KEY_DOWN);break;
                                 case SDLK_LEFT: mplayer_put_key(KEY_LEFT);break;
                                 case SDLK_RIGHT: mplayer_put_key(KEY_RIGHT);break;
-                                case SDLK_PLUS:
+                                /*case SDLK_PLUS:
                                 case SDLK_KP_PLUS: mplayer_put_key('+');break;
                                 case SDLK_MINUS:
-                                case SDLK_KP_MINUS: mplayer_put_key('-');break;
+                                case SDLK_KP_MINUS: mplayer_put_key('-');break;*/
+				default:
+					mplayer_put_key(keypressed);
                                 }
                                 
 				break;
