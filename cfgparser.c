@@ -22,6 +22,8 @@
 #define COMMAND_LINE		0
 #define CONFIG_FILE		1
 
+#define LIST_SEPARATOR ','
+
 #define CONFIG_GLOBAL (1<<0)
 #define CONFIG_RUNNING (1<<1)
 
@@ -39,7 +41,8 @@
 
 #include "cfgparser.h"
 
-
+static void m_config_list_options(m_config_t *config);
+static void m_config_error(int err,char* opt,char* val);
 
 static void
 m_config_save_option(m_config_t* config, config_t* conf,char* opt, char *param) {
@@ -102,6 +105,9 @@ m_config_save_option(m_config_t* config, config_t* conf,char* opt, char *param) 
       save->param.as_pointer = strdup(param);
   case CONF_TYPE_FUNC :    
     break;
+  case CONF_TYPE_STRING_LIST :
+    save[sl].param.as_pointer = *((char***)conf->p);
+    break;
   default :
     mp_msg(MSGT_CFGPARSER,MSGL_ERR,"Should never append in m_config_save_option : conf->type=%d\n",conf->type);
   }
@@ -138,6 +144,9 @@ m_config_revert_option(m_config_t* config, config_save_t* save) {
     break;
   case CONF_TYPE_STRING :
     *((char**)save->opt->p) = save->param.as_pointer;
+    break;
+  case CONF_TYPE_STRING_LIST :
+    *((char***)save->opt->p) = save->param.as_pointer;
     break;
   case CONF_TYPE_FUNC_PARAM :
   case CONF_TYPE_FUNC_FULL :
@@ -580,6 +589,56 @@ static int config_read_option(m_config_t *config,config_t** conf_list, char *opt
 			*((char **) conf[i].p) = strdup(param);
 			ret = 1;
 			break;
+		case CONF_TYPE_STRING_LIST:
+			if (param == NULL)
+				goto err_missing_param;
+			else {
+			  int n = 0,len;
+			  char *ptr = param, *last_ptr, **res;
+
+			  while(ptr[0] != '\0') {
+			    last_ptr = ptr;
+			    ptr = strchr(ptr,LIST_SEPARATOR);
+			    if(!ptr) {
+			      if(strlen(last_ptr) > 0)
+				n++;
+			      break;
+			    }
+			    ptr++;
+			    n++;
+			  }
+			  if(n == 0)
+			    goto err_missing_param;
+			  else if( (conf[i].flags & CONF_MIN && n < conf[i].min) || 
+				   (conf[i].flags & CONF_MAX && n > conf[i].max) ) {
+			    ret = ERR_OUT_OF_RANGE;
+			    goto out;
+			  }
+			  ret = 1;
+			  res = malloc((n+1)*sizeof(char*));
+			  ptr = param;
+			  n = 0;
+			  while(ptr[0] != '\0') {
+			    last_ptr = ptr;
+			    ptr = strchr(ptr,LIST_SEPARATOR);
+			     if(!ptr) {
+			       if(strlen(last_ptr) > 0) {
+				 res[n] = strdup(last_ptr);
+				 n++;
+			       }
+			       break;
+			     }
+			     len = ptr - last_ptr;
+			     res[n] = (char*)malloc(len + 1);
+			     strncpy(res[n],last_ptr,len);
+			     res[n][len] = '\0';
+			     ptr++;
+			     n++;
+			  }
+			  res[n] = NULL;
+			  *((char ***) conf[i].p) = res;
+			}
+			break;
 		case CONF_TYPE_FUNC_PARAM:
 			if (param == NULL)
 				goto err_missing_param;
@@ -993,6 +1052,10 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 		    opt++;
 
 		    mp_msg(MSGT_CFGPARSER, MSGL_DBG3, "this_opt = option: %s\n", opt);
+		    if(strcasecmp(opt,"list-options") == 0) {
+		      m_config_list_options(config);
+		      exit(1);
+		    }
 		    tmp = m_config_set_option(config, opt, argv[i + 1]);
 
 		    switch (tmp) {
@@ -1000,8 +1063,8 @@ int m_config_parse_command_line(m_config_t *config, int argc, char **argv, char 
 		    case ERR_MISSING_PARAM:
 		    case ERR_OUT_OF_RANGE:
 		    case ERR_FUNC_ERR:
-			mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Error %d while parsing option: '%s'!\n",
-			    tmp, opt);
+		      mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Error: ");
+		      m_config_error(tmp,opt,argv[i+1]);
 			goto err_out;
 		    default:
 			i += tmp;
@@ -1296,3 +1359,99 @@ int m_config_is_option_set(m_config_t *config, char* arg) {
 }
 
 #undef AS_INT
+
+static void m_config_print_option_list(char* prefix, config_t* opt_list) {
+  char* pf = NULL;
+  config_t* opt;
+  char min[50],max[50],*type;
+
+  
+  for(opt = opt_list ; opt->name != NULL ; opt++) {
+    if(opt->type == CONF_TYPE_SUBCONFIG) {
+      if(prefix) {
+	pf = (char*)malloc(strlen(prefix) + strlen(opt->name) + 1);
+	sprintf(pf,"%s:%s",prefix,opt->name);
+      } else
+	pf = strdup(opt->name);
+      m_config_print_option_list(pf,(config_t*)opt->p);
+      free(pf);
+      continue;
+    }
+    if(prefix)
+      printf("%1.15s:",prefix);
+    if(opt->flags & CONF_MIN)
+      sprintf(min,"%-8.0f",opt->min);
+    else
+      strcpy(min,"No");
+    if(opt->flags & CONF_MAX)
+      sprintf(max,"%-8.0f",opt->max);
+    else
+      strcpy(max,"No");
+    switch(opt->type) {
+    case  CONF_TYPE_FLAG:
+      type = "Flag";
+      break;
+    case CONF_TYPE_INT:
+      type = "Integer";
+      break;
+    case CONF_TYPE_FLOAT:
+      type = "Float";
+      break;
+    case CONF_TYPE_STRING:
+      type = "String";
+      break;
+    case CONF_TYPE_FUNC:
+    case CONF_TYPE_FUNC_PARAM:
+    case CONF_TYPE_FUNC_FULL:
+      type = "Function";
+      break;
+    case CONF_TYPE_PRINT:
+      type = "Print";
+      break;
+    case CONF_TYPE_STRING_LIST:
+      type = "String list";
+      break;
+    default:
+      type = "";
+      break;
+    }
+    printf("%-*.15s  %-13.13s %-10.10s %-10.10s %-3.3s %-3.3s %-3.3s\n",
+	   30 - (prefix ? strlen(prefix) + 1 : 0),
+	   opt->name,
+	   type,
+	   min,
+	   max,
+	   opt->flags & CONF_GLOBAL ? "Yes" : "No",
+	   opt->flags & CONF_NOCMD ? "No" : "Yes",
+	   opt->flags & CONF_NOCFG ? "No" : "Yes");
+  }
+
+}
+
+
+static void m_config_list_options(m_config_t *config) {
+  int i;
+                                                                         
+  printf("\nName                            Type          Min        Max       Glob CL  Cfg\n\n");
+  for(i = 0; config->opt_list[i] ; i++)
+    m_config_print_option_list(NULL,config->opt_list[i]);
+}
+  
+
+
+static void m_config_error(int err,char* opt,char* val) {
+  switch(err) {
+  case ERR_NOT_AN_OPTION:
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"'%s' is not an mplayer option\n",opt);
+    break;
+  case ERR_MISSING_PARAM:
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"option '%s' need a parameter\n",opt);
+    break;
+  case ERR_OUT_OF_RANGE:
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"value '%s' of option '%s' is out of range\n",val,opt);
+    break;
+  case ERR_FUNC_ERR:
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR,"while parsing option '%s'\n",opt);
+    break;
+  }
+}

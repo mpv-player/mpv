@@ -14,6 +14,7 @@
 #define CONF_TYPE_PRINT		6
 #define CONF_TYPE_FUNC_FULL	7
 #define CONF_TYPE_SUBCONFIG	8
+#define CONF_TYPE_STRING_LIST           9
 
 
 #define ERR_NOT_AN_OPTION	-1
