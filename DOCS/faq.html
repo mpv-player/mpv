@@ -145,7 +145,7 @@ It's much faster. If SDL's DGA works too, use that, it'll be EVEN faster!
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
 What is the meaning of numbers in the status line?
 </B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
-See: <CODE>A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0</CODE><BR>
+See: <CODE>A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0 4</CODE><BR>
 <UL>
 <LI>A: audio position in seconds
 <LI>V: video position in seconds
@@ -156,8 +156,15 @@ See: <CODE>A:   2.1  V:   2.2  A-V: -0.167  ct:  0.042   57  41%   0%  2.6% 0</C
 <LI>video_out cpu usage for avi, 0 for mpg (see above)
 <LI>audio codec cpu usage in percent
 <LI>frames needed to drop to maintain A-V sync
+<LI>current level of image postprocessing (when using -autoq)
 </UL>
 <I>Most of them are for debug purposes, and will be removed soon.</I>
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+What if I don't want them to appear?
+</B></TD><TR><TD></TD><TD VALIGN=top>A:</TD><TD><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
+Then you use the -quiet option, and read the manpage.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top>Q:</TD><TD WIDTH=100%><B><font face="Verdana, Arial, Helvetica, sans-serif" size="2">
