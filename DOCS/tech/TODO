@@ -23,7 +23,11 @@ FOR THE LAST RC-RELEASE:
      (It's in new-conf. I can provide shell access...:)
    - Dec 28: Re: [Mplayer-cvslog] CVS: main/libvo vo_svga.c,1.55,1.56
      (vo_svga is unusably broken. On my Cirrus, and Geforce2, confirmed)
-   - Dec 31: [BUG] sig11 in subreader.c - FIXED?
+   - Dec 31: [BUG] sig11 in subreader.c - FIXED!
+   - Jan 5:  [BUG] surround audio plugin broken
+   - VERY old bug: DVD stream playing broken on some systems (like mine):
+     audio is delayed, even after -dumpstream and play the dumped stream
+     (-audio -0.25 fixes)
 
 FOR THE v0.90 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
