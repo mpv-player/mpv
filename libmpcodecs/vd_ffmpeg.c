@@ -115,9 +115,11 @@ static int init(sh_video_t *sh){
     if(vd_use_slices && lavc_codec->capabilities&CODEC_CAP_DRAW_HORIZ_BAND)
 	ctx->do_slices=1;
  
+#if LIBAVCODEC_BUILD > 4615
     if(lavc_codec->capabilities&CODEC_CAP_DR1)
 	ctx->do_dr1=1;
-    
+#endif
+            
     ctx->avctx = malloc(sizeof(AVCodecContext));
     memset(ctx->avctx, 0, sizeof(AVCodecContext));
     avctx = ctx->avctx;
