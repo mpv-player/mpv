@@ -76,7 +76,7 @@ $(PRG_CFG):        .depend codec-cfg.c codec-cfg.h
 	$(CC) $(CFLAGS) -g codec-cfg.c -o $(PRG_CFG) -DCODECS2HTML
 
 install: $(PRG)
-	install -D -m 755 -s $(PRG) $(BINDIR)
+	install -D -m 755 -s $(PRG) $(BINDIR)/$(PRG)
 	install -D -m 644 DOCS/mplayer.1 $(prefix)/man/man1/mplayer.1
 
 clean:
