@@ -85,7 +85,7 @@ static int init(int rate,int channels,int format,int flags){
 	  {"waveheader", OPT_ARG_BOOL, &ao_pcm_waveheader, NULL},
 	  {"file",       OPT_ARG_STR,  &file,              NULL},
 	  {NULL}
-	}
+	};
 	// set defaults
 	ao_pcm_waveheader = 1;
 	file.str = "audiodump.wav";
