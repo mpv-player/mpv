@@ -16,6 +16,9 @@ char *ao_subdevice = NULL;
 #ifdef USE_OSS_AUDIO
 extern ao_functions_t audio_out_oss;
 #endif
+#ifdef MACOSX
+extern ao_functions_t audio_out_macosx;
+#endif
 #ifdef USE_ARTS
 extern ao_functions_t audio_out_arts;
 #endif
@@ -49,9 +52,6 @@ extern ao_functions_t audio_out_sgi;
 #endif
 #ifdef HAVE_WIN32WAVEOUT
 extern ao_functions_t audio_out_win32;
-#endif
-#ifdef MACOSX
-extern ao_functions_t audio_out_macosx;
 #endif
 #ifdef HAVE_DXR2
 extern ao_functions_t audio_out_dxr2;
