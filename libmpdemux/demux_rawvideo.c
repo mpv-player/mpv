@@ -36,7 +36,8 @@ m_option_t demux_rawvideo_opts[] = {
   { "16cif", &size_id, CONF_TYPE_FLAG,0,0,7, NULL },
   { "sif", &size_id, CONF_TYPE_FLAG,0,0,8, NULL },
   // format:
-  { "format", &format, CONF_TYPE_INT, 0, 0 , 0, NULL },
+  { "format", &format, CONF_TYPE_IMGFMT, 0, 0 , 0, NULL },
+  // below options are obsolete
   { "y420", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_I420, NULL },
   { "yv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_YV12, NULL },
   { "nv12", &format, CONF_TYPE_FLAG, 0, 0 , IMGFMT_NV12, NULL },
