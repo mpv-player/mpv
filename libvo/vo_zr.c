@@ -3,6 +3,8 @@
  * Copyright (C) Rik Snel 2001,2002, License GNU GPL v2
  */
 
+/* $Id$ */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -81,19 +83,62 @@ struct video_capability vc;
 
 //should be command line options
 int norm = VIDEO_MODE_AUTO;
+#if 0
 #ifndef VO_ZR_DEFAULT_DEVICE
 #define VO_ZR_DEFAULT_DEVICE "/dev/video"
+#endif
 #endif
 char *device = NULL;
 
 int zoran_getcap() {
-	char* dev = device ? device : VO_ZR_DEFAULT_DEVICE;
+	char* dev;
+
+	if (device)
+		dev = device;
+	else {  /* code borrowed from mjpegtools lavplay.c // 20020416 too */
+		struct stat vstat;
+
+#undef VIDEV		
+#define VIDEV "/dev/video"		
+		if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
+			dev = VIDEV;
+#undef VIDEV		
+#define VIDEV "/dev/video0"		
+		else if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
+			dev = VIDEV;
+#undef VIDEV		
+#define VIDEV "/dev/v4l/video0"		
+		else if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
+			dev = VIDEV;
+#undef VIDEV		
+#define VIDEV "/dev/v4l0"		
+		else if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
+			dev = VIDEV;
+#undef VIDEV		
+#define VIDEV "/dev/v4l"		
+		else if (stat(VIDEV, &vstat) == 0 && S_ISCHR(vstat.st_mode))
+			dev = VIDEV;
+#undef VIDEV		
+		else {
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: unable to find video device\n");
+			return 1;
+		}
+		mp_msg(MSGT_VO, MSGL_V, "zr: found video device %s\n", dev);
+	}
+			
 	vdes = open(dev, O_RDWR);
+
+	if (vdes < 0) {
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error opening %s: %s\n", 
+		       dev, strerror(errno));
+		return 1;
+	}
+
 	/* before we can ask for the maximum resolution, we must set 
 	 * the correct tv norm */
 
 	if (ioctl(vdes, MJPIOC_G_PARAMS, &zp) < 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "device at %s is probably not a DC10(+)/buz/lml33\n", dev);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: device at %s is probably not a DC10(+)/buz/lml33\n", dev);
 		return 1;
 	}
 	
@@ -102,26 +147,19 @@ int zoran_getcap() {
 		zp.norm = norm;
 		if (ioctl(vdes, MJPIOC_S_PARAMS, &zp) < 0) {
 			mp_msg(MSGT_VO, MSGL_ERR,
-				"unable to change video norm, use another program to change it (XawTV)\n");
+				"zr: unable to change video norm, use another program to change it (XawTV)\n");
 			return 1;
 		}
 		ioctl(vdes, MJPIOC_G_PARAMS, &zp);
 		if (norm != zp.norm) {
 			mp_msg(MSGT_VO, MSGL_ERR,
-				"unable to change video norm, use another program to change it (XawTV)\n");
+				"zr: unable to change video norm, use another program to change it (XawTV)\n");
 			return 1;
 		}
 	}
 	
-	if (vdes < 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "error opening %s\n", 
-				dev);
-		return 1;
-	}
-
-
 	if (ioctl(vdes, VIDIOCGCAP, &vc) < 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "error getting video capabilities from %s\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error getting video capabilities from %s\n");
 		return 1;
 	}
 	mp_msg(MSGT_VO, MSGL_V, "zr: MJPEG card reports maxwidth=%d, maxheight=%d\n", vc.maxwidth, vc.maxheight);
@@ -138,7 +176,7 @@ int init_zoran(int zrhdec, int zrvdec) {
 	}
 
 	if (image_height > vc.maxheight) {
-		mp_msg(MSGT_VO, MSGL_ERR, "movie to be played is too high, max height currenty %d\n", vc.maxheight);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: movie to be played is too high, max height currenty %d\n", vc.maxheight);
 		return 1;
 	}
 
@@ -154,7 +192,7 @@ int init_zoran(int zrhdec, int zrvdec) {
 	mp_msg(MSGT_VO, MSGL_V, "zr: geometry (after 'scaling'): %dx%d+%d+%d fields=%d, w=%d, h=%d\n", zp.img_width, (3-fields)*zp.img_height, zp.img_x, zp.img_y, fields, image_width/hdec, image_height);
 
 	if (ioctl(vdes, MJPIOC_S_PARAMS, &zp) < 0) {
-		mp_msg(MSGT_VO, MSGL_ERR, "error setting display parameters\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error setting display parameters\n");
 		return 1;
 	}
 
@@ -162,7 +200,7 @@ int init_zoran(int zrhdec, int zrvdec) {
 	zrq.size = MJPEG_SIZE;
 
 	if (ioctl(vdes, MJPIOC_REQBUFS, &zrq)) {
-		mp_msg(MSGT_VO, MSGL_ERR, "error requesting %d buffers of size %d\n", zrq.count, zrq.size);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %d buffers of size %d\n", zrq.count, zrq.size);
 		return 1;
 	}
 
@@ -170,7 +208,7 @@ int init_zoran(int zrhdec, int zrvdec) {
 			MAP_SHARED, vdes, 0);
 
 	if (buf == MAP_FAILED) {
-		mp_msg(MSGT_VO, MSGL_ERR, "error requesting %d buffers of size %d\n", zrq.count, zrq.size);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %d buffers of size %d\n", zrq.count, zrq.size);
 		return 1;
 	}
 	return 0;
@@ -183,13 +221,13 @@ void uninit_zoran(void) {
 	}
 	while (queue > synco + 1) {
 		if (ioctl(vdes, MJPIOC_SYNC, &zs) < 0) 
-			mp_msg(MSGT_VO, MSGL_ERR, "error waiting for buffers to become free"); 
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: error waiting for buffers to become free\n"); 
 		synco++;
 	}
 	/* stop streaming */
 	frame = -1;
 	if (ioctl(vdes, MJPIOC_QBUF_PLAY, &frame) < 0) 
-		mp_msg(MSGT_VO, MSGL_ERR, "error stopping playback of last frame");
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error stopping playback of last frame\n");
 	close(vdes);
 }
 
@@ -208,20 +246,20 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	if (g.set) {
 		if (g.width%2 != 0 || g.height%2 != 0 ||
 				g.xoff%2 != 0 || g.yoff%2 != 0) {
-			mp_msg(MSGT_VO, MSGL_ERR, "arguments in -zrcrop must be multiples of 2\n");
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: arguments in -zrcrop must be multiples of 2\n");
 			return 1;
 		}
 		if (g.width <= 0 || g.height <= 0 ||
 				g.xoff < 0 || g.yoff < 0) {
-			mp_msg(MSGT_VO, MSGL_ERR, "width and height must be positive and offset nonnegative\n");
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: width and height must be positive and offset nonnegative\n");
 			return 1;
 		}
 		if (g.width + g.xoff > width) {
-			mp_msg(MSGT_VO, MSGL_ERR, "width+xoffset (%d+%d>%d) is too big\n", g.width, g.xoff, width);
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: width+xoffset (%d+%d>%d) is too big\n", g.width, g.xoff, width);
 			return 1;
 		}
 		if (g.height + g.yoff > height) {
-			mp_msg(MSGT_VO, MSGL_ERR, "height+yoffset (%d+%d>%d) is too big\n", g.height, g.yoff, height);
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: height+yoffset (%d+%d>%d) is too big\n", g.height, g.yoff, height);
 			return 1;
 		}
 	} else {
@@ -258,7 +296,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 			stretchy = 2;
 		} else if (vdec == 4) {
 			if (!zrfd) {
-				mp_msg(MSGT_VO, MSGL_WARN, "vo_zr: vertical decimation too high, changing to 2 (use -zrfd to keep vdec=4)\n");
+				mp_msg(MSGT_VO, MSGL_WARN, "zr: vertical decimation too high, changing to 2 (use -zrfd to keep vdec=4)\n");
 				vdec = 2;
 			}
 			stretchy = 2;
@@ -267,7 +305,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 			stretchx = 4;
 		} else if (hdec == 4){
 			if (!zrfd) {
-				mp_msg(MSGT_VO, MSGL_WARN, "vo_zr: horizontal decimation too high, changing to 2 (use -zrfd to keep hdec=4)\n");
+				mp_msg(MSGT_VO, MSGL_WARN, "zr: horizontal decimation too high, changing to 2 (use -zrfd to keep hdec=4)\n");
 				hdec = 2;
 			}
 			stretchx = 4;
@@ -278,12 +316,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		stretchy = 2;
 		fields = 1;
 		if (vdec != 1 && !zrfd) {
-			mp_msg(MSGT_VO, MSGL_WARN, "vo_zr: vertical decimation too high, changing to 1 (use -zrfd to keep vdec=%d)\n", vdec);
+			mp_msg(MSGT_VO, MSGL_WARN, "zr: vertical decimation too high, changing to 1 (use -zrfd to keep vdec=%d)\n", vdec);
 			vdec = 1;
 		}
 
 		if (hdec != 1 && !zrfd) {
-			mp_msg(MSGT_VO, MSGL_WARN, "vo_zr: vertical decimation too high, changing to 1 (use -zrfd to keep hdec=%d)\n", hdec);
+			mp_msg(MSGT_VO, MSGL_WARN, "zr: vertical decimation too high, changing to 1 (use -zrfd to keep hdec=%d)\n", hdec);
 			hdec = 1;
 		}
 	}
@@ -323,12 +361,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	off_c += (image_width - g.width)/4;
 	framenum = 0;
 	size = image_width*image_height;
-	mp_msg(MSGT_VO, MSGL_V, "input: %dx%d, cropped: %dx%d, output: %dx%d, off_y=%d, off_c=%d\n", width, height, g.width, g.height, image_width, image_height, off_y, off_c);
+	mp_msg(MSGT_VO, MSGL_V, "zr: input: %dx%d, cropped: %dx%d, output: %dx%d, off_y=%d, off_c=%d\n", width, height, g.width, g.height, image_width, image_height, off_y, off_c);
 	
 	image = malloc(2*size); /* this buffer allows for YUV422 data,
 				 * so it is a bit too big for YUV420 */
 	if (!image) {
-		mp_msg(MSGT_VO, MSGL_ERR, "Memory exhausted\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: Memory exhausted\n");
 		return 1;
 	}
 	/* and make sure that the borders are _really_ black */
@@ -376,12 +414,12 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 					0, quality, bw);
 			break;
 		default:
-			mp_msg(MSGT_VO, MSGL_FATAL, "internal inconsistency in vo_zr\n");
+			mp_msg(MSGT_VO, MSGL_FATAL, "zr: internal inconsistency in vo_zr\n");
 	}
 
 
 	if (j == NULL) {
-		mp_msg(MSGT_VO, MSGL_ERR, "Error initializing the jpeg encoder\n");
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error initializing the jpeg encoder\n");
 		return 1;
 	}
 
@@ -408,7 +446,7 @@ static void flip_page (void) {
 		frame = queue;
 	} else {
 		if (ioctl(vdes, MJPIOC_SYNC, &zs) < 0) 
-			mp_msg(MSGT_VO, MSGL_ERR, "error waiting for buffers to become free"); 
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: error waiting for buffers to become free\n"); 
 		frame = zs.frame;
 		synco++;
 	}
@@ -431,7 +469,7 @@ static void flip_page (void) {
 	
 	if (ioctl(vdes, MJPIOC_QBUF_PLAY, &frame) < 0) 
 		mp_msg(MSGT_VO, MSGL_ERR,
-				"error queueing buffer for playback");
+				"zr: error queueing buffer for playback\n");
 	queue++;
 
 	framenum++;
@@ -569,7 +607,7 @@ vo_zr_parseoption(struct config * conf, char *opt, char *param){
 				&g.xoff, &g.yoff) != 4) {
 		g.xoff = 0; g.yoff = 0;
 		if (sscanf(param, "%dx%d", &g.width, &g.height) != 2) {
-			mp_msg(MSGT_VO, MSGL_ERR, "argument to -zrcrop must be of the form 352x288+16+0\n");
+			mp_msg(MSGT_VO, MSGL_ERR, "zr: argument to -zrcrop must be of the form 352x288+16+0\n");
 			return ERR_OUT_OF_RANGE;
 		}
 	}
