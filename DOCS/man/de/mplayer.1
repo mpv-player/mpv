@@ -5920,7 +5920,7 @@ des ersten Durchlaufs.
 .B turbo (nur im two-pass-Modus)
 Erhöht die Geschwindigkeit des ersten Durchgangs drastisch, indem schnellere
 Algorithmen benutzt und CPU-intensive Optionen deaktiviert werden
-Die wird den PSNR-Wert im Ganzen wahrscheinlich ein wenig (etwa
+Dies wird den PSNR-Wert im Ganzen wahrscheinlich ein wenig (etwa
 0.01dB) und Typ und PSNR-Wert einzelner Frames ein wenig mehr (bis zu
 0.03db) verringern.
 .
@@ -5949,7 +5949,7 @@ Das gleiche wie die Option aspect, wobei jedoch das Verhältnis automatisch
 berechnet wird.
 Veränderungen in der Filterkette wie crop/\:expand/\:scale/\:etc.\& werden
 dabei berücksichtigt.
-Dies Option verursacht keine Performanceeinbußen, du kannst sie also getrost
+Diese Option verursacht keine Performanceeinbußen, du kannst sie also getrost
 immer aktivert lassen.
 .
 .TP
@@ -5976,41 +5976,73 @@ Werte im Bereich 1000\-100000 sind vernünftig.
 .br
 .I ANMERKUNG:
 vratetol sollte im zweiten Durchlauf nicht zu groß sein, es kann sonst in
-Verbindung mitvrc_(min|max)rate zu Problemen kommen.
-.\" manpage is synced from top down to this option.
+Verbindung mit vrc_(min|max)rate zu Problemen kommen.
 .
-.IPs vrc_maxrate=<Wert>
-maximale Bitrate in kbit/\:sec (Durchgang 1/\:2)
-.IPs vrc_minrate=<Wert>
-minimale Bitrate in kbit/\:sec (Durchgang 1/\:2)
-.IPs vrc_buf_size=<Wert>
-Puffergröße in kbit (Durchgang 1/\:2)
-Anmerkung: vratetol sollte während des zweiten Durchgangs nicht zu hoch
-gesetzt werden, da ansonsten Probleme auftreten können, wenn vrc_(min|max)rate
-benutzt wird.
-.IPs vb_qfactor=<-31.0\-31.0>
-Quantizer\-Faktor zwischen B\- und Nicht\-B\-Frames (Durchgang 1/\:2)
-(Standardwert: 1.25)
-.IPs vi_qfactor=<-31.0\-31.0>
-Quantizer\-Faktor zwischen I\- und Nicht\-I\-Frames (Durchgang 1/\:2)
-(Standardwert: 0.8)
-.IPs vb_qoffset=<-31.0\-31.0>
-Quantizer\-Offset zwischen B\- und Nicht\-B\-Frames (Durchgang 1/\:2)
-(Standardwert: 1.25)
-.IPs vi_qoffset=<-31.0\-31.0>
-Quantizer\-Offset zwischen I\- und Nicht\-I\-Frames (Durchgang 1/\:2)
-(Standardwert: 0.0)
+.TP
+.B vrc_maxrate=<Wert>
+maximale Bitrate in kbit/\:Sek (Durchlauf 1/\:2)
+(Standard: 0, unbegrenzt)
+.
+.TP
+.B vrc_minrate=<Wert>
+minimale Bitrate in kbit/\:Sek (Durchlauf 1/\:2)
+(Standard: 0, unbegrenzt)
+.
+.TP
+.B vrc_buf_size=<Wert>
+Puffergröße in kbit (Durchlauf 1/\:2).
+Für MPEG-1/\:2-Dateien setzt dies außerdem die vbv-Puffergröße; benutze 327
+für VCDs, 917 für SVCDs und 1835 für DVDs.
+.
+.TP
+.B vrc_buf_aggressivity
+momentan nutzlos
+.
+.TP
+.B vrc_strategy
+Platzhalter, reserviert für zukünftige Benutzung.
+.
+.TP
+.B vb_qfactor=<-31.0\-31.0>
+Quantisierungsparameter zwischen B- und Nicht-B-Frames (Durchlauf 1/\:2)
+(Standard: 1.25)
+.
+.TP
+.B vi_qfactor=<-31.0\-31.0>
+Quantisierungsparameter zwischen Intra- und Nicht-Intraframes (Durchlauf 1/\:2)
+(Standard: 0.8)
+.
+.TP
+.B vb_qoffset=<-31.0\-31.0>
+Offset des Quantisierungsparameters zwischen B- und Nicht-B-Frames (Durchlauf
+1/\:2)
+(Standard: 1.25)
+.
+.TP
+.B vi_qoffset=<-31.0\-31.0>
+Offset des Quantisierungsparameters zwischen Intra- und Nicht-Intraframes
+(Durchlauf 1/\:2)
+(Standard: 0.0)
 .br
-if v{b|i}_qfactor > 0 then
+if v{b|i}_qfactor > 0
 .br
-I/\:B-Frame\-Quantizer = P-Frame\-Quantizer * v{b|i}_qfactor + v{b|i}_qoffset
+Intra-/\:B-Frame-Quantisierungsparameter = P-Frame-Quantisierungsparameter *
+v{b|i}_qfactor + v{b|i}_qoffset
 .br
 else
 .br
-benutze die normale Bitratenkontrolle (lege den nächsten P\-Frame\-Quantizer
-nicht fest) und setze
+benutze die normale Bitratenkontrolle (lege den nächsten
+P-Frame-Quantisierungsparameter nicht fest) und setze
 q= -q * v{b|i}_qfactor + v{b|i}_qoffset
-.IPs vqblur=<0.0\-1.0>
+.br
+.I TIP:
+Für Encodierung mit unterschiedlichen aber konstanten Quantisierungsparametern
+für Intra-/P- und B-Frames kannst du folgendes benutzen:
+lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>.
+.
+.\" manpage is synced from top down to this option.
+.TP
+.B vqblur=<0.0\-1.0>
 Quantizer\-Glättung (Durchgang 1):
 .RSss
 0.0: qblur deaktiviert
