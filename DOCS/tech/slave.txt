@@ -1,8 +1,6 @@
 SLAVE MODE PROTOCOL
 -------------------
 
-FIXME: Some of these options are still not documented, patches welcome.
-
 Most slave mode commands are equivalent to command line options.
 Have a look at the man page for more detailed descriptions.
 
@@ -239,14 +237,18 @@ menu <command>
 set_menu <menu_name>
     Display the menu named <menu_name>.
 
+The following commands are really only useful for OSD menu console mode:
+
 help
-    ???
+    Displays help text, currently empty.
 
 exit
-    ???
+    Exits from OSD menu console. Unlike 'quit', does not quit MPlayer.
 
 hide
-    ???
+    Hides the OSD menu console. Clicking a menu command unhides it. Other
+    keybindings act as usual.
 
 run <value>
-    Run <value> as shell command.
+    Run <value> as shell command. In OSD menu console mode stdout and stdin
+    are through the video output driver.
