@@ -175,7 +175,14 @@ will be messy for a short time after seeking.</P>
 
 <P>It's recommended to download and install RealPlayer8 or RealONE, because
   <B>MPlayer</B> can use their libraries to decode files with RealVideo 2.0 or
-  RealVideo 3.0 video!</P>
+  RealVideo 3.0 video! All you have to do is:</P>
+
+<P>
+  &nbsp;&nbsp;<CODE>ln -s /usr/local/RealPlayer8/Codecs $PREFIX/lib/real</CODE>
+</P>
+
+<P>NOTE: RealPlayer's installation path may differ from the above, please check
+  it.</P>
 
 <P>NOTE: RealPlayer libraries currently <B>can only be used with Linux or FreeBSD
   on the x86 platform</B>!</P>
