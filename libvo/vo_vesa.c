@@ -147,9 +147,9 @@ static inline void __vbeSwitchBank(unsigned long offset)
   if((err=vbeSetWindow(win.idx,new_offset)) != VBE_OK)
   {
     show_err:
+    vesa_term();
     PRINT_VBE_ERR("vbeSetWindow",err);
     printf("vo_vesa: Fatal error occured! Can't continue\n");
-    vesa_term();
     exit(-1);
   }
   win.low = new_offset * gran;
@@ -313,14 +313,19 @@ static void flip_page(void)
     if(!HAS_DGA()) __vbeCopyData(dga_buffer);
     flip_trigger = 0;
   }
-#if 0
   if(vo_doublebuffering && multi_size > 1)
   {
-   vbeSetDisplayStart(multi_buff[multi_idx],1);
-   multi_idx = multi_idx ? 0 : 1;
-   win.ptr = dga_buffer = video_base + multi_buff[multi_idx];
+    int err;
+    if((err=vbeSetDisplayStart(multi_buff[multi_idx],1)) != VBE_OK)
+    {
+      vesa_term();
+      PRINT_VBE_ERR("vbeSetDispayStart",err);
+      printf("vo_vesa: Fatal error occured! Can't continue\n");
+      exit(EXIT_FAILURE);
+    }
+    multi_idx = multi_idx ? 0 : 1;
+    win.ptr = dga_buffer = video_base + multi_buff[multi_idx];
   }
-#endif
 /*
   else
   if(tripple_buffering)
@@ -416,6 +421,34 @@ static void vesa_aspect(uint32_t width,uint32_t height,
     *image_width = yres * aspect_factor;
     if(verbose) printf("vo_vesa: Y > X therefore *image=%ux%u\n",*image_width,*image_height);
   }
+}
+
+static void paintBkGnd( void )
+{
+    int x_res = video_mode_info.XResolution;
+    int y_res = video_mode_info.YResolution;
+    int x, y;
+
+    for (y = 0; y < y_res; ++y)
+    {
+	for (x = 0; x < x_res; ++x)
+	{
+	    int r, g, b;
+	    if ((x & 16) ^ (y & 16))
+	    {
+		r = x * 255 / x_res;
+		g = y * 255 / y_res;
+		b = 255 - x * 255 / x_res;
+	    }
+	    else
+	    {
+		r = 255 - x * 255 / x_res;
+		g = y * 255 / y_res;
+		b = 255 - y * 255 / y_res;
+	    }
+	    __vbeSetPixel(x, y, r, g, b);
+	}
+    }
 }
 
 static char *model2str(unsigned char type)
@@ -796,42 +829,24 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	  printf("vo_vesa: VESA initialization complete\n");
 	  fflush(stdout);
 	}
-	if(verbose)
+	if(HAS_DGA())
 	{
-		int x_res = video_mode_info.XResolution;
-		int y_res = video_mode_info.YResolution;
-		int x, y;
-
-		for (y = 0; y < y_res; ++y)
-			{
-			for (x = 0; x < x_res; ++x)
-				{
-				int r, g, b;
-				if ((x & 16) ^ (y & 16))
-					{
-					r = x * 255 / x_res;
-					g = y * 255 / y_res;
-					b = 255 - x * 255 / x_res;
-					}
-				else
-					{
-					r = 255 - x * 255 / x_res;
-					g = y * 255 / y_res;
-					b = 255 - y * 255 / y_res;
-					}
-
-				__vbeSetPixel(x, y, r, g, b);
-				}
-			}
+	    int y = 0;
+	    for(i=0;i<MAX_BUFFERS;i++)
+	    {
+		win.ptr = dga_buffer = video_base + multi_buff[i];
+		if(verbose) paintBkGnd();
+	    }
 	}
-	/*if(1)*/
+	else
 	{
-	  int x;
-	  x = video_mode_info.XCharSize ?
-	      (video_mode_info.XResolution/video_mode_info.XCharSize)/2-strlen(title)/2 :
-	      0;
-	  if(x < 0) x = 0;
-	  vbeWriteString(x,0,7,title);
+	    if(verbose) paintBkGnd();
+	    {
+	        int x;
+	        x = (video_mode_info.XResolution/video_mode_info.XCharSize)/2-strlen(title)/2;
+	        if(x < 0) x = 0;
+	        vbeWriteString(x,0,7,title);
+	    }
 	}
 	return 0;
 }
@@ -847,9 +862,9 @@ get_info(void)
 static void
 uninit(void)
 {
+    vesa_term();
     if(verbose > 2)
         printf("vo_vesa: uninit was called\n");
-	vesa_term();
 }
 
 

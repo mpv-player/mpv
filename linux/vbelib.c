@@ -539,25 +539,29 @@ int vbeSetDisplayStart(unsigned long offset, int vsync)
 	"pushl	%%ebx\n"
 	"movl	%1, %%ebx\n"
 	::"a"(0x4f07),"S"(vsync ? 0x80 : 0),
-	  "c"(offset & 0xffff),"d"((offset>>16)&0xffff):"memory");
+	  "c"((offset>>2) & 0xffff),"d"((offset>>18)&0xffff):"memory");
     (*vbe_pm_info.SetDisplayStart)();
     __asm __volatile("popl	%%ebx":::"memory");
     retval = VBE_OK;
   }
   else
   {
+#if 0
+    /* Something wrong here */
     struct LRMI_regs r;
     unsigned long pixel_num;
     memset(&r,0,sizeof(struct LRMI_regs));
-    r.eax = 0x4f07;
-    r.ebx = vsync ? 0x80 : 0;
     pixel_num = offset%(unsigned long)curr_mode_info.BytesPerScanLine;
     if(pixel_num*(unsigned long)curr_mode_info.BytesPerScanLine!=offset) pixel_num++;
+    r.eax = 0x4f07;
+    r.ebx = vsync ? 0x80 : 0;
     r.ecx = pixel_num;
     r.edx = offset/(unsigned long)curr_mode_info.BytesPerScanLine;
     if(!VBE_LRMI_int(0x10,&r)) return VBE_VM86_FAIL;
     retval = r.eax & 0xffff;
     if(retval == 0x4f) retval = VBE_OK;
+#endif
+    retval = VBE_BROKEN_BIOS;
   }
   return retval;
 }
