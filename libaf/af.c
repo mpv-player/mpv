@@ -521,7 +521,7 @@ int af_outputlen(af_stream_t* s, int len)
 {
   int t = s->input.bps*s->input.nch;
   af_instance_t* af=s->first; 
-  register frac_t mul = {1,1};
+  frac_t mul = {1,1};
   // Iterate through all filters 
   do{
     af_frac_mul(&mul, &af->mul);
@@ -538,7 +538,7 @@ int af_inputlen(af_stream_t* s, int len)
 {
   int t = s->input.bps*s->input.nch;
   af_instance_t* af=s->first; 
-  register frac_t mul = {1,1};
+  frac_t mul = {1,1};
   // Iterate through all filters 
   do{
     af_frac_mul(&mul, &af->mul);
@@ -562,7 +562,7 @@ int af_calc_insize_constrained(af_stream_t* s, int len,
   int in  = 0;
   int out = 0;
   af_instance_t* af=s->first; 
-  register frac_t mul = {1,1};
+  frac_t mul = {1,1};
   // Iterate through all filters and calculate total multiplication factor
   do{
     af_frac_mul(&mul, &af->mul);
