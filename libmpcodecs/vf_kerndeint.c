@@ -85,6 +85,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	const unsigned char *srcp, *srcpp, *srcpn, *srcpnn, *srcppp, *srcp3p, *srcp3n, *srcp4p, *srcp4n;
 	unsigned char *dstp, *dstp_saved;
 	int src_pitch;
+	int psrc_pitch;
 	int dst_pitch;
 	int x, y, z;
 	int n = vf->priv->frame++;
@@ -116,6 +117,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 
 		srcp = srcp_saved = mpi->planes[z];
 		src_pitch = mpi->stride[z];
+		psrc_pitch = pmpi->stride[z];
 		dstp = dstp_saved = dmpi->planes[z];
 		dst_pitch = dmpi->stride[z];
 		srcp = srcp_saved + (1-order) * src_pitch;
@@ -135,13 +137,13 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 		/* For the other field choose adaptively between using the previous field
 		   or the interpolant from the current field. */
 
-		prvp = pmpi->planes[z] + 5*src_pitch - (1-order)*src_pitch;
-		prvpp = prvp - src_pitch;
-		prvppp = prvp - 2*src_pitch;
-		prvp4p = prvp - 4*src_pitch;
-		prvpn = prvp + src_pitch;
-		prvpnn = prvp + 2*src_pitch;
-		prvp4n = prvp + 4*src_pitch;
+		prvp = pmpi->planes[z] + 5*psrc_pitch - (1-order)*psrc_pitch;
+		prvpp = prvp - psrc_pitch;
+		prvppp = prvp - 2*psrc_pitch;
+		prvp4p = prvp - 4*psrc_pitch;
+		prvpn = prvp + psrc_pitch;
+		prvpnn = prvp + 2*psrc_pitch;
+		prvp4n = prvp + 4*psrc_pitch;
 		srcp = srcp_saved + 5*src_pitch - (1-order)*src_pitch;
 		srcpp = srcp - src_pitch;
 		srcppp = srcp - 2*src_pitch;
@@ -242,13 +244,13 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 					dstp[x] = srcp[x];
 				}
 			}
-			prvp  += 2*src_pitch;
-			prvpp  += 2*src_pitch;
-			prvppp  += 2*src_pitch;
-			prvpn  += 2*src_pitch;
-			prvpnn  += 2*src_pitch;
-			prvp4p  += 2*src_pitch;
-			prvp4n  += 2*src_pitch;
+			prvp  += 2*psrc_pitch;
+			prvpp  += 2*psrc_pitch;
+			prvppp  += 2*psrc_pitch;
+			prvpn  += 2*psrc_pitch;
+			prvpnn  += 2*psrc_pitch;
+			prvp4p  += 2*psrc_pitch;
+			prvp4n  += 2*psrc_pitch;
 			srcp  += 2*src_pitch;
 			srcpp += 2*src_pitch;
 			srcppp += 2*src_pitch;
@@ -260,7 +262,14 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 			srcp4n += 2*src_pitch;
 			dstp  += 2*dst_pitch;
 		}
-		memcpy(pmpi->planes[z], mpi->planes[z], w*h);
+
+		srcp = mpi->planes[z];
+		dstp = pmpi->planes[z];
+		for (y=0; y<h; y++) {
+			memcpy(dstp, srcp, w);
+			srcp += src_pitch;
+			dstp += psrc_pitch;
+		}
 	}
 
 	return vf_next_put_image(vf,dmpi);
