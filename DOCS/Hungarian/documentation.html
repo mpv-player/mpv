@@ -232,6 +232,7 @@
       <LI><A HREF="#6.4">6.4 StrongARM</A></LI>
       <LI><A HREF="#6.5">6.5 SGI/Irix</A></LI>
       <LI><A HREF="#6.6">6.6 QNX</A></LI>
+      <LI><A HREF="#6.7">6.7 OpenBSD</A></LI>
     </UL>
   <LI><A HREF="../documentation.html#A">A. Készítõk</A></LI>
   <UL>
@@ -1460,6 +1461,27 @@ Közelebbi információ valakinél?</P>
 <P>A <CODE>-vo x11</CODE> kimenet lassabb mintha Linuxon próbálnád, tekintve
   hogy a QNX csak <I>emulálja</I> az X-et, és azt is lassan. Használd az
   SDL-t.</P>
+
+
+<P><B><A NAME=6.7>6.7. OpenBSD</A></B></P>
+
+<P>A forditáshoz GNU make szükséges (gmake, /usr/ports/devel/gmake), a natív
+  BSD make nem jó. Szükséges továbbá egy friss binutils (objcopy-val).</P>
+
+<P>Jelenleg meg kell adnod a <CODE>--disable-mpdvdkit</CODE> opciót
+  fordításnál különben sikertelen lesz.</P>
+
+<P>A <I>gas</I> különbözõ verzióinak hiányosságai miatt (relokáció vs mms),
+  két lépésben kell fordítani: elõször legyen a nem-natív verzió a PATH-ban
+  és add ki a <CODE>gmake -k</CODE> parancsot, aztán a natív verzióval
+  <CODE>gmake</CODE>.</P>
+
+<P>Win32 DLL-ek használatához a kernelt <CODE>option USER_LDT</CODE>-vel kell
+  fordítani.</P>
+
+<P>Ha az <B>MPlayer</B> a <CODE>/dev/cdrom</CODE> vagy <CODE>/dev/dvd</CODE>
+  hiányára panaszkodik, csinálj egy szimbolikus linket :<BR>
+  <CODE>ln -s /dev/(cdrom egység) /dev/cdrom</CODE></P>
 
 
 <P><B><A NAME=A>A függelék - Készítõk</A></B></P>
