@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.45 -->
+<!-- synced with 1.49 -->
 <sect2 id="video-dev">
 <title>Urządzenia wyjścia video</title>
 
@@ -1578,7 +1578,8 @@ nie zostały jeszcze odkryte, więc prawdopodobnie próba z otwartym sterownikie
 
 <listitem><para>
 Obecnie tylko kodeki zdolne do wyjścia na przestrzeń kolorów UYVY mogą współpracować
-z tym sterownikiem. Niestety żaden dekoder z rodziny libavcodec się nie nadaje.
+z tym sterownikiem. Niestety żaden dekoder z rodziny 
+<systemitem class="library">libavcodec</systemitem> się nie nadaje.
 Pozostają nam następujące popularne kodeki: <systemitem>cvid, divxds, xvid, divx4, 
 wmv7, wmv8</systemitem> i kilka innych. Zauważ, że jest to tylko chwilowa niedogodność.
 składnie wygląda w ten sposób:
@@ -1656,26 +1657,27 @@ Przykład: <option>-vo directfb:2</option> (standardową jest warstwa -1 : autod
 <sect4 id="dfbmga">
 <title>DirectFB/Matrox (dfbmga)</title>
 <para>
-Przeczytaj proszę główną sekcję <link linkend="directfb">DirectFB</link> 
-lub informacje ogólne. 
+Przeczytaj proszę główną sekcję <link linkend="directfb">DirectFB</link>, znajdziesz tam
+ogólne informacje. 
 </para>
 
-<para>Ten sterownik wyjścia video włączy CRTC2 
+<para>
+Ten sterownik wyjścia video włączy CRTC2 
 (na drugim wyjściu z karty) w kartach Matrox G400/G450/G550, 
 wyświetlając obraz <emphasis role="bold">niezależnie</emphasis> 
 od pierwszego wyjścia z karty.
 </para>
 
 <para>
-Instrukcję jak to zrobić można znaleźć w sekcji
-<ulink url="../../tech/directfb.txt">tech</ulink> 
-lub bezpośrednio na  
-<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">
-stronie domowej</ulink> Ville Syrjala.
+Ville Syrjala ma na swojej stronie domowej
+<ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">README</ulink>
+oraz
+<ulink url="http://www.sci.fi/~syrjala/directfb/matrox_tv-out_howto">HOWTO</ulink>
+wyjaśniające jak uruchomić wyjście TV DirectFB w kartach Matrox.
 </para>
 
 <note><para>
-Pierwszą wersją DirectFB, jaką udało nam się zmusić do pracy była 0.9.17 
+Pierwszą wersją DirectFB, jaką udało nam się uruchomić była 0.9.17 
 (wadliwa, potrzebuje łatki <systemitem>surfacemanager</systemitem> 
 z powyższego URL).
 W ogóle to kod CRTC2 jest w trakcie portowania do 
@@ -1793,17 +1795,12 @@ dla 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
 
 <formalpara>
-
-<title>Używanie karty DVB do oglądania cyfrowej TV (moduł wejścia DVB)</title>
-<para>
-  Najpierw musisz przekazać parametr <literal>dvb_shutdown_timeout=0</literal>
-  do modułu jądra <filename>dvb-core</filename> lub <application>MPlayer</application> 
-  umrze po 10 sekundach.
-</para>
+<title>Cyfrowa telewizja (moduł wejścia DVB)</title>
+<para>Możesz użyć swojej karty DVB do oglądania cyfrowej telewizji.</para>
 </formalpara>
 
 <para>
- Powinieneś także mieć zainstalowane programy <command>scan</command> oraz
+ Powinieneś mieć zainstalowane programy <command>scan</command> oraz
  <command>szap/tzap/czap</command>; wszystkie są w paczce ze sterownikami.
 </para>
 
@@ -2026,7 +2023,9 @@ wyjściem audio (<option>-ac hwac3</option>).
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
 Aby oglądać zawartość nie-MPEG na em8300 (np. DivX lub RealVideo) będziesz
-musiał określić filtr video MPEG1 taki jak libavcodec (lavc) lub libfame (fame).
+musiał określić filtr video MPEG1 taki jak 
+<systemitem class="library">libavcodec</systemitem> (lavc) lub 
+<systemitem class="library">libfame</systemitem> (fame).
 W tej chwili lavc jest szybszy i daje lepszą jakość obrazu. Sugerowanie jest
 jego użycie, chyba że masz z nim problemy. Spójrz na stronę man aby
 uzyskać więcej informacji o <option>-vf lavc/fame</option>. Używanie lavc jest
@@ -2079,9 +2078,8 @@ Jest to sterownik wyświetlania (<option>-vo zr</option>) dla wielu kart
 służących do przechwytywania/odtwarzania MJPEG (testowane z DC10+ i Buz,
 powinien także działać dla LML33 oraz DC10). Sterownik koduje ramkę na JPEG i
 wysyła ją do karty. Do konwersji na JPEG używany i wymagany jest
-<systemitem>libavcodec</systemitem>. Korzystając ze specjalnego trybu
+<systemitem class="library">libavcodec</systemitem>. Korzystając ze specjalnego trybu
 <emphasis>cinerama</emphasis>
-<!--frogu: czy mają na myśli tutaj tryb XINERAMA???-->
 możesz oglądać filmy w formacie panoramicznym (wide screen), zakładając że masz
 dwa ekrany i dwie karty MJPEG. W zależności od rozdzielczości i ustawień
 jakości, sterownik ten może wymagać sporo mocy CPU. Pamiętaj aby użyć
