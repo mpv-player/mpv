@@ -98,8 +98,7 @@ read the <link linkend="aspect">Preserving aspect ratio</link> section.
 The scaling process is handled by the <literal>scale</literal> video filter:
 <option>-vf scale=<replaceable>width</replaceable>:<replaceable>height</replaceable></option>.
 Its quality can be set with the <option>-sws</option> option.
-If it's not specified, <application>MEncoder</application> will use 0: fast
-bilinear.
+If it's not specified, <application>MEncoder</application> will use 2: bicubic.
 </para>
 
 <para>
