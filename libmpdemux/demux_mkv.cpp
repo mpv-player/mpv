@@ -1150,12 +1150,12 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + Default flag: %u\n",
                        track->default_track);
 
-              } else if ((EbmlId(*l3) !=
-                          KaxTrackFlagLacing::ClassInfos.GlobalId) &&
-                         (EbmlId(*l3) !=
-                          KaxTrackMinCache::ClassInfos.GlobalId) &&
-                         (EbmlId(*l3) != 
-                          KaxTrackMaxCache::ClassInfos.GlobalId))
+              } else if ((!(EbmlId(*l3) ==
+                            KaxTrackFlagLacing::ClassInfos.GlobalId)) &&
+                         (!(EbmlId(*l3) ==
+                            KaxTrackMinCache::ClassInfos.GlobalId)) &&
+                         (!(EbmlId(*l3) ==
+                            KaxTrackMaxCache::ClassInfos.GlobalId)))
                 mp_msg(MSGT_DEMUX, MSGL_V, "[mkv] |  + unknown element@3: "
                        "%s\n", typeid(*l3).name());
 
