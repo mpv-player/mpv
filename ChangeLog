@@ -2,16 +2,35 @@
 mplayer (0.90)
 
   rc2:
-    * X11 fullscreen switching code changed again (esp. for gnome2/kde3.1)
-    * libavcodec: fixed possible 20% speedloss bug
-    * Some DOCS corrections/updates/sync/html fixes
+    General:
     * DOCS/tech/encoding-tips.txt and tech/directfb.txt
-    * GUI: fixed three submenu bugs and other problems
+    * Some DOCS corrections/updates/sync/html fixes
+    * GUI: fixed three submenu bugs and several other problems
     * more compiler warning fixes
+    * NetBSD: cpu sse/sse2 detection & VCD reading fixes
     * fixed possible v4l capturing crash
+    * Merged the EDL 0.5 patch - using & creating Edit-Lists (runtime cut&skip)
+    * Subtitle lines alignment changeable: top/bottom/middle (key 'i')
+    * -slang support for VobSub files
+    
+    VO:
+    * X11 fullscreen switching code changed again (esp. for gnome2/kde3.1)
+    * VIDIX: svgalib kernelhelper support (as libdha alternative)
+    * VIDIX driver for trident cyberblade card
+    * VIDIX: 8 pixel shift & pink window bugs fixed in the RADEON driver
+    * New, rewritten version of vo_svga (vidix support etc) and vo_gif89
     * yuv4mpeg vs. framedrop/frameskip fixed
+    
+    Codecs:
+    * libavcodec: fixed possible 20% speedloss bug
     * support for the experimental (and buggy) dev-api-3 XViD CVS branch
     * fallback to built-in codecs.conf if no compatible external file found
+    * experimental Sorenson 1/3 encoding (using quicktime DLLs)
+    * More accurate video bitrate calculation for AVI files
+    * Presets support for libmp3lame encoding
+    * CDDA seeking fixed
+    * Win32/RealPlayer codecs DLL & 64bit Alpha Linux RealPlayer codecs support
+    * XMMS Input plugins (demuxer & codec) support
 
   rc1:  "CodecCounter"
     Docs:
