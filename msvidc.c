@@ -43,6 +43,7 @@ void AVI_Decode_Video1_16(
   int bytes_per_pixel)
 {
   int block_ptr, pixel_ptr;
+  int total_blocks;
   int pixel_x, pixel_y;  // pixel width and height iterators
   int block_x, block_y;  // block width and height iterators
   int blocks_wide, blocks_high;  // width and height in 4x4 blocks
@@ -59,6 +60,7 @@ void AVI_Decode_Video1_16(
   skip_blocks = 0;
   blocks_wide = width / 4;
   blocks_high = height / 4;
+  total_blocks = blocks_wide * blocks_high;
   block_inc = 4 * bytes_per_pixel;
   row_dec = (width + 4) * bytes_per_pixel;
 
@@ -72,6 +74,7 @@ void AVI_Decode_Video1_16(
       {
         block_ptr += block_inc;
         skip_blocks--;
+        total_blocks--;
         continue;
       }
 
@@ -82,7 +85,7 @@ void AVI_Decode_Video1_16(
       byte_b = encoded[stream_ptr++];
 
       // check if the decode is finished
-      if ((byte_a == 0) && (byte_b == 0))
+      if ((byte_a == 0) && (byte_b == 0) && (total_blocks == 0))
         return;
 
       // check if this is a skip code
@@ -204,6 +207,7 @@ void AVI_Decode_Video1_16(
       }
 
       block_ptr += block_inc;
+      total_blocks--;
     }
   }
 }
@@ -218,6 +222,7 @@ void AVI_Decode_Video1_8(
   int bytes_per_pixel)
 {
   int block_ptr, pixel_ptr;
+  int total_blocks;
   int pixel_x, pixel_y;  // pixel width and height iterators
   int block_x, block_y;  // block width and height iterators
   int blocks_wide, blocks_high;  // width and height in 4x4 blocks
@@ -234,6 +239,7 @@ void AVI_Decode_Video1_8(
   skip_blocks = 0;
   blocks_wide = width / 4;
   blocks_high = height / 4;
+  total_blocks = blocks_wide * blocks_high;
   block_inc = 4 * bytes_per_pixel;
   row_dec = (width + 4) * bytes_per_pixel;
 
@@ -247,6 +253,7 @@ void AVI_Decode_Video1_8(
       {
         block_ptr += block_inc;
         skip_blocks--;
+        total_blocks--;
         continue;
       }
 
@@ -257,7 +264,7 @@ void AVI_Decode_Video1_8(
       byte_b = encoded[stream_ptr++];
 
       // check if the decode is finished
-      if ((byte_a == 0) && (byte_b == 0))
+      if ((byte_a == 0) && (byte_b == 0) && (total_blocks == 0))
         return;
 
       // check if this is a skip code
@@ -376,6 +383,7 @@ void AVI_Decode_Video1_8(
       }
 
       block_ptr += block_inc;
+      total_blocks--;
     }
   }
 }
