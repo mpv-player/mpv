@@ -591,8 +591,6 @@ static int open(vf_instance_t *vf, char* args){
 
     if(vf->priv->qp < 0)
         vf->priv->qp = 0;
-    if(vf->priv->qp > 31 )
-        vf->priv->qp = 31;
 
     switch(vf->priv->mode){
         default:
