@@ -757,6 +757,7 @@ return 0;
 static void uninit(void) 
 {
  int i;
+ if(!mDisplay) return;
  saver_on(mDisplay); // screen saver back on
  for( i=0;i<num_buffers;i++ ) deallocate_xvimage( i );
 #ifdef HAVE_XF86VM
