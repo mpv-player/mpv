@@ -45,6 +45,10 @@ extern struct config lavcopts_conf[];
 extern struct config vfwopts_conf[];
 #endif
 
+#ifdef HAVE_XVID
+extern struct config xvidencopts_conf[];
+#endif
+
 struct config ovc_conf[]={
 	{"copy", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_COPY, NULL},
 	{"frameno", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_FRAMENO, NULL},
@@ -55,6 +59,7 @@ struct config ovc_conf[]={
 	{"rawrgb", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_RAWRGB, NULL},
 	{"vfw", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_VFW, NULL},
 	{"libdv", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_LIBDV, NULL},
+	{"xvid", &out_video_codec, CONF_TYPE_FLAG, 0, 0, VCODEC_XVID, NULL},
 	{"help", "\nAvailable codecs:\n"
 	"   copy     - frame copy, without re-encoding. doesn't work with filters!\n"
 	"   frameno  - special audio-only file for 3-pass encoding, see DOCS!\n"
@@ -70,6 +75,9 @@ struct config ovc_conf[]={
 #endif
 #ifdef HAVE_LIBDV095
 	"   libdv    - DV encoding using libdv v0.9.5\n"
+#endif
+#ifdef HAVE_XVID
+	"   xvid\n"
 #endif
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
@@ -164,6 +172,9 @@ static config_t mencoder_opts[]={
 #endif
 #ifdef USE_WIN32DLL
 	{"vfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#endif
+#ifdef HAVE_XVID
+	{"xvidencopts", xvidencopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
 #define MAIN_CONF
