@@ -155,7 +155,7 @@ eingebauten und binären Codecs.
 Es können VideoCDs, SuperVCDs, DVDs, 3ivx\-, DivX\ 3/\:4/\:5\- und sogar 
 WMV\-Filme angeschaut werden.
 .PP
-MPlayer unterstützt eine große Auswahl an unterstützten Ausgabetreibern\:
+MPlayer unterstützt eine große Auswahl an Ausgabetreibern\:
 X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, 
 DirectFB sowie GGI, SDL (und damit alle von SDL unterstützen Treiber), 
 VESA (mit jeder VESA\-kompatiblen Grafikkarte, auch ohne X11),
@@ -181,7 +181,7 @@ von MPlayer abspielbare Formate (siehe unten) umwandeln kann.
 Er encodiert nach DivX4, XviD, jeden der libavcodec-Codecs und Audio
 nach PCM/\:MP3/\:VBR\-MP3, das ganze in 1, 2 oder 3 Durchgängen.
 Weiterhin kann er Streams kopieren und verfügt über ein mächtiges
-Filter\-System (Enterfen (cropping) und Hinzufügen (expanding) von Rändern, 
+Filter\-System (Entfernen (cropping) und Hinzufügen (expanding) von Rändern, 
 horizontales Spiegeln, Nachbearbeitung (Postprocessing), Rotation, Skalierung, 
 Rauschunterdrückung (denoising), RGB/\:YUV\-Konvertierung und mehr).
 .PP
@@ -221,7 +221,7 @@ zurück\:vor in der Playlist
 .IPs "HOME und END"
 spiele den nächsten/\:vorigen Eintrag des Wiedergabebaums der aktuellen Liste
 .IPs "INS und DEL"
-wähle die nächste/\:vorige alternative Quelle (nur bei asx-Playlists)
+wähle die nächste/\:vorige alternative Quelle (nur bei ASX-Playlists)
 .IPs "p / LEERTASTE"
 Wiedergabe pausieren (jede Taste unterbricht die Pause)
 .IPs "q / ESC"
@@ -242,9 +242,11 @@ unterstützt von X11-Treibern (außer SDL) sowie von directx and gl2 unter Windows
 .IPs "w und e"
 verringern/\:erhöhen der Panscan - Weite
 .IPs o\ \ \ \ 
-wechselt zwischen OSD-Anzeigen: keine / Zeit / Zeit+Gesamtzeit
+wechselt zwischen OSD-Anzeigen: keine / Suche / Suche+Zeit /
+Suche+Zeit+Gesamtzeit
 .IPs d\ \ \ \ 
-wechselt zwischen verschiedenen Frame-dropping Einstellungen:  keine / überspringe
+wechselt zwischen verschiedenen Framedropping-Einstellungen:  keine /
+überspringe
 Display / überspringe Dekodierung (siehe \-framedrop und \-hardframedrop)
 .IPs v\ \ \ \ 
 ändert Sichtbarkeit der Untertitel (aus/ein)
@@ -554,7 +556,9 @@ Schaltet die Joystickunterstützung aus.
 Schaltet Unterstützung für LIRC aus.
 .TP
 .B \-nomouseinput (nur bei X11)
-Sperrt die Eingabe mittels Mausbuttons (Buttonpress/release), diese Option wird unter anderem von mozplayerxp verwendet, um ein eigenes Kontextmenü anzuzeigen.
+Sperrt die Eingabe mittels Mausbuttons (Buttonpress/release), diese Option
+wird unter anderem von mozplayerxp verwendet, um ein eigenes Kontextmenü
+anzuzeigen.
 .TP
 .B \-nortc (nur bei RTC)
 Deaktiviert die Benutzung der Echtzeituhr (real-time clock, RTC, /dev/\:rtc)
@@ -581,8 +585,8 @@ Spielt die Dateien in zufälliger Reihenfolge ab.
 .TP
 .B \-skin <Verzeichnisname> (nur beim GUI)
 Lädt eine Oberfläche (skin) aus dem Verzeichnis, das sich in einem der beiden
-Standardoberflächenverzeichnisse /usr/local/share/mplayer/ und/oder ~/.mplayer/
-befindet (nicht den ganzen Pfad angeben!).
+Standardoberflächenverzeichnisse /usr/local/share/mplayer/Skin und/oder
+~/.mplayer/Skin befindet (nicht den ganzen Pfad angeben!).
 
 .I BEISPIEL:
 .PD 0
@@ -661,7 +665,7 @@ ungarische Audiospur vorhanden ist.
 .B \-audio\-demuxer <Nummer> (nur mit \-audiofile)
 Erzwingt den Audiodemuxertyp für \-audiofile.
 Alle in demuxers.h definierten Demuxer-IDs sind zulässig.
-Benutze \-audio\-demuxer 17, um eine Datei als .mp3 abzuspielen.
+Benutze \-audio\-demuxer 17, um eine Datei als MP3 abzuspielen.
 .TP
 .B \-audiofile <Dateiname>
 Spielt Audio aus einer externen Datei (WAV, MP3 oder Ogg Vorbis) zu einem
@@ -677,8 +681,8 @@ Servern, die Streams in verschiedenen Bitraten senden können).
 Nützlich, wenn du Live\-Streams über eine langsame Verbindung ansehen
 möchtest.
 .TP
-.B \-cdrom\-device <Pfad zum Gerät>
-Überschreibt den Standardwert für das CDROM-Gerät, /dev/\:cdrom.
+.B \-cdrom-device <Pfad zum Gerät>
+Überschreibt den Standardwert für das CD-ROM-Gerät, /dev/\:cdrom.
 .TP
 .B \-cache <kbytes>
 Diese Option gibt an, wieviel Speicher (in kbytes) MPlayer zum
@@ -724,7 +728,7 @@ Akzeptiere (niemals) nicht perfekte Datenrekonstruktion.
 .
 .TP
 .B \-channels <Anzahl>
-Ändere die Anzahl der wiederzugebenden Kanäle (standardmäßig '2', wenn nichts
+Ändere die Anzahl der wiederzugebenden Kanäle (Standard: 2, wenn nichts
 anderes angegeben wird). Wenn die Anzahl der Ausgabekanäle größer als die
 Anzahl der Eingangskanäle ist, dann werden leere Kanäle erzeugt (es sei
 denn, es wird von Mono zu Stereo erweitert - dann wird der Mono-Kanal auf
@@ -771,20 +775,13 @@ Sende Cookies bei HTTP-Anfragen.
 .B \-cookies-file <Dateiname) (nur im Netzwerk)
 Lies HTTP-Cookies aus dieser Datei.
 Es wird angenommen, daß die Datei im Netscape-Format vorliegt.
-Wenn Du diese Option benutzt, wird MPlayer nicht in den Verzeichnissen ~/.netscape/
-und ~/.mozilla/ nach Cookies suchen.
-.TP
-.B \-csslib <Dateiname>
-(alter DVD-Zugriff) Gibt die zu verwendende libcss.so an.
-.TP
-.B \-cuefile <Datename> (siehe auch \-vcd)
-Spiele eine VCD/\:SVCD/\:XCD in CDRwins Diskformat (bin/\:cue) ab und benutze
-dazu die angegebene .cue\-Datei.
+Wenn Du diese Option benutzt, wird MPlayer nicht in den Verzeichnissen 
+~/.netscape/ und ~/.mozilla/ nach Cookies suchen.
 .TP
 .B \-demuxer <Nummer>
 Erzwingt einen bestimmten Audiodemuxertyp.
 Alle in demuxers.h definierten Demuxer-IDs sind zulässig.
-Benutze \-audio\-demuxer 17, um eine Datei als .mp3 abzuspielen.
+Benutze \-audio\-demuxer 17, um eine Datei als MP3 abzuspielen.
 .TP
 .B \-dumpaudio (nur MPlayer)
 Schreibt den unbehandelten, komprimierten Audiostream nach ./\:stream.dump
@@ -982,7 +979,7 @@ nicht durchlässt (siehe http://www.live.com/mplayer/).
 .TP
 .B \-sb <Byteposition> (siehe auch bei \-ss)
 Springt an die Byteposition.
-Nützlich beim Abspielen von CDROM-Abbildern / .VOB-Dateien mit Schrott
+Nützlich beim Abspielen von CD-ROM-Abbildern / .VOB-Dateien mit Schrott
 am Anfang.
 .TP
 .B \-srate <Hz>
@@ -1127,30 +1124,30 @@ gedacht).
 .br
 Siehe auch \-vf expand.
 .TP
-.B \-dumpmicrodvdsub (nur bei MPLAYER)
+.B \-dumpmicrodvdsub (nur bei MPlayer)
 Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
 MicroDVD\-Format. Erstellt eine Datei dumpsub.sub im aktuellen Verzeichnis.
 .TP
-.B \-dumpmpsub (nur bei MPLAYER)
+.B \-dumpmpsub (nur bei MPlayer)
 Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
 MPlayer\-Format MPsub. Erstellt eine Datei dump.mpsub im aktuellen Verzeichnis.
 .TP
-.B \-dumpsrtsub (nur bei MPLAYER)
+.B \-dumpsrtsub (nur bei MPlayer)
 Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
 zeitbasierende SubViewer\-Format (SRT).
 Erstellt eine Datei dumpsub.srt im aktuellen Verzeichnis.
 .TP
-.B \-dumpjacosub (nur bei MPLAYER)
+.B \-dumpjacosub (nur bei MPlayer)
 Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
 zeitbasierende JACOsub\-Format.
 Erstellt eine Datei dumpsub.js im aktuellen Verzeichnis.
 .TP
-.B \-dumpsami (nur bei MPLAYER)
+.B \-dumpsami (nur bei MPlayer)
 Konvertiert die mit der \-sub\-Option angegebenen Untertitel in das
 zeitbasierende SAMI\-Format.
 Erstellt eine Datei dumpsub.smi im aktuellen Verzeichnis.
 .TP
-.B \-dumpsub (nur bei MPLAYER) (BETA\-CODE)
+.B \-dumpsub (nur bei MPlayer) (BETA\-CODE)
 Speichert den Untertitel-Substream eines VOB-Streams.
 Siehe auch -dump*sub und -vobsubout*.
 .TP
@@ -1214,7 +1211,7 @@ Aktiviert die Überlappung von Untertiteln bei allen Untertitelformaten.
 Deaktiviert das Überlappen von Untertiteln. Normalerweise wird es bei
 bestimmten Formaten automatisch aktiviert.
 .TP
-.B \-osdlevel <0\-3> (nur bei MPLAYER)
+.B \-osdlevel <0\-3> (nur bei MPlayer)
 Gibt den Modus an, in dem das OSD startet:
 
 .PD 0
@@ -2645,7 +2642,7 @@ Probiert zuerst die XAnim-Codecs.
 .PD 1
 .
 .TP
-.B \-x <x> (nur bei MPLAYER)
+.B \-x <x> (nur bei MPlayer)
 Skaliert das Bild auf eine Breite von x (falls Software\-/\:Hardwareskalierung
 verfügbar ist). Deaktiviert die Berechnung des Höhen\-/\:Breitenverhältnisses.
 s.TP
@@ -2674,7 +2671,7 @@ Höhen\-/\:Breitenverhältnis beibehalten wird.
 .PD 1
 .
 .TP
-.B \-y <y> (nur bei MPLAYER)
+.B \-y <y> (nur bei MPlayer)
 Skaliert das Bild auf eine Höhe von x (falls Software\-/\:Hardwareskalierung
 verfügbar ist). Deaktiviert die Berechnung des Höhen\-/\:Breitenverhältnisses.
 .TP
