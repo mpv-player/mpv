@@ -109,7 +109,7 @@ libvo drivers:
     * vo_gif89a.c - Joey Parrish
     * vo_gl.c - Reimar Döffinger
     * vo_gl2.c - Reimar Döffinger
-    * vo_jpeg.c - None
+    * vo_jpeg.c - Ivo van Poorten
     * vo_md5.c - None
     * vo_mga.c - Attila Kinali
     * vo_mpegpes.c - None
