@@ -64,6 +64,7 @@ static int lavc_param_chroma_elim_threshold = 0;
 static int lavc_param_packet_size= 0;
 static int lavc_param_strict= 0;
 static int lavc_param_data_partitioning= 0;
+static int lavc_param_gray=0;
 
 #include "cfgparser.h"
 
@@ -95,6 +96,9 @@ struct config lavcopts_conf[]={
 	{"vdpart", &lavc_param_data_partitioning, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
 #endif
 	{"keyint", &lavc_param_keyint, CONF_TYPE_INT, 0, 0, 0, NULL},
+#if LIBAVCODEC_BUILD >= 4614
+	{"gray", &lavc_param_gray, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_PART, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
 #endif
@@ -175,6 +179,10 @@ static int config(struct vf_instance_s* vf,
 #ifdef CODEC_FLAG_PART
     lavc_venc_context.flags|= lavc_param_data_partitioning;
 #endif
+#if LIBAVCODEC_BUILD >= 4614
+    if(lavc_param_gray) lavc_venc_context.flags|= CODEC_FLAG_GRAY;
+#endif
+
 
     /* lavc internal 2pass bitrate control */
     if(lavc_param_vpass==1)
@@ -337,6 +345,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('d', 'i', 'v', '3');
     else if (!strcasecmp(lavc_param_vcodec, "msmpeg4v2"))
 	mux_v->bih->biCompression = mmioFOURCC('M', 'P', '4', '2');
+    else if (!strcasecmp(lavc_param_vcodec, "wmv1"))
+	mux_v->bih->biCompression = mmioFOURCC('W', 'M', 'V', '1');
     else
 	mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
 		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
