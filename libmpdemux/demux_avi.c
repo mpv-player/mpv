@@ -635,15 +635,19 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
             int id=((AVIINDEXENTRY *)priv->idx)[i].ckid;
             if(avi_stream_id(id)==d_audio->id){
                 len=((AVIINDEXENTRY *)priv->idx)[i].dwChunkLength;
-                audio_chunk_pos=i; ++d_audio->pack_no;
+                ++d_audio->pack_no;
                 if(d_audio->dpos<=curr_audio_pos && curr_audio_pos<(d_audio->dpos+len)){
                   break;
                 }
                 d_audio->dpos+=len;
             }
           }
+	  audio_chunk_pos=i;
 	  skip_audio_bytes=curr_audio_pos-d_audio->dpos;
 
+          mp_msg(MSGT_SEEK,MSGL_V,"SEEK: i=%d (max:%d) dpos=%d (wanted:%d)  \n",
+	      i,chunk_max,(int)d_audio->dpos,curr_audio_pos);
+	      
 	} else {
 	    // VBR audio
 	    int chunks=(priv->avi_video_pts)*(float)sh_audio->audio.dwRate/(float)sh_audio->audio.dwScale;
@@ -705,8 +709,8 @@ void demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
 
           mp_msg(MSGT_SEEK,MSGL_V,"SEEK: idx=%d  (a:%d v:%d)  v.skip=%d  a.skip=%d/%4.3f  \n",
-            priv->idx_pos,audio_chunk_pos,video_chunk_pos,
-            priv->skip_video_frames,skip_audio_bytes,skip_audio_secs);
+            (int)priv->idx_pos,audio_chunk_pos,video_chunk_pos,
+            (int)priv->skip_video_frames,skip_audio_bytes,skip_audio_secs);
 
           if(skip_audio_bytes){
             demux_read_data(d_audio,NULL,skip_audio_bytes);
