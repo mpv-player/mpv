@@ -49,6 +49,7 @@ static vo_info_t vo_info =
 
 /* private prototypes */
 static void Display_Image ( XImage * myximage,unsigned char *ImageData );
+static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
 /* since it doesn't seem to be defined on some platforms */
 int XShmGetEventBase( Display* );
@@ -111,6 +112,25 @@ static uint32_t image_format;
 
 static void check_events(){
   vo_x11_check_events(mDisplay);
+}
+
+static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_rgb32(w,h,src,srca,stride,ImageData+4*(y0*image_width+x0),4*image_width);
+}
+
+static void draw_alpha_24(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_rgb24(w,h,src,srca,stride,ImageData+3*(y0*image_width+x0),3*image_width);
+}
+
+static void draw_alpha_16(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_rgb16(w,h,src,srca,stride,ImageData+2*(y0*image_width+x0),2*image_width);
+}
+
+static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_rgb15(w,h,src,srca,stride,ImageData+2*(y0*image_width+x0),2*image_width);
+}
+
+static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
 }
 
 static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d_height,uint32_t flags,char *title,uint32_t format )
@@ -316,7 +336,17 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
   DeInstallXErrorHandler();
 #endif
 
-  bpp=myximage->bits_per_pixel;
+  switch ((bpp=myximage->bits_per_pixel)){
+         case 24: draw_alpha_fnc=draw_alpha_24; break;
+         case 32: draw_alpha_fnc=draw_alpha_32; break;
+         case 15:
+         case 16: if (depth==15)
+	 	     draw_alpha_fnc=draw_alpha_15;
+       		  else
+	 	     draw_alpha_fnc=draw_alpha_16;
+          	  break;
+   	default:  draw_alpha_fnc=draw_alpha_null;
+ }
 
 //  printf( "X11 color mask:  R:%lX  G:%lX  B:%lX\n",myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
@@ -334,8 +364,9 @@ static uint32_t init( uint32_t width,uint32_t height,uint32_t d_width,uint32_t d
   }
 
  if( format==IMGFMT_YV12 ) yuv2rgb_init( ( depth == 24 ) ? bpp : depth,mode );
-
+   
  XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask );
+   
  X_already_started++;
 
 // vo_initthread( mThread );
@@ -385,26 +416,8 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
 #endif
 }
 
-static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-    switch(bpp){
-        case 24: 
-          vo_draw_alpha_rgb24(w,h,src,srca,stride,ImageData+3*(y0*image_width+x0),3*image_width);
-          break;
-        case 32: 
-          vo_draw_alpha_rgb32(w,h,src,srca,stride,ImageData+4*(y0*image_width+x0),4*image_width);
-          break;
-        case 15:
-        case 16:
-          if(depth==15)
-            vo_draw_alpha_rgb15(w,h,src,srca,stride,ImageData+2*(y0*image_width+x0),2*image_width);
-          else
-            vo_draw_alpha_rgb16(w,h,src,srca,stride,ImageData+2*(y0*image_width+x0),2*image_width);
-          break;
-    }
-}
-
 static void draw_osd(void)
-{ vo_draw_text(image_width,image_height,draw_alpha); }
+{ vo_draw_text(image_width,image_height,draw_alpha_fnc); }
 
 static void flip_page( void ){
     Display_Image( myximage,ImageData );

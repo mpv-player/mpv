@@ -94,6 +94,25 @@ static uint32_t               drwcX,drwcY,dwidth,dheight,mFullscreen;
  static uint32_t               mdwidth,mdheight;
 #endif
 
+
+static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
+
+static void draw_alpha_yv12(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[current_buf]->data+image_width*y0+x0,image_width);
+}
+
+static void draw_alpha_yuy2(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[current_buf]->data+2*(image_width*y0+x0),2*image_width);
+}
+
+static void draw_alpha_uyvy(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+   vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[current_buf]->data+2*(image_width*y0+x0)+1,2*image_width);
+}
+
+static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+}
+
+
 /*
  * connect to server, create and map window,
  * allocate colors and (shared) memory
@@ -215,8 +234,18 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t
    if (xv_port != 0)
     {
      printf( "using Xvideo port %d for hw scaling\n",xv_port );
+       
+       switch (xv_format){
+	case IMGFMT_YV12:  
+	case IMGFMT_I420:
+        case IMGFMT_IYUV: draw_alpha_fnc=draw_alpha_yv12; break;
+	case IMGFMT_YUY2:
+	case IMGFMT_YVYU: draw_alpha_fnc=draw_alpha_yuy2; break;	
+	case IMGFMT_UYVY: draw_alpha_fnc=draw_alpha_uyvy; break;
+	default:   	  draw_alpha_fnc=draw_alpha_null;
+       }
 
-     for(current_buf=0;current_buf<num_buffers;++current_buf)
+      for(current_buf=0;current_buf<num_buffers;++current_buf)
        allocate_xvimage(current_buf);
 
      current_buf=0;
@@ -307,29 +336,8 @@ static void check_events(void)
   }
 }
 
-
-static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-    int x,y;
-
-  switch (xv_format) {
-	case IMGFMT_YV12:  
-	case IMGFMT_I420:
-        case IMGFMT_IYUV:
-    		vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[current_buf]->data+image_width*y0+x0,image_width);
-	break;
-	case IMGFMT_YUY2:
-        case IMGFMT_YVYU:	
-    		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[current_buf]->data+2*(image_width*y0+x0),2*image_width);
-	break;
-        case IMGFMT_UYVY:
-    		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[current_buf]->data+2*(image_width*y0+x0)+1,2*image_width);
-	break;
-  }		
-
-}
-
 static void draw_osd(void)
-{ vo_draw_text(image_width,image_height,draw_alpha);}
+{ vo_draw_text(image_width,image_height,draw_alpha_fnc);}
 
 static void flip_page(void)
 {
