@@ -6197,7 +6197,7 @@ int main(){
 } 
 EOF
   if cc_check ; then 
-    if test `grep -l MPlayerBigEndian $TMPO` ; then 
+    if test `strings $TMPO | grep -l MPlayerBigEndian` ; then 
       _big_endian=yes
     else
       _big_endian=no
