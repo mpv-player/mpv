@@ -613,6 +613,17 @@ Use:
 
 <qandaentry>
 <question><para>
+I downloaded a movie off a P2P network and it doesn't work!
+</para></question>
+<answer><para>
+Your file is most probably broken or a fake file. If you got it from
+a friend, and he says it works, try comparing
+<application>md5sum</application> hashes.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 I've just installed <application>MPlayer</application>. When I want to
 open a video file it causes a fatal error:
 <screen>
@@ -636,6 +647,20 @@ to <filename>~/.mplayer/config</filename> and/or
 vo_driver = <replaceable>selected_vo</replaceable>
 </programlisting>
 to <filename>~/.mplayer/gui.conf</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+I'm having trouble getting my subtitles to display, help!!
+</para></question>
+<answer><para>
+Make sure you have installed fonts properly. Run through the steps in the
+<link linkend="mpsub-install">OSD and subtitle</link> part of the installation
+section again. If you are using TrueType fonts, verify that you have the
+<systemitem class="library">freetype</systemitem> library installed.
+Other things include checking your subtitles in a text editor or with other
+players. Also try converting them to another format.
 </para></answer>
 </qandaentry>
 
