@@ -272,9 +272,11 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
     		vo_draw_alpha_yv12(w,h,src,srca,stride,xvimage[0]->data+image_width*y0+x0,image_width);
 	break;
 	case IMGFMT_YUY2:
-        case IMGFMT_UYVY:
         case IMGFMT_YVYU:	
     		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[0]->data+2*(image_width*y0+x0),2*image_width);
+	break;
+        case IMGFMT_UYVY:
+    		vo_draw_alpha_yuy2(w,h,src,srca,stride,xvimage[0]->data+2*(image_width*y0+x0)+1,2*image_width);
 	break;
   }		
 
