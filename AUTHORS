@@ -333,7 +333,7 @@ D Richard Felker III (dalias) <dalias@aerifal.cx>
     * eq, halfpack, dint, detc, field, decimate, dsize, ilpack, ivtc,
       tfields, pullup video filters
 
-Dominik Mierzejewski <dominik@rangers.eu.org>
+Dominik Mierzejewski (Rathann) <dominik@rangers.eu.org>
     * compiler warning fixes
     * official RPM packages
     * Polish documentation translation
