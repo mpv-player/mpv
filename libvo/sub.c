@@ -16,8 +16,7 @@ inline static void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,in
         int x=20;
 
         while (*cp){
-          c=*cp;
-	  cp++;
+          c=*cp++;
           if ((font=vo_font->font[c])>=0)
             draw_alpha(x,y,
               vo_font->width[c],
@@ -36,16 +35,15 @@ int vo_osd_progbar_value=100;   // 0..255
 inline static void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
         int i;
         int y=(dys-vo_font->height)/2;
-        int x;
         int c,font;
-        int charw=vo_font->width[OSD_PB_0]+vo_font->charspace;
         int delimw=vo_font->width[OSD_PB_START]
-		      +vo_font->width[OSD_PB_END]
-		      +vo_font->charspace;
+     		  +vo_font->width[OSD_PB_END]
+     		  +vo_font->charspace;
         int width=(2*dxs-3*delimw)/3;
+   	int charw=vo_font->width[OSD_PB_0]+vo_font->charspace;
         int elems=width/charw;
+   	int x=(dxs-elems*charw-delimw)/2;
         int mark=(vo_osd_progbar_value*(elems+1))>>8;
-        x=(dxs-elems*charw-delimw)/2;
 
 //        printf("osd.progbar  width=%d  xpos=%d\n",width,x);
 
