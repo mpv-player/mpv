@@ -34,6 +34,7 @@
 #include "mp_msg.h"
 #include "libvo/fastmemcpy.h"
 #include "osdep/timer.h"
+#include "subopt-helper.h"
 
 
 static ao_info_t info =
@@ -113,6 +114,8 @@ static LPDIRECTSOUNDBUFFER hdsbuf = NULL; ///secondary direct sound buffer (stre
 static int buffer_size = 0;               ///size in bytes of the direct sound buffer   
 static int write_offset = 0;              ///offset of the write cursor in the direct sound buffer
 static int min_free_space = 4096;         ///if the free space is below this value get_space() will return 0
+static int device_num = 0;                ///wanted device number
+static GUID device;                       ///guid of the device 
 
 /***************************************************************************************/
 
@@ -166,6 +169,41 @@ static void UninitDirectSound(void)
 }
 
 /**
+\brief print the commandline help
+*/
+static void print_help()
+{
+  mp_msg(MSGT_AO, MSGL_FATAL,
+           "\n-ao dsound commandline help:\n"
+           "Example: mplayer -ao dsound:device=1\n"
+           "  sets 1st device\n"
+           "\nOptions:\n"
+           "  device=<device-number>\n"
+           "    Sets device number, use -v to get a list\n");
+}
+
+
+/**
+\brief enumerate direct sound devices
+\return TRUE to continue with the enumeration
+*/
+static BOOL CALLBACK DirectSoundEnum(LPGUID guid,LPCSTR desc,LPCSTR module,LPVOID context)
+{
+    int* device_index=context;
+    mp_msg(MSGT_AO, MSGL_V,"%i %s ",*device_index,desc);
+    if(device_num==*device_index){
+        mp_msg(MSGT_AO, MSGL_V,"<--");
+        if(guid){
+            memcpy(&device,guid,sizeof(GUID));
+        }
+    }
+    mp_msg(MSGT_AO, MSGL_V,"\n");
+    (*device_index)++;
+    return TRUE;
+}
+
+
+/**
 \brief initilize direct sound
 \return 0 if error, 1 if ok
 */
@@ -175,21 +213,37 @@ static int InitDirectSound(void)
 
 	// initialize directsound
     HRESULT (WINAPI *OurDirectSoundCreate)(LPGUID, LPDIRECTSOUND *, LPUNKNOWN);
+	HRESULT (WINAPI *OurDirectSoundEnumerate)(LPDSENUMCALLBACKA, LPVOID);   
+	int device_index=0;
+	opt_t subopts[] = {
+	  {"device", OPT_ARG_INT, &device_num,NULL},
+	  {NULL}
+	}; 
+	if (subopt_parse(ao_subdevice, subopts) != 0) {
+		print_help();
+		return 0;
+	}
+    
 	hdsound_dll = LoadLibrary("DSOUND.DLL");
 	if (hdsound_dll == NULL) {
 		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot load DSOUND.DLL\n");
 		return 0;
 	}
 	OurDirectSoundCreate = (void*)GetProcAddress(hdsound_dll, "DirectSoundCreate");
+	OurDirectSoundEnumerate = (void*)GetProcAddress(hdsound_dll, "DirectSoundEnumerateA");
 
-	if (OurDirectSoundCreate == NULL) {
+	if (OurDirectSoundCreate == NULL || OurDirectSoundEnumerate == NULL) {
 		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: GetProcAddress FAILED\n");
 		FreeLibrary(hdsound_dll);
 		return 0;
 	}
+    
+	// Enumerate all directsound devices
+	mp_msg(MSGT_AO, MSGL_V,"ao_dsound: Output Devices:\n");
+	OurDirectSoundEnumerate(DirectSoundEnum,&device_index);
 
 	// Create the direct sound object
-	if FAILED(OurDirectSoundCreate(NULL, &hds, NULL )) {
+	if FAILED(OurDirectSoundCreate((device_num)?&device:NULL, &hds, NULL )) {
 		mp_msg(MSGT_AO, MSGL_ERR, "ao_dsound: cannot create a DirectSound device\n");
 		FreeLibrary(hdsound_dll);
 		return 0;
