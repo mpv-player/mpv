@@ -77,7 +77,7 @@ static offset_t mp_seek(URLContext *h, offset_t pos, int whence){
     else if(whence != SEEK_SET)
         return -1;
 
-    if(pos<stream->end_pos)
+    if(pos<stream->end_pos && stream->eof)
         stream_reset(stream);
     if(stream_seek(stream, pos)==0)
         return -1;
@@ -155,7 +155,14 @@ int demux_open_lavf(demuxer_t *demuxer){
         return 0;
     }
 
-//demux_info_add(demuxer, "author", string); ...
+    if(avfc->title    [0]) demux_info_add(demuxer, "name"     , avfc->title    );
+    if(avfc->author   [0]) demux_info_add(demuxer, "author"   , avfc->author   );
+    if(avfc->copyright[0]) demux_info_add(demuxer, "copyright", avfc->copyright);
+    if(avfc->comment  [0]) demux_info_add(demuxer, "comments" , avfc->comment  );
+    if(avfc->album    [0]) demux_info_add(demuxer, "album"    , avfc->album    );
+//    if(avfc->year        ) demux_info_add(demuxer, "year"     , avfc->year     );
+//    if(avfc->track       ) demux_info_add(demuxer, "track"    , avfc->track    );
+    if(avfc->genre    [0]) demux_info_add(demuxer, "genre"    , avfc->genre    );
 
     for(i=0; i<avfc->nb_streams; i++){
         AVStream *st= avfc->streams[i];
@@ -211,6 +218,12 @@ int demux_open_lavf(demuxer_t *demuxer){
             sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
             sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             sh_video->format = bih->biCompression;
+            sh_video->aspect=   codec->width * codec->sample_aspect_ratio.num 
+                              / (float)(codec->height * codec->sample_aspect_ratio.den);
+            mp_msg(MSGT_DEMUX,MSGL_DBG2,"aspect= %d*%d/(%d*%d)\n", 
+                codec->width, codec->sample_aspect_ratio.num,
+                codec->height, codec->sample_aspect_ratio.den);
+
             sh_video->ds= demuxer->video;
             if(codec->extradata_size)
                 memcpy(sh_video->bih + 1, codec->extradata, codec->extradata_size);
