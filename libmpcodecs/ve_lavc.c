@@ -153,7 +153,8 @@ static int config(struct vf_instance_s* vf,
 		    5) == -1){
 	    mp_msg(MSGT_MENCODER,MSGL_ERR,"2pass failed: filename=%s\n", passtmpfile);
 	    pass=0;
-	}
+	} else
+	    lavc_venc_context.flags|=CODEC_FLAG_QSCALE|CODEC_FLAG_TYPE; // VBR
 	break;
     }
 
@@ -199,13 +200,8 @@ static void put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(pass==2){ // handle 2-pass:
 	lavc_venc_context.flags|=CODEC_FLAG_QSCALE; // enable VBR
 	lavc_venc_context.quality=VbrControl_get_quant();
-#ifdef CODEC_FLAG_TYPE
-	lavc_venc_context.flags|=CODEC_FLAG_TYPE; // force keyframes
 	lavc_venc_context.key_frame=VbrControl_get_intra();
 	lavc_venc_context.gop_size=0x3fffffff;
-#else
-#error you should upgrade libavcodec... get latest CVS
-#endif
 	out_size = avcodec_encode_video(&lavc_venc_context, mux_v->buffer, mux_v->buffer_size,
 	    &lavc_venc_picture);
 	VbrControl_update_2pass_vbr_encoding(lavc_venc_context.mv_bits,
