@@ -124,7 +124,7 @@ static int init(int rate,int channels,int format,int flags){
   // Create list of plugins from cfg option
   int i=0; 
   if(ao_plugin_cfg.plugin_list){
-    config = malloc(strlen(ao_plugin_cfg.plugin_list));
+    config = malloc(strlen(ao_plugin_cfg.plugin_list)+1);
     if(!config) return 0;
     if(!strcpy(config, ao_plugin_cfg.plugin_list) || !add_plugin(i,config)){
       free(config);
