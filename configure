@@ -3069,7 +3069,7 @@ fi
 echocheck "DVD support (libmpdvdkit)"
 if test "$_dvdkit" = auto ; then
  _dvdkit=no
- if linux || freebsd || netbsd || darwin || cygwin || openbsd; then
+ if linux || freebsd || netbsd || darwin || cygwin || openbsd || sunos; then
   test -f "./libmpdvdkit2/Makefile" && _dvdkit=yes
   test -f "./libmpdvdkit/Makefile" && _dvdkit=yes
  fi
@@ -3623,13 +3623,13 @@ EOF
   _iconv=no
   if cc_check -lm -liconv ; then
     _iconv=yes
+    _ld_iconv='-liconv'
   else
     cc_check -lm && _iconv=yes
   fi
 fi
 if test "$_iconv" = yes ; then
   _def_iconv='#define USE_ICONV 1'
-  linux || _ld_iconv='-liconv'
 else
   _def_iconv='#undef USE_ICONV'
 fi
@@ -4124,7 +4124,7 @@ fi
 
 # Checking for CFLAGS
 _stripbinaries=yes
-if test "$_profile" || test "$_debug" ; then
+if test "$_profile" != "" || test "$_debug" != "" ; then
   CFLAGS="-W -Wall -O2 $_march $_mcpu $_debug $_profile"
   _stripbinaries=no
 elif test -z "$CFLAGS" ; then
@@ -4215,7 +4215,7 @@ if netbsd ; then
 fi
 
 _def_debug='#undef MP_DEBUG'
-test "$_debug" && _def_debug='#define MP_DEBUG 1'
+test "$_debug" != "" && _def_debug='#define MP_DEBUG 1'
 
 _def_linux='#undef TARGET_LINUX'
 linux && _def_linux='#define TARGET_LINUX 1'
