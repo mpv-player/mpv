@@ -535,7 +535,8 @@ if(strncmp("dvd://",filename,6) == 0){
 int dvd_parse_chapter_range(m_option_t *conf, const char *range){
   const char *s;
   char *t;
-/*  conf; prevent warning from GCC */
+  if (!range)
+    return M_OPT_MISSING_PARAM;
   s = range;
   dvd_chapter = 1;
   dvd_last_chapter = 0;
@@ -543,26 +544,26 @@ int dvd_parse_chapter_range(m_option_t *conf, const char *range){
     dvd_chapter = strtol(range, &s, 10);
     if (range == s) {
       mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
-      return -1;
+      return M_OPT_INVALID;
     }
   }
   if (*s == 0)
     return 0;
   else if (*s != '-') {
     mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
-    return -1;
+    return M_OPT_INVALID;
   }
   ++s;
   if (*s == 0)
       return 0;
   if (! isdigit(*s)) {
     mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
-    return -1;
+    return M_OPT_INVALID;
   }
   dvd_last_chapter = strtol(s, &t, 10);
   if (s == t || *t)  {
     mp_msg(MSGT_OPEN, MSGL_ERR, "Invalid chapter range specification %s\n", range);
-    return -1;
+    return M_OPT_INVALID;
   }
   return 0;
 }
