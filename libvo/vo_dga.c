@@ -23,11 +23,10 @@
  * - works only on x86 architectures
  *
  * $Log$
- * Revision 1.11  2001/04/13 18:49:59  acki2
- * - completely rewrote depth switching
- * - support for -bpp
- *   (needs at least mplayer.c 1.53 and cfg-mplayer.h 1.18 and latest stuff from
- *   libvo to work)
+ * Revision 1.12  2001/04/13 22:11:08  acki2
+ * - fixed bug with depth and mpg when current bpp of XServer was != 32
+ * - when -bpp is selected, I accept only query_modes() for THIS particular depth
+ *   (if it's supported by hardware)
  *
  * Revision 1.10  2001/04/01 22:01:28  acki2
  * - still more debug output to be able to fix 15/16 bpp problem
@@ -153,6 +152,18 @@ int vd_ModeEqual(int depth, int bitspp,
      ? 1 : 0); 
 }
 
+
+int vd_ValidateMode( int mplayer_depth){
+  int i;
+  if(mplayer_depth == 0)return 0;
+  for(i=1; i<vo_dga_mode_num; i++){
+    if(vo_dga_modes[i].vdm_mplayer_depth == mplayer_depth ){ 
+      vo_dga_modes[i].vdm_supported = 1;
+      return i;
+    }
+  }
+  return 0;
+}
 
 int vd_ModeValid( int mplayer_depth){
   int i;
@@ -361,12 +372,12 @@ static uint32_t query_format( uint32_t format )
      vd_printf(VD_ERR, "vo_dga: Can't open display!\n");
      return 0;
    }
-
-   vo_dga_XServer_mode = vd_EnableMode(  DefaultDepth(qdisp, DefaultScreen(qdisp)),
-                       BitmapUnit(qdisp),
-                       DefaultVisual(qdisp, DefaultScreen(qdisp))->red_mask,
-                       DefaultVisual(qdisp, DefaultScreen(qdisp))->green_mask,
-                       DefaultVisual(qdisp, DefaultScreen(qdisp))->blue_mask);
+   if( !vo_init() ){
+    vd_printf(VD_ERR, "vo_dga: vo_init() failed!\n");
+    return 1; 
+  }
+  vo_dga_XServer_mode = vd_ValidateMode(vo_depthonscreen);
+ 
    if(vo_dga_XServer_mode ==0){
 #ifndef HAVE_DGA2
      vd_printf(VD_ERR, "vo_dga: Your X-Server is not running in a ");
@@ -388,7 +399,7 @@ static uint32_t query_format( uint32_t format )
 		modelines[i].redMask,
 		modelines[i].greenMask,
 	        modelines[i].blueMask,
-		modelines[i].viewportWidth,
+	 	modelines[i].viewportWidth,
 		modelines[i].viewportHeight);			  
         vd_EnableMode(
 		modelines[i].depth,
@@ -406,7 +417,12 @@ static uint32_t query_format( uint32_t format )
 
    for(i=0; i<vo_dga_mode_num; i++){
      if(vo_dga_modes[i].vdm_supported != 0){
-       vd_printf(VD_INFO, "vo_dga: Supporting mode: %s\n", vd_GetModeString(i));
+       vd_printf(VD_INFO, "vo_dga: Supporting mode: %s", vd_GetModeString(i));
+       if(vo_dbpp && vo_dbpp != vo_dga_modes[i].vdm_mplayer_depth){
+         vo_dga_modes[i].vdm_supported = 0;
+         vd_printf(VD_INFO, " ...disabled by -bpp %d", vo_dbpp );
+       }
+       vd_printf(VD_INFO, "\n");
      }
    }
  }
@@ -435,11 +451,11 @@ uninit(void)
     XUngrabPointer (vo_dga_dpy, CurrentTime);
     XUngrabKeyboard (vo_dga_dpy, CurrentTime);
 #ifdef HAVE_DGA2
+    XDGACloseFramebuffer(vo_dga_dpy, XDefaultScreen(vo_dga_dpy));
     dgadevice = XDGASetMode(vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
     if(dgadevice != NULL){
       XFree(dgadevice);	
     }
-    XDGACloseFramebuffer(vo_dga_dpy, XDefaultScreen(vo_dga_dpy));
 #else
     XF86DGADirectVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
     // first disable DirectVideo and then switch mode back!	
