@@ -14,12 +14,7 @@
 static unsigned long long int __attribute__((aligned(8))) x_plus_minus_3dnow = 0x8000000000000000ULL;
 static float plus_1f = 1.0;
 
-#ifdef __CYGWIN__
-/* will probably cause sig11 with debuggingsymbols, but otherwise undef. ref */
-void dct64_MMX_3dnowex(real *a,real *b,real *c)
-#else
 void __attribute__ (( __stdcall__ )) dct64_MMX_3dnowex(real *a,real *b,real *c)
-#endif
 {
   char tmp[256];
     __asm __volatile(

@@ -6,12 +6,7 @@
 #include "../mangle.h"
 #define real float /* ugly - but only way */
 
-#ifdef __CYGWIN__
-/* will probably cause sig11 with debuggingsymbols, but otherwise undef. ref */
-void dct64_MMX(real *a,real *b,real *c)
-#else
 void __attribute__ (( __stdcall__ )) dct64_MMX(real *a,real *b,real *c)
-#endif
 {
     char tmp[256];
     __asm __volatile(

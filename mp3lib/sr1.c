@@ -373,11 +373,11 @@ int _has_mmx = 0;
 static int tables_done_flag=0;
 
 /* It's hidden from gcc in assembler */
-extern void dct64_MMX( void );
-extern void dct64_MMX_3dnow( void );
-extern void dct64_MMX_3dnowex( void );
-extern void dct64_MMX_sse( void );
-void (*dct64_MMX_func)( void );
+extern void __attribute__((__stdcall__)) dct64_MMX(real *, real *, real *);
+extern void __attribute__((__stdcall__)) dct64_MMX_3dnow(real *, real *, real *);
+extern void __attribute__((__stdcall__)) dct64_MMX_3dnowex(real *, real *, real *);
+extern void __attribute__((__stdcall__)) dct64_MMX_sse(real *, real *, real *);
+void __attribute__((__stdcall__)) (*dct64_MMX_func)(real *, real *, real *);
 
 #include "../cpudetect.h"
 
