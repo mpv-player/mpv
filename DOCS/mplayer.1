@@ -8,11 +8,29 @@
 .\" Macro definitions
 .\" --------------------------------------------------------------------------
 .
-.de RSx
-.RS +12
+.\" default indentation is 7, don't change!
+.nr IN 7
 ..
-.de RSy
-.RS +10
+.\" define indentation for suboptions
+.nr SS 18
+..
+.\" add new suboption
+.de IPs
+.IP "\\$1" \n(SS
+..
+.\" begin of first grade suboptions, end with .RE
+.de RSs
+.RS \n(IN+3
+..
+.\" begin of 2nd grade suboptions
+.de RSss
+.PD 0
+.RS \n(SS+3
+..
+.\" end of 2nd grade suboptions
+.de REss
+.RE
+.PD 1
 ..
 .
 .\" --------------------------------------------------------------------------
@@ -32,25 +50,25 @@ mencoder \- Movie Encoder for Linux
 .
 .SH SYNOPSIS
 .B mplayer
-.RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \fIplaylist\fP\ |\ \-\ ]
+.RI [options]\ [ \ file\  | \ URL\  | \ playlist\  | \ -\  ]
 .br
 .B mplayer
-.RB [global\ options]\ \fIfile1\fP\ [specific\ options]\ [file2]\ [specific\ options]
+.RI [global\ options] \ file1\  [specific\ options]\ [file2]\ [specific\ options]
 .br
 .B mplayer
-.RB [global\ options]\ {\fIgroup\ of\ files\ and\ options\fP}\ [group\ specific\ options]
+.RI [global\ options]\ { group\ of\ files\ and\ options }\ [group\ specific\ options]
 .br
 .B mplayer
-.RB [dvd|vcd|cdda|cddb|tv]://[title]\ [options]
+.RI [ dvd | vcd | cdda | cddb | tv ] ://title\  [options]
 .br
 .B mplayer
-.RB [mms|mmst|http|http_proxy|rtp|rtsp]://[user:passwd@]URL[:port]\ [options]
+.RI [ mms | mmst | http | http_proxy | rtp | rtsp ] :// [user:passwd@] URL [:port]\ [options]
 .br
 .B mencoder
-.RB [options]\ [\fIfile\fP\ |\ \fIURL\fP\ |\ \-\ ]\ [\-o\ file]
+.RI [options]\ [ \ file\  | \ URL\  | \ -\  ]\ [\-o\ file]
 .br
 .B gmplayer
-.RB [options]\ [\-skin\ skin]
+.RI [options]\ [\-skin\ skin]
 
 .\" --------------------------------------------------------------------------
 .\" Description
@@ -63,30 +81,30 @@ CPUs, see the documentation). It plays most MPEG/VOB, AVI, OGG/OGM, VIVO, ASF/WM
 FLI, RM, NuppelVideo, yuv4mpeg, FILM, RoQ files, supported by many native, XAnim, and
 Win32 DLL codecs. You can watch VideoCD, SVCD, DVD, 3ivx, DivX 3/4/5 and even WMV
 movies, too (without the avifile library).
-
+.P
 Another great feature of mplayer is the wide range of supported output drivers.
 It works with X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, but you can use
-GGI, SDL (and this way all their drivers), VESA (on every VESA compatible card, even 
+GGI, SDL (and this way all their drivers), VESA (on every VESA compatible card, even
 without X11!) and some low level card-specific drivers (for Matrox, 3Dfx and ATI), too!
 .br
 Most of them support software or hardware scaling, so you can enjoy movies in fullscreen.
 MPlayer supports displaying through some hardware MPEG decoder boards, such as the Siemens
 DVB, DXR2 and DXR3/Hollywood+!
-
+.P
 MPlayer has an onscreen display (OSD) for status information, nice big
 antialiased shaded subtitles and visual feedback for keyboard controls.
 European/ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic and Korean
 fonts are supported along with 9 subtitle formats (MicroDVD, SubRip,
 SubViewer, Sami, VPlayer, RT, SSA, AQTitle and our own: MPsub). DVD subtitles
 (SPU streams, VobSub and Closed Captions) are supported.
-
+.P
 .B mencoder
 (MPlayer's Movie Encoder) is a simple movie encoder, designed to
 encode MPlayer-playable movies (see above) to other MPlayer-playable formats
 (see below). It encodes to DivX4 (1, 2 or 3 passes), XviD, codecs of libavcodec,
 PCM/MP3/VBRMP3 audio. It also has stream copying abilities, a powerful plugin system
 (crop, expand, flip, postprocess, rotate, scale, add/remove noise, rgb/yuv conversion) and more.
-
+.P
 .B gmplayer
 is MPlayer with a graphical user interface.
 It has the same options as MPlayer.
@@ -99,7 +117,7 @@ It has the same options as MPlayer.
 .SH GENERAL NOTES
 .B Check the HTML documentation, too!
 
-Every "flag" option has a "noflag" counterpart, e.g.  the opposite of the \-fs
+Every "flag" option has a "noflag" counterpart, e.g. the opposite of the \-fs
 option is \-nofs.
 .br
 You can put all of the options in a config file which will be read every time
@@ -113,7 +131,7 @@ and disabled by setting them to 'no' or '0'. Even suboptions can be specified
 in this way.
 
 .I EXAMPLE:
-
+.br
 # Use Matrox driver by default.
 .br
 vo=xmga
@@ -125,6 +143,104 @@ flip=yes
 # Decode/encode multiple files from png, start it with -mf on
 .br
 mf= type=png:fps=25
+
+
+.SH "PLAYER OPTIONS (MPLAYER ONLY)"
+.TP
+.B \-autoq <quality> (use with -vop pp!)
+Dynamically changes the level of postprocess, depending on spare CPU time
+available. The number you specify will be the maximum level used. Usually you
+can use some big number. You may not use it together with \-pp but it is OK with
+\-npp!
+.TP
+.B \-benchmark
+Prints some statistics on CPU usage and dropped frames at the end.
+Used in combination with \-nosound and \-vo null for benchmarking only video codec.
+.TP
+.B \-dapsync (OBSOLETE)
+Use alternative A/V sync method.
+.TP
+.B \-framedrop (see \-hardframedrop option too!)
+Frame dropping: decode all (except B) frames, video may skip.
+Useful for playback on slow VGA card/bus.
+.TP
+.B \-h, \-\-help
+Show short summary of options.
+.TP
+.B \-hardframedrop
+More intense frame dropping (breaks decoding). Leads to image distortion!
+.TP
+.B \-input <commands>
+This option can be used to configure certain parts of the input system.
+Relative path are relative to $HOME/.mplayer. Available commands are:
+
+    conf=<file>  Read alternative input.conf.
+                 If given without pathname,
+                 $HOME/.mplayer is assumed.
+    ar\-delay     Delay in msec before we start
+                 to autorepeat a key
+                 (0 to disable).
+    ar\-rate      How many key presses/second when
+                 we autorepeat.
+    keylist      Prints all keys that can be
+                 bound to.
+    cmdlist      Prints all commands that can
+                 be bound.
+    js\-dev       Specifies the joystick device
+                 to use
+                 (default is /dev/input/js0).
+
+.I NOTE:
+Autorepeat is currently only supported by joysticks.
+.TP
+.B \-lircconf <config\ file>
+Specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc.
+.TP
+.B \-loop <number>
+Loops movie playback <number> times. 0 means forever.
+.TP
+.B \-nojoystick
+Turns off joystick support. Default is on, if compiled in.
+.TP
+.B \-nolirc
+Turns off lirc support.
+.TP
+.B \-nortc \ \ 
+Turns off usage of /dev/rtc (real-time clock).
+.TP
+.B \-playlist <file>
+Play files according to this file list (1 file/row or Winamp or asx format).
+.TP
+.B \-quiet \ \ 
+Display less output, status messages.
+.TP
+.B \-skin <skin\ directory> (BETA CODE)
+Load skin from this directory (WITHOUT path name!).
+
+.I EXAMPLE:
+    \-skin fittyfene  tries these:
+                        /usr/local/share/mplayer/Skin/fittyfene
+                        ~/.mplayer/Skin/fittyfene
+.TP
+.B \-slave \ \ 
+This option switches on slave mode. This is intended for use
+of MPlayer as a backend to other programs. Instead of intercepting keyboard
+events, MPlayer will read simplistic command lines from its stdin.
+See section
+.B SLAVE MODE PROTOCOL
+For the syntax.
+.TP
+.B \-softsleep
+Uses high quality software timers. Efficient as the RTC, doesn't need root,
+but requires more CPU.
+.TP
+.B \-sstep <sec>
+Specifies seconds between displayed frames. Useful for slideshows.
+.TP
+.B \-stop_xscreensaver
+Turns off xscreensaver at startup and turns it on again on exit.
+.TP
+.B \-use-stdin
 
 
 .SH "DEMUXER/STREAM OPTIONS"
@@ -240,7 +356,7 @@ found below.
 this option gives the CSS key needed to decrypt the VOB (the key is printed
 when authenticating with the DVD drive using \-dvdauth).
 .TP
-.B \-dvdnav (BETA CODE) 
+.B \-dvdnav (BETA CODE)
 Force usage of libdvdnav.
 .TP
 .B \-forceidx
@@ -261,7 +377,7 @@ especially when seeking backwards \- it has to rewind to the beginning to find
 the exact frame.
 .TP
 .B \-idx (also see \-forceidx)
-Rebuilds INDEX of the AVI if no INDEX was found, 
+Rebuilds INDEX of the AVI if no INDEX was found,
 thus allowing seeking. Useful with broken/incomplete
 downloads, or badly created AVIs.
 .TP
@@ -320,7 +436,7 @@ Seek to given time position.
     \-ss 01:10:00  seeks to 1 hour 10 min
 .TP
 .B \-tv <option1:option2:...>
-This option enables the TV grabbing feature of MPlayer (see documentation). 
+This option enables the TV grabbing feature of MPlayer (see documentation).
 Available options are:
 
     on                use TV input
@@ -381,7 +497,7 @@ Available options are:
 .I NOTE:
 Mplayer doesn't accept colons so type dots instead in the device ID,
 eg. hw.0,0 instead of hw:0,0)
-
+.br
 Be advised that although you can select any samplerate when using ALSA,
 the LAME audio codec is able to encode only the "standard" samplerates.
 You'll get an .avi file with no sound when you choose an odd
@@ -398,353 +514,6 @@ Select video channel [MPG: 0\-15  ASF:  0\-255].
 .TP
 .B \-vivo <sub\-options> (DEBUG CODE)
 Force audio parameters for the .vivo demuxer (for debugging purposes).
-
-
-.SH "DECODING/FILTERING OPTIONS"
-.TP
-.B \-ac <codec name>
-Force usage of a specific audio codec, according to its codec name in
-codecs.conf.
-
-.I EXAMPLE:
-    \-ac mp3     use mp3lib
-    \-ac mad     use libmad
-    \-ac mp3acm  use l3codeca.acm MP3 codec
-    \-ac ac3     use AC3 codec
-    \-ac hwac3   enable hardware AC3 passthrough
-                (see documentation)
-    \-ac vorbis  use libvorbis
-    \-ac ffmp3   use FFmpeg's MP3 decoder (SLOW)
-
-See \-ac help for a full list of available codecs.
-.TP
-.B \-afm <driver name>
-Force usage of a specific audio codec family, according to its driver name
-in codecs.conf and fall back to default if it failed.
-
-.I EXAMPLE:
-    \-afm ffmpeg     use FFmpeg's libavcodec (mp1/2/3)
-    \-afm acm        use a matching Win32 codec
-
-See \-afm help for a full list of available drivers.
-.TP
-.B \-aspect <ratio>
-Override aspect ratio of movies. It's autodetected on MPEG files, but can't be
-autodetected on most AVI files.
-
-.I EXAMPLE:
-    \-aspect 4:3  or \-aspect 1.3333
-    \-aspect 16:9 or \-aspect 1.7777
-.TP
-.B \-flip \ 
-Flip image upside\-down.
-.TP
-.B \-lavdopts <option1:option2:...> (DEBUG CODE)
-If decoding with a codec from libavcodec, you can specify its parameters here.
-
-.I EXAMPLE:
-    \-lavdopts bug=1
-
-Available options are:
-  
-    ver=<value>  error resilience:
-                   -1  needed for some very broken
-                       encoders
-                    0  default
-                    1  more aggressive error
-                       detection
-    bug=<value>  manual workaround encoder bugs:
-                   0  default
-                   1  workaround for some old lavc
-                      generated msmpeg4v3 files
-.TP
-.B \-nosound
-Do not play/encode sound.
-.TP
-.B \-npp <option1,option2,...>
-This option allows giving more literate postprocessing options, 
-and is another way of calling it (not with \-pp). See \-npp help
-for a full list of available options. The keywords accept a '\-'
-prefix to disable the option.
-.br
-A ':' followed by a letter may be appended to the option to indicate its 
-scope:
-    a  Automatically switches the filter off if the CPU is too slow.
-    c  Do chrominance filtering, too.
-    y  Do not do chrominance filtering (only luminance filtering).
-.br
-Each filter defaults to 'c' (chrominance).
-.br
-.I NOTE:
--npp only controls the external postprocess filter, and you HAVE TO
-load it manually by -vop pp (Usage: -vop pp -npp <options>),
-it is not auto-loaded!
-
-.I EXAMPLE:
-    \-npp hb,vb,dr,al,lb  same as \-pp 0x2007f
-    \-npp hb,vb,dr,al     same as \-pp 0x7f
-    \-npp de,\-al          default filters without
-                         brightness/contrast
-                         correction
-    \-npp de,tn:1:2:3     Enable default filters
-                         & temporal denoiser.
-    \-npp hb:y,vb:a \-autoq 6
-                         Deblock horizontal only
-                         luminance and switch
-                         vertical deblocking on or
-                         off automatically
-                         depending on available
-                         CPU time.
-.TP
-.B \-pp <quality> (see \-npp option too!)
-Apply postprocess filter on decoded image.
-
-Value given by -pp is sent to the codec, if the codec has built-in postprocess
-filter (newer win32 DShow DLLs, divx4linux) otherwise the external postprocess
-filter plugin (-vop pp) is auto-loaded and used.
-Note, that you can use the built-in and external pp at the
-same time, use -pp to set internal pp, and -vop pp=value to set up the external!
-
-The valid range of -pp value for built-in pp filters vary on codecs, mostly
-0-6, where 0=disable 6=slowest/best.
-
-For the external pp filter, this is the numerical mode to use postprocessing. The '\-npp' option described
-above has the same effects but with letters. To have several filters at the
-same time, simply add the hexadecimal values.
-
-.I EXAMPLE:
-The following values are known to give good results:
-    \-pp 0x20000 (\-npp lb)        deinterlacing (for DVD/MPEG2 playback e.g.)
-    \-pp 0x7f (\-npp hb,vb,dr,al)  deblocking filter (for DivX)
-.TP
-.B \-ssf <mode> (BETA CODE)
-Specifies SwScaler parameters. Available options are:
-
-    lgb=[0..100]  Gaussian blur filter (luma) 
-    cgb=[0..100]  Gaussian blur filter (chroma)
-    ls=[0..100]   sharpen filter (luma)
-    cs=[0..100]   sharpen filter (chroma)
-    cvs=x         chroma vertical shifting
-    chs=x         chroma horizontal shifting
-
-.I EXAMPLE
-    \-vop scale -ssf lgb=3.0
-.TP
-.B \-stereo <mode>
-Select type of MP2/MP3 stereo output.
-
-    Stereo         0
-    Left channel   1
-    Right channel  2
-.TP
-.B \-sws <software\ scaler\ type> (see \-vop scale option too!)
-This option sets the quality (and speed, respectively) of the software scaler,
-with the \-zoom option. For example with x11 or other outputs which lack
-hardware acceleration. Possible settings are:
-
-    0  fast bilinear (default)
-    1  bilinear
-    2  bicubic (good quality)
-    3  experimental
-    4  nearest neighbour (bad quality)
-    5  area
-    6  luma bicubic / chroma bilinear
-    7  gauss
-    8  sincR
-    9  lanczos
-   10  bicubic spline
-
-.I NOTE:
-For \-sws 2 and 7, the sharpness can be set with the scaling parameter (p)
-of \-vop scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
-length (1 \- 10).
-.TP
-.B \-vc <codec name>
-Force usage of a specific video codec, according to its codec name in codecs.conf,
-
-.I EXAMPLE:
-    \-vc divx      use VFW DivX codec
-    \-vc divxds    use DirectShow DivX codec
-    \-vc ffdivx    use libavcodec's DivX codec
-    \-vc ffmpeg12  use libavcodec's MPEG1/2 codec
-    \-vc divx4     use Project Mayo's DivX codec
-
-See \-vc help for a full list of available codecs.
-.TP
-.B \-vfm <driver name>
-Force usage of a specific video codec family, according to its driver name
-in codecs.conf and fall back to default if it failed.
-
-.I EXAMPLE:
-    \-vfm ffmpeg  use libavcodec codecs
-    \-vfm vfw     use VFW (Win32) codecs
-    \-vfm odivx   use OpenDivX/DivX4 codec (YV12)
-                  (same as \-vc odivx but fallback)
-    \-vfm dshow   use DirectShow (Win32) codecs
-    \-vfm divx4   use DivX4 codec (YUY2)
-                  (same as \-vc divx4 but fallback)
-    \-vfm xanim   use XAnim codecs
-
-.I NOTE:
-If libdivxdecore support was compiled in, then odivx and divx4 now contains
-just the same DivX4 codec, but different APIs to reach it. For difference
-between them and when to use which, check the DivX4 section in the
-documentation.
-
-See \-vfm help for a full list of available drivers.
-.TP
-.B \-vop <...,plugin3[=options],plugin2,plugin1>
-Activate a comma separated list of video filters.
-Available plugins are:
-
-  crop[=w:h:x:y]       Crops the given part of the
-                       image and discards the rest.
-                       Useful to remove black bands
-                       from widescreen movies.
-
-  rectangle[=w:h:x:y]  Draws a rectangle of the
-                       requested width and height
-                       at the specified coordinates
-                       over the image (used to test
-                       crop).
-                       (default: maximum w/h, upper
-                       left x/y position)
-
-  expand[=w:h:x:y:o]   Expands (not scales) movie
-                       resolution to the given
-                       value and places the
-                       unscaled original at
-                       coordinates x y.
-                       Can be used for placing
-                       subtitles/OSD in the
-                       resulting black bands.
-                       (default: original w/h,
-                       centered x/y)
-                       parameter (de)activates OSD
-                       rendering. (default: 0)
-
-  flip                 Flips the image upside down.
-
-  mirror               Flips the image on Y axis.
-
-  rotate[=<0-3>]       Rotates and flips the image
-                       +/\- 90 degrees.
-
-  scale[=w:h[:c[:p]]]  Scales the image with the
-                       software scaler (slow) and
-                       performs a YUV<\->RGB
-                       colorspace conversion
-                       (see \-sws option too!).
-                       The value 0 is used for
-                       scaled (aspect) destination
-                       w/h.
-                       (default: original w/h,
-                       destination w/h with \-zoom)
-                       Optionaly chroma skipping
-                       (c from 0\-3) and scaling
-                       parameters can be specified.
-                       (see the \-sws option for
-                       details)
-                       
-  yuy2                 Forces software YV12/I420 to
-                       YUY2 conversion.
-
-  rgb2bgr[=swap]       RGB 24/32 <\-> BGR 24/32
-                       colorspace conversion with
-                       optional R <\-> B swapping.
-
-  palette              RGB/BGR 8 \-> 15/16/24/32bpp
-                       colorspace conversion using
-                       palette.
-
-  format[=fourcc]      Restricts the colorspace for
-                       next filter. It does not do
-                       any conversion! Use the
-                       scale filter for a real
-                       conversion.
-
-  pp[=flags]           Activates the internal
-                       postprocessing filter.
-                       (see \-pp option for details)
-
-  lavc[=quality:fps]   Realtime MPEG1 encoder for
-                       use with DVB/DXR3
-                       (libavcodec)
-
-  fame                 Realtime MPEG1 encoder for
-                       use with DVB/DXR3 (libfame)
-
-  dvbscale[=aspect]    Set up optimal scaling for
-                       DVB cards.
-                       (aspect=
-                       DVB_HEIGHT*ASPECTRATIO)
-
-  cropdetect[=0-255]   Calculates necessary
-                       cropping parameters and
-                       prints the recommended
-                       parameters to stdout.
-                       The threshold can be
-                       optionally
-                       specified from nothing (0)
-                       to everything (255).
-                       (default: 24)
-
-  noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
-                       Adds noise
-                         <0-100>  luma noise
-                         <0-100>  chroma noise
-                         u        uniform noise
-                         t        temporal noise
-                         a        averaged
-                                  temporal noise
-                         h        high quality
-                         p        mix with pattern
-
-  eq[=bright:cont]     Activates the software
-                       equalizer with interactive
-                       controls like the hardware
-                       eq controls.
-                       The values can be from -100
-                       to 100.
-
-  halfpack             Convert planar YUV 4:2:0
-                       to half-height packed 4:2:2,
-                       downsampling luma but keeping
-                       all chroma samples. Useful
-                       for output to low-resolution
-                       display devices when hardware
-                       downscaling is poor quality
-                       or is not available.
-
-.I NOTE:
-The parameters are optional and if omitted, some of them are set to default values.
-Use -1 to keep the default value.
-
-You can get the list of available plugins executing
-.I mplayer \-vop help
-.TP
-.B \-x <x> (MPLAYER only)
-Scale image to x width (if sw/hw scaling available). Disables aspect calcs.
-.TP
-.B \-xvidopts <option>
-Specify additional parameters when decoding with XviD.
-
-    dr2    Activate direct rendering method 2.
-    nodr2  Deactivate direct rendering method 2.
-.TP
-.B \-xy <x>
-    x<=8  Scale image by factor <x>.
-    x>8   Set width to <x> and calculate height to
-          keep correct aspect ratio.
-.TP
-.B \-y <y> (MPLAYER only)
-Scale image to y height (if sw/hw scaling available). Disables aspect calcs.
-.TP
-.B \-zoom \ 
-Allow software scaling, where available. Could be used to force scaling with -vop scale
-.br
-.I NOTE:
-\-vop scale will IGNORE options -x/-y/-xy/-fs/-aspect without -zoom.
 
 
 .SH "OSD/SUB OPTIONS"
@@ -780,7 +549,6 @@ fonts: ~/.mplayer/font/font.desc, default for FreeType fonts:
 .I NOTE:
 With FreeType, this option determines path to the text font file.
 .br
-.I NOTE:
 The \-subfont-* options are available only with FreeType support compiled in.
 If FreeType support is enabled, the old font support can't be used.
 
@@ -840,6 +608,7 @@ Sets the autoscale mode. Can be:
     2  proportional to movie height
     3  proportional to movie diagonal (default)
 
+.I NOTE:
 Zero means that text-scale and osd-scale are font heights in points.
 .TP
 .B \-subfont-blur <0\-8>
@@ -849,7 +618,7 @@ Sets the font blur radius (default: 2).
 Sets the font encoding. When set to "unicode", all the glyphs from the
 font file will be rendered and unicode will be used (default: unicode).
 .TP
-.B \-subfont-osd-scale <0\-100> 
+.B \-subfont-osd-scale <0\-100>
 Sets the osd elements autoscale coefficient (default: 6).
 .TP
 .B \-subfont-outline <0\-8>
@@ -896,15 +665,16 @@ Override audio driver/card buffer size detection, -ao oss only
 .B \-ao <driver>[:<device>]
 Select audio output driver and optionally device. "device" is valid with
 SDL, too, it means subdriver then.
+.br
+.I NOTE:
+You can get the list of available drivers executing
+.I mplayer \-ao help
 
 .I EXAMPLE
     \-ao oss:/dev/dsp1  specifies the sound device
                        to use with OSS (replaces
                        the old \-dsp option)
     \-ao sdl:esd        specifies the SDL subdriver
-
-You can get the list of available drivers executing
-.I mplayer \-ao help
 .TP
 .B \-aofile <filename>
 Filename for \-ao pcm.
@@ -931,12 +701,13 @@ Available options are:
                      (volume plugin only)
 .TP
 .B \-channels <number>
-Select number of audio output channels to be used
+Select number of audio output channels to be used. Available options are:
 
     Stereo    2
     Surround  4
     Full 5.1  6
 
+.I NOTE:
 Currently this option is only honored for AC3 audio, and/or the surround plugin.
 .TP
 .B \-delay <sec>
@@ -961,7 +732,7 @@ Use different color depth than autodetect. Not all \-vo drivers support
 it (fbdev, dga2, svga, vesa).
 .TP
 .B \-brightness <\-100\ \-\ 100>
-Adjust brightness of video output (default 0). It changes intensity of 
+Adjust brightness of video output (default 0). It changes intensity of
 RGB components of video signal from black to white screen.
 .TP
 .B \-contrast <\-100\ \-\ 100>
@@ -1039,13 +810,11 @@ Sets the layer of the fullscreen window of mplayer for icewm.
     OnTop       6
     Dock        8
     AboveDock  10
-    Menu       12
-
-Default is layer Menu (12).
+    Menu       12 (default)
 .TP
 .B \-jpeg <option1:option2:...> (\-vo jpeg only)
 Specify options for the JPEG output (see documentation).
-Available options are [no]progressiv, [no]baseline, 
+Available options are [no]progressiv, [no]baseline,
 optimize, smooth, quality and outdir.
 .TP
 .B \-monitor_dotclock <dotclock\ (or\ pixelclock) range>  (fbdev only)
@@ -1067,17 +836,16 @@ Disable drawing video by 16-pixel height slices/bands, instead draws the
 while frame in a single run. May be faster or slower, depending on card/cache.
 It has effect only with libmpeg2 and libavcodec codecs.
 .TP
-.B \-panscan <range>
+.B \-panscan <0.0\-1.0>
 Enables Pan & Scan functionality, i.e. in order to display a 16:9 movie
 on a 4:3 display, the sides of the movie are cropped to get a 4:3 image
 which fits the screen. This function works only with xv, xmga and xvidix
 drivers.
-
-The range varies between 0.0 and 1.0 and controls how much of the image is
-cropped.
+.br
+The range controls how much of the image is cropped.
 .TP
 .B \-saturation <\-100\ \-\ 100>
-Adjust saturation of video output (default 0). You can get grayscale output 
+Adjust saturation of video output (default 0). You can get grayscale output
 with this option.
 .TP
 .B \-rootwin
@@ -1096,13 +864,13 @@ output drivers support it.
 .B \-vo <driver>[:<device>]
 Select video output driver and optionally device. "device" is valid with
 SDL and GGI too, it means subdriver then.
+.br
+.I NOTE:
+See \-vo help for a full list of available drivers.
 
 .I EXAMPLE:
     \-vo xmga
     \-vo sdl:aalib
-
-You can get the list of available drivers executing
-.I mplayer \-vo help
 .TP
 .B \-vsync \ \ 
 Enables VBI for vesa.
@@ -1164,110 +932,363 @@ of the movie relative to the upper left corner of the screen. The movie
 is centered by default.
 
 
-.SH "PLAYER OPTIONS (MPLAYER ONLY)"
+.SH "DECODING/FILTERING OPTIONS"
 .TP
-.B \-autoq <quality> (use with -vop pp!)
-Dynamically changes the level of postprocess, depending on spare CPU time
-available. The number you specify will be the maximum level used. Usually you
-can use some big number. You may not use it together with \-pp but it is OK with
-\-npp!
-.TP
-.B \-benchmark
-Prints some statistics on CPU usage and dropped frames at the end.
-Used in combination with \-nosound and \-vo null for benchmarking only video codec.
-.TP
-.B \-dapsync (OBSOLETE)
-Use alternative A/V sync method.
-.TP
-.B \-framedrop (see \-hardframedrop option too!)
-Frame dropping: decode all (except B) frames, video may skip.
-Useful for playback on slow VGA card/bus.
-.TP
-.B \-h, \-\-help
-Show short summary of options.
-.TP
-.B \-hardframedrop
-More intense frame dropping (breaks decoding). Leads to image distortion!
-.TP
-.B \-input <commands>
-This option can be used to configure certain parts of the input system.
-Relative path are relative to $HOME/.mplayer.
-
-    conf=<file>  Read alternative input.conf.
-                 If given without pathname,
-                 $HOME/.mplayer is assumed.
-    ar\-delay     Delay in msec before we start
-                 to autorepeat a key
-                 (0 to disable).
-    ar\-rate      How many key presses/second when
-                 we autorepeat.
-    keylist      Prints all keys that can be
-                 bound to.
-    cmdlist      Prints all commands that can
-                 be bound.
-    js\-dev       Specifies the joystick device
-                 to use
-                 (default is /dev/input/js0).
-
+.B \-ac <codec name>
+Force usage of a specific audio codec, according to its codec name in
+codecs.conf.
+.br
 .I NOTE:
-Autorepeat is currently only supported by joysticks.
-.TP
-.B \-lircconf <config\ file>
-Specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc.
-.TP
-.B \-loop <number>
-Loops movie playback <number> times. 0 means forever.
-.TP
-.B \-nojoystick
-Turns off joystick support. Default is on, if compiled in.
-.TP
-.B \-nolirc
-Turns off lirc support.
-.TP
-.B \-nortc \ \ 
-Turns off usage of /dev/rtc (real-time clock).
-.TP
-.B \-playlist <file>
-Play files according to this file list (1 file/row or Winamp or asx format).
-.TP
-.B \-quiet \ \ 
-Display less output, status messages.
-.TP
-.B \-skin <skin\ directory> (BETA CODE)
-Load skin from this directory (WITHOUT path name!).
+See \-ac help for a full list of available codecs.
 
 .I EXAMPLE:
-    \-skin fittyfene  tries these:
-                        /usr/local/share/mplayer/Skin/fittyfene
-                        ~/.mplayer/Skin/fittyfene
+    \-ac mp3     use mp3lib
+    \-ac mad     use libmad
+    \-ac mp3acm  use l3codeca.acm MP3 codec
+    \-ac ac3     use AC3 codec
+    \-ac hwac3   enable hardware AC3 passthrough
+                (see documentation)
+    \-ac vorbis  use libvorbis
+    \-ac ffmp3   use FFmpeg's MP3 decoder (SLOW)
 .TP
-.B \-slave \ \ 
-This option switches on slave mode. This is intended for use
-of MPlayer as a backend to other programs. Instead of intercepting keyboard
-events, MPlayer will read simplistic command lines from its stdin.
-See section
-.B SLAVE MODE PROTOCOL
-For the syntax.
+.B \-afm <driver name>
+Force usage of a specific audio codec family, according to its driver name
+in codecs.conf and fall back to default if it failed.
+.br
+.I NOTE:
+See \-afm help for a full list of available drivers.
+
+.I EXAMPLE:
+    \-afm ffmpeg     use FFmpeg's libavcodec (mp1/2/3)
+    \-afm acm        use a matching Win32 codec
 .TP
-.B \-softsleep
-Uses high quality software timers. Efficient as the RTC, doesn't need root,
-but requires more CPU.
+.B \-aspect <ratio>
+Override aspect ratio of movies. It's autodetected on MPEG files, but can't be
+autodetected on most AVI files.
+
+.I EXAMPLE:
+    \-aspect 4:3  or \-aspect 1.3333
+    \-aspect 16:9 or \-aspect 1.7777
 .TP
-.B \-sstep <sec>
-Specifies seconds between displayed frames. Useful for slideshows.
+.B \-flip \ 
+Flip image upside\-down.
 .TP
-.B \-stop_xscreensaver
-Turns off xscreensaver at startup and turns it on again on exit.
+.B \-lavdopts <option1:option2:...> (DEBUG CODE)
+If decoding with a codec from libavcodec, you can specify its parameters here.
+Available options are:
+
+    ver=<value>  error resilience:
+                   -1  needed for some very broken
+                       encoders
+                    0  default
+                    1  more aggressive error
+                       detection
+    bug=<value>  manual workaround encoder bugs:
+                   0  default
+                   1  workaround for some old lavc
+                      generated msmpeg4v3 files
+
+.I EXAMPLE:
+    \-lavdopts bug=1
 .TP
-.B \-use-stdin
+.B \-nosound
+Do not play/encode sound.
+.TP
+.B \-npp <option1,option2,...>
+This option allows giving more literate postprocessing options,
+and is another way of calling it (not with \-pp).
+.br
+.I NOTE:
+See \-npp help for a full list of available options.
+.br
+The keywords accept a '\-' prefix to disable the option.
+.br
+A ':' followed by a letter may be appended to the option to indicate its
+scope:
+    a  Automatically switches the filter off if the CPU is too slow.
+    c  Do chrominance filtering, too.
+    y  Do not do chrominance filtering (only luminance filtering).
+.br
+Each filter defaults to 'c' (chrominance).
+.br
+\-npp only controls the external postprocess filter, and you HAVE TO
+load it manually by -vop pp (Usage: -vop pp -npp <options>),
+it is not auto-loaded!
+
+.I EXAMPLE:
+    \-npp hb,vb,dr,al,lb  same as \-pp 0x2007f
+    \-npp hb,vb,dr,al     same as \-pp 0x7f
+    \-npp de,\-al          default filters without
+                         brightness/contrast
+                         correction
+    \-npp de,tn:1:2:3     Enable default filters
+                         & temporal denoiser.
+    \-npp hb:y,vb:a \-autoq 6
+                         Deblock horizontal only
+                         luminance and switch
+                         vertical deblocking on or
+                         off automatically
+                         depending on available
+                         CPU time.
+.TP
+.B \-pp <quality> (see \-npp option too!)
+Apply postprocess filter on decoded image.
+.P
+Value given by -pp is sent to the codec, if the codec has built-in postprocess
+filter (newer win32 DShow DLLs, divx4linux) otherwise the external postprocess
+filter plugin (-vop pp) is auto-loaded and used.
+Note, that you can use the built-in and external pp at the
+same time, use -pp to set internal pp, and -vop pp=value to set up the external!
+.P
+The valid range of -pp value for built-in pp filters vary on codecs, mostly
+0-6, where 0=disable 6=slowest/best.
+.P
+For the external pp filter, this is the numerical mode to use postprocessing. The '\-npp' option described
+above has the same effects but with letters. To have several filters at the
+same time, simply add the hexadecimal values.
+
+.I EXAMPLE:
+The following values are known to give good results:
+    \-pp 0x20000 (\-npp lb)        deinterlacing (for DVD/MPEG2 playback e.g.)
+    \-pp 0x7f (\-npp hb,vb,dr,al)  deblocking filter (for DivX)
+.TP
+.B \-ssf <mode> (BETA CODE)
+Specifies SwScaler parameters. Available options are:
+
+    lgb=[0..100]  Gaussian blur filter (luma)
+    cgb=[0..100]  Gaussian blur filter (chroma)
+    ls=[0..100]   sharpen filter (luma)
+    cs=[0..100]   sharpen filter (chroma)
+    cvs=x         chroma vertical shifting
+    chs=x         chroma horizontal shifting
+
+.I EXAMPLE
+    \-vop scale -ssf lgb=3.0
+.TP
+.B \-stereo <mode>
+Select type of MP2/MP3 stereo output.
+
+    Stereo         0
+    Left channel   1
+    Right channel  2
+.TP
+.B \-sws <software\ scaler\ type> (see \-vop scale option too!)
+This option sets the quality (and speed, respectively) of the software scaler,
+with the \-zoom option. For example with x11 or other outputs which lack
+hardware acceleration. Possible settings are:
+
+    0  fast bilinear (default)
+    1  bilinear
+    2  bicubic (good quality)
+    3  experimental
+    4  nearest neighbour (bad quality)
+    5  area
+    6  luma bicubic / chroma bilinear
+    7  gauss
+    8  sincR
+    9  lanczos
+   10  bicubic spline
+
+.I NOTE:
+For \-sws 2 and 7, the sharpness can be set with the scaling parameter (p)
+of \-vop scale (0 (soft) \- 100 (sharp)), for \-sws 9, it specifies the filter
+length (1 \- 10).
+.TP
+.B \-vc <codec name>
+Force usage of a specific video codec, according to its codec name in codecs.conf,
+.br
+.I NOTE:
+See \-vc help for a full list of available codecs.
+
+.I EXAMPLE:
+    \-vc divx      use VFW DivX codec
+    \-vc divxds    use DirectShow DivX codec
+    \-vc ffdivx    use libavcodec's DivX codec
+    \-vc ffmpeg12  use libavcodec's MPEG1/2 codec
+    \-vc divx4     use Project Mayo's DivX codec
+.TP
+.B \-vfm <driver name>
+Force usage of a specific video codec family, according to its driver name
+in codecs.conf and fall back to default if it failed.
+.br
+.I NOTE:
+If libdivxdecore support was compiled in, then odivx and divx4 now contains
+just the same DivX4 codec, but different APIs to reach it. For difference
+between them and when to use which, check the DivX4 section in the
+documentation.
+.br
+See \-vfm help for a full list of available drivers.
+
+.I EXAMPLE:
+    \-vfm ffmpeg  use libavcodec codecs
+    \-vfm vfw     use VFW (Win32) codecs
+    \-vfm odivx   use OpenDivX/DivX4 codec (YV12)
+                  (same as \-vc odivx but fallback)
+    \-vfm dshow   use DirectShow (Win32) codecs
+    \-vfm divx4   use DivX4 codec (YUY2)
+                  (same as \-vc divx4 but fallback)
+    \-vfm xanim   use XAnim codecs
+.TP
+.B \-vop <...,plugin3[=options],plugin2,plugin1>
+Activate a comma separated list of video filters.
+Available plugins are:
+
+  crop[=w:h:x:y]       Crops the given part of the
+                       image and discards the rest.
+                       Useful to remove black bands
+                       from widescreen movies.
+
+  rectangle[=w:h:x:y]  Draws a rectangle of the
+                       requested width and height
+                       at the specified coordinates
+                       over the image (used to test
+                       crop).
+                       (default: maximum w/h, upper
+                       left x/y position)
+
+  expand[=w:h:x:y:o]   Expands (not scales) movie
+                       resolution to the given
+                       value and places the
+                       unscaled original at
+                       coordinates x y.
+                       Can be used for placing
+                       subtitles/OSD in the
+                       resulting black bands.
+                       (default: original w/h,
+                       centered x/y)
+                       parameter (de)activates OSD
+                       rendering. (default: 0)
+
+  flip                 Flips the image upside down.
+
+  mirror               Flips the image on Y axis.
+
+  rotate[=<0-3>]       Rotates and flips the image
+                       +/\- 90 degrees.
+
+  scale[=w:h[:c[:p]]]  Scales the image with the
+                       software scaler (slow) and
+                       performs a YUV<\->RGB
+                       colorspace conversion
+                       (see \-sws option too!).
+                       The value 0 is used for
+                       scaled (aspect) destination
+                       w/h.
+                       (default: original w/h,
+                       destination w/h with \-zoom)
+                       Optionaly chroma skipping
+                       (c from 0\-3) and scaling
+                       parameters can be specified.
+                       (see the \-sws option for
+                       details)
+
+  yuy2                 Forces software YV12/I420 to
+                       YUY2 conversion.
+
+  rgb2bgr[=swap]       RGB 24/32 <\-> BGR 24/32
+                       colorspace conversion with
+                       optional R <\-> B swapping.
+
+  palette              RGB/BGR 8 \-> 15/16/24/32bpp
+                       colorspace conversion using
+                       palette.
+
+  format[=fourcc]      Restricts the colorspace for
+                       next filter. It does not do
+                       any conversion! Use the
+                       scale filter for a real
+                       conversion.
+
+  pp[=flags]           Activates the internal
+                       postprocessing filter.
+                       (see \-pp option for details)
+
+  lavc[=quality:fps]   Realtime MPEG1 encoder for
+                       use with DVB/DXR3
+                       (libavcodec)
+
+  fame                 Realtime MPEG1 encoder for
+                       use with DVB/DXR3 (libfame)
+
+  dvbscale[=aspect]    Set up optimal scaling for
+                       DVB cards.
+                       (aspect=
+                       DVB_HEIGHT*ASPECTRATIO)
+
+  cropdetect[=0-255]   Calculates necessary
+                       cropping parameters and
+                       prints the recommended
+                       parameters to stdout.
+                       The threshold can be
+                       optionally
+                       specified from nothing (0)
+                       to everything (255).
+                       (default: 24)
+
+  noise[=luma[u][t|a][h][p]:chroma[u][t|a][h][p]]
+                       Adds noise
+                         <0-100>  luma noise
+                         <0-100>  chroma noise
+                         u        uniform noise
+                         t        temporal noise
+                         a        averaged
+                                  temporal noise
+                         h        high quality
+                         p        mix with pattern
+
+  eq[=bright:cont]     Activates the software
+                       equalizer with interactive
+                       controls like the hardware
+                       eq controls.
+                       The values can be from -100
+                       to 100.
+
+  halfpack             Convert planar YUV 4:2:0
+                       to half-height packed 4:2:2,
+                       downsampling luma but keeping
+                       all chroma samples. Useful
+                       for output to low-resolution
+                       display devices when hardware
+                       downscaling is poor quality
+                       or is not available.
+
+.I NOTE:
+The parameters are optional and if omitted, some of them are set to default values.
+Use -1 to keep the default value.
+.br
+You can get the list of available plugins executing
+.I mplayer \-vop help
+.TP
+.B \-x <x> (MPLAYER only)
+Scale image to x width (if sw/hw scaling available). Disables aspect calcs.
+.TP
+.B \-xvidopts <option>
+Specify additional parameters when decoding with XviD.
+
+    dr2    Activate direct rendering method 2.
+    nodr2  Deactivate direct rendering method 2.
+.TP
+.B \-xy <x>
+    x<=8  Scale image by factor <x>.
+    x>8   Set width to <x> and calculate height to
+          keep correct aspect ratio.
+.TP
+.B \-y <y> (MPLAYER only)
+Scale image to y height (if sw/hw scaling available). Disables aspect calcs.
+.TP
+.B \-zoom \ 
+Allow software scaling, where available. Could be used to force scaling with -vop scale
+.br
+.I NOTE:
+\-vop scale will IGNORE options -x/-y/-xy/-fs/-aspect without -zoom.
 
 
 .SH "ENCODING OPTIONS (MENCODER ONLY)"
 .TP
 .B -audio-density <1\-50>
 Number of audio chunks per second (default is 2 for 0.5s long audio chunks).
-
-.I Note:
+.br
+.I NOTE:
 CBR only, VBR ignores this as it puts each packet in a new chunk.
 .TP
 .B -audio-delay <0.0\-...>
@@ -1294,24 +1315,23 @@ Available options are:
     min_quant=<1\-31>   minimum quantizer
     max_quant=<1\-31>   maximum quantizer
     rc_period=<value>  rate control period
-    rc_reaction_period=<value> 
+    rc_reaction_period=<value>
                        rate control reaction period
-    rc_reaction_ratio=<value> 
+    rc_reaction_ratio=<value>
                        rate control reaction ratio
     crispness=<0\-100>  specify crispness/smoothness
 .TP
-.B \-endpos <time|byte\ position>
+.B \-endpos <time|byte\ position> (see \-ss and \-sb option too!)
 Stop encoding at given time or byte position. Can be specified in many ways:
-
-    -endpos 56        encode only 56 seconds
-    -endpos 01:10:00  encode only 1 hour 10 minutes
-    -endpos 100mb     encode only 100 MBytes
-
-Can be used in conjunction with -ss or -sb!
 .br
 .I NOTE:
 Byte position won't be accurate, as it can only stop at
 a frame boundary.
+
+.I EXAMPLE:
+    -endpos 56        encode only 56 seconds
+    -endpos 01:10:00  encode only 1 hour 10 minutes
+    -endpos 100mb     encode only 100 MBytes
 .TP
 .B \-ffourcc <fourcc>
 Can be used to override the video fourcc of the output file.
@@ -1357,13 +1377,6 @@ Available options are:
 .TP
 .B \-lavcopts <option1:option2:...>
 If encoding with a codec from libavcodec, you can specify its parameters here.
-.br
-.I NOTE:
-Also see DOCS/tech/libavc-rate-control.txt.
-
-.I EXAMPLE:
-    \-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
-
 Available options are:
 
   help              get help
@@ -1519,6 +1532,9 @@ You can use the following options only in pass 2 of 2-pass mode:
     vrc_strategy, vb_strategy
 
 All other options can be used in all modes.
+
+.I EXAMPLE:
+    \-lavcopts vcodec=msmpeg4:vbitrate=1800:vhq:keyint=250
 .TP
 .B \-noskip
 Do not skip frames.
@@ -1560,7 +1576,7 @@ When encoding in 2pass mode, MEncoder dumps first pass' informations
 to the given file instead of the default divx2pass.log.
 .TP
 .B \-skiplimit <value>
-Maximal skipable frames after non-skipped one 
+Maximal skipable frames after non-skipped one
 (-noskiplimit for unlimited number).
 .TP
 .B \-v, \-\-verbose
@@ -1586,16 +1602,14 @@ overrides what is read from the DVD or the .ifo file.
 .SH "KEYBOARD CONTROL"
 .I NOTE:
 MPlayer has a fully configurable, command driven, control layer
-which allow you to control MPlayer using keyboard, mouse, joystick 
+which allow you to control MPlayer using keyboard, mouse, joystick
 or remote control (using lirc).
 .B See documentation!
 .br
-.I NOTE:
-The default config file for the input system is 
-$HOME/.mplayer/input.conf but it can be overriden 
+The default config file for the input system is
+$HOME/.mplayer/input.conf but it can be overriden
 using the -input conf option.
 .br
-.I NOTE:
 These keys may/may not work, depending on your video output driver.
 .TP
 .B general control
@@ -1617,7 +1631,7 @@ p / SPACE       pause movie (any key unpauses)
 .br
 q / ESC         stop playing and quit program
 .br
-+ and \-         adjust audio delay 
++ and \-         adjust audio delay
                 by +/\- 0.1 second
 .br
 / and *         decrease/increase volume
@@ -1684,7 +1698,7 @@ S               select
 .\" --------------------------------------------------------------------------
 .
 .SH "SLAVE MODE PROTOCOL"
-If the \-slave switch is given, playback is controlled by a 
+If the \-slave switch is given, playback is controlled by a
 line\-based protocol. Each line must contain one command
 otherwise one of the following tokens:
 .TP
@@ -1708,7 +1722,7 @@ grap_frames     Somebody know ?
 
 pt_step <value> [force=<value>]
                 Go to next/previous entry in
-                the playtree. 
+                the playtree.
 
 pt_up_step <value> [force=<value>]
                 Like pt_step but it jumps to
@@ -1717,7 +1731,7 @@ pt_up_step <value> [force=<value>]
 alt_src_step <value>
                 When more than one source is
                 available it selects the
-                next/previous one (only 
+                next/previous one (only
                 supported by asx playlist).
 
 sub_delay <value> [abs=<value>]
@@ -1753,10 +1767,10 @@ tv_step_channel <dir>
 
 tv_step_norm    Change TV norm.
 
-tv_step_chanlist 
+tv_step_chanlist
                 Change channel list.
 
-gui_loadfile   
+gui_loadfile
 .br
 gui_loadsubtitle
 .br
@@ -1800,7 +1814,7 @@ are searched for in this priority (for example /mnt/movie/movie.avi):
 .br
   /mnt/cdrom/movie.sub
 .br
-  ~/.mplayer/sub/movie.sub 
+  ~/.mplayer/sub/movie.sub
 .br
   ~/.mplayer/default.sub
 
@@ -1815,7 +1829,7 @@ are searched for in this priority (for example /mnt/movie/movie.avi):
 mplayer \-dvd 1
 .TP
 .B Play in japanese with english subtitles
-mplayer \-dvd 1 \-alang ja \-slang en 
+mplayer \-dvd 1 \-alang ja \-slang en
 .TP
 .B Play only chapters 5, 6, 7
 mplayer \-dvd 1 \-chapter 5\-7
@@ -1880,10 +1894,10 @@ Send your complete bug reports to the MPlayer-users mailing list at
 
 .SH AUTHORS
 Check documentation!
-.TP 4
+.TP
 MPlayer is (C) 2000\-2002
 .B Arpad Gereoffy
-.TP 4
+.TP
 This man page is written and maintained by
 .B Gabucino
 .br
