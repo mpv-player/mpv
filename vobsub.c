@@ -410,6 +410,7 @@ typedef struct {
     void *spudec;
     unsigned int palette[16];
     unsigned int orig_frame_width, orig_frame_height;
+    unsigned int origin_x, origin_y;
     /* index */
     packet_queue_t *spu_streams;
     unsigned int spu_streams_size;
@@ -481,7 +482,7 @@ vobsub_add_timestamp(vobsub_t *vob, off_t filepos, unsigned int ms)
     if (packet_queue_grow(queue) >= 0) {
 	pkt = queue->packets + (queue->packets_size - 1);
 	pkt->filepos = filepos;
-	pkt->pts100 = ms / 10;
+	pkt->pts100 = ms * 90;
 	return 0;
     }
     return -1;
@@ -588,6 +589,23 @@ vobsub_parse_size(vobsub_t *vob, const char *line)
 }
 
 static int
+vobsub_parse_origin(vobsub_t *vob, const char *line)
+{
+    // org: X,Y
+    char *p;
+    while (isspace(*line))
+	++line;
+    if (!isdigit(*line))
+	return -1;
+    vob->origin_x = strtoul(line, &p, 10);
+    if (*p != ',')
+	return -1;
+    ++p;
+    vob->origin_y = strtoul(p, NULL, 10);
+    return 0;
+}
+
+static int
 vobsub_parse_palette(vobsub_t *vob, const char *line)
 {
     // palette: XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX, XXXXXX
@@ -634,6 +652,8 @@ vobsub_parse_one_line(vobsub_t *vob, FILE *fd)
 	    res = vobsub_parse_palette(vob, line + 8);
 	else if (strncmp("size:", line, 5) == 0)
 	    res = vobsub_parse_size(vob, line + 5);
+	else if (strncmp("org:", line, 4) == 0)
+	    res = vobsub_parse_origin(vob, line + 4);
 	else if (strncmp("timestamp:", line, 10) == 0)
 	    res = vobsub_parse_timestamp(vob, line + 10);
 	else {
@@ -822,15 +842,16 @@ vobsub_close(void *this)
 void vobsub_draw(void *this, int dxs, int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
 {
     vobsub_t *vob = (vobsub_t *)this;
-    if (vob->spudec)
+    if (vob->spudec) {
 	spudec_draw_scaled(vob->spudec, dxs, dys, draw_alpha);
+    }	
 }
 
 void
 vobsub_process(void *vobhandle, float pts)
 {
     vobsub_t *vob = (vobsub_t *)vobhandle;
-    unsigned int pts100 = 100 * pts;
+    unsigned int pts100 = 90000 * pts;
     if (vob->spudec) {
 	spudec_heartbeat(vob->spudec, pts100);
 	if (vob->spu_streams && 0 <= vobsub_id && (unsigned) vobsub_id < vob->spu_streams_size) {
