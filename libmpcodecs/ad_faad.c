@@ -193,7 +193,8 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
     }
 
     if(faac_finfo.error > 0) {
-      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: Trying to resync!\n");
+      mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: error: %s, trying to resync!\n",
+              faacDecGetErrorMessage(faac_finfo.error));
       j++;
     } else
       break;
