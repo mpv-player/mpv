@@ -697,11 +697,15 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AVI){
   demuxer=new_demuxer(stream,DEMUXER_TYPE_AVI,audio_id,video_id,dvdsub_id);
   { //---- RIFF header:
     int id=stream_read_dword_le(demuxer->stream); // "RIFF"
-    if(id==mmioFOURCC('R','I','F','F')){
+    if((id==mmioFOURCC('R','I','F','F')) || (id==mmioFOURCC('O','N','2',' '))){
       stream_read_dword_le(demuxer->stream); //filesize
       id=stream_read_dword_le(demuxer->stream); // "AVI "
       if(id==formtypeAVI){ 
         mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"AVI");
+        file_format=DEMUXER_TYPE_AVI;
+      }	
+      if(id==mmioFOURCC('O','N','2','f')){ 
+        mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat,"ON2 AVI");
         file_format=DEMUXER_TYPE_AVI;
       }	
     }
