@@ -568,6 +568,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FontEncoding19 "韩语(CP949)"
 #define MSGTR_PREFERENCES_FontEncoding20 "泰语(CP874)"
 #define MSGTR_PREFERENCES_FontEncoding21 "Windows的西里尔语(CP1251)"
+#define MSGTR_PREFERENCES_FontEncoding22 "Windows的西里尔/中欧语(CP1250)"
 #define MSGTR_PREFERENCES_FontNoAutoScale "不自动缩放"
 #define MSGTR_PREFERENCES_FontPropWidth "宽度成比例"
 #define MSGTR_PREFERENCES_FontPropHeight "高度成比例"
