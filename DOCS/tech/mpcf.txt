@@ -92,7 +92,11 @@ stream_header:
 	fixed_fps				u(1)
 	index_flag				u(1)
 	reserved				u(6)
-	codec_specific_data			b
+	for(;;){
+		codec_specific_data_type	b
+		if(codec_specific_data_type=="") break;
+		codec_specific_data		b
+	}
 
 video_stream_header:
 	stream_header
@@ -250,6 +254,12 @@ lsb_timestamp_length
 fixed_fps
 	1 indicates that the fps is fixed
 
+codec_specific_data_type
+	"bitmapinfoheader", "waveformatex", "imagedesc", "sounddesc",
+	"native"
+	"native", means a simple api & container independanet storage form,
+	for example some mpeg4-es headers
+        
 codec_specific_data
 	private global data for a codec (could be huffman tables or ...)
         
