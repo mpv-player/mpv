@@ -80,27 +80,18 @@ static int control(int cmd,void *arg){
 // return: 1=success 0=fail
 static int init(int rate,int channels,int format,int flags){
 	int bits;
-	strarg_t file;
 	opt_t subopts[] = {
 	  {"waveheader", OPT_ARG_BOOL, &ao_pcm_waveheader, NULL},
-	  {"file",       OPT_ARG_STR,  &file,              NULL},
+	  {"file",       OPT_ARG_MSTRZ, &ao_outputfilename, NULL},
 	  {NULL}
 	};
 	// set defaults
 	ao_pcm_waveheader = 1;
-	file.str = NULL;
-	file.len = 0;
+	ao_outputfilename =
+	      strdup((ao_pcm_waveheader)?"audiodump.wav":"audiodump.pcm");
 	if (subopt_parse(ao_subdevice, subopts) != 0) {
 	  return 0;
 	}
-	if (file.len > 0) {
-	ao_outputfilename = malloc(file.len + 1);
-	memcpy(ao_outputfilename, file.str, file.len);
-	ao_outputfilename[file.len] = 0;
-	}
-	else
-	  ao_outputfilename =
-	      strdup((ao_pcm_waveheader)?"audiodump.wav":"audiodump.pcm");
 
 	/* bits is only equal to format if (format == 8) or (format == 16);
 	   this means that the following "if" is a kludge and should
