@@ -26,8 +26,3 @@ Player features:
 - support for MPEG TS (transport streams) and PES format - I need sample files!
 - verify valid range of numeric options (like '-xy 0') - new configfile code?
 - audio copy/encoding capability
-
-Requested codecs:
-- WMV (failing to load) - Check again with new loader!
-- ASUS ASV2 (loaded, but picture is upside-down and very pixelized)
-- VoxWare audio (DirectShow required)
