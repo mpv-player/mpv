@@ -1,4 +1,4 @@
-.\" synced with 1.765
+.\" synced with 1.778
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -37,7 +37,7 @@
 .\" Název
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-09-19" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2004-10-14" "The MPlayer Project" "The Movie Player"
 .
 .SH NÁZEV
 mplayer  \- multimediální pøehrávaè
@@ -232,6 +232,10 @@ dal¹í/\:pøedchozí podstrom v rodièovském playlistu
 dal¹í/\:pøedchozí alternativní zdroj (pouze ASX playlist)
 .IPs "p / MEZERNÍK"
 Pauza pøehrávání (libovolná klávesa odpauzuje).
+.IPs "."
+Krok vpøed.
+Prvním stiskem pozastavíte pøehrávání, s ka¾dým dal¹ím stiskem se pøehraje jeden
+snímek a opìt zastaví (libovolná jiná klávesa odpauzuje).
 .IPs "q / ESC"
 Stop pøehrávání a ukonèení programu.
 .IPs "+ a -"
@@ -2519,17 +2523,24 @@ Pou¾ije svga s VIDIX.
 .TP
 .B gl\ \ \ \ \ 
 Video rozhraní OpenGL.
-Velmi jednoduchá verze, ¾ádné OSD a rozmìry videa musí být men¹í ne¾ maximální 
+Jednoduchá verze, rozmìry videa musí být men¹í ne¾ maximální 
 velikost textury ve va¹í OpenGL implementaci.
-Navr¾eno tak aby to pracovalo i s velmi jednoduchými implementacemi OpenGL.
+Navr¾eno tak, aby pracovalo i s velmi jednoduchými implementacemi OpenGL.
 .PD 0
 .RSs
 .IPs (no)manyfmts
 Zapne podporu pro více (RGB a BGR) barevných schémat.
-Vy¾aduje OpenGL ve verzi >= 1.2, zatím NEPRACUJE správnì.
+Vy¾aduje OpenGL ve verzi >= 1.2.
 .IPs slice-height=<0\-...>
 Poèet øádkù kopírovaných do textury najednou (default: 4).
 0 pro celý obrázek.
+.IPs (no)osd
+Zapne nebo vypne podporu pro renderování OSD pomocí OpenGL (default: zapnuto).
+Hlavnì pro testování, vy mù¾ete pou¾ít \-osdlevel 0 pro vypnutí OSD.
+.IPs (no)aspect
+Zapne nebo vypne ¹kálování na správný pomìr stran a podporu 'pan and scan'
+(default: zapnuto).
+Vypnutí mù¾e zvý¹it rychlost.
 .RE
 .PD 1
 .
@@ -2759,11 +2770,11 @@ Umo¾òuje zadat jméno výstupního souboru (default: ./grab.mpg).
 .PD 1
 .
 .TP
-.B zr (viz také \-zr* a \-zrhelp, zrmjpeg video filtr)
+.B zr (viz také \-zr* a \-zrhelp)
 Výstupní video rozhraní mnoha MJPEG zachytávacích/\:pøehrávacích karet.
 .
 .TP
-.B zr2\ \ \ \ 
+.B zr2 (viz také zrmjpeg video filtr)
 Výstupní video rozhraní mnoha MJPEG zachytávacích/\:pøehrávacích karet, druhá generace.
 .PD 0
 .RSs
@@ -3029,6 +3040,14 @@ mmap_soubor: soubor do kterého se mají data mapovat
 .br
 pvzorkù: poèet vzorkù na kanál (default: 512)
 .REss
+.IPs extrastereo[=mul]
+Zvìt¹uje rozdíl mezi pravým a levým kanálem, co¾ dodá urèitý druh "live"
+efektu pøi pøehrávání.
+.RSss
+mul: rozdílový koeficient (default: 2.5)
+.REss
+.IPs volnorm
+Maximalizuje hlasitost bez zkreslení zvuku.
 .RE
 .
 .TP
@@ -4869,7 +4888,7 @@ Enkódovací volby pro kodeky mù¾ete pøedat pomocí následující syntaxe:
 .B \-<kodek>opts <volba1[=hodnota],volba2,...>
 .
 .PP
-Kde <kodek> mù¾e být: lavc, xvidenc, divx4, lame, x264enc
+Kde <kodek> mù¾e být: lavc, xvidenc, divx4, lame, toolame, x264enc
 .
 .
 .SS divx4 (\-divx4opts)
@@ -4883,7 +4902,7 @@ nápovìda
 .
 .TP
 .B br=<hodnota>
-nastaví datový tok (bitrate)
+Nastaví datový tok (bitrate).
 .RSs
 .IPs 4\-16000
 (v kilobitech)
@@ -4897,7 +4916,7 @@ maximální interval mezi klíèovými snímky (ve snímcích)
 .
 .TP
 .B deinterlace
-zapne odstraòování prokladu (zapomeòte na to, DivX4 je chybné)
+Zapne odstraòování prokladu (zapomeòte na to, DivX4 je chybné).
 .
 .TP
 .B q=<1\-5>
@@ -4925,12 +4944,13 @@ rozsah reakce kontroléru rychlosti
 .
 .TP
 .B crispness=<0\-100>
-nastaví ostrost/\:vyhlazení
+Nastaví ostrost/\:vyhlazení.
 .
 .TP
 .B pass=<1\-2>
-Takto mù¾ete enkódovat dvou-prùchodovì DivX4 soubory.
-Nejdøíve enkódujte s pass=1, pak se stejnými parametry enkódujte s pass=2.
+Takto mù¾ete enkódovat dvouprùchodovì DivX4 soubory.
+Nejdøíve enkódujte s pass=1, pak proveïte dal¹í enkódování se stejnými parametry
+ale pass=2.
 .
 .TP
 .B vbrpass=<0\-2>
@@ -4978,15 +4998,15 @@ prùmìrný datový tok
 .TP
 .B cbr\ \ \ \ 
 pevný datový tok.
-Vynutí CBR re¾im enkódování i v ní¾e uvedených ABR preset re¾imech
+Vynutí CBR re¾im enkódování také v ní¾e uvedených pøednastavených ABR re¾imech
 .
 .TP
 .B br=<0\-1024>
-nastaví datový tok v kBitech (pouze CBR a ABR)
+datový tok v kBitech (pouze CBR a ABR)
 .
 .TP
 .B q=<0\-9>
-kvalita (0\-nejlep¹í, 9\-nejhor¹í) (pouze pro VBR)
+kvalita (0\-nejlep¹í, 9\-nejhor¹í) (pouze VBR)
 .
 .TP
 .B aq=<0\-9>
@@ -4998,7 +5018,7 @@ kompresní pomìr
 .
 .TP
 .B vol=<0\-10>
-nastaví zisk audio vstupu
+zisk audio vstupu
 .
 .TP
 .B mode=<0\-3>
@@ -5031,8 +5051,8 @@ pøizpùsobivé
 .
 .TP
 .B fast\ \ \ 
-zapne rychlej¹í enkódování v ní¾e uvedených VBR preset re¾imech, ponìkud 
-hor¹í kvalita a vy¹¹í datové toky.
+Zapne rychlej¹í enkódování v ní¾e uvedených VBR preset re¾imech. Výsledkem je
+ponìkud hor¹í kvalita a vy¹¹í datové toky.
 .
 .TP
 .B highpassfreq=<kmitoèet>
@@ -5052,16 +5072,18 @@ sdìlí LAME aby zvolil hodnoty automaticky.
 .B preset=<hodnota>
 pøednastaví hodnoty
 .RSs
+.IPs help\ 
+Vypí¹e dal¹í volby a informace o pøednastavených hodnotách.
 .IPs medium
-VBR enkódování, dobrá kvalita, datový tok 150\-180 kbps.
+VBR enkódování, dobrá kvalita, datový tok 150\-180 kbps
 .IPs standard
-VBR enkódování, vysoká kvalita, datový tok 170\-210 kbps.
+VBR enkódování, vysoká kvalita, datový tok 170\-210 kbps
 .IPs extreme
-VBR enkódování, velmi vysoká kvalita, datový tok 200\-240 kbps.
+VBR enkódování, velmi vysoká kvalita, datový tok 200\-240 kbps
 .IPs insane
-CBR enkódování, nejvy¹¹í pøednastavitelná kvalita, datový tok 320 kbps.
+CBR enkódování, nejvy¹¹í pøednastavitelná kvalita, datový tok 320 kbps
 .IPs <8\-320>
-ABR enkódování s prùmìrným datovým tokem na nastavené hodnotì.
+ABR enkódování s prùmìrným datovým tokem na nastavené hodnotì
 .RE
 .sp 1
 .RS
@@ -5070,15 +5092,13 @@ ABR enkódování s prùmìrným datovým tokem na nastavené hodnotì.
 .PD 0
 .RSs
 .IPs fast:preset=standard
-pro vìt¹inu lidí a vìt¹inu hudby poskytuje u¾ dost vysokou kvalitu.
+Urèeno pro vìt¹inu lidí a vìt¹inu typù hudby poskytuje dostateènì vysokou kvalitu.
 .IPs cbr:preset=192
-enkóduje s ABR pøednastaveným na 192 kbps s vynuceným konstantním datovým tokem.
+Enkóduje s ABR pøednastaveným na 192 kbps s vynuceným konstantním datovým tokem.
 .IPs preset=172
-enkóduje s ABR pøednastaveným na 172 kbps prùmìrného datového toku.
+Enkóduje s ABR pøednastaveným na 172 kbps prùmìrného datového toku.
 .IPs preset=extreme
-pro lidi s extrémnì dobrým sluchem a odpovídající aparaturou.
-.IPs preset=help
-vypí¹e doplòkové volby a informace o preset nastaveních.
+Urèeno pro lidi s extrémnì dobrým sluchem a odpovídající aparaturou.
 .RE
 .PD 1
 .
@@ -5465,10 +5485,12 @@ nastat problémy pøi pou¾ití vrc_(min|max)rate.
 .TP
 .B vrc_maxrate=<hodnota>
 maximální datový tok v kbit/\:sec (prùchod\ 1/\:2)
+(default: 0, neomezený)
 .
 .TP
 .B vrc_minrate=<hodnota>
 minimální datový tok kbit/\:sec (prùchod\ 1/\:2)
+(default: 0, neomezený)
 .
 .TP
 .B vrc_buf_size=<hodnota>
@@ -5968,24 +5990,8 @@ Pou¾ít quarter pel kompenzaci pohybu (oboustranná exkluzivita s ilme).
 Tip: Toto, jak se zdá, je u¾iteèné pouze pøi enkódování s vysokým datovým tokem.
 .
 .TP
-.B ildctcmp=<0\-2000>
-srovnávací funkce pro prokládané dct rozhodování
-.
-.TP
-.B precmp=<0\-2000>
-srovnávací funkce pro odhad pohybu pøed prùchodem
-.
-.TP
-.B cmp=<0\-2000>
-srovnávací funkce pro plný odhad pel pohybu
-.
-.TP
-.B subcmp=<0\-2000>
-srovnávací funkce pro odhad sub pel pohybu
-.
-.TP
 .B mbcmp=<0\-2000>
-srovnávací funkce pro rozhodování v makrobloku, pou¾ito pouze pokud mbd=0
+Nastaví porovnávací funkci pro rozhodování v makrobloku, pou¾ito pouze pokud mbd=0.
 .PD 0
 .RSs
 .IPs "0 (SAD)"
@@ -6014,6 +6020,26 @@ souèet ètvereèkovaných svislých odchylek
 pou¾ít té¾ barvu, v souèasnosti nepracuje (správnì) s B snímky
 .RE
 .PD 1
+.
+.TP
+.B ildctcmp=<0\-2000>
+Nastaví porovnávací funkci pro prokládané dct rozhodování
+(viz.\& mbcmp pro dostupné porovnávací funkce) (default: 0).
+.
+.TP
+.B precmp=<0\-2000>
+Nastaví porovnávací funkci pro odhad pohybu pøed prùchodem
+(viz.\& mbcmp pro dostupné porovnávací funkce) (default: 0).
+.
+.TP
+.B cmp=<0\-2000>
+Nastaví porovnávací funkci pro plný odhad pel pohybu
+(viz.\& mbcmp pro dostupné porovnávací funkce) (default: 0).
+.
+.TP
+.B subcmp=<0\-2000>
+Nastaví porovnávací funkci pro odhad sub pel pohybu
+(viz.\& mbcmp pro dostupné porovnávací funkce) (default: 0).
 .
 .TP
 .B nssew=<0\-100>
@@ -6244,12 +6270,12 @@ V souèasnosti nefunguje (zatím).
 .
 .SS nuv (\-nuvopts)
 .
-Nuppel video je zalo¾eno na rtjpeg a lzo.
-Defaultnì jsou snímky nejprve enkódovány pomocí rtjpeg a poté komprimovány 
-pomocí lzo.
+Nuppel video je zalo¾eno na RTJPEG a LZO.
+Defaultnì jsou snímky nejprve enkódovány pomocí RTJPEG a poté komprimovány 
+pomocí LZO.
 Ale oba prùchody mohou být zapnuté nebo ne.
-Tak¾e mù¾ete ve skuteènosti vyprodukovat syrový i420, lzo komprimovaný i420, 
-rtjpeg, nebo defaultní lzo komprimovaný rtjpeg.
+Tak¾e mù¾ete ve skuteènosti vyprodukovat surový i420, LZO komprimovaný i420, 
+RTJPEG, nebo defaultní LZO komprimovaný RTJPEG.
 .br
 .I POZNÁMKA:
 Dokumentace nuvrec obsahuje rùzné rady a pøíklady k volbám pro nejpou¾ívanìj¹í
@@ -6257,27 +6283,31 @@ TV enkódování.
 .
 .TP
 .B c=<0\-20>
-práh barev
+práh barev (default: 1)
 .
 .TP
 .B l=<0\-20>
-práh jasu
+práh jasu (default: 1)
+.
+.TP
+.B lzo \ 
+Zapne LZO kompresi (default).
 .
 .TP
 .B nolzo \ 
-Vypnout lzo kompresi.
+Vypnout LZO kompresi.
 .
 .TP
 .B q=<3\-255>
-Nastavit úroveò kvality.
+úroveò kvality (default: 255)
 .
 .TP
 .B raw \ \ \ 
-Vypnout rtjpeg enkódování.
+Vypnout RTJPEG enkódování (default).
 .
 .TP
 .B rtjpeg\ 
-Zapnout rtjpeg enkódování.
+Zapnout RTJPEG enkódování.
 .
 .SS xvidenc (\-xvidencopts)
 .
@@ -6303,11 +6333,10 @@ Pøepne do re¾imu s pevným kvantizerem a nastaví kvantizer který bude pou¾it.
 .TP
 .B me_quality=<0\-6>
 Tato volba ovlivòuje subsystém odhadování pohybu.
-Vy¹¹í hodnota by mìla dát pøesnìj¹í odhad pohybu.
+Vy¹¹í hodnota by mìla dát pøesnìj¹í odhad pohybu (default: 6).
 Èím lep¹í odhad, tím lep¹í komprese.
 Pøesnost je vyvá¾ena vìt¹í zátì¾í CPU, tak¾e tuto hodnotu sni¾te, po¾adujete-li
 enkódování v reálném èase.
-(default: 6)
 .
 .TP
 .B interlacing
@@ -6427,7 +6456,7 @@ verzemi XviD 1.0.x (api4).
 Vytvoøí bitový proud který mù¾e být dekódován bez zpo¾dìní.
 .br
 .I VAROVÁNÍ:
-Takto vygenerujete ilegální bitový proud, který NEBUDE dekódovatelný pomocí
+takto vygenerujete ilegální bitový proud, který nebude dekódovatelný pomocí
 ISO-MPEG4 dekodérù s výjimkou DivX/\:libavcodec/\:XviD.
 .br
 .I VAROVÁNÍ:
@@ -6714,6 +6743,16 @@ ulo¾í snímkové PSNR do souboru s názvem ve tvaru 'psnr_hhmmss.log' v aktuálním
 adresáøi.
 Vrácené hodnoty jsou v dB (decibel), èím vy¹¹í tím lep¹í.
 .
+.PP
+.sp 1
+Následující volba je dostupná pouze ve vývojových verzích XviD 1.1.x.
+.
+.TP
+.B bvhq=<0|1>
+Toto nastavení umo¾ní výbìr z vektorových kandidátù na B snímky na základì
+operátoru optimalizovaného na omezení datového toku.
+To samé zaji¹»uje volba vhq pro P snímky.
+Takto dostaneme hezèí B snímky s témìø nepostøehnutelným dopadem na rychlost.
 .
 .SS x264enc (\-x264encopts)
 .
@@ -6730,13 +6769,25 @@ pøetáèení (default: 250).
 .
 .TP
 .B idrint=<hodnota>
-Ka¾dé <hodnota> I-Snímky jsou IDR-Snímky (default: 2).
+Jeden z ka¾dých <hodnota> I-Snímkú je IDR-Snímkem (default: 2).
 V H.264, nemusí být nutnì I-Snímky zapouzdøeny v GOP, proto¾e je mo¾né
 aby byl P-snímek iniciován z více snímkù ne¾ bezprostøednì pøedcházejícím
 (viz také frameref).
 Proto se na I-snímky nemusí dát nutnì pøetáèet.
 IDR-Snímky zabrání dal¹ím P-snímkùm ukazovat na jakýkoli snímek 
 pøed IDR-Snímkem.
+.
+.TP
+.B scenecut=<-1\-100>
+Ovládá, jak agresivnì budou vkládány I-snímky navíc (default: 40).
+Pøi nízkých hodnotách scenecut vynutí èasto kodek I-snímek a¾ pøi pøekroèení
+hodnoty keyint.
+Vhodné hodnoty scenecut mohou nalézti lep¹í umístìní pro I-snímek.
+Velké hodnoty pou¾ívají více I snímkù, ne¾ je nezbytné, co¾ plýtvá bity.
+Hodnota -1 vypne detekci zmìny scény, tak¾e na ka¾dých keyint snímkù pøipadá
+v¾dy jen jeden I snímek, dokonce i kdy¾ dojde ke zmìnì scény døíve.
+Vypnutí nedoporuèujeme. Plýtvá datovým tokem, proto¾e P-snímky pøi zmìnì
+scény jsou stejnì velké jako I snímky, av¹ak nevynulují "poèítadlo keyint".
 .
 .TP
 .B frameref=<1\-15>
@@ -6896,7 +6947,8 @@ vy¹¹í hodnoty vynucují pozvolnìj¹í zmìny.
 .
 .TP
 .B fullinter | nofullinter
-Pou¾ije ve snímku v¹echny dostupné typy makrobloku (i16x16, i4x4, p16x16-4x4)
+Pou¾ije v¹echny dostupné typy inter makroblokù (i16x16, i4x4, p16x16,
++p16x8, p8x16, p8x8, p8x4, p4x8, p4x4, pskip).
 Úèelem je najít typ a rozmìr nejlépe odpovídající urèité oblasti obrázku,
 co¾ se projeví zejména na animované tvorbì, kde jsou obvyklé velké stejnobarevné
 oblasti (default: i16x16, i4x4, p16x16-8x8).
