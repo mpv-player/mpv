@@ -67,6 +67,7 @@ static int scenecut_threshold = 40;
 static int bframe = 0;
 static int bframe_adaptive = 1;
 static int bframe_bias = 0;
+static int bframe_pyramid = 0;
 static int deblock = 1;
 static int deblockalpha = 0;
 static int deblockbeta = 0;
@@ -106,6 +107,8 @@ m_option_t x264encopts_conf[] = {
     {"b_adapt", &bframe_adaptive, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nob_adapt", &bframe_adaptive, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"b_bias", &bframe_bias, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
+    {"b_pyramid", &bframe_pyramid, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"nob_pyramid", &bframe_pyramid, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"deblock", &deblock, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nodeblock", &deblock, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"deblockalpha", &deblockalpha, CONF_TYPE_INT, CONF_RANGE, -6, 6, NULL},
@@ -160,6 +163,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_bframe = bframe;
     mod->param.b_bframe_adaptive = bframe_adaptive;
     mod->param.i_bframe_bias = bframe_bias;
+    mod->param.b_bframe_pyramid = bframe_pyramid;
     mod->param.b_deblocking_filter = deblock;
     mod->param.i_deblocking_filter_alphac0 = deblockalpha;
     mod->param.i_deblocking_filter_beta = deblockbeta;

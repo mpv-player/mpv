@@ -7660,6 +7660,20 @@ Controls the decision performed by b_adapt.
 A higher b_bias produces more B-frames. (default: 0)
 .
 .TP
+.B (no)b_pyramid
+Allows B-frames to be used as references for predicting other frames.
+For example, consider 3 consecutive B-frames: I0 B1 B2 B3 P4.
+Without this option, B-frames follow the same pattern as MPEG-[124].
+So they are coded in the order I0 P4 B1 B2 B3, and all the B-frames 
+are predicted from I0 and P4.
+With this option, they are coded as I0 P4 B2 B1 B3.
+B2 is the same as above, but B1 is predicted from I0 and B2, and 
+B3 is predicted from B2 and P4.
+This results in slightly improved compression, at no speed cost.
+Requires bframes >= 2.
+Disadvantage: increases decoding delay to 2 frames.
+.
+.TP
 .B (no)deblock
 Use deblocking filter (default: on).
 As it takes very little time compared to its quality gain, it's not
