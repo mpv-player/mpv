@@ -140,8 +140,17 @@ static int nr_modes = 0;
 
 static int parse_fbmode_cfg(char *cfgfile)
 {
+#define CHECK_IN_MODE_DEF\
+	do {\
+	if (!in_mode_def) {\
+		printf("'needs 'mode' first");\
+		goto err_out_print_linenum;\
+	}\
+	} while (0)
+
 	fb_mode_t *mode = NULL;
 	char *endptr;	// strtoul()...
+	int in_mode_def = 0;
 	int tmp, i;
 
 	if (verbose > 0)
@@ -172,6 +181,10 @@ static int parse_fbmode_cfg(char *cfgfile)
 		if (tmp == RET_EOL)
 			continue;
 		if (!strcmp(token[0], "mode")) {
+			if (in_mode_def) {
+				printf("'endmode' required");
+				goto err_out_print_linenum;
+			}
 			if (!validate_mode(mode))
 				goto err_out_not_valid;
 		loop_enter:
@@ -197,7 +210,9 @@ static int parse_fbmode_cfg(char *cfgfile)
 				printf("can't strdup -> 'name': %s\n", strerror(errno));
 				goto err_out;
 			}
+			in_mode_def = 1;
 		} else if (!strcmp(token[0], "geometry")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(5) < 0)
 				goto err_out_parse_error;
 			mode->xres = strtoul(token[0], &endptr, 0);
@@ -216,6 +231,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 			if (*endptr)
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "timings")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(7) < 0)
 				goto err_out_parse_error;
 			mode->pixclock = strtoul(token[0], &endptr, 0);
@@ -240,8 +256,10 @@ static int parse_fbmode_cfg(char *cfgfile)
 			if (*endptr)
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "endmode")) {
-			/* FIXME NOTHING for now*/
+			CHECK_IN_MODE_DEF;
+			in_mode_def = 0;
 		} else if (!strcmp(token[0], "accel")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
 			/*
@@ -249,6 +267,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 			 * so we just ignore it.
 			 */
 		} else if (!strcmp(token[0], "hsync")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
 			if (!strcmp(token[0], "low"))
@@ -258,6 +277,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 			else
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "vsync")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
 			if (!strcmp(token[0], "low"))
@@ -267,6 +287,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 			else
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "csync")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
 			if (!strcmp(token[0], "low"))
@@ -276,6 +297,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 			else
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "extsync")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
 			if (!strcmp(token[0], "false"))
@@ -285,6 +307,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 			else
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "laced")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
 			if (!strcmp(token[0], "false"))
@@ -294,6 +317,7 @@ static int parse_fbmode_cfg(char *cfgfile)
 			else
 				goto err_out_parse_error;
 		} else if (!strcmp(token[0], "double")) {
+			CHECK_IN_MODE_DEF;
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
 			if (!strcmp(token[0], "false"))
