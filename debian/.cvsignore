@@ -1,0 +1,6 @@
+files
+mplayer
+mplayer.postinst.debhelper
+mplayer.postrm.debhelper
+mplayer.prerm.debhelper
+mplayer.substvars
