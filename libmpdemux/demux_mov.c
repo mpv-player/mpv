@@ -4,8 +4,12 @@
 //  compressed header support from moov.c of the openquicktime lib.
 //  References: http://openquicktime.sf.net/, http://www.heroinewarrior.com/
 //  http://www.geocities.com/SiliconValley/Lakes/2160/fformats/files/mov.pdf
-//  The QuickTime File Format PDF (QTFileFormat.pdf) from Apple:
-//  http://developer.apple.com/quicktime/
+//  (above url no longer works, file mirrored somewhere? ::atmos)
+//  The QuickTime File Format PDF from Apple:
+//  http://developer.apple.com/techpubs/quicktime/qtdevdocs/PDF/QTFileFormat.pdf
+//  (Complete list of documentation at http://developer.apple.com/quicktime/)
+//  MP4-Lib sources from http://mpeg4ip.sf.net/ might be usefull fot .mp4
+//  aswell as .mov specific stuff.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -233,12 +237,21 @@ int mov_check_file(demuxer_t* demuxer){
 	else if (len == 0) /* deleted chunk */
 	{
 	    /* XXX: CJB! is this right? - alex */
-	    goto skip_chunk;
+	    break; // skip chunk
 	}
 #endif
 	else if(len<8) break; // invalid chunk
 
 	switch(id){
+	case MOV_FOURCC('f','t','y','p'):
+	  // skip over the file type chunk
+	  // Here are my guesses on it's format (atmos):
+	  // char[4]  majorBrand   (eg. 'isom')
+	  // int      minorVersion (eg. 0x00000000)
+	  // char[4]  mediaType(?) (eg. 'mp41')
+	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Skipping unsupported Filetype chunk (len: %d)!\n",
+	      len);
+	  break;
 	case MOV_FOURCC('m','o','o','v'):
 //	case MOV_FOURCC('c','m','o','v'):
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: Movie header found!\n");
@@ -268,7 +281,6 @@ int mov_check_file(demuxer_t* demuxer){
 	  id = be2me_32(id);
 	  mp_msg(MSGT_DEMUX,MSGL_V,"MOV: unknown chunk: %.4s %d\n",&id,(int)len);
 	}
-skip_chunk:
 	if(!stream_skip(demuxer->stream,len-skipped)) break;
 	++no;
     }
@@ -657,7 +669,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    int atom_len = char2int(trak->stdata,28);
 		    switch(char2int(trak->stdata,32)) { // atom type
 		      case MOV_FOURCC('e','s','d','s'):
-			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 esds audio atom (%d)!\n", atom_len);
+			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 audio Elementary Stream Descriptor atom (%d)!\n", atom_len);
 			if(atom_len >= 28)
 			  mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio compressed datarate: %dkbit/s\n",
 			      char2int(trak->stdata,62)/1000);
@@ -755,8 +767,8 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			  atom_len);
 		      break;
 		    case MOV_FOURCC('e','s','d','s'):
-		      // MPEG4 esds header
-		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 esds movie atom (%d)!\n", atom_len);
+		      // MPEG4 Elementary Stream Descriptor header
+		      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found MPEG4 movie Elementary Stream Descriptor atom (%d)!\n", atom_len);
 		      // add code here to save esds header of length atom_len-8
 		      // beginning at stdata[86] to some variable to pass it
 		      // on to the decoder ::atmos
@@ -769,13 +781,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		}
 		if(!sh->fps) sh->fps=trak->timescale;
 		sh->frametime=1.0f/sh->fps;
-#if 0
-		sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
-		sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
-#else
+
 		sh->disp_w=trak->stdata[25]|(trak->stdata[24]<<8);
 		sh->disp_h=trak->stdata[27]|(trak->stdata[26]<<8);
-#endif		
+		// if image size is zero, fallback to display size
+		if(!sh->disp_w && !sh->disp_h) {
+		  sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
+		  sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
+		}  
 
 		if(depth&(~15)) printf("*** depht = 0x%X\n",depth);
 
