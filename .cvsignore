@@ -7,3 +7,5 @@ help_mp.h
 mencoder
 mplayer
 version.h
+build-stamp
+configure-stamp
