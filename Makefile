@@ -247,10 +247,25 @@ ifeq ($(GUI),yes)
 endif
 	if test ! -d $(MANDIR)/man1 ; then mkdir -p $(MANDIR)/man1; fi
 	$(INSTALL) -c -m 644 DOCS/en/mplayer.1 $(MANDIR)/man1/mplayer.1
-	@for LCLMANS in de fr hu pl; do $(INSTALL) -D -c -m 644 DOCS/$$LCLMANS/mplayer.1 $(MANDIR)/$$LCLMANS/man1/mplayer.1; done
+	@if [ -n "$(LANGUAGES)" ]; then \
+	    for i in $(LANGUAGES); do \
+		if [ -f DOCS/$$i/mplayer.1 ]; then \
+		    echo "Installing manual for language $$i" ; \
+		    mkdir -p $(MANDIR)/$$i/man1 ; \
+		    $(INSTALL) -c -m 644 DOCS/$$i/mplayer.1 $(MANDIR)/$$i/man1/mplayer.1 ; \
+		fi ; \
+	    done ; \
+	fi
 ifeq ($(MENCODER),yes)
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG_MENCODER) $(BINDIR)/$(PRG_MENCODER)
-	@for LCLMANS in de fr hu pl; do ln -sf mplayer.1 $(MANDIR)/$$LCLMANS/man1/mencoder.1; done
+	ln -sf mplayer.1 $(MANDIR)/man1/mencoder.1
+	@if [ -n "$(LANGUAGES)" ]; then \
+	    for i in $(LANGUAGES); do \
+		if [ -f DOCS/$$i/mplayer.1 ]; then \
+		    ln -sf mplayer.1 $(MANDIR)/$$i/man1/mencoder.1 ; \
+		fi ; \
+	    done ; \
+	fi
 endif
 	@if test ! -d $(DATADIR) ; then mkdir -p $(DATADIR) ; fi
 	@if test ! -d $(DATADIR)/font ; then mkdir -p $(DATADIR)/font ; fi

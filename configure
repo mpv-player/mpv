@@ -293,6 +293,10 @@ EOF
 done # for parm in ...
 
 
+# set up LANGUAGES
+test "$LINGUAS" || LINGUAS=`cd DOCS;/bin/ls -d ??` 2>/dev/null
+LANGUAGES=`echo $LINGUAS | sed 's/en//g' | sed 's/^ *//'`
+
 # 1st pass checking for vital options
 _install=install
 _ranlib=ranlib
@@ -4808,6 +4812,7 @@ cat > config.mak << EOF
 
 LANG = C
 LINGUAS = $LINGUAS
+LANGUAGES = $LANGUAGES
 TARGET_OS = $system_name
 DESTDIR =
 prefix = \$(DESTDIR)$_prefix
