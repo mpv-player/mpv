@@ -66,7 +66,6 @@ typedef struct {
 	char *device;		/* /dev/video1 */
 	int bw;			/* if bw == 1, display in black&white */
 	int norm;	 	/* PAL/NTSC */
-	int buffer_size;	/* MJPEG buffer size */
 
 	/* buffers + pointers + info */
 
@@ -75,7 +74,6 @@ typedef struct {
 	int off_y, off_c, stride;    /* for use by 'draw slice/frame' */
 
 	unsigned char *buf;   /* the jpeg images will be placed here */
-	unsigned int buf_allocated; /* size of the block actually allocated */
 	jpeg_enc_t *j;
 	unsigned char *y_data, *u_data, *v_data; /* used by the jpeg encoder */
 	int y_stride, u_stride, v_stride; /* these point somewhere in image */
@@ -86,26 +84,27 @@ typedef struct {
 	int frame, synco, queue; 	/* buffer management */
 	struct mjpeg_sync zs;		/* state information */
 	struct mjpeg_params p;
+	struct mjpeg_requestbuffers zrq;
 	struct video_capability vc;	/* max resolution and so on */
 	int fields, stretchy; /* must the *image be interlaced
 					   or stretched to fit on the screen? */
 } zr_info_t;
 
 static zr_info_t zr_info[ZR_MAX_DEVICES] = {
-	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, 128, NULL, 0, 0, 0, 0, 0, 
-	0, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, 128, NULL, 0, 0, 0, 0, 0, 
-	0, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, 128, NULL, 0, 0, 0, 0, 0, 
-	0, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, 128, NULL, 0, 0, 0, 0, 0, 
-	0, NULL, 0, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
+	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0, 
+	0, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0, 
+	0, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0, 
+	0, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+	{1, 1, 1, -1, -1, 2, {0, 0, 0, 0, 0}, NULL, 0, VIDEO_MODE_AUTO, NULL, 0, 0, 0, 0, 0, 
+	0, NULL, NULL, NULL, NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}};
 
 
 
 
 #define MJPEG_NBUFFERS	2
-/*#define MJPEG_SIZE	1024*128*/
+#define MJPEG_SIZE	1024*256
 
 
 int zoran_getcap(zr_info_t *zr) {
@@ -184,7 +183,6 @@ int zoran_getcap(zr_info_t *zr) {
 }
 	
 int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
-	struct mjpeg_requestbuffers zrq;
 	/* center the image, and stretch it as far as possible (try to keep
 	 * aspect) and check if it fits */
 	if (zr->image_width > zr->vc.maxwidth) {
@@ -223,21 +221,26 @@ int init_zoran(zr_info_t *zr, int stretchx, int stretchy) {
 		return 1;
 	}
 
-	zrq.count = MJPEG_NBUFFERS;
-	zrq.size = 1024*zr->buffer_size;
+	zr->zrq.count = MJPEG_NBUFFERS;
+	zr->zrq.size = MJPEG_SIZE;
 
-	if (ioctl(zr->vdes, MJPIOC_REQBUFS, &zrq)) {
-		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %d buffers of size %d\n", zrq.count, zrq.size);
+	if (ioctl(zr->vdes, MJPIOC_REQBUFS, &zr->zrq)) {
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %d buffers of size %d\n", zr->zrq.count, zr->zrq.size);
 		return 1;
 	}
 
 	/* the buffer count allocated may be different to the request */
-	zr->buf_allocated = zrq.count * zrq.size;
-	zr->buf = (unsigned char*)mmap(0, zrq.count*zrq.size, 
+	zr->buf = (unsigned char*)mmap(0, zr->zrq.count*zr->zrq.size, 
 			PROT_READ|PROT_WRITE, MAP_SHARED, zr->vdes, 0);
 
 	if (zr->buf == MAP_FAILED) {
-		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %d buffers of size %d\n", zrq.count, zrq.size);
+		mp_msg(MSGT_VO, MSGL_ERR, "zr: error requesting %d buffers of size %d\n", zr->zrq.count, zr->zrq.size);
+		return 1;
+	}
+	
+	mp_msg(MSGT_VO, MSGL_V, "zr: got %d buffers of size %d (wanted %d buffers of size %d)\n", zr->zrq.count, zr->zrq.size, MJPEG_NBUFFERS, MJPEG_SIZE);
+	if (zr->zrq.count < MJPEG_NBUFFERS) {
+		mp_msg(MSGT_VO, MSGL_V, "zr: got not enough buffers\n");
 		return 1;
 	}
 
@@ -261,7 +264,7 @@ void uninit_zoran(zr_info_t *zr) {
 	zr->frame = -1;
 	if (ioctl(zr->vdes, MJPIOC_QBUF_PLAY, &zr->frame) < 0) 
 		mp_msg(MSGT_VO, MSGL_ERR, "zr: error stopping playback of last frame\n");
-	if (munmap(zr->buf,zr->buf_allocated))
+	if (munmap(zr->buf,zr->zrq.count*zr->zrq.size))
 	   mp_msg(MSGT_VO, MSGL_ERR, "zr: error unmapping buffer\n");
 	close(zr->vdes);
 }
@@ -491,6 +494,9 @@ static void flip_page (void) {
 	/* do we have a free buffer? */
 	for (j = 0; j < zr_count; j++) {
 		zr_info_t *zr = &zr_info[j];
+		/* using MJPEG_NBUFFERS here, using the real number of 
+		 * buffers may give sync issues (real number of buffers
+		 * is always sufficient) */
 		if (zr->queue-zr->synco < MJPEG_NBUFFERS) {
 			zr->frame = zr->queue;
 		} else {
@@ -504,9 +510,8 @@ static void flip_page (void) {
 			k+=jpeg_enc_frame(zr->j, zr->y_data + i*zr->y_stride, 
 					zr->u_data + i*zr->u_stride, 
 					zr->v_data + i*zr->v_stride, 
-					zr->buf+
-					1024*zr->frame*zr->buffer_size+k);
-		if (k > 1024*zr->buffer_size) mp_msg(MSGT_VO, MSGL_WARN, "zr: jpeg image too large or buffer size too small, try -zrbsize 256. If your\nmotherboard/card combo can't handle that: lower the jpeg encoding quality\nor the resolution of the movie. Image may become distorted, MPlayer may crash.\nDon't bugreport, it is a known problem. The standard buffer size of 128kB\nshould be sufficient and is a safe-for-almost-all choice.\n");
+					zr->buf + zr->frame*zr->zrq.size+k);
+		if (k > zr->zrq.size) mp_msg(MSGT_VO, MSGL_WARN, "zr: jpeg image too large for maximum buffer size. Lower the jpeg encoding\nquality or the resolution of the movie.\n");
 	}
 	/* Warning: Only the first jpeg image contains huffman- and 
 	 * quantisation tables, so don't expect files other than
@@ -699,11 +704,6 @@ vo_zr_parseoption(m_option_t* conf, char *opt, char *param){
 	if (i != 1 && i != 2 && i != 4) return ERR_OUT_OF_RANGE;
 	zr->hdec = i;
 	return 1;
-    }else if (!strcasecmp(opt, "zrbsize")) {
-        i = atoi(param);
-	if (i < 32) return ERR_OUT_OF_RANGE;
-	zr->buffer_size = i;
-	return 1;
     }else if (!strcasecmp(opt, "zrvdec")) {
         i = atoi(param);
 	if (i != 1 && i != 2 && i != 4) return ERR_OUT_OF_RANGE;
@@ -756,11 +756,6 @@ vo_zr_parseoption(m_option_t* conf, char *opt, char *param){
 		    "  -zrquality  jpeg compression quality [BEST] 1 - 20 [VERY BAD]\n"
 		    "  -zrdev      playback device (example -zrdev /dev/video1)\n"
 		    "  -zrnorm     specify norm PAL/NTSC (default: leave at current setting)\n"
-		    "  -zrbsize    set the MPJEG buffer size to a number of kilobytes (def. 128)\n"
-		    "              use this if MPlayer complains about the MJPEG buffer size\n"
-		    "              being too small, 256kB is recommended. If your card/mobo\n"
-		    "              doesn't allow buffers > 128kB lower the jpeg encoding\n"
-		    "              quality or the resolution of the movie\n"
 		    "\n"
 		    "Cinerama support: additional occurances of -zrcrop activate cinerama mode,\n"
 		    "suppose you have a 704x272 movie, two DC10+ cards and two beamers (or tv's),\n"              
@@ -796,8 +791,6 @@ void vo_zr_revertoption(m_option_t* opt,char* param) {
     zr->fd=0;
   else if (!strcasecmp(param, "zrcrop"))
     zr->g.set = zr->g.xoff = zr->g.yoff = 0;
-  else if (!strcasecmp(param, "zrbsize"))
-    zr->buffer_size = 128;
   else if (!strcasecmp(param, "zrhdec"))
     zr->hdec = 1;
   else if (!strcasecmp(param, "zrvdec"))
