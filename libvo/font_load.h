@@ -2,7 +2,8 @@
 #define __MPLAYER_FONT_LOAD_H
 
 #ifdef HAVE_FREETYPE
-#include <freetype/freetype.h>
+#include <ft2build.h>
+#include FT_FREETYPE_H
 #endif
 
 typedef struct {
