@@ -10,6 +10,7 @@
  * 2003-04-25   Spring cleanup -- Alex
  * 2004-08-04   Added multiple subdirectory support -- Ivo (ivop@euronet.nl)
  * 2004-09-01   Cosmetics update -- Ivo
+ * 2004-09-05   Added suboptions parser -- Ivo
  *
  */
 
@@ -147,7 +148,12 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
 
     if ( !buffer ) return 1; 
     if ( (outfile = fopen(name, "wb") ) == NULL ) {
-        return 1;
+        mp_msg(MSGT_VO, MSGL_ERR, "\n%s: %s\n", info.short_name,
+                MSGTR_VO_JPEG_CantCreateFile);
+        mp_msg(MSGT_VO, MSGL_ERR, "%s: %s: %s\n",
+                info.short_name, MSGTR_VO_JPEG_GenericError,
+                strerror(errno) );
+        exit_player(MSGTR_Exit_error);
     }
  
     cinfo.err = jpeg_std_error(&jerr);
@@ -189,7 +195,6 @@ static uint32_t draw_frame(uint8_t *src[])
 {
     static uint32_t framecounter = 0, subdircounter = 0;
     char buf[BUFLENGTH];
-    uint8_t *dst = src[0];
     static char subdirname[BUFLENGTH] = "";
     struct stat stat_p;
 

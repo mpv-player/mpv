@@ -661,6 +661,7 @@ Vajna, Miklós (VMiklos) <mamajom@axelero.hu>
 
 van Poorten, Ivo (ivop) <ivop@euronet.nl>
     * multiple directory support for vo_jpeg
+    * vo_jpeg suboptions parser
 
 Verdejo Pinochet, Reynaldo H. (reynaldo) <reynaldo@opendot.cl>
     * improved EDL support
