@@ -417,6 +417,7 @@ int dvdsub_id=-1;
 float default_max_pts_correction=-1;//0.01f;
 int delay_corrected=1;
 float force_fps=0;
+int force_srate=0;
 float audio_delay=0;
 float initial_pts_delay=0;
 int vcd_track=0;
@@ -1407,7 +1408,8 @@ int drop_frame_cnt=0;
 
 if(has_audio){
 
-  if(!audio_out->init(sh_audio->samplerate,sh_audio->channels,sh_audio->sample_format,0)){
+  if(!audio_out->init(force_srate?force_srate:sh_audio->samplerate,
+      sh_audio->channels,sh_audio->sample_format,0)){
     printf("couldn't open/init audio device -> NOSOUND\n");
     has_audio=0;
   }
