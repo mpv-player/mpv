@@ -3839,18 +3839,29 @@ if test "$_win32" = auto ; then
 fi
 if test "$_win32" = yes ; then
   _def_win32='#define USE_WIN32DLL 1'
-  _ld_win32='loader/libloader.a'
-  _dep_win32='loader/libloader.a'
-  _codecmodules="win32 $_codecmodules"
   echores "yes"
-  if openbsd ; then
-    x86 && _ld_win32="$_ld_win32 -li386"
-  fi
 else
   _def_win32='#undef USE_WIN32DLL'
   _nocodecmodules="win32 $_nocodecmodules"
   _dshow=no
   echores "no"
+fi
+
+if test "$_win32" != no ; then
+  _def_win32_loader='#undef WIN32_LOADER'
+  echocheck "Win32 loader support"
+  if ! cygwin ; then
+    _ld_win32='loader/libloader.a'
+    _dep_win32='loader/libloader.a'
+    _codecmodules="win32 $_codecmodules"
+    if openbsd ; then
+      x86 && _ld_win32="$_ld_win32 -li386"
+    fi
+    _def_win32_loader='#define WIN32_LOADER 1'
+    echores "yes"
+  else
+    echores "no (using native windows)"
+  fi
 fi
 
 echocheck "DirectShow"
@@ -3944,7 +3955,8 @@ fi
 echocheck "RealPlayer DLL"
 if test "$_real" = auto ; then
   _real=no
-  if test "$_dl" = yes ; then
+  if test "$_dl" = yes || test "$_win32" = yes ; then
+#  if test "$_dl" = yes  ; then
     if linux || freebsd || netbsd || cygwin ; then
       _real=yes
     else
@@ -5132,6 +5144,9 @@ $_def_win32
 
 /* DirectShow support */
 $_def_dshow
+
+/* Build our Win32-loader */
+$_def_win32_loader
 
 /* ffmpeg's libavcodec support (requires libavcodec source) */
 $_def_libavcodec
