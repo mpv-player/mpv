@@ -43,6 +43,12 @@ typedef struct {
 /* ------------------------------------------------------------------------ */
 static unsigned char *in_buffer, uiclip[1024], *uiclp = NULL;
 
+#define SCALEBITS 16
+#define ONE_HALF  ((long) 1 << (SCALEBITS-1))
+#define FIX(x)    ((long) ((x) * (1L<<SCALEBITS) + 0.5))
+static long CU_Y_tab[256], CV_Y_tab[256], CU_Cb_tab[256], CV_Cb_tab[256],
+	CU_Cr_tab[256], CV_Cr_tab[256];
+
 #define get_byte() *(in_buffer++)
 #define skip_byte() in_buffer++
 #define get_word() ((unsigned short)(in_buffer += 2, \
@@ -54,6 +60,8 @@ static unsigned char *in_buffer, uiclip[1024], *uiclp = NULL;
 /* ---------------------------------------------------------------------- */
 static inline void read_codebook_yuy2(cvid_codebook *c, int mode)
 {
+unsigned char y0, y1, y2, y3, u, v;
+int y_uv;
 
 	if(mode)		/* black and white */
 		{
@@ -65,12 +73,25 @@ static inline void read_codebook_yuy2(cvid_codebook *c, int mode)
 		}
 	else			/* colour */
 		{
-		c->y0 = get_byte();  /* luma */
-		c->y1 = get_byte();
-		c->y2 = get_byte();
-		c->y3 = get_byte();
-		c->u = 128+get_byte(); /* chroma */
-		c->v = 128+get_byte();
+		y0 = get_byte();  /* luma */
+		y1 = get_byte();
+		y2 = get_byte();
+		y3 = get_byte();
+		u = 128+get_byte(); /* chroma */
+		v = 128+get_byte();
+
+		/*             YUV * inv(CinYUV)
+		 *  | Y  |   | 1 -0.0655  0.0110 | | CY |
+		 *  | Cb | = | 0  1.1656 -0.0062 | | CU |
+		 *  | Cr |   | 0  0.0467  1.4187 | | CV |
+		 */
+		y_uv = (int)((CU_Y_tab[u] + CV_Y_tab[v]) >> SCALEBITS);
+		c->y0 = uiclp[y0 + y_uv];
+		c->y1 = uiclp[y1 + y_uv];
+		c->y2 = uiclp[y2 + y_uv];
+		c->y3 = uiclp[y3 + y_uv];
+		c->u = uiclp[(int)((CU_Cb_tab[u] + CV_Cb_tab[v]) >> SCALEBITS)];
+		c->v = uiclp[(int)((CU_Cr_tab[u] + CV_Cr_tab[v]) >> SCALEBITS)];
 		}
 }
 
@@ -324,7 +345,7 @@ int row_inc = stride-4*3;
 void *decode_cinepak_init(void)
 {
 cinepak_info *cvinfo;
-int i;
+int i, x;
 
 	if((cvinfo = calloc(sizeof(cinepak_info), 1)) == NULL) return NULL;
 	cvinfo->strip_num = 0;
@@ -334,6 +355,16 @@ int i;
 		uiclp = uiclip+512;
 		for(i = -512; i < 512; i++)
 			uiclp[i] = (i < 0 ? 0 : (i > 255 ? 255 : i));
+		}
+
+	for(i = 0, x = -128; i < 256; i++, x++)
+		{
+		CU_Y_tab[i] = (-FIX(0.0655)) * x;
+		CV_Y_tab[i] = (FIX(0.0110)) * x + ONE_HALF;
+		CU_Cb_tab[i] = (FIX(1.1656)) * x;
+		CV_Cb_tab[i] = (-FIX(0.0062)) * x + ONE_HALF + FIX(128);
+		CU_Cr_tab[i] = (FIX(0.0467)) * x;
+		CV_Cr_tab[i] = (FIX(1.4187)) * x + ONE_HALF + FIX(128);
 		}
 
 	return (void *)cvinfo;
