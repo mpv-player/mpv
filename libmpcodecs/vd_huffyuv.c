@@ -81,6 +81,8 @@ typedef struct {
 	int method;
 	// Bitmap color type
 	int bitmaptype;
+	// Interlaced flag
+	int interlaced;
 	// Huffman tables
 	unsigned char decode1_shift[256];
 	unsigned char decode2_shift[256];
@@ -200,17 +202,6 @@ static int init(sh_video_t *sh)
 
 	sh->context = (void *)hc;
 
-	mp_msg(MSGT_DECVIDEO, MSGL_V, "[HuffYUV] Allocating above line buffer\n");
-	if ((hc->abovebuf1 = malloc(sizeof(char) * 4 * bih->biWidth)) == NULL) {
-		mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Can't allocate memory for HuffYUV above buffer 1\n");
-		return 0;
-	}
-
-	if ((hc->abovebuf2 = malloc(sizeof(char) * 4 * bih->biWidth)) == NULL) {
-		mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Can't allocate memory for HuffYUV above buffer 2\n");
-		return 0;
-	}
-
 	if (bih->biCompression != FOURCC_HFYU) {
 		mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[HuffYUV] BITMAPHEADER fourcc != HFYU\n");
 		return 0;
@@ -294,6 +285,33 @@ static int init(sh_video_t *sh)
 			break;
 		default:
 			mp_msg(MSGT_DECVIDEO, MSGL_WARN, "[HuffYUV] Method unknown\n");
+	}
+
+	/* Take care of interlaced images */
+	hc->interlaced = 0;
+	if (bih->biHeight > 288) {
+		// Image is interlaced (flag != 0), but we may not care
+		hc->interlaced = 1;
+		mp_msg(MSGT_DECVIDEO, MSGL_V, "[HuffYUV] Image is interlaced\n");
+	}
+
+	/* Allocate buffers */
+	hc->abovebuf1 = NULL;
+	hc->abovebuf2 = NULL;
+	if ((hc->method == METHOD_MEDIAN) || (hc->method == METHOD_GRAD) ||
+			(hc->method == METHOD_GRAD_DECORR)) {
+		// If inetrlaced flag will be 2
+		(hc->interlaced)++;
+		mp_msg(MSGT_DECVIDEO, MSGL_V, "[HuffYUV] Allocating above line buffer\n");
+		if ((hc->abovebuf1 = malloc(sizeof(char) * 4 * bih->biWidth * hc->interlaced)) == NULL) {
+			mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Can't allocate memory for HuffYUV above buffer 1\n");
+			return 0;
+		}
+
+		if ((hc->abovebuf2 = malloc(sizeof(char) * 4 * bih->biWidth * hc->interlaced)) == NULL) {
+			mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Can't allocate memory for HuffYUV above buffer 2\n");
+			return 0;
+		}
 	}
 
 	/* Get compressed Huffman tables */
@@ -477,6 +495,40 @@ static void uninit(sh_video_t *sh)
 
 
 
+#define YUV_PREDMED_1ST() \
+{ \
+	MEDIAN (left_y, abovebuf[0], curbuf[width2*4-2]); \
+	curbuf[0] = outptr[pixel_ptr++] = left_y = med + y1; \
+	MEDIAN (left_u, abovebuf[1], curbuf[width2*4+1-4]); \
+	curbuf[1] = outptr[pixel_ptr++] = left_u = med + u; \
+	MEDIAN (left_y, abovebuf[2], abovebuf[0]); \
+	curbuf[2] = outptr[pixel_ptr++] = left_y = med + y2; \
+	MEDIAN (left_v, abovebuf[3], curbuf[width2*4+3-4]); \
+	curbuf[3] = outptr[pixel_ptr++] = left_v = med + v; \
+}
+	
+	
+	
+#define YUV_PREDGRAD() \
+{ \
+	curbuf[col] = outptr[pixel_ptr++] = left_y += y1 + abovebuf[col]-abovebuf[col-2]; \
+	curbuf[col+1] = outptr[pixel_ptr++] = left_u += u + abovebuf[col+1]-abovebuf[col+1-4]; \
+	curbuf[col+2] = outptr[pixel_ptr++] = left_y += y2 + abovebuf[col+2]-abovebuf[col+2-2]; \
+	curbuf[col+3] = outptr[pixel_ptr++] = left_v += v + abovebuf[col+3]-abovebuf[col+3-4]; \
+}
+
+
+
+#define YUV_PREDGRAD_1ST() \
+{ \
+	curbuf[0] = outptr[pixel_ptr++] = left_y += y1 + abovebuf[0] - curbuf[width2*4-2]; \
+	curbuf[1] = outptr[pixel_ptr++] = left_u += u + abovebuf[1] - curbuf[width2*4+1-4]; \
+	curbuf[2] = outptr[pixel_ptr++] = left_y += y2 + abovebuf[2] - abovebuf[0]; \
+	curbuf[3] = outptr[pixel_ptr++] = left_v += v + abovebuf[3] - curbuf[width2*4+3-4]; \
+}
+
+
+
 #define RGB_PREDLEFT_DECORR() \
 { \
 	outptr[pixel_ptr++] = left_b += b + g; \
@@ -487,6 +539,15 @@ static void uninit(sh_video_t *sh)
 
 
 
+#define RGB_PREDLEFT_DECORR_BUF() \
+{ \
+	abovebuf[col] = outptr[pixel_ptr++] = left_b += b + g; \
+	abovebuf[col+1] = outptr[pixel_ptr++] = left_g += g; \
+	abovebuf[col+2] = outptr[pixel_ptr++] = left_r += r + g; \
+	pixel_ptr += bgr32; \
+}
+
+
 #define RGB_PREDLEFT() \
 { \
 	outptr[pixel_ptr++] = left_b += b; \
@@ -495,6 +556,34 @@ static void uninit(sh_video_t *sh)
 	pixel_ptr += bgr32; \
 }
 
+
+
+#define RGB_PREDGRAD_DECORR() \
+{ \
+	curbuf[col] = outptr[pixel_ptr++] = left_b += b + g + abovebuf[col]-abovebuf[col-3]; \
+	curbuf[col+1] = outptr[pixel_ptr++] = left_g += g + abovebuf[col+1]-abovebuf[col+1-3]; \
+	curbuf[col+2] = outptr[pixel_ptr++] = left_r += r + g + abovebuf[col+2]-abovebuf[col+2-3]; \
+	pixel_ptr += bgr32; \
+}
+
+
+
+#define RGB_PREDGRAD_DECORR_1ST() \
+{ \
+	curbuf[0] = outptr[pixel_ptr++] = left_b += b + g + abovebuf[0] - curbuf[width2*3-3]; \
+	curbuf[1] = outptr[pixel_ptr++] = left_g += g + abovebuf[1] - curbuf[width2*3+1-3]; \
+	curbuf[2] = outptr[pixel_ptr++] = left_r += r + g + abovebuf[2] - curbuf[width2*3+2-3]; \
+	pixel_ptr += bgr32; \
+}
+
+
+
+#define SWAPBUF() \
+{ \
+	swap = abovebuf; \
+	abovebuf = curbuf; \
+	curbuf = swap; \
+}
 
 
 
@@ -520,18 +609,30 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 	unsigned char *outptr;
 	int width = sh->disp_w; // Real image width
 	int height = sh->disp_h; // Real image height
+	int width2, height2;
 	int bgr32;
+	int interlaced, oddlines;
 
-	// skipped frame
+	// Skipped frame
 	if(len <= 0)
 		return NULL;
 
-	/* Do not accept stride for rgb, it gives me wrong output :-( */
-	if (hc->bitmaptype == BMPTYPE_YUV)
-		mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE, sh->disp_w, sh->disp_h);
-	else
-		mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, 0, sh->disp_w, sh->disp_h);
+	/* If image is interlaced and we care about it fix size */
+	if (hc->interlaced == 2) {
+		width2 = width*2; // Double image width
+		height2 = height/2; // Half image height
+		oddlines = height%2; // Set if line number is odd
+		interlaced = 1; // Used also for row counter computation, must be exactly 1
+	} else {
+		width2 = width; // Real image width
+		height2 = height; // Real image height
+		interlaced = 0;  // Flag is 0: no need to deinterlaced image
+		oddlines = 0; // Don't care about odd line number if not interlaced
+	}
 
+
+	/* Get output image buffer */
+	mpi=mpcodecs_get_image(sh, MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE, sh->disp_w, sh->disp_h);
 	if (!mpi) {
 		mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Can't allocate mpi image for huffyuv codec.\n");
 		return NULL;
@@ -541,6 +642,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 
 	if (hc->bitmaptype == BMPTYPE_YUV) {
 		width >>= 1; // Each cycle stores two pixels
+		width2 >>= 1;
 		if (hc->method == METHOD_GRAD) {
 			/*
 			 * YUV predict gradient
@@ -550,26 +652,41 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 			// Decompress 1st row (always stored with left prediction)
 			for (col = 1*4; col < width*4; col += 4) {
 				HUFF_DECOMPRESS_YUYV();
-				YUV_PREDLEFT_BUF(abovebuf, col);
+				YUV_PREDLEFT_BUF (abovebuf, col);
 			}
-			curbuf[width*4-1] = curbuf[width*4-2] = curbuf[width*4-3] = 0;
-			for (row = 1; row < height; row++) {
-				pixel_ptr = row * mpi->stride[0];
+			if (interlaced) {
+				pixel_ptr = mpi->stride[0];
+				for (col = width*4; col < width*8; col += 4) {
+					HUFF_DECOMPRESS_YUYV();
+					YUV_PREDLEFT_BUF (abovebuf, col);
+				}
+			}
+			curbuf[width2*4-1] = curbuf[width2*4-2] = curbuf[width2*4-3] = 0;
+			for (row = 1; row < height2; row++) {
+				pixel_ptr = (interlaced + 1) * row * mpi->stride[0];
 				HUFF_DECOMPRESS_YUYV();
-				curbuf[0] = outptr[pixel_ptr++] = left_y += y1 + abovebuf[0] - curbuf[width*4-2];
-				curbuf[1] = outptr[pixel_ptr++] = left_u += u + abovebuf[1] - curbuf[width*4+1-4];
-				curbuf[2] = outptr[pixel_ptr++] = left_y += y2 + abovebuf[2] - abovebuf[0];
-				curbuf[3] = outptr[pixel_ptr++] = left_v += v + abovebuf[3] - curbuf[width*4+3-4];
+				YUV_PREDGRAD_1ST();
 				for (col = 1*4; col < width*4; col += 4) {
 					HUFF_DECOMPRESS_YUYV();
-					curbuf[col] = outptr[pixel_ptr++] = left_y += y1 + abovebuf[col]-abovebuf[col-2];
-					curbuf[col+1] = outptr[pixel_ptr++] = left_u += u + abovebuf[col+1]-abovebuf[col+1-4];
-					curbuf[col+2] = outptr[pixel_ptr++] = left_y += y2 + abovebuf[col+2]-abovebuf[col+2-2];
-					curbuf[col+3] = outptr[pixel_ptr++] = left_v += v + abovebuf[col+3]-abovebuf[col+3-4];
+					YUV_PREDGRAD();
 				}
-				swap = abovebuf;
-				abovebuf = curbuf;
-				curbuf = swap;
+				if (interlaced) {
+					pixel_ptr = (2 * row + 1) * mpi->stride[0];
+					for (col = width*4; col < width*8; col += 4) {
+						HUFF_DECOMPRESS_YUYV();
+						YUV_PREDGRAD();
+					}
+				}
+				SWAPBUF();
+			}
+			if (oddlines) {
+				pixel_ptr = 2 * height * mpi->stride[0];
+				HUFF_DECOMPRESS_YUYV();
+				YUV_PREDGRAD_1ST();
+				for (col = 1*4; col < width*4; col += 4) {
+					HUFF_DECOMPRESS_YUYV();
+					YUV_PREDGRAD();
+				}
 			}
 		} else if (hc->method == METHOD_MEDIAN) {
 			/*
@@ -582,8 +699,15 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 				HUFF_DECOMPRESS_YUYV();
 				YUV_PREDLEFT_BUF (abovebuf, col);
 			}
+			if (interlaced) {
+				pixel_ptr = mpi->stride[0];
+				for (col = width*4; col < width*8; col += 4) {
+					HUFF_DECOMPRESS_YUYV();
+					YUV_PREDLEFT_BUF (abovebuf, col);
+				}
+			}
 			// Decompress 1st two pixels of 2nd row
-			pixel_ptr = mpi->stride[0];
+			pixel_ptr = mpi->stride[0] * (interlaced + 1);
 			HUFF_DECOMPRESS_YUYV();
 			YUV_PREDLEFT_BUF (curbuf, 0);
 			HUFF_DECOMPRESS_YUYV();
@@ -593,27 +717,39 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 				HUFF_DECOMPRESS_YUYV();
 				YUV_PREDMED();
 			}
-			swap = abovebuf;
-			abovebuf = curbuf;
-			curbuf = swap;
-			for (row = 2; row < height; row++) {
-				pixel_ptr = row * mpi->stride[0];
+			if (interlaced) {
+				pixel_ptr = mpi->stride[0] * 3;
+				for (col = width*4; col < width*8; col += 4) {
+					HUFF_DECOMPRESS_YUYV();
+					YUV_PREDMED();
+				}
+			}
+			SWAPBUF();
+			for (row = 2; row < height2; row++) {
+				pixel_ptr = (interlaced + 1) * row * mpi->stride[0];
 				HUFF_DECOMPRESS_YUYV();
-				MEDIAN (left_y, abovebuf[0], curbuf[width*4-2]);
-				curbuf[0] = outptr[pixel_ptr++] = left_y = med + y1;
-				MEDIAN (left_u, abovebuf[1], curbuf[width*4+1-4]);
-				curbuf[1] = outptr[pixel_ptr++] = left_u = med + u;
-				MEDIAN (left_y, abovebuf[2], abovebuf[0]);
-				curbuf[2] = outptr[pixel_ptr++] = left_y = med + y2;
-				MEDIAN (left_v, abovebuf[3], curbuf[width*4+3-4]);
-				curbuf[3] = outptr[pixel_ptr++] = left_v = med + v;
+				YUV_PREDMED_1ST();
 				for (col = 1*4; col < width*4; col += 4) {
 					HUFF_DECOMPRESS_YUYV();
 					YUV_PREDMED();
 				}
-				swap = abovebuf;
-				abovebuf = curbuf;
-				curbuf = swap;
+				if (interlaced) {
+					pixel_ptr = (2 * row + 1) * mpi->stride[0];
+					for (col = width*4; col < width*8; col += 4) {
+						HUFF_DECOMPRESS_YUYV();
+						YUV_PREDMED();
+					}
+				}
+				SWAPBUF();
+			}
+			if (oddlines) {
+				pixel_ptr = 2 * height2 * mpi->stride[0];
+				HUFF_DECOMPRESS_YUYV();
+				YUV_PREDMED_1ST();
+				for (col = 1*4; col < width*4; col += 4) {
+					HUFF_DECOMPRESS_YUYV();
+					YUV_PREDMED();
+				}
 			}
 		} else {
 			/*
@@ -663,29 +799,41 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags)
 			// Decompress 1st row (always stored with left prediction)
 			for (col = 1*3; col < width*3; col += 3) {
 				HUFF_DECOMPRESS_RGB_DECORR();
-				abovebuf[col] = outptr[pixel_ptr++] = left_b += b + g;
-				abovebuf[col+1] = outptr[pixel_ptr++] = left_g += g;
-				abovebuf[col+2] = outptr[pixel_ptr++] = left_r += r + g;
-				pixel_ptr += bgr32;
+				RGB_PREDLEFT_DECORR_BUF();
 			}
-			curbuf[width*3-1] = curbuf[width*3-2] = curbuf[width*3-3] = 0;
-			for (row = 1; row < height; row++) {
-				pixel_ptr = (height - row - 1) * mpi->stride[0];
+			if (interlaced) {
+				pixel_ptr = (height-2)*mpi->stride[0];
+				for (col = width*3; col < width*6; col += 3) {
+					HUFF_DECOMPRESS_RGB_DECORR();
+					RGB_PREDLEFT_DECORR_BUF();
+				}
+			}
+			curbuf[width2*3-1] = curbuf[width2*3-2] = curbuf[width2*3-3] = 0;
+			for (row = 1; row < height2; row++) {
+				pixel_ptr = (height - (interlaced + 1) * row - 1) * mpi->stride[0];
 				HUFF_DECOMPRESS_RGB_DECORR();
-				curbuf[0] = outptr[pixel_ptr++] = left_b += b + g + abovebuf[0] - curbuf[width*3-3];
-				curbuf[1] = outptr[pixel_ptr++] = left_g += g + abovebuf[1] - curbuf[width*3+1-3];
-				curbuf[2] = outptr[pixel_ptr++] = left_r += r + g + abovebuf[2] - curbuf[width*3+2-3];
-				pixel_ptr += bgr32;
+				RGB_PREDGRAD_DECORR_1ST();
 				for (col = 1*3; col < width*3; col += 3) {
 					HUFF_DECOMPRESS_RGB_DECORR();
-					curbuf[col] = outptr[pixel_ptr++] = left_b += b + g + abovebuf[col]-abovebuf[col-3];
-					curbuf[col+1] = outptr[pixel_ptr++] = left_g += g + abovebuf[col+1]-abovebuf[col+1-3];
-					curbuf[col+2] = outptr[pixel_ptr++] = left_r += r + g + abovebuf[col+2]-abovebuf[col+2-3];
-					pixel_ptr += bgr32;
+					RGB_PREDGRAD_DECORR();
 				}
-				swap = abovebuf;
-				abovebuf = curbuf;
-				curbuf = swap;
+				if (interlaced) {
+					pixel_ptr = (height - 2 * row - 2) * mpi->stride[0];
+					for (col = width*3; col < width*6; col += 3) {
+						HUFF_DECOMPRESS_RGB_DECORR();
+						RGB_PREDGRAD_DECORR();
+					}
+				}
+				SWAPBUF();
+			}
+			if (oddlines) {
+				pixel_ptr = mpi->stride[0];
+				HUFF_DECOMPRESS_RGB_DECORR();
+				RGB_PREDGRAD_DECORR_1ST();
+				for (col = 1*3; col < width*3; col += 3) {
+					HUFF_DECOMPRESS_RGB_DECORR();
+					RGB_PREDGRAD_DECORR();
+				}
 			}
 		} else {
 			/*
