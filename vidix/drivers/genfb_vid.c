@@ -27,10 +27,11 @@ static int probed = 0;
 static vidix_capability_t genfb_cap =
 {
     "General Framebuffer",
+    "alex",
     TYPE_OUTPUT,
     { 0, 0, 0, 0 },
-    1024,
-    768,
+    2048,
+    2048,
     4,
     4,
     -1,
@@ -111,6 +112,13 @@ int vixConfigPlayback(vidix_playback_t *info)
 
     info->num_frames = 2;
     info->frame_size = info->src.w*info->src.h+(info->src.w*info->src.h)/2;
+    info->dest.pitch.y = 32;
+    info->dest.pitch.u = info->dest.pitch.v = 16;
+    info->offsets[0] = 0;
+    info->offsets[1] = info->frame_size;
+    info->offset.y = 0;
+    info->offset.v = ((info->src.w+31) & ~31) * info->src.h;
+    info->offset.u = info->offset.v+((info->src.w+31) & ~31) * info->src.h/4;    
     info->dga_addr = malloc(info->num_frames*info->frame_size);   
     printf("[genfb] frame_size: %d, dga_addr: %x\n",
 	info->frame_size, info->dga_addr);
@@ -132,5 +140,6 @@ int vixPlaybackOff(void)
 
 int vixPlaybackFrameSelect(unsigned int frame)
 {
+    printf("[genfb] frameselect: %d\n", frame);
     return(0);
 }
