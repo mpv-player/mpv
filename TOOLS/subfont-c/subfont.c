@@ -74,12 +74,9 @@ iconv_t cd;					// iconv conversion descriptor
 
 
 
-#define eprintf(...)		fprintf(stderr, __VA_ARGS__)
-#define ERROR_(msg, ...)	(eprintf("%s: error: " msg "\n", command, __VA_ARGS__), exit(1))
-#define WARNING_(msg, ...)	eprintf("%s: warning: " msg "\n", command, __VA_ARGS__)
-#define ERROR(...)		ERROR_(__VA_ARGS__, NULL)
-#define WARNING(...)		WARNING_(__VA_ARGS__, NULL)
-
+#define eprintf(...)		fprintf(stderr, ##__VA_ARGS__)
+#define ERROR(msg, ...)		eprintf("%s: error: " msg "\n", command, ##__VA_ARGS__),exit(1)
+#define WARNING(msg, ...)	eprintf("%s: warning: " msg "\n", command, ##__VA_ARGS__)
 
 #define f266ToInt(x)		(((x)+32)>>6)	// round fractional fixed point number to integer
 						// coordinates are in 26.6 pixels (i.e. 1/64th of pixels)
@@ -304,7 +301,7 @@ void render() {
 	    glyph_index = FT_Get_Char_Index(face, uni_charmap ? character:code);
 	    if (glyph_index==0) {
 		WARNING("Glyph for char 0x%02lx|U+%04lX|%c not found.", code, character,
-			 code<' '||code>255 ? '.':code);
+			 code<' '||code>255 ? '.':(char)code);
 		continue;
 	    }
 	}
@@ -368,7 +365,7 @@ void render() {
 	fprintf(f, "0x%04lx %i %i;\tU+%04lX|%c\n", unicode_desc ? character:code,
 		pen_x,						// bitmap start
 		pen_xa-1,					// bitmap end
-		character, code<' '||code>255 ? '.':code);
+		character, code<' '||code>255 ? '.':(char)code);
 #endif
 	pen_x = ALIGN(pen_xa);
     }
