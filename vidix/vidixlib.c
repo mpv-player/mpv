@@ -232,7 +232,7 @@ int  vdlGetCapability(VDL_HANDLE handle, vidix_capability_t *cap)
 #define MPLAYER_IMGFMT_BGR (('B'<<24)|('G'<<16)|('R'<<8))
 #define MPLAYER_IMGFMT_RGB_MASK 0xFFFFFF00
 
-static uint32_t normilize_fourcc(uint32_t fourcc)
+static uint32_t normalize_fourcc(uint32_t fourcc)
 {
   if((fourcc & MPLAYER_IMGFMT_RGB_MASK) == (MPLAYER_IMGFMT_RGB|0) ||
      (fourcc & MPLAYER_IMGFMT_RGB_MASK) == (MPLAYER_IMGFMT_BGR|0))
@@ -242,13 +242,13 @@ static uint32_t normilize_fourcc(uint32_t fourcc)
 
 int  vdlQueryFourcc(VDL_HANDLE handle,vidix_fourcc_t *f)
 {
-  f->fourcc = normilize_fourcc(f->fourcc);
+  f->fourcc = normalize_fourcc(f->fourcc);
   return t_vdl(handle)->query_fourcc(f);
 }
 
 int  vdlConfigPlayback(VDL_HANDLE handle,vidix_playback_t *p)
 {
-  p->fourcc = normilize_fourcc(p->fourcc);
+  p->fourcc = normalize_fourcc(p->fourcc);
   return t_vdl(handle)->config_playback(p);
 }
 
