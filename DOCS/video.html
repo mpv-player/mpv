@@ -1165,10 +1165,10 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
 
 <H4>Usage:</H4>
 <DL>
-  <DT><CODE>-vo dxr3:noprebuf:&lt;device&gt;</CODE></DT>
-  <DD><CODE>noprebuf</CODE> turns off prebuffering. Prebuffering is a feature
+  <DT><CODE>-vo dxr3:prebuf:sync:&lt;device&gt;</CODE></DT>
+  <DD><CODE>prebuf</CODE> turns on prebuffering. Prebuffering is a feature
     of the em8300 chip that enables it to hold more than one frame of video at
-    a time. This means that when you are running with prebuffering (default)
+    a time. This means that when you are running with prebuffering
     MPlayer will try to keep the video buffer filled with data at all
     times. If you are on a slow machine MPlayer will probably use close
     to, or precisely 100% of CPU. This is especially common if you play pure MPEG
@@ -1177,18 +1177,18 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     With prebuffering video playback is <B>much</B> less sensitive to other
     programs hogging the CPU, it will not drop frames unless applications hog
     the CPU for a long time.<BR>
-    Prebuffering does not work on all machines (especially Athlons where it is
-    turned off automatically). If you experience problems with video/audio sync
-    use <CODE>noprebuf</CODE>. When running without prebuffering the em8300 is
-    much more sensitive to CPU load, so it is highly suggested that you turn on
-    <B>MPlayer's</B> <CODE>-framedrop</CODE> option to avoid further loss of
-    sync.<BR>
+    When running without prebuffering the em8300 is much more sensitive to CPU
+    load, so it is highly suggested that you turn on <B>MPlayer's</B>
+    <CODE>-framedrop</CODE> option to avoid further loss of sync.<BR>
+    <CODE>sync</CODE> will turn on the new sync-engine. This is currently an
+    experimental feature. With the sync feature turned on the em8300's internal
+    clock will be monitored at all times, if it starts to deviate from MPlayer's
+    clock it will be reset causing the em8300 to drop any frames that are lagging
+    behind.<BR>
     <CODE>&lt;device&gt;</CODE> = device number to use if you have more than one
     em8300 card.
     <BR>
-    Any of these options may be left out, but they must be specified in this
-    exact order, i.e. <CODE>dxr3:noprebuf</CODE> works, <CODE>dxr3:1</CODE>
-    works, but <CODE>dxr3:1:noprebuf</CODE> will not.</DD>
+    Any of these options may be left out.</DD>
 
   <DT><CODE>-ao oss:/dev/em8300_ma-X</CODE></DT>
   <DD>For audio output, where <CODE>X</CODE> is the device number
@@ -1206,7 +1206,11 @@ for 16:9 TV:  -vop lavc,expand=-1:576:-1:-1:1,scale=-1:0,dvbscale=1024
     to specify an MPEG1 video filter such as libavcodec (lavc) or libfame
     (fame). At the moment lavc is both faster and gives better image quality, it
     is suggested that you use that unless you have problems with it. See the man
-    page for further info about <CODE>-vop lavc/fame</CODE>.</DD>
+    page for further info about <CODE>-vop lavc/fame</CODE>.<BR>
+    Using lavc is highly recommended. Currently there is no way of setting the
+    fps of the em8300 which means that it is fixed to 29.97fps. Because of this
+    it is highly recommended that you use <CODE>-vop lavc=&lt;quality&gt;:29.97</CODE>,
+    especially if you are using prebuffering.</DD>
   
   <DT><CODE>-ac hwac3</CODE></DT>
   <DD>The em8300 supports playing back AC3 audio (surround sound) through the
