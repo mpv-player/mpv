@@ -39,6 +39,7 @@ LIBVO_EXTERN(xv)
 #include "aspect.h"
 
 #include "../postproc/rgb2rgb.h"
+#include "../mp_image.h"
 
 static vo_info_t vo_info =
 {
@@ -741,6 +742,28 @@ static uint32_t draw_frame(uint8_t *src[])
   return 0;
 }
 
+static uint32_t get_image(mp_image_t *mpi){
+    if(mpi->type==MP_IMGTYPE_STATIC && num_buffers>1) return VO_FALSE; // it is not static
+//    if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; // slow video ram
+    if(mpi->width==image_width){
+       if(mpi->flags&MP_IMGFLAG_PLANAR){
+	   mpi->planes[0]=xvimage[current_buf]->data;
+	   mpi->planes[1]=xvimage[current_buf]->data+image_width*image_height;
+	   mpi->planes[2]=xvimage[current_buf]->data+image_width*image_height*5/4;
+	   mpi->stride[0]=image_width;
+	   mpi->stride[1]=mpi->stride[2]=image_width/2;
+       } else {
+           mpi->planes[0]=xvimage[current_buf]->data;
+	   mpi->stride[0]=image_width;
+       }
+       mpi->flags|=MP_IMGFLAG_DIRECT;
+//	printf("mga: get_image() SUCCESS -> Direct Rendering ENABLED\n");
+       return VO_TRUE;
+    }
+    return VO_FALSE;
+}
+
+
 static uint32_t query_format(uint32_t format)
 {
 
@@ -799,6 +822,8 @@ static uint32_t control(uint32_t request, void *data, ...)
     return VO_TRUE;
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_GET_IMAGE:
+    return get_image(data);
   }
   return VO_NOTIMPL;
 }
