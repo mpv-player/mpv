@@ -272,15 +272,28 @@ static int vf_open(vf_instance_t *vf, char* args){
     memset(vf->priv,0,sizeof(struct vf_priv_s));
     vf->priv->mux=args;
 
-    mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
-    mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+    /* XXX: hack: some of the MJPEG decoder DLL's needs exported huffman
+       table, so we define a zero-table, also lavc mjpeg encoder is putting
+       huffman tables into the stream, so no problem */
+    if (lavc_param_vcodec && !strcasecmp(lavc_param_vcodec, "mjpeg"))
+    {
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER)+28);
+	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+28);
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+28;
+    }
+    else
+    {
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
+	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER));
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER);
+    }
     mux_v->bih->biWidth=0;
     mux_v->bih->biHeight=0;
     mux_v->bih->biPlanes=1;
     mux_v->bih->biBitCount=24;
     if (!lavc_param_vcodec)
     {
-	printf("No libavcodec codec specified! It's requested!\n");
+	printf("No libavcodec codec specified! It's required!\n");
 	return 0;
     }
 
@@ -320,7 +333,7 @@ static int vf_open(vf_instance_t *vf, char* args){
 vf_info_t ve_info_lavc = {
     "libavcodec encoder",
     "lavc",
-    "A'rpi",
+    "A'rpi and Alex",
     "for internal use by mencoder",
     vf_open
 };
