@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.49 -->
+<!-- synced with 1.50 -->
 <sect1 id="codecs">
 <title>Wspierane kodeki</title>
 
@@ -753,7 +753,7 @@ Jeżeli używasz gcc 3.2, który ma kłopoty z kompilacją wbudowanej wersji
 FAAD lub chcesz z jakichś powodów użyć zewnętrznej biblioteki,
 ściągnij ją z
 <ulink url="http://www.audiocoding.com/download.php">tej strony</ulink>
-i dodaj opcję <option>--with-external-faad</option> do
+i dodaj opcję <option>--enable-external-faad</option> do
 <filename>configure</filename>. Nie potrzebujesz całego faad2 do dekodowanie
 plików AAC. Wystarczy użyć samej biblioteki libfaad. Zbudujesz ją w następujący
 sposób
