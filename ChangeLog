@@ -83,13 +83,14 @@ mplayer (1.0)
     * fixing padding bug autodetection for some rare files
     * DspContext.(i)dct_* bitexact cleanup
     * user settable quantizer bias
-    * mpeg1 slice encoding support
-    * msmpeg4 2-pass support
+    * MPEG1 slice encoding support
+    * MSMPEG4 2-pass support
     * H264 video decoding
     * Indeo 3 video decoding
     * VP3 video decoder (buggy somtimes)
     * Sorenson 3 (SVQ3) video decoder (it's actually a h264 variant)
-    * 3IV1 (3ivx v1) decoding, ASV1 (ASUS Video v1) decoding
+    * 3IV1 (3ivx v1) decoding
+    * ASV1 (ASUS Video v1) and ASV2 (ASUS Video v2) en/decoding
     * Improved SVQ1 decoding (using FFmpeg VLC functions)
     * truncated unary binarization, unary k-th order exp golomb binarization :)
     * FFV1: lossless YUV codec, compresses a lot better than huffyuv, but slower
@@ -99,10 +100,13 @@ mplayer (1.0)
     * ARM optimized simple_idct
     * MPEG2 encoding
     * PSX MDEC decoder
-    
+    * user settable quantization matrices
+        
     Drivers:
     * x11_common: fix detection of metacity
     * x11_common: 10l fix in original layer detection code
+    * x11_common: extended fstype config options
+    * x11_common: smooth window moving
     * tdfx_vid driver (3dfx cards overlay with AGP support)
     * vo_xover: general x11 overlay driver, currently only tdfx_vid uses it
     * mga_vid: various fixes, 16MB G400 detection, support for multiple cards
@@ -112,6 +116,7 @@ mplayer (1.0)
     * vo_fbdev cleanup/partial rewrite, now with real direct rendering
     * vo_xvmc: new driver featuring XvMC (HW MC/IDCT) acceleration
     * new TGA output driver
+    * new vo_fbdev2 (written from scratch)
 
     Others:
     * gcc can now detect badly called mp_msg()s
