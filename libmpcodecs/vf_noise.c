@@ -192,6 +192,48 @@ static inline void lineNoise_C(uint8_t *dst, uint8_t *src, int8_t *noise, int le
 
 /***************************************************************************/
 
+#ifdef HAVE_MMX
+static inline void lineNoiseAvg_MMX(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
+	int mmx_len= len&(~7);
+
+	asm volatile(
+		"movl %5, %%eax			\n\t"
+		".balign 16			\n\t"
+		"1:				\n\t"
+		"movq (%1, %%eax), %%mm1	\n\t"
+		"movq (%0, %%eax), %%mm0	\n\t"
+		"paddb (%2, %%eax), %%mm1	\n\t"
+		"paddb (%3, %%eax), %%mm1	\n\t"
+		"movq %%mm0, %%mm2		\n\t"
+		"movq %%mm1, %%mm3		\n\t"
+		"punpcklbw %%mm0, %%mm0		\n\t"
+		"punpckhbw %%mm2, %%mm2		\n\t"
+		"punpcklbw %%mm1, %%mm1		\n\t"
+		"punpckhbw %%mm3, %%mm3		\n\t"
+		"pmulhw %%mm0, %%mm1		\n\t"
+		"pmulhw %%mm2, %%mm3		\n\t"
+		"paddw %%mm1, %%mm1		\n\t"
+		"paddw %%mm3, %%mm3		\n\t"
+		"paddw %%mm0, %%mm1		\n\t"
+		"paddw %%mm2, %%mm3		\n\t"
+		"psrlw $8, %%mm1		\n\t"
+		"psrlw $8, %%mm3		\n\t"
+                "packuswb %%mm3, %%mm1		\n\t"
+		"movq %%mm1, (%4, %%eax)	\n\t"
+		"addl $8, %%eax			\n\t"
+		" js 1b				\n\t"
+		:: "r" (src+mmx_len), "r" (shift[0]+mmx_len), "r" (shift[1]+mmx_len), "r" (shift[2]+mmx_len), 
+                   "r" (dst+mmx_len), "g" (-mmx_len)
+		: "%eax"
+	);
+
+	if(mmx_len!=len){
+		int8_t *shift2[3]={shift[0]+mmx_len, shift[1]+mmx_len, shift[2]+mmx_len};
+		lineNoiseAvg_C(dst+mmx_len, src+mmx_len, len-mmx_len, shift2);
+	}
+}
+#endif
+
 static inline void lineNoiseAvg_C(uint8_t *dst, uint8_t *src, int len, int8_t **shift){
 	int i;
         int8_t *src2= (int8_t*)src;
@@ -381,8 +423,10 @@ static int open(vf_instance_t *vf, char* args){
 
  
 #ifdef HAVE_MMX
-    if(gCpuCaps.hasMMX) lineNoise= lineNoise_MMX;
-//    if(gCpuCaps.hasMMX) lineNoiseAvg= lineNoiseAvg_MMX;
+    if(gCpuCaps.hasMMX){
+        lineNoise= lineNoise_MMX;
+        lineNoiseAvg= lineNoiseAvg_MMX;
+    }
 #endif
 #ifdef HAVE_MMX2
     if(gCpuCaps.hasMMX2) lineNoise= lineNoise_MMX2;
