@@ -20,7 +20,6 @@ Medium Priority:
 - audio copy/encoding capability
 
 Low Priority:
-- SDL version detection into ./configure - DONE (disabled :))
 - fix X4.0.x/DRI OpenGL (doesn't really work, at least mga & tdfx & nvidia)
 - support for MPEG TS (transport streams) - I need sample files!
 - integrating the gui?
