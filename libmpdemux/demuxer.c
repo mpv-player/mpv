@@ -146,7 +146,7 @@ extern int tv_param_on;
 
 extern int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds);
 extern int demux_open_tv(demuxer_t *demuxer);
-#if defined(USE_TV) && defined(HAVE_TV_V4L)
+#if defined(USE_TV) && (defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2))
 extern void demux_close_tv(demuxer_t *demuxer);
 #endif
 #endif
@@ -177,7 +177,7 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_nuv(demuxer); break;
     case DEMUXER_TYPE_MPEG_TY:
       demux_close_ty(demuxer); break;
-#if defined(USE_TV) && defined(HAVE_TV_V4L)
+#if defined(USE_TV) && (defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2))
     case DEMUXER_TYPE_TV:
 	demux_close_tv(demuxer); break;
 #endif

@@ -1619,4 +1619,4 @@ static int get_audio_framesize(priv_t *priv)
     return(priv->audio_in.blocksize);
 }
 
-#endif /* USE_TV || HAVE_TV_V4L2 */
+#endif /* USE_TV && HAVE_TV_V4L2 */

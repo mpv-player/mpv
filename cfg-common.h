@@ -304,7 +304,7 @@ struct config tvopts_conf[]={
 	{"contrast", &tv_param_contrast, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
 	{"hue", &tv_param_hue, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
 	{"saturation", &tv_param_saturation, CONF_TYPE_INT, CONF_RANGE, -100, 100, NULL},
-#ifdef HAVE_TV_V4L
+#if defined(HAVE_TV_V4L) || defined(HAVE_TV_V4L2)
 	{"amode", &tv_param_amode, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
 	{"volume", &tv_param_volume, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
 	{"bass", &tv_param_bass, CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
