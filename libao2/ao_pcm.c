@@ -122,6 +122,7 @@ static void uninit(){
 	if(ao_pcm_waveheader && fseek(fp, 0, SEEK_SET) == 0){ /* Write wave header */
 		wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
 		wavhdr.file_length = le2me_32(wavhdr.file_length);
+		wavhdr.data_length = le2me_32(wavhdr.data_length);
 		fwrite(&wavhdr,sizeof(wavhdr),1,fp);
 	}
 	fclose(fp);
