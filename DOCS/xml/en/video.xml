@@ -2251,7 +2251,7 @@ if possible.
 </para>
 <para>
 You must use <option>-vo vesa</option>. The tested chip was capable of 1.333333
-aspect ratio only, so be sure to use the <option>-x -y</options> and/or the
+aspect ratio only, so be sure to use the <option>-x -y</option> options and/or the
 <option>-vf scale,crop,expand</option> filters if the box doesn't let you
 enable TV output. Maximum resolution was 720*576 at 16bpp.
 </para>
