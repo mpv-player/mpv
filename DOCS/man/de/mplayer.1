@@ -6040,82 +6040,103 @@ Für Encodierung mit unterschiedlichen aber konstanten Quantisierungsparametern
 für Intra-/P- und B-Frames kannst du folgendes benutzen:
 lmin= <ip_quant>:lmax= <ip_quant>:vb_qfactor= <b_quant/\:ip_quant>.
 .
-.\" manpage is synced from top down to this option.
 .TP
-.B vqblur=<0.0\-1.0>
-Quantizer\-Glättung (Durchgang 1):
-.RSss
-0.0: qblur deaktiviert
-.br
-0.5 (Standard)
-.br
-1.0: wähle einen Durchschnittsquantizer aller vorhergehender Frames. Größere
-Werte bilden den Durchschnitt über mehr Frames (langsamerer Wechsel).
-.REss
-.IPs vqblur=<0.0\-99.0>
-Gaußsche Unschärfe für die Quantizer. Größere
-Werte bilden den Durchschnitt über mehr Frames (langsamerer Wechsel)
-(Durchgang 2) (Standardwert: 0.5).
-.IPs vqcomp=<Wert>
-Quantizer\-Kompression, hängt von vrc_eq ab (Durchgang 1/\:2) (Standardwert:
-0.5)
-.IPs vrc_eq=<equation>
-hauptsächlich verwendete Gleichung für die Bitratenkontrolle (Durchgang 1/\:2):
-
-1: konstant Bitrate
-.br
-tex: konstante Qualität
-.br
-1+(tex/\:avgTex-1)*qComp: ungefähr die Gleichung der alten Bitratenkontrolle
-code
-.br
-tex^qComp: mit qcomp = 0.5 oder einem ähnlichen Wert (Standard)
-
-Infixoperatoren: +,-,*,/,^
-
-Variables:
-.br
-tex:             Texturkomplexität
-.br
-iTex,pTex:       Intra\- und Nicht\-Intra\-Texturkomplexität
-.br
-avgTex:          durchschnittliche Texturkomplexität
-.br
-avgIITexaverage: Intra\-Texturkomplexität bei I\-Frames
-.br
-avgPITexaverage: Intra\-Texturkomplexität bei P\-Frames
-.br
-avgPPTexaverage: Nicht\-Intra\-Texturkomplexität bei P\-Frames
-.br
-avgBPTexaverage: Nicht\-Intra\-Texturkomplexität bei B\-Frames
-.br
-mv:              für Motion-Vectors verwendete Bits
-.br
-fCode:           maximale Länge der Motion-Vectors (log2)
-.br
-iCount:          Anzahl der Intra\-Makroblöcke / Anzahl der Makroblöcke
-.br
-var:             räumliche Komplexität
-.br
-mcVar:           zeitliche Komplexität
-.br
-qComp:           auf der Kommandozeile angegebener Wert von qcomp
-.br
-isI, isP, isB:   is 1 if picture type is I/\:P/\:B else 0
-.br
-Pi,E:            schau in dein Lieblingsmathebuch
-
-Functions:
-.br
-max(a,b),min(a,b): Maximum / Minimum
-.br
-gt(a,b): (greater than) ist 1, falls a>b, ansonsten 0
-.br
-lt(a,b): (less than) ist 1, falls a<b, ansonsten 0
-.br
-eq(a,b): (equak) ist 1, falls a==b, ansonten 0
-.br
-sin, cos, tan, sinh, cosh, tanh, exp, log, abs
+.B vqblur=<0.0\-1.0> (Durchlauf 1)
+Glättung des Quantisierungsparameters (Standard: 0.5); größere Werte bilden den
+Durchschnitt über mehr Frames (langsamerer Wechsel).
+.PD 0
+.RSs
+.IPs 0.0
+Glättung des Quantisierungsparameters deaktiviert.
+.IPs 1.0
+Bildet für den Quantisierungsparameter einen Durchschnitt aller vorangegangener
+Frames.
+.RE
+.PD 1
+.
+.TP
+.B vqblur=<0.0\-99.0> (Durchlauf 2)
+Gaußsche Unschärfe des Quantisierungsparameters (Standard: 0.5); größere Werte
+bilden den Durchschnitt über mehr Frames (langsamerer Wechsel).
+.
+.TP
+.B vqcomp=<Wert>
+Kompression des Quantisierungsparameters, hängt von vrc_eq ab (Durchlauf 1/\:2)
+(Standard: 0.5)
+.
+.TP
+.B vrc_eq=<Gleichung>
+Hauptsächlich verwendete Gleichung für die Bitratenkontrolle (Durchlauf 1/\:2):
+.RE
+.RSs
+.IPs 1\ \ \ \ 
+konstante Bitrate
+.IPs tex\ \ 
+konstante Qualität
+.IPs 1+(tex/\:avgTex-1)*qComp
+ungefähr die Gleichung der alten Bitratenkontrolle
+.IPs tex^qComp
+wobei qcomp = 0.5 oder einem ähnlichen Wert (Standard)
+.RE
+.PP
+.RS
+Infixoperatoren:
+.RE
+.RSs
+.IPs +,-,*,/,^
+.RE
+.PP
+.RS
+Variablen:
+.RE
+.RSs
+.IPs tex\ \ 
+Texturkomplexität
+.IPs iTex,pTex
+Intra- und Nicht-Intra-Texturkomplexität
+.IPs avgTex
+durchschnittliche Texturkomplexität
+.IPs avgIITex
+durchschnittliche Intra-Texturkomplexität bei Intraframes
+.IPs avgPITex
+durchschnittliche Intra-Texturkomplexität bei P-Frames
+.IPs avgPPTex
+durchschnittliche Nicht-Intra-Texturkomplexität bei P-Frames
+.IPs avgBPTexaverage
+durchschnittliche Nicht-Intra-Texturkomplexität bei B-Frames
+.IPs mv\ \ \ 
+für Motion-Vectors verwendete Bits
+.IPs fCode
+maximale Länge der Motion-Vectors in log2-Skalierung
+.IPs iCount
+Anzahl der Intra-Macroblöcke / Anzahl der Macroblöcke
+.IPs var\ \ 
+räumliche Komplexität
+.IPs mcVar
+zeitliche Komplexität
+.IPs qComp
+auf der Kommandozeile angegebener Wert für qcomp
+.IPs "isI, isP, isB"
+Is 1 if picture type is I/\:P/\:B else 0.
+.IPs Pi,E\ 
+Schau in dein Lieblingsmathebuch.
+.RE
+.PP
+.RS
+Funktionen:
+.RE
+.RSs
+.IPs max(a,b),min(a,b)
+Maximum / Minimum
+.IPs gt(a,b)
+(greater than) ist 1 falls a>b, sonst 0
+.IPs lt(a,b)
+(less than) ist 1 falls a<b, sonst 0
+.IPs eq(a,b)
+(equals) ist 1 falls a==b, sonst 0
+.IPs "sin, cos, tan, sinh, cosh, tanh, exp, log, abs"
+.RE
+.\" manpage is synced from top down to this option.
 .
 .IPs vrc_override=<Optionen>
 Benutzerdefinierte Qualität für bestimmte Abschnitte (Durchgang 1/\:2).
