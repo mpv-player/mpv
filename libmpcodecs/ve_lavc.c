@@ -135,10 +135,17 @@ static int lavc_param_cbp= 0;
 static int lavc_param_mv0= 0;
 static int lavc_param_noise_reduction= 0;
 
+char *lavc_param_acodec = "mp2";
+int lavc_param_atag = 0;
+int lavc_param_abitrate = 224;
+
 #include "m_option.h"
 
 #ifdef USE_LIBAVCODEC
 m_option_t lavcopts_conf[]={
+	{"acodec", &lavc_param_acodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"abitrate", &lavc_param_abitrate, CONF_TYPE_INT, CONF_RANGE, 1, 1000, NULL},
+	{"atag", &lavc_param_atag, CONF_TYPE_INT, CONF_RANGE, 0, 0xffff, NULL},
 	{"vcodec", &lavc_param_vcodec, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"vbitrate", &lavc_param_vbitrate, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
 	{"vratetol", &lavc_param_vrate_tolerance, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},

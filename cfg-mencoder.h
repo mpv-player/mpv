@@ -108,11 +108,19 @@ m_option_t oac_conf[]={
 #else
 	{"mp3lame", "MPlayer was compiled without libmp3lame support!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
+#ifdef USE_LIBAVCODEC
+	{"lavc", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_LAVC, NULL},
+#else
+	{"lavc", "MPlayer was compiled without libavcodec! See README or DOCS!\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif
 	{"help", "\nAvailable codecs:\n"
 	"   copy     - frame copy, without re-encoding (useful for AC3)\n"
 	"   pcm      - uncompressed PCM audio\n"
 #ifdef HAVE_MP3LAME
 	"   mp3lame  - cbr/abr/vbr MP3 using libmp3lame\n"
+#endif
+#ifdef USE_LIBAVCODEC
+	"   lavc     - ffmpeg audio encoder (mp2, ac3, ...)\n"
 #endif
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}

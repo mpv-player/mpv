@@ -3251,6 +3251,8 @@ no encoding, just streamcopy
 encode to uncompressed PCM
 .IPs "\-oac mp3lame"
 encode to MP3 (using Lame)
+.IPs "\-oac lavc"
+encode with a libavcodec codecs
 .RE
 .PD 1
 .
@@ -3530,8 +3532,29 @@ For full details read the source.
 .PD 1
 
 .TP
+.B acodec=<value>
+Audio codec (default: mp2):
+.PD 0
+.RSs
+.IPs mp2
+MPEG Layer 2
+.IPs mp3
+MPEG Layer 3
+.IPs ac3
+AC3
+.IPs adpcm_ima_wav
+IMA Adaptive PCM (4bits per sample, 4:1 compression)
+.RE
+.PD 1
+.TP
+.B abitrate=<value>
+Audio bitrate in kBit (default 224).
+.TP
+.B atag=<value>
+Use the specified windows audio format tag (e.g. atag=0x55).
+.TP
 .B vcodec=<value>
-use the specified codec (there is no default, you must specify it):
+use the specified codec (default: mpeg4):
 .PD 0
 .RSs
 .IPs mjpeg

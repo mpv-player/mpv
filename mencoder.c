@@ -14,6 +14,7 @@
 #define ACODEC_PCM 1
 #define ACODEC_VBRMP3 2
 #define ACODEC_NULL 3
+#define ACODEC_LAVC 4
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -70,6 +71,21 @@
 #include "libvo/fastmemcpy.h"
 
 #include "osdep/timer.h"
+
+#ifdef USE_LIBAVCODEC
+// for lavc audio encoding
+#include "libavcodec/avcodec.h"
+static AVCodec        *lavc_acodec;
+static AVCodecContext *lavc_actx = NULL;
+extern char    *lavc_param_acodec;
+extern int      lavc_param_abitrate;
+extern int      lavc_param_atag;
+// tmp buffer for lavc audio encoding (to free!!!!!)
+static void    *lavc_abuf = NULL;
+extern int      avcodec_inited;
+
+static uint32_t lavc_find_atag(char *codec);
+#endif
 
 int vo_doublebuffering=0;
 int vo_directrendering=0;
@@ -792,6 +808,145 @@ case ACODEC_VBRMP3:
     }
     break;
 #endif
+#ifdef USE_LIBAVCODEC
+case ACODEC_LAVC:
+    if(!lavc_param_acodec)
+    {
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, Missing codec name!\n");
+	exit(1);
+    }
+
+    if(!avcodec_inited){
+	avcodec_init();
+	avcodec_register_all();
+	avcodec_inited=1;
+    }
+
+    lavc_acodec = avcodec_find_encoder_by_name(lavc_param_acodec);
+    if (!lavc_acodec)
+    {
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, couldn't find encoder for codec %s\n", lavc_param_acodec);
+	exit(1);
+    }
+
+    lavc_actx = avcodec_alloc_context();
+    if(lavc_actx == NULL)
+    {
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Audio LAVC, couldn't allocate context!\n");
+	exit(1);
+    }
+
+    if(lavc_param_atag == 0)
+	lavc_param_atag = lavc_find_atag(lavc_param_acodec);
+
+    // put sample parameters
+    lavc_actx->channels = audio_output_channels ? audio_output_channels : sh_audio->channels;
+    lavc_actx->sample_rate = force_srate ? force_srate : sh_audio->samplerate;
+    lavc_actx->bit_rate = lavc_param_abitrate * 1000;
+
+    /*
+     * Special case for imaadpcm.
+     * The bitrate is only dependant on samplerate.
+     * We have to known frame_size and block_align in advance,
+     * so I just copied the code from libavcodec/adpcm.c
+     *
+     * However, ms imaadpcm uses a block_align of 2048,
+     * lavc defaults to 1024
+     */
+    if(lavc_param_atag == 0x11) {
+	int blkalign = 2048;
+	int framesize = (blkalign - 4 * lavc_actx->channels) * 8 / (4 * lavc_actx->channels) + 1;
+	lavc_actx->bit_rate = lavc_actx->sample_rate*8*blkalign/framesize;
+    }
+
+    if(avcodec_open(lavc_actx, lavc_acodec) < 0)
+    {
+	mp_msg(MSGT_MENCODER, MSGL_FATAL, "Couldn't open codec %s, br=%d\n", lavc_param_acodec, lavc_param_abitrate);
+	exit(1);
+    }
+
+    if(lavc_param_atag == 0x11) {
+	lavc_actx->block_align = 2048;
+	lavc_actx->frame_size = (lavc_actx->block_align - 4 * lavc_actx->channels) * 8 / (4 * lavc_actx->channels) + 1;
+    }
+
+    lavc_abuf = malloc(lavc_actx->frame_size * 2 * lavc_actx->channels);
+    if(lavc_abuf == NULL)
+    {
+	fprintf(stderr, "Couldn't allocate %d bytes\n", lavc_actx->frame_size * 2 * lavc_actx->channels);
+	exit(1);
+    }
+
+    if (sizeof(MPEGLAYER3WAVEFORMAT) != 30)  // should be 30
+	broken_c_compiler___size_of_MPEGLAYER3WAVEFORMAT_not_30();
+
+    mux_a->wf = malloc(sizeof(MPEGLAYER3WAVEFORMAT));
+    mux_a->wf->wFormatTag = lavc_param_atag;
+    mux_a->wf->nChannels = lavc_actx->channels;
+    mux_a->wf->nSamplesPerSec = lavc_actx->sample_rate;
+    mux_a->wf->nAvgBytesPerSec = (lavc_actx->bit_rate / 8);
+    mux_a->h.dwRate = mux_a->wf->nAvgBytesPerSec;
+    if (lavc_actx->block_align) {
+	mux_a->h.dwSampleSize = mux_a->h.dwScale = lavc_actx->block_align;
+    } else {
+	mux_a->h.dwScale = (mux_a->wf->nAvgBytesPerSec * lavc_actx->frame_size)/ mux_a->wf->nSamplesPerSec; /* for cbr */
+
+	if ((mux_a->wf->nAvgBytesPerSec *
+	    lavc_actx->frame_size) % mux_a->wf->nSamplesPerSec) {
+	    mux_a->h.dwScale = lavc_actx->frame_size;
+	    mux_a->h.dwRate = lavc_actx->sample_rate;
+	    mux_a->h.dwSampleSize = 0; // Blocksize not constant
+	} else {
+	    mux_a->h.dwSampleSize = mux_a->h.dwScale;
+	}
+    }
+    mux_a->wf->nBlockAlign = mux_a->h.dwScale;
+    mux_a->h.dwSuggestedBufferSize = audio_preload*mux_a->wf->nAvgBytesPerSec;
+    mux_a->h.dwSuggestedBufferSize -= mux_a->h.dwSuggestedBufferSize % mux_a->wf->nBlockAlign;
+
+    switch (lavc_param_atag) {
+    case 0x11: /* imaadpcm */
+	mux_a->wf->wBitsPerSample = 4;
+	mux_a->wf->cbSize = 2;
+	/*
+	 * Magic imaadpcm values, currently probably only valid
+	 * for 48KHz Stereo
+	 */
+	((unsigned char*)mux_a->wf)[sizeof(WAVEFORMATEX)] = 0xf9;
+	((unsigned char*)mux_a->wf)[sizeof(WAVEFORMATEX)+1] = 0x07;
+	break;
+    case 0x55: /* mp3 */
+	mux_a->wf->cbSize = 12;
+	mux_a->wf->wBitsPerSample = 0; /* does not apply */
+	((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->wID = 1;
+	((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->fdwFlags = 2;
+	((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->nBlockSize = mux_a->wf->nBlockAlign;
+	((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->nFramesPerBlock = 1;
+	((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->nCodecDelay = 0;
+	break;
+    default:
+	mux_a->wf->cbSize = 0;
+	mux_a->wf->wBitsPerSample = 0; /* Unknown */
+	break;
+    }
+
+    // setup filter:
+    if (!init_audio_filters(
+	sh_audio,
+	sh_audio->samplerate, sh_audio->channels,
+	sh_audio->sample_format, sh_audio->samplesize,
+	mux_a->wf->nSamplesPerSec, mux_a->wf->nChannels,
+	AFMT_S16_NE, 2,
+	mux_a->h.dwSuggestedBufferSize,
+	mux_a->h.dwSuggestedBufferSize*2)) {
+	mp_msg(MSGT_CPLAYER, MSGL_ERR, "Couldn't find matching filter / ao format!\n");
+	exit(1);
+    }
+
+    mp_msg(MSGT_MENCODER, MSGL_V, "FRAME_SIZE: %d, BUFFER_SIZE: %d, TAG: 0x%x\n", lavc_actx->frame_size, lavc_actx->frame_size * 2 * lavc_actx->channels, mux_a->wf->wFormatTag);
+
+    break;
+#endif
 }
 
 if (verbose>1) print_wave_header(mux_a->wf);
@@ -919,6 +1074,33 @@ if(sh_audio){
 
 	ptimer_start = GetTimerMS();
 
+#ifdef USE_LIBAVCODEC
+	if(mux_a->codec == ACODEC_LAVC){
+	    int  size, rd_len;
+	
+	    size = lavc_actx->frame_size * 2 * mux_a->wf->nChannels;
+
+	    rd_len = dec_audio(sh_audio, lavc_abuf, size);
+	    if(rd_len != size)
+		break;
+
+	    // Encode one frame
+	    mux_a->buffer_len += avcodec_encode_audio(lavc_actx, mux_a->buffer + mux_a->buffer_len, size, lavc_abuf);
+	    if (mux_a->h.dwSampleSize) { /* CBR */
+		/*
+		 * work around peculiar lame behaviour
+		 */
+		if (mux_a->buffer_len < mux_a->wf->nBlockAlign) {
+		    len = 0;
+		} else {
+		    len = mux_a->wf->nBlockAlign*(mux_a->buffer_len/mux_a->wf->nBlockAlign);
+		}
+	    } else { /* VBR */
+		len = mux_a->buffer_len;
+	    }
+	    if (mux_v->timer == 0) mux_a->h.dwInitialFrames++;
+	}
+#endif
 	if(mux_a->h.dwSampleSize){
 	    // CBR - copy 0.5 sec of audio
 	    switch(mux_a->codec){
@@ -1294,6 +1476,11 @@ if(sh_video){ uninit_video(sh_video);sh_video=NULL; }
 if(demuxer) free_demuxer(demuxer);
 if(stream) free_stream(stream); // kill cache thread
 
+#ifdef USE_LIBAVCODEC
+if(lavc_abuf != NULL)
+    free(lavc_abuf);
+#endif
+
 return interrupted;
 }
 
@@ -1600,3 +1787,26 @@ static void  lame_presets_longinfo_dm ( FILE* msgfp )
 	mencoder_exit(0, NULL);
 }
 #endif
+
+#ifdef USE_LIBAVCODEC
+static uint32_t lavc_find_atag(char *codec)
+{
+    if(codec == NULL)
+       return 0;
+
+    if(! strcasecmp(codec, "mp2"))
+       return 0x50;
+
+    if(! strcasecmp(codec, "mp3"))
+       return 0x55;
+
+    if(! strcasecmp(codec, "ac3"))
+       return 0x2000;
+
+    if(! strcasecmp(codec, "adpcm_ima_wav"))
+       return 0x11;
+
+    return 0;
+}
+#endif
+
