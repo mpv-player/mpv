@@ -887,7 +887,7 @@ if (out_file_format == MUXER_TYPE_MPEG)
 	}
 	if (audio_density < 4) {
 	  fprintf(stderr,"Increasing audio density to 4\n");
-	  audio_preload = 4;
+	  audio_density = 4;
 	}
 	}
 
