@@ -236,6 +236,7 @@ static int init(sh_video_t *sh){
     if (sh->bih && (sh->bih->biSize != sizeof(BITMAPINFOHEADER)) &&
 	(sh->format == mmioFOURCC('M','4','S','2') ||
 	 sh->format == mmioFOURCC('M','P','4','S') ||
+	 sh->format == mmioFOURCC('H','F','Y','U') ||
 	 sh->format == mmioFOURCC('W','M','V','2')
          ))
     {
@@ -243,6 +244,10 @@ static int init(sh_video_t *sh){
 	avctx->extradata = malloc(avctx->extradata_size);
 	memcpy(avctx->extradata, sh->bih+1, avctx->extradata_size);
     }
+    
+#if LIBAVCODEC_BUILD >= 4639
+    avctx->bits_per_sample= sh->bih->biBitCount;
+#endif    
 
     /* open it */
     if (avcodec_open(avctx, lavc_codec) < 0) {
@@ -361,12 +366,14 @@ static int init_vo(sh_video_t *sh){
 	case PIX_FMT_YUV410P: ctx->best_csp=IMGFMT_YVU9;break; //svq1
 #endif
 	case PIX_FMT_YUV420P: ctx->best_csp=IMGFMT_YV12;break; //mpegs
-	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg
+	case PIX_FMT_YUV422P: ctx->best_csp=IMGFMT_422P;break; //mjpeg / huffyuv
 	case PIX_FMT_YUV444P: ctx->best_csp=IMGFMT_444P;break; //???
 #if LIBAVCODEC_BUILD >= 4631
 	case PIX_FMT_YUV411P: ctx->best_csp=IMGFMT_411P;break; //dv ntsc
 #endif
-	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //???
+	case PIX_FMT_YUV422:  ctx->best_csp=IMGFMT_YUY2;break; //huffyuv perhaps in the future
+	case PIX_FMT_BGR24 :  ctx->best_csp=IMGFMT_BGR24;break; //huffyuv
+	case PIX_FMT_BGRA32:  ctx->best_csp=IMGFMT_BGR32;break; //huffyuv
 	default:
 	    ctx->best_csp=0;
 	}

@@ -92,6 +92,8 @@ static float lavc_param_spatial_cplx_masking= 0.0;
 static float lavc_param_p_masking= 0.0;
 static int lavc_param_normalize_aqp= 0;
 static int lavc_param_interlaced_dct= 0;
+static int lavc_param_prediction_method= FF_PRED_LEFT;
+static char *lavc_param_format="YV12";
 
 #include "cfgparser.h"
 
@@ -166,6 +168,10 @@ struct config lavcopts_conf[]={
 #endif
 #if LIBAVCODEC_BUILD >= 4629
         {"idct", &lavc_param_idct, CONF_TYPE_INT, CONF_RANGE, 0, 20, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4639
+        {"pred", &lavc_param_prediction_method, CONF_TYPE_INT, CONF_RANGE, 0, 20, NULL},
+        {"format", &lavc_param_format, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -341,7 +347,17 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4627
     if(lavc_param_interlaced_dct) lavc_venc_context->flags|= CODEC_FLAG_INTERLACED_DCT;
 #endif
-
+#if LIBAVCODEC_BUILD >= 4639
+    lavc_venc_context->prediction_method= lavc_param_prediction_method;
+    if(!strcasecmp(lavc_param_format, "YV12"))
+        lavc_venc_context->pix_fmt= PIX_FMT_YUV420P;
+    else if(!strcasecmp(lavc_param_format, "422P"))
+        lavc_venc_context->pix_fmt= PIX_FMT_YUV422P;
+    else{
+        mp_msg(MSGT_MENCODER,MSGL_ERR,"%s is not a supported format\n", lavc_param_format);
+        return 0;
+    }
+#endif
     /* lavc internal 2pass bitrate control */
     switch(lavc_param_vpass){
     case 1: 
@@ -407,6 +423,14 @@ static int config(struct vf_instance_s* vf,
     if(lavc_venc_context->stats_in) free(lavc_venc_context->stats_in);
     lavc_venc_context->stats_in= NULL;
 #endif
+#if LIBAVCODEC_BUILD >= 4639
+    if(lavc_venc_context->bits_per_sample)
+        mux_v->bih->biBitCount= lavc_venc_context->bits_per_sample;
+    if(lavc_venc_context->extradata_size){
+        memcpy(mux_v->bih + 1, lavc_venc_context->extradata, lavc_venc_context->extradata_size);
+        mux_v->bih->biSize= sizeof(BITMAPINFOHEADER) + lavc_venc_context->extradata_size;
+    }
+#endif
     
     return 1;
 }
@@ -421,7 +445,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
     case IMGFMT_I420:
-      return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
+        if(!strcasecmp(lavc_param_format, "YV12"))
+            return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
+        break;
+    case IMGFMT_422P:
+        if(!strcasecmp(lavc_param_format, "422P"))
+            return VFCAP_CSP_SUPPORTED | VFCAP_ACCEPT_STRIDE;
+        break;
     }
     return 0;
 }
@@ -486,6 +516,13 @@ static int vf_open(vf_instance_t *vf, char* args){
 	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+28);
 	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+28;
     }
+    else if (lavc_param_vcodec && !strcasecmp(lavc_param_vcodec, "huffyuv"))
+    {
+    /* XXX: hack: huffyuv needs to store huffman tables (allthough we dunno the size yet ...) */
+	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER)+1000);
+	memset(mux_v->bih, 0, sizeof(BITMAPINFOHEADER)+1000);
+	mux_v->bih->biSize=sizeof(BITMAPINFOHEADER)+1000;
+    }
     else
     {
 	mux_v->bih=malloc(sizeof(BITMAPINFOHEADER));
@@ -518,6 +555,8 @@ static int vf_open(vf_instance_t *vf, char* args){
 	mux_v->bih->biCompression = mmioFOURCC('M', 'P', '4', '2');
     else if (!strcasecmp(lavc_param_vcodec, "wmv1"))
 	mux_v->bih->biCompression = mmioFOURCC('W', 'M', 'V', '1');
+    else if (!strcasecmp(lavc_param_vcodec, "huffyuv"))
+	mux_v->bih->biCompression = mmioFOURCC('H', 'F', 'Y', 'U');
     else
 	mux_v->bih->biCompression = mmioFOURCC(lavc_param_vcodec[0],
 		lavc_param_vcodec[1], lavc_param_vcodec[2], lavc_param_vcodec[3]); /* FIXME!!! */
