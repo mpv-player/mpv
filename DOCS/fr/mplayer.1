@@ -1,4 +1,4 @@
-401.\" MPlayer (C) 2000-2003 Arpad Gereoffy
+.\" MPlayer (C) 2000-2003 Arpad Gereoffy
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < n@tourmentine.com >
 .\"
@@ -179,7 +179,7 @@ DVD (SPU streams, VobSub et Closed Captions).
 .B mencoder
 (MPlayer's Movie Encoder) est un simple encodeur de vidéos, conçu pour encoder
 des vidéos jouables par MPlayer (voir ci-dessus) dans d'autres formats jouables
-par MPlayer (voir ci-dessous) .
+par MPlayer (voir ci-dessous).
 Il encode en DivX4, XviD, un des codecs libavcodec, et en PCM/\:MP3/\:VBRMP3
 audio en 1, 2 ou 3\ passes.
 Il permet également de copier des flux de données (stream), possède un puissant
@@ -3820,7 +3820,7 @@ Ajuste le décalage des sous-titres de +/\:- <valeur> secondes et l'initialise à
 .IPs "osd [level=<valeur>]"
 Bascule le mode OSD ou le met à un niveau quand level >= 0.
 .IPs "volume <dir>"
-Augmente/\:diminue le volume
+Augmente/\:diminue le volume.
 .IPs "use_master"
 Bascule le contrôle du volume entre master et pcm.
 .IPs "mute"
@@ -3834,7 +3834,7 @@ Initialise l'alignement des sous-titres.
 .IPs "sub_visibility"
 Bascule l'affichage des sous-titres.
 .IPs "sub_pos <valeur>"
-Ajoute la position des sous-titres.
+Ajuste la position des sous-titres.
 .IPs "vobsub_lang"
 Commute la langue des sous-titres pendant l'utilisation de sous-titres VOBSub.
 .IPs "get_percent_pos"
@@ -3947,6 +3947,7 @@ mplayer dummy.avi \-sub source.sub \-dumpmpsub
 .B Convertit les sous-titres en MPsub sans afficher le film
 mplayer /dev/zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
 \-benchmark \-sub source.sub \-dumpmpsub
+.TP
 .B Entrée depuis V4L standard
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
