@@ -1217,7 +1217,8 @@ if [ "$system_name" = "Linux" ];then
     fi
     if [ ! -z "$_k_verc_fail" ]; then
 	echo "$kernel_version, fail"
-	echo "WARNING! If you want to run mplayer on this system, be prepared for problems"
+	echo "WARNING! If you want to run mplayer on this system, be prepared for problems!"
+	echo "(SSE support of 2.2.x series is limited. Upgrade kernel or use --disable-sse)"
     else
 	echo "$kernel_version, ok"
     fi
