@@ -16,6 +16,7 @@ mplayer \- Filmlejátszó Linuxra
 .RB [ \-cdrom-pathname\ <útvonal> ]
 .RB [ \-sb\ <byte\ pozíció> ]
 .RB [ \-nosound ]
+.RB [ \-audiofile\ <filenév> ]
 .RB [ \-abs\ <byte-ok> ]
 .RB [ \-delay\ <másodperc> ]
 .RB [ \-nobps ]
@@ -215,6 +216,9 @@ az alapértelmezett /dev/cdrom helyett más egység használata
 .TP
 .B \-nosound
 hang nélküli lejátszás
+.TP
+.B \-audiofile <filenév>
+audio film melletti lejátszása külsõ fileból (MP3, AC3, Vorbis, stb)
 .TP
 .B \-fs
 teljesképernyõs lejátszás (középre helyezi a filmet, és fekete sávokat

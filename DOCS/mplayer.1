@@ -16,6 +16,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-cdrom-device\ <path\ to\ device> ]
 .RB [ \-sb\ <byte\ position> ]
 .RB [ \-nosound ]
+.RB [ \-audiofile\ <filename> ]
 .RB [ \-abs\ <bytes> ]
 .RB [ \-delay\ <secs> ]
 .RB [ \-nobps ]
@@ -214,6 +215,9 @@ override default CDROM drive name /dev/cdrom
 .TP
 .B \-nosound
 don't play sound
+.TP
+.B \-audiofile\ <filename>
+play audio from an external file (MP3, AC3, Vorbis, etc)
 .TP
 .B \-fs
 fullscreen playing (centers movie, and makes black
