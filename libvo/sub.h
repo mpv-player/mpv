@@ -6,8 +6,7 @@ extern unsigned char* vo_osd_text;
 extern int vo_osd_progbar_type;
 extern int vo_osd_progbar_value;   // 0..255
 
-extern int vo_sub_lines;
-extern unsigned char* vo_sub_text[8];
+extern subtitle* vo_sub;
 
 #define OSD_PLAY 0x01
 #define OSD_PAUSE 0x02

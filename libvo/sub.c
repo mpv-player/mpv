@@ -1,4 +1,5 @@
 
+#include "subreader.h"
 #include "sub.h"
 
 //static int vo_font_loaded=-1;
@@ -89,17 +90,16 @@ void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int 
 }
 
 
-int vo_sub_lines=2;
-unsigned char* vo_sub_text[8];
+subtitle* vo_sub=NULL;
 
 void vo_draw_text_sub(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)){
     int i;
     int y;
 
-    y=dys-(1+vo_sub_lines)*vo_font->height;
+    y=dys-(1+vo_sub->lines)*vo_font->height;
     
-    for(i=0;i<vo_sub_lines;i++){
-        unsigned char* text="Hello World! HÛDEJÓ!"; //vo_sub_text[i];
+    for(i=0;i<vo_sub->lines;i++){
+        unsigned char* text=vo_sub->text[i];//  "Hello World! HÛDEJÓ!";
         int len=strlen(text);
         int j;
         int xsize=-vo_font->charspace;
@@ -144,7 +144,7 @@ void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h,
         vo_draw_text_osd(dxs,dys,draw_alpha);
     }
 
-    if(vo_sub_lines>0){
+    if(vo_sub){
         vo_draw_text_sub(dxs,dys,draw_alpha);
     }
     
