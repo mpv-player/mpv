@@ -739,7 +739,8 @@ OSD/SUB feature. There are many ways to get it:
   <systemitem class="library">fontconfig</systemitem> support, the above methods
   won't work, instead the <option>-font</option> expects a
   <systemitem class="library">fontconfig</systemitem> font name
-  and defaults to the sans-serif font. To get a list of fonts known to fontconfig,
+  and defaults to the sans-serif font. To get a list of fonts known to 
+  <systemitem class="library">fontconfig</systemitem>,
   use <command>fc-list</command>. Example: <option>-font 'Bitstream Vera Sans'</option>
   </para></listitem>
 <listitem><para>
