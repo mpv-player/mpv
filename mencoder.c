@@ -777,8 +777,8 @@ if (spudec_ifo) {
   if (vobsub_parse_ifo(spudec_ifo, palette, &width, &height, 1) >= 0)
     vo_spudec=spudec_new_scaled(palette, sh_video->disp_w, sh_video->disp_h);
 }
-if (vo_spudec==NULL) {
 #ifdef USE_DVDREAD
+if (vo_spudec==NULL) {
 vo_spudec=spudec_new_scaled(stream->type==STREAMTYPE_DVD?((dvd_priv_t *)(stream->priv))->cur_pgc->palette:NULL,
 			    sh_video->disp_w, sh_video->disp_h);
 }
