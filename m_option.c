@@ -913,40 +913,63 @@ m_option_type_t m_option_type_subconfig = {
 };
 
 #include "libmpcodecs/img_format.h"
-// TODO : use an array so we parse/print easily
+
+static struct {
+  char* name;
+  unsigned int fmt;
+} mp_imgfmt_list[] = {
+  {"444p", IMGFMT_444P},
+  {"422p", IMGFMT_422P},
+  {"411p", IMGFMT_411P},
+  {"yuy2", IMGFMT_YUY2},
+  {"yv12", IMGFMT_YV12},
+  {"i420", IMGFMT_I420},
+  {"yvu9", IMGFMT_YVU9},
+  {"if09", IMGFMT_IF09},
+  {"iyuv", IMGFMT_IYUV},
+  {"uyvy", IMGFMT_UYVY},
+  {"bgr24", IMGFMT_BGR24},
+  {"bgr32", IMGFMT_BGR32},
+  {"bgr16", IMGFMT_BGR16},
+  {"bgr15", IMGFMT_BGR15},
+  {"bgr8", IMGFMT_BGR8},
+  {"bgr4", IMGFMT_BGR4},
+  {"bg4b", IMGFMT_BG4B},
+  {"bgr1", IMGFMT_BGR1},
+  {"rgb24", IMGFMT_RGB24},
+  {"rgb32", IMGFMT_RGB32},
+  {"rgb16", IMGFMT_RGB16},
+  {"rgb15", IMGFMT_RGB15},
+  {"rgb8", IMGFMT_RGB8},
+  {"rgb4", IMGFMT_RGB4},
+  {"rg4b", IMGFMT_RG4B},
+  {"rgb1", IMGFMT_RGB1},
+  { NULL, 0 }
+};
 
 static int parse_imgfmt(m_option_t* opt,char *name, char *param, void* dst, int src) {
   uint32_t fmt = 0;
+  int i;
 
   if (param == NULL || strlen(param) == 0)
     return M_OPT_MISSING_PARAM;
 
-  // From vf_format
-  if(!strcasecmp(param,"444p")) fmt=IMGFMT_444P; else
-  if(!strcasecmp(param,"422p")) fmt=IMGFMT_422P; else
-  if(!strcasecmp(param,"411p")) fmt=IMGFMT_411P; else
-  if(!strcasecmp(param,"yuy2")) fmt=IMGFMT_YUY2; else
-  if(!strcasecmp(param,"yv12")) fmt=IMGFMT_YV12; else
-  if(!strcasecmp(param,"i420")) fmt=IMGFMT_I420; else
-  if(!strcasecmp(param,"yvu9")) fmt=IMGFMT_YVU9; else
-  if(!strcasecmp(param,"if09")) fmt=IMGFMT_IF09; else
-  if(!strcasecmp(param,"iyuv")) fmt=IMGFMT_IYUV; else
-  if(!strcasecmp(param,"uyvy")) fmt=IMGFMT_UYVY; else
-  if(!strcasecmp(param,"bgr24")) fmt=IMGFMT_BGR24; else
-  if(!strcasecmp(param,"bgr32")) fmt=IMGFMT_BGR32; else
-  if(!strcasecmp(param,"bgr16")) fmt=IMGFMT_BGR16; else
-  if(!strcasecmp(param,"bgr15")) fmt=IMGFMT_BGR15; else
-  if(!strcasecmp(param,"bgr8")) fmt=IMGFMT_BGR8; else
-  if(!strcasecmp(param,"bgr4")) fmt=IMGFMT_BGR4; else
-  if(!strcasecmp(param,"bgr1")) fmt=IMGFMT_BGR1; else
-  if(!strcasecmp(param,"rgb24")) fmt=IMGFMT_RGB24; else
-  if(!strcasecmp(param,"rgb32")) fmt=IMGFMT_RGB32; else
-  if(!strcasecmp(param,"rgb16")) fmt=IMGFMT_RGB16; else
-  if(!strcasecmp(param,"rgb15")) fmt=IMGFMT_RGB15; else
-  if(!strcasecmp(param,"rgb8")) fmt=IMGFMT_RGB8; else
-  if(!strcasecmp(param,"rgb4")) fmt=IMGFMT_RGB4; else
-  if(!strcasecmp(param,"rgb1")) fmt=IMGFMT_RGB1; else { 
-    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: unknown format name: '%s'\n",param);
+  if(!strcmp(param,"help")) {
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "Avaible formats :");
+    for(i = 0 ; mp_imgfmt_list[i].name ; i++)
+      mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s",mp_imgfmt_list[i].name);
+    mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
+    exit(0);
+  }
+
+  for(i = 0 ; mp_imgfmt_list[i].name ; i++) {
+    if(!strcasecmp(param,mp_imgfmt_list[i].name)) {
+      fmt=mp_imgfmt_list[i].fmt;
+      break;
+    }
+  }
+  if(!mp_imgfmt_list[i].name) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Option %s: unknown format name: '%s'\n",name,param);
     return M_OPT_INVALID;
   }
 
@@ -957,7 +980,7 @@ static int parse_imgfmt(m_option_t* opt,char *name, char *param, void* dst, int 
 }
 
 m_option_type_t m_option_type_imgfmt = {
-  "Image format (aka colorspace)",
+  "Image format",
   "Pls report any missing colorspace",
   sizeof(uint32_t),
   0,
