@@ -50,6 +50,7 @@ void mplStop()
  if ( !mplShMem->Playing ) return;
  mplShMem->Playing=0;
  mplShMem->TimeSec=0;
+ mplShMem->Position=0;
  if ( !appMPlayer.subWindow.isFullScreen )
   {
    wsMoveWindow( &appMPlayer.subWindow,appMPlayer.sub.x,appMPlayer.sub.y );
@@ -96,15 +97,9 @@ void mplResize( unsigned int X,unsigned int Y,unsigned int width,unsigned int he
 
 void mplMPlayerInit( int argc,char* argv[], char *envp[] )
 {
-#if 0
- mplShMem=shmem_alloc( ShMemSize );
-#else
- mplShMem=calloc( 1,ShMemSize );
-#endif
- signal( SIGTYPE,mplMainSigHandler );
-
- memset( mplShMem,0,ShMemSize );
+ mplShMem=calloc( 1,sizeof( mplCommStruct ) );
  mplShMem->Balance=50.0f;
+ signal( SIGTYPE,mplMainSigHandler );
 }
 
 float mplGetPosition( void )

@@ -47,8 +47,6 @@ typedef struct
  gtkOptionsStruct      op;
 } gtkCommStruct;
 
-#define ShMemSize sizeof( gtkCommStruct )
-
 extern gtkCommStruct * gtkShMem;
 
 extern GtkWidget     * SkinBrowser;

@@ -85,7 +85,7 @@ static void gtkThreadProc( int argc,char * argv[] )
 
 void gtkInit( int argc,char* argv[], char *envp[] )
 {
- gtkShMem=shmem_alloc( ShMemSize );
+ gtkShMem=shmem_alloc( sizeof( gtkCommStruct ) );
  if ( ( gtkPID = fork() ) == 0 ) gtkThreadProc( argc,argv );
 }
 
