@@ -284,7 +284,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   distort sound and video or crash on some systems. If the image is
   distorted, try turning off hardware acceleration with
   <option>-vo directx:noaccel</option>. Download
-  <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/dx7headers.tgz">DirectX 7 header files</ulink>
   to compile the DirectX video output driver. Furthermore you need to have
   DirectX 7 or later installed for the DirectX video output driver to work.
   </para>
@@ -292,7 +292,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para><link linkend="vidix">VIDIX</link> now works under Windows as
   <option>-vo winvidix</option>, although it is still experimental
   and needs a bit of manual setup. Download
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> or
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (with MTRR support)</ulink>
   and copy it to the
   <filename class="directory">libdha/dhahelperwin</filename> directory in your
   <application>MPlayer</application> source tree.
@@ -360,16 +361,13 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>Sascha Sommer releases official Windows binaries from time to time,
   Joey Parrish makes unofficial Windows packages complete with installer.
   Look for these in the Windows section of
-  <ulink url="http://www.mplayerhq.hu/homepage/projects.html#windows">our projects page</ulink>.</para>
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">our projects page</ulink>.</para>
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
 
-<para><application>Cygwin</application> versions prior to 1.5.0 do
-  not include <filename>inttypes.h</filename>. Put this
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
-  in <filename class="directory">/usr/include/</filename> in order to
-  make <application>MPlayer</application> compile.</para>
+<para>You need to run <application>Cygwin</application> 1.5.0 or later in
+  order to compile <application>MPlayer</application>.</para>
 
 <para>DirectX header files need to be extracted to <filename class="directory">/usr/include/</filename> or
   <filename class="directory">/usr/local/include/</filename>.</para>
@@ -389,10 +387,6 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   works out of the box now. Just install <application>MinGW</application>
   3.1.0 or later and MSYS 1.0.9 or later and tell the MSYS postinstall that
   <application>MinGW</application> is installed.</para>
-
-<para>If you use a version of <application>MinGW</application> before 3.1.0,
-  you need to replace <filename>/mingw/include/sys/types.h</filename> with this
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para>
 
 <para>Extract DirectX header files to <filename class="directory">/mingw/include/</filename>.</para>
 
