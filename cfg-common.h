@@ -3,6 +3,7 @@
 
 #ifdef USE_STREAM_CACHE
 	{"cache", &stream_cache_size, CONF_TYPE_INT, CONF_RANGE, 4, 65536, NULL},
+	{"nocache", &stream_cache_size, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 #else
 	{"cache", "MPlayer was compiled WITHOUT cache2 support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
