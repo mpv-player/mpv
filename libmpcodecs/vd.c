@@ -26,6 +26,10 @@ extern vd_functions_t mpcodecs_vd_cinepak;
 extern vd_functions_t mpcodecs_vd_qtrpza;
 extern vd_functions_t mpcodecs_vd_ffmpeg;
 extern vd_functions_t mpcodecs_vd_dshow;
+extern vd_functions_t mpcodecs_vd_vfw;
+extern vd_functions_t mpcodecs_vd_vfwex;
+extern vd_functions_t mpcodecs_vd_odivx;
+extern vd_functions_t mpcodecs_vd_divx4;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -34,8 +38,18 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
 #ifdef USE_LIBAVCODEC
         &mpcodecs_vd_ffmpeg,
 #endif
+#ifdef USE_WIN32DLL
 #ifdef USE_DIRECTSHOW
         &mpcodecs_vd_dshow,
+#endif
+        &mpcodecs_vd_vfw,
+        &mpcodecs_vd_vfwex,
+#endif
+#ifdef USE_DIVX
+        &mpcodecs_vd_odivx,
+#ifdef NEW_DECORE
+        &mpcodecs_vd_divx4,
+#endif
 #endif
 	NULL
 };
@@ -56,30 +70,31 @@ static int static_idx=0;
 // Note: buffer allocation may be moved to mpcodecs_config_vo() later...
 mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, int w, int h){
   mp_image_t* mpi=NULL;
+  int w2=(mp_imgflag&MP_IMGFLAG_ACCEPT_STRIDE)?((w+15)&(~15)):w;
   // Note: we should call libvo first to check if it supports direct rendering
   // and if not, then fallback to software buffers:
   switch(mp_imgtype){
   case MP_IMGTYPE_EXPORT:
 //    mpi=new_mp_image(w,h);
-    if(!export_images[0]) export_images[0]=new_mp_image(w,h);
+    if(!export_images[0]) export_images[0]=new_mp_image(w2,h);
     mpi=export_images[0];
     break;
   case MP_IMGTYPE_STATIC:
-    if(!static_images[0]) static_images[0]=new_mp_image(w,h);
+    if(!static_images[0]) static_images[0]=new_mp_image(w2,h);
     mpi=static_images[0];
     break;
   case MP_IMGTYPE_TEMP:
-    if(!temp_images[0]) temp_images[0]=new_mp_image(w,h);
+    if(!temp_images[0]) temp_images[0]=new_mp_image(w2,h);
     mpi=temp_images[0];
     break;
   case MP_IMGTYPE_IPB:
     if(!(mp_imgflag&MP_IMGFLAG_READABLE)){ // B frame:
-      if(!temp_images[0]) temp_images[0]=new_mp_image(w,h);
+      if(!temp_images[0]) temp_images[0]=new_mp_image(w2,h);
       mpi=temp_images[0];
       break;
     }
   case MP_IMGTYPE_IP:
-    if(!static_images[static_idx]) static_images[static_idx]=new_mp_image(w,h);
+    if(!static_images[static_idx]) static_images[static_idx]=new_mp_image(w2,h);
     mpi=static_images[static_idx];
     static_idx^=1;
     break;
@@ -88,8 +103,8 @@ mp_image_t* mpcodecs_get_image(sh_video_t *sh, int mp_imgtype, int mp_imgflag, i
     mpi->type=mp_imgtype;
     mpi->flags&=~(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE);
     mpi->flags|=mp_imgflag&(MP_IMGFLAG_PRESERVE|MP_IMGFLAG_READABLE);
-    if((mpi->width!=w || mpi->height!=h) && !(mpi->flags&MP_IMGFLAG_DIRECT)){
-	mpi->width=w;
+    if((mpi->width!=w2 || mpi->height!=h) && !(mpi->flags&MP_IMGFLAG_DIRECT)){
+	mpi->width=w2;
 	mpi->height=h;
 	if(mpi->flags&MP_IMGFLAG_ALLOCATED){
 	    // need to re-allocate buffer memory:
