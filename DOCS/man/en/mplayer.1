@@ -3576,6 +3576,15 @@ quantizer per MB in the future, msmpeg4 cannot be fixed as it does not support
 that).
 .RE
 .TP
+.B lmin=<0.01\-255.0>
+Minimum lagrange multiplier for ratecontrol, you probably want it to be
+equal to or lower than vqmin. (default: 2.0)
+.RE
+.TP
+.B lmax=<0.01\-255.0>
+Maximum lagrange multiplier for ratecontrol. (default: 31.0)
+.RE
+.TP
 .B vqscale=<1\-31>
 Constant quantizer /\: constant quality encoding (selects fixed quantizer mode).
 A lower value means better quality but larger files (default: 0 (disabled)).
@@ -3733,6 +3742,8 @@ minimum bitrate in kbit/\:sec (pass\ 1/\:2)
 .TP
 .B vrc_buf_size=<value>
 buffer size in kbit (pass\ 1/\:2).
+For MPEG1/2 this also sets the vbv buffer size, use 327 for VCD,
+917 for SVCD and 1835 for DVD.
 Note: vratetol should not be too large during the second pass or there might
 be problems if vrc_(min|max)rate is used.
 .TP
