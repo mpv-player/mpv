@@ -4,16 +4,16 @@
 #
 # Usage: awk -f pci_db2c.awk pci.db
 #
-# Tested with Gawk v 3.0.3
-# But there are reports that it works with Awk and Mawk
-# (Nobody tested it with Nawk).
+# Tested with Gawk v 3.0.x and Mawk 1.3.3
+# But it should work with standard Awk implementations (hopefully).
+# (Nobody tested it with Nawk, but it should work, too).
 #
 
 BEGIN {
 
     if(ARGC != 2) {
 # check for arguments:
-	print "Usage gawk -f pci_dc2c.awk pci.db";
+	print "Usage awk -f pci_db2c.awk pci.db (and make sure pci.db file exists first)";
 	exit(1);
     }
     in_file = ARGV[1];
