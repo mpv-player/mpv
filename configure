@@ -142,8 +142,7 @@ Optional features:
   --enable-faad          build with FAAD (AAC) support [autodetect]
   --disable-iconv        do not use iconv(3) function [autodetect]
   --disable-rtc          disable RTC (/dev/rtc) on Linux [autodetect]
-  --enable-mp1e          enable libmp1e support
-                         (use this option if it does not compile) [disable]
+  --enable-mp1e          enable libmp1e support [disable]
   --disable-libdv        disable libdv 0.9.5 support [autodetect]
   --disable-streaming    disable network streaming support
                          (support for: http/mms/rtp) [enable]
