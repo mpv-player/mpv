@@ -1107,6 +1107,9 @@ int 	vixPlaybackSetEq( const vidix_video_eq_t * eq)
   RTFCheckParam(equal.saturation);
   RTFCheckParam(equal.contrast);
   RTFCheckParam(equal.hue);
+  RTFCheckParam(equal.red_intense);
+  RTFCheckParam(equal.green_intense);
+  RTFCheckParam(equal.blue_intense);
   radeon_set_transform(RTFBrightness(equal.brightness),
 		       RTFContrast(equal.contrast),
 		       RTFSaturation(equal.saturation),
