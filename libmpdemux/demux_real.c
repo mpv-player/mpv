@@ -8,6 +8,9 @@
     TODO: fix the whole syncing mechanism
     
     $Log$
+    Revision 1.14  2002/06/10 02:27:31  arpi
+    export extra data for cook codec, some debug stuff
+
     Revision 1.13  2002/06/09 01:07:22  arpi
     - multiple audio/video stream support fixed
     - aid/vid autodetection (asf style - use id of first packet received)
@@ -64,6 +67,8 @@ Video codecs: (supported by RealPlayer8 for Linux)
 #include "demuxer.h"
 #include "stheader.h"
 #include "bswap.h"
+
+//#define mp_dbg(mod,lev, args... ) mp_msg_c((mod<<8)|lev, ## args )
 
 #define MKTAG(a, b, c, d) (a | (b << 8) | (c << 16) | (d << 24))
 
@@ -438,6 +443,7 @@ loop:
 	if (sh_audio != NULL) {
             dp = new_demux_packet(len);
 	    stream_read(demuxer->stream, dp->buffer, len);
+	    fprintf(stderr,"audio block len=%d\n",len);
 	    if (sh_audio->format == 0x2000)
 	    {
 		char *ptr = dp->buffer;
@@ -450,11 +456,11 @@ loop:
 		    ptr += 2;
 		}
 	    }
-	    dp->pts = timestamp/90000.0f;
+	    dp->pts = timestamp/1000.0f;
 	    dp->pos = demuxer->filepos;
 	    dp->flags = (flags & 0x2) ? 0x10 : 0;
 	    ds_add_packet(ds, dp);
-	}
+	} else
 	if (sh_video != NULL) {
 	    if (sh_video->format==0x30335652 ||
 		sh_video->format==0x30325652 ) {
@@ -530,6 +536,7 @@ loop:
 		    // we have an incomplete packet:
 		    if(ds->asf_seq!=vpkg_seqnum){
 			// this fragment is for new packet, close the old one
+			mp_msg(MSGT_DEMUX,MSGL_DBG2, "closing probably incomplete packet, len: %d  \n",ds->asf_packet->len);
 			ds_add_packet(ds,ds->asf_packet);
 			ds->asf_packet=NULL;
 		    } else {
@@ -764,6 +771,8 @@ void demux_open_real(demuxer_t* demuxer)
 
 		tmp = stream_read_dword(demuxer->stream);
 
+//#define stream_skip(st,siz) { int i; for(i=0;i<siz;i++) mp_msg(MSGT_DEMUX,MSGL_V," %02X",stream_read_char(st)); mp_msg(MSGT_DEMUX,MSGL_V,"\n");}
+
 		if (tmp == MKTAG(0xfd, 'a', 'r', '.'))
 		{
 		    /* audio header */
@@ -771,6 +780,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    char buf[128]; /* for codec name */
 		    int frame_size;
 		    int version;
+		    int flavor;
 		    
 		    mp_msg(MSGT_DEMUX,MSGL_V,"Found audio stream!\n");
 		    version = stream_read_word(demuxer->stream);
@@ -781,30 +791,31 @@ void demux_open_real(demuxer_t* demuxer)
 		    stream_skip(demuxer->stream, 4);
 		    stream_skip(demuxer->stream, 2); /* version (4 or 5) */
 		    stream_skip(demuxer->stream, 4); /* header size */
-		    stream_skip(demuxer->stream, 2); /* add codec info */
+		    flavor = stream_read_word(demuxer->stream);/* codec flavor id */
 		    stream_skip(demuxer->stream, 4); /* coded frame size */
-		    stream_skip(demuxer->stream, 4);
-		    stream_skip(demuxer->stream, 4);
-		    stream_skip(demuxer->stream, 4);
-		    stream_skip(demuxer->stream, 2); /* 1 */
+		    stream_skip(demuxer->stream, 4); // big number
+		    stream_skip(demuxer->stream, 4); // bigger number
+		    stream_skip(demuxer->stream, 4); // 2
+		    stream_skip(demuxer->stream, 2); // 10
 //		    stream_skip(demuxer->stream, 2); /* coded frame size */
 		    frame_size = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"frame_size: %d\n", frame_size);
-		    stream_skip(demuxer->stream, 4);
+		    stream_skip(demuxer->stream, 4); // 60,0
 		    
 		    if (version == 5)
-			stream_skip(demuxer->stream, 6);
+			stream_skip(demuxer->stream, 6); //0,srate,0
 
 		    sh->samplerate = stream_read_word(demuxer->stream);
-		    stream_skip(demuxer->stream, 4);
+		    stream_skip(demuxer->stream, 2);  // 0
+		    sh->samplesize = stream_read_word(demuxer->stream)/8;
 		    sh->channels = stream_read_word(demuxer->stream);
 		    mp_msg(MSGT_DEMUX,MSGL_V,"samplerate: %d, channels: %d\n",
 			sh->samplerate, sh->channels);
 
 		    if (version == 5)
 		    {
-			stream_skip(demuxer->stream, 4);
-			stream_read(demuxer->stream, buf, 4);
+			stream_skip(demuxer->stream, 4);  // "genr"
+			stream_read(demuxer->stream, buf, 4); // fourcc
 			buf[4] = 0;
 		    }
 		    else
@@ -819,7 +830,7 @@ void demux_open_real(demuxer_t* demuxer)
 		    sh->wf = malloc(sizeof(WAVEFORMATEX));
 		    memset(sh->wf, 0, sizeof(WAVEFORMATEX));
 		    sh->wf->nChannels = sh->channels;
-		    sh->wf->wBitsPerSample = 16;
+		    sh->wf->wBitsPerSample = sh->samplesize*8;
 		    sh->wf->nSamplesPerSec = sh->samplerate;
 		    sh->wf->nAvgBytesPerSec = bitrate;
 		    sh->wf->nBlockAlign = frame_size;
@@ -854,7 +865,10 @@ void demux_open_real(demuxer_t* demuxer)
 			    break;
 			case MKTAG('c', 'o', 'o', 'k'):
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Real's GeneralCooker (?) (RealAudio G2?) (unsupported)\n");
-			    tmp = 0;
+			    sh->wf = realloc(sh->wf, sizeof(WAVEFORMATEX)+2+24);
+			    *((short*)(sh->wf+1))=flavor;
+			    stream_read(demuxer->stream, ((char*)(sh->wf+1))+2, 24); // extras
+//			    tmp = 0;
 			    break;
 			case MKTAG('a', 't', 'r', 'c'):
 			    mp_msg(MSGT_DEMUX,MSGL_V,"Audio: Sony ATRAC3 (RealAudio 8) (unsupported)\n");
@@ -894,6 +908,9 @@ void demux_open_real(demuxer_t* demuxer)
 		    else
 			free(sh->wf);
 //		    break;
+
+#undef stream_skip
+
 		}
 		else
 //		case MKTAG('V', 'I', 'D', 'O'):
