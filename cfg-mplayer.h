@@ -28,6 +28,7 @@ extern char *lirc_configfile;
 #endif
 
 extern int vo_doublebuffering;
+extern int vo_fsmode;
 extern int vo_dbpp;
 extern int osd_level;
 extern int sub_unicode;
@@ -165,6 +166,7 @@ struct config conf[]={
         {"noflip", &flip, CONF_TYPE_FLAG, 0, -1, 0},
        
         {"bpp", &vo_dbpp, CONF_TYPE_INT, CONF_RANGE, 0, 32},
+	{"fsmode", &vo_fsmode, CONF_TYPE_INT, CONF_RANGE, 0, 7},
 	{"double", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 0, 1},
 	{"nodouble", &vo_doublebuffering, CONF_TYPE_FLAG, 0, 1, 0},
 #ifdef HAVE_LIRC
