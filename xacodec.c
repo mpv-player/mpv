@@ -166,19 +166,19 @@ int xacodec_init(char *filename, xacodec_driver_t *codec_driver)
 	{
 	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: avi init/query func (id: %d)\n",
 		func[i].iq_func, func[i].id);
-	    codec_driver->iq_func = func[i].iq_func;
+	    codec_driver->iq_func = (void *)(func[i].iq_func);
 	}
 	if (func[i].what & XAVID_QT_QUERY)
 	{
 	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: qt init/query func (id: %d)\n",
 		func[i].iq_func, func[i].id);
-	    codec_driver->iq_func = func[i].iq_func;
+	    codec_driver->iq_func = (void *)func[i].iq_func;
 	}
 	if (func[i].what & XAVID_DEC_FUNC)
 	{
 	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "0x%08x: decoder func (init/query: 0x%08x) (id: %d)\n",
 		func[i].dec_func, func[i].iq_func, func[i].id);
-	    codec_driver->dec_func = func[i].dec_func;
+	    codec_driver->dec_func = (void *)func[i].dec_func;
 	}
     }
     return(1);
@@ -192,7 +192,7 @@ int xacodec_query(xacodec_driver_t *codec_driver, XA_CODEC_HDR *codec_hdr)
     switch(codec_ret)
     {
 	case CODEC_SUPPORTED:
-	    codec_driver->dec_func = codec_hdr->decoder;
+	    codec_driver->dec_func = (void *)codec_hdr->decoder;
 	    mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "Codec is supported: found decoder for %s at 0x%08x\n",
 		codec_hdr->description, codec_hdr->decoder);
 	    return(1);
@@ -372,7 +372,7 @@ xacodec_image_t* xacodec_decode_frame(uint8_t *frame, int frame_size, int skip_f
 
     if (ret == ACT_DLT_NORM)
     {
-	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "norm\n");
+//	mp_msg(MSGT_DECVIDEO, MSGL_DBG2, "norm\n");
 	return &xacodec_driver->image;
     }
 
@@ -438,7 +438,7 @@ int xacodec_exit()
 }
 
 
-/* *** XANIM SHIT *** */
+/* *** XANIM Conversions *** */
 /* like loader/win32.c - mini XANIM library */
 
 unsigned long XA_Time_Read()
@@ -566,7 +566,7 @@ void *YUV2x2_Map_Func(unsigned int image_type, unsigned int dith_type)
 {
 //    XA_Print("YUV2x2_Map_Func('image_type: %d', 'dith_type: %d')",
 //	    image_type, dith_type);
-    return (void*)XA_YUV_2x2_clr;
+    return((void*)XA_YUV_2x2_clr);
 }
 
 /* -------------------- whole YV12 frame converter ------------------- */
@@ -593,7 +593,7 @@ typedef struct
 } YUVTabs;
 
 //  Here's are the YUV 16 1 1  routines.
-void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
+void XA_YUV1611_Convert(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
 {
@@ -609,7 +609,7 @@ void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned in
 	yuv_tabs->YUV_UG_tab,
 	yuv_tabs->YUV_VG_tab );
 
-    XA_Print("XA_YUV1611_To_CLR8('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
+    XA_Print("XA_YUV1611_Convert('image: %08x', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
 	image, imagex, imagey, i_x, i_y, yuv, yuv_tabs, map_flag, map, chdr);
 
     printf("YUV: %p %p %p %X (%d) %dx%d %dx%d\n",
@@ -656,20 +656,17 @@ void XA_YUV1611_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned in
 /* used by Indeo 3,4,5 */
 void *XA_YUV1611_Func(unsigned int image_type)
 {
-    void (*color_func)();
-
-    XA_Print("XA_YUV1611_Func('image_type: %d')", image_type);
-
-    return XA_YUV1611_To_CLR8;
+//    XA_Print("XA_YUV1611_Func('image_type: %d')", image_type);
+    return((void *)XA_YUV1611_Convert);
 }
 
 
-/* YUV 41 11 11 routines */
-void XA_YUV411111_To_RGB(unsigned char *image, unsigned int imagex, unsigned int imagey,
+/* YUV 41 11 11 (4:1:1) routines */
+void XA_YUV411111_Convert(unsigned char *image, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv_bufs, YUVTabs *yuv_tabs,
     unsigned int map_flag, unsigned int *map, XA_CHDR *chdr)
 {
-    XA_Print("XA_YUV411111_To_RGB('image: %d', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
+    XA_Print("XA_YUV411111_Convert('image: %d', 'imagex: %d', 'imagey: %d', 'i_x: %d', 'i_y: %d', 'yuv_bufs: %08x', 'yuv_tabs: %08x', 'map_flag: %d', 'map: %08x', 'chdr: %08x')",
 	    image, imagex, imagey, i_x, i_y, yuv_bufs, yuv_tabs, map_flag, map, chdr);
     return;
 }
@@ -677,22 +674,20 @@ void XA_YUV411111_To_RGB(unsigned char *image, unsigned int imagex, unsigned int
 
 void *XA_YUV411111_Func(unsigned int image_type)
 {
-
-    XA_Print("XA_YUV411111_Func('image_type: %d')", image_type);
-    
-    return (void*) XA_YUV411111_To_RGB;
+//    XA_Print("XA_YUV411111_Func('image_type: %d')", image_type);
+    return((void*)XA_YUV411111_Convert);
 }
 
 
 /* input frame format:  YUV 4:2:0 (YV12) */
-void XA_YUV221111_To_CLR8(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
+void XA_YUV221111_Convert(unsigned char *image_p, unsigned int imagex, unsigned int imagey,
     unsigned int i_x, unsigned int i_y, YUVBufs *yuv, YUVTabs *yuv_tabs, unsigned int map_flag,
     unsigned int *map, XA_CHDR *chdr)
 {
     xacodec_image_t *image=(xacodec_image_t*)image_p;
 
 #if 0
-    printf("XA_YUV221111_To_CLR8(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
+    printf("XA_YUV221111_Convert(%p  %dx%d %d;%d [%dx%d]  %p %p %d %p %p)\n",
 	image,imagex,imagey,i_x,i_y, image->width,image->height,
 	yuv,yuv_tabs,map_flag,map,chdr);
 
@@ -728,14 +723,14 @@ if(i_x==image->width && i_y==image->height){
 }
 
 /* used by H263,3ivX */
-/* YUV 22 11 11 routines */
+/* YUV 22 11 11 (4:2:2) routines */
 void *XA_YUV221111_Func(unsigned int image_type)
 {
-    XA_Print("XA_YUV221111_Func('image_type: %d')", image_type);    
-    return((void *)XA_YUV221111_To_CLR8);
+//    XA_Print("XA_YUV221111_Func('image_type: %d')", image_type);    
+    return((void *)XA_YUV221111_Convert);
 }
 
 YUVBufs jpg_YUVBufs;
 YUVTabs def_yuv_tabs;
 
-/* *** EOF XANIM SHIT *** */
+/* *** EOF XANIM *** */
