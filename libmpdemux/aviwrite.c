@@ -147,15 +147,6 @@ void aviwrite_write_header(aviwrite_t *muxer,FILE *f){
   aviwrite_info_t info[16];
 
   // RIFF header:
-#ifdef WORDS_BIGENDIAN 
-  /* FIXME: updating the header on big-endian causes the video
-   * to be unreadable ("AVI_NI: No video stream found!").
-   * Just don't update it (no seeking, not playable with WMP,
-   * but better than nothing)
-   */
-  if(muxer->file_end != 0)
-      return;
-#endif
   riff[0]=mmioFOURCC('R','I','F','F');
   riff[1]=muxer->file_end-2*sizeof(unsigned int);  // filesize
   riff[2]=formtypeAVI; // 'AVI '
