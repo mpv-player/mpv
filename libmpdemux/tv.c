@@ -298,6 +298,17 @@ static int open_tv(tvi_handle_t *tvh)
 	        if (tv_channel_current->freq == 0)
 		    mp_msg(MSGT_TV, MSGL_ERR, "Couldn't find frequency for channel %s (%s)\n",
 				    tv_channel_current->number, tv_channel_current->name);
+		else {
+		  sep = strchr(tv_channel_current->name, '-');
+		  if ( !sep ) sep = strchr(tv_channel_current->name, '+');
+
+		  if ( sep ) {
+		    i = atoi (sep+1);
+		    if ( sep[0] == '+' ) tv_channel_current->freq += i * 100;
+		    if ( sep[0] == '-' ) tv_channel_current->freq -= i * 100;
+		    sep[0] = '\0';
+		  }
+		}
 
 		/*mp_msg(MSGT_TV, MSGL_INFO, "-- Detected channel %s - %s (%5.3f)\n",
 				tv_channel_current->number, tv_channel_current->name,
