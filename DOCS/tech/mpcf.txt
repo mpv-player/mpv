@@ -60,7 +60,7 @@ b (binary data or string)
 	Note: strings MUST be encoded in utf8
 
         
-f(x)	n fixed bits
+f(x)	n fixed bits in big endian order
 u(x)	unsigned number encoded in x bits in MSB first order
 
 
@@ -76,7 +76,11 @@ align_byte
 reserved_bytes
 	for(i=0; i<forward_ptr - length_of_non_reserved; i++)
 		reserved			u(8)
-  
+	a decoder MUST ignore any reserved bytes
+	a encoder MUST NOT write any reserved bytes, as this would make it
+	inpossible to add new fields at the end of packets in the future in
+	a compatible way
+
 main header:
 	packet header
 	main_startcode				f(64)
