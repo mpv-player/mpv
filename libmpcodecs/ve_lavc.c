@@ -58,11 +58,13 @@ static int lavc_param_vrate_tolerance = 1000*8;
 static int lavc_param_mb_decision = 0; /* default is realtime encoding */
 static int lavc_param_v4mv = 0;
 static int lavc_param_vme = 4;
-static int lavc_param_vqscale = 0;
+static float lavc_param_vqscale = 0.0;
 static int lavc_param_vqmin = 2;
 static int lavc_param_vqmax = 31;
 static int lavc_param_mb_qmin = 2;
 static int lavc_param_mb_qmax = 31;
+static float lavc_param_lmin = 2;
+static float lavc_param_lmax = 31;
 static int lavc_param_vqdiff = 3;
 static float lavc_param_vqcompress = 0.5;
 static float lavc_param_vqblur = 0.5;
@@ -143,11 +145,13 @@ m_option_t lavcopts_conf[]={
 	{"mbd", &lavc_param_mb_decision, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
 	{"v4mv", &lavc_param_v4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"vme", &lavc_param_vme, CONF_TYPE_INT, CONF_RANGE, 0, 5, NULL},
-	{"vqscale", &lavc_param_vqscale, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
+	{"vqscale", &lavc_param_vqscale, CONF_TYPE_FLOAT, CONF_RANGE, 0.01, 255.0, NULL},
 	{"vqmin", &lavc_param_vqmin, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"vqmax", &lavc_param_vqmax, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"mbqmin", &lavc_param_mb_qmin, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"mbqmax", &lavc_param_mb_qmax, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
+	{"lmin", &lavc_param_lmin, CONF_TYPE_FLOAT, CONF_RANGE, 0.01, 255.0, NULL},
+	{"lmax", &lavc_param_lmax, CONF_TYPE_FLOAT, CONF_RANGE, 0.01, 255.0, NULL},
 	{"vqdiff", &lavc_param_vqdiff, CONF_TYPE_INT, CONF_RANGE, 1, 31, NULL},
 	{"vqcomp", &lavc_param_vqcompress, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
 	{"vqblur", &lavc_param_vqblur, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
@@ -248,6 +252,10 @@ struct vf_priv_s {
 #define mux_v (vf->priv->mux)
 #define lavc_venc_context (vf->priv->context)
 
+#if LIBAVCODEC_BUILD < 4684
+#define FF_QP2LAMBDA 1
+#endif
+
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
@@ -282,6 +290,10 @@ static int config(struct vf_instance_s* vf,
 #if LIBAVCODEC_BUILD >= 4646
     lavc_venc_context->mb_qmin= lavc_param_mb_qmin;
     lavc_venc_context->mb_qmax= lavc_param_mb_qmax;
+#endif
+#if LIBAVCODEC_BUILD >= 4684
+    lavc_venc_context->lmin= (int)(FF_QP2LAMBDA * lavc_param_lmin + 0.5);
+    lavc_venc_context->lmax= (int)(FF_QP2LAMBDA * lavc_param_lmax + 0.5);
 #endif
     lavc_venc_context->max_qdiff= lavc_param_vqdiff;
     lavc_venc_context->qcompress= lavc_param_vqcompress;
@@ -547,12 +559,12 @@ static int config(struct vf_instance_s* vf,
     /* fixed qscale :p */
     if (lavc_param_vqscale)
     {
-	printf("Using constant qscale = %d (VBR)\n", lavc_param_vqscale);
+	printf("Using constant qscale = %f (VBR)\n", lavc_param_vqscale);
 	lavc_venc_context->flags |= CODEC_FLAG_QSCALE;
 #if LIBAVCODEC_BUILD >= 4668
-        lavc_venc_context->global_quality= FF_QUALITY_SCALE * lavc_param_vqscale;
+        lavc_venc_context->global_quality= 
 #endif
-	vf->priv->pic->quality = lavc_param_vqscale;
+	vf->priv->pic->quality = (int)(FF_QP2LAMBDA * lavc_param_vqscale + 0.5);
     }
 
     if (avcodec_open(lavc_venc_context, vf->priv->codec) != 0) {
@@ -679,7 +691,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	    }
 	    quality /= w * h;
 	} else 
-	    quality = lavc_venc_context->coded_frame->quality;
+	    quality = lavc_venc_context->coded_frame->quality / (float)FF_QP2LAMBDA;
 
         fprintf(fvstats, "%6d, %2.2f, %6d, %2.2f, %2.2f, %2.2f, %2.2f %c\n",
             lavc_venc_context->coded_frame->coded_picture_number,
