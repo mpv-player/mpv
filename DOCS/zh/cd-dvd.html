@@ -44,7 +44,7 @@
 
 <P>为了优化你的CD-ROM请参考"<CODE>/proc/ide/[cdrom device]/settings</CODE>"。</P>
 
-<P>SCSI驱动器没有一个统一的设置参数的方法(你知道这样一种方法？告诉我们！) 有一种工具可以用于<A 
+<P>SCSI驱动器没有一个统一的设置参数的方法(你知道这样一种方法？告诉我们！) 有一种工具可以用于<A
 HREF="http://das.ist.org/~georg/">Plextor的SCSI驱动器</A>。</P>
 
 <P>FreeBSD:</P>
@@ -107,15 +107,15 @@ HREF="http://das.ist.org/~georg/">Plextor的SCSI驱动器</A>。</P>
 <P>默认的DVD设备是<CODE>/dev/dvd</CODE>。如果你的设置不同，作一个符号链接，或者在命令行中用<CODE>-dvd-device</CODE>选项
 指定一个正确的设备。</P>
 
-<H4>DVD授权</H4>
+<H4>DVD认证</H4>
 
-<P>新式DVD支持的授权和解密的方法是通过一个打了补丁的<CODE>libdvdcss</CODE>(见上面)来完成的。可以通过指定环境
+<P>新式DVD支持的认证和解密的方法是通过一个打了补丁的<CODE>libdvdcss</CODE>(见上面)来完成的。可以通过指定环境
 变量<CODE>DVDCSS_METHOD</CODE>来设置解密方法，可以设置的值为<CODE>key</CODE>, <CODE>disk</CODE>或者<CODE>title</CODE>。</P>
 
 <P>如果什么都没有指定它将会尝试下列方法(默认: key, title request)：</P>
 
 <OL>
-  <LI><B>bus key:</B> 这个密钥在授权(一长串的ioctls和各种密钥的交换，加密的东西的混合)的过程中确定，然后在通过没有保护的
+  <LI><B>bus key:</B> 这个密钥在认证(一长串的ioctls和各种密钥的交换，加密的东西的混合)的过程中确定，然后在通过没有保护的
 总线之前用它加密title和disk keys(防止窃听)。需要bus key来获得加密的disk key并对其进行预解密.</LI>
   <LI><B>cached key:</B> MPlayer寻找已经破解的title keys，存放在<CODE>~/.mplayer/DVDKeys</CODE>目录下(很快;).</LI>
   <LI><B>key:</B> 如果没有可用的cached key，MPlayer尝试使用播放器密钥来对disk key进行解密。</LI>
