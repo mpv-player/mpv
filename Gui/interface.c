@@ -98,7 +98,11 @@ void guiGetEvent( int type,char * arg )
 	break;
    case guiSetShVideo:
 	 {
-	  mplResizeToMovieSize( vo_dwidth,vo_dheight );
+	  if ( !appMPlayer.subWindow.isFullScreen )
+	   {
+	    wsResizeWindow( &appMPlayer.subWindow,vo_dwidth,vo_dheight );
+            wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
+	   }
 	  guiIntfStruct.MovieWidth=vo_dwidth;
 	  guiIntfStruct.MovieHeight=vo_dwidth;
          }

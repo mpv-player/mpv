@@ -361,6 +361,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
  win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;
  win->SizeHint.height=win->Height;
+
  if ( D & wsMinSize )
   {
    win->SizeHint.flags|=PMinSize;
@@ -373,6 +374,7 @@ void wsCreateWindow( wsTWindow * win,int X,int Y,int wX,int hY,int bW,int cV,uns
    win->SizeHint.max_width=win->Width;
    win->SizeHint.max_height=win->Height;
   }
+
  win->SizeHint.height_inc=1;
  win->SizeHint.width_inc=1;
  win->SizeHint.base_width=win->Width;
@@ -770,9 +772,12 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
  win->Width=sx;
  win->Height=sy;
 
- win->SizeHint.flags=PSize | PWinGravity;
+ win->SizeHint.flags=PPosition | PSize | PWinGravity | PBaseSize;
+ win->SizeHint.x=win->X;
+ win->SizeHint.y=win->Y;
  win->SizeHint.width=win->Width;
  win->SizeHint.height=win->Height;
+/*
  if ( win->Property & wsMinSize )
   {
    win->SizeHint.flags|=PMinSize;
@@ -785,9 +790,13 @@ void wsResizeWindow( wsTWindow * win,int sx, int sy )
    win->SizeHint.max_width=win->Width;
    win->SizeHint.max_height=win->Height;
   }
+*/
  win->SizeHint.win_gravity=StaticGravity;
+ win->SizeHint.base_width=sx; win->SizeHint.base_height=sy;
+ if ( !wsIsKDE ) XUnmapWindow( wsDisplay,win->WindowID );
  XSetWMNormalHints( wsDisplay,win->WindowID,&win->SizeHint );
  XResizeWindow( wsDisplay,win->WindowID,sx,sy );
+ XMapRaised( wsDisplay,win->WindowID );
  if ( win->ReSize ) win->ReSize( win->X,win->Y,win->Width,win->Height );
 }
 

@@ -15,7 +15,6 @@ extern void mplPause( void );
 extern void mplState( void );
 extern void mplPrev( void );
 extern void mplNext( void );
-extern void mplResizeToMovieSize( unsigned int width,unsigned int height );
 
 extern void mplIncAudioBufDelay( void );
 extern void mplDecAudioBufDelay( void );

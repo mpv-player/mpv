@@ -207,15 +207,6 @@ void ChangeSkin( char * name )
  btnModify( evFullScreen,!appMPlayer.subWindow.isFullScreen );
 }
 
-void mplResizeToMovieSize( unsigned int width,unsigned int height )
-{
- if ( !appMPlayer.subWindow.isFullScreen )
-  {
-   wsResizeWindow( &appMPlayer.subWindow,width,height );
-   wsMoveWindow( &appMPlayer.subWindow,True,appMPlayer.sub.x,appMPlayer.sub.y );
-  }
-}
-
 void mplSetFileName( char * fname )
 {
  if ( !fname ) return;
