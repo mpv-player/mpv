@@ -1,5 +1,5 @@
-.\" synced with 1.837
-.\" MPlayer (C) 2000-2004 MPlayer Team
+.\" synced with 1.842
+.\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
 .\"            i Maciej "Paszczi" Paszta (paszczi@go2.pl)
@@ -313,7 +313,7 @@ Prze³±cza tryb pe³noekranowy (patrz te¿ \-fs).
 .IPs "option + [ and option + ]"
 Ustawia przezroczysto¶æ okna filmu.
 .IPs T\ \ \ \ 
-Prze³±cza warstwê video: na wierzchu/pod spodem/normalnie (patrz te¿ \-ontop).
+Prze³±cza warstwê video: na wierzchu/\:pod spodem/\:normalnie (patrz te¿ \-ontop).
 .RE
 .PD 1
 
@@ -777,10 +777,6 @@ Przydatne je¶li chcesz ogl±daæ na ¿ywo media ze strumieni przy wolnym
 po³±czeniu.
 .
 .TP
-.B \-cdrom-device <¶cie¿ka\ do\ urz±dzenia>
-Ustawia ¶cie¿kê do urz±dzenia CD-ROM (domy¶lnie: /dev/\:cdrom).
-.
-.TP
 .B \-cache <kBajty>
 Ta opcja okre¶la ile pamiêci (w kBajtach) ma byæ u¿yte do wstêpnego
 buforowania zbioru lub URL.
@@ -789,6 +785,10 @@ Szczególnie przydatne przy powolnych no¶nikach.
 .TP
 .B \-cache-min <procent>
 Odtwarzanie rozpocznie siê gdy bufor zostanie wype³niony w podanym stopniu.
+.
+.TP
+.B \-cdrom-device <¶cie¿ka\ do\ urz±dzenia>
+Ustawia ¶cie¿kê do urz±dzenia CD-ROM (domy¶lnie: /dev/\:cdrom).
 .
 .TP
 .B \-cache-prefil <procent> (jeszcze nie zaimplementowane)
@@ -1554,7 +1554,9 @@ wyrównywanie dolnej krawêdzi.
 .TP
 .B \-subcc \ 
 Wy¶wietla napisy DVD Closed Caption (CC).
-NIE s± to napisy VOB, s± to specjalne napisy ASCII dla nies³ysz±cych
+To
+.B nie
+s± napisy VOB, s± to specjalne napisy ASCII dla nies³ysz±cych
 zakodowane w strumieniu danych u¿ytkownika VOB na wiêkszo¶ci DVD z regionu 1.
 Jak dot±d niespotykane na DVD z innych regionów.
 .
@@ -1935,14 +1937,8 @@ Je¿eli nie jest do³±czony, zostanie wygenerowane srowe wyj¶cie PCM.
 Zapisuje d¼wiêk do <nazwa\ pliku> zamiast domy¶lnego audiodump.wav.
 Je¿eli okre¶lnono parametr nowaveheader, domy¶lnym zbiorem wyj¶ciowym jest
 audiodump.pcm.
-.REss
-.PD 1
-.RS
-.sp 1
-.I INFORMACJA:
-Je¿eli nie okre¶lisz ¿adnej opcji, wyj¶cie jest progresywne
-(np.\& bez przeplotu).
 .RE
+.PD 1
 .
 .TP
 .B plugin\ \ 
@@ -3710,7 +3706,7 @@ z pakietu SDK LADSPA.
 .IPs parametry
 Parametry s± liczbami rzeczywistymi wiêkszymi lub równymi zeru, które okre¶laj±
 zachowanie za³adowanej bilioteki (np. opó¼nienie, próg czy wzmocnienie).
-W trybie "gadatliwym" (dodaj flagê -v do wiersza poleceñ MPlayera), wypisywane
+W trybie "gadatliwym" (dodaj flagê \-v do wiersza poleceñ MPlayera), wypisywane
 s± wszystkie mo¿liwe parametry i ich poprawne zakresy.
 Zastêpuje to funkcjê "analyseplugin" z pakietu SDK LADSPA.
 .RE
@@ -3955,7 +3951,9 @@ Zmienia po¿±dan± wielko¶æ obrazu/\:proporcjê w wybranym miejscu ³añcucha
 filtrów.
 Proporcja mo¿e byæ podana jako u³amek (4/\:3) lub liczba rzeczywista (1.33).
 Zamiast tego mo¿na podaæ dok³adne wymiary wyj¶cia.
-Proszê zauwa¿yæ, ¿e filtr ten NIE przeskalowywuje nic samemu; on tylko ustawia
+Proszê zauwa¿yæ, ¿e filtr ten
+.B nie
+przeskalowywuje nic samemu; on tylko ustawia
 co nastêpne skalowania (sprzêtowe lub programowe) zrobi± przy dostosowywaniu do
 prawid³owych proporcji.
 .
@@ -3981,7 +3979,7 @@ Konwersja kolorów RGB 24/\:32 <\-> BGR 24/\:32
 .PD 0
 .RSs
 .IPs swap\ 
-Dodatkowo zamienia R <\-> B.
+Dodatkowo zamienia R <-> B.
 .RE
 .PD 1
 .
@@ -4583,7 +4581,9 @@ U¿ywa trybu dwuprzebiegowego (two-pass).
 Efektem jest lepsza jako¶æ.
 Przej¶cie 1 analizuje film i zapisuje informacje do pliku informacyjnego.
 Przej¶cie 2 czyta ten plik i wykorzystuje go przy w³a¶ciwej obróbce.
-Te przebiegi NIE odpowiadaj± przebiegom 1 i 2 w procesie kodowania.
+Te przebiegi
+.B nie
+odpowiadaj± przebiegom 1 i 2 w procesie kodowania.
 Aby wykorzystaæ tryb dwuprzebiegowy divtc z dwuprzebiegowym kodowaniem, musisz
 wykonaæ nastêpuj±ce trzy kroki: 1 przebieg divtc i kodera, pó¼niej 2 przebieg
 divtc i 1 kodera, na koñcu 2 przebieg divtc i kodera.
@@ -4819,8 +4819,8 @@ Ustawia domy¶ln± warto¶æ flagi "hidden" (0=widoczny, 1=ukryty).
 .IPs <nieprzezroczysty>
 Ustawia domy¶ln± warto¶æ flagi "opaque" (0=przezroczysty, 1=nieprzezroczysty).
 .IPs <kolejka>
-¶cie¿ka/\:nazwa pliku FIFO (nazwana kolejka ³±cz±ca mplayer \-vf bmovl
-z aplikacj± kontroluj±)
+¶cie¿ka/\:nazwa pliku FIFO (nazwana kolejka ³±cz±ca "mplayer \-vf bmovl"
+z aplikacj± kontroluj±c±)
 .RE
 .PD 1
 .sp 1
@@ -4889,7 +4889,8 @@ jest aktualizowana.
 Renderuje tylko ka¿d± n-t± lub ka¿d± Intra (kluczow± - key) klatkê.
 .sp 1
 Je¿eli wywo³asz ten filtr z parametrem I (du¿a litera), wy¶wietlane bêd±
-tylko klatki kluczowe.
+.B tylko
+klatki kluczowe.
 Dla DVD oznacza to zwykle co 15/\:12 ramkê (IBBPBBPBBPBBPBB),
 a dla AVI ka¿d± zmianê sceny lub ka¿d± warto¶æ keyint (sprawd¼ warto¶æ
 \-lavcopts keyint= je¿eli korzystasz z MEncodera przy kodowaniu video).
@@ -4975,8 +4976,8 @@ Domy¶lnie u¿ywany jest tryb kolorowy.
 Poziome dziesi±tkowanie 1, 2 lub 4.
 .IPs vdec={1,2,4}
 Pionowe dziesi±tkowanie 1, 2 lub 4.
-.IPs quality=1-20
-Ustawia jako¶æ kompresji JPEG [NAJLEPSZA] 1 - 20 [NAJGORSZA].
+.IPs quality=1\-20
+Ustawia jako¶æ kompresji JPEG [NAJLEPSZA] 1 \- 20 [NAJGORSZA].
 .IPs fd|nofd
 Domy¶lnie, dziesi±tkowanie jest stosowane, je¿eli sprzêt Zoran mo¿e
 przeskalowaæ wzwy¿ wynikowe obrazy MJPEG do ich oryginalnego rozmiaru.
@@ -5041,7 +5042,7 @@ Da plik wyj¶ciowy zawieraj±cy "div3" jako video fourcc.
 .TP
 .B \-force-avi-aspect <0.2\-3.0>
 Nadpisuje aspekt zawarty nag³ówku vprp AVI OpenDML.
-Opcja ta mo¿e byæ u¿yta do zmiany proporcji przy \-ovc copy.
+Opcja ta mo¿e byæ u¿yta do zmiany proporcji przy "\-ovc copy".
 .
 .TP
 .B \-info <opcja1:opcja2:...> (tylko AVI)
@@ -5129,7 +5130,7 @@ Koduje do AVI (domy¶lne).
 .IPs "\-of mpeg"
 Koduje do MPEG.
 .IPs "\-of rawvideo"
-surowy strumieñ video (bez muksowania - tylko jeden strumieñ video)
+surowy strumieñ video (bez muksowania \- tylko jeden strumieñ video)
 .RE
 .PD 1
 .
@@ -5155,7 +5156,7 @@ Nie koduje, tylko kopiuje strumieñ.
 .IPs "\-ovc divx4"
 Koduje do DivX4/\:DivX5.
 .IPs "\-ovc raw"
-Koduje do nieskompesowanego formatu (u¿yj \-vf format, aby wybraæ).
+Koduje do nieskompesowanego formatu (u¿yj "\-vf format", aby wybraæ).
 .IPs "\-ovc lavc"
 Koduje z kodekiem libavcodec.
 .RE
@@ -5314,11 +5315,11 @@ bitrate w kbit (tylko CBR i ABR)
 .
 .TP
 .B q=<0\-9>
-jako¶æ (0\-najwy¿sza, 9\-najni¿sza) (tylko VBR)
+jako¶æ (0 \- najwy¿sza, 9 \- najni¿sza) (tylko VBR)
 .
 .TP
 .B aq=<0\-9>
-jako¶æ algorytmiczna (0\-najlepsza/\:najwolniejsze, 9\-najgorsza/\:najszybsze)
+jako¶æ algorytmiczna (0 \- najlepsza/najwolniejsza, 9 \- najgorsza/najszybsza)
 .
 .TP
 .B ratio=<1\-100>
@@ -5395,7 +5396,7 @@ kodowanie ABR z u¶rednion± warto¶ci± podanego bitrate
 .RE
 .sp 1
 .RS
-.I PRZYK£AD:
+.I PRZYK£ADY:
 .RE
 .PD 0
 .RSs
@@ -7166,11 +7167,11 @@ Wybiera kwantyzator, jaki bêdzie u¿yty z klatkami P.
 Klatki I i B ró¿ni± siê od tej warto¶ci odpowiednio o ip_factor i pb_factor.
 Najbardziej przydatny zakres to 20\-40 (domy¶lnie: 26).
 Ni¿sze warto¶ci to lepsza dok³adno¶c, ale wiêksze warto¶ci bitrate.
-Zauwa¿, ¿e kwantyzacja w H.264 dzia³a zupe³nie inaczej ni¿ w MPEG[124].
+Zauwa¿, ¿e kwantyzacja w H.264 dzia³a zupe³nie inaczej ni¿ w MPEG-[124].
 Parametr kwantyzacji (QP) H.264 jest w skali logarytmicznej.
 Na przyk³ad, ró¿nica bitratete miêdzy QP=20 a QP=40 jest mniej wiêcej równa
 wspó³czynnikowi wynosz±cemu 10. Przydatne kwantyzatory w H.264 s± du¿o wiêksze
-w porównaniu z tymi z MPEG[124].
+w porównaniu z tymi z MPEG-[124].
 .
 .TP
 .B pass=<1\-3>
@@ -7636,7 +7637,7 @@ sposób tworzenia przydatnych zg³oszeñ b³êdów.
 MPlayer zosta³ stworzony przez Arpad'a Gereöffy.
 Lista niektórych z wielu uczestników znajduje siê w zbiorze AUTHORS.
 .PP
-MPlayer (C) 2000\-2004  Za³oga MPlayera
+MPlayer (C) 2000\-2005  Za³oga MPlayera
 .PP
 G³ównymi autorami tej strony s± Gabucino, Jonas Jermann i Diego Biurrun.
 Obecnie opiekuje siê ni± Diego Biurrun.
