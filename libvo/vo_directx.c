@@ -79,6 +79,7 @@ extern int vo_directrendering;
 extern int vo_ontop;
 extern int vo_rootwin;
 extern int vidmode;
+extern int vo_colorkey;
 
 /*****************************************************************************
  * DirectDraw GUIDs.
@@ -978,6 +979,7 @@ static uint32_t preinit(const char *arg)
     monitor_rect.right=GetSystemMetrics(SM_CXSCREEN);
     monitor_rect.bottom=GetSystemMetrics(SM_CYSCREEN);
 	
+    windowcolor = vo_colorkey;
     wc.style         =  CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   =  WndProc;
     wc.cbClsExtra    =  0;
