@@ -100,7 +100,7 @@ static int open(vf_instance_t *vf, char* args){
 }
 
 vf_info_t vf_info_swapuv = {
-    "UV swaper",
+    "UV swapper",
     "swapuv",
     "Michael Niedermayer",
     "",
