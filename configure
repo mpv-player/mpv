@@ -3550,44 +3550,38 @@ fi
 echocheck "XviD"
 cat > $TMPC << EOF
 #include <xvid.h>
+#include <divx4.h>
 int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
 if test "$_xvid" != no && cc_check -lm "$_xvidcore" ; then
   _xvid=yes
   _ld_xvid="$_xvidcore"
   _def_xvid='#define HAVE_XVID 1'
+  _def_divx4_h='#define HAVE_DIVX4_H 1'
   _codecmodules="xvid $_codecmodules"
 elif test "$_xvid" != no && cc_check -lm -lxvidcore ; then
   _xvid=yes
   _ld_xvid='-lxvidcore'
   _def_xvid='#define HAVE_XVID 1'
+  _def_divx4_h='#define HAVE_DIVX4_H 1'
   _codecmodules="xvid $_codecmodules"
 else
   _xvid=no
   _ld_xvid=''
   _def_xvid='#undef HAVE_XVID'
+  _def_divx4_h='#undef HAVE_DIVX4_H'
   _nocodecmodules="xvid $_nocodecmodules"
 fi
 echores "$_xvid"
 
 _xvidcompat=no
-_def_divx4_h='#undef HAVE_DIVX4_H'
 if test "$_xvid" = yes ; then
   echocheck "DivX4 compatibility in XviD"
   cat > $TMPC << EOF
 #include <divx4.h>
 int main(void) { (void) decore(0, 0, 0, 0); return 0; }
 EOF
-  if cc_check -lm "$_ld_xvid" ; then
-    _xvidcompat='yes (using divx4.h)'
-    _def_divx4_h='#define HAVE_DIVX4_H 1'
-  else
-    cat > $TMPC << EOF
-#include <decore.h>
-int main(void) { (void) decore(0, 0, 0, 0); return 0; }
-EOF
-    cc_check -lm "$_ld_xvid" && _xvidcompat='yes (using decore.h)'
-  fi
+  cc_check -lm "$_ld_xvid" && _xvidcompat=yes
   echores "$_xvidcompat"
 fi
 
