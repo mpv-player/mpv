@@ -80,6 +80,20 @@ void mov_build_index(mov_track_t* trak){
     int i,j,s;
     int last=trak->chunks_size;
     unsigned int pts=0;
+
+#if 0
+    if (trak->chunks_size <= 0)
+    {
+	mp_msg(MSGT_DEMUX, MSGL_WARN, "No chunk offset table, trying to build one!\n");
+	
+	trak->chunks_size = trak->samples_size;
+	trak->chunks = realloc(trak->chunks, sizeof(mov_chunk_t)*trak->chunks_size);
+	
+	for (i=0; i < trak->chunks_size; i++)
+	    trak->chunks[i].pos = -1;
+    }
+#endif
+
     mp_msg(MSGT_DEMUX, MSGL_HINT, "MOV track: %d chunks, %d samples\n",trak->chunks_size,trak->samples_size);
     mp_msg(MSGT_DEMUX, MSGL_HINT, "pts=%d  scale=%d  time=%5.3f\n",trak->length,trak->timescale,(float)trak->length/(float)trak->timescale);
 
@@ -93,6 +107,18 @@ void mov_build_index(mov_track_t* trak){
 	}
 	last=trak->chunkmap[i].first;
     }
+
+#if 0
+    for (i=0; i < trak->chunks_size; i++)
+    {
+	/* fixup position */
+	if (trak->chunks[i].pos == -1)
+	    if (i > 0)
+		trak->chunks[i].pos = trak->chunks[i-1].pos + trak->chunks[i-1].size;
+	    else
+		trak->chunks[i].pos = 0; /* FIXME: set initial pos */
+    }
+#endif
 
     // calc pts of chunks:
     s=0;
@@ -390,6 +416,34 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		for(i=0;i<len;i++) trak->chunks[i].pos=stream_read_dword(demuxer->stream);
 		break;
 	    }
+	    case MOV_FOURCC('c','o','6','4'): {
+		int temp=stream_read_dword(demuxer->stream);
+		int len=stream_read_dword(demuxer->stream);
+		int i;
+		mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*s64bit chunk offset table! (%d chunks)\n",level,"",len);
+		// extend array if needed:
+		if(len>trak->chunks_size){
+		    trak->chunks=realloc(trak->chunks,sizeof(mov_chunk_t)*len);
+		    trak->chunks_size=len;
+		}
+		// read elements:
+		for(i=0;i<len;i++)
+		{
+		    int len1=stream_read_dword(demuxer->stream);
+		    int len2=stream_read_dword(demuxer->stream);
+		    
+		    mp_msg(MSGT_DEMUX, MSGL_DBG3, "Chunk #%d: len1=%d, len2=%d\n", i, len1, len2);
+
+#ifndef _LARGEFILE_SOURCE /* is this right ?! -- alex */
+		    if (len1)
+			mp_msg(MSGT_DEMUX, MSGL_WARN, "Chunk %d has got 64bit address, but you've MPlayer compiled without LARGEFILE support!\n", i);
+		    trak->chunks[i].pos = len2;
+#else
+		    trak->chunks[i].pos = len1+len2; /* also off_t pos -> on 64bit platform off_t MUST be 64bit */
+#endif
+		}
+		break;
+	    }
 	    case MOV_FOURCC('s','t','s','s'): {
 		int temp=stream_read_dword(demuxer->stream);
 		int entries=stream_read_dword(demuxer->stream);
@@ -501,6 +555,7 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    }
 	    case MOV_TRAK_VIDEO: {
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
+		int depth = trak->stdata[43+32]; /* requested by Mike Melanson for Apple RLE decoder -- alex */
 		sh->format=trak->fourcc;
 		if(!sh->fps) sh->fps=trak->timescale;
 		sh->frametime=1.0f/sh->fps;
@@ -514,11 +569,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->bih->biWidth=sh->disp_w;
 		sh->bih->biHeight=sh->disp_h;
 		sh->bih->biPlanes=0;
-		sh->bih->biBitCount=16;
+		sh->bih->biBitCount=depth;
 		sh->bih->biCompression=trak->fourcc;
 		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight;
 
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Image size: %d x %d\n",sh->disp_w,sh->disp_h);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Image size: %d x %d (%dbits)\n",sh->disp_w,sh->disp_h,sh->bih->biBitCount);
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s  Codec: '%.*s'\n",&trak->fourcc,trak->stdata_len-43,trak->stdata+43);
 		
 		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
@@ -818,7 +873,7 @@ if(trak->samplesize){
     }
     else
 	x=trak->chunks[trak->pos].size;
-    printf("X = %d\n", x);
+//    printf("X = %d\n", x);
     if(trak->stdata_len>=36){
 	// extended stsd header - works for CBR MP3:
 	x/=(trak->stdata[30]<<8)+trak->stdata[31];  // samples/packet
