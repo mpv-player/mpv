@@ -1,7 +1,12 @@
 
 // mga_vid drawing functions
 
-extern int mga_next_frame;
+static int mga_next_frame=0;
+
+static mga_vid_config_t mga_vid_config;
+static uint8_t *vid_data, *frames[4];
+static int f;
+
 
 static void
 write_frame_g200(uint8_t *y,uint8_t *cr, uint8_t *cb)
@@ -161,7 +166,7 @@ vo_mga_flip_page(void)
 
 #if 1
 	ioctl(f,MGA_VID_FSEL,&mga_next_frame);
-	mga_next_frame=(mga_next_frame+1)&3;
+	mga_next_frame=(mga_next_frame+1)%mga_vid_config.num_frames;
 	vid_data=frames[mga_next_frame];
 #endif
 
@@ -216,5 +221,31 @@ query_format(uint32_t format)
         return 1;
     }
     return 0;
+}
+
+static int mga_init(){
+	char *frame_mem;
+
+	mga_vid_config.num_frames=4;
+	mga_vid_config.version=MGA_VID_VERSION;
+	if (ioctl(f,MGA_VID_CONFIG,&mga_vid_config))
+	{
+		perror("Error in mga_vid_config ioctl");
+		return -1;
+	}
+	ioctl(f,MGA_VID_ON,0);
+
+	frames[0] = (char*)mmap(0,mga_vid_config.frame_size*mga_vid_config.num_frames,PROT_WRITE,MAP_SHARED,f,0);
+	frames[1] = frames[0] + 1*mga_vid_config.frame_size;
+	frames[2] = frames[0] + 2*mga_vid_config.frame_size;
+	frames[3] = frames[0] + 3*mga_vid_config.frame_size;
+	mga_next_frame = 0;
+	vid_data = frames[mga_next_frame];
+
+	//clear the buffer
+	memset(frames[0],0x80,mga_vid_config.frame_size*mga_vid_config.num_frames);
+
+  return 0;
+
 }
 
