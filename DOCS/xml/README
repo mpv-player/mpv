@@ -1,6 +1,7 @@
 Tools required for building the documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+* GNU make 3.80 or later
 * DocBook 4.1.2 or later
 * The DocBook XML DTD (also known as DocBk XML)
 * DocBook XSL stylesheets -- version 1.50.0 or later is recommended.
