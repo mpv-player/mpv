@@ -1147,7 +1147,7 @@ if(file_format==DEMUXER_TYPE_AVI && sh_audio){
 //             audio_delay,audio_buffer_delay,a_pts,sh_audio->timer);
     printf("START:  a_pts=%5.3f  v_pts=%5.3f  \n",d_audio->pts,d_video->pts);
   }
-//  delay_corrected=0; // has to correct PTS diffs
+  delay_corrected=0; // has to correct PTS diffs
   d_video->pts=0;d_audio->pts=0; // PTS is outdated now!
 } else {
   pts_from_bps=0; // it must be 0 for mpeg/asf !
