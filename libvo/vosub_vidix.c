@@ -37,7 +37,7 @@
 static VDL_HANDLE vidix_handler = NULL;
 static uint8_t *vidix_mem = NULL;
 static uint8_t next_frame;
-static unsigned image_bpp,image_height,image_width,src_format;
+static unsigned image_Bpp,image_height,image_width,src_format;
 extern int verbose;
 static int video_on=0;
 
@@ -45,6 +45,7 @@ static vidix_capability_t vidix_cap;
 static vidix_playback_t   vidix_play;
 static vidix_fourcc_t	  vidix_fourcc;
 static vo_functions_t *   vo_server;
+static vidix_yuv_t	  dstrides;
 static uint32_t (*server_control)(uint32_t request, void *data, ...);
 
 
@@ -146,20 +147,16 @@ static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h
 {
     uint8_t *src;
     uint8_t *dest;
-    unsigned bespitch,apitch;
     int i;
 
     /* Plane Y */
-    apitch = vidix_play.dest.pitch.y-1;
-    bespitch = (w + apitch) & ~apitch;
-    
     dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += bespitch*y + x;
+    dest += dstrides.y*y + x;
     src = image[0];
     for(i=0;i<h;i++){
         memcpy(dest,src,w);
         src+=stride[0];
-        dest += bespitch;
+        dest += dstrides.y;
     }
 
     if (vidix_play.flags & VID_PLAY_INTERLEAVED_UV)
@@ -167,7 +164,7 @@ static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h
         int hi,wi;
         uint8_t *src2;
         dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.v;
-        dest += bespitch*y/2 + x; // <- is this correct ?
+        dest += dstrides.y*y/2 + x; // <- is this correct ?
         h/=2;
         w/=2;
         src = image[1];
@@ -179,143 +176,61 @@ static uint32_t vidix_draw_slice_420(uint8_t *image[], int stride[], int w,int h
                 dest[2*wi+0] = src[wi];
                 dest[2*wi+1] = src2[wi];
             }
-            dest += bespitch;
+            dest += dstrides.y;
             src += stride[1];
-			src2+= stride[2];
-		}
-
-    } else {
-
+	    src2+= stride[2];
+	}
+    }
+    else 
+    {
 		/* Plane V */
-		apitch = vidix_play.dest.pitch.v-1;
-		bespitch = (w + apitch) & ~apitch;
-
 		dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.v;
-		dest += bespitch*y/4 + x;
+		dest += dstrides.v*y/4 + x;
 		src = image[1];
 		for(i=0;i<h/2;i++){
 			memcpy(dest,src,w/2);
 			src+=stride[1];
-			dest+=bespitch/2;
+			dest+=dstrides.v/2;
 		}
 
 		/* Plane U */
-		apitch = vidix_play.dest.pitch.u-1;
-		bespitch = (w + apitch) & ~apitch;
-
 		dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.u;
-		dest += bespitch*y/4 + x;
+		dest += dstrides.u*y/4 + x;
 		src = image[2];
 		for(i=0;i<h/2;i++){
 			memcpy(dest,src,w/2);
 			src+=stride[2];
-			dest += bespitch/2;
+			dest += dstrides.u/2;
 		}
 		return 0;
-	}
+    }
 }
 
-static uint32_t vidix_draw_slice_422(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static uint32_t vidix_draw_slice_packed(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
-    unsigned bespitch,apitch;
     int i;
-    apitch = vidix_play.dest.pitch.y-1;
-    bespitch = (w*2 + apitch) & ~apitch;
     dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += bespitch*y + x;
+    dest += dstrides.y*y + x;
     src = image[0];
     for(i=0;i<h;i++){
-        memcpy(dest,src,w*2);
+        memcpy(dest,src,w*image_Bpp);
         src+=stride[0];
-        dest += bespitch;
+        dest += dstrides.y;
     }
     return 0;
 }
 
-static uint32_t vidix_draw_slice_422_fast(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static uint32_t vidix_draw_slice_packed_fast(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     uint8_t *src;
     uint8_t *dest;
-    unsigned bespitch,apitch;
     int i;
-    apitch = vidix_play.dest.pitch.y-1;
-    bespitch = (w*2 + apitch) & ~apitch;
     dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += bespitch*y + x;
+    dest += dstrides.y*y + x;
     src = image[0];
-    memcpy(dest,src,h*bespitch);
-    return 0;
-}
-
-static uint32_t vidix_draw_slice_32(uint8_t *image[], int stride[], int w,int h,int x,int y)
-{
-    uint8_t *src;
-    uint8_t *dest;
-    unsigned bespitch,apitch;
-    int i;
-    apitch = vidix_play.dest.pitch.y-1;
-    bespitch = (w*4 + apitch) & ~apitch;
-    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += bespitch*y + x;
-    src = image[0];
-    for(i=0;i<h;i++){
-        memcpy(dest,src,w*4);
-        src+=stride[0];
-        dest += bespitch;
-    }
-
-    return 0;
-}
-
-static uint32_t vidix_draw_slice_32_fast(uint8_t *image[], int stride[], int w,int h,int x,int y)
-{
-    uint8_t *src;
-    uint8_t *dest;
-    unsigned bespitch,apitch;
-    int i;
-    apitch = vidix_play.dest.pitch.y-1;
-    bespitch = (w*4 + apitch) & ~apitch;
-    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += bespitch*y + x;
-    src = image[0];
-    memcpy(dest,src,h*bespitch);
-    return 0;
-}
-
-static uint32_t vidix_draw_slice_24(uint8_t *image[], int stride[], int w,int h,int x,int y)
-{
-    uint8_t *src;
-    uint8_t *dest;
-    unsigned bespitch,apitch;
-    int i;
-    apitch = vidix_play.dest.pitch.y-1;
-    bespitch = (w*3 + apitch) & ~apitch;
-    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += bespitch*y + x;
-    src = image[0];
-    for(i=0;i<h;i++){
-        memcpy(dest,src,w*3);
-        src+=stride[0];
-        dest += bespitch;
-    }
-
-    return 0;
-}
-
-static uint32_t vidix_draw_slice_24_fast(uint8_t *image[], int stride[], int w,int h,int x,int y)
-{
-    uint8_t *src;
-    uint8_t *dest;
-    unsigned bespitch,apitch;
-    int i;
-    apitch = vidix_play.dest.pitch.y-1;
-    bespitch = (w*3 + apitch) & ~apitch;
-    dest = vidix_mem + vidix_play.offsets[next_frame] + vidix_play.offset.y;
-    dest += bespitch*y + x;
-    src = image[0];
-    memcpy(dest,src,h*bespitch);
+    memcpy(dest,src,h*dstrides.y);
     return 0;
 }
 
@@ -506,7 +421,7 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 {
   size_t i,awidth;
   int err,is_422_planes_eq;
-  uint32_t sstride,dstride;
+  uint32_t sstride,apitch;
   if(verbose > 1)
      printf("vosub_vidix: vidix_init() was called\n"
     	    "src_w=%u src_h=%u dest_x_y_w_h = %u %u %u %u\n"
@@ -634,29 +549,53 @@ int      vidix_init(unsigned src_width,unsigned src_height,
 	for (i = 0; i < vidix_play.num_frames; i++)
 	    memset(vidix_mem + vidix_play.offsets[i], 0x80,
 		vidix_play.frame_size);
+	switch(format)
+	{
+	    /*
+	    case IMGFMT_YV09:
+	    case IMGFMT_IF09:
+	    */
+	    case IMGFMT_I420:
+	    case IMGFMT_IYUV:
+	    case IMGFMT_YV12:
+		apitch = vidix_play.dest.pitch.y-1;
+		dstrides.y = (image_width + apitch) & ~apitch;
+		apitch = vidix_play.dest.pitch.v-1;
+		dstrides.v = (image_width + apitch) & ~apitch;
+		apitch = vidix_play.dest.pitch.u-1;
+		dstrides.u = (image_width + apitch) & ~apitch;
+		image_Bpp=1;
+		break;
+	    case IMGFMT_RGB32:
+	    case IMGFMT_BGR32:
+		apitch = vidix_play.dest.pitch.y-1;
+		dstrides.y = (image_width*4 + apitch) & ~apitch;
+		dstrides.u = dstrides.v = 0;
+		image_Bpp=4;
+		break;
+	    case IMGFMT_RGB24:
+	    case IMGFMT_BGR24:
+		apitch = vidix_play.dest.pitch.y-1;
+		dstrides.y = (image_width*3 + apitch) & ~apitch;
+		dstrides.u = dstrides.v = 0;
+		image_Bpp=3;
+		break;
+	    default:
+		apitch = vidix_play.dest.pitch.y-1;
+		dstrides.y = (image_width*2 + apitch) & ~apitch;
+		dstrides.u = dstrides.v = 0;
+		image_Bpp=2;
+		break;
+	}
         /* tune some info here */
 	sstride = src_width*2;
-	dstride = (src_width*2+(vidix_play.dest.pitch.y-1))&~(vidix_play.dest.pitch.y-1);
-	is_422_planes_eq = sstride == dstride;
+	is_422_planes_eq = sstride == dstrides.y;
         if(src_format == IMGFMT_YV12 || src_format == IMGFMT_I420 || src_format == IMGFMT_IYUV)
 		vo_server->draw_slice = vidix_draw_slice_420;
-	else
-	if(src_format == IMGFMT_RGB32 || src_format == IMGFMT_BGR32)
-		vo_server->draw_slice =
+	else	vo_server->draw_slice =
 			is_422_planes_eq ?
-			vidix_draw_slice_32_fast:
-			vidix_draw_slice_32;
-	else
-	if(src_format == IMGFMT_RGB24 || src_format == IMGFMT_BGR24)
-		vo_server->draw_slice =
-			is_422_planes_eq ?
-			vidix_draw_slice_24_fast:
-			vidix_draw_slice_24;
-	else
-		vo_server->draw_slice =
-			is_422_planes_eq ?
-			vidix_draw_slice_422_fast:
-			vidix_draw_slice_422;
+			vidix_draw_slice_packed_fast:
+			vidix_draw_slice_packed;
 	return 0;
 }
 
@@ -665,13 +604,13 @@ static uint32_t vidix_get_image(mp_image_t *mpi)
     if(mpi->type==MP_IMGTYPE_STATIC && vidix_play.num_frames>1) return VO_FALSE;
     if(mpi->flags&MP_IMGFLAG_READABLE) return VO_FALSE; /* slow video ram */
     mpi->planes[0]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.y;
-    mpi->stride[0]=vidix_play.dest.pitch.y;
+    mpi->stride[0]=dstrides.y;
     if(mpi->flags&MP_IMGFLAG_PLANAR)
     {
 	mpi->planes[1]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.v;
-	mpi->stride[1]=vidix_play.dest.pitch.v;
+	mpi->stride[1]=dstrides.v;
 	mpi->planes[2]=vidix_mem+vidix_play.offsets[next_frame]+vidix_play.offset.u;
-	mpi->stride[2]=vidix_play.dest.pitch.u;
+	mpi->stride[2]=dstrides.u;
     }
     mpi->flags|=MP_IMGFLAG_DIRECT;
     return VO_TRUE;
