@@ -25,6 +25,7 @@ extern vd_functions_t mpcodecs_vd_null;
 extern vd_functions_t mpcodecs_vd_cinepak;
 extern vd_functions_t mpcodecs_vd_qtrpza;
 extern vd_functions_t mpcodecs_vd_ffmpeg;
+extern vd_functions_t mpcodecs_vd_dshow;
 
 vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_null,
@@ -32,6 +33,9 @@ vd_functions_t* mpcodecs_vd_drivers[] = {
         &mpcodecs_vd_qtrpza,
 #ifdef USE_LIBAVCODEC
         &mpcodecs_vd_ffmpeg,
+#endif
+#ifdef USE_DIRECTSHOW
+        &mpcodecs_vd_dshow,
 #endif
 	NULL
 };
