@@ -116,6 +116,7 @@ Installation directories:
 Optional features:
   --disable-mencoder     disable mencoder [autodetect]
   --enable-largefiles    enable support for files >2^32 bytes long [disable]
+  --enable-linux-devfs   set default devices to devfs ones [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
   --enable-lirc          enable LIRC (remote control) support [autodetect]
   --enable-gui           enable GUI [disable]
@@ -779,7 +780,7 @@ _largefiles=no
 _vo2=no
 _language=en
 _shm=auto
-
+_linux_devfs=no
 
 for ac_option do
   case "$ac_option" in
@@ -905,6 +906,8 @@ for ac_option do
   --disable-shm)	_shm=no         ;;
   --enable-select)	_select=yes	;;
   --disable-select)	_select=no	;;
+  --enable-linux-devfs)	_linux_devfs=yes	;;
+  --disable-linux-devfs)	_linux_devfs=no	;;
 
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
   --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
@@ -1452,6 +1455,9 @@ else
 fi
 echores "$_shm"
 
+# XXX: FIXME, add runtime checking
+echocheck "linux devfs"
+echores "$_linux_devfs"
 
 echocheck "3dfx"
 if test "$_3dfx" = yes ; then
@@ -2093,8 +2099,17 @@ if test "$_ossaudio" = yes ; then
   _def_ossaudio='#define USE_OSS_AUDIO 1'
   _aosrc="$_aosrc ao_oss.c"
   _aomodules="oss $_aomodules"
+  if test "$_linux_devfs" = yes; then
+    _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/sound/dspW"'
+    _def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/sound/mixer"'
+  else
+    _def_ossaudio_devdsp='#define PATH_DEV_DSP "/dev/dsp"'
+    _def_ossaudio_devmixer='#define PATH_DEV_MIXER "/dev/mixer"'
+  fi  
 else
   _def_ossaudio='#undef USE_OSS_AUDIO'
+  _def_ossaudio_devdsp='#define PATH_DEV_DSP ""'
+  _def_ossaudio_devmixer='#define PATH_DEV_MIXER ""'
 fi
 echores "$_ossaudio"
 
@@ -3210,6 +3225,8 @@ $_def_gui
 
 /* Audio output drivers */
 $_def_ossaudio
+$_def_ossaudio_devdsp
+$_def_ossaudio_devmixer
 $_def_alsa5
 $_def_alsa9
 $_def_sunaudio
