@@ -459,7 +459,7 @@ options to <application>cdparanoia</application>.
 plugins to play many file formats. There are plugins for SNES game tunes, SID
 tunes (from Commodore 64), many Amiga formats, .xm, .it, VQF, musepack, Bonk,
 shorten and many others. You can find them at the
-<ulink url="http://www.xmms.org/plugins_input.html">XMMS input plugin page</ulink>.
+<ulink url="http://www.xmms.org/plugins.php?category=input">XMMS input plugin page</ulink>.
 </para>
 
 <para>

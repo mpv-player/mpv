@@ -241,10 +241,9 @@ You need a fairly recent system. On Linux, 2.4.x kernels are recommended.
   </para></listitem>
 <listitem><para>
   For <emphasis role="bold">Ogg Vorbis</emphasis> audio decoding you need to
-  install <systemitem class="library">libvorbis</systemitem> properly. Use
-  deb/rpm packages if available, or compile from
-  <ulink url="http://ogg.org/ogg/vorbis/download/vorbis_nightly_cvs.tgz">source</ulink>
-  (this is a nightly updated tarball of Vorbis CVS).
+  install <systemitem class="library">libvorbis</systemitem> properly.
+  You can get binary packages and source code from the
+  <ulink url="http://www.vorbis.com/download.psp">Ogg Vorbis site</ulink>.
   </para></listitem>
 <listitem><para>
   <application>MPlayer</application> can use the libraries of RealPlayer 8
@@ -741,7 +740,7 @@ OSD/SUB feature. There are many ways to get it:
 <listitem><para>
   Use the font generator <application>GIMP</application> plugin at <filename
   class="directory">TOOLS/subfont-GIMP</filename> (note: you must have HSI
-  RAW plugin too, see <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/" />).
+  RAW plugin too, see <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts" />).
  </para></listitem>
 <listitem><para>
   using a TrueType (TTF) font, by the means of the <systemitem class="library">freetype</systemitem>
@@ -799,7 +798,7 @@ OSD/SUB feature. There are many ways to get it:
     various fonts by users
     </entry></row>
   <row><entry>
-    <ulink url="http://realtime.ssu.ac.kr/~lethean/mplayer/"></ulink>
+    <ulink url="http://realtime.ssu.ac.kr/~lethean/index.php?pagename=MplayerKoreanFonts"></ulink>
     </entry><entry>
     Korean fonts and RAW plugin
     </entry></row>
