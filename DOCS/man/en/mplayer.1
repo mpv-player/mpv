@@ -571,7 +571,7 @@ and afterwards ~/.mplayer/Skin/fittyfene.
 .
 .TP
 .B \-slave (also see \-input)
-Switches on slave mode in which MPlayer works as a backend for other programs.
+Switches on slave mode, in which MPlayer works as a backend for other programs.
 Instead of intercepting keyboard events, MPlayer will read commands from stdin.
 See DOCS/tech/slave.txt and \-input cmdlist for a list of slave commands.
 .TP
@@ -4481,6 +4481,10 @@ should only be used for regression tests, which need binary
 identical files even if the encoder version changes.
 This also suppresses the user_data header in MPEG-4 streams.
 Do not use this option unless you know exactly what you are doing.
+.TP
+.B threads=<1\-8>
+Maximum number of threads to use (default: 1).
+.RE
 .TP
 .B vcodec=<value>
 use the specified codec (default: mpeg4):
