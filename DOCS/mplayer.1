@@ -179,7 +179,8 @@ mf= type=png:fps=25
 .SH "PLAYER OPTIONS (MPLAYER ONLY)"
 .TP
 .B \-, \-use-stdin
-Read data from stdin. \-idx option does not work in conjunction with this.
+Read data from stdin.
+The \-idx option does not work in conjunction with this.
 .TP
 .B \-autoq <quality> (use with \-vop pp)
 Dynamically changes the level of postprocessing depending on available spare
@@ -210,21 +211,23 @@ Use in combination with \-nosound and \-vo null for benchmarking only the
 video codec.
 .TP
 .B \-edl <filename>
-Enables edit decision list (EDL) actions during playback. Video will be
-skipped over and audio will be muted and unmuted according to the entries in
-the given file.
+Enables edit decision list (EDL) actions during playback.
+Video will be skipped over and audio will be muted and unmuted according to
+the entries in the given file.
 See DOCS/documentation.html#edl for details on how to use this.
 .TP
 .B \-edlout <filename>
 Creates a new file and writes edit decision list (EDL) records to that file.
 During playback, when the user hits 'i', an entry to skip over the last two
-seconds of playback will be written to the file. This provides a starting
-point from which the user can fine-tune EDL entries later.
+seconds of playback will be written to the file.
+This provides a starting point from which the user can fine-tune EDL entries
+later.
 See DOCS/documentation.html#edl for details.
 .TP
 .B \-fixed-vo (BETA CODE!)
 Enforces a fixed video system for multiple files (one (un)initialisation for
-all files). Therefore only one window will be opened for all files.
+all files).
+Therefore only one window will be opened for all files.
 Currently the following drivers are fixed-vo compliant: x11, xv, xvidix, xmga
 and gl2.
 .TP
@@ -240,9 +243,9 @@ More intense frame dropping (breaks decoding).
 Leads to image distortion!
 .TP
 .B \-identify
-Show file parameters in easy parsable format.  The wrapper script
-TOOLS/midentify suppresses the other mplayer output and (hopefully)
-shellescapes the filenames.
+Show file parameters in easy parsable format.
+The wrapper script TOOLS/midentify suppresses the other mplayer output and
+(hopefully) shellescapes the filenames.
 .TP
 .B \-input <commands>
 This option can be used to configure certain parts of the input system.
@@ -259,7 +262,7 @@ Available commands are:
 .IPs conf=<file>
 Read alternative input.conf.
 If given without pathname, ~/\:.mplayer is assumed.
-.IPs ar\-delay
+.In ar\-delay
 Delay in msec before we start to autorepeat a key (0 to disable).
 .IPs ar\-rate
 How many key presses per second when we autorepeat.
@@ -270,7 +273,8 @@ Prints all commands that can be bound.
 .IPs js\-dev
 Specifies the joystick device to use (default is /dev/\:input/\:js0).
 .IPs file
-Read commands from the given file. Mostly useful with a fifo.
+Read commands from the given file.
+Mostly useful with a fifo.
 .RE
 .PD 1
 .
@@ -438,11 +442,13 @@ channel is repeated in both output channels).
 If the number of output channels is smaller than the number of input channels,
 results depend on the audio decoder (\-afm).
 Mplayer asks the decoder to decode the audio into as many channels as
-specified. Now it's up to the decoder to fulfill the requirement. If the
-decoder outputs more channels than requested, the exceeding channels are
-truncated. This is usually only important when playing videos with AC3 audio
-(like DVDs). In that case liba52 does the decoding by default and correctly
-downmixes the audio into the requested number of channels.
+specified.
+Now it's up to the decoder to fulfill the requirement.
+If the decoder outputs more channels than requested, the exceeding channels
+are truncated.
+This is usually only important when playing videos with AC3 audio (like DVDs).
+In that case liba52 does the decoding by default and correctly downmixes the
+audio into the requested number of channels.
 
 .I NOTE:
 .br
@@ -603,9 +609,9 @@ fourcc in hex
 .TP
 .B \-rtsp-stream-over-tcp
 Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
-packets be streamed over TCP (using the same TCP connection as RTSP). This
-option may be useful if you have a broken Internet connection that does not
-pass incoming UDP packets (see http://www.live.com/mplayer/).
+packets be streamed over TCP (using the same TCP connection as RTSP).
+This option may be useful if you have a broken Internet connection that does
+not pass incoming UDP packets (see http://www.live.com/mplayer/).
 .TP
 .B \-skipopening
 Skip DVD opening (dvdnav only).
@@ -841,15 +847,16 @@ Selects Hungarian and falls back to English if Hungarian is not available.
 .B \-sub <subtitle\ file>
 Use/\:display this subtitle file.
 .TP
-.B \-sub-bkg-alpha <0-255>
+.B \-sub-bkg-alpha <0\-255>
 Specify the alpha channel value for subtitles and OSD backgrounds.
-Big values means more transparent. The 0 value is an exception and means
-completly transparent.
+Big values means more transparent.
+The 0 value is an exception and means completly transparent.
 .TP
-.B \-sub-bkg-color <0-255>
+.B \-sub-bkg-color <0\-255>
 Specify the color value for subtitles and OSD backgrounds.
 Currently subtitles are grayscale so this value is equivalente to the
-intensity of the color. The 255 value means white and 0 black.
+intensity of the color.
+The 255 value means white and 0 black.
 .TP
 .B \-subcc \ 
 Display DVD Closed Caption (CC) subtitles.
@@ -936,7 +943,8 @@ Specify the position of subtitles on the screen.
 The value is the vertical position of the subtitle in % of the screen height.
 .TP
 .B \-subwidth <10\-100>
-Specify the maximum width of subtitles on the screen. Useful for TV-out.
+Specify the maximum width of subtitles on the screen.
+Useful for TV-out.
 The value is the width of the subtitle in % of the screen width.
 .TP
 .B \-unicode
@@ -977,8 +985,9 @@ If the number of output channels is smaller than the number of input channels
 the exceeding channels are truncated.
 .IPs format[=bps,f]
 Select the format f and bits per sample bps used for output from the
-filter layer. The option bps is an integer and denotes bytes per
-sample. The format f is a string containing a concatenated mix of:
+filter layer.
+The option bps is an integer and denotes bytes per sample.
+The format f is a string containing a concatenated mix of:
 .br
 alaw, mulaw or imaadpcm
 .br
@@ -993,17 +1002,19 @@ Select the output volume level.
 This filter is not reentrant and can therefore only be enabled once for every
 audio stream.
 .RSss
-v: desired gain in dB for all channels in the stream. The gain can be
-set from -200dB to +40dB (where -200dB mutes the sound completely and
-+40dB equals a gain of 1000). The default gain is -20dB.
+v: desired gain in dB for all channels in the stream.
+The gain can be set from -200dB to +40dB (where -200dB mutes the sound
+completely and +40dB equals a gain of 1000).
+The default gain is -20dB.
 .br
 sc: enable soft clipping.
 .br
-pr: enable probing of the volume level for each audio stream. Both the
-maximum and instantaneous volume is probed. The instantaneous volume
-can only be accessed through the runtime interface, but the maximum
-volume is printed at the end of the movie. This value can be used when
-transcoding movies to maximize the utilization of the dynamic range.
+pr: enable probing of the volume level for each audio stream.
+Both the maximum and instantaneous volume is probed.
+The instantaneous volume can only be accessed through the runtime interface,
+but the maximum volume is printed at the end of the movie.
+This value can be used when transcoding movies to maximize the utilization
+of the dynamic range.
 .br
 en: enable and disable the volume control.
 .REss
@@ -1178,10 +1189,11 @@ Note: The lavc filter is now auto inserted if you try to play a non MPEG1/2
 format so all formats supported by MPlayer should play out of the box (if
 you have the CPU power needed to encode on the fly).
 The overlay chipset used on the dxr2 is of pretty bad quality but the default
-settings should work for everybody. The OSD may be usable with the
-overlay (not on TV) by drawing it in the colorkey. With the default colorkey
-settings you may get variable results, usually you will see the colorkey
-around the characters or some other funny effect.
+settings should work for everybody.
+The OSD may be usable with the overlay (not on TV) by drawing it in the
+colorkey.
+With the default colorkey settings you may get variable results, usually you
+will see the colorkey around the characters or some other funny effect.
 Buf if you properly adjust the colorkey settings you should be able to get
 acceptable results.
 .
@@ -1622,9 +1634,9 @@ Disable automatic movie aspect ratio compensation.
 Do not play/\:encode sound.
 .TP
 .B \-pp <quality> (see \-vop pp option too!)
-Set postprocess level of the DLL. This option is NO LONGER USABLE with
-MPlayer's postprocess filter, but only with Win32 DirectShow DLLs which
-have interal postprocessing routine.
+Set postprocess level of the DLL.
+This option is NO LONGER USABLE with MPlayer's postprocess filter, but only
+with Win32 DirectShow DLLs which have interal postprocessing routine.
 
 The valid range of \-pp value vary on codecs, mostly
 0\-6, where 0=disable 6=slowest/\:best.
@@ -1959,7 +1971,8 @@ thresh: filter all (0), filter flat areas (0\-30) or filter edges (-30\-0)
 .REss
 .IPs "perspective=x0:y0:x1:y1:x2:y2:x3:y3:t"
 .RSss
-x0,y0,...: coordinates of the topleft, topright, bottomleft, bottomright corners
+x0,y0,...: coordinates of the topleft, topright, bottomleft, bottomright
+corners
 .br
 t: linear (0) or cubic resampling (1)
 .REss
@@ -2075,7 +2088,8 @@ First encode with pass=1, then with the same parameters, encode with
 pass=2.
 .IPs vbrpass=<0\-2>
 Override the pass argument and use XviD VBR Library instead of DivX4
-VBR.  Available options are:
+VBR.
+Available options are:
 .
 .RSss
 0: one pass encoding (as in not putting pass on the command line)
@@ -2337,9 +2351,11 @@ Activates internal 2pass mode (default: disabled):
 2: second pass
 .REss
 .IPs aspect=<x.x/y.y>
-Store movie aspect internally, just like MPEG files. Much nicer solution than
-rescaling, because quality isn't decreased. Only MPlayer will play these files
-back correctly, other players will display them with wrong aspect. Example:
+Store movie aspect internally, just like MPEG files.
+Much nicer solution than rescaling, because quality isn't decreased.
+Only MPlayer will play these files back correctly, other players will display
+them with wrong aspect.
+Example:
 .RSss
 aspect=16.0/9.0
 .REss
