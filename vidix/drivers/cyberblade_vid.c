@@ -2,11 +2,11 @@
     Driver for CyberBlade/i1 - Version 0.1.1
 
     Copyright (C) 2002 by Alastair M. Robinson.
+    Official homepage: http://www.blackfiveservices.co.uk/EPIAVidix.shtml
+
     Based on Permedia 3 driver by Måns Rullgård
 
     Thanks to Gilles Frattini for bugfixes
-    
-    Official homepage: http://www.blackfiveservices.co.uk/EPIAVidix.shtml
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -200,6 +200,7 @@ void vixDestroy(void)
 	SROUTB(0x11, protect);
 	unmap_phys_mem(cyberblade_reg_base, 0x20000);
 	unmap_phys_mem(cyberblade_mem, 0x800000);
+	disable_app_io();
 }
 
 
@@ -255,7 +256,11 @@ int vixGetGrKeys(vidix_grkey_t *grkey)
 int vixSetGrKeys(const vidix_grkey_t *grkey)
 {
 	int pixfmt=CRINB(0x38);
+	int protect;
 	memcpy(&cyberblade_grkey, grkey, sizeof(vidix_grkey_t));
+
+	protect=SRINB(0x11);
+	SROUTB(0x11, 0x92);
 
 	if(pixfmt&0x28) /* 32 or 24 bpp */
 	{
@@ -278,6 +283,7 @@ int vixSetGrKeys(const vidix_grkey_t *grkey)
 		SROUTB(0x55, 0xff); /* Colour Key Mask */
 		SROUTB(0x56, 0x00); /* Colour Key Mask */
 	}
+	SROUTB(0x11,protect);
 	return(0);
 }
 
@@ -385,13 +391,13 @@ int vixConfigPlayback(vidix_playback_t *info)
 			break;
 	}
 
-	/* Assume we have 4 MB to play with */
-	info->num_frames = 0x400000 / info->frame_size;
+	/* Assume we have 2 MB to play with */
+	info->num_frames = 0x200000 / info->frame_size;
 	if(info->num_frames > VID_PLAY_MAXFRAMES)
 		info->num_frames = VID_PLAY_MAXFRAMES;
 
-	/* Start at 4 MB. Let's hope it's not in use. */
-	base0 = 0x400000;
+	/* Start at 6 MB. Let's hope it's not in use. */
+	base0 = 0x600000;
 	info->dga_addr = cyberblade_mem + base0;
 
 	info->dest.pitch.y = 16;
@@ -403,6 +409,12 @@ int vixConfigPlayback(vidix_playback_t *info)
 		info->offsets[i] = info->frame_size * i;
 		frames[i] = base0+info->offsets[i];
 	}
+
+	enable_app_io();
+	OUTPORT8(0x3d4,0x39);
+	OUTPORT8(0x3d5,INPORT(0x3d5)|1);
+
+	SRINB(0x0b); /* Select new mode */
 
 	/* Unprotect hardware registers... */
 	protect=SRINB(0x11);
@@ -422,6 +434,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 			SROUTB(0x54, 0xff); /* Colour Key Mask */
 			SROUTB(0x55, 0xff); /* Colour Key Mask */
 			SROUTB(0x56, 0xff); /* Colour Key Mask */
+                        printf("[cyberblade] 24/32-bit mode detected\n"); 
 		}
 		else
 		{
@@ -434,6 +447,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 			SROUTB(0x54, 0xff); /* Colour Key Mask */
 			SROUTB(0x55, 0xff); /* Colour Key Mask */
 			SROUTB(0x56, 0x00); /* Colour Key Mask */
+                        printf("[cyberblade] 16-bit assumed\n"); 
 		}
 	}
 	/* compute_scale_factor(&src_w, &drw_w, &shrink, &zoom); */
@@ -443,7 +457,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 
 		if(CRINB(0xd1)&0x80)
 		{
-			fprintf(stderr,"[cyberblade] Using TV-CRTC\n");
+			printf("[cyberblade] Using TV-CRTC\n");
 			HTotal=CRINB(0xe0);
 			HSync=CRINB(0xe4);
 			VTotal=CRINB(0xe6);
@@ -459,7 +473,7 @@ int vixConfigPlayback(vidix_playback_t *info)
 		}
 		else
 		{
-			fprintf(stderr,"[cyberblade] Using Standard CRTC\n");
+			printf("[cyberblade] Using Standard CRTC\n");
 			HTotal=CRINB(0x00);
 			HSync=CRINB(0x04);
 			VTotal=CRINB(0x06);
@@ -469,10 +483,13 @@ int vixConfigPlayback(vidix_playback_t *info)
 			HSync <<=3;
 			VTotal |= (Overflow & 1) <<8;
 			VTotal |= (Overflow & 0x20) <<4;
+			VTotal +=4;
 			VSync |= (Overflow & 4) <<6;
 			VSync |= (Overflow & 0x80) <<2;
 		}
 
+		printf("[cyberblade] HTotal: 0x%x, HSStart: 0x%x\n",HTotal,HSync); 
+		printf("  VTotal: 0x%x, VStart: 0x%x\n",VTotal,VSync);
 		tx1=(HTotal-HSync)+15+info->dest.x;
 		ty1=(VTotal-VSync)-8+info->dest.y;
 		tx2=tx1+info->dest.w;
