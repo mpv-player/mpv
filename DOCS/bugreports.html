@@ -12,6 +12,14 @@
 
 <H1><A NAME=C>Appendix C - How to report bugs</A></H1>
 
+<P>Good bug reports are a very valuable contribution to the development of any
+  software project. But just like writing good software, good problem reports
+  involve some work. Please realize that most developers are extremely busy and
+  receive obscene amounts of email. So while your feedback is crucial in
+  improving <B>MPlayer</B> and very much appreciated, please understand that you
+  have to provide <B>all</B> of the information we request and follow the
+  instructions in this document closely.</P>
+
 
 <H2>How to fix bugs</H2>
 
@@ -26,7 +34,9 @@
 <H2>How to report bugs</H2>
 
 <P>First of all please try the latest CVS version of <B>MPlayer</B> as your bug
-  might already be fixed there. CVS instructions can be found at the bottom of
+  might already be fixed there. Development moves extremely fast, most problems
+  in official releases are reported within days or even hours, so please use
+  <B>only CVS</B> to report bugs. CVS instructions can be found at the bottom of
   <A HREF="http://www.mplayerhq.hu/homepage/dload.html">this page</A> or in the
   README. If this did not help please refer to
   <A HREF="documentation.html#known_bugs">the list of known bugs</A> and the
@@ -65,8 +75,11 @@
 <P>The language of this list is <B>English</B>. Please follow the standard
   <A HREF="http://www.ietf.org/rfc/rfc1855.txt">Netiquette Guidelines</A> and
   <B>do not send HTML mail</B> to any of our mailing lists.  You will only get
-  ignored or banned. Also note that we will not individually CC (carbon-copy)
-  people so it is a good idea to subscribe to actually receive your answer.</P>
+  ignored or banned. If you do not know what HTML mail is or why it is evil,
+  read this <A HREF="http://expita.com/nomime.html">fine document</A>. It
+  explains all the details and has instructions for turning HTML off. Also note
+  that we will not individually CC (carbon-copy) people so it is a good idea to
+  subscribe to actually receive your answer.</P>
 
 
 <H3>What to report?</H3>
@@ -188,7 +201,7 @@ Please include these files:
 
 <H4>How to extract meaningful information from a core dump</H4>
 
-<P>Please create following command file:</P>
+<P>Please create the following command file:</P>
 
 <P><CODE>disass $eip-32 $eip+32<BR>
   printf "eax=%08lX\n",$eax<BR>
