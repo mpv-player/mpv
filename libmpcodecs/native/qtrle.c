@@ -61,7 +61,8 @@ void qt_decode_rle24(
   {
     pixel_ptr = row_ptr + ((encoded[stream_ptr++] - 1) * bytes_per_pixel);
 
-    while ((rle_code = (signed char)encoded[stream_ptr++]) != -1)
+    while (stream_ptr < encoded_size &&
+           (rle_code = (signed char)encoded[stream_ptr++]) != -1)
     {
       if (rle_code == 0)
         // there's another skip code in the stream
