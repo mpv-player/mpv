@@ -1238,7 +1238,7 @@ if(sh_audio){
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
-    else if(audio_fm && strcmp(sh_audio->codec->drv,audio_fm)) continue;
+    if(audio_fm && strcmp(sh_audio->codec->drv,audio_fm)) continue;
     mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] afm:%s (%s)\n",
 	audio_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
     break;
@@ -1295,13 +1295,16 @@ if(video_codec){
     init_video(sh_video,video_codec,NULL,-1);
 } else {
     int status;
-    // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
-    if(video_fm) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmtStr,video_fm);
-    for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status){
-	if(video_fm) // try first the preferred codec family:
+    // try in stability order: UNTESTED, WORKING, BUGGY. never try CRASHING.
+    if(video_fm){
+	// try first the preferred codec family:
+	mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmtStr,video_fm);
+	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
 	    if(init_video(sh_video,NULL,video_fm,status)) break;
-	if(init_video(sh_video,NULL,NULL,status)) break;
     }
+    if(!sh_video->inited)
+	for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status)
+	    if(init_video(sh_video,NULL,NULL,status)) break;
 }
 if(!sh_video->inited){
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindVideoCodec,sh_video->format);
