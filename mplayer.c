@@ -232,7 +232,6 @@ int divx_quality=0;
 char *seek_to_sec=NULL;
 int seek_to_byte=0;
 int has_audio=1;
-//int has_video=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
 int audio_family=-1;     // override audio codec family 
@@ -347,7 +346,6 @@ void exit_player(char* how){
   #endif
   lirc_mp_cleanup();
 #endif
-  //if(play_in_bg) system("xsetroot -solid \\#000000");
   exit(1);
 }
 
@@ -375,8 +373,6 @@ void exit_sighandler(int x){
 }
 
 extern int vcd_get_track_end(int fd,int track);
-extern int init_video_codec(sh_video_t *sh_video);
-//extern void mpeg2_allocate_image_buffers(picture_t * picture);
 extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
 
 // dec_audio.c:
@@ -1132,7 +1128,6 @@ while(1){
   else if(video_family!=-1 && sh_video->codec->driver!=video_family) continue;
   break;
 }
-//has_video=sh_video->codec->driver;
 
 printf("%s video codec: [%s] drv:%d (%s)\n",video_codec?"Forcing":"Detected",sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
 
@@ -1166,8 +1161,6 @@ if(!init_video(sh_video)){
      GUI_MSG( mplUnknowError )
      exit(1);
 }
-
-if(verbose) printf("vo_debug2: out_fmt=%s\n",vo_format_name(out_fmt));
 
 // ================== Init output files for encoding ===============
    if(encode_name){
@@ -1250,8 +1243,6 @@ make_pipe(&keyb_fifo_get,&keyb_fifo_put);
                       fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
                       title,out_fmt);
 
-if(verbose) printf("vo_debug3: out_fmt=%s\n",vo_format_name(out_fmt));
-
    #ifdef HAVE_GUI
     if ( !nogui )
      {
@@ -1276,7 +1267,7 @@ if(verbose) printf("vo_debug3: out_fmt=%s\n",vo_format_name(out_fmt));
 //================== MAIN: ==========================
 {
 
-float frame_correction=0; // A-V timestamp kulonbseg atlagolas
+float frame_correction=0; // average of A-V timestamp differences
 int frame_corr_num=0;   //
 float v_frame=0;    // Video
 float time_frame=0; // Timer
@@ -1371,16 +1362,7 @@ if(!has_audio){
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
   if(sh_audio) if(sh_audio->a_buffer) free(sh_audio->a_buffer);
-  //alsa=1;
-  // fake, required for timer:
-#if 1
   sh_audio=NULL;
-#else
-  sh_audio=new_sh_audio(255); // FIXME!!!!!!!!!!
-  sh_audio->samplerate=76800;
-  sh_audio->samplesize=sh_audio->channels=2;
-  sh_audio->o_bps=sh_audio->channels*sh_audio->samplerate*sh_audio->samplesize;
-#endif
 }
 
   current_module=NULL;
@@ -1389,11 +1371,11 @@ if(!has_audio){
 
 if(file_format==DEMUXER_TYPE_AVI && has_audio){
   //a_pts=d_audio->pts;
-  printf("Initial frame delay  A: %d  V: %d\n",(int)sh_audio->audio.dwInitialFrames,(int)sh_video->video.dwInitialFrames);
+  if(verbose) printf("Initial frame delay  A: %d  V: %d\n",(int)sh_audio->audio.dwInitialFrames,(int)sh_video->video.dwInitialFrames);
   if(!pts_from_bps){
     float x=(float)(sh_audio->audio.dwInitialFrames-sh_video->video.dwInitialFrames)*sh_video->frametime;
     audio_delay-=x;
-    printf("AVI Initial frame delay: %5.3f\n",x);
+    if(verbose) printf("AVI Initial frame delay: %5.3f\n",x);
   }
   if(verbose){
 //    printf("v: audio_delay=%5.3f  buffer_delay=%5.3f  a_pts=%5.3f  a_frame=%5.3f\n",
@@ -1453,8 +1435,6 @@ while(has_audio){
       sh_audio->a_buffer_len-=playsize;
       memcpy(sh_audio->a_buffer,&sh_audio->a_buffer[playsize],sh_audio->a_buffer_len);
       a_frame+=playsize/(float)(sh_audio->o_bps);
-      //a_pts+=playsize/(float)(sh_audio->o_bps);
-//      time_frame+=playsize/(float)(sh_audio->o_bps);
   }
 
   break;
@@ -1491,9 +1471,6 @@ if(1)
 
     current_module="decode_video";
     
-//    if(!force_redraw && v_frame+0.1<a_frame) drop_frame=1; else drop_frame=0;
-//    if(drop_frame) ++drop_frame_cnt;
-
   //--------------------  Decode a frame: -----------------------
 
   if(file_format==DEMUXER_TYPE_MPEG_ES || file_format==DEMUXER_TYPE_MPEG_PS){
@@ -1582,7 +1559,6 @@ if(1)
         }
     }
     v_frame+=frame_time;
-    //v_pts+=frame_time;
     time_frame+=frame_time;  // for nosound
 
     if(file_format==DEMUXER_TYPE_MPEG_PS) d_video->pts+=frame_time;
@@ -2066,17 +2042,6 @@ switch(file_format){
 
 } // switch(file_format)
 
-        // Set OSD:
-      if(osd_level){
-        int len=((demuxer->movi_end-demuxer->movi_start)>>8);
-        if(len>0){
-          osd_visible=sh_video->fps; // 1 sec
-          vo_osd_progbar_type=0;
-          vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
-        }
-        //printf("avi filepos = %d  (len=%d)\n",vo_osd_progbar_value,len);
-      }
-
       //====================== re-sync audio: =====================
       if(has_audio){
 
@@ -2100,15 +2065,25 @@ switch(file_format){
           }
         }
 
-        current_module=NULL;
-
+        current_module="audio_reset";
         audio_out->reset(); // stop audio, throwing away buffered data
+        current_module=NULL;
 
         c_total=0; // kell ez?
         printf("A:%6.1f  V:%6.1f  A-V:%7.3f",d_audio->pts,d_video->pts,0.0f);
         printf("  ct:%7.3f   \r",c_total);fflush(stdout);
       } else {
         printf("A: ---   V:%6.1f   \r",d_video->pts);fflush(stdout);
+      }
+
+        // Set OSD:
+      if(osd_level){
+        int len=((demuxer->movi_end-demuxer->movi_start)>>8);
+        if(len>0){
+          osd_visible=sh_video->fps; // 1 sec
+          vo_osd_progbar_type=0;
+          vo_osd_progbar_value=(demuxer->filepos-demuxer->movi_start)/len;
+        }
       }
 
       max_pts_correction=0.1;
@@ -2118,7 +2093,6 @@ switch(file_format){
       a_frame=-skip_audio_secs;
       v_frame=0; // !!!!!!
       audio_time_usage=0; video_time_usage=0; vout_time_usage=0;
-//      num_frames=real_num_frames=0;
 
   }
  rel_seek_secs=0;
