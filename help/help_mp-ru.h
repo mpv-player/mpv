@@ -6,7 +6,7 @@
 #ifdef HELP_MP_DEFINE_STATIC
 static char* banner_text=
 "\n\n"
-"MPlayer " VERSION "(C) 2000-2003 'Arp'ad Gere\"offy (см. DOCS)\n"
+"MPlayer " VERSION "(C) 2000-2003 MPlayer Team\n"
 "\n";
 
 static char help_text[]=
