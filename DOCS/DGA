@@ -97,6 +97,21 @@ Contents
  results in much smoother movie replaying. It will tell you whether double-
  buffering is enabled or not.
 
+ Doublebuffering means that the next frame of your video is being drawn in
+ some offscreen memory while the current frame is being displayed. When the
+ next frame is ready, the graphics chip is just told the location in memory 
+ of the new frame and simply fetches the data to be displayed from there.
+ In the meantime the other buffer in memory will be filled again with new 
+ video data.
+
+ Doublebuffering may be switched on by using the option -double and may be 
+ disabled with -nodouble. Current default option is to disable 
+ doublebuffering. When using the DGA driver, onscreen display (OSD) only 
+ works with doublebuffering enabled. However, enabling doublebuffering may
+ result in a big speed penalty (on my K6-II+ 525 it used an additional 20% of
+ CPU time!) depending on the implementation of DGA for your hardware. 
+ 
+
 
 6. Speed issues
 ~~~~~~~~~~~~~~~

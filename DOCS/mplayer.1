@@ -28,6 +28,7 @@ mplayer \- Movie Player for Linux
 .RB [ \-dsp\ device ]
 .RB [ \-pp\ quality ]
 .RB [ \-include\ configfile ]
+.RB [ \-lircconfig\ configfile ]
 .RB [ \-ffactor\ number ]
 .RB [ \-sub\ file ]
 .RB [ \-subfps\ rate ]
@@ -158,6 +159,9 @@ delays subtitles by <sec> seconds. Can be negative.
 .B \-osdlevel\ level
 specifies which mode the OSD should start in (0 : none, 1 : seek, 2: seek+timer)
 (default = 2)
+.TP
+.B \-lircconfig\ configfile
+specifies a configfile for LIRC (see http://www.lirc.org) if you don't like the default ~/.lircrc 
 .IP
 .SH "ADVANCED OPTIONS"
 .TP
@@ -241,6 +245,13 @@ no frame dropping : every frame is played, audio may skip (default)
 .TP
 .B \-framedrop
 frame dropping : decode all frames, video may skip
+.TP
+.B \-nodouble
+disable doublebuffering (default). Currently this is only honoured by the DGA driver.
+With the DGA driver this also disables OSD support but yields some speed gain.
+.TP
+.B \-double
+enable doublebuffering. Currently this is only honoured by the DGA driver.
 .TP
 .B \-dvdkey key
 key to decrypt stream encrypted with CSS. For example : -dvdkey F169072699
