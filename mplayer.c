@@ -431,7 +431,7 @@ static void exit_sighandler(int x){
 
 //extern void write_avi_header_1(FILE *f,int fcc,float fps,int width,int height);
 
-extern void mp_register_options(m_config_t* cfg);
+extern void mp_input_register_options(m_config_t* cfg);
 
 #include "mixer.h"
 #include "cfg-mplayer.h"
@@ -580,7 +580,7 @@ int gui_no_filename=0;
     mconfig = m_config_new(playtree);
     m_config_register_options(mconfig,mplayer_opts);
     // TODO : add something to let modules register their options
-    mp_register_options(mconfig);
+    mp_input_register_options(mconfig);
     parse_cfgfiles(mconfig);
 
 #ifdef HAVE_NEW_GUI

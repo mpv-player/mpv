@@ -17,7 +17,7 @@ static int samplerate = 44100;
 static int samplesize = 2;
 static int format = 0x1; // Raw PCM
 
-static config_t demux_rawaudio_opts[] = {
+config_t demux_rawaudio_opts[] = {
   { "on", &use_rawaudio, CONF_TYPE_FLAG, 0,0, 1, NULL },
   { "channels", &channels, CONF_TYPE_INT,CONF_RANGE,1,8, NULL },
   { "rate", &samplerate, CONF_TYPE_INT,CONF_RANGE,1000,8*48000, NULL },
@@ -26,14 +26,6 @@ static config_t demux_rawaudio_opts[] = {
   {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
-static config_t demux_rawaudio_conf[] = {
-  { "rawaudio", &demux_rawaudio_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-  { NULL,NULL, 0, 0, 0, 0, NULL}
-};
-
-void demux_rwaudio_register_options(m_config_t* cfg) {
-  m_config_register_options(cfg,demux_rawaudio_conf);
-}
 
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 

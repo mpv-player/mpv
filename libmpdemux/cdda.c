@@ -19,7 +19,7 @@ static int toc_bias = 0;
 static int toc_offset = 0;
 static int no_skip = 0;
 
-static config_t cdda_opts[] = {
+config_t cdda_opts[] = {
   { "speed", &speed, CONF_TYPE_INT, CONF_RANGE,1,100, NULL },
   { "paranoia", &paranoia_mode, CONF_TYPE_INT,CONF_RANGE, 0, 2, NULL },
   { "generic-dev", &generic_dev, CONF_TYPE_STRING, 0, 0, 0, NULL },
@@ -31,15 +31,6 @@ static config_t cdda_opts[] = {
   { "skip", &no_skip, CONF_TYPE_FLAG, 0 , 1, 0, NULL },
   {NULL, NULL, 0, 0, 0, 0, NULL}
 };
-
-static config_t cdda_conf[] = {
-  { "cdda", &cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-  { NULL,NULL, 0, 0, 0, 0, NULL}
-};
-
-void cdda_register_options(m_config_t* cfg) {
-  m_config_register_options(cfg,cdda_conf);
-}
 
 stream_t* open_cdda(char* dev,char* track) {
   stream_t* st;

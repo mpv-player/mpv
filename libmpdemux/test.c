@@ -20,7 +20,7 @@ void resync_audio_stream(sh_audio_t *sh_audio){
 }
 
 int mp_input_check_interrupt(int time){
-    if(time) usec_sleep(time);
+    if(time) usleep(time);
     return 0;
 }
 

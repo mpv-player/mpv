@@ -61,7 +61,7 @@ static int mute_mode = DXR2_AUDIO_MUTE_OFF;
 static int ignore_cache = 0;
 static int update_cache = 0;
 
-static config_t dxr2_opts[] = {
+config_t dxr2_opts[] = {
   { "overlay", &use_ol, CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { "nooverlay", &use_ol, CONF_TYPE_FLAG, 0, 1, 0, NULL},
   { "overlay-ratio", &ol_ratio, CONF_TYPE_INT, CONF_RANGE, 1, 2500, NULL },
@@ -95,15 +95,6 @@ static config_t dxr2_opts[] = {
   { "update-cache",&update_cache,CONF_TYPE_FLAG, 0, 0, 1, NULL},
   { NULL,NULL, 0, 0, 0, 0, NULL}
 };
-
-static config_t dxr2_opt[] = {
-  { "dxr2", &dxr2_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
-  { NULL,NULL, 0, 0, 0, 0, NULL}
-};
-
-void vo_dxr2_register_options(m_config_t* cfg) {
-  m_config_register_options(cfg,dxr2_opt);
-}
 
 static vo_info_t vo_info = {
   "DXR2 video out",

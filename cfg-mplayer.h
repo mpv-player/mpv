@@ -89,6 +89,10 @@ extern int vo_zr_parseoption(struct config * conf, char *opt, char * param);
 extern void vo_zr_revertoption(config_t* opt,char* pram);
 #endif
 
+#ifdef HAVE_DXR2
+extern config_t dxr2_opts[];
+#endif
+
 #ifdef STREAMING_LIVE_DOT_COM
 extern int isSDPFile;
 extern int rtspStreamOverTCP;
@@ -302,6 +306,10 @@ static config_t mplayer_opts[]={
 #ifdef HAVE_ZR
 	// -vo zr
 	{"zr*", vo_zr_parseoption, CONF_TYPE_FUNC_FULL, 0, 0, 0, &vo_zr_revertoption },
+#endif
+
+#ifdef HAVE_DXR2
+	{"dxr2", &dxr2_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
 #endif
 
 #ifdef STREAMING_LIVE_DOT_COM

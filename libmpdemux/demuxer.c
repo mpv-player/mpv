@@ -1037,9 +1037,10 @@ return demuxer;
 }
 
 char* audio_stream = NULL;
-static char* sub_stream = NULL;
-static int demuxer_type = 0, audio_demuxer_type = 0, sub_demuxer_type = 0;
-extern m_config_t* mconfig;
+char* sub_stream = NULL;
+int demuxer_type = 0, audio_demuxer_type = 0, sub_demuxer_type = 0;
+
+extern int hr_mp3_seek;
 
 demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int dvdsub_id){
   stream_t *as = NULL,*ss = NULL;
@@ -1069,7 +1070,7 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
     if(!ad)
       mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningAudioDemuxerFailed,audio_stream);
     else if(ad->audio->sh && ((sh_audio_t*)ad->audio->sh)->format == 0x55) // MP3
-      m_config_set_flag(mconfig,"hr-mp3-seek",1); // Enable high res seeking
+      hr_mp3_seek=1; // Enable high res seeking
   }
   if(ss) {
     sd = demux_open_stream(ss,sub_demuxer_type ? sub_demuxer_type : sfmt,-2,-2,dvdsub_id);
@@ -1243,20 +1244,5 @@ char* demux_info_get(demuxer_t *demuxer, char *opt) {
   }
 
   return NULL;
-}
-
-/******************* Options stuff **********************/
-
-static config_t demuxer_opts[] = {
-  { "audiofile", &audio_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
-  { "subfile", &sub_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
-  { "demuxer", &demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
-  { "audio-demuxer", &audio_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
-  { "sub-demuxer", &sub_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
-  { NULL, NULL, 0, 0, 0, 0, NULL}
-};
-
-void demuxer_register_options(m_config_t* cfg) {  
-  m_config_register_options(cfg,demuxer_opts);
 }
 

@@ -77,7 +77,7 @@ int vo_config_count=0;
 //--------------------------
 
 // cache2:
-static int stream_cache_size=0;
+int stream_cache_size=0;
 #ifdef USE_STREAM_CACHE
 extern int cache_fill_status;
 #else
@@ -269,8 +269,6 @@ static int dec_audio(sh_audio_t *sh_audio,unsigned char* buffer,int total){
     return size;
 }
 
-extern void me_register_options(m_config_t* cfg);
-
 //---------------------------------------------------------------------------
 
 static int at_eof=0;
@@ -370,7 +368,6 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
   playtree = play_tree_new();
   mconfig = m_config_new(playtree);
   m_config_register_options(mconfig,mencoder_opts);
-  me_register_options(mconfig);
   parse_cfgfiles(mconfig);
 
   if(m_config_parse_command_line(mconfig, argc, argv) < 0) mencoder_exit(1, "error parsing cmdline");

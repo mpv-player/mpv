@@ -29,7 +29,7 @@ typedef struct da_priv {
 extern void free_sh_audio(sh_audio_t* sh);
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 
-static int hr_mp3_seek = 0;
+int hr_mp3_seek = 0;
 
 int demux_audio_open(demuxer_t* demuxer) {
   stream_t *s;
@@ -337,16 +337,3 @@ void demux_close_audio(demuxer_t* demuxer) {
   free(priv);
 }
 
-/****************** Options stuff ******************/
-
-#include "../cfgparser.h"
-
-static config_t demux_audio_opts[] = {
-  { "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
-  { "nohr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-  {NULL, NULL, 0, 0, 0, 0, NULL}
-};
-
-void demux_audio_register_options(m_config_t* cfg) {
-  m_config_register_options(cfg,demux_audio_opts);
-}

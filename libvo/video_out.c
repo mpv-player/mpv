@@ -184,16 +184,6 @@ vo_functions_t* video_out_drivers[] =
         NULL
 };
 
-#ifdef HAVE_DXR2
-extern void vo_dxr2_register_options(void*);
-#endif
-
-void libvo_register_options(void* cfg) {
-#ifdef HAVE_DXR2
-  vo_dxr2_register_options(cfg);
-#endif
-}
-
 void list_video_out(){
       int i=0;
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);

@@ -31,14 +31,14 @@
 #include "../version.h"
 
 extern int verbose;
-extern m_config_t *mconfig;
+extern int stream_cache_size;
 
 extern int mp_input_check_interrupt(int time);
 
 /* Variables for the command line option -user, -passwd & -bandwidth */
-char *network_username;
-char *network_password;
-int   network_bandwidth;
+char *network_username=NULL;
+char *network_password=NULL;
+int   network_bandwidth=0;
 
 
 static struct {
@@ -381,34 +381,24 @@ http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry) {
 	} else {
 		mp_msg(MSGT_NETWORK,MSGL_INFO,"Authentication required\n");
 	}
-	ret = m_config_is_option_set(mconfig,"user");
-	if( ret==1 ) {
-		char *username;
-		username = *((char**)m_config_get_option_ptr(mconfig, "user"));
-		if( username==NULL ) return -1;
-		url->username = (char*)malloc(strlen(username)+1);
+	if( network_username ) {
+		url->username = strdup(network_username);
 		if( url->username==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 			return -1;
 		}
-		strcpy(url->username, username);
 	} else {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to read the username\n");
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"Please use the option -user and -passwd to provide your username/password for a list of URLs,\n");
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"or form an URL like: http://username:password@hostname/file\n");
 		return -1;
 	}
-	ret = m_config_is_option_set(mconfig,"passwd");
-	if( ret==1 ) {
-		char *password;
-		password = *((char**)m_config_get_option_ptr(mconfig, "passwd"));
-		if( password==NULL ) return -1;
-		url->password = (char*)malloc(strlen(password)+1);
+	if( network_password ) {
+		url->password = strdup(network_password);
 		if( url->password==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_FATAL,"Memory allocation failed\n");
 			return -1;
 		}
-		strcpy(url->password, password);
 	} else {
 		mp_msg(MSGT_NETWORK,MSGL_INFO,"No password provided, trying blank password\n");
 	}
@@ -830,18 +820,7 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 	ret = -1;
 	
 	// Get the bandwidth available
-	ret = m_config_is_option_set(mconfig,"bandwidth");
-	if(ret < 0) {
-		mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to know if the bandwidth limit was set\n");
-	} else {
-		val = m_config_get_int( mconfig, "bandwidth", NULL);
-		if( val<0 ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to retrieve the bandwidth option value\n");
-			stream->streaming_ctrl->bandwidth = 0;	// Don't limit bandwidth
-		} else {
-			stream->streaming_ctrl->bandwidth = val;
-		}
-	}
+	stream->streaming_ctrl->bandwidth = network_bandwidth;
 	
 #ifndef STREAMING_LIVE_DOT_COM
 	// For RTP streams, we usually don't know the stream type until we open it.
@@ -905,31 +884,14 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		streaming_ctrl_free( stream->streaming_ctrl );
 		stream->streaming_ctrl = NULL;
 	} else if( stream->streaming_ctrl->buffering ) {
-		int cache_size = 0; 
-		int cache_opt, val;
-		cache_opt = m_config_is_option_set(mconfig,"cache");
-		if(cache_opt < 0) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to know if cache size option was set\n");
-		} else if(!cache_opt) {
+		int cache_size = stream_cache_size; 
+		if(!stream_cache_size) {
 			// cache option not set, will use our computed value.
 			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
-			val = (stream->streaming_ctrl->prebuffer_size/1024)*5;
-			if( val<16 ) val = 16;	// 16KBytes min buffer
-			if( m_config_set_int( mconfig, "cache", val )<0 ) { 
-				mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to set the cache size option\n");
-			} else {
-				cache_size = val;
-			}
-		} else {
-			// cache option set, will use the given one.
-			val = m_config_get_int( mconfig, "cache", NULL );
-			if( val<0 ) {
-				mp_msg(MSGT_NETWORK,MSGL_ERR,"Unable to retrieve the cache option value\n");
-			} else {
-				cache_size = val;
-			}
+			stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;
+			if( stream_cache_size<16 ) stream_cache_size = 16;	// 16KBytes min buffer
 		}
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", cache_size );
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes\n", stream_cache_size);
 	}
 
 	return ret;

@@ -71,6 +71,22 @@
 	{"vid", &video_id, CONF_TYPE_INT, CONF_RANGE, 0, 255, NULL},
 	{"sid", &dvdsub_id, CONF_TYPE_INT, CONF_RANGE, 0, 31, NULL},
 
+	{ "hr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 0, 1, NULL },
+	{ "nohr-mp3-seek", &hr_mp3_seek, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+
+	{ "rawaudio", &demux_rawaudio_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+
+#ifdef HAVE_CDDA
+	{ "cdda", &cdda_opts, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
+#endif
+
+	// demuxer.c - select audio/sub file/demuxer
+	{ "audiofile", &audio_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
+	{ "subfile", &sub_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
+	{ "demuxer", &demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
+	{ "audio-demuxer", &audio_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
+	{ "sub-demuxer", &sub_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
+
         {"mf", mfopts_conf, CONF_TYPE_SUBCONFIG, 0,0,0, NULL},
 #ifdef USE_TV
 	{"tv", tvopts_conf, CONF_TYPE_SUBCONFIG, 0, 0, 0, NULL},
@@ -198,6 +214,15 @@ extern char *network_username;
 extern char *network_password;
 extern int   network_bandwidth;
 #endif
+
+/* defined in libmpdemux: */
+extern int hr_mp3_seek;
+extern config_t demux_rawaudio_opts[];
+extern config_t cdda_opts[];
+
+extern char* audio_stream;
+extern char* sub_stream;
+extern int demuxer_type, audio_demuxer_type, sub_demuxer_type;
 
 #include "libmpdemux/tv.h"
 
