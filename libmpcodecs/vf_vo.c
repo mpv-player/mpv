@@ -44,7 +44,7 @@ static int control(struct vf_instance_s* vf,
         int request, void* data){
     switch(request){
     case VFCTRL_DRAW_OSD:
-	if(!vo_config_count) CONTROL_FALSE; // vo not configured?
+	if(!vo_config_count) return CONTROL_FALSE; // vo not configured?
 	video_out->draw_osd();
 	return CONTROL_TRUE;
     }
