@@ -181,6 +181,7 @@ float sub_last_pts = -303;
 
 #ifdef HAVE_MP3LAME
 int lame_param_quality=0; // best
+int lame_param_algqual=5; // same as old default
 int lame_param_vbr=vbr_default;
 int lame_param_mode=-1; // unset
 int lame_param_padding=-1; // unset
@@ -749,12 +750,12 @@ lame_set_bWriteVbrTag(lame,0);
 lame_set_in_samplerate(lame,sh_audio->samplerate);
 lame_set_num_channels(lame,mux_a->wf->nChannels);
 lame_set_out_samplerate(lame,mux_a->wf->nSamplesPerSec);
+lame_set_quality(lame,lame_param_algqual); // 0 = best q
 if(lame_param_vbr){  // VBR:
     lame_set_VBR(lame,lame_param_vbr); // vbr mode
     lame_set_VBR_q(lame,lame_param_quality+1); // 1 = best vbr q  6=~128k
     if(lame_param_br>0) lame_set_VBR_mean_bitrate_kbps(lame,lame_param_br);
 } else {    // CBR:
-    lame_set_quality(lame,lame_param_quality); // 0 = best q
     if(lame_param_br>0) lame_set_brate(lame,lame_param_br);
 }
 if(lame_param_mode>=0) lame_set_mode(lame,lame_param_mode); // j-st
