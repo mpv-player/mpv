@@ -2970,7 +2970,7 @@ debug:
 .br
 0x1000: bugs
 .REss
-.IPs ec\ \ \ 
+.IPs ec=<value>
 error concealment:
 .RSss
 1: Use strong deblock filter for damaged MBs.
@@ -2993,6 +2993,11 @@ error resilience:
 .br
 4: very aggressive
 .REss
+.IPs fast\ 
+Enable optimizations that do not comply to the specification and might
+potentially cause problems, like simpler dequantization, assuming use
+of the default quantization matrix, assuming YUV 4:2:0, skipping a few
+checks to detect damaged bitstreams).
 .IPs gray\ 
 grayscale only decoding (a bit faster than with color)
 .IPs "idct=<0\-99> (see \-lavcopts)"
