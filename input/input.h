@@ -117,7 +117,7 @@ typedef struct mp_key_name {
 
 // These functions should return the key code or one of the error code
 typedef int (*mp_key_func_t)(int fd);
-// These functions should act like read
+// These functions should act like read but they must use our error code (if needed ;-)
 typedef int (*mp_cmd_func_t)(int fd,char* dest,int size);
 // These are used to close the driver
 typedef void (*mp_close_func_t)(int fd);

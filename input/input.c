@@ -343,6 +343,9 @@ static config_t mp_input_opts[] = {
 static int
 mp_input_default_key_func(int fd);
 
+static int
+mp_input_default_cmd_func(int fd,char* buf, int l);
+
 static char*
 mp_input_get_key_name(int key);
 
@@ -356,7 +359,7 @@ mp_input_add_cmd_fd(int fd, int select, mp_cmd_func_t read_func, mp_close_func_t
 
   memset(&cmd_fds[num_cmd_fd],0,sizeof(mp_input_fd_t));
   cmd_fds[num_cmd_fd].fd = fd;
-  cmd_fds[num_cmd_fd].read_func = read_func ? read_func : (mp_cmd_func_t)read;
+  cmd_fds[num_cmd_fd].read_func = read_func ? read_func : mp_input_default_cmd_func;
   cmd_fds[num_cmd_fd].close_func = close_func;
   if(!select)
     cmd_fds[num_cmd_fd].flags = MP_FD_NO_SELECT;
@@ -542,8 +545,6 @@ static int
 mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
   char* end;
   (*ret) = NULL;
-  
-  if(mp_fd->flags & MP_FD_DEAD) return MP_INPUT_NOTHING;
 
   // Allocate the buffer if it dont exist
   if(!mp_fd->buffer) {
@@ -556,21 +557,19 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
   while( !(mp_fd->flags & MP_FD_GOT_CMD) && !(mp_fd->flags & MP_FD_EOF) && (mp_fd->size - mp_fd->pos > 1) ) {
     int r = ((mp_cmd_func_t)mp_fd->read_func)(mp_fd->fd,mp_fd->buffer+mp_fd->pos,mp_fd->size - 1 - mp_fd->pos);
     // Error ?
-    if(r == MP_INPUT_NOTHING) break;
     if(r < 0) {
-      if(errno == EINTR)
-	continue;
-      else if(errno == EAGAIN)
-	break;
-      mp_msg(MSGT_INPUT,MSGL_WARN,"Error while reading cmd fd %d : %s\n",mp_fd->fd,strerror(errno));
-      return r; // MP_INPUT_ERROR or MP_INPUT_DEAD
+      switch(r) {
+      case MP_INPUT_ERROR:
+      case MP_INPUT_DEAD:
+	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading cmd fd %d : %s\n",mp_fd->fd,strerror(errno));
+      case MP_INPUT_NOTHING:
+	return r;
+      }
       // EOF ?
-    }
-    if(r == 0) {
+    } else if(r == 0) {
       mp_fd->flags |= MP_FD_EOF;
       break;
     }
-    // r > 0
     mp_fd->pos += r;
     break;
   }
@@ -618,6 +617,25 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
     return 1;
   else
     return MP_INPUT_NOTHING;
+}
+
+static int
+mp_input_default_cmd_func(int fd,char* buf, int l) {
+
+  while(1) {
+    int r = read(fd,buf,l);
+    // Error ?
+    if(r < 0) {
+      if(errno == EINTR)
+	continue;
+      else if(errno == EAGAIN)
+	return MP_INPUT_NOTHING;
+      return MP_INPUT_ERROR;
+      // EOF ?
+    }
+    return r;
+  }
+
 }
 
 static char*
