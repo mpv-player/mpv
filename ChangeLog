@@ -72,7 +72,7 @@ mplayer (0.90)
     * -geometry option, also accepts X11 syntax
     * real .bin+.cue (S)VCD images support (-vcd 2 -cuefile xxx.cue)
     * postprocess: YUV 411/422/444 support, stride fixes
-    * overlapping sub's pumping fixed, sorting is automatical, iconv fixes
+    * jumping of overlapping subs fixed, sorting is automatical, iconv fixes
     * mpeg2 telecine detection and automatic inverse telecine (mplayer only)
 
     Gui:
