@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.66 -->
+<!-- synced with 1.72 -->
 <sect1 id="video">
 <title>Urządzenia wyjścia video</title>
 
@@ -22,12 +22,12 @@ reg01: base=0xd8000000 (3456MB), size= 128MB: write-combining, count=1<!--
 
 <para>
 Widać mojego Matroksa G400 z 16MB pamięci. Wydałem tę komendę z XFree 4.x.x, 
-które ustawiają MTRR automatycznie
+które ustawiają MTRR automatycznie.
 </para>
 
 <para>
 Jeżeli nie zadziałało, trzeba to ustawić ręcznie. 
-Przede wszystkim, musisz znaleźć adres bazowy. Możesz to zrobić na 3 sposoby:
+Przede wszystkim musisz znaleźć adres bazowy. Możesz to zrobić na 3 sposoby:
 
 <orderedlist>
 <listitem><para>
@@ -54,7 +54,7 @@ Memory at d8000000 (32-bit, prefetchable)
 
 <para>
 Znajdźmy teraz rozmiar pamięci. Jest to bardzo łatwe, po prostu zamień 
-rozmiar RAMu na karcie graficznej na system szestnastkowy, lub użyj 
+rozmiar RAMu na karcie graficznej na system szestnastkowy lub użyj 
 tej tabelki:
 <informaltable frame="none">
 <tgroup cols="2">
@@ -80,7 +80,7 @@ echo "base=0xd8000000 size=0x2000000 type=write-combining" &gt;| /proc/mtrr</scr
 
 <para> 
 Nie wszystkie procesory obsługują MTRR. Na przykład starsze K6-2 
-(jakieś 266MHz, stepping 0) nie obsługują MTRR, ale już stepping 12 tak. 
+(jakieś 266MHz, stepping 0) nie obsługują MTRR, ale stepping 12 już tak. 
 (<command>cat /proc/cpuinfo </command> aby sprawdzić).
 </para>
 </sect2>
@@ -195,7 +195,7 @@ więc najlepiej ją sprzedaj.
 Obecnie niejasne jest, które modele kart Savage nie mają sprzętowej obsługi YV12 i 
 robią to programowo (co jest wolne). Jeżeli podejrzewasz o to swoją kartę, 
 zdobądź nowsze sterowniki, lub grzecznie poproś o sterownik z obsługą MMX/3DNow!
-na grupie dyskusyjnej mplayer-users 
+na liście dyskusyjnej mplayer-users 
 </para>
 </note>
 </sect4>
@@ -233,7 +233,7 @@ Więcej informacji znajdziesz w sekcji <link linkend="vidix-nvidia">nVidia</link
 <title>Karty ATI</title>
 
 <para>
-<ulink url="http://www.linuxvideo.org/gatos">Sterowniki GATOS</ulink> 
+<ulink url="http://gatos.sf.net">Sterowniki GATOS</ulink> 
 (których powinieneś używać, chyba że masz Rage128 lub Radeon) 
 mają standardowo włączone VSYNC. Znaczy to, że szybkość dekodowania (!)
 jest zsynchronizowana z (pionową) częstotliwością odświeżania obrazu. 
@@ -333,8 +333,8 @@ i co może zrobić sterownik do <application>MPlayera</application>
 <title>CO TO JEST DGA</title>
 <para>
 <acronym>DGA</acronym> to skrót od <emphasis>Direct Graphics Access 
-(Bezpośredni Dostęp do Grafiki)</emphasis> i jest środkiem dla programu 
-na ominięcie X serwera i bezpośrednią modyfikację pamięci bufora ramki 
+(Bezpośredni Dostęp do Grafiki)</emphasis> i jest dla programu sposobem 
+ominięcia X serwera i bezpośrednią modyfikację pamięci bufora ramki 
 (framebuffer). Technicznie mówiąc, działa to w ten sposób, 
 że pamięć bufora ramki mapowana jest na zakres pamięci Twojego procesu. 
 Jest to dozwolone tylko i wyłącznie gdy masz prawa administratora (superuser). 
@@ -407,13 +407,13 @@ Teraz DGA działa także dla zwykłego użytkownika.
 </para>
 
 <caution>
-<title>Zagrożenie Bezpieczeństwa</title>
+<title>Zagrożenie bezpieczeństwa</title>
 <para>
 To jest <emphasis role="bold">poważne</emphasis> zagrożenie bezpieczeństwa! 
 <emphasis role="bold">Nigdy</emphasis> 
 nie rób tego na serwerze, ani na komputerze dostępnym dla innych osób, 
-ponieważ mogą one zdobyć prawa roota poprzez SUID root 
-<application>MPlayer</application>.
+ponieważ mogą one zdobyć prawa roota poprzez 
+<application>MPlayera</application> z ustawionym SUID root.
 </para>
 </caution>
 
@@ -440,7 +440,7 @@ Są one definiowane przez tak zwane "modelines" (linie trybów) i zależą od mo
 Twojego sprzętu. 
 X serwer skanuje przy starcie ten plik konfiguracyjny 
 i wyłącza tryby nie pasujące do Twojego sprzętu. Aby się dowiedzieć, 
-które tryby przetrwały ten proces sprawdź: 
+które tryby przetrwały ten proces sprawdź plik 
 <filename>/var/log/XFree86.0.log</filename>.
 </para>
 </formalpara>
@@ -469,10 +469,10 @@ EndSection
 <title>DGA i MPLAYER</title>
 <para>
 DGA jest używane w dwóch miejscach w <application>MPlayerze</application>: 
-może go używać sterownik SDL (<option>-vo sdl:dga</option>) 
+można go używać przez sterownik SDL (<option>-vo sdl:dga</option>) 
 oraz bezpośrednio przez sterownik DGA (<option>-vo dga</option>). 
-To co zostało napisane powyżej jest prawdziwe dla obu; 
-w następnych sekcjach wyjaśnię jak działa sterownik DGA dla 
+To, co zostało napisane powyżej, jest prawdziwe dla obu; 
+w następnych sekcjach wyjaśnię, jak działa sterownik DGA dla 
 <application>MPlayera</application>.
 </para>
 </formalpara>
@@ -489,8 +489,8 @@ pasującą do obrazu.
 Ignorowane są opcje <option>-vm</option> i <option>-fs</option> 
 (zmiana trybu wyświetlania oraz wyświetlanie pełnoekranowe). 
 Sterownik zawsze próbuje pokryć jak największą powierzchnię ekranu poprzez 
-zmianę trybu wyświetlania, dzięki temu oszczędza jeden cykl procesora, 
-który byłby wykorzystany na skalowanie obrazu. 
+zmianę trybu wyświetlania, dzięki temu nie marnuje mocy procesora 
+na skalowanie obrazu.
 Jeżeli nie podoba Ci się dobrany tryb, możesz sam go określić, 
 korzystając z opcji <option>-x</option> oraz <option>-y</option>. 
 Jeżeli podasz opcję <option>-v</option>, 
@@ -500,13 +500,13 @@ w tej chwili trybów, dostępnych w Twoim pliku konfiguracyjnym
 Mając DGA2 możesz zmusić je także do wyświetlania obrazu w określonej głębi, 
 używając opcji <option>-bpp</option>. 
 Prawidłowymi głębiami są 15, 16, 34 i 32. 
-Od Twojego sprzętu zależy czy są one obsługiwane natywnie czy też dokonywana 
+Od Twojego sprzętu zależy, czy są one obsługiwane natywnie, czy też dokonywana 
 jest konwersja (możliwe, że powolna).
 
 </para>
 </formalpara>
 <para>
-Jeżeli jesteś takim szczęśliwcem, że masz wystarczająco dużo pamięci poza-ekranowej 
+Jeżeli jesteś takim szczęśliwcem, że masz wystarczająco dużo pamięci pozaekranowej 
 (offscreen memory) aby zmieścił się tam cały obraz, 
 sterownik DGA użyje podwójnego buforowania.
 Efektem będzie płynniejsze odtwarzanie filmu. 
@@ -515,7 +515,7 @@ Sterownik poinformuje Cię czy podwójne buforowanie jest włączone czy nie.
 
 <para>
 Podwójne buforowanie oznacza, że następna ramka Twojego filmu jest rysowana 
-w pamięci poza-ekranowej w czasie gdy obecna ramka jest wyświetlana. 
+w pamięci pozaekranowej w czasie gdy obecna ramka jest wyświetlana. 
 Gdy następna ramka będzie gotowa, układ graficzny zostanie poinformowany 
 o lokalizacji nowej ramki w pamięci i po prostu sięgnie tam po dane 
 aby je wyświetlić. 
@@ -532,20 +532,20 @@ Jeśli używasz sterownika DGA wyświetlanie OSD
 (On Screen Display - wyświetlanie na ekranie) 
 działa wyłącznie z włączonym podwójnym buforowaniem. 
 Jednakże włączenie podwójnego buforowania może zaowocować dużym spadkiem 
-szybkości (na moim K6-II+ 525 jest używane dodatkowe 20% czasu procesora!) 
+szybkości (na moim K6-II+ 525 używało dodatkowe 20% czasu procesora!) 
 w zależności od implementacji DGA dla Twojego sprzętu.
 </para>
 
 
 <formalpara>
-<title>SPRAWA SZYBKOŚCI</title>
+<title>KWESTIA SZYBKOŚCI</title>
 
 <para>
-Ogólnie rzecz biorąc dostęp do bufora ramki poprzez DGA powinien być 
-przynajmniej tak szybki jak podczas używania sterownika X11, 
+Ogólnie rzecz biorąc, dostęp do bufora ramki poprzez DGA powinien być 
+przynajmniej tak szybki, jak podczas używania sterownika X11, 
 z dodatkową korzyścią uzyskania pełnoekranowego obrazu. 
 Procentowe wartości szybkości wyświetlane przez 
-<application>MPlayera</application> należy ostrożnie interpretować. 
+<application>MPlayera</application> należy interpretować ostrożnie. 
 Na przykład przy korzystaniu ze sterownika X11 nie jest uwzględniany czas 
 potrzebny dla X serwera na rysowanie. 
 Podłącz terminal do portu szeregowego swojego komputera i uruchom 
@@ -554,19 +554,20 @@ Podłącz terminal do portu szeregowego swojego komputera i uruchom
 </formalpara>
 
 <para>
-Generalnie przyśpieszenie przy używaniu DGA w stosunku  do "normalnego" 
-używania X11 bardzo zależy od Twojej karty graficznej i od tego jak dobrze 
+Generalnie przyśpieszenie przy używaniu DGA w stosunku  do
+&quot;normalnego&quot;
+używania X11 bardzo zależy od Twojej karty graficznej i od tego, jak dobrze 
 zoptymalizowany jest moduł do X serwera.
 </para>
 
 <para>
 Jeżeli masz wolny system, lepiej używaj 15 lub 16 bitowej 
-głębi kolorów ponieważ wymaga ona tylko połowy przepustowości pamięci 
+głębi kolorówi, ponieważ wymaga ona tylko połowy przepustowości pamięci 
 w porównaniu do głębi 32 bitowej.
 </para>
 
 <para>
-Używanie 24 bitowej głębi jest dobrym pomysłem jeżeli 
+Używanie 24 bitowej głębi jest dobrym pomysłem, jeżeli 
 Twoja karta natywnie obsługuje tylko 32 bitową głębię, ponieważ 24 bitowa głębia 
 przesyła 25% mniej danych w porównaniu do w pełni 32 bitowego trybu.
 </para>
@@ -630,9 +631,9 @@ OSD działa tylko z włączonym podwójnym buforowaniem (w przeciwnym razie migo
 <para>
 <acronym>SDL</acronym> (Simple Directmedia Layer) jest w gruncie rzeczy 
 zunifikowanym interfejsem video/audio. 
-Programy, które go używają wiedzą tylko o SDL, 
+Programy, które go używają, wiedzą tylko o SDL, 
 a nie o sterownikach audio lub video, których używa SDL. 
-Na przykład port Doom'a używający SDL może działać korzystając z 
+Na przykład port Dooma używający SDL może działać korzystając z 
 svgalib, aalib, X, fbdev i innych, musisz tylko określić (na przykład) 
 sterownik video, którego chcesz użyć. 
 Wybór następuje poprzez zmienną środowiskową <envar>SDL_VIDEODRIVER</envar>. 
@@ -649,8 +650,8 @@ Rozumiesz już? :)
 </para>
 
 <para>
-Pomaga także z niektórymi wadliwymi sterownikami/kartami w przypadku gdy 
-odtwarzanie kuleje (nie z powodu wolnego systemu), lub gdy dźwięk jest opóźniony.
+Pomaga także z niektórymi wadliwymi sterownikami/kartami w przypadku, gdy 
+odtwarzanie kuleje (nie z powodu wolnego systemu) lub gdy dźwięk jest opóźniony.
 </para>
 
 <para>
@@ -663,14 +664,14 @@ Wyjście video SDL obsługuje wyświetlanie napisów pod filmem, na czarnym pask
 <varlistentry>
   <term><option>-vo sdl:<replaceable>nazwa</replaceable></option></term>
   <listitem><simpara>
-  określa sterownik video którego ma użyć SDL (np. <literal>aalib</literal>,
+  określa sterownik video, którego ma użyć SDL (np. <literal>aalib</literal>,
     <literal>dga</literal>, <literal>x11</literal>)
   </simpara></listitem>
 </varlistentry>
 <varlistentry>
   <term><option>-ao sdl:<replaceable>nazwa</replaceable></option></term>
   <listitem><simpara>
-  określa sterownik audio którego ma użyć SDL (np. <literal>dsp</literal>,
+  określa sterownik audio, którego ma użyć SDL (np. <literal>dsp</literal>,
     <literal>esd</literal>, <literal>artsc</literal>)
   </simpara></listitem>
 </varlistentry>
@@ -714,7 +715,7 @@ Wyjście video SDL obsługuje wyświetlanie napisów pod filmem, na czarnym pask
   </simpara></listitem>
 <listitem><simpara>
   NIE UŻYWAJ SDL z GUI (Graficznym Interfejsem Użytkownika)! 
-  Nie będzie to działało tak jak powinno.
+  Nie będzie działało tak, jak powinno.
   </simpara></listitem>
 </itemizedlist>
 </sect3>
@@ -739,7 +740,7 @@ svgalib współdziałało z Twoją kartą i monitorem.
 Nie używaj opcji <option>-fs</option> ponieważ włącza ona 
 skalowanie programowe, które jest powolne. Jeżeli naprawdę tego potrzebujesz, 
 używaj opcji <option>-sws 4</option>, 
-która produkuje obraz złej jakości, ale jest poniekąd szybsza.
+która produkuje obraz złej jakości, ale jest nieco szybsza.
 </para>
 </note>
 
@@ -761,7 +762,7 @@ Używalne jest to w następujących zestawieniach:
 </itemizedlist>
 
 <para>
-bpp (bity na piksel) musi być ustawione na 4 ręcznie: <option>-bpp 4</option>
+bpp (bity na piksel) musi być ustawione ręcznie na 4: <option>-bpp 4</option>
 </para>
 
 <para>
@@ -772,7 +773,7 @@ lub
 </para>
 
 <para>
-Aby to osiągnąć potrzebujemy sięgnąć po szybką, lecz złej jakości metodę skalowania:
+Aby to osiągnąć, musimy sięgnąć po szybką, lecz złej jakości metodę skalowania:
 <screen>-sws 4</screen>
 </para>
 
@@ -869,7 +870,7 @@ mplayer -vm -fbmode <replaceable>nazwa_trybu</replaceable> <replaceable>nazwa_pl
   Nie możesz używać trybów 8bpp (lub mniej).
   </para></listitem>
 <listitem><para>
-Możliwe, że chcesz wyłączyć kursor:
+Możesz chcieć wyłączyć kursor:
   <screen>echo -e '\033[?25l'</screen>
   lub
   <screen>setterm -cursor off</screen>
@@ -885,8 +886,8 @@ Możliwe, że chcesz wyłączyć kursor:
 <note>
 <para>
 Zmiana trybów FBdev <emphasis>nie działa</emphasis> z buforem ramki VESA, 
-i nie proś o to, ponieważ nie jest to ograniczenie w 
-<application>MPlayerze</application>.
+i nie proś o to, ponieważ nie jest to ograniczenie
+<application>MPlayera</application>.
 </para>
 </note>
 </sect3>
@@ -989,19 +990,19 @@ Będziesz także musiał odpowiednio skompilować <application>MPlayera</applica
 lecz jeśli Twoja platforma/sterownik obsługuje Xv, 
 jak powinno być w przypadku PeCetów z Linuksem, używaj Xv. 
 Wydajność OpenGL jest znacząco mniejsza. 
-Jeżeli masz implementację X11 bez obsługi Xv, OpenGL jest poważną alternatywą.
+Jeżeli masz implementację X11 bez obsługi Xv, OpenGL jest sensowną alternatywą.
 </para>
 
 <para>
 Niestety nie wszystkie sterowniki to obsługują. 
 Sterowniki Utah-GLX (dla XFree86 3.3.6) obsługują to w każdej karcie. 
 Szczegóły odnośnie instalacji dostępne są na stronie
-<ulink url="http://utah-glx.sourceforge.net"/>.
+<ulink url="http://utah-glx.sf.net"/>.
 </para>
 
 <para>
 XFree86(DRI) 4.0.3 i nowsze obsługują OpenGL w kartach Matrox i Radeon, 
-4.2.0 i nowsze obsługują Rage128. Na <ulink url="http://dri.sourceforge.net"/> 
+4.2.0 i nowsze obsługują Rage128. Na <ulink url="http://dri.sf.net"/> 
 znajdziesz instrukcję ściągania (download) i instalacji.
 </para>
 
@@ -1031,7 +1032,7 @@ zostanie zbudowany sterownik aalib libvo.
 </para>
 
 <para>
-Możesz używać pewnych klawiszy w oknie AA aby zmienić opcje renderowania:
+Możesz używać następujących klawiszy w oknie AA, aby zmienić opcje renderowania:
 </para>
 
 <informaltable>
@@ -1124,16 +1125,16 @@ kilka ważniejszych:</title>
 <note>
 <para>
 Renderowanie bardzo obciąża CPU, zwłaszcza przy użyciu AA-on-X (aalib w X), 
-a mniej zajmuje CPU na standardowej, nie-framebuffer konsoli. 
-Użyj SVGATextMode aby ustawić duży tryb tekstowy i baw się dobrze! 
-(drugie złącze karty Hercules wymiata:)) 
-(ale moim skromnym zdaniem możesz używać opcji 
-<option>-vf 1bpp</option> aby dostać grafikę na hgafb:)
+a zajmuje mniej CPU na standardowej, nie-framebufferowej konsoli. 
+Użyj SVGATextMode, aby ustawić duży tryb tekstowy i baw się dobrze! 
+(drugi monitor z kartą Hercules wymiata:)) 
+(ale moim skromnym zdaniem możesz użyć opcji 
+<option>-vf 1bpp</option> aby uzyskać grafikę na hgafb:)
 </para>
 </note>
 
 <para>
-Użyj opcji <option>-framedrop</option> jeżeli Twój komputer nie jest na tyle szybki 
+Użyj opcji <option>-framedrop</option>, jeżeli Twój komputer nie jest na tyle szybki, 
 aby wyrenderować wszystkie ramki!
 </para>
 
@@ -1144,7 +1145,7 @@ Jednakże będziesz potrzebował praw zapisu na
 <filename>/dev/vcsa<replaceable>&lt;terminal&gt;</replaceable></filename>! 
 Nie jest to  wykrywane automatycznie przez aalib, ale vo_aa próbuje 
 znaleźć najlepszy tryb. Spójrz na 
-<ulink url="http://aa-project.sourceforge.net/tune"/>, 
+<ulink url="http://aa-project.sf.net/tune"/>, 
 jest tam więcej informacji o dostrajaniu.
 </para>
 </sect3>
@@ -1154,12 +1155,12 @@ jest tam więcej informacji o dostrajaniu.
 		Art library (biblioteka kolorowego ASCII-Art)</title>
 
 <para>
-Biblioteka<ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
-jest bibiloteką produkującą tekst zamiast pikseli, więc może pracować na
+Biblioteka <ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
+jest bibiloteką produkującą tekst zamiast pikseli, może więc pracować na
 starszych kartach graficznych oraz terminalach tekstowych. Jest podobna do
-słunnej biblioteki <systemitem class="library">AAlib</systemitem>.
-<systemitem class="library">libcaca</systemitem> potrzebuje dop pracy terminalu,
-więc powinna działać na wszystkich systemach Uniksowych (włącznie z Mac OS X),
+słynnej biblioteki <systemitem class="library">AAlib</systemitem>.
+<systemitem class="library">libcaca</systemitem> potrzebuje do pracy terminalu,
+powinna więc działać na wszystkich systemach Uniksowych (włącznie z Mac OS X),
 używając biblioteki
 <systemitem class="library">slang</systemitem> lub biblioteki
 <systemitem class="library">ncurses</systemitem>, w DOSie używając biblioteki
@@ -1168,7 +1169,7 @@ używając <systemitem class="library">slang</systemitem> lub
 <systemitem class="library">ncurses</systemitem> (poprzez emulację Cygwin) bądź
 <systemitem class="library">conio.h</systemitem>. Jeżeli
 <filename>./configure</filename>
-wykryje <systemitem class="library">libcaca</systemitem>, to zostanie abudowany
+wykryje <systemitem class="library">libcaca</systemitem>, to zostanie zbudowany
 sterownik caca libvo.
 </para>
 
@@ -1192,7 +1193,7 @@ sterownik caca libvo.
 </itemizedlist>
 
 <para>
-	Aby zmienić opcje renderowania, możesz użyć pewnych klawiszy w oknie caca:
+	Aby zmienić opcje renderowania, możesz użyć następujących klawiszy w oknie caca:
 </para>
 
 <informaltable>
@@ -1202,10 +1203,10 @@ sterownik caca libvo.
 </thead>
 <tbody>
 <row><entry><keycap>d</keycap></entry><entry>
-  Przęłączanie metod dirtheringu <systemitem class="library">libcaca</systemitem>.
+  Przełączanie metod ditheringu <systemitem class="library">libcaca</systemitem>.
   </entry></row>
 <row><entry><keycap>a</keycap></entry><entry>
-		Przełączanie anyaliasungu (wygładzania) <systemitem
+		Przełączanie anyaliasingu (wygładzania) <systemitem
 			class="library">libcaca</systemitem>.
   </entry></row>
 <row><entry><keycap>b</keycap></entry><entry>
@@ -1217,11 +1218,11 @@ sterownik caca libvo.
 
 <variablelist>
 <title><systemitem class="library">libcaca</systemitem> będzie także szukać
-	pewnych zmiennych środowiskowych:</title>
+	następujących zmiennych środowiskowych:</title>
 <varlistentry>
   <term><option>CACA_DRIVER</option></term>
   <listitem><simpara>
-    Ustawia zwlecany sterownik caca, np. ncurses, slang, x11.
+    Ustawia zalecany sterownik caca, np. ncurses, slang, x11.
     </simpara></listitem>
 </varlistentry>
 <varlistentry>
@@ -1239,7 +1240,7 @@ sterownik caca libvo.
 </variablelist>
 
 <para>
-	Jeżeli Twój komputer nie jest wystarczająco szybki aby renderować
+	Jeżeli Twój komputer nie jest wystarczająco szybki, aby renderować
 	wszystkie ramki, użyj opcji <option>-framedrop</option>.
 </para>
 
@@ -1249,10 +1250,10 @@ sterownik caca libvo.
 <title>VESA - wyjście na VESA BIOS</title>
 
 <para>
-Ten sterownik został stworzony jako 
-<emphasis role="bold">ogólny sterownik</emphasis> dla jakiejkolwiek karty, 
+Ten sterownik został zaprojektowany i napisany jako 
+<emphasis role="bold">ogólny sterownik</emphasis> dla dowolnej karty, 
 która ma BIOS zgodny z VESA VBE 2.0. Inną zaletą tego sterownika jest to, 
-ze próbuje on wymusić włączenie wyjścia TV.
+że próbuje on wymusić włączenie wyjścia TV.
 <citetitle>VESA BIOS EXTENSION (VBE) Version 3.0, z dnia 16 września 1998</citetitle>
 (Strona 70) mówi:
 </para>
@@ -1261,13 +1262,13 @@ ze próbuje on wymusić włączenie wyjścia TV.
 <formalpara><title>Podwójne kontrolery (Dual-Controller Designs)</title>
 <para>
 VBE 3.0 obsługuje podwójne kontrolery zakładając, że zwykle obydwa kontrolery
-są dostarczane przez ten sam OEM, pod kontrolą pojedynczego BIOS ROM 
+są dostarczane przez tego samego OEM, pod kontrolą pojedynczego BIOS ROMu 
 na karcie graficznej. Jest możliwe ukrycie przed aplikacją, 
 że obecne są dwa kontrolery. Ograniczeniem tego jest brak możliwości 
 równoczesnego używania niezależnych kontrolerów, ale umożliwia aplikacjom 
 wypuszczonym przed VBE 3.0 na normalne działanie. 
 Funkcja VBE 00h (zwróć informację o kontrolerze) zwraca połączone 
-informacje o obydwóch kontrolerach, włącznie z połaćzoną listą 
+informacje o obydwóch kontrolerach, włącznie z połączoną listą 
 dostępnych trybów. 
 Gdy aplikacja wybiera tryb, włączany jest odpowiedni kontroler. 
 Każda z pozostałych funkcji VBE operuje później na aktywnym kontrolerze.
@@ -1285,7 +1286,7 @@ lub przynajmniej samodzielnym wyjściem.)
 <title>ZALETY</title>
 <listitem><simpara>
 Jest szansa, że będziesz mógł oglądać filmy 
-<emphasis role="bold">nawet, gdy Linux nie wie</emphasis> jakiego sprzętu używasz.
+<emphasis role="bold">nawet, gdy Linux nie wie</emphasis>, jakiego sprzętu używasz.
   </simpara></listitem>
 <listitem><simpara>
 Nie ma potrzeby instalowania jakichkolwiek rzeczy związanych z grafiką 
@@ -1298,23 +1299,23 @@ Jest szansa że uzyskasz <emphasis role="bold">działające wyjście TV</emphasi
   </simpara></listitem>
 <listitem><simpara>
 Ten sterownik wywołuje procedurę obsługi przerwania 10h 
-(<function>int 10h</function> handler) więc nie jest emulatorem - 
+(<function>int 10h</function> handler), nie jest więc emulatorem - 
 odwołuje się do <emphasis role="bold">rzeczywistych</emphasis> rzeczy 
 <emphasis>rzeczywistego</emphasis> BIOSu w 
-<emphasis>trybie rzeczywistym (real-mode)</emphasis>. (
-tak na prawdę to w trybie vm86, ale działa równie szybko).
+<emphasis>trybie rzeczywistym (real-mode)</emphasis>. (tak naprawdę,
+to w trybie vm86, ale działa równie szybko).
   </simpara></listitem>
 <listitem><simpara>
-Możesz używać VIDIX, uzyskując po przez to przyśpieszone wyświetlanie video 
+Możesz używać VIDIX, uzyskując przez to przyśpieszone wyświetlanie video 
 <emphasis role="bold">oraz</emphasis> wyjście TV w tym samym czasie! 
 (Zalecane dla kart ATI.)
   </simpara></listitem>
 <listitem><simpara>
 Jeżeli masz VESA VBE 3.0+ i określiłeś gdzieś 
 <option>monitor-hfreq, monitor-vfreq, monitor-dotclock</option> 
-(w pliku konfiguracyjnym lub w wierszu poleceń) uzyskasz najwyższą możliwą 
+(w pliku konfiguracyjnym lub w wierszu poleceń), uzyskasz najwyższą możliwą 
 częstotliwość odświeżania (Używając General Timing Formula 
-(Ogólnej Formuły Taktowania)). Aby uzyskać tę cechę musisz określić 
+(Ogólnej Formuły Taktowania)). Aby to włączyć, musisz określić 
 <emphasis role="bold">wszystkie</emphasis> opcje monitora.
   </simpara></listitem>
 </itemizedlist>
@@ -1345,11 +1346,11 @@ Nie będzie działać!
 <varlistentry>
   <term><option>-vo vesa:<replaceable>opts</replaceable></option></term>
   <listitem><simpara>
-    obecnie rozpoznawane: <literal>dga</literal> aby wymusić tryb dga oraz
-    <literal>nodga</literal> aby wyłączyć tryb dga. W trybie dga możesz 
+    obecnie rozpoznawane: <literal>dga</literal>, aby wymusić tryb dga oraz
+    <literal>nodga</literal>, aby wyłączyć tryb dga. W trybie dga możesz 
     włączyć podwójne buforowanie
-    poprzez opcję <option>-double</option>. Informacja: możesz pominąć 
-    te parametry aby włączyć <emphasis role="bold">automatyczne wykrywanie
+    opcją <option>-double</option>. Informacja: możesz pominąć 
+    te parametry, aby włączyć <emphasis role="bold">automatyczne wykrywanie
     </emphasis> trybu dga.
     </simpara></listitem>
 </varlistentry>
@@ -1396,7 +1397,7 @@ ponieważ video BIOS inicjalizuje się tylko podczas procedury POST
 <title>X11</title>
 
 <para>
-Unikaj jeśli to możliwe. Wyjście na X11 (używa rozszerzenia współdzielonej pamięci) 
+Unikaj, jeśli to możliwe. Wyjście na X11 (używa rozszerzenia współdzielonej pamięci) 
 nie używa żadnego przyśpieszania sprzętowego. 
 Obsługuje (przyśpieszane przez MMX/3DNow/SSE, lecz ciągle wolne) skalowanie programowe. 
 Użyj opcji <option>-fs -zoom</option>. 
@@ -1454,8 +1455,9 @@ taktowania układu RAMDAC), które są wymagane dla trybów o niskiej rozdzielcz
 <emphasis role="bold">I</emphasis>nterface 
 for *ni<emphasis role="bold">X</emphasis> 
 (Interfejs VIDeo dla *niXów). 
-VIDIX został stworzony jako interfejs dla szybkich sterowników przestrzeni 
-użytkownika (user-space) zapewniających taką samą wydajność jak mga_vid 
+VIDIX został zaprojektowany i napisany jako interfejs dla szybkich
+sterowników działających w przestrzeni 
+użytkownika (user-space), zapewniających taką samą wydajność, jak mga_vid 
 dla kart Matrox. Jest także wysoce przenośny (portable).
 </para>
 </formalpara>
@@ -1464,9 +1466,9 @@ Ten interfejs został zaprojektowany jako próba dopasowania istniejących
 interfejsów przyśpieszanego video 
 (znanych jako mga_vid, rage128_vidm radeon_vid, pm3_vid) do ustalonego schematu. 
 Zapewnia wysokopoziomowy interfejs dla układów znanych jako BES (BackEnd Scalers) 
-lub OV (Video Overlay - maskowanie video). 
+lub OV (Video Overlay - nakładka video). 
 Nie zapewnia on niskopoziomowego interfejsu do tworów znanych jako serwery grafiki. 
-(nie chcę współzawodniczyć z zespołem X11 w zmienianiu trybów graficznych). 
+(nie chcę współzawodniczyć z zespołem X11 w przełączaniu trybów graficznych). 
 Innymi słowy, 
 głównym celem tego interfejsu jest maksymalizacja szybkości odtwarzania video.
 </para>
@@ -1475,11 +1477,12 @@ głównym celem tego interfejsu jest maksymalizacja szybkości odtwarzania video
 <title>ZASTOSOWANIE</title>
 <listitem><simpara>
 Możesz używać samodzielnego sterownika wyjścia video: 
-<option>-vo xvidix</option>. Ten sterownik został stworzony jako front end 
-do technologii VIDIX. Wymaga X serwera i może pracować tylko w X serwerze. 
+<option>-vo xvidix</option>. Ten sterownik został stworzony jako
+interfejs X11
+dla technologii VIDIX. Wymaga X serwera i może pracować tylko pod nim. 
 Zwróć uwagę na to, że stosowany jest bezpośredni dostęp do sprzętu 
 i omijany jest sterownik X, pixmapy przechowywane (cached) w pamięci karty 
-mogą być uszkodzone. Możesz temu zapobiec ograniczając ilość używanej przez X 
+mogą zostać uszkodzone. Możesz temu zapobiec ograniczając ilość używanej przez X 
 pamięci poprzez opcję "VideoRam" w sekcji "device". 
 Powinieneś ustawić to na rozmiar pamięci na karcie minus 4MB. 
 Jeżeli masz mniej niż 8MB pamięci video (video RAM), 
@@ -1554,9 +1557,9 @@ mplayer -vo vesa:vidix:radeon_vid.so -fs -zoom -double -bpp 32 <replaceable>plik
 Ale jest to niebezpieczne i nie powinieneś tego robić. 
 W tym przypadku podany sterownik zostanie wymuszony i rezultat może być 
 nieprzewidywalny (może <emphasis role="bold">zawiesić</emphasis> Twój komputer). 
-Powinieneś to robić TYLKO gdy jesteś całkowicie pewien, że zadziała, 
+Powinieneś to robić TYLKO, jeśli jesteś całkowicie pewien, że zadziała, 
 a <application>MPlayer</application> nie robi tego automatycznie. 
-Proszę powiadom o tym deweloperów. Prawidłowym sposobem jest używanie VIDIX 
+Proszę, powiadom o tym deweloperów. Prawidłowym sposobem jest używanie VIDIX 
 bez żadnych argumentów, aby umożliwić automatyczne wykrywanie sterownika.
 </para>
 
@@ -1589,7 +1592,7 @@ Skompiluj moduł w katalogu <filename class="directory">svgalib_helper</filename
 <filename class="directory">svgalib-1.9.17/kernel/</filename>) i załaduj go (insmod).
   </para></step>
   <step><para>
-  Aby stworzyć odpowiednie urządzenia (devices) w katalogu <filename class="directory">/dev</filename>,
+  Aby utworzyć odpowiednie urządzenia (devices) w katalogu <filename class="directory">/dev</filename>,
   wykonaj jako root <screen>make device</screen> w katalogu <filename class="directory">svgalib_helper</filename>.
   </para></step>
 
@@ -1630,7 +1633,7 @@ Matrox G200, G400, G450 i G550 zgłoszono jako działające.
 
 <para>
 Sterownik obsługuje korektory (equalizery) video i powinien być prawie tak szybki jak 
-<link linkend="mga_vid">Matrox framebuffer</link>
+<link linkend="mga_vid">bufor ramki Matrox</link>
 </para>
 </sect4>
 
@@ -1642,7 +1645,7 @@ na płytach głównych VIA Epia.
 </para>
 
 <para>
-Sterownik ten został napisany (i jest utrzymywany) przez
+Sterownik ten został napisany przez (i jest pod opieką)
 <ulink url="http://www.blackfiveservices.co.uk/EPIAVidix.shtml">Alastaira M. Robinsona</ulink>
 </para>
 </sect4>
@@ -1666,18 +1669,19 @@ GeForce2. Doniesiono nam, że na innych też działa.
 <title>OGRANICZENIA</title>
 <listitem><para>
 Wskazane jest używanie binarnych sterowników nVidia dla X zanim użyjesz tego 
-sterownika VIDIX. Jest to spowodowane tym, że niektóre rejestry, które muszą być zainicjalizowane 
+sterownika VIDIX. Jest to spowodowane tym, że niektóre rejestry, które muszą być zainicjalizowane,
 nie zostały jeszcze odkryte, więc prawdopodobnie próba z otwartym sterownikiem XFree86
 <filename>nv.o</filename> także się nie powiedzie.
 </para></listitem>
 
 <listitem><para>
-Obecnie tylko kodeki zdolne do wyjścia na przestrzeń kolorów UYVY mogą współpracować
-z tym sterownikiem. Niestety żaden dekoder z rodziny 
+Obecnie tylko kodeki zdolne do produkowania na wyjściu obrazu w
+przestrzeni kolorów UYVY mogą współpracować z tym sterownikiem. 
+Niestety, żaden dekoder z rodziny 
 <systemitem class="library">libavcodec</systemitem> się nie nadaje.
 Pozostają nam następujące popularne kodeki: <systemitem>cvid, divxds, xvid, divx4, 
 wmv7, wmv8</systemitem> i kilka innych. Zauważ, że jest to tylko chwilowa niedogodność.
-składnie wygląda w ten sposób:
+składnia wygląda w ten sposób:
   <screen>
     mplayer -vf format=uyvy -vc divxds <replaceable>plik_divx3.avi</replaceable>
   </screen>
@@ -1707,10 +1711,10 @@ Jest to kod wysoce eksperymentalny. (Tak jak nvidia_vid).
 </para>
 
 <para>
-Przetestowano go na SiS 650/651/740 (najczęściej używane układy w SiSowskiej
-wersji "Shuttle XPC")
-<!--It's been tested on SiS 650/651/740 (the most common chipsets used in the 
-SiS versions of the "Shuttle XPC" barebones boxes out there)-->
+Przetestowano go na SiS 650/651/740 (najczęściej używane układy w
+minimalistycznych pecetach-kostkach &quot;Shuttle XPC&quot; z płytami
+SiS).
+
 </para>
 
 <para>
@@ -1727,7 +1731,7 @@ Czekamy na raporty!
 &quot;DirectFB jest biblioteką graficzną, która była tworzona z myślą o 
 systemach typu embedded.
 Oferuje ona maksymalną przyśpieszaną sprzętowo wydajność przy minimalnym zużyciu 
-i obciążeniu zasobów.
+zasobów i minimalnym narzucie biblioteki.
 &quot; - cytat z <ulink url="http://www.directfb.org"/>
 </para></blockquote>
 
@@ -1768,7 +1772,7 @@ Ville Syrjala ma na swojej stronie domowej
 <ulink url="http://www.sci.fi/~syrjala/directfb/Matrox_TV-out_README.txt">README</ulink>
 oraz
 <ulink url="http://www.sci.fi/~syrjala/directfb/matrox_tv-out_howto">HOWTO</ulink>
-wyjaśniające jak uruchomić wyjście TV DirectFB w kartach Matrox.
+wyjaśniające, jak uruchomić wyjście TV DirectFB w kartach Matrox.
 </para>
  
 <note><para>
@@ -1790,22 +1794,22 @@ Mile widziane są
 <title>Wejście i wyjście DVB</title>
 <para>
 <application>MPlayer</application> obsługuje karty z układem Siemens DVB, 
-od producentów takich jak Siemens, Technotrend, Galaxis czy Hauppauge.
+od producentów takich, jak: Siemens, Technotrend, Galaxis czy Hauppauge.
 Najnowsze sterowniki DVB są dostępne na 
 <ulink url="http://www.linuxtv.org">stronie Linux TV</ulink>.
-Jeżeli chcesz programowego transkodowania powinieneś dysponować procesorem 
+Jeżeli chcesz programowego transkodowania, powinieneś dysponować procesorem 
 o zegarem co najmniej 1GHz.
 </para>
 
 <para>
 Configure powinien wykryć Twoją kartę DVB. Jeżeli tak się nie stało, 
-możesz wymusić obsługę DVB poprzez:
+możesz wymusić obsługę DVB używając
 </para>
 
 <para><screen>./configure --enable-dvb</screen></para>
 
 <para>Jeżeli Twoje nagłówki 'ost' znajdują się w niestandardowym miejscu, 
-ustaw ścieżkę poprzez</para>
+ustaw ścieżkę przy pomocy</para>
 
 <para><screen>./configure --with-extraincdir=<replaceable>katalog ze źródłami DVB</replaceable>/ost/include</screen></para>
 
@@ -1814,7 +1818,7 @@ ustaw ścieżkę poprzez</para>
 <formalpara>
 <title>ZASTOSOWANIE</title>
 <para>
-Sprzętowego dekodowania (odtwarzanie standardowych plików MPEG1/2) 
+Sprzętowego dekodowania (odtwarzanie standardowych plików MPEG-1/2) 
 można dokonać tą komendą:
 </para>
 </formalpara>
@@ -1822,8 +1826,8 @@ można dokonać tą komendą:
 <para><screen>mplayer -ao mpegpes -vo mpegpes <replaceable>plik.mpg|vob</replaceable></screen></para>
 
 <para>
-Programowego dekodowania oraz transkodowania różnych formatów do MPEG1 
-można uzyskać używając polecenia takiego jak te:
+Programowe dekodowanie oraz transkodowanie różnych formatów do MPEG-1 
+można uzyskać używając polecenia podobnego do:
 </para>
 <para><screen>
 mplayer -ao mpegpes -vo mpegpes <replaceable>twójplik.roz</replaceable>
@@ -1831,7 +1835,7 @@ mplayer -ao mpegpes -vo mpegpes -vf expand <replaceable>twójplik.roz</replaceab
 </screen></para>
 
 <para>
-Zauważ, że karty DVB obsługują tylko pionową rozdzielczość równą 288 i 576 dla PAL 
+Zauważ, że karty DVB obsługują tylko rozdzielczość pionową równą 288 i 576 dla PAL 
 oraz 240 i 480 dla NTSC.
 <emphasis role="bold">Musisz</emphasis> przeskalować obraz, dodając opcję 
 <option>scale=szerokość:wysokość</option>, 
@@ -1839,20 +1843,20 @@ gdzie szerokość i wysokość są takie jak dla opcji <option>-vf</option>.
 Karty DVB akceptują różne szerokości, takie jak 720, 704, 640, 512, 480, 352 itp 
 i dokonują sprzętowego skalowania w kierunku horyzontalnym, 
 więc w większości przypadków nie musisz skalować horyzontalnie.
-Dla DivX 512x384 (format 4:3) wypróbuj:
+Dla MPEG-4 (DivX) 512x384 (format 4:3) wypróbuj:
 </para>
 
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=512:576</screen></para>
 
 <para>Jeżeli masz film w formacie panoramicznym i nie chcesz go skalować 
 do pełnej wysokości, możesz użyć filtru <option>expand=szer:wys</option> 
-aby dodać czarne paski. Aby wyświetlić DivX 640x384, wypróbuj:
+aby dodać czarne paski. Aby wyświetlić MPEG-4 (DivX) 640x384, wypróbuj:
 </para>
 
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf expand=640:576 <replaceable>plik.avi</replaceable>
 </screen></para>
 
-<para>Jeżeli twój CPU jest za wolny na pełnowymiarowy DivX 720x576, 
+<para>Jeżeli twój CPU jest za wolny na pełnowymiarowy MPEG-4 (DivX) 720x576, 
 spróbuj przeskalować w dół:</para>
 
 <para><screen>mplayer -ao mpegpes -vo mpegpes -vf scale=352:576 <replaceable>plik.avi</replaceable>
@@ -1865,30 +1869,31 @@ skalowania w dół:</para>
 </screen></para>
 
 <para>
-Dla OSD i napisów użyj cechy OSD filtru expand. Tak więc zamiast 
-<option>expand=wys:szer</option> lub <option>expand=wys:szer:x:y</option>, użyj
+Dla OSD i napisów użyj cechy OSD filtru expand. Zamiast 
+<option>expand=wys:szer</option> lub
+<option>expand=wys:szer:x:y</option>, użyj więc
 <option>expand=wys:szer:x:y:1</option> (piąty parametr <option>:1</option>
 na końcu umożliwi renderowanie (wyświetlanie) OSD).
 Możesz chcieć przesunąć obraz trochę w górę, aby zyskać więcej miejsca na napisy. 
 Możesz także chcieć przesunąć napisy w górę, jeżeli znajdują się poza ekranem TV, 
-użyj opcji <option>-subpos &lt;0-100&gt;</option> aby to dopasować 
+użyj opcji <option>-subpos &lt;0-100&gt;</option>, aby to dopasować 
 (<option>-subpos 80</option> jest dobrym wyborem).
 </para>
 
 <para>
-Aby odtwarzać filmy inne niż 25fps na telewizorze PAL lub na wolnym CPU, 
+Aby odtwarzać filmy z liczbą klatek na sekundę inną niż 25 na telewizorze PAL lub na wolnym CPU, 
 dodaj opcję <option>-framedrop</option>.
 </para>
 
 <para>
-Aby zachować proporcje plików DivX oraz otrzymać optymalne parametry skalowania 
+Zachowanie proporcji plików MPEG-4 (DivX) oraz optymalne parametry skalowania 
 (sprzętowe poziome i programowe pionowe z zachowaniem odpowiednich proporcji), 
-użyj nowego filtru dvbscale:
+można uzyskać przy użyciu nowego filtru dvbscale:
 </para>
 
 <para><screen>
-dla 4:3 TV: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
-dla 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
+dla TV 4:3: -vf dvbscale,scale=-1:0,expand=-1:576:-1:-1:1
+dla TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </screen></para>
 
 <formalpara>
@@ -1903,7 +1908,7 @@ dla 16:9 TV: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 
 <para>
   Sprawdź czy Twoje sterowniki działają prawidłowo używając programu takiego jak 
-  <ulink url="http://www.sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
+  <ulink url="http://sf.net/projects/dvbtools/"><command>dvbstream</command></ulink>
   (jest on podstawą modułu wejścia DVB).
 </para>
 
@@ -1919,8 +1924,8 @@ naziemnego), to możesz zapisać swoje pliki kanałów jako:
   <filename>~/.mplayer/channels.conf.sat</filename> (satelita),
   <filename>~/.mplayer/channels.conf.ter</filename> (naziemna)
  oraz <filename>~/.mplayer/channels.conf.cbl</filename> (kablówka),
- dając w ten sposób <application>MPlayerowi</application> wskazówkę aby raczej 
- użwyał tych plików zamiast <filename>~/.mplayer/channels.conf</filename>, a Ty
+ dając w ten sposób <application>MPlayerowi</application> wskazówkę aby 
+ używał tych plików zamiast <filename>~/.mplayer/channels.conf</filename>, a Ty
  musisz tylko określić, której karty użyć.
 </para>
 
@@ -1928,8 +1933,8 @@ naziemnego), to możesz zapisać swoje pliki kanałów jako:
   Upewnij się, że w <filename>channels.conf</filename> masz
   <emphasis>tylko</emphasis> kanały niekodowane (Free to Air). W przeciwnym
   razie <application>MPlayer</application> będzie próbował przeskoczyć do
-  następnego widzialnego kanału, lecz może to zająć trochę czasu jeżeli wystąpi
-  po sobie wiele kanałów kodowanych.
+  następnego widzialnego kanału, lecz może to zająć trochę czasu jeżeli
+	wystąpuje po sobie wiele kanałów kodowanych.
 </para>
 <para>
 W polach audio i video możesz użyć rozszerzonej składni:
@@ -1940,7 +1945,7 @@ w każdym wierszu pidu PMT (jeżeli go znasz) dla określanego kanału. Inne mo�
 zastosowania: pid televideo, druga ścieżka dźwiękowa, itp.
 </para>
 <para>
-  Aby wyświetlić pierwszy z kanałów obecnych na Twojej liście uruchom
+  Aby wyświetlić pierwszy z kanałów obecnych na Twojej liście, uruchom
 </para>
 
 <screen>
@@ -1984,7 +1989,7 @@ zastosowania: pid televideo, druga ścieżka dźwiękowa, itp.
 </para>
 
 <para>
-  Jeżeli chcesz zapisać program (audycję) na dysku użyj 
+  Jeżeli chcesz zapisać program (audycję) na dysku, użyj 
 </para>
 
 <screen>
@@ -1992,8 +1997,8 @@ zastosowania: pid televideo, druga ścieżka dźwiękowa, itp.
 </screen>
 
 <para>
-  Jeżeli chcesz nagrać go w innym formacie (przekodowując go) możesz zamiast
-  tego użyć polecenia takiego jak
+  Jeżeli chcesz nagrać go w innym formacie (przekodowując go), możesz zamiast
+  tego użyć polecenia podobnego do
 </para>
 
 <screen>
@@ -2020,8 +2025,9 @@ Proszę pamiętaj, że językiem listy jest angielski.
 <para>
 W przyszłości możesz się spodziewać zdolności wyświetlania OSD i napisów 
 przy użyciu natywnej cechy OSD kart DVB, a także bardziej płynnego 
-odtwarzania filmów innych niż 25fps oraz transkodowania w czasie rzeczywistym MPEG2 i MPEG4 
-(częściowa dekompresja)
+odtwarzania filmów innych niż 25fps oraz transkodowania w czasie
+rzeczywistym MPEG-2 i MPEG-4 
+(częściowa dekompresja).
 </para>
 </sect3>
 
@@ -2032,7 +2038,7 @@ użyciu karty DXR2.</para>
 <para>
 Przede wszystkim będziesz potrzebował poprawnie zainstalowanych sterowników DXR2. 
 Sterowniki i instrukcję instalacji możesz znaleźć na stronie 
-<ulink url="http://dxr2.sourceforge.net/">Centrum zasobów DXR2 (DXR2 Resource Center)</ulink>.
+<ulink url="http://dxr2.sf.net/">Centrum zasobów DXR2 (DXR2 Resource Center)</ulink>.
 </para>
 
 <variablelist>
@@ -2044,7 +2050,7 @@ Sterowniki i instrukcję instalacji możesz znaleźć na stronie
 
 <varlistentry>
 <term><option>-vo dxr2:x11</option> lub <option>-vo dxr2:xv</option></term>
-<listitem><para>włącz wyjście Overlay w X11</para></listitem>
+<listitem><para>włącz wyjście nakładki w X11</para></listitem>
 </varlistentry>
 
 <varlistentry>
@@ -2054,12 +2060,13 @@ Sterowniki i instrukcję instalacji możesz znaleźć na stronie
 </variablelist>
 
 <para>
-Graficzny układ maskujący (overlay chipset) używany w DXR2 jest złej jakości, 
-ale standardowe ustawienia powinny działać u każdego.
-OSD może być użyte z maską (nie na TV) poprzez rysowanie go poprzez kolor kluczowy (colorkey). 
+Układ nakładki (overlay chipset) używany w DXR2 jest dość kiepskiej jakości, 
+ale standardowe ustawienia powinny działać u wszystkich.
+OSD może być użyte z nakładką (nie na TV) poprzez rysowanie go kolorem
+kluczowym (colorkey). 
 Ze standardowymi ustawieniami koloru kluczowego możesz uzyskać różne rezultaty, 
 zwykle będziesz widział kolor kluczowy dookoła znaków lub inny śmieszny efekt. 
-Jeżeli dobrze dostosujesz ustawienia koloru kluczowego powinieneś uzyskać akceptowalne wyniki.
+Jeżeli dobrze dostosujesz ustawienia koloru kluczowego, powinieneś uzyskać akceptowalne wyniki.
 </para>
 
 <para>Listę dostępnych opcji znajdziesz na stronie man.</para>
@@ -2077,7 +2084,7 @@ Obie te karty używają układu dekodującego em8300 firmy Sigma Designs.
 Przede wszystkim będziesz potrzebował poprawnie zainstalowanych sterowników DXR3/H+ 
 w wersji 0.12.0 lub nowszej.
 Sterowniki i instrukcję ich instalacji możesz znaleźć na stronie 
-<ulink url="http://dxr3.sourceforge.net/">DXR3 &amp; Hollywood Plus dla Linuksa</ulink>.
+<ulink url="http://dxr3.sf.net/">DXR3 &amp; Hollywood Plus dla Linuksa</ulink>.
 <filename>configure</filename> powinno wykryć Twoją kartę automatycznie, kompilacja powinna przebiec bez problemu.
 </para>
 
@@ -2087,18 +2094,18 @@ Sterowniki i instrukcję ich instalacji możesz znaleźć na stronie
 <varlistentry>
 <term><option>-vo dxr3:prebuf:sync:norm=x:<replaceable>device</replaceable></option></term>
 <listitem><para>
-<option>overlay</option> włącza maskę zamiast wyjścia TV.
-Do działania wymaga poprawnie skonfigurowanych ustawień maski.
-Najłatwiejszym sposobem konfiguracji maski jest odpalenie autocal.
+<option>overlay</option> włącza nakładkę zamiast wyjścia TV.
+Do działania wymaga poprawnie skonfigurowanych ustawień nakładki.
+Najłatwiejszym sposobem konfiguracji nakładki jest odpalenie autocal.
 Następnie uruchom <application>MPlayera</application> z wyjściem dxr3 oraz z 
-wyłączoną maską; uruchom dxr3view.
-W dxr3view możesz dostrajać ustawienia maski i oglądać efekty na bieżąco,
+wyłączoną nakładką; uruchom dxr3view.
+W dxr3view możesz dostrajać ustawienia nakładki i oglądać efekty na bieżąco,
 być może będzie to w przyszłości obsługiwane przez GUI <application>MPlayera</application>.
-Po poprawnym ustawieniu maski nie będziesz już musiał używać dxr3view.
+Po poprawnym ustawieniu nakładki nie będziesz już musiał używać dxr3view.
 <option>prebuf</option> włącza buforowanie z wyprzedzeniem (prebuffering).
 Prebuffering jest możliwością układu em8300, która umożliwia przetrzymywanie w pamięci
-więcej niż jednej ramki video na raz. Oznacza to, że <application>MPlayer</application>, 
-gdy uruchomiony z włączonym prebufferingiem, będzie próbował cały czas utrzymywać 
+więcej niż jednej ramki video na raz. Oznacza to, że <application>MPlayer</application> 
+uruchomiony z włączonym prebufferingiem będzie próbował cały czas utrzymywać 
 wypełniony bufor. Jeżeli masz wolną maszynę, <application>MPlayer</application> będzie 
 używał prawie lub dokładnie 100% CPU. Jest to szczególnie powszechne przy odtwarzaniu
 czystych strumieni MPEG (takich jak DVD, SVCD itd.). <application>MPlayer</application> wypełni
@@ -2106,26 +2113,28 @@ bufor bardzo szybko, ponieważ nie będzie musiał przekodowywać strumienia do 
 Z prebufferingiem odtwarzanie video jest <emphasis role="bold">dużo</emphasis> 
 mniej wrażliwe na inne programy wykorzystujące CPU. Nie będzie gubił ramek, chyba że 
 inne aplikacje będą wykorzystywały CPU przez dłuższy czas.
-Gdy uruchamiany bez prebufferingu, em839 jest o wiele bardziej wrażliwy na obciążenie 
+Uruchamiany bez prebufferingu, em8300 jest o wiele bardziej wrażliwy na obciążenie 
 CPU, włączenie opcji <option>-framedrop</option> jest więc wysoce wskazane aby 
 uniknąć dalszej utraty synchronizacji.
 <option>sync</option> włączy nowy mechanizm synchronizacji (sync-engine). Jest
-to na razie możliwość eksperymentalna. Z włączonym sync wewnętrzny zegar em8300
+to na razie funkcja eksperymentalna. Z włączonym sync wewnętrzny zegar em8300
 będzie cały czas monitorowany. Gdy zacznie się różnić od zegara <application>MPlayera</application> 
 zostanie zresetowany, czego skutkiem będzie opuszczenie przez em8300 wszystkich opóźnionych 
-ramek. <option>norm=x</option> ustawi normę TV dla DXR3, bez potrzeby
-używania zewnętrznych narzędzi, takich jak em8300setup. Poprawnymi normami są:
-5 = NTSC, 4 = PAL-60, 3 = PAL. Specjalnymi normami są 2 (automatyczne dostrojenie
+ramek. <option>norm=x</option> ustawi standard TV dla DXR3 bez potrzeby
+używania zewnętrznych narzędzi, takich jak em8300setup. Poprawnymi
+standardami są:
+5 = NTSC, 4 = PAL-60, 3 = PAL. Specjalne standardy to 2 (automatyczne dostrojenie
 używające PAL/PAL-60) oraz 1 (automatyczne dostrojenie używające PAL/NTSC);
-decydują one, której normy użyć patrząc na ilość klatek na sekundę filmu. 
-norm = 0 (standardowe) nie zmienia obecnej normy. 
+decydują one, którego standardu użyć patrząc na ilość klatek na sekundę filmu. 
+norm = 0 (standardowe) nie zmienia bieżącego standardu. 
 <option><replaceable>device</replaceable></option> = numer urządzenia, którego
-użyć jeżeli masz więcej niż jedną kartę em8300.
-Każda z tych opcji może zostać opuszczona.
+możesz użyć, jeżeli masz więcej niż jedną kartę em8300.
+Każda z tych opcji może być pominięta.
 <option>:prebuf:sync</option> spisuje się doskonale przy odtwarzaniu filmów
-DivX. Niektórzy miewają problemy podczas odtwarzania plików MPEG1/2 korzystając
+MPEG-4 (DivX). Niektórzy miewają problemy podczas odtwarzania plików
+MPEG-1/2 korzystając
 z opcji prebuf. Spróbuj najpierw bez żadnych opcji. Jeżeli będziesz miał
-problemy z synchronizacją lub z napisami DVD wypróbuj <option>:sync</option>.
+problemy z synchronizacją lub z napisami DVD, wypróbuj <option>:sync</option>.
 </para></listitem>
 </varlistentry>
 
@@ -2152,12 +2161,12 @@ wyjściem audio (<option>-ac hwac3</option>).
 <varlistentry>
 <term><option>-vf lavc/fame</option></term>
 <listitem><para>
-Aby oglądać zawartość nie-MPEG na em8300 (np. DivX lub RealVideo) będziesz
-musiał określić filtr video MPEG1 taki jak 
+Aby oglądać zawartość nie-MPEG na em8300 (np. MPEG-4 (DivX) lub RealVideo) będziesz
+musiał określić filtr video MPEG-1 taki jak 
 <systemitem class="library">libavcodec</systemitem> (lavc) lub 
 <systemitem class="library">libfame</systemitem> (fame).
-W tej chwili lavc jest szybszy i daje lepszą jakość obrazu. Sugerowanie jest
-jego użycie, chyba że masz z nim problemy. Spójrz na stronę man aby
+W tej chwili lavc jest szybszy i daje lepszą jakość obrazu. Sugerowane jest
+użycie właśnie jego, chyba że masz z nim problemy. Spójrz na stronę man, aby
 uzyskać więcej informacji o <option>-vf lavc/fame</option>. Używanie lavc jest
 wysoce zalecane. Obecnie nie istnieje sposób ustawienia współczynnika fps dla
 em8300, co oznacza, że jest on zablokowany na 29.97fps. Z tego powodu jest
@@ -2166,19 +2175,19 @@ bardzo wskazane abyś używał
 jeżeli używasz buforowania z wyprzedzeniem. Dlaczego 25 a nie 29.97? Cóż,
 przy 29.97 odtwarzanie staje się nieco skokowe. Powód tego nie jest nam znany.
 Jeżeli ustawisz fps pomiędzy 25 a 27 obraz stanie się stabilny. W chwili obecnej
-nie możemy zrobić nić poza zaakceptowaniem tego faktu.
+nie możemy zrobić nic poza zaakceptowaniem tego faktu.
 </para></listitem>
 </varlistentry>
 
 <varlistentry>
 <term><option>-vf expand=-1:-1:-1:-1:1</option></term>
 <listitem><para>
-Chociaż sterownik DXR3 może wstawić jakieś OSD w obraz MPEG1/2/4, ma ono wiele
-niższą jakość niż tradycyjne OSD <application>MPlayera</application>, 
+Chociaż sterownik DXR3 może wstawić jakieś OSD w obraz MPEG-1/2/4, ma ono
+o wiele niższą jakość niż tradycyjne OSD <application>MPlayera</application>, 
 ma także liczne problemy z odświeżaniem. Powyższa linia najpierw zamieni 
-wejściowe video na MPEG4 (jest to konieczne, przepraszamy), 
+wejściowe video na MPEG-4 (jest to konieczne, przepraszamy), 
 następnie nałoży filtr expand (rozszerzenie), który
-nic nie rozszerzy (-1: standard) ale doda normalne OSD do obrazu (robi to ta
+nic nie rozszerzy (-1: domyślne), ale doda normalne OSD do obrazu (robi to ta
 jedynka na końcu).
 
 </para></listitem>
@@ -2211,15 +2220,15 @@ wysyła ją do karty. Do konwersji na JPEG używany i wymagany jest
 <emphasis>cinerama</emphasis>
 możesz oglądać filmy w formacie panoramicznym (wide screen), zakładając że masz
 dwa ekrany i dwie karty MJPEG. W zależności od rozdzielczości i ustawień
-jakości, sterownik ten może wymagać sporo mocy CPU. Pamiętaj aby użyć
-<option>-framedrop</option> jeżeli Twoja maszyna jest zbyt wolna. Info: Mój AMD
+jakości, sterownik ten może wymagać sporo mocy CPU. Pamiętaj, aby użyć
+<option>-framedrop</option>, jeżeli Twoja maszyna jest zbyt wolna. Info: Mój AMD
 K6-2 350MHz jest (z <option>-framedrop</option>) całkiem wystarczający do
 oglądania materiałów o rozmiarach VCD, oraz przeskalowanych w dół filmów.
 </para>
 
 <para>
-sterownik ten "rozmawia" ze sterownikiem jądra dostępnym na
-<ulink url="http://mjpeg.sourceforge.net"/>, więc najpierw musisz go uruchomić.
+Sterownik ten &quot;rozmawia&quot; ze sterownikiem jądra dostępnym na
+<ulink url="http://mjpeg.sf.net"/>, musisz więc go najpierw uruchomić.
 Obecność karty MJPEG jest wykrywana automatycznie przez skrypt
 <filename>configure</filename>. Jeżeli autodetekcja zawiedzie, wymuś wykrywanie
 używając <screen>./configure --enable-zr</screen>
@@ -2231,12 +2240,12 @@ stronie man, krótki poprzez wywołanie
 </para>
 
 <para>
-Rzeczy takie jak skalowanie i OSD (wyświetlanie na ekranie) nie są obsługiwane
+Rzeczy takie, jak skalowanie i OSD (wyświetlanie na ekranie) nie są obsługiwane
 przez ten sterownik, ale można je uzyskać poprzez filtry video. Załóżmy, że
 masz film w rozdzielczości 512x272 i chciałbyś go wyświetlić na pełnym
 ekranie, używając swojego DC10+. Istnieją trzy główne możliwości - możesz
 przeskalować film do szerokości 768, 384 lub 192. Ze względu na wydajność i
-jakość wybrałbym przeskalowanie filmu do 384x204 używając szybkiego programowego
+jakość, wybrałbym przeskalowanie filmu do 384x204 używając szybkiego programowego
 skalowania w trybie bilinear. Polecenie wygląda w ten sposób: 
 <screen>
 mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>film.avi</replaceable>
@@ -2245,7 +2254,7 @@ mplayer -vo zr -sws 0 -vf scale=384:204 <replaceable>film.avi</replaceable>
 
 <para>
 Kadrowania można dokonać filtrem <option>crop</option> albo tym
-sterownikiem. załóżmy, że Twój film jest zbyt szeroki aby go wyświetlić na Twoim
+sterownikiem. Załóżmy, że Twój film jest zbyt szeroki, aby go wyświetlić na Twoim
 Buz i chcesz użyć <option>-zrcrop</option>, aby uczynić film mniej szerokim. 
 Powinieneś użyć takiego polecenia: 
 <screen>
@@ -2254,7 +2263,7 @@ mplayer -vo zr -zrcrop 720x320+80+0 <replaceable>benhur.avi</replaceable>
 </para>
 
 <para>
-jeżeli chcesz użyć filtru <option>crop</option> to wykonaj: 
+Jeżeli chcesz użyć filtru <option>crop</option>, wykonaj: 
 <screen>
 mplayer -vo zr -vf crop=720:320:80:0 <replaceable>benhur.avi</replaceable>
 </screen>
@@ -2266,9 +2275,9 @@ Dodatkowe wystąpienia <option>-zrcrop</option> wywołują tryb
 lub projektorów, uzyskując w ten sposób większy ekran.  Powiedzmy, że masz dwa
 projektory, lewy podłączony do karty Buz na <filename>/dev/video1</filename>
 a prawy do DC10+ na <filename>/dev/video0</filename>. Film jest w
-rozdzielczości 704x288. Załóżmy także, że chcesz żeby obraz z prawego projektora
-był czarno-biały oraz, że ramki jpeg wyświetlane z lewego projektora były
-jakości 10. Aby uzyskać taki efekt powinieneś wydać takie polecenie:
+rozdzielczości 704x288. Załóżmy także, że chcesz, aby obraz z prawego projektora
+był czarno-biały oraz aby ramki jpeg wyświetlane z lewego projektora były
+jakości 10. Aby uzyskać taki efekt powinieneś wydać następujące polecenie:
 <screen>
 mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
           -zrcrop 352x288+0+0 -zrdev /dev/video1 -zrquality 10 \
@@ -2277,20 +2286,18 @@ mplayer -vo zr -zrdev /dev/video0 -zrcrop 352x288+352+0 -zrxdoff 0 -zrbw \
 </para>
 
 <para>
-Jak pewnie zauważyłeś opcje przed drugim <option>-zrcrop</option> odnoszą się
-tylko do DC10+ a opcje po drogim <option>-zrcrop</option> odnoszą się do Buz.
+Jak pewnie zauważyłeś, opcje przed drugim <option>-zrcrop</option> odnoszą się
+tylko do DC10+, a opcje po drogim <option>-zrcrop</option> odnoszą się do Buz.
 Ilość kart uczestniczących w <emphasis>cinerama</emphasis> ograniczona jest do
 czterech, więc możesz zbudować ekran (ścianę video:) 2x2.
-<!--frogu: 2x2 vidiwall.=ściana video??-->
-<!--paszczi: si :)-->
 </para>
 
 <para>
-Na koniec - ważna uwaga: Nie włączaj ani wyłączaj XawTV na urządzeniu
-odtwarzającym - zawiesisz swój komputer. W porządku jest 
+Na koniec - ważna uwaga: Nie włączaj ani nie wyłączaj XawTV na urządzeniu
+odtwarzającym - zawiesisz swój komputer. Można natomiast 
 <emphasis role="bold">NAJPIERW</emphasis> włączyć XawTV, 
 <emphasis role="bold">NASTĘPNIE</emphasis> włączyć <application>MPlayera</application>, 
-poczekać aż <application>MPlayer</application> zakończy działanie i 
+poczekać, aż <application>MPlayer</application> zakończy działanie i 
 <emphasis role="bold">POTEM</emphasis> wyłączyć XawTV.
 </para>
 </sect3>
@@ -2299,10 +2306,10 @@ poczekać aż <application>MPlayer</application> zakończy działanie i
 <title>Blinkenlights</title>
 <para>
 Ten sterownik zdolny jest do odtwarzanie używając protokołu UDP Blinkenlights
-(mrugające światła - przyp. tłum.). Jeżeli nie wiesz czym jest 
+(mrugające światła - przyp. tłum.). Jeżeli nie wiesz, czym jest 
 <ulink url="http://www.blinkenlights.de/">Blinkenlights</ulink>
 lub jego następca - <ulink url="http://www.blinkenlights.de/arcade/">Arcade</ulink>,
-dowiedz się. Pomimo, że prawdopodobnie jest to najmniej używane wyjście video,
+dowiedz się. Pomimo, że prawdopodobnie jest to najrzadziej używane wyjście video,
 z pewnością jest najfajniejszym jakie <application>MPlayer</application> ma
 do zaoferowania. Po prostu pooglądaj kilka 
 <ulink url="http://www.blinkenlights.de/video.en.html">dokumentacyjnych filmów
@@ -2336,7 +2343,7 @@ instrukcje dla Matrox G450/G550 znajdują się w następnej sekcji!
     <ulink url="http://www.matrox.com">stronie Matroksa</ulink>. Będziesz miał X
     na TV.
     </para><para>
-    <emphasis role="bold">Ten sposób nie umożliwia Ci przyśpieszanego
+    <emphasis role="bold">Ten sposób nie daje Ci przyśpieszanego
     odtwarzania</emphasis> jak pod Windowsami! Drugie wyjście ma tylko bufor
     ramki YUV, <emphasis>BES</emphasis> (Back End Scaler, układ skalujący YUV na
     kartach G200/G400/G450/G550) tam nie działa. Windowsowy sterownik jakoś to
@@ -2346,7 +2353,7 @@ instrukcje dla Matrox G450/G550 znajdują się w następnej sekcji!
     <emphasis role="bold">WOLNE</emphasis> i będzie miało włączone zabezpieczenie przed 
     kopiowaniem <emphasis role="bold">Macrovision</emphasis> (Macrovision copy protection).
     (możesz &quot;obejść&quot; Macrovision używając tego 
-    <ulink url="http://avifile.sourceforge.net/mgamacro.pl">skryptu perla</ulink>).
+    <ulink url="http://avifile.sf.net/mgamacro.pl">skryptu perla</ulink>).
     </para></listitem>
 </varlistentry>
 <varlistentry>
@@ -2422,7 +2429,7 @@ mplayer -vo mga -fs -screenw 640 -screenh 512 <replaceable>nazwa_pliku</replacea
       
       (Jeżeli używasz X, przełącz się teraz na matroxfb używając np. 
       <keycap>Ctrl</keycap>+<keycap>Alt</keycap>+<keycap>F1</keycap>.)
-      Zmień <literal>640</literal> oraz <literal>512</literal> jeżeli chcesz
+      Zmień <literal>640</literal> oraz <literal>512</literal>, jeżeli chcesz
       ustawić inną rozdzielczość...
      </para></step>
     <step><para>
@@ -2466,9 +2473,9 @@ przez Balázs Kerekes)
 <sect3 id="tv-out_matrox_g450">
 <title>Karty Matrox G450/G550</title>
 <para>
-Obsługa wyjścia TV dla tych kart została przedstawione dopiero niedawno i nie
-należy jeszcze do głównego drzewa jądra. <!--mainstream kernel-->. Z tego co
-wiem obecnie  moduł <emphasis role="bold">mga_vid</emphasis> nie może być użyty
+Obsługa wyjścia TV dla tych kart została dodana dopiero niedawno i nie
+należy jeszcze do głównego drzewa jądra. <!--mainstream kernel-->. Z tego, co
+wiem, moduł <emphasis role="bold">mga_vid</emphasis> nie może być obecnie użyty
 ponieważ sterownik G450/G550 pracuje tylko w jednej konfiguracji: pierwszy układ
 CRTC (z wieloma możliwościami) na pierwszym ekranie (monitor) i drugi CRTC (bez
 <emphasis role="bold">BES</emphasis> - po objaśnienia do BES sięgnij do sekcji
@@ -2509,7 +2516,7 @@ licencjonowanej technologii Macrovision.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">ASIC Radeon VIVO</emphasis>:
-  obsługiwane przez <ulink url="http://gatos.sf.net">gatos</ulink>.
+  obsługiwane przez <ulink url="http://gatos.sf.net">GATOS</ulink>.
   </simpara></listitem>
 <listitem><simpara>
   <emphasis role="bold">Radeon</emphasis> oraz <emphasis role="bold">Rage128</emphasis>:
@@ -2530,7 +2537,7 @@ Potrzebny jest jednak potężny CPU.
 
 <para>
 Jedyna rzecz, którą musisz zrobić to: 
-<emphasis role="bold">Mieć podłączony odbiornik TV przez zabootowaniem swojego
+<emphasis role="bold">Mieć podłączony odbiornik TV przez uruchomieniem swojego
 PC</emphasis>, ponieważ video BIOS inicjalizuje się tylko podczas procedury POST.
 </para>
 </sect3>
@@ -2584,17 +2591,17 @@ Oczywiście najważniejsza jest część TwinView.
 <sect3 id="tvout-neomagic">
 <title>NeoMagic</title>
 <para>
-Układ NeoMagic Można znaleźć w rożnych laptopach, niektóre wyposażone są w
-prosty analogowy koder TV, niektóre mają bardziej zaawansowaną wersję.
+Układ NeoMagic można znaleźć w rożnych laptopach, niektóre wyposażone są w
+prosty analogowy koder TV, inne mają bardziej zaawansowaną wersję.
 <itemizedlist>
 <listitem><simpara>
   <emphasis role="bold">Układ analogowy</emphasis>:
 	Przetestowane na Toshiba Tecra 8000. Jego układ wyjścia TV jest żałosnym złomem. 
-	Unikaj tego jeżeli tylko możesz.
+	Unikaj tego jeśli tylko możesz.
 	</simpara>
 	<simpara>
 	Musisz używać <option>-vo vesa</option>. Testowany układ był zdolny do
-	wyświetlania obrazu tylko w formacie (proporcjach) 1.333333, wiec musisz używać
+	wyświetlania tylko obrazu o proporcjach 1.333333, musisz więc używać
 	opcji <option>-x</option>, <option>-y</option> i/lub filtrów
 	<option>-vf scale,crop,expand</option> jeżeli sprzęt nie pozwoli Ci włączyć
 	wyjścia TV. Maksymalną rozdzielczością było 720*576 przy 16bpp.
@@ -2606,11 +2613,11 @@ prosty analogowy koder TV, niektóre mają bardziej zaawansowaną wersję.
   </simpara></listitem>
 	<listitem><simpara>
   <emphasis role="bold">Układ kodujący Chrontel 70xx</emphasis>:
-  Obecny w IBM thinkpad 390E a także możliwe, że w innych Thinkpadach lub notebookach.
+  Obecny w IBM thinkpad 390E, a możliwe, że także w innych Thinkpadach lub notebookach.
 	</simpara><simpara>
 	Dla trybu PAL musisz użyć <option>-vo vesa:neotv_pal</option>.
 	Dla truby NTSC - <option>-vo vesa:neotv_ntsc</option>.
-  Zapewni to funkcję wyjśca TV w następujących trybach 16 bpp i 8 bpp:
+  Zapewni to funkcję wyjścia TV w następujących trybach 16 bpp i 8 bpp:
 	</simpara>
 	 <itemizedlist>
 	 <listitem><simpara>NTSC 320x240, 640x480, byćmoże także 800x600.</simpara></listitem>
@@ -2618,15 +2625,15 @@ prosty analogowy koder TV, niektóre mają bardziej zaawansowaną wersję.
 	 </itemizedlist>
 	 <simpara>Tryb 512x384 nie jest obsługiwany przez BIOS. Musisz przeskalować obraz
 						do innej rozdzielczości aby aktywować wyjście TV. Jeżeli widzisz obraz 
-						na ekranie w rozdzielczości 640x480 lub 800x600 lecz nie w 320x240, 
+						na ekranie w rozdzielczości 640x480 lub 800x600, lecz nie w 320x240, 
 						lub w innych mniejszych rozdzielczościach, to musisz zamienić dwie tabele w
 						<filename>vbelib.c</filename>.
-						Aby uzysać szczegóły zobacz do funkcji vbeSetTV. W tym przypadku skontaktuj
+						Więcej sczegółów znajdziesz w kodzie funkcji vbeSetTV. W tym przypadku skontaktuj
 						się z autorem.
   </simpara>
   <simpara>
-  Znane problemy: Tylko BESA, nie zaimplementowane inne kontrolki niż jasność, kontrast,
-	poziom czerni (blacklevel), filt migotania (flickfilter).
+  Znane problemy: Tylko VESA, nie zaimplementowane ustawienia obrazu
+	poza jasnością, kontrastem, poziomem czerni (blacklevel) i filtrem migotania (flickfilter).
   </simpara>
 	</listitem>
   </itemizedlist>

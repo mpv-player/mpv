@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.47 -->
+<!-- synced with 1.56 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
 
@@ -13,7 +13,7 @@
 Jak mam stworzyć poprawną łatkę do <application>MPlayera</application>?
 </para></question>
 <answer><para>
-Stworzyliśmy <ulink url="../../tech/patches.txt">krótki dokument</ulink>
+Przygotowaliśmy <ulink url="../../tech/patches.txt">krótki dokument</ulink>
 opisujący wszystkie potrzebne szczegóły. Kieruj się zawartymi w nim wskazówkami.
 </para></answer>
 </qandaentry>
@@ -35,14 +35,14 @@ Jak mogę wesprzeć rozwój <application>MPlayera</application>?
 </para></question>
 <answer><para>
 Jesteśmy bardziej niż szczęśliwi, gdy ofiarowujecie nam sprzęt i oprogramowanie w formie
-<ulink url="http://www.mplayerhq.hu/homepage/donations.html">dotacji</ulink>.
+<ulink url="http://www.mplayerhq.hu/homepage/donations.html">darów</ulink>.
 Pomagają one nam ciągle ulepszać <application>MPlayera</application>.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-Jak mogę stać się developerem <application>MPlayera</application>?
+Jak mogę zostać deweloperem <application>MPlayera</application>?
 </para></question>
 <answer><para>
 Programiści i dokumentatorzy zawsze są mile widziani. Na początek przeczytaj
@@ -185,7 +185,7 @@ obsługiwać nawet Windowsów i nigdy nie próbowali kompilować jądra.
 Zainstalowali (z ustawieniami domyślnymi) Mandrake'a, RedHata lub SuSE 
 i bez RTFMowania (przeczytanie instrukcji - przyp. tłum) przysyłają nam wiadomości 
 "Nie działa! Pomocy! Proszę! 
-Jestem nowy w Linuksie! Pomocy! Oh! Pomocy!". Nie możemy ich powstrzymać 
+Jestem nowy w Linuksie! Pomocy! Och! Pomocy!". Nie możemy ich powstrzymać 
 ale przynajmniej możemy ich zmusić do RTFMowania i do czytania komunikatów 
 ./configure oraz <application>MPlayera</application>.
 </para>
@@ -308,7 +308,7 @@ w systemach Mandrake). Można je utworzyć następującymi poleceniami:
      # ln -sf /usr/X11R6 /usr/X11
      # ln -sf /usr/X11R6/include/X11 /usr/include/X11
 </screen>
-Twoja dystrybucja może się różnić od 
+Układ katalogów w Twojej dystrybucji może odbiegać od
 <ulink url="http://www.pathname.com/fhs/">Standardu Hierarchii Systemu Plików (FHS) </ulink>.
 </para></answer>
 </qandaentry>
@@ -402,7 +402,7 @@ Mam problemy z odtwarzaniem plików przy użyciu kodeka ... Czy mogę ich używa
 Sprawdź <ulink url="http://www.mplayerhq.hu/DOCS/codecs-status.html">status kodeków</ulink>,
 jeżeli nie zawiera on Twojego kodeka przeczytaj 
 <link linkend="codecs">dokumentację kodeków</link>,
-a w szczególności <link linkend="win32-codecs">HOWTO importowania kodeków</link> i skontaktuj się z nami.
+a w szczególności <link linkend="codec-importing">HOWTO importowania kodeków</link> i skontaktuj się z nami.
 </para></answer>
 </qandaentry>
 
@@ -413,7 +413,7 @@ Gdy zaczynam odtwarzanie wyświetla się następujący komunikat lecz wszystko w
 </para></question>
 <answer><para>
 Potrzebujesz uprawnień roota lub specjalnie ustawionego jądra, aby używać
-nowego kodu taktowania.
+nowego kodu synchronizacji czasu.
 Aby uzyskać szczegóły, spójrz do sekcji <link linkend="rtc">RTC</link> w dokumentacji.
 </para></answer>
 </qandaentry>
@@ -423,7 +423,7 @@ Aby uzyskać szczegóły, spójrz do sekcji <link linkend="rtc">RTC</link> w dok
 Jak mogę zrobić zrzut ekranu?
 </para></question>
 <answer><para>
-Musisz skożystać ze sterownika wyjścia video, który nie używa video overlay. Pod X11 
+Musisz skorzystać ze sterownika wyjścia video, który nie używa nakładki video. Pod X11 
 wystarczy użyć <option>-vo x11</option>, pod Windows działa <option>-vo directx:noaccel</option>
 </para></answer>
 </qandaentry>
@@ -444,11 +444,11 @@ Opcja <option>-xy</option> lub <option>-fs</option> nie działa ze sterownikiem 
 <answer><para>
 Działa, lecz musisz osobno zażądać skalowania programowego (bardzo wolne)
 opcją <option>-zoom</option>. Lepiej skorzystaj z obsługi trybu XF86VidMode: musisz
-zadać opcje <option>-vm</option> oraz <option>-fs</option> i to wszystko.
-Upewnij się, że masz odpowiednie linie trybów (modelines) w swoim pliku 
+podać opcje <option>-vm</option> oraz <option>-fs</option> i to wszystko.
+Upewnij się, że masz odpowiednie definicje trybów graficznych (modelines) w swoim pliku 
 <filename>XF86Config</filename> i spróbuj uruchomić 
 <link linkend="dga">sterownik DGA</link> oraz <link
-linkend="sdl">sterownik SDL DGA</link>. Jest o wiele szybciej. Jeżeli SDL DGA
+linkend="sdl">sterownik SDL DGA</link>. Jest o wiele szybszy. Jeżeli SDL DGA
 działa - używaj go. Działa jeszcze szybciej.
 </para></answer>
 </qandaentry>
@@ -470,11 +470,13 @@ Przykład:
 <listitem><para>użycie procesora w procentach przez kodek video (dla porcji/pakietów i
 DR zawiera także video_out)</para></listitem>
 <listitem><para>użycie procesora przez video_out</para></listitem>
-<listitem><para>użycie procesora w procentach przez kodek audio </para></listitem>
+<listitem><para>użycie procesora w procentach przez kodek audio</para></listitem>
 <listitem><para>ramki opuszczone, aby zachować synchronizację A-V</para></listitem>
 <listitem><para>obecny poziom postprocessingu obrazu (gdy używasz 
 <option>-autoq</option>)</para></listitem>
-<listitem><para>obecne użycie pamięci cache (normalne jest około 50%)</para></listitem>
+<listitem><para>szybkość odtwarzania będąca mnożnikiem oryginalnej
+szybkości</para></listitem>
+<!--FIXME: factor? czynnik, mnożnik?-->
 </itemizedlist>
 Większość z nich obecna jest dla celów odpluskwiania (debugging) i zostanie w
 pewnym momencie usunięta.
@@ -496,7 +498,7 @@ Dlaczego użycie procesora przez video_out wynosi zero (0%) dla niektórych
 plików?
 </para></question>
 <answer><para>
-To nie jest zero, lecz jest wywołane z kodeka i poprzez to nie
+Nie jest ono zerowe, ale pomiar jest wywołany z kodeka i poprzez to nie
 może być mierzone oddzielnie. Powinieneś spróbować odtworzyć plik 
 używając <option>-vo null</option> a potem <option>-vo ...</option> i 
 sprawdzić różnicę, aby zobaczyć prędkość video_out.
@@ -560,7 +562,7 @@ Napisy są bardzo ładne, najpiękniejsze jakie widziałem, ale spowalniają
 odtwarzanie! Wiem, że to jest niezwykłe...
 </para></question>
 <answer><para>
-Po odpaleniu <filename>./configure</filename>, wyedytyj <filename>config.h</filename>
+Po odpaleniu <filename>./configure</filename>, wyedytuj <filename>config.h</filename>
 i zamień <systemitem>#undef FAST_OSD</systemitem> na
 <systemitem>#define FAST_OSD</systemitem>. Po czym skompiluj ponownie.
 </para></answer>
@@ -638,7 +640,7 @@ Użyj:
 
 <qandaentry>
 <question><para>
-Jak mogę określić ścieżkę audio/napisów z pliku  OGM, Matroska, NUT lub DVD?
+Jak mogę określić ścieżkę audio/napisów z pliku OGM, Matroska, NUT lub DVD?
 </para></question>
 <answer><para>
 Musisz użyć <option>-aid</option> (ID audio) lub <option>-alang</option>
@@ -658,7 +660,7 @@ mplayer -vo null -ao null -frames 0 -v <replaceable>nazwa_pliku</replaceable> | 
 
 <qandaentry>
 <question><para>
-Próbuję odtworzyć jakikolwiek strumień z internetu, ale nie udaje mi się.
+Próbuję odtworzyć jakiś strumień z internetu, ale nie udaje mi się.
 </para></question>
 <answer><para>
 Spróbuj otworzyć strumień korzystając z opcji <option>-playlist</option>.
@@ -667,7 +669,7 @@ Spróbuj otworzyć strumień korzystając z opcji <option>-playlist</option>.
 
 <qandaentry>
 <question><para>
-Ściągnąłem film z sieci P2P i nie nie chce się odtworzyć! 
+Ściągnąłem film z sieci P2P i nie chce się odtworzyć! 
 </para></question>
 <answer><para>
 Prawdopodobnie plik jest uszkodzony lub jest to fałszywka.
@@ -801,7 +803,7 @@ PRELINK_OPTS="-mR --no-exec-shield"
 <answer><para>
 <application>MPlayer</application> to nie <application>xine/avifile/...</application>.
 Chociaż te aplikacje mają trochę wspólnego kodu, zestaw kodeków (DLL), 
-synchronizację, demultiplexing itp są inne i nie powinny być porównywane.
+to synchronizacja, demultiplexing itp. są inne i nie powinny być porównywane.
 Jeżeli masz plik, którego <application>MPlayer</application> nie odtwarza 
 poprawnie, lecz nie ma z nim problemów w innych odtwarzaczach, przeczytaj 
 <link linkend="bugreports">wskazówki do zgłaszania błędów</link> i wgraj 
@@ -822,7 +824,7 @@ i wgraj plik na FTP.
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> kończy pracę z jakimś błędem przy kożystaniu z  <filename>l3codeca.acm</filename>.
+<application>MPlayer</application> kończy pracę z jakimś błędem przy korzystaniu z <filename>l3codeca.acm</filename>.
 </para></question>
 <answer><para>
 Sprawdź wynik <command>ldd /usr/local/bin/mplayer</command>. Jeżeli zawiera 
@@ -833,7 +835,7 @@ Jeżeli wygląda tak:
 to świadczy o problemie z twoim jądrem/libc. Być może używasz jakiś łatek 
 związanych z bezpieczeństwem (na przykład łatka OpenWall Solar Designera), które 
 wymuszają ładowanie bibliotek pod bardzo niskie adresy. Poniewaź <filename>l3codeca.acm</filename> 
-jest nierealokowalną biblioteką DLL musi być ładowana pod <literal>0x00400000</literal>,
+jest nierelokowalną biblioteką DLL musi być ładowana pod <literal>0x00400000</literal>,
 nie możemy tego zmienić. Powinieneś używać niełatanego jądra lub skorzystać z opcji
 <application>MPlayera</application> <option>-afm 1</option>,
 aby wyłączyć używanie <filename>l3codeca.acm</filename>.
@@ -847,16 +849,15 @@ z dźwiękiem mp3 stereo. Gdy użyję opcji <option>-nosound</option>, wszystko 
 OK (lecz bez dźwięku).
 </para></question>
 <answer><para>
-Twój komputer jest zbyt wolny lub sterownik
-karty dźwiękowej jest
-zepsuty. Skonsultuj się z dokumentacją, aby zobaczyć, czy możesz polepszyć
+Twój komputer jest zbyt wolny lub sterownik karty dźwiękowej jest
+zepsuty. Skonsultuj się z dokumentacją, aby zobaczyć, czy możesz poprawić
 wydajność.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> przerywa z komunikatem <screen>MPlayer interrupted by
+<application>MPlayer</application> przerywa działanie z komunikatem <screen>MPlayer interrupted by
 signal 4 in module: decode_video</screen> (MPlayer przerwany przez sygnał 4 w
 module: decode_video).
 </para></question>
@@ -865,7 +866,7 @@ Spróbuj uruchamiać <application>MPlayera</application> na maszynie, na której
 skompilowałeś. Albo przekompiluj z detekcją CPU podczas pracy. 
 (<command>./configure --enable-runtime-cpudetection</command>).
 Nie używaj <application>MPlayera</application> na CPU innym niż ten, 
-na którym był kompilowany, bez użycia opcji przed chwilą wymienionej.
+na którym był kompilowany, bez użycia przed chwilą wymienionej opcji.
 </para></answer>
 </qandaentry>
 
@@ -950,7 +951,7 @@ Twój sterownik dźwięku jest wadliwy lub używasz ALSA 0.5 z <option>-ao oss</
 Spójrz do <link linkend="audio">sekcji kart dźwiękowych</link>.
 </para></listitem>
 <listitem><para>
-Plik Avi ma zły nagłówek, spróbuj użyć opcji <option>-nobps</option> i/lub <option>-mc 0</option>.
+Plik AVI ma zły nagłówek, spróbuj użyć opcji <option>-nobps</option> i/lub <option>-mc 0</option>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -968,7 +969,7 @@ Użyj innego kodeka do odtwarzania tego pliku, spróbuj <option>-vc ffmjpeg</opt
 
 <qandaentry>
 <question><para>
-Gdy próbuję przechwytywać z mojego tunera, działa lecz kolory są dziwne. Działa
+Gdy próbuję przechwytywać obraz z mojego tunera, działa lecz kolory są dziwne. Działa
 normalnie z innymi aplikacjami.
 </para></question>
 <answer><para>
@@ -1022,7 +1023,7 @@ sprawdzić, czy <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
 
 <qandaentry>
 <question><para>
-Audio/video całkowicie wychodzi z synchronizacji, gdy uruchamiam 
+Audio/video całkowicie traci synchronizację, gdy uruchamiam 
 <application>MPlayera</application> jako root na moim notebooku. Działa
 normalnie, gdy uruchamiam go jako zwykły użytkownik.
 </para></question>
@@ -1150,7 +1151,7 @@ rozwiązane przez
 poprawkę #621 z logu CVS XFree86 4.1.0</ulink>. 
 Zaktualizuj więc XFree86 do 4.1.0 lub nowszego.
 Możesz także ściągnąć DRI w wersji (przynajmniej) 0.6 ze
-<ulink url="http://dri.sourceforge.net">strony DRI</ulink> lub użyj DRI z CVSu.
+<ulink url="http://dri.sf.net">strony DRI</ulink> lub użyj DRI z CVSu.
 </para></answer>
 </qandaentry>
 
@@ -1245,7 +1246,7 @@ Solarisem?
 </para></question>
 <answer><para>
 Kto wie... Mówią, że działa, więc proszę przetestuj to i przyślij nam
-informacje. Odnieś się do dokumentacji libdvdread oraz jego strony domowej. Nie
+informacje. Zajrzyj do dokumentacji libdvdread oraz jego strony domowej. Nie
 jesteśmy autorami libdvdread. Używaj <emphasis
 role="bold">libmpdvdkit2</emphasis>, który jest obecny w źródłach
 <application>MPlayera</application> i jest używany domyślnie.
@@ -1267,7 +1268,7 @@ Jak mogę ustawić kod regionu w moim napędzie DVD? Nie mam Windowsów!
 </para></question>
 <answer><para>
 Użyj <ulink
-url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">narzędzia regionset</ulink>.
+url="http://linvdr.org/projects/regionset/">narzędzia regionset</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -1472,7 +1473,7 @@ na jakimkolwiek CD. Sprawdź czy libmp3lame jest zainstalowana poprawnie.
 
 <qandaentry>
 <question><para>
-Nie mogę zakodować plików ASF do AVI/DivX, ponieważ mają 1000 fps?
+Nie mogę zakodować pliku ASF do AVI/DivX, ponieważ ma on 1000 fps?
 </para></question>
 <answer><para>
 Ponieważ ASF używa zmiennego frame rate (ilość ramek na sekundę), a AVI używa
@@ -1488,6 +1489,28 @@ Jak mogę wstawić napisy do pliku wynikowego?
 <answer><para>
 Po prostu przekaż opcję <option>-sub &lt;nazwa_pliku&gt;</option> 
 (lub odpowiednio <option>-sid</option>) do <application>MEncodera</application>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak zakodować wyłącznie dźwięk z teledysku?
+</para></question>
+<answer><para>
+Nie jest to możliwe bezpośrednio lecz możesz sprówować następującego
+sposobu (zwróć uwagę na znak 
+<emphasis role="bold">&amp;</emphasis> na końcu polecenia
+<command>mplayer</command>):
+<screen>
+    mkfifo encode
+    mplayer -ao pcm -aofile encode dvd://1 &amp;
+    lame <replaceable>your_opts</replaceable> encode music.mp3
+    rm encode
+</screen>
+Ten sposób pozwala na użycie dowolnego kodera, nie tylko
+<application>LAME</application>.
+Po prostu zamień <command>lame</command> w powyższym poleceniu 
+na swój ulubiony koder audio.
 </para></answer>
 </qandaentry>
 

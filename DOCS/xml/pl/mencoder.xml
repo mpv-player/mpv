@@ -1,96 +1,49 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.17 -->
+<!-- Synced with 1.34 -->
 <chapter id="mencoder">
 <title>Kodowanie z <application>MEncoderem</application></title>
 
 <para>
 Pełna lista dostępnych opcji <application>MEncodera</application> oraz
-przykłady znajdują sie na stronie man. W pliku <ulink url="../../tech/encoding-tips.txt">encoding-tips</ulink>
+przykłady znajdują się na stronie man. W pliku <ulink url="../../tech/encoding-tips.txt">encoding-tips</ulink>
 znajduje się dużo przykładów i przewodników skompletowanych z wielu wątków listy dyskusyjnej mplayer-users. W
 <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">archiwum</ulink>
 znajdziesz mnóstwo dyskusji o aspektach i problemach związanych z kodowaniem
 przy pomocy <application>MEncodera</application>.
 </para>
 
-<sect1 id="menc-feat-divx4">
-<title>Kodowanie 2 lub 3-przebiegowe MPEG-4 (&quot;DivX&quot;)</title>
+<sect1 id="menc-feat-mpeg4">
+<title>Kodowanie 2-przebiegowe MPEG-4 ("DivX")</title>
 
-<formalpara>
-<title>Kodowanie 2-przebiegowe</title>
 <para>
 Nazwa pochodzi od faktu, że przy użyciu tej metody plik kodowany jest <emphasis>dwa razy</emphasis>.
 Pierwsze kodowanie (dubbed pass) tworzy pliki tymczasowe
-(<filename>*.log</filename>) o rozmiarze kilku megabajtów, nie kasuj ich odrazu
+(<filename>*.log</filename>) o rozmiarze kilku megabajtów, nie kasuj ich od razu
 (możesz natomiast skasować plik AVI). W drugim przebiegu
 przy pomocy danych o bitrate'cie z plików tymczasowych tworzony jest plik wyjściowy
 2-przebiegu. Plik końcowy będzie miał o wiele lepszą jakość w porównaniu ze standardowym 1-przebiegowym kodowaniem.
 Jeżeli pierwszy raz o tym słyszysz, powinieneś zajrzeć do któregoś z wielu
 przewodników dostępnych w sieci.
 </para>
-</formalpara>
-
-<para>
-Ten przykład pokazuje jak zakodować DVD do 2-przebiegowego MPEG-4 (&quot;DivX&quot;) AVI.
-Będą do tego potrzebne tylko dwie komendy:
-<screen>rm frameno.avi</screen>
-usuń ten plik, który może pochodzić z poprzedniego 3-przebiegowego kodowania (wpływa on na aktualny)
-<screen>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>film.avi</replaceable>
-mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>film.avi</replaceable>
-</screen>
-</para>
-
-<formalpara>
-<title>Kodowanie 3-przebiegowe</title>
-<para>
-Jest to rozszerzenie kodowania 2-przebiegowego, gdzie dźwięk jest kodowany osobno. Ta metoda wyświetla zalecany bitrate
-taki, aby film zmieścił sie na pojedyńczą płytę CD. Również, dźwięk kodowany jest tylko raz, inaczej niż w trybie 2-przebiegowym.
-Schemat wygląda tak:
-</para>
-</formalpara>
-
-<procedure>
-<step><para>
-  Usuń przeszkadzający plik tymczasowy:
-  <screen>rm frameno.avi</screen>
-  </para></step>
-<step><para>
-  <emphasis>Pierwszy przebieg:</emphasis>
-
-  <screen>mencoder <replaceable>plik/DVD</replaceable> -ovc frameno -oac mp3lame -lameopts vbr=3 -o frameno.avi</screen>
-
-  Zostanie stworzony plik avi tylko ze scieżką dźwiękową, zawierający
-  <emphasis role="bold">jedynie</emphasis> rządany strumień audio. Nie zapomnij o
-  <option>-lameopts</option>, jeżeli musisz je ustawić. Jeśli kodowałeś długi film, <application>MEncoder</application>,
-  po zakończeniu tego przebiegu, wypisze zalecane wartości bitrate'u dla docelowych pojemności 650Mb, 700Mb, i 800Mb.
-  </para></step>
-<step><para>
-  <emphasis>Drugi przebieg:</emphasis>
-  <screen>
-mencoder <replaceable>plik/DVD</replaceable> -oac copy -ovc lavc
--lavcopts vcodec=mpeg4:vpass=1:vbitrate=<replaceable>bitrate</replaceable><!--
---></screen>
-Jest to pierwszy przebieg kodowania video. Opcjonalnie ustal video bitrate na ten który MEncoder wypisał
-na końcu poprzedniego przebiegu.</para></step>
-<step><para>
-  <emphasis>Trzeci przebieg:</emphasis>
-<screen>
-mencoder <replaceable>file/DVD</replaceable> -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2:vbitrate=<replaceable>bitrate</replaceable>
-</screen>
-Jest to drugi przebieg kodowania video. Ustal ten sam bitrate co w poprzednim przebiegu, chyba że naprawdę wiesz co robisz.
-W tym przebiegu, dźwięk z <filename>frameno.avi</filename> będzie dołączony do pliku końcowego... i gotowe!
-</para></step>
-</procedure>
 
 <example>
-<title>Przykład 3-przebiegowego kodowania</title>
+<title>kopiowanie ścieżki dźwiękowej</title>
 <para>
-<screen>rm frameno.avi</screen>
-usuń ten plik, który może pochodzić z poprzedniego 3-przebiegowego kodowania (wpływa on na aktualny)
+2-przebiegowe kodowanie DVD do MPEG-4 ("DivX") AVI z kopiowaniem ścieżki dźwiękowej.
 <screen>
-mencoder dvd://2 -ovc frameno -o frameno.avi -oac mp3lame -lameopts vbr=3
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>film.avi</replaceable>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replaceable>film.avi</replaceable>
+</screen>
+</para>
+</example>
+
+<example>
+<title>kodowanie ścieżki dzwiękowej</title>
+<para>
+2-przebiegowe kodowanie DVD do MPEG-4 ("DivX") AVI z kodowaniem ścieżki dźwiękowej do MP3.
+<screen>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
+mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
 </screen>
 </para>
 </example>
@@ -102,15 +55,15 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <application>MEncoder</application> może tworzyć pliki formatu MPEG (MPEG-PS).
 Jest to prawdopodobnie użyteczne tylko z kodekiem <emphasis>mpeg1video</emphasis>
 pochodzącym z <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>, ponieważ odtwarzacze - za wyjątkiem
-<application>MPlayera</application> - oczekują obrazu zakodowanego w MPEG1 i
-strumienia dźwiękowego w MPEG1 warstwa (layer) 2 (MP2) w pliku MPEG.
+<application>MPlayera</application> - oczekują obrazu zakodowanego w MPEG-1 i
+strumienia dźwiękowego w MPEG-1 warstwa (layer) 2 (MP2) w pliku MPEG.
 </para>
 
 <para>
-Cecha ta nie jest zbytnio przydatna w tej chwili, poza tym
+Możliwość ta nie jest zbytnio przydatna w tej chwili, poza tym
 zawiera prawdopodobnie wiele błędów, ale najważniejsze jest to,
 że <application>MEncoder</application> w tej chwili nie może kodować
-2 warstwy MPEG1 (MP2) audio której oczekują wszystkie odtwarzacze w plikach MPEG.
+2 warstwy MPEG-1 (MP2) audio której oczekują wszystkie odtwarzacze w plikach MPEG.
 </para>
 
 <para>
@@ -120,9 +73,7 @@ Aby zmienić wyjściowy format plików <application>MEncodera</application>, użyj o
 <para>
 Przykład:
 <screen>
-mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy
-<replaceable>inne opcje</replaceable> <replaceable>media.avi
-</replaceable> -o <replaceable>wyjscie.mpg</replaceable>
+mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>inne opcje</replaceable> <replaceable>media.avi </replaceable> -o <replaceable>wyjscie.mpg</replaceable>
 </screen>
 </para>
 </sect1>
@@ -132,25 +83,25 @@ mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy
 <title>Przeskalowywanie filmów</title>
 
 <para>
-Najczęściej potrzeba zmiany wielkości obrazu jest nagła. Jej powodów może być wiele:
-zmniejszenie rozmiaru pliku, przepustowość sieci, itd. Wiekszość ludzi stosuje skalowanie
-przy konwertowaniu DVD lub SVCD do DivXa (AVI). To jest <emphasis role="bold">złe</emphasis> rozwiązanie.
-Zamiast tak robić, przeczytaj sekcje <link linkend="aspect">Zachowywanie proporcji obrazu</link>.
+Często zachodzi potrzeba zmiany wielkości obrazu. Powodów tego może być wiele:
+zmniejszenie rozmiaru pliku, przepustowość sieci, itd. Większość ludzi stosuje 
+ponowne skalowanie przy konwertowaniu płyt DVD, SVCD do DivX AVI. Jeżeli
+chcesz przeskalowywać, przeczytaj sekcję o <link linkend="aspect">zachowywaniu proporcji obrazu</link>.
+
 </para>
 
 <para>
 Proces skalowania obsługiwany jest przez filtr video <literal>scale</literal>
 <option>-vf scale=<replaceable>szerokość</replaceable>:<replaceable>wysokość</replaceable></option>.
 Jego jakość może być ustawiona parametrem <option>-sws</option>.
-Jeśli nie jest on podany <application>MEncoder</application> użyje wartości 0: szybki
-bilinearny.
+Jeśli nie jest on podany <application>MEncoder</application> użyje wartości 2: bicubic.
 </para>
 
 <para>
 Przykład:
 <screen>
 mencoder <replaceable>wejscie.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4
--vf scale=640:480-o <replaceable>wyjscie.avi</replaceable>
+-vf scale=640:480 -o <replaceable>wyjscie.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -168,10 +119,10 @@ je. Ta sekcja jest o <emphasis role="bold">kopiowaniu</emphasis>.
 <itemizedlist>
 <listitem><para>
   <emphasis role="bold">Strumień video</emphasis> (opcja <option>-ovc copy</option>):
-  ładne rzeczy można wyczyniać:) Jak, wstawianie (nie konwertowanie) FLI, VIDO lub MPEG1 video w plik AVI !
+  można ładne rzeczy wyczyniać:) Jak wstawianie (nie konwertowanie) FLI, VIDO lub MPEG-1 video w plik AVI!
   Oczywiście tylko <application>MPlayer</application> potrafi odtwarzać takie pliki :) I prawdopodobnie nie ma
-  dla tego żadnego sensownego zastosowania. Na zdrowy rozsądek: kopiowanie strumieni video może być przydatne
-  tylko wtedy, gdy np. tylko strumień  audio ma być zakodowany (np. PCM do MP3).
+  dla tego żadnego sensownego zastosowania. Poważniej: kopiowanie strumieni video może być przydatne
+  wtedy, gdy np. tylko strumień  audio ma być zakodowany (np. PCM do MP3).
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">Strumień audio</emphasis> (opcja <option>-oac copy</option>):
@@ -188,8 +139,8 @@ je. Ta sekcja jest o <emphasis role="bold">kopiowaniu</emphasis>.
 <para>
 Najprostsza sprawa. Po prostu kopiujemy strumień audio i video, a
 <application>MEncoder</application> generuje indeks. Oczywiście nie
-naprawi to możliwych błęów w strumieniu video i/lub audio, ale za to, naprawi pliki z zepsutym przeplotem,
-+tak więc opcja <option>-ni</option> nie będzie tu już potrzebna.
+naprawi to możliwych błędów w strumieniu video i/lub audio, ale za to, naprawi pliki z zepsutym przeplotem,
+tak więc opcja <option>-ni</option> nie będzie tu już potrzebna.
 </para>
 
 <para>
@@ -244,19 +195,19 @@ Możesz kodować do następujących kodeków (mniej lub bardziej aktualne)
    Bezstratny JPEG
   </entry></row>
 <row><entry>h263</entry><entry>
-  H263
+  H.263
   </entry></row>
 <row><entry>h263p</entry><entry>
-  H263 Plus
+  H263+
   </entry></row>
 <row><entry>mpeg4</entry><entry>
-  Standtard ISO MPEG-4 (DivX 5, XVID kompatybilne)
+  Standard ISO MPEG-4 (DivX 5, XVID kompatybilne)
   </entry></row>
 <row><entry>msmpeg4</entry><entry>
-  pierwotny wariant MPEG-4 przez MS, v3 (DivX3)
+  pierwotny wariant MPEG-4 od MS, v3 (DivX3)
   </entry></row>
 <row><entry>msmpeg4v2</entry><entry>
-  pierwotny wariant MPEG-4 przez MS, v2 (używany w starych plikach asf)
+  pierwotny wariant MPEG-4 od MS, v2 (używany w starych plikach asf)
   </entry></row>
 <row><entry>wmv1</entry><entry>
   Windows Media Video, wersja 1 (WMV7)
@@ -268,10 +219,10 @@ Możesz kodować do następujących kodeków (mniej lub bardziej aktualne)
   Stary kodek RealVideo
   </entry></row>
 <row><entry>mpeg1video</entry><entry>
-  MPEG1 video
+  MPEG-1 video
   </entry></row>
 <row><entry>mpeg2video</entry><entry>
-  MPEG2 video
+  MPEG-2 video
   </entry></row>
 <row><entry>huffyuv</entry><entry>
   bezstratna kompresja
@@ -308,7 +259,7 @@ Przykład z kompresją MJPEG:
 <para>
 <application>MEncoder</application> jest w stanie stworzyć film z jednego
 lub wielu plików JPEG, PNG lub TGA. Poprzez proste kopiowanie ramek może stworzyć pliki MJPEG
-(Motion(ruchomy - przypis tłumacza) JPEG), MPNG (Motion PNG) lub MTGA (Motion TGA).
+(Motion (ruchomy - przypis tłumacza) JPEG), MPNG (Motion PNG) lub MTGA (Motion TGA).
 </para>
 
 <orderedlist>
@@ -320,7 +271,7 @@ lub wielu plików JPEG, PNG lub TGA. Poprzez proste kopiowanie ramek może stworzy
   </para></listitem>
 <listitem><para>
   Potem <application>MEncoder</application> kompresuje zdekodowane pliki podanym kompresorem
-  (DivX4, Xvid, ffmpeg msmpeg4, itd.).
+  (DivX4, XviD, FFmpeg msmpeg4, itd.).
   </para></listitem>
 </orderedlist>
 
@@ -331,26 +282,25 @@ Opis i sposób działania funkcji <option>-mf</option> znajdują się na stronie man
 
 <informalexample>
 <para>
-Tworzenie pliku DivX4 ze wszystkich plików JPEG w aktualnym katalogu:
+Tworzenie pliku MPEG-4 ze wszystkich plików JPEG w aktualnym katalogu:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o <replaceable>wyjscie.avi</replaceable> \*.jpg<!--
---></screen>
+mencoder mf://*.jpg -mf w=800:h=600:fps=25:type=jpg -ovc lavc -lavcopts vcodec=mpeg4 -oac copy -o <replaceable>wyjscie.avi</replaceable>
+</screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Tworzenie pliku DivX4 z wybranych plików JPEG w aktualnym katalogu:
+Tworzenie pliku MPEG-4 z wybranych plików JPEG w aktualnym katalogu:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25 -ovc divx4 -o <replaceable>wyjscie.avi</replaceable>
-<replaceable>ramka001.jpg,ramka002.jpg</replaceable> <!--
---></screen>
+mencoder mf://*.jpg -mf type=jpg:w=800:h=600:fps=25 -ovc copy -oac copy -o <replaceable>wyjscie.avi</replaceable>
+</screen>
 </para>
 </informalexample>
 
 <informalexample>
 <para>
-Tworzenie pliku Motion (ruchomego - przyp. tłum.) JPEG (MJPEG) ze wszystkich plików JPEG w aktualnym katalogu:
+Tworzenie pliku Motion JPEG (MJPEG) ze wszystkich plików JPEG w aktualnym katalogu:
 <screen>
 mencoder -mf on:w=800:h=600:fps=25 -ovc copy -o <replaceable>wyjscie.avi</replaceable> \*.jpg<!--
 --></screen>
@@ -361,7 +311,7 @@ mencoder -mf on:w=800:h=600:fps=25 -ovc copy -o <replaceable>wyjscie.avi</replac
 <para>
 Tworzenie nieskompresowanego pliku ze wszystkich plików PNG w aktualnym katalogu:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw -o <replaceable>output.avi</replaceable> \*.png<!--
+mencoder -mf on:w=800:h=600:fps=25:type=png -ovc raw -o <replaceable>wyjscie.avi</replaceable> \*.png<!--
 --></screen>
 </para>
 </informalexample>
@@ -373,9 +323,8 @@ Szerokości musi być liczbą podzielną przez 4, takie są ograniczenia formatu RAW 
 <informalexample>
 <para>
 Tworzenie pliku Motion PNG (MPNG) ze wszystkich plików PNG w aktualnym katalogu:
-<screen>
-mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o <replaceable>wyjscie.avi</replaceable> \*.png<!--
---></screen>
+<screen>mencoder mf://*.png -mf w=800:h=600:fps=25:type=png -ovc copy -oac copy -o <replaceable>wyjscie.avi</replaceable> <!--
+ --></screen>
 </para>
 </informalexample>
 
@@ -383,8 +332,8 @@ mencoder -mf on:w=800:h=600:fps=25:type=png -ovc copy -o <replaceable>wyjscie.av
 <para>
 Tworzenie pliku Motion TGA (MTGA) ze wszystkich plików TGA w aktualnym katalogu:
 <screen>
-mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy -o <replaceable>wyjscie.avi</replaceable> \*.tga<!--
---></screen>
+mencoder mf://*.tga -mf w=800:h=600:fps=25:type=tga -ovc copy -oac copy -o <replaceable>wyjscie.avi</replaceable><!--
+ --></screen>
 </para>
 </informalexample>
 
@@ -394,11 +343,11 @@ mencoder -mf on:w=800:h=600:fps=25:type=tga -ovc copy -o <replaceable>wyjscie.av
 
 
 <sect1 id="menc-feat-extractsub">
-<title>Wyciąganie napisów z DVD do pliku Vobsub</title>
+<title>Ekstraktowanie napisów z DVD do pliku VOBsub</title>
 
 <para>
 <application>MEncoder</application> jest w stanie wyciągnąć napisy z DVD do pliku
-w formacie Vobsub. Tworzy je para plików z rozszerzeniem
+w formacie VOBsub. Tworzy je para plików z rozszerzeniem
 <filename>.idx</filename> i <filename>.sub</filename>, które są zazwyczaj spakowane do
 pojedyńczego archiwum <filename>.rar</filename>.
 <application>MPlayer</application> może je odtwarzać z opcjami
@@ -412,7 +361,7 @@ Podajesz nazwę bazową (tzn. bez rozszerzenia <filename>.idx</filename> lub
 </para>
 
 <para>
-Jeżeli źródłem nie jest, DVD powinieneś użyć opcji <option>-ifo</option>, aby
+Jeżeli źródłem nie jest DVD powinieneś użyć opcji <option>-ifo</option>, aby
 wskazać plik <filename>.ifo</filename> potrzebny do stworzenia pliku wynikowego
 <filename>.idx</filename>.
 </para>
@@ -424,26 +373,24 @@ Jeżeli źródłem nie jest DVD i nie masz pliku <filename>.ifo</filename>, będziesz
 </para>
 
 <para>
-Każde uruchomienie dołączy bierzące napisy, jeżeli pliki <filename>.idx</filename>
+Każde uruchomienie dołączy do istniejących napisów, jeżeli pliki <filename>.idx</filename>
 i <filename>.sub</filename> istnieją. Więc powinieneś je usunąć przed uruchomieniem.
 </para>
 
 <example>
-<title>Kopiowanie dwóch napisów z DVD podczas 3-przebiegowego kodowania</title>
+<title>Kopiowanie dwóch napisów z DVD podczas 2-przebiegowego kodowania</title>
 <screen>
 rm subtitles.idx subtitles.sub
-mencoder dvd://1 -vobsubout napisy -vobsuboutindex 0 -sid 2 -o frameno.avi -ovc frameno
-mencoder dvd://1 -oac copy -ovc divx4 -pass 1
-mencoder dvd://1 -oac copy -ovc divx4 -pass 2 -vobsubout napisy -vobsuboutindex 1 -sid 5<!--
---></screen>
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
+mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout subtitles -vobsuboutindex 1 -sid 5<!--
+ --></screen>
 </example>
 
 <example>
 <title>Kopiowanie francuskich napisów z pliku MPEG</title>
 <screen>
 rm napisy.idx napisy.sub
-mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable>
- -vobsubout napisy -vobsuboutindex 0 -vobsuboutid fr -sid 1<!--
+mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable> -vobsubout napisy -vobsuboutindex 0 -vobsuboutid fr -sid 1<!--
 --></screen>
 </example>
 
@@ -452,23 +399,22 @@ mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replace
 <sect1 id="aspect">
 <title>Utrzymywanie proporcji obrazu (aspect ratio)</title>
 <para>
-Pliki DVD i SVCD (tzn. MPEG1/2) zawierają wartość proporcji obrazu, która
-opisuje, jak odtwarzacz ma skalować strumień video, wiec ludzie nie bedą się męczyć (np.: 480x480 + 4:3 = 640x480).
-Jednak przy kodowaniu plików AVI (DivX), musisz być świadom, że nagłowek AVI nie przechowuje
+Pliki DVD i SVCD (tzn. MPEG-1/2) zawierają wartość proporcji obrazu, która
+opisuje, jak odtwarzacz ma skalować strumień video, więc ludzie nie będą się męczyć (np.: 480x480 + 4:3 = 640x480).
+Jednak przy kodowaniu plików AVI (DivX) musisz być świadom, że nagłówek AVI nie przechowuje
 tej wartości. Przeskalowywanie jest obrzydliwe i czasochłonne, musi być jakiś lepszy sposób!
 </para>
 
 <para>Jest</para>
 
 <para>
-MPEG4 posiada unikalną cechę: strumień video może posiadać swoją wartość proporcji obrazu.
-Tak, dokładnie jak pliki MPEG1/2 (DVD, SVCD) i H263. Niestety, nie ma
-<emphasis role="bold">żadnych</emphasis> odtwarzaczy video które by wykorzystywały tą
-zaletę MPEG4, oprócz <application>MPlayera</application>.
+MPEG-4 posiada unikalną cechę: strumień video może posiadać swoją wartość proporcji obrazu.
+Tak, dokładnie jak pliki MPEG-1/2 (DVD, SVCD) i H.263. Niestety, nie ma
+<emphasis role="bold">żadnych</emphasis> odtwarzaczy video które by to wykorzystywały, oprócz <application>MPlayera</application>.
 </para>
 
 <para>
-Właściwość ta może być jedynie używana z kodekiem <systemitem>mpeg4</systemitem>
+Możliwość ta może być jedynie używana z kodekiem <systemitem>mpeg4</systemitem>
 z biblioteki <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 Pamiętaj: chociaż <application>MPlayer</application>
 poprawnie odtworzy stworzone pliki, inne odtwarzacze
@@ -483,8 +429,7 @@ Zobacz jak używać filtrów <systemitem>cropdetect</systemitem> i <systemitem>crop
 <para>
 Sposób użycia:
 <screen>
-mencoder <replaceable>przykład-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:autoaspect
--vf crop=714:548:0:14 -oac copy -o <replaceable>wyjscie.avi</replaceable>
+mencoder <replaceable>przykład-svcd.mpg</replaceable> -ovc lavc -lavcopts vcodec=mpeg4:autoaspect -vf crop=714:548:0:14 -oac copy -o <replaceable>wyjscie.avi</replaceable>
 </screen>
 </para>
 </sect1>
@@ -505,7 +450,7 @@ Typowy sposób użycia tej opcji to ustawienie matrycy na specyfikacje preferowane
 </para>
 
 <para>
-Matryca Kwantyzacji <emphasis role="bold">KVCD &quot;Notch&quot;:</emphasis>
+<emphasis role="bold">Matryca Kwantyzacji KVCD "Notch":</emphasis>
 </para>
 
 <para>
@@ -537,8 +482,7 @@ Inter:
 <para>
 Sposób użycia:
 <screen>
-$ mencoder <replaceable>wejscie.avi</replaceable> -o <replaceable>wyjscie.avi</replaceable>
--oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
+$ mencoder <replaceable>wejscie.avi</replaceable> -o <replaceable>wyjscie.avi</replaceable> -oac copy -ovc lavc -lavcopts inter_matrix=...:intra_matrix=...
 </screen>
 </para>
 
@@ -556,183 +500,923 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect1>
 
 <sect1 id="menc-feat-dvd-mpeg4">
-<title>Rippowanie DVD do wysokiej jakości pliku MPEG4 (&quot;DivX&quot;)</title>
+<title>Rippowanie DVD do wysokiej jakości pliku MPEG-4 ("DivX")</title>
 
 <para>
-  Na ripowanie DVD do pliku MPEG4 (DivX) wysokiej jakości składa sie wiele czynników.
-  Poniżej znajduje się przykład tego procesu gdy nie ma żadnego rozmiaru docelowego
-  pliku końcowego (innego niż zmieszczenie rezultatu w 2GB).
-  <systemitem class="library">Libavcodec</systemitem> zostanie użyte do zakodowania obrazu,
-  dźwięk natomiast będzie skopiowany bez zmian.
+  Jednym z najczęsciej zadawanych pytań jest "Jak zripować DVD do najwyższej osiągalnej
+  jakości? Nie interesuje mnie rozmiar pliku, chcę tylko najwyższą jakość".
 </para>
+
+<para>
+    To jest co najmniej źle sformułowane. W końcu jeżeli nie obchodzi Cię rozmiar
+    pliku, to czemu nie skopiować po prostu całego strumienia video MPEG-2 z DVD?
+    Pewnie, plik będzie miał 5GB, jak chcesz to nie pakuj się w to, ale jeżeli chcesz
+    najwyższej jakości i nie martwi Cię rozmiar pliku, to jest na pewno najlepsze 
+    rozwiązanie.
+</para>
+
+<para>
+  Tak na prawdę, powodem dla którego chcesz przekodować DVD do pliku MPEG-4
+  jest właśnie to, że <emphasis role="bold">zależy</emphasis> Ci na rozmiarze pliku.
+</para>
+
+<para>
+    Trudno jest podać przepis krok-po-kroku jak stworzyć wysokiej jakości 
+    ripa DVD. Trzeba uwzględnić kilka czynników, musisz je zrozumieć żeby
+    być zadowolonym z rezultatów jakie osiągniesz. Poniżej zbadamy kilka
+    z tych czynników i spojrzymy na przykłady. Zakładamy, że korzystasz z 
+    <systemitem class="library">libavcodec</systemitem> do kodowania
+    video, teorii jednak można używać przy innych kodekach.
+</para>
+
+<para>
+    Głównym założeniem tego przewodnika jest to, iż nie masz  konkretnego
+    docelowego rozmiaru pliku i nie masz problemu w oddaniu kilku bitów 
+    w zamian za poprawę jakości. Wiele informacji tutaj zawartych jest przydatnych
+    w każdej sytuacji, ale niektóre mogą działać na Twoją niekorzyść jeżeli
+    masz obrany cel w postaci wielkości pliku wynikowego, na przykład zmieszczeniu
+    video na CD.
+</para>
+
+<sect2 id="menc-feat-dvd-mpeg4-2pass">
+<title>Stały Kwantyzator vs. 2-przebiegowe</title>
+
+<para>
+  Istnieją trzy podejścia do kodowania video: stały bitrate (CBR), 
+  stały kwantyzator i kodowanie 2-przebiegowe (ABR, uśredniony bitrate).
+</para>
+
+<para>
+    W każdym z tych trybów, <systemitem class="library">libavcodec</systemitem>
+    rozbija ramke na makroblok 16x16 pikseli i aplikuje kwantyzator do każdego makrobloku
+    Im niższy kwantyzator, tym lepsza jakość i wyższy bitrate.
+    Metoda jaką używa <systemitem class="library">libavcodec</systemitem>
+    do zdeterminowania jaki kwantyzator użyć do danego makrobloku zależy od wielu
+    czynników i jest łatwo zmienialna. (Jest to bardzo ogólny opis prawdziwego procesu,
+    ale warto rozumieć podstawowy koncept.)
+</para>
+
+<para>
+    Kiedy ustawisz stały bitrate, <systemitem class="library">libavcodec</systemitem> 
+    zakoduje video, niszcząc najmniejszą ilość detali jaka jest potrzebna żeby pozostać
+    poniżej wyznaczonej wartości bitrate. Jeżeli naprawdę  nie zależy Ci na rozmiarze pliku
+    mógłbyś użyć CBR i ustawić bitrate na nieskończoność. (W praktyce oznacza to liczbę
+    tak wysoką aby nie stawiała żadnego limitu, np. 10000Kbit.). Bez prawdziwych ograniczeń
+    <systemitem class="library">libavcodec</systemitem> użyje dla każdego makrobloku 
+    możliwie najniższego kwantyzatora (zapisanego w zmiennej <option>vqmin</option>,
+    która domyślnie jest ustawiona na 2). Gdy tylko ustawisz niższy bitrate 
+    <systemitem class="library">libavcodec</systemitem> będzie zmuszony do użycia
+    wyższego kwantyzatora, a więc i pogorszenia jakości video. Ogólnie, jeżeli zależy Ci na jakości
+    wogóle nie powinieneś używać CBR.
+</para>
+
+<para>
+   Ze stałym kwantyzatorem, <systemitem class="library">libavcodec</systemitem>
+   używa kwantyzatora ustawionego przez opcję <option>vqscale</option> 
+   na każdym makrobloku. Jeżeli chcesz najwyższej możliwej jakości, igonrując
+   bitrate, możesz użyć <option>vqscale=2</option>. Będzie to miało taki sam efekt
+   jak ustawienie <option>vbitrate</option>=nieskończoność i domyślnie 
+   <option>vqmin</option> na 2 przy CBR.
+</para>
+
+<para>
+     Problemem przy stałym kwantyzowaniu jest to, iż używa on danego
+     kwantyzatora czy makroblok potrzebuje go czy nie. To znaczy
+     że można byłoby użyć wyższego kwantyzatora bez starty jakości obrazu.
+     Po co tracić miejsce na niepotrzebnie niski kwantyzator? Twój procesor
+     ma tyle cykli ile jest czasu, ale na twardym dysku jest ograniczona ilosć miejsca.
+</para>
+
+<para>
+  W dwu-przebiegowym kodowaniu, pierwszy przebieg zripuje film ze stałym
+  bitratem (CBR), ale stworzy plik logujący właściwości każdej ramki. Te
+  informacje są używane podczas drugiego przebiegu i na ich podstawie
+  dobierany jest odpowiedni kwantyzator. Podczas szybkiej akcji lub 
+  scen z małą ilością detali, będzie użyty wysoki kwantyzator, a podczas
+  wolnego ruchu lub scen z wieloma detalami niższy.
+</para>
+
+<para>
+  Jeżeli używasz <option>vqscale=2</option>, to tracisz miejsce. Jeżeli
+  używasz <option>vqscale=3</option>, to nie dostaniesz najwyższej jakości.
+  Przypuśćmy, że ripujesz DVD z opcją <option>vqscale=3</option>, a rezultatem
+  jest 1800Kbit. Jeżeli zastosujesz dwu-przebiegowe kodowanie z 
+  <option>vbitrate=1800</option>, wyjściowe video będzie miało 
+  <emphasis role="bold">wyższą jakość</emphasis> dla 
+  <emphasis role="bold">tej samej wartości bitrate</emphasis>.
+</para>
+
+<para>
+     Ponieważ jesteś już przekonany, że dwu-przbiegowe kodowanie jest
+     najlepszym rozwiązaniem, prawdziwym pytaniem jest jakiej użyć
+     wartości bitrate? Nie ma jednoznacznej odpowiedzi. Idealna wartość
+     jest najlepszym balansem między jakością a rozmiarem pliku. 
+     Zmienia się ona zależnie od źródłowego video.
+</para>
+
+<para>
+     Dobrym punktem startowym dla wysokiej jakości ripów jest 2000Kbit
+     plus minus 200Kbit. Przy szybkiej akcji, wielu detalach lub poprostu
+     gdy masz wysokie wymagania, możesz zdecydować się na 2400
+     lub 2600. Przy niektórych DVD, możesz nie zauważyć różnicy przy
+     1400KBit. Najlepiej jest troszkę poeksperymentować przy różnych
+     wartościach bitrate.
+</para>
+
+</sect2>
+
+
 
 <sect2 id="menc-feat-dvd-mpeg4-crop">
-<title>Kadrowanie</title>
+<title>Kadrowanie i Skalowanie</title>
+
 <para>
-  Odtwórz DVD i uruchom na nim filtr detekcji kadrowania (<option>-vf cropdetect</option>).
-  Rezultatem bedzie prostokąt kadrowania do użycia przy kodowaniu. Powodem kadrowania
-  jest to, że wiele filmów nie zostało nakręconych w standardowej dla DVD proporcji obrazu
-  (aspect ratio)(16/9 lub 4/3), lub, powodem może być cokolwiek,
-  obraz nie wypełnia poprawnie całej ramki. A więc chcesz wyciąć bezsensowne czarne
-  pasy podczas ripowania. To również poprawia jakość ripu w ponieważ kodowanie ostrych krawędzi
-  czarnych pasów zajmuje wiele bitów.
-  Powszechną proporcja obrazu jest 2.35, taka jak w kineskopie. Większość dużych filmów-pogromców bloków
-  ma własnie taką proporcje obrazu (aspect ratio).
+    Normalne DVD ma rozdzielczość 720x480 dla NTSC i 720x576 dla PAL,
+    ale jest jeszcze flaga mówiąca czy jest to obraz pełno ekranowy (4:3), czy
+    panoramiczny (16:9). Wiele (jeżeli nie wszystkie) panoramiczne DVD nie są
+    dokładnie 16:9, tylko 1.85:1 lub 2.35:1 (kineskop). Oznacza to iż pojawią
+    się czarne pasy którę będą musiały być wykadrowane.
 </para>
+
+<para>
+     W tym miejscu pojawia się <application>MPlayer</application> posiadający
+     opcję ustalającą prostokąt kadrowania (<option>-vf cropdetect</option>).
+     Ponieważ MPEG-4 używa makrobloków 16x16, będziesz chciał aby każdy wymiar
+     obrazu był wielokrotnością 16, w innym wypadku pogorszy się jakość szczególnie
+     przy niskich wartościach bitrate. Możesz osiągnąć to zaokrąglając prostokąt kadrowania
+     do najbliższej wielokrotności 16. Przy kadrowaniu będziesz chciał zwiększyć przesunięcie
+     w osi y o połowę różnicy między starą a nową wartością tak aby obraz brany był
+     z środka ramki. Z powodu sposobu w jaki obraz jest próbkowany na DVD  musi to być
+     przysta liczba. (Tak naprawdę nigdy nie używaj nieparzystych wartości przy kadrowaniu 
+     ani skalowaniu.) Jeżeli nie chcesz wyrzucać kilku pikseli, może wolisz zeskalować
+     obraz. Przyjrzyjmy sie skalowaniu w naszym następnym przykładzie.
+</para>
+
+<para>
+     Uważaj też na "miękkie" czarne piksele na brzegach. Wykadruj je
+     też, bo inaczej będziesz tracił bity którę zostaną wykorzystane lepiej 
+     gdzie indziej.
+</para>
+
+<para>
+  Po wszytskim, dostaniesz najprawdopodobniej video którego piksele
+  nie są raczej ani 1.85:1 czy  2.35:1, tylko coś w pobliżu. Mógłbyś policzyć
+  nowe proporcje obrazu ręcznie, ale <application>MEncoder</application>
+  oferuje opcję biblioteki <systemitem class="library">libavcodec</systemitem>
+  o nazwie <option>autoaspect</option> która zrobi to za Ciebie. W żadnym 
+  wypadku nie skaluj pikseli w celu zrobienia z nich kwadratów, chyba że lubisz
+  tracić miejsce na twardym dysku. Skalowanie powinno odbywać się przy 
+  odtwarzaniu, a odtwarzacz użyje proporcji zapisanych w nagłówku AVI, aby
+  zdeterminować prawidłową rozdzielczość.
+</para>
+
 </sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-quality">
-<title>Poziom jakość</title>
+<title>Audio</title>
 <para>
-  Następną rzeczą jaką musisz ustalić to docelowy poziom jakości. Gdy nie ma potrzeby
-  zmieszczenia pliku na płycie/płytach CD, użycie stałej kwantyzacji znanej
-  również pod nazwą stałej jakości będzie dobrym wyborem. W ten sposób każda ramka
-  zajmuje tyle bitów ile potrzebuje aby zachować jakość na wybranym poziomie,
-  za to wielokrotne kodowanie nie jest w tym wypadku potrzebne. W
-  <systemitem class="library">libavcodec</systemitem>, otrzymasz stałą jakość
-  używając opcji <option>-lavcopts vqscale=<replaceable>N</replaceable></option>.
-  <option>vqscale=3</option> powinno dać końcowy rezultat poniżej 2GB, zależy to głównie
-  od długości filmu i poziomu szumów obrazu (im wiecej szumów tym trudniej jest dany obraz skompresować).
-</para></sect2>
+     Dźwięk jest o wiele prostszym problemem do rozwiązania.: zostaw go
+     poprostu takim jakim jest. Nawet strumienie AC3 5.1 są najwyżej  
+     448Kbit/s i są one warte każdego bitu. Kuszące może wydawać się
+     zakodowanie dźwięku do wysokiej jakości Ogg Vorbis, ale to że nie
+     posiadasz dzisiaj odbiornika A/V do AC3 nie oznacza że nie będziesz go miał
+     jutro. Zabezpiecz swoje ripy DVD zostawiając im strumień AC3.
+</para>
 
-<sect2 id="menc-feat-dvd-mpeg4-2gb">
-<title>Pliki powyżej 2GB</title>
+</sect2>
+
+<sect2 id="menc-feat-dvd-mpeg4-interlacing">
+<title>Przeplot i Telecine</title>
+
 <para>
-  Jeżeli plik wynikowy z kodowania o stałej jakości jest większy od 2GB
-  , będziesz musiał stworzyć indeks aby móc oglądać go poprawnie.
-  Albo
+  Prawie wszytskie filmy kręcone są z prędkością 24 fps. Ponieważ NTSC jest
+  29.97 fps, obraz 24 fps trzeba poddać działaniu kilku procesów aby mógł
+  być on odtwarzany na szybkości NTSC. Proces ten nazywa się 3:2 pulldown,
+  często wiązany z telecine (ponieważ pulldown jest często stosowany podczas
+  procesu telecine), i naiwnie opisywany jako iż działa on przez zwalnianie filmu do
+  23.976 fps, i powtarzaniu co czwartej ramki.
+</para>
 
+<para>
+   Video w formacie PAL z DVD, o prędkość 25 fps nie jest poddawane 
+   żadnym specjalnym procesom. (Praktcznie, PAL może zostać poddany
+   procesowi telcine, nazywanemu 2:2 pulldown, ale w praktyce to nie jest
+   problemem.) Film 24 fps jest poprostu odtwarzany z prędkością 25 fps. 
+   W efekcie film leci trochę szybciej ale jeżeli nie jesteś kosmitą pewnie nie 
+   zauważysz różnicy. Większość DVD w PALu posiada poprawiony dźwięk,
+   więc nawet przy odtwarzaniu z prędkością 25 fps będzie on brzmiał poprawnie,
+   pomimo tego, iż ścieżka dźwiękowa (a wiec i cały film) jest odtwarzana
+   4% czasu krócej niż NTSC DVD.
+</para>
+
+<para>
+     Ponieważ video w PAL DVD nie zostało zmienione, nie musisz martwić
+     się o tempo odtwarzania. Źródło jest 25 fps i Twoj rip będzie 25 fps.
+     Jednakże, jeżeli ripujesz NTSC DVD, możliwe że będziesz musiał zastosować
+     odwrócone telecine.
+</para>
+
+<para>
+     W filmach nakręconych w prędkości 24 fps, video na NTSC DVD jest albo
+     ztelecinowane do 29.97 fps lub progresywne 24 fps i przeznaczone to
+     telecine które ma zostać wykonane w locie przez odtwarzacz DVD. Z drugiej
+     strony, seriale telewizyjne są zazwyczaj tylko przeplecione, nie ztelecionowane.
+     Jednakże nie jest to regułą: niektóre seriale TV są przeplecione (jak Buffy 
+     Postrach Wampirów), a niektóre są miksturą progresywnego i przeplecionego
+     video (jak Angel, lub 24 godziny).
+</para>
+
+<para>
+     Szczególnie polecamy do przeczytania sekcje o tym
+     <link linkend="menc-feat-telecine">Jak sobie radzić z telecine
+     i przeplotem w DVD w formacie NTSC</link>.
+</para>
+
+<para>
+     Jeżeli, ripujesz tylko filmy, najprawdopodobniej musisz radzić sobie tylko
+     z obrazem 24 fps progresywnym lub telecine. W takiej sytuacji możesz
+     użyć fitru <option>pullup</option> (<option>-vf pullup,softskip</option>).
+</para>
+
+</sect2>
+
+
+<sect2 id="menc-feat-dvd-mpeg4-filtering">
+<title>Filtrowanie</title>
+<para>
+    Ogólnie, chcesz filtrować jak najmniej aby pozostać najbliżej jak się da
+    do źródłowego DVD. Kadrowanie jest zazwyczaj niezbędne (opisane powyżej),
+    ale nie skaluj obrazu. Skalowanie w dół jest czasami preferowane zamiast
+    wysokich kwantyzatorów, chcemy uniknąć obu tych rzeczy: pamiętaj co
+    ustaliliśmy na początkum, że chcemy wymienać bity na jakość.
+</para>
+
+<para>
+    Również nie zmieniaj wartośći gamma, kontrastu, jasności, itd. To co wygląda
+    dobrze na Twoim monitorze, może nie wyglądać dobrze na innych. Te ustawienia
+    powinny być realizowane tylko przy odtwarzaniu.
+</para>
+
+<para>
+    Jedną rzeczą którą mógłbyś chcieć zrobić jest przepuszczenie obrazu
+    przez lekki odszumiający filtr, tak jak np. <option>-vf hqdn3d=2:1:2</option>.
+    Znów, jest to sprawa lepszego spożytkowania miejsca: po co tracić je 
+    na kodowanie szumów jeżeli możesz dodać je podczas odtwarzania? 
+    Zwiększenie parametrów <option>hqdn3d</option> zwiększy 
+    możliwości kompresji, ale jeżeli zwiększysz parametry za bardzo 
+    ryzykujesz utratę klarowności obrazu. Sugerowane powyżej wartości  
+    (<option>2:1:2</option>) są dość zachowawcze; 
+    spróbuj poeksperymentować z wyższmi wartościami i samemu porównać efekty.
+</para>
+
+</sect2>
+
+
+<sect2 id="menc-feat-dvd-mpeg4-example">
+<title>Przykład</title>
+
+<para>
+     Kupiłeś wieć nowiutką kopię Harrego Pottera i Komnaty Tajemnic (oczywiście wersję
+     panoramiczną) i chcesz zripować to DVD aby dodać ją do swojego komputerowego
+     kina domowego. Jest to DVD z regionu 1, a więc NTSC. Poniższy przykład będzie
+     działał z fomratem PAL jeżeli pomiesz opcję <option>-ofps 23.976</option>
+     (ponieważ wejściowa szybkość jest taka sama jak wyjściowa), oczywiście
+     paramtery kadrowania będą inne.
+</para>
+
+<para>
+     Po uruchomieniu <option>mplayer dvd://1</option>, podążamy opisem
+     zawartym w sekcji <link linkend="menc-feat-telecine">Jak sobie radzić z telecine
+     i przeplotem w DVD w formacie NTSC</link> i odkrywamy, że jest to progresywne
+     video 24 fps, co oznacza że nie musimy używać filtrów odwróconego telecine,
+     jak <option>pullup</option> czy <option>filmdint</option>.
+</para>
+
+<para>
+     Następnie, chcemy zdeterminować odpowiedni prostokąt kadrowania,
+     używamy fitru cropdetect:
+     
+     <screen>mplayer dvd://1 -vf cropdetect</screen>
+     
+     Przewniń do w pełni wypełnionej ramki (jasna scena), i zobaczysz
+     wyjście <application>MPlayer</application>a na konsoli:
+     
+     <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
+     
+     Teraz odtwarzamy film z tym fitrem aby sprawdzić jego poprawność:
+     
+     <screen>mplayer dvd://1 -vf crop=720:362:0:58</screen>
+     
+     I widzimy że wygląda świetnie. Teraz, upewniamy sie że wymiary śa wielokrotnością
+     16 . Szerokość jest w porządku, niestety wysokość nie. Ponieważ nie
+     oblaliśmy matematyki w liceum, wiemy że najbliższą wielokrotnościa
+     16 mniejszą niż 362 jest 352.
+     
+</para>
+
+<para>
+    Moglibyśmy poprostu użyć <option>crop=720:352:0:58</option>, ale
+    ładniej byłoby wziąć trochę z góry i z dołu aby utrzymać się na środku. 
+    Zmneijszylismy wysokość o 10 pikseli, ale nie chcemy zwiększyć
+    przesunięcia y o 5 pikseli ponieważ jest to liczba nieparzysta i
+    pogorszyłaby jakość. Zwiększymy zatem przesunięcie na osi y o 4 piksele:
+
+   <screen>mplayer dvd://1 -vf crop=720:352:0:62</screen>
+
+    Innym powodem dla którego powinniśmy obcinać piksele równomiernie z góry 
+    i dołu są "połowy czarnych pikseli" które bezwzględnie powinniśmy obciąć jeżeli istnieją.
+    Pamiętaj, jeżeli Twoje video jest ztelecinowane, upewnij się że filtr <option>pullup</option>
+    (lub inny filtr odwróconego telecine który zdecydujesz się użyć) pojawia się
+    w łańcuchu fitrów przed fitrem kadrowania. Jeżeli video posiada przeplot, 
+    usuń go przed kadrowaniem. (Jeżeli zdecydujesz się pozostawić przeplot, upewnij
+    się że wertykalne przesunięcie kadrowania jest wielokrotnością 4.)
+</para>
+
+<para>
+    Jeżeli naprawdę jesteś przejęty utratą tych 10 pikseli, może wolisz
+    przeskalować wymiary obrazu do najbliższej wielkortoności 16.
+    Łańcuch fitrów powinen wyglądać tak:
+
+  <screen>-vf crop=720:362:0:58,scale=720:352</screen>
+
+   Skalowanie video w dół oznacza utratę małej ilości detali, która będzie
+   najprawdopodobnie niezauważalna. Skalowanie w góre oznacza utratę
+   jakości (chyba że zwiększysz bitrate). Kadrowanie wyrzuca te piksele. Jest
+   to wymiana jaką trzeba rozważyć w każdym wypadku. Na przykłąd,
+   jeżeli DVD było zrobione dla telewizji, możesz chcieć uniknąć wertykalnego
+   skalowania, ponieważ zestawienie linii odpowiada temu jak obraz był 
+   oryginalnie nagrywany.
+</para>
+
+<para>
+     Przy insepkcji widzimy że  nasz film ma dużo akcji i szczegółów, wybieramy
+     więc 2400Kbit na nasze bitrate.
+</para>
+
+<para>
+     Jesteśmy gotowi do 2-przebiegowego kodowania. Przebieg 1:
+     
+  <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+-lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
+-o Harry_Potter_2.avi</screen>
+
+     Drugi przebieg jest taki sam, podajemy tylko opcję <option>vpass=2</option>:
+
+  <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
+-lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
+-o Harry_Potter_2.avi</screen>
+</para>
+
+<para>
+     Opcje <option>v4mv:mbd=2:trell</option> ogromnie poprawią jakość
+     za cenę czasu kodowania. Opcje <option>cmp=3:subcmp=3:mbcmp=3</option>
+     wybierają funkcje porównywania które wybierają lepsza jakość niż te domyśłne.
+     Możesz poeksperymentować z tymi wartościami (skonsultuj stronę man co do 
+     prawidłowych wartości) ponieważ różne funkcję mogą mieć duży wpływ na jakość
+     zależnie od matriału źródłowego. Na przykład, jeżeli <systemitem class="library">libavcodec</systemitem>
+     produkuje za dużo artefaktów możesz spróbować wybrać eksperymentalną funkcję NSSE
+     jako funkcję porównującą przez <option>*cmp=10</option>.
+</para>
+
+<para>
+     Dla tego filmu, końcowe AVI będzie miało 138 minut i prawie 3GB.
+     A ponieważ powiedziałeś że rozmiar nie ma znaczenia, to jest
+     akceptowalna wielkość. Jednakże, jeżelli chciałbyś mniejszy plik, mógłbyś
+     spróbować niższy bitrate. Zwiększanie wartości bitrate daje malejące rezultaty,
+     więc jeżeli widać wyraźną róźnicę między 1800Kbit, a 2000Kbit, to nie znaczy
+     że będzie lepiej powyżej 2000Kbit. Ekperymentuj aż będziesz zadowolony.
+</para>
+
+<para>
+    Ponieważ przepuściliśmy źródłowy obraz przez filtr odszumiający, możesz chcieć
+    dodać go trochę podczas odtwarzania. To razem z fitrem postprocessingu 
+    <option>spp</option>, drastycznie poprawia odbiór obrazu i pomaga wyeliminować
+    artefakty. W <application>MPlayer</application>ze dostępna jest opcja 
+    <option>autoq</option>. W tym momencie możesz również poprawić
+    gammę lub/i korekcję kolorów. Na przykład:
+
+  <screen>mplayer Harry_Potter_2.avi -vf spp,noise=9ah:5ah,eq2=1.2 -autoq 3</screen>
+
+</para>
+</sect2>
+
+</sect1>
+
+<sect1 id="menc-feat-telecine">
+<title>Jak radzić sobie telecine i przeplotem w NTSC DVD</title>
+
+<formalpara>
+<title>Wprowadzenie</title>
+<para>
+  Radzę abyś odwiedził poniższą stronę jeżeli nie za bardzo rozumiesz co 
+  jest napisane w tym dokumencie:
+  <ulink url="http://www.divx.com/support/guides/guide.php?gid=10">http://www.divx.com/support/guides/guide.php?gid=10</ulink>
+  Ten URL prowadzi do zrozumiałego i rozsądnej wielkości przewodnika traktującego o tym 
+  czym jest telecine.
+</para></formalpara>
+
+<para>
+  Z przyczyn technicznych odnoszących się do wczesnych 
+  urządzeń telwizyjnych, każde video które miało być odtwarzane 
+  na telewizorze NTSC musiało być ustawione na 59,94 pola na sekundę.
+  Filmy i programy nagrane dla telewizji są najczęściej ograniczone
+  bezpośrednio do 59,94 pól na sekundę, ale większość filmów kinowych
+  jest nagrywanych w 24 lub 23,976 klatkach na sekundę. Kiedy DVD z kinowym
+  filmem jest odtwarzane, video jest konwertowane dla telewizji przy pomocy procesu
+  nazywanego telecine.
+</para>
+
+<para>
+  Obraz na DVD, tak naprawdę nigdy nie jest przechowywany jako
+  59,94 pól na sekundę. Dla obrazu który oryginalnie był 59,94, każda 
+  para pól jest łączona w ramkę, co daje rezultat 29,97 ramek na sekundę.
+  Sprzętowe odtwarzacze DVD odczytują flagę osadzoną w strumieniu video
+  aby określić czy parzyste czy nieparzyste linie powinny formować pierwsze pole.
+</para>
+
+<para>
+  Zazwyczaj, informacja o 23,976 ramkach na sekundę mówi
+  odtwarzaczowi DVD, że musi przeprowadzić telecine w locie.
+  Czasami, jednak, proces telecine na obrazie przeprowadzony jest 
+  <emphasis>przed</emphasis> umieszczeniem go na DVD; Nawet
+  jeżeli był on nagrany jako  23,976 ramek na sekundę, staje się on 59,94 
+  pola na sekundę i jest przechowywany na dysku jako 29,97 ramek na sekundę.
+</para>
+
+<para>
+  Patrząc na indywidualne ramki uformowane z ztelecinowanego 
+  obrazu 59,94 pól na sekundę, przeplot jest wyraźnie widoczny przy ruchu, 
+  ponieważ jedno pole (powiedzmy parzyste linie) reprezentują moment
+  w czasie o 1/59,94 sekundy później niż pozostałe. Odtwarzanie video z przeplotem
+  na komputerze wygląda ohydnie, z dwóch przyczyn, ponieważ monitor jest większej
+  rozdzielczości i obraz jest wyświetlany ramka-po-ramce zamiast pole-po-polu.
+</para>
+
+<para>
+Notki:
+</para>
 <itemizedlist>
 <listitem><para>
-  odtwórz film z opcją <option>-forceidx</option> aby stworzyć index w locie albo
+  Ta sekcja odnosi się tylko do NTSC DVD, nie do PAL.
   </para></listitem>
 <listitem><para>
-  użyj <option>-saveidx</option> aby zapisać indeks do pliku tylko raz i użyć go potem przy odtwarzaniu
-  pliku używając opcji <option>-loadidx</option>.
+  Przykładowe komendy <application>MEncodera</application> w tym dokumencie
+  <emphasis role="bold">nie</emphasis> są przeznaczone do prawdziwego użycia.
+  Są one po prostu minimum do kodowania danej kategorii video. Jak zrobić dobre ripy DVD
+  lub precyzyjnie-ustawić <systemitem class="library">libavcodec</systemitem> dla
+  najlepszej jakości nie są zagadnieniami dla tego tego dokumentu.
+  </para></listitem>
+<listitem><para>
+   Jest kilka przypisów do tego dokumentu, zaznaczonych tak: 
+  <link linkend="menc-feat-telecine-footnotes">[1]</link>
   </para></listitem>
 </itemizedlist>
 
-  Jeśli denerwuje Cię to, możesz chcieć utrzymać wielkość pliku poniżej 2GB.
+<sect2 id="menc-feat-telecine-ident">
+<title>Jak ustalić jaki typ video masz</title>
+
+<sect3 id="menc-feat-telecine-ident-progressive">
+<title>Progresywny</title>
+<para>
+  Progresywne video było oryginalnie filmowane przy 23.976 fps (ramek na sekundę - przyp. tłum.), i
+  przechowywane na DVD bez zmian.
 </para>
 
 <para>
-  Są trzy sposoby aby uniknąć tego. Możesz spróbować zakodować jeszcze raz używająć
-  <option>vqscale=4</option> i zobaczyć czy wielkość i jakość pliku wynikowego są
-  zadowalające. Możesz także spróbować
-  <link linkend="menc-feat-divx4">kodowania 2przebiegowego</link>.
-  Gdy będziesz kopiował scieżkę dźwiękową automatycznie będziesz znał jej
-  bitrate, znasz także długość filmu, możesz więc obliczyć potrzebny bitrate
-  aby przekazać go opcji <option>-lavcopts vbitrate=<replaceable>bitrate</replaceable></option>
-  bez używania <link linkend="menc-feat-divx4">kodowania 3przebieowego</link>.
+  Kiedy odtwarzasz progresywne DVD w <application>MPlayerze</application>,
+  <application>MPlayer</application> wyświetli nastepujący wiersz zaraz gdy film zacznie być odtwarzany:
+
+  <screen> demux_mpg: 24fps progressive NTSC content detected, switching framerate.</screen>
+  
+  Od tego momentu, demux_mpg niepowinien nigdy powiedzieć iż znalazł
+  "30fps NTSC content."
 </para>
 
 <para>
-  Trzecią i prawdopodobnie najlepszą opcją będzie lekkie zeskalowanie rozdzielczości.
-  Lekkie zmiękczenie obrazu i stracenie setali jest bardziej przyjazne dla oka niż
-  artefakty powodowane przez kompresję MPEG. Zeskalowywanie wydajnie redukuje szumy obrazy
-  ,co jest dobre, ponieważ szumy się ciężko kompresuje.
+  Kiedy oglądasz progresywne video, nie powinieneś zauważyć żadnego
+  przeplotu. Bądź jednak czujny ponieważ jest tam czasami wmiksowany mały
+  kawałek telecine, tam gdzie się go nie spodziewasz. Napotkałem DVD z programami
+  telewizyjnymi w których przy każdej zmianie sceny i  w losowych miejscach była jedna 
+  sekunda telecine. Raz oglądałem DVD który miał jedną połowę
+  progresywną, a drugą ztelecinowaną. Jeżeli chcesz być <emphasis>naprawdę</emphasis>
+  pewny, możesz przeskanować cały film:
+
+  <screen>mplayer dvd://1 -nosound -vo null -benchmark</screen>
+
+  Użycie opcji <option>-benchmark</option> przekazuje
+  <application>MPlayerowi</application> aby odtwarzał film 
+  tak szybko jak tylko może; ciągle jednak, jako że jest zależny od Twojego sprzętu
+  może to zając trochę czasu. Za każdym razem demux_mpg zgłasza zmianę liczby 
+  ramek na sekundę, pierwsza linia nad pokaże czas w którym nastąpiła ta zmiana.
 </para>
+
+<para>
+ Progresywne video jest czasami nazywane "miękkie-telecine"
+ ponieważ jest ono stworzone aby odtwarzac DVD wykonał na nim proces telecine.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-ident-telecined">
+<title>Ztelecinowany</title>
+<para>
+  Obraz "ztelecinowany" był oryginalnie sfilmowany jako 23,976, ale
+  został poddany procesowi telecine <emphasis>przed</emphasis>
+  zapisaniem go na płycie DVD.
+</para>
+
+<para>
+  
+  <application>MPlayer</application> (nigdy) nie zwraca
+  żadnych zmian ilości ramek na sekundę kiedy 
+  odtwarza ztelecinowane video.
+</para>
+
+<para>
+  Podczas oglądania video poddanego procesowi telecine, zobaczysz
+  artefakty przeplotu które wydają się "migać": szybko 
+  pojawiają się i znikają. Możesz się im bliżej przyjrzeć wpisując
+  <orderedlist>
+  <listitem>
+    <screen>mplayer dvd://1 -speed 0.1</screen>
+    </listitem>
+  <listitem><para>
+    Przewiń na dynamiczne sceny.
+    </para></listitem>
+  <listitem><para>
+  
+    Popatrz na wzór przeploto-wyglądających i progresywnie-wyglądających
+    ramek. Jeżeli wzór który widzisz wygąda jak PPPII,PPPII,PPPII,... wtedy video
+    ztelecinowane. Jeżeli widzisz inny wzór, wtedy możliwe jest że video zostało
+    niestandartowo poddane procesowi telecine i <application>MEncoder</application>
+    nie może bezstratnie przekonwertować go do progresywnego video. Jeżeli
+    nie widzisz żadnego wzoru, wtedy najprawdopodobniej video zawiera tylko przeplot.
+    </para></listitem>
+  </orderedlist>
+</para>
+
+<para>
+  Czasami video poddane procesowi telecine nazywane jest "twarde-telecine".
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-ident-interlaced">
+<title>Przepleciony</title>
+<para>
+  Przeplecione video było oryginalnie sfilmowane jako 59,94 pól na sekundę
+  i przechowywane na DVD jako 29,97 fps. Przeplot to rezultat połączenia 
+  par pól w ramkę, ponieważ w każdej ramce, każde pole jest oddzielone o 
+  1/59,94 sekundy.
+</para>
+
+<para>
+   Tak jak przy ztelecinowanym video, podczas odtwarzania filmu z przeplotem
+  <application>MPlayer</application> nigdy nie
+  powinien powiadamiać o zmianie ilości ramek na sekundę.
+ 
+</para>
+
+<para>
+  Kiedy z bliska oglądasz przeplecione video z <option>-speed 0.1</option>
+  zobaczysz, iż każda pojedyńcza klatka jest przepleciona.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-ident-mixedpt">
+<title>Mieszane progresywne i telecine</title>
+
+<para>
+  Wszystkie "wymieszane progresywne i telecine" video
+  były oryginalnie nagrane jako 23.976 ramek na sekundę, ale 
+  niektóre części skończyły jako ztelecinowane.
+</para>
+
+<para>
+  Kiedy <application>MPlayer</application> odtwarza tę kategorię, będzie on
+  (zazwyczaj bardzo szybko) przełączał się tam i z powrotem między "30fps
+  NTSC" i "24fps progresywne NTSC". Przyjrzyj się wyjściu 
+  <application>MPlayera</application> (na konsoli - przyp. tlum.) aby zobaczyć
+  te wiadomości.
+</para>
+
+<para>
+ Powinieneś przyjrzeć się sekcji "30fps NTSC" aby upewnić się
+ czy są one na pewno telecine a nie tylko przeplecione.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-ident-mixedpi">
+<title>Mieszane progresywne i telecine</title>
+<para>
+  W "mieszanej progresywnej i przeplecionej" zawartości, 
+  progresywne i przeplecione video zostało połączone razem.
+</para>
+
+<para>
+  Ta kategoria wygląda zupełnie jak "mieszane progresywne i telecine",
+  do momentu kiedy przyjrzysz się fragmentom 30fps i zobaczysz iż nie maja one wzoru telecine.
+</para>
+</sect3>
 
 </sect2>
 
-<sect2 id="menc-feat-dvd-mpeg4-deinterlacing">
-<title>Usuwanie przeplotu</title>
+<sect2 id="menc-feat-telecine-encode">
+<title>Jak zakodować każdą kategorię</title>
 <para>
-  Jeżeli film ma przeplot, możesz chcieć go zlikwidować podczas ripowania.
-  Jest to kwestia dyskusyjna czy usuwanie przeplotu powinno być robione
-  na tym etapie. Zaletą jest to że usuwanie przeplotu podczas konwertowania do
-  MPEG4 polepsza kompresje, ułatwia oglądanie które jest mniej zasobożerne na
-  monitorach komputerowych. <!-- aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa -->
+ Jak już wspomniałem na początku, przykładowe polecenia <application>MEncodera</application>
+ poniżej <emphasis role="bold">nie</emphasis> są przewidziane do rzeczywistego
+ użycia; demonstrują one tylko minimalne parametry potrzebne do prawidłowego zakodowanie danej kategorii.
+</para>
+
+<sect3 id="menc-feat-telecine-encode-progressive">
+<title>Progresywne</title>
+<para>
+  Progresywne video nie wymaga żadnego specjalnego filtrowania do kodowania.
+  Jedynym koniecznym paramterem jaki musisz użyć jest   <option>-ofps 23.976</option>.
+  Inaczej, <application>MEncoder</application> będzie próbował kodować przy prędkości 29,97
+  i duplikować ramki.
 </para>
 
 <para>
-  Czy usuwanie przeplotu na etapie ripowania jest dobrym pomysłem zależy od
-  DVD. Jeżeli DVD zostało zrobione z filmu nakręconego w prędkości 24 fps (przyp. tłum. ramek
-  na sekundę), możesz ze spokojem usunąć przeplot w czasie ripowania.
-  Jednakże jeśli prędkość orginlanego filmu wynosiła 50/60 fps, konwertowanie go
-  do video 23.976/25 fps bez przeplotu, nie będzie dobry pomysłem, ponieważ skutkiem
-  takiego procesu będzie strata informacji.  <!-- If, however, the original was 50/60 fps video, converting into deinterlaced 23.976/25 fps video will lose information. -->
-  If you do decide to interlace, you can further
-  experiment with different deinterlacing filters. See
-  <ulink url="http://www.wieser-web.de/MPlayer/">http://www.wieser-web.de/MPlayer/</ulink>
-  for examples. A good starting point is <option>-vf pp=fd</option>.
+  <screen>mencoder dvd://1 -nosound -ovc lavc -ofps 23.976</screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-encode-telecined">
+<title>Ztelecinowane</title>
+<para>
+ Proces telecine może zostać odwrócony, aby odzyskać oryginalną zawartość
+ 23,976, przy użyciu metody o nazwie odwrócone-telecine.
+ <application>MPlayer</application> zawiera dwa filtry które są w stanie dokonać tego:
+ <option>detc</option> i <option>ivtc</option>. Możesz przeczytać stronę man
+ aby dowiedzieć się co je różni, ale jeżeli chodzi o DVD to nigdy nie miałem
+ problemu z <option>ivtc</option>. Pamiętaj, że
+ przed przeskalowywaniem powinieneś <emphasis role="bold">zawsze</emphasis>
+ odwrócić telecine; odwróć telecine także przed
+cropowaniem, chyba że naprawdę wiesz co robisz <link linkend="menc-feat-telecine-footnotes">[1]</link>. 
+ </para>
+
+<para>
+  <screen>mencoder dvd://1 -nosound -vf ivtc=1 -ovc lavc -ofps 23.976</screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-telecine-encode-interlaced">
+<title>Przeplecione</title>
+<para>
+  Dla większości praktycznych przypadków nie jest możliwe całkowite
+  odzyskanie progresywnego video z przeplecionej zawartości. 
+  Jedynym sposobem bez gubienia połowy pionowej rozdzielczości
+  jest podwojenie ilości ramek na sekundę i "zgadnięcie" co powinno
+  zastąpić odpowiadające linie każdego pola (ma to pewne wady - zobacz trzecią metodę).
 </para>
 
-<para>
-  Jeżeli naraz kadrujesz i usuwasz przeplot, to usuń przeplot
-  <emphasis>przed</emphasis> kadrowaniem. Aktualnie, nie jest to konieczne
-  gdy wertykalny offset kadrowania jest podzielny przez 2. Jednakże z innymi filtrami
-  ,takimi jak dering, kadrowanie powinno być ostatnie, dlatego jest to dobrym
-  przyzwyczajeniem aby ustawiać kadrowanie jako ostatnie.
-</para></sect2>
+<orderedlist>
+<listitem><para>
+ Kodowanie video z przeplotem. Normalnie, przeplot niszczy szanse enkodera
+ na dobre zakodowanie, lecz <systemitem class="library">libavcodec</systemitem>
+ posiada dwie opcje pozwalające przechowywać video z przeplotem ciut lepiej:
+ <option> ildct</option> i <option>ilme</option>.
+ Użycie <option>mbd=2</option> jest także zalecane <link linkend="menc-feat-telecine-footnotes">[2] </link>
+ ponieważ zakoduje on makrobloki bez przeplotu w miejscach gdzie nie ma ruchu
+ Zauważ iż opcja <option>-ofps</option> NIE jest tu potrzebna.
 
-<sect2 id="menc-feat-dvd-mpeg4-telecine">
-<title>Odwrócone telecine</title>
+  <screen>mencoder dvd://1 -nosound -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
+  </para></listitem>
+<listitem><para>  
+  Użycie filtru likwidującego przeplot przed kodowaniem. Jest kilka takich 
+  filtrów, każdy ma swoje wady i zalety. Skonsultuj <option>mplayer -pphelp</option>
+  aby zobaczyć co jest dostępne (grepuj "deint") i przeszukaj
+  <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
+  listy dyskusyjne MPlayera</ulink> aby znaleźć wiele dyskusji na temat różnych filtrów.
+  Ilość ramek na sekundę znów się nie zmienia, więc nie używamy <option>-ofps</option>.
+  Likwidowanie przeplotu powinno zostać zrobione po kadrowaniu 
+  <link linkend="menc-feat-telecine-footnotes">[1]</link> i przed skalowaniem.
+
+  <screen>mencoder dvd://1 -nosound -vf pp=lb -ovc lavc</screen>
+  </para></listitem>
+<listitem><para>
+  Niestety ta opcja zawiera błędy w <application>MEncoderze</application>; 
+  Będzie działać w <application>MEncoder G2</application>, którego jeszcze nie ma.
+  Na razie możesz doświadczyć nieoczekiwanych wywaleń.
+  <!-- Qba: myslalem ze ktos zaproponuje bardziej formalna wersje :) -->
+  
+  Celem opcji <option>-vf tfields</option> jest stworzenie pełnej klatki z każdego pola,
+  co w efekcie daje framerate 59,94. Zaletą tego podejścia jest zerowa utrata danych;
+  jednak ze względu na to, iż każda ramka pochodzi od jednego pola pozostałe linie muszą
+  być jakoś zinterpolowane. Są niezbyt dobre metody generowania brakujących
+  danych, a rezultaty będą podobne do tych jakie otrzymamy przy filtrach 
+  likwidujących przeplot. Generowanie brakujących linii tworzy kolejne problemy, 
+  po prostu ilość danych się podwaja. Więc, aby zachować jakość potrzebny jest 
+  większy kodujący bitrate i większa cześć mocy procesora jest używana do kodowania jak
+  i dekodowania. tfields posiada kilka różnych opcji do generowania brakujących linii. Jeżeli
+  używasz tej metody, odwołaj się do manuala <!-- podręcznika ?--> i wybierz opcję która
+  najbardziej odpowiada Twojemu materiałowi. Zauważ, że gdy używasz <option>tfields</option>
+   <emphasis role="bold">musisz</emphasis> podać i <option>-fps</option>
+   i <option>-ofps</option> aby podwoić ilość ramek na sekundę Twojego źródła.
+  
+  <screen>mencoder dvd://1 -nosound -vf tfields=2 -ovc lavc -fps 59.94 -ofps 59.94</screen>
+  </para></listitem>
+<listitem><para>   
+  Jeżeli planujesz drastyczne zmniejszenie rozdzielczości możesz odciąć i zakodować
+  tylko jedno z dwóch pól. Oczywiście stracisz połowę pionowej rozdzielczości,
+   ale jeśli chcesz zeskalować do mniej niż połowy pionowej rozdzielczości, strata  
+   nie będzie miała dużego znaczenia. Rezultatem będzie progresywny plik o prędkości
+   29,97 ramek na sekundę. Procedura wymaga użycia <option>-vf field</option>,
+   potem wykadrowania <link linkend="menc-feat-telecine-footnotes">[1]</link>
+   i wyskalowania. Pamiętaj, iż będziesz musiał skompensować połowę pionowej
+   rozdzielczości odpowiednią skalą.
+   <screen>mencoder dvd://1 -nosound -vf field=0 -ovc lavc</screen>
+  </para></listitem>
+</orderedlist>
+</sect3>
+
+<sect3 id="menc-feat-telecine-encode-mixedpt">
+<title>Mieszane progresywne i telecine</title>
 <para>
-  Jeśli ripujesz DVD w formacie PAL, które jest 25 fps, nie musisz myśleć o fps'ach
-  (ramkach na sekunde - przyp. tłum.). Użyj poprostu 25 fps. Z drugiej strony DVD w
-  formacie NTSC są 29.97 fps (zakrąglone zazwyczaj od 30 fps, ale to  nie jest prawda).
-  Jeżeli film był nakręcony dla TV, znów nie musisz dotykać się do fps'ów.
-  Ale jeśli film został nakręcony na taśmie, pociąga to sa sobą, że miał
-  (dokładnie) 24 fps i zostal przekonwertowany podczas tworzenia DVD do 29.97 fps.
-  Konwersja, gdzie do każdej z 24 ramek filmu dodaje sie 12 pól, nazywa sie telecine.
-  Aby wiecej sie dowiedzieć o telecine zobacz
-  <ulink url="http://www.google.com/search?q=telecine+field+23.976">
-  Wyniki szukania (Google) &quot;telecine field 23.976&quot;</ulink>.
+  W celu zmienienia zmieszanego video w całkowicie progresywne, części
+  ztelecinowane będą musiały być poddane procesowi odwróconego telecine.
+  Są dwa filtry które tego dokonają natywnie, ale najlepszym sposobem 
+  jest użycie ich obu połączonych (czytaj dalej aby dowiedzieć się więcej).
 </para>
 
-<para>
-  W przypadku gdy masz takie ztelecinowane DVD, będziesz chciał
-  odwrócić telecine, tzn. konwertować film do 23.976 (29.97*4/5).
-  Inaczej panning kamery będzie wyglądał brzydko i głupio.
-  Do tego celu możesz użyć opcji <option>-ofps 23.976</option>.
-  Wszystko co jest pokazywane w kinach jest nakręcone na taśmie i potrzebuje
-  odwróconego telecine, programy telewizyjne natomiast nie.
-</para></sect2>
+<itemizedlist>
+<listitem><para>
+  Obecnie najbardziej niezawodną metodą na poradzenie sobie z tym 
+  typem video, jest nie odwracanie telecine ztelecinowanych części, ale 
+  ztelecinować nie-ztelecinowane części i odwrócić telecine całego video.
+  Brzmi skomplikowanie? softpulldown jest filtrem który zamienia całe video
+  na telecine. Jeżeli po softpulldown nastąpi <option>detc</option> lub
+  <option>ivtc</option>, końcowym rezultatem będzie w całości progresywne video.
+  Kadrowanie i skalowanie powinno być zrobione po operacjach odwracających telecine
+  z opcją <option> -ofps 23.976</option>.
 
-<sect2 id="menc-feat-dvd-mpeg4-scaling">
-<title>Skalowanie i proporcje obrazu (aspect ratio)</title>
+  <screen>mencoder dvd://1 -nosound -vf softpulldown,ivtc=1 -ovc lavc -ofps 23.976</screen>
+  </para>
+  </listitem>
+<listitem><para>
+  <option>-vf pullup</option> jest zaprojektowane aby odwracać telecine 
+  ztelecinowanego materiału, a progresywne dane zostawiać w spokoju.
+  Pullup nie działa za dobrze
+  z obecnym <application>MEncoderem</application>, ale będzie działał z 
+  <application>MEncoder G2</application> (kiedy ten będzie tylko gotowy).
+  Działa dobrze bez opcji <option>-ofps</option>, ale <option>-ofps</option>
+  jest potrzebne aby zapobiec poszatkowanemu wyjściu <!-- hmmmmm-->. Z  
+  <option>-ofps</option> pullup czasami zawodzi. Problem wywodzi się z zachowania
+  <application>MEncodera</application> który zrzuca ramki aby zachować
+  synchronizację między dźwiękiem i obrazem: zrzuca ramki raczej przed wysłaniem ich przez
+  łańcuch filtrów, niż po. W rezultacie <option>pullup</option> jest czasami pozbawiony danych
+  których potrzebuje.
+  </para>
+
+  <para>
+  Jeżeli <application>MEncoder</application> zrzuca za dużo ramek pod rząd, 
+  zagładza bufor <option>pullupa</option> i powoduje jego nieoczekiwane zamknięcie.
+  </para>
+
+  <para>
+  Jeżeli nawet <application>MEncoder</application> zrzuca jedną ramkę,
+   <option>pullup</option> wciąż nie widzi jej i operuje na złej sekwencji ramek.
+  Nawet jeśli to nie powoduje nieoczekiwanego zakończenia,
+  <option>pullup</option> nie będzie w stanie podjąć właściwych decyzji jak
+  połączyć progresywne ramki i albo będzie niewłaściwie dopasowywał do siebie
+   pola albo zrzucał parę pól aby skompensować.
+  </para>
+  </listitem>
+
+<listitem><para>
+  Nie używałem <option>-vf filmdint</option> osobiście, ale zobacz co
+  ma do powiedzenia na ten temat D Richard Felker III:
+
+  <blockquote><para>To jest w porządku, ale IMO (MZ - Moim zdaniem - przyp. tłum.)
+  to raczej próbuje usunąć przeplot niż odwrócić telecine (podobnie
+  jak odtwarzacze DVD settop <!-- co ? co to jestr settop-->&amp; progresywne TV)
+  czego skutkiem jest ohydne miganie i inne artefakty. 
+  Jeżeli zamierzasz używać tego, musisz chociaż spędzi trochę czasu
+  na dopasowaniu opcji i oglądaniu rezultatów aby upewnić się, że się nie 
+  kaszani.</para></blockquote>
+  </para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3 id="menc-feat-telecine-encode-mixedpi">
+<title>Mieszane progresywne i z przeplotem</title>
 <para>
-  Aby uzyskać najlepszą jakość nie skaluj podczas ripowania.
-  Zeskalowywanie w dół powoduje strate detali, a skalowanie w górę
-  skutkuje pojawieniem się artefaktów i zwiększa rozmiar pliku.
-  Piksele w filmach DVD nie są kwadratowe, a więc filmy DVD zawierają informacje
-  o poprawnej proporcji obrazu. Jest możliwe aby przechowywać tę informacje w
-  nagłówku wynikowego pliku MPEG4. Większość odtwarzaczy video ignoruje
-  tę informacje, ale <application>MPlayer</application> honoruje ją.
-  Więc jeśli zamierzasz używać tylko <application>MPlayer</application>
-  do odtwarzania zripowanego pliku, nie musisz skalować filmu, poprostu przekaż
-  opcję <option>-lavcopts autoaspect</option> do
-  <application>MEncoder</application>a i wszystko automagiczne będzie działać.
-  Jeśli musisz skalować, bądź ostrożny aby uzyskać poprawny rozmiar obrazu szczególnie gdy kadrujesz.
-</para>
+  Są dwie metody na poradzenie sobie z tą kategorią, każda jest pewnym 
+  kompromisem. Powinieneś zdecydować na podstawie czasu trwania/miejsca każdego
+  typu.
+  </para>
+
+<itemizedlist>
+<listitem><para>
+  Traktuj video jak progresywne. Części z przeplotem będą wyglądały jak 
+  z przeplotem i niektóre przeplecione pola będą musiały być zrzucone, czego
+  rezultatem będzie niemiarowe skakanie. Jeśli chcesz możesz użyć filtrów
+  postprocessingu, ale może to nieznacznie zdegradować progresywne części.
+  </para>
+
+  <para>
+  Ta opcja na pewno nie powinna być używana jeśli docelowo masz zamiar
+  wyświetlać video na urządzeniu wykorzystującym przeplot (np. z kartą TV)
+  Jeżeli masz ramki z przeplotem 23,937 fps, będą one ztelecinowane razem 
+  z progresywnymi ramkami. Połowa "ramek" z przeplotem będzie wyświetlona
+  w czasie wyświetlania trzech pól (3/59.94 sekund), co w rezultacie da migający
+  "skok wstecz w czasie" efekt który kiepsko wygląda. Jeżeli próbowałeś
+  tego <emphasis role="bold">musisz</emphasis> użyć filtru
+  likwidującego przeplot jak <option>lb</option> lub <option>l5</option>.
+  </para>
+
+  <para>
+  To może być również zły pomysł dla progresywnego obrazu. 
+  Zrzuci to pary nieprzerwanych przeplecionych pól, dając w rezultacie nieciągłość
+  która może być bardziej widoczna niż w drugim przypadku który pokazuje
+  niektóre ramki dwa razy. Video z przeplotem 29,97 fps jest już trochę
+  poszatkowane ponieważ powinno być wyświetlanie z prędkością
+  59,94 pól na sekundę, więc zduplikowane pola nie są aż tak widoczne.
+  </para>
+  
+  <para>
+  W każdym przypadku najlepiej jest rozpatrywać materiał i to gdzie masz zamiar 
+  go wyświetlać. Jeśli video jest w 90% progresywne i nie masz zamiaru nigdy go wyświetlać
+  na TV, powinieneś faworyzować progresywne podejście. Jeżeli jest tylko w połowie
+  progresywne, będziesz pewnie chciał je kodować tak jakby było
+  w całości z przeplotem.
+  </para>
+  </listitem>
+  
+<listitem><para>
+  Traktuj video jakby było z przeplotem. Niektóre klatki z progresywnych
+  części będą musiały być zduplikowane, dając w rezultacie niemiarowe skoki.
+  Znów filtry  likwidujące przeplot mogą nieznacznie zdegradować progresywne części.
+  </para></listitem>
+
+</itemizedlist>
+</sect3>
+
 </sect2>
 
-<sect2 id="menc-feat-dvd-mpeg4-summary">
-<title>Podsumowanie</title>
-<para>
-  Podsumowując wszystko, dobrą kodującą komendą może być:
+<sect2 id="menc-feat-telecine-footnotes">
+<title>Notatki</title>
+<orderedlist>
+<listitem><formalpara>
+  <title>O kadrowaniu:</title>
+  <para>
+  Video na DVD jest przechowywane w formacie nazywanym YUV 4:2:0.
+  W video YUV luma ("jasność") i chroma ("kolor")
+  są przechowywane osobno. Ponieważ ludzkie oczy są mniej wrażliwe na
+  kolor niż na jasność, w obrazie YUV 4:2:0 na cztery piksele luma przypada jeden
+  piksel chroma. W progresywnym obrazie, każdy kwadrat czterech pikseli luma 
+  (dwa na każdym boku) ma jeden wspólny piksel chroma. Musisz wykadrować progresywne 
+  video YUV 4:2:0 do parzystych rozdzielczości, i używać parzystych przesunięć. Na przykład 
+  <option>crop=716:380:2:26</option> jest OK ale
+  <option>crop=716:380:3:26 </option> nie jest.
+  </para>
+  </formalpara>
 
-  <screen>
-mencoder dvd://1 -aid 128 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vqscale=3:vhq:v4mv:trell:autoaspect \
-  -ofps 23.976 -vf crop=720:364:0:56 -o Harry_Potter_2.avi
-  </screen>
+  <para>
+  Kiedy masz do czynienia z YUV 4:2:0 z przeplotem, sytuacja jest
+  trochę bardziej skomplikowana. Zamiast każdych czterech pikseli
+  luma w <emphasis>ramce</emphasis> dzielących jeden piksel
+  chroma, każde cztery piksele w <emphasis>polu</emphasis>
+  dzielą jeden piksel chroma. Kiedy pola są przeplatane aby stworzyć
+  ramkę, każda linia skanująca jest wysokości jednego piksela.
+  Teraz, zamiast czterech pikseli luma w kwadracie, są dwa bok-przy-boku
+  i dwa następne bok-przy-boku dwie linie skanujące niżej. Całe to zamieszanie
+   powoduje, że pionowe rozmiary kadru i przesunięcia muszą być
+  wielokrotnościami czterech. Wymiary poziome mogą pozostać parzyste.
+  </para>
 
-  <option>dvd://1</option> wskazuje na tytuł DVD do zripowania. Opcja
-  <option>-aid 128</option> mówi aby użyć 128ej scieżki audio, i
-  <option>-oac copy</option> skopiować ją bez zmian. Będziesz musiał użyć
-  <application>MPlayer</application>a aby znaleźć poprawne wartości do tych opcji.
-</para>
+  <para>
+  Dla telecinowanego video, zalecam kadrować po procesie odwracania
+  telecine. Kiedy video jest już progresywne wymagane jest tylko kadrowanie do
+  parzystych wymiarów. Jeśli naprawdę potrzebujesz lekkiego przyspieszenia
+  jakie da kadrowanie najpierw musisz kadrować pionowo do wielokrotności
+  czterech, inaczej filtr odwracający telecine nie będzie otrzymywał prawidłowych danych.
+  </para>
 
-<para>
-  Opcje <option>vhq:v4mv:trell</option> do
-  <option>-lavcopts</option> poprawiają jakość vs. bitrate, ale przedłużąją kodowanie.
-  Szczególnie opcja <option>trell</option> zwalnia kodowanie znacząco ale też zauważalnie
-  poprawia jakość. Jeżeli chcesz usunąć przeplot dodaj filtr <option>pp</option> do
-  <option>-vf</option>, na przykład:
-  <option>-vf pp=fd,crop=720:364:0:56</option> (w takiej kolejności). Jeśli nie potrzebujesz
-  odwróconego telecine, zostaw <option>-ofps 23.976</option>.
-</para>
+  <para>
+  Przy video z przeplotem (nie telecine), musisz zawsze kadrować
+   pionowo do wielokrotności czwórki, chyba że używasz opcji 
+  <option>-vf field</option> przed kadrowaniem.
+  </para>
+  </listitem>
+
+<listitem><formalpara>
+  <title>O parametrach i jakości kodowania:</title>
+  <para>
+  Tylko to, że poleciłem <option>mbd=2</option> tutaj nie znaczy że
+  nie może być on używany gdzie indziej. Razem z <option>trell</option>, 
+  <option>mbd=2</option> jest jedną z dwóch najbardziej podnoszących jakość opcji
+  biblioteki <systemitem class="library">libavcodec</systemitem>, których zawsze
+  powinieneś używać, chyba że spadek szybkości kodowania jest niedopuszczalny
+  (np. kodowanie w czasie rzeczywistym). Biblioteka <systemitem class="library">libavcodec</systemitem>
+  ma wiele opcji umożliwiających zwiększenie jakości wyjściowej kodowania (i zmniejszyenie
+  prędkości) ale ten temat jest poza zakresem tego dokumentu.
+  </para>
+  </formalpara>
+  </listitem>
+
+</orderedlist>
+
 </sect2>
 
 </sect1>

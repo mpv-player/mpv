@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.14 -->
 <chapter id="cd-dvd">
 <title>Używanie CD/DVD</title>
 
@@ -283,10 +283,12 @@ napędzie RPC2 (powolne).
 Napędy DVD RPC-1 zabezpieczają ustawienia regionu jedynie poprzez
 oprogramowanie. Napędy RPC-2 mają sprzętowe zabezpieczenie, które pozwala na co
 najwyżej 5 zmian. Jeżeli posiadamy napęd DVD RPC-2 wymagana/zalecana jest
-aktualizacja firmware'u do RPC-1 . Nowe wersje firmware'ów można znaleźć na tej
-<ulink url="http://www.firmware-flash.com">stronie z firmware'ami</ulink>.
+aktualizacja firmware'u do RPC-1. 
+Nowe wersje firmware'ów można znaleźć w internecie. 
+Poszukiwania radzimy rozpocząć od 
+<ulink url="http://forum.rpc-1.com/dl_all.php">forum firmware'ów</ulink>.
 Jeżeli nie ma tam nowej wersji firmware'u dla naszego urządzenia, użyj
-<ulink url="http://www.linuxtv.org/download/dvd/dvd_disc_20000215.tar.gz">regionset tool
+<ulink url="http://linvdr.org/projects/regionset/">regionset tool
 (narzędzia do zmiany regionów)</ulink> aby ustawić kod regionu na swoim napędzie
 DVD (pod Linuksem). <emphasis role="bold">Ostrzeżenie</emphasis>: Możesz
 ustawić region tylko 5 razy.
@@ -318,28 +320,38 @@ obsługę SCSI dla VCD.
 
 <para>
 W międzyczasie możesz wyciągać dane z VCD za pomocą
-<ulink url="http://140.132.1.204/OS/Linux/packages/X/viewers/readvcd/">readvcd</ulink>
+<ulink url="http://miketeo.net/links/readvcd-0.3.tgz">readvcd</ulink>
 i odtwarzać plik wynikowy za pomocą <application>MPlayera</application>
 </para>
 
 <formalpara>
 <title>Struktura VCD</title>
-<para>Płyty VCD składają się z jednej lub więcej ścieżek:</para>
+<para>
+Video CD (VCD) składa się z sektorów CD-ROM XA, tzn. CD-ROM 
+mode 2 form 1 i form 2 posiada ścieżki:</para>
 </formalpara>
 
 <itemizedlist>
 <listitem><para>
-Pierwsza ścieżka jest małą ścieżką o gęstości 2048 bajtów/sektor z danymi w
-systemie plików iso9660, zwykle zawierająca windowsowy odtwarzacz VCD i być
-może inne informacje (obrazy, tekst, itp.).
+Pierwsza ścieżka jest w formacie mode 2 form 2, który oznacza użycie korekcji 
+błędów L2. Ścieżka ta zawiera system plików ISO-9660 o gęstości 2048 bajtów/sektor.
+Ten system plików z kolei zawiera metainformacje VCD, a także nieruchome klatki, często 
+używane w menu. Segmenty MPEG dla menu mogą także być składowane w tejże pierwszej 
+ścieżce, ale MPEGi muszą być podzielone na kawałki po 150 sektorów. System plików ISO-9660 
+może zawierać inne pliki bądź programy, niekonieczne dla eksploatacji VCD.
 </para></listitem>
 
 <listitem><para>
-Druga i pozostałe ścieżki o gęstości 2324 bajtów/sektor zawierają po jednym
-pakiecie czystego strumienia MPEG PS na sektor zamiast systemu plików.
-Podobnie, jak w przypadku ścieżek audio CD, ścieżki te <emphasis role="bold">nie
-mogą być montowane</emphasis> (Czy kiedykolwiek montowałeś płytę audio CD by
-ją odtworzyć?). Biorąc pod uwagę, że filmy znajdują się na tej ścieżce,
+Druga i pozostałe ścieżki są zwykle ścieżkami video MGEG typu raw o gęstości 
+2324 bajtów/sektor, zawierającymi jeden pakiet danych MGEG PS na sektor.
+Ścieżki te są w formacje mode 2 form 1, więc przechowują one więcej danych 
+na sektor, w zamian za słabszą korekcję błędów. Możliwe są też ścieżki 
+CD-DA na VCD poza pierwszą ścieżką.
+Niektóre systemy operacyjne używają pewnych trików aby ścieżki nie zawięrające 
+systemu plików ISO-9660 były widoczne w systemie plików. W pozostałych systemach, 
+jak na przykład w systemie GNU/Linux, nie ma takiej możliwości (jeszcze). W takim 
+przypadku dane MPEG <emphasis role="bold">nie mogą być montowane</emphasis>. 
+Jako że większość filmów znajduje się na tego typu ścieżce,
 powinieneś spróbować na początek opcji <option>vcd://2</option>.
 </para></listitem>
 
@@ -348,6 +360,14 @@ Istnieją również płyty VCD bez pierwszej ścieżki (pojedyncza ścieżka i
 brak systemu plików w ogóle). Je również da się odtwarzać, ale nie da
 się ich montować.
 </para></listitem>
+
+<listitem><para> Definicja standardu Video CD, nazywana "Białą Księgą"
+Phillipsa, generalnie nie jest dostępna online, musi być zakupiona u Phillipsa. 
+Bardziej szczegółowe informacje na temat Video CD można znaleźć na 
+<ulink url="http://www.vcdimager.org/pub/vcdimager/manuals/0.7/vcdimager.html#SEC4">stronie 
+dokumentacji vcdimagera</ulink>.
+</para></listitem>
+
 </itemizedlist>
 
 <formalpara>
@@ -370,7 +390,7 @@ Linuksa! Zamiast tego użyj opcji <option>vcd://</option>. Alternatywą dla
 kopiowania VCD jest nowy sterownik:
 <ulink url="http://www.elis.rug.ac.be/~ronsse/cdfs/">cdfs</ulink> (nie jest
 częścią oficjalnego jądra), który wyświetla sesje CD jako pliki obrazów, oraz
-<ulink url="http://cdrdao.sourceforge.net/">cdrdao</ulink>, program do zgrywania
+<ulink url="http://cdrdao.sf.net/">cdrdao</ulink>, program do zgrywania
 płyt CD bit po bicie.
 </para>
 </formalpara>
