@@ -5,7 +5,7 @@
 */
 #include <errno.h>
 #ifdef __i386__
-#include <sys/perm.h>
+// is this needed? #include <sys/perm.h>
 #else
 #if !defined(__sparc__) && !defined(__powerpc__)
 #include <sys/io.h>

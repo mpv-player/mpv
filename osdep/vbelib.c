@@ -7,6 +7,10 @@
    of GNU General Public licence v2.
    Written by Nick Kurshev <nickols_k@mail.ru>
 */
+
+#include <../config.h>
+#ifdef HAVE_VESA
+
 #include "vbelib.h"
 #include "lrmi.h"
 #include <stdlib.h>
@@ -728,3 +732,5 @@ void vbeUnmapVideoBuffer(unsigned long linear_addr,unsigned long size)
   if(verbose > 1) printf("vbelib: vbeUnmapVideoBuffer(%08lX,%08lX)\n",linear_addr,size);
   munmap((void *)linear_addr,size);
 }
+
+#endif

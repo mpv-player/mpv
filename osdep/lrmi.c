@@ -11,6 +11,9 @@ This software has NO WARRANTY.  Use it at your own risk.
 Original location: http://cvs.debian.org/lrmi/
 */
 
+#include "../config.h"
+#ifdef HAVE_VESA
+
 #include <signal.h>
 #include <stdio.h>
 #include <string.h>
@@ -918,3 +921,4 @@ LRMI_int(int i, struct LRMI_regs *r)
 	return vret;
 	}
 
+#endif

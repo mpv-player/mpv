@@ -2098,7 +2098,19 @@ if test "$_inttypes" = yes ; then
   # nothing to do
   :
 else
-  die "cannot find header inttypes.h (see DOCS/HTML/en/faq.html)"
+  echores "no"
+  echocheck "bitypes.h (inttypes.h predecessor)"
+  cat > $TMPC << EOF
+#include <sys/bitypes.h>
+int main(void) { return 0; }
+EOF
+  _inttypes=no
+  cc_check && _inttypes=yes
+  if test "$_inttypes" = yes ; then
+    die "you don't have inttypes.h, but sys/bitypes.h is present. Please copy etc/inttypes.h.link into the include path, and re-run configure."
+  else
+    die "cannot find header either inttypes.h or bitypes.h (see DOCS/HTML/en/faq.html)"
+  fi
 fi
 echores "$_inttypes"
 
@@ -3504,22 +3516,27 @@ EOF
 esac
 
 
-if test "$_vesa" != no ; then
 echocheck "VESA support"
+if test "$_vesa" = auto ; then
 if x86 && linux ; then
+  _vesa=no
+  cat > $TMPC << EOF
+#include <sys/io.h>
+int main(void) { return 0; }
+EOF
+  cc_check && _vesa=yes
+fi
+fi
+if test "$_vesa" = yes ; then
   _def_vesa='#define HAVE_VESA 1'
   _vosrc="$_vosrc vo_vesa.c vesa_lvo.c"
   _vomodules="vesa $_vomodules"
   echores "yes"
 else
   _def_vesa='#undef HAVE_VESA'
-  _novomodules="vesa $_novomodules"
   echores "no (not supported on this OS/architecture)"
+  _novomodules="vesa $_novomodules"
 fi
-else
-_def_vesa='#undef HAVE_VESA'
-fi
-
 
 #################
 # VIDEO + AUDIO #
@@ -5877,6 +5894,11 @@ cat > config.h << EOF
 
 /* use GNU internationalization */
 $_def_i18n
+
+/* missing mmap function on libc5 systems */
+#ifndef MAP_FAILED
+# define MAP_FAILED     ((void *) -1)
+#endif
 
 /* use setlocale() function */
 $_def_setlocale
