@@ -89,6 +89,11 @@ static int lavc_param_fdct=0;
 #if LIBAVCODEC_BUILD >= 4623
 static float lavc_param_aspect=0.0;
 #endif
+static float lavc_param_lumi_masking= 0.0;
+static float lavc_param_temporal_cplx_masking= 0.0;
+static float lavc_param_spatial_cplx_masking= 0.0;
+static float lavc_param_p_masking= 0.0;
+static int lavc_param_normalize_aqp= 0;
 
 #include "cfgparser.h"
 
@@ -147,6 +152,13 @@ struct config lavcopts_conf[]={
 #endif
 #if LIBAVCODEC_BUILD >= 4623
 	{"aspect", &lavc_param_aspect, CONF_TYPE_FLOAT, CONF_RANGE, 0.2, 3.0, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4625
+	{"lumi_mask", &lavc_param_lumi_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
+	{"tcplx_mask", &lavc_param_temporal_cplx_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
+	{"scplx_mask", &lavc_param_spatial_cplx_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
+	{"p_mask", &lavc_param_p_masking, CONF_TYPE_FLOAT, CONF_RANGE, -1.0, 1.0, NULL},
+	{"naq", &lavc_param_normalize_aqp, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 #endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
@@ -251,6 +263,13 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->dct_algo= lavc_param_fdct;
 #endif
 
+#if LIBAVCODEC_BUILD >= 4625
+    lavc_venc_context->lumi_masking= lavc_param_lumi_masking;
+    lavc_venc_context->temporal_cplx_masking= lavc_param_temporal_cplx_masking;
+    lavc_venc_context->spatial_cplx_masking= lavc_param_spatial_cplx_masking;
+    lavc_venc_context->p_masking= lavc_param_p_masking;
+#endif
+
 #if LIBAVCODEC_BUILD >= 4623
     if (lavc_param_aspect != 0.0)
     {
@@ -303,6 +322,9 @@ static int config(struct vf_instance_s* vf,
     if(lavc_param_gray) lavc_venc_context->flags|= CODEC_FLAG_GRAY;
 #endif
 
+#if LIBAVCODEC_BUILD >= 4625
+    if(lavc_param_normalize_aqp) lavc_venc_context->flags|= CODEC_FLAG_NORMALIZE_AQP;
+#endif
 
     /* lavc internal 2pass bitrate control */
 #ifdef HAVE_DIVX4ENCORE
