@@ -1277,6 +1277,7 @@ if test "$_vidix" = auto ; then
   # should check for x86 systems supporting vidix (does qnx have vidix?)
   x86 && _vidix=yes
   cygwin && _vidix=no
+  qnx && _vidix=no
 fi
 
 # checking for a working awk, I'm using mawk first, because it's fastest - atmos
@@ -3279,12 +3280,12 @@ if test "$_real" = auto ; then
           fi;
         done
       fi
-    fi
-    test "$_reallibdir" || _real=no
-    if test "$_real" = yes ; then
-      echores "yes (using $_reallibdir)"
-    else
-      echores "no (no suitable directory found - see DOCS/codecs.html)"
+      test "$_reallibdir" || _real=no
+      if test "$_real" = yes ; then
+        echores "yes (using $_reallibdir)"
+      else
+        echores "no (no suitable directory found - see DOCS/codecs.html)"
+      fi
     fi
   else
     echores "no (dynamic loader support needed)"
