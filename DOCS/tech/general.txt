@@ -191,6 +191,9 @@ Now, go on:
 			0x1  -  supported (by hardware or conversion)
 			0x2  -  supported (by hardware, without conversion)
 			0x4  -  sub/osd supported (has draw_alpha)
+			0x8  -  hardware handles subpics
+			0x100  -  driver/hardware handles timing (blocking)
+
    IMPORTANT: it's mandatorial that every vo driver support the YV12 format,
 	 and one (or both) of BGR15 and BGR24, with conversion, if needed.
 	 If these aren't supported, not every codec will work! The mpeg codecs
