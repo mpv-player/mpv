@@ -2020,12 +2020,12 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
     BITMAPINFOHEADER *bih;
 
     idesc = NULL;
-    bih = (BITMAPINFOHEADER *)safemalloc(track->private_size);
-    memset(bih, 0, sizeof(BITMAPINFOHEADER));
 
     if (track->ms_compat) {         // MS compatibility mode
       BITMAPINFOHEADER *src;
       src = (BITMAPINFOHEADER *)track->private_data;
+      bih = (BITMAPINFOHEADER *)safemalloc(track->private_size);
+      memset(bih, 0, track->private_size);
       bih->biSize = get_uint32(&src->biSize);
       bih->biWidth = get_uint32(&src->biWidth);
       bih->biHeight = get_uint32(&src->biHeight);
@@ -2042,6 +2042,8 @@ extern "C" int demux_mkv_open(demuxer_t *demuxer) {
              track->private_size - sizeof(BITMAPINFOHEADER));
 
     } else {
+      bih = (BITMAPINFOHEADER *)safemalloc(sizeof(BITMAPINFOHEADER));
+      memset(bih, 0, sizeof(BITMAPINFOHEADER));
       bih->biSize = sizeof(BITMAPINFOHEADER);
       bih->biWidth = track->v_width;
       bih->biHeight = track->v_height;
