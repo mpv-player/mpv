@@ -18,21 +18,23 @@
 <P>¼ì²é<A HREF="http://www.mplayerhq.hu/DOCS/codecs-status.html">codec status table</A>À´»ñµÃÍêÕûµÄ£¬Ã¿ÈÕ¸üÐÂµÄ
 ÁÐ±í¡£´ó²¿·ÖµÄ±à½âÂëÆ÷¿ÉÒÔ´ÓÎÒÃÇµÄÖ÷Ò³ÏÂÔØ£¬ÔÚÎÒÃÇµÄ<A
 HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">±à½âÂëÆ÷Ò³</A>¿ÉÒÔÕÒµ½ËûÃÇ¡£</P>
- 
+
 
 <P>ËùÓÐÖ®ÖÐ×îÖØÒªµÄ£º</P>
 <UL>
-  <LI>MPEG1(VCD)ºÍMPEG2(DVD)ÊÓÆµ</LI>
-  <LI>DivXµÄ±¾µØµÄ½âÂëÆ÷;-)£¬OpenDivX£¬DivX4£¬DivX5£¬M$ MPEG4 v1£¬v2ºÍÆäËüµÄMPEG4±äÖÖ</LI>
-  <LI>Windows Media Video 7/8(WMV1/WMV2)µÄ±¾µØµÄ½âÂëÆ÷£¬ºÍWindows Media Video 9(WMV3)µÄWin32 DLL½âÂëÆ÷£¬ËüÃÇ¶¼ÓÃÓÚ.wmvÎÄ¼þ</LI>
-  <LI><B>±¾µØµÄSorenson(SVQ1)½âÂëÆ÷</B></LI>
-  <LI><B>Win32/QT Sorenson 3 (SVQ3) decoder</B></LI>
-  <LI>3ivx v1, v2½âÂëÆ÷</LI>
-  <LI>CinepakºÍIntel Indeo½âÂëÆ÷(3.1,3.2,4.1,5.0)</LI>
-  <LI>MJPEG£¬AVID£¬VCR2£¬ASV2ºÍÆäËüÓ²¼þ¸ñÊ½</LI>
-  <LI>VIVO 1.0£¬2.0£¬I263ºÍÆäËüh263(+)µÄ±äÖÖ</LI>
+  <LI><B>MPEG1</B>(<B>VCD</B>)ºÍ<B>MPEG2</B>(<B>DVD</B>)ÊÓÆµ</LI>
+  <LI><B>DivX ;-)</B>, <B>OpenDivX</B>, <B>DivX4</B>, <B>
+    DivX5</B>, <B>M$ MPEG4</B> v1, v2ºÍÆäËüMPEG4¸ñÊ½µÄ±äÖÖµÄ±¾µØ½âÂëÆ÷¡£</LI>
+  <LI><B>Windows Media Video 7/8</B>(<B>WMV1/WMV2</B>)µÄ±¾µØ½âÂëÆ÷£¬ÒÔ
+¼°<B>Windows Media Video 9</B>(<B>WMV3</B>)µÄWin32 DLL½âÂë£¬.wmvÎÄ¼þÊ¹ÓÃÕâÁ½ÖÖ¸ñÊ½</LI>
+  <LI>±¾µØµÄ<B>Sorenson 1 (SVQ1)</B>½âÂëÆ÷r</LI>
+  <LI>Win32/QTµÄ<B>Sorenson 3 (SVQ3)</B>½âÂëÆ÷</LI>
+  <LI><B>3ivx</B> v1, v2½âÂëÆ÷</LI>
+  <LI>CinepakºÍ<B>Intel Indeo</B>±à½âÂëÆ÷(3.1, 3.2, 4.1, 5.0)</LI>
+  <LI><B>MJPEG</B>, AVID, VCR2, ASV2ºÍÆäËüÓ²¼þ¸ñÊ½</LI>
+  <LI>VIVO 1.0, 2.0, I263ºÍÆäËü<B>h263</B>(+)¸ñÊ½µÄ±äÖÖ</LI>
   <LI>FLI/FLC</LI>
-  <LI>libavcodecµÄRealVideo 1.0½âÂëÆ÷£¬ºÍÊ¹ÓÃRealPlayer¿âµÄRealVideo 2.0£¬3.0½âÂëÆ÷</LI>
+  <LI>LibavcodecµÄ<B>RealVideo 1.0</B>½âÂëÆ÷£¬ºÍÊ¹ÓÃRealPlayer¿âµÄ<B>RealVideo 2.0</B>, <B>3.0</B>ºÍ<B>4.0</B>½âÂëÆ÷</LI>
   <LI>HuffYUVµÄ±¾µØµÄ½âÂëÆ÷</LI>
   <LI>¸÷ÖÖ¸÷ÑùµÄÀÏµÄ¼òµ¥µÄÀàËÆRLEµÄ¸ñÊ½</LI>
 </UL>
@@ -77,12 +79,12 @@ HREF="http://www.divx.com">divx.com</A>ÏÂÔØ£¬½âÑ¹Ö®ºó£¬ÒÔrootÈ¨ÏÞÔËÐÐ<CODE>./ins
     <PRE>
     cd divxcore/decore/build/linux
     make
-    cp libdivxdecore.so /usr/local/lib 
-    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0 
+    cp libdivxdecore.so /usr/local/lib
+    ln -s /usr/local/lib/libdivxdecore.so /usr/local/lib/libdivxdecore.so.0
     cp ../../src/decore.h /usr/local/include
     </PRE>
     </LI>
-  <LI>°¦£¬¶ÔÓÚ±àÂë¿âÃ»ÓÐ¿ÉÓÃµÄLinuxµÄMakefile£¬¶øÇÒMMXÓÅ»¯´úÂëÖ»ÄÜÓÃÓÚWindowsµ«ÄãÈÔÈ»¿ÉÒÔÓÃÕâ¸ö<A 
+  <LI>°¦£¬¶ÔÓÚ±àÂë¿âÃ»ÓÐ¿ÉÓÃµÄLinuxµÄMakefile£¬¶øÇÒMMXÓÅ»¯´úÂëÖ»ÄÜÓÃÓÚWindowsµ«ÄãÈÔÈ»¿ÉÒÔÓÃÕâ¸ö<A
 HREF="ftp://ftp.mplayerhq.hu/MPlayer/contrib/divx-mf/Makefile">Makefile</A>À´±àÒëËü
     <PRE>
     cd ../../../encore/build
@@ -125,38 +127,44 @@ H263/MJPEG/RV10/DivX3/DivX4/DivX5/MP41/MP42/WMV1/WMV2/HuffYUV±àÂë¸ñÊ½±àÂëµÄÊÓÆµÁ
 
 <H4><A NAME="xanim">2.2.1.3 XAnim½âÂëÆ÷</A></H4>
 
-<P>Ç°ÑÔ£º<BR>
-  XAnimµÄ¶þ½øÖÆµÄ½âÂëÆ÷°üÀïÃæÓÐÒ»·Ý¹ØÓÚºÏ·¨À¦°óÈí¼þÐí¿ÉµÄÉùÃ÷£¬³ýÆäËüÏÞÖÆÖ®Íâ£¬½ûÖ¹ÓÃ»§ÓÃ³ýXAnimÍâµÄÈÎºÎ³ÌÐòÊ¹ÓÃÆä½âÂëÆ÷¡£È»¶ø£¬
+<H4>Ç°ÑÔ</H4>
+<P>
+XAnimµÄ¶þ½øÖÆµÄ½âÂëÆ÷°üÀïÃæÓÐÒ»·Ý¹ØÓÚºÏ·¨À¦°óÈí¼þÐí¿ÉµÄÉùÃ÷£¬³ýÆäËüÏÞÖÆÖ®Íâ£¬½ûÖ¹ÓÃ»§ÓÃ³ýXAnimÍâµÄÈÎºÎ³ÌÐòÊ¹ÓÃÆä½âÂëÆ÷¡£È»¶ø£¬
 XAnimµÄ×÷Õßµ½Ä¿Ç°ÎªÖ¹Ã»ÓÐ¾Í½âÂëÆ÷ÓÐ¹ØµÄÎÊÌâ¶Ô×ÅÈÎºÎÈË²ÉÈ¡·¨ÂÉÐÐ¶¯¡£
 </P>
+
+<H4>°²×°ºÍÊ¹ÓÃ</H4>
 
 <P>MPlayer¿ÉÒÔÊ¹ÓÃXAnimµÄ½âÂëÆ÷½âÂë¡£°´ÕÕÏÂÁÐÖ¸ÁîÀ´¿ªÆôËü£º</P>
 
 <OL>
   <LI>´Ó<A HREF="http://xanim.va.pubnix.com">XAnimµÄÕ¾µã</A>ÏÂÔØÄãÏëÒªµÄ½âÂëÆ÷¡£<B>3ivx</B>µÄ½âÂëÆ÷²»ÔÚÄÇÀï£¬¶øÊÇÔÚ<A
-HREF="http://www.3ivx.com">3ivxµÄÕ¾µã</A>¡£</LI>
+  HREF="http://www.3ivx.com">3ivxµÄÕ¾µã</A>¡£</LI>
+  <LI><B>»òÕß</B>´ÓÎÒÃÇµÄ<A
+  HREF="http://www.mplayerhq.hu/MPlayer/releases/codecs/">±à½âÂëÆ÷Ò³</A>ÏÂÔØ±à½âÂëÆ÷°ü¡£
+    </LI>
   <LI>Ê¹ÓÃ<CODE>--with-xanimlibdir</CODE>Ñ¡ÏîÀ´¸æËßconfigureÔÚºÎ´¦¿ÉÒÔÕÒµ½XAnimµÄ½âÂëÆ÷¡£È±Ê¡µÄ»°£¬ËüÔÚ
 <CODE>/usr/local/lib/xanim/mods, /usr/lib/xanim/mods and /usr/lib/xanim</CODE>ÀïÑ°ÕÒ¡£»òÕßÄã¿ÉÒÔ°Ñ<I>XANIM_MOD_DIR</I>»·¾³±äÁ¿
 ÉèÖÃÎªXAnim½âÂëÆ÷ËùÔÚµÄÄ¿Â¼¡£</LI>
   <LI>¸øÎÄ¼þ¸ÄÃû/×ö·ûºÅÁ´½Ó£¬È¥µô´ú±íÆ½Ì¨¹¹¼ÜÖ®ÀàµÄ¶«Î÷£¬ÈÃËûÃÇ¿´ÆðÀ´ÏñÕâÑù£º<CODE>vid_cvid.xa, vid_h263.xa, vid_iv50.xa</CODE>¡£</LI>
 </OL>
 
-<P>XAnimÊôÓÚÊÓÆµ±à½âÂëÆ÷×å<I>xanim</I>£¬ËùÒÔÄã¿ÉÄÜÐèÒªÊ¹ÓÃ<CODE>-vfm xanim</CODE>¡£</P>
+<P>XAnimÊôÓÚÊÓÆµ±à½âÂëÆ÷×å<CODE>xanim</CODE>£¬ËùÒÔÄã¿ÉÄÜÐèÒªÊ¹ÓÃ<CODE>-vfm xanim</CODE>¡£</P>
 
 <P>²âÊÔ¹ýµÄ½âÂëÆ÷°üÀ¨£º<B>Indeo 3.2</B>£¬<B>4.1</B>£¬<B>5.0</B>£¬<B>CVID</B>£¬<B>3ivX</B>£¬<B>h263</B>¡£</P>
 
 
 <H4><A NAME="vivo_video">2.2.1.4 VIVOÊÓÆµ</A></H4>
 
-<P>MPlayerÄÜ²¥·ÅVivo(1.0ºÍ2.0)ÊÓÆµ¡£¶ÔÓÚ1.0µÄÎÄ¼þ×îÊÊºÏµÄ½âÂëÆ÷ÊÇFFmpegµÄH263½âÂëÆ÷£¬Äã¿ÉÒÔÓÃ<CODE>-vc ffh263</CODE>Ñ¡Ïî
-(Ä¬ÈÏµÄ)À´Ê¹ÓÃËü¡£¶ÔÓÚ2.0¸öÎÄ¼þ£¬Ê¹ÓÃ<A
-HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/ivvideo.dll">ivvideo.dll</A>Õâ¸öWin32 DLLÎÄ¼þ£¬½«Ëü°²×°ÔÚ<CODE>/usr/lib/win32</CODE>»òÕßÄã·ÅWin32½âÂëÆ÷µÄÄÇ¸öÊ²Ã´µØ·½¡£</P>
+<P>MPlayerÄÜ²¥·ÅVivo(1.0ºÍ2.0)ÊÓÆµ¡£¶ÔÓÚ1.0µÄÎÄ¼þ×îÊÊºÏµÄ½âÂëÆ÷ÊÇFFmpegµÄH263½âÂëÆ÷£¬Äã¿ÉÒÔÓÃ<CODE>-vc ffh263</CODE>Ñ¡ÏîÀ´
+Ê¹ÓÃËü¡£¶ÔÓÚ2.0¸öÎÄ¼þ£¬Ê¹ÓÃ<CODE>-vc vivo</CODE>ÃüÁîÀ´µ÷ÓÃWin32 DLL¡£Èç¹ûÄãÃ»ÓÐÌí¼ÓÃüÁîÐÐÑ¡ÏîMPlayer½«×Ô¶¯Ñ¡Ôñ×îºÃµÄ½âÂëÆ÷¡£</P>
 
 
 <H4><A NAME="mpeg">2.2.1.5 MPEG 1/2ÊÓÆµ</A></H4>
 
-<P>MPEG1ºÍMPEG2ÓÃ±¾µØµÄ¶àÆ½Ì¨µÄ<B>libmpeg2</B>¿â½âÂë£¬ÆäÔ´´úÂë±»°üÀ¨ÔÚMPlayerÖÐ¡£¶ÔÓÚbuggyµÄMPEG 1/2ÊÓÆµÎÄ¼þÎÒÃÇÍ¨¹ý½Ø»ñsig11
-(segmentation fault)£¬È»ºóÑ¸ËÙÔÙ´Î³õÊ¼»¯½âÂëÆ÷£¬´ÓÊ§°ÜµÄµØ·½¼ÌÐøµÄ·½·¨À´´¦Àí¡£ÕâÖÖ»Ö¸´¼¼Êõ»á´øÀ´ÎÞ·¨¹ÀÁ¿µÄËÙ¶ÈËðÊ§¡£</P>
+<P>MPEG1ºÍMPEG2ÓÃ±¾µØµÄ¶àÆ½Ì¨µÄ<B>libmpeg2</B>¿â½âÂë£¬ÆäÔ´´úÂë±»°üÀ¨ÔÚMPlayerÖÐ¡£¶ÔÓÚbuggyµÄMPEG 1/2ÊÓÆµÎÄ¼þÎÒÃÇ
+Í¨¹ý½Ø»ñ<CODE>Signal 11 (Segmentation fault)</CODE>£¬È»ºóÑ¸ËÙÔÙ´Î³õÊ¼»¯½âÂëÆ÷£¬´ÓÊ§°ÜµÄµØ·½¼ÌÐøµÄ·½·¨À´´¦Àí¡£ÕâÖÖ
+»Ö¸´¼¼Êõ»á´øÀ´ÎÞ·¨¹ÀÁ¿µÄËÙ¶ÈËðÊ§¡£</P>
 
 
 <H4><A NAME="ms_video1">2.2.1.6 MS Video1</A></H4>
@@ -167,7 +175,8 @@ HREF="mailto:melanson@pcisys.net">Mike Melanson</A>Ìá¹©)¡£</P>
 
 <H4><A NAME="cinepak">2.2.1.7 Cinepak CVID</A></H4>
 
-<P>MPlayerÄ¬ÈÏ½«Ê¹ÓÃ×Ô¼ºµÄ¿ªÔ´µÄ£¬¶àÆ½Ì¨µÄCinepak½âÂëÆ÷¡£ËüÖ§³ÖYUVÊä³ö£¬ËùÒÔÖ»ÒªÓ²¼þÇý¶¯ÔÊÐíËü½«Ê¹ÓÃÓ²¼þËõ·Å¡£</P>
+<P>MPlayerÄ¬ÈÏ½«Ê¹ÓÃ×Ô¼ºµÄ¿ªÔ´µÄ£¬¶àÆ½Ì¨µÄCinepak½âÂëÆ÷(ÓÉ<A
+ HREF="mailto:timf@csse.monash.edu.au">Dr. Tim Ferguson</A>Ìá¹©)¡£ËüÖ§³ÖYUVÊä³ö£¬ËùÒÔÖ»ÒªÓ²¼þÇý¶¯ÔÊÐíËü½«Ê¹ÓÃÓ²¼þËõ·Å¡£</P>
 
 
 <H4><A NAME="realvideo">2.2.1.8 RealVideo</A></H4>
@@ -183,14 +192,15 @@ MPlayerÖ§³ÖËùÓÐ°æ±¾µÄRealVideoµÄ½âÂë£º
 MPlayerµÄÅäÖÃ½Å±¾Ó¦¸Ã»áÔÚÒ»¸öÍêÈ«°²×°µÄRealPlayerµÄ±ê×¼Î»ÖÃÕÒµ½ËüµÄ¿â¡£Èç¹ûËüÃ»ÕÒµ½£¬ÓÃ<CODE>--with-reallibdir</CODE>
 Ñ¡Ïî¸æËßconfigureµ½ÄÄÀïÈ¥ÕÒ¡£</P>
 
-<P><B>×¢Òâ£º</B>RealPlayer¿âÄ¿Ç°<B>Ö»ÄÜÓÃÓÚx86Æ½Ì¨ÉÏµÄLinux£¬FreeBSD£¬NetBSDºÍCygwin¡£</B></P>
+<P><B>×¢Òâ£º</B>RealPlayer¿âÄ¿Ç°<B>Ö»ÄÜÓÃÓÚx86Æ½Ì¨ÉÏµÄLinux£¬FreeBSD£¬NetBSDºÍCygwin£¬ºÍAlphaÒÔ
+¼°PowerPC(¾­¹ýLinux/AlphaºÍLinux/PowerPC²âÊÔ)Æ½Ì¨¡£</B></P>
 
 <H4><A NAME="xvid">2.2.1.9 XViD</A></H4>
 
-<P><B>XViD</B>OpenDivX±à½âÂëÆ÷µÄ¿ª·¢·ÖÖ§¡£¹ÊÊÂ·¢ÉúÔÚMayo¹¤³Ì°ÑOpenDivX±ä³É·â±ÕÔ´ÂëµÄDivX4µÄÊ±ºò£¬ÄÇÐ©´ÓÊÂÓÚOpenDivXµÄ·ÇMayo¹¤³Ì
-µÄÈËÃÇ¸Ðµ½·ßÅ­£¬ÓÚÊÇ¿ªÊ¼ÁËXViD¡£ËùÒÔÁ½¸öÏîÄ¿ÓÐÏàÍ¬µÄÆðÔ´¡£</P>
+<P><A HREF="http://www.xvid.org/"><B>XViD</B></A>OpenDivX±à½âÂëÆ÷µÄ¿ª·¢·ÖÖ§¡£¹ÊÊÂ·¢ÉúÔÚMayo¹¤³Ì°ÑOpenDivX±ä³É·â±Õ
+Ô´ÂëµÄDivX4µÄÊ±ºò£¬ÄÇÐ©´ÓÊÂÓÚOpenDivXµÄ·ÇMayo¹¤³ÌµÄÈËÃÇ¸Ðµ½·ßÅ­£¬ÓÚÊÇ¿ªÊ¼ÁËXViD¡£ËùÒÔÁ½¸öÏîÄ¿ÓÐÏàÍ¬µÄÆðÔ´¡£</P>
 
-<H4>ÓÅµã£º</H4>
+<H4>ÓÅµã</H4>
 
 <UL>
   <LI>¿ª·ÅÔ´Âë</LI>
@@ -199,13 +209,16 @@ MPlayerµÄÅäÖÃ½Å±¾Ó¦¸Ã»áÔÚÒ»¸öÍêÈ«°²×°µÄRealPlayerµÄ±ê×¼Î»ÖÃÕÒµ½ËüµÄ¿â¡£Èç¹ûËüÃ»Õ
   <LI>²»´íµÄ±àÂëÖÊÁ¿£¬DivX4¸ü¿ìµÄËÙ¶È(±àÒëÊ±ÄãÄÜÕë¶ÔÄãµÄ»úÆ÷ÓÅ»¯Ëü)</LI>
 </UL>
 
-<H4>È±µã£º</H4>
+<H4>È±µã</H4>
 
 <UL>
-  <LI>Ä¿Ç°»¹²»ÄÜÕýÈ·µÄ<B>½âÂë</B>ËùÓÐµÄDivXÓëDivX4ÎÄ¼þ(Ã»ÎÊÌâÒòÎªlibavcodecÄÜ²¥·ÅËûÃÇ)</LI>
+  <LI>Ä¿Ç°»¹²»ÄÜÕýÈ·µÄ<B>½âÂë</B>ËùÓÐµÄDivXÓëDivX4ÎÄ¼þ(Õâ²»³ÉÎÊÌâÒòÎª<A
+   HREF="#libavcodec">libavcodec</A>ÄÜ²¥·ÅËûÃÇ)</LI>
   <LI>±àÒëÊ±Äã±ØÐëÑ¡ÔñÖ§³ÖDivX4<B>»òÕß</B>Ö§³ÖXViD</LI>
   <LI>»¹ÔÚ¿ª·¢ÖÐ</LI>
 </UL>
+
+<H4>°²×°XVID CVS</H4>
 
 <P>XViDÄ¿Ç°Ö»ÄÜ´ÓCVSÖÐµÃµ½¡£ÕâÊÇÏÂÔØºÍ°²×°µÄÖ¸Áî£º</P>
 
@@ -233,7 +246,7 @@ MPlayerµÄÅäÖÃ½Å±¾Ó¦¸Ã»áÔÚÒ»¸öÍêÈ«°²×°µÄRealPlayerµÄ±ê×¼Î»ÖÃÕÒµ½ËüµÄ¿â¡£Èç¹ûËüÃ»Õ
   <LI>Sorenson 3(fourcc <I>SVQ3</I>) - ÓÉ<B>Win32µÄQuickTime¿â</B>½âÂë¡£</LI>
 </UL>
 
-<H4>±àÒëÖ§³ÖQuickTime¿âµÄMPlayer</H4>
+<H4>±àÒëÖ§³ÖQUICKTIME¿âµÄSUPPORT</H4>
 
 <P><B>×¢Òâ£º</B>Ä¿Ç°Ö»Ö§³Ö32Î»µÄIntelÆ½Ì¨¡£</P>
 
@@ -299,8 +312,7 @@ MPlayerµÄÅäÖÃ½Å±¾Ó¦¸Ã»áÔÚÒ»¸öÍêÈ«°²×°µÄRealPlayerµÄ±ê×¼Î»ÖÃÕÒµ½ËüµÄ¿â¡£Èç¹ûËüÃ»Õ
 <H4><A NAME="vivo_audio">2.2.2.4 VIVOÒôÆµ</A></H4>
 
 <P>VIVOÎÄ¼þµÄÊ¹ÓÃµÄÒôÆµ±àÂëÈ¡¾öÓÚËüÊÇVIVO/1.0»¹ÊÇVIVO/2.0¡£VIVO/1.0ÎÄ¼þÊ¹ÓÃ<B>g.723</B>ÒôÆµ£¬¶øVIVO/2.0ÎÄ¼þÊ¹ÓÃ<B>Vivo Siren</B>ÒôÆµ¡£
-ËûÃÇÁ½¸ö¶¼Ö§³Ö¡£ÄãÄÜ´ÓMPlayerÕ¾µãÏÂÔØ<A HREF="http://www.mplayerhq.hu/MPlayer/samples/drivers32/vivog723.acm">g.723/Siren</A>µÄWin32 DLL£¬
-È»ºó°ÑËü¸´ÖÆµ½<CODE>/usr/lib/win32</CODE>Ä¿Â¼ÏÂ¡£</P>
+ÕâÁ½ÖÖÒôÆµÏÖÔÚ¶¼Ö§³Ö¡£</P>
 
 
 <H4><A NAME="realaudio">2.2.2.5 RealAudio</A></H4>

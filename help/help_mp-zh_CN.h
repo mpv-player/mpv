@@ -122,6 +122,7 @@ static char help_text[]=
 #define MSGTR_AvailableVideoCodecs "可用的视频解码器:\n"
 #define MSGTR_AvailableAudioFm "\n可用的(编译了的)音频解码器族/驱动:\n"
 #define MSGTR_AvailableVideoFm "\n可用的(编译了的)视频解码器族/驱动:\n"
+#define MSGTR_AvailableFsType "可用的全屏实现模式:\n"
 #define MSGTR_UsingRTCTiming "使用Linux的硬件RTC计时(%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "视频: 无法读取属性\n"
 #define MSGTR_NoStreamFound "找不到流媒体\n"

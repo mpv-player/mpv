@@ -189,11 +189,11 @@ section = movieplayer
   window = main
   ; ... items for main window ...
   end
-  
+
   window = sub
   ; ... items for subwindow ...
   end
-  
+
   window = menu
   ; ... items for skin menu ...
   end
@@ -230,11 +230,9 @@ end
   <tr bgcolor="#ffffcc">
     <td>这里有个例子可以把这个搞清楚。假设你有个叫<code>main.png</code>的图像用来做主窗口：
       <blockquote>
-<pre>
-    base = main, -1, -1
-</pre>
+        <code>base = main, -1, -1</code>
       </blockquote>
-      MPlayer将尝试装载<code>main</code>，<code>main.png</code>，<code>main.PNG</code>文件。<br>
+      MPlayer将尝试装载<code>main</code>，<code>main.png</code>，<code>main.PNG</code>文件。
     </td>
   </tr>
 </table>
@@ -242,14 +240,15 @@ end
 
 <h3><a name="mainwindow">D.2.1 主窗口和播放条</a></h3>
 
-<p>下面是所有能用于'<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>'和'<code>window = playbar</code>' &nbsp;.&nbsp;. '<code>end</code>'块中的项目的列表。</p>
+<p>下面是所有能用于'<code>window = main</code>' .&nbsp;.&nbsp;. '<code>end</code>'和'<code>window
+= playbar</code>' &nbsp;.&nbsp;. '<code>end</code>'块中的项目的列表。</p>
 
 <dl>
   <dt><a name="main.base"><b><code>base = image, X, Y</code></b></a></dt>
   <dd>指定用于主窗口的背景图像。窗口将显示在屏幕上的<code>X，Y</code>位置，窗口的大小与图像相同。
-    <div><em class=warn><b>注意：</b>这些参数目前对显示窗口不起作用。</em><br>
-      <em class=warn><b>警告：</b>图像中的透明区域(彩色的#FF00FF )在没有XShape扩展的X服务器上是黑色的。图像的宽度必须能被8整除。</em>
-    </div>
+    <div><em class=warn><b>注意：</b>这些参数目前对显示窗口不起作用。</em></div>
+    <div><em class=warn><b>警告：</b>图像中的透明区域(彩色的#FF00FF )在没有XShape扩展的X服务器上是
+黑色的。图像的宽度必须能被8整除。</em>    </div>
   </dd>
 
   <dt><a name="main.button"><b><code>button = image, X, Y, width, height, message</code></b></a></dt>
@@ -269,10 +268,10 @@ end
 
   <dt><a name="main.decoration"><b><code>decoration = enable|disable</code></b></a></dt>
   <dd>允许或禁止window manager修饰主窗口。缺省设定是<b>禁止</b>。<br><br>
-    <em class=warn><b>注意：</b>这对显示窗口无效，它们不需要。</em><br>
+    <div><em class="warn"><b>注意：</b>这对显示窗口无效，它们不需要。</em><div>
   </dd>
 
-  <dt><a name="main.hpotmeter"><b><code>hpotmeter = button, bwidth, bheight, phases, numphases, default, 
+  <dt><a name="main.hpotmeter"><b><code>hpotmeter = button, bwidth, bheight, phases, numphases, default,
   X, Y, width, height, message</code><br><code>vpotmeter = button, bwidth, bheight, phases, numphases, default,
   X, Y, width, height, message</code></b></a></dt>
   <dd>在<code>X</code>，<code>Y</code>位置放置一个大小为<code>width</code>*<code>height</code>的水平滑动条。
@@ -305,7 +304,7 @@ end
       <li><code>message</code> -- 当<code>hpotmeter</code>的值改变时产生的消息</li>
     </ul>
 
-  </dd>	
+  </dd>
 
   <dt><a name="main.potmeter"><b><code>potmeter = phases, numphases, default, X, Y, width, height, message</code></b></a></dt>
   <dd>没有按钮的<code>hpotmeter</code>。(我猜它是用来旋转，但它只对水平拖拽作出反应)。
@@ -378,9 +377,9 @@ text只能是无格式文本(<code>$x</code>之类的变量不起作用)而且必须封在一对双引号中(
       <tr><td align=center><kbd>$x</kbd></td>
         <td>电影宽度</td></tr>
       <tr><td align=center><kbd>$y</kbd></td>
-        <td>电影高度</td></tr> 
+        <td>电影高度</td></tr>
       <tr><td align=center><kbd>$C</kbd></td>
-        <td>使用的编解码器的名字</td></tr> 
+        <td>使用的编解码器的名字</td></tr>
     </table>
 
     <em class="note"><b>注意：</b><kbd>$a</kbd>，<kbd>$T</kbd>，<kbd>$p</kbd>，<kbd>$s</kbd>和<kbd>$e</kbd>变量都返回应该被显示作为特殊的符号
@@ -545,7 +544,7 @@ image = font.png
     <dd>搜索到制定位置(能被滑动条使用；使用与滑动条相关的值( 0-100% ))。</dd>
   </dl>
 </blockquote>
-  
+
 
 <h3>视频控制：</h3>
 <blockquote>
