@@ -41,7 +41,7 @@
 
 #ifdef STREAMING
 	{"user", &network_username, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"pass", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"passwd", &network_password, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #else
 	{"user", "MPlayer was compiled WITHOUT streaming(network) support\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
