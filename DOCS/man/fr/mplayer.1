@@ -3014,7 +3014,7 @@ l'option subdirs est définie.
 .PD 1
 .
 .TP
-.B pnm (voir aussi pnm, pgm et ppm)
+.B pnm (voir aussi les pages de man de pnm, pgm et ppm)
 Écrit, dans le répertoire courant, chaque trame dans un fichier PNM.
 Le nom de chaque fichier contient le numéro de trame, précédé au besoin par
 des zéros.
@@ -5587,15 +5587,41 @@ toujours utiliser le nombre maximum de trames B (par défaut)
 .RE
 .
 .TP
-.B vpass=<1\-2>
-Active le mode 2passes interne, ne le spécifiez que si vous désirez utiliser
-l'encodage deux passes\ :
+.B vpass=<1\-3>
+Active le mode deux (ou trois) passes interne, ne le spécifiez que si
+vous désirez utiliser l'encodage deux (ou trois) passes\ :
 .PD 0
 .RSs
 .IPs 1
-première passe
+première passe (voir aussi turbo)
 .IPs 2
 seconde passe
+.IPs 3
+Nième passe (seconde et troisième passes de l'encodage trois passes)
+.RE
+.RS
+Voici comment cela fonctionne, et comment l'utiliser\ :
+.br
+La première passes (vpass=1) écrit le fichier de statistiques.
+Vous devriez désactiver des options gourmandes en temps processeur,
+comme le fait le mode "turbo".
+.br
+En mode deux passes, la seconde passe (vpass=2) se base sur le fichier de
+stats pour allouer le bon nombre de bits aux trames (ratecontrol).
+.b
+En mode trois passes, la seconde passe (vpass=3, non ce n'est pas une
+erreur ;-) ) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
+par dessus.
+(Peut-être que vous devriez sauver le fichier divx2pass.log avant si
+MEncoder peut être interrompu dans son cours).
+Vous devriez utiliser toutes les options d'encodage, à l'exception de celles
+vraiment très gourmandes, comme "qns".
+.br
+La troisième passe (vpass=3) fait la même chose que la seconde, à la
+différence près qu'elle dispose des stats de la deuxième passe pour mieux
+travailler.
+Vous pouvez utiliser toutes les options d'encodage, même les plus
+gourmandes.
 .RE
 .PD 1
 .sp 1
@@ -6381,10 +6407,13 @@ réduction du  bruit, 0 pour désactivé
 .
 .TP
 .B qns=<0\-3>
-Quantificateur du modèle de bruit, réduit les artefacts, de plus grandes
-valeurs sont plus lentes mais donnent une meilleur qualité.
+Quantification d'après un modèle de bruit.
+Au lieu de baser sa quantification pour avoir l'image la plus fidèle d'un
+point de vue PSNR, la quantification sera faite de façon à ce que le bruit
+(souvent le "ringing") sera masqué par des données de fréquence similaire
+dans l'image.
 Ceci peut et doit être utilisé avec la quantisation par treillis, dans ce
-cas la quantisation par treillis (optimale pour un poids constant) sera
+cas la quantisation par trellis (optimale pour un poids constant) sera
 utilisée comme point de départ pour la recherche itérative.
 .PD 0
 .RSs
@@ -6976,7 +7005,8 @@ Affecte le gradient maximum autorisé entre deux blocs adjacents
 .TP
 .B cabac\ \ \ 
 Utilise CABAC (codage de l'information adaptée en fonction du contexte\ :
-Context-Adaptive Binary Arithmetic Coding)
+Context-Adaptive Binary Arithmetic Coding).
+Ralentit l'encodage mais économise 10-15% des bits.
 .
 .TP
 .B cabacidc=<value>
@@ -7067,7 +7097,10 @@ progressive.
 .TP
 .B fullinter
 Utilise tous les types de macro-blocs inter-trames (i16x16, i4x4, p16x16-4x4)
-(par défaut\ : i16x16, i4x4, p16x16-8x8).
+L'idée est de trouver le type et la taille des macro-blocs qui décrit le
+mieux une certaine région de l'image.
+Typiquement très efficace pour les dessins animés, qui contiennent souvent
+de grands à-plats de couleurs (par défaut\ : i16x16, i4x4, p16x16-8x8).
 .
 .TP
 .B log=<-1\-3>
