@@ -2723,81 +2723,81 @@ quality \-500\-0: minõségkorrektúra százalékban
 .IPs vrc_init_cplx=<0\-1000>
 induló komplexitás (1-es menet)
 .IPs vqsquish=<0\-1>
-specify how to keep the quantizer between qmin and qmax (pass\ 1/\:2):
+itt adható meg hogy hogyan maradjon a quantizer a qmin és qmax között
+(1/\:2-es menet):
 .RSss
-0: use cliping
+0: cliping használata
 .br
-1: use a nice differentiable function (default)
+1: differenciálható funkció használata (alap)
 .REss
 .IPs vlelim=<-1000\-1000>
-single coefficient elimination threshold for luminance.
-Negative values will also consider the dc coefficient (should be at least -4
-or lower for encoding
-at quant=1):
+single coefficient elimination threshold for luminance. (aha..)
+A negatív értékek figyelembe veszik a dc-t is (quant=1 enkódoláshoz -4 vagy
+annál alacsonyabbnak kell lennie):
 .RSss
-0: disabled (default)
+0: kikapcsolva (alap)
 .br
--4 (JVT recommendation)
+-4 (JVT ajánlás)
 .REss
 .IPs vcelim=<-1000\-1000>
 single coefficient elimination threshold for chrominance.
-Negative values will also consider the dc coefficient (should be at least -4
-or lower for encoding at quant=1):
+A negatív értékek figyelembe veszik a dc-t is (quant=1 enkódoláshoz -4 vagy
+annál alacsonyabbnak kell lennie):
 .RSss
-0 disabled (default)
+0: kikapcsolva (alap)
 .br
-7 (JVT recommendation)
+7 (JVT ajánlás)
 .REss
 .IPs vstrict=<-1\-1>
-(strict) standard compliance.
+(szigorú) megfeleltetés a szabványoknak.
 .RSss
-0: disabled (default)
+0: kikapcsolva (alap)
 .br
-1: only recommended if you want to feed the output into the mpeg4
-reference decoder
+1: csak akkor ajánlott ha a kimenetet mpeg4 referencia dekóderrel akarod
+dekódolni
 .br
--1: allows non-standard YV12 huffyuv encoding (20% smaller files, but
-can't be played back by the official huffyuv codec)
+-1: nem-szabványos YV12 huffyuv enkódolás engedélyezése (20%-kal kisebb
+file-ok, viszont a hivatalos huffyuv codec nem játssza le)
 .REss
 .IPs vdpart
-data partitioning.
-Adds 2 byte per video packet, improves error-resistance when transfering over
-unreliable channels (eg.\& streaming over the internet)
+adatpartícionálás.
+2 byte-ot ad a video csomagokhoz, javítva a hibatûrést megbízhatatlan
+csatornákon történõ átvitelnél (pl. internet)
 .IPs vpsize=<0\-10000>
-video packet size, improves error-resistance (see \-vdpart option too):
+video csomag mérete, jobb hibatûrés (lásd még \-vdpart):
 .RSss
-0: disabled (default)
+0: kikapcsolva (alap)
 .br
-100-1000: good choice
+100-1000: jó választás
 .REss
 .IPs gray
-grayscale only encoding (faster) (default: disabled)
+fekete-fehér enkódolás (gyors) (alap: kikapcsolva)
 .IPs vfdct=<0\-10>
-dct algorithm:
+dct algoritmus:
 .RSss
-0: automatically select a good one (default)
+0: automatikus kiválasztás (alap)
 .br
-1: fast integer
+1: gyors, egész alapú
 .br
-2: accurate integer
+2: pontos, egész alapú
 .br
 3: mmx
 .br
 4: mlib
 .REss
 .IPs idct=<0\-99>
-idct algorithm.
-Note: all these IDCTs do pass the IEEE1180 tests afaik:
+idct algoritmus.
+Megjegyzés, tudtommal mindezek megfelelnek az IEEE1180 teszteknek:
 .RSss
-0: automatically select a good one (default)
+0: automatikus kiválasztás (alap)
 .br
-1: jpeg reference integer
+1: jpeg referencia, egész alapú
 .br
 2: simple
 .br
 3: simplemmx
 .br
-4: libmpeg2mmx (inaccurate, DONT USE for encoding with keyint >100)
+4: libmpeg2mmx (nem pontos, keyint 100-nál nagyobb értékeivel NE használd)
 .br
 5: ps2
 .br
@@ -2806,36 +2806,37 @@ Note: all these IDCTs do pass the IEEE1180 tests afaik:
 7: arm
 .REss
 .IPs lumi_mask=<0.0\-1.0>
-luminance masking.
-Warning: be careful, too large values can cause disasterous things.
-Warning2: large values might look good on some monitors but may look horrible
-on other monitors:
+luminance maszkolás.
+Vigyázat: magas értékek katasztrófális dolgokat eredményezhetnek.
+Vigyázat2: magas értékek egyes monitorokon jól nézhetnek ki, míg másokon
+szörnyûen:
 .RSss
-0.0: disabled (default)
+0.0: kikapcsolva (alap)
 .br
-0.0\-0.3: sane range
+0.0\-0.3: ésszerû értékek
 .REss
 .IPs dark_mask=<0.0\-1.0>
+sötétség maszkolása.
 darkness masking.
-Warning: be careful, too large values can cause disasterous things.
-Warning2: large values might look good on some monitors but may look horrible
-on other monitors / TV / TFT:
+Vigyázat: magas értékek katasztrófális dolgokat eredményezhetnek.
+Vigyázat2: magas értékek egyes monitorokon jól nézhetnek ki, míg másokon
+szörnyûen:
 .RSss
-0.0: disabled (default)
+0.0: kikapcsolva (alap)
 .br
-0.0\-0.3: sane range
+0.0\-0.3: ésszerû értékek
 .REss
 .IPs tcplx_mask=<0.0\-1.0>
-temporal complexity masking (default: 0.0 (disabled))
+temporális komplexitás maszkolása (alap: 0.0 (kikapcsolva))
 .IPs scplx_mask=<0.0\-1.0>
-spatial complexity masking.
-Larger values help against blockiness, if no deblocking filter is used for
-decoding.
-Crop any black borders to get better quality:
+spatial komplexitás maszkolása.
+A magasabb értékek a kockásodás ellen segíthetnek, ha a dekodolásnál nem
+lesz jelen egy deblocking szûrõ.
+A fekete kereteket vágd le a jobb minõséghez:
 .RSss
-0.0: disabled (default)
+0.0: kikapcsolva (alap)
 .br
-0.0\-0.5: sane range
+0.0\-0.5: ésszerû értékek
 .REss
 .IPs naq\ \ 
 Normalize adaptive quantization (experimental).
@@ -2960,171 +2961,175 @@ use MPEG quantizers instead of H.263.
 .
 .TP
 .B \-noskip
-Do not skip frames.
+Ne ugorjon át képkockákat.
 .TP
-.B \-o <filename>
-Outputs to the given filename, instead of the default 'test.avi'.
+.B \-o <filenév>
+Megadott nevû file használata kimenetként az alapértelmezett 'test.avi'
+helyett.
 .TP
-.B \-oac <codec name>
-Encode with the given audio codec.
-Use \-ovc help to get a list of available codecs.
-(no default set)
+.B \-oac <codec neve>
+Enkódolás a megadott audio codec-kel.
+A codec-ek listája \-ovc help opcióval kérhetõ le (nincs alapértelmezés).
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "-oac copy"
-no encoding, just streamcopy
+nincs enkódolás, csak stream másolás
 .IPs "-oac pcm"
-encode to uncompressed PCM
+enkódolás tömörítetlen PCM-be
 .IPs "-oac mp3lame"
-encode to MP3 (using Lame)
+enkódolás MP3-ba (Lame használatával)
 .RE
 .PD 1
 .
 .TP
-.B \-of <format> (BETA CODE!)
-Encode to the specified format.
-Use \-of help to get a list of available formats.
+.B \-of <formátum> (BÉTA KÓD!)
+Enkódolás a megadott formátumba.
+A formátumok listája az \-of help opcióval kérhetõ le.
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "-of avi"
-encode to avi (default)
+enkódolás AVI-ba (alap)
 .IPs "-of mpeg"
-encode to mpeg
+enkódolás MPEG-be
 .RE
 .PD 1
 .
 .TP
 .B \-ofps <fps>
-The output file will have different frame/\:sec than the source.
-You MUST set it for variable fps (asf, some mov) and progressive
-(29.97fps telecined mpeg) files.
+A kimeneti file-nak a forrástól eltérõ fps-re beállítása. Be KELL állítani
+változó fps-û (asf, néhány mov), valamint progresszív (29.97fps telecine
+mpeg) file-oknál.
 .TP
-.B \-ovc <codec name>
-Encode with the given video codec.
-Use \-ovc help to get a list of available codecs.
-(no default set)
+.B \-ovc <codec neve>
+Enkódolás a megadott video codec-kel.
+A codec-ek listája az \-ovc help paranccsal kérhetõ le
+(nincs alapértelmezés).
 
-.I EXAMPLE:
+.I PÉLDA:
 .PD 0
 .RSs
 .IPs "\-ovc copy"
-no encoding, just streamcopy
+nincs enkódolás, csak a stream másolása
 .IPs "\-ovc divx4"
-encode to DivX4/\:DivX5
+enkódolás DivX4/\:DivX5-be
 .IPs "\-ovc rawrgb"
-encode to uncompressed RGB24
+enkódolás tömörítetlen RGB24-be
 .IPs "\-ovc lavc"
-encode with a libavcodec codecs
+enkódolás libavcodec codec-ekkel
 .RE
 .PD 1
 .
 .TP
-.B \-passlogfile <filename>
-When encoding in 2pass mode, MEncoder dumps first pass' informations
-to the given file instead of the default divx2pass.log.
+.B \-passlogfile <filenév>
+2 menetes enkódolás esetén a MEncoder az elsõ menet információit
+alapban a divx2pass.log file-ba írja, itt ez a filenév megváltoztatható.
 .TP
-.B \-skiplimit <value>
-Maximal skipable frames after non-skipped one
-(-noskiplimit for unlimited number).
+.B \-skiplimit <érték>
+Egy nem átugrott képkocka utáni átugorható képkockák száma
+(a -noskiplimit opció = végtelen).
 .TP
 .B \-v, \-\-verbose
-Increment verbose level (more \-v means more verbosity).
+Bõbeszédûség szintjének növelése (a több \-v több információt jelent).
 
 .PD 0
 .RSs
 .IPs 0
-only some informal output (default)
+kevés kimenet (alap)
 .IPs 1
-some basic debug infos, avi header, function values (init debug)
+alap hibakeresõ információk, avi fejléc, funkciók értékei (init debug)
 .IPs 2
-print avi indexes, chunk inputs, more debug infos (player debug)
+avi index-ek, chunk bemenetek, és még több hibakeresõ info kiírása
+(lejátszás debug-olása)
 .IPs 3
-prints everything related to input parsers (parser debug)
+minden, input parserrel kapcsolatos info kiírása (parser debug)
 .RE
 .PD 1
 .
 .TP
-.B \-vobsubout <basename>
-Specify the basename for the output .idx and .sub files.
-This turns off subtitle rendering in the encoded movie and diverts it to
-Vobsub subtitle files.
+.B \-vobsubout <kiterjesztés_nélküli_név>
+A kimeneti .idx és .sub file-ok nevének megadása.
+Kikapcsolja a feliratok megjelenítését, és átirányítja õket a
+Vobsub felirat file-okba.
 .TP
 .B \-vobsuboutindex <index>
-Specify the index of the subtitles in the output files.
-(default: 0)
+A kimeneti file-okban lévõ feliratok indexének megadása.
+(alap: 0)
 .TP
-.B \-vobsuboutid <langid>
-Specify the language two letter code for the subtitles.
-This overrides what is read from the DVD or the .ifo file.
+.B \-vobsuboutid <nyelv_id>
+A nyelv 2 betûs kódjának megadása.
+Felülbírálja a DVD-rõl illetve az .ifo file-ból olvasott értéket.
 .TP
-.B \-xvidencopts <option1:option2:...>
-If encoding to XviD, you can specify its parameters here.
+.B \-xvidencopts <opció1:opció2:...>
+Amennyiben XviD-be történik az enkódolás, annak paramétereit itt lehet
+megadni.
 .br
-There's three modes available: constant bitrate (CBR), fixed quantizer and
-2pass.
+Három mód választható: konstans bitráta (CBR), fix quantizer, és 2 menetes
+mód.
 .br
-Available options are:
+A rendelkezésre álló opciók:
 .
 .RSs
 .IPs pass=<1|2>
-specify the pass in 2pass mode
-.IPs bitrate=<value>
-sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
-if >16000
-(CBR or 2pass mode, default=687 kbits/s)
+menet számának megadása
+.IPs bitrate=<érték>
+bitráta megadása, kbit/\:másodperc a mértékegység 16000-nál kisebb
+érték esetén, míg annál nagyobb értéknél bit/\:másodperc
+(CBR vagy 2pass mode, alap=687 kbits/mp)
 .IPs fixed_quant=<1\-31>
-switch to fixed quantizer mode and specify the quantizer to be used
+fix quantizer-es mód kiválasztása, egyben a használandó quantizer
+megadása
 .IPs me_quality=<0\-6>
-specify the motion detection quality (default=4)
+mozgásdetektálás minõsége (alap=4)
 .IPs 4mv
-use 4 motion vectors per macro-block, might give better compression at the
-cost of a slower encoding (default=off)
-.IPs rc_reaction_delay_factor=<value>
-specify how fast the rate control reacts, lower values are faster
-.IPs rc_averaging_period=<value>
-period to reach the required average
-.IPs rc_buffer=<value>
-size of the rate control buffer
+4 mozgásvektor használata makroblokkonként, jobb minõséget ad a lassabb
+enkódolás árán (alap=kikapcsolva)
+.IPs rc_reaction_delay_factor=<érték>
+itt adható meg hogy milyen gyors legyen a ráta kontroll reagálása, az
+alacsonyabb értékek gyorsabbat jelentenek
+.IPs rc_averaging_period=<érték>
+a szükséges átlag eléréséhez kellõ idõtartam
+.IPs rc_buffer=<érték>
+a ráta kontroll buffer mérete
 .IPs quant_range=<1\-31>\-<1\-31>[/<1\-31>\-<1\-31>]
-min & max quantizer for all frames (default=2\-31, CBR mode)
+minimum és maximum quantizer az összes képkockára (alap=2\-31, CBR mód)
 .br
-min & max quantizer for I/P frames (default=2\-31/2\-31, 2pass mode)
-.IPs min_key_interval=<value>
-minimum interval between key frames (default=0, 2pass only)
-.IPs max_key_interval=<value>
-maximum interval between key frames (default=10*fps)
+minimum és maximum quantizer az I/P képkockákra (alap=2\-31/2\-31, 2
+menetes mód)
+.IPs min_key_interval=<érték>
+minimális intervallum 2 key képkocka között (alap=0, csak 2 menetes mód)
+.IPs max_key_interval=<érték>
+minimális intervallum 2 key képkocka között (alap=10*fps)
 .IPs mpeg_quant
-use MPEG quantizers instead of H.263 (default=off)
+MPEG quantizer-ek használata H.263 helyett (alap=kikapcsolva)
 .IPs mod_quant
-decide whether to use MPEG or H.263 quantizers on a frame-by-frame basis.
-(default=off, 2pass mode only)
+azt határozza meg, hogy MPEG vagy H.263 quantizer legyen használva.
+(alap=kikapcsolva, csak 2 menetes mód)
 .IPs lumi_mask
-use a lumimasking algorithm (default=off, seems buggy)
+lumimasking algoritmus használata (alap=kikapcsolva, bugos)
 .IPs hintedme
-save Motion Estimation vectors to a file during the first pass and reuse this
-file during the second (default=off, 2pass mode only, seems buggy)
+az elsõ menetben az ME vektorok elmentése egy file-ba, majd a második menet
+során ezen file felhasználása (alap=kikapcsolva, bugos)
 .IPs hintfile
-specify the temporary file to be used by the 'hintedme' option
-(default= \./xvid_hint_me.dat, 2pass mode only)
+az elõbbi opcióhoz tartozó file neve (alap= \./xvid_hint_me.dat)
 .IPs debug
-save per-frame statistics in xvid.dbg (default=off)
+képkockánkénti statisztika kimentése az xvid.dbg file-ba (alap=kikapcsolva)
 .br
-this is *not* the 2pass control file
+NEM a 2. menet file-ja!
 .IPs keyframe_boost=<0\-1000>
-(default=0, 2pass mode only)
+(alap=0, csak 2 menetes módban)
 .IPs kfthreshold=<value>
-(default=10, 2pass mode only)
+(alap=10, csak 2 menetes módban)
 .IPs kfreduction=<0\-100>
-(default=30, 2pass mode only)
+(alap=30, csak 2 menetes módban)
 .RE
 
 
 .\" --------------------------------------------------------------------------
-.\" Keyboard control
+.\" Irányítás billentyûzetrõl
 .\" --------------------------------------------------------------------------
 .
 .SH "KEYBOARD CONTROL"
