@@ -46,11 +46,11 @@ LIBVO_EXTERN (dxr3)
 rte_context *mp1e_context = NULL;
 rte_codec *mp1e_codec = NULL;
 rte_buffer mp1e_buffer;
+#endif
 
 /* Color buffer data used with libmp1e */
 static unsigned char *picture_data[3];
 static unsigned int picture_linesize[3];
-#endif
 
 /* Resolutions and positions */
 static int v_width, v_height;
