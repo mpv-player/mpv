@@ -76,6 +76,7 @@ typedef struct {
     unsigned char* tkdata;
     int stdata_len;  // stream data
     unsigned char* stdata;
+    //
     int samples_size;
     mov_sample_t* samples;
     int chunks_size;
@@ -347,18 +348,15 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		    off_t len=stream_read_dword(demuxer->stream);
 		    unsigned int fourcc=stream_read_dword_le(demuxer->stream);
 		    if(len<8) break; // error
-		    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*s desc #%d: %.4s",level,"",i,&fourcc);
+		    mp_msg(MSGT_DEMUX,MSGL_V,"MOV: %*s desc #%d: %.4s  (%d bytes)\n",level,"",i,&fourcc,len-16);
 		    if(!i){
 			trak->fourcc=fourcc;
-			// read codec data
+			// read type specific (audio/video/time/text etc) header
+			// NOTE: trak type is not yet known at this point :(((
 			trak->stdata_len=len-8;
 			trak->stdata=malloc(trak->stdata_len);
 			stream_read(demuxer->stream,trak->stdata,trak->stdata_len);
-			if(trak->type==MOV_TRAK_VIDEO && trak->stdata_len>43){
-			    mp_msg(MSGT_DEMUX,MSGL_V," '%.*s'",trak->stdata_len-43,trak->stdata+43);
-			}
 		    }
-		    mp_msg(MSGT_DEMUX,MSGL_V,"\n");
 		    if(fourcc!=trak->fourcc && i)
 			mp_msg(MSGT_DEMUX,MSGL_WARN,MSGTR_MOVvariableFourCC);
 		    if(!stream_seek(demuxer->stream,pos+len)) break;
@@ -549,6 +547,22 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_TRAK_AUDIO: {
 		sh_audio_t* sh=new_sh_audio(demuxer,priv->track_db);
 		sh->format=trak->fourcc;
+
+//  stdata[]:
+//	8   short	version
+//	10  short	revision
+//	12  int		vendor_id
+//	16  short	channels
+//	18  short	samplesize
+//	20  short	compression_id
+//	22  short	packet_size (==0)
+//	24  int		sample_rate
+//    ---- qt3.0+
+//	28  int		samples_per_packet
+//	32  int		bytes_per_packet
+//	36  int		bytes_per_frame
+//	40  int		bytes_per_sample
+
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Audio bits: %d  chans: %d\n",trak->stdata[19],trak->stdata[17]);
 		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s\n",&trak->fourcc);
 #if 0
@@ -578,20 +592,44 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 	    case MOV_TRAK_VIDEO: {
 		int i, entry;
 		int flag, start, count_flag, end, palette_count;
-		int hdr_ptr = 43+33;  // the byte just after depth
+		int hdr_ptr = 76;  // the byte just after depth
 		unsigned char *palette_map;
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
-		int depth = trak->stdata[43+32]; /* requested by Mike Melanson for Apple RLE decoder -- alex */
+		int depth = trak->stdata[75]|(trak->stdata[74]<<8);
 		sh->format=trak->fourcc;
+
+//  stdata[]:
+//	8   short	version
+//	10  short	revision
+//	12  int		vendor_id
+//	16  int		temporal_quality
+//	20  int		spatial_quality
+//	24  short	width
+//	26  short	height
+//	28  int		h_dpi
+//	32  int		v_dpi
+//	36  int		0
+//	40  short	frames_per_sample
+//	42  char[32]	compressor_name
+//	74  short	depth
+//	76  short	color_table_id
+
 		if(!sh->fps) sh->fps=trak->timescale;
 		sh->frametime=1.0f/sh->fps;
+#if 0
 		sh->disp_w=trak->tkdata[77]|(trak->tkdata[76]<<8);
 		sh->disp_h=trak->tkdata[81]|(trak->tkdata[80]<<8);
+#else
+		sh->disp_w=trak->stdata[25]|(trak->stdata[24]<<8);
+		sh->disp_h=trak->stdata[27]|(trak->stdata[26]<<8);
+#endif		
+
+		if(depth&(~15)) printf("*** depht = 0x%X\n",depth);
 
 		// palettized?
-		if ((depth == 2) || (depth == 4) || (depth == 8) ||
-		  (depth == 34) || (depth == 36) || (depth == 40))
-		  palette_count = (1 << (depth & 0x0F));
+		depth&=31; // flag 32 means grayscale
+		if ((depth == 2) || (depth == 4) || (depth == 8))
+		  palette_count = (1 << depth);
 		else
 		  palette_count = 0;
 
@@ -655,8 +693,12 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		sh->bih->biCompression=trak->fourcc;
 		sh->bih->biSizeImage=sh->bih->biWidth*sh->bih->biHeight;
 
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Image size: %d x %d (%dbits)\n",sh->disp_w,sh->disp_h,sh->bih->biBitCount);
-		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s  Codec: '%.*s'\n",&trak->fourcc,trak->stdata_len-43,trak->stdata+43);
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Image size: %d x %d (%d bpp)\n",sh->disp_w,sh->disp_h,sh->bih->biBitCount);
+		if(trak->tkdata_len>81)
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Display size: %d x %d\n",
+		    trak->tkdata[77]|(trak->tkdata[76]<<8),
+		    trak->tkdata[81]|(trak->tkdata[80]<<8));
+		mp_msg(MSGT_DEMUX, MSGL_INFO, "Fourcc: %.4s  Codec: '%.*s'\n",&trak->fourcc,trak->stdata[42]&31,trak->stdata+43);
 		
 		if(demuxer->video->id==-1 || demuxer->video->id==priv->track_db){
 		    // (auto)selected video track:
