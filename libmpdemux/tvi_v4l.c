@@ -26,6 +26,10 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/time.h>
+
+/* Necessary to prevent collisions between <linux/time.h> and <sys/time.h> when V4L2 is installed. */
+#define _LINUX_TIME_H
+
 #include <linux/videodev.h>
 #include <unistd.h>
 #include <sys/mman.h>
@@ -404,6 +408,7 @@ static void init_v4l_audio(priv_t *priv)
     }
 }
 
+#ifndef __LINUX_VIDEODEV2_H
 struct v4l2_capability
 {
         __u8    driver[16];     /* i.e. "bttv" */
@@ -415,6 +420,7 @@ struct v4l2_capability
 };
 
 #define VIDIOC_QUERYCAP         _IOR  ('V',  0, struct v4l2_capability)
+#endif
 
 static int init(priv_t *priv)
 {
