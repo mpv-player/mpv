@@ -39,7 +39,6 @@ static int image_width;
 static int image_height;
 static int image_format;
 static uint8_t *image_data=NULL;
-static unsigned int scale_srcW = 0, scale_srcH = 0;
 
 static int reverse_map = 0;
 static unsigned char framenum = 0;
@@ -49,52 +48,36 @@ static int target_fps = 0;
 
 GifFileType *newgif=NULL;
 
-/*
- * TODO
- * OSD!!!
- */
-
 static uint32_t config
 	(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, 
 		uint32_t fullscreen, char *title, uint32_t format, const vo_tune_info_t *info) {
     char filename[] = "out.gif";
     ColorMapObject *Cmap;
+#ifdef HAVE_GIF_4
     char LB[] = {
 	'N','E','T','S',
 	'C','A','P','E',
 	'2','.','0' };
     char LB2[] = { 1, 0x00, 0x00 };
+#endif
 
     if (target_fps == 0) target_fps = 5;
     gif_frameskip = (vo_fps + 0.25) / target_fps;
     gif_framedelay = 100 / target_fps;
     
-    if ((width != d_width) || (height != d_height)) {
-	    image_width = (d_width + 7) & ~7;
-	    image_height = d_height;
-	    scale_srcW = width;
-	    scale_srcH = height;
-	    SwScale_Init();
-    } else {
-	    image_width = width;
-	    image_height = height;
-    }
+    image_width = width;
+    image_height = height;
     image_format = format;
 
     Cmap = MakeMapObject(256, NULL);
 
     switch(format) {
-	case IMGFMT_BGR32:
 	case IMGFMT_BGR24:
 	     reverse_map = 1;
 	break;     
-	case IMGFMT_RGB32:
 	case IMGFMT_RGB24:
 	break;     
-	case IMGFMT_IYUV:
-	case IMGFMT_I420:
 	case IMGFMT_YV12:
-	     reverse_map = 1;
 	     yuv2rgb_init(24, MODE_RGB);
 	     image_data = malloc(image_width*image_height*3);
 	break;
@@ -105,7 +88,15 @@ static uint32_t config
     if (vo_config_count > 0)
         return 0;
     
+    // this line causes crashes in certain earlier versions of libungif.
+    // i don't know exactly which, but certainly all those before v4.
+    // if you have problems, you need to upgrade your gif library.
+#ifdef HAVE_GIF_4
     EGifSetGifVersion("89a");
+#else
+    fprintf(stderr, "vo_gif89a: Your version of libgif/libungif needs to be upgraded.\n");
+    fprintf(stderr, "vo_gif89a: Some functionality has been disabled.\n");
+#endif
     newgif = EGifOpenFileName(filename, 0);
     if (newgif == NULL)
     {
@@ -113,8 +104,12 @@ static uint32_t config
 	    return(1);
     }
     EGifPutScreenDesc(newgif, image_width, image_height, 256, 0, Cmap);
+#ifdef HAVE_GIF_4
+    // version 3 of libgif/libungif does not support multiple control blocks.
+    // for this version, looping will be disabled.
     EGifPutExtensionFirst(newgif, 0xFF, 11, LB);
     EGifPutExtensionLast(newgif, 0, 3, LB2);
+#endif
     
     return 0;
 }
@@ -134,12 +129,6 @@ static uint32_t draw_frame(uint8_t * src[])
 
   if ((framenum++ % gif_frameskip)) return(0);
   
-  if ((image_format == IMGFMT_BGR32) || (image_format == IMGFMT_RGB32))
-  {
-    rgb32to24(src[0], image_data, image_width * image_height * 4);
-    src[0] = image_data;
-  }
-
   Cmap = MakeMapObject(256, NULL);
   use_data = (uint8_t *)malloc(image_width * image_height);
   if (gif_reduce(image_width, image_height, src[0], use_data, Colors)) return(0);
@@ -170,8 +159,18 @@ static uint32_t draw_frame(uint8_t * src[])
   return (0);
 }
 
+#ifdef USE_OSD
+static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
+{
+  vo_draw_alpha_rgb24(w, h, src, srca, stride, image_data + 3 * (y0 * image_width + x0), 3 * image_width);
+}
+#endif
+
 static void draw_osd(void)
 {
+#ifdef USE_OSD
+  vo_draw_text(image_width, image_height, draw_alpha);
+#endif
 }
 
 static void flip_page (void)
@@ -182,7 +181,7 @@ static void flip_page (void)
   int z;
   char CB[] = { (char)(gif_framedelay >> 8), (char)(gif_framedelay & 0xff), 0, 0};
   
-  if ((image_format == IMGFMT_YV12) || (image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420)) {
+  if (image_format == IMGFMT_YV12) {
 
     if ((framenum++ % gif_frameskip)) return;
 
@@ -217,26 +216,8 @@ static void flip_page (void)
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
-  /* hack: swap planes for I420 ;) -- alex */
-  if ((image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420))
-  {
-    uint8_t *src_i420[3];
-    
-    src_i420[0] = src[0];
-    src_i420[1] = src[2];
-    src_i420[2] = src[1];
-    src = src_i420;
-  }
-
-  if (scale_srcW) {
-    uint8_t *dst[3] = {image_data, NULL, NULL};
-    SwScale_YV12slice(src,stride,y,h,
-		      dst, image_width*3, 24,
-		      scale_srcW, scale_srcH, image_width, image_height);
-  } else {
-    uint8_t *dst = image_data + (image_width * y + x) * 3;
-    yuv2rgb(dst,src[0],src[1],src[2],w,h,image_width*3,stride[0],stride[1]);
-  }
+  uint8_t *dst = image_data + (image_width * y + x) * 3;
+  yuv2rgb(dst,src[0],src[1],src[2],w,h,image_width*3,stride[0],stride[1]);
   return 0;
 }
 
@@ -244,14 +225,10 @@ static uint32_t
 query_format(uint32_t format)
 {
     switch(format){
-    case IMGFMT_IYUV:
-    case IMGFMT_I420:
     case IMGFMT_YV12:
-    case IMGFMT_RGB|32:
-    case IMGFMT_BGR|32:
     case IMGFMT_RGB|24:
     case IMGFMT_BGR|24:
-        return 1 | VFCAP_SWSCALE | VFCAP_TIMER | VFCAP_ACCEPT_STRIDE;
+        return 1 | VFCAP_TIMER | VFCAP_ACCEPT_STRIDE;
     }
     return 0;
 }
