@@ -76,7 +76,7 @@ struct config ovc_conf[]={
 	"   libdv    - DV encoding using libdv v0.9.5\n"
 #endif
 #ifdef HAVE_XVID
-	"   xvid\n"
+	"   xvid     - xvid encoding\n"
 #endif
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
