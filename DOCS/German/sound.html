@@ -15,7 +15,7 @@ zur Zeit diese Treiber:</P>
 <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>oss</TD><TD>&nbsp;&nbsp;</TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>OSS (ioctl) Treiber</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sdl</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SDL Treiber (unterstützt Up-/Downsampling, <B>ESD</B>, <B>ARTS</B> usw.)</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa5</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA 0.5 Treiber</TD></TR>
-<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa9</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA 0.9 Treiber (fehlerhaft, verwende OSS Emulation!)</TD></TR>
+<TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>alsa9</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>ALSA 0.9 Treiber (funkioniert, macht aber Probleme -> verwende OSS)</TD></TR>
 <TR><TD></TD><TD VALIGN=top><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>sun</TD><TD></TD><TD><FONT face="Verdana, Arial, Helvetica, sans-serif" size=2>SUN Audio-Treiber (/dev/audio) für BSD und Solaris8 Anwender</TD></TR>
 
 </TABLE>
@@ -34,7 +34,9 @@ etwa so einer Meldung <B>abstützen</B>:<BR>
   <UL>
     <CODE>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</CODE></UL>
 </LI>
-<LI>Wenn du ALSA Version 0.9 hast, verwende <I>-ao oss</I> oder <I>-ao sdl</I>, wie du willst.</LI>
+<LI>Wenn du ALSA Version 0.9 hast, verwende <I>-ao oss</I> oder <I>-ao sdl</I>, wie du willst.
+Du kannst auch <I>-ao alsa9</I> verwende, aber es hat noch einige Probleme
+(Verlust von Sync, Audio hört plötzlich auf, usw.)</LI>
 </UL></P>
 
 <P>Verwende auf <B>Solaris/FreeBSD</B> Systemen den SUN Audio-Treiber mit der <I>-ao sun</I> Option,
