@@ -14,7 +14,7 @@
 #include "../postproc/rgb2rgb.h"
 
 
-static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcstride,int w,int h,int bpp){
+static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcstride,int w,int h,int bpp,unsigned int fmt){
     int y;
     for(y=0;y<h;y++){
 	int x;
@@ -23,7 +23,33 @@ static void mirror(unsigned char* dst,unsigned char* src,int dststride,int srcst
 	    for(x=0;x<w;x++) dst[x]=src[w-x-1];
 	    break;
 	case 2:
-	    for(x=0;x<w;x++) *((short*)(dst+x*2))=*((short*)(src+(w-x-1)*2));
+	    switch(fmt){
+	    case IMGFMT_UYVY: {
+		// packed YUV is tricky. U,V are 32bpp while Y is 16bpp:
+		int w2=w>>1;
+		for(x=0;x<w2;x++){
+		    // TODO: optimize this...
+		    dst[x*4+0]=src[0+(w2-x-1)*4];
+		    dst[x*4+1]=src[3+(w2-x-1)*4];
+		    dst[x*4+2]=src[2+(w2-x-1)*4];
+		    dst[x*4+3]=src[1+(w2-x-1)*4];
+		}
+		break; }
+	    case IMGFMT_YUY2:
+	    case IMGFMT_YVYU: {
+		// packed YUV is tricky. U,V are 32bpp while Y is 16bpp:
+		int w2=w>>1;
+		for(x=0;x<w2;x++){
+		    // TODO: optimize this...
+		    dst[x*4+0]=src[2+(w2-x-1)*4];
+		    dst[x*4+1]=src[1+(w2-x-1)*4];
+		    dst[x*4+2]=src[0+(w2-x-1)*4];
+		    dst[x*4+3]=src[3+(w2-x-1)*4];
+		}
+		break; }
+	    default:
+		for(x=0;x<w;x++) *((short*)(dst+x*2))=*((short*)(src+(w-x-1)*2));
+	    }
 	    break;
 	case 3:
 	    for(x=0;x<w;x++){
@@ -53,17 +79,17 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
     if(mpi->flags&MP_IMGFLAG_PLANAR){
 	       mirror(dmpi->planes[0],mpi->planes[0],
 	       dmpi->stride[0],mpi->stride[0],
-	       dmpi->w,dmpi->h,1);
+	       dmpi->w,dmpi->h,1,mpi->imgfmt);
 	       mirror(dmpi->planes[1],mpi->planes[1],
 	       dmpi->stride[1],mpi->stride[1],
-	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1);
+	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1,mpi->imgfmt);
 	       mirror(dmpi->planes[2],mpi->planes[2],
 	       dmpi->stride[2],mpi->stride[2],
-	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1);
+	       dmpi->w>>mpi->chroma_x_shift,dmpi->h>>mpi->chroma_y_shift,1,mpi->imgfmt);
     } else {
 	mirror(dmpi->planes[0],mpi->planes[0],
 	       dmpi->stride[0],mpi->stride[0],
-	       dmpi->w,dmpi->h,dmpi->bpp>>3);	
+	       dmpi->w,dmpi->h,dmpi->bpp>>3,mpi->imgfmt);
     }
     
     return vf_next_put_image(vf,dmpi);
