@@ -33,6 +33,9 @@ CHUNK_XSL = /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl
 # List of subdirectories to be processed.
 SUBDIRS = en
 
+# Here all generated html's go
+HTML_TOP = ../HTML
+
 #####[ End of configuration ]###########################################
 
 export CHUNK_XSL SGML_CATALOG_FILES XMLLINT XSLTPROC
@@ -53,11 +56,11 @@ all: build-html
 
 .PHONY: build-html
 build-html:
-	test -d HTML || mkdir HTML
+	test -d $(HTML_TOP) || mkdir $(HTML_TOP)
 	for d in $(SUBDIRS); do\
 		test -f $$d/Makefile &&\
-		(test -d HTML/$$d || mkdir HTML/$$d) &&\
-		if $(MAKE) HTMLDIR=../../HTML/$$d -C $$d; then :; else exit 1; fi;\
+		(test -d $(HTML_TOP)/$$d || mkdir $(HTML_TOP)/$$d) &&\
+		if $(MAKE) HTMLDIR=../$(HTML_TOP)/$$d -C $$d; then :; else exit 1; fi;\
 	done
 
 .PHONY: test
@@ -69,7 +72,7 @@ test:
 
 .PHONY: clean-html
 clean-html:
-	-rm -rf ../HTML
+	-rm -rf $(HTML_TOP)
 
 .PHONY: distclean
 distclean: clean-html
