@@ -383,12 +383,16 @@ void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
 //    printf("\r -- asf: newpos=%d -- \n",newpos);
     stream_seek(demuxer->stream,newpos);
 
+    if (d_video->id >= 0)
     ds_fill_buffer(d_video);
     if(sh_audio){
       ds_fill_buffer(d_audio);
       resync_audio_stream(sh_audio);
     }
     
+    if (d_video->id < 0)
+      sh_audio->delay = d_audio->pts;
+    else
     while(1){
 	if(sh_audio && !d_audio->eof){
 	  float a_pts=d_audio->pts;
