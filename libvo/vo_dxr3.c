@@ -408,7 +408,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 			}
 			avc_context->frame_rate = (int) (vo_fps * FRAME_RATE_BASE);
 			avc_context->bit_rate = 6e6;
-			avc_context->flags = CODEC_FLAG_HQ | CODEC_FLAG_QSCALE;
+			avc_context->flags = CODEC_FLAG_QSCALE;
 			avc_context->quality = 2;
 			avc_context->pix_fmt = PIX_FMT_YUV420P;
 			if (avcodec_open(avc_context, avc_codec) < 0) {
