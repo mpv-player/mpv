@@ -17,7 +17,7 @@ INSTALLSTRIP = -s
 endif
 
 
-# these subdirectories required installation due binaries within them
+# These subdirectories require installation due to binaries within them.
 ifeq ($(VIDIX),yes)
 SUBDIRS += libdha vidix
 DO_MAKE = @ for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
@@ -211,11 +211,11 @@ $(PRG_MENCODER): $(MENCODER_DEP)
 	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) -Llibmpcodecs -lmpencoders $(COMMON_LIBS) $(EXTRA_LIB) $(ENCORE_LIB) $(MLIB_LIB)
 endif
 
-# Every mplayer dependancy depends on version.h, to force building version.h
-# first (in serial mode) before any other of the dependancies for a parallel make
+# Every mplayer dependency depends on version.h, to force building version.h
+# first (in serial mode) before any other of the dependencies for a parallel make
 # run.  This is necessary, because the make rule for version.h removes objects
 # in a recursive "make distclean" and we must wait for this "make distclean" to
-# finish before be can start builing new object files.
+# finish before we can start building new object files.
 $(MPLAYER_DEP): version.h
 $(MENCODER_DEP): version.h
 
@@ -259,7 +259,7 @@ ifeq ($(DVDKIT_SHARED),yes)
 endif
 endif
 ifeq ($(CSS_USE),yes)
-	@echo "Following task requires root privs. If it fails don't panic"
+	@echo "The following task requires root privileges. If it fails don't panic,"
 	@echo "however it means you can't use fibmap_mplayer."
 	@echo "Without this (or without running mplayer as root) you won't be"
 	@echo "able to play encrypted DVDs."
