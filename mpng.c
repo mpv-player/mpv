@@ -1,9 +1,9 @@
-
 #include <stdlib.h>
 
 #include "config.h"
 #include "bswap.h"
 #include "postproc/rgb2rgb.h"
+#include "libvo/fastmemcpy.h"
 #include "mp_msg.h"
 #include "png.h"
 
@@ -33,6 +33,15 @@ void decode_mpng(
  char	       * palette = NULL;
  int             depth,color;
  png_uint_32     i;
+
+ /* currently supporting only 24 and 32bpp */
+ if ((bytes_per_pixel != 3) && (bytes_per_pixel != 4))
+ {
+    /* is this memset really needed? */
+    memset(decoded, 0, width*height*bytes_per_pixel);
+    return;
+ }
+
  png=png_create_read_struct( PNG_LIBPNG_VER_STRING,NULL,NULL,NULL );
  info=png_create_info_struct( png );
  endinfo=png_create_info_struct( png );
@@ -71,9 +80,13 @@ void decode_mpng(
           free( data );
 	  break;
    case PNG_COLOR_TYPE_GRAY:
+	  /* constant 256 colors */
           palette=malloc( 1024 );
           for ( i=0;i < 256;i++ ) palette[(i*4)]=palette[(i*4)+1]=palette[(i*4)+2]=(char)i;
-	  palette8torgb24( data,decoded,png_width * png_height,palette );
+	  if (bytes_per_pixel == 4)
+	    palette8torgb32( data,decoded,png_width * png_height,palette );
+	  else
+	    palette8torgb24( data,decoded,png_width * png_height,palette );
           free( data );
 	  break;
    case PNG_COLOR_TYPE_PALETTE:
@@ -81,7 +94,8 @@ void decode_mpng(
            int    cols;
 	   unsigned char * pal;
            png_get_PLTE( png,info,(png_colorp*)&pal,&cols ); 
-           palette=calloc( 1,1024 );
+           palette=calloc( 1,cols*4 );
+	   mp_dbg(MSGT_DECVIDEO, MSGL_DBG2, "[mPNG] palette. used colors: %d\n", cols);
 	   for ( i=0;i < cols;i++ )
 	    {
 	     palette[(i*4)  ]=pal[(i*3)+2];
@@ -89,11 +103,17 @@ void decode_mpng(
 	     palette[(i*4)+2]=pal[(i*3)  ];
 	    }
 	  }
-	  palette8torgb24( data,decoded,png_width * png_height,palette );
+	  if (bytes_per_pixel == 4)
+	    palette8torgb32( data,decoded,png_width * png_height,palette );
+	  else
+	    palette8torgb24( data,decoded,png_width * png_height,palette );
           free( data );
 	  break;
    case PNG_COLOR_TYPE_RGB_ALPHA:
-          rgb32to24( data,decoded,png_width * png_height * 4 );
+	  if (bytes_per_pixel == 4)
+	    memcpy(decoded, data, png_width * png_height * 4);
+	  else
+            rgb32to24( data,decoded,png_width * png_height * 4 );
           free( data );
 	  break;
   }
