@@ -1593,7 +1593,7 @@ Sets noblock-mode, mmap-mode and the device-name as first card, fourth device.
 .
 .sp 1
 FIXME: Document suboptions for sdl, arts, esd, jack, nas, macosx, sgi, sun,
-win32, dxr2, mpegpes, null, pcm, plugin.
+dxr2, mpegpes, null, pcm, plugin.
 .sp 1
 Available audio output drivers are:
 .
@@ -2111,7 +2111,7 @@ Uses the DirectX driver with acceleration features turned off.
 .
 .sp 1
 FIXME: Document suboptions for x11, xover, dga, sdl, vidix, xvidix, fbdev,
-fbdev2, vesa, svga, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
+fbdev2, vesa, null, aa, bl, ggi, mga, xmga, syncfb, 3dfx, tdfx_vid,
 tdfxfb, dxr2, dxr3, mpegpes, zr, zr2, yuv4mpeg, gif89a, jpeg, pgm, png, tga.
 .sp 1
 Available video output drivers are:
@@ -2253,6 +2253,27 @@ FIXME: document this
 .TP
 .B svga\ \ \ 
 Play video using the SVGA library.
+.PD 0
+.RSs
+.IPs "<video mode>"
+Specify video mode to use.
+The mode can be given in a <width>x<height>x<colors> format,
+e.g.\& 640x480x16M or be a graphics mode number, e.g.\& 84.
+.IPs bbosd
+Draw OSD into black bands below the movie (slower).
+.IPs native
+Use only native drawing functions.
+This avoids direct rendering, OSD and hardware acceleration.
+.IPs retrace
+Force frame switch on vertical retrace.
+Usable only with \-double.
+It has the same effect as the \-vsync option.
+.IPs sq\ \ \ 
+Try to select a video mode with square pixels.
+.IPs vidix
+Use svga with VIDIX.
+.RE
+.PD 1
 .TP
 .B gl\ \ \ \ \ 
 OpenGL video output driver.
@@ -2458,7 +2479,8 @@ Allows specifying the output filename (default: ./md5).
 Transforms the video stream into a sequence of uncompressed YUV 4:2:0
 images and stores it in a file called 'stream.yuv' in the current
 directory.
-Useful if you want to process the video with the mjpegtools suite.
+The format is the same as the one employed by mjpegtools, so this is
+useful if you want to process the video with the mjpegtools suite.
 .TP
 .B gif89a\ 
 Output each frame into a GIF file in the current directory.
