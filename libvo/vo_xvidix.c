@@ -43,13 +43,14 @@ static vo_info_t vo_info =
     ""
 };
 
+#define UNUSED(x) ((void)(x)) /* Removes warning about unused arguments */
+
 /* X11 related variables */
 static Window mWindow;
 static int X_already_started = 0;
 
 static GC mGC;
 static XGCValues mGCV;
-
 static uint32_t	fgColor;
 
 /* VIDIX related stuff */
@@ -71,33 +72,24 @@ static Window mRoot;
 static uint32_t drwX, drwY, drwWidth, drwHeight, drwBorderWidth,
     drwDepth, drwcX, drwcY, dwidth, dheight, mFullscreen;
 
-#ifdef HAVE_NEW_GUI
-static uint32_t	mdwidth, mdheight;
-#endif
-
 static vidix_grkey_t gr_key;
-
-static void mDrawColorKey(void)
-{
-    XSetForeground(mDisplay, mGC, fgColor);
-    XFillRectangle(mDisplay, mWindow, mGC, drwX, drwY, drwWidth,
-	(mFullscreen ? drwHeight - 1 : drwHeight));
-    XFlush(mDisplay);
-}
 
 static void set_window(int force_update)
 {
 #ifdef HAVE_NEW_GUI
     if (vo_window != None)
     {
-	mFullscreen = 0;
-	dwidth = mdwidth;
-	dheight = mdheight;
 	if ((vo_dwidth == vo_screenwidth) && (vo_dheight == vo_screenheight))
 	{
 	    mFullscreen = 1;
 	    dwidth = vo_screenwidth;
-	    dheight = vo_screenwidth * mdheight / mdwidth;
+	    dheight = vo_screenwidth * vo_dheight / vo_dwidth;
+	}
+	else
+	{
+	    mFullscreen = 0;
+	    dwidth = vo_dwidth;
+	    dheight = vo_dheight;
 	}
     }
 #endif
@@ -108,8 +100,9 @@ static void set_window(int force_update)
     XTranslateCoordinates(mDisplay, mWindow, mRoot, 0, 0,
 	&drwcX, &drwcY, &mRoot);
 
-    mp_msg(MSGT_VO, MSGL_DBG2, "[xvidix] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
-	drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
+    if (!mFullscreen)
+	mp_msg(MSGT_VO, MSGL_V, "[xvidix] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
+	    drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
 
     /* following stuff copied from vo_xmga.c */
     aspect(&dwidth, &dheight, A_NOZOOM);
@@ -123,12 +116,10 @@ static void set_window(int force_update)
 	drwcY += drwY;
 	drwWidth = (dwidth > vo_screenwidth ? vo_screenwidth : dwidth);
 	drwHeight = (dheight > vo_screenheight ? vo_screenheight : dheight);
-	mp_msg(MSGT_VO, MSGL_DBG2, "[xvidix-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
+	mp_msg(MSGT_VO, MSGL_V, "[xvidix-fs] dcx: %d dcy: %d dx: %d dy: %d dw: %d dh: %d\n",
 	    drwcX, drwcY, drwX, drwY, drwWidth, drwHeight);
     }
 #endif
-
-    mDrawColorKey();
 
 #ifdef HAVE_XINERAMA
     if (XineramaIsActive(mDisplay))
@@ -153,8 +144,8 @@ static void set_window(int force_update)
 #endif
 
     /* set new values in VIDIX */
-    if (force_update || ((window_x != drwcX) || (window_y != drwcY) ||
-	(window_width != drwWidth) || (window_height != drwHeight)))
+    if (force_update || (window_x != drwcX) || (window_y != drwcY) ||
+	(window_width != drwWidth) || (window_height != drwHeight))
     {
 	window_x = drwcX;
 	window_y = drwcY;
@@ -178,6 +169,16 @@ static void set_window(int force_update)
     mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
 	window_x, window_y, window_width, window_height);
 
+
+    /* mDrawColorKey: */
+
+    /* fill drawable with specified color */
+    XSetForeground(mDisplay, mGC, fgColor);
+    XFillRectangle(mDisplay, mWindow, mGC, drwX, drwY, drwWidth,
+	(mFullscreen ? drwHeight - 1 : drwHeight));
+    /* flush, update drawable */
+    XFlush(mDisplay);
+
     return;
 }
 
@@ -188,7 +189,6 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
     XVisualInfo vinfo;
-    XEvent xev;
     XSizeHints hint;
     XSetWindowAttributes xswa;
     unsigned long xswamask;
@@ -248,11 +248,6 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
     window_width = d_width;
     window_height = d_height;
 
-#ifdef HAVE_NEW_GUI
-    mdwidth = width;
-    mdheight = height;
-#endif
-
     mFullscreen = flags&0x01;
 
     X_already_started++;
@@ -284,6 +279,7 @@ if (vo_window == None)
 
 #ifdef X11_FULLSCREEN
     if (mFullscreen) /* fullscreen */
+    {
         if (flags & 0x04)
         {
     	    aspect(&d_width, &d_height, A_ZOOM);
@@ -293,6 +289,7 @@ if (vo_window == None)
 	    d_width = vo_screenwidth;
 	    d_height = vo_screenheight;
     	}
+    }
 #endif
 
     /* Make the window */
@@ -320,7 +317,7 @@ if (vo_window == None)
     }
     else
 	mWindow = XCreateWindow(mDisplay, RootWindow(mDisplay, mScreen),
-	    hint.x, hint.y, hint.width, hint.height, xswa.border_pixel,
+	    window_x, window_y, window_width, window_height, xswa.border_pixel,
 	    vinfo.depth, InputOutput, vinfo.visual, xswamask, &xswa);
 
     vo_x11_classhint(mDisplay, mWindow, "xvidix");
@@ -353,10 +350,14 @@ if (vo_window == None)
 }
 else
 {
+    /* window was created by GUI */
     mWindow = vo_window;
     mGC = vo_gc;
 }
 #endif
+
+    mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] image properties: %dx%d depth: %d\n",
+	image_width, image_height, image_depth);
 
     if (vidix_grkey_support())
     {
@@ -371,44 +372,16 @@ else
 
     set_window(1);
 
-#if 0
-    XGetGeometry(mDisplay, mWindow, &mRoot, &drwX, &drwY, &drwWidth,
-	&drwHeight, &drwBorderWidth, &drwDepth);
-    drwX = drwY = 0;
-    XTranslateCoordinates(mDisplay, mWindow, mRoot, 0, 0, &drwcX, &drwcY, &mRoot);
-
-    window_x = drwcX;
-    window_y = drwcY;
-    window_width = drwWidth;
-    window_height = drwHeight;
+#ifdef HAVE_NEW_GUI
+    if (vo_window == None)
 #endif
-    
-    mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] image properties: %dx%d depth: %d\n",
-	image_width, image_height, image_depth);
-    mp_msg(MSGT_VO, MSGL_INFO, "[xvidix] window properties: pos: %dx%d, size: %dx%d\n",
-	window_x, window_y, window_width, window_height);
-
-#if 0
-    if (vidix_init(image_width, image_height, window_x, window_y, window_width,
-	window_height, format, vo_depthonscreen, vo_screenwidth, vo_screenheight) != 0)
     {
-	mp_msg(MSGT_VO, MSGL_FATAL, "Can't initialize VIDIX driver: %s: %s\n",
-	    vidix_name, strerror(errno));
-	vidix_term();
-	return(-1);
+	XFlush(mDisplay);
+	XSync(mDisplay, False);
     }
-#endif
 
 #ifdef HAVE_NEW_GUI
-if (vo_window == None)
-#endif
-{
-    XFlush(mDisplay);
-    XSync(mDisplay, False);
-}
-
-#ifdef HAVE_NEW_GUI
-    if (vo_window == None);
+    if (vo_window == None)
 #endif
     saver_off(mDisplay); /* turning off screen saver */
 
@@ -420,27 +393,13 @@ static const vo_info_t *get_info(void)
     return(&vo_info);
 }
 
-/* i think this is obsoleted.... -- alex */
-static void Terminate_Display_Process(void) 
-{
-    getchar();	/* wait for enter to remove window */
-    vidix_term();
-    XDestroyWindow(mDisplay, mWindow);
-    XCloseDisplay(mDisplay);
-    X_already_started = 0;
-
-    return;
-}
 
 static void check_events(void)
 {
     const int event = vo_x11_check_events(mDisplay);
 
-    if (event & VO_EVENT_RESIZE)
+    if ((event & VO_EVENT_RESIZE) || (event & VO_EVENT_EXPOSE))
 	set_window(0);
-    else
-    if (event & VO_EVENT_EXPOSE)
-	mDrawColorKey();
 
     return;
 }
@@ -462,12 +421,19 @@ static void flip_page(void)
 static uint32_t draw_slice(uint8_t *src[], int stride[],
     int w, int h, int x, int y)
 {
+    UNUSED(src);
+    UNUSED(stride);
+    UNUSED(w);
+    UNUSED(h);
+    UNUSED(x);
+    UNUSED(y);
     mp_msg(MSGT_VO, MSGL_FATAL, "[xvidix] error: didn't used vidix draw_slice!\n");
     return(0);
 }
 
 static uint32_t draw_frame(uint8_t *src[])
 {
+    UNUSED(src);
     mp_msg(MSGT_VO, MSGL_FATAL, "[xvidix] error: didn't used vidix draw_frame!\n");
     return(0);
 }
@@ -503,12 +469,27 @@ static void uninit(void)
 {
     vidix_term();
 #ifdef HAVE_NEW_GUI
+    /* destroy window only if it's not controlled by GUI */
     if (vo_window == None)
 #endif
     {
 	saver_on(mDisplay); /* screen saver back on */
 	if (!(WinID > 0)) /* don't destory window if -wid specified */
+	{
 	    XDestroyWindow(mDisplay, mWindow);
-//	XCloseDisplay(mDisplay);
+	    XCloseDisplay(mDisplay);
+	}
     }
+}
+
+/* i think this is obsoleted.... -- alex */
+static void Terminate_Display_Process(void) 
+{
+    getchar();	/* wait for enter to remove window */
+    vidix_term();
+    XDestroyWindow(mDisplay, mWindow);
+    XCloseDisplay(mDisplay);
+    X_already_started = 0;
+
+    return;
 }
