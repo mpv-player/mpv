@@ -409,31 +409,35 @@ static void rivatv_overlay_colorkey (rivatv_info* info, unsigned int chromakey){
     }
 }
 
+static void nv_waitidle(struct rivatv_info *info ){
+     while (info->chip.PGRAPH[0x1C0] & 1) {}
+}
+
 
 /* Start overlay video. */
 void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     uint32_t base, size, offset, xscale, yscale, pan,bpp, pitch0=0;
-	int x, y;
+	int x=8, y=8;
 	int lwidth=info->d_width, lheight=info->d_height;
 	int bps;
 
+    size = info->buffer_size;
+	base = info->picture_offset;
+	offset = bufno*size;
     /*update depth & dimensions here because it may change with vo vesa or vo fbdev*/
     info->chip.lock (&info->chip, 0);
-    do {
+    nv_waitidle(info);
     switch (info->chip.arch) {
 	  case NV_ARCH_03:
         pitch0 = info->chip.PGRAPH[0x00000650/4];
         break;
-      case NV_ARCH_04:	
+      case NV_ARCH_04:
 	  case NV_ARCH_10:
 	  case NV_ARCH_20:
       case NV_ARCH_30:
         pitch0 = info->chip.PGRAPH[0x00000670/4];
         break;
     }
-    if (pitch0 == 0)
-	    printf("[nvidia_vid]: pitch0 = 0!!! Rereading\n");
-    } while (pitch0 == 0);
     VID_WR08(info->chip.PCIO, 0x03D4, 0x28);
     bpp = VID_RD08(info->chip.PCIO,0x03D5);
     if(bpp==3)bpp = 4; //fixme do nvidia cards support 24bpp?
@@ -444,32 +448,35 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     {
 //	    printf("[nvidia_vid] video mode: %ux%u@%u\n",info->screen_x = pitch0/bpp,(pitch0/bpp*3)/4,info->depth);
 	    info->screen_x = pitch0/bpp;
-    }
-    
-	bps = info->screen_x * ((info->depth+1)/8);
-	/* get pan offset of the physical screen */
-	pan = rivatv_overlay_pan (info);
-	size = info->buffer_size;
-	/* adjust window position depending on the pan offset */
-	x = info->wx - (pan % bps) * 8 / info->depth;
-	y = info->wy - (pan / bps);
-
-	base = info->picture_offset;
-	offset = bufno*size;
-
-	/* adjust negative output window variables */
-	if (x < 0) {
-		lwidth = info->d_width + x;
-		offset += (-x * info->width / info->d_width) << 1; 
-//		offset += (-window->x * port->vld_width / window->width) << 1; 
-		x = 0;
-	}
-	if (y < 0) {		
-		lheight = info->d_height + y;
-		offset += (-y * info->height / info->d_height * info->width) << 1;
+        bps = info->screen_x * ((info->depth+1)/8);
+    	/* get pan offset of the physical screen */
+     	pan = rivatv_overlay_pan (info);
+    	/* adjust window position depending on the pan offset */
+    	x = info->wx - (pan % bps) * 8 / info->depth;
+    	y = info->wy - (pan / bps);
+	    /* adjust negative output window variables */
+	    if (x < 0) {
+		  lwidth = info->d_width + x;
+		  offset += (-x * info->width / info->d_width) << 1;
+//		offset += (-window->x * port->vld_width / window->width) << 1;
+		  x = 0;
+	    }
+	    if (y < 0) {
+		  lheight = info->d_height + y;
+		  offset += (-y * info->height / info->d_height * info->width) << 1;
 //		offset += (-window->y * port->vld_height / window->height * port->org_width) << 1;
-		y = 0;
-	}
+	      y = 0;
+	    }
+
+
+
+
+
+
+    }
+
+
+
 
 	switch (info->chip.arch) {
 	case NV_ARCH_10:
@@ -601,6 +608,11 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 }
 
 
+
+
+
+
+
 static rivatv_info* info;
 
 
@@ -648,7 +660,7 @@ int vixInit(void){
         /* This maps framebuffer @6MB, thus 2MB are left for video. */
 	    info->video_base = map_phys_mem(pci_info.base1, info->chip.fbsize);
         /* This may trash your screen for resolutions greater than 1024x768, sorry. */
-        info->picture_offset = 2*1024*768*4 ;
+        info->picture_offset = 1024*768* 4 * ((info->chip.fbsize > 4194304)?2:1);
         info->picture_base = (uint32_t) info->video_base + info->picture_offset;
         info->chip.PRAMIN = (uint32_t *) (info->video_base + 0x00C00000);
         break;
@@ -677,21 +689,18 @@ int vixInit(void){
   {
     uint32_t bpp=0,pitch0=0;
     info->chip.lock (&info->chip, 0);
-    do {
+    nv_waitidle(info);
     switch (info->chip.arch) {
 	  case NV_ARCH_03:
         pitch0 = info->chip.PGRAPH[0x00000650/4];
         break;
-      case NV_ARCH_04:	
+      case NV_ARCH_04:
 	  case NV_ARCH_10:
 	  case NV_ARCH_20:
       case NV_ARCH_30:
         pitch0 = info->chip.PGRAPH[0x00000670/4];
         break;
     }
-    if (pitch0 == 0)
-	    printf("[nvidia_vid]: pitch0 = 0!!! Rereading\n");
-    } while (pitch0 == 0);
     VID_WR08(info->chip.PCIO, 0x03D4, 0x28);
     bpp = VID_RD08(info->chip.PCIO,0x03D5);
     if(bpp==3)bpp = 4; //fixme do nvidia cards support 24bpp?
