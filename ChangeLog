@@ -130,7 +130,8 @@ MPlayer (1.0)
     * as usual, lots of bug fixes and optimizations
 
     Filters:
-    * software volume control when no hardware support
+    * software volume control when no hardware support, can be controled
+      with the -softvol and -softvol-max parameters
     * high-quality audio resampling with -af lavcresample
     * cropdetect rounding parameter
     * missing audio plugins (extrastereo, volnorm) converted to audio filters
