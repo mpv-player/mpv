@@ -181,7 +181,6 @@ bailout:
       e->d = 1;
     menu_list_add_entry(menu,e);
     free(namelist[n]);
-    free(e);
   }
   free(namelist);
 
