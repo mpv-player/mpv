@@ -65,8 +65,6 @@ static unsigned char *ImageData;
 
 /* X11 related variables */
 //static Display *mDisplay;
-static Window mywindow;
-static GC mygc;
 static XImage *myximage;
 static int depth,bpp,mode;
 static XWindowAttributes attribs;
@@ -218,7 +216,7 @@ static void getMyXImage()
    shmemerror:
    Shmem_Flag=0;
 #endif
-   myximage=XGetImage( mDisplay,mywindow,0,0,
+   myximage=XGetImage( mDisplay,vo_window,0,0,
    image_width,image_height,AllPlanes,ZPixmap );
    ImageData=myximage->data;
 #ifdef HAVE_SHM
@@ -292,7 +290,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  aspect= ((1<<16)*d_width + d_height/2)/d_height;
 
 #ifdef HAVE_NEW_GUI
- if ( vo_window != None ) { mywindow=vo_window; mygc=vo_gc; }
+ if ( vo_window != None ) { vo_window=vo_window; vo_gc=vo_gc; }
   else
 #endif   
    {
@@ -352,40 +350,40 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
 #endif
  
     if ( WinID>=0 ){
-      mywindow = WinID ? ((Window)WinID) : RootWindow( mDisplay,mScreen );
-      XUnmapWindow( mDisplay,mywindow );
-      XChangeWindowAttributes( mDisplay,mywindow,xswamask,&xswa );
+      vo_window = WinID ? ((Window)WinID) : RootWindow( mDisplay,mScreen );
+      XUnmapWindow( mDisplay,vo_window );
+      XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
     }
     else
-      mywindow=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
+      vo_window=XCreateWindow( mDisplay,RootWindow( mDisplay,mScreen ),
                          hint.x,hint.y,
                          hint.width,hint.height,
                          xswa.border_pixel,depth,CopyFromParent,vinfo.visual,xswamask,&xswa );
 
-    vo_x11_classhint( mDisplay,mywindow,"x11" );
-    vo_hidecursor(mDisplay,mywindow);
-    if ( fullscreen ) vo_x11_decoration( mDisplay,mywindow,0 );
-    XSelectInput( mDisplay,mywindow,StructureNotifyMask );
-    XSetStandardProperties( mDisplay,mywindow,hello,hello,None,NULL,0,&hint );
-    XMapWindow( mDisplay,mywindow );
+    vo_x11_classhint( mDisplay,vo_window,"x11" );
+    vo_hidecursor(mDisplay,vo_window);
+    if ( fullscreen ) vo_x11_decoration( mDisplay,vo_window,0 );
+    XSelectInput( mDisplay,vo_window,StructureNotifyMask );
+    XSetStandardProperties( mDisplay,vo_window,hello,hello,None,NULL,0,&hint );
+    XMapWindow( mDisplay,vo_window );
 #ifdef HAVE_XINERAMA
-   vo_x11_xinerama_move(mDisplay,mywindow);
+   vo_x11_xinerama_move(mDisplay,vo_window);
 #endif
-    do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != mywindow );
-    XSelectInput( mDisplay,mywindow,NoEventMask );
+    do { XNextEvent( mDisplay,&xev ); } while ( xev.type != MapNotify || xev.xmap.event != vo_window );
+    XSelectInput( mDisplay,vo_window,NoEventMask );
 
     XFlush( mDisplay );
     XSync( mDisplay,False );
-    mygc=XCreateGC( mDisplay,mywindow,0L,&xgcv );
+    vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
 
 #ifdef HAVE_XF86VM
     if ( vm )
      {
       /* Grab the mouse pointer in our window */
-      XGrabPointer(mDisplay, mywindow, True, 0,
+      XGrabPointer(mDisplay, vo_window, True, 0,
                    GrabModeAsync, GrabModeAsync,
-                   mywindow, None, CurrentTime);
-      XSetInputFocus(mDisplay, mywindow, RevertToNone, CurrentTime);
+                   vo_window, None, CurrentTime);
+      XSetInputFocus(mDisplay, vo_window, RevertToNone, CurrentTime);
      }
 #endif
    }
@@ -437,7 +435,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  if ( vo_window == None ) 
 #endif 
   {
-   XSelectInput( mDisplay,mywindow,StructureNotifyMask | KeyPressMask 
+   XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask 
 #ifdef HAVE_NEW_INPUT
 		 | ButtonPressMask | ButtonReleaseMask
 #endif
@@ -456,7 +454,7 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
 #ifdef HAVE_SHM
  if ( Shmem_Flag )
   {
-   XShmPutImage( mDisplay,mywindow,mygc,myximage,
+   XShmPutImage( mDisplay,vo_window,vo_gc,myximage,
                  0,0,
                  ( vo_dwidth - swsContext->dstW ) / 2,( vo_dheight - myximage->height ) / 2,
                  swsContext->dstW,myximage->height,True );
@@ -464,7 +462,7 @@ static void Display_Image( XImage *myximage,uint8_t *ImageData )
   else
 #endif
    {
-    XPutImage( mDisplay,mywindow,mygc,myximage,
+    XPutImage( mDisplay,vo_window,vo_gc,myximage,
                0,0,
                ( vo_dwidth - swsContext->dstW ) / 2,( vo_dheight - myximage->height ) / 2,
                swsContext->dstW,myximage->height);
@@ -579,7 +577,7 @@ uninit(void)
  vo_vm_close(mDisplay);
 #endif
 
- vo_x11_uninit(mDisplay, mywindow);
+ vo_x11_uninit(mDisplay, vo_window);
 
  freeSwsContext(swsContext);
 }
@@ -618,11 +616,11 @@ static uint32_t control(uint32_t request, void *data, ...)
 	int foo;
 	Window root;
 
-        vo_x11_decoration( mDisplay,mywindow,0 );
-	XGetGeometry(mDisplay, mywindow, &root, &foo, &foo,
+        vo_x11_decoration( mDisplay,vo_window,0 );
+	XGetGeometry(mDisplay, vo_window, &root, &foo, &foo,
 		     &vo_fs_oldwidth, &vo_fs_oldheight, &foo, &foo);
 	    
-        XTranslateCoordinates(mDisplay, mywindow, root, 0, 0,
+        XTranslateCoordinates(mDisplay, vo_window, root, 0, 0,
 				  &vo_fs_oldx, &vo_fs_oldy,(Window *) &foo);
 
 	mp_msg(MSGT_VO,MSGL_V,"X11 Fullscreen: saved old place: %dx%d-%dx%d\n",
@@ -631,15 +629,15 @@ static uint32_t control(uint32_t request, void *data, ...)
 	/* resize */
 	vo_dwidth = vo_screenwidth;
 	vo_dheight = vo_screenheight;
-	XMoveResizeWindow(mDisplay, mywindow, 0, 0,
+	XMoveResizeWindow(mDisplay, vo_window, 0, 0,
 	    vo_screenwidth, vo_screenheight);
 	XSync(mDisplay, False);
     }
     else
     {
-	XMoveResizeWindow(mDisplay, mywindow, vo_fs_oldx, vo_fs_oldy, 
+	XMoveResizeWindow(mDisplay, vo_window, vo_fs_oldx, vo_fs_oldy, 
 	    vo_fs_oldwidth, vo_fs_oldheight);
-	vo_x11_decoration( mDisplay,mywindow,1 );
+	vo_x11_decoration( mDisplay,vo_window,1 );
 
 	/* restore */
 	vo_dwidth = vo_fs_oldwidth;
