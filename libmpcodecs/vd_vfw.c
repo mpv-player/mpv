@@ -115,11 +115,13 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
     case VDCTRL_SET_PP_LEVEL:
 	vfw_set_postproc(sh,10*(*((int*)arg)));
 	return CONTROL_OK;
-#if 0
+#if 1
     // FIXME: make this optional...
     case VDCTRL_QUERY_FORMAT:
       {
 	HRESULT ret;
+	if(!(sh->codec->outflags[sh->outfmtidx]&CODECS_FLAG_QUERY))
+	    return CONTROL_UNKNOWN;	// do not query!
 	set_csp(priv->o_bih,*((int*)arg));
 #ifdef BUILD_VFWEX
 	ret = ICDecompressQueryEx(priv->handle, sh->bih, priv->o_bih);
