@@ -3158,7 +3158,7 @@ fi
 if test "$_lirc" = yes ; then
   _def_lirc='#define HAVE_LIRC 1'
   if test "$_new_input" = yes ; then
-     _ld_new_input="-llirc_client $_ld_new_input"
+     _ld_new_input="$_ld_new_input -llirc_client"
   else
      _ld_lirc='-llirc_client'
   fi
