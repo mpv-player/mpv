@@ -68,6 +68,7 @@ char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 			aspect(&d_width,&d_height,A_ZOOM);
 		else
 			aspect(&d_width,&d_height,A_NOZOOM);
+		printf("vo_mga aspect(): resized to %dx%d\n",d_width,d_height);
 	}
 
 
