@@ -3778,6 +3778,54 @@ Convertit un son multicanaux vers 2 canaux pour un casque stéréo, tout en
 préservant la spatialité du son.
 .
 .TP
+.B equalizer=[g1:g2:g3:...:g10]
+Égaliseur graphique à 10 bandes, implémenté en utilisant 10 filtres
+passe-bande IIR.
+Cela signifie qu'il fonctionne quel que soit le type de son joué.
+Les fréquences centrales pour chacune des 10 bandes sont:
+.sp 1
+.PD 0
+.RS
+.IPs "No. fréquence"
+.IPs "0    31.25 Hz"
+.IPs "1    62.50 Hz"
+.IPs "2   125.00 Hz"
+.IPs "3   250.00 Hz"
+.IPs "4   500.00 Hz"
+.IPs "5    1.00 kHz"
+.IPs "6    2.00 kHz"
+.IPs "7    4.00 kHz"
+.IPs "8    8.00 kHz"
+.IPs "9   16.00 kHz"
+.RE
+.PD 1
+.sp 1
+.RS
+Si la fréquence du son joué est plus basse que la fréquence centrale
+de la bande de fréquence, alors cette bande sera désactivée.
+Un bogue connu de ce filtre est que les caractéristiques de la bande
+la plus haute ne sont pas complètement symétriques si la fréquence
+de l'échantillon est proche de la fréquence centrale de la bande.
+Ce problème peut être contourné en sur-échantillonnant le son en
+utilisant le filtre resample avant qu'il n'atteigne ce filtre.
+.RE
+.PD 0
+.RSs
+.IPs <g1>:<g2>:<g3>:...:<g10>
+nombres à virgule compris représentant le gain en dB de chaque
+bande de fréquence (-12\-12)
+.RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.IPs "mplayer \-af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi"
+Amplifierait le son sur les fréquences les plus hautes et les plus basses tout en les annulant presque complètement autour de 1kHz.
+.RE
+.PD 1
+.
+.TP
 .B channels=nch[:nr:from1:to1:from2:to2:from3:to3:...]
 Peut être utilisé pour ajouter, supprimer, re-router et copier des
 canaux audios.
@@ -3836,18 +3884,54 @@ s8, floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 et imaadpcm.
 .PD 1
 .
 .TP
-.B volume[=v:sc]
-Selectionne le niveau du volume de sortie.
-Ce filtre n'est pas réentrant et ne peux donc être activé qu'une seule fois
-pour chaque flux audio.
+.B volume[=v[:sc]]
+Implémente un contrôleur logiciel de volume.
+Utilisez ce filtre avec précaution car il peut réduire le rapport
+signal sur bruit (et donc la fidélité) du son.
+Dans la plupart des cas il vaut mieux fixer le niveau du son PCM
+au max, laisser ce filtre de côté et contrôler le niveau de sortie
+de vos haut-parleurs avec le contrôleur de volume principal du mixeur.
+Au cas où votre carte son a un mixeur numérique au lieu d'un
+analogique, et que vous entendez un son distordu, utilisez le mixeur
+MASTER à la place.
+Si il y a un amplificateur externe connecté à l'ordinateur (ce qui
+est presque toujours le cas), le niveau de bruit peut être minimisé
+en ajustant le niveau maître et le bouton du volume jusqu'à ce que
+le bruit résiduel soit parti.
+Ce filtre a une seconde fonction\ : Il mesure le niveau maximum du
+son et l'affiche quand MPlayer se termine.
+Cette estimation de volume peut être utilisée pour définir le
+niveau de son dans MEncoder pour que la dynamique maximale soit
+utilisé.
+.br
+.I NOTE\ :
+Ce filtre n'est pas réentrant et ne peux donc être activé qu'une seule
+fois pour chaque flux audio.
 .PD 0
 .RSs
-.IPs <v>
+.IPs <v>\ \ 
 Défini le gain désiré en dB pour tous les canaux du flux,
-de -200dB à +60dB (où -200dB coupe le son complètement
-et +40dB équivaut à un gain de 1000).
-.IPs <sc>
-Active le découpage logiciel.
+de -200dB à +60dB, où -200dB coupe le son complètement
+et +40dB équivaut à un gain de 1000 (par défaut\ : 0).
+.IPs <sc>\ 
+Active (1) ou désactive (0) le l'écrêtage logiciel.
+L'écrêtage logiciel peut rendre le son plus doux si le son filtré
+comporte des sont très forts.
+Activez cette option si la dynamique de vos enceintes est très
+faible.
+.br
+.I ATTENTION\ :
+Cette fonctionnalité peut créer des distortions, et ne devrait
+être utilisée qu'en dernier recours.
+.RE
+.sp 1
+.RS
+.I EXEMPLE\ :
+.RE
+.RSs
+.IPs "mplayer -af volume=10.1:0 media.avi"
+amplifierait le son de 10.1dB et bloque le volume s'il est
+trop haut.
 .RE
 .PD 1
 .
