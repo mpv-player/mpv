@@ -47,6 +47,7 @@ struct fb_fix_screeninfo fb_fix_info;
 struct fb_var_screeninfo fb_var_info;
 static uint32_t fb_xres_virtual;
 static uint32_t fb_yres_virtual;
+static struct fb_cmap *oldcmap = NULL;
 
 static int in_width;
 static int in_height;
@@ -245,6 +246,11 @@ static int fb_init(void)
 	}
 	if (fb_fix_info.visual == FB_VISUAL_DIRECTCOLOR) {
 		printf("fb_init: creating cmap for directcolor\n");
+		if (ioctl(fb_dev_fd, FBIOGETCMAP, oldcmap)) {
+			printf("fb_init: can't get cmap: %s\n",
+					strerror(errno));
+			goto err_out_fd;
+		}
 		if (!(cmap = make_directcolor_cmap(&fb_var_info)))
 			goto err_out_fd;
 		if (ioctl(fb_dev_fd, FBIOPUTCMAP, cmap)) {
@@ -454,6 +460,11 @@ static void flip_page(void)
 static void uninit(void)
 {
 	printf("vo_fbdev: uninit\n");
+	if (oldcmap) {
+		if (ioctl(fb_dev_fd, FBIOPUTCMAP, oldcmap))
+			printf("vo_fbdev: Can't restore original cmap\n");
+		oldcmap = NULL;
+	}
 	fb_var_info.xres_virtual = fb_xres_virtual;
 	fb_var_info.yres_virtual = fb_yres_virtual;
 	if (fb_dev_fd != -1) {
