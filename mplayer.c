@@ -1377,9 +1377,9 @@ if(identify) {
   if (sh_video) {
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
     if (sh_video->format >= 0x20202020)
-      mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", &sh_video->format);
+	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=%.4s\n", &sh_video->format);
     else
-      mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=%d\n", sh_video->format);
+	mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_FORMAT=0x%08X\n", sh_video->format);
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_BITRATE=%d\n", sh_video->i_bps*8);
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_WIDTH=%d\n", sh_video->disp_w);
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_VIDEO_HEIGHT=%d\n", sh_video->disp_h);
