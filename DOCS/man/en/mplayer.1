@@ -5796,7 +5796,7 @@ sh4
 .TP
 .B lumi_mask=<0.0\-1.0>
 Luminance masking is a 'psychosensory' setting that is supposed to
-make use of the fact that the human eye tends to notice less details
+make use of the fact that the human eye tends to notice fewer details
 in very bright parts of the picture.
 Luminance masking compresses bright areas stronger than medium ones,
 so it will save bits that can be spent again on other frames, raising
@@ -5818,7 +5818,7 @@ sane range
 .TP
 .B dark_mask=<0.0\-1.0>
 Darkness masking is a 'psychosensory' setting that is supposed to
-make use of the fact that the human eye tends to notice less details
+make use of the fact that the human eye tends to notice fewer details
 in very dark parts of the picture.
 Darkness masking compresses dark areas stronger than medium ones,
 so it will save bits that can be spent again on other frames, raising
@@ -6018,10 +6018,11 @@ use chroma too, doesn't work (correctly) with B frames currently
 .
 .TP
 .B nssew=<0\-100>
-If you prefer to keep some noise in your encoded video rather than
-filtering it away before encoding, this setting controls NSSE weight,
-where larger weights will result in more noise.
-0 NSSE is identical to SSE.
+This setting controls NSSE weight, where larger weights will result in
+more noise.
+0 NSSE is identical to SSE
+You may find this useful if you prefer to keep some noise in your encoded
+video rather than filtering it away before encoding.
 .
 .TP
 .B predia=<-99\-6>
@@ -6736,6 +6737,7 @@ This is required if you want a CBR (constant bitrate) encode.
 .TP
 .B iframe=<value>
 I frame frequency (default: 60)
+Raising their frequency usually improves quality.
 .
 .TP
 .B frameref=<value>
@@ -6770,6 +6772,12 @@ allowed to cause on any one pixel.
 Secondly, this parameter affects the threshold for difference across the
 edge being filtered.
 A positive value reduces blocking artifacts more, but will also smear details.
+.br
+For encodes that are intended to be reasonably high quality, you might
+want to turn it down a little bit.
+However, if your source material already has some blocking or noise
+which you would like to remove, or if it is animation, it may be a good
+idea to turn it up a little bit.
 .
 .TP
 .B deblockbeta=<-6\-6>
@@ -6780,6 +6788,7 @@ Affects the maximum allowed gradient within two adjacent blocks.
 .B cabac\ \ \ 
 Use CABAC (Context-Adaptive Binary Arithmetic Coding).
 Slows down encoding but should save 10-15% of the bits.
+Unless you are looking for speed, you should activate it.
 .
 .TP
 .B cabacidc=<value>
@@ -6847,6 +6856,8 @@ quantizer factor between P and B frames (default: 2.0)
 .B pass=<1|2>
 Enable 2-pass mode.
 The first pass saves statistics.
+It is recommanded to always encode in 2-pass mode as it leads to a better bit
+distribution and improves overall quality.
 .
 .TP
 .B qcomp=<0\-1>
@@ -6867,6 +6878,8 @@ Use all available interframe macroblock types (i16x16, i4x4, p16x16-4x4)
 The idea is to find the type and size that best describe a certain area
 of the picture, i.e.\& very effective for Anime, which usually contains
 large areas of the same color (default: i16x16, i4x4, p16x16-8x8).
+Depending on the source material, it can improve or degrade quality, use
+it with care.
 .
 .TP
 .B log=<-1\-3>
@@ -6889,6 +6902,7 @@ Adjust the amount of logging info printed to the screen.
 Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
 estimation decision process.
+It can improve quality significantly.
 .RSs
 0: halfpel only
 .br
