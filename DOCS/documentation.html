@@ -1793,7 +1793,7 @@ end
 <H2><A NAME="cygwin">6.7 Cygwin</A></H2>
 
 <P>The Cygwin port is still in its infancy. Currently there is no support for
-  Win32 DLLs, VCDs or OpenGL. SDL is known to distort sound and image or crash
+  Win32 DLLs or OpenGL. SDL is known to distort sound and image or crash
   on some systems. <A HREF="tech/patches.txt">Patches</A> are always welcome.
   Best results are achieved with the native DirectX video output driver
   (<CODE>-vo directx</CODE>) and the native Windows waveout audio driver
@@ -1813,6 +1813,23 @@ end
 
 <P>Instructions and files for making SDL run under Cygwin can be found on the
   <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</A>.</P>
+
+<P>You can play VCDs by playing the <CODE>.DAT</CODE> or <CODE>.MPG</CODE> files
+  that Windows exposes on VCDs.  It works like this (adjust for the drive letter
+  of your CD-ROM):</P>
+
+<P><CODE>mplayer d:/mpegav/avseq01.dat</CODE></P>
+
+<P><CODE>mplayer /cydrive/d/MPEG2/AVSEQ01.MPG</CODE></P>
+
+<P>DVDs also work, just set the DVD device correctly to whatever your CD-ROM
+  device is:</P>
+
+<P><CODE>mplayer -dvd &lt;title&gt; -dvd-device d:</CODE></P>
+
+<P>QuickTime DLLs have also been reported to work if you put them into the
+  default Windows DLL location, <CODE>C:\WINNT\system32</CODE> or
+  <CODE>C:\Windows\system</CODE> depending on your Windows version.</P>
 
 
 
