@@ -229,7 +229,6 @@ switch(d_video->demuxer->file_format){
    // fill aspect info:
    switch(picture.aspect_ratio_information){
      case 2:  // PAL/NTSC SVCD/DVD 4:3
-     case 4:  // SECAM 4:3? - XXX check with more files! 
      case 8:  // PAL VCD 4:3
      case 12: // NTSC VCD 4:3
        sh_video->aspect=4.0/3.0;
@@ -238,6 +237,9 @@ switch(d_video->demuxer->file_format){
      case 6:  // (PAL?)/NTSC Widescreen SVCD 16:9
        sh_video->aspect=16.0/9.0;
      break;
+     case 4:  // according to ISO-138182-2 Table 6.3
+       sh_video->aspect=2.21;
+       break;
      case 9: // Movie Type ??? / 640x480
        sh_video->aspect=0.0;
      break;
