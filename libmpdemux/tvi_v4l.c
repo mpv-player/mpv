@@ -298,7 +298,6 @@ static void init_v4l_audio(priv_t *priv)
 	    ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[i]);
 	}
 	
-	priv->audio[i].audio = i;
 	if (ioctl(priv->video_fd, VIDIOCGAUDIO, &priv->audio[i]) == -1)
 	{
 	    mp_msg(MSGT_TV, MSGL_ERR, "ioctl get audio failed: %s\n", strerror(errno));
@@ -338,13 +337,6 @@ static int init(priv_t *priv)
     if (tv_param_immediate == 1)
 	tv_param_noaudio = 1;
     
-    if (!tv_param_noaudio) {
-    }
-
-    if (priv->audio_device) {
-	audio_in_set_device(&priv->audio_in, priv->audio_device);
-    }
-
     priv->video_ringbuffer = NULL;
     priv->video_timebuffer = NULL;
     priv->audio_ringbuffer = NULL;
@@ -476,6 +468,10 @@ static int init(priv_t *priv)
 #else
 	audio_in_init(&priv->audio_in, AUDIO_IN_OSS);
 #endif
+
+	if (priv->audio_device) {
+	    audio_in_set_device(&priv->audio_in, priv->audio_device);
+	}
 
 	if (tv_param_audio_id < priv->capability.audios)
 	    priv->audio_id = tv_param_audio_id;
@@ -704,6 +700,12 @@ static int start(priv_t *priv)
     if (priv->audio[priv->audio_id].volume <= 0)
 	priv->audio[priv->audio_id].volume = 100;
     priv->audio[priv->audio_id].flags &= ~VIDEO_AUDIO_MUTE;
+    mp_msg(MSGT_TV, MSGL_V, "Starting audio capture\n");
+    mp_msg(MSGT_TV, MSGL_V, "id=%d volume=%d bass=%d treble=%d balance=%d mode=%s\n",
+	   priv->audio_id,
+	   priv->audio[priv->audio_id].volume, priv->audio[priv->audio_id].bass, priv->audio[priv->audio_id].treble,
+	   priv->audio[priv->audio_id].balance, audio_mode2name[priv->audio[priv->audio_id].mode]);
+    mp_msg(MSGT_TV, MSGL_V, " channels: %d\n", priv->audio_channels[priv->audio_id]);
     ioctl(priv->video_fd, VIDIOCSAUDIO, &priv->audio[priv->audio_id]);
 	    
     /* launch capture threads */

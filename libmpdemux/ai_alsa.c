@@ -105,7 +105,7 @@ int ai_alsa_init(audio_in_t *ai)
     
     err = snd_pcm_open(&ai->alsa.handle, ai->alsa.device, SND_PCM_STREAM_CAPTURE, 0);
     if (err < 0) {
-	mp_msg(MSGT_TV, MSGL_ERR, "Error opening audio");
+	mp_msg(MSGT_TV, MSGL_ERR, "Error opening audio: %s\n", snd_strerror(err));
 	return -1;
     }
     

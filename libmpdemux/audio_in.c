@@ -106,7 +106,7 @@ int audio_in_set_device(audio_in_t *ai, char *device)
 	ai->alsa.device = strdup(device);
 	/* mplayer cannot handle colons in arguments */
 	for (i = 0; i < strlen(ai->alsa.device); i++) {
-	    if (ai->alsa.device[i] == ',') ai->alsa.device[i] = ':';
+	    if (ai->alsa.device[i] == '.') ai->alsa.device[i] = ':';
 	}
 	return 0;
 #endif
