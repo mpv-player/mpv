@@ -309,7 +309,7 @@ GtkWidget * create_PopUpMenu( void )
       char tmp[32]; int i;
       for ( i=0;i < guiIntfStruct.VCDTracks;i++ )
        {
-        sprintf( tmp,MSGTR_MENU_Title,i+1 );
+        snprintf( tmp,32,MSGTR_MENU_Title,i+1 );
 	AddMenuItem( VCDTitleMenu,tmp,( (i+1) << 16 ) + evSetVCDTrack );
        }
      }
@@ -330,7 +330,7 @@ GtkWidget * create_PopUpMenu( void )
        char tmp[32]; int i;
        for ( i=0;i < guiIntfStruct.DVD.titles;i++ )
         {
-         sprintf( tmp,MSGTR_MENU_Title,i+1 );
+         snprintf( tmp,32,MSGTR_MENU_Title,i+1 );
          AddMenuItem( DVDTitleMenu,tmp,( (i+1) << 16 ) + evSetDVDTitle );
         }
       }
@@ -345,7 +345,7 @@ GtkWidget * create_PopUpMenu( void )
        char tmp[32]; int i;
        for ( i=0;i < guiIntfStruct.DVD.chapters;i++ )
         {
-         sprintf( tmp,MSGTR_MENU_Chapter,i+1 );
+         snprintf( tmp,32,MSGTR_MENU_Chapter,i+1 );
          AddMenuItem( DVDChapterMenu,tmp,( (i+1) << 16 ) + evSetDVDChapter );
         }
       }
@@ -378,7 +378,7 @@ GtkWidget * create_PopUpMenu( void )
        AddMenuItem( DVDSubtitleLanguageMenu,"None",( (unsigned short)-1 << 16 ) + evSetDVDSubtitle );
        for ( i=0;i < guiIntfStruct.DVD.nr_of_subtitles;i++ )
         {
-         strcpy( tmp,GetLanguage( guiIntfStruct.DVD.subtitles[i].language ) );
+	 snprintf( tmp,64,"%s",GetLanguage( guiIntfStruct.DVD.subtitles[i].language ) );
          AddMenuItem( DVDSubtitleLanguageMenu,tmp,( guiIntfStruct.DVD.subtitles[i].id << 16 ) + evSetDVDSubtitle );
         }
       }
