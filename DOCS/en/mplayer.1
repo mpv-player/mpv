@@ -1645,16 +1645,16 @@ Use _WIN_LAYER hint with default layer.
 Use _WIN_LAYER hint with layer number.
 .IPs "netwm"
 Force NETWM style.
-.IPs "none"
+.IPs "none\ "
 Don't set fullscreen window layer.
 .IPs "stays_on_top"
 Use _NETWM_STATE_STAYS_ON_TOP hint if available.
 .RE
 .PD 1
 
-It's possible to negate the modes by prefixing them with "\-"
+You can negate the modes by prefixing them with '-'.
 .br
-The default order is "layer,stays_on_top,above,fullscreen".
+The default order is layer,stays_on_top,above,fullscreen.
 It will be used as a fallback in case of specifying incorrect
 or unsupported modes.
 .br
