@@ -13,13 +13,13 @@ CYBERBLADE_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
 RADEON_VID=radeon_vid.so
 RADEON_SRCS=radeon_vid.c
 RADEON_OBJS=radeon_vid.o
-RADEON_LIBS=-L../../libdha -ldha -lm
+RADEON_LIBS=-L../../libdha -ldha -lm $(X_LIB)
 RADEON_CFLAGS=$(OPTFLAGS) -fPIC -I. -I..
 
 RAGE128_VID=rage128_vid.so
 RAGE128_SRCS=radeon_vid.c
 RAGE128_OBJS=rage128_vid.o
-RAGE128_LIBS=-L../../libdha -ldha
+RAGE128_LIBS=-L../../libdha -ldha -lm $(X_LIB)
 RAGE128_CFLAGS=$(OPTFLAGS) -fPIC -I. -I.. -DRAGE128
 
 PM3_VID=pm3_vid.so
