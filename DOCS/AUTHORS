@@ -37,6 +37,9 @@ Andreas Ackermann:  <asackerm@stud.informatik.uni-erlangen.de>
 Felix Bünemann: <Felix.Buenemann@gmx.de>
 - SDL driver
 
+BERECZ Szabolcs: <szabi@inf.elte.hu>
+- config file and command line parser (coming soon)
+
 Main testers:
   Gabucino
   Balazs Tibor (Tibcu)
