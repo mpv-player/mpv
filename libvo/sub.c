@@ -185,14 +185,15 @@ inline static void vo_update_text_progbar(mp_osd_obj_t* obj,int dxs,int dys){
         int elems=width/charw;
    	int x=(dxs-elems*charw-delimw)/2;
 	int delta = 0;
-	if (vo_osd_progbar_type>0 && vo_font->font[vo_osd_progbar_type]>=0){
-	    delta = vo_font->width[vo_osd_progbar_type]+vo_font->spacewidth;
-	    delta = (x-delta > 0) ? delta : x;
-	}
 	h=get_height(OSD_PB_START,h);
 	h=get_height(OSD_PB_END,h);
 	h=get_height(OSD_PB_0,h);
 	h=get_height(OSD_PB_1,h);
+	if (vo_osd_progbar_type>0 && vo_font->font[vo_osd_progbar_type]>=0){
+	    delta = vo_font->width[vo_osd_progbar_type]+vo_font->spacewidth;
+	    delta = (x-delta > 0) ? delta : x;
+	    h=get_height(vo_osd_progbar_type,h);
+	}
 	obj->bbox.x1=obj->x=x;
 	obj->bbox.y1=obj->y=y;
 	obj->bbox.x2=x+width+delimw;
