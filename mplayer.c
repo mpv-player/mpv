@@ -1274,7 +1274,7 @@ if(sh_audio){
   //const ao_info_t *info=audio_out->info;
   current_module="ao2_init";
   if(!(audio_out=init_best_audio_out(audio_driver_list,
-      (ao_plugin_cfg.plugin_list), // plugin flag
+      (ao_plugin_cfg.plugin_list!=NULL), // plugin flag
       force_srate?force_srate:sh_audio->samplerate*playback_speed,
       audio_output_channels?audio_output_channels:
       sh_audio->channels,audio_output_format?audio_output_format:

@@ -14,6 +14,8 @@
 
 #define video_out ((vo_functions_t*)(vf->priv))
 
+static int query_format(struct vf_instance_s* vf, unsigned int fmt); /* forward declaration */
+
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){

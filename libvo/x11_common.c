@@ -635,7 +635,7 @@ void vo_x11_setlayer( int layer )
  Atom            type;
  int             format;
  unsigned long   nitems, bytesafter;
- Atom          * args = NULL;
+ unsigned char   * args = NULL;
 
  if ( WinID >= 0 ) return;
  
