@@ -3136,6 +3136,52 @@ telecined, inserting this filter before them should make them more reliable.
 Currently only libmpeg2 exports the needed flags.
 If used on material that does not set them, the filter does nothing.
 .TP
+.B phase=[t|b|p|a|u|T|B|A|U][:v]
+Delay interlaced video by one field time so that the field order
+changes.
+The intended use is to fix PAL movies that have been captured with the
+opposite field order to the film-to-video transfer.
+The options are:
+.RSs
+.IPs t
+Capture field order top-first, transfer bottom-first.
+Filter will delay the bottom field.
+.IPs b
+Capture bottom-first, transfer top-first.
+Filter will delay the top field.
+.IPs p
+Capture and transfer with the same field order.
+This mode only exists for the documentation of the other options to refer to,
+but if you actually select it, the filter will faithfully do nothing ;-)
+.IPs a
+Capture field order determined automatically by field flags, transfer opposite.
+Filter selects among t and b modes on a frame by frame basis using field flags.
+If no field information is available, then this works just like u.
+.IPs u
+Capture unknown or varying, transfer opposite.
+Filter selects among t and b on a frame by frame basis by analyzing the
+images and selecting the alternative that produces best match between the
+fields.
+.IPs T
+Capture top-first, transfer unknown or varying.
+Filter selects among t and p using image analysis.
+.IPs B
+Capture bottom-first, transfer unknown or varying.
+Filter selects among b and p using image analysis.
+.IPs A
+Capture determined by field flags, transfer unknown or varying.
+Filter selects among t, b and p using field flags and image analysis.
+If no field information is available, then this works just like U.
+This is the default mode.
+.IPs U
+Both capture and transfer unknown or varying.
+Filter selects among t, b and p using image analysis only.
+.IPs v
+Verbose operation.
+Prints the selected mode for each frame and the average squared difference
+between fields for t, b, and p alternatives.
+.RE
+.TP
 .B telecine[=start]
 Apply 3:2 'telecine' process to increase framerate by 20%.
 This most likely will not work correctly with MPlayer, but it can

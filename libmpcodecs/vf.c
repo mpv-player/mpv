@@ -87,6 +87,7 @@ extern vf_info_t vf_info_yuvcsp;
 extern vf_info_t vf_info_kerndeint;
 extern vf_info_t vf_info_rgbtest;
 extern vf_info_t vf_info_qp;
+extern vf_info_t vf_info_phase;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
@@ -167,6 +168,7 @@ static vf_info_t* filter_list[]={
 #ifdef USE_LIBAVCODEC
     &vf_info_qp,
 #endif
+    &vf_info_phase,
     NULL
 };
 
