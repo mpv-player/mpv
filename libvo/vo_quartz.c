@@ -250,9 +250,11 @@ static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef
 			case kEventMouseDown:
 			{
 				EventMouseButton button;
+				short part;
+
 				GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(EventMouseButton), 0, &button);
 				
-				short part = FindWindow(mousePos,&tmpWin);
+				part = FindWindow(mousePos,&tmpWin);
 				
 				if(part == inMenuBar)
 				{
@@ -276,9 +278,11 @@ static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef
 			case kEventMouseWheelMoved:
 			{
 				int wheel;
+				short part;
+
 				GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(int), 0, &wheel);
 
-				short part = FindWindow(mousePos,&tmpWin);
+				part = FindWindow(mousePos,&tmpWin);
 				
 				if(part == inContent)
 				{
@@ -301,13 +305,13 @@ static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef
 static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus result = noErr;
+	UInt32_t d_width;
+	UInt32_t d_height;
 	UInt32 class = GetEventClass (event);
 	UInt32 kind = GetEventKind (event); 
 
 	result = CallNextEventHandler(nextHandler, event);
 	
-	uint32_t d_width;
-	uint32_t d_height;
 	aspect(&d_width,&d_height,A_NOZOOM);
 
 	if(class == kEventClassCommand)
@@ -462,10 +466,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	WindowAttributes	windowAttrs;
 	GDHandle			deviceHdl;
 	OSErr				qterr;
-	
-	//Get Main device info///////////////////////////////////////////////////
 	int i;
-	
+
+	//Get Main device info///////////////////////////////////////////////////
+
+
 	deviceHdl = GetMainDevice();
 	
 	for(i=0; i<device_id; i++)
