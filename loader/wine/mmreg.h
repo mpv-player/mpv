@@ -83,25 +83,6 @@ typedef struct {
 } WAVEFORMATEXTENSIBLE, *PWAVEFORMATEXTENSIBLE;
 #endif // !_WAVEFORMATEXTENSIBLE_
 
-//
-//  Extended PCM waveform format structure based on WAVEFORMATEXTENSIBLE.
-//  Use this for multiple channel and hi-resolution PCM data
-//
-typedef WAVEFORMATEXTENSIBLE    WAVEFORMATPCMEX; /* Format.cbSize = 22 */
-typedef WAVEFORMATPCMEX       *PWAVEFORMATPCMEX;
-typedef WAVEFORMATPCMEX NEAR *NPWAVEFORMATPCMEX;
-typedef WAVEFORMATPCMEX FAR  *LPWAVEFORMATPCMEX;
-
-//
-//  Extended format structure using IEEE Float data and based
-//  on WAVEFORMATEXTENSIBLE.  Use this for multiple channel
-//  and hi-resolution PCM data in IEEE floating point format.
-//
-typedef WAVEFORMATEXTENSIBLE          WAVEFORMATIEEEFLOATEX; /* Format.cbSize = 22 */
-typedef WAVEFORMATIEEEFLOATEX       *PWAVEFORMATIEEEFLOATEX;
-typedef WAVEFORMATIEEEFLOATEX NEAR *NPWAVEFORMATIEEEFLOATEX;
-typedef WAVEFORMATIEEEFLOATEX FAR  *LPWAVEFORMATIEEEFLOATEX;
-
 
 /* WAVE form wFormatTag IDs */
 
