@@ -26,7 +26,7 @@ void mp_msg_init(int verbose){
 
 void mp_msg_c( int x, const char *format, ... ){
     va_list va;
-    char tmp[128];
+    char tmp[8*80];
     if((x&255)>mp_msg_levels[x>>8]) return; // do not display
     va_start(va, format);
     vsnprintf( tmp,128,format,va );
