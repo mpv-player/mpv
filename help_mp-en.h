@@ -85,7 +85,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Trying to force audio codec driver family %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Can't find audio codec for forced driver family, fallback to other drivers.\n"
 #define MSGTR_CantFindAudioCodec "Can't find codec for audio format 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Try to upgrade %s from etc/codecs.conf\n*** If it's still not OK, then read DOCS/CODECS!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Try to upgrade %s from etc/codecs.conf\n*** If it's still not OK, then read DOCS/codecs.html!\n"
 #define MSGTR_CouldntInitAudioCodec "Couldn't initialize audio codec! -> nosound\n"
 #define MSGTR_TryForceVideoFmt "Trying to force video codec driver family %d ...\n"
 #define MSGTR_CantFindVfmtFallback "Can't find video codec for forced driver family, fallback to other drivers.\n"
@@ -158,7 +158,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Can't seek in raw .AVI streams! (index required, try with the -idx switch!)  \n"
 #define MSGTR_CantSeekFile "Can't seek in this file!  \n"
 
-#define MSGTR_EncryptedVOB "Encrypted VOB file (not compiled with libcss support)! Read file DOCS/DVD\n"
+#define MSGTR_EncryptedVOB "Encrypted VOB file (not compiled with libcss support)! Read file DOCS/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Encrypted stream but authentication was not requested by you!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Compressed headers not (yet) supported!\n"
@@ -242,12 +242,12 @@ static char help_text[]=
 #define MSGTR_SKIN_BITMAP_UnknownFileType "unknown file type ( %s )\n"
 #define MSGTR_SKIN_BITMAP_ConvertError "24 bit to 32 bit convert error ( %s )\n"
 #define MSGTR_SKIN_BITMAP_UnknownMessage "unknown message: %s\n"
-#define MSGTR_SKIN_FONT_NotEnoughtMemory "not enought memory\n"
+#define MSGTR_SKIN_FONT_NotEnoughtMemory "not enough memory\n"
 #define MSGTR_SKIN_FONT_TooManyFontsDeclared "too many fonts declared\n"
 #define MSGTR_SKIN_FONT_FontFileNotFound "font file not found\n"
 #define MSGTR_SKIN_FONT_FontImageNotFound "font image file not found\n"
 #define MSGTR_SKIN_FONT_NonExistentFontID "non-existent font identifier ( %s )\n"
 #define MSGTR_SKIN_UnknownParameter "unknown parameter ( %s )\n"
-#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] not enought memory.\n"
+#define MSGTR_SKINBROWSER_NotEnoughMemory "[skinbrowser] not enough memory.\n"
 
 #endif
