@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.20  2001/05/02 23:21:27  acki2
+ * - now we use fastmemcpy() for copying. Saves about 25% of copying time on K6-2+
+ *
  * Revision 1.19  2001/05/01 22:37:37  acki2
  * - now features 24->32 conversion (this is actually faster than letting the
  *   codec produce depth 32 in the first place for avis :-))) )
@@ -113,6 +116,8 @@ LIBVO_EXTERN( dga )
 
 #include "x11_common.h"
 
+#include "fastmemcpy.h"
+	
 static vo_info_t vo_info =
 {
 #ifdef HAVE_DGA2
@@ -384,7 +389,17 @@ static uint32_t draw_frame( uint8_t *src[] ){
   
   switch(SRC_MODE.vdm_conversion_func){
   case VDM_CONV_NATIVE:
-    rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
+  {int i;
+   for(i=0; i< vo_dga_lines; i++){
+        memcpy(d, s, vo_dga_bytes_per_line);
+	d+=vo_dga_vp_skip;
+	d+=vo_dga_bytes_per_line;
+	s+=vo_dga_bytes_per_line;
+   }
+  }	  
+	  
+	  
+	  //    rep_movsl(d, s, lpl, vo_dga_vp_skip, numlines );
     break;
   case VDM_CONV_15TO16:
     printf("vo_dga: 15 to 16 not implemented yet!!!\n");
