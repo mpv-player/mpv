@@ -1,3 +1,9 @@
+mplayer (0.90-3) unstable; urgency=low
+
+  * Remove configuration files on purge.
+
+ -- Diego Biurrun <diego@biurrun.de>  Sun,  1 Sep 2002 11:03:13 +0200
+
 mplayer (0.90-2) unstable; urgency=low
 
   * Use the confdir we compile with in the helper scripts
