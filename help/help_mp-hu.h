@@ -1,7 +1,7 @@
 // Translated by: Gabucino the Almighty! <gabucino@mplayerhq.hu>
 // Send me money/hw/babes!
 // ... Okay enough of the hw, now send the other two!
-// Sync'ed with help_mp-en.h 1.97
+// Sync'ed with help_mp-en.h 1.105
 
 // ========================= MPlayer help ===========================
 
