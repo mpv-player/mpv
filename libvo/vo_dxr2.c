@@ -73,7 +73,8 @@ static int ck_g = 0;
 static int ck_bmin = 0x40;
 static int ck_bmax = 0xFF;
 static int ck_b = 0xFF;
-
+static int cr_left = 0, cr_right = 0;
+static int cr_top = 55, cr_bot = 300;
 
 config_t dxr2_opts[] = {
   { "overlay", &use_ol, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -125,6 +126,10 @@ config_t dxr2_opts[] = {
   { "ck-bmin", &ck_bmin, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
   { "ck-bmax", &ck_bmax, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
   { "ck-b", &ck_b, CONF_TYPE_INT, CONF_RANGE, 0, 0xFF, NULL},
+  { "cr-left", &cr_left, CONF_TYPE_INT, CONF_RANGE, 0, 500, NULL},
+  { "cr-right", &cr_right, CONF_TYPE_INT, CONF_RANGE, 0, 500, NULL},
+  { "cr-top", &cr_top, CONF_TYPE_INT, CONF_RANGE, 0, 500, NULL},
+  { "cr-bot", &cr_bot, CONF_TYPE_INT, CONF_RANGE, 0, 500, NULL},
 
   { NULL,NULL, 0, 0, 0, 0, NULL}
 };
@@ -414,10 +419,10 @@ static int dxr2_set_vga_params(dxr2_vgaParams_t* vga,int detect) {
   dxr2_twoArg_t win;
   dxr2_fourArg_t crop;
 
-  crop.arg1=0;
-  crop.arg2=0;
-  crop.arg3=55;
-  crop.arg4=300;
+  crop.arg1= cr_left;
+  crop.arg2= cr_right;
+  crop.arg3 = cr_top;
+  crop.arg4 = cr_bot;
   ioctl(dxr2_fd, DXR2_IOC_SET_OVERLAY_CROPPING, &crop);
   
   oc.arg1 = 0x40;
