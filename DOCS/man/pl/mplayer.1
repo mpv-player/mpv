@@ -1,4 +1,4 @@
-.\" synced with 1.728
+.\" synced with 1.738
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1690,7 +1690,7 @@ Korzysta z miksera innego ni¿ domy¶lny /dev/\:mixer.
 Przy ALSA jest to nazwa miksera.
 .
 .TP
-.B \-mixer-channel <linia miksera> (tylko \-ao oss i \-ao alsa)
+.B \-mixer-channel <linia miksera>[, indeks miksera] (tylko \-ao oss i \-ao alsa)
 Ta opcja mówi MPlayerowi, ¿eby u¿y³ innego kana³u do sterowania g³o¶no¶ci± ni¿
 domy¶lne PCM.
 Czê¶æ mo¿liwo¶ci dla OSS to
@@ -1699,6 +1699,11 @@ Czê¶æ mo¿liwo¶ci dla OSS to
 /usr/\:include/\:linux/\:soundcard.h.
 Dla ALSA mo¿esz u¿yæ nazw, które, na przyk³ad, pokazuje alsamixer, jak
 .B Master, Line, PCM.
+.br
+.I INFORMACJA:
+Nazwy kana³ów miksera ALSA z do³±czonym numerem musz± byæ zapisane w formacie
+<nazwa, numer>, np.\& kana³ nazwany 'PCM 1' w alsamixer musi byæ zamieniony na
+.BR PCM,1.
 .
 .TP
 .B \-nowaveheader (tylko \-ao pcm)
@@ -2814,7 +2819,7 @@ Pozwala podaæ nazwê zbioru wyj¶ciowego (domy¶lnie ./md5)
 .PD 1
 .
 .TP
-.B md5sum\ \ \ \ 
+.B md5sum\ 
 Oblicza sumê md5 ka¿dej klatki i zapisuje je wszystkie do pliku.
 Obs³uguje przestrzenie kolorów RGB24 i YV12.
 Przydatne przy debugowaniu.
@@ -2889,7 +2894,7 @@ wspó³czynnik optymalizacji (domy¶lnie: 100)
 wspó³czynnik wyg³adzania (domy¶lnie: 0)
 .IPs quality=<0\-100>
 wspó³czynnik jako¶ci (domy¶lnie: 75)
-.IPs outdir=<warto¶æ>
+.IPs outdir=<nazwa\ katalogu>
 Okre¶la katalog, w którym bêd± zapisywane pliki JPEG.
 Je¿eli nie podano ¿adnej warto¶ci, wszystkie pliki bêd± zapisane
 w bie¿±cym katalogu.
@@ -2927,18 +2932,14 @@ na dole obrazu.
 Zapisuje pliki PNM w trybie surowym (raw) (domy¶lnie).
 .IPs ascii
 Zapisuje pliki PNM w trybie ASCII.
-.IPs outdir=<warto¶æ>
-Okre¶la katalog, w którym bêd± zachowane pliki PNM.
-Je¿eli parametr nie zosta³ podany, wszystkie pliki PNM zostan± zapisane do
-bie¿±cego katalogu.
+.IPs outdir=<nazwa\ katalogu>
+Okre¶la katalog, w którym bêd± zachowane pliki PNM (domy¶lnie: ./).
 .IPs subdirs=<warto¶æ>
-Je¿eli parametr zostal okreslony, MPlayer utworzy ponumerowane podkatalogi
-z podanym prefiksem.
-Je¿eli opcja zosta³a pominiêta, ¿adne podkatalogi nie zostan± stworzone
-a wsztstkie pliki PNM zostan± zapisane w tym samym katalogu.
-.IPs maxfiles=<warto¶æ>
-Maksymalna ilo¶æ plików PNM jakie bêd± zachowane w ka¿dym podkatalogu
-(je¶li opcja subdirs zosta³a okreslona).
+MPlayer utworzy ponumerowane podkatalogi z podanym prefiksem.
+Domy¶lnie ¿adne podkatalogi nie zostan± stworzone
+a wszystkie pliki PNM zostan± zapisane w tym samym katalogu.
+.IPs maxfiles=<warto¶æ> (tylko z subdirs)
+Maksymalna ilo¶æ plików PNM jakie bêd± zachowane w ka¿dym podkatalogu.
 Warto¶æ musi byæ wiêksza lub równa 1 (domy¶lnie: 1000).
 .RE
 .PD 1
@@ -3785,8 +3786,9 @@ nazwa formatu taka jak rgb15, bgr24, yv12, itp (domy¶lnie: yv12)
 .B pp[=filtr1[:opcja1[:opcja2...]]/\:[-]filtr2...] (zobacz tak¿e \-pphelp)
 Ta opcja uruchamia okre¶lony ³añcuch podfiltrów postprocessingu.
 Podfiltry musz± byæ oddzielone znakiem "/" i mog± byæ wy³±czone przez
-poprzedzenie ich kombinacj± "'\-". Zakres podfiltru mo¿e zostaæ okre¶lony przez
-dodanie ":" i "a", "c" lub "y" (domy¶lnie: c):
+poprzedzenie ich kombinacj± "'\-".
+Zakres podfiltru mo¿e zostaæ okre¶lony przez dodanie ":" i "a", "c"
+lub "y" (domy¶lnie: c):
 .PD 0
 .RSs
 .IPs a
@@ -5154,6 +5156,27 @@ drukuje dodatkowe opcje i informacje o ustawieniach.
 .PD 1
 .
 .
+.SS toolame (\-toolameopts)
+.
+.TP
+.B br=<0\-384> (tylko tryb CBR)
+Okre¶la bitrate w kBitach.
+.TP
+.B mode=<stereo  |  jstereo  |  mono  |  dual>
+(domy¶lnie: mono dla d¼wiêku jednokana³owego, w przeciwnym wypadku stereo)
+.TP
+.B psy=<0\-3>
+model psychoakustyczny (domy¶lnie: 2)
+.TP
+.B errprot=<0 | 1>
+W³±cza ochronê przed b³êdami.
+.TP
+.B debug=<0\-10>
+poziom debugowania
+.RE
+.PD 1
+.
+.
 .SS lavc (\-lavcopts)
 Wiele opcji lavc jest wyspecjalizowanych i sk±po udokumentowanych.
 Szczegó³owe informacje znajdziesz w ¼ród³ach.
@@ -5330,7 +5353,7 @@ log (niska jako¶æ)
 .IPs 3
 phods (niska jako¶æ)
 .IPs 4
-EPZS (domy¶lna)
+EPZS: rozmiar diamentu jest równy 1 (domy¶lna)
 .IPs 5
 X1 (eksperymentalna)
 .RE
@@ -5365,6 +5388,7 @@ Dzia³a tak samo jak mbd=1, trzymany ze wzglêdu na kompatybilno¶æ.
 .TP
 .B v4mv\ \ \ 
 Zezwala na 4 wektory ruchu w ka¿dym makrobloku (trochê lepsza jako¶æ).
+Dzia³a lepiej w parze z mbd>0.
 .
 .TP
 .B obmc\ \ \ 
@@ -5433,10 +5457,10 @@ podobnie jak tryb "turbo".
 W trybie dwuprzej¶ciowym drugie przej¶cie (vpass=2) czyta plik ze statystykami
 i opiera decyzje o kontroli tempa na nim.
 .br
-W trybie trójprzej¶ciowym drugie przej¶cie (vpass=3, to nie b³±d ;-) )
+W trybie trójprzej¶ciowym drugie przej¶cie (vpass=3, to nie b³±d)
 robi obie rzeczy: Najpierw czyta statystyki z pliku, pó¼niej je nadpisuje.
-(Mo¿e bêdziesz chcia³ zachowaæ kopiê pliku divx2pass.log zanim to siê stanie,
-je¶li istnieje mo¿liwo¶æ, ¿e bêdiesz musia³ przerwaæ dzia³anie MEncodera).
+Mo¿e bêdziesz chcia³ zachowaæ kopiê pliku divx2pass.log zanim to siê stanie,
+je¶li istnieje mo¿liwo¶æ, ¿e bêdiesz musia³ przerwaæ dzia³anie MEncodera.
 Mo¿esz u¿ywaæ wszystkich opcji kodowania, poza tymi obci±¿aj±cymi procesor
 w znacznym stopniu (jak "qns").
 .br
@@ -5488,6 +5512,7 @@ Parametr proporcji mo¿e byæ podany jako stosunek lub liczba rzeczywista.
 Podobnie jak opcja aspect, ale proporcja wyliczana jest automatycznie, bior±c
 pod uwagê wszystkie filtry dostrajaj±ce (crop/\:expand/\:scale/\:itp) podane w
 ³añcuchu.
+Nie powoduje spadku wydajno¶ci, wiêc mo¿esz j± mieæ spokojnie zawsze w³±czon±.
 .
 .TP
 .B vbitrate=<warto¶æ>
@@ -5831,7 +5856,11 @@ sh4
 .
 .TP
 .B lumi_mask=<0.0\-1.0>
-maskowanie jasno¶ci
+Maskowanie jasno¶ci jest "psychosensorycznym" parametrem, który wykorzystuje
+fakt, ¿e ludzkie oko widzi mniej szczegó³ów na bardzo jasnych polach obrazu.
+Kompresuje on mocniej jasne obszary ni¿ te o ¶redniej jasno¶ci, wiêc zachowa to
+kilka bitów, które mog± byæ wykorzystane przez nastêpne klatki, podnosz±c ogóln±,
+subiektywn± jako¶æ, przy jednoczesnym, prawdopodobnym spadku warto¶ci PSNR.
 .br
 .I UWAGA:
 B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
@@ -5848,7 +5877,11 @@ rozs±dny zakres
 .
 .TP
 .B dark_mask=<0.0\-1.0>
-maskowanie ciemno¶ci
+Maskowanie jasno¶ci jest "psychosensorycznym" parametrem, który wykorzystuje
+fakt, ¿e ludzkie oko widzi mniej szczegó³ów na bardzo ciemnych polach obrazu.
+Kompresuje on mocniej ciemne obszary ni¿ te o ¶redniej jasno¶ci, wiêc zachowa to
+kilka bitów, które mog± byæ wykorzystane przez nastêpne klatki, podnosz±c ogóln±,
+subiektywn± jako¶æ, przy jednoczesnym, prawdopodobnym spadku warto¶ci PSNR.
 .br
 .I UWAGA:
 B±d¼ ostro¿ny, zbyt du¿e warto¶ci mog± spowodowaæ okropne rzeczy.
@@ -6045,9 +6078,10 @@ wykorzystuje te¿ barwê, obecnie nie dzia³a (prawid³owo) z klatkami typu B
 .PD 1
 .
 .TP
-.B nsse_weight=<0\-100>
-Waga NSSE, wiêksze warto¶ci zaowocuj± wiêkszymi szumami, warto¶æ 0 dla NSSE
-jest równowa¿na z SSE.
+.B nssew=<0\-100>
+Je¶li wolisz zachowaæ jakie¶ szumy w zakodowanym video, ni¿ przefiltrowaæ je
+przed kodowaniem, ten parametr kontroluje wagê NSSE, wiêksze warto¶ci zaowocuj±
+wiêkszymi szumami, warto¶æ 0 dla NSSE jest równowa¿na z SSE.
 .
 .TP
 .B predia=<-99\-6>
@@ -6056,6 +6090,17 @@ Typ i rozmiar diamentu dla wstêpnego przej¶cia przewidywania ruchu
 .TP
 .B dia=<-99\-6>
 Typ i rozmiar diamentu dla przewidywania ruchu
+Preces wyszukiwania ruchu jest iteracyjny.
+Korzystanie z ma³ego diamentu nie ogranicza przeszukiwania tylko do ma³ych
+wektorów ruchu, zwiêksza siê jednak prawdopodobieñstwo zatrzymania przed
+znalezieniem tego najlepszego szczególnie, gdy obraz zawiera szum.
+Wiêksze diamenty pozwalaj± na wyszukiwanie najlepszego w szerszym zakresie,
+dlatego te¿ s± wolniejsze ale daj± leszp± jako¶æ.
+.br
+Wielkie, normalne diamenty s± lepsze ni¿ te przystosowuj±ce kszta³ty.
+.br
+Diamenty przystosowuj±ce kszta³t s± dobrym kompromisem miêdzy szybko¶ci±
+a jako¶ci±.
 .br
 .I INFORMACJA:
 Rozmiary normalnych diamentów i tych przystosowuj±cych kszta³ty nie maj±
@@ -6066,7 +6111,7 @@ diament przystosowuj±cy kszta³t (szybkie) o rozmiarze 3
 .IPs -2
 diament przystosowuj±cy kszta³t (szybkie) o rozmiarze 2
 .IPs -1
-eksperymentalne
+trochê wyj±tkowe: Mo¿e byæ wolniejszy i/lub lepszy ni¿ dia=-2.
 .IPs  1
 normalny diament o rozmiarze=1 (domy¶lnie) =diament typu EPZS
 .nf
@@ -6874,7 +6919,7 @@ Uruchamia tryb dwuprzej¶ciowy.
 Pierwsze przej¶cie zachowuje statystyki.
 .
 .TP
-.B qcompress=<0\-1>
+.B qcomp=<0\-1>
 Kompresja kwantyzatora (domy¶lnie: 0.6).
 Wp³ywa na kontrolê tempa: ni¿sza warto¶æ sprawia, ¿e bitrate
 jest bardziej sta³y, podczas gdy wy¿sza, sprawia, ¿e parametr kwantyzacji
@@ -6911,6 +6956,25 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .REss
 .
 .TP
+.B subq=<0\-5>
+Dopasowuje jako¶æ udoskonalenia subpel.
+Ten parametr kontroluje kompromis miêdzy jako¶ci± a szybko¶ci± bior±cy
+udzia³ w procesie podejmowania decyzji dotycz±cych  przewidywania ruchu.
+.RSs
+0: tylko halfpel
+.br
+1: 1 iteracja qpel na wygrywaj±cym kandydacie (domy¶lnie)
+.br
+2: 2 iteracj2 qpel na wygrywaj±cym kandydacie
+.br
+3: halfpel na wszystkich typach makrobloków (MB), qpel na zwyciêzcy
+.br
+4: qpel na wszystkim
+.br
+5: wiêcej iteracji qpel
+.REss
+.
+.TP
 .B psnr\ \ \ 
 Drukuje statystyki stosunku sygna³u do szumu.
 .
@@ -6939,7 +7003,7 @@ plik konfiguracyjny GUI
 .
 .TP
 ~/.mplayer/\:gui.pl
-playlista GUI
+lista odtwarzania GUI
 .
 .TP
 ~/.mplayer/\:font/
