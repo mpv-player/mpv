@@ -253,6 +253,11 @@ extern "C" int demux_rtp_fill_buffer(demuxer_t* demuxer, demux_stream_t* ds) {
       break;
     }
     
+#ifdef DEBUG_PRINT_DISCARDED_PACKETS
+    RTPState* rtpState = (RTPState*)(demuxer->priv);
+    ReadBufferQueue* bufferQueue = ds == demuxer->video ? rtpState->videoBufferQueue : rtpState->audioBufferQueue;
+    fprintf(stderr, "Discarding %s packet (%fs behind)\n", bufferQueue->tag(), ptsBehind);
+#endif
     free_demux_packet(dp); // give back this packet, and get another one
   }
 
