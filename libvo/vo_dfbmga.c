@@ -727,7 +727,7 @@ config( uint32_t width, uint32_t height,
           mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: CRTC2 using %s buffering\n",
                   dlc.buffermode == DLBM_TRIPLE ? "triple" :
                   dlc.buffermode == DLBM_BACKVIDEO ? "double" : "single" );
-          mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: CRTC2 surface %dx%d %s\n", dlc.width, dlc.height, pixelformat_name( dlc.pixelformat ) );
+          mp_msg( MSGT_VO, MSGL_INFO, "vo_dfbmga: CRTC2 surface %dx%d %s\n", screen_width, screen_height, pixelformat_name( dlc.pixelformat ) );
      } else {
           use_spic      = 0;
      }
