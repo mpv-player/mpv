@@ -57,32 +57,21 @@ static vo_info_t vo_info =
 static void Display_Image ( XImage * myximage,unsigned char *ImageData );
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 
-/* since it doesn't seem to be defined on some platforms */
-int XShmGetEventBase( Display* );
-
 /* local data */
 static unsigned char *ImageData;
 
 /* X11 related variables */
-//static Display *mDisplay;
 static XImage *myximage;
 static int depth,bpp,mode;
 static XWindowAttributes attribs;
-
-//static int vo_dwidth,vo_dheight;
 
 static int Flip_Flag;
 static int zoomFlag;
 
 #ifdef HAVE_SHM
-
 #include <sys/ipc.h>
 #include <sys/shm.h>
 #include <X11/extensions/XShm.h>
-
-//static int HandleXError _ANSI_ARGS_( ( Display * dpy,XErrorEvent * event ) );
-static void InstallXErrorHandler ( void );
-static void DeInstallXErrorHandler ( void );
 
 static int Shmem_Flag;
 static int Quiet_Flag;
@@ -90,18 +79,8 @@ static XShmSegmentInfo Shminfo[1];
 static int gXErrorFlag;
 static int CompletionType=-1;
 
-static void InstallXErrorHandler()
-{
-        //XSetErrorHandler( HandleXError );
-        XFlush( mDisplay );
-}
-
-static void DeInstallXErrorHandler()
-{
-        XSetErrorHandler( NULL );
-        XFlush( mDisplay );
-}
-
+/* since it doesn't seem to be defined on some platforms */
+int XShmGetEventBase( Display* );
 #endif
 
 static uint32_t image_width;
@@ -157,8 +136,6 @@ static void getMyXImage()
     if ( !Quiet_Flag ) printf( "Shared memory not supported\nReverting to normal Xlib\n" );
    }
  if ( Shmem_Flag ) CompletionType=XShmGetEventBase( mDisplay ) + ShmCompletion;
-
- InstallXErrorHandler();
 
  if ( Shmem_Flag )
   {
@@ -228,8 +205,6 @@ static void getMyXImage()
    ImageData=myximage->data;
 #ifdef HAVE_SHM
   }
-
-  DeInstallXErrorHandler();
 #endif
 }
 
@@ -256,8 +231,6 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  int vm=0;
 // int interval, prefer_blank, allow_exp, nothing;
  unsigned int fg,bg;
- char *hello=( title == NULL ) ? "X11 render" : title;
-// char *name=":0.0";
  XSizeHints hint;
  XEvent xev;
  XGCValues xgcv;
@@ -269,6 +242,9 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
  static uint32_t vm_width;
  static uint32_t vm_height;
 #endif
+
+ if (!title)
+    title = strdup("MPlayer X11 (XImage/Shm) render");
 
  in_format=format;
  srcW= width;
@@ -370,7 +346,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     vo_hidecursor(mDisplay,vo_window);
     if ( fullscreen ) vo_x11_decoration( mDisplay,vo_window,0 );
     XSelectInput( mDisplay,vo_window,StructureNotifyMask );
-    XSetStandardProperties( mDisplay,vo_window,hello,hello,None,NULL,0,&hint );
+    XSetStandardProperties( mDisplay,vo_window,title,title,None,NULL,0,&hint );
     XMapWindow( mDisplay,vo_window );
 #ifdef HAVE_XINERAMA
    vo_x11_xinerama_move(mDisplay,vo_window);
@@ -382,7 +358,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
     XSync( mDisplay,False );
     vo_gc=XCreateGC( mDisplay,vo_window,0L,&xgcv );
 
-    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask );
+    XSelectInput( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | ButtonPressMask | ButtonReleaseMask);
 
 #ifdef HAVE_XF86VM
     if ( vm )
@@ -610,11 +586,18 @@ static uint32_t control(uint32_t request, void *data, ...)
 	Window root;
 
         vo_x11_decoration( mDisplay,vo_window,0 );
+#ifdef LOCAL_LOOKUP
 	XGetGeometry(mDisplay, vo_window, &root, &foo, &foo,
 		     &vo_fs_oldwidth, &vo_fs_oldheight, &foo, &foo);
 	    
         XTranslateCoordinates(mDisplay, vo_window, root, 0, 0,
 				  &vo_fs_oldx, &vo_fs_oldy,(Window *) &foo);
+#else
+	vo_fs_oldwidth = vo_dwidth;
+	vo_fs_oldheight = vo_dheight;
+	vo_fs_oldx = vo_dx;
+	vo_fs_oldy = vo_dy;
+#endif
 
 	mp_msg(MSGT_VO,MSGL_V,"X11 Fullscreen: saved old place: %dx%d-%dx%d\n",
 	    vo_fs_oldx, vo_fs_oldy, vo_fs_oldwidth, vo_fs_oldheight);
@@ -632,9 +615,11 @@ static uint32_t control(uint32_t request, void *data, ...)
 	    vo_fs_oldwidth, vo_fs_oldheight);
 	vo_x11_decoration( mDisplay,vo_window,1 );
 
+#ifdef LOCAL_LOOKUP
 	/* restore */
 	vo_dwidth = vo_fs_oldwidth;
 	vo_dheight = vo_fs_oldheight;
+#endif
 	
 	/* clean */
 	vo_fs_oldwidth = -1;
