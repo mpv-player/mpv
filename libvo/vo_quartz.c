@@ -9,12 +9,12 @@
 	
 	MPlayer Mac OSX Quartz video out module.
 	
-	todo:	-RGB32 color space support
+	todo:	-key binding to set zoom, a la quicktime
 			-screen overlay output
 			-while mouse button down event mplayer is locked, fix that
 			-Enable live resize
 			-fix menu
-			-quit properly when using close button
+			-RGB32 lost HW accel in fullscreen
 			-(add sugestion here)
  */
 
@@ -92,6 +92,12 @@ static int device_id;
 
 static WindowRef theWindow = NULL;
 static WindowGroupRef winGroup = NULL;
+static CGContextRef context;
+static CGRect bounds;
+
+static CGDataProviderRef dataProviderRef;
+static CGImageAlphaInfo alphaInfo;
+static CGImageRef image;
 
 static Rect imgRect; // size of the original image (unscaled)
 static Rect dstRect; // size of the displayed image (after scaling)
@@ -389,6 +395,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	aspect_save_screenres(device_width, device_height);
 
 	aspect(&d_width,&d_height,A_NOZOOM);
+	
+	if(image_data)
+		free(image_data);
+	
+	image_data = malloc(image_size);
 
 	//Create player window//////////////////////////////////////////////////
 	windowAttrs =   kWindowStandardDocumentAttributes
@@ -420,6 +431,23 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	
 	switch (image_format) 
 	{
+		case IMGFMT_RGB32:
+		{
+			CreateCGContextForPort (GetWindowPort (theWindow), &context);
+			
+			dataProviderRef = CGDataProviderCreateWithData (0, image_data, imgRect.right * imgRect.bottom * 4, 0);
+			
+			image = CGImageCreate   (imgRect.right,
+									 imgRect.bottom,
+									 8,
+									 image_depth,
+									 ((imgRect.right*32)+7)/8,
+									 CGColorSpaceCreateDeviceRGB(),
+									 kCGImageAlphaNoneSkipFirst,
+									 dataProviderRef, 0, 1, kCGRenderingIntentDefault);
+			break;
+		}
+			
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
@@ -623,6 +651,13 @@ static void flip_page(void)
 {
 	switch (image_format) 
 	{
+		case IMGFMT_RGB32:
+		{
+			CGContextDrawImage (context, bounds, image);
+			CGContextFlush (context);
+		}
+		break;
+			
 		case IMGFMT_YV12:
 		case IMGFMT_IYUV:
 		case IMGFMT_I420:
@@ -676,6 +711,10 @@ static uint32_t draw_frame(uint8_t *src[])
 {
 	switch (image_format)
 	{
+		case IMGFMT_RGB32:
+			memcpy(image_data,src[0],image_size);
+			return 0;
+			
 		case IMGFMT_UYVY:
 		case IMGFMT_YUY2:
 			memcpy_pic(((char*)P), src[0], imgRect.right * 2, imgRect.bottom, imgRect.right * 2, imgRect.right * 2);
@@ -688,6 +727,11 @@ static uint32_t query_format(uint32_t format)
 {
 	image_format = format;
 	image_qtcodec = 0;
+
+	if (format == IMGFMT_RGB32)
+	{
+		return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN;
+    }
     
     if ((format == IMGFMT_YV12) || (format == IMGFMT_IYUV) || (format == IMGFMT_I420))
 	{
@@ -713,14 +757,27 @@ static uint32_t query_format(uint32_t format)
 static void uninit(void)
 {
 	OSErr qterr;
-			
-	if (EnterMoviesDone)
+	
+	switch (image_format)
 	{
-		qterr = CDSequenceEnd(seqId);
-		if (qterr)
+		case IMGFMT_YV12:
+		case IMGFMT_IYUV:
+		case IMGFMT_I420:
+		case IMGFMT_UYVY:
+		case IMGFMT_YUY2:
 		{
-			mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: CDSequenceEnd (%d)\n", qterr);
+			if (EnterMoviesDone)
+			{
+				qterr = CDSequenceEnd(seqId);
+				if (qterr)
+				{
+					mp_msg(MSGT_VO, MSGL_ERR, "Quartz error: CDSequenceEnd (%d)\n", qterr);
+				}
+			}
+			break;
 		}
+		default:
+			break;
 	}
 
 	ShowMenuBar();
@@ -905,22 +962,41 @@ void window_resized()
 	RGBColor blackC = { 0x0000, 0x0000, 0x0000 };
     RGBForeColor( &blackC );
     PaintRect( &winRect );
-
-	long scale_X = FixDiv(Long2Fix(dstRect.right - dstRect.left),Long2Fix(imgRect.right));
-	long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top),Long2Fix(imgRect.bottom));
-
-	SetIdentityMatrix(&matrix);
-	if (((dstRect.right - dstRect.left)   != imgRect.right) || ((dstRect.bottom - dstRect.right) != imgRect.bottom))
+	
+	switch (image_format)
 	{
-		ScaleMatrix(&matrix, scale_X, scale_Y, 0, 0);
-	      
-		if (padding > 0)
+		case IMGFMT_RGB32:
 		{
-			TranslateMatrix(&matrix, Long2Fix(dstRect.left), Long2Fix(dstRect.top));
+			bounds = CGRectMake(dstRect.left, dstRect.top, dstRect.right-dstRect.left, dstRect.bottom-dstRect.top);
+			CreateCGContextForPort (GetWindowPort (theWindow), &context);
+			break;
 		}
-	}
+		case IMGFMT_YV12:
+		case IMGFMT_IYUV:
+		case IMGFMT_I420:
+		case IMGFMT_UYVY:
+		case IMGFMT_YUY2:
+		{
+			long scale_X = FixDiv(Long2Fix(dstRect.right - dstRect.left),Long2Fix(imgRect.right));
+			long scale_Y = FixDiv(Long2Fix(dstRect.bottom - dstRect.top),Long2Fix(imgRect.bottom));
 			
-	SetDSequenceMatrix(seqId, &matrix);
+			SetIdentityMatrix(&matrix);
+			if (((dstRect.right - dstRect.left)   != imgRect.right) || ((dstRect.bottom - dstRect.right) != imgRect.bottom))
+			{
+				ScaleMatrix(&matrix, scale_X, scale_Y, 0, 0);
+				
+				if (padding > 0)
+				{
+					TranslateMatrix(&matrix, Long2Fix(dstRect.left), Long2Fix(dstRect.top));
+				}
+			}
+			
+			SetDSequenceMatrix(seqId, &matrix);
+			break;
+		}
+		default:
+			break;
+	}
 }
 
 void window_ontop()
