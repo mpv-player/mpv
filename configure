@@ -3598,16 +3598,15 @@ if test -z "$_livelibdir" ; then
 fi
 
 echocheck "LIVE.COM Streaming Media libraries"
-if test "$_live" = auto ; then
+if test "$_live" = auto  && test "$_streaming" = yes ; then
   _live=yes
   test "$_livelibdir" || _live=no
   # TODO: deeper, more reliable test of libs, and version!
   # (users may have empty live/ dir or something different there, for
   # example 'live config files', or they may have old, incompatibel version)
 fi
-if test "$_live" = yes ; then
+if test "$_live" = yes && test "$_streaming" = yes ; then
   echores "yes (using $_livelibdir)"
-  _streaming=yes
   _def_live='#define STREAMING_LIVE_DOT_COM 1'
   _live_libs_def="# LIVE.COM Streaming Media libraries:
 LIVE_LIB_DIR = $_livelibdir
