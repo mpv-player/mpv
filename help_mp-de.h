@@ -164,7 +164,7 @@ static char help_text[]=
 
 #define MSGTR_UsingNINI "Verwende NON-INTERLEAVED defektes AVI Dateiformat!\n"
 #define MSGTR_CouldntDetFNo "Konnte die Anzahl der Frames (für absulute Suche) nicht finden  \n"
-#define MSGTR_CantSeekRawAVI "Kann kein RAW .AVI-Streams durchsuchen! (Index erforderlich, versuche es mit der -idx Option!)  \n"
+#define MSGTR_CantSeekRawAVI "Kann keine RAW .AVI-Streams durchsuchen! (Index erforderlich, versuche es mit der -idx Option!)  \n"
 #define MSGTR_CantSeekFile "Kann diese Datei nicht durchsuchen!  \n"
 
 #define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei (wurde ohne libcss Unterstützung kompiliert)! Lese DOCS\n"
