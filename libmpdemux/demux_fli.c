@@ -65,10 +65,6 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   demuxer->movi_start = 128;
   demuxer->movi_end = stream_read_dword_le(demuxer->stream);
 
-#if 0
-  // skip the magic number
-  stream_skip(demuxer->stream, 2);
-#else
   magic_number = stream_read_word_le(demuxer->stream);
   
   if ((magic_number != 0xAF11) && (magic_number != 0xAF12))
@@ -77,7 +73,6 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
 	magic_number);
     return(NULL);    
   }
-#endif
 
   // fetch the number of frames
   frames->num_frames = stream_read_word_le(demuxer->stream);
@@ -112,10 +107,8 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   speed = stream_read_word_le(demuxer->stream);
   if (speed == 0)
     speed = 1;
-#if 0
   if (magic_number == 0xAF11)
     speed *= 1000/70;
-#endif
   sh_video->fps = 1000 / speed;
   sh_video->frametime = 1/sh_video->fps;
 
