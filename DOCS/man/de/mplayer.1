@@ -5156,117 +5156,65 @@ hochskalieren kann.
 Die Option fd weist den Filter an, die geforderte Skalierung immer auszuführen
 (hässlich).
 .RE
-.\" manpage is synced from top down to this option.
 .
 .
 .
-.SH "ENCODING-OPTIONEN (NUR BEI MENCODER)"
+.SH "ALLGEMEINE ENCODING-OPTIONEN (NUR BEI MENCODER)"
+.
+.TP
+.B \-audio-delay <0.0\-...>
+Setzt das Feld für die Audioverzögerung im Dateikopf.
+Standardwert ist 0.0, negative Werte funktionieren nicht.
+Diese Option verzögert den Ton nicht während des Encodierens, sondern der
+Player wird beim Abspielen den Ton verzögern, sodass du dann nicht mehr
+\-delay angeben musst.
+.
 .TP
 .B \-audio-density <1\-50>
 Anzahl der Audioblöcke pro Sekunde (Standard ist 2, was in 0.5s langen
 Audioblöcken resultiert).
-
-.I ANMERKUNG:
 .br
-Nur bei CBR (konstanter Bitrate). VBR (variable Bitrate) ignoriert diese
+.I ANMERKUNG:
+Nur bei CBR (konstanter Bitrate), VBR (variable Bitrate) ignoriert diese
 Einstellung, da jedes Paket in einen eigenen Block kommt.
-.TP
-.B \-audio-delay <0.0\-...>
-Setzt das Audioverzögerungsfeld im Dateikopf. Standardwert ist 0.0. Negative
-Werte funktionieren nicht.
-Diese Option verzögert den Ton nicht während des Encodierens, sondern der
-Player wird beim Abspielen den Ton verzögern, sodass du dann nicht mehr
-\-delay angeben musst.
+.
 .TP
 .B \-audio-preload <0.0\-2.0>
-Setzt Audiopuffer-Zeitintervall (Standardwert: 0.5s).
-.TP
-.B \-divx4opts <option1:option2:...>
-Wenn du mit DivX4 encodierst, dann kannst du hier die Parameter angeben.
-.br
-Die verfügbaren Parameter lauten:
-.
-.RSs
-.IPs help
-gibt einen Hilfstext aus
-.IPs br=<Wert>
-gibt die Bitrate in
-.RSss
-kbit <4\-16000> oder in
-.br
-bit  <16001\-24000000> an
-.REss
-.IPs key=<Wert>
-maximale Anzahl Bilder zwischen zwei Schlüsselbildern (key frames)
-.IPs deinterlace
-aktiviert Deinterlacing (vermeide das, da es bei DivX4 buggy ist. Nimm lieber
-einen der Postprocessing-Filter dafür.)
-.IPs q=<1\-5>
-Qualitätslevel (1\-am schnellsten, 5\-am besten)
-.IPs min_quant=<1\-31>
-minimaler Quantizer
-.IPs max_quant=<1\-31>
-maximaler Quantizer
-.IPs rc_period=<Wert>
-Bitratenkontrollzeitrahmen
-.IPs rc_reaction_period=<Wert>
-Reaktionszeitrahmen für die Bitratenkontrolle
-.IPs rc_reaction_ratio=<Wert>
-Reaktionsverhältnis für die Bitratenkontrolle
-.IPs crispness=<0\-100>
-gibt Schärfe/\:Glätte an
-.IPs pass=<1\-2>
-Mit dieser Option können DivX4-Dateien in zwei Durchläufen erstellt werden.
-Zuerst encodierst du mit pass=1, dann mit denselben Parametern und pass=2
-anstelle von pass=1.
-.IPs vbrpass=<0\-2>
-Überschreibt die pass\-Option und aktiviert den VBR\-Code von XviD anstelle
-des DivX4\-VBR\-Codes. Verfügbare Optionen sind:
-.
-.RSss
-0: Encodieren in einem Durchlauf (als ob pass überhaupt nicht verwendet würde)
-.br
-1: Analyse bzw. erster Durchlauf. Das erstellte AVI kann nach /dev/null
-umgeleitet werden.
-.br
-2: Finaler zweiter Durchlauf
-.REss
-.RE
+Setzt Audiopuffer-Zeitintervall (Standard: 0.5s).
 .
 .TP
 .B \-endpos <[[hh:]mm:]ss[.ms]|Größe[b|kb|mb]> (siehe auch \-ss und \-sb)
-Beende das Encodieren nach der angegeben Zeit oder Byteposition. Kann auf
-verschiedene Art angegeben werden:
-
-.I ANMERKUNG:
+Beende das Encodieren nach der angegeben Zeit oder Byteposition.
 .br
-Die Byteposition ist nicht exakt, da mencoder nur an Bildgrenzen mit dem
+.I ANMERKUNG:
+Die Byteposition ist nicht exakt, da MEncoder nur an Bildgrenzen mit dem
 Encodieren aufhören kann.
-
+.sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "\-endpos 56"
-Encodiere nur 56 Sekunden
+Encodiere nur 56 Sekunden.
 .IPs "\-endpos 01:10:00"
-Encodiere nur 1 Stunde 10 Minuten
+Encodiere nur 1 Stunde 10 Minuten.
 .IPs "\-endpos 100mb"
-Encodiere nur 100 MBytes
+Encodiere nur 100 MBytes.
 .RE
 .PD 1
 .
 .TP
 .B \-ffourcc <fourcc>
-Hiermit wird die Video\-FourCC der Ausgabedatei überschrieben.
-
+Hiermit kann das FourCC-Feld der Ausgabedatei überschrieben werden.
+.sp
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "-ffourcc div3"
-setzt das FourCC\-Feld in der Ausgabedatei auf 'div3'.
+Setzt das FourCC-Feld der Ausgabedatei auf 'div3'.
 .RE
 .PD 1
 .
+.\" manpage is synced from top down to this option.
 .TP
 .B \-include <Konfigurationsdatei>
 Gibt eine nach den Standardkonfigurationsdateien zu lesende Datei an.
@@ -6087,7 +6035,7 @@ zwischengespeicherte CSS-Schlüssel
 .
 .TP
 Angenommen, dass /Pfad/\:zum/\:film.avi abgespielt wird,
-sucht MPlayer nach lUntertiteldateien in folgender Reihenfolge:
+sucht MPlayer nach Untertiteldateien in folgender Reihenfolge:
 .RS
 /Pfad/\:zum/\:film.sub
 .br
