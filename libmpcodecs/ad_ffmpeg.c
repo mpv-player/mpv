@@ -78,6 +78,15 @@ static int init(sh_audio_t *sh_audio)
                lavc_context->extradata_size);
     }
 
+    // for QDM2
+    if (sh_audio->codecdata_len && sh_audio->codecdata && !lavc_context->extradata)
+    {
+        lavc_context->extradata = av_malloc(sh_audio->codecdata_len);
+        lavc_context->extradata_size = sh_audio->codecdata_len;
+        memcpy(lavc_context->extradata, (char *)sh_audio->codecdata, 
+               lavc_context->extradata_size);	
+    }
+
     /* open it */
     if (avcodec_open(lavc_context, lavc_codec) < 0) {
         mp_msg(MSGT_DECAUDIO,MSGL_ERR, MSGTR_CantOpenCodec);
