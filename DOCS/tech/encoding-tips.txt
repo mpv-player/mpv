@@ -645,3 +645,79 @@ why ;)
 A = Rémi
 
 
+================================================================================
+
+
+TIPS FOR TWEAKING RATECONTROL
+
+(For the purpose of this explanation, consider "2nd pass" to be any beyond 
+the 1st. The algorithm is run only on P-frames; I- and B-frames use QPs 
+based on the adjacent P. While x264's 2pass ratecontrol is based on lavc's, 
+it has diverged somewhat and not all of this is valid for x264.)
+
+Consider the default ratecontrol equation in lavc: "tex^qComp".
+At the beginning of the 2nd pass, rc_eq is evaluated for each frame, and 
+the result is the number of bits allocated to that frame (multiplied by 
+some constant as needed to match the total requested bitrate).
+
+"tex" is the complexity of a frame, i.e. the estimated number of bits it 
+would take to encode at a given quantizer. (If the 1st pass was CQP and 
+not turbo, then we know tex exactly. Otherwise it is calculated by 
+multiplying the 1st pass's bits by the QP of that frame. But that's not 
+why CQP is potentially good; more on that later.)
+"qComp" is just a constant. It has no effect outside the rc_eq, and is 
+directly set by the vqcomp parameter.
+
+If vqcomp=1, then rc_eq=tex^1=tex, so 2pass allocates to each frame the 
+number of bits needed to encode them all at the same QP.
+If vqcomp=0, then rc_eq=tex^0=1, so 2pass allocates the same number of 
+bits to each frame, i.e. CBR. (Actually, this is worse than 1pass CBR in 
+terms of quality; CBR can vary within its allowed buffer size, while 
+vqcomp=0 tries to make each frame exactly the same size.)
+If vqcomp=0.5, then rc_eq=sqrt(tex), so the allocation is somewhere 
+between CBR and CQP. High complexity frames get somewhat lower quality 
+than low complexity, but still more bits.
+
+While the actual selection of a good value of vqcomp is experimental, the 
+following underlying factors determine the result:
+Arguing towards CQP: You want the movie to be somewhere approaching 
+constant quality; oscillating quality is even more annoying than constant 
+low quality. (However, constant quality does not mean constant PSNR nor 
+constant QP. Details are less noticeable in high-motion scenes, so you can 
+get away with somewhat higher QP in high-complexity frames for the same 
+perceived quality.)
+Arguing towards CBR: You get more quality per bit if you spend those bits 
+in frames where motion compensation works well (which tends to be 
+correlated with "tex"): A given artifact may stick around several seconds 
+in a low-motion scene, and you only have to fix it in one frame to improve 
+the quality of the whole sequence.
+
+Now for why the 1st pass ratecontrol method matters:
+The number of bits at constant quant is as good a measure of complexity as
+any other simple formula for the purpose of allocating bits. But it's not
+perfect for predicting which QP will produce the desired number of bits.
+Bits are approximately inversely proportional to QP, but the exact scaling
+is non-linear, and depends on the amount of detail/noise, the complexity of
+motion, the quality of previous frames, and other stuff not measured by the
+ratecontrol. So it predicts best when the QP used for a given frame in the
+2nd pass is close to the QP used in the 1st pass. When the prediction is
+wrong, lavc needs to distribute the surplus or deficit of bits among future
+frames, which means that they too deviate from the planned distribution.
+Obviously, with vqcomp=1 you can get the 1st pass QPs very close by using
+CQP, and with vqcomp=0 a CBR 1st pass is very close. But with vqcomp=0.5
+it's more ambiguous. The accepted wisdom is that CBR is better for
+vqcomp=0.5, mostly because you then don't have to guess a QP in advance.
+But with vqcomp=0.6 or 0.7, the 2nd pass QPs vary less, so a CQP 1st pass
+(with the right QP) will be a better predictor than CBR.
+
+To make it more confusing, 1pass CBR uses the same rc_eq with a different
+meaning. In CBR, we don't have a real encode to estimate from, so "tex" is
+calculated from the full-pixel precision motion-compensation residual.
+While the number of bits allocated to a given frame is decided by the rc_eq
+just like in 2nd pass, the target bitrate is constant (instead of being the
+sum of per-frame rc_eq values). So the scaling factor (which is constant in
+2nd pass) now varies in order to keep the local average bitrate near the
+CBR target. So vqcomp does affect CBR, though it only determines the local
+allocation of bits, not the long-term allocation.
+
+--Loren Merritt
