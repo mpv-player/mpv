@@ -325,6 +325,9 @@ while(current<end){
     if(setjmp(mpeg2_jmp_buf)==0){
       ret+=parse_chunk(output, code&0xFF, pos);
     } else {
+#ifdef ARCH_X86
+	    if (config.flags & MM_ACCEL_X86_MMX) emms ();
+#endif
       printf("@@@ libmpeg2 returned from sig11... @@@\n");
     }
   }
