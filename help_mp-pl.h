@@ -83,7 +83,7 @@ static char help_text[]=
 #define MSGTR_TryForceAudioFmt "Wymuszam zastosowanie kodeka audio z rodziny %d ...\n"
 #define MSGTR_CantFindAfmtFallback "Nie mogê znale¼æ kodeka audio dla wymuszonej rodziny, wracam do standardowych.\n"
 #define MSGTR_CantFindAudioCodec "Nie mogê znale¼æ kodeka dla formatu audio 0x%X !\n"
-#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Sprobuj uaktualniæ %s etc/codecs.conf\n*** Je¶li to nie pomaga, przeczytaj DOCS/CODECS!\n"
+#define MSGTR_TryUpgradeCodecsConfOrRTFM "*** Sprobuj uaktualniæ %s etc/codecs.conf\n*** Je¶li to nie pomaga, przeczytaj DOCS/codecs.html !\n"
 #define MSGTR_CouldntInitAudioCodec "Nie moge zainicjowaæ sterownika audio! -> nosound\n"
 #define MSGTR_TryForceVideoFmt "Wymuszam zastosowanie kodeka video z rodziny %d ...\n"
 #define MSGTR_CantFindVfmtFallback "Nie mogê znale¼æ kodeka video dla wymuszonej rodziny, wracam do standardowych..\n"
@@ -143,7 +143,7 @@ static char help_text[]=
 #define MSGTR_FormatNotRecognized "========== Przepraszam,  format pliku nierozpoznany/nieobs³ugiwany ==========\n"\
 				  "=== Je¶li to strumieñ AVI, ASF lub MPEG, proszê skontaktuj siê z autorem! ===\n"
 #define MSGTR_MissingVideoStream "Nie znaleziono strumienia video!\n"
-#define MSGTR_MissingAudioStream "Nie znaleziono strumienia audio...  ->nosound\n"
+#define MSGTR_MissingAudioStream "Nie znaleziono strumienia audio... -> nosound\n"
 #define MSGTR_MissingVideoStreamBug "Zgubiony strumieñ video!? skontaktuj siê z autorem, mo¿e to b³±d:(\n"
 
 #define MSGTR_DoesntContainSelectedStream "demux: plik nie zawiera wybranego strumienia audio lub video\n"
@@ -154,10 +154,10 @@ static char help_text[]=
 
 #define MSGTR_UsingNINI "U¿ywa uszkodzonego formatu pliku NON-INTERLEAVED AVI !\n"
 #define MSGTR_CouldntDetFNo "Nie mogê okre¶liæ liczby klatek (dla przeszukiwania)\n"
-#define MSGTR_CantSeekRawAVI "Nie mogê przeszukiwaæ czystych strumieni .AVI! (wymagany indeks, sprobuj z opcj± -idx !)  \n"
+#define MSGTR_CantSeekRawAVI "Nie mogê przeszukiwaæ nieindeksowanych strumieni .AVI! (sprawd¼ opcjê -idx !)\n"
 #define MSGTR_CantSeekFile "Nie mogê przeszukiwaæ tego pliku!  \n"
 
-#define MSGTR_EncryptedVOB "Zaszyfrowany plik VOB (nie wkompilowano obs³ugi libcss)! Przeczytaj plik DOCS/DVD\n"
+#define MSGTR_EncryptedVOB "Zaszyfrowany plik VOB (nie wkompilowano obs³ugi libcss)! Przeczytaj plik DOCS/cd-dvd.html\n"
 #define MSGTR_EncryptedVOBauth "Zaszyfrowany strumieñ, nie za¿yczy³e¶ sobie autentykacji!!\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Spakowane nag³ówki nie s± obs³ugiwane (na razie)!\n"
