@@ -391,6 +391,7 @@ int main(int argc,char* argv[], char *envp[]){
 
 #ifdef USE_SUB
 static subtitle* subtitles=NULL;
+float sub_last_pts = -303;
 #endif
 
 static demuxer_t *demuxer=NULL;
@@ -2068,7 +2069,10 @@ if(rel_seek_secs || abs_seek_pos){
       float pts=d_video->pts;
       if(sub_fps==0) sub_fps=sh_video->fps;
       current_module="find_sub";
-      find_sub(subtitles,sub_uses_time?(100*(pts+sub_delay)):((pts+sub_delay)*sub_fps)); // FIXME! frame counter...
+      if (pts > sub_last_pts || pts < sub_last_pts-1.0 ) {
+         find_sub(subtitles,sub_uses_time?(100*(pts+sub_delay)):((pts+sub_delay)*sub_fps)); // FIXME! frame counter...
+         sub_last_pts = pts;
+      }
       current_module=NULL;
   }
 #endif
