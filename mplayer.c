@@ -2931,7 +2931,7 @@ if(benchmark){
 #endif
    mplStop();
 #warning workaround for kiba playtree with gui ... if i dont play the prev/next file, then playtree sig6 (assert)
-   eof=0;
+//   eof=0;
   }	
 #endif
 

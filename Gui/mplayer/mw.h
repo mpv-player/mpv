@@ -359,6 +359,7 @@ NoPause:
           appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight ) / 2;
           appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight;
           wsFullScreen( &appMPlayer.subWindow );
+	  vo_fs=0;
          }
         break;
    case evDoubleSize:
@@ -369,6 +370,7 @@ NoPause:
           appMPlayer.subWindow.OldY=( wsMaxY - guiIntfStruct.MovieHeight * 2 ) / 2;
           appMPlayer.subWindow.OldWidth=guiIntfStruct.MovieWidth * 2; appMPlayer.subWindow.OldHeight=guiIntfStruct.MovieHeight * 2;
           wsFullScreen( &appMPlayer.subWindow );
+	  vo_fs=0;
          }
         break;
    case evFullScreen:

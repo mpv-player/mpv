@@ -66,7 +66,7 @@ void gtkInit( int argc,char* argv[], char *envp[] )
 {
  gtk_set_locale();
  gtk_init( &argc,&argv );
- gdk_set_use_xshm( TRUE );
+ gdk_set_use_xshm( FALSE );
  widgetsCreate();
 }
 
