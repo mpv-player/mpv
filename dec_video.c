@@ -1157,7 +1157,7 @@ if(verbose>1){
     decode_mpng(
         start, in_size, sh_video->our_out_buffer,
 	sh_video->disp_w,sh_video->disp_h,
-	24
+	((out_fmt&255)+7)/8
     );
     blit_frame = 3;
     break;
