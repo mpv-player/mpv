@@ -240,11 +240,14 @@ static int init(sh_video_t *sh){
     ICSendMessage(priv->handle, ICM_USER+80, (long)(&divx_quality), 0);
 
     // don't do this palette mess always, it makes div3 dll crashing...
-    if((sh->codec->outfmt[sh->outfmtidx]==IMGFMT_BGR8) &&
-       (!ICDecompressGetPalette(priv->handle, sh->bih, priv->o_bih)))
-    {
-	priv->palette = ((unsigned char*)priv->o_bih) + sh->bih->biSize;
-	mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetPalette OK\n");
+    if(sh->codec->outfmt[sh->outfmtidx]==IMGFMT_BGR8){
+	if(ICDecompressGetPalette(priv->handle, sh->bih, priv->o_bih)){
+	    priv->palette = (unsigned char*)(priv->o_bih+1);
+	    mp_msg(MSGT_WIN32,MSGL_V,"ICDecompressGetPalette OK\n");
+	} else {
+	    if(sh->bih->biSize>=40+4*4)
+		priv->palette = (unsigned char*)(sh->bih+1);
+	}
     }
 
     mp_msg(MSGT_DECVIDEO,MSGL_V,"INFO: Win32 video codec init OK!\n");
