@@ -6,17 +6,27 @@ int             mplSubMoved = 0;
 
 void mplSubDraw( wsParamDisplay )
 {
- if ( appMPlayer.subWindow.Visible == wsWindowNotVisible ) return;
+ if ( ( appMPlayer.subWindow.Visible == wsWindowNotVisible )||
+      ( appMPlayer.subWindow.State != wsWindowExpose ) ) return;
+
  if ( ( mplShMem->Playing )&&( appMPlayer.subWindow.State == wsWindowExpose ) )
-  { appMPlayer.subWindow.State=0; vo_expose=1; return; }
+  { 
+   wsSetBackgroundRGB( &appMPlayer.subWindow,0,0,0 );
+   wsClearWindow( appMPlayer.subWindow );
+   appMPlayer.subWindow.State=0; 
+   vo_expose=1; 
+   return; 
+  }
 
  if ( mplSubRender )
   {
    wsSetBackgroundRGB( &appMPlayer.subWindow,appMPlayer.subR,appMPlayer.subG,appMPlayer.subB );
    wsClearWindow( appMPlayer.subWindow );
-   if ( appMPlayer.sub.Bitmap.Image ) wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
-   mplSubRender=0;
-   if ( appMPlayer.sub.Bitmap.Image ) wsPutImage( &appMPlayer.subWindow );
+   if ( appMPlayer.sub.Bitmap.Image ) 
+    {
+     wsConvert( &appMPlayer.subWindow,appMPlayer.sub.Bitmap.Image,appMPlayer.sub.Bitmap.ImageSize );
+     wsPutImage( &appMPlayer.subWindow );
+    } 
    XFlush( wsDisplay );
   }
 }

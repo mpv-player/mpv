@@ -354,7 +354,7 @@ NoPause:
         mplMainRender=1;
         wsPostRedisplay( &appMPlayer.mainWindow );
 //        if ( !mplShMem->Playing ) 
-	wsPostRedisplay( &appMPlayer.subWindow );
+//	wsPostRedisplay( &appMPlayer.subWindow );
         XFlush( wsDisplay );
 	mplRedrawTimer=mplRedrawTimerConst;
         break;
