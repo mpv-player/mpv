@@ -124,6 +124,56 @@ static void CalcFlatPoint(int x,int y,GLfloat *px,GLfloat *py)
   if(*py>1.0) *py=1.0;
 }
 
+static GLint getInternalFormat()
+{
+#ifdef GL_WIN32
+  PIXELFORMATDESCRIPTOR pfd;
+  int pf = GetPixelFormat(vo_hdc);
+  if (!DescribePixelFormat(vo_hdc, pf, sizeof pfd, &pfd)) {
+    r_sz = g_sz = b_sz = a_sz = 0;
+  } else {
+    r_sz = pfd.cRedBits;
+    g_sz = pfd.cGreenBits;
+    b_sz = pfd.cBlueBits;
+    a_sz = pfd.cAlphaBits;
+  }
+#else
+  if (glXGetConfig(mDisplay, gl_vinfo, GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
+  if (glXGetConfig(mDisplay, gl_vinfo, GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
+  if (glXGetConfig(mDisplay, gl_vinfo, GLX_BLUE_SIZE, &b_sz) != 0) b_sz = 0;
+  if (glXGetConfig(mDisplay, gl_vinfo, GLX_ALPHA_SIZE, &a_sz) != 0) a_sz = 0;
+#endif
+
+  rgb_sz=r_sz+g_sz+b_sz;
+  if(rgb_sz<=0) rgb_sz=24;
+
+#ifdef TEXTUREFORMAT_ALWAYS
+  return TEXTUREFORMAT_ALWAYS;
+#else
+  if(r_sz==3 && g_sz==3 && b_sz==2 && a_sz==0)
+	  return GL_R3_G3_B2;
+  if(r_sz==4 && g_sz==4 && b_sz==4 && a_sz==0)
+	  return GL_RGB4;
+  if(r_sz==5 && g_sz==5 && b_sz==5 && a_sz==0)
+	  return GL_RGB5;
+  if(r_sz==8 && g_sz==8 && b_sz==8 && a_sz==0)
+	  return GL_RGB8;
+  if(r_sz==10 && g_sz==10 && b_sz==10 && a_sz==0)
+	  return GL_RGB10;
+  if(r_sz==2 && g_sz==2 && b_sz==2 && a_sz==2)
+	  return GL_RGBA2;
+  if(r_sz==4 && g_sz==4 && b_sz==4 && a_sz==4)
+	  return GL_RGBA4;
+  if(r_sz==5 && g_sz==5 && b_sz==5 && a_sz==1)
+	  return GL_RGB5_A1;
+  if(r_sz==8 && g_sz==8 && b_sz==8 && a_sz==8)
+	  return GL_RGBA8;
+  if(r_sz==10 && g_sz==10 && b_sz==10 && a_sz==2)
+	  return GL_RGB10_A2;
+#endif
+  return GL_RGB;
+}
+
 static int initTextures()
 {
   struct TexSquare *tsq=0;
@@ -143,6 +193,7 @@ static int initTextures()
   { s*=2; e_y++; }
   texture_height=s;
 
+  gl_internal_format = getInternalFormat();
 
   /* Test the max texture size */
   do
@@ -575,9 +626,6 @@ static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsi
 #ifdef GL_WIN32
 
 static int config_w32(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
-    PIXELFORMATDESCRIPTOR pfd;
-    int pf;
-
     o_dwidth = d_width;
     o_dheight = d_height;
     vo_fs = flags & VOFLAG_FULLSCREEN;
@@ -592,16 +640,6 @@ static int config_w32(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 
     if (vo_fs)
 	aspect(&d_width, &d_height, A_ZOOM);
-
-    pf = GetPixelFormat(vo_hdc);
-    if (!DescribePixelFormat(vo_hdc, pf, sizeof pfd, &pfd)) {
-	r_sz = g_sz = b_sz = a_sz = 0;
-    } else {
-	r_sz = pfd.cRedBits;
-	g_sz = pfd.cGreenBits;
-	b_sz = pfd.cBlueBits;
-	a_sz = pfd.cAlphaBits;
-    }
 
     return 0;
 }
@@ -729,16 +767,6 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
     vo_x11_fullscreen();
 
   setGlWindow(&gl_vinfo, &gl_context, vo_window);
-
-  if(glXGetConfig(mDisplay,gl_vinfo,GLX_RED_SIZE, &r_sz)!=0) 
-	  r_sz=0;
-  if(glXGetConfig(mDisplay,gl_vinfo,GLX_GREEN_SIZE, &g_sz)!=0) 
-	  g_sz=0;
-  if(glXGetConfig(mDisplay,gl_vinfo,GLX_BLUE_SIZE, &b_sz)!=0) 
-	  b_sz=0;
-  if(glXGetConfig(mDisplay,gl_vinfo,GLX_ALPHA_SIZE, &a_sz)!=0) 
-	  a_sz=0;
-
         return 0;
 }
 
@@ -748,11 +776,6 @@ static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
   vo_dheight = d_height;
   guiGetEvent( guiSetShVideo,0 ); // the GUI will set up / resize the window
   setGlWindow(&gl_vinfo, &gl_context, vo_window);
-
-  if (glXGetConfig(mDisplay,gl_vinfo,GLX_RED_SIZE, &r_sz) != 0) r_sz = 0;
-  if (glXGetConfig(mDisplay,gl_vinfo,GLX_GREEN_SIZE, &g_sz) != 0) g_sz = 0;
-  if (glXGetConfig(mDisplay,gl_vinfo,GLX_BLUE_SIZE, &b_sz) != 0) b_sz = 0;
-  if (glXGetConfig(mDisplay,gl_vinfo,GLX_ALPHA_SIZE, &a_sz) != 0) a_sz = 0;
   return 0;
 }
 #endif
@@ -859,37 +882,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   } else {
 	mp_msg(MSGT_VO, MSGL_INFO, "[gl2] You have OpenGL < 1.2 drivers, BAD (16bpp and BGR may be damaged!)\n");
   }
-
-  rgb_sz=r_sz+g_sz+b_sz;
-  if(rgb_sz<=0) rgb_sz=24;
-
-  if(r_sz==3 && g_sz==3 && b_sz==2 && a_sz==0) {
-	  gl_internal_format=GL_R3_G3_B2;
-  } else if(r_sz==4 && g_sz==4 && b_sz==4 && a_sz==0) {
-	  gl_internal_format=GL_RGB4;
-  } else if(r_sz==5 && g_sz==5 && b_sz==5 && a_sz==0) {
-	  gl_internal_format=GL_RGB5;
-  } else if(r_sz==8 && g_sz==8 && b_sz==8 && a_sz==0) {
-	  gl_internal_format=GL_RGB8;
-  } else if(r_sz==10 && g_sz==10 && b_sz==10 && a_sz==0) {
-	  gl_internal_format=GL_RGB10;
-  } else if(r_sz==2 && g_sz==2 && b_sz==2 && a_sz==2) {
-	  gl_internal_format=GL_RGBA2;
-  } else if(r_sz==4 && g_sz==4 && b_sz==4 && a_sz==4) {
-	  gl_internal_format=GL_RGBA4;
-  } else if(r_sz==5 && g_sz==5 && b_sz==5 && a_sz==1) {
-	  gl_internal_format=GL_RGB5_A1;
-  } else if(r_sz==8 && g_sz==8 && b_sz==8 && a_sz==8) {
-	  gl_internal_format=GL_RGBA8;
-  } else if(r_sz==10 && g_sz==10 && b_sz==10 && a_sz==2) {
-	  gl_internal_format=GL_RGB10_A2;
-  } else {
-	  gl_internal_format=GL_RGB;
-  }
-
-#ifdef TEXTUREFORMAT_ALWAYS
-  gl_internal_format=TEXTUREFORMAT_ALWAYS;
-#endif
 
   glFindFormat(format, &image_bpp, NULL, &gl_bitmap_format, &gl_bitmap_type);
 
