@@ -2107,12 +2107,13 @@ demux_close_mkv (demuxer_t *demuxer)
 
 static int
 demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
-                             uint8_t *laces, uint32_t *lace_size)
+                             uint8_t *laces, uint32_t **all_lace_sizes)
 {
-  uint32_t total = 0;
+  uint32_t total = 0, *lace_size;
   uint8_t flags;
   int i;
 
+  *all_lace_sizes = NULL;
   /* lacing flags */
   flags = *buffer++;
   (*size)--;
@@ -2121,6 +2122,7 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
     {
     case 0:  /* no lacing */
       *laces = 1;
+      lace_size = (uint32_t *)calloc(*laces, sizeof(uint32_t));
       lace_size[0] = *size;
       break;
 
@@ -2129,8 +2131,8 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
     case 3:  /* EBML lacing */
       *laces = *buffer++;
       (*size)--;
-      if (++*laces > 8)
-        return 1;
+      (*laces)++;
+      lace_size = (uint32_t *)calloc(*laces, sizeof(uint32_t));
 
       switch ((flags & 0x06) >> 1)
         {
@@ -2157,8 +2159,10 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
           {
             int l;
             uint64_t num = ebml_read_vlen_uint (buffer, &l);
-            if (num == EBML_UINT_INVALID)
+            if (num == EBML_UINT_INVALID) {
+              free(lace_size);
               return 1;
+            }
             buffer += l;
             *size -= l;
 
@@ -2167,8 +2171,10 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
               {
                 int64_t snum;
                 snum = ebml_read_vlen_int (buffer, &l);
-                if (snum == EBML_INT_INVALID)
+                if (snum == EBML_INT_INVALID) {
+                  free(lace_size);
                   return 1;
+                }
                 buffer += l;
                 *size -= l;
                 lace_size[i] = lace_size[i-1] + snum;
@@ -2180,6 +2186,7 @@ demux_mkv_read_block_lacing (uint8_t *buffer, uint64_t *size,
         }
       break;
     }
+  *all_lace_sizes = lace_size;
   return 0;
 }
 
@@ -2471,7 +2478,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   demux_stream_t *ds = NULL;
   uint64_t old_length;
   int64_t tc;
-  uint32_t lace_size[8];
+  uint32_t *lace_size;
   uint8_t laces;
   int i, num, tmp, use_this_block = 1;
   float current_pts;
@@ -2485,14 +2492,17 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   block += 2;
   length -= tmp + 2;
   old_length = length;
-  demux_mkv_read_block_lacing (block, &length, &laces, lace_size);
+  if (demux_mkv_read_block_lacing (block, &length, &laces, &lace_size))
+    return 0;
   block += old_length - length;
 
   tc = ((time*mkv_d->tc_scale+mkv_d->cluster_tc) /1000000.0 - mkv_d->first_tc);
   if (tc < 0)
     tc = 0;
-  if (mkv_d->stop_timecode > 0 && tc > mkv_d->stop_timecode)
+  if (mkv_d->stop_timecode > 0 && tc > mkv_d->stop_timecode) {
+    free(lace_size);
     return -1;
+  }
   current_pts = tc / 1000.0;
 
   clear_subtitles(demuxer, tc, 0);
@@ -2588,9 +2598,11 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
       else if (ds == demuxer->audio)
         mkv_d->a_skip_to_keyframe = 0;
 
+      free(lace_size);
       return 1;
     }
 
+  free(lace_size);
   return 0;
 }
 
