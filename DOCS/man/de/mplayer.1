@@ -1738,30 +1738,6 @@ Gibt die ID für die VOBsub-Untertitel an.
 Überschreibt die automatisch erkannte Puffergröße der Audiotreiber/\:-karte.
 .
 .TP
-.B \-aop <list=Plugin1,Plugin2...:Option1=Wert1:opt2=Wert2...>
-Gibt die Audioplugins und ihre Optionen an (siehe auch Audio-Plugins in der
-(englischen) Dokumentation).
-.sp 1
-Verfügbare Optionen sind:
-.RSs
-.IPs list=[Plugins]
-Kommaseparierte Liste der Plugins (resample, surround, format, volume,
-extrastereo, volnorm, delay)
-.IPs delay=<Sek>
-Beispiel-Plugin, benutze es nicht (nur beim delay-Plugin).
-.IPs format=<Format>
-Ausgabeformat (nur beim format-Plugin)
-.IPs fout=<Hz>
-Ausgabefrequenz (nur beim resample-Plugin)
-.IPs volume=<0\-255>
-Lautstärke (nur beim volume-Plugin)
-.IPs mul=<Wert>
-Stereokoeffizient (standardmäßig 2.5) (nur beim extrastereo-Plugin)
-.IPs softclip
-Kompressor- / 'soft-clipping'-Einstellungen (nur beim volume-Plugin)
-.RE
-.
-.TP
 .B \-delay <Sek>
 Audioverzögerung in Sekunden (positive oder negative Fließkommazahl).
 .
@@ -1948,6 +1924,18 @@ Wähle das zu benutzende Audiogerät explizit (Standard: /dev/\:audio).
 .TP
 .B win32 (nur bei Windows)
 Nativer Windows-Waveout-Audioausgabetreiber.
+.
+.TP
+.B dsound (nur bei Windows)
+DirectX-Audioausgabetreiber DirectSound.
+.PD 0
+.RSs
+.IPs device=<Gerätenummer>
+Setzt das zu benutzende Gerät.
+Wenn du eine Datei mit \-v abspielst, wird dir eine Liste aller verfügbaren
+Geräte angezeigt.
+.RE
+.PD 1
 .
 .TP
 .B dxr2 (siehe auch \-dxr2) (nur bei DXR2)
@@ -5857,9 +5845,9 @@ Für eine strikte Einhaltung von MPEG-1/2/4 müsste dieser Wert <=132 sein.
 .TP
 .B sc_threshold=<-1000000\-1000000>
 Schwellenwert für die Erkennung eines Szenenwechsels.
-Libavcodec fügt einen Keyframe ein, wenn er einen Szenenwechsel entdeckt.
+libavcodec fügt einen Keyframe ein, wenn er einen Szenenwechsel entdeckt.
 Mit dieser Option kannst du die Sensitivität dieser Erkennung bestimmen.
--1000000 bedeutet, dass mit jedem Frame ein Szenenwechsel erkannt wird,
+-1000000 bedeutet, dass mit jedem Frame ein Szenenwechsel erkannt wird;
 1000000 bedeutet, dass gar keine Szenenwechsel erkannt werden (Standard: 0).
 .
 .TP
@@ -5925,34 +5913,70 @@ Encodiert mit einer optimalen Huffman-Tabelle, basierend auf den Statistiken
 des ersten Durchlaufs.
 .RE
 .PD 1
+.
+.TP
+.B turbo (nur im two-pass-Modus)
+Erhöht die Geschwindigkeit des ersten Durchgangs drastisch, indem schnellere
+Algorithmen benutzt und CPU-intensive Optionen deaktiviert werden
+Die wird den PSNR-Wert im Ganzen wahrscheinlich ein wenig (etwa
+0.01dB) und Typ und PSNR-Wert einzelner Frames ein wenig mehr (bis zu
+0.03db) verringern.
+.
+.TP
+.B aspect=<x/\:y>
+Speichere den Filmaspekt intern, wie bei MPEG-Dateien.
+Dies ist eine viel elegantere Lösung als den Film neu zu skalieren, da die
+Qualität nicht verringert wird.
+MPlayer und ein paar weitere Player werden diese Dateien korrekt wiedergeben,
+andere werden das Größenverhältnis falsch darstellen.
+Der Parameter für das Verhältnis kann als Bruch oder Fließkommawert angegeben
+werden.
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.PD 0
+.IPs "aspect=16/\:9 oder aspect=1.78"
+.PD 1
+.RE
+.
+.TP
+.B autoaspect
+Das gleiche wie die Option aspect, wobei jedoch das Verhältnis automatisch
+berechnet wird.
+Veränderungen in der Filterkette wie crop/\:expand/\:scale/\:etc.\& werden
+dabei berücksichtigt.
+Dies Option verursacht keine Performanceeinbußen, du kannst sie also getrost
+immer aktivert lassen.
+.
+.TP
+.B vbitrate=<Wert>
+Gibt die Bitrate an (Durchlauf 1/\:2) (Standard: 800).
+.br
+.I WARNUNG:
+1kBit = 1000 Bits
+.PD 0
+.RSs
+.IPs 4\-16000
+(in kBit)
+.IPs 16001\-24000000
+(in Bit)
+.RE
+.PD 1
+.
+.TP
+.B vratetol=<Wert>
+ungefähre Dateigrößentoleranz in kBit.
+Werte im Bereich 1000\-100000 sind vernünftig.
+(Warnung: 1kBit = 1000 Bits)
+(Standard: 8000)
+.br
+.I ANMERKUNG:
+vratetol sollte im zweiten Durchlauf nicht zu groß sein, es kann sonst in
+Verbindung mitvrc_(min|max)rate zu Problemen kommen.
 .\" manpage is synced from top down to this option.
 .
-.IPs aspect=<x.x/y.y>
-Speichert das Höhen\-/:Breitenverhältnis intern im Videostream, genauso wie
-bei MPEG-1/\:2. Deutlich bessere Lösung als Skalierung, da hierbei die
-Qualität nicht gemindert wird. Momentan kann nur MPlayer solche Dateien
-mit dem richtigen Verhältnis wiedergeben, andere Player zeigen ein falsches
-Verhältnis.
-Beispiel:
-.RSss
-aspect=16.0/9.0
-.REss
-.IPs vbitrate=<Wert>
-gibt die Bitrate (bei Durchgang 1/\:2) in
-specify bitrate (pass\ 1/\:2) in
-.RSss
-kBit <4\-16000> oder
-.br
-Bit  <16001\-24000000> an
-.br
-(Warnung: 1kBit = 1000 Bits)
-.br
-(Standardwert: 800)
-.REss
-.IPs vratetol=<Wert>
-ungefähre Dateigrößentoleranz in kbit
-(Warnung: 1kBit = 1000 Bits)
-(Standardwert: 8000)
 .IPs vrc_maxrate=<Wert>
 maximale Bitrate in kbit/\:sec (Durchgang 1/\:2)
 .IPs vrc_minrate=<Wert>
