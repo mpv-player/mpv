@@ -27,13 +27,16 @@ typedef struct ao_plugin_local_data_s
 {
   void* buf;					 // Output data buffer
   int len;					 // Amount of data in buffer
+  int channels;
+  int format;
+  int bpm;   //bit of format
   float bps;					 // Bytes per second out
   ao_functions_t* driver;      			 // Output driver
   ao_plugin_functions_t** plugins;               // List of used plugins
   ao_plugin_functions_t* available_plugins[NPL]; // List of available plugins
 } ao_plugin_local_data_t;
 
-static ao_plugin_local_data_t ao_plugin_local_data={NULL,0,0.0,NULL,NULL,AO_PLUGINS};
+static ao_plugin_local_data_t ao_plugin_local_data={NULL,0,0,0,0,0.0,NULL,NULL,AO_PLUGINS};
 
 // global data 
 volatile ao_plugin_data_t ao_plugin_data;             // Data used by the plugins
@@ -123,6 +126,11 @@ static int init(int rate,int channels,int format,int flags){
 
   /* Set input parameters and itterate through plugins each plugin
      changes the parameters according to its output */
+
+  ao_plugin_local_data.format=format;
+  ao_plugin_local_data.channels=channels;
+  ao_plugin_local_data.bpm=audio_out_format_bits(format);
+
   ao_plugin_data.rate=rate;
   ao_plugin_data.channels=channels;
   ao_plugin_data.format=format;
@@ -139,16 +147,7 @@ static int init(int rate,int channels,int format,int flags){
   // Calculate bps
   ao_plugin_local_data.bps=(float)(ao_plugin_data.rate * 
 				   ao_plugin_data.channels);
-
-  if(ao_plugin_data.format == AFMT_S16_LE ||
-     ao_plugin_data.format == AFMT_S16_BE ||
-     ao_plugin_data.format == AFMT_U16_LE ||
-     ao_plugin_data.format == AFMT_U16_BE)
-    ao_plugin_local_data.bps *= 2;
-
-  if(ao_plugin_data.format == AFMT_S32_LE ||
-     ao_plugin_data.format == AFMT_S32_BE)
-    ao_plugin_local_data.bps *= 4;
+  ao_plugin_local_data.bps*=audio_out_format_bits(ao_plugin_data.format)/8;
 
   // This should never happen but check anyway 
   if(NULL==ao_plugin_local_data.driver)
@@ -213,12 +212,16 @@ static void audio_resume(){
 
 // return: how many bytes can be played without blocking
 static int get_space(){
-  double sz=(double)(driver()->get_space());
+double sz;
+int isz;
+  sz=(double)(driver()->get_space());
   if(sz+(double)ao_plugin_local_data.len > (double)MAX_OUTBURST)
     sz=(double)MAX_OUTBURST-(double)ao_plugin_local_data.len;
   sz*=ao_plugin_data.sz_mult;
   sz+=ao_plugin_data.sz_fix;
-  return (int)(sz);
+  isz=(int)(sz);
+  isz-=isz%(ao_plugin_local_data.channels*ao_plugin_local_data.bpm/8);
+  return isz;
 }
 
 // plays 'len' bytes of 'data'
@@ -232,6 +235,11 @@ static int play(void* data,int len,int flags){
     // Filter data
     ao_plugin_data.len=ret_len;
     ao_plugin_data.data=data;
+
+// update plugins and uncoment that
+//    ao_plugin_data.channels=ao_plugin_local_data.channels;
+//    ao_plugin_data.format=ao_plugin_local_data.format;
+    
     while(plugin(i))
       plugin(i++)->play();
     // Copy data to output buffer
