@@ -819,7 +819,7 @@ Table of Contents
 		W/S mappings for * and / (mixer control)
 
   KNOWN BUGS:
-  - Keys pressed under aalib console driver repeat forever. (use -vo aa !)
+  - Keys pressed under sdl:aalib console driver repeat forever. (use -vo aa !)
     It's bug in SDL, I can't change it (tested with SDL 1.2.1).
 
 
@@ -962,15 +962,46 @@ Table of Contents
   ASCII renderer. There are LOTS of programs already supporting it, like Doom,
   Quake, etc. MPlayer contains a very usable driver for it.
   If ./configure detects aalib installed, the aalib libvo driver will be built.
-  It uses some keys to change Fast rendering ON/OFF, dithering mode change,
-  inverse picture, contrast, brightness. Use -vo aa and look out for the help
-  text.
+  
+  You can use some keys in the AA Window to change rendering options:
+        1 : switch fast rendering on/off
+        2 : set dithering mode (none, error distribution, floyd steinberg)
+        3 : invert image
+        4 : decrease contrast
+        5 : increase contrast
+        6 : decrease brightness
+        7 : increase brightness
+  
+
+  The following command line options can be used:
+	-aaosdcolor=V : change osd color
+	-aasubcolor=V : change osd color
+              where V can be: (0/normal, 1/dark, 2/bold, 3/boldfont, 4/reverse, 5/special) 
+	      
+        AAlib itselves provides a large sum of options.
+	Here are some important:
+	-aadriver     : set recommended aa driver (X11, curses, linux)
+	-aaextended   : use all 256 characters
+	-aaeight      : use eight bit ascii
+	-aahelp       : prints out all aalib options
+	
+	
+
+        
 
   NOTE: the rendering is very CPU intensive, especially when using AA-on-X
         (using aalib on X), and it's least CPU intensive on standard,
         non-framebuffer console. Use SVGATextMode to set up a big textmode,
         then enjoy! (secondary head Hercules cards rock :)) (anyone can enhance
-        fbdev to do conversion/dithering to hgafb? Would be neat :)
+	fbdev to do conversion/dithering to hgafb? Would be neat :)
+	
+	Use the -framedrop option if your comp isn't fast enough to render all frames!
+
+	Playing on terminal you'll get better speed and quality using the linux driver, not
+	curses (-aadriver linux). But therefore you need write access on /dev/vcsa<terminal>!
+	That isn't autodetected by aalib, bu vo_aa tries to find the best mode.
+	See http://aa-project.sourceforge.net/tune/ for further tuning issues.
+
 
   <A NAME=2.2.2>2.2.2.  Audio output devices
 
@@ -1999,7 +2030,7 @@ Vladimir Kushnir: <vkushnir@Alfacom.net>
 Bertrand BAUDET: <bertrand_baudet@yahoo.com>
 - network streaming support
 
-Folke Ashberg: <folke@ashberg.de
+Folke Ashberg: <folke@ashberg.de>
 - native AAlib driver (-vo aa)
 
 Main testers:
