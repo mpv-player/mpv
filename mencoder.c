@@ -64,7 +64,8 @@ static float default_max_pts_correction=-1;//0.01f;
 static float max_pts_correction=0;//default_max_pts_correction;
 static float c_total=0;
 
-int force_fps=0;
+float force_fps=0;
+float force_ofps=0; // set to 24 for inverse telecine
 
 //#include "libmpeg2/mpeg2.h"
 //#include "libmpeg2/mpeg2_internal.h"
@@ -172,7 +173,8 @@ lame_global_flags *lame;
 
 float audio_preload=0.3;
 
-float v_timer_corr=0;
+double v_pts_corr=0;
+double v_timer_corr=0;
 
 //int out_buffer_size=0x200000;
 //unsigned char* out_buffer=malloc(out_buffer_size);
@@ -337,7 +339,7 @@ mux_v->source=sh_video;
 
 mux_v->h.dwSampleSize=0; // VBR
 mux_v->h.dwScale=10000;
-mux_v->h.dwRate=mux_v->h.dwScale*sh_video->fps;
+mux_v->h.dwRate=mux_v->h.dwScale*(force_ofps?force_ofps:sh_video->fps);
 
 mux_v->codec=VCODEC_DIVX4; // 0=streamcopy
 
@@ -417,7 +419,7 @@ case VCODEC_DIVX4:
     // init divx4linux:
     enc_param.x_dim=sh_video->disp_w;
     enc_param.y_dim=sh_video->disp_h;
-    enc_param.framerate=sh_video->fps;
+    enc_param.framerate=(float)mux_v->h.dwRate/mux_v->h.dwScale;
     enc_param.bitrate=800000;
     enc_param.rc_period=0;
     enc_param.rc_reaction_period=0;
@@ -475,6 +477,7 @@ while(!eof){
     float v_pts=0;
     unsigned char* start=NULL;
     int in_size;
+    int skip_flag=0; // 1=skip  -1=duplicate
 
 if(sh_audio){
     // get audio:
@@ -540,11 +543,34 @@ if(sh_audio){
     in_size=video_read_frame(sh_video,&frame_time,&start,force_fps);
     if(in_size<0){ eof=1; break; }
     sh_video->timer+=frame_time;
+    
+    v_timer_corr-=frame_time-(float)mux_v->h.dwScale/mux_v->h.dwRate;
 
-//    if(!blit_frame) continue;
+// check frame duplicate/drop:
 
-if(v_timer_corr<2*sh_video->frametime){
-// don't have to skip frame.
+if(v_timer_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate){
+    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+    ++skip_flag; // skip
+} else
+while(v_timer_corr<=-(float)mux_v->h.dwScale/mux_v->h.dwRate){
+    v_timer_corr+=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+    --skip_flag; // dup
+}
+
+while( (v_pts_corr<=-(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag>0)
+ || (v_pts_corr<=-2*(float)mux_v->h.dwScale/mux_v->h.dwRate) ){
+    v_pts_corr+=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+    --skip_flag; // dup
+}
+if( (v_pts_corr>=(float)mux_v->h.dwScale/mux_v->h.dwRate && skip_flag<0)
+ || (v_pts_corr>=2*(float)mux_v->h.dwScale/mux_v->h.dwRate) )
+  if(skip_flag<=0){ // we can't skip more than 1 frame now
+    v_pts_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
+    ++skip_flag; // skip
+  }
+
+
+if(skip_flag<=0){ // don't have to skip frame.
 switch(mux_v->codec){
 case 0:
     mux_v->buffer=start;
@@ -579,19 +605,20 @@ case VCODEC_DIVX4:
     aviwrite_write_chunk(muxer,mux_v,muxer_f,enc_frame.length,enc_result.is_key_frame?0x10:0);
     break;
 }
-if(v_timer_corr<-2*sh_video->frametime){
+
+if(skip_flag<0){
     // duplicate frame
-    printf("\nduplicate frame!!!    \n");
-    aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
-    v_timer_corr+=(float)mux_v->h.dwScale/mux_v->h.dwRate;
-//    v_timer_corr=0;
+    printf("\nduplicate %d frame(s)!!!    \n",-skip_flag);
+    while(skip_flag<0){
+	aviwrite_write_chunk(muxer,mux_v,muxer_f,0,0);
+	++skip_flag;
+    }
 }
 
 } else {
     // skip frame
     printf("\nskip frame!!!    \n");
-    v_timer_corr-=(float)mux_v->h.dwScale/mux_v->h.dwRate;
-//    v_timer_corr=0;
+    --skip_flag;
 }
 
 if(sh_audio){
@@ -612,7 +639,7 @@ if(sh_audio){
     }
     v_pts=d_video->pts;
     // av = compensated (with out buffering delay) A-V diff
-    AV_delay=(a_pts-v_pts); AV_delay-=mux_a->timer-(mux_v->timer-v_timer_corr);
+    AV_delay=(a_pts-v_pts); AV_delay-=mux_a->timer-(mux_v->timer-(v_timer_corr+v_pts_corr));
 	// compensate input video timer by av:
         x=AV_delay*0.1f;
         if(x<-max_pts_correction) x=-max_pts_correction; else
@@ -623,12 +650,12 @@ if(sh_audio){
           max_pts_correction=sh_video->frametime*0.10; // +-10% of time
 	// sh_video->timer-=x;
 	c_total+=x;
-	v_timer_corr+=x;
+	v_pts_corr+=x;
 
-    printf("A:%6.1f V:%6.1f A-V:%7.3f oAV:%7.3f diff:%7.3f ct:%7.3f vtc:%7.3f   \r",
+    printf("A:%6.1f V:%6.1f A-V:%7.3f oAV:%7.3f diff:%7.3f ct:%7.3f vpc:%7.3f   \r",
 	a_pts,v_pts,a_pts-v_pts,
 	(float)(mux_a->timer-mux_v->timer),
-	AV_delay, c_total, v_timer_corr );
+	AV_delay, c_total, v_pts_corr );
 
 }
 
