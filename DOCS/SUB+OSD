@@ -9,22 +9,28 @@ OSD is used to display current time, volume bar, seek bar etc.
 
 
 INSTALLING OSD and SUB
--------
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-@ NOTE: OSD and SUBTITLES are NOT enabled by default! You have to        @
-@ download fonts from mplayer's download page                            @
-@  mplayer.sourceforge.net/homepage/dload.html                           @
-@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-Standard (Central-European, Latin1) font package:
-	http://thot.banki.hu/mp-ftp/releases/mp_font3.zip
-	(it obsoletes mp_font1.zip and mp_font2.zip)
+----------------------
 
-Cyrillic fonts:
-	http://thot.banki.hu/mp-ftp/releases/bgfont.zip
+You need an mplayer font package to be able to use OSD/SUB feature.
+There are many ways to get it:
 
-And visit this site for korean subtitle support:
-	http://realtime.ssu.ac.kr/~lethean/mplayer
-	
+1. use the font generator tool at TOOLS/subfont-c
+   It's a complete tool to convert from TTF/Type1/etc font to mplayer font pkg.
+   (read TOOLS/subfont-c/README for details)
+
+2. use the font generator GIMP plugin at TOOLS/subfont-GIMP
+   (note: you must have HSI RAW plugin too, see URL bellow)
+
+3. download ready-to-use font packages from mplayer site.
+   Note: currently available fonts are only for limited iso 8859-1/2 support,
+   and there is a few special version for korean, russian etc codepages.
+   You'd better building font yourself with tool mentioned above.
+   
+   some usefull URLs:
+   ftp://ftp.mplayerhq.hu/MPlayer/releases/         - ISO fonts, OBSOLETED!
+   ftp://ftp.mplayerhq.hu/MPlayer/contrib/fonts/    - various fonts by users
+   http://realtime.ssu.ac.kr/~lethean/mplayer       - korean fonts & RAW plugin
+
 After that, UNZIP the files to ~/.mplayer/font/
 Now you have to see a clock at the upper left corner of the movie
 (switch it off with 'o')
@@ -33,3 +39,5 @@ OSD has 3 states: (switch with 'o')
     - clock + volume bar + seek bar + sub     (default)
     - volume bar + seek bar + sub
     - only sub
+
+You can change default behaviour by setting osdlevel= variable in config file.
