@@ -4386,7 +4386,7 @@ char inbuffer[INBUFSIZE];
 char outbuffer[OUTBUFSIZE];
 
 int main(void) {
-  ssize_t numread;
+  size_t numread;
   iconv_t icdsc;
   char *tocode="UTF-8";
   char *fromcode="cp1250";
