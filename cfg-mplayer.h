@@ -110,10 +110,17 @@ struct config conf[]={
 #else
 //        {"dvd", "DVD support was not compiled in. See file DOCS/DVD.\n",
 //            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
+#ifdef USE_DVDREAD
+        {"dvdkey", "MPlayer was compiled with libdvdread support, this option not available.\n",
+            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
+        {"dvdauth", "MPlayer was compiled with libdvdread support! Use option -dvd !\n",
+            CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
+#else
         {"dvdkey", "DVD support was not compiled in. See file DOCS/DVD.\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
         {"dvdauth", "DVD support was not compiled in. See file DOCS/DVD.\n",
             CONF_TYPE_PRINT, CONF_NOCFG, 0 , 0},
+#endif
 #endif
 			    
 #ifdef HAVE_FBDEV
