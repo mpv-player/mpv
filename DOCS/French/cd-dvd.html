@@ -40,8 +40,10 @@ Il y a plusieurs raisons possibles pour changer cette vitesse:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>echo file_readahead:2000000 &gt; /proc/ide/[périph. cdrom]/settings</CODE></P>
 
-<P>pour créer 2MB de cache du fichier (utile pour les CD-Roms endommagés). Il est également recommandé
-d'optimiser votre lecteur de CD-Roms avec hdparm:</P>
+<P>pour créer 2MB de cache du fichier, ce qui est utile pour les CD-Roms endommagés.
+  Si vous lui donnez une valeur trop haute, le lecteur ne va pas arréter de s'arréter et de repartir,
+  ce qui va dramatiquement diminuer les performances.
+  Il est également recommandé d'optimiser votre lecteur de CD-Roms avec hdparm:</P>
 
 <P>&nbsp;&nbsp;&nbsp;&nbsp;<CODE>hdparm -d1 -a8 -u1 (périph. cdrom)</CODE></P>
 
