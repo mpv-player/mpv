@@ -3414,7 +3414,7 @@ Vertical decimation 1, 2 or 4.
 .IPs quality=1-20
 Set JPEG compression quality [BEST] 1 - 20 [VERY BAD].
 .IPs fd|nofd
-By default, decimation is only performed if the zoran hardware
+By default, decimation is only performed if the Zoran hardware
 can upscale the resulting MJPEG images to the original size.
 The option fd instructs the filter to always perform the requested
 decimation (ugly).
@@ -5274,10 +5274,10 @@ mplayer /dev/zero \-rawvideo on:pal:fps=xx \-vc null \-vo null \-noframedrop
 mplayer tv:// \-tv driver=v4l:width=640:height=480:outfmt=i420 \-vc rawi420
 \-vo xv
 .TP
-.B Playback on zoran card (old style, depreciated)
+.B Playback on Zoran card (old style, deprecated)
 mplayer -vo zr -vf scale=352:288 file.avi
 .TP
-.B Playback on zoran card (new style)
+.B Playback on Zoran card (new style)
 mplayer -vo zr2 -vf scale=352:288,zrmjpeg file.avi
 .TP
 .B Encoding DVD title #2, only selected chapters
