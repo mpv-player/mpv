@@ -467,8 +467,6 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
   uint8_t *dst[3];
   int dstStride[3];
 
-  check_events();
-  
   if((old_vo_dwidth != vo_dwidth || old_vo_dheight != vo_dheight) /*&& y==0*/ && zoomFlag)
   {
     int newW= vo_dwidth;
