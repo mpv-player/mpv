@@ -194,15 +194,17 @@ do{
     if(stream_eof(demux->stream)) return 0; // EOF!
     
     if(id!=idx->ckid){
-      printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
-      continue;
+      if(verbose) printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
+      id=idx->ckid;
+//      continue;
     }
     len=stream_read_dword_le(demux->stream);
 //    if((len&(~1))!=(idx->dwChunkLength&(~1))){
 //    if((len)!=(idx->dwChunkLength)){
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
-      printf("ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
-      continue;
+      if(verbose) printf("ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
+      len=idx->dwChunkLength;
+//      continue;
     }
     if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else {
@@ -282,15 +284,17 @@ do{
     if(stream_eof(demux->stream)) return 0;
 
     if(id!=idx->ckid){
-      printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
-      continue;
+      if(verbose) printf("ChunkID mismatch! raw=%.4s idx=%.4s  \n",(char *)&id,(char *)&idx->ckid);
+      id=idx->ckid;
+//      continue;
     }
     len=stream_read_dword_le(demux->stream);
 //    if((len&(~1))!=(idx->dwChunkLength&(~1))){
 //    if((len)!=(idx->dwChunkLength)){
     if((len!=idx->dwChunkLength)&&((len+1)!=idx->dwChunkLength)){
-      printf("ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
-      continue;
+      if(verbose) printf("ChunkSize mismatch! raw=%d idx=%ld  \n",len,idx->dwChunkLength);
+      len=idx->dwChunkLength;
+//      continue;
     }
     if(idx->dwFlags&AVIIF_KEYFRAME) flags=1;
   } else return 0;
