@@ -226,7 +226,6 @@ static void needVideoFrameRate(demuxer_t* demuxer,
       break;
     }
 
-    fprintf(stderr, "%d: cur %f, last %f\n", i, curPTS, lastPTS);//#####@@@@@
     if (curPTS > lastPTS && lastPTS != 0.0) {
       // Use the difference between these two "pts"s to guess the frame rate.
       // (should really check that there were no missing frames inbetween)#####
