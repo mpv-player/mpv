@@ -97,7 +97,11 @@ static int framenum = 0;
 void jpeg_mkdir(char *buf, int verbose) { 
     struct stat stat_p;
 
+#ifndef __MINGW32__	
     if ( mkdir(buf, 0755) < 0 ) {
+#else
+    if ( mkdir(buf) < 0 ) {
+#endif
         switch (errno) { /* use switch in case other errors need to be caught
                             and handled in the future */
             case EEXIST:
