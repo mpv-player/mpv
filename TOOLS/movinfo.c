@@ -305,6 +305,8 @@ void lschunks(FILE *f,int level,unsigned int endpos){
   case 0x73747473: // stts  Sample time table
   case 0x63737473: // stsc  Sample->Chunk mapping table
   case 0x7A737473: // stsz  Sample size table
+  case 0x746f6e70: // pnot
+  case 0x54434950: // PICT
       break;
   default: lschunks(f,level+1,pos+atom_size);
   }
