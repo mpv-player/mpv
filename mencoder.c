@@ -883,7 +883,7 @@ case VCODEC_LIBAVCODEC:
     }
 
 #if 1
-    if (out_fmt != IMGFMT_YV12)
+    if (out_fmt != IMGFMT_YV12 && out_fmt != IMGFMT_I420)
     {
         printf("Not supported image format! (%s)\n",
     	    vo_format_name(out_fmt));
@@ -896,8 +896,16 @@ case VCODEC_LIBAVCODEC:
 	int size = lavc_venc_context.width * lavc_venc_context.height;
 
 /* Y */	lavc_venc_picture.data[0] = vo_image_ptr;
-/* U */	lavc_venc_picture.data[2] = lavc_venc_picture.data[0] + size;
-/* V */	lavc_venc_picture.data[1] = lavc_venc_picture.data[2] + size/4;
+	if (out_fmt == IMGFMT_YV12)
+	{
+/* U */		lavc_venc_picture.data[2] = lavc_venc_picture.data[0] + size;
+/* V */		lavc_venc_picture.data[1] = lavc_venc_picture.data[2] + size/4;
+	}
+	else /* IMGFMT_I420 */
+	{
+/* U */		lavc_venc_picture.data[1] = lavc_venc_picture.data[0] + size;
+/* V */		lavc_venc_picture.data[2] = lavc_venc_picture.data[1] + size/4;
+	}
 	lavc_venc_picture.linesize[0] = lavc_venc_context.width;
 	lavc_venc_picture.linesize[1] = lavc_venc_context.width / 2;
 	lavc_venc_picture.linesize[2] = lavc_venc_context.width / 2;
