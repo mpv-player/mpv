@@ -198,16 +198,16 @@ Public License Version 2.
 </chapter>
 
 
-&features.xml;
-&usage.xml;
-&faq.xml;
-&cd-dvd.xml;
-&ports.xml;
-&mencoder.xml;
-&mail-lists.xml;
-&bugreports.xml;
-&bugs.xml;
-&skin.xml;
-&users-vs-dev.xml;
+<!-- &features.xml; -->
+<!-- &usage.xml; -->
+<!-- &faq.xml; -->
+<!-- &cd-dvd.xml; -->
+<!-- &ports.xml; -->
+<!-- &mencoder.xml; -->
+<!-- &mail-lists.xml; -->
+<!-- &bugreports.xml; -->
+<!-- &bugs.xml; -->
+<!-- &skin.xml; -->
+<!-- &users-vs-dev.xml; -->
 &patches.xml;
 </book>
