@@ -26,7 +26,7 @@ static vd_info_t info =
 	"libdv",
 	"Alexander Neundorf <neundorf@kde.org>",
 	"http://libdv.sf.net",
-	""
+	"native codec"
 };
 
 LIBVD_EXTERN(libdv)

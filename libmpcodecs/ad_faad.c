@@ -19,7 +19,7 @@ static ad_info_t info =
 	"faad",
 	"Felix Buenemann",
 	"faad2",
-	"Under development!"
+	"uses libfaad2"
 };
 
 LIBAD_EXTERN(faad)

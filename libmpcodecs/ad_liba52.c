@@ -21,7 +21,7 @@ static uint32_t a52_flags=0;
 
 static ad_info_t info = 
 {
-	"AC3-liba52",
+	"AC3 decoding with liba52",
 	"liba52",
 	"Nick Kurshev",
 	"Michel LESPINASSE",

@@ -2,6 +2,9 @@
     DK3 ADPCM Decoder for MPlayer
       by Mike Melanson
 
+    "This format number was used by Duck Corp. but not officially 
+    registered with Microsoft"
+
     This file is responsible for decoding audio data encoded with
     Duck Corp's DK3 ADPCM algorithm. Details about the data format
     can be found here:
@@ -18,11 +21,11 @@
 
 static ad_info_t info = 
 {
-	"Duck DK3 ADPCM decoder",
+	"Duck Corp. DK3 ADPCM decoder",
 	"dk3adpcm",
 	"Nick Kurshev",
 	"Mike Melanson",
-	"This format number was used by Duck Corp. but not officially registered with Microsoft"
+	""
 };
 
 LIBAD_EXTERN(dk3adpcm)

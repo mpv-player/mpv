@@ -127,6 +127,8 @@ static char help_text[]=
 #define MSGTR_AvailableAudioOutputDrivers "Available audio output drivers:\n"
 #define MSGTR_AvailableAudioCodecs "Available audio codecs:\n"
 #define MSGTR_AvailableVideoCodecs "Available video codecs:\n"
+#define MSGTR_AvailableAudioFm "\nAvailable (compiled-in) audio codec families/drivers:\n"
+#define MSGTR_AvailableVideoFm "\nAvailable (compiled-in) video codec families/drivers:\n"
 #define MSGTR_UsingRTCTiming "Using Linux's hardware RTC timing (%ldHz)\n"
 #define MSGTR_CannotReadVideoPropertiers "Video: can't read properties\n"
 #define MSGTR_NoStreamFound "No stream found\n"

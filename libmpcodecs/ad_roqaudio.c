@@ -11,8 +11,8 @@ static ad_info_t info =
 	"Id RoQ File Audio Decoder",
 	"roqaudio",
 	"Nick Kurshev",
-	"Mike Melanson"
-	"RoQA is an internal MPlayer FOURCC"
+	"Mike Melanson",
+	"" //"RoQA is an internal MPlayer FOURCC"
 };
 
 LIBAD_EXTERN(roqaudio)

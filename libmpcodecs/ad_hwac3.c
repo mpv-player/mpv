@@ -18,7 +18,7 @@ extern int a52_fillbuff(sh_audio_t *sh_audio);
 
 static ad_info_t info = 
 {
-	"AC3 through SPDIF",
+	"AC3 pass-through SP/DIF",
 	"hwac3",
 	"Nick Kurshev",
 	"???",

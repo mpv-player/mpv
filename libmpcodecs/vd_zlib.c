@@ -11,7 +11,7 @@
 #include "vd_internal.h"
 
 static vd_info_t info = {
-	"zlib decoder (avizlib)",
+	"AVIzlib decoder",
 	"zlib",
 	"Alex",
 	"based on vd_ijpg.c",

@@ -10,10 +10,9 @@ static vd_info_t info =
 {
 	"Null video decoder",
 	"null",
-	0,
 	"A'rpi",
 	"A'rpi",
-	""
+	"no decoding"
 };
 
 LIBVD_EXTERN(null)

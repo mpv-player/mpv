@@ -21,7 +21,7 @@ static vd_info_t info = {
 	"divx4",
 	"A'rpi",
 	"http://www.divx.com",
-	"native codecs"
+	"native binary codec"
 };
 
 LIBVD_EXTERN(divx4)

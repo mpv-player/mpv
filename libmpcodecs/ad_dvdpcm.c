@@ -7,7 +7,7 @@
 
 static ad_info_t info = 
 {
-	"Uncompressed DVD PCM audio decoder",
+	"Uncompressed DVD/VOB LPCM audio decoder",
 	"dvdpcm",
 	"Nick Kurshev",
 	"A'rpi",

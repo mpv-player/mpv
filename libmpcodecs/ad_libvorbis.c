@@ -14,7 +14,7 @@ static ad_info_t info =
 	"libvorbis",
 	"Felix Buenemann, A'rpi",
 	"libvorbis",
-	"buggy"
+	""
 };
 
 LIBAD_EXTERN(libvorbis)

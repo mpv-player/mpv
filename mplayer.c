@@ -639,6 +639,16 @@ if(!parse_codec_cfg(get_path("codecs.conf"))){
       printf("\n");
       exit(0);
     }
+    if(video_fm && strcmp(video_fm,"help")==0){
+      vfm_help();
+      printf("\n");
+      exit(0);
+    }
+    if(audio_fm && strcmp(audio_fm,"help")==0){
+      afm_help();
+      printf("\n");
+      exit(0);
+    }
 
 
     if(!filename && !vcd_track && !dvd_title && !dvd_nav && !tv_param_on){

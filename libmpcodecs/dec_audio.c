@@ -26,6 +26,22 @@ int audio_output_channels = 2;
 
 static ad_functions_t* mpadec;
 
+void afm_help(){
+    int i;
+    mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_AvailableAudioFm);
+    mp_msg(MSGT_DECAUDIO,MSGL_INFO,"    afm:    info:  (comment)\n");
+    for (i=0; mpcodecs_ad_drivers[i] != NULL; i++)
+      if(mpcodecs_ad_drivers[i]->info->comment && mpcodecs_ad_drivers[i]->info->comment[0])
+	mp_msg(MSGT_DECAUDIO,MSGL_INFO,"%9s  %s (%s)\n",
+	    mpcodecs_ad_drivers[i]->info->short_name,
+	    mpcodecs_ad_drivers[i]->info->name,
+	    mpcodecs_ad_drivers[i]->info->comment);
+      else
+	mp_msg(MSGT_DECAUDIO,MSGL_INFO,"%9s  %s\n",
+	    mpcodecs_ad_drivers[i]->info->short_name,
+	    mpcodecs_ad_drivers[i]->info->name);
+}
+
 int init_audio(sh_audio_t *sh_audio)
 {
   unsigned i;

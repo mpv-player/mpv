@@ -29,8 +29,8 @@ static vd_info_t info = {
 	"HuffYUV Video decoder",
 	"huffyuv",
 	"Roberto Togni",
-	"Roberto Togni",
-	"native codec, original win32 by Ben Rudiak-Gould http://www.math.berkeley.edu/~benrg/huffyuv.html"
+	"Roberto Togni, original win32 by Ben Rudiak-Gould http://www.math.berkeley.edu/~benrg/huffyuv.html",
+	"native codec"
 };
 
 LIBVD_EXTERN(huffyuv)

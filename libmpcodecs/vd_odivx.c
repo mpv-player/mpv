@@ -27,7 +27,11 @@ static vd_info_t info = {
 #else
 	"http://www.projectmayo.org",
 #endif
-	"native codecs"
+#ifdef NEW_DECORE
+	"native binary codec"
+#else
+	"native codec"
+#endif
 };
 
 LIBVD_EXTERN(odivx)
