@@ -2452,6 +2452,7 @@ echores "$_mp1e"
 echocheck "OSS Audio"
 if test "$_ossaudio" = auto ; then
   cat > $TMPC << EOF
+#include <sys/ioctl.h>
 $_inc_soundcard
 int main(void) { int arg = SNDCTL_DSP_SETFRAGMENT; return 0; }
 EOF
