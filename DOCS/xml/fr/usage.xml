@@ -332,12 +332,6 @@ sera probablement implémenté (en gardant une compatibilité descendante avec les
 précédents formats EDL).
 </para>
 
-<para>
-Le nombre maximum d'entrées EDL pour l'incarnation actuelle de EDL est 1000.
-Si vous avez besoin de plus, changez le <systemitem>#define MAX_EDL_ENTRIES</systemitem>
-dans le fichier <filename>edl.h</filename>.
-</para>
-
 <sect2 id="edl_using">
 <title>Utiliser un fichier EDL</title>
 <para>

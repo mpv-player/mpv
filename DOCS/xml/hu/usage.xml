@@ -335,12 +335,6 @@ fejlettségi szintet, egy XML alapú fájl formátum lesz implementálva valószínûleg
 (megtartva a kompatibilitást visszafelé, a régi EDL formátumokkal).
 </para>
 
-<para>
-Az EDL bejegyzések maximális száma a jelenlegi EDL változatban 1000. Ha esetleg
-neked több kellene, változtasd meg a <systemitem>#define MAX_EDL_ENTRIES</systemitem>
-sort az <filename>edl.h</filename> fájlban.
-</para>
-
 <sect2 id="edl_using">
 <title>EDL fájl használata</title>
 <para>

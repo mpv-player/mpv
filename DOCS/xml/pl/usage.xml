@@ -335,13 +335,6 @@ bazuj±cy na XML. (zachowuj±c wsteczn± kompatybilno¶æ z wcze¶niejszymi formatami
 EDL).
 </para>
 
-<para>
-Maksymalna liczba wpisów dla aktualnego wcielenia EDL wynosi 1000.
-Je¿eli zdarzy siê, ¿e bêdziesz potrzebowa³ wiêcej, zmieñ tê warto¶æ w
-<systemitem>#define MAX_EDL_ENTRIES</systemitem> w pliku
-<filename>edl.h</filename>.
-</para>
-
 <sect2 id="edl_using">
 <title>U¿ywanie pliku EDL</title>
 <para>

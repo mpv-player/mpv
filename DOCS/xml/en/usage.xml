@@ -329,12 +329,6 @@ certain level of maturity, an XML-based file format will probably be implemented
 (keeping backwards compatibility with previous EDL formats).
 </para>
 
-<para>
-The maximum number of EDL entries for the current incarnation of EDL is 1000.
-If you happen to need more, change the <systemitem>#define MAX_EDL_ENTRIES</systemitem>
-in the <filename>edl.h</filename> file.
-</para>
-
 <sect2 id="edl_using">
 <title>Using an EDL file</title>
 <para>

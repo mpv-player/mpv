@@ -522,12 +522,6 @@ un formato de archivo basada en XML (manteniendo compatibilidad con los
 formatos previos de EDL).
 </para>
 
-<para>
-El número máximo de entradas de la implementación actual de EDL es 1000.
-Si llega a necesitar más, cambie <systemitem>#define MAX_EDL_ENTRIES</systemitem>
-en el archivo <filename>edl.h</filename>.
-</para>
-
 <sect2 id="edl_using">
 <title>Usando un archivo EDL</title>
 <para>
