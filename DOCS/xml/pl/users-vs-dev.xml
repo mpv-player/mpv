@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
 <!-- synced with 1.10 -->
 <appendix id="users-vs-dev">
-<title>Developerzy wyrywają sobie włosy</title>
+<title>Deweloperzy wyrywają sobie włosy</title>
 
 <sect1 id="gcc-296">
 <title>GCC 2.96</title>
@@ -96,7 +96,7 @@ paczek, poniżej znajdziesz informacje, jak skompilować GCC 3 ze źródeł:
   <screen>tar -xvzf gcc-core-<replaceable>XXX</replaceable>.tar.gz</screen>
   </para></step>
 <step><para>
-  GCC nie jest budowane w katalogu źródłowym, jak większość programów,
+  GCC nie jest budowane w katalogu źródłowym jak większość programów,
   ale potrzebuje katalogu kompilacji poza katalogiem ze źródłami.  Będziesz musiał 
   stworzyć katalog przez 
   <screen>mkdir gcc-build</screen>
@@ -156,7 +156,7 @@ słabym wsparciu dla użytkownika i eksperta.
 Wiele z tych problemów/kwestii pojawia się ciągle. nVidia skontaktowała się
 z nami ostatnio i stwierdziła, że te błędy nie istnieją, a przyczyną braku
 stabilności są wadliwe układy AGP, nie otrzymali również żadnych zgłoszeń
-o błędach w sterowniku (takich, jak purpurowa linia). Jeżeli masz problem ze swoją kartą 
+o błędach w sterowniku (takich jak purpurowa linia). Jeżeli masz problem ze swoją kartą 
 nVidia, radzimy zainstalować najnowszą wersję sterowników nVidia i/lub 
 kupno nowej płyty głównej lub poprosić nVidię o otwarte sterowniki. W każdym razie,
 jeżeli używasz sterowników binarnych nVidia i stajesz przed problemami z nimi związanymi, 
