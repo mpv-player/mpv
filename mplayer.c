@@ -1645,6 +1645,7 @@ switch(sh_video->codec->driver){
 #endif
           (!f || getch2(20)<=0) && mplayer_get_key()<=0){
 	  video_out->check_events();
+          if(!f) usleep(1000); // do not eat the CPU
       }
       osd_function=OSD_PLAY;
   }
@@ -1660,7 +1661,7 @@ switch(sh_video->codec->driver){
 #ifdef HAVE_LIRC
       (c=lirc_mp_getinput())>0 ||
 #endif
-      (!f && (c=getch2(0)))>0 || (c=mplayer_get_key())>0) switch(c){
+      (f && (c=getch2(0))>0) || (c=mplayer_get_key())>0) switch(c){
     // seek 10 sec
     case KEY_RIGHT:
       osd_function=OSD_FFW;
