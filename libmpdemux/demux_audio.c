@@ -1,5 +1,6 @@
 
 #include "config.h"
+#include "../mp_msg.h"
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -83,7 +84,7 @@ int demux_audio_open(demuxer_t* demuxer) {
   switch(frmt) {
   case MP3:
     sh_audio->format = 0x55;
-    demuxer->movi_start = st_pos;
+    demuxer->movi_start = st_pos-3;
     for(n = 0; n < 5 ; n++) {
       pos = mp_decode_mp3_header(hdr);
       if(pos < 0)
@@ -159,13 +160,15 @@ int demux_audio_open(demuxer_t* demuxer) {
   priv = (da_priv_t*)malloc(sizeof(da_priv_t));
   priv->frmt = frmt;
   demuxer->priv = priv;
-  demuxer->movi_start = st_pos;
+//  demuxer->movi_start = st_pos;
   demuxer->audio->id = 0;
   demuxer->audio->sh = sh_audio;
   sh_audio->ds = demuxer->audio;
 
   if(stream_tell(s) != demuxer->movi_start)
     stream_seek(s,demuxer->movi_start);
+
+  mp_msg(MSGT_DEMUX,MSGL_V,"demux_audio: audio data 0x%X - 0x%X  \n",demuxer->movi_start,demuxer->movi_end);
 
   return 1;
 }
