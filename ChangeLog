@@ -30,7 +30,7 @@ mplayer (1.0)
       (no backward compatibilty!)
     
     Ports:
-    * HPUX fixes
+    * HP-UX fixes
     * Ported to Darwin / Mac OS X (with extra accurate Darwin timers)
     * Ported to Win32/MinGW (including network, timers, getch etc)
     * win32 codecs DLL support on Win32/Cygwin (and MinGW too!)
