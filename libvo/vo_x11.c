@@ -23,6 +23,7 @@
 #include "sub.h"
 
 #include "../postproc/swscale.h"
+#include "../postproc/swscale_internal.h" //FIXME
 #include "../postproc/rgb2rgb.h"
 
 #include "../mp_msg.h"
@@ -371,7 +372,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
   if ( myximage )
    {
     freeMyXImage();
-    freeSwsContext(swsContext);
+    sws_freeContext(swsContext);
    }
   getMyXImage();
   
@@ -397,7 +398,7 @@ static uint32_t config( uint32_t width,uint32_t height,uint32_t d_width,uint32_t
   }
 
   /* always allocate swsContext as size could change between frames */
-  swsContext= getSwsContextFromCmdLine(width, height, in_format, width, height, out_format );
+  swsContext= sws_getContextFromCmdLine(width, height, in_format, width, height, out_format );
 
   //printf( "X11 bpp: %d  color mask:  R:%lX  G:%lX  B:%lX\n",bpp,myximage->red_mask,myximage->green_mask,myximage->blue_mask );
 
@@ -482,7 +483,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 
     if(sws_flags==0) newW&= (~31); // not needed but, if the user wants the FAST_BILINEAR SCALER, then its needed
 
-    swsContext= getSwsContextFromCmdLine(srcW, srcH, in_format, 
+    swsContext= sws_getContextFromCmdLine(srcW, srcH, in_format, 
     					 newW, newH, out_format);
     if(swsContext)
     {
@@ -491,7 +492,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 
 	freeMyXImage();
 	getMyXImage();
-	freeSwsContext(oldContext);
+	sws_freeContext(oldContext);
     }    
     else
     {
@@ -507,13 +508,13 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
   {
 	dstStride[0]= -image_width*((bpp+7)/8);
 	dst[0]=ImageData - dstStride[0]*(image_height-1);
-	swsContext->swScale(swsContext,src,stride,y,h,dst, dstStride);
+	sws_scale(swsContext,src,stride,y,h,dst, dstStride);
   }
   else
   {
 	dstStride[0]=image_width*((bpp+7)/8);
 	dst[0]=ImageData;
-	swsContext->swScale(swsContext,src,stride,y,h,dst, dstStride);
+	sws_scale(swsContext,src,stride,y,h,dst, dstStride);
   }
   return 0;
 }
@@ -609,7 +610,7 @@ static void uninit(void)
  zoomFlag=0;
  vo_x11_uninit();
 
- freeSwsContext(swsContext);
+ sws_freeContext(swsContext);
 }
 
 static uint32_t preinit(const char *arg)

@@ -46,7 +46,7 @@ typedef struct FilterParam{
 	float strength;
 	int threshold;
 	float quality;
-	SwsContext *filterContext;
+	struct SwsContext *filterContext;
 }FilterParam;
 
 struct vf_priv_s {
@@ -88,15 +88,15 @@ static int allocStuff(FilterParam *f, int width, int height){
 	SwsVector *vec;
 	SwsFilter swsF;
 
-	vec = getGaussianVec(f->radius, f->quality);
-	scaleVec(vec, f->strength);
+	vec = sws_getGaussianVec(f->radius, f->quality);
+	sws_scaleVec(vec, f->strength);
 	vec->coeff[vec->length/2]+= 1.0 - f->strength;
 	swsF.lumH= swsF.lumV= vec;
 	swsF.chrH= swsF.chrV= NULL;
-	f->filterContext= getSwsContext(
+	f->filterContext= sws_getContext(
 		width, height, IMGFMT_Y8, width, height, IMGFMT_Y8, 0, &swsF, NULL);
 
-	freeVec(vec);
+	sws_freeVec(vec);
 
 	return 0;
 }
@@ -116,7 +116,7 @@ static int config(struct vf_instance_s* vf,
 }
 
 static void freeBuffers(FilterParam *f){
-	if(f->filterContext) freeSwsContext(f->filterContext);
+	if(f->filterContext) sws_freeContext(f->filterContext);
 	f->filterContext=NULL;
 }
 
@@ -138,7 +138,7 @@ static inline void blur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride,
 	int srcStrideArray[3]= {srcStride, 0, 0};
 	int dstStrideArray[3]= {dstStride, 0, 0};
 
-	f.filterContext->swScale(f.filterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
+	sws_scale(f.filterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
 	
 	if(f.threshold > 0){
 		for(y=0; y<h; y++){

@@ -43,7 +43,7 @@ typedef struct FilterParam{
 	float preFilterRadius;
 	float strength;
 	float quality;
-	SwsContext *preFilterContext;
+	struct SwsContext *preFilterContext;
 	uint8_t *preFilterBuf;
 	int preFilterStride;
 	int distWidth;
@@ -95,14 +95,14 @@ static int allocStuff(FilterParam *f, int width, int height){
 	f->preFilterBuf= (uint8_t*)memalign(8, stride*height);
 	f->preFilterStride= stride;
 
-	vec = getGaussianVec(f->preFilterRadius, f->quality);
+	vec = sws_getGaussianVec(f->preFilterRadius, f->quality);
 	swsF.lumH= swsF.lumV= vec;
 	swsF.chrH= swsF.chrV= NULL;
-	f->preFilterContext= getSwsContext(
+	f->preFilterContext= sws_getContext(
 		width, height, IMGFMT_Y8, width, height, IMGFMT_Y8, 0, &swsF, NULL);
 	
-	freeVec(vec);
-	vec = getGaussianVec(f->strength, 5.0);
+	sws_freeVec(vec);
+	vec = sws_getGaussianVec(f->strength, 5.0);
 	for(i=0; i<512; i++){
 		double d;
 		int index= i-256 + vec->length/2;
@@ -112,8 +112,8 @@ static int allocStuff(FilterParam *f, int width, int height){
 		
 		f->colorDiffCoeff[i]= (int)(d/vec->coeff[vec->length/2]*(1<<12) + 0.5);
 	}
-	freeVec(vec);
-	vec = getGaussianVec(f->radius, f->quality);
+	sws_freeVec(vec);
+	vec = sws_getGaussianVec(f->radius, f->quality);
 	f->distWidth= vec->length;
 	f->distStride= (vec->length+7)&~7;
 	f->distCoeff= (int32_t*)memalign(8, f->distWidth*f->distStride*sizeof(int32_t));
@@ -127,7 +127,7 @@ static int allocStuff(FilterParam *f, int width, int height){
 //				printf("%6d ", f->distCoeff[x + y*f->distStride]);
 		}
 	}
-	freeVec(vec);
+	sws_freeVec(vec);
 	
 	return 0;
 }
@@ -147,7 +147,7 @@ static int config(struct vf_instance_s* vf,
 }
 
 static void freeBuffers(FilterParam *f){
-	if(f->preFilterContext) freeSwsContext(f->preFilterContext);
+	if(f->preFilterContext) sws_freeContext(f->preFilterContext);
 	f->preFilterContext=NULL;
 	
 	if(f->preFilterBuf) free(f->preFilterBuf);
@@ -176,7 +176,8 @@ static inline void blur(uint8_t *dst, uint8_t *src, int w, int h, int dstStride,
 	int srcStrideArray[3]= {srcStride, 0, 0};
 	int dstStrideArray[3]= {f.preFilterStride, 0, 0};
 
-	f.preFilterContext->swScale(f.preFilterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
+//	f.preFilterContext->swScale(f.preFilterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
+	sws_scale(f.preFilterContext, srcArray, srcStrideArray, 0, h, dstArray, dstStrideArray);
 	
 	for(y=0; y<h; y++){
 		for(x=0; x<w; x++){

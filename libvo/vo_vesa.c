@@ -95,7 +95,7 @@ static void (*cpy_blk_fnc)(unsigned long,uint8_t *,unsigned long) = NULL;
 static uint32_t srcW=0,srcH=0,srcBpp,srcFourcc; /* source image description */
 static uint32_t dstBpp,dstW, dstH,dstFourcc; /* destinition image description */
 
-static SwsContext * sws = NULL;
+static struct SwsContext * sws = NULL;
 
 static int32_t x_offset,y_offset; /* to center image on screen */
 static unsigned init_mode=0; /* mode before run of mplayer */
@@ -161,7 +161,7 @@ static void vesa_term( void )
   if(HAS_DGA()) vbeUnmapVideoBuffer((unsigned long)win.ptr,win.high);
   if(dga_buffer && !HAS_DGA()) free(dga_buffer);
   vbeDestroy();
-  if(sws) freeSwsContext(sws);
+  if(sws) sws_freeContext(sws);
   sws=NULL;
 }
 
@@ -278,7 +278,7 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
     dstStride[1]=
     dstStride[2]=dstStride[0]>>1;
     if(HAS_DGA()) dst[0] += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
-    sws->swScale(sws,image,stride,y,h,dst,dstStride);
+    sws_scale(sws,image,stride,y,h,dst,dstStride);
     flip_trigger = 1;
     return 0;
 }
@@ -423,7 +423,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	else
 	    srcStride[0] = srcW*2;
 	if(HAS_DGA()) dst[0] += y_offset*SCREEN_LINE_SIZE(PIXEL_SIZE())+x_offset*PIXEL_SIZE();
-	sws->swScale(sws,src,srcStride,0,srcH,dst,dstStride);
+	sws_scale(sws,src,srcStride,0,srcH,dst,dstStride);
 	flip_trigger=1;
     }
     return 0;
@@ -800,7 +800,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 #endif
 		) 
 		{
-		    sws = getSwsContextFromCmdLine(srcW,srcH,srcFourcc,dstW,dstH,dstFourcc);
+		    sws = sws_getContextFromCmdLine(srcW,srcH,srcFourcc,dstW,dstH,dstFourcc);
 		    if(!sws)
 		    {
 			printf("vo_vesa: Can't initialize SwScaler\n");

@@ -724,27 +724,27 @@ static void scale_image(int x, int y, scale_pixel* table_x, scale_pixel* table_y
 void sws_spu_image(unsigned char *d1, unsigned char *d2, int dw, int dh, int ds,
 	unsigned char *s1, unsigned char *s2, int sw, int sh, int ss)
 {
-	SwsContext *ctx;
+	struct SwsContext *ctx;
 	static SwsFilter filter;
 	static int firsttime = 1;
 	static float oldvar;
 	int i;
 
-	if (!firsttime && oldvar != spu_gaussvar) freeVec(filter.lumH);
+	if (!firsttime && oldvar != spu_gaussvar) sws_freeVec(filter.lumH);
 	if (firsttime) {
 		filter.lumH = filter.lumV =
-			filter.chrH = filter.chrV = getGaussianVec(spu_gaussvar, 3.0);
-		normalizeVec(filter.lumH, 1.0);
+			filter.chrH = filter.chrV = sws_getGaussianVec(spu_gaussvar, 3.0);
+		sws_normalizeVec(filter.lumH, 1.0);
 		firsttime = 0;
 		oldvar = spu_gaussvar;
 	}
 	
-	ctx=getSwsContext(sw, sh, IMGFMT_Y800, dw, dh, IMGFMT_Y800, SWS_GAUSS, &filter, NULL);
-	ctx->swScale(ctx,&s1,&ss,0,sh,&d1,&ds);
+	ctx=sws_getContext(sw, sh, IMGFMT_Y800, dw, dh, IMGFMT_Y800, SWS_GAUSS, &filter, NULL);
+	sws_scale(ctx,&s1,&ss,0,sh,&d1,&ds);
 	for (i=ss*sh-1; i>=0; i--) if (!s2[i]) s2[i] = 255; //else s2[i] = 1;
-	ctx->swScale(ctx,&s2,&ss,0,sh,&d2,&ds);
+	sws_scale(ctx,&s2,&ss,0,sh,&d2,&ds);
 	for (i=ds*dh-1; i>=0; i--) if (d2[i]==0) d2[i] = 1; else if (d2[i]==255) d2[i] = 0;
-	freeSwsContext(ctx);
+	sws_freeContext(ctx);
 }
 
 void spudec_draw_scaled(void *me, unsigned int dxs, unsigned int dys, void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride))
