@@ -108,8 +108,10 @@ DECODING/FILTERING OPTIONS
     Decoding/Filtering layer options (ad, vd, pl).
 VIDEO FILTERS
     Video filter description (vf)
-ENCODING OPTIONS (MENCODER ONLY)
+GENERAL ENCODING OPTIONS (MENCODER ONLY)
     Encoding option descriptions (ve) (MEncoder only).
+CODEC SPECIFIC ENCODING OPTIONS (MENCODER ONLY)
+    Codec specific option descriptions (lavc,divx4,xvid,lame) (MEncoder only).
 FILES
     A list and description of all installed/used files/directories.
 EXAMPLES
