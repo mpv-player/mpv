@@ -65,7 +65,8 @@ static void draw_alpha(int x0,int y0, int w,int h, unsigned char* src, unsigned 
 static uint32_t
 init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
-    if (fullscreen&0x04 && (width != d_width || height != d_height) && format==IMGFMT_YV12) {
+    if (fullscreen&0x04 && (width != d_width || height != d_height) &&
+	((format==IMGFMT_YV12) /*|| (format == IMGFMT_I420) || (format == IMGFMT_IYUV)*/)) {
 	/* software scaling */
 	image_width = (d_width + 7) & ~7;
 	image_height = d_height;
@@ -89,6 +90,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	     bpp = 24;
 	     cspace = RGB;
 	break;     
+	case IMGFMT_IYUV:
+	case IMGFMT_I420:
 	case IMGFMT_YV12:
 	     bpp = 24;
 	     cspace = RGB;
@@ -248,7 +251,7 @@ static void flip_page (void)
     struct pngdata png;
     png_byte *row_pointers[image_height];
   
-  if(image_format == IMGFMT_YV12) {
+  if((image_format == IMGFMT_YV12) || (image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420)) {
 
     snprintf (buf, 100, "%08d.png", ++framenum);
 
@@ -273,6 +276,17 @@ static void flip_page (void)
 
 static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
+  /* hack: swap planes for I420 ;) -- alex */
+  if ((image_format == IMGFMT_IYUV) || (image_format == IMGFMT_I420))
+  {
+    uint8_t *src_i420[3];
+    
+    src_i420[0] = src[0];
+    src_i420[1] = src[2];
+    src_i420[2] = src[1];
+    src = src_i420;
+  }
+
   if (scale_srcW) {
     uint8_t *dst[3] = {image_data, NULL, NULL};
     SwScale_YV12slice(src,stride,y,h,
@@ -280,8 +294,7 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y 
 		      scale_srcW, scale_srcH, image_width, image_height);
   }
   else {
-  uint8_t *dst;
-  dst = image_data + (image_width * y + x) * (bpp/8);
+  uint8_t *dst = image_data + (image_width * y + x) * (bpp/8);
   yuv2rgb(dst,src[0],src[1],src[2],w,h,image_width*(bpp/8),stride[0],stride[1]);
   }
   return 0;
@@ -291,6 +304,8 @@ static uint32_t
 query_format(uint32_t format)
 {
     switch(format){
+    case IMGFMT_IYUV:
+    case IMGFMT_I420:
     case IMGFMT_YV12:
     case IMGFMT_RGB|24:
     case IMGFMT_BGR|24:
