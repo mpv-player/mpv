@@ -1,4 +1,4 @@
-#! /bin/sh
+#!/bin/sh
 
 # This script walks through the master (stdin) help/message file, and
 # prints (stdout) only those messages which are missing from the help
@@ -6,24 +6,23 @@
 #
 # Example: help_diff.sh help_mp-hu.h < help_mp-en.h > missing.h
 
-curr="x"
+curr=""
 
-while read -r line ; do
+while read -r line; do
+	if echo -E "$line" | grep -q '^#define'; then
+		curr=`echo -E "$line" | cut -d ' ' -f 2`
+		if grep -q "^#define $curr " $1; then
+			curr=""
+		fi
+	else
+		if [ -z "$line" ]; then
+			curr=""
+		fi
+	fi
 
-if ( echo $line | cut -d ' ' -f 1 | grep '^#define' > /dev/null ); then
-    curr=`echo $line | cut -d ' ' -f 2`
-    if ( grep " $curr " $1 > /dev/null ); then
-	curr="x"
-    fi
-else
-    if test x"$line" = x; then
-	curr="x"
-    fi
-fi
-
-if test $curr != "x" ; then
-    echo "$line"
-fi
-
+	if [ -n "$curr" ]; then
+		echo -E "$line"
+	fi
 done
+
 
