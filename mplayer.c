@@ -1952,14 +1952,14 @@ if(sh_audio) sh_audio->delay=-audio_delay;
 
 if(!sh_audio){
   mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_NoSound);
-  mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %s unused audio chunks.\n",d_audio->packs);
+  mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused audio chunks.\n",d_audio->packs);
   ds_free_packs(d_audio); // free buffered chunks
   d_audio->id=-2;         // do not read audio chunks
   //uninit_player(INITED_AO); // close device
 }
 if(!sh_video){
    mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Video_NoVideo);
-   mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %s unused video chunks.\n",d_video->packs);
+   mp_msg(MSGT_CPLAYER,MSGL_V,"Freeing %d unused video chunks.\n",d_video->packs);
    ds_free_packs(d_video);
    d_video->id=-2;
    //if(!fixed_vo) uninit_player(INITED_VO);
