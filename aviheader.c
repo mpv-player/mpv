@@ -158,6 +158,7 @@ if(index_mode>=2 || (demuxer->idx_size==0 && index_mode==1)){
   stream_seek(demuxer->stream,demuxer->movi_start);
   
   demuxer->idx_pos=0;
+  demuxer->idx_size=0;
   demuxer->idx=NULL;
 
   while(1){
@@ -173,8 +174,11 @@ if(index_mode>=2 || (demuxer->idx_size==0 && index_mode==1)){
       continue;
     }
     if(stream_eof(demuxer->stream)) break;
+    if(!id || avi_stream_id(id)==100) goto skip_chunk; // bad ID (or padding?)
+
     if(demuxer->idx_pos<=demuxer->idx_size){
-      demuxer->idx_size+=32;
+//      demuxer->idx_size+=32;
+      demuxer->idx_size+=1024; // +16kB
       demuxer->idx=realloc(demuxer->idx,demuxer->idx_size*sizeof(AVIINDEXENTRY));
       if(!demuxer->idx){demuxer->idx_pos=0; break;} // error!
     }
@@ -202,6 +206,7 @@ if(index_mode>=2 || (demuxer->idx_size==0 && index_mode==1)){
       printf("\n");
     }
 #endif
+skip_chunk:
     skip=(len+1)&(~1); // total bytes in this chunk
     stream_seek(demuxer->stream,8+demuxer->filepos+skip);
   }
