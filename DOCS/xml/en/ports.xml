@@ -295,6 +295,27 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <ulink url="http://www.videolan.org/vlc/dx7headers.tgz">DirectX 7 header files</ulink>
   to compile the DirectX video output driver.</para>
 
+<para><link linkend="vidix">VIDIX</link> now works under Windows as
+  <option>-vo winvidix</option>, although it is still experimental
+	and needs a bit of manual setup. Download
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>
+  and copy it to the
+  <filename class="directory">libdha/dhahelperwin</filename> directory in your
+	<application>MPlayer</application> source tree.
+	Open a console and change to that directory. Then type
+
+  <screen>gcc -o dhasetup.exe dhasetup.c</screen>
+
+  and execute
+
+  <screen>dhasetup.exe install</screen>
+
+  as Administrator.  After that you will have to reboot.  When you are
+  done, copy the <systemitem class="library">.so</systemitem> files from
+	<filename class="directory">vidix/drivers</filename> to the
+	<filename class="directory">mplayer/vidix</filename> directory
+  relative to your <filename>mplayer.exe</filename>.</para>
+
 <para>For best results <application>MPlayer</application> should use a
   colorspace that your video card supports in hardware.  Unfortunately many
   Windows graphics drivers wrongly report some colorspaces as supported in
@@ -363,6 +384,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>DVDs also work, adjust <option>-dvd-device</option> for the drive letter
   of your DVD-ROM:</para>
 
+<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:</screen>
+
 <screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device '\\.\<replaceable>d</replaceable>:'</screen>
 
 </sect2>
@@ -391,6 +414,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <screen>mplayer <replaceable>/d/MPEG2/AVSEQ01.MPG</replaceable></screen>
 
 <screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device /<replaceable>d</replaceable>/</screen>
+
+<screen>mplayer dvd://<replaceable>&lt;title&gt;</replaceable> -dvd-device <replaceable>d</replaceable>:\\</screen>
 
 </sect2>
 
