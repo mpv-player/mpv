@@ -176,13 +176,26 @@
                   <LI><A HREF="video.html#tv-out_matrox_g450">2.3.1.5.2 Cartes Matrox G450/G550</A></LI>
                   <LI><A HREF="video.html#tv-out_ati">2.3.1.5.3 Cartes ATI</A></LI>
                   <LI><A HREF="video.html#tv-out_voodoo">2.3.1.5.4 Voodoo 3</A></LI>
+                  <LI><A HREF="video.html#tv-out_nvidia">2.3.1.5.5 nVidia</A></LI>
                 </UL>
               </LI>
             </UL>
           <LI><A HREF="sound.html">2.3.2 Sorties audio</A>
             <UL>
-              <LI><A HREF="sound.html#experiences">2.3.2.1 Trucs, astuces et recommendations sur les cartes son</A></LI>
-              <LI><A HREF="sound.html#plugins">2.3.2.2 Plugins Audio</A>
+              <LI><A HREF="sound.html#sync">2.3.2.1 Synchronisation audio/video</A></LI>
+              <LI><A HREF="sound.html#experiences">2.3.2.2 Trucs, astuces et recommendations sur les cartes son</A></LI>
+              <LI><A HREF="sound.html#af">2.3.2.3 Filtres Audio</A>
+                <UL>
+                  <LI><A HREF="sound.html#af_resample">2.3.2.3.1 Up/Downsampling</A></LI>
+                  <LI><A HREF="sound.html#af_channels">2.3.2.3.2 Changer le nombre de canaux</A></LI>
+                  <LI><A HREF="sound.html#af_format">2.3.2.3.3 Convertisseur de format de sample</A></LI>
+                  <LI><A HREF="sound.html#af_delay">2.3.2.3.4 Delay</A></LI>
+                  <LI><A HREF="sound.html#af_volume">2.3.2.3.5 Contrôle de volume logiciel</A></LI>
+                  <LI><A HREF="sound.html#af_equalizer">2.3.2.3.6 Egualiseur</A></LI>
+                  <LI><A HREF="sound.html#af_panning">2.3.2.3.7 Filtre panoramique</A></LI>
+                </UL>
+              </LI>
+              <LI><A HREF="sound.html#plugins">2.3.2.4 Plugins Audio (à ne plus utiliser)</A>
                 <UL>
                   <LI><A HREF="sound.html#resample">2.3.2.2.1 Up/Downsampling</A></LI>
                   <LI><A HREF="sound.html#surround_decoding">2.3.2.2.2 Surround Sound decoding</A></LI>
@@ -846,7 +859,7 @@
   L'option   <CODE>-vobsubid</CODE> est comme l'option <CODE>-sid</CODE> pour les DVDs, vous pouvez
   choisir les pistes de sous-titres (langues) avec. Au cas où <CODE>-vobsubid</CODE>  est ommis, 
   MPlayer essaira d'utiliser les langues indiqués par l'option <CODE>-slang</CODE> et se rabattra
-  sur l'objet <CODE>langidx<CODE> du fichier .IDX pour définir la langue de sous-titres. Si cela
+  sur l'objet <CODE>langidx</CODE> du fichier .IDX pour définir la langue de sous-titres. Si cela
   échoue, il n'y aura pas de sous-titres.</P>
 
 <H4>Autres sous-titres</H4>

@@ -12,36 +12,51 @@
 
 <H3><A NAME="audio">2.3.2 Périphériques de sortie audio</A></H3>
 
-<H4><A NAME="sync">2.3.2.1 Description de la méthode de synchro A/V de MPlayer</A></H4>
+<H4><A NAME="sync">2.3.2.1 Synchronisation audio/vidéo</A></H4>
 
 <P>L'interface audio de MPlayer se nomme <I>libao2</I>. Elle possède actuellement 
   ces drivers :</P>
 
-<TABLE BORDER=0>
-  <TR><TD COLSPAN=4><P><B>General:</B></P></TD></TR>
-  <TR><TD>&nbsp;&nbsp;</TD><TD VALIGN=top>oss</TD><TD>&nbsp;&nbsp;</TD><TD>pilote OSS (ioctl) (supporte le transfert AC3 matériel)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>sdl</TD><TD></TD><TD>pilote SDL (supporte <B>ESD</B>, <B>ARTS</B> etc)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>nas</TD><TD></TD><TD>pilote NAS (Network Audio System)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>alsa5</TD><TD></TD><TD>pilote natif ALSA 0.5</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>alsa9</TD><TD></TD><TD>pilote natif ALSA 0.9 (supporte le transfert AC3 matériel)</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>sun</TD><TD></TD><TD>pilote SUN audio (<CODE>/dev/audio</CODE>) pour les utilisateurs de BSD et de Solaris8</TD></TR>
-  <TR><TD></TD><TD VALIGN=top>arts</TD><TD></TD><TD>pilote natif ARTS (surtout pour les utilisateurs de KDE)</TD></TR>
-</TABLE>
+<DL>
+  <DT>oss</DT>
+  <DD>pilote OSS (ioctl) (supporte le transfert AC3 matériel)</DD>
+
+  <DT>sdl</DT>
+  <DD>pilote SDL (supporte <B>ESD</B>, <B>ARTS</B> etc)</DD>
+
+  <DT>nas</DT>
+  <DD>pilote NAS (Network Audio System)</DD>
+
+  <DT>alsa5</DT>
+  <DD>pilote ALSA 0.5 natif</DD>
+
+  <DT>alsa9</DT>
+  <DD>pilote ALSA 0.9 natif (supporte le transfert AC3 matériel)</DD>
+
+  <DT>sun</DT>
+  <DD>pilote audio SUN (<CODE>/dev/audio</CODE>) pour les utilisateurs BSD et Solaris8</DD>
+
+  <DT>arts</DT>
+  <DD>pilote ARTS natif (principalement pour les utilisateurs KDE)</DD>
+
+  <DT>esd</DT>
+  <DD>pilote ESD natif (principalement pour les utilisateurs GNOME)</DD>
+</DL>
 
 <P>Il faut bien le reconnaître, les pilotes des cartes son ont des problèmes
-  d'incompatibilité. MPlayer utilise une fonction des pilotes écrits normalement
+  d'incompatibilité. MPlayer utilise une fonction des pilotes écrits correctement
   pour maintenir la synchro audio/vidéo. Malheureusement, certains auteurs de pilote
   n'ont que faire de cette fonction: elle n'est pas requise pour lire des MP3s, ou
-  des effets sonores.</P>
+  pour les effets sonores.</P>
 
 <P>Les autres lecteurs multimédia comme aviplay ou xine fonctionnent probablement
   autrement avec ces pilotes parce qu'ils utilisent de "simples" méthodes pour leur
   synchro interne. Une note: le temps affiché avec leurs méthodes ne sont pas AUSSI
   précis que celui de MPlayer.</P>
 
-<P>Utiliser MPlayer avec un pilote correctement écrit ne vous donnera pas de désynchro
-  A/V relatives à l'audio, seulement avec les les fichiers très mal créés (voir la
-  documentation pour les contournements!).</P>
+<P>Avec un pilote correctement écrit Mplayer ne provoquera pas de désynchro
+  A/V relatives à l'audio, à moins que votre fichier soit très endommagé. Quelques options
+  pour contourner ces problèmes sont décris dans la page de man).</P>
 
 <P>Si vous avez un mauvais pilote audio, essayez l'option <CODE>-autosync</CODE>,
   il devrait régler vos problèmes. Voir la page de man pour les informations
@@ -53,9 +68,9 @@
   <LI>Si vous avez un pilote OSS, essayez d'abord avec l'option <CODE>-ao oss</CODE>
     (utilisé par défaut). Si vous obtenez des scratchs ou une sonorité anormale, 
     essayez l'option <CODE>-ao sdl</CODE>(NOTE: vous devez bien sûr avoir installé 
-    les librairies SDL et SDL-devel). Elles sont plus efficaces dans de nombreux cas 
-    (elles supportent également ESD, ARTS, et la lecture accélérée/ralentie. ESD est le
-    le démon son de GNOME, ARTS celui de KDE).</LI>
+    les librairies SDL ainsi que leurs fichiers d'entête). Le pilote audio SDL est plus 
+    efficace dans de nombreux cas et supporte également ESD et ARTS. (ESD est le le 
+    démon son de GNOME, ARTS celui de KDE).</LI>
   <LI>Si vous avez ALSA version 0.5, vous devrez presque toujours utiliser l'option
     <CODE>-ao alsa5</CODE> , la version 0.5 émulant mal l'OSS, qui <B>plante MPlayer</B> 
       avec un message du type:<BR>
@@ -70,7 +85,8 @@
 
 <TABLE BORDER=0 WIDTH="100%">
   <TR><TD COLSPAN=3><B>Chipset VIA intégré (via82cxxx) 48kHz uniquement</B></TD></TR>
-  <TR><TD></TD><TD>Pilote:</TD><TD> depuis <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">sourceforge.net</A></TD></TR>
+  <TR><TD></TD><TD>Pilote:</TD><TD> depuis 
+  <A HREF="http://sourceforge.net/project/showfiles.php?group_id=3242&amp;release_id=59602">le projet gkernel</A></TD></TR>
 
   <TR><TD COLSPAN=3><B>Aureal Vortex 2</B></TD></TR>
   <TR><TD>&nbsp;&nbsp;&nbsp;&nbsp;</TD><TD>OSS:</TD><TD>pas de pilote</TD></TR>
@@ -78,8 +94,8 @@
   <TR><TD></TD><TD>ALSA:</TD><TD>pas de pilote</TD></TR>
   <TR><TD></TD><TD>Max kHz:</TD><TD>48</TD></TR>
   <TR><TD></TD><TD>Pilote:</TD><TD><A HREF="http://aureal.sourceforge.net">aureal.sourceforge.net</A></TD></TR>
-  <TR><TD></TD><TD>Pilote2:</TD><TD> depuis <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">Pontscho's page</A><BR>
-    (<I>tille du buffer augmentée à 32k</I>)</TD></TR>
+  <TR><TD></TD><TD>Pilote2:</TD><TD> depuis <A HREF="http://makacs.poliod.hu/~pontscho/aureal/au88xx-1.1.3.tar.bz2">Pontscho's page</A>
+    (<I>taille du buffer augmentée à 32k</I>)</TD></TR>
 
   <TR><TD COLSPAN=3><B>GUS PnP</B></TD></TR>
   <TR><TD></TD><TD>OSS:</TD><TD>pas de pilote</TD></TR>
@@ -141,17 +157,323 @@
   <CODE>hdparm -u1 /dev/cdrom</CODE> (<CODE>man hdparm</CODE>). C'est généralement bénéfique
   et décrit plus en détail dans la <A HREF="cd-dvd.html#drives">section CD-ROM</A>.</P>
 
-<P>Partager votre carte son avec une autre application comme XMMS est <B>fortement
-  découragé</B>!  Si l'autre application sonore utilise ESD, lancez
-  MPlayer avec l'option <CODE>-vo sdl:esd</CODE> pour combiner les deux
-  flux sonores. En fait, l'option <CODE>-vo sdl:esd</CODE> aurait pu être
-  utilisé avec ESD même en utilisant MPlayer seul.</P>
-
 <P>Les retour sur ce document sont les bienvenus.
   Merci de nous faire savoir comment MPlayer gère votre carte son.</P>
 
+  
+<H4><A NAME="af">2.3.2.3 Filtres audio</A></H4>
 
-<H4><A NAME="plugins">2.3.2.3 Plugins Audio</A></H4>
+<P>Les anciens plugins audio ont été remplacés par une nouvelle couche de filtres audio. 
+  Les filtres audio sont utilisés pour changer les propriétés des données audio avant
+  que le son n'atteigne la carte son. L'activation et la désactivation sont normalement
+  automatisés mais peuvent être outrepassés. Les filtres sont activés quand les propriétés
+  des données audio différent de celles requises par la carte son et désactivés si 
+  nécessaire. L'option <CODE>-af filtre1,filtre2,...</CODE> est utilisée pour outrepasser
+  l'activation automatique des filtres ou pour insérer des filtres qui ne le sont pas
+  automatiquement. Les filtres seront éxecutés dans l'ordre où ils apparaissent dans la
+  liste séparée par des virgules.</P>
+
+<P>Exemple:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af resample,pan film.avi </CODE></P>
+
+<P>ferait passer le son au travers du filtre de resampling suivi du filtre panoramique.
+  Remarquez que la liste ne doit contenir aucun espace, sinon cela échouera.</P>
+
+<P>Les filtres ont souvent des option changeant leur comportement. Ces options sont 
+  expliquées en détail dans les sections ci-dessous. Un filtre sera éxecuté en utilisant
+  ses paramètres par défaut si ses options sont omises. Voici un exemple de comment utiliser
+  les filtres en conjonction avec des options spécifiques à un filtre:</P>
+
+<P>&nbsp;&nbsp;<CODE>mplayer -af resample=11025,pan=1:0.5:0.5 -channels 1
+  -srate 11025 media.avi</CODE></P>
+
+<P>définirait la fréquence de sortie du filtre resample filter à 11025Hz et downmixerait
+  l'audio dans 1 cannal en utilisant le filtre pan.</P>
+
+<P>La plupart des filtres répondent à l'option <CODE>-v</CODE>, qui leur fait afficher des
+  messages d'état.</P>
+
+<P>Le fonctionnement général de la couche filtre est controllé en utilisant l'option
+  <CODE>-af-adv</CODE>. Cette option a deux sous-options:</P>
+
+<DL>
+  <DT><CODE>force</CODE><DT>
+  <DD>est un entier entre 0 et 3 qui contrôle comment les filtres sont insérés
+    et quelles optimisations de vitesse/exactitude ils utilisent:
+    <DL>
+      <DT>0</DT>
+      <DD>Utilise l'insertion automatique des filtres et optimise selon la vitesse
+        du CPU.</DD>
+      <DT>1</DT>
+      <DD>Utilise l'insertion automatique des filtres et optimise pour la plus haute 
+        vitesse. Si cette option est activée le traitement des données audio sera
+        fait en utilisant des opérations à virgule fixe. Attention: Certaines fonctions
+        des filtres audio échoueront en silence, et la qualité du son risque d'en souffrir.</DD>
+      <DT>2</DT>
+      <DD>Utilise l'insertion automatique des filtres et optimise pour la qualité. Si cette
+        option est activée le traitement des données audio sera fait en utilisant des 
+        opérations à virgule flottante et donc très intensif en usage CPU, mais donne
+        une bien meilleure qualité sonore qu'avec le traitement à virgule fixe.</DD>
+      <DT>3</DT>
+      <DD>N'utilise pas l'insertion automatique des filtres et n'optimise pas. Attention: 
+        il est possible que MPlayer plante en utilisant ce paramètre.</DD>
+    </DL>
+  </DD>
+  
+  <DT><CODE>list</CODE></DT>
+  <DD>est un alias de l'option -af.</DD>
+</DL>
+
+
+<H5><A NAME="af_resample">2.3.2.3.1 Up/Down-sampling</A></H5>
+
+<P>MPlayer supporte pleinement l'up/down-sampling du son. Ce filtre peut être utilisé
+  si vous avez une carte son à fréquence fixe ou si vous avez une vieille carte son
+  qui n'est capable que de 44.1kHz. Ce filtre est automatiquement activé si cela est
+  nécessaire, mais il peut être explicitement activé en ligne de commande. Il a trois
+  options:</P>
+
+<DL>
+  <DT><CODE>srate</CODE></DT>
+  <DD>est un entier utilisé pour définir la fréquence d'échantillonage de sortie
+    en Hz. L'intervale valide pour ce paramètre va de 8kHz à 192kHz. Si les fréquences
+    d'entrée et de sortie sont les mêmes ou si les paramètres sont
+    ommis, le filtre est automatiquement retiré. Un fréquence d'échantillonage haute
+    augmente normallement la qualité audio, surtout utilisé en conjonction avec d'autres
+    filtres.</DD>
+
+  <DT><CODE>sloppy</CODE></DT>
+  <DD>est un paramètre binaire optionnel qui permet à la fréquence de sortie de différer
+    légèrement de la fréquence donnée par <CODE>srate</CODE>. Cette option est utilisé
+    au démarrage si la lecture est extremement lente.</DD>
+
+  <DT><CODE>fast</CODE><DT>
+  <DD>est un paramètre binaire optionnel qui active l'interpolation linéaire comme
+    méthode de resampling. L'interpolation linéaire est extrémement rapide, mais souffre
+    d'une piètre qualité sonore surtout si elle est utilisée pour l'up-sampling.</DD>
+</DL>
+
+<P>Example:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af resample=44100:0:1</CODE></P>
+
+<P>fixerait la fréquence de sortie du filtre resample à 44100Hz en utilisant une echelle 
+  de fréquence exacte et l'interpolation linéaire.</P>
+
+
+<H5><A NAME="af_channels">2.3.2.3.2 Changer le nombre de canaux</A></H5>
+
+<P>Le filtre <CODE>channels</CODE> peut être utilisé pour ajouter ou retirer 
+  des canaux, il peut aussi être utilisé pour le routage ou la copie de canaux. Il est
+  automatiquement activé quand la sortie du filtre audio diffère de la couche d'entrée 
+  ou quand il est demandé par un autre filtre. Se filtre se retire si il n'est pas requis. 
+  Le nombre d'option est dynamique:</P>
+
+<DL>
+  <DT><CODE>nch</CODE></DT>
+  <DD>est un entier entre 1 et 6 qui est utilisé pour définir le nombre de canaux de
+    sortie. Cette option est requise, la laisser vide provoquera une erreur à l'éxecution.</DD>
+
+  <DT><CODE>nr</CODE></DT>
+  <DD>est un entier entre 1 et 6 qui est utilisé pour définir le nombre de routes.
+    Ce paramètre est optionnel. Si il est omis le routage par défaut est utilisé.</DD>
+
+  <DT><CODE>from1:to1:from2:to2:from3:to3...</CODE></DT>
+  <DD>sont des paires de nombres entre 0 et 5 qui définissent où chaque canal est
+    routé.</DD>
+</DL>
+
+<P>Si seul <CODE>nch</CODE> est indiqué le routage par défaut est utilisé, il fonctionne
+  comme cela: Si le nombre de canaux de sortie est plus grand que le nombre de canaux
+  d'entrée des canaux vides sont insérés (exepté le mixage de mono vers stéréo, dans ce
+  cas le canal mono est répété sur chacun des canaux de sortie). Si le nombre de canaux de
+  sortie est plus petit que le nombre de canaux d'entrée les canaux en trop seront 
+  tronqués.</P>
+
+<P>Exemple 1:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi </CODE></P>
+
+<P>changerait le nombre de canaux à 4 et définirait 4 routes qui interchangent le canal
+  0 et le canal 1 et laissent les canaux 2 et 3 intacts. Remarquez que si le 
+  media qui contient deux canaux était joué en arrière, les canaux 2 et 3 contiendraient
+  du silence mais les 0 et 1 seraient tout de même inversés.</P>
+
+<P>Exemple 2:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi </CODE></P>
+
+<P>changerait le nombre de canaux à 6 et définirait 4 routes copiant le canal 0
+  dans les canaux 0 à 3. Les canaux 4 et 5 contiendront du silence.</P>
+
+
+<H5><A NAME="af_format">2.3.2.3.3 Convertisseur de format de sample</A></H5>
+
+<P>Ce filtre est un convertisseur de format de sample. Il est automatiquement activé
+  si requis par la carte son ou un autre filtre.</P>
+
+<DL>
+  <DT><CODE>bps</CODE></DT>
+  <DD>peut être 1, 2 ou 4 et définie le nombre d'octets par sample. Cette option
+    est requise, la laisser vide provoquera une erreur à l'éxecution.</DD>
+
+  <DT><CODE>f</CODE></DT>
+  <DD>est une chaine texte décrivant le format de sample. Cette chaine est un mix
+    concaténé de: <CODE>alaw</CODE>, <CODE>mulaw</CODE> ou
+    <CODE>imaadpcm</CODE>, <CODE>float</CODE> ou <CODE>int</CODE>,
+    <CODE>unsigned</CODE> ou <CODE>signed</CODE>, <CODE>le</CODE> ou
+    <CODE>be</CODE> (little ou big endian). Cette option est requise, la laisser vide 
+    provoquera une erreur à l'éxecution.</DD>
+</DL>
+
+<P>Example:<BR>
+  &nbsp;&nbsp;<CODE>mplayer media.avi -af format=4:float</CODE></P>
+
+<P>initialiserait le format de sortie en données à virgule de 4 octets par sample.</P>
+
+
+<H5><A NAME="af_delay">2.3.2.3.4 Delay</A></H5>
+
+<P>Ce filtre décale le son vers les haut-parleurs de façon a faire arriver le son dans les 
+  différents canaux au même moment dans la position d'écoute. Cela n'est utile que si
+  vous avez plus de 2 haut-parleurs Ce filtre a une nombre variable de paramètres:</P>
+
+<DL>
+  <DT><CODE>d1:d2:d3...</CODE></DT>
+  <DD>sont des nombres à virgule représentant les décalages en ms qui devraient être
+    imposés aux différents canaux. Le décalage minimum est 0ms et le maximum
+    est 1000ms.</DD>
+</DL>
+
+<P>Pour calculer le décalage requis pour chaque canal, faites comme ceci:</P>
+
+<OL>
+  <LI>Mesurez la distance entre les hauts parleurs et votre position d'écoute (en metres) 
+    ce qui vous donne les distances s1 à s5 (pour un système 5.1).
+    Ce n'est pas la peine de le faire pour le caisson de basses (vous n'entendrez pas la 
+    différence de toute façon).</LI>
+  <LI>Soustraiez les distances s1 à s5 à la distance maximum c-a-d.<BR>
+    s[i] = max(s) - s[i]; i = 1...5</LI>
+  <LI>Les décalages requis (en ms) sont calculés avec<BR>
+    d[i] = 1000*s[i]/342; i = 1...5 </LI>
+</OL>
+
+<P>Exemple:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af delay=10.5:10.5:0:0:7:0 media.avi</CODE></P>
+
+<P>décalerait les canaux avant gauche et droite de 10.5ms, les deux canaux arrière et le
+  caisson de 0ms et le canal central de 7ms.</P>
+
+
+<H5><A NAME="af_volume">2.3.2.3.5 Contrôle de volume logiciel</A></H5>
+
+<P>Ce filtre est un contrôleur de volume logiciel. Utilisez ce filtre avec précaution 
+  car il peut réduire le signal au niveau de bruit du son. Dans la plupart des cas
+  il vaut mieux fixer le niveau du son PCM au max, laisser ce filtre de côté et contrôler
+  le niveau de sortie de vos haut-parleurs avec le contrôleur de volume principal du 
+  mixeur. Si il y a un amplificateur externe connecté à l'ordinateur (ce qui est presque
+  toujours le cas), le niveau de bruit peut être minimisé en ajustant le niveau maître
+  et le bouton du volume jusqu'à ce que le bruit résiduel soit parti. Ce filtre a
+  deux options:</P>
+
+<DL>
+  <DT><CODE>v</CODE></DT>
+  <DD>est un nombre à virgule compris entre -200 et +60 qui représente le niveau
+    du volume en dB. Le niveau par défaut est -10dB.</DD>
+
+  <DT><CODE>c</CODE></DT>
+  <DD>est un contrôle binaire qui active et désactuve le soft clipping. Le Soft-clipping 
+    peut rendre le son plus fluide si de très gros niveaux de volume de son sont utilisés. 
+    Activez cette option si l'intervale dynamique de vos haut-parleurs est très bas.
+    Soyez conscient que cette fonction crée une distortion et ne devrait être utilisé
+    qu'en dernier recours.</DD>
+</DL>
+
+<P>Example:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af volume=10.1:0 media.avi</CODE></P>
+
+<P>amplifierait le son de 10.1dB et bloque le volume si il est trop haut.</P>
+
+<P>Ce filtre a une seconde fonction: Il mesure le niveau maximum du son et l'affiche 
+  quand MPlayer se termine. Cette estimation de volume peut être utilisée pour définir
+  le niveau de son dans MEncoder pour que l'intervale dynamique maximum soit utilisé.</P>
+
+
+<H5><A NAME="af_equalizer">2.3.2.3.6 Egaliseur</A></H5>
+
+<P> Ce filtre est un égaliseur graphique à 10 bandes, implementé en utilisant 10 filtres
+  IIR de bande passante. Cela signifie qu'il fonctionne quel que soit le type d'audio
+  joué. Les fréquences centrales pour les 10 bandes sont:</P>
+
+<TABLE BORDER="0" WIDTH="100%">
+  <TR><TD>Bande No.</TD><TD>Fréquence centrale</TD></TR>
+  <TR><TD>0</TD><TD>31.25 Hz</TD></TR>
+  <TR><TD>1</TD><TD>62.50 Hz</TD></TR>
+  <TR><TD>2</TD><TD>125.0 Hz</TD></TR>
+  <TR><TD>3</TD><TD>250.0 Hz</TD></TR>
+  <TR><TD>4</TD><TD>500.0 Hz</TD></TR>
+  <TR><TD>5</TD><TD>1.000 kHz</TD></TR>
+  <TR><TD>6</TD><TD>2.000 kHz</TD></TR>
+  <TR><TD>7</TD><TD>4.000 kHz</TD></TR>
+  <TR><TD>8</TD><TD>8.000 kHz</TD></TR>
+  <TR><TD>9</TD><TD>16.00 kHz</TD></TR>
+</TABLE>
+
+<P>Si la fréquence du son joué est plus basse que la fréquence centrale pour une bande
+  de fréquence, alors cette bande sera désactivée. Un bogue connu de ce filtre est que
+  les caractéristiques de la plus haute bande ne sont pas complètement symétriques si
+  la fréquence du sample est proche de la fréquence centrale de la bande. Ce problème
+  peut être contourné en up-samplant le son en utilisant le filtre resample avant qu'il
+  n'atteigne ce filtre. </P>
+
+<P>Ce filtre a 10 paramètres:</P>
+
+<DL>
+  <DT><CODE>g1:g2:g3...g10</CODE></DT>
+  <DD>sont des nombres à virgule compris entre -12 et +12dB représentant le gain en
+    dB pour chaque bande de fréquence.</DD>
+</DL>
+
+<P>Exemple:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi</CODE></P>
+
+<P>amplifierait le son sur les fréquences les plus hautes et les plus basses tout en
+  les annulant presque complètement autour de 1kHz.</P>
+
+<H5><A NAME="af_panning">2.3.2.3.7 Filtre panoramique</A></H5>
+
+<P>Ce filtre peut être utilisé pour mixer les canaux arbitrairement. Fondamentalement
+  c'est une combinaison des filtres volume control et channels. Il y a deux utilisations
+  principales pour ce filtre: </P>
+
+<OL>
+  <LI>Down-mixage de nombreux canaux dans seulement quelques-un, stéréo vers mono par 
+  exemple.</LI>
+  <LI>Faire varier la "largeur" du haut parleur central dans un système de son surround.</LI>
+</OL>
+
+<P>Ce filtre est difficile à utiliser, et nécessitera quelques réglage avant d'obtenir le 
+  résultat souhaité. Le nombre d'options pour ce filtre dépends du nombre de canaux de 
+  sortie:</P>
+
+<DL>
+  <DT><CODE>nch</CODE></DT>
+  <DD>est un entier compris entre 1 et 6 et est utilisé pour définir le nombre de canaux
+    de sortie. Cette option est requise, la laisser vide provoquera une erreur à 
+    l'éxecution.</DD>
+
+  <DT><CODE>l00:l01:l02:..l10:l11:l12:...ln0:ln1:ln2:...</CODE></DT>
+  <DD>sont des nombres à virgule compris entre 0 et 1. <CODE>l[i][j]</CODE> détermine
+    le nombre j de canaux d'entrée à mixer dans le nombre i de canaux de sortie.</DD>
+</DL>
+
+<P>Exemple:<BR>
+  &nbsp;&nbsp;<CODE>mplayer -af pan=1:0.5:0.5 -channels 1 media.avi</CODE></P>
+
+<P>down-mixerait de stéréo vers mono.</P>
+
+
+<H2><STRONG>Note: Les plugins audio ont été remplacés par les filtres audio et seront
+  prochainements supprimés.</STRONG></H2>
+
+<H4><A NAME="plugins">2.3.2.4 Plugins Audio (à ne plus utiliser)</A></H4>
 
 <P>Mplayer supporte les plugins audio. Les plugins audio peuvent être utilisés
   pour changer les propriétés des données audio avant que le son n'atteigne la
