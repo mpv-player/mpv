@@ -363,9 +363,11 @@ int find_best_svga_mode(int req_w,int req_h, int req_bpp){
   prev_badness = 0;//take care of special case below
   bestmode = 0; //0 is the TEXT mode
   lastmode = vga_lastmodenumber();
-  for(i=1;i<lastmode;i++){
+  for(i=1;i<=lastmode;i++){
     vminfo = vga_getmodeinfo(i);
     if( vminfo == NULL ) continue;
+    if(verbose>3)
+      printf("vo_svga: testing mode %d (%s) %d\n",i,vga_getmodename(i));
     if( vga_hasmode(i) == 0 ) continue;
     if( req_bpp != bpp_from_vminfo(vminfo) )continue;
     if( (vminfo->width < req_w) || (vminfo->height < req_h) ) continue;
@@ -638,7 +640,7 @@ vga_modeinfo * vminfo;
   if( vo_dbpp>0 && vo_dbpp!=req_bpp ) return 0; //support -bpp options
 //scan all modes
   lastmode = vga_lastmodenumber();
-  for(i=1;i<lastmode;i++){
+  for(i=1;i<=lastmode;i++){
     vminfo = vga_getmodeinfo(i);
     if( vminfo == NULL ) continue;
     if( vga_hasmode(i) == 0 ) continue;
