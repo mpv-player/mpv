@@ -1,4 +1,4 @@
-.\" synced with 1.805
+.\" synced with 1.806
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Nicolas Le Gaillart < nicolas AT legaillart.com >
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "14 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "17 Novembre 2004" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -190,8 +190,8 @@ DVD (SPU streams, VobSub et Closed Captions).
 (MPlayer's Movie Encoder) est un simple encodeur de vidéos, conçu pour encoder
 des vidéos jouables par MPlayer (voir ci-dessus) dans d'autres formats jouables
 par MPlayer (voir ci-dessous).
-Il encode en DivX4, XviD, un des codecs libavcodec, et en PCM/\:MP3/\:VBRMP3
-audio en 1, 2 ou 3\ passes.
+Il encode en MPEG4 (DivX/XviD), un des codecs libavcodec, et en
+PCM/\:MP3/\:VBRMP3 audio en 1, 2 ou 3\ passes.
 Il permet également de copier des flux de données (stream), possède un
 puissant système de plugins (découpage, expansion, retournement, postprocess,
 rotation, redimensionnement, bruit, conversion rgb/\:yuv) et bien plus.
@@ -247,7 +247,7 @@ pères.
 Va à la prochaine/\:précédente source de rechange (liste de lecture ASX
 uniquement)
 .IPs "p / ESPACE"
-Met le film en pause (n'importe quelle touche pour redémarrer).
+Met le film en pause (un autre appuis reprend la lecture).
 .IPs .\ \ \ \
 Avance d'une trame.
 Le premier appui mettra le film en pause, et chaque appui suivant jouera
@@ -1848,10 +1848,10 @@ Force l'utilisation du mixeur logiciel à la place de celui de la carte son.
 .
 .TP
 .B \-softvol-max <10.0\-10000.0>
-Définit le niveau maximal d'amplification en pourcents (par défault\ : 0).
+Définit le niveau maximal d'amplification en pourcents (par défaut\ : 0).
 Une valeur de 200 vous permet d'ajuster le volume, au maximum, jusqu'au double
 du niveau courant.
-Avec une valeur inférieure à 100, le niveau de départ (qui est 100%) sera
+Avec une valeur inférieure à 100, le niveau initial (qui est 100%) sera
 au-delà du niveau maximum\ ; par conséquent l'OSD ne l'affichera pas
 correctement.
 .
@@ -3881,9 +3881,19 @@ Inverse l'image selon l'axe Y, comme dans un miroir.
 .
 .TP
 .B rotate[=<0\-7>]
-Tourne et (éventuellement) inverse l'image de +/\:- 90 degrés.
-Pour les paramètres entre 4\-7 la rotation n'est faite que si la géométrie
+Retourne l'image de 90 degrés et éventuellement la retourne.
+Pour les valeurs entre 4\-7 la rotation n'est faite que si la géométrie
 du film est en mode portrait et non en paysage.
+.RSs
+.IPs 0
+Retourne de 90 degrés dans le sens horaire et retourne.
+.IPs 1
+Retourne de 90 degrés dans le sens horaire.
+.IPs 2
+Retourne de 90 degrés dans le sens anti-horaire.
+.IPs 3
+Retourne de 90 degrés dans le sens anti-horaire et retourne.
+.RE
 .
 .TP
 .B scale[=w:h[:entrelacé[:chr_drop[:param[:param2[:presize]]]]]]
@@ -4220,6 +4230,14 @@ luminosité et de contraste.
 Notez que cela utilise le même code MMX optimisé que \-vf eq si toutes les
 valeurs gamma sont 1.0.
 Les paramètres sont donnés en nombres flottants.
+.RSs
+.IPs rg
+valeur gamma pour la composante rouge
+.IPs gg
+valeur gamma pour la composante verte
+.IPs bg
+valeur gamma pour la composante bleue
+.RE
 Les paramètres rg, vg, bg sont les valeurs gamma indépendantes pour les
 composantes rouges, vertes et bleues.
 Le paramètre poids peut être utilisé pour réduire l'effet d'un gamma trop
@@ -5556,7 +5574,7 @@ H.263
 .IPs h263p
 H.263+
 .IPs mpeg4
-DivX 4/\:5
+MPEG4 (DivX 4/5)
 .IPs msmpeg4
 DivX 3
 .IPs msmpeg4v2
@@ -5634,7 +5652,7 @@ obsolète, utilisez vqmax
 .
 .TP
 .B vqdiff=<1\-31>
-différence maximale de quantificateur entre chaque trames-I ou -P
+différence maximale de quantificateur entre chaque trame-I ou -P
 consécutive (passe\ 1/\:2) (par défaut\ : 3)
 .
 .TP
@@ -6976,7 +6994,7 @@ Une mauvaise utilisation de cette option peut produire des vidéos de très
 mauvaise qualité, soyez prévenus\ !
 .
 .TP
-.B (no)qpel\ 
+.B (no)qpel
 MPEG4 recherche par défaut les mouvements avec une précision d'un demi-pixel.
 Il est néanmoins possible de faire une recherche avec une précision d'un
 quart de pixel, ce qui permet généralement d'obtenir une image plus
@@ -6989,7 +7007,7 @@ de ne garder que celle qui vous paraît la plus fidèle (qui n'est pas
 forcément celle dont le PSNR est le plus élevé).
 .
 .TP
-.B (no)gmc\ 
+.B (no)gmc
 Active la Compensation de Mouvement Globale, ce qui permet à XviD d'engendrer
 des trames spéciales (trames GMC), particulièrement adaptées aux mouvements
 de travelling/\:zoom/\:rotation.
