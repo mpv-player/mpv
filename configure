@@ -3308,7 +3308,13 @@ EOF
   if cc_check $_inc_directfb -ldirectfb && "$TMPO" >> "$TMPLOG" ; then
     _directfb_version=`"$TMPO"`
     _def_directfb_version="#define DIRECTFBVERSION $_directfb_version"
-    echores "yes ($_directfb_version)"
+    if test "$_directfb_version" -ge 913; then
+	echores "yes ($_directfb_version)"
+    else
+        _def_directfb_version='#undef DIRECTFBVERSION'
+	_directfb=no
+	echores "no (version =>0.9.13 required)"
+    fi
   else
     _directfb=no
     echores "no (failed to get version)"
@@ -3321,11 +3327,9 @@ if test "$_directfb" = yes ; then
   _def_directfb='#define HAVE_DIRECTFB 1'
   if test "$_directfb_version" -ge 913; then
     _vosrc="$_vosrc vo_directfb2.c"
-  else
-    _vosrc="$_vosrc vo_directfb.c"
+    _vomodules="directfb $_vomodules"
+    _ld_directfb='-ldirectfb'
   fi
-  _vomodules="directfb $_vomodules"
-  _ld_directfb='-ldirectfb'
 
   if test "$_directfb_version" -ge 915; then
     _vosrc="$_vosrc vo_dfbmga.c"
