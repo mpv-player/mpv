@@ -1,4 +1,4 @@
-.\" synced with 1.565
+.\" synced with 1.571
 .\" MPlayer (C) 2000-2004 El equipo de MPlayer 
 .\" Esta página de manual ha sido escrita por Gabucino, Diego Biurrun,
 .\" Jonas Jermann y traducida al español por Juan Martín López.
@@ -147,8 +147,8 @@ WMV (sin usar la librería avifile).
 .PP
 Otra gran característica de MPlayer es el amplio rango de controladores de
 salida soportados.
-Funciona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, DirectFB, y también
-puede usar GGI, SDL (y de este modo todos los controladores), VESA (en cualquier
+Funciona con X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB, Quartz,
+pero también puede usar GGI, SDL (y todos sus controladores), VESA (en cualquier
 tarjeta compatible con VESA, incluso sin X11), algunos controladores de tarjetas
 específicas a bajo nivel (par Matrox, 3Dfs y ATI) y algunas tarjetas decodificadoras
 de MPEG por hardware, tales como Siemens DVB, DXR2 y DXR3/\:Hollywood+.
@@ -766,9 +766,9 @@ no usar los valores por defecto:
 Especifica el número de tarjeta usada 1\-4 (por defecto: 1).
 .IPs file=<archivo>
 Ordena a MPlayer que lea los canales desde la lista <archivo>.
-.IPs type=<SAT|TER|CBL>
-Especifica si el tipo de tarjeta es SATélite, TERrestre o CaBLe. Si no
-se especifica el tipo se usará autodetección.
+Por defecto es ~/.mplayer/channels.conf.{sat,ter,cbl} (basado en su tipo
+de tarjeta)
+o ~/.mplayer/channels.conf como última opción.
 .RE
 .PD 1
 .
@@ -3609,6 +3609,9 @@ Pruebe esta opción si tiene problemas con la representación en pantalla.
 .RE
 .PD 1
 .TP
+.B quartz (Mac OS X solamente)
+Controlador de salida Mac OS X Quartz .
+.TP
 .B fbdev (solamente Linux)
 Usa el framebuffer del núcleo para la salida de video.
 .TP
@@ -3637,9 +3640,23 @@ Salida de video usando la biblioteca SVGA.
 .TP
 .B gl\ \ \ \ \ 
 Controlador de salida OpenGL.
+Versión muy simple, sin soporte OSD y el tamaño del video debe ser menor
+que el tamaño máximo de la textura de su implementación OpenGL.
+Está hecho para que trabaje incluso con las implementaciones OpenGL más simples.
+.PD 0
+.RSs
+.IPs manyfmts
+Activa soporte para más (RGB y BGR) formatos de color.
+Necesita versión >= 1.2 de OpenGL, NO FUNCIONA correctamente todavía.
+.IPs slice-height=<0\-...>
+Número de líneas copiadas a la textura en una pieza (por defecto: 4).
+0 para la imagen entera.
+.RE
+.PD 1
 .TP
 .B gl2\ \ \ \ 
 Controlador de salida de OpenGL, segunda generación.
+Soporta OSD y videos más grandes que el tamaño máximo de la textura.
 .TP
 .B null\ \ \ 
 No produce salida de video.
@@ -3647,6 +3664,9 @@ No produce salida de video.
 .TP
 .B aa\ \ \ \ \ 
 Controlador de salida ASCII art que funciona en una consola de texto.
+.TP
+.B caca\ \ \ 
+Controlador de salida AsCii Art coloreado que funciona en una consola de texto.
 .TP
 .B bl\ \ \ \ \ 
 Reproducción de video usando el protocolo UDP Blinkenlights.

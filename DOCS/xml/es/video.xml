@@ -1135,6 +1135,99 @@ y ajustes.
 </para>
 </sect4>
 
+<sect4 id="caca">
+<title><systemitem class="library">libcaca</systemitem> - Biblioteca de Arte AsCii
+en color</title>
+
+<para>
+La biblioteca <ulink url="http://sam.zoy.org/projects/libcaca/"><systemitem class="library">libcaca</systemitem></ulink>
+es una biblioteca gráfica que tiene como salida texto en lugar de pixels, de modo
+que funicona en cualquier tarjeta gráfica antigua o en terminales de texto.
+No es como la famosa biblioteca <systemitem class="library">AAlib</systemitem>.
+<systemitem class="library">libcaca</systemitem> necesita un terminal para funcionar,
+esto es funciona en todo sistema Unix (incluyendo Mac OS X) usando bien la biblioteca
+<systemitem class="library">slang</systemitem> o bien la biblioteca
+<systemitem class="library">ncurses</systemitem>, en DOS usando la biblioteca
+<systemitem class="library">conio.h</systemitem>, y en sistemas Windows usando bien
+<systemitem class="library">slang</systemitem> o
+<systemitem class="library">ncurses</systemitem> (a través de emulación Cygwin) o
+<systemitem class="library">conio.h</systemitem>. Si <filename>./configure</filename>
+detecta <systemitem class="library">libcaca</systemitem>, el controlador de salida
+caca libvo será construido.
+</para>
+
+<itemizedlist>
+<title>Las diferencias con <systemitem class="library">AAlib</systemitem> son las
+siguientes:</title>
+<listitem><simpara>
+  16 colores disponibles para la salida de caracteres (256 pares de colores)
+  </simpara></listitem>
+<listitem><simpara>
+  difuminado del color de la imagen
+  </simpara></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Pero <systemitem class="library">libcaca</systemitem> también tiene las siguientes
+limitaciones:</title>
+<listitem><simpara>
+  no soporta brillo, contraste, gamma
+  </simpara></listitem>
+</itemizedlist>
+
+<para>
+Puede usar algunas teclas en la ventana caca para cambiar opciones de renderizado:
+</para>
+
+<informaltable>
+<tgroup cols="2">
+<thead>
+  <row><entry>Tecla</entry><entry>Acción</entry></row>
+</thead>
+<tbody>
+<row><entry><keycap>d</keycap></entry><entry>
+  Cambia los métodos de difuminado de <systemitem class="library">libcaca</systemitem>.
+  </entry></row>
+<row><entry><keycap>a</keycap></entry><entry>
+  Cambia el antialiasing en <systemitem class="library">libcaca</systemitem>.
+  </entry></row>
+<row><entry><keycap>b</keycap></entry><entry>
+  Cambia el fondo en <systemitem class="library">libcaca</systemitem>.
+  </entry></row>
+</tbody>
+</tgroup>
+</informaltable>
+
+<variablelist>
+<title><systemitem class="library">libcaca</systemitem> también mira algunas
+variables de entorno:</title>
+<varlistentry>
+  <term><option>CACA_DRIVER</option></term>
+  <listitem><simpara>
+    Establece el controlador caca recomendado, e.g. ncurses, slang, x11.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>CACA_GEOMETRY (solo X11)</option></term>
+  <listitem><simpara>
+    Especifica el número de filas y columnas. e.g. 128x50.
+    </simpara></listitem>
+</varlistentry>
+<varlistentry>
+  <term><option>CACA_FONT (solo X11)</option></term>
+  <listitem><simpara>
+    Especifica la tipografía a usar. e.g. fixed, nexus.
+    </simpara></listitem>
+</varlistentry>
+</variablelist>
+
+<para>
+Use la opción <option>-framedrop</option> si su ordenador no es suficientemente
+rápido para renderizar todos los marcos de imagen.
+</para>
+
+</sect4>
+
 
 <sect4 id="vesa">
 <title>VESA - salida en VESA BIOS</title>
@@ -1849,9 +1942,22 @@ para una TV 16:9: -vf dvbscale=1024,scale=-1:0,expand=-1:576:-1:-1:1
 </para>
 
 <para>
+  Si tiene más de un tipo de tarjeta (e.g. Satélite, Terrestre y Cable)
+  puede guardar sus archivos de canales como
+  <filename>~/.mplayer/channels.conf.sat</filename>,
+  <filename>~/.mplayer/channels.conf.ter</filename>
+  y <filename>~/.mplayer/channels.conf.cbl</filename>,
+  respectivamente, de ese modo se indica implícitamente a
+  <application>MPlayer</application> que uso esos archivos en lugar de
+  <filename>~/.mplayer/channels.conf</filename>,
+  y solo tiene que especificar qué tarjeta usar.
+</para>
+
+<para>
   Asegúrese de que tiene <emphasis>solo</emphasis> canales Free to Air en su
   archivo <filename>channels.conf</filename>, o <application>MPlayer</application>
-  se colgará en los otros.
+  intentará saltar al siguiente visible, pero puede tardar mucho si hay varios
+  canales consecutivos encriptados.
 </para>
 
 <para>

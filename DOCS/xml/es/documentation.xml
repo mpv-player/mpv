@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.11 -->
+<!-- synced with 1.12 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - El reproductor de Películas
@@ -65,7 +65,7 @@ nativos, de XAnim, de RealPlayer y de DLL de Win32. Puede ver películas en forma
 y <emphasis>DivX</emphasis> también (¡y no es necesaria la librería avifile!). 
 Otra gran característica de <application>MPlayer</application> es el amplio
 rango de controladores de salida soportados. Funciona con X11, Xv, DGA, OpenGL,
-SVGAlib, fbdev, AAlib, DirectFB, ¡pero también puede usar GGI y SDL (y de esta
+SVGAlib, fbdev, AAlib, libcaca, DirectFB, ¡pero también puede usar GGI y SDL (y de esta
 manera todos sus controladores) y algunos controladores de bajo nivel
 específicos de algunas placas (para Matrox, 3Dfx y Radeon, Mach64, Permidia3)!
 Casi todos ellos soportan escalado por software o hardware, por lo que puede
