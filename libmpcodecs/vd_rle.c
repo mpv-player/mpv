@@ -8,14 +8,14 @@
 
 static vd_info_t info = {
 	"RLE Video decoder",
-	"rle",
-	VFM_RLE,
+	"msrle",
+	VFM_MSRLE,
 	"A'rpi",
 	"XAnim rip...",
 	"native codec"
 };
 
-LIBVD_EXTERN(rle)
+LIBVD_EXTERN(msrle)
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
