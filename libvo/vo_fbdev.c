@@ -6,6 +6,8 @@
  * Some idea and code borrowed from Chris Lawrence's ppmtofb-0.27
  */
 
+#define FBDEV "fbdev: "
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -41,7 +43,7 @@ static vo_info_t vo_info = {
 extern int verbose;
 
 /******************************
-*	fb.modes parser       *
+*	fb.modes support      *
 ******************************/
 
 /*
@@ -250,7 +252,10 @@ static int parse_fbmode_cfg(char *cfgfile)
 		} else if (!strcmp(token[0], "accel")) {
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
-			/* NOTHING for now*/
+			/*
+			 * it's only used for text acceleration
+			 * so we just ignore it.
+			 */
 		} else if (!strcmp(token[0], "hsync")) {
 			if (get_token(1) < 0)
 				goto err_out_parse_error;
@@ -320,8 +325,11 @@ err_out_parse_error:
 err_out_print_linenum:
 	PRINT_LINENUM;
 err_out:
-	if (fb_modes)
+	if (fb_modes) {
 		free(fb_modes);
+		fb_modes = NULL;
+	}
+	nr_modes = 0;
 	free(line);
 	free(fp);
 	return -2;
@@ -341,11 +349,82 @@ static fb_mode_t *find_mode_by_name(char *name)
 	return NULL;
 }
 
+static float dcf(fb_mode_t *m)	//driving clock frequency
+{
+	return 1000000.0f / m->pixclock;
+}
+
+static float hsf(fb_mode_t *m)	//horizontal scan frequency
+{
+	int htotal = m->left + m->xres + m->right + m->hslen;
+	return dcf(m) / htotal;
+}
+
+static float vsf(fb_mode_t *m)	//vertical scan frequency
+{
+	int vtotal = m->upper + m->yres + m->lower + m->vslen;
+	return hsf(m) / vtotal;
+}
+
+typedef struct {
+	float min;
+	float max;
+} range;
+
+static int in_range(range *r, float f)
+{
+	for (/* NOTHING */; r; r++) {
+		if (f >= r->min && f <= r->max)
+			return 1;
+	}
+	return 0;
+}
+
+static fb_mode_t *find_best_mode(int xres, int yres, range *hfreq,
+		range *vfreq, range *dotclock)
+{
+	int i;
+	fb_mode_t *best = fb_modes;
+	fb_mode_t *curr = fb_modes + 1;
+
+	for (i = nr_modes - 1; i; i--, curr++) {
+		if (curr->xres >= xres && curr->yres >= yres) {
+			if (curr->xres < best->xres && curr->yres < best->yres) {
+				if (!in_range(hfreq, hsf(curr)))
+					continue;
+				if (!in_range(vfreq, vsf(curr)))
+					continue;
+				if (!in_range(dotclock, dcf(curr)))
+					continue;
+				best = curr;
+			}
+		}
+	}
+	if ((best->xres < xres || best->yres < yres) ||
+			!in_range(hfreq, hsf(best)) ||
+			!in_range(vfreq, vsf(best)) ||
+			!in_range(dotclock, dcf(curr)))
+		return NULL;
+	return best;
+}
+
 /******************************
 *	    vo_fbdev	      *
 ******************************/
 
-static int fb_init_done = 0;
+/*
+ * command line/config file options
+ */
+char *fb_dev_name = NULL;
+char *fb_mode_cfgfile = "/etc/fb.modes";
+char *fb_mode_name = NULL;
+int fb_mode_depth = 0;
+int fb_mode_auto = 0;
+char *monitor_hfreq = NULL;
+char *monitor_vfreq = NULL;
+char *monitor_dotclock = NULL;
+
+static int fb_preinit_done = 0;
 static int fb_works = 0;
 static int fb_dev_fd;
 static size_t fb_size;
@@ -357,14 +436,9 @@ static struct fb_cmap *fb_oldcmap = NULL;
 static int fb_pixel_size;	// 32:  4  24:  3  16:  2  15:  2
 static int fb_real_bpp;		// 32: 24  24: 24  16: 16  15: 15
 static int fb_bpp;		// 32: 32  24: 24  16: 16  15: 15
+static int fb_bpp_we_want;	// 32: 32  24: 24  16: 16  15: 15
 static int fb_screen_width;
-
-char *fb_dev_name = NULL;
-char *fb_mode_cfgfile = "/etc/fb.modes";
-char *fb_mode_name = NULL;
-int fb_mode_depth = 0;
 static fb_mode_t *fb_mode = NULL;
-static int fb_switch_mode = 0;
 
 static uint8_t *next_frame;
 static int in_width;
@@ -444,92 +518,120 @@ struct fb_cmap *make_directcolor_cmap(struct fb_var_screeninfo *var)
   return cmap;
 }
 
-static void set_rgb_fields(struct fb_var_screeninfo *p, int depth)
+static void set_bpp(struct fb_var_screeninfo *p, int bpp)
 {
-	switch (depth) {
+	p->bits_per_pixel = (bpp == 15) ? 16 : bpp;
+	p->red.msb_right = p->green.msb_right = p->blue.msb_right = 0;
+	switch (bpp) {
 		case 32:
 		case 24:
 			p->red.offset = 16;
 			p->red.length = 8;
-			p->red.msb_right = 0;
 			p->green.offset = 8;
 			p->green.length = 8;
-			p->green.msb_right = 0;
 			p->blue.offset = 0;
 			p->blue.length = 8;
-			p->blue.msb_right = 0;
 			break;
 		case 16:
 			p->red.offset = 11;
 			p->red.length = 5;
-			p->red.msb_right = 0;
 			p->green.offset = 5;
 			p->green.length = 6;
-			p->green.msb_right = 0;
 			p->blue.offset = 0;
 			p->blue.length = 5;
-			p->blue.msb_right = 0;
 			break;
 		case 15:
 			p->red.offset = 10;
 			p->red.length = 5;
-			p->red.msb_right = 0;
 			p->green.offset = 5;
 			p->green.length = 5;
-			p->green.msb_right = 0;
 			p->blue.offset = 0;
 			p->blue.length = 5;
-			p->blue.msb_right = 0;
 			break;
 	}
 }
 
-static int fb_init(void)
+static int fb_preinit(void)
 {
-	int fd;
-	struct fb_cmap *cmap;
-
-	if (fb_mode_name) {
-		if (parse_fbmode_cfg(fb_mode_cfgfile) < 0)
-			goto err_out;
-		if (!(fb_mode = find_mode_by_name(fb_mode_name))) {
-			printf("fb: can't find requested video mode\n");
-			goto err_out;
-		}
-		fb_switch_mode = 1;
-	} else if (fb_mode_depth) {
-		printf("fb: Do _not_ use the 'fbdepth' parameter! "
-				"this parameter will be removed\n");
-		if (fb_mode_depth != 15 && fb_mode_depth != 16 &&
-				fb_mode_depth != 24 && fb_mode_depth != 32) {
-			printf("fb: can't switch to %d bpp\n", fb_mode_depth);
-			goto err_out;
-		}
-	}
-
 	if (!fb_dev_name && !(fb_dev_name = getenv("FRAMEBUFFER")))
 		fb_dev_name = "/dev/fb0";
 	if (verbose > 0)
-		printf("fb: using %s\n", fb_dev_name);
+		printf(FBDEV "using %s\n", fb_dev_name);
 
 	if ((fb_dev_fd = open(fb_dev_name, O_RDWR)) == -1) {
-		printf("fb: Can't open %s: %s\n", fb_dev_name, strerror(errno));
+		printf(FBDEV "Can't open %s: %s\n", fb_dev_name, strerror(errno));
 		goto err_out;
 	}
-
 	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
-		printf("fb: Can't get VSCREENINFO: %s\n", strerror(errno));
+		printf(FBDEV "Can't get VSCREENINFO: %s\n", strerror(errno));
 		goto err_out_fd;
 	}
 
+	fb_bpp = (fb_vinfo.bits_per_pixel == 32) ? 32 :
+		(fb_vinfo.red.length + fb_vinfo.green.length +
+		 fb_vinfo.blue.length);
+
+	if ((!!fb_mode_name + !!fb_mode_depth + !!fb_mode_auto) > 1) {
+		printf(FBDEV "Use can use only one of the following parameters:"
+				"-fbmode, -fbdepth, -fbauto\n");
+		goto err_out;
+	}
+	if (fb_mode_name || fb_mode_auto)
+		if (parse_fbmode_cfg(fb_mode_cfgfile) < 0)
+			goto err_out;
+
+	if (fb_mode_name) {
+		if (!(fb_mode = find_mode_by_name(fb_mode_name))) {
+			printf(FBDEV "can't find requested video mode\n");
+			goto err_out;
+		}
+		fb_bpp = fb_mode->depth;
+	} else if (fb_mode_depth) {
+		printf(FBDEV "Do _not_ use the 'fbdepth' parameter! "
+				"this parameter will be removed\n");
+		if (fb_mode_depth != 15 && fb_mode_depth != 16 &&
+				fb_mode_depth != 24 && fb_mode_depth != 32) {
+			printf(FBDEV "can't switch to %d bpp\n", fb_mode_depth);
+			goto err_out;
+		}
+		fb_bpp = fb_mode_depth;
+	} else if (fb_mode_auto) {
+		printf(FBDEV "Not implemented. try later... :)\n");
+		goto err_out;
+		fb_bpp = fb_mode->depth;
+	}
+	fb_bpp_we_want = fb_bpp;
+
+	fb_preinit_done = 1;
+	fb_works = 1;
+	return 0;
+err_out_fd:
+	close(fb_dev_fd);
+	fb_dev_fd = -1;
+err_out:
+	fb_preinit_done = 1;
+	return 1;
+}
+
+static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
+		uint32_t d_height, uint32_t fullscreen, char *title,
+		uint32_t format)
+{
+	struct fb_cmap *cmap;
+
+	if (!fb_preinit_done)
+		if (fb_preinit())
+			return 1;
+	if (!fb_works)
+		return 1;
+
 	fb_orig_vinfo = fb_vinfo;
-	if (fb_switch_mode) {
+	if (fb_mode_name) {
 		fb_vinfo.xres = fb_mode->xres;
 		fb_vinfo.yres = fb_mode->yres;
 		fb_vinfo.xres_virtual = fb_mode->vxres;
 		fb_vinfo.yres_virtual = fb_mode->vyres;
-		fb_vinfo.bits_per_pixel = fb_mode->depth;
-		set_rgb_fields(&fb_vinfo, fb_mode->depth);
+		set_bpp(&fb_vinfo, fb_mode->depth);
 		fb_vinfo.pixclock = fb_mode->pixclock;
 		fb_vinfo.left_margin = fb_mode->left;
 		fb_vinfo.right_margin = fb_mode->right;
@@ -540,171 +642,171 @@ static int fb_init(void)
 		fb_vinfo.sync = fb_mode->sync;
 		fb_vinfo.vmode = fb_mode->vmode;
 	} else if (fb_mode_depth) {
-		fb_vinfo.bits_per_pixel = fb_mode_depth;
-		set_rgb_fields(&fb_vinfo, fb_mode_depth);
+		set_bpp(&fb_vinfo, fb_mode_depth);
 	}
 	fb_vinfo.xres_virtual = fb_vinfo.xres;
 	fb_vinfo.yres_virtual = fb_vinfo.yres;
 
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_vinfo)) {
-		printf("fb: Can't put VSCREENINFO: %s\n", strerror(errno));
-		goto err_out_fd;
+		printf(FBDEV "Can't put VSCREENINFO: %s\n", strerror(errno));
+		return 1;
+	}
+	if (ioctl(fb_dev_fd, FBIOGET_VSCREENINFO, &fb_vinfo)) {
+		printf(FBDEV "Can't get VSCREENINFO: %s\n", strerror(errno));
+		return 1;
 	}
 
+	if (verbose > 0) {
+		printf(FBDEV "var info:\n");
+		printf(FBDEV "xres: %ul\n", fb_vinfo.xres);
+		printf(FBDEV "yres: %ul\n", fb_vinfo.yres);
+		printf(FBDEV "xres_virtual: %ul\n", fb_vinfo.xres_virtual);
+		printf(FBDEV "yres_virtual: %ul\n", fb_vinfo.yres_virtual);
+		printf(FBDEV "xoffset: %ul\n", fb_vinfo.xoffset);
+		printf(FBDEV "yoffset: %ul\n", fb_vinfo.yoffset);
+		printf(FBDEV "bits_per_pixel: %ul\n", fb_vinfo.bits_per_pixel);
+		printf(FBDEV "grayscale: %ul\n", fb_vinfo.grayscale);
+		printf(FBDEV "red: %lu %lu %lu\n",
+				(unsigned long) fb_vinfo.red.offset,
+				(unsigned long) fb_vinfo.red.length,
+				(unsigned long) fb_vinfo.red.msb_right);
+		printf(FBDEV "green: %lu %lu %lu\n",
+				(unsigned long) fb_vinfo.green.offset,
+				(unsigned long) fb_vinfo.green.length,
+				(unsigned long) fb_vinfo.green.msb_right);
+		printf(FBDEV "blue: %lu %lu %lu\n",
+				(unsigned long) fb_vinfo.blue.offset,
+				(unsigned long) fb_vinfo.blue.length,
+				(unsigned long) fb_vinfo.blue.msb_right);
+		printf(FBDEV "transp: %lu %lu %lu\n",
+				(unsigned long) fb_vinfo.transp.offset,
+				(unsigned long) fb_vinfo.transp.length,
+				(unsigned long) fb_vinfo.transp.msb_right);
+		printf(FBDEV "nonstd: %ul\n", fb_vinfo.nonstd);
+		if (verbose > 1) {
+			printf(FBDEV "activate: %ul\n", fb_vinfo.activate);
+			printf(FBDEV "height: %ul\n", fb_vinfo.height);
+			printf(FBDEV "width: %ul\n", fb_vinfo.width);
+			printf(FBDEV "accel_flags: %ul\n", fb_vinfo.accel_flags);
+			printf(FBDEV "timing:\n");
+			printf(FBDEV "pixclock: %ul\n", fb_vinfo.pixclock);
+			printf(FBDEV "left_margin: %ul\n", fb_vinfo.left_margin);
+			printf(FBDEV "right_margin: %ul\n", fb_vinfo.right_margin);
+			printf(FBDEV "upper_margin: %ul\n", fb_vinfo.upper_margin);
+			printf(FBDEV "lower_margin: %ul\n", fb_vinfo.lower_margin);
+			printf(FBDEV "hsync_len: %ul\n", fb_vinfo.hsync_len);
+			printf(FBDEV "vsync_len: %ul\n", fb_vinfo.vsync_len);
+			printf(FBDEV "sync: %ul\n", fb_vinfo.sync);
+			printf(FBDEV "vmode: %ul\n", fb_vinfo.vmode);
+		}
+	}
 	if (ioctl(fb_dev_fd, FBIOGET_FSCREENINFO, &fb_finfo)) {
-		printf("fb: Can't get VSCREENINFO: %s\n", strerror(errno));
-		goto err_out_fd;
+		printf(FBDEV "Can't get FSCREENINFO: %s\n", strerror(errno));
 		return 1;
+	}
+	if (verbose > 0) {
+		printf(FBDEV "fix info:\n");
+		if (verbose > 1) {
+			printf(FBDEV "id: %.16s\n", fb_finfo.id);
+			printf(FBDEV "smem_start: %p\n", (void *) fb_finfo.smem_start);
+		}
+		printf(FBDEV "framebuffer size: %d bytes\n", fb_size);
+		printf(FBDEV "type: %lu\n", (unsigned long) fb_finfo.type);
+		printf(FBDEV "type_aux: %lu\n", (unsigned long) fb_finfo.type_aux);
+		printf(FBDEV "visual: %lu\n", (unsigned long) fb_finfo.visual);
+		if (verbose > 1) {
+			printf(FBDEV "xpanstep: %u\n", fb_finfo.xpanstep);
+			printf(FBDEV "ypanstep: %u\n", fb_finfo.ypanstep);
+			printf(FBDEV "ywrapstep: %u\n", fb_finfo.ywrapstep);
+		}
+		printf(FBDEV "line_length: %lu bytes\n", (unsigned long) fb_finfo.line_length);
+		if (verbose > 1) {
+			printf(FBDEV "mmio_start: %p\n", (void *) fb_finfo.mmio_start);
+			printf(FBDEV "mmio_len: %ul bytes\n", fb_finfo.mmio_len);
+			printf(FBDEV "accel: %ul\n", fb_finfo.accel);
+		}
 	}
 	switch (fb_finfo.type) {
 		case FB_TYPE_VGA_PLANES:
-			printf("fb: FB_TYPE_VGA_PLANES not supported.\n");
-			goto err_out_fd;
-			break;
+			printf(FBDEV "FB_TYPE_VGA_PLANES not supported.\n");
+			return 1;
 		case FB_TYPE_PLANES:
-			printf("fb: FB_TYPE_PLANES not supported.\n");
-			goto err_out_fd;
-			break;
+			printf(FBDEV "FB_TYPE_PLANES not supported.\n");
+			return 1;
 		case FB_TYPE_INTERLEAVED_PLANES:
-			printf("fb: FB_TYPE_INTERLEAVED_PLANES not supported.\n");
-			goto err_out_fd;
-			break;
+			printf(FBDEV "FB_TYPE_INTERLEAVED_PLANES not supported.\n");
+			return 1;
 #ifdef FB_TYPE_TEXT
 		case FB_TYPE_TEXT:
-			printf("fb: FB_TYPE_TEXT not supported.\n");
-			goto err_out_fd;
-			break;
+			printf(FBDEV "FB_TYPE_TEXT not supported.\n");
+			return 1;
 #endif
 		case FB_TYPE_PACKED_PIXELS:
 			/* OK */
 			if (verbose > 0)
-				printf("fb: FB_TYPE_PACKED_PIXELS: OK\n");
+				printf(FBDEV "FB_TYPE_PACKED_PIXELS: OK\n");
 			break;
 		default:
-			printf("fb: unknown FB_TYPE: %d\n", fb_finfo.type);
-			goto err_out_fd;
+			printf(FBDEV "unknown FB_TYPE: %d\n", fb_finfo.type);
+			return 1;
 	}
 	switch (fb_finfo.visual) {
-	case FB_VISUAL_TRUECOLOR:
-		break;
-	case FB_VISUAL_DIRECTCOLOR:
-		if (verbose > 0)
-			printf("fb: creating cmap for directcolor\n");
-		if (ioctl(fb_dev_fd, FBIOGETCMAP, fb_oldcmap)) {
-			printf("fb: can't get cmap: %s\n",
-					strerror(errno));
-			goto err_out_fd;
-		}
-		if (!(cmap = make_directcolor_cmap(&fb_vinfo)))
-			goto err_out_fd;
-		if (ioctl(fb_dev_fd, FBIOPUTCMAP, cmap)) {
-			printf("fb: can't put cmap: %s\n",
-					strerror(errno));
-			goto err_out_fd;
-		}
-		free(cmap->red);
-		free(cmap->green);
-		free(cmap->blue);
-		free(cmap);
-		break;
-	case FB_VISUAL_PSEUDOCOLOR:
-		printf("fb: visual is FB_VISUAL_PSEUDOCOLOR. it's not tested!\n");
-		break;
-	default:
-		printf("fb: visual: %d not yet supported\n",
-				fb_finfo.visual);
-		goto err_out_fd;
+		case FB_VISUAL_TRUECOLOR:
+			break;
+		case FB_VISUAL_DIRECTCOLOR:
+			if (verbose > 0)
+				printf(FBDEV "creating cmap for directcolor\n");
+			if (ioctl(fb_dev_fd, FBIOGETCMAP, fb_oldcmap)) {
+				printf(FBDEV "can't get cmap: %s\n",
+						strerror(errno));
+				return 1;
+			}
+			if (!(cmap = make_directcolor_cmap(&fb_vinfo)))
+				return 1;
+			if (ioctl(fb_dev_fd, FBIOPUTCMAP, cmap)) {
+				printf(FBDEV "can't put cmap: %s\n",
+						strerror(errno));
+				return 1;
+			}
+			free(cmap->red);
+			free(cmap->green);
+			free(cmap->blue);
+			free(cmap);
+			break;
+		case FB_VISUAL_PSEUDOCOLOR:
+			printf(FBDEV "visual is FB_VISUAL_PSEUDOCOLOR."
+					"it's not tested!\n");
+			break;
+		default:
+			printf(FBDEV "visual: %d not yet supported\n",
+					fb_finfo.visual);
+			return 1;
 	}
 
 	fb_pixel_size = fb_vinfo.bits_per_pixel / 8;
 	fb_real_bpp = fb_vinfo.red.length + fb_vinfo.green.length +
 		fb_vinfo.blue.length;
 	fb_bpp = (fb_pixel_size == 4) ? 32 : fb_real_bpp;
+	if (fb_bpp_we_want != fb_bpp)
+		printf(FBDEV "can't set bpp (requested %d, got %d bpp)!!!\n",
+				fb_bpp_we_want, fb_bpp);
 	fb_screen_width = fb_finfo.line_length;
 	fb_size = fb_finfo.smem_len;
 	if ((frame_buffer = (uint8_t *) mmap(0, fb_size, PROT_READ | PROT_WRITE,
 				MAP_SHARED, fb_dev_fd, 0)) == (uint8_t *) -1) {
-		printf("fb: Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
-		goto err_out_fd;
-	}
-
-	if (verbose > 0 && verbose < 4)
-		printf("fb: use verbose level >= 4 to get some info (you will get _lots_ of info)\n");
-	if (verbose >= 4) {
-		printf("fb: fix info:\n");
-		printf("fb: id: %.16s\n", fb_finfo.id);
-		printf("fb: smem_start: %p\n", fb_finfo.smem_start);
-		printf("fb: framebuffer size: %d bytes\n", fb_size);
-		printf("fb: type: %lu\n", fb_finfo.type);
-		printf("fb: type_aux: %lu\n", fb_finfo.type_aux);
-		printf("fb: visual: %lu\n", fb_finfo.visual);
-		printf("fb: xpanstep: %u\n", fb_finfo.xpanstep);
-		printf("fb: ypanstep: %u\n", fb_finfo.ypanstep);
-		printf("fb: ywrapstep: %u\n", fb_finfo.ywrapstep);
-		printf("fb: line_length: %lu bytes\n", fb_finfo.line_length);
-		printf("fb: mmio_start: %p\n", fb_finfo.mmio_start);
-		printf("fb: mmio_len: %ul bytes\n", fb_finfo.mmio_len);
-		printf("fb: accel: %ul\n", fb_finfo.accel);
-		printf("fb: var info:\n");
-		printf("fb: xres: %ul\n", fb_vinfo.xres);
-		printf("fb: yres: %ul\n", fb_vinfo.yres);
-		printf("fb: xres_virtual: %ul\n", fb_vinfo.xres_virtual);
-		printf("fb: yres_virtual: %ul\n", fb_vinfo.yres_virtual);
-		printf("fb: xoffset: %ul\n", fb_vinfo.xoffset);
-		printf("fb: yoffset: %ul\n", fb_vinfo.yoffset);
-		printf("fb: bits_per_pixel: %ul\n", fb_vinfo.bits_per_pixel);
-		printf("fb: grayscale: %ul\n", fb_vinfo.grayscale);
-		printf("fb: red: %lu %lu %lu\n", fb_vinfo.red.offset,
-				fb_vinfo.red.length, fb_vinfo.red.msb_right);
-		printf("fb: green: %lu %lu %lu\n", fb_vinfo.green.offset,
-				fb_vinfo.green.length, fb_vinfo.green.msb_right);
-		printf("fb: blue: %lu %lu %lu\n", fb_vinfo.blue.offset,
-				fb_vinfo.blue.length, fb_vinfo.blue.msb_right);
-		printf("fb: transp: %lu %lu %lu\n", fb_vinfo.transp.offset,
-				fb_vinfo.transp.length, fb_vinfo.transp.msb_right);
-		printf("fb: nonstd: %ul\n", fb_vinfo.nonstd);
-		printf("fb: activate: %ul\n", fb_vinfo.activate);
-		printf("fb: height: %ul\n", fb_vinfo.height);
-		printf("fb: width: %ul\n", fb_vinfo.width);
-		printf("fb: accel_flags: %ul\n", fb_vinfo.accel_flags);
-		printf("fb: timing:\n");
-		printf("fb: pixclock: %ul\n", fb_vinfo.pixclock);
-		printf("fb: left_margin: %ul\n", fb_vinfo.left_margin);
-		printf("fb: right_margin: %ul\n", fb_vinfo.right_margin);
-		printf("fb: upper_margin: %ul\n", fb_vinfo.upper_margin);
-		printf("fb: lower_margin: %ul\n", fb_vinfo.lower_margin);
-		printf("fb: hsync_len: %ul\n", fb_vinfo.hsync_len);
-		printf("fb: vsync_len: %ul\n", fb_vinfo.vsync_len);
-		printf("fb: sync: %ul\n", fb_vinfo.sync);
-		printf("fb: vmode: %ul\n", fb_vinfo.vmode);
-		printf("fb: other:\n");
-		printf("fb: frame_buffer @ %p\n", frame_buffer);
-		printf("fb: fb_bpp: %d\n", fb_bpp);
-		printf("fb: fb_real_bpp: %d\n", fb_real_bpp);
-		printf("fb: fb_pixel_size: %d bytes\n", fb_pixel_size);
-		printf("fb: pixel per line: %d\n", fb_screen_width / fb_pixel_size);
-	}
-
-	fb_init_done = 1;
-	fb_works = 1;
-	return 0;
-err_out_fd:
-	close(fb_dev_fd);
-	fb_dev_fd = -1;
-err_out:
-	fb_init_done = 1;
-	return 1;
-}
-
-static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
-		uint32_t d_height, uint32_t fullscreen, char *title,
-		uint32_t format)
-{
-	if (!fb_init_done)
-		if (fb_init())
-			return 1;
-	if (!fb_works)
+		printf(FBDEV "Can't mmap %s: %s\n", fb_dev_name, strerror(errno));
 		return 1;
+	}
+
+	if (verbose > 0) {
+		printf(FBDEV "other:\n");
+		if (verbose > 1)
+			printf(FBDEV "frame_buffer @ %p\n", frame_buffer);
+		printf(FBDEV "fb_bpp: %d\n", fb_bpp);
+		printf(FBDEV "fb_real_bpp: %d\n", fb_real_bpp);
+		printf(FBDEV "fb_pixel_size: %d bytes\n", fb_pixel_size);
+		printf(FBDEV "pixel per line: %d\n", fb_screen_width / fb_pixel_size);
+	}
 
 	in_width = width;
 	in_height = height;
@@ -712,7 +814,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	out_height = height;
 	pixel_format = format;
 	if (!(next_frame = (uint8_t *) malloc(in_width * in_height * fb_pixel_size))) {
-		printf("Can't malloc next_frame: %s\n", strerror(errno));
+		printf(FBDEV "Can't malloc next_frame: %s\n", strerror(errno));
 		return 1;
 	}
 
@@ -723,14 +825,15 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
 static uint32_t query_format(uint32_t format)
 {
-	if (!fb_init_done)
-		if (fb_init())
+	if (!fb_preinit_done)
+		if (fb_preinit())
 			return 0;
 	if (!fb_works)
 		return 0;
 
 	if (verbose > 0)
-		printf("fb: query_format(%#lx(%.4s))\n", format, &format);
+		printf(FBDEV "query_format(%#lx(%.4s))\n",(unsigned long) format,
+				(char *) &format);
 	if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR) {
 		int bpp = format & 0xff;
 		if (bpp == fb_bpp)
@@ -749,6 +852,19 @@ static const vo_info_t *get_info(void)
 {
 	return &vo_info;
 }
+
+extern void vo_draw_alpha_rgb32(int w, int h, unsigned char* src,
+		unsigned char *srca, int srcstride, unsigned char* dstbase,
+		int dststride);
+extern void vo_draw_alpha_rgb24(int w, int h, unsigned char* src,
+		unsigned char *srca, int srcstride, unsigned char* dstbase,
+		int dststride);
+extern void vo_draw_alpha_rgb16(int w, int h, unsigned char* src,
+		unsigned char *srca, int srcstride, unsigned char* dstbase,
+		int dststride);
+extern void vo_draw_alpha_rgb15(int w, int h, unsigned char* src,
+		unsigned char *srca, int srcstride, unsigned char* dstbase,
+		int dststride);
 
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
@@ -829,6 +945,10 @@ static void put_frame(void)
 	}
 }
 
+extern void vo_draw_text(int dxs, int dys, void (*draw_alpha)(int x0, int y0,
+			int w, int h, unsigned char *src, unsigned char *srca,
+			int stride));
+
 static void flip_page(void)
 {
 	vo_draw_text(in_width, in_height, draw_alpha);
@@ -839,14 +959,14 @@ static void flip_page(void)
 static void uninit(void)
 {
 	if (verbose > 0)
-		printf("fbdev: uninit\n");
+		printf(FBDEV "uninit\n");
 	if (fb_oldcmap) {
 		if (ioctl(fb_dev_fd, FBIOPUTCMAP, fb_oldcmap))
-			printf("fbdev: Can't restore original cmap\n");
+			printf(FBDEV "Can't restore original cmap\n");
 		fb_oldcmap = NULL;
 	}
 	if (ioctl(fb_dev_fd, FBIOPUT_VSCREENINFO, &fb_orig_vinfo))
-		printf("fbdev: Can't set virtual screensize to original value: %s\n", strerror(errno));
+		printf(FBDEV "Can't set virtual screensize to original value: %s\n", strerror(errno));
 	close(fb_dev_fd);
 	memset(next_frame, '\0', in_height * in_width * fb_pixel_size);
 	put_frame();
