@@ -80,11 +80,14 @@ extern int ao_pcm_waveheader;
 
 #ifdef HAVE_X11
 extern char *mDisplayName;
-extern int WinID;
 extern int fs_layer;
 extern int stop_xscreensaver;
 extern char **vo_fstype_list;
 extern int vo_nomouse_input;
+#endif
+
+#if defined(HAVE_X11) || defined(MACOSX)
+extern int WinID;
 #endif
 
 #ifdef HAVE_AA
@@ -292,13 +295,16 @@ m_option_t mplayer_opts[]={
 #ifdef HAVE_X11
 	// x11,xv,xmga,xvidix
 	{"wid", &WinID, CONF_TYPE_INT, 0, 0, 0, NULL},
-	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 	{"icelayer", "-icelayer is obsolete. Use -fstype layer:<number> instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"stop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nostop-xscreensaver", &stop_xscreensaver, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"stop_xscreensaver", "Use -stop-xscreensaver instead, options with _ have been obsoleted.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 	{"fstype", &vo_fstype_list, CONF_TYPE_STRING_LIST, 0, 0, 0, NULL},
 	{"nomouseinput", &vo_nomouse_input, CONF_TYPE_FLAG,0,0,-1,NULL},
+#endif
+
+#if defined(HAVE_X11) || defined(MACOSX)
+	{"rootwin", &WinID, CONF_TYPE_FLAG, 0, -1, 0, NULL},
 #endif
 
 #ifdef HAVE_XINERAMA
