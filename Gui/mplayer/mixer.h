@@ -8,5 +8,6 @@ extern void  mixerIncVolume( void );
 extern void  mixerDecVolume( void );
 extern void  mixerMute( void );
 extern void  mixerSetBalance( float b );
+extern float mixerGetBalance( void );
 
 #endif
