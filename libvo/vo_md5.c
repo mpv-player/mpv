@@ -35,12 +35,15 @@ LIBVO_EXTERN (md5)
 extern vo_functions_t video_out_pgm;
 extern char vo_pgm_filename[24];
 
-static FILE * md5_file;
+static FILE * md5_file = NULL;
+static char * md5_filename = NULL;
 
 static uint32_t
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
 {
-    md5_file = fopen ("md5", "w");
+    md5_file = fopen (md5_filename?md5_filename:"md5", "w");
+    if (!md5_file)
+	return -1;
     return video_out_pgm.config (width, height, d_width,d_height,fullscreen, title, format);
 }
 
@@ -58,12 +61,16 @@ static void flip_page (void)
 
     snprintf (buf2, 100, "md5sum %s", vo_pgm_filename);
     f = popen (buf2, "r");
+    if (!f) {
+	snprintf (buf2, 100, "md5 %s", vo_pgm_filename);
+	f = popen(buf2, "r");
+    }
+    if (f) {
     i = fread (buf2, 1, sizeof(buf2), f);
     pclose (f);
     fwrite (buf2, 1, i, md5_file);
-
+    }
     remove (vo_pgm_filename);
-    
 }
 
 //static uint32_t draw_slice(uint8_t * src[], uint32_t slice_num)
@@ -90,7 +97,17 @@ static void
 uninit(void)
 {
     video_out_pgm.uninit();
-    fclose(md5_file);
+    if (md5_file)
+    {
+	fflush(md5_file);
+	fclose(md5_file);
+	md5_file = NULL;
+    }
+    if (md5_filename)
+    {
+	free(md5_filename);
+	md5_filename = NULL;
+    }
 }
 
 
@@ -101,10 +118,7 @@ static void check_events(void)
 static uint32_t preinit(const char *arg)
 {
     if(arg) 
-    {
-	printf("vo_md5: Unknown subdevice: %s\n",arg);
-	return ENOSYS;
-    }
+	md5_filename = strdup(arg);
     return 0;
 }
 
