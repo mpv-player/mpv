@@ -148,6 +148,7 @@ static int add_to_inout(char *sfmt, char *sflags, unsigned int *outfmt,
 		"noflip",
 		"yuvhack",
 		"query",
+		"static",
 		NULL
 	};
 
