@@ -1100,7 +1100,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	if (!nooverlay && Directx_CreateOverlay(image_format))
 	{
 			nooverlay=1; /*overlay creation failed*/
-			mp_msg(MSGT_VO, MSGL_V,"<vo_directx><WARN>can't use overlay mode => switching to nonoverlay\n");
+			mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't use overlay mode: please use -vo directx:noaccel\n");
+			return 1;
 	}
 	if(nooverlay)
 	{
