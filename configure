@@ -2350,6 +2350,12 @@ EOF
   elif cc_check -lgif && "$TMPO" >> "$TMPLOG" ; then
     _gif=yes
     _ld_gif="-lgif"
+  elif cc_check -lungif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
+    _gif=yes
+    _ld_gif="-lungif $_ld_x11"
+  elif cc_check -lgif $_ld_x11 && "$TMPO" >> "$TMPLOG" ; then
+    _gif=yes
+    _ld_gif="-lgif $_ld_x11"
   fi
 fi
 
