@@ -124,5 +124,20 @@ ansonsten wirdst kein du Video, also auch keine Ton haben.</P>
 <LI> Sag uns bitte, wie MPlayer und deine Soundkarte(n) zusammen funktionieren!
 </UL></P>
 
+
+
+<P><B><A NAME=2.3.2.2>2.3.2.2. Audio Plugins</B></P>
+
+<P><B><A NAME=2.3.2.2.1>2.3.2.2.1. Up/Downsampling</B></P>
+
+<P><B>MPlayer</B> unterstützt vollständiges up/downsampling von Audiostreams.
+Es wird nicht automatisch erkannt, also must du es ganz normal angeben, wenn du
+zum Beispiel eine maximal 44.1Khz-fähige Soundkarte hast du der Audiostream 48Khz hat.
+Diese Funktion ist zur Zeit auch noch nicht implementiert in <B>MEncoder</B>.</P>
+
+<P>Verwendung:<BR>
+&nbsp;&nbsp;<CODE>mplayer media.avi -aop list=resample:fout=&lt;erforderliche Frequenz in Hz, z.B. 44100&gt;</CODE></P>
+
+
 </BODY>
 </HTML>
