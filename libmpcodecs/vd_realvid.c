@@ -191,7 +191,7 @@ struct rv_init_t {
 // init driver
 static int init(sh_video_t *sh){
 	//unsigned int out_fmt;
-	char path[4096];
+	char *path;
 	int result;
 	// we export codec id and sub-id from demuxer in bitmapinfohdr:
 	unsigned int* extrahdr=(unsigned int*)(sh->bih+1);
@@ -201,6 +201,8 @@ static int init(sh_video_t *sh){
 
 	mp_msg(MSGT_DECVIDEO,MSGL_V,"realvideo codec id: 0x%08X  sub-id: 0x%08X\n",extrahdr[1],extrahdr[0]);
 
+	path = malloc(strlen(REALCODEC_PATH)+strlen(sh->codec->dll)+2);
+	if (!path) return 0;
 	sprintf(path, REALCODEC_PATH "/%s", sh->codec->dll);
 
 	/* first try to load linux dlls, if failed and we're supporting win32 dlls,
@@ -214,8 +216,10 @@ static int init(sh_video_t *sh){
 	{
 		mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);
 		mp_msg(MSGT_DECVIDEO,MSGL_HINT,"Read the RealVideo section of the DOCS!\n");
+		free(path);
 		return 0;
 	}
+	free(path);
 	// only I420 supported
 //	if((sh->format!=0x30335652) && !mpcodecs_config_vo(sh,sh->disp_w,sh->disp_h,IMGFMT_I420)) return 0;
 	// init codec:
