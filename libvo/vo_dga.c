@@ -23,6 +23,9 @@
  * - works only on x86 architectures
  *
  * $Log$
+ * Revision 1.39  2002/01/31 11:45:25  alex
+ * removed obsoleted Terminate_Display_Process
+ *
  * Revision 1.38  2002/01/31 09:52:45  nick
  * new info for tuning
  *
@@ -580,13 +583,6 @@ static uint32_t draw_slice( uint8_t *src[],int stride[],
   }
   return 0;
 };
-
-//---------------------------------------------------------
-
-
-static void Terminate_Display_Process( void ){
-  vd_printf(VD_DBG, "vo_dga: Terminating display process\n");
-}
 
 //---------------------------------------------------------
 

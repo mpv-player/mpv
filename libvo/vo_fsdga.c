@@ -270,11 +270,6 @@ static uint32_t draw_slice( uint8_t *srcptr[],int stride[],
   return 0;
 };
 
-static void Terminate_Display_Process( void ){
-
-  printf("vo_dga: Terminating display process\n");
-}
-
 static const vo_info_t* get_info( void )
 { return &vo_info; }
 
@@ -295,9 +290,7 @@ static uint32_t query_format( uint32_t format )
 static void
 uninit(void)
 {
-
   vo_dga_is_running = 0;
-  printf("vo_dga: in uninit\n");
   XUngrabPointer (vo_dga_dpy, CurrentTime);
   XUngrabKeyboard (vo_dga_dpy, CurrentTime);
   XF86DGADirectVideo (vo_dga_dpy, XDefaultScreen(vo_dga_dpy), 0);
