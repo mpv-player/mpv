@@ -85,13 +85,12 @@ struct syncframe {
 
 int ac3_iec958_build_burst(int length, int data_type, int big_endian, unsigned char * data, unsigned char * out)
 {
-	const char sync[6] = { 0x72, 0xF8, 0x1F, 0x4E, 0x00, 0x00 };
-
-	memcpy(out, sync, 6);
-	if (length)
-		out[4] = data_type; /* & 0x1F; */
-	else
-		out[4] = 0;
+	out[0] = 0x72;
+	out[1] = 0xF8;
+	out[2] = 0x1F;
+	out[3] = 0x4E;
+	out[4] = (length) ? data_type : 0; /* & 0x1F; */
+	out[5] = 0x00;
 	out[6] = (length << 3) & 0xFF;
 	out[7] = (length >> 5) & 0xFF;
 	if (big_endian)
