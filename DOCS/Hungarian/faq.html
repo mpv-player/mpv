@@ -185,7 +185,7 @@ Le akarom fordítani az MPlayer-t Minixre.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Az -xy opció nem mûkodik az x11 kimenettel (-vo x11)
+Az -xy és az -fs opció nem mûködik az x11 kimenettel (-vo x11)
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 De mûködik, viszont ehhez külön engedélyezned kell a szoftveres skálázást
 a <CODE>-zoom</CODE> opcióval (LASSÚ!). Inkább használd az XF86VidMode
@@ -230,15 +230,9 @@ Akkor használd a -quiet opciót, és olvasd el a manpage-t.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
- Mi az az XMMP? (nem lehet hogy XMMS vagy XMPS csak rosszul írva?)
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
- Új project, lásd http://frozenproductions.com .
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
  Valami hibaüzenet van, hogy nem találja a /usr/lib/win32/... file-t.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
- A *mi* FTP-nkrõl töltsd le a w32codec-0.60.tar.bz2 csomagot.
+ A *mi* FTP-nkrõl töltsd le a w32codec-0.90.tar.bz2 csomagot.
  (az avifile csomagja különbözik)
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
@@ -272,9 +266,16 @@ Akkor használd a -quiet opciót, és olvasd el a manpage-t.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
+ És mi az a "Faszom(C)ounter" ?
+</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
+ Tudod te azt.
+</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
+
+<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
  A LIRC nem mûködik, mert ...
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
- Biztos "mplayer_lirc"-et használsz "mplayer" helyett ?
+ Biztos "mplayer"-t használsz "mplayer_lirc" helyett ? Régebben "mplayer_lirc"
+ kellett, de nemrég visszaváltottunk "mplayer"-re.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -306,9 +307,10 @@ Lásd a <A HREF="codecs.html#2.1.2.2">2.1.2.2-es fejezetet</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-A GUI használhatatlan icewm-el, mert valami panel mindig a film fölött van!!
+ Icewm-et használok, és a tálca mindig látható!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Tudjuk. Az icewm diktatórikus. Megoldhatatlan.
+Az <CODE>~/.icewm/preferences</CODE> file-ba írd bele a következõt:<BR>
+<CODE>TaskBarKeepBelow=1</CODE>
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">
@@ -354,19 +356,6 @@ Tudjuk. Az icewm diktatórikus. Megoldhatatlan.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
- Indeo 3.x/4.x filmek fejjel lefele vannak!!!?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
- Ismert hiba (tulajdonképp a codec hibája/korlátja) Próbáld ki hogy a
-     -vo drivered támogatja-e a -flip opciót.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
- Indeo 3.x/4.x filmek nem mûködnek 32bpp felbontásokban (16,24bpp rendben)
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
- Ismert hiba (tulajdonképp a codec hibája/korlátja)
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
  MPlayer valami hibaüzenettel lép ki, amikor l3codeca.acm-et használok.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
  Nézd meg, hogy mit ír ki az 'ldd /usr/local/bin/mplayer' . Ha ilyet   
@@ -403,7 +392,7 @@ Jah fiam, hát lassú a géped. Ez van.
  Gondjaim vannak a kedvenc ablakkezelõm esetén a teljesképernyõs xv/xmga/..
      móddal..
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
- Használd az -fsmode opciót. Bõvebben: lásd example.conf vagy a manpage-t.
+ Szólj.. Lásd <A HREF="bugreports.html">bugreports.html</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -487,7 +476,7 @@ A/V szinkron problémáim vannak. A legtöbb AVI-m lejátszása jó, de az
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 Bugos a hangkártyád vagy a meghajtója. Valószínûleg fix 44100Hz-es a kártya,
 és egy 22050Hz-es audiot tartalmazó file-t akarsz lejátszani vele. Használd
-a <CODE>-ao sdl</CODE> opciót (SDL meghajtó).
+a "resample" audio plugint (lásd dokumentáció).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
@@ -552,23 +541,6 @@ a <CODE>-ao sdl</CODE> opciót (SDL meghajtó).
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Mikor XVideo-t használok, nem tudok lejátszani DivX avi-kat a
-Voodoo 3/Banshee-mmel !
-Azt mondja:<BR>
-...<BR>
-<CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
-Xvideo image format: 0x30323449 (I420) planar<BR></CODE>
-...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A1:</TD><TD><FONT CLASS="text">
-Lásd az elõzõ választ.
-</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A2:</TD><TD><FONT CLASS="text">
-A 0.18pre4 verzió óta az MPlayer támogatja a libavcodec-et az ffmpeg
-programból. Ez magában foglal egy C nyelvû DivX és OpenDivX dekódert.
-A DivX dekóder YV12-es formátumot használ, szóval mûködni fog nálad.
-Fordítsd be a libavcodec-et.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
  Az OpenGL (-vo gl) output nem mûködik.
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
  Az OpenGL drivered nem támogatja a dinamikus textúraváltást
@@ -612,27 +584,6 @@ igenis használ xv-t, ha támogatva van. Nem kell külön írni semmit hozzá..
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD COLSPAN=3><P><B><A NAME=5.5><FONT CLASS="text">5.5.  Feature kérések</A></B></P>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Hogyan játszhatok le RealMedia file-okat MPlayer-rel?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Nem lehetséges. A legjobb az lenne ha lángok nyelnék el ezeket a
-formátumokat. Elméletileg visszafejthetõk a Linuxos Real codec-ek
-(.so file-ként tárolódnak), de gyakorlatban ez nagyon nehéz feladat, még
-akkor is az, ha tudnád hogy miként lett fordítva.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Mikor lesz &lt;szabadonválasztott képmegjelenítéssel kapcsolatos&gt; képessége az MPlayernek?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Várd meg amíg a libvo2 elkészül.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Mikor fogok tudni enkódolni ?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Hamarosan.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">

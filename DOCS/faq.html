@@ -282,7 +282,7 @@ separately. You should try to play the file using <CODE>-vo null</CODE> and then
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 There are error messages about file not found <CODE>/usr/lib/win32/</CODE> ...
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-Download the <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.60.tar.bz2">Win32 codecs</A>
+Download the <A HREF="ftp://ftp.mplayerhq.hu/MPlayer/releases/w32codec-0.90.tar.bz2">Win32 codecs</A>
 from <B>our</B> FTP site (avifile's codec package has a different DLL set) and
 install it.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
@@ -364,7 +364,7 @@ the <A HREF="codecs.html#2.2.1.2">FFmpeg section</A>.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-The taskbar keeps covering the movie in fullscreen mode!
+Icewm's taskbar keeps covering the movie in fullscreen mode!
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 The taskbar cannot be overlapped by any window unless you add the following
 line to <CODE>~/.icewm/preferences</CODE>:<BR>
@@ -594,21 +594,6 @@ or use CVS DRI.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-When using Xvideo, I can't play DivX AVIs with my Voodoo 3/Banshee!
-It says:<BR>
-...<BR>
-<CODE>Xvideo image format: 0x32315659 (YV12) planar<BR>
-Xvideo image format: 0x30323449 (I420) planar<BR></CODE>
-...
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A1:</TD><TD><FONT CLASS="text">
-See the previous answer.
-</TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A2:</TD><TD><FONT CLASS="text">
-Since 0.18pre4 we support libavcodec from the FFmpeg package. It contains
-a C language DivX and OpenDivX decoder. The DivX decoder uses YV12 format
-for output, thus it should work for you. Compile in libavcodec support.
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
 OpenGL (<CODE>-vo gl</CODE>) output doesn't work (hang/black window/X11 errors/...).
 </B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
 Your OpenGL driver doesn't support dynamic texture changes (glTexSubImage).
@@ -656,15 +641,6 @@ it ... Note: you can force/disable Xv via SDL using <CODE>-forcexv<CODE> and <CO
 
 <TD COLSPAN=3>
 <B><A NAME=5.5><FONT CLASS="text">5.5. Feature requests</A></B>
-</TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
-
-<TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
-Is there a hint on how to watch RealMedia movies in MPlayer?
-</B></TD><TR><TD></TD><TD VALIGN=top><FONT CLASS="text">A:</TD><TD><FONT CLASS="text">
-There's no way to do it. Therefore this format deserves to die in flames.
-Theoretically you can reverse engineer Real codecs built for Linux (they
-are available as .so files), but in practice that's really difficult, even
-if you know how the compiler used by Real is making assembler code.
 </TD><TR><TD COLSPAN=3>&nbsp;</TD><TR>
 
 <TD></TD><TD VALIGN=top><FONT CLASS="text">Q:</TD><TD WIDTH=100%><B><FONT CLASS="text">
