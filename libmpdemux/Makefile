@@ -30,7 +30,7 @@ ifeq ($(MATROSKA_INTERNAL),yes)
 SRCS += demux_mkv.c ebml.c
 endif
 ifeq ($(MATROSKA_EXTERNAL),yes)
-CPLUSPLUSSRCS += demux_mkv.cpp
+CPLUSPLUSSRCS += demux_mkv_old.cpp
 endif
 
 
