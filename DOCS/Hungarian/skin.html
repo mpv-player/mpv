@@ -76,12 +76,12 @@ egy skint telepíteni kell</b> a GUI használatához.
 A skineket a következõ könyvtárakban (és a megadott sorrendben)
 keresi a program:
 <pre>
-    /usr/local/share/mplayer/Skin/
     ~/.mplayer/Skin/
+    /usr/local/share/mplayer/Skin/
 </pre>
 
 <p>
-Az elsõ könyvtár más is lehet, attól függõen, hogy hogyan volt konfigurálva
+A második könyvtár más is lehet, attól függõen, hogy hogyan volt konfigurálva
 az MPlayer (lásd a <code>configure</code> script <code>--datadir</code>
 kapcsolóját).
 
@@ -94,9 +94,8 @@ Az elõbbi könyvtárak alatt minden skin a saját könyvtárába kerül, például:
 
 <h3><a name="images">2.2. Képformátumok</a></h3>
 
-A skinhez használt képek trucolor (24 vagy 32 bit/pixel) BMP, TGA vagy PNG
-formátumban lehetnek (a TGA-nak tömörítetlennek kell lennie).
-<em>Jó tömörítési hatásfoka miatt a PNG javasolt.</em>
+A skinhez használt képek trucolor (24 vagy 32 bit/pixel) PNG
+formátumban lehetnek.
 
 <p>
 A fõablakban (lásd alább) teljesen "átlátszó" részeket tartalmazó képeket
@@ -146,7 +145,9 @@ megadni. A címkékrõl részletesen a <a href="#main.dlabel">dlabel</a> és
 <em class=note>
 <b>Megjegyzés:</b> a fõablak rajzolásához használt képek tartalmazhatnak
 teljesen átlátszó részeket, ahogy arról a
-<a href="#images">képformátumoknál</a> már szó volt.
+<a href="#images">képformátumoknál</a> már szó volt. Ha az X Server nem tartalmazza az XShape bõvitményt, akkor
+az átlátszónak megjelölt részek fekete színüek lesznek. Ha ezt ki szeretnéd használni, akkor a main ablak hátter
+képének szélességének oszthatónak kell lennie nyolccal.
 </em>
 </li>
 
@@ -279,7 +280,7 @@ section = movieplayer
   end
   
   window = menu
-  ; ... a skin menü elemei ...
+  ; ... a menü elemei ...
   end
 end
 </pre></td></tr></table>
@@ -287,13 +288,13 @@ end
 <p>
 Végezetül néhány szó az elemekhez rendelt képek megadásáról.
 <br>
-A fájlok nevét könyvtárak nélkül kell megadni, ugyanis a képeket a skin
+A fájlok nevét könyvtárak nélkül kell megadni, ugyanis a képeket a skin file
 könyvtárában keresi az MPlayer. A fájlok kiterjesztése elhagyható.
 Ha a megadott
 fájl nem létezik, akkor az MPlayer megpróbálja betölteni a
 <i>&lt;fájlnév&gt;.&lt;kit&gt;</i> nevû fájlt, ahol a <i>&lt;kit&gt;</i>
-helyére a <i>tga</i>, <i>TGA</i>, <i>bmp</i>, <i>BMP</i>, <i>png</i>
-és <i>PNG</i> végzõdést helyezi (a megadott sorrendben). Az elsõ létezõ fájlt
+helyére a <i>png</i>
+vagy <i>PNG</i> végzõdést helyezi (a megadott sorrendben). Az elsõ létezõ fájlt
 fogja betölteni.
 
 <p>
@@ -307,19 +308,9 @@ Itt egy példa, hogy mindez világosabb legyen. Tegyük fel, hogy a
 </pre>
 </blockquote>
 
-Ennek hatására az MPlayer megpróbálja betölteni a <i>main</i>, <i>main.tga</i>,
-<i>main.TGA</i>, <i>main.bmp</i> stb. fájlt, így végül megtalálja a
+Ennek hatására az MPlayer megpróbálja betölteni a <i>main</i>, <i>main.png</i>,
+majd a <i>main.PNG<i> fájlt, így végül megtalálja a
 <i>main.png</i>-t.
-<br>
-Ha (mondjuk tévedésbõl) ezt írnád:
-<blockquote>
-<pre>
-    base = main.bmp, -2, -2
-</pre>
-</blockquote>
-akkor az MPlayer a <i>main.bmp</i>, <i>main.bmp.tga</i>, <i>main.bmp.TGA</i>,
-<i>main.bmp.bmp</i> stb. betöltésével próbálkozna, majd végül feladná a dolgot,
-hiszen a könyvtárban <i>main.png</i> van, nem pedig <i>main.bmp</i>.
 </td></tr></table>
 
 
@@ -341,7 +332,7 @@ sarka). Értékük igazításra is használható: a -1 középre, a
 <p>
 <em class=warn>
 <b>Figyelem:</b> a képen az átlátszónak megjelölt területek (#FF00FF színûek)
-feketék lesznek az XShape támogatás nélküli X szervereken.
+feketék lesznek az XShape támogatás nélküli X szervereken. A kép szélességének oszthatónak kell lennie nyolccal.
 </em>
 </dd>
 </dl>
@@ -531,6 +522,12 @@ felsorolt változók is használhatók.
 <tr><td align=center><kbd>$e</kbd></td>
     <td>az "e" karakter, ha a lejátszás szünetel, és a font
     tartalmazza az "e" karaktert</td></tr>
+<tr><td align=center><kbd>$x</kbd></td>
+    <td>a film szélessége</td></tr>
+<tr><td align=center><kbd>$y</kbd></td>
+    <td>a film magassága</td></tr>
+<tr><td align=center><kbd>$C</kbd></td>
+    <td>a használt codec neve</td></tr>
 </table></div>
 <p>
 <b>Megjegyzés:</b> a <kbd>$a</kbd>, <kbd>$T</kbd>, <kbd>$p</kbd>, <kbd>$s</kbd>
@@ -718,11 +715,6 @@ megjelenítésére használhatók, és amikhez érdemes külön fontot készíteni.
 </table>
 </div>
 
-<p>
-<b>Megjegyzés:</b> jelenleg csak a "p", "s", "e", "n", "m" és "t"
-szimbólum használható.
-</p>
-
 <h2><a name="guimsg">A. függelék: GUI üzenetek</a></h2>
 
 A gombok, potméterek és menüpontok az alább felsorolt üzeneteket generálhatják.
@@ -845,6 +837,9 @@ relatív értékét (0-100%) használja).
 <dt><b>evAbout</b>
 <dd>Megjeleníti a program információs ablakát.
 
+<dt><b>evDropSubtitle</b>
+<dd>Törli az aktuálisan használt felirat fájlt.
+
 <dt><b>evEqualizer</b>
 <dd>Bekapcsolja/kikapcsolja az equalizert.
 
@@ -861,14 +856,32 @@ relatív értékét (0-100%) használja).
 <dd>Ugyanaz mint az <i>evLoad</i>, de betöltés után automatikusan megkezdi
 a lejátszást.
 
+<dt><b>evLoadSubtitle</b>
+<dd>Betölt egy felirat fájlt (amit egy fájlválasztó ablakban jelölhetsz ki).
+
+<dt><b>evLoadAudioFile</b>
+<dd>Betölt egy hang fájlt (amit egy fájlválasztó ablakban jelölhetsz ki).
+
 <dt><b>evNone</b>
 <dd>Üres üzenet, nincs hatása. (Legfeljebb csak a CVS verzióban. :-))
 
 <dt><b>evPlayList</b>
 <dd>Megnyitja/bezárja a lejátszólista ablakot.
 
+<dt><b>evPlayDVD</b>
+<dd>Megpróbálja megnyitni a megadott DVDROM - ban lévõ lemezt.
+
+<dt><b>evPlayVCD</b>
+<dd>Megpróbálja megnyitni a megadott CDROM - ban lévõ lemezt.
+
 <dt><b>evPreferences</b>
 <dd>Megnyitja a beállítások ablakot.
+
+<dt><b>evSetAspect</b>
+<dd>Beállítja a képarányt a megadottra.
+
+<dt><b>evSetURL</b>
+<dd>Elõvarázsolja az URL dialogus ablakot.
 
 <dt><b>evSkinBrowser</b>
 <dd>Megnyitja a skinböngészõ ablakot.
