@@ -9,7 +9,6 @@ static ad_info_t info =
 {
 	"Uncompressed PCM audio decoder",
 	"pcm",
-	AFM_PCM,
 	"Nick Kurshev",
 	"A'rpi",
 	""

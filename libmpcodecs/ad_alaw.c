@@ -9,7 +9,6 @@ static ad_info_t info =
 {
 	"aLaw/uLaw audio decoder",
 	"alaw",
-	AFM_ALAW,
 	"Nick Kurshev",
 	"A'rpi",
 	""

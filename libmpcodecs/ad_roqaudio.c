@@ -10,7 +10,6 @@ static ad_info_t info =
 {
 	"Id RoQ File Audio Decoder",
 	"roqaudio",
-	AFM_ROQAUDIO,
 	"Nick Kurshev",
 	"Mike Melanson"
 	"RoQA is an internal MPlayer FOURCC"

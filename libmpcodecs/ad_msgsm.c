@@ -9,7 +9,6 @@ static ad_info_t info =
 {
 	"native MSGSM audio decoder",
 	"msgsm",
-	AFM_GSM,
 	"A'rpi",
 	"XAnim",
 	""

@@ -16,7 +16,6 @@
 static vd_info_t info = {
 	"FFmpeg's libavcodec codec family",
 	"ffmpeg",
-	VFM_FFMPEG,
 	"A'rpi",
 	"http://ffmpeg.sf.net",
 	"native codecs"

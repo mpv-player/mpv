@@ -15,7 +15,6 @@
 static ad_info_t info =  {
 	"RealAudio decoder",
 	"realaud",
-	AFM_REAL,
 	"A'rpi",
 	"Florian Schneider",
 	"binary real audio codecs"

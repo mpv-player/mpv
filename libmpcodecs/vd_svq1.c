@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"SVQ1 (Sorenson v1) Video decoder",
 	"svq1",
-	VFM_SVQ1,
 	"A'rpi",
 	"XINE team",
 	"native codec"

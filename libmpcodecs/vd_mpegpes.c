@@ -10,7 +10,6 @@ static vd_info_t info =
 {
 	"MPEG 1/2 Video passthrough",
 	"mpegpes",
-	VFM_MPEGPES,
 	"A'rpi",
 	"A'rpi",
 	"for hw decoders"

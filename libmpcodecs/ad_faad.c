@@ -17,7 +17,6 @@ static ad_info_t info =
 {
 	"AAC (MPEG2/4 Advanced Audio Coding)",
 	"faad",
-	AFM_AAC,
 	"Felix Buenemann",
 	"faad2",
 	"Under development!"

@@ -19,7 +19,6 @@ static vd_info_t info = {
 	"DivX4Linux lib (divx4 mode)",
 #endif
 	"divx4",
-	VFM_DIVX4,
 	"A'rpi",
 	"http://www.divx.com",
 	"native codecs"

@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"RLE Video decoder",
 	"msrle",
-	VFM_MSRLE,
 	"A'rpi",
 	"XAnim rip...",
 	"native codec"

@@ -10,7 +10,6 @@ static vd_info_t info =
 {
 	"MPEG 1/2 Video decoder v2.0",
 	"libmpeg2",
-	VFM_MPEG,
 	"A'rpi",
 	"Aaron & Walken",
 	"native"

@@ -23,7 +23,6 @@ static ad_info_t info =
 {
 	"AC3-liba52",
 	"liba52",
-	AFM_A52,
 	"Nick Kurshev",
 	"Michel LESPINASSE",
 	""

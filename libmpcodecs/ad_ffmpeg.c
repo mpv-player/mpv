@@ -16,7 +16,6 @@ static ad_info_t info =
 {
 	"FFmpeg audio decoders",
 	"ffmpeg",
-	AFM_FFMPEG,
 	"Nick Kurshev",
 	"ffmpeg.sf.net",
 	""

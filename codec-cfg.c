@@ -210,6 +210,7 @@ err_out_parse_error:
 	return 0;
 }
 
+#if 0
 static short get_driver(char *s,int audioflag)
 {
 	static char *audiodrv[] = {
@@ -278,6 +279,7 @@ static short get_driver(char *s,int audioflag)
 
 	return -1;
 }
+#endif
 
 static int validate_codec(codecs_t *c, int type)
 {
@@ -581,8 +583,10 @@ int parse_codec_cfg(char *cfgfile)
 		} else if (!strcmp(token[0], "driver")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
-			if ((codec->driver = get_driver(token[0],codec_type))<0)
-				goto err_out_parse_error;
+			if (!(codec->drv = strdup(token[0]))) {
+				mp_msg(MSGT_CODECCFG,MSGL_ERR,"can't strdup -> 'driver': %s\n", strerror(errno));
+				goto err_out;
+			}
 		} else if (!strcmp(token[0], "dll")) {
 			if (get_token(1, 1) < 0)
 				goto err_out_parse_error;
@@ -651,11 +655,6 @@ int parse_codec_cfg(char *cfgfile)
 				goto err_out_parse_error;
 			if (!(codec->cpuflags = get_cpuflags(token[0])))
 				goto err_out_parse_error;
-    } else if (!strcasecmp(token[0], "priority")) {
-			if (get_token(1, 1) < 0)
-				goto err_out_parse_error;
-      //printf("\n\n!!!cfg-parse: priority %s (%d) found!!!\n\n", token[0], atoi(token[0])); // ::atmos
-      codec->priority = atoi(token[0]);
 		} else
 			goto err_out_parse_error;
 	}
@@ -738,7 +737,8 @@ codecs_t* find_codec(unsigned int fourcc,unsigned int *fourccmap,
 		for (/* NOTHING */; i--; c++) {
                         if(start && c<=start) continue;
 			for (j = 0; j < CODECS_MAX_FOURCC; j++) {
-				if (c->fourcc[j]==fourcc || c->driver==0) {
+				// FIXME: do NOT hardwire 'null' name here:
+				if (c->fourcc[j]==fourcc || !strcmp(c->drv,"null")) {
 					if (fourccmap)
 						*fourccmap = c->fourccmap[j];
 					return c;
@@ -787,9 +787,9 @@ void list_codecs(int audioflag){
 			  case CODECS_STATUS_UNTESTED:    s="untested";break;
 			}
 			if(c->dll)
-			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s%2d  %s  %s  [%s]\n",c->name,c->driver,s,c->info,c->dll);
+			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s %-6s  %s  %s  [%s]\n",c->name,c->drv,s,c->info,c->dll);
 			else
-			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s%2d  %s  %s\n",c->name,c->driver,s,c->info);
+			  mp_msg(MSGT_CODECCFG,MSGL_INFO,"%-11s %-6s  %s  %s\n",c->name,c->drv,s,c->info);
 			
 		}
 

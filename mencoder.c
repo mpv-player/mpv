@@ -87,8 +87,8 @@ static char* spudec_ifo=NULL;
 static int has_audio=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
-int audio_family=-1;     // override audio codec family 
-int video_family=-1;     // override video codec family 
+char* audio_fm=NULL;     // override audio codec family 
+char* video_fm=NULL;     // override video codec family 
 
 // libvo opts: (defiend at libmpcodecs/vd.c)
 extern int screen_size_xy;
@@ -488,14 +488,14 @@ sh_video=d_video->sh;
 if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
-  if(audio_family!=-1) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceAudioFmt,audio_family);
+  if(audio_fm) mp_msg(MSGT_MENCODER,MSGL_INFO,MSGTR_TryForceAudioFmtStr,audio_fm);
   while(1){
     sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
     if(!sh_audio->codec){
-      if(audio_family!=-1) {
+      if(audio_fm) {
         sh_audio->codec=NULL; /* re-search */
         mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindAfmtFallback);
-        audio_family=-1;
+        audio_fm=NULL;
         continue;      
       }
       mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
@@ -504,8 +504,8 @@ if(sh_audio && (out_audio_codec || seek_to_sec || !sh_audio->wf)){
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
-    else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
-    mp_msg(MSGT_MENCODER,MSGL_INFO,"%s audio codec: [%s] drv:%d (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    else if(audio_fm && strcmp(sh_audio->codec->drv,audio_fm)) continue;
+    mp_msg(MSGT_MENCODER,MSGL_INFO,"%s audio codec: [%s] afm:%s (%s)\n",audio_codec?"Forcing":"Detected",sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
     break;
   }
 }
@@ -670,11 +670,11 @@ if(video_codec){
 } else {
     int status;
     // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
-    if(video_family>=0) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
+    if(video_fm) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmtStr,video_fm);
     for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status){
-	if(video_family>=0) // try first the preferred codec family:
-	    if(init_video(sh_video,NULL,video_family,status)) break;
-	if(init_video(sh_video,NULL,-1,status)) break;
+	if(video_fm) // try first the preferred codec family:
+	    if(init_video(sh_video,NULL,video_fm,status)) break;
+	if(init_video(sh_video,NULL,NULL,status)) break;
     }
 }
 if(!sh_video->inited){
@@ -682,8 +682,8 @@ if(!sh_video->inited){
     mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
     mencoder_exit(1,NULL);
 }
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] drv:%d (%s)\n",
-    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] vfm:%s (%s)\n",
+    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->drv,sh_video->codec->info);
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 }

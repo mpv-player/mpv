@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Quicktime Apple Video",
 	"qtrpza",
-	VFM_QTRPZA,
 	"Roberto Togni",
 	"Roberto Togni",
 	"native codec"

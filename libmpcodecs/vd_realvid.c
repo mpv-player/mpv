@@ -14,7 +14,6 @@
 static vd_info_t info = {
 	"RealVideo decoder",
 	"realvid",
-	VFM_REAL,
 	"Florian Schneider & A'rpi",
 	"using original closed source codecs for Linux",
 	"binary real video codecs"

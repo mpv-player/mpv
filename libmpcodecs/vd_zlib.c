@@ -13,7 +13,6 @@
 static vd_info_t info = {
 	"zlib decoder (avizlib)",
 	"zlib",
-	VFM_ZLIB,
 	"Alex",
 	"based on vd_ijpg.c",
 	"uses zlib, supports only BGR24 (as AVIzlib)"

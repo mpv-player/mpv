@@ -20,7 +20,6 @@ static ad_info_t info =
 {
 	"AC3 through SPDIF",
 	"hwac3",
-	AFM_HWAC3,
 	"Nick Kurshev",
 	"???",
 	""

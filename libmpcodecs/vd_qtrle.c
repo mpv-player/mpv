@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Quicktime Animation (RLE) decoder",
 	"qtrle",
-	VFM_QTRLE,
 	"A'rpi",
 	"Mike Melanson",
 	"native codec"

@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"NuppelVideo decoder",
 	"nuv",
-	VFM_NUV,
 	"A'rpi",
 	"Alex & Panagiotis Issaris <takis@lumumba.luc.ac.be>",
 	"native codecs"

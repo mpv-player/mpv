@@ -17,7 +17,6 @@
 static vd_info_t info = {
 	"PNG Images decoder",
 	"mpng",
-	VFM_MPNG,
 	"A'rpi",
 	".so, based on mpng.c",
 	"uses libpng, 8bpp modes not supported yet"

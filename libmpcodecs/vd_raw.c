@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"RAW Uncompressed Video",
 	"raw",
-	VFM_RAW,
 	"A'rpi",
 	"A'rpi & Alex",
 	"uncompressed"

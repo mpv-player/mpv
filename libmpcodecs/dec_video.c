@@ -134,13 +134,13 @@ int set_rectangle(sh_video_t *sh_video,int param,int value)
 
 void uninit_video(sh_video_t *sh_video){
     if(!sh_video->inited) return;
-    mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_UninitVideo,sh_video->codec->driver);
+    mp_msg(MSGT_DECVIDEO,MSGL_V,MSGTR_UninitVideoStr,sh_video->codec->drv);
     mpvdec->uninit(sh_video);
     vf_uninit_filter_chain(sh_video->vfilter);
     sh_video->inited=0;
 }
 
-int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
+int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
     unsigned int orig_fourcc=sh_video->bih?sh_video->bih->biCompression:0;
     sh_video->codec=NULL;
     sh_video->vf_inited=0;
@@ -155,16 +155,17 @@ int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status){
 	// ok we found one codec
 	if(sh_video->codec->flags&CODECS_FLAG_SELECTED) continue; // already tried & failed
 	if(codecname && strcmp(sh_video->codec->name,codecname)) continue; // -vc
-	if(vfm>=0 && sh_video->codec->driver!=vfm) continue; // vfm doesn't match
+	if(vfm && strcmp(sh_video->codec->drv,vfm)) continue; // vfm doesn't match
 	if(sh_video->codec->status<status) continue; // too unstable
 	sh_video->codec->flags|=CODECS_FLAG_SELECTED; // tagging it
 	// ok, it matches all rules, let's find the driver!
 	for (i=0; mpcodecs_vd_drivers[i] != NULL; i++)
-	    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
+//	    if(mpcodecs_vd_drivers[i]->info->id==sh_video->codec->driver) break;
+	    if(!strcmp(mpcodecs_vd_drivers[i]->info->short_name,sh_video->codec->drv)) break;
 	mpvdec=mpcodecs_vd_drivers[i];
 	if(!mpvdec){ // driver not available (==compiled in)
-	    mp_msg(MSGT_DECVIDEO,MSGL_WARN,MSGTR_VideoCodecFamilyNotAvailable,
-		sh_video->codec->name, sh_video->codec->driver);
+	    mp_msg(MSGT_DECVIDEO,MSGL_WARN,MSGTR_VideoCodecFamilyNotAvailableStr,
+		sh_video->codec->name, sh_video->codec->drv);
 	    continue;
 	}
 	// it's available, let's try to init!

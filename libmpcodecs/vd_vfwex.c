@@ -14,7 +14,6 @@
 static vd_info_t info = {
 	"Win32/VfWex video codecs",
 	"vfwex",
-	VFM_VFWEX,
 	"A'rpi",
 	"based on http://avifile.sf.net",
 	"win32 codecs"

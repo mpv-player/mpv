@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Cinepak Video decoder",
 	"cinepak",
-	VFM_CINEPAK,
 	"A'rpi",
 	"Dr. Tim Ferguson, http://www.csse.monash.edu.au/~timf/videocodec.html",
 	"native codec"

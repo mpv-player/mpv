@@ -14,7 +14,6 @@ static ad_info_t info =
 {
 	"Win32 ACM audio decoder",
 	"acm",
-	AFM_ACM,
 	"Nick Kurshev",
 	"avifile.sf.net",
 	""

@@ -15,7 +15,6 @@
 static vd_info_t info = {
 	"DirectShow video codecs",
 	"dshow",
-	VFM_DSHOW,
 	"A'rpi",
 	"based on http://avifile.sf.net",
 	"win32 codecs"

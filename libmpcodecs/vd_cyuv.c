@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Creative YUV decoder",
 	"cyuv",
-	VFM_CYUV,
 	"A'rpi",
 	"Dr. Tim Ferguson",
 	"native codec"

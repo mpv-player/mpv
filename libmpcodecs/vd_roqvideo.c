@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Id RoQ File Video decoder",
 	"roqvideo",
-	VFM_ROQVIDEO,
 	"A'rpi",
 	"Mike Melanson",
 	"native codec"

@@ -16,7 +16,6 @@ static vd_info_t info =
 {
 	"xvid decoder",
 	"xvid",
-	VFM_XVID,
 	"Albeu",
 	"Albeu",
 	""

@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Microsoft Video 1 / CRAM decoder",
 	"msvidc",
-	VFM_MSVIDC,
 	"A'rpi",
 	"Mike Melanson",
 	"native codec"

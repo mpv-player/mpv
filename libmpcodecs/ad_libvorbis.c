@@ -12,7 +12,6 @@ static ad_info_t info =
 {
 	"Ogg/Vorbis audio decoder",
 	"libvorbis",
-	AFM_VORBIS,
 	"Felix Buenemann, A'rpi",
 	"libvorbis",
 	"buggy"

@@ -10,7 +10,6 @@
 static ad_info_t info =  {
 	"Sample audio decoder",  // name of the driver
 	"sample",    // driver name. should be the same as filename without ad_
-	AFM_SAMPLE,  // replace with registered AFM number
 	"A'rpi",     // writer/maintainer of _this_ file
 	"",          // writer/maintainer/site of the _codec_
 	""           // comments

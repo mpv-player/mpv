@@ -9,7 +9,6 @@ static ad_info_t info =
 {
 	"MPEG layer-2, layer-3",
 	"mp3lib",
-	AFM_MPEG,
 	"Nick Kurshev",
 	"mpg123",
 	"Optimized to MMX/SSE/3Dnow!"

@@ -71,7 +71,6 @@ static ad_info_t info =
 {
 	"IMA ADPCM audio decoder",
 	"imaadpcm",
-	AFM_IMAADPCM,
 	"Nick Kurshev",
 	"Mike Melanson",
 	""

@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Autodesk FLI/FLC Animation decoder",
 	"fli",
-	VFM_FLI,
 	"A'rpi",
 	"Mike Melanson",
 	"native codec"

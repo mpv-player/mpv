@@ -13,7 +13,6 @@
 static ad_info_t info =  {
 	"libmad mpeg audio decoder",
 	"libmad",
-	AFM_MAD,
 	"A'rpi",
 	"libmad...",
 	"based on Xine's libmad/xine_decoder.c"

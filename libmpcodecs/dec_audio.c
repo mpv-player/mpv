@@ -30,12 +30,13 @@ int init_audio(sh_audio_t *sh_audio)
 {
   unsigned i;
   for (i=0; mpcodecs_ad_drivers[i] != NULL; i++)
-    if(mpcodecs_ad_drivers[i]->info->id==sh_audio->codec->driver){
+//    if(mpcodecs_ad_drivers[i]->info->id==sh_audio->codec->driver){
+    if(!strcmp(mpcodecs_ad_drivers[i]->info->short_name,sh_audio->codec->drv)){
 	mpadec=mpcodecs_ad_drivers[i]; break;
     }
   if(!mpadec){
-      mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_AudioCodecFamilyNotAvailable,
-          sh_audio->codec->name, sh_audio->codec->driver);
+      mp_msg(MSGT_DECAUDIO,MSGL_ERR,MSGTR_AudioCodecFamilyNotAvailableStr,
+          sh_audio->codec->name, sh_audio->codec->drv);
       return 0; // no such driver
   }
   
@@ -119,7 +120,7 @@ void uninit_audio(sh_audio_t *sh_audio)
     if(sh_audio->a_in_buffer) free(sh_audio->a_in_buffer);
     sh_audio->a_in_buffer=NULL;
     if(!sh_audio->inited) return;
-    mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_UninitAudio,sh_audio->codec->driver);
+    mp_msg(MSGT_DECAUDIO,MSGL_V,MSGTR_UninitAudioStr,sh_audio->codec->drv);
     mpadec->uninit(sh_audio);
     sh_audio->inited=0;
 }

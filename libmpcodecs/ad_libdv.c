@@ -24,7 +24,6 @@ static ad_info_t info =
 {
 	"Raw DV Audio Decoder",
 	"libdv",
-	AFM_LIBDV,
 	"Alexander Neundorf <neundorf@kde.org>",
 	"http://libdv.sf.net",
 	""

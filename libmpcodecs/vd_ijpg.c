@@ -20,7 +20,6 @@
 static vd_info_t info = {
 	"JPEG Images decoder",
 	"ijpg",
-	VFM_IJPG,
 	"Pontscho",
 	"based on vd_mpng.c",
 	"uses Indipended JPEG Group's jpeglib"

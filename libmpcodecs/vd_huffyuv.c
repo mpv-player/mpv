@@ -28,7 +28,6 @@
 static vd_info_t info = {
 	"HuffYUV Video decoder",
 	"huffyuv",
-	VFM_HUFFYUV,
 	"Roberto Togni",
 	"Roberto Togni",
 	"native codec, original win32 by Ben Rudiak-Gould http://www.math.berkeley.edu/~benrg/huffyuv.html"

@@ -11,7 +11,6 @@
 static vd_info_t info = {
 	"XAnim codecs",
 	"xanim",
-	VFM_XANIM,
 	"A'rpi & Alex",
 	"Xanim (http://xanim.va.pubnix.com/)",
 	"binary codec plugins"

@@ -26,59 +26,6 @@
 #define CODECS_STATUS_UNTESTED		2
 #define CODECS_STATUS__MAX		2
 
-// Codec family/driver:
-#define AFM_MPEG 1
-#define AFM_PCM 2
-#define AFM_AC3 3
-#define AFM_ACM 4
-#define AFM_ALAW 5
-#define AFM_GSM 6
-#define AFM_DSHOW 7
-#define AFM_DVDPCM 8
-#define AFM_HWAC3 9
-#define AFM_VORBIS 10
-#define AFM_FFMPEG 11
-#define AFM_MAD 12
-#define AFM_MSADPCM 13
-#define AFM_A52 14
-#define AFM_G72X 15
-#define AFM_IMAADPCM 16
-#define AFM_DK4ADPCM 17
-#define AFM_DK3ADPCM 18
-#define AFM_ROQAUDIO 19
-#define AFM_AAC 20
-#define AFM_REAL 21
-#define AFM_LIBDV 22
-
-#define VFM_MPEG 1
-#define VFM_VFW 2
-#define VFM_ODIVX 3
-#define VFM_DSHOW 4
-#define VFM_FFMPEG 5
-#define VFM_VFWEX 6
-#define VFM_DIVX4 7
-#define VFM_RAW 8
-#define VFM_MSRLE 9
-#define VFM_XANIM 10
-#define VFM_MSVIDC 11
-#define VFM_FLI 12
-#define VFM_CINEPAK 13
-#define VFM_QTRLE 14
-#define VFM_NUV 15
-#define VFM_CYUV 16
-#define VFM_QTSMC 17
-#define VFM_DUCKTM1 18
-#define VFM_ROQVIDEO 19
-#define VFM_QTRPZA 20
-#define VFM_MPNG 21
-#define VFM_IJPG 22
-#define VFM_HUFFYUV 23
-#define VFM_ZLIB 24
-#define VFM_MPEGPES 25
-#define VFM_REAL 26
-#define VFM_SVQ1 27
-#define VFM_XVID 28
-#define VFM_LIBDV 29
 
 #ifndef GUID_TYPE
 #define GUID_TYPE
@@ -102,12 +49,12 @@ typedef struct codecs_st {
 	char *info;
 	char *comment;
 	char *dll;
+	char* drv;
 	GUID guid;
-	short driver;
+//	short driver;
 	short flags;
 	short status;
 	short cpuflags;
-  short priority;
 } codecs_t;
 
 int parse_codec_cfg(char *cfgfile);

@@ -3,7 +3,7 @@
 extern int video_read_properties(sh_video_t *sh_video);
 
 //extern int init_video(sh_video_t *sh_video, int *pitches);
-extern int init_video(sh_video_t *sh_video,char* codecname,int vfm,int status);
+extern int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status);
 extern void uninit_video(sh_video_t *sh_video);
 
 extern int decode_video(sh_video_t *sh_video,unsigned char *start,int in_size,int drop_frame);

@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Microsoft RLE decoder",
 	"msrle",
-	VFM_MSRLE,
 	"Mike Melanson",
 	"Mike Melanson",
 	"native codec"

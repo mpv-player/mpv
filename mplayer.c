@@ -176,8 +176,8 @@ int has_audio=1;
 int has_video=1;
 char *audio_codec=NULL; // override audio codec
 char *video_codec=NULL; // override video codec
-int audio_family=-1;     // override audio codec family 
-int video_family=-1;     // override video codec family 
+char *audio_fm=NULL;    // override audio codec family 
+char *video_fm=NULL;    // override video codec family 
 
 // IMHO this stuff is no longer of use, or is there a special
 // reason why dshow should be completely disabled? - atmos ::
@@ -1201,15 +1201,15 @@ current_module="find_audio_codec";
 if(sh_audio){
   // Go through the codec.conf and find the best codec...
   sh_audio->codec=NULL;
-  if(audio_family!=-1) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceAudioFmt,audio_family);
+  if(audio_fm) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceAudioFmtStr,audio_fm);
   while(1){
     sh_audio->codec=find_codec(sh_audio->format,NULL,sh_audio->codec,1);
     if(!sh_audio->codec){
-      if(audio_family!=-1) {
+      if(audio_fm) {
         sh_audio->codec=NULL; /* re-search */
         mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAfmtFallback);
-        audio_family=-1;
-        continue;      
+        audio_fm=NULL;
+        continue;
       }
       mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CantFindAudioCodec,sh_audio->format);
       mp_msg(MSGT_CPLAYER,MSGL_HINT, MSGTR_TryUpgradeCodecsConfOrRTFM,get_path("codecs.conf"));
@@ -1217,9 +1217,9 @@ if(sh_audio){
       break;
     }
     if(audio_codec && strcmp(sh_audio->codec->name,audio_codec)) continue;
-    else if(audio_family!=-1 && sh_audio->codec->driver!=audio_family) continue;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] afm:%d (%s)\n",
-	audio_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_audio->codec->name,sh_audio->codec->driver,sh_audio->codec->info);
+    else if(audio_fm && strcmp(sh_audio->codec->drv,audio_fm)) continue;
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s audio codec: [%s] afm:%s (%s)\n",
+	audio_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_audio->codec->name,sh_audio->codec->drv,sh_audio->codec->info);
     break;
   }
 }
@@ -1275,11 +1275,11 @@ if(video_codec){
 } else {
     int status;
     // try in stability order: UNTESTED, WORKING, BUGGY, BROKEN
-    if(video_family>=0) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmt,video_family);
+    if(video_fm) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_TryForceVideoFmtStr,video_fm);
     for(status=CODECS_STATUS__MAX;status>=CODECS_STATUS__MIN;--status){
-	if(video_family>=0) // try first the preferred codec family:
-	    if(init_video(sh_video,NULL,video_family,status)) break;
-	if(init_video(sh_video,NULL,-1,status)) break;
+	if(video_fm) // try first the preferred codec family:
+	    if(init_video(sh_video,NULL,video_fm,status)) break;
+	if(init_video(sh_video,NULL,NULL,status)) break;
     }
 }
 if(!sh_video->inited){
@@ -1291,8 +1291,8 @@ if(!sh_video->inited){
     goto main; // exit_player(MSGTR_Exit_error);
 }
 
-mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] vfm:%d (%s)\n",
-    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->driver,sh_video->codec->info);
+mp_msg(MSGT_CPLAYER,MSGL_INFO,"%s video codec: [%s] vfm:%s (%s)\n",
+    video_codec?mp_gettext("Forcing"):mp_gettext("Detected"),sh_video->codec->name,sh_video->codec->drv,sh_video->codec->info);
 mp_msg(MSGT_CPLAYER,MSGL_INFO,"==========================================================================\n");
 
 if(auto_quality>0){

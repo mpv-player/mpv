@@ -20,7 +20,6 @@ static ad_info_t info =
 {
 	"Duck DK3 ADPCM decoder",
 	"dk3adpcm",
-	AFM_DK3ADPCM,
 	"Nick Kurshev",
 	"Mike Melanson",
 	"This format number was used by Duck Corp. but not officially registered with Microsoft"

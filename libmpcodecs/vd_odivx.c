@@ -21,7 +21,6 @@ static vd_info_t info = {
 	"Opendivx 0.48 codec",
 #endif
 	"odivx",
-	VFM_ODIVX,
 	"A'rpi",
 #ifdef NEW_DECORE
 	"http://www.divx.com",

@@ -7,8 +7,6 @@ typedef struct mp_codec_info_s
         const char *name;
         /* short name (same as driver name in codecs.conf) ("dshow") */
         const char *short_name;
-	/* codec family: -vfm id */
-	const int id;
         /* interface author/maintainer */
         const char *maintainer;
         /* codec author ("Aaron Holtzman <aholtzma@ess.engr.uvic.ca>") */

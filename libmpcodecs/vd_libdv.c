@@ -24,7 +24,6 @@ static vd_info_t info =
 {
 	"Raw DV Video Decoder",
 	"libdv",
-	VFM_LIBDV,
 	"Alexander Neundorf <neundorf@kde.org>",
 	"http://libdv.sf.net",
 	""

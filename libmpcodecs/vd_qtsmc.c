@@ -9,7 +9,6 @@
 static vd_info_t info = {
 	"Apple Graphics (SMC) decoder",
 	"qtsmc",
-	VFM_QTSMC,
 	"A'rpi",
 	"Mike Melanson",
 	"native codec"

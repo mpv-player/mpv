@@ -14,7 +14,6 @@ static ad_info_t info =
 {
 	"Win32/DirectShow decoders",
 	"dshow",
-	AFM_DSHOW,
 	"Nick Kurshev",
 	"avifile.sf.net",
 	""
