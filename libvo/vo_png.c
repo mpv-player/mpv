@@ -1,5 +1,5 @@
 /* 
- * vo_png.c, Portable Network Graphics Renderer for Mplayer
+ * vo_png.c, Portable Network Graphics Renderer for MPlayer
  *
  * Copyright 2001 by Felix Buenemann <atmosfear@users.sourceforge.net>
  *

@@ -1,5 +1,5 @@
 /* 
- * vo_jpeg.c, JPEG Renderer for Mplayer
+ * vo_jpeg.c, JPEG Renderer for MPlayer
  *
  * Copyright 2002 by Pontscho (pontscho@makacs.poliod.hu)
  * 25/04/2003: Spring cleanup -- alex

@@ -103,7 +103,7 @@ uint32_t num_frames;
 #define IMGFMT_YUVP 0x50565559
 #define IMGFMT_UYVP 0x50565955
 
-/* Compressed Formats. Mplayer's extensions!!! */
+/* Compressed Formats. MPlayer's extensions!!! */
 #define IMGFMT_MPEGPES (('M'<<24)|('P'<<16)|('E'<<8)|('S'))
 
 
