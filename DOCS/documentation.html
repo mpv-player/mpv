@@ -1628,36 +1628,6 @@ end
   do not work/compile, you should disable them in configure with
   <CODE>./configure --disable-win32 --disable-gl --disable-mpdvdkit</CODE>.</P>
 
-<P>SDL has also been reported to work after some tweaking:<BR>
-  There are several changes that need to be made to the <CODE>config.mak</CODE>
-  file after running <CODE>configure</CODE>. These changes, like any change to
-  <CODE>config.mak</CODE> after the <CODE>configure</CODE> run are <B>not</B>
-  supported, so please do <B>not</B> report bugs!</P>
-
-<P>Find the line that reads</P>
-
-<PRE>
-  SDL_LIB = -L/usr/local/lib -lmingw32 -lSDLmain -lSDL -mwindows -mno-cygwin
-</PRE>
-
-<P>and change it to:</P>
-
-<PRE>
-  SDL_LIB = -L/usr/local/lib -lSDL -mcygwin
-</PRE>
-
-<P>and replace</P>
-
-<PRE>
-  SDL_INC = -I/usr/local/include -I/usr/local/include/SDL -Dmain=SDL_main -I/usr/include/mingw -DWIN32 -Uunix -mno-cygwin
-</PRE>
-
-<P>with</P>
-
-<PRE>
-  SDL_INC = -I/usr/local/include -I/usr/local/include/SDL -Uunix -mcygwin
-</PRE>
-
 <P>Instructions and files for making SDL run under Cygwin can be found on the
   <A HREF="http://www.libsdl.org/extras/win32/cygwin/">libsdl site</A>.</P>
 
