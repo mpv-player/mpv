@@ -4967,7 +4967,7 @@ cat > $TMPC << EOF
 #include <xvid.h>
 int main(void) { xvid_init(0, 0, 0, 0); return 0; }
 EOF
-_ld_xvid="$_ld_xvid -lxvidcore"
+_ld_xvid="$_ld_xvid -lxvidcore -lm"
 if test "$_xvid" != no && cc_check $_inc_xvid $_ld_xvid ; then
   _xvid=yes
   _def_xvid3='#define HAVE_XVID3 1'
