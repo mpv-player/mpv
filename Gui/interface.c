@@ -40,6 +40,7 @@
 #include "../libmpcodecs/dec_video.h"
 
 guiInterface_t guiIntfStruct;
+int guiWinID=-1;
 
 char * gstrcat( char ** dest,char * src )
 {
@@ -197,10 +198,11 @@ void guiInit( void )
   if (WinID>0)
   {
     appMPlayer.subWindow.Parent=WinID;
-    appMPlayer.mainWindow.Parent=WinID;
     appMPlayer.sub.x=0;
     appMPlayer.sub.y=0;
   }
+  if (guiWinID>=0)
+    appMPlayer.mainWindow.Parent=guiWinID;
  
  wsCreateWindow( &appMPlayer.subWindow,
   appMPlayer.sub.x,appMPlayer.sub.y,appMPlayer.sub.width,appMPlayer.sub.height,
@@ -517,7 +519,7 @@ int guiGetEvent( int type,char * arg )
 	   }
 	  guiIntfStruct.MovieWidth=vo_dwidth;
 	  guiIntfStruct.MovieHeight=vo_dheight;
-          if (WinID>0)
+          if (guiWinID>=0)
             wsMoveWindow( &appMPlayer.mainWindow,0,0, vo_dheight);
          }
 	break;
