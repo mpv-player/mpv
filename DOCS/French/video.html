@@ -873,8 +873,6 @@ De plus le pilote de sortie vidéo utilisé avec <B>VIDIX</B> n'a pas d'importance
     actifs et être capable de donner au sous-périphérique VIDIX quelques
     caractéristiques du serveur.</LI>
 </UL>
-J'espère que probablement chaque pilote de sortie vidéo de MPlayer
-pourra reconnaître le sous-périphérique <CODE>:vidix</CODE>.
 
 <H4>MÉTHODES D'UTILISATION</H4>
 
@@ -915,55 +913,6 @@ pourra reconnaître le sous-périphérique <CODE>:vidix</CODE>.
   pour utiliser VIDIX à cause de l'accès direct au matériel. Au moins le
   bit <B>SUID</B> de l'exécutable MPlayer doit être fixé.
 </BLOCKQUOTE>
-
-<H4>ÉGALISEUR VIDEO</H4>
-
-<P>Il y a une égaliseur vidéo implémenté spécialement pour VIDIX. Vous pouvez
-  l'utiliser soit avec les touches <B>1-8</B> comme décrit dans la page de man,
-  soit en ligne de commande. MPlayer reconnaît les options suivantes:</P>
-
-<DL>
-  <DT><CODE>-brightness</CODE></DT>
-  <DD>Ajuste la <B>LUMINOSITÉ</B> de la sortie vidéo. Ce n'est pas égal à
-    l'ajustement de luminosité sur un moniteur ou une TV. Elle change
-    l'intensité des composants RGB du signal vidéo de noir jusqu'à blanc.</DD>
-
-  <DT><CODE>-contrast</CODE></DT>
-  <DD>Ajuste le <B>CONTRASTE</B> de la sortie vidéo. Fonctionne de manière
-  similaire à brightness.</DD>
-
-  <DT><CODE>-saturation</CODE></DT>
-  <DD>Ajuste la <B>SATURATION</B> de la sortie vidéo. Vous pouvez obtenir une
-    sortie en niveaux de gris avec cette option.</DD>
-
-  <DT><CODE>-hue</CODE></DT>
-  <DD>Ajuste la <B>COULEUR (HUE)</B> du signal vidéo. Vous
-    pouvez obtenir un négatif de l'image avec cette option.</DD>
-
-  <DT><CODE>-red_intensity</CODE></DT>
-  <DD>Ajuste l'intensité du composant <B>ROUGE</B> du signal vidéo.</DD>
-
-  <DT><CODE>-green_intensity</CODE></DT>
-  <DD>Ajuste l'intensité du composant <B>VERT</B> du signal vidéo.</DD>
-
-  <DT><CODE>-blue_intensity</CODE></DT>
-  <DD>Ajuste l'intensité du composant <B>BLEU</B> du signal vidéo.</DD>
-</DL>
-
-<P>Chaque paramètre accepte les valeurs de <B>-1000</B> à <B>+1000</B>.<BR>
-  La valeur par défaut de chaque paramètre est <B>0</B>.</P>
-
-<P><B>Note:</B> Les pilotes ne supportent pas tous ces paramètres.
-  Actuellement seul <B>radeon_vid.so</B> fournit un support complet de
-  l'égalisation vidéo. Les autres pilotes n'ont qu'un support partiel de
-  ces options.</P>
-
-<P><B>Exemples:</B><BR>
-  <CODE>mplayer -vo vesa:vidix -brightness -300 -contrast 200
-  nomfichier.avi</CODE><BR>
-  ou<BR>
-  <CODE>mplayer -vo xvidix -red_intensity -50 -saturation 400 -hue 300
-  nomfichier.vob</CODE></P>
 
 
 <H4><A NAME="directfb">2.3.1.2.13 DirectFB</A></H4>
