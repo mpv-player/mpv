@@ -1888,6 +1888,17 @@ Explicitly choose the audio device to use (default: /dev/\:audio).
 Native Windows waveout audio output driver.
 .
 .TP
+.B dsound (Windows only)
+Directx DirectSound audio output driver.
+.PD 0
+.RSs
+.IPs device=<devicenum>
+Sets the device number to use.
+Playing a file with -v will show a list of available devices.
+.RE
+.PD 1
+.
+.TP
 .B dxr2 (also see \-dxr2) (DXR2 only)
 Creative DXR2 specific output driver.
 .
