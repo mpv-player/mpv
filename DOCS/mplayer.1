@@ -375,7 +375,7 @@ MPlayer prints the available IDs when running in verbose (-v) mode.
 Works only for DVD playback.
 It selects the DVD audio language and always tries to play audio streams whose
 language matches the given code.
-For the list of available languages, use with the \-v switch and look at the
+For the list of available languages, use with the \-v option and look at the
 output.
 
 .I EXAMPLE:
@@ -805,27 +805,27 @@ Force audio parameters for the .vivo demuxer (for debugging purposes).
 See \-vop expand too.
 .TP
 .B \-dumpmicrodvdsub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub switch) to the
+Convert the given subtitle (specified with the \-sub option) to the
 MicroDVD subtitle format.
 Creates a dumpsub.sub file in the current directory.
 .TP
 .B \-dumpmpsub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub switch) to MPlayer's
+Convert the given subtitle (specified with the \-sub option) to MPlayer's
 subtitle format, MPsub.
 Creates a dump.mpsub file in the current directory.
 .TP
 .B \-dumpsrtsub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub switch) to the time-based
+Convert the given subtitle (specified with the \-sub option) to the time-based
 SubViewer (SRT) subtitle format.
 Creates a dumpsub.srt file in the current directory.
 .TP
 .B \-dumpjacosub (MPLAYER only)
-Convert the given subtitle (specified with the \-sub switch) to the time-based
+Convert the given subtitle (specified with the \-sub option) to the time-based
 JACOsub subtitle format.
 Creates a dumpsub.js file in the current directory.
 .TP
 .B \-dumpsami (MPLAYER only)
-Convert the given subtitle (specified with the \-sub switch) to the time-based
+Convert the given subtitle (specified with the \-sub option) to the time-based
 SAMI subtitle format.
 Creates a dumpsub.smi file in the current directory.
 .TP
@@ -908,13 +908,13 @@ volume + seek + timer + percentage + total time
 Turns on DVD subtitle displaying.
 Also, you MUST specify a number which corresponds to a DVD subtitle language
 (0\-31).
-For the list of available subtitles, use with the \-v switch and look at the
+For the list of available subtitles, use with the \-v option and look at the
 output.
 .TP
 .B \-slang <two\ letter\ country\ code> (also see \-sid option)
 Works only for DVD playback.
 Turns on/\:selects DVD subtitle language.
-For the list of available subtitles, use with the \-v switch and look at the
+For the list of available subtitles, use with the \-v option and look at the
 output.
 
 .I EXAMPLE:
@@ -3268,7 +3268,7 @@ select
 .\" --------------------------------------------------------------------------
 .
 .SH "SLAVE MODE PROTOCOL"
-If the \-slave switch is given, playback is controlled by a
+If the \-slave option is given, playback is controlled by a
 line\-based protocol.
 Each line must contain one command otherwise one of the following tokens:
 .TP
