@@ -276,11 +276,18 @@ d	10024146	Radeon R300 AF [Radeon 9700]	0
 d	10024e50	RV350 [Mobility Radeon 9600 M10]	0	New PCI ID provided by ATI developer relations	
 d	10024e52	RV350 [Mobility Radeon 9600 M10]	0	New PCI ID provided by ATI developer relations	
 d	10024e64	Radeon R300 [Radeon 9700] (Secondary)	0	
+d	10024148	Radeon R350 AH [Radeon 9800]	0
+d	10024149	Radeon R350 AI [Radeon 9800]	0
 d	10024150	Radeon RV350 AP [Radeon 9600 Pro]	0
 d	10024170	Radeon RV350 AP [Radeon 9600 Pro] (Secondary)	0
 d	10024152	Radeon RV350 AR [Radeon 9600XT]	0
+d	10024168	Radeon R350 [Radeon 9800] (Secondary)	0
 d	10024e48	Radeon R350 NH [Radeon 9800]	0
+d	10024e49	Radeon R350 [Radeon 9800]	0
+d	10024e4a	Radeon RV350 NJ [Radeon 9800 XT]	0
 d	10024e68	Radeon R350 [Radeon 9800] (Secondary)	0
+d	10024e69	Radeon R350 [Radeon 9800] (Secondary)	0
+d	10024e6a	Radeon RV350 NJ [Radeon 9800 XT] (Secondary)	0
 d	10025041	Rage 128 PA/PRO	0	
 d	10025042	Rage 128 PB/PRO AGP 2x	0	
 d	10025043	Rage 128 PC/PRO AGP 4x	0	
