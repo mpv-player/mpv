@@ -7,7 +7,7 @@ Homepage:
    Design:  Chass
    Content: Gabucino
 English docs:
-   tech-*.txt, BUGS, BUGREPORTS: A'rpi
+   tech-*.txt: A'rpi
    others: Gabucino
 DOCS translations:
    Hungarian:  Gabucino & Tibcu
@@ -32,15 +32,12 @@ subtitles file parser/reader: Lez
 config files & commandline parser: Szabi
 fastmemcpy: Nick
 LIRC support: Acki
-
-libavcodec:
-~~~~~~~~~~~
-author/maintainer: Gerard Lantau
-asm optimizaton: Nick
+sub/osd renderer: Adam Tla/lka
 
 libvo drivers:
 ~~~~~~~~~~~~~~
 vo_3dfx.c   - OBSOLETED, use xv
+vo_aa.c     - Folke Ashberg
 vo_dga.c    - Acki
 vo_fbdev.c  - Szabi
 vo_fsdga.c  - OBSOLETED, use dga
@@ -69,3 +66,9 @@ ao_pcm.c    - Atmos
 ao_sdl.c    - Atmos
 ao_sun.c    - Jürgen Keil
 
+TOOLS:
+~~~~~~
+subfont-c    - Artur Zaprzala: <artur.zaprzala@talex.com.pl>
+subfont-GIMP - lanzz@lanzz.org
+*.pl         - Atmos
+others       - A'rpi

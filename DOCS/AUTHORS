@@ -42,7 +42,7 @@ Gábor Bérczi (Gabucino):  <gabucino@k2.jozsef.kando.hu>
 - webpage maintainer
 - testing, codecs quality & speed comparsions
 - IRC channel #MPlayer operator
-- experimental MINIX port
+- experimental MINIX port :)
 
 Szabolcs Berecz (Szabi): <szabi@inf.elte.hu>
 - codecs.conf file parser
@@ -93,21 +93,23 @@ Jens Hoffmann: <hoffmajs@gmx.de>
 Nick Kurshev: <nickols_k@mail.ru>
 - memcpy optimizations for AMD K7 and Intel Pentium III  (fastmemcpy.h)
 - CDROM tune info
-- further 3DNow! optimizations into mp3lib and libac3
+- further 3DNow! optimizations into mp3lib, libac3 and ffmpeg
 - russian translation of documentation
 
 German Gomez Garcia: <german@piraos.com>
-- DVD .ifo parser and chapter selection [not yet in the main trunk]
-- SPDIF AC3 output for SBLive!  [not yet in the main trunk]
+- SPDIF AC3 output for SBLive!
 
 Dariush Pietrzak (Eyck): <eyck@incubus.ar.lublin.pl>
 - debian packaging support (see debian/* and DOCS/DEBIAN)
 - support for vplayer subtitle format
 - prelimenary support for .RT subtitle format
 
+Marcus Comstedt: <marcus@idonex.se>
+- initial solaris8-x86 support
+
 Jürgen Keil and Marcus Comstedt: <jk@tools.de> <marcus@idonex.se>
 - patched MPlayer to work on Solaris 8 x86
-- configure fixes
+- various fixes (win32, configure, etc)
 - SUN audio driver in libao2
 
 Vladimir Kushnir: <vkushnir@Alfacom.net>
@@ -115,6 +117,19 @@ Vladimir Kushnir: <vkushnir@Alfacom.net>
 
 Bertrand BAUDET: <bertrand_baudet@yahoo.com>
 - network streaming support
+
+Artur Zaprzala: <artur.zaprzala@talex.com.pl>
+- Complete font generator prog + OSD font (TOOLS/subfont-c)
+
+lanzz@lanzz.org:
+- GIMP font generator plugin (TOOLS/subfont-gimp)
+
+Adam Tla/lka: <atlka@pg.gda.pl>
+- osd/sub review, fixes, optimization, utf8 support
+- various fixes
+
+Folke Ashberg: <folke@ashberg.de>
+- AAlib driver for libvo (vo_aa)
 
 Main testers:
   Tibor Balázs (Tibcu)
@@ -143,7 +158,7 @@ Zdenek Kabelac:  <kabi@informatics.muni.cz>
 - some technical help about the win32 stuff and timers
 
 Gerard Lantau: <glantau@yahoo.fr>
-- ffmpeg/libavcodec author,maintainer  (opensource mpeg & divx en/decoder)
+- ffmpeg/libavcodec author,maintainer  (opensource mpeg, mjpeg & divx codecs)
 
 Project Mayo:  [http://www.projectmayo.com]
 - the OpenDivX codec authors
