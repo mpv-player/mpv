@@ -53,10 +53,6 @@ Cleanup:
 
  * remove all obsolete code, options, files etc
 
- * move Zoran JPEG encoder to video filters
-
- * convert -zr options to -zr suboption:suboption format
-
  * Restructure configure and fix CPU flags supported but not shown.
 
 
@@ -79,8 +75,6 @@ Enhancements:
 
  * SSA style & colors handling
 
- * plugin structure for vf/af
-
  * support for VirtualDub and Winamp plugins
 
  * implement xawtv config file parser (for channels, etc)
@@ -88,8 +82,6 @@ Enhancements:
  * finish icc support
 
  * G400 2nd head through mga_vid ;)
-
- * DTS support
 
  * do more things automagically
 
@@ -103,7 +95,7 @@ Enhancements:
 
  * color subtitles
 
- * swf (flash) demuxer
+ * swf (flash) demuxer (working through libavformat)
 
  * DirectX video acceleration -vo for Windows (similar to XvmC)
 
@@ -118,7 +110,7 @@ Enhancements:
 
 Difficult stuff:
 
- * RE all closed source codecs (QDM2, WMV9, RV30, RV40, cook, ...)
+ * RE all closed source codecs (QDMC, WMV9, RV30, RV40, cook, ...)
 
  * support for Bink/Smacker codecs
 
