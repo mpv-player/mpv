@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.21 -->
+<!-- synced with 1.22 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -97,7 +97,7 @@ ismert formátumok
 (<emphasis role="bold">AVI/ASF/OGG/DVD/VCD/VOB/MPG/MOV/VIV/FLI/RM/NUV/NET/PVA</emphasis>)
 más, az <application>MPlayer</application>rel is lejátszható formátumokba való
 átalakításra. Sokféle codec-kel tud kódolni, például <emphasis role="bold">MPEG-4 (DivX4)</emphasis>-gyel
-(1 vagy 2 menetes), a <systemitem class="library">libavcodec</systemitem>-et
+(egy vagy két menetes), a <systemitem class="library">libavcodec</systemitem>-et
 alkotó codec-ekkel, audiót tekintve pedig
 <emphasis role="bold">PCM/MP3/VBR MP3</emphasis> a választék.
 </para>
