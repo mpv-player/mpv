@@ -150,6 +150,7 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
 	    mpeg2dec->decoder.quant_store=mpi->qscale;
 	    mpeg2dec->decoder.quant_stride=mpi->qstride;
 	    mpi->pict_type=type; // 1->I, 2->P, 3->B
+	    mpi->qscale_type= 1;
 #endif
 
 	    if(mpi->flags&MP_IMGFLAG_DRAW_CALLBACK &&

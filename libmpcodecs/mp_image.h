@@ -76,6 +76,7 @@ typedef struct mp_image_s {
     char * qscale;
     int qstride;
     int pict_type; // 0->unknown, 1->I, 2->P, 3->B
+    int qscale_type; // 0->mpeg1/4/h263, 1->mpeg2
     int num_planes;
     /* these are only used by planar formats Y,U(Cb),V(Cr) */
     int chroma_width;
