@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.22 -->
+<!-- synced with 1.23 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Odtwarzacz filmów</title>
@@ -148,7 +148,7 @@ oraz audio <emphasis role="bold">PCM/MP3/VBR MP3</emphasis>.
   </simpara></listitem>
 <listitem><simpara>
   Korekta FPS opcją <option>-ofps</option> (przydatne gdy kodujesz
-  29.97 fps VOB na 24 fps AVI)
+  30000/1001 fps VOB na 24000/1001 fps AVI)
   </simpara></listitem>
 <listitem><simpara>
   Możliwość zastosowania naszego potężnego systemu filtrów (kadrowanie,
