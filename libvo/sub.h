@@ -39,23 +39,8 @@ extern subtitle* vo_sub;
 #define OSD_PB_1 0x13
 
 /* now in textform */
-static char * osd_names[]={
-    "Seekbar",
-    "Play",
-    "Pause",
-    "Stop",
-    "Rewind",
-    "Forward",
-    "Clock",
-    "Contrast",
-    "Saturation",
-    "Volume",
-    "Brightness",
-    "Hue"
-};
-static char * osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", ""};
-    
-
+extern char * __sub_osd_names[];
+extern char * __sub_osd_names_short[];
 
 //extern void vo_draw_text_osd(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 //extern void vo_draw_text_progbar(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));

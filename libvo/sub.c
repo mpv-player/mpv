@@ -1,6 +1,23 @@
 
 #include "sub.h"
 
+
+char * __sub_osd_names[]={
+    "Seekbar",
+    "Play",
+    "Pause",
+    "Stop",
+    "Rewind",
+    "Forward",
+    "Clock",
+    "Contrast",
+    "Saturation",
+    "Volume",
+    "Brightness",
+    "Hue"
+};
+char * __sub_osd_names_short[] ={ "", "|>", "||", "[]", "<<" , ">>", "", "", "", "", "", ""};
+
 //static int vo_font_loaded=-1;
 font_desc_t* vo_font=NULL;
 

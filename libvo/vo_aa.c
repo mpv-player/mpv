@@ -194,14 +194,14 @@ printosdtext()
      * places the mplayer status osd
      */
     if (vo_osd_text)
-	aa_printf(c, 0, 0 , aaopt_osdcolor, "%s %s ", osd_names_short[vo_osd_text[0]], vo_osd_text+1);
+	aa_printf(c, 0, 0 , aaopt_osdcolor, "%s %s ", __sub_osd_names_short[vo_osd_text[0]], vo_osd_text+1);
 }
 
 void
 printosdprogbar(){
     /* print mplayer osd-progbar */
     if (vo_osd_progbar_type!=-1){
-	osdpercent(1,1,0,255,vo_osd_progbar_value, osd_names[vo_osd_progbar_type], "");	
+	osdpercent(1,1,0,255,vo_osd_progbar_value, __sub_osd_names[vo_osd_progbar_type], "");	
     }
 }
 static uint32_t
