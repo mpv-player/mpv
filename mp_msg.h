@@ -47,7 +47,7 @@ extern int verbose; // defined in mplayer.c
 #define MSGT_DVD 17	// open.c (DVD init/read/seek)
 
 #define MSGT_PARSEES 18	// parse_es.c (mpeg stream parser)
-#define MSGT_LIRC 19	// lirc_mp.c
+#define MSGT_LIRC 19	// lirc_mp.c and input lirc driver
 
 #define MSGT_STREAM 20  // stream.c
 #define MSGT_CACHE 21 	// cache2.c
@@ -63,6 +63,8 @@ extern int verbose; // defined in mplayer.c
 #define MSGT_SPUDEC 26	// spudec.c
 
 #define MSGT_PLAYTREE 27    // Playtree handeling (playtree.c, playtreeparser.c)
+
+#define MSGT_INPUT 28
 
 #define MSGT_MAX 64
 
