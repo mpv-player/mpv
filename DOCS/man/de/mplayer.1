@@ -388,6 +388,14 @@ soll. Für Slideshows nützlich.
 
 .SH "DEMUXER/STREAM-OPTIONEN"
 .TP
+.B \-a52drc <level>
+Gibt die Höhe der Dynamic Range Compression für den AC3 Audio Stream an.
+<level> ist ein Fließkommawert im Bereich von 0 bis 1, wobei 0 keine Kompression
+und 1 (der Standardwert) volle Kompression bedeutet (laute Passagen werden leiser
+und umgekehrt).
+Diese Option zeigt nur Wirkung, wenn im AC3 Stream die Rangei Compression i
+Information vorhanden ist.
+.TP
 .B \-aid <id> (siehe auch \-alang)
 Gibt die zu verwendende Audiospur an [MPEG: 0\-31 AVI/\:OGM: 1\-99
 ASF/\:RM: 0\-127 VOB(AC3): 128\-159 VOB(LPCM): 160\-191]

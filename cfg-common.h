@@ -134,6 +134,8 @@
 	{"channels", &audio_output_channels, CONF_TYPE_INT, CONF_RANGE, 1, 6, NULL},
 	{"format", &audio_output_format, CONF_TYPE_INT, CONF_RANGE, 0, 0x00002000, NULL},
 
+        {"a52drc", &a52_drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
+
 // ------------------------- codec/vfilter options --------------------
 
 	// MP3-only: select stereo/left/right
@@ -302,6 +304,8 @@ extern int network_prefer_ipv4;
 extern int network_ipv4_only_proxy;
 
 #endif
+
+extern float a52_drc_level;
 
 /* defined in libmpdemux: */
 extern int hr_mp3_seek;

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <math.h>
 
 #include "config.h"
 #ifdef USE_LIBA52
@@ -18,6 +19,13 @@
 static sample_t * a52_samples;
 static a52_state_t a52_state;
 static uint32_t a52_flags=0;
+
+#define DRC_NO_ACTION      0
+#define DRC_NO_COMPRESSION 1
+#define DRC_CALLBACK       2
+
+float a52_drc_level = 1.0;
+static int a52_drc_action = DRC_NO_ACTION;
 
 #include "bswap.h"
 
@@ -95,6 +103,11 @@ int channels=0;
   return (flags&A52_LFE) ? (channels+1) : channels;
 }
 
+sample_t dynrng_call (sample_t c, void *data) {
+//	fprintf(stderr, "(%lf, %lf): %lf\n", (double)c, (double)a52_drc_level, (double)pow((double)c, a52_drc_level));
+	return pow((double)c, a52_drc_level);
+}
+
 
 static int preinit(sh_audio_t *sh)
 {
@@ -126,6 +139,21 @@ static int init(sh_audio_t *sh_audio)
 	mp_msg(MSGT_DECAUDIO,MSGL_ERR,"A52 sync failed\n");
 	return 0;
   }
+
+
+  /* Init a52 dynrng */
+  if (a52_drc_level < 0.001) {
+	  /* level == 0 --> no compression, init library without callback */
+	  a52_drc_action = DRC_NO_COMPRESSION;
+  } else if (a52_drc_level > 0.999) {
+	  /* level == 1 --> full compression, do nothing at all (library default = full compression) */
+	  a52_drc_action = DRC_NO_ACTION;
+  } else {
+	  a52_drc_action = DRC_CALLBACK;
+  }
+  /* Library init for dynrng has to be done for each frame, see decode_audio() */
+
+
   /* 'a52 cannot upmix' hotfix:*/
   a52_printinfo(sh_audio);
   sh_audio->channels=audio_output_channels;
@@ -186,6 +214,15 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
 	    mp_msg(MSGT_DECAUDIO,MSGL_WARN,"a52: error decoding frame\n");
 	    return len;
 	}
+
+	/* handle dynrng */
+	if (a52_drc_action != DRC_NO_ACTION) {
+	    if (a52_drc_action == DRC_NO_COMPRESSION)
+		a52_dynrng(&a52_state, NULL, NULL);
+	    else
+		a52_dynrng(&a52_state, dynrng_call, NULL);
+	}
+
 	len=0;
 	for (i = 0; i < 6; i++) {
 	    if (a52_block (&a52_state, a52_samples)){

@@ -596,6 +596,14 @@ this option.
 .
 .SH "DEMUXER/STREAM OPTIONS"
 .TP
+.B \-a52drc <level>
+Select the Dynamic Range Compression level for AC3 audio streams.
+<level> is a float value ranging from 0 to 1, where 0 means no compression 
+and 1 (which is the default) means full compression (make loud passages more 
+silent and vice versa).
+This option only shows an effect if the AC3 stream contains the required range 
+compression information.
+.TP
 .B \-aid <id> (also see \-alang option)
 Select audio channel [MPEG: 0\-31 AVI/\:OGM: 1\-99 ASF/\:RM: 0\-127
 VOB(AC3): 128\-159 VOB(LPCM): 160\-191 MPEG-TS 17\-8190].
