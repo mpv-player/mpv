@@ -1,4 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#include "wine/mmreg.h"
+#include "wine/avifmt.h"
+#include "wine/vfw.h"
+
+#include "aviwrite.h"
 
 static const short h263_format[8][2] = {
     { 0, 0 },
@@ -34,10 +42,11 @@ unsigned int x_get_bits(int n){
 #define skip_bits(xxx,n) x_get_bits(n)
 #define skip_bits1(xxx) x_get_bits(1)
 
+    int format, width, height;
+
 /* most is hardcoded. should extend to handle all h263 streams */
 int h263_decode_picture_header(unsigned char *b_ptr)
 {
-    int format, width, height;
     
     buffer=b_ptr;
     bufptr=bitcnt=buf=0;
@@ -116,22 +125,30 @@ int h263_decode_picture_header(unsigned char *b_ptr)
     return 0;
 }
 
+int postable[32768];
 
 int main(){
 int c;
 unsigned int head=-1;
 int pos=0;
+int frames=0;
+FILE *f=fopen("coap.viv","rb");
+FILE *f2=fopen("coap.avi","wb");
+aviwrite_t* avi=aviwrite_new_muxer();
+aviwrite_stream_t* mux=aviwrite_new_stream(avi,AVIWRITE_TYPE_VIDEO);
+int i;
 
-while((c=getchar())>=0){
+while((c=fgetc(f))>=0){
     ++pos;
     head=(head<<8)|c;
     if((head&0xFFFFFF)==0x80){
         unsigned char buf[33];
 	int i;
 	buf[0]=buf[1]=0; buf[2]=0x80;
-	printf("%08X: 00 00 80",pos);
-	for(i=0;i<30;i++){
-	    c=getchar();++pos;
+	printf("%08X: 00 00 80",pos-3);
+	postable[frames++]=pos-3;
+	for(i=0;i<8;i++){
+	    c=fgetc(f);++pos;
 	    printf(" %02X",c);
 	    buf[3+i]=c;
 	}
@@ -139,6 +156,34 @@ while((c=getchar())>=0){
 	h263_decode_picture_header(buf);
     }
 }
+postable[frames]=pos;
+printf("%d frames\n",frames);
 
+mux->buffer_size=0x200000;
+mux->buffer=malloc(mux->buffer_size);
+
+mux->h.dwScale=1; 
+mux->h.dwRate=10; 
+
+
+mux->bih=malloc(sizeof(BITMAPINFOHEADER));
+mux->bih->biSize=sizeof(BITMAPINFOHEADER);
+mux->bih->biWidth=width;
+mux->bih->biHeight=height;
+mux->bih->biPlanes=1;
+mux->bih->biBitCount=24;
+mux->bih->biCompression=0x6f766976;//      7669766f;
+mux->bih->biSizeImage=3*width*height;
+aviwrite_write_header(avi,f2);
+
+for(i=0;i<frames;i++){
+    int len=postable[i+1]-postable[i];
+    fseek(f,postable[i],SEEK_SET);
+    fread(mux->buffer,len,1,f);
+    aviwrite_write_chunk(avi,mux,f2,len,0x10);
+}
+aviwrite_write_index(avi,f2);
+fseek(f2,0,SEEK_SET);
+aviwrite_write_header(avi,f2);
 
 }
