@@ -11,7 +11,7 @@
 /*
   TODO:
   - hw YUV support (need volunteers who have corresponding hardware)
-  - double (triple) buffering (if it will really speedup playback).
+  - triple buffering (if it will really speedup playback).
     note: triple buffering requires VBE 3.0.
   - refresh rate support (need additional info from mplayer)
 */
@@ -40,6 +40,8 @@
 
 LIBVO_EXTERN(vesa)
 extern int verbose;
+
+#define MAX_BUFFERS 3
 
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
@@ -87,10 +89,16 @@ static int flip_trigger = 0;
 static void (*draw_alpha_fnc)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride);
 static void (*rgb2rgb_fnc)(uint8_t *src,uint8_t *dst,uint32_t src_size);
 
-#define HAS_DGA()  (win.idx == -1)
+/* multibuffering */
+uint8_t*  video_base; /* should be never changed */
+uint32_t  multi_buff[MAX_BUFFERS]; /* contains offsets of buffers */
+uint8_t   multi_size=0; /* total number of buffers */
+uint8_t   multi_idx=0; /* active buffer */
 
+#define HAS_DGA()  (win.idx == -1)
 #define MOVIE_MODE (MODE_ATTR_COLOR | MODE_ATTR_GRAPHICS)
-#define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_READABLE | MODE_WIN_WRITEABLE)
+#define FRAME_MODE (MODE_WIN_RELOCATABLE | MODE_WIN_WRITEABLE)
+
 static char * vbeErrToStr(int err)
 {
   char *retval;
@@ -256,35 +264,43 @@ static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int
     return 0;
 }
 
-static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   unsigned int offset=HAS_DGA()?video_mode_info.XResolution:image_width;
-   vo_draw_alpha_rgb32(w,h,src,srca,stride,dga_buffer+4*(y0*offset+x0),4*offset);
+static void draw_alpha_32(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+{
+   unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:image_width;
+   vo_draw_alpha_rgb32(w,h,src,srca,stride,dga_buffer+4*(y0*dstride+x0),4*dstride);
 }
 
-static void draw_alpha_24(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   unsigned int offset=HAS_DGA()?video_mode_info.XResolution:image_width;
-   vo_draw_alpha_rgb24(w,h,src,srca,stride,dga_buffer+3*(y0*offset+x0),3*offset);
+static void draw_alpha_24(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+{
+   unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:image_width;
+   vo_draw_alpha_rgb24(w,h,src,srca,stride,dga_buffer+3*(y0*dstride+x0),3*dstride);
 }
 
-static void draw_alpha_16(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   unsigned int offset=HAS_DGA()?video_mode_info.XResolution:image_width;
-   vo_draw_alpha_rgb16(w,h,src,srca,stride,dga_buffer+2*(y0*offset+x0),2*offset);
+static void draw_alpha_16(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+{
+   unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:image_width;
+   vo_draw_alpha_rgb16(w,h,src,srca,stride,dga_buffer+2*(y0*dstride+x0),2*dstride);
 }
 
-static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
-   unsigned int offset=HAS_DGA()?video_mode_info.XResolution:image_width;
-   vo_draw_alpha_rgb15(w,h,src,srca,stride,dga_buffer+2*(y0*offset+x0),2*offset);
+static void draw_alpha_15(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+{
+   unsigned int dstride=HAS_DGA()?video_mode_info.XResolution:image_width;
+   vo_draw_alpha_rgb15(w,h,src,srca,stride,dga_buffer+2*(y0*dstride+x0),2*dstride);
 }
 
-static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride){
+static void draw_alpha_null(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride)
+{
 }
 
 
 static void draw_osd(void)
 {
+ uint32_t w,h;
  if(verbose > 2)
 	printf("vo_vesa: draw_osd was called\n");
- if(dga_buffer) vo_draw_text(image_width,image_height,draw_alpha_fnc);
+ w = HAS_DGA()?video_mode_info.XResolution:image_width;
+ h = HAS_DGA()?video_mode_info.YResolution:image_height;
+ if(dga_buffer) vo_draw_text(w,h,draw_alpha_fnc);
 }
 
 static void flip_page(void)
@@ -296,22 +312,58 @@ static void flip_page(void)
     if(!HAS_DGA()) __vbeCopyData(dga_buffer);
     flip_trigger = 0;
   }
+#if 0
+  if(vo_doublebuffering && multi_size > 1)
+  {
+   vbeSetDisplayStart(multi_buff[multi_idx],1);
+   multi_idx = multi_idx ? 0 : 1;
+   win.ptr = dga_buffer = video_base + multi_buff[multi_idx];
+  }
+#endif
+/*
+  else
+  if(tripple_buffering)
+  {
+   vbeSetScheduledDisplayStart(multi_buffer[multi_idx],1);
+   multi_idx++;
+   if(multi_idx > 2) multi_idx = 0;
+   win.ptr = dga_buffer = video_base + multi_buffer[multi_idx];
+  }
+*/
 }
 
 /* is called for rgb only */
 static uint32_t draw_frame(uint8_t *src[])
 {
-  uint8_t *data;
+  uint8_t *data = src[0];
     if(verbose > 2)
         printf("vo_vesa: draw_frame was called\n");
     if(rgb2rgb_fnc)
     {
-      (*rgb2rgb_fnc)(src[0],dga_buffer,image_width*image_height*image_bpp);
-      data = dga_buffer;
+      if(HAS_DGA()) 
+      {
+	size_t i, psize, ssize, dsize;
+	uint8_t *dest, *sptr;
+	psize = PIXEL_SIZE();
+	dsize = SCREEN_LINE_SIZE(psize);
+	ssize = IMAGE_LINE_SIZE(image_bpp);
+	dest = dga_buffer/* + y_offset*dsize + x_offset*psize*/;
+	sptr = src[0];
+	for(i=0;i<image_height;i++)
+	{
+	   (*rgb2rgb_fnc)(sptr,dest,ssize);
+	   sptr += ssize;
+	   dest += dsize;
+	}
+      }
+      else
+      {
+	(*rgb2rgb_fnc)(src[0],dga_buffer,image_width*image_height*image_bpp);
+	data = dga_buffer;
+      }
       if(verbose > 2)
           printf("vo_vesa: rgb2rgb_fnc was called\n");
     } 
-    else data = src[0];
     if(!rgb2rgb_fnc || !HAS_DGA()) __vbeCopyData(data);
     return 0;
 }
@@ -382,6 +434,37 @@ static char *model2str(unsigned char type)
   return retval;
 }
 
+unsigned fillMultiBuffer( unsigned long vsize, unsigned nbuffs )
+{
+  unsigned long screen_size, offset;
+  unsigned total,i;
+  screen_size = video_mode_info.XResolution*video_mode_info.YResolution*((video_mode_info.BitsPerPixel+7)/8);
+  if(screen_size%64) screen_size=((screen_size/64)*64)+64;
+  total = vsize / screen_size;
+  if(verbose) printf("vo_vesa: Can use %u video buffers\n",total);
+  i = 0;
+  offset = 0;
+  total = min(total,nbuffs);
+  while(i < total) { multi_buff[i++] = offset; offset += screen_size; }
+  if(!i)
+    printf("vo_vesa: Your have too small size of video memory for this mode:\n"
+	   "vo_vesa: Requires: %08lX exists: %08lX\n", screen_size, vsize);
+  return i;
+}
+
+#define SUBDEV_NODGA     0x00000001UL
+#define SUBDEV_FORCEDGA  0x00000002UL
+uint32_t parseSubDevice(const char *sd)
+{
+   uint32_t flags;
+   flags = 0;
+   if(strcmp(sd,"nodga") == 0) { flags |= SUBDEV_NODGA; flags &= ~(SUBDEV_FORCEDGA); }
+   else
+   if(strcmp(sd,"dga") == 0)   { flags &= ~(SUBDEV_NODGA); flags |= SUBDEV_FORCEDGA; }
+   else if(verbose) printf("vo_vesa: Unknown subcommand: %s\n", sd);
+   return flags;
+}
+
 /* fullscreen:
  * bit 0 (0x01) means fullscreen (-fs)
  * bit 1 (0x02) means mode switching (-vm)
@@ -394,7 +477,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
   struct VbeInfoBlock vib;
   struct VesaModeInfoBlock vmib;
   size_t i,num_modes;
-  uint32_t w,h;
+  uint32_t w,h, sd_flags;
   unsigned short *mode_ptr,win_seg;
   unsigned bpp,best_x = UINT_MAX,best_y=UINT_MAX,best_mode_idx = UINT_MAX;
   int err,fs_mode,yuv_fmt;
@@ -402,6 +485,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 	image_height = height;
 	fs_mode = 0;
 	rgb2rgb_fnc = NULL;
+        sd_flags = 0;
+        if(vo_subdevice) sd_flags = parseSubDevice(vo_subdevice);
 	if(flags & 0x8)
 	{
 	  printf("vo_vesa: switch -flip is not supported\n");
@@ -551,10 +636,7 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		printf("vo_vesa: Using VESA mode (%u) = %x [%ux%u@%u]\n"
 			,best_mode_idx,video_mode,video_mode_info.XResolution
 			,video_mode_info.YResolution,video_mode_info.BitsPerPixel);
-#if 0
-/* Redefine here any mode related parameters. It's for test purposes only */
-	        video_mode_info.PhysBasePtr = 0;
-#endif
+		if(sd_flags & SUBDEV_NODGA) video_mode_info.PhysBasePtr = 0;
 		if( vesa_zoom || fs_mode )
 		{
 		  if( format==IMGFMT_YV12 )
@@ -613,15 +695,19 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		      printf("vo_vesa: Can't use DGA. Force bank switching mode. :(\n");
 		    else
 		    {
-		      win.ptr = lfb;
+		      video_base = win.ptr = lfb;
 		      win.low = 0UL;
 		      win.high = vsize;
 		      win.idx = -1; /* HAS_DGA() is on */
 		      video_mode |= VESA_MODE_USE_LINEAR;
-		      printf("vo_vesa: Using DGA (physical resources: %08lXh, %08lXh) at %08lXh\n"
+		      printf("vo_vesa: Using DGA (physical resources: %08lXh, %08lXh)"
 			     ,video_mode_info.PhysBasePtr
-			     ,vsize
-			     ,(unsigned long)lfb);
+			     ,vsize);
+		      if(verbose) printf(" at %08lXh",(unsigned long)lfb);
+		      printf("\n");
+		      if(!(multi_size = fillMultiBuffer(vsize,2))) return -1;
+		      if(vo_doublebuffering && multi_size < 2)
+			printf("vo_vesa: Can't use double buffering: not enough video memory\n");
 		    }
 		}
 		if(win.idx == -2)
@@ -631,6 +717,11 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		}
 		if(!HAS_DGA())
 		{
+		  if(sd_flags & SUBDEV_FORCEDGA)
+		  {
+			printf("vo_vesa: you've forced DGA. Exiting\n");
+			return -1;
+		  }
 		  if(!(win_seg = win.idx == 0 ? video_mode_info.WinASegment:video_mode_info.WinBSegment))
 		  {
 		    printf("vo_vesa: Can't find valid window address\n");
@@ -639,6 +730,8 @@ init(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint3
 		  win.ptr = PhysToVirtSO(win_seg,0);
 		  win.low = 0L;
 		  win.high= video_mode_info.WinSize*1024;
+		  printf("vo_vesa: Using bank switching mode (physical resources: %08lXh, %08lXh)\n"
+			 ,(unsigned long)win.ptr,(unsigned long)win.high);
 		}
 		if(video_mode_info.XResolution > image_width)
 		    x_offset = (video_mode_info.XResolution - image_width) / 2;
