@@ -27,6 +27,7 @@
 #ifndef STREAMING_LIVE_DOT_COM
 #include "rtp.h"
 #endif
+#include "pnm.h"
 
 #include "../version.h"
 
@@ -440,6 +441,12 @@ autodetectProtocol(streaming_ctrl_t *streaming_ctrl, int *fd_out, int *file_form
 			return -1;
 		}
 
+		// Checking for PNM://
+		if( !strcasecmp(url->protocol, "pnm") ) {
+			*file_format = DEMUXER_TYPE_REAL;
+			return 0;
+		}
+
 		// Get the extension of the file if present
 		if( url->file!=NULL ) {
 			for( i=strlen(url->file) ; i>0 ; i-- ) {
@@ -710,6 +717,38 @@ nop_streaming_start( stream_t *stream ) {
 	return 0;
 }
 
+int
+pnm_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl ) {
+	return pnm_read(stream_ctrl->data, buffer, size);
+}
+
+
+int
+pnm_streaming_start( stream_t *stream ) {
+	int fd;
+	pnm_t *pnm;
+	if( stream==NULL ) return -1;
+
+	fd = connect2Server( stream->streaming_ctrl->url->hostname,
+	    stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 7070 );
+	printf("PNM:// fd=%d\n",fd);
+	if(fd<0) return -1;
+	
+	pnm = pnm_connect(fd,stream->streaming_ctrl->url->file);
+	if(!pnm) return -1;
+
+	stream->fd=fd;
+	stream->streaming_ctrl->data=pnm;
+
+	stream->streaming_ctrl->streaming_read = pnm_streaming_read;
+//	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
+	stream->streaming_ctrl->prebuffer_size = 128;	// KBytes
+	stream->streaming_ctrl->buffering = 1;
+	stream->streaming_ctrl->status = streaming_playing_e;
+	return 0;
+}
+
+
 #ifndef STREAMING_LIVE_DOT_COM
 // Start listening on a UDP port. If multicast, join the group.
 int
@@ -844,6 +883,12 @@ streaming_start(stream_t *stream, int *demuxer_type, URL_t *url) {
 		ret = rtp_streaming_start( stream );
 	} else
 #endif
+
+	if( !strcasecmp( stream->streaming_ctrl->url->protocol, "pnm")) {
+		stream->fd = -1;
+		ret = pnm_streaming_start( stream );
+	} else
+	
 	// For connection-oriented streams, we can usually determine the streaming type.
 	switch( *demuxer_type ) {
 		case DEMUXER_TYPE_ASF:

@@ -8,7 +8,7 @@ ifeq ($(XMMS_PLUGINS),yes)
 SRCS += demux_xmms.c
 endif 
 ifeq ($(STREAMING),yes)
-SRCS += asf_streaming.c url.c http.c network.c asf_mmst_streaming.c
+SRCS += asf_streaming.c url.c http.c network.c asf_mmst_streaming.c pnm.c
 ifeq ($(STREAMING_LIVE_DOT_COM),yes)
 CPLUSPLUSSRCS = demux_rtp.cpp
 CPLUSPLUSINCLUDE = -I$(LIVE_LIB_DIR)/liveMedia/include
