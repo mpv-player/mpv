@@ -615,16 +615,21 @@ inline int af_resize_local_buffer(af_instance_t* af, af_data_t* data)
   return AF_OK;
 }
 
-// send control to all filters, starting with the last until
-// one responds with AF_OK
-int af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
+/**
+ * \brief send control to all filters, starting with the last, until
+ *        one responds with AF_OK
+ * \return The instance that accepted the command or NULL if none did.
+ */
+af_instance_t *af_control_any_rev (af_stream_t* s, int cmd, void* arg) {
   int res = AF_UNKNOWN;
   af_instance_t* filt = s->last;
-  while (filt && res != AF_OK) {
+  while (filt) {
     res = filt->control(filt, cmd, arg);
+    if (res == AF_OK)
+      return filt;
     filt = filt->prev;
   }
-  return (res == AF_OK);
+  return NULL;
 }
 
 void af_help (void) {
