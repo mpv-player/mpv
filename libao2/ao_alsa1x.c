@@ -14,6 +14,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <string.h>
+#include <sys/poll.h>
 
 #include "../config.h"
 
@@ -48,16 +49,21 @@ static snd_pcm_hw_params_t *alsa_hwparams;
 static snd_pcm_sw_params_t *alsa_swparams;
 static char *alsa_device;
 
-/* possible 4096, original 8192, OUTBURST is set statically to 512 in config.h */
-static int alsa_fragsize = 4096; //OUTBURST
-static int alsa_fragcount = 8;
+/* possible 4096, original 8192 
+ * was only needed for calculating chunksize? */
+static int alsa_fragsize = 4096;
+/* 16 sets buffersize to 16 * chunksize is as default 1024
+ * which seems to be good avarge for most situations 
+ * so buffersize is 16384 frames by default */
+static int alsa_fragcount = 16;
+static int chunk_size = 1024; //is alsa_fragsize / 4
 
-static int chunk_size = -1;
 static size_t bits_per_sample, bits_per_frame;
 static size_t chunk_bytes;
 
 int ao_mmap = 0;
 int ao_noblock = 0;
+int first = 1;
 
 static int open_mode;
 static int set_block_mode;
@@ -66,13 +72,13 @@ static int set_block_mode;
 
 #undef BUFFERTIME
 #define SET_CHUNKSIZE
+#undef USE_POLL
 
-snd_pcm_t *
-
-spdif_init(char *pcm_name)
+snd_pcm_t *spdif_init(char *pcm_name)
 {
 	//char *pcm_name = "hw:0,2"; /* first card second device */
 	static snd_aes_iec958_t spdif;
+	static snd_aes_iec958_t spdif_test;
 	snd_pcm_info_t 	*info;
 	snd_pcm_t *handler;
 	snd_pcm_format_t format = SND_PCM_FORMAT_S16_LE;
@@ -96,10 +102,15 @@ spdif_init(char *pcm_name)
         printf("device: %d, subdevice: %d\n", snd_pcm_info_get_device(info),
                 snd_pcm_info_get_subdevice(info));                              
 	{
+
         snd_ctl_elem_value_t *ctl;
         snd_ctl_t *ctl_handler;
+	snd_ctl_elem_id_t *elem_id;
+	unsigned int elem_device;
+	const char *elem_name;
         char ctl_name[12];
         int ctl_card;
+	//elem_id = 36;
 
 	spdif.status[0] = IEC958_AES0_NONAUDIO |
 			  IEC958_AES0_CON_EMPHASIS_NONE;
@@ -109,16 +120,18 @@ spdif_init(char *pcm_name)
 	spdif.status[3] = IEC958_AES3_CON_FS_48000;
 
         snd_ctl_elem_value_alloca(&ctl);
-        snd_ctl_elem_value_set_interface(ctl, SND_CTL_ELEM_IFACE_PCM);
+	snd_ctl_elem_id_alloca(&elem_id); 
+	snd_ctl_elem_value_set_interface(ctl, SND_CTL_ELEM_IFACE_PCM); //SND_CTL_ELEM_IFACE_MIXER
         snd_ctl_elem_value_set_device(ctl, snd_pcm_info_get_device(info));
         snd_ctl_elem_value_set_subdevice(ctl, snd_pcm_info_get_subdevice(info));
-        snd_ctl_elem_value_set_name(ctl, SND_CTL_NAME_IEC958("", PLAYBACK,PCM_STREAM));
-        snd_ctl_elem_value_set_iec958(ctl, &spdif);
+        snd_ctl_elem_value_set_name(ctl,SND_CTL_NAME_IEC958("", PLAYBACK, PCM_STREAM)); //SWITCH
+	snd_ctl_elem_value_set_iec958(ctl, &spdif);
         ctl_card = snd_pcm_info_get_card(info);
         if (ctl_card < 0) {
            fprintf(stderr, "Unable to setup the IEC958 (S/PDIF) interface - PCM has no assigned card");
            goto __diga_end;
         }
+
        sprintf(ctl_name, "hw:%d", ctl_card);
        printf("hw:%d\n", ctl_card);
        if ((err = snd_ctl_open(&ctl_handler, ctl_name, 0)) < 0) {
@@ -126,9 +139,19 @@ spdif_init(char *pcm_name)
           goto __diga_end;
        }
        if ((err = snd_ctl_elem_write(ctl_handler, ctl)) < 0) {
-        fprintf(stderr, "Unable to update the IEC958 control: %s\n", snd_strerror(err));
+	 //fprintf(stderr, "Unable to update the IEC958 control: %s\n", snd_strerror(err));
+	 printf("alsa-spdif-init: cant set spdif-trough automatically\n");
         goto __diga_end;
        }
+       	//test area
+       /* elem_device = snd_ctl_elem_id_get_device(elem_id); */
+       /* elem_name = snd_ctl_elem_value_get_name(ctl);  */
+       /* snd_ctl_elem_value_get_iec958(ctl, &spdif); */
+       /* printf("spdif = %i, device = %i\n", &spdif, elem_device); */
+       /* printf("name = %s\n", elem_name); */
+	//end test area
+
+
       snd_ctl_close(ctl_handler);
       __diga_end:                                                       
 
@@ -318,7 +341,7 @@ static int init(int rate_hz, int channels, int format, int flags)
     ao_data.format = format;
     ao_data.channels = channels;
     ao_data.outburst = OUTBURST;
-    ao_data.buffersize = MAX_OUTBURST; // was 16384
+    //ao_data.buffersize = MAX_OUTBURST; // was 16384
 
     switch (format)
     {
@@ -489,7 +512,53 @@ static int init(int rate_hz, int channels, int format, int flags)
       set_block_mode = 0;
       str_block_mode = "block-mode";
     }
-      
+    //cvs cosmetics fix
+    //sets buff/chunksize if its set manually
+    if (ao_data.buffersize) {
+      switch (ao_data.buffersize)
+	{
+	case 1:
+	  alsa_fragcount = 16;
+	  chunk_size = 512;
+	  if (verbose) {
+	    printf("alsa-init: buffersize set manually to 8192\n");
+	    printf("alsa-init: chunksize set manually to 512\n");
+	  }
+	  break;
+	case 2:
+	  alsa_fragcount = 8;
+	  chunk_size = 1024;
+	  if (verbose) {
+	    printf("alsa-init: buffersize set manually to 8192\n");
+	    printf("alsa-init: chunksize set manually to 1024\n");
+	  }
+	  break;
+	case 3:
+	  alsa_fragcount = 32;
+	  chunk_size = 512;
+	  if (verbose) {
+	    printf("alsa-init: buffersize set manually to 16384\n");
+	    printf("alsa-init: chunksize set manually to 512\n");
+	  }
+	  break;
+	case 4:
+	  alsa_fragcount = 16;
+	  chunk_size = 1024;
+	  if (verbose) {
+	    printf("alsa-init: buffersize set manually to 16384\n");
+	    printf("alsa-init: chunksize set manually to 1024\n");
+	  }
+	  break;
+	default:
+	  alsa_fragcount = 16;
+	  if (ao_mmap)
+	    chunk_size = 512;
+	  else
+	    chunk_size = 1024;
+	  break;
+	}
+    }
+
     if (!alsa_handler) {
       //modes = 0, SND_PCM_NONBLOCK, SND_PCM_ASYNC
       if ((err = snd_pcm_open(&alsa_handler, alsa_device, SND_PCM_STREAM_PLAYBACK, open_mode)) < 0)
@@ -537,7 +606,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 	printf("alsa-init: mmap set\n");
       } else {
 	err = snd_pcm_hw_params_set_access(alsa_handler, alsa_hwparams,SND_PCM_ACCESS_RW_INTERLEAVED);
-	printf("alsa-init: interleave set\n");
       }
       if (err < 0) {
 	printf("alsa-init: unable to set access type: %s\n", snd_strerror(err));
@@ -594,8 +662,6 @@ static int init(int rate_hz, int channels, int format, int flags)
 #ifdef SET_CHUNKSIZE
       {
 	//set chunksize
-	chunk_size = alsa_fragsize / 4;
-
 	if ((err = snd_pcm_hw_params_set_period_size(alsa_handler, alsa_hwparams, chunk_size, 0)) < 0)
 	  {
 	    printf("alsa-init: unable to set periodsize: %s\n", snd_strerror(err));
@@ -653,7 +719,7 @@ static int init(int rate_hz, int channels, int format, int flags)
 
 	  //set min available frames to consider pcm ready (4)
 	  //increased for nonblock-mode should be set dynamically later
-	  if ((err = snd_pcm_sw_params_set_avail_min(alsa_handler, alsa_swparams, chunk_size)) < 0)
+	  if ((err = snd_pcm_sw_params_set_avail_min(alsa_handler, alsa_swparams, 4)) < 0)
 	    {
 	      printf("alsa-init: unable to set avail_min %s\n",snd_strerror(err));
 	      return(0);
@@ -776,6 +842,22 @@ static void reset()
     }
 }
 
+#ifdef USE_POLL
+static int wait_for_poll(snd_pcm_t *handle, struct pollfd *ufds, unsigned int count)
+{
+  unsigned short revents;
+
+  while (1) {
+    poll(ufds, count, -1);
+    snd_pcm_poll_descriptors_revents(handle, ufds, count, &revents);
+    if (revents & POLLERR)
+      return -EIO;
+    if (revents & POLLOUT)
+      return 0;
+  }
+} 
+#endif
+
 #ifndef timersub
 #define timersub(a, b, result) \
 do { \
@@ -819,6 +901,17 @@ static int xrun(u_char *str_mode)
   return(1); /* ok, data should be accepted again */
 }
 
+static int play(void* data, int len, int flags)
+{
+  int result;
+  if (ao_mmap)
+    result = play_mmap(data, len);
+  else
+    result = play_normal(data, len);
+
+  return result;
+}
+
 /*
     plays 'len' bytes of 'data'
     returns: number of bytes played
@@ -826,10 +919,10 @@ static int xrun(u_char *str_mode)
     thanxs for marius <marius@rospot.com> for giving us the light ;)
 */
 
-static int play(void* data, int len, int flags)
+static int play_normal(void* data, int len)
 {
 
-  //ao_data.bps is always 4 cause its set to channels * 2 by alsa_format??
+  //ao_data.bps is always 4 for 2 chn S16_LE
   int num_frames = len / ao_data.bps;
   signed short *output_samples=data;
   snd_pcm_sframes_t res = 0;
@@ -843,11 +936,7 @@ static int play(void* data, int len, int flags)
 
   while (num_frames > 0) {
 
-      if (ao_mmap) {
-	res = snd_pcm_mmap_writei(alsa_handler, (void *)output_samples, num_frames);
-      } else {
-	res = snd_pcm_writei(alsa_handler, (void *)output_samples, num_frames);
-      }
+    res = snd_pcm_writei(alsa_handler, (void *)output_samples, num_frames);
 
       if (res == -EAGAIN) {
 	snd_pcm_wait(alsa_handler, 1000);
@@ -886,6 +975,115 @@ static int play(void* data, int len, int flags)
   return res < 0 ? (int)res : len;
 }
 
+/* mmap-mode mainly based on descriptions by Joshua Haberman <joshua@haberman.com>
+ * 'An overview of the ALSA API' http://people.debian.org/~joshua/x66.html
+ * and some help by Paul Davis <pbd@op.net> */
+
+static int play_mmap(void* data, int len)
+{
+  snd_pcm_sframes_t commitres, frames_available;
+  snd_pcm_uframes_t frames_transmit, size, offset;
+  const snd_pcm_channel_area_t *area;
+  void *outbuffer;
+  int err, result;
+
+#ifdef USE_POLL //seems not really be needed
+  struct pollfd *ufds;
+  int count;
+
+  count = snd_pcm_poll_descriptors_count (alsa_handler);
+  ufds = malloc(sizeof(struct pollfd) * count);
+  snd_pcm_poll_descriptors(alsa_handler, ufds, count);
+
+  //first wait_for_poll
+    if (err = (wait_for_poll(alsa_handler, ufds, count) < 0)) {
+      if (snd_pcm_state(alsa_handler) == SND_PCM_STATE_XRUN || 
+	  snd_pcm_state(alsa_handler) == SND_PCM_STATE_SUSPENDED) {
+        xrun("play");
+      }
+    }
+#endif
+
+  outbuffer = alloca(ao_data.buffersize);
+
+  //don't trust get_space() ;)
+  frames_available = snd_pcm_avail_update(alsa_handler) * ao_data.bps;
+  if (frames_available < 0)
+    xrun("play");
+
+  if (frames_available < 4) {
+    if (first) {
+      first = 0;
+      snd_pcm_start(alsa_handler);
+    }
+    else { //FIXME should break and return 0?
+      snd_pcm_wait(alsa_handler, -1);
+      first = 1;
+    }
+  }
+
+  /* len is simply the available bufferspace got by get_space() 
+   * but real avail_buffer in frames is ab/ao_data.bps */
+  size = len / ao_data.bps;
+
+  //if (verbose)
+  //printf("len: %i size %i, f_avail %i, bps %i ...\n", len, size, frames_available, ao_data.bps);
+
+  frames_transmit = size;
+
+  /* prepare areas and set sw-pointers
+   * frames_transmit returns the real available buffer-size
+   * sometimes != frames_available cause of ringbuffer 'emulation' */
+  snd_pcm_mmap_begin(alsa_handler, &area, &offset, &frames_transmit);
+
+  /* this is specific to interleaved streams (or non-interleaved
+   * streams with only one channel) */
+  outbuffer = ((char *) area->addr + (area->first + area->step * offset) / 8); //8
+
+  //write data
+  memcpy(outbuffer, data, (frames_transmit * ao_data.bps));
+
+  commitres = snd_pcm_mmap_commit(alsa_handler, offset, frames_transmit);
+
+  if (commitres < 0 || commitres != frames_transmit) {
+    if (snd_pcm_state(alsa_handler) == SND_PCM_STATE_XRUN || 
+	snd_pcm_state(alsa_handler) == SND_PCM_STATE_SUSPENDED) {
+      xrun("play");
+    }
+  }
+
+  //if (verbose)
+  //printf("mmap ft: %i, cres: %i\n", frames_transmit, commitres);
+
+  /* 	err = snd_pcm_area_copy(&area, offset, &data, offset, len, alsa_format); */
+  /* 	if (err < 0) { */
+  /* 	  printf("area-copy-error\n"); */
+  /* 	  return 0; */
+  /* 	} */
+
+
+  //calculate written frames!
+  result = commitres * ao_data.bps;
+
+
+  /* if (verbose) { */
+  /* if (len == result) */
+  /* printf("result: %i, frames written: %i ...\n", result, frames_transmit); */
+  /* else */
+  /* printf("result: %i, frames written: %i, result != len ...\n", result, frames_transmit); */
+  /* } */
+
+  //mplayer doesn't like -result
+  if (result < 0)
+    result = 0;
+
+#ifdef USE_POLL
+  free(ufds);
+#endif
+
+  return result;
+}
+
 /* how many byes are free in the buffer */
 static int get_space()
 {
@@ -912,8 +1110,14 @@ static int get_space()
     case SND_PCM_STATE_OPEN:
       str_status = "open";
     case SND_PCM_STATE_PREPARED:
-      if (str_status != "open")
+      if (str_status != "open") {
 	str_status = "prepared";
+	first = 1;
+	ret = snd_pcm_status_get_avail(status) * ao_data.bps;
+	if (ret == 0) //ugly workaround for hang in mmap-mode
+	  ret = 10;
+	break;
+      }
     case SND_PCM_STATE_RUNNING:
       ret = snd_pcm_status_get_avail(status) * ao_data.bps;
       //avail_frames = snd_pcm_avail_update(alsa_handler) * ao_data.bps;
@@ -928,11 +1132,15 @@ static int get_space()
     case SND_PCM_STATE_XRUN:
       xrun("space");
       str_status = "xrun";
+      first = 1;
       ret = 0;
       break;
     default:
       str_status = "undefined";
-      ret = 0;
+      ret = snd_pcm_status_get_avail(status) * ao_data.bps;
+      if (ret <= 0) {
+	xrun("space");
+      }
     }
 
     if (verbose && str_status != "running")
