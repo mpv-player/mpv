@@ -483,8 +483,6 @@ OSD и субтитры. Рекомендуемый метод - установка TTF шрифта и указание MPlyer'у
 называются <systemitem class="library">gtk-dev</systemitem> и <systemitem class="library">libpng-dev</systemitem>) должны быть установлены.
 Вы можете собрать GUI, указав <option>--enable-gui</option> в <option>./configure</option>.
 Затем, чтобы использовать GUI, Вы должны запускать <command>gmplayer</command>.
-  </para></listitem>
-</itemizedlist>
 </para>
 
 <para>
