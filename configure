@@ -224,6 +224,7 @@ Audio output:
   --disable-esd          disable esd sound support [autodetect]
   --disable-alsa         disable alsa sound support [autodetect]
   --disable-sunaudio     disable Sun sound support [autodetect]
+  --disable-nas          disable NAS sound support [autodetect]
   --disable-win32waveout disable Windows waveout sound support [autodetect]
   --disable-select       disable using select() on audio device [enable]
 
@@ -2360,7 +2361,7 @@ fi
 
 echocheck "X11 headers presence"
 if test -z "$_inc_x11" ; then
-  for I in /usr/include /usr/include/X11R6 /usr/X11R6/include /usr/X11/include /usr/openwin/include ; do
+  for I in /usr/X11/include /usr/X11R6/include /usr/include/X11R6 /usr/include /usr/openwin/include ; do
     if test -d "$I/X11" && test -f "$I/X11/Xlib.h" ; then
       _inc_x11="-I$I"
       echores "yes (using $I)"
