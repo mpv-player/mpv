@@ -294,7 +294,7 @@ m_option_t lavcopts_conf[]={
 	{"cgop", &lavc_param_closed_gop, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG_CLOSED_GOP, NULL},
 #endif
 #if LIBAVCODEC_BUILD >= 4711
-	{"dc", &lavc_param_dc_precision, CONF_TYPE_INT, CONF_RANGE, 8, 10, NULL},
+	{"dc", &lavc_param_dc_precision, CONF_TYPE_INT, CONF_RANGE, 8, 11, NULL},
 #endif
 	{"inter_threshold", &lavc_param_inter_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
 	{"sc_threshold", &lavc_param_sc_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
