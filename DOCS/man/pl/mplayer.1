@@ -1,4 +1,4 @@
-.\" synced with 1.738
+.\" synced with 1.739
 .\" MPlayer (C) 2000-2004 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -6079,9 +6079,11 @@ wykorzystuje te¿ barwê, obecnie nie dzia³a (prawid³owo) z klatkami typu B
 .
 .TP
 .B nssew=<0\-100>
-Je¶li wolisz zachowaæ jakie¶ szumy w zakodowanym video, ni¿ przefiltrowaæ je
-przed kodowaniem, ten parametr kontroluje wagê NSSE, wiêksze warto¶ci zaowocuj±
-wiêkszymi szumami, warto¶æ 0 dla NSSE jest równowa¿na z SSE.
+Ten parametr kontroluje wagê NSSE, gdzie wiêksze warto¶ci zaowocuj±
+wiêkszymi szumami.
+NSSE 0 jest identyczne z SSE.
+Mo¿e ci siê on przydaæ, je¶li wolisz zachowaæ jakie¶ szumy w zakodowanym video,
+ni¿ przefiltrowaæ je przed kodowaniem.
 .
 .TP
 .B predia=<-99\-6>
@@ -6807,6 +6809,7 @@ Ta opcja jest konieczna, je¿eli chcesz kodowaæ z CBR (sta³y bitrate).
 .TP
 .B iframe=<warto¶æ>
 Czêstotliwo¶æ wystêpowania klatek I (domy¶lnie: 60)
+Zazwyczaj zwiêkszaj±c jej warto¶æ podnosisz jako¶æ filmu.
 .
 .TP
 .B frameref=<warto¶æ>
@@ -6841,6 +6844,11 @@ Po pierwsze parametr ten okre¶la maksymaln± ilo¶æ zmian jak± filtr mo¿e
 nanie¶æ na pojedynczy piksel.
 Po drugie opcja ta ma wp³yw na próg filtrowanej ró¿nicy wystêpuj±cej na krawêdzi.
 Warto¶æ dodatnia ogranicza blokuj±ce szumy, ale rozmywa równie¿ detale.
+.br
+Dla kodowañ z zamierzon± wysok± jako¶ci±, zmniejsz trochê warto¶æ tego parametru.
+Jednak, je¿eli materia³ ¼ród³owy zawiera jakie¶ szumy albo sceny z przeskokami,
+które bêdziesz chcia³ usun±æ lub je¶li to animacja, dobrym pomys³em bêdzie
+nieznaczne zwiêkszenie jego warto¶ci.
 .
 .TP
 .B deblockbeta=<-6\-6>
@@ -6851,6 +6859,7 @@ Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
 .B cabac\ \ \ 
 Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding).
 Spowalnia kodowania ale oszczêdza okolo 10-15% bitów.
+Powiniene¶ go w³±czyæ, chyba ¿e zale¿y ci na szybko¶ci.
 .
 .TP
 .B cabacidc=<warto¶æ>
@@ -6917,6 +6926,8 @@ wspó³czynnik kwantyzatora miêdzy klatkami P a B (domy¶lnie: 2.0)
 .B pass=<1|2>
 Uruchamia tryb dwuprzej¶ciowy.
 Pierwsze przej¶cie zachowuje statystyki.
+Zaleca siê kodowanie zawsze w trybie dwuprzej¶ciowym z uwagi na lepsz±
+dystrubucjê bitów i wzrost jako¶ci.
 .
 .TP
 .B qcomp=<0\-1>
@@ -6938,6 +6949,8 @@ Wykorzystuje wszystkie dostêpne makrobloki inter-klatek
 Idea polega na tym, aby odnale¼æ typ i rozmiar, który najlepiej opisuje
 okre¶lony obszar obrazu, np.\& bardzo dore rezultaty dla Anime, które zazwyczaj
 zawieraj± du¿e obszary tego samego koloru (domy¶lnie: i16x16, i2x4, p16x16-8x8).
+Zale¿nie od materia³u ¼ród³owego, parametr ten mo¿e zwiêkszyæ lub
+zmniejszyæ jako¶æ, u¿ywaj go z ostro¿no¶ci±.
 .
 .TP
 .B log=<-1\-3>
@@ -6960,6 +6973,7 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 Dopasowuje jako¶æ udoskonalenia subpel.
 Ten parametr kontroluje kompromis miêdzy jako¶ci± a szybko¶ci± bior±cy
 udzia³ w procesie podejmowania decyzji dotycz±cych  przewidywania ruchu.
+Mo¿e znacznie poprawiæ jako¶æ.
 .RSs
 0: tylko halfpel
 .br
