@@ -14,6 +14,7 @@
 #include "vf.h"
 
 extern vf_info_t vf_info_vo;
+extern vf_info_t vf_info_rectangle;
 extern vf_info_t vf_info_crop;
 extern vf_info_t vf_info_expand;
 extern vf_info_t vf_info_pp;
@@ -39,6 +40,7 @@ char** vo_plugin_args=(char**) NULL;
 
 // list of available filters:
 static vf_info_t* filter_list[]={
+    &vf_info_rectangle,
     &vf_info_crop,
     &vf_info_expand,
     &vf_info_pp,
