@@ -1379,6 +1379,55 @@ void dump_microdvd(subtitle* subs, float fps) {
     mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Subtitles dumped in \'dumpsub.txt\'.\n");
 }
 
+void dump_jacosub(subtitle* subs, float fps) {
+    int i,j;
+    int h,m,s,cs;
+    FILE * fd;
+    subtitle * onesub;
+    unsigned long temp;
+
+    if (!sub_uses_time && sub_fps == 0)
+	sub_fps = fps;
+    fd=fopen("dumpsub.js","w");
+    if(!fd)
+    { 
+	perror("dump_jacosub: fopen");
+	return;
+    }
+    fprintf(fd, "#TIMERES %d\n", (sub_uses_time) ? 100 : (int)sub_fps);    
+    for(i=0;i<sub_num;i++)
+    {
+        onesub=subs+i;    //=&subs[i];
+
+	temp=onesub->start;
+	if (!sub_uses_time)
+	    temp = temp * 100 / sub_fps;
+	temp -= sub_delay * 100;
+	h=temp/360000;temp%=360000;	//h =1*100*60*60
+	m=temp/6000;  temp%=6000;	//m =1*100*60
+	s=temp/100;   temp%=100;	//s =1*100
+	cs=temp;			//cs=1*10
+	fprintf(fd,"%02d:%02d:%02d.%02d ",h,m,s,cs);
+
+	temp=onesub->end;
+	if (!sub_uses_time)
+	    temp = temp * 100 / sub_fps;
+	temp -= sub_delay * 100;
+	h=temp/360000;temp%=360000;
+	m=temp/6000;  temp%=6000;
+	s=temp/100;   temp%=100;
+	cs=temp;
+	fprintf(fd,"%02d:%02d:%02d.%02d {~} ",h,m,s,cs);
+	
+	for(j=0;j<onesub->lines;j++)
+	    fprintf(fd,"%s%s",j ? "\\n" : "", onesub->text[j]);
+
+	fprintf(fd,"\n");
+    }
+    fclose(fd);
+    mp_msg(MSGT_SUBREADER,MSGL_INFO,"SUB: Subtitles dumped in \'dumpsub.js\'.\n");
+}
+
 void sub_free( subtitle * subs )
 {
  int i;

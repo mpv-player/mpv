@@ -119,8 +119,8 @@ fullscreen.
 MPlayer has an onscreen display (OSD) for status information, nice big
 antialiased shaded subtitles and visual feedback for keyboard controls.
 European/\:ISO 8859-1,2 (Hungarian, English, Czech, etc), Cyrillic and Korean
-fonts are supported along with 9 subtitle formats (MicroDVD, SubRip,
-SubViewer, Sami, VPlayer, RT, SSA, AQTitle and our own: MPsub) and DVD
+fonts are supported along with 10 subtitle formats (MicroDVD, SubRip,
+SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub and our own: MPsub) and DVD
 subtitles (SPU streams, VobSub and Closed Captions).
 .PP
 .B mencoder
@@ -717,6 +717,11 @@ Creates a dump.mpsub file in the current directory.
 Convert the given subtitle (specified with the \-sub switch) to the time-based
 SubViewer (SRT) subtitle format.
 Creates a dumpsub.srt file in the current directory.
+.TP
+.B \-dumpjacosub (MPLAYER only)
+Convert the given subtitle (specified with the \-sub switch) to the time-based
+JACOsub subtitle format.
+Creates a dumpsub.js file in the current directory.
 .TP
 .B \-dumpsub (MPLAYER only) (BETA CODE)
 Dumps the subtitle substream from VOB streams.
