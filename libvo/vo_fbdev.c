@@ -20,19 +20,15 @@
 #include <sys/mman.h>
 #include <sys/ioctl.h>
 #include <linux/fb.h>
-#include <linux/vt.h>
 
 #include "config.h"
 #include "video_out.h"
 #include "video_out_internal.h"
-
+#include "fastmemcpy.h"
 #include "osd.h"
 #include "sub.h"
-
 #include "yuv2rgb.h"
 extern void rgb15to16_mmx(char *s0, char *d0, int count);
-
-#include "fastmemcpy.h"
 
 LIBVO_EXTERN(fbdev)
 
@@ -345,10 +341,9 @@ static fb_mode_t *find_mode_by_name(char *name)
 {
 	int i;
 
-	for (i = 0; i < nr_modes; i++) {
+	for (i = 0; i < nr_modes; i++)
 		if (!strcmp(name, fb_modes[i].name))
 			return fb_modes + i;
-	}
 	return NULL;
 }
 
@@ -376,10 +371,9 @@ typedef struct {
 
 static int in_range(range_t *r, float f)
 {
-	for (/* NOTHING */; (r->min != -1 && r->max != -1); r++) {
+	for (/* NOTHING */; (r->min != -1 && r->max != -1); r++)
 		if (f >= r->min && f <= r->max)
 			return 1;
-	}
 	return 0;
 }
 
@@ -553,9 +547,7 @@ out_err:
 *	    vo_fbdev	      *
 ******************************/
 
-/*
- * command line/config file options
- */
+/* command line/config file options */
 char *fb_dev_name = NULL;
 char *fb_mode_cfgfile = "/etc/fb.modes";
 char *fb_mode_name = NULL;
@@ -563,16 +555,19 @@ char *monitor_hfreq_str = NULL;
 char *monitor_vfreq_str = NULL;
 char *monitor_dotclock_str = NULL;
 
+/* fb.modes related variables */
 range_t *monitor_hfreq = NULL;
 range_t *monitor_vfreq = NULL;
 range_t *monitor_dotclock = NULL;
+static fb_mode_t *fb_mode = NULL;
 
+/* vo_fbdev related variables */
 static int fb_preinit_done = 0;
 static int fb_works = 0;
 static int fb_dev_fd;
 static size_t fb_size;
 static uint8_t *frame_buffer;
-static uint8_t *L123123875;	/* thx to .so */
+static uint8_t *L123123875;	/* thx .so :) */
 static struct fb_fix_screeninfo fb_finfo;
 static struct fb_var_screeninfo fb_orig_vinfo;
 static struct fb_var_screeninfo fb_vinfo;
@@ -583,7 +578,9 @@ static int fb_real_bpp;		// 32: 24  24: 24  16: 16  15: 15
 static int fb_bpp;		// 32: 32  24: 24  16: 16  15: 15
 static int fb_bpp_we_want;	// 32: 32  24: 24  16: 16  15: 15
 static int fb_screen_width;
-static fb_mode_t *fb_mode = NULL;
+static void (*draw_alpha_p)(int w, int h, unsigned char *src,
+		unsigned char *srca, int stride, unsigned char *dst,
+		int dstride);
 
 static uint8_t *next_frame;
 static int in_width;
@@ -774,6 +771,7 @@ static void lots_of_printf(void)
 		}
 	}
 }
+
 static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		uint32_t d_height, uint32_t fullscreen, char *title,
 		uint32_t format)
@@ -802,10 +800,12 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 	if (VM)
 		if (parse_fbmode_cfg(fb_mode_cfgfile) < 0)
 			return 1;
+#if 0
 	if ((!d_width + !d_height) == 1) {
 		printf(FBDEV "use both -x and -y, or none of them\n");
 		return 1;
 	}
+#endif
 	if (d_width) {
 		out_width = d_width;
 		out_height = d_height;
@@ -935,6 +935,23 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 		printf(FBDEV "pixel per line: %d\n", fb_screen_width / fb_pixel_size);
 	}
 
+	switch (fb_bpp) {
+	case 32:
+		draw_alpha_p = vo_draw_alpha_rgb32;
+		break;
+	case 24:
+		draw_alpha_p = vo_draw_alpha_rgb24;
+		break;
+	case 16:
+		draw_alpha_p = vo_draw_alpha_rgb16;
+		break;
+	case 15:
+		draw_alpha_p = vo_draw_alpha_rgb15;
+		break;
+	}
+	if (verbose > 1)
+		printf(FBDEV "draw_alpha_p:%dbpp = %p\n", fb_bpp, draw_alpha_p);
+
 	if (!(next_frame = (uint8_t *) malloc(in_width * in_height * fb_pixel_size))) {
 		printf(FBDEV "Can't malloc next_frame: %s\n", strerror(errno));
 		return 1;
@@ -948,7 +965,7 @@ static uint32_t init(uint32_t width, uint32_t height, uint32_t d_width,
 
 static uint32_t query_format(uint32_t format)
 {
-	int ret = 0x4; /* osd/sub supported on all bpp */
+	int ret = 0x4; /* osd/sub is supported on every bpp */
 
 	if (!fb_preinit_done)
 		if (fb_preinit())
@@ -967,7 +984,7 @@ static uint32_t query_format(uint32_t format)
 			return ret|0x1;
 	}
 	if (format == IMGFMT_YV12)
-		return ret|0x2;
+		return ret|0x1;
 	return 0;
 }
 
@@ -979,23 +996,10 @@ static const vo_info_t *get_info(void)
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 		unsigned char *srca, int stride)
 {
-	uint8_t *dst = next_frame + (in_width * y0 + x0) * fb_pixel_size;
+	unsigned char *dst = next_frame + (in_width * y0 + x0) * fb_pixel_size;
 	int dstride = in_width * fb_pixel_size;
 
-	switch (fb_bpp) {
-	case 24:
-		vo_draw_alpha_rgb24(w, h, src, srca, stride, dst, dstride);
-		break;
-	case 32:
-		vo_draw_alpha_rgb32(w, h, src, srca, stride, dst, dstride);
-		break;
-	case 15:
-		vo_draw_alpha_rgb15(w, h, src, srca, stride, dst, dstride);
-		break;
-	case 16:
-		vo_draw_alpha_rgb16(w, h, src, srca, stride, dst, dstride);
-		break;
-	}
+	(*draw_alpha_p)(w, h, src, srca, stride, dst, dstride);
 }
 
 static uint32_t draw_frame(uint8_t *src[])
