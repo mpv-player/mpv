@@ -118,13 +118,16 @@ void AVI_Decode_Video1_8(
   unsigned char *palette_map,
   int bytes_per_pixel);
 
-void Decode_Fli(
+void *init_fli_decoder(int width, int height);
+
+void decode_fli_frame(
   unsigned char *encoded,
   int encoded_size,
   unsigned char *decoded,
   int width,
   int height,
-  int bytes_per_pixel);
+  int bytes_per_pixel,
+  void *context);
 
 void qt_decode_rle(
   unsigned char *encoded,
@@ -712,8 +715,9 @@ switch(sh_video->codec->driver){
      }
    }
    break;
- case VFM_MSVIDC:
  case VFM_FLI:
+   sh_video->context = init_fli_decoder(sh_video->disp_w, sh_video->disp_h);
+ case VFM_MSVIDC:
  case VFM_QTRLE:
  case VFM_DUCKTM1:
 #ifdef HAVE_PNG
@@ -1117,10 +1121,11 @@ if(verbose>1){
     blit_frame = 3;
     break;
   case VFM_FLI:
-    Decode_Fli(
+    decode_fli_frame(
         start, in_size, sh_video->our_out_buffer,
         sh_video->disp_w, sh_video->disp_h,
-        ((out_fmt&255)+7)/8);
+        ((out_fmt&255)+7)/8,
+        sh_video->context);
     blit_frame = 3;
     break;
   case VFM_NUV:

@@ -4,11 +4,19 @@
     (C) 2001 Mike Melanson
     
     32bpp support (c) alex
+
+    Additional code and bug fixes by Roberto Togni
+
+    For information on the FLI format, as well as various traps to
+    avoid while programming one, visit:
+      http://www.pcisys.net/~melanson/codecs/
 */
 
+#include <stdio.h>
+#include <stdlib.h>
 #include "config.h"
 #include "bswap.h"
-#include <stdio.h>
+#include "mp_msg.h"
 
 #define LE_16(x) (le2me_16(*(unsigned short *)(x)))
 #define LE_32(x) (le2me_32(*(unsigned int *)(x)))
@@ -24,15 +32,24 @@
 
 // 256 RGB entries; 25% of these bytes will be unused, but it's faster
 // to index 4-byte entries
-static unsigned char palette[256 * 4];
+#define PALETTE_SIZE 1024
+static unsigned char palette[PALETTE_SIZE];
 
-void Decode_Fli(
+void *init_fli_decoder(int width, int height)
+{
+  memset(palette, 0, PALETTE_SIZE);
+
+  return malloc(width * height * sizeof (unsigned int));
+}
+
+void decode_fli_frame(
   unsigned char *encoded,
   int encoded_size,
   unsigned char *decoded,
   int width,
   int height,
-  int bytes_per_pixel)
+  int bytes_per_pixel,
+  void *context)
 {
   int stream_ptr = 0;
   int pixel_ptr;
@@ -56,9 +73,14 @@ void Decode_Fli(
   int starting_line;
   signed short line_packets;
   int y_ptr;
-  int line_inc;
+  int line_inc = width * bytes_per_pixel;
   signed char byte_run;
-
+  int pixel_skip;
+  int update_whole_frame = 0; // Palette change flag
+  unsigned int *fli_ghost_image = (unsigned int *)context;
+  int ghost_pixel_ptr;
+  int ghost_y_ptr;
+	
   frame_size = LE_32(&encoded[stream_ptr]);
   stream_ptr += 6;  // skip the magic number
   num_chunks = LE_16(&encoded[stream_ptr]);
@@ -89,6 +111,9 @@ void Decode_Fli(
       {
         // first byte is how many colors to skip
         palette_ptr1 += (encoded[stream_ptr++] * 4);
+        // wrap around, for good measure
+        if (palette_ptr1 >= PALETTE_SIZE)
+          palette_ptr1 = 0;
         // next byte indicates how many entries to change
         color_changes = encoded[stream_ptr++];
         // if there are 0 color changes, there are actually 256
@@ -107,11 +132,12 @@ void Decode_Fli(
       // so account for a pad byte
       if (stream_ptr & 0x01)
         stream_ptr++;
+      /* Palette has changed, must update frame */
+      update_whole_frame = 1;
       break;
 
     case FLI_DELTA:
-      line_inc = width * bytes_per_pixel;
-      y_ptr = 0;
+      y_ptr = ghost_y_ptr = 0;
       compressed_lines = LE_16(&encoded[stream_ptr]);
       stream_ptr += 2;
       while (compressed_lines > 0)
@@ -122,14 +148,18 @@ void Decode_Fli(
         {
           line_packets = -line_packets;
           y_ptr += (line_packets * line_inc);
+          ghost_y_ptr += (line_packets * width);
         }
         else
         {
           pixel_ptr = y_ptr;
+          ghost_pixel_ptr = ghost_y_ptr;
           for (i = 0; i < line_packets; i++)
           {
             // account for the skip bytes
-            pixel_ptr += encoded[stream_ptr++] * bytes_per_pixel;
+            pixel_skip = encoded[stream_ptr++];
+            pixel_ptr += pixel_skip * bytes_per_pixel;
+            ghost_pixel_ptr += pixel_skip;
             byte_run = encoded[stream_ptr++];
             if (byte_run < 0)
             {
@@ -138,12 +168,14 @@ void Decode_Fli(
               palette_ptr2 = encoded[stream_ptr++] * 4;
               for (j = 0; j < byte_run; j++)
               {
+                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
 		if (bytes_per_pixel == 4) /* 32bpp */
 		    pixel_ptr++;
 
+                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr2;
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr2 + 2];
@@ -156,6 +188,7 @@ void Decode_Fli(
               for (j = 0; j < byte_run * 2; j++)
               {
                 palette_ptr1 = encoded[stream_ptr++] * 4;
+                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -165,6 +198,7 @@ void Decode_Fli(
             }
           }
           y_ptr += line_inc;
+          ghost_y_ptr += width;
           compressed_lines--;
         }
       }
@@ -172,29 +206,33 @@ void Decode_Fli(
 
     case FLI_LC:
       // line compressed
-      line_inc = width * bytes_per_pixel;
       starting_line = LE_16(&encoded[stream_ptr]);
       stream_ptr += 2;
       y_ptr = starting_line * line_inc;
+      ghost_y_ptr = starting_line * width;
 
       compressed_lines = LE_16(&encoded[stream_ptr]);
       stream_ptr += 2;
       while (compressed_lines > 0)
       {
         pixel_ptr = y_ptr;
+        ghost_pixel_ptr = ghost_y_ptr;
         line_packets = encoded[stream_ptr++];
         if (line_packets > 0)
         {
           for (i = 0; i < line_packets; i++)
           {
             // account for the skip bytes
-            pixel_ptr += encoded[stream_ptr++] * bytes_per_pixel;
+            pixel_skip = encoded[stream_ptr++];
+            pixel_ptr += pixel_skip * bytes_per_pixel;
+            ghost_pixel_ptr += pixel_skip;
             byte_run = encoded[stream_ptr++];
             if (byte_run > 0)
             {
               for (j = 0; j < byte_run; j++)
               {
                 palette_ptr1 = encoded[stream_ptr++] * 4;
+                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -208,6 +246,7 @@ void Decode_Fli(
               palette_ptr1 = encoded[stream_ptr++] * 4;
               for (j = 0; j < byte_run; j++)
               {
+                fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
                 decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -219,29 +258,26 @@ void Decode_Fli(
         }
 
         y_ptr += line_inc;
+        ghost_y_ptr += width;
         compressed_lines--;
       }
       break;
 
     case FLI_BLACK:
-      // set the whole frame to color 0 (which is usually black)
-      for (pixel_ptr = 0; pixel_ptr < (width * height * bytes_per_pixel); pixel_ptr++)
-      {
-        decoded[pixel_ptr++] = palette[0];
-        decoded[pixel_ptr++] = palette[1];
-        decoded[pixel_ptr++] = palette[2];
-	if (bytes_per_pixel == 4) /* 32bpp */
-	    pixel_ptr++;
-      }
+      // set the whole frame to color 0 (which is usually black) by
+      // clearing the ghost image and trigger a full frame update
+      memset(fli_ghost_image, 0, width * height * sizeof(unsigned int));
+      update_whole_frame = 1;
       break;
 
     case FLI_BRUN:
       // byte run compression
-      line_inc = width * bytes_per_pixel;
       y_ptr = 0;
+      ghost_y_ptr = 0;
       for (lines = 0; lines < height; lines++)
       {
         pixel_ptr = y_ptr;
+        ghost_pixel_ptr = ghost_y_ptr;
         line_packets = encoded[stream_ptr++];
         for (i = 0; i < line_packets; i++)
         {
@@ -251,6 +287,7 @@ void Decode_Fli(
             palette_ptr1 = encoded[stream_ptr++] * 4;
             for (j = 0; j < byte_run; j++)
             {
+              fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
               decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -264,6 +301,7 @@ void Decode_Fli(
             for (j = 0; j < byte_run; j++)
             {
               palette_ptr1 = encoded[stream_ptr++] * 4;
+              fli_ghost_image[ghost_pixel_ptr++] = palette_ptr1;
               decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
               decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
@@ -274,20 +312,16 @@ void Decode_Fli(
         }
 
         y_ptr += line_inc;
+        ghost_y_ptr += width;
       }
       break;
 
     case FLI_COPY:
-      // copy the chunk (uncompressed frame)
-      for (pixel_ptr = 0; pixel_ptr < chunk_size - 6; pixel_ptr++)
-      {
-        palette_ptr1 = encoded[stream_ptr++] * 4;
-        decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
-        decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
-        decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
-        if (bytes_per_pixel == 4) /* 32bpp */
-          pixel_ptr++;
-      }
+      // copy the chunk (uncompressed frame) to the ghost image and
+      // schedule the whole frame to be updated
+      memcpy(fli_ghost_image, &encoded[stream_ptr], chunk_size - 6);
+      stream_ptr += chunk_size - 6;
+      update_whole_frame = 1;
       break;
 
     case FLI_MINI:
@@ -303,4 +337,26 @@ void Decode_Fli(
     frame_size -= chunk_size;
     num_chunks--;
   }
+
+  if (update_whole_frame)
+  {
+    pixel_ptr = 0;
+    while (pixel_ptr < (width * height * bytes_per_pixel))
+    {
+      palette_ptr1 = fli_ghost_image[pixel_ptr/bytes_per_pixel];
+      decoded[pixel_ptr++] = palette[palette_ptr1 + 0];
+      decoded[pixel_ptr++] = palette[palette_ptr1 + 1];
+      decoded[pixel_ptr++] = palette[palette_ptr1 + 2];
+      if (bytes_per_pixel == 4) /* 32bpp */
+        pixel_ptr++;
+    }
+  }
+
+  // by the end of the chunk, the stream ptr should equal the frame 
+  // size (minus 1, possible); if it doesn't, issue a warning
+  if ((stream_ptr != encoded_size) && (stream_ptr != encoded_size - 1))
+    mp_msg(MSGT_DECVIDEO, MSGL_WARN,
+      "  warning: processed FLI chunk where encoded size = %d\n" \
+      "  and final chunk ptr = and final chunk ptr = %d\n",
+      encoded_size, stream_ptr);
 }
