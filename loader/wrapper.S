@@ -15,12 +15,12 @@ wrapper_target:
 .section .text
 .globl null_call
 	.type null_call, @function
-	.align 16,0x90
+	.balign 16,0x90
 null_call:
 	ret
 .globl wrapper
 	.type wrapper, @function
-	.align 16,0x90
+	.balign 16,0x90
 wrapper:
 	pusha			# store registers (EAX, ECX, EDX, EBX, ESP, EBP, ESI, EDI) 
 	pushf			# store flags
@@ -53,7 +53,7 @@ wrapper:
 	
 	jmp *wrapper_target	# wrapper_target should return at .Lwrapper_return
 
-	.align 16, 0x90
+	.balign 16, 0x90
 .Lwrapper_return:	
 	pushl caller_return	# restore the original return address
 	pusha			# more for reference sake here
