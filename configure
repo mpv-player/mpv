@@ -755,11 +755,6 @@ fi
 fi
 
 
-_aa=no
-if test -s "/usr/local/lib/libaa.a"  || test -s "/usr/lib/libaa.a" ; then
-	_aa=yes
-fi	
-
 # Atmosfear: added libcss autodetect
 _css=no
 if test -s "/usr/local/lib/libcss.so" ; then
@@ -778,6 +773,10 @@ else
 	fi
 fi
 
+
+_aa=no
+$_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -laa > /dev/null 2>&1 && _aa=yes
+
 _divx4linux=no
 $_cc $_extraincdir $_extralibdir $TMPC -o $TMPO -ldivxdecore > /dev/null 2>&1 && _divx4linux=yes
 
@@ -785,7 +784,7 @@ _termcap=no
 $_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -ltermcap > /dev/null 2>&1 && _termcap=yes
 
 _png=no
-$_cc  $_extraincdir $_extralibdir $_extraincdir $_extralibdir $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
+$_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lpng -lz -lm > /dev/null 2>&1 && _png=yes
 
 _ggi=no
 $_cc  $_extraincdir $_extralibdir $TMPC -o $TMPO -lggi > /dev/null 2>&1 && _ggi=yes
