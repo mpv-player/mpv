@@ -460,7 +460,6 @@ wolna. U¿ywaj SDL.
 
 <para>¯eby osi±gn±æ najlepsze wyniki <application>MPlayer</application> powinien
   korzystaæ z przestrzeni kolorów, któr± Twoja karta wspomaga sprzêtowo. Niestety
-  <!-- Motywacja: Obs³ugiwaæ mozna prawie wszysko. Chodiz o akceleracjê -->
   wiele sterowników graficznych Windowsa ¼le informuje o obs³ugiwanych przez kartê
   przestrzeniach. Aby sprawdziæ które s± ¼le obs³ugiwane, wykonaj poni¿sz± komendê:
 
