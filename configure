@@ -3720,14 +3720,18 @@ if test "$_aa" = auto ; then
 int main(void) { (void) aa_init(0, 0, 0); return 0; }
 EOF
   _aa=no
-  cc_check  -laa && _aa=yes
+  if cc_check -laa ; then
+    _aa=yes
+    _ld_aa="-laa"
+  elif cc_check $_ld_x11 -laa ; then
+    _aa=yes
+    _ld_aa="$_ld_x11 -laa"
+  fi
 fi
 if test "$_aa" = yes ; then
   _def_aa='#define HAVE_AA 1'
   if cygwin ; then
     _ld_aa=`aalib-config --libs | cut -d " " -f 2,5,6`
-  else
-    _ld_aa='-laa'
   fi
   _vosrc="$_vosrc vo_aa.c"
   _vomodules="aa $_vomodules"
