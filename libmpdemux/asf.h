@@ -125,6 +125,14 @@ typedef enum {
 	ASF_PlainText_e
 } ASF_StreamType_e;
 
+typedef struct {
+	ASF_StreamType_e streaming_type;
+	int request;
+	int packet_size;
+	int *audio_streams,n_audio,*video_streams,n_video;
+	int audio_id, video_id;
+} asf_http_streaming_ctrl_t;
+
 
 /*
  * Some macros to swap little endian structures read from an ASF file
