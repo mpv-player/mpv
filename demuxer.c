@@ -21,6 +21,11 @@
 #include "codec-cfg.h"
 #include "stheader.h"
 
+void free_demuxer_stream(demux_stream_t *ds){
+    ds_free_packs(ds);
+    free(ds);
+}
+
 demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id){
   demux_stream_t* ds=malloc(sizeof(demux_stream_t));
   ds->buffer_pos=ds->buffer_size=0;
@@ -74,6 +79,13 @@ sh_audio_t* new_sh_audio(demuxer_t *demuxer,int id){
     return demuxer->a_streams[id];
 }
 
+void free_sh_audio(sh_audio_t* sh){
+    if(sh->a_in_buffer) free(sh->a_in_buffer);
+    if(sh->a_buffer) free(sh->a_buffer);
+    if(sh->wf) free(sh->wf);
+    free(sh);
+}
+
 sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
     if(demuxer->v_streams[id]){
         mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_VideoStreamRedefined,id);
@@ -83,6 +95,27 @@ sh_video_t* new_sh_video(demuxer_t *demuxer,int id){
         memset(demuxer->v_streams[id],0,sizeof(sh_video_t));
     }
     return demuxer->v_streams[id];
+}
+
+void free_sh_video(sh_video_t* sh){
+//    if(sh->our_out_buffer) free(sh->our_out_buffer);
+//    if(sh->bih) free(sh->bih);
+    free(sh);
+}
+
+void free_demuxer(demuxer_t *demuxer){
+    int i;
+    // free streams:
+    for(i=0;i<256;i++){
+	if(demuxer->a_streams[i]) free_sh_audio(demuxer->a_streams[i]);
+	if(demuxer->v_streams[i]) free_sh_video(demuxer->v_streams[i]);
+    }
+    //if(sh_audio) free_sh_audio(sh_audio);
+    //if(sh_video) free_sh_video(sh_video);
+    // free demuxers:
+    free_demuxer_stream(demuxer->audio);
+    free_demuxer_stream(demuxer->video);
+    free(demuxer);
 }
 
 
@@ -480,8 +513,6 @@ switch(file_format){
 
 return demuxer;
 }
-
-
 
 int demux_seek_avi(demuxer_t *demuxer,float rel_seek_secs,int flags);
 int demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags);

@@ -94,6 +94,8 @@ inline static void free_demux_packet(demux_packet_t* dp){
 
 demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id);
 demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id);
+void free_demuxer_stream(demux_stream_t *ds);
+void free_demuxer(demuxer_t *demuxer);
 
 void ds_add_packet(demux_stream_t *ds,demux_packet_t* dp);
 void ds_read_packet(demux_stream_t *ds,stream_t *stream,int len,float pts,off_t pos,int flags);
@@ -148,5 +150,6 @@ static inline int avi_stream_id(unsigned int id){
 
 demuxer_t* demux_open(stream_t *stream,int file_format,int aid,int vid,int sid);
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+
 
 
