@@ -996,15 +996,32 @@ int status,rez;
    XvMCSyncSurface(mDisplay, srf);
 }
 
-static void flip_page(void){
+static void put_xvmc_image(xvmc_render_state_t * p_render_surface){
 int rez;
 int clipX,clipY,clipW,clipH;
-int i,cfs;
+
+   if(p_render_surface == NULL)
+      return;
 
    clipX = drwX-(vo_panscan_x>>1);
    clipY = drwY-(vo_panscan_y>>1); 
    clipW = vo_dwidth+vo_panscan_x;
    clipH = vo_dheight+vo_panscan_y;
+
+   rez = XvMCPutSurface(mDisplay, p_render_surface->p_surface, 
+                        vo_window,
+                        0, 0, image_width, image_height,
+                        clipX, clipY, clipW, clipH,
+                        3);//p_render_surface_to_show->display_flags);
+   if(rez != Success){
+      printf("vo_xvmc: PutSurface failer, critical error!\n");
+      assert(0);
+   }
+}
+
+static void flip_page(void){
+int i,cfs;
+
 
    if( verbose > 3 ) 
       printf("vo_xvmc: flip_page  show(rndr=%p)\n\n",p_render_surface_to_show);
@@ -1044,15 +1061,7 @@ int i,cfs;
 
    //show it, displaying is always vsynced, so skip it for benchmark
    if(!benchmark){
-      rez = XvMCPutSurface(mDisplay, p_render_surface_to_show->p_surface, 
-                         vo_window,
-                         0, 0, image_width, image_height,
-                         clipX, clipY, clipW, clipH,
-                         3);//p_render_surface_to_show->display_flags);
-      if(rez != Success){
-         printf("vo_xvmc: PutSurface failer, critical error!\n");
-         assert(0);
-      }
+      put_xvmc_image(p_render_surface_to_show);
    }
 
    p_render_surface_visible = p_render_surface_to_show;
@@ -1089,11 +1098,7 @@ int e=vo_x11_check_events(mDisplay);
    if ( e & VO_EVENT_EXPOSE )
    {
       vo_xv_draw_colorkey(drwX,drwY,vo_dwidth,vo_dheight);
-      if(p_render_surface_visible != NULL)
-         XvMCPutSurface(mDisplay, p_render_surface_visible->p_surface,vo_window,
-                     0, 0, image_width, image_height,
-                     drwX,drwY,vo_dwidth,vo_dheight,
-                     3);//,p_render_surface_visible->display_flags);!!
+      put_xvmc_image(p_render_surface_visible);
    }
 }
 
@@ -1365,8 +1370,11 @@ static uint32_t control(uint32_t request, void *data, ... )
 
             if(old_y != vo_panscan_y)
             {
-               XClearWindow(mDisplay, vo_window);
-               XFlush(mDisplay);
+               vo_x11_clearwindow_part(mDisplay, vo_window,
+                                        vo_dwidth + vo_panscan_x - 1,
+                                        vo_dheight + vo_panscan_y - 1,
+                                        1);
+               put_xvmc_image(p_render_surface_visible);
             }
          }
          return VO_TRUE;
