@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.10 -->
+<!-- synced to 1.11 -->
 <appendix id="bugreports">
 <title>Hogyan jelentsd a hibákat</title>
 <para>
@@ -18,7 +18,7 @@ kell adnod és követned kell az ebben a dokumentumban leírt lépéseket.
 Ha úgy érzed, hogy képes vagy rá, bátran állj neki és javítsd ki a hibát magad.
 Vagy talán már meg is tetted? Kérlek olvasd el <ulink url="../../tech/patches.txt">ezt a rövid dokumentumot</ulink>,
 hogy megtudd, hogyan kerülhet be a kódod az <application>MPlayer</application>be.
-Az <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+Az <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 levelezési listán lévő emberkék segítenek neked, ha kérdésed van.
 </para>
 </sect1>
@@ -76,7 +76,7 @@ tudjuk garantálni, hogy kapsz megoldást vagy egyáltalán választ a problémádra.
 <sect1 id="bugreports_where">
 <title>Hol kell jelezni a hibákat</title>
 <para>
-Iratkozz fel az mplayer-users levelezési listára:
+Iratkozz fel az MPlayer-users levelezési listára:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 (vagy a magyar nyelvűre itt: <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-felhasznalok"/>)
 és küldd el a hibajelentéseidet a
@@ -322,7 +322,7 @@ Majd add ki ezt a parancsot:
 Ha készítettél egy megfelelő hibajelentést a fenti utasítások betartásával és biztos
 vagy benne, hogy az <application>MPlayer</application>ben van a hiba és nem a fordítóban
 vagy hibás fájl miatt, már elolvastad a dokumentációt és nem tudtad javítani a problémát,
-a hang vezérlőid rendben vannak, akkor iratkozz fel az mplayer-advusers listára és
+a hang vezérlőid rendben vannak, akkor iratkozz fel az MPlayer-advusers listára és
 küldd el a hibajelentésedet oda a jobb és gyorsabb válaszért.
 </para>
 
