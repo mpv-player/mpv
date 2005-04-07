@@ -116,12 +116,12 @@ Pour que cela fonctionne, vérifiez ceci :
   <note><para>
   NOTE: ceci charge seulement l'extension de XFree86. Dans une installation correcte,
   celle ci est toujours chargée, et ne signifie pas que le support XVideo spécifique à
-  <emphasis role="bold">votre carte</emphasis> est chargé !
+  <emphasis role="bold">votre carte</emphasis> est chargée !
   </para></note>
   </para></listitem>
 <listitem><para>
   Votre carte a le support Xv sous Linux. Pour le vérifier, essayez <command>xvinfo</command>,
-  inclut dans XFree86. Cela doit afficher un long message, similaire à :
+  inclus dans XFree86. Cela doit afficher un long message, similaire à :
   <screen>
 X-Video Extension version 2.2
 screen #0
@@ -476,7 +476,7 @@ le pilote DGA affichera, entre autres choses, une liste de toutes les résolution
 supportées par votre fichier <filename>XF86Config</filename>. Avec DGA2 vous pouvez
 également le forcer a utiliser un certain nombre de couleurs en utilisant l'option
 <option>-bpp</option>. Les nombres de couleurs autorisées sont 15, 16, 24 et 32. Cela
-dépends de votre matériel, soit ces modes sont nativement supportés, ou si une
+dépend de votre matériel, soit ces modes sont nativement supportés, ou si une
 conversion logicielle doit être appliquée (ce qui peut ralentir la lecture).
 </para>
 </formalpara>
@@ -609,7 +609,7 @@ Vous comprenez maintenant? :)
 </para>
 
 <para>
-Cela aide également avec certains pilotes/cartes bogués si la vidéo est saccadé (pas de
+Cela aide également avec certains pilotes/cartes boguées si la vidéo est saccadée (pas de
 problème de lenteur du système), ou si l'audio est retardé.
 </para>
 

@@ -166,7 +166,7 @@ Vous aurez besoin des fichiers suivants pour construire une skin:
   L'image de fond de la fenêtre principale.
 </para></listitem>
 <listitem><para>
-  Les images correspondant aux objets de la fenêtre principale (y compris une ou
+  Les images correspondants aux objets de la fenêtre principale (y compris une ou
   plusieurs polices et descripteurs nécessaires à l'affichage des textes).
 </para></listitem>
 <listitem><para>
@@ -187,7 +187,7 @@ Vous aurez besoin des fichiers suivants pour construire une skin:
 <title>Le fichier skin</title>
 <para>
 Comme mentionné plus haut, c'est le fichier de configuration de la skin. Il est
-lu ligne par ligne; les lignes de commentaire démarrent par le caractère
+lu ligne par ligne; les lignes de commentaires démarrent par le caractère
 '<literal>;</literal>' en début de ligne (seuls les espaces et tabulations sont
 autorisées avant ce signe).
 </para>

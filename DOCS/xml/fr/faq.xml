@@ -147,7 +147,7 @@ réellement l'utiliser, soyez sûr d'obtenir la dernière version et indiquez l'opt
 seul sur ce point. Ne rapportez <emphasis role="bold">pas</emphasis> de bogues,
 ne demandez <emphasis role="bold">pas</emphasis> d'aide sur les listes de diffusion.
 Nous ne fournirons <emphasis role="bold">pas</emphasis> de support au cas où vous
-rencontrez des problèmes.
+rencontreriez des problèmes.
 </para></answer>
 </qandaentry>
 
@@ -1426,7 +1426,7 @@ Parce que le bitrate avec lequel vous avez encodé l'audio est trop grand pour fa
 Je ne peux pas convertir de fichiers ASF en AVI/DivX car il utilisent 1000 fps?
 </para></question>
 <answer><para>
-Vous devrez fixer le débit à la main en utilsant <option>-ofps</option>, car ASF
+Vous devrez fixer le débit à la main en utilisant <option>-ofps</option>, car ASF
 utilise un débit variable alors que AVI en utilise un fixe.
 </para></answer>
 </qandaentry>
@@ -1436,7 +1436,7 @@ utilise un débit variable alors que AVI en utilise un fixe.
 Comment puis-je insérer des sous-titres dans le fichier de sortie ?
 </para></question>
 <answer><para>
-Passez simplement l'option <option>-sub &lt;nomfichier&gt;</option> (ou <option>-sid</option>,
+Passez simplement l'option <option>-sub &lt;nom fichier&gt;</option> (ou <option>-sid</option>,
 <option>-vobsub</option>, respectivement) à <application>MEncoder</application>.
 </para></answer>
 </qandaentry>

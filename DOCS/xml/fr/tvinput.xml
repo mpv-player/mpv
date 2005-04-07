@@ -195,7 +195,7 @@ très importante.
      -oac mp3lame -lameopts cbr:br=48 \
      -vf crop=720:540:24:18,pp=tn/lb,scale=384:288 -sws 1 -o <replaceable>sortie.avi</replaceable> tv://
 </screen>
-Il est également possible de spécifier des dimensions d'image plus petites
+Il est également possible de spécifier des dimensions d'images plus petites
 dans l'option <option>-tv</option> et d'omettre le zoom logiciel mais cette approche
 utilise le maximum d'informations disponibles et, est un peu plus résistant au bruit.
 Les chipsets bt8x8 peuvent faire une moyenne de pixels uniquement dans la direction

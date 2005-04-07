@@ -16,22 +16,22 @@ les discussions à propos de tous les aspects et problèmes relatifs à l'encodage 
 </para>
 
 <sect1 id="menc-feat-divx4">
-<title>Encodage MPEG-4 (&quot;DivX&quot;) 2 passes</title>
+<title>Encodage MPEG-4 ("DivX") 2 passes</title>
 
 <para>
 le nom vient du fait que cette méthode encode le fichier <emphasis>deux fois</emphasis>.
 Le premier encodage (du mode deux passes) créé quelques fichiers temporaires (<filename>*.log</filename>)
 avec une taille de quelques méga-octets, ne les détruisez pas tout de suite (vous pouvez
-effacer l'AVI). Lors de la seconde passe, la fichier de sortie 2-passes est créé, en
+effacer l'AVI). Lors de la seconde passe, le fichier de sortie 2-passes est créé, en
 utilisant les données bitrate des fichiers temporaires. Le fichier résultant aura une
-image de bien meilleur qualité. Si c'est la première fois que vous entendez parler de
+image de bien meilleure qualité. Si c'est la première fois que vous entendez parler de
 ça, vous devriez consulter les guides disponibles sur le Net.
 </para>
 
 <example>
 <title>copie de la piste audio</title>
 <para>
-Encodage 2-passes d'un DVD en AVI MPEG-4 (&quot;DivX&quot;) pendant la copie de
+Encodage 2-passes d'un DVD en AVI MPEG-4 ("DivX") pendant la copie de
 la piste audio.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>film.avi</replaceable>
@@ -43,7 +43,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <example>
 <title>encodage de la piste audio</title>
 <para>
-Encodage 2-passes d'un DVD en AVI MPEG-4 (&quot;DivX&quot;) pendant la conversion
+Encodage 2-passes d'un DVD en AVI MPEG-4 ("DivX") pendant la conversion
 de la piste audio en MP3.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
@@ -90,7 +90,7 @@ mencoder -of mpeg -ovc lavc -lavcopts vcodec=mpeg1video -oac copy <replaceable>a
 <para>
 Souvent le besoin de redimensionner les images d'un film se fait sentir. Les raisons
 peuvent être multiples: diminuer la taille du fichier, la bande passante du réseau, etc.
-La plupart des gens redimensionnement même en convertissant des DVDs ou SVCDs en AVI
+La plupart des gens redimensionnent même en convertissant des DVDs ou SVCDs en AVI
 DivX. Si vous désirez redimensionner, lisez la
 section <link linkend="aspect">Préserver le ratio d'aspect</link>.
 </para>
@@ -457,7 +457,7 @@ recommandées par les spécifications <ulink url="http://www.kvcd.net/">KVCD</ulin
 </para>
 
 <para>
-La <emphasis role="bold">matrice de quantification &quot;Notch&quot; de KVCD:</emphasis>
+La <emphasis role="bold">matrice de quantification "Notch" de KVCD:</emphasis>
 </para>
 
 <para>
@@ -509,11 +509,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect1>
 
 <sect1 id="menc-feat-dvd-mpeg4">
-<title>Créer un rip MPEG-4 (&quot;DivX&quot;) de haute qualité à partir d'un DVD</title>
+<title>Créer un rip MPEG-4 ("DivX") de haute qualité à partir d'un DVD</title>
 
 <para>
-  Une question fréquemment posée est &quot;Comment faire le meilleur rip DVD possible ?
-  Peut importe la taille du fichier, je veux simplement la meilleur qualité.&quot;
+  Une question fréquemment posée est "Comment faire le meilleur rip DVD possible ?
+  Peut importe la taille du fichier, je veux simplement la meilleure qualité."
 </para>
 
 <para>
@@ -667,7 +667,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  De plus, faites attention aux pixels &quot;à moitié noirs&quot; sur les
+  De plus, faites attention aux pixels "à moitié noirs" sur les
   bords.
   Assurez-vous de les découper également, ou sinon vous gaspillerez des bits
   qui seraient mieux dépensés ailleurs.
@@ -955,7 +955,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   de télévision, toute vidéo destinée à être joué sur un poste de télévision
   NTSC doit être à 59.94 champs par seconde. Les téléfilms et les émissions
   sont souvent filmés directement à 59.94 champs par seconde, alors que la
-  majorité les films de cinéma sont filmé à 24 ou 23.976 trames par seconde.
+  majorité les films de cinéma sont filmés à 24 ou 23.976 trames par seconde.
   Quand le DVD d'un film est masterisé, la vidéo est convertie pour la
   télévision en utilisant un procédé appelé téléciné.
 </para>
@@ -972,7 +972,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   En général, le contenu à 23.976 trames par seconde reste tel quel quand il
-  est encodé pour un DVD, et le lecteur DVD doit &quot;téléciner&quot; à la
+  est encodé pour un DVD, et le lecteur DVD doit "téléciner" à la
   volée.
   Parfois, cependant, la vidéo est téléciné <emphasis>avant</emphasis> d'être
   stockée sur le DVD; même si elle était à l'origine à 23.976 trames par
@@ -998,9 +998,9 @@ Notes:
   Cette section ne s'applique qu'aux DVDs NTSC, et non PAL.
   </para></listitem>
 <listitem><para>
-  Les exemples de d'utilisation de <application>MEncoder</application>
+  Les exemples de l'utilisation de <application>MEncoder</application>
   présents dans ce document ne sont <emphasis role="bold">pas</emphasis>
-  destinées à un usage tel-quel.
+  destinés à un usage tel-quel.
   C'est juste le minimum requis pour encoder des vidéos de cette catégorie.
   Comment faire des bons rips DVD ou paramétrer 
   <systemitem class="library">libavcodec</systemitem> pour la meilleure qualité
@@ -1030,7 +1030,7 @@ Notes:
   <screen> demux_mpg: 24fps progressive NTSC content detected, switching framerate.</screen>
 
   À partir de maintenant, demux_mpg ne devrait jamais dire qu'il trouve du
-  &quot;30fps NTSC content.&quot;
+  "30fps NTSC content."
 </para>
 
 <para>
@@ -1053,7 +1053,7 @@ Notes:
 </para>
 
 <para>
-  Parfois la vidéo progressive est appelé &quot;soft-telecine&quot;
+  Parfois la vidéo progressive est appelé "soft-telecine"
   parce qu'elle est destinée à être téléciné par le lecteur DVD.
 </para>
 </sect3>
@@ -1072,7 +1072,7 @@ Notes:
 
 <para>
   En regardant de la vidéo téléciné, vous verrez des artefacts d'entrelacement
-  qui semblent &quot;clignoter&quot;: ils apparaissent et disparaissent
+  qui semblent "clignoter": ils apparaissent et disparaissent
   rapidement.
   Vous pouvez les regarder plus attentivement avec par exemple
   <orderedlist>
@@ -1094,7 +1094,7 @@ Notes:
 </para>
 
 <para>
-  Parfois la vidéo téléciné est appelée &quot;hard-telecine&quot;.
+  Parfois la vidéo téléciné est appelée "hard-telecine".
 </para>
 </sect3>
 
@@ -1122,20 +1122,20 @@ Notes:
 <sect3 id="menc-feat-telecine-ident-mixedpt">
 <title>Progressive et télécinée mélangées</title>
 <para>
-  Toute la vidéo &quot;progressive et téléciné mélangées&quot; était à
+  Toute la vidéo "progressive et téléciné mélangées" était à
   l'origine en 23.976 trames par seconde, mais certaines parties ont fini en
   téléciné.
 </para>
 
 <para>
   Quand <application>MPlayer</application> joue cette catégorie, il oscillera
-  (de manière répetée) entre &quot;30fps NTSC&quot; et &quot;24fps progressive
-  NTSC&quot;. Regardez le bas de la sortie texte de
+  (de manière répetée) entre "30fps NTSC" et "24fps progressive
+  NTSC". Regardez le bas de la sortie texte de
   <application>MPlayer</application> pour voir ces messages.
 </para>
 
 <para>
-  Vous devriez regarder les sections &quot;30fps NTSC&quot; pour vérifier que
+  Vous devriez regarder les sections "30fps NTSC" pour vérifier que
   c'est effectivement du téléciné, et pas juste de l'entrelaçé.
 </para>
 </sect3>
@@ -1143,13 +1143,13 @@ Notes:
 <sect3 id="menc-feat-telecine-ident-mixedpi">
 <title>Progressive et entrelacée mélangées</title>
 <para>
-  Dans le contenu &quot;progressive et entrelaçée&quot;, la vidéo progressive
-  et entrelaçée ont été collé l'un après l'autre.
+  Dans ce type de vidéo, le contenu progressif et entrelaçé,
+  ont été collés l'un après l'autre.
 </para>
 
 <para>
-  Cette catégorie ressemble tout à fait à &quot;progressive et télécinée
-  mélangées&quot;, jusqu'à ce que vous examiniez les sections 30fps et voyez
+  Cette catégorie ressemble tout à fait à "progressive et télécinée
+  mélangées", jusqu'à ce que vous examiniez les sections 30fps et voyez
   qu'elles n'ont pas de motif de téléciné.
 </para>
 </sect3>
@@ -1159,7 +1159,7 @@ Notes:
 <sect2 id="menc-feat-telecine-encode">
 <title>Comment encoder chaque catégorie</title>
 <para>
-  Comme mentionné au début, les exemples d'utilisations de
+  Comme mentionné au début, les exemples d'utilisation de
   <application>MEncoder</application> ne sont
   <emphasis role="bold">pas</emphasis> destinés a être utilisé directement;
   ils démontrent juste les paramètres minimum pour encoder chaque catégorie.
@@ -1206,7 +1206,7 @@ Notes:
   Dans la plupart des cas pratiques, il n'est pas possible d'extraire
   une vidéo progressive complète à partir de contenu entrelaçé. La seule
   manière d'y parvenir sans perdre la moitié de la résolution verticale est de
-  doubler le débit et d'essayer de &quot;deviner&quot; ce qui est destiné a
+  doubler le débit et d'essayer de "deviner" ce qui est destiné a
   constituer les lignes correspondantes pour chaque champ (cela a des
   inconvénients - voir la méthode 3).
 </para>
@@ -1220,7 +1220,7 @@ Notes:
   <option> ildct</option> et <option>ilme</option>. De plus,
   utiliser <option>mbd=2</option> est fortement recommandé
   <link linkend="menc-feat-telecine-footnotes">[2] </link> car il encodera les
-  macroblocs en tant que non-entrelaçé là où il n'y a pas de mouvement.
+  macroblocs en tant que non-entrelaçés là où il n'y a pas de mouvement.
   Notez que <option>-ofps</option> n'est PAS requis ici.
 
   <screen>mencoder dvd://1 -nosound -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
@@ -1229,7 +1229,7 @@ Notes:
   Utilisez un filtre de désentrelacement avant l'encodage. Il y a beaucoup de
   de choix parmi les filtres disponibles, chacun ayant ses avantages et ses
   inconvénients. Consultez <option>mplayer -pphelp</option> pour voir ce qui
-  est disponible (recherche sur &quot;deint&quot;), et cherchez sur les
+  est disponible (recherche sur "deint"), et cherchez sur les
   <ulink url="http://www.mplayerhq.hu/homepage/design7/info.html#mailing_lists">
   listes de diffusion de MPlayer</ulink> pour trouver des discussions à propos
   des divers filtres. De nouveau, le débit ne change pas, donc il n'y a pas de 
@@ -1254,7 +1254,7 @@ Notes:
   désentrelacement.
   Générer les lignes manquantes créé d'autres problèmes, également, simplement
   parce que la quantité de données double. Donc, un débit d'encodage supérieur
-  est requis pour maintenir la qualité, et plus de puissance CPU est utilisé
+  est requis pour maintenir la qualité, et plus de puissance CPU est utilisée
   pour l'encodage et le décodage. tflields a de nombreuses options différentes
   pour la création des lignes manquantes de chaque trame. Si vous utilisez
   cette méthode, alors référez vous à la page de manuel, et choisissez
@@ -1284,7 +1284,7 @@ Notes:
 <title>Progressive et téléciné mélangées</title>
 <para>
   De façon à transformer la vidéo progressive et télécinée mélangée en
-  vidéo entièrement progressive, l'inverse-telecine doit être appliqué sur
+  vidéo entièrement progressive, l'inverse-telecine doit être appliquée sur
   les parties télécinées. Il y a deux filtres qui accomplissent nativement
   cette tâche, mais la plupart du temps la meilleure solution est d'utiliser
   deux filtres en conjonction (lire la suite pour plus de détails).
@@ -1373,8 +1373,8 @@ Notes:
   la vidéo sur un périphérique entrelaçé (avec une carte TV, par exemple).
   Si vous avez des trames entrelaçées dans une vidéo de 23.976 trames par
   secondes, elles seront télécinées avec les trames progressives. La moitié
-  des &quot;trames&quot; sera affichée durant trois champs (3/59.94 secondes),
-  provoquant un effet tremblotant &quot;saut dans le temps&quot; qui rend
+  des "trames" sera affichée durant trois champs (3/59.94 secondes),
+  provoquant un effet tremblotant "saut dans le temps" qui rend
   particulièrement mauvais. Si vous essayez cela, vous
   <emphasis role="bold">devez</emphasis> utiliser un filtre de désentrelacement
   comme <option>lb</option> ou <option>l5</option>.
@@ -1417,8 +1417,8 @@ Notes:
   <title>À propos du découpage:</title>
   <para>
   Les données vidéo des DVDs sont stockées dans un format appelé YUV 4:2:0. 
-  Dans la vidéo YUV, luma (&quot;luminosité&quot;) et chroma
-  (&quot;couleur&quot;) sont stockés séparemment. Dans une image YUV 4:2:0 il
+  Dans la vidéo YUV, luma ("luminosité") et chroma
+  ("couleur") sont stockés séparemment. Dans une image YUV 4:2:0 il
   n'y a qu'un pixel chroma pour quatre pixels luma, car l'oeil humain est plus
   sensible à la couleur qu'à la luminosité. Dans une image progressive, chaque
   carré de quatre pixels luma (deux de chaque coté) a un pixel chroma en

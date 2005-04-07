@@ -179,10 +179,14 @@ Si rien n'est spécifié il essaie les méthodes suivantes (par défaut: clé, demand
 
 <orderedlist>
 <listitem><para>
-<emphasis role="bold">clé bus</emphasis>: Cette clé est négociée durant la certification (un long mix
-d'ioctls et d'échanges de clé variés, trucs de crypto) et est utilisé pour crypter le titre et les clés
-disque avant de les envoyer sur un bus non protégé (pour empêcher les écoutes). La clé bus est requise
-pour obtenir et décrypter les clés disque cryptées.
+<emphasis role="bold">clé bus</emphasis>: Cette clé est
+négociée durant l'authentification (une longue suite
+d'ioctls et d'échanges de diverses clefs cryptographiques) et est
+utilisé pour crypter le titre et la clef du
+disque avant de les envoyer sur un bus non protégé (pour
+empêcher les écoutes). La clef bus est nécessaire
+pour obtenir et pré-décrypter la clef disque cryptée.
+
 </para></listitem>
 
 <listitem><para>

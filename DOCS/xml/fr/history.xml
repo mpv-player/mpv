@@ -21,10 +21,10 @@ d'images. J'ai donc décidé d'en écrire/modifier un...
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.1-v0.3</emphasis>: 22-25 Sep 2000
   </para>
-  <para>Le premier essai, r&eacute;alis&eacute; en une demi-heure !
-  J'ai utilis&eacute; libmpeg3 de <ulink url="http://www.heroinewarrior.com"/>
-  dans sa version 0.3, mais il pr&eacute;sentait des probl&egrave;mes de
-  vitesse/qualit&eacute; d'images.
+  <para>Le premier essai, réalisé en une demi-heure !
+  J'ai utilisé libmpeg3 de <ulink url="http://www.heroinewarrior.com"/>
+  dans sa version 0.3, mais il présentait des problèmes graves;mes de
+  vitesse/qualité d'images.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.5-v0.87</emphasis>: 28 Sep-20 Oct 2000
@@ -33,14 +33,14 @@ d'images. J'ai donc décidé d'en écrire/modifier un...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>mpg12play</application> v0.9-v0.95pre5</emphasis>: 21 Oct-2 Nov 2000
-  </para><para>Le codec MPEG était libmpeg2 (mpeg2dec) par Aaron Holtzman &amp; Michel Lespinasse.
-    Il est excellent, un code C rapide et bien optimis&eacute; avec une qualit&eacute; d'image parfaite
+  </para><para>Le codec MPEG était libmpeg2 (mpeg2dec) par Aaron Holtzman et Michel Lespinasse.
+    Il est excellent, un code C rapide et bien optimisé; avec une qualité d'image parfaite
     et 100% compatible avec les standards MPEG.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.3-v0.9</emphasis>: 18 Nov-4 Dec 2000
-  </para><para>Un condens&eacute; de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip'
-    bas&eacute; sur le chargeur de DLL Win32 de avifile.
+  </para><para>Un condensé de deux programmes: mpg12playv0.95pre6 et mon nouveau lecteur de AVI 'avip'
+    basé sur le chargeur de DLL Win32 de avifile.
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.10</emphasis>: 1er Jan 2001
@@ -48,28 +48,26 @@ d'images. J'ai donc décidé d'en écrire/modifier un...
   </para></listitem>
 <listitem><para>
   <emphasis role="bold">série <application>MPlayer</application> v0.11pre</emphasis>:
-  </para><para>De nouveaux d&eacute;veloppeurs ont joint le projet et depuis la version 0.11 le projet
-    MPlayer est un travail d'&eacute;quipe ! Ajout du support des fichiers .ASF, et
-    de l'encodage/d&eacute;codage OpenDivX (c.f. <ulink url="http://www.projectmayo.com"/>).
+  </para><para>De nouveaux développeurs ont joint le projet et depuis la version 0.11 le projet
+    MPlayer est un travail d'équipe ! Ajout du support des fichiers .ASF, et
+    de l'encodage/décodage OpenDivX (c.f. <ulink url="http://www.projectmayo.com"/>).
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> v0.17a &quot;The IdegCounter&quot;</emphasis> 27 Avr 2001
-  </para><para>La finalisation de la version 0.11pre apr&egrave;s 4 mois de d&eacute;veloppement intensif !
-    Essayez la, et soyez conquis ! Des dizaines de nouvelles fonctionnalit&eacute;s...
-    et bien 	s&ucirc;r le code existant a &eacute;t&eacute; am&eacute;lior&eacute;,
-    les bogues fix&eacute;s, etc.
+  </para><para>La finalisation de la version 0.11pre après 4 mois de développement intensif !
+    Essayez la, et soyez conquis ! Des dizaines de nouvelles fonctionnalités ont été apportées, le code existant amélioré et sécurisé, et de nombreux bogues ont été corrigés..
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.18 &quot;The BugCounter&quot;</emphasis> 9 Juillet 2001
-  </para><para>Deux mois apr&egrave;s la 0.17, une nouvelle parution.. Compl&eacute;t&eacute; le support ASF,
-    plus de formats pour les sous-titres, introduction de libao (similaire &agrave; libvo pour l'audio),
+  </para><para>Deux mois après la 0.17, une nouvelle parution.. Compléter le support ASF,
+    plus de formats pour les sous-titres, introduction de libao (similaire et libvo pour l'audio),
     encore plus stable et performant.... C'est un MUST !
   </para></listitem>
 <listitem><para>
   <emphasis role="bold"><application>MPlayer</application> 0.50 &quot;The Faszom(C)ounter&quot;</emphasis> 8 Oct 2001
-  </para><para>Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalit&eacute;s, une GUI en version
-    b&ecirc;ta, des bogues fix&eacute;s, de nouveaux drivers vo et ao, portage
-    sur de nombreux syst&egrave;mes, incluant les codecs DivX Open-Source, et bien plus
+  </para><para>Hmm. Une nouvelle sortie. Des tonnes de nouvelles fonctionnalités, une GUI en version
+    b&ecirc;ta, des bogues fixés, de nouveaux drivers vo et ao, portage
+    sur de nombreux systèmes, incluant les codecs DivX Open-Source, et bien plus
     encore... Essayez le !
   </para></listitem>
 <listitem><para>

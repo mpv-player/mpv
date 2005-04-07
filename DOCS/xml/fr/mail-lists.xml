@@ -73,8 +73,8 @@ raisonnable.
 <para>Tous les changements de code dans <application>MPlayer</application> sont
 automatiquement envoyés sur cette liste.
 Seules les questions à propos de ses changements sont autorisées ici (si vous ne
-comprenez pas pourquoi un changement est requis ou si vous en avez un meilleur ou si
-vous avez remarquer un bogue/problème possible dans l'envoi).
+comprenez pas pourquoi un changement est requis, si vous en avez un meilleur ou si
+vous avez remarqué un bogue/problème possible dans l'envoi).
 </para></listitem>
 <listitem><para>
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs"><application>MPlayer</application>-DOCS</ulink>

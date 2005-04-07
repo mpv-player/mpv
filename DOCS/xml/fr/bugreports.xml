@@ -251,9 +251,9 @@ extension .txt. Décrivez le problème que vous avez avec ce fichier et incluez vo
 adresse e-mail ainsi que la sortie de MPlayer en verbosité niveau 1. Généralement les
 premiers 1-5 Mo sont suffisants pour reproduire le problème, mais pour être sûrs nous
 vous demandons de faire:
-<screen>dd if=<replaceable>votrefichier</replaceable> of=<replaceable>petitfichier</replaceable> bs=1024k count=5</screen>
-Cela coupera les 5 premiers Mo de '<emphasis role="bold">votrefichier</emphasis>'
-et les sauvera dans '<emphasis role="bold">petitfichier</emphasis>'. Essayez alors de
+<screen>dd if=<replaceable>votre fichier</replaceable> of=<replaceable>petit fichier</replaceable> bs=1024k count=5</screen>
+Cela coupera les 5 premiers Mo de '<emphasis role="bold">votre fichier</emphasis>'
+et les sauvera dans '<emphasis role="bold">petit fichier</emphasis>'. Essayez alors de
 lire le petit fichier, et si le bogue persiste vous pouvez envoyer le petit fichier par
 ftp. <emphasis role="bold">N'envoyez jamais</emphasis> ces fichiers par e-mail SVP !
 Envoyez les par FTP, et postez seulement leur nom/adresse sur ce FTP. Si le fichier est

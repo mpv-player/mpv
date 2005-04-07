@@ -370,7 +370,7 @@ et <option>-fixed-vo</option> pour les afficher plus longtemps).
 <application>MPlayer</application> ne supporte actuellement pas le déplacement
 dans les fichiers GIF. Les fichiers GIF n'ont pas nécessairement une taille de
 trame fixe, ni un débit fixe. De plus, chaque trame est de taille indépendante
-et, est sensée être positionné à une certaine place dans un champ de taille fixe.
+et, est sensée être positionnée à une certaine place dans un champ de taille fixe.
 Le débit est contrôlé par un bloc optionnel avant chaque trame qui spécifie le
 décalage de la prochaine trame en centièmes de seconde.
 </para>

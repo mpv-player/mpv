@@ -13,7 +13,7 @@
 </listitem>
 <listitem>
 <para>SIGILL (signal 4) Général:</para>
-<para>Problème: vous avez compilé et utilisez <application>MPlayer</application> sur des machines différentes
+<para>Problème: vous avez compilé et utilisé <application>MPlayer</application> sur des machines différentes
 (par exemple compilé sur P3 et tournant sur Celeron)</para>
 <para>Solution: compilez <application>MPlayer</application> sur la machine sur laquelle vous l'utiliserez !</para>
 <para>Contournement: Vous pouvez oublier tout ceci en passant l'option <option>--enable-runtime-cpudetection</option>
@@ -151,7 +151,7 @@ Vous essayez de lire un fichier DivX 3.x avec le décodeur OpenDivX ou XviD
 <title>Problèmes de sortie vidéo</title>
 <para>
 Première note: les options <option>-fs -vm</option> et <option>-zoom</option> sont
-juste des recommandations, pas (encore) supporté par tous les pilotes. Donc ce n'est
+juste des recommandations, pas (encore) supportées par tous les pilotes. Donc ce n'est
 pas un bogue si ça ne marche pas. Seuls quelques pilotes supportent le
 redimensionnement/zoom, ne l'espérez pas de x11 ou dga.
 </para>

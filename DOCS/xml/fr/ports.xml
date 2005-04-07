@@ -288,7 +288,7 @@ X qui est TRÈS lente. Utilisez SDL.
   <ulink url="http://www.cygwin.com/">Cygwin</ulink> et
   <ulink url="http://www.mingw.org/">MinGW</ulink>.
   Il n'a pas encore de GUI, mais la version en ligne de commande est presque
-  complètement opérationelle. Les <ulink url="../../tech/patches.txt">patches</ulink>
+  complètement opérationnelle. Les <ulink url="../../tech/patches.txt">patches</ulink>
   sont toujours les bienvenus. Vous devriez jeter un oeil à la liste de diffusion
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
   pour obtenir de l'aide et les dernières informations.</para>

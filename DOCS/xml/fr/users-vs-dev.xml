@@ -61,8 +61,11 @@ disparaissent avec un compilateur différent. Dans tous les cas cela ne peut plus
 Normalement un GCC 3.x mature résoudra les problèmes. Si vous voulez compiler avec 2.96
 passez l'option <option>--disable-gcc-checking</option> à <filename>configure</filename>.
 Rappelez-vous que vous êtes seul et donc <emphasis role="bold">de ne pas rapporter de bogues</emphasis>.
-Si vous le faites, vous serez juste insulté voir banni de nos listes de diffusion car
-nous en avons plus qu'assez des empoignes sur GCC 2.96. S'il vous plaît, restons-en là.
+Si vous le faites quand même, préparez-vous au pire comme vous faire 
+insulter, voir banni de nos listes de diffusions car nous en avons par 
+dessus la tête des problèmes relatifs à GCC-2.96 ; alors s'il vous 
+plaît, abstenez-vous.
+
 </para>
 </formalpara>
 
@@ -82,7 +85,7 @@ compiler GCC 3 depuis les sources:
   Allez sur la
   <ulink url="http://gcc.gnu.org/mirrors.html">page des miroirs GCC</ulink>
   et téléchargez <filename>gcc-core-<replaceable>XXX</replaceable>.tar.gz</filename> où
-  <replaceable>XXX</replaceable> est le numéro de version. Ceci inclue le compilateur C
+  <replaceable>XXX</replaceable> est le numéro de version. Ceci inclus le compilateur C
   complet et est suffisant pour <application>MPlayer</application>. Si vous voulez
   aussi C++, Java ou certaines autres fonctions avancées de GCC,
   <filename>gcc-<replaceable>XXX</replaceable>.tar.gz</filename> pourrait mieux convenir à vos besoins.
@@ -204,7 +207,7 @@ des abus des utilisateurs. Je suppose que je mérite de la reconnaissance pour
 cela, même si j'en fait partie moi-même. Arpi et le reste de l'équipe du projet
 doivent ressentir cela aussi, car ils ont pris soin de me le rappeler dans une
 section spéciale de la documentation incluse dans l'archive. Comme je l'ai dit
-au début, certaines choses n'ont pas changées du tout.
+au début, certaines choses n'ont pas changé du tout.
 </para></blockquote>
 
 Nous n'aurions pas pu résumer mieux nos sentiments à l'égard de Joe Barr:
