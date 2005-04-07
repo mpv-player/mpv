@@ -34,6 +34,8 @@ MPlayer (1.0)
     * support for multichannel WAV files
     * ALAC (QuickTime lossless audio) support via lavc
     * WNV1 support via lavc
+    * AASC (Autoderk RLE video) support via lavc
+    * LOCO video support via lavc
 
     Demuxers:
     * vqf demuxer
@@ -67,6 +69,7 @@ MPlayer (1.0)
     * LOCO video decoder
     * WNV1 video decoder
     * shorten audio decoder and demuxer
+    * AASC video decoder
 
     GUI:
     * half size event implemented and added to the menu
