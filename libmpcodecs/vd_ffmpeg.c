@@ -335,7 +335,8 @@ static int init(sh_video_t *sh){
 	 sh->format == mmioFOURCC('M','P','4','V') ||
 	 sh->format == mmioFOURCC('F','L','I','C') ||
 	 sh->format == mmioFOURCC('S','N','O','W') ||
-	 sh->format == mmioFOURCC('a','v','c','1')
+	 sh->format == mmioFOURCC('a','v','c','1') ||
+	 sh->format == mmioFOURCC('L','O','C','O')
          ))
     {
 	avctx->extradata_size = sh->bih->biSize-sizeof(BITMAPINFOHEADER);
