@@ -1,4 +1,4 @@
-.\" synced with 1.925
+.\" synced with 1.927
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -7645,7 +7645,7 @@ Groupe D'Images encadrées par deux trames-I), ce qui signifie que chaque
 GOP sera indépendant des GOP suivants.
 Ceci implique que la dernière trame du GOP est soit une trame-P ou une
 trame-N, mais pas une trame-B.
-Il est plutôt recommandé d'activer cette option (par défaut\ : activé)
+Il est plutôt recommandé d'activer cette option (par défaut\ : activé).
 .
 .TP
 .B frame_drop_ratio=<0\-100> (max_bframes=0 uniquement)
@@ -7688,7 +7688,8 @@ d'économiser des bits en modifiant les coefficients de quantification pour
 augmenter la compressibilité de la vidéo.
 À même temps de calcul, cela améliore plus la qualité visuelle
 que de jouer sur les options VHQ .
-Aussi, dans un contexte d'encodage temps réel, pensez à cette option!
+Aussi, dans un contexte d'encodage temps réel, pensez à cette option
+(par défaut\ : activé).
 .
 .TP
 .B (no)cartoon
@@ -7709,7 +7710,8 @@ utiliser la quantification MPEG.
 .TP
 .B (no)chroma_me
 Utilise l'information chroma en plus de la luma pour estimer le mouvement.
-L'efficacité de cette option dépend de la vidéo source.
+Suivant le type de vidéo encodée, cette option peut aider à trouver de
+meilleurs vecteurs de mouvement (par défaut\ : activé).
 .
 .TP
 .B (no)chroma_opt
@@ -7736,9 +7738,9 @@ Du plus rapide au plus lent\ :
 .PD 0
 .RSs
 .IPs 0
-off (défaut)
+off
 .IPs 1
-sélection du mode (inter/\:intra MB)
+sélection du mode (inter/\:intra MB) (par défaut)
 .IPs 2
 recherche limitée
 .IPs 3
@@ -7925,7 +7927,7 @@ Cette option permet une sélection des différents candidats de vecteurs
 de mouvement pour les trames-B d'après leur taux de distortion,
 ce qui correspond à ce que fait l'option vhq avec les trames-P.
 Cela produit des trames-B plus jolies sans pour autant avoir un impact
-significatif sur le temps de calcul.
+significatif sur le temps de calcul (par défaut\: 1).
 .
 .
 .SS x264enc (\-x264encopts)

@@ -7335,7 +7335,7 @@ saves bits by modifying quantized coefficients to make them more
 compressible by the entropy encoder.
 Its impact on quality is good, and if VHQ uses too much CPU for you,
 this setting can be a good alternative to save a few bits (and gain
-quality at fixed bitrate) at a lesser cost than with VHQ.
+quality at fixed bitrate) at a lesser cost than with VHQ (default: on).
 .
 .TP
 .B (no)cartoon
@@ -7358,7 +7358,8 @@ The usual motion estimation algorithm uses only the luminance information to
 find the best motion vector.
 However for some video material, using the chroma planes can help find
 better vectors.
-This setting toggles the use of chroma planes for motion estimation.
+This setting toggles the use of chroma planes for motion estimation
+(default: on).
 .
 .TP
 .B (no)chroma_opt
@@ -7389,7 +7390,7 @@ Fastest to slowest:
 .IPs 0
 off (default)
 .IPs 1
-mode decision (inter/\:intra MB)
+mode decision (inter/\:intra MB) (default)
 .IPs 2
 limited search
 .IPs 3
@@ -7570,7 +7571,7 @@ This setting allows vector candidates for B-frames to be used for
 the encoding chosen using a rate distortion optimized operator,
 which is what is done for P-frames by the vhq option.
 This produces nicer-looking B-frames while incurring almost no
-performance penalty.
+performance penalty (default: 1).
 .
 .
 .SS x264enc (\-x264encopts)
