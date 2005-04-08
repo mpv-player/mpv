@@ -23,11 +23,6 @@ static int config(struct vf_instance_s* vf,
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
-    if(mpi->flags&MP_IMGFLAG_DIRECT){
-	// we've used DR, so we're ready...
-	return vf_next_put_image(vf,(mp_image_t*)mpi->priv);
-    }
-
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 	MP_IMGTYPE_EXPORT, MP_IMGFLAG_ACCEPT_STRIDE,
 	mpi->width, mpi->height/2);
