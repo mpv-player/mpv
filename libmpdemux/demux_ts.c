@@ -1862,7 +1862,7 @@ static uint16_t parse_mp4_es_descriptor(pmt_t *pmt, uint8_t *buf, int len, void 
 	return len;
 }
 
-static int parse_mp4_object_descriptor(pmt_t *pmt, uint8_t *buf, int len, void *elem)
+static void parse_mp4_object_descriptor(pmt_t *pmt, uint8_t *buf, int len, void *elem)
 {
 	int i, j = 0, id;
 	
@@ -1887,7 +1887,7 @@ static int parse_mp4_object_descriptor(pmt_t *pmt, uint8_t *buf, int len, void *
 }
 
 
-static int parse_mp4_iod(pmt_t *pmt, uint8_t *buf, int len, void *elem)
+static void parse_mp4_iod(pmt_t *pmt, uint8_t *buf, int len, void *elem)
 {
 	int i, j = 0;
 	mp4_od_t *iod = &(pmt->iod);
