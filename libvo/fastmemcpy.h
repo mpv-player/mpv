@@ -25,7 +25,16 @@ static inline void * mem2agpcpy_pic(void * dst, void * src, int bytesPerLine, in
 	int i;
 	void *retval=dst;
 
-	if(dstStride == srcStride) mem2agpcpy(dst, src, srcStride*height);
+	if(dstStride == srcStride)
+	{
+		if (srcStride < 0) {
+	    		src += (height-1)*srcStride;
+	    		dst += (height-1)*dstStride;
+	    		srcStride = -srcStride;
+		}
+
+		mem2agpcpy(dst, src, srcStride*height);
+	}
 	else
 	{
 		for(i=0; i<height; i++)
@@ -44,7 +53,16 @@ static inline void * memcpy_pic(void * dst, void * src, int bytesPerLine, int he
 	int i;
 	void *retval=dst;
 
-	if(dstStride == srcStride) memcpy(dst, src, srcStride*height);
+	if(dstStride == srcStride)
+	{
+		if (srcStride < 0) {
+	    		src += (height-1)*srcStride;
+	    		dst += (height-1)*dstStride;
+	    		srcStride = -srcStride;
+		}
+
+		memcpy(dst, src, srcStride*height);
+	}
 	else
 	{
 		for(i=0; i<height; i++)
