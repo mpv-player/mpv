@@ -301,7 +301,7 @@ static void hexdump (char *buf, int length) {
  * and returns number of bytes read 
  */
 
-static unsigned int pnm_get_chunk(pnm_t *p, 
+static int pnm_get_chunk(pnm_t *p, 
                          unsigned int max,
                          unsigned int *chunk_type,
                          char *data, int *need_response) {
@@ -688,12 +688,12 @@ static int pnm_get_stream_chunk(pnm_t *p) {
     rm_read (p->s, &p->buffer[8], size-5);
     p->buffer[size+3]=0;
     printf("input_pnm: got message from server while reading stream:\n%s\n", &p->buffer[3]);
-    return 0;
+    return -1;
   }
   if (p->buffer[0] == 'F')
   {
     printf("input_pnm: server error.\n");
-    return 0;
+    return -1;
   }
 
   /* skip bytewise to next chunk.
@@ -808,6 +808,7 @@ int pnm_read (pnm_t *this, char *data, int len) {
   char *dest=data;
   char *source=this->recv + this->recv_read;
   int fill=this->recv_size - this->recv_read;
+  int retval;
   
   if (len < 0) return 0;
   while (to_copy > fill) {
@@ -817,10 +818,13 @@ int pnm_read (pnm_t *this, char *data, int len) {
     dest += fill;
     this->recv_read=0;
 
-    if (!pnm_get_stream_chunk (this)) {
+    if ((retval = pnm_get_stream_chunk (this)) <= 0) {
 #ifdef LOG
       printf ("input_pnm: %d of %d bytes provided\n", len-to_copy, len);
 #endif
+      if (retval < 0)
+        return retval;
+      else
       return len-to_copy;
     }
     source = this->recv;
