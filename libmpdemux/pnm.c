@@ -668,6 +668,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
    */
   
   n = rm_read (p->s, p->buffer, 8);
+  if (n<0) return -1;
   if (n<8) return 0;
   
   /* skip 8 bytes if 0x62 is read */
