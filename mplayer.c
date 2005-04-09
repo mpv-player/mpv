@@ -3282,6 +3282,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       else
 #endif
 	if(video_out && vo_config_count) video_out->control(VOCTRL_FULLSCREEN, 0);
+     // reload font when panscan > 0 and font is proportional to video size
+     if (sh_video && (subtitle_autoscale == 2 || subtitle_autoscale == 3)
+	 && vo_panscan > 0) force_load_font = 1;
     } break;
     case MP_CMD_VO_ONTOP:
     {
