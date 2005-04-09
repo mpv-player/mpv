@@ -56,6 +56,7 @@ MPlayer (1.0)
     * fallback to HTTP if connection refused on pnm://
     * support for UDP streaming (udp://)
     * support for vstream TiVo streams (tivo://)
+    * EOF detect and bugfixes in pnm:// streams
 
     FFmpeg/libavcodec:
     * RV20 fixes
