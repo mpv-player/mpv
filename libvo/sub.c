@@ -764,7 +764,10 @@ int vo_update_osd(int dxs,int dys){
 
 #ifdef HAVE_FREETYPE    
     // here is the right place to get screen dimensions
-    if (!vo_font || force_load_font) {
+    if (!vo_font
+	|| force_load_font
+	|| ((dxs != vo_image_width || dys != vo_image_height)
+	   && (subtitle_autoscale == 2 || subtitle_autoscale == 3))) {
 	force_load_font = 0;
 	load_font_ft(dxs, dys);
     }
