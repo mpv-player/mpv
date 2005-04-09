@@ -297,8 +297,9 @@ static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsig
 
 int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
 {
-  unsigned int n = 0, m = 0, v, i, j;
+  unsigned int n = 0, v, i, j, mbh;
   unsigned char *dest;
+  int frame_mbs_only;
 
   dest = (unsigned char*) malloc(len);
   if(! dest)
@@ -343,9 +344,11 @@ int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
   }
   read_golomb(buf, &n);
   getbits(buf, n++, 1);
-  read_golomb(buf, &n);
-  read_golomb(buf, &n);
-  if(!getbits(buf, n++, 1))
+  picture->display_picture_width = 16 *(read_golomb(buf, &n)+1);
+  mbh = read_golomb(buf, &n)+1;
+  frame_mbs_only = getbits(buf, n++, 1);
+  picture->display_picture_height = 16 * (2 - frame_mbs_only) * mbh;
+  if(!frame_mbs_only)
     getbits(buf, n++, 1);
   getbits(buf, n++, 1);
   if(getbits(buf, n++, 1))
