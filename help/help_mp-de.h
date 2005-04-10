@@ -683,7 +683,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "Nächster Stream"
 #define MSGTR_MENU_PrevStream "Vorheriger Stream"
 #define MSGTR_MENU_Size "Größe"
-#define MSGTR_MENU_HalfSize   "Halbe Größe"
+#define MSGTR_MENU_HalfSize "Halbe Größe"
 #define MSGTR_MENU_NormalSize "Normale Größe"
 #define MSGTR_MENU_DoubleSize "Doppelte Größe"
 #define MSGTR_MENU_FullScreen "Vollbild"
