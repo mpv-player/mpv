@@ -15,7 +15,7 @@ static void I_step_one(unsigned int balloc[], unsigned int scale_index[2][SBLIMI
   unsigned int *ba=balloc;
   unsigned int *sca = (unsigned int *) scale_index;
 
-  if(fr->stereo) {
+  if(fr->stereo == 2) {
     int i;
     int jsbound = fr->jsbound;
     for (i=0;i<jsbound;i++) { 
@@ -59,7 +59,7 @@ static void I_step_two(real fraction[2][SBLIMIT],unsigned int balloc[2*SBLIMIT],
   register unsigned int *ba;
   register unsigned int *sca = (unsigned int *) scale_index;
 
-  if(fr->stereo) {
+  if(fr->stereo == 2) {
     int jsbound = fr->jsbound;
     register real *f0 = fraction[0];
     register real *f1 = fraction[1];
