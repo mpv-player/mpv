@@ -678,8 +678,8 @@ void pullup_init_context(struct pullup_context *c)
 	if (c->nbuffers < 10) c->nbuffers = 10;
 	c->buffers = calloc(c->nbuffers, sizeof (struct pullup_buffer));
 
-	c->metric_w = (c->w[mp] - (c->junk_left + c->junk_right << 3)) >> 3;
-	c->metric_h = (c->h[mp] - (c->junk_top + c->junk_bottom << 1)) >> 3;
+	c->metric_w = (c->w[mp] - ((c->junk_left + c->junk_right) << 3)) >> 3;
+	c->metric_h = (c->h[mp] - ((c->junk_top + c->junk_bottom) << 1)) >> 3;
 	c->metric_offset = c->junk_left*c->bpp[mp] + (c->junk_top<<1)*c->stride[mp];
 	c->metric_len = c->metric_w * c->metric_h;
 	
