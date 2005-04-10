@@ -1,4 +1,4 @@
-.\" synced with 1.928
+.\" synced with 1.929
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -3678,10 +3678,19 @@ d³ugo¶ci filtru
 przemiatanie sinusoidalne
 .
 .TP
-.B hrtf\ \ \ 
+.B hrtf[=flaga]
 Head-related transfer function (funkcja transferowa zwi±zana z g³ow±):
 Konwertuje wielokana³owe audio do dwóch kana³ów przeznaczonych dla s³uchawek,
 zachowuj±c przestrzenno¶æ d¼wiêku.
+.sp 1
+.PD 0
+.RS
+.IPs "Flaga  Znaczenie"
+.IPs "s      macierzowe dekodowanie tylnego kana³u"
+.IPs "m      dwukana³owe dekodowanie macierzowe"
+.IPs "0      brak dekodowania macierzowego (domy¶lne)"
+.RE
+.PD 1
 .
 .TP
 .B equalizer=[g1:g2:g3:...:g10]
