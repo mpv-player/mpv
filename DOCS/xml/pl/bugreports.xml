@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.10 -->
+<!-- synced with 1.11 -->
 <appendix id="bugreports">
 <title>Jak zgłaszać błędy</title>
 <para>
@@ -21,7 +21,7 @@ samodzielnego poprawiania błędów. A może już to zrobiłeś? Przeczytaj
 się w jaki sposób dodać swoją łatę do źródeł
 <application>MPlayera</application>. Jeżeli będziesz miał jakieś pytania, pomogą
 Ci ludzie z listy
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 (tylko w języku angielskim -przyp. tłumacza).
 </para>
 </sect1>
@@ -85,7 +85,7 @@ odpowiemy na Twoje zgłoszenie.
 <sect1 id="bugreports_where">
 <title>Gdzie zgłaszać błędy</title>
 <para>
-Zapisz się na listę mplayer-users:
+Zapisz się na listę MPlayer-users:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 i wyślij swoje zgłoszenie błędu na
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/>, gdzie będzie można je omówić.
@@ -345,7 +345,7 @@ Jeżeli utworzyłeś właściwy raport błędu kierując się powyższymi wskazówkami i
 jesteś pewien że to błąd <application>MPlayera</application>, nie kompilatora
 albo uszkodzonego pliku, przeczytałeś dokumentację i nie możesz znaleźć
 rozwiązania, Twoje sterowniki dźwięku są w porządku, możesz chcieć zapisać się
-na listę mplayer-advusers (tylko po angielsku - przyp. tłum.) i wysłać tam swoje
+na listę MPlayer-advusers (tylko po angielsku - przyp. tłum.) i wysłać tam swoje
 zgłoszenie błędu, aby uzyskać lepszą i szybszą odpowiedź.
 </para>
 
