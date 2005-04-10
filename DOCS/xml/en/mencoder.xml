@@ -630,6 +630,125 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect2>
 
 
+<sect2 id="menc-feat-dvd-mpeg4-constraints">
+<title>Constraints for efficient encoding</title>
+
+<para>
+  Due to the nature of MPEG-type compression, there are various
+  constraints you should follow for maximal quality.
+  MPEG splits the video up into 16x16 squares called macroblocks,
+  each composed of 4 8x8 blocks of luma (intensity) information and two
+  half-resolution 8x8 chroma (color) blocks (one for red-cyan axis and
+  the other for the blue-yellow axis).
+  Even if your movie width and height are not multiples of 16, the
+  encoder will use enough 16x16 macroblocks to cover the whole picture
+  area, and the extra space will go to waste.
+  So in the interests of maximizing quality at a fixed filesize, it is
+  a bad idea to use dimensions that are not multiples of 16.
+</para>
+
+<para>
+  Most DVDs also have some degree of black borders at the edges. Leaving
+  these in place can hurt quality in several ways.
+</para>
+
+<orderedlist>
+<listitem>
+<para>
+  MPEG-type compression is also highly dependent on frequency domain
+  transformats, in particular the Discrete Cosine Transform (DCT),
+  which is similar to the Fourier transform. This sort of encoding is
+  efficient for representing patterns and smooth transitions, but it
+  has a hard time with sharp edges. In order to encode them it must
+  use many more bits, or else an artifact known as ringing will
+  appear.
+</para>
+
+<para>
+  The frequency transform (DCT) takes place separately on each
+  macroblock (actually each block), so this problem only applies when
+  the sharp edge is inside a block. If your black borders begin
+  exactly at multiple-of-16 pixel boundaries, this is not a problem.
+  However, the black borders on DVDs rarely come nicely aligned, so
+  in practice you will always need to crop to avoid this penalty.
+</para>
+</listitem>
+</orderedlist>
+
+<para>
+  In addition to frequency domain transforms, MPEG-type compression uses
+  motion vectors to represent the change from one frame to the next.
+  Motion vectors naturally work much less efficiently for new content
+  coming in from the edges of the picture, because it is not present in
+  the previous frame. As long as the picture extends all the way to the
+  edge of the encoded region, motion vectors have no problem with
+  content moving out the edges of the picture. However, in the presence
+  of black borders, there can be trouble:
+</para>
+
+<orderedlist continuation="continues">
+<listitem>
+<para>
+  For each macroblock, MPEG-type compression stores a vector
+  identifying which part of the previous frame should be copied into
+  this macroblock as a base for predicting the next frame. Only the
+  remaining differences need to be encoded. If a macroblock spans the
+  edge of the picture and contains part of the black border, then
+  motion vectors from other parts of the picture will overwrite the
+  black border. This means that lots of bits must be spent either
+  re-blackening the border that was overwritten, or (more likely) a
+  motion vector won't be used at all and all the changes in this
+  macroblock will have to be coded explicitly. Either way, encoding
+  efficiency is greatly reduced.
+</para>
+
+<para>
+  Again, this problem only applies if black borders do not line up on
+  multiple-of-16 boundaries.
+</para>
+</listitem>
+
+<listitem>
+<para>
+  Finally, suppose we have a macroblock in the interior of the
+  picture, and an object is moving into this block from near the edge
+  of the image. MPEG-type coding can't say "copy the part that's
+  inside the picture but not the black border." So the black border
+  will get copied inside too, and lots of bits will have to be spent
+  encoding the part of the picture that's supposed to be there.
+</para>
+
+<para>
+  If the picture runs all the way to the edge of the encoded area,
+  MPEG has special optimizations to repeatedly copy the pixels at the
+  edge of the picture when a motion vector comes from outside the
+  encoded area. This feature becomes useless when the movie has black
+  borders. Unlike problems 1 and 2, aligning the borders at multiples
+  of 16 does not help here.
+</para>
+</listitem>
+
+<listitem>
+<para>
+  Depite the borders being entirely black and never changing, there
+  is at least a minimal amount of overhead involved in having more
+  macroblocks.
+</para>
+</listitem>
+</orderedlist>
+
+<para>
+  For all of these reasons, it's recommended to fully crop black
+  borders. Further, if there is an area of noise/distortion at the edge
+  of the picture, cropping this will improve encoding efficiency as
+  well. Videophile purists who want to preserve the original as close as
+  possible may object to this cropping, but unless you plan to encode at
+  constant quantizer, the quality you gain from cropping will
+  considerably exceed the amount of information lost at the edges.
+</para>
+</sect2>
+
+
 <sect2 id="menc-feat-dvd-mpeg4-crop">
 <title>Cropping and Scaling</title>
 
