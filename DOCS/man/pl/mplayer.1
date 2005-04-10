@@ -1,4 +1,4 @@
-.\" synced with 1.923
+.\" synced with 1.928
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2005-01-13" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2005-04-03" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -280,6 +280,8 @@ Zmniejsza/\:zwiêksza g³o¶no¶æ.
 Zmniejsza/\:zwiêksza g³o¶no¶æ.
 .IPs m\ \ \ \ 
 Wycisza d¼wiêk.
+.IPs "#" (tylko MPEG)
+Prze³±cza miêdzy dostêpnymi ¶cie¿kami d¼wiêku.
 .IPs f\ \ \ \ 
 Prze³±cza tryb pe³noekranowy (patrz te¿ \-fs).
 .IPs T\ \ \ \ 
@@ -437,6 +439,19 @@ Sprawia, ¿e wyj¶cie na konsolê jest mniej gadatliwe; w szczególno¶ci zapobiegnie
 to wy¶wietleniu wiersza stanu (tzn.\& A:   0.7 V:   0.6 A-V:  0.068 ...).
 Szczególnie przydatne na wolnych terminalach lub na takich, które nie obs³uguj±
 poprawnie znaku powrotu karetki (tzn.\& \\r).
+.
+.TP
+.B \-priority <prio> (Windows only)
+Ustawia priorytet procesu MPlayera wed³ug predefiniowanych ustawieñ Windows.
+.sp 1
+Mo¿liwe warto¶ci <prio>:
+.RSs
+idle|belownormal|normal|abovenormal|high|realtime
+.sp 1
+.I UWAGA:
+.br
+U¿ywanie priorytetu realtime mo¿e spowodowaæ zawieszenie systemu.
+.RE
 .
 .TP
 .B \-v, \-verbose
@@ -7423,7 +7438,7 @@ wspó³czynników, tak aby lepiej ulaga³y kompresji przez koder entropii.
 Dobrze wp³ywa na poprawê jako¶ci, a je¶li VHQ u¿ywa wg Ciebie zbyt du¿o mocy
 obliczeniowej, ta opcja mo¿e byæ dobr± alternatyw± zaoszczêdzaj±c±
 kilku bitów (i poprawiaj±c± jako¶æ przy sta³ym bitrate) przy mniejszym
-obci±¿eniu ni¿ VHQ.
+obci±¿eniu ni¿ VHQ (domy¶lnie: w³±czone).
 .
 .TP
 .B (no)cartoon
@@ -7444,7 +7459,8 @@ Zwyk³y algorytm przewidywania ruchu u¿ywa tylko informacji o jasno¶ci
 dla znalezienia najlepszego wektora ruchu.
 Jednak¿e dla niektórych filmów, wykorzystanie przestrzeni kolorów pozwoli
 znale¼æ lepsze wektory.
-Ten parametr w³±cza wykorzystanie przestrzeni barw do przewidywania ruchu.
+Ten parametr w³±cza wykorzystanie przestrzeni barw do przewidywania ruchu
+(domy¶lnie: w³±czone).
 .
 .TP
 .B (no)chroma_opt
@@ -7475,7 +7491,7 @@ Od najszybszego do najwolniejszego:
 .IPs 0
 wy³±czone (domy¶lnie)
 .IPs 1
-decyzja dotycz±ca trybu (inter/\:intra MB)
+decyzja dotycz±ca trybu (inter/\:intra MB) (domy¶lnie)
 .IPs 2
 ograniczone przeszukiwanie
 .IPs 3
@@ -7653,7 +7669,7 @@ Nastêpna opcja jest dostêpna tylko w rozwojowych wersjach XviD 1.1.x.
 To ustawienie pozwala na wybieranie z mo¿liwych kandydatów takich wektorów dla
 ramek B, które minimalizuja zaburzenia,
 podobnie jak opcja vhq robi to dla ramek P.
-Daje to ³adniejsze ramki B prawie bez spadku wydajno¶ci.
+Daje to ³adniejsze ramki B prawie bez spadku wydajno¶ci (domy¶lnie: 1).
 .
 .
 .SS x264enc (\-x264encopts)
@@ -8101,7 +8117,7 @@ Ustawia wysoko¶æ i szeroko¶æ filmu gdy jest to MPEG-1/2.
 Ustawia wysoko¶æ i szeroko¶æ trybu panoramicznego filmu gdy jest to MPEG-2.
 .
 .TP
-.B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1>
+.B vaspect=<1 | 4/3 | 16/9 | 221/100>
 Ustawia proporcje filmu MPEG-1/2.
 .
 .TP
