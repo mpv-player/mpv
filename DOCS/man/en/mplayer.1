@@ -3619,9 +3619,18 @@ cutoff frequency (0.0-1.0), default set depending upon filter length
 sine sweep
 .
 .TP
-.B hrtf\ \ \ 
+.B hrtf[=flag]
 Head-related transfer function: Converts multichannel audio to
 2 channel output for headphones, preserving the spatiality of the sound.
+.sp 1
+.PD 0
+.RS
+.IPs "Flag  Meaning"
+.IPs "s     matrix decoding of the rear channel"
+.IPs "m     2-channel matrix decoding"
+.IPs "0     no matrix decoding (default)"
+.RE
+.PD 1
 .
 .TP
 .B equalizer=[g1:g2:g3:...:g10]
