@@ -758,18 +758,40 @@ void free_osd_list(){
     vo_osd_list=NULL;
 }
 
+#define FONT_LOAD_DEFER 6
+
 int vo_update_osd(int dxs,int dys){
     mp_osd_obj_t* obj=vo_osd_list;
     int chg=0;
+#ifdef HAVE_FREETYPE    
+    static int defer_counter = 0, prev_dxs = 0, prev_dys = 0;
+#endif
 
 #ifdef HAVE_FREETYPE    
     // here is the right place to get screen dimensions
-    if (!vo_font
-	|| force_load_font
-	|| ((dxs != vo_image_width || dys != vo_image_height)
-	   && (subtitle_autoscale == 2 || subtitle_autoscale == 3))) {
+    if (((dxs != vo_image_width)
+	   && (subtitle_autoscale == 2 || subtitle_autoscale == 3))
+	|| ((dys != vo_image_height)
+	    && (subtitle_autoscale == 1 || subtitle_autoscale == 3)))
+    {
+	// screen dimensions changed
+	// wait a while to avoid useless reloading of the font
+	if (dxs == prev_dxs || dys == prev_dys) {
+	    defer_counter++;
+	} else {
+	    prev_dxs = dxs;
+	    prev_dys = dys;
+	    defer_counter = 0;
+	}
+	if (defer_counter >= FONT_LOAD_DEFER) force_load_font = 1;
+    }
+
+    if (!vo_font || force_load_font) {
 	force_load_font = 0;
 	load_font_ft(dxs, dys);
+	prev_dxs = dxs;
+	prev_dys = dys;
+	defer_counter = 0;
     }
 #endif
 
