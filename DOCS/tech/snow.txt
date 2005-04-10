@@ -1,0 +1,58 @@
+ HOW TO TEST SNOW
+ ----------------
+
+Snow is an experimental wavelet-based codec made by the FFmpeg developers,
+and while it is still in heavy development, it is already giving very good
+results.
+Be very careful though, as the format of the bitstream produced might
+change, do not rely on it to store videos that you value.
+For this reason, MEncoder will not encode without 'vstrict=-1' on the
+command line.
+
+
+OPTIONS OBEYED BY SNOW
+
+ * vqscale=<0.01-255>
+   Encoding quality, sane range 1-10, default: 0 (lossless).
+   A given quality in snow needs a somewhat lower qscale than the same
+   quality in MPEG-4.
+   Note that 0 may not be specified; if you want lossless encoding, you
+   must leave out vqscale. (Yes, quantizer can be fractional.)
+
+ * cmp, subcmp, mbcmp
+   Set the comparison function, default: 0 (SAD).
+   useful values = 0 (SAD), 1 (SSD), 11 (5/3 wavelet), 12 (9/7 wavelet).
+   Experience shows that SSD is the best most of the time, while SAD is
+   slightly better the remainder of the time.
+   You can add 256 to any of the options to enable chroma motion
+   estimation for that comparison (e.g. mbcmp=257 for SSD with chroma),
+   but it doesn't seem to help much for the moment.
+
+ * pred=<0-2>
+   Wavelet type. 0 (9/7 wavelet), 1 (5/3 wavelet), 2 (13/7 wavelet).
+   9/7 is probably better for for lossy coding, and 5/3 for lossless.
+
+ * last_pred=<0-3>
+   Tries a few extra predicted motion vectors before doing EPZS search,
+   default=0.
+   This option has negligible effect on both speed and quality of snow,
+   so just leave it off. (it does, however, help mpeg4.)
+
+ * qpel
+   Refines motion estimation, default: off.
+   This setting always helps compressibility, but costs some CPU time
+   both while encoding and decoding.
+
+ * v4mv
+   Allows smaller motion partitions, default: off.
+   The current MB decision algorithm doesn't make very good use of this:
+   It improves quality, but also increases bitrate. (and you could get
+   more quality per bitrate by reducing quantizer instead.)
+
+
+v4mv and the wavelet cmp functions are theoretically good, but in practice
+won't work well until we get OBMC-aware motion estimation.
+
+In short:
+The best options in almost all cases are
+vcodec=snow:vstrict=-1:vqscale=$N:pred=0:cmp=1:subcmp=1:mbcmp=1:qpel
