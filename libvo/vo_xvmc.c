@@ -51,6 +51,7 @@ extern int vo_verbose;
 
 static int benchmark;
 static int use_sleep;
+static int first_frame;//draw colorkey on first frame
 static int use_queue;
 static int xv_port_request = 0;
 
@@ -741,6 +742,7 @@ found_subpic:
    p_render_surface_to_show = NULL;
 
    free_element = 0;
+   first_frame = 1;
 
    vo_directrendering = 1;//ugly hack, coz xvmc works only with direct rendering
    return 0;		
@@ -996,7 +998,7 @@ int status,rez;
    XvMCSyncSurface(mDisplay, srf);
 }
 
-static void put_xvmc_image(xvmc_render_state_t * p_render_surface){
+static void put_xvmc_image(xvmc_render_state_t * p_render_surface, int draw_ck){
 int rez;
 int clipX,clipY,clipW,clipH;
 
@@ -1007,6 +1009,12 @@ int clipX,clipY,clipW,clipH;
    clipY = drwY-(vo_panscan_y>>1); 
    clipW = vo_dwidth+vo_panscan_x;
    clipH = vo_dheight+vo_panscan_y;
+   
+   if(draw_ck)
+      vo_xv_draw_colorkey(clipX,clipY,clipW,clipH);
+
+   if(benchmark)
+      return;
 
    rez = XvMCPutSurface(mDisplay, p_render_surface->p_surface, 
                         vo_window,
@@ -1014,9 +1022,10 @@ int clipX,clipY,clipW,clipH;
                         clipX, clipY, clipW, clipH,
                         3);//p_render_surface_to_show->display_flags);
    if(rez != Success){
-      printf("vo_xvmc: PutSurface failer, critical error!\n");
+      printf("vo_xvmc: PutSurface failer, critical error %d!\n",rez);
       assert(0);
    }
+   XFlush(mDisplay);
 }
 
 static void flip_page(void){
@@ -1060,9 +1069,8 @@ int i,cfs;
 //!!fixme   assert(p_render_surface_to_show->state & MP_XVMC_STATE_DISPLAY_PENDING);
 
    //show it, displaying is always vsynced, so skip it for benchmark
-   if(!benchmark){
-      put_xvmc_image(p_render_surface_to_show);
-   }
+   put_xvmc_image(p_render_surface_to_show,first_frame);
+   first_frame=0;//make sure we won't draw it anymore
 
    p_render_surface_visible = p_render_surface_to_show;
    p_render_surface_to_show = NULL;
@@ -1097,8 +1105,7 @@ int e=vo_x11_check_events(mDisplay);
    }
    if ( e & VO_EVENT_EXPOSE )
    {
-      vo_xv_draw_colorkey(drwX,drwY,vo_dwidth,vo_dheight);
-      put_xvmc_image(p_render_surface_visible);
+      put_xvmc_image(p_render_surface_visible,1);
    }
 }
 
@@ -1370,11 +1377,8 @@ static uint32_t control(uint32_t request, void *data, ... )
 
             if(old_y != vo_panscan_y)
             {
-               vo_x11_clearwindow_part(mDisplay, vo_window,
-                                        vo_dwidth + vo_panscan_x - 1,
-                                        vo_dheight + vo_panscan_y - 1,
-                                        1);
-               put_xvmc_image(p_render_surface_visible);
+	       //this also draws the colorkey
+               put_xvmc_image(p_render_surface_visible,1);
             }
          }
          return VO_TRUE;
