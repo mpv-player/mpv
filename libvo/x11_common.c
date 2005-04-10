@@ -2444,12 +2444,14 @@ int vo_xv_init_colorkey()
  * It also draws the black bars ( when the video doesn't fit to the
  * display in full screen ) seperately, so they don't overlap with the
  * video area.
+ * It doesn't call XFlush
  *
  */
-inline void vo_xv_draw_colorkey( uint32_t x, uint32_t y,
-                                 uint32_t w, uint32_t h  )
+inline void vo_xv_draw_colorkey(  int32_t x,  int32_t y,
+                                  int32_t w,  int32_t h  )
 {
-  if( xv_ck_info.method == CK_METHOD_MANUALFILL )
+  if( xv_ck_info.method == CK_METHOD_MANUALFILL ||
+      xv_ck_info.method == CK_METHOD_BACKGROUND   )//less tearing than XClearWindow()
   {
     XSetForeground( mDisplay, vo_gc, xv_colorkey );
     XFillRectangle( mDisplay, vo_window, vo_gc,
@@ -2458,28 +2460,28 @@ inline void vo_xv_draw_colorkey( uint32_t x, uint32_t y,
   }
 
   /* draw black bars if needed */
+  /* TODO! move this to vo_x11_clearwindow_part() */
   if ( vo_fs )
   {
     XSetForeground( mDisplay, vo_gc, 0 );
+    /* making non overlap fills, requiare 8 checks instead of 4*/
     if ( y > 0 )
       XFillRectangle( mDisplay, vo_window, vo_gc,
                       0, 0,
                       vo_screenwidth, y);
     if (x > 0)
       XFillRectangle( mDisplay, vo_window, vo_gc,
-                      0, y,
-                      x, h );
+                      0, 0,
+                      x, vo_screenheight);
     if (x + w < vo_screenwidth)
       XFillRectangle( mDisplay, vo_window, vo_gc,
-                      x + w, y,
-                      vo_screenwidth - (x + w), h );
+                      x + w, 0,
+                      vo_screenwidth, vo_screenheight);
     if (y + h < vo_screenheight)
       XFillRectangle( mDisplay, vo_window, vo_gc,
                       0, y + h,
-                      vo_screenwidth, vo_screenheight - (y + h) );
+                      vo_screenwidth, vo_screenheight);
   }
-
-  XFlush( mDisplay );
 }
 
 /** \brief tests if a valid arg for the ck suboption was given */ 
