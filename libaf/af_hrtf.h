@@ -1,3 +1,7 @@
+#define HRTF_MIX_51 0
+#define HRTF_MIX_STEREO 1
+#define HRTF_MIX_MATRIX2CH 2
+
 /* Amplitude scaling factors */
 #define M17_0DB		0.1414213562
 #define M6_99DB		0.4472135955
@@ -13,8 +17,14 @@
 
 #define BASSFILTFREQ	180	/* Bass compensation filter cut (Hz) */
 #define BASSFILTLEN	193	/* Bass compensation filter length */
-#define BASSGAIN	M4_77DB	/* Bass compensation gain */
+#define BASSGAIN	M_SQRT2	/* Bass compensation gain */
 #define BASSCROSS	0.35	/* Bass cross talk */
+
+#define FWRDURATION	240	/* FWR average duration (samples) */
+#define MATREARDELAY	720	/* Matrix mode rear delay (samples) */
+
+#define MATAGCTRIG	8.0	/* (Fuzzy) AGC trigger */
+#define MATAGCDECAY	1.0	/* AGC baseline decay rate (1/samp.) */
 
 #define CFECHODELAY	360	/* Center front echo delay (samples) */
 #define CFECHOAMPL	M17_0DB	/* Center front echo amplitude */
