@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.20 -->
+<!-- synced with 1.21 -->
 <sect1 id="formats">
 <title>Obsługiwane formaty</title>
 
@@ -61,6 +61,14 @@ Pliki MPEG spotykamy w różnych kształtach:
   dźwięku nie-MPEG (AC3). Zawiera zakodowany strumień obrazu MPEG-2 i przeważnie
   dźwięk AC3, lecz dozwolone są także DTS, MP2 i nieskompresowane LPCM.
   <emphasis role="bold">Przejrzyj sekcję <link linkend="dvd">DVD</link></emphasis>!
+  </simpara></listitem>
+<listitem><simpara>
+  TY: To jest strumień TiVo MPEG. Zawiera on dane MPEG PES strumieni audio
+  i video, oraz dodatkowe informacje jak napisy Closed Caption. Ten format nie
+  jest strumieniem programu MPEG, ale zamkniętym formatem stworzonym przez
+  TiVo. Więcej informacji o formacie strumienia TiVo można uzyskać na
+  <ulink url="http://dvd-create.sourceforge.net/tystudio/tystream.shtml">
+  stronie TyStudio</ulink>.
   </simpara></listitem>
 </itemizedlist>
 
