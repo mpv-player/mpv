@@ -8,6 +8,7 @@ MPlayer (1.0)
     * slave mode command documentation finished
     * TOOLS documented in TOOLS/README
     * audio filter documentation moved to the man page and updated
+    * improved encoding guide
 
     Ports:
     * DirectX video output fixed on Windows95
