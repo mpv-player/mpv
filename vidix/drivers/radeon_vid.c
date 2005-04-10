@@ -895,6 +895,7 @@ static unsigned short ati_card_ids[] =
  DEVICE_ATI_RV280_RADEON_92003,
  DEVICE_ATI_RV280_RADEON_92004,
  DEVICE_ATI_RV280_RADEON_92005,
+ DEVICE_ATI_RV280_RADEON_92006,
  DEVICE_ATI_RADEON_R300_ND,
  DEVICE_ATI_RADEON_R300_NE,
  DEVICE_ATI_RADEON_R300_NF,
@@ -1074,6 +1075,7 @@ int vixProbe( int verbose,int force )
             case DEVICE_ATI_RV280_RADEON_92003:
             case DEVICE_ATI_RV280_RADEON_92004:
             case DEVICE_ATI_RV280_RADEON_92005:
+            case DEVICE_ATI_RV280_RADEON_92006:
               RadeonFamily = 280;
               break;
 
