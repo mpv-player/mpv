@@ -1155,6 +1155,7 @@ int vixInit( void )
   /* Rage Mobility (rage128) also has memsize bug */
   if (radeon_ram_size == 0 &&
       (def_cap.device_id == DEVICE_ATI_RAGE_MOBILITY_M3 ||
+       def_cap.device_id == DEVICE_ATI_RAGE_128_RL_VR ||
        def_cap.device_id == DEVICE_ATI_RAGE_MOBILITY_M32))
   {
       printf(RADEON_MSG" Workarounding buggy Rage Mobility M3 (0 vs. 8MB ram)\n");
