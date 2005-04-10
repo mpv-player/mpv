@@ -4,7 +4,7 @@
 <title>Sposób u¿ycia</title>
 
 <sect1 id="commandline">
-<title>Linia poleceñ</title>
+<title>Wiersz poleceñ</title>
 
 <para>
 <application>MPlayer</application> u¿ywa skomplikowanego drzewa odtwarzania.
@@ -113,7 +113,7 @@ pe³nej listy skrótów klawiszowych.
 
 <para>
 <application>MPlayer</application> pozwala Ci przypisaæ dowolny klawisz/przycisk
-do ka¿dej komendy za pomoc± prostego pliku konfiguracyjnego. Sk³adnia tego
+do dowolnego polecenia za pomoc± prostego pliku konfiguracyjnego. Sk³adnia tego
 pliku to nazwa klawisza, po której znajduje siê komenda. Domy¶lny plik
 konfiguracyjny znajduje siê w <filename>$HOME/.mplayer/input.conf</filename>, ale
 mo¿na podaæ tak¿e inny za pomoc± opcji
@@ -303,7 +303,7 @@ lecz bardzo zalecana.
 </para>
 
 <para>
-Miej na uwadze to, ¿e serwer nie jest aktualnie w ogóle bezpieczny. Nie narzekaj
+Miej na uwadze to, ¿e aktualnie serwer nie ma ¿adnych zabezpieczeñ. Nie narzekaj
 wiêc na liczne nadu¿ycia, które s± przez to mo¿liwe. Zamiast tego wy¶lij jak±¶
 (dobr±) ³atkê, by sta³ siê lepszy lub napisz swój w³asny serwer.
 </para>
@@ -329,7 +329,7 @@ zastosowania, jak automatyczne pomijanie reklam w ogl±danych filmach.
 </para>
 
 <para>
-Format pliku EDL jest raczej "go³y". Jako, ¿e system EDL osi±gn±³ pewien
+Format pliku EDL jest raczej "go³y". Gdy system EDL osi±gnie pewien
 stopieñ dojrza³o¶ci, prawdopodobnie zostanie zaimplamentowany format pliku
 bazuj±cy na XML. (zachowuj±c wsteczn± kompatybilno¶æ z wcze¶niejszymi formatami
 EDL).

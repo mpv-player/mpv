@@ -35,8 +35,8 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
 <listitem><para>
   <emphasis role="bold">gcc</emphasis> - zalecanymi wersjami s±: <emphasis role="bold">2.95.3</emphasis>
   (mo¿e <emphasis role="bold">2.95.4</emphasis>) i <emphasis role="bold">3.2+</emphasis>.
-  <emphasis role="bold">Nigdy</emphasis> nie u¿ywaj 2.96 lub 3.0.x! Tworz± one
-  wadliwy kod dla <application>MPlayera</application>. Je¿eli zdecydujesz siê
+  <emphasis role="bold">Nigdy</emphasis> nie u¿ywaj 2.96 lub 3.0.x! Generuj± one
+  wadliwy kod <application>MPlayera</application>. Je¿eli zdecydujesz siê
   na zmianê gcc z 2.96, nie rób tego na korzy¶æ 3.x tylko dlatego, ¿e jest nowsze! Wczesne
   wydania 3.x mia³y jeszcze wiêcej b³êdów ni¿ 2.96. Spróbuj obni¿yæ wersjê do 2.95.x
   (obni¿ równie¿ wersjê <systemitem class="library">libstdc++</systemitem>, inne
@@ -177,7 +177,7 @@ Potrzebujesz do¶æ nowego sprzêtu. Je¶li u¿ywasz Linuksa, zalecane s± j±dra z ser
   Cechy:
   <itemizedlist>
   <listitem><simpara>
-    potrzebujesz tego do zakodowania, na przyk³ad, filmów nagranych z u¿yciem
+    potrzebujesz tego do odtwarzania i zakodowania, na przyk³ad, filmów nagranych z u¿yciem
     ró¿nych kompresorów sprzêtowych, jak tunery, kamery cyfrowe
     (na przyk³ad: DV, ATI VCR, MJPEG)
     </simpara></listitem>
@@ -516,7 +516,7 @@ w g³ównym katalogu <application>MPlayera</application>. Przeczytaj rozdzia³
 <para>
 <emphasis role="bold">Zawsze przejrzyj wyniki</emphasis>
 <filename>./configure</filename> i plik
-<filename>configure.log</filename>, zawieraj± informacje o tym, co bêdzie zbudowane,
+<filename>configure.log</filename>, zawieraj± one informacje o tym, co bêdzie zbudowane,
 a co nie. Mo¿esz równie¿ obejrzeæ pliki
 <filename>config.h</filename> i <filename>config.mak</filename>.
 Je¿eli masz zainstalowane jakie¶ biblioteki, ale nie s± one wykrywane przez
@@ -579,11 +579,11 @@ program korzysta³ ze skórki w katalogu
 
 <para>
 <application>MPlayer</application> mo¿e wy¶wietlaæ napisy podczas odtwarzania
-filmu. Obecnie nastêpuj±ce formaty s± obs³ugiwane:
+filmu. Obecnie obs³ugiwane s± nastêpuj±ce formaty:
 <itemizedlist>
 <listitem><para>VOBsub</para></listitem>
 <listitem><para>OGM</para></listitem>
-<listitem><para>CC (zamkniêty format napisów)</para></listitem>
+<listitem><para>CC (closed caption)</para></listitem>
 <listitem><para>MicroDVD</para></listitem>
 <listitem><para>SubRip</para></listitem>
 <listitem><para>SubViewer</para></listitem>
@@ -679,10 +679,10 @@ musisz przekazaæ opcjê <option>-sub
 Je¿eli podczas u¿ywania napisów w formacie MicroDVD zauwa¿ysz rosn±ce opó¼nienie
 miêdzy nimi a filmem, to prawdopodobnie ilo¶æ klatek na sekundê filmu ró¿ni siê
 od warto¶ci, do której zosta³y przystosowane napisy.
-Zauwa¿, ¿e format ten korzysta z bezwzglêdnych numerów ramek do wy¶wietlania
-napisów w odpowiednim momencie, ale nie zawiera informacji o warto¶ci fps w
-sobie, dlatego powiniene¶ skorzystaæ z opcji <option>-subfps</option>.
-Je¿eli chcia³by¶ rozwi±zaæ ten problem ostatecznie, musisz rêcznie zmieniæ
+Zauwa¿, ¿e format ten korzysta z bezwzglêdnych numerów klatek do wy¶wietlania
+napisów w odpowiednim momencie, ale nie zawiera w sobie informacji o warto¶ci fps,
+dlatego powiniene¶ skorzystaæ z opcji <option>-subfps</option>.
+Je¿eli chcia³by¶ trwale rozwi±zaæ ten problem, musisz rêcznie zmieniæ
 warto¶æ framerate pliku z napisami.
 <application>MPlayer</application> mo¿e zrobiæ to za ciebie:
 
@@ -746,7 +746,7 @@ filmu, itp.
 <title>Instalacja OSD i napisów</title>
 
 <para>
-Bêdziesz potrzebowa³ paczki zwieraj±cej czcionkê dla <application>MPlayera</application>,
+Bêdziesz potrzebowa³ paczki zawieraj±cej czcionkê dla <application>MPlayera</application>,
 ¿eby móc skorzystaæ z OSD/NAPISÓW. Jest wiele sposobów, aby j± uzyskaæ:
 </para>
 
