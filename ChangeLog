@@ -36,6 +36,7 @@ MPlayer (1.0)
     * WNV1 support via lavc
     * AASC (Autoderk RLE video) support via lavc
     * LOCO video support via lavc
+    * fixed Layer 1 stereo playback via mp3lib
 
     Demuxers:
     * vqf demuxer
@@ -82,6 +83,7 @@ MPlayer (1.0)
     * faster af_format for most common cases
     * float handling in the audio filter layer finally fixed
     * audio plugins finally removed
+    * updated HRTF filter
 
     MEncoder:
     * new experimental MPEG muxer, compatible with DVD and (S)VCD
