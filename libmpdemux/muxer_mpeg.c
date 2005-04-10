@@ -66,7 +66,7 @@ static const char *aspect_ratios[] = {
 static char *conf_mux = "mpeg2";
 static uint16_t conf_packet_size = 0;		//dvd
 static uint32_t conf_muxrate = 0;		//kb/s
-static char *conf_vaspect = NULL; 
+static float conf_vaspect = 0; 
 static float conf_vframerate = 0;
 static uint32_t conf_vwidth = 0, conf_vheight = 0, conf_panscan_width = 0, conf_panscan_height = 0;
 static uint32_t conf_vbitrate = 0;
@@ -162,7 +162,7 @@ m_option_t mpegopts_conf[] = {
 	{"format", &(conf_mux), CONF_TYPE_STRING, 0, 0 ,0, NULL},
 	{"size", &(conf_packet_size), CONF_TYPE_INT, CONF_RANGE, 0, 65535, NULL},
 	{"muxrate", &(conf_muxrate), CONF_TYPE_INT, CONF_RANGE, 0, 12000000, NULL},	//12 Mb/s
-	{"vaspect", &(conf_vaspect), CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"vaspect", &(conf_vaspect), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
 	{"vframerate", &(conf_vframerate), CONF_TYPE_FLOAT, 0, 0, 0, NULL},
 	{"vwidth", &(conf_vwidth), CONF_TYPE_INT, CONF_RANGE, 1, 4095, NULL},
 	{"vheight", &(conf_vheight), CONF_TYPE_INT, CONF_RANGE, 1, 4095, NULL},
@@ -2450,16 +2450,19 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   setup_sys_params(priv);
 
   priv->skip_padding = conf_skip_padding;
-  if(conf_vaspect != NULL)
+  if(conf_vaspect > 0)
   {
-	if(! strcmp(conf_vaspect, "1/1"))
-		priv->vaspect = ASPECT_1_1;
-	else if(! strcmp(conf_vaspect, "4/3"))
+	int asp = (int) (conf_vaspect * 1000.0f);
+	if(asp >= 1332 && asp <= 1334)
 		priv->vaspect = ASPECT_4_3;
-	else if(! strcmp(conf_vaspect, "16/9"))
+	else if(asp >= 1776 && asp <= 1778)
 		priv->vaspect = ASPECT_16_9;
-	else if(! strcmp(conf_vaspect, "2.21/1"))
+	else if(asp >= 2209 && asp <= 2211)
 		priv->vaspect = ASPECT_2_21_1;
+	else if(asp == 1000)
+		priv->vaspect = ASPECT_1_1;
+	else
+		mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR: unrecognized aspect %.3f\n", conf_vaspect);
   }
   
   priv->vframerate = 0;		// no change
