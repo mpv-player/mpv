@@ -2,7 +2,7 @@
 // MPlayer-pl translation team, mplayer-pl.emdej.com
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 1.157
+// Synced with help_mp-en.h 1.167
 
 // ========================= MPlayer help ===========================
 
@@ -211,6 +211,11 @@ static char help_text[]=
 #define MSGTR_WritingAVIHeader "Zapisujê nag³ówek AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d powtórzona(e) ramka(i)!\n"
 #define MSGTR_SkipFrame "\nOpuszczam ramkê!\n"
+#define MSGTR_ResolutionDoesntMatch "\nNowy film ma inn± rozdzielczo¶æ lub przestrzeñ kolorów ni¿ poprzedni.\n"
+#define MSGTR_FrameCopyFileMismatch "\nWszystkie filmy musz± mieæ identyczne fps, rozdzielczo¶æ i przestrzeñ kolorów przy -ovc copy.\n"
+#define MSGTR_AudioCopyFileMismatch "\nWszystkie filmy musz± mieæ identyczne kodeki i formaty audio przy -oac copy.\n"
+#define MSGTR_NoSpeedWithFrameCopy "UWAGA: Nie ma gwarancji ¿e -speed dzia³a prawid³owo przy -oac copy"\
+"Kodowanie mo¿e byæ popsute!\n"
 #define MSGTR_ErrorWritingFile "%s B³±d przy zapisie pliku.\n"
 #define MSGTR_WritingAVIIndex "\nZapisujê indeks AVI...\n"
 #define MSGTR_FixupAVIHeader "Naprawiam nag³ówek AVI...\n"
@@ -331,6 +336,9 @@ static char help_text[]=
 "mw-us => 40kbps/mono        voice => 56kbps/mono\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
+#define MSGTR_LameCantInit "Nie mo¿na ustawiæ opcji LAME, sprawd¼ bitrate/czêstotliwo¶ci "\
+"próbkowania. Niektóre bardzo niskie bitrate (<32) wymagaj± ni¿szych czêstotliwo¶ci próbkowania "\
+"(n.p. -srate 8000). Je¶li wszysto zawiedzie wypróbuj wbudowane ustawienie."
 #define MSGTR_ConfigfileError "b³±d pliku konfiguracyjnego"
 #define MSGTR_ErrorParsingCommandLine "b³±d przy przetwarzaniu wiersza poleceñ"
 #define MSGTR_VideoStreamRequired "Strumieñ video jest wymagany!\n"
@@ -517,8 +525,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Informacje %s o demuxerze s± ju¿ obecne!\n"
 #define MSGTR_ClipInfo "Informacje o klipie:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Wykryto zawarto¶æ 30fps NTSC, zmieniam liczbê ramek na sekundê.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: Wykryto progresywn± zawarto¶æ 24fps NTSC, zmieniam liczbê ramek na sekundê.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: Wykryto zawarto¶æ 30000/1001fps NTSC, zmieniam liczbê ramek na sekundê.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: Wykryto progresywn± zawarto¶æ 240000/1001fps NTSC, zmieniam liczbê ramek na sekundê.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Nie mogê otworzyæ kodeka.\n"
@@ -734,6 +742,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DoNotPlaySound "Nie odtwarzaj d¼wiêku"
 #define MSGTR_PREFERENCES_NormalizeSound "Normalizuj d¼wiêk"
 #define MSGTR_PREFERENCES_EnEqualizer "W³±cz equalizer (korektor)"
+#define MSGTR_PREFERENCES_SoftwareMixer "W³±cz Mikser Programowy"
 #define MSGTR_PREFERENCES_ExtraStereo "W³±cz extra stereo"
 #define MSGTR_PREFERENCES_Coefficient "Wspó³czynnik:"
 #define MSGTR_PREFERENCES_AudioDelay "Opó¼nienie d¼wiêku"
@@ -892,6 +901,16 @@ static char help_text[]=
 #define MSGTR_VO_NoValueSpecified "Nie podano ¿adnej warto¶ci."
 #define MSGTR_VO_UnknownSuboptions "Nieznana podopcja(e)"
 
+// vo_aa.c
+
+#define MSGTR_VO_AA_HelpHeader "\n\nAAlib ma nastêpuj±ce podopcje:\n"
+#define MSGTR_VO_AA_AdditionalOptions "Dodatkowe opcje obs³ugiwane przez vo_aa:\n" \
+"  help        wy¶wietla tê wiadomo¶æ\n" \
+"  osdcolor    ustawia kolor osd\n  subcolor    ustawia kolor napisów\n" \
+"        parametry kolorów to:\n           0 : normalny\n" \
+"           1 : ciemny\n           2 : jasny\n           3 : pogrubiony\n" \
+"           4 : odwrócony\n           5 : specjalny\n\n\n"
+
 // vo_jpeg.c
 #define MSGTR_VO_JPEG_ProgressiveJPEG "Progresywny JPEG w³±czony."
 #define MSGTR_VO_JPEG_NoProgressiveJPEG "Progresywny JPEG wy³±czony."
@@ -938,7 +957,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup: Mikser karty d¼wiêkowej nie ma kana³u '%s', u¿ywam domy¶lnego.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Nie mogê otworzyæ urz±dzenia audio %s: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Nie mogê utworzyæ deskryptora blokuj±cego: %s\n"
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Nie mogê ustawiæ urz±dzenia audio %s na wyj¶cie AC3, próbujê S16...\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] Nie mogê ustawiæ urz±dzenia audio %s na wyj¶cie %s, próbujê %s...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Nie mogê ustawiæ urz±dzenia audio na %d kana³ów.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: sterownik nie obs³uguje SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Twój sterownik d¼wiêku NIE obs³uguje select()  ***\n Przekompiluj MPlayera z #undef HAVE_AUDIO_SELECT w config.h !\n\n"
