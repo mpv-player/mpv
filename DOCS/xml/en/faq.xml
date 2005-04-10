@@ -1337,6 +1337,22 @@ tool set).
 
 <qandaentry>
 <question><para>
+How can I fix an AVIs with broken index or interleaving?
+</para></question>
+<answer><para>
+Simply copy the video and audio streams into a new file, and
+<application>MEncoder</application> generates the index.
+Of course this cannot fix possible bugs in the video and/or audio streams.
+It also fixes files with broken interleaving, thus the
+<option>-ni</option> option will not be needed for them anymore.
+<screen>
+mencoder -idx <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 I can't encode DVD subtitles into the AVI!
 </para></question>
 <answer><para>
