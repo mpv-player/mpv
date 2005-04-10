@@ -141,7 +141,10 @@ static void draw_osd(struct vf_instance_s* vf_,int w,int h){
 	// yep, we're expanding image, not just copy.
 	if(vf->dmpi->planes[0]!=vf->priv->fb_ptr){
 	    // double buffering, so we need full clear :(
-	    remove_func(0,0,vf->priv->exp_w,vf->priv->exp_h);
+	    if (vf->priv->exp_y > 0)
+		remove_func_2(0,0,vf->priv->exp_w,vf->priv->exp_y);
+	    if (vf->priv->exp_y+h < vf->priv->exp_h)
+		remove_func_2(0,vf->priv->exp_y+h,vf->priv->exp_w,vf->priv->exp_h-h-vf->priv->exp_y);
 	} else {
 	    // partial clear:
 	    vo_remove_text(vf->priv->exp_w,vf->priv->exp_h,remove_func);
@@ -261,10 +264,23 @@ static void draw_slice(struct vf_instance_s* vf,
 	vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
 			   vf->dmpi->w,vf->priv->exp_y,0,0);
     vf_next_draw_slice(vf,src,stride,w,h,x+vf->priv->exp_x,y+vf->priv->exp_y);
-    if(vf->priv->exp_y+vf->h<vf->dmpi->h && y+h == vf->h)
-	vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
+    if(vf->priv->exp_y+vf->h<vf->dmpi->h && y+h == vf->h) {
+	unsigned char *src2[MP_MAX_PLANES];
+	src2[0] = vf->dmpi->planes[0]
+		+ (vf->priv->exp_y+vf->h)*vf->dmpi->stride[0];
+	if(vf->dmpi->flags&MP_IMGFLAG_PLANAR){
+	    src2[1] = vf->dmpi->planes[1]
+		+ ((vf->priv->exp_y+vf->h)>>vf->dmpi->chroma_y_shift)*vf->dmpi->stride[1];
+	    src2[2] = vf->dmpi->planes[2]
+		+ ((vf->priv->exp_y+vf->h)>>vf->dmpi->chroma_y_shift)*vf->dmpi->stride[2];
+	} else {
+	    src2[1] = vf->dmpi->planes[1]; // passthrough rgb8 palette
+	}
+	
+	vf_next_draw_slice(vf, src2, vf->dmpi->stride,
 			   vf->dmpi->w,vf->dmpi->h-(vf->priv->exp_y+vf->h),
 			   0,vf->priv->exp_y+vf->h);
+    }
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
