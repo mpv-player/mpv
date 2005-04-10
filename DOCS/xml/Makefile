@@ -24,6 +24,7 @@ help:
 	@echo "clean-html-single : Purge the 'HTML-single' directory."
 	@echo "clean-html-chunked: Purge the 'HTML' directory."
 	@echo "clean             : Purge the 'HTML' and 'HTML-single' directories."
+	@echo "releaseclean      : Remove generated files but keep the HTML."
 	@echo "distclean         : Remove ALL generated files."
 	@echo "distclean-LANG    : Remove ALL generated files for one language."
 	@echo "Substitute LANG for one of $(SUBDIRS)"
@@ -46,9 +47,11 @@ clean-html-chunked:
 clean-html-single:
 	-rm -rf $(HTML_SINGLE)
 
-.PHONY: distclean
-distclean: clean-html-chunked clean-html-single $(addprefix distclean-,$(SUBDIRS))
+.PHONY: releaseclean
+releaseclean: $(addprefix distclean-,$(SUBDIRS))
 	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
+
+distclean: clean releaseclean
 
 xsltproc.sh xmllint.sh:
 	sh configure
