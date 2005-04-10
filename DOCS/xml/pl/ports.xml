@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.60 -->
+<!-- synced with 1.61 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -421,7 +421,7 @@ wolna. Używaj SDL.
   Nie ma jeszcze interfejsu GUI, ale wersja dla wiersza poleceń jest już prawie w pełni
   funkcjonalna. <ulink url="../../tech/patches.txt">Łatki</ulink> są zawsze mile widziane.
   Powinieneś sprawdzić listę
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>,
+  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>,
   aby uzyskać pomoc albo otrzymać najnowsze informacje.</para>
 
 <para>Najlepsze wyniki są osiągane ze sterownikami wyjściowymi video DirectX
