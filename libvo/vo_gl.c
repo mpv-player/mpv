@@ -93,6 +93,10 @@ static void resize(int x,int y){
   glLoadIdentity();
 
   if (!scaled_osd) {
+#ifdef HAVE_FREETYPE
+  // adjust font size to display size
+  force_load_font = 1;
+#endif
   vo_osd_changed(OSDTYPE_OSD);
   }
 }
