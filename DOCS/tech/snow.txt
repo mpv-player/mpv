@@ -10,14 +10,15 @@ For this reason, MEncoder will not encode without 'vstrict=-1' on the
 command line.
 
 
-OPTIONS OBEYED BY SNOW
+OPTIONS RECOGNIZED BY SNOW
 
  * vqscale=<0.01-255>
-   Encoding quality, sane range 1-10, default: 0 (lossless).
+   Encoding quality, sane range 1-10, default: 0 (lossless). May be
+   fractional.
    A given quality in snow needs a somewhat lower qscale than the same
    quality in MPEG-4.
    Note that 0 may not be specified; if you want lossless encoding, you
-   must leave out vqscale. (Yes, quantizer can be fractional.)
+   must leave out vqscale.
 
  * cmp, subcmp, mbcmp
    Set the comparison function, default: 0 (SAD).
@@ -34,9 +35,9 @@ OPTIONS OBEYED BY SNOW
 
  * last_pred=<0-3>
    Tries a few extra predicted motion vectors before doing EPZS search,
-   default=0.
+   default: 0.
    This option has negligible effect on both speed and quality of snow,
-   so just leave it off. (it does, however, help mpeg4.)
+   so just leave it off. (It does, however, help MPEG-4.)
 
  * qpel
    Refines motion estimation, default: off.
@@ -46,7 +47,7 @@ OPTIONS OBEYED BY SNOW
  * v4mv
    Allows smaller motion partitions, default: off.
    The current MB decision algorithm doesn't make very good use of this:
-   It improves quality, but also increases bitrate. (and you could get
+   It improves quality, but also increases bitrate. (You could get
    more quality per bitrate by reducing quantizer instead.)
 
 
