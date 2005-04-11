@@ -1337,7 +1337,7 @@ tool set).
 
 <qandaentry>
 <question><para>
-How can I fix AVI file(s) with broken index or interleaving?
+How can I fix AVI files with broken index or interleaving?
 </para></question>
 <answer><para>
 Simply copy the video and audio streams into a new file, and
