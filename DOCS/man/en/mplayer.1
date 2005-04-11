@@ -1290,7 +1290,7 @@ Use hardware MJPEG compression (if the card supports it).
 When using this option, you do not need to specify the width and height
 of the output window, because MPlayer will determine it automatically
 from the decimation value (see below).
-.IPs decimation=<1,2,4>
+.IPs decimation=<1|2|4>
 choose the size of the picture that will be compressed by hardware
 MJPEG compression:
 .RSss
@@ -2314,7 +2314,7 @@ happens if the hardware scaler can stretch the image to its original size.
 Use this option to force decimation.
 .
 .TP
-.B \-zrhdec <1,2,4> (\-vo zr only)
+.B \-zrhdec <1|2|4> (\-vo zr only)
 Horizontal decimation: Ask the driver to send only every 2nd or 4th
 line/\:pixel of the input image to the MJPEG card and use the scaler
 of the MJPEG card to stretch the image to its original size.
@@ -2333,7 +2333,7 @@ Specify the TV norm as PAL or NTSC (default: no change).
 A number from 1 (best) to 20 (worst) representing the JPEG encoding quality.
 .
 .TP
-.B \-zrvdec <1,2,4> (\-vo zr only)
+.B \-zrvdec <1|2|4> (\-vo zr only)
 Vertical decimation: Ask the driver to send only every 2nd or 4th
 line/\:pixel of the input image to the MJPEG card and use the scaler
 of the MJPEG card to stretch the image to its original size.
@@ -6407,7 +6407,7 @@ quality correction in %
 initial complexity (pass\ 1)
 .
 .TP
-.B vqsquish=<0,1>
+.B vqsquish=<0|1>
 Specify how to keep the quantizer between qmin and qmax (pass\ 1/\:2).
 .PD 0
 .RSs
@@ -6447,7 +6447,7 @@ JVT recommendation
 .PD 1
 .
 .TP
-.B vstrict=<-1,0,1>
+.B vstrict=<-1|0|1>
 strict standard compliance
 .PD 0
 .RSs
@@ -8015,11 +8015,11 @@ When used with init_adelay the muxer drops the part of audio that was
 anticipated.
 .
 .TP
-.B vwidth, vheight=<1,4095>
+.B vwidth, vheight=<1\-4095>
 Set the video width and height when video is MPEG-1/2.
 .
 .TP
-.B vpswidth, vpsheight=<1,4095>
+.B vpswidth, vpsheight=<1\-4095>
 Set pan and scan video width and height when video is MPEG-2.
 .
 .TP
