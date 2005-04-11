@@ -105,8 +105,8 @@ Enhancements:
 
  * implement Jack Transport API
 
- * stream quality selection, possibly based on available bandwidth
-
+ * Stream quality selection, possibly based on available bandwidth.
+   Currently only available for MMS-over-HTTP (libmpdemux/asf_streaming.c).
 
 
 Difficult stuff:
