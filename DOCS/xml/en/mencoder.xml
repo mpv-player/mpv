@@ -619,12 +619,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   audio track(s), so you should <link linkend="menc-feat-dvd-mpeg4-audio">rip
   those</link> first.
   You can compute the bitrate with the following equation:
-  <equation>bitrate = (target_size_in_Mbytes - sound_size_in_Mbytes) *
-  1024 * 1024 / length_in_secs * 8 / 1000</equation>
+  <systemitem>bitrate = (target_size_in_Mbytes - sound_size_in_Mbytes) *
+  1024 * 1024 / length_in_secs * 8 / 1000</systemitem>
   For instance, to squeeze a two-hour movie onto a 702MB CD, with 60MB
   of audio track, the video bitrate will have to be:
-  <equation>(702 - 60) * 1024 * 1024 / (120*60) * 8 / 1000
-  = 740kbps</equation>
+  <systemitem>(702 - 60) * 1024 * 1024 / (120*60) * 8 / 1000
+  = 740kbps</systemitem>
 </para>
 
 </sect2>
@@ -802,7 +802,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   First, you should compute the encoded aspect ratio:
-  <equation>ARc = (Wc x (ARa / PRdvd )) / Hc</equation>
+  <systemitem>ARc = (Wc x (ARa / PRdvd )) / Hc</systemitem>
 <itemizedlist>
 <title>where:</title>
 <listitem><para>
@@ -820,8 +820,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Then, you can compute the X and Y resolution, according to a certain
   Compression Quality (CQ) factor:
-  <equation>ResY = INT(SQRT( 1000*Bitrate/25/ARc/CQ )/16) * 16</equation>
-  <equation>ResX = INT( ResY * ARc / 16) * 16</equation>
+  <systemitem>ResY = INT(SQRT( 1000*Bitrate/25/ARc/CQ )/16) * 16</systemitem>
+  <systemitem>ResX = INT( ResY * ARc / 16) * 16</systemitem>
 </para>
 
 <para>
