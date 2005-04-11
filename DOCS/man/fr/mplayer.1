@@ -1,4 +1,4 @@
-.\" synced with 1.928
+.\" synced with 1.932
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -462,13 +462,13 @@ gèrent pas les retours chariot (c-a-d \\r).
 .B \-priority <prio> (Windows uniquement)
 Défini le niveau de priorité de MPlayer suivant les priorités prédéfinies
 de Windows
-.sp 1
 Valeurs possibles de <prio>\ :
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
+.RE
 .sp 1
-.I Attention\ :
-.br
+.RS
+.I ATTENTION\ :
 L'utilisation de la priorité realtime (temps-réel) peut figer le système.
 .RE
 .
@@ -1381,7 +1381,7 @@ En utilisant cette option, vous n'avez pas besoin de spécifier la largeur
 et la hauteur de la fenêtre de sortie, car MPlayer la déterminera
 automatiquement d'après la valeur affectée à l'option decimation
 (voir ci-dessous).
-.IPs decimation=<1,2,4>
+.IPs decimation=<1|2|4>
 choisit la taille de l'image qui sera compressée matériellement\ :
 .RSss
 1: pleine résolution
@@ -2479,7 +2479,7 @@ Forcer le sous-échantillonnage\ : le sous-échantillonnage, paramétré via
 \-zrhdec et \-zrvdec, ne fonctionne que si le zoom matériel peut étirer
 l'image à sa taille originale.
 Utilisez cette option pour forcer le sous-échantillonnage.
-\-zrhdec <1,2,4> (\-vo zr uniquement)
+\-zrhdec <1|2|4> (\-vo zr uniquement)
 Sous-échantillonnage horizontal\ : Demande au pilote de n'envoyer que chaque
 2ème ou 4ème ligne/\:pixel de l'image à la carte MJPEG et d'utiliser
 le zoom de la carte MJPEG pour étirer l'image à sa taille initiale.
@@ -2500,7 +2500,7 @@ JPEG.
 1 est la meilleure qualité et 20 la plus mauvaise.
 .
 .TP
-.B \-zrvdec <1,2,4> (\-vo zr uniquement)
+.B \-zrvdec <1|2|4> (\-vo zr uniquement)
 Sous-échantillonnage vertical\ : Demande au pilote de n'envoyer que chaque
 2ème ou 4ème ligne/\:pixel de l'image à la carte MJPEG et d'utiliser
 le zoom de la carte MJPEG pour étirer l'image à sa taille initiale.
@@ -3829,9 +3829,18 @@ longueur du filtre)
 balayage sinus
 .
 .TP
-.B hrtf\ \ \ 
+.B hrtf[=drapeau]
 Convertit un son multicanaux vers 2 canaux pour un casque stéréo, tout en
 préservant la spatialité du son.
+.sp 1
+.PD 0
+.RS
+.IPs "Drapeau  Signification"
+.IPs "m        décodage du canal arrière en matrice"
+.IPs "s        décodage de 2 canaux en matrice"
+.IPs "0        pas de décodage en matrice (par défaut)"
+.RE
+.PD 1
 .
 .TP
 .B equalizer=[g1:g2:g3:...:g10]
@@ -6722,7 +6731,7 @@ correction de qualité en %
 complexité initiale (passe\ 1)
 .
 .TP
-.B vqsquish=<0,1>
+.B vqsquish=<0|1>
 Définit comment garder le quantum entre qmin et qmax (passe\ 1/\:2).
 .PD 0
 .RSs
@@ -6762,7 +6771,7 @@ recommandation JVT
 .PD 1
 .
 .TP
-.B vstrict=<-1,0,1>
+.B vstrict=<-1|0|1>
 conformité stricte au standard
 .PD 0
 .RSs
@@ -8410,11 +8419,11 @@ le début de la piste sonore qui n'aurait pas été jouée si elle commençait
 avant la vidéo.
 .
 .TP
-.B vwidth, vheight=<1,4095>
+.B vwidth, vheight=<1\-4095>
 Défini la largeur et la hauteur de la vidéo lorsqu'il s'agit de MPEG-1/2.
 .
 .TP
-.B vpswidth, vpsheight=<1,4095>
+.B vpswidth, vpsheight=<1\-4095>
 Défini la largeur et la hauteur de la vidéo pan et scan lorsqu'il s'agit
 de MPEG-1/2.
 .
