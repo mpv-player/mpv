@@ -88,6 +88,16 @@ int pulse_detect(float *sx)
     return 0;
 }
 
+/* Fuzzy matrix coefficient transfer function to "lock" the matrix on
+   a effectively passive mode if the gain is approximately 1 */
+inline float passive_lock(float x)
+{
+   const float x1 = x - 1;
+   const float ax1s = fabs(x - 1) * (1.0 / MATAGCLOCK);
+
+   return x1 - x1 / (1 + ax1s * ax1s) + 1;
+}
+
 /* Unified active matrix decoder for 2 channel matrix encoded surround
    sources */
 inline void matrix_decode(short *in, const int k, const int il,
@@ -105,13 +115,22 @@ inline void matrix_decode(short *in, const int k, const int il,
       (1 + l_fwr + l_fwr);
    float r_gain = (l_fwr + r_fwr) /
       (1 + r_fwr + r_fwr);
-   float lpr_gain = (lpr_fwr + lmr_fwr) /
+   /* The 2nd axis has strong gain fluctuations, and therefore require
+      limits.  The factor corresponds to the 1 / amplification of (Lt
+      - Rt) when (Lt, Rt) is strongly correlated. (e.g. during
+      dialogues).  It should be bigger than -12 dB to prevent
+      distortion. */
+   float lmr_lim_fwr = lmr_fwr > M9_03DB * lpr_fwr ?
+      lmr_fwr : M9_03DB * lpr_fwr;
+   float lpr_gain = (lpr_fwr + lmr_lim_fwr) /
       (1 + lpr_fwr + lpr_fwr);
-   float lmr_gain = (lpr_fwr + lmr_fwr) /
+   float lmr_gain = (lpr_fwr + lmr_lim_fwr) /
+      (1 + lmr_lim_fwr + lmr_lim_fwr);
+   float lmr_unlim_gain = (lpr_fwr + lmr_fwr) /
       (1 + lmr_fwr + lmr_fwr);
    float lpr, lmr;
    float l_agc, r_agc, lpr_agc, lmr_agc;
-   float f, d_gain;
+   float f, d_gain, c_gain, c_agc_cfk;
 
 #if 0
    static int counter = 0;
@@ -119,8 +138,9 @@ inline void matrix_decode(short *in, const int k, const int il,
 
    if(counter == 0)
       fp_out = fopen("af_hrtf.log", "w");
-   fprintf(fp_out, "%g %g %g %g %g ", counter * (1.0 / 48000),
-	   l_gain, r_gain, lpr_gain, lmr_gain);
+   if(counter % 240 == 0)
+      fprintf(fp_out, "%g %g %g %g %g ", counter * (1.0 / 48000),
+	      l_gain, r_gain, lpr_gain, lmr_gain);
 #endif
 
    /*** AXIS NO. 1: (Lt, Rt) -> (C, Ls, Rs) ***/
@@ -132,8 +152,8 @@ inline void matrix_decode(short *in, const int k, const int il,
    *adapt_l_gain = (1 - f) * *adapt_l_gain + f * l_gain;
    *adapt_r_gain = (1 - f) * *adapt_r_gain + f * r_gain;
    /* Matrix */
-   l_agc = in[il] * *adapt_l_gain;
-   r_agc = in[ir] * *adapt_r_gain;
+   l_agc = in[il] * passive_lock(*adapt_l_gain);
+   r_agc = in[ir] * passive_lock(*adapt_r_gain);
    cf[k] = (l_agc + r_agc) * M_SQRT1_2;
    if(decode_rear) {
       lr[kr] = rr[kr] = (l_agc - r_agc) * M_SQRT1_2;
@@ -150,29 +170,39 @@ inline void matrix_decode(short *in, const int k, const int il,
    lpr = (in[il] + in[ir]) * M_SQRT1_2;
    lmr = (in[il] - in[ir]) * M_SQRT1_2;
    /* AGC adaption */
-   d_gain = (fabs(lpr_gain - *adapt_lpr_gain) +
-	     fabs(lmr_gain - *adapt_lmr_gain)) * 0.5;
+   d_gain = fabs(lmr_unlim_gain - *adapt_lmr_gain);
    f = d_gain * (1.0 / MATAGCTRIG);
    f = MATAGCDECAY - MATAGCDECAY / (1 + f * f);
    *adapt_lpr_gain = (1 - f) * *adapt_lpr_gain + f * lpr_gain;
    *adapt_lmr_gain = (1 - f) * *adapt_lmr_gain + f * lmr_gain;
-   /* The 2nd axis has strong gain fluctuations, and therefore require
-      limits.  The factor is tricky.  I think 2 is the reasonable
-      value here, which phase inverts the L, R channel if Lt, Rt is
-      strongly correlated (e.g. during dialogues) (1 would inhibit the
-      steering behavior, > 4 appears to result in distortions). */
-   if(*adapt_lmr_gain > 2 * *adapt_lpr_gain)
-      *adapt_lmr_gain = 2 * *adapt_lpr_gain;
    /* Matrix */
-   lpr_agc = lpr * *adapt_lpr_gain;
-   lmr_agc = lmr * *adapt_lmr_gain;
+   lpr_agc = lpr * passive_lock(*adapt_lpr_gain);
+   lmr_agc = lmr * passive_lock(*adapt_lmr_gain);
    lf[k] = (lpr_agc + lmr_agc) * M_SQRT1_2;
    rf[k] = (lpr_agc - lmr_agc) * M_SQRT1_2;
 
+   /*** CENTER FRONT CANCELLATION ***/
+   /* A heuristic approach exploits that Lt + Rt gain contains the
+      information about Lt, Rt correlation.  This effectively reshapes
+      the front and rear "cones" to concentrate Lt + Rt to C and
+      introduce Lt - Rt in L, R. */
+   /* 0.67677 is the emprical lower bound for lpr_gain. */
+   c_gain = 8 * (*adapt_lpr_gain - 0.67677);
+   c_gain = c_gain > 0 ? c_gain : 0;
+   /* c_gain should not be too high, not even reaching full
+      cancellation (~ 0.50 - 0.55 at current AGC implementation), or
+      the center will s0und too narrow. */
+   c_gain = MATCOMPGAIN / (1 + c_gain * c_gain);
+   c_agc_cfk = c_gain * cf[k];
+   lf[k] -= c_agc_cfk;
+   rf[k] -= c_agc_cfk;
+   cf[k] += c_agc_cfk + c_agc_cfk;
 #if 0
-   fprintf(fp_out, "%g %g %g %g\n",
-	   *adapt_l_gain, *adapt_r_gain,
-	   *adapt_lpr_gain, *adapt_lmr_gain);
+   if(counter % 240 == 0)
+      fprintf(fp_out, "%g %g %g %g %g\n",
+	      *adapt_l_gain, *adapt_r_gain,
+	      *adapt_lpr_gain, *adapt_lmr_gain,
+	      c_gain);
    counter++;
 #endif
 }

@@ -4,6 +4,7 @@
 
 /* Amplitude scaling factors */
 #define M17_0DB		0.1414213562
+#define M9_03DB		0.3535533906
 #define M6_99DB		0.4472135955
 #define M4_77DB		0.5773502692
 #define M3_01DB		0.7071067812
@@ -25,6 +26,10 @@
 
 #define MATAGCTRIG	8.0	/* (Fuzzy) AGC trigger */
 #define MATAGCDECAY	1.0	/* AGC baseline decay rate (1/samp.) */
+#define MATAGCLOCK	0.2	/* AGC range (around 1) where the
+				   matrix behaves passively */
+#define MATCOMPGAIN	0.37	/* Cross talk compensation gain,
+				   0.50 - 0.55 is full cancellation. */
 
 #define CFECHODELAY	360	/* Center front echo delay (samples) */
 #define CFECHOAMPL	M17_0DB	/* Center front echo amplitude */
