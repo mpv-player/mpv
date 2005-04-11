@@ -101,10 +101,12 @@ sub_visibility
 get_sub_visibility
     Print out subtitle visibility (1 == on, 0 == off).
 
-sub_select
-    Cycle through the available subtitles. Supported subtitle sources are
-    -sub options on the command line, VOBsubs, DVD subtitles, and Ogg text
-    streams.
+sub_select [<value>]
+    Display subtitle with index <value>. Turn subtitle display off if
+    <value> is -1 or greater than the highest available subtitle index.
+    Cycle through the available subtitles if <value> is omitted or less
+    than -1. Supported subtitle sources are -sub options on the command
+    line, VOBsubs, DVD subtitles, and Ogg and Matroska text streams.
 
 sub_log
     Logs the current or last displayed subtitle together with filename

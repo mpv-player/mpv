@@ -3375,8 +3375,12 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_SUB_SELECT:
     if (global_sub_size) {
         int source = -1;
+        int v = cmd->args[0].v.i;
 
-        global_sub_pos++;
+        if (v < -1)
+            global_sub_pos++;
+        else
+            global_sub_pos = v;
         if (global_sub_pos >= global_sub_size)
             global_sub_pos = -1;
         if (global_sub_pos >= 0)
