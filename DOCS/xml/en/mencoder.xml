@@ -656,7 +656,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem>
 <para>
   MPEG-type compression is also highly dependent on frequency domain
-  transformats, in particular the Discrete Cosine Transform (DCT),
+  transformations, in particular the Discrete Cosine Transform (DCT),
   which is similar to the Fourier transform. This sort of encoding is
   efficient for representing patterns and smooth transitions, but it
   has a hard time with sharp edges. In order to encode them it must
