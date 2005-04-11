@@ -38,6 +38,7 @@ MPlayer (1.0)
     * AASC (Autoderk RLE video) support via lavc
     * LOCO video support via lavc
     * fixed Layer 1 stereo playback via mp3lib
+    * VMnc (VMware video) decoder via binary DLL
 
     Demuxers:
     * vqf demuxer
