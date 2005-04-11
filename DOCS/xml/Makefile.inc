@@ -30,12 +30,15 @@ endif
 HTML_STYLESHEET ?= ../default.css
 
 # This is the main target...
-.PHONY: all html-chunked html-single
+.PHONY: all html-chunked html-single xmllint
 all: html-chunked html-single
 html-chunked: $(HTMLDIR)/index.html
 html-single: $(HTMLFILE)
 
 SYMLINKS_DEPS:=$(if $(findstring yes,$(USE_SYMLINKS)), $(patsubst ../en/%,%,$(wildcard ../en/*.xml)))
+
+xmllint: main.xml $(SYMLINKS_DEPS)
+	../xmllint.sh $<
 
 $(HTMLDIR)/index.html: main.xml $(CHUNK_XSL_DEPS) $(SYMLINKS_DEPS)
 ifndef HTMLDIR
