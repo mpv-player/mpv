@@ -18,6 +18,8 @@ MPlayer (1.0)
     Drivers:
     * fixed ontop event for some window managers
     * audio output layer cleanup
+    * unified colorkey handling code
+    * vo_xvmc panscan fix
 
     Decoders:
     * TWinVQ decoder via binary DLL
@@ -84,7 +86,7 @@ MPlayer (1.0)
     * big cleanup of audio filter layer
     * faster af_format for most common cases
     * float handling in the audio filter layer finally fixed
-    * audio plugins finally removed
+    * obsolete audio plugins finally removed
     * updated HRTF filter
 
     MEncoder:
