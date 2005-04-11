@@ -7,7 +7,16 @@ _xsltwrapper="xsltproc.sh"
 _xmllintwrapper="xmllint.sh"
 
 echo "Searching for XML catalogs..."
-for _try_catalog in /etc/sgml/catalog /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog /usr/share/apps/ksgmltools2/customization/en/catalog /usr/share/sgml/catalog /usr/local/share/sgml/catalog /usr/lib/sgml/catalog /usr/local/lib/sgml/catalog /usr/share/docbook-xml42/catalog.xml /usr/share/sgml/docbook/xmlcatalog
+for _try_catalog in \
+  /etc/sgml/catalog \
+  /usr/share/sgml/docbook/xml-dtd-4.1.2/xmlcatalog \
+  /usr/share/apps/ksgmltools2/customization/en/catalog \
+  /usr/share/sgml/catalog \
+  /usr/local/share/sgml/catalog \
+  /usr/lib/sgml/catalog \
+  /usr/local/lib/sgml/catalog \
+  /usr/share/docbook-xml42/catalog.xml \
+  /usr/share/sgml/docbook/xmlcatalog
 do
   if test -f "$_try_catalog"
   then
@@ -28,7 +37,14 @@ fi
 
 echo "Searching for stylesheets..."
 echo "Searching for html/chunk.xsl..."
-for _try_chunk_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl /usr/share/docbook-xsl/html/chunk.xsl /usr/share/sgml/docbook/xsl-stylesheets/html/chunk.xsl /usr/share/sgml/docbook/xsl-stylesheets-1.62.4/html/chunk.xsl
+for _try_chunk_xsl in \
+  /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl \
+  /usr/share/sgml/docbook/yelp/docbook/html/chunk.xsl \
+  /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl \
+  /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl \
+  /usr/share/docbook-xsl/html/chunk.xsl \
+  /usr/share/sgml/docbook/xsl-stylesheets/html/chunk.xsl \
+  /usr/share/sgml/docbook/xsl-stylesheets-1.62.4/html/chunk.xsl
 do
   if test -f "$_try_chunk_xsl"
   then
@@ -47,7 +63,14 @@ else
 fi
 
 echo "Searching for html/docbook.xsl..."
-for _try_docbook_xsl in /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl /usr/share/sgml/docbook/yelp/docbook/html/docbook.xsl /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl /usr/local/share/sgml/docbook/yelp/docbook/html/docbook.xsl /usr/share/docbook-xsl/html/docbook.xsl /usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl /usr/share/sgml/docbook/xsl-stylesheets-1.62.4/html/docbook.xsl
+for _try_docbook_xsl in \
+  /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl \
+  /usr/share/sgml/docbook/yelp/docbook/html/docbook.xsl \
+  /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl \
+  /usr/local/share/sgml/docbook/yelp/docbook/html/docbook.xsl \
+  /usr/share/docbook-xsl/html/docbook.xsl \
+  /usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl \
+  /usr/share/sgml/docbook/xsl-stylesheets-1.62.4/html/docbook.xsl
 do
   if test -f "$_try_docbook_xsl"
   then
@@ -95,7 +118,13 @@ cat > html-single.xsl << EOF
 EOF
 
 echo "Searching for DTD..."
-for _try_dtd in /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd /usr/share/docbook-xml42/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.1.2*/docbookx.dtd /usr/share/sgml/docbook/xml-dtd-4.2/docbookx.dtd /usr/share/xml/docbook/schema/dtd/4.2/docbookx.dtd /usr/share/sgml/docbook/dtd/4.2/docbookx.dtd
+for _try_dtd in \
+  /usr/share/sgml/docbook/dtd/xml/4.1.2/docbookx.dtd \
+  /usr/share/docbook-xml42/docbookx.dtd \
+  /usr/share/sgml/docbook/xml-dtd-4.1.2*/docbookx.dtd \
+  /usr/share/sgml/docbook/xml-dtd-4.2/docbookx.dtd \
+  /usr/share/xml/docbook/schema/dtd/4.2/docbookx.dtd \
+  /usr/share/sgml/docbook/dtd/4.2/docbookx.dtd
 do
   if test -f "$_try_dtd"
   then
@@ -175,7 +204,11 @@ then
   else
     # Try to find the right jar files for classpath.
     # This must not trigger on something like saxon-fop-6.4.4.jar.
-    for _try_saxon_jar in /usr/share/java/saxon-[0-9]*.jar /usr/local/share/java/saxon-[0-9]*.jar /usr/share/java/saxon.jar /usr/local/share/java/saxon.jar
+    for _try_saxon_jar in \
+      /usr/share/java/saxon-[0-9]*.jar \
+      /usr/local/share/java/saxon-[0-9]*.jar \
+      /usr/share/java/saxon.jar \
+      /usr/local/share/java/saxon.jar
     do
       if test -f "$_try_saxon_jar"
       then
@@ -235,7 +268,9 @@ then
     echo "xsltproc and Saxon XSLT processors not found."
     echo "I will try to use OpenJade or Jade (using '$_jade')."
     echo "They aren't (currently) fully supported, however."
-    for _try_docbook_dsl in /usr/share/sgml/docbook/stylesheet/dsssl/modular/html/docbook.dsl /usr/local/share/sgml/docbook/stylesheet/dsssl/modular/html/docbook.dsl 
+    for _try_docbook_dsl in \
+      /usr/share/sgml/docbook/stylesheet/dsssl/modular/html/docbook.dsl \
+      /usr/local/share/sgml/docbook/stylesheet/dsssl/modular/html/docbook.dsl
     do
       if test -f "$_try_docbook_dsl"
       then
@@ -243,7 +278,9 @@ then
         break
       fi
     done
-    for _try_xml_dcl in /usr/share/sgml/declaration/xml.dcl /usr/local/share/sgml/declaration/xml.dcl
+    for _try_xml_dcl in \
+      /usr/share/sgml/declaration/xml.dcl \
+      /usr/local/share/sgml/declaration/xml.dcl
     do
       if test -f "$_try_xml_dcl"
       then
