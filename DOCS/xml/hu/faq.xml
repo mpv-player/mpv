@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.65 -->
+<!-- synced with 1.72 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -25,7 +25,7 @@ Hogyan fordíthatom le az <application>MPlayer</application>t egy új nyelvre?
 <answer><para>
 Olvasd el a <ulink url="../../tech/translations.txt">fordítás HOGYAN</ulink>-t,
 az elmagyaráz mindent. További segítséget kaphatsz az
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
 levelezési listán.
 </para></answer>
 </qandaentry>
@@ -49,9 +49,9 @@ Hogyan lehetek én is <application>MPlayer</application> fejlesztő?
 Mindig örömmel várjuk a programozókat és a dokumentáció készítőket. Olvasd el a
 <ulink url="../../tech/">technikai dokumentációt</ulink>
 hogy egy kicsit megértsd a dolgokat. Majd fel kell iratkoznod az
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 levelezési listára és elkezdeni kódolni. Ha a dokumentáció készítésében szeretnél segíteni,
-csatlakozz az <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>
+csatlakozz az <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
 levelezési listához!
 </para></answer>
 </qandaentry>
@@ -199,7 +199,7 @@ státuszának listáját a <link linkend="install">telepítési</link> részben.
 </para></question>
 <answer><para>
 Idézet egy <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">levélből</ulink>,
-amit Árpi küldött az <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+amit Árpi küldött az <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">MPlayer-users</ulink>
 listára (az 'ideg' szó leírása alább található):
 <blockquote>
 <para>
@@ -596,6 +596,24 @@ Hogy tudom az <application>MPlayer</application> a háttérben futtatni?
 
 <qandaentry>
 <question><para>
+Nem találom néhány érdekes lejátszási probléma okát.
+</para></question>
+<answer><para>
+Nem maradt valahol egy <filename>codecs.conf</filename> fájlod a
+<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
+<filename>/usr/local/etc/</filename> vagy hasonló helyen? Töröld le,
+egy régi <filename>codecs.conf</filename> fájl ismeretlen problémákat
+okozhat és csak a fejlesztőknek lett szánva a codec támogatások elkészítéséhez.
+Felülbírálja az <application>MPlayer</application> belső codec beállításait,
+ami megbosszulja magát, ha az újabb verziókban inkompatibilis változások
+jelennek meg. Hacsak nem vagy hozzáértő, ez a tuti recept a láthatóan
+véletlenszerű és nehezen azonosítható fagyások és lejátszási problémák esetén.
+Ha még valahol megtalálható a rendszereden, most azonnal töröld le!
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 Hogyan tudok audió/felirat sávot választani a DVD, OGM, Matroska vagy NUT fájlban?
 </para></question>
 <answer><para>
@@ -673,20 +691,6 @@ Ha TrueType betűtípusokat használsz, ellenőrizd, hogy van
 <systemitem class="library">FreeType</systemitem> függvénykönyvtárad telepítve.
 Ellenőrizheted még a feliratodat egy szövegszerkesztőben vagy másik lejátszóval.
 Próbáld meg átkonvertálni másik formátumra.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Nem tudok rájönni pár különös lejátszási probléma okára.
-</para></question>
-<answer><para>
-Nincs egy visszamaradt <filename>codecs.conf</filename> fájlod a
-<filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
-<filename>/usr/local/etc/</filename> vagy hasonló helyen? Töröld le,
-az idejétmúlt <filename>codecs.conf</filename> fájlok furcsa hibákat
-produkálhatnak. Az <application>MPlayer</application> a beépítettet fogja
-használni helyette.
 </para></answer>
 </qandaentry>
 
@@ -837,7 +841,7 @@ Ezt kapom MPEG fájlok lejátszásakor: Can't find codec for video format 0x1000000
 Túl régi, idejétmúlt <filename>codecs.conf</filename> van a
 <filename class="directory">~/.mplayer/</filename>,
 <filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> vagy vmelyik hasonló
+<filename class="directory">/usr/local/etc/</filename> vagy valamelyik hasonló
 könyvtárban. Töröld le, már nincs rá szükség.
 <emphasis role="bold">VAGY</emphasis> van <option>vc=</option> vagy más hasonló
 opció a konfigurációs fájl(aid)ban.
@@ -1342,6 +1346,22 @@ készültek. Megpróbálhatod az
 <application>avimerge</application>-t (a
 <ulink url="http://www.transcoding.org/">transcode</ulink>
 eszközcsomag részei).
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Hogyan tudom megjavítani a hibás indexű vagy átlapolt AVI fájlokat?
+</para></question>
+<answer><para>
+Egyszerűen csak másold át a videó és az audió folyamokat egy új fájlba és
+a <application>MEncoder</application> legenerálja az index-et.
+Természetesen ezzel nem tudod kijavítani a videó és/vagy audió folyamban
+lévő esetleges hibákat. Ez megjavítja a hibás átlapolású fájlokat is,
+így a <option>-ni</option> kapcsolót ezután már nem kell használni hozzájuk.
+<screen>
+mencoder -idx <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
+</screen>
 </para></answer>
 </qandaentry>
 
