@@ -41,6 +41,10 @@ Barat, Zsolt (joyping) <joy@streamminister.de>
     * ao_alsa9 fixes, AC3 passthrough support
     * ao_alsa unified ALSA audio output driver
 
+Barbato, Luca (lu_zero) <lu_zero@gentoo.org>
+    * random AltiVec fixes
+    * other minor fixes
+
 Baryshkov, Dmitry (lumag) <mitya@school.ioffe.ru>
     * Russian documentation translation
     * FLAC decoding support
