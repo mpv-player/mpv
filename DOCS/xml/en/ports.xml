@@ -52,9 +52,9 @@ our bitmap fonts for a while, you can (apt-)get them from
 <sect2 id="rpm">
 <title>RPM packaging</title>
 <para>
-Dominik Mierzejewski created and maintains official Red Hat RPM packages of
-<application>MPlayer</application>. They are available from his
-<ulink url="http://greysector.rangers.eu.org/mplayer.html">homepage</ulink>.
+Dominik Mierzejewski created and maintains the official RPM packages of
+<application>MPlayer</application> for Red Hat and Fedora Core. They are available
+from his <ulink url="http://rpm.greysector.net/mplayer/">repository</ulink>.
 </para>
 
 <para>
