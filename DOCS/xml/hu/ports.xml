@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.60 -->
+<!-- synced with 1.62 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -53,10 +53,9 @@ a betűtípusokból, melyek akár az apt-get segítségével is telepíthetők
 <sect2 id="rpm">
 <title>RedHat csomagolás</title>
 <para>
-Dominik Mierzejweski a "hivatalos" <application>MPlayer</application> csomagok
-karbantartója. A 
-<ulink url="http://greysector.rangers.eu.org/mplayer.html">honlapjáról</ulink>.
-elérhetőek a csomagok.
+Dominik Mierzejewski készítette el és tartja karban az <application>MPlayer</application>
+hivatalos RPM csomagjait a Red Hat-hoz és a Fedora Core-hoz. Elérhetőek ezen a
+<ulink url="http://rpm.greysector.net/mplayer/">helyen</ulink>.
 </para>
 
 <para>
@@ -419,7 +418,7 @@ Használj SDL-t.
   Még nincs GUI-ja, de a parancssoros verzió majdnem teljesen működik.
   <ulink url="../../tech/patches.txt">Javításokat</ulink> mindig örömmel fogadunk.
   Ajánlott szétnézni az
-  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">mplayer-cygwin</ulink>
+  <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
   levelezési listán is a legfrissebb információkért.</para>
 
 <para>A legjobb eredmény a natív DirectX videó kimeneti vezérlővel
