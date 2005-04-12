@@ -873,7 +873,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   stream <link linkend="menc-feat-mpeg4">during the encoding</link>.
   You can also extract the AC3 stream in order to mux it into containers such
   as NUT, Matroska or OGM.
-  <screen>mplayer source_file.vob -aid 129 -dumpaudio -dumpfile sound.ac3</screen>
+  <screen>mplayer <replaceable>source_file.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>sound.ac3</replaceable></screen>
   will dump into the file sound.ac3 the audio track number 129 from the file
   source_file.vob (NB: DVD VOB files usually use a different audio numbering,
   which means that the VOB audio track 129 is the 2nd audio track of the file).
@@ -892,7 +892,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   First of all, you will have to convert the DVD sound into a WAV file that the
   audio codec can use as input.
   For example:
-  <screen>mplayer source_file.vob -ao pcm:file=destination_sound.wav -vc dummy -aid 1 -vo null</screen>
+  <screen>mplayer <replaceable>source_file.vob</replaceable> -ao pcm:file=<replaceable>destination_sound.wav</replaceable> -vc dummy -aid 1 -vo null</screen>
   will dump the second audio track from the file source_file.vob into the file
   destination_sound.wav.
   You may want to normalize the sound before encoding, as DVD audio tracks
@@ -903,7 +903,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   can do the same job.
   You will compress in either Vorbis or MP3.
   For example:
-  <screen>oggenc -q1 destination_sound.wav</screen>
+  <screen>oggenc -q1 <replaceable>destination_sound.wav</replaceable></screen>
   will encode destination_sound.wav with the encoding quality 1, which is
   roughly equivalent to 80Kb/s, and is the minimum quality at which you
   should encode if you care about quality.
