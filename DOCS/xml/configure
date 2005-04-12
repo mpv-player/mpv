@@ -43,8 +43,7 @@ for _try_chunk_xsl in \
   /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/chunk.xsl \
   /usr/local/share/sgml/docbook/yelp/docbook/html/chunk.xsl \
   /usr/share/docbook-xsl/html/chunk.xsl \
-  /usr/share/sgml/docbook/xsl-stylesheets/html/chunk.xsl \
-  /usr/share/sgml/docbook/xsl-stylesheets-1.62.4/html/chunk.xsl
+  /usr/share/sgml/docbook/xsl-stylesheets*/html/chunk.xsl 
 do
   if test -f "$_try_chunk_xsl"
   then
@@ -69,8 +68,7 @@ for _try_docbook_xsl in \
   /usr/local/share/sgml/docbook/stylesheet/xsl/nwalsh/html/docbook.xsl \
   /usr/local/share/sgml/docbook/yelp/docbook/html/docbook.xsl \
   /usr/share/docbook-xsl/html/docbook.xsl \
-  /usr/share/sgml/docbook/xsl-stylesheets/html/docbook.xsl \
-  /usr/share/sgml/docbook/xsl-stylesheets-1.62.4/html/docbook.xsl
+  /usr/share/sgml/docbook/xsl-stylesheets*/html/docbook.xsl 
 do
   if test -f "$_try_docbook_xsl"
   then
