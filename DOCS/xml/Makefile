@@ -22,7 +22,7 @@ help:
 	@echo "html-chunked      : Build HTML documentation (multiple files)."
 	@echo "html-chunked-LANG : As above, but only one language."
 	@echo "xmllint           : Check syntax of all xml files."
-	@echo "xmlling-LANG      : Check syntax of LANG xml files."
+	@echo "xmllint-LANG      : Check syntax of LANG xml files."
 	@echo "clean-html-single : Purge the 'HTML-single' directory."
 	@echo "clean-html-chunked: Purge the 'HTML' directory."
 	@echo "clean             : Purge the 'HTML' and 'HTML-single' directories."
