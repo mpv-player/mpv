@@ -1365,9 +1365,6 @@ static uint32_t control(uint32_t request, void *data, ... )
 	 return VO_TRUE;
       case VOCTRL_FULLSCREEN:
          vo_x11_fullscreen();
-      case VOCTRL_GET_PANSCAN:
-         if ( !vo_config_count || !vo_fs ) return VO_FALSE;
-         return VO_TRUE;
       // indended, fallthrough to update panscan on fullscreen/windowed switch
       case VOCTRL_SET_PANSCAN:
          if ( ( vo_fs && ( vo_panscan != vo_panscan_amount ) ) || ( !vo_fs && vo_panscan_amount ) )
@@ -1382,7 +1379,9 @@ static uint32_t control(uint32_t request, void *data, ... )
             }
          }
          return VO_TRUE;
-
+      case VOCTRL_GET_PANSCAN:
+         if ( !vo_config_count || !vo_fs ) return VO_FALSE;
+         return VO_TRUE;
       case VOCTRL_SET_EQUALIZER:
       {
       va_list ap;
