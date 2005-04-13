@@ -1,4 +1,4 @@
-.\" synced with 1.929
+.\" synced with 1.932
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -443,11 +443,12 @@ poprawnie znaku powrotu karetki (tzn.\& \\r).
 .TP
 .B \-priority <prio> (Windows only)
 Ustawia priorytet procesu MPlayera wed³ug predefiniowanych ustawieñ Windows.
-.sp 1
 Mo¿liwe warto¶ci <prio>:
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
+.RE
 .sp 1
+.RS
 .I UWAGA:
 .br
 U¿ywanie priorytetu realtime mo¿e spowodowaæ zawieszenie systemu.
@@ -1313,7 +1314,7 @@ U¿ywa sprzêtowej kompresji MJPEG (je¿eli karta ma tak± mo¿liwo¶æ).
 Gdy u¿ywasz tej opcji, nie musisz podawaæ szeroko¶ci i wysoko¶ci okna
 wyj¶ciowego, poniewa¿ MPlayer ustali je automatycznie z warto¶ci decimation
 (patrz poni¿ej).
-.IPs decimation=<1,2,4>
+.IPs decimation=<1|2|4>
 wybierz rozmiar obrazu, który bêdzie skompresowany przez sprzêtow± kompresjê
 MJPEG:
 .RSss
@@ -2337,7 +2338,7 @@ jego oryginalnych rozmiarów.
 Ta opcja wymusza dziesi±tkowania.
 .
 .TP
-.B \-zrhdec <1,2,4> (tylko \-vo zr)
+.B \-zrhdec <1|2|4> (tylko \-vo zr)
 Poziome dziesi±tkowanie (decimation): Informuje sterownik by przekazywa³ tylko
 co 2-g± lub 4-t± liniê/\:piksel obrazu do karty MJPEG i u¿y³ urz±dzenia
 skaluj±cego karty do rozci±gniêcia obrazu do jego oryginalnych rozmiarów.
@@ -2356,7 +2357,7 @@ Wybiera normê TV PAL lub NTSC (domy¶lnie: nie zmieniaæ).
 Liczba od 1 (najlepsza) do 20 (najgorsza) okre¶laj±ca jako¶æ kodowania JPEG.
 .
 .TP
-.B \-zrvdec <1,2,4> (tylko \-vo zr)
+.B \-zrvdec <1|2|4> (tylko \-vo zr)
 Pionowe dziesi±tkowanie (decimation): Informuje sterownik by przekazywa³ tylko
 co 2-g± lub 4-t± liniê/\:piksel obrazu do karty MJPEG i u¿y³ urz±dzenia
 skaluj±cego karty do rozci±gniêcia obrazu do jego oryginalnych rozmiarów.
@@ -3686,8 +3687,8 @@ zachowuj±c przestrzenno¶æ d¼wiêku.
 .PD 0
 .RS
 .IPs "Flaga  Znaczenie"
-.IPs "s      macierzowe dekodowanie tylnego kana³u"
-.IPs "m      dwukana³owe dekodowanie macierzowe"
+.IPs "m      macierzowe dekodowanie tylnego kana³u"
+.IPs "s      dwukana³owe dekodowanie macierzowe"
 .IPs "0      brak dekodowania macierzowego (domy¶lne)"
 .RE
 .PD 1
@@ -6490,7 +6491,7 @@ korekcja jako¶ci w %
 pocz±tkowa z³o¿ono¶æ (przebieg\ 1)
 .
 .TP
-.B vqsquish=<0,1>
+.B vqsquish=<0|1>
 Okre¶la jak ma siê zachowywaæ kwantyzator miêdzy qmin a qmax (przebieg\ 1/\:2).
 .PD 0
 .RSs
@@ -6530,7 +6531,7 @@ zalecane przez JVT
 .PD 1
 .
 .TP
-.B vstrict=<-1,0,1>
+.B vstrict=<-1|0|1>
 ¶cis³a zgodno¶æ ze standardami
 .PD 0
 .RSs
@@ -8118,11 +8119,11 @@ U¿ywane razem z init_delay powoduje ¿e muxer opuszcza oczekiwany kawa³ek
 audio.
 .
 .TP
-.B vwidth, vheight=<1,4095>
+.B vwidth, vheight=<1\-4095>
 Ustawia wysoko¶æ i szeroko¶æ filmu gdy jest to MPEG-1/2.
 .
 .TP
-.B vpswidth, vpsheight=<1,4095>
+.B vpswidth, vpsheight=<1\-4095>
 Ustawia wysoko¶æ i szeroko¶æ trybu panoramicznego filmu gdy jest to MPEG-2.
 .
 .TP
