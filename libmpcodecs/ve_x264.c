@@ -72,7 +72,6 @@ static int deblock = 1;
 static int deblockalpha = 0;
 static int deblockbeta = 0;
 static int cabac = 1;
-static int cabacidc = -1;
 static int p4x4mv = 0;
 static int p8x8mv = 1;
 static int b8x8mv = 1;
@@ -117,7 +116,6 @@ m_option_t x264encopts_conf[] = {
     {"deblockbeta", &deblockbeta, CONF_TYPE_INT, CONF_RANGE, -6, 6, NULL},
     {"cabac", &cabac, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nocabac", &cabac, CONF_TYPE_FLAG, 0, 1, 0, NULL},
-    {"cabacidc", &cabacidc, CONF_TYPE_INT, CONF_RANGE, -1, 2, NULL},
     {"4x4mv", &p4x4mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"no4x4mv", &p4x4mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"8x8mv", &p8x8mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -173,7 +171,6 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_deblocking_filter_alphac0 = deblockalpha;
     mod->param.i_deblocking_filter_beta = deblockbeta;
     mod->param.b_cabac = cabac;
-    mod->param.i_cabac_init_idc = cabacidc;
 
     mod->param.rc.i_qp_constant = qp_constant;
     if(qp_min > qp_constant)

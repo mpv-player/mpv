@@ -7757,23 +7757,6 @@ Slightly slows down encoding and decoding, but should save 10-15% bitrate.
 Unless you are looking for decoding speed, you should not disable it.
 .
 .TP
-.B cabacidc=<value>
-Initial value of CABAC IDC.
-The encoder must choose a context for each block it encodes, but for the
-first block in a frame, there are no prior blocks to predict the context.
-Adjusting this may affect bitrate by a fraction of a percent, but it doesn't
-directly affect distortion.
-.RSs
--1: Encoder chooses context, usually 0 (default).
-.br
-0: low complexity
-.br
-1: medium complexity
-.br
-2: high complexity
-.REss
-.
-.TP
 .B qp_min=<1\-51> (CBR or two pass)
 Minimum quantizer, 10\-30 seems to be a useful range (default: 10).
 .
