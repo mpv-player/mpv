@@ -1290,6 +1290,142 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 </sect2>
 
+<sect2 id="menc-feat-dvd-mpeg4-muxing">
+<title>Muxing</title>
+<para>
+  Now that you have encoded your video, you will most likely want
+  to mux it with one or more audio tracks into a movie container, such
+  as AVI, Matroska or NUT.
+  <application>MEncoder</application> is currently only able to output
+  audio and video into MPEG and AVI container formats.
+  for example:
+  <screen>mencoder -oac copy -ovc copy  -o <replaceable>output_movie.avi</replaceable> -audiofile <replaceable>input_audio.mp2</replaceable> <replaceable>input_video.avi</replaceable></screen>
+  This would merge the video file <replaceable>input_video.avi</replaceable>
+  and the audio file <replaceable>input_audio.mp2</replaceable>
+  into the AVI file <replaceable>output_movie.avi</replaceable>.
+  This command works with MPEG-1 layer I, II and III (more commonly known
+  as MP3) audio, WAV and a few other audio formats too.
+</para>
+
+<para>
+  MEncoder features experimental support for
+  <systemitem class="library">libavformat</systemitem>, which is a
+  library from the FFmpeg project that supports muxing and demuxing
+  a variety of containers.
+  For example:
+  <screen>mencoder -oac copy -ovc copy  -o <replaceable>output_movie.asf</replaceable> -audiofile <replaceable>input_audio.mp2</replaceable> <replaceable>input_video.avi</replaceable> -of lavf -lavfopts format=asf</screen>
+  This will do the same thing as the previous example, except that
+  the output container will be ASF.
+  Please note that this support is highly experimental (but getting
+  better every day), and will only work if you compiled
+  <application>MPlayer</application> with the support for
+  <systemitem class="library">libavformat</systemitem> enabled (which
+  means that a pre-packaged binary version will not work in most cases).
+</para>
+
+<sect3 id="menc-feat-dvd-mpeg4-muxing-avi-limitations">
+<title>Limitations of the AVI container</title>
+<para>
+  Although it is the most widely-supported container format after MPEG-1,
+  AVI also has some major drawbacks.
+  Perhaps the most obvious is the overhead.
+  For each chunk of the AVI file, 24 bytes are wasted on headers and
+  index.
+  This translates into a little over 5 MB per hour, or 1-2.5%
+  overhead for a 700 MB movie. This may not seem like much, but it could
+  mean the difference between being able to use 700 kbit/sec video or
+  714 kbit/sec, and every bit of quality counts.
+</para>
+
+<para>
+  In addition this gross inefficiency, AVI also has the following major
+  limitations:
+</para>
+
+<orderedlist>
+<listitem>
+<para>
+  Only fixed-fps content can be stored. This is particularly limiting
+  if the original material you want to encode is mixed content, for
+  example a mix of NTSC video and film material.
+  Actually there are hacks that can be used to store mixed-framerate
+  content in AVI, but they increase the (already huge) overhead
+  fivefold or more and so are not practical.
+</para>
+</listitem>
+<listitem>
+<para>
+  Audio in AVI files must be either constant-bitrate (CBR) or
+  constant-framesize (i.e. all frames decode to the same number of
+  samples).
+  Unfortunately, the most efficient codec, Vorbis, does not meet
+  either of these requirements.
+  Therefore, if you plan to store your movie in AVI, you'll have to
+  use a less efficient codec such as MP3 or AC3.
+</para>
+</listitem>
+</orderedlist>
+
+<para>
+  Having said all that, <application>MEncoder</application> does not
+  currently support variable-fps output or Vorbis encoding.
+  Therefore, you may not see these as limitations if
+  <application>MEncoder</application> is the
+  only tool you will be using to produce your encodes.
+  However, it is possible to use <application>MEncoder</application>
+  only for video encoding, and then use external tools to encode
+  audio and mux it into another container format.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-dvd-mpeg4-muxing-matroska">
+<title>Muxing into the Matroska container</title>
+<para>
+  The Matroska is a free, open standard container format, aiming
+  to offer a lot of advanced features, which older containers
+  like AVI cannot handle.
+  For example, Matroska supports variable bitrate audio content
+  (VBR), variable framerates (VFR), chapters, file attachments,
+  error detection (EDC) and modern A/V Codecs like "advanced audio
+  coding" (AAC), "Vorbis" or "MPEG-4 AVC" (H.264), next to nothing
+  handled by AVI.
+</para>
+
+<para>
+  The tools required to create Matroska files are collectively called
+  <application>mkvtoolnix</application>, and are available for most
+  Unix platforms as well as <application>Windows</application>.
+  Given that Matroska is an open standard, you may find other
+  tools that suit you better, but since mkvtoolnix is the most
+  common, and is supported by the Matroska team itself, we will
+  only cover its usage.
+</para>
+
+<para>
+  Probably the easiest way to get started with Matroska is to use 
+  <application>MMG</application>, the graphical frontend shipped with
+  <application>mkvtoolnix</application>, and follow the
+  <ulink url="http://www.bunkus.org/videotools/mkvtoolnix/doc/mkvmerge-gui.html">guide to mkvmerge GUI (mmg)</ulink>
+</para>
+
+<para>
+  You may also mux audio and video files using the command line:
+  <screen>mkvmerge -o <replaceable>output.mkv</replaceable> <replaceable>input_video.avi</replaceable> <replaceable>input_audio1.mp3</replaceable> <replaceable>input_audio2.ac3</replaceable></screen>
+  This would merge the video file <replaceable>input_video.avi</replaceable>
+  and the two audio files <replaceable>input_audio1.mp3</replaceable>
+  and <replaceable>input_audio2.ac3</replaceable> into the Matroska
+  file <replaceable>output.mkv</replaceable>.
+  Matroska, as mentioned earlier, is able to do much more than that, like
+  multiple audio tracks (including fine-tuning of audio/video
+  synchronization), chapters, subtitles, splitting, etc...
+  Please refer to the documentation of those applications for
+  more details.
+</para>
+
+</sect3>
+
+</sect2>
+
 </sect1>
 
 <sect1 id="menc-feat-telecine">
