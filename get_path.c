@@ -8,6 +8,16 @@
  *   by the caller.
  *
  */
+#ifdef MACOSX_BUNDLE
+#include <Carbon/Carbon.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#endif
+
 char *get_path(char *filename){
 	char *homedir;
 	char *buff;
@@ -17,6 +27,9 @@ char *get_path(char *filename){
 	static char *config_dir = "/.mplayer";
 #endif
 	int len;
+#ifdef MACOSX_BUNDLE
+	struct stat dummy;
+#endif
 
 	if ((homedir = getenv("HOME")) == NULL)
 #if defined(__MINGW32__)||defined(__CYGWIN__) /*hack to get fonts etc. loaded outside of cygwin environment*/
@@ -42,6 +55,38 @@ char *get_path(char *filename){
 			return NULL;
 		sprintf(buff, "%s%s/%s", homedir, config_dir, filename);
 	}
+
+#ifdef MACOSX_BUNDLE
+	if(stat(buff, &dummy)) {
+	CFIndex maxlen=64;
+	CFURLRef resources=NULL;
+	
+		free(buff);
+		buff=NULL;
+		
+		resources=CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
+		if(resources) {
+
+			buff=malloc(maxlen);
+			*buff=0;
+		
+			while(!CFURLGetFileSystemRepresentation(resources, true, buff, maxlen)) {
+				maxlen*=2;
+				buff=realloc(buff, maxlen);
+			}
+			CFRelease(resources);
+		}
+			
+		if(buff&&filename) {
+			if((strlen(filename)+strlen(buff)+2)>maxlen) {
+				maxlen=strlen(filename)+strlen(buff)+2;
+				buff=realloc(buff, maxlen);
+			}
+			strcat(buff,"/");
+			strcat(buff, filename);
+		}
+	}
+#endif
 	mp_msg(MSGT_GLOBAL,MSGL_V,"get_path('%s') -> '%s'\n",filename,buff);
 	return buff;
 }

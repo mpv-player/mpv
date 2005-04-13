@@ -185,6 +185,7 @@ Optional features:
   --disable-enca         Disable using ENCA charset oracle library [autodetect]
   --disable-macosx       Disable Mac OS X specific features [autodetect]
   --enable-macosx-finder-support  Enable Mac OS X Finder invocation parameter parsing [disabled]
+  --enable-macosx-bundle Enable Mac OS X bundle file locations [autodetect]
   --disable-inet6        Disable IPv6 support [autodetect]
   --disable-gethostbyname2  gethostbyname() function is not provided by the C
                             library [autodetect]
@@ -1400,6 +1401,7 @@ _menu=no
 _qtx=auto
 _macosx=auto
 _macosx_finder_support=no
+_macosx_bundle=auto
 _sortsub=yes
 _freetypeconfig='freetype-config'
 _fribidi=no
@@ -1684,6 +1686,8 @@ for ac_option do
   --disable-macosx) _macosx=no ;;
   --enable-macosx-finder-support) _macosx_finder_support=yes ;;
   --disable-macosx-finder-support) _macosx_finder_support=no ;;
+  --enable-macosx-bundle) _macosx_bundle=yes;;
+  --disable-macosx-bundle) _macosx_bundle=no;;  
 
   --enable-sortsub) _sortsub=yes ;;
   --disable-sortsub) _sortsub=no ;;
@@ -3207,6 +3211,18 @@ else
   _macosx_finder_support=no
 fi 
 echores "$_macosx_finder_support"
+
+echocheck "Mac OS X Bundle file locations"
+if test "$_macosx_bundle" = auto ; then
+  _macosx_bundle=$_macosx_finder_support
+fi
+if test "$_macosx_bundle" = yes; then
+  _def_macosx_bundle='#define MACOSX_BUNDLE 1'
+else
+  _def_macosx_bundle='#undef MACOSX_BUNDLE'
+  _macosx_bundle=no
+fi 
+echores "$_macosx_bundle"
 
 echocheck "Samba support (libsmbclient)"
 if test "$_smbsupport" = yes; then
@@ -6824,6 +6840,7 @@ XMMS_PLUGINS = $_xmms
 XMMS_LIB = $_xmms_lib
 MACOSX = $_macosx
 MACOSX_FINDER_SUPPORT = $_macosx_finder_support
+MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FRAMEWORKS = $_macosx_frameworks
 TOOLAME=$_toolame
 TOOLAME_EXTRAFLAGS=$_toolame_extraflags
@@ -7131,6 +7148,7 @@ $_def_dshow
 /* Mac OS X specific features */
 $_def_macosx
 $_def_macosx_finder_support
+$_def_macosx_bundle
 
 /* Build our Win32-loader */
 $_def_win32_loader
