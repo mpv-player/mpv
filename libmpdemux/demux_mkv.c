@@ -3340,6 +3340,32 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
       *((int *) arg) = (int) (100 * mkv_d->last_pts / mkv_d->duration);
       return DEMUXER_CTRL_OK; 
 
+    case DEMUXER_CTRL_SWITCH_AUDIO:
+      if (demuxer->audio && demuxer->audio->sh) {
+        int i;
+        demux_stream_t *d_audio = demuxer->audio;
+        sh_audio_t *sh_audio = d_audio->sh;
+        int idx = d_audio->id - 1; // track ids are 1 based
+        int num = mkv_d->num_tracks;
+        mkv_track_t *otrack = mkv_d->tracks[idx];
+        for (i = 1; i < num; i++) {
+          mkv_track_t *track = mkv_d->tracks[(idx+i)%num];
+          if ((track->type == MATROSKA_TRACK_AUDIO) &&
+              !strcmp(track->codec_id, otrack->codec_id) &&
+              (track->a_channels == otrack->a_channels) &&
+              (track->a_bps == otrack->a_bps) &&
+              (track->a_sfreq == otrack->a_sfreq)) {
+            break;
+          }
+        }
+        if (i < num) {
+          d_audio->id = (idx+i)%num + 1;
+          ds_free_packs(d_audio);
+        }
+        *((int *)arg)=(int)d_audio->id;
+      }
+      return DEMUXER_CTRL_OK;
+
     default:
       return DEMUXER_CTRL_NOTIMPL;
     }
