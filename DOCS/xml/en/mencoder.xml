@@ -872,10 +872,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   You can keep the AC3 stream either by copying it directly into the video
   stream <link linkend="menc-feat-mpeg4">during the encoding</link>.
   You can also extract the AC3 stream in order to mux it into containers such
-  as NUT, Matroska or OGM.
+  as NUT or Matroska.
   <screen>mplayer <replaceable>source_file.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>sound.ac3</replaceable></screen>
-  will dump into the file sound.ac3 the audio track number 129 from the file
-  source_file.vob (NB: DVD VOB files usually use a different audio numbering,
+  will dump into the file <replaceable>sound.ac3</replaceable> the
+  audio track number 129 from the file
+  <replaceable>source_file.vob</replaceable> (NB: DVD VOB files
+  usually use a different audio numbering,
   which means that the VOB audio track 129 is the 2nd audio track of the file).
 </para>
 
@@ -893,8 +895,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   audio codec can use as input.
   For example:
   <screen>mplayer <replaceable>source_file.vob</replaceable> -ao pcm:file=<replaceable>destination_sound.wav</replaceable> -vc dummy -aid 1 -vo null</screen>
-  will dump the second audio track from the file source_file.vob into the file
-  destination_sound.wav.
+  will dump the second audio track from the file
+  <replaceable>source_file.vob</replaceable> into the file
+  <replaceable>destination_sound.wav</replaceable>.
   You may want to normalize the sound before encoding, as DVD audio tracks
   are commonly recorded at low volumes.
   You can use the tool <application>normalize</application> for instance,
@@ -904,9 +907,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   You will compress in either Vorbis or MP3.
   For example:
   <screen>oggenc -q1 <replaceable>destination_sound.wav</replaceable></screen>
-  will encode destination_sound.wav with the encoding quality 1, which is
-  roughly equivalent to 80Kb/s, and is the minimum quality at which you
-  should encode if you care about quality.
+  will encode <replaceable>destination_sound.wav</replaceable> with
+  the encoding quality 1, which is roughly equivalent to 80Kb/s, and
+  is the minimum quality at which you should encode if you care about
+  quality.
   Please note that MEncoder currently cannot mux Vorbis audio tracks
   into the output file because it only supports AVI and MPEG
   containers as an output, each of which may lead to audio/video
@@ -1295,7 +1299,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Now that you have encoded your video, you will most likely want
   to mux it with one or more audio tracks into a movie container, such
-  as AVI, Matroska or NUT.
+  as AVI, MPEG, Matroska or NUT.
   <application>MEncoder</application> is currently only able to output
   audio and video into MPEG and AVI container formats.
   for example:
