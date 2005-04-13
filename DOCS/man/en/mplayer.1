@@ -7683,10 +7683,12 @@ are just as big as I-frames, but don't reset the "keyint counter".
 .
 .TP
 .B frameref=<1\-16>
-Number of previous frames used as predictors in a P-frame (default: 1).
-This is effective in Anime, but seems to make little difference in
-live-action source material.
-Some decoders are unable to deal with large frameref values.
+Number of previous frames used as predictors in B- and P-frames (default: 1).
+This is effective in anime, but in live-action material the improvements
+usually drop off very rapidly above 6 or so reference frames.
+This has no effect on decoding speed, but does increase the memory needed for
+decoding.
+Some decoders can only handle a maximum of 15 reference frames.
 .
 .TP
 .B bframes=<0\-16>
@@ -7713,7 +7715,10 @@ are predicted from I0 and P4.
 With this option, they are coded as I0 P4 B2 B1 B3.
 B2 is the same as above, but B1 is predicted from I0 and B2, and 
 B3 is predicted from B2 and P4.
-This results in slightly improved compression, at no speed cost.
+This usually results in slightly improved compression, at almost no
+speed cost.
+However, this is an experimental option: it is not fully tuned and
+may not always help.
 Requires bframes >= 2.
 Disadvantage: increases decoding delay to 2 frames.
 .
@@ -7726,29 +7731,30 @@ recommend to disable it.
 .TP
 .B deblockalpha=<-6\-6>
 AlphaC0 parameter of deblocking filter (default: 0).
-This adjusts thresholds for the H.264 deblocking filter.
+This adjusts thresholds for the H.264 in-loop deblocking filter.
 First, this parameter adjusts the maximum amount of change that the filter is
 allowed to cause on any one pixel.
 Secondly, this parameter affects the threshold for difference across the
 edge being filtered.
 A positive value reduces blocking artifacts more, but will also smear details.
 .br
-For encodes that are intended to be reasonably high quality, you might
-want to turn it down a little bit.
-However, if your source material already has some blocking or noise
-which you would like to remove, or if it is animation, it may be a good
-idea to turn it up a little bit.
+The default behavior of the filter almost always achieves optimal quality,
+so it is best to either leave it alone, or make only small adjustments.
+However, if your source material already has some blocking or noise which
+you would like to remove, it may be a good idea to turn it up a little bit.
 .
 .TP
 .B deblockbeta=<-6\-6>
 Beta parameter of deblocking filter (default: 0).
-Affects the maximum allowed gradient within two adjacent blocks.
+Affects the detail threshold.
+Very detailed blocks are not filtered, since the smoothing caused by the
+filter would be more noticeable than the original blocking.
 .
 .TP
 .B (no)cabac
 Use CABAC (Context-Adaptive Binary Arithmetic Coding) (default: on).
 Slightly slows down encoding and decoding, but should save 10-15% bitrate.
-Unless you are looking for speed, you should not disable it.
+Unless you are looking for decoding speed, you should not disable it.
 .
 .TP
 .B cabacidc=<value>
@@ -7769,7 +7775,7 @@ directly affect distortion.
 .
 .TP
 .B qp_min=<1\-51> (CBR or two pass)
-Minimum quantizer, 10\-35 seems to be a useful range (default: 10).
+Minimum quantizer, 10\-30 seems to be a useful range (default: 10).
 .
 .TP
 .B qp_max=<1\-51> (CBR or two pass)
@@ -7839,10 +7845,9 @@ Temporal: motion vectors are interpolated from the following P-frame.
 (default)
 .RE
 .PD 1
-The best choice depends on the movie.
 Spatial and temporal are approximately the same speed and PSNR,
 but temporal often looks better.
-direct_pred=0 is usually both slower and lower quality.
+direct_pred=0 is both slower and lower quality.
 .
 .TP
 .B (no)weight_b
@@ -7944,7 +7949,7 @@ Adjust the amount of logging info printed to the screen.
 .br
  1: warnings
 .br
- 2: PSNR, encoding times, and other analysis stats when the encode finishes
+ 2: PSNR and other analysis stats when the encode finishes
 (default)
 .br
  3: PSNR, QP, frametype, size, and other stats for every frame
