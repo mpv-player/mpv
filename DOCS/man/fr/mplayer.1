@@ -1,4 +1,4 @@
-.\" synced with 1.932
+.\" synced with 1.934
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "12 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "13 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -8057,11 +8057,13 @@ mais ne remettent pas à zéro le "compteur keyint".
 .TP
 .B frameref=<1\-15>
 Nombre des trames précédentes à utiliser comme prédicteur pour les
-trames-P (par défaut\ : 1).
-Est efficace avec les dessins animés, mais semble l'être beaucoup moins
-avec des films dont les sujets sont réels.
-Quelques décodeurs sont incapables de gérer de grandes valeurs de
-frameref.
+trames-B et -P (par défaut\ : 1).
+Est efficace avec les dessins animés, mais avec des films dont les
+sujets sont réels, on n'observe plus d'amélioration significative
+au-delà d'environ 6 trames de référence.
+N'a pas d'effet sur le temps de décodage, mais augmente la quantité
+de mémoire nécessaire pour le décodage.
+Quelques décodeurs ne gèrent qu'au plus 15 trames de référence.
 .
 .TP
 .B bframe=<0\-16>
@@ -8091,8 +8093,10 @@ trames-B sont prédites à partir de I0 et P4.
 Avec cette option, elles sont codées I0 P4 B2 B1 B3.
 B2 est la même que ci-dessus, mais B1 est prédit à partir de I0 et
 B2, et B3 est prédite à partir de B2 et P4.
-Ceci améliore légèrement la compressiblité, et ne dégrade pas la
-vitesse d'encodage.
+Ceci améliore généralement légèrement la compressiblité, et ne dégrade
+pas la vitesse d'encodage.
+Cependant, c'est une option expérimentale\ : elle n'est pas encore
+peaufinée, et n'aide pas toujours la compression.
 Requière bframes >= 2.
 Désavantage\ : augmente de 2 trames le délais de décodage.
 .
@@ -8105,7 +8109,8 @@ visuelle qu'il procure, il est déconseillé de le désactiver.
 .
 .TP
 .B deblockalpha=<-6\-6>
-Paramètre alphaC0 du filtre de deblocking (par défaut\ : 0).
+Paramètre alphaC0 du filtre de deblocking intégré (inloop)
+(par défaut\ : 0).
 Il détermine les seuils du filtre de deblocking de H.264.
 Tout d'abord, cette option détermine à quel point le filtre peut modifier
 l'apparence de chacun des pixels de l'image.
@@ -8114,49 +8119,31 @@ filtrés.
 Une valeur positive réduit les artefacts de blocking, mais enlève du détail
 à l'image.
 .br
-Lorsque vous réalisez un encodage destiné à être de bonne qualité, vous
-devez le diminuer un peu.
+Le paramétrage par défaut de ce filtre permet généralement d'atteindre
+une qualité optimale, il est donc conseillé de laisser la valeur par
+défaut ou de ne la changer qu'un peu.
 Par contre, si la vidéo source souffre déjà d'artefacts de blocking
-ou de bruit que vous voulez atténuer, ou bien si c'est un dessin animé,
-vous devez l'augmenter un peu.
+ou de bruit que vous voulez atténuer, vous deviez l'augmenter un peu.
 .
 .TP
 .B deblockbeta=<-6\-6>
 Paramètre beta du filtre de deblocking (par défaut\ : 0).
-Affecte le gradient maximum autorisé entre deux blocs adjacents
+Affecte seuil de détail.
+Les blocs très détaillés ne sont pas filtrés, puisque l'effet de lissage
+dû au filtre seraient plus visibles que l'effet de bloc original.
 .
 .TP
 .B (no)cabac
 Utilise CABAC (codage de l'information adaptée en fonction du contexte\ :
 Context-Adaptive Binary Arithmetic Coding) (par défaut\ : activé).
 Ralentit un peu l'encodage mais permet d'économiser 10-15% du bitrate.
-À moins que vous ayez besoin d'encoder à vitesse élevée, vous ne
+À moins que vous ayez besoin de décoder à vitesse élevée, vous ne
 devriez jamais le désactiver.
 .
 .TP
-.B cabacidc=<value>
-Valeur initiale de l'IDC de CABAC.
-L'encodeur doit choisir un contexte pour chaque block qu'il encode, mais pour
-le premier d'une trame, il n'existe pas de contexte de prédiction.
-Agir sur ce paramètre peut affecter le débit binaire vidéo (bitrate) de
-quelques pour-millièmes, mais ne change pas la distortion par rapport à
-l'image d'origine.
-FIXME: indiquer ce que signifie IDC.
-.RSs
--1: L'encodeur décide lui-même du contexte, 0 la plupart du temps (par défaut).
-.br
-0: complexité faible
-.br
-1: complexité moyenne
-.br
-2: complexité importante
-.REss
-.
-.TP
 .B qp_min=<1\-51> (CBR ou 2 passes)
-Quantificateur minimum, 10\-35 semble être un intervalle raisonnable
+Quantificateur minimum, 10\-30 semble être un intervalle raisonnable
 (par défaut\ : 10).
-.
 .TP
 .B qp_max=<1\-51> (CBR ou 2 passes)
 quantum maximum (par défaut\ : 51)
@@ -8230,11 +8217,10 @@ Temporel\ : les vecteur de mouvements sont interpolés d'après la trame-P
 suivante (par défaut).
 .RE
 .PD 1
-Le meilleur choix dépend de chaque film.
 Les prédicteurs spatiaux et temporels sont approximativement de la même
 vitesse, produisent un PSNR similaire, mais les temporels sont souvent
 plus jolis.
-direct_pred=0 est généralement lent et de qualité moindre.
+direct_pred=0 est lent et de qualité médiocre.
 .
 .TP
 .B (no)weight_b
@@ -8342,8 +8328,8 @@ Ajuste la quantité d'informations de log à afficher à l'écran.
 .br
  1: avertissements
 .br
- 2: PSNR, temps d'encodage et autres analyses statistiques lorsque
-l'encodage se termine (par défaut)
+ 2: PSNR et autres analyses statistiques lorsque l'encodage se termine
+(par défaut)
 .br
  3: PSNR, paramètres de quantification, type de trame, taille, et autres
 statistiques sur chaque trame
