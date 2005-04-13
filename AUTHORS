@@ -166,6 +166,10 @@ Christiansen, Dan Villiom Podlaski (danchr) <danchr@daimi.au.dk>
     * ao_macosx
     * build system cleanups for Darwin
 
+Clagg, Jeff (snacky) <snacky@ikaruga.co.uk>
+    * minor updates and fixes for x264 support
+    * superficial clarity fixes for mpcf.txt
+
 Comstedt, Marcus <marcus@idonex.se>
     * initial Solaris 8 x86 support
     * configure fixes
