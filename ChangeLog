@@ -14,6 +14,7 @@ MPlayer (1.0)
     * DirectX video output fixed on Windows95
     * DirectX video output now supports 256 color mode
     * audio device selection support for ao dsound
+    * --enable-macosx-bundle, use config directory inside the appwrapper on Mac OSX
 
     Drivers:
     * fixed ontop event for some window managers
