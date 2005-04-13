@@ -136,6 +136,7 @@ static void string_utf16(char *dest, char *src, int len) {
     else
     {
 #endif
+	if (len > 499) len = 499;
 	for (i=0; i<len; i++) {
 	    dest[i*2] = src[i];
 	    dest[i*2+1] = 0;
