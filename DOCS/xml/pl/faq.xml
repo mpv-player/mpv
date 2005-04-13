@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.69 -->
+<!-- synced with 1.72 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>FAQ - Często Zadawane Pytania</title>
 
@@ -1376,6 +1376,22 @@ Możesz też spróbować
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> i
 <application>avimerge</application> (część zestawu narzędzi
 <ulink url="http://www.transcoding.org/">transcode</ulink>).
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mogę naprawić pliki AVI z popsutym indeksem lub przeplotem?
+</para></question>
+<answer><para>
+Po prostu skopiuj strumienie audio i video do nowego zbioru,
+a <application>MEncoder</application> wygeneruje indeks.
+Oczywiście to nie może naprawić ewentualnych błędów w strumieniach audio i/lub
+video. Naprawia to też pliki z popsutym przeplotem, więc opcja
+<option>ni</option> nie będzie już potrzebna.
+<screen>
+mencoder -idx <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
+</screen>
 </para></answer>
 </qandaentry>
 
