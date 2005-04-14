@@ -1,4 +1,4 @@
-.\" synced with 1.932
+.\" synced with 1.935
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -280,7 +280,7 @@ Zmniejsza/\:zwiêksza g³o¶no¶æ.
 Zmniejsza/\:zwiêksza g³o¶no¶æ.
 .IPs m\ \ \ \ 
 Wycisza d¼wiêk.
-.IPs "#" (tylko MPEG)
+.IPs "#" (tylko MPEG i Matroska)
 Prze³±cza miêdzy dostêpnymi ¶cie¿kami d¼wiêku.
 .IPs f\ \ \ \ 
 Prze³±cza tryb pe³noekranowy (zobacz tak¿e \-fs).
@@ -7785,11 +7785,13 @@ ale nie resetuj± "licznika keyint".
 .
 .TP
 .B frameref=<1\-16>
-Ilo¶æ poprzednich ramek wykorzystanych do przewidywania w ramek P
-(domy¶lnie: 1).
-Ma to do¶æ znaczny wp³yw na Anime, ale przy materia³ach z "¿ywymi"
-aktorami i scenami nie ma wiêkszego wp³ywu.
-Niektóre dekodery nie radz± sobie z du¿ymi warto¶ciami frameref.
+Liczba poprzednich ramek wykorzystanych do przewidywania
+klatek P lub B (domy¶lnie: 1).
+Parametr ten ma do¶æ znaczny wp³yw na anime, jednak przy materia³ach z "¿ywymi"
+aktorami jako¶æ znacznie spada, a parametr wzrasta powy¿ej 6 lub wiêcej klatek odniesienia.
+Opcja nie ma ¿adnego wp³ywu na szykbo¶æ dekodowania, ale zwiêksza zapotrzebowanie na pamiêæ
+w trakcie tego procesu.
+Niektóre dekodery potrafi± obs³u¿yæ tylko do 15 klatek odniesienia.
 .
 .TP
 .B bframes=<0\-16>
@@ -7817,7 +7819,9 @@ przewidywane z I0 i P4.
 Z t± opcj± s± kodowane w kolejno¶ci I0 P4 B2 B1 B3.
 B2 jest takie samo jak powy¿ej, ale B1 jest przewidywane z I0 i B2
 a B3 jest przewidywane z B2 i P4.
-Wynikiem tego jest nieco lepsza kompresja bez straty szybko¶ci.
+Wynikiem tego jest nieco lepsza kompresja praktycznie bez straty szybko¶ci.
+Jednak¿e jest to opcja eksperymentalna: nie jest do koñca dostrojona i nie zawsze
+mo¿e przynie¶æ oczekiwane rezultaty.
 Wymaga bframes >= 2.
 Wada: zwiêksza opó¼nienie dekodowania do 2 ramek.
 .
@@ -7829,46 +7833,32 @@ jaki daje, nie jest zalecane wy³±czanie go.
 .
 .TP
 .B deblockalpha=<-6\-6>
-Parametr AlphaC0 dla filtru odblokowywuj±cy (deblock) (domy¶lnie: 0).
-Opcja ta dostosowuje zakresy dla filtru odlokowywuj±cego H.264.
+Parametr AlphaC0 dla filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
+Opcja ta dostosowuje zakresy dla filtru in-loop deblocking H.264.
 Po pierwsze parametr ten okre¶la maksymaln± ilo¶æ zmian jak± filtr mo¿e
 nanie¶æ na pojedynczy piksel.
 Po drugie opcja ta ma wp³yw na próg filtrowanej ró¿nicy wystêpuj±cej na krawêdzi.
 Warto¶æ dodatnia ogranicza blokuj±ce szumy, ale rozmywa równie¿ detale.
 .br
-Dla kodowañ które maj± mieæ wysok± jako¶æ, zmniejsz trochê warto¶æ tego parametru.
-Jednak, je¿eli materia³ ¼ród³owy zawiera jakie¶ szumy albo sceny z przeskokami,
-które bêdziesz chcia³ usun±æ lub je¶li to animacja, dobrym pomys³em bêdzie
-nieznaczne zwiêkszenie jego warto¶ci.
+Domy¶lne zachowanie filtru pozwala prawie zawsze osi±gn±c optymaln± jako¶æ,
+wiêc najlepiej albo zostawiæ wszystkie parametry takie jakimi s± albo dokonaæ
+tylko niewielkich zmian.
+Jednak¿e, je¿eli Twój materia³ ¼ród³owy zawiera ju¿ jakie¶ szumy lub nosi ¶ladu efektu bloków,
+które chcia³by¶ usun±æ, dobrym pomys³em bêdzie nieznaczne zwiêkszenie warto¶ci parametru.
 .
 .TP
 .B deblockbeta=<-6\-6>
 Parametr Beta filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
-Ma wp³yw na maksymalny, dozwolony gradient miêdzy dwoma przylegaj±cymi blokami.
+Ma wp³yw na próg detali. Bloki zawieraj±ce du¿± liczbê detali nie bêd± filtrowane,
+poniewa¿ wyg³adzanie stosowane przez ten filtr bêdzie bardziej widoczne ni¿ oryginalny
+efekt blokowy.
 .
 .TP
 .B (no)cabac
 Wykorzystuje CABAC (Context-Adaptive Binary Arithmetic Coding)
 (domy¶lnie: w³±czony).
 Nieco spowalnia kodowanie i dekodowanie, ale oszczêdza oko³o 10-15% bitów.
-Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y Ci na szybko¶ci.
-.
-.TP
-.B cabacidc=<warto¶æ>
-Warto¶æ pocz±tkowa CABAC IDC.
-Koder musi wybraæ kontekst dla ka¿dego bloku, który koduje, jednak dla
-pierwszego bloku w klatce, nie ma ¿adnych poprzedzaj±cych go bloków.
-Dostosowanie tego parametru mo¿e zmieniæ bitrate o u³amek procenta,
-ale nie ma bezpo¶redniego wp³ywu na zniekszta³cenie.
-.RSs
--1: Koder wybiera kontekst, zazwyczaj 0 (domy¶lne).
-.br
-0: niska z³o¿ono¶æ
-.br
-1: ¶rednia z³o¿ono¶æ
-.br
-2: wysoka z³o¿ono¶æ
-.REss
+Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y Ci na szybko¶ci dekodowania.
 .
 .TP
 .B qp_min=<1\-51> (CBR lub tryb dwuprzebiegowy)
@@ -7942,10 +7932,9 @@ Czasowy: wektory ruchu s± interpolowane z nastêpnych klatek P.
 (domy¶lny)
 .RE
 .PD 1
-W³a¶ciwy wybór zale¿y od filmu.
 Typ przestrzenny i czasowy maj± podobn± prêdko¶æ dzia³ania i wspó³czynnik
 PSNR, ale najczê¶ciej ten drugi wygl±da lepiej.
-direct_pred=0 to zazwyczaj metoda wolniejsza i daj±ca gorsz± jako¶æ.
+direct_pred=0 to metoda i wolniejsza, i daj±ca gorsz± jako¶æ.
 .
 .TP
 .B (no)weight_b
@@ -8046,7 +8035,7 @@ Okre¶la ilo¶æ informacji drukowanych na ekranie.
 .br
  1: ostrze¿enia
 .br
- 2: PSNR, czas kodowania i inne statystyki analiz po skoñczonym kodowaniu
+ 2: PSNR i inne statystyki analiz po skoñczonym kodowaniu
  (domy¶lne)
 .br
  3: PSNR, QP, typ ramki, rozmiar i inne statystyki dla ka¿dej klatki
