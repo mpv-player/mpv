@@ -1385,13 +1385,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <sect3 id="menc-feat-dvd-mpeg4-muxing-matroska">
 <title>Muxing into the Matroska container</title>
 <para>
-  The Matroska is a free, open standard container format, aiming
+  Matroska is a free, open standard container format, aiming
   to offer a lot of advanced features, which older containers
   like AVI cannot handle.
   For example, Matroska supports variable bitrate audio content
   (VBR), variable framerates (VFR), chapters, file attachments,
-  error detection (EDC) and modern A/V Codecs like "advanced audio
-  coding" (AAC), "Vorbis" or "MPEG-4 AVC" (H.264), next to nothing
+  error detection code (EDC) and modern A/V Codecs like "Advanced Audio
+  Coding" (AAC), "Vorbis" or "MPEG-4 AVC" (H.264), next to nothing
   handled by AVI.
 </para>
 
@@ -1399,7 +1399,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   The tools required to create Matroska files are collectively called
   <application>mkvtoolnix</application>, and are available for most
   Unix platforms as well as <application>Windows</application>.
-  Given that Matroska is an open standard, you may find other
+  Because Matroska is an open standard you may find other
   tools that suit you better, but since mkvtoolnix is the most
   common, and is supported by the Matroska team itself, we will
   only cover its usage.
