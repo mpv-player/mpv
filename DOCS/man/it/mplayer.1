@@ -1,4 +1,4 @@
-.\" synced with 1.932
+.\" synced with 1.935
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/e' stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -309,7 +309,7 @@ Aumenta/\:diminuisce il volume
 Aumenta/\:diminuisce il volume
 .IPs m\ \ \ \ 
 Suono muto
-.IPs "#" (solo MPEG)
+.IPs "#" (solo MPEG e Matroska)
 Passa attraverso tutte le tracce audio disponibili.
 .IPs f\ \ \ \ 
 Attiva/disattiva schermo intero
@@ -8063,9 +8063,14 @@ ma non azzerano il contatore "keyint".
 .TP
 .B frameref=<1\-16>
 Numero di fotogrammi precedenti utilizzati come predittori nei fotogrammi
-P (default: 1).
+B e P (default: 1).
+E' efficacie con alcuni cartoni animati (anime) ma su filmati ripresi dal
+vivo i miglioramenti calarno rapidamente dopo circa 6 fotogrammi di
+riferimento.
+Non ha effetto sulla velocita' di decodifica ma incrementa la memoria necessaria
+alla decodifica stessa.
 Questo puo' causare piccoli cambiamenti nel bitrate e nel PSNR.
-Alcuni decodificatori non sono capaci di gestire valori elevati di frameref.
+Alcuni decodificatori possono gestire un massimo di 15 fotogrammi di riferimento.
 .
 .TP
 .B bframes=<valore>
@@ -8094,6 +8099,10 @@ B sono predetti da I0 e P4.
 Con questa opzione sono invece codificati come I0 P4 B2 B1 B3.
 B2 e' lo stesso dell'esempio sopra ma B1 e' predetto da I0 e B2 mentre
 B3 e' predetto da B2 e P4.
+Normalmente si ottiene una compressione leggermente migliore, praticamente
+senza alcuna perdita di velocita'.
+Nota che questa e' pero' una opzione sperimentale: non e' perfettamente ottimizzata
+e puo' non sempre aiutare.
 Questo genera una compressione leggermente migliore senza perdite di velocita'.
 Necessita di bframes >= 2.
 Svantaggi: incrementa il ritardo di decodifica di 2 fotogrammi.
@@ -8107,7 +8116,7 @@ ottiene, non e' molto consigliato disabilitarlo.
 .TP
 .B deblockalpha=<-6\-6>
 Parametro alpha del filtro di de-block (default: 0).
-Controlla la soglia per il filtro di de-block di H.264.
+Controlla la soglia per il filtro di de-block in-loop di H.264.
 Per prima cosa, questo parametro controlla la massima quantita' di cambiamento
 che il filtro puo' causare su ogni pixel.
 Inoltre questo parametro influenza la soglia della differenza tra gli spigoli
@@ -8115,46 +8124,30 @@ che vengono filtrati.
 Un valore positivo riduce di molto gli artefatti dei blocchi ma rovina anche
 i dettagli.
 .br
-Per codifiche che vogliono avere una ragionevole alta qualita', puoi volerlo
-abbassare un poco.
+Il comportamento di default del filtro praticamente ottiene sempre una qualita'
+ottimale percio' e' meglio lasciarlo stare oppure fare solo piccoli
+aggiustamenti.
 Pero', se il materiale originale ha gia' un po' di effetti a blocchi o del
-rumore che vorresti eliminare, oppure se e' una animazione, puo' essere
-una buona idea alzarlo un poco.
+rumore che vorresti eliminare puo' essere una buona idea alzarlo un poco.
 .
 .TP
 .B deblockbeta=<-6\-6>
 Parametro beta del filtro di de-block (default: 0).
-Influenza il gradiente massimo permesso tra due blocchi adiacenti.
+Influenza la soglia di dettaglio.
+Blocchi molto dettagliati non vengono filtrati visto che la smussatura creata
+dal filtro verrebbe notata di piu' rispetto ai blocchi originali.
 .
 .TP
 .B (no)cabac
 Utilizza CABAC (Context-Adaptive Binary Arithmetic Coding) (default: on).
 Rallenta leggermente la codifica e la decodifica ma puo' permettere di
 risparmiare il 10-15% dei bit.
-A meno che la velocita' non sia una prerogativa indispensabile non dovresti
-disabilitarlo.
-.
-.TP
-.B cabacidc=<value>
-Valore iniziale della IDC CABAC.
-Il codificatore deve selezionare un contesto per ogni blocco che codifica,
-ma per il primo blocco in un fotogramma non esiste nessun blocco precedente
-per prevedere il contesto.
-Controllando questa opzione si puo' modificare il bitrate di una frazione
-percentuale, ma non influenza direttamente la distorsione.
-.RSs
--1: Il codificatore sceglie quale contesto usare, normalmente 0 (default)
-.br
-0: complessita' bassa
-.br
-1: complessita' media
-.br
-2: complessita' alta
-.REss
+A meno che la velocita' di decodifica non sia una prerogativa indispensabile 
+non dovresti disabilitarlo.
 .
 .TP
 .B qp_min=<2\-51> (CBR o modalita' a due passi)
-Valore minimo di quantizzazione. Una gamma utile sembra essere 10\-35
+Valore minimo di quantizzazione. Una gamma utile sembra essere 10\-30
 (default: 10)
 .
 .TP
@@ -8228,12 +8221,10 @@ Temporale: i vettori di movimento vengono interpolati dai fotogrammi di tipo
 P che seguono (default).
 .RE
 .PD 1
-La scelta migliore dipende dal filmato che si sta codificando.
 Le due predizioni spaziali e temporali hanno approssimativamente la
 stessa velocita' e qualita' (PSNR) ma normalmente quella temporale sembra
 migliore.
-Utilizzare direct_pred=0 generalmente e' piu' lento e genera una qualita'
-peggiore.
+Utilizzare direct_pred=0 e' piu' lento e genera una qualita' peggiore.
 .
 .TP
 .B (no)weight_b
