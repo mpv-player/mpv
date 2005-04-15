@@ -334,8 +334,12 @@ static int interp_header (uint8_t *header, int header_len)
 
       printf ("stream object, stream id: %d\n", stream_id);
 
+      if (num_stream_ids < 20) {
       stream_ids[num_stream_ids] = stream_id;
       num_stream_ids++;
+      } else {
+        printf ("too many id, stream skipped");
+      }
       
     } else {
       printf ("unknown object\n");
