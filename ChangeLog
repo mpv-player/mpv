@@ -66,7 +66,7 @@ MPlayer (1.0)
     * demux ac3 audio files using libavformat by default
     * online audio stream switching in the MPEG and Matroska demuxers
     * 3GP demuxing support
-    * DVB ATSC tuner support
+    * DVB updates and ATSC tuner support
     * AVC in Matroska support
     * SWF and FLV support via libavformat
     * use proper Vorbis fourcc
@@ -92,6 +92,7 @@ MPlayer (1.0)
     * shorten audio decoder and demuxer
     * AASC video decoder
     * AMR NB/WB support via external reference decoders
+    * experimental ratecontrol for snow
 
     GUI:
     * half size event implemented and added to the menu
@@ -126,7 +127,7 @@ MPlayer (1.0)
     * several memleak fixes
     * -aa* options are replaced by -vo aa suboptions
     * excessive verbosity reduced
-    * xBSD RTC support
+    * RTC support for *BSD
     * non-UTF8 external subtitles with Matroska fixed
     * gcc4 fixes
     * partial NX (noexec bit) support
