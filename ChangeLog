@@ -2,6 +2,11 @@ MPlayer (1.0)
 
   pre7: "PatentCounter" April 16, 2005
 
+    Security:
+    * heap overflow in Real RTSP streaming code fixed
+    * buffer overflow in MMST streaming code fixed
+
+
     DOCS:
     * Czech documentation translation in progress
     * German man page almost synced
