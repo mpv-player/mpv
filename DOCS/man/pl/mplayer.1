@@ -7788,9 +7788,9 @@ ale nie resetuj± "licznika keyint".
 Liczba poprzednich ramek wykorzystanych do przewidywania
 klatek P lub B (domy¶lnie: 1).
 Parametr ten ma do¶æ znaczny wp³yw na anime, jednak przy materia³ach z "¿ywymi"
-aktorami jako¶æ znacznie spada, a parametr wzrasta powy¿ej 6 lub wiêcej klatek odniesienia.
-Opcja nie ma ¿adnego wp³ywu na szykbo¶æ dekodowania, ale zwiêksza zapotrzebowanie na pamiêæ
-w trakcie tego procesu.
+aktorami skuteczno¶æ znacznie spada powy¿ej oko³o sze¶ciu klatek odniesienia.
+Opcja nie ma ¿adnego wp³ywu na szybko¶æ dekodowania, ale zwiêksza
+zapotrzebowanie na pamiêæ w trakcie tego procesu.
 Niektóre dekodery potrafi± obs³u¿yæ tylko do 15 klatek odniesienia.
 .
 .TP
@@ -7814,14 +7814,14 @@ Wy¿szy wspó³czynnik b_bias generuje wiêksz± liczbê klatek B (domy¶lnie: 0).
 Pozwala na stosowanie ramek B jako odno¶ników do przewidywania innych ramek.
 Na przyk³ad rozwa¿my 3 kolejne ramki B: I0 B1 B2 B3 P4.
 Bez tej opcji ramki B wystêpuj± tak samo jak w MPEG-[124].
-Zatem s± kodowane w kolejno¶ci I0 P4 B1 B2 B3 i wyszystkie klatki B s±
+Zatem s± kodowane w kolejno¶ci I0 P4 B1 B2 B3 i wszystkie klatki B s±
 przewidywane z I0 i P4.
 Z t± opcj± s± kodowane w kolejno¶ci I0 P4 B2 B1 B3.
 B2 jest takie samo jak powy¿ej, ale B1 jest przewidywane z I0 i B2
 a B3 jest przewidywane z B2 i P4.
-Wynikiem tego jest nieco lepsza kompresja praktycznie bez straty szybko¶ci.
+Wynikiem tego zwykle jest nieco lepsza kompresja praktycznie bez straty szybko¶ci.
 Jednak¿e jest to opcja eksperymentalna: nie jest do koñca dostrojona i nie zawsze
-mo¿e przynie¶æ oczekiwane rezultaty.
+mo¿e daæ oczekiwane rezultaty.
 Wymaga bframes >= 2.
 Wada: zwiêksza opó¼nienie dekodowania do 2 ramek.
 .
@@ -7843,15 +7843,17 @@ Warto¶æ dodatnia ogranicza blokuj±ce szumy, ale rozmywa równie¿ detale.
 Domy¶lne zachowanie filtru pozwala prawie zawsze osi±gn±c optymaln± jako¶æ,
 wiêc najlepiej albo zostawiæ wszystkie parametry takie jakimi s± albo dokonaæ
 tylko niewielkich zmian.
-Jednak¿e, je¿eli Twój materia³ ¼ród³owy zawiera ju¿ jakie¶ szumy lub nosi ¶ladu efektu bloków,
-które chcia³by¶ usun±æ, dobrym pomys³em bêdzie nieznaczne zwiêkszenie warto¶ci parametru.
+Jednak¿e, je¿eli Twój materia³ ¼ród³owy zawiera ju¿ jakie¶ szumy lub nosi ¶ladu
+efektu bloków, które chcia³by¶ usun±æ, dobrym pomys³em bêdzie nieco wiêksze
+zwiêkszenie warto¶ci parametru.
 .
 .TP
 .B deblockbeta=<-6\-6>
 Parametr Beta filtru odblokowywuj±cego (deblock) (domy¶lnie: 0).
-Ma wp³yw na próg detali. Bloki zawieraj±ce du¿± liczbê detali nie bêd± filtrowane,
-poniewa¿ wyg³adzanie stosowane przez ten filtr bêdzie bardziej widoczne ni¿ oryginalny
-efekt blokowy.
+Ma wp³yw na próg detali.
+Bloki zawieraj±ce du¿± liczbê detali nie bêd± filtrowane,
+poniewa¿ wyg³adzanie stosowane przez ten filtr bêdzie bardziej widoczne ni¿
+oryginalny efekt blokowy.
 .
 .TP
 .B (no)cabac
@@ -7862,7 +7864,7 @@ Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y Ci na szybko¶ci dekodowania.
 .
 .TP
 .B qp_min=<1\-51> (CBR lub tryb dwuprzebiegowy)
-Minimalny kwantyzator, 10\-35 to u¿yteczny zakres (domy¶lnie: 10).
+Minimalny kwantyzator, 10\-30 to u¿yteczny zakres (domy¶lnie: 10).
 .
 .TP
 .B qp_max=<1\-51> (tylko CBR)
