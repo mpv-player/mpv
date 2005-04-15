@@ -17,6 +17,9 @@
   In future I'll also add functions for format enumeration, 
   but not right now.
 
+  Modified for use with MPlayer, detailed CVS changelog at
+  http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+  $Id$
   
 ***************************************************************************/
 #include "config.h"

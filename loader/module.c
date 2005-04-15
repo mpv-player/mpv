@@ -2,6 +2,11 @@
  * Modules
  *
  * Copyright 1995 Alexandre Julliard
+ *
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ *
  */
 
 // define for quicktime calls debugging and/or MacOS-level emulation:

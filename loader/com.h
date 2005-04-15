@@ -1,3 +1,9 @@
+/*
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
 #ifndef AVIFILE_COM_H
 #define AVIFILE_COM_H
 

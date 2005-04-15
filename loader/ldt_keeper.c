@@ -11,6 +11,13 @@
  */
 
 /* applied some modification to make make our xine friend more happy */
+
+/*
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
 #include "ldt_keeper.h"
 
 #include <string.h>

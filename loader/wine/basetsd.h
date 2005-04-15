@@ -3,6 +3,12 @@
  * for both Win32 and Win64 are supported by this file.
  */
 
+/*
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
 #ifndef __WINE_BASETSD_H
 #define __WINE_BASETSD_H
 

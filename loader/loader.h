@@ -6,6 +6,12 @@
 
 *********************************************************/
 
+/*
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
 #ifndef _LOADER_H
 #define _LOADER_H
 

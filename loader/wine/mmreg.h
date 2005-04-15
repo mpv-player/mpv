@@ -1,5 +1,10 @@
 /*
  *      mmreg.h   -       Declarations for ???
+ *
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ *
  */
 
 #ifndef __WINE_MMREG_H

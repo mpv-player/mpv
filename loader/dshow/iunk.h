@@ -1,3 +1,9 @@
+/*
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
 #ifndef DS_IUNK_H
 #define DS_IUNK_H
 

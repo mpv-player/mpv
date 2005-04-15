@@ -8,6 +8,12 @@
  *
  ********************************************************/
 
+/*
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
 #ifdef __cplusplus
 extern "C" {
 #endif

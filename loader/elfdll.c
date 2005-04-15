@@ -2,6 +2,11 @@
  * Elf-dll loader functions
  *
  * Copyright 1999 Bertho A. Stultiens
+ *
+ * Modified for use with MPlayer, detailed CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ *
  */
 #include "config.h"
 
