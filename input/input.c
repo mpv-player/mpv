@@ -628,7 +628,7 @@ mp_input_parse_cmd(char* str) {
       } else if(!e) e = ptr+strlen(ptr);
       l = e-start;
       ptr2 = start;
-       for(e = strchr(ptr2,'\\') ; e ; e = strchr(ptr2,'\\')) {
+      for(e = strchr(ptr2,'\\') ; e && e<start+l ; e = strchr(ptr2,'\\')) {
 	memmove(e,e+1,strlen(e));
 	ptr2 = e + 1;
         l--;
