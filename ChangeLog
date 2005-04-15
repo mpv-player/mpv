@@ -9,17 +9,18 @@ MPlayer (1.0)
     * TOOLS documented in TOOLS/README
     * audio filter documentation moved to the man page and updated
     * improved encoding guide
-    * preliminary documentation for experimental snow codec in DOCS/tech/snow.txt
+    * preliminary documentation for snow codec in DOCS/tech/snow.txt
+    * misc updates and fixes all over the place
 
     Ports:
     * DirectX video output fixed on Windows95
     * DirectX video output now supports 256 color mode
-    * audio device selection support for ao dsound
-    * --enable-macosx-bundle, use config directory inside the appwrapper on Mac OSX
+    * audio device selection support for dsound audio output driver
+    * --enable-macosx-bundle, use config directory in the appwrapper on OS X
     * Sun audio output cleanup
     * x86_64 support fixes
     * OpenBSD support in libdha
-    * more Radeon 9200 models support
+    * VIDIX support for more Radeon 9200 models
 
     Drivers:
     * fixed ontop event for some window managers
@@ -27,7 +28,7 @@ MPlayer (1.0)
     * unified colorkey handling code
     * vo_xvmc panscan fix
     * fixed some X11 crashes
-    * OSD fixes in various VOs
+    * OSD fixes in various video output drivers
 
     Decoders:
     * TWinVQ decoder via binary DLL
@@ -37,7 +38,7 @@ MPlayer (1.0)
     * support for Real 10 RV30/40 Linux binary codec (fixes some RV40 files)
     * expose support for 422P and 444P raw formats
     * 32 bit RGB support in binary TSCC decoder
-    * dropped support of old faad2 versions (<= 1.1)
+    * dropped support of old FAAD2 versions (<= 1.1)
     * support for Real 10 cook Linux binary codec (decodes cook5.1)
     * improved NV12/NV21 support
     * support for 32 bit float and extended WAV files
@@ -62,8 +63,8 @@ MPlayer (1.0)
     * avisynth demuxer
     * Multichannel MP3 in MP4 files support (MP3on4)
     * some classes of nonworking 14.4/28.8 RealAudio files fixed
-    * added code to autodetect and demux mpeg audio layers 1 and 2
-    * demux ac3 audio files using libavformat by default
+    * added code to autodetect and demux MPEG audio layers 1 and 2
+    * demux AC3 audio files using libavformat by default
     * online audio stream switching in the MPEG and Matroska demuxers
     * 3GP demuxing support
     * DVB updates and ATSC tuner support
@@ -93,6 +94,7 @@ MPlayer (1.0)
     * AASC video decoder
     * AMR NB/WB support via external reference decoders
     * experimental ratecontrol for snow
+    * countless bug fixes all over the place
 
     GUI:
     * half size event implemented and added to the menu
@@ -128,8 +130,8 @@ MPlayer (1.0)
     * -aa* options are replaced by -vo aa suboptions
     * excessive verbosity reduced
     * RTC support for *BSD
-    * non-UTF8 external subtitles with Matroska fixed
-    * gcc4 fixes
+    * non-UTF-8 external subtitles with Matroska fixed
+    * gcc 4 fixes
     * partial NX (noexec bit) support
     * support libsmbclient with SSL
 
