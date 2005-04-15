@@ -1,4 +1,10 @@
 /*
+ * Modified for use with MPlayer, for details see the CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
+/*
  * Layer 2 Alloc tables .. 
  * most other tables are calculated on program start (which is (of course)
  * not ISO-conform) .. 

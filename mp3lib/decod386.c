@@ -1,4 +1,10 @@
 /*
+ * Modified for use with MPlayer, for details see the CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
+/*
  * Mpeg Layer-1,2,3 audio decoder
  * ------------------------------
  * copyright (c) 1995,1996,1997 by Michael Hipp, All rights reserved.

@@ -1,4 +1,10 @@
 /*
+ * Modified for use with MPlayer, for details see the CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
+/*
  * mpg123 defines
  * used source: musicout.h from mpegaudio package
  */

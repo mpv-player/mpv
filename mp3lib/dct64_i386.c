@@ -1,3 +1,8 @@
+/*
+ * Modified for use with MPlayer, for details see the CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
 
 /*
  * Discrete Cosine Tansform (DCT) for subband synthesis

@@ -1,4 +1,10 @@
 /*
+ * Modified for use with MPlayer, for details see the CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
+/*
 * mpg123_synth_1to1 works the same way as the c version of this
 * file.  only two types of changes have been made:
 * - reordered floating point instructions to
