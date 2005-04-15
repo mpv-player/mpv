@@ -1,26 +1,33 @@
 MPlayer (1.0)
 
-  pre7: ""
+  pre7: "PatentCounter" April 16, 2005
 
     DOCS:
-    * Czech documentation translation started
+    * Czech documentation translation in progress
     * German man page almost synced
     * slave mode command documentation finished
     * TOOLS documented in TOOLS/README
     * audio filter documentation moved to the man page and updated
     * improved encoding guide
+    * preliminary documentation for experimental snow codec in DOCS/tech/snow.txt
 
     Ports:
     * DirectX video output fixed on Windows95
     * DirectX video output now supports 256 color mode
     * audio device selection support for ao dsound
     * --enable-macosx-bundle, use config directory inside the appwrapper on Mac OSX
+    * Sun audio output cleanup
+    * x86_64 support fixes
+    * OpenBSD support in libdha
+    * more Radeon 9200 models support
 
     Drivers:
     * fixed ontop event for some window managers
     * audio output layer cleanup
     * unified colorkey handling code
     * vo_xvmc panscan fix
+    * fixed some X11 crashes
+    * OSD fixes in various VOs
 
     Decoders:
     * TWinVQ decoder via binary DLL
@@ -42,6 +49,8 @@ MPlayer (1.0)
     * LOCO video support via lavc
     * fixed Layer 1 stereo playback via mp3lib
     * VMnc (VMware video) decoder via binary DLL
+    * AMR NB/WB support via libavcodec and external reference decoders
+    * ADTS AAC support
 
     Demuxers:
     * vqf demuxer
@@ -55,7 +64,12 @@ MPlayer (1.0)
     * some classes of nonworking 14.4/28.8 RealAudio files fixed
     * added code to autodetect and demux mpeg audio layers 1 and 2
     * demux ac3 audio files using libavformat by default
-    * online audio stream switching in the MPEG demuxer
+    * online audio stream switching in the MPEG and Matroska demuxers
+    * 3GP demuxing support
+    * DVB ATSC tuner support
+    * AVC in Matroska support
+    * SWF and FLV support via libavformat
+    * use proper Vorbis fourcc
 
     Streaming:
     * stream selection and bandwidth support for MMS over HTTP
@@ -77,6 +91,7 @@ MPlayer (1.0)
     * WNV1 video decoder
     * shorten audio decoder and demuxer
     * AASC video decoder
+    * AMR NB/WB support via external reference decoders
 
     GUI:
     * half size event implemented and added to the menu
@@ -89,12 +104,20 @@ MPlayer (1.0)
     * float handling in the audio filter layer finally fixed
     * obsolete audio plugins finally removed
     * updated HRTF filter
+    * center channel adding filter
+    * soft-telecined input support in pullup improved
 
     MEncoder:
     * new experimental MPEG muxer, compatible with DVD and (S)VCD
     * multiple file support
     * -speed support (framerate conversion with speedup/slowdown)
     * EDL support
+    * low bitrate mp3lame encoding fix
+    * MJPEG encoding fix
+    * NUV endianness fix (makes old NUV files unplayable)
+    * experimental libavformat muxer
+    * mp3lame CBR encoding fix
+    * 35% faster turbo mode for 1st pass
 
     Others:
     * -z option replaced by -vo png suboption
@@ -102,6 +125,12 @@ MPlayer (1.0)
     * crash with Turkish locale fixed
     * several memleak fixes
     * -aa* options are replaced by -vo aa suboptions
+    * excessive verbosity reduced
+    * xBSD RTC support
+    * non-UTF8 external subtitles with Matroska fixed
+    * gcc4 fixes
+    * partial NX (noexec bit) support
+    * support libsmbclient with SSL
 
 
   pre6: "X-mas present" December 23, 2004
