@@ -397,6 +397,7 @@ static int rtsp_get_answers(rtsp_t *s) {
   unsigned int answer_seq;
   char **answer_ptr=s->answers;
   int code;
+  int ans_count = 0;
   
   answer=rtsp_get(s);
   if (!answer)
@@ -448,7 +449,7 @@ static int rtsp_get_answers(rtsp_t *s) {
     }
     *answer_ptr=answer;
     answer_ptr++;
-  } while (strlen(answer)!=0);
+  } while ((strlen(answer)!=0) && (++ans_count < MAX_FIELDS));
   
   s->cseq++;
   
