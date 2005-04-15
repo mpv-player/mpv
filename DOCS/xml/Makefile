@@ -28,6 +28,8 @@ help:
 	@echo "clean             : Purge the 'HTML' and 'HTML-single' directories."
 	@echo "releaseclean      : Remove generated files but keep the HTML."
 	@echo "distclean         : Remove ALL generated files."
+	@echo "clean-LANG        : Remove HTML files for one language."
+	@echo "releaseclean-LANG : Remove generated files for one language."
 	@echo "distclean-LANG    : Remove ALL generated files for one language."
 	@echo "Substitute LANG for one of $(SUBDIRS)"
 
@@ -53,7 +55,7 @@ clean-html-single:
 	-rm -rf $(HTML_SINGLE)
 
 .PHONY: releaseclean distclean clean
-releaseclean: $(addprefix distclean-,$(SUBDIRS))
+releaseclean: $(addprefix releaseclean-,$(SUBDIRS))
 	-rm -f html-chunk.xsl html-single.xsl xsltproc.sh xmllint.sh
 
 distclean: clean releaseclean
@@ -64,7 +66,8 @@ xsltproc.sh xmllint.sh:
 clean: clean-html-chunked clean-html-single
 
 define lang-def
-.PHONY: html-chunked-$(1) html-single-$(1) xmllint-$(1) distclean-$(1)
+.PHONY: html-chunked-$(1) html-single-$(1) xmllint-$(1) \
+  distclean-$(1) releaseclean-$(1) clean-$(1)
 html-chunked-$(1): xsltproc.sh xmllint.sh chunked-dir
 	(test -d $(HTML_CHUNKED)/$(1) || mkdir $(HTML_CHUNKED)/$(1))
 	$(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$(1) -C $(1) html-chunked
@@ -76,8 +79,12 @@ html-single-$(1): xsltproc.sh xmllint.sh single-dir
 xmllint-$(1): xmllint.sh
 	$(MAKE) HTMLFILE=../$(HTML_SINGLE)/$(1)/MPlayer.html -C $(1) xmllint
 
-distclean-$(1):
+distclean-$(1): clean-$(1) releaseclean-$(1)
+
+clean-$(1):
 	-rm -rf $(HTML_SINGLE)/$(1) $(HTML_CHUNKED)/$(1)
+
+releaseclean-$(1):
 	$(MAKE) HTMLDIR=../$(HTML_CHUNKED)/$(1) -C $(1) distclean
 endef
 
