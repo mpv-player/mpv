@@ -5,6 +5,10 @@
  **  Copyright (C) 2000-2002 by Christian Scheurer (www.ChristianScheurer.ch)
  **  UNIX port copyright (c) 2000-2002 by Johannes Winkelmann (jw@tks6.net)
  **
+ ** Modified for use with MPlayer, detailed CVS changelog at
+ ** http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ ** $Id$
+ **
  **  The contents of this file are subject to the UniquE RAR File Library
  **  License (the "unrarlib-license.txt"). You may not use this file except
  **  in compliance with the License. You may obtain a copy of the License
