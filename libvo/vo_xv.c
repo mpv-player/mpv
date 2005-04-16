@@ -578,7 +578,10 @@ static void check_events(void)
 
     if (e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE)
     {
-        vo_xv_draw_colorkey(drwX,drwY,vo_dwidth,vo_dheight);
+	vo_xv_draw_colorkey(drwX - (vo_panscan_x >> 1),
+			    drwY - (vo_panscan_y >> 1),
+			    vo_dwidth + vo_panscan_x - 1,
+			    vo_dheight + vo_panscan_y - 1);
     }
 
     if ((e & VO_EVENT_EXPOSE || e & VO_EVENT_RESIZE) && int_pause)
