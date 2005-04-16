@@ -1,4 +1,4 @@
-.\" synced with 1.935
+.\" synced with 1.939
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2414,7 +2414,7 @@ uruchom MPlayera z opcj± \-v, i poszukaj wierszy oznaczonych na pocz±tku
 .RSs
 .IPs port=<numer>
 Okre¶la port XVideo.
-.IPs ck=cur|use|set
+.IPs ck=<cur|use|set>
 Okre¶la ¼ród³o, z którego pobierany jest kolor kluczowy (domy¶lnie: cur).
 .RSss
 .IPs cur
@@ -2425,7 +2425,7 @@ Wykorzystuje, ale nie ustawia koloru kluczowego z MPlayera (podaj opcjê
 .IPs set
 Podobnie jak use, ale ustawia równie¿ dostarczony kolor kluczowy.
 .RE
-.IPs ck-method=man|bg|auto
+.IPs ck-method=<man|bg|auto>
 Ustawia metodê rysowania koloru kluczowego (domy¶lnie: man).
 .RSss
 .IPs man
@@ -3675,8 +3675,15 @@ d³ugo¶ci filtru
 .PD 1
 .
 .TP
-.B sweep[=prêdko¶æ]
-przemiatanie sinusoidalne
+.B sweep[=szybko¶æ]
+Wykonuje przemiatanie sinusoidalne.
+.PD 0
+.RSs
+.IPs <0.0\-1.0>
+Delta funckji sinusoidalnej, ¿eby us³yszeæ przemiatanie dobierz bardzo ma³e
+warto¶ci.
+.RE
+.PD 1
 .
 .TP
 .B hrtf[=flaga]
@@ -3911,6 +3918,22 @@ do 4 kana³u wyj¶ciowego.
 .PD 1
 .
 .TP
+.B center
+Towrzy kana³ centralny z przednich kana³ów.
+Narazie mo¿e charakteryzowaæ siê nisk± jako¶ci±, poniewa¿ nie wykorzystuje
+filtru górnoprzepustowego dla prawid³owego selekcjonowania, ale, zamiast
+tego, u¶rednia i dzieli na po³owê oba kana³y.
+.PD 0
+.RSs
+.IPs <ch>\ 
+Okre¶la numer kana³u, do którego wstawiony zostanie kana³ centralny.
+Warto¶æ tego parametru mo¿e byæ z przedzia³u 0 do 5 (domy¶lnie: 5).
+Zauwa¿, ¿e liczba kana³ów bêdzie automatycznie zwiêkszonado <ch>, je¶li
+zajdzie taka potrzeba.
+.RE
+.PD1
+.
+.TP
 .B surround[=opo¼nienie]
 Dekoder macierzowo zakodowanego d¼wiêku przestrzennego takiego jak Dolby
 Surround.
@@ -4052,6 +4075,18 @@ s± wszystkie mo¿liwe parametry i ich poprawne zakresy.
 Zastêpuje to funkcjê "analyseplugin" z pakietu SDK LADSPA.
 .RE
 .PD 1
+.
+.TP
+.B comp\ \ \ 
+Filtr kompresuj±cy/rozkompresowuj±cy przdatny przy wej¶ciu z mikrofonu.
+Zapobiega przenoszeniu artefaktów przy du¿ym poziomie d¼wiêku, a zg³asnia
+przy niskm.
+Filtr ten nie by³ testowany i mo¿e byæ nawet bezu¿yteczny.
+.
+.TP
+.B gate\ \ \ 
+Filtr bramkuj±cy szum podobny do filtru comp.
+Filtr ten nie by³ testowany i mo¿e byæ nawet bezu¿yteczny.
 .
 .
 .
@@ -4379,6 +4414,8 @@ Automatycznie wy³±cza filtr, je¶li procesor jest zbyt wolny.
 Filtruje te¿ kolory (domy¶lne).
 .IPs y/nochrom
 Wykonuje tylko filtrowanie jasno¶ci (nie filtruje barw).
+.IPs n/noluma
+Wykonuje tylko filtrowanie barw (nie filtruje jano¶ci).
 .RE
 .PD 1
 .sp 1
