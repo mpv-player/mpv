@@ -99,6 +99,7 @@ MPlayer (1.0)
     * shorten audio decoder and demuxer
     * AASC video decoder
     * AMR NB/WB support via external reference decoders
+    * significantly faster snow decoding
     * experimental ratecontrol for snow
     * countless bug fixes all over the place
 
