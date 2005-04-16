@@ -1,4 +1,10 @@
-/* Imported from the dvbstream-0.2 project */
+/* Imported from the dvbstream-0.2 project
+ *
+ * Modified for use with MPlayer, for details see the CVS changelog at
+ * http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+ * $Id$
+ */
+
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>

@@ -5,6 +5,10 @@ dvbstream
 
 The latest version can be found at http://www.linuxstb.org/dvbstream
 
+Modified for use with MPlayer, for details see the CVS changelog at
+http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+$Id$
+
 Copyright notice:
 
 This program is free software; you can redistribute it and/or modify

@@ -2,6 +2,10 @@
 
    Copyright (C) Dave Chapman 2001,2002
 
+   Modified for use with MPlayer, for details see the CVS changelog at
+   http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
+   $Id$
+
    This program is free software; you can redistribute it and/or
    modify it under the terms of the GNU General Public License
    as published by the Free Software Foundation; either version 2
