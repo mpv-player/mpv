@@ -3625,13 +3625,6 @@ Sine function delta, use very low values to hear the sweep.
 .PD 1
 .
 .TP
-.B comp\ \ \ 
-Compressor/expander filter usable for microphone input.
-Prevents artifacts on very loud sound and raises the volume on
-very low sound.
-This filter is untested, maybe even unusable.
-.
-.TP
 .B hrtf[=flag]
 Head-related transfer function: Converts multichannel audio to
 2 channel output for headphones, preserving the spatiality of the sound.
@@ -4016,6 +4009,18 @@ and their valid ranges are printed.
 This eliminates the use of 'analyseplugin' from the LADSPA SDK.
 .RE
 .PD 1
+.
+.TP
+.B comp\ \ \ 
+Compressor/expander filter usable for microphone input.
+Prevents artifacts on very loud sound and raises the volume on
+very low sound.
+This filter is untested, maybe even unusable.
+.
+.TP
+.B gate\ \ \ 
+Noise gate filter similar to the comp audio filter.
+This filter is untested, maybe even unusable.
 .
 .
 .
