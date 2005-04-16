@@ -51,11 +51,11 @@ Homepage:   http://libmpeg2.sourceforge.net/
 Directory:  libmpeg2
 License:    GNU General Public License
 
-Name:       mpglib (part of mpg123)
+Name:       mpg123
 Version:    0.59s
 Homepage:   http://www.mpg123.de/
 Directory:  mp3lib
-License:    GNU Lesser General Public License
+License:    GNU General Public License
 
 Name:       Tremor
 Version:    1.0 + parts CVS from December 2004
@@ -96,7 +96,7 @@ License:    GNU General Public License
 Name:       matroxset
 Version:    0.3
 Homepage:   ftp://platan.vc.cvut.cz/pub/linux/matrox-latest/
-Directory:  TOOLS/TVout/matroxset
+Directory:  TOOLS/TVout/matroxset/
 License:    GNU General Public License
 
 Name:       unrarlib
