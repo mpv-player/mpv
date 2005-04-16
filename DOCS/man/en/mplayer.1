@@ -2390,7 +2390,7 @@ beginning.
 .RSs
 .IPs port=<number>
 Select a specific XVideo port.
-.IPs ck=cur|use|set
+.IPs ck=<cur|use|set>
 Select the source from which the colorkey is taken (default: cur).
 .RSss
 .IPs cur
@@ -2401,7 +2401,7 @@ it).
 .IPs set
 Same as use but also sets the supplied colorkey.
 .RE
-.IPs ck-method=man|bg|auto
+.IPs ck-method=<man|bg|auto>
 Sets the colorkey drawing method (default: man).
 .RSss
 .IPs man
@@ -3617,6 +3617,12 @@ cutoff frequency (0.0-1.0), default set depending upon filter length
 .TP
 .B sweep[=speed]
 sine sweep
+.PD 0
+.RSs
+.IPs <speed>
+sine function speed
+.RE
+.PD 1
 .
 .TP
 .B hrtf[=flag]
@@ -3853,6 +3859,13 @@ would add a sub-woofer channel with a cutoff frequency of
 100Hz to output channel 4.
 .RE
 .PD 1
+.
+.TP
+.B center
+Creates a center channel from the front channels.
+May currently be low quality as it does not implement a
+high-pass filter for proper extracting yet, but averages and
+halves the channels instead.
 .
 .TP
 .B surround[=delay]
@@ -8023,7 +8036,7 @@ Sets the video bitrate in kbit/s for MPEG-1/2 video.
 .TP
 .B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
 Sets the framerate for MPEG-1/2 video.
-This option will be ignored if used with option telecine.
+This option will be ignored if used with the telecine option.
 .
 .TP
 .B telecine
