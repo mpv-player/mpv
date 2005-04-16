@@ -224,12 +224,17 @@ void af_remove(af_stream_t* s, af_instance_t* af)
    failure */
 int af_reinit(af_stream_t* s, af_instance_t* af)
 {
-  if(!af)
-    return AF_ERROR;
-
   do{
     af_data_t in; // Format of the input to current filter
     int rv=0; // Return value
+
+    // Check if there are any filters left in the list
+    if(NULL == af){
+      if(!(af=af_append(s,s->first,"dummy"))) 
+	return AF_UNKNOWN; 
+      else
+	return AF_ERROR;
+    }
 
     // Check if this is the first filter 
     if(!af->prev) 
@@ -243,6 +248,7 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
     rv = af->control(af,AF_CONTROL_REINIT,&in);
     switch(rv){
     case AF_OK:
+	af = af->next;
       break;
     case AF_FALSE:{ // Configuration filter is needed
       // Do auto insertion only if force is not specified
@@ -286,7 +292,7 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 		 "This error should never uccur, please send bugreport.\n");
 	  return AF_ERROR;
 	}
-	af=new;
+	af=new->next;
       }
       break;
     }
@@ -296,7 +302,7 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	af_instance_t* aft=af->prev;
 	af_remove(s,af);
 	if(aft)
-	  af=aft;
+	  af=aft->next;
 	else
 	  af=s->first; // Restart configuration
       }
@@ -307,13 +313,6 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	     " filter '%s' returned error code %i\n",af->info->name,rv);
       return AF_ERROR;
     }
-    // Check if there are any filters left in the list
-    if(NULL == af){
-      if(!(af=af_append(s,s->first,"dummy"))) 
-	return -1; 
-    }
-    else
-      af=af->next;
   }while(af);
   return AF_OK;
 }
@@ -402,7 +401,7 @@ int af_init(af_stream_t* s, int force_output)
 	    af = af_append(s,s->last,resampler);
 	}
       // Init the new filter
-      if(!af || (AF_OK != af->control(af,AF_CONTROL_RESAMPLE_RATE,
+      if(!af || (AF_OK != af->control(af,AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET,
 				      &(s->output.rate))))
 	return -1;
       // Use lin int if the user wants fast
