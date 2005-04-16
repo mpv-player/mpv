@@ -2407,11 +2407,12 @@ int vo_xv_init_colorkey()
       }
     }
 
+    xv_atom = xv_intern_atom_if_exists( "XV_AUTOPAINT_COLORKEY" );    
+
     /* should we draw the colorkey ourselves or activate autopainting? */
     if ( xv_ck_info.method == CK_METHOD_AUTOPAINT )
     {
       rez = !Success; // reset rez to something different than Success
-      xv_atom = xv_intern_atom_if_exists( "XV_AUTOPAINT_COLORKEY" );
  
       if ( xv_atom != None ) // autopaint is supported
       {
@@ -2422,6 +2423,13 @@ int vo_xv_init_colorkey()
       {
         // fallback to manual colorkey drawing
         xv_ck_info.method = CK_METHOD_MANUALFILL;
+      }
+    }
+    else // disable colorkey autopainting if supported
+    {
+      if ( xv_atom != None ) // we have autopaint attribute
+      {
+        XvSetPortAttribute( mDisplay, xv_port, xv_atom, 0 );
       }
     }
   }
