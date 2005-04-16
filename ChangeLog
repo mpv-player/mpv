@@ -13,6 +13,7 @@ MPlayer (1.0)
     * slave mode command documentation finished
     * TOOLS documented in TOOLS/README
     * audio filter documentation moved to the man page and updated
+    * all audio filters documented
     * improved encoding guide
     * preliminary documentation for snow codec in DOCS/tech/snow.txt
     * misc updates and fixes all over the place
