@@ -1,4 +1,4 @@
-.\" synced with 1.934
+.\" synced with 1.938
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "13 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "16 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2558,7 +2558,7 @@ puis regardez les lignes commençant par [xv common].
 .RSs
 .IPs port=<nombre>
 Sélectionne un port XVideo particulier.
-.IPs ck=cur|use|set
+.IPs ck=<cur|use|set>
 Sélectionne la source à partir de laquelle la couleur de transparence
 est prise (par défaut\ : cur).
 .RSss
@@ -2570,7 +2570,7 @@ Utilise mais ne défini pas la couleur de transparence depuis MPlayer
 .IPs set
 Comme 'use' mais défini aussi la couleur de transparence donnée.
 .RE
-.IPs ck-method=man|bg|auto
+.IPs ck-method=<man|bg|auto>
 Défini la méthode de remplissage de la couleur de transparence
 (par défaut\ : man).
 .RSss
@@ -3799,7 +3799,7 @@ en réalisant une changement de fréquence et une interpolation linéaire.
 .PD 1
 .
 .TP
-.B lavcresample[=srate[:longueur[:linéaire[:count[:cutoff]]]]]
+.B lavcresample[=srate[:longueur[:linéaire[:nombre[:freq_coup]]]]]
 Change le taux d'échantillonnage du flux audio en un entier <srate> en Hz.
 Ne gère que le format 16-bit en boutisme (endianness) natif.
 .br
@@ -3815,18 +3815,26 @@ longueur du filtre par rapport au taux d'échantillonnage le plus faible
 .IPs <linéaire>
 si à 1 alors les filtres seront interpolés linéairement entre les entrées
 polyphase
-.IPs <count>
+.IPs <nombre>
 le log2 du nombre d'entrées polyphase
 (..., 10->1024, 11->2048, 12->4096, ...) (par défaut\ : 10->1024)
-.IPs <cutoff>
+.IPs <freq_coup>
 fréquence de coupure (0.0-1.0) (par défaut\ : initialisé en fonction de la
 longueur du filtre)
 .RE
 .PD 1
 .
 .TP
-.B sweep[=speed]
-balayage sinus
+.B sweep[=vitesse]
+Produit un balayage sinus, tonalité dont la fréquence augmente avec le
+temps.
+.PD 0
+.RSs
+.IPs <0.0\-1.0>
+Delat de la fonction sinus, prenez des valeurs très faible pour
+entrendre le balayage.
+.RE
+.PD 1
 .
 .TP
 .B hrtf[=drapeau]
@@ -4073,6 +4081,23 @@ coupure sera de 100Hz, et sera envoyé vers le canal 4.
 .PD 1
 .
 .TP
+.B center[=<ca>]
+Crée un canal central à partir des canaux de devant.
+Peut être de mauvaise qualité puisqu'il n'implémente pas pour le
+moment un filtre passe-haut pour une bonne extraction, mais
+fait une moyenne des canaux et l'atténue de moitié à la place.
+.PD 0
+.RSs
+.IPs <ca>
+Détermine le canal dans lequel insérer le canal central.
+Le numéro de canal peut être un nombre compris entre 0 et 5
+(par défaut\ : 5).
+Notez que le nombre de canaux sera automatiquement augmenté à <ca>
+si nécessaire.
+.RE
+.PD1
+.
+.TP
 .REss
 .B surround[=retard]
 Décodeur pour le son surround encodé en matrice comme Dolby Surround.
@@ -4210,6 +4235,20 @@ Ceci élimine d'utilisation de 'analyseplugin' depuis le kit de développement
 LADSPA.
 .RE
 .PD 1
+.
+.TP
+.B comp\ \ \ 
+Filtre de compression/expansion utile pour une entrée micro.
+Augmente le volume des sons faibles ou diminue celui des sons forts
+pour éviter des artefacts sonores.
+Ce filtre a été très peu testé, et n'es peut-être même pas
+utilisable.
+.
+.TP
+.B gate\ \ \ 
+Filtre antiparasite similaire au filtre audio comp.
+Ce filtre a été très peu testé, et n'es peut-être même pas
+utilisable.
 .
 .
 .
@@ -4545,6 +4584,8 @@ Désactive le sous-filtre automatiquement si le micro-processeur est trop lent.
 Filtre également la chrominance (par défaut).
 .IPs y/nochrom
 Filtrage de la luminance uniquement (pas de la chrominance).
+.IPs n/noluma
+Filtrage de la chrominance uniquement (pas de la luminance).
 .RE
 .PD 1
 .sp 1
