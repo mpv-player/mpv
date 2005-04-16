@@ -3616,13 +3616,20 @@ cutoff frequency (0.0-1.0), default set depending upon filter length
 .
 .TP
 .B sweep[=speed]
-sine sweep
+Produces a sine sweep.
 .PD 0
 .RSs
-.IPs <speed>
-sine function speed
+.IPs <0.0\-1.0>
+Sine function delta, use very low values to hear the sweep.
 .RE
 .PD 1
+.
+.TP
+.B comp\ \ \ 
+Compressor/expander filter usable for microphone input.
+Prevents artifacts on very loud sound and raises the volume on
+very low sound.
+This filter is untested, maybe even unusable.
 .
 .TP
 .B hrtf[=flag]
@@ -3861,11 +3868,20 @@ would add a sub-woofer channel with a cutoff frequency of
 .PD 1
 .
 .TP
-.B center
+.B center\ 
 Creates a center channel from the front channels.
 May currently be low quality as it does not implement a
-high-pass filter for proper extracting yet, but averages and
+high-pass filter for proper extraction yet, but averages and
 halves the channels instead.
+.PD 0
+.RSs
+.IPs <ch>\ 
+Determines the channel number in which to insert the center channel.
+Channel number can be between 0 and 5 (default: 5).
+Observe that the number of channels will automatically
+be increased to <ch> if necessary.
+.RE
+.PD1
 .
 .TP
 .B surround[=delay]
