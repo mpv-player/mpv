@@ -26,7 +26,7 @@ OPTIONS RECOGNIZED BY SNOW
  * vbitrate=<value>
    Specify bitrate of the 2nd pass.
    Don't use it for 1st pass as CBR isn't implemented yet, use vqscale
-   instead, and set it to a quantizer near to the target average quant
+   instead, and set it to a quantizer near the target average quant
    of the final encode.
 
  * cmp, subcmp, mbcmp
