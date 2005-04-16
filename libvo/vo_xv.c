@@ -952,6 +952,10 @@ static uint32_t control(uint32_t request, void *data, ...)
                                             vo_dwidth + vo_panscan_x - 1,
                                             vo_dheight + vo_panscan_y - 1,
                                             1);
+		    vo_xv_draw_colorkey(drwX - (vo_panscan_x >> 1),
+					drwY - (vo_panscan_y >> 1),
+					vo_dwidth + vo_panscan_x - 1,
+					vo_dheight + vo_panscan_y - 1);
                     flip_page();
                 }
             }
