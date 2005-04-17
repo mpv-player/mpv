@@ -5614,7 +5614,7 @@ EOF
       fi
   fi
 
-  if test "$_live_dist" = no && test "$_livelibdir" && cc_check -I$_livelibdir/liveMedia/include/ \
+  if test "$_live_dist" = no && test "$_livelibdir" && cc_check -I$_livelibdir/liveMedia/include \
       -I$_livelibdir/UsageEnvironment/include -I$_livelibdir/groupsock/include; then
       _live=yes
   else
