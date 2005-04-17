@@ -2,6 +2,7 @@ How to make an MPlayer release
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 preparations:
+- Announce release target date on dev-eng and #mplayerdev
 - Ask the DOCS maintainers to commit their final changes, check if
   all docs are up to date, etc.
 - Verify man page, remove obsolete options, mention new ones.
@@ -10,10 +11,14 @@ preparations:
   to verify their parts, etc. Ask Diego to spellcheck it.
 - Consult at -dev-eng about unstable parts of the code which should be
   disabled for the release.
+- Find a codename for the release
 
 create the release tree:
+- tag cvs with release name
+- update release.sh script with version number
+***the following steps are done automatically by release.sh script***
 - cvs checkout the mplayer src tree
-- if releasing from 'main', check out libavcodec from FFmpeg CVS
+- check out libavcodec and libavformat from FFmpeg CVS
 - remove the CVS subdirs:
     find main -name CVS -exec rm -rf {} \;
 - remove the .cvsignore files:
@@ -26,25 +31,40 @@ create the release tree:
 echo "#define VERSION \"1.0pre5-$1 \"" > version.h
 ============
 
+- build the HTML docs from XML sources; then cleanup
+    make html-chunked; make releaseclean
+
 release the tree:
     cd ..
     mv main MPlayer-0.90rc5
     tar -cf MPlayer-0.90rc5.tar MPlayer-0.90rc5
     bzip2 -9 MPlayer-0.90rc5.tar
+***end of part done by release.sh**
 
 test it (download to your local machine, extract, compile, run)
+ - compilers: gcc 3, gcc 2.95, mingw, cygwin
+ - architectures: PPC, AMD64, x86 with MMX[2], SSE[2], 3DNow
+ - OS: Linux, BSD, Windows, MacOS X
 
 copy to FTP:
     cp MPlayer-0.90rc5.tar.bz2 /home/ftp/MPlayer/releases/
+    cp ChangeLog-0.90rc5 and update ChangeLog symlink
+    md5sum MPlayer-0.90rc5.tar.bz2 > MPlayer-0.90rc5.tar.bz2.md5
 
 move the older (pre)release(s) (except the last one before the current one)
 to ../OLD_stuff/ dir
 
 Somehow get Diego to write a news entry for the release, and update the
 source file of dload.html and commit it. Test it, it's sometimes buggy
-(broken links etc).
+(broken links etc). Update also translated versions of dload.html
 
 Send a message to mplayer-announce mailing list.
+
+Add the new release version to bugzilla page.
+
+Update relase version in #mplayer topic
+
+Update project page on Freshmeat
 
 Done.
 
