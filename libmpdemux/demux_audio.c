@@ -117,7 +117,7 @@ int demux_audio_open(demuxer_t* demuxer) {
   stream_t *s;
   sh_audio_t* sh_audio;
   uint8_t hdr[HDR_SIZE];
-  int frmt = 0, n = 0, step, mp3_freq, mp3_chans, mp3_flen;
+  int frmt = 0, n = 0, step, mp3_freq, mp3_chans, mp3_flen, mpa_layer = 3, mpa_spf = 1152;
   off_t st_pos = 0, next_frame_pos = 0;
   // mp3_hdrs list is sorted first by next_frame_pos and then by frame_pos
   mp3_hdr_t *mp3_hdrs = NULL, *mp3_found = NULL;
@@ -157,7 +157,7 @@ int demux_audio_open(demuxer_t* demuxer) {
     } else if( hdr[0] == 'f' && hdr[1] == 'm' && hdr[2] == 't' && hdr[3] == ' ' ) {
       frmt = WAV;
       break;      
-    } else if((mp3_flen = mp_get_mp3_header(hdr,&mp3_chans,&mp3_freq)) > 0) {
+    } else if((mp3_flen = mp_get_mp3_header(hdr,&mp3_chans,&mp3_freq,&mpa_spf,&mpa_layer)) > 0) {
       mp3_found = add_mp3_hdr(&mp3_hdrs, st_pos, mp3_chans, mp3_freq, mp3_flen);
       if (mp3_found) {
         frmt = MP3;
@@ -184,17 +184,17 @@ int demux_audio_open(demuxer_t* demuxer) {
 
   switch(frmt) {
   case MP3:
-    sh_audio->format = 0x55;
+    sh_audio->format = (mpa_layer < 3 ? 0x50 : 0x55);
     demuxer->movi_start = mp3_found->frame_pos;
     next_frame_pos = mp3_found->next_frame_pos;
     sh_audio->audio.dwSampleSize= 0;
-    sh_audio->audio.dwScale = 1152;
+    sh_audio->audio.dwScale = mpa_spf;
     sh_audio->audio.dwRate = mp3_found->mp3_freq;
     sh_audio->wf = malloc(sizeof(WAVEFORMATEX));
     sh_audio->wf->wFormatTag = sh_audio->format;
     sh_audio->wf->nChannels = mp3_found->mp3_chans;
     sh_audio->wf->nSamplesPerSec = mp3_found->mp3_freq;
-    sh_audio->wf->nBlockAlign = 1152;
+    sh_audio->wf->nBlockAlign = mpa_spf;
     sh_audio->wf->wBitsPerSample = 16;
     sh_audio->wf->cbSize = 0;    
     free(mp3_found);
@@ -397,7 +397,7 @@ int demux_audio_fill_buffer(demux_stream_t *ds) {
 	dp = new_demux_packet(l);
 	memcpy(dp->buffer,hdr,4);
 	stream_read(s,dp->buffer + 4,l-4);
-	priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + 1152/(float)sh_audio->samplerate; // FIXME: 1152->576 if MPEG-2
+	priv->last_pts = priv->last_pts < 0 ? 0 : priv->last_pts + sh_audio->audio.dwScale/(float)sh_audio->samplerate;
 	break;
       }
     } break;
@@ -433,7 +433,7 @@ static void high_res_mp3_seek(demuxer_t *demuxer,float time) {
   da_priv_t* priv = demuxer->priv;
   sh_audio_t* sh = (sh_audio_t*)demuxer->audio->sh;
 
-  nf = time*sh->samplerate/1152;
+  nf = time*sh->samplerate/sh->audio.dwScale;
   while(nf > 0) {
     stream_read(demuxer->stream,hdr,4);
     len = mp_decode_mp3_header(hdr);
@@ -442,7 +442,7 @@ static void high_res_mp3_seek(demuxer_t *demuxer,float time) {
       continue;
     }
     stream_skip(demuxer->stream,len-4);
-    priv->last_pts += 1152/(float)sh->samplerate;
+    priv->last_pts += sh->audio.dwScale/(float)sh->samplerate;
     nf--;
   }
 }

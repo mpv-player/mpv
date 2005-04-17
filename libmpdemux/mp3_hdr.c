@@ -34,7 +34,7 @@ int mp_mp3_get_lsf(unsigned char* hbuf){
 /*
  * return frame size or -1 (bad frame)
  */
-int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
+int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int* mpa_layer){
     int stereo,ssize,lsf,framesize,padding,bitrate_index,sampling_frequency;
     int layer, mult[3] = { 12000, 144000, 144000 };
     unsigned long newhead = 
@@ -115,7 +115,20 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate){
       framesize += padding;
 
 //    if(framesize<=0 || framesize>MAXFRAMESIZE) return FALSE;
-    if(srate) *srate = freqs[sampling_frequency];
+    if(srate) {
+      *srate = freqs[sampling_frequency];
+      if(spf) {
+        if(layer == 1)
+	  *spf = 384;
+        else if(layer == 2)
+	  *spf = 1152;
+        else if(*srate < 32000)
+          *spf = 576;
+        else
+	  *spf = 1152;
+      }
+    }
+    if(mpa_layer) *mpa_layer = layer;
     if(chans) *chans = stereo;
 
     return framesize;
