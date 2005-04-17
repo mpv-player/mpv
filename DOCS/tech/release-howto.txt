@@ -31,7 +31,7 @@ create the release tree:
 echo "#define VERSION \"1.0pre5-$1 \"" > version.h
 ============
 
-- build the HTML docs from XML sources; then cleanup
+- build the HTML docs from XML sources, then cleanup.
     make html-chunked; make releaseclean
 
 release the tree:
@@ -56,13 +56,13 @@ to ../OLD_stuff/ dir
 
 Somehow get Diego to write a news entry for the release, and update the
 source file of dload.html and commit it. Test it, it's sometimes buggy
-(broken links etc). Update also translated versions of dload.html
+(broken links etc). Also, update translated versions of dload.html.
 
 Send a message to mplayer-announce mailing list.
 
 Add the new release version to bugzilla page.
 
-Update relase version in #mplayer topic
+Update release version in #mplayer topic
 
 Update project page on Freshmeat
 
