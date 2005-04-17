@@ -88,7 +88,7 @@ static struct {
 	{ "audio/x-mpegurl", DEMUXER_TYPE_PLAYLIST },
 	{ "audio/x-pls", DEMUXER_TYPE_PLAYLIST },
 	// Real Media
-	{ "audio/x-pn-realaudio", DEMUXER_TYPE_REAL },
+//	{ "audio/x-pn-realaudio", DEMUXER_TYPE_REAL },
 	// OGG Streaming
 	{ "application/x-ogg", DEMUXER_TYPE_OGG },
 	// NullSoft Streaming Video
