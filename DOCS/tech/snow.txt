@@ -20,8 +20,8 @@ OPTIONS RECOGNIZED BY SNOW
    Note that 0 may not be specified; if you want lossless encoding, you
    must leave out vqscale.
 
- * vpass=<1|2>
-   Activates  internal two pass mode.
+ * vpass=<1-3>
+   Activates internal two (or more) pass mode.
 
  * vbitrate=<value>
    Specify bitrate of the 2nd pass.
@@ -37,10 +37,12 @@ OPTIONS RECOGNIZED BY SNOW
    You can add 256 to any of the options to enable chroma motion
    estimation for that comparison (e.g. mbcmp=257 for SSD with chroma),
    but it doesn't seem to help much for the moment.
+   NOTE: 9/7 wavelet doesn't work with lossless mode.
 
  * pred=<0-2>
    Wavelet type. 0 (9/7 wavelet), 1 (5/3 wavelet), 2 (13/7 wavelet).
    9/7 is probably better for for lossy coding, and 5/3 for lossless.
+   NOTE: 9/7 wavelet doesn't work with lossless mode.
 
  * last_pred=<0-3>
    Tries a few extra predicted motion vectors before doing EPZS search,
