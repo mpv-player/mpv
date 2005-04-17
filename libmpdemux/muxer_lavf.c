@@ -81,6 +81,7 @@ static URLProtocol mp_protocol = {
 	mp_write,
 	mp_seek,
 	mp_close,
+	NULL
 };
 
 static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
@@ -102,7 +103,7 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not alloc muxer_stream, EXIT\n");
 		return NULL;
 	}
-	stream->b_buffer = malloc(2048);
+	stream->b_buffer = (unsigned char *)malloc(2048);
 	if(!stream->b_buffer)
 	{
 		mp_msg(MSGT_MUXER, MSGL_ERR, "Could not alloc b_buffer, EXIT\n");
@@ -167,7 +168,9 @@ static void fix_parameters(muxer_stream_t *stream)
 		ctx->channels = stream->wf->nChannels;
                 if(stream->h.dwRate && (stream->h.dwScale * (int64_t)ctx->sample_rate) % stream->h.dwRate == 0)
                     ctx->frame_size= (stream->h.dwScale * (int64_t)ctx->sample_rate) / stream->h.dwRate;
-//                printf("ctx->block_align = stream->wf->nBlockAlign; %d=%d stream->wf->nAvgBytesPerSec:%d\n", ctx->block_align, stream->wf->nBlockAlign, stream->wf->nAvgBytesPerSec);
+                mp_msg(MSGT_MUXER, MSGL_V, "MUXER_LAVF(audio stream) frame_size: %d, scale: %u, sps: %u, rate: %u, ctx->block_align = stream->wf->nBlockAlign; %d=%d stream->wf->nAvgBytesPerSec:%d\n", 
+			ctx->frame_size, stream->h.dwScale, ctx->sample_rate, stream->h.dwRate,
+			ctx->block_align, stream->wf->nBlockAlign, stream->wf->nAvgBytesPerSec);
 		ctx->block_align = stream->wf->nBlockAlign;
 	}
 	else if(stream->type == MUXER_TYPE_VIDEO)
@@ -188,18 +191,17 @@ static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags)
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	muxer_stream_priv_t *spriv = (muxer_stream_priv_t *) stream->priv;
 	AVPacket pkt;
-	AVCodecContext *ctx;
 	
 	stream->size += len;
-	if(stream->type == MUXER_TYPE_VIDEO && !len)
-		return;
 	
+	if(len)
+	{
 	av_init_packet(&pkt);
 	pkt.size = len;
 	pkt.stream_index= spriv->avstream->index;
 	pkt.data = stream->buffer;
 	
-	if((stream->type == MUXER_TYPE_VIDEO) && (flags & AVIIF_KEYFRAME))
+	if(flags & AVIIF_KEYFRAME)
 		pkt.flags |= PKT_FLAG_KEY;
 	else
 		pkt.flags = 0;
@@ -208,16 +210,16 @@ static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags)
 	//pkt.pts = AV_NOPTS_VALUE; 
 	pkt.pts = AV_TIME_BASE * stream->timer;
 	
-	if(stream->h.dwSampleSize) 	// CBR
-		stream->h.dwLength += len / stream->h.dwSampleSize;
-	else				// VBR
-		stream->h.dwLength++;
-	
-	//;
 	if(av_interleaved_write_frame(priv->oc, &pkt) != 0) //av_write_frame(priv->oc, &pkt)
 	{
 		mp_msg(MSGT_MUXER, MSGL_ERR, "Error while writing frame\n");
 	}
+	}
+	
+	if(stream->h.dwSampleSize) 	// CBR
+		stream->h.dwLength += len / stream->h.dwSampleSize;
+	else				// VBR
+		stream->h.dwLength++;
 	
 	stream->timer = (double) stream->h.dwLength * stream->h.dwScale / stream->h.dwRate;
 	return;
