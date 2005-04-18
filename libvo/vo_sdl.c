@@ -155,11 +155,6 @@ static void setenv(const char *name, const char *val, int _xx)
 #endif
 
 
-#define FS 0x01
-#define VM 0x02
-#define ZOOM 0x04
-#define FLIP 0x08  
-
 #ifdef SDL_ENABLE_LOCKS
 #define	SDL_OVR_LOCK(x)        if (SDL_LockYUVOverlay (priv->overlay)) { \
 				if(verbose) printf("SDL: Couldn't lock YUV overlay\n"); \
@@ -690,7 +685,7 @@ static void set_fullmode (int mode) {
  
 	/* if we haven't set a fullmode yet, default to the lowest res fullmode first */
 	/* But select a mode where the full video enter */
-	if(priv->X && priv->fulltype & FS) {
+	if(priv->X && priv->fulltype & VOFLAG_FULLSCREEN) {
 		screen_surface_w = priv->XWidth;
 		screen_surface_h = priv->XHeight;
 	}
@@ -726,7 +721,7 @@ static void set_fullmode (int mode) {
 
 	/* calculate new video size/aspect */
 	if(priv->mode == YUV) {
-        if(priv->fulltype&FS)
+        if(priv->fulltype&VOFLAG_FULLSCREEN)
 		aspect_save_screenres(priv->XWidth, priv->XHeight);
 
         aspect(&priv->dstwidth, &priv->dstheight, A_ZOOM);
@@ -868,28 +863,28 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	 */
 //      printf("SDL: flags are set to: %i\n", flags);
 //	printf("SDL: Width: %i Height: %i D_Width %i D_Height: %i\n", width, height, d_width, d_height);
-	if(flags&FLIP) {
+	if(flags&VOFLAG_FLIPPING) {
 		if(verbose) printf("SDL: using flipped video (only with RGB/BGR/packed YUV)\n");
 		priv->flip = 1; 
 	}
-	if(flags&FS) {
+	if(flags&VOFLAG_FULLSCREEN) {
 	  	if(verbose) printf("SDL: setting zoomed fullscreen without modeswitching\n");
 		printf("SDL: Info - please use -vm or -zoom to switch to best resolution.\n");
-		priv->fulltype = FS;
+		priv->fulltype = VOFLAG_FULLSCREEN;
 		set_fullmode(priv->fullmode);
           	/*if((priv->surface = SDL_SetVideoMode (d_width, d_height, priv->bpp, priv->sdlfullflags)))
 			SDL_ShowCursor(0);*/
 	} else	
-	if(flags&VM) {
+	if(flags&VOFLAG_MODESWITCHING) {
 	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
-		priv->fulltype = VM;
+		priv->fulltype = VOFLAG_MODESWITCHING;
 		set_fullmode(priv->fullmode);
           	/*if((priv->surface = SDL_SetVideoMode (d_width ? d_width : width, d_height ? d_height : height, priv->bpp, priv->sdlfullflags)))
 			SDL_ShowCursor(0);*/
 	} else
-	if(flags&ZOOM) {
+	if(flags&VOFLAG_SWSCALE) {
 	 	if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
-		priv->fulltype = ZOOM;
+		priv->fulltype = VOFLAG_SWSCALE;
 		set_fullmode(priv->fullmode);
 	} 
         else {
@@ -904,7 +899,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		}
 		else {
 			if(verbose) printf("SDL: setting zoomed fullscreen with modeswitching\n");
-			priv->fulltype = ZOOM;
+			priv->fulltype = VOFLAG_SWSCALE;
 			set_fullmode(priv->fullmode);
 		}	
 	}

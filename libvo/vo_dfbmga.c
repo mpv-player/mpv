@@ -547,7 +547,7 @@ static void release_config( void )
 static uint32_t
 config( uint32_t width, uint32_t height,
         uint32_t d_width, uint32_t d_height,
-        uint32_t fullscreen,
+        uint32_t flags,
         char *title,
 	uint32_t format )
 {
@@ -735,7 +735,7 @@ config( uint32_t width, uint32_t height,
                out_height = screen_height;
 
           aspect_save_screenres( out_width, out_height );
-          aspect( &out_width, &out_height, (fullscreen & 0x01) ? A_ZOOM : A_NOZOOM );
+          aspect( &out_width, &out_height, (flags & VOFLAG_FULLSCREEN) ? A_ZOOM : A_NOZOOM );
 
           if (in_width != out_width ||
               in_height != out_height)

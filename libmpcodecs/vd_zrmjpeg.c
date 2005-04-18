@@ -9,6 +9,7 @@
 
 #include "config.h"
 #include "mp_msg.h"
+#include "vfcap.h"
 
 /* some convenient #define's, is this portable enough? */
 #define VERBOSE(...) mp_msg(MSGT_DECVIDEO, MSGL_V, "vd_zrmjpeg: " __VA_ARGS__)
@@ -38,7 +39,7 @@ typedef struct {
 
 static int query_format(sh_video_t *sh, unsigned int format) {
 	vd_zrmjpeg_ctx_t *ctx = sh->context;
-	if (format == ctx->preferred_csp) return CONTROL_TRUE;
+	if (format == ctx->preferred_csp) return VFCAP_CSP_SUPPORTED;
 	return CONTROL_FALSE;
 }
 	

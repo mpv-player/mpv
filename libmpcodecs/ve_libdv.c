@@ -66,8 +66,8 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-    if(fmt==IMGFMT_YUY2) return 3;
-    if(fmt==IMGFMT_RGB24) return 1;
+    if(fmt==IMGFMT_YUY2) return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+    if(fmt==IMGFMT_RGB24) return VFCAP_CSP_SUPPORTED;
     return 0;
 }
 

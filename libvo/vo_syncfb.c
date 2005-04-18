@@ -342,12 +342,12 @@ query_format(uint32_t format)
     case IMGFMT_YV12:
 //    case IMGFMT_RGB|24:
 //    case IMGFMT_BGR|24:
-        return 1;
+        return VFCAP_CSP_SUPPORTED;
     }
     return 0;
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	uint_32 frame_size;
 

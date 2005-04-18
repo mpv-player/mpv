@@ -179,7 +179,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,uint32_
     vo_dx=( vo_screenwidth - d_width ) / 2; vo_dy=( vo_screenheight - d_height ) / 2;    
     geometry(&vo_dx, &vo_dy, &d_width, &d_height, vo_screenwidth, vo_screenheight);
 
-    vo_fs = flags&0x01;
+    vo_fs = flags&VOFLAG_FULLSCREEN;
 
 
     aspect(&d_width, &d_height, A_NOZOOM);

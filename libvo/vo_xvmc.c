@@ -602,7 +602,7 @@ found_subpic:
    vo_dwidth=d_width; vo_dheight=d_height;
 
 #ifdef HAVE_XF86VM
-   if( flags&0x02 ) vm = 1;
+   if( flags&VOFLAG_MODESWITCHING ) vm = 1;
 #endif
 
    aspect_save_screenres(vo_screenwidth,vo_screenheight);
@@ -686,7 +686,7 @@ found_subpic:
          XSetStandardProperties(mDisplay, vo_window, hello, hello, None, NULL, 0, &hint);
          XSetWMNormalHints( mDisplay,vo_window,&hint );
 	 XMapWindow(mDisplay, vo_window);
-	 if ( flags&1 ) vo_x11_fullscreen();
+	 if ( flags&VOFLAG_FULLSCREEN ) vo_x11_fullscreen();
 	 else {
 #ifdef HAVE_XINERAMA
 	    vo_x11_xinerama_move(mDisplay,vo_window);
@@ -697,7 +697,7 @@ found_subpic:
 	// vo_fs set means we were already at fullscreen
 	 vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );
 	 if ( !vo_fs ) XMoveResizeWindow( mDisplay,vo_window,hint.x,hint.y,hint.width,hint.height );
-	 if ( flags&1 && !vo_fs ) vo_x11_fullscreen(); // handle -fs on non-first file
+	 if ( flags&VOFLAG_FULLSCREEN && !vo_fs ) vo_x11_fullscreen(); // handle -fs on non-first file
       }
 
 //    vo_x11_sizehint( hint.x, hint.y, hint.width, hint.height,0 );   
@@ -719,7 +719,7 @@ found_subpic:
    }
 
    aspect(&vo_dwidth,&vo_dheight,A_NOZOOM);
-   if ( (( flags&1 )&&( WinID <= 0 )) || vo_fs )
+   if ( (( flags&VOFLAG_FULLSCREEN )&&( WinID <= 0 )) || vo_fs )
    {
       aspect(&vo_dwidth,&vo_dheight,A_ZOOM);
       drwX=( vo_screenwidth - (vo_dwidth > vo_screenwidth?vo_screenwidth:vo_dwidth) ) / 2;

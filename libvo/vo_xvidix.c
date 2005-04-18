@@ -301,7 +301,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 #endif
 
 #ifdef X11_FULLSCREEN
-        if ((flags & 1) || (flags & 0x04))
+        if ((flags & VOFLAG_FULLSCREEN) || (flags & VOFLAG_SWSCALE))
             aspect(&d_width, &d_height, A_ZOOM);
 #endif
         dwidth = d_width;
@@ -367,13 +367,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                 XStoreName(mDisplay, vo_window, title);
                 XMapWindow(mDisplay, vo_window);
 
-                if (flags & 1)
+                if (flags & VOFLAG_FULLSCREEN)
                     vo_x11_fullscreen();
 
 #ifdef HAVE_XINERAMA
                 vo_x11_xinerama_move(mDisplay, vo_window);
 #endif
-            } else if (!(flags & 1))
+            } else if (!(flags & VOFLAG_FULLSCREEN))
                 XMoveResizeWindow(mDisplay, vo_window, vo_dx, vo_dy,
                                   vo_dwidth, vo_dheight);
         }
@@ -385,7 +385,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     }
 #endif
 
-    if ((!WinID) && (flags & 1))
+    if ((!WinID) && (flags & VOFLAG_FULLSCREEN))
     {
         vo_dx = 0;
         vo_dy = 0;

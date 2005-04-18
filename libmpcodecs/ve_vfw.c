@@ -234,7 +234,7 @@ static int control(struct vf_instance_s* vf, int request, void* data){
 }
 
 static int query_format(struct vf_instance_s* vf, unsigned int fmt){
-    if(fmt==IMGFMT_BGR24) return 3 | VFCAP_FLIPPED;
+    if(fmt==IMGFMT_BGR24) return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_FLIPPED;
     return 0;
 }
 

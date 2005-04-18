@@ -214,7 +214,7 @@ query_format(uint32_t format)
   switch(format) {
   case IMGFMT_BGR8:
     if(tdfx_cfg.screen_format == TDFX_VID_FORMAT_BGR8)
-      return 3 | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
+      return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     return 0;
   case IMGFMT_YUY2:
   case IMGFMT_UYVY:
@@ -226,19 +226,19 @@ query_format(uint32_t format)
   case IMGFMT_I420:
     if(tdfx_cfg.screen_format == TDFX_VID_FORMAT_BGR8)
       return 0;
-    return 3 | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
+    return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
   }
   return 0;
 }
 
 static uint32_t
-config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format)
+config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 
   if(tdfx_fd < 0)
     return 1;
   // When we are run as sub vo we must follow the size gaven to us
-  if(!(fullscreen & VOFLAG_XOVERLAY_SUB_VO)) {
+  if(!(flags & VOFLAG_XOVERLAY_SUB_VO)) {
     if(!vo_screenwidth)
       vo_screenwidth = tdfx_cfg.screen_width;
     if(!vo_screenheight)
@@ -248,7 +248,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     aspect_save_prescale(d_width,d_height);
     aspect_save_screenres(vo_screenwidth,vo_screenheight);
     
-    if(fullscreen&0x01) { /* -fs */
+    if(flags&VOFLAG_FULLSCREEN) { /* -fs */
       aspect(&d_width,&d_height,A_ZOOM);
       vo_fs = VO_TRUE;
     } else {

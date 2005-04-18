@@ -76,7 +76,7 @@ static uint32_t setup_vidix(){
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_height, uint32_t flags, char *title, uint32_t format){
-  vo_fs = flags & 0x01;
+  vo_fs = flags & VOFLAG_FULLSCREEN;
   if(!vo_config_count){
     if(vo_screenwidth && vo_screenheight){
       if(!vo_geometry)center=1;

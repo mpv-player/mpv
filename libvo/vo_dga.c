@@ -627,7 +627,7 @@ static uint32_t config(uint32_t width, uint32_t height,
     vo_dga_vp_width = mX;
     vo_dga_vp_height = mY;
 
-    if ((flags & 0x04) || (flags & 0x01))
+    if ((flags & VOFLAG_SWSCALE) || (flags & VOFLAG_FULLSCREEN))
     {                           /* -zoom or -fs */
         scale_dstW = (d_width + 7) & ~7;
         scale_dstH = d_height;
@@ -636,9 +636,9 @@ static uint32_t config(uint32_t width, uint32_t height,
         aspect_save_screenres(mX, mY);
         aspect_save_orig(scale_srcW, scale_srcH);
         aspect_save_prescale(scale_dstW, scale_dstH);
-        if (flags & 0x01)       /* -fs */
+        if (flags & VOFLAG_FULLSCREEN)       /* -fs */
             aspect(&scale_dstW, &scale_dstH, A_ZOOM);
-        else if (flags & 0x04)  /* -fs */
+        else if (flags & VOFLAG_SWSCALE)  /* -fs */
             aspect(&scale_dstW, &scale_dstH, A_NOZOOM);
         mp_msg(MSGT_VO, MSGL_INFO,
                "vo_dga: Aspect corrected size for SwScaler: %4d x %4d.\n",

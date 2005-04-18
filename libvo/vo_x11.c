@@ -293,13 +293,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     vo_dwidth = d_width;
     vo_dheight = d_height;
 
-    if (flags & 0x03)
+    if (flags & (VOFLAG_FULLSCREEN|VOFLAG_MODESWITCHING))
         fullscreen = 1;
-    if (flags & 0x02)
+    if (flags & VOFLAG_MODESWITCHING)
         vm = 1;
-    if (flags & 0x08)
+    if (flags & VOFLAG_FLIPPING)
         Flip_Flag = 1;
-    zoomFlag = flags & 0x04;
+    zoomFlag = flags & VOFLAG_SWSCALE;
 
     int_pause = 0;
 // if(!fullscreen) zoomFlag=1; //it makes no sense to avoid zooming on windowd mode
@@ -690,10 +690,10 @@ static uint32_t query_format(uint32_t format)
         if (IMGFMT_BGR_DEPTH(format) <= 8)
             return 0;           // TODO 8bpp not yet fully implemented
         if (IMGFMT_BGR_DEPTH(format) == vo_depthonscreen)
-            return 3 | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_FLIP |
+            return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_FLIP |
                 VFCAP_ACCEPT_STRIDE;
         else
-            return 1 | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_FLIP |
+            return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_FLIP |
                 VFCAP_ACCEPT_STRIDE;
     }
 
@@ -709,7 +709,7 @@ static uint32_t query_format(uint32_t format)
         case IMGFMT_I420:
         case IMGFMT_IYUV:
         case IMGFMT_YV12:
-            return 1 | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_ACCEPT_STRIDE;
+            return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_ACCEPT_STRIDE;
     }
     return 0;
 }

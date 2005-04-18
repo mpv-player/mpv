@@ -468,7 +468,7 @@ static uint32_t query_format(uint32_t format)
 #ifdef CONFIG_VIDIX
     if(vidix_name)return(vidix_query_fourcc(format));
 #endif
-    return 1 | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_ACCEPT_STRIDE; /* due new SwScale code */
+    return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_ACCEPT_STRIDE; /* due new SwScale code */
 }
 
 static void paintBkGnd( void )
@@ -634,12 +634,12 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	  return -1;
 	}
 	if(subdev_flags == 0xFFFFFFFFUL) return -1;
-	if(flags & 0x8)
+	if(flags & VOFLAG_FLIPPING)
 	{
 	  printf("vo_vesa: switch -flip is not supported\n");
 	}
-	if(flags & 0x04) use_scaler = 1;
-	if(flags & 0x01)
+	if(flags & VOFLAG_SWSCALE) use_scaler = 1;
+	if(flags & VOFLAG_FULLSCREEN)
 	{
 	  if(use_scaler) use_scaler = 2;
 	  else          fs_mode = 1;

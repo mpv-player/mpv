@@ -163,7 +163,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	aspect(&d_width,&d_height,A_NOZOOM);
 #ifdef X11_FULLSCREEN
-//        if( flags&0x01 ){ // (-fs)
+//        if( flags&VOFLAG_FULLSCREEN ){ // (-fs)
 //          aspect(&d_width,&d_height,A_ZOOM);
 //        }
 #endif
@@ -214,7 +214,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
       vo_x11_classhint( mDisplay,vo_window,"gl" );
       vo_hidecursor(mDisplay,vo_window);
 
-//      if ( flags&0x01 ) vo_x11_decoration( mDisplay,vo_window,0 );
+//      if ( flags&VOFLAG_FULLSCREEN ) vo_x11_decoration( mDisplay,vo_window,0 );
 	  XSelectInput(mDisplay, vo_window, StructureNotifyMask);
 	  /* Tell other applications about this window */
 	  XSetStandardProperties(mDisplay, vo_window, title, title, None, NULL, 0, &hint);

@@ -8,13 +8,14 @@
 #include "mp_image.h"
 #include "vf.h"
 
+#include "../libvo/video_out.h"
 
 //===========================================================================//
 
 static int config(struct vf_instance_s* vf,
         int width, int height, int d_width, int d_height,
 	unsigned int flags, unsigned int outfmt){
-    flags&=~8; // remove the FLIP flag
+    flags&=~VOFLAG_FLIPPING; // remove the FLIP flag
     return vf_next_config(vf,width,height,d_width,d_height,flags,outfmt);
 }
 

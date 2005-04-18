@@ -165,7 +165,7 @@ static uint32_t preinit(const char *arg)
 }
 
 static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
-		uint32_t d_height, uint32_t fullscreen, char *title,
+		uint32_t d_height, uint32_t flags, char *title,
 		uint32_t format)
 {
 #ifdef HAVE_GIF_4

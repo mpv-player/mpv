@@ -136,7 +136,7 @@ static uint32_t preinit(const char *arg)
  */
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
-                       uint32_t d_height, uint32_t fullscreen, char *title,
+                       uint32_t d_height, uint32_t flags, char *title,
                        uint32_t format)
 {
     if (vo_config_count > 0 ) { /* Already configured */

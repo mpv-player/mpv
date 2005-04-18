@@ -188,10 +188,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     vo_dheight = d_height;
 
 #ifdef HAVE_XF86VM
-    if (flags & 0x02)
+    if (flags & VOFLAG_MODESWITCHING)
         vm = 1;
 #endif
-    flip_flag = flags & 8;
+    flip_flag = flags & VOFLAG_FLIPPING;
     num_buffers =
         vo_doublebuffering ? (vo_directrendering ? NUM_BUFFERS : 2) : 1;
 
@@ -331,7 +331,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                                    NULL, 0, &hint);
             vo_x11_sizehint(hint.x, hint.y, hint.width, hint.height, 0);
             XMapWindow(mDisplay, vo_window);
-            if (flags & 1)
+            if (flags & VOFLAG_FULLSCREEN)
                 vo_x11_fullscreen();
             else
             {
@@ -346,7 +346,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
             if (!vo_fs)
                 XMoveResizeWindow(mDisplay, vo_window, hint.x, hint.y,
                                   hint.width, hint.height);
-            if (flags & 1 && !vo_fs)
+            if (flags & VOFLAG_FULLSCREEN && !vo_fs)
                 vo_x11_fullscreen();    // handle -fs on non-first file
         }
 
@@ -405,7 +405,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 #endif
 
     aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
-    if (((flags & 1) && (WinID <= 0)) || vo_fs)
+    if (((flags & VOFLAG_FULLSCREEN) && (WinID <= 0)) || vo_fs)
     {
         aspect(&vo_dwidth, &vo_dheight, A_ZOOM);
         drwX =

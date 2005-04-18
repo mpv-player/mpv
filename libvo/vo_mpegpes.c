@@ -81,7 +81,7 @@ static vo_info_t info =
 LIBVO_EXTERN (mpegpes)
 
 static uint32_t
-config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t fullscreen, char *title, uint32_t format)
+config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format)
 {
 #ifdef HAVE_DVB
     switch(s_height){
@@ -368,7 +368,7 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x0,i
 static uint32_t
 query_format(uint32_t format)
 {
-    if(format==IMGFMT_MPEGPES) return 3|VFCAP_TIMER;
+    if(format==IMGFMT_MPEGPES) return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_TIMER;
     return 0;
 }
 

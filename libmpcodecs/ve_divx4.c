@@ -376,13 +376,13 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
     case IMGFMT_YV12:
     case IMGFMT_IYUV:
     case IMGFMT_I420:
-	return 3; // no conversion
+	return VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW; // no conversion
     case IMGFMT_YUY2:
     case IMGFMT_UYVY:
-	return 1; // conversion
+	return VFCAP_CSP_SUPPORTED; // conversion
     case IMGFMT_RGB24:
     case IMGFMT_BGR24:
-	return 1 | VFCAP_FLIPPED; // conversion+flipped
+	return VFCAP_CSP_SUPPORTED | VFCAP_FLIPPED; // conversion+flipped
     }
     return 0;
 }

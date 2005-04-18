@@ -399,7 +399,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 // This function is called to init the video driver for specific mode
 //
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
-                       uint32_t d_height, uint32_t flags, char *title, 
+                       uint32_t d_height, uint32_t flags, char *title,
                        uint32_t format) {
   int32_t req_w = width;// (d_width > 0 ? d_width : width);
   int32_t req_h = height;// (d_height > 0 ? d_height : height);
@@ -408,7 +408,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   
   uint32_t accflags;
   if(verbose)
-    printf("vo_svga: config(%i, %i, %i, %i, %08x, %s, %08x)\n", width, height, 
+    printf("vo_svga: config(%i, %i, %i, %i, %08x, %s, %08x)\n", width, height,
            d_width, d_height, flags, title, format);
 //Only RGB modes supported
   if (!IMGFMT_IS_RGB(format) && !IMGFMT_IS_BGR(format)) {assert(0);return -1;} 

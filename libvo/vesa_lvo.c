@@ -27,6 +27,7 @@
 #include "fastmemcpy.h"
 #include "osd.h"
 #include "video_out.h"
+#include "libmpcodecs/vfcap.h"
 
 #define WIDTH_ALIGN 32 /* should be 16 for rage:422 and 32 for rage:420 */
 #define NUM_FRAMES 10
@@ -289,7 +290,7 @@ void     vlvo_draw_osd(void)
 uint32_t vlvo_query_info(uint32_t format)
 {
   if(verbose > 1) printf("vesa_lvo: query_format was called: %x (%s)\n",format,vo_format_name(format));
-  return 1;
+  return VFCAP_CSP_SUPPORTED;
 }
 
 uint32_t vlvo_control(uint32_t request, void *data, ...)

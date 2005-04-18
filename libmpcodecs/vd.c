@@ -148,6 +148,7 @@ int mpcodecs_config_vo(sh_video_t *sh, int w, int h, unsigned int preferred_outf
 //    vo_functions_t* video_out=sh->video_out;
     vf_instance_t* vf=sh->vfilter,*sc=NULL;
     int palette=0;
+    int vocfg_flags=0;
 
     if(!sh->disp_w || !sh->disp_h)
         mp_msg(MSGT_DECVIDEO,MSGL_WARN, MSGTR_CodecDidNotSet);
@@ -188,16 +189,16 @@ csp_again:
 	if(out_fmt==(unsigned int)0xFFFFFFFF) continue;
 	flags=vf->query_format(vf,out_fmt);
 	mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: query(%s) returned 0x%X (i=%d) \n",vo_format_name(out_fmt),flags,i);
-	if((flags&2) || (flags && j<0)){
+	if((flags&VFCAP_CSP_SUPPORTED_BY_HW) || (flags&VFCAP_CSP_SUPPORTED && j<0)){
 	    // check (query) if codec really support this outfmt...
 	    sh->outfmtidx=j; // pass index to the control() function this way
 	    if(mpvdec->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)==CONTROL_FALSE){
 		mp_msg(MSGT_CPLAYER,MSGL_DBG2,"vo_debug: codec query_format(%s) returned FALSE\n",vo_format_name(out_fmt));
 		continue;
 	    }
-	    j=i; vo_flags=flags; if(flags&2) break;
+	    j=i; vo_flags=flags; if(flags&VFCAP_CSP_SUPPORTED_BY_HW) break;
 	} else
-	if(!palette && !(flags&3) && (out_fmt==IMGFMT_RGB8||out_fmt==IMGFMT_BGR8)){
+	    if(!palette && !(flags&(VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_CSP_SUPPORTED)) && (out_fmt==IMGFMT_RGB8||out_fmt==IMGFMT_BGR8)){
 	    sh->outfmtidx=j; // pass index to the control() function this way
 	    if(mpvdec->control(sh,VDCTRL_QUERY_FORMAT,&out_fmt)!=CONTROL_FALSE)
 		palette=1;
@@ -300,18 +301,23 @@ csp_again:
     }
   }
 
+  vocfg_flags = (fullscreen ? VOFLAG_FULLSCREEN:0)
+      | (vidmode ? VOFLAG_MODESWITCHING:0)
+      | (softzoom ? VOFLAG_SWSCALE:0)
+      | (flip ? VOFLAG_FLIPPING:0);
+
     // Time to config libvo!
     mp_msg(MSGT_CPLAYER,MSGL_V,"VO Config (%dx%d->%dx%d,flags=%d,'%s',0x%X)\n",
                       sh->disp_w,sh->disp_h,
                       screen_size_x,screen_size_y,
-                      fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
+                      vocfg_flags,
                       "MPlayer",out_fmt);
 
     vf->w = sh->disp_w;
     vf->h = sh->disp_h;
     if(vf_config_wrapper(vf,sh->disp_w,sh->disp_h,
 			 screen_size_x,screen_size_y,
-			 fullscreen|(vidmode<<1)|(softzoom<<2)|(flip<<3),
+			 vocfg_flags,
 			 out_fmt)==0){
 //                      "MPlayer",out_fmt)){
 	mp_msg(MSGT_CPLAYER,MSGL_WARN,MSGTR_CannotInitVO);

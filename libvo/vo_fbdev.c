@@ -797,11 +797,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 		uint32_t format)
 {
 	struct fb_cmap *cmap;
-	int vm = flags & 0x02;
-	int zoom = flags & 0x04;
+	int vm = flags & VOFLAG_MODESWITCHING;
+	int zoom = flags & VOFLAG_SWSCALE;
 	int vt_fd;
 
-	fs = flags & 0x01;
+	fs = flags & VOFLAG_FULLSCREEN;
 
 	if(pre_init_err == -2)
 	{

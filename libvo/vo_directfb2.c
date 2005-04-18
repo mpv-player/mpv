@@ -524,7 +524,7 @@ return DFENUM_OK;
 #define CONFIG_ERROR -1
 
 static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
-		uint32_t d_height, uint32_t fullscreen, char *title,
+		uint32_t d_height, uint32_t flags, char *title,
 		uint32_t format)
 {
   /*
@@ -533,10 +533,10 @@ static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 
 // decode flags
 
-	int fs = fullscreen & 0x01;
-        int vm = fullscreen & 0x02;
-	int zoom = fullscreen & 0x04;
-	int flip = fullscreen & 0x08;
+	int fs = flags & VOFLAG_FULLSCREEN;
+        int vm = flags & VOFLAG_MODESWITCHING;
+	int zoom = flags & VOFLAG_SWSCALE;
+	int flip = flags & VOFLAG_FLIPPING;
 
 	DFBSurfaceDescription dsc;
         DFBResult             ret;
