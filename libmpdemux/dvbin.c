@@ -404,14 +404,8 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 		pfds[0].fd = fd;
 		pfds[0].events = POLLIN | POLLPRI;
 
-		poll(pfds, 1, 500);
 		rk = size - pos;
-		if((rk = read(fd, &buffer[pos], rk)) > 0)
-		{
-			pos += rk;
-			mp_msg(MSGT_DEMUX, MSGL_DBG3, "ret (%d) bytes\n", pos);
-		}
-		else
+		if(poll(pfds, 1, 500) <= 0)
 		{
 			errno = 0;
 			mp_msg(MSGT_DEMUX, MSGL_ERR, "dvb_streaming_read, attempt N. %d failed with errno %d when reading %d bytes\n", tries, errno, size-pos);
@@ -419,8 +413,14 @@ static int dvb_streaming_read(stream_t *stream, char *buffer, int size)
 				continue;
 			else
 				break;
-			}
 		}
+		if((rk = read(fd, &buffer[pos], rk)) > 0)
+		{
+			pos += rk;
+			mp_msg(MSGT_DEMUX, MSGL_DBG3, "ret (%d) bytes\n", pos);
+		}
+	}
+		
 
 	if(! pos)
 		mp_msg(MSGT_DEMUX, MSGL_ERR, "dvb_streaming_read, return %d bytes\n", pos);
