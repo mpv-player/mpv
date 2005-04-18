@@ -1159,7 +1159,9 @@ static void uninit(void){
    if( verbose > 3 ) printf("vo_xvmc: uninit called\n");
    xvmc_free();
  //from vo_xv
+#ifdef HAVE_XF86VM
    vo_vm_close(mDisplay);
+#endif
    vo_x11_uninit();
 }
 
