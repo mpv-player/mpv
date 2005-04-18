@@ -29,6 +29,11 @@ OPTIONS RECOGNIZED BY SNOW
    instead, and set it to a quantizer near the target average quant
    of the final encode.
 
+ * lmin, lmax, vqcomp, vratetol
+   Generic multipass ratecontrol options, subject to the same suggestions
+   as in other codecs.
+   lmin=1 can be useful for medium to high bitrates (see vqscale).
+
  * cmp, subcmp, mbcmp
    Set the comparison function, default: 0 (SAD).
    useful values = 0 (SAD), 1 (SSD), 11 (5/3 wavelet), 12 (9/7 wavelet).
