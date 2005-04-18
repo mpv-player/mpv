@@ -730,7 +730,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem>
 <para>
-  Depite the borders being entirely black and never changing, there
+  Despite the borders being entirely black and never changing, there
   is at least a minimal amount of overhead involved in having more
   macroblocks.
 </para>
@@ -809,9 +809,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Wc and Hc are the width and height of the cropped video,
 </para></listitem>
 <listitem><para>
-  PRdvd is the pixel ratio of the DVD wich is equal to 1.25=(720/576) for PAL,
-</para></listitem>
-<listitem><para>
+  PRdvd is the pixel ratio of the DVD wich is equal to 1.25=(720/576) for PAL
   DVDs and 1.5=(720/480) for NTSC DVDs,
 </para></listitem>
 </itemizedlist>
@@ -845,7 +843,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   image; if there aren't enough bits, the edges of those blocks are
   visible).
   It's therefore wise to take a CQ ranging from 0.20 to 0.22 for a 1 CD rip,
-  and  0.26-0.28 for 2 CDs.
+  and 0.26-0.28 for 2 CDs.
 </para>
 
 <para>
