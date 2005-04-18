@@ -101,6 +101,9 @@ static mp3_hdr_t *add_mp3_hdr(mp3_hdr_t **list, off_t st_pos,
     }
   }
   if (!in_list) { // does not belong into an existing chain, insert
+    // find right position to insert to keep sorting
+    while (*list && (*list)->next_frame_pos <= st_pos + mp3_flen)
+      list = &((*list)->next);
     tmp = malloc(sizeof(mp3_hdr_t));
     tmp->frame_pos = st_pos;
     tmp->next_frame_pos = st_pos + mp3_flen;
@@ -158,8 +161,6 @@ int demux_audio_open(demuxer_t* demuxer) {
       frmt = WAV;
       break;      
     } else if((mp3_flen = mp_get_mp3_header(hdr,&mp3_chans,&mp3_freq,&mpa_spf,&mpa_layer)) > 0) {
-      stream_skip(s, mp3_flen - HDR_SIZE);
-      step = HDR_SIZE;
       mp3_found = add_mp3_hdr(&mp3_hdrs, st_pos, mp3_chans, mp3_freq, mp3_flen);
       if (mp3_found) {
         frmt = MP3;
