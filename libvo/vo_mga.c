@@ -60,7 +60,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		aspect_save_prescale(d_width,d_height);
 		aspect_save_screenres(vo_screenwidth,vo_screenheight);
 	
-		if(fullscreen&VOFLAG_FULLSCREEN) { /* -fs */
+		if(flags&VOFLAG_FULLSCREEN) { /* -fs */
 			aspect(&d_width,&d_height,A_ZOOM);
 			vo_fs = VO_TRUE;
 		} else {
