@@ -16,7 +16,7 @@ typedef struct {
     int top_field_first;
     int display_time; // secs*100
     //the following are for mpeg4
-    int timeinc_resolution, timeinc_bits, timeinc_unit;
+    unsigned int timeinc_resolution, timeinc_bits, timeinc_unit;
     int picture_type;
 } mp_mpeg_header_t;
 
