@@ -809,7 +809,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Wc and Hc are the width and height of the cropped video,
 </para></listitem>
 <listitem><para>
-  PRdvd is the pixel ratio of the DVD wich is equal to 1.25=(720/576) for PAL
+  PRdvd is the pixel ratio of the DVD which is equal to 1.25=(720/576) for PAL
   DVDs and 1.5=(720/480) for NTSC DVDs,
 </para></listitem>
 </itemizedlist>
