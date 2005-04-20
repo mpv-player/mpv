@@ -105,22 +105,22 @@ I. TECH SIDE:
 
 9. Reverting broken commits
 
-  In case you committed something really broken and wish to undo it completely,
-  you can use the 'cvs admin -o' command, which removes entries from the
-  revision history of a file. It does not undo the changes related to that
-  revision, but for the corner case that you remove the last revision (and only
-  then!) this amounts to reverting a commit.
+  Should you commit something really broken, notice it quickly and wish to undo
+  it completely, the 'cvs admin -o' command can be used as a last resort. This
+  command removes entries from the revision history of a file. For the corner
+  case of removing the last revision (and only then!) this amounts to reverting
+  a commit. The HEAD version is not affected by removing revisions that came
+  before, only revision history will be lost and holes left in the revision
+  numbering. ONLY EVER use this command to delete the LAST revision of a file.
+
+  In short, if you use this improperly you can wreak permanent havoc. Employ it
+  only if you are completely sure of what you are doing.
 
   Assuming that 1.123 is the last revision
 
     cvs -z3 admin -o1.123 filename
 
   will remove revision 1.123, thus reverting the file back to revision 1.122.
-
-  ONLY use this command to delete the LAST revision of a file. Removing other
-  revisions will NOT undo the changes connected to that revision, so the last
-  revision will remain unmodified, only revision history will be lost and
-  holes left in the revision numbering.
 
 10. RSA authentication
 
