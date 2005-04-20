@@ -1,4 +1,4 @@
-.\" synced with 1.940
+.\" synced with 1.941
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "16 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "20 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -1355,12 +1355,10 @@ Elle peut être utilisée quand la carte tv est incapable de renvoyer le
 mode audio courant.
 .IPs adevice=<valeur>
 Indique un périphérique audio.
-.RSss
-/dev/\:...\& pour OSS
-.br
-ID matériel pour ALSA.
-Voir la documentation de \-ao alsa pour savoir comment définir l'ID matériel.
-.REss
+<valeur> devrait être /dev/\:xxx pour OSS et l'identifiant (ID) matériel
+pour ALSA.
+Vous devez remplacer tout ':' par un '.' dans l'identifiant matériel
+pour ALSA.
 .IPs audioid=<valeur>
 choisit la sortie audio de la carte de capture, si elle en a plus qu'une.
 .IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
