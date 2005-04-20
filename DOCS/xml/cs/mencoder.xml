@@ -57,7 +57,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts
 <para>
 <application>MEncoder</application> umí vytvoøit výstupní soubor formátu
 MPEG (MPEG-PS). To je pravdìpodobnì pou¾itelné pouze s <emphasis>mpeg1video</emphasis>
-kodekem z <systemitem class="library">libavcodec</systemitem></link>, proto¾e
+kodekem z <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>, proto¾e
 pøehrávaèe &ndash; s výjimkou <application>MPlayer</application>u &ndash;
 oèekávají MPEG-1 video a MPEG-1 layer 2 (MP2) audio proudy v MPEG souborech.
 </para>
@@ -764,7 +764,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Poté co provedete v¹e, co jsme si doposud øekli, budete mít video, které asi
   nebude právì 1.85:1 nebo 2.35:1, ale nìkde poblí¾. Mù¾ete spoèítat nový pomìr
   stran ruènì, ale <application>MEncoder</application> nabízí volbu pro
-  class="library">libavcodec</systemitem> nazývanou <option>autoaspect</option>,
+  <systemitem class="library">libavcodec</systemitem> nazývanou <option>autoaspect</option>,
   která to za vás udìlá. Nezvìt¹ujte video jen proto, abyste dosáhli ètvercových
   pixelù, pokud je vám milé místo na disku. ©kálování by mìlo být provedeno pøi
   pøehrávání, kdy pøehrávaè pou¾ije pomìr stran ulo¾ený v AVI pro zaji¹tìní
@@ -1637,7 +1637,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <sect3 id="menc-feat-telecine-encode-progressive">
-<title>Progresivní/title>
+<title>Progresivní</title>
 <para>
   Progresivní video nevy¾aduje ¾ádné speciální filtrování pro enkódování.
   Jediná volba, která by urèitì nemìla chybìt je
@@ -1928,8 +1928,6 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   </para>
   </formalpara>
   </listitem>
-
-</orderedlist>
 
 <!-- Some further explanation, because of homonym problem in interlace and
      interleave translation. If anybody wants it in english, just ask.  -->
