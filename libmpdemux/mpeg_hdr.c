@@ -286,7 +286,7 @@ static int h264_parse_vui(mp_mpeg_header_t * picture, unsigned char * buf, unsig
     fixed_fps = getbits(buf, n, 1);
     
     if(picture->timeinc_unit > 0 && picture->timeinc_resolution > 0)
-      picture->fps = ((uint64_t)picture->timeinc_resolution * 10000) / picture->timeinc_unit;
+      picture->fps = ((u_int64_t)picture->timeinc_resolution * 10000) / picture->timeinc_unit;
   }
   
   //fprintf(stderr, "H264_PARSE_VUI, OVESCAN=%u, VSP_COLOR=%u, CHROMA=%u, TIMING=%u, DISPW=%u, DISPH=%u, TIMERES=%u, TIMEINC=%u, FIXED_FPS=%u\n", overscan, vsp_color, chroma, timing, picture->display_picture_width, picture->display_picture_height,
