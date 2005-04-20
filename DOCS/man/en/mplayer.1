@@ -1271,7 +1271,7 @@ current audio mode.
 .IPs adevice=<value>
 Set an audio device.
 <value> should be /dev/\:xxx for OSS and a hardware ID for ALSA.
-See the \-ao alsa documentation to find out how to specify the hardware ID.
+You must replace any ':' by a '.' in the hardware ID for ALSA.
 .IPs audioid=<value>
 Choose an audio output of the capture card, if it has more than one.
 .IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
