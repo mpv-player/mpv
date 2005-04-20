@@ -1,9 +1,8 @@
-// Sync'ed with help_mp-en.h 1.155 (still missing a few messages)
+// Sync'ed with help_mp-en.h 1.167
 // Encoding/Кодировка: MS CP1251
 //
 // Преведено от А. Димитров, plazmus@gmail.com
-// Това не е окончателен превод, подлежи на корекции.
-// Ако имате по-добри предложения, те са добре дошли.
+// Всички предложения са добре дошли.
 
 // ========================= MPlayer help ===========================
 
@@ -34,7 +33,7 @@ static char help_text[]=
 " -framedrop        разрешава прескачането на кадри (при бавни машини)\n"
 "\n"
 "Основни клавиши:   (пълен списък има в ръководството, проверете също input.conf)\n"
-" <-  или  ->        превърта назад/напред с 10 секунди\n"
+" <-  или  ->       превърта назад/напред с 10 секунди\n"
 " up или down       превърта назад/напред с 1 минута\n"
 " pgup или pgdown   превърта назад/напред с 10 минути\n"
 " < или >           стъпка назад/напред в playlist списъка\n"
@@ -44,7 +43,7 @@ static char help_text[]=
 " o                 превключва OSD режима: без/лента за превъртане/лента и таймер\n"
 " * или /           увеличава или намалява силата на звука (PCM)\n"
 " z или x           променя закъснението на субтитрите с +/- 0.1 секунда\n"
-" r или t           премества субтитрите  нагоре/надолу, вижте и -vf expand\n"
+" r или t           премества субтитрите нагоре/надолу, вижте и -vf expand\n"
 "\n"
 " * * * ЗА ПОДРОБНОСТИ, ДОПЪЛНИТЕЛНИ ОПЦИИ И КЛАВИШИ, ВИЖТЕ РЪКОВОДСТВОТО! * * *\n"
 "\n";
@@ -212,6 +211,11 @@ static char help_text[]=
 #define MSGTR_WritingAVIHeader "Запис на AVI header...\n"
 #define MSGTR_DuplicateFrames "\n%d дублиращи се кадъра!\n"
 #define MSGTR_SkipFrame "\nПрескочен кадър!\n"
+#define MSGTR_ResolutionDoesntMatch "\nНовият видео файл има различна резолюция или цветови формат от предишния.\n" 
+#define MSGTR_FrameCopyFileMismatch "\nВсички видео файлове трябва да имат идентични резолюции, кадрови честоти и кодеци за -ovc copy.\n"
+#define MSGTR_AudioCopyFileMismatch "\nВсички файлове трябва да имат идентични аудио кодеци и формати за -oac copy.\n"
+#define MSGTR_NoSpeedWithFrameCopy "ПРЕДУПРЕЖДЕНИЕ: -speed не работи гарантирано правилно с -oac copy!\n"\
+"Кодирането ви може да се окаже повредено!\n"
 #define MSGTR_ErrorWritingFile "%s: Грешка при запис на файла.\n"
 #define MSGTR_WritingAVIIndex "\nЗаписва се AVI индекс...\n"
 #define MSGTR_FixupAVIHeader "Поправка на AVI header...\n"
@@ -332,6 +336,9 @@ static char help_text[]=
 "mw-us => 40kbps/моно        voice => 56kbps/моно\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
+#define MSGTR_LameCantInit "Не могат да се зададат LAME опциите, проверете битрейтовете/честотите на дискретите,"
+"някои много ниски битрейтове (<32) изискват ниски честоти на дискретите (напр. -srate 8000)."\
+"Ако нищо друго не помага пробвайте някой preset."
 #define MSGTR_ConfigfileError "грешка в конфигурационния файл"
 #define MSGTR_ErrorParsingCommandLine "грешка при обработката на командния ред"
 #define MSGTR_VideoStreamRequired "Задължително е да има видео поток!\n"
@@ -403,7 +410,7 @@ static char help_text[]=
 #define MSGTR_ParseErrorFIDNotNumber "грешка при разчитане (ID на формата не е число?)"
 #define MSGTR_ParseErrorFIDAliasNotNumber "грешка при разчитане (ID псевдонима на формата не е число?)"
 #define MSGTR_DuplicateFID "дублирано ID на формата"
-//#define MSGTR_TooManyOut "too many out..."
+#define MSGTR_TooManyOut "твърде много изходни формати..."
 #define MSGTR_InvalidCodecName "\nкодекът(%s) има невалидно име!\n"
 #define MSGTR_CodecLacksFourcc "\nкодекът(%s) няма FourCC код/формат!\n"
 #define MSGTR_CodecLacksDriver "\nкодекът(%s) няма драйвер!\n"
@@ -416,10 +423,10 @@ static char help_text[]=
 #define MSGTR_CantGetMemoryForLine "Няма достатъчно памет за 'line': %s\n"
 #define MSGTR_CantReallocCodecsp "Не може да презадели памет за '*codecsp': %s\n"
 #define MSGTR_CodecNameNotUnique "Името на кодека '%s' не е уникално."
-//#define MSGTR_CantStrdupName "Can't strdup -> 'name': %s\n"
-//#define MSGTR_CantStrdupInfo "Can't strdup -> 'info': %s\n"
-//#define MSGTR_CantStrdupDriver "Can't strdup -> 'driver': %s\n"
-//#define MSGTR_CantStrdupDLL "Can't strdup -> 'dll': %s"
+#define MSGTR_CantStrdupName "Не може да се изпълни strdup -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "Не може да се изпълни strdup -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "Не може да се изпълни strdup -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "Не може да се изпълни strdup -> 'dll': %s"
 #define MSGTR_AudioVideoCodecTotals "%d аудио & %d видео кодека\n"
 #define MSGTR_CodecDefinitionIncorrect "Кодекът не е дефиниран коректно."
 #define MSGTR_OutdatedCodecsConf "Tози codecs.conf е твърде стар и несъвместим с тази версия на MPlayer!"
@@ -514,8 +521,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Информацията за разпределител %s е вече налична !\n"
 #define MSGTR_ClipInfo "Информация за клипа:\n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC съдържание, превключване на кадровата честота.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps прогресивен NTSC съдържание, превключване на кадровата честота.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC съдържание, превключване на кадровата честота.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps прогресивен NTSC, превключване на кадровата честота.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Не може да бъде отворен кодек.\n"
@@ -664,6 +671,7 @@ static char help_text[]=
 #define MSGTR_MENU_NextStream "Следващ"
 #define MSGTR_MENU_PrevStream "Предишен"
 #define MSGTR_MENU_Size "Размер"
+#define MSGTR_MENU_HalfSize   "Половин размер"
 #define MSGTR_MENU_NormalSize "Нормален размер"
 #define MSGTR_MENU_DoubleSize "Двоен размер"
 #define MSGTR_MENU_FullScreen "На цял екран"
@@ -729,6 +737,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DoNotPlaySound "Без звук"
 #define MSGTR_PREFERENCES_NormalizeSound "Изравняване на звука"
 #define MSGTR_PREFERENCES_EnEqualizer "Включване на еквалайзера"
+#define MSGTR_PREFERENCES_SoftwareMixer "Включва Софтуерен Смесител"
 #define MSGTR_PREFERENCES_ExtraStereo "Включване на допълнително стерео"
 #define MSGTR_PREFERENCES_Coefficient "Коефициент:"
 #define MSGTR_PREFERENCES_AudioDelay "Закъснение на звука"
@@ -884,6 +893,17 @@ static char help_text[]=
 #define MSGTR_VO_NoValueSpecified "Не е указана стойност."
 #define MSGTR_VO_UnknownSuboptions "Неизвестна подопция(и)"
 
+// vo_aa.c
+
+#define MSGTR_VO_AA_HelpHeader "\n\nТова са подопциите на aalib vo_aa:\n"
+#define MSGTR_VO_AA_AdditionalOptions "Допълнителни опции предвидени от vo_aa:\n" \
+"  help        показва това съобщение\n" \
+"  osdcolor    задава цвят за osd\n  subcolor    задава цвета на субтитрите\n" \
+"        параметрите за цвят са:\n           0 : нормален\n" \
+"           1 : dim\n           2 : удебелен\n           3 : удебелен шрифт\n" \
+"           4 : обърнат\n           5 : специален\n\n\n" 
+
+
 // vo_jpeg.c
 #define MSGTR_VO_JPEG_ProgressiveJPEG "Включен е progressive JPEG формат."
 #define MSGTR_VO_JPEG_NoProgressiveJPEG "Progressive JPEG форматът е изключен."
@@ -927,7 +947,8 @@ static char help_text[]=
 #define MSGTR_AO_OSS_ChanNotFound "[AO OSS] audio_setup:\nСмесителят на звуковата карта няма канал '%s', използва се подразбиращ се.\n"
 #define MSGTR_AO_OSS_CantOpenDev "[AO OSS] audio_setup: Аудио устройство %s не може да бъде отворено: %s\n"
 #define MSGTR_AO_OSS_CantMakeFd "[AO OSS] audio_setup: Не може да бъде създаден файлов дескриптор: %s\n"
-#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Не може да се зададе за устройство %s формат AC3, опит с S16...\n"
+//#define MSGTR_AO_OSS_CantSetAC3 "[AO OSS] Не може да се зададе за устройство %s формат AC3, опит с S16...\n"
+#define MSGTR_AO_OSS_CantSet "[AO OSS] Аудио устройство %s не може да бъде настроено за %s извеждане, проба с %s...\n"
 #define MSGTR_AO_OSS_CantSetChans "[AO OSS] audio_setup: Не може да настрои звуковата карта за %d канала.\n"
 #define MSGTR_AO_OSS_CantUseGetospace "[AO OSS] audio_setup: драйверът не поддържа SNDCTL_DSP_GETOSPACE :-(\n"
 #define MSGTR_AO_OSS_CantUseSelect "[AO OSS]\n   ***  Вашият аудио драйвер НЕ поддържа функцията select()  ***\n Рекомпилирайте MPlayer с #undef HAVE_AUDIO_SELECT в config.h !\n\n"
@@ -1002,14 +1023,14 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_CantSetParms "[AO ALSA5] alsa-init: грешка при настройване на параметрите: %s\n"
 #define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: грешка при настройка на канал: %s\n"
 #define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: грешка при подготовка на канал: %s\n"
-//#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: drain error при възпроизвеждане: %s\n"
-//#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: flush error при възпроизвеждане: %s\n"
+#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: грешка при изчистване потока за възпроизвеждане: %s\n"
+#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: грешка при възстановяване на буферите за възпроизвеждане: %s\n"
 #define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: грешка при затваряне на pcm: %s\n"
-//#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: грешка в процеса на възпроизвеждане: %s\n"
-//#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: грешка при извличане: %s\n"
+#define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: грешка при изчистване на потока за възпроизвеждане: %s\n"
+#define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: грешка при възстановяване на буферите за възпроизвеждане: %s\n"
 #define MSGTR_AO_ALSA5_ResetChanPrepareError "[AO ALSA5] alsa-reset: грешка при подготовка на канал: %s\n"
-//#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: drain error при пауза: %s\n"
-//#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: flush error при пауза: %s\n"
+#define MSGTR_AO_ALSA5_PauseDrainError "[AO ALSA5] alsa-pause: грешка при изчистване на потока за възпроизвеждане: %s\n"
+#define MSGTR_AO_ALSA5_PauseFlushError "[AO ALSA5] alsa-pause: грешка при възстановяване на буферите за възпроизвеждане: %s\n"
 #define MSGTR_AO_ALSA5_ResumePrepareError "[AO ALSA5] alsa-resume: грешка при подготовка на канал: %s\n"
 #define MSGTR_AO_ALSA5_Underrun "[AO ALSA5] alsa-play: претоварване на alsa, рестартиране на потока.\n"
 #define MSGTR_AO_ALSA5_PlaybackPrepareError "[AO ALSA5] alsa-play: грешка при подготовка за възпроизвеждане: %s\n"
@@ -1033,7 +1054,7 @@ static char help_text[]=
 #define MSGTR_AF_LADSPA_ErrInOutDiff "Броя на аудио входовете на този LADSPA плъгин се различава от броя на аудио изходите."
 #define MSGTR_AF_LADSPA_ErrFailedToLoad "не може да се зареди"
 #define MSGTR_AF_LADSPA_ErrNoDescriptor "Функцията ladspa_descriptor() не може да бъде открита в указания библиотечен файл."
-#define MSGTR_AF_LADSPA_ErrLabelNotFound "Не може да бъде намерен етикета в библиотеката."
+#define MSGTR_AF_LADSPA_ErrLabelNotFound "Етикета не може да бъде намерен в библиотеката."
 #define MSGTR_AF_LADSPA_ErrNoSuboptions "Не са указани подопции"
 #define MSGTR_AF_LADSPA_ErrNoLibFile "Не е указан файл с библиотека"
 #define MSGTR_AF_LADSPA_ErrNoLabel "Не е указан етикет на филтър"
