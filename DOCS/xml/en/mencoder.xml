@@ -753,6 +753,335 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Cropping and Scaling</title>
 
 <para>
+  Recall from the previous section that the final picture size you
+  encode should be a multiple of 16 (in both width and height).
+  This can be achieved by cropping, scaling, or a combination of both.
+</para>
+
+<para>
+  When cropping, there are a few guidelines that must be followed to
+  avoid damaging your movie.
+  The normal YUV format, 4:2:0, stores chroma (color) information
+  subsampled, i.e. chroma is only sampled half as often in each
+  direction as luma (intensity) information.
+  Observe this diagram, where L indicates luma sampling points and C
+  chroma.
+</para>
+
+<informaltable>
+<?dbhtml table-width="40%" ?>
+<?dbfo table-width="40%" ?>
+<tgroup cols="8" align="center">
+<colspec colnum="1" colname="col1"/>
+<colspec colnum="2" colname="col2"/>
+<colspec colnum="3" colname="col3"/>
+<colspec colnum="4" colname="col4"/>
+<colspec colnum="5" colname="col5"/>
+<colspec colnum="6" colname="col6"/>
+<colspec colnum="7" colname="col7"/>
+<colspec colnum="8" colname="col8"/>
+<spanspec spanname="spa1-2" namest="col1" nameend="col2"/>
+<spanspec spanname="spa3-4" namest="col3" nameend="col4"/>
+<spanspec spanname="spa5-6" namest="col5" nameend="col6"/>
+<spanspec spanname="spa7-8" namest="col7" nameend="col8"/>
+  <tbody>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry spanname="spa1-2">C</entry>
+      <entry spanname="spa3-4">C</entry>
+      <entry spanname="spa5-6">C</entry>
+      <entry spanname="spa7-8">C</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry spanname="spa1-2">C</entry>
+      <entry spanname="spa3-4">C</entry>
+      <entry spanname="spa5-6">C</entry>
+      <entry spanname="spa7-8">C</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+  </tbody>
+</tgroup>
+</informaltable>
+
+<para>
+  As you can see, rows and columns of the image naturally come in pairs.
+  Thus your crop offsets and dimensions <emphasis>must</emphasis> be
+  even numbers.
+  If they are not, the chroma will no longer line up correctly with the
+  luma.
+  In theory, it's possible to crop with odd offsets, but it requires
+  resampling the chroma which is potentially a lossy operation and not
+  supported by the crop filter.
+</para>
+
+<para>
+  Further, interlaced video is sampled as follows:
+</para>
+
+<informaltable>
+<?dbhtml table-width="80%" ?>
+<?dbfo table-width="80%" ?>
+<tgroup cols="16" align="center">
+<colspec colnum="1"  colname="col1"/>
+<colspec colnum="2"  colname="col2"/>
+<colspec colnum="3"  colname="col3"/>
+<colspec colnum="4"  colname="col4"/>
+<colspec colnum="5"  colname="col5"/>
+<colspec colnum="6"  colname="col6"/>
+<colspec colnum="7"  colname="col7"/>
+<colspec colnum="8"  colname="col8"/>
+<colspec colnum="9"  colname="col9"/>
+<colspec colnum="10" colname="col10"/>
+<colspec colnum="11" colname="col11"/>
+<colspec colnum="12" colname="col12"/>
+<colspec colnum="13" colname="col13"/>
+<colspec colnum="14" colname="col14"/>
+<colspec colnum="15" colname="col15"/>
+<colspec colnum="16" colname="col16"/>
+<spanspec spanname="spa1-2"   namest="col1" nameend="col2"/>
+<spanspec spanname="spa3-4"   namest="col3" nameend="col4"/>
+<spanspec spanname="spa5-6"   namest="col5" nameend="col6"/>
+<spanspec spanname="spa7-8"   namest="col7" nameend="col8"/>
+<spanspec spanname="spa9-10"  namest="col9" nameend="col10"/>
+<spanspec spanname="spa11-12" namest="col11" nameend="col12"/>
+<spanspec spanname="spa13-14" namest="col13" nameend="col14"/>
+<spanspec spanname="spa15-16" namest="col15" nameend="col16"/>
+  <tbody>
+    <row>
+      <entry namest="col1" nameend="col8">Top field</entry>
+      <entry namest="col9" nameend="col16">Bottom field</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry spanname="spa1-2">C</entry>
+      <entry spanname="spa3-4">C</entry>
+      <entry spanname="spa5-6">C</entry>
+      <entry spanname="spa7-8">C</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry spanname="spa9-10">C</entry>
+      <entry spanname="spa11-12">C</entry>
+      <entry spanname="spa13-14">C</entry>
+      <entry spanname="spa15-16">C</entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry spanname="spa1-2">C</entry>
+      <entry spanname="spa3-4">C</entry>
+      <entry spanname="spa5-6">C</entry>
+      <entry spanname="spa7-8">C</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry spanname="spa9-10">C</entry>
+      <entry spanname="spa11-12">C</entry>
+      <entry spanname="spa13-14">C</entry>
+      <entry spanname="spa15-16">C</entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+  </tbody>
+</tgroup>
+</informaltable>
+
+<para>
+  As you can see, the pattern does not repeat until after 4 lines.
+  So for interlaced video, your y-offset and height for cropping must
+  be multiples of 4.
+</para>
+
+<para>
   Native DVD resolution is 720x480 for NTSC, and 720x576 for PAL, but
   there's an aspect flag that specifies whether it's full-screen (4:3) or
   wide-screen (16:9). Many (if not most) widescreen DVDs are not strictly
@@ -763,11 +1092,40 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   <application>MPlayer</application> provides a crop detection filter that
   will determine the crop rectangle (<option>-vf cropdetect</option>).
+  Run <application>MPlayer</application> with
+  <option>-vf cropdetect</option> and it will print out the crop
+  settings to remove the borders.
+  You should let the movie run long enough that the whole picture
+  area is used, in order to get accurate crop values.
+</para>
+
+<para>
+  Then, test the values you get with <application>MPlayer</application>,
+  using the command line which was printed by
+  <option>cropdetect</option>, and adjust the rectangle as needed.
+  The <option>rectangle</option> filter can help by allowing you to
+  interactively position the crop rectangle over your movie.
+  Remember to follow the above divisibility guidelines so that you
+  do not misalign the chroma planes.
+</para>
+
+<para>
+  In certain cases, scaling may be undesirable.
+  Scaling in the vertical direction is difficult with interlaced
+  video, and if you wish to preserve the interlacing, you should
+  usually refrain from scaling.
+  If you will not be scaling but you still want to use multiple-of-16
+  dimensions, you will have to overcrop.
+  Do not undercrop, since black borders are very bad for encoding!
+</para>
+
+<para>
   Because MPEG-4 uses 16x16 macroblocks, you'll want to make sure that each
   dimension of the video you're encoding is a multiple of 16 or else you
   will be degrading quality, especially at lower bitrates. You can do this
   by rounding the width and height of the crop rectangle down to the nearest
-  multiple of 16. When cropping, you'll want to increase the y-offset by
+  multiple of 16.
+  As stated earlier, when cropping, you'll want to increase the Y offset by
   half the difference of the old and the new height so that the resulting
   video is taken from the center of the frame. And because of the way DVD
   video is sampled, make sure the offset is an even number. (In fact, as a
