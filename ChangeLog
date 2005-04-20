@@ -1,5 +1,18 @@
 MPlayer (1.0)
 
+  pre8:
+
+    Decoders:
+    * Indeo2 (RT21) support via lavc
+
+    Streaming:
+    * fix streaming of realaudio files over http
+
+    FFmpeg/libavcodec:
+    * lavc mpeg2 decoder speedup
+    * Indeo2 decoder
+
+
   pre7: "PatentCounter" April 16, 2005
 
     Security:
