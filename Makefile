@@ -244,7 +244,7 @@ $(PRG):	$(MPLAYER_DEP)
     ifeq ($(TARGET_WIN32),yes)
 	windres -o osdep/mplayer-rc.o osdep/mplayer.rc
     endif
-	$(CC) $(CFLAGS) -Wl,-z,noexecstack -o $(PRG) $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(STATIC_LIB) $(ARCH_LIB) $(I18NLIBS) $(MATH_LIB)
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(STATIC_LIB) $(ARCH_LIB) $(I18NLIBS) $(MATH_LIB)
 
 mplayer.exe.spec.c: libmpcodecs/libmpcodecs.a
 	winebuild -fPIC -o mplayer.exe.spec.c -exe mplayer.exe -mcui \
@@ -259,7 +259,7 @@ mplayer_wine.so:	$(MPLAYER_DEP)
 
 ifeq ($(MENCODER),yes)
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -Wl,-z,noexecstack -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(ENCORE_LIB) $(COMMON_LIBS) $(EXTRA_LIB) $(MLIB_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(ARCH_LIB) $(I18NLIBS) $(MATH_LIB)
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(ENCORE_LIB) $(COMMON_LIBS) $(EXTRA_LIB) $(MLIB_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(ARCH_LIB) $(I18NLIBS) $(MATH_LIB)
 endif
 
 codecs.conf.h: $(PRG_CFG) etc/codecs.conf
