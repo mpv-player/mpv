@@ -66,7 +66,7 @@ n'est pas requise pour jouer des MP3 ou des effets sonores.
 D'autres lecteurs multimédia comme <ulink url="http://avifile.sf.net">aviplay</ulink>
 ou <ulink url="http://xinehq.de">xine</ulink> fonctionnent probablement
 autrement avec ces pilotes parce qu'ils utilisent des méthodes "simples" pour leur 
-synchro interne. Des mesures ont montrés que leurs méthodes n'etaient pas aussi 
+synchro interne. Des mesures ont montré que leurs méthodes n'étaient pas aussi 
 efficaces que celles de <application>MPlayer</application>.
 </para>
 
@@ -458,7 +458,7 @@ la plupart des filtres.
 <varlistentry>
 <term><option>-channels</option></term>
 <listitem><para>
-Cette option défini le nombre de canaux de sortie voulus pour votre carte son. Il
+Cette option définit le nombre de canaux de sortie voulus pour votre carte son. Il
 affecte également le nombre de canaux qui sont décodés à partir des médias. Si le médium
 contient moins de canaux que le nombre demandé le filtre channels (voir plus bas) sera
 automatiquement inséré. Le routage sera le routage par défaut pour le filtre channels.
@@ -477,7 +477,7 @@ la différence.
 <varlistentry>
 <term><option>-format</option></term>
 <listitem><para>
-Cette option défini le format d'échantillon de la couche audio et de la carte son. Si le
+Cette option définit le format d'échantillon de la couche audio et de la carte son. Si le
 format d'échantillon demandé pour votre carte son est différent de celui du médium, le
 filtre format (voir plus bas) sera inséré pour rectifier la différence.
 </para></listitem>
@@ -527,7 +527,7 @@ explicitement activé en ligne de commande. Il a trois options:
     calculs en entiers et <literal>2</literal> correspond à un ré-échantillonnage en
     utilisant une banque de filtres poly-phase et des calculs en virgule flottante.
     L'interpolation linéaire est extrêmement rapide, mais est de mauvaise qualité
-    sonore surtout quand elle est utilisée pour le sur-échantillonnage. La meilleur qualité
+    sonore surtout quand elle est utilisée pour le sur-échantillonnage. La meilleure qualité
     est obtenue avec <literal>2</literal> mais cette méthode est entachée d'une forte demande
     en temps CPU.
 </para></listitem>
@@ -816,13 +816,13 @@ deux utilisations principales de ce filtre:
 Fusion de plusieurs canaux vers seulement quelques uns, stéréo vers mono par exemple.
 </para></listitem>
 <listitem><para>
-Faire varier la &quot;largeur&quot; du haut parleur central dans un système de son surround.
+Faire varier la largeur si vous voulez, du haut parleur central dans un système de son surround.
 </para></listitem>
 </orderedlist>
 
 <para>
-Ce filtre est difficile à utiliser, et nécessitera quelques réglage avant d'obtenir le
-résultat souhaité. Le nombre d'options pour ce filtre dépends du nombre de canaux de sortie:
+Ce filtre est difficile à utiliser, et nécessitera quelques réglages avant d'obtenir le
+résultat souhaité. Le nombre d'options pour ce filtre dépend du nombre de canaux de sortie:
 </para>
 
 <variablelist>
@@ -982,7 +982,7 @@ exporterait 1024 échantillons par canal dans <filename>/tmp/mplayer-af_export</f
 <para>
 Ce filtre audio augmente (linéairement) la différence entre les cannaux gauches et 
 droits (comme le plugin extrastereo de <application>XMMS</application>), ce qui ajoute
-une sorte d'effet &quot;live&quot; à la lecture.
+une sorte d'effet live à la lecture.
 Ce filtre a un paramètre:</para>
 
 <variablelist>
@@ -1082,7 +1082,7 @@ où <literal><replaceable>freq</replaceable></literal> est la fréquence en Hz, pa
 <note>
 <para>
 Notez que la fréquence de sortie ne devrait pas être augmentée au dessus de sa valeur
-par défaut. Le dépassement provoquera la lecture des flux audio et vidéo au ralentit
+par défaut. Le dépassement provoquera la lecture des flux audio et vidéo au ralenti
 assortie d'une distortion audio.
 </para>
 </note>
