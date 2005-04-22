@@ -116,6 +116,30 @@ static int get_frame_size(audio_encoder_t *encoder)
 	return compressed_frame_size;
 }
 
+static uint32_t lavc_find_atag(char *codec)
+{
+	if(codec == NULL)
+	        return 0;
+
+	if(! strcasecmp(codec, "mp2"))
+		return 0x50;
+
+	if(! strcasecmp(codec, "mp3"))
+		return 0x55;
+
+	if(! strcasecmp(codec, "ac3"))
+		return 0x2000;
+
+	if(! strcasecmp(codec, "adpcm_ima_wav"))
+		return 0x11;
+
+	if(! strncasecmp(codec, "bonk", 4))
+		return 0x2048;
+
+	return 0;
+}
+
+
 int mpae_init_lavc(audio_encoder_t *encoder)
 {
 	encoder->params.samples_per_frame = encoder->params.sample_rate;
@@ -141,7 +165,11 @@ int mpae_init_lavc(audio_encoder_t *encoder)
 	}
 	if(lavc_param_atag == 0)
 	{
+#ifdef USE_LIBAVFORMAT
 		lavc_param_atag = codec_get_wav_tag(lavc_acodec->id);
+#else
+		lavc_param_atag = lavc_find_atag(lavc_param_acodec);
+#endif
 		if(!lavc_param_atag)
 		{
 			mp_msg(MSGT_MENCODER, MSGL_FATAL, "Couldn't find wav tag for specified codec, exit\n");
