@@ -68,6 +68,9 @@ Bedel, Alban (albeu) <albeu@free.fr>
     * OSD menu
     * new modular config/command line parser code
 
+Behrisch, Michael <list@behrisch.de>
+    * online audio stream switching for MPEG and Matroska files
+
 Belev, Luchezar (lucho) <lucho@haemimont.bg>
     * hw-accelerated video eq support into x11, gl2 (using DirectColor cmap)
 
