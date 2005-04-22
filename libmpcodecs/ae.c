@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <inttypes.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <math.h>
 #include "aviheader.h"
 #include "ms_hdr.h"

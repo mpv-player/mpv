@@ -3,6 +3,7 @@
 #include <inttypes.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/types.h>
 #include "m_option.h"
 #include "../mp_msg.h"
 #include "aviheader.h"
