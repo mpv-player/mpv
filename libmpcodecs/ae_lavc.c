@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <inttypes.h>
+#include <unistd.h>
 #include <string.h>
 #include "m_option.h"
 #include "../mp_msg.h"
