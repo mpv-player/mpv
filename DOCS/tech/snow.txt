@@ -29,7 +29,7 @@ OPTIONS RECOGNIZED BY SNOW
    instead, and set it to a quantizer near the target average quant
    of the final encode.
 
- * lmin, lmax, vqcomp, vratetol
+ * lmin, lmax, vqcomp, vratetol, vrc_eq, vrc_override
    Generic multipass ratecontrol options, subject to the same suggestions
    as in other codecs.
    lmin=1 can be useful for medium to high bitrates (see vqscale).
@@ -42,7 +42,6 @@ OPTIONS RECOGNIZED BY SNOW
    You can add 256 to any of the options to enable chroma motion
    estimation for that comparison (e.g. mbcmp=257 for SSD with chroma),
    but it doesn't seem to help much for the moment.
-   NOTE: 9/7 wavelet doesn't work with lossless mode.
 
  * pred=<0-2>
    Wavelet type. 0 (9/7 wavelet), 1 (5/3 wavelet), 2 (13/7 wavelet).
@@ -53,7 +52,7 @@ OPTIONS RECOGNIZED BY SNOW
    Tries a few extra predicted motion vectors before doing EPZS search,
    default: 0.
    This option has negligible effect on both speed and quality of snow,
-   so just leave it off. (It does, however, help MPEG-4.)
+   so just leave it off.
 
  * qpel
    Refines motion estimation, default: off.
