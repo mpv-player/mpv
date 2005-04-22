@@ -2143,9 +2143,9 @@ if(sh_audio){
   current_module="ao2_init";
   if(!(audio_out=init_best_audio_out(audio_driver_list,
       0, // plugin flag
-      force_srate?force_srate:ao_data.samplerate,
-      audio_output_channels?audio_output_channels:ao_data.channels,
-      audio_output_format?audio_output_format:ao_data.format,0))){
+      ao_data.samplerate,
+      ao_data.channels,
+      ao_data.format,0))){
     // FAILED:
     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_CannotInitAO);
     uninit_player(INITED_ACODEC); // close codec
