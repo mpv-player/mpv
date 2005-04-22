@@ -19,7 +19,7 @@ ifeq ($(HAVE_FFPOSTPROCESS),yes)
 VFILTER_SRCS += vf_pp.c
 endif
 
-ENCODER_SRCS=ve.c ve_divx4.c ve_lavc.c ve_vfw.c ve_raw.c ve_libdv.c ve_xvid.c ve_xvid4.c ve_qtvideo.c ve_nuv.c ve_x264.c
+ENCODER_SRCS=ve.c ve_divx4.c ve_lavc.c ve_vfw.c ve_raw.c ve_libdv.c ve_xvid.c ve_xvid4.c ve_qtvideo.c ve_nuv.c ve_x264.c ae.c ae_pcm.c
 
 NATIVE_SRCS=native/RTjpegN.c native/minilzo.c native/nuppelvideo.c native/xa_gsm.c native/decode144.c native/decode288.c
 
@@ -40,8 +40,16 @@ VIDEO_SRCS += vd_ijpg.c
 endif
 
 ifeq ($(TOOLAME),yes)
-AUDIO_SRCS += ae_toolame.c
+ENCODER_SRCS += ae_toolame.c
 EXTRA_INC += $(TOOLAME_EXTRAFLAGS)
+endif
+
+ifeq ($(CONFIG_MP3LAME),yes)
+ENCODER_SRCS += ae_lame.c
+endif
+
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+ENCODER_SRCS += ae_lavc.c
 endif
 
 SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS) $(NATIVE_SRCS) img_format.c

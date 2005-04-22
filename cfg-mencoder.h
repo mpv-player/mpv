@@ -22,33 +22,7 @@ extern m_option_t divx4opts_conf[];
 #endif
 
 #ifdef HAVE_MP3LAME
-m_option_t lameopts_conf[]={
-	{"q", &lame_param_quality, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
-	{"aq", &lame_param_algqual, CONF_TYPE_INT, CONF_RANGE, 0, 9, NULL},
-	{"vbr", &lame_param_vbr, CONF_TYPE_INT, CONF_RANGE, 0, vbr_max_indicator, NULL},
-	{"cbr", &lame_param_vbr, CONF_TYPE_FLAG, 0, 0, 0, NULL},
-	{"abr", &lame_param_vbr, CONF_TYPE_FLAG, 0, 0, vbr_abr, NULL},
-	{"mode", &lame_param_mode, CONF_TYPE_INT, CONF_RANGE, 0, MAX_INDICATOR, NULL},
-	{"padding", &lame_param_padding, CONF_TYPE_INT, CONF_RANGE, 0, PAD_MAX_INDICATOR, NULL},
-	{"br", &lame_param_br, CONF_TYPE_INT, CONF_RANGE, 0, 1024, NULL},
-	{"ratio", &lame_param_ratio, CONF_TYPE_INT, CONF_RANGE, 0, 100, NULL},
-	{"vol", &lame_param_scale, CONF_TYPE_FLOAT, CONF_RANGE, 0, 10, NULL},
-	{"lowpassfreq",&lame_param_lowpassfreq, CONF_TYPE_INT, CONF_RANGE, -1, 48000,0},
-	{"highpassfreq",&lame_param_highpassfreq, CONF_TYPE_INT, CONF_RANGE, -1, 48000,0},
-	{"nofree", &lame_param_free_format, CONF_TYPE_FLAG, 0, 0, 0, NULL},
-	{"free", &lame_param_free_format, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"br_min", &lame_param_br_min, CONF_TYPE_INT, CONF_RANGE, 0, 1024, NULL},
-	{"br_max", &lame_param_br_max, CONF_TYPE_INT, CONF_RANGE, 0, 1024, NULL},
-#if HAVE_MP3LAME >= 392
-	{"fast", &lame_param_fast, CONF_TYPE_FLAG, 0, 0, 1, NULL},
-	{"preset", &lame_param_preset, CONF_TYPE_STRING, 0, 0, 0, NULL},
-#else
-	{"fast", "MPlayer was built without -lameopts fast support (requires libmp3lame >=3.92).\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{"preset", "MPlayer was built without -lameopts preset support (requires libmp3lame >=3.92).\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-#endif
-	{"help", MSGTR_MEncoderMP3LameHelp, CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
-	{NULL, NULL, 0, 0, 0, 0, NULL}
-};
+extern m_option_t lameopts_conf[];
 #endif
 
 #ifdef USE_LIBAVCODEC

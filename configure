@@ -6800,6 +6800,7 @@ DS_DEP = $_dep_dshow
 DS_LIB = $_ld_dshow
 AV_DEP = $_dep_libavcodec $_dep_libavformat
 AV_LIB = $_ld_libavcodec $_ld_libavformat
+CONFIG_LIBAVCODEC = $_libavcodec
 CONFIG_LIBAVFORMAT = $_libavformat
 ZORAN = $_zr
 FAME = $_fame
