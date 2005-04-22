@@ -159,7 +159,7 @@ MPlayer (1.0)
     * gcc 4 fixes
     * partial NX (noexec bit) support
     * support libsmbclient with SSL
-    * put changed notices into all imported files for GPL §2a compliance
+    * put changed notices into all imported files for GPL 2a compliance
 
 
   pre6: "X-mas present" December 23, 2004
