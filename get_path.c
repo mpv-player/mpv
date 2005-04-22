@@ -9,7 +9,7 @@
  *
  */
 #ifdef MACOSX_BUNDLE
-#include <Carbon/Carbon.h>
+#include <CoreFoundation/CoreFoundation.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <stdio.h>
