@@ -2,6 +2,9 @@ MPlayer (1.0)
 
   pre8:
 
+    DOCS:
+    * improved encoding guide
+
     Decoders:
     * Indeo2 (RT21) support via lavc
 
@@ -9,8 +12,10 @@ MPlayer (1.0)
     * fix streaming of realaudio files over http
 
     FFmpeg/libavcodec:
-    * lavc mpeg2 decoder speedup
-    * Indeo2 decoder
+    * snow bug fixes and speedup
+    * MPEG-1/2 decoder speedup
+    * Indeo2 video decoder
+    * countless bug fixes all over the place
 
 
   pre7: "PatentCounter" April 16, 2005
