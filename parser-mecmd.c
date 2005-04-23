@@ -67,7 +67,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
     //next:
     opt = argv[i];
     /* check for -- (no more options id.) except --help! */
-    if ((*opt == '-') && (*(opt+1) == '-') && (*(opt+2) != 'h'))
+    if ((*opt == '-') && (*(opt+1) == '-') && (*(opt+2) == 0))
       {
 	no_more_opts = 1;
 	if (i+1 >= argc)
