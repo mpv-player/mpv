@@ -776,7 +776,7 @@ tvi_handle_t *tvi_init_v4l2(char *video_dev, char *audio_dev)
     }
     PRIV->video_fd = -1;
 
-    PRIV->video_dev = strdup(video_dev? video_dev: "/dev/video");
+    PRIV->video_dev = strdup(video_dev? video_dev: "/dev/video0");
     if (!PRIV->video_dev) {
 	free_handle(tvi_handle);
 	return NULL;
