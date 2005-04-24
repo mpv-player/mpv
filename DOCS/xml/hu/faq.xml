@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.72 -->
+<!-- synced with 1.73 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1361,6 +1361,20 @@ lévő esetleges hibákat. Ez megjavítja a hibás átlapolású fájlokat is,
 így a <option>-ni</option> kapcsolót ezután már nem kell használni hozzájuk.
 <screen>
 mencoder -idx <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Hogyan tudom kijavítani egy AVI fájl képénnek méretarányát?
+</para></question>
+<answer><para>
+Ilyet is tudsz csinálni hála a <application>MEncoder</application>
+<option>-force-avi-aspect</option> kapcsolójának, ami felülbírálja az
+AVI OpenDML vprp fejlécébe beírt értéket. Például:
+<screen>
+mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable> -force-avi-aspect 4/3
 </screen>
 </para></answer>
 </qandaentry>
