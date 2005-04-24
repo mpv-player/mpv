@@ -1,15 +1,18 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE OggVorbis 'TREMOR' CODEC SOURCE CODE.   *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
+ * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
+ * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis 'TREMOR' SOURCE CODE IS (C) COPYRIGHT 1994-2002    *
- * BY THE Xiph.Org FOUNDATION http://www.xiph.org/                  *
- * ALL REDISTRIBUTION RIGHTS RESERVED.                              *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
  function: code raw [Vorbis] packets into framed OggSquish stream and
            decode Ogg streams back into raw packets
+ last mod: $Id$
 
  note: The CRC code is directly derived from public domain code by
  Ross Williams (ross@guest.adelaide.edu.au).  See docs/framing.html
@@ -92,7 +95,29 @@ int ogg_page_packets(ogg_page *og){
   return(count);
 }
 
-static ogg_uint32_t crc_lookup[256]={
+
+#if 0
+/* helper to initialize lookup for direct-table CRC (illustrative; we
+   use the static init below) */
+
+static ogg_uint32_t _ogg_crc_entry(unsigned long index){
+  int           i;
+  unsigned long r;
+
+  r = index << 24;
+  for (i=0; i<8; i++)
+    if (r & 0x80000000UL)
+      r = (r << 1) ^ 0x04c11db7; /* The same as the ethernet generator
+				    polynomial, although we use an
+				    unreflected alg and an init/final
+				    of 0, not 0xffffffff */
+    else
+       r<<=1;
+ return (r & 0xffffffffUL);
+}
+#endif
+
+static const ogg_uint32_t crc_lookup[256]={
   0x00000000,0x04c11db7,0x09823b6e,0x0d4326d9,
   0x130476dc,0x17c56b6b,0x1a864db2,0x1e475005,
   0x2608edb8,0x22c9f00f,0x2f8ad6d6,0x2b4bcb61,
@@ -164,11 +189,11 @@ int ogg_stream_init(ogg_stream_state *os,int serialno){
   if(os){
     memset(os,0,sizeof(*os));
     os->body_storage=16*1024;
-    os->body_data=(unsigned char *)_ogg_malloc(os->body_storage*sizeof(*os->body_data));
+    os->body_data=_ogg_malloc(os->body_storage*sizeof(*os->body_data));
 
     os->lacing_storage=1024;
-    os->lacing_vals=(int *)_ogg_malloc(os->lacing_storage*sizeof(*os->lacing_vals));
-    os->granule_vals=(ogg_int64_t *)_ogg_malloc(os->lacing_storage*sizeof(*os->granule_vals));
+    os->lacing_vals=_ogg_malloc(os->lacing_storage*sizeof(*os->lacing_vals));
+    os->granule_vals=_ogg_malloc(os->lacing_storage*sizeof(*os->granule_vals));
 
     os->serialno=serialno;
 
@@ -203,15 +228,15 @@ int ogg_stream_destroy(ogg_stream_state *os){
 static void _os_body_expand(ogg_stream_state *os,int needed){
   if(os->body_storage<=os->body_fill+needed){
     os->body_storage+=(needed+1024);
-    os->body_data=(unsigned char *)_ogg_realloc(os->body_data,os->body_storage*sizeof(*os->body_data));
+    os->body_data=_ogg_realloc(os->body_data,os->body_storage*sizeof(*os->body_data));
   }
 }
 
 static void _os_lacing_expand(ogg_stream_state *os,int needed){
   if(os->lacing_storage<=os->lacing_fill+needed){
     os->lacing_storage+=(needed+32);
-    os->lacing_vals=(int *)_ogg_realloc(os->lacing_vals,os->lacing_storage*sizeof(*os->lacing_vals));
-    os->granule_vals=(ogg_int64_t *)_ogg_realloc(os->granule_vals,os->lacing_storage*sizeof(*os->granule_vals));
+    os->lacing_vals=_ogg_realloc(os->lacing_vals,os->lacing_storage*sizeof(*os->lacing_vals));
+    os->granule_vals=_ogg_realloc(os->granule_vals,os->lacing_storage*sizeof(*os->granule_vals));
   }
 }
 
@@ -235,11 +260,205 @@ void ogg_page_checksum_set(ogg_page *og){
     for(i=0;i<og->body_len;i++)
       crc_reg=(crc_reg<<8)^crc_lookup[((crc_reg >> 24)&0xff)^og->body[i]];
     
-    og->header[22]=crc_reg&0xff;
-    og->header[23]=(crc_reg>>8)&0xff;
-    og->header[24]=(crc_reg>>16)&0xff;
-    og->header[25]=(crc_reg>>24)&0xff;
+    og->header[22]=(unsigned char)(crc_reg&0xff);
+    og->header[23]=(unsigned char)((crc_reg>>8)&0xff);
+    og->header[24]=(unsigned char)((crc_reg>>16)&0xff);
+    og->header[25]=(unsigned char)((crc_reg>>24)&0xff);
   }
+}
+
+/* submit data to the internal buffer of the framing engine */
+int ogg_stream_packetin(ogg_stream_state *os,ogg_packet *op){
+  int lacing_vals=op->bytes/255+1,i;
+
+  if(os->body_returned){
+    /* advance packet data according to the body_returned pointer. We
+       had to keep it around to return a pointer into the buffer last
+       call */
+    
+    os->body_fill-=os->body_returned;
+    if(os->body_fill)
+      memmove(os->body_data,os->body_data+os->body_returned,
+	      os->body_fill);
+    os->body_returned=0;
+  }
+ 
+  /* make sure we have the buffer storage */
+  _os_body_expand(os,op->bytes);
+  _os_lacing_expand(os,lacing_vals);
+
+  /* Copy in the submitted packet.  Yes, the copy is a waste; this is
+     the liability of overly clean abstraction for the time being.  It
+     will actually be fairly easy to eliminate the extra copy in the
+     future */
+
+  memcpy(os->body_data+os->body_fill,op->packet,op->bytes);
+  os->body_fill+=op->bytes;
+
+  /* Store lacing vals for this packet */
+  for(i=0;i<lacing_vals-1;i++){
+    os->lacing_vals[os->lacing_fill+i]=255;
+    os->granule_vals[os->lacing_fill+i]=os->granulepos;
+  }
+  os->lacing_vals[os->lacing_fill+i]=(op->bytes)%255;
+  os->granulepos=os->granule_vals[os->lacing_fill+i]=op->granulepos;
+
+  /* flag the first segment as the beginning of the packet */
+  os->lacing_vals[os->lacing_fill]|= 0x100;
+
+  os->lacing_fill+=lacing_vals;
+
+  /* for the sake of completeness */
+  os->packetno++;
+
+  if(op->e_o_s)os->e_o_s=1;
+
+  return(0);
+}
+
+/* This will flush remaining packets into a page (returning nonzero),
+   even if there is not enough data to trigger a flush normally
+   (undersized page). If there are no packets or partial packets to
+   flush, ogg_stream_flush returns 0.  Note that ogg_stream_flush will
+   try to flush a normal sized page like ogg_stream_pageout; a call to
+   ogg_stream_flush does not guarantee that all packets have flushed.
+   Only a return value of 0 from ogg_stream_flush indicates all packet
+   data is flushed into pages.
+
+   since ogg_stream_flush will flush the last page in a stream even if
+   it's undersized, you almost certainly want to use ogg_stream_pageout
+   (and *not* ogg_stream_flush) unless you specifically need to flush 
+   an page regardless of size in the middle of a stream. */
+
+int ogg_stream_flush(ogg_stream_state *os,ogg_page *og){
+  int i;
+  int vals=0;
+  int maxvals=(os->lacing_fill>255?255:os->lacing_fill);
+  int bytes=0;
+  long acc=0;
+  ogg_int64_t granule_pos=os->granule_vals[0];
+
+  if(maxvals==0)return(0);
+  
+  /* construct a page */
+  /* decide how many segments to include */
+  
+  /* If this is the initial header case, the first page must only include
+     the initial header packet */
+  if(os->b_o_s==0){  /* 'initial header page' case */
+    granule_pos=0;
+    for(vals=0;vals<maxvals;vals++){
+      if((os->lacing_vals[vals]&0x0ff)<255){
+	vals++;
+	break;
+      }
+    }
+  }else{
+    for(vals=0;vals<maxvals;vals++){
+      if(acc>4096)break;
+      acc+=os->lacing_vals[vals]&0x0ff;
+      granule_pos=os->granule_vals[vals];
+    }
+  }
+  
+  /* construct the header in temp storage */
+  memcpy(os->header,"OggS",4);
+  
+  /* stream structure version */
+  os->header[4]=0x00;
+  
+  /* continued packet flag? */
+  os->header[5]=0x00;
+  if((os->lacing_vals[0]&0x100)==0)os->header[5]|=0x01;
+  /* first page flag? */
+  if(os->b_o_s==0)os->header[5]|=0x02;
+  /* last page flag? */
+  if(os->e_o_s && os->lacing_fill==vals)os->header[5]|=0x04;
+  os->b_o_s=1;
+
+  /* 64 bits of PCM position */
+  for(i=6;i<14;i++){
+    os->header[i]=(unsigned char)(granule_pos&0xff);
+    granule_pos>>=8;
+  }
+
+  /* 32 bits of stream serial number */
+  {
+    long serialno=os->serialno;
+    for(i=14;i<18;i++){
+      os->header[i]=(unsigned char)(serialno&0xff);
+      serialno>>=8;
+    }
+  }
+
+  /* 32 bits of page counter (we have both counter and page header
+     because this val can roll over) */
+  if(os->pageno==-1)os->pageno=0; /* because someone called
+				     stream_reset; this would be a
+				     strange thing to do in an
+				     encode stream, but it has
+				     plausible uses */
+  {
+    long pageno=os->pageno++;
+    for(i=18;i<22;i++){
+      os->header[i]=(unsigned char)(pageno&0xff);
+      pageno>>=8;
+    }
+  }
+  
+  /* zero for computation; filled in later */
+  os->header[22]=0;
+  os->header[23]=0;
+  os->header[24]=0;
+  os->header[25]=0;
+  
+  /* segment table */
+  os->header[26]=(unsigned char)(vals&0xff);
+  for(i=0;i<vals;i++)
+    bytes+=os->header[i+27]=(unsigned char)(os->lacing_vals[i]&0xff);
+  
+  /* set pointers in the ogg_page struct */
+  og->header=os->header;
+  og->header_len=os->header_fill=vals+27;
+  og->body=os->body_data+os->body_returned;
+  og->body_len=bytes;
+  
+  /* advance the lacing data and set the body_returned pointer */
+  
+  os->lacing_fill-=vals;
+  memmove(os->lacing_vals,os->lacing_vals+vals,os->lacing_fill*sizeof(*os->lacing_vals));
+  memmove(os->granule_vals,os->granule_vals+vals,os->lacing_fill*sizeof(*os->granule_vals));
+  os->body_returned+=bytes;
+  
+  /* calculate the checksum */
+  
+  ogg_page_checksum_set(og);
+
+  /* done */
+  return(1);
+}
+
+
+/* This constructs pages from buffered packet segments.  The pointers
+returned are to static buffers; do not free. The returned buffers are
+good only until the next call (using the same ogg_stream_state) */
+
+int ogg_stream_pageout(ogg_stream_state *os, ogg_page *og){
+
+  if((os->e_o_s&&os->lacing_fill) ||          /* 'were done, now flush' case */
+     os->body_fill-os->body_returned > 4096 ||/* 'page nominal size' case */
+     os->lacing_fill>=255 ||                  /* 'segment table full' case */
+     (os->lacing_fill&&!os->b_o_s)){          /* 'initial header page' case */
+        
+    return(ogg_stream_flush(os,og));
+  }
+  
+  /* not enough data to construct a page and not end of stream */
+  return(0);
+}
+
+int ogg_stream_eos(ogg_stream_state *os){
+  return os->e_o_s;
 }
 
 /* DECODING PRIMITIVES: packet streaming layer **********************/
@@ -286,7 +505,7 @@ int ogg_sync_destroy(ogg_sync_state *oy){
 char *ogg_sync_buffer(ogg_sync_state *oy, long size){
 
   /* first, clear out any space that has been previously returned */
-  if(oy->returned>8192){
+  if(oy->returned){
     oy->fill-=oy->returned;
     if(oy->fill>0)
       memmove(oy->data,oy->data+oy->returned,oy->fill);
@@ -298,9 +517,9 @@ char *ogg_sync_buffer(ogg_sync_state *oy, long size){
     long newsize=size+oy->fill+4096; /* an extra page to be nice */
 
     if(oy->data)
-      oy->data=(unsigned char *)_ogg_realloc(oy->data,newsize);
+      oy->data=_ogg_realloc(oy->data,newsize);
     else
-      oy->data=(unsigned char *)_ogg_malloc(newsize);
+      oy->data=_ogg_malloc(newsize);
     oy->storage=newsize;
   }
 
@@ -401,7 +620,7 @@ long ogg_sync_pageseek(ogg_sync_state *oy,ogg_page *og){
   oy->bodybytes=0;
   
   /* search for possible capture */
-  next=(unsigned char *)memchr(page+1,'O',bytes-1);
+  next=memchr(page+1,'O',bytes-1);
   if(!next)
     next=oy->data+oy->fill;
 
@@ -426,7 +645,7 @@ int ogg_sync_pageout(ogg_sync_state *oy, ogg_page *og){
      buffer.  If it doesn't verify, we look for the next potential
      frame */
 
-  while(1){
+  for(;;){
     long ret=ogg_sync_pageseek(oy,og);
     if(ret>0){
       /* have a page */
@@ -472,14 +691,14 @@ int ogg_stream_pagein(ogg_stream_state *os, ogg_page *og){
     long br=os->body_returned;
 
     /* body data */
-    if(br>8192){
+    if(br){
       os->body_fill-=br;
       if(os->body_fill)
 	memmove(os->body_data,os->body_data+br,os->body_fill);
       os->body_returned=0;
     }
 
-    if(lr>8192){
+    if(lr){
       /* segment table */
       if(os->lacing_fill-lr){
 	memmove(os->lacing_vals,os->lacing_vals+lr,
@@ -513,10 +732,13 @@ int ogg_stream_pagein(ogg_stream_state *os, ogg_page *og){
       os->lacing_vals[os->lacing_fill++]=0x400;
       os->lacing_packet++;
     }
+  }
 
-    /* are we a 'continued packet' page?  If so, we'll need to skip
-       some segments */
-    if(continued){
+  /* are we a 'continued packet' page?  If so, we may need to skip
+     some segments */
+  if(continued){
+    if(os->lacing_fill<1 || 
+       os->lacing_vals[os->lacing_fill-1]==0x400){
       bos=0;
       for(;segptr<segments;segptr++){
 	int val=header[27+segptr];
@@ -600,6 +822,12 @@ int ogg_stream_reset(ogg_stream_state *os){
   os->packetno=0;
   os->granulepos=0;
 
+  return(0);
+}
+
+int ogg_stream_reset_serialno(ogg_stream_state *os,int serialno){
+  ogg_stream_reset(os);
+  os->serialno=serialno;
   return(0);
 }
 

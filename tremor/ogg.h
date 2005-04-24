@@ -1,14 +1,17 @@
 /********************************************************************
  *                                                                  *
- * THIS FILE IS PART OF THE OggVorbis 'TREMOR' CODEC SOURCE CODE.   *
+ * THIS FILE IS PART OF THE OggVorbis SOFTWARE CODEC SOURCE CODE.   *
+ * USE, DISTRIBUTION AND REPRODUCTION OF THIS LIBRARY SOURCE IS     *
+ * GOVERNED BY A BSD-STYLE SOURCE LICENSE INCLUDED WITH THIS SOURCE *
+ * IN 'COPYING'. PLEASE READ THESE TERMS BEFORE DISTRIBUTING.       *
  *                                                                  *
- * THE OggVorbis 'TREMOR' SOURCE CODE IS (C) COPYRIGHT 1994-2002    *
- * BY THE Xiph.Org FOUNDATION http://www.xiph.org/                  *
- * ALL REDISTRIBUTION RIGHTS RESERVED.                              *
+ * THE OggVorbis SOURCE CODE IS (C) COPYRIGHT 1994-2002             *
+ * by the Xiph.Org Foundation http://www.xiph.org/                  *
  *                                                                  *
  ********************************************************************
 
- function: subsumed libogg includes
+ function: toplevel libogg include
+ last mod: $Id$
 
  ********************************************************************/
 #ifndef _OGG_H
@@ -107,21 +110,46 @@ typedef struct {
 /* Ogg BITSTREAM PRIMITIVES: bitstream ************************/
 
 extern void  oggpack_writeinit(oggpack_buffer *b);
+extern void  oggpack_writetrunc(oggpack_buffer *b,long bits);
+extern void  oggpack_writealign(oggpack_buffer *b);
+extern void  oggpack_writecopy(oggpack_buffer *b,void *source,long bits);
 extern void  oggpack_reset(oggpack_buffer *b);
 extern void  oggpack_writeclear(oggpack_buffer *b);
 extern void  oggpack_readinit(oggpack_buffer *b,unsigned char *buf,int bytes);
 extern void  oggpack_write(oggpack_buffer *b,unsigned long value,int bits);
 extern long  oggpack_look(oggpack_buffer *b,int bits);
-extern long  oggpack_look_huff(oggpack_buffer *b,int bits);
 extern long  oggpack_look1(oggpack_buffer *b);
 extern void  oggpack_adv(oggpack_buffer *b,int bits);
-extern int   oggpack_adv_huff(oggpack_buffer *b,int bits);
 extern void  oggpack_adv1(oggpack_buffer *b);
 extern long  oggpack_read(oggpack_buffer *b,int bits);
 extern long  oggpack_read1(oggpack_buffer *b);
 extern long  oggpack_bytes(oggpack_buffer *b);
 extern long  oggpack_bits(oggpack_buffer *b);
 extern unsigned char *oggpack_get_buffer(oggpack_buffer *b);
+
+extern void  oggpackB_writeinit(oggpack_buffer *b);
+extern void  oggpackB_writetrunc(oggpack_buffer *b,long bits);
+extern void  oggpackB_writealign(oggpack_buffer *b);
+extern void  oggpackB_writecopy(oggpack_buffer *b,void *source,long bits);
+extern void  oggpackB_reset(oggpack_buffer *b);
+extern void  oggpackB_writeclear(oggpack_buffer *b);
+extern void  oggpackB_readinit(oggpack_buffer *b,unsigned char *buf,int bytes);
+extern void  oggpackB_write(oggpack_buffer *b,unsigned long value,int bits);
+extern long  oggpackB_look(oggpack_buffer *b,int bits);
+extern long  oggpackB_look1(oggpack_buffer *b);
+extern void  oggpackB_adv(oggpack_buffer *b,int bits);
+extern void  oggpackB_adv1(oggpack_buffer *b);
+extern long  oggpackB_read(oggpack_buffer *b,int bits);
+extern long  oggpackB_read1(oggpack_buffer *b);
+extern long  oggpackB_bytes(oggpack_buffer *b);
+extern long  oggpackB_bits(oggpack_buffer *b);
+extern unsigned char *oggpackB_get_buffer(oggpack_buffer *b);
+
+/* Ogg BITSTREAM PRIMITIVES: encoding **************************/
+
+extern int      ogg_stream_packetin(ogg_stream_state *os, ogg_packet *op);
+extern int      ogg_stream_pageout(ogg_stream_state *os, ogg_page *og);
+extern int      ogg_stream_flush(ogg_stream_state *os, ogg_page *og);
 
 /* Ogg BITSTREAM PRIMITIVES: decoding **************************/
 
@@ -143,6 +171,7 @@ extern int      ogg_stream_packetpeek(ogg_stream_state *os,ogg_packet *op);
 extern int      ogg_stream_init(ogg_stream_state *os,int serialno);
 extern int      ogg_stream_clear(ogg_stream_state *os);
 extern int      ogg_stream_reset(ogg_stream_state *os);
+extern int      ogg_stream_reset_serialno(ogg_stream_state *os,int serialno);
 extern int      ogg_stream_destroy(ogg_stream_state *os);
 extern int      ogg_stream_eos(ogg_stream_state *os);
 
