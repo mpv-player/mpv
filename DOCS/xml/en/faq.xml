@@ -1353,6 +1353,20 @@ mencoder -idx <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <repla
 
 <qandaentry>
 <question><para>
+How can I fix the aspect ration of an AVI file?
+</para></question>
+<answer><para>
+You can do such a thing thanks to <application>MEncoder</application>'s
+<option>-force-avi-aspect</option> option, which overrides the aspect
+stored in the AVI OpenDML vprp header option. For example:
+<screen>
+mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable> -force-avi-aspect 4/3
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 I can't encode DVD subtitles into the AVI!
 </para></question>
 <answer><para>
