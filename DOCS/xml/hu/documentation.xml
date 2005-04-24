@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.23 -->
+<!-- synced with 1.24 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - The Movie Player</title>
@@ -141,7 +141,7 @@ alkotó codec-ekkel, audiót tekintve pedig
   Bemeneti file A/V szinkronizálása (PTS-alapú, az <option>-mc 0</option> opcióval kikapcsolható)
   </simpara></listitem>
 <listitem><simpara>
-  FPS javítás az <option>-ofps</option> opcióval (hasznos ha 30000/1001 fps-es
+  fps javítás az <option>-ofps</option> opcióval (hasznos ha 30000/1001 fps-es
   VOB-ot kódolsz 24000/1001 fps-es AVI-ba)
   </simpara></listitem>
 <listitem><simpara>
