@@ -28,11 +28,13 @@ static struct vf_priv_s {
     int exp_x,exp_y;
     int osd;
     unsigned char* fb_ptr;
+    int first_slice;
 } vf_priv_dflt = {
   -1,-1,
   -1,-1,
   0,
-  NULL
+  NULL,
+  0
 };
 
 extern int opt_screen_size_x;
@@ -250,20 +252,25 @@ static void start_slice(struct vf_instance_s* vf, mp_image_t *mpi){
     if(!mpi->priv)
 	mpi->priv=vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
 //	MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-	    mpi->type, mpi->flags, 
+	    MP_IMGTYPE_TEMP, mpi->flags, 
             MAX(vf->priv->exp_w, mpi->width +vf->priv->exp_x), 
             MAX(vf->priv->exp_h, mpi->height+vf->priv->exp_y));
     if(!(vf->dmpi->flags&MP_IMGFLAG_DRAW_CALLBACK))
 	printf("WARNING! next filter doesn't support SLICES, get ready for sig11...\n"); // shouldn't happen.
+    vf->priv->first_slice = 1;
 }
 
-static void draw_slice(struct vf_instance_s* vf,
-        unsigned char** src, int* stride, int w,int h, int x, int y){
-//    printf("draw_slice() called %d at %d\n",h,y);
-    if(vf->priv->exp_y>0 && y == 0)
+static void draw_top_blackbar_slice(struct vf_instance_s* vf,
+				    unsigned char** src, int* stride, int w,int h, int x, int y){
+    if(vf->priv->exp_y>0 && y == 0) {
 	vf_next_draw_slice(vf, vf->dmpi->planes, vf->dmpi->stride,
 			   vf->dmpi->w,vf->priv->exp_y,0,0);
-    vf_next_draw_slice(vf,src,stride,w,h,x+vf->priv->exp_x,y+vf->priv->exp_y);
+    }
+    
+}
+
+static void draw_bottom_blackbar_slice(struct vf_instance_s* vf,
+				    unsigned char** src, int* stride, int w,int h, int x, int y){
     if(vf->priv->exp_y+vf->h<vf->dmpi->h && y+h == vf->h) {
 	unsigned char *src2[MP_MAX_PLANES];
 	src2[0] = vf->dmpi->planes[0]
@@ -276,11 +283,33 @@ static void draw_slice(struct vf_instance_s* vf,
 	} else {
 	    src2[1] = vf->dmpi->planes[1]; // passthrough rgb8 palette
 	}
-	
 	vf_next_draw_slice(vf, src2, vf->dmpi->stride,
 			   vf->dmpi->w,vf->dmpi->h-(vf->priv->exp_y+vf->h),
 			   0,vf->priv->exp_y+vf->h);
     }
+}
+
+static void draw_slice(struct vf_instance_s* vf,
+        unsigned char** src, int* stride, int w,int h, int x, int y){
+//    printf("draw_slice() called %d at %d\n",h,y);
+    
+    if (y == 0 && y+h == vf->h) {
+	// special case - only one slice
+	draw_top_blackbar_slice(vf, src, stride, w, h, x, y);
+	vf_next_draw_slice(vf,src,stride,w,h,x+vf->priv->exp_x,y+vf->priv->exp_y);
+	draw_bottom_blackbar_slice(vf, src, stride, w, h, x, y);
+	return;
+    }
+    if (vf->priv->first_slice) {
+	draw_top_blackbar_slice(vf, src, stride, w, h, x, y);
+	draw_bottom_blackbar_slice(vf, src, stride, w, h, x, y);
+    }
+    vf_next_draw_slice(vf,src,stride,w,h,x+vf->priv->exp_x,y+vf->priv->exp_y);
+    if (!vf->priv->first_slice) {
+	draw_top_blackbar_slice(vf, src, stride, w, h, x, y);
+	draw_bottom_blackbar_slice(vf, src, stride, w, h, x, y);
+    }
+    vf->priv->first_slice = 0;
 }
 
 static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
