@@ -17,6 +17,9 @@ MPlayer (1.0)
     * Indeo2 video decoder
     * countless bug fixes all over the place
 
+    MEncoder:
+    audio encoding modularized
+    added faac encoder
 
   pre7: "PatentCounter" April 16, 2005
 
