@@ -217,6 +217,7 @@ Codecs:
   --disable-internal-matroska disable internal Matroska support [enabled]
   --enable-external-faad build with external FAAD2 (AAC) support [autodetect]
   --disable-internal-faad disable internal FAAD2 (AAC) support [autodetect]
+  --disable-faac         disable support for FAAC (AAC encoder) [autodetect]
   --disable-ladspa       disable LADSPA plugin support [autodetect]
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (MPEG audio) support [autodetect]
@@ -1333,6 +1334,7 @@ _matroska_internal=yes
 _tremor=no
 _faad_internal=auto
 _faad_external=auto
+_faac=auto
 _ladspa=auto
 _xmms=no
 # dvdnav disabled, it does not work
@@ -1531,6 +1533,7 @@ for ac_option do
   --disable-internal-faad)	_faad_internal=no	;;
   --enable-external-faad)	_faad_external=yes	_faad_internal=no	;;
   --disable-external-faad)	_faad_external=no	;;
+  --disable-faac)	_faac=no	;;
   --enable-ladspa)	_ladspa=yes	;;
   --disable-ladspa)	_ladspa=no		;;
   --enable-xmms)	_xmms=yes	;;
@@ -5317,6 +5320,34 @@ else
 fi
 echores "$_matroska_internal"
 
+echocheck "FAAC (AAC encoder) support"
+if test "$_faac" = auto ; then
+  cat > $TMPC <<EOF
+#include <inttypes.h> 
+#include <faac.h>
+int main(void) { unsigned long x, y; faacEncOpen(48000, 2, &x, &y); return 0; }
+EOF
+  if ( cc_check -c -O4 -lfaac $_ld_lm ); then
+    _faac=yes
+    _ld_faac="-lfaac"
+  else
+    if ( cc_check -c -O4 -lfaac -lmp4v2 -lstdc++ $_ld_lm ); then
+      _faac=yes
+      _ld_faac="-lfaac -lmp4v2 -lstdc++"
+    else
+      _faac=no
+      _ld_faac=""
+    fi
+  fi
+fi
+if test "$_faac" = yes ; then
+  _def_faac="#define HAVE_FAAC 1"
+  _codecmodules="$_codecmodules faac"
+else
+  _def_faac="#undef HAVE_FAAC"
+  _nocodecmodules="$_nocodecmodules faac"
+fi
+echores "$_faac"
 
 echocheck "internal FAAD2 (AAC) support"
 _inc_faad="-I`pwd`/libfaad2"
@@ -6846,6 +6877,8 @@ MACOSX_FRAMEWORKS = $_macosx_frameworks
 TOOLAME=$_toolame
 TOOLAME_EXTRAFLAGS=$_toolame_extraflags
 TOOLAME_LIB=$_toolame_lib
+FAAC=$_faac
+FAAC_LIB=$_ld_faac
 AMR_NB=$_amr_nb
 AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
@@ -7381,6 +7414,9 @@ $_def_matroska
 /* enable FAAD (AAC) support */
 $_def_faad
 $_def_faad_internal
+
+/* enable FAAC (AAC encoder) support */
+$_def_faac
 
 /* enable LADSPA plugin support */
 $_def_ladspa

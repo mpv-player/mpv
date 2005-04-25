@@ -33,6 +33,10 @@ extern m_option_t lavcopts_conf[];
 extern m_option_t toolameopts_conf[];
 #endif
 
+#ifdef HAVE_FAAC
+extern m_option_t faacopts_conf[];
+#endif
+
 #ifdef USE_WIN32DLL
 extern m_option_t vfwopts_conf[];
 #endif
@@ -115,6 +119,11 @@ m_option_t oac_conf[]={
 #else
 	{"toolame", "MPlayer was compiled without libtoolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
+#ifdef HAVE_FAAC
+	{"faac", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_FAAC, NULL},
+#else
+	{"faac", "MPlayer was compiled without libfaac. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif
 	{"help", "\nAvailable codecs:\n"
 	"   copy     - frame copy, without re-encoding (useful for AC3)\n"
 	"   pcm      - uncompressed PCM audio\n"
@@ -126,6 +135,9 @@ m_option_t oac_conf[]={
 #endif
 #ifdef HAVE_TOOLAME
 	"   toolame  - Toolame MP2 audio encoder\n"
+#endif
+#ifdef HAVE_FAAC
+	"   faac  - FAAC AAC audio encoder\n"
 #endif
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
@@ -243,6 +255,11 @@ m_option_t mencoder_opts[]={
 	{"toolameopts", toolameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"toolameopts", "MPlayer was compiled without libtoolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif
+#ifdef HAVE_FAAC
+	{"faacopts", faacopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+#else
+	{"faacopts", "MPlayer was compiled without libfaac. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef USE_WIN32DLL
 	{"vfwopts", vfwopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},

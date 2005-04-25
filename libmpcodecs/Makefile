@@ -52,6 +52,10 @@ ifeq ($(CONFIG_LIBAVCODEC),yes)
 ENCODER_SRCS += ae_lavc.c
 endif
 
+ifeq ($(FAAC),yes)
+ENCODER_SRCS += ae_faac.c
+endif
+
 SRCS=$(AUDIO_SRCS) $(VIDEO_SRCS) $(VFILTER_SRCS) $(NATIVE_SRCS) img_format.c
 OBJS=$(SRCS:.c=.o)
 

@@ -23,6 +23,10 @@
 #include "ae_lavc.h"
 #endif
 
+#ifdef HAVE_FAAC
+#include "ae_faac.h"
+#endif
+
 audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params_t *params)
 {
 	int ris;
@@ -52,6 +56,11 @@ audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params
 #ifdef HAVE_MP3LAME
 		case ACODEC_VBRMP3:
 			ris = mpae_init_lame(encoder);
+			break;
+#endif
+#ifdef HAVE_FAAC
+		case ACODEC_FAAC:
+			ris = mpae_init_faac(encoder);
 			break;
 #endif
 	}

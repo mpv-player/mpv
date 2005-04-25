@@ -17,6 +17,7 @@
 #define ACODEC_NULL 3
 #define ACODEC_LAVC 4
 #define ACODEC_TOOLAME 5
+#define ACODEC_FAAC 6
 
 #include <stdio.h>
 #include <stdlib.h>
