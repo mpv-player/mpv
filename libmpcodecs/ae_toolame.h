@@ -7,6 +7,7 @@
 typedef struct {
 	toolame_options *toolame_ctx;
 	int channels, srate, bitrate;
+	int vbr;
 	int16_t left_pcm[1152], right_pcm[1152];
 } mpae_toolame_ctx;
 

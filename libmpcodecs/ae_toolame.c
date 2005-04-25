@@ -17,7 +17,7 @@
 static int 
     param_bitrate = 192,
     param_psy = 3,
-    param_maxvbr = 192,
+    param_maxvbr = 0,
     param_errprot = 0,
     param_debug = 0;
     
@@ -38,29 +38,31 @@ m_option_t toolameopts_conf[] = {
 
 static int bind_toolame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 {
+	mpae_toolame_ctx *ctx = (mpae_toolame_ctx *) encoder->priv;
+	
 	mux_a->wf = malloc(sizeof(WAVEFORMATEX)+256);
 	mux_a->wf->wFormatTag = 0x50;
 	mux_a->wf->nChannels = encoder->params.channels;
 	mux_a->wf->nSamplesPerSec = encoder->params.sample_rate;
 	mux_a->wf->nAvgBytesPerSec = 125 * encoder->params.bitrate;
-	mux_a->h.dwRate = mux_a->wf->nAvgBytesPerSec;
-	mux_a->h.dwScale = (mux_a->wf->nAvgBytesPerSec * encoder->params.samples_per_frame)/ mux_a->wf->nSamplesPerSec; /* for cbr */
 	
-	if((mux_a->wf->nAvgBytesPerSec * encoder->params.samples_per_frame) % mux_a->wf->nSamplesPerSec) 
+	if(ctx->vbr || ((mux_a->wf->nAvgBytesPerSec * encoder->params.samples_per_frame) % mux_a->wf->nSamplesPerSec))
 	{
 		mux_a->h.dwScale = encoder->params.samples_per_frame;
 		mux_a->h.dwRate = encoder->params.sample_rate;
 		mux_a->h.dwSampleSize = 0; // Blocksize not constant
-	} 
-	else 
+	}
+	else
 	{
+		mux_a->h.dwScale = (mux_a->wf->nAvgBytesPerSec * encoder->params.samples_per_frame)/ mux_a->wf->nSamplesPerSec; /* for cbr */
+		mux_a->h.dwRate = mux_a->wf->nAvgBytesPerSec;
 		mux_a->h.dwSampleSize = mux_a->h.dwScale;
 	}
 	mux_a->wf->nBlockAlign = mux_a->h.dwScale;
 	mux_a->h.dwSuggestedBufferSize = (encoder->params.audio_preload*mux_a->wf->nAvgBytesPerSec)/1000;
 	mux_a->h.dwSuggestedBufferSize -= mux_a->h.dwSuggestedBufferSize % mux_a->wf->nBlockAlign;
 	
-	mux_a->wf->cbSize = 12;
+	mux_a->wf->cbSize = 0; //12;
 	mux_a->wf->wBitsPerSample = 0; /* does not apply */
 	((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->wID = 1;
 	((MPEGLAYER3WAVEFORMAT *) (mux_a->wf))->fdwFlags = 2;
@@ -81,7 +83,7 @@ static int bind_toolame(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 static int encode_toolame(audio_encoder_t *encoder, uint8_t *dest, void *src, int len, int max_size)
 {
 	mpae_toolame_ctx *ctx = (mpae_toolame_ctx *)encoder->priv;
-	int ret_size = 0, i, nsamples;
+	int ret_size = 0, r2, i, nsamples;
 	int16_t *buffer;
 	
 	nsamples = len / (2*encoder->params.channels);
@@ -93,6 +95,10 @@ static int encode_toolame(audio_encoder_t *encoder, uint8_t *dest, void *src, in
 	}
 	
 	toolame_encode_buffer(ctx->toolame_ctx, ctx->left_pcm, ctx->right_pcm, nsamples, dest, max_size, &ret_size);
+	r2 = mp_decode_mp3_header(dest);	
+	mp_msg(MSGT_MENCODER, MSGL_V, "\nSIZE: %d, max: %d, r2: %d\n", ret_size, max_size, r2);
+	if(r2 > 0)
+		ret_size = r2;
 	return ret_size;
 }
 
@@ -154,6 +160,7 @@ int mpae_init_toolame(audio_encoder_t *encoder)
 		free(ctx);
 		return 0;
 	}
+	ctx->vbr = 0;
 	ctx->channels = encoder->params.channels;
 	ctx->srate = encoder->params.sample_rate;
 
@@ -177,12 +184,16 @@ int mpae_init_toolame(audio_encoder_t *encoder)
 	{
 		if(toolame_setVBR(ctx->toolame_ctx, TRUE) != 0)
 			return 0;
-		if(toolame_setVBRLevel(ctx->toolame_ctx, param_maxvbr) != 0)
+		if(toolame_setVBRLevel(ctx->toolame_ctx, param_vbr) != 0)
 			return 0;
 		if(toolame_setPadding(ctx->toolame_ctx, FALSE) != 0)
 			return 0;
-		if(toolame_setVBRUpperBitrate(ctx->toolame_ctx, param_maxvbr) != 0)
-			return 0;
+		if(param_maxvbr)
+		{
+			if(toolame_setVBRUpperBitrate(ctx->toolame_ctx, param_maxvbr) != 0)
+				return 0;
+		}
+		ctx->vbr = 1;
 	}
 	
 	if(toolame_setVerbosity(ctx->toolame_ctx, param_debug) != 0)
