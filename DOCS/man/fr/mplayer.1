@@ -1,4 +1,4 @@
-.\" synced with 1.941
+.\" synced with 1.943
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "20 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "25 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -5952,7 +5952,7 @@ la syntaxe ci-dessous\ :
 .B \-<codec>opts <option1[=valeur],option2,...>
 .
 .PP
-Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, x264enc, mpeg.
+Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, faac, x264enc, mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6188,6 +6188,50 @@ Rajoute des informations de correction d'erreurs.
 .TP
 .B debug=<0\-10>
 niveau de débogage
+.RE
+.PD 1
+.
+.
+.SS faac (\-faacopts)
+.
+.TP
+.B br=<bitrate>
+débit binaire moyen en kps (mutuellement exclusif avec quality)
+.TP
+.B quality=<1\-1000>
+mode qualité, plus la valeur est grande, plus la qualité est bonne
+(mutuellement exclusif avec br)
+.TP
+.B object=<0\-3>
+complexité du type d'objet
+.PD 0
+.RSs
+.IPs 0
+MAIN (par défaut)
+.IPs 1
+LOW
+.IPs 2
+SSR
+.IPs 3
+LTP (extrêmement lent)
+.RE
+.PD 1
+.TP
+.B mpeg=<2|4>
+version de MPEG (par défaut\ : 4)
+.TP
+.B tns\ \ \ \ 
+Active la modélisation temporelle de bruit.
+.TP
+.B cutoff=<0\-fréquence d'échantillonnage/2>
+fréquence de coupure (par défaut\ : échantillonnage/2)
+.TP
+.B raw\ \ \ \ 
+Stocke le flux de bit en tant que la charge utile brute et les données
+supplémentaires de l'en-tête du container
+(par défaut\ : 0, correspond à ADTS).
+Ne levez ce drapeau que si cela est explicitement requis ou sinon
+vous ne pourrez pas re-multiplexer le flux audio plus tard.
 .RE
 .PD 1
 .
