@@ -8,6 +8,7 @@
 #define ACODEC_NULL 3
 #define ACODEC_LAVC 4
 #define ACODEC_TOOLAME 5
+#define ACODEC_FAAC 6
 
 #define AE_NEEDS_COMPRESSED_INPUT 1
 
@@ -19,7 +20,7 @@ typedef struct {
 	int audio_preload;
 } audio_encoding_params_t;
 
-typedef struct {
+typedef struct audio_encoder_s {
 	int codec;
 	int flags;
 	muxer_stream_t *stream;
@@ -31,12 +32,12 @@ typedef struct {
 	int decode_buffer_size;
 	int decode_buffer_len;
 	void *priv;
-	int (*bind)(void*, muxer_stream_t*);
-	int (*get_frame_size)(void*);
-	int (*set_decoded_len)(void *encoder, int len);
-	int (*encode)(void *encoder, uint8_t *dest, void *src, int nsamples, int max_size);
-	int (*fixup)();
-	int (*close)();
+	int (*bind)(struct audio_encoder_s*, muxer_stream_t*);
+	int (*get_frame_size)(struct audio_encoder_s*);
+	int (*set_decoded_len)(struct audio_encoder_s *encoder, int len);
+	int (*encode)(struct audio_encoder_s *encoder, uint8_t *dest, void *src, int nsamples, int max_size);
+	void (*fixup)(struct audio_encoder_s *encoder);
+	int (*close)(struct audio_encoder_s *encoder);
 } audio_encoder_t;
 
 audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params_t *params);

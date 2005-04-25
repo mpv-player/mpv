@@ -41,9 +41,9 @@ static int encode_pcm(audio_encoder_t *encoder, uint8_t *dest, void *src, int ns
 	return max_size;
 }
 
-static void set_decoded_len(audio_encoder_t *encoder, int len)
+static int set_decoded_len(audio_encoder_t *encoder, int len)
 {
-	return;
+	return len;
 }
 
 static int close_pcm(audio_encoder_t *encoder)
