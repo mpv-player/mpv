@@ -483,9 +483,13 @@ struct {
 } priority_presets_defs[] = {
   { "realtime", REALTIME_PRIORITY_CLASS},
   { "high", HIGH_PRIORITY_CLASS},
+#ifdef ABOVE_NORMAL_PRIORITY_CLASS
   { "abovenormal", ABOVE_NORMAL_PRIORITY_CLASS},
+#endif
   { "normal", NORMAL_PRIORITY_CLASS},
+#ifdef BELOW_NORMAL_PRIORITY_CLASS
   { "belownormal", BELOW_NORMAL_PRIORITY_CLASS},
+#endif
   { "idle", IDLE_PRIORITY_CLASS},
   { NULL, NORMAL_PRIORITY_CLASS} /* default */
 };
