@@ -1,4 +1,4 @@
-.\" synced with 1.943
+.\" synced with 1.944
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -766,11 +766,11 @@ Cette option enclenche le mode esclave.
 Ceci est prévu pour l'utilisation de MPlayer en tant que base (backend)
 pour d'autres programmes.
 Au lieu d'intercepter les évènements clavier, MPlayer va lire ses
-commandes via son entrée stdin.
+commandes séparés par un retour chariot (\\n) via l'entrée stdin.
 .br
 .I NOTE\ :
 Voir \-input cmdlist pour une liste des commandes esclaves, et
-DOCS/tech/\:slave.txt pour leur description.
+DOCS/tech/slave.txt pour leur description.
 .
 .TP
 .B \-softsleep
@@ -1184,7 +1184,7 @@ taille de trame en octets
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (live.com uniquement)
+.B \-rtsp-stream-over-tcp (LIVE.com uniquement)
 Utilisé avec 'rtsp://', URLs pour indiquer que les paquets RTP et RTCP
 entrants seront streamés sur TCP (en utilisant la même connexion TCP que
 RTSP).
