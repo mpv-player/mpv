@@ -1,18 +1,25 @@
 SLAVE MODE PROTOCOL
 -------------------
 
-When run with the -slave option MPlayer will read commands separated by a
-newline (\n) from stdin. This allows controlling MPlayer like a user would with
-keypresses and command line options and is useful for building simple frontends.
+The -slave option switches on slave mode, in which MPlayer works as a backend
+for other programs. Instead of intercepting keyboard events, MPlayer will read
+commands separated by a newline (\n) from stdin.
 
-Most slave mode commands are equivalent to command line options.
-Have a look at the man page for more detailed descriptions.
+To try slave mode out by hand, run
+
+  mplayer -slave -quiet <movie>
+
+and type slave commands into the console window.
+
+Most slave mode commands are equivalent to command line options, though not
+necessarily under the same name. Detailed descriptions can be found in the
+man page.
 
 All commands can be prefixed with "pausing ", causing MPlayer to pause as soon
 as possible after processing the command. Please note that this can be before
 the command is fully executed.
 
-Available commands:
+Available commands ('mplayer -input cmdlist' will print a list):
 
 
 seek <value> [<type>]
