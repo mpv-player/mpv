@@ -719,10 +719,11 @@ and afterwards ~/.mplayer/\:Skin/\:fittyfene.
 .TP
 .B \-slave (also see \-input)
 Switches on slave mode, in which MPlayer works as a backend for other programs.
-Instead of intercepting keyboard events, MPlayer will read commands from stdin.
+Instead of intercepting keyboard events, MPlayer will read commands separated
+by a newline (\\n) from stdin.
 .br
 .I NOTE:
-See \-input cmdlist for a list of slave commands and DOCS/\:tech/\:slave.txt
+See \-input cmdlist for a list of slave commands and DOCS/tech/slave.txt
 for their description.
 .
 .TP
@@ -1118,7 +1119,7 @@ frame size in Bytes
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (live.com only)
+.B \-rtsp-stream-over-tcp (LIVE.COM only)
 Used with 'rtsp://' URLs to specify that the resulting incoming RTP and RTCP
 packets be streamed over TCP (using the same TCP connection as RTSP).
 This option may be useful if you have a broken internet connection that does
@@ -2284,7 +2285,7 @@ Useful to embed MPlayer in a browser (e.g.\& the plugger extension).
 .TP
 .B \-xineramascreen <0\-...>
 In Xinerama configurations (i.e.\& a single desktop that spans across multiple
-displays) this option tells MPlayer which screen to display movie on.
+displays) this option tells MPlayer which screen to display the movie on.
 .
 .TP
 .B \-zrbw (\-vo zr only)
