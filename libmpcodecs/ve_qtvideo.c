@@ -134,7 +134,7 @@ static int config(struct vf_instance_s* vf,
 
 
 
-    memset(&desc,0,sizeof(cdesc));
+    memset(&cdesc,0,sizeof(cdesc));
     cdesc.componentType= (((unsigned char)'i')<<24)|
 			(((unsigned char)'m')<<16)|
 			(((unsigned char)'c')<<8)|
