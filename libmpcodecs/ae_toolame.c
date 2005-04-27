@@ -28,7 +28,7 @@ m_option_t toolameopts_conf[] = {
 	{"br", &param_bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"mode", &param_mode, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"psy", &param_psy, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
-	{"vbr", &param_vbr, CONF_TYPE_FLOAT, CONF_RANGE, 0, 50, NULL},
+	{"vbr", &param_vbr, CONF_TYPE_FLOAT, CONF_RANGE, -50, 50, NULL},
 	{"maxvbr", &param_maxvbr, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"errprot", &param_errprot, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
 	{"debug", &param_debug, CONF_TYPE_INT, CONF_RANGE, 0, 100000000, NULL},
@@ -180,7 +180,7 @@ int mpae_init_toolame(audio_encoder_t *encoder)
 		if(toolame_setErrorProtection(ctx->toolame_ctx, TRUE) != 0)
 			return 0;
 	
-	if(param_vbr > 0)
+	if(param_vbr != 0)
 	{
 		if(toolame_setVBR(ctx->toolame_ctx, TRUE) != 0)
 			return 0;
