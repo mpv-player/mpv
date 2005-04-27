@@ -55,7 +55,7 @@ static int bind_faac(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 	mux_a->h.dwRate=encoder->params.sample_rate;
 	mux_a->h.dwScale=encoder->params.samples_per_frame;
 	mux_a->wf->nSamplesPerSec=mux_a->h.dwRate;
-	mux_a->wf->nAvgBytesPerSec = 125 * encoder->params.bitrate;
+	mux_a->wf->nAvgBytesPerSec = encoder->params.bitrate / 8;
 	
 	mux_a->wf->nBlockAlign = mux_a->h.dwScale;
 	mux_a->h.dwSuggestedBufferSize = (encoder->params.audio_preload*mux_a->wf->nAvgBytesPerSec)/1000;
