@@ -102,6 +102,7 @@ demuxers:
     * demux_ogg.c - Moritz Bunkus
     * demux_realaud.c - Roberto Togni
     * demux_rtp* - Ross Finlayson
+    * demux_mpg and demux_ts - Nico Sabbi
 
 codec support:
     * FFmpeg: Michael Niedermayer
