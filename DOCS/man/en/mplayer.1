@@ -5881,8 +5881,18 @@ for people with extremely good hearing and similar equipment
 .SS toolame (\-toolameopts)
 .
 .TP
-.B br=<0\-384> (CBR only)
-bitrate in kbps
+.B br=<32\-384>
+in CBR mode this parameter indicates the bitrate in kbps, 
+when in VBR mode it's the minimum bitrate allowed per frame; 
+in this last case it has to be set to a value >= 112 or VBR mode won't work
+.TP
+.B vbr=<-50\-50> (VBR only)
+variability range; if negative toolame shifts the average bitrate towards
+the lower limit, if positive towards the higher. 
+When set to 0 CBR is used (default)
+.TP
+.B maxvbr=<32\-384> (VBR only)
+maximum bitrate allowed per frame, in kpbs
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (default: mono for 1-channel audio, stereo otherwise)
