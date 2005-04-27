@@ -381,7 +381,15 @@ static uint32_t preinit(const char *arg)
     }
 
     if ((char *)arg)
+    {
+	int i = 0;
 	ggi_conf.driver = strdup(arg);
+	while (ggi_conf.driver[i]) {
+	  if (ggi_conf.driver[i] == '.')
+	    ggi_conf.driver[i] = ',';
+	  i++;
+	}
+    }
     else
 	ggi_conf.driver = NULL;
     
