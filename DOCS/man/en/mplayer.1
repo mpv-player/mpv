@@ -5882,14 +5882,14 @@ for people with extremely good hearing and similar equipment
 .
 .TP
 .B br=<32\-384>
-in CBR mode this parameter indicates the bitrate in kbps, 
-when in VBR mode it's the minimum bitrate allowed per frame; 
-in this last case it has to be set to a value >= 112 or VBR mode won't work
+In CBR mode this parameter indicates the bitrate in kbps,
+when in VBR mode it is the minimum bitrate allowed per frame.
+VBR mode will not work with a value below 112.
 .TP
 .B vbr=<-50\-50> (VBR only)
-variability range; if negative toolame shifts the average bitrate towards
-the lower limit, if positive towards the higher. 
-When set to 0 CBR is used (default)
+variability range; if negative toolame shifts the average bitrate
+towards the lower limit, if positive towards the higher.
+When set to 0 CBR is used (default).
 .TP
 .B maxvbr=<32\-384> (VBR only)
 maximum bitrate allowed per frame, in kpbs
