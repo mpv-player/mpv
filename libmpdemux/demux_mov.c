@@ -350,6 +350,7 @@ int mov_check_file(demuxer_t* demuxer){
 	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: 3GPP Profile 1\n");
      	      break;
 	    case MOV_FOURCC('3','g','p','2'):
+	    case MOV_FOURCC('3','g','2','a'):
 	      mp_msg(MSGT_DEMUX,MSGL_INFO,"ISO: File Type Major Brand: 3GPP Profile 2\n");
      	      break;
 	    case MOV_FOURCC('3','g','p','3'):
