@@ -3985,8 +3985,21 @@ unchanged, with -1.0 left and right channels will be swapped.
 .PD 1
 .
 .TP
-.B volnorm
+.B volnorm[=method]
 Maximizes the volume without distorting the sound.
+.PD 0
+.RSs
+.IPs <method>
+Sets the used method.
+.RSss
+1: Use a single sample to smooth the variations via the standard
+weighted mean over past samples (default).
+.br
+2: Use several samples to smooth the variations via the standard
+weighted mean over past samples.
+.REss
+.RE
+.PD 1
 .
 .TP
 .B ladspa=file:label[:controls...]
