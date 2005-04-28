@@ -1778,8 +1778,9 @@ int demuxer_get_percent_pos(demuxer_t *demuxer){
     return ans;
 }
 
-int demuxer_switch_audio(demuxer_t *demuxer){     
-    int ans = 0;
-    int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &ans);
-    return ans;
+int demuxer_switch_audio(demuxer_t *demuxer, int index){     
+    int res = demux_control(demuxer, DEMUXER_CTRL_SWITCH_AUDIO, &index);
+    if (res == DEMUXER_CTRL_NOTIMPL)
+      index = demuxer->audio->id;
+    return index;
 }

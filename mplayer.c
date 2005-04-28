@@ -3494,9 +3494,11 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_GET_PERCENT_POS : {
 	mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsPercentPos, demuxer_get_percent_pos(demuxer));
     } break;
-    case MP_CMD_SWITCH_AUDIO :
-        demuxer_switch_audio(demuxer);
-        break;
+    case MP_CMD_SWITCH_AUDIO : {
+        int v = demuxer_switch_audio(demuxer, cmd->args[0].v.i);
+        if (identify)
+          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_TRACK=%d\n", v);
+    } break;
     case MP_CMD_RUN : {
 #ifndef __MINGW32__
         if(!fork()) {

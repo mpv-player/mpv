@@ -2118,16 +2118,17 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
 
 void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags);
 
-/** \brief Given a matroska track number, find the subtitle number that mplayer would ask for.
+/** \brief Given a matroska track number and type, find the id that mplayer would ask for.
  *  \param d The demuxer for which the subtitle id should be returned.
  *  \param num The matroska track number we are looking up.
+ *  \param type The track type.
  */
-static int demux_mkv_sub_reverse_id(mkv_demuxer_t *d, int num)
+static int demux_mkv_reverse_id(mkv_demuxer_t *d, int num, int type)
 {
   int i, id;
   
   for (i=0, id=0; i < d->num_tracks; i++)
-    if (d->tracks[i] != NULL && d->tracks[i]->type == MATROSKA_TRACK_SUBTITLE) {
+    if (d->tracks[i] != NULL && d->tracks[i]->type == type) {
       if (d->tracks[i]->tnum == num)
         return id;
       id++;
@@ -2351,7 +2352,7 @@ demux_mkv_open (demuxer_t *demuxer)
           {
             mp_msg (MSGT_DEMUX, MSGL_INFO,
                     "[mkv] Will display subtitle track %u\n", track->tnum);
-	    dvdsub_id = demux_mkv_sub_reverse_id(mkv_d, track->tnum);
+	    dvdsub_id = demux_mkv_reverse_id(mkv_d, track->tnum, MATROSKA_TRACK_SUBTITLE);
             demuxer->sub->id = track->tnum;
           }
   else
@@ -3344,12 +3345,13 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
       if (demuxer->audio && demuxer->audio->sh) {
         int i;
         demux_stream_t *d_audio = demuxer->audio;
-        sh_audio_t *sh_audio = d_audio->sh;
         int idx = d_audio->id - 1; // track ids are 1 based
         int num = mkv_d->num_tracks;
         mkv_track_t *otrack = mkv_d->tracks[idx];
-        for (i = 1; i < num; i++) {
-          mkv_track_t *track = mkv_d->tracks[(idx+i)%num];
+        mkv_track_t *track = 0;
+        if (*((int*)arg) < 0)
+        for (i = 1; i <= num; i++) {
+          track = mkv_d->tracks[(idx+i)%num];
           if ((track->type == MATROSKA_TRACK_AUDIO) &&
               !strcmp(track->codec_id, otrack->codec_id) &&
               (track->a_channels == otrack->a_channels) &&
@@ -3358,12 +3360,21 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
             break;
           }
         }
-        if (i < num) {
-          d_audio->id = (idx+i)%num + 1;
+        else {
+          track = demux_mkv_find_track_by_num (mkv_d, *((int*)arg), MATROSKA_TRACK_AUDIO);
+          if (track == NULL ||
+              strcmp (track->codec_id, otrack->codec_id) ||
+              track->a_channels != otrack->a_channels ||
+              track->a_bps != otrack->a_bps ||
+              track->a_sfreq != otrack->a_sfreq)
+            track = otrack;
+        }
+        if (track != otrack) {
+          d_audio->id = track->tnum;
           ds_free_packs(d_audio);
         }
-        *((int *)arg)=(int)d_audio->id;
       }
+      *((int*)arg) = demux_mkv_reverse_id (mkv_d, demuxer->audio->id, MATROSKA_TRACK_AUDIO);
       return DEMUXER_CTRL_OK;
 
     default:

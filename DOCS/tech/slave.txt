@@ -91,8 +91,9 @@ use_master
 mute
     Mute/unmute sound output.
 
-switch_audio (MPEG and Matroska only)
-    Cycle through the available audio tracks.
+switch_audio [<value>] (MPEG and Matroska only)
+    Switch to the audio track with the id <value>. Cycle through the
+    available tracks if <value> is omitted or negative.
 
 [contrast|gamma|brightness|hue|saturation] <-100 - 100> [<abs>]
     Set/adjust video parameters.
