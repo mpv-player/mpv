@@ -6552,7 +6552,7 @@ fi
 echores "$_crash_debug"
 
 if darwin ; then
-  CFLAGS="$CFLAGS -DSYS_DARWIN"
+  CFLAGS="$CFLAGS -mdynamic-no-pic -falign-loops=16 -DSYS_DARWIN"
   if [ "$_cc_major" = 3 ] && [ "$_cc_minor" -lt 1 ]; then
     CFLAGS="$CFLAGS -no-cpp-precomp"
   fi
