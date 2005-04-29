@@ -1045,6 +1045,8 @@ int gui_no_filename=0;
 
   srand((int) time(NULL)); 
 
+  InitTimer();
+  
   mp_msg_init();
   mp_msg_set_level(MSGL_STATUS);
 
@@ -2214,8 +2216,6 @@ if(loop_times==1) loop_times = -1;
 
 mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_StartPlaying);fflush(stdout);
 
-InitTimer();
-
 #ifdef USE_DVDNAV
 if (stream->type==STREAMTYPE_DVDNAV) {
   dvdnav_stream_fullstart((dvdnav_priv_t *)stream->priv);
@@ -2457,6 +2457,15 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	}
     } else
 #endif
+#ifdef SYS_DARWIN
+    {
+		current_module="sleep_darwin";
+        while(time_frame>0.005) {
+			usec_sleep(1000000*time_frame);
+			time_frame-=GetRelativeTime();
+        }
+	}
+#else
     {
 	// -------- TIMER + SOFTSLEEP -----------
 	float min=softsleep?0.021:0.005;
@@ -2474,7 +2483,7 @@ if(time_frame>0.001 && !(vo_flags&256)){
 	    while(time_frame>0) time_frame-=GetRelativeTime(); // burn the CPU
 	}
     }
-
+#endif
 }
 
 //if(!frame_time_remaining){	// should we display the frame now?
