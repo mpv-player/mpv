@@ -3199,21 +3199,20 @@ EOF
     _noaomodules="macosx $_noaomodules"
     _novomodules="quartz $_novomodules"
   fi
-fi
-echores "$_macosx"
-
-echocheck "Mac OS X Core Video Support"
-if test "$_macosx" = yes ; then
-	if test "`sysctl -n kern.osrelease | cut -d "." -f 1`" = "8" ; then
-		echo "yes"
+cat > $TMPC <<EOF
+#include <Carbon/Carbon.h>
+#include <QuartzCore/CoreVideo.h>
+int main(void) {}
+EOF
+	if cc_check -framework Carbon -framework QuartzCore -framework OpenGL; then
 		_vosrc="$_vosrc vo_macosx.m"
 		_vomodules="macosx $_vomodules"
 		_macosx_frameworks="$_macosx_frameworks -framework Cocoa -framework QuartzCore -framework OpenGL"
 	else
-		echo "no"
 		_novomodules="macosx $_novomodules"
 	fi
 fi
+echores "$_macosx"
 
 echocheck "Mac OS X Finder Support"
 if test "$_macosx_finder_support" = auto ; then
