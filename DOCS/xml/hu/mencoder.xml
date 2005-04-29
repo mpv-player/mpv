@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.55 -->
+<!-- synced to 1.56 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -977,6 +977,24 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
       <entry>L</entry>
       <entry>L</entry>
       <entry>L</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
     </row>
     <row>
       <entry spanname="spa1-2">C</entry>
