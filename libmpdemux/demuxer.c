@@ -224,7 +224,7 @@ void free_demuxer(demuxer_t *demuxer){
     case DEMUXER_TYPE_SMJPEG:
       demux_close_smjpeg(demuxer); break;
     case DEMUXER_TYPE_DEMUXERS:
-      demux_close_demuxers(demuxer); break;
+      demux_close_demuxers(demuxer); return;
     case DEMUXER_TYPE_AVI: 
     case DEMUXER_TYPE_AVI_NI:
     case DEMUXER_TYPE_AVI_NINI:
