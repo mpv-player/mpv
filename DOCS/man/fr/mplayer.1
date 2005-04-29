@@ -1,4 +1,4 @@
-.\" synced with 1.947
+.\" synced with 1.948
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "27 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "29 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -4204,8 +4204,22 @@ inversés.
 .PD 1
 .
 .TP
-.B volnorm
+.B volnorm[=méthode]
 Maximalise le volume sans introduire de distortions sonores.
+.PD 0
+.RSs
+.IPs <méthode>
+Définit la méthode utilisée.
+.RSss
+1 : Utilise un seul échantillon pour lisser les variations en
+prenant une moyenne pondérée des échantillons précédents
+(par défaut).
+.br
+2 : Utilise plusieurs échantillons pour lisser les variations en
+prenant une moyenne pondérée des échantillons précédents
+.REss
+.RE
+.PD 1
 .
 .TP
 .B ladspa=nom_fichier:label[:contrôles...]
