@@ -3202,6 +3202,19 @@ EOF
 fi
 echores "$_macosx"
 
+echocheck "Mac OS X Core Video Support"
+if test "$_macosx" = yes ; then
+	if test "`sysctl -n kern.osrelease | cut -d "." -f 1`" = "8" ; then
+		echo "yes"
+		_vosrc="$_vosrc vo_macosx.m"
+		_vomodules="macosx $_vomodules"
+		_macosx_frameworks="$_macosx_frameworks -framework Cocoa -framework QuartzCore -framework OpenGL"
+	else
+		echo "no"
+		_novomodules="macosx $_novomodules"
+	fi
+fi
+
 echocheck "Mac OS X Finder Support"
 if test "$_macosx_finder_support" = auto ; then
   _macosx_finder_support=$_macosx
@@ -7538,7 +7551,7 @@ EOF
 #############################################################################
 
 echo "Creating libvo/config.mak"
-_voobj=`echo $_vosrc | sed -e 's/\.c/\.o/g'`
+_voobj=`echo $_vosrc | sed -e 's/\.c/\.o/g;s/\.m/\.o/g'`
 cat > libvo/config.mak << EOF
 include ../config.mak
 OPTIONAL_SRCS = $_vosrc
