@@ -197,11 +197,11 @@ même des films WMV.
 Un autre gros atout de MPlayer est la grande variété de pilotes de
 sortie audio et vidéo gérés.
 Il fonctionne avec X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
-DirectFB, Quartz, mais vous pouvez aussi utiliser GGI, SDL (et de cette
-façon tous leurs drivers), VESA (sur n'importe quelle carte compatible
-VESA, même sans X11), quelques drivers spécifiques à certaines cartes
-(pour Matrox, 3Dfx et ATI) et certaines cartes de décompression MPEG,
-telles que les Siemens DVB, DXR2 et DXR3/\:Hollywood+.
+DirectFB, Quartz, Mac OS X CoreVideo, mais vous pouvez aussi utiliser
+GGI, SDL (et de cette façon tous leurs drivers), VESA (sur n'importe 
+quelle carte compatible VESA, même sans X11), quelques drivers spécifiques à
+certaines cartes (pour Matrox, 3Dfx et ATI) et certaines cartes de
+décompression MPEG, telles que les Siemens DVB, DXR2 et DXR3/\:Hollywood+.
 La plupart d'entre eux gèrent le redimensionnement logiciel ou
 matériel, vous pouvez donc apprécier les films en plein-écran.
 .PP
@@ -2707,6 +2707,16 @@ avec par ex.\& \-vf format=yuy2
 Choisir le moniteur à utiliser en plein-écran.
 .IPs fs_res=<largeur>:<hauteur>
 Choisir la résolution du mode plein-écran (utile sur les systèmes plus lents).
+.RE
+.PD 1
+.
+.TP
+.B macosx (Mac OS X 10.4 ou 10.3.9 avec Quicktime 7)
+Pilote de sortie vidéo CoreVideo pour Mac OS X.
+.PD 0
+.RSs
+.IPs device_id=<numéro>
+Choisir le moniteur à utiliser en plein-écran.
 .RE
 .PD 1
 .

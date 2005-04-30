@@ -194,10 +194,10 @@ too.
 .PP
 MPlayer supports a wide range of video and audio output drivers.
 It works with X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
-Quartz, but you can also use GGI, SDL (and all their drivers), VESA (on every
-VESA-compatible card, even without X11), some low-level card-specific drivers
-(for Matrox, 3Dfx and ATI) and some hardware MPEG decoder boards, such as the
-Siemens DVB, DXR2 and DXR3/\:Hollywood+.
+Quartz, Mac OS X CoreVideo, but you can also use GGI, SDL (and all their drivers),
+VESA (on every VESA-compatible card, even without X11), some low-level 
+card-specific drivers (for Matrox, 3Dfx and ATI) and some hardware MPEG decoder
+boards, such as the Siemens DVB, DXR2 and DXR3/\:Hollywood+.
 Most of them support software or hardware scaling, so you can enjoy movies in
 fullscreen mode.
 .PP
@@ -2547,6 +2547,16 @@ packed YUV output format, with e.g.\& \-vf format=yuy2.
 Choose the display device to use in fullscreen.
 .IPs fs_res=<width>:<height>
 Specify the fullscreen resolution (useful on slow systems).
+.RE
+.PD 1
+.
+.TP
+.B macosx (Mac OS X 10.4 or 10.3.9 with Quicktime 7)
+Mac OS X CoreVideo video output driver.
+.PD 0
+.RSs
+.IPs device_id=<number>
+Choose the display device to use in fullscreen.
 .RE
 .PD 1
 .
