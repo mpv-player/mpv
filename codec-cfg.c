@@ -5,7 +5,7 @@
  *
  * to compile tester app: gcc -Iloader/ -DTESTING -o codec-cfg codec-cfg.c
  * to compile CODECS2HTML:
- *   gcc -Iloader/ -DCODECS2HTML -o codecs2html codec-cfg.c mp-msg.o
+ *   gcc -Iloader/ -DCODECS2HTML -o codecs2html codec-cfg.c mp_msg.o
  *
  * TODO: implement informat in CODECS2HTML too
  */
