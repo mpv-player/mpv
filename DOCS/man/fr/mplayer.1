@@ -1,4 +1,4 @@
-.\" synced with 1.948
+.\" synced with 1.949
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -3620,9 +3620,8 @@ bicubique spline naturelle
 .sp 1
 .RS
 .I NOTE\ :
-Pour \-sws\ 2 et 7, la netteté (sharpness) peut être contrôlée avec le
-paramètre de zoom de \-vf scale (0 (doux) \- 100 (net)), pour \-sws 9,
-le paramètre de zoom définit la longueur du filtre (1 \- 10).
+Certaines option de \-sws sont paramétrables.
+Plus d'informations sont disponibles dans la description du filtre scale.
 .
 .TP
 .B \-vc <[-]codec1,[-]codec2,...[,]>
@@ -4391,7 +4390,7 @@ Ajoute un bord de 50 pixels en bas de l'image.
 .PD 1
 .IPs <x>,<y>
 position de l'image originale sur l'image étendue (par défaut\ : centrée)
-.IPs <o>\ 
+.IPs <o>\ \ 
 rendu OSD/\:sous-titres
 .RSss
 0: désactivé (par défaut)
