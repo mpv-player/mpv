@@ -61,26 +61,38 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context.width = width;
     lavc_venc_context.height = height;
     
+#if LIBAVCODEC_BUILD >= 4754
+    if(!lavc_venc_context.time_base.num){
+#else
     if(!lavc_venc_context.frame_rate){
+#endif
 	// guess FPS:
 	switch(height){
 	case 240:
 	case 480:
+#if LIBAVCODEC_BUILD >= 4754
+	    lavc_venc_context.time_base= (AVRational){1001,30000};
+#else
 #if LIBAVCODEC_BUILD >= 4662
 	    lavc_venc_context.frame_rate     = 30000;
 	    lavc_venc_context.frame_rate_base= 1001;
 #else
 	    lavc_venc_context.frame_rate=29.97*FRAME_RATE_BASE; // NTSC
 #endif
+#endif
 	    break;
 	case 576:
 	case 288:
 	default:
+#if LIBAVCODEC_BUILD >= 4754
+	    lavc_venc_context.time_base= (AVRational){1,25};
+#else
 #if LIBAVCODEC_BUILD >= 4662
 	    lavc_venc_context.frame_rate     = 25;
 	    lavc_venc_context.frame_rate_base= 1;
 #else
 	    lavc_venc_context.frame_rate=25*FRAME_RATE_BASE; // PAL
+#endif
 #endif
 	    break;
 //	    lavc_venc_context.frame_rate=vo_fps*FRAME_RATE_BASE; // same as src
@@ -191,11 +203,16 @@ static int open(vf_instance_t *vf, char* args){
 	// fixed bitrate (in kbits)
 	lavc_venc_context.bit_rate = 1000*p_quality;
     }
+#if LIBAVCODEC_BUILD >= 4754
+    lavc_venc_context.time_base.num = 1000*1001;
+    lavc_venc_context.time_base.den = (p_fps<1.0) ? 0 : (p_fps * lavc_venc_context.time_base.num);
+#else
 #if LIBAVCODEC_BUILD >= 4662
     lavc_venc_context.frame_rate_base = 1000*1001;
     lavc_venc_context.frame_rate      = (p_fps<1.0) ? 0 : (p_fps * lavc_venc_context.frame_rate_base);
 #else
     lavc_venc_context.frame_rate      = (p_fps<1.0) ? 0 : (p_fps * FRAME_RATE_BASE);
+#endif
 #endif
     lavc_venc_context.gop_size = 0; // I-only
 
