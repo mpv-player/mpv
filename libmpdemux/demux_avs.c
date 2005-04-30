@@ -103,7 +103,6 @@ AVS_T *initAVS(const char *filename)
     
     /* Dynamic import of needed stuff from avisynth.dll */
     IMPORT_FUNC(avs_create_script_environment);
-    IMPORT_FUNC(avs_create_script_environment);
     IMPORT_FUNC(avs_invoke);
     IMPORT_FUNC(avs_get_video_info);
     IMPORT_FUNC(avs_take_clip);
