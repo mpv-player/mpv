@@ -21,6 +21,11 @@ MPlayer (1.0)
     audio encoding modularized
     added faac encoder
 
+    Ports:
+    * improved timer function on Mac OS X
+    * New Mac OS X "macosx" video output driver. Supported on OS X 10.4
+      and 10.3 with Quicktime 7 (Require Quicktime 7 SDK to build on 10.3)
+
   pre7: "PatentCounter" April 16, 2005
 
     Security:
