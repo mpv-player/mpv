@@ -32,7 +32,7 @@
 // for mmioFOURCC:
 #include "libmpdemux/aviheader.h"
 
-#include "libvo/img_format.h"
+#include "libmpcodecs/img_format.h"
 #include "codec-cfg.h"
 
 #ifndef CODECS2HTML
