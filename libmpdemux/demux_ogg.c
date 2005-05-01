@@ -973,8 +973,21 @@ int demux_ogg_open(demuxer_t* demuxer) {
       } else if(strncmp(st->streamtype,"audio",5) == 0) {
 	char buffer[5];
 	unsigned int extra_size = get_uint32 (&st->size) - sizeof(stream_header);
+	unsigned int extra_offset = 0;
+
 	memcpy(buffer,st->subtype,4);
 	buffer[4] = '\0';
+
+        /* Nasty workaround. stream_header.size seems not to contain the real
+           size in all cases. There are four extra bytes that are unaccounted
+           for in front of the real codec initialization data _at least_ for
+           AAC. So far I've only seen those bytes being all 0, so we can
+           just skip them here. */
+	if ((strtol(buffer, NULL, 16) == 0xff) && (extra_size >= 4)) {
+	  extra_size -= 4;
+	  extra_offset = 4;
+	}
+
 	sh_a = new_sh_audio(demuxer,ogg_d->num_sub);
 	sh_a->wf = (WAVEFORMATEX*)calloc(1,sizeof(WAVEFORMATEX)+extra_size);
 	sh_a->format =  sh_a->wf->wFormatTag = strtol(buffer, NULL, 16);
@@ -986,7 +999,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 	sh_a->samplesize = (sh_a->wf->wBitsPerSample+7)/8;
 	sh_a->wf->cbSize = extra_size;
 	if(extra_size)
-	  memcpy(((char *)sh_a->wf)+sizeof(WAVEFORMATEX),st+1,extra_size);
+	  memcpy(((char *)sh_a->wf)+sizeof(WAVEFORMATEX),((char *)(st+1))+extra_offset,extra_size);
 
 	ogg_d->subs[ogg_d->num_sub].samplerate = sh_a->samplerate; // * sh_a->channels;
 	if (identify)
