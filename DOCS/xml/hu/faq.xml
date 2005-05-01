@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.73 -->
+<!-- synced with 1.74 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -390,7 +390,7 @@ Kérünk olvasd el a <link linkend="bugreports">hiba jelentési útmutatót</link>
 Problémám van a ... codeckel történő lejátszással. Egyáltalán használható?
 </para></question>
 <answer><para>
-Ellenőrizd a <ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">codec státusz</ulink>
+Ellenőrizd a <ulink url="../../codecs-status.html">codec státusz</ulink>
 oldalt, ha nem tartalmazza a te codecedet, olvasd el a <link linkend="codecs">codec dokumentációt</link>,
 különösen a <link linkend="codec-importing">codec importálás HOGYAN</link>-t és keress meg minket.
 </para></answer>
