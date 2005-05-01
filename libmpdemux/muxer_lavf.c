@@ -213,7 +213,12 @@ static void write_chunk(muxer_stream_t *stream, size_t len, unsigned int flags)
 	
 	
 	//pkt.pts = AV_NOPTS_VALUE; 
+#if LIBAVFORMAT_BUILD >= 4624
+	pkt.pts = (stream->timer / av_q2d(priv->oc->streams[pkt.stream_index]->time_base) + 0.5);
+#else
 	pkt.pts = AV_TIME_BASE * stream->timer;
+#endif
+//fprintf(stderr, "%Ld %Ld id:%d tb:%f %f\n", pkt.dts, pkt.pts, pkt.stream_index, av_q2d(priv->oc->streams[pkt.stream_index]->time_base), stream->timer);
 	
 	if(av_interleaved_write_frame(priv->oc, &pkt) != 0) //av_write_frame(priv->oc, &pkt)
 	{
