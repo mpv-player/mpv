@@ -368,6 +368,11 @@ int af_init(af_stream_t* s, int force_output)
   if(AF_OK != af_reinit(s,s->first))
     return -1;
 
+  // make sure the chain is not empty and valid (e.g. because of AF_DETACH)
+  if (!s->first)
+    if (!af_append(s,s->first,"dummy") || AF_OK != af_reinit(s,s->first))
+      return -1;
+
   // If force_output isn't set do not compensate for output format
   if(!force_output){
     memcpy(&s->output, s->last->data, sizeof(af_data_t));
