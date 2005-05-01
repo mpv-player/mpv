@@ -236,8 +236,13 @@ int demux_open_lavf(demuxer_t *demuxer){
             sh_video->bih= bih;
             sh_video->disp_w= codec->width;
             sh_video->disp_h= codec->height;
+#if LIBAVFORMAT_BUILD >= 4624
+            sh_video->video.dwRate= codec->time_base.den;
+            sh_video->video.dwScale= codec->time_base.num;
+#else
             sh_video->video.dwRate= codec->frame_rate;
             sh_video->video.dwScale= codec->frame_rate_base;
+#endif
             sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
             sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
             sh_video->format = bih->biCompression;
@@ -339,8 +344,13 @@ int demux_lavf_fill_buffer(demuxer_t *demux){
     }
 
     if(pkt.pts != AV_NOPTS_VALUE){
+#if LIBAVFORMAT_BUILD >= 4624
+        dp->pts=pkt.pts * av_q2d(priv->avfc->streams[id]->time_base);
+        priv->last_pts= dp->pts * AV_TIME_BASE;
+#else
         priv->last_pts= pkt.pts;
         dp->pts=pkt.pts / (float)AV_TIME_BASE;
+#endif
     }
     dp->pos=demux->filepos;
     dp->flags= !!(pkt.flags&PKT_FLAG_KEY);
