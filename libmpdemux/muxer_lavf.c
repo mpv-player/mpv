@@ -180,8 +180,13 @@ static void fix_parameters(muxer_stream_t *stream)
 		ctx->width = stream->bih->biWidth;
 		ctx->height = stream->bih->biHeight;
 		ctx->bit_rate = 800000;
+#if (LIBAVFORMAT_BUILD >= 4624)
+		ctx->time_base.den = stream->h.dwRate;
+		ctx->time_base.num = stream->h.dwScale;
+#else
 		ctx->frame_rate = stream->h.dwRate;
 		ctx->frame_rate_base = stream->h.dwScale;
+#endif
 	}
 }
 
