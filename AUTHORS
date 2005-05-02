@@ -171,6 +171,7 @@ Christiansen, Dan Villiom Podlaski (danchr) <danchr@daimi.au.dk>
 
 Clagg, Jeff (snacky) <snacky@ikaruga.co.uk>
     * minor updates and fixes for x264 support
+    * x264's encoding guide
     * superficial clarity fixes for mpcf.txt
 
 Comstedt, Marcus <marcus@idonex.se>
@@ -587,6 +588,7 @@ Poirier, Guillaume <guillaume.poirier@etudiant.univ-rennes1.fr>
     * French documentation translation and synchronization
     * XviD documentation
     * lavc's turbo mode
+    * lots of updates of MEncoder's documentation
 
 Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * the original configure script and Makefiles for easy compilation
