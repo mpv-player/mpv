@@ -49,6 +49,7 @@ extern int vo_rootwin;
 extern int vo_ontop;
 extern int vo_fs;
 static int isFullscreen;
+static int isOntop;
 extern float monitor_aspect;
 extern int vo_keepaspect;
 extern float movie_aspect;
@@ -513,6 +514,16 @@ static uint32_t control(uint32_t request, void *data, ...)
 */
 - (void) ontop
 {
+	if(vo_ontop)
+	{
+		[window setLevel:NSScreenSaverWindowLevel];
+		isOntop = YES;
+	}
+	else
+	{
+		[window setLevel:NSNormalWindowLevel];
+		isOntop = NO;
+	}
 }
 
 /*
