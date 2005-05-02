@@ -210,7 +210,7 @@ is the WMA decoder.
 
 <para>
 The most recent codec deserving credit is the <emphasis role="bold">Sorenson 3</emphasis>
-(SVQ3) codec. This is the first, completely opensource implementation. It's even
+(SVQ3) codec. This is the first, completely opensource implementation. It is even
 faster than the original. Be sure to prefer this instead of the binary codec!
 </para>
 

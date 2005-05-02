@@ -57,7 +57,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts
 <title>Encoding to MPEG format</title>
 <para>
 <application>MEncoder</application> can create MPEG (MPEG-PS) format output
-files. It's probably useful only with
+files. It is probably useful only with
 <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>'s
 <emphasis>mpeg1video</emphasis> codec, because players - except
 <application>MPlayer</application> - expect MPEG-1 video, and MPEG-1 layer 2 (MP2)
@@ -98,7 +98,7 @@ read the <link linkend="aspect">Preserving aspect ratio</link> section.
 The scaling process is handled by the <literal>scale</literal> video filter:
 <option>-vf scale=<replaceable>width</replaceable>:<replaceable>height</replaceable></option>.
 Its quality can be set with the <option>-sws</option> option.
-If it's not specified, <application>MEncoder</application> will use 2: bicubic.
+If it is not specified, <application>MEncoder</application> will use 2: bicubic.
 </para>
 
 <para>
@@ -285,7 +285,7 @@ mencoder mf:// -mf w=800:h=600:fps=25:type=png -ovc raw -oac copy -o <replaceabl
 </informalexample>
 
 <note><para>
-Width must be integer multiple of 4, it's a limitation of the RAW RGB AVI format.
+Width must be integer multiple of 4, it is a limitation of the RAW RGB AVI format.
 </para></note>
 
 <informalexample>
@@ -374,9 +374,9 @@ mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</repla
 <title>Preserving aspect ratio</title>
 <para>
 DVDs and SVCDs (i.e. MPEG-1/2) files contain an aspect ratio value, which
-describes how the player should scale the video stream, so humans won't
+describes how the player should scale the video stream, so humans will not
 have egg heads (ex.: 480x480 + 4:3 = 640x480). However when encoding to AVI
-(DivX) files, you have be aware that AVI headers don't store this value.
+(DivX) files, you have be aware that AVI headers do not store this value.
 Rescaling the movie is disgusting and time consuming, there has to be a better
 way!
 </para>
@@ -482,14 +482,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   One frequently asked question is "How do I make the highest quality rip for
   a given size?". Another question is "How do I make the highest quality DVD
-  rip possible? I don't care about file size, I just want the best quality."
+  rip possible? I do not care about file size, I just want the best quality."
 </para>
 
 <para>
   The latter question is perhaps at least somewhat wrongly posed. After all, if
-  you don't care about file size, why not simply copy the entire MPEG-2 video
+  you do not care about file size, why not simply copy the entire MPEG-2 video
   stream from the the DVD? Sure, your AVI will end up being 5GB, give
-  or take, but if you want the best quality and don't care about size,
+  or take, but if you want the best quality and do not care about size,
   this is certainly your best option.
 </para>
 
@@ -500,11 +500,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  It's difficult to offer a cookbook recipe on how to create a very high
+  It is difficult to offer a cookbook recipe on how to create a very high
   quality DVD rip. There are several factors to consider, and you should
-  understand these details or else you're likely to end up disappointed
-  with your results. Below we'll investigate some of these issues, and
-  then have a look at an example. We assume you're using
+  understand these details or else you are likely to end up disappointed
+  with your results. Below we will investigate some of these issues, and
+  then have a look at an example. We assume you are using
   <systemitem class="library">libavcodec</systemitem> to encode the video,
   although the theory applies to other codecs as well.
 </para>
@@ -542,7 +542,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   When you specify a constant bitrate, <systemitem
   class="library">libavcodec</systemitem> will encode the video, discarding
   detail as much as necessary and as little as possible in order to remain
-  lower than the given bitrate. If you truly don't care about file size,
+  lower than the given bitrate. If you truly do not care about file size,
   you could as well use CBR and specify a bitrate of infinity. (In
   practice, this means a value high enough so that it poses no limit, like
   10000Kbit.) With no real restriction on bitrate, the result is that
@@ -550,7 +550,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   possible quantizer for each macroblock (as specified by
   <option>vqmin</option>, which is 2 by default). As soon as you specify a
   low enough bitrate that <systemitem class="library">libavcodec</systemitem>
-  is forced to use a higher quantizer, then you're almost certainly ruining
+  is forced to use a higher quantizer, then you are almost certainly ruining
   the quality of your video.
   In order to avoid that, you should probably downscale your video, according
   to the method described later on in this guide.
@@ -573,7 +573,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   whether the macroblock needs it or not. That is, it might be possible
   to use a higher quantizer on a macroblock without sacrificing visual
   quality. Why waste the bits on an unnecessarily low quantizer? Your
-  CPU has as many cycles as there is time, but there's only so many bits
+  CPU has as many cycles as there is time, but there is only so many bits
   on your hard disk.
 </para>
 
@@ -587,8 +587,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  If you use <option>vqscale=2</option>, then you're wasting bits. If you
-  use <option>vqscale=3</option>, then you're not getting the highest
+  If you use <option>vqscale=2</option>, then you are wasting bits. If you
+  use <option>vqscale=3</option>, then you are not getting the highest
   quality rip. Suppose you rip a DVD at <option>vqscale=3</option>, and
   the result is 1800Kbit. If you do a two pass encode with
   <option>vbitrate=1800</option>, the resulting video will have <emphasis
@@ -597,19 +597,19 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  Since you're now convinced that two pass is the way to go, the real
-  question now is what bitrate to use? The answer is that there's no
+  Since you are now convinced that two pass is the way to go, the real
+  question now is what bitrate to use? The answer is that there is no
   single answer. Ideally you want to choose a bitrate that yields the
   best balance between quality and file size. This is going to vary
   depending on the source video.
 </para>
 
 <para>
-  If size doesn't matter, a good starting point for a very high quality
+  If size does not matter, a good starting point for a very high quality
   rip is about 2000Kbit plus or minus 200Kbit.
   For fast action or high detail source video, or if you just have a very
   critical eye, you might decide on 2400 or 2600.
-  For some DVDs, you might not notice a difference at 1400Kbit. It's a
+  For some DVDs, you might not notice a difference at 1400Kbit. It is a
   good idea to experiment with scenes at different bitrates to get a feel.
 </para>
 
@@ -697,7 +697,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   motion vectors from other parts of the picture will overwrite the
   black border. This means that lots of bits must be spent either
   re-blackening the border that was overwritten, or (more likely) a
-  motion vector won't be used at all and all the changes in this
+  motion vector will not be used at all and all the changes in this
   macroblock will have to be coded explicitly. Either way, encoding
   efficiency is greatly reduced.
 </para>
@@ -712,10 +712,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Finally, suppose we have a macroblock in the interior of the
   picture, and an object is moving into this block from near the edge
-  of the image. MPEG-type coding can't say "copy the part that's
+  of the image. MPEG-type coding cannot say "copy the part that is
   inside the picture but not the black border." So the black border
   will get copied inside too, and lots of bits will have to be spent
-  encoding the part of the picture that's supposed to be there.
+  encoding the part of the picture that is supposed to be there.
 </para>
 
 <para>
@@ -738,7 +738,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </orderedlist>
 
 <para>
-  For all of these reasons, it's recommended to fully crop black
+  For all of these reasons, it is recommended to fully crop black
   borders. Further, if there is an area of noise/distortion at the edge
   of the picture, cropping this will improve encoding efficiency as
   well. Videophile purists who want to preserve the original as close as
@@ -847,7 +847,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   even numbers.
   If they are not, the chroma will no longer line up correctly with the
   luma.
-  In theory, it's possible to crop with odd offsets, but it requires
+  In theory, it is possible to crop with odd offsets, but it requires
   resampling the chroma which is potentially a lossy operation and not
   supported by the crop filter.
 </para>
@@ -1101,7 +1101,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Native DVD resolution is 720x480 for NTSC, and 720x576 for PAL, but
-  there's an aspect flag that specifies whether it's full-screen (4:3) or
+  there is an aspect flag that specifies whether it is full-screen (4:3) or
   wide-screen (16:9). Many (if not most) widescreen DVDs are not strictly
   16:9, and will be either 1.85:1 or 2.35:1 (cinescope). This means that
   there will be black bands in the video that will need to be cropped out.
@@ -1138,18 +1138,18 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  Because MPEG-4 uses 16x16 macroblocks, you'll want to make sure that each
-  dimension of the video you're encoding is a multiple of 16 or else you
+  Because MPEG-4 uses 16x16 macroblocks, you will want to make sure that each
+  dimension of the video you are encoding is a multiple of 16 or else you
   will be degrading quality, especially at lower bitrates. You can do this
   by rounding the width and height of the crop rectangle down to the nearest
   multiple of 16.
-  As stated earlier, when cropping, you'll want to increase the Y offset by
+  As stated earlier, when cropping, you will want to increase the Y offset by
   half the difference of the old and the new height so that the resulting
   video is taken from the center of the frame. And because of the way DVD
   video is sampled, make sure the offset is an even number. (In fact, as a
-  rule, never use odd values for any parameter when you're cropping and
-  scaling video.) If you're not comfortable throwing a few extra pixels
-  away, you might prefer instead to scale the video instead. We'll look
+  rule, never use odd values for any parameter when you are cropping and
+  scaling video.) If you are not comfortable throwing a few extra pixels
+  away, you might prefer instead to scale the video instead. We will look
   at this in our example below.
   You can actually let the <option>cropdetect</option> filter do all of the
   above for you, as it has an optional <option>round</option> parameter that
@@ -1158,13 +1158,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Also, be careful about "half black" pixels at the edges. Make sure you
-  crop these out too, or else you'll be wasting bits there that
+  crop these out too, or else you will be wasting bits there that
   are better spent elsewhere.
 </para>
 
 <para>
-  After all is said and done, you'll probably end up with video whose pixels
-  aren't quite 1.85:1 or 2.35:1, but rather something close to that. You
+  After all is said and done, you will probably end up with video whose pixels
+  are not quite 1.85:1 or 2.35:1, but rather something close to that. You
   could calculate the new aspect ratio manually, but
   <application>MEncoder</application> offers an option for <systemitem
   class="library">libavcodec</systemitem> called <option>autoaspect</option>
@@ -1204,21 +1204,21 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Roughly speaking, the greater the CQ, the less the likelihood to see
   encoding artifacts.
   However, if you have a target size for your movie (1 or 2 CDs for instance),
-  there's a limited total number of bits that you can spend; therefore it's
+  there is a limited total number of bits that you can spend; therefore it is
   necessary to find a good tradeoff between compressibility and quality.
 </para>
 
 <para>
   The CQ depends both on the bitrate and the movie resolution.
-  In order to raise the CQ, typically you'd downscale the movie given that the
+  In order to raise the CQ, typically you would downscale the movie given that the
   bitrate is computed in function of the target size and the length of the
   movie, which are constant.
   A CQ below 0.18 usually ends up in a very blocky picture, because there
-  aren't enough bits to code the information of each macroblock (MPEG4, like
+  are not enough bits to code the information of each macroblock (MPEG4, like
   many other codecs, groups pixels by blocks of several pixels to compress the
-  image; if there aren't enough bits, the edges of those blocks are
+  image; if there are not enough bits, the edges of those blocks are
   visible).
-  It's therefore wise to take a CQ ranging from 0.20 to 0.22 for a 1 CD rip,
+  It is therefore wise to take a CQ ranging from 0.20 to 0.22 for a 1 CD rip,
   and 0.26-0.28 for 2 CDs.
 </para>
 
@@ -1226,7 +1226,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Please take note that the CQ is just an indicative figure, as depending on
   the encoded content, a CQ of 0.18 may look just fine for a Bergman, contrary
   to a movie such as The Matrix, which contains many high-motion scenes.
-  On the other hand, it's worthless to raise CQ higher than 0.30 as you'd
+  On the other hand, it is worthless to raise CQ higher than 0.30 as you would
   be wasting bits without any noticeable quality gain.
 </para>
 
@@ -1238,10 +1238,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Audio is a much simpler problem to solve: if you care about quality, just
   leave it as is.
-  Even AC3 5.1 streams are at most 448Kbit/s, and they're worth every bit.
+  Even AC3 5.1 streams are at most 448Kbit/s, and they are worth every bit.
   You might be tempted to transcode the audio to high quality Vorbis, but
-  just because you don't have an A/V receiver for AC3 pass-through today
-  doesn't mean you won't have one tomorrow. Future-proof your DVD rips by
+  just because you do not have an A/V receiver for AC3 pass-through today
+  does not mean you will not have one tomorrow. Future-proof your DVD rips by
   preserving the AC3 stream.
   You can keep the AC3 stream either by copying it directly into the video
   stream <link linkend="menc-feat-mpeg4">during the encoding</link>.
@@ -1276,7 +1276,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   are commonly recorded at low volumes.
   You can use the tool <application>normalize</application> for instance,
   which is available in most distributions.
-  If you're using Windows, a tool such as <application>BeSweet</application>
+  If you are using Windows, a tool such as <application>BeSweet</application>
   can do the same job.
   You will compress in either Vorbis or MP3.
   For example:
@@ -1290,7 +1290,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   containers as an output, each of which may lead to audio/video
   playback synchronization problems with some players when the AVI file
   contain VBR audio streams such as Vorbis.
-  Don't worry, this document will show you how you can do that with third
+  Do not worry, this document will show you how you can do that with third
   party programs.
 </para>
 
@@ -1311,18 +1311,18 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   No special processing, however, is done to the video for PAL DVDs, which
   run at 25 fps. (Technically, PAL can be telecined, called 2:2 pulldown,
-  but this doesn't become an issue in practice.) The 24 fps film is simply
+  but this does not become an issue in practice.) The 24 fps film is simply
   played back at 25 fps. The result is that the movie runs slightly faster,
-  but unless you're an alien, you probably won't notice the difference.
-  Most PAL DVDs have pitch-corrected audio, so when they're played back at
+  but unless you are an alien, you probably will not notice the difference.
+  Most PAL DVDs have pitch-corrected audio, so when they are played back at
   25 fps things will sound right, even though the audio track (and hence the
-  whole movie) has a running time that's 4% less than NTSC DVDs.
+  whole movie) has a running time that is 4% less than NTSC DVDs.
 </para>
 
 <para>
-  Because the video in a PAL DVD hasn't been altered, you needn't worry
+  Because the video in a PAL DVD has not been altered, you needn't worry
   much about frame rate. The source is 25 fps, and your rip will be 25
-  fps. However, if you're ripping an NTSC DVD movie, you may need to
+  fps. However, if you are ripping an NTSC DVD movie, you may need to
   apply inverse telecine.
 </para>
 
@@ -1336,13 +1336,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  It's highly recommended that you read the section on
+  It is highly recommended that you read the section on
   <link linkend="menc-feat-telecine">How to deal with telecine and interlacing in NTSC DVDs</link>
   to learn how to handle the different possibilities.
 </para>
 
 <para>
-  However, if you're mostly just ripping movies, likely you're either
+  However, if you are mostly just ripping movies, likely you are either
   dealing with 24 fps progressive or telecined video, in which case you can
   use the <option>pullup</option> filter <option>-vf
   pullup,softskip</option>.
@@ -1372,7 +1372,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   One thing you might want to do, however, is pass the video through a
   very light denoise filter, such as <option>-vf hqdn3d=2:1:2</option>.
-  Again, it's a matter of putting those bits to better use: why waste them
+  Again, it is a matter of putting those bits to better use: why waste them
   encoding noise when you can just add that noise back in during playback?
   Increasing the parameters for <option>hqdn3d</option> will further
   improve compressibility, but if you increase the values too much, you
@@ -1387,11 +1387,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Encoding options of libavcodec</title>
 
 <para>
-  Ideally, you'd probably want to be able to just tell the encoder to switch
+  Ideally, you would probably want to be able to just tell the encoder to switch
   into "high quality" mode and move on.
   That would probably be nice, but unfortunately hard to implement as different
   encoding options yield different quality results depending on the source material.
-  That's because compression depends on the visual properties of the video
+  That is because compression depends on the visual properties of the video
   in question.
   For example, anime and live action have very different properties and
   thus require different options to obtain optimum encoding.
@@ -1407,7 +1407,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <emphasis role="bold">vmax_b_frames</emphasis>: 1 or 2 is good, depending on
   the movie.
   Note that libavcodec does not yet support closed GOP (the option
-  <option>cgop</option> doesn't currently work), so DivX5 won't be able to
+  <option>cgop</option> does not currently work), so DivX5 will not be able to
   decode anything encoded with B-frames.
 </para></listitem>
 
@@ -1466,8 +1466,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   with qprd.
   This option will make the encoder minimize noise due to compression
   artifacts instead of making the encoded video strictly match the source.
-  Don't use this unless you've already tweaked everything else as far as it
-  will go and the results still aren't good enough.
+  Do not use this unless you have already tweaked everything else as far as it
+  will go and the results still are not good enough.
 </para></listitem>
 
 <listitem><para>
@@ -1496,14 +1496,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   MPEG-4 uses half pixel precision for its motion search by default,
   therefore this option comes with an overhead as more information will be
   stored in the encoded file.
-  The compression gain/loss depends on the movie, but it's usually not very
+  The compression gain/loss depends on the movie, but it is usually not very
   effective on anime.
   qpel always incurs a significant cost in CPU decode time (+20% in
   practice).
 </para></listitem>
 
 <listitem><para>
-  <emphasis role="bold">psnr</emphasis>: doesn't affect the actual encoding,
+  <emphasis role="bold">psnr</emphasis>: does not affect the actual encoding,
   but writes a log file giving the type/size/quality of each frame, and
   prints a summary of PSNR (Peak Signal to Noise Ratio) at the end.
 </para></listitem>
@@ -1519,7 +1519,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">lumi_mask, dark_mask</emphasis>: Psychovisual adaptive
   quantization.
-  You don't want to play with those options if you care about quality.
+  You do not want to play with those options if you care about quality.
   Reasonable values may be effective in your case, but be warned this is very
   subjective.
 </para></listitem>
@@ -1536,10 +1536,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Example</title>
 
 <para>
-  So, you've just bought your shiny new copy of Harry Potter and the Chamber
+  So, you have just bought your shiny new copy of Harry Potter and the Chamber
   of Secrets (widescreen edition, of course), and you want to rip this DVD
   so that you can add it to your Home Theatre PC. This is a region 1 DVD,
-  so it's NTSC. The example below will still apply to PAL, except you'll
+  so it is NTSC. The example below will still apply to PAL, except you will
   omit <option>-ofps 24000/1001</option> (because the output framerate is the
   same as the input framerate), and of course the crop dimensions will be
   different.
@@ -1548,7 +1548,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   After running <option>mplayer dvd://1</option>, we follow the process
   detailed in the section <link linkend="menc-feat-telecine">How to deal
-  with telecine and interlacing in NTSC DVDs</link> and discover that it's
+  with telecine and interlacing in NTSC DVDs</link> and discover that it is
   24000/1001 fps progressive video, which means that we needn't use an inverse
   telecine filter, such as <option>pullup</option> or
   <option>filmdint</option>.
@@ -1561,7 +1561,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <screen>mplayer dvd://1 -vf cropdetect</screen>
 
   Make sure you seek to a fully filled frame (such as a bright scene), and
-  you'll see in <application>MPlayer</application>'s console output:
+  you will see in <application>MPlayer</application>'s console output:
 
   <screen>crop area: X: 0..719  Y: 57..419  (-vf crop=720:362:0:58)</screen>
 
@@ -1571,22 +1571,22 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
   And we see that it looks perfectly fine. Next, we ensure the width and
   height are a multiple of 16. The width is fine, however the height is
-  not. Since we didn't fail 7th grade math, we know that the nearest
+  not. Since we did not fail 7th grade math, we know that the nearest
   multiple of 16 lower than 362 is 352.
 </para>
 
 <para>
-  We could just use <option>crop=720:352:0:58</option>, but it'd be nice
+  We could just use <option>crop=720:352:0:58</option>, but it would be nice
   to take a little off the top and a little off the bottom so that we
-  retain the center. We've shrunk the height by 10 pixels, but we don't
-  want to increase the y-offset by 5-pixels since that's an odd number and
-  will adversely affect quality. Instead, we'll increase the y-offset by
+  retain the center. We have shrunk the height by 10 pixels, but we do not
+  want to increase the y-offset by 5-pixels since that is an odd number and
+  will adversely affect quality. Instead, we will increase the y-offset by
   4 pixels:
 
   <screen>mplayer dvd://1 -vf crop=720:352:0:62</screen>
 
   Another reason to shave pixels from both the top and the bottom is that we
-  ensure we've eliminated any half-black pixels if they exist. Note that if
+  ensure we have eliminated any half-black pixels if they exist. Note that if
   your video is telecined, make sure the <option>pullup</option> filter (or
   whichever inverse telecine filter you decide to use) appears in the filter
   chain before you crop. If it is interlaced, deinterlace before cropping.
@@ -1595,16 +1595,16 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  If you're really concerned about losing those 10 pixels, you might
+  If you are really concerned about losing those 10 pixels, you might
   prefer instead to scale the dimensions down to the nearest multiple of 16.
   The filter chain would look like:
 
   <screen>-vf crop=720:362:0:58,scale=720:352</screen>
 
   Scaling the video down like this will mean that some small amount of
-  detail is lost, though it probably won't be perceptible. Scaling up will
+  detail is lost, though it probably will not be perceptible. Scaling up will
   result in lower quality (unless you increase the bitrate). Cropping
-  discards those pixels altogether. It's a tradeoff that you'll want to
+  discards those pixels altogether. It is a tradeoff that you will want to
   consider for each circumstance. For example, if the DVD video was made
   for television, you might want to avoid vertical scaling, since the line
   sampling corresponds to the way the content was originally recorded.
@@ -1616,7 +1616,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  We're now ready to do the two pass encode. Pass one:
+  We are now ready to do the two pass encode. Pass one:
 
   <screen>mencoder dvd://1 -ofps 24000/1001 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
@@ -1631,7 +1631,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   The options <option>v4mv:mbd=2:trell</option> will greatly increase the
-  quality at the expense of encoding time. There's little reason to leave
+  quality at the expense of encoding time. There is little reason to leave
   these options out when the primary goal is quality. The options
   <option>cmp=3:subcmp=3:mbcmp=3</option> select a comparison function that
   yields higher quality than the defaults. You might try experimenting with
@@ -1645,12 +1645,12 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   For this movie, the resulting AVI will be 138 minutes long and nearly
-  3GB. And because you said that file size doesn't matter, this is a
+  3GB. And because you said that file size does not matter, this is a
   perfectly acceptable size. However, if you had wanted it smaller, you
   could try a lower bitrate. Increasing bitrates have diminishing
   returns, so while we might clearly see an improvement from 1800Kbit to
   2000Kbit, it might not be so noticeable above 2000Kbit. Feel
-  free to experiment until you're happy.
+  free to experiment until you are happy.
 </para>
 
 <para>
@@ -1738,7 +1738,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   samples).
   Unfortunately, the most efficient codec, Vorbis, does not meet
   either of these requirements.
-  Therefore, if you plan to store your movie in AVI, you'll have to
+  Therefore, if you plan to store your movie in AVI, you will have to
   use a less efficient codec such as MP3 or AC3.
 </para>
 </listitem>
@@ -2114,7 +2114,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <formalpara>
 <title>What is telecine?</title>
 <para>
-  I suggest you visit this page if you don't understand much of what
+  I suggest you visit this page if you do not understand much of what
   is written in this document:
   <ulink url="http://www.divx.com/support/guides/guide.php?gid=10">http://www.divx.com/support/guides/guide.php?gid=10</ulink>
   This URL links to an understandable and reasonably comprehensive
@@ -2237,7 +2237,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   When you watch progressive video, you should never see any
   interlacing. Beware, however, because sometimes there is a tiny bit
-  of telecine mixed in where you wouldn't expect. I've encountered TV
+  of telecine mixed in where you would not expect. I have encountered TV
   show DVDs that have one second of telecine at every scene change, or
   at seemingly random places. I once watched a DVD that had a
   progressive first half, and the second half was telecined. If you
@@ -2293,7 +2293,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
     video is telecined. If you see some other pattern, then the video
     may have been telecined using some non-standard method;
     <application>MEncoder</application> cannot losslessly convert
-    non-standard telecine to progressive. If you don't see any
+    non-standard telecine to progressive. If you do not see any
     pattern at all, then it is most likely interlaced.
     </para></listitem>
   </orderedlist>
@@ -2356,7 +2356,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   This category looks just like &quot;mixed progressive and telecine&quot;,
-  until you examine the 30000/1001 fps sections and see that they don't have the
+  until you examine the 30000/1001 fps sections and see that they do not have the
   telecine pattern.
 </para>
 </sect3>
@@ -2436,7 +2436,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Use a deinterlacing filter before encoding. There are several of
   these filters available to choose from, each with its own advantages
   and disadvantages. Consult <option>mplayer -pphelp</option> to see
-  what's available (grep for &quot;deint&quot;), and search the
+  what is available (grep for &quot;deint&quot;), and search the
   <ulink url="http://www.mplayerhq.hu/homepage/design6/info.html#mailing_lists">
   MPlayer mailing lists</ulink> to find many discussions about the
   various filters. Again, the framerate is not changing, so no
@@ -2449,7 +2449,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   Unfortunately, this option is buggy with
   <application>MEncoder</application>; it ought to work well with
-  <application>MEncoder G2</application>, but that isn't here yet. You
+  <application>MEncoder G2</application>, but that is not here yet. You
   might experience crahes. Anyway, the purpose of <option> -vf
   tfields</option> is to create a full frame out of each field, which
   makes the framerate 60000/1001. The advantage of this approach is that no
@@ -2473,13 +2473,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   </para></listitem>
 <listitem><para>
   If you plan on downscaling dramatically, you can extract and encode
-  only one of the two fields. Of course, you'll lose half the vertical
+  only one of the two fields. Of course, you will lose half the vertical
   resolution, but if you plan on downscaling to at most 1/2 of the
-  original, the loss won't matter much. The result will be a
+  original, the loss will not matter much. The result will be a
   progressive 30000/1001 frames per second file. The procedure is to use
   <option>-vf field</option>, then crop
   <link linkend="menc-feat-telecine-footnotes">[1]</link> and scale
-  appropriately. Remember that you'll have to adjust the scale to
+  appropriately. Remember that you will have to adjust the scale to
   compensate for the vertical resolution being halved.
   <screen>mencoder dvd://1 -nosound -vf field=0 -ovc lavc</screen>
   </para></listitem>
@@ -2494,7 +2494,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   inverse-telecined. There are three ways to accomplish this,
   described below. Note that you should
   <emphasis role="bold">always</emphasis> inverse-telecine before any
-  rescaling; unless you really know what you're doing,
+  rescaling; unless you really know what you are doing,
   inverse-telecine before cropping, too
   <link linkend="menc-feat-telecine-footnotes">[1]</link>.
   <option>-ofps 24000/1001</option> is needed here because the output video
@@ -2532,15 +2532,15 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   </listitem>
 
 <listitem><para>
-  I haven't used <option>-vf filmdint</option> myself, but here's what
+  I have not used <option>-vf filmdint</option> myself, but here is what
   D Richard Felker III has to say:
 
-  <blockquote><para>It's OK, but IMO it tries to deinterlace rather
+  <blockquote><para>It is OK, but IMO it tries to deinterlace rather
     than doing inverse telecine too often (much like settop DVD
     players &amp; progressive TVs) which gives ugly flickering and
-    other artifacts. If you're going to use it, you at least need to
+    other artifacts. If you are going to use it, you at least need to
     spend some time tuning the options and watching the output first
-    to make sure it's not messing up.</para></blockquote>
+    to make sure it is not messing up.</para></blockquote>
   </para></listitem>
 </itemizedlist>
 </sect3>
@@ -2580,15 +2580,15 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   that can be more visible than with the second method, which shows
   some progressive frames twice. 30000/1001 frames per second interlaced
   video is already a bit choppy because it really should be shown at
-  60000/1001 fields per second, so the duplicate frames don't stand out as
+  60000/1001 fields per second, so the duplicate frames do not stand out as
   much.
   </para>
 
   <para>
-  Either way, it's best to consider your content and how you intend to
+  Either way, it is best to consider your content and how you intend to
   display it. If your video is 90% progressive and you never intend to
-  show it on a TV, you should favor a progressive approach. If it's
-  only half progressive, you probably want to encode it as if it's all
+  show it on a TV, you should favor a progressive approach. If it is
+  only half progressive, you probably want to encode it as if it is all
   interlaced.
   </para>
   </listitem>
@@ -2643,7 +2643,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   inverse telecining. Once the video is progressive you only need to
   crop by even numbers. If you really want to gain the slight speedup
   that cropping first may offer, you must crop vertically by multiples
-  of four or else the inverse-telecine filter won't have proper data.
+  of four or else the inverse-telecine filter will not have proper data.
   </para>
 
   <para>
@@ -2656,8 +2656,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><formalpara>
   <title>About encoding parameters and quality:</title>
   <para>
-  Just because I recommend <option>mbd=2</option> here doesn't mean it
-  shouldn't be used elsewhere. Along with <option>trell</option>,
+  Just because I recommend <option>mbd=2</option> here does not mean it
+  should not be used elsewhere. Along with <option>trell</option>,
   <option>mbd=2</option> is one of the two
    <systemitem class="library">libavcodec</systemitem> options that
   increases quality the most, and you should always use at least those
