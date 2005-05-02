@@ -306,6 +306,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 								backing:NSBackingStoreBuffered
 								defer:NO];
 
+	[window setDelegate:self];
 	[window setContentView:self];
 	[window setInitialFirstResponder:self];
 	[window setAcceptsMouseMovedEvents:YES];
@@ -664,5 +665,10 @@ static uint32_t control(uint32_t request, void *data, ...)
 - (BOOL) resignFirstResponder
 {
 	return YES;
+}
+
+- (void)windowWillClose:(NSNotification *)aNotification
+{
+	mplayer_put_key(KEY_ESC);
 }
 @end
