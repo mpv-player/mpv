@@ -50,6 +50,7 @@ extern int vo_ontop;
 extern int vo_fs;
 static int isFullscreen;
 static int isOntop;
+static int isRootwin;
 extern float monitor_aspect;
 extern int vo_keepaspect;
 extern float movie_aspect;
@@ -141,6 +142,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	
 	vo_fs = flags & VOFLAG_FULLSCREEN;
 	
+	if(vo_rootwin)
+		[glView rootwin];	
+
 	if(vo_fs)
 		[glView fullscreen: NO];
 	
@@ -280,6 +284,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		case VOCTRL_RESUME: return (int_pause=0);
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
 		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); [glView ontop]; return VO_TRUE;
+		case VOCTRL_ROOTWIN: vo_rootwin = (!(vo_rootwin)); [glView rootwin]; return VO_TRUE;
 		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); [glView fullscreen: YES]; return VO_TRUE;
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
 		case VOCTRL_SET_PANSCAN: [glView panscan]; return VO_TRUE;
@@ -312,7 +317,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	[window setAcceptsMouseMovedEvents:YES];
     [window setTitle:@"MPlayer - The Movie Player"];
 	[window center];
-	[window makeKeyAndOrderFront:nil];
+	[window makeKeyAndOrderFront:self];
 	
 	[self setOpenGLContext:glContext];
 	[glContext setView:self];
@@ -424,7 +429,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	glFlush();
 	
 	//auto hide mouse cursor and futur on-screen control?
-	if(isFullscreen && !mouseHide)
+	if(isFullscreen && !mouseHide && !isRootwin)
 	{
 		DateTimeRec d;
 		unsigned long curTime;
@@ -477,10 +482,13 @@ static uint32_t control(uint32_t request, void *data, ...)
 	//go fullscreen
 	if(vo_fs)
 	{
-		//hide menubar and mouse if fullscreen on main display
-		HideMenuBar();
-		HideCursor();
-		mouseHide = YES;
+		if(!isRootwin)
+		{
+			//hide menubar and mouse if fullscreen on main display
+			HideMenuBar();
+			HideCursor();
+			mouseHide = YES;
+		}
 		
 		panscan_calc();
 		old_frame = [window frame];	//save main window size & position
@@ -532,6 +540,24 @@ static uint32_t control(uint32_t request, void *data, ...)
 */
 - (void) panscan
 {
+}
+
+/*
+	Toggle rootwin
+ */
+- (void) rootwin
+{
+	if(vo_rootwin)
+	{
+		[window setLevel:CGWindowLevelForKey(kCGDesktopWindowLevelKey)];
+		[window orderBack:self];
+		isRootwin = YES;
+	}
+	else
+	{
+		[window setLevel:NSNormalWindowLevel];
+		isRootwin = NO;
+	}
 }
 
 /*
@@ -608,7 +634,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 */
 - (void) mouseMoved: (NSEvent *) theEvent
 {
-	if(isFullscreen)
+	if(isFullscreen && !isRootwin)
 	{
 		ShowMenuBar();
 		ShowCursor();

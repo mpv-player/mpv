@@ -10,6 +10,7 @@
 
 #import <Cocoa/Cocoa.h>
 #import <QuartzCore/QuartzCore.h>
+#import <QuickTime/QuickTime.h>
 
 @interface CustomOpenGLView : NSOpenGLView
 {
@@ -45,6 +46,7 @@
 - (void) fullscreen: (BOOL) animate;
 - (void) ontop;
 - (void) panscan;
+- (void) rootwin;
 
 //event
 - (void) keyDown: (NSEvent *) theEvent;
