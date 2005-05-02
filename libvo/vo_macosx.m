@@ -420,10 +420,10 @@ static uint32_t control(uint32_t request, void *data, ...)
 	
 	glColor3f(1,1,1);
 	glBegin(GL_QUADS);
-	glTexCoord2f(upperLeft[0], upperLeft[1]); glVertex2i(image_rec.origin.x, image_rec.origin.y);
-	glTexCoord2f(lowerLeft[0], lowerLeft[1]); glVertex2i(image_rec.origin.x, image_rec.size.height);
-	glTexCoord2f(lowerRight[0], lowerRight[1]); glVertex2i(image_rec.size.width, image_rec.size.height);	
-	glTexCoord2f(upperRight[0], upperRight[1]); glVertex2i(image_rec.size.width, image_rec.origin.y);
+	glTexCoord2f(upperLeft[0], upperLeft[1]); glVertex2i(	image_rec.origin.x-(vo_panscan_x >> 1), image_rec.origin.y-(vo_panscan_y >> 1));
+	glTexCoord2f(lowerLeft[0], lowerLeft[1]); glVertex2i(	image_rec.origin.x-(vo_panscan_x >> 1), image_rec.size.height+(vo_panscan_y >> 1));
+	glTexCoord2f(lowerRight[0], lowerRight[1]); glVertex2i(	image_rec.size.width+(vo_panscan_x >> 1), image_rec.size.height+(vo_panscan_y >> 1));
+	glTexCoord2f(upperRight[0], upperRight[1]); glVertex2i(	image_rec.size.width+(vo_panscan_x >> 1), image_rec.origin.y-(vo_panscan_y >> 1));
 	glEnd();
 	
 	glFlush();
@@ -540,6 +540,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 */
 - (void) panscan
 {
+	panscan_calc();
 }
 
 /*
