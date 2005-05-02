@@ -1,4 +1,4 @@
-.\" synced with 1.940
+.\" synced with 1.951
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -196,7 +196,8 @@ Mo¿esz odtwarzaæ VideoCD, SVCD, DVD, 3ivx, DivX 3/\:4/\:5, a nawet filmy WMV.
 .PP
 MPlayer obs³uguje wiele sterowników wyj¶cia video i audio.
 Pracuje z X11, Xv, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca, DirectFB,
-Quartz, ale mo¿esz u¿ywaæ GGI, SDL (i w ten sposób wszystkich ich sterowników),
+Quartz, Mac OS X CoreVideo, ale mo¿esz u¿ywaæ GGI,
+SDL (i w ten sposób wszystkich ich sterowników),
 VESA (we wszystkich kartach kompatybilnych z VESA, nawet bez X11), niektórych
 niskopoziomowych, specyficznych dla kart sterowników (dla Matrox, 3Dfx i ATI) i
 niektórych sprzêtowych dekoderów MPEG, takich jak Siemens DVB, DXR2 i
@@ -332,15 +333,15 @@ Modyfikuje nasycenie.
 .PP
 .PD 0
 .RSs
-.IPs "option + 0"
+.IPs "command + 0"
 Przeskalowuje okno filmu do po³owy oryginalnej wielko¶ci.
-.IPs "option + 1"
+.IPs "command + 1"
 Przeskalowuje okno filmu do oryginalnej wielko¶ci.
-.IPs "option + 2"
+.IPs "command + 2"
 Przeskalowuje okno filmu do dwukrotnej oryginalnej wielko¶ci.
-.IPs "option + f"
+.IPs "command + f"
 Prze³±cza tryb pe³noekranowy (zobacz tak¿e \-fs).
-.IPs "option + [ and option + ]"
+.IPs "command + [ i command + ]"
 Ustawia przezroczysto¶æ okna filmu.
 .IPs T\ \ \ \ 
 Prze³±cza warstwê video: na wierzchu/\:pod spodem/\:normalnie (zobacz tak¿e \-ontop).
@@ -731,12 +732,12 @@ pó¼niej ~/.mplayer/\:Skin/\:fittyfene.
 .B \-slave (zobacz tak¿e \-input)
 Ta opcja prze³±cza MPlayera w tryb slave, w którym mo¿na go u¿ywaæ jako koñcówki
 (backend) dla innych programów.
-Zamiast przechwytywania wci¶niêtych klawiszy, MPlayer bêdzie czyta³ proste
-polecenia ze standardowego wej¶cia.
+Zamiast przechwytywania wci¶niêtych klawiszy, MPlayer bêdzie czyta³ ze
+standardowego wej¶cia polecenia oddzielane koñcem wiersza (\\n).
 .br
 .I INFORMACJA:
 Listê poleceñ otrzymasz z \-input cmdlist, a ich opis znajdziesz
-w DOCS/\:tech/\:slave.txt.
+w DOCS/tech/slave.txt.
 .
 .TP
 .B \-softsleep
@@ -1143,7 +1144,7 @@ rozmiar ramki w bajtach
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (tylko z live.com)
+.B \-rtsp-stream-over-tcp (tylko z LIVE.COM)
 U¿ywane z URLami "rtsp://" dla okre¶lenia, ¿e nadchodz±ce pakiety RTP i RTCP
 maj± byæ przesy³ane przez TCP (u¿ywaj±c tego samego po³±czenia co RTSP).
 Przydatne przy uszkodzonym po³±czeniu internetowym, które nie przepuszcza
@@ -1295,7 +1296,7 @@ Przydatne je¶li karta TV nie jest w stanie zg³osiæ prawid³owego trybu audio.
 .IPs adevice=<warto¶æ>
 ustawia urz±dzenie audio
 <warto¶æ> powinna byæ /dev/\:...\& dla OSS i ID sprzêtu dla ALSA.
-Opis podawania ID sprzêtu jest w dokumentacji \-ao alsa.
+Zast±p wszystkie ":" w ID sprzêtu dla ALSA na ".".
 .IPs audioid=<warto¶æ>
 Wybiera wyj¶cie audio karty, je¿eli karta ma wiêcej ni¿ jedno.
 .IPs "[volume|bass|treble|balance]=<0\-65535> (v4l1)"
@@ -2579,6 +2580,16 @@ Podaje rozdzielczo¶æ pe³noekranow± (przydatne na wolnych systemach).
 .PD 1
 .
 .TP
+.B macosx (Mac OS X 10.4 lub 10.3.9 z Quicktime 7)
+Sterownik wyj¶cia video Mac OS X CoreVideo.
+.PD 0
+.RSs
+.IPs device_id=<numer>
+Okre¶la numer urz±dzenia u¿ywanego w trybie pe³noekranowym.
+.RE
+.PD 1
+.
+.TP
 .B fbdev (tylko Linux)
 U¿ywa bufora ramki oferowanego przez j±dro do wy¶wietlania obrazu.
 .PD 0
@@ -2720,6 +2731,7 @@ Sterownik wyj¶cia video dla systemu grafiki GGI.
 .RSs
 .IPs <sterownik>
 Wybiera u¿ywany sterownik GGI.
+Zamieñ wszystkie "," w sterowniku przez ".".
 .RE
 .PD 1
 .
@@ -3463,9 +3475,8 @@ naturalna dwusze¶cienna krzywa sklejana
 .sp 1
 .RS
 .I INFORMACJA:
-Dla \-sws\ 2 i 7 ostro¶æ mo¿e byæ ustawiona parametrem skalowania
-przez \-vf scale (0 (miêkko) \- 100 (ostro)), dla \-sws 9, okre¶la on
-d³ugo¶æ filtru (1 \- 10).
+Niektóre opcje \-sws mo¿na dostosowaæ.
+Wiêcej informacji jest w opisie filtra video scale.
 .RE
 .
 .TP
@@ -4046,8 +4057,21 @@ podasz -1.0, lewy kana³ zostanie zamieniony z prawym.
 .PD 1
 .
 .TP
-.B volnorm
+.B volnorm[=metoda]
 Maksymalnie zwiêksza g³o¶no¶æ, nie zniekszta³caj±c przy tym d¼wiêku.
+.PD 0
+.RSs
+.IPs <metoda>
+Ustawia u¿wan± metodê.
+.RSss
+1: U¿ywa pojedynczej próbki by wyg³adziæ zaburzenia u¿ywaj±c standardowej
+¶redniej wa¿onej z poprzednich próbek (domy¶lne).
+.br
+2: U¿ywa kilku próbek by wyg³adziæ zaburzenia u¿ywaj±c standardowej
+¶redniej wa¿onej z poprzednich próbek.
+.REss
+.RE
+.PD 1
 .
 .TP
 .B ladspa=plik:etykieta[:opcje...]
@@ -4213,7 +4237,7 @@ Dodaje 50 pixeli ramki na dole obrazka.
 .PD 1
 .IPs <x>,<y>
 pozycja oryginalnego obrazu na rozszerzonym obrazie (domy¶lnie: na ¶rodku)
-.IPs <o>\ 
+.IPs <o>\ \ 
 wy¶wietlanie OSD/\:napisów
 .RSss
 0: wy³±czone (domy¶lne)
@@ -5735,7 +5759,7 @@ z poni¿szej sk³adni:
 .B \-<codec>opts <opcja1[=warto¶æ],opcja2,...>
 .
 .PP
-Gdzie <codec> to: lavc, xvidenc, divx4, lame, toolame, x264enc lub mpeg.
+Gdzie <codec> to: lavc, xvidenc, divx4, lame, toolame, faac, x264enc lub mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5953,8 +5977,18 @@ Dla ludzi z niewiarygodnie dobrym s³uchem i podobnym wyposa¿eniem.
 .SS toolame (\-toolameopts)
 .
 .TP
-.B br=<0\-384> (tylko tryb CBR)
-bitrate w kbps
+.B br=<32\-384>
+W trybie CBR parametr ten oznacza bitrate w kbps,
+natomiast w trybie VBR jest to minimalny bitrate na ramkê.
+Tryb VBR nie zadzia³a z warto¶ci± mniejsz± ni¿ 112.
+.TP
+.B vbr=<-50\-50> (tylko VBR)
+Przedzia³ zmienno¶ci; je¶li ujemny toolame przesuwa ¶redni bitrate w stronê
+dolnej granicy, je¶li dodatni w stronê górnej.
+Je¶li ustawione na 0 jest u¿ywany tryb CBR (domy¶lne).
+.TP
+.B maxvbr=<32\-384> (VBR only)
+maksymalny bitrate dozwolony na ramkê, w kbps
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (domy¶lnie: mono dla d¼wiêku jednokana³owego, w przeciwnym wypadku stereo)
@@ -5967,6 +6001,48 @@ W³±cza ochronê przed b³êdami.
 .TP
 .B debug=<0\-10>
 poziom debugowania
+.RE
+.PD 1
+.
+.
+.SS faac (\-faacopts)
+.
+.TP
+.B br=<bitrate>
+¶redni bitrate w kbps (nie dzia³a z quality)
+.TP
+.B quality=<1\-1000>
+jako¶æ, im wy¿sza tym lepsza (nie dzia³a z br)
+.TP
+.B object=<0\-3>
+typ z³o¿ono¶ci obiektów
+.PD 0
+.RSs
+.IPs 0
+MAIN (domy¶lnie)
+.IPs 1
++LOW
+.IPs 2
++SSR
+.IPs 3
++LTP (niezwykle wolne)
+.RE
+.PD 1
+.TP
+.B mpeg=<2|4>
+Wersja MPEG (domy¶lnie: 4)
+.TP
+.B tns\ \ \ \ 
+W³±cza czasowe kszta³towanie szumu.
+.TP
+.B cutoff=<0\-czêstotliwo¶æ_próbkowania/2>
+czêstotliow¶æ obcinania (domy¶lnie: czêstotliwo¶æ_próbkowania/2)
+.TP
+.B raw\ \ \ \ 
+Przechowuje strumieñ jako surowy ³adunek z dodatkowymi danymi w nag³ówku
+kontenera (domy¶lnie: 0, co oznacza ADTS).
+Nie ustawiaj tej flagi je¶li wyra¼nie tego nie potrzebujesz, albo nie bêdziesz
+móg³ pó¼niej zremuksowaæ strumienia audio.
 .RE
 .PD 1
 .
