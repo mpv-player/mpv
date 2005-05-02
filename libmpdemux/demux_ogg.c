@@ -756,6 +756,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
   clear_sub = -1;
   s = demuxer->stream;
 
+  demuxer->priv =
   ogg_d = (ogg_demuxer_t*)calloc(1,sizeof(ogg_demuxer_t));
   sync = &ogg_d->sync;
   page = &ogg_d->page;
@@ -1076,9 +1077,6 @@ int demux_ogg_open(demuxer_t* demuxer) {
     goto err_out;
   }
 
-  /// Finish to setup the demuxer
-  demuxer->priv = ogg_d;
-
   if(!n_video || (video_id < 0))
     demuxer->video->id = -2;
   else
@@ -1112,7 +1110,6 @@ int demux_ogg_open(demuxer_t* demuxer) {
   return 1;
 
 err_out:
-  demux_close_ogg(demuxer);
   return 0;
 }
 
