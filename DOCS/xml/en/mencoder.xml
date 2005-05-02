@@ -1806,6 +1806,306 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 </sect1>
 
+<sect1 id="menc-feat-x264">
+<title>Encoding with the <systemitem class="library">x264</systemitem> codec</title>
+<para>
+  <systemitem class="library">x264</systemitem> is a free library for
+  encoding H264/AVC video streams.
+  Before starting to encode, you need to <link linkend="codec-x264-encode">
+  set up <application>MEncoder</application> to support it</link>.
+</para>
+
+<sect2 id="menc-feat-x264-intro">
+<title>What options should I use to get the best results?</title>
+
+<para>
+  Please begin by reviewing the
+  <systemitem class="library">x264</systemitem> section of
+  <application>MPlayer</application>'s man page.
+  This section is intended to be a supplement to the man page.
+</para>
+
+<orderedlist>
+<title>There are mainly three types of considerations when choosing encoding
+  options:</title>
+  <listitem><para>Trading off encoding time vs. quality</para></listitem>
+  <listitem><para>Frame type decision options</para></listitem>
+  <listitem><para>Ratecontrol and quantization decision options</para></listitem>
+</orderedlist>
+
+<para>
+  This guide is mostly concerned with the first class of options.
+  The other two types often have more to do with personal
+  preferences and individual requirements.
+</para>
+
+<para>
+  Before continuing, please note that this guide uses only one
+  quality metric: global PSNR.
+  For a brief explanation of what PSNR is, see
+  <ulink url="http://en.wikipedia.org/wiki/PSNR">the Wikipedia article on PSNR</ulink>.
+  Global PSNR is the last PSNR number reported when you include
+  the <option>psnr</option> option in <option>x264encopts</option>.
+  Any time you will read a claim about PSNR, one of the assumptions
+  behind the claim is that equal bitrates are used.
+</para>
+
+<para>
+  Nearly all of this guide's comments assume you are using
+  two pass.
+  When comparing options, there are two major reasons for using
+  two pass encoding.
+  First, using two pass often gains around 1dB PSNR, which is a
+  very big difference.
+  Secondly, testing options by doing direct quality comparisons
+  with 1-pass encodes is a dubious proposition because bitrate
+  often varies significantly with each encode.
+  It is not always easy to tell whether quality changes are due
+  mainly to changed options, or if they mostly reflect
+  differences in the achieved bitrate.
+</para>
+
+<para>
+  Of the options which allow you to trade off speed for quality,
+  <option>subq</option> and <option>frameref</option> are usually
+  by far the most important.
+  If you are interested in tweaking either speed or quality, these
+  are the first options you should consider.
+</para>
+
+<para>
+  On the speed dimension, the <option>frameref</option> and
+  <option>subq</option> options interact with each other fairly
+  strongly.
+  Experience shows that, with one reference frame,
+  <option>subq=5</option> takes about 35% more time than
+  <option>subq=1</option>.
+  With 6 reference frames, the penalty grows to over 60%.
+  <option>subq</option>'s effect on PSNR seems fairly constant
+  regardless of the number of reference frames.
+  Typically, <option>subq=5</option> gains 0.2-0.5 dB
+  global PSNR over <option>subq=1</option>.
+  This is usually enough to be visible.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-x264-encoding-options">
+<title>Encoding options of x264</title>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">frameref</emphasis>:
+  <option>frameref</option> is set to 1 by default, but this
+  should not be taken to imply that it is reasonable to set it
+  to 1.
+  Merely raising <option>frameref</option> to 2 gains around
+  0.15dB PSNR with a 5-10% speed penalty; this seems like a
+  good tradeoff.
+  <option>frameref=3</option> gains around 0.25dB PSNR over
+  <option>frameref=1</option>, which should be a visible
+  difference.
+  <option>frameref=3</option> is around 15% slower than
+  <option>frameref=1</option>.
+  Unfortunately, diminishing returns set in rapidly.
+  <option>frameref=6</option> can be expected to gain only
+  0.05-0.1 dB over <option>frameref=3</option> at an additional
+  15% speed penalty.
+  Above <option>frameref=6</option>, the quality gains are
+  usually very small (although you should keep in mind throughout
+  this whole discussion that it can vary quite a lot depending on
+  your source).
+  In a fairly typical case, <option>frameref=12</option>
+  will improve global PSNR by a tiny 0.02dB over
+  <option>frameref=6</option>, at a speed cost of 15%-20%.
+  At such high <option>frameref</option> values, the only really
+  good thing that can be said is that increasing even further will
+  almost certainly never <emphasis role="bold">harm</emphasis>
+  PSNR, but the additional quality benefits are barely even
+  measurable, let alone perceptible.
+</para>
+<note><title>Note:</title>
+<para>
+  Raising <option>frameref</option> to unnecessarily high values
+  <emphasis role="bold">can</emphasis> and
+  <emphasis role="bold">usually does</emphasis>
+  hurt coding efficiency if you turn CABAC off.
+  With CABAC on (the default behavior), the possibility of setting
+  <option>frameref</option> "too high" currently seems too remote
+  to even worry about, and in the future, optimizations may remove
+  the possibility altogether).
+</para>
+</note>
+<para>
+  If you care about speed, a reasonable compromise is to use low
+  <option>subq</option> and <option>frameref</option> values on
+  the first pass, and then raise them on the second pass.
+  Typically, this has a negligible negative effect on the final
+  quality: you will probably lose well under 0.1dB PSNR, which
+  should be much too small of a difference to see.
+  However, different values of <option>frameref</option> can
+  occasionally affect frametype decision.
+  Most likely, these are rare outlying cases, but if you want to
+  be pretty sure, consider whether your video has either
+  fullscreen repetitive flashing patterns or very large temporary
+  occlusions which might force an I-frame.
+  Adjust the first-pass <option>frameref</option> so it is large
+  enough to contain the duration of the flashing cycle (or occlusion).
+  For example, if the scene flashes back and forth between two images
+  over a duration of three frames, set the first pass
+  <option>frameref</option> to 3 or higher.
+  This issue is probably extremely rare in live action video material,
+  but it does sometimes come up in video game captures.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">bframes</emphasis>:
+  The usefulness of B-frames is questionable in most other codecs
+  you may be used to.
+  In H.264, this has changed: there are new techniques and block
+  types that are possible in B-frames.
+  Usually, even a naive B-frame choice algorithm can have a
+  significant PSNR benefit.
+  It is also interesting to note that if you turn off the adaptive
+  B-frame decision (<option>nob_adapt</option>), encoding with
+  <option>bframes</option> usually speeds up encoding speed somewhat.
+</para>
+<para>
+  With adaptive B-frame decision turned off
+  (<option>x264encopts</option>'s <option>nob_adapt</option>),
+  the optimal value for this setting will usually range from
+  <option>bframes=1</option> to <option>bframes=3</option>.
+  With adaptive B-frame decision on (the default behavior), it is
+  probably safe to use higher values; the encoder will try to
+  reduce the use of B-frames in scenes where they would hurt
+  compression.
+</para>
+<para>
+  If you are going to use <option>bframes</option> at all, consider
+  setting the maximum number of B-frames to 2 or higher in order to
+  take advantage of weighted prediction.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">b_adapt</emphasis>:
+  Note: this is on by default.
+</para>
+<para>
+  With this option enabled, the encoder will use some simple
+  heuristics to reduce the number of B-frames used in scenes that
+  might not benefit from them as much.
+  You can use <option>b_bias</option> to tweak how B-frame-happy
+  the encoder is.
+  The speed penalty of adaptive B-frames is currently rather modest,
+  but so is the potential quality gain.
+  It usually does not hurt, however.
+  Note that this only affects speed and frametype decision on the
+  first pass.
+  <option>b_adapt</option> and <option>b_bias</option> have no
+  effect on subsequent passes.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">b_pyramid</emphasis>:
+  You might as well enable this option if you are using >2 B-frames;
+  as the man page says, you get a little quality improvement with no
+  speed cost.
+  Note that these videos cannot be read by libavcodec-based decoders
+  older than about March 5, 2005.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">weight_b</emphasis>:
+  In typical cases, there is not much gain with this option.
+  However, in crossfades or fade-to-black scenes, weighted
+  prediction gives rather large bitrate savings.
+  In MPEG-4 ASP, a fade-to-black is usually best coded as a series
+  of expensive I-frames; using weighted prediction in B-frames
+  makes it possible to turn at least some of these into much more
+  reasonably-sized B-frames.
+  Encoding time cost seems to be minimal, if there is any.
+  Also, contrary to what some people seem to guess, the decoder
+  CPU requirements are not much affected by weighted prediction,
+  all else being equal.
+</para>
+<para>
+  Unfortunately, the current adaptive B-frame decision algorithm
+  has a strong tendency to avoid B-frames during fades.
+  Until this changes, it may be a good idea to add
+  <option>nob_adapt</option> to your x264encopts, if you expect
+  fades to have a significant effect in your particular video
+  clip.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
+  This topic is going to be a bit controversial.
+</para>
+<para>
+  H.264 defines a simple deblocking procedure on I-blocks that uses
+  pre-set strengths and thresholds depending on the QP of the block
+  in question.
+  By default, high QP blocks are filtered heavily, and low QP blocks
+  are not deblocked at all.
+  The pre-set strengths defined by the standard are well-chosen and
+  the odds are very good that they are PSNR-optimal for whatever
+  video you are trying to encode.
+  The <option>deblockalpha</option> and <option>deblockbeta</option>
+  parameters allow you to specify offsets to the preset deblocking
+  thresholds.
+</para>
+<para>
+  Many people seem to think it is a good idea to lower the deblocking
+  filter strength by large amounts (say, -3).
+  This is however almost never a good idea, and in most cases,
+  people who are doing this do not understand very well how
+  deblocking works by default.
+</para>
+<para>
+  The first and most important thing to know about the in-loop
+  deblocking filter is that the default thresholds are almost always
+  PSNR-optimal.
+  In the rare cases that they are not optimal, the ideal offset is
+  plus or minus 1.
+  Adjusting deblocking parameters by a larger amount is almost
+  guaranteed to hurt PSNR.
+  Strengthening the filter will smear more details; weakening the
+  filter will increase the appearance of blockiness.
+</para>
+<para>
+  It is definitely a bad idea to lower the deblocking thresholds if
+  your source is mainly low in spacial complexity (i.e., not a lot
+  of detail or noise).
+  The in-loop filter does a rather excellent job of concealing
+  the artifacts that occur.
+  If the source is high in spacial complexity, however, artifacts
+  are less noticeable.
+  This is because the ringing tends to look like detail or noise.
+  Human visual perception easily notices when detail is removed,
+  but it does not so easily notice when the noise is wrongly
+  represented.
+  When it comes to subjective quality, noise and detail are somewhat
+  interchangeable.
+  By lowering the deblocking filter strength, you are most likely
+  increasing error by adding ringing artifacts, but the eye does
+  not notice because it confuses the artifacts with detail.
+</para>
+
+<para>
+  This <emphasis role="bold">still</emphasis> does not justify
+  lowering the deblocking filter strength, however.
+  You can generally get better quality noise from postprocessing.
+  If your H.264 encodes look too blurry or smeared, try playing with
+  <option>-vf noise</option> when you play your encoded movie.
+  <option>-vf noise=8a:4a</option> should conceal most mild
+  artifacting.
+  It will almost certainly look better than the results you
+  would have gotten just by fiddling with the deblocking filter.
+</para></listitem>
+</itemizedlist>
+</sect2>
+</sect1>
+
 <sect1 id="menc-feat-telecine">
 <title>How to deal with telecine and interlacing within NTSC DVDs</title>
 
