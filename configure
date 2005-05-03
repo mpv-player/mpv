@@ -230,6 +230,8 @@ Codecs:
   --disable-amr_nb       disable amr narrowband, floating point [autodetect]
   --disable-amr_nb-fixed disable amr narrowband, fixed point [autodetect]
   --disable-amr_wb       disable amr wideband, floating point [autodetect]
+  --disable-codec=CODEC  disable specified codec
+  --enable-codec=CODEC   dnable specified codec
   
 Video output:
   --disable-vidix        disable VIDIX [enable on x86 *nix]
@@ -1282,6 +1284,7 @@ _libavcodec=auto
 _amr_nb=auto
 _amr_nb_fixed=auto
 _amr_wb=auto
+_libavcodecs=`grep 'register_avcodec(&[a-z]' libavcodec/allcodecs.c  | sed 's/.*&\(.*\)).*/\1/'`
 _libavcodecso=auto 
 _libavformat=auto
 _fame=auto
@@ -1607,6 +1610,8 @@ for ac_option do
   --disable-amr_nb-fixed)	_amr_nb_fixed=no ;;
   --enable-amr_wb)	_amr_wb=yes	;;
   --disable-amr_wb)	_amr_wb=no	;;
+  --enable-codec=*)	_libavcodecs="$_libavcodecs `echo $ac_option | cut -d '=' -f 2`" ;;
+  --disable-codec=*)	_libavcodecs="$(echo $_libavcodecs | sed "s/$(echo $ac_option | cut -d '=' -f 2)//g")" ;;
   --enable-libavformat)	_libavformat=yes;;
   --disable-libavformat)	_libavformat=no	;;
   --enable-libfame)	_fame=yes	;;
@@ -6894,6 +6899,7 @@ FAAC_LIB=$_ld_faac
 AMR_NB=$_amr_nb
 AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
+`echo $_libavcodecs | awk '{$0=toupper($0)}1' | sed 's/ \?\([-_a-zA-Z0-9]*\)/CONFIG_\1=yes\n/g'`
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -7221,6 +7227,9 @@ $_def_libavformat_win32
 $_def_amr_nb
 $_def_amr_nb_fixed
 $_def_amr_wb
+
+/* Use specific codecs from libavcodec */
+`echo $_libavcodecs | awk '{$0=toupper($0)}1' | sed 's/ \?\([-_a-zA-Z0-9]*\)/#define CONFIG_\1 1\n/g'`
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
