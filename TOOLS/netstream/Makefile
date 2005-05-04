@@ -24,7 +24,7 @@ netstream: $(MPROOT)/libmpdemux/libmpdemux.a netstream.o
 		$(MPROOT)/libmpdvdkit2/libmpdvdkit.a \
 		$(MPROOT)/libmpcodecs/native/minilzo.o \
 		$(MPROOT)/libvo/aclib.o $(MPROOT)/libmpcodecs/img_format.o \
-		$(MPROOT)/liba52/liba52.a $(MPROOT)/libao2/afmt.o $(MPROOT)/m_option.o \
+		$(MPROOT)/liba52/liba52.a $(MPROOT)/m_option.o \
 		$(MPROOT)/m_struct.o $(MPROOT)/subreader.o \
 		$(MPROOT)/mp_msg.o $(MPROOT)/osdep/shmem.o \
 		$(MPROOT)/osdep/timer-*.o $(MPROOT)/osdep/strl.o \
