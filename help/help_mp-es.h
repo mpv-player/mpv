@@ -889,7 +889,7 @@ static char help_text[]=
 #define MSGTR_WS_ShmError "[ws] Error en la extensión de memoria compartida\n"
 #define MSGTR_WS_NotEnoughMemoryDrawBuffer "[ws] Lo lamento, no hay suficiente memoria para el buffer de dibujo.\n"
 #define MSGTR_WS_DpmsUnavailable "¿DPMS no disponible?\n"
-+#define MSGTR_WS_DpmsNotEnabled "No se pudo activar DPMS.\n"
+#define MSGTR_WS_DpmsNotEnabled "No se pudo activar DPMS.\n"
 
 // wsxdnd.c
 
