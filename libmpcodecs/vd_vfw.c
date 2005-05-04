@@ -147,6 +147,13 @@ static int init(sh_video_t *sh){
     int i, o_bih_len;
     vd_vfw_ctx *priv;
   
+    /* Hack for VSSH codec: new dll can't decode old files
+     * In my samples old files have no extradata, so use that info
+     * to decide what dll should be used (here and in vd_dshow).
+     */
+    if (!strcmp(sh->codec->dll, "vssh264.dll") && (sh->bih->biSize > 40))
+      return 0;
+
     priv = malloc(sizeof(vd_vfw_ctx));
     if (!priv)
 	return 0;

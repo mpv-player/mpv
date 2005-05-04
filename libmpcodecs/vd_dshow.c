@@ -50,6 +50,14 @@ static int control(sh_video_t *sh,int cmd,void* arg,...){
 // init driver
 static int init(sh_video_t *sh){
     unsigned int out_fmt;
+
+    /* Hack for VSSH codec: new dll can't decode old files
+     * In my samples old files have no extradata, so use that info
+     * to decide what dll should be used (here and in vd_vfw).
+     */
+    if (!strcmp(sh->codec->dll, "vsshdsd.dll") && (sh->bih->biSize == 40))
+      return 0;
+
     if(!(sh->context=DS_VideoDecoder_Open(sh->codec->dll,&sh->codec->guid, sh->bih, 0, 0))){
         mp_msg(MSGT_DECVIDEO,MSGL_ERR,MSGTR_MissingDLLcodec,sh->codec->dll);
         mp_msg(MSGT_DECVIDEO,MSGL_HINT,MSGTR_DownloadCodecPackage);
