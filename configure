@@ -6899,7 +6899,7 @@ FAAC_LIB=$_ld_faac
 AMR_NB=$_amr_nb
 AMR_NB_FIXED=$_amr_nb_fixed
 AMR_WB=$_amr_wb
-`echo $_libavcodecs | LC_ALL=C awk '{$0=toupper($0)}1' | sed 'y/& /&\n/;s/\([-_a-zA-Z0-9]*\)/CONFIG_\1=yes/g'`
+`echo $_libavcodecs | tr 'a-z ' 'A-Z\n' | sed 's/^/CONFIG_/;s/$/=yes/'`
 
 # --- Some stuff for autoconfigure ----
 $_target_arch
@@ -7229,7 +7229,7 @@ $_def_amr_nb_fixed
 $_def_amr_wb
 
 /* Use specific codecs from libavcodec */
-`echo $_libavcodecs | LC_ALL=C awk '{$0=toupper($0)}1' | sed 'y/& /&\n/;s/\([-_a-zA-Z0-9]*\)/#define CONFIG_\1 1/g'`
+`echo $_libavcodecs | tr 'a-z ' 'A-Z\n' | sed 's/^/#define CONFIG_/;s/$/ 1/'`
 
 /* Use codec libs included in mplayer CVS / source dist: */
 $_def_mp3lib
