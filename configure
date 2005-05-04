@@ -1611,7 +1611,7 @@ for ac_option do
   --enable-amr_wb)	_amr_wb=yes	;;
   --disable-amr_wb)	_amr_wb=no	;;
   --enable-codec=*)	_libavcodecs="$_libavcodecs `echo $ac_option | cut -d '=' -f 2`" ;;
-  --disable-codec=*)	_libavcodecs="`echo $_libavcodecs | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"`" ;;
+  --disable-codec=*)	_libavcodecs=`echo $_libavcodecs | sed "s/\`echo $ac_option | cut -d '=' -f 2\`//g"` ;;
   --enable-libavformat)	_libavformat=yes;;
   --disable-libavformat)	_libavformat=no	;;
   --enable-libfame)	_fame=yes	;;
