@@ -349,7 +349,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 */
 - (void)prepareOpenGL
 {
-	glDisable(GL_BLEND); 
+	glEnable(GL_BLEND); 
 	glDisable(GL_DEPTH_TEST);
 	glDepthMask(GL_FALSE);
 	glDisable(GL_CULL_FACE);
@@ -425,6 +425,30 @@ static uint32_t control(uint32_t request, void *data, ...)
 	glTexCoord2f(lowerRight[0], lowerRight[1]); glVertex2i(	image_rec.size.width+(vo_panscan_x >> 1), image_rec.size.height+(vo_panscan_y >> 1));
 	glTexCoord2f(upperRight[0], upperRight[1]); glVertex2i(	image_rec.size.width+(vo_panscan_x >> 1), image_rec.origin.y-(vo_panscan_y >> 1));
 	glEnd();
+	glDisable(CVOpenGLTextureGetTarget(texture));
+	
+	//render resize box
+	if(!isFullscreen)
+	{
+		NSRect frame = [self frame];
+		
+		glBegin(GL_LINES);
+		glColor4f(0.2, 0.2, 0.2, 0.5);
+		glVertex2i(frame.size.width-1, frame.size.height-1); glVertex2i(frame.size.width-1, frame.size.height-1);
+		glVertex2i(frame.size.width-1, frame.size.height-5); glVertex2i(frame.size.width-5, frame.size.height-1);
+		glVertex2i(frame.size.width-1, frame.size.height-9); glVertex2i(frame.size.width-9, frame.size.height-1);
+
+		glColor4f(0.4, 0.4, 0.4, 0.5);
+		glVertex2i(frame.size.width-1, frame.size.height-2); glVertex2i(frame.size.width-2, frame.size.height-1);
+		glVertex2i(frame.size.width-1, frame.size.height-6); glVertex2i(frame.size.width-6, frame.size.height-1);
+		glVertex2i(frame.size.width-1, frame.size.height-10); glVertex2i(frame.size.width-10, frame.size.height-1);
+		
+		glColor4f(0.6, 0.6, 0.6, 0.5);
+		glVertex2i(frame.size.width-1, frame.size.height-3); glVertex2i(frame.size.width-3, frame.size.height-1);
+		glVertex2i(frame.size.width-1, frame.size.height-7); glVertex2i(frame.size.width-7, frame.size.height-1);
+		glVertex2i(frame.size.width-1, frame.size.height-11); glVertex2i(frame.size.width-11, frame.size.height-1);
+		glEnd();
+	}
 	
 	glFlush();
 	
