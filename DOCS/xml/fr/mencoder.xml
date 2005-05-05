@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.36 -->
+<!-- synced with 1.37 -->
 <chapter id="mencoder">
 <title>Encodage avec <application>MEncoder</application></title>
 
@@ -1035,11 +1035,11 @@ Notes:
 
 <para>
   Quand vous regardez une vidéo progressive, vous ne devriez jamais voir
-  d'entrelacement. Attention, cependant, car il y est parfois mêlé un peu de
-  téléciné, là où vous ne vous y attendriez pas. J'ai rencontré des DVDs de
-  programmes TV qui avaient une seconde de téléciné à chaque changement de
-  scène, ou dans des endroits apparemment aléatoires. J'ai vu une fois un DVD
-  qui était en progressive durant la première moitié, et téléciné dans la
+  d'entrelacement. Attention, cependant, car il y est parfois mêlé un peu
+  de téléciné, là où vous ne vous y attendriez pas. On peut même trouver des DVDs
+  de programmes TV qui ont une seconde de téléciné à chaque changement de
+  scène, ou dans des endroits apparemment aléatoires. On trouve aussi des DVDs
+  qui progressifs durant la première moitié, et téléciné dans la
   seconde. Si vous voulez être <emphasis>vraiment</emphasis> certain, vous
   pouvez scanner tout le film:
 
@@ -1077,24 +1077,30 @@ Notes:
   Vous pouvez les regarder plus attentivement avec par exemple
   <orderedlist>
   <listitem>
-    <screen>mplayer dvd://1 -speed 0.1</screen>
+    <screen>mplayer dvd://1</screen>
     </listitem>
   <listitem><para>
     Sautez à une partie avec du mouvement.
     </para></listitem>
   <listitem><para>
+    Utilisez la touche <keycap>.</keycap> pour sauter une image a la fois.
+    </para></listitem>
+  <listitem><para>
     Regardez le motif des trames à l'apparence entrelacées et progressives.
     Si le motif que vous voyez est PPPII,PPPII,PPPII,... alors la vidéo est
     téléciné. Si vous voyez un autre motif, alors la vidéo a été téléciné en
-    utilisant une méthode non-standard et <application>MEncoder</application>
-    ne peut pas la convertir en progressive sans perte. Si vous ne voyez
-    aucun motif, c'est certainement que la vidéo est entrelaçée.
+    utilisant une méthode non-standard; <application>MEncoder</application>
+    ne peut pas convertir une video téléciné non-standard en progressive sans
+    perte. Si vous ne voyez aucun motif, c'est certainement que la vidéo
+    est entrelaçée.
     </para></listitem>
   </orderedlist>
 </para>
 
 <para>
   Parfois la vidéo téléciné est appelée "hard-telecine".
+  Etant donné que le "hard-téléciné" est déja à 59.94 champs par secondes,
+  le lecteur DVD lit la vidéo sans aucune manipulation.
 </para>
 </sect3>
 
@@ -1102,9 +1108,11 @@ Notes:
 <title>Entrelaçée</title>
 <para>
   La vidéo entrelaçée a été filmé à 59.94 champs par seconde, et stockée sur
-  DVD à 29.97 trames par seconde. L'entrelacement est le résultat de la
-  combinaison des paires de champs dans des trames, car dans chaque trame,
-  chaque champ est séparé du suivant par 1/59.94 secondes.
+  DVD à 29.97 trames par seconde.
+  L'entrelacement (souvent appelé "combing") est le résultat de la combinaison
+  des paires de champs dans des trames.
+  Chaque champ est séparé du suivant par 1/59.94 secondes ; lorsqu'ils sont
+  affichés simultanément, la différence est flagrante.
 </para>
 
 <para>
@@ -1128,10 +1136,11 @@ Notes:
 </para>
 
 <para>
-  Quand <application>MPlayer</application> joue cette catégorie, il oscillera
-  (de manière répetée) entre "30fps NTSC" et "24fps progressive
-  NTSC". Regardez le bas de la sortie texte de
-  <application>MPlayer</application> pour voir ces messages.
+  Quand <application>MPlayer</application> joue cette catégorie, il
+  oscillera (de manière répetée) entre "30fps NTSC" et "24fps progressive
+  NTSC".
+  Regardez le bas de la sortie texte de <application>MPlayer</application>
+  pour voir ces messages.
 </para>
 
 <para>
@@ -1177,6 +1186,15 @@ Notes:
 <para>
   <screen>mencoder dvd://1 -nosound -ovc lavc -ofps 23.976</screen>
 </para>
+<para>
+  Il arrive souvent, cependant, qu'une vidéo apparemment progressive
+  contienne en réalité quelques parties téléciné.
+  A moins d'être sùr, il est préférable de considérer la video comme
+  <link linkend="menc-feat-telecine-encode-mixedpt">progressive et télécinée mélangée</link>.
+  La perte de performance sera minime
+  <link linkend="menc-feat-telecine-footnotes">[3]</link>.
+</para>
+
 </sect3>
 
 <sect3 id="menc-feat-telecine-encode-telecined">
@@ -1184,19 +1202,9 @@ Notes:
 <para>
   Le téléciné peut être inversé pour retrouver le contenu original en 23.976,
   en utilisant un procédé appelé inverse-téléciné.
-  <application>MPlayer</application> contient deux filtres pour accomplir cela:
-  <option>detc</option> et <option>ivtc</option>. Vous pouvez lire la page de
-  man pour voir leurs différences, mais pour les DVDs je n'ai jamais eu de
-  problèmes avec <option>ivtc</option>. Notez que vous devriez 
-  <emphasis role="bold">toujours</emphasis> appliquer l'inverse-telecine avant
-  tout redimensionnement; à moins que vous ne sachiez vraiment ce que vous
-  faites, appliquez l'inverse-téléciné également avant tout découpage
-  <link linkend="menc-feat-telecine-footnotes">[1]</link>. De nouveau,
-  <option>-ofps 23.976</option> est également requis.
-</para>
-
-<para>
-  <screen>mencoder dvd://1 -nosound -vf ivtc=1 -ovc lavc -ofps 23.976</screen>
+  <application>MPlayer</application> contient plusieurs filtres pour accomplir
+  cela ; le meilleur, <option>pullup</option>, est décrit dans la section
+  <link linkend="menc-feat-telecine-encode-mixedpt">progressive et télécinée mélangées</link>.
 </para>
 </sect3>
 
@@ -1285,61 +1293,48 @@ Notes:
 <para>
   De façon à transformer la vidéo progressive et télécinée mélangée en
   vidéo entièrement progressive, l'inverse-telecine doit être appliquée sur
-  les parties télécinées. Il y a deux filtres qui accomplissent nativement
-  cette tâche, mais la plupart du temps la meilleure solution est d'utiliser
-  deux filtres en conjonction (lire la suite pour plus de détails).
+  les parties télécinées.
+  Il y a trois manières de faire cela décrites plus bas.
+  Notez que vous devriez <emphasis role="bold">toujours</emphasis>, à moins
+  d'être sûr de ce que vous faites, appliquer un inverse-téléciné avant tout
+  redimensionnement ou découpage de la vidéo
+  <link linkend="menc-feat-telecine-footnotes">[1]</link>.
+  L'option <option>-ofps 23.976</option> est alors nécessaire ici, car la sortie
+  sera à 23.976 images par seconde.
 </para>
 
 <itemizedlist>
 <listitem><para>
-  Actuellement la méthode la plus fiable pour traiter ce type de vidéo est,
+  L'option <option>-vf pullup</option> est utile pour appliquer un
+  inverse-téléciné sur les parties télécinées tout en laissant les parties
+  progressives intactes.
+  Pour fonctionner correctement, l'option <option>pullup</option>
+  <emphasis role="bold">doit</emphasis> être suivie de l'option
+  <option>softskip</option>,
+  sinon <application>MEncoder</application> se plantera.
+  L'option <option>pullup</option> est, cependant, la méthode la plus propre
+  et la plus précise pour encoder en télécinée et en "progressive et téléciné mélangée".
+
+  <screen>mencoder dvd://1 -nosound -vf pullup,softskip -ovc lavc -ofps 23.976</screen>
+ </para>
+ </listitem>
+ <listitem><para>
+  Une méthode plus ancienne pour traiter ce type de vidéo est,
   plutôt que d'appliquer un inverse-téléciné sur les parties télécinées, de
   téléciner les parties non-télécinées et d'ensuite appliquer
   l'inverse-téléciné sur la vidéo entière.
   Cela vous semble confus ? softpulldown est un filtre qui parcoure une vidéo
   et la rend entièrement télécinée. Si vous faites suivre softpulldown de soit
   <option>detc</option>, soit  <option>ivtc</option>, le résultat final sera
-  entièrement progressif. Le découpage et le redimensionnement devrait être
-  fait après les opérations d'inverse-téléciné, et
-  <option> -ofps 23.976</option> est requis.
+  entièrement progressif.
+  L'option <option> -ofps 23.976</option> est requise.
 
   <screen>mencoder dvd://1 -nosound -vf softpulldown,ivtc=1 -ovc lavc -ofps 23.976</screen>
   </para>
   </listitem>
-<listitem><para>
-  <option>-vf pullup</option> est conçu pour appliquer un inverse-telecine
-  sur la vidéo télécinée tout en laissant les données progressives intactes.
-  Pullup ne fonctionne pas vraiment avec l'actuel
-  <application>MEncoder</application>, cependant, il est vraiment prévu 
-  pour l'utilisation avec <application>MEncoder G2</application> (quand
-  celui-ci sera prêt). Il fonctionne bien sans <option>-ofps</option>, mais
-  <option>-ofps</option> est requis pour empêcher un affichage haché. Avec
-  <option>-ofps</option>, cela échoue parfois. Le problème provient du 
-  comportement de <application>MEncoder</application> qui saute des trames
-  pour maintenir la synchronisation entre l'audio et la vidéo: il saute des
-  trames avant de les envoyer dans la chaine de filtres, plutôt qu'après.
-  Résultat, <option>pullup</option> est parfois privé des données dont il a
-  besoin.
-  </para>
-
-  <para>
-  Si <application>MEncoder</application> saute trop de trames consécutives,
-  il vide les tampons de <option>pullup</option> et le fait planter.
-  </para>
-
-  <para>
-  Même si <application>MEncoder</application> ne saute qu'une seule trame,
-  <option> pullup</option> ne pourra toujours pas la voir, et finira par
-  opérer sur une séquence incorrecte de trames. Même si cela ne provoque pas
-  de plantage, <option>pullup</option> ne sera pas capable de prendre les
-  bonnes décisions pour ré-assembler les trames progressives, et va soit mal
-  faire correspondre les champs, soit sauter plusieurs champs pour compenser.
-  </para>
-  </listitem>
 
 <listitem><para>
-  Je n'ai jamais utilisé <option>-vf filmdint</option> moi-même, mais voici
-  ce qu'en dit D Richard Felker III:
+ Voici ce que D Richard Felker III dit de <option>-vf filmdint</option>:
 
   <blockquote><para>Il est bon, mais AMA il essaie de désentrelacer plutôt que
     de faire de l'inverse-téléciné trop souvent (tout comme les lecteurs DVD
@@ -1472,6 +1467,22 @@ Notes:
   temps-réel). Il y a beaucoup d'autres options qui augmentent la qualité
   (et diminuent la vitesse d'encodage) mais c'est en dehors du cadre de ce
   document.
+  </para>
+  </formalpara>
+  </listitem>
+  <listitem><formalpara>
+  <title>A propos des performances de pullup:</title>
+  <para>
+   C'est une bonne idée, en général, d'utiliser l'option
+   <option>pullup</option>
+   (avec l'option <option>softskip</option>) pour une video progressive,
+   à moins d'être certain que cette vidéo est entièrement progressive.
+   La perte de performance est minime dans la plupart des cas.
+   Pour un encodage minimum, l'option <option>pullup</option> ralentit
+   <application>MEncoder</application> de 50%.
+   L'encodage du son et l'utilisation d'options <option>lavcopts</option>
+   avancées masque cette difference, réduisant la baisse de performance dûe
+   à l'option <option>pullup</option> à 2%.
   </para>
   </formalpara>
   </listitem>
