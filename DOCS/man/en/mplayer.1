@@ -7740,8 +7740,6 @@ bases ratecontrol decisions on it.
 .br
 In three pass mode, the second pass (pass=3, that is not a typo)
 does both: It first reads the stats, then overwrites them.
-You might want to backup divx2pass.log before doing this if there is
-any possibility that you will have to cancel MEncoder.
 You can use all encoding options, except very CPU-hungry options.
 .br
 The third pass (pass=3) is the same as the second pass, except that it has
@@ -7983,6 +7981,24 @@ small moving objects are better represented by smaller blocks.
 4x4mv is recommended only with subq >= 3.
 .
 .TP
+.B me=<1\-3>
+Select fullpixel motion estimation algorithm.
+.PD 0
+.RSs
+.IPs 1
+Diamond search, radius 1. (fast)
+.IPs 2
+Hexagon search, radius 2. (default)
+.IPs 3
+Exhaustive search, controlled by me_range. (very slow)
+.RE
+.PD 1
+.
+.TP
+.B me_range=<4\-64>
+Radius of exhaustive motion search. (default: 16)
+.
+.TP
 .B subq=<1\-5>
 Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
@@ -7995,8 +8011,7 @@ Then selects the best type.
 Then refines the motion of that type to fast quarterpixel precision.
 (fastest)
 .br
-2: As 1, but uses a slightly slower fullpixel search and a slightly slower
-quarterpixel refinement.
+2: As 1, but uses a slower quarterpixel refinement.
 .br
 3: Runs halfpixel precision motion estimation on all candidate macroblock
 types.
