@@ -93,6 +93,8 @@ static float qblur = 0.5;
 static float complexity_blur = 20;
 static char *rc_eq = "blurCplx^(1-qComp)";
 static int subq = 5;
+static int me_method = 2;
+static int me_range = 16;
 static int level_idc = 40;
 static int psnr = 0;
 static int log_level = 2;
@@ -142,6 +144,8 @@ m_option_t x264encopts_conf[] = {
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
     {"cplx_blur", &complexity_blur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 999, NULL},
     {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 1, 5, NULL},
+    {"me", &me_method, CONF_TYPE_INT, CONF_RANGE, 1, 3, NULL},
+    {"me_range", &me_range, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
     {"level_idc", &level_idc, CONF_TYPE_INT, CONF_RANGE, 10, 51, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nopsnr", &psnr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -225,6 +229,12 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     }
     mod->param.rc.f_ip_factor = ip_factor;
     mod->param.rc.f_pb_factor = pb_factor;
+    switch(me_method) {
+        case 1: mod->param.analyse.i_me_method = X264_ME_DIA; break;
+        case 2: mod->param.analyse.i_me_method = X264_ME_HEX; break;
+        case 3: mod->param.analyse.i_me_method = X264_ME_ESA;
+                mod->param.analyse.i_me_range = me_range; break;
+    }
     mod->param.analyse.inter = X264_ANALYSE_I4x4;
     if(p4x4mv)
         mod->param.analyse.inter |= X264_ANALYSE_PSUB8x8;
