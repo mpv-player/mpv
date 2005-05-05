@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.33 -->
+<!-- synced with 1.36 -->
 <chapter id="mencoder">
 <title>Encodage avec <application>MEncoder</application></title>
 
@@ -16,13 +16,13 @@ les discussions à propos de tous les aspects et problèmes relatifs à l'encodage 
 </para>
 
 <sect1 id="menc-feat-divx4">
-<title>Encodage MPEG-4 ("DivX") 2 passes</title>
+<title>Encodage MPEG-4 ("DivX") deux passes</title>
 
 <para>
 le nom vient du fait que cette méthode encode le fichier <emphasis>deux fois</emphasis>.
 Le premier encodage (du mode deux passes) créé quelques fichiers temporaires (<filename>*.log</filename>)
 avec une taille de quelques méga-octets, ne les détruisez pas tout de suite (vous pouvez
-effacer l'AVI). Lors de la seconde passe, le fichier de sortie 2-passes est créé, en
+effacer l'AVI). Lors de la seconde passe, le fichier de sortie deux passes est créé, en
 utilisant les données bitrate des fichiers temporaires. Le fichier résultant aura une
 image de bien meilleure qualité. Si c'est la première fois que vous entendez parler de
 ça, vous devriez consulter les guides disponibles sur le Net.
@@ -31,7 +31,7 @@ image de bien meilleure qualité. Si c'est la première fois que vous entendez par
 <example>
 <title>copie de la piste audio</title>
 <para>
-Encodage 2-passes d'un DVD en AVI MPEG-4 ("DivX") pendant la copie de
+Encodage deux passes d'un DVD en AVI MPEG-4 ("DivX") pendant la copie de
 la piste audio.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac copy -o <replaceable>film.avi</replaceable>
@@ -43,7 +43,7 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac copy -o <replacea
 <example>
 <title>encodage de la piste audio</title>
 <para>
-Encodage 2-passes d'un DVD en AVI MPEG-4 ("DivX") pendant la conversion
+Encodage deux passes d'un DVD en AVI MPEG-4 ("DivX") pendant la conversion
 de la piste audio en MP3.
 <screen>
 mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -oac mp3lame -lameopts vbr=3 -o <replaceable>film.avi</replaceable>
@@ -383,7 +383,7 @@ et <filename>.sub</filename> déjà existants. Vous devrez donc les enlever avant 
 </para>
 
 <example>
-<title>Copier deux sous-titres d'un DVD pendant l'encodage 2-passes</title>
+<title>Copier deux sous-titres d'un DVD pendant l'encodage deux passes</title>
 <screen>
 rm subtitles.idx subtitles.sub
 mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=1 -vobsubout subtitles -vobsuboutindex 0 -sid 2
@@ -549,7 +549,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <sect2 id="menc-feat-dvd-mpeg4-2pass">
-<title>Quantiseur constant contre 2-passes</title>
+<title>Quantiseur constant contre deux passes</title>
 
 <para>
   Il y a trois approches possibles pour encoder une vidéo: débit constant
@@ -614,14 +614,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Si vous utilisez <option>vqscale=2</option>, alors vous gaspillerez des bits.
   Si vous utilisez <option>vqscale=3</option>, vous n'aurez pas la meilleur
   qualité de rip. Supposez que vous rippez un DVD avec <option>vqscale=3</option>, 
-  et que le résultat soit 1800Kbit. Si vous faites un encodage 2-passes avec
+  et que le résultat soit 1800Kbit. Si vous faites un encodage deux passes avec
   <option>vbitrate=1800</option>, la vidéo produite aura une 
   <emphasis role="bold">meilleur qualité</emphasis> pour le 
   <emphasis role="bold">même débit</emphasis>.
 </para>
 
 <para>
-  Maintenant que vous êtes convaincu que l'encodage 2-passes est la bonne méthode,
+  Maintenant que vous êtes convaincu que l'encodage deux passes est la bonne méthode,
   la vraie question est maintenant de savoir quel débit utiliser. La réponse
   est qu'il n'y a pas de réponse unique. Idéalement, vous devriez choisir un
   débit offrant un compromis entre qualité et taille de fichier. Cela varie suivant
@@ -880,13 +880,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para>
 
 <para>
-  Nous sommes maintenant prêts pour l'encodage 2 passes. Passe 1:
+  Nous sommes maintenant prêts pour l'encodage 2 passes. Première passe:
 
   <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=1 \
 -o Harry_Potter_2.avi</screen>
 
-  La passe 2 est identique, sauf que nous spécifions <option>vpass=2</option>:
+  La deuxième passe est identique, sauf que nous spécifions <option>vpass=2</option>:
 
   <screen>mencoder dvd://1 -ofps 23.976 -oac copy -vf crop=720:352:0:62,hqdn3d=2:1:2 -ovc lavc \
 -lavcopts vcodec=mpeg4:vbitrate=2400:v4mv:mbd=2:trell:cmp=3:subcmp=3:mbcmp=3:autoaspect:vpass=2 \
