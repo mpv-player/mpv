@@ -8106,8 +8106,6 @@ stats pour allouer le bon nombre de bits aux trames (ratecontrol).
 En mode trois passes, la seconde passe (pass=3, non ce n'est pas une
 erreur) fait les deux\ : elle lit le fichier de stats, puis ré-écrit
 par dessus.
-Peut-être que vous devriez sauver le fichier divx2pass.log avant si
-MEncoder peut être interrompu dans son cours.
 Vous devriez utiliser toutes les options d'encodage, à l'exception de celles
 vraiment très gourmandes.
 .br
@@ -8382,7 +8380,25 @@ qu'un petit objet en mouvement sera mieux codé par des petits blocs.
 .br
 4x4mv n'est recommandé que si subq >=3.
 .
- .TP
+.TP
+.B me=<1\-3>
+Défini l'algorithme d'estimation du mouvement fullpixel.
+.PD 0
+.RSs
+.IPs 1
+Recherche diamant, de rayon 1 (rapide).
+.IPs 2
+Recherche hexagone, de rayon 2 (par défaut).
+.IPs 3
+Recherche exhaustive, controllé par me_range (très lent).
+.RE
+.PD 1
+.
+.TP
+.B me_range=<4\-64>
+Rayon de de la recherche exhaustive de mouvement (par défaut\ 16).
+.
+.TP
 .B subq=<1\-5>
 Ajuste la qualité d'affinement de subpel.
 Ce paramètre contrôle le compromis qualité/\:vitesse lié aux décisions du
@@ -8396,8 +8412,7 @@ Sélectionne ensuite le meilleur type.
 Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
 ce type. (rapide)
 .br
-Comme 1, mais effectue une recherche de mouvement fullpixel un peu plus lente
-et un affinage au quart de pixel un peu plus lente.
+2: Comme 1, mais affine au quart de pixel (un peu plus lent).
 .br
 3: Effectue une recherche de mouvement d'une précision demi pixel sur tous les
 types de macro-blocs candidats.
