@@ -14,6 +14,9 @@
 //  http://www.cmlab.csie.ntu.edu.tw/~pkhsiao/thesis.html
 //  I really recommend N4270-1.doc and N4270-2.doc which are exact specs
 //  of the MP4-File Format and the MPEG4 Specific extensions. ::atmos
+//  TSGS#15(02)0088
+//  http://www.3gpp.org/ftp/tsg_sa/TSG_SA/TSGS_15/Docs/pdf/SP-020088.pdf
+//  http://www.3gpp2.org/Public_html/specs/C.S0050-0_v1.0_121503.pdf
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -1009,6 +1012,14 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 			    memcpy(sh->codecdata, &trak->stdata[28], sh->codecdata_len);
 			}
 		      } break;
+                      case MOV_FOURCC('d','a','m','r'):
+                        mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found AMR audio atom %c%c%c%c (%d)!\n", trak->stdata[32+adjust],trak->stdata[33+adjust],trak->stdata[34+adjust],trak->stdata[35+adjust], atom_len);
+                        if (atom_len>14) {
+                          mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Vendor: %c%c%c%c Version: %d\n",trak->stdata[36+adjust],trak->stdata[37+adjust],trak->stdata[38+adjust], trak->stdata[39+adjust],trak->stdata[40+adjust]);
+                          mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Modes set: %02x%02x\n",trak->stdata[41+adjust],trak->stdata[42+adjust]);
+                          mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Mode change period: %d Frames per sample: %d\n",trak->stdata[43+adjust],trak->stdata[44+adjust]);
+                        }
+                        break;
 		      default:
 			mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found unknown audio atom %c%c%c%c (%d)!\n",
 			    trak->stdata[32+adjust],trak->stdata[33+adjust],trak->stdata[34+adjust],trak->stdata[35+adjust],
@@ -1196,6 +1207,11 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		        memcpy(trak->stream_header, trak->stdata+pos+8, trak->stream_header_len);
 		      }	      
 		      break;
+                    case MOV_FOURCC('d','2','6','3'):
+                      mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Found H.263 decoder atom %c%c%c%c (%d)!\n", trak->stdata[pos+4],trak->stdata[pos+5],trak->stdata[pos+6],trak->stdata[pos+7],atom_len);
+              	      if (atom_len>10)
+                        mp_msg(MSGT_DEMUX, MSGL_INFO, "MOV: Vendor: %c%c%c%c H.263 level: %d H.263 profile: %d \n", trak->stdata[pos+8],trak->stdata[pos+9],trak->stdata[pos+10],trak->stdata[pos+11],trak->stdata[pos+12],trak->stdata[pos+13]);
+                      break;
 		    case 0:
 		      break;
 		    default:
