@@ -3213,8 +3213,12 @@ EOF
 		_vosrc="$_vosrc vo_macosx.m"
 		_vomodules="macosx $_vomodules"
 		_macosx_frameworks="$_macosx_frameworks -framework Cocoa -framework QuartzCore -framework OpenGL"
+		_def_macosx_corevideo='#define MACOSX_COREVIDEO 1'
+		_macosx_corevideo=yes
 	else
 		_novomodules="macosx $_novomodules"
+		_def_macosx_corevideo='#undef MACOSX_COREVIDEO'
+		_macosx_corevideo=no
 	fi
 fi
 echores "$_macosx"
@@ -6891,6 +6895,7 @@ MACOSX = $_macosx
 MACOSX_FINDER_SUPPORT = $_macosx_finder_support
 MACOSX_BUNDLE = $_macosx_bundle
 MACOSX_FRAMEWORKS = $_macosx_frameworks
+MACOSX_COREVIDEO = $_macosx_corevideo
 TOOLAME=$_toolame
 TOOLAME_EXTRAFLAGS=$_toolame_extraflags
 TOOLAME_LIB=$_toolame_lib
@@ -7201,6 +7206,7 @@ $_def_dshow
 $_def_macosx
 $_def_macosx_finder_support
 $_def_macosx_bundle
+$_def_macosx_corevideo
 
 /* Build our Win32-loader */
 $_def_win32_loader

@@ -121,7 +121,9 @@ extern vo_functions_t video_out_tdfx_vid;
 extern vo_functions_t video_out_tga;
 #endif
 #ifdef MACOSX
+#ifdef MACOSX_COREVIDEO
 extern vo_functions_t video_out_macosx;
+#endif
 extern vo_functions_t video_out_quartz;
 #endif
 #ifdef HAVE_PNM
@@ -140,7 +142,9 @@ vo_functions_t* video_out_drivers[] =
         &video_out_directx,
 #endif
 #ifdef MACOSX
+#ifdef MACOSX_COREVIDEO
 	&video_out_macosx,
+#endif
 	&video_out_quartz,
 #endif
 #ifdef HAVE_XMGA
