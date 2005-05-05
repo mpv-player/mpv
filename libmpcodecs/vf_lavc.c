@@ -215,6 +215,7 @@ static int open(vf_instance_t *vf, char* args){
 #endif
 #endif
     lavc_venc_context.gop_size = 0; // I-only
+    lavc_venc_context.pix_fmt= PIX_FMT_YUV420P;
 
     return 1;
 }
