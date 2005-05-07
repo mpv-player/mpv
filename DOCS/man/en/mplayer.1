@@ -5685,7 +5685,7 @@ syntax:
 .B \-<codec>opts <option1[=value],option2,...>
 .
 .PP
-Where <codec> may be: lavc, xvidenc, divx4, lame, toolame, faac, x264enc, mpeg.
+Where <codec> may be: lavc, xvidenc, divx4, lame, toolame, twolame, faac, x264enc, mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5900,7 +5900,7 @@ for people with extremely good hearing and similar equipment
 .PD 1
 .
 .
-.SS toolame (\-toolameopts)
+.SS toolame and twolame (\-toolameopts and \-twolameopts respectively)
 .
 .TP
 .B br=<32\-384>
@@ -5909,7 +5909,7 @@ when in VBR mode it is the minimum bitrate allowed per frame.
 VBR mode will not work with a value below 112.
 .TP
 .B vbr=<-50\-50> (VBR only)
-variability range; if negative toolame shifts the average bitrate
+variability range; if negative the encoder shifts the average bitrate
 towards the lower limit, if positive towards the higher.
 When set to 0 CBR is used (default).
 .TP
