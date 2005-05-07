@@ -27,6 +27,10 @@
 #include "ae_faac.h"
 #endif
 
+#ifdef HAVE_TWOLAME
+#include "ae_twolame.h"
+#endif
+
 audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params_t *params)
 {
 	int ris;
@@ -61,6 +65,11 @@ audio_encoder_t *new_audio_encoder(muxer_stream_t *stream, audio_encoding_params
 #ifdef HAVE_FAAC
 		case ACODEC_FAAC:
 			ris = mpae_init_faac(encoder);
+			break;
+#endif
+#ifdef HAVE_TWOLAME
+		case ACODEC_TWOLAME:
+			ris = mpae_init_twolame(encoder);
 			break;
 #endif
 	}

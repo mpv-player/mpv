@@ -44,6 +44,10 @@ ENCODER_SRCS += ae_toolame.c
 EXTRA_INC += $(TOOLAME_EXTRAFLAGS)
 endif
 
+ifeq ($(TWOLAME),yes)
+ENCODER_SRCS += ae_twolame.c
+endif
+
 ifeq ($(CONFIG_MP3LAME),yes)
 ENCODER_SRCS += ae_lame.c
 endif

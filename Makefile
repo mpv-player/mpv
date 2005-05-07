@@ -41,6 +41,10 @@ CFLAGS += $(TOOLAME_EXTRAFLAGS)
 CODEC_LIBS += $(TOOLAME_LIB)
 endif
 
+ifeq ($(TWOLAME),yes)
+CODEC_LIBS += $(TWOLAME_LIB)
+endif
+
 ifeq ($(FAAC),yes)
 CODEC_LIBS += $(FAAC_LIB)
 endif

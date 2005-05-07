@@ -9,6 +9,7 @@
 #define ACODEC_LAVC 4
 #define ACODEC_TOOLAME 5
 #define ACODEC_FAAC 6
+#define ACODEC_TWOLAME 7
 
 #define AE_NEEDS_COMPRESSED_INPUT 1
 

@@ -33,6 +33,10 @@ extern m_option_t lavcopts_conf[];
 extern m_option_t toolameopts_conf[];
 #endif
 
+#ifdef HAVE_TWOLAME
+extern m_option_t twolameopts_conf[];
+#endif
+
 #ifdef HAVE_FAAC
 extern m_option_t faacopts_conf[];
 #endif
@@ -119,6 +123,11 @@ m_option_t oac_conf[]={
 #else
 	{"toolame", "MPlayer was compiled without libtoolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
+#ifdef HAVE_TWOLAME
+	{"twolame", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_TWOLAME, NULL},
+#else
+	{"twolame", "MPlayer was compiled without libtwolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif
 #ifdef HAVE_FAAC
 	{"faac", &out_audio_codec, CONF_TYPE_FLAG, 0, 0, ACODEC_FAAC, NULL},
 #else
@@ -136,8 +145,11 @@ m_option_t oac_conf[]={
 #ifdef HAVE_TOOLAME
 	"   toolame  - Toolame MP2 audio encoder\n"
 #endif
+#ifdef HAVE_TWOLAME
+	"   twolame  - Twolame MP2 audio encoder\n"
+#endif
 #ifdef HAVE_FAAC
-	"   faac  - FAAC AAC audio encoder\n"
+	"   faac     - FAAC AAC audio encoder\n"
 #endif
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
@@ -255,6 +267,11 @@ m_option_t mencoder_opts[]={
 	{"toolameopts", toolameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 #else
 	{"toolameopts", "MPlayer was compiled without libtoolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
+#endif
+#ifdef HAVE_TWOLAME
+	{"twolameopts", twolameopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
+#else
+	{"twolameopts", "MPlayer was compiled without libtwolame. See README or DOCS.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 #endif
 #ifdef HAVE_FAAC
 	{"faacopts", faacopts_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},

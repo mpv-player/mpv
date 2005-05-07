@@ -222,6 +222,7 @@ Codecs:
   --disable-libdv        disable libdv 0.9.5 en/decoding support [autodetect]
   --disable-mad          disable libmad (MPEG audio) support [autodetect]
   --disable-toolame      disable Toolame (MPEG layer 2 audio) support in mencoder [autodetect]
+  --disable-twolame      disable Twolame (MPEG layer 2 audio) support in mencoder [autodetect]
   --enable-xmms          build with XMMS inputplugin support [disabled]
   --disable-mp3lib       disable builtin mp3lib [enabled]
   --disable-liba52       disable builtin liba52 [enabled]
@@ -1325,6 +1326,7 @@ _jack=auto
 _liblzo=auto
 _mad=auto
 _toolame=auto
+_twolame=auto
 _tremor_internal=yes
 _tremor_low=no
 _vorbis=auto
@@ -1510,6 +1512,7 @@ for ac_option do
   --enable-mad)		_mad=yes	;;
   --disable-mad)	_mad=no		;;
   --disable-toolame)	_toolame=no	;;
+  --disable-twolame)	_twolame=no	;;
   --enable-liblzo)	_liblzo=yes	;;
   --disable-liblzo)	_liblzo=no		;;
   --enable-vorbis)	_vorbis=yes	;;
@@ -5184,6 +5187,26 @@ else
   echores "$_toolame (using $_toolamedir)"
 fi
 
+echocheck "Twolame"
+if test "$_twolame" = auto ; then
+  cat > $TMPC <<EOF
+#include <twolame.h>
+int main(void) { twolame_init(); return 0; }
+EOF
+  _twolame=no
+  _twolame_lib="-ltwolame"
+  cc_check $_twolame_lib $_ld_lm && _twolame=yes
+fi
+if test "$_twolame" = yes ; then
+  _def_twolame='#define HAVE_TWOLAME 1'
+  _codecmodules="$_codecmodules twolame"
+else
+  _def_toolame='#undef HAVE_TWOLAME'
+  _twolame_lib=""
+  _nocodecmodules="twolame $_nocodecmodules"
+fi
+echores "$_twolame"
+
 echocheck "OggVorbis support"
 if test "$_tremor_internal" = yes; then
   _vorbis=yes
@@ -6899,6 +6922,8 @@ MACOSX_COREVIDEO = $_macosx_corevideo
 TOOLAME=$_toolame
 TOOLAME_EXTRAFLAGS=$_toolame_extraflags
 TOOLAME_LIB=$_toolame_lib
+TWOLAME=$_twolame
+TWOLAME_LIB=$_twolame_lib
 FAAC=$_faac
 FAAC_LIB=$_ld_faac
 AMR_NB=$_amr_nb
@@ -7551,6 +7576,7 @@ $_def_aa
 $_def_caca
 $_def_tga
 $_def_toolame
+$_def_twolame
 
 /* used by GUI: */
 $_def_xshape
