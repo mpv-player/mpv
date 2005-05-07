@@ -1,4 +1,4 @@
-.\" synced with 1.949
+.\" synced with 1.954
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -5977,7 +5977,8 @@ la syntaxe ci-dessous\ :
 .B \-<codec>opts <option1[=valeur],option2,...>
 .
 .PP
-Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, faac, x264enc, mpeg.
+Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, twolame,
+faac, x264enc, mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6197,7 +6198,7 @@ bonne et un équipement HI-FI en rapport.
 .PD 1
 .
 .
-.SS toolame (\-toolameopts)
+.SS toolame et twolame (respectivement \-toolameopts et \-twolameopts)
 .TP
 .B br=<0\-384>
 En mode débit binaire constant (CBR), ce paramètre défini le débit
@@ -6206,7 +6207,7 @@ défini le débit minimum autorisée part trame.
 Le mode VBR ne fonctionnera pas avec une valeur inférieure à 112.
 .TP
 .B vbr=<-50\-50> (VBR uniquement)
-plage de variation; si elle est négative, toolame fait tendre le
+plage de variation; si elle est négative, l'encodeur fait tendre le
 débit binaire moyen vers la limite basse, tandis qu'une valeur
 positive le fait tendre vers la limite haute.
 À 0, le mode CBR est utilisé (par défaut).
