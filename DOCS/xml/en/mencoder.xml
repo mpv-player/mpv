@@ -1846,7 +1846,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <ulink url="http://en.wikipedia.org/wiki/PSNR">the Wikipedia article on PSNR</ulink>.
   Global PSNR is the last PSNR number reported when you include
   the <option>psnr</option> option in <option>x264encopts</option>.
-  Any time you will read a claim about PSNR, one of the assumptions
+  Any time you read a claim about PSNR, one of the assumptions
   behind the claim is that equal bitrates are used.
 </para>
 
@@ -1933,7 +1933,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   With CABAC on (the default behavior), the possibility of setting
   <option>frameref</option> "too high" currently seems too remote
   to even worry about, and in the future, optimizations may remove
-  the possibility altogether).
+  the possibility altogether.
 </para>
 </note>
 <para>
