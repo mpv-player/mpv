@@ -103,6 +103,7 @@ static float lavc_param_dark_masking= 0.0;
 static float lavc_param_temporal_cplx_masking= 0.0;
 static float lavc_param_spatial_cplx_masking= 0.0;
 static float lavc_param_p_masking= 0.0;
+static float lavc_param_border_masking= 0.0;
 static int lavc_param_normalize_aqp= 0;
 static int lavc_param_interlaced_dct= 0;
 static int lavc_param_prediction_method= FF_PRED_LEFT;
@@ -296,6 +297,9 @@ m_option_t lavcopts_conf[]={
 #endif
 #if LIBAVCODEC_BUILD >= 4711
 	{"dc", &lavc_param_dc_precision, CONF_TYPE_INT, CONF_RANGE, 8, 11, NULL},
+#endif
+#if LIBAVCODEC_BUILD >= 4741
+	{"border_mask", &lavc_param_border_masking, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
 #endif
 	{"inter_threshold", &lavc_param_inter_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
 	{"sc_threshold", &lavc_param_sc_threshold, CONF_TYPE_INT, CONF_RANGE, -1000000, 1000000, NULL},
@@ -513,6 +517,9 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->spatial_cplx_masking= lavc_param_spatial_cplx_masking;
     lavc_venc_context->p_masking= lavc_param_p_masking;
     lavc_venc_context->dark_masking= lavc_param_dark_masking;
+#if LIBAVCODEC_BUILD >= 4741
+        lavc_venc_context->border_masking = lavc_param_border_masking;
+#endif
 
     if (lavc_param_aspect != NULL)
     {
