@@ -614,7 +614,8 @@ static int config(struct vf_instance_s* vf,
     {
 	case IMGFMT_YV12:
 	    // HACK, mjpeg accepts PIX_FMT_YUV420P only with vstrict=-1
-	    if (strcasecmp(lavc_param_vcodec, "mjpeg") == 0)
+	    if (strcasecmp(lavc_param_vcodec, "mjpeg") == 0 ||
+	        strcasecmp(lavc_param_vcodec, "ljpeg") == 0)
 	      lavc_venc_context->pix_fmt = PIX_FMT_YUVJ420P;
 	    else
 	    lavc_venc_context->pix_fmt = PIX_FMT_YUV420P;
