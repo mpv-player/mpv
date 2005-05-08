@@ -1185,6 +1185,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Wc and Hc are the width and height of the cropped video,
 </para></listitem>
 <listitem><para>
+  ARa is the displayed aspect ratio, which usually is 4/3 or 16/9,
+</para></listitem>
+<listitem><para>
   PRdvd is the pixel ratio of the DVD which is equal to 1.25=(720/576) for PAL
   DVDs and 1.5=(720/480) for NTSC DVDs,
 </para></listitem>
@@ -1195,6 +1198,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Then, you can compute the X and Y resolution, according to a certain
   Compression Quality (CQ) factor:
   <systemitem>ResY = INT(SQRT( 1000*Bitrate/25/ARc/CQ )/16) * 16</systemitem>
+  and
   <systemitem>ResX = INT( ResY * ARc / 16) * 16</systemitem>
 </para>
 
