@@ -589,11 +589,11 @@ decoders:
   bitrate.
   Actual results will depend on both the source material and the
   encoder.
-  The gains from using H.264 do not come for free: decoding H.264
+  The gains from using H.264 do not come for free: Decoding H.264
   streams seems to have steep CPU and memory requirements.
   For instance, on a 1733 MHz Athlon, a 1500kbps H.264 video uses
   around 50% CPU to decode.
-  By comparison, decoding a 1500kbps MPEG4-ASP stream requires
+  By comparison, decoding a 1500kbps MPEG-4 ASP stream requires
   around 10% CPU.
   This means that decoding high-definition streams is almost out of
   the question for most users.
@@ -603,7 +603,7 @@ decoders:
 <para>
   At least with <systemitem class="library">x264</systemitem>,
   encoding requirements are not much worse than what you are used to
-  with MPEG4-ASP.
+  with MPEG-4 ASP.
   For instance, on a 1733 MHz Athlon a typical DVD encode would run
   at 5-15fps.
 </para>

@@ -1814,7 +1814,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Encoding with the <systemitem class="library">x264</systemitem> codec</title>
 <para>
   <systemitem class="library">x264</systemitem> is a free library for
-  encoding H264/AVC video streams.
+  encoding H.264/AVC video streams.
   Before starting to encode, you need to <link linkend="codec-x264-encode">
   set up <application>MEncoder</application> to support it</link>.
 </para>
@@ -1862,7 +1862,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   First, using two pass often gains around 1dB PSNR, which is a
   very big difference.
   Secondly, testing options by doing direct quality comparisons
-  with 1-pass encodes is a dubious proposition because bitrate
+  with one pass encodes is a dubious proposition because bitrate
   often varies significantly with each encode.
   It is not always easy to tell whether quality changes are due
   mainly to changed options, or if they mostly reflect
@@ -1945,7 +1945,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <option>subq</option> and <option>frameref</option> values on
   the first pass, and then raise them on the second pass.
   Typically, this has a negligible negative effect on the final
-  quality: you will probably lose well under 0.1dB PSNR, which
+  quality: You will probably lose well under 0.1dB PSNR, which
   should be much too small of a difference to see.
   However, different values of <option>frameref</option> can
   occasionally affect frametype decision.
@@ -1992,7 +1992,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem><para>
   <emphasis role="bold">b_adapt</emphasis>:
-  Note: this is on by default.
+  Note: This is on by default.
 </para>
 <para>
   With this option enabled, the encoder will use some simple
@@ -2012,7 +2012,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">b_pyramid</emphasis>:
   You might as well enable this option if you are using >2 B-frames;
-  as the man page says, you get a little quality improvement with no
+  as the man page says, you get a little quality improvement at no
   speed cost.
   Note that these videos cannot be read by libavcodec-based decoders
   older than about March 5, 2005.
