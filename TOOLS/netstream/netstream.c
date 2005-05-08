@@ -38,6 +38,7 @@
 #include <arpa/inet.h>
 #else
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #endif
 
 #include <libmpdemux/stream.h>
@@ -53,6 +54,16 @@
 char* dvdsub_lang=NULL;
 char* audio_lang=NULL;
 int sub_justify=0;
+int identify=0;
+int dvdsub_id=0;
+int audio_id=0;
+int video_id=0;
+void af_fmt2str() {};
+
+#ifdef __MINGW32__
+#define usleep sleep
+void strsep() {};
+#endif
 
 static unsigned short int port = 10000;
 
@@ -254,7 +265,11 @@ void exit_sig(int sig) {
   count++;
   if(count==3) exit(1);
   if(count > 3)
+#ifdef __MINGW32__
+    WSACleanup();
+#else
     kill(getpid(),SIGKILL);
+#endif
   run_server = 0;
 }
 
@@ -263,10 +278,11 @@ static int main_loop(int listen_fd) {
   fd_set fds;
 
   signal(SIGTERM,exit_sig); // kill
+#ifndef __MINGW32__
   signal(SIGHUP,exit_sig);  // kill -HUP  /  xterm closed
   signal(SIGINT,exit_sig);  // Interrupt from keyboard
   signal(SIGQUIT,exit_sig); // Quit from keyboard
-  
+#endif 
 
   while(run_server) {
     int sel_n = make_fd_set(&fds,&clients,listen_fd);
@@ -309,6 +325,9 @@ static int main_loop(int listen_fd) {
   }
   mp_msg(MSGT_NETST,MSGL_INFO,"Exit ....\n");
   close(listen_fd);
+#ifdef __MINGW32__
+  WSACleanup();
+#endif
   while(clients) {
     client_t* f = clients;
     if(f->stream) free_stream(f->stream);
@@ -326,6 +345,10 @@ int main(int argc, char** argv) {
   mp_msg_init();
   mp_msg_set_level(verbose+MSGL_STATUS);
   
+#ifdef __MINGW32__
+  WSADATA wsaData;
+  WSAStartup(MAKEWORD(1,1), &wsaData);
+#endif
   listen_fd = socket(AF_INET, SOCK_STREAM, 0);
   if(listen_fd < 0) {
     mp_msg(MSGT_NETST,MSGL_FATAL,"Failed to create listen_fd: %s\n",strerror(errno));

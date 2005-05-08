@@ -16,11 +16,9 @@ all: netstream
 	$(CC) -c $(CFLAGS) -o $@ $<
 
 
-netstream: $(MPROOT)/libmpdemux/libmpdemux.a netstream.o
 # FIXME: linking is a mess that should be fixed properly some day
 # it does not work with either GUI, live.com or libavformat enabled
-	$(CC) $(CFLAGS) netstream.o -o netstream \
-		$(MPROOT)/libmpdemux/libmpdemux.a \
+DEPS =		$(MPROOT)/libmpdemux/libmpdemux.a \
 		$(MPROOT)/libmpdvdkit2/libmpdvdkit.a \
 		$(MPROOT)/libmpcodecs/native/minilzo.o \
 		$(MPROOT)/libvo/aclib.o $(MPROOT)/libmpcodecs/img_format.o \
@@ -30,6 +28,14 @@ netstream: $(MPROOT)/libmpdemux/libmpdemux.a netstream.o
 		$(MPROOT)/osdep/timer-*.o $(MPROOT)/osdep/strl.o \
 		$(VORBIS_LIB) $(CDPARANOIA_LIB) $(Z_LIB) $(GIF_LIB) \
 		$(SMBSUPPORT_LIB) $(LIVE_LIBS) $(ARCH_LIB) $(COMMON_LIBS) -lm
+
+ifeq ($(TARGET_WIN32),yes)
+DEPS += $(MPROOT)/osdep/glob-win.o $(WIN32_LIB) -lwsock32
+endif
+
+netstream: $(MPROOT)/libmpdemux/libmpdemux.a netstream.o
+
+	$(CC) $(CFLAGS) netstream.o -o netstream $(DEPS)
 
 clean:
 	rm -f *.o *.a *~
