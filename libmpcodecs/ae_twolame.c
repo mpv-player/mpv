@@ -27,7 +27,7 @@ static char *param_mode = "stereo";
 m_option_t twolameopts_conf[] = {
 	{"br", &param_bitrate, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"mode", &param_mode, CONF_TYPE_STRING, 0, 0, 0, NULL},
-	{"psy", &param_psy, CONF_TYPE_INT, CONF_RANGE, 0, 3, NULL},
+	{"psy", &param_psy, CONF_TYPE_INT, CONF_RANGE, -1, 4, NULL},
 	{"vbr", &param_vbr, CONF_TYPE_FLOAT, CONF_RANGE, -50, 50, NULL},
 	{"maxvbr", &param_maxvbr, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"errprot", &param_errprot, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
