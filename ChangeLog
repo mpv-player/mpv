@@ -22,6 +22,7 @@ MPlayer (1.0)
     MEncoder:
     * audio encoding modularized
     * added FAAC encoder
+    * border processing adaptive quantization in libavcodec
 
     Ports:
     * improved timer function on Mac OS X
