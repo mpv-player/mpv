@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.67  -->
+<!-- Synced with: 1.74  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -25,7 +25,7 @@ Jak přeložím <application>MPlayer</application> do nového jazyka?
 <answer><para>
 Přečtěte si <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
 to vám objasní vše. Podrobnější pomoc můžete dostat v
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
 mailing listu.
 </para></answer>
 </qandaentry>
@@ -49,9 +49,9 @@ Jak se mohu stát vývojářem <application>MPlayer</application>u?
 Vždy uvítáme nové kodéry i dokumentaristy. Přečtěte si
 <ulink url="../../tech/">technickou dokumentaci</ulink>
 abyste dostali obecnou představu. Pak byste se měli přihlásit do
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 mailing listu a začít psát kód. Pokud chcete pomoci s dokumentací, připojte se do
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">mplayer-docs</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
 mailing listu.
 </para></answer>
 </qandaentry>
@@ -201,9 +201,9 @@ zjistíte v sekci <link linkend="install">Instalace</link>.
 </para></question>
 <answer><para>
 Citováno z <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">mailu</ulink>
-který A'rpi poslal do listu <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">mplayer-users</ulink>
+který A'rpi poslal do listu <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">MPlayer-users</ulink>
 (slovo 'ideg' je vysvětleno níže) (POZOR: Tento překlad se snaží být co nejblíže
-smyslu původního textu, ale místy jde jen stěží. Pozn. překl.):
+smyslu původního textu, ale místy to jde jen stěží. Pozn. překl.):
 <blockquote>
 <para>
 A my máme idegy. A naše počitadlo idegů znovu a znovu přetéká.
@@ -388,7 +388,7 @@ Mám potíže s přehráváním souborů s ... kodekem. Mohu je používat?
 </para></question>
 <answer><para>
 Prověřte
-<ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">stav kodeku</ulink>,
+<ulink url="../../codecs-status.html">stav kodeku</ulink>,
 pokud neobsahuje váš kodek, přečtěte si
 <link linkend="codecs">kodekovou dokumentaci</link>,
 zvláště <link linkend="codec-importing">codec importing HOWTO</link>
@@ -603,14 +603,13 @@ Máte zatoulaný soubor <filename>codecs.conf</filename> v
 <filename>~/.mplayer/</filename>, <filename>/etc/</filename>,
 <filename>/usr/local/etc/</filename> a podobně? Odstraňte jej, protože
 zastaralé <filename>codecs.conf</filename> soubory mohou způsobit obskurní
-potíže a jsou zamýšleny jen pro použití vývojáři.
-Například se v současnosti změnilo FourCC pro Vorbis.
-Pokud někde povalujete starý <filename>codecs.conf</filename>, pak jistě
-neobsahuje toto nové FourCC.
-Proto se nebude přehrávat.
-Pokud neplánujete své připojení k vývoji <application>MPlayer</application>u,
-není vám tento soubor na nic a měl by být smazán.
-<application>MPlayer</application> použije místo něj svůj vestavěný.
+potíže a jsou zamýšleny jen pro použití vývojáři pracujícími na podpoře kodeků.
+Tento soubor má přednost před vestavěným nastavením kodeků
+<application>MPlayer</application>u, což způsobí katastrofu, jakmile dojde
+k nekompatibilním změnám v nových verzích programu.
+Pokud není používán experty, jedná se jistou cestu do pekel, působící
+náhodné a těžko odhalitelné pády aplikace a problémy s přehráváním.
+Pokud jej tedy stále ještě někde máte, ihned se jej zbavte.
 </para></answer>
 </qandaentry>
 
@@ -1358,6 +1357,36 @@ Také můžete zkusit
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> a
 <application>avimerge</application> (součást sady nástrojů
 <ulink url="http://www.transcoding.org/">transcode</ulink>).
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu opravit AVI soubory s vadným indexem nebo prokládáním?
+</para></question>
+<answer><para>
+Prostě zkopírujte video a audio proudy do nového souboru a
+<application>MEncoder</application> vygeneruje index a rovněž opraví prokládání,
+takže volba <option>-ni</option> již nebude potřeba.
+To samozřejmě nemůže opravit případné chyby v samotných video a/nebo audio
+proudech.
+<screen>
+mencoder -idx <replaceable>vstupní.avi</replaceable> -ovc copy -oac copy -o <replaceable>výstupní.avi</replaceable>
+</screen>
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu opravit poměr stran videa v AVI souboru?
+</para></question>
+<answer><para>
+Poměr stran lze opravit díky volbě <application>MEncoder</application>u
+<option>-force-avi-aspect</option>, která přepíše poměr stran uložený
+v AVI OpenDML vprp hlavičce. Například:
+<screen>
+mencoder <replaceable>vstupní.avi</replaceable> -ovc copy -oac copy -o <replaceable>výstupní.avi</replaceable> -force-avi-aspect 4/3
+</screen>
 </para></answer>
 </qandaentry>
 
