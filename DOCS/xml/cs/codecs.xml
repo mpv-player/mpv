@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.59 -->
+<!-- Synced with 1.63 -->
 <sect1 id="codecs">
 <title>Podporované kodeky</title>
 
@@ -8,7 +8,7 @@
 
 <para>
 Kompletní denně aktualizovaný seznam naleznete v naší stránce
-<ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">tabulce statutu kodeku</ulink>.
+<ulink url="../../codecs-status.html">tabulce statutu kodeku</ulink>.
 Docela dost kodeků si můžete stáhnout z naší domovské stránky.
 Odkaz najdete na
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">stránce kodeků</ulink>.
@@ -539,6 +539,140 @@ platformy.</para></note>
 <step><para>zkomilujte <application>MPlayer</application></para></step>
 </procedure>
 
+</sect3>
+
+<sect3 id="codec-x264">
+<title>x264</title>
+
+<sect4 id="codec-x264-whatis">
+<title>Co je x264?</title>
+<para>
+  <systemitem class="library">x264</systemitem> je knihovna pro tvorbu
+  H.264 video proudů.
+  Není 100% dokončena, ale již má alespoň určitou podporu většiny H.264
+  vlastností ovlivňujících kvalitu.
+  Ve specifikaci H.264 je ovšem mnoho pokročilých funkcí, které nemají přímo
+  co do činění s kvalitou videa. Mnoho z těchto vlastností zatím není
+  implementováno v <systemitem class="library">x264</systemitem>.
+</para>
+
+<itemizedlist>
+<title>Vlastnosti enkodéru</title>
+  <listitem><para>CAVLC/CABAC</para></listitem>
+  <listitem><para>Multi-reference</para></listitem>
+  <listitem><para>Intra: všechny typy makrobloků (16x16 a 4x4 se všemi
+    predikcemi)</para></listitem>
+  <listitem><para>Inter P: všechna rozdělení (partitiony) (od 16x16 níže až do
+    4x4)</para></listitem>
+  <listitem><para>Inter B: rozdělení od 16x16 níže až do 8x8
+    (včetně SKIP/DIRECT)</para></listitem>
+  <listitem><para>Řízení datového toku: konstantní kvantizér, konstantní datový
+    tok nebo víceprůchodový ABR</para></listitem>
+  <listitem><para>Detekce změny scény</para></listitem>
+  <listitem><para>Adaptivní umísťování B-snímků</para></listitem>
+  <listitem><para>B-snímky jako referenční / libovolné řazení snímků
+    </para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Omezení enkodéru</title>
+  <listitem><para>Nemá skutečný RD</para></listitem>
+</itemizedlist>
+
+
+</sect4>
+
+<sect4 id="codec-h264-whatis">
+<title>Co je H.264?</title>
+<para>
+  H.264 je jeden z názvů nového kodeku digitálního videa vyvíjeného společně skupinami
+  ITU a MPEG.
+  Rovněž může být zprávně nazýván těžkopádně jako
+  "ISO/IEC 14496-10" nebo "MPEG-4 Part 10".
+  Častěji je nazýván jako "MPEG-4 AVC" nebo jen "AVC".
+</para>
+<para>
+  Ať už mu říkáte jakkoli, H.264 stojí za vyzkoušení, protože obvykle
+  dosahuje kvality MPEG-4 ASP při datovém toku o 5%-30% nižším.
+  Konkrétní výsledky závisí jak na zdrojovém videu, tak na enkodéru.
+  Prospěch z použití H.264 není zadarmo: zdá se, že dekódování H.264 datových
+  proudů má přemrštěné nároky na CPU a paměť.
+  Například na 1733 MHz Athlonu využije dekódování 1500kbps H.264 videa
+  kolem 50% CPU.
+  Pro porovnání, dekódování 1500kbps MPEG4-ASP proudu vyžaduje okolo
+  10% CPU.
+  To znamená, že dekódování datových proudů je pro většinu uživatelů téměř
+  nemožné.
+  Rovněž to znamená, že dokonce i rozumný DVD rip se může občas zakousnout
+  na procesorech slabších než cca 2.0 GHz.
+</para>
+<para>
+  Alespoň s <systemitem class="library">x264</systemitem>,
+  nejsou požadavky ne enkódování o mnoho větší než ty, které vyžaduje MPEG4-ASP.
+  Například na 1733 MHz Athlonu poběží typické DVD enkódování při 5-15 snímků
+  za sekundu.
+</para>
+<para>
+  Tento dokument se nesnaží vysvětlit detaily H.264, ale pokud máte zájem
+  o stručný přehled, přečtěte si
+  <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
+</para>
+</sect4>
+
+<sect4 id="codec-x264-playback">
+<title>Jak mohu přehrávat H.264 videa <application>MPlayer</application>em?</title>
+<para>
+  <application>MPlayer</application> používá H.264 dekodér z
+  <systemitem class="library">libavcodec</systemitem>u.
+  <systemitem class="library">libavcodec</systemitem> má alespoň
+  minimálně použitelný H.264 dekodér již asi od července 2004,
+  od té doby však byly provedeny velké změny a vylepšení jak v počtu funkčností,
+  tak ve vylepšení použití CPU.
+  Pro jistotu je vždy nejlepší používat aktuální CVS verzi.
+</para>
+<para>
+  Chcete-li se snadno a rychle dozvědět o změnách v H.264 dekódování
+  <systemitem class="library">libavcodec</systemitem>u, sledujte
+  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">webové rozhraní FFmpeg CVS repozitáře</ulink>.
+</para>
+</sect4>
+
+<sect4 id="codec-x264-encode">
+<title>Jak mohu enkódovat video pomocí <application>MEncoder</application> a <systemitem class="library">x264</systemitem>?</title>
+<para>
+  Pokud máte nainstalován klient subversion, můžete si poslední x264
+  zdrojové kódy x264 opatřit tímto příkazem:
+  <screen>
+    svn co svn://svn.videolan.org/x264/trunk x264
+  </screen>
+  Zdrojové kódy <application>MPlayer</application>u jsou aktualizovány, kdykoli
+  nastane změna API v <systemitem class="library">x264</systemitem>, takže vždy
+  doporučujeme používat také CVS verzi <application>MPlayer</application>u.
+  Tato situace se snad změní, až <systemitem class="library">x264</systemitem>
+  dospěje k "vydání".
+  Mezi tím by měla být <systemitem class="library">x264</systemitem> považována
+  za velmi nestabilní v tom smyslu, že se její programové rozhraní neustále
+  mění.
+</para>
+<para>
+  <systemitem class="library">x264</systemitem> je setavována a
+  instalována standardním postupem:
+  <screen>
+    ./configure &amp;&amp; make &amp;&amp; sudo make install
+  </screen>
+  To nainstaluje libx264.a do /usr/local/lib a x264.h je umístěn do
+  /usr/local/include.
+
+  S knihovnou <systemitem class="library">x264</systemitem> a jejím hlavičkovým
+  souborem umístěnými na standardních místech je sestavení
+  <application>MPlayer</application>u s podporou
+  <systemitem class="library">x264</systemitem> snadné.
+  Stačí spustir standardní:
+  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
+  Skript configure automaticky detekuje, že jste splnili požadavky pro
+  <systemitem class="library">x264</systemitem>.
+</para>
+</sect4>
 </sect3>
 </sect2>
 
