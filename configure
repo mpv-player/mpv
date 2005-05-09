@@ -1000,6 +1000,7 @@ EOF
 
   ppc)
     _def_arch='#define ARCH_POWERPC 1'
+    _def_dcbzl='#define NO_DCBZL 1'
     _target_arch='TARGET_ARCH_POWERPC = yes'
     iproc='ppc'
     proc=''
@@ -1064,7 +1065,8 @@ EOF
 	# gcc 3.2 and up supports 970
 	if test "$_cc_major" -ge "3" && test "$_cc_minor" -ge "3"; then
 	    case "$proc" in
-		970*) _march='-mcpu=970' _mcpu='-mtune=970' ;;
+		970*) _march='-mcpu=970' _mcpu='-mtune=970'
+                      _def_dcbzl='#undef NO_DCBZL' ;;
     		*) ;;
     	    esac
 	fi
@@ -7336,6 +7338,10 @@ $_def_tv_bsdbt848
 $_def_words_endian
 
 $_def_arch
+
+/* For the PPC.  G5 has the dcbzl when in 64bit mode but G4s and earlier do not
+   have the instruction. */
+$_def_dcbzl
 
 /* libmpeg2 wants ARCH_PPC and the rest of mplayer use ARCH_POWERPC,
  * define ARCH_PPC if ARCH_POWERPC is set to cope with that.
