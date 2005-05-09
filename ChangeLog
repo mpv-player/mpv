@@ -11,23 +11,26 @@ MPlayer (1.0)
     * Indeo2 (RT21) support via lavc
 
     Streaming:
-    * fix streaming of realaudio files over http
+    * fix streaming of RealAudio files over HTTP
 
     FFmpeg/libavcodec:
     * snow bug fixes and speedup
     * MPEG-1/2 decoder speedup
     * Indeo2 video decoder
+    * RV20 fixes
     * countless bug fixes all over the place
 
     MEncoder:
     * audio encoding modularized
-    * added FAAC encoder
+    * AAC (FAAC) audio encoding
     * border processing adaptive quantization in libavcodec
 
     Ports:
     * improved timer function on Mac OS X
     * New Mac OS X "macosx" video output driver. Supported on OS X 10.4
-      and 10.3 with Quicktime 7 (Require Quicktime 7 SDK to build on 10.3)
+      and 10.3 with Quicktime 7 (requires QuickTime 7 SDK to build on 10.3)
+    * Mac OS X 10.4 (Tiger) fixes
+
 
   pre7: "PatentCounter" April 16, 2005
 
