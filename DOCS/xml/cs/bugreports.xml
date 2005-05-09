@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.10 -->
+<!-- Synced with: 1.11 -->
 <appendix id="bugreports">
 <title>Jak hlásit chyby</title>
 <para>
@@ -21,7 +21,7 @@ opravil(a) chybu samostatně. Nebo jste to již udělal(a)? Přečtěte si prosím
 <ulink url="../../tech/patches.txt">tento krátký dokument</ulink>, abyste se
 dozvěděli jak zahrnout váš kód do <application>MPlayer</application>u.
 Lidé z konference
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">mplayer-dev-eng</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-dev-eng">MPlayer-dev-eng</ulink>
 vám pomohou, pokud budete mít otázky.
 </para>
 </sect1>
@@ -79,7 +79,7 @@ dostanete odpověď.
 <sect1 id="bugreports_where">
 <title>Kam hlásit chyby</title>
 <para>
-Přihlaste se do e-mailové konference mplayer-users:
+Přihlaste se do e-mailové konference MPlayer-users:
 <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-users"/>
 a pošlete své hlášení o chybách na adresu
 <ulink url="mailto:mplayer-users@mplayerhq.hu"/> kde o tom můžeme diskutovat.
@@ -329,7 +329,7 @@ Pokud jste vytvořili příkladné hlášení chyby pomocí výšeuvedených kroků a jste
 si jisti, že chyba je v <application>MPlayer</application>u, nikoli chyba
 kompilátoru nebo poškozený soubor, již jste si přečetli dokumentaci ale nenalezli
 řešení, vaše ovladače zvuku jsou OK, pak byste se měli přihlásit do konference
-mplayer-advusers a poslat hlášení chyb zde, abyste dostali lepší a rychlejší
+MPlayer-advusers a poslat hlášení chyb zde, abyste dostali lepší a rychlejší
 odpověď.
 </para>
 
