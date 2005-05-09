@@ -267,6 +267,7 @@ inline void update_ch(af_hrtf_t *s, short *in, const int k)
 static int control(struct af_instance_s *af, int cmd, void* arg)
 {
     af_hrtf_t *s = af->setup;
+    int test_output_res;
     char mode;
 
     switch(cmd) {
@@ -281,8 +282,6 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
 	    return AF_ERROR;
 	}
 	af->data->nch    = ((af_data_t*)arg)->nch;
-	if(af->data->nch < 5) {
-	    af->data->nch = 5;
 	    if(af->data->nch == 2) {
  	       /* 2 channel input */
  	       if(s->decode_mode != HRTF_MIX_MATRIX2CH) {
@@ -290,11 +289,17 @@ static int control(struct af_instance_s *af, int cmd, void* arg)
  		  s->decode_mode = HRTF_MIX_STEREO;
 	       }
 	    }
-	}
+	    else if (af->data->nch < 5)
+	      af->data->nch = 5;
 	af->data->format = AF_FORMAT_S16_NE;
 	af->data->bps    = 2;
+	test_output_res = af_test_output(af, (af_data_t*)arg);
+	af->mul.n = 2;
+	af->mul.d = af->data->nch;
+	// after testing input set the real output format
+	af->data->nch = 2;
 	s->print_flag = 1;
-	return af_test_output(af, (af_data_t*)arg);
+	return test_output_res;
     case AF_CONTROL_COMMAND_LINE:
 	sscanf((char*)arg, "%c", &mode);
 	switch(mode) {
@@ -516,9 +521,9 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data)
 	left  += (1 - BASSCROSS) * left_b  + BASSCROSS * right_b;
 	right += (1 - BASSCROSS) * right_b + BASSCROSS * left_b;
 	/* Also mix the LFE channel (if available) */
-	if(af->data->nch >= 6) {
-	    left  += out[5] * M3_01DB;
-	    right += out[5] * M3_01DB;
+	if(data->nch >= 6) {
+	    left  += in[5] * M3_01DB;
+	    right += in[5] * M3_01DB;
 	}
 
 	/* Amplitude renormalization. */
@@ -545,11 +550,6 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data)
 	   break;
 	}
 
-	/* The remaining channels are not needed any more */
-	out[2] = out[3] = out[4] = 0;
-	if(af->data->nch >= 6)
-	    out[5] = 0;
-
 	/* Next sample... */
 	in = &in[data->nch];
 	out = &out[af->data->nch];
@@ -561,7 +561,7 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data)
     /* Set output data */
     data->audio = af->data->audio;
     data->len   = (data->len * af->mul.n) / af->mul.d;
-    data->nch   = af->data->nch;
+    data->nch   = 2;
 
     return data;
 }
