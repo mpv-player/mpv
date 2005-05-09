@@ -6559,17 +6559,20 @@ JVT recommendation
 .PD 1
 .
 .TP
-.B vstrict=<-1|0|1>
+.B vstrict=<-2|-1|0|1>
 strict standard compliance
 .PD 0
 .RSs
 .IPs 0
-disabled (default)
+disabled
 .IPs 1
 Only recommended if you want to feed the output into the
 MPEG-4 reference decoder.
 .IPs -1
-Allows some non-standard codecs to work (snow, ffvhuff, ffv1).
+Allow libavcodec specific extensions (default)
+.IPs -2
+Enables experimental codecs and features which might not play back with
+later MPlayer versions (snow, ffvhuff, ffv1).
 .RE
 .PD 1
 .

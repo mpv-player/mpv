@@ -80,7 +80,7 @@ static int lavc_param_vb_strategy = 0;
 static int lavc_param_luma_elim_threshold = 0;
 static int lavc_param_chroma_elim_threshold = 0;
 static int lavc_param_packet_size= 0;
-static int lavc_param_strict= 0;
+static int lavc_param_strict= -1;
 static int lavc_param_data_partitioning= 0;
 static int lavc_param_gray=0;
 static float lavc_param_rc_qsquish=1.0;
@@ -620,11 +620,6 @@ static int config(struct vf_instance_s* vf,
     switch(lavc_param_format)
     {
 	case IMGFMT_YV12:
-	    // HACK, mjpeg accepts PIX_FMT_YUV420P only with vstrict=-1
-	    if (strcasecmp(lavc_param_vcodec, "mjpeg") == 0 ||
-	        strcasecmp(lavc_param_vcodec, "ljpeg") == 0)
-	      lavc_venc_context->pix_fmt = PIX_FMT_YUVJ420P;
-	    else
 	    lavc_venc_context->pix_fmt = PIX_FMT_YUV420P;
 	    break;
 	case IMGFMT_422P:
