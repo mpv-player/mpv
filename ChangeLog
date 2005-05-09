@@ -19,6 +19,7 @@ MPlayer (1.0)
     * Indeo2 video decoder
     * RV20 fixes
     * countless bug fixes all over the place
+    * vstrict=-1 is default, snow, ffv1 etc. need vstrict=-2
 
     MEncoder:
     * audio encoding modularized

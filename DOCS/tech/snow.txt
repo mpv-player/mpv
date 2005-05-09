@@ -6,7 +6,7 @@ and while it is still in heavy development, it is already giving very good
 results.
 Be very careful though, as the format of the bitstream produced might
 change, do not rely on it to store videos that you value.
-For this reason, MEncoder will not encode without 'vstrict=-1' on the
+For this reason, MEncoder will not encode without 'vstrict=-2' on the
 command line.
 
 
@@ -71,4 +71,4 @@ won't work well until we get OBMC-aware motion estimation.
 
 In short:
 The best options in almost all cases are
-vcodec=snow:vstrict=-1:vqscale=$N:pred=0:cmp=1:subcmp=1:mbcmp=1:qpel
+vcodec=snow:vstrict=-2:vqscale=$N:pred=0:cmp=1:subcmp=1:mbcmp=1:qpel
