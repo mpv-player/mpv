@@ -1,4 +1,4 @@
-.\" synced with 1.955
+.\" synced with 1.959
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -6892,17 +6892,22 @@ recommandation JVT
 .PD 1
 .
 .TP
-.B vstrict=<-1|0|1>
+.B vstrict=<-2|-1|0|1>
 conformité stricte au standard
 .PD 0
 .RSs
 .IPs 0
-désactivé (par défaut)
+désactivé
 .IPs 1
 Seulement recommandé si vous voulez fournir la sortie au décodeur MPEG-4 de
 référence.
 .IPs -1
 Autorise l'encodage avec des codecs non-standard (snow, ffvhuff, ffv1).
+Autorise des extensions spécifiques à libavcodec (par défaut).
+.IPs -2
+Active les codecs et les fonctionnalitées expérimentales risquant de ne
+plus pouvoir être lues dans les futures versions de MPlayer
+(snow, ffvhuff, ffv1).
 .RE
 .PD 1
 .
@@ -7109,6 +7114,13 @@ Réduit la qualité des blocs inter, ce qui revient à augmenter celle blocs
 intra blocks, puisque le même bitrate moyen sera distribué par le "rate
 controller" à l'ensemble de la séquence vidéo (par défaut\ : 0.0 (désactivé)).
 p_mask=1.0 double la quantité de bits donnés à chaque bloc intra.
+.
+.TP
+.B border_mask=<0.0\-1.0>
+masquage des bords pour les encodeurs de type MPEG.
+Le masquage des bords augmente les quantum des macro-blocs se situant
+à 1/5e de la largeur/hauteur du bord de la trame, étant donné qu'ils
+ont moins d'importance visuelle.
 .
 .TP
 .B naq\ \ \ \ 
