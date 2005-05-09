@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.60 -->
+<!-- synced to 1.64 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -530,6 +530,147 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
 <step><para>fordítsd le az <application>MPlayer</application>t</para></step>
 </procedure>
 
+</sect3>
+<sect3 id="codec-x264">
+<title>x264</title>
+
+<sect4 id="codec-x264-whatis">
+<title>What is x264?</title>
+<para>
+  Az <systemitem class="library">x264</systemitem> egy függvénykönyvtár
+  a H.264 videó folyamok létrehozásához.
+  Még nincs kész 100%-ig, de valamilyen szinten már támogatja a
+  H.264 legtöbb minőségjavító tulajdonságát.
+  Van számos fejlett tulajdonság a H.264 specifikációjában, aminek
+  semmi köze a videó minőségéhez; ezek többsége még nincs implementálva
+  az <systemitem class="library">x264</systemitem>-ben.
+</para>
+
+<itemizedlist>
+<title>Kódoló tulajdonságai</title>
+  <listitem><para>CAVLC/CABAC</para></listitem>
+  <listitem><para>Többszörös hivatkozás</para></listitem>
+  <listitem><para>Intra: az összes makroblokk típus (16x16 és 4x4 az
+    összes jóslással)</para></listitem>
+  <listitem><para>Inter P: az összes elosztás (16x16-tól le
+    4x4-ig)</para></listitem>
+  <listitem><para>Inter B: elosztás 16x16-tól le 8x8-ig
+    (beleértve a SKIP/DIRECT-et)</para></listitem>
+  <listitem><para>Rátavezérlés: konstans kvantáló, konstans bitráta,
+    vagy többlépéses ABR</para></listitem>
+  <listitem><para>Jelenet vágás detektálása</para></listitem>
+  <listitem><para>Adaptív B-kocka elhelyezés</para></listitem>
+  <listitem><para>B-kocka mint referencia / önkényes képkocka
+    sorrend</para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Kódolási korlátok</title>
+  <listitem><para>Nincs igazi RD</para></listitem>
+</itemizedlist>
+
+
+</sect4>
+
+<sect4 id="codec-h264-whatis">
+<title>Mi az a H.264?</title>
+<para>
+  A H.264 az ITU és az MPEG által közösen fejlesztett új digitális
+  videó codec egyik neve.
+  Hivatkoznak rá még olyan kellemetlen neveken is, mint
+  "ISO/IEC 14496-10" vagy "MPEG-4 Part 10".
+  Legtöbbször "MPEG-4 AVC" vagy csak "AVC" néven szerepel.
+</para>
+<para>
+  Bárhogy is nevezed, a H.264 megéri, hogy kipróbáld, mert általában
+  eléri az MPEG-4 ASP minőségét 5%-30%-kal kisebb bitrátával.
+  A valódi eredmények mind a forrás anyagtól, mind a kódolótól
+  függnek.
+  A H.264 előnyei nem jönnek ingyen: a H.264 folyamok dekódolásának
+  elég meredek a CPU és memória igénye.
+  Például egy 1733 Mhz-es Athlon-on egy 1500kbps-es H.264 videó kb.
+  50% CPU-t használ a dekódoláshoz.
+  Összehasonlításként egy 1500kbps-es MPEG-4 ASP folyamnak 10% körüli
+  CPU kell.
+  Ez azt jelenti, hogy a nagy-felbontású folyamok dekódolása szinte
+  szóba se jön a legtöbb felhasználónál.
+  Azt is jelenti, hogy egy tisztességes DVD rip néha akadhat a 2.0
+  Ghz-nél lassabb processzorokon, és így tovább.
+</para>
+<para>
+  Az <systemitem class="library">x264</systemitem>-mal
+  a kódolási szükségletek nem sokkal rosszabbak, mint amit az
+  MPEG-4 ASP-nél megszoktál.
+  Például egy 1733 Mhz-es Athlon-on egy tipikus DVD kódolás 5-15
+  fps-sel fut.
+</para>
+<para>
+  Ennek a dokumentumnak nem célja a H.264 részletes leírása, ha
+  érdekel egy rövid áttekintés, akkor olvasd el a
+  <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>
+  című írást.
+</para>
+</sect4>
+
+<sect4 id="codec-x264-playback">
+<title>Hogyan tudok lejátszani H.264 videókat az <application>MPlayer</application>rel?</title>
+<para>
+  Az <application>MPlayer</application> a
+  <systemitem class="library">libavcodec</systemitem> H.264
+  dekódolóját használja.
+  A <systemitem class="library">libavcodec</systemitem> már 2004.
+  júliusa óta tartalmaz egy minimálisan használható H.264 dekódolást,
+  de azóta több fontos változás és fejlesztés történt, mind a
+  támogatott funkcionalitások, mind a CPU felhasználás szempontjából.
+  Csak a biztonság kedvéért érdemes mindig a legfrissebb CVS
+  kódot használni.
+</para>
+<para>
+  Ha gyors és könnyen emészthető formában szeretnél információkat
+  arról, hogy milyen új változások történtek a
+  <systemitem class="library">libavcodec</systemitem>
+  H.264 dekódolójában, tartsd figyelemmel az
+  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">FFmpeg CVS fájának web-es felületét</ulink>.
+</para>
+</sect4>
+
+<sect4 id="codec-x264-encode">
+<title>Hogyan tudok a <application>MEncoder</application>rel és az <systemitem class="library">x264</systemitem>-gyel videót kódolni?</title>
+<para>
+  Ha van feltelepítve subversion kliensed, a legújabb x264
+  forrást letöltheted ezzel a paranccsal:
+  <screen>
+    svn co svn://svn.videolan.org/x264/trunk x264
+  </screen>
+  Az <application>MPlayer</application> forrás mindig frissül, ha
+  egy <systemitem class="library">x264</systemitem> API változás
+  jelenik meg, így javasolt az <application>MPlayer</application> CVS
+  verziójának használata.
+  Talán ez a szituáció változni fog ha egy
+  <systemitem class="library">x264</systemitem> "kiadás" megjelenik.
+  Addig az <systemitem class="library">x264</systemitem> nagyon
+  instabilként kezelendő, figyelembe véve, hogy a programozási felülete
+  is változik.
+</para>
+<para>
+  Az <systemitem class="library">x264</systemitem> a szabványos módon
+  fordítható le és telepíthető:
+  <screen>
+    ./configure &amp;&amp; make &amp;&amp; sudo make install
+  </screen>
+  Ez telepíti a libx264.a-t a /usr/local/lib könyvtárba és az x264.h-t
+  beleteszi a /usr/local/include-ba.
+
+  Miután az <systemitem class="library">x264</systemitem> függvénykönyvtár
+  és a fejléc fájl a megfelelő helyre került, az
+  <application>MPlayer</application> fordítása
+  <systemitem class="library">x264</systemitem> támogatással már egyszerű.
+  csak futtasd a szabványos parancsokat:
+  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
+  A configure script automatikusan detektálja, hogy elget teszel az
+  <systemitem class="library">x264</systemitem> követelményeinek.
+</para>
+</sect4>
 </sect3>
 </sect2>
 
