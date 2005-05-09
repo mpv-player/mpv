@@ -23,6 +23,10 @@
 #
 #############################################################################
 
+# Prevent locale nonsense from breaking basic text processing utils
+LC_ALL=C
+export LC_ALL
+
 # Prefer these macros to full length text !
 # These macros only return an error code - NO display is done
 cc_check() {
