@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.52 -->
+<!-- Synced with: 1.58 -->
 <chapter id="mencoder">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -728,6 +728,349 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Ořezávání a škálování</title>
 
 <para>
+  Připomeňme z předchozí části, že konečná velikost obrázku by měla mít
+  jak šířku, tak výšku beze zbytku dělitelnou 16, čehož můžete dosáhnout
+  pomocí ořezání, škálování, nebo kombinací obou.
+</para>
+
+<para>
+  Při ořezávání byste se měli držet několika zásad, abyste předešli poškození
+  svého filmu.
+  Normální YUV formát 4:2:0, ukládá barvonosnou (chroma) informaci
+  podvzorkovanou, čili hustota vzorkování barvy je poloviční oproti jasové
+  (černobílé) složce v obou směrech.
+  Prohlédněte si tento diagram, kde L označuje vzorkovací body jasu a C
+  barvy.
+</para>
+
+<informaltable>
+<?dbhtml table-width="40%" ?>
+<?dbfo table-width="40%" ?>
+<tgroup cols="8" align="center">
+<colspec colnum="1" colname="col1"/>
+<colspec colnum="2" colname="col2"/>
+<colspec colnum="3" colname="col3"/>
+<colspec colnum="4" colname="col4"/>
+<colspec colnum="5" colname="col5"/>
+<colspec colnum="6" colname="col6"/>
+<colspec colnum="7" colname="col7"/>
+<colspec colnum="8" colname="col8"/>
+<spanspec spanname="spa1-2" namest="col1" nameend="col2"/>
+<spanspec spanname="spa3-4" namest="col3" nameend="col4"/>
+<spanspec spanname="spa5-6" namest="col5" nameend="col6"/>
+<spanspec spanname="spa7-8" namest="col7" nameend="col8"/>
+  <tbody>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry spanname="spa1-2">C</entry>
+      <entry spanname="spa3-4">C</entry>
+      <entry spanname="spa5-6">C</entry>
+      <entry spanname="spa7-8">C</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry spanname="spa1-2">C</entry>
+      <entry spanname="spa3-4">C</entry>
+      <entry spanname="spa5-6">C</entry>
+      <entry spanname="spa7-8">C</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+  </tbody>
+</tgroup>
+</informaltable>
+
+<para>
+  Jak vidíte, řádky i sloupce obrázku se přirozeně párují. Při ořezávání tedy
+  <emphasis>musí</emphasis> být hodnoty odsazení i rozměrů sudá čísla.
+  Pokud nejsou, nebude se barvonosná informace zprávně krýt s jasovou.
+  Teoreticky lze stříhat s lichým odsazením, ale to vyžaduje převzorkování
+  barvy, což je potenciálně ztrátový úkon a není podporován filtrem crop.
+</para>
+
+<para>
+  Dále, prokládané video je vzorkováno takto:
+</para>
+
+<informaltable>
+<?dbhtml table-width="80%" ?>
+<?dbfo table-width="80%" ?>
+<tgroup cols="16" align="center">
+<colspec colnum="1"  colname="col1"/>
+<colspec colnum="2"  colname="col2"/>
+<colspec colnum="3"  colname="col3"/>
+<colspec colnum="4"  colname="col4"/>
+<colspec colnum="5"  colname="col5"/>
+<colspec colnum="6"  colname="col6"/>
+<colspec colnum="7"  colname="col7"/>
+<colspec colnum="8"  colname="col8"/>
+<colspec colnum="9"  colname="col9"/>
+<colspec colnum="10" colname="col10"/>
+<colspec colnum="11" colname="col11"/>
+<colspec colnum="12" colname="col12"/>
+<colspec colnum="13" colname="col13"/>
+<colspec colnum="14" colname="col14"/>
+<colspec colnum="15" colname="col15"/>
+<colspec colnum="16" colname="col16"/>
+<spanspec spanname="spa1-2"   namest="col1" nameend="col2"/>
+<spanspec spanname="spa3-4"   namest="col3" nameend="col4"/>
+<spanspec spanname="spa5-6"   namest="col5" nameend="col6"/>
+<spanspec spanname="spa7-8"   namest="col7" nameend="col8"/>
+<spanspec spanname="spa9-10"  namest="col9" nameend="col10"/>
+<spanspec spanname="spa11-12" namest="col11" nameend="col12"/>
+<spanspec spanname="spa13-14" namest="col13" nameend="col14"/>
+<spanspec spanname="spa15-16" namest="col15" nameend="col16"/>
+  <tbody>
+    <row>
+      <entry namest="col1" nameend="col8">Horní půlsnímek</entry>
+      <entry namest="col9" nameend="col16">Spodní půlsnímek</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry spanname="spa1-2">C</entry>
+      <entry spanname="spa3-4">C</entry>
+      <entry spanname="spa5-6">C</entry>
+      <entry spanname="spa7-8">C</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry spanname="spa9-10">C</entry>
+      <entry spanname="spa11-12">C</entry>
+      <entry spanname="spa13-14">C</entry>
+      <entry spanname="spa15-16">C</entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry spanname="spa1-2">C</entry>
+      <entry spanname="spa3-4">C</entry>
+      <entry spanname="spa5-6">C</entry>
+      <entry spanname="spa7-8">C</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+    <row>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry spanname="spa9-10">C</entry>
+      <entry spanname="spa11-12">C</entry>
+      <entry spanname="spa13-14">C</entry>
+      <entry spanname="spa15-16">C</entry>
+    </row>
+    <row>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry></entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+      <entry>L</entry>
+    </row>
+  </tbody>
+</tgroup>
+</informaltable>
+
+<para>
+  Jak vidíte, tak se vzor opakuje každé 4 řádky, takže při ořezu prokládaného
+  videa musí být odsazení v ose y a výška beze zbytku delitelné 4.
+</para>
+
+<para>
   Nativní DVD rozlišení je 720x480 pro NTSC a 720x576 pro PAL, ale je zde ještě
   příznak poměru stran, který udává, zda se jedná o obrazovku (full-screen)(4:3),
   nebo širokoúhlý film (wide-screen)(16:9). Mnoho (jestli ne většina)
@@ -739,10 +1082,38 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   <application>MPlayer</application> poskytuje filtr pro detekci potřebného
   ořezu, který stanoví ořezový obdélník (<option>-vf cropdetect</option>).
+  Spusťte <application>MPlayer</application> s volbou
+  <option>-vf cropdetect</option> a on vám vypíše nastavení filtru crop pro
+  ořezání okrajů.
+  Měli byste nechat běžet film tak dlouho, dokud není použita celá plocha
+  obrázku, abyste dostali správné hodnoty crop.
+</para>
+
+<para>
+  Pak otestujte získané hodnoty z příkazového řádku
+  <application>MPlayer</application>u vypisované <option>cropdetect</option>em
+  a upravte obdélník podle potřeby.
+  V tom vám pomůže filtr <option>rectangle</option>, který interaktivně
+  nastavit obdélník pro váš film.
+  Nezapomeňte zachovat výše uvedená doporučení, abyste nepoškodili barevnou
+  mapu.
+</para>
+
+<para>
+  Škálování je obvykle nevhodné.
+  Škálování prokládaného videa je obtížné a pokud chcete zachovat prokládání,
+  měli byste se mu úplně vyhnout.
+  Pokud mebudete škálovat, ale budete chtít používat rozměry v násobcích 16,
+  budete muset oříznout i část obrazu.
+  Neponechávejte ani malé černé okraje, jelikož se velmi špatně kódují!
+</para>
+
+<para>
   Protože MPEG-4 používá makrobloky 16x16, měli byste se ujistit, že oba rozměry
   videa jsou násobkem 16, jinak snížíte kvalitu, zvlášť při nízkých datových
   tocích. Můžete to zajistit zaokrouhlením šířky a výšky ořezového obdélníku
-  dolů na nejbližší násobek 16. Při ořezávání byste měli zvýšit odsazení
+  dolů na nejbližší násobek 16.
+  Jak jsme již řekli, měli byste při ořezávání zvýšit odsazení
   (offset) v ose y o polovinu rozdílu mezi starou a novou výškou, takže bude
   výsledné video bráno ze středu snímku. Z důvodu principu vzorkování DVD videa
   se ujistěte, že je odsazení sudé číslo. (Popravdě, přijměte jako pravidlo,
@@ -783,8 +1154,6 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 <listitem><para>
   PRdvd je poměr pixelů v DVD, který je roven 1.25=(720/576) pro DVD
-</para></listitem>
-<listitem><para>
   v PALu a 1.5=(720/480) pro DVD v NTSC,
 </para></listitem>
 </itemizedlist>
@@ -1376,6 +1745,284 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 </sect2>
 
+</sect1>
+
+<sect1 id="menc-feat-x264">
+<title>Enkódování s <systemitem class="library">x264</systemitem> kodekem</title>
+<para>
+  <systemitem class="library">x264</systemitem> je svobodná knihovna pro
+  enkódování H264/AVC video proudů.
+  Pře zahájením enkódování budete muset <link linkend="codec-x264-encode">
+  nastavit její podporu v<application>MEncoder</application>u</link>.
+</para>
+
+<sect2 id="menc-feat-x264-intro">
+<title>Jaké volby bychom měli nastavit pro nejlepší výsledky?</title>
+
+<para>
+  Začněte prosím prostudováním části
+  <systemitem class="library">x264</systemitem> v man stránce
+  <application>MPlayer</application>u.
+  Tato sekce je zamýšlena jako doplněk man stránky.
+</para>
+
+<orderedlist>
+<title>Obecně jsou zde tři typy uvažování při volbě vhodných voleb enkodéru:
+</title>
+  <listitem><para>Časová náročnost enkódování vs. kvalita</para></listitem>
+  <listitem><para>Volby rozhodující o typu snímků</para></listitem>
+  <listitem><para>Volby ovlivňující kontrolu datového toku a kvantizaci</para></listitem>
+</orderedlist>
+
+<para>
+  Tento návod se většinou zaměřuje na první skupinu voleb.
+  Další dvě skupiny často záleží na osobních preferencích a individuálních
+  požadavcích.
+</para>
+
+<para>
+  Než budeme pokračovat, poznamenejme, že tento návod používá jediné měřítko
+  kvality: celkový PSNR.
+  Stručné vysvětlení co je to PSNR, naleznete
+  <ulink url="http://en.wikipedia.org/wiki/PSNR">ve Wikipedii pod heslem PSNR</ulink>.
+  Celkové PSNR je poslední hlášené PSNR číslo při zařazení volby
+  <option>psnr</option> v <option>x264encopts</option>.
+  Kdykoli budete číst prohlášení o PSNR, jeden z předpokladů tohoto sdělení
+  je, že jsou použity shodné datové toky.
+</para>
+
+<para>
+  Téměř všechny komentáře v tomto návodu předpokládají, že enkódujete
+  dvouprůchodově.
+  Při porovnávání voleb jsou zde dva hlavní důvody pro použití dvouprůchodového
+  enkódování.
+  Zaprvé, dvouprůchodové enkódování vám získá zhruba 1dB PSNR, což je
+  velký rozdíl.
+  Zadruhé, testování voleb pomocí přímého porovnání kvality v jednoprůchodových
+  výsledcích je pochybné, jelikož se datový tok značně liší s každým
+  enkódováním.
+  Není vždy snadné určit, zda se změnila kvalita díky změně voleb, nebo
+  z větší části odpovídají změnám datového toku.
+</para>
+
+<para>
+  Z voleb, které umožňují vyměnit čas za kvalitu, jsou obvykle nejdůležitější
+  <option>subq</option> a <option>frameref</option>.
+  Máte-li zájem ovlivnit jak rychlost, tak kvalitu, jsou to první volby,
+  které byste měli zvážit.
+</para>
+
+<para>
+  Ve smyslu rychlosti se spolu volby <option>frameref</option> a
+  <option>subq</option> velmi silně ovlivňují.
+  Zkušenosti ukazují, že při jednom referenčním snímku si
+  <option>subq=5</option> vezme asi o 35% více času než
+  <option>subq=1</option>.
+  Při 6 referenčních snímcích naroste spomalení nad 60%.
+  Vliv <option>subq</option> na PSNR se zdá být poměrně stálý,
+  bez ohledu na počet referenčních snímků.
+  Typicky <option>subq=5</option> získá 0.2-0.5 dB
+  celkového PSNR přes <option>subq=1</option>.
+  To je obvykle již viditelné.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-x264-encoding-options">
+<title>Enkódovací volby x264</title>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">frameref</emphasis>:
+  Výchozí nastavení <option>frameref</option> je 1, ale nemělo by to být bráno
+  tak, že je rozumné nastavovat jej na 1.
+  Pouhé zvýšení <option>frameref</option> na 2 získá okolo
+  0.15dB PSNR s 5-10% spomalením, což je zřejmě dobrý obchod.
+  <option>frameref=3</option> získá kolem 0.25dB PSNR navíc k
+  <option>frameref=1</option>, což již může být viditelný
+  rozdíl.
+  <option>frameref=3</option> je asi o 15% pomalejší než
+  <option>frameref=1</option>.
+  Naneštěstí se zisk rychle vytrácí.
+  Prř <option>frameref=6</option> můžete očekávat zisk pouze
+  0.05-0.1 dB nad <option>frameref=3</option> při dodatečném
+  15% zpomalení.
+  Nad <option>frameref=6</option> je zisk kvality obvykle velmi malý
+  (ačkoli byste měli mít na paměti, že se to může výrazně lišit v závislosti
+  na zdrojovém materiálu).
+  V poměrně typickém případě zlepší <option>frameref=12</option>
+  celkový PSNR o pouhé 0.02dB nad <option>frameref=6</option>,
+  při spomalení o 15%-20%.
+  Při tak vysokých hodnotách <option>frameref</option> lze říct pouze
+  jedinou dobrou věc, a to že jejich další zvyšování téměř nikdy
+  <emphasis role="bold">nesníží</emphasis> PSNR, ale další zisk kvality
+  je stěží měřitelný, natož viditelný.
+</para>
+<note><title>Poznámka:</title>
+<para>
+  Zvýšení <option>frameref</option> na nemístně vysokou hodnotu
+  <emphasis role="bold">může</emphasis> a
+  <emphasis role="bold">obvykle taky sníží</emphasis>
+  efektivitu kódování, pokud vypnete CABAC.
+  Se zapnutým CABAC (výchozí chování) se zdá být možnost nastavit
+  <option>frameref</option> "příliš vysoko" příliš vzdálená na to,
+  abyste se tím museli trápit a v budoucnu mohou optimalizace
+  tuto možnost zcela vyloučit.
+</para>
+</note>
+<para>
+  Pokud vám záleží na rychlosti, bývá vhodným kompromisem použít
+  nízké hodnoty <option>subq</option> a <option>frameref</option>
+  v prvním průchodu a zvýšit je ve druhém.
+  Typicky to má zanedbatelný záporný vliv na konečnou kvalitu:
+  pravděpodobně stratíte méně než 0.1dB PSNR, což by měl být až příliš
+  malý rozdíl, než aby byl vidět.
+  Odlišné hodnoty <option>frameref</option> však mohou místy ovlivnit
+  volbu typu snímku.
+  Nejspíš to budou ojedinělé případy, ale chcete-li si být zcela jisti,
+  zjistěte, jestli vaše video obsahuje buď blýskavé vzory přes celou obrazovku,
+  nebo rozsáhlé krátkodobé změny, které by mohly vynutit I-snímek.
+  Nastavte <option>frameref</option> pro první průchod tak, aby byl
+  dostatečně velký pro pokrytí doby bliknutí (nebo změny).
+  Například, pokud scéna přepíná tam a zpět mezi dvěma obrázky přes tři snímky,
+  nastavte <option>frameref</option> pro první průchod na 3 a více.
+  Tento případ je nejspíš zcela ojedinělý v hraných filmech, ale občas se
+  vyskytuje v záznamech z videoher.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">bframes</emphasis>:
+  Použitelnost B-snímků je ve většině ostatních kodeků diskutabilní.
+  V H.264 se to změnilo: jsou zde nové techniky a typy bloků pro použití
+  v B-snímcích.
+  Obvykle i naivní algoritmus pro výběr B-snímku může zajistit znatelný
+  zisk PSNR.
+  Také je zajímavé, že pokud vypnete adaptivní rozhodování o B-snímku
+  (<option>nob_adapt</option>), zvýší obvykle enkódování s
+  <option>bframes</option> o trochu rychlost enkódování.
+</para>
+<para>
+  S vypnutým adaptivním rozhodováním o B-snímku
+  (<option>x264encopts</option>'s <option>nob_adapt</option>),
+  se optimální hodnota této volby obvykle pohybuje od
+  <option>bframes=1</option> do <option>bframes=3</option>.
+  Se zapnutým adaptivním rozhodováním o B-snímku (výchozí chování),
+  je obvykle bezpečné použít vyšší hodnoty; enkodér se pokusí snížit
+  použití B-snímků ve scénách, kde by snížily kompresi.
+</para>
+<para>
+  Pokud vůbec použijete <option>bframes</option>, zvažte
+  nastavení maximálního počtu B-snímků na 2 nebo více, pokud chcete
+  těžit z vážené predikce.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">b_adapt</emphasis>:
+  Poznámka: ve výchozím stavu zapnuto.
+</para>
+<para>
+  Je-li tato volba zapnuta, bude enkodér používat jendoduchou
+  heuristiku pro snížení počtu B-snímků ve scénách, kde by jejich
+  použitím příliš nezískaly.
+  Můžete použít <option>b_bias</option> pro nastavení jak přátelský
+  bude enkodér k B-snímkům.
+  Spomalení působené adaptivními B-snímky je nyní spíše malé, ale
+  stejně tak potenciální zisk kvality.
+  Obvykle však nijak neškodí.
+  Poznamenejme, že ovlivňuje rychlost a rozhodování o typu snímku pouze
+  v prvním průchodu.
+  <option>b_adapt</option> a <option>b_bias</option> nemají žádný vliv
+  v náslydných průchodech.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">b_pyramid</emphasis>:
+  Pokud používáte >2 B-snímky, můžete také zapnout tuto volbu; jak
+  říká man stránka, dostanete malé zvýšení kvality bez ztráty rychlosti.
+  Poznamenejme, že tato videa nelze číst dekodéry založenými na libavcodec
+  staršími než 5. března 2005.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">weight_b</emphasis>:
+  V typických případech tato volba nepřináší velký zisk.
+  V prolínacích nebo stmívacích scénách však vážená predikce
+  umožňuje poměrně velkou úsporu datového toku.
+  V MPEG-4 ASP bývá stmívání obvykle nejlépe kódováno jako série
+  velkých I-snímků; použití vážené predikce v B-snímcích umožňuje
+  změnit alespoň některé z nich na rozumně menší B-snímky.
+  Spomalení enkódování se zdá být minimální, pokud nějaké je.
+  Rovněž, v rozporu s tím, co si někteří lidé mohou myslet,
+  požadavky dekodéru na CPU nejsou váženou predikcí ovlivněny,
+  ostatní možnosti jsou stejně náročné.
+</para>
+<para>
+  Naneštěstí má aktuálně algoritmus adaptivního rozhodování o B-snímcích
+  výraznou tendenci vyvarovat se B-snímků při stmívání.
+  Dokud se to nezmění, bude dobré přidat
+  <option>nob_adapt</option> do x264encopts, pokud očekáváte, že stmívání
+  bude mít znatelný vliv ve vašem konkrétním klipu.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
+  Toto bude poněkud kontroverzní.
+</para>
+<para>
+  H.264 definuje jednoduchou deblokující proceduru na I-blocích, která
+  používá přednastavené síly a prahy na QP daného bloku.
+  Ve výchozím stavu jsou bloky s nízkým QP silně filtrovány a bloky s
+  nízkým QP nejsou deblokovány vůbec.
+  Přednastavené síly definované standardem jsou dobře voleny a
+  odchylky jsou velmi dobré, takže jsou PSNR optimální pro jakékoli
+  video, které zkoušíte enkódovat.
+  Volby <option>deblockalpha</option> a <option>deblockbeta</option>
+  vám umožní nastavit odchylky přednastavených deblokovacích prahů.
+</para>
+<para>
+  Zdá se, že si mnoho lidí myslí, že je vhodné výrazně snížit sílu (řekněme, -3)
+  deblokovacího filtru.
+  To však není téměř nikdy dobrý nápad a v mnoha případech lidé, kteří
+  tak činí, dobře nerozumí jak výchozí deblokování pracuje.
+</para>
+<para>
+  První a nejdůležitější věc, kterou byste měli o in-loop deblokovacím
+  filtru vědět je, že výchozí nastavení prahů je téměř vždy optimální
+  vzhledem k PSNR.
+  V řídkých případech kdy není, je ideální odchylka plus mínus 1.
+  Změna deblokujících parametrů o větší hodnotu vede téměř s jistotou
+  ke zhoršení PSNR.
+  Zesílení filtru setře více detailů; zeslabení zvýší viditelnost čtverečkování.
+</para>
+<para>
+  Rozhodně je nevhodné snižovat deblokovací prahy, pokud má vaše video
+  nízkou prostorovou komplexnost (čili nemnoho detailů nebo šumu).
+  In-loop filtr téměř perfektně kryje artefakty, které se vyskytnou.
+  Pokud má však zdroj vysokou prostorovou komplexnost, jsou artefakty
+  hůře rozeznatelné.
+  To proto, že kroužkování má tendenci vypadat jako detail nebo šum.
+  Lidská vizuální vnímavost si snadno povšimne, když je odstraněn detail,
+  ale obtížněji si všimne, když je špatně reprezentován šum.
+  Když příjde na subjektivní kvalitu, je šum částečně zaměnitelný s detaily.
+  Snížením síly deblokovacího filtru nejspíše zvýšíte chybu přidáním
+  kroužkových artefaktů, ale oko si toho nevšimne, protože si splete
+  artefakty s detaily.
+</para>
+
+<para>
+  To však <emphasis role="bold">stále</emphasis> neospravedlňuje
+  snížení síly deblokovacího filtru.
+  Obecně dostanete kvalitnější šum z postprocesingu.
+  Pokud vaše H.264 videa vypadají příliš rozmazané nebo flekaté, zkuste si
+  pohrát s
+  <option>-vf noise</option> při přehrávání.
+  <option>-vf noise=8a:4a</option> by mělo zamaskovat většinu smazaných
+  artefaků.
+  Téměř jistě to bude vypadat lépe než to, co dostanete pomocí
+  podvádění deblokovacího filtru.
+</para></listitem>
+</itemizedlist>
+</sect2>
 </sect1>
 
 <sect1 id="menc-feat-telecine">
