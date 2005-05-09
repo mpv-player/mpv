@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.56 -->
+<!-- synced to 1.61 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -1171,6 +1171,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Wc és Hc a vágott videó szélessége és a magassága,
 </para></listitem>
 <listitem><para>
+  ARa a megjelenített kép aránya, ami általában 4/3 vagy 16/9,
+</para></listitem>
+<listitem><para>
   PRdvd a DVD pixel rátája, ami PAL DVD-k esetén 1.25=(720/576)
   és 1.5=(720/480) NTSC DVD-knél,
 </para></listitem>
@@ -1181,6 +1184,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Ezután, kiszámíthatod az X és Y felbontást, egy bizonyos Tömörítési
   Minőség (Compression Quality, CQ) faktornak megfelelően:
   <systemitem>ResY = INT( SQRT(1000 * Bitrate / 25 / ARc / CQ) / 16 ) * 16</systemitem>
+  és
   <systemitem>ResX = INT( ResY * ARc / 16) * 16</systemitem>
 </para>
 
@@ -1776,6 +1780,303 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 </sect2>
 
+</sect1>
+
+<sect1 id="menc-feat-x264">
+<title>Kódolás az <systemitem class="library">x264</systemitem> codec-kel</title>
+<para>
+  Az <systemitem class="library">x264</systemitem> egy szabad függvénykönyvtár
+  a H.264/AVC videó folyamok kódolásához.
+  Mielőtt elkezdenél kódolni, <link linkend="codec-x264-encode">be kell állítanod a 
+  <application>MEncoder</application>ben a támogatását</link>.
+</para>
+
+<sect2 id="menc-feat-x264-intro">
+<title>Milyen opciókat kell használhom a legjobb eredményhez?</title>
+
+<para>
+  Kérlek kezd az olvasást az <application>MPlayer</application> man oldalának
+  <systemitem class="library">x264</systemitem> részével.
+  Ez a rész a man oldal kiegészítésének lett szánva.
+</para>
+
+<orderedlist>
+<title>Három fő szempontot kell megfontolni, amikor kódolási opciókat
+  választasz:</title>
+  <listitem><para>A kódolási idő vs. minőség kérdés</para></listitem>
+  <listitem><para>Képkocka típusra vonatkozó döntések</para></listitem>
+  <listitem><para>Ráta és kvantálási tulajdonságokkal kapcsolatos döntések</para></listitem>
+</orderedlist>
+
+<para>
+  Ez a leírás leginkább az első kérdéssel foglalkozik.
+  A másik két típus gyakran a személyes beállítottságtól és
+  egyéni igényektől függ.
+</para>
+
+<para>
+  Mielőtt folytatnád, kérlek vedd figyelembe, hogy ez a leírás csak egy
+  minőségi mércét használ: a globális PSNR-t.
+  A PSNR rövid leírása megtalálható
+  <ulink url="http://en.wikipedia.org/wiki/PSNR">a Wikipedia PSNR-ről szóló cikkében</ulink>.
+  A globális PSNR az utolsó PSNR szám, amit kiír az <option>x264encopts</option>,
+  ha megadod neki a <option>psnr</option> opciót.
+  Bármikor, amikor egy kijelentést olvasol a PSNR-ről, él az a
+  feltételezés, hogy azonos bitrátát használsz.
+</para>
+
+<para>
+  Ezen leírás majdnem teljesen egészében feltételezi, hogy két lépéses
+  kódolást használsz.
+  Az opciók összehasonlításánál két fő érv szól a kétlépéses
+  kódolás mellett.
+  Az egyik, hogy a két lépés alkalmazása kb. 1dB PSNR-t jelent pluszba,
+  ami nagyon nagy különbség.
+  A másik, hogy az opciók tesztelésénél a direkt minőség-összehasonlítás
+  az egy lépéses kódolásokkal bizonytalan, mert a bitráta gyakran
+  jelentősen változik a kódolások között.
+  Nem minden esetben könnyű megmondani, hogy a minőség változás a
+  megváltozott opciók miatt következett-e be vagy az elért bitráta
+  különbségből adódik.
+</para>
+
+<para>
+  Azon opciók, amik segítségével a sebesség kárára javíthatod a minőséget,
+  a <option>subq</option> és a <option>frameref</option> a legfontosabbak
+  általában.
+  Ha érdekel akár a sebesség, akár a minőség tuningolása, akkor ezt a
+  két opciót kell először megvizsgálnod.
+</para>
+
+<para>
+  Sebesség szempontjából a <option>frameref</option> és a
+  <option>subq</option> opciók elég erőteljes kölcsönhatásban
+  vannak.
+  A tapasztalatok szerint egy referencia kockával a
+  <option>subq=5</option> kb. 35%-kal több időt kíván, mint a
+  <option>subq=1</option>.
+  6 referencia kockával az igény 60% fölé megy.
+  A <option>subq</option> hatása a PSNR-re elég egyenletes,
+  a referencia kockák számától függetlenül.
+  Általában a <option>subq=5</option> 0.2-0.5 dB hasznot hoz a
+  globális PSNR szempontjából a <option>subq=1</option>-hez képest.
+  Ez már látható különbség.
+</para>
+
+</sect2>
+
+<sect2 id="menc-feat-x264-encoding-options">
+<title>Az x264 kódolási opciói</title>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">frameref</emphasis>:
+  A <option>frameref</option> alapértéke 1, de ez nem jelenti
+  azt, hogy jó dolog 1-re állítani.
+  Pusztán a <option>frameref</option> növelése 2-re kb.
+  0.15dB PSNR nyereséget jelent 5-10%-os sebességcsökkenéssel; ez így
+  még jó üzletnek tűnik.
+  A <option>frameref=3</option> 0.25dB PSNR-t hoz a
+  <option>frameref=1</option>-hez képest, ami látható különbség.
+  A <option>frameref=3</option> kb. 15%-kal lassabb a
+  <option>frameref=1</option>-nél.
+  Ezután sajnos gyorsan jön a csökkenés.
+  A <option>frameref=6</option> valószínűleg csak
+  0.05-0.1 dB pluszt jelent a <option>frameref=3</option>-hoz képest,
+  további 15% sebességveszteség mellett.
+  <option>frameref=6</option> felett a minőségjavulás általában nagyon
+  kicsi (bár vedd figyelembe az egész rész olvasása közben, hogy ez
+  nagymértékben változhat a forrásodtól függően).
+  Egy átlagos esetben a <option>frameref=12</option>
+  a globális PSNR-t csekély 0.02dB-vel javítja a
+  <option>frameref=6</option>-hoz képest, 15%-20% sebességveszteség árán.
+  Az ilyen magas <option>frameref</option> értékeknél az egyedüli
+  igazán jó dolog, amit mondhatunk, hogy a további növelés majdnem
+  biztosan soha sem <emphasis role="bold">árt</emphasis> a
+  PSNR-nek, de a minőségi javulás szinte alig mérhető és nem is észrevehető.
+</para>
+<note><title>Megjegyzés:</title>
+<para>
+  A <option>frameref</option> növelése szükségtelenül magas értékekre
+  <emphasis role="bold">ronthatja</emphasis> és
+  <emphasis role="bold">általában rontja is</emphasis>
+  a kódolási hatékonyságot, ha kikapcsolod a CABAC-ot.
+  Bekapcsolt CABAC-kal (alapértelmezett), a <option>frameref</option>
+  "túl magas" értékre történő beállítása jelenleg nagyon távolinak
+  tűnik ahhoz, hogy aggódjunk miatta és a jövőben az optimalizációk
+  lehet, hogy meg is szüntetik ennek lehetőségét.
+</para>
+</note>
+<para>
+  Ha számít a sebesség, akkor megfontolandó, hogy alacsony
+  <option>subq</option> és <option>frameref</option> értékeket
+  használj az első lépésben és majd a második lépésben emeld.
+  Általában ez jelentéktelen negatív hatással van a végső minőségre:
+  valószínűleg jóval kevesebb, mint 0.1dB PSNR-t veszítesz, ami
+  túl kicsi különbség ahhoz, hogy észrevedd.
+  Bár a <option>frameref</option> különböző értékei alkalmanként
+  befolyásolhatják a frametype döntéseket.
+  Ezek legtöbbször ritka, szélsőséges esetek, de ha teljesen biztos
+  akarsz lenni, gondolkozz el rajta, hogy van-e a videódban teljes
+  képernyős ismétlődő, csillogó minta vagy nagyon nagy ideiglenes
+  elzáródás, ami kikényszeríthet egy I-kockát. 
+  Az első lépés <option>frameref</option>-jét úgy állítsd be, hogy
+  elég nagy legyen ahhoz, hogy tartalmazza a villódzási ciklust
+  (vagy az elzárást). Például ha a jelenet oda-vissza ugrál két kép
+  között három keret idejéig, állítsd be az első lépés
+  <option>frameref</option>-jét 3-ra vagy magasabbra.
+  Ez a dolog eléggé ritka az élő akciót tartalmazó videóanyagokban,
+  de néha előjön videójátékok képének mentésekor.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">bframes</emphasis>:
+  A B-kockák haszna megkérdőjelezhető a legtöbb, eddig használt codec
+  esetében.
+  A H.264-nél ez megváltozott: új technikák és blokk típusok lehetnek a
+  B-kockákban.
+  Általában még a naív B-kocka választó algoritmus is jelentős
+  PSNR hasznot hozhat.
+  Azt is érdemes megemlíteni, hogy ha kikapcsolod az adaptív
+  B-kocka döntést (<option>nob_adapt</option>), a
+  <option>bframes</option>-szel történő kódolás általában
+  valamivel gyorsít a kódolási folyamaton.
+</para>
+<para>
+  Az adaptív B-kocka döntés kikapcsolásával
+  (<option>x264encopts</option> <option>nob_adapt</option> opciója),
+  ezen beállítás optimális értéke általában a
+  <option>bframes=1</option> és <option>bframes=3</option> tartományba
+  esik. Ha az adaptív B-kocka döntés be van kapcsolva (alapértelmezett
+  tulajdonság), akkor nyugodtan használhatsz magasabb értékeket is;
+  a kódoló megpróbálja csökkenteni a B-kockák használatát azokban a
+  jelenetekben, ahol ronthatják a tömörítést.
+</para>
+<para>
+  Ha használni akarod a <option>bframes</option>-t, gondolkodj el
+  a B-kockák maximális számának 2-re vagy nagyobbra állításán,
+  hogy kihasználd a súlyozott jóslás előnyét.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">b_adapt</emphasis>:
+  Megjegyzés: Ez alapértelmezetten be van kapcsolva.
+</para>
+<para>
+  Ezzel az opcióval a kódoló egy egyszerű heurisztikát
+  fog használni a B-kockák számának csökkentésére az olyan
+  jelenetekben, amelyek nem profitálnak belőlük.
+  Használhatod a <option>b_bias</option>-t a kódoló
+  B-kocka-használatának nyomonkövetésére.
+  Az adaptív B-kockák sebességbeli hátránya jelenleg elég
+  szerény, de ilyen a potenciális minőségbeli javulás is.
+  De általában nem árt.
+  Jegyezd meg, hogy ez csak az első lépésben érinti a
+  sebességet és a képkocka típus döntéseket.
+  A <option>b_adapt</option>-nak és a <option>b_bias</option>-nak
+  nincs hatása a következő lépésekre.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">b_pyramid</emphasis>:
+  Jó ha engedélyezed ezt az opciót, ha >2 B-kockát használsz;
+  ahogy a man oldal is írja, egy kicsi minőségi javulást
+  kapsz sebességcsökkenés nélkül.
+  Jegyezd meg, hogy ezen videók nem olvashatóak a 2005.
+  március 5-nél korábbi libavcodec-alapú dekódolókkal.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">weight_b</emphasis>:
+  Általános esetekben ez az opció nem hoz sokat a konyhára.
+  Bár az át- és az elsötétülő jeleneteknél, a súlyozott
+  jóslás jelentős bitráta spórolást hoz.
+  Az MPEG-4 ASP-ben az elsötétülés általában drága I-kockák
+  sorozatával kerül legjobban elkódolásra; a B-kockákban
+  használt súlyozott jóslással lehetséges ezek legalább
+  részben a sokkal ésszerűbben-méretezett B-kockákkal
+  történő lecserélése.
+  A kódolási időben jelentkező plusz ráfordítás minimálisnak
+  tűnik, ha van egyáltalán.
+  Ellentétben azzal, amire pár ember gondol, a dekódoló CPU
+  igényét nem érinti jelentősen a súlyozott jóslás.
+</para>
+<para>
+  Sajnos a jelenlegi adaptív B-kocka döntési algoritmusnak
+  van egy olayn érdekes tulajdonsága, hogy kerüli a B-kockákat
+  az elsötétedéseknél. Amíg ez nem változik meg, jó ötlet
+  lehet a <option>nob_adapt</option> opció hozzáadása az
+  x264encopts-hoz, ha arra számítasz, hogy sötétedések jelentősen
+  befolyásolják a videódat.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
+  Ez a rész egy kicsit vitatható lesz.
+</para>
+<para>
+  A H.264 egy egyszerű deblocking eljárást definiál az I-blokkokra,
+  ami előre beállított erősséget és áteresztést használ a szóbanforgó
+  blokk QP-je alapján.
+  Alapértelmezettként a nagy QP blokkok erős szűrön mennek át, az
+  alacsony QP blokkok nem kerülnek deblock-olásra semennyire sem.
+  Az alapértelmezett értékek szerint előre beállított erősség jól
+  megválasztott és jó eséllyel PSNR-optimális bármilyen videóhoz,
+  amit csak próbálsz elkódolni.
+  A <option>deblockalpha</option> és a <option>deblockbeta</option>
+  paraméterekkel megadhatod az előre beállított deblocking áteresztés
+  eltolását.
+</para>
+<para>
+  Sokan úgy gondolják, hogy jó ötlet nagy mértékben csökkenteni a
+  deblocking szűrő erősségét (mondjuk -3-ra).
+  Ez valójában szinte soha sem jó ötlet és a legtöbb esetben
+  azok az emberek, akik ezt csinálják, nem is értik igazán,
+  hogy hogyan működik a deblocking alapból.
+</para>
+<para>
+  Az első és legfontosabb dolog azt tudni a beépített deblocking
+  szűrőről, hogy az alapértelmezett áteresztés majdnem mindig
+  PSNR-optimális.
+  Ritkább esetben nem optimális, az ideális eltolás plusz vagy
+  mínusz 1.
+  A deblocking paramétereinek nagy mértékben történő megváltoztatása
+  majdnem garantáltan rontja a PSNR-t.
+  A szűrő erősítése elmaszatol néhány részletet; a szűrő gyengítése
+  a kockásodás láthatóságát növeli.
+</para>
+<para>
+  Tipikusan rossz ötlet a deblocking áteresztés csökkentése, ha a
+  forrásod térbeli komplexitása alacsony (pl. nem túl részletes vagy
+  zajos).
+  A beépített szűrő remek munkát végez a felbukkanó mellékhatások
+  elrejtése érdekében.
+  Ha a forrásban térbeli komplexitása nagy, a mellékhatások még
+  kevésbé láthatóak.
+  Ez azért van, mert a gyűrűs haladás részletnek vagy zajnak látszik.
+  Az emberi szem könnyen meglátja, ha egy részlet elmozdul, de nem
+  olyan könnyű észrevenni, ha a zaj rosszul van reprezentálva.
+  Ha szubjektív minőséghez ér, a zaj és a részletesség valamennyire
+  felcserélhető.
+  A deblocking szűrő erősségének csökkentésével a legvalószínűbb,
+  hogy növeled a hibákat a gyűrűs mellékhatások hozzáadásával, de
+  a szem nem veszi észre, mert összekeveri a mellékhatásokat és a
+  részleteket.
+</para>
+
+<para>
+  Ez <emphasis role="bold">még</emphasis> nem igazolja a deblocking
+  szűrő erősségének csökkentését.
+  Általában jobb zajminőséget érhetsz el az utófeldolgozással.
+  Ha a H.264 kódolásod túl foltos vagy maszatos, próbáld meg 
+  lejátszani a <option>-vf noise</option> kapcsolóval.
+  A <option>-vf noise=8a:4a</option>-nak a gyenge mellékhatásokat
+  el kell tüntetnie.
+  Majdnem biztos, hogy jobb eredményt kapsz, mint a deblocking
+  szűrővel való pepecseléssel.
+</para></listitem>
+</itemizedlist>
+</sect2>
 </sect1>
 
 <sect1 id="menc-feat-telecine">
