@@ -3191,9 +3191,9 @@ Probiert zuerst die Win32-Codecs.
 .PD 1
 .
 .TP
-.B \-aspect <Verhältnis>
+.B \-aspect <Verhältnis> (siehe auch \-zoom)
 Überschreibt das Höhen-/\:Breitenverhältnis des Films in dem Falle, dass die in
-der wiedergegeben Datei gespeicherten Informationen fehlerhaft sind oder ganz
+der wiedergegebenen Datei gespeicherten Informationen fehlerhaft sind oder ganz
 fehlen.
 .sp 1
 .I BEISPIEL:
@@ -3636,20 +3636,22 @@ In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
 .B lavcresample[=srate[:Länge[:linear[:Zähler[:Abschluss]]]]]
 Ändert die Samplerate des Audiostreams zu einem Integerwert in Hz.
 Unterstützt nur das 16-bit Little-Endian-Format.
+.br
+.I ANMERKUNG:
 In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
 .PD 0
 .RSs
-.IPs srate
+.IPs <srate>
 die Samplerate der Ausgabe
-.IPs Länge
+.IPs <Länge>
 Länge: Länge des Filters hinsichtlich der niedrigeren Samplerate (Standard: 16)
-.IPs linear
+.IPs <linear>
 Falls 1 werden die Filter zwischen Polyphase-Einträgen linear interpoliert.
-.IPs Zähler
+.IPs <Zähler>
 log2 der Anzahl der Polyphase-Einträge
 (..., 10->1024, 11->2048, 12->4096, ...)
 (Standard: 10->1024)
-.IPs Abschluss
+.IPs <Abschluss>
 Abschlussfrequenz (0.0-1.0), Standardwert wird abhängig von der Filterlänge
 gesetzt.
 .RE
@@ -3667,7 +3669,7 @@ Klangs.
 .
 .TP
 .B channels[=nch]
-Ändert die Anzahl der Kanäle in nch Ausgabekanäle.
+Ändert die Anzahl der Kanäle in <nch> Ausgabekanäle.
 Falls die Anzahl der Ausgabekanäle größer ist als die Anzahl der
 Eingangskanäle,
 so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo, dann wird
@@ -3701,12 +3703,12 @@ Dieser Filter ist nicht reentrant (ablaufinvariant) und kann dementsprechend
 nur einmal pro Audiostream aufgerufen werden.
 .PD 0
 .RSs
-.IPs v
+.IPs <v>\ \ 
 Setzt die gewünschte Verstärkung in dB für alle Kanäle in diesem Stream.
 Die Verstärkung kann zwischen -200dB und +60dB liegen, wobei -200dB den
 Sound komplett verstummen lässt und +60dB einer 1000-fachen Verstärkung
 entspricht.
-.IPs sc
+.IPs <sc>\ 
 Aktiviert "Soft-Clipping".
 .RE
 .PD 1
@@ -3720,9 +3722,9 @@ heruntergemischt werden kann, findest du im Abschnitt Beispiele nahe dem Ende
 der man page.
 .PD 0
 .RSs
-.IPs n
+.IPs <n>\ \ 
 Anzahl der Eingabekanäle (1\-6).
-.IPs lij
+.IPs <lij>
 Gibt an, wieviel vom Eingabekanal j in den Ausgabekanal i gemischt wird.
 .RE
 .PD 1
@@ -3732,21 +3734,21 @@ Gibt an, wieviel vom Eingabekanal j in den Ausgabekanal i gemischt wird.
 Fügt einen Subwoofer-Kanal hinzu.
 .PD 0
 .RSs
-.IPs fc
+.IPs <fc>\ 
 Ab dieser Frequenz schneidet der Tiefpassfilter ab (20Hz bis 300Hz)
 (Standard: 60Hz).
-.IPs ch
+.IPs <ch>\ 
 Kanalnummer für die Sub-Kanäle.
 .RE
 .PD 1
 .
 .TP
-.B surround[=d]
+.B surround[=delay]
 Decoder für Matrix-encodierten Surroundsound, funktioniert bei vielen
 Zweikanaldateien.
 .PD 0
 .RSs
-.IPs d
+.IPs <delay>
 Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms)
 (Standard: 20ms).
 .RE
@@ -3764,10 +3766,10 @@ Exportiert das Eingangssignal an andere Prozesse mittels Memory Mapping
 (mmap()).
 .PD 0
 .RSs
-.IPs mmapped_file
+.IPs <mmapped_file>
 Datei, zur der die Daten exportiert werden sollen
 (Standard: ~/\:.mplayer/\:mplayer-af_export).
-.IPs nsamples
+.IPs <nsamples>
 Anzahl der Samples pro Kanal (Standard: 512)
 .RE
 .PD 1
@@ -3778,7 +3780,7 @@ Erhöht den Unterschied zwischen linken und rechten Kanälen, um der Wiedergabe
 eine Art "Live"-Effekt hinzuzufügen.
 .PD 0
 .RSs
-.IPs mul\ \ 
+.IPs <mul>
 Differenz-Koeffizient (Standard: 2.5)
 .RE
 .PD 1
@@ -3793,17 +3795,17 @@ Lade ein LADSPA (Linux Audio Developer's Simple Plugin API) Plugin.
 Es können mehrere Filter gleichzeitig verwendet werden.
 .PD 0
 .RSs
-.IPs Datei\ 
+.IPs <Datei>
 Gibt eine Bibliotheksdatei des LADSPA-Plugins an.
 Falls LADSPA_PATH gesetzt ist, wird nach der angegeben Datei gesucht.
 Ist es nicht gesetzt, muss der volle Pfadname angegeben werden.
-.IPs Label
+.IPs <Label>
 Gibt den Filter innerhalb der Bibliothek an.
 Manche Bibliotheken beinhalten nur einen Filter, andere aber enthalten mehrere.
 Angabe von 'help' zeigt alle verfügbaren Filter innerhalb der angegebenen
 Bibliothek, was die Benutzung von 'listplugins' des LADSPA SDK überflüssig
 macht.
-.IPs Kontrollen
+.IPs <Kontrollen>
 Kontrollen sind null oder mehr Fließkommawerte, die das Verhalten des
 geladenen Plugins bestimmen (zum Beispiel Verzögerung, Schwellenwert oder
 Verstärkung).
@@ -7647,7 +7649,8 @@ Setzt das Level des Bitstreams wie in Anhang A des H.264-Standard definiert.
 Dies wird benutzt, um dem Decoder mitzuteilen, welche Fähigkeiten dieser
 unterstützen muß.
 Benutze diesen Parameter nur, wenn du weißt, was er bedeutet, und du ihn
-wirklich setzen mußt. Standard: 40 (Level 4.0)
+wirklich setzen mußt.
+Standard: 40 (Level 4.0)
 .
 .TP
 .B scenecut=<-1\-100>
