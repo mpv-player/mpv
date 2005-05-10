@@ -124,7 +124,7 @@ mencoder \- Movie Encoder
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p | ftp ] ://
+.RI [ mms[t] | http | http_proxy | rt[s]p | ftp | udp] ://
 [Benutzer:Passwort@]\fIURL\fP[:Port] [Optionen]
 .br
 .in
@@ -748,8 +748,9 @@ Erhöht oder verringert die Abspielgeschwindigkeit abhängig vom angegebenen Fakto
 .
 .TP
 .B \-sstep <Sekunden>
-Zeigt einen Frame alle <Sekunden> Sekunden.
-Für Slideshows nützlich.
+Überspringt <Sekunden> Sekunden nach jedem Frame.
+Die normale Framerate des Films wird beibehalten, die Wiedergabe ist also
+beschleunigt.
 Da MPlayer nur zum nächsten Keyframe springen kann, kann diese Option ungenau
 sein.
 .
@@ -3740,6 +3741,9 @@ Aktiviert "Soft-Clipping".
 .B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Mischt Kanäle beliebig.
 Details findest du (auf Englisch) in DOCS/\:HTML/\:en/\:audio.html.
+Ein Beispiel dazu, wie mit diesem Filter eine 6-Kanal-Datei auf 2 Kanäle
+heruntergemischt werden kann, findest du im Abschnitt Beispiele nahe dem Ende
+der man page.
 .PD 0
 .RSs
 .IPs n
@@ -7804,8 +7808,7 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg Datei.avi
 .
 .TP
 .B Spiele eine 6-kanalige AAC-Datei mit nur zwei Lautsprechern ab:
-mplayer -rawaudio on:format=0xff -af pan=6:1:1:0:1:0:1:1:0:1:0:1:1
-adts_he-aac160_51.aac
+mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
 .
 .SH BEISPIELE ZUM GEBRAUCH VON MENCODER
 .
