@@ -307,9 +307,9 @@ Setze EDL-Markierung.
 .RE
 .PD 1
 .PP
-(Die folgenden Eingaben funktionieren nur in Verbindung mit hardware-beschleunigter
-Videoausgabe (xv, (x)vidix, (x)mga, etc) oder dem Software Equalizer-Filter
-(\-vf eq oder \-vf eq2).
+(Die folgenden Eingaben funktionieren nur in Verbindung mit hardwarebeschleunigter
+Videoausgabe (xv, (x)vidix, (x)mga, etc), dem Softwareequalizer-
+(\-vf eq oder \-vf eq2) oder dem Farbtonfilter (\-vf hue).
 .PP
 .PD 0
 .RSs
@@ -3903,10 +3903,10 @@ Schneidet den angegeben Teil des Bildes aus und verwirft den Rest.
 Nützlich, um schwarze Balken bei Widescreen-Filmen zu entfernen.
 .PD 0
 .RSs
-.IPs b,h
+.IPs <b>,<h>
 Abgeschnittene Breite und Höhe, ist voreingestellt auf die originale Breite
 und Höhe.
-.IPs x,y
+.IPs <x>,<y>
 Position des abgeschnittenen Bildes, ist voreingestellt auf die Mitte.
 .RE
 .PD 1
@@ -3917,12 +3917,12 @@ Berechnet die Schneideparameter für den crop-Filter und gibt die empfohlenen
 Parameter auf die Standardausgabe aus.
 .PD 0
 .RSs
-.IPs Limit
+.IPs <Limit>
 Schwellenwert, der optional angegeben werden kann als nichts (0) bis hin zu
 allem
 (255) (Standard: 24).
 .br
-.IPs Rundung
+.IPs <Rundung>
 Wert, durch den die Breite/\:Höhe teilbar sein sollte (Standard: 16).
 Der Offset wird automatisch angepasst, um das Video zu zentrieren.
 Benutze 2, um gerade Dimensionen zu bekommen (wird für 4:2:2-Video gebraucht).
@@ -3936,10 +3936,10 @@ Das Plugin reagiert auf die Direktive 'change_rectangle' der Datei input.conf,
 die zwei Parameter entgegennimmt.
 .PD 0
 .RSs
-.IPs b,h
+.IPs <b>,<h>
 Breite und Höhe (Standard: -1, maximal mögliche Breite, wobei die Begrenzungen
 sichtbar bleiben)
-.IPs x,y
+.IPs <x>,<y>
 Position der linken oberen Ecke (Standard: -1, ganz oben, ganz links)
 .RE
 .PD 1
@@ -3951,7 +3951,7 @@ platziert das unskalierte Originalbild an die Koordinaten x/\:y.
 Kann benutzt werden, um die Platzierung des OSD/\:der Untertitel auf
 schwarzen Balken zu erreichen.
 .RSs
-.IPs b,h
+.IPs <b>,<h>
 Expandierte Breite,Höhe (Standard: originale Breite,Höhe).
 Negative Werte für b und h werden als Offsets zur Originalgröße behandelt.
 .sp 1
@@ -3962,9 +3962,9 @@ Negative Werte für b und h werden als Offsets zur Originalgröße behandelt.
 Fügt unterhalb des Bildes einen Rand von 50 Pixel ein.
 .RE
 .PD 1
-.IPs x,y
+.IPs <x>,<y>
 Position des ursprünglichen Bildes im expandierten Bild (Standard: Mitte)
-.IPs o
+.IPs o\ 
 Anzeige von OSD/\:Untertiteln
 .RSss
 0: deaktiviert (Standard)
@@ -4119,7 +4119,7 @@ durchzuführen.
 Für eine Liste der verfügbaren Formate siehe format=fmt=help.
 .PD 0
 .RSs
-.IPs fourcc
+.IPs <fourcc>
 Formatname wie rgb15, bgr24, yv12 usw.\& (Standard: yuy2)
 .RE
 .PD 1
@@ -4135,7 +4135,7 @@ dem von dir angegebenen.
 Für eine Liste der verfügbaren Formate siehe noformat=fmt=help.
 .PD 0
 .RSs
-.IPs fourcc
+.IPs <fourcc>
 Formatname wie rgb15, bgr24, yv12 usw.\& (Standard: yv12)
 .RE
 .PD 1
@@ -4283,11 +4283,11 @@ je nach verfügbarer CPU-Auslastung hinzu.
 .B spp[=Qualität[:qp[:Modus]]]
 einfacher Nachbearbeitungsfilter
 .RSs
-.IPs Qualität
+.IPs <Qualität>
 0\-6 (Standard: 3)
-.IPs qp\ \ \ 
+.IPs <qp>\ 
 Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
-.IPs Modus\ \ \ 
+.IPs <Modus>
 0: harter Schwellenwert (Standard)
 .br
 1: weicher Schwellenwert (bessere Entschärfung, aber unschärfer)
@@ -4297,7 +4297,7 @@ Erzwinge Quantisierungsparameter (Standard: 0, benutze QP vom Video).
 .B qp=Gleichung
 Quantisierungsparameter- (QP) Wechselfilter
 .RSs
-.IPs Gleichung
+.IPs <Gleichung>
 eine Gleichung wie "2+2*sin(PI*qp)"
 .RE
 .
@@ -4316,13 +4316,13 @@ Schnelle Softwarekonvertierung mit libavcodec für die Benutzung von
 DVB/\:DXR3.
 Schnellere und bessere Qualität als mit \-vf fame.
 .RSs
-.IPs Qualität
+.IPs <Qualität>
 .RSss
 1\-31: feste qscale
 .br
 32\-:  feste Bitrate in kBit
 .REss
-.IPs fps\ \ 
+.IPs <fps>
 Erzwinge Ausgabe-fps (Fließkommawert) (Standard: 0, automatische
 Erkennung basierend auf Höhe)
 .RE
@@ -4339,7 +4339,7 @@ die X-Achse und berecht die Y-Achse softwareseitig, um den Aspekt
 beizubehalten.
 Nützlich nur in Verbindung mit expand und scale.
 .RSs
-.IPs Verhältnis
+.IPs <Verhältnis>
 Kontrolliere das Seitenverhältnis, berechnet durch DVB_HÖHE*VERHÄLTNIS
 (Standard:
 576*4/\:3=768), setze auf 576*(16/\:9)=1024 für einen 16:9-Fernseher.
@@ -4383,11 +4383,11 @@ Dieser Filter versucht, Bildrauschen zu unterdrücken und so bewegungslose
 Bilder wirklich statisch zu machen (was das Bild besser komprimierbar macht).
 .PD 0
 .RSs
-.IPs Helligkeit
+.IPs <Helligkeit>
 räumliche Helligkeitsstärke (Standard = 4)
-.IPs Farbwert
+.IPs <Farbwert>
 räumliche Farbstärke (Standard = 3)
-.IPs Zeit\ 
+.IPs <Zeit>
 zeitliche Stärke (Standard = 6)
 .RE
 .PD 1
@@ -4402,10 +4402,17 @@ Parameter und Gebrauch sind dieselben.
 Softwareequalizer mit interaktiver Kontrolle wie beim Hardwareequalizer, für
 Karten/\:Treiber, die die Kontrolle über Helligkeit und Kontrast via Hardware
 nicht unterstützen.
-Die Werte können zwischen -100 und 100 liegen.
-Kann in Verbindung mit MEncoder nützlich sein, einerseits, um schlecht auf
-genommene Filme zu reparieren, und zum anderen, um Artifakte zu maskieren und
-niedrigere Bitraten benutzen zu können.
+Kann in Verbindung mit MEncoder nützlich sein; einerseits, um schlecht 
+aufgenommene Filme zu reparieren, und zum anderen, um Artifakte zu maskieren
+und niedrigere Bitraten benutzen zu können.
+.PD 0
+.RSs
+.IPs <-100\-100>
+initiale Helligkeit
+.IPs <-100\-100>
+initialer Kontrast
+.RE
+.PD 1
 .
 .TP
 .B eq2[=gamma:Kontrast:Helligkeit:Sättigung:rg:gg:bg:weight]
@@ -4417,34 +4424,44 @@ alle Gammawerte 1.0 betragen!
 Die Parameter werden als Fließkommazahlen angegeben.
 .PD 0
 .RSs
-.IPs rg
-Gammawert der roten Komponente
-.IPs gg
-Gammawert der grünen Komponente
-.IPs bg
-Gammawert der blauen Komponente
-.REss
-.PD 1
-.RE
-Die Parameter rg, gg, bg sind unabhängige Gammawerte für die einzelnen
-Farbkomponenten Rot, Grün und Blau.
+.IPs <0.1\-10>
+initialer Gammawert (Standard: 1.0)
+.IPs <-2\-2>
+initialer Kontrast, wobei negative Werte ein Negativbild bewirken
+(Standard: 1.0)
+.IPs <-1\-1>
+initiale Helligkeit (Standard: 0.0)
+.IPs <0\-3>
+initiale Sättigung (Standard: 1.0)
+.IPs <0.1\-10>
+Gammawert der roten Komponente (Standard: 1.0)
+.IPs <0.1\-10>
+Gammawert der grünen Komponente  (Standard: 1.0)
+.IPs <0.1\-10>
+Gammawert der blauen Komponente  (Standard: 1.0)
+.IPs <0\-1>
 Der Parameter weight kann verwendet werden, um die Wirkung hoher Gammawerte auf
 helle Bildbereiche zu reduzieren, sie also davon abzuhalten
 zu übersteuern und ganz weiss zu werden.
 Bei 0.0 hat die Gammakorrektur gar keinen Effekt mehr, bei 1.0 hat sie die
 volle Stärke.
-Standardwerte sind gamma=1.0, Kontrast=1.0, Helligkeit=0.0,
-Sättigung=1.0 und weight=1.0.
-Die Wertebereiche betragen 0.1\-10 für gamma, -2\-2 für Kontrast (negative
-Werte invertieren das Bild), -1\-1 für die Helligkeit, 0\-3 für die
-Sättigung und 0\-1 für weight.
 .RE
+.PD 1
 .
 .TP
 .B hue[=Farbton:Sättigung]
-Standardwerte sind Farbton=0.0 und Sättigung=1.0.
-Die Wertebereiche sind -180\-180 für den Farbton und -2\-2 für die Sättigung
-(negative Werte resultieren in umgekehrten Farbwerten).
+Softwareequalizer mit interaktiver Kontrolle wie beim Hardwareequalizer, für
+Karten/\Treiber, die Farbton- und Sättigungskontrolle nicht in Hardware
+unterstützen.
+.PD 0
+.RSs
+.IPs <-180\-180>
+initiale Farbtonstärke (Standard: 0.0)
+.IPs <-100\-100>
+initiale Sättigung, wobei negative Werte zu negativer Chrominanz führen
+(Standard: 1.0)
+.RE
+.PD 1
 .
 .TP
 .B halfpack[=f]
@@ -4454,11 +4471,19 @@ Nützlich bei Ausgaben auf Geräte mit niedriger Auflösung, bei denen
 die Hardwareskalierung schlechte Qualität liefert oder nicht verfügbar ist.
 Kann auch als primitiver Deinterlacer benutzt werden, der nur auf dem
 Helligkeitsanteil arbeitet und sehr wenig CPU-Leistung erfordert.
-Standardmäßig bildet halfpack den Durchschnitt mehrer Zeilen beim
-Downsampling.
-Der optionale Parameter f steuert, welche Zeilen erhalten bleiben: bei 0
-nur die geraden, bei 1 nur die ungeraden.
-Andere Werte für f aktivieren das Standardverhalten (Durchschnittsbildung).
+.PD 0
+.RSs
+.IPs <f>\ \ 
+In der Voreinstellung bildet halfpack  beim Downsampling den Durchschnitt
+mehrer Zeilen.
+Jeder von 0 oder 1 verschiedene Wert liefert das Standardverhalten.
+.RSss
+0: Benutze beim Downsampling nur die geraden Zeilen.
+.br
+1: Benutze beim Downsampling nur die ungeraden Zeilen.
+.REss
+.RE
+.PD 1
 .
 .TP
 .B ilpack[=Modus]
@@ -4469,10 +4494,18 @@ Dieser Filter packt die planaren 4:2:0-Daten in das YUY2 (4:2:2)-Format
 mit den Chrominanzlinien an den richten Stellen.
 So kommen die Daten für Helligkeit und Chrominanz für jede Linie vom selben
 Feld.
-Das optionale Argument wählt den Sampling-Modus.
-Als Standard wird die lineare Interpolation (Modus 1) verwendet.
-Modus 0 verwendet die Sampling-Methode des nächstgelegenen Nachbars
-(nearest-neighbor), welche schnell aber unkorrekt arbeitet.
+.PD 0
+.RSs
+.IPs <Modus>
+Wähle den Sampling-Modus.
+.RSss
+0: Sampling-Methode des nächstgelegenen Nachbars (nearest-neighbor), schnell
+oder ungenau
+.br
+1: lineare Interpolation (Standard)
+.REss
+.RE
+.PD 1
 .
 .TP
 .B harddup
@@ -4500,29 +4533,41 @@ und vor all denjenigen, die CPU-intensiv sind.
 .B decimate[=max:hi:lo:frac]
 Lässt Frames weg, die sich nicht sehr on den vorigen unterscheiden, um die
 Framerate zu reduzieren.
-Das Argument max (falls positiv) setzt eine obere Grenze für die Anzahl
-aufeinanderfolgender Frames, die weggelassen werden können, sonst (falls
-negativ) das kleinste Intervall zwischen weggelassenen Frames.
+Die Hauptanwendung für diesen Filters ist die Encodierung bei sehr niedrigen
+Bitraten (z.B.\& Streaming über eine Modemverbindung), er kann aber
+theoretisch auch dazu benutzt werden, Filme zu reparieren, die mit
+inversed-telecine fehlerhaft encodiert worden sind.
+.PD 0
+.RSs
+.IPs <max>
+Setzt eine obere Grenze für die Anzahl aufeinanderfolgender Frames, die
+weggelassen werden können (falls positiv), sonst das kleinste Intervall
+zwischen weggelassenen Frames (falls negativ).
+.IPs <hi>,<lo>,<frac>
 Ein Frame ist Kanditat dafür, weggelassen zu werden, falls keine 8x8-Region
-sich mehr unterscheidet als der Schwellenwert hi angibt und falls sich nicht
-mehr als der Anteil frac angibt (wobei 1 das ganze Bild bedeutet) vom
-Schwellenwert lo unterscheidet.
-Werte für hi und lo beziehen sich auf 8x8-Pixelblöcke und repräsentieren
+sich mehr unterscheidet als der Schwellenwert <hi> angibt und falls sich nicht
+mehr als der Anteil <frac> angibt (wobei 1 das ganze Bild bedeutet) vom
+Schwellenwert <lo> unterscheidet.
+Werte für <hi> und <lo> beziehen sich auf 8x8-Pixelblöcke und repräsentieren
 aktuelle Unterschiede der Pixelwerte.
 Ein Schwellenwert von 64 entspricht einer Einheit im Unterschied für jeden
 Pixel oder derselben unterschiedlichen Ausbreitung über einen Block.
-Die Hauptanwendung für diesen Filter ist die Encodierung bei sehr niedrigen
-Bitraten (z.B.\& Streaming über eine Modemverbindung), er kann aber
-theoretisch auch dazu benutzt werden, um Filme zu reparieren, die mit
-inversed-telecine fehlerhaft encodiert worden sind.
+.RE
+.PD 1
 .
 .TP
 .B dint[=sense:level]
-Erkennt interlaced Bilder im Videostream und verwirft jeweils das erste.
-Die Werte können zwischen 0.0 und 1.0 liegen.
-Der erste Wert (Standard: 0.1) ist die relative Differenz zwischen benachbarten
-Pixeln, der zweite Wert (Standard: 0.15) gibt an, wieviel des Bildes als
-interlaced erkannt werden muss, damit das Bild verworfen wird.
+Der verwerfende Deinterlace-Filter (drop-deinterlace, dint) erkennt und
+verwirft den ersten einer Gruppe von interlaced Frames.
+.PD 0
+.RSs
+.IPs <0.0\-1.0>
+relative Differenz zwischen benachbarten Pixeln (Standard: 0.1)
+.IPs <0.0\-1.0>
+Wie groß der als interlaced erkannte Teil eines Bildes sein muß, damit der
+Frame verworfen wird (Standard: 0.15).
+.RE
+.PD 1
 .
 .TP
 .B lavcdeint (VERALTET)
@@ -4535,16 +4580,32 @@ Führt ein Deinterlacing von Teilen des Videos durch, falls ein
 wählbarer Schwellenwert überschritten wird.
 .PD 0
 .RSs
-.IPs "thresh (0 \- 255)"
-Schwellenwert (Standard 10).
-.IPs "map (0 oder 1)"
-Färbt Pixel, die den Schwellenwert überschreiten, weiß (Standard: 0).
-.IPs "order (0 oder 1)"
-Tauscht Felder falls 1 (Standard: 0).
-.IPs "sharp (0 oder 1)"
-Fügt zusätzlich Schärfe hinzu (Standard: 0).
-.IPs "twoway (0 oder 1)"
-Aktiviert zwei-Wege-Schärfung (Standard: 0).
+.IPs <0\-255>
+Schwellenwert (Standard 10)
+.IPs <map>
+.RSss
+0: Ignoriere Pixel, die den Schwellenwert überschreiten (Standard).
+.br
+1: Färbt Pixel, die den Schwellenwert überschreiten, weiß.
+.REss
+.IPs <order>
+.RSss
+0: Rühre die Felder nicht an (Standard).
+.br
+1: Tausche die Felder.
+.REss
+.IPs <sharp>
+.RSss
+0: Deaktiviert zusätzliches Schärfen (Standard).
+.br
+1: Fügt zusätzlich Schärfe hinzu.
+.REss
+.IPs <twoway>
+.RSss
+0: Deaktiviert zwei-Wege-Schärfung (default).
+.br
+1: Aktiviert zwei-Wege-Schärfung.
+.REss
 .RE
 .PD 1
 .
@@ -4638,30 +4699,35 @@ und filmdint für die meisten Anwendungen besser geeignet sind.
 Die folgenden Argumente (Syntax siehe oben) steuern das Verhalten des
 detc-Filters:
 .RSs
-.IPs dr\ \ \ 
+.IPs <dr>\ 
 Setzt den Framedropping-Modus.
-0 (Standard) bedeutet, dass kein Frame ausgelassen wird, um die Framerate der
-Ausgabe beizubehalten.
-1 bedeutet, dass ein Frame ausgelassen wird, wenn es keine Auslassungen oder
+.RSss
+0: Kein Frame wird ausgelassen, um die Framerate der Ausgabe beizubehalten
+(Standard).
+.br
+1: Ein Frame wird immer dann verworfen, wenn es keine Auslassungen oder
 Telecine-Zusammenführungen innerhalb der letzten 5 Frames gab.
-2 bedeutet, dass ein ständiges Verhältnis von 5:4 der Eingabe zur Ausgabe
-beibehalten wird.
+.br
+2: Ein ständiges Verhältnis von 5:4 der Eingabe zur Ausgabe wird beibehalten.
 .br
 .I ANMERKUNG:
 Benutze Modus 1 oder 2 mit MEncoder.
-.IPs am\ \ \ 
+.REss
+.IPs <am>\ 
 Analyse-Modus.
-Verfügbare Werte sind 0 (festgelegtes Muster mit initialer Anzahl der Frames
-angegeben durch fr=#) aund 1 (aggressive Suche nach Telecine-Muster).
-Standard ist 1.
-.IPs fr\ \ \ 
+.RSss
+0: Festgelegtes Muster mit initialer Anzahl der Frames angegeben durch <fr>.
+.br
+1: aggressive Suche nach Telecine-Muster (Standard).
+.REss
+.IPs <fr>\ 
 Setzt die initiale Anzahl der Frames in Folge.
 0\-2 sind die drei sauberen, progressiven Frames; 3 und 4 sind die beiden
 interlaced-Frames.
 Der Standardwert, -1, bedeutet 'nicht in Telecine-Abfolge'.
 Die hier angegebene Zahl gibt den Typ des imaginären vorigen Frames an, bevor
 der Film beginnt.
-.IPs "tr0, tr1, tr2, tr3"
+.IPs "<t0>, <t1>, <t2>, <t3>"
 Schwellenwerte, die in bestimmten Modi verwendet werden.
 .RE
 .
@@ -4746,27 +4812,27 @@ Frameraten, aber dies ist im Allgemeinen besser als pp=lb oder gar kein
 Deinterlacing zu benutzen.
 Es können mehrere Optionen getrennt durch / angegeben werden.
 .RSs
-.IPs crop=b:h:x:y
+.IPs crop=<w>:<h>:<x>:<y>
 Genau wie der Filter crop, aber schneller, und er funktioniert auch mit mixed
 hard und soft telecined-Inhalten, wenn y kein Vielfaches von 4 ist.
 Falls x oder y das Abschneiden von nicht-ganzzahligen Pixeln erfordern würde,
 wird die Chrominanzebene erweitert.
 Das bedeutet üblicherweise, dass x und y geradzahlig sein müssen.
-.IPs io=ifps:ofps
+.IPs io=<ifps>:<ofps>
 Für alle ifps Eingabeframes wird der Filter ofps Ausgabeframes liefern.
 Das Verhältnis von ifps/\:ofps sollte dem Verhältnis \-fps/\-ofps entsprechen.
 Dies könnte benutzt werden, um Filme zu filtern, die auf einem Fernseher mit
 einer anderen Framerate als der originalen wiedergegeben werden.
-.IPs luma_only=n
+.IPs luma_only=<n>
 Ist n ungleich 0, wird die Chrominanzebene unverändert kopiert.
 Dies ist nützlich für Fernseher im YV12-Modus, die eine der Chrominanzebenen
 wegfallen lassen.
-.IPs mmx2=n
+.IPs mmx2=<n>
 Auf der x86-Architektur, falls n=1, benutze MMX2-optimierte Funktionen, falls
 n=2, benutze 3DNow!-optimierte Funktionen, sonst einfach C.
 Wird diese Option nicht angegeben, werden MMX2 und 3DNow! automatisch erkannt.
 Benutze diese Option, um die automatische Erkennung zu übergehen.
-.IPs fast=n
+.IPs fast=<n>
 Bei größeren Werten für n wird dies den Filter auf Kosten der Genauigkeit
 beschleunigen.
 Der Standardwert ist n=3.
@@ -4782,24 +4848,24 @@ schnelleren Filter zur Folge hat, ohne dabei an Genauigkeit zu verlieren.
 Ist n=4 oder 5, so wird eine schnellere, aber weniger genauere Metrik benutzt,
 um Frameunterbrechungen zu finden, welche dazu neigt, hohe vertikale Details
 als interlaced-Inhalte fehlzuinterpretieren.
-.IPs verbose=n
+.IPs verbose=<n>
 Falls n von null verschieden ist, gibt dies die detaillierteren Metriken für
 jeden Frame aus.
 Nützlich für Debugging.
-.IPs dint_thres=n
+.IPs dint_thres=<n>
 Schwellenwert für Deinterlacing.
 Wird während des Deinterlacing von nichtgetroffenen Frames benutzt.
 Größere Werte bedeuten weniger Deinterlacing; benutze n=256, um Deinterlacing
 komplett abzuschalten.
 Standardwert ist n=8.
-.IPs comb_thres=n
+.IPs comb_thres=<n>
 Schwellenwert für den Vergleich von top fields und bottom fields.
 Standardwert ist 128.
-.IPs diff_thres=n
+.IPs diff_thres=<n>
 Schwellenwert, um die zeitliche Veränderung eines Feldes zu
 erkennen.
 Standardwert ist 128.
-.IPs sad_thres=n
+.IPs sad_thres=<n>
 Summe des "Absolute Difference"-Schwellenwerts, Standardwert ist 64.
 .RE
 .
@@ -4838,14 +4904,14 @@ Um divtc two-pass mit der two-pass-Videoencodierung zu benutzen, sind drei
 Schritte nötig: zuerst divtc Durchlauf 1 und Encoder Durchlauf 1, dann divtc
 Durchlauf 2 und Encoder Durchlauf 1, schließlich dann divtc
 Durchlauf 2 und Encoder Durchlauf 2.
-.IPs file=Dateiname
+.IPs file=<Dateiname>
 Setzt den Dateinamen für das Logfile bei two-pass (Standard: "framediff.log").
-.IPs threshold=Wert
+.IPs threshold=<Wert>
 Setzt die minimale Stärke, die das telecine-Muster haben muss, damit der Filter
 es als solches wahrnimmt (Standard: 0.5).
 Dies wird benutzt, um bei sehr dunklen oder fast still stehenden Videos die
 Erkennung von falschen Mustern zu vermeiden.
-.IPs window=numframes
+.IPs window=<numframes>
 Setzt die Anzahl der vorangegangenen Frames, die bei der Suche nach Mustern
 berücksichtigt werden (Standard: 30).
 Ein längeres Zeitfenster erhöht die Zuverlässigkeit der Mustersuche, ein
@@ -4863,7 +4929,7 @@ genutzt werden, um ein mögliches Haken am Anfang zu korrigieren.
 Der erste Durchlauf des two-pass-Modus benutzt dies auch; wenn du also die
 Ausgabe des ersten Durchlaufs speicherst, bekommst du als Ergebnis eine
 konstante Phase.
-.IPs deghost=Wert
+.IPs deghost=<Wert>
 Setzt den Schwellenwert für "Deghosting" (Entfernung von stark unscharfen
 Bildern) (0\-255 im one-pass-Modus, -255\-255 im two-pass-Modus, Standard: 0).
 Ist der Wert ungleich null, wird Deghosting benutzt.
@@ -5039,9 +5105,9 @@ Korrigiere die Perspektive von Filmen, die nicht lotrecht zum Bildschirm
 gefilmt wurden.
 .PD 0
 .RSs
-.IPs x0,y0,...
+.IPs <x0>,<y0>,...
 Koordinaten der Ecken links oben, rechts oben, links unten, rechts unten
-.IPs t\ \ \ \ 
+.IPs <t>\ \ 
 lineares (0) oder kubisches (1) Resampling
 .RE
 .PD 1
@@ -5063,7 +5129,7 @@ Dabei wird die Größe so geändert, dass das ursprüngliche Größenverhältnis
 beibehalten wird.
 .PD 0
 .RSs
-.IPs Zeilen
+.IPs <Zeilen>
 Anzahl der Zeilen, die von der Mitte des Bildes ausgewählt werden sollen
 (Standard: 12)
 .RE
@@ -5119,23 +5185,23 @@ Die Argumente sind folgende:
 .RE
 .PD 0
 .RSs
-.IPs "Breite, Höhe"
+.IPs "<Breite>, <Höhe>"
 Größe des Bildes/Bereiches.
-.IPs "xpos, ypos"
+.IPs "<xpos>, <ypos>"
 Starte bei Position x/y.
-.IPs alpha
+.IPs <alpha>
 Setzt die Alpha-Differenz.
 Wenn du den Wert auf -255 setzt, dann kannst du mit einer Sequenz von
 ALPHA-Kommandos den Bereich auf -225, -200, -175 etc.\& setzen, um einen netten
 Fade-In-Effekt zu erzielen! ;)
 .RSss
-\ \ \ 0:    genau wie bei der Vorlage.
+0:    genau wie bei der Vorlage.
 .br
-\ 255:  Bedecke alles.
+255:  Bedecke alles.
 .br
 -255: Mache alles transparent.
 .REss
-.IPs clear
+.IPs <clear>
 Lösche den Framebuffer vor dem "Blitting".
 .RSss
 0: Das Blitting eines Bildes wird nur über dem vorigen (darunterliegenden)
@@ -5213,11 +5279,11 @@ verschwindet (und manchmal etwas unschöneres entsteht \- deine Erfahrungen
 können variieren).
 .PD 0
 .RSs
-.IPs x,y
+.IPs <x>,<y>
 die linke obere Ecke des Logos
-.IPs b,h
+.IPs <b>,<h>
 Breite und Höhe des bereinigten Rechtecks
-.IPs t
+.IPs <t>
 Dicke des fließenden Übergangs des Rechtecks zum Rest (wird zur Breite und
 Höhe addiert).
 Auf -1 gesetzt wird ein grünes Rechteck auf den Bildschirm gezeichnet, um das
@@ -5230,7 +5296,7 @@ Finden der richtigen Parameter für x,y,w und h zu erleichtern.
 Software-Encoder von YV12 nach MJPEG für die Benutzung des
 zr2-Videoausgabetreibers.
 .RSs
-.IPs maxheight=h|maxwidth=b
+.IPs maxheight=<h>|maxwidth=<b>
 Diese Optionen setzen die maximale Breite und Höhe, die die zr-Karte handhaben
 kann (die Filterschicht von MPlayer kann diese momentan nicht abfragen).
 .IPs {dc10+,dc10,buz,lml33}-{PAL|NTSC}
