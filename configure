@@ -2410,6 +2410,19 @@ else
 fi
 echores "$_lrintf"
 
+echocheck "round"
+cat > $TMPC << EOF
+#include <math.h>
+int main(void) { (void) round(0.0); return 0; }
+EOF
+_round=no
+cc_check $_ld_lm && _round=yes
+if test "$_round" = yes ; then
+  _def_round="#define HAVE_ROUND 1"
+else
+  _def_round="#undef HAVE_ROUND"
+fi
+echores "$_round"
 
 echocheck "nanosleep"
 # also check for nanosleep
@@ -7405,6 +7418,9 @@ $_def_vcd
 
 /* C99 lrintf function available */
 $_def_lrintf
+
+/* round function is available */
+$_def_round
 
 /* yes, we have inttypes.h */
 #define HAVE_INTTYPES_H 1
