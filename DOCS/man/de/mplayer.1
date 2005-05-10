@@ -7642,6 +7642,14 @@ IDR-Frames schränken aufeinanderfolgende P-Frames insofern ein, dass sie auf
 keinen Frame, der vor der IDR-Frame liegt, verweisen.
 .
 .TP
+.B level_idc=<10\-51>
+Setzt das Level des Bitstreams wie in Anhang A des H.264-Standard definiert.
+Dies wird benutzt, um dem Decoder mitzuteilen, welche Fähigkeiten dieser
+unterstützen muß.
+Benutze diesen Parameter nur, wenn du weißt, was er bedeutet, und du ihn
+wirklich setzen mußt. Standard: 40 (Level 4.0)
+.
+.TP
 .B scenecut=<-1\-100>
 Steuert, wie energisch Intraframes extra eingefügt werden (Standard: 40).
 Bei geringen Werten für scenecut erzwingt der Codec häufig einen Intraframe,
