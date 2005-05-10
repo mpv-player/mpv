@@ -1763,39 +1763,11 @@ Gibt die ID für die VOBsub-Untertitel an.
 Audioverzögerung in Sekunden (positive oder negative Fließkommazahl).
 .
 .TP
-.B \-format <0\-8192>
-Wählt das Ausgabeformat der Filterschicht.
-Die Formatnummer entspricht den in libao2/\:afmt.h definierten Werten.
-.PD 0
-.RSs
-.IPs "   1"
-Mu-Law
-.IPs "   2"
-A-Law
-.IPs "   4"
-Ima-ADPCM
-.IPs "   8"
-unsigned 8-bit
-.IPs "  16"
-signed 16-bit (Little-Endian)
-.IPs "  32"
-signed 16-bit (Big-Endian)
-.IPs "  64"
-signed 8-bit
-.IPs " 128"
-unsigned  16-bit (Little-Endian)
-.IPs " 256"
-unsigned 16-bit (Big-Endian)
-.IPs " 512"
-MPEG (2) Audio
-.IPs 1024
-AC3
-.IPs 4096
-signed 32-bit (Little-Endian)
-.IPs 8192
-signed 32-bit (Big-Endian)
-.RE
-.PD 1
+.B \-format <Format> (siehe auch format Audiofilter)
+Wählt das Sampleformat, das für die Ausgabe der Filterschicht zur Soundkarte
+verwendet wird.
+Die Werte, die <Format> annehmen kann, stehen unten in der Beschreibung
+des format Audiofilters.
 .
 .TP
 .B \-mixer <Gerät>
@@ -3704,21 +3676,23 @@ Ist die Anzahl der Ausgabekanäle kleiner als die Anzahl der Eingangskanäle,
 so werden die überschüssigen Kanäle verworfen.
 .
 .TP
-.B format[=bps,f]
-Wählt das Format f und die Anzahl der Bytes pro Sample, bps, für die Ausgabe
-der Filterschicht.
-Die Option bps ist eine ganze Zahl und gibt Bytes pro Sample an.
-Das Format f ist eine Zeichenkette, die das Format beschreibt und folgende
-Optionen aneinandergehängt enthalten kann:
-.br
-alaw, mulaw oder imaadpcm
-.br
-float oder int
-.br
-unsigned oder signed
-.br
-le oder be (little- oder big-endian)
-.br
+.B format[=Format] (siehe auch \-format)
+Konvertiert zwischen verschiedenen Sampleformaten.
+Wird automatisch aktiviert, falls die Soundkarte oder ein anderer Filter dies
+benötigt.
+.PD 0
+.RSs
+.IPs <Format>
+Setzt das gewünschte Format.
+Die allgemeine Form is 'sbe', wobei 's' für 'signed' steht (alternativ 'u'
+für 'unsigned'), 'b' die Anzahl der Bits pro Sample ist (16, 24 oder 32)
+und 'e' die Endianness angibt ('le' heißt little-endian, 'be' big-endian; 'ne'
+ist die Endianness des Computers, auf dem MPlayer läuft).
+Gültige Werte (unter anderem) sind: 's16le', 'u32be' und 'u24ne'.
+Ausnahmen dieser Regel, die auch gültige Formatangaben sind: u8, s8,
+floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 und imaadpcm.
+.RE
+.PD 1
 .
 .TP
 .B volume[=v:sc]
@@ -3774,7 +3748,7 @@ Zweikanaldateien.
 .RSs
 .IPs d
 Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms)
-(Standard: 15ms).
+(Standard: 20ms).
 .RE
 .PD 1
 .
