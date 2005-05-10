@@ -6047,9 +6047,9 @@ Vermeide B-Frames in schnell bewegten Szenen.
 .PD 1
 .
 .TP
-.B vpass=<1\-2>
-Aktiviert den internen Modus für zwei (oder drei) Durchläufe.
-Gib diese Option nur an, wenn du mit zwei (oder drei) Durchläufen encodieren
+.B vpass=<1\-3>
+Aktiviert den internen Modus für zwei (oder mehr) Durchläufe.
+Gib diese Option nur an, wenn du mit zwei (oder mehr) Durchläufen encodieren
 möchtest.
 .PD 0
 .RSs
@@ -6058,7 +6058,7 @@ erster Durchlauf (siehe auch turbo)
 .IPs 2
 zweiter Durchlauf
 .IPs 3
-n-ter Durchlauf (zweiter und dritter Durchlauf beim three-pass-Modus)
+N-ter Durchlauf (zweiter und weiterer Durchläufe beim N-pass-Modus)
 .RE
 .RS
 Hier also wie es funktioniert und benutzt wird:
@@ -6070,16 +6070,24 @@ deaktivieren.
 Im two-pass-Modus (vpass=2) wird im zweiten Durchlauf die Statistikdatei
 gelesen, und die Bitratenkontrolle fällt dementsprechende Entscheidungen.
 .br
-Im three-pass-Modus (vpass=3, kein Druckfehler) wird beides getan: Erst
+Im N-pass-Modus (vpass=3, kein Druckfehler) wird beides getan: Erst
 werden die Statistiken eingelesen, dann überschrieben.
 Wenn die Möglichkeit besteht, dass du diesen Vorgang abbrechen musst, solltest
 du die Datei divx2pass.log vorher sichern.
 Du kannst alle Encodierungsoptionen verwenden, außer sehr CPU-lastigen
 wie "qns".
 .br
-Der dritte Durchlauf (vpass=3) ist derselbe wie der zweite, außer dass er für
-die Arbeit die Statistiken des zweiten Durchlaufs hat.
-Du kannst alle Encodierungsoptionen verwenden, auch CPU-intensive.
+Du kannst denselben Durchlauf wiederholt durchführen, um die Encodierung zu
+verfeinern.
+Jeder folgende Durchlauf wird die Statistiken des vorigen benutzen, um die
+Ergebnisse zu verbessern.
+Der letzte Durchlauf kann beliebige CPU-intensive Optionen beinhalten.
+.br
+Wenn du 2-pass-Encodierung möchtest, benutze zuerst vpass=1 und dann vpass=2.
+.br
+Wenn du 3- oder mehrfach-Encodierung möchtest, benutze vpass=1 für den ersten
+Durchlauf, dann vpass=3 und dann vpass=3 immer wieder, bis du mit dem Ergebnis
+zufrieden bist.
 .RE
 .PD 1
 .sp 1
