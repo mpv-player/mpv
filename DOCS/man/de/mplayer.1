@@ -7679,6 +7679,90 @@ Manche Decoder sind nicht in der Lage, große frameref-Werte zu handhaben.
 .B bframes=<0\-16>
 Anzahl aufeinanderfolgender B-Frames zwischen Intra- und P-Frames (Standard: 0)
 .
+.
+.SS MPEG Muxer (\-mpegopts)
+.
+Der MPEG Muxer kann 5 verschiedene Streamtypen generieren, wovon jeder
+sinnvolle Standardparameter hat, die der Benutzer überschreiben kann.
+Beim Generieren von mpeg-Dateien ist es generell sinnvoll, den Frame-skip Code
+von MEncoder zu benutzen (siehe \-noskip, \-mc, harddup, softskip).
+.br
+.
+.TP
+.B format=<mpeg1 | mpeg2 | xvcd | xsvcd | dvd>
+Streamformat (Standard: mpeg2)
+.
+.TP
+.B size=<bis zu 65535>
+Paketgröße in Bytes; verändere diese nicht, wenn du nicht genau weißt, was du
+tust (Standard: 2048).
+.
+.TP
+.B muxrate=<int>
+Nominale Mux-Rate in Kbit/s, die in den Paket-Headern benutzt wird (Standard:
+1800 kb/s).
+Wird aktualisiert, wenn nötig, im Falle format=mpeg1 oder mpeg2.
+.
+.TP
+.B tsaf\ \ \ 
+Setzt Zeitstempel (timestamps) bei allen Frames, wenn möglich.
+.
+.TP
+.B (no)reorder
+Aktiviert Code für Neuanordnung von Frames.
+Frames werden in Decodierungs- (und nicht Anzeige-) reihenfolge gespeichert
+(Standard: deaktiviert).
+Benutze dies nur, wenn du glaubst, dass Videoframes im originalen Stream nicht
+korrekt gespeichert wurden.
+Funktioniert nur mit MPEG-1/2-Video.
+.
+.TP
+.B init_vpts=<100\-700>
+Initiales Video pts in Millisekunden (Standard: 200).
+.
+.TP
+.B init_apts=<100\-700>
+Initiales Audio pts in Millisekunden (Standard: 200).
+.
+.
+.TP
+.B init_adelay=<-32760\--1>
+Initiale Audioanpassungszeit == Videoverzögerung in Millisekunden (Standard:
+0).
+Benutze dies, um Video in bezug zu Audio zu verzögern.
+.
+.
+.TP
+.B drop
+Bei Benutzung mit init_adelay verwirft der Muxer den Teil der Audiospur, die
+angepasst wurde.
+.
+.
+.TP
+.B vwidth, vheight=<1,4095>
+Diese Parameter verändern Videobreite und -höhe, wenn das Video mpeg1/2 ist.
+.
+.
+.TP
+.B vpswidth, vpsheight=<1,4095>
+Verändert Videobreite und -höhe bei Pan-und-Scan-Video bei mpeg2.
+.
+.
+.TP
+.B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1>
+Korrigiert den Aspekt für mpeg1/2-Video.
+.
+.
+.TP
+.B vbitrate=<int>
+Verändert die Videobitrate in Kbit/s für mpeg1/2-Video.
+.
+.
+.TP
+.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
+Verändert die Framerate bei mpeg1/2-Video.
+.
+.
 .\" --------------------------------------------------------------------------
 .\" Dateien
 .\" --------------------------------------------------------------------------
