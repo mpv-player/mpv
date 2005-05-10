@@ -3220,6 +3220,9 @@ EOF
     _aomodules="macosx $_aomodules"
     _vosrc="$_vosrc vo_quartz.c"
     _vomodules="quartz $_vomodules"
+    if test "$_cc_major" -ge "4" ; then
+      _def_altivec_h='#undef HAVE_ALTIVEC_H'
+    fi
   else
     _macosx=no
     _def_macosx='#undef MACOSX'
