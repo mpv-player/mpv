@@ -6715,6 +6715,18 @@ Modell zu kleinem Kontext
 Modell zu großem Kontext
 .RE
 .PD 1
+.sp 1
+.RS
+(für ffvhuff)
+.RE
+.PD 0
+.RSs
+.IPs 0
+vorbestimmte Huffman-Tabellen (eingebaut oder two-pass)
+.IPs 1
+adaptive Huffman-Tabellen
+.RE
+.PD 1
 .
 .TP
 .B qpel\ \ \ 
@@ -7751,16 +7763,16 @@ Funktioniert nur mit MPEG-1/2-Video.
 .
 .TP
 .B init_vpts=<100\-700>
-Initiales Video pts in Millisekunden (Standard: 200)
+initiales Video pts in Millisekunden (Standard: 200)
 .
 .TP
 .B init_apts=<100\-700>
-Initiales Audio pts in Millisekunden (Standard: 200)
+initiales Audio pts in Millisekunden (Standard: 200)
 .
 .
 .TP
-.B init_adelay=<-32760\--1>
-Initiale Audioanpassungszeit == Videoverzögerung in Millisekunden (Standard:
+.B vdelay=<1\-32760>
+Initiale Zeit, um die das Video verzögert wird, in Millisekunden (Standard:
 0), benutze dies, um Video in bezug zu Audio zu verzögern.
 .
 .TP
@@ -7771,7 +7783,7 @@ angepasst wurde.
 .
 .TP
 .B vwidth, vheight=<1,4095>
-Setzt Videobreite und -höhe, wenn das Video MPEG1/2 ist.
+Setzt Videobreite und -höhe, wenn das Video MPEG-1/2 ist.
 .
 .
 .TP
@@ -7781,7 +7793,7 @@ Setzt Videobreite und -höhe bei Pan-und-Scan-Video bei MPEG-2.
 .
 .TP
 .B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1>
-Setzt den Aspekt für mpeg1/2-Video.
+Setzt den Aspekt für MPEG-1/2-Video.
 .
 .
 .TP
@@ -7791,7 +7803,7 @@ Setzt die Videobitrate in kbit/s für MPEG-1/2-Video.
 .
 .TP
 .B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
-Setzt die Framerate bei mpeg1/2-Video.
+Setzt die Framerate bei MPEG-1/2-Video.
 Diese Option wird ignoriert, wenn sie zusammen mit der Option telecine benutzt
 wird.
 .
