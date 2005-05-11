@@ -1,4 +1,4 @@
-.\" synced with 1.959
+.\" synced with 1.963
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "29 Avril 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "11 Mai 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2378,9 +2378,9 @@ hauteur/\:largeur de fenêtres.
 .
 .TP
 .B \-ontop\ 
-Rends la fenêtre de lecture toujours visible.
+Rend la fenêtre de lecture toujours visible.
 Permise par les pilotes de sortie vidéo qui utilisent X11, excepté SDL,
-aussi bien que directx et gl2 sous Windows.
+aussi bien que directx, macosx, quartz, ggi et gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -2711,8 +2711,8 @@ Choisir la résolution du mode plein-écran (utile sur les systèmes plus lents).
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 ou 10.3.9 avec Quicktime 7)
-Pilote de sortie vidéo CoreVideo pour Mac OS X.
+.B macosx (Mac OS X 10.4 ou 10.3.9 avec QuickTime 7)
+pilote de sortie vidéo CoreVideo pour Mac OS X
 .PD 0
 .RSs
 .IPs device_id=<numéro>
@@ -6902,11 +6902,10 @@ désactivé
 Seulement recommandé si vous voulez fournir la sortie au décodeur MPEG-4 de
 référence.
 .IPs -1
-Autorise l'encodage avec des codecs non-standard (snow, ffvhuff, ffv1).
 Autorise des extensions spécifiques à libavcodec (par défaut).
 .IPs -2
 Active les codecs et les fonctionnalitées expérimentales risquant de ne
-plus pouvoir être lues dans les futures versions de MPlayer
+plus pouvoir être lues par les futures versions de MPlayer
 (snow, ffvhuff, ffv1).
 .RE
 .PD 1
@@ -8076,10 +8075,13 @@ significatif sur le temps de calcul (par défaut\: 1).
 .
 .TP
 .B bitrate=<valeur>
-Fixe le débit binaire (bitrate) à utiliser en kbits/\:seconde
+Fixe le débit binaire (bitrate) moyen à utiliser en kbits/\:seconde
 (par défaut\ : désactivé).
-Pour un encodage en débit binaire constant (CBR), vous devez définir ce
-paramètre.
+Etant donné que le débit binaire peut varier, cette moyenne peut ne
+pas être respectée pour des vidéos très courtes (voir ratetol).
+Pour un encodage en débit binaire constant (CBR), vous devez utiliser
+cette option accompagnée de vbv_maxrate, pour une qualité finale
+significativement moins bonne.
 .
 .TP
 .B qp_constant=<1\-51>
@@ -8128,12 +8130,10 @@ travailler.
 Vous pouvez utiliser toutes les options d'encodage, même les plus
 gourmandes.
 .br
-La première passe peut être effectuée à un débit binaire constant ou à
-quanta constant.
-À quanta constant, le résultat est souvent meilleur, mais requiert
-que vous deviniez un qp_constant qui serait proche du débit binaire souhaité.
-(Mieux vaut se tromper en sous-estimant qp_constant, c-à-d un débit binaire
-plus haut.)
+La première passe peut être effectuée à un débit binaire moyen (ABR) ou
+à quanta constant.
+Le mode ABR est recommandé puisqu'il ne nécessite pas que vous deviniez
+le quanta à utiliser.
 Les passes suivantes sont ABR (débit binaire moyen), et vous devez définir
 un débit binaire.
 .br
@@ -8156,7 +8156,7 @@ grandes valeurs de keyint.
 .TP
 .B keyint_min=<1\-keyint/2>
 Définit l'intervalle minimum entre chaque trame-IDR
-(par défaut\ : keyint * 0.4).
+(par défaut\ : 25).
 Si des changements de scène apparaissent dans cet intervalle, ils seront
 quand même encodés en trame-I, mais n'initient pas un nouveau GOP.
 En H.264, les trames-I n'encadrent pas nécessairement un groupe fermé de
@@ -8272,32 +8272,36 @@ Ralentit un peu l'encodage mais permet d'économiser 10-15% du bitrate.
 devriez jamais le désactiver.
 .
 .TP
-.B qp_min=<1\-51> (CBR ou 2 passes)
-Quantificateur minimum, 10\-30 semble être un intervalle raisonnable
+.B qp_min=<1\-51> (ABR ou deux passes)
+Quanta minimum, 10\-30 semble être un intervalle raisonnable
 (par défaut\ : 10).
 .TP
-.B qp_max=<1\-51> (CBR ou 2 passes)
-quantum maximum (par défaut\ : 51)
+.B qp_max=<1\-51> (ABR ou deux passes)
+quanta maximum (par défaut\ : 51)
 .
 .TP
-.B qp_step=<1\-50> (CBR ou 2 passes)
-Différence de quantum maximale autorisée d'une trame à l'autre
-(par défaut\ : 1)
+.B qp_step=<1\-50> (ABR ou deux passes)
+différence de quanta maximale autorisée d'une trame à l'autre
+(par défaut\ : 2)
 .
 .TP
-.B rc_buffer_size=<valeur> (CBR ou 2 passes)
-taille du tampon ratecontrol, en kbits (tampon permettant de distribuer
-intelligemment les bits aux trames) (par défaut\ : la taille nécessaire pour 1
-seconde au débit binaire (bitrate) que vous avez défini).
+.B ratetol=<0.1\-100.0> (ABR ou deux passes)
+écart autorisé par rapport au débit binaire donné
+(par d'unité particulière) (par défaut: 1.0)
 .
 .TP
-.B rc_init_buffer=<0.0\-1.0>  (CBR uniquement)
-Définit le niveau initial du tampon ratecontrol (fraction de la taille totale
-de ce tampon) (par défaut\ : 0.25).
+.B vbv_maxrate=<valeur> (ABR ou deux passes)
+pic maximum de débit binaire, en kbits/\:secondes
 .
 .TP
-.B rc_sens=<0\-100> (CBR uniquement)
-sensibilité du ratecontrol (default: 4)
+.B vbv_bufsize=<value> (ABR ou deux passes)
+temps de moyennage de vbv_maxrate, en kbits
+(par défaut\ : aucun, mais doit être définit si vbv_maxrate est activé)
+.
+.TP
+.B vbv_init=<0.0\-1.0> (ABR ou deux passes)
+occupation initiale du tampon, exprimé en fraction de vbv_bufsize
+(par défaut\ : 0.9)
 .
 .TP
 .B ip_factor=<value>
@@ -8308,7 +8312,7 @@ facteur de quantification entre les trames-I et -P (par défaut\ : 1.4)
 facteur de quantification entre les trames-P et -B (par défaut\ : 1.3)
 .
 .TP
-.B qcomp=<0\-1> (2 passes uniquement)
+.B qcomp=<0\-1> (ABR ou deux passes)
 compression des quantum (par défaut\ : 0.6)
 Une faible valeur rend le débit binaire plus constant,
 alors qu'une valeur importante rend les quantum plus constants.
