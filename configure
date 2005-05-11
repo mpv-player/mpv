@@ -248,6 +248,7 @@ Video output:
   --enable-aa            build with AAlib render support [autodetect]
   --enable-caca          build with CACA render support [autodetect]
   --enable-ggi           build with GGI render support [autodetect]
+  --enable-ggiwmh        build with GGI libggiwmh extension [autodetect]
   --enable-directx       build with DirectX support [autodetect]
   --enable-dxr2          build with DXR2 render support [autodetect]
   --enable-dxr3          build with DXR3/H+ render support [autodetect]
@@ -1312,6 +1313,7 @@ _md5sum=yes
 _gif=auto
 _gl=auto
 _ggi=auto
+_ggiwmh=auto
 _aa=auto
 _caca=auto
 _svga=auto
@@ -1477,6 +1479,8 @@ for ac_option do
   --disable-gl)		_gl=no		;;
   --enable-ggi)		_ggi=yes	;;
   --disable-ggi)	_ggi=no		;;
+  --enable-ggiwmh)	_ggiwmh=yes	;;
+  --disable-ggiwmh)	_ggiwmh=no	;;
   --enable-aa)		_aa=yes		;;
   --disable-aa)		_aa=no		;;
   --enable-caca)	_caca=yes	;;
@@ -3817,6 +3821,27 @@ else
   _novomodules="ggi $_novomodules"
 fi
 echores "$_ggi"
+
+echocheck "GGI extension: libggiwmh"
+if test "$_ggiwmh" = auto ; then
+  _ggiwmh=no
+  cat > $TMPC << EOF
+#include <ggi/ggi.h>
+#include <ggi/wmh.h>
+int main(void) { return 0; }
+EOF
+  cc_check -lggi -lggiwmh && _ggiwmh=yes
+fi
+# needed to get right output on obscure combination
+# like --disable-ggi --enable-ggiwmh
+if test "$_ggi" = yes && test "$_ggiwmh" = yes ; then
+  _def_ggiwmh='#define HAVE_GGIWMH 1'
+  _ld_ggi="$_ld_ggi -lggiwmh"
+else
+  _ggiwmh=no
+  _def_ggiwmh='#undef HAVE_GGIWMH'
+fi
+echores "$_ggiwmh"
 
 
 echocheck "AA"
@@ -7583,6 +7608,7 @@ $_def_sdl
 $_def_sdlbuggy
 $_def_directx
 $_def_ggi
+$_def_ggiwmh
 $_def_3dfx
 $_def_tdfxfb
 $_def_tdfxvid
