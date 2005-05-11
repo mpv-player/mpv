@@ -7623,6 +7623,15 @@ auch gute Qualität liefern.
 .REss
 .
 .TP
+.B (no)weight_b
+Benutze gewichtete Vorhersage für B-Frames.
+Ohne diese Option liefern bidirektional gerichtete Makroblöcke jedem
+Referenzframe das gleiche Gewicht.
+Mit dieser Option wird die Gewichtung durch Bestimmung der zeitlichen Position
+eines B-Frames zu seinen Referenzen bestimmt.
+Benötigt bframes > 1.
+.
+.TP
 .B keyint=<Wert>
 Setzt das maximale Intervall zwischen IDR-Frames (Standard: 250).
 Größere Werte sparen Bits und erhöhen so die Qualität, dies geht aber auf
