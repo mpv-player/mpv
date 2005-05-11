@@ -1314,7 +1314,7 @@ Ein Wert von 0 bedeutet: Nimm Audio und Video zusammen in einem Puffer auf
 Ein Wert von 1 bedeutet: Nimm nur Video direkt von der Karte und Audio
 über ein externes Kabel von der TV-Karte zur Soundkarte auf (Standardwert
 für MPlayer).
-.IPs mjpeg (siehe auch vstrict)
+.IPs mjpeg
 Benutzte Hardware-MJPEG-Kompression (wenn dies die Karte unterstützt). 
 Bei dieser Option mußt du Breite und Höhe des Ausgabefensters nicht
 angeben, denn MPlayer ermittelt diese Werte automatisch vom
@@ -3653,13 +3653,13 @@ Die verfügbaren Filter lauten:
 .TP
 .B resample[=srate[:salopp][:Typ]]
 Ändert die Samplerate des Audiostreams zu der ganzzahligen srate (in Hz).
-Unterstützt nur das 16-bit Little-Endian-Format.
+Unterstützt nur 16-bit-Integer und -Float im Native-Endian-Format.
 In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
 .
 .TP
 .B lavcresample[=srate[:Länge[:linear[:Zähler[:Abschluss]]]]]
 Ändert die Samplerate des Audiostreams zu einem Integerwert in Hz.
-Unterstützt nur das 16-bit Little-Endian-Format.
+Unterstützt nur das 16-bit Native-Endian-Format.
 .br
 .I ANMERKUNG:
 In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
@@ -6402,7 +6402,7 @@ deaktiviert (Standard)
 Nur empfehlenswert, wenn die Ausgabe mit einem MPEG-4-Referenzdecoder
 decodiert werden soll.
 .IPs -1
-Erlaubt die Benutzung nicht-standardkonformer Codecs (mjpeg, ffvhuff, ffv1).
+Erlaubt die Benutzung nicht-standardkonformer Codecs (snow, ffvhuff, ffv1).
 .RE
 .PD 1
 .
@@ -7721,7 +7721,19 @@ Manche Decoder sind nicht in der Lage, große frameref-Werte zu handhaben.
 .
 .TP
 .B bframes=<0\-16>
-Anzahl aufeinanderfolgender B-Frames zwischen Intra- und P-Frames (Standard: 0)
+maximale Anzahl aufeinanderfolgender B-Frames zwischen Intra- und P-Frames
+(Standard: 0)
+.
+.TP
+.B (no)b_adapt
+Entscheidet automatisch, wann und wie viele B-Frames benutzt werden, bis zum
+oben definierten Maximum (Standard: ein).
+Wenn diese Option deaktiviert ist, wird die maximale Anzahl B-Frames benutzt.
+.
+.TP
+.B b_bias=<-100\-100>
+Steuert die von b_adapt getroffene Entscheidung.
+Ein höherer b_bias-Wert bewirkt mehr B-Frames (Standard: 0).
 .
 .
 .SS MPEG Muxer (\-mpegopts)
