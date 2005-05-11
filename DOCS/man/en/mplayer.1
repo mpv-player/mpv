@@ -7709,8 +7709,11 @@ performance penalty (default: 1).
 .
 .TP
 .B bitrate=<value>
-Sets the bitrate to be used in kbits/\:second (default: off).
-This is required if you want a CBR (constant bitrate) encode.
+Sets the average bitrate to be used in kbits/\:second (default: off).
+Since local bitrate may vary, this average may be inaccurate for
+very short videos (see ratetol).
+Constant bitrate can be achieved by combining this with vbv_maxrate,
+at significant reduction in quality.
 .
 .TP
 .B qp_constant=<1\-51>
@@ -7756,10 +7759,8 @@ The third pass (pass=3) is the same as the second pass, except that it has
 the second pass' stats to work from.
 You can use all encoding options, including CPU-hungry ones.
 .br
-The first pass may use either constant bitrate or constant quantizer.
-Constant quantizer is often slightly better, but requires that you guess a
-qp_constant that is somewhere near your desired bitrate.
-(It is better to err on the side of lower qp_constant, i.e.\& higher bitrate.)
+The first pass may use either average bitrate or constant quantizer.
+ABR is recommended, since it doesn't require guessing a quantizer.
 Subsequent passes are ABR, and must specify bitrate.
 .br
 .I
@@ -7779,7 +7780,7 @@ values of keyint.
 .
 .TP
 .B keyint_min=<1\-keyint/2>
-Sets minimum interval between IDR-frames (default: keyint * 0.4).
+Sets minimum interval between IDR-frames (default: 25).
 If scenecuts appear within this interval, they are still encoded as
 I-frames, but do not start a new GOP.
 In H.264, I-frames do not necessarily bound a closed GOP because it is
@@ -7877,30 +7878,34 @@ Slightly slows down encoding and decoding, but should save 10-15% bitrate.
 Unless you are looking for decoding speed, you should not disable it.
 .
 .TP
-.B qp_min=<1\-51> (CBR or two pass)
+.B qp_min=<1\-51> (ABR or two pass)
 Minimum quantizer, 10\-30 seems to be a useful range (default: 10).
 .
 .TP
-.B qp_max=<1\-51> (CBR or two pass)
+.B qp_max=<1\-51> (ABR or two pass)
 maximum quantizer (default: 51)
 .
 .TP
-.B qp_step=<1\-50> (CBR or two pass)
-Maximum Value by which the quantizer may be incremented/decremented between
-frames (default: 1).
+.B qp_step=<1\-50> (ABR or two pass)
+maximum value by which the quantizer may be incremented/decremented between
+frames (default: 2)
 .
 .TP
-.B rc_buffer_size=<value> (CBR or two pass)
-ratecontrol buffer size, in kbit (default: 1 second's worth at the bitrate you
-specified)
+.B ratetol=<0.1\-100.0> (ABR or two pass)
+allowed variance in average bitrate (no particular units) (default: 1.0)
 .
 .TP
-.B rc_init_buffer=<0.0\-1.0> (CBR only)
-Set the initial ratecontrol buffer fullness (default: 0.25).
+.B vbv_maxrate=<value> (ABR or two pass)
+maximum local bitrate, in kbits/\:second (default: disabled)
 .
 .TP
-.B rc_sens=<0\-100> (CBR only)
-ratecontrol sensitivity (default: 4)
+.B vbv_bufsize=<value> (ABR or two pass)
+averaging period for vbv_maxrate, in kbits
+(default: none, must be specified if vbv_maxrate is enabled)
+.
+.TP
+.B vbv_init=<0.0\-1.0> (ABR or two pass)
+initial buffer occupancy, as a fraction of vbv_bufsize (default: 0.9)
 .
 .TP
 .B ip_factor=<value>
@@ -7911,7 +7916,7 @@ quantizer factor between I- and P-frames (default: 1.4)
 quantizer factor between P- and B-frames (default: 1.3)
 .
 .TP
-.B qcomp=<0\-1> (two pass only)
+.B qcomp=<0\-1> (ABR or two pass)
 quantizer compression (default: 0.6).
 A lower value makes the bitrate more constant,
 while a higher value makes the quantization parameter more constant.
