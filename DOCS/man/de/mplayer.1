@@ -882,8 +882,10 @@ Gibt das CD-ROM-Gerät an (Standard: /dev/\:cdrom).
 .B \-channels <Anzahl>
 Ändere die Anzahl der wiederzugebenden Kanäle (Standard: 2).
 Wenn die Anzahl der Ausgabekanäle größer als die Anzahl der Eingangskanäle ist,
-dann werden leere Kanäle erzeugt (es sei denn, es wird von Mono zu Stereo
-erweitert - dann wird der Mono-Kanal auf beiden Kanälen wiederholt).
+dann werden leere Kanäle unter Zuhilfenahme des channels Audiofilter erzeugt
+(es sei denn, es wird von Mono zu Stereo erweitert - dann wird der Mono-Kanal
+auf beiden Kanälen wiederholt).
+Das Routing wird das Standard-Routing für den channels Filter sein.
 Wenn die Anzahl der Eingangskanäle größer als die Anzahl der Ausgabekanäle ist,
 dann hängt das Ergebnis vom Audiodecoder (\-afm) ab.
 MPlayer weist den Decoder an, den Ton in so viele Kanäle zu decodieren,
@@ -898,11 +900,11 @@ einen korrekten Downmix des Audios auf die geforderte Anzahl von Kanälen.
 .br
 .I ANMERKUNG:
 .br
-Diese Option wird von den Codecs (nur AC3), den Filtern (Surround)
-und den ao-Treibern (zumindest von OSS) beachtet.
-
+Diese Option wird von den Codecs (nur AC3), den Filtern (surround)
+und den Audioausgabetreibern (zumindest von OSS) beachtet.
+.sp 1
 Verfügbare Optionen sind:
-
+.sp 1
 .PD 0
 .RSs
 .IPs 2
@@ -1164,9 +1166,14 @@ am Anfang.
 .
 .TP
 .B \-srate <Hz>
-Erzwingt eine Audioabspielrate, wobei bei Bedarf ein Resampling stattfindet.
+Erzwingt eine zu benutzende Audioabspielrate (natürlich haben Soundkarten
+diesbezüglich Beschränkungen).
+Falls die gewählte Samplefrequenz verschieden von der des aktuellen Mediums
+ist, wird der resample oder lavcresample Audiofilter in die Audiofilterschicht
+eingefügt, um den Unterschied auszugleichen.
 Der Resampling-Typ kann mit der Option \-af-adv gesteuert werden.
 Standard ist ein schnelles Resampling, das Störungen verursachen kann.
+.br
 MEncoder übergibt diesen Wert an lame für das Resampling.
 .
 .TP
@@ -3766,8 +3773,7 @@ Zweikanaldateien.
 .PD 0
 .RSs
 .IPs <delay>
-Verzögerung in ms für den hinteren Lautsprecher (0ms bis 1000ms)
-(Standard: 20ms).
+Verzögerung in ms für den hinteren Lautsprecher (0 bis 1000) (Standard: 20).
 .RE
 .PD 1
 .
@@ -7710,8 +7716,9 @@ Anzahl aufeinanderfolgender B-Frames zwischen Intra- und P-Frames (Standard: 0)
 .
 Der MPEG Muxer kann 5 verschiedene Streamtypen generieren, wovon jeder
 sinnvolle Standardparameter hat, die der Benutzer überschreiben kann.
-Beim Generieren von mpeg-Dateien ist es generell sinnvoll, den Frame-skip Code
-von MEncoder zu benutzen (siehe \-noskip, \-mc, harddup, softskip).
+Beim Generieren von MPEG-Dateien ist es generell sinnvoll, den Frame-skip Code
+von MEncoder zu benutzen (siehe \-noskip, \-mc sowie die Videofilter harddup
+und softskip).
 .br
 .
 .TP
@@ -7725,9 +7732,9 @@ tust (Standard: 2048).
 .
 .TP
 .B muxrate=<int>
-Nominale Mux-Rate in Kbit/s, die in den Paket-Headern benutzt wird (Standard:
+Nominale Mux-Rate in kbit/s, die in den Paket-Headern benutzt wird (Standard:
 1800 kb/s).
-Wird aktualisiert, wenn nötig, im Falle format=mpeg1 oder mpeg2.
+Wird aktualisiert, wenn nötig, im Falle 'format=mpeg1' oder 'mpeg2'.
 .
 .TP
 .B tsaf\ \ \ 
@@ -7744,19 +7751,17 @@ Funktioniert nur mit MPEG-1/2-Video.
 .
 .TP
 .B init_vpts=<100\-700>
-Initiales Video pts in Millisekunden (Standard: 200).
+Initiales Video pts in Millisekunden (Standard: 200)
 .
 .TP
 .B init_apts=<100\-700>
-Initiales Audio pts in Millisekunden (Standard: 200).
+Initiales Audio pts in Millisekunden (Standard: 200)
 .
 .
 .TP
 .B init_adelay=<-32760\--1>
 Initiale Audioanpassungszeit == Videoverzögerung in Millisekunden (Standard:
-0).
-Benutze dies, um Video in bezug zu Audio zu verzögern.
-.
+0), benutze dies, um Video in bezug zu Audio zu verzögern.
 .
 .TP
 .B drop\ \ \ 
@@ -7766,27 +7771,29 @@ angepasst wurde.
 .
 .TP
 .B vwidth, vheight=<1,4095>
-Diese Parameter verändern Videobreite und -höhe, wenn das Video mpeg1/2 ist.
+Setzt Videobreite und -höhe, wenn das Video MPEG1/2 ist.
 .
 .
 .TP
 .B vpswidth, vpsheight=<1,4095>
-Verändert Videobreite und -höhe bei Pan-und-Scan-Video bei mpeg2.
+Setzt Videobreite und -höhe bei Pan-und-Scan-Video bei MPEG-2.
 .
 .
 .TP
 .B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1>
-Korrigiert den Aspekt für mpeg1/2-Video.
+Setzt den Aspekt für mpeg1/2-Video.
 .
 .
 .TP
 .B vbitrate=<int>
-Verändert die Videobitrate in Kbit/s für mpeg1/2-Video.
+Setzt die Videobitrate in kbit/s für MPEG-1/2-Video.
 .
 .
 .TP
 .B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
-Verändert die Framerate bei mpeg1/2-Video.
+Setzt die Framerate bei mpeg1/2-Video.
+Diese Option wird ignoriert, wenn sie zusammen mit der Option telecine benutzt
+wird.
 .
 .
 .\" --------------------------------------------------------------------------
