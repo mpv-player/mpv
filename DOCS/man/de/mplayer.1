@@ -1307,7 +1307,7 @@ Ein Wert von 0 bedeutet: Nimm Audio und Video zusammen in einem Puffer auf
 Ein Wert von 1 bedeutet: Nimm nur Video direkt von der Karte und Audio
 über ein externes Kabel von der TV-Karte zur Soundkarte auf (Standardwert
 für MPlayer).
-.IPs mjpeg
+.IPs mjpeg (siehe auch vstrict)
 Benutzte Hardware-MJPEG-Kompression (wenn dies die Karte unterstützt). 
 Bei dieser Option mußt du Breite und Höhe des Ausgabefensters nicht
 angeben, denn MPlayer ermittelt diese Werte automatisch vom
@@ -3155,7 +3155,7 @@ Probiere andere Codecs, ausgenommen den MP3-Decoder von FFmpeg.
 .B \-af-adv <force=(0\-3):list=(Filter)> (siehe auch \-af)
 Gibt erweiterte Audiofilteroptionen an:
 .RSs
-.IPs force=<0-3>
+.IPs force=<0\-7>
 Erzwingt das Einfügen von Audiofiltern nach folgenden Regeln:
 .RSss
 0: Komplett automatisches Einfügen (Standard)
@@ -3163,8 +3163,25 @@ Erzwingt das Einfügen von Audiofiltern nach folgenden Regeln:
 1: Optimiere auf Genauigkeit.
 .br
 2: Optimiere auf Geschwindigkeit.
+.I Warnung:
+Manche Features der Audiofilter können ohne Meldung zu geben versagen, wodurch
+sich die Audioqualität verringern kann.
 .br
-3: Schalte automatisches Einfügen ab.
+3: Benutze kein automatisches Einfügen von Filtern und keine Optimierung.
+.I Warnung:
+Diese Einstellung kann MPlayer zum Absturz bringen.
+.br
+4: Benutze automatisches Einfügen von Filtern gemäß Option 0 oben, benutze
+aber Verarbeitung von Fließkommawerten, falls möglich.
+.br
+5: Benutze automatisches Einfügen von Filtern gemäß Option 1 oben, benutze
+aber Verarbeitung von Fließkommawerten, falls möglich.
+.br
+6: Benutze automatisches Einfügen von Filtern gemäß Option 2 oben, benutze
+aber Verarbeitung von Fließkommawerten, falls möglich.
+.br
+7: Benutze automatisches Einfügen von Filtern gemäß Option 3 oben, benutze
+aber Verarbeitung von Fließkommawerten, falls möglich.
 .REss
 .IPs list=<Filter>
 Das gleiche wie \-af (siehe \-af).
@@ -5520,8 +5537,8 @@ folgende Syntax benutzt:
 .B \-<Codec>opts <Option1[=Wert1],Option2,...>
 .
 .PP
-wobei <Codec> einer der folgenden sein kann: lavc, xvidenc, divx4, lame,
-toolame und x264enc
+Wobei <Codec> einer der folgenden sein kann: lavc, xvidenc, divx4, lame,
+toolame, x264enc und mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5841,11 +5858,13 @@ MPEG-1-Video
 MPEG-2-Video
 .IPs huffyuv
 HuffYUV
+.IPs ffvhuff (siehe auch: vstrict)
+nicht-standardkonformes, 20% kleineres HuffYUV, benutzt YV12
 .IPs asv1\ 
 ASUS Video v1
 .IPs asv2\ 
 ASUS Video v2
-.IPs ffv1\ 
+.IPs ffv1 (siehe auch: vstrict)
 FFmpegs verlustfreier Videocodec
 .RE
 .PD 1
@@ -6377,9 +6396,7 @@ deaktiviert (Standard)
 Nur empfehlenswert, wenn die Ausgabe mit einem MPEG-4-Referenzdecoder
 decodiert werden soll.
 .IPs -1
-Erlaubt nicht-standardkonforme YV12-HuffYUV-Encodierung (20% kleinere
-Dateien, die aber nicht mit dem offiziellen HuffYUV-Codec abgespielt
-werden können).
+Erlaubt die Benutzung nicht-standardkonformer Codecs (mjpeg, ffvhuff, ffv1).
 .RE
 .PD 1
 .
@@ -7742,7 +7759,7 @@ Benutze dies, um Video in bezug zu Audio zu verzögern.
 .
 .
 .TP
-.B drop
+.B drop\ \ \ 
 Bei Benutzung mit init_adelay verwirft der Muxer den Teil der Audiospur, die
 angepasst wurde.
 .
