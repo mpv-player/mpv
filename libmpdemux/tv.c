@@ -180,8 +180,10 @@ static int open_tv(tvi_handle_t *tvh)
 	case IMGFMT_YUY2:
 	case IMGFMT_RGB32:
 	case IMGFMT_RGB24:
-	case IMGFMT_RGB16:
-	case IMGFMT_RGB15:
+	case IMGFMT_BGR32:
+	case IMGFMT_BGR24:
+	case IMGFMT_BGR16:
+	case IMGFMT_BGR15:
 	    break;
 	default:
 	    mp_msg(MSGT_TV, MSGL_ERR, "==================================================================\n");
