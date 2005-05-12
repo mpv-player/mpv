@@ -444,7 +444,14 @@ void free_stream(stream_t *s){
   default:
     if(s->close) s->close(s);
   }
-  if(s->fd>0) closesocket(s->fd);
+  if(s->fd>0){
+    /* on unix we define closesocket to close
+       on windows however we have to distinguish between
+       network socket and file */
+    if(s->url && strstr(s->url,"://"))
+      closesocket(s->fd);
+    else close(s->fd);
+  }
 #ifdef HAVE_WINSOCK2
   mp_msg(MSGT_STREAM,MSGL_V,"WINSOCK2 uninit\n");
   WSACleanup(); // there might be a better place for this (-> later)
