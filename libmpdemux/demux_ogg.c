@@ -1187,6 +1187,7 @@ int demux_ogg_open(demuxer_t* demuxer) {
 
   mp_msg(MSGT_DEMUX,MSGL_V,"Ogg demuxer : found %d audio stream%s, %d video stream%s and %d text stream%s\n",n_audio,n_audio>1?"s":"",n_video,n_video>1?"s":"",ogg_d->n_text,ogg_d->n_text>1?"s":"");
 
+  sh_a = demuxer->audio->sh;
   if(sh_a)
     if(sh_a->format == FOURCC_VORBIS)
       fixup_vorbis_wf(sh_a);
