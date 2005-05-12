@@ -754,14 +754,14 @@ static inline unsigned int store_ughvlc(unsigned char *s, unsigned int v)
 
 static void fixup_vorbis_wf(sh_audio_t *sh)
 {
-  int i, k, offset;
+  int i, offset;
   ogg_packet op[3];
   unsigned char *buf[3];
   unsigned char *ptr;
 
   for(i = 0; i < 3; i++) {
     op[i].bytes = ds_get_packet(sh->ds, &(op[i].packet));
-    mp_msg(MSGT_DEMUX,MSGL_V, "fixup_vorbis_wf: i=%d, size=%d\n", i, op[i].bytes);
+    mp_msg(MSGT_DEMUX,MSGL_V, "fixup_vorbis_wf: i=%d, size=%ld\n", i, op[i].bytes);
     if(op[i].bytes < 0) {
        mp_msg(MSGT_DEMUX,MSGL_ERR,"Ogg demuxer error!, fixup_vorbis_wf: bad packet n. %d\n", i);
        return;
@@ -778,11 +778,11 @@ static void fixup_vorbis_wf(sh_audio_t *sh)
   ptr[0] = 2;
   offset = 1;
   offset += store_ughvlc(&ptr[offset], op[0].bytes);
-  mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, offset after 1st len = %d\n", offset);
+  mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, offset after 1st len = %u\n", offset);
   offset += store_ughvlc(&ptr[offset], op[1].bytes);
-  mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, offset after 2nd len = %d\n", offset);
+  mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, offset after 2nd len = %u\n", offset);
   for(i = 0; i < 3; i++) {
-    mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, i=%d\n", op[i].bytes, offset, i);
+    mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, i=%d, bytes: %ld, offset: %u\n", i, op[i].bytes, offset);
     memcpy(&ptr[offset], buf[i], op[i].bytes);
     offset += op[i].bytes;
   }
