@@ -72,6 +72,11 @@ static int init(sh_audio_t *sh)
     return 0; \
   }
 
+  /// Init the decoder with the 3 header packets
+  ov = (struct ov_struct_st*)malloc(sizeof(struct ov_struct_st));
+  vorbis_info_init(&ov->vi);
+  vorbis_comment_init(&vc);
+
   if(! sh->wf) {
     mp_msg(MSGT_DECAUDIO,MSGL_ERR,"ad_vorbis, extradata seems to be absent! exit\n");
     ERROR();
@@ -117,10 +122,6 @@ static int init(sh_audio_t *sh)
   hsizes[2] = sh->wf->cbSize - offset - hsizes[0] - hsizes[1];
   mp_msg (MSGT_DEMUX, MSGL_V, "ad_vorbis, header sizes: %d %d %d\n", hsizes[0], hsizes[1], hsizes[2]);
 
-  /// Init the decoder with the 3 header packets
-  ov = (struct ov_struct_st*)malloc(sizeof(struct ov_struct_st));
-  vorbis_info_init(&ov->vi);
-  vorbis_comment_init(&vc);
   for(i=0; i<3; i++) {
     op.bytes = hsizes[i];
     op.packet = headers[i];
