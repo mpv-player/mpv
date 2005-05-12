@@ -164,8 +164,8 @@ static int fcc_mp2vl(int fcc)
 {
     switch (fcc) {
     case IMGFMT_RGB8:	return V4L2_PIX_FMT_RGB332;
-    case IMGFMT_RGB15:	return V4L2_PIX_FMT_RGB555;
-    case IMGFMT_RGB16:	return V4L2_PIX_FMT_RGB565;
+    case IMGFMT_BGR15:	return V4L2_PIX_FMT_RGB555;
+    case IMGFMT_BGR16:	return V4L2_PIX_FMT_RGB565;
     case IMGFMT_RGB24:	return V4L2_PIX_FMT_RGB24;
     case IMGFMT_RGB32:	return V4L2_PIX_FMT_RGB32;
     case IMGFMT_BGR24:	return V4L2_PIX_FMT_BGR24;
@@ -187,8 +187,8 @@ static int fcc_vl2mp(int fcc)
 {
     switch (fcc) {
     case V4L2_PIX_FMT_RGB332:	return IMGFMT_RGB8;
-    case V4L2_PIX_FMT_RGB555:	return IMGFMT_RGB15;
-    case V4L2_PIX_FMT_RGB565:	return IMGFMT_RGB16;
+    case V4L2_PIX_FMT_RGB555:	return IMGFMT_BGR15;
+    case V4L2_PIX_FMT_RGB565:	return IMGFMT_BGR16;
     case V4L2_PIX_FMT_RGB24:	return IMGFMT_RGB24;
     case V4L2_PIX_FMT_RGB32:	return IMGFMT_RGB32;
     case V4L2_PIX_FMT_BGR24:	return IMGFMT_BGR24;
