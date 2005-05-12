@@ -1781,48 +1781,8 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
         track->a_formattag = mmioFOURCC('M', 'P', '4', 'A');
       else if (!strcmp(track->codec_id, MKV_A_VORBIS))
         {
-          unsigned char *c;
-          uint32_t offset, length;
-
           if (track->private_data == NULL)
             return 1;
-
-          c = (unsigned char *) track->private_data;
-          if (*c != 2)
-            {
-              mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Vorbis track does not "
-                      "contain valid headers.\n");
-              return 1;
-            }
-
-          offset = 1;
-          for (i=0; i < 2; i++)
-            {
-              length = 0;
-              while (c[offset] == (unsigned char) 0xFF
-                     && length < track->private_size)
-                {
-                  length += 255;
-                  offset++;
-                }
-              if (offset >= (track->private_size - 1))
-                {
-                  mp_msg (MSGT_DEMUX, MSGL_WARN, "[mkv] Vorbis track "
-                          "does not contain valid headers.\n");
-                  return 1;
-                }
-              length += c[offset];
-              offset++;
-              track->header_sizes[i] = length;
-            }
-
-          track->headers[0] = &c[offset];
-          track->headers[1] = &c[offset + track->header_sizes[0]];
-          track->headers[2] = &c[offset + track->header_sizes[0] +
-                                 track->header_sizes[1]];
-          track->header_sizes[2] = track->private_size - offset
-            - track->header_sizes[0] - track->header_sizes[1];
-
           track->a_formattag = mmioFOURCC('v', 'r', 'b', 's');
         }
       else if (!strcmp(track->codec_id, MKV_A_QDMC))
@@ -1954,14 +1914,9 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
     }
   else if (track->a_formattag == mmioFOURCC('v', 'r', 'b', 's'))  /* VORBIS */
     {
-      for (i=0; i < 3; i++)
-        {
-          dp = new_demux_packet (track->header_sizes[i]);
-          memcpy (dp->buffer,track->headers[i],track->header_sizes[i]);
-          dp->pts = 0;
-          dp->flags = 0;
-          ds_add_packet (demuxer->audio, dp);
-        }
+      sh_a->wf->cbSize = track->private_size;
+      sh_a->wf = (WAVEFORMATEX*)realloc(sh_a->wf, sizeof(WAVEFORMATEX) + sh_a->wf->cbSize);
+      memcpy((unsigned char *) (sh_a->wf+1), track->private_data, sh_a->wf->cbSize);
     }
   else if (track->private_size >= sizeof(real_audio_v4_props_t)
            && !strncmp (track->codec_id, MKV_A_REALATRC, 7))

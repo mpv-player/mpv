@@ -736,6 +736,86 @@ char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
 
 void demux_close_ogg(demuxer_t* demuxer);
 
+static inline unsigned int store_ughvlc(unsigned char *s, unsigned int v)
+{
+  unsigned int n = 0;
+
+  while(v >= 0xff)
+  {
+    *s++ = 0xff;
+    v -= 0xff;
+    n++;
+  }
+  *s = v;
+  n++;
+
+  return n;
+}
+
+static void fixup_vorbis_wf(sh_audio_t *sh)
+{
+  int i, k, offset;
+  ogg_packet op[3];
+  unsigned char *buf[3];
+  unsigned char *ptr;
+
+  for(i = 0; i < 3; i++) {
+    op[i].bytes = ds_get_packet(sh->ds, &(op[i].packet));
+    mp_msg(MSGT_DEMUX,MSGL_V, "fixup_vorbis_wf: i=%d, size=%d\n", i, op[i].bytes);
+    if(op[i].bytes < 0) {
+       mp_msg(MSGT_DEMUX,MSGL_ERR,"Ogg demuxer error!, fixup_vorbis_wf: bad packet n. %d\n", i);
+       return;
+    }
+    buf[i] = malloc(op[i].bytes);
+    if(!buf[i])
+      return;
+    memcpy(buf[i], op[i].packet, op[i].bytes);
+  }
+
+  sh->wf = (WAVEFORMATEX*)calloc(1, sizeof(WAVEFORMATEX) + op[0].bytes + op[1].bytes + op[2].bytes + 64);
+  ptr = (unsigned char*) (sh->wf+1);
+
+  ptr[0] = 2;
+  offset = 1;
+  offset += store_ughvlc(&ptr[offset], op[0].bytes);
+  mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, offset after 1st len = %d\n", offset);
+  offset += store_ughvlc(&ptr[offset], op[1].bytes);
+  mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, offset after 2nd len = %d\n", offset);
+  for(i = 0; i < 3; i++) {
+    mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, i=%d\n", op[i].bytes, offset, i);
+    memcpy(&ptr[offset], buf[i], op[i].bytes);
+    offset += op[i].bytes;
+  }
+  sh->wf->cbSize = offset;
+  mp_msg(MSGT_DEMUX,MSGL_V, "demux_ogg, extradata size: %d\n", sh->wf->cbSize);
+  sh->wf = (WAVEFORMATEX*)realloc(sh->wf, sizeof(WAVEFORMATEX) + sh->wf->cbSize);
+
+  if(op[0].bytes >= 29) {
+    unsigned int br, nombr, minbr, maxbr;
+    ptr = buf[0];
+    sh->channels = ptr[11];
+    sh->samplerate = sh->wf->nSamplesPerSec = get_uint32(&ptr[12]);
+    maxbr = get_uint32(&ptr[16]);  //max
+    nombr = get_uint32(&ptr[20]);  //nominal
+    minbr = get_uint32(&ptr[24]);  //minimum
+    br = maxbr / 8;
+    if(!br)
+      br = nombr / 8;
+    if(!br)
+      br = minbr / 8;
+    sh->wf->nAvgBytesPerSec = br;
+    sh->wf->wBitsPerSample = 16;
+    sh->samplesize = (sh->wf->wBitsPerSample+7)/8;
+
+    mp_msg(MSGT_DEMUX,MSGL_V,"demux_ogg, vorbis stream features are: channels: %d, srate: %d, bitrate: %d, max: %u, nominal: %u, min: %u\n", 
+      sh->channels, sh->samplerate, sh->wf->nAvgBytesPerSec, maxbr, nombr, minbr);
+  }
+  free(buf[2]);
+  free(buf[1]);
+  free(buf[0]);
+}
+
+
 /// Open an ogg physical stream
 int demux_ogg_open(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d;
@@ -1106,6 +1186,9 @@ int demux_ogg_open(demuxer_t* demuxer) {
   }
 
   mp_msg(MSGT_DEMUX,MSGL_V,"Ogg demuxer : found %d audio stream%s, %d video stream%s and %d text stream%s\n",n_audio,n_audio>1?"s":"",n_video,n_video>1?"s":"",ogg_d->n_text,ogg_d->n_text>1?"s":"");
+
+  if(sh_a->format == FOURCC_VORBIS)
+    fixup_vorbis_wf(sh_a);
 
   return 1;
 
