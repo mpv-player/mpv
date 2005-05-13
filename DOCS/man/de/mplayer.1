@@ -288,6 +288,8 @@ Erhöht/\:verringert die Lautstärke.
 Erhöht/\:verringert die Lautstärke.
 .IPs m\ \ \ \ 
 Ändert Ton-Stummschaltung (ein/\:aus).
+.IPs "#" (nur bei MPEG)
+Wechselt zwischen den verfügbaren Audiospuren.
 .IPs f\ \ \ \ 
 Ändert Vollbild-Wiedergabe (ein/\:aus).
 .IPs T\ \ \ \ 
@@ -452,6 +454,20 @@ Konsolenausgaben werden weniger ausführlich; im Besonderen wird damit die
 Statuszeile (z.B.\& A:   0.7 V:   0.6 A-V:  0.068 ...) nicht angezeigt.
 Besonders nützlich ist dies bei langsamen Terminals oder fehlerhaften, die 
 Zeilenvorschübe nicht richtig verarbeiten (z.B.\& \\r).
+.
+.TP
+.B \-priority <prio> (nur bei Windows)
+Setzt die Prozesspriorität für MPlayer anhand von Windows vordefinierten
+Prioritäten.
+Mögliche Werte für <prio>:
+.RSs
+idle|belownormal|normal|abovenormal|high|realtime
+.RE
+.sp 1
+.RS
+.I WARNUNG:
+Echtzeitpriorität zu benutzen kann das System einfrieren.
+.RE
 .
 .TP
 .B \-v, \-verbose
@@ -1333,7 +1349,7 @@ Benutzte Hardware-MJPEG-Kompression (wenn dies die Karte unterstützt).
 Bei dieser Option mußt du Breite und Höhe des Ausgabefensters nicht
 angeben, denn MPlayer ermittelt diese Werte automatisch vom
 Dezimierungswert (siehe unten).
-.IPs decimation=<1,2,4>
+.IPs decimation=<1|2|4>
 Wählt die Bildgröße für die Hardware-MJPEG-Kompression:
 .RSss
 1: volle Größe
@@ -2390,7 +2406,7 @@ ursprüngliche Größe ausdehnen kann.
 Mit dieser Option wird die Dezimierung erzwungen.
 .
 .TP
-.B \-zrhdec <1,2,4> (nur bei \-vo zr)
+.B \-zrhdec <1|2|4> (nur bei \-vo zr)
 Horizontale Dezimierung: Weist den Treiber an, nur jede zweite
 oder vierte Zeile/\:Pixel des Bildes an die MJPEG-Karte zu schicken und
 den Hardwareskalierer der MJPEG-Karte dazu zu benutzen, das Bild wieder
@@ -2411,7 +2427,7 @@ Eine Nummer von 1 (beste) bis 20 (schlechteste), die die
 JPEG-Codierungsqualität angibt.
 .
 .TP
-.B \-zrvdec <1,2,4> (nur bei \-vo zr)
+.B \-zrvdec <1|2|4> (nur bei \-vo zr)
 Horizontale Dezimierung: Weist den Treiber an, nur jede zweite
 oder vierte Spalte/\:Pixel des Bildes an die MJPEG-Karte zu schicken und
 den Hardwareskalierer der MJPEG-Karte dazu zu benutzen, das Bild wieder
@@ -3763,10 +3779,19 @@ gesetzt.
 Sinus des Durchlaufs
 .
 .TP
-.B hrtf\ \ \ 
+.B hrtf[=flag]
 Die "head-related transfer function": Konvertiert mehrkanäliges
 Audiosignal auf zwei Kanäle für Kopfhörer, behält dabei die Räumlichkeit des
 Klangs.
+.sp 1
+.PD 0
+.RS
+.IPs "Flag  Bedeutung"
+.IPs "m     Matrixdecodierung des hinteren Kanals"
+.IPs "s     2-Kanal-Matrixdecodierung"
+.IPs "0     keine Matrixdecodierung (Standard)"
+.RE
+.PD 1
 .
 .TP
 .B equalizer=[g1:g2:g3:...:g10]
@@ -6667,7 +6692,7 @@ Qualitätskorrektur in %
 anfängliche Komplexität (Durchlauf 1)
 .
 .TP
-.B vqsquish=<0,1>
+.B vqsquish=<0|1>
 Gibt an, wie die Quantisierungsparameter zwischen qmin und qmax gehalten werden
 (Durchlauf 1/\:2):
 .PD 0
@@ -6710,7 +6735,7 @@ JVT-Empfehlung
 .PD 1
 .
 .TP
-.B vstrict=<-1,0,1>
+.B vstrict=<-1|0|1>
 .PD 0
 .RSs
 .IPs 0
@@ -7527,7 +7552,7 @@ Der letzte Intraframe wird normal behandelt.
 .
 .TP
 .B divx5bvop
-Generiere DivX5-kompatible B-Frames (Standard: ein).
+Generiere DivX5-kompatible B-Frames (Standard: aktiviert).
 Dies scheint für alte Versionen des DivX-Decoders notwendig zu sein.
 .br
 .I WARNUNG:
@@ -7647,7 +7672,7 @@ Entropie-Encoder stärker komprimiert werden können.
 Der Einfluss auf die Qualität ist gut, und falls VHQ für dich zu viel
 CPU-Leistung braucht, kann diese Option eine gute Möglichkeit sein, mit
 weniger Aufwand als bei VHQ ein paar Bits einzusparen (und bei fester Bitrate
-die Qualität zu erhöhen).
+die Qualität zu erhöhen) (Standard: aktiviert).
 .
 .TP
 .B (no)cartoon
@@ -7674,7 +7699,7 @@ Helligkeitsinformationen, um den besten Motion-Vector zu finden.
 Für manches Videomaterial jedoch kann die Benutzung der Chrominanzebenen
 helfen, bessere Resultate zu finden.
 Diese Einstellung (de)aktiviert die Benutzung der Chrominanzebenen für die
-Bewegungsabschätzung.
+Bewegungsabschätzung (Standard: aktiviert).
 .
 .TP
 .B (no)chroma_opt
@@ -7708,9 +7733,9 @@ Vom schnellsten zum langsamsten:
 .PD 0
 .RSs
 .IPs 0
-aus (Standard)
+aus
 .IPs 1
-Entscheidung des Modus (Inter-/\:Intra-Macro-Block)
+Entscheidung des Modus (Inter-/\:Intra-Macro-Block) (Standard)
 .IPs 2
 begrenzte Suche
 .IPs 3
@@ -7896,7 +7921,7 @@ Diese Einstellung erlaubt mögliche Auswahlen des Encodierungsvorgangs für
 B-Frames, einen Raten-störungsoptimierten Operator verwenden, was für
 P-Frames mit der Option vhq getan wird.
 Dies liefert besser aussehende B-Frames, während fast keine
-Performance-Einbußen auftreten.
+Performance-Einbußen auftreten (Standard: 1).
 .
 .
 .SS x264enc (\-x264encopts)
@@ -8056,7 +8081,7 @@ maximale Anzahl aufeinanderfolgender B-Frames zwischen Intra- und P-Frames
 .TP
 .B (no)b_adapt
 Entscheidet automatisch, wann und wie viele B-Frames benutzt werden, bis zum
-oben definierten Maximum (Standard: ein).
+oben definierten Maximum (Standard: aktiviert).
 Wenn diese Option deaktiviert ist, wird die maximale Anzahl B-Frames benutzt.
 .
 .TP
@@ -8140,17 +8165,17 @@ angepasst wurde.
 .
 .
 .TP
-.B vwidth, vheight=<1,4095>
+.B vwidth, vheight=<1\-4095>
 Setzt Videobreite und -höhe, wenn das Video MPEG-1/2 ist.
 .
 .
 .TP
-.B vpswidth, vpsheight=<1,4095>
+.B vpswidth, vpsheight=<1\-4095>
 Setzt Videobreite und -höhe bei Pan-und-Scan-Video bei MPEG-2.
 .
 .
 .TP
-.B vaspect=<1:1 | 4:3 | 16:9 | 2.21:1>
+.B vaspect=<1 | 4/3 | 16/9 | 221/100>
 Setzt den Aspekt für MPEG-1/2-Video.
 .
 .
