@@ -198,13 +198,14 @@ eingebauten und binären Codecs.
 Es können VideoCDs, SuperVCDs, DVDs, 3ivx\-, DivX\ 3/\:4/\:5\- und sogar 
 WMV\-Filme angeschaut werden.
 .PP
-MPlayer unterstützt eine große Auswahl an Ausgabetreibern\:
-X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, 
-DirectFB sowie GGI, SDL (und damit alle von SDL unterstützen Treiber), 
-VESA (mit jeder VESA\-kompatiblen Grafikkarte, auch ohne X11),
-einige Kartenspezifischen Low\-Level\-Treiber (für Matrox, 3Dfx und ATI)
-und einige Hardware\-MPEG\-Decoderkarten wie sie Siemens DVB, DXR2 und
-DXR3/\:Hollywood+ benutzen.
+MPlayer unterstützt eine große Auswahl an Ausgabetreibern.
+Er funktioniert mit X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
+DirectFB, Quartz und Mac OS X CoreVideo, du kannst ihn aber auch mit GGI, SDL
+(und damit alle von SDL unterstützen Treiber), VESA (mit jeder VESA-kompatiblen
+Grafikkarte, auch ohne X11) sowie mit einigen kartenspezifischen
+Low-Level-Treibern (für Matrox, 3Dfx und ATI) und ein paar
+Hardware-MPEG-Decoderkarten wie der Siemens DVB, DXR2 und DXR3/\:Hollywood+
+benutzen.
 Die meisten von ihnen unterstützen Software- oder Hardwareskalierung,
 so dass die Vollbildwiedergabe kein Problem ist.
 .PP
@@ -342,15 +343,15 @@ Quartz-Videoausgabetreibers.)
 .PP
 .PD 0
 .RSs
-.IPs "Option + 0"
+.IPs "Befehl + 0"
 Ändere die Größe des Abspielfensters auf die Hälfte der Originalgröße.
-.IPs "Option + 1"
+.IPs "Befehl + 1"
 Ändere die Größe des Abspielfensters auf die Originalgröße.
-.IPs "Option + 2"
+.IPs "Befehl + 2"
 Ändere die Größe des Abspielfensters auf das doppelte der Originalgröße.
-.IPs "Option + f"
+.IPs "Befehl + f"
 Aktiviere/\:deaktiviere Vollbildwiedergabe (siehe auch \-fs).
-.IPs "Option + [ und Option + ]"
+.IPs "Befehl + [ und Befehl + ]"
 Setze Alphawert des Abspielfensters.
 .IPs T\ \ \ \ 
 Ändere den Video-Layer: immer ganz oben/\:ganz unten/\:normal (siehe auch
@@ -2313,7 +2314,7 @@ Aktiviert Pan & Scan.
 Dabei werden z.B.\& bei einem 16:9-Film und einem 4:3-Monitor die Seiten
 abgeschnitten, damit der komplette Bildbereich ausgefüllt wird.
 Der Bereich kontrolliert, wieviel vom Bild abgeschnitten wird.
-Dies funktioniert nur mit den xv-, xmga-, mga-, gl-, quartz- und
+Dies funktioniert nur mit den xv-, xmga-, mga-, gl-, quartz-, macosx- und
 xvidix-Videoausgabetreibern.
 .
 .TP
@@ -2325,7 +2326,7 @@ Momentan nur unterstützt durch \-vo directx kombiniert mit der \-vm-Option.
 .B \-rootwin
 Spielt den Film im Root-Fenster (dem Desktophintergrund) ab.
 Desktophintergrundbilder können den Film allerdings verdecken.
-Funktioniert nur mit den x11-, xv-, xmga-, xvidix-, quartz- und
+Funktioniert nur mit den x11-, xv-, xmga-, xvidix-, quartz-, macosx- und
 directx-Videoausgabetreibern.
 .
 .TP
@@ -2649,6 +2650,16 @@ YUV-Ausgabeformat zu erzwingen, z.B.\& mit \-vf format=yuy2.
 Wähle ein Gerät für die Darstellung im Vollbildmodus.
 .IPs fs_res=<Breite>:<Höhe>
 Gib die Auflösung im Vollbildmodus an (nützlich auf langsamen Systemen).
+.RE
+.PD 1
+.
+.TP
+.B macosx (Mac OS X 10.4 oder 10.3.9 mit QuickTime 7)
+Mac OS X CoreVideo Videoausgabetreiber
+.PD 0
+.RSs
+.IPs device_id=<Nummer>
+Wähle das Anzeigegerät für die Vollbildwiedergabe.
 .RE
 .PD 1
 .
@@ -3560,9 +3571,8 @@ natural bicubic spline
 .sp 1
 .RS
 .I ANMERKUNG:
-Für \-sws\ 2 und 7 kann die Schärfe mit dem Skalierungsparameter des
-Skalierungsfilters (\-vf scale (0 (weich) \-  100 (scharf))) gesetzt werden.
-Bei \-sws 9 gibt dieser Parameter dagegen die Filterlänge an (1 \- 10).
+Manche \-sws-Optionen sind einstellbar.
+Die Beschreibung des Videofilters scale enthält weitere Informationen.
 .RE
 .
 .TP
@@ -4343,7 +4353,7 @@ Fügt unterhalb des Bildes einen Rand von 50 Pixel ein.
 .PD 1
 .IPs <x>,<y>
 Position des ursprünglichen Bildes im expandierten Bild (Standard: Mitte)
-.IPs o\ 
+.IPs <o>\ \ 
 Anzeige von OSD/\:Untertiteln
 .RSss
 0: deaktiviert (Standard)
@@ -6144,7 +6154,7 @@ Für Menschen mit einem sehr guten Gehör und entsprechender HiFi-Ausstattung.
 .PD 1
 .
 .
-.SS toolame und twolame (\-toolameopts und \twolameopts respektive)
+.SS toolame und twolame (\-toolameopts und \-twolameopts respektive)
 .
 .TP
 .B br=<32\-384>
@@ -6163,7 +6173,7 @@ maximal erlaubte Bitrate pro Frame, in kpbs
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (Standard: mono bei 1-Kanal-Audio, sonst stereo)
 .TP
-.B psy=<0\-3>
+.B psy=<-1\-4>
 psychoakustisches Modell (Standard: 2)
 .TP
 .B errprot=<0 | 1>
@@ -6179,10 +6189,10 @@ Debugging-Level
 .
 .TP
 .B br=<Bitrate>
-mittlere Bitrate in kbps (schließt Option quality gegenseitig aus)
+mittlere Bitrate in kbps (schließt Option quality aus)
 .TP
 .B quality=<1\-1000>
-Qualitätsmodus, je höher desto besser (schließt Option br gegenseitig aus)
+Qualitätsmodus, je höher desto besser (schließt Option br aus)
 .TP
 .B object=<0\-3>
 Komplexität des Objekttyps
@@ -6836,16 +6846,20 @@ JVT-Empfehlung
 .PD 1
 .
 .TP
-.B vstrict=<-1|0|1>
+.B vstrict=<-2|-1|0|1>
 .PD 0
 .RSs
 .IPs 0
-deaktiviert (Standard)
+deaktiviert
 .IPs 1
 Nur empfehlenswert, wenn die Ausgabe mit einem MPEG-4-Referenzdecoder
 decodiert werden soll.
 .IPs -1
-Erlaubt die Benutzung nicht-standardkonformer Codecs (snow, ffvhuff, ffv1).
+Erlaubt die Benutzung libavcodec-spezifischer Erweiterungen (Standard).
+.IPs -2
+Erlaubt die Benutzung experimenteller Codecs und Features, die von zukünftigen
+Versionen von MPlayer möglicherweise nicht abspielbar sein werden (snow,
+ffvhuff, ffv1).
 .RE
 .PD 1
 .
@@ -7051,6 +7065,13 @@ Dies ist das Äquivalent zum Erhöhen der Qualität der Intrablöcke, da dieselbe
 mittlere Bitrate von der Bitratenkontrolle zur ganzen Videosequenz zugeteilt
 wird (Standard: 0.0 (deaktiviert)).
 p_mask=1.0 verdoppelt die Anzahl der jedem Intrablock zugeteilten Bits.
+.
+.TP
+.B border_mask=<0.0\-1.0>
+Randbearbeitung (border processing) bei MPEG-ähnlichen Encodern.
+Randbearbeitung erhöht den Quantisierungsparameter für Makroblöcke, die
+weniger als ein Fünftel der Framebreite/\:-höhe vom Rand des Frames entfernt
+sind, da sie visuell oft weniger bedeutsam sind.
 .
 .TP
 .B naq\ \ \ \ 
@@ -8074,8 +8095,6 @@ Statistiken und steuert dementsprechend Entscheidungen der Bitratenkontrolle.
 Im Modus mit drei Durchläufen tut der zweite Durchlauf (pass=3, kein
 Rechtschreibfehler) beides: Er liest zuerst die Statistiken und überschreibt
 sie dann.
-Wenn die Möglichkeit besteht, dass du diesen Vorgang abbrechen musst, solltest
-du die Datei divx2pass.log vorher sichern.
 Du kannst alle Optionen für die Encodierung verwenden, außer den sehr
 CPU-intensiven.
 .br
@@ -8126,6 +8145,54 @@ Referenzframe das gleiche Gewicht.
 Mit dieser Option wird die Gewichtung durch Bestimmung der zeitlichen Position
 eines B-Frames zu seinen Referenzen bestimmt.
 Benötigt bframes > 1.
+.
+.TP
+.B me=<1\-3>
+Wählt Vollpixel-Bewegungsabschätzungsalgorithmus (me = motion estimation).
+.PD 0
+.RSs
+.IPs 1
+Diamantsuche, Radius 1 (schnell).
+.IPs 2
+Hexagonsuche, Radius 2 (Standard).
+.IPs 3
+Erschöpfende Suche, kontrolliert von me_range (sehr langsam).
+.RE
+.PD 1
+.
+.TP
+.B me_range=<4\-64>
+Radius der Erschöpfenden Bewegungssuche (Standard: 16).
+.
+.TP
+.B subq=<1\-5>
+Passt die Qualität der subpel-Verfeinerung an.
+Dieser Parameter kontrolliert den Ausgleich von Qualität und Geschwindigkeit
+beim Prozess der Bewegungsabschätzung.
+subq=5 kann bis zu 10% besser komprimieren als subq=1.
+.RSs
+1: Startet Vollpixel-Präzisions-Bewegungsabschätzung für alle in Frage
+kommenden Makroblock-Typen und wählt dann den besten aus.
+Dann verfeinert er die Bewegung dieses Typs zu einer schnellen
+Viertelpixel-Präzision (am schnellsten).
+.br
+2: Wie 1, benutzt aber eine langsamere Viertelpixel-Verfeinerung.
+.br
+3: Startet Halbpixel-Präzisions-Bewegungsabschätzung für alle in Frage
+kommenden Makroblock-Typen und wählt dann den besten aus.
+Dann verfeinert er die Bewegung dieses Typs zu einer Viertelpixel-Präzision.
+.br
+4: Startet schnelle Viertelpixel-Präzisions-Bewegungsabschätzung für alle in
+Frage kommenden Makroblock-Typen, wählt den besten aus und beendet die
+Viertelpixel-Verfeinerung für diesen Typ.
+.br
+5: Startet Viertelpixel-Präzisions-Bewegungsabschätzung in der höchsten
+Qualitätsstufe für alle in Frage kommenden Makroblock-Typen, bevor er den
+besten Typ auswählt (am besten, Standard).
+.REss
+Oben beschriebene "alle in Frage kommenden Makroblock-Typen" bedeut nicht alle
+möglichen Typen:
+4x4, 4x8, 8x4 werden nur probiert, wenn 8x8 besser ist als 16x16.
 .
 .TP
 .B keyint=<Wert>
