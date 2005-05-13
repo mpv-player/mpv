@@ -1,4 +1,4 @@
-.\" synced with 1.963
+.\" synced with 1.968
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -556,13 +556,6 @@ configuration \--enable-crash-debug ou si un fichier .developer était
 présent dans le répertoire source.
 .
 .TP
-.B \-edl <nomfichier> (EDL uniquement)
-Active les actions d'édition de liste de décision (EDL) durant la lecture.
-La vidéo sera sautée et le son coupé et remis suivant les entrées du
-fichier indiqué.
-Voir DOCS/\:HTML/\:fr/\:edl.html pour les détails sur comment l'utiliser.
-.
-.TP
 .B \-edlout <nomfichier>
 Créé un nouveau fichier et écrit les enregistrements d'édition de la liste
 de décision (EDL) dans ce fichier.
@@ -1014,6 +1007,13 @@ pour copier des titres de DVD (voir les exemples).
 Certains DVD contiennent des scènes qui peuvent être vues sous différents
 angles.
 Vous pouvez ainsi dire à MPlayer quels angles utiliser (par défaut\ : 1).
+.
+.TP
+.B \-edl <nomfichier> (EDL uniquement)
+Active les actions d'édition de liste de décision (EDL) durant la lecture.
+La vidéo sera sautée et le son coupé et remis suivant les entrées du
+fichier indiqué.
+Voir DOCS/\:HTML/\:fr/\:edl.html pour les détails sur comment l'utiliser.
 .
 .TP
 .B \-forceidx
@@ -3801,8 +3801,8 @@ en cas de sur-échantillonnage)
 .RE
 .PD 0
 .RSs
-.IPs "mplayer -af resample=44100:0:0"
-mettrait la fréquence de sortie du filtre resample filter à 44100Hz
+.IPs "mplayer \-af resample=44100:0:0"
+Mettrait la fréquence de sortie du filtre resample filter à 44100Hz
 en réalisant une changement de fréquence et une interpolation linéaire.
 .RE
 .PD 1
@@ -4041,9 +4041,9 @@ Combien du canal j est mixé dans le canal de sortie i (0\-1).
 .I EXEMPLE\ :
 .RE
 .RSs
-.IPs "mplayer -af pan=1:0.5:0.5 -channels 1 media.avi"
+.IPs "mplayer \-af pan=1:0.5:0.5 -channels 1 media.avi"
 Mixe ensemble les canaux stéréo vers mono.
-.IPs "mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
+.IPs "mplayer \-af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
 Donnerait 3 canaux, en laissant là où ils sont les canaux 0 et 1,
 et mixerait les canaux 0 et 1 vers le canal 2 (qui pourrait par
 exemple être envoyé sur un caisson de basse).
@@ -4083,8 +4083,8 @@ si nécessaire.
 .I EXEMPLE\ :
 .RE
 .RSs
-.IPs "mplayer -af sub=100:4 -channels 5 media.avi"
-ajoutera un canal pour caisson de basse dont la fréquence de
+.IPs "mplayer \-af sub=100:4 -channels 5 media.avi"
+Ajoutera un canal pour caisson de basse dont la fréquence de
 coupure sera de 100Hz, et sera envoyé vers le canal 4.
 .RE
 .PD 1
@@ -5819,6 +5819,20 @@ Outrepasse le rapport hauteur/\:largeur inscrit dans l'en-tête AVI OpenDML
 vprp.
 Cela permet, avec '\-ovc copy', de changer le hauteur/\:largeur d'un fichier
 existant
+.
+.TP
+.B \-hr-edl-seek (EDL uniquement)
+Utilise une méthode précise, mais plus lente pour sauter des
+séquences de film.
+Les séquences marquées pour être sautées ne sont pas réellement
+sautées, à la place toutes les trames sont décodées, mais uniquement
+les trames utiles sont encodées.
+Ceci permet de pouvoir commencer en dehors de frontières de
+trames-clées.
+.br
+.I NOTE\ :
+Ceci n'est pas garanti de fonctionner correctement avec
+'\-ovc copy'.
 .
 .TP
 .B \-info <option1:option2:...> (AVI uniquement)
