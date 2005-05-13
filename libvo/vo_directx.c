@@ -41,6 +41,9 @@
 # define WM_XBUTTONDBLCLK  0x020D
 #endif
 
+#define WNDCLASSNAME_WINDOWED	"MPlayer - The Movie Player"
+#define WNDCLASSNAME_FULLSCREEN	"MPlayer - Fullscreen"
+
 static LPDIRECTDRAWCOLORCONTROL	g_cc = NULL;		//color control interface
 static LPDIRECTDRAW7        g_lpdd = NULL;          //DirectDraw Object
 static LPDIRECTDRAWSURFACE7  g_lpddsPrimary = NULL;  //Primary Surface: viewport through the Desktop
@@ -53,6 +56,10 @@ static RECT                 rd;                     //rect of our stretched imag
 static RECT                 rs;                     //rect of our source image
 static HWND                 hWnd=NULL;              //handle to the window
 static HWND                 hWndFS=NULL;           //fullscreen window
+static HBRUSH               colorbrush = NULL;      // Handle to colorkey brush
+static HBRUSH               blackbrush = NULL;      // Handle to black brush
+static HICON                mplayericon = NULL;     // Handle to mplayer icon
+static HCURSOR              mplayercursor = NULL;   // Handle to mplayer cursor
 static uint32_t image_width, image_height;          //image width and height
 static uint32_t d_image_width, d_image_height;      //image width and height zoomed 
 static uint8_t  *image=NULL;                        //image data
@@ -345,8 +352,21 @@ static void uninit(void)
     g_lpddsPrimary = NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>primary released\n");
 	if(hWndFS)DestroyWindow(hWndFS);
-	if(hWnd != NULL)DestroyWindow(hWnd);
+	hWndFS = NULL;
+	if((WinID == -1) && hWnd) DestroyWindow(hWnd);
+	hWnd = NULL;
 	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>window destroyed\n");
+	UnregisterClass(WNDCLASSNAME_WINDOWED, GetModuleHandle(NULL));
+	UnregisterClass(WNDCLASSNAME_FULLSCREEN, GetModuleHandle(NULL));
+	if (mplayericon) DestroyIcon(mplayericon);
+	mplayericon = NULL;
+	if (mplayercursor) DestroyCursor(mplayercursor);
+	mplayercursor = NULL;
+	if (blackbrush) DeleteObject(blackbrush);
+	blackbrush = NULL;
+	if (colorbrush) DeleteObject(colorbrush);
+	colorbrush = NULL;
+	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>GDI resources deleted\n");
 	if (g_lpdd != NULL){
 	    if(vidmode)g_lpdd->lpVtbl->RestoreDisplayMode(g_lpdd);
 	    g_lpdd->lpVtbl->Release(g_lpdd);
@@ -521,7 +541,8 @@ static uint32_t Directx_ManageDisplay()
       aspect(&width,&height,A_ZOOM);
       rd.left=(vo_screenwidth-width)/2;
       rd.top=(vo_screenheight-height)/2;
-      if(ShowCursor(FALSE)>=0)while(ShowCursor(FALSE)>=0){}
+      if (WinID == -1)
+        if(ShowCursor(FALSE)>=0)while(ShowCursor(FALSE)>=0){}
     }
     else if (WinID != -1 && vo_geometry) {
       POINT pt;
@@ -562,7 +583,8 @@ static uint32_t Directx_ManageDisplay()
           }
           else height=tmpheight;
       }    
-      while(ShowCursor(TRUE)<=0){}
+      if (WinID == -1)
+          while(ShowCursor(TRUE)<=0){}
     }
     rd.right=rd.left+width;
     rd.bottom=rd.top+height;
@@ -663,7 +685,7 @@ static uint32_t Directx_ManageDisplay()
           SetWindowPos(hWnd,(vo_ontop)?HWND_TOPMOST:(vo_rootwin?HWND_BOTTOM:HWND_NOTOPMOST),rdw.left,rdw.top,rdw.right-rdw.left,rdw.bottom-rdw.top,SWP_NOOWNERZORDER); 
       }
     }
-    else SetWindowPos(vidmode?hWnd:hWndFS,vo_rootwin?HWND_BOTTOM:HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOOWNERZORDER);
+    else SetWindowPos(vidmode?hWnd:hWndFS,vo_rootwin?HWND_BOTTOM:HWND_TOPMOST,0,0,0,0,SWP_NOMOVE|SWP_NOSIZE|SWP_NOOWNERZORDER|SWP_NOCOPYBITS);
 
     /*make sure the overlay is inside the screen*/
     if(rd.left<0)rd.left=0;
@@ -985,7 +1007,6 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 static uint32_t preinit(const char *arg)
 {
     HINSTANCE hInstance = GetModuleHandle(NULL);
-	HICON mplayericon=NULL;
     char exedir[MAX_PATH];
     WNDCLASS   wc;
 	if(arg)
@@ -1002,33 +1023,36 @@ static uint32_t preinit(const char *arg)
         mplayericon = ExtractIcon( hInstance, exedir, 0 );
   	}
     if(!mplayericon)mplayericon=LoadIcon(NULL,IDI_APPLICATION);
+    mplayercursor = LoadCursor(NULL, IDC_ARROW);
     monitor_rect.right=GetSystemMetrics(SM_CXSCREEN);
     monitor_rect.bottom=GetSystemMetrics(SM_CYSCREEN);
 	
     windowcolor = vo_colorkey;
+    colorbrush = CreateSolidBrush(windowcolor);
+    blackbrush = (HBRUSH)GetStockObject(BLACK_BRUSH);
     wc.style         =  CS_HREDRAW | CS_VREDRAW;
     wc.lpfnWndProc   =  WndProc;
     wc.cbClsExtra    =  0;
     wc.cbWndExtra    =  0;
     wc.hInstance     =  hInstance;
-    wc.hCursor       =  LoadCursor(NULL,IDC_ARROW);
+    wc.hCursor       =  mplayercursor;
     wc.hIcon         =  mplayericon;
-    wc.hbrBackground =  CreateSolidBrush(vidmode?RGB(0,0,0):windowcolor);
-    wc.lpszClassName =  "MPlayer - The Movie Player";
+    wc.hbrBackground =  vidmode ? blackbrush : colorbrush;
+    wc.lpszClassName =  WNDCLASSNAME_WINDOWED;
     wc.lpszMenuName  =  NULL;
     RegisterClass(&wc);
     if (WinID != -1) hWnd = WinID;
     else
     hWnd = CreateWindowEx(vidmode?WS_EX_TOPMOST:0,
-        "MPlayer - The Movie Player","",(vidmode)?WS_POPUP:WS_OVERLAPPEDWINDOW| WS_SIZEBOX,
+        WNDCLASSNAME_WINDOWED,"",(vidmode)?WS_POPUP:WS_OVERLAPPEDWINDOW| WS_SIZEBOX,
         CW_USEDEFAULT, CW_USEDEFAULT, 100, 100,NULL,NULL,hInstance,NULL);
-	wc.hbrBackground = CreateSolidBrush(RGB(0,0,0));                     
-    wc.lpszClassName = "MPlayer - Fullscreen";
+    wc.hbrBackground = blackbrush;
+    wc.lpszClassName = WNDCLASSNAME_FULLSCREEN;
     RegisterClass(&wc);
 	
 	if (Directx_InitDirectDraw()!= 0)return 1;          //init DirectDraw
 	
-    if(!vidmode)hWndFS = CreateWindow("MPlayer - Fullscreen","MPlayer Fullscreen",WS_POPUP,monitor_rect.left,monitor_rect.top,monitor_rect.right-monitor_rect.left,monitor_rect.bottom-monitor_rect.top,hWnd,NULL,hInstance,NULL);			
+    if(!vidmode)hWndFS = CreateWindow(WNDCLASSNAME_FULLSCREEN,"MPlayer Fullscreen",WS_POPUP,monitor_rect.left,monitor_rect.top,monitor_rect.right-monitor_rect.left,monitor_rect.bottom-monitor_rect.top,hWnd,NULL,hInstance,NULL);			
     mp_msg(MSGT_VO, MSGL_DBG3 ,"<vo_directx><INFO>initial mplayer windows created\n");
     
     if (Directx_CheckPrimaryPixelformat()!=0)return 1;
@@ -1244,6 +1268,21 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     window_aspect= (float)d_image_width / (float)d_image_height;
     vo_dx = 0;
     vo_dy = 0;   
+
+    /*release all directx objects*/
+    if (g_cc != NULL)g_cc->lpVtbl->Release(g_cc);
+    g_cc=NULL;
+    if(g_lpddclipper)g_lpddclipper->lpVtbl->Release(g_lpddclipper);
+        g_lpddclipper=NULL;   
+    if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
+    g_lpddsBack = NULL;
+    if(vo_doublebuffering)
+        if (g_lpddsOverlay != NULL)g_lpddsOverlay->lpVtbl->Release(g_lpddsOverlay);
+    g_lpddsOverlay = NULL;
+    if (g_lpddsPrimary != NULL) g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
+    g_lpddsPrimary = NULL;
+    mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>overlay surfaces released\n");
+
     if(!vidmode){
         if(vo_geometry){
             vo_dx= ( vo_screenwidth - d_image_width ) / 2; vo_dy=( vo_screenheight - d_image_height ) / 2;    
@@ -1273,19 +1312,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     
     
     if(vidmode)vo_fs=0;    
-	if (g_cc != NULL)g_cc->lpVtbl->Release(g_cc);
-	g_cc=NULL;
-	/*release all surfaces*/
-	if (g_lpddsBack != NULL) g_lpddsBack->lpVtbl->Release(g_lpddsBack);
-	g_lpddsBack = NULL;
-	if(vo_doublebuffering)
-	{
-		if (g_lpddsOverlay != NULL)g_lpddsOverlay->lpVtbl->Release(g_lpddsOverlay);
-	}
-    g_lpddsOverlay = NULL;
-	if (g_lpddsPrimary != NULL) g_lpddsPrimary->lpVtbl->Release(g_lpddsPrimary);
-    g_lpddsPrimary = NULL;
-	mp_msg(MSGT_VO, MSGL_DBG3,"<vo_directx><INFO>overlay surfaces released\n");
 
 
 	/*create the surfaces*/
@@ -1326,8 +1352,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 		mp_msg(MSGT_VO, MSGL_V,"<vo_directx><INFO>back surface created\n");
 		vo_doublebuffering = 0;
 		/*create clipper for nonoverlay mode*/
-	    if(g_lpddclipper)g_lpddclipper->lpVtbl->Release(g_lpddclipper);
-        g_lpddclipper=NULL;
 	    if(g_lpdd->lpVtbl->CreateClipper(g_lpdd, 0, &g_lpddclipper,NULL)!= DD_OK){mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't create clipper\n");return 1;}
         if(g_lpddclipper->lpVtbl->SetHWnd (g_lpddclipper, 0, hWnd)!= DD_OK){mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't associate clipper with window\n");return 1;}
         if(g_lpddsPrimary->lpVtbl->SetClipper (g_lpddsPrimary,g_lpddclipper)!=DD_OK){mp_msg(MSGT_VO, MSGL_FATAL,"<vo_directx><FATAL ERROR>can't associate primary surface with clipper\n");return 1;}
