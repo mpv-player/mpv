@@ -3795,8 +3795,8 @@ This feature creates distortion and should be considered a last resort.
 .I EXAMPLE:
 .RE
 .RSs
-.IPs "mplayer -af volume=10.1:0 media.avi"
-would amplify the sound by 10.1dB and hard-clip if the
+.IPs "mplayer \-af volume=10.1:0 media.avi"
+Would amplify the sound by 10.1dB and hard-clip if the
 sound level is too high.
 .RE
 .PD 1
@@ -3826,9 +3826,9 @@ How much of input channel j is mixed into output channel i (0\-1).
 .I EXAMPLE:
 .RE
 .RSs
-.IPs "mplayer -af pan=1:0.5:0.5 -channels 1 media.avi"
+.IPs "mplayer \-af pan=1:0.5:0.5 \-channels 1 media.avi"
 Would down-mix from stereo to mono.
-.IPs "mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
+.IPs "mplayer \-af pan=3:1:0:1:0.5:0.5 \-channels 3 media.avi"
 Would give 3 channel output leaving channels 0 and 1 intact,
 and mix channels 0 and 1 into output channel 2 (which could
 be sent to a subwoofer for example).
@@ -3865,8 +3865,8 @@ be increased to <ch> if necessary.
 .I EXAMPLE:
 .RE
 .RSs
-.IPs "mplayer -af sub=100:4 -channels 5 media.avi"
-would add a sub-woofer channel with a cutoff frequency of
+.IPs "mplayer \-af sub=100:4 \-channels 5 media.avi"
+Would add a sub-woofer channel with a cutoff frequency of
 100Hz to output channel 4.
 .RE
 .PD 1
@@ -3898,7 +3898,7 @@ Requires a sound card supporting at least 4 channels.
 delay time in ms for the rear speakers (0 to 1000) (default: 20)
 This delay should be set as follows: If d1 is the distance
 from the listening position to the front speakers and d2 is the distance
-from the listening position to the rear speakers, then the delay d should
+from the listening position to the rear speakers, then the delay should
 be set to 15ms if d1 <= d2 and to 15 + 5*(d1-d2) if d1 > d2.
 .RE
 .sp 1
@@ -3930,8 +3930,9 @@ To calculate the required delay for the different channels do as follows:
 .IP 1. 3
 Measure the distance to the loudspeakers in meters in relation
 to your listening position, giving you the distances s1 to s5
-(for a 5.1 system). There is no point in compensating for the
-subwoofer (you will not hear the difference anyway).
+(for a 5.1 system).
+There is no point in compensating for the subwoofer (you will not hear the
+difference anyway).
 .IP 2. 3
 Subtract the distances s1 to s5 from the maximum distance,
 i.e.\& s[i] = max(s) - s[i]; i = 1...5.
