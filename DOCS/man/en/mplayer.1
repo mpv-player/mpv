@@ -524,13 +524,6 @@ Support must be compiled in by configuring with --enable-crash-debug or
 by having a .developer file in the source tree.
 .
 .TP
-.B \-edl <filename> (EDL only)
-Enables edit decision list (EDL) actions during playback.
-Video will be skipped over and audio will be muted and unmuted according to
-the entries in the given file.
-See DOCS/\:HTML/\:en/\:edl.html for details on how to use this.
-.
-.TP
 .B \-edlout <filename> (EDL only)
 Creates a new file and writes edit decision list (EDL) records to that file.
 During playback, when the user hits 'i', an entry to skip over the last two
@@ -957,6 +950,13 @@ copy DVD titles in the first place (see the examples).
 .B \-dvdangle <angle\ ID> (DVD only)
 Some DVD discs contain scenes that can be viewed from multiple angles.
 Here you can tell MPlayer which angles to use (default: 1).
+.
+.TP
+.B \-edl <filename> (EDL only)
+Enables edit decision list (EDL) actions during playback.
+Video will be skipped over and audio will be muted and unmuted according to
+the entries in the given file.
+See DOCS/\:HTML/\:en/\:edl.html for details on how to use this.
 .
 .TP
 .B \-forceidx
