@@ -3653,8 +3653,50 @@ Die verfügbaren Filter lauten:
 .TP
 .B resample[=srate[:salopp][:Typ]]
 Ändert die Samplerate des Audiostreams zu der ganzzahligen srate (in Hz).
+Kann benutzt werden, wenn du eine Soundkarte mit fester Frequenz hast oder
+eine, die maximal 44.1kHz unterstützt.
+Dieser Filter wird automatisch eingefügt, wenn nötig.
 Unterstützt nur 16-bit-Integer und -Float im Native-Endian-Format.
+.br
+.I ANMERKUNG:
 In Verbindung mit MEncoder musst du zusätzlich \-srate <srate> angeben.
+.PD 0
+.RSs
+.IPs <srate>
+Ausgabe-Samplerate in Hz.
+Der gültige Bereich dieses Parameters ist 8000 bis 192000.
+Falls die Samplefrequenz von Eingabe und Ausgabe gleich ist oder dieser
+Parameter ausgelassen wird, wird der Filter automatisch entfernt.
+Eine hohe Samplefrequenz erhöht normalerweise die Audioqualität, vor allem in
+Kombination mit anderen Filtern.
+.IPs <salopp>
+Erlaube (1) oder erlaube nicht (0), dass sich die Ausgabefrequenz leicht von
+der von <srate> vorgegebenen Frequenz unterscheidet (Standard: 1).
+Kann benutzt werden, wenn der Start der Wiedergabe extrem langsam ist.
+.IPs <Typ>
+Wählt die zu verwendende Methode für das Resampling.
+.RSss
+0: lineare Interpolation (schnell, schlechte Qualität, vor allem bei
+Erhöhung der Frequenz)
+.br
+1: mehrphasige Filterbank und Integer-Verarbeitung
+.br
+2: mehrphasige Filterbank und Fließkommazahl-Verarbeitung (langsam,
+beste Qualität)
+.REss
+.PD 1
+.RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.PD 0
+.RSs
+.IPs "mplayer \-af resample=44100:0:0"
+würde die Ausgabefrequenz des resample-Filters auf 44100Hz setzen und dabei
+exakte Skalierung der Ausgabefrequenz und lineare Interpolation verwenden.
+.RE
+.PD 1
 .
 .TP
 .B lavcresample[=srate[:Länge[:linear[:Zähler[:Abschluss]]]]]
@@ -3692,14 +3734,92 @@ Audiosignal auf zwei Kanäle für Kopfhörer, behält dabei die Räumlichkeit des
 Klangs.
 .
 .TP
-.B channels[=nch]
-Ändert die Anzahl der Kanäle in <nch> Ausgabekanäle.
-Falls die Anzahl der Ausgabekanäle größer ist als die Anzahl der
-Eingangskanäle,
-so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono auf Stereo, dann wird
-der Monokanal auf beiden Ausgabekanälen wiederholt).
+.B equalizer=[g1:g2:g3:...:g10]
+Graphischer Equalizier, der im 10-Octaven-Frequenzbereich arbeitet; benutzt
+10-IIR-Bandfilter.
+Das bedeutet, dass er unabhängig davon funktioniert, welcher Art der
+wiedergegebene Audiotyp ist.
+Die mittleren Frequenzen für die 10 Frequenzbereiche sind:
+.sp 1
+.PD 0
+.RS
+.IPs "Nr.  Frequenz"
+.IPs "0    31.25 Hz"
+.IPs "1    62.50 Hz"
+.IPs "2   125.00 Hz"
+.IPs "3   250.00 Hz"
+.IPs "4   500.00 Hz"
+.IPs "5    1.00 kHz"
+.IPs "6    2.00 kHz"
+.IPs "7    4.00 kHz"
+.IPs "8    8.00 kHz"
+.IPs "9   16.00 kHz"
+.RE
+.PD 1
+.sp 1
+.RS
+Falls die Samplerate des wiedergegebenen Klangs niedriger ist als die mittlere
+Frequenz für einen Frequenzbereich, wird dieser Bereich deaktiviert.
+Ein bekannter Fehler dieses Filters ist, dass die Charakteristiken für den
+höchsten Bereich nicht komplett symmetrisch sind, wenn die Samplerate nah an
+der mittleren Frequenz dieses Bereichs liegt.
+Dieses Problem kann dadurch umgangen werden, dass man mit Hilfe des
+Filters resample die Samplerate des Klangs erhöht, bevor er diesen Filter
+erreicht.
+.RE
+.PD 0
+.RSs
+.IPs <g1>:<g2>:<g3>:...:<g10>
+Fließkommawerte, die die Verstärkung in dB für jeden Frequenzbereich
+repräsentieren (-12\-12)
+.RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af equalizer=11:11:10:5:0:-12:0:5:12:12 media.avi"
+Würde den Klang im Bereich der oberen und unteren Frequenzen verstärken und
+ihn gleichzeitig im Bereich um 1kHz fast verschwinden lassen.
+.RE
+.PD 1
+.
+.TP
+.B channels=nch[:nr:from1:to1:from2:to2:from3:to3:...]
+Kann benutzt werden, um Audiokanäle hinzuzufügen, zu entfernen, zu kopieren
+oder deren Routing zu verändern.
+Wenn nur <nch> gegeben ist, wird das Standardrouting benutzt, es funktioniert
+folgendermaßen: Falls die Anzahl der Ausgabekanäle größer ist als die Anzahl
+der Eingangskanäle, so werden leere Kanäle erzeugt (Ausnahme: Upmix von Mono
+auf Stereo, dann wird der Monokanal auf beiden Ausgabekanälen wiederholt).
 Ist die Anzahl der Ausgabekanäle kleiner als die Anzahl der Eingangskanäle,
 so werden die überschüssigen Kanäle verworfen.
+.PD 0
+.RSs
+.IPs <nch>
+Anzahl der Ausgabekanäle (1\-6)
+.IPs <nr>\ 
+Anzahl der Leitungen für das Routing (1\-6)
+.IPs <von1:bis1:von2:bis2:von3:bis3:...>
+Paare von Nummers zwischen 0 und 5, die festlegen, wo das Routing für jeden
+Kanal stattfinden soll.
+.RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
+Würde die Anzahl der Kanäle auf 4 setzen und 4 Routen aufsetzen, die die
+Kanäle 0 und 1 vertauschen und die Kanäle 2 und 3 unberührt lassen.
+Beachte, dass bei der Wiedergabe eines Mediums mit nur zwei Känalen die Kanäle
+2 und 3 still wären, 0 und 1 aber trotzdem vertauscht würden.
+.IPs "mplayer \-af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
+Würde die Anzahl der Kanäle auf 6 setzen und 4 Routen aufsetzen, die den Kanal
+0 nach Kanal 0 und 3 kopieren.
+Kanäle 4 und 5 werden keinen Ton enthalten.
+.RE
+.PD 1
 .
 .TP
 .B format[=Format] (siehe auch \-format)
@@ -3722,7 +3842,25 @@ floatle, floatbe, floatne, mulaw, alaw, mpeg2, ac3 und imaadpcm.
 .
 .TP
 .B volume[=v:sc]
-Wählt das Lautstärkelevel der Ausgabe.
+Implementiert die Lautstärkeregulierung in Software.
+Benutze diesen Filter mit Vorsicht, da er das Verhältnis von Signalstärke zum
+Rauschen (signal to noise ratio) reduzieren kann.
+In den meisten Fällen ist es am besten, das Level für den PCM-Sound auf
+maximal zu stellen, diesen Filter wegzulassen und die Ausgabestärke zu den
+Lautsprechern mit der Mixereinstellung Master zu regulieren.
+In dem Falle, dass deine Soundkarte einen digitalen anstelle eines analogen
+PCM-Mixers hat, benutze stattdessen die MASTER-Mixereinstellung.
+Wenn ein externer Verstärker mit dem Computer verbunden ist (das ist fast
+immer der Fall), kann das Rauschlevel minimiert werden, indem Master-Level und
+der Lautstärkeregler am Verstärker angepasst werden, bis das Rauschen im
+Hintergrund verschwunden ist.
+.br
+Dieser Filter hat ein zweites Feature: Er misst die insgesamt maximale
+Lautstärke und gibt diese aus, wenn MPlayer beendet wird.
+Diese Lautstärkeabschätzung kann benutzt werden, um die Lautstärke in MEncoder
+so zu setzen, dass ein maximaler dynamischer Bereich benutzt wird.
+.br
+.I ANMERKUNG:
 Dieser Filter ist nicht reentrant (ablaufinvariant) und kann dementsprechend
 nur einmal pro Audiostream aufgerufen werden.
 .PD 0
@@ -3731,16 +3869,40 @@ nur einmal pro Audiostream aufgerufen werden.
 Setzt die gewünschte Verstärkung in dB für alle Kanäle in diesem Stream.
 Die Verstärkung kann zwischen -200dB und +60dB liegen, wobei -200dB den
 Sound komplett verstummen lässt und +60dB einer 1000-fachen Verstärkung
-entspricht.
+entspricht (Standard: 0).
 .IPs <sc>\ 
-Aktiviert "Soft-Clipping".
+Schaltet "Soft-Clipping" an (1) oder aus (0).
+Soft-Clipping kann den Klang weicher machen, wenn sehr hohe Lautstärken
+benutzt werden.
+Benutze diese Option, wenn der dynamische Bereich der Lautsprecher sehr
+niedrig ist.
+.br
+.I WARNUNG:
+Dieses Feature bewirkt Störgeräusche und sollte als letzte Möglichkeit
+angesehen werden.
+.RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af volume=10.1:0 media.avi"
+Würde den Klang um 10.1dB verstärken und abschneiden, wenn die Lautstärke zu
+hoch ist.
 .RE
 .PD 1
 .
 .TP
-.B pan[=n:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
+.B pan=n[:l01:l02:...l10:l11:l12:...ln0:ln1:ln2:...]
 Mischt Kanäle beliebig.
-Details findest du (auf Englisch) in DOCS/\:HTML/\:en/\:audio.html.
+Im Prinzip eine Kombination der Filter volume und channels, der benutzt werden
+kann, viele Kanäle auf nur wenige herunterzumischen, z.B.\& stereo nach mono
+oder das Verändern der "Breite" vom mittleren Lautsprecher in einem
+Surroundsound-System.
+Dieser Filter ist schwierig zu benutzen und wird etwas Herumprobieren
+benötigen, bevor die gewünschten Ergebnisse eintreten.
+Die Anzahl der Optionen für diesen Filter hängt von der Anzahl der
+Ausgabekanäle ab.
 Ein Beispiel dazu, wie mit diesem Filter eine 6-Kanal-Datei auf 2 Kanäle
 heruntergemischt werden kann, findest du im Abschnitt Beispiele nahe dem Ende
 der man page.
@@ -3749,62 +3911,169 @@ der man page.
 .IPs <n>\ \ 
 Anzahl der Eingabekanäle (1\-6).
 .IPs <lij>
-Gibt an, wieviel vom Eingabekanal j in den Ausgabekanal i gemischt wird.
+Gibt an, wieviel vom Eingabekanal j in den Ausgabekanal i gemischt wird (0\-1).
+.RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af pan=1:0.5:0.5 \-channels 1 media.avi"
+Würde von stereo nach mono heruntermischen.
+.IPs "mplayer \-af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
+Würde 3 Ausgabekanäle liefern, Kanäle 0 und 1 bleiben intakt und der
+Ausgabekanal 2 wäre die Mischung aus den Kanälen 0 und 1 (und könnte zum
+Beispiel an eine Subwoofer geschickt werden).
 .RE
 .PD 1
 .
 .TP
 .B sub[=fc:ch]
-Fügt einen Subwoofer-Kanal hinzu.
+Fügt dem Audiostream einen Subwoofer-Kanal hinzu.
+Die Audiodaten, die für die Erzeugung des Subwoofer-Kanals benutzt werden,
+ist ein Durchschnitt des Klanges in Kanal 0 und Kanal 1.
+Der resultierende Klang ist dann tiefpassgefiltert von einem
+Butterworth-Filter vierten Ranges mit einem voreingestellten Abschnitt der
+Frequenzen bei 60Hz und wird in einem separaten Kanal dem Audiostream
+hinzugefügt.
+.br
+.I WARNUNG:
+Deaktiviere diesen Filter, wenn du DVDs mit Dolby Digital 5.1-Klang abspielst,
+sonst wird dieser Filter den Klang des Subwoofers stören.
 .PD 0
 .RSs
 .IPs <fc>\ 
 Ab dieser Frequenz schneidet der Tiefpassfilter ab (20Hz bis 300Hz)
 (Standard: 60Hz).
+Versuche für beste Resultate die Frequenz, ab der abgeschnitten
+wird, so niedrig wie möglich zu setzten.
+Das wird den Stereo- oder Surroundsound-Genuß erhöhen.
 .IPs <ch>\ 
-Kanalnummer für die Sub-Kanäle.
+Bestimmt die Kanalnummer, in die der Sub-Kanal eingefügt werden soll.
+Die Kanalnummer kann zwischen 0 und 5 liegen (Standard: 5).
+Beachte, dass die Anzahl der Kanäle automatisch auf <ch> erhöht wird, sollte
+es nötig sein.
+.RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af sub=100:4 -channels 5 media.avi"
+Würde einen Subwoofer-Kanal mit einer Abschlussfrequenz von 100Hz zum
+Ausgabekanal 4 hinzufügen.
 .RE
 .PD 1
 .
 .TP
-.B surround[=delay]
+.B surround[=Verzögerung]
 Decoder für Matrix-encodierten Surroundsound, funktioniert bei vielen
 Zweikanaldateien.
 .PD 0
 .RSs
-.IPs <delay>
-Verzögerung in ms für den hinteren Lautsprecher (0 bis 1000) (Standard: 20).
+.IPs <Verzögerung>
+Verzögerung in ms für den hinteren Lautsprecher (0 bis 1000) (Standard: 20)
+Diese Verzögerung sollte wie folgt gesetzt werden: Wenn d1 der Abstand ist,
+von dem aus die vorderen Lautsprecher gehört werden, und d2 der Abstand ist,
+von dem aus die hinteren Lautsprecher gehört werden, dann sollte die
+Verzögerung auf 15ms gesetzt werden, falls d1 <= d2 und auf 15 + 5*(d1-d2),
+falls d1 > d2.
+.RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af surround=15 \-channels 4 media.avi"
+Würde Decodierung von Surroundsound hinzufügen mit einer Verzögerung von 15ms
+für die hinteren Lautsprecher.
 .RE
 .PD 1
 .
 .TP
 .B delay[=ch1:ch2:...]
-Verzögert die Soundausgabe.
-Gib für jeden Kanal einzeln die Verzögerung der Soundausgabe in ms an
-(Fließkommazahl zwischen 0 und 1000).
+Verzögert die Soundausgabe zu den Lautsprechern so, dass der Klang der
+verschiedenen Kanäle die Position, an dem sie gehört werden, gleichzeitig
+erreicht.
+Das macht nur Sinn, wenn du mehr als 2 Lautsprecher hast.
+.PD 0
+.RSs
+.IPs ch1,ch2,...
+Die Verzögerung in ms, die jedem Kanal auferlegt wird (Fließkommazahl zwischen
+0 und 1000).
+.RE
+.PD 1
+.sp 1
+.RS
+Um die benötigte Verzögerung für die verschiedenen Kanäle zu berechnen, gehe
+wie folgt vor:
+.IP 1. 3
+Messe die Entfernung der Lautsprecher in Metern in Relation zu der Position,
+an der gehört wird, was dir die Entfernungen s1 bis s5 liefert (bei einem
+5.1-System).
+Für den Subwoofer macht Anpassung keinen Sinn (du wirst den Unterschied eh
+nicht hören).
+.IP 2. 3
+Subtrahiere die Abstände s1 bis s5 von der maximalen Entfernung, z.B.\&
+s[i] = max(s) - s[i]; i = 1...5.
+.IP 3.
+Berechne die benötigten Verzögerungen in ms als d[i] = 1000*s[i]/342; i =
+1...5.
+.RE
+.PD 0
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af delay=10.5:10.5:0:0:7:0 media.avi"
+Würde die vordere Linke und Rechte um 10.5ms verzögern, die beiden hinteren
+Kanäle und den Subwoofer um 0ms und Center um 7ms.
+.RE
+.PD 1
 .
 .TP
 .B export[=mmapped_Datei[:nsamples]]
 Exportiert das Eingangssignal an andere Prozesse mittels Memory Mapping
 (mmap()).
+Memory-mapped-Bereiche enhalten einen Header:
+.sp 1
+.nf
+int nch                     /*Anzahl der Kanäle*/
+int size                    /*Größe des Buffers*/
+unsigned long long counter  /*Wird benutzt, um Synchronisation zu wahren; wird
+                  jedes mal, wenn neue Daten exportiert werden, aktualisiert.*/
+.fi
+.sp 1
+Der Rest sind (nicht-interleaved) 16-bit-Daten über die Auslastung.
 .PD 0
 .RSs
-.IPs <mmapped_file>
+.IPs <mmapped_Datei>
 Datei, zur der die Daten exportiert werden sollen
 (Standard: ~/\:.mplayer/\:mplayer-af_export).
 .IPs <nsamples>
 Anzahl der Samples pro Kanal (Standard: 512)
 .RE
+.sp 1
+.RS
+.I BEISPIEL:
+.RE
+.RSs
+.IPs "mplayer \-af export=/tmp/mplayer-af_export:1024 media.avi"
+Würde 1024 Samples pro Kanal nach '/tmp/mplayer-af_export' exportieren.
+.RE
 .PD 1
 .
 .TP
 .B extrastereo[=mul]
-Erhöht den Unterschied zwischen linken und rechten Kanälen, um der Wiedergabe
-eine Art "Live"-Effekt hinzuzufügen.
+Erhöht den Unterschied zwischen linken und rechten Kanälen (linear), was der
+Wiedergabe eine Art "Live"-Effekt hinzuzufügt.
 .PD 0
 .RSs
 .IPs <mul>
-Differenz-Koeffizient (Standard: 2.5)
+Setzt den Differenz-Koeffizient (Standard: 2.5).
+0.0 bedeutet Klang in mono (Durchschnitt beider Kanäle), bei 1.0 bleibt der
+Klang unverändert, mit -1.0 werden linker und rechter Kanal vertauscht.
 .RE
 .PD 1
 .
@@ -3864,7 +4133,7 @@ die x:y-Position relativ zur linken oberen Ecke des größeren Bildes.
 .I ANMERKUNG:
 Eine vollständige Liste aller verfügbaren Plugins liefert \-vf help.
 .sp 1
-Filter werden in Listen verwaltet.
+Videofilter werden in Listen verwaltet.
 Es gibt ein paar Kommandos, um die Filterliste zu regeln.
 .
 .TP
