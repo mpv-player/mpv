@@ -288,7 +288,7 @@ Erhöht/\:verringert die Lautstärke.
 Erhöht/\:verringert die Lautstärke.
 .IPs m\ \ \ \ 
 Ändert Ton-Stummschaltung (ein/\:aus).
-.IPs "#" (nur bei MPEG)
+.IPs "#" (nur bei MPEG und Matroska)
 Wechselt zwischen den verfügbaren Audiospuren.
 .IPs f\ \ \ \ 
 Ändert Vollbild-Wiedergabe (ein/\:aus).
@@ -457,7 +457,7 @@ Zeilenvorschübe nicht richtig verarbeiten (z.B.\& \\r).
 .
 .TP
 .B \-priority <prio> (nur bei Windows)
-Setzt die Prozesspriorität für MPlayer anhand von Windows vordefinierten
+Setzt die Prozesspriorität für MPlayer anhand der von Windows vordefinierten
 Prioritäten.
 Mögliche Werte für <prio>:
 .RSs
@@ -8000,6 +8000,24 @@ auch gute Qualität liefern.
 .REss
 .
 .TP
+.B direct_pred=<0\-2>
+Bestimmt den Typ der Bewegungsabschätzung, die in B-Frames für direkte
+Macroblöcke benutzt wird.
+.PD 0
+.RSs
+.IPs 0
+Keiner: direkte Macroblöcke werden nicht benutzt.
+.IPs 1
+Regional: Motion-Vectors werden von benachbarten Blöcken extrapoliert.
+.IPs 2
+Zeitlich: Motion-Vectors werden vom folgenden P-Frame extrapoliert (Standard).
+.RE
+.PD 1
+Regional und zeitlich sind ungefähr gleich schnell und haben einen ähnlichen
+PSNR-Wert, zeitlich sieht jedoch oft besser aus.
+direct_pred=0 ist langsamer und liefert schlechtere Qualität.
+.
+.TP
 .B (no)weight_b
 Benutze gewichtete Vorhersage für B-Frames.
 Ohne diese Option liefern bidirektional gerichtete Makroblöcke jedem
@@ -8043,12 +8061,28 @@ Brauchbare Werte liegen im Bereich <-2\-2> (Standard: 0).
 .
 .TP
 .B level_idc=<10\-51>
-Setzt das Level des Bitstreams wie in Anhang A des H.264-Standard definiert.
+Setzt das Level des Bitstreams wie in Anhang A des H.264-Standard definiert
+Standard: 40 (Level 4.0).
 Dies wird benutzt, um dem Decoder mitzuteilen, welche Fähigkeiten dieser
 unterstützen muß.
 Benutze diesen Parameter nur, wenn du weißt, was er bedeutet, und du ihn
 wirklich setzen mußt.
-Standard: 40 (Level 4.0)
+.
+.TP
+.B log=<-1\-3>
+Passt an, wieviele Logging-Informationen ausgegeben werden.
+.RSs
+-1: keine
+.br
+ 0: Gib nur Fehler aus.
+.br
+ 1: Warnungen
+.br
+ 2: PSNR und andere Statistiken der Analyse, wenn die Encodierung fertig ist
+(Standard)
+.br
+ 3: PSNR, QP, Frametyp, Größe und andere Statistiken für jeden Frame
+.REss
 .
 .TP
 .B scenecut=<-1\-100>
@@ -8067,11 +8101,14 @@ keyint aber nicht zurücksetzen.
 .
 .TP
 .B frameref=<1\-16>
-Anzahl der vorigen Frames, die für die Vorhersage in einem P-Frame verwendet
+Anzahl der vorigen Frames, die für die Vorhersage in B- und P-Frames verwendet
 werden (Standard: 1).
-Dies is effektiv in Animes, scheint aber bei Material mit Live-Action wenig
-Unterschied zu machen.
-Manche Decoder sind nicht in der Lage, große frameref-Werte zu handhaben.
+Dies is effektiv in Animes, bei Material mit Live-Action aber nehmen die
+Verbesserungen bei mehr als ca.\& 6 Referenzframes schnell ab.
+Dies hat keinen Effekt auf die Geschwindigkeit der Decodierung, es erhöht nur
+den dafür nötigen Speicherbedarf.
+Manche Decoder sind nicht in der Lage, mehr als 15 Referenzframes zu
+verarbeiten.
 .
 .TP
 .B bframes=<0\-16>
@@ -8105,6 +8142,54 @@ Dies ist trotzdem eine experimentelle Option: Sie ist nicht völlig abgestimmt
 und wird nicht immer helfen.
 Benötigt bframes >= 2.
 Nachteil: Verzögert eine Decodierungsverzögerung um 2 Frames.
+.
+.TP
+.B (no)deblock
+Benutze einen Deblocking-Filter (Standard: aktiviert).
+Da es sehr wenig Zeit kostet verglichen mit dem Gewinn von Qualität, wird nicht
+empfohlen, ihn zu deaktivieren.
+.
+.TP
+.B deblockalpha=<-6\-6>
+AlphaC0-Parameter des Deblocking-Filters (Standard: 0).
+Dieser passt Schwellenwerte für den In-loop-Deblocking-Filter von H.264 an.
+Zuerst passt dieser Parameter den maximalen Wert an, um den dieser Filter
+einen Pixel verändern darf.
+Als zweites beeinflusst dieser Parameter den Schwellenwert für die Differenz
+jenseits der Kante, die gefiltert wird.
+Ein positiver Wert reduziert Blockartefakte stärker, wird jedoch Details
+verschmieren.
+.br
+Das Standardverhalten des Filters erreicht fast immer optimale Qualität, daher
+ist es am besten, die Werte nicht zu ändern oder nur geringe Änderungen
+vorzunehmen.
+Wenn dein Quellmaterial aber doch schon Blöcke oder Rauschen enthält, die du
+entfernen möchtest, kann es eine gute Idee sein, ihn etwas zu erhöhen.
+.
+.TP
+.B deblockbeta=<-6\-6>
+Beta-Parameter des Deblocking-Filters (Standard: 0).
+Beeinflusst den Schwellenwert für Details.
+Sehr detaillierte Blöcke werden nicht gefiltert, da das Weichzeichnen des
+Filters stärker auffallen würde als Blocking-Effekte des Originals.
+.
+.TP
+.B (no)cabac
+Benutze CABAC (Context-Adaptive Binary Arithmetic Coding) (Standard:
+aktiviert)
+Verlangsamt Encodierung und Decodierung leicht, sollte aber 10-15%
+Bitrate sparen.
+Wenn du nicht gerade nach Decodiergeschwindigkeit suchst, solltest du dies
+nicht deaktivieren.
+.
+.TP
+.B qp_min=<1\-51> (ABR oder two-pass)
+minimaler Quantisierungsparameter, 10\-30 scheint ein brauchbarer Bereich zu
+sein Standard: 10).
+.
+.TP
+.B qp_max=<1\-51> (ABR oder two-pass)
+maximaler Quantisierungsparameter (Standard: 51)
 .
 .
 .SS MPEG Muxer (\-mpegopts)
