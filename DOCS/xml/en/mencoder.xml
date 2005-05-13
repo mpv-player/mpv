@@ -2011,7 +2011,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem><para>
   <emphasis role="bold">b_pyramid</emphasis>:
-  You might as well enable this option if you are using >2 B-frames;
+  You might as well enable this option if you are using >=2 B-frames;
   as the man page says, you get a little quality improvement at no
   speed cost.
   Note that these videos cannot be read by libavcodec-based decoders
