@@ -161,14 +161,25 @@ mencoder \- Movie Encoder
 .br
 .in
 .B gmplayer
+'in +\n[.k]u
 [Optionen]
 [\-skin\ skin]
 .
 .br
+.in
 .B mencoder
+'in +\n[.k]u
 [Optionen]
 .RI [ \ Datei\  | \ URL\  | \ \-\  ]
 [\-o\ Datei]
+.
+.br
+.in
+.B mencoder
+'in +\n[.k]u
+[globale Optionen]
+.I Datei1
+[spezielle Optionen] [Datei2] [spezielle Optionen]
 .ad
 .hy
 
@@ -745,10 +756,6 @@ Benutzt hochqualitative Softwaretimer, die genauso präzise wie die Echtzeituhr
 Der Preis dafür ist eine höhere CPU-Auslastung.
 .
 .TP
-.B \-speed <0.01\-100>
-Erhöht oder verringert die Abspielgeschwindigkeit abhängig vom angegebenen Faktor.
-.
-.TP
 .B \-sstep <Sekunden>
 Überspringt <Sekunden> Sekunden nach jedem Frame.
 Die normale Framerate des Films wird beibehalten, die Wiedergabe ist also
@@ -1165,6 +1172,13 @@ Diese Option ist veraltet, da MPlayer nun OpenDML unterstützt.
 Springt an die Byte-Position.
 Nützlich beim Abspielen von CD-ROM-Abbildern / .VOB-Dateien mit Schrott
 am Anfang.
+.
+.TP
+.B \-speed <0.01\-100>
+Erhöht oder verringert die Abspielgeschwindigkeit abhängig vom angegebenen
+Faktor.
+Es wird nicht garantiert, dass diese Option zusammen mit \-ovc copy
+funktioniert.
 .
 .TP
 .B \-srate <Hz>
@@ -5039,14 +5053,15 @@ wie bei Capturing von TV-Input.
 Der optionale Parameter (ivtc=1) entspricht der Option dr=1 des detc-Filters
 und sollte nur von MEncoder, nicht von MPlayer verwendet werden.
 Wie bei detc muß auch hier bei Benutzung von MEncoder die korrekte
-Ausgabe-Framerate (\-ofps 23.976) angegeben werden.
+Ausgabe-Framerate (\-ofps 24000/1001) angegeben werden.
 Die Entwicklung an itvc findet nicht weiter statt, da die Filter pullup und
 filmident genauer zu sein scheinen.
 .
 .TP
 .B pullup[=jl:jr:jo:ju:sb:mp]\
 Pulldown-Umkehrungs- (inverse telecine) Filter der dritten Generation, der
-mixed hard-telecine und Progressive-Material mit 24 und 30 fps handhaben kann.
+mixed hard-telecine und Progressive-Material mit 24000/1001 und 30000/1001 fps
+handhaben kann.
 Der Pullup-Filter ist wesentlich robuster als detc oder ivtc, da er
 für Entscheidungen zukünftigen Kontext zurate zieht.
 Wie ivtc auch ist pullup zustandslos in dem Sinne, dass er nicht nach einem zu
@@ -5101,8 +5116,8 @@ werden.
 Abhängig von der MPEG-Quelle kannst du diesen Hinweis ignorieren, solange du
 keine Warnungen "Bottom-first field" bekommst.
 Werden keine Optionen angegeben, bewerkstelligt dieser Filter normales inverse
-telecine und sollte zusammen mit mencoder \-fps 29.97 \-ofps 23.976 benutzt
-werden.
+telecine und sollte zusammen mit mencoder \-fps 30000/1001 \-ofps 30000/1001
+benutzt werden.
 Wird dieser Filter mit mplayer benutzt wird, kommt es zu unregelmäßigen
 Frameraten, aber dies ist im Allgemeinen besser als pp=lb oder gar kein
 Deinterlacing zu benutzen.
@@ -5349,7 +5364,7 @@ Interpoliere fehlende Zeilen.
 .IPs 2
 Wandle Felder mit linearer Interpolation zu 1/4 Pixel um (kein Sprung).
 .IPs 4
-Wandle Felder mit dem 4tap-Filter zu 1/4 Pixel um (höhere Qualität).
+Wandle Felder mit dem 4tap-Filter zu 1/4 Pixel um (höhere Qualität) (Standard).
 .RE
 .PD 1
 .
@@ -5774,8 +5789,8 @@ reiner (raw) Videostream (kein Muxing, nur ein Videostream)
 Setzt die Anzahl der Bilder pro Sekunde (fps) für die Ausgabedatei, die
 unterschiedlich zu der der Quelldatei sein kann.
 Diese Option muss gesetzt werden, wenn eine Quelldatei mit
-variabler Framerate (ASF, einige MOV) oder ein progressiver Film (29.97fps
-telecined MPEG) encodiert wird.
+variabler Framerate (ASF, einige MOV) oder ein progressiver Film (30000/1001
+fps telecined MPEG) encodiert wird.
 .
 .TP
 .B \-ovc <Codecname>
@@ -6547,8 +6562,17 @@ bilden den Durchschnitt über mehr Frames (langsamerer Wechsel).
 .
 .TP
 .B vqcomp=<Wert>
-Kompression des Quantisierungsparameters, hängt von vrc_eq ab (Durchlauf 1/\:2)
-(Standard: 0.5)
+Kompression des Quantisierungsparameters, vrc_eq hängt davon ab (Durchlauf
+1/\:2) (Standard: 0.5).
+Sei beispielsweise angenommen, dass die Standard-Bitratenkontrollgleichung
+benutzt wird, so wird die Bitratenkontrolle bei vqcomp=1.0 für jeden Frame so
+viele Bits reservieren, dass sie alle mit dem selben Quantisierungsparameter
+encodiert werden können.
+Bei vqcomp=0.0 reserviert die Bitratenkontrolle für jeden Frame dieselbe
+Anzahl Bits, also striktes CBR.
+.I ANMERKUNG:
+Dies sind extreme Einstellungen und sollten nie benutzt werden.
+Die wahrgenommene Qualität ist optimal zwischen diesen beiden Extremen.
 .
 .TP
 .B vrc_eq=<Gleichung>
@@ -8136,7 +8160,7 @@ Setzt die Videobitrate in kbit/s für MPEG-1/2-Video.
 .
 .
 .TP
-.B vframerate=<23.976 | 24 | 25 | 29.97 | 30 | 50 | 59.94 | 60 >
+.B vframerate=<24000/1001 | 24 | 25 | 30000/1001 | 30 | 50 | 60000/1001 | 60 >
 Setzt die Framerate bei MPEG-1/2-Video.
 Diese Option wird ignoriert, wenn sie zusammen mit der Option telecine benutzt
 wird.
