@@ -343,15 +343,15 @@ Quartz-Videoausgabetreibers.)
 .PP
 .PD 0
 .RSs
-.IPs "Befehl + 0"
+.IPs "Apfel + 0"
 Ändere die Größe des Abspielfensters auf die Hälfte der Originalgröße.
-.IPs "Befehl + 1"
+.IPs "Apfel + 1"
 Ändere die Größe des Abspielfensters auf die Originalgröße.
-.IPs "Befehl + 2"
+.IPs "Apfel + 2"
 Ändere die Größe des Abspielfensters auf das doppelte der Originalgröße.
-.IPs "Befehl + f"
+.IPs "Apfel + f"
 Aktiviere/\:deaktiviere Vollbildwiedergabe (siehe auch \-fs).
-.IPs "Befehl + [ und Befehl + ]"
+.IPs "Apfel + [ und Apfel + ]"
 Setze Alphawert des Abspielfensters.
 .IPs T\ \ \ \ 
 Ändere den Video-Layer: immer ganz oben/\:ganz unten/\:normal (siehe auch
@@ -550,14 +550,6 @@ Hängt bei einem Absturz oder SIGTRAP automatisch gdb an.
 Unterstützung hierfür muß einkompiliert sein durch Ausführung von 'configure'
 mit --enable-crash-debug oder Vorhandensein einer .developer-Datei im
 Source-Tree.
-.
-.TP
-.B \-edl <Dateiname> (nur bei EDL)
-Aktiviert EDL-Aktionen (Edit Decision List) während der Wiedergabe.
-Teile des Videos werden entsprechend den Einträgen der angegebenen
-Datei übersprungen und Teile des Audios stummgeschaltet.
-Siehe DOCS/\:de/\:documentation.html#edl, dort stehen Details, wie du dieses
-Feature benutzen kannst.
 .
 .TP
 .B \-edlout <Dateiname> (nur bei EDL)
@@ -1015,6 +1007,14 @@ Einige DVDs beinhalten Szenen, die aus verschiedenen Perspektiven/\:Winkeln
 betrachtet werden können. 
 Mit dieser Option kannst du MPlayer sagen, welche Perspektive er wiedergeben
 soll (Standard: 1).
+.
+.TP
+.B \-edl <Dateiname> (nur bei EDL)
+Aktiviert EDL-Aktionen (Edit Decision List) während der Wiedergabe.
+Teile des Videos werden entsprechend den Einträgen der angegebenen
+Datei übersprungen und Teile des Audios stummgeschaltet.
+Siehe DOCS/\:de/\:documentation.html#edl, dort stehen Details, wie du dieses
+Feature benutzen kannst.
 .
 .TP
 .B \-forceidx
@@ -3996,7 +3996,7 @@ Gibt an, wieviel vom Eingabekanal j in den Ausgabekanal i gemischt wird (0\-1).
 .RSs
 .IPs "mplayer \-af pan=1:0.5:0.5 \-channels 1 media.avi"
 Würde von stereo nach mono heruntermischen.
-.IPs "mplayer \-af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
+.IPs "mplayer \-af pan=3:1:0:1:0.5:0.5 \-channels 3 media.avi"
 Würde 3 Ausgabekanäle liefern, Kanäle 0 und 1 bleiben intakt und der
 Ausgabekanal 2 wäre die Mischung aus den Kanälen 0 und 1 (und könnte zum
 Beispiel an eine Subwoofer geschickt werden).
@@ -4035,7 +4035,7 @@ es nötig sein.
 .I BEISPIEL:
 .RE
 .RSs
-.IPs "mplayer \-af sub=100:4 -channels 5 media.avi"
+.IPs "mplayer \-af sub=100:4 \-channels 5 media.avi"
 Würde einen Subwoofer-Kanal mit einer Abschlussfrequenz von 100Hz zum
 Ausgabekanal 4 hinzufügen.
 .RE
@@ -4653,6 +4653,8 @@ Quantisierungsparameter, den du angibst.
 Standard-pp-Filterkombination (hb:a,vb:a,dr:a)
 .IPs fa/fast
 schnelle pp-Filterkombination (h1:a,v1:a,dr:a)
+.IPs ac\ \ \ 
+hochqualitative pp-Filterkombination (ha:a:128:7,va:a,dr:a)
 .RE
 .RS
 .sp 1
@@ -5777,6 +5779,18 @@ Setzt das FourCC-Feld der Ausgabedatei auf 'div3'.
 .B \-force-avi-aspect <0.2\-3.0>
 Überschreibe den Aspekt, der im AVI-OpenDML-vprp-Header gespeichert ist.
 Dies kann benutzt werden, um den Aspekt mit '\-ovc copy' zu ändern.
+.
+.TP
+.B \-hr-edl-seek (nur bei EDL)
+Benutze eine präzisere, jedoch wesentlich langsamere Methode, Bereiche zu
+überspringen.
+Bereiche, die markiert sind, übersprungen zu werden, werden nicht direkt
+übergangen, sondern es werden alle Frames decodiert, aber nur die benötigten
+Frames werden encodiert.
+Dies erlaubt das Starten in Bereichen zwischen Keyframes.
+.br
+.I ANMERKUNG:
+Es ist nicht garantiert, dass dies mit der Option '\-ovc copy' funktioniert.
 .
 .TP
 .B \-info <Option1:Option2:...> (nur für AVIs)
@@ -8050,8 +8064,12 @@ Performance-Einbußen auftreten (Standard: 1).
 .
 .TP
 .B bitrate=<Wert>
-Setzt die zu benutzende Bitrate in kbits/\:Sekunde (Standard: aus).
-Wird benötigt, wenn du CBR (Encodierung mit konstanter Bitrate) möchtest.
+Setzt die durchschnittlich zu benutzende Bitrate in kbits/\:Sekunde (Standard:
+deaktiviert).
+Da eine lokale Bitrate variieren kann, kann dieser Durchschnitt für sehr kurze
+Videos ungenau sein (siehe ratetol).
+Konstante Bitrate kann erreicht werden, indem diese Option mit vbv_maxrate
+kombiniert wird, was jedoch die Qualität signifikant verringert.
 .
 .TP
 .B qp_constant=<1\-51>
@@ -8103,14 +8121,11 @@ Statistiken des zweiten Durchlaufs zur Grundlage hat.
 Du kannst alle Optionen für die Encodierung verwenden, auch die sehr
 CPU-intensiven.
 .br
-Der erste Durchlauf darf entweder konstante Bitrate oder konstanten
+Der erste Durchlauf kann entweder durchschnittlich Bitrate oder konstanten
 Quantisierungsparameter verwenden.
-Ein konstanter Quantisierungsparameter ist oft ein bisschen besser, aber du
-mußt einen qp_constant raten, der in der Nähe deiner erwünschten Bitrate liegt.
-(Es ist besser, eher einen niedrigeren Wert für qp_constant zu raten, also hin
-zu einer höheren Bitrate.)
-Nachfolgende Durchläufe sind ABR (average bitrate), und du musst eine Bitrate
-angeben.
+ABR wird empfohlen, da er nicht darauf angewiesen ist, einen
+Quantisierungsparameter zu ermitteln.
+Aufeinanderfolgende Durchläufe sind ABR und müssen eine Bitrate angeben.
 .br
 .I ANMERKUNG:
 Die Unterstützung für die Encodierung in drei Durchläufen für x264 ist neu in
@@ -8118,6 +8133,12 @@ MEncoder, wir freuen uns daher über jegliches Feedback, das du geben kannst
 hinsichtlich guten Kombinationen von x264-Optionen, die sowohl schnell sind als
 auch gute Qualität liefern.
 .REss
+.
+.TP
+.B qcomp=<0\-1> (ABR oder two-pass)
+Kompression des Quantisierungsparameters (Standard: 0.6).
+Ein niedrigerer Wert macht die Bitrate konstanter, während ein höherer Wert
+die Quantisierungsparameter konstanter macht.
 .
 .TP
 .B direct_pred=<0\-2>
@@ -8204,7 +8225,7 @@ am DCT-Drift.
 .
 .TP
 .B keyint_min=<1\-keyint/\:2>
-Setzt das minimale Intervall zwischen IDR-Frames (Standard: keyint * 0.4).
+Setzt das minimale Intervall zwischen IDR-Frames (Standard: 25).
 Sollten Szenenwechsel innerhalb dieses Intervalls vorkommen, so werden sie als
 Intraframes encodiert und nicht als Beginn einer neuen GOP.
 Bei H.264 sind Intraframes nicht notwendigerweise an eine geschlossene GOP
@@ -8358,6 +8379,29 @@ sein Standard: 10).
 .TP
 .B qp_max=<1\-51> (ABR oder two-pass)
 maximaler Quantisierungsparameter (Standard: 51)
+.
+.TP
+.B qp_step=<1\-50> (ABR oder two-pass)
+maximaler Wert, um den der Quantisierungsparameter zwischen
+Frames erhöht/erniedrigt werden darf (Standard: 2)
+.
+.TP
+.B ratetol=<0.1\-100.0> (ABR oder two-pass)
+erlaubte Abweichung der durchschnittlichen Bitrate (keine bestimmten
+Einheiten) (Standard: 1.0)
+.
+.TP
+.B vbv_maxrate=<Wert> (ABR oder two-pass)
+maximale lokale Bitrate in kbits/\:Sekunde (Standard: deaktiviert)
+.
+.TP
+.B vbv_bufsize=<Wert> (ABR oder two-pass)
+Intervall für vbv_maxrate, über die gemittelt wird in kbits (Standard: keiner,
+muss angegeben werden, wenn vbv_maxrate aktiviert wird)
+.
+.TP
+.B vbv_init=<0.0\-1.0> (ABR oder two-pass)
+initiale Bufferbelegung als Bruchteil von vbv_bufsize (Standard: 0.9)
 .
 .
 .SS MPEG Muxer (\-mpegopts)
