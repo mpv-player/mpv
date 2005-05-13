@@ -117,7 +117,7 @@ static int check_font(font_desc_t *desc, float ppem, int padding, int pic_idx,
 		      int unicode) {
     FT_Error	error;
     FT_Face face = desc->faces[pic_idx];
-    int	const	load_flags = FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING;
+    int	const	load_flags = FT_LOAD_DEFAULT;
     int		ymin = INT_MAX, ymax = INT_MIN;
     int		space_advance = 20;
     int         width, height;
@@ -496,7 +496,7 @@ void render_one_glyph(font_desc_t *desc, int c)
     int width, height, stride, maxw, off;
     unsigned char *abuffer, *bbuffer;
     
-    int	const	load_flags = FT_LOAD_DEFAULT | FT_LOAD_NO_HINTING;
+    int	const	load_flags = FT_LOAD_DEFAULT;
     int		pen_xa;
     int font = desc->font[c];
     int error;
