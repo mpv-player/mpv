@@ -504,15 +504,17 @@ vorstellen).
 .TP
 .B \-colorkey <Nummer>
 Ändert den Farbwert auf einen RGB-Wert deiner Wahl.
-0x000000 ist schwarz und ist weiß.
+0x000000 ist schwarz und 0xffffff ist weiß.
 Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev, 
-svga, vesa, winvidix, xmga, xvidix, xover und directx.
+svga, vesa, winvidix, xmga, xvidix, xover, xv (siehe \-vo xv:ck), xvmc
+(siehe \-vo xv:ck) und directx.
 .
 .TP
 .B \-nocolorkey
 Schaltet die Wahl des Farbwertes ab.
 Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev, 
-svga, vesa, winvidix, xmga, xvidix und xover.
+svga, vesa, winvidix, xmga, xvidix, xover, xv (siehe \-vo xv:ck), xvmc
+(siehe \-vo xv:ck) und directx.
 .
 .TP
 .B \-crash-debug (DEBUG-CODE)
@@ -1972,11 +1974,6 @@ Plugin-Audioausgabetreiber.
 .SH "OPTIONEN FÜR DIE VIDEOAUSGABE (NUR BEI MPLAYER)"
 .
 .TP
-.B \-aa* (nur bei \-vo aa)
-Du bekommst eine Liste mit allen Optionen und ihren Erläuterungen mit
-.I mplayer \-aahelp
-.
-.TP
 .B \-adapter <Wert>
 Bestimmt die Grafikkarte, die das Bild erhalten wird.
 Benötigt die \-vm-Option, um zu funktionieren.
@@ -2454,10 +2451,35 @@ Benutzt die XVideo-Erweiterung von XFee86 4.x, um hardwarebeschleunigtes
 Abspielen zu ermöglichen.
 Wenn du keinen hardwarespezifischen Treiber wählen kannst, ist dies für dich
 vermutlich die beste Wahl.
+Für Informationen darüber, welcher Farbschlüssel benutzt wird und wie er
+dargestellt wird, starte MPlayer mit der Option \-v und suche in der Ausgabe
+Zeilen, die am Anfang mit [xv common] gekennzeichnet sind.
 .PD 0
 .RSs
 .IPs port=<Nummer>
 Wähle einen bestimmten Port für XVideo.
+.IPs ck=<cur|use|set>
+Wählt die Quelle, von der der Farbschlüssel genommen wird (Standard: cur).
+.RSss
+.IPs cur
+Benutzt den aktuell in Xv gesetzten Farbschlüssel.
+.IPs use
+Benutze, setze aber nicht den Farbschlüssel von MPlayer (benutze die Option
+\-colorkey, um dies zu ändern).
+.IPs set
+Das gleiche wie bei der Option use, setzt jedoch auch den gelieferten
+Farbschlüssel.
+.RE
+.IPs ck-method=<man|bg|auto>
+Setzt die Zeichenmethode für den Farbschlüssel (Standard: man).
+.RSss
+.IPs man
+Zeichne den Farbschlüssel manuell (reduziert in manchen Fällen Flimmern).
+.IPs bg
+Setze den Farbschlüssel als Fensterhintergrund.
+.IPs auto
+Lässt Xv den Farbschlüssel zeichnen.
+.RE
 .RE
 .PD 1
 .
@@ -2482,25 +2504,28 @@ werden soll.
 .B xvmc (nur bei X11 mit \-vc ffmpeg12mc)
 Ein Videoausgabetreiber, der die XvMC- (X Video Motion Compensation)
 Unterstützung von XFree86 4.x benutzt, um das Decodieren von MPEG-1/\:2 und
-VCR2
-zu beschleunigen.
+VCR2 zu beschleunigen.
 .PD 0
 .RSs
-.IPs benchmark
+.IPs port=<Nummer>
+Wählt einen speziellen XVideo-Port.
+.IPs (no)benchmark
 Deaktiviert die Anzeige von Bildern.
 Benötigt für einwandfreies Benchmarking von Treibern, die den Bildpuffer nur
 bei einem Monitor-Retrace ändern (nVidia).
-.IPs queue
+Voreinstellung ist, die Bildwiedergabe nicht zu deaktivieren (nobenchmark).
+.IPs (no)queue
 Frames werden in einer Queue angeordnet, um der Videohardware weitergehendes
 paralleles Arbeiten zu ermöglichen.
 Dies kann eine geringe konstante (nicht bemerkbare) A/\:V-Desynchronisation mit
-sich bringen.
-.IPs sleep
+sich bringen (Standard: noqueue).
+.IPs (no)sleep
 Benutze die Sleep-Funktion, während auf Beendigung des Renderns gewartet
-wird (nicht empfohlen unter Linux).
-.IPs wait\ 
-Benutze die Sleep-Funktion nicht, während auf Beendigung des Renderns gewartet
-wird (Standard).
+wird (nicht empfohlen unter Linux) (Standard: nosleep).
+.IPs ck=cur|use|set
+Das gleiche wie \-vo xv:ck (siehe \-vo xv).
+.IPs ck-method=man|bg|auto
+Das gleiche wie die \-vo xv:ck-Methode (siehe \-vo xv).
 .RE
 .PD 1
 .
@@ -2712,8 +2737,10 @@ Produziert keine Videoausgabe.
 Nützlich für Benchmarking-Zwecke.
 .
 .TP
-.B aa (siehe auch \-aa*)
+.B aa\ \ \ \ \ 
 ASCII-Art-Videoausgabetreiber, der auf einer Textkonsole funktioniert.
+Du bekommst eine Liste mit allen Optionen und ihren Erläuterungen mit
+.I mplayer \-vo aa:help
 .
 .TP
 .B caca\ \ \ 
@@ -4275,6 +4302,9 @@ vorskalierten Breiten-/\:Höhenverhältnis.
 .br
 -3:   Berechne Breite/\:Höhe anhand der jeweils anderen Größe und dem
 originalen Breiten-/\:Höhenverhältnis.
+.br
+-(n+8): wie -n oben, rundet aber die Abmessung auf das nächste Vielfache von
+16.
 .REss
 .IPs <interlaced>
 Schalte Interlaced-Skalierung an/\:aus.
@@ -7951,6 +7981,18 @@ IDR-Frames schränken aufeinanderfolgende P-Frames insofern ein, dass sie auf
 keinen Frame, der vor der IDR-Frame liegt, verweisen.
 .
 .TP
+.B (no)chroma_me
+Benutzt Chrominanzinformationen bei der Subpixel-Bewegungsabschätzung
+(Standard: aktiviert).
+Benötigt subq=5.
+.
+.TP
+.B chroma_qp_offset=<-12\-12>
+Benutzt einen anderen Quantisierungsparameter für Chrominanz im Vergleich zur
+Helligkeit.
+Brauchbare Werte liegen im Bereich <-2\-2> (Standard: 0).
+.
+.TP
 .B level_idc=<10\-51>
 Setzt das Level des Bitstreams wie in Anhang A des H.264-Standard definiert.
 Dies wird benutzt, um dem Decoder mitzuteilen, welche Fähigkeiten dieser
@@ -7975,7 +8017,7 @@ P-Frames codiert werden, genauso groß sind wie Intraframes, den Zähler für
 keyint aber nicht zurücksetzen.
 .
 .TP
-.B frameref=<1\-15>
+.B frameref=<1\-16>
 Anzahl der vorigen Frames, die für die Vorhersage in einem P-Frame verwendet
 werden (Standard: 1).
 Dies is effektiv in Animes, scheint aber bei Material mit Live-Action wenig
@@ -7997,6 +8039,23 @@ Wenn diese Option deaktiviert ist, wird die maximale Anzahl B-Frames benutzt.
 .B b_bias=<-100\-100>
 Steuert die von b_adapt getroffene Entscheidung.
 Ein höherer b_bias-Wert bewirkt mehr B-Frames (Standard: 0).
+.
+.TP
+.B (no)b_pyramid
+Erlaubt B-Frames, als Referenz für die Vorhersage von anderen Frames zu dienen.
+Betrachte zum Beispiel drei aufeinanderfolgende B-Frames: I0 B1 B2 B3 P4.
+Ohne diese Option würden B-Frames dem selben Muster folgen wie MPEG-[124].
+Also werden sie in der Reihenfolge I0 P4 B1 B2 B3 codiert, und alle B-Frames
+werden von I0 und P4 vorhergesagt.
+Mit dieser Option werden sie als I0 P4 B2 B1 B3 kodiert.
+B2 ist der gleiche wie oben, aber B1 wird von I0 und B2 vorhergesagt, und B3
+wird von B2 und P4 vorhergesagt.
+Dies bewirkt normalerweise eine leicht verbesserte Kompression, bei fast keinen
+Kosten für die Geschwindigkeit.
+Dies ist trotzdem eine experimentelle Option: Sie ist nicht völlig abgestimmt
+und wird nicht immer helfen.
+Benötigt bframes >= 2.
+Nachteil: Verzögert eine Decodierungsverzögerung um 2 Frames.
 .
 .
 .SS MPEG Muxer (\-mpegopts)
@@ -8086,7 +8145,9 @@ wird.
 .B telecine
 Aktiviert Soft-telecine-Modus: Der Muxer wird tricksen, so dass der
 Videostream wie mit 29.97 oder 30 fps encodiert aussieht; das funktioniert nur
-mit MPEG-2-Video, wenn die Framerate entweder 23.976 oder 24 fps beträgt.
+mit MPEG-2-Video, wenn die Framerate der Ausgabe, eventuell konvertiert
+mit \-ofps, entweder 23.976 oder 24 fps beträgt.
+Jede andere Framerate ist mit dieser Option nicht kompatibel.
 .
 .
 .\" --------------------------------------------------------------------------
@@ -8204,6 +8265,10 @@ mplayer \-vo zr2 \-vf scale=352:288,zrmjpeg Datei.avi
 .TP
 .B Spiele eine 6-kanalige AAC-Datei mit nur zwei Lautsprechern ab:
 mplayer \-rawaudio on:format=0xff \-af pan=6:.32:.39:.06:.17:-.17:.33:.32:.06:.39:-.17:.17:.33 adts_he-aac160_51.aac
+.br
+Du könntest etwas mit den Werten für pan experimentieren (z.B.\& mit einem
+Wert multiplizieren), um die Lautstärke zu erhöhen oder Abschneiden von Sound
+zu vermeiden.
 .
 .SH BEISPIELE ZUM GEBRAUCH VON MENCODER
 .
