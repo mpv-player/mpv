@@ -758,12 +758,12 @@ anschließend
 .B \-slave (siehe auch \-input)
 Diese Option aktiviert den Slave-Modus, der dazu gedacht ist, MPlayer von
 anderen Programmen aus zu steuern.
-Anstatt selber Tastatureingaben auszuwerten, liest MPlayer einfache
-Kommandos von stdin. 
+Anstatt Tastatureingaben abzufangen, liest MPlayer durch Zeilenumbruchszeichen
+(\\n) getrennte Kommandos von stdin.
 .br
 .I ANMERKUNG:
-Siehe DOCS/\:tech/\:slave.txt (Englisch) und \-input cmdlist für eine
-Liste der Befehle.
+Siehe DOCS/\:tech/\:slave.txt (Englisch) und \-input cmdlist für deren
+Beschreibung.
 .
 .TP
 .B \-softsleep
@@ -1168,7 +1168,7 @@ Bildgröße in Bytes
 .PD 1
 .
 .TP
-.B \-rtsp-stream-over-tcp (nur bei live.com)
+.B \-rtsp-stream-over-tcp (nur bei LIVE.COM)
 Kann zusammen mit 'rtsp://'-URLs verwendet werden, um anzugeben, dass die
 daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP 
 übertragen werden (mit der gleichen TCP-Verbindung wie RTSP). 
@@ -2796,6 +2796,7 @@ Videoausgabetreiber für das GGI-Grafiksystem.
 .RSs
 .IPs <Treiber>
 Wählt den zu benutzenden GGI-Treiber explizit.
+Ersetze jedes ',' das in der Treiberzeichenkette vorkommt durch ein '.'.
 .RE
 .PD 1
 .
@@ -4159,8 +4160,21 @@ Klang unverändert, mit -1.0 werden linker und rechter Kanal vertauscht.
 .PD 1
 .
 .TP
-.B volnorm
+.B volnorm[=Methode]
 Maximiert die Lautstärke, ohne den Klang zu verzerren.
+.PD 0
+.RSs
+.IPs <Methode>
+Setzt die zu benutzende Methode.
+.RSss
+1: Benutze ein einziges Sample, um die Abweichungen mit Hilfe eines
+standardgewichteten Durchschnitts der vorigen Samples zu glätten (Standard).
+.br
+2: Benutze mehrere Samples, um die Abweichungen mit Hilfe eines
+standardgewichteten Durchschnitts der vorigen Samples zu glätten.
+.REss
+.RE
+.PD 1
 .
 .TP
 .B ladspa=Datei:Label[:Kontrollen...]
@@ -5912,7 +5926,7 @@ folgende Syntax benutzt:
 .
 .PP
 Wobei <Codec> einer der folgenden sein kann: lavc, xvidenc, divx4, lame,
-toolame, x264enc und mpeg.
+toolame, twolame, faac, x264enc und mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6130,11 +6144,21 @@ Für Menschen mit einem sehr guten Gehör und entsprechender HiFi-Ausstattung.
 .PD 1
 .
 .
-.SS toolame (\-toolameopts)
+.SS toolame und twolame (\-toolameopts und \twolameopts respektive)
 .
 .TP
-.B br=<0\-384> (nur bei CBR)
-Bitrate in kBit/s
+.B br=<32\-384>
+Im CBR-Modus gibt dieser Parameter die Bitrate in kbps an, im VBR-Modus ist er
+die minimal erlaubte Bitrate pro Frame.
+VBR funktioniert nicht mit einem Wert unter 112.
+.TP
+.B vbr=<-50\-50> (nur bei VBR)
+Bereich für Abweichungen; falls negativ verlagert der Encoder die
+durchschnittliche Bitrate zum unteren Limit, wenn positiv zum höheren.
+Auf 0 gesetzt wird CBR benutzt (Standard).
+.TP
+.B maxvbr=<32\-384> (VBR only)
+maximal erlaubte Bitrate pro Frame, in kpbs
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (Standard: mono bei 1-Kanal-Audio, sonst stereo)
@@ -6147,6 +6171,48 @@ Füge Fehlerkorrektur hinzu.
 .TP
 .B debug=<0\-10>
 Debugging-Level
+.RE
+.PD 1
+.
+.
+.SS faac (\-faacopts)
+.
+.TP
+.B br=<Bitrate>
+mittlere Bitrate in kbps (schließt Option quality gegenseitig aus)
+.TP
+.B quality=<1\-1000>
+Qualitätsmodus, je höher desto besser (schließt Option br gegenseitig aus)
+.TP
+.B object=<0\-3>
+Komplexität des Objekttyps
+.PD 0
+.RSs
+.IPs 0
+MAIN (Standard)
+.IPs 1
+LOW
+.IPs 2
+SSR
+.IPs 3
+LTP (extrem langsam)
+.RE
+.PD 1
+.TP
+.B mpeg=<2|4>
+MPEG-Version (Standard: 4)
+.TP
+.B tns\ \ \ \ 
+Aktiviert temporäre Rauschanpassung.
+.TP
+.B cutoff=<0\-Samplerate/2>
+Frequenz, ab der abgeschnitten wird (Standard: <Samplerate>/2)
+.TP
+.B raw\ \ \ \ 
+Speichert den Bitstream als reine Arbeitsdaten mit Extrainformationen im
+Header des Containers (Standard: 0, entspricht ADTS).
+Setze diese Option nicht, wenn du sie nicht unbedingt brauchst, sonst wirst
+du den Audiostream später nicht verwenden können.
 .RE
 .PD 1
 .
