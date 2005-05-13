@@ -1173,8 +1173,6 @@ ist, wird der resample oder lavcresample Audiofilter in die Audiofilterschicht
 eingefügt, um den Unterschied auszugleichen.
 Der Resampling-Typ kann mit der Option \-af-adv gesteuert werden.
 Standard ist ein schnelles Resampling, das Störungen verursachen kann.
-.br
-MEncoder übergibt diesen Wert an lame für das Resampling.
 .
 .TP
 .B \-ss <Zeit> (siehe auch \-sb)
@@ -2119,16 +2117,11 @@ Wechselt in den angegebenen Videomodus, der als <Modusname> in
 /etc/\:fb.modes steht.
 .br
 .I ANMERKUNG:
-.br
 Der VESA-Framebuffer unterstützt den Auflösungswechsel nicht.
 .
 .TP
 .B \-fbmodeconfig <Dateiname> (nur bei \-vo fbdev)
 Benutze diese Konfigurationsdatei an Stelle der Standarddatei /etc/\:fb.modes.
-.
-.TP
-.B \-forcexv (nur bei \-vo sdl)
-Erzwingt die Benutzung von XVideo über den SDL-Videoausgabetreiber.
 .
 .TP
 .B \-fs (siehe auch \-zoom) 
@@ -2281,10 +2274,6 @@ Funktioniert nur mit den x11-, xv-, xmga-, xvidix- und
 directx-Videoausgabetreibern.
 Außerdem muß dein Windowmanager unter X11 Anweisungen zum
 Fenster-Seitenverhältnis verstehen.
-.
-.TP
-.B \-noxv (nur bei \-vo sdl)
-Deaktiviert die Benutzung von XVideo durch den SDL-Videoausgabetreiber.
 .
 .TP
 .B \-ontop\ 
@@ -2528,8 +2517,13 @@ Da SDL einen eigenen X11-Layer benutzt, haben die X11-Optionen von MPlayer
 keine Wirkung auf SDL.
 .PD 0
 .RSs
-.IPs <Treiber>
+.IPs driver=<Treiber>
 Wähle den zu benutzenden SDL-Treiber explizit.
+.IPs (no)forcexv
+Erzwingt die Benutzung von XVideo über den SDL-Videoausgabetreiber (Standard:
+forcexv).
+.IPs (no)hwaccel
+Benutze den hardwarebeschleunigten Skalierer (Standard: hwaccel).
 .RE
 .PD 1
 .
@@ -8087,6 +8081,12 @@ Setzt die Videobitrate in kbit/s für MPEG-1/2-Video.
 Setzt die Framerate bei MPEG-1/2-Video.
 Diese Option wird ignoriert, wenn sie zusammen mit der Option telecine benutzt
 wird.
+.
+.TP
+.B telecine
+Aktiviert Soft-telecine-Modus: Der Muxer wird tricksen, so dass der
+Videostream wie mit 29.97 oder 30 fps encodiert aussieht; das funktioniert nur
+mit MPEG-2-Video, wenn die Framerate entweder 23.976 oder 24 fps beträgt.
 .
 .
 .\" --------------------------------------------------------------------------
