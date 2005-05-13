@@ -1328,8 +1328,7 @@ zurückgeben kann.
 .IPs adevice=<Wert>
 Setzt das Audiogerät.
 <Wert> sollte /dev/\:xxx bei OSS und eine Hardware-ID bei ALSA sein.
-Siehe Dokumentation von \-ao alsa für Informationen darüber, wie die
-Hardware-ID angegeben wird.
+Du musst in der Hardware-ID von ALSA jedes ':' durch ein '.' ersetzen.
 .IPs audioid=<Wert>
 Wählt einen Audioausgang der TV-Karte, wenn diese mehrere hat.
 .IPs "[volume|bass|treble|balance]=<0\-65535> v4l1"
@@ -3776,7 +3775,13 @@ gesetzt.
 .
 .TP
 .B sweep[=Geschwindigkeit]
-Sinus des Durchlaufs
+Erzeugt eine Sinus-Schwingung.
+.PD 0
+.RSs
+.IPs <0.0\-1.0>
+Sinusfunktions-Delta, benutze sehr geringe Werte, um die Schwingung zu hören.
+.RE
+.PD 1
 .
 .TP
 .B hrtf[=flag]
@@ -4026,6 +4031,22 @@ Ausgabekanal 4 hinzufügen.
 .PD 1
 .
 .TP
+.B center\ 
+Erzeugt aus den vorderen Kanälen einen mittleren Kanal.
+Kann zur Zeit möglicherweise geringe Qualität liefern, da er keine
+Hochpassfilter für eine entsprechende Extraktion besitzt, sondern nur über die
+Kanäle mittelt und halbiert.
+.PD 0
+.RSs
+.IPs <ch>\ 
+Legt die Kanalnummer fest, in die der mittlere Kanal eingefügt werden soll.
+Die Kanalnummer kann zwischen 0 und 5 liegen (Standard: 5).
+Beachte dass die Anzahl der Kanäle automatisch auf <ch> erhöht wird, wenn es
+nötig sein sollte.
+.RE
+.PD 1
+.
+.TP
 .B surround[=Verzögerung]
 Decoder für Matrix-encodierten Surroundsound, funktioniert bei vielen
 Zweikanaldateien.
@@ -4167,6 +4188,18 @@ Dies macht die Benutzung von 'analyseplugin' des LADSPA SDK überflüssig.
 .RE
 .PD 1
 .
+.TP
+.B comp\ \ \ 
+Kompressor/Expandier-Filter, der bei Input von einem Mikrophon benutzt werden
+kann.
+Verhindert Artefakte bei sehr lautem Klang und erhöht die Lautstärke bei sehr
+leisem Klang.
+Dieser Filter ist nicht getestet und möglicherweise unbrauchbar.
+.
+.TP
+.B gate\ \ \ 
+Ein das Rauschen beschränkender Filter, ähnlich dem Filter comp.
+Dieser Filter ist nicht getestet und möglicherweise unbrauchbar.
 .
 .
 .SH "VIDEOFILTER"
@@ -4490,9 +4523,11 @@ bestimmen:
 .IPs a/autoq
 Schalte den Unterfilter automatisch aus, falls die CPU zu langsam ist.
 .IPs c/chrom
-Führe außerdem Chrominanz-Filterung durch.
+Führe außerdem Chrominanz-Filterung durch (Standard).
 .IPs y/nochrom
-Führe Luminanz-Filterung durch (keine Chrominanz).
+Führe nur Luminanz-Filterung durch (keine Chrominanz).
+.IPs n/noluma
+Führe nur Chrominanz-Filterung durch (keine Luminanz).
 .RE
 .PD 1
 .sp 1
