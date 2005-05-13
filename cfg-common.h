@@ -348,7 +348,7 @@ extern char* edl_output_filename;
 #ifdef USE_TV
 m_option_t tvopts_conf[]={
 	{"on", "-tv on is deprecated, use tv:// instead.\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
-	{"immediatemode", &tv_param_immediate, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+	{"immediatemode", &tv_param_immediate, CONF_TYPE_INT, CONF_RANGE, 0, 1, NULL},
 	{"noaudio", &tv_param_noaudio, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"audiorate", &tv_param_audiorate, CONF_TYPE_INT, 0, 0, 0, NULL},
 	{"driver", &tv_param_driver, CONF_TYPE_STRING, 0, 0, 0, NULL},
