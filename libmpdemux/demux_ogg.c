@@ -758,6 +758,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh)
   ogg_packet op[3];
   unsigned char *buf[3];
   unsigned char *ptr;
+  unsigned int len;
 
   for(i = 0; i < 3; i++) {
     op[i].bytes = ds_get_packet(sh->ds, &(op[i].packet));
@@ -772,7 +773,8 @@ static void fixup_vorbis_wf(sh_audio_t *sh)
     memcpy(buf[i], op[i].packet, op[i].bytes);
   }
 
-  sh->wf = (WAVEFORMATEX*)calloc(1, sizeof(WAVEFORMATEX) + op[0].bytes + op[1].bytes + op[2].bytes + 64);
+  len = op[0].bytes + op[1].bytes + op[2].bytes;
+  sh->wf = (WAVEFORMATEX*)calloc(1, sizeof(WAVEFORMATEX) + len + len/255 + 64);
   ptr = (unsigned char*) (sh->wf+1);
 
   ptr[0] = 2;
