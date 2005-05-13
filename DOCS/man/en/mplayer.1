@@ -2397,7 +2397,7 @@ Select the source from which the colorkey is taken (default: cur).
 .IPs cur
 The default takes the colorkey currently set in Xv.
 .IPs use
-Use but do not set the colorkey from mplayer (use \-colorkey option to change
+Use but do not set the colorkey from MPlayer (use \-colorkey option to change
 it).
 .IPs set
 Same as use but also sets the supplied colorkey.
@@ -2449,7 +2449,7 @@ Queue frames for display to allow more parallel work of the video hardware.
 May add a small (not noticeable) constant A/\:V desync (default: noqueue).
 .IPs (no)sleep
 Use sleep function while waiting for rendering to finish
-(not recomended on Linux). Default is not to sleep (nosleep).
+(not recomended on Linux) (default: nosleep).
 .IPs ck=cur|use|set
 Same as \-vo xv:ck (see \-vo xv).
 .IPs ck-method=man|bg|auto
@@ -7532,7 +7532,7 @@ Fastest to slowest:
 .PD 0
 .RSs
 .IPs 0
-off (default)
+off
 .IPs 1
 mode decision (inter/\:intra MB) (default)
 .IPs 2
