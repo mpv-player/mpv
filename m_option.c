@@ -1743,6 +1743,12 @@ static int parse_custom_url(m_option_t* opt,char *name,
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Option %s: URL doesn't have a valid protocol!\n",name);
     return M_OPT_INVALID;
   }
+  if(m_option_list_find(desc->fields,"string")) {
+    if(strlen(ptr1)>3) {
+      m_struct_set(desc,dst,"string",ptr1+3);
+      return 1;
+    }
+  }
   pos1 = ptr1-url;
   if(dst && m_option_list_find(desc->fields,"protocol")) {
     ptr1[0] = '\0';
