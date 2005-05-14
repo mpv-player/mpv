@@ -14,14 +14,16 @@
 
 static struct stream_priv_s {
   char* filename;
+  char* dummy_hostname;
 } stream_priv_dflts = {
-  NULL
+  NULL, NULL
 };
 
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
 /// URL definition
 static m_option_t stream_opts_fields[] = {
   {"filename", ST_OFF(filename), CONF_TYPE_STRING, 0, 0 ,0, NULL},
+  {"hostname", ST_OFF(dummy_hostname), CONF_TYPE_STRING, 0, 0, 0, NULL },
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 static struct m_struct_st stream_opts = {
