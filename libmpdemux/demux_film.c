@@ -132,6 +132,28 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
         dp->buffer[i + 1] = byte_swap;
       }
 
+    /* for SegaSaturn .cpk file, translate audio data if stereo */
+    if (sh_audio->wf->nChannels == 2) {
+      if (sh_audio->wf->wBitsPerSample == 8) {
+        unsigned char* tmp = dp->buffer;
+        unsigned char  buf[film_chunk.chunk_size];
+        for(i = 0; i < film_chunk.chunk_size/2; i++) {
+          buf[i*2] = tmp[i];
+          buf[i*2+1] = tmp[film_chunk.chunk_size/2+i];
+        }
+        memcpy( tmp, buf, film_chunk.chunk_size );
+      }
+      else {/* for 16bit */
+        unsigned short* tmp = dp->buffer;
+        unsigned short  buf[film_chunk.chunk_size/2];
+        for(i = 0; i < film_chunk.chunk_size/4; i++) {
+          buf[i*2] = tmp[i];
+          buf[i*2+1] = tmp[film_chunk.chunk_size/4+i];
+        }
+        memcpy( tmp, buf, film_chunk.chunk_size );
+      }
+    }
+
     // append packet to DS stream
     ds_add_packet(demuxer->audio, dp);
    }
