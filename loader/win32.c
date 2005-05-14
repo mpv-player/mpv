@@ -4951,6 +4951,9 @@ struct exports exp_msvcrt[]={
     FF(printf,-1)
     FF(getenv,-1)
     FF(floor,-1)
+/* needed by frapsvid.dll */
+    {"strstr",-1,(char *)&strstr},
+    {"qsort",-1,(void *)&qsort},
 #ifdef MPLAYER
     FF(_EH_prolog,-1)
 #endif
