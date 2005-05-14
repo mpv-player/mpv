@@ -37,6 +37,15 @@ Playing a file:
 </para>
 
 <para>
+Another way to play a file:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>options</replaceable>]<!--
+--> <replaceable>file:///uri-escaped-path</replaceable>
+</synopsis>
+</para>
+
+<para>
 Playing more files:
 <synopsis>
 <command>mplayer</command><!--
