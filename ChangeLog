@@ -32,6 +32,10 @@ MPlayer (1.0)
       and 10.3 with Quicktime 7 (requires QuickTime 7 SDK to build on 10.3)
     * Mac OS X 10.4 (Tiger) fixes
 
+    Demuxers:
+    * simultaneous audio capture and playback in mplayer
+      (-tv immediatemode=0) fixed in v4l2
+
 
   pre7: "PatentCounter" April 16, 2005
 
