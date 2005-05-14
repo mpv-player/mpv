@@ -411,11 +411,24 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para>Yes, <application>MPlayer</application> runs on Windows under
   <ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> and
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
-  It does not have a GUI yet, but the command line version is almost completely
-  functional. <ulink url="../../tech/patches.txt">Patches</ulink> are always welcome.
-  You should check out the
+  It does not have an official GUI yet, but the command line version
+  is completely functional. You should check out the
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
-  mailing list for help and latest information.</para>
+  mailing list for help and latest information.
+  Official Windows binaries can be found on the
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">download page</ulink>.
+  Installer packages and simple GUI frontends are available from external
+  sources, we have collected then in the Windows section of our
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">projects page</ulink>.
+</para>
+
+<para>If you wish to avoid using the command line, a simple trick is
+  to put a shortcut on your desktop that contains something like the
+  following in the execute section:
+  <screen><replaceable>c:\path\to\</replaceable>mplayer.exe %1</screen>
+  This will make <application>MPlayer</application> play any movie that is
+  dropped on the shortcut. Add <option>-fs</option> for fullscreen mode.
+</para>
 
 <para>Best results are achieved with the native DirectX video output driver
   (<option>-vo directx</option>) and the native Windows waveout audio driver
@@ -496,11 +509,6 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   <option>-double</option> option. If playback is jerky, try
   <option>-autosync 100</option>. If some of these options help you, you
   may want to put them in your config file.</para>
-
-<para>Sascha Sommer releases official Windows binaries from time to time,
-  Joey Parrish makes unofficial Windows packages complete with installer.
-  Look for these in the Windows section of
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">our projects page</ulink>.</para>
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
