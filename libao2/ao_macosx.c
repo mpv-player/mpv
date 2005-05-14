@@ -337,6 +337,7 @@ static int init(int rate,int channels,int format,int flags)
 	memset(&ao->outputStreamBasicDescription,0,propertySize);
 	ao->outputStreamBasicDescription.mSampleRate=rate;
 	ao->outputStreamBasicDescription.mFormatID=kAudioFormatLinearPCM;
+	ao->outputStreamBasicDescription.mChannelsPerFrame=channels;
 //	status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioStreamPropertyPhysicalFormatMatch, &propertySize, &ao->outputStreamBasicDescription);
 	status = AudioDeviceGetProperty(ao->outputDeviceID, 0, false, kAudioDevicePropertyStreamFormatMatch, &propertySize, &ao->outputStreamBasicDescription);
 	if (status || ao->outputStreamBasicDescription.mFormatID!=kAudioFormatLinearPCM) {
