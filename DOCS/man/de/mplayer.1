@@ -124,7 +124,7 @@ mencoder \- Movie Encoder
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p | ftp | udp] ://
+.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp] ://
 [Benutzer:Passwort@]\fIURL\fP[:Port] [Optionen]
 .br
 .in
@@ -1168,14 +1168,14 @@ FourCC als Hexadezimalwert
 .B \-rawvideo <option1:option2:...>
 Mit dieser Option kannst du Dateien abspielen, die nur aus Videodaten bestehen.
 .sp 1
-Die verfügbaren Optionen lauten:
+Verfügbare Optionen sind folgende:
 .sp 1
 .PD 0
 .RSs
 .IPs on\ \ \ 
-benutze den nur-Video-Demuxer
+benutze den Raw-Video-Demuxer
 .IPs fps=<Wert>
-Anzahl der Bilder pro Sekunde, Standardwert: 25.0
+Anzahl der Bilder pro Sekunde (Standard: 25.0)
 .IPs sqcif|qcif|cif|4cif|pal|ntsc
 setzt die Standardbildgröße
 .IPs w=<Wert>
@@ -1185,7 +1185,7 @@ Bildhöhe in Pixeln
 .IPs i420|yv12|yuy2|y8
 wählt den Farbraum
 .IPs format=<Wert>
-gibt die FourCC des Farbraums in Hex an
+Farbraum (FourCC) als Hexadezimalwert
 .IPs size=<Wert>
 Bildgröße in Bytes
 .RE
