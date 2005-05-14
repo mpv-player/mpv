@@ -39,7 +39,7 @@
 .\" Titel
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-05-03" "Das MPlayer Projekt"
+.TH MPlayer 1 "2005-05-03" "Das MPlayer Projekt"
 .
 .SH NAME
 mplayer  \- Movie Player
@@ -453,7 +453,7 @@ eingelesen werden soll.
 .
 .TP
 .B \-quiet \ \ 
-Konsolenausgaben werden weniger ausführlich; im Besonderen wird damit die 
+Konsolenausgaben werden weniger ausführlich; insbesondere wird damit die
 Statuszeile (z.B.\& A:   0.7 V:   0.6 A-V:  0.068 ...) nicht angezeigt.
 Besonders nützlich ist dies bei langsamen Terminals oder fehlerhaften, die 
 Zeilenvorschübe nicht richtig verarbeiten (z.B.\& \\r).
@@ -478,7 +478,7 @@ macht Ausgaben ausführlicher (mehrere \-v erzeugen höhere Ausführlichkeit).
 .PD 0
 .RSs
 .IPs 0
-nur einige Informationsausgaben (standard)
+nur einige Informationsausgaben (Standard)
 .IPs 1
 einige Debug-Informationen, avi-Header, Funktionswerte (init-Debug)
 .IPs 2
@@ -498,27 +498,29 @@ gibt alles aus, was mit dem Input-Parser zu tun hat (Parser-Debug)
 Ändert dynamisch das Qualitätslevel des Postprocessings, je nachdem, wieviel
 CPU-Zeit gerade frei ist.
 Das angegebene Level ist das maximal verwendete Level.
-Normalerweise kanns du eine große Nummer wählen.
+Normalerweise kannst du eine große Nummer wählen.
 Um dieses Feature zu benutzen, muss \-vf [s]pp ohne Parameter aufgerufen
 werden.
 .
 .TP
 .B \-autosync <Faktor>
-Ändert schrittweise die A/\:V\-Synchronisation basierend auf den
+Ändert schrittweise die A/\:V-Synchronisation basierend auf den
 Messungen der Audioverzögerung.
-Mit \-autosync 0, dem Standardwert, wird das Bildtiming nur auf der
+Mit \-autosync\ 0, dem Standardwert, wird das Bildtiming nur auf der
 gemessenen Audioverzögerung basieren.
-Mit \-autosync 1 wird der A/\:V-Sync-Algorithmus leicht verändert.
+Mit \-autosync\ 1 wird der A/\:V-Synchronisationsalgorithmus leicht verändert.
 Bei einem Film mit nicht gleichbleibender Framerate, der mit \-nosound
 problemlos abgespielt wird, kann \-autosync mit einem Wert größer 1
-helfen. Je höher der Wert gewählt wird, desto mehr ähnelt das Verhalten
-dem von \-nosound.
-\-autosync 30 kann bei Probleme helfen, die bei Audiotreibern entstehen,
+helfen.
+Je höher der Wert gewählt wird, desto mehr ähnelt das Verhalten dem von
+\-nosound.
+\-autosync\ 30 kann bei Problemen helfen, die bei Audiotreibern entstehen,
 die keine perfekt funktionierende Messung der Audioverzögerung zulassen.
-Mit diesem Wert dauert es nur eine oder zwei Sekunden, bis A/\:V-Sync wieder
-ok ist, wenn große A/\:V-Synch-Unterschiede auftreten.
-Diese Verzögerung bei der Reaktion auf abrupte A/\:V-Sync-Änderungen
-sollte der einzige Nebeneffekt dieser Option sein, bei allen Sound-Treibern.
+Falls große A/\:V-Synchronisationsunterschiede auftreten, dauert es mit mit
+diesem Wert meist nur eine oder zwei Sekunden, bis die A/\:V-Synchronisation
+wieder in Ordnung ist.
+Diese Verzögerung bei der Reaktion auf abrupte A/\:V-Synchronisationsänderungen
+sollte bei allen Sound-Treibern der einzige Nebeneffekt dieser Option sein.
 .
 .TP
 .B \-benchmark
@@ -551,7 +553,7 @@ svga, vesa, winvidix, xmga, xvidix, xover, xv (siehe \-vo xv:ck), xvmc
 Hängt bei einem Absturz oder SIGTRAP automatisch gdb an.
 Unterstützung hierfür muß einkompiliert sein durch Ausführung von 'configure'
 mit --enable-crash-debug oder Vorhandensein einer .developer-Datei im
-Source-Tree.
+Verzeichnis der Sourcedateien.
 .
 .TP
 .B \-edlout <Dateiname> (nur bei EDL)
@@ -580,9 +582,9 @@ svga, x11, xmga, xv, xvidix und dfbmga.
 .TP
 .B \-framedrop (siehe auch \-hardframedrop)
 Verwirft einige Frames, ohne sie anzuzeigen, um auf langsamen Systemen
-die A/\:V-Syncronisation beizubehalten. Diese Frames werden dann auch nicht 
-durch die Videofilter geschleust. B-Frames werden ebenfalls nicht dekodiert
-und Videofilter nicht benutzt.
+die A/\:V-Syncronisation beizubehalten.
+Videofilter werden auf diese Frames nicht angewendet.
+B-Frames werden überhaupt nicht decodiert.
 .
 .TP
 .B \-h, \-help, \-\-help
@@ -591,7 +593,8 @@ Zeigt eine kurze Zusammenfassung der Optionen an.
 .TP
 .B \-hardframedrop
 Noch rabiateres Verwerfen von Frames (verhindert evtl. korrektes
-Decodieren). Führt zu Bildstörungen!
+Decodieren).
+Führt zu Bildstörungen!
 .
 .TP
 .B \-identify
@@ -604,10 +607,12 @@ und führt (hoffentlich) Shell-Escaping für die Dateinamen aus.
 .TP
 .B \-input <Kommandos>
 Diese Option kann benutzt werden, um bestimmte Teile von MPlayers
-Eingabesystem zu konfigurieren. Pfadangaben sind zu ~/\:.mplayer/ relativ.
+Eingabesystem zu konfigurieren.
+Pfadangaben sind relativ zu ~/\:.mplayer/.
 .br
 .I ANMERKUNG:
-Automatische Wiederholung wird momentan nur von Joysticks unterstützt.
+Automatische Wiederholung (autorepeat) wird momentan nur von Joysticks
+unterstützt.
 .sp 1
 Die verfügbaren Kommandos lauten:
 .sp 1
@@ -618,12 +623,12 @@ Gib eine andere Konfigurationsdatei als die Standarddatei
 ~/\:.mplayer/\:input.conf an.
 Wenn kein Pfadname angegeben wird, dann wird ~/\:.mplayer/\:<Dateiname>
 angenommen.
-.IPs ar\-delay
+.IPs ar-delay
 Zeit in Millisekunden, bevor ein Tastendruck automatisch wiederholt
-wird (0 dekativiert dies).
-.IPs ar\-rate
+wird (0 deaktiviert dies).
+.IPs ar-rate
 Anzahl der Tastendrücke pro Sekunde bei automatisch wiederholten
-Tastendrücken (0 dekativiert dies).
+Tastendrücken (0 deaktiviert dies).
 .IPs keylist
 Zeigt alle Tastennamen an, die mit Kommandos belegt werden können.
 .IPs cmdlist
@@ -663,7 +668,8 @@ Gibt alle verfügbaren Optionen aus.
 .
 .TP
 .B \-loop <Anzahl>
-Wiederholt die Wiedgabe <Anzahl> mal. 0 bedeutet ständige Wiederholung.
+Wiederholt die Wiedergabe <Anzahl> mal.
+0 bedeutet ständige Wiederholung.
 .
 .TP
 .B \-menu (nur bei OSD)
@@ -674,7 +680,7 @@ Aktiviert das OSD\-Menü.
 Benutzt eine andere menu.conf.
 .
 .TP
-.B \-menu\-root <Wert> (nur bei OSD)
+.B \-menu-root <Wert> (nur bei OSD)
 Gibt das Hauptmenü an.
 .
 .TP
@@ -683,13 +689,14 @@ Zeigt das Hauptmenü beim Start von MPlayer.
 .
 .TP
 .B \-noconsolecontrols
-Standardinput (stdin) wird anstelle von Tastatureingaben verwendet.
-Wenn du /dev/\:stdin (oder das Äquivalent auf deinem System) öffnest, stdin in
+Für Ereignisse wird von MPlayer nicht die Standardeingabe (stdin) verwendet.
+Das ist nützlich beim Lesen von Daten von der Standardeingabe.
+Diese Option wird automatisch aktiviert, wenn \- auf der Kommandozeile
+gefunden wird.
+Es gibt auch Situationen, in denen du sie manuell setzen musst, z.B.\&
+wenn du /dev/\:stdin (oder das Äquivalent auf deinem System) öffnest, stdin in
 einer Playlist öffnest, oder vorhast, irgendwann später von stdin via loadfile
-oder loadlist Slave-Kommandos zu lesen, dann
-.B brauchst
-du diese Option.
-Die Option -idx ist in diesem Falle nicht verfügbar.
+oder loadlist Slave-Kommandos zu lesen.
 .
 .TP
 .B \-nojoystick
@@ -701,14 +708,14 @@ Schaltet Unterstützung für LIRC aus.
 .
 .TP
 .B \-nomouseinput (nur bei X11)
-Sperrt die Eingabe mittels Mausbuttons (Buttonpress/\:-release), diese Option
+Sperrt die Eingabe mittels Mausbuttons (Buttonpress/\:-release) (diese Option
 wird unter anderem von mozplayerxp verwendet, um ein eigenes Kontextmenü
-anzuzeigen.
+anzuzeigen).
 .
 .TP
 .B \-nortc (nur bei RTC)
-Deaktiviert die Benutzung der Echtzeituhr (real-time clock, RTC, /dev/\:rtc)
-zum Timing.
+Deaktiviert die Benutzung der Echtzeituhr (real-time clock (RTC) \- /dev/\:rtc)
+für das Timing.
 .
 .TP
 .B \-playlist <Dateiname>
@@ -716,13 +723,13 @@ Spielt die in der Datei angegebenen Dateien ab (eine Datei pro Zeile,
 oder eine Datei im Winamp- oder ASX-Format).
 .br
 .I Anmerkung:
-Diese Option wird als Eintrag gesehen, so daß alle Optionen danach nur auf die
-Elemente dieser Playlist angewendet werden.
+Diese Option wird als ein Eintrag gesehen, so daß alle Optionen danach nur auf
+die Elemente dieser Playlist angewendet werden.
 .br
-FIXME: Dies muß noch genauer angegeben und dokumentiert werden.
+FIXME: Dies muss noch genauer angegeben und ordentlich dokumentiert werden.
 .
 .TP
-.B \-really\-quiet
+.B \-really-quiet (siehe auch \-quiet)
 Zeigt noch weniger Statusmeldungen an als mit \-quiet.
 .
 .TP
@@ -730,22 +737,21 @@ Zeigt noch weniger Statusmeldungen an als mit \-quiet.
 Benutze das angegebene Gerät als Echtzeituhr.
 .
 .TP
-.B \-shuffle \ \ 
+.B \-shuffle
 Spielt die Dateien in zufälliger Reihenfolge ab.
 .
 .TP
-.B \-skin <Verzeichnisname> (nur beim GUI)
-Lädt eine Oberfläche (skin) aus dem Verzeichnis, das sich in einem der beiden
-Standardoberflächenverzeichnisse /usr/\:local/\:share/\:mplayer/\:Skin/\: und
-~/.mplayer/\:Skin/.
+.B \-skin <Name> (nur beim GUI)
+Lädt eine Oberfläche (skin) aus dem angegebenen Verzeichnis, das sich in einem
+der beiden Standardoberflächenverzeichnisse
+/usr/\:local/\:share/\:mplayer/\:Skin/\: und ~/.mplayer/\:Skin/ befindet.
 .sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "\-skin fittyfene"
 Probiert zuerst /usr/\:local/\:share/\:mplayer/\:Skin/\:fittyfene und
-anschließend
-~/.mplayer/\:Skin/\:fittyfene.
+anschließend ~/.mplayer/\:Skin/\:fittyfene.
 .RE
 .PD 1
 .
@@ -757,13 +763,13 @@ Anstatt Tastatureingaben abzufangen, liest MPlayer durch Zeilenumbruchszeichen
 (\\n) getrennte Kommandos von stdin.
 .br
 .I ANMERKUNG:
-Siehe DOCS/\:tech/\:slave.txt (Englisch) und \-input cmdlist für deren
-Beschreibung.
+Siehe \-input cmdlist für eine Liste der Slave-Kommandos und
+DOCS/\:tech/\:slave.txt (englisch) für deren Beschreibung.
 .
 .TP
 .B \-softsleep
-Benutzt hochqualitative Softwaretimer, die genauso präzise wie die Echtzeituhr
-(RTC) sind, ohne dafür root-Privilegien zu benötigen.
+Benutzt hochqualitative Softwaretimer anstelle der Echtzeituhr.
+Sie sind so präzise wir die Echtzeituhr, benötigen aber keine Root-Rechte.
 Der Preis dafür ist eine höhere CPU-Auslastung.
 .
 .TP
