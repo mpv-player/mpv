@@ -13,7 +13,7 @@ endif
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. -I../osdep $(FREETYPE_INC) $(SDL_INC) $(X11_INC) $(EXTRA_INC) $(DXR2_INC) $(DIRECTFB_INC) -DMPG12PLAY #-Wall
 
-.SUFFIXES: .c .o
+.SUFFIXES: .c .o .m
 
 # .PHONY: all clean
 
