@@ -531,8 +531,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   determining what type of content you are dealing with.
   If your source material comes from DVD or broadcast/cable/satellite
   TV, it will be stored in one of two formats: NTSC for North
-  America and Japan, and PAL for Europe, etc.
-  But it is important to realize that this is just the formatting for
+  America and Japan, PAL for Europe, etc.
+  It is important to realize, however, that this is just the formatting for
   presentation on a television, and often does
   <emphasis role="bold">not</emphasis> correspond to the
   original format of the movie.
@@ -558,7 +558,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">PAL video</emphasis>: Recorded with a PAL
   video camera at 50 fields per second.
-  A field consists of just the even or odd numbered lines of a
+  A field consists of just the odd- or even-numbered lines of a
   frame.
   Television was designed to refresh these in alternation as a
   cheap form of analog compression.
@@ -577,12 +577,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Animation</emphasis>: Usually drawn at
-  24fps, but animation also comes in mixed-framerate varieties.
+  24fps, but also comes in mixed-framerate varieties.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Computer Graphics (CG)</emphasis>: Can be
-  any framerate, but 24 and 30 fps are the most frequently
-  encountered in NTSC regions, and 25 fps in PAL regions.
+  any framerate, but some are more common than others; 23 and
+  30 frames per second are typical for NTSC, and 25fps is typical
+  for PAL.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Old Film</emphasis>: Various lower
@@ -596,7 +597,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <para>
   Movies consisting of frames are referred to as progressive,
   while those consisting of independent fields are called
-  interlaced, or sometimes video, although this latter term is
+  either interlaced or video - though this latter term is
   ambiguous.
 </para>
 <para>
@@ -623,14 +624,14 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <listitem><para>
   <emphasis role="bold">PAL 2:2 pulldown</emphasis>: The nicest of
   them all.
-  Each frame is shown for two fields duration, by extracting the
+  Each frame is shown for the duration of two fields, by extracting the
   even and odd lines and showing them in alternation.
   If the original material is 24fps, this process speeds up the
   movie by 4%.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">PAL 2:2:2:2:2:2:2:2:2:2:2:3 pulldown</emphasis>:
-  Every 12th frame is shown for three fields duration, instead of
+  Every 12th frame is shown for the duration of three fields, instead of
   just two.
   This avoids the 4% speedup issue, but makes the process much
   more difficult to reverse.
@@ -639,8 +640,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">NTSC 3:2 telecine</emphasis>: Frames are
-  shown alternatively for 3 fields or 2 fields duration.
-  This gives a fieldrate 5/2 times the original framerate.
+  shown alternately for the duration of 3 fields or 2 fields.
+  This gives a fieldrate 2.5 times the original framerate.
   The result is also slowed down very slightly from 60 fields per
   second to 59.94 fields per second to maintain NTSC fieldrate.
 </para></listitem>
@@ -652,30 +653,31 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </itemizedlist>
 
 <para>
-  There are also methods for converting between NTSC and PAL video.
-  Such topics are beyond the scope of this guide.
+  There are also methods for converting between NTSC and PAL video,
+  but such topics are beyond the scope of this guide.
   If you encounter such a movie and want to encode it, your best
   bet is to find a copy in the original format.
-  NTSC/PAL conversion is highly destructive and cannot be reversed
-  cleanly, so your encode will greatly suffer if it is made from a
-  converted source.
+  Conversion between these two formats is highly destructive and
+  cannot be reversed cleanly, so your encode will greatly suffer
+  if it is made from a converted source.
 </para>
 <para>
   When video is stored on DVD, consecutive pairs of fields are
   grouped as a frame, even though they are not intended to be shown
   at the same moment in time.
-  The MPEG-2 standard used on DVD and digital TV provides a way to
-  encode the original progressive frames, and store the number of
-  fields for which each should be shown in the frame headers.
-  If this method has been used, the term "soft telecine" will often
-  be used to describe the movie, since the process only directs the
+  The MPEG-2 standard used on DVD and digital TV provides both a
+  way to encode the original progressive frames, and to store in
+  the header of each frame the number of fields for which it should
+  be shown.
+  If this method has been used, the movie will often be described
+  as "soft-telecined", since the process only directs the
   DVD player to apply pulldown to the movie rather than altering
   the movie itself.
   This case is highly preferable since it can easily be reversed
   (actually ignored) by the encoder, and since it preserves maximal
   quality.
   However, many DVD and broadcast production studios do not use
-  proper encoding techniques, and instead produce movies with
+  proper encoding techniques but instead produce movies with
   "hard telecine", where fields are actually duplicated in the
   encoded MPEG-2.
 </para>
@@ -706,14 +708,13 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 <listitem><para>
   If <application>MPlayer</application> never shows the framerate
-  change, and every single frame with motion appears combed, your
+  changing, and every single frame with motion appears combed, your
   movie is NTSC video at 59.94 fields per second.
 </para></listitem>
 <listitem><para>
   If <application>MPlayer</application> never shows the framerate
   change, and two frames out of every five appear combed, your
-  movie is "hard telecined"
-  24fps content.
+  movie is "hard telecined" 24fps content.
 </para></listitem>
 </itemizedlist>
 
@@ -744,21 +745,33 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-2pass">
-<title>Constant Quantizer vs. two pass</title>
+<title>Constant quantizer vs. multi-pass</title>
 
 <para>
   It is possible to encode your movie at a wide range of qualities.
   With modern video encoders and a bit of pre-codec compression
   (downscaling and denoising), it is possible to achieve very good
   quality at 700 MB, for a 90-110 minute widescreen movie.
-  And all but the longest movies can be encoded with near-perfect
+  Furthermore, all but the longest movies can be encoded with near-perfect
   quality at 1400 MB.
 </para>
 
 <para>
   There are three approaches to encoding the video: constant bitrate
-  (CBR), constant quantizer, and two pass (ABR, or average bitrate).
+  (CBR), constant quantizer, and multi-pass (ABR, or average bitrate).
 </para>
+
+<note><title>Note:</title>
+<para>
+  Most codecs which support ABR encode only support two pass encode
+  while some others such as <systemitem class="library">x264</systemitem>
+  and <systemitem class="library">libavcodec</systemitem> support
+  multi-pass, which slightly improves quality at each pass,
+  yet this improvement is no longer noticeable after the 6th or so pass.
+  Therefore, in this section, two pass and multi-pass will be used
+  interchangeably.
+</para>
+</note>
 
 <para>
   In each of these modes, <systemitem class="library">libavcodec</systemitem>
@@ -1596,8 +1609,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   deinterlace or not.
   While deinterlacing will make your movie usable on progressive
   scan displays such a computer monitors and projectors, it comes
-  at a cost: The field rate of 50 or 59.94 fields per second
-  is halved to 25 or 29.97 frames per second, and roughly half
+  at a cost: The fieldrate of 50 or 59.94 fields per second
+  is halved to 25 or 29.97 frames per second, and roughly half of
   the information in your movie will be lost during scenes with
   significant motion.
 </para>
