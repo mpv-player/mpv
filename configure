@@ -1549,6 +1549,7 @@ for ac_option do
   --disable-internal-faad)	_faad_internal=no	;;
   --enable-external-faad)	_faad_external=yes	_faad_internal=no	;;
   --disable-external-faad)	_faad_external=no	;;
+  --enable-faac)	_faac=yes	;;
   --disable-faac)	_faac=no	;;
   --enable-ladspa)	_ladspa=yes	;;
   --disable-ladspa)	_ladspa=no		;;
@@ -5420,20 +5421,17 @@ int main(void) { unsigned long x, y; faacEncOpen(48000, 2, &x, &y); return 0; }
 EOF
   if ( cc_check -c -O4 -lfaac $_ld_lm ); then
     _faac=yes
-    _ld_faac="-lfaac"
+  elif ( cc_check -c -O4 -lfaac -lmp4v2 -lstdc++ $_ld_lm ); then
+    _faac=yes
+    _ld_faac="-lmp4v2 -lstdc++"
   else
-    if ( cc_check -c -O4 -lfaac -lmp4v2 -lstdc++ $_ld_lm ); then
-      _faac=yes
-      _ld_faac="-lfaac -lmp4v2 -lstdc++"
-    else
-      _faac=no
-      _ld_faac=""
-    fi
+    _faac=no
   fi
 fi
 if test "$_faac" = yes ; then
   _def_faac="#define HAVE_FAAC 1"
   _codecmodules="$_codecmodules faac"
+  _ld_faac="-lfaac $_ld_faac"
 else
   _def_faac="#undef HAVE_FAAC"
   _nocodecmodules="$_nocodecmodules faac"
