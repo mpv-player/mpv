@@ -76,10 +76,6 @@ typedef struct mkv_track
   void *private_data;
   unsigned int private_size;
 
-  /* for vorbis audio */
-  unsigned char *headers[3];
-  uint32_t header_sizes[3];
-
   /* stuff for realmedia */
   int realmedia;
   int rv_kf_base, rv_kf_pts;
@@ -1732,7 +1728,6 @@ demux_mkv_open_audio (demuxer_t *demuxer, mkv_track_t *track)
 {
   sh_audio_t *sh_a = new_sh_audio(demuxer, track->tnum);
   demux_packet_t *dp;
-  int i;
 
   sh_a->ds = demuxer->audio;
   sh_a->wf = (WAVEFORMATEX *) malloc (sizeof (WAVEFORMATEX));
