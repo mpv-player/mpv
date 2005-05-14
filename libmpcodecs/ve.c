@@ -28,7 +28,9 @@ static vf_info_t* encoder_list[]={
 #endif
 #ifdef USE_WIN32DLL
     &ve_info_vfw,
+#ifdef USE_QTX_CODECS
     &ve_info_qtvideo,
+#endif
 #endif
 #ifdef HAVE_LIBDV095
     &ve_info_libdv,
