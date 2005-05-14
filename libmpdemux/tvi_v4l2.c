@@ -1728,7 +1728,7 @@ static double grab_audio_frame(priv_t *priv, char *buffer, int len)
 	// this is mencoder => just wait until some audio is available
 	usleep(10000);
     }
-//    pthread_mutex_lock(&priv->audio_mutex);
+    pthread_mutex_lock(&priv->audio_mutex);
     memcpy(buffer, priv->audio_ringbuffer+priv->audio_head*priv->audio_in.blocksize, len);
     priv->audio_head = (priv->audio_head+1) % priv->audio_buffer_size;
     priv->audio_cnt--;
