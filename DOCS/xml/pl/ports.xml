@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.62 -->
+<!-- synced with 1.63 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -419,11 +419,26 @@ wolna. Używaj SDL.
 <para>Tak, <application>MPlayer</application> działa na Windowsie pod
   <ulink url="http://www.cygwin.com/"><application>Cygwinem</application></ulink> i
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink>.
-  Nie ma jeszcze interfejsu GUI, ale wersja dla wiersza poleceń jest już prawie w pełni
-  funkcjonalna. <ulink url="../../tech/patches.txt">Łatki</ulink> są zawsze mile widziane.
-  Powinieneś sprawdzić listę
+  Nie ma jeszcze oficjalnego interfejsu GUI, ale wersja dla wiersza poleceń jest już w pełni
+  funkcjonalna. Powinieneś sprawdzić listę
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>,
-  aby uzyskać pomoc albo otrzymać najnowsze informacje.</para>
+  aby uzyskać pomoc albo otrzymać najnowsze informacje.
+  Oficjalne paczki z binariami dla Windowsa znajdziesz na
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">stronie pobierania</ulink>.
+  Pakiety zawierające instalatory i proste nakładki GUI dostępne są z zewnętrznych
+  źródeł, informacje o nich zebraliśmy w sekcji poświęconej Windowsowi na
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">stronie projektów</ulink>.
+</para>
+
+<para>Jeżeli chcesz uniknąć korzystania z wiersza poleceń, prostym sposobem
+      na jego ominięcie jest umieszczenie skrótu na pulpicie, który będzie
+      zawierał podobny wpis w części odpowiedzialnej za wykonanie
+      komendy:
+      <screen><replaceable>c:\ścieżka\do\</replaceable>mplayer.exe %1</screen>
+      Spowoduje to, że <application>MPlayer</application> będzie odtwarzał
+      film, który zostanie przeciągnięty na jego skrót. Dodaj opcję
+      <option>-fs</option>, aby korzystać z trybu pełnoekranowego.
+</para>
 
 <para>Najlepsze wyniki są osiągane ze sterownikami wyjściowymi video DirectX
   (<option>-vo directx</option>) i rdzennym wyjściem dźwiękowym wave Windows
@@ -505,12 +520,6 @@ wolna. Używaj SDL.
   opcją <option>-double</option>. Jeżeli odtwarzanie jest nierówne, spróbuj użyć
   <option>-autosync 100</option>. Jeżeli którakolwiek z tych opcji Ci pomogła,
   może będziesz chciał umieścić ją w swoim pliku konfiguracyjnym.</para>
-
-<para>Sascha Sommer wydaje, od czasu do czasu, oficjalne paczki dla Windowsa,
-  Joey Parrish tworzy nieoficjalne paczki z instalatorem.
-  Poszukaj ich w sekcji Windows
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">na stronie
-  naszych projektów</ulink>.</para>
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
