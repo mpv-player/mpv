@@ -498,7 +498,7 @@ gibt alles aus, was mit dem Input-Parser zu tun hat (Parser-Debug)
 Ändert dynamisch das Qualitätslevel des Postprocessings, je nachdem, wieviel
 CPU-Zeit gerade frei ist.
 Das angegebene Level ist das maximal verwendete Level.
-Normalerweise kannst du eine große Nummer wählen.
+Normalerweise kannst du eine große Zahl wählen.
 Um dieses Feature zu benutzen, muss \-vf [s]pp ohne Parameter aufgerufen
 werden.
 .
@@ -786,12 +786,11 @@ sein.
 .
 .TP
 .B \-a52drc <Level>
-Gibt die Höhe der Dynamic Range Compression für den AC3 Audio Stream an.
+Gibt das Level der Dynamic Range Compression für den AC3 Audiostream an.
 <Level> ist ein Fließkommawert im Bereich von 0 bis 1, wobei 0 keine Kompression
-und 1 (der Standardwert) volle Kompression bedeutet (laute Passagen werden leiser
-und umgekehrt).
+und 1 volle Kompression bedeutet (laute Passagen werden leiser und umgekehrt).
 Diese Option zeigt nur Wirkung, wenn im AC3 Stream die Range Compression
-Information vorhanden ist.
+Information vorhanden ist (Standard: 1).
 .
 .TP
 .B \-aid <ID> (siehe auch \-alang)
@@ -808,15 +807,15 @@ Gibt eine Prioritätenliste der abzuspielenden Audiospuren an.
 Verschiedene Containerformate verwenden unterschiedliche Ländercodes.
 DVDs benutzen den zweibuchstabigen ISO 639-1 Sprachcode, Matroska und NUT
 benutzen den dreibuchstabigen ISO 639-2 Sprachcode, während OGM einen
-beliebigen Bezeichner verwendet.
-MPlayer gibt alle vorhandenen Sprachen aus, wenn er im
-Verbose-Modus (\-v) gestartet wird.
+formlosen Bezeichner verwendet.
+MPlayer gibt alle vorhandenen Sprachen aus, wenn er im ausführlichen Modus
+(\-v) gestartet wird.
 .sp 1
 .I BEISPIEL:
 .PD 0
 .RSs
 .IPs "mplayer dvd://1 \-alang hu,en"
-Wählt die ungarische Sprachspur einer DVD und wählt die Englische, wenn
+Wählt die ungarische Sprachspur einer DVD und wählt die englische, wenn
 ungarisch nicht verfügbar ist.
 .IPs "mplayer \-alang jpn example.mkv"
 Spielt eine Matroskadatei auf japanisch ab.
@@ -824,7 +823,7 @@ Spielt eine Matroskadatei auf japanisch ab.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <Nummer> (nur mit \-audiofile)
+.B \-audio-demuxer <Nummer> (nur bei \-audiofile)
 Erzwingt den Audiodemuxertyp für \-audiofile.
 Gib die Demuxer-ID an wie in libmpdemux/\:demuxer.h definiert.
 \-audio-demuxer 17 erzwingt das Abspielen als MP3.
@@ -836,14 +835,14 @@ Film ab.
 .
 .TP
 .B \-audiofile-cache <kByte>
-Aktiviert das Cachen des von \-audiofile benutzten Streams;
-benutzt dafür die angegebene Menge Speicher.
+Aktiviert das Cachen des von \-audiofile benutzten Streams; benutzt dafür die
+angegebene Menge Speicher.
 .
 .TP
-.B \-bandwidth <Wert> (nur im Netzwerk)
+.B \-bandwidth <Wert> (nur bei Netzwerk)
 Gibt die maximal zu benutzende Bandbreite für Netzwerkstreaming an (bei
 Servern, die Streams in verschiedenen Bitraten senden können).
-Nützlich, wenn du Live\-Streams über eine langsame Verbindung ansehen
+Nützlich, wenn du Live-Streams über eine langsame Verbindung ansehen
 möchtest.
 .
 .TP
@@ -854,7 +853,7 @@ Besonders bei langsamen Medien sinnvoll.
 .
 .TP
 .B \-cache-min <Prozent>
-Die Wiedergabe startet, wenn der Cache bis zu <Prozent> des Gesamten gefüllt
+Die Wiedergabe startet, wenn der Cache bis zu <Prozent> der Gesamtgröße gefüllt
 ist.
 .TP
 .
@@ -868,7 +867,7 @@ dieser Option gesetzt wird.
 Diese Option kann benutzt werden, um die CD-Audio-Auslesefeatures von
 MPlayer zu verfeinern.
 sp 1
-Vorhandene Optionen sind diese:
+Vorhandene Optionen sind folgende:
 .RSs
 .IPs speed=<Wert>
 Setzt die CD-Umdrehungsgeschwindigkeit.
@@ -895,34 +894,35 @@ Einige Toshiba-Laufwerke benötigen diese Option, um die Spurgrenzen richtig
 zu erkennen.
 .IPs toc-offset=<Wert>
 Addiere <Wert> Sektoren zu den ermittelten Werten bei der Adressierung
-der Spuren. Kann negativ sein.
+der Spuren.
+Kann negativ sein.
 .IPs (no)skip
 Akzeptiere (niemals) nicht perfekte Datenrekonstruktion.
 .RE
 .
 .TP
-.B \-cdrom-device <Pfad zum Gerät>
+.B \-cdrom-device <Pfad\ zum\ Gerät>
 Gibt das CD-ROM-Gerät an (Standard: /dev/\:cdrom).
 .
 .TP
 .B \-channels <Anzahl>
 Ändere die Anzahl der wiederzugebenden Kanäle (Standard: 2).
 Wenn die Anzahl der Ausgabekanäle größer als die Anzahl der Eingangskanäle ist,
-dann werden leere Kanäle unter Zuhilfenahme des channels Audiofilter erzeugt
-(es sei denn, es wird von Mono zu Stereo erweitert - dann wird der Mono-Kanal
+dann werden leere Kanäle unter Zuhilfenahme des Audiofilters channels erzeugt
+(es sei denn, es wird von Mono zu Stereo erweitert \- dann wird der Mono-Kanal
 auf beiden Kanälen wiederholt).
-Das Routing wird das Standard-Routing für den channels Filter sein.
+Das Routing wird das Standard-Routing für den Filter channels sein.
 Wenn die Anzahl der Eingangskanäle größer als die Anzahl der Ausgabekanäle ist,
 dann hängt das Ergebnis vom Audiodecoder (\-afm) ab.
 MPlayer weist den Decoder an, den Ton in so viele Kanäle zu decodieren,
 wie angegeben wurde.
-Jetzt liegt es am Decoder, diese Anforderung zu erfüllen.
+Dann liegt es am Decoder, diese Anforderung zu erfüllen.
 Wenn der Decoder mehr Kanäle als angefordert ausgibt, so werden die
 überschüssigen Kanäle abgeschnitten.
 Das ist normalerweise nur dann wichtig, wenn Videos mit AC3-Audio abgespielt
-werden (wie z.B.\& DVDs).
+werden (wie z.B.\& bei DVDs).
 In diesem Fall decodiert normalerweise die liba52 den Ton und sorgt für
-einen korrekten Downmix des Audios auf die geforderte Anzahl von Kanälen.
+einen korrekten Downmix des Audios auf die geforderte Anzahl Kanäle.
 .br
 .I ANMERKUNG:
 .br
@@ -943,20 +943,19 @@ volles 5.1
 .PD 1
 .
 .TP
-.B \-chapter <Kapitel\-ID>[\-<Kapitel\-ID\ des\ letzten\ Kapitels>] (nur bei DVD)
-Gibt das Kapitel an, ab dem abgespielt werden soll. Optional kann angegeben
-werden, nach welchem Kapitel mit dem Abspielen aufgehört werden soll
-(Standard: 1).
-Unten stehen Beispiele.
+.B \-chapter <Kapitel-ID>[\-<Kapitel-ID\ des\ letzten\ Kapitels>] (nur bei DVD)
+Gibt das Kapitel an, ab dem abgespielt werden soll.
+Optional kann angegeben werden, nach welchem Kapitel mit dem Abspielen
+aufgehört werden soll (Standard: 1).
 .
 .TP
-.B \-cookies (nur im Netzwerk)
+.B \-cookies (nur bei Netzwerk)
 Sende Cookies bei HTTP-Anfragen.
 .
 .TP
-.B \-cookies-file <Dateiname) (nur im Netzwerk)
-Lies HTTP-Cookies aus dieser Datei und überspringe die Suche in den
-Standardverzeichnissen ~/.mozilla/ und ~/.netscape/.
+.B \-cookies-file <Dateiname>) (nur bei Netzwerk)
+Lies HTTP-Cookies aus <Dateiname> und überspringe die Suche in den
+Standardverzeichnissen (Standard: ~/.mozilla/ und ~/.netscape/).
 Es wird angenommen, dass die Datei im Netscape-Format vorliegt.
 .
 .TP
@@ -972,16 +971,17 @@ Schreibt den unbehandelten, komprimierten Audiostream nach ./\:stream.dump
 .
 .TP
 .B \-dumpfile <Dateiname> (nur MPlayer)
-Gibt den Dateinamen an, in den MPlayer schreiben soll. Sollte in Verbindung
-mit \-dumpaudio / \-dumpvideo / \-dumpstream benutzt werden.
+Gibt den Dateinamen an, in den MPlayer schreiben soll.
+Sollte in Verbindung mit \-dumpaudio / \-dumpvideo / \-dumpstream benutzt
+werden.
 .
 .TP
 .B \-dumpstream (nur MPlayer)
-Schreibt den unbehandelten Stream nach ./\:stream.dump. Nützlich, um DVD-
-oder Netzwerk-Streams zu rippen.
+Schreibt den unbehandelten Stream nach ./\:stream.dump.
+Nützlich, um DVD- oder Netzwerk-Streams zu rippen.
 .
 .TP
-.B \-dumpvideo (nur MPlayer)
+.B \-dumpvideo (nur bei MPlayer)
 Schreibt den unbehandelten, komprimierten Videostream nach ./stream.dump
 (nicht sehr nützlich).
 .
@@ -989,13 +989,13 @@ Schreibt den unbehandelten, komprimierten Videostream nach ./stream.dump
 .B \-dvbin <Optionen> (nur bei DVB)
 Übergibt die folgenden Parameter an das DVB-Inputmodul und überschreibt dabei
 die Standardeinstellungen:
-
+.sp 1
 .PD 0
 .RSs
 .IPs card=<1\-4>
 Benutze Karte 1\-4 (Standard: 1).
 .IPs file=<Dateiname>
-Weist MPlayer an, die Liste der Kanäle aus <Datei> zu lesen (Standard:
+Weist MPlayer an, die Liste der Kanäle aus <Dateiname> zu lesen (Standard:
 ~/\:.mplayer/\:channels.conf.{sat,ter,cbl,atsc} (je nach Kartentyp)
 oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit).
 .RE
@@ -1005,58 +1005,59 @@ oder ~/\:.mplayer/\:channels.conf als letzte Möglichkeit).
 .B \-dvd-device <Pfad\ zum\ Gerät> (nur bei DVD)
 Gibt das DVD-Gerät an (Standard: /dev/\:dvd).
 Du kannst auch ein Verzeichnis angeben, das die zuvor direkt von DVD kopierten
-Dateien enthält (so wie mit vobcopy).
-Merke, dass die Benutzung von \-dumpstream normalerweise ein besserer Weg ist,
-DVD-Titel zu kopieren (siehe Beispiele).
+Dateien enthält (z.B.\& von vobcopy).
+Beachte, dass die Benutzung von \-dumpstream normalerweise ein besserer Weg
+ist, DVD-Titel zu kopieren (siehe Beispiele).
 .
 .TP
 .B \-dvdangle <Winkel-ID> (nur bei DVD)
 Einige DVDs beinhalten Szenen, die aus verschiedenen Perspektiven/\:Winkeln
 betrachtet werden können. 
-Mit dieser Option kannst du MPlayer sagen, welche Perspektive er wiedergeben
-soll (Standard: 1).
+Mit dieser Option kannst du MPlayer bestimmen, welche Perspektive er
+wiedergeben soll (Standard: 1).
 .
 .TP
 .B \-edl <Dateiname> (nur bei EDL)
 Aktiviert EDL-Aktionen (Edit Decision List) während der Wiedergabe.
 Teile des Videos werden entsprechend den Einträgen der angegebenen
 Datei übersprungen und Teile des Audios stummgeschaltet.
-Siehe DOCS/\:de/\:documentation.html#edl, dort stehen Details, wie du dieses
+Siehe DOCS/\:de/\:documentation.html#edl für Details, wie du dieses
 Feature benutzen kannst.
 .
 .TP
 .B \-forceidx
 Erzwingt Indexgenerierung.
-Nützlich für Dateien mit defektem Index (A/\:V-Desynchronisation etc.).
+Nützlich für Dateien mit defektem Index (A/\:V-Desynchronisation etc).
 Das ermöglicht das Spulen in Dateien, in denen dies vorher nicht möglich war.
 Mit MEncoder kann der Index permanent repariert werden (siehe Dokumentation).
 .br
 .I ANMERKUNG:
 Diese Option funktioniert nur, wenn das zugrunde liegende Medium Spulen
-unterstützt (z.B.\& nicht bei Standardeingabe, Pipe usw.)
+unterstützt (z.B.\& nicht bei Standardeingabe, Pipe etc)
 .
 .TP
 .B \-fps <Fließkommazahl>
 Überschreibt die Videobildrate.
-Nützlich, falls dieser Wert falsch ist oder im Header fehlt.
+Nützlich, falls dieser Wert falsch ist oder fehlt.
 .
 .TP
 .B \-frames <Anzahl>
-Nur die ersten <Anzahl> Bilder werden wiedergegeben/encodiert.
-Beendet sich danach.
+Nur die ersten <Anzahl> Bilder werden wiedergegeben/\:encodiert.
+Danach wird MPlayer beendet.
 .
 .TP
-.B \-hr\-mp3\-seek (nur bei .MP3)
-Hi\-res mp3-Spulen.
+.B \-hr-mp3-seek (nur bei .MP3)
+Hi-res mp3-Spulen.
 Standardmäßig ist diese Option an, wenn ein externes MP3 abgespielt wird,
-da MPlayer an die exakte Position spulen muss, um die A/\:V-Sync zu erhalten.
+da MPlayer an die exakte Position spulen muss, um die A/\:V-Syncronisation
+beizubehalten.
 Kann langsam sein, vor allem dann, wenn zurückgespult wird, da dann erst
 zum Anfang gespult wird, um die genaue Stelle zu finden.
 .
 .TP
 .B \-idx (siehe auch \-forceidx)
-Erstellt den Index neu, wenn bei einem AVI kein Index gefunden wurde,
-und ermöglicht somit Spulen.
+Erstellt den Index neu, wenn kein Index gefunden wurde, und ermöglicht somit
+Spulen.
 Nützlich bei defekten/\:unvollständigen Downloads oder bei schlecht
 erstellten Dateien.
 .br
@@ -1070,46 +1071,60 @@ unterstützt (z.B.\& nicht bei Standardeingabe, Pipe usw.)
 Für IPv4-Verbindungen wird er aber benutzt.
 .
 .TP
-.B \-mc <Sekunden/\:Bild>
-Maximale A/\:V-Sync-Anpassung pro Bild (in Sekunden).
+.B \-loadidx <Index-Datei>
+Die Datei, von der die von \-saveidx gespeicherten Indexdaten für das Video
+gelesen werden.
+Dieser Index wird zum Spulen benutzt, dabei wird der im AVI enthaltene Index
+überschrieben.
+MPlayer wird nicht verhindern, dass du einen Index einer anderen AVI-Datei
+benutzt, aber dies wird sicherlich zu ungewünschten Resultaten führen.
+.br
+.I ANMERKUNG:
+Diese Option ist veraltet, da MPlayer nun Unterstützung für OpenDML hat.
 .
 .TP
-.B \-mf <option1:option2:...>
+.B \-mc <Sekunden/\:Bild>
+maximale A/\:V-Synchronisationsanpassung pro Bild (in Sekunden)
+.
+.TP
+.B \-mf <Option1:Option2:...>
 Wird benutzt, wenn mehrere PNG- oder JPEG-Dateien decodiert werden.
 .sp 1
-Die verfügbaren Optionen lauten:
+Verfügbare Optionen sind folgende:
 .sp 1
 .PD 0
 .RSs
 .IPs w=<Wert>
-Ausgabebreite (automatische Erkennung)
+Ausgabebreite (Standard: automatische Erkennung)
 .IPs h=<Wert>
-Ausgabehöhe (automatische Erkennung)
+Ausgabehöhe (Standard: automatische Erkennung)
 .IPs fps=<Wert>
 Frames pro Sekunde bei der Ausgabe (Standard: 25)
 .IPs type=<Wert>
-Typ der Quelldateien (mögliche Typen sind jpeg, png, tga, sgi)
+Typ der Quelldateien (mögliche Typen sind: jpeg, png, tga, sgi)
 .RE
 .PD 1
 .
 .TP
-.B \-ni (nur bei .AVI)
-Erzwingt die Benutzung des nicht\-interleaved-AVI-Parsers (was die
-Wiedergabe einiger schlecht erstellter AVIs ermöglicht).
+.B \-ni (nur bei AVI)
+Erzwingt die Benutzung des nicht-interleaved-AVI-Parsers (was die Wiedergabe
+einiger schlecht erstellter AVIs ermöglicht).
 .
 .TP
-.B \-nobps (nur bei .AVI)
-Benutze nicht die durchschnittlichen Bytes/\:Sekunde für A\-V-Sync (AVI).
+.B \-nobps (nur bei AVI)
+Benutze nicht den durchschnittlichen Bytes/\:Sekunde-Wert für die
+A/\:V-Synchronisation.
 Hilft bei einigen AVIs mit defektem Header.
 .
 .TP
 .B \-noextbased
 Deaktiviert die auf Dateinamenserweiterungen basierende Demultiplexerauswahl.
 Wenn der Dateityp (und damit der Demultiplexer) nicht zweifelsfrei
-festgestellt werden kann (z.B. wenn die Datei keinen Dateikopf besitzt
-oder dieser nicht eindeutig genug ist), dann wird normalerweise ein
+festgestellt werden kann (z.B. wenn die Datei keinen Header besitzt
+oder dieser nicht zuverlässig genug ist), dann wird normalerweise ein
 Demultiplexer anhand der Dateiendung gewählt.
-Die inhaltsbasierende Demultiplexerauswahl wird immer vorgenommen.
+Die inhaltsbasierende Demultiplexerauswahl wird bei Problemen immer
+vorgenommen.
 .
 .TP
 .B \-passwd <Passwort> (siehe auch \-user) (nur bei Netzwerk)
@@ -1126,26 +1141,26 @@ Benutzt IPv6 bei Netzwerkverbindungen.
 Greift automatisch auf IPv4-Verbindungen zurück.
 .
 .TP
-.B \-rawaudio <option1:option2:...>
+.B \-rawaudio <Option1:Option2:...>
 Mit dieser Option können raw-Audiodateien abgespielt werden.
 Sie kann auch verwendet werden, um Audio-CDs abzuspielen, die nicht mit 44KHz
 16Bit stereo aufgenommen wurden.
 Zum Abspielen von RAW-AC3-Streams benutze \-rawaudio on:format=0x2000.
 .sp 1
-Verfügbare Optionen:
+Verfügbare Optionen sind folgende:
 .sp 1
 .PD 0
 .RSs
 .IPs on\ \ \ 
-benutzt den nur-Audio-Demuxer
+Benutze den Raw-Audio-Demuxer.
 .IPs channels=<Wert>
 Anzahl der Kanäle
 .IPs rate=<Wert>
 Rate in Samples pro Sekunde
 .IPs samplesize=<Wert>
-Sample-Größe in Byte
+Sample-Größe in Bytes
 .IPs format=<Wert>
-FourCC in Hexadezimal
+FourCC als Hexadezimalwert
 .RE
 .PD 1
 .
