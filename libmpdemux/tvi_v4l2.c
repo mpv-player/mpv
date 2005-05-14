@@ -118,10 +118,16 @@ typedef struct {
     volatile int                shutdown;
 
     double                      audio_secs_per_block;
+    long long                   audio_usecs_per_block;
     long long                   audio_skew_total;
     long long                   audio_skew_delta_total;
     long			audio_recv_blocks_total;
     long			audio_sent_blocks_total;
+    pthread_mutex_t             audio_mutex;
+    int                         audio_insert_null_samples;
+    volatile long               audio_null_blocks_inserted;
+    volatile long long          dropped_frames_timeshift;
+    long long                   dropped_frames_compensated;
 } priv_t;
 
 #include "tvi_def.h"
@@ -144,8 +150,8 @@ static void *video_grabber(void *data);
     This may be an useful translation table for some others:
 
     IMGFMT_RGB8  == V4L2_PIX_FMT_RGB332
-    IMGFMT_RGB15 == V4L2_PIX_FMT_RGB555
-    IMGFMT_RGB16 == V4L2_PIX_FMT_RGB565
+    IMGFMT_BGR15 == V4L2_PIX_FMT_RGB555
+    IMGFMT_BGR16 == V4L2_PIX_FMT_RGB565
     IMGFMT_RGB24 == V4L2_PIX_FMT_RGB24
     IMGFMT_RGB32 == V4L2_PIX_FMT_RGB32
     IMGFMT_BGR24 == V4L2_PIX_FMT_BGR24
@@ -841,6 +847,7 @@ static int uninit(priv_t *priv)
     if (!tv_param_noaudio && !tv_param_immediate) {
 	pthread_join(priv->audio_grabber_thread, NULL);
 	pthread_mutex_destroy(&priv->skew_mutex);
+	pthread_mutex_destroy(&priv->audio_mutex);
     }
 
     if (priv->input.audioset) {
@@ -1168,6 +1175,7 @@ static int start(priv_t *priv)
 	priv->audio_secs_per_block = (double)priv->audio_in.blocksize/(priv->audio_in.samplerate
 								    *priv->audio_in.channels
 								    *priv->audio_in.bytes_per_sample);
+	priv->audio_usecs_per_block = 1e6*priv->audio_secs_per_block;
 	priv->audio_head = 0;
 	priv->audio_tail = 0;
 	priv->audio_cnt = 0;
@@ -1177,6 +1185,13 @@ static int start(priv_t *priv)
 	priv->audio_skew_delta_total = 0;
 	priv->audio_recv_blocks_total = 0;
 	priv->audio_sent_blocks_total = 0;
+	priv->audio_null_blocks_inserted = 0;
+	priv->audio_insert_null_samples = 0;
+	priv->dropped_frames_timeshift = 0;
+	priv->dropped_frames_compensated = 0;
+
+	pthread_mutex_init(&priv->skew_mutex, NULL);
+	pthread_mutex_init(&priv->audio_mutex, NULL);
     }
 
     /* setup video parameters */
@@ -1209,6 +1224,8 @@ static int start(priv_t *priv)
 	mp_msg(MSGT_TV, MSGL_ERR, "cannot allocate time buffer: %s\n", strerror(errno));
 	return 0;
     }
+
+    pthread_mutex_init(&priv->video_buffer_mutex, NULL);
 
     priv->video_head = 0;
     priv->video_tail = 0;
@@ -1318,7 +1335,7 @@ static inline void copy_frame(priv_t *priv, unsigned char *dest, unsigned char *
 static void *video_grabber(void *data)
 {
     priv_t *priv = (priv_t*)data;
-    long long skew, prev_skew, xskew, interval, prev_interval;
+    long long skew, prev_skew, xskew, interval, prev_interval, delta;
     int i;
     int framesize = priv->format.fmt.pix.height*priv->format.fmt.pix.width*
 	pixfmt2depth(priv->format.fmt.pix.pixelformat)/8;
@@ -1341,7 +1358,6 @@ static void *video_grabber(void *data)
     priv->streamon = 1;
 
     if (!tv_param_noaudio) {
-	pthread_mutex_init(&priv->skew_mutex, NULL);
 	pthread_create(&priv->audio_grabber_thread, NULL, audio_grabber, priv);
     }
 
@@ -1424,6 +1440,7 @@ static void *video_grabber(void *data)
 //	fprintf(stderr, "idx = %d, ts = %lf\n", buf.index, (double)(priv->curr_frame) / 1e6);
 
 	interval = priv->curr_frame - priv->first_frame;
+	delta = interval - prev_interval;
 
 	if (!priv->immediate_mode) {
 	    // interpolate the skew in time
@@ -1431,17 +1448,17 @@ static void *video_grabber(void *data)
 	    xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
 	    pthread_mutex_unlock(&priv->skew_mutex);
  	    // correct extreme skew changes to avoid (especially) moving backwards in time
-	    if (xskew - prev_skew > (interval - prev_interval)*MAX_SKEW_DELTA) {
-		skew = prev_skew + (interval - prev_interval)*MAX_SKEW_DELTA;
-	    } else if (xskew - prev_skew < -(interval - prev_interval)*MAX_SKEW_DELTA) {
-		skew = prev_skew - (interval - prev_interval)*MAX_SKEW_DELTA;
+	    if (xskew - prev_skew > delta*MAX_SKEW_DELTA) {
+		skew = prev_skew + delta*MAX_SKEW_DELTA;
+	    } else if (xskew - prev_skew < -delta*MAX_SKEW_DELTA) {
+		skew = prev_skew - delta*MAX_SKEW_DELTA;
 	    } else {
 		skew = xskew;
 	    }
 	}
 
 	mp_msg(MSGT_TV, MSGL_DBG3, "\nfps = %lf, interval = %lf, a_skew = %f, corr_skew = %f\n",
-	       (interval != prev_interval) ? (double)1e6/(interval - prev_interval) : -1,
+	       delta ? (double)1e6/delta : -1,
 	       (double)1e-6*interval, (double)1e-6*xskew, (double)1e-6*skew);
 	mp_msg(MSGT_TV, MSGL_DBG3, "vcnt = %d, acnt = %d\n", priv->video_cnt, priv->audio_cnt);
 
@@ -1469,6 +1486,11 @@ static void *video_grabber(void *data)
 	if (priv->video_cnt == priv->video_buffer_size_current) {
 	    if (!priv->immediate_mode) {
 		mp_msg(MSGT_TV, MSGL_ERR, "\nvideo buffer full - dropping frame\n");
+		if (priv->audio_insert_null_samples) {
+		    pthread_mutex_lock(&priv->audio_mutex);
+		    priv->dropped_frames_timeshift += delta;
+		    pthread_mutex_unlock(&priv->audio_mutex);
+		}
 	    }
 	} else {
 	    if (priv->immediate_mode) {
@@ -1478,8 +1500,16 @@ static void *video_grabber(void *data)
 		// negative skew => there are more audio samples, increase interval
 		// positive skew => less samples, shorten the interval
 		priv->video_timebuffer[priv->video_tail] = interval - skew;
+		if (priv->audio_insert_null_samples && priv->video_timebuffer[priv->video_tail] > 0) {
+		    pthread_mutex_lock(&priv->audio_mutex);
+		    priv->video_timebuffer[priv->video_tail] += 
+			(priv->audio_null_blocks_inserted
+			 - priv->dropped_frames_timeshift/priv->audio_usecs_per_block)
+			*priv->audio_usecs_per_block;
+		    pthread_mutex_unlock(&priv->audio_mutex);
+		}
 	    }
-		
+
 	    copy_frame(priv, priv->video_ringbuffer[priv->video_tail], priv->map[buf.index].addr);
 	    priv->video_tail = (priv->video_tail+1)%priv->video_buffer_size_current;
 	    priv->video_cnt++;
@@ -1585,7 +1615,7 @@ static void *audio_grabber(void *data)
 	current_time = (long long)1e6*tv.tv_sec + tv.tv_usec - priv->audio_start_time;
 
 	if (priv->audio_recv_blocks_total < priv->aud_skew_cnt*2) {
-	    start_time_avg += (long long)1e6*tv.tv_sec + tv.tv_usec - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total;
+	    start_time_avg += (long long)1e6*tv.tv_sec + tv.tv_usec - priv->audio_usecs_per_block*priv->audio_recv_blocks_total;
 	    priv->audio_start_time = start_time_avg/(priv->audio_recv_blocks_total+1);
 	}
 
@@ -1595,7 +1625,7 @@ static void *audio_grabber(void *data)
 	// put the current skew into the ring buffer
 	priv->audio_skew_total -= priv->audio_skew_buffer[audio_skew_ptr];
 	priv->audio_skew_buffer[audio_skew_ptr] = current_time
-	    - 1e6*priv->audio_secs_per_block*priv->audio_recv_blocks_total;
+	    - priv->audio_usecs_per_block*priv->audio_recv_blocks_total;
 	priv->audio_skew_total += priv->audio_skew_buffer[audio_skew_ptr];
 
 	pthread_mutex_lock(&priv->skew_mutex);
@@ -1643,6 +1673,7 @@ static void *audio_grabber(void *data)
 	
 //	fprintf(stderr, "audio_skew = %lf, delta = %lf\n", (double)priv->audio_skew/1e6, (double)priv->audio_skew_delta_total/1e6);
 
+	pthread_mutex_lock(&priv->audio_mutex);
 	if ((priv->audio_tail+1) % priv->audio_buffer_size == priv->audio_head) {
 	    mp_msg(MSGT_TV, MSGL_ERR, "\ntoo bad - dropping audio frame !\n");
 	    priv->audio_drop++;
@@ -1650,6 +1681,7 @@ static void *audio_grabber(void *data)
 	    priv->audio_tail = (priv->audio_tail+1) % priv->audio_buffer_size;
 	    priv->audio_cnt++;
 	}
+	pthread_mutex_unlock(&priv->audio_mutex);
     }
     return NULL;
 }
@@ -1659,25 +1691,49 @@ static double grab_audio_frame(priv_t *priv, char *buffer, int len)
     mp_dbg(MSGT_TV, MSGL_DBG2, "grab_audio_frame(priv=%p, buffer=%p, len=%d)\n",
 	priv, buffer, len);
 
-    if (priv->first) {
-        pthread_create(&priv->video_grabber_thread, NULL, video_grabber, priv);
-        priv->first = 0;
+    // hack: if grab_audio_frame is called first, it means we are used by mplayer
+    // => switch to the mode which outputs audio immediately, even if
+    // it should be silence
+    if (priv->first) priv->audio_insert_null_samples = 1;
+
+    pthread_mutex_lock(&priv->audio_mutex);
+    while (priv->audio_insert_null_samples
+	   && priv->dropped_frames_timeshift - priv->dropped_frames_compensated >= priv->audio_usecs_per_block) {
+	// some frames were dropped - drop the corresponding number of audio blocks
+	if (priv->audio_drop) {
+	    priv->audio_drop--;
+	} else {
+	    if (priv->audio_head == priv->audio_tail) break;
+	    priv->audio_head = (priv->audio_head+1) % priv->audio_buffer_size;
+	}
+	priv->dropped_frames_compensated += priv->audio_usecs_per_block;
     }
 
     // compensate for dropped audio frames
     if (priv->audio_drop && (priv->audio_head == priv->audio_tail)) {
 	priv->audio_drop--;
-	priv->audio_sent_blocks_total++;
 	memset(buffer, 0, len);
-	return (double)priv->audio_sent_blocks_total*priv->audio_secs_per_block;
+	goto out;
     }
 
+    if (priv->audio_insert_null_samples && (priv->audio_head == priv->audio_tail)) {
+	// return silence to avoid desync and stuttering
+	memset(buffer, 0, len);
+	priv->audio_null_blocks_inserted++;
+	goto out;
+    }
+
+    pthread_mutex_unlock(&priv->audio_mutex);
     while (priv->audio_head == priv->audio_tail) {
+	// this is mencoder => just wait until some audio is available
 	usleep(10000);
     }
+//    pthread_mutex_lock(&priv->audio_mutex);
     memcpy(buffer, priv->audio_ringbuffer+priv->audio_head*priv->audio_in.blocksize, len);
     priv->audio_head = (priv->audio_head+1) % priv->audio_buffer_size;
     priv->audio_cnt--;
+out:
+    pthread_mutex_unlock(&priv->audio_mutex);
     priv->audio_sent_blocks_total++;
     return (double)priv->audio_sent_blocks_total*priv->audio_secs_per_block;
 }
