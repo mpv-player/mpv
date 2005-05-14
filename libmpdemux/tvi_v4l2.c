@@ -844,7 +844,7 @@ static int uninit(priv_t *priv)
     }
 
     /* stop audio thread */
-    if (!tv_param_noaudio && !tv_param_immediate) {
+    if (!tv_param_noaudio) {
 	pthread_join(priv->audio_grabber_thread, NULL);
 	pthread_mutex_destroy(&priv->skew_mutex);
 	pthread_mutex_destroy(&priv->audio_mutex);
@@ -1432,9 +1432,9 @@ static void *video_grabber(void *data)
 
 	/* store the timestamp of the very first frame as reference */
 	if (!priv->frames++) {
-	    pthread_mutex_lock(&priv->skew_mutex);
+	    if (!tv_param_noaudio) pthread_mutex_lock(&priv->skew_mutex);
 	    priv->first_frame = (long long)1e6*buf.timestamp.tv_sec + buf.timestamp.tv_usec;
-	    pthread_mutex_unlock(&priv->skew_mutex);
+	    if (!tv_param_noaudio) pthread_mutex_unlock(&priv->skew_mutex);
 	}
 	priv->curr_frame = (long long)buf.timestamp.tv_sec*1e6+buf.timestamp.tv_usec;
 //	fprintf(stderr, "idx = %d, ts = %lf\n", buf.index, (double)(priv->curr_frame) / 1e6);
@@ -1444,9 +1444,9 @@ static void *video_grabber(void *data)
 
 	if (!priv->immediate_mode) {
 	    // interpolate the skew in time
-	    pthread_mutex_lock(&priv->skew_mutex);
+	    if (!tv_param_noaudio) pthread_mutex_lock(&priv->skew_mutex);
 	    xskew = priv->audio_skew + (interval - priv->audio_skew_measure_time)*priv->audio_skew_factor;
-	    pthread_mutex_unlock(&priv->skew_mutex);
+	    if (!tv_param_noaudio) pthread_mutex_unlock(&priv->skew_mutex);
  	    // correct extreme skew changes to avoid (especially) moving backwards in time
 	    if (xskew - prev_skew > delta*MAX_SKEW_DELTA) {
 		skew = prev_skew + delta*MAX_SKEW_DELTA;
