@@ -14,7 +14,7 @@
 
 static struct stream_priv_s {
   char* filename;
-  char* dummy_hostname;
+  char *filename2;
 } stream_priv_dflts = {
   NULL, NULL
 };
@@ -22,8 +22,8 @@ static struct stream_priv_s {
 #define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
 /// URL definition
 static m_option_t stream_opts_fields[] = {
-  {"filename", ST_OFF(filename), CONF_TYPE_STRING, 0, 0 ,0, NULL},
-  {"hostname", ST_OFF(dummy_hostname), CONF_TYPE_STRING, 0, 0, 0, NULL },
+  {"string", ST_OFF(filename), CONF_TYPE_STRING, 0, 0 ,0, NULL},
+  {"filename", ST_OFF(filename2), CONF_TYPE_STRING, 0, 0 ,0, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 static struct m_struct_st stream_opts = {
@@ -71,6 +71,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   int f;
   mode_t m = 0;
   off_t len;
+  unsigned char *filename;
   struct stream_priv_s* p = (struct stream_priv_s*)opts;
 
   if(mode == STREAM_READ)
@@ -83,7 +84,13 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
     return STREAM_UNSUPORTED;
   }
 
-  if(!p->filename) {
+  if(p->filename)
+    filename = p->filename;
+  else if(p->filename2)
+    filename = p->filename2;
+  else
+    filename = NULL;
+  if(!filename) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[file] No filename\n");
     m_struct_free(&stream_opts,opts);
     return STREAM_ERROR;
@@ -93,7 +100,7 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
   m |= O_BINARY;
 #endif    
 
-  if(!strcmp(p->filename,"-")){
+  if(!strcmp(filename,"-")){
     if(mode == STREAM_READ) {
       // read from stdin
       mp_msg(MSGT_OPEN,MSGL_INFO,MSGTR_ReadSTDIN);
@@ -109,9 +116,9 @@ static int open_f(stream_t *stream,int mode, void* opts, int* file_format) {
 #endif
     }
   } else {
-    f=open(p->filename,m);
+    f=open(filename,m);
     if(f<0) {
-      mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,p->filename);
+      mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_FileNotFound,filename);
       m_struct_free(&stream_opts,opts);
       return STREAM_ERROR;
     }
