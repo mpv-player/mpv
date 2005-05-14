@@ -104,7 +104,7 @@ struct CHANLISTS {
 /* --------------------------------------------------------------------- */
 
 extern struct CHANLISTS   chanlists[];
-extern struct STRTAB chanlist_names[];
+//extern struct STRTAB chanlist_names[];
 
 extern int                chantab;
 extern struct CHANLIST   *chanlist;
