@@ -9,6 +9,7 @@ MPlayer (1.0)
 
     Decoders:
     * Indeo2 (RT21) support via lavc
+    * Fraps video decoder via binary DLL
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
