@@ -39,7 +39,7 @@
 .\" Titel
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2004-08-28" "Das MPlayer Projekt"
+.TH MPlayer 1 "2004-05-03" "Das MPlayer Projekt"
 .
 .SH NAME
 mplayer  \- Movie Player
@@ -54,7 +54,7 @@ mencoder \- Movie Encoder
 .na
 .nh
 .B mplayer
-.RI [Optionen]\ [ \ Datei\  | \ URL\  | \ Playlist\  | \ -\  ]
+.RI [Optionen]\ [ \ Datei\  | \ URL\  | \ Playlist\  | \ \-\  ]
 .
 .br
 .in
@@ -76,7 +76,7 @@ mencoder \- Movie Encoder
 .in
 .B mplayer
 'in +\n[.k]u
-.I dvd://[Titel | [Starttitel]-Endtitel ]
+.I dvd://[Titel | [Starttitel]\-Endtitel ]
 [Optionen]
 .
 .br
@@ -163,7 +163,7 @@ mencoder \- Movie Encoder
 .B gmplayer
 'in +\n[.k]u
 [Optionen]
-[\-skin\ skin]
+[\-skin\ Skin]
 .
 .br
 .in
@@ -189,16 +189,16 @@ mencoder \- Movie Encoder
 .
 .SH BESCHREIBUNG
 .B mplayer
-ist ein Movie-Player für Linux (der auch auf vielen anderen Unixen und
-nicht\-x86-CPUs läuft, siehe Dokumentation).
+ist ein Movie-Player für Linux (der auch auf vielen anderen Plattformen und
+CPU-Architekturen läuft, siehe Dokumentation).
 Er spielt die meisten Dateien in den Formaten
 MPEG/\:VOB, AVI, ASF/\:WMA/\:WMV, RM, QT/\:MOV/\:MP4, OGG/\:OGM,
 VIVO, FLI, NuppelVideo, yuv4mpeg, FILM und RoQ ab, unterstützt von vielen
 eingebauten und binären Codecs.
-Es können VideoCDs, SuperVCDs, DVDs, 3ivx\-, DivX\ 3/\:4/\:5\- und sogar 
-WMV\-Filme angeschaut werden.
+Es können VideoCDs, SuperVCDs, DVDs, 3ivx-, DivX\ 3/\:4/\:5- und sogar
+WMV-Filme angeschaut werden.
 .PP
-MPlayer unterstützt eine große Auswahl an Ausgabetreibern.
+MPlayer unterstützt eine große Auswahl an Video- und Audioausgabetreibern.
 Er funktioniert mit X11, XV, DGA, OpenGL, SVGAlib, fbdev, AAlib, libcaca,
 DirectFB, Quartz und Mac OS X CoreVideo, du kannst ihn aber auch mit GGI, SDL
 (und damit alle von SDL unterstützen Treiber), VESA (mit jeder VESA-kompatiblen
@@ -212,7 +212,7 @@ so dass die Vollbildwiedergabe kein Problem ist.
 MPlayer verfügt über ein On-Screen-Display (OSD) für Statusinformationen,
 schöne, große, schattierte und kantengeglättete Untertitel und visuelles
 Feedback bei Tastatureingaben.
-Europäische/\:ISO 8859\-1,2 (Ungarisch, Englisch, Tschechisch etc), Kyrillische
+Europäische/\:ISO 8859-1,2 (Ungarisch, Englisch, Tschechisch etc), Kyrillische
 und Koreanische Schriftarten werden ebenso wie zwölf Untertitelformate
 (MicroDVD, SubRip, OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub,
 PJS und unser eigenes: MPsub) unterstützt, ebenso wie DVD-Untertitel
@@ -223,18 +223,18 @@ PJS und unser eigenes: MPsub) unterstützt, ebenso wie DVD-Untertitel
 wurde, dass er alle von MPlayer abspielbaren Filme (siehe oben) in andere
 von MPlayer abspielbare Formate (siehe unten) umwandeln kann.
 Er encodiert nach MPEG-4 (DivX/XviD), jeden der libavcodec-Codecs und Audio
-nach PCM/\:MP3/\:VBR\-MP3, das ganze in 1, 2 oder 3 Durchgängen.
-Weiterhin kann er Streams kopieren und verfügt über ein mächtiges
-Filter\-System (Entfernen (cropping) und Hinzufügen (expanding) von Rändern, 
+nach PCM/\:MP3/\:VBRMP3, das ganze in 1, 2 oder 3 Durchgängen.
+Des weiteren kann er Streams kopieren und verfügt über ein mächtiges
+Filtersystem (Entfernen (cropping) und Hinzufügen (expanding) von Rändern,
 horizontales Spiegeln, Postprocessing (Nachbearbeitung), Rotation, Skalierung,
-Rauschunterdrückung (denoising), RGB/\:YUV\-Konvertierung und mehr).
+Rauschunterdrückung (denoising), RGB/\:YUV-Konvertierung und mehr).
 .PP
 .B gmplayer
-ist die Bezeichnung für MPlayer mit einem graphischen Benutzerinterface. Er 
-verfügt über die gleichen Optionen wie MPlayer.
+ist die Bezeichnung für MPlayer mit einem graphischen Benutzerinterface.
+Er verfügt über die gleichen Optionen wie MPlayer.
 .PP
-Beispiele zum Gebrauch, die Dir zu einem schnellen Start verhelfen,
-findest Du am Ende dieser Manpage.
+Beispiele zum Gebrauch, die dir zu einem schnellen Start verhelfen,
+findest Du am Ende dieser Man page.
 .PP
 .B Siehe auch die HTML-Dokumentation!
 .
@@ -245,8 +245,9 @@ findest Du am Ende dieser Manpage.
 .
 .SH "TASTATURSTEUERUNG"
 MPlayer besitzt eine Kontrollfunktion, die befehlsgesteuert ist und sich komplett
-konfigurieren lässt. Die Steuerung geschieht mittels Tastatur, Maus, Joystick
-oder Fernbedienung (funktionierende LIRC-Unterstützung vorausgesetzt).
+konfigurieren lässt.
+Die Steuerung geschieht mittels Tastatur, Maus, Joystick oder Fernbedienung
+(funktionierende LIRC-Unterstützung vorausgesetzt).
 Bei der Option \-input findest du Beschreibungen, wie man diese Funktionen
 anpassen kann.
 .
@@ -263,11 +264,11 @@ Springe 10 Minuten zurück/\:vor.
 .IPs "[ und ]"
 Verringert/erhöht die Abspielgeschwindigkeit um 10%.
 .IPs "{ und }"
-Halbiert/verdoppelt die Abspielgeschwindigkeit.
+Halbiert/\:verdoppelt die Abspielgeschwindigkeit.
 .IPs "Löschen (Backspace)"
 Setzt die Abspielgeschwindigkeit zurück.
 .IPs "< und >"
-zurück\:vor in der Playlist
+zurück/\:vor in der Playlist
 .IPs "Pos1 und Ende"
 nächster/\:voriger Eintrag des Wiedergabebaums der aktuellen Liste
 .IPs "INS und DEL"
@@ -395,30 +396,31 @@ Wählt vorigen/\:nächsten Kanal.
 .\" --------------------------------------------------------------------------
 .
 .SH "ZUM UMGANG MIT MPLAYER"
-Jede Option 'flag' kennt ein Gegenstück, 'noflag'. Beispielsweise ist '\-nofs'
-das Gegenstück zu '\-fs'.
+Jede Option 'flag' kennt ein Gegenstück, 'noflag'.
+Beispielsweise ist '\-nofs' das Gegenstück zu '\-fs'.
 .PP
-Wenn eine Option als (nur XXX)\-markiert ist, wird diese nur in Kombination mit
+Wenn eine Option als (nur XXX)-markiert ist, wird diese nur in Kombination mit
 der XXX-Option funktionieren oder wenn XXX einkompiliert ist.
 .PP
 Du kannst jede Option in einer Konfigurationsdatei speichern, die bei jedem
 Start von MPlayer gelesen wird.
 Die systemweite Konfigurationsdatei 'mplayer.conf' liegt in deinem
 Konfigurationsverzeichnis (z.B.\& /etc/\:mplayer oder
-/usr/\:local/\:etc/\:mplayer). Die benutzerspezifische Datei liegt in
+/usr/\:local/\:etc/\:mplayer), die benutzerspezifische Datei ist
 \'~/\:.mplayer/\:config'.
 Benutzerspezifische Einstellungen haben Vorrang vor den systemweiten,
 und Optionen auf der Kommandozeile überschreiben die beiden anderen.
-Die Syntax der Konfigurationsdateien lautet 'option=<wert>'. Alles, was nach
-einem '#' kommt, wird als Kommentar verstanden und nicht ausgewertet.
+Die Syntax der Konfigurationsdateien lautet 'Option=<Wert>'.
+Alles, was nach einem '#' kommt, wird als Kommentar verstanden und nicht
+ausgewertet.
 Optionen, die keine Werte benötigen, können aktiviert werden, wenn
-du ihnen den Wert 'yes' oder '1' oder 'true' zuweist. Deaktiviert werden sie 
+du ihnen den Wert 'yes' oder '1' oder 'true' zuweist, deaktiviert werden sie
 mit \'no' oder '0'.
 Selbst Suboptionen können in dieser Art angegeben werden.
 .PP
 .I BEISPIEL:
 .nf
-# Benutze standardmäßig den Matrox-Treiber
+# Benutze in der Voreinstellung den Matrox-Treiber
 vo=xmga
 # Ich stehe darauf, beim Zusehen einen Handstand zu machen.
 flip=yes
@@ -429,11 +431,11 @@ mf=type=png:fps=25
 vf=eq2=1.0:-0.8
 .fi
 .PP
-Du kannst auch dateispezifische Konfigurationsdateien schreiben. Wenn du
-für einen Film namens 'movie.avi' eine Konfigurationsdatei schreiben möchtest,
-dann nenne diese Datei 'movie.avi.conf', stecke dort alle nur für diesen
-Film relevanten Optionen rein und speichere die Datei in ~/\:.mplayer oder im
-gleichen Verzeichnis wie 'movie.avi'.
+Du kannst auch dateispezifische Konfigurationsdateien schreiben.
+Wenn du für einen Film namens 'movie.avi' eine Konfigurationsdatei schreiben
+möchtest, dann nenne diese Datei 'movie.avi.conf', stecke dort alle nur für
+diesen Film relevanten Optionen rein und speichere die Datei in ~/\:.mplayer
+oder im gleichen Verzeichnis wie 'movie.avi'.
 .
 .
 .
