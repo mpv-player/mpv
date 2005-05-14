@@ -117,6 +117,7 @@ typedef struct {
     volatile int                audio_drop;
     volatile int                shutdown;
 
+    int                         audio_inited;
     double                      audio_secs_per_block;
     long long                   audio_usecs_per_block;
     long long                   audio_skew_total;
@@ -338,6 +339,45 @@ static void setup_audio_buffer_sizes(priv_t *priv)
 
     mp_msg(MSGT_TV, MSGL_V, "Audio capture - buffer %d blocks of %d bytes, skew average from %d meas.\n",
 	   priv->audio_buffer_size, priv->audio_in.blocksize, priv->aud_skew_cnt);
+}
+
+static void init_audio(priv_t *priv)
+{
+    if (priv->audio_inited) return;
+
+    if (!tv_param_noaudio) {
+#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
+	if (tv_param_alsa)
+	    audio_in_init(&priv->audio_in, AUDIO_IN_ALSA);
+	else
+	    audio_in_init(&priv->audio_in, AUDIO_IN_OSS);
+#else
+	audio_in_init(&priv->audio_in, AUDIO_IN_OSS);
+#endif
+
+	if (priv->audio_dev) {
+	    audio_in_set_device(&priv->audio_in, priv->audio_dev);
+	}
+
+	audio_in_set_samplerate(&priv->audio_in, 44100);
+	if (priv->capability.capabilities & V4L2_CAP_TUNER) {
+	    if (priv->tuner.audmode == V4L2_TUNER_MODE_STEREO) {
+		audio_in_set_channels(&priv->audio_in, 2);
+	    } else {
+		audio_in_set_channels(&priv->audio_in, 1);
+	    }
+	} else {
+	    if (tv_param_forcechan >= 0) {
+		audio_in_set_channels(&priv->audio_in, tv_param_forcechan);
+	    } else {
+		audio_in_set_channels(&priv->audio_in, 2);
+	    }
+	}
+
+	if (audio_in_setup(&priv->audio_in) < 0) return;
+
+	priv->audio_inited = 1;
+    }
 }
 
 #if 0
@@ -737,26 +777,35 @@ static int control(priv_t *priv, int cmd, void *arg)
 	}
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_FORMAT:
+	init_audio(priv);
+	if (!priv->audio_inited) return TVI_CONTROL_FALSE;
 	*(int *)arg = AF_FORMAT_S16_LE;
 	mp_msg(MSGT_TV, MSGL_V, "%s: get audio format: %d\n",
 	       info.short_name, *(int *)arg);
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_SAMPLERATE:
+	init_audio(priv);
+	if (!priv->audio_inited) return TVI_CONTROL_FALSE;
 	*(int *)arg = priv->audio_in.samplerate;
 	mp_msg(MSGT_TV, MSGL_V, "%s: get audio samplerate: %d\n",
 	       info.short_name, *(int *)arg);
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_SAMPLESIZE:
-	*(int *)arg = priv->audio_in.bytes_per_sample;;
+	init_audio(priv);
+	if (!priv->audio_inited) return TVI_CONTROL_FALSE;
+	*(int *)arg = priv->audio_in.bytes_per_sample;
 	mp_msg(MSGT_TV, MSGL_V, "%s: get audio samplesize: %d\n",
 	       info.short_name, *(int *)arg);
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_GET_CHANNELS:
+	init_audio(priv);
+	if (!priv->audio_inited) return TVI_CONTROL_FALSE;
 	*(int *)arg = priv->audio_in.channels;
 	mp_msg(MSGT_TV, MSGL_V, "%s: get audio channels: %d\n",
 	       info.short_name, *(int *)arg);
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_AUD_SET_SAMPLERATE:
+	init_audio(priv);
 	mp_msg(MSGT_TV, MSGL_V, "%s: set audio samplerate: %d\n",
 	       info.short_name, *(int *)arg);
 	if (audio_in_set_samplerate(&priv->audio_in, *(int*)arg) < 0) return TVI_CONTROL_FALSE;
@@ -893,12 +942,11 @@ static int init(priv_t *priv)
 {
     int i;
 
-    if (tv_param_immediate == 1)
-	tv_param_noaudio = 1;
-
     priv->audio_ringbuffer = NULL;
     priv->audio_skew_buffer = NULL;
     priv->audio_skew_delta_buffer = NULL;
+
+    priv->audio_inited = 0;
 
     /* Open the video device. */
     priv->video_fd = open(priv->video_dev, O_RDWR);
@@ -1070,39 +1118,6 @@ static int init(priv_t *priv)
 	    set_control(priv, &control, 0);
 	}
     }
-    
-    /* audio init */
-    if (!tv_param_noaudio) {
-#if defined(HAVE_ALSA9) || defined(HAVE_ALSA1X)
-	if (tv_param_alsa)
-	    audio_in_init(&priv->audio_in, AUDIO_IN_ALSA);
-	else
-	    audio_in_init(&priv->audio_in, AUDIO_IN_OSS);
-#else
-	audio_in_init(&priv->audio_in, AUDIO_IN_OSS);
-#endif
-
-	if (priv->audio_dev) {
-	    audio_in_set_device(&priv->audio_in, priv->audio_dev);
-	}
-
-	audio_in_set_samplerate(&priv->audio_in, 44100);
-	if (priv->capability.capabilities & V4L2_CAP_TUNER) {
-	    if (priv->tuner.audmode == V4L2_TUNER_MODE_STEREO) {
-		audio_in_set_channels(&priv->audio_in, 2);
-	    } else {
-		audio_in_set_channels(&priv->audio_in, 1);
-	    }
-	} else {
-	    if (tv_param_forcechan >= 0) {
-		audio_in_set_channels(&priv->audio_in, tv_param_forcechan);
-	    } else {
-		audio_in_set_channels(&priv->audio_in, 2);
-	    }
-	}
-	if (audio_in_setup(&priv->audio_in) < 0) return 0;
-//	setup_audio_buffer_sizes(priv);
-    }
 
     return 1;
 }
@@ -1145,6 +1160,9 @@ static int start(priv_t *priv)
     int i;
 
     /* setup audio parameters */
+
+    init_audio(priv);
+    if (!tv_param_noaudio && !priv->audio_inited) return 0;
 
     /* we need this to size the audio buffer properly */
     if (priv->immediate_mode) {
