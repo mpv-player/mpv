@@ -666,7 +666,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   grouped as a frame, even though they are not intended to be shown
   at the same moment in time.
   The MPEG-2 standard used on DVD and digital TV provides both a
-  way to encode the original progressive frames, and to store in
+  way to encode the original progressive frames, and store in
   the header of each frame the number of fields for which it should
   be shown.
   If this method has been used, the movie will often be described
@@ -713,7 +713,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 <listitem><para>
   If <application>MPlayer</application> never shows the framerate
-  change, and two frames out of every five appear combed, your
+  changing, and two frames out of every five appear combed, your
   movie is "hard telecined" 24fps content.
 </para></listitem>
 </itemizedlist>
@@ -745,7 +745,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-2pass">
-<title>Constant quantizer vs. multi-pass</title>
+<title>Constant quantizer vs. multipass</title>
 
 <para>
   It is possible to encode your movie at a wide range of qualities.
@@ -758,7 +758,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   There are three approaches to encoding the video: constant bitrate
-  (CBR), constant quantizer, and multi-pass (ABR, or average bitrate).
+  (CBR), constant quantizer, and multipass (ABR, or average bitrate).
 </para>
 
 <note><title>Note:</title>
@@ -766,9 +766,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Most codecs which support ABR encode only support two pass encode
   while some others such as <systemitem class="library">x264</systemitem>
   and <systemitem class="library">libavcodec</systemitem> support
-  multi-pass, which slightly improves quality at each pass,
-  yet this improvement is no longer noticeable after the 6th or so pass.
-  Therefore, in this section, two pass and multi-pass will be used
+  multipass, which slightly improves quality at each pass,
+  yet this improvement is no longer mesurable nor noticeable after the
+  4th or so pass.
+  Therefore, in this section, two pass and multipass will be used
   interchangeably.
 </para>
 </note>
