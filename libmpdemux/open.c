@@ -32,7 +32,6 @@ static URL_t* url;
 
 /// We keep these 2 for the gui atm, but they will be removed.
 int dvd_title=0;
-int vcd_track=0;
 
 int dvd_chapter=1;
 int dvd_last_chapter=0;
@@ -66,10 +65,6 @@ char * dvd_audio_stream_types[8] =
 char * dvd_audio_stream_channels[6] =
 	{ "mono", "stereo", "unknown", "unknown", "5.1/6.1", "5.1" };
 #endif
-
-#include "cue_read.h"
-
-
 
 // Define function about auth the libsmbclient library
 // FIXME: I really do not not is this function is properly working
@@ -124,35 +119,6 @@ off_t len;
 if(!filename) {
    mp_msg(MSGT_OPEN,MSGL_ERR,"NULL filename, report this bug\n");
    return NULL;
-}
-
-// for opening of vcds in bincue files
-if(strncmp("cue://",filename,6) == 0){
-  int ret,ret2;
-  char* p = filename + 6;
-  vcd_track = 1;
-  p = strchr(p,':');
-  if(p && p[1] != '\0') {
-    vcd_track = strtol(p+1,NULL,0);
-    if(vcd_track < 1){ 
-      mp_msg(MSGT_OPEN,MSGL_ERR,"Invalid cue track %s\n",p+1);
-      return NULL;
-    }
-    p[0] = '\0';
-  }
-  f = cue_read_cue (filename + 6);
-  if(p && p[1] != '\0') p[0] = ':';
-  if (f == -1) return NULL;
-  cue_vcd_read_toc();
-  ret2=cue_vcd_get_track_end(vcd_track);
-  ret=cue_vcd_seek_to_track(vcd_track);
-  if(ret<0){ mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");return NULL;}
-  mp_msg(MSGT_OPEN,MSGL_V,"VCD start byte position: 0x%X  end: 0x%X\n",ret,ret2);
-
-  stream=new_stream(f,STREAMTYPE_VCDBINCUE);
-  stream->start_pos=ret;
-  stream->end_pos=ret2;
-  return stream;
 }
 
 
@@ -497,7 +463,7 @@ if(strncmp("dvd://",filename,6) == 0){
     strncmp("vcd://", filename, 6) && strncmp("dvb://", filename, 6) &&
     strncmp("cdda://", filename, 7) && strncmp("cddb://", filename, 7) &&
     strncmp("mpst://", filename, 7) && strncmp("tivo://", filename, 7) &&
-    strncmp("file://", filename, 7) && 
+    strncmp("file://", filename, 7) && strncmp("cue://", filename, 6) &&
     strstr(filename, "://")) {
      url = url_new(filename);
     }

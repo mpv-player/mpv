@@ -35,8 +35,6 @@
 extern int verbose; // defined in mplayer.c
 void cache_uninit(stream_t *s); // defined in cache2.c
 
-#include "cue_read.h"
-
 //#include "vcd_read_bincue.h"
 
 #ifdef USE_DVDREAD
@@ -68,6 +66,7 @@ extern stream_info_t stream_info_ftp;
 extern stream_info_t stream_info_vstream;
 #endif
 
+extern stream_info_t stream_info_cue;
 extern stream_info_t stream_info_null;
 extern stream_info_t stream_info_file;
 
@@ -90,6 +89,7 @@ stream_info_t* auto_open_streams[] = {
 #ifdef HAVE_VSTREAM
   &stream_info_vstream,
 #endif
+  &stream_info_cue,
   &stream_info_null,
   &stream_info_file,
   NULL
@@ -203,8 +203,6 @@ int stream_fill_buffer(stream_t *s){
 #else
     len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
 #endif
-  case STREAMTYPE_VCDBINCUE:
-    len=cue_vcd_read(s->buffer);break;
 #ifdef USE_DVDNAV
   case STREAMTYPE_DVDNAV: {
     dvdnav_stream_read((dvdnav_priv_t*)s->priv,s->buffer,&len);
@@ -253,8 +251,6 @@ off_t newpos=0;
 #else
     newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
 #endif
-  case STREAMTYPE_VCDBINCUE:
-    newpos=(pos/VCD_SECTOR_DATA)*VCD_SECTOR_DATA;break;
   case STREAMTYPE_DVD:
     newpos=pos/2048; newpos*=2048; break;
   default:
@@ -291,10 +287,6 @@ if(newpos==0 || newpos!=s->pos){
     if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
     break;
 #endif
-  case STREAMTYPE_VCDBINCUE:
-    s->pos=newpos; // real seek
-    cue_set_msf(s->pos/VCD_SECTOR_DATA);
-    break;
 #ifdef USE_DVDNAV
   case STREAMTYPE_DVDNAV: {
     if (newpos==0) {

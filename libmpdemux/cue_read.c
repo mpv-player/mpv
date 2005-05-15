@@ -16,6 +16,9 @@
 #include "stream.h"
 
 #include "cue_read.h"
+#include "help_mp.h"
+#include "../m_option.h"
+#include "../m_struct.h"
 
 #define byte    unsigned char
 #define SIZERAW 2352
@@ -31,6 +34,25 @@
 #define MODE1_2048 30
 #define MODE2_2336 40
 #define UNKNOWN -1
+
+static struct stream_priv_s {
+  char* filename;
+} stream_priv_dflts = {
+  NULL
+};
+
+#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
+/// URL definition
+static m_option_t stream_opts_fields[] = {
+  { "string", ST_OFF(filename), CONF_TYPE_STRING, 0, 0 ,0, NULL},
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+static struct m_struct_st stream_opts = {
+  "cue",
+  sizeof(struct stream_priv_s),
+  &stream_priv_dflts,
+  stream_opts_fields
+};
 
 static FILE* fd_cue;
 static int fd_bin = 0;
@@ -74,7 +96,7 @@ static struct cue_track_pos {
 static int nTracks = 0;
 
 /* presumes Line is preloaded with the "current" line of the file */
-int cue_getTrackinfo(char *Line, tTrack *track)
+static int cue_getTrackinfo(char *Line, tTrack *track)
 {
   char inum[3];
   char min;
@@ -139,7 +161,7 @@ int cue_getTrackinfo(char *Line, tTrack *track)
  * on the arrays to have the same size, thus we need to make
  * sure the sizes are in sync.
  */
-int cue_find_bin (char *firstline) {
+static int cue_find_bin (char *firstline) {
   int i,j;
   char s[256];
   char t[256];
@@ -251,7 +273,7 @@ static inline int cue_get_msf() {
                            cue_current_pos.frame);
 }
 
-inline void cue_set_msf(unsigned int sect){
+static inline void cue_set_msf(unsigned int sect){
   cue_current_pos.frame=sect%75;
   sect=sect/75;
   cue_current_pos.second=sect%60;
@@ -278,7 +300,7 @@ static inline int cue_mode_2_sector_size(int mode)
 }
 
 
-int cue_read_cue (char *in_cue_filename)
+static int cue_read_cue (char *in_cue_filename)
 {
   struct stat filestat;
   char sLine[256];
@@ -410,7 +432,7 @@ int cue_read_cue (char *in_cue_filename)
 
 
 
-int cue_read_toc_entry() {
+static int cue_read_toc_entry() {
 
   int track = cue_current_pos.track - 1;
 
@@ -440,8 +462,8 @@ int cue_read_toc_entry() {
   return 0;
 }
 
-int cue_read_raw(char *buf) {
-  int position;
+static int cue_read_raw(char *buf) {
+  unsigned long position;
   int track = cue_current_pos.track - 1;
 
   /* get the mode of the bin file part and calc the positon */
@@ -470,7 +492,7 @@ int cue_read_raw(char *buf) {
 
 
 
-int cue_vcd_seek_to_track (int track){
+static int cue_vcd_seek_to_track (int track){
   cue_current_pos.track  = track;
 
   if (cue_read_toc_entry ())
@@ -479,7 +501,7 @@ int cue_vcd_seek_to_track (int track){
   return VCD_SECTOR_DATA * cue_get_msf();
 }
 
-int cue_vcd_get_track_end (int track){
+static int cue_vcd_get_track_end (int track){
   cue_current_pos.frame = tracks[track].frame;
   cue_current_pos.second = tracks[track].second;
   cue_current_pos.minute = tracks[track].minute;
@@ -487,13 +509,13 @@ int cue_vcd_get_track_end (int track){
   return VCD_SECTOR_DATA * cue_get_msf();
 }
 
-void cue_vcd_read_toc(){
+static void cue_vcd_read_toc(){
   int i;
   for (i = 0; i < nTracks; ++i) {
 
     mp_msg(MSGT_OPEN,MSGL_INFO,
            "track %02d:  format=%d  %02d:%02d:%02d\n",
-           i,
+           i+1,
            tracks[i].mode,
            tracks[i].minute,
            tracks[i].second,
@@ -505,7 +527,7 @@ void cue_vcd_read_toc(){
 
 static char vcd_buf[VCD_SECTOR_SIZE];
 
-int cue_vcd_read(char *mem){
+static int cue_vcd_read(stream_t *stream, char *mem, int size) {
 
   if (cue_read_raw(vcd_buf)==-1) return 0; // EOF?
 
@@ -523,3 +545,73 @@ int cue_vcd_read(char *mem){
 
   return VCD_SECTOR_DATA;
 }
+
+static int seek(stream_t *s,off_t newpos) {
+  s->pos=newpos;
+  cue_set_msf(s->pos/VCD_SECTOR_DATA);
+  return 1;
+}
+
+
+static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
+  struct stream_priv_s* p = (struct stream_priv_s*)opts;
+  int ret,ret2,f,track = 0;
+  char *filename = NULL, *colon = NULL;
+
+  if(mode != STREAM_READ || !p->filename) {
+    m_struct_free(&stream_opts,opts);
+    return STREAM_UNSUPORTED;
+  }
+  filename = strdup(p->filename);
+  if(!filename) {
+    m_struct_free(&stream_opts,opts);
+    return STREAM_UNSUPORTED;
+  }
+  colon = strstr(filename, ":");
+  if(colon) {
+    if(strlen(colon)>1)
+      track = atoi(colon+1);
+    *colon = 0;
+  }
+  if(!track)
+    track = 1;
+  
+  f = cue_read_cue(filename);
+  if(f < 0) {
+    m_struct_free(&stream_opts,opts);
+    return STREAM_UNSUPORTED;
+  }
+  cue_vcd_read_toc();
+  ret2=cue_vcd_get_track_end(track);
+  ret=cue_vcd_seek_to_track(track);
+  if(ret<0){ 
+    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_ErrTrackSelect " (seek)\n");
+    return STREAM_UNSUPORTED;
+  }
+  mp_msg(MSGT_OPEN,MSGL_INFO,"CUE stream_open, filename=%s, track=%d, available tracks: %d -> %d\n", filename, track, ret, ret2);
+
+  stream->fd = f;
+  stream->type = STREAMTYPE_VCDBINCUE;
+  stream->sector_size = VCD_SECTOR_DATA;
+  stream->flags = STREAM_READ | STREAM_SEEK_FW;
+  stream->start_pos = ret;
+  stream->end_pos = ret2;
+  stream->fill_buffer = cue_vcd_read;
+  stream->seek = seek;
+
+  free(filename);
+  m_struct_free(&stream_opts,opts);
+  return STREAM_OK;
+}
+
+stream_info_t stream_info_cue = {
+  "CUE track",
+  "cue",
+  "Albeu",
+  "based on the code from ???",
+  open_s,
+  { "cue", NULL },
+  &stream_opts,
+  1 // Urls are an option string
+};
+
