@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.62 -->
+<!-- synced with 1.63 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -415,11 +415,26 @@ Használj SDL-t.
 <para>Igen, az <application>MPlayer</application> fut Windows-on
   <ulink url="http://www.cygwin.com/"><application>Cygwin</application></ulink> és
   <ulink url="http://www.mingw.org/"><application>MinGW</application></ulink> alatt.
-  Még nincs GUI-ja, de a parancssoros verzió majdnem teljesen működik.
-  <ulink url="../../tech/patches.txt">Javításokat</ulink> mindig örömmel fogadunk.
-  Ajánlott szétnézni az
+  Még nincs hivatalos GUI-ja, de a parancssoros verzió
+  teljes mértékben használható. Ajánlott megnézni az
   <ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-cygwin/">MPlayer-cygwin</ulink>
-  levelezési listán is a legfrissebb információkért.</para>
+  levelezési listát is segítéségért és a legfrissebb információkért.
+  A hivatalos Windows-os binárisok megtalálhatóak a
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/dload.html">letöltési oldalon</ulink>.
+  A külső forrásból származó telepítő csomagokat és egyszerű GUI frontend-eket
+  összegyűjtöttük a 
+  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">kapcsolódó projektek oldal</ulink>
+  Windows-os részében.
+</para>
+
+<para>Ha el akarod kerülni a parancssor használatát, van egy egyszerű trükk.
+  Tegyél egy parancsikont az asztalodra, ami valami hasonló parancssort
+  tartalmaz:
+  <screen><replaceable>c:\eleresi\ut\</replaceable>mplayer.exe %1</screen>
+  Ezután az <application>MPlayer</application> le fog játszani bármilyen
+  videót, amit erre a parancsikonra ejtesz. Írd hozzá a <option>-fs</option>
+  kapcsolót a teljes képernyős módhoz.
+</para>
 
 <para>A legjobb eredmény a natív DirectX videó kimeneti vezérlővel
   (<option>-vo directx</option>) és a natív Windows waveout audió vezérlővel
@@ -498,12 +513,6 @@ Használj SDL-t.
   előírt dupla buffereléssel. Ha a lejátszás szaggatott, próbáld meg a
   <option>-autosync 100</option> opciót. Ha ezek közül bármelyik segít, írd
   be a konfigurációs fájlodba.</para>
-
-<para>Sascha Sommer hivatalos Windows binárisokat ad ki időről időre,
-  Joey Parrish nem hivatalos Windows csomagokat készít telepítővel.
-  Megtalálhatod ezeket a
-  <ulink url="http://www.mplayerhq.hu/homepage/design7/projects.html#windows">projektek oldal</ulink>  
-  Windows-os részében.</para>
 
 <sect2 id="cygwin">
 <title><application>Cygwin</application></title>
