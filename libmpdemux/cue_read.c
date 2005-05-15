@@ -324,13 +324,13 @@ static int cue_read_cue (char *in_cue_filename)
      if (*t == '\0')
        strcpy(t, "/");
   }
-  printf ("dirname: %s\n", t);
+  mp_msg(MSGT_OPEN,MSGL_V,"dirname: %s\n", t);
   strlcpy(bincue_path,t,sizeof( bincue_path ));
 
 
   /* no path at all? */
   if (strcmp(bincue_path, ".") == 0) {
-    printf ("bincue_path: %s\n", bincue_path);
+    mp_msg(MSGT_OPEN,MSGL_V,"bincue_path: %s\n", bincue_path);
     strlcpy(cue_filename,in_cue_filename,sizeof( cue_filename ));
   } else {
     strlcpy(cue_filename,in_cue_filename + strlen(bincue_path) + 1,
@@ -462,36 +462,6 @@ static int cue_read_toc_entry() {
   return 0;
 }
 
-static int cue_read_raw(char *buf) {
-  unsigned long position;
-  int track = cue_current_pos.track - 1;
-
-  /* get the mode of the bin file part and calc the positon */
-  position = tracks[track].start_offset +
-             (cue_msf_2_sector(cue_current_pos.minute,
-                               cue_current_pos.second,
-                               cue_current_pos.frame) -
-              tracks[track].start_sector)
-             * cue_mode_2_sector_size(tracks[track].mode);
-
-  /* check if the track is at its end*/
-  if (position >= tracks[track+1].start_offset)
-    return -1;
-
-  if (lseek (fd_bin, position, SEEK_SET) == -1) {
-    mp_msg(MSGT_OPEN,MSGL_ERR,
-           "[bincue] unexpected end of bin file\n");
-    return -1;
-  }
-
-  if (!read (fd_bin, buf, VCD_SECTOR_SIZE))
-    return -1;
-  else
-    return VCD_SECTOR_DATA;
-}
-
-
-
 static int cue_vcd_seek_to_track (int track){
   cue_current_pos.track  = track;
 
@@ -524,14 +494,36 @@ static void cue_vcd_read_toc(){
   }
 }
 
-
-static char vcd_buf[VCD_SECTOR_SIZE];
-
 static int cue_vcd_read(stream_t *stream, char *mem, int size) {
+  unsigned long position;
+  int track = cue_current_pos.track - 1;
+  unsigned char tmp[VCD_SECTOR_OFFS];
 
-  if (cue_read_raw(vcd_buf)==-1) return 0; // EOF?
+  position = tracks[track].start_offset +
+             (cue_msf_2_sector(cue_current_pos.minute,
+                               cue_current_pos.second,
+                               cue_current_pos.frame) -
+              tracks[track].start_sector)
+             * cue_mode_2_sector_size(tracks[track].mode);
 
-  memcpy(mem,&vcd_buf[VCD_SECTOR_OFFS],VCD_SECTOR_DATA);
+  
+  if(position >= tracks[track+1].start_offset)
+    return 0;
+
+  if(lseek(fd_bin, position, SEEK_SET) == -1) {
+    mp_msg(MSGT_OPEN,MSGL_ERR, "[bincue] unexpected end of bin file\n");
+    return 0;
+  }
+
+  if(read(fd_bin, tmp, VCD_SECTOR_OFFS) != VCD_SECTOR_OFFS) {
+    mp_msg(MSGT_OPEN,MSGL_ERR, "[bincue] couldn't skip %d bytes before payload\n", VCD_SECTOR_OFFS);
+    return 0;
+  }
+
+  if(read(fd_bin, mem, VCD_SECTOR_DATA) != VCD_SECTOR_DATA) {
+    mp_msg(MSGT_OPEN,MSGL_ERR, "[bincue] couldn't read %d bytes of payload\n", VCD_SECTOR_DATA);
+    return 0;
+  }
 
   cue_current_pos.frame++;
   if (cue_current_pos.frame==75){
