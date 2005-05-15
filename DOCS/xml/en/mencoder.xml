@@ -665,8 +665,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   When video is stored on DVD, consecutive pairs of fields are
   grouped as a frame, even though they are not intended to be shown
   at the same moment in time.
-  The MPEG-2 standard used on DVD and digital TV provides both a
-  way to encode the original progressive frames, and store in
+  The MPEG-2 standard used on DVD and digital TV provides a
+  way to both encode the original progressive frames and store in
   the header of each frame the number of fields for which it should
   be shown.
   If this method has been used, the movie will often be described
@@ -767,7 +767,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   while some others such as <systemitem class="library">x264</systemitem>
   and <systemitem class="library">libavcodec</systemitem> support
   multipass, which slightly improves quality at each pass,
-  yet this improvement is no longer mesurable nor noticeable after the
+  yet this improvement is no longer measurable nor noticeable after the
   4th or so pass.
   Therefore, in this section, two pass and multipass will be used
   interchangeably.
