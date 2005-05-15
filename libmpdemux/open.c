@@ -32,6 +32,7 @@ static URL_t* url;
 
 /// We keep these 2 for the gui atm, but they will be removed.
 int dvd_title=0;
+int vcd_track=0;
 
 int dvd_chapter=1;
 int dvd_last_chapter=0;
