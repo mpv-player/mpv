@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.25 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -33,6 +33,15 @@ Egy fájl lejátszása:
 <command>mplayer</command><!--
 --> [<replaceable>kapcsolók</replaceable>]<!--
 --> [<replaceable>elérési út</replaceable>/]<replaceable>fájlnév</replaceable>
+</synopsis>
+</para>
+
+<para>
+Másik módszer egy fájl lejátszásához:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>opciók</replaceable>]<!--
+--> <replaceable>file:///uri-escaped-path</replaceable>
 </synopsis>
 </para>
 
