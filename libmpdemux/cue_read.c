@@ -168,6 +168,7 @@ static int cue_find_bin (char *firstline) {
 
   /* get the filename out of that */
   /*                      12345 6  */
+  mp_msg (MSGT_OPEN,MSGL_INFO, "[bincue] cue_find_bin(%s)\n", firstline);
   if (strncmp(firstline, "FILE \"",6)==0)
   {
     i = 0;
@@ -324,9 +325,9 @@ static int cue_read_cue (char *in_cue_filename)
      if (*t == '\0')
        strcpy(t, "/");
   }
-  mp_msg(MSGT_OPEN,MSGL_V,"dirname: %s\n", t);
+  
   strlcpy(bincue_path,t,sizeof( bincue_path ));
-
+  mp_msg(MSGT_OPEN,MSGL_V,"dirname: %s, cuepath: %s\n", t, bincue_path);
 
   /* no path at all? */
   if (strcmp(bincue_path, ".") == 0) {
@@ -497,7 +498,6 @@ static void cue_vcd_read_toc(){
 static int cue_vcd_read(stream_t *stream, char *mem, int size) {
   unsigned long position;
   int track = cue_current_pos.track - 1;
-  unsigned char tmp[VCD_SECTOR_OFFS];
 
   position = tracks[track].start_offset +
              (cue_msf_2_sector(cue_current_pos.minute,
@@ -510,13 +510,8 @@ static int cue_vcd_read(stream_t *stream, char *mem, int size) {
   if(position >= tracks[track+1].start_offset)
     return 0;
 
-  if(lseek(fd_bin, position, SEEK_SET) == -1) {
+  if(lseek(fd_bin, position+VCD_SECTOR_OFFS, SEEK_SET) == -1) {
     mp_msg(MSGT_OPEN,MSGL_ERR, "[bincue] unexpected end of bin file\n");
-    return 0;
-  }
-
-  if(read(fd_bin, tmp, VCD_SECTOR_OFFS) != VCD_SECTOR_OFFS) {
-    mp_msg(MSGT_OPEN,MSGL_ERR, "[bincue] couldn't skip %d bytes before payload\n", VCD_SECTOR_OFFS);
     return 0;
   }
 
