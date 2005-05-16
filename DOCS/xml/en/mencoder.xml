@@ -364,8 +364,8 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout s
 <title>Copying a french subtitle from an MPEG file</title>
 <screen>
 rm subtitles.idx subtitles.sub
-mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1<!--
---></screen>
+mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1 -nosound -ovc copy
+</screen>
 </example>
 
 </sect1>
