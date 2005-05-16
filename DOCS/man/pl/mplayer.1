@@ -1,4 +1,4 @@
-.\" synced with 1.952
+.\" synced with 1.971
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -37,7 +37,7 @@
 .\" Tytu³
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2005-04-03" "Projekt MPlayer" "Odtwarzacz filmów"
+.TH MPlayer 1 "2005-05-15" "Projekt MPlayer" "Odtwarzacz filmów"
 .
 .SH NAZWA
 mplayer  \- odtwarzacz filmów
@@ -122,7 +122,7 @@ mencoder \- enkoder (koder) filmów
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ mms[t] | http | http_proxy | rt[s]p | ftp | udp ] ://
+.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp ] ://
 [u¿ytkownik:has³o@]\fIURL\fP[:port] [opcje]
 .
 .br
@@ -530,14 +530,6 @@ winvidix, xmga, xvidix, xv (zobacz tak¿e \-vo xv:ck), xvmc
 Automatycznie pod³±cza gdb przy b³edzie lub SIGTRAP.
 Obs³uga musi zostaæ wkompilowana poprzez podanie --enable-crash-debug lub
 posiadanie zbioru .developer w katalogu przy konfiguracji.
-.
-.TP
-.B \-edl <nazwa\ pliku>
-W³±cza decyzyjn± listê edycji (ang.\& edit decision list (EDL)) podczas
-odtwarzania.
-Video bêdzie pomijane, audio bêdzie wyciszane i w³±czane zgodnie z wpisami w
-podanym zbiorze.
-Szczegó³owe informacje zawarte s± w DOCS/\:HTML/\:pl/\:edl.html.
 .
 .TP
 .B \-edlout <nazwa\ zbioru>
@@ -979,6 +971,14 @@ na kopiowanie tytu³ów DVD (zobacz przyk³ady).
 .B \-dvdangle <ID\ ujêcia> (tylko DVD)
 Niektóre dyski DVD zawieraj± sceny, które mog± byæ ogl±dane z ró¿nych ujêæ.
 Opcja ta informuje MPlayera, którego ujêcia ma u¿ywaæ (domy¶lnie: 1).
+.
+.TP
+.B \-edl <nazwa\ pliku>
+W³±cza decyzyjn± listê edycji (ang.\& edit decision list (EDL)) podczas
+odtwarzania.
+Video bêdzie pomijane, audio bêdzie wyciszane i w³±czane zgodnie z wpisami w
+podanym zbiorze.
+Szczegó³owe informacje zawarte s± w DOCS/\:HTML/\:pl/\:edl.html.
 .
 .TP
 .B \-forceidx
@@ -2250,7 +2250,7 @@ Dodatkowo, pod X11 Twój manager okien musi rozumieæ zalecenia proporcji okna.
 .B \-ontop\ 
 Sprawia, ¿e okno zostaje nad innymi oknami.
 Obs³ugiwane przez sterowniki wyj¶cia video u¿ywaj±ce X11, poza SDL
-oraz directx i gl2 pod Windows.
+oraz directx, macosx, quartz, ggi i gl2.
 .
 .TP
 .B \-panscan <0.0\-1.0>
@@ -2476,8 +2476,7 @@ Mo¿e spowodowaæ ma³± (nie zauwa¿aln±) sta³± desynchronizacjê A/\:V
 (domy¶lnie: noqueue).
 .IPs (no)sleep
 Wykorzystuje funkcjê sleep podczas czekania na zakoñczenie renderowania
-(niezalecane na Linuksie).
-Domy¶lnie nie u¿ywa funkcji sleep (nosleep).
+(niezalecane na Linuksie) (domy¶lnie: nosleep).
 .IPs ck=cur|use|set
 To samo co \-vo xv:ck (zobacz tak¿e \-vo xv).
 .IPs ck-method=man|bg|auto
@@ -2580,8 +2579,8 @@ Podaje rozdzielczo¶æ pe³noekranow± (przydatne na wolnych systemach).
 .PD 1
 .
 .TP
-.B macosx (Mac OS X 10.4 lub 10.3.9 z Quicktime 7)
-Sterownik wyj¶cia video Mac OS X CoreVideo.
+.B macosx (Mac OS X 10.4 lub 10.3.9 z QuickTime 7)
+sterownik wyj¶cia video Mac OS X CoreVideo
 .PD 0
 .RSs
 .IPs device_id=<numer>
@@ -3652,7 +3651,7 @@ zmiennoprzecinkowych (filterbank and integer processing)
 .RE
 .PD 0
 .RSs
-.IPs "mplayer -af resample=44100:0:0"
+.IPs "mplayer \-af resample=44100:0:0"
 Ustawi czêstotliwo¶æ wyj¶ciow± filtru na 44100Hz, korzystaj±c
 z dok³adnego skalowania i interpolacji liniowej.
 .RE
@@ -3783,12 +3782,12 @@ kana³.
 .I PRZYK£AD:
 .RE
 .RSs
-.IPs "mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
+.IPs "mplayer \-af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
 Zmieni liczbê kana³ów na 4 i ustawi 4 drogi przekierowania, które zamieni±
 kana³ 0 z 1, a 2 i 3 pozostawi± niezmienione.
 Zauwa¿, ¿e je¿eli odtwarzany by³ zbiór zawieraj±cy 2 kana³y, kana³y 2 i 3
 bêd± puste, ale 0 i 1 zostan± zamienione.
-.IPs "mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
+.IPs "mplayer \-af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
 Zmieni liczbê kana³ów na 6 i ustawi 4 drogi przekierowania, które
 skopiuj± kana³ 0 do 0 do 3, a kana³y 4 i 5 bêd± zawiera³y ciszê.
 .RE
@@ -3855,7 +3854,7 @@ Metoda ta powoduje przek³amania i powinna byæ u¿yta tylko w ostateczno¶ci.
 .I PRZYK£AD:
 .RE
 .RSs
-.IPs "mplayer -af volume=10.1:0 media.avi"
+.IPs "mplayer \-af volume=10.1:0 media.avi"
 Wzmocni g³o¶no¶æ o 10.1dB i zastosuje hard-clipping (twarde obcinanie), je¿eli
 poziom jest zbyt wysoki.
 .RE
@@ -3885,9 +3884,9 @@ Jak du¿o z kana³u wej¶ciowego j jest miksowane w kana³ wyj¶ciowy i (0\-1).
 .I PRZYK£AD:
 .RE
 .RSs
-.IPs "mplayer -af pan=1:0.5:0.5 -channels 1 media.avi"
+.IPs "mplayer \-af pan=1:0.5:0.5 -channels 1 media.avi"
 Zmiksuje d¼wiêk ze stereo do mono.
-.IPs "mplayer -af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
+.IPs "mplayer \-af pan=3:1:0:1:0.5:0.5 -channels 3 media.avi"
 Da 3 kana³y wyj¶ciowe, pozostawiaj±c 0 i 1 bez zmian oraz miksuj±c 0 i 1
 do 2 kana³u (który mo¿e, na przyk³ad, zostaæ wys³any do subwoofera).
 .RE
@@ -3922,7 +3921,7 @@ Zauwa¿, ¿e liczb± kana³ów zwiêkszy siê do <kan>, je¿eli zajdzie taka potrzeba.
 .I PRZYK£AD:
 .RE
 .RSs
-.IPs "mplayer -af sub=100:4 -channels 5 media.avi"
+.IPs "mplayer \-af sub=100:4 -channels 5 media.avi"
 Doda kana³ subwoofera z ustawion± czêstotliwo¶ci± graniczn± na 100Hz
 do 4 kana³u wyj¶ciowego.
 .RE
@@ -3945,7 +3944,7 @@ zajdzie taka potrzeba.
 .PD 1
 .
 .TP
-.B surround[=opo¼nienie]
+.B surround[=opó¼nienie]
 Dekoder macierzowo zakodowanego d¼wiêku przestrzennego takiego jak Dolby
 Surround.
 Wiele plików zawieraj±cych 2 kana³y audio, w rzeczywisto¶ci zawiera d¼wiêk
@@ -3956,7 +3955,7 @@ Aby u¿yæ tego filtru potrzebujesz karty z obs³ug± przynajmniej 4 kana³ów.
 .IPs <opó¼nienie>
 Ustawia opó¼nienie w ms dla tylnych g³o¶ników (0ms do 1000ms) (domy¶lnie: 20ms).
 Powinno byæ ustawione tak: je¶li d1 to odleg³o¶æ od pozycji s³uchacza do
-przednich g³o¶ników a d2 to odleg³o¶æ od tylnych g³o¶ników, to opó¼nienie d
+przednich g³o¶ników a d2 to odleg³o¶æ od tylnych g³o¶ników, to opó¼nienie
 powinno byæ ustawione na 15ms, je¿eli d1 <= d2 i 15 + 5*(d1-d2) je¿eli d1 > d2.
 Domy¶lna warto¶æ dla d to 20ms.
 .RE
@@ -4538,6 +4537,8 @@ Wymusza zastosowanie podanego kwantyzatora zamiast tego z wej¶cia.
 domy¶lna kombinacja filtrów (hb:a,vb:a,dr:a)
 .IPs fa/fast
 szybka kombinacja filtrów (h1:a,v1:a,dr:a)
+.IPs ac\ \ \ 
+kombinacja filtrów wysokiej jako¶ci (ha:a:128:7,va:a,dr:a)
 .RE
 .RS
 .sp 1
@@ -5607,6 +5608,16 @@ Nadpisuje aspekt zawarty nag³ówku vprp AVI OpenDML.
 Opcja ta mo¿e byæ u¿yta do zmiany proporcji przy "\-ovc copy".
 .
 .TP
+.B \-hr-edl-seek (tylko EDL)
+U¿ywa dok³adniejszej, ale o wiele wolniejszej metody przeskakiwania.
+OBszary przeznaczone do pominiêdzia nie s± przeskakiwane, zamiat tego
+dekodowane s± wszystkie ramki ale tylko potrzebne s± kodowane.
+Pozwala to na zaczynanie nie na klatkach kluczowych.
+.br
+.I INFORMACJA:
+Nie ma gwarancji prawid³owego dzia³ania z "\-ovc copy".
+.
+.TP
 .B \-info <opcja1:opcja2:...> (tylko AVI)
 Wybiera informacjê nag³ówka otrzymywanego pliku AVI.
 .sp 1
@@ -5759,7 +5770,7 @@ z poni¿szej sk³adni:
 .B \-<codec>opts <opcja1[=warto¶æ],opcja2,...>
 .
 .PP
-Gdzie <codec> to: lavc, xvidenc, divx4, lame, toolame, faac, x264enc lub mpeg.
+Gdzie <codec> to: lavc, xvidenc, divx4, lame, toolame, twolame, faac, x264enc lub mpeg.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -5974,7 +5985,7 @@ Dla ludzi z niewiarygodnie dobrym s³uchem i podobnym wyposa¿eniem.
 .PD 1
 .
 .
-.SS toolame (\-toolameopts)
+.SS toolame i twolame (odpowiednio \-toolameopts i \-twolameopts)
 .
 .TP
 .B br=<32\-384>
@@ -5983,7 +5994,7 @@ natomiast w trybie VBR jest to minimalny bitrate na ramkê.
 Tryb VBR nie zadzia³a z warto¶ci± mniejsz± ni¿ 112.
 .TP
 .B vbr=<-50\-50> (tylko VBR)
-Przedzia³ zmienno¶ci; je¶li ujemny toolame przesuwa ¶redni bitrate w stronê
+Przedzia³ zmienno¶ci; je¶li ujemny koder przesuwa ¶redni bitrate w stronê
 dolnej granicy, je¶li dodatni w stronê górnej.
 Je¶li ustawione na 0 jest u¿ywany tryb CBR (domy¶lne).
 .TP
@@ -5993,7 +6004,7 @@ maksymalny bitrate dozwolony na ramkê, w kbps
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (domy¶lnie: mono dla d¼wiêku jednokana³owego, w przeciwnym wypadku stereo)
 .TP
-.B psy=<0\-3>
+.B psy=<-1\-4>
 model psychoakustyczny (domy¶lnie: 2)
 .TP
 .B errprot=<0 | 1>
@@ -6644,17 +6655,20 @@ zalecane przez JVT
 .PD 1
 .
 .TP
-.B vstrict=<-1|0|1>
+.B vstrict=<-2|-1|0|1>
 ¶cis³a zgodno¶æ ze standardami
 .PD 0
 .RSs
 .IPs 0
-wy³±czona (domy¶lne)
+wy³±czona
 .IPs 1
 Zalecane tylko w przypadku, je¿eli chcesz przekazaæ wyj¶cie do referencyjnego
 dekodera MPEG-4.
 .IPs -1
-Pozwala na korzystanie z niestandardowych kodeków (snow, ffvhuff, ffv1).
+Pozwala na rozszerzenia libavcodec (domy¶lne).
+.IPs -2
+W³±cza eksperymentalne kodeki i mo¿liwo¶ci które mog± nie byæ obs³ugiwane
+przez przysz³e wersje MPlayera (snow, ffvhuff, ffv1).
 .RE
 .PD 1
 .
@@ -6855,6 +6869,13 @@ Jest to jednoznaczne z podniesieniem jako¶ci intra bloków, poniewa¿ ta sama,
 przeciêtna warto¶æ bitrate, bêdzie rozprowadzona przez kontroler tempa
 (rate controller) na ca³± sekwencjê video (domy¶lnie: 0.0 (wy³±czone)).
 p_mask=1.0 podwoja lo¶æ bitów alokowanych do ka¿dego inta bloku.
+.
+.TP
+.B border_mask=<0.0\-1.0>
+Przetwarzanie ramek w koderach typu MPEG.
+Przetwarzanie ramek zwiêksza kwantyzator dla makrobloków które s± odleg³e
+od krawêdzi o mniej ni¿ 1/5t± wysoko¶ci/szeroko¶ci obrazu,
+jako ¿e czêsto s± one mniej wa¿ne wizualnie.
 .
 .TP
 .B naq\ \ \ \ 
@@ -7612,7 +7633,7 @@ Od najszybszego do najwolniejszego:
 .PD 0
 .RSs
 .IPs 0
-wy³±czone (domy¶lne)
+wy³±czone
 .IPs 1
 decyzja dotycz±ca trybu (inter/\:intra MB) (domy¶lne)
 .IPs 2
@@ -7799,8 +7820,11 @@ Daje to ³adniejsze ramki B prawie bez spadku wydajno¶ci (domy¶lnie: 1).
 .
 .TP
 .B bitrate=<warto¶æ>
-Ustawia u¿yty bitrate w kbit/\:sekunda (domy¶lnie: wy³±czone).
-Ta opcja jest konieczna, je¿eli chcesz kodowaæ z CBR (sta³y bitrate).
+Ustawia ¶redni u¿ywany bitrate w kbit/\:sekundê (domy¶lnie: wy³±czone).
+Poniewa¿ lokalny bitrate mo¿e siê wachaæ, ta ¶rednia mo¿e byæ niedok³adna dla
+bardzo krótkich filmów (zobacz tak¿e opcjê ratetol).
+Sta³y bitrate mo¿na osi±gn±æ ³±cz±c tê opcjê z vbv_maxrate,
+za cenê powa¿nego spadku jako¶ci.
 .
 .TP
 .B qp_constant=<1\-51>
@@ -7839,9 +7863,7 @@ W trybie dwuprzebiegowym, drugie przej¶cie (pass=2) czyta dane z pliku i opiera
 na nich decyzje dotycz±ce kontroli tempa.
 .br
 W trybie trzyprzebiegowym, drugie przej¶cie (pass=3, to nie b³±d)
-robi dwie rzeczy na raz: Czyta dane i nadpisuje je. Mo¿e bêdziesz chcia³
-zrobiæ kopiê plik divx2pass.log zanim zaczniesz kodowaæ, je¿eli istnieje
-jakakolwiek szansa, ¿e bêdziesz musia³ przerwaæ dzia³anie MEncodera.
+robi dwie rzeczy na raz: Czyta dane i nadpisuje je.
 Mo¿esz u¿ywaæ wszystkich opcji kodowania, poza tymi wymagaj±cymi
 du¿ej mocy obliczeniowej.
 .br
@@ -7850,10 +7872,9 @@ zasobu ze statystykami zebranymi podczas drugiego przebiegu.
 Mo¿esz korzystaæ z wszystkich opcji kodowanie, ³±cznie z tymi wymagaj±cymi
 du¿ej mocy obliczeniowej.
 .br
-Pierwszy przebieg mo¿e u¿ywaæ albo sta³ej warto¶ci bitrate albo sta³ego
-kwantyzatora. Ten drugi czêsto jest lepszym wyborem, ale wymaga okre¶lenia
-warto¶ci qp_constant bêd±cej najbli¿szej oczekiwanej warto¶ci bitrate.
-(Lepiej jest b³êdnie wybraæ ni¿sz± warto¶æ qp_constant, tzn.\& wy¿szy bitrate.)
+Pierwszy przebieg mo¿e u¿ywaæ albo ¶redniej warto¶ci bitrate albo sta³ego
+kwantyzatora.
+Zalecane jest ABR, poniewa¿ nie wymaga zgadywania kwantyzatora.
 Kolejne przebiegi s± w trybie ABR i musi zostaæ okre¶lona warto¶æ bitrate.
 .br
 .I
@@ -7872,7 +7893,7 @@ du¿ych warto¶ciach keyint.
 .
 .TP
 .B keyint_min=<1\-keyint/2>
-Ustawia minimaln± odleg³o¶æ miêdzy ramkami IDR (domy¶lnie: keyint * 0.4).
+Ustawia minimaln± odleg³o¶æ miêdzy ramkami IDR (domy¶lnie: 25).
 Je¶li w obrêbie tego przedzia³u pojawi sie zmiana sceny, nadal jest ona
 kodowana jako ramka I, ale nie zaczyna nowego GOPu.
 W H.264 ramki I niekoniecznie ograniczaj± zamkniêty GOP, poniewa¿
@@ -7976,30 +7997,35 @@ Nieco spowalnia kodowanie i dekodowanie, ale oszczêdza oko³o 10-15% bitów.
 Nie powiniene¶ go wy³±czaæ, chyba ¿e zale¿y Ci na szybko¶ci dekodowania.
 .
 .TP
-.B qp_min=<1\-51> (CBR lub tryb dwuprzebiegowy)
+.B qp_min=<1\-51> (ABR lub tryb dwuprzebiegowy)
 Minimalny kwantyzator, 10\-30 to u¿yteczny zakres (domy¶lnie: 10).
 .
 .TP
-.B qp_max=<1\-51> (tylko CBR)
+.B qp_max=<1\-51> (ABR lub tryb dwuprzebiegowy)
 maksymalny kwantyzator (domy¶lnie: 51)
 .
 .TP
-.B qp_step=<1\-50> (tylko CBR lub tryb dwuprzebiegowy)
-Maksymalna warto¶æ o jak± kwantyzator mo¿e byæ zwiêkszony/zmniejszony
-pomiêdzy klatkami (domy¶lnie: 1).
+.B qp_step=<1\-50> (ABR lub tryb dwuprzebiegowy)
+maksymalna warto¶æ o jak± kwantyzator mo¿e byæ zwiêkszony/zmniejszony
+pomiêdzy klatkami (domy¶lnie: 2)
 .
 .TP
-.B rc_buffer_size=<warto¶æ> (tylko CBR lub tryb dwuprzebiegowy)
-rozmiar bufora kontroli tempa w kbitach
-(domy¶lnie: 1 sekunda przy okre¶lonym bitrate)
+.B ratetol=<0.1\-100.0> (ABR lub tryb dwuprzebiegowy)
+dozwolona wariancja dla ¶redniej warto¶ci bitrate (nieokre¶lona jednostka)
+(domy¶lnie: 1.0)
 .
 .TP
-.B rc_init_buffer=<0.0\-1.0> (tylko CBR)
-Ustawia wstêpne zape³nienie bufora kontroli tempa (domy¶lnie: 0.25)
+.B vbv_maxrate=<warto¶æ> (ABR lub tryb dwuprzebiegowy)
+maksymalne lokalne bitrate, w kbit/\:sekundê (domy¶lnie: wy³±czone)
 .
 .TP
-.B rc_sens=<0\-100> (tylko CBR)
-czu³o¶æ kontroli tempa (domy¶lnie: 4)
+.B vbv_bufsize=<warto¶æ> (ABR lub tryb dwuprzebiegowy)
+okres u¶redniania dla vbv_maxrate, w kbitach
+(domy¶lnie: ¿aden, musi byæ podany je¶lo w³±czono vbv_maxrate)
+.
+.TP
+.B vbv_init=<0.0\-1.0> (ABR lub tryb dwuprzebiegowy)
+pocz±tkowa zajêto¶æ bufora, jako u³amek vbv_bufsize (domy¶lnie: 0.9)
 .
 .TP
 .B ip_factor=<warto¶æ>
@@ -8010,7 +8036,7 @@ wspó³czynnik kwantyzatora miêdzy ramkami I a P (domy¶lnie: 1.4)
 wspó³czynnik kwantyzatora miêdzy ramkami P a B (domy¶lnie: 1.3)
 .
 .TP
-.B qcomp=<0\-1> (tylko tryb dwuprzebiegowy)
+.B qcomp=<0\-1> (ABR lub tryb dwuprzebiegowy)
 Kompresja kwantyzatora (domy¶lnie: 0.6).
 Ni¿sza warto¶æ sprawia, ¿e bitrate jest bardziej sta³y, podczas gdy wy¿sza,
 sprawia, ¿e parametr kwantyzacji jest bardziej sta³y.
@@ -8089,6 +8115,24 @@ podczas gdy ma³e poruszaj±ce siê obiekty przez mniejsze segmenty.
 Zaleca siê u¿ywanie 4x4mv tylko z subq >= 3.
 .
 .TP
+.B me=<1\-3>
+Wybiera algorytm pe³nopikseolowego szacowania ruchu.
+.PD 0
+.RSs
+.IPs 1
+Szukanie kwadratowe, rozmiar 1 (szybkie).
+.IPs 2
+Szukanie sze¶ciok±tne, rozmiar 2 (domyslne).
+.IPs 3
+Szukanie wyczerpuj±ce, kontrolowane przez me_range (bardzo wolne).
+.RE
+.PD 1
+.
+.TP
+.B me_range=<4\-64>
+Promieñ wyczerpuj±cego szukania ruchu (domy¶lnie: 16).
+.
+.TP
 .B subq=<1\-5>
 Dopasowuje jako¶æ udoskonalenia subpel.
 Ten parametr kontroluje kompromis miêdzy jako¶ci± a szybko¶ci± bior±cy
@@ -8101,8 +8145,7 @@ Potem wybiera najlepszy typ.
 Potem poprawia ruch tego typu co do prezycji quarterpixel.
 (najszybsze)
 .br
-2: Podobnie jak 1, ale korzysta z nieco wolniejszego przeszukiwania fullpixel i
-nieco wolniejszego poprawiania quarterpixel.
+2: Podobnie jak 1, ale korzysta z wolniejszego poprawiania quarterpixel.
 .br
 3: Korzysta z przewidywania ruchu z precyzj± halfpixel dla wszystkich
 kandyduj±cych typów makrobloków.
@@ -8248,7 +8291,7 @@ Ta opcja zostanie zignorowana je¶li bêdzie u¿yta razem z opcj± telecine.
 W³±cza tryb miêkkiego telecine: muxer oszukuje strumieñ obrazu tak, aby wygl±da³
 jak kodowany przy 29.97 lub 30 fps; dzia³a to tylko z filmami MPEG-2, kiedy
 wyj¶ciowa ilo¶æ klatek na sekundê, po ewentualnej konwersji przez \-ofps wynosi
-23.976 lub 24.
+24000/1001 lub 24.
 Wszystkie pozosta³e warto¶ci s± niekompatybilne z t± opcj±.
 .
 .
