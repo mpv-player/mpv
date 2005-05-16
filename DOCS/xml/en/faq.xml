@@ -1306,11 +1306,11 @@ section.
 
 <qandaentry>
 <question><para>
-How can I dump a full DVD title to a file?
+How can I dump a full DVD title into a file?
 </para></question>
 <answer><para>
-Once you selected your title, and made sure it plays fine with
-<application>MPlayer</application>, use the option <option>-dumpstream</option>
+Once you have selected your title, and made sure it plays fine with
+<application>MPlayer</application>, use the option <option>-dumpstream</option>.
 For example:
 <screen>
 mplayer -dumpstream dvd://5 -dumpfile <replaceable>dvd_dump.vob</replaceable>
