@@ -3595,7 +3595,7 @@ Selects which resampling method to use.
 .RE
 .PD 0
 .RSs
-.IPs "mplayer -af resample=44100:0:0"
+.IPs "mplayer \-af resample=44100:0:0"
 would set the output frequency of the resample filter to 44100Hz using
 exact output frequency scaling and linear interpolation.
 .RE
@@ -3721,12 +3721,12 @@ Pairs of numbers between 0 and 5 that define where to route each channel.
 .I EXAMPLE:
 .RE
 .RSs
-.IPs "mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
+.IPs "mplayer \-af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
 Would change the number of channels to 4 and set up 4 routes that
 swap channel 0 and channel 1 and leave channel 2 and 3 intact.
 Observe that if media containing two channels was played back, channels
 2 and 3 would contain silence but 0 and 1 would still be swapped.
-.IPs "mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
+.IPs "mplayer \-af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
 Would change the number of channels to 6 and set up 4 routes
 that copy channel 0 to channels 0 to 3.
 Channel 4 and 5 will contain silence.
@@ -8014,17 +8014,17 @@ Select fullpixel motion estimation algorithm.
 .PD 0
 .RSs
 .IPs 1
-Diamond search, radius 1. (fast)
+Diamond search, radius 1 (fast).
 .IPs 2
-Hexagon search, radius 2. (default)
+Hexagon search, radius 2 (default).
 .IPs 3
-Exhaustive search, controlled by me_range. (very slow)
+Exhaustive search, controlled by me_range (very slow).
 .RE
 .PD 1
 .
 .TP
 .B me_range=<4\-64>
-Radius of exhaustive motion search. (default: 16)
+Radius of exhaustive motion search (default: 16).
 .
 .TP
 .B subq=<1\-5>
@@ -8036,8 +8036,7 @@ subq=5 can compress up to 10% better than subq=1.
 1: Runs fullpixel precision motion estimation on all candidate
 macroblock types.
 Then selects the best type.
-Then refines the motion of that type to fast quarterpixel precision.
-(fastest)
+Then refines the motion of that type to fast quarterpixel precision (fastest).
 .br
 2: As 1, but uses a slower quarterpixel refinement.
 .br
