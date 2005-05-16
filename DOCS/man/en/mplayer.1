@@ -33,7 +33,7 @@
 .\" Title
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "2005-04-03" "The MPlayer Project" "The Movie Player"
+.TH MPlayer 1 "2005-05-15" "The MPlayer Project" "The Movie Player"
 .
 .SH NAME
 mplayer  \- movie player
@@ -8181,9 +8181,9 @@ This option will be ignored if used with the telecine option.
 .TP
 .B telecine
 Enables soft telecine mode: the muxer will trick the video stream so as 
-to make it look like encoded at 29.97 or 30 fps; it only works with MPEG-2 
+to make it look like encoded at 30000/1001 or 30 fps; it only works with MPEG-2 
 video when the output framerate, eventually converted with \-ofps, is either 
-23.976 or 24 fps.
+24000/1001 or 24 fps.
 Any other framerate is incompatible with this option.
 .
 .

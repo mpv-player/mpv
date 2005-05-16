@@ -571,7 +571,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">NTSC Video</emphasis>: Recorded with an
-  NTSC video camera at 59.94 fields per second, or 60 fields per
+  NTSC video camera at 60000/1001 fields per second, or 60 fields per
   second in the pre-color era.
   Otherwise similar to PAL.
 </para></listitem>
@@ -581,7 +581,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">Computer Graphics (CG)</emphasis>: Can be
-  any framerate, but some are more common than others; 23 and
+  any framerate, but some are more common than others; 24 and
   30 frames per second are typical for NTSC, and 25fps is typical
   for PAL.
 </para></listitem>
@@ -643,7 +643,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   shown alternately for the duration of 3 fields or 2 fields.
   This gives a fieldrate 2.5 times the original framerate.
   The result is also slowed down very slightly from 60 fields per
-  second to 59.94 fields per second to maintain NTSC fieldrate.
+  second to 60000/1001 fields per second to maintain NTSC fieldrate.
 </para></listitem>
 <listitem><para>
   <emphasis role="bold">NTSC 2:2 pulldown</emphasis>: Used for
@@ -692,29 +692,29 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>NTSC regions:</title>
 <listitem><para>
   If <application>MPlayer</application> prints that the framerate
-  has changed to 23.976 when watching your movie, and never changes
-  back, it is almost certainly 24fps content that has been
+  has changed to 24000/1001 when watching your movie, and never changes
+  back, it is almost certainly progressive content that has been
   "soft telecined".
 </para></listitem>
 <listitem><para>
   If <application>MPlayer</application> shows the framerate
-  switching back and forth between 23.976 and 29.97, and you see
+  switching back and forth between 24000/1001 and 30000/1001, and you see
   "combing" at times, then there are several possibilities.
-  The 23.976 fps segments are almost certainly 24fps progressive
-  content, "soft telecined", but the 29.97 fps parts could be
-  either hard-telecined 24fps content or NTSC video content.
+  The 24000/1001 fps segments are almost certainly progressive
+  content, "soft telecined", but the 30000/1001 fps parts could be
+  either hard-telecined 24000/1001 fps content or 60000/1001 fields per second NTSC video.
   Use the same guidelines as the following two cases to determine
   which.
 </para></listitem>
 <listitem><para>
   If <application>MPlayer</application> never shows the framerate
   changing, and every single frame with motion appears combed, your
-  movie is NTSC video at 59.94 fields per second.
+  movie is NTSC video at 60000/1001 fields per second.
 </para></listitem>
 <listitem><para>
   If <application>MPlayer</application> never shows the framerate
   changing, and two frames out of every five appear combed, your
-  movie is "hard telecined" 24fps content.
+  movie is "hard telecined" 24000/1001fps content.
 </para></listitem>
 </itemizedlist>
 
@@ -1610,8 +1610,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   deinterlace or not.
   While deinterlacing will make your movie usable on progressive
   scan displays such a computer monitors and projectors, it comes
-  at a cost: The fieldrate of 50 or 59.94 fields per second
-  is halved to 25 or 29.97 frames per second, and roughly half of
+  at a cost: The fieldrate of 50 or 60000/1001 fields per second
+  is halved to 25 or 30000/1001 frames per second, and roughly half of
   the information in your movie will be lost during scenes with
   significant motion.
 </para>
@@ -1622,7 +1622,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   You can always deinterlace the movie at playback time when
   displaying it on progressive scan devices, and future players will
   be able to deinterlace to full fieldrate, interpolating 50 or
-  59.94 entire frames per second from the interlaced video.
+  60000/1001 entire frames per second from the interlaced video.
 </para>
 
 <para>
