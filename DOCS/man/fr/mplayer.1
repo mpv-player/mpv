@@ -1,4 +1,4 @@
-.\" synced with 1.970
+.\" synced with 1.971
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -3932,13 +3932,13 @@ Paires de nombres entre 0 and 5 définissant où router chaque canal.
 .I EXEMPLE\ :
 .RE
 .RSs
-.IPs "mplayer -af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
+.IPs "mplayer \-af channels=4:4:0:1:1:0:2:2:3:3 media.avi"
 Changera le nombre de canaux à 4 et défini 4 routes qui
 échangent le canal 0 et le canal 1 et laisse le canal 2 et 3 intact.
 Veuillez noter que si un média contenant deux canaux était joué, les
 canaux 2 et 3 contiendraient uniquement du silence, mais 0 et 1 seraient
 quand même échangés.
-.IPs "mplayer -af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
+.IPs "mplayer \-af channels=6:4:0:0:0:1:0:2:0:3 media.avi"
 Changerait le nombre de canaux à 6 et construit 4 routes copiant
 les canaux 0 vers les canaux 0 et 3
 Les canaux 4 et 5 contiendront du silence.
@@ -8443,7 +8443,7 @@ capture les mouvements d'une trame à la suivante avec une précision d'un pixel)
 sur tous les types de macro-blocs candidats.
 Sélectionne ensuite le meilleur type.
 Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
-ce type. (rapide)
+ce type (le plus rapide).
 .br
 2: Comme 1, mais affine au quart de pixel (un peu plus lent).
 .br
