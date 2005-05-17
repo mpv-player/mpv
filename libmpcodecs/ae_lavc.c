@@ -76,8 +76,7 @@ static int bind_lavc(audio_encoder_t *encoder, muxer_stream_t *mux_a)
 			mux_a->wf->wBitsPerSample = 0; /* Unknown */
 			if (lavc_actx->extradata && (lavc_actx->extradata_size > 0))
 			{
-				memcpy(mux_a->wf+sizeof(WAVEFORMATEX), lavc_actx->extradata,
-					lavc_actx->extradata_size);
+				memcpy(mux_a->wf+1, lavc_actx->extradata, lavc_actx->extradata_size);
 				mux_a->wf->cbSize = lavc_actx->extradata_size;
 			}
 			else
