@@ -172,6 +172,18 @@ static void fix_parameters(muxer_stream_t *stream)
 			ctx->frame_size, stream->h.dwScale, ctx->sample_rate, stream->h.dwRate,
 			ctx->block_align, stream->wf->nBlockAlign, stream->wf->nAvgBytesPerSec);
 		ctx->block_align = stream->wf->nBlockAlign;
+		if(stream->wf+1 && stream->wf->cbSize)
+		{
+			ctx->extradata = av_malloc(stream->wf->cbSize);
+			if(ctx->extradata != NULL)
+			{
+				ctx->extradata_size = stream->wf->cbSize;
+				memcpy(ctx->extradata, stream->wf+1, ctx->extradata_size);
+			}
+			else
+				mp_msg(MSGT_MUXER, MSGL_ERR, "MUXER_LAVF(audio stream) error! couldn't allocate %d bytes for extradata\n",
+					stream->wf->cbSize);
+		}
 	}
 	else if(stream->type == MUXER_TYPE_VIDEO)
 	{
@@ -187,6 +199,18 @@ static void fix_parameters(muxer_stream_t *stream)
 		ctx->frame_rate = stream->h.dwRate;
 		ctx->frame_rate_base = stream->h.dwScale;
 #endif
+		if(stream->bih+1 && (stream->bih->biSize > sizeof(BITMAPINFOHEADER)))
+		{
+			ctx->extradata = av_malloc(stream->bih->biSize - sizeof(BITMAPINFOHEADER));
+			if(ctx->extradata != NULL)
+			{
+				ctx->extradata_size = stream->bih->biSize - sizeof(BITMAPINFOHEADER);
+				memcpy(ctx->extradata, stream->bih+1, ctx->extradata_size);
+			}
+			else
+				mp_msg(MSGT_MUXER, MSGL_ERR, "MUXER_LAVF(video stream) error! couldn't allocate %d bytes for extradata\n",
+					stream->bih->biSize - sizeof(BITMAPINFOHEADER));
+		}
 	}
 }
 
