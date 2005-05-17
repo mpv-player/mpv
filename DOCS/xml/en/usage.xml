@@ -260,6 +260,25 @@ It's also recommended to enable <option>-cache</option> when playing
 from the network:
 <screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
+
+<sect2 id="streaming-save">
+<title>Saving streamed content</title>
+<para>
+  Once you succeed in making <application>MPlayer</application> play
+  your favorite internet radio station, you can use the option
+  <option>-dumpstream</option> to save the stream into a file.
+  For example:
+<screen>
+  mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>tsf-jazz.mp3</replaceable>
+</screen>
+  will save the content streamed from
+  <replaceable>http://217.71.208.37:8006</replaceable> into
+  <replaceable>tsf-jazz.mp3</replaceable>.
+  This also works with all protocols supported by
+  <application>MPlayer</application>, like MMS, RSTP, and so forth.
+</para>
+</sect2>
+
 </sect1>
 
 <sect1 id="mpst" xreflabel="Remote streams">
