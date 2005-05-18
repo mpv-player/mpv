@@ -76,6 +76,10 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
     png_uint_32     i;
     mp_image_t* mpi;
 
+    int cols;
+    png_colorp pal;
+    unsigned char *p;
+
     if(len<=0) return NULL; // skipped frame
     
  png=png_create_read_struct( PNG_LIBPNG_VER_STRING,NULL,NULL,NULL );
@@ -88,7 +92,6 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  png_set_sig_bytes( png,8 );
  png_read_info( png,info );
  png_get_IHDR( png,info,&png_width,&png_height,&depth,&color,NULL,NULL,NULL );
-
  png_set_bgr( png );
 
  switch( info->color_type ) {
@@ -96,6 +99,8 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
       mp_msg( MSGT_DECVIDEO,MSGL_INFO,"Sorry gray scaled png with alpha channel not supported at moment.\n" );
       break;
    case PNG_COLOR_TYPE_GRAY:
+      out_fmt=IMGFMT_Y800;
+      break;
    case PNG_COLOR_TYPE_PALETTE:
       out_fmt=IMGFMT_BGR8;
       break;
@@ -137,8 +142,18 @@ static mp_image_t* decode(sh_video_t *sh,void* data,int len,int flags){
  for ( i=0; i < png_height; i++ ) row_p[i]=mpi->planes[0] + mpi->stride[0]*i;
  png_read_image( png,row_p );
  free( row_p );
- 
- //png_get_PLTE( png,info,(png_colorp*)&pal,&cols );
+
+ if (out_fmt==IMGFMT_BGR8) {
+     png_get_PLTE( png,info,&pal,&cols );
+     mpi->planes[1] = (char*)realloc(mpi->planes[1], 4*cols);
+     p = mpi->planes[1];
+     for (i = 0; i < cols; i++) {
+	 *p++ = pal[i].blue;
+	 *p++ = pal[i].green;
+	 *p++ = pal[i].red;
+	 *p++ = 0;
+     }
+ }
  
  png_read_end( png,endinfo );
  png_destroy_read_struct( &png,&info,&endinfo );
