@@ -12,16 +12,23 @@ MPlayer (1.0)
     * Fraps video decoder via binary DLL
     * support for 8-bit PNGs with palette
 
+    Demuxers:
+    * simultaneous audio capture and playback in MPlayer
+      (-tv immediatemode=0) fixed in v4l2
+
     Streaming:
     * fix streaming of RealAudio files over HTTP
 
     FFmpeg/libavcodec:
-    * snow bug fixes and speedup
+    * Snow bug fixes and speedup
     * MPEG-1/2 decoder speedup
     * Indeo2 video decoder
+    * Fraps video decoder (v0 & v1)
+    * Vorbis audio decoder
     * RV20 fixes
+    * VP3 decoder fixes and speedup
     * countless bug fixes all over the place
-    * vstrict=-1 is default, snow, ffv1 etc. need vstrict=-2
+    * vstrict=-1 is default, Snow, ffv1 etc. need vstrict=-2
 
     MEncoder:
     * audio encoding modularized
@@ -31,12 +38,13 @@ MPlayer (1.0)
     Ports:
     * improved timer function on Mac OS X
     * New Mac OS X "macosx" video output driver. Supported on OS X 10.4
-      and 10.3 with Quicktime 7 (requires QuickTime 7 SDK to build on 10.3)
+      and 10.3 with QuickTime 7 (requires QuickTime 7 SDK to build on 10.3)
     * Mac OS X 10.4 (Tiger) fixes
 
-    Demuxers:
-    * simultaneous audio capture and playback in mplayer
-      (-tv immediatemode=0) fixed in v4l2
+    Others:
+    * enabled hinting for TrueType fonts
+    * support for file:// syntax
+
 
 
   pre7: "PatentCounter" April 16, 2005
@@ -54,7 +62,7 @@ MPlayer (1.0)
     * audio filter documentation moved to the man page and updated
     * all audio filters documented
     * improved encoding guide
-    * preliminary documentation for snow codec in DOCS/tech/snow.txt
+    * preliminary documentation for Snow codec in DOCS/tech/snow.txt
     * misc updates and fixes all over the place
 
     Ports:
@@ -138,8 +146,8 @@ MPlayer (1.0)
     * shorten audio decoder and demuxer
     * AASC video decoder
     * AMR NB/WB support via external reference decoders
-    * significantly faster snow decoding
-    * experimental ratecontrol for snow
+    * significantly faster Snow decoding
+    * experimental ratecontrol for Snow
     * countless bug fixes all over the place
 
     GUI:
@@ -253,7 +261,7 @@ MPlayer (1.0)
     * H.261 video codec support via libavcodec
     * TechSmith Camtasia video codec support via libavcodec
     * sonic audio codec support via libavcodec
-    * snow video codec support via libavcodec
+    * Snow video codec support via libavcodec
     * QuickDraw video support via libavcodec
     * Cinepak, CYUV and RoQ audio/video moved to FFmpeg
     * Vianet Lsvx video support via binary DLL
@@ -281,7 +289,7 @@ MPlayer (1.0)
 
     FFmpeg/libavcodec:
     * reduced resolution decoding with the lowres option
-    * new experimental wavelet-based snow video codec
+    * new experimental wavelet-based Snow video codec
     * new sonic audio codec
     * TechSmith Camtasia video decoder
     * IBM Ultimotion video decoder
@@ -324,7 +332,7 @@ MPlayer (1.0)
     * NSV demuxer
     * DVD compatible MPEG muxer
     * MJPEG-B fixes
-    * range coder (arithmetic entropy coder) used by snow and ffv1
+    * range coder (arithmetic entropy coder) used by Snow and ffv1
     * ffv1 enhancements: signed golomb, range codes
     * multi slice support for main profile H.264 streams
     * as usual, lots of bug fixes and optimizations
