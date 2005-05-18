@@ -172,6 +172,7 @@ static char help_text[]=
 #define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
 #define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
 #define MSGTR_AnsPercentPos "ANS_PERCENT_POSITION=%ld\n"
+#define MSGTR_AnsTimePos "ANS_TIME_POSITION=%.1f\n"
 #define MSGTR_DvdnavNullEvent "DVDNAV Event NULL?!\n"
 #define MSGTR_DvdnavHighlightEventBroken "DVDNAV Event: Highlight event broken\n"
 #define MSGTR_DvdnavEvent "DVDNAV Event: %s\n"

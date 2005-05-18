@@ -81,6 +81,7 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_SELECT, "sub_select", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } },
   { MP_CMD_SUB_LOG, "sub_log", 0, { {-1,{0}} } },
   { MP_CMD_GET_PERCENT_POS, "get_percent_pos", 0, { {-1,{0}} } },
+  { MP_CMD_GET_TIME_POS, "get_time_pos", 0, { {-1,{0}} } },
   { MP_CMD_GET_TIME_LENGTH, "get_time_length", 0, { {-1,{0}} } },
   { MP_CMD_SWITCH_AUDIO, "switch_audio", 0, { { MP_CMD_ARG_INT,{-1} }, {-1,{0}} } },
 #ifdef USE_TV

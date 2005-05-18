@@ -3503,6 +3503,15 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
     case MP_CMD_GET_PERCENT_POS : {
 	mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsPercentPos, demuxer_get_percent_pos(demuxer));
     } break;
+    case MP_CMD_GET_TIME_POS : {
+      float pos = 0;
+      if (sh_video)
+        pos = sh_video->pts;
+      else
+      if (sh_audio && audio_out)
+        pos = sh_audio->delay - audio_out->get_delay() * playback_speed;
+      mp_msg(MSGT_GLOBAL, MSGL_INFO, MSGTR_AnsTimePos, pos);
+    } break;
     case MP_CMD_SWITCH_AUDIO : {
         int v = demuxer_switch_audio(demuxer, cmd->args[0].v.i);
         if (identify)

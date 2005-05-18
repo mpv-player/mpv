@@ -132,6 +132,9 @@ vobsub_lang
 get_percent_pos
     Print out the current position in the file, as integer percentage [0-100).
 
+get_time_pos
+    Print out the current position in the file in seconds, as float.
+
 get_time_length
     Print out the length of the current file in seconds.
 
