@@ -4156,8 +4156,9 @@ Memory-mapped-Bereiche enhalten einen Header:
 .nf
 int nch                     /*Anzahl der Kanäle*/
 int size                    /*Größe des Buffers*/
-unsigned long long counter  /*Wird benutzt, um Synchronisation zu wahren; wird
-                  jedes mal, wenn neue Daten exportiert werden, aktualisiert.*/
+unsigned long long counter  /*Wird benutzt, um Synchronisation zu
+                              wahren und aktualisiert, wenn neue
+                              Daten exportiert werden.*/
 .fi
 .sp 1
 Der Rest sind (nicht-interleaved) 16-bit-Daten über die Auslastung.
