@@ -72,6 +72,8 @@
 
 #include "osdep/timer.h"
 
+#include "get_path.c"
+
 #ifdef USE_LIBAVCODEC
 #ifdef USE_LIBAVCODEC_SO
 #include <ffmpeg/avcodec.h>
@@ -229,8 +231,6 @@ static off_t seek_to_byte=0;
 static void parse_end_at();
 static char * end_at_string=0;
 //static uint8_t* flip_upside_down(uint8_t* dst, const uint8_t* src, int width, int height);
-
-#include "get_path.c"
 
 #ifdef USE_EDL
 #include "edl.h"
