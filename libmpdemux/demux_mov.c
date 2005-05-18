@@ -37,6 +37,8 @@
 
 #ifdef MACOSX
 #include <QuickTime/QuickTime.h>
+#include <QuickTime/ImageCompression.h>
+#include <QuickTime/ImageCodec.h>
 #else
 #include "../loader/qtx/qtxsdk/components.h"
 #endif
