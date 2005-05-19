@@ -5,7 +5,6 @@
 
 #include <libsmbclient.h>
 #include <unistd.h>
-#include <stdio.h>
 
 #include "mp_msg.h"
 #include "stream.h"
