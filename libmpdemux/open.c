@@ -34,45 +34,6 @@ static URL_t* url;
 int vcd_track=0;
 char* cdrom_device=NULL;
 
-
-// Define function about auth the libsmbclient library
-// FIXME: I really do not not is this function is properly working
-
-#ifdef LIBSMBCLIENT
-
-#include "libsmbclient.h"
-
-static char smb_password[15];
-static char smb_username[15];
-
-static void smb_auth_fn(const char *server, const char *share,
-             char *workgroup, int wgmaxlen, char *username, int unmaxlen,
-	     char *password, int pwmaxlen)
-{
-  char temp[128];
-  
-  strcpy(temp, "LAN");				  
-  if (temp[strlen(temp) - 1] == 0x0a)
-    temp[strlen(temp) - 1] = 0x00;
-					
-  if (temp[0]) strncpy(workgroup, temp, wgmaxlen - 1);
-					   
-  strcpy(temp, smb_username); 
-  if (temp[strlen(temp) - 1] == 0x0a)
-    temp[strlen(temp) - 1] = 0x00;
-						    
-  if (temp[0]) strncpy(username, temp, unmaxlen - 1);
-						      
-  strcpy(temp, smb_password); 
-  if (temp[strlen(temp) - 1] == 0x0a)
-    temp[strlen(temp) - 1] = 0x00;
-								
-   if (temp[0]) strncpy(password, temp, pwmaxlen - 1);
-}
-								  
-
-#endif
-
 // Open a new stream  (stdin/file/vcd/url)
 
 stream_t* open_stream(char* filename,char** options, int* file_format){
@@ -122,50 +83,12 @@ if(!filename) {
     strncmp("cdda://", filename, 7) && strncmp("cddb://", filename, 7) &&
     strncmp("mpst://", filename, 7) && strncmp("tivo://", filename, 7) &&
     strncmp("file://", filename, 7) && strncmp("cue://", filename, 6) &&
-    strncmp("ftp://", filename, 6) &&
+    strncmp("ftp://", filename, 6) && strncmp("smb://", filename, 6) && 
     strncmp("dvd://", filename, 6) && strncmp("dvdnav://", filename, 9) &&
     strstr(filename, "://")) {
      url = url_new(filename);
     }
   if(url) {
-	if (strcmp(url->protocol, "smb")==0){
-#ifdef LIBSMBCLIENT
-	    
-	    // we need init of libsmbclient
-            int err;
-	    
-	    // FIXME: HACK: make the username/password global varaibles
-	    // so the auth_fn function should grab it ...
-	    // i cannot thing other way...
-	    err = smbc_init(smb_auth_fn, 10);  	/* Initialize things */
-	                        	        // libsmbclient using				
-	    if (err < 0) {
-        	mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBInitError,err);
-	    	return NULL;
-	    }
-	    f=smbc_open(filename, O_RDONLY, 0666);    
-	    
-	    // cannot open the file, outputs that
-	    // MSGTR_FileNotFound -> MSGTR_SMBFileNotFound
-    	    if(f<0){ 
-		mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBFileNotFound,filename);
-		return NULL; 
-	    }
-	    len=smbc_lseek(f,0,SEEK_END); 
-	    smbc_lseek(f,0,SEEK_SET);
-	    // FIXME: I really wonder is such situation -> but who cares ;)
-//	    if (len == -1)	
-//    		   return new_stream(f,STREAMTYPE_STREAM); // open as stream
-	    url_free(url);
-	    url = NULL;
-            stream=new_stream(f,STREAMTYPE_SMB);
-    	    stream->end_pos=len;
-	    return stream;
-#else
-	    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_SMBNotCompiled);
-	    return NULL;
-#endif
-	}
         stream=new_stream(f,STREAMTYPE_STREAM);
 	if( streaming_start( stream, file_format, url )<0){
           mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_UnableOpenURL, filename);

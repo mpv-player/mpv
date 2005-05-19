@@ -37,10 +37,6 @@ void cache_uninit(stream_t *s); // defined in cache2.c
 
 //#include "vcd_read_bincue.h"
 
-#ifdef LIBSMBCLIENT
-#include "libsmbclient.h"
-#endif
-
 #ifdef HAVE_VCD
 extern stream_info_t stream_info_vcd;
 #endif
@@ -61,6 +57,9 @@ extern stream_info_t stream_info_vstream;
 #endif
 #ifdef USE_DVDNAV
 extern stream_info_t stream_info_dvdnav;
+#endif
+#ifdef LIBSMBCLIENT
+extern stream_info_t stream_info_smb;
 #endif
 
 extern stream_info_t stream_info_cue;
@@ -86,6 +85,9 @@ stream_info_t* auto_open_streams[] = {
 #endif
 #ifdef HAVE_VSTREAM
   &stream_info_vstream,
+#endif
+#ifdef LIBSMBCLIENT
+  &stream_info_smb,
 #endif
   &stream_info_cue,
   &stream_info_dvd,
@@ -191,11 +193,6 @@ int stream_fill_buffer(stream_t *s){
   int len;
   if (/*s->fd == NULL ||*/ s->eof) { s->buf_pos = s->buf_len = 0; return 0; }
   switch(s->type){
-#ifdef LIBSMBCLIENT
-  case STREAMTYPE_SMB:
-    len=smbc_read(s->fd,s->buffer,STREAM_BUFFER_SIZE);
-    break;
-#endif    
   case STREAMTYPE_STREAM:
 #ifdef MPLAYER_NETWORK
     if( s->streaming_ctrl!=NULL ) {
@@ -230,7 +227,6 @@ off_t newpos=0;
   s->buf_pos=s->buf_len=0;
 
   switch(s->type){
-  case STREAMTYPE_SMB:
   case STREAMTYPE_STREAM:
 #ifdef _LARGEFILE_SOURCE
     newpos=pos&(~((long long)STREAM_BUFFER_SIZE-1));break;
@@ -264,12 +260,6 @@ if(verbose>=3){
 
 if(newpos==0 || newpos!=s->pos){
   switch(s->type){
-#ifdef LIBSMBCLIENT
-  case STREAMTYPE_SMB:
-    s->pos=newpos; // real seek
-    if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
-    break;
-#endif
   case STREAMTYPE_STREAM:
     //s->pos=newpos; // real seek
     // Some streaming protocol allow to seek backward and forward
@@ -386,15 +376,7 @@ void free_stream(stream_t *s){
     cache_uninit(s);
   }
 #endif
-  switch(s->type) {
-#ifdef LIBSMBCLIENT
-  case STREAMTYPE_SMB:
-    smbc_close(s->fd);
-    break;    
-#endif
-  default:
-    if(s->close) s->close(s);
-  }
+  if(s->close) s->close(s);
   if(s->fd>0){
     /* on unix we define closesocket to close
        on windows however we have to distinguish between
