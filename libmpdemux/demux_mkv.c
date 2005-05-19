@@ -458,6 +458,7 @@ free_cached_dps (demuxer_t *demuxer)
       track->cached_dps = NULL;
       track->num_cached_dps = 0;
       track->num_allocated_dps = 0;
+      track->max_pts = 0;
     }
 }
 
