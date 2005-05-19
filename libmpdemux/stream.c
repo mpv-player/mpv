@@ -37,12 +37,6 @@ void cache_uninit(stream_t *s); // defined in cache2.c
 
 //#include "vcd_read_bincue.h"
 
-#ifdef USE_DVDREAD
-int dvd_read_sector(dvd_priv_t *d,unsigned char* data);
-void dvd_seek(dvd_priv_t *d,int pos);
-void dvd_close(dvd_priv_t *d);
-#endif
-
 #ifdef LIBSMBCLIENT
 #include "libsmbclient.h"
 #endif
@@ -65,10 +59,14 @@ extern stream_info_t stream_info_ftp;
 #ifdef HAVE_VSTREAM
 extern stream_info_t stream_info_vstream;
 #endif
+#ifdef USE_DVDNAV
+extern stream_info_t stream_info_dvdnav;
+#endif
 
 extern stream_info_t stream_info_cue;
 extern stream_info_t stream_info_null;
 extern stream_info_t stream_info_file;
+extern stream_info_t stream_info_dvd;
 
 stream_info_t* auto_open_streams[] = {
 #ifdef HAVE_VCD
@@ -90,6 +88,11 @@ stream_info_t* auto_open_streams[] = {
   &stream_info_vstream,
 #endif
   &stream_info_cue,
+  &stream_info_dvd,
+#ifdef USE_DVDNAV
+  &stream_info_dvdnav;
+#endif
+
   &stream_info_null,
   &stream_info_file,
   NULL
@@ -203,23 +206,6 @@ int stream_fill_buffer(stream_t *s){
 #else
     len=read(s->fd,s->buffer,STREAM_BUFFER_SIZE);break;
 #endif
-#ifdef USE_DVDNAV
-  case STREAMTYPE_DVDNAV: {
-    dvdnav_stream_read((dvdnav_priv_t*)s->priv,s->buffer,&len);
-    if (len==0) return 0; // this was an event, so repeat the read
-    break;
-  }
-#endif
-#ifdef USE_DVDREAD
-  case STREAMTYPE_DVD: {
-    off_t pos=dvd_read_sector(s->priv,s->buffer);
-    if(pos>=0){
-	len=2048; // full sector
-	s->pos=2048*pos-len;
-    } else len=-1; // error
-    break;
-  }
-#endif
   case STREAMTYPE_DS:
     len = demux_read_data((demux_stream_t*)s->priv,s->buffer,STREAM_BUFFER_SIZE);
     break;
@@ -251,8 +237,6 @@ off_t newpos=0;
 #else
     newpos=pos&(~(STREAM_BUFFER_SIZE-1));break;
 #endif
-  case STREAMTYPE_DVD:
-    newpos=pos/2048; newpos*=2048; break;
   default:
     // Round on sector size
     if(s->sector_size)
@@ -276,7 +260,6 @@ if(verbose>=3){
     (unsigned int)s->pos,newpos,pos,s->buf_len);
 #endif
 }
-
   pos-=newpos;
 
 if(newpos==0 || newpos!=s->pos){
@@ -285,25 +268,6 @@ if(newpos==0 || newpos!=s->pos){
   case STREAMTYPE_SMB:
     s->pos=newpos; // real seek
     if(smbc_lseek(s->fd,s->pos,SEEK_SET)<0) s->eof=1;
-    break;
-#endif
-#ifdef USE_DVDNAV
-  case STREAMTYPE_DVDNAV: {
-    if (newpos==0) {
-      if (dvdnav_stream_reset((dvdnav_priv_t*)s->priv))
-        s->pos=0;
-    }
-    if(newpos!=s->pos){
-      mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek in DVDNAV streams yet!\n");
-      return 1;
-    }
-    break;
-  }
-#endif
-#ifdef USE_DVDREAD
-  case STREAMTYPE_DVD:
-    s->pos=newpos; // real seek
-    dvd_seek(s->priv,s->pos/2048);
     break;
 #endif
   case STREAMTYPE_STREAM:
@@ -427,11 +391,6 @@ void free_stream(stream_t *s){
   case STREAMTYPE_SMB:
     smbc_close(s->fd);
     break;    
-#endif
-
-#ifdef USE_DVDREAD
-  case STREAMTYPE_DVD:
-    dvd_close(s->priv);
 #endif
   default:
     if(s->close) s->close(s);

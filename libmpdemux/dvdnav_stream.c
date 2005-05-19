@@ -13,6 +13,28 @@
 #include "dvdnav_stream.h"
 #include "../libvo/video_out.h"
 #include "../spudec.h"
+#include "../m_option.h"
+#include "../m_struct.h"
+
+static struct stream_priv_s {
+  int track;
+  char* device;
+} stream_priv_dflts = {
+  1,
+  NULL
+};
+
+#define ST_OFF(f) M_ST_OFF(struct stream_priv_s,f)
+/// URL definition
+static m_option_t stream_opts_fields[] = {
+  { NULL, NULL, 0, 0, 0, 0,  NULL }
+};
+static struct m_struct_st stream_opts = {
+  "dvd",
+  sizeof(struct stream_priv_s),
+  &stream_priv_dflts,
+  stream_opts_fields
+};
 
 int dvd_nav_skip_opening=0;     /* skip opening stalls? */
 int osd_show_dvd_nav_delay=0;   /* count down for dvd nav text on OSD */
@@ -233,4 +255,57 @@ unsigned int * dvdnav_stream_get_palette(dvdnav_priv_t * dvdnav_priv) {
   return dvdnav_priv->dvdnav->vm->state.pgc->palette;
 }
   
+
+static int seek(stream_t *s, off_t newpos) {
+  if(newpos==0) {
+    if(dvdnav_stream_reset((dvdnav_priv_t*)s->priv))
+      s->pos=0;
+  }
+  if(newpos!=s->pos)
+    mp_msg(MSGT_STREAM,MSGL_INFO,"Cannot seek in DVDNAV streams yet!\n");
+
+  return 1;
+}
+
+static void stream_dvd_close(stream_t *s) {
+  dvd_close(s->priv);
+}
+
+static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
+  struct stream_priv_s* p = (struct stream_priv_s*)opts;
+  char *filename, *name;
+  int event,len,tmplen=0;
+  dvdnav_priv_t *dvdnav_priv;
+
+  mp_msg(MSGT_OPEN,MSGL_INFO,"URL: %s\n", filename);
+  filename = strdup(stream->url);
+  name = (filename[9] == '\0') ? NULL : filename + 9;
+  if(!name) name=DEFAULT_DVD_DEVICE;
+  if(!(dvdnav_priv=new_dvdnav_stream(name))) {
+    mp_msg(MSGT_OPEN,MSGL_ERR,MSGTR_CantOpenDVD,name);
+    return STREAM_UNSUPORTED;
+  }
+
+  stream->sector_size = 2048;
+  stream->flags = STREAM_READ | STREAM_SEEK;
+  stream->fill_buffer = fill_buffer;
+  stream->seek = seek;
+  stream->close = stream_dvd_close;
+  stream->type = STREAMTYPE_DVDNAV;
+  stream->priv=(void*)dvdnav_priv;
+
+  return STREAM_OK;
+}
+
+stream_info_t stream_info_dvdnav = {
+  "DVDNAV stream",
+  "null",
+  "",
+  "",
+  open_s,
+  { "dvdnav", NULL },
+  &stream_opts,
+  1 // Urls are an option string
+};
+
 #endif /* USE_DVDNAV */
