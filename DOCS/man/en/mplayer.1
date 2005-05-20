@@ -5696,7 +5696,8 @@ syntax:
 .B \-<codec>opts <option1[=value],option2,...>
 .
 .PP
-Where <codec> may be: lavc, xvidenc, divx4, lame, toolame, twolame, faac, x264enc, mpeg.
+Where <codec> may be: lavc, xvidenc, divx4, lame, toolame, twolame,
+nuv, vfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -8182,6 +8183,13 @@ to make it look like encoded at 30000/1001 or 30 fps; it only works with MPEG-2
 video when the output framerate, eventually converted with \-ofps, is either 
 24000/1001 or 24 fps.
 Any other framerate is incompatible with this option.
+.
+.
+.SS FFmpeg libavformat muxers (\-lavfopts)
+.
+.TP
+.B format=<container_format>
+Select which container format to mux into (no default).
 .
 .
 .\" --------------------------------------------------------------------------
