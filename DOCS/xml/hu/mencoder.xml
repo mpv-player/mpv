@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.61 -->
+<!-- synced to 1.69 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -361,8 +361,8 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout s
 <title>Francia felirat másolása egy MPEG fájlból</title>
 <screen>
 rm subtitles.idx subtitles.sub
-mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1<!--
---></screen>
+mencoder <replaceable>movie.mpg</replaceable> -ifo <replaceable>movie.ifo</replaceable> -vobsubout subtitles -vobsuboutindex 0 -vobsuboutid fr -sid 1 -nosound -ovc copy
+</screen>
 </example>
 
 </sect1>
@@ -514,13 +514,251 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   hozzon.
 </para>
 
-<sect2 id="menc-feat-dvd-mpeg4-2pass">
-<title>Konstant kvantálás vs. két menet</title>
+<sect2 id="menc-feat-dvd-mpeg4-preparing-encode">
+<title>Felkészülés a kódolásra: A forrás anyag és frameráta azonosítása</title>
+<para>
+  Mielőtt eszedbe jutna bármiféle film átkódolása, meg kell tenned
+  pár előkészületi lépést.
+</para>
 
 <para>
-  Három féle megközelítése van egy videó kódolásának: konstans bitráta (CBR),
-  konstans kvantálás, és két lépéses kódolás (ABR vagy átlagos bitráta).
+  Az első és legfontosabb lépés a kódolás előtt annak megállapítása,
+  hogy miféle anyaggal van egyáltalán dolgod.
+  Ha a forrás anyagod DVD-ről származik vagy sugárzott/kábeles/műholdas
+  TV, a következő két formátum valamelyikében tárolódik: NTSC Észak
+  Amerikában és Japánban, PAL Európában.
+  Fontos tudatosítani, hogy ez csak a televízión történő megjelenítés
+  formátuma és gyakran <emphasis role="bold">nincs</emphasis>
+  összhangban a film eredeti formátumával.
+  Ahhoz, hogy megfelelő legyen a kódolás, ismerned kell az eredeti
+  formátumot.
+  Ennek elmulasztása esetén csúnya törési (átlapolás) mellékhatások
+  lesznek a kódolásodban.
+  Mindamellett, hogy csúnya, a mellékhatások rontják a kódolási
+  hatékonyságot is: rosszabb minőség per bitráta arányt kapsz.
 </para>
+
+<sect3 id="menc-feat-dvd-mpeg4-preparing-encode-fps">
+<title>A forrás framerátájának azonosítása</title>
+<para>
+  Itt van egy lista a forrás anyagok által általában használt típusokról,
+  ebben valószínűleg megtalálod a tiédet és annak jellemzőit:
+</para>
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Szabványos film</emphasis>: Moziban történő
+  vetítéshez rögzítették 24 fps-sel.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">PAL videó</emphasis>: PAL videókamerával
+  rögzítették 50 mező per másodperc sebességgel.
+  Egy mező csak a képkocka páros vagy páratlan sorszámú sorait
+  tartalmazza.
+  A televíziót úgy tervezték meg, hogy ilyen arányban frissítsen,
+  az analóg tömörítés egy olcsó formájaként.
+  Az emberi szemnek ezt kompenzálnia kellene, de ha egyszer megérted
+  az átlapolást, meg fogod látni a TV-n és soha többé nem fogod
+  élvezni a TV adást.
+  Két mező még <emphasis role="bold">nem</emphasis> alkot egy
+  teljes képkockát, mert 1/50 másodpercnyire vannak egymástól időben
+  és így csak mozgásnál igazodnak össze.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">NTSC Videó</emphasis>: NTSC kamerával felvett,
+  60000/1001 mező per másodperc vagy a színek előtti időben 60 mező per
+  másodperc sebességű film. Egyébként hasonló a PAL-hoz.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Animáció</emphasis>: Általában 24fps-sel
+  rajzolják, de található kevert-framerátás változat is.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Számítógépes grafika (CG)</emphasis>: Bármilyen
+  framerátával mehet, de van pár, ami gyakoribb a többinél; 24 és
+  30 képkocka per másodpercesek a tipikusak NTSC-nél és 25fps PAL-nál.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Régi film</emphasis>: Különböző alacsony
+  frameráták.
+</para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3 id="menc-feat-dvd-mpeg4-preparing-encode-material">
+<title>A forrásanyag beazonosítása</title>
+<para>
+  A képkockákból álló filmekre progresszívként szoktak hivatkozni,
+  míg az egymástól független mezőkből állóakra vagy átlapoltként
+  vagy videóként - bár ez utóbbi félreérthető.
+</para>
+<para>
+  További bonyolításként néhány film a fenti kettő keveréke.
+</para>
+<para>
+  A legfontosabb különbség, amit észre kell venni a két formátum
+  között, hogy van, amelyik képkocka-alapú míg mások mező alapúak.
+  <emphasis role="bold">Bármikor</emphasis>, ha egy filmet televíziós
+  megjelenítésre készítenek elő (beleértve a DVD-t is), átkonvertálják
+  mező-alapú formába.
+  A különböző módszereket, amikkel ez végrehajtható, gyűjtőnéven
+  "pulldown"-nak hívjuk, ennek egyik változata a hírhedt NTSC-s
+  "3:2 telecine".
+  Hacsak nem volt az eredeti anyag is mező-alapú (és megegyező
+  mező rátájú), más formátumbú lesz a filmed, mint az eredeti.
+</para>
+
+<itemizedlist>
+<title>Számos általános típusa van a pulldown-nak:</title>
+<listitem><para>
+  <emphasis role="bold">PAL 2:2 pulldown</emphasis>: Az összes közül a
+  legjobb.
+  Minden képkocka két mező idejéig látszódik, úgy, hogy a páros és páratlan
+  sorokat kinyeri belőlük és váltakozva mutatja őket.
+  Ha az eredeti anyag 24fps-es, ez az eljárás felgyorsítja a filmet
+  4%-kal.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">PAL 2:2:2:2:2:2:2:2:2:2:2:3 pulldown</emphasis>:
+  Minden 12. kockát három mező hosszan mutat kettő helyett.
+  Ezzel elkerüli a 4%-os gyorsulást, de sokkal nehezebben megfordíthatóvá
+  teszi a folyamatot.
+  Általában musical készítésénél használják, ahol a 4%-os sebességmódosulás
+  komolyan rontaná a zenei jelet.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">NTSC 3:2 telecine</emphasis>: A kockák
+  felváltva 3 vagy 2 mezőnyi ideig látszódnak. Ezáltal a mező ráta
+  2.5-szöröse lesz az eredeti framerátának.
+  Az eredmény nagyon kis mértékben lelassul, 60 mező per másodpercről
+  59.94 mező per másodpercre, az NTSC mező ráta megtartása miatt.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">NTSC 2:2 pulldown</emphasis>: A 30fps-es
+  anyagok NTSC-n történő megjelenítéséhez használják.
+  Szép, csakúgy, mint a 2:2 PAL pulldown.
+</para></listitem>
+</itemizedlist>
+
+<para>
+  Vannak még egyéb módszerek az NTSC és a PAL videó közötti konvertáláshoz,
+  de ez a téma meghaladja ezen leírás célkitűzéseit.
+  Ha ilyen filmbe futsz bele és el szeretnéd kódolni, a legjobb, ha
+  keresel egy másolatot az eredeti formátumban.
+  A két formátum közötti konvertálás nagyon romboló hatású és nem
+  lehet teljesen visszafordítani, így a kódolt adatod nagyon
+  megszenvedi, ha már konvertált forrásból készül.
+</para>
+<para>
+  Ha a videó DVD-n van, az egymást követő mezők képkockává
+  csoportosíthatóak, még akkor is, ha nem egyidejű megjelenítésre
+  tervezték őket.
+  A DVD-n és digitális TV-n használt MPEG-2 szabvány lehetőséget nyújt
+  mind az eredeti progresszív kockák elkódolására, mind pedig arra, hogy
+  azon mezők számát, amelyhez egy képkockát meg kell jeleníteni, az
+  adott képkocka fejlécében tárolhassuk.
+  Ha ezt a módszert használják, a filmet gyakran "soft-telecined"-ként
+  jellemzik, mert ez az eljárás csak utasítja a DVD lejátszót a pulldown
+  alkalmazására a film tényleges megváltoztatása helyett.
+  Ez a lehetőség nagyon preferált, mert könnyen visszafordítható
+  (tulajdonképpen kihagyható) a kódoló által és megtartja a maximális
+  minőséget.
+  Bár sok DVD és műsorszóró stúdió nem használ megfelelő kódolási
+  technikát, hanem inkább "hard telecine"-es filmeket alkalmaznak,
+  ahol a mezők tulajdonképpen duplázva vannak az elkódolt MPEG-2-ben.
+</para>
+<para>
+  Az eljárás, ahogy ezeket az eseteket kezelni kell, később kerül leírásra
+  ebben az útmutatóban.
+  Most következzék pár tanács, amik segítségével eldöntheted, hogy milyen
+  anyaggal van dolgod:
+</para>
+
+<itemizedlist>
+<title>NTSC régiók:</title>
+<listitem><para>
+  Ha az <application>MPlayer</application> azt írja ki, hogy a frameráta
+  megváltozott 24000/1001-re a film nézése közben, és soha nem vált vissza,
+  akkor majdnem biztosan progresszív tartalomról van szó, amit "soft telecine"
+  eljárásnak vetettek alá.
+</para></listitem>
+<listitem><para>
+  Ha az <application>MPlayer</application> a frameráta oda-vissza
+  váltakozását mutatja 24000/1001 és 30000/1001 között és "hullámzást"
+  látsz ilyenkor, akkor több lehetőség is van.
+  A 24000/1001 fps-es részek majdnem biztosan progresszív
+  tartalmak, "soft telecine"-ltek, de a 30000/1001 fps-es részek
+  lehetnek vagy hard-telecine-lt 24000/1001 fps-esek vagy 60000/1001
+  mező per másodperces NTSC videók.
+  Kövesd a következő két esetben leírt irányelveket, hogy el tudd
+  dönteni, valójában melyik formátummal van dolgod.
+</para></listitem>
+<listitem><para>
+  Ha az <application>MPlayer</application> soha nem mutatja a frameráta
+  változást és minden egyes mozgást tartalmazó kocka hullámosnak tűnik,
+  akkor a filmed NTSC videó 60000/1001 mező per másodperc sebességgel.
+</para></listitem>
+<listitem><para>
+  Ha az <application>MPlayer</application> soha nem mutatja a frameráta
+  változást és minden ötből két kocka hullámosnak tűnik, akkor a filmed
+  "hard telecine"-s 24000/1001fps-es formátumú.
+</para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>PAL régiók:</title>
+<listitem><para>
+  Ha sosem látsz hullámzást, akkor a filmed 2:2 pulldown-os.
+</para></listitem>
+<listitem><para>
+  Ha hullámzást látsz váltakozóan ki-be minden fél másodpercben,
+  akkor a filmed 2:2:2:2:2:2:2:2:2:2:2:3 pulldown-os.
+</para></listitem>
+<listitem><para>
+  Ha mindig látsz hullámzást a mozgás közben, akkor a filmed PAL
+  videó 50 mező per másodperces sebességgel.
+</para></listitem>
+</itemizedlist>
+
+<note><title>Tanács:</title>
+<para>
+  Az <application>MPlayer</application> le tudja lassítani a lejátszást
+  a -speed kapcsolóval.
+  Próbáld meg használni a <option>-speed</option> 0.2-t, hogy nagyon lassan
+  nézhesd a filmet és azonosíthasd a mintákat, ha nem látod meg teljes
+  sebességnél.
+</para>
+</note>
+</sect3>
+</sect2>
+
+<sect2 id="menc-feat-dvd-mpeg4-2pass">
+<title>Konstant kvantálás vs. többmenetes kódolás</title>
+
+<para>
+  Nagyon sokféle minőségben tudod elkódolni a filmedet.
+  A modern videó kódolókkal és egy kis pre-codec tömörítéssel
+  (leméretezés és zajcsökkentés), lehetséges nagyon jó minőség elérése
+  700 MB-on, egy 90-110 perces szélesvásznú filmnél.
+  Továbbá minden, kivéve a leghosszabb filmeket, elkódolható majdnem
+  tökéletes minőséggel 1400 MB-ba.
+</para>
+
+<para>
+  Három féle megközelítése van egy videó kódolásának: konstans bitráta
+  (CBR), konstans kvantálás, és többmenetes (ABR vagy átlagos bitráta).
+</para>
+
+<note><title>Megjegyzés:</title>
+<para>
+  A legtöbb ABR kódolást támogató codec csak a két lépéses kódolást
+  támogatja, míg néhány másik, mint pl. az <systemitem class="library">x264</systemitem>
+  és a <systemitem class="library">libavcodec</systemitem> támogatják
+  a többmenetest, ami kissé javít a minőségen minden lépésben,
+  bár ez a javulás nem mérhető és nem is észrevehető a 4. lépés után.
+  Ezért, ebben a részben a két lépéses és a többmenetes felváltva
+  értelmezhető.
+</para>
+</note>
 
 <para>
   Ezen módok mindegyikében a <systemitem class="library">libavcodec</systemitem>
@@ -1336,6 +1574,60 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 </sect2>
 
+<sect2 id="menc-feat-dvd-mpeg4-encoding-interlaced">
+<title>Átlapolt videó elkódolása</title>
+
+<para>
+  Ha az általad elkódolni kívánt film átlapolt (NTSC videó vagy
+  PAL videó), el kell döntened, hogy akarsz-e deinterlacing-et
+  vagy sem.
+  A deinterlacing használhatóvá teszi a filmed progresszív scan-es
+  megjelenítőkön, mint pl. a számítógép monitorok vagy a projektorok,
+  van ára is: az 50 vagy 60000/1001-es mezőráta feleződik 25 vagy
+  30000/1001 képkocka per másodpercre és így a filmedben tárolt
+  információk durván fele elveszik a jelentős mozgást tartalmazó
+  részekben.
+</para>
+
+<para>
+  Így hát ha archiválási okokból jó minőség kell, akkor kerüld el a
+  deinterlace-t.
+  Bármikor deinterlace-lheted a filmet lejátszás közben is, ha
+  progresszív scan-es megjelenítőd van, valamint a jövő lejátszói
+  képesek lesznek teljes mezőrátával deinterlacing-elni, 50 vagy
+  60000/1001 teljes képkocka per másodpercre interpolálni az átlapolt
+  videóból.
+</para>
+
+<para>
+Fokozott figyelemmel kell eljárni, ha átlapolt videóval dolgozol:
+</para>
+
+<orderedlist>
+<listitem><para>
+  A vágási magasság és y-offszet 4 többszöröse kell, hogy legyen.
+</para></listitem>
+<listitem><para>
+  Bármilyen függőleges átméretezést átlapolt módban kell elvégezni.
+</para></listitem>
+<listitem><para>
+  Az utófeldolgozó és a zajcsökkentő szűrők nem az elvártnak megfelelően
+  működnek, ha nem gondoskodsz róla, hogy egyszerre csak egy mezővel
+  dolgozzanak, különben a nem megfelelő használat miatt sérülhet a videó.
+</para></listitem>
+</orderedlist>
+
+<para>
+Mindezt észben tartva, itt az első példánk:
+</para>
+<screen>
+  mencoder <replaceable>capture.avi</replaceable> -mc 0 -oac lavc -ovc lavc -lavcopts \
+  vcodec=mpeg2video:vbitrate=6000:ilmv:ildct:acodec=mp2:abitrate=224
+</screen>
+<para>
+Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
+</para>
+</sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-filtering">
 <title>Szűrés</title>
@@ -1979,7 +2271,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem><para>
   <emphasis role="bold">b_pyramid</emphasis>:
-  Jó ha engedélyezed ezt az opciót, ha >2 B-kockát használsz;
+  Jó ha engedélyezed ezt az opciót, ha >=2 B-kockát használsz;
   ahogy a man oldal is írja, egy kicsi minőségi javulást
   kapsz sebességcsökkenés nélkül.
   Jegyezd meg, hogy ezen videók nem olvashatóak a 2005.
