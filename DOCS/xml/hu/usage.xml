@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.25 -->
+<!-- synced with 1.27 -->
 <chapter id="usage">
 <title>Használat</title>
 
@@ -266,6 +266,30 @@ tudod használni:
 Tanácsos megadni a <option>-cache</option> kapcsolót, ha hálózatról játszol le:
 <screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
+
+<sect2 id="streaming-save">
+<title>Stream-elt tartalom lementése</title>
+<para>
+  Ha már sikerült az <application>MPlayer</application>rel lejátszani
+  a kedvenc internetes stream-edet, a <option>-dumpstream</option>
+  kapcsoló segítségével el is tudod menteni a folyamot egy fájlba.
+  Például:
+<screen>
+  mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>stream.asf</replaceable>
+</screen>
+  Ez el fogja menteni a
+  <replaceable>http://217.71.208.37:8006</replaceable> szerveren stream-elt
+  tartalmat a <replaceable>stream.asf</replaceable> fájlba.
+  Ez működik az <application>MPlayer</application> által támogatott
+  összes protokollal, mint MMS, RSTP és így tovább.
+  Ha csak audiót vagy videót akarsz lementeni, használd a megfelelő
+  <option>-dumpaudio</option> vagy <option>-dumpvideo</option> kapcsolót,
+  de figyelj rá, hogy az <application>MPlayer</application> a parancssorban
+  megadott összes <option>-dump*</option> kapcsolót figyelmen kívül hagyja
+  az utolsó kivételével.
+</para>
+</sect2>
+
 </sect1>
 
 <sect1 id="mpst" xreflabel="Remote streams">
