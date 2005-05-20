@@ -339,8 +339,8 @@ Passe Sättigung an.
 .RE
 .PD 1
 .PP
-(Die folgenden Tasten sind nur gültig bei Benutzung des
-Quartz-Videoausgabetreibers.)
+(Die folgenden Tasten sind nur gültig bei Benutzung der Videoausgabetreiber
+quartz und macosx.)
 .PP
 .PD 0
 .RSs
@@ -354,9 +354,6 @@ Quartz-Videoausgabetreibers.)
 Aktiviere/\:deaktiviere Vollbildwiedergabe (siehe auch \-fs).
 .IPs "Apfel + [ und Apfel + ]"
 Setze Alphawert des Abspielfensters.
-.IPs T\ \ \ \ 
-Ändere den Video-Layer: immer ganz oben/\:ganz unten/\:normal (siehe auch
-\-ontop).
 .RE
 .PD 1
 .
@@ -582,7 +579,7 @@ svga, x11, xmga, xv, xvidix und dfbmga.
 .TP
 .B \-framedrop (siehe auch \-hardframedrop)
 Verwirft einige Frames, ohne sie anzuzeigen, um auf langsamen Systemen
-die A/\:V-Syncronisation beizubehalten.
+die A/\:V-Synchronisation beizubehalten.
 Videofilter werden auf diese Frames nicht angewendet.
 B-Frames werden überhaupt nicht decodiert.
 .
@@ -1123,7 +1120,7 @@ Wenn der Dateityp (und damit der Demultiplexer) nicht zweifelsfrei
 festgestellt werden kann (z.B. wenn die Datei keinen Header besitzt
 oder dieser nicht zuverlässig genug ist), dann wird normalerweise ein
 Demultiplexer anhand der Dateiendung gewählt.
-Die inhaltsbasierende Demultiplexerauswahl wird bei Problemen immer
+Die inhaltsbasierte Demultiplexerauswahl wird bei Problemen immer
 vorgenommen.
 .
 .TP
