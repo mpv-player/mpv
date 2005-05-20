@@ -1234,26 +1234,7 @@ void window_ontop()
 	//Cycle between level
 	winLevel++;
 	if(winLevel>2)
-		winLevel = 0;
-		
-	//hide menu bar and mouse cursor if in fullscreen and quiting wallpaper mode
-	if(vo_fs)
-	{
-		if(winLevel != 0)
-		{
-			if(device_id == 0)
-			{
-				HideMenuBar();
-				HideCursor();
-			}
-		}
-		else
-		{
-			ShowMenuBar();
-			ShowCursor();
-		}
-	}
-
+		winLevel = 1;
 	}
 	SetWindowGroupLevel(winGroup, CGWindowLevelForKey(levelList[winLevel]));
 }
