@@ -666,9 +666,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   grouped as a frame, even though they are not intended to be shown
   at the same moment in time.
   The MPEG-2 standard used on DVD and digital TV provides a
-  way to both encode the original progressive frames and store in
-  the header of each frame the number of fields for which it should
-  be shown.
+  way both to encode the original progressive frames and to store
+  the number of fields for which a frame should be shown in the
+  header of that frame.
   If this method has been used, the movie will often be described
   as "soft-telecined", since the process only directs the
   DVD player to apply pulldown to the movie rather than altering
