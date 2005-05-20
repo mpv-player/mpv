@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.167 (2005. 03. 22.)
+// Sync'ed with help_mp-en.h 1.168 (2005. 05. 20.)
 
 // ========================= MPlayer help ===========================
 
@@ -171,6 +171,7 @@ static char help_text[]=
 #define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
 #define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
 #define MSGTR_AnsPercentPos "ANS_PERCENT_POSITION=%ld\n"
+#define MSGTR_AnsTimePos "ANS_TIME_POSITION=%.1f\n"
 #define MSGTR_DvdnavNullEvent "DVDNAV esemény NULL (NINCS)?!\n"
 #define MSGTR_DvdnavHighlightEventBroken "DVDNAV esemény: Kiemelés esemény hibás\n"
 #define MSGTR_DvdnavEvent "DVDNAV esemény: %s\n"
