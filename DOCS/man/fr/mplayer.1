@@ -1,4 +1,4 @@
-.\" synced with 1.972
+.\" synced with 1.974
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "18 Mai 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "21 Mai 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -5991,7 +5991,7 @@ la syntaxe ci-dessous\ :
 .
 .PP
 Où <codec> peut être: lavc, xvidenc, divx4, lame, toolame, twolame,
-faac, x264enc, mpeg.
+nuv, vfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -8601,6 +8601,16 @@ de trames par secondes, éventuellement obtenu à l'aide de l'option \-ofps
 est 24000/1001 ou bien 24 fps.
 Tout autre nombre de trames par seconde est incompatible avec cette
 option.
+.
+.
+.SS FFmpeg multiplexeurs de libavformat (\-lavfopts)
+.
+.TP
+.B format=<container_format>
+Défini le format de container vers lequel multiplexer le fichier de
+sortie (par de container par défaut, auto-détection d'après l'extension
+de fichier utilisée).
+
 .
 .
 .\" --------------------------------------------------------------------------
