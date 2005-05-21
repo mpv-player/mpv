@@ -185,7 +185,9 @@ m_option_t of_conf[]={
 	{"help", "\nAvailable output formats:\n"
 	"   avi      - Microsoft Audio/Video Interleaved\n"
 	"   mpeg     - MPEG-1/2 system stream format\n"
+#ifdef USE_LIBAVFORMAT
 	"   lavf     - FFmpeg libavformat muxers\n"
+#endif
 	"   rawvideo - (video only, one stream only) raw stream, no muxing\n"
 	"\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{NULL, NULL, 0, 0, 0, 0, NULL}
