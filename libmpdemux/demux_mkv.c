@@ -3305,6 +3305,8 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
           track = mkv_d->tracks[(idx+i)%num];
           if ((track->type == MATROSKA_TRACK_AUDIO) &&
               !strcmp(track->codec_id, otrack->codec_id) &&
+              (track->private_size == otrack->private_size) &&
+              !memcmp(track->private_data, otrack->private_data, track->private_size) &&
               (track->a_channels == otrack->a_channels) &&
               (track->a_bps == otrack->a_bps) &&
               (track->a_sfreq == otrack->a_sfreq)) {
@@ -3315,6 +3317,8 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
           track = demux_mkv_find_track_by_num (mkv_d, *((int*)arg), MATROSKA_TRACK_AUDIO);
           if (track == NULL ||
               strcmp (track->codec_id, otrack->codec_id) ||
+              (track->private_size != otrack->private_size) ||
+              memcmp(track->private_data, otrack->private_data, track->private_size) ||
               track->a_channels != otrack->a_channels ||
               track->a_bps != otrack->a_bps ||
               track->a_sfreq != otrack->a_sfreq)
