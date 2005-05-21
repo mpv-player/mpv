@@ -8,10 +8,18 @@
 //=============================================================================
 */
 
+#ifndef __af_config_h__
+#define __af_config_h__
+
 #include "../config.h" // WORDS_BIGENDIAN
+
+#ifndef MPLAYER_CONFIG_H
+#error Mandatory WORDS_BIGENDIAN does not contain 0 nor 1
+#endif
 
 // Number of channels
 #ifndef AF_NCH
 #define AF_NCH 6
 #endif
 
+#endif /* __af_config_h__ */
