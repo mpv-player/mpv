@@ -429,7 +429,7 @@ static int query_format(struct vf_instance_s* vf, unsigned int fmt){
 	int flags;
 	if(!best) return 0;	 // no matching out-fmt
 	flags=vf_next_query_format(vf,best);
-	if(!(flags&3)) return 0; // huh?
+	if(!(flags&(VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW))) return 0; // huh?
 	if(fmt!=best) flags&=~VFCAP_CSP_SUPPORTED_BY_HW;
 	// do not allow scaling, if we are before the PP fliter!
 	if(!(flags&VFCAP_POSTPROC)) flags|=VFCAP_SWSCALE;
