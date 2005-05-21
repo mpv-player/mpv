@@ -343,7 +343,8 @@
 +#include </usr/conf/h/mnttab.h>
  #elif defined(SYS_BSD)
  #include <fstab.h>
- #elif defined(__linux__)
+-#elif defined(__linux__)
++#elif defined(__linux__) || defined(__CYGWIN__)
  #include <mntent.h>
  #endif
  
@@ -426,6 +427,15 @@
  
      /* Try to open libdvdcss or fall back to standard functions */
      have_css = DVDInputSetup();
+@@ -274,7 +320,7 @@
+ 	char *path_copy;
+ #if defined(SYS_BSD)
+ 	struct fstab* fe;
+-#elif defined(__sun) || defined(__linux__)
++#elif defined(__sun) || defined(__linux__) || defined(__CYGWIN__)
+ 	FILE *mntfile;
+ #endif
+ 
 @@ -289,7 +331,9 @@
  	    if( cdir >= 0 ) {
  		chdir( path_copy );
@@ -436,11 +446,20 @@
  		close( cdir );
  		if( new_path ) {
  		    free( path_copy );
+@@ -345,7 +393,7 @@
+ 	    }
+ 	    fclose( mntfile );
+ 	}
+-#elif defined(__linux__)
++#elif defined(__linux__) || defined(__CYGWIN__)
+         mntfile = fopen( MOUNTED, "r" );
+         if( mntfile ) {
+             struct mntent *me;
 @@ -364,6 +408,9 @@
              }
              fclose( mntfile );
  	}
-+#elif defined(WIN32)	
++#elif defined(__MINGW32__)	
 +	dev_name = strdup(path);
 +	auth_drive = DVDOpenImageFile( path, have_css );
  #endif
