@@ -543,6 +543,10 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   Configure it with <option>--prefix=/mingw</option> and install
   it before compiling <application>MPlayer</application>.</para>
 
+<para>Complete instructions for building <application>MPlayer</application>
+  and necessary libraries can be found in the
+  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32-beta/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
+
 </sect2>
 
 
