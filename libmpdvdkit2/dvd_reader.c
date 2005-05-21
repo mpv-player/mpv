@@ -45,7 +45,7 @@
 #include </usr/conf/h/mnttab.h>
 #elif defined(SYS_BSD)
 #include <fstab.h>
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__CYGWIN__)
 #include <mntent.h>
 #endif
 
@@ -320,7 +320,7 @@ dvd_reader_t *DVDOpen( const char *path )
 	char *path_copy;
 #if defined(SYS_BSD)
 	struct fstab* fe;
-#elif defined(__sun) || defined(__linux__)
+#elif defined(__sun) || defined(__linux__) || defined(__CYGWIN__)
 	FILE *mntfile;
 #endif
 
@@ -393,7 +393,7 @@ dvd_reader_t *DVDOpen( const char *path )
 	    }
 	    fclose( mntfile );
 	}
-#elif defined(__linux__)
+#elif defined(__linux__) || defined(__CYGWIN__)
         mntfile = fopen( MOUNTED, "r" );
         if( mntfile ) {
             struct mntent *me;
@@ -412,7 +412,7 @@ dvd_reader_t *DVDOpen( const char *path )
             }
             fclose( mntfile );
 	}
-#elif defined(WIN32)	
+#elif defined(__MINGW32__)	
 	dev_name = strdup(path);
 	auth_drive = DVDOpenImageFile( path, have_css );
 #endif
