@@ -666,10 +666,17 @@ found_subpic:
       vo_window = WinID ? ((Window)WinID) : mRootWin;
       if ( WinID ) 
       {
+         Window mRoot;
+         uint32_t drwBorderWidth, drwDepth;
          XUnmapWindow( mDisplay,vo_window );
          XChangeWindowAttributes( mDisplay,vo_window,xswamask,&xswa );
 	 vo_x11_selectinput_witherr( mDisplay,vo_window,StructureNotifyMask | KeyPressMask | PropertyChangeMask | PointerMotionMask | ButtonPressMask | ButtonReleaseMask | ExposureMask );
          XMapWindow( mDisplay,vo_window );
+         XGetGeometry(mDisplay, vo_window, &mRoot,
+                      &drwX, &drwY, &vo_dwidth, &vo_dheight,
+                      &drwBorderWidth, &drwDepth);
+         drwX = drwY = 0; // coordinates need to be local to the window
+         aspect_save_prescale(vo_dwidth, vo_dheight);
       } else { drwX=vo_dx; drwY=vo_dy; }
    } else 
       if ( vo_window == None ){

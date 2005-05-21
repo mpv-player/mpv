@@ -298,6 +298,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                                            ButtonReleaseMask |
                                            ExposureMask);
                 XMapWindow(mDisplay, vo_window);
+                XGetGeometry(mDisplay, vo_window, &mRoot,
+                             &drwX, &drwY, &vo_dwidth, &vo_dheight,
+                             &drwBorderWidth, &drwDepth);
+                drwX = drwY = 0; // coordinates need to be local to the window
+                aspect_save_prescale(vo_dwidth, vo_dheight);
             } else
             {
                 drwX = vo_dx;

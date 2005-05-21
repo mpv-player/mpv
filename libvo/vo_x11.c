@@ -377,6 +377,8 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
             vo_window = WinID ? ((Window) WinID) : mRootWin;
             if (WinID)
             {
+                int border;
+                Window win;
                 XUnmapWindow(mDisplay, vo_window);
                 XChangeWindowAttributes(mDisplay, vo_window, xswamask,
                                         &xswa);
@@ -389,6 +391,9 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
                                            ButtonReleaseMask |
                                            ExposureMask);
                 XMapWindow(mDisplay, vo_window);
+                XGetGeometry(mDisplay, vo_window, &mRootWin,
+                             &vo_dx, &vo_dy, &vo_dwidth, &vo_dheight,
+                             &border, &depth);
             } else
                 XSelectInput(mDisplay, vo_window, ExposureMask);
         } else
