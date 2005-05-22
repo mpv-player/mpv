@@ -190,7 +190,7 @@ int dvd_sid_from_lang(stream_t *stream, unsigned char* lang) {
 static int dvd_next_cell(dvd_priv_t *d) {
   int next_cell=d->cur_cell;
 
-  mp_msg(MSGT_DVD,MSGL_V, "dvd_next_cell: next1=0x%X  \n",next_cell);
+  mp_msg(MSGT_DVD,MSGL_DBG2, "dvd_next_cell: next1=0x%X  \n",next_cell);
   if( d->cur_pgc->cell_playback[ next_cell ].block_type == BLOCK_TYPE_ANGLE_BLOCK ) {
     while(next_cell<d->last_cell) {
       if( d->cur_pgc->cell_playback[next_cell].block_mode == BLOCK_MODE_LAST_CELL )
@@ -198,7 +198,7 @@ static int dvd_next_cell(dvd_priv_t *d) {
       ++next_cell;
     }
   }
-  mp_msg(MSGT_DVD,MSGL_V, "dvd_next_cell: next2=0x%X  \n",next_cell);
+  mp_msg(MSGT_DVD,MSGL_DBG2, "dvd_next_cell: next2=0x%X  \n",next_cell);
 
   ++next_cell;
   if(next_cell>=d->last_cell) 
@@ -208,7 +208,7 @@ static int dvd_next_cell(dvd_priv_t *d) {
     if(next_cell>=d->last_cell) 
       return -1; // EOF
   }
-  mp_msg(MSGT_DVD,MSGL_V, "dvd_next_cell: next3=0x%X  \n",next_cell);
+  mp_msg(MSGT_DVD,MSGL_DBG2, "dvd_next_cell: next3=0x%X  \n",next_cell);
   return next_cell;
 }
 
