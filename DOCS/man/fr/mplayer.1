@@ -1,4 +1,4 @@
-.\" synced with 1.977
+.\" synced with 1.978
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -960,6 +960,9 @@ Utilisez \-demuxer 17 pour forcer la détection des .mp3.
 .B \-dumpaudio (MPlayer uniquement)
 Décharge le flux audio brut dans ./stream.dump (utile avec
 mpeg/\:ac3).
+Vous ne pouvez spécifier qu'une seule des options \-dumpaudio,
+\-dumpvideo, \-dumpstream, la dernière de la ligne de commande ayant
+priorité sur toutes les autres..
 .
 .TP
 .B \-dumpfile <nomfichier> (MPlayer uniquement)
@@ -970,10 +973,16 @@ Devrait être utilisé avec \-dumpaudio / \-dumpvideo / \-dumpstream.
 .B \-dumpstream (MPlayer uniquement)
 Décharge le flux brut dans ./stream.dump.
 Utile en rippant depuis un DVD ou depuis le réseau.
+Vous ne pouvez spécifier qu'une seule des options \-dumpaudio, 
+\-dumpvideo, \-dumpstream, la dernière de la ligne de commande ayant
+priorité sur toutes les autres..
 .
 .TP
 .B \-dumpvideo (MPlayer uniquement)
 Décharge le flux vidéo brut dans ./stream.dump (pas très utilisable).
+Vous ne pouvez spécifier qu'une seule des options \-dumpaudio, 
+\-dumpvideo, \-dumpstream, la dernière de la ligne de commande ayant
+priorité sur toutes les autres..
 .
 .TP
 .B \-dvbin <options> (DVB uniquement)
