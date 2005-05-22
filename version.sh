@@ -17,8 +17,8 @@ case "$OS" in
 	;;
      Darwin|*BSD) 
 	# BSD 'date -r' does not print modification time
-	# LANG=C sets month/day order and English language in the date string
-	LS=`LANG=C ls -lT CVS/Entries`
+	# LC_ALL=C sets month/day order and English language in the date string
+	LS=`LC_ALL=C ls -lT CVS/Entries`
 	year=`echo $LS | cut -d' ' -f9 | cut -c 3-4`
 	month=`echo $LS | awk -F" " '{printf "%.2d", \
 		(index("JanFebMarAprMayJunJulAugSepOctNovDec",$6)+2)/3}'`
