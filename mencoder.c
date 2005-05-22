@@ -254,6 +254,7 @@ int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t 
 #endif
 #include "vobsub.h"
 
+#include "libao2/audio_out.h"
 /* FIXME */
 static void mencoder_exit(int level, char *how)
 {
@@ -367,6 +368,7 @@ int curfile=0;
 int new_srate;
 
 unsigned int timer_start;
+ao_data_t ao_data = {0,0,0,0,OUTBURST,-1,0};
 
 audio_encoding_params_t aparams;
 audio_encoder_t *aencoder = NULL;
@@ -808,8 +810,21 @@ mux_a->source=sh_audio;
 
 mux_a->codec=out_audio_codec;
 
-aparams.channels = audio_output_channels ? audio_output_channels : sh_audio->channels;
-aparams.sample_rate = force_srate ? force_srate : new_srate;
+ao_data.samplerate = force_srate ? force_srate : new_srate;
+ao_data.channels = audio_output_channels ? audio_output_channels : sh_audio->channels;
+ao_data.format = audio_output_format ? audio_output_format : sh_audio->sample_format;
+if(!preinit_audio_filters(sh_audio,
+   // input:
+   new_srate,
+   sh_audio->channels, sh_audio->sample_format,
+   // output:
+   &ao_data.samplerate, &ao_data.channels, &ao_data.format)) {
+     mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_AudioFilterChainPreinitError);
+     mencoder_exit(1, NULL);
+   }
+
+aparams.channels = ao_data.channels;
+aparams.sample_rate = ao_data.samplerate;
 aparams.audio_preload = 1000 * audio_preload;
 if(mux_a->codec != ACODEC_COPY) {
     aencoder = new_audio_encoder(mux_a, &aparams);
