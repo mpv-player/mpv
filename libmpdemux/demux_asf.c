@@ -12,6 +12,7 @@
 #include "asf.h"
 #include "demuxer.h"
 
+#include "../libvo/fastmemcpy.h"
 
 /*
  * Load 16/32-bit values in little endian byte order
@@ -40,9 +41,9 @@ extern int asf_movielength;
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
-static void asf_descrambling(unsigned char *src,int len){
+static void asf_descrambling(unsigned char **src,int len){
   unsigned char *dst=malloc(len);
-  unsigned char *s2=src;
+  unsigned char *s2=*src;
   int i=0,x,y;
   while(len-i>=asf_scrambling_h*asf_scrambling_w*asf_scrambling_b){
 //    mp_msg(MSGT_DEMUX,MSGL_DBG4,"descrambling! (w=%d  b=%d)\n",w,asf_scrambling_b);
@@ -55,8 +56,8 @@ static void asf_descrambling(unsigned char *src,int len){
 	s2+=asf_scrambling_h*asf_scrambling_w*asf_scrambling_b;
   }
   //if(i<len) memcpy(dst+i,src+i,len-i);
-  memcpy(src,dst,i);
-  free(dst);
+  free(*src);
+  *src = dst;
 }
 
 
@@ -96,7 +97,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
         // closed segment, finalize packet:
 		if(ds==demux->audio)
 		  if(asf_scrambling_h>1 && asf_scrambling_w>1)
-		    asf_descrambling(ds->asf_packet->buffer,ds->asf_packet->len);
+		    asf_descrambling(&ds->asf_packet->buffer,ds->asf_packet->len);
         ds_add_packet(ds,ds->asf_packet);
         ds->asf_packet=NULL;
       } else {
