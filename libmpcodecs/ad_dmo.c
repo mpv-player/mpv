@@ -96,7 +96,7 @@ static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int m
           sh_audio->a_in_buffer_len=0;
         } else {
           sh_audio->a_in_buffer_len-=size_in;
-          memcpy(sh_audio->a_in_buffer,&sh_audio->a_in_buffer[size_in],sh_audio->a_in_buffer_len);
+          memmove(sh_audio->a_in_buffer,&sh_audio->a_in_buffer[size_in],sh_audio->a_in_buffer_len);
         }
 //        len=size_out;
   return size_out;
