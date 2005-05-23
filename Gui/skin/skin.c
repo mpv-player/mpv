@@ -688,7 +688,11 @@ int skinRead( char * dname )
  linenumber=0;
  while ( !feof( skinFile ) )
   {
-   fgets( tmp,255,skinFile ); linenumber++;
+   if (!fgets( tmp,255,skinFile )) {
+     mp_msg(MSGT_GPLAYER, MSGL_FATAL, MSGTR_SKIN_SkinFileNotReadable, fn);
+     return -1;
+   }
+   linenumber++;
 
    c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;
    c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;

@@ -641,6 +641,7 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING2 "[skin] warning in config file line %d:\nwidget (%s) found but no \"subsection\" found before"
 #define MSGTR_SKIN_WARNING3 "[skin] warning in config file line %d:\nthis subsection is not supported by widget (%s)"
 #define MSGTR_SKIN_SkinFileNotFound "[skin] file ( %s ) not found.\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[skin] file ( %s ) not readable.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "16 bits or less depth bitmap not supported (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "file not found (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP read error (%s)\n"
