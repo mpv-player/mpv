@@ -126,6 +126,7 @@ static int preinit(sh_audio_t *sh)
 {
   /* Dolby AC3 audio: */
   /* however many channels, 2 bytes in a word, 256 samples in a block, 6 blocks in a frame */
+  if (sh->samplesize < 2) sh->samplesize = 2;
   sh->audio_out_minsize=audio_output_channels*sh->samplesize*256*6;
   sh->audio_in_minsize=3840;
   a52_level = 1.0;
