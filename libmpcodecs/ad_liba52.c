@@ -263,8 +263,9 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 {
     switch(cmd)
     {
+      case ADCTRL_RESYNC_STREAM:
       case ADCTRL_SKIP_FRAME:
-	  a52_fillbuff(sh); break; // skip AC3 frame
+	  a52_fillbuff(sh);
 	  return CONTROL_TRUE;
       case ADCTRL_SET_VOLUME: {
 	  float vol = *(float*)arg;
