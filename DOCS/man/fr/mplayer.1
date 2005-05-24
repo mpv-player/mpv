@@ -1,4 +1,4 @@
-.\" synced with 1.978
+.\" synced with 1.980
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "21 Mai 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "24 Mai 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -8359,6 +8359,28 @@ d'une trame à l'autre\ ; une valeur forte oblige la variation à être plus
 progressive.
 .
 .TP
+.B zones=<zone0>[/\:<zone1>[/\:...]] (ABR ou deux passes)
+Redéfinition de la qualité de certaines partie du film
+(crédits, générique de fin, ...).
+Chaque zone est définie par le triplet
+<trame de début>,<trame de fin>,<option> où option peut être
+.PD 0
+.RSs
+.IPs "q=<0\-51>"
+quanta
+.IPs "b=<0.01\-100.0>"
+multiplicateur du débit binaire (bitrate)
+.RE
+.PD 1
+.RS
+.I NOTE\ :
+L'option quanta n'est pas respectée strictemement.
+Elle affect uniquement le stade de planning du contrôleur
+de débit (ratecontrol), et est encore sujet à la compensation
+de débordement et à qp_min/qp_max.
+.RE
+.
+.TP
 .B direct_pred=<0\-2>
 Détermine le type de prédicteur de mouvement utilisé pour les macro-blocs
 directs dans les trames-B.
@@ -8420,7 +8442,7 @@ qu'un petit objet en mouvement sera mieux codé par des petits blocs.
 4x4mv n'est recommandé que si subq >=3.
 .
 .TP
-.B me=<1\-3>
+.B me=<1\-4>
 Défini l'algorithme d'estimation du mouvement fullpixel.
 .PD 0
 .RSs
@@ -8429,6 +8451,8 @@ recherche diamant, de rayon 1 (rapide)
 .IPs 2
 recherche hexagone, de rayon 2 (par défaut)
 .IPs 3
+recherche multi-hexagone irrégulière
+.IPs 4
 Recherche exhaustive, controllé par me_range (très lent).
 .RE
 .PD 1
