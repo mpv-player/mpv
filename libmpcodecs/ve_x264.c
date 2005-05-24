@@ -93,6 +93,7 @@ static float qcomp = 0.6;
 static float qblur = 0.5;
 static float complexity_blur = 20;
 static char *rc_eq = "blurCplx^(1-qComp)";
+static char *zones = NULL;
 static int subq = 5;
 static int me_method = 2;
 static int me_range = 16;
@@ -145,8 +146,9 @@ m_option_t x264encopts_conf[] = {
     {"qcomp", &qcomp, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
     {"cplx_blur", &complexity_blur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 999, NULL},
+    {"zones", &zones, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"subq", &subq, CONF_TYPE_INT, CONF_RANGE, 1, 5, NULL},
-    {"me", &me_method, CONF_TYPE_INT, CONF_RANGE, 1, 3, NULL},
+    {"me", &me_method, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"me_range", &me_range, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
     {"level_idc", &level_idc, CONF_TYPE_INT, CONF_RANGE, 10, 51, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -191,7 +193,6 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.rc.f_qblur = qblur;
     mod->param.rc.f_complexity_blur = complexity_blur;
     mod->param.analyse.i_subpel_refine = subq;
-    mod->param.analyse.i_me_method = subq==1 ? X264_ME_DIA : X264_ME_HEX;
     mod->param.rc.psz_stat_out = passtmpfile;
     mod->param.rc.psz_stat_in = passtmpfile;
     if((pass & 2) && bitrate <= 0)
@@ -233,12 +234,15 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     }
     mod->param.rc.f_ip_factor = ip_factor;
     mod->param.rc.f_pb_factor = pb_factor;
+    mod->param.rc.psz_zones = zones;
     switch(me_method) {
         case 1: mod->param.analyse.i_me_method = X264_ME_DIA; break;
         case 2: mod->param.analyse.i_me_method = X264_ME_HEX; break;
-        case 3: mod->param.analyse.i_me_method = X264_ME_ESA;
-                mod->param.analyse.i_me_range = me_range; break;
+        case 3: mod->param.analyse.i_me_method = X264_ME_UMH; break;
+        case 4: mod->param.analyse.i_me_method = X264_ME_ESA; break;
     }
+    if(me_method >= 3)
+        mod->param.analyse.i_me_range = me_range;
     mod->param.analyse.inter = X264_ANALYSE_I4x4;
     if(p4x4mv)
         mod->param.analyse.inter |= X264_ANALYSE_PSUB8x8;

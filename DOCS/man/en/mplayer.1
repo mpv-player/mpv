@@ -7957,6 +7957,23 @@ Lower values allow the quantizer value to jump around more,
 higher values force it to vary more smoothly.
 .
 .TP
+.B zones=<zone0>[/\:<zone1>[/\:...]]
+User specified quality for specific parts (ending, credits, ...)
+(ABR or two pass).
+Each zone is <start-frame>,<end-frame>,<option> where option may be
+.PD 0
+.RSs
+.IPs "q=<0\-51>"
+quantizer
+.IPs "b=<0.01\-100.0>"
+bitrate multiplier
+.RE
+.PD 1
+Note: The quantizer option is not strictly enforced.
+It affects only the planning stage of ratecontrol, and is still subject
+to overflow compensation and qp_min/qp_max.
+.
+.TP
 .B direct_pred=<0\-2>
 Determines the type of motion prediction used for direct macroblocks
 in B-frames.
@@ -8014,7 +8031,7 @@ small moving objects are better represented by smaller blocks.
 4x4mv is recommended only with subq >= 3.
 .
 .TP
-.B me=<1\-3>
+.B me=<1\-4>
 Select fullpixel motion estimation algorithm.
 .PD 0
 .RSs
@@ -8023,7 +8040,9 @@ diamond search, radius 1 (fast)
 .IPs 2
 hexagon search, radius 2 (default)
 .IPs 3
-Exhaustive search, controlled by me_range (very slow).
+uneven multi-hexagon search
+.IPs 4
+exhaustive search, controlled by me_range (very slow)
 .RE
 .PD 1
 .
