@@ -1329,7 +1329,7 @@ void* guess_cp(FILE *fd, char *preferred_language, char *fallback)
 	analyser = enca_analyser_alloc(languages[i]);
 	encoding = enca_analyse_const(analyser, buffer, buflen);
 	tmp = enca_charset_name(encoding.charset, ENCA_NAME_STYLE_ICONV);
-	if (tmp) {
+	if (tmp && encoding.charset != ENCA_CS_UNKNOWN) {
 	    detected_sub_cp = strdup(tmp);
 	    mp_msg(MSGT_SUBREADER, MSGL_INFO, "ENCA detected charset: %s\n", tmp);
 	}
