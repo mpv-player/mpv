@@ -810,6 +810,7 @@ mux_a->source=sh_audio;
 
 mux_a->codec=out_audio_codec;
 
+#if 0
 ao_data.samplerate = force_srate ? force_srate : new_srate;
 ao_data.channels = audio_output_channels ? audio_output_channels : sh_audio->channels;
 ao_data.format = audio_output_format ? audio_output_format : sh_audio->sample_format;
@@ -825,6 +826,10 @@ if(!preinit_audio_filters(sh_audio,
 
 aparams.channels = ao_data.channels;
 aparams.sample_rate = ao_data.samplerate;
+#else
+aparams.channels = audio_output_channels ? audio_output_channels : sh_audio->channels;
+aparams.sample_rate = force_srate ? force_srate : new_srate;
+#endif
 aparams.audio_preload = 1000 * audio_preload;
 if(mux_a->codec != ACODEC_COPY) {
     aencoder = new_audio_encoder(mux_a, &aparams);
