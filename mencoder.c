@@ -1612,15 +1612,16 @@ int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t 
         if (sh_audio) {
             a_pts = d_audio->pts + (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
             while (sh_video->pts > a_pts) {
+                int len;
                 if (mux_a->h.dwSampleSize) {
-                    int len;
                     len = mux_a->wf->nAvgBytesPerSec * (sh_video->pts - a_pts);
                     len/= mux_a->h.dwSampleSize; if(len<1) len=1;
                     len*= mux_a->h.dwSampleSize;
-                    demux_read_data(sh_audio->ds,mux_a->buffer,len);
+                    len = demux_read_data(sh_audio->ds,mux_a->buffer,len);
                 } else {
-                    ds_get_packet(sh_audio->ds,(unsigned char**) &mux_a->buffer);
+                    len = ds_get_packet(sh_audio->ds,(unsigned char**) &mux_a->buffer);
                 }
+                if (len <= 0) break; // EOF of audio.
                 a_pts = d_audio->pts + (ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
             }
         }
