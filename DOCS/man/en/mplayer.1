@@ -7969,9 +7969,12 @@ quantizer
 bitrate multiplier
 .RE
 .PD 1
-Note: The quantizer option is not strictly enforced.
+.RS
+.I NOTE:
+The quantizer option is not strictly enforced.
 It affects only the planning stage of ratecontrol, and is still subject
 to overflow compensation and qp_min/qp_max.
+.RE
 .
 .TP
 .B direct_pred=<0\-2>
@@ -7988,9 +7991,11 @@ Temporal: motion vectors are interpolated from the following P-frame.
 (default)
 .RE
 .PD 1
+.RS
 Spatial and temporal are approximately the same speed and PSNR,
 but temporal often looks better.
 direct_pred=0 is both slower and lower quality.
+.RE
 .
 .TP
 .B (no)weight_b
