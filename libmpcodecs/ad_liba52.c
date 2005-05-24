@@ -73,7 +73,7 @@ while(1){
     if(length>=7 && length<=3840) break; /* we're done.*/
     /* bad file => resync*/
     if(sh_audio->format!=0x2000) swab(sh_audio->a_in_buffer,sh_audio->a_in_buffer,8);
-    memcpy(sh_audio->a_in_buffer,sh_audio->a_in_buffer+1,7);
+    memmove(sh_audio->a_in_buffer,sh_audio->a_in_buffer+1,7);
     --sh_audio->a_in_buffer_len;
 }
     mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"a52: len=%d  flags=0x%X  %d Hz %d bit/s\n",length,flags,sample_rate,bit_rate);
