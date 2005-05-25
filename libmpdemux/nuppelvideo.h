@@ -1,15 +1,17 @@
 /* nuppelvideo.h  rh */
 
-typedef struct rtfileheader
+typedef struct  __attribute__((packed)) rtfileheader
 {
   char finfo[12];     // "NuppelVideo" + \0
   char version[5];    // "0.05" + \0
+  char pad1[3];
   int  width;
   int  height;
   int  desiredwidth;  // 0 .. as it is
   int  desiredheight; // 0 .. as it is
   char pimode;        // P .. progressive
 		      // I .. interlaced  (2 half pics) [NI]
+  char pad2[3];
   double aspect;      // 1.0 .. square pixel (1.5 .. e.g. width=480: width*1.5=720
                       // for capturing for svcd material
   double fps;
@@ -19,7 +21,7 @@ typedef struct rtfileheader
   int keyframedist;
 } rtfileheader;
 
-typedef struct rtframeheader
+typedef struct  __attribute__((packed)) rtframeheader
 {
    char frametype;			// A .. Audio, V .. Video, S .. Sync, T .. Text
    					// R .. Seekpoint: String RTjjjjjjjj (use full packet)
