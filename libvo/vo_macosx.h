@@ -30,6 +30,18 @@
     GLfloat upperLeft[2];
 	
 	BOOL mouseHide;
+	
+	//menu command id
+	NSMenuItem *kQuitCmd;
+	NSMenuItem *kHalfScreenCmd;
+	NSMenuItem *kNormalScreenCmd;
+	NSMenuItem *kDoubleScreenCmd;
+	NSMenuItem *kFullScreenCmd;
+	NSMenuItem *kKeepAspectCmd;
+	NSMenuItem *kAspectOrgCmd;
+	NSMenuItem *kAspectFullCmd;
+	NSMenuItem *kAspectWideCmd;
+	NSMenuItem *kPanScanCmd;
 }
 
 - (BOOL) acceptsFirstResponder;
@@ -38,6 +50,8 @@
 
 //window & rendering
 - (void) initOpenGLView;
+- (void) initMenu;
+- (void) menuAction:(id)sender;
 - (void) prepareOpenGL;
 - (void) render;
 - (void) reshape;

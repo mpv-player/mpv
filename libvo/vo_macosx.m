@@ -301,6 +301,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 	NSRect frame = [self frame];
 	CVReturn error = kCVReturnSuccess;
 	
+	//init menu
+	[self initMenu];
+	
 	//create OpenGL Context
 	glContext = [[NSOpenGLContext alloc] initWithFormat:[NSOpenGLView defaultPixelFormat] shareContext:nil];	
 	
@@ -342,6 +345,166 @@ static uint32_t control(uint32_t request, void *data, ...)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
 	
 	isFullscreen = 0;
+}
+
+/*
+	Init Menu
+*/
+- (void)initMenu
+{
+	NSMenu *menu;
+	NSMenuItem *menuItem;
+	
+	[NSApp setMainMenu:[[NSMenu alloc] init]];
+
+//Create Movie Menu
+	menu = [[NSMenu alloc] initWithTitle:@"Movie"];
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Half Size" action:@selector(menuAction:) keyEquivalent:@"0"]; [menu addItem:menuItem];
+	kHalfScreenCmd = menuItem;
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Normal Size" action:@selector(menuAction:) keyEquivalent:@"1"]; [menu addItem:menuItem];
+	kNormalScreenCmd = menuItem;
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Double Size" action:@selector(menuAction:) keyEquivalent:@"2"]; [menu addItem:menuItem];
+	kDoubleScreenCmd = menuItem;
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Full Size" action:@selector(menuAction:) keyEquivalent:@"f"]; [menu addItem:menuItem];
+	kFullScreenCmd = menuItem;
+	menuItem = [NSMenuItem separatorItem]; [menu addItem:menuItem];
+	
+		NSMenu	*aspectMenu;
+		aspectMenu = [[NSMenu alloc] initWithTitle:@"Aspect Ratio"];
+		menuItem = [[NSMenuItem alloc] initWithTitle:@"Keep" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
+		if(vo_keepaspect) [menuItem setState:NSOnState];
+		kKeepAspectCmd = menuItem;
+		menuItem = [[NSMenuItem alloc] initWithTitle:@"Pan-Scan" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
+		if(vo_panscan) [menuItem setState:NSOnState];
+		kPanScanCmd = menuItem;
+		menuItem = [NSMenuItem separatorItem]; [aspectMenu addItem:menuItem];	
+		menuItem = [[NSMenuItem alloc] initWithTitle:@"Original" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
+		kAspectOrgCmd = menuItem;
+		menuItem = [[NSMenuItem alloc] initWithTitle:@"4:3" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
+		kAspectFullCmd = menuItem;
+		menuItem = [[NSMenuItem alloc] initWithTitle:@"16:9" action:@selector(menuAction:) keyEquivalent:@""];	[aspectMenu addItem:menuItem];
+		kAspectWideCmd = menuItem;
+		menuItem = [[NSMenuItem alloc] initWithTitle:@"Aspect Ratio" action:nil keyEquivalent:@""];
+		[menuItem setSubmenu:aspectMenu];
+		[menu addItem:menuItem];
+		[aspectMenu release];
+	
+	//Add to menubar
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Movie" action:nil keyEquivalent:@""];
+	[menuItem setSubmenu:menu];
+	[[NSApp mainMenu] addItem:menuItem];
+	
+//Create Window Menu
+	menu = [[NSMenu alloc] initWithTitle:@"Window"];
+	
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"]; [menu addItem:menuItem];
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Zoom" action:@selector(performZoom:) keyEquivalent:@""]; [menu addItem:menuItem];
+
+	//Add to menubar
+	menuItem = [[NSMenuItem alloc] initWithTitle:@"Window" action:nil keyEquivalent:@""];
+	[menuItem setSubmenu:menu];
+	[[NSApp mainMenu] addItem:menuItem];
+	[NSApp setWindowsMenu:menu];
+	
+	[menu release];
+	[menuItem release];
+}
+
+/*
+	Menu Action
+ */
+- (void)menuAction:(id)sender
+{
+	uint32_t d_width;
+	uint32_t d_height;
+	NSRect frame;
+	
+	aspect((int *)&d_width, (int *)&d_height,A_NOZOOM);
+	//if(sender == kQuitCmd)
+	
+	if(sender == kHalfScreenCmd)
+	{
+		if(isFullscreen) {
+			vo_fs = (!(vo_fs)); [self fullscreen:YES];
+		}
+		
+		frame.size.width = (d_width/2);
+		frame.size.height = ((d_width/movie_aspect)/2);
+		[window setContentSize: frame.size];
+		[self reshape];
+	}
+	if(sender == kNormalScreenCmd)
+	{
+		if(isFullscreen) {
+			vo_fs = (!(vo_fs)); [self fullscreen:YES];
+		}
+		
+		frame.size.width = d_width;
+		frame.size.height = d_width/movie_aspect;
+		[window setContentSize: frame.size];
+		[self reshape];
+	}
+	if(sender == kDoubleScreenCmd)
+	{
+		if(isFullscreen) {
+			vo_fs = (!(vo_fs)); [self fullscreen:YES];
+		}
+		
+		frame.size.width = d_width*2;
+		frame.size.height = (d_width/movie_aspect)*2;
+		[window setContentSize: frame.size];
+		[self reshape];
+	}
+	if(sender == kFullScreenCmd)
+	{
+		vo_fs = (!(vo_fs));
+		[self fullscreen:YES];
+	}
+
+	if(sender == kKeepAspectCmd)
+	{
+		vo_keepaspect = (!(vo_keepaspect));
+		if(vo_keepaspect)
+			[kKeepAspectCmd setState:NSOnState];
+		else
+			[kKeepAspectCmd setState:NSOffState];
+	}
+	
+	if(sender == kPanScanCmd)
+	{
+		vo_panscan = (!(vo_panscan));
+		if(vo_panscan)
+			[kPanScanCmd setState:NSOnState];
+		else
+			[kPanScanCmd setState:NSOffState];
+	}
+	
+	if(sender == kAspectOrgCmd)
+	{
+		movie_aspect = old_movie_aspect;
+		frame.size.width = d_width;
+		frame.size.height = d_width/movie_aspect;
+		[window setContentSize: frame.size];
+		[self reshape];
+	}
+	
+	if(sender == kAspectFullCmd)
+	{
+		movie_aspect = 4.0f/3.0f;
+		frame.size.width = d_width;
+		frame.size.height = d_width/movie_aspect;
+		[window setContentSize: frame.size];
+		[self reshape];
+	}
+		
+	if(sender == kAspectWideCmd)
+	{
+		movie_aspect = 16.0f/9.0f;
+		frame.size.width = d_width;
+		frame.size.height = d_width/movie_aspect;
+		[window setContentSize: frame.size];
+		[self reshape];
+	}
 }
 
 /*
