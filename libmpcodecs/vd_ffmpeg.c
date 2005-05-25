@@ -471,9 +471,13 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 
     width = avctx->width;
     height = avctx->height;
-    if (sh->bih && sh->format == mmioFOURCC('h','2','6','3')) {
-	width = sh->bih->biWidth;
-	height = sh->bih->biHeight;
+
+    // HACK!
+    // if sh->ImageDesc is non-NULL, it means we decode QuickTime(tm) video.
+    // use dimensions from BIH to avoid black borders at the right and bottom.
+    if (sh->bih && sh->ImageDesc) {
+	width = sh->bih->biWidth>>lavc_param_lowres;
+	height = sh->bih->biHeight>>lavc_param_lowres;
     }
     
      // it is possible another vo buffers to be used after vo config()
