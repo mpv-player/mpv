@@ -30,7 +30,7 @@
 
 #if defined(__linux__)
 	#include <linux/cdrom.h>
-#elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 	#include <sys/cdio.h>
 #endif
 
@@ -82,7 +82,7 @@ read_toc(const char *dev) {
 	return tochdr.cdth_trk1;
 }
 
-#elif defined(__FreeBSD__) || defined(__bsdi__)
+#elif defined(__FreeBSD__) || defined(__bsdi__) || defined(__DragonFly__)
 int 
 read_toc(const char *dev) {
 	int drive;

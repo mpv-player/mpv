@@ -88,12 +88,17 @@ inline static unsigned long long int bswap_64(unsigned long long int x)
 }
 #define B2N_64(x) x = bswap_64(x)
 
+#elif defined(__DragonFly__)
+#include <sys/endian.h>
+#define B2N_16(x) x = be16toh(x)
+#define B2N_32(x) x = be32toh(x)
+#define B2N_64(x) x = be64toh(x)
+
 /* This is a slow but portable implementation, it has multiple evaluation 
  * problems so beware.
  * FreeBSD and Solaris don't have <byteswap.h> or any other such 
  * functionality! 
  */
-
 #elif defined(__FreeBSD__) || defined(__sun) || defined(__bsdi__) || defined(__CYGWIN__)
 #define B2N_16(x) \
  x = ((((x) & 0xff00) >> 8) | \

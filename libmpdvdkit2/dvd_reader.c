@@ -35,7 +35,7 @@
 #include <limits.h>
 #include <dirent.h>
  
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__)|| defined(__DARWIN__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__)|| defined(__DARWIN__) || defined(__DragonFly__)
 #define SYS_BSD 1
 #endif
 

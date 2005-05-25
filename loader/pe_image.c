@@ -905,7 +905,7 @@ void PE_UnloadLibrary(WINE_MODREF *wm)
  */
 static void __attribute__((noinline)) extend_stack_for_dll_alloca(void)
 {
-#ifndef __FreeBSD__
+#if !defined(__FreeBSD__) && !defined(__DragonFly__)
     volatile int* mem=alloca(0x20000);
     *mem=0x1234;
 #endif

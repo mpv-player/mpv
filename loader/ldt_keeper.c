@@ -50,7 +50,7 @@ int modify_ldt(int func, void *ptr, unsigned long bytecount);
 }
 #endif
 #else
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 #include <machine/segments.h>
 #include <machine/sysarch.h>
 #endif
@@ -165,7 +165,7 @@ static int LDT_Modify( int func, struct modify_ldt_ldt_s *ptr,
 #endif
 #endif
 
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 static void LDT_EntryToBytes( unsigned long *buffer, const struct modify_ldt_ldt_s *content )
 {
     *buffer++ = ((content->base_addr & 0x0000ffff) << 16) |
@@ -227,7 +227,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
     }
 #endif /*linux*/
 
-#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__)
+#if defined(__NetBSD__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
     {
         unsigned long d[2];
 
@@ -246,7 +246,7 @@ ldt_fs_t* Setup_LDT_Keeper(void)
             printf("Did you reconfigure the kernel with \"options USER_LDT\"?\n");
         }
     }
-#endif  /* __NetBSD__ || __FreeBSD__ || __OpenBSD__ */
+#endif  /* __NetBSD__ || __FreeBSD__ || __OpenBSD__ || __DragonFly__ */
 
 #if defined(__svr4__)
     {

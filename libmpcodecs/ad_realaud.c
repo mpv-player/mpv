@@ -35,7 +35,7 @@ void __builtin_delete(void* ize) {
 	free(ize);
 }
 
-#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+#if defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__) || defined(__DragonFly__)
 void *__ctype_b=NULL;
 #endif
 

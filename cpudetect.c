@@ -20,7 +20,7 @@ CpuCaps gCpuCaps;
 #include <machine/cpu.h>
 #endif
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__DragonFly__)
 #include <sys/types.h>
 #include <sys/sysctl.h>
 #endif
@@ -169,7 +169,7 @@ void GetCpuCaps( CpuCaps *caps)
 #endif
 
 		/* FIXME: Does SSE2 need more OS support, too? */
-#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__CYGWIN__) || defined(__OpenBSD__)
+#if defined(__linux__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__CYGWIN__) || defined(__OpenBSD__) || defined(__DragonFly__)
 		if (caps->hasSSE)
 			check_os_katmai_support();
 		if (!caps->hasSSE)
@@ -324,7 +324,7 @@ static void check_os_katmai_support( void )
 #ifdef ARCH_X86_64
    gCpuCaps.hasSSE=1;
    gCpuCaps.hasSSE2=1;
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__DragonFly__)
    int has_sse=0, ret;
    size_t len=sizeof(has_sse);
 

@@ -14,7 +14,7 @@
 #include <sys/ioctl.h>
 #include <errno.h>
 
-#ifdef __FreeBSD__
+#if defined(__FreeBSD__) || defined(__DragonFly__)
 #include <sys/cdrio.h>
 #include "vcd_read_fbsd.h" 
 #elif defined(__NetBSD__) || defined (__OpenBSD__)
