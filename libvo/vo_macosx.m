@@ -131,7 +131,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
 	aspect_save_screenres(device_width,device_height);
-	aspect(&d_width,&d_height,A_NOZOOM);
+	aspect((int *)&d_width,(int *)&d_height,A_NOZOOM);
 	
 	movie_aspect = (float)d_width/(float)d_height;
 	old_movie_aspect = movie_aspect;
@@ -542,7 +542,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	//set image_rec
 	if(vo_keepaspect)
 	{
-		aspect( &d_width, &d_height, A_NOZOOM);
+		aspect( (int *)&d_width, (int *)&d_height, A_NOZOOM);
 		d_height = ((float)d_width/movie_aspect);
 		
 		aspectX = (float)((float)frame.size.width/(float)d_width);
