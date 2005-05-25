@@ -467,12 +467,20 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 #else
     float aspect= avctx->aspect_ratio;
 #endif
+    int width, height;
 
+    width = avctx->width;
+    height = avctx->height;
+    if (sh->bih && sh->format == mmioFOURCC('h','2','6','3')) {
+	width = sh->bih->biWidth;
+	height = sh->bih->biHeight;
+    }
+    
      // it is possible another vo buffers to be used after vo config()
      // lavc reset its buffers on width/heigh change but not on aspect change!!!
     if (// aspect != ctx->last_aspect ||
-	avctx->width != sh->disp_w ||
-	avctx->height != sh->disp_h ||
+	width != sh->disp_w  ||
+	height != sh->disp_h ||
 	!ctx->vo_inited)
     {
 	mp_msg(MSGT_DECVIDEO, MSGL_V, "[ffmpeg] aspect_ratio: %f\n", aspect);
@@ -480,8 +488,8 @@ static int init_vo(sh_video_t *sh, enum PixelFormat pix_fmt){
 //	if(ctx->last_aspect>=0.01 && ctx->last_aspect<100)
 	if(sh->aspect==0.0)
 	    sh->aspect = ctx->last_aspect;
-	sh->disp_w = avctx->width;
-	sh->disp_h = avctx->height;
+	sh->disp_w = width;
+	sh->disp_h = height;
 	ctx->vo_inited=1;
 	switch(pix_fmt){
 	// YUVJ are YUV formats that use the full Y range and not just
