@@ -73,21 +73,22 @@ struct _ct {
     unsigned int bits;
     const GUID* subtype;
     int cap;
+    char *name;
 	    };
             
 static ct check[] = {
-    { fccI420, 12, &MEDIASUBTYPE_I420, CAP_I420 },
-    { fccYV12, 12, &MEDIASUBTYPE_YV12, CAP_YV12 },
-    { fccYUY2, 16, &MEDIASUBTYPE_YUY2, CAP_YUY2 },
-    { fccUYVY, 16, &MEDIASUBTYPE_UYVY, CAP_UYVY },
-    { fccYVYU, 16, &MEDIASUBTYPE_YVYU, CAP_YVYU },
-    { fccIYUV, 24, &MEDIASUBTYPE_IYUV, CAP_IYUV },
+    { fccI420, 12, &MEDIASUBTYPE_I420,   CAP_I420, NULL     },
+    { fccYV12, 12, &MEDIASUBTYPE_YV12,   CAP_YV12, NULL     },
+    { fccYUY2, 16, &MEDIASUBTYPE_YUY2,   CAP_YUY2, NULL     },
+    { fccUYVY, 16, &MEDIASUBTYPE_UYVY,   CAP_UYVY, NULL     },
+    { fccYVYU, 16, &MEDIASUBTYPE_YVYU,   CAP_YVYU, NULL     },
+    { fccIYUV, 24, &MEDIASUBTYPE_IYUV,   CAP_IYUV, NULL     },
 
-    {      8,  8, &MEDIASUBTYPE_RGB8, CAP_NONE },
-    {     15, 16, &MEDIASUBTYPE_RGB555, CAP_NONE },
-    {     16, 16, &MEDIASUBTYPE_RGB565, CAP_NONE },
-    {     24, 24, &MEDIASUBTYPE_RGB24, CAP_NONE },
-    {     32, 32, &MEDIASUBTYPE_RGB32, CAP_NONE },
+    {       8,  8, &MEDIASUBTYPE_RGB8,   CAP_NONE, "RGB8"   },
+    {      15, 16, &MEDIASUBTYPE_RGB555, CAP_NONE, "RGB555" },
+    {      16, 16, &MEDIASUBTYPE_RGB565, CAP_NONE, "RGB565" },
+    {      24, 24, &MEDIASUBTYPE_RGB24,  CAP_NONE, "RGB24"  },
+    {      32, 32, &MEDIASUBTYPE_RGB32,  CAP_NONE, "RGB32"  },
 
     {0,0,NULL,0},
 };
@@ -230,7 +231,7 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
               
 	    this->m_Caps = CAP_NONE;
 
-	    printf("Decoder supports the following YUV formats: ");
+	    printf("Decoder supports the following formats: ");
 	    for (c = check; c->bits; c++)
 	    {
 		this->m_sVhdr2->bmiHeader.biBitCount = c->bits;
@@ -241,7 +242,10 @@ DMO_VideoDecoder * DMO_VideoDecoder_Open(char* dllname, GUID* guid, BITMAPINFOHE
 		if (!result)
 		{
 		    this->m_Caps = (this->m_Caps | c->cap);
-		    printf("%.4s ", (char*) &c->fcc);
+		    if (c->name)
+			printf("%s ", c->name);
+		    else
+			printf("%.4s ", (char*) &c->fcc);
 		}
 	    }
 	    printf("\n");
