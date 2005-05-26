@@ -238,6 +238,9 @@ int read_asf_header(demuxer_t *demuxer){
         sh_video->bih=calloc((len<sizeof(BITMAPINFOHEADER))?sizeof(BITMAPINFOHEADER):len,1);
         memcpy(sh_video->bih,&buffer[4+4+1+2],len);
 	le2me_BITMAPINFOHEADER(sh_video->bih);
+	if (sh_video->bih->biCompression == mmioFOURCC('D', 'V', 'R', ' '))
+	  mp_msg(MSGT_DEMUXER, MSGL_WARN, "DVR will probably only work with "
+	          "libavformat, try -demuxer 35 if you have problems\n");
         //sh_video->fps=(float)sh_video->video.dwRate/(float)sh_video->video.dwScale;
         //sh_video->frametime=(float)sh_video->video.dwScale/(float)sh_video->video.dwRate;
         if(verbose>=1) print_video_header(sh_video->bih);
