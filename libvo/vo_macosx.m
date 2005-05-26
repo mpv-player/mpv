@@ -666,6 +666,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 	static NSRect old_view_frame;
 	NSRect device_rect = [[window screen] frame];
 
+	panscan_calc();
+			
 	//go fullscreen
 	if(vo_fs)
 	{
@@ -677,7 +679,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 			mouseHide = YES;
 		}
 		
-		panscan_calc();
 		old_frame = [window frame];	//save main window size & position
 		[window setFrame:device_rect display:YES animate:animate]; //zoom-in window with nice useless sfx
 		old_view_frame = [self bounds];
