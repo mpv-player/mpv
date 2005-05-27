@@ -1291,14 +1291,14 @@ switch(file_format){
   demux_open_lmlm4(demuxer);
   if(!ds_fill_buffer(d_video)){
     mp_msg(MSGT_DEMUXER,MSGL_INFO,"LMLM4: " MSGTR_MissingVideoStream);
-    sh_video=NULL;
+    d_video->sh=NULL;
   } else {
     sh_video=d_video->sh;sh_video->ds=d_video;
   }
   if(audio_id!=-2) {
    if(!ds_fill_buffer(d_audio)){
     mp_msg(MSGT_DEMUXER,MSGL_INFO,"LMLM4: " MSGTR_MissingAudioStream);
-    sh_audio=NULL;
+    d_audio->sh=NULL;
    } else {
     sh_audio=d_audio->sh;sh_audio->ds=d_audio;
    }
@@ -1319,7 +1319,7 @@ switch(file_format){
   if(d_video->id != -2) {
     if(!ds_fill_buffer(d_video)){
       mp_msg(MSGT_DEMUXER,MSGL_WARN,"ASF: " MSGTR_MissingVideoStream);
-      sh_video=NULL;
+      d_video->sh=NULL;
       //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
     } else {
       sh_video=d_video->sh;sh_video->ds=d_video;
@@ -1331,7 +1331,7 @@ switch(file_format){
     mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_ASFSearchingForAudioStream,d_audio->id);
     if(!ds_fill_buffer(d_audio)){
       mp_msg(MSGT_DEMUXER,MSGL_INFO,"ASF: " MSGTR_MissingAudioStream);
-      sh_audio=NULL;
+      d_audio->sh=NULL;
     } else {
       sh_audio=d_audio->sh;sh_audio->ds=d_audio;
       sh_audio->format=sh_audio->wf->wFormatTag;
@@ -1342,7 +1342,7 @@ switch(file_format){
  case DEMUXER_TYPE_H264_ES:
  case DEMUXER_TYPE_MPEG4_ES:
  case DEMUXER_TYPE_MPEG_ES: {
-   sh_audio=NULL;   // ES streams has no audio channel
+   d_audio->sh=NULL;   // ES streams has no audio channel
    d_video->sh=new_sh_video(demuxer,0); // create dummy video stream header, id=0
    sh_video=d_video->sh;sh_video->ds=d_video;
    break;
@@ -1356,7 +1356,7 @@ switch(file_format){
   if(audio_id!=-2) {
    if(!ds_fill_buffer(d_audio)){
     mp_msg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " MSGTR_MissingAudioStream);
-    sh_audio=NULL;
+    d_audio->sh=NULL;
    } else {
     sh_audio=d_audio->sh;sh_audio->ds=d_audio;
    }
