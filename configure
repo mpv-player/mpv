@@ -950,10 +950,49 @@ EOF
     _def_arch='#define ARCH_X86_64 1'
     _target_arch='TARGET_ARCH_X86_64 = yes'
     iproc='x86_64'
-    proc=''
-    _march=''
-    _mcpu=''
-    _optimizing=''
+
+    # athlon64 cpu-type only supported in gcc >= 3.4.0
+    # also, gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
+    if test "$cc_vendor" = "gnu" && test "$_cc_major" -gt 3 -o "$_cc_major" -eq 3 -a "$_cc_minor" -ge 4 ; then
+    	proc=athlon64
+	cpuopt=-mtune
+    else
+    	proc=athlon-xp
+	cpuopt=-mcpu
+    fi
+
+
+    echocheck "GCC & CPU optimization abilities"
+cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+    # This is a stripped-down version of the i386 fallback.
+    if test "$_runtime_cpudetection" = no ; then
+      if test "$proc" = "k8" -o "$proc" = "opteron" -o "$proc" = "athlon64" -o "$proc" = "athlon-fx" ; then
+        cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
+      fi
+      # This will fail if gcc version < 3.3, which is ok because earlier
+      # versions don't really support 64-bit on amd64.
+      # Is this a valid assumption? -Corey
+      if test "$proc" = "athlon-xp" || test "$proc" = "athlon-4" ; then
+        cc_check -march=$proc $cpuopt=$proc || proc=error
+      fi
+      if test "$proc" = "error" ; then
+        echores "Your $_cc does not even support \"athlon-xp\" for '-march' and '$cpuopt'."
+        _mcpu=""
+        _march=""
+      fi
+    else
+      _march=""
+      _mcpu=""
+    fi
+    
+    _march="-march=$proc"
+    _mcpu="$cpuopt=$proc"
+    _optimizing=""
+
+    echores "$proc"
+
     x86_exts_check
     ;;
 
