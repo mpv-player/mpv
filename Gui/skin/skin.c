@@ -686,12 +686,8 @@ int skinRead( char * dname )
  appInitStruct( skinAppMPlayer );
 
  linenumber=0;
- while ( !feof( skinFile ) )
+ while (fgets(tmp, 255, skinFile))
   {
-   if (!fgets( tmp,255,skinFile )) {
-     mp_msg(MSGT_GPLAYER, MSGL_FATAL, MSGTR_SKIN_SkinFileNotReadable, fn);
-     return -1;
-   }
    linenumber++;
 
    c=tmp[ strlen( tmp ) - 1 ]; if ( c == '\n' || c == '\r' ) tmp[ strlen( tmp ) - 1 ]=0;
@@ -714,5 +710,9 @@ int skinRead( char * dname )
     if ( !strcmp( command,skinItem[i].name ) )
      if ( skinItem[i].func( param ) ) return -2;
   }
+ if (linenumber == 0) {
+   mp_msg(MSGT_GPLAYER, MSGL_FATAL, MSGTR_SKIN_SkinFileNotReadable, fn);
+   return -1;
+ }
  return 0;
 }
