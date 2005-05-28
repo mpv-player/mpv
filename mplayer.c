@@ -2318,6 +2318,11 @@ if(!sh_video) {
 	sh_video->timer+=frame_time;
 	if(sh_audio) sh_audio->delay-=frame_time;
 	time_frame+=frame_time;  // for nosound
+	// video_read_frame can change fps (e.g. for asf video)
+	vo_fps = sh_video->fps;
+#ifdef HAVE_X11
+	vo_mouse_timer_const = (int)sh_video->fps;
+#endif
 	// check for frame-drop:
 	current_module="check_framedrop";
 	if(sh_audio && !d_audio->eof){
