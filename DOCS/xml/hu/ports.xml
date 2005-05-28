@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.63 -->
+<!-- synced with 1.64 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -549,8 +549,12 @@ Használj SDL-t.
 <para>A tömörített MOV fejlécek támogatásához
   <ulink url="http://www.gzip.org/zlib/">zlib</ulink> kell, ami
   alaphelyzetben nincs benne a <application>MinGW</application>-ben.
-  ÁLlítsd be a <option>--prefix=/mingw</option> kapcsolóval és
+  Állítsd be a <option>--prefix=/mingw</option> kapcsolóval és
   telepítsd, mielőtt az <application>MPlayer</application>t fordítanád.</para>
+  
+<para>Az <application>MPlayer</application> és a szükséges függvénykönyvtárak
+  elkészítésének módját elolvashatod az
+  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32-beta/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.</para>
 
 </sect2>
 
