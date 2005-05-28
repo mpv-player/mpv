@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.168 (2005. 05. 20.)
+// Sync'ed with help_mp-en.h 1.169 (2005. 05. 28.)
 
 // ========================= MPlayer help ===========================
 
@@ -640,6 +640,7 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING2 "[skin] figyelmeztetés a skin konfigurációs fájljának %d. sorában: widget (%S) megvan, de nincs elõtte \"subsection\""
 #define MSGTR_SKIN_WARNING3 "[skin] figyelmeztetés a skin konfigurációs fájljának %d. sorában: ez az elem nem használható ebben az alrészben (%s)"
 #define MSGTR_SKIN_SkinFileNotFound "[skin] a fájl ( %s ) nem található.\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[skin] fájl ( %s ) nem olvasható.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "16 vagy kevesebb bites bitmap nem támogatott (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "fájl nem található (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "BMP olvasási hiba (%s)\n"
