@@ -801,7 +801,12 @@ case "$host_arch" in
 		proc=athlon # TODO: should the Duron Spitfire be considered a Thunderbird instead?
 	fi
 	;;
-    
+    15) iproc=686
+    	# athlon64 cpu-type only supported in gcc >= 3.4.0, but that will be
+    	# caught and remedied in the optimation tests below.
+    	proc=athlon64
+    	;;
+
     *) proc=athlon-xp iproc=686 ;;
     esac
     ;;
@@ -857,6 +862,9 @@ cat > $TMPC << EOF
 int main(void) { return 0; }
 EOF
   if test "$_runtime_cpudetection" = no ; then
+    if test "$proc" = "k8" -o "$proc" = "opteron" -o "$proc" = "athlon64" -o "$proc" = "athlon-fx" ; then
+      cc_check -march=$proc $cpuopt=$proc || proc=athlon-xp
+    fi
     if test "$proc" = "athlon-xp" || test "$proc" = "athlon-4" || test "$proc" = "athlon-tbird"; then
       cc_check -march=$proc $cpuopt=$proc || proc=athlon
     fi
