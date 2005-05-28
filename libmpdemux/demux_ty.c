@@ -43,12 +43,7 @@
 #include "demuxer.h"
 #include "parse_es.h"
 #include "stheader.h"
-//#include "mp3_hdr.h"
-//#include "../subreader.h"
 #include "../sub_cc.h"
-//#include "../libvo/sub.h"
-
-//#include "dvdauth.h"
 
 extern void resync_audio_stream( sh_audio_t *sh_audio );
 extern void skip_audio_frame( sh_audio_t *sh_audio );
@@ -79,31 +74,299 @@ extern int sub_justify;
 #define PTS_KHZ          ( PTS_MHZ * 1000 )
 
 #define TY_V             ( 1 )
-#define TY_A             ( 1 )
+#define TY_A             ( 2 )
+
+typedef struct stmf_fileParts
+{
+   int   fileNo;
+   off_t fileSize;
+   int   chunks;
+   off_t startOffset;
+} tmf_fileParts;
+
+#define MAX_TMF_PARTS ( 16 )
 
 typedef struct sTivoInfo
 {
-   unsigned char lastAudio[ MAX_AUDIO_BUFFER ];
-   int           lastAudioEnd;
+   int             whichChunk;
 
-   int           tivoType;           // 1 = SA, 2 = DTiVo
+   unsigned char   lastAudio[ MAX_AUDIO_BUFFER ];
+   int             lastAudioEnd;
 
-   float         firstAudioPTS;
-   float         firstVideoPTS;
+   int             tivoType;           // 1 = SA, 2 = DTiVo
 
-   float         lastAudioPTS;
-   float         lastVideoPTS;
+   float           firstAudioPTS;
+   float           firstVideoPTS;
 
-   int           headerOk;
-   unsigned int  pesFileId;          // Should be 0xf5467abd
-   int           streamType;         // Should be 0x02
-   int           chunkSize;          // Should always be 128k
-   off_t         size;
-   int           readHeader;
+   float           lastAudioPTS;
+   float           lastVideoPTS;
+
+   int             headerOk;
+   unsigned int    pesFileId;          // Should be 0xf5467abd
+   int             streamType;         // Should be 0x02
+   int             chunkSize;          // Should always be 128k
+   off_t           size;
+   int             readHeader;
+   
+   int             tmf;
+   tmf_fileParts   tmfparts[ MAX_TMF_PARTS ];
+   int             tmf_totalparts;
+   off_t           tmf_totalsize;
+   off_t           tmf_totalchunks;
+
 } TiVoInfo;
 
 off_t vstream_streamsize( );
 void ty_ClearOSD( int start );
+
+// ===========================================================================
+#define TMF_SIG "showing.xml"
+
+int ty_octaltodecimal( char *num )
+{
+   int i;
+   int result = 0;
+   int len;
+   int mult;
+
+   len = strlen( num );
+   mult = 1;
+
+   for ( i = ( len - 1 ) ; i >= 0 ; i-- )
+   {
+      result += ( ( num[ i ] - '0') * mult );
+      mult *= 8;
+   }
+   return( result );
+}
+
+
+
+// ===========================================================================
+int ty_extensionis( char *name, char *ext )
+{
+   char *ptr;
+
+   if ( strlen( ext ) > strlen( name ) ) return( 0 );
+   ptr = name;
+   ptr += ( strlen( name ) - strlen( ext ) );
+   if ( strcmp( ptr, ext ) == 0 ) return( 1 );
+   return( 0 );
+}
+
+
+// ===========================================================================
+int ty_tmf_filetoparts( demuxer_t *demux, TiVoInfo *tivo )
+{
+   char    header[ 512 ];
+   char    name[ 80 ];
+   char    sizestr[ 80 ];
+   int     size;
+   int     count;
+   int     blocks;
+   int     done;
+   off_t   offset;
+   off_t   totalsize;
+   off_t   skip;
+   int     error = 0;
+   int     parts = 0;
+   int     isty;
+   int     index;
+   int     ok;
+
+   offset = 0;
+   totalsize = demux->stream->end_pos;
+
+   done = 0;
+   mp_msg( MSGT_DEMUX, MSGL_DBG3, "Dumping tar contents\n" );
+   while ( done == 0 )
+   {
+      ok = stream_seek( demux->stream, offset );
+      if ( ( offset + 512 ) == totalsize )
+      {
+         done = 1;
+         break;
+      }
+      if ( ok == 0 )
+      { 
+         mp_msg( MSGT_DEMUX, MSGL_DBG3, "Seek bad %d\n", offset );
+         done = 1;
+         error = 1;
+         break;
+      }
+      count = stream_read( demux->stream, header, 512 );
+      if ( count < 512 )
+      { 
+         mp_msg( MSGT_DEMUX, MSGL_DBG3, "Read bad\n" );
+         done = 1;
+         error = 1;
+         break;
+      }
+      strncpy( name, &header[ 0 ], 100 );
+      strncpy( sizestr, &header[ 124 ], 12 );
+      size = ty_octaltodecimal( sizestr );
+
+      blocks = size / 512;
+      if ( ( size % 512 ) > 0 ) blocks++;
+      skip = ( blocks + 1 ) * 512;
+
+      if ( ( offset + skip ) > totalsize )
+      {
+         size = totalsize - offset;
+      }
+
+      isty = ty_extensionis( name, ".ty" );
+
+      mp_msg( MSGT_DEMUX, MSGL_DBG3, "name %-20.20s size %-12.12s %d %d\n", 
+         name, sizestr, size, isty );
+
+      if ( isty )
+      {
+         tivo->tmfparts[ parts ].fileNo = parts;
+			// HACK - Ignore last chunk of a Part File
+			// Why?  I have no idea.
+         tivo->tmfparts[ parts ].fileSize = size - 0x20000;
+         tivo->tmfparts[ parts ].startOffset = offset + 512;
+         tivo->tmfparts[ parts ].chunks = 
+            ( tivo->tmfparts[ parts ].fileSize / CHUNKSIZE );
+         mp_msg
+         ( 
+            MSGT_DEMUX, MSGL_DBG3,
+           "tmf_filetoparts(): index %d, file %d, chunks %d\n",
+            parts,
+            tivo->tmfparts[ parts ].fileNo,
+            tivo->tmfparts[ parts ].chunks
+         );
+         mp_msg
+         ( 
+            MSGT_DEMUX, MSGL_DBG3,
+           "tmf_filetoparts(): size %lld\n",
+           tivo->tmfparts[ parts ].fileSize
+         );
+         mp_msg
+         ( 
+            MSGT_DEMUX, MSGL_DBG3,
+           "tmf_filetoparts(): startOffset %lld\n",
+           tivo->tmfparts[ parts ].startOffset
+         );
+         parts++;
+         if ( parts > MAX_TMF_PARTS )
+         {
+            mp_msg( MSGT_DEMUX, MSGL_ERR, "ty:tmf too big\n" );
+         }
+      }
+
+      if ( ( offset + skip ) > totalsize )
+      {
+         done = 1;
+         error = 1;
+      }
+      else
+      {
+         offset += skip;
+      }
+   }
+   if ( error )
+   {
+      mp_msg( MSGT_DEMUX, MSGL_DBG3, 
+         "WARNING : tmf parse error, not intact\n" );
+   }
+   tivo->tmf_totalparts = parts;
+   mp_msg( MSGT_DEMUX, MSGL_DBG3,
+      "tmf_filetoparts(): No More Part Files %d\n", parts );
+
+   tivo->tmf_totalsize = 0;
+   tivo->tmf_totalchunks = 0;
+   for( index = 0 ; index < tivo->tmf_totalparts ; index++ )
+   {
+      tivo->tmf_totalsize += tivo->tmfparts[ index ].fileSize;
+      tivo->tmf_totalchunks += ( tivo->tmfparts[ index ].fileSize / CHUNKSIZE );
+   }
+   mp_msg( MSGT_DEMUX, MSGL_DBG3,
+      "tmf_filetoparts():total size %lld\n", tivo->tmf_totalsize );
+   mp_msg( MSGT_DEMUX, MSGL_DBG3,
+      "tmf_filetoparts():total chunks %d\n", tivo->tmf_totalchunks );
+
+   return( 1 );
+}
+
+
+// ===========================================================================
+void tmf_filetooffset( TiVoInfo *tivo, int chunk, off_t *offset )
+{
+   int index;
+
+   *offset = 0;
+
+   for( index = 0 ; index < tivo->tmf_totalparts ; index++ )
+   {
+      if ( chunk >= tivo->tmfparts[ index ].chunks )
+      {
+         chunk -= tivo->tmfparts[ index ].chunks;
+      }
+      else
+      {
+         break;
+      }
+   }
+   if ( chunk < tivo->tmfparts[ index ].chunks )
+   {
+      *offset = tivo->tmfparts[ index ].startOffset +
+         ( chunk * CHUNKSIZE );
+   }
+   mp_msg
+   ( 
+      MSGT_DEMUX, MSGL_DBG3, 
+      "tmf_filetooffset() offset %llx\n", *offset
+   );
+}
+
+
+// ===========================================================================
+int tmf_load_chunk( demuxer_t *demux, TiVoInfo *tivo, 
+   unsigned char *buff, int size, int readChunk )
+{
+   off_t fileoffset;
+   int    count;
+
+   mp_msg( MSGT_DEMUX, MSGL_DBG3, "\ntmf_load_chunk() begin %d\n", 
+      readChunk );
+
+   if ( tivo->tmf_totalparts <= 0 )
+   {
+      return( 0 );
+   }
+
+   if ( readChunk >= tivo->tmf_totalchunks )
+   {
+      mp_msg( MSGT_DEMUX, MSGL_ERR, "Read past EOF()\n" );
+      return( 0 );
+   }
+
+   tmf_filetooffset( tivo, readChunk, &fileoffset );
+
+   if ( stream_seek( demux->stream, fileoffset ) != 1 )
+   {
+      mp_msg( MSGT_DEMUX, MSGL_ERR, "Read past EOF()\n" );
+      return( 0 );
+   }
+   count = stream_read( demux->stream, buff, size );
+	demux->filepos = stream_tell( demux->stream );
+
+   mp_msg( MSGT_DEMUX, MSGL_DBG3, "tmf_load_chunk() count %x\n", 
+		count );
+
+   mp_msg( MSGT_DEMUX, MSGL_DBG3, 
+		"tmf_load_chunk() bytes %x %x %x %x %x %x %x %x\n", 
+		buff[ 0 ], buff[ 1 ], buff[ 2 ], buff[ 3 ],
+		buff[ 4 ], buff[ 5 ], buff[ 6 ], buff[ 7 ] );
+
+   mp_msg( MSGT_DEMUX, MSGL_DBG3, "tmf_load_chunk() end\n" );
+    
+   return( count );
+}
+
+// ===========================================================================
 
 // DTiVo MPEG 336, 480, 576, 768
 // SA TiVo 864
@@ -116,10 +379,11 @@ void ty_ClearOSD( int start );
 #define AC3_PTS_LENGTH             ( 16 )
 #define AC3_PTS_OFFSET             ( 9 )
 
-#define NUMBER_DIFFERENT_AUDIO_SIZES ( 6 )
+#define NUMBER_DIFFERENT_AUDIO_SIZES ( 7 )
 static int Series1AudioWithPTS[ NUMBER_DIFFERENT_AUDIO_SIZES ] = 
 { 
    336 + SERIES1_PTS_LENGTH, 
+   384 + SERIES1_PTS_LENGTH, 
    480 + SERIES1_PTS_LENGTH, 
    576 + SERIES1_PTS_LENGTH, 
    768 + SERIES1_PTS_LENGTH, 
@@ -128,6 +392,7 @@ static int Series1AudioWithPTS[ NUMBER_DIFFERENT_AUDIO_SIZES ] =
 static int Series2AudioWithPTS[ NUMBER_DIFFERENT_AUDIO_SIZES ] = 
 { 
    336 + SERIES2_PTS_LENGTH, 
+   384 + SERIES2_PTS_LENGTH, 
    480 + SERIES2_PTS_LENGTH, 
    576 + SERIES2_PTS_LENGTH, 
    768 + SERIES2_PTS_LENGTH, 
@@ -316,21 +581,6 @@ static int tivobuffer2hostlong( unsigned char *buffer )
    );
 }
 
-static unsigned char tivo_reversebyte( unsigned char val )
-{
-   int           count;
-   unsigned char ret;
-
-   ret = 0;
-   for ( count = 0 ; count < 8 ; count++ )
-   {
-      ret = ret << 1;
-      ret |= ( ( val >> count ) & 0x01 );
-   }
-   return( ret );
-}
-
-
 static unsigned char ty_VideoPacket[] = { 0x00, 0x00, 0x01, 0xe0 };
 static unsigned char ty_MPEGAudioPacket[] = { 0x00, 0x00, 0x01, 0xc0 };
 static unsigned char ty_AC3AudioPacket[] = { 0x00, 0x00, 0x01, 0xbd };
@@ -363,6 +613,9 @@ int demux_ty_fill_buffer( demuxer_t *demux )
    int              esOffset1;
    int              esOffset2;
 
+   unsigned char    lastCC[ 16 ];
+   unsigned char    lastXDS[ 16 ];
+
    TiVoInfo         *tivo = 0;
 
    if ( demux->stream->type == STREAMTYPE_DVD )
@@ -370,7 +623,7 @@ int demux_ty_fill_buffer( demuxer_t *demux )
 		return( 0 );
 	}
 
-   mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Parsing a chunk\n" );
+   mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:ty processing\n" );
    if ( ( demux->a_streams[ MAX_A_STREAMS - 1 ] ) == 0 )
    {
       demux->a_streams[ MAX_A_STREAMS - 1 ] = malloc( sizeof( TiVoInfo ) );
@@ -407,31 +660,64 @@ int demux_ty_fill_buffer( demuxer_t *demux )
       if ( tivo->readHeader == 0 )
       {
          tivo->readHeader = 1;
+         tivo->size = demux->stream->end_pos;
+
          filePos = demux->filepos;
          stream_seek( demux->stream, 0 );
+
          // mp_msg( MSGT_DEMUX, MSGL_DBG3, 
 			// 	"ty:Reading a chunk %d\n", __LINE__ );
+
          readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
+
+         if ( memcmp( chunk, TMF_SIG, sizeof( TMF_SIG ) ) == 0 )
+         {
+            mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Detected a tmf\n" );
+            tivo->tmf = 1;
+            ty_tmf_filetoparts( demux, tivo );
+            readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE, 0 );
+         }
+
          if ( readSize == CHUNKSIZE )
          {
             tivo->pesFileId = tivobuffer2hostlong( &chunk[ 0x00 ] );
             tivo->streamType = tivobuffer2hostlong( &chunk[ 0x04 ] );
             tivo->chunkSize = tivobuffer2hostlong( &chunk[ 0x08 ] );
-            tivo->size = tivobuffer2hostlong( &chunk[ 0x0c ] );
+
             if ( tivo->pesFileId == TIVO_PES_FILEID )
             {
                off_t numberParts;
-               off_t size;
 
-               if ( demux->stream->end_pos > TIVO_PART_LENGTH )
+               readSize = 0;
+               
+               if ( tivo->tmf != 1 )
                {
+                  off_t size;
+                  off_t offset;
+
                   numberParts = demux->stream->end_pos / TIVO_PART_LENGTH;
-                  mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Number Parts %d\n",
+                  offset = numberParts * TIVO_PART_LENGTH;
+
+                  mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:ty/ty+Number Parts %d\n",
                     numberParts );
-                  stream_seek( demux->stream, numberParts * TIVO_PART_LENGTH );
-                  // mp_msg( MSGT_DEMUX, MSGL_DBG3, 
-				      //    "ty:Reading a chunk %d\n", __LINE__ );
-                  readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
+
+                  if ( ( offset + CHUNKSIZE ) < demux->stream->end_pos )
+                  {
+                     stream_seek( demux->stream, offset );
+                     readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
+                  }
+               }
+               else
+               {
+                  numberParts = tivo->tmf_totalparts;
+                  offset = numberParts * TIVO_PART_LENGTH;
+                  readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE, 
+                     ( numberParts * ( TIVO_PART_LENGTH - 0x20000 ) / 
+                     CHUNKSIZE ) );
+               }
+
+               if ( readSize == CHUNKSIZE )
+               {
                   pesFileId = tivobuffer2hostlong( &chunk[ 0x00 ] );
                   if ( pesFileId == TIVO_PES_FILEID )
                   {
@@ -444,19 +730,7 @@ int demux_ty_fill_buffer( demuxer_t *demux )
                      mp_msg( MSGT_DEMUX, MSGL_DBG3, 
                         "ty:Header Calc Stream Size %lld\n", tivo->size );
                   }
-                  else
-                  {
-                     tivo->size = demux->stream->end_pos;
-                  }
                }
-               else
-               {
-                  tivo->size = demux->stream->end_pos;
-               }
-            }
-            else
-            {
-               tivo->size = demux->stream->end_pos;
             }
          }
          if ( tivo->size > demux->stream->end_pos )
@@ -470,6 +744,7 @@ int demux_ty_fill_buffer( demuxer_t *demux )
 			}
          stream_seek( demux->stream, filePos );
 			demux->filepos = stream_tell( demux->stream );
+         tivo->whichChunk = ( filePos / CHUNKSIZE );
       }
       demux->movi_start = 0;
       demux->movi_end = tivo->size;
@@ -481,10 +756,9 @@ int demux_ty_fill_buffer( demuxer_t *demux )
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "ty:ty header size %llx\n", tivo->size );
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
+      "ty:ty which Chunk %llx\n", tivo->whichChunk );
+   mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "ty:file end_pos   %llx\n", demux->stream->end_pos );
-//   mp_msg( MSGT_DEMUX, MSGL_DBG3,
-//      "ty:vstream size   %llx\n", vstream_streamsize() );
-
    mp_msg( MSGT_DEMUX, MSGL_DBG3,
       "\nty:wanted current offset %llx\n", stream_tell( demux->stream ) );
 
@@ -497,31 +771,55 @@ int demux_ty_fill_buffer( demuxer_t *demux )
       }
    }
 
-   // Make sure we are on a 128k boundary
-   if ( ( demux->filepos % CHUNKSIZE ) != 0 )
+   if ( tivo->tmf != 1 )
    {
-      whichChunk = demux->filepos / CHUNKSIZE;
-      if ( ( demux->filepos % CHUNKSIZE ) > ( CHUNKSIZE / 2 ) )
+      // Make sure we are on a 128k boundary
+      if ( ( demux->filepos % CHUNKSIZE ) != 0 )
       {
-         whichChunk++;
+         whichChunk = demux->filepos / CHUNKSIZE;
+         if ( ( demux->filepos % CHUNKSIZE ) > ( CHUNKSIZE / 2 ) )
+         {
+            whichChunk++;
+         }
+         stream_seek( demux->stream, ( whichChunk * CHUNKSIZE ) );
       }
-      stream_seek( demux->stream, ( whichChunk * CHUNKSIZE ) );
-   }
 
-   demux->filepos = stream_tell( demux->stream );
-   readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
-   if ( readSize != CHUNKSIZE )
+      demux->filepos = stream_tell( demux->stream );
+      tivo->whichChunk = demux->filepos / CHUNKSIZE;
+      readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
+      if ( readSize != CHUNKSIZE )
+      {
+         return( 0 );
+      }
+   }
+   else
    {
-      return( 0 );
+      readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE, 
+         tivo->whichChunk );
+      if ( readSize != CHUNKSIZE )
+      {
+         return( 0 );
+      }
+      tivo->whichChunk++;
    }
 
    // We found a part header, skip it
    pesFileId = tivobuffer2hostlong( &chunk[ 0x00 ] );
    if( pesFileId == TIVO_PES_FILEID )
    {
-      demux->filepos = stream_tell( demux->stream );
       mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:Skipping PART Header\n" );
-      readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
+      if ( tivo->tmf != 1 )
+      {
+         demux->filepos = stream_tell( demux->stream );
+         readSize = stream_read( demux->stream, chunk, CHUNKSIZE );
+      }
+      else
+      {
+         readSize = tmf_load_chunk( demux, tivo, chunk, CHUNKSIZE, 
+            tivo->whichChunk );
+         tivo->whichChunk++;
+      }
+
       if ( readSize != CHUNKSIZE )
       {
          return( 0 );
@@ -545,6 +843,7 @@ int demux_ty_fill_buffer( demuxer_t *demux )
    // ======================================================================
    // Finally, we get to actually parse the chunk
    // ======================================================================
+   mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:ty parsing a chunk\n" );
    numberRecs = chunk[ 0 ];
    recPtr = &chunk[ 4 ];
    offset = ( numberRecs * 16 ) + 4;
@@ -825,17 +1124,20 @@ int demux_ty_fill_buffer( demuxer_t *demux )
 
 			mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:CC %x %x\n", b1, b2 );
 
-			buffer[ 0x00 ] = 0x00;
-			buffer[ 0x01 ] = 0x00;
-			buffer[ 0x02 ] = 0x01;
-			buffer[ 0x03 ] = 0xb2;
-			buffer[ 0x04 ] = 'T';
-			buffer[ 0x05 ] = 'Y';
-			buffer[ 0x06 ] = 0x01;
-			buffer[ 0x07 ] = b1;
-			buffer[ 0x08 ] = b2;
-			demux_ty_CopyToDemuxPacket( TY_V, tivo, demux->video, buffer, 0x09,
-				( demux->filepos + offset ), tivo->lastVideoPTS );
+			lastCC[ 0x00 ] = 0x00;
+			lastCC[ 0x01 ] = 0x00;
+			lastCC[ 0x02 ] = 0x01;
+			lastCC[ 0x03 ] = 0xb2;
+			lastCC[ 0x04 ] = 'T';
+			lastCC[ 0x05 ] = 'Y';
+			lastCC[ 0x06 ] = 0x01;
+			lastCC[ 0x07 ] = b1;
+			lastCC[ 0x08 ] = b2;
+         if ( subcc_enabled )
+         {
+			   demux_ty_CopyToDemuxPacket( TY_V, tivo, demux->video, lastCC, 0x09,
+  				   ( demux->filepos + offset ), tivo->lastVideoPTS );
+         }
 		}
       // ================================================================
       // Extended Data Services
@@ -855,20 +1157,33 @@ int demux_ty_fill_buffer( demuxer_t *demux )
 
          mp_msg( MSGT_DEMUX, MSGL_DBG3, "ty:XDS %x %x\n", b1, b2 );
 
-			buffer[ 0x00 ] = 0x00;
-			buffer[ 0x01 ] = 0x00;
-			buffer[ 0x02 ] = 0x01;
-			buffer[ 0x03 ] = 0xb2;
-			buffer[ 0x04 ] = 'T';
-			buffer[ 0x05 ] = 'Y';
-			buffer[ 0x06 ] = 0x02;
-			buffer[ 0x07 ] = b1;
-			buffer[ 0x08 ] = b2;
-			demux_ty_CopyToDemuxPacket( TY_V, tivo, demux->video, buffer, 0x09,
-				( demux->filepos + offset ), tivo->lastVideoPTS );
+			lastXDS[ 0x00 ] = 0x00;
+			lastXDS[ 0x01 ] = 0x00;
+			lastXDS[ 0x02 ] = 0x01;
+			lastXDS[ 0x03 ] = 0xb2;
+			lastXDS[ 0x04 ] = 'T';
+			lastXDS[ 0x05 ] = 'Y';
+			lastXDS[ 0x06 ] = 0x02;
+			lastXDS[ 0x07 ] = b1;
+			lastXDS[ 0x08 ] = b2;
+         if ( subcc_enabled )
+         {
+			   demux_ty_CopyToDemuxPacket( TY_V, tivo, demux->video, lastXDS, 0x09,
+				   ( demux->filepos + offset ), tivo->lastVideoPTS );
+         }
 		}
       // ================================================================
       // Found a 0x03 on Droid's TiVo, I have no idea what it is
+      // ================================================================
+		else if ( type == 0x03 )
+		{
+         if ( ( size > 0 ) && ( ( size + offset ) <= CHUNKSIZE ) )
+         {
+            offset += size;
+			}
+		}
+      // ================================================================
+      // Found a 0x03 on Hermit's TiVo, I have no idea what it is
       // ================================================================
 		else if ( type == 0x03 )
 		{
@@ -986,7 +1301,10 @@ void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, int flags )
    {
       newpos = 0;
    }
-   stream_seek( demuxer->stream, newpos  );
+
+   tivo->whichChunk = newpos / CHUNKSIZE;
+
+   stream_seek( demuxer->stream, newpos );
 
    // re-sync video:
    videobuf_code_len = 0; // reset ES stream buffer
