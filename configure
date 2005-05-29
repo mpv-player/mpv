@@ -2451,7 +2451,7 @@ echores "$_posix4"
 echocheck "lrintf"
 cat > $TMPC << EOF
 #include <math.h>
-int main(void) { (void) lrintf(0.0); return 0; }
+int main(void) { long (*foo)(double); foo = lrintf; (void)(*foo)(0.0); return 0; }
 EOF
 _lrintf=no
 cc_check $_ld_lm && _lrintf=yes
