@@ -7,8 +7,10 @@ set -e
 
 arch=$(dpkg --print-installation-architecture)
 
-[ -d /usr/lib/win32 ] || mkdir -v /usr/lib/win32
-cd /usr/lib/win32
+codecsdir=/usr/lib/codecs
+
+[ -d $codecsdir ] || mkdir -v $codecsdir
+cd $codecsdir
 [ -d mplayer_win32_codecs ] || mkdir -v mplayer_win32_codecs
    
 INSTALL () { 
@@ -16,7 +18,7 @@ INSTALL () {
     site="$2"
     url="$site/$filename"
 
-    cd /usr/lib/win32/mplayer_win32_codecs
+    cd $codecsdir/mplayer_win32_codecs
 
     if [ -r $filename.list ] ; then
       #if we stop the script, we don't want to redownload things
@@ -56,7 +58,7 @@ case "$1" in
      
    mainurl=''
 
-   pref=/usr/lib/win32/mplayer_win32_codecs/bestsite
+   pref=$codecsdir/mplayer_win32_codecs/bestsite
 
    #distribute the load
    if [ -r $pref ] ; then
@@ -111,13 +113,13 @@ case "$1" in
 	;;
     
     uninstall)
-	cd /usr/lib/win32/
+	cd $codecsdir
 	rm -rf mplayer_win32_codecs      
 	#FIXME we need a better clean system
 	if [ -r /usr/bin/symlinks ] ; then
          symlinks -d .
 	else
-	 echo "please install the package 'symlinks' and run 'symlinks -d /usr/lib/win32' "
+	 echo "please install the package 'symlinks' and run 'symlinks -d $codecsdir' "
 	fi
 	echo "Uninstalled Succesfully!"
 	
