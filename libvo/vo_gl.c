@@ -162,6 +162,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 	aspect(&d_width,&d_height,A_NOZOOM);
+	geometry(&vo_dx, &vo_dy, &d_width, &d_height,
+	          vo_screenwidth, vo_screenheight);
 #ifdef X11_FULLSCREEN
 //        if( flags&VOFLAG_FULLSCREEN ){ // (-fs)
 //          aspect(&d_width,&d_height,A_ZOOM);
@@ -186,8 +188,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 
 	vo_fs = VO_FALSE;
 
-	hint.x = 0;
-	hint.y = 0;
+	hint.x = vo_dx;
+	hint.y = vo_dy;
 	hint.width = d_width;
 	hint.height = d_height;
 	hint.flags = PPosition | PSize;
@@ -241,7 +243,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   }
       if (vo_ontop) vo_x11_setlayer(mDisplay, vo_window, vo_ontop);
 
-  vo_x11_nofs_sizepos(0, 0, d_width, d_height);
+  vo_x11_nofs_sizepos(vo_dx, vo_dy, d_width, d_height);
   if (vo_fs ^ (flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen();
   setGlWindow(&gl_vinfo, &gl_context, vo_window);

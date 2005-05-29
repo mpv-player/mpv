@@ -692,8 +692,8 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 	XVisualInfo *vinfo, vinfo_buf;
 	XEvent xev;
 
-		hint.x = 0;
-		hint.y = 0;
+		hint.x = vo_dx;
+		hint.y = vo_dy;
 		hint.width = d_width;
 		hint.height = d_height;
 		hint.flags = PPosition | PSize;
@@ -745,7 +745,7 @@ static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_
 		 | ButtonPressMask | ButtonReleaseMask | ExposureMask
         );
   }
-  vo_x11_nofs_sizepos(0, 0, d_width, d_height);
+  vo_x11_nofs_sizepos(vo_dx, vo_dy, d_width, d_height);
   if (vo_fs ^ (flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen();
 
@@ -829,6 +829,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 	aspect(&d_width,&d_height,A_NOZOOM);
+	geometry(&vo_dx, &vo_dy, &d_width, &d_height,
+	          vo_screenwidth, vo_screenheight);
 
 #if defined(HAVE_NEW_GUI) && !defined(GL_WIN32)
 	if (use_gui) {
