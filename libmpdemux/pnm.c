@@ -33,6 +33,10 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <inttypes.h>
+#include "stream.h"
+#include "demuxer.h"
+#include "help_mp.h"
+
 
 #include "config.h"
 #ifndef HAVE_WINSOCK2
@@ -46,6 +50,8 @@
 
 #include "pnm.h"
 //#include "libreal/rmff.h"
+
+extern int network_bandwidth;
 
 #define FOURCC_TAG( ch0, ch1, ch2, ch3 ) \
         (((long)(unsigned char)(ch3)       ) | \
@@ -836,22 +842,79 @@ int pnm_read (pnm_t *this, char *data, int len) {
   this->recv_read += to_copy;
 
 #ifdef LOG
-  printf ("input_pnm: %d bytes provided\n", len);
+  mp_msg(MSGT_OPEN, MSGL_INFO, "input_pnm: %d bytes provided\n", len);
 #endif
 
   return len;
 }
 
-int pnm_peek_header (pnm_t *this, char *data) {
+static int pnm_peek_header (pnm_t *this, char *data) {
 
   memcpy (data, this->header, this->header_len);
   return this->header_len;
 }
 
-void pnm_close(pnm_t *p) {
+static void pnm_close(pnm_t *p) {
 
   if (p->s >= 0) closesocket(p->s);
   free(p->path);
   free(p);
 }
 
+static int pnm_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl ) {
+	return pnm_read(stream_ctrl->data, buffer, size);
+}
+
+static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
+  int fd;
+  pnm_t *pnm;
+  URL_t *url;
+
+  mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_PNM, URL: %s\n", stream->url);
+  stream->streaming_ctrl = streaming_ctrl_new();
+  if(stream->streaming_ctrl==NULL) {
+    return STREAM_ERROR;
+  }
+  stream->streaming_ctrl->bandwidth = network_bandwidth;
+  url = url_new(stream->url);
+  stream->streaming_ctrl->url = check4proxies(url);
+  //url_free(url);
+
+  fd = connect2Server( stream->streaming_ctrl->url->hostname,
+    stream->streaming_ctrl->url->port ? stream->streaming_ctrl->url->port : 7070,1 );
+  
+  if(fd<0)
+    goto fail;
+
+  pnm = pnm_connect(fd,stream->streaming_ctrl->url->file);
+  if(!pnm) 
+    goto fail;
+  stream->type = STREAMTYPE_STREAM;
+  stream->fd=fd;
+  stream->streaming_ctrl->data=pnm;
+  stream->streaming_ctrl->streaming_read = pnm_streaming_read;
+  //stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
+  stream->streaming_ctrl->prebuffer_size = 8*1024;  // 8 KBytes
+  stream->streaming_ctrl->buffering = 1;
+  stream->streaming_ctrl->status = streaming_playing_e;
+  *file_format = DEMUXER_TYPE_REAL;
+  fixup_network_stream_cache(stream);
+  return STREAM_OK;
+
+fail:
+  streaming_ctrl_free(stream->streaming_ctrl);
+  stream->streaming_ctrl = NULL;
+  return STREAM_UNSUPORTED;
+}
+
+
+stream_info_t stream_info_pnm = {
+  "RealNetworks pnm",
+  "pnm",
+  "Arpi, xine team",
+  "ported from xine",
+  open_s,
+  {"pnm", NULL},	//pnm as fallback
+  NULL,
+  0 // Urls are an option string
+};

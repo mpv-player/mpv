@@ -7,10 +7,111 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "http.h"
 #include "url.h"
 #include "mp_msg.h"
+
+#include "stream.h"
+#include "demuxer.h"
+#include "network.h"
+#include "help_mp.h"
+
+#ifndef HAVE_WINSOCK2
+#define closesocket close
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
+
+
+extern mime_struct_t mime_type_table[];
+extern int stream_cache_size;
+extern int network_bandwidth;
+
+extern int http_seek(stream_t *stream, off_t pos);
+
+static int nop_streaming_start( stream_t *stream ) {
+	HTTP_header_t *http_hdr = NULL;
+	char *next_url=NULL;
+	URL_t *rd_url=NULL;
+	int fd,ret;
+	if( stream==NULL ) return -1;
+
+	fd = stream->fd;
+	if( fd<0 ) {
+		fd = http_send_request( stream->streaming_ctrl->url, 0 ); 
+		if( fd<0 ) return -1;
+		http_hdr = http_read_response( fd );
+		if( http_hdr==NULL ) return -1;
+
+		switch( http_hdr->status_code ) {
+			case 200: // OK
+				mp_msg(MSGT_NETWORK,MSGL_V,"Content-Type: [%s]\n", http_get_field(http_hdr, "Content-Type") );
+				mp_msg(MSGT_NETWORK,MSGL_V,"Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length") );
+				if( http_hdr->body_size>0 ) {
+					if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
+						http_free( http_hdr );
+						return -1;
+					}
+				}
+				break;
+			// Redirect
+			case 301: // Permanently
+			case 302: // Temporarily
+				ret=-1;
+				next_url = http_get_field( http_hdr, "Location" );
+
+				if (next_url != NULL)
+					rd_url=url_new(next_url);
+
+				if (next_url != NULL && rd_url != NULL) {
+					mp_msg(MSGT_NETWORK,MSGL_STATUS,"Redirected: Using this url instead %s\n",next_url);
+							stream->streaming_ctrl->url=check4proxies(rd_url);
+					ret=nop_streaming_start(stream); //recursively get streaming started 
+				} else {
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"Redirection failed\n");
+					closesocket( fd );
+					fd = -1;
+				}
+				return ret;
+				break;
+			case 401: //Authorization required
+			case 403: //Forbidden
+			case 404: //Not found
+			case 500: //Server Error
+			default:
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"Server returned code %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
+				closesocket( fd );
+				fd = -1;
+				return -1;
+				break;
+		}
+		stream->fd = fd;
+	} else {
+		http_hdr = (HTTP_header_t*)stream->streaming_ctrl->data;
+		if( http_hdr->body_size>0 ) {
+			if( streaming_bufferize( stream->streaming_ctrl, http_hdr->body, http_hdr->body_size )<0 ) {
+				http_free( http_hdr );
+				stream->streaming_ctrl->data = NULL;
+				return -1;
+			}
+		}
+	}
+
+	if( http_hdr ) {
+		http_free( http_hdr );
+		stream->streaming_ctrl->data = NULL;
+	}
+
+	stream->streaming_ctrl->streaming_read = nop_streaming_read;
+	stream->streaming_ctrl->streaming_seek = nop_streaming_seek;
+	stream->streaming_ctrl->prebuffer_size = 64*1024; // 64 KBytes
+	stream->streaming_ctrl->buffering = 1;
+	stream->streaming_ctrl->status = streaming_playing_e;
+	return 0;
+}
 
 HTTP_header_t *
 http_new_header() {
@@ -439,4 +540,236 @@ base64_encode(const void *enc, int encLen, char *out, int outMax) {
 	return -1;
 }
 
+static int http_streaming_start(stream_t *stream, int* file_format) {
+	HTTP_header_t *http_hdr;
+	unsigned int i;
+	int fd=-1;
+	int redirect = 0;
+	int auth_retry=0;
+	int seekable=0;
+	char *content_type;
+	char *next_url;
+	URL_t *url = stream->streaming_ctrl->url;
 
+	do
+	{
+		fd = http_send_request( url, 0 );
+		if( fd<0 ) {
+			return -1;
+		}
+
+		http_hdr = http_read_response( fd );
+		if( http_hdr==NULL ) {
+			closesocket( fd );
+			http_free( http_hdr );
+			return -1;
+		}
+
+		stream->fd=fd;
+		if( verbose>0 ) {
+			http_debug_hdr( http_hdr );
+		}
+		
+		stream->streaming_ctrl->data = (void*)http_hdr;
+
+		// Check if we can make partial content requests and thus seek in http-streams
+		if( http_hdr!=NULL && http_hdr->status_code==200 ) {
+		    char *accept_ranges;
+		    if( (accept_ranges = http_get_field(http_hdr,"Accept-Ranges")) != NULL )
+			seekable = strncmp(accept_ranges,"bytes",5)==0;
+		}
+
+		// Check if the response is an ICY status_code reason_phrase
+		if( !strcasecmp(http_hdr->protocol, "ICY") ) {
+			switch( http_hdr->status_code ) {
+				case 200: { // OK
+					char *field_data = NULL;
+					// note: I skip icy-notice1 and 2, as they contain html <BR>
+					// and are IMHO useless info ::atmos
+					if( (field_data = http_get_field(http_hdr, "icy-name")) != NULL )
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"Name   : %s\n", field_data); field_data = NULL;
+					if( (field_data = http_get_field(http_hdr, "icy-genre")) != NULL )
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"Genre  : %s\n", field_data); field_data = NULL;
+					if( (field_data = http_get_field(http_hdr, "icy-url")) != NULL )
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"Website: %s\n", field_data); field_data = NULL;
+					// XXX: does this really mean public server? ::atmos
+					if( (field_data = http_get_field(http_hdr, "icy-pub")) != NULL )
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"Public : %s\n", atoi(field_data)?"yes":"no"); field_data = NULL;
+					if( (field_data = http_get_field(http_hdr, "icy-br")) != NULL )
+						mp_msg(MSGT_NETWORK,MSGL_INFO,"Bitrate: %skbit/s\n", field_data); field_data = NULL;
+					
+					// If content-type == video/nsv we most likely have a winamp video stream 
+					// otherwise it should be mp3. if there are more types consider adding mime type 
+					// handling like later
+					if ( (field_data = http_get_field(http_hdr, "content-type")) != NULL && (!strcmp(field_data, "video/nsv") || !strcmp(field_data, "misc/ultravox")))
+						*file_format = DEMUXER_TYPE_NSV;
+					else
+						*file_format = DEMUXER_TYPE_AUDIO;
+					return 0;
+				}
+				case 400: // Server Full
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server is full, skipping!\n");
+					return -1;
+				case 401: // Service Unavailable
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server return service unavailable, skipping!\n");
+					return -1;
+				case 403: // Service Forbidden
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server return 'Service Forbidden'\n");
+					return -1;
+				case 404: // Resource Not Found
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: ICY-Server couldn't find requested stream, skipping!\n");
+					return -1;
+				default:
+					mp_msg(MSGT_NETWORK,MSGL_ERR,"Error: unhandled ICY-Errorcode, contact MPlayer developers!\n");
+					return -1;
+			}
+		}
+
+		// Assume standard http if not ICY			
+		switch( http_hdr->status_code ) {
+			case 200: // OK
+				// Look if we can use the Content-Type
+				content_type = http_get_field( http_hdr, "Content-Type" );
+				if( content_type!=NULL ) {
+					char *content_length = NULL;
+					mp_msg(MSGT_NETWORK,MSGL_V,"Content-Type: [%s]\n", content_type );
+					if( (content_length = http_get_field(http_hdr, "Content-Length")) != NULL)
+						mp_msg(MSGT_NETWORK,MSGL_V,"Content-Length: [%s]\n", http_get_field(http_hdr, "Content-Length"));
+					// Check in the mime type table for a demuxer type
+					i = 0;
+					while(mime_type_table[i].mime_type != NULL) {
+						if( !strcasecmp( content_type, mime_type_table[i].mime_type ) ) {
+							*file_format = mime_type_table[i].demuxer_type;
+							return seekable;
+						}
+						i++;
+					}
+				}
+				// Not found in the mime type table, don't fail,
+				// we should try raw HTTP
+				return seekable;
+			// Redirect
+			case 301: // Permanently
+			case 302: // Temporarily
+				// TODO: RFC 2616, recommand to detect infinite redirection loops
+				next_url = http_get_field( http_hdr, "Location" );
+				if( next_url!=NULL ) {
+					closesocket( fd );
+					url_free( url );
+					stream->streaming_ctrl->url = url = url_new( next_url );
+					http_free( http_hdr );
+					redirect = 1;	
+				}
+				break;
+			case 401: // Authentication required
+				if( http_authenticate(http_hdr, url, &auth_retry)<0 ) return STREAM_UNSUPORTED;
+				redirect = 1;
+				break;
+			default:
+				mp_msg(MSGT_NETWORK,MSGL_ERR,"Server returned %d: %s\n", http_hdr->status_code, http_hdr->reason_phrase );
+				return -1;
+		}
+	} while( redirect );
+
+	return -1;
+}
+
+static int fixup_open(stream_t *stream,int seekable) {
+
+	stream->type = STREAMTYPE_STREAM;
+	if(seekable)
+	{
+		stream->flags |= STREAM_SEEK;
+		stream->seek = http_seek;
+	}
+	stream->streaming_ctrl->bandwidth = network_bandwidth;
+	if(nop_streaming_start( stream )) {
+		mp_msg(MSGT_NETWORK,MSGL_ERR,"nop_streaming_start failed\n");
+		streaming_ctrl_free(stream->streaming_ctrl);
+		stream->streaming_ctrl = NULL;
+		return STREAM_UNSUPORTED;
+	}
+	if(stream->streaming_ctrl->buffering) {
+		if(stream_cache_size<0) {
+			// cache option not set, will use our computed value.
+			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
+			stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;
+			if( stream_cache_size<64 ) stream_cache_size = 64;	// 16KBytes min buffer
+		}
+		mp_msg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes, seekable: %d\n", stream_cache_size, seekable);
+	}
+
+	fixup_network_stream_cache(stream);
+	return STREAM_OK;
+}
+
+static int open_s1(stream_t *stream,int mode, void* opts, int* file_format) {
+	int seekable=0;
+	URL_t *url;
+
+	stream->streaming_ctrl = streaming_ctrl_new();
+	if( stream->streaming_ctrl==NULL ) {
+		return STREAM_ERROR;
+	}
+	stream->streaming_ctrl->bandwidth = network_bandwidth;
+	url = url_new(stream->url);
+	stream->streaming_ctrl->url = check4proxies(url);
+	//url_free(url);
+	
+	mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_HTTP(1), URL: %s\n", stream->url);
+	seekable = http_streaming_start(stream, file_format);
+	if((seekable < 0) || (*file_format == DEMUXER_TYPE_ASF)) {
+		streaming_ctrl_free(stream->streaming_ctrl);
+		stream->streaming_ctrl = NULL;
+		return STREAM_UNSUPORTED;
+	}
+
+	return fixup_open(stream, seekable);
+}
+
+static int open_s2(stream_t *stream,int mode, void* opts, int* file_format) {
+	int seekable=0;
+	URL_t *url;
+
+	stream->streaming_ctrl = streaming_ctrl_new();
+	if( stream->streaming_ctrl==NULL ) {
+		return STREAM_ERROR;
+	}
+	stream->streaming_ctrl->bandwidth = network_bandwidth;
+	url = url_new(stream->url);
+	stream->streaming_ctrl->url = check4proxies(url);
+	//url_free(url);
+	
+	mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_HTTP(2), URL: %s\n", stream->url);
+	seekable = http_streaming_start(stream, file_format);
+	if(seekable < 0) {
+		streaming_ctrl_free(stream->streaming_ctrl);
+		stream->streaming_ctrl = NULL;
+		return STREAM_UNSUPORTED;
+	}
+
+	return fixup_open(stream, seekable);
+}
+
+
+stream_info_t stream_info_http1 = {
+  "http streaming",
+  "null",
+  "Bertrand, Albeau, Reimar Doeffinger, Arpi?",
+  "plain http",
+  open_s1,
+  {"http", "http_proxy", NULL},
+  NULL,
+  0 // Urls are an option string
+};
+
+stream_info_t stream_info_http2 = {
+  "http streaming",
+  "null",
+  "Bertrand, Albeu, Arpi? who?",
+  "plain http, aslo used as falback for many other protocols",
+  open_s2,
+  {"http", "http_proxy", "pnm", "mms", "mmsu", "mmst", "rtsp", NULL},	//all the others as fallback
+  NULL,
+  0 // Urls are an option string
+};

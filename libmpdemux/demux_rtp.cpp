@@ -16,38 +16,6 @@ extern "C" {
 #include "GroupsockHelper.hh"
 #include <unistd.h>
 
-extern "C" stream_t* stream_open_sdp(int fd, off_t fileSize,
-				     int* file_format) {
-  *file_format = DEMUXER_TYPE_RTP;
-  stream_t* newStream = NULL;
-  do {
-    char* sdpDescription = (char*)malloc(fileSize+1);
-    if (sdpDescription == NULL) break;
-
-    ssize_t numBytesRead = read(fd, sdpDescription, fileSize);
-    if (numBytesRead != fileSize) break;
-    sdpDescription[fileSize] = '\0'; // to be safe
-
-    newStream = (stream_t*)calloc(sizeof (stream_t), 1);
-    if (newStream == NULL) break;
-
-    // Store the SDP description in the 'priv' field, for later use:
-    newStream->priv = sdpDescription; 
-  } while (0);
-  return newStream;
-}
-
-extern "C" int _rtsp_streaming_seek(int /*fd*/, off_t /*pos*/,
-				    streaming_ctrl_t* /*streaming_ctrl*/) {
-  return -1; // For now, we don't handle RTSP stream seeking
-}
-
-extern "C" int rtsp_streaming_start(stream_t* stream) {
-  stream->streaming_ctrl->streaming_seek = _rtsp_streaming_seek;
-
-  return 0;
-}
-
 // A data structure representing input data for each stream:
 class ReadBufferQueue {
 public:

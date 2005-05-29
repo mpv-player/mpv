@@ -11,12 +11,6 @@
 #include "demuxer.h"
 #endif
 
-// Open a SDP file:
-stream_t* stream_open_sdp(int fd, off_t fileSize, int* file_format);
-
-// Open a RTSP URL:
-int rtsp_streaming_start(stream_t* stream);
-
 // Open a RTP demuxer (which was initiated either from a SDP file,
 // or from a RTSP URL):
 demuxer_t* demux_open_rtp(demuxer_t* demuxer);

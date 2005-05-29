@@ -30,15 +30,14 @@
 #endif
 
 extern int verbose;
+extern int network_bandwidth;
 
-
-int asf_http_streaming_start( stream_t *stream, int *demuxer_type );
 int asf_mmst_streaming_start( stream_t *stream );
-
+static int asf_http_streaming_start(stream_t *stream, int *demuxer_type);
 
 // We can try several protocol for asf streaming
 // * first the UDP protcol, if there is a firewall, UDP
-//   packets will not come back, so the mmsu will failed.
+//   packets will not come back, so the mmsu will fail.
 // * Then we can try TCP, but if there is a proxy for
 //   internet connection, the TCP connection will not get
 //   through
@@ -46,20 +45,10 @@ int asf_mmst_streaming_start( stream_t *stream );
 // 
 // Note: Using 	WMP sequence  MMSU then MMST and then HTTP.
 
-int
-asf_streaming_start( stream_t *stream, int *demuxer_type) {
+static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
     char *proto = stream->streaming_ctrl->url->protocol;
     int fd = -1;
     int port = stream->streaming_ctrl->url->port;
-
-    // Is protocol even valid mms,mmsu,mmst,http,http_proxy?
-    if (!(!strncasecmp(proto, "mmst", 4) || !strncasecmp(proto, "mmsu", 4) ||
-	!strncasecmp(proto, "http_proxy", 10) || !strncasecmp(proto, "mms", 3) ||
-	!strncasecmp(proto, "http", 4)))
-    {
-        mp_msg(MSGT_NETWORK,MSGL_ERR,"Unknown protocol: %s\n", proto );
-        return -1;
-    }
 
     // Is protocol mms or mmsu?
     if (!strncasecmp(proto, "mmsu", 4) || !strncasecmp(proto, "mms", 3))
@@ -84,7 +73,7 @@ asf_streaming_start( stream_t *stream, int *demuxer_type) {
 
     //Is protocol http, http_proxy, or mms? 
     if (!strncasecmp(proto, "http_proxy", 10) || !strncasecmp(proto, "http", 4) ||
-	!strncasecmp(proto, "mms", 3))
+	!strncasecmp(proto, "mms", 3) || !strncasecmp(proto, "mmshttp", 7))
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream, demuxer_type );
@@ -151,6 +140,11 @@ extern const char asf_stream_header_guid[];
 extern const char asf_stream_group_guid[];
 extern int audio_id;
 extern int video_id;
+
+static void close_s(stream_t *stream) {
+	close(stream->fd);
+	stream->fd=-1;
+}
 
 static int max_idx(int s_count, int *s_rates, int bound) {
   int i, best = -1, rate = -1;
@@ -848,8 +842,52 @@ asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 		stream->streaming_ctrl->buffering = 1;
 	}
 	stream->streaming_ctrl->status = streaming_playing_e;
+	stream->close = close_s;
 
 	http_free( http_hdr );
 	return 0;
 }
+
+static int open_s(stream_t *stream,int mode, void* opts, int* file_format) {
+	URL_t *url;
+
+	stream->streaming_ctrl = streaming_ctrl_new();
+	if( stream->streaming_ctrl==NULL ) {
+		return STREAM_ERROR;
+	}
+	stream->streaming_ctrl->bandwidth = network_bandwidth;
+	url = url_new(stream->url);
+	stream->streaming_ctrl->url = check4proxies(url);
+	//url_free(url);
+	
+	mp_msg(MSGT_OPEN, MSGL_INFO, "STREAM_ASF, URL: %s\n", stream->url);
+	if((!strncmp(stream->url, "http", 4)) && (*file_format!=DEMUXER_TYPE_ASF && *file_format!=DEMUXER_TYPE_UNKNOWN)) {
+		streaming_ctrl_free(stream->streaming_ctrl);
+		stream->streaming_ctrl = NULL;
+		return STREAM_UNSUPORTED;
+	}
+
+	if(asf_streaming_start(stream, file_format) < 0) {
+		mp_msg(MSGT_OPEN, MSGL_ERR, "failed, exiting\n");
+		streaming_ctrl_free(stream->streaming_ctrl);
+		stream->streaming_ctrl = NULL;
+		return STREAM_UNSUPORTED;
+	}
+	
+	*file_format = DEMUXER_TYPE_ASF;
+	stream->type = STREAMTYPE_STREAM;
+	fixup_network_stream_cache(stream);
+	return STREAM_OK;
+}
+
+stream_info_t stream_info_asf = {
+  "mms and mms over http streaming",
+  "null",
+  "Bertrand, Reimar Doeffinger, Albeu",
+  "originally based on work by Majormms (is that code still there?)",
+  open_s,
+  {"mms", "mmsu", "mmst", "http", "http_proxy", "mmshttp", NULL},
+  NULL,
+  0 // Urls are an option string
+};
 

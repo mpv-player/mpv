@@ -32,12 +32,12 @@
 
 typedef struct pnm_s pnm_t;
 
-pnm_t*   pnm_connect (int fd,char *url);
+//pnm_t*   pnm_connect (int fd,char *url);
 
-int      pnm_read (pnm_t *this, char *data, int len);
-void     pnm_close (pnm_t *this);
+//int      pnm_read (pnm_t *this, char *data, int len);
+//void     pnm_close (pnm_t *this);
 
-int      pnm_peek_header (pnm_t *this, char *data);
+//int      pnm_peek_header (pnm_t *this, char *data);
 
 #endif
 

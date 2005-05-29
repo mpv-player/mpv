@@ -25,6 +25,11 @@
 
 #define BUFFER_SIZE		2048
 
+typedef struct {
+	char *mime_type;
+	int demuxer_type;
+} mime_struct_t;
+
 typedef enum {
 	streaming_stopped_e,
 	streaming_playing_e
@@ -45,11 +50,12 @@ typedef struct streaming_control {
 } streaming_ctrl_t;
 
 //int streaming_start( stream_t *stream, int *demuxer_type, URL_t *url );
-
+streaming_ctrl_t *streaming_ctrl_new();
 int streaming_bufferize( streaming_ctrl_t *streaming_ctrl, char *buffer, int size);
 
 int nop_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *stream_ctrl );
 int nop_streaming_seek( int fd, off_t pos, streaming_ctrl_t *stream_ctrl );
+void streaming_ctrl_free( streaming_ctrl_t *streaming_ctrl );
 
 int connect2Server(char *host, int port,int verb);
 
@@ -57,5 +63,6 @@ int http_send_request(URL_t *url, off_t pos);
 HTTP_header_t *http_read_response(int fd);
 
 int http_authenticate(HTTP_header_t *http_hdr, URL_t *url, int *auth_retry);
+URL_t* check4proxies(URL_t *url);
 
 #endif

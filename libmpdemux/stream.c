@@ -45,6 +45,12 @@ extern stream_info_t stream_info_cdda;
 #endif
 #ifdef MPLAYER_NETWORK
 extern stream_info_t stream_info_netstream;
+extern stream_info_t stream_info_pnm;
+extern stream_info_t stream_info_asf;
+extern stream_info_t stream_info_rtsp;
+extern stream_info_t stream_info_rtp_udp;
+extern stream_info_t stream_info_http1;
+extern stream_info_t stream_info_http2;
 #endif
 #ifdef HAS_DVBIN_SUPPORT
 extern stream_info_t stream_info_dvb;
@@ -61,6 +67,10 @@ extern stream_info_t stream_info_dvdnav;
 #ifdef LIBSMBCLIENT
 extern stream_info_t stream_info_smb;
 #endif
+#ifdef STREAMING_LIVE_DOT_COM
+extern stream_info_t stream_info_sdp;
+extern stream_info_t stream_info_rtsp_sip;
+#endif;
 
 extern stream_info_t stream_info_cue;
 extern stream_info_t stream_info_null;
@@ -76,6 +86,16 @@ stream_info_t* auto_open_streams[] = {
 #endif
 #ifdef MPLAYER_NETWORK
   &stream_info_netstream,
+  &stream_info_http1,
+  &stream_info_asf,
+  &stream_info_pnm,
+  &stream_info_rtsp,
+#ifdef STREAMING_LIVE_DOT_COM
+  &stream_info_sdp,
+  &stream_info_rtsp_sip,
+#endif
+  &stream_info_rtp_udp,
+  &stream_info_http2,
 #endif
 #ifdef HAS_DVBIN_SUPPORT
   &stream_info_dvb,
