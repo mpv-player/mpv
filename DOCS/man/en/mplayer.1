@@ -8106,6 +8106,14 @@ Use this parameter only if you know what it means,
 and you have a need to set it.
 .
 .TP
+.B threads=<1\-4>
+Split each frame into slices and encode them in parallel (default: 1).
+Also allows multithreaded decoding if the decoder supports it (lavc does not).
+This has a slight penalty to compression.
+Requires that libx264 was compiled with pthread support; if not, this
+option will produce a warning and enable slices but not multithreading.
+.
+.TP
 .B log=<-1\-3>
 Adjust the amount of logging info printed to the screen.
 .RSs

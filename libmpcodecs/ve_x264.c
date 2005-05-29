@@ -97,6 +97,7 @@ static char *zones = NULL;
 static int subq = 5;
 static int me_method = 2;
 static int me_range = 16;
+static int threads = 1;
 static int level_idc = 40;
 static int psnr = 0;
 static int log_level = 2;
@@ -151,6 +152,7 @@ m_option_t x264encopts_conf[] = {
     {"me", &me_method, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"me_range", &me_range, CONF_TYPE_INT, CONF_RANGE, 4, 64, NULL},
     {"level_idc", &level_idc, CONF_TYPE_INT, CONF_RANGE, 10, 51, NULL},
+    {"threads", &threads, CONF_TYPE_INT, CONF_RANGE, 1, 4, NULL},
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nopsnr", &psnr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"log", &log_level, CONF_TYPE_INT, CONF_RANGE, -1, 3, NULL},
@@ -264,6 +266,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_log_level = log_level;
     mod->param.vui.i_sar_width = d_width*height;
     mod->param.vui.i_sar_height = d_height*width;
+    mod->param.i_threads = threads;
 
     switch(outfmt) {
     case IMGFMT_I420:
