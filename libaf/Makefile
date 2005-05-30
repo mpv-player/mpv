@@ -9,7 +9,7 @@ af_lavcresample.c af_sweep.c af_hrtf.c format.c af_center.c $(OPTIONAL_SRCS)
 
 OBJS=$(SRCS:.c=.o)
 
-CFLAGS  = $(OPTFLAGS) -I. -Wall $(EXTRA_INC)
+CFLAGS  = $(OPTFLAGS) -I. -Wall $(EXTRA_INC) -D_GNU_SOURCE
 
 ifeq ($(TARGET_OS),MINGW32)
 CFLAGS += -D_IO_H_

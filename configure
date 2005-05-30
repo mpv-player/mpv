@@ -2463,10 +2463,10 @@ echores "$_gnu99"
 echocheck "lrintf"
 cat > $TMPC << EOF
 #include <math.h>
-int main(void) { long (*foo)(double); foo = lrintf; (void)(*foo)(0.0); return 0; }
+int main(void) { long (*foo)(float); foo = lrintf; (void)(*foo)(0.0); return 0; }
 EOF
 _lrintf=no
-cc_check $_opt_gnu99 $_ld_lm && _lrintf=yes
+cc_check $_opt_gnu99 -D_GNU_SOURCE $_ld_lm && _lrintf=yes
 if test "$_lrintf" = yes ; then
   _def_lrintf="#define HAVE_LRINTF 1"
 else
