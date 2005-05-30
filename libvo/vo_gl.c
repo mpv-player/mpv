@@ -162,6 +162,8 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	aspect_save_screenres(vo_screenwidth,vo_screenheight);
 
 	aspect(&d_width,&d_height,A_NOZOOM);
+	vo_dx = (vo_screenwidth - d_width) / 2;
+	vo_dy = (vo_screenheight - d_height) / 2;
 	geometry(&vo_dx, &vo_dy, &d_width, &d_height,
 	          vo_screenwidth, vo_screenheight);
 #ifdef X11_FULLSCREEN

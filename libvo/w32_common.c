@@ -180,7 +180,7 @@ int createRenderingContext(void) {
     updateScreenProperties();
     vo_dwidth = vo_fs ? vo_screenwidth : o_dwidth;
     vo_dheight = vo_fs ? vo_screenheight : o_dheight;
-    SetWindowPos(vo_window, layer, (vo_screenwidth - vo_dwidth) / 2, (vo_screenheight - vo_dheight) / 2, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
+    SetWindowPos(vo_window, layer, vo_dx, vo_dy, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
 
     PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof pfd);
