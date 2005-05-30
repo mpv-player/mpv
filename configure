@@ -2447,6 +2447,18 @@ if test "$_posix4" = yes ; then
 fi
 echores "$_posix4"
 
+echocheck "-std=gnu99"
+cat > $TMPC << EOF
+int main(void) { return 0; }
+EOF
+_gnu99=no
+cc_check -std=gnu99 && _gnu99=yes
+if test "$_gnu99" = yes ; then
+  _opt_gnu99="-std=gnu99"
+else
+  _opt_gnu99=""
+fi
+echores "$_gnu99"
 
 echocheck "lrintf"
 cat > $TMPC << EOF
@@ -2454,7 +2466,7 @@ cat > $TMPC << EOF
 int main(void) { long (*foo)(double); foo = lrintf; (void)(*foo)(0.0); return 0; }
 EOF
 _lrintf=no
-cc_check $_ld_lm && _lrintf=yes
+cc_check $_opt_gnu99 $_ld_lm && _lrintf=yes
 if test "$_lrintf" = yes ; then
   _def_lrintf="#define HAVE_LRINTF 1"
 else
@@ -6862,7 +6874,7 @@ RANLIB = $_ranlib
 INSTALL = $_install
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu $_pipe -fomit-frame-pointer -ffast-math
 EXTRA_INC = $_inc_extra $_inc_gtk
-OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
+OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC) $_opt_gnu99
 STRIPBINARIES = $_stripbinaries
 CHARSET = $_charset
 HELP_FILE = $_mp_help
