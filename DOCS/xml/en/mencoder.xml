@@ -2263,6 +2263,38 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 </para></listitem>
 
 <listitem><para>
+  <emphasis role="bold">me</emphasis>:
+  This option is for choosing the motion estimation search method.
+  Altering this option provides a straightforward quality-vs-speed
+  tradeoff. <option>me=1</option> is only a few percent faster than
+  the default search, at a cost of under 0.1dB global PSNR. The 
+  default setting (<option>me=2</option>) is a reasonable tradeoff
+  between speed and quality. <option>me=3</option> gains a little under
+  0.1dB global PSNR, with a speed penalty that varies depending on
+  <option>frameref</option>.  At high values of
+  <option>frameref</option> (e.g. 12 or so), <option>me=3</option>
+  is about 40% slower than the default <option> me=2</option>. With
+  <option>frameref=3</option>, the speed penalty incurred drops to
+  25%-30%.
+</para>
+<para>
+  <option>me=4</option> uses an exhaustive search that is too slow for
+  practical use.
+</para>
+</listitem>
+
+<listitem><para>
+  <emphasis role="bold">4x4mv</emphasis>:
+  This option enables the use of 8x4, 4x8 and 4x4 subpartitions in
+  predicted macroblocks. Enabling it results in a fairly consistent
+  10%-15% loss of speed. This option is rather useless in source
+  containing only low motion, however in some high-motion source,
+  particularly source with lots of small moving objects, gains of
+  about 0.1dB can be expected.
+</para>
+</listitem>
+
+<listitem><para>
   <emphasis role="bold">bframes</emphasis>:
   The usefulness of B-frames is questionable in most other codecs
   you may be used to.
