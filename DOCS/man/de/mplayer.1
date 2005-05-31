@@ -1,12 +1,12 @@
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Diese Man-Page wurde/wird von Gabucino, Diego Biurrun, Jonas Jermann,
 .\" Moritz Bunkus und Sebastian Krämer gepflegt.
-.\" 
+.\"
 .\" Gib dies ein, um eine HTML-Version der Man-Page zu erhalten:
 .\"   cat mplayer.1 | sed s/SS\ 20/SS\ 4/ | groff -man -Thtml - > manpage.html
 .\" Gib dies ein, um eine Textversion der Man-Page zu erhalten:
 .\"   groff -m man -Tascii mplayer.1 | col -bx > manpage.txt
-.\" 
+.\"
 .
 .\" --------------------------------------------------------------------------
 .\" Macrodefinitionen
@@ -452,7 +452,7 @@ eingelesen werden soll.
 .B \-quiet \ \ 
 Konsolenausgaben werden weniger ausführlich; insbesondere wird damit die
 Statuszeile (z.B.\& A:   0.7 V:   0.6 A-V:  0.068 ...) nicht angezeigt.
-Besonders nützlich ist dies bei langsamen Terminals oder fehlerhaften, die 
+Besonders nützlich ist dies bei langsamen Terminals oder fehlerhaften, die
 Zeilenvorschübe nicht richtig verarbeiten (z.B.\& \\r).
 .
 .TP
@@ -534,14 +534,14 @@ vorstellen).
 .B \-colorkey <Nummer>
 Ändert den Farbwert auf einen RGB-Wert deiner Wahl.
 0x000000 ist schwarz und 0xffffff ist weiß.
-Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev, 
+Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev,
 svga, vesa, winvidix, xmga, xvidix, xover, xv (siehe \-vo xv:ck), xvmc
 (siehe \-vo xv:ck) und directx.
 .
 .TP
 .B \-nocolorkey
 Schaltet die Wahl des Farbwertes ab.
-Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev, 
+Wird nur von folgenden Videoausgabetreibern unterstützt: cvidix, fbdev,
 svga, vesa, winvidix, xmga, xvidix, xover, xv (siehe \-vo xv:ck), xvmc
 (siehe \-vo xv:ck) und directx.
 .
@@ -573,7 +573,7 @@ anstatt sie sofort abzuspielen.
 Erzwingt dasselbe Videosystem für mehrere Dateien (einmalige Initialisierung
 für alle Dateien).
 Dementsprechend wird für alle Dateien nur ein Fenster geöffnet.
-Momentan funktionieren die folgenden Treiber mit \-fixed-vo: gl, gl2, mga, 
+Momentan funktionieren die folgenden Treiber mit \-fixed-vo: gl, gl2, mga,
 svga, x11, xmga, xv, xvidix und dfbmga.
 .
 .TP
@@ -1009,7 +1009,7 @@ ist, DVD-Titel zu kopieren (siehe Beispiele).
 .TP
 .B \-dvdangle <Winkel-ID> (nur bei DVD)
 Einige DVDs beinhalten Szenen, die aus verschiedenen Perspektiven/\:Winkeln
-betrachtet werden können. 
+betrachtet werden können.
 Mit dieser Option kannst du MPlayer vorschreiben, welche Perspektive er
 wiedergeben soll (Standard: 1).
 .
@@ -1191,8 +1191,8 @@ Bildgröße in Bytes
 .TP
 .B \-rtsp-stream-over-tcp (nur bei LIVE.COM)
 Kann zusammen mit 'rtsp://'-URLs verwendet werden, um anzugeben, dass die
-daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP 
-übertragen werden (mit der gleichen TCP-Verbindung wie RTSP). 
+daraus resultierenden eingehenden RTP- und RTCP-Pakete per TCP
+übertragen werden (mit der gleichen TCP-Verbindung wie RTSP).
 Diese Option kann hilfreich sein, wenn deine Internetverbindung eingehende
 UDP-Pakete nicht durchlässt (siehe http://www.live.com/\:mplayer/).
 .
@@ -1242,7 +1242,7 @@ Springt zu 1 Stunde 10 Minuten.
 .PD 1
 .
 .TP
-.B \-tskeepbroken 
+.B \-tskeepbroken
 Sorgt dafür, daß MPlayer solche TS-Pakete, die als unbrauchbar markiert wurden,
 nicht ignoriert.
 Diese Option wird manchmal gebraucht, um korrupte MPEG-TS-Dateien abzuspielen.
@@ -1299,14 +1299,14 @@ Für v4l2, siehe Option normid und die Ausgabe von MPlayer für eine Liste der
 verfügbaren TV-Normen.
 .IPs "normid=<ID> (nur bei V4L2)"
 Setzt die TV-Norm auf die angegebene ID.
-Die TV-Norm hängt von der Videokarte ab. 
+Die TV-Norm hängt von der Videokarte ab.
 Siehe MPlayer-Output für eine Liste der verfügbaren TV-Normen.
 .IPs channel=<Wert>
 Setzt den Tuner auf Kanal <Wert>.
 .IPs chanlist=<Wert>
 Werte: europe-east, europe-west, us-bcast, us-cable, etc
 .IPs channels=<Kanal>\-<Name>,<Kanal>\-<Name>,...
-Setzt Namen für Kanäle. 
+Setzt Namen für Kanäle.
 Benutze '_' anstelle von Leerzeichen bei Namen (oder spiel mit der
 Shellquotierung rum ;-).
 Die Sendernamen werden dann per OSD angezeigt, und die Slave-Kommandos
@@ -1315,7 +1315,7 @@ Fernbedienung benutzbar sein (siehe LIRC).
 Kann nicht zusammen mit dem frequency\-Parameter benutzt werden.
 .br
 .I ANMERKUNG:
-Die Sendernummer wird dann die Position des Eintrags in 
+Die Sendernummer wird dann die Position des Eintrags in
 der 'channels'-Liste sein, wobei der erste Eintrag die 1 bekommt.
 .br
 .I BEISPIEL:
@@ -1365,7 +1365,7 @@ Ein Wert von 1 bedeutet: Nimm nur Video direkt von der Karte und Audio
 über ein externes Kabel von der TV-Karte zur Soundkarte auf (Standardwert
 für MPlayer).
 .IPs mjpeg
-Benutzte Hardware-MJPEG-Kompression (wenn dies die Karte unterstützt). 
+Benutzte Hardware-MJPEG-Kompression (wenn dies die Karte unterstützt).
 Bei dieser Option mußt du Breite und Höhe des Ausgabefensters nicht
 angeben, denn MPlayer ermittelt diese Werte automatisch vom
 Dezimierungswert (siehe unten).
@@ -1554,7 +1554,7 @@ der Option \-v.
 .B \-slang <Sprachcode[,Sprachcode,...]> (siehe auch \-sid)
 Gibt eine Prioritätenliste von zu benutzenden Untertitelsprachen an.
 Verschiedene Containerformate verwenden unterschiedliche Sprachcodes.
-DVDs benutzen ISO 639-1-Sprachcodes mit zwei Buchstaben, Matroska verwendet 
+DVDs benutzen ISO 639-1-Sprachcodes mit zwei Buchstaben, Matroska verwendet
 ISO 639-2-Sprachcodes mit drei Buchstaben, während OGM einen formfreien
 Bezeichner gebraucht.
 Die verfügbaren Untertitelsprachen erhältst du bei der Verwendung
@@ -2101,7 +2101,7 @@ Schaltet den 7.5 IRE-Ausgabemodus an.
 .IPs no75ire
 Schaltet den 7.5 IRE-Ausgabemodus ab (Standard).
 .IPs bw\ \ \ 
-TV-Ausgabe in Schwarz/\:Weiß 
+TV-Ausgabe in Schwarz/\:Weiß
 .IPs color
 TV-Ausgabe in Farbe (Standard)
 .IPs interlaced
@@ -2171,7 +2171,7 @@ Der VESA-Framebuffer unterstützt den Auflösungswechsel nicht.
 Benutze diese Konfigurationsdatei an Stelle der Standarddatei /etc/\:fb.modes.
 .
 .TP
-.B \-fs (siehe auch \-zoom) 
+.B \-fs (siehe auch \-zoom)
 Vollbildwiedergabe (zentriert den Film und erstellt schwarze Balken rund um
 das Bild).
 Nicht jeder Videoausgabetreiber unterstützt dies.
@@ -3377,7 +3377,7 @@ Zeige Debugging-Informationen an.
 .br
 2: Ratenkontrolle (Rate Control)
 .br
-4: Bitstream 
+4: Bitstream
 .br
 8: Makroblock-Typ (MB type)
 .br
@@ -3502,7 +3502,7 @@ aber 0\-6, wobei 0=deaktiviert und 6=langsamster/\:bester Modus bedeutet.
 .B \-pp <Qualität> (siehe auch \-vf pp)
 Setzt das Postprocessing-Level der DLL.
 Diese Option kann nicht mehr in Verbindung mit \-vf pp verwendet werden,
-sondern nur noch mit Win32-DirectShow-DLLs, die eigene interne 
+sondern nur noch mit Win32-DirectShow-DLLs, die eigene interne
 Postprocessing-Routinen mitbringen.
 Der gültige Wertebereich für \-pp variiert je nach Codec, ist meistens aber
 0\-6, wobei 0=deaktiviert und 6=langsamster/\:bester Modus bedeutet.
@@ -4819,7 +4819,7 @@ Parameter und Gebrauch sind dieselben.
 Softwareequalizer mit interaktiver Kontrolle wie beim Hardwareequalizer, für
 Karten/\:Treiber, die die Kontrolle über Helligkeit und Kontrast via Hardware
 nicht unterstützen.
-Kann in Verbindung mit MEncoder nützlich sein; einerseits, um schlecht 
+Kann in Verbindung mit MEncoder nützlich sein; einerseits, um schlecht
 aufgenommene Filme zu reparieren, und zum anderen, um Artifakte zu maskieren
 und niedrigere Bitraten benutzen zu können.
 .PD 0
@@ -5937,7 +5937,7 @@ Encodiere mit einem libavcodec Codec.
 .TP
 .B \-passlogfile <Dateiname>
 Wenn mit zwei Durchgängen encodiert wird, dann schreibt MEncoder die
-Informationen des ersten Durchgangs in die angegebene Datei und nicht 
+Informationen des ersten Durchgangs in die angegebene Datei und nicht
 nach divx2pass.log.
 .
 .TP
