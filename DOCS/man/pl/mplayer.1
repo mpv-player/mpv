@@ -1,4 +1,4 @@
-.\" synced with 1.972
+.\" synced with 1.984
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -329,7 +329,8 @@ Modyfikuje nasycenie.
 .RE
 .PD 1
 .PP
-(Nastêpuj±ce klawisze dzia³aj± tylko ze sterownikiem wyj¶cia video quartz).
+(Nastêpuj±ce klawisze dzia³aj± tylko ze sterownikiem wyj¶cia video quartz lub
+macosx.)
 .PP
 .PD 0
 .RSs
@@ -341,10 +342,8 @@ Przeskalowuje okno filmu do oryginalnej wielko¶ci.
 Przeskalowuje okno filmu do dwukrotnej oryginalnej wielko¶ci.
 .IPs "command + f"
 Prze³±cza tryb pe³noekranowy (zobacz tak¿e \-fs).
-.IPs "command + [ i command + ]"
+.IPs "command + [ i command + ]" (tylko \-vo quartz)
 Ustawia przezroczysto¶æ okna filmu.
-.IPs T\ \ \ \ 
-Prze³±cza warstwê video: na wierzchu/\:pod spodem/\:normalnie (zobacz tak¿e \-ontop).
 .RE
 .PD 1
 
@@ -928,6 +927,8 @@ Podaj ID demuxera zdefiniowane w libmpdemux/\:demuxer.h.
 .B \-dumpaudio (tylko MPlayer)
 Zrzuca surowy, skompresowany strumieñ audio do ./stream.dump
 (przydatne z MPEG/\:AC3).
+Mo¿esz podaæ tylko jedn± z \-dumpaudio, \-dumpvideo i \-dumpstream,
+w przeciwnym wypadku znaczenie ma tylko ostatnia w wierszu poleceñ.
 .
 .TP
 .B \-dumpfile <nazwa\ zbioru> (tylko MPlayer)
@@ -938,11 +939,15 @@ Podaje nazwê zbioru wynikowego dla opcji \-dumpaudio / \-dumpvideo /
 .B \-dumpstream (tylko MPlayer)
 Zrzuca surowy strumieñ do ./stream.dump.
 Przydatny gdy rippujesz z DVD lub sieci.
+Mo¿esz podaæ tylko jedn± z \-dumpaudio, \-dumpvideo i \-dumpstream,
+w przeciwnym wypadku znaczenie ma tylko ostatnia w wierszu poleceñ.
 .
 .TP
 .B \-dumpvideo (tylko MPlayer)
 Zrzuca surowy, skompresowany strumieñ video do ./stream.dump (niezbyt
 przydatne).
+Mo¿esz podaæ tylko jedn± z \-dumpaudio, \-dumpvideo i \-dumpstream,
+w przeciwnym wypadku znaczenie ma tylko ostatnia w wierszu poleceñ.
 .
 .TP
 .B \-dvbin <options>
@@ -2174,7 +2179,7 @@ liczone wzglêdem lewego górnego rogu tego okna a nie ekranu.
 .br
 .I INFORMACJA:
 Ta opcja jest obs³ugiwana tylko przez sterowniki wyj¶cia video x11, xmga, xv,
-xvmc, xvidix, directx i tdfxfb.
+xvmc, xvidix, gl, gl2, directx i tdfxfb.
 .sp 1
 .I PRZYK£AD:
 .PD 0
@@ -5767,10 +5772,11 @@ Mo¿esz okre¶liæ specyficzne parametry kodowania dla kodeka, korzystaj±c
 z poni¿szej sk³adni:
 .
 .TP
-.B \-<codec>opts <opcja1[=warto¶æ],opcja2,...>
+.B \-<kodek>opts <opcja1[=warto¶æ],opcja2,...>
 .
 .PP
-Gdzie <codec> to: lavc, xvidenc, divx4, lame, toolame, twolame, faac, x264enc lub mpeg.
+Gdzie <kodek> to jedno z: lavc, xvidenc, divx4, lame, toolame, twolame, nuv,
+vfw, faac, x264enc, mpeg lub lavf.
 .
 .
 .SS divx4 (\-divx4opts)
@@ -6312,8 +6318,8 @@ T± opcj± mo¿esz okre¶liæ czu³o¶æ tej detekcji.
 oznacza, ¿e ¿adne zmiany nie bêd± wykryte (domy¶lnie: 0).
 .
 .TP
-.B vb_strategy=<0\-1>
-strategia wyboru miêdzy ramkami I/\:P/\:B (przebieg\ 1):
+.B vb_strategy=<0\-1> (tylko pierwszy przebieg)
+strategia wyboru miêdzy ramkami I/\:P/\:B:
 .PD 0
 .RSs
 .IPs 0
@@ -8059,6 +8065,26 @@ Ni¿sze warto¶ci pozwalaj± na wiêksze skoki warto¶ci kwantyzatora,
 wy¿sze zmuszaj± go do delikatniejszych zmian.
 .
 .TP
+.B zones=<czê¶æ0>[/\:<czê¶æ1>[/\:...]]
+Inna jako¶æ dla poszczególnych czê¶ci (zakoñczenie, napisy, ...)
+(ABR lub tryb dwuprzebiegowy).
+Ka¿da czê¶æ to <klatka-pocz±tkowa>,<klatka-koñcowa>,<opcja> gdzie opcja to:
+.PD 0
+.RSs
+.IPs "q=<0\-51>"
+kwantyzator
+.IPs "b=<0.01\-100.0>"
+mno¿nik bitrate
+.RE
+.PD 1
+.RS
+.I INFORMACJA:
+Kwantyzator nie jest dok³adnie wymuszany.
+Dzia³a tylko w fazie planowania kontroli tempa i jest podatny na kompensacjê
+przepe³nienia i qp_min/qp_max.
+.RE
+.
+.TP
 .B direct_pred=<0\-2>
 Wykrywa typ systemu przewidywania ruchu dla bezpo¶rednich makrobloków
 w klatkach typu B.
@@ -8073,9 +8099,11 @@ Czasowy: wektory ruchu s± interpolowane z nastêpnych klatek P.
 (domy¶lny)
 .RE
 .PD 1
+.RS
 Typ przestrzenny i czasowy maj± podobn± prêdko¶æ dzia³ania i wspó³czynnik
 PSNR, ale najczê¶ciej ten drugi wygl±da lepiej.
 direct_pred=0 to metoda i wolniejsza, i daj±ca gorsz± jako¶æ.
+.RE
 .
 .TP
 .B (no)weight_b
@@ -8115,16 +8143,18 @@ podczas gdy ma³e poruszaj±ce siê obiekty przez mniejsze segmenty.
 Zaleca siê u¿ywanie 4x4mv tylko z subq >= 3.
 .
 .TP
-.B me=<1\-3>
+.B me=<1\-4>
 Wybiera algorytm pe³nopikselowego szacowania ruchu.
 .PD 0
 .RSs
 .IPs 1
 szukanie kwadratowe, rozmiar 1 (szybkie)
 .IPs 2
-szukanie sze¶ciok±tne, rozmiar 2 (domyslne)
+szukanie sze¶ciok±tne, rozmiar 2 (domy¶lne)
 .IPs 3
-Szukanie wyczerpuj±ce, kontrolowane przez me_range (bardzo wolne).
+nierówne szulanie wielosze¶ciok±tne
+.IPs 4
+szukanie wyczerpuj±ce, kontrolowane przez me_range (bardzo wolne)
 .RE
 .PD 1
 .
@@ -8181,7 +8211,15 @@ Sensowne warto¶ci s± w zakresie <-2\-2> (domy¶lnie: 0).
 Ustawia parametr Level strumienia bitów, wed³ug definicji w aneksie A standardu
 H.264 (domy¶lnie: 40 - Level 4.0).
 U¿ywane ¿eby przekazaæ dekoderowi jakie mo¿liwo¶ci musi obs³ugiwaæ.
-U¿ywaj tylko je¶li wiesz co to znaczy i musisz tego u¿yæ
+U¿ywaj tylko je¶li wiesz co to znaczy i musisz tego u¿yæ.
+.
+.TP
+.B threads=<1\-4>
+Dzieli ka¿d± klatkê na paski i koduje je równolegle (domy¶lnie: 1).
+Pozwala te¿ na wielow±tkowe dekodowanie je¶li dekoder to umo¿liwia (lavc nie).
+Lekko zmniejsza kompresjê.
+Wymaga ¿eby libx264 by³a skompilowana z obs³ug± pthread; je¶li tak nie jest
+opcja ta wy¶wietli ostrze¿enie i w³±czy paski ale nie wielow±tkowo¶æ.
 .
 .TP
 .B log=<-1\-3>
@@ -8293,6 +8331,14 @@ jak kodowany przy 29.97 lub 30 fps; dzia³a to tylko z filmami MPEG-2, kiedy
 wyj¶ciowa ilo¶æ klatek na sekundê, po ewentualnej konwersji przez \-ofps wynosi
 24000/1001 lub 24.
 Wszystkie pozosta³e warto¶ci s± niekompatybilne z t± opcj±.
+.
+.
+.SS Muksery FFmpeg z libavformat (\-lavfopts)
+.
+.TP
+.B format=<format_pliku>
+Wymusza format pliku na który nale¿y muksowaæ
+(domy¶lnie: autodetekcja wed³ug rozszerzenia).
 .
 .
 .\" --------------------------------------------------------------------------
