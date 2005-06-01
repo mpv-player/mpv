@@ -464,7 +464,7 @@ static char help_text[]=
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM-Laufwerk '%s' nicht gefunden.\n"
-#define MSGTR_ErrTrackSelect "Fehler beim Auswählen des VCD Tracks.\n"
+#define MSGTR_ErrTrackSelect "Fehler beim Auswählen des VCD Tracks."
 #define MSGTR_ReadSTDIN "Lese von Standardeingabe (stdin)...\n"
 #define MSGTR_UnableOpenURL "Kann URL nicht öffnen: %s\n"
 #define MSGTR_ConnToServer "Verbunden mit Server: %s\n"
@@ -534,8 +534,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxerinfo %s schon vorhanden.\n"
 #define MSGTR_ClipInfo "Clip-Info: \n"
 
-#define MSGTR_LeaveTelecineMode "demux_mpg: 30fps NTSC-Inhalt erkannt, wechsele Framerate.\n"
-#define MSGTR_EnterTelecineMode "demux_mpg: 24fps progressiven NTSC-Inhalt erkannt, wechsele Framerate.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC-Inhalt erkannt, wechsele Framerate.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps progressiven NTSC-Inhalt erkannt, wechsele Framerate.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Konnte Codec nicht öffnen.\n"
@@ -644,7 +644,7 @@ static char help_text[]=
 #define MSGTR_SKIN_ERRORMESSAGE "[Skin] Fehler in Skin-Konfigurationsdatei in Zeile %d: %s" 
 #define MSGTR_SKIN_WARNING1 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"section\" nicht gefunden"
 #define MSGTR_SKIN_WARNING2 "[Skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nWidget (%s) gefunden, aber davor wurde \"subsection\" nicht gefunden (%s)"
-#define MSGTR_SKIN_WARNING3 "[skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nDiese Untersektion wird vom Widget nicht unterstützt (%s).\n"
+#define MSGTR_SKIN_WARNING3 "[skin] Warnung in Skin-Konfigurationsdatei in Zeile %d:\nDiese Untersektion wird vom Widget nicht unterstützt (%s)."
 #define MSGTR_SKIN_SkinFileNotFound "[skin] Datei ( %s ) nicht gefunden.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "Bitmaps mit 16 Bits oder weniger werden nicht unterstützt (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "Datei nicht gefunden (%s)\n"
