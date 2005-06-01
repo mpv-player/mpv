@@ -356,7 +356,6 @@ multiple paths separated by ':'):
   --with-toolamedir=DIR    path to Toolame library and include file
   --with-xmmsplugindir=DIR XMMS plugins in DIR
   --with-xmmslibdir=DIR    libxmms.so.1 in DIR
-  --with-bio2jack=DIR      libbio2jack.a in DIR
   --with-cdparanoiaincdir=DIR  cdparanoia headers in DIR (*)
   --with-cdparanoialibdir=DIR  cdparanoia libraries (libcdda_*) in DIR (*)
   --with-xvmclib=NAME      name of adapter-specific library (e.g. XvMCNVIDIA)
@@ -1809,10 +1808,6 @@ for ac_option do
     _xmmsplugindir=`echo $ac_option | cut -d '=' -f 2`
     ;;
 
-  --with-bio2jack=*)
-    _bio2jackdir=`echo $ac_option | cut -d '=' -f 2`
-    ;;
-    
   --enable-profile)
     _profile='-p'
     ;;
@@ -4693,16 +4688,9 @@ if test "$_jack" = auto ; then
 
 cat > $TMPC << EOF
 #include <jack/jack.h>
-int main(void) { JACK_Init(); return 0; }
+int main(void) { jack_client_new("test"); return 0; }
 EOF
-        # This test only checks the minor version number.
-    if ( ( test `bio2jack-config --version | cut -d '.' -f 2` -ge 3 ) ) >/dev/null 2>&1 ; then
-      if test -z "$_bio2jackdir" ; then
-		cc_check -lbio2jack `pkg-config --libs --cflags jack` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _jack=yes
-	else
-		cc_check -L "$_bio2jackdir" -lbio2jack `pkg-config --libs --cflags jack` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _jack=yes
-	fi
-  fi
+	cc_check `pkg-config --libs --cflags jack` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _jack=yes
 fi
 fi
 
@@ -4710,11 +4698,7 @@ if test "$_jack" = yes ; then
   _def_jack='#define USE_JACK 1'
   _aosrc="$_aosrc ao_jack.c"
   _aomodules="jack $_aomodules"
-  if test -z "$_bio2jackdir" ; then
-    _ld_jack="-lbio2jack `pkg-config --libs jack`"
-  else
-	_ld_jack="-L \"$_bio2jackdir\" -lbio2jack `pkg-config --libs jack`"
-  fi
+  _ld_jack="`pkg-config --libs jack`"
   _inc_jack=`pkg-config --cflags jack`
 else
   _noaomodules="jack $_noaomodules"

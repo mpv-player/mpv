@@ -209,6 +209,7 @@ Döffinger, Reimar (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
     * various fixes all over the place
     * reworked live changing playback speed
     * made MMS over HTTP stream selection work and modified ASF header parsing
+    * reimplemented ao_jack without bio2jack dependency
 
 Dolbeau, Romain <romain@dolbeau.org>
     * random AltiVec (PowerPC multimedia extensions) stuff
@@ -670,6 +671,9 @@ Strasser, Alexander (beastd) <eclipse7@gmx.net>
     * string handling security audit
     * EWMH fullscreen
     * suboption parser
+
+Strzelecki, Kamil < esack at browarek.net >
+    * first version of ao_jack, using bio2jack
 
 Svoboda, Jiri (zar) <Jiri.Svoboda@seznam.cz>
     * AQT type subtitles support
