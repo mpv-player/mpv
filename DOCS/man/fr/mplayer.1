@@ -1,4 +1,4 @@
-.\" synced with 1.980
+.\" synced with 1.984
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -340,7 +340,7 @@ Ajuste la saturation.
 .PD 1
 .PP
 (Les touches suivantes ne sont valides que lorsque le pilote de sortie
-vidéo quartz est utilisé.)
+vidéo quartz ou macosx est utilisé.)
 .PP
 .PD 0
 .RSs
@@ -352,7 +352,7 @@ Ajuste la fenêtre fenêtre vidéo à sa taille d'origine.
 Double la taille de la fenêtre vidéo.
 .IPs "command + f"
 Bascule en mode plein-écran (voir aussi \-fs).
-.IPs "command + [ et command + ]"
+.IPs "command + [ et command + ]" (\-vo quartz uniquement)
 Change l'alpha (transparence) de la fenêtre vidéo.
 .RE
 .PD 1
@@ -8515,6 +8515,17 @@ Ceci est utilisé pour indiquer au décodeur quelles options du codec il
 doit gérer.
 N'utilisez ce paramètre que si vous saisissez bien ce qu'il signifie,
 et qu'il vous faut le modifier.
+.
+.TP
+.B threads=<1\-4>
+Découpe chaque trame en tranche (slice) et les encode en parallèle
+(par défaut\ : 1).
+Autorise de plus le décodage "multi-threadé" si le décodeur le gère
+(pas libavcodec).
+Cela dégrade un peu la compressibilité.
+Cela nécessite que libx264 a été compilé avec le support pthread\ ;
+Si ce n'est pas le cas, cette option affichera un avertissement et
+activera le découpage en trache, sans le multithreading.
 .
 .TP
 .B log=<-1\-3>
