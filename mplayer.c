@@ -1914,18 +1914,18 @@ if(sh_video) {
   if(sub_auto) { // auto load sub file ...
     char *psub = get_path( "sub/" );
     char **tmp = sub_filenames((psub ? psub : ""), filename);
-    char **tmp2 = tmp;
+    int i = 0;
     free(psub); // release the buffer created by get_path() above
-    while (*tmp2)
-        add_subtitles (*tmp2++, sh_video->fps, 0);
+    while (tmp[i]) {
+        add_subtitles (tmp[i], sh_video->fps, 0);
+        free(tmp[i++]);
+    }
     free(tmp);
     if (set_of_sub_size == 0)
     {
         add_subtitles (mem_ptr=get_path("default.sub"), sh_video->fps, 1);
     free(mem_ptr); // release the buffer created by get_path()
     }
-    if (set_of_sub_size > 0)
-        add_subtitles (NULL, sh_video->fps, 1);
   }
   if (set_of_sub_size > 0)  {
       // setup global sub numbering

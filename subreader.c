@@ -1350,7 +1350,6 @@ void* guess_cp(FILE *fd, char *preferred_language, char *fallback)
 #endif
 
 sub_data* sub_read_file (char *filename, float fps) {
-        //filename is assumed to be malloc'ed,  free() is used in sub_free()
     FILE *fd;
     int n_max, n_first, i, j, sub_first, sub_orig;
     subtitle *first, *second, *sub, *return_sub;
@@ -1718,7 +1717,7 @@ if ((suboverlap_enabled == 2) ||
 }
     if (return_sub == NULL) return NULL;
     subt_data = (sub_data *)malloc(sizeof(sub_data));
-    subt_data->filename = filename;
+    subt_data->filename = strdup(filename);
     subt_data->sub_uses_time = uses_time;
     subt_data->sub_num = sub_num;
     subt_data->sub_errs = sub_errs;
