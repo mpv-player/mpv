@@ -6728,6 +6728,17 @@ else
   echores "only used for x86"
 fi
 
+echocheck "compiler support for noexecstack"
+cat > $TMPC <<EOF
+int main(void) { return 0; }
+EOF
+if cc_check -Wl,-z,noexecstack ; then
+  _ld_extra="-Wl,-z,noexecstack $_ld_extra"
+  echores "yes"
+else
+  echores "no"
+fi
+
 echocheck "ftello()"
 # if we don't have ftello use the osdep/ compatibility module
 cat > $TMPC << EOF
