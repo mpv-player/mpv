@@ -407,7 +407,7 @@ static char help_text[]=
 #define MSGTR_ParseErrorFIDNotNumber "tolkningsfel (format-ID är inget nummer?)"
 #define MSGTR_ParseErrorFIDAliasNotNumber "tolkningsfel (format-ID-alias är inget nummer?)"
 #define MSGTR_DuplicateFID "duplicerade format-ID"
-#define MSGTR_TooManyOut "för många ut..." //FIXME "to many out"?
+#define MSGTR_TooManyOut "för många ut..." //FIXME 'to many out'?
 #define MSGTR_InvalidCodecName "\ncodec(%s) namn är icke godkänt!\n"
 #define MSGTR_CodecLacksFourcc "\ncodec(%s) har inte FourCC/format!\n"
 #define MSGTR_CodecLacksDriver "\ncodec(%s) har ingen drivrutin!\n"
