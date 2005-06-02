@@ -12,7 +12,7 @@
 #import <QuartzCore/QuartzCore.h>
 #import <QuickTime/QuickTime.h>
 
-@interface CustomOpenGLView : NSOpenGLView
+@interface MPlayerOpenGLView : NSOpenGLView
 {
 	//Cocoa
 	NSWindow *window;
@@ -49,18 +49,22 @@
 - (BOOL) resignFirstResponder;
 
 //window & rendering
-- (void) initOpenGLView;
-- (void) initMenu;
-- (void) menuAction:(id)sender;
+- (void) initView;
 - (void) prepareOpenGL;
 - (void) render;
 - (void) reshape;
 - (void) setCurrentTexture;
 - (void) drawRect: (NSRect *) bounds;
+
+//vo control
 - (void) fullscreen: (BOOL) animate;
 - (void) ontop;
 - (void) panscan;
 - (void) rootwin;
+
+//menu
+- (void) initMenu;
+- (void) menuAction:(id)sender;
 
 //event
 - (void) keyDown: (NSEvent *) theEvent;

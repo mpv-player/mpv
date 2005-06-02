@@ -25,7 +25,7 @@
 extern void mplayer_put_key(int code);
 
 //Cocoa
-CustomOpenGLView *glView;
+MPlayerOpenGLView *mpGLView;
 NSAutoreleasePool *autoreleasepool;
 OSType pixelFormat;
 
@@ -137,26 +137,26 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	old_movie_aspect = movie_aspect;
 	
 	//init OpenGL View
-	glView = [[CustomOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, d_width, d_height) pixelFormat:[CustomOpenGLView defaultPixelFormat]];
-	[glView initOpenGLView];
+	mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, d_width, d_height) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
+	[mpGLView initView];
 	
 	vo_fs = flags & VOFLAG_FULLSCREEN;
 	
 	if(vo_rootwin)
-		[glView rootwin];	
+		[mpGLView rootwin];	
 
 	if(vo_fs)
-		[glView fullscreen: NO];
+		[mpGLView fullscreen: NO];
 	
 	if(vo_ontop)
-		[glView ontop];
+		[mpGLView ontop];
 	
 	return 0;
 }
 
 static void check_events(void)
 {
-	[glView check_events];
+	[mpGLView check_events];
 	
 	//update activity every 60 seconds to prevent
 	//screensaver from starting up.
@@ -181,12 +181,12 @@ static void draw_osd(void)
 
 static void flip_page(void)
 {
-	[glView render];
+	[mpGLView render];
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
-	[glView setCurrentTexture];
+	[mpGLView setCurrentTexture];
 	return 0;
 }
 
@@ -204,7 +204,7 @@ static uint32_t draw_frame(uint8_t *src[])
 			memcpy_pic(image_data, src[0], image_width * 2, image_height, image_width * 2, image_width * 2);
 			break;
 	}
-	[glView setCurrentTexture];
+	[mpGLView setCurrentTexture];
 	return 0;
 }
 
@@ -283,11 +283,11 @@ static uint32_t control(uint32_t request, void *data, ...)
 		case VOCTRL_PAUSE: return (int_pause=1);
 		case VOCTRL_RESUME: return (int_pause=0);
 		case VOCTRL_QUERY_FORMAT: return query_format(*((uint32_t*)data));
-		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); [glView ontop]; return VO_TRUE;
-		case VOCTRL_ROOTWIN: vo_rootwin = (!(vo_rootwin)); [glView rootwin]; return VO_TRUE;
-		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); [glView fullscreen: YES]; return VO_TRUE;
+		case VOCTRL_ONTOP: vo_ontop = (!(vo_ontop)); [mpGLView ontop]; return VO_TRUE;
+		case VOCTRL_ROOTWIN: vo_rootwin = (!(vo_rootwin)); [mpGLView rootwin]; return VO_TRUE;
+		case VOCTRL_FULLSCREEN: vo_fs = (!(vo_fs)); [mpGLView fullscreen: YES]; return VO_TRUE;
 		case VOCTRL_GET_PANSCAN: return VO_TRUE;
-		case VOCTRL_SET_PANSCAN: [glView panscan]; return VO_TRUE;
+		case VOCTRL_SET_PANSCAN: [mpGLView panscan]; return VO_TRUE;
 	}
 	return VO_NOTIMPL;
 }
@@ -295,8 +295,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 //////////////////////////////////////////////////////////////////////////
 // NSOpenGLView Subclass
 //////////////////////////////////////////////////////////////////////////
-@implementation CustomOpenGLView
-- (void) initOpenGLView
+@implementation MPlayerOpenGLView
+- (void) initView
 {
 	long swapInterval = 1;
 	NSRect frame = [self frame];
