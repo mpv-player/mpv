@@ -329,6 +329,16 @@ int h264_parse_sps(mp_mpeg_header_t * picture, unsigned char * buf, int len)
   picture->fps = picture->timeinc_unit = picture->timeinc_resolution = 0;
   n = 24;
   read_golomb(buf, &n);
+  if(buf[0] >= 100){
+    if(read_golomb(buf, &n) == 3)
+      n++;
+    read_golomb(buf, &n);
+    read_golomb(buf, &n);
+    n++;
+    if(getbits(buf, n++, 1)){
+      //FIXME scaling matrix
+    }
+  }
   read_golomb(buf, &n);
   v = read_golomb(buf, &n);
   if(v == 0)
