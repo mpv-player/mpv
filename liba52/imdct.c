@@ -770,6 +770,8 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     int m;
     int two_m;
     int two_m_plus_one;
+    int two_m_plus_one_shl3;
+    complex_t *buf_offset;
 
 /*  sample_t tmp_a_i;
     sample_t tmp_a_r;
@@ -938,6 +940,8 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     for (m=3; m < 7; m++) {
 	two_m = (1 << m);
 	two_m_plus_one = two_m<<1;
+	two_m_plus_one_shl3 = (two_m_plus_one<<3);
+	buf_offset = buf+128;
 	asm volatile(
 		"movl %0, %%esi				\n\t"
 		".balign 16				\n\t"
@@ -963,7 +967,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"addl %2, %%esi				\n\t"
 		"cmpl %1, %%esi				\n\t"
 		" jb 1b					\n\t"
-		:: "g" (buf), "m" (buf+128), "m" (two_m_plus_one<<3), "r" (two_m<<3),
+		:: "g" (buf), "m" (buf_offset), "m" (two_m_plus_one_shl3), "r" (two_m<<3),
 		   "r" (sseW[m])
 		: "%esi", "%edi", "%edx"
 	);
