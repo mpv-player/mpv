@@ -157,21 +157,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 static void check_events(void)
 {
 	[mpGLView check_events];
-	
-	//update activity every 60 seconds to prevent
-	//screensaver from starting up.
-	DateTimeRec d;
-	unsigned long curTime;
-	static unsigned long lastTime = 0;
-	
-	GetTime(&d);
-	DateToSeconds( &d, &curTime);
-	
-	if( ( (curTime - lastTime) >= 60) || (lastTime == 0))
-	{
-		UpdateSystemActivity(UsrActivity);
-		lastTime = curTime;
-	}
 }
 
 static void draw_osd(void)
@@ -758,6 +743,21 @@ static uint32_t control(uint32_t request, void *data, ...)
 {
 	event = [NSApp nextEventMatchingMask:NSAnyEventMask untilDate:[NSDate dateWithTimeIntervalSinceNow:0.0001] inMode:NSEventTrackingRunLoopMode dequeue:YES];
 	[NSApp sendEvent:event];
+	
+	//update activity every 60 seconds to prevent
+	//screensaver from starting up.
+	DateTimeRec d;
+	unsigned long curTime;
+	static unsigned long lastTime = 0;
+	
+	GetTime(&d);
+	DateToSeconds( &d, &curTime);
+	
+	if( ( (curTime - lastTime) >= 60) || (lastTime == 0))
+	{
+		UpdateSystemActivity(UsrActivity);
+		lastTime = curTime;
+	}
 }
 
 /*
