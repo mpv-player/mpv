@@ -67,6 +67,9 @@ typedef struct tagAVS
     AVS_Value handler;
     AVS_Clip *clip;
     const AVS_VideoInfo *video_info;
+#ifdef WIN32_LOADER
+    ldt_fs_t* ldt_fs;
+#endif
     HMODULE dll;
     int frameno;
     int init;
@@ -91,14 +94,14 @@ AVS_T *initAVS(const char *filename)
     memset(AVS, 0, sizeof(AVS_T));
 
 #ifdef WIN32_LOADER
-    Setup_LDT_Keeper();
+    AVS->ldt_fs = Setup_LDT_Keeper();
 #endif
     
     AVS->dll = LoadLibraryA("avisynth.dll");
     if(!AVS->dll)
     {
         mp_msg(MSGT_DEMUX ,MSGL_V, "AVS: failed to load avisynth.dll\n");
-        return NULL;
+        goto avs_err;
     }
     
     /* Dynamic import of needed stuff from avisynth.dll */
@@ -116,7 +119,7 @@ AVS_T *initAVS(const char *filename)
     if (!AVS->avs_env)
     {
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_create_script_environment failed\n");
-        return NULL;
+        goto avs_err;
     }
     
 
@@ -125,16 +128,24 @@ AVS_T *initAVS(const char *filename)
     if (avs_is_error(AVS->handler))
     {
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Avisynth error: %s\n", avs_as_string(AVS->handler));
-        return NULL;
+        goto avs_err;
     }
 
     if (!avs_is_clip(AVS->handler))
     {
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Avisynth doesn't return a clip\n");
-        return NULL;
+        goto avs_err;
     }
     
     return AVS;
+
+avs_err:
+    if (AVS->dll) FreeLibrary(AVS->dll);
+#ifdef WIN32_LOADER
+    Restore_LDT_Keeper(AVS->ldt_fs);
+#endif
+    free(AVS);
+    return NULL;
 }
 
 /* Implement RGB MODES ?? */
@@ -354,6 +365,9 @@ void demux_close_avs(demuxer_t* demuxer)
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Unloading avisynth.dll\n");
             FreeLibrary(AVS->dll);
         }
+#ifdef WIN32_LOADER
+        Restore_LDT_Keeper(AVS->ldt_fs);
+#endif
         free(AVS);
     }
 }
