@@ -7276,21 +7276,23 @@ Each zone is <start-frame>,<mode>,<value> where <mode> may be
 .PD 0
 .RSs
 .IPs "q"
-constant quantizer override.
-In that case, value=<2.0\-31.0> represents the quantizer value.
+Constant quantizer override, where value=<2.0\-31.0>
+represents the quantizer value.
 .IPs "w"
-ratecontrol weight override.
-In that case, value=<0.01\-2.00> represents the quality correction in %.
+Ratecontrol weight override, where value=<0.01\-2.00>
+represents the quality correction in %.
 .RE
 .PD 1
+.sp 1
 .RS
 .I EXAMPLE:
 .RE
+.PD 0
 .RSs
 .IPs zones=90000,q,20
 Encodes all frames starting with frame 90000 at constant quantizer 20.
 .IPs zones=0,w,0.1/10001,w,1.0/90000,q,20
-Encode frames 0\-10000 at 10% bitrate, encode frames 90000 and 
+Encode frames 0\-10000 at 10% bitrate, encode frames 90000
 up to the end at constant quantizer 20.
 Note that the second zone is needed to delimit the first zone, as
 without it everything up until frame 89999 would be encoded at 10%
