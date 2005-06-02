@@ -4,10 +4,19 @@
  * (C) 2001, MPlayer team.
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+
+#ifndef HAVE_WINSOCK2
+#define closesocket close
+#else
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#endif
 
 #include "http.h"
 #include "url.h"
@@ -17,13 +26,6 @@
 #include "demuxer.h"
 #include "network.h"
 #include "help_mp.h"
-
-#ifndef HAVE_WINSOCK2
-#define closesocket close
-#else
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#endif
 
 
 extern mime_struct_t mime_type_table[];

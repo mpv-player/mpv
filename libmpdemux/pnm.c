@@ -23,6 +23,8 @@
  * based upon code from joschka
  */
 
+#include "config.h"
+
 #include <unistd.h>
 #include <stdio.h>
 #include <assert.h>
@@ -33,12 +35,6 @@
 #include <stdlib.h>
 #include <sys/time.h>
 #include <inttypes.h>
-#include "stream.h"
-#include "demuxer.h"
-#include "help_mp.h"
-
-
-#include "config.h"
 #ifndef HAVE_WINSOCK2
 #define closesocket close
 #include <sys/socket.h>
@@ -47,6 +43,10 @@
 #else
 #include <winsock2.h>
 #endif
+
+#include "stream.h"
+#include "demuxer.h"
+#include "help_mp.h"
 
 #include "pnm.h"
 //#include "libreal/rmff.h"
