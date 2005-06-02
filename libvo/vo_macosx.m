@@ -298,6 +298,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 @implementation CustomOpenGLView
 - (void) initOpenGLView
 {
+	long swapInterval = 1;
 	NSRect frame = [self frame];
 	CVReturn error = kCVReturnSuccess;
 	
@@ -323,6 +324,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	[window makeKeyAndOrderFront:self];
 	
 	[self setOpenGLContext:glContext];
+	[[self openGLContext] setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
 	[glContext setView:self];
 	[glContext makeCurrentContext];	
 	
