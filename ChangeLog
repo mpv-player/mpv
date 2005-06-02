@@ -34,6 +34,7 @@ MPlayer (1.0)
     * audio encoding modularized
     * AAC (FAAC) audio encoding
     * border processing adaptive quantization in libavcodec
+    * XviD's encoding zones
 
     Ports:
     * improved timer function on Mac OS X

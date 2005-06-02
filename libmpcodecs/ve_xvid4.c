@@ -61,6 +61,8 @@
 #define FINE (!0)
 #define BAD (!FINE)
 
+#define MAX_ZONES   64
+
 // Code taken from Libavcodec and ve_lavc.c to handle Aspect Ratio calculation
 
 typedef struct xvid_rational_s{
@@ -201,6 +203,8 @@ static int xvidenc_par_height = 0;
 static float xvidenc_dar_aspect = 0.0f;
 static int xvidenc_autoaspect = 0;
 
+static char *xvidenc_zones = NULL; // zones string
+
 m_option_t xvidencopts_conf[] =
 {
 	/* Standard things mencoder should be able to treat directly */
@@ -281,6 +285,9 @@ m_option_t xvidencopts_conf[] =
 	{"autoaspect", &xvidenc_autoaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"noautoaspect", &xvidenc_autoaspect, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 
+	/* Section Zones */
+	{"zones", &xvidenc_zones, CONF_TYPE_STRING, 0, 0, 0, NULL},
+
 	/* End of the config array */
 	{NULL, 0, 0, 0, 0, 0, NULL}
 };
@@ -302,7 +309,7 @@ typedef struct _xvid_mplayer_module_t
 
 	/* This data must survive local block scope, so here it is */
 	xvid_enc_plugin_t    plugins[7];
-	xvid_enc_zone_t      zones[1];
+	xvid_enc_zone_t      zones[MAX_ZONES];
 
 	/* MPEG4 stream buffer */
 	muxer_stream_t *mux;
@@ -873,6 +880,7 @@ static void dispatch_settings(xvid_mplayer_module_t *mod)
 static int set_create_struct(xvid_mplayer_module_t *mod)
 {
 	int pass;
+	int doZones = 0;
 	xvid_enc_create_t *create    = &mod->create;
 
 	/* Most of the structure is initialized by dispatch settings, only a
@@ -988,6 +996,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 			mp_msg(MSGT_MENCODER, MSGL_INFO,
 			       "xvid: CBR Rate Control -- bitrate=%dkbit/s\n",
 			       xvidenc_bitrate>16000?xvidenc_bitrate/1000:xvidenc_bitrate);
+			doZones = 1;
 		}
 
 		create->plugins[create->num_plugins].func  = xvid_plugin_single;
@@ -1038,8 +1047,63 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 		create->plugins[create->num_plugins].func  = xvid_plugin_2pass2;
 		create->plugins[create->num_plugins].param = pass2;
 		create->num_plugins++;
+		doZones = 1;
 	}
-
+	// parse zones
+	if (xvidenc_zones != NULL && doZones > 0) // do not apply zones in CQ, and first pass mode (xvid vfw doesn't allow them in those modes either)
+	{
+		void *p;
+		int i;
+		p = xvidenc_zones;
+		create->num_zones = 0; // set the number of zones back to zero, this overwrites the zone defined for CQ - desired because each zone has to be specified on the commandline even in cq mode
+		for(i = 0; p; i++)
+		{
+        		int start;
+			double value;
+			char mode;
+        		int e = sscanf(p, "%d,%c,%lf", &start, &mode, &value); // start,mode(q = constant quant, w = weight),value
+        		if(e != 3)
+			{
+	    			mp_msg(MSGT_MENCODER,MSGL_ERR, "error parsing zones\n");
+            		return(BAD);
+        		}
+			int q = (int)(value * 100);
+			if (mode == 'q')
+			{
+				if (q < 200 || q > 3100) // make sure that quantizer is in allowable range
+				{
+					mp_msg(MSGT_MENCODER, MSGL_ERR, "zone quantizer must be between 2 and 31\n");
+					return(BAD);
+				}
+				else
+				{
+					create->zones[create->num_zones].mode      = XVID_ZONE_QUANT;
+				}
+			}
+			if (mode == 'w')
+			{
+				if (q < 1 || q > 200)
+				{
+					mp_msg(MSGT_MENCODER, MSGL_ERR, "zone weight must be between 1 and 200\n");
+					return(BAD);
+				}
+				else
+				{
+					create->zones[create->num_zones].mode      = XVID_ZONE_WEIGHT;
+				}
+			}
+			create->zones[create->num_zones].frame     = start;
+			create->zones[create->num_zones].increment = q;
+			create->zones[create->num_zones].base      = 100; // increment is 100 times the actual value
+			create->num_zones++;
+			if (create->num_zones > MAX_ZONES) // show warning if we have too many zones
+			{
+				mp_msg(MSGT_MENCODER, MSGL_ERR, "too many zones, zones will be ignored\n");
+			}
+        		p = strchr(p, '/');
+        		if(p) p++;
+    		}
+	}
 	return(FINE);
 }
 

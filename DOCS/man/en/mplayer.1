@@ -7269,6 +7269,36 @@ If <value> is negative, XviD will use its absolute value as the target size
 Switch to fixed quantizer mode and specify the quantizer to be used.
 .
 .TP
+.B zones=<zone0>[/\:<zone1>[/\:...]]
+User specified quality for specific parts (ending, credits, ...)
+(ABR or two pass).
+Each zone is <start-frame>,<mode>,<value> where <mode> may be
+.PD 0
+.RSs
+.IPs "q"
+constant quantizer override.
+In that case, value=<2.0\-31.0> represents the quantizer value.
+.IPs "w"
+ratecontrol weight override.
+In that case, value=<0.01\-2.00> represents the quality correction in %.
+.RE
+.PD 1
+.RS
+.I EXAMPLE:
+.RE
+.RSs
+.IPs zones=90000,q,20
+Encodes all frames starting with frame 90000 at constant quantizer 20.
+.IPs zones=0,w,0.1/10001,w,1.0/90000,q,20
+Encode frames 0\-10000 at 10% bitrate, encode frames 90000 and 
+up to the end at constant quantizer 20.
+Note that the second zone is needed to delimit the first zone, as
+without it everything up until frame 89999 would be encoded at 10%
+bitrate.
+.RE
+.PD 1
+.
+.TP
 .B me_quality=<0\-6>
 This option controls the motion estimation subsystem.
 The higher the value, the more precise the estimation should be (default: 6).
