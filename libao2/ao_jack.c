@@ -41,6 +41,7 @@ LIBAO_EXTERN(jack)
 static jack_port_t *ports[MAX_CHANS];
 static int num_ports; ///< Number of used ports == number of channels
 static jack_client_t *client;
+static float jack_latency;
 static volatile int paused = 0; ///< set if paused
 static volatile int underrun = 0; ///< signals if an underrun occured
 
@@ -261,13 +262,16 @@ static int init(int rate, int channels, int format, int flags) {
       goto err_out;
     }
   }
+  rate = jack_get_sample_rate(client);
+  jack_latency = (float)(jack_port_get_total_latency(client, ports[0]) +
+                         jack_get_buffer_size(client)) / (float)rate;
   buffer = (unsigned char *) malloc(BUFFSIZE);
 
   ao_data.channels = channels;
-  ao_data.samplerate = rate = jack_get_sample_rate(client);
+  ao_data.samplerate = rate;
   ao_data.format = AF_FORMAT_FLOAT_NE;
   ao_data.bps = channels * rate * sizeof(float);
-  ao_data.buffersize = jack_port_get_total_latency(client, ports[0]) * channels;
+  ao_data.buffersize = CHUNK_SIZE * NUM_CHUNKS;
   ao_data.outburst = CHUNK_SIZE;
   free(matching_ports);
   free(port_name);
@@ -334,7 +338,7 @@ static int play(void *data, int len, int flags) {
 
 static float get_delay() {
   int buffered = BUFFSIZE - CHUNK_SIZE - buf_free(); // could be less
-  float in_jack = (float)ao_data.buffersize / (float)ao_data.bps;
+  float in_jack = jack_latency;
 #ifdef JACK_ESTIMATE_DELAY
   unsigned int elapsed = GetTimer() - callback_time;
   in_jack += (float)callback_samples / (float)ao_data.samplerate - (float)elapsed / 1000.0 / 1000.0;
