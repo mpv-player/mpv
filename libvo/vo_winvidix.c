@@ -308,7 +308,7 @@ static uint32_t preinit(const char *arg){
 static uint32_t control(uint32_t request, void *data, ...){
   switch (request) {
   case VOCTRL_FULLSCREEN:
-    if(!vo_fs){vo_fs=1;ShowWindow(hWndFS,SW_SHOW);}  
+    if(!vo_fs){vo_fs=1;ShowWindow(hWndFS,SW_SHOW);SetForegroundWindow(hWndFS);}  
     else {vo_fs=0; ShowWindow(hWndFS,SW_HIDE);}  
     break;
   case VOCTRL_QUERY_FORMAT:
