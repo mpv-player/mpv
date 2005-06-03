@@ -119,7 +119,7 @@ static int host_connect_attempt(struct in_addr ia, int port) {
 
   s = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);  
   if (s == -1) {
-    printf ("rtsp: socket(): %s\n", strerror(errno));
+    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: socket(): %s\n", strerror(errno));
     return -1;
   }
 
@@ -133,7 +133,7 @@ static int host_connect_attempt(struct in_addr ia, int port) {
 #else
       && WSAGetLastError() == WSAEINPROGRESS) {
 #endif
-    printf ("rtsp: connect(): %s\n", strerror(errno));
+    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: connect(): %s\n", strerror(errno));
     closesocket(s);
     return -1;
   }
@@ -148,7 +148,7 @@ static int host_connect(const char *host, int port) {
   
   h = gethostbyname(host);
   if (h == NULL) {
-    printf ("rtsp: unable to resolve '%s'.\n", host);
+    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: unable to resolve '%s'.\n", host);
     return -1;
   }
 
@@ -160,7 +160,7 @@ static int host_connect(const char *host, int port) {
     if(s != -1)
       return s;
   }
-  printf ("rtsp: unable to connect to '%s'.\n", host);
+  mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: unable to connect to '%s'.\n", host);
   return -1;
 }
 
@@ -217,7 +217,7 @@ static ssize_t read_stream(int fd, void *buf, size_t count) {
         continue;
       }
       
-      printf ("rtsp: read error.\n");
+      mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: read error.\n");
       return ret;
     } else
       total += ret;
@@ -237,31 +237,31 @@ static void hexdump (char *buf, int length) {
 
   int i;
 
-  printf ("rtsp: ascii>");
+  mp_msg(MSGT_OPEN, MSGL_INFO, "rtsp: ascii>");
   for (i = 0; i < length; i++) {
     unsigned char c = buf[i];
 
     if ((c >= 32) && (c <= 128))
-      printf ("%c", c);
+      mp_msg(MSGT_OPEN, MSGL_INFO, "%c", c);
     else
-      printf (".");
+      mp_msg(MSGT_OPEN, MSGL_INFO, ".");
   }
-  printf ("\n");
+  mp_msg(MSGT_OPEN, MSGL_INFO, "\n");
 
-  printf ("rtsp: hexdump> ");
+  mp_msg(MSGT_OPEN, MSGL_INFO, "rtsp: hexdump> ");
   for (i = 0; i < length; i++) {
     unsigned char c = buf[i];
 
-    printf ("%02x", c);
+    mp_msg(MSGT_OPEN, MSGL_INFO, "%02x", c);
 
     if ((i % 16) == 15)
-      printf ("\nrtsp:         ");
+      mp_msg(MSGT_OPEN, MSGL_INFO, "\nrtsp:         ");
 
     if ((i % 2) == 1)
-      printf (" ");
+      mp_msg(MSGT_OPEN, MSGL_INFO, " ");
 
   }
-  printf ("\n");
+  mp_msg(MSGT_OPEN, MSGL_INFO, "\n");
 }
 #endif
 
@@ -283,7 +283,7 @@ static char *rtsp_get(rtsp_t *s) {
   }
 
   if (n>=BUF_SIZE) {
-    printf("librtsp: buffer overflow in rtsp_get\n");
+    mp_msg(MSGT_OPEN, MSGL_FATAL, "librtsp: buffer overflow in rtsp_get\n");
     exit(1);
   }
   string=malloc(sizeof(char)*n);
@@ -291,7 +291,7 @@ static char *rtsp_get(rtsp_t *s) {
   string[n-1]=0;
 
 #ifdef LOG
-  printf("librtsp: << '%s'\n", string);
+  mp_msg(MSGT_OPEN, MSGL_INFO, "librtsp: << '%s'\n", string);
 #endif
   
 
@@ -309,7 +309,7 @@ static void rtsp_put(rtsp_t *s, const char *string) {
   char *buf=malloc(sizeof(char)*len+2);
 
 #ifdef LOG
-  printf("librtsp: >> '%s'", string);
+  mp_msg(MSGT_OPEN, MSGL_INFO, "librtsp: >> '%s'", string);
 #endif
 
   memcpy(buf,string,len);
@@ -319,7 +319,7 @@ static void rtsp_put(rtsp_t *s, const char *string) {
   write_stream(s->s, buf, len+2);
   
 #ifdef LOG
-  printf(" done.\n");
+  mp_msg(MSGT_OPEN, MSGL_INFO, " done.\n");
 #endif
 
   free(buf);
@@ -344,7 +344,7 @@ static int rtsp_get_code(const char *string) {
     return RTSP_STATUS_SET_PARAMETER;
   }
 
-  if(code != 200) printf("librtsp: server responds: '%s'\n",string);
+  if(code != 200) mp_msg(MSGT_OPEN, MSGL_INFO, "librtsp: server responds: '%s'\n",string);
 
   return code;
 }
@@ -421,7 +421,7 @@ static int rtsp_get_answers(rtsp_t *s) {
       sscanf(answer,"Cseq: %u",&answer_seq);
       if (s->cseq != answer_seq) {
 #ifdef LOG
-        printf("librtsp: warning: Cseq mismatch. got %u, assumed %u", answer_seq, s->cseq);
+        mp_msg(MSGT_OPEN, MSGL_WARN, "librtsp: warning: Cseq mismatch. got %u, assumed %u", answer_seq, s->cseq);
 #endif
         s->cseq=answer_seq;
       }
@@ -438,14 +438,14 @@ static int rtsp_get_answers(rtsp_t *s) {
       sscanf(answer,"Session: %s",buf);
       if (s->session) {
         if (strcmp(buf, s->session)) {
-          printf("rtsp: warning: setting NEW session: %s\n", buf);
+          mp_msg(MSGT_OPEN, MSGL_WARN, "rtsp: warning: setting NEW session: %s\n", buf);
           free(s->session);
           s->session=strdup(buf);
         }
       } else
       {
 #ifdef LOG
-        printf("rtsp: setting session id to: %s\n", buf);
+        mp_msg(MSGT_OPEN, MSGL_INFO, "rtsp: setting session id to: %s\n", buf);
 #endif
         s->session=strdup(buf);
       }
@@ -593,7 +593,7 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
       free(rest);
       if (seq<0) {
 #ifdef LOG
-        printf("rtsp: warning: cseq not recognized!\n");
+        mp_msg(MSGT_OPEN, MSGL_WARN, "rtsp: warning: cseq not recognized!\n");
 #endif
         seq=1;
       }
@@ -612,7 +612,7 @@ int rtsp_read_data(rtsp_t *s, char *buffer, unsigned int size) {
   } else
     i=read_stream(s->s, buffer, size);
 #ifdef LOG
-  printf("librtsp: << %d of %d bytes\n", i, size);
+  mp_msg(MSGT_OPEN, MSGL_INFO, "librtsp: << %d of %d bytes\n", i, size);
 #endif
 
   return i;
@@ -653,12 +653,12 @@ rtsp_t *rtsp_connect(int fd, char* mrl, char *path, char *host, int port, char *
     path++;
   if ((s->param = strchr(s->path, '?')) != NULL)
     s->param++;
-  //printf("path=%s\n", s->path);
-  //printf("param=%s\n", s->param ? s->param : "NULL");
+  //mp_msg(MSGT_OPEN, MSGL_INFO, "path=%s\n", s->path);
+  //mp_msg(MSGT_OPEN, MSGL_INFO, "param=%s\n", s->param ? s->param : "NULL");
   s->s = fd;
 
   if (s->s < 0) {
-    printf ("rtsp: failed to connect to '%s'\n", s->host);
+    mp_msg(MSGT_OPEN, MSGL_ERR, "rtsp: failed to connect to '%s'\n", s->host);
     rtsp_close(s);
     return NULL;
   }

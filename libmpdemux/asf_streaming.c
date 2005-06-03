@@ -87,8 +87,7 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
 	return -1;
 }
 
-int 
-asf_streaming(ASF_stream_chunck_t *stream_chunck, int *drop_packet ) {
+static int asf_streaming(ASF_stream_chunck_t *stream_chunck, int *drop_packet ) {
 /*	
 printf("ASF stream chunck size=%d\n", stream_chunck->size);
 printf("length: %d\n", length );
@@ -157,8 +156,7 @@ static int max_idx(int s_count, int *s_rates, int bound) {
   return best;
 }
 
-static int
-asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
+static int asf_streaming_parse_header(int fd, streaming_ctrl_t* streaming_ctrl) {
   ASF_header_t asfh;
   ASF_stream_chunck_t chunk;
   asf_http_streaming_ctrl_t* asf_ctrl = (asf_http_streaming_ctrl_t*) streaming_ctrl->data;
@@ -407,8 +405,7 @@ len_err_out:
   return -1;
 }
 
-int
-asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
+static int asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
   static ASF_stream_chunck_t chunk;
   int read,chunk_size = 0;
   static int rest = 0, drop_chunk = 0, waiting = 0;
@@ -483,8 +480,7 @@ asf_http_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *strea
   return read;
 }
 
-int
-asf_http_streaming_seek( int fd, off_t pos, streaming_ctrl_t *streaming_ctrl ) {
+static int asf_http_streaming_seek( int fd, off_t pos, streaming_ctrl_t *streaming_ctrl ) {
 	return -1;
 	// to shut up gcc warning
 	fd++;
@@ -492,8 +488,7 @@ asf_http_streaming_seek( int fd, off_t pos, streaming_ctrl_t *streaming_ctrl ) {
 	streaming_ctrl=NULL;
 }
 
-int
-asf_header_check( HTTP_header_t *http_hdr ) {
+static int asf_header_check( HTTP_header_t *http_hdr ) {
 	ASF_obj_header_t *objh;
 	if( http_hdr==NULL ) return -1;
 	if( http_hdr->body==NULL || http_hdr->body_size<sizeof(ASF_obj_header_t) ) return -1;
@@ -503,8 +498,7 @@ asf_header_check( HTTP_header_t *http_hdr ) {
 	return -1;
 }
 
-int
-asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_hdr ) {
+static int asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_hdr ) {
 	if( content_type==NULL ) return ASF_Unknown_e;
 	if( 	!strcasecmp(content_type, "application/octet-stream") ||
 		!strcasecmp(content_type, "application/vnd.ms.wms-hdr.asfv1") ||        // New in Corona, first request
@@ -556,8 +550,7 @@ asf_http_streaming_type(char *content_type, char *features, HTTP_header_t *http_
 	return ASF_Unknown_e;
 }
 
-HTTP_header_t *
-asf_http_request(streaming_ctrl_t *streaming_ctrl) {
+static HTTP_header_t *asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	HTTP_header_t *http_hdr;
 	URL_t *url = NULL;
 	URL_t *server_url = NULL;
@@ -655,8 +648,7 @@ asf_http_request(streaming_ctrl_t *streaming_ctrl) {
 	return http_hdr;
 }
 
-int
-asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTTP_header_t *http_hdr ) {
+static int asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTTP_header_t *http_hdr ) {
 	char *content_type, *pragma;
 	char features[64] = "\0";
 	size_t len;
@@ -715,8 +707,7 @@ asf_http_parse_response(asf_http_streaming_ctrl_t *asf_http_ctrl, HTTP_header_t 
 	return 0;
 }
 
-int
-asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
+static int asf_http_streaming_start( stream_t *stream, int *demuxer_type ) {
 	HTTP_header_t *http_hdr=NULL;
 	URL_t *url = stream->streaming_ctrl->url;
 	asf_http_streaming_ctrl_t *asf_http_ctrl;

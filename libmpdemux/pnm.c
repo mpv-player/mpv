@@ -121,7 +121,7 @@ struct pnm_s {
 
 /* header of rm files */
 #define RM_HEADER_SIZE 0x12
-const unsigned char rm_header[]={
+static const unsigned char rm_header[]={
         0x2e, 0x52, 0x4d, 0x46, /* object_id      ".RMF" */
         0x00, 0x00, 0x00, 0x12, /* header_size    0x12   */
         0x00, 0x00,             /* object_version 0x00   */
@@ -131,7 +131,7 @@ const unsigned char rm_header[]={
 
 /* data chunk header */
 #define PNM_DATA_HEADER_SIZE 18
-const unsigned char pnm_data_header[]={
+static const unsigned char pnm_data_header[]={
         'D','A','T','A',
          0,0,0,0,       /* data chunk size  */
          0,0,           /* object version   */
@@ -150,14 +150,14 @@ const unsigned char pnm_data_header[]={
 #define PNA_CLIENT_STRING    0x63
 #define PNA_PATH_REQUEST     0x52
 
-const unsigned char pnm_challenge[] = "0990f6b4508b51e801bd6da011ad7b56";
-const unsigned char pnm_timestamp[] = "[15/06/1999:22:22:49 00:00]";
-const unsigned char pnm_guid[]      = "3eac2411-83d5-11d2-f3ea-d7c3a51aa8b0";
-const unsigned char pnm_response[]  = "97715a899cbe41cee00dd434851535bf";
-const unsigned char client_string[] = "WinNT_9.0_6.0.6.45_plus32_MP60_en-US_686l";
+static const unsigned char pnm_challenge[] = "0990f6b4508b51e801bd6da011ad7b56";
+static const unsigned char pnm_timestamp[] = "[15/06/1999:22:22:49 00:00]";
+static const unsigned char pnm_guid[]      = "3eac2411-83d5-11d2-f3ea-d7c3a51aa8b0";
+static const unsigned char pnm_response[]  = "97715a899cbe41cee00dd434851535bf";
+static const unsigned char client_string[] = "WinNT_9.0_6.0.6.45_plus32_MP60_en-US_686l";
 
 #define PNM_HEADER_SIZE 11
-const unsigned char pnm_header[] = {
+static const unsigned char pnm_header[] = {
         'P','N','A',
         0x00, 0x0a,
         0x00, 0x14,
@@ -165,7 +165,7 @@ const unsigned char pnm_header[] = {
         0x00, 0x01 };
 
 #define PNM_CLIENT_CAPS_SIZE 126
-const unsigned char pnm_client_caps[] = {
+static const unsigned char pnm_client_caps[] = {
     0x07, 0x8a, 'p','n','r','v', 
        0, 0x90, 'p','n','r','v', 
        0, 0x64, 'd','n','e','t', 
@@ -188,18 +188,18 @@ const unsigned char pnm_client_caps[] = {
        0, 0x12, 'l','p','c','J', 
        0, 0x07, '0','5','_','6' };
 
-const uint32_t pnm_default_bandwidth=10485800;
-const uint32_t pnm_available_bandwidths[]={14400,19200,28800,33600,34430,57600,
+static const uint32_t pnm_default_bandwidth=10485800;
+static const uint32_t pnm_available_bandwidths[]={14400,19200,28800,33600,34430,57600,
                                   115200,262200,393216,524300,1544000,10485800};
 
 #define PNM_TWENTYFOUR_SIZE 16
-unsigned char pnm_twentyfour[]={
+static unsigned char pnm_twentyfour[]={
     0xd5, 0x42, 0xa3, 0x1b, 0xef, 0x1f, 0x70, 0x24,
     0x85, 0x29, 0xb3, 0x8d, 0xba, 0x11, 0xf3, 0xd6 };
 
 /* now other data follows. marked with 0x0000 at the beginning */
-int after_chunks_length=6;
-unsigned char after_chunks[]={
+static int after_chunks_length=6;
+static unsigned char after_chunks[]={
     0x00, 0x00, /* mark */
     
     0x50, 0x84, /* seems to be fixated */
@@ -258,7 +258,7 @@ static ssize_t rm_read(int fd, void *buf, size_t count) {
     ret=recv (fd, ((uint8_t*)buf)+total, count-total, 0);
 
     if (ret<=0) {
-      printf ("input_pnm: read error.\n");
+      mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: read error.\n");
       return ret;
     } else
       total += ret;
@@ -275,31 +275,31 @@ static void hexdump (char *buf, int length) {
 
   int i;
 
-  printf ("input_pnm: ascii>");
+  mp_msg(MSGT_OPEN, MSGL_INFO, "input_pnm: ascii>");
   for (i = 0; i < length; i++) {
     unsigned char c = buf[i];
 
     if ((c >= 32) && (c <= 128))
-      printf ("%c", c);
+      mp_msg(MSGT_OPEN, MSGL_INFO, "%c", c);
     else
-      printf (".");
+      mp_msg(MSGT_OPEN, MSGL_INFO, ".");
   }
-  printf ("\n");
+  mp_msg(MSGT_OPEN, MSGL_INFO, "\n");
 
-  printf ("input_pnm: hexdump> ");
+  mp_msg(MSGT_OPEN, MSGL_INFO, "input_pnm: hexdump> ");
   for (i = 0; i < length; i++) {
     unsigned char c = buf[i];
 
-    printf ("%02x", c);
+    mp_msg(MSGT_OPEN, MSGL_INFO, "%02x", c);
 
     if ((i % 16) == 15)
-      printf ("\npnm:         ");
+      mp_msg(MSGT_OPEN, MSGL_INFO, "\npnm:         ");
 
     if ((i % 2) == 1)
-      printf (" ");
+      mp_msg(MSGT_OPEN, MSGL_INFO, " ");
 
   }
-  printf ("\n");
+  mp_msg(MSGT_OPEN, MSGL_INFO, "\n");
 }
 
 /*
@@ -349,7 +349,7 @@ static int pnm_get_chunk(pnm_t *p,
         max -= 2;
 	if (*ptr == 'X') /* checking for server message */
 	{
-	  printf("input_pnm: got a message from server:\n");
+	  mp_msg(MSGT_OPEN, MSGL_WARN, "input_pnm: got a message from server:\n");
 	  if (max < 1)
 	    return -1;
 	  rm_read (p->s, ptr+2, 1);
@@ -360,13 +360,13 @@ static int pnm_get_chunk(pnm_t *p,
 	  rm_read (p->s, ptr+3, n);
 	  max -= n;
 	  ptr[3+n]=0;
-	  printf("%s\n",ptr+3);
+	  mp_msg(MSGT_OPEN, MSGL_WARN, "%s\n",ptr+3);
 	  return -1;
 	}
 	
 	if (*ptr == 'F') /* checking for server error */
 	{
-	  printf("input_pnm: server error.\n");
+	  mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: server error.\n");
 	  return -1;
 	}
 	if (*ptr == 'i')
@@ -396,7 +396,7 @@ static int pnm_get_chunk(pnm_t *p,
     case MDPR_TAG:
     case CONT_TAG:
       if (chunk_size > max || chunk_size < PREAMBLE_SIZE) {
-        printf("error: max chunk size exeeded (max was 0x%04x)\n", max);
+        mp_msg(MSGT_OPEN, MSGL_ERR, "error: max chunk size exceded (max was 0x%04x)\n", max);
 #ifdef LOG
         n=rm_read (p->s, &data[PREAMBLE_SIZE], 0x100 - PREAMBLE_SIZE);
         hexdump(data,n+PREAMBLE_SIZE);
@@ -531,7 +531,7 @@ static int pnm_get_headers(pnm_t *p, int *need_response) {
   while(1) {
     if (HEADER_SIZE-size<=0)
     {
-      printf("input_pnm: header buffer overflow. exiting\n");
+      mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: header buffer overflow. exiting\n");
       return 0;
     }
     chunk_size=pnm_get_chunk(p,HEADER_SIZE-size,&chunk_type,ptr,&nr);
@@ -554,7 +554,7 @@ static int pnm_get_headers(pnm_t *p, int *need_response) {
   }
   
   if (!prop_hdr) {
-    printf("input_pnm: error while parsing headers.\n");
+    mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: error while parsing headers.\n");
     return 0;
   }
   
@@ -639,14 +639,14 @@ static int pnm_calc_stream(pnm_t *p) {
         return 1;
       /* does not help, we guess type 0     */
 #ifdef LOG
-      printf("guessing stream# 0\n");
+      mp_msg(MSGT_OPEN, MSGL_INFO, "guessing stream# 0\n");
 #endif
       p->seq_num[0]=p->seq_current[0]+1;
       p->seq_num[1]=p->seq_current[1]+1;
       return 0;
       break;
   }
-  printf("input_pnm: wow, something very nasty happened in pnm_calc_stream\n");
+  mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: wow, something very nasty happened in pnm_calc_stream\n");
   return 2;
 }
 
@@ -683,7 +683,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
     n = rm_read (p->s, p->buffer, 8);
     if (n<8) return 0;
 #ifdef LOG
-    printf("input_pnm: had to seek 8 bytes on 0x62\n");
+    mp_msg(MSGT_OPEN, MSGL_WARN, "input_pnm: had to seek 8 bytes on 0x62\n");
 #endif
   }
   
@@ -694,12 +694,12 @@ static int pnm_get_stream_chunk(pnm_t *p) {
 
     rm_read (p->s, &p->buffer[8], size-5);
     p->buffer[size+3]=0;
-    printf("input_pnm: got message from server while reading stream:\n%s\n", &p->buffer[3]);
+    mp_msg(MSGT_OPEN, MSGL_WARN, "input_pnm: got message from server while reading stream:\n%s\n", &p->buffer[3]);
     return -1;
   }
   if (p->buffer[0] == 'F')
   {
-    printf("input_pnm: server error.\n");
+    mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: server error.\n");
     return -1;
   }
 
@@ -718,13 +718,13 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   }
 
 #ifdef LOG
-  if (n) printf("input_pnm: had to seek %i bytes to next chunk\n", n);
+  if (n) mp_msg(MSGT_OPEN, MSGL_WARN, "input_pnm: had to seek %i bytes to next chunk\n", n);
 #endif
 
   /* check for 'Z's */
   if ((p->buffer[0] != 0x5a)||(p->buffer[7] != 0x5a))
   {
-    printf("input_pnm: bad boundaries\n");
+    mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: bad boundaries\n");
     hexdump(p->buffer, 8);
     return 0;
   }
@@ -734,7 +734,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
   fof2=BE_16(&p->buffer[3]);
   if (fof1 != fof2)
   {
-    printf("input_pnm: frame offsets are different: 0x%04x 0x%04x\n",fof1,fof2);
+    mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: frame offsets are different: 0x%04x 0x%04x\n",fof1,fof2);
     return 0;
   }
 
@@ -780,7 +780,7 @@ static int pnm_get_stream_chunk(pnm_t *p) {
 }
 
 // pnm_t *pnm_connect(const char *mrl) {
-pnm_t *pnm_connect(int fd, char *path) {
+static pnm_t *pnm_connect(int fd, char *path) {
   
   pnm_t *p=malloc(sizeof(pnm_t));
   int need_response=0;
@@ -790,7 +790,7 @@ pnm_t *pnm_connect(int fd, char *path) {
 
   pnm_send_request(p,pnm_available_bandwidths[10]);
   if (!pnm_get_headers(p, &need_response)) {
-    printf ("input_pnm: failed to set up stream\n");
+    mp_msg(MSGT_OPEN, MSGL_ERR, "input_pnm: failed to set up stream\n");
     free(p->path);
     free(p);
     return NULL;
@@ -809,7 +809,7 @@ pnm_t *pnm_connect(int fd, char *path) {
   return p;
 }
 
-int pnm_read (pnm_t *this, char *data, int len) {
+static int pnm_read (pnm_t *this, char *data, int len) {
   
   int to_copy=len;
   char *dest=data;
@@ -827,7 +827,7 @@ int pnm_read (pnm_t *this, char *data, int len) {
 
     if ((retval = pnm_get_stream_chunk (this)) <= 0) {
 #ifdef LOG
-      printf ("input_pnm: %d of %d bytes provided\n", len-to_copy, len);
+      mp_msg(MSGT_OPEN, MSGL_INFO, "input_pnm: %d of %d bytes provided\n", len-to_copy, len);
 #endif
       if (retval < 0)
         return retval;
