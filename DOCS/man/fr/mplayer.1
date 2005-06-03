@@ -1,4 +1,4 @@
-.\" synced with 1.984
+.\" synced with 1.986
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -7621,6 +7621,39 @@ visée de la vidéo (CBR ou mode 2passes, défaut\ : 687 kbits/\:s).
 .TP
 .B fixed_quant=<1\-31>
 Passe en mode quantum fixe et définit le quantum à utiliser.
+.
+.TP
+.B zones=<zone0>[/\:<zone1>[/\:...]]
+Personnalisation de la qualité de parties spécifiques (générique du
+début, de fin...) (ABR ou deux passes).
+Chaque zone est définie par <trame-du-debut>,<mode>,<valeur> où <mode>
+peut être
+.PD 0
+.RSs
+.IPs "q"
+Forçage à quanta constant, où valeur=<2.0\-31.0>
+represente la valeur de quanta.
+.IPs "w"
+Forçage du poids du contrôleur de flux, où valeur=<0.01\-2.00>
+représente la correction de qualité en %.
+.RE
+.PD 1
+.sp 1
+.RS
+.I EXEMPLE:
+.RE
+.PD 0
+.RSs
+.IPs zones=90000,q,20
+Encode les trames depuis la trame 90000 à quanta constant 20.
+.IPs zones=0,w,0.1/10001,w,1.0/90000,q,20
+Encode les trames 0\-10000 à 10% de bitrate, encode les trames de 90000
+jusqu'à la fin à quanta constant 20.
+Notez que la seconde zone est nécessaire pour arrêter la première zone,
+puisque sans cela toutes les trames jusqu'à la trame 89999 seraient
+encodées à 10% du bitrate.
+.RE
+.PD 1
 .
 .TP
 .B me_quality=<0\-6>
