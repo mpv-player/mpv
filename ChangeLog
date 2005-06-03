@@ -45,6 +45,8 @@ MPlayer (1.0)
     Others:
     * enabled hinting for TrueType fonts
     * support for file:// syntax
+    * ported all streams to the new API, with consequent massive cleanup of the 
+      stream layer
 
 
 
