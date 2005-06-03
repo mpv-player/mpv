@@ -3229,7 +3229,7 @@ Display debugging information.
 .br
 8: macroblock (MB) type
 .br
-16: quantization parameter (QP)
+16: per-block quantization parameter (QP)
 .br
 32: motion vector
 .br
@@ -3246,6 +3246,10 @@ Display debugging information.
 0x0800: memory management control operations (H.264)
 .br
 0x1000: bugs
+.br
+0x2000: Visualize quantization parameter (QP), lower QP are tinted greener.
+.br
+0x4000: Visualize block types.
 .REss
 .IPs ec=<value>
 Set error concealment strategy.
