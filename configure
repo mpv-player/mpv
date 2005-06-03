@@ -1861,7 +1861,7 @@ for ac_option do
     _inc_x11=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
     ;;
   --with-x11libdir=*)
-    _ld_x11=-L`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
+    _x11_paths=`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -L,g'`
     ;;
   --with-dxr2incdir=*)
     _inc_dxr2=-I`echo $ac_option | cut -d '=' -f 2 | sed 's,:, -I,g'`
@@ -3521,29 +3521,6 @@ if test "$_inc_x11" = "-I/usr/include" ; then
 fi
 
 
-echocheck "X11 libs presence"
-if test -z "$_ld_x11" ; then
-  for I in /usr/X11R6/lib /usr/lib/X11R6 /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 /usr/lib ; do
-    if test -d "$I" && ( test -f "$I/libX11.so" || test -f "$I/libX11.a" || test -f "$I/libX11.dll.a" ) ; then
-      if netbsd; then
-        _ld_x11="-L$I -Wl,-R$I"
-      else
-        _ld_x11="-L$I"
-      fi
-      echores "yes (using $I)"
-      break;
-    fi
-  done
-  if test -z "$_ld_x11" ; then
-    _x11=no
-    echores "not found (check if the dev(el) packages are installed)"
-  fi
-else
-  echores "yes (using $_ld_x11)"
-fi
-_ld_x11="$_ld_x11 -lXext -lX11 $_ld_sock"
-
-
 echocheck "X11"
 if test "$_x11" != no ; then
   cat > $TMPC <<EOF
@@ -3551,20 +3528,33 @@ if test "$_x11" != no ; then
 #include <X11/Xutil.h>
 int main(void) { (void) XCreateWindow(0,0,0,0,0,0,0,0,0,0,0,0); return 0; }
 EOF
-  _x11=no
-  cc_check $_inc_x11 $_ld_x11 && _x11=yes
+  if test -z "$_x11_paths" ; then
+    _x11_paths="/usr/X11R6/lib /usr/lib/X11R6 /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 /usr/lib"
+  fi
+  for I in $_x11_paths ; do
+    _ld_x11="-L$I -lXext -lX11 $_ld_sock"
+    if netbsd; then
+      _ld_x11="$_ld_x11 -Wl,-R$I"
+    fi
+    if test -d "$I" && cc_check $_inc_x11 $_ld_x11 ; then
+      _x11=yes
+      break
+    fi
+  done
 fi
 if test "$_x11" = yes ; then
   _def_x11='#define HAVE_X11 1'
   _vosrc="$_vosrc x11_common.c vo_x11.c vo_xover.c"
   _vomodules="x11 xover $_vomodules"
+  echores "yes (using $I)"
 else
+  _x11=no
   _def_x11='#undef HAVE_X11'
   _inc_x11=''
   _ld_x11=''
   _novomodules="x11 $_novomodules"
+  echores "no (check if the dev(el) packages are installed)"
 fi
-echores "$_x11"
 
 
 echocheck "DPMS"
