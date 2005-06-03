@@ -29,6 +29,11 @@ char *get_path(char *filename){
 	int len;
 #ifdef MACOSX_BUNDLE
 	struct stat dummy;
+	CFIndex maxlen=256;
+	CFURLRef res_url_ref=NULL;
+	CFURLRef bdl_url_ref=NULL;
+	char *res_url_path = NULL;
+	char *bdl_url_path = NULL;
 #endif
 
 	if ((homedir = getenv("HOME")) == NULL)
@@ -58,30 +63,39 @@ char *get_path(char *filename){
 
 #ifdef MACOSX_BUNDLE
 	if(stat(buff, &dummy)) {
-	CFIndex maxlen=64;
-	CFURLRef resources=NULL;
 	
-		free(buff);
-		buff=NULL;
+		res_url_ref=CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
+		bdl_url_ref=CFBundleCopyBundleURL(CFBundleGetMainBundle());
 		
-		resources=CFBundleCopyResourcesDirectoryURL(CFBundleGetMainBundle());
-		if(resources) {
+		if(res_url_ref&&bdl_url_ref) {
 
-			buff=malloc(maxlen);
-			*buff=0;
-		
-			while(!CFURLGetFileSystemRepresentation(resources, true, buff, maxlen)) {
+			res_url_path=malloc(maxlen);
+			bdl_url_path=malloc(maxlen);
+
+			while(!CFURLGetFileSystemRepresentation(res_url_ref, true, res_url_path, maxlen)) {
 				maxlen*=2;
-				buff=realloc(buff, maxlen);
+				res_url_path=realloc(res_url_path, maxlen);
 			}
-			CFRelease(resources);
+			CFRelease(res_url_ref);
+			
+			while(!CFURLGetFileSystemRepresentation(bdl_url_ref, true, bdl_url_path, maxlen)) {
+				maxlen*=2;
+				bdl_url_path=realloc(bdl_url_path, maxlen);
+			}
+			CFRelease(bdl_url_ref);
+				
+			if( strcmp(res_url_path, bdl_url_path) == 0)
+				res_url_path = NULL;
 		}
 			
-		if(buff&&filename) {
-			if((strlen(filename)+strlen(buff)+2)>maxlen) {
-				maxlen=strlen(filename)+strlen(buff)+2;
-				buff=realloc(buff, maxlen);
+		if(res_url_path&&filename) {
+			if((strlen(filename)+strlen(res_url_path)+2)>maxlen) {
+				maxlen=strlen(filename)+strlen(res_url_path)+2;
 			}
+			free(buff);
+			buff = (char *) malloc(maxlen);
+			strcpy(buff, res_url_path);
+				
 			strcat(buff,"/");
 			strcat(buff, filename);
 		}
