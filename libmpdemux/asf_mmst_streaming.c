@@ -343,7 +343,20 @@ static int interp_header (uint8_t *header, int header_len)
       }
       
     } else {
+#if 0
+      int b = i;
+      printf ("unknown object (guid: %016llx, %016llx, len: %lld)\n", guid_1, guid_2, length);
+      for (; b < length; b++)
+      {
+        if (isascii(header[b]) || isalpha(header[b]))
+	    printf("%c ", header[b]);
+	else
+    	    printf("%x ", header[b]);
+      }
+      printf("\n");
+#else
       mp_msg(MSGT_NETWORK,MSGL_WARN,"unknown object\n");
+#endif
     }
 
 //    mp_msg(MSGT_NETWORK,MSGL_INFO,"length    : %lld\n", length);
