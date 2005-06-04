@@ -1591,8 +1591,8 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"jnz 1b                \n\t"
 	"5:                      \n\t"
 
-	: "+S"(data), "+D"(output), "+c"(cnt), "+d"(thr_adr)// input regs
-	: 
+	: "+S"(data), "+D"(output), "+c"(cnt)// input regs
+	: "d"(thr_adr)
 	: "%eax"
 	);
 }
@@ -2103,8 +2103,8 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"decl %%ecx                   \n\t"
 	"jnz 6b                  \n\t"
 
-	: "+S"(pixels), "+D"(data), "+a"(line_size), "+c"(cnt) //input regs
-	:
+	: "+S"(pixels), "+D"(data), "+c"(cnt) //input regs
+	: "a"(line_size)
 	: "%edx");
 }
 
