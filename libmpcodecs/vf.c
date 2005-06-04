@@ -87,6 +87,7 @@ extern vf_info_t vf_info_tile;
 extern vf_info_t vf_info_delogo;
 extern vf_info_t vf_info_hue;
 extern vf_info_t vf_info_spp;
+extern vf_info_t vf_info_fspp;
 extern vf_info_t vf_info_yuvcsp;
 extern vf_info_t vf_info_kerndeint;
 extern vf_info_t vf_info_rgbtest;
@@ -168,6 +169,7 @@ static vf_info_t* filter_list[]={
     &vf_info_hue,
 #ifdef USE_LIBAVCODEC
     &vf_info_spp,
+    &vf_info_fspp,
 #endif
     &vf_info_yuvcsp,
     &vf_info_kerndeint,
