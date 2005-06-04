@@ -38,6 +38,11 @@
 
 #include "../config.h"
 
+#ifdef ARCH_X86_64
+// until the mmx code is fixed to support x86-64
+#undef HAVE_MMX
+#endif
+
 #ifdef USE_LIBAVCODEC
 
 #include "../mp_msg.h"
