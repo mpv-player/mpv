@@ -38,11 +38,6 @@
 
 #include "../config.h"
 
-#ifdef ARCH_X86_64
-// until the mmx code is fixed to support x86-64
-#undef HAVE_MMX
-#endif
-
 #ifdef USE_LIBAVCODEC
 
 #include "../mp_msg.h"
@@ -187,213 +182,213 @@ static void row_fdct_c(DCTELEM *data, const uint8_t *pixels, int line_size, int 
 #else /* HAVE_MMX */
 
 //This func reads from 1 slice, 1 and clears 0 & 1
-static void store_slice_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int height, int log2_scale)
+static void store_slice_mmx(uint8_t *dst, int16_t *src, long dst_stride, long src_stride, long width, long height, long log2_scale)
 {
     const uint8_t *od=&dither[0][0];
+    const uint8_t *end=&dither[height][0];
     width = (width+7)&~7;
     dst_stride-=width;
     //src_stride=(src_stride-width)*2;
-    height=(int)(&dither[height][0]);
     asm volatile(
-	"movl %5, %%edx                \n\t"
-	"movl %6, %%esi                \n\t"
-	"movl %7, %%edi                \n\t"
-	"movl %1, %%eax                \n\t"
-	"movd %%edx, %%mm5             \n\t"
-	"xorl $-1, %%edx              \n\t"
-	"movl %%eax, %%ecx             \n\t"
-	"addl $7, %%edx               \n\t"
-	"negl %%eax                   \n\t"
-	"subl %0, %%ecx            \n\t"
-	"addl %%ecx, %%ecx             \n\t"
-	"movd %%edx, %%mm2             \n\t"
-	"movl %%ecx, %1       \n\t"
-	"movl %2, %%edx               \n\t"
-	"shll $4, %%eax               \n\t"
+	"mov %5, %%"REG_d"                \n\t"
+	"mov %6, %%"REG_S"                \n\t"
+	"mov %7, %%"REG_D"                \n\t"
+	"mov %1, %%"REG_a"                \n\t"
+	"movd %%"REG_d", %%mm5             \n\t"
+	"xor $-1, %%"REG_d"              \n\t"
+	"mov %%"REG_a", %%"REG_c"             \n\t"
+	"add $7, %%"REG_d"               \n\t"
+	"neg %%"REG_a"                   \n\t"
+	"sub %0, %%"REG_c"            \n\t"
+	"add %%"REG_c", %%"REG_c"             \n\t"
+	"movd %%"REG_d", %%mm2             \n\t"
+	"mov %%"REG_c", %1       \n\t"
+	"mov %2, %%"REG_d"               \n\t"
+	"shl $4, %%"REG_a"               \n\t"
 
 	"2:                        \n\t"
-	"movq (%%edx), %%mm3           \n\t"
+	"movq (%%"REG_d"), %%mm3           \n\t"
 	"movq %%mm3, %%mm4             \n\t"
 	"pxor %%mm7, %%mm7             \n\t"
 	"punpcklbw %%mm7, %%mm3        \n\t"
 	"punpckhbw %%mm7, %%mm4        \n\t"
-	"movl %0, %%ecx            \n\t"
+	"mov %0, %%"REG_c"            \n\t"
 	"psraw %%mm5, %%mm3            \n\t"
 	"psraw %%mm5, %%mm4            \n\t"
 	"1:                        \n\t"
-	"movq %%mm7, (%%esi,%%eax,)     \n\t"
-	"movq (%%esi), %%mm0           \n\t"
-	"movq 8(%%esi), %%mm1          \n\t"
+	"movq %%mm7, (%%"REG_S",%%"REG_a",)     \n\t"
+	"movq (%%"REG_S"), %%mm0           \n\t"
+	"movq 8(%%"REG_S"), %%mm1          \n\t"
 
-	"movq %%mm7, 8(%%esi,%%eax,)    \n\t"
+	"movq %%mm7, 8(%%"REG_S",%%"REG_a",)    \n\t"
 	"paddw %%mm3, %%mm0            \n\t"
 	"paddw %%mm4, %%mm1            \n\t"
 
-	"movq %%mm7, (%%esi)           \n\t"
+	"movq %%mm7, (%%"REG_S")           \n\t"
 	"psraw %%mm2, %%mm0            \n\t"
 	"psraw %%mm2, %%mm1            \n\t"
 
-	"movq %%mm7, 8(%%esi)          \n\t"
+	"movq %%mm7, 8(%%"REG_S")          \n\t"
 	"packuswb %%mm1, %%mm0         \n\t"
-	"addl $16, %%esi              \n\t"
+	"add $16, %%"REG_S"              \n\t"
 
-	"movq %%mm0, (%%edi)           \n\t"
-	"addl $8, %%edi               \n\t"
-	"subl $8, %%ecx               \n\t"
+	"movq %%mm0, (%%"REG_D")           \n\t"
+	"add $8, %%"REG_D"               \n\t"
+	"sub $8, %%"REG_c"               \n\t"
 	"jg 1b                      \n\t"
-	"addl %1, %%esi       \n\t"
-	"addl $8, %%edx               \n\t"
-	"addl %3, %%edi       \n\t"
-	"cmpl %4, %%edx           \n\t"
+	"add %1, %%"REG_S"       \n\t"
+	"add $8, %%"REG_d"               \n\t"
+	"add %3, %%"REG_D"       \n\t"
+	"cmp %4, %%"REG_d"           \n\t"
 	"jl 2b                      \n\t"
 
 	:
-	: "m" (width), "m" (src_stride), "g" (od), "m" (dst_stride), "g" (height),
+	: "m" (width), "m" (src_stride), "g" (od), "m" (dst_stride), "g" (end),
 	  "m" (log2_scale), "m" (src), "m" (dst) //input
-	: "%eax", "%ecx", "%edx", "%esi", "%edi"
+	: "%"REG_a, "%"REG_c, "%"REG_d, "%"REG_S, "%"REG_D
 	);    
 }
 
 //This func reads from 2 slices, 0 & 2  and clears 2-nd
-static void store_slice2_mmx(uint8_t *dst, int16_t *src, int dst_stride, int src_stride, int width, int height, int log2_scale)
+static void store_slice2_mmx(uint8_t *dst, int16_t *src, long dst_stride, long src_stride, long width, long height, long log2_scale)
 {
     const uint8_t *od=&dither[0][0];
+    const uint8_t *end=&dither[height][0];
     width = (width+7)&~7;
     dst_stride-=width;
     //src_stride=(src_stride-width)*2;
-    height=(int)(&dither[height][0]);
     asm volatile(
-	"movl %5, %%edx                \n\t"
-	"movl %6, %%esi                \n\t"
-	"movl %7, %%edi                \n\t"
-	"movl %1, %%eax            \n\t"
-	"movd %%edx, %%mm5             \n\t"
-	"xorl $-1, %%edx              \n\t"
-	"movl %%eax, %%ecx             \n\t"
-	"addl $7, %%edx               \n\t"
-	"subl %0, %%ecx            \n\t"
-	"addl %%ecx, %%ecx             \n\t"
-	"movd %%edx, %%mm2             \n\t"
-	"movl %%ecx, %1       \n\t"
-	"movl %2, %%edx               \n\t"
-	"shll $5, %%eax               \n\t"
+	"mov %5, %%"REG_d"                \n\t"
+	"mov %6, %%"REG_S"                \n\t"
+	"mov %7, %%"REG_D"                \n\t"
+	"mov %1, %%"REG_a"            \n\t"
+	"movd %%"REG_d", %%mm5             \n\t"
+	"xor $-1, %%"REG_d"              \n\t"
+	"mov %%"REG_a", %%"REG_c"             \n\t"
+	"add $7, %%"REG_d"               \n\t"
+	"sub %0, %%"REG_c"            \n\t"
+	"add %%"REG_c", %%"REG_c"             \n\t"
+	"movd %%"REG_d", %%mm2             \n\t"
+	"mov %%"REG_c", %1       \n\t"
+	"mov %2, %%"REG_d"               \n\t"
+	"shl $5, %%"REG_a"               \n\t"
 
 	"2:                        \n\t"
-	"movq (%%edx), %%mm3           \n\t"
+	"movq (%%"REG_d"), %%mm3           \n\t"
 	"movq %%mm3, %%mm4             \n\t"
 	"pxor %%mm7, %%mm7             \n\t"
 	"punpcklbw %%mm7, %%mm3        \n\t"
 	"punpckhbw %%mm7, %%mm4        \n\t"
-	"movl %0, %%ecx            \n\t"
+	"mov %0, %%"REG_c"            \n\t"
 	"psraw %%mm5, %%mm3            \n\t"
 	"psraw %%mm5, %%mm4            \n\t"
 	"1:                        \n\t"
-	"movq (%%esi), %%mm0           \n\t"
-	"movq 8(%%esi), %%mm1          \n\t"
+	"movq (%%"REG_S"), %%mm0           \n\t"
+	"movq 8(%%"REG_S"), %%mm1          \n\t"
 	"paddw %%mm3, %%mm0            \n\t"
 
-	"paddw (%%esi,%%eax,), %%mm0    \n\t"
+	"paddw (%%"REG_S",%%"REG_a",), %%mm0    \n\t"
 	"paddw %%mm4, %%mm1            \n\t"
-	"movq 8(%%esi,%%eax,), %%mm6    \n\t"
+	"movq 8(%%"REG_S",%%"REG_a",), %%mm6    \n\t"
 
-	"movq %%mm7, (%%esi,%%eax,)     \n\t"
+	"movq %%mm7, (%%"REG_S",%%"REG_a",)     \n\t"
 	"psraw %%mm2, %%mm0            \n\t"
 	"paddw %%mm6, %%mm1            \n\t"
 
-	"movq %%mm7, 8(%%esi,%%eax,)    \n\t"
+	"movq %%mm7, 8(%%"REG_S",%%"REG_a",)    \n\t"
 	"psraw %%mm2, %%mm1            \n\t"
 	"packuswb %%mm1, %%mm0         \n\t"
 
-	"movq %%mm0, (%%edi)           \n\t"
-	"addl $16, %%esi              \n\t"
-	"addl $8, %%edi               \n\t"
-	"subl $8, %%ecx               \n\t"
+	"movq %%mm0, (%%"REG_D")           \n\t"
+	"add $16, %%"REG_S"              \n\t"
+	"add $8, %%"REG_D"               \n\t"
+	"sub $8, %%"REG_c"               \n\t"
 	"jg 1b                      \n\t"
-	"addl %1, %%esi       \n\t"
-	"addl $8, %%edx               \n\t"
-	"addl %3, %%edi       \n\t"
-	"cmpl %4, %%edx           \n\t"
+	"add %1, %%"REG_S"       \n\t"
+	"add $8, %%"REG_d"               \n\t"
+	"add %3, %%"REG_D"       \n\t"
+	"cmp %4, %%"REG_d"           \n\t"
 	"jl 2b                      \n\t"
 
 	:
-	: "m" (width), "m" (src_stride), "g" (od), "m" (dst_stride), "g" (height),
+	: "m" (width), "m" (src_stride), "g" (od), "m" (dst_stride), "g" (end),
 	  "m" (log2_scale), "m" (src), "m" (dst) //input
-	: "%eax", "%ecx", "%edx", "%edi", "%esi"
+	: "%"REG_a, "%"REG_c, "%"REG_d, "%"REG_D, "%"REG_S
 	);  
 }
 
 static void mul_thrmat_mmx(struct vf_priv_s *p, int q)
 {
-    int adr=(int)(&p->threshold_mtx_noq[0]);
+    uint64_t *adr=&p->threshold_mtx_noq[0];
     asm volatile(
 	"movd %0, %%mm7                \n\t"
-	"addl $8*8*2, %%edi            \n\t"
-	"movq 0*8(%%esi), %%mm0        \n\t"
+	"add $8*8*2, %%"REG_D"            \n\t"
+	"movq 0*8(%%"REG_S"), %%mm0        \n\t"
 	"punpcklwd %%mm7, %%mm7        \n\t"
-	"movq 1*8(%%esi), %%mm1        \n\t"
+	"movq 1*8(%%"REG_S"), %%mm1        \n\t"
 	"punpckldq %%mm7, %%mm7        \n\t"
 	"pmullw %%mm7, %%mm0           \n\t"
 
-	"movq 2*8(%%esi), %%mm2        \n\t"
+	"movq 2*8(%%"REG_S"), %%mm2        \n\t"
 	"pmullw %%mm7, %%mm1           \n\t"
 
-	"movq 3*8(%%esi), %%mm3        \n\t"
+	"movq 3*8(%%"REG_S"), %%mm3        \n\t"
 	"pmullw %%mm7, %%mm2           \n\t"
 
-	"movq %%mm0, 0*8(%%edi)        \n\t"
-	"movq 4*8(%%esi), %%mm4        \n\t"
+	"movq %%mm0, 0*8(%%"REG_D")        \n\t"
+	"movq 4*8(%%"REG_S"), %%mm4        \n\t"
 	"pmullw %%mm7, %%mm3           \n\t"
 
-	"movq %%mm1, 1*8(%%edi)        \n\t"
-	"movq 5*8(%%esi), %%mm5        \n\t"
+	"movq %%mm1, 1*8(%%"REG_D")        \n\t"
+	"movq 5*8(%%"REG_S"), %%mm5        \n\t"
 	"pmullw %%mm7, %%mm4           \n\t"
 
-	"movq %%mm2, 2*8(%%edi)        \n\t"
-	"movq 6*8(%%esi), %%mm6        \n\t"
+	"movq %%mm2, 2*8(%%"REG_D")        \n\t"
+	"movq 6*8(%%"REG_S"), %%mm6        \n\t"
 	"pmullw %%mm7, %%mm5           \n\t"
 
-	"movq %%mm3, 3*8(%%edi)        \n\t"
-	"movq 7*8+0*8(%%esi), %%mm0    \n\t"
+	"movq %%mm3, 3*8(%%"REG_D")        \n\t"
+	"movq 7*8+0*8(%%"REG_S"), %%mm0    \n\t"
 	"pmullw %%mm7, %%mm6           \n\t"
 
-	"movq %%mm4, 4*8(%%edi)        \n\t"
-	"movq 7*8+1*8(%%esi), %%mm1    \n\t"
+	"movq %%mm4, 4*8(%%"REG_D")        \n\t"
+	"movq 7*8+1*8(%%"REG_S"), %%mm1    \n\t"
 	"pmullw %%mm7, %%mm0           \n\t"
 
-	"movq %%mm5, 5*8(%%edi)        \n\t"
-	"movq 7*8+2*8(%%esi), %%mm2    \n\t"
+	"movq %%mm5, 5*8(%%"REG_D")        \n\t"
+	"movq 7*8+2*8(%%"REG_S"), %%mm2    \n\t"
 	"pmullw %%mm7, %%mm1           \n\t"
 
-	"movq %%mm6, 6*8(%%edi)        \n\t"
-	"movq 7*8+3*8(%%esi), %%mm3    \n\t"
+	"movq %%mm6, 6*8(%%"REG_D")        \n\t"
+	"movq 7*8+3*8(%%"REG_S"), %%mm3    \n\t"
 	"pmullw %%mm7, %%mm2           \n\t"
 
-	"movq %%mm0, 7*8+0*8(%%edi)    \n\t"
-	"movq 7*8+4*8(%%esi), %%mm4    \n\t"
+	"movq %%mm0, 7*8+0*8(%%"REG_D")    \n\t"
+	"movq 7*8+4*8(%%"REG_S"), %%mm4    \n\t"
 	"pmullw %%mm7, %%mm3           \n\t"
 
-	"movq %%mm1, 7*8+1*8(%%edi)    \n\t"
-	"movq 7*8+5*8(%%esi), %%mm5    \n\t"
+	"movq %%mm1, 7*8+1*8(%%"REG_D")    \n\t"
+	"movq 7*8+5*8(%%"REG_S"), %%mm5    \n\t"
 	"pmullw %%mm7, %%mm4           \n\t"
 
-	"movq %%mm2, 7*8+2*8(%%edi)    \n\t"
-	"movq 7*8+6*8(%%esi), %%mm6    \n\t"
+	"movq %%mm2, 7*8+2*8(%%"REG_D")    \n\t"
+	"movq 7*8+6*8(%%"REG_S"), %%mm6    \n\t"
 	"pmullw %%mm7, %%mm5           \n\t"
 
-	"movq %%mm3, 7*8+3*8(%%edi)    \n\t"
-	"movq 14*8+0*8(%%esi), %%mm0   \n\t"
+	"movq %%mm3, 7*8+3*8(%%"REG_D")    \n\t"
+	"movq 14*8+0*8(%%"REG_S"), %%mm0   \n\t"
 	"pmullw %%mm7, %%mm6           \n\t"
 
-	"movq %%mm4, 7*8+4*8(%%edi)    \n\t"
-	"movq 14*8+1*8(%%esi), %%mm1   \n\t"
+	"movq %%mm4, 7*8+4*8(%%"REG_D")    \n\t"
+	"movq 14*8+1*8(%%"REG_S"), %%mm1   \n\t"
 	"pmullw %%mm7, %%mm0           \n\t"
 
-	"movq %%mm5, 7*8+5*8(%%edi)    \n\t"
+	"movq %%mm5, 7*8+5*8(%%"REG_D")    \n\t"
 	"pmullw %%mm7, %%mm1           \n\t"
 
-	"movq %%mm6, 7*8+6*8(%%edi)    \n\t"
-	"movq %%mm0, 14*8+0*8(%%edi)   \n\t"
-	"movq %%mm1, 14*8+1*8(%%edi)   \n\t"
+	"movq %%mm6, 7*8+6*8(%%"REG_D")    \n\t"
+	"movq %%mm0, 14*8+0*8(%%"REG_D")   \n\t"
+	"movq %%mm1, 14*8+1*8(%%"REG_D")   \n\t"
 
 	: "+g" (q), "+S" (adr), "+D" (adr)
 	:
@@ -422,8 +417,7 @@ static void filter(struct vf_priv_s *p, uint8_t *dst, uint8_t *src,
     const int stride= is_luma ? p->temp_stride : (width+16);//((width+16+15)&(~15))
     const int step=6-p->log2_count;
     const int qps= 3 + is_luma; 
-    int32_t block_align1[4*8*BLOCKSZ+ 4*8*BLOCKSZ+8];//32
-    int32_t *block_align=(int32_t*)(((int)block_align1+31)&(~31));
+    int32_t __attribute__((aligned(32))) block_align[4*8*BLOCKSZ+ 4*8*BLOCKSZ];
     DCTELEM *block= (DCTELEM *)block_align;
     DCTELEM *block3=(DCTELEM *)(block_align+4*8*BLOCKSZ);    
 
@@ -877,27 +871,27 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
     asm volatile(
 	".align 16                   \n\t"
 	"1:                   \n\t"
-	"movq "DCTSIZE_S"*0*2(%%esi), %%mm1 \n\t"
+	"movq "DCTSIZE_S"*0*2(%%"REG_S"), %%mm1 \n\t"
 	//
-	"movq "DCTSIZE_S"*3*2(%%esi), %%mm7 \n\t"
+	"movq "DCTSIZE_S"*3*2(%%"REG_S"), %%mm7 \n\t"
 	"movq %%mm1, %%mm0             \n\t"
 
-	"paddw "DCTSIZE_S"*7*2(%%esi), %%mm1 \n\t" //t0    
+	"paddw "DCTSIZE_S"*7*2(%%"REG_S"), %%mm1 \n\t" //t0    
 	"movq %%mm7, %%mm3             \n\t"
 
-	"paddw "DCTSIZE_S"*4*2(%%esi), %%mm7 \n\t" //t3
+	"paddw "DCTSIZE_S"*4*2(%%"REG_S"), %%mm7 \n\t" //t3
 	"movq %%mm1, %%mm5             \n\t"
 
-	"movq "DCTSIZE_S"*1*2(%%esi), %%mm6 \n\t"
+	"movq "DCTSIZE_S"*1*2(%%"REG_S"), %%mm6 \n\t"
 	"psubw %%mm7, %%mm1            \n\t" //t13
 
-	"movq "DCTSIZE_S"*2*2(%%esi), %%mm2 \n\t"
+	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
 	"movq %%mm6, %%mm4             \n\t"
 
-	"paddw "DCTSIZE_S"*6*2(%%esi), %%mm6 \n\t" //t1
+	"paddw "DCTSIZE_S"*6*2(%%"REG_S"), %%mm6 \n\t" //t1
 	"paddw %%mm7, %%mm5            \n\t" //t10
 
-	"paddw "DCTSIZE_S"*5*2(%%esi), %%mm2 \n\t" //t2
+	"paddw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t2
 	"movq %%mm6, %%mm7             \n\t"
 
 	"paddw %%mm2, %%mm6            \n\t" //t11    
@@ -909,21 +903,21 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm6, %%mm2            \n\t" //d4      
 	"paddw %%mm1, %%mm7            \n\t"
 
-	"movq  4*16(%%edx), %%mm6      \n\t"
+	"movq  4*16(%%"REG_d"), %%mm6      \n\t"
 	"psllw $2, %%mm7              \n\t"
 
-	"psubw 0*16(%%edx), %%mm5      \n\t"
+	"psubw 0*16(%%"REG_d"), %%mm5      \n\t"
 	"psubw %%mm6, %%mm2            \n\t"
 
-	"paddusw 0*16(%%edx), %%mm5    \n\t"
+	"paddusw 0*16(%%"REG_d"), %%mm5    \n\t"
 	"paddusw %%mm6, %%mm2          \n\t"
 
 	"pmulhw "MANGLE(MM_FIX_0_707106781)", %%mm7 \n\t"
 	//
-	"paddw 0*16(%%edx), %%mm5      \n\t"
+	"paddw 0*16(%%"REG_d"), %%mm5      \n\t"
 	"paddw %%mm6, %%mm2            \n\t"
 
-	"psubusw 0*16(%%edx), %%mm5    \n\t"
+	"psubusw 0*16(%%"REG_d"), %%mm5    \n\t"
 	"psubusw %%mm6, %%mm2          \n\t"
 
 //This func is totally compute-bound,  operates at huge speed. So,  DC shortcut
@@ -938,23 +932,23 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm1, %%mm6             \n\t"
 	"paddw %%mm7, %%mm1            \n\t" //d2
 
-	"psubw 2*16(%%edx), %%mm1      \n\t"
+	"psubw 2*16(%%"REG_d"), %%mm1      \n\t"
 	"psubw %%mm7, %%mm6            \n\t" //d6
 
-	"movq 6*16(%%edx), %%mm7       \n\t"
+	"movq 6*16(%%"REG_d"), %%mm7       \n\t"
 	"psraw $2, %%mm5              \n\t"
 
-	"paddusw 2*16(%%edx), %%mm1    \n\t"
+	"paddusw 2*16(%%"REG_d"), %%mm1    \n\t"
 	"psubw %%mm7, %%mm6            \n\t"
 	// t7 d2 /t11 t4 t6 - d6 /t10     
 
-	"paddw 2*16(%%edx), %%mm1      \n\t"
+	"paddw 2*16(%%"REG_d"), %%mm1      \n\t"
 	"paddusw %%mm7, %%mm6          \n\t"
 
-	"psubusw 2*16(%%edx), %%mm1    \n\t"
+	"psubusw 2*16(%%"REG_d"), %%mm1    \n\t"
 	"paddw %%mm7, %%mm6            \n\t"
 
-	"psubw "DCTSIZE_S"*4*2(%%esi), %%mm3 \n\t"
+	"psubw "DCTSIZE_S"*4*2(%%"REG_S"), %%mm3 \n\t"
 	"psubusw %%mm7, %%mm6          \n\t"
 
 	//movq [edi+"DCTSIZE_S"*2*2], mm1
@@ -962,10 +956,10 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm1, %%mm7             \n\t"
 	"psraw $2, %%mm2              \n\t"
 
-	"psubw "DCTSIZE_S"*6*2(%%esi), %%mm4 \n\t"
+	"psubw "DCTSIZE_S"*6*2(%%"REG_S"), %%mm4 \n\t"
 	"psubw %%mm6, %%mm1            \n\t"
 
-	"psubw "DCTSIZE_S"*7*2(%%esi), %%mm0 \n\t"
+	"psubw "DCTSIZE_S"*7*2(%%"REG_S"), %%mm0 \n\t"
 	"paddw %%mm7, %%mm6            \n\t" //'t13
 
 	"psraw $2, %%mm6              \n\t" //paddw mm6, MM_2 !!    ---
@@ -977,10 +971,10 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm2, "MANGLE(temps)"+0*8       \n\t" //!
 	"psubw %%mm6, %%mm7            \n\t" //'t3
 
-	"movq "DCTSIZE_S"*2*2(%%esi), %%mm2 \n\t"
+	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
 	"psubw %%mm6, %%mm1            \n\t" //'t12        
 
-	"psubw "DCTSIZE_S"*5*2(%%esi), %%mm2 \n\t" //t5
+	"psubw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t5
 	"movq %%mm5, %%mm6             \n\t"
 
 	"movq %%mm7, "MANGLE(temps)"+3*8       \n\t"
@@ -1013,7 +1007,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm5, "MANGLE(temps)"+1*8       \n\t"
 	"paddw %%mm3, %%mm4            \n\t" //z4
 
-	"movq 3*16(%%edx), %%mm3       \n\t"
+	"movq 3*16(%%"REG_d"), %%mm3       \n\t"
 	"movq %%mm0, %%mm1             \n\t"
 
 	"movq %%mm6, "MANGLE(temps)"+2*8       \n\t"
@@ -1023,13 +1017,13 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"paddw %%mm2, %%mm0            \n\t" //z11 
 	"movq %%mm1, %%mm5             \n\t"
 
-	"movq 5*16(%%edx), %%mm2       \n\t"
+	"movq 5*16(%%"REG_d"), %%mm2       \n\t"
 	"psubw %%mm7, %%mm1            \n\t" //d3
 
 	"paddw %%mm7, %%mm5            \n\t" //d5
 	"psubw %%mm3, %%mm1            \n\t"
 
-	"movq 1*16(%%edx), %%mm7       \n\t"
+	"movq 1*16(%%"REG_d"), %%mm7       \n\t"
 	"psubw %%mm2, %%mm5            \n\t"
 
 	"movq %%mm0, %%mm6             \n\t"
@@ -1039,7 +1033,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm4, %%mm6            \n\t" //d7  
 
 	// d1 d3 - - - d5 d7 -    
-	"movq 7*16(%%edx), %%mm4       \n\t"
+	"movq 7*16(%%"REG_d"), %%mm4       \n\t"
 	"psubw %%mm7, %%mm0            \n\t"
 
 	"psubw %%mm4, %%mm6            \n\t"
@@ -1066,8 +1060,8 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"packssdw %%mm4, %%mm4         \n\t"
 	"psubusw %%mm7, %%mm0          \n\t"
 
-	"movd %%mm4, %%eax             \n\t"
-	"orl %%eax, %%eax              \n\t"
+	"movd %%mm4, %%"REG_a"             \n\t"
+	"or %%"REG_a", %%"REG_a"              \n\t"
 	"jnz 2f                 \n\t"
 	//movq [edi+"DCTSIZE_S"*3*2], mm1
 	//movq [edi+"DCTSIZE_S"*5*2], mm5
@@ -1082,7 +1076,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"pmulhw "MANGLE(MM_FIX_0_847759065)", %%mm0 \n\t" //tmp6
 	"movq %%mm1, %%mm2             \n\t"
 
-	"movq "DCTSIZE_S"*0*2(%%edi), %%mm5 \n\t"
+	"movq "DCTSIZE_S"*0*2(%%"REG_D"), %%mm5 \n\t"
 	"movq %%mm2, %%mm3             \n\t"
 
 	"pmulhw "MANGLE(MM_FIX_0_566454497)", %%mm1 \n\t" //tmp5
@@ -1095,49 +1089,49 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"pmulhw "MANGLE(MM_FIX_0_198912367)", %%mm2 \n\t" //-tmp4
 	"psubw %%mm3, %%mm4            \n\t"
 
-	"movq "DCTSIZE_S"*1*2(%%edi), %%mm7 \n\t"
+	"movq "DCTSIZE_S"*1*2(%%"REG_D"), %%mm7 \n\t"
 	"paddw %%mm3, %%mm5            \n\t"
 
-	"movq %%mm4, "DCTSIZE_S"*7*2(%%edi) \n\t"
+	"movq %%mm4, "DCTSIZE_S"*7*2(%%"REG_D") \n\t"
 	"paddw %%mm6, %%mm7            \n\t"
 
 	"movq "MANGLE(temps)"+2*8, %%mm3       \n\t"
 	"psubw %%mm0, %%mm6            \n\t"
 
-	"movq "DCTSIZE_S"*2*2(%%edi), %%mm4 \n\t"
+	"movq "DCTSIZE_S"*2*2(%%"REG_D"), %%mm4 \n\t"
 	"paddw %%mm0, %%mm7            \n\t"
 
-	"movq %%mm5, "DCTSIZE_S"*0*2(%%edi) \n\t"
+	"movq %%mm5, "DCTSIZE_S"*0*2(%%"REG_D") \n\t"
 	"paddw %%mm3, %%mm4            \n\t"
 
-	"movq %%mm6, "DCTSIZE_S"*6*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*6*2(%%"REG_D") \n\t"
 	"psubw %%mm1, %%mm3            \n\t"
 
-	"movq "DCTSIZE_S"*5*2(%%edi), %%mm5 \n\t"
+	"movq "DCTSIZE_S"*5*2(%%"REG_D"), %%mm5 \n\t"
 	"paddw %%mm1, %%mm4            \n\t"
 
-	"movq "DCTSIZE_S"*3*2(%%edi), %%mm6 \n\t"
+	"movq "DCTSIZE_S"*3*2(%%"REG_D"), %%mm6 \n\t"
 	"paddw %%mm3, %%mm5            \n\t"
 
 	"movq "MANGLE(temps)"+3*8, %%mm0       \n\t"
-	"addl $8, %%esi               \n\t"
+	"add $8, %%"REG_S"               \n\t"
 
-	"movq %%mm7, "DCTSIZE_S"*1*2(%%edi) \n\t"
+	"movq %%mm7, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
 	"paddw %%mm0, %%mm6            \n\t"
 
-	"movq %%mm4, "DCTSIZE_S"*2*2(%%edi) \n\t"
+	"movq %%mm4, "DCTSIZE_S"*2*2(%%"REG_D") \n\t"
 	"psubw %%mm2, %%mm0            \n\t"
 
-	"movq "DCTSIZE_S"*4*2(%%edi), %%mm7 \n\t"
+	"movq "DCTSIZE_S"*4*2(%%"REG_D"), %%mm7 \n\t"
 	"paddw %%mm2, %%mm6            \n\t"
 
-	"movq %%mm5, "DCTSIZE_S"*5*2(%%edi) \n\t"
+	"movq %%mm5, "DCTSIZE_S"*5*2(%%"REG_D") \n\t"
 	"paddw %%mm0, %%mm7            \n\t"
 
-	"movq %%mm6, "DCTSIZE_S"*3*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*3*2(%%"REG_D") \n\t"
 
-	"movq %%mm7, "DCTSIZE_S"*4*2(%%edi) \n\t"
-	"addl $8, %%edi               \n\t"
+	"movq %%mm7, "DCTSIZE_S"*4*2(%%"REG_D") \n\t"
+	"add $8, %%"REG_D"               \n\t"
 	"jmp 4f                  \n\t"
 
 	"2:                    \n\t"
@@ -1179,16 +1173,16 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	//paddw mm7, MM_2
 	"psraw $2, %%mm7              \n\t"
 
-	"paddw "DCTSIZE_S"*0*2(%%edi), %%mm4 \n\t"
+	"paddw "DCTSIZE_S"*0*2(%%"REG_D"), %%mm4 \n\t"
 	"psubw %%mm7, %%mm6            \n\t"
 
 	"movq "MANGLE(temps)"+1*8, %%mm3       \n\t"
 	"paddw %%mm7, %%mm4            \n\t"
 
-	"movq %%mm6, "DCTSIZE_S"*7*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*7*2(%%"REG_D") \n\t"
 	"paddw %%mm5, %%mm1            \n\t" //'t12
 
-	"movq %%mm4, "DCTSIZE_S"*0*2(%%edi) \n\t"
+	"movq %%mm4, "DCTSIZE_S"*0*2(%%"REG_D") \n\t"
 	"psubw %%mm7, %%mm1            \n\t" //'t6
 
 	"movq "MANGLE(temps)"+2*8, %%mm7       \n\t"
@@ -1197,65 +1191,65 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq "MANGLE(temps)"+3*8, %%mm6       \n\t"
 	"movq %%mm3, %%mm5             \n\t"
 
-	"paddw "DCTSIZE_S"*1*2(%%edi), %%mm3 \n\t"
+	"paddw "DCTSIZE_S"*1*2(%%"REG_D"), %%mm3 \n\t"
 	"psubw %%mm1, %%mm5            \n\t"
 
 	"psubw %%mm1, %%mm2            \n\t" //'t5
 	"paddw %%mm1, %%mm3            \n\t"
 
-	"movq %%mm5, "DCTSIZE_S"*6*2(%%edi) \n\t"
+	"movq %%mm5, "DCTSIZE_S"*6*2(%%"REG_D") \n\t"
 	"movq %%mm7, %%mm4             \n\t"
 
-	"paddw "DCTSIZE_S"*2*2(%%edi), %%mm7 \n\t"
+	"paddw "DCTSIZE_S"*2*2(%%"REG_D"), %%mm7 \n\t"
 	"psubw %%mm2, %%mm4            \n\t"
 
-	"paddw "DCTSIZE_S"*5*2(%%edi), %%mm4 \n\t"
+	"paddw "DCTSIZE_S"*5*2(%%"REG_D"), %%mm4 \n\t"
 	"paddw %%mm2, %%mm7            \n\t"
 
-	"movq %%mm3, "DCTSIZE_S"*1*2(%%edi) \n\t"
+	"movq %%mm3, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
 	"paddw %%mm2, %%mm0            \n\t" //'t4     
 
 	// 't4 't6 't5 - - - - 't7
-	"movq %%mm7, "DCTSIZE_S"*2*2(%%edi) \n\t"
+	"movq %%mm7, "DCTSIZE_S"*2*2(%%"REG_D") \n\t"
 	"movq %%mm6, %%mm1             \n\t"
 
-	"paddw "DCTSIZE_S"*4*2(%%edi), %%mm6 \n\t"
+	"paddw "DCTSIZE_S"*4*2(%%"REG_D"), %%mm6 \n\t"
 	"psubw %%mm0, %%mm1            \n\t"
 
-	"paddw "DCTSIZE_S"*3*2(%%edi), %%mm1 \n\t"
+	"paddw "DCTSIZE_S"*3*2(%%"REG_D"), %%mm1 \n\t"
 	"paddw %%mm0, %%mm6            \n\t"
 
-	"movq %%mm4, "DCTSIZE_S"*5*2(%%edi) \n\t"
-	"addl $8, %%esi               \n\t"
+	"movq %%mm4, "DCTSIZE_S"*5*2(%%"REG_D") \n\t"
+	"add $8, %%"REG_S"               \n\t"
 
-	"movq %%mm6, "DCTSIZE_S"*4*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*4*2(%%"REG_D") \n\t"
 
-	"movq %%mm1, "DCTSIZE_S"*3*2(%%edi) \n\t"
-	"addl $8, %%edi               \n\t"
+	"movq %%mm1, "DCTSIZE_S"*3*2(%%"REG_D") \n\t"
+	"add $8, %%"REG_D"               \n\t"
 
 	"4:                     \n\t"
 //=part 2 (the same)===========================================================    
-	"movq "DCTSIZE_S"*0*2(%%esi), %%mm1 \n\t"
+	"movq "DCTSIZE_S"*0*2(%%"REG_S"), %%mm1 \n\t"
 	//
-	"movq "DCTSIZE_S"*3*2(%%esi), %%mm7 \n\t"
+	"movq "DCTSIZE_S"*3*2(%%"REG_S"), %%mm7 \n\t"
 	"movq %%mm1, %%mm0             \n\t"
 
-	"paddw "DCTSIZE_S"*7*2(%%esi), %%mm1 \n\t" //t0    
+	"paddw "DCTSIZE_S"*7*2(%%"REG_S"), %%mm1 \n\t" //t0    
 	"movq %%mm7, %%mm3             \n\t"
 
-	"paddw "DCTSIZE_S"*4*2(%%esi), %%mm7 \n\t" //t3
+	"paddw "DCTSIZE_S"*4*2(%%"REG_S"), %%mm7 \n\t" //t3
 	"movq %%mm1, %%mm5             \n\t"
 
-	"movq "DCTSIZE_S"*1*2(%%esi), %%mm6 \n\t"
+	"movq "DCTSIZE_S"*1*2(%%"REG_S"), %%mm6 \n\t"
 	"psubw %%mm7, %%mm1            \n\t" //t13
 
-	"movq "DCTSIZE_S"*2*2(%%esi), %%mm2 \n\t"
+	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
 	"movq %%mm6, %%mm4             \n\t"
 
-	"paddw "DCTSIZE_S"*6*2(%%esi), %%mm6 \n\t" //t1
+	"paddw "DCTSIZE_S"*6*2(%%"REG_S"), %%mm6 \n\t" //t1
 	"paddw %%mm7, %%mm5            \n\t" //t10
 
-	"paddw "DCTSIZE_S"*5*2(%%esi), %%mm2 \n\t" //t2
+	"paddw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t2
 	"movq %%mm6, %%mm7             \n\t"
 
 	"paddw %%mm2, %%mm6            \n\t" //t11    
@@ -1267,21 +1261,21 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm6, %%mm2            \n\t" //d4      
 	"paddw %%mm1, %%mm7            \n\t"
 
-	"movq  1*8+4*16(%%edx), %%mm6  \n\t"
+	"movq  1*8+4*16(%%"REG_d"), %%mm6  \n\t"
 	"psllw $2, %%mm7              \n\t"
 
-	"psubw 1*8+0*16(%%edx), %%mm5  \n\t"
+	"psubw 1*8+0*16(%%"REG_d"), %%mm5  \n\t"
 	"psubw %%mm6, %%mm2            \n\t"
 
-	"paddusw 1*8+0*16(%%edx), %%mm5 \n\t"
+	"paddusw 1*8+0*16(%%"REG_d"), %%mm5 \n\t"
 	"paddusw %%mm6, %%mm2          \n\t"
 
 	"pmulhw "MANGLE(MM_FIX_0_707106781)", %%mm7 \n\t"
 	//
-	"paddw 1*8+0*16(%%edx), %%mm5  \n\t"
+	"paddw 1*8+0*16(%%"REG_d"), %%mm5  \n\t"
 	"paddw %%mm6, %%mm2            \n\t"
 
-	"psubusw 1*8+0*16(%%edx), %%mm5 \n\t"
+	"psubusw 1*8+0*16(%%"REG_d"), %%mm5 \n\t"
 	"psubusw %%mm6, %%mm2          \n\t"
 
 //This func is totally compute-bound,  operates at huge speed. So,  DC shortcut
@@ -1296,23 +1290,23 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm1, %%mm6             \n\t"
 	"paddw %%mm7, %%mm1            \n\t" //d2
 
-	"psubw 1*8+2*16(%%edx), %%mm1  \n\t"
+	"psubw 1*8+2*16(%%"REG_d"), %%mm1  \n\t"
 	"psubw %%mm7, %%mm6            \n\t" //d6
 
-	"movq 1*8+6*16(%%edx), %%mm7   \n\t"
+	"movq 1*8+6*16(%%"REG_d"), %%mm7   \n\t"
 	"psraw $2, %%mm5              \n\t"
 
-	"paddusw 1*8+2*16(%%edx), %%mm1 \n\t"
+	"paddusw 1*8+2*16(%%"REG_d"), %%mm1 \n\t"
 	"psubw %%mm7, %%mm6            \n\t"
 	// t7 d2 /t11 t4 t6 - d6 /t10     
 
-	"paddw 1*8+2*16(%%edx), %%mm1  \n\t"
+	"paddw 1*8+2*16(%%"REG_d"), %%mm1  \n\t"
 	"paddusw %%mm7, %%mm6          \n\t"
 
-	"psubusw 1*8+2*16(%%edx), %%mm1 \n\t"
+	"psubusw 1*8+2*16(%%"REG_d"), %%mm1 \n\t"
 	"paddw %%mm7, %%mm6            \n\t"
 
-	"psubw "DCTSIZE_S"*4*2(%%esi), %%mm3 \n\t"
+	"psubw "DCTSIZE_S"*4*2(%%"REG_S"), %%mm3 \n\t"
 	"psubusw %%mm7, %%mm6          \n\t"
 
 	//movq [edi+"DCTSIZE_S"*2*2], mm1
@@ -1320,10 +1314,10 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm1, %%mm7             \n\t"
 	"psraw $2, %%mm2              \n\t"
 
-	"psubw "DCTSIZE_S"*6*2(%%esi), %%mm4 \n\t"
+	"psubw "DCTSIZE_S"*6*2(%%"REG_S"), %%mm4 \n\t"
 	"psubw %%mm6, %%mm1            \n\t"
 
-	"psubw "DCTSIZE_S"*7*2(%%esi), %%mm0 \n\t"
+	"psubw "DCTSIZE_S"*7*2(%%"REG_S"), %%mm0 \n\t"
 	"paddw %%mm7, %%mm6            \n\t" //'t13
 
 	"psraw $2, %%mm6              \n\t" //paddw mm6, MM_2 !!    ---
@@ -1335,10 +1329,10 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm2, "MANGLE(temps)"+0*8       \n\t" //!
 	"psubw %%mm6, %%mm7            \n\t" //'t3
 
-	"movq "DCTSIZE_S"*2*2(%%esi), %%mm2 \n\t"
+	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
 	"psubw %%mm6, %%mm1            \n\t" //'t12        
 
-	"psubw "DCTSIZE_S"*5*2(%%esi), %%mm2 \n\t" //t5
+	"psubw "DCTSIZE_S"*5*2(%%"REG_S"), %%mm2 \n\t" //t5
 	"movq %%mm5, %%mm6             \n\t"
 
 	"movq %%mm7, "MANGLE(temps)"+3*8       \n\t"
@@ -1371,7 +1365,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq %%mm5, "MANGLE(temps)"+1*8       \n\t"
 	"paddw %%mm3, %%mm4            \n\t" //z4
 
-	"movq 1*8+3*16(%%edx), %%mm3   \n\t"
+	"movq 1*8+3*16(%%"REG_d"), %%mm3   \n\t"
 	"movq %%mm0, %%mm1             \n\t"
 
 	"movq %%mm6, "MANGLE(temps)"+2*8       \n\t"
@@ -1381,13 +1375,13 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"paddw %%mm2, %%mm0            \n\t" //z11 
 	"movq %%mm1, %%mm5             \n\t"
 
-	"movq 1*8+5*16(%%edx), %%mm2   \n\t"
+	"movq 1*8+5*16(%%"REG_d"), %%mm2   \n\t"
 	"psubw %%mm7, %%mm1            \n\t" //d3
 
 	"paddw %%mm7, %%mm5            \n\t" //d5
 	"psubw %%mm3, %%mm1            \n\t"
 
-	"movq 1*8+1*16(%%edx), %%mm7   \n\t"
+	"movq 1*8+1*16(%%"REG_d"), %%mm7   \n\t"
 	"psubw %%mm2, %%mm5            \n\t"
 
 	"movq %%mm0, %%mm6             \n\t"
@@ -1397,7 +1391,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"psubw %%mm4, %%mm6            \n\t" //d7  
 
 	// d1 d3 - - - d5 d7 -    
-	"movq 1*8+7*16(%%edx), %%mm4   \n\t"
+	"movq 1*8+7*16(%%"REG_d"), %%mm4   \n\t"
 	"psubw %%mm7, %%mm0            \n\t"
 
 	"psubw %%mm4, %%mm6            \n\t"
@@ -1424,8 +1418,8 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"packssdw %%mm4, %%mm4         \n\t"
 	"psubusw %%mm7, %%mm0          \n\t"
 
-	"movd %%mm4, %%eax             \n\t"
-	"orl %%eax, %%eax              \n\t"
+	"movd %%mm4, %%"REG_a"             \n\t"
+	"or %%"REG_a", %%"REG_a"              \n\t"
 	"jnz 3f                 \n\t"
 	//movq [edi+"DCTSIZE_S"*3*2], mm1
 	//movq [edi+"DCTSIZE_S"*5*2], mm5
@@ -1440,7 +1434,7 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"pmulhw "MANGLE(MM_FIX_0_847759065)", %%mm0 \n\t" //tmp6
 	"movq %%mm1, %%mm2             \n\t"
 
-	"movq "DCTSIZE_S"*0*2(%%edi), %%mm5 \n\t"
+	"movq "DCTSIZE_S"*0*2(%%"REG_D"), %%mm5 \n\t"
 	"movq %%mm2, %%mm3             \n\t"
 
 	"pmulhw "MANGLE(MM_FIX_0_566454497)", %%mm1 \n\t" //tmp5
@@ -1453,50 +1447,50 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"pmulhw "MANGLE(MM_FIX_0_198912367)", %%mm2 \n\t" //-tmp4
 	"psubw %%mm3, %%mm4            \n\t"
 
-	"movq "DCTSIZE_S"*1*2(%%edi), %%mm7 \n\t"
+	"movq "DCTSIZE_S"*1*2(%%"REG_D"), %%mm7 \n\t"
 	"paddw %%mm3, %%mm5            \n\t"
 
-	"movq %%mm4, "DCTSIZE_S"*7*2(%%edi) \n\t"
+	"movq %%mm4, "DCTSIZE_S"*7*2(%%"REG_D") \n\t"
 	"paddw %%mm6, %%mm7            \n\t"
 
 	"movq "MANGLE(temps)"+2*8, %%mm3       \n\t"
 	"psubw %%mm0, %%mm6            \n\t"
 
-	"movq "DCTSIZE_S"*2*2(%%edi), %%mm4 \n\t"
+	"movq "DCTSIZE_S"*2*2(%%"REG_D"), %%mm4 \n\t"
 	"paddw %%mm0, %%mm7            \n\t"
 
-	"movq %%mm5, "DCTSIZE_S"*0*2(%%edi) \n\t"
+	"movq %%mm5, "DCTSIZE_S"*0*2(%%"REG_D") \n\t"
 	"paddw %%mm3, %%mm4            \n\t"
 
-	"movq %%mm6, "DCTSIZE_S"*6*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*6*2(%%"REG_D") \n\t"
 	"psubw %%mm1, %%mm3            \n\t"
 
-	"movq "DCTSIZE_S"*5*2(%%edi), %%mm5 \n\t"
+	"movq "DCTSIZE_S"*5*2(%%"REG_D"), %%mm5 \n\t"
 	"paddw %%mm1, %%mm4            \n\t"
 
-	"movq "DCTSIZE_S"*3*2(%%edi), %%mm6 \n\t"
+	"movq "DCTSIZE_S"*3*2(%%"REG_D"), %%mm6 \n\t"
 	"paddw %%mm3, %%mm5            \n\t"
 
 	"movq "MANGLE(temps)"+3*8, %%mm0       \n\t"
-	"addl $24, %%esi              \n\t"
+	"add $24, %%"REG_S"              \n\t"
 
-	"movq %%mm7, "DCTSIZE_S"*1*2(%%edi) \n\t"
+	"movq %%mm7, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
 	"paddw %%mm0, %%mm6            \n\t"
 
-	"movq %%mm4, "DCTSIZE_S"*2*2(%%edi) \n\t"
+	"movq %%mm4, "DCTSIZE_S"*2*2(%%"REG_D") \n\t"
 	"psubw %%mm2, %%mm0            \n\t"
 
-	"movq "DCTSIZE_S"*4*2(%%edi), %%mm7 \n\t"
+	"movq "DCTSIZE_S"*4*2(%%"REG_D"), %%mm7 \n\t"
 	"paddw %%mm2, %%mm6            \n\t"
 
-	"movq %%mm5, "DCTSIZE_S"*5*2(%%edi) \n\t"
+	"movq %%mm5, "DCTSIZE_S"*5*2(%%"REG_D") \n\t"
 	"paddw %%mm0, %%mm7            \n\t"
 
-	"movq %%mm6, "DCTSIZE_S"*3*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*3*2(%%"REG_D") \n\t"
 
-	"movq %%mm7, "DCTSIZE_S"*4*2(%%edi) \n\t"
-	"addl $24, %%edi              \n\t"
-	"subl $2, %%ecx               \n\t"
+	"movq %%mm7, "DCTSIZE_S"*4*2(%%"REG_D") \n\t"
+	"add $24, %%"REG_D"              \n\t"
+	"sub $2, %%"REG_c"               \n\t"
 	"jnz 1b                \n\t"
 	"jmp 5f                   \n\t"
 
@@ -1539,16 +1533,16 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	//paddw mm7, MM_2
 	"psraw $2, %%mm7              \n\t"
 
-	"paddw "DCTSIZE_S"*0*2(%%edi), %%mm4 \n\t"
+	"paddw "DCTSIZE_S"*0*2(%%"REG_D"), %%mm4 \n\t"
 	"psubw %%mm7, %%mm6            \n\t"
 
 	"movq "MANGLE(temps)"+1*8, %%mm3       \n\t"
 	"paddw %%mm7, %%mm4            \n\t"
 
-	"movq %%mm6, "DCTSIZE_S"*7*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*7*2(%%"REG_D") \n\t"
 	"paddw %%mm5, %%mm1            \n\t" //'t12
 
-	"movq %%mm4, "DCTSIZE_S"*0*2(%%edi) \n\t"
+	"movq %%mm4, "DCTSIZE_S"*0*2(%%"REG_D") \n\t"
 	"psubw %%mm7, %%mm1            \n\t" //'t6
 
 	"movq "MANGLE(temps)"+2*8, %%mm7       \n\t"
@@ -1557,48 +1551,48 @@ static void column_fidct_mmx(int16_t* thr_adr,  DCTELEM *data,  DCTELEM *output,
 	"movq "MANGLE(temps)"+3*8, %%mm6       \n\t"
 	"movq %%mm3, %%mm5             \n\t"
 
-	"paddw "DCTSIZE_S"*1*2(%%edi), %%mm3 \n\t"
+	"paddw "DCTSIZE_S"*1*2(%%"REG_D"), %%mm3 \n\t"
 	"psubw %%mm1, %%mm5            \n\t"
 
 	"psubw %%mm1, %%mm2            \n\t" //'t5
 	"paddw %%mm1, %%mm3            \n\t"
 
-	"movq %%mm5, "DCTSIZE_S"*6*2(%%edi) \n\t"
+	"movq %%mm5, "DCTSIZE_S"*6*2(%%"REG_D") \n\t"
 	"movq %%mm7, %%mm4             \n\t"
 
-	"paddw "DCTSIZE_S"*2*2(%%edi), %%mm7 \n\t"
+	"paddw "DCTSIZE_S"*2*2(%%"REG_D"), %%mm7 \n\t"
 	"psubw %%mm2, %%mm4            \n\t"
 
-	"paddw "DCTSIZE_S"*5*2(%%edi), %%mm4 \n\t"
+	"paddw "DCTSIZE_S"*5*2(%%"REG_D"), %%mm4 \n\t"
 	"paddw %%mm2, %%mm7            \n\t"
 
-	"movq %%mm3, "DCTSIZE_S"*1*2(%%edi) \n\t"
+	"movq %%mm3, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
 	"paddw %%mm2, %%mm0            \n\t" //'t4     
 
 	// 't4 't6 't5 - - - - 't7
-	"movq %%mm7, "DCTSIZE_S"*2*2(%%edi) \n\t"
+	"movq %%mm7, "DCTSIZE_S"*2*2(%%"REG_D") \n\t"
 	"movq %%mm6, %%mm1             \n\t"
 
-	"paddw "DCTSIZE_S"*4*2(%%edi), %%mm6 \n\t"
+	"paddw "DCTSIZE_S"*4*2(%%"REG_D"), %%mm6 \n\t"
 	"psubw %%mm0, %%mm1            \n\t"
 
-	"paddw "DCTSIZE_S"*3*2(%%edi), %%mm1 \n\t"
+	"paddw "DCTSIZE_S"*3*2(%%"REG_D"), %%mm1 \n\t"
 	"paddw %%mm0, %%mm6            \n\t"
 
-	"movq %%mm4, "DCTSIZE_S"*5*2(%%edi) \n\t"
-	"addl $24, %%esi              \n\t"
+	"movq %%mm4, "DCTSIZE_S"*5*2(%%"REG_D") \n\t"
+	"add $24, %%"REG_S"              \n\t"
 
-	"movq %%mm6, "DCTSIZE_S"*4*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*4*2(%%"REG_D") \n\t"
 
-	"movq %%mm1, "DCTSIZE_S"*3*2(%%edi) \n\t"
-	"addl $24, %%edi              \n\t"
-	"subl $2, %%ecx               \n\t"
+	"movq %%mm1, "DCTSIZE_S"*3*2(%%"REG_D") \n\t"
+	"add $24, %%"REG_D"              \n\t"
+	"sub $2, %%"REG_c"               \n\t"
 	"jnz 1b                \n\t"
 	"5:                      \n\t"
 
 	: "+S"(data), "+D"(output), "+c"(cnt)// input regs
 	: "d"(thr_adr)
-	: "%eax"
+	: "%"REG_a
 	);
 }
 
@@ -1675,18 +1669,18 @@ static void row_idct_mmx (DCTELEM* workspace,
 			  int16_t* output_adr,  int output_stride,  int cnt)
 {
     asm volatile(
-	"leal (%%eax,%%eax,2), %%edx    \n\t"
+	"lea (%%"REG_a",%%"REG_a",2), %%"REG_d"    \n\t"
 	"1:                     \n\t"
-	"movq "DCTSIZE_S"*0*2(%%esi), %%mm0 \n\t"
+	"movq "DCTSIZE_S"*0*2(%%"REG_S"), %%mm0 \n\t"
 	//
 
-	"movq "DCTSIZE_S"*1*2(%%esi), %%mm1 \n\t"
+	"movq "DCTSIZE_S"*1*2(%%"REG_S"), %%mm1 \n\t"
 	"movq %%mm0, %%mm4             \n\t"
 
-	"movq "DCTSIZE_S"*2*2(%%esi), %%mm2 \n\t"
+	"movq "DCTSIZE_S"*2*2(%%"REG_S"), %%mm2 \n\t"
 	"punpcklwd %%mm1, %%mm0        \n\t"
 
-	"movq "DCTSIZE_S"*3*2(%%esi), %%mm3 \n\t"
+	"movq "DCTSIZE_S"*3*2(%%"REG_S"), %%mm3 \n\t"
 	"punpckhwd %%mm1, %%mm4        \n\t"
 
 	//transpose 4x4
@@ -1714,10 +1708,10 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"psllw $2, %%mm0              \n\t"
 	"paddw %%mm2, %%mm4            \n\t" //t10
 
-	"movq "DCTSIZE_S"*0*2+"DCTSIZE_S"(%%esi), %%mm3 \n\t"
+	"movq "DCTSIZE_S"*0*2+"DCTSIZE_S"(%%"REG_S"), %%mm3 \n\t"
 	"psubw %%mm2, %%mm1            \n\t" //t11
 
-	"movq "DCTSIZE_S"*1*2+"DCTSIZE_S"(%%esi), %%mm2 \n\t"
+	"movq "DCTSIZE_S"*1*2+"DCTSIZE_S"(%%"REG_S"), %%mm2 \n\t"
 	"psubw %%mm5, %%mm0            \n\t"
 
 	"movq %%mm4, %%mm6             \n\t"
@@ -1726,7 +1720,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"psubw %%mm5, %%mm6            \n\t" //t3
 	"movq %%mm1, %%mm7             \n\t"
 
-	"movq "DCTSIZE_S"*2*2+"DCTSIZE_S"(%%esi), %%mm5 \n\t"
+	"movq "DCTSIZE_S"*2*2+"DCTSIZE_S"(%%"REG_S"), %%mm5 \n\t"
 	"paddw %%mm0, %%mm1            \n\t" //t1
 
 	"movq %%mm4, "MANGLE(temps)"+0*8       \n\t" //t0
@@ -1736,7 +1730,7 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"punpcklwd %%mm2, %%mm3        \n\t"
 
 	//transpose 4x4    
-	"movq "DCTSIZE_S"*3*2+"DCTSIZE_S"(%%esi), %%mm6 \n\t"
+	"movq "DCTSIZE_S"*3*2+"DCTSIZE_S"(%%"REG_S"), %%mm6 \n\t"
 	"punpckhwd %%mm2, %%mm4        \n\t"
 
 	"movq %%mm5, %%mm2             \n\t"
@@ -1812,61 +1806,61 @@ static void row_idct_mmx (DCTELEM* workspace,
 	"paddw %%mm2, %%mm7            \n\t"
 	"psraw $3, %%mm5              \n\t"
 
-	"paddw (%%edi), %%mm5          \n\t"
+	"paddw (%%"REG_D"), %%mm5          \n\t"
 	"psraw $3, %%mm7              \n\t"
 
-	"paddw (%%edi,%%eax,), %%mm1    \n\t"
+	"paddw (%%"REG_D",%%"REG_a",), %%mm1    \n\t"
 	"paddw %%mm2, %%mm0            \n\t"
 
-	"paddw (%%edi,%%eax,2), %%mm7   \n\t"
+	"paddw (%%"REG_D",%%"REG_a",2), %%mm7   \n\t"
 	"paddw %%mm2, %%mm3            \n\t"
 
-	"movq %%mm5, (%%edi)           \n\t"
+	"movq %%mm5, (%%"REG_D")           \n\t"
 	"paddw %%mm2, %%mm6            \n\t"
 
-	"movq %%mm1, (%%edi,%%eax,)     \n\t"
+	"movq %%mm1, (%%"REG_D",%%"REG_a",)     \n\t"
 	"psraw $3, %%mm0              \n\t"
 
-	"movq %%mm7, (%%edi,%%eax,2)    \n\t"
-	"addl %%edx, %%edi             \n\t" //3*ls
+	"movq %%mm7, (%%"REG_D",%%"REG_a",2)    \n\t"
+	"add %%"REG_d", %%"REG_D"             \n\t" //3*ls
 
 	"movq "MANGLE(temps)"+1*8, %%mm5       \n\t" //t3
 	"psraw $3, %%mm3              \n\t"
 
-	"paddw (%%edi,%%eax,2), %%mm0   \n\t"
+	"paddw (%%"REG_D",%%"REG_a",2), %%mm0   \n\t"
 	"psubw %%mm4, %%mm5            \n\t" //d3
 
-	"paddw (%%edi,%%edx,), %%mm3    \n\t"
+	"paddw (%%"REG_D",%%"REG_d",), %%mm3    \n\t"
 	"psraw $3, %%mm6              \n\t"
 
 	"paddw "MANGLE(temps)"+1*8, %%mm4      \n\t" //d4        
 	"paddw %%mm2, %%mm5            \n\t"
 
-	"paddw (%%edi,%%eax,4), %%mm6   \n\t"
+	"paddw (%%"REG_D",%%"REG_a",4), %%mm6   \n\t"
 	"paddw %%mm2, %%mm4            \n\t"
 
-	"movq %%mm0, (%%edi,%%eax,2)    \n\t"
+	"movq %%mm0, (%%"REG_D",%%"REG_a",2)    \n\t"
 	"psraw $3, %%mm5              \n\t"
 
-	"paddw (%%edi), %%mm5          \n\t"
+	"paddw (%%"REG_D"), %%mm5          \n\t"
 	"psraw $3, %%mm4              \n\t"
 
-	"paddw (%%edi,%%eax,), %%mm4    \n\t"
-	"addl $"DCTSIZE_S"*2*4, %%esi      \n\t" //4 rows
+	"paddw (%%"REG_D",%%"REG_a",), %%mm4    \n\t"
+	"add $"DCTSIZE_S"*2*4, %%"REG_S"      \n\t" //4 rows
 
-	"movq %%mm3, (%%edi,%%edx,)     \n\t"
-	"movq %%mm6, (%%edi,%%eax,4)    \n\t"
-	"movq %%mm5, (%%edi)           \n\t"
-	"movq %%mm4, (%%edi,%%eax,)     \n\t"
+	"movq %%mm3, (%%"REG_D",%%"REG_d",)     \n\t"
+	"movq %%mm6, (%%"REG_D",%%"REG_a",4)    \n\t"
+	"movq %%mm5, (%%"REG_D")           \n\t"
+	"movq %%mm4, (%%"REG_D",%%"REG_a",)     \n\t"
 
-	"subl %%edx, %%edi             \n\t"
-	"addl $8, %%edi               \n\t"
-	"decl %%ecx                   \n\t"
+	"sub %%"REG_d", %%"REG_D"             \n\t"
+	"add $8, %%"REG_D"               \n\t"
+	"dec %%"REG_c"                   \n\t"
 	"jnz 1b                  \n\t"
 
 	: "+S"(workspace), "+D"(output_adr), "+c"(cnt) //input regs
 	: "a"(output_stride*sizeof(short))
-	: "%edx"
+	: "%"REG_d
 	);
 }
 
@@ -1940,27 +1934,27 @@ static void row_fdct_c(DCTELEM *data, const uint8_t *pixels, int line_size, int 
 static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size,  int cnt)
 {
     asm volatile(
-	"leal (%%eax,%%eax,2), %%edx    \n\t"
+	"lea (%%"REG_a",%%"REG_a",2), %%"REG_d"    \n\t"
 	"6:                     \n\t"
-	"movd (%%esi), %%mm0           \n\t"
+	"movd (%%"REG_S"), %%mm0           \n\t"
 	"pxor %%mm7, %%mm7             \n\t"
 
-	"movd (%%esi,%%eax,), %%mm1     \n\t"
+	"movd (%%"REG_S",%%"REG_a",), %%mm1     \n\t"
 	"punpcklbw %%mm7, %%mm0        \n\t"
 
-	"movd (%%esi,%%eax,2), %%mm2    \n\t"
+	"movd (%%"REG_S",%%"REG_a",2), %%mm2    \n\t"
 	"punpcklbw %%mm7, %%mm1        \n\t"
 
 	"punpcklbw %%mm7, %%mm2        \n\t"
-	"addl %%edx, %%esi             \n\t"
+	"add %%"REG_d", %%"REG_S"             \n\t"
 
 	"movq %%mm0, %%mm5             \n\t"
 	//       
 
-	"movd (%%esi,%%eax,4), %%mm3    \n\t" //7  ;prefetch!
+	"movd (%%"REG_S",%%"REG_a",4), %%mm3    \n\t" //7  ;prefetch!
 	"movq %%mm1, %%mm6             \n\t"
 
-	"movd (%%esi,%%edx,), %%mm4     \n\t" //6
+	"movd (%%"REG_S",%%"REG_d",), %%mm4     \n\t" //6
 	"punpcklbw %%mm7, %%mm3        \n\t"
 
 	"psubw %%mm3, %%mm5            \n\t"
@@ -1969,7 +1963,7 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"paddw %%mm3, %%mm0            \n\t"
 	"psubw %%mm4, %%mm6            \n\t"
 
-	"movd (%%esi,%%eax,2), %%mm3    \n\t" //5
+	"movd (%%"REG_S",%%"REG_a",2), %%mm3    \n\t" //5
 	"paddw %%mm4, %%mm1            \n\t"
 
 	"movq %%mm5, "MANGLE(temps)"+0*8       \n\t" //t7
@@ -1978,10 +1972,10 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"movq %%mm6, "MANGLE(temps)"+1*8       \n\t" //t6
 	"movq %%mm2, %%mm4             \n\t"
 
-	"movd (%%esi), %%mm5           \n\t" //3
+	"movd (%%"REG_S"), %%mm5           \n\t" //3
 	"paddw %%mm3, %%mm2            \n\t"
 
-	"movd (%%esi,%%eax,), %%mm6     \n\t" //4
+	"movd (%%"REG_S",%%"REG_a",), %%mm6     \n\t" //4
 	"punpcklbw %%mm7, %%mm5        \n\t"
 
 	"psubw %%mm3, %%mm4            \n\t"
@@ -2033,16 +2027,16 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"punpckhdq %%mm7, %%mm5        \n\t" //1
 	"movq %%mm6, %%mm7             \n\t"
 
-	"movq %%mm0, "DCTSIZE_S"*0*2(%%edi) \n\t"
+	"movq %%mm0, "DCTSIZE_S"*0*2(%%"REG_D") \n\t"
 	"punpckldq %%mm2, %%mm6        \n\t" //2     
 
-	"movq %%mm5, "DCTSIZE_S"*1*2(%%edi) \n\t"
+	"movq %%mm5, "DCTSIZE_S"*1*2(%%"REG_D") \n\t"
 	"punpckhdq %%mm2, %%mm7        \n\t" //3    
 
-	"movq %%mm6, "DCTSIZE_S"*2*2(%%edi) \n\t"
+	"movq %%mm6, "DCTSIZE_S"*2*2(%%"REG_D") \n\t"
 	"paddw %%mm1, %%mm4            \n\t"
 
-	"movq %%mm7, "DCTSIZE_S"*3*2(%%edi) \n\t"
+	"movq %%mm7, "DCTSIZE_S"*3*2(%%"REG_D") \n\t"
 	"psllw $2, %%mm3              \n\t" //t10    
 
 	"movq "MANGLE(temps)"+0*8, %%mm2       \n\t"
@@ -2089,28 +2083,28 @@ static void row_fdct_mmx(DCTELEM *data,  const uint8_t *pixels,  int line_size, 
 	"movq %%mm2, %%mm7             \n\t"
 
 	"punpckldq %%mm5, %%mm2        \n\t" //4
-	"subl %%edx, %%esi             \n\t"
+	"sub %%"REG_d", %%"REG_S"             \n\t"
 
 	"punpckhdq %%mm5, %%mm7        \n\t" //5
 	"movq %%mm4, %%mm5             \n\t"
 
-	"movq %%mm2, "DCTSIZE_S"*0*2+"DCTSIZE_S"(%%edi) \n\t"
+	"movq %%mm2, "DCTSIZE_S"*0*2+"DCTSIZE_S"(%%"REG_D") \n\t"
 	"punpckldq %%mm6, %%mm4        \n\t" //6
 
-	"movq %%mm7, "DCTSIZE_S"*1*2+"DCTSIZE_S"(%%edi) \n\t"
+	"movq %%mm7, "DCTSIZE_S"*1*2+"DCTSIZE_S"(%%"REG_D") \n\t"
 	"punpckhdq %%mm6, %%mm5        \n\t" //7    
 
-	"movq %%mm4, "DCTSIZE_S"*2*2+"DCTSIZE_S"(%%edi) \n\t"
-	"addl $4, %%esi               \n\t"
+	"movq %%mm4, "DCTSIZE_S"*2*2+"DCTSIZE_S"(%%"REG_D") \n\t"
+	"add $4, %%"REG_S"               \n\t"
 
-	"movq %%mm5, "DCTSIZE_S"*3*2+"DCTSIZE_S"(%%edi) \n\t"
-	"addl $"DCTSIZE_S"*2*4, %%edi      \n\t" //4 rows    
-	"decl %%ecx                   \n\t"
+	"movq %%mm5, "DCTSIZE_S"*3*2+"DCTSIZE_S"(%%"REG_D") \n\t"
+	"add $"DCTSIZE_S"*2*4, %%"REG_D"      \n\t" //4 rows    
+	"dec %%"REG_c"                   \n\t"
 	"jnz 6b                  \n\t"
 
 	: "+S"(pixels), "+D"(data), "+c"(cnt) //input regs
 	: "a"(line_size)
-	: "%edx");
+	: "%"REG_d);
 }
 
 #endif // HAVE_MMX
