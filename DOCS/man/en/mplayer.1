@@ -906,8 +906,8 @@ Give the demuxer ID as defined in libmpdemux/\:demuxer.h.
 .TP
 .B \-dumpaudio (MPlayer only)
 Dumps raw compressed audio stream to ./stream.dump (useful with MPEG/\:AC3).
-You can only specify one of \-dumpaudio, \-dumpvideo, \-dumpstream, the
-last one on the command line will take precedence over the others..
+If you give more than one of \-dumpaudio, \-dumpvideo, \-dumpstream
+on the command line only the last one will work.
 .
 .TP
 .B \-dumpfile <filename> (MPlayer only)
@@ -918,14 +918,14 @@ Should be used together with \-dumpaudio / \-dumpvideo / \-dumpstream.
 .B \-dumpstream (MPlayer only)
 Dumps the raw stream to ./stream.dump.
 Useful when ripping from DVD or network.
-You can only specify one of \-dumpaudio, \-dumpvideo, \-dumpstream, the
-last one on the command line will take precedence over the others..
+If you give more than one of \-dumpaudio, \-dumpvideo, \-dumpstream
+on the command line only the last one will work.
 .
 .TP
 .B \-dumpvideo (MPlayer only)
 Dump raw compressed video stream to ./stream.dump (not very usable).
-You can only specify one of \-dumpaudio, \-dumpvideo, \-dumpstream, the
-last one on the command line will take precedence over the others..
+If you give more than one of \-dumpaudio, \-dumpvideo, \-dumpstream
+on the command line only the last one will work.
 .
 .TP
 .B \-dvbin <options> (DVB only)
