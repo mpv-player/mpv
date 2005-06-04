@@ -1,4 +1,4 @@
-.\" synced with 1.986
+.\" synced with 1.990
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "24 Mai 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "05 Juin 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -960,29 +960,29 @@ Utilisez \-demuxer 17 pour forcer la détection des .mp3.
 .B \-dumpaudio (MPlayer uniquement)
 Décharge le flux audio brut dans ./stream.dump (utile avec
 mpeg/\:ac3).
-Vous ne pouvez spécifier qu'une seule des options \-dumpaudio,
-\-dumpvideo, \-dumpstream, la dernière de la ligne de commande ayant
-priorité sur toutes les autres..
+Si vous spécifier plus qu'une des options \-dumpaudio, \-dumpvideo,
+\-dumpstream, seule la dernière de la ligne de commande sera prise en
+compte.
 .
 .TP
 .B \-dumpfile <nomfichier> (MPlayer uniquement)
-Indique dans quel fichier MPlayer doit décharger.
+Indique dans quel fichier MPlayer doit écrire le flux à sauver.
 Devrait être utilisé avec \-dumpaudio / \-dumpvideo / \-dumpstream.
 .
 .TP
 .B \-dumpstream (MPlayer uniquement)
 Décharge le flux brut dans ./stream.dump.
 Utile en rippant depuis un DVD ou depuis le réseau.
-Vous ne pouvez spécifier qu'une seule des options \-dumpaudio, 
-\-dumpvideo, \-dumpstream, la dernière de la ligne de commande ayant
-priorité sur toutes les autres..
+Si vous spécifier plus qu'une des options \-dumpaudio, \-dumpvideo,
+\-dumpstream, seule la dernière de la ligne de commande sera prise en
+compte.
 .
 .TP
 .B \-dumpvideo (MPlayer uniquement)
 Décharge le flux vidéo brut dans ./stream.dump (pas très utilisable).
-Vous ne pouvez spécifier qu'une seule des options \-dumpaudio, 
-\-dumpvideo, \-dumpstream, la dernière de la ligne de commande ayant
-priorité sur toutes les autres..
+Si vous spécifier plus qu'une des options \-dumpaudio, \-dumpvideo,
+\-dumpstream, seule la dernière de la ligne de commande sera prise en
+compte.
 .
 .TP
 .B \-dvbin <options> (DVB uniquement)
@@ -2008,6 +2008,12 @@ Choisit explicitement le serveur ESD à utiliser (par défaut\ : localhost).
 .TP
 .B jack\ \ \ \ 
 sortie audio par JACK (Jack Audio Connection Kit)
+.PD 0
+.RSs
+.IPs port=<nom_port>
+Se connecte au ports <nom_port> (par défaut\ : ports physiques)
+.RE
+.PD 1
 .
 .TP
 .B nas\ \ \ \ 
@@ -3423,7 +3429,7 @@ Affiche des informations de débogage.
 .br
 8: type de macro-bloc (MB)
 .br
-16: paramètre de quantification (QP)
+16: paramètre de quantification par bloc (QP)
 .br
 32: vecteur de mouvement (MV)
 .br
@@ -3440,6 +3446,11 @@ Affiche des informations de débogage.
 0x0800: opérations de contrôle de gestion de la mémoire (H264)
 .br
 0x1000: bogues
+.br
+0x2000: Visualise le paramètre quantification (QP), plus le QP est bas plus
+teinte est verte.
+.br
+0x4000: Visualise le type de bloc.
 .REss
 .IPs ec=<valeur>
 Définit la stratégie de dissimulation des erreurs.
@@ -7945,6 +7956,18 @@ recherche moyenne
 recherche large
 .RE
 .PD 1
+.
+.TP
+.B (no)lumi_mask
+La quantification adaptative permet aux quanta des macro-blocs de
+varier à l'intérieur de chaque trame.
+Il s'agit ici d'un algorithme psychosensoriel sensé tenir compte
+de la moindre sensibilité rétinienne aux zones saturées de lumière
+ou plongées dans le noir.
+Ces zones seront alors compressées plus fortement que les zones
+intermédiaires, économisant ainsi des bits pouvant être redistribués
+à d'autres trames, augmentant ainsi la qualité subjective globale
+de la vidéo, tout en dégradant probablement un peu le PSNR.
 .
 .TP
 .B min_iquant=<0\-31>
