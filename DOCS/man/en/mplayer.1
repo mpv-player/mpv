@@ -7593,6 +7593,17 @@ wide search
 .PD 1
 .
 .TP
+.B (no)lumi_mask
+Adaptive quantization allows each macroblock quantizer to vary inside
+each frame.
+This is a 'psychosensory' setting that is supposed to make use of the
+fact that the human eye tends to notice fewer details in very bright
+and very dark parts of the picture.
+It compresses those areas more strongly than medium ones, which will
+save bits that can be spent again on other frames, raising overall
+subjective quality and possibly reducing PSNR.
+.
+.TP
 .B min_iquant=<0\-31>
 minimum I-frame quantizer (default: 2)
 .

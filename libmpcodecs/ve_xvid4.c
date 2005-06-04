@@ -169,6 +169,7 @@ static int xvidenc_stats = 0;
 static int xvidenc_max_key_interval = 0; /* Let xvidcore set a 10s interval by default */
 static int xvidenc_frame_drop_ratio = 0;
 static int xvidenc_greyscale = 0;
+static int xvidenc_luminance_masking = 0;
 static int xvidenc_debug = 0;
 static int xvidenc_psnr = 0;
 
@@ -245,6 +246,8 @@ m_option_t xvidencopts_conf[] =
 	{"max_key_interval", &xvidenc_max_key_interval, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 	{"greyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"nogreyscale", &xvidenc_greyscale, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+	{"lumi_mask", &xvidenc_luminance_masking, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+	{"nolumi_mask", &xvidenc_luminance_masking, CONF_TYPE_FLAG, 0, 1, 0, NULL},
 	{"turbo", &xvidenc_turbo, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"debug", &xvidenc_debug, CONF_TYPE_INT , 0 ,0,-1,NULL},
 	{"stats", &xvidenc_stats, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -1049,6 +1052,13 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 		create->num_plugins++;
 		doZones = 1;
 	}
+
+	if (xvidenc_luminance_masking) {
+		create->plugins[create->num_plugins].func = xvid_plugin_lumimasking;
+		create->plugins[create->num_plugins].param = NULL;
+		create->num_plugins++;
+	}
+
 	// parse zones
 	if (xvidenc_zones != NULL && doZones > 0) // do not apply zones in CQ, and first pass mode (xvid vfw doesn't allow them in those modes either)
 	{
