@@ -7,6 +7,10 @@ MPlayer (1.0)
     * encoding tips for x264
     * how to set up MEncoder for x264 support
 
+    Driver:
+    * JACK audio output rewritten without bio2jack
+    * OpenGL video output modules support -geometry option
+
     Decoders:
     * Indeo2 (RT21) support via lavc
     * Fraps video decoder via binary DLL
