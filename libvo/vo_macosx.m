@@ -22,8 +22,6 @@
 
 #include "osdep/keycodes.h"
 
-extern void mplayer_put_key(int code);
-
 //Cocoa
 MPlayerOpenGLView *mpGLView;
 NSAutoreleasePool *autoreleasepool;
@@ -297,8 +295,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	//create window
 	window = [[NSWindow alloc]	initWithContentRect:NSMakeRect(0, 0, frame.size.width, frame.size.height) 
 								styleMask:NSTitledWindowMask|NSTexturedBackgroundWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask
-								backing:NSBackingStoreBuffered
-								defer:NO];
+								backing:NSBackingStoreBuffered defer:NO];
 
 	[window setDelegate:self];
 	[window setContentView:self];
@@ -308,18 +305,13 @@ static uint32_t control(uint32_t request, void *data, ...)
 	[window center];
 	[window makeKeyAndOrderFront:self];
 	
+	
 	[self setOpenGLContext:glContext];
-	[[self openGLContext] setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
+	[glContext setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
 	[glContext setView:self];
 	[glContext makeCurrentContext];	
 	
-	error = CVPixelBufferCreateWithBytes(	NULL,
-											image_width, image_height,
-											pixelFormat,
-											image_data,
-											image_width*image_bytes,
-											NULL, NULL, NULL,
-											&currentFrameBuffer);
+	error = CVPixelBufferCreateWithBytes( NULL, image_width, image_height, pixelFormat, image_data, image_width*image_bytes, NULL, NULL, NULL, &currentFrameBuffer);
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create Pixel Buffer(%d)\n", error);
 	
