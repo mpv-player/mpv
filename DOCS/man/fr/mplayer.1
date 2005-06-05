@@ -1,4 +1,4 @@
-.\" synced with 1.990
+.\" synced with 1.996
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2011,7 +2011,7 @@ sortie audio par JACK (Jack Audio Connection Kit)
 .PD 0
 .RSs
 .IPs port=<nom_port>
-Se connecte au ports <nom_port> (par défaut\ : ports physiques)
+Se connecte au port <nom_port> (par défaut\ : port physique).
 .RE
 .PD 1
 .
@@ -4750,7 +4750,10 @@ processeur disponible.
 .
 .TP
 .B spp[=qualité[:qp[:mode]]]
-filtre de postprocessing simple
+Filtre de post-traitement simple qui compresse et décompresse l'image
+avec différents (ou - dans le cas du niveau de qualité 6 - tous)
+décalages et fait la moyenne des résultats.
+
 .RSs
 .IPs <qualité>
 0\-6 (par défaut\ : 3)
@@ -4762,6 +4765,22 @@ la video).
 .br
 1: faible seuillage (soft thresholding) (meilleure élimination des parasites,
 mais image plus floue)
+.RE
+.
+.TP
+.B fspp[=qualité[:qp[:force]]]
+version plus rapide du filtre de post-traitement simple
+.RSs
+.IPs <qualité>
+4\-5 (équivalent à spp; par défaut\ : 4)
+.IPs <qp>\ 
+Force les paramètres de quantification (par défaut\ : 0, prend le QP de
+la vidéo).
+IPs <-15\-32>
+Force du filtrage, de faibles valeurs signifie plus de détails, mais
+aussi plus d'artefacts, tandis que de valeurs plus grandes signifie
+rend l'image plus lisse mais plus floue
+(par défaut\ : 0 - optimal vis-à-vis du PSNR).
 .RE
 .
 .TP
@@ -8467,6 +8486,17 @@ temporelle de la trame-B par rapport à celles de référence.
 Requière bframes > 1.
 .
 .TP
+.B (no)i4x4
+Utilise en plus le type de macro-blocs i4x4 (par défaut\ : activé).
+Sans cette option, les trames-P et B n'utilisent que les types
+i16x16 et inter définies plus bas.
+.
+.TP
+.B (no)i8x8
+Utilise en plus le type de macro-bloc i8x8 (par défaut\ : activé).
+Cette option n'a d'effet que si 8x8dct est activé.
+.
+.TP
 .B (no)b8x8mv
 Utilise en plus les types de macro-blocs b16x8, b8x16, b8x8
 (par défaut\: activé).
@@ -8479,7 +8509,7 @@ Voir 4x4mv pour plus de détails.
 Utilise en plus les types de macro-blocs p16x8, p8x16, p8x8
 (par défaut\ : activé).
 Sans cette option, les trames-P n'utiliseront que les types
-i16x16, i4x4, p16x16, skip.
+i16x16, i8x8, i4x4, p16x16, skip.
 Cette option c'est fournie à titre expérimental.
 Il n'est guère recommandé de désactiver 8x8mv lors d'un vrai encodage.
 .
@@ -8487,7 +8517,7 @@ Il n'est guère recommandé de désactiver 8x8mv lors d'un vrai encodage.
 .B (no)4x4mv
 Utilise en plus les types de macro-blocs p8x4, p4x8, p4x4.
 Sans cette option, les trames-P n'utiliseront que les types
-i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
+i16x16, i8x8, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
 Requière 8x8mv.
 .br
 L'idée est de trouver le type et la taille des macro-blocs qui décrit le
@@ -8496,6 +8526,12 @@ Par exemple, un travelling est mieux représenté par des blocs 16x16, tandis
 qu'un petit objet en mouvement sera mieux codé par des petits blocs.
 .br
 4x4mv n'est recommandé que si subq >=3.
+.
+.TP
+.B (no)8x8dct
+Taille de transformée spatiale adaptative\ : autorise les macro-blocs
+à décider entre 4x4 et 8x8 DCT.
+Sans cette option, uniquement le type 4x4 DCT est utilisé.
 .
 .TP
 .B me=<1\-4>
