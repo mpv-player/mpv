@@ -302,9 +302,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	[window setInitialFirstResponder:self];
 	[window setAcceptsMouseMovedEvents:YES];
     [window setTitle:@"MPlayer - The Movie Player"];
-	[window center];
-	[window makeKeyAndOrderFront:self];
-	
+	[window center];	
 	
 	[self setOpenGLContext:glContext];
 	[glContext setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
@@ -322,6 +320,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 	error = CVOpenGLTextureCacheCreateTextureFromImage(	NULL, textureCache, currentFrameBuffer, 0, &texture);
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
+	
+	//show window
+	[window makeKeyAndOrderFront:self];
 	
 	isFullscreen = 0;
 }
