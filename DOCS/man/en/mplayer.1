@@ -8079,17 +8079,28 @@ of the B-frame relative to the references.
 Requires bframes > 1.
 .
 .TP
+.B (no)i4x4
+Use additional macroblock type i4x4 (default: enabled).
+Without this option, P- and B-frames will use only 
+i16x16 and the inter types specified below.
+.
+.TP
+.B (no)i8x8
+Use additional macroblock type i8x8 (default: enabled).
+This option has no effect unless 8x8dct is enabled.
+.
+.TP
 .B (no)b8x8mv
 Use additional macroblock types b16x8, b8x16, b8x8 (default: enabled).
 Without this option, B-frames will use only types
-i16x16, i4x4, b16x16, skip, direct.
+i16x16, i8x8, i4x4, b16x16, skip, direct.
 See 4x4mv for details.
 .
 .TP
 .B (no)8x8mv
 Use additional macroblock types p16x8, p8x16, p8x8 (default: enabled).
 Without this option, P-frames will use only types
-i16x16, i4x4, p16x16, skip.
+i16x16, i8x8, i4x4, p16x16, skip.
 This option is provided for experimentation only.
 It is not recommended to disable 8x8mv in a real encode.
 .
@@ -8097,7 +8108,7 @@ It is not recommended to disable 8x8mv in a real encode.
 .B (no)4x4mv
 Use additional macroblock types p8x4, p4x8, p4x4 (default: disabled).
 Without this option, P-frames will use only types
-i16x16, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
+i16x16, i8x8, i4x4, p16x16, p16x8, p8x16, p8x8, skip.
 Requires 8x8mv.
 .br
 The idea is to find the type and size that best describe a certain area
@@ -8106,6 +8117,12 @@ For example, a global pan is better represented by 16x16 blocks, while
 small moving objects are better represented by smaller blocks.
 .br
 4x4mv is recommended only with subq >= 3.
+.
+.TP
+.B (no)8x8dct
+Adaptive spatial transform size: allows macroblocks to choose between
+4x4 and 8x8 DCT. Also allows the i8x8 macroblock type.
+Without this option, only 4x4 DCT is used.
 .
 .TP
 .B me=<1\-4>

@@ -75,6 +75,9 @@ static int cabac = 1;
 static int p4x4mv = 0;
 static int p8x8mv = 1;
 static int b8x8mv = 1;
+static int i8x8 = 1;
+static int i4x4 = 1;
+static int dct8 = 0;
 static int direct_pred = X264_DIRECT_PRED_TEMPORAL;
 static int weight_b = 0;
 static int chroma_me = 1;
@@ -127,6 +130,12 @@ m_option_t x264encopts_conf[] = {
     {"no8x8mv", &p8x8mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"b8x8mv", &b8x8mv, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nob8x8mv", &b8x8mv, CONF_TYPE_FLAG, 0, 1, 0, NULL},
+    {"i4x4", &i4x4, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"noi4x4", &i4x4, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+    {"i8x8", &i8x8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"noi8x8", &i8x8, CONF_TYPE_FLAG, 0, 0, 0, NULL},
+    {"8x8dct", &dct8, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"no8x8dct", &dct8, CONF_TYPE_FLAG, 0, 0, 0, NULL},
     {"direct_pred", &direct_pred, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
     {"weight_b", &weight_b, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"noweight_b", &weight_b, CONF_TYPE_FLAG, 0, 1, 0, NULL},
@@ -245,13 +254,13 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     }
     if(me_method >= 3)
         mod->param.analyse.i_me_range = me_range;
-    mod->param.analyse.inter = X264_ANALYSE_I4x4;
-    if(p4x4mv)
-        mod->param.analyse.inter |= X264_ANALYSE_PSUB8x8;
-    if(p8x8mv)
-        mod->param.analyse.inter |= X264_ANALYSE_PSUB16x16;
-    if(b8x8mv)
-        mod->param.analyse.inter |= X264_ANALYSE_BSUB16x16;
+    mod->param.analyse.inter = 0;
+    if(p4x4mv) mod->param.analyse.inter |= X264_ANALYSE_PSUB8x8;
+    if(p8x8mv) mod->param.analyse.inter |= X264_ANALYSE_PSUB16x16;
+    if(b8x8mv) mod->param.analyse.inter |= X264_ANALYSE_BSUB16x16;
+    if(i4x4)   mod->param.analyse.inter |= X264_ANALYSE_I4x4;
+    if(i8x8)   mod->param.analyse.inter |= X264_ANALYSE_I8x8;
+    mod->param.analyse.b_transform_8x8 = dct8;
     mod->param.analyse.i_direct_mv_pred = direct_pred;
     mod->param.analyse.b_weighted_bipred = weight_b;
     mod->param.analyse.i_chroma_qp_offset = chroma_qp_offset;
