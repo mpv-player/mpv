@@ -1873,7 +1873,7 @@ audio output through JACK (Jack Audio Connection Kit)
 .PD 0
 .RSs
 .IPs port=<name>
-Connects to the ports with the given name (default: physical ports)
+Connects to the port with the given name (default: physical port).
 .RE
 .PD 1
 .
@@ -4510,7 +4510,9 @@ on or off automatically depending on available CPU time.
 .
 .TP
 .B spp[=quality[:qp[:mode]]]
-simple postprocessing filter
+Simple postprocessing filter that compresses and decompresses the
+image at several (or - in the case of quality level 6 - all)
+shifts and averages the results.
 .RSs
 .IPs <quality>
 0\-6 (default: 3)
