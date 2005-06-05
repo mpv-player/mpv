@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -209,6 +210,7 @@ static void print_help ()
 static int init(int rate, int channels, int format, int flags) {
   const char **matching_ports = NULL;
   char *port_name = NULL;
+  char client_name[40];
   opt_t subopts[] = {
     {"port", OPT_ARG_MSTRZ, &port_name, NULL},
     {NULL}
@@ -223,7 +225,8 @@ static int init(int rate, int channels, int format, int flags) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] Invalid number of channels: %i\n", channels);
     goto err_out;
   }
-  client = jack_client_new("MPlayer");
+  sprintf(client_name, "MPlayer [%d]", getpid());
+  client = jack_client_new(client_name);
   if (!client) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
     goto err_out;
