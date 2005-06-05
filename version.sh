@@ -18,14 +18,17 @@ case "$OS" in
      Darwin|*BSD) 
 	# BSD 'date -r' does not print modification time
 	# LC_ALL=C sets month/day order and English language in the date string
-	LS=`LC_ALL=C ls -lT CVS/Entries`
-	year=`echo $LS | cut -d' ' -f9 | cut -c 3-4`
-	month=`echo $LS | awk -F" " '{printf "%.2d", \
-		(index("JanFebMarAprMayJunJulAugSepOctNovDec",$6)+2)/3}'`
-	day=`printf %.2d \` echo $LS | cut -d' ' -f7 \` `
-	hour=`echo $LS | cut -d' ' -f8 | cut -d: -f1`
-	minute=`echo $LS | cut -d' ' -f8 | cut -d: -f2`
-	last_cvs_update="${year}${month}${day}-${hour}:${minute}"
+	# The if in the awk call works around wrong day/month order.
+	last_cvs_update=`LC_ALL=C ls -lT CVS/Entries | \
+	  awk '{ \
+	    day=$7; \
+	    month=index(" JanFebMarAprMayJunJulAugSepOctNovDec", $6); \
+	    if(month==0) { \
+	      day=$6; \
+	      month=index(" JanFebMarAprMayJunJulAugSepOctNovDec",$7); } \
+	    printf("%s%.02d%.02d-%s", \
+	      substr($9, 3, 2), (month+1)/3, day, substr($8, 0, 5)); \
+	  }'`
 	;;
      *)
 	last_cvs_update=`date +%y%m%d-%H:%M`
