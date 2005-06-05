@@ -647,9 +647,14 @@ static int open(vf_instance_t *vf, char* args)
 
     if( log2c >=4 && log2c <=5 )
         vf->priv->log2_count = log2c;
+    else if( log2c >= 6 )
+	vf->priv->log2_count = 5;
 
     if(vf->priv->qp < 0)
         vf->priv->qp = 0;
+
+    if (i < -15) i = -15;
+    if (i > 32) i = 32;
     
     bias= (1<<4)+i; //regulable
     vf->priv->prev_q=0;
