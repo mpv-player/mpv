@@ -7179,6 +7179,10 @@ A more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR.
 .TP
 .B nr=<0\-100000>
 Noise reduction, 0 means disabled.
+0\-600 is a useful range on typical content, but you may want to turn it
+up a bit more on very noisy content (default: 0).
+Given its small impact on speed, you might want to prefer to use this over
+filtering noise away with video filters like denoise3d or hqdn3d.
 .
 .TP
 .B qns=<0\-3>
@@ -7610,7 +7614,7 @@ wide search
 .
 .TP
 .B (no)lumi_mask
-Adaptive quantization allows each macroblock quantizer to vary inside
+Adaptive quantization allows the macroblock quantizers to vary inside
 each frame.
 This is a 'psychosensory' setting that is supposed to make use of the
 fact that the human eye tends to notice fewer details in very bright
