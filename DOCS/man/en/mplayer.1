@@ -4525,13 +4525,19 @@ Force quantization parameter (default: 0, use QP from video).
 .RE
 .
 .TP
-.B fspp[=quality[:qp]]
+.B fspp[=quality[:qp[:strength]]]
 faster version of the simple postprocessing filter
 .RSs
 .IPs <quality>
 4\-5 (equivalent to spp; default: 4)
 .IPs <qp>\ 
 Force quantization parameter (default: 0, use QP from video).
+.IPs <-15-32>\ 
+-15: less filtering (more details, but more artifacts)
+.br
+0: default
+.br
+32: more filtering (very smooth, but blurry)
 .RE
 .
 .TP
