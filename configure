@@ -370,6 +370,11 @@ multiple paths separated by ':'):
   --with-glib-config=PATH  path to glib*-config (e.g. /opt/bin/glib-config)
   --with-gtk-config=PATH   path to gtk*-config (e.g. /opt/bin/gtk-config)
   --with-sdl-config=PATH   path to sdl*-config (e.g. /opt/bin/sdl-config)
+
+This configure script is NOT autoconf-based, even though its output is similar.
+It will try to autodetect all configuration options. If you --enable an option
+it will be forcefully turned on, skipping autodetection. This can break
+compilation, so you need to know what you are doing.
 EOF
     exit 0
   fi
