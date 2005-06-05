@@ -22,7 +22,7 @@ case "$OS" in
 	year=`echo $LS | cut -d' ' -f9 | cut -c 3-4`
 	month=`echo $LS | awk -F" " '{printf "%.2d", \
 		(index("JanFebMarAprMayJunJulAugSepOctNovDec",$6)+2)/3}'`
-	day=`echo $LS | cut -d' ' -f7`
+	day=`printf %.2d \` echo $LS | cut -d' ' -f7 \` `
 	hour=`echo $LS | cut -d' ' -f8 | cut -d: -f1`
 	minute=`echo $LS | cut -d' ' -f8 | cut -d: -f2`
 	last_cvs_update="${year}${month}${day}-${hour}:${minute}"
