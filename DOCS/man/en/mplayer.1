@@ -4533,11 +4533,9 @@ faster version of the simple postprocessing filter
 .IPs <qp>\ 
 Force quantization parameter (default: 0, use QP from video).
 .IPs <-15\-32>
--15: less filtering (more details, but more artifacts)
-.br
-0: default
-.br
-32: more filtering (very smooth, but blurry)
+Filter strength, lower values mean more details but also more artifacts,
+while higher values make the image smoother but also blurrier (default:
+0 - PSNR optimal).
 .RE
 .
 .TP
