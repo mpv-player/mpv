@@ -5,17 +5,7 @@ case "$OS" in
   CYGWIN*|Linux)
     last_cvs_update=`date -r CVS/Entries +%y%m%d-%H:%M 2>/dev/null`
     ;;
-  BSD/OS)
-    LS=`ls -lT CVS/Entries`
-    month=`echo $LS | awk -F" " '{print $6}'`
-    day=`echo $LS | awk -F" " '{print $7}'`
-    hms=`echo $LS | awk -F" " '{print $8}'`
-    hour=`echo $hms | awk -F":" '{print $1}'`
-    minute=`echo $hms | awk -F":" '{print $2}'`
-    year=`echo $LS | awk -F" " '{print $9}'`
-    last_cvs_update="${year}${month}${day}-${hour}:${minute}"
-    ;;
-  Darwin|*BSD)
+  Darwin|*BSD*)
     # BSD 'date -r' does not print modification time
     # LC_ALL=C sets month/day order and English language in the date string
     # The if in the awk call works around wrong day/month order.
