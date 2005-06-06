@@ -1,4 +1,4 @@
-.\" synced with 1.996
+.\" synced with 1.998
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "05 Juin 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "06 Juin 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -2219,11 +2219,6 @@ Active la sortie TV.
 .IPs overlay-ratio=<1\-2500>
 Règle l'incrustation (par défaut\ : 1000).
 .RE
-.
-.TP
-.B \-fb <périphérique> (\-vo fbdev ou directfb uniquement) (OBSOLÈTE)
-Définit le périphérique framebuffer (tampon de trame) à utiliser
-(par défaut\ : /dev/\:fb0).
 .
 .TP
 .B \-fbmode <nom_mode> (\-vo fbdev uniquement)
@@ -7538,6 +7533,12 @@ le PSNR
 .TP
 .B nr=<0\-100000>
 Réduction du  bruit, 0 signifie désactivé.
+Les valeurs typiques se situent dans l'intervalle 0\-600 pour la plupart
+des vidéos, mais vous pouvez essayer des valeurs un peu plus grandes pour
+des vidéos particulièrement bruitées (par défaut\ : 0).
+Étant donné son faible impact sur la vitesse d'encodage, vous pouvez
+essayer cette option à la place des filtres de débruitage vidéo tels que
+denoise3d ou hqdn3d.
 .
 .TP
 .B qns=<0\-3>
