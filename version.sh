@@ -2,7 +2,7 @@
 
 OS=`uname -s`
 case "$OS" in
-  CYGWIN*|Linux)
+  CYGWIN*|Linux|MINGW*)
     last_cvs_update=`date -r CVS/Entries +%y%m%d-%H:%M 2>/dev/null`
     ;;
   Darwin|*BSD*)
