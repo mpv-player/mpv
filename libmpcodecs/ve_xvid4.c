@@ -1069,6 +1069,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 		for(i = 0; p; i++)
 		{
         		int start;
+        		int q;
 			double value;
 			char mode;
         		int e = sscanf(p, "%d,%c,%lf", &start, &mode, &value); // start,mode(q = constant quant, w = weight),value
@@ -1077,7 +1078,7 @@ static int set_create_struct(xvid_mplayer_module_t *mod)
 	    			mp_msg(MSGT_MENCODER,MSGL_ERR, "error parsing zones\n");
             		return(BAD);
         		}
-			int q = (int)(value * 100);
+			q = (int)(value * 100);
 			if (mode == 'q')
 			{
 				if (q < 200 || q > 3100) // make sure that quantizer is in allowable range
