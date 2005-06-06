@@ -13,7 +13,6 @@ extern char *monitor_dotclock_str;
 #endif
 
 #ifdef HAVE_FBDEV
-extern char *fb_dev_name;
 extern char *fb_mode_cfgfile;
 extern char *fb_mode_name;
 #endif
@@ -201,7 +200,6 @@ m_option_t mplayer_opts[]={
 #endif 
 
 #ifdef HAVE_FBDEV
-	{"fb", &fb_dev_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fbmode", &fb_mode_name, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"fbmodeconfig", &fb_mode_cfgfile, CONF_TYPE_STRING, 0, 0, 0, NULL},
 #endif
