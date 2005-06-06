@@ -195,6 +195,7 @@ Optional features:
                             library [autodetect]
   --disable-ftp          Disable ftp support [enabled]
   --disable-vstream      Disable tivo vstream client support [autodetect]
+  --disable-pthreads     Disable Posix threads support [autodetect]
 
 Codecs:
   --enable-gif		 enable gif support [autodetect]
@@ -1477,6 +1478,7 @@ _inet6=auto
 _gethostbyname2=auto
 _ftp=yes
 _vstream=auto
+_pthreads=yes
 for ac_option do
   case "$ac_option" in
   # Skip 1st pass
@@ -1729,6 +1731,8 @@ for ac_option do
   --disable-ftp)        _ftp=no         ;;
   --enable-vstream)     _vstream=yes    ;;
   --disable-vstream)    _vstream=no     ;;
+  --enable-pthreads)    _pthreads=yes   ;;
+  --disable-pthreads)   _pthreads=no    ;;
 
   --enable-fribidi)     _fribidi=yes    ;;
   --disable-fribidi)    _fribidi=no     ;;
@@ -2793,15 +2797,17 @@ echores "$_dynamic_plugins"
 _def_threads='#undef HAVE_THREADS'
 
 echocheck "pthread"
+_ld_pthread=''
+if test "$_pthreads" != no ; then
 cat > $TMPC << EOF
 #include <pthread.h>
 void* func(void *arg) { return arg; }
 int main(void) { pthread_t tid; return pthread_create (&tid, 0, func, 0) == 0 ? 0 : 1; }
 EOF
-if mingw32 ; then
+if hpux ; then
   _ld_pthread=''
-elif hpux ; then
-  _ld_pthread=''
+elif ( cc_check -lpthreadGC2 && $TMPO ) ; then # mingw pthreads-win32
+  _ld_pthread='-lpthreadGC2'
 elif ( cc_check && $TMPO ) ; then              # QNX
   _ld_pthread=' ' # _ld_pthread='' would disable pthreads, but the test worked
 elif ( cc_check -lpthread && $TMPO ) ; then
@@ -2823,6 +2829,7 @@ else
     echores "no (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled)"
     _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _macosx=no ; _win32=no
   fi
+fi
 fi
 if test "$_ld_pthread" != '' ; then
   echores "yes (using $_ld_pthread)"
