@@ -6,6 +6,7 @@ MPlayer (1.0)
     * improved encoding guide
     * encoding tips for x264
     * how to set up MEncoder for x264 support
+    * misc improvements all over the place
 
     Driver:
     * JACK audio output rewritten without bio2jack
@@ -15,10 +16,12 @@ MPlayer (1.0)
     * Indeo2 (RT21) support via lavc
     * Fraps video decoder via binary DLL
     * support for 8-bit PNGs with palette
+    * support for dmb1 MJPEG files with ffmjpeg
 
     Demuxers:
     * simultaneous audio capture and playback in MPlayer
       (-tv immediatemode=0) fixed in v4l2
+    * PVR support
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
@@ -48,13 +51,14 @@ MPlayer (1.0)
     * New Mac OS X "macosx" video output driver. Supported on OS X 10.4
       and 10.3 with QuickTime 7 (requires QuickTime 7 SDK to build on 10.3)
     * Mac OS X 10.4 (Tiger) fixes
+    * support for playing DVDs from the hard disk on Cygwin
+    * DragonFly BSD support
 
     Others:
     * enabled hinting for TrueType fonts
     * support for file:// syntax
-    * ported all streams to the new API, with consequent massive cleanup of the 
-      stream layer
-
+    * -fb option removed, use the device suboption of -vo fbdev/fbdev2 instead
+    * massive stream layer cleanup, all streams ported to the new API
 
 
   pre7: "PatentCounter" April 16, 2005
