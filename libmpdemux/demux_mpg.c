@@ -387,20 +387,100 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
   return 0;
 }
 
-int num_elementary_packets100=0;
-int num_elementary_packets101=0;
-int num_elementary_packets12x=0;
-int num_elementary_packets1B6=0;
-int num_elementary_packetsPES=0;
-int num_h264_slice=0; //combined slice
-int num_h264_dpa=0; //DPA Slice
-int num_h264_dpb=0; //DPB Slice
-int num_h264_dpc=0; //DPC Slice
-int num_h264_idr=0; //IDR Slice
-int num_h264_sps=0;
-int num_h264_pps=0;
+static int num_elementary_packets100=0;
+static int num_elementary_packets101=0;
+static int num_elementary_packets12x=0;
+static int num_elementary_packets1B6=0;
+static int num_elementary_packetsPES=0;
+static int num_h264_slice=0; //combined slice
+static int num_h264_dpa=0; //DPA Slice
+static int num_h264_dpb=0; //DPB Slice
+static int num_h264_dpc=0; //DPC Slice
+static int num_h264_idr=0; //IDR Slice
+static int num_h264_sps=0;
+static int num_h264_pps=0;
 
-int num_mp3audio_packets=0;
+static int num_mp3audio_packets=0;
+
+int demux_mpg_probe(demuxer_t *demuxer) {
+  int pes=1;
+  int tmp;
+  off_t tmppos;
+  int file_format = DEMUXER_TYPE_UNKNOWN;
+
+  tmppos=stream_tell(demuxer->stream);
+  tmp=stream_read_dword(demuxer->stream);
+  if(tmp==0x1E0 || tmp==0x1C0) {
+    tmp=stream_read_word(demuxer->stream);
+    if(tmp>1 && tmp<=2048) pes=0; // demuxer->synced=3; // PES...
+  }
+  stream_seek(demuxer->stream,tmppos);
+
+  num_elementary_packets100=0;
+  num_elementary_packets101=0;
+  num_elementary_packets1B6=0;
+  num_elementary_packets12x=0;
+  num_elementary_packetsPES=0;
+  num_h264_slice=0; //combined slice
+  num_h264_dpa=0; //DPA Slice
+  num_h264_dpb=0; //DPB Slice
+  num_h264_dpc=0; //DPC Slice
+  num_h264_idr=0; //IDR Slice
+  num_h264_sps=0;
+  num_h264_pps=0;
+  num_mp3audio_packets=0;
+
+  if(demux_mpg_open(demuxer))
+    file_format=DEMUXER_TYPE_MPEG_PS;
+  else {
+    mp_msg(MSGT_DEMUX,MSGL_V,"MPEG packet stats: p100: %d  p101: %d p1B6: %d p12x: %d sli: %d a: %d b: %d c: %d idr: %d sps: %d pps: %d PES: %d  MP3: %d, synced: %d\n",
+     num_elementary_packets100,num_elementary_packets101,
+     num_elementary_packets1B6,num_elementary_packets12x,
+     num_h264_slice, num_h264_dpa,
+     num_h264_dpb, num_h264_dpc=0,
+     num_h264_idr, num_h264_sps=0,
+     num_h264_pps,
+     num_elementary_packetsPES,num_mp3audio_packets, demuxer->synced);
+
+     //MPEG packet stats: p100: 458  p101: 458  PES: 0  MP3: 1103  (.m2v)
+     if(num_mp3audio_packets>50 && num_mp3audio_packets>2*num_elementary_packets100
+        && abs(num_elementary_packets100-num_elementary_packets101)>2)
+       return file_format;
+
+      // some hack to get meaningfull error messages to our unhappy users:
+      if(num_elementary_packets100>=2 && num_elementary_packets101>=2 &&
+         abs(num_elementary_packets101+8-num_elementary_packets100)<16) {
+         if(num_elementary_packetsPES>=4 && num_elementary_packetsPES>=num_elementary_packets100-4) {
+           return file_format;
+         }
+         file_format=DEMUXER_TYPE_MPEG_ES; //  <-- hack is here :)
+      } else
+#if 1
+          // fuzzy mpeg4-es detection. do NOT enable without heavy testing of mpeg formats detection!
+        if(num_elementary_packets1B6>3 && num_elementary_packets12x>=1 &&
+           num_elementary_packetsPES==0 && num_elementary_packets100<=num_elementary_packets12x &&
+           demuxer->synced<2) {
+             file_format=DEMUXER_TYPE_MPEG4_ES;
+        } else
+#endif
+#if 1
+         // fuzzy h264-es detection. do NOT enable without heavy testing of mpeg formats detection!
+        if((num_h264_slice>3 || (num_h264_dpa>3 && num_h264_dpb>3 && num_h264_dpc>3)) && 
+          /* FIXME num_h264_sps>=1 && */ num_h264_pps>=1 && num_h264_idr>=1 &&
+          num_elementary_packets1B6==0 && num_elementary_packetsPES==0 &&
+          demuxer->synced<2) {
+            file_format=DEMUXER_TYPE_H264_ES;
+        } else
+#endif
+        {
+          if(demuxer->synced==2)
+            mp_msg(MSGT_DEMUXER,MSGL_ERR,"MPEG: " MSGTR_MissingVideoStreamBug);
+          else
+            mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_NotSystemStream);
+        }
+  }
+  return file_format;
+}
 
 int demux_mpg_es_fill_buffer(demuxer_t *demux){
   // Elementary video stream
