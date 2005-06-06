@@ -660,7 +660,7 @@ Reproduce archivos en orden aleatorio.
 .
 .TP
 .B \-skin <nombre> (sólo GUI)
-Carga un skin del directorio dado como parámetros bajo el directorio
+Carga un skin del directorio dado como parámetro bajo el directorio
 por defecto para los skins, /usr/\:local/\:share/\:mplayer/ y
 ~/.mplayer/\:Skin/.
 .sp 1 
@@ -797,7 +797,7 @@ Establece el nivel de paranoia.
 .IPs generic-dev=<valor>
 Usa dispositivo genérico SCSI especificado.
 .IPs sector-size=<valor>
-Tamaño de lectura atómico.
+tamaño de lectura atómico
 .IPs overlap=<valor>
 Fuerza el mínimo solapamiento de búsqueda durante la verificación a <valor>
 sectores.
@@ -924,7 +924,7 @@ Esta opción solo funciona si el dispositivo soporta búsquedas
 .
 .TP
 .B \-fps <valor en coma flotante>
-Sobreescribe el la tasa de imágenes por segundo.
+Sobreescribe la tasa de imágenes por segundo.
 Útil si el valor original es incorrecto o no existe.
 .
 .TP
@@ -965,7 +965,7 @@ desde un AVI diferente, pero tenga por seguro que causará resultados
 no favorables.
 .br
 .I NOTA:
-Esta opción está obsoleta ahora que MPlayer tiene soporte para OpenDML.
+Esta opción es obsoleta ahora que MPlayer tiene soporte para OpenDML.
 .
 .TP
 .B \-mc <segundos/\:marco>
@@ -1015,12 +1015,12 @@ Especifica una contraseña para autenticación HTTP.
 .
 .TP
 .B \-prefer-ipv4 (red solamente)
-Usa IPv4 en las conexiones de red.
+Usa IPv4 en las conecciones de red.
 Si falla, usa IPv6 automáticamente.
 .
 .TP
 .B \-prefer-ipv6 (red solamente)
-Usa IPv6 para las conexiones de red.
+Usa IPv6 para las conecciones de red.
 Si falla, usa IPv4 automáticamente.
 .
 .TP
@@ -1080,8 +1080,8 @@ tamaño de marco en Bytes
 .TP
 .B \-rtsp-stream-over-tcp (live.com solamente)
 Usado con URLs 'rtsp://' para especificar que los paquetes entrantes RTP y
-RTCP serán enviados a través de TCP (usando la misma conexión TCP como RTSP).
-Esta opción puede ser útil si dispone de una mala conexión a internet que
+RTCP serán enviados a través de TCP (usando la misma conección TCP como RTSP).
+Esta opción puede ser útil si dispone de una mala conección a internet que
 no acepta paquetes UDP entrantes (vea http://www.live.com/\:mplayer/).
 .
 .TP
@@ -1090,7 +1090,7 @@ Fuerza la reconstrucción del índice y vuelca el índice a <archivo>.
 Actualmente solo funciona con archivos AVI.
 .br
 .I NOTA:
-Esta opción está obsoleta ahora que MPlayer tiene soporte para OpenDML.
+Esta opción es obsoleta ahora que MPlayer tiene soporte para OpenDML.
 .
 .TP
 .B \-sb <posición\ del\ byte> (vea también la opción \-ss)
@@ -2383,7 +2383,7 @@ Vea \-vo help para una lista de controladores compilados.
 .PD 0
 .RSs
 .IPs "\-vo xmga,xv,"
-Prueba el controlador Matrox X11, luego el controlador Xv, y luego los otros.
+Prueba el controlador Matrox X11, luego el controlador Xv y luego los otros.
 .IPs "\-vo directx:noaccel"
 Usa el controlador DirectX con las características de aceleración
 desactivadas.
@@ -2516,11 +2516,11 @@ Elige el dispositivo de salida a usar en pantalla completa.
 .PD 1
 .TP
 .B fbdev (solamente Linux)
-Usa el framebuffer del núcleo para la reproducir video.
+Usa el framebuffer del kernel para la reproducir video.
 .
 .TP
 .B fbdev2 (solamente Linux)
-Usa el framebuffer del núcleo para reproducir video,
+Usa el framebuffer del kernel para reproducir video,
 implementación alternativa.
 .
 .TP
@@ -2681,14 +2681,14 @@ mirando la tasa de marcos de imagen de la película.
 .TP
 .B mga (solamente Linux)
 Controlador de salida de video específico de Matrox que hace uso del backend
-scaler YUV en tarjetas Gxxx a través del módulo del núcleo.
+scaler YUV en tarjetas Gxxx a través del módulo del kernel.
 Si tiene una tarjeta Matrox, esta es la opción más rápida.
 .TP
 .B xmga (solamente Linux, X11)
 El controlador de salida de video mga, funcionando en una ventana X11.
 .TP
 .B syncfb\ 
-Controlador de salida de video para el módulo del núcleo SyncFB, que provee
+Controlador de salida de video para el módulo del kernel SyncFB, que provee
 características de hardware especiales para las tarjetas Matrox Gxxx como
 desentrelazado por hardware, escalado y sincronización de la salida de video
 con el refresco vertical de su monitor.
@@ -2708,7 +2708,7 @@ FIXME: ¿Cuál es la diferencia entre 3dfx, tdfxfb y tdfx_vid?
 .TP
 .B tdfx_vid (solamente Linux)
 Controlador de salida de video específico para 3Dfx.
-Funciona conjuntamente con el módulo del núcleo.
+Funciona conjuntamente con el módulo del kernel.
 .
 .TP
 .B dxr2 (vea también \-dxr2) (DXR2 solamente)
@@ -3452,7 +3452,7 @@ añade un borde de 50 pixels en la parte de abajo de la imagen
 .RE
 .PD 1
 .IPs x,y
-posición del a imagen original en la imagen expandida (por defecto: centrada)
+posición de la imagen original en la imagen expandida (por defecto: centrada)
 .IPs o
 renderizado de OSD/\:subtítulos
 .RSss
@@ -3542,7 +3542,7 @@ coma flotante (1.33).
 Alternativamente, puede especificar el ancho y alto deseados exactos para la
 pantalla.
 Note que este filtro NO escala por sí mismo; solo afecta cuando se está
-escalando (software o hardware) o cuando se auto se auto-escala para corregir
+escalando (software o hardware) o cuando se auto-escala para corregir
 aspecto.
 .TP
 .B yuy2\ \ \ 
@@ -3670,7 +3670,7 @@ Genera varios patrones de test.
 .B rgbtest
 Genera un patrón de test RGB útil para detectar problemas de RGB frente
 a BGR.
-Debe ver franjas roja, verde y azul de arriba a abajo.
+Debe mostrar franjas roja, verde y azul de arriba a abajo.
 .TP
 .B lavc[=quality:fps]
 Conversión sofware YV12 a MPEG1 con libavcodec para usar con DVB/\:DXR3.
@@ -3835,7 +3835,7 @@ las diferencias de valores de pixels actuales, para que un umbral de 64
 corresponda a 1 unidad de diferencia para cada pixel, o el mismo esparcido
 de forma diferente sobre el bloque.
 El principal uso de este filtro es para codificación a bitrate-muy-bajo (p.e.\&
-streaming sobre conexión con modem), pero puede ser en teoría usado para
+streaming sobre conección con modem), pero puede ser en teoría usado para
 corregir películas que han sido invertidas en telecine incorrectamente.
 .TP
 .B dint[=sense:level]
@@ -5513,15 +5513,15 @@ Naq intentará ajustar los cuantizadores por-MB para mantener la media correcta.
 Usa dct entrelazado
 .TP
 .B ilme\ \ \ 
-Usa estimación de movimiento entrelazada (mutamente excluyente con qpel).
+Usa estimación de movimiento entrelazada (mutuamente excluyente con qpel).
 .TP
 .B alt\ \ \ \ 
-Usa scantable alternativa
+Usa scantable alternativa.
 .TP
 .B format=<valor>
 .RSs
 .IPs YV12\ 
-Por defecto
+por defecto
 .IPs 422P\ \ 
 para huffyuv or jpeg sin pérdida
 .IPs 411P,410P,BGR32
