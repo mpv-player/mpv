@@ -215,7 +215,7 @@ de los controles con teclado.
 Tipos de letra Europeo/\:ISO 8859-1,2 (Húngaro, Inglés, Checoslovaco, etc),
 Cirílico y Koreano son soportados en 12 formatos de subtítulo (MicroDVD, SubRip,
 OGM, SubViewer, Sami, VPlayer, RT, SSA, AQTitle, JACOsub, PJS y el nuestro:
-MPsub) así como subtítulos DVD (cadenas SPU, VOBSub y Closed Captions).
+MPsub) así como subtítulos DVD (cadenas SPU, VOBsub y Closed Captions).
 .PP
 .B mencoder
 (Codificador de Películas de MPlayer) es un codificador simple de películas,
@@ -1435,7 +1435,7 @@ Selecciona Español y vuelve a Inglés si el Español no está disponible.
 .
 .TP
 .B \-spuaa <modo> (OSD solamente)
-Modo antialias/\:escalado para DVD/\:VOBSub. 
+Modo antialias/\:escalado para DVD/\:VOBsub.
 Un valor de 16 puede añadirse al <modo> para forzar escalado incluso cuando
 la imagen original y la escalada coinciden en tamaño.
 Puede emplearse por ejemplo para suavizar subtítulos cuando se usa
@@ -1458,7 +1458,7 @@ usa difuminado gaussiano swscaler (se ve bastante bien)
 .
 .TP
 .B \-spualign <-1\-2> (OSD solamente)
-Especifica cómo deben alinearse los subtítulos SPU (DVD/\:VOBSub).
+Especifica cómo deben alinearse los subtítulos SPU (DVD/\:VOBsub).
 .PD 0
 .RSs
 .IPs -1
@@ -1659,13 +1659,13 @@ Le dice a MPlayer que maneje los archivos de subtítulos como UTF-8.
 .
 .TP
 .B \-vobsub <archivo\ VOBsub\ sin\ extensión>
-Especifica los archivos VOBSub que serán usados para subtítulos.
+Especifica los archivos VOBsub que serán usados para subtítulos.
 Esto es la ruta completa sin extensiones, p.e.\& sin
 el '.idx', '.ifo' o '.sub'.
 .
 .TP
 .B \-vobsubid <0\-31>
-Especifica el ID del subtítulo VOBSub.
+Especifica el ID del subtítulo VOBsub.
 .
 .TP
 .
@@ -1738,9 +1738,9 @@ MPEG (2) Audio
 .IPs 1024
 AC3
 .IPs 4096
-signed 32-bit (Little-Endian)
+signed 32-bit (little-endian)
 .IPs 8192
-signed 32-bit (Big-Endian)
+signed 32-bit (big-endian)
 .RE
 .PD 1
 .
@@ -2877,7 +2877,7 @@ float o int
 .br
 unsigned o signed
 .br
-le o be (little o big endian)
+le o be (little o big-endian)
 .br
 .IPs volume[=v:sc]
 Selecciona el nivel del volumen de salida.
@@ -2902,7 +2902,7 @@ lij: Cuánto del canal de entrada j es mezclado con el canal de salida i.
 Añade canal de sub-woofer.
 .RSss
 fc: frecuencia de corte para el filtro paso-baja (20Hz a 300Hz) (por
-defecto: 60Hz).
+defecto: 60Hz)
 .br
 ch: número de canal para el sub-canal.
 .REss
@@ -4685,6 +4685,7 @@ Donde <codec> puede ser: lavc, xvidenc, divx4, lame, x264
 .
 .
 .SS divx4 (\-divx4opts)
+.
 DivX4 está obsoleto y solo tiene soporte por completitud.
 Para detalles acerca de las opciones para divx4, lea el código, la
 mayoría de las opciones no se describen aquí.
@@ -4873,6 +4874,7 @@ imprime opciones adicionales e información en la configuración preestablecida.
 .
 .
 .SS lavc (\-lavcopts)
+.
 Muchas de las opciones de lavc son muy especializadas y concísamente
 documentadas. Lea el código fuente para los detalles completos.
 .PP
@@ -5815,6 +5817,7 @@ Si especifica vcodec=mpeg2video este valor puede ser 8, 9, 10 u 11.
 Cierra todos los GOPs.
 Actualmente no funciona (todavía).
 .
+.
 .SS nuv (\-nuvopts)
 .
 Nuppel video está basado en rtjpeg y lzo.
@@ -6099,7 +6102,10 @@ imprime la psnr (pico de relación señal ruido) para el video completo después
 de codificar y almacenar la psnr por marco en un archivo con un nombre
 como 'psnr_hhmmss.log' en el directorio actual.
 Los valores devueltos están en dB (decibelios), cuanto más altos mejor.
+.
+.
 .SS x264enc (\-x264encopts)
+.
 .TP
 .B bitrate=<valor>
 Establece la tasa de bits a usar en kbits/\:segundo (por defecto: desactivado).
