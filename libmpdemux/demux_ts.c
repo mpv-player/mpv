@@ -938,10 +938,17 @@ demuxer_t *demux_open_ts(demuxer_t * demuxer)
 
 	if(params.atype != UNKNOWN)
 	{
+		ES_stream_t *es = priv->ts.pids[params.apid];
 		sh_audio = new_sh_audio(demuxer, 0);
 		sh_audio->ds = demuxer->audio;
 		sh_audio->format = params.atype;
 		demuxer->audio->sh = sh_audio;
+		if(es->extradata && es->extradata_len)
+		{
+			sh_audio->wf = (WAVEFORMATEX *) malloc(sizeof (WAVEFORMATEX) + es->extradata_len);
+			sh_audio->wf->cbSize = es->extradata_len;
+			memcpy(sh_audio->wf + 1, es->extradata, es->extradata_len);
+                }
 	}
 
 
