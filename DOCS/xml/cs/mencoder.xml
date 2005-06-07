@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.58 -->
+<!-- Synced with: 1.70 -->
 <chapter id="mencoder">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -360,8 +360,8 @@ mencoder dvd://1 -oac copy -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -vobsubout t
 <title>Kopírování francouzských titulků z MPEG souboru</title>
 <screen>
 rm titulky.idx titulky.sub
-mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable> -vobsubout titulky -vobsuboutindex 0 -vobsuboutid fr -sid 1<!--
---></screen>
+mencoder <replaceable>film.mpg</replaceable> -ifo <replaceable>film.ifo</replaceable> -vobsubout titulky -vobsuboutindex 0 -vobsuboutid fr -sid 1 -nosound -ovc copy
+</screen>
 </example>
 
 </sect1>
@@ -512,13 +512,241 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   za vás.
 </para>
 
+<sect2 id="menc-feat-dvd-mpeg4-preparing-encode">
+<title>Příprava na enkódování: Určení zdrojového materiálu a datového toku</title>
+<para>
+  Předtím než i jen pomyslíte na enkódování filmu, budete muset učinit
+  několik přípravných kroků.
+</para>
+
+<para>
+  Prvním a nejdůležitějším krokem před enkódováním by mělo být zjištění
+  druhu obsahu se kterým máte co do činění.
+  Pokud vaše zdrojové video pochází z DVD nebo veřejné/kabelové/satelitní
+  TV, bude uložen v jednom ze dvou formátů: NTSC v Severní Americe a
+  Japonsku, PAL v Euvropě, atd.
+  Je ovšem důležité si uvědomit, že to je pouze formátování pro prezentaci
+  v televizi a často <emphasis role="bold">neodpovídá</emphasis>
+  originálnímu formátu filmu.
+  Abaste dosáhli uspokojivého výsledku, musíte znát původní formát.
+  Nevezmete-li to správně v potaz, dostanete obraz plný ošklivých kombinačních
+  (proklad) artefaktů.
+  Kromě toho, že budete mít nekvalitní obraz, artefakty rovněž snižují
+  efektivitu kódování:
+  Dosáhnete horší kvality při daném datovém toku.
+</para>
+
+<sect3 id="menc-feat-dvd-mpeg4-preparing-encode-fps">
+<title>Zjištění snímkové rychlosti zdroje</title>
+<para>
+  Zde máte seznam běžných typů zdrojového materiálu, kde na který nejspíš
+  narazíte a jejich volby:
+</para>
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Standardní film</emphasis>: Vytvořený pro promítání
+  v kině při 24fps.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">PAL video</emphasis>: Zaznamenáno PAL
+  video kamerou s rychlostí 50 půlsnímků za sekundu.
+  Půlsnímek sestává jen z lichých nebo sudých řádků daného snímku.
+  Televize je navržena pro jejich střídavé zobrazování jako laciná
+  forma analogové komprese.
+  Lidské oko to pravděpodobně vykompenzuje, ale jakmile porozumíte
+  prokládání, naučíte se jej vidět i v TV a už si ji neužijete.
+  Dva půlsnímky <emphasis role="bold">netvoří</emphasis> úplný snímek,
+  protože jsou zaznamenány s časovou odchylkou 1/50 sekundy a proto se
+  nekryjí, dokud je zde pohyb.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">NTSC Video</emphasis>: Zaznamenáno
+  NTSC video kamerou s rychlostí 60000/1001 půlsnímků za sekundu, nebo 60
+  půlsnímků za sekundu v době před barevnou televizí.
+  Jinak obdobné PAL.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Animovaný film</emphasis>: Obvykle kreslený při
+  24 snímcích za sekundu, ale rovněž bývá v některé variantě prměnné snímkové
+  rychlosti.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Počítačová grafika (CG)</emphasis>: Může mít jakoukoli
+  snímkovou rychlost, ale některé jsou častější než jiné; 24 a 30 snímků za
+  sekundu jsou typické pro NTSC a 25 snímků za sekundu zase pro PAL.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Starý film</emphasis>: Různé nižší snímkové rychlosti.
+</para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3 id="menc-feat-dvd-mpeg4-preparing-encode-material">
+<title>Určení zdrojového materiálu</title>
+<para>
+  Filmy sestávající ze snímků jsou nazývány progresivní,
+  zatímco ty složené z nezávislých půlsnímků buď prokládané, nebo
+  jen video &ndash; ačkoli druhý termín je zavádějící.
+</para>
+<para>
+  Abychom to ještě zkomplikovali, některé filmy mohou být směsí
+  všeho výše uvedeného.
+</para>
+<para>
+  Nejdůležitějším rozdílem mezi všemi těmito formáty je to, že základem
+  některých jsou snímky a jiných půlsnímky.
+  <emphasis role="bold">Vždy</emphasis>, když je film připravován pro promítání
+  v televizi (včetně DVD), je převeden na půlsnímky.
+  Různé metody jak toho lze dosáhnout jsou souhrnně nazývány "pulldown" a
+  nechvalně známé NTSC "3:2 telecine" je jednou z variant.
+  Pokud nebyl základ vašeho filmu rovněž půlsnímkový (se stejnou půlsnímkovou
+  rychlostí), máte film v jiném formátu, než byl původně.
+</para>
+
+<itemizedlist>
+<title>Zde je několik běžných typů pulldown:</title>
+<listitem><para>
+  <emphasis role="bold">PAL 2:2 pulldown</emphasis>: Je nejhezčí z nich.
+  Každý snímek je zobrazován po dobu dvou půlsnímků tak, že se oddělí liché
+  a sudé řádky a zobrazují se střídavě.
+  Pokud měl originál 24 snímků za sekundu, zrychlí se film o 4%.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">PAL 2:2:2:2:2:2:2:2:2:2:2:3 pulldown</emphasis>:
+  Každý 12 snímek je zobrazen po dobu tří půlsnímků, místo dvou.
+  To odstraní nevýhodu 4% zrychlení, ale znesnadní obrácený proces.
+  Obvykle je používán pouze u hudební produkce, jelikož zde by 4% zrychlení
+  znatelně poškodilo hudební zážitek.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">NTSC 3:2 telecine</emphasis>: Snímky jsou zobrazovány
+  po dobu 2 nebo 3 půlsnímků, čímž je dosaženo 2.5 krát
+  vyšší půlsnímkové rychlosti, než je originální snímková rychlost.
+  Výsledek je dále velmi mírně spomalen ze 60 půlsnímků za sekundu na
+  60000/1001 půlsnímků za sekundu, aby se dosáhlo NTSC půlsnímkové rychlosti.
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">NTSC 2:2 pulldown</emphasis>: Používá se pro
+  promítání 30fps materiálu na NTSC.
+  Pěkné, stejně jako 2:2 PAL pulldown.
+</para></listitem>
+</itemizedlist>
+
+<para>
+  Existují rovněž metody pro konverzi mezi NTSC a PAL vieem, ale to
+  již je nad rámec této příručky.
+  Pokud se setkáte s takovým filmem a budete jej chtít enkódovat,
+  bude pro vás nejlepší opatřit si jej v originálním formátu.
+  Konverze mezi těmito formáty je vysoce destruktivní a nelze ji
+  čistě zvrátit, takže výsledek velmi utrpí, pokud je vytvořen z
+  konvertovaného materiálu.
+</para>
+<para>
+  Když je video ukládáno na DVD, po sobě jdoucí páry půlsnímků jsou
+  seskupovány do snímků, dokonce i když nejsou určeny pro zobrazení
+  ve stejném okamžiku.
+  Standard MPEG-2 použitý na DVD a digitální televizi poskytuje možnost
+  jak pro enkódování originálních progresivních snímků, tak pro uložení
+  informací do hlavičky snímku o počtu půlsnímků, po jejichž dobu by měl
+  být daný snímek zobrazován.
+  Pokud je použita tato metoda, film bývá často označen jako
+  "soft-telecined", jelikož proces pouze řídí DVD přehrávač pro
+  aplikaci pulldown na film spíše než že mění samotný film.
+  Tento případ je velmi upřednostňován, jalikož může být snadno
+  zvrácen (ve skutečnosti ignorován) enkodérem a proto poskytuje maximální
+  kvalitu.
+  Mnoho DVD a televizních produkčních společností však nepoužívá vhodné
+  enkódovací techniky, ale místo toho produkují filmy s
+  "hard telecine", kdy jsou ve skutečnosti půlsnímky duplikovány
+  ve výsledném MPEG-2.
+</para>
+<para>
+  Postupy pro tyto případy budou uvedeny později v této příručce.
+  Prozatím si řekneme několik návodů pro identifikaci o jaký typ materiálu jde:
+</para>
+
+<itemizedlist>
+<title>NTSC regiony:</title>
+<listitem><para>
+  Pokud <application>MPlayer</application> při přehrávání vypíše, že se snímková
+  rychlost změnila na 24000/1001 a již se to nezmění, pak se nejspíš jedná
+  o progresivní obsah, který byl "soft telecinován".
+</para></listitem>
+<listitem><para>
+  Pokud <application>MPlayer</application> ukazuje, že se snímková rychlost
+  mění tam a zpět mezi 24000/1001 a 30000/1001 a někdy vidíte
+  "combing", pak je zde několik možností.
+  Segmenty 24000/1001 fps mají téměř jistě "soft telecinovaný" progresivní
+  obsah, ale 30000/1001 fps části mohou mít buď hard-telecined 24000/1001 fps
+  obsah, nobo se jedná o 60000/1001 půlsnímků za sekundu NTSC video.
+  Použijte stejný postup jako v následujících dvou případech pro určení
+  který z nich to je.
+</para></listitem>
+<listitem><para>
+  Pokud <application>MPlayer</application> neukáže změnu snímkové rychlosti
+  a všechny snímky jsou zubaté, je váš film ve formátu NTSC video s 60000/1001
+  půlsnímky za sekundu.
+</para></listitem>
+<listitem><para>
+  Pokud <application>MPlayer</application> neukáže změnu snímkové rychlosti
+  a dva snímky z pěti vypadají zubatě, má vaše video "hard telecinovaný"
+  24000/1001fps obsah.
+</para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>PAL regiony:</title>
+<listitem><para>
+  Pokud není nikde vidět žádné zubatění, je váš film 2:2 pulldown.
+</para></listitem>
+<listitem><para>
+  Pokud vidíte jak se objevuje a mizí zubatění každou půlsekundu,
+  pak je váš film 2:2:2:2:2:2:2:2:2:2:2:3 pulldown.
+</para></listitem>
+<listitem><para>
+  Pokud je zubatění vidět stále, je to PAL video s 50 půlsnímky za sekundu.
+</para></listitem>
+</itemizedlist>
+
+<note><title>Rada:</title>
+<para>
+  <application>MPlayer</application> umí spomalit přehrávání videa
+  pomocí volby -speed.
+  Zkuste použít <option>-speed</option> 0.2 pro velmi pomalé přehrávání a
+  najděte vzor, pokud jej nevidíte při plné rychlosti.
+</para>
+</note>
+</sect3>
+</sect2>
+
 <sect2 id="menc-feat-dvd-mpeg4-2pass">
-<title>Pevný kvantizer vs. dva průchody</title>
+<title>Pevný kvantizer vs. více průchodů</title>
+
+<para>
+  Enkódování vašeho videa je možné provést v široké škále kvality.
+  S moderními video enkodéry a trochou předkodekové komprese
+  (zmenšení a odšumování) je možné dosáhnout velmi dobré kvality v 700 MB,
+  pro 90-110 minut dlouhé širokoúhlé video.
+  Jinak lze všechna videa, snad kromě těch nejdelších, enkódovat v téměř
+  perfektní kvalitě do 1400 MB.
+</para>
 
 <para>
   Jsou tři přístupy k enkódování videa: pevný datový tok (CBR), pevný kvantizer
-  a dvouprůchodový (ABR, nebili průměrovaný datový tok).
+  a víceprůchodový (ABR, neboli průměrovaný datový tok).
 </para>
+
+<note><title>Poznámka:</title>
+<para>
+  Většina kodeků, které podporují ABR enkódování, podporují pouze dvouprůchodové
+  enkódování, zatímco ostatní jako <systemitem class="library">x264</systemitem>
+  a <systemitem class="library">libavcodec</systemitem> podporují víceprůchodové
+  enkódování, které s každým průchodem trochu zlepší kvalitu, ačkoli toto
+  zlepšení již není viditelné, nebo měřitelné po asi čtvrtém průchodu.
+  V této sekci budeme považovat dvouprůchodové a víceprůchodové
+  enkódování za shodné.
+</para>
+</note>
 
 <para>
   V každém z těchto režimů <systemitem class="library">libavcodec</systemitem>
@@ -1153,6 +1381,9 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Šo a Vo jsou šířka a výška ořezaného videa,
 </para></listitem>
 <listitem><para>
+  PSa je zobrazovaný poměr stran, jež je obvykle 4/3 nebo 16/9,
+</para></listitem>
+<listitem><para>
   PRdvd je poměr pixelů v DVD, který je roven 1.25=(720/576) pro DVD
   v PALu a 1.5=(720/480) pro DVD v NTSC,
 </para></listitem>
@@ -1163,6 +1394,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Pak si můžete spočítat rozlišení X a Y podle určitého faktoru kvality komprese
   (CQ):
   <systemitem>RozY = INT(SQRT( 1000*Datový_tok/25/PSo/CQ )/16) * 16</systemitem>
+  a
   <systemitem>RozX = INT( RozY * PSo / 16) * 16</systemitem>
 </para>
 
@@ -1309,6 +1541,57 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 </sect2>
 
+<sect2 id="menc-feat-dvd-mpeg4-encoding-interlaced">
+<title>Enkódování prokládaného videa</title>
+
+<para>
+  Pokud je film, který chcete enkódovat, prokládaný (NTSC video nebo
+  PAL video), budete si muset vybrat, zda jej chcete "odproložit" nebo ne.
+  Zatímco odstranění prokladu učiní váš film použitelným na progresivně
+  vykreslovaných zobrazovačích jako jsou počítačové monitory a projektory.
+  Cenou za to je, snížení rychlosti z 50 nebo 60000/1001 půlsnímků za sekundu
+  na 25 nebo 30000/1001 snímků za sekundu a zhruba polovina informací bude
+  z vašeho filmu ztracena ve scénách s významným množstvím pohybu.
+</para>
+
+<para>
+  Proto pokud enkódujete ve vysoké kvalitě pro archivační účely, doporučujeme
+  ponechat film prokládaný.
+  Vždy můžete provést odstranění prokladu při přehrávání pokud zobrazujete
+  na progresivním zařízení a přehrávače v budoucnosti budou schopny odstraňovat
+  proklad v plné půlsnímkové rychlosti, čili odvozovat 50 nebo 60000/1001
+  úplných snímků za sekundu z prokládaného videa.
+</para>
+
+<para>
+Když pracujete s prokládaným videem, musíte zvláště dbát na:
+</para>
+
+<orderedlist>
+<listitem><para>
+  Výška a svislé odsazení musí být násobkem 4.
+</para></listitem>
+<listitem><para>
+  Jakékoli svislé škálování musí být provedeno v prokládaném režimu.
+</para></listitem>
+<listitem><para>
+  Postprocesní a odšumovací filtry nemusí pracovat podle očekávání,
+  dokud nezařídíte, aby zpracovávaly najednou pouze jeden půlsnímek a
+  mohou vám poškodit video při nesprávném použití.
+</para></listitem>
+</orderedlist>
+
+<para>
+S vědomím těchto souvislostí vám předkládáme první příklad:
+</para>
+<screen>
+  mencoder <replaceable>capture.avi</replaceable> -mc 0 -oac lavc -ovc lavc -lavcopts \
+  vcodec=mpeg2video:vbitrate=6000:ilmv:ildct:acodec=mp2:abitrate=224
+</screen>
+<para>
+Povšimněte si voleb <option>ilmv</option> a <option>ildct</option>.
+</para>
+</sect2>
 
 <sect2 id="menc-feat-dvd-mpeg4-filtering">
 <title>Filtrování</title>
@@ -1751,7 +2034,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <title>Enkódování s <systemitem class="library">x264</systemitem> kodekem</title>
 <para>
   <systemitem class="library">x264</systemitem> je svobodná knihovna pro
-  enkódování H264/AVC video proudů.
+  enkódování H.264/AVC video proudů.
   Pře zahájením enkódování budete muset <link linkend="codec-x264-encode">
   nastavit její podporu v<application>MEncoder</application>u</link>.
 </para>
@@ -1787,8 +2070,8 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <ulink url="http://en.wikipedia.org/wiki/PSNR">ve Wikipedii pod heslem PSNR</ulink>.
   Celkové PSNR je poslední hlášené PSNR číslo při zařazení volby
   <option>psnr</option> v <option>x264encopts</option>.
-  Kdykoli budete číst prohlášení o PSNR, jeden z předpokladů tohoto sdělení
-  je, že jsou použity shodné datové toky.
+  Kdykoli píšeme o PSNR, je jedním z předpokladů tohoto sdělení
+  to, že jsou použity shodné datové toky.
 </para>
 
 <para>
@@ -1797,7 +2080,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Při porovnávání voleb jsou zde dva hlavní důvody pro použití dvouprůchodového
   enkódování.
   Zaprvé, dvouprůchodové enkódování vám získá zhruba 1dB PSNR, což je
-  velký rozdíl.
+  znatelný rozdíl.
   Zadruhé, testování voleb pomocí přímého porovnání kvality v jednoprůchodových
   výsledcích je pochybné, jelikož se datový tok značně liší s každým
   enkódováním.
@@ -1875,7 +2158,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   nízké hodnoty <option>subq</option> a <option>frameref</option>
   v prvním průchodu a zvýšit je ve druhém.
   Typicky to má zanedbatelný záporný vliv na konečnou kvalitu:
-  pravděpodobně stratíte méně než 0.1dB PSNR, což by měl být až příliš
+  Pravděpodobně stratíte méně než 0.1dB PSNR, což by měl být až příliš
   malý rozdíl, než aby byl vidět.
   Odlišné hodnoty <option>frameref</option> však mohou místy ovlivnit
   volbu typu snímku.
@@ -1889,6 +2172,38 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   Tento případ je nejspíš zcela ojedinělý v hraných filmech, ale občas se
   vyskytuje v záznamech z videoher.
 </para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">me</emphasis>:
+  Tato volba je určena pro výběr metody vyhledávání pohybu.
+  Změnou této volby jednoduše měníte poměr kvalita-versus-rychlost.
+  Volba <option>me=1</option> je jen o málo procent rychlejší než
+  výchozí vyhledávání za cenu pod 0.1dB globálního PSNR.
+  Výchozí nastavení (<option>me=2</option>) je rozumným kompromisem
+  mezi rychlostí a kvalitou. Volba <option>me=3</option> získá o trošku méně
+  než 0.1dB globální PSNR, při spomalení, které se liší v závislosti na
+  <option>frameref</option>.  Při vysokých hodnotách
+  <option>frameref</option> (řekněme 12 nebo tak), je <option>me=3</option>
+  asi o 40% pomalejší než výchozí <option> me=2</option>. Při
+  <option>frameref=3</option>, klesne způsobené spomalení na
+  25%-30%.
+</para>
+<para>
+  Volba <option>me=4</option> používá tak rozsáhlé vyhledávání, že je příliš
+  pomalá pro praktické využití.
+</para>
+</listitem>
+
+<listitem><para>
+  <emphasis role="bold">4x4mv</emphasis>:
+  Tato volba zapíná použití podčástí 8x4, 4x8 a 4x4 v predikovaných
+  makroblocích. Její aktivace vede k poměrně stálé 
+  10%-15% ztrátě rychlosti. Tato volba je poměrně neužitečná ve zdroji
+  obsahujícím pouze pomalý pohyb, naproti tomu u některých zdrojů s rychlým
+  pohybem, přesněji zdrojů s velkým množstvím malých pohyblivých objektů,
+  můžete očekávat zisk okolo 0.1dB.
+</para>
+</listitem>
 
 <listitem><para>
   <emphasis role="bold">bframes</emphasis>:
@@ -1918,7 +2233,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem><para>
   <emphasis role="bold">b_adapt</emphasis>:
-  Poznámka: ve výchozím stavu zapnuto.
+  Poznámka: Výchozí je zapnuto.
 </para>
 <para>
   Je-li tato volba zapnuta, bude enkodér používat jendoduchou
@@ -1937,7 +2252,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <listitem><para>
   <emphasis role="bold">b_pyramid</emphasis>:
-  Pokud používáte >2 B-snímky, můžete také zapnout tuto volbu; jak
+  Pokud používáte >=2 B-snímky, můžete také zapnout tuto volbu; jak
   říká man stránka, dostanete malé zvýšení kvality bez ztráty rychlosti.
   Poznamenejme, že tato videa nelze číst dekodéry založenými na libavcodec
   staršími než 5. března 2005.
