@@ -62,8 +62,8 @@
  
  #include "common.h"
  #include "css.h"
---- device.c	2003-07-29 01:37:06.000000000 +0200
-+++ device.c	2005-03-01 07:41:41.000000000 +0100
+--- dvdcss/device.c	2005-06-07 19:22:40.181853664 +0200
++++ device.c	2005-06-07 15:36:21.000000000 +0200
 @@ -33,18 +36,9 @@
  #include <string.h>
  #include <sys/types.h>
@@ -108,6 +108,45 @@
  
      /* Initialize readv temporary buffer */
      dvdcss->p_readv_buffer   = NULL;
+@@ -276,14 +273,14 @@
+      * won't send back the right result).
+      * (See Microsoft Q241374: Read and Write Access Required for SCSI
+      * Pass Through Requests) */
+-    (HANDLE) dvdcss->i_fd =
++    dvdcss->i_fd = (int)
+                 CreateFile( psz_dvd, GENERIC_READ | GENERIC_WRITE,
+                             FILE_SHARE_READ | FILE_SHARE_WRITE,
+                             NULL, OPEN_EXISTING,
+                             FILE_FLAG_RANDOM_ACCESS, NULL );
+ 
+     if( (HANDLE) dvdcss->i_fd == INVALID_HANDLE_VALUE )
+-        (HANDLE) dvdcss->i_fd =
++        dvdcss->i_fd = (int)
+                     CreateFile( psz_dvd, GENERIC_READ, FILE_SHARE_READ,
+                                 NULL, OPEN_EXISTING,
+                                 FILE_FLAG_RANDOM_ACCESS, NULL );
+@@ -305,8 +302,8 @@
+     DWORD dwSupportInfo;
+     struct w32_aspidev *fd;
+     int i, j, i_hostadapters;
+-    long (*lpGetSupport)( void );
+-    long (*lpSendCommand)( void* );
++    GETASPI32SUPPORTINFO lpGetSupport;
++    SENDASPI32COMMAND lpSendCommand;
+     char c_drive = psz_device[0];
+ 
+     /* load aspi and init w32_aspidev structure */
+@@ -317,8 +314,8 @@
+         return -1;
+     }
+ 
+-    (FARPROC) lpGetSupport = GetProcAddress( hASPI, "GetASPI32SupportInfo" );
+-    (FARPROC) lpSendCommand = GetProcAddress( hASPI, "SendASPI32Command" );
++    lpGetSupport = (GETASPI32SUPPORTINFO) GetProcAddress( hASPI, "GetASPI32SupportInfo" );
++    lpSendCommand = (SENDASPI32COMMAND) GetProcAddress( hASPI, "SendASPI32Command" );
+ 
+     if(lpGetSupport == NULL || lpSendCommand == NULL )
+     {
 --- error.c	2003-03-10 01:15:31.000000000 +0100
 +++ error.c	2005-03-01 07:41:41.000000000 +0100
 @@ -25,16 +28,9 @@
@@ -499,3 +538,24 @@
  extern int      dvdcss_seek  ( dvdcss_t,
                                 int i_blocks,
                                 int i_flags );
+--- dvdcss/ioctl.h	2005-06-07 19:22:40.187852752 +0200
++++ ioctl.h	2005-06-07 15:31:43.000000000 +0200
+@@ -318,6 +318,9 @@
+  * win32 aspi specific
+  *****************************************************************************/
+ 
++typedef WINAPI DWORD (*GETASPI32SUPPORTINFO)(VOID);
++typedef WINAPI DWORD (*SENDASPI32COMMAND)(LPVOID);
++
+ #define WIN2K               ( GetVersion() < 0x80000000 )
+ #define ASPI_HAID           0
+ #define ASPI_TARGET         0
+@@ -339,7 +342,7 @@
+     long  hASPI;
+     short i_sid;
+     int   i_blocks;
+-    long  (*lpSendCommand)( void* );
++    SENDASPI32COMMAND lpSendCommand;
+ };
+ 
+ #pragma pack(1)
