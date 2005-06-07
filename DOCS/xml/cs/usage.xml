@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.24  -->
+<!-- Synced with: 1.27  -->
 <chapter id="usage">
 <title>Použití</title>
 
@@ -33,6 +33,15 @@ Přehrávání souboru:
 <command>mplayer</command><!--
 --> [<replaceable>volby</replaceable>]<!--
 --> [<replaceable>cesta</replaceable>/]<replaceable>soubor</replaceable>
+</synopsis>
+</para>
+
+<para>
+Jiný způsob přehrání souboru:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>volby</replaceable>]<!--
+--> <replaceable>file:///uri-eskejpovaná-cesta-k-souboru</replaceable>
 </synopsis>
 </para>
 
@@ -246,7 +255,7 @@ a použije proxy pokud je k dispozici. Proxi může být rovněž vynucena:
 <application>MPlayer</application> umí číst ze std. vstupu
 (<emphasis>ne</emphasis> z pojmenovaných rour). To může být například použito
 pro přehrávání z FTP:
-<screen>wget <replaceable>ftp://micorsops.com/something.avi</replaceable> -O - | mplayer -</screen>
+<screen>wget <replaceable>ftp://micorsops.com/cokoli.avi</replaceable> -O - | mplayer -</screen>
 </para>
 
 <note><para>
@@ -254,6 +263,29 @@ Také doporučujeme zapnout <option>-cache</option> při přehrávání
 ze síťe:
 <screen>wget <replaceable>ftp://micorsops.com/cokoli.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
+
+<sect2 id="streaming-save">
+<title>Uložení proudového obsahu</title>
+<para>
+  Jakmile jste přiměli <application>MPlayer</application> přehrát
+  váš oblíbený internetový proud, můžete použít volbu
+  <option>-dumpstream</option> k uložení datového proudu do souboru.
+  For example:
+<screen>
+  mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>proud.asf</replaceable>
+</screen>
+  uloží proudové video z
+  <replaceable>http://217.71.208.37:8006</replaceable> do
+  <replaceable>proud.asf</replaceable>.
+  Pracovat to bude se všemi <application>MPlayer</application>em podporovanými
+  protokoly, jako MMS, RSTP, a tak dále.
+  Pokud chcete z proudu uložit pouze zvuk nebo video, použijte
+  <option>-dumpaudio</option> nebo <option>-dumpvideo</option>, ale pamatujte,
+  že <application>MPlayer</application> bude ignorovat všechny vyjma poslední
+  <option>-dump*</option> volby zadané na příkazovém řádku.
+</para>
+</sect2>
+
 </sect1>
 
 <sect1 id="mpst" xreflabel="Remote streams">
