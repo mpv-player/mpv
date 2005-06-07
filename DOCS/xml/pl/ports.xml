@@ -447,7 +447,7 @@ wolna. U¿ywaj SDL.
   zak³óceñ w d¼wiêku i obrazie albo wywo³aæ b³±d, i zakoñczyæ dzia³anie programu.
   Je¿eli wystêpuj± zak³ócenia obrazu, spróbuj
   wy³±czyæ sprzêtow± akceleracjê przez opcjê <option>-vo directx:noaccel</option>. ¦ci±gnij
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/dx7headers.tgz">pliki
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">pliki
   nag³ówkowe DirectX 7</ulink>, ¿eby skompilowaæ sterownik do wyj¶cia video
   DirectX. Co wiêcej, musisz mieæ zainstalowany DirectX 7 lub nowszy,
   aby to wyj¶cie zadzia³a³o.</para>
@@ -455,9 +455,9 @@ wolna. U¿ywaj SDL.
 <para><link linkend="vidix">VIDIX</link> dzia³a teraz równie¿ pod Windowsem jako
   <option>-vo winvidix</option>, chocia¿ jego obs³uga jest eksperymentalna i wymaga
   trochê rêcznego przygotowania. Pobierz
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink>
   lub
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys
   (z obs³ug± MTRR)</ulink>
   i skopiuj go do
   <filename class="directory">libdha/dhahelperwin</filename> w drzewie ¼ród³owym
