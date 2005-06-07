@@ -53,9 +53,10 @@ na¹ich bitmapových fontù, mù¾ete si je stáhnout (apt-get) z
 <sect2 id="rpm">
 <title>Balení RPM</title>
 <para>
-Dominik Mierzejewski vytvoøil a udr¾uje oficiální Red Hat RPM balíèky
-<application>MPlayer</application>u. Tz jsou dostupné z jeho
-<ulink url="http://greysector.rangers.eu.org/mplayer.html">domácí stránky</ulink>.
+Dominik Mierzejewski vytvoøil a udr¾uje oficiální RPM balíèky
+<application>MPlayer</application>u pro Red Hat a Fedora Core. Ty jsou dostupné
+z jeho
+<ulink url="http://rpm.greysector.net/mplayer/">repozitáøe</ulink>.
 </para>
 
 <para>
@@ -155,23 +156,22 @@ zvuku.
 </para>
 
 <para>
-On <emphasis role="bold">UltraSPARCs</emphasis>, <application>MPlayer</application>
-takes advantage of their <emphasis role="bold">VIS</emphasis> extensions
-(equivalent to MMX), currently only in
+Na <emphasis role="bold">UltraSPARC</emphasis>ích, <application>MPlayer</application>
+vyu¾ívá jejich roz¹íøení <emphasis role="bold">VIS</emphasis>
+(ekvivalentní MMX), zatím jen v
 <systemitem class="library">libmpeg2</systemitem>,
 <systemitem class="library">libvo</systemitem>
-and <systemitem class="library">libavcodec</systemitem>, but not in
-<systemitem class="library">mp3lib</systemitem>. You can watch a VOB file
-on a 400MHz CPU. You'll need
-<ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>
-installed.
+a <systemitem class="library">libavcodec</systemitem>, ale nikoli v
+<systemitem class="library">mp3lib</systemitem>. Mù¾ete pøehrávat VOB soubor
+na 400MHz CPU. Budete k tomu potøebovat nainstalovanou
+<ulink url="http://www.sun.com/sparc/vis/mediaLib.html"><systemitem class="library">mLib</systemitem></ulink>.
 </para>
 
 <para>
-To build the package you will need GNU <application>make</application>
-(<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), native
-Solaris make will not work. Typical error you get when building with
-Solaris' make instead of GNU make:
+Pro kompilaci balíku budete potøebovat GNU <application>make</application>
+(<filename>gmake</filename>, <filename>/opt/sfw/gmake</filename>), jeliko¾
+nativní make Solarisu nebude pracovat. Typickou chybou kompilace s make
+Solarisu namísto GNU make je:
 <screen>
    % /usr/ccs/bin/make
    make: Fatal error in reader: Makefile, line 25: Unexpected end of line seen
@@ -179,39 +179,40 @@ Solaris' make instead of GNU make:
 </para>
 
 <para>
-On Solaris SPARC, you need the GNU C/C++ Compiler; it does not matter if
-GNU C/C++ compiler is configured with or without the GNU assembler.
+Na Solarisu SPARC, potøebujete GNU C/C++ Compiler; nezále¾í na tom, zda je
+GNU C/C++ compiler konfigurován s nebo bez GNU assembleru.
 </para>
 
 <para>
-On Solaris x86, you need the GNU assembler and the GNU C/C++ compiler,
-configured to use the GNU assembler! The <application>MPlayer</application>
-code on the x86 platform makes heavy use of MMX, SSE and 3DNOW! instructions
-that cannot be compiled using Sun's assembler <filename>/usr/ccs/bin/as</filename>.
+Na Solarisu x86, potøebujete GNU assembler a GNU C/C++ compiler,
+konfigurovaný pro pou¾ití GNU assembleru! Kód <application>MPlayer</application>u
+na platformì x86 intenzivnì pou¾ívá MMX, SSE a 3DNOW! instrukce,
+které nemù¾e být kompilovány Sun assemblerem <filename>/usr/ccs/bin/as</filename>.
 </para>
 
 <para>
-The <filename>configure</filename> script tries to find out, which
-assembler program is used by your &quot;gcc&quot; command (in case the autodetection
-fails, use the <option>--as=<replaceable>/wherever/you/have/installed/gnu-as</replaceable></option>
-option to tell the <filename>configure</filename> script where it can find GNU
-"as" on your system).
+Skript <filename>configure</filename> zkou¹í zjistit, který assembler je pou¾itý
+va¹ím pøíkazem &quot;gcc&quot; (v pøípadì ¾e autodetekce sel¾e, pou¾ijte volbu
+<option>--as=<replaceable>/kdekoli/máte/nainstalován/gnu-as</replaceable></option>
+pro nastavení <filename>configure</filename> skriptu tak, aby na¹el GNU
+"as" na va¹em systému).
 </para>
 
 <para>
-Error message from <filename>configure</filename> on a Solaris x86 system using
-GCC without GNU assembler:
+Chybová zpráva z <filename>configure</filename> na systému Solaris x86
+s pou¾itím GCC bez GNU assembleru:
 <screen>
    % configure
    ...
    Checking assembler (/usr/ccs/bin/as) ... , failed
    Please upgrade(downgrade) binutils to 2.10.1...
 </screen>
-(Solution: Install and use a gcc configured with <option>--with-as=gas</option>)
+(Øe¹ení: Nainstalujte a pou¾ijte gcc konfigurovaný s <option>--with-as=gas</option>)
 </para>
 
 <para>
-Typical error you get when building with a GNU C compiler that does not use GNU as:
+Typická chyba, kterou dostanete pøi kompilaci pomocí GNU C kompilátoru, který
+nepou¾ívá GNU as:
 <screen>
    % gmake
    ...
@@ -225,24 +226,24 @@ Typical error you get when building with a GNU C compiler that does not use GNU 
 </para>
 
 <para>
-Due to bugs in Solaris 8, you may not be able to play DVD discs larger than 4 GB:
+Díky chybám v Solarisu 8, nemù¾ete pøehrávat DVD disky vìt¹í ne¾ 4 GB:
 </para>
 
 <itemizedlist>
 <listitem><para>
-The sd(7D) driver on Solaris 8 x86 has a bug when accessing a disk block >4GB
-on a device using a logical blocksize != DEV_BSIZE (i.e. CD-ROM and DVD media).
-Due to a 32Bit int overflow, a disk address modulo 4GB is accessed
+Ovladaè sd(7D) na Solarisu 8 x86 má chybu v pøístupu k diskovému bloku >4GB
+na zaøízeních, které mají logical blocksize != DEV_BSIZE (èili CD-ROM a DVD média).
+Díky 32Bit int overflow, dostanete pøístupovou diskovou adresu modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22516"/>).
-This problem does not exist in the SPARC version of Solaris 8.
+Tento problém neexistuje ve SPARC verzi Solarisu 8.
 </para></listitem>
 
 <listitem><para>
-A similar bug is present in the hsfs(7FS) filesystem code (AKA ISO9660),
-hsfs may not not support partitions/disks larger than 4GB, all data is
-accessed modulo 4GB
+Podobná chyba je i v kódu systému souborù hsfs(7FS) (AKA ISO9660),
+hsfs nemusí podporovat oddíly/disky vìt¹í ne¾ 4GB, ke v¹em datùm je pøistupováno
+modulo 4GB
 (<ulink url="http://groups.yahoo.com/group/solarisonintel/message/22592"/>).
-The hsfs problem can be fixed by installing patch 109764-04 (sparc) / 109765-04 (x86).
+Problém hsfs mù¾e být odstranìn nainstalováním patche 109764-04 (sparc) / 109765-04 (x86).
 </para></listitem>
 </itemizedlist>
 </sect1>
