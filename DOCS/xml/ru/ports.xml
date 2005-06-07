@@ -297,7 +297,7 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 <para><link linkend="vidix">VIDIX</link> теперь доступен из-под Windows, как
   <option>-vo winvidix</option>, хотя это ещё экспериментально и требует небольшой
 	ручной установки. Скачайте
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelper.sys">dhahelper.sys</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelper.sys">dhahelper.sys</ulink>
   и скопируйте его в каталог
   <filename class="directory">libdha/dhahelperwin</filename> в Вашем дереве
 	исходного кода <application>MPlayer</application>'а.
@@ -377,7 +377,7 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 
 <para><application>Cygwin</application> версий до 1.5.0 не включал
   <filename>inttypes.h</filename>. Поместите этот
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/inttypes.h">inttypes.h</ulink>
   в <filename class="directory">/usr/include/</filename>, чтобы
   <application>MPlayer</application> мог скомпилироваться.</para>
 
@@ -405,7 +405,7 @@ QNX X'ы <emphasis>эмулируются</emphasis>, что ОЧЕНЬ медленно. Используйте SDL.
 <para>Если Вы используете более раннюю, чем 3.1.0 версию
   <application>MinGW</application>, Вам нужно
   заменить <filename>/mingw/include/sys/types.h</filename> этим файлом:
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h"><filename>types.h</filename></ulink>.</para>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/types.h"><filename>types.h</filename></ulink>.</para>
 
 <para>Распакуйте файлы заголовков DirectX в <filename class="directory">/mingw/include/</filename>.</para>
 
