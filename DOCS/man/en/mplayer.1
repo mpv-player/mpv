@@ -5099,22 +5099,33 @@ using a method that keeps one field and interpolates the other, the result is
 a juddering video that has every fourth frame duplicated.
 This filter is intended to find and drop those duplicates and restore the
 original film framerate.
-When using this filter, you must specify \-ofps that is 4/\:5 of the fps of the
-input file (24000/1001 if the input is 30000/1001 fps).
+When using this filter, you must specify \-ofps that is 4/\:5 of
+the fps of the input file and place the softskip later in the
+filter chain to make sure that divtc sees all the frames.
+Two different modes are available:
+One pass mode is the default and is straightforward to use,
+but has the disadvantage that any changes in the telecine
+phase (lost frames or bad edits) cause momentary judder
+until the filter can resync again.
+Two pass mode avoids this by analyzing the whole video
+beforehand so it will have forward knowledge about the
+phase changes and can resync at the exact spot.
+These passes do
+.B not
+correspond to pass one and two of the encoding process.
+You must run an extra pass using divtc pass one before the
+actual encoding throwing the resulting video away.
+Use \-nosound \-ovc raw \-o /dev/null to avoid
+wasting CPU power for this pass.
+You may add something like crop=2:2:0:0 after divtc
+to speed things up even more.
+Then use divtc pass two for the actual encoding.
+If you use multiple encoder passes, use divtc
+pass two for all of them.
 The options are:
 .RSs
 .IPs pass=1|2
 Use two pass mode.
-This produces best results.
-Pass one analyzes the video and writes the results to a log file.
-Pass two then reads this log file and uses the information to do
-the actual work.
-Note that these passes do
-.B not
-correspond to pass one and two of the encoding process.
-In order to use divtc two pass with two pass video encoding, you must perform
-three passes: first divtc pass one and encoder pass one, then divtc pass two
-and encoder pass one, and finally divtc pass two and encoder pass two.
 .IPs file=<filename>
 Set the two pass log filename (default: "framediff.log").
 .IPs threshold=<value>
