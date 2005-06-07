@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.63 -->
+<!-- Synced with 1.64 -->
 <sect1 id="codecs">
 <title>Podporované kodeky</title>
 
@@ -595,11 +595,11 @@ platformy.</para></note>
   Ať už mu říkáte jakkoli, H.264 stojí za vyzkoušení, protože obvykle
   dosahuje kvality MPEG-4 ASP při datovém toku o 5%-30% nižším.
   Konkrétní výsledky závisí jak na zdrojovém videu, tak na enkodéru.
-  Prospěch z použití H.264 není zadarmo: zdá se, že dekódování H.264 datových
+  Prospěch z použití H.264 není zadarmo: Zdá se, že dekódování H.264 datových
   proudů má přemrštěné nároky na CPU a paměť.
   Například na 1733 MHz Athlonu využije dekódování 1500kbps H.264 videa
   kolem 50% CPU.
-  Pro porovnání, dekódování 1500kbps MPEG4-ASP proudu vyžaduje okolo
+  Pro porovnání, dekódování 1500kbps MPEG-4 ASP proudu vyžaduje okolo
   10% CPU.
   To znamená, že dekódování datových proudů je pro většinu uživatelů téměř
   nemožné.
@@ -608,7 +608,7 @@ platformy.</para></note>
 </para>
 <para>
   Alespoň s <systemitem class="library">x264</systemitem>,
-  nejsou požadavky ne enkódování o mnoho větší než ty, které vyžaduje MPEG4-ASP.
+  nejsou požadavky ne enkódování o mnoho větší než ty, které vyžaduje MPEG-4 ASP.
   Například na 1733 MHz Athlonu poběží typické DVD enkódování při 5-15 snímků
   za sekundu.
 </para>
