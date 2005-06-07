@@ -273,14 +273,14 @@ static int win2k_open ( dvdcss_t dvdcss, char const *psz_device )
      * won't send back the right result).
      * (See Microsoft Q241374: Read and Write Access Required for SCSI
      * Pass Through Requests) */
-    (HANDLE) dvdcss->i_fd =
+    dvdcss->i_fd = (int)
                 CreateFile( psz_dvd, GENERIC_READ | GENERIC_WRITE,
                             FILE_SHARE_READ | FILE_SHARE_WRITE,
                             NULL, OPEN_EXISTING,
                             FILE_FLAG_RANDOM_ACCESS, NULL );
 
     if( (HANDLE) dvdcss->i_fd == INVALID_HANDLE_VALUE )
-        (HANDLE) dvdcss->i_fd =
+        dvdcss->i_fd = (int)
                     CreateFile( psz_dvd, GENERIC_READ, FILE_SHARE_READ,
                                 NULL, OPEN_EXISTING,
                                 FILE_FLAG_RANDOM_ACCESS, NULL );
@@ -302,8 +302,8 @@ static int aspi_open( dvdcss_t dvdcss, char const * psz_device )
     DWORD dwSupportInfo;
     struct w32_aspidev *fd;
     int i, j, i_hostadapters;
-    long (*lpGetSupport)( void );
-    long (*lpSendCommand)( void* );
+    GETASPI32SUPPORTINFO lpGetSupport;
+    SENDASPI32COMMAND lpSendCommand;
     char c_drive = psz_device[0];
 
     /* load aspi and init w32_aspidev structure */
@@ -314,8 +314,8 @@ static int aspi_open( dvdcss_t dvdcss, char const * psz_device )
         return -1;
     }
 
-    (FARPROC) lpGetSupport = GetProcAddress( hASPI, "GetASPI32SupportInfo" );
-    (FARPROC) lpSendCommand = GetProcAddress( hASPI, "SendASPI32Command" );
+    lpGetSupport = (GETASPI32SUPPORTINFO) GetProcAddress( hASPI, "GetASPI32SupportInfo" );
+    lpSendCommand = (SENDASPI32COMMAND) GetProcAddress( hASPI, "SendASPI32Command" );
 
     if(lpGetSupport == NULL || lpSendCommand == NULL )
     {

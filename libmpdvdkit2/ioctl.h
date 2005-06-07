@@ -318,6 +318,9 @@ typedef struct _SCSI_PASS_THROUGH_DIRECT
  * win32 aspi specific
  *****************************************************************************/
 
+typedef WINAPI DWORD (*GETASPI32SUPPORTINFO)(VOID);
+typedef WINAPI DWORD (*SENDASPI32COMMAND)(LPVOID);
+
 #define WIN2K               ( GetVersion() < 0x80000000 )
 #define ASPI_HAID           0
 #define ASPI_TARGET         0
@@ -339,7 +342,7 @@ struct w32_aspidev
     long  hASPI;
     short i_sid;
     int   i_blocks;
-    long  (*lpSendCommand)( void* );
+    SENDASPI32COMMAND lpSendCommand;
 };
 
 #pragma pack(1)
