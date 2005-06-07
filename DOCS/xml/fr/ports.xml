@@ -300,15 +300,15 @@ X qui est TRÈS lente. Utilisez SDL.
   et SDL est connu pour distordre le son et l'image et planter sur certains systèmes. 
   Si l'image est distordue, essayez de désactiver l'accélération matérielle avec
   <option>-vo directx:noaccel</option>. Téléchargez les
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/dx7headers.tgz">fichiers d'entête DirectX 7</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">fichiers d'entête DirectX 7</ulink>
   pour compiler le pilote de sortie vidéo DirectX. De plus vous devez
   avoir DirectX 7 ou supérieur pour que ce pilote fonctionne.</para>
 
 <para><link linkend="vidix">VIDIX</link> fonctionne maintenant sous Windows
   avec <option>-vo winvidix</option>, bien que ce soit toujours expérimental
   et que cela requiert une configuration manuelle. Téléchargez
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> ou
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (avec support des MTRR)</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> ou
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (avec support des MTRR)</ulink>
   et copiez le dans le répertoire 
   <filename class="directory">libdha/dhahelperwin</filename> de votre arborescence
   <application>MPlayer</application>.

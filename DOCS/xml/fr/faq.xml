@@ -241,29 +241,6 @@ C'est prêt !
 
 <qandaentry>
 <question><para>
-Cela ne compile pas, il manque un <systemitem>uint64_t</systemitem>, 
-<filename>inttypes.h</filename> ou des choses similaires...
-</para></question>
-<answer><para>
-Copiez <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">ce <filename>inttypes.h</filename></ulink>
-dans <filename class="directory">/usr/local/include/</filename> ou dans un endroit
-équivalent et essayez de nouveau...
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-J'ai un Linux tournant sur un Pentium III mais <filename>./configure</filename>
-ne détecte pas SSE...
-</para></question>
-<answer><para>
-Seuls les noyaux de version 2.4.x supportent SSE (ou essayez le 2.2.19 ou supérieur,
-mais préparez-vous à des problèmes).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 J'ai une Matrox G200/G400/G450/G550, comment puis-je compiler/utiliser le pilote mga_vid ?
 </para></question>
 <answer><para>
