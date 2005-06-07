@@ -347,7 +347,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 
 <para>Versiones de <application>Cygwin</application> anteriores a la
   1.5.0 no incluyen <filename>inttypes.h</filename>. Ponga esto
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h">inttypes.h</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/inttypes.h">inttypes.h</ulink>
   en <filename class="directory">/usr/include/</filename> para hacer que
   <application>MPlayer</application> compile.</para>
 
@@ -386,7 +386,7 @@ solo tiene <emphasis>emulación</emphasis> de X que es MUY lenta. Use SDL.
 
 <para>Si usa una versión de MinGW anterior a la 3.1.0, necesita reemplazar
   <filename>/mingw/include/sys/types.h</filename> con esta
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/types.h">
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/types.h">
   <filename>types.h</filename></ulink>.</para>
 
 <para>Extraiga los archivos de cabecera de DirectX a 

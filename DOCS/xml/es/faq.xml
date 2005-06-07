@@ -244,29 +244,6 @@ Ahora escriba <command>make</command>. ¡Ya lo tiene!
 
 <qandaentry>
 <question><para>
-No se compila, y se salta <systemitem>uint64_t</systemitem>,
-<filename>inttypes.h</filename> y cosas parecidas...
-</para></question>
-<answer><para>
-Copia <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/inttypes.h"> este <filename>inttypes.h</filename></ulink>
-a <filename class="directory">/usr/local/include/</filename> o un lugar
-equivalente e inténtelo de nuevo...
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Tengo Linux corriendo en un Pentium III pero <filename>./configure</filename>
-no detecta SSE ...
-</para></question>
-<answer><para>
-Solo versiones del kernel 2.4.x soportan SSE (o pruebe 2.2.19 o posterior, pero
-prepárese para problemas).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Tengo una Matrox G200/G400/G450/G550, ¿cómo puedo compilar/usar el controlador mga_vid?
 </para></question>
 <answer><para>
