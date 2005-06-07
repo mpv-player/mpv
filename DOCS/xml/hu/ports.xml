@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.64 -->
+<!-- synced with 1.65 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -443,14 +443,14 @@ Használj SDL-t.
   torzítja a hangot és a képet vagy összeomlik néhány rendszeren. Ha torz a kép,
   próbáld meg kikapcsolni a hardveres gyorsítást a
   <option>-vo directx:noaccel</option> kapcsolóval. Töltsd le a
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/dx7headers.tgz">DirectX 7 fejléc fájlokat</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">DirectX 7 fejléc fájlokat</ulink>
   a DirectX videó kimeneti vezérlő beforgatásához.</para>
 
 <para>A <link linkend="vidix">VIDIX</link> is működik már Windows alatt
   a <option>-vo winvidix</option> kapcsolóval, bár még kisérleti fázisban
   van és egy kis kézi állítgatás kell hozzá. Töltsd le a
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink>
-  vagy <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (MTRR támogatással)</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink>
+  vagy <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (MTRR támogatással)</ulink>
   fájlt és másold be a <filename class="directory">libdha/dhahelperwin</filename> könyvtárba
   az <application>MPlayer</application> forrás fádban. Nyisd meg a konzolt és
   válts át erre a könyvtárra, majd írd be
@@ -554,7 +554,7 @@ Használj SDL-t.
   
 <para>Az <application>MPlayer</application> és a szükséges függvénykönyvtárak
   elkészítésének módját elolvashatod az
-  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32-beta/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.</para>
+  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOGYAN</ulink>-ban.</para>
 
 </sect2>
 
