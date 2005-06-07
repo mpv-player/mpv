@@ -5730,6 +5730,7 @@ nuv, vfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
+.
 DivX4 is obsolete and only supported for completeness.
 For details about DivX4 options, read the source, most options are not
 described here.
@@ -6015,6 +6016,7 @@ remux the audio stream later on.
 .
 .
 .SS lavc (\-lavcopts)
+.
 Many libavcodec (lavc for short) options are tersely documented.
 Read the source for full details.
 .PP
@@ -7175,8 +7177,8 @@ A more positive bias (-32 \- -16 instead of -64) seems to improve the PSNR.
 .TP
 .B nr=<0\-100000>
 Noise reduction, 0 means disabled.
-0\-600 is a useful range on typical content, but you may want to turn it
-up a bit more on very noisy content (default: 0).
+0\-600 is a useful range for typical content, but you may want to turn it
+up a bit more for very noisy content (default: 0).
 Given its small impact on speed, you might want to prefer to use this over
 filtering noise away with video filters like denoise3d or hqdn3d.
 .
