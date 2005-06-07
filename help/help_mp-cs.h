@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
-//                 Jiri Heryan,  technik at domotech.cz
-// Synced to 1.167
+//                 Jiri Heryan
+// Synced to 1.169
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -165,6 +165,7 @@ static char help_text[]=
 #define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
 #define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
 #define MSGTR_AnsPercentPos "ANS_PERCENT_POSITION=%ld\n"
+#define MSGTR_AnsTimePos "ANS_TIME_POSITION=%.1f\n"
 #define MSGTR_DvdnavNullEvent "Nedefinovaná DVDNAV událost?!\n"
 #define MSGTR_DvdnavHighlightEventBroken "DVDNAV událost: Vadné zvýrazòování událostí\n"
 #define MSGTR_DvdnavEvent "DVDNAV událost: %s\n"
@@ -632,6 +633,7 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING2 "[témata] varování v konfiguraèním souboru témat na øádce %d:\nwidget nalezen ale pøed ním nebyla nalezena ¾ádná \"subsection\" (%s)"
 #define MSGTR_SKIN_WARNING3 "[témata] varování v konfiguraèním souboru témat na øádce %d:\nwidget (%s) nepodporuje tuto subsekci"
 #define MSGTR_SKIN_SkinFileNotFound "[skin] soubor ( %s ) nenalezen.\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[skin] soubor ( %s ) nelze pøeèíst.\n"
 #define MSGTR_SKIN_BITMAP_16bit  "bitmapa s hloubkou 16 bitù a ménì není podporována (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "soubor nenalezen (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "chyba ètení BMP (%s)\n"
