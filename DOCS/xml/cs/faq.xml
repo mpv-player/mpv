@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.74  -->
+<!-- Synced with: 1.76  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -1327,6 +1327,22 @@ Jak mohu enkódovat?
 <answer><para>
 Přečtěte si sekci
 <link linkend="mencoder"><application>MEncoder</application></link>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak mohu "nahrát" celý DVD titul do souboru?
+</para></question>
+<answer><para>
+Jakmile jste vybrali svůj titul a ujistili se, že jej lze dobře přehrát
+<application>MPlayer</application>em, použijte volbu <option>-dumpstream</option>.
+Například:
+<screen>
+mplayer -dumpstream dvd://5 -dumpfile <replaceable>dvd_dump.vob</replaceable>
+</screen>
+nahraje 5. titul z DVD do souboru
+<replaceable>dvd_dump.vob</replaceable>
 </para></answer>
 </qandaentry>
 
