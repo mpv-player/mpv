@@ -437,7 +437,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
   distort sound and video or crash on some systems. If the image is
   distorted, try turning off hardware acceleration with
   <option>-vo directx:noaccel</option>. Download
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/contrib/dx7headers.tgz">DirectX 7 header files</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/contrib/dx7headers.tgz">DirectX 7 header files</ulink>
   to compile the DirectX video output driver. Furthermore you need to have
   DirectX 7 or later installed for the DirectX video output driver to work.
   </para>
@@ -445,8 +445,8 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 <para><link linkend="vidix">VIDIX</link> now works under Windows as
   <option>-vo winvidix</option>, although it is still experimental
   and needs a bit of manual setup. Download
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> or
-  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32-beta/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (with MTRR support)</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/dhahelper.sys">dhahelper.sys</ulink> or
+  <ulink url="http://www.mplayerhq.hu/MPlayer/releases/win32/dhahelperwin/withmtrr/dhahelper.sys">dhahelper.sys (with MTRR support)</ulink>
   and copy it to the
   <filename class="directory">libdha/dhahelperwin</filename> directory in your
   <application>MPlayer</application> source tree.
@@ -545,7 +545,7 @@ since QNX has only X <emphasis>emulation</emphasis> which is VERY slow. Use SDL.
 
 <para>Complete instructions for building <application>MPlayer</application>
   and necessary libraries can be found in the
-  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32-beta/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
+  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
 
 </sect2>
 
