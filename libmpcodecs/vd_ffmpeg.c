@@ -453,9 +453,9 @@ static void draw_slice(struct AVCodecContext *s,
 #endif
     if (y < sh->disp_h) {
 #if LIBAVCODEC_BUILD >= 4670
-        mpcodecs_draw_slice (sh, source, src->linesize, sh->disp_w, (y+16)<=sh->disp_h?height:sh->disp_h-y, 0, y);
+        mpcodecs_draw_slice (sh, source, src->linesize, sh->disp_w, (y+height)<=sh->disp_h?height:sh->disp_h-y, 0, y);
 #else
-        mpcodecs_draw_slice (sh,src, stride, sh->disp_w, (y+16)<=sh->disp_h?height:sh->disp_h-y, 0, y);
+        mpcodecs_draw_slice (sh,src, stride, sh->disp_w, (y+height)<=sh->disp_h?height:sh->disp_h-y, 0, y);
 #endif
     }
 }
