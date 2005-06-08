@@ -189,7 +189,7 @@ Option descriptions:
 
 Macro definitions (see beginning of man page):
 
-    - SS      Starting value of the suboption column
+    - .SS      Starting value of the suboption column
     - .IPs    Add new suboption (we use .TP for normal options and .IP for
               the rest)
     - .RSs    Begin of suboptions, end with .RE
