@@ -5486,6 +5486,17 @@ simplify finding the right x,y,w,h parameters.
 .PD 1
 .
 .TP
+.B remove-logo=/path/to/logo_bitmap_file_name.pgm
+Suppresses a TV station logo using a PGM or PPM file to tell it
+which pixels comprise the logo. The width and height must match
+those of the video stream being processed. Uses the filter
+image and a circular blur algorithm to remove the logo.
+.RSs
+.IPs /path/to/logo_bitmap_file_name.pgm
+[path] + file name of the filter image.
+.RE
+.
+.TP
 .B zrmjpeg[=options]
 Software YV12 to MJPEG encoder for use with the zr2 video
 output device.
