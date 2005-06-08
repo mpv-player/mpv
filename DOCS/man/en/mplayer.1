@@ -7409,8 +7409,8 @@ As of XviD-1.0.x, this option is replaced by the
 [min|max]_[i|p|b]quant options.
 .
 .TP
-.B min_key_interval=<value>
-minimum interval between keyframes (default: 0, two pass only)
+.B min_key_interval=<value> (two pass only)
+minimum interval between keyframes (default: 0)
 .
 .TP
 .B max_key_interval=<value>
@@ -7439,14 +7439,20 @@ by any MPEG-4 decoder besides libavcodec or XviD.
 As of XviD-1.0.x, this option is no longer available.
 .
 .TP
-.B keyframe_boost=<0\-1000>
+.B keyframe_boost=<0\-1000> (two pass mode only)
 Shift some bits from the pool for other frame types to intra frames,
 thus improving keyframe quality.
-(default: 0, two pass mode only)
+This amount is an extra percentage, so a value of 10 will give
+your keyframes 10% more bits than normal
+(default: 0).
 .
 .TP
-.B kfthreshold=<value>
-(default: 10, two pass mode only)
+.B kfthreshold=<value> (two pass mode only)
+Works together with kfreduction.
+Determines the minimum distance below which you consider that
+two frames are considered consecutive and treated differently
+according to kfreduction.
+(default: 10).
 .
 .TP
 .B kfreduction=<0\-100>
