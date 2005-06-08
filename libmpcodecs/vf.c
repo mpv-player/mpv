@@ -85,6 +85,7 @@ extern vf_info_t vf_info_filmdint;
 extern vf_info_t vf_info_framestep;
 extern vf_info_t vf_info_tile;
 extern vf_info_t vf_info_delogo;
+extern vf_info_t vf_info_remove_logo;
 extern vf_info_t vf_info_hue;
 extern vf_info_t vf_info_spp;
 extern vf_info_t vf_info_fspp;
@@ -166,6 +167,7 @@ static vf_info_t* filter_list[]={
     &vf_info_framestep,
     &vf_info_tile,
     &vf_info_delogo,
+    &vf_info_remove_logo,
     &vf_info_hue,
 #ifdef USE_LIBAVCODEC
     &vf_info_spp,
