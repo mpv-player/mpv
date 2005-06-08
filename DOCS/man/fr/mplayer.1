@@ -1,4 +1,4 @@
-.\" synced with 1.999
+.\" synced with 1.1002
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -5352,23 +5352,41 @@ désentrelacé avec une méthode qui garde un champ et interpole l'autre,
 la vidéo se retrouve saccadée dont une trame sur quatre est dupliquée.
 Ce filtre a pour but de trouver et jeter ces trames dupliquées pour
 retrouver le débit de trame (framerate) original.
-Lorsque vous utilisez ce filtre, vous devez définir \-ofps à 4/\:5 du débit
-de trame du fichier d'entrée (24000/1001 si l'entrée est à 30000/1001 fps).
+Lorsque vous utilisez ce filtre, vous devez définir \-ofps
+à 4/\:5 du débit de trame du fichier d'entrée et ajouter
+softskip après dans la chaîne de filtrage pour être sûr
+que divtc voit bien toutes les trames.
+Deux modes sont possibles\ :
+Le mode une passe, qui est celui par défaut et dont
+l'usage est évident, mais a le désavantage que tout
+changement dans la phase télécinée (trame manquante
+ou mauvais générique de fin) cause des erreurs
+temporaires d'affichage jusqu'à ce que le filtre se
+re-synchronise.
+Le mode deux passes permet d'éviter ça en analysant
+tout d'abord toute la vidéo pour connaître les
+changements de phase et ainsi toujours conserver la
+synchronisation.
+Ces passes ne correspondent
+.B pas
+aux deux passes du processus d'encodage.
+Vous devez lancer une passe préliminaire suplémentaire
+pour faire la première passe divtc avant de commencer
+à encoder, en jettant la vidéo résultante .
+Utilisez les options \-nosound \-ovc raw \-o /dev/null
+pour ne pas gâcher inutilement du temps processeur pour
+cette passe.
+Vous pouvez aussi ajouter quelquechose comme
+crop=2:2:0:0 après divtc pour accélérer encore le
+processus.
+Utilisez ensuite la passe deux divtc pour l'encodage
+proprement dit.
+Si vous faites plusieurs passes d'encodage, utilisez la
+la passe deux divtc pour chacune d'entre elles.
 Les options sont\ :
 .RSs
 .IPs pass=1|2
-Mode 2-passes.
-Cela produit de meilleurs résultats.
-La passe 1 analyse la vidéo et écrit les résultats dans un fichier journal.
-La 2ème passe lit alors le journal et utilise ces informations pour faire
-le travail.
-Notez que ces deux passes ne correspondent
-.B pas
-aux deux passes du processus d'encodage.
-Si vous voulez utiliser le mode 2-passes de divtc lors d'un encodage vidéo,
-il vous faut réaliser 3 passes\ : d'abord la passe 1 de divtc et la passe 1
-de l'encodeur, puis la passe 2 de divtc et la passe 1 de l'encodeur, et enfin
-la passe 2 de divtc avec la passe 2 de l'encodeur.
+Utilise le mode deux passes.
 .IPs file=<nom_fichier>
 Définit le nom du fichier journal (par défaut\ : "framediff.log").
 .IPs threshold=<valeur>
@@ -5757,6 +5775,20 @@ Quand il est égal à -1, un rectangle vert est dessiné sur l'écran pour
 simplifier la recherche des paramètres x,y,l,h.
 .RE
 .PD 1
+.
+.TP
+.B remove-logo=/chemin/vers/nom_fichier_bitmap_du_logo.pgm
+Supprime un logo de station TV, en utilisant un fichier
+d'image PGM ou PPM pour déterminer quels sont les pixels
+se compose le logo.
+La largeur et la longueur de l'image doit correspondre à
+celles du flux vidéo traité.
+Le logo sera éliminé grâce au filtre défini par le fichier
+image donné, et par un algorithme de flou circulaire.
+.RSs
+.IPs /chemin/vers/nom_fichier_bitmap_du_logo.pgm
+[chemin] + nom de l'image définissant le filtre.
+.RE
 .
 .TP
 .B zrmjpeg[=options]
