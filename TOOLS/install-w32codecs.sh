@@ -23,7 +23,7 @@ INSTALL () {
     if [ -r $filename.list ] ; then
       #if we stop the script, we don't want to redownload things
       #fixme we should check timestamps
-      echo you have already downloaded and installed $filename
+      echo You have already downloaded and installed $filename.
     else
      wget $url || return 1
      case "$filename" in 
@@ -48,7 +48,7 @@ INSTALL () {
 
 
 if [ `whoami` != root ]; then
-    echo "You must be a root to start this script. Login As root first!"
+    echo "You must be root to start this script. Login as root first!"
     exit 1
 else
 
@@ -73,8 +73,8 @@ case "$1" in
            | awk '{print $2}' > $pref
      mainurl=`cat $pref `
     else
-     echo "(If you install 'netselect', it will select the best mirror for you"
-     echo "  you may wish to stop this script and rerun after installation)"
+     echo "(If you install 'netselect', it will select the best mirror for you."
+     echo "  You may wish to stop this script and rerun after installation.)"
      sleep 2
     fi
    fi
@@ -119,7 +119,7 @@ case "$1" in
 	if [ -r /usr/bin/symlinks ] ; then
          symlinks -d .
 	else
-	 echo "please install the package 'symlinks' and run 'symlinks -d $codecsdir' "
+	 echo "Please install the package 'symlinks' and run 'symlinks -d $codecsdir'."
 	fi
 	echo "Uninstalled Succesfully!"
 	
