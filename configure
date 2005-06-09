@@ -5291,7 +5291,7 @@ if test "$_twolame" = yes ; then
   _def_twolame='#define HAVE_TWOLAME 1'
   _codecmodules="$_codecmodules twolame"
 else
-  _def_toolame='#undef HAVE_TWOLAME'
+  _def_twolame='#undef HAVE_TWOLAME'
   _twolame_lib=""
   _nocodecmodules="twolame $_nocodecmodules"
 fi
