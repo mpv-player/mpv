@@ -76,6 +76,14 @@ sub_step <value>
     Step forward in the subtitle list by <value> steps or backwards if <value>
     is negative.
 
+sub_load <subtitle_file>
+    Loads subtitles from <subtitle_file>.
+
+sub_remove [<value>]
+    If the <value> argument is present and non-negative, removes the subtitle
+    file with index <value>. If the argument is omitted or negative, removes
+    all subtitle files.
+
 osd [<level>]
     Toggle OSD mode or set it to level when <level> >= 0.
 

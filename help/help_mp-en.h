@@ -152,6 +152,7 @@ static char help_text[]=
 "  won't help unless you provide this information when reporting a possible bug.\n"
 #define MSGTR_LoadingConfig "Loading config '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: added subtitle file (%d): %s\n"
+#define MSGTR_RemovedSubtitleFile "SUB: removed subtitle file (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Error opening file [%s] for writing!\n"
 #define MSGTR_CommandLine "CommandLine:"
 #define MSGTR_RTCDeviceNotOpenable "Failed to open %s: %s (it should be readable by the user.)\n"

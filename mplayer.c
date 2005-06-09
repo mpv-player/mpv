@@ -3378,6 +3378,70 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       }
 #endif
     } break;
+    case MP_CMD_SUB_LOAD:
+    {
+#ifdef USE_SUB
+      if (sh_video) {
+        int n = set_of_sub_size;
+        add_subtitles(cmd->args[0].v.s, sh_video->fps, 0);
+        if (n != set_of_sub_size) {
+          if (global_sub_indices[SUB_SOURCE_SUBS] < 0)
+            global_sub_indices[SUB_SOURCE_SUBS] = global_sub_size;
+          ++global_sub_size;
+        }
+      }
+#endif
+    } break;
+    case MP_CMD_SUB_REMOVE:
+    {
+#ifdef USE_SUB
+      if (sh_video) {
+        int v = cmd->args[0].v.i;
+        sub_data *subd;
+        if (v < 0) {
+          for (v = 0; v < set_of_sub_size; ++v) {
+            subd = set_of_subtitles[v];
+            mp_msg(MSGT_CPLAYER, MSGL_STATUS, MSGTR_RemovedSubtitleFile, v + 1, subd->filename);
+            sub_free(subd);
+            set_of_subtitles[v] = NULL;
+          }
+          global_sub_indices[SUB_SOURCE_SUBS] = -1;
+          global_sub_size -= set_of_sub_size;
+          set_of_sub_size = 0;
+          if (set_of_sub_pos >= 0) {
+            global_sub_pos = -2;
+            vo_sub_last = vo_sub = NULL;
+            vo_osd_changed(OSDTYPE_SUBTITLE);
+            vo_update_osd(sh_video->disp_w, sh_video->disp_h);
+            mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
+          }
+        }
+        else if (v < set_of_sub_size) {
+          subd = set_of_subtitles[v];
+          mp_msg(MSGT_CPLAYER, MSGL_STATUS, MSGTR_RemovedSubtitleFile, v + 1, subd->filename);
+          sub_free(subd);
+          if (set_of_sub_pos == v) {
+            global_sub_pos = -2;
+            vo_sub_last = vo_sub = NULL;
+            vo_osd_changed(OSDTYPE_SUBTITLE);
+            vo_update_osd(sh_video->disp_w, sh_video->disp_h);
+            mp_input_queue_cmd(mp_input_parse_cmd("sub_select"));
+          }
+          else if (set_of_sub_pos > v) {
+            --set_of_sub_pos;
+            --global_sub_pos;
+          }
+          while (++v < set_of_sub_size)
+            set_of_subtitles[v - 1] = set_of_subtitles[v];
+          --set_of_sub_size;
+          --global_sub_size;
+          if (set_of_sub_size <= 0)
+            global_sub_indices[SUB_SOURCE_SUBS] = -1;
+          set_of_subtitles[set_of_sub_size] = NULL;
+        }
+      }
+#endif
+    } break;
     case MP_CMD_GET_SUB_VISIBILITY:
 	{
 #ifdef USE_SUB

@@ -65,6 +65,8 @@
 #define MP_CMD_SUB_LOG 61
 #define MP_CMD_SWITCH_AUDIO 62
 #define MP_CMD_GET_TIME_POS 63
+#define MP_CMD_SUB_LOAD 64
+#define MP_CMD_SUB_REMOVE 65
 
 #define MP_CMD_GUI_EVENTS       5000
 #define MP_CMD_GUI_LOADFILE     5001

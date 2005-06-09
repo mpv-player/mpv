@@ -77,6 +77,8 @@ static mp_cmd_t mp_cmds[] = {
   { MP_CMD_SUB_POS, "sub_pos", 1, { {MP_CMD_ARG_INT,{0}}, {MP_CMD_ARG_INT,{0}}, {-1,{0}} } },
   { MP_CMD_SUB_ALIGNMENT, "sub_alignment",0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_SUB_VISIBILITY, "sub_visibility", 0, { {-1,{0}} } },
+  { MP_CMD_SUB_LOAD, "sub_load", 1, { {MP_CMD_ARG_STRING,{0}}, {-1,{0}} } },
+  { MP_CMD_SUB_REMOVE, "sub_remove", 0, { {MP_CMD_ARG_INT,{-1}}, {-1,{0}} } },
   { MP_CMD_SUB_SELECT, "vobsub_lang", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } }, // for compatibility
   { MP_CMD_SUB_SELECT, "sub_select", 0, { { MP_CMD_ARG_INT,{-2} }, {-1,{0}} } },
   { MP_CMD_SUB_LOG, "sub_log", 0, { {-1,{0}} } },
