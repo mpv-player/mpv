@@ -2938,7 +2938,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
 
   if (use_this_block)
     {
-      mkv_d->last_pts = ds->pts = current_pts;
+      mkv_d->last_pts = current_pts;
       mkv_d->last_filepos = demuxer->filepos;
 
       for (i=0; i < laces; i++)
