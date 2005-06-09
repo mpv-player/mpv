@@ -807,9 +807,9 @@ case "$host_arch" in
 	fi
 	;;
     15) iproc=686
-    	# athlon64 cpu-type only supported in gcc >= 3.4.0, but that will be
-    	# caught and remedied in the optimation tests below.
-    	proc=athlon64
+    	# k8 cpu-type only supported in gcc >= 3.4.0, but that will be
+    	# caught and remedied in the optimization tests below.
+    	proc=k8
     	;;
 
     *) proc=athlon-xp iproc=686 ;;
@@ -964,16 +964,15 @@ EOF
     _target_arch='TARGET_ARCH_X86_64 = yes'
     iproc='x86_64'
 
-    # athlon64 cpu-type only supported in gcc >= 3.4.0
-    # also, gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
+    # gcc >= 3.4.0  doesn't support -mcpu, we have to use -mtune instead
     if test "$cc_vendor" = "gnu" && test "$_cc_major" -gt 3 -o "$_cc_major" -eq 3 -a "$_cc_minor" -ge 4 ; then
-    	proc=athlon64
 	cpuopt=-mtune
     else
-    	proc=athlon-xp
 	cpuopt=-mcpu
     fi
-
+    # k8 cpu-type only supported in gcc >= 3.4.0, but that will be
+    # caught and remedied in the optimization tests below.
+    proc=k8
 
     echocheck "GCC & CPU optimization abilities"
 cat > $TMPC << EOF
