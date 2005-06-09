@@ -10,9 +10,8 @@
 	MPlayer Mac OSX Quartz video out module.
 	
 	todo:	-screen overlay output
-			-clear window background after live resize
 			-fit osd in black bar when available
-			-RGB32 lost HW accel in fullscreen
+			-fix RGB32
 			-(add sugestion here)
  */
 
@@ -117,7 +116,6 @@ static MenuRef windMenu;
 static MenuRef movMenu;
 static MenuRef aspectMenu;
 
-static int border = 15;
 enum
 {
 	kQuitCmd			= 1,
@@ -133,11 +131,14 @@ enum
 };
 
 #include "osdep/keycodes.h"
-extern void mplayer_put_key(int code);
 
+extern void mplayer_put_key(int code);
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
 
 //PROTOTYPE/////////////////////////////////////////////////////////////////
+static OSStatus KeyEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
+static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
+static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
 void window_resized();
 void window_ontop();
 void window_fullscreen();
@@ -197,9 +198,6 @@ static inline int convert_key(UInt32 key, UInt32 charcode)
     }
 }
 
-static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
-static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData);
-
 static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigned char *srca, int stride)
 {
 	switch (image_format)
@@ -221,8 +219,8 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 	}
 }
 
-//default window event handler
-static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
+//default keyboard event handler
+static OSStatus KeyEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus result = noErr;
 	UInt32 class = GetEventClass (event);
@@ -260,25 +258,65 @@ static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef
 		else
 			result = eventNotHandledErr;
 	}
-	else if(class == kEventClassMouse)
+	
+    return result;
+}
+
+//default mouse event handler
+static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
+{
+    OSStatus result = noErr;
+	UInt32 class = GetEventClass (event);
+	UInt32 kind = GetEventKind (event); 
+
+	result = CallNextEventHandler(nextHandler, event);
+	
+	if(class == kEventClassMouse)
 	{
 		WindowPtr tmpWin;
 		Point mousePos;
+		Point winMousePos;
 
 		GetEventParameter(event, kEventParamMouseLocation, typeQDPoint, 0, sizeof(Point), 0, &mousePos);
+		GetEventParameter(event, kEventParamWindowMouseLocation, typeQDPoint, 0, sizeof(Point), 0, &winMousePos);
 
 		switch (kind)
 		{
+			case kEventMouseWheelMoved:
+			{
+				int wheel;
+				short part;
+				
+				GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(int), 0, &wheel);
+
+				part = FindWindow(mousePos,&tmpWin);
+				
+				if(part == inContent)
+				{
+					if(wheel > 0)
+						mplayer_put_key(MOUSE_BTN3);
+					else
+						mplayer_put_key(MOUSE_BTN4);
+				}
+			}
+			break;
+			
 			case kEventMouseDown:
 			{
 				EventMouseButton button;
 				short part;
-
+				Rect bounds;
+				
+				GetWindowPortBounds(theWindow, &bounds);
 				GetEventParameter(event, kEventParamMouseButton, typeMouseButton, 0, sizeof(EventMouseButton), 0, &button);
 				
 				part = FindWindow(mousePos,&tmpWin);
 				
-				if(part == inMenuBar)
+				if( (winMousePos.h > (bounds.right - 15)) && (winMousePos.v > (bounds.bottom)) )
+				{
+					GrowWindow(theWindow, mousePos, NULL);
+				}
+				else if(part == inMenuBar)
 				{
 					MenuSelect(mousePos);
 					HiliteMenu(0);
@@ -297,34 +335,21 @@ static OSStatus MainWindowEventHandler(EventHandlerCallRef nextHandler, EventRef
 			}		
 			break;
 			
-			case kEventMouseWheelMoved:
-			{
-				int wheel;
-				short part;
-
-				GetEventParameter(event, kEventParamMouseWheelDelta, typeSInt32, 0, sizeof(int), 0, &wheel);
-
-				part = FindWindow(mousePos,&tmpWin);
-				
-				if(part == inContent)
-				{
-					if(wheel > 0)
-						mplayer_put_key(MOUSE_BTN3);
-					else
-						mplayer_put_key(MOUSE_BTN4);
-				}
-			}
+			case kEventMouseUp:
 			break;
 			
+			case kEventMouseDragged:
+			break;
+				
 			default:result = eventNotHandledErr;break;
 		}
 	}
-	
+
     return result;
 }
 
-//default window command handler
-static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
+//default window event handler
+static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef event, void *userData)
 {
     OSStatus result = noErr;
 	uint32_t d_width;
@@ -353,7 +378,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
 						
-					SizeWindow(theWindow, (d_width/2), ((d_width/movie_aspect)/2)+border, 1);
+					SizeWindow(theWindow, (d_width/2), ((d_width/movie_aspect)/2), 1);
 					window_resized();
 				break;
 
@@ -363,7 +388,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
 						
-					SizeWindow(theWindow, d_width, (d_width/movie_aspect)+border, 1);
+					SizeWindow(theWindow, d_width, (d_width/movie_aspect), 1);
 					window_resized();
 				break;
 
@@ -373,7 +398,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 						vo_fs = (!(vo_fs)); window_fullscreen();
 					}
 						
-					SizeWindow(theWindow, (d_width*2), ((d_width/movie_aspect)*2)+border, 1);
+					SizeWindow(theWindow, (d_width*2), ((d_width/movie_aspect)*2), 1);
 					window_resized();
 				break;
 
@@ -388,19 +413,19 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 				
 			case kAspectOrgCmd:
 				movie_aspect = old_movie_aspect;
-				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect)+border,1);
+				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
 				window_resized();
 				break;
 				
 			case kAspectFullCmd:
 				movie_aspect = 4.0f/3.0f;
-				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect)+border,1);
+				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
 				window_resized();
 				break;
 				
 			case kAspectWideCmd:
 				movie_aspect = 16.0f/9.0f;
-				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect)+border,1);
+				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
 				window_resized();
 				break;
 				
@@ -434,6 +459,7 @@ static OSStatus MainWindowCommandHandler(EventHandlerCallRef nextHandler, EventR
 				break;
 				
 			//resize window
+			case kEventWindowZoomed:
 			case kEventWindowBoundsChanged:
 				window_resized();
 				flip_page();
@@ -523,22 +549,27 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	CFRelease(windowTitle);
   
 	//Install event handler
-    const EventTypeSpec commands[] = {
+    const EventTypeSpec win_events[] = {
         { kEventClassWindow, kEventWindowClosed },
 		{ kEventClassWindow, kEventWindowBoundsChanged },
         { kEventClassCommand, kEventCommandProcess }
     };
 
-    const EventTypeSpec events[] = {
+    const EventTypeSpec key_events[] = {
 		{ kEventClassKeyboard, kEventRawKeyDown },
-		{ kEventClassKeyboard, kEventRawKeyRepeat },
-		{ kEventClassMouse, kEventMouseDown },
-		{ kEventClassMouse, kEventMouseWheelMoved }
+		{ kEventClassKeyboard, kEventRawKeyRepeat }
     };
 
-    
-	InstallApplicationEventHandler (NewEventHandlerUPP (MainWindowEventHandler), GetEventTypeCount(events), events, NULL, NULL);	
-	InstallWindowEventHandler (theWindow, NewEventHandlerUPP (MainWindowCommandHandler), GetEventTypeCount(commands), commands, theWindow, NULL);
+	const EventTypeSpec mouse_events[] = {
+		{ kEventClassMouse, kEventMouseWheelMoved },
+		{ kEventClassMouse, kEventMouseDown },
+		{ kEventClassMouse, kEventMouseUp },
+		{ kEventClassMouse, kEventMouseDragged }
+	};
+	
+	InstallApplicationEventHandler (NewEventHandlerUPP (KeyEventHandler), GetEventTypeCount(key_events), key_events, NULL, NULL);
+	InstallApplicationEventHandler (NewEventHandlerUPP (MouseEventHandler), GetEventTypeCount(mouse_events), mouse_events, NULL, NULL);
+	InstallWindowEventHandler (theWindow, NewEventHandlerUPP (WindowEventHandler), GetEventTypeCount(win_events), win_events, theWindow, NULL);
 }
 
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
@@ -546,6 +577,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	WindowAttributes	windowAttrs;
 	OSErr				qterr;
 	int i;
+	CGRect tmpBounds;
 
 	//Get Main device info///////////////////////////////////////////////////
 
@@ -609,18 +641,22 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	//Create player window//////////////////////////////////////////////////
 	windowAttrs =   kWindowStandardDocumentAttributes
 					| kWindowStandardHandlerAttribute
-					| kWindowCompositingAttribute
 					| kWindowLiveResizeAttribute;
+					
+	windowAttrs &= (~kWindowResizableAttribute);
 					
  	if (theWindow == NULL)
 	{
-		quartz_CreateWindow(d_width, d_height+border, windowAttrs);
+		quartz_CreateWindow(d_width, d_height, windowAttrs);
 		
 		if (theWindow == NULL)
 		{
 			mp_msg(MSGT_VO, MSGL_FATAL, "Quartz error: Couldn't create window !!!!!\n");
 			return -1;
 		}
+		tmpBounds = CGRectMake( 0, 0, winRect.right, winRect.bottom);
+		CreateCGContextForPort(GetWindowPort(theWindow),&context);
+		CGContextFillRect(context, tmpBounds);
 	}
 	else 
 	{
@@ -630,11 +666,6 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		SetRect(&oldWinRect, 0, 0, d_width, d_height);
 		SizeWindow (theWindow, d_width, d_height, 1);
  	}
-	
-	//Show window
-	SetThemeWindowBackground( theWindow, kThemeBrushModelessDialogBackgroundActive, TRUE);
-	RepositionWindow(theWindow, NULL, kWindowCenterOnMainScreen);
-	ShowWindow (theWindow);
 	
 	switch (image_format) 
 	{
@@ -810,6 +841,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		SetWindowGroupLevel(winGroup, CGWindowLevelForKey(levelList[winLevel]));
 		window_fullscreen();
 	}
+	
+	//Show window
+	RepositionWindow(theWindow, NULL, kWindowCenterOnMainScreen);
+	ShowWindow (theWindow);
 	
 	return 0;
 }
@@ -1167,35 +1202,29 @@ void window_resized()
 	d_height = ((float)d_width/movie_aspect);
 	
 	aspectX = (float)((float)winRect.right/(float)d_width);
-	aspectY = (float)((float)(winRect.bottom-border)/(float)d_height);
+	aspectY = (float)((float)(winRect.bottom)/(float)d_height);
 	
-	if((d_height*aspectX)>(winRect.bottom-border))
+	if((d_height*aspectX)>(winRect.bottom))
 	{
 		padding = (winRect.right - d_width*aspectY)/2;
 		SetRect(&dstRect, padding, 0, d_width*aspectY+padding, d_height*aspectY);
 	}
 	else
 	{
-		padding = ((winRect.bottom-border) - d_height*aspectX)/2;
+		padding = ((winRect.bottom) - d_height*aspectX)/2;
 		SetRect(&dstRect, 0, padding, (d_width*aspectX), d_height*aspectX+padding);
 	}
 	}
 	else
 	{
-		SetRect(&dstRect, 0, 0, winRect.right, winRect.bottom-border);
+		SetRect(&dstRect, 0, 0, winRect.right, winRect.bottom);
 	}
-
-	//Clear Background
-	SetThemeWindowBackground( theWindow, kThemeBrushUtilityWindowBackgroundInactive, TRUE);
-	tmpBounds = CGRectMake( 0, border, winRect.right, winRect.bottom);
-	CreateCGContextForPort(GetWindowPort(theWindow),&context);
-	CGContextClearRect(context, tmpBounds);
 	
 	switch (image_format)
 	{
 		case IMGFMT_RGB32:
 		{
-			bounds = CGRectMake(dstRect.left, dstRect.top+border, dstRect.right-dstRect.left, dstRect.bottom-dstRect.top);
+			bounds = CGRectMake(dstRect.left, dstRect.top, dstRect.right-dstRect.left, dstRect.bottom-dstRect.top);
 			CreateCGContextForPort (GetWindowPort (theWindow), &context);
 			break;
 		}
@@ -1225,6 +1254,11 @@ void window_resized()
 		default:
 			break;
 	}
+	
+	//Clear Background
+	tmpBounds = CGRectMake( 0, 0, winRect.right, winRect.bottom);
+	CreateCGContextForPort(GetWindowPort(theWindow),&context);
+	CGContextFillRect(context, tmpBounds);
 }
 
 void window_ontop()
@@ -1274,9 +1308,8 @@ void window_fullscreen()
 		}
 		
 		//go fullscreen
-		border = 0;
 		panscan_calc();
-		ChangeWindowAttributes(theWindow, kWindowNoShadowAttribute, kWindowResizableAttribute);
+		ChangeWindowAttributes(theWindow, kWindowNoShadowAttribute, 0);
 		MoveWindow(theWindow, deviceRect.left-(vo_panscan_x >> 1), deviceRect.top-(vo_panscan_y >> 1), 1);
 		SizeWindow(theWindow, device_width+vo_panscan_x, device_height+vo_panscan_y,1);
 
@@ -1301,14 +1334,13 @@ void window_fullscreen()
 		ShowCursor();
 		
 		//revert window to previous setting
-		border = 15;
-		ChangeWindowAttributes(theWindow, kWindowResizableAttribute, kWindowNoShadowAttribute);
+		ChangeWindowAttributes(theWindow, 0, kWindowNoShadowAttribute);
 		SizeWindow(theWindow, oldWinRect.right, oldWinRect.bottom,1);
 		MoveWindow(theWindow, oldWinBounds.left, oldWinBounds.top, 1);
 
  		vo_quartz_fs = 0;
 	}
-	
+	window_resized();
 }
 
 void window_panscan()
