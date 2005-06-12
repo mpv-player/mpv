@@ -220,6 +220,9 @@ Dönmez, Ismail (cartman) <ismail.donmez@boun.edu.tr>
     * compile fix for mga_vid to compile with Linux 2.5/2.6 kernels
     * small fixes all around
 
+Edele, Robert (yartrebo) <yartrebo@earthlink.net>
+    * remove_logo filter
+
 Egger, Christoph <christoph_egger@gmx.de>
     * vo_ggi updates
 
@@ -585,11 +588,11 @@ Plourde, Nicolas <nicolas.plourde@sympatico.ca>
 Poettering, Lennart <mzzcynlre@0pointer.de>
     * audio driver for the Polypaudio sound server
 
-Poirier, Guillaume <guillaume.poirier@etudiant.univ-rennes1.fr>
+Poirier, Guillaume (poirierg) <guillaume.poirier@etudiant.univ-rennes1.fr>
     * French documentation translation and synchronization
     * XviD documentation
-    * lavc's turbo mode
-    * lots of updates of MEncoder's documentation
+    * libavcodec turbo mode
+    * lots of updates for the MEncoder documentation
 
 Ponekker, Zoltán (Pontscho/fresh!mindworkz) <pontscho@makacs.poliod.hu>
     * the original configure script and Makefiles for easy compilation
