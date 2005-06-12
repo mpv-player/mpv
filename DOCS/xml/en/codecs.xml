@@ -418,7 +418,7 @@ Alpha and PowerPC (Linux/Alpha and Linux/PowerPC have been tested) platforms and
 <title>XviD</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> is an free software MPEG-4 ASP
+<ulink url="http://www.xvid.org">XviD</ulink> is a free software MPEG-4 ASP
 compliant video codec, which features two-pass encoding and full MPEG-4 ASP
 support, making it a lot more efficient than the well-known DivX codec.
 It yields very good video quality and good performance due to CPU
