@@ -492,9 +492,9 @@ itself. In this case, the decoding percentage contains the display percentage, t
 There are error messages about file not found <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
-Download the Win32 codecs from our
+Download the binary codecs from our
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codecs page</ulink>
-(avifile's codec package has a different DLL set) and install it.
+and install it.
 </para></answer>
 </qandaentry>
 
