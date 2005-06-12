@@ -418,47 +418,30 @@ Alpha and PowerPC (Linux/Alpha and Linux/PowerPC have been tested) platforms and
 <title>XviD</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> is a forked development of the
-OpenDivX codec. It happened when ProjectMayo changed OpenDivX to closed source
+<ulink url="http://www.xvid.org">XviD</ulink> is an free software MPEG-4 ASP
+compliant video codec, which features two-pass encoding and full MPEG-4 ASP
+support, making it a lot more efficient than the well-known DivX codec.
+It yields very good video quality and good performance due to CPU
+optimizations for most modern processors.
+</para>
+<para>
+It began as a forked development of the OpenDivX codec.
+This happened when ProjectMayo changed OpenDivX to closed source
 DivX4 (now DivX5), and the non-ProjectMayo people working on OpenDivX got angry,
 then started XviD. So both projects have the same origin.
-
-<itemizedlist>
-<title>ADVANTAGES</title>
-<listitem><simpara>
-  open source
-  </simpara></listitem>
-<listitem><simpara>
-  its API is compatible with DivX4 so adding support for it is easy
-  </simpara></listitem>
-<listitem><simpara>
-  2-pass encoding support
-  </simpara></listitem>
-<listitem><simpara>
-  nice encoding quality, higher speed than DivX4 (you can optimize it for
-  your box while compiling)
-  </simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>DISADVANTAGES</title>
-<listitem><simpara>
-  currently it does not properly <emphasis role="bold">decode</emphasis> all
-  DivX/DivX4 files (no problem as
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-  can play them)
-  </simpara></listitem>
-<listitem><simpara>
-  under development
-  </simpara></listitem>
-</itemizedlist>
 </para>
 
 <procedure>
-<title>INSTALLING XVID CVS</title>
+<title>Installing <systemitem class="library">XviD</systemitem></title>
 <para>
-  It is currently available only from CVS. Here are download and installation
-  instructions (you need at least autoconf 2.50, automake and libtool):
+  Like most open source software, it is available in two flavors:
+  <ulink url="http://www.xvid.org/downloads.html">official releases</ulink>
+  and the CVS version.
+  The CVS version is usually stable enough to use, as most of the time it
+  features fixes for bugs that exist in releases.
+  Here is what to do to make <systemitem class="library">XviD</systemitem>
+  CVS work with <application>MEncoder</application> (you need at least
+  autoconf 2.50, automake and libtool):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
