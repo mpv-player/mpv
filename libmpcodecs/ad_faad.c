@@ -53,7 +53,7 @@ static int aac_probe(unsigned char *buffer, int len)
   mp_msg(MSGT_DECAUDIO,MSGL_V, "\nAAC_PROBE: %d bytes\n", len);
   while(i <= len-4) {
     if(
-       ((buffer[i] == 0xff) && ((buffer[i+1] & 0xfe) == 0xf8)) ||
+       ((buffer[i] == 0xff) && ((buffer[i+1] & 0xf6) == 0xf0)) ||
        (buffer[i] == 'A' && buffer[i+1] == 'D' && buffer[i+2] == 'I' && buffer[i+3] == 'F')
     ) {
       pos = i;
