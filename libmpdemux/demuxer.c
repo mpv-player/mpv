@@ -157,6 +157,7 @@ extern void demux_close_ra(demuxer_t* demuxer);
 extern void demux_close_ty(demuxer_t* demuxer);
 extern void demux_close_lavf(demuxer_t* demuxer);
 extern void demux_close_vqf(demuxer_t* demuxer);
+extern void demux_close_aac(demuxer_t* demuxer);
 #ifdef USE_WIN32DLL
 extern void demux_close_avs(demuxer_t* demuxer);
 #endif
@@ -247,6 +248,8 @@ void free_demuxer(demuxer_t *demuxer){
       demux_close_ra(demuxer); break;
     case DEMUXER_TYPE_VQF:
       demux_close_vqf(demuxer); break;
+    case DEMUXER_TYPE_AAC:
+      demux_close_aac(demuxer); break;
 #ifdef USE_LIBAVFORMAT
     case DEMUXER_TYPE_LAVF:
       demux_close_lavf(demuxer); break;
@@ -338,6 +341,7 @@ int demux_ts_fill_buffer(demuxer_t *demux);
 int demux_ra_fill_buffer(demuxer_t *demux);
 int demux_vqf_fill_buffer(demuxer_t *demux);
 
+extern int demux_aac_fill_buffer(demuxer_t *demux);
 extern int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 extern int demux_ogg_fill_buffer(demuxer_t *d);
 extern int demux_rawaudio_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds);
@@ -405,6 +409,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 	return demux_ts_fill_buffer(demux);
     case DEMUXER_TYPE_REALAUDIO: return demux_ra_fill_buffer(demux);
     case DEMUXER_TYPE_VQF: return demux_vqf_fill_buffer(demux);
+    case DEMUXER_TYPE_AAC: return demux_aac_fill_buffer(demux);
 #ifdef USE_LIBAVFORMAT
      case DEMUXER_TYPE_LAVF: return demux_lavf_fill_buffer(demux);
 #endif
@@ -612,6 +617,8 @@ extern int rawdv_check_file(demuxer_t *demuxer);
 int avs_check_file(demuxer_t *demuxer, const char *filename);
 #endif
 
+extern int demux_aac_open(demuxer_t *demuxer);
+extern int demux_aac_probe(demuxer_t *demuxer);
 extern int vivo_check_file(demuxer_t *demuxer);
 extern void demux_open_vivo(demuxer_t *demuxer);
 extern int y4m_check_file(demuxer_t *demuxer);
@@ -1095,6 +1102,14 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPEG_TY)
   }
 }
 #endif
+//================Try AAC ===============================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AAC) {
+ demuxer=new_demuxer(stream,DEMUXER_TYPE_AAC,audio_id,video_id,dvdsub_id);
+ if(! demux_aac_probe(demuxer)) {
+   free_demuxer(demuxer);
+   demuxer = NULL;
+ } else file_format = DEMUXER_TYPE_AAC;
+}
 //=============== Unknown, exiting... ===========================
 if(file_format==DEMUXER_TYPE_UNKNOWN || demuxer == NULL){
   //mp_msg(MSGT_DEMUXER,MSGL_ERR,MSGTR_FormatNotRecognized); // will be done by mplayer.c after fallback to playlist-parsing
@@ -1302,6 +1317,10 @@ switch(file_format){
   if (!demux_open_vqf(demuxer)) return NULL;
   break;
  }
+ case DEMUXER_TYPE_AAC: {
+  if (!demux_aac_open(demuxer)) return NULL;
+  break;
+ }
 #ifdef USE_LIBAVFORMAT
   case DEMUXER_TYPE_LAVF: {
   if (!demux_open_lavf(demuxer)) return NULL;
@@ -1431,6 +1450,7 @@ extern void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags
 extern void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_mkv_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_seek_vqf(demuxer_t *demuxer,float rel_seek_secs,int flags);
+extern void demux_aac_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 
 int demux_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
@@ -1539,6 +1559,8 @@ switch(demuxer->file_format){
  case DEMUXER_TYPE_AVS:
       demux_seek_avs(demuxer,rel_seek_secs,flags); break;
  #endif
+ case DEMUXER_TYPE_AAC:
+      demux_aac_seek(demuxer,rel_seek_secs,flags); break;
 
 } // switch(demuxer->file_format)
 

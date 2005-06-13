@@ -22,6 +22,7 @@ MPlayer (1.0)
     * simultaneous audio capture and playback in MPlayer
       (-tv immediatemode=0) fixed in v4l2
     * PVR support
+    * AAC ADTS demuxer
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
