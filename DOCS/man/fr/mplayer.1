@@ -5352,35 +5352,6 @@ désentrelacé avec une méthode qui garde un champ et interpole l'autre,
 la vidéo se retrouve saccadée dont une trame sur quatre est dupliquée.
 Ce filtre a pour but de trouver et jeter ces trames dupliquées pour
 retrouver le débit de trame (framerate) original.
-<<<<<<< mplayer.1
-Lorsque vous utilisez ce filtre, vous devez définir \-ofps
-à 4/\:5 du débit de trame du fichier d'entrée et ajouter
-softskip après dans la chaîne de filtrage pour être sûr
-que divtc voit bien toutes les trames.
-Deux modes sont possibles\ :
-Le mode une passe, qui est celui par défaut et dont
-l'usage est évident, mais a le désavantage que tout
-changement dans la phase télécinée (trame manquante
-ou mauvais générique de fin) cause des erreurs
-temporaires d'affichage jusqu'à ce que le filtre se
-re-synchronise.
-Le mode deux passes permet d'éviter ça en analysant
-tout d'abord toute la vidéo pour connaître les
-changements de phase et ainsi toujours conserver la
-synchronisation.
-Ces passes ne correspondent
-.B pas
-aux deux passes du processus d'encodage.
-+You must run an extra pass using divtc pass one before the
-+actual encoding throwing the resulting video away.
-+Use \-nosound \-ovc raw \-o /dev/null to avoid
-+wasting CPU power for this pass.
-+You may add something like crop=2:2:0:0 after divtc
-+to speed things up even more.
-+Then use divtc pass two for the actual encoding.
-+If you use multiple encoder passes, use divtc
-+pass two for all of them.
-=======
 Lorsque vous utilisez ce filtre, vous devez définir \-ofps
 à 4/\:5 du débit de trame du fichier d'entrée et ajouter
 softskip après dans la chaîne de filtrage pour être sûr
@@ -5412,7 +5383,6 @@ Utilisez ensuite la passe deux divtc pour l'encodage
 proprement dit.
 Si vous faites plusieurs passes d'encodage, utilisez la
 la passe deux divtc pour chacune d'entre elles.
->>>>>>> 1.274
 Les options sont\ :
 .RSs
 .IPs pass=1|2
@@ -7699,28 +7669,28 @@ Active l'encodage RTJPEG (par défaut).
 .SS xvidenc (\-xvidencopts)
 .
 Il y a trois modes disponibles: débit binaire constant (CBR), quantum
-fixe et 2passes.
+fixe et deux passes.
 .
 .TP
 .B pass=<1|2>
-Définit la passe en mode 2passes.
+Définit la passe en mode deux passes.
 .
 .TP
-.B bitrate=<valeur>
+.B bitrate=<valeur> (CBR ou mode deux passes)
 Fixe le débit binaire (bitrate) à utiliser en kbits/\:seconde si <16000 ou
 en bits/\:seconde
 si >16000.
 Si <valeur> est un nombre négatif, XviD l'interprètera comme la taille
-visée de la vidéo (CBR ou mode 2passes, défaut\ : 687 kbits/\:s).
+visée de la vidéo (défaut\ : 687 kbits/\:s).
 .
 .TP
 .B fixed_quant=<1\-31>
 Passe en mode quantum fixe et définit le quantum à utiliser.
 .
 .TP
-.B zones=<zone0>[/\:<zone1>[/\:...]]
+.B zones=<zone0>[/\:<zone1>[/\:...]] (CBR ou mode deux passes)
 Personnalisation de la qualité de parties spécifiques (générique du
-début, de fin...) (ABR ou deux passes).
+début, de fin...).
 Chaque zone est définie par <trame-du-debut>,<mode>,<valeur> où <mode>
 peut être
 .PD 0
