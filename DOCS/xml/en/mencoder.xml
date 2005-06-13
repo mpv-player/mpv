@@ -2302,24 +2302,20 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   types that are possible in B-frames.
   Usually, even a naive B-frame choice algorithm can have a
   significant PSNR benefit.
-  It is also interesting to note that if you turn off the adaptive
-  B-frame decision (<option>nob_adapt</option>), encoding with
-  <option>bframes</option> usually speeds up encoding speed somewhat.
+  It is interesting to note that using B-frames usually speeds up
+  the second pass somewhat, and may also speed up a single pass
+  encode if adaptive B-frame decision is turned off.
 </para>
 <para>
   With adaptive B-frame decision turned off
   (<option>x264encopts</option>'s <option>nob_adapt</option>),
-  the optimal value for this setting will usually range from
-  <option>bframes=1</option> to <option>bframes=3</option>.
+  the optimal value for this setting is usually no more than
+  <option>bframes=1</option>, or else high-motion scenes can suffer.
   With adaptive B-frame decision on (the default behavior), it is
-  probably safe to use higher values; the encoder will try to
-  reduce the use of B-frames in scenes where they would hurt
-  compression.
-</para>
-<para>
-  If you are going to use <option>bframes</option> at all, consider
-  setting the maximum number of B-frames to 2 or higher in order to
-  take advantage of weighted prediction.
+  safe to use higher values; the encoder will reduce the use of
+  B-frames in scenes where they would hurt compression.
+  The encoder rarely chooses to use more than 3 or 4 B-frames;
+  setting this option any higher will have little effect.
 </para></listitem>
 
 <listitem><para>
@@ -2359,7 +2355,7 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   of expensive I-frames; using weighted prediction in B-frames
   makes it possible to turn at least some of these into much more
   reasonably-sized B-frames.
-  Encoding time cost seems to be minimal, if there is any.
+  Encoding time cost is minimal, as no extra decisions need to be made.
   Also, contrary to what some people seem to guess, the decoder
   CPU requirements are not much affected by weighted prediction,
   all else being equal.
