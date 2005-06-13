@@ -152,8 +152,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	glFindFormat(format, &image_bytes, &gl_texfmt, &gl_format, &gl_type);
 	image_bytes = (image_bytes + 7) / 8;
 
-  if (use_osd)
-  sub_bg_alpha = 255; // We need alpha = 255 for invisible part of the OSD
 	int_pause = 0;
 
 	panscan_init();
@@ -270,6 +268,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
                                  unsigned char *src, unsigned char *srca,
                                  int stride)
 {
+  int i;
   // initialize to 8 to avoid special-casing on alignment
   int sx = 8, sy = 8;
   GLfloat xcov, ycov;
@@ -306,8 +305,10 @@ static void create_osd_texture(int x0, int y0, int w, int h,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, scale_type);
   glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, scale_type);
+  for (i = 0; i < h * stride; i++)
+    clearTexture[i] = ~(-srca[i]);
   glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_ALPHA,
-                    GL_UNSIGNED_BYTE, srca);
+                    GL_UNSIGNED_BYTE, clearTexture);
 #endif
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
   glAdjustAlignment(image_width * image_bytes);
