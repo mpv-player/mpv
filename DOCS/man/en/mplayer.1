@@ -7309,21 +7309,20 @@ two pass.
 Specify the pass in two pass mode.
 .
 .TP
-.B bitrate=<value>
+.B bitrate=<value> (CBR or two pass mode)
 Sets the bitrate to be used in kbits/\:second if <16000 or in bits/\:second
 if >16000.
 If <value> is negative, XviD will use its absolute value as the target size
-(in kbytes) of the video and compute the associated bitrate automagically.
-(CBR or two pass mode, default: 687 kbits/\:s)
+(in kbytes) of the video and compute the associated bitrate automagically
+(default: 687 kbits/\:s).
 .
 .TP
 .B fixed_quant=<1\-31>
 Switch to fixed quantizer mode and specify the quantizer to be used.
 .
 .TP
-.B zones=<zone0>[/\:<zone1>[/\:...]]
-User specified quality for specific parts (ending, credits, ...)
-(ABR or two pass).
+.B zones=<zone0>[/\:<zone1>[/\:...]] (CBR or two pass mode)
+User specified quality for specific parts (ending, credits, ...).
 Each zone is <start-frame>,<mode>,<value> where <mode> may be
 .PD 0
 .RSs
@@ -7451,17 +7450,17 @@ your keyframes 10% more bits than normal
 Works together with kfreduction.
 Determines the minimum distance below which you consider that
 two frames are considered consecutive and treated differently
-according to kfreduction.
+according to kfreduction
 (default: 10).
 .
 .TP
-.B kfreduction=<0\-100>
+.B kfreduction=<0\-100> (two pass mode only)
 The above two settings can be used to adjust the size of keyframes that
 you consider too close to the first (in a row).
 kfthreshold sets the range in which keyframes are reduced, and
 kfreduction determines the bitrate reduction they get.
 The last I-frame will get treated normally.
-(default: 30, two pass mode only)
+(default: 30)
 .
 .TP
 .B divx5bvop
