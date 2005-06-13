@@ -1,4 +1,4 @@
-.\" synced with 1.1003
+.\" synced with 1.1006
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -4746,7 +4746,7 @@ processeur disponible.
 .TP
 .B spp[=qualité[:qp[:mode]]]
 Filtre de post-traitement simple qui compresse et décompresse l'image
-avec différents (ou - dans le cas du niveau de qualité 6 - tous)
+avec différents (ou \- dans le cas du niveau de qualité 6 \- tous)
 décalages et fait la moyenne des résultats.
 
 .RSs
@@ -4775,7 +4775,7 @@ IPs <-15\-32>
 Force du filtrage, de faibles valeurs signifie plus de détails, mais
 aussi plus d'artefacts, tandis que de valeurs plus grandes signifie
 rend l'image plus lisse mais plus floue
-(par défaut\ : 0 - optimal vis-à-vis du PSNR).
+(par défaut\ : 0 \- optimal vis-à-vis du PSNR).
 .RE
 .
 .TP
@@ -7818,8 +7818,8 @@ Cette option n'existe plus à partir de XviD-1.0.x.
 .TP
 .B keyframe_boost=<0\-1000> (mode deux passes uniquement)
 Emprunte des bits depuis les autres "pools" de trames vers les trames-clés
-pour augmenter la qualité des trames-clés.
-(défaut\ : 0, mode 2passes uniquement)
+pour augmenter la qualité des trames-clés
+(défaut\ : 0).
 .
 .TP
 .B kfthreshold=<valeur> (mode deux passes uniquement)
@@ -7830,13 +7830,13 @@ différemment en fonction de kfreduction
 (défaut\ : 0).
 .
 .TP
-.B kfreduction=<0\-100>
+.B kfreduction=<0\-100> (mode 2passes uniquement)
 Les deux options ci-dessus contrôlent la taille des trames-clés qui vous
 semblent trop proches l'une de l'autre.
 kfthreshold contrôle la réduction de la distance inter trames-clés et
 kfreduction contrôle leur réduction de débit binaire.
 La dernière trame-clé est traitée normalement.
-(défaut\ : 0, mode 2passes uniquement)
+(défaut\ : 0)
 .
 .TP
 .B divx5bvop
@@ -8584,17 +8584,18 @@ Défini l'algorithme d'estimation du mouvement fullpixel.
 .IPs 1
 recherche diamant, de rayon 1 (rapide)
 .IPs 2
-recherche hexagone, de rayon 2 (par défaut)
+recherche hexagonale, de rayon 2 (par défaut)
 .IPs 3
-recherche multi-hexagone irrégulière
+recherche multi-hexagonale irrégulière
 .IPs 4
-Recherche exhaustive, controllé par me_range (très lent).
+Recherche exhaustive (très lent).
 .RE
 .PD 1
 .
 .TP
 .B me_range=<4\-64>
-rayon de de la recherche exhaustive de mouvement (par défaut\ 16)
+rayon de de la recherche exhaustive et multi-hexagonale de mouvement
+(par défaut\ 16)
 .
 .TP
 .B subq=<1\-5>
