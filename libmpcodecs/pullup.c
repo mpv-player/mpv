@@ -147,6 +147,53 @@ static int licomb_y_mmx(unsigned char *a, unsigned char *b, int s)
 		);
 	return ret;
 }
+
+static int var_y_mmx(unsigned char *a, unsigned char *b, int s)
+{
+	int ret;
+	asm volatile (
+		"movl $3, %%ecx \n\t"
+		"pxor %%mm4, %%mm4 \n\t"
+		"pxor %%mm7, %%mm7 \n\t"
+		
+		".balign 16 \n\t"
+		"1: \n\t"
+		
+		"movq (%%esi), %%mm0 \n\t"
+		"movq (%%esi), %%mm2 \n\t"
+		"movq (%%esi,%%eax), %%mm1 \n\t"
+		"addl %%eax, %%esi \n\t"
+		"psubusb %%mm1, %%mm2 \n\t"
+		"psubusb %%mm0, %%mm1 \n\t"
+		"movq %%mm2, %%mm0 \n\t"
+		"movq %%mm1, %%mm3 \n\t"
+		"punpcklbw %%mm7, %%mm0 \n\t"
+		"punpcklbw %%mm7, %%mm1 \n\t"
+		"punpckhbw %%mm7, %%mm2 \n\t"
+		"punpckhbw %%mm7, %%mm3 \n\t"
+		"paddw %%mm0, %%mm4 \n\t"
+		"paddw %%mm1, %%mm4 \n\t"
+		"paddw %%mm2, %%mm4 \n\t"
+		"paddw %%mm3, %%mm4 \n\t"
+		
+		"decl %%ecx \n\t"
+		"jnz 1b \n\t"
+
+		"movq %%mm4, %%mm3 \n\t"
+		"punpcklwd %%mm7, %%mm4 \n\t"
+		"punpckhwd %%mm7, %%mm3 \n\t"
+		"paddd %%mm4, %%mm3 \n\t"
+		"movd %%mm3, %%eax \n\t"
+		"psrlq $32, %%mm3 \n\t"
+		"movd %%mm3, %%edx \n\t"
+		"addl %%edx, %%eax \n\t"
+		"emms \n\t"
+		: "=a" (ret)
+		: "S" (a), "a" (s)
+		: "%ecx", "%edx"
+		);
+	return 4*ret;
+}
 #endif
 #endif
 
@@ -194,6 +241,18 @@ static int licomb_y_test(unsigned char *a, unsigned char *b, int s)
 	return m;
 }
 #endif
+
+static int var_y(unsigned char *a, unsigned char *b, int s)
+{
+	int i, j, var=0;
+	for (i=3; i; i--) {
+		for (j=0; j<8; j++) {
+			var += ABS(a[j]-a[j+s]);
+		}
+		a+=s; b+=s;
+	}
+	return 4*var; /* match comb scaling */
+}
 
 
 
@@ -307,6 +366,7 @@ static void alloc_metrics(struct pullup_context *c, struct pullup_field *f)
 {
 	f->diffs = calloc(c->metric_len, sizeof(int));
 	f->comb = calloc(c->metric_len, sizeof(int));
+	f->var = calloc(c->metric_len, sizeof(int));
 	/* add more metrics here as needed */
 }
 
@@ -357,6 +417,7 @@ void pullup_submit_field(struct pullup_context *c, struct pullup_buffer *b, int 
 
 	compute_metric(c, f, parity, f->prev->prev, parity, c->diff, f->diffs);
 	compute_metric(c, parity?f->prev:f, 0, parity?f:f->prev, 1, c->comb, f->comb);
+	compute_metric(c, f, parity, f, -1, c->var, f->var);
 
 	/* Advance the circular list */
 	if (!c->first) c->first = c->head;
@@ -463,14 +524,32 @@ static void compute_affinity(struct pullup_context *c, struct pullup_field *f)
 		f->next->next->flags |= F_HAVE_AFFINITY;
 		return;
 	}
-	for (i = 0; i < c->metric_len; i++) {
-		l = f->comb[i] - f->next->comb[i];
-		if (l > max_l) max_l = l;
-		if (-l > max_r) max_r = -l;
+	if (1) {
+		for (i = 0; i < c->metric_len; i++) {
+			int lv = f->prev->var[i];
+			int rv = f->next->var[i];
+			int v = f->var[i];
+			int lc = f->comb[i] - (v+lv) + ABS(v-lv);
+			int rc = f->next->comb[i] - (v+rv) + ABS(v-rv);
+			lc = lc>0 ? lc : 0;
+			rc = rc>0 ? rc : 0;
+			l = lc - rc;
+			if (l > max_l) max_l = l;
+			if (-l > max_r) max_r = -l;
+		}
+		if (max_l + max_r < 64) return;
+		if (max_r > 6*max_l) f->affinity = -1;
+		else if (max_l > 6*max_r) f->affinity = 1;
+	} else {
+		for (i = 0; i < c->metric_len; i++) {
+			l = f->comb[i] - f->next->comb[i];
+			if (l > max_l) max_l = l;
+			if (-l > max_r) max_r = -l;
+		}
+		if (max_l + max_r < 64) return;
+		if (max_r > 2*max_l) f->affinity = -1;
+		else if (max_l > 2*max_r) f->affinity = 1;
 	}
-	if (max_l + max_r < 64) return;
-	if (max_r > 2*max_l) f->affinity = -1;
-	else if (max_l > 2*max_r) f->affinity = 1;
 }
 
 static void foo(struct pullup_context *c)
@@ -692,11 +771,13 @@ void pullup_init_context(struct pullup_context *c)
 	case PULLUP_FMT_Y:
 		c->diff = diff_y;
 		c->comb = licomb_y;
+		c->var = var_y;
 #ifdef ARCH_X86
 #ifdef HAVE_MMX
 		if (c->cpu & PULLUP_CPU_MMX) {
 			c->diff = diff_y_mmx;
 			c->comb = licomb_y_mmx;
+			c->var = var_y_mmx;
 		}
 #endif
 #endif
