@@ -314,7 +314,10 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 				
 				if( (winMousePos.h > (bounds.right - 15)) && (winMousePos.v > (bounds.bottom)) )
 				{
-					GrowWindow(theWindow, mousePos, NULL);
+					if(!vo_quartz_fs)
+					{
+						GrowWindow(theWindow, mousePos, NULL);
+					}
 				}
 				else if(part == inMenuBar)
 				{
@@ -895,7 +898,6 @@ static void flip_page(void)
 		case IMGFMT_RGB32:
 		{
 			CGContextDrawImage (context, bounds, image);
-			CGContextFlush (context);
 		}
 		break;
 			
@@ -921,6 +923,38 @@ static void flip_page(void)
 				}
 			}
 		break;
+	}
+	
+	if(!vo_quartz_fs)
+	{
+		//render resize box
+		CGContextBeginPath(context);
+		CGContextSetAllowsAntialiasing(context, false);
+		//CGContextSaveGState(context);
+	
+		//line white
+		CGContextSetRGBStrokeColor (context, 0.2, 0.2, 0.2, 0.5);
+		CGContextMoveToPoint( context, winRect.right-1, 1); CGContextAddLineToPoint( context, winRect.right-1, 1);	
+		CGContextMoveToPoint( context, winRect.right-1, 5); CGContextAddLineToPoint( context, winRect.right-5, 1);
+		CGContextMoveToPoint( context, winRect.right-1, 9); CGContextAddLineToPoint( context, winRect.right-9, 1);
+		CGContextStrokePath( context );
+
+		//line gray
+		CGContextSetRGBStrokeColor (context, 0.4, 0.4, 0.4, 0.5);
+		CGContextMoveToPoint( context, winRect.right-1, 2); CGContextAddLineToPoint( context, winRect.right-2, 1);	
+		CGContextMoveToPoint( context, winRect.right-1, 6); CGContextAddLineToPoint( context, winRect.right-6, 1);
+		CGContextMoveToPoint( context, winRect.right-1, 10); CGContextAddLineToPoint( context, winRect.right-10, 1);
+		CGContextStrokePath( context );
+	
+		//line black
+		CGContextSetRGBStrokeColor (context, 0.6, 0.6, 0.6, 0.5);
+		CGContextMoveToPoint( context, winRect.right-1, 3); CGContextAddLineToPoint( context, winRect.right-3, 1);	
+		CGContextMoveToPoint( context, winRect.right-1, 7); CGContextAddLineToPoint( context, winRect.right-7, 1);
+		CGContextMoveToPoint( context, winRect.right-1, 11); CGContextAddLineToPoint( context, winRect.right-11, 1);
+		CGContextStrokePath( context );
+		
+		//CGContextRestoreGState( context );
+		CGContextFlush (context);
 	}
 }
 
