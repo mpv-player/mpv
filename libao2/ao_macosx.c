@@ -74,7 +74,6 @@ typedef struct ao_macosx_s
 {
   /* AudioUnit */
   AudioUnit theOutputUnit;
-  AudioConverterRef theConverter;
   int packetSize;
 
   /* Ring-buffer */
@@ -155,18 +154,13 @@ static int read_buffer(unsigned char* data,int len){
   return len;
 }
 
-/* end ring buffer stuff */
-
-OSStatus ACComplexInputProc(AudioConverterRef inAudioConverter, UInt32 *ioNumberDataPackets, AudioBufferList *ioData, AudioStreamPacketDescription **outDataPacketDescription, void *inUserData)
+OSStatus theRenderProc(void *inRefCon, AudioUnitRenderActionFlags *inActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumFrames, AudioBufferList *ioData)
 {
 int amt=buf_used();
-int req=(*ioNumberDataPackets)*ao->packetSize;
+int req=(inNumFrames)*ao->packetSize;
 
 
 	ioData->mBuffers[0].mData = ao->chunk;
- 	ioData->mBuffers[0].mDataByteSize = req;
- 	
-// 	fprintf(stderr, "##### req=%d amt=%d #####\n", req, amt);
 
 	if(amt>req)
  		amt=req;
@@ -174,34 +168,9 @@ int req=(*ioNumberDataPackets)*ao->packetSize;
 	if(amt)
 		read_buffer((unsigned char *)ioData->mBuffers[0].mData, amt);
 
-	if(req-amt)
-		memset(ioData->mBuffers[0].mData+amt, 0, req-amt);
+	ioData->mBuffers[0].mDataByteSize = amt;
 
  	return noErr;
-}
-
-OSStatus theRenderProc(void *inRefCon, AudioUnitRenderActionFlags *inActionFlags, const AudioTimeStamp *inTimeStamp, UInt32 inBusNumber, UInt32 inNumFrames, AudioBufferList *ioData)
-{
-OSStatus err = noErr;
-void *inInputDataProcUserData = NULL;
-AudioStreamPacketDescription *outPacketDescription = NULL;
-
-
-    err = AudioConverterFillComplexBuffer(ao->theConverter, ACComplexInputProc, inInputDataProcUserData, &inNumFrames, ioData, outPacketDescription);
-
-    /*Parameters for AudioConverterFillComplexBuffer()
-	    converter - the converter being used
-	    ACComplexInputProc() - input procedure to supply data to the Audio Converter
-	    inInputDataProcUserData - Used to hold any data that needs to be passed on.
-        inNumFrames - The amount of requested data.  On output, this number is the amount actually received.
-		ioData - Buffer of the converted data recieved on return
-		outPacketDescription - contains the format of the returned data.
-    */
-
-	if(err)
-		ao_msg(MSGT_AO, MSGL_WARN, "AudioConverterFillComplexBuffer failed status %-8d\n", err);
-
-    return err;
 }
 
 static int control(int cmd,void *arg){
@@ -333,13 +302,10 @@ UInt32 size, maxFrames;
 	}
 
 	size =  sizeof(AudioStreamBasicDescription);
-	err = AudioUnitGetProperty(ao->theOutputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, 0, &outDesc, &size);
-	print_format("destination: ", &outDesc);	
-	err = AudioUnitSetProperty(ao->theOutputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &outDesc, size);
+	err = AudioUnitSetProperty(ao->theOutputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &inDesc, size);
 
-	err = AudioConverterNew(&inDesc, &outDesc, &(ao->theConverter));
 	if (err) {
-		ao_msg(MSGT_AO, MSGL_WARN, "Unable to create the AudioConverter component (err=%d)\n", err);
+		ao_msg(MSGT_AO, MSGL_WARN, "Unable to set the input format (err=%d)\n", err);
 		return CONTROL_FALSE;
 	}
 
@@ -417,7 +383,6 @@ static void uninit(int immed)
 
   reset();
 
-  AudioConverterDispose(ao->theConverter);
   AudioOutputUnitStop(ao->theOutputUnit);
   AudioUnitUninitialize(ao->theOutputUnit);
   CloseComponent(ao->theOutputUnit);
