@@ -8289,7 +8289,7 @@ produisant des images de qualité.
 .B keyint=<valeur>
 Définit l'intervalle maximum autorisé entre trames-IDR (par défaut\ : 250).
 Un intervalle plus grand fait économiser des bits, et donc améliore la
-qualité, mais rend la navigation moins précise.
+qualité, mais rend la navigation (seeking) moins précise.
 Contrairement à MPEG-1/2/4, H.264 ne souffre d'aucune dérive DCT avec des
 grandes valeurs de keyint.
 .
@@ -8305,7 +8305,7 @@ trames prédites (closed GOP) car une trame-P peut aussi être prédite
 Ainsi, les trames-I ne permettent pas nécessairement une navigation précise
 dans le film.
 Les trames-IDR empêchent les trames-P qui les suivent d'être prédites à partir
-de trames précédant mes trames-IDR.
+de trames précédant les trames-IDR.
 .
 .TP
 .B scenecut=<-1\-100>
@@ -8354,7 +8354,7 @@ Un biais plus important produit plus de trames-B (par défaut\ : 0).
 .
 .TP
 .B (no)b_pyramid
-Autorise les trames-B de servir de référence pour prédire d'autres
+Autorise les trames-B à servir de référence pour prédire d'autres
 trames.
 Si on prend par exemple 3 trames-B consécutives\ : I0 B1 B2 B3 P4.
 Sans cette option, les trames-B ont les mêmes restrictions que
@@ -8373,8 +8373,8 @@ Désavantage\ : augmente de 2 trames le délais de décodage.
 .
 .TP
 .B (no)deblock
-Utilise un filtre atténuant l'effet de blocs (deblocking)
-(par défaut\ : activé).
+Utilise le filtre intégré (inloop) atténuant l'effet de blocs
+(deblocking) (par défaut\ : activé).
 Étant donné qu'il prend assez peu de temps au regard de l'amélioration
 visuelle qu'il procure, il est déconseillé de le désactiver.
 .
@@ -8405,11 +8405,15 @@ dû au filtre seraient plus visibles que l'effet de bloc original.
 .
 .TP
 .B (no)cabac
-Utilise CABAC (codage de l'information adaptée en fonction du contexte\ :
-Context-Adaptive Binary Arithmetic Coding) (par défaut\ : activé).
+Utilise CABAC (codage de l'information adaptée en fonction du contexte
+avec un codes de longueur variable non entière\ : Context-Adaptive Binary
+Arithmetic Coding) (par défaut\ : activé).
 Ralentit un peu l'encodage mais permet d'économiser 10-15% du bitrate.
 À moins que vous ayez besoin de décoder à vitesse élevée, vous ne
 devriez jamais le désactiver.
+Si vous désactivez cette option, le codage CAVLC (codage de l'information
+adaptée en fonction du contexte avec un codes de longueur variable
+entière\ : Context-Adaptive Variable Length Coding) est utilisé à la place.
 .
 .TP
 .B qp_min=<1\-51> (ABR ou deux passes)
@@ -8478,7 +8482,7 @@ progressive.
 .
 .TP
 .B zones=<zone0>[/\:<zone1>[/\:...]] (ABR ou deux passes)
-Redéfinition de la qualité de certaines partie du film
+Redéfinition de la qualité de certaines parties du film
 (crédits, générique de fin, ...).
 Chaque zone est définie par le triplet
 <trame de début>,<trame de fin>,<option> où option peut être
@@ -8575,10 +8579,21 @@ qu'un petit objet en mouvement sera mieux codé par des petits blocs.
 Taille de transformée spatiale adaptative\ : autorise les macro-blocs
 à décider entre 4x4 et 8x8 DCT.
 Sans cette option, uniquement le type 4x4 DCT est utilisé.
+Appartient au "High Profile" de la norme h264.
 .
 .TP
 .B me=<1\-4>
 Défini l'algorithme d'estimation du mouvement fullpixel.
+Suivant chaque itérations, les macroblocs sont parcourus pour
+déterminer les vecteurs de mouvement des blocs de pixels.
+On retient celui qui donne la distorsion la plus faible.
+A partir de là, on teste les vecteurs de mouvement voisins.
+La méthode qui est utilisée ici permet donc de définir le nombre
+de vecteurs voisins qui seront testés.
+Pour se qui la recherche en "diamant", la méthode consiste à
+tester les 4 vecteurs de mouvements voisins.
+Pour la recherche hexagonale, c'est les 6 vecteurs de mouvement
+voisins. 
 .PD 0
 .RSs
 .IPs 1
