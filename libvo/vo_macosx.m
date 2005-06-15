@@ -27,11 +27,12 @@ MPlayerOpenGLView *mpGLView;
 NSAutoreleasePool *autoreleasepool;
 OSType pixelFormat;
 
-//Device
-static int device_width;
-static int device_height;
-static int device_id;
-static GDHandle device_handle;
+//Screen
+int screen_id;
+BOOL screen_force;
+NSRect screen_frame;
+NSScreen *screen_handle;
+NSArray *screen_array;
 
 //image
 unsigned char *image_data;
@@ -86,27 +87,22 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	int i;
-	
-	//Get Main device info///////////////////////////////////////////////////
-	device_handle = GetMainDevice();
-	
-	for(i=0; i<device_id; i++)
+
+	//init screen
+	screen_array = [NSScreen screens];
+	if(screen_id < [screen_array count])
 	{
-		device_handle = GetNextDevice(device_handle);
-		
-		if(device_handle == NULL)
-		{
-			mp_msg(MSGT_VO, MSGL_FATAL, "Get device error: Device ID %d do not exist, falling back to main device.\n", device_id);
-			device_handle = GetMainDevice();
-			device_id = 0;
-			break;
-		}
+		screen_handle = [screen_array objectAtIndex:screen_id];
 	}
+	else
+	{
+		mp_msg(MSGT_VO, MSGL_FATAL, "Get device error: Device ID %d do not exist, falling back to main device.\n", screen_id);
+		screen_handle = [screen_array objectAtIndex:0];
+		screen_id = 0;
+	}
+	screen_frame = [screen_handle frame];
 	
-	NSRect device_rect = [[NSScreen mainScreen] frame];
-	device_width = device_rect.size.width;
-	device_height = device_rect.size.height;
-	monitor_aspect = (float)device_width/(float)device_height;
+	monitor_aspect = (float)screen_frame.size.width/(float)screen_frame.size.height;
 	
 	//misc mplayer setup
 	image_width = width;
@@ -128,7 +124,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	panscan_init();
 	aspect_save_orig(width,height);
 	aspect_save_prescale(d_width,d_height);
-	aspect_save_screenres(device_width,device_height);
+	aspect_save_screenres(screen_frame.size.width, screen_frame.size.height);
 	aspect((int *)&d_width,(int *)&d_height,A_NOZOOM);
 	
 	movie_aspect = (float)d_width/(float)d_height;
@@ -208,21 +204,6 @@ static uint32_t preinit(const char *arg)
 {
 	int parse_err = 0;
 	
-    if(arg) 
-    {
-        char *parse_pos = (char *)&arg[0];
-        while (parse_pos[0] && !parse_err) 
-		{
-			if (strncmp (parse_pos, "device_id=", 10) == 0)
-			{
-				parse_pos = &parse_pos[10];
-                device_id = strtol(parse_pos, &parse_pos, 0);
-            }
-            if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
-            else if (parse_pos[0]) parse_err = 1;
-        }
-    }
-	
 	#if !defined (MACOSX_FINDER_SUPPORT) || !defined (HAVE_SDL)
 	//this chunk of code is heavily based off SDL_macosx.m from SDL 
 	//it uses an Apple private function to request foreground operation
@@ -242,6 +223,22 @@ static uint32_t preinit(const char *arg)
 		}
 	}
 	#endif
+
+    if(arg) 
+    {
+        char *parse_pos = (char *)&arg[0];
+        while (parse_pos[0] && !parse_err) 
+		{
+			if (strncmp (parse_pos, "device_id=", 10) == 0)
+			{
+				parse_pos = &parse_pos[10];
+				screen_id = strtol(parse_pos, &parse_pos, 0);
+				screen_force = YES;
+            }
+            if (parse_pos[0] == ':') parse_pos = &parse_pos[1];
+            else if (parse_pos[0]) parse_err = 1;
+        }
+    }
 
 	NSApplicationLoad();
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
@@ -303,6 +300,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	NSRect frame;
 	CVReturn error = kCVReturnSuccess;
 	
+	//config window
 	aspect((int *)&d_width, (int *)&d_height,A_NOZOOM);
 	frame = NSMakeRect(0, 0, d_width, d_height);
 	[window setContentSize: frame.size];
@@ -328,6 +326,10 @@ static uint32_t control(uint32_t request, void *data, ...)
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
 	
+	//show window
+	[window center];
+	[window makeKeyAndOrderFront:mpGLView];
+	
 	if(vo_rootwin)
 		[mpGLView rootwin];	
 
@@ -336,10 +338,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 	
 	if(vo_ontop)
 		[mpGLView ontop];
-		
-	//show window
-	[window center];
-	[window makeKeyAndOrderFront:mpGLView];
 }
 
 /*
@@ -659,7 +657,11 @@ static uint32_t control(uint32_t request, void *data, ...)
 {
 	static NSRect old_frame;
 	static NSRect old_view_frame;
-	NSRect device_rect = [[window screen] frame];
+	
+	if(screen_force)
+		screen_frame = [screen_handle frame];
+	else
+		screen_frame = [[window screen] frame];
 
 	panscan_calc();
 			
@@ -675,13 +677,13 @@ static uint32_t control(uint32_t request, void *data, ...)
 		}
 		
 		old_frame = [window frame];	//save main window size & position
-		[window setFrame:device_rect display:YES animate:animate]; //zoom-in window with nice useless sfx
+		[window setFrame:screen_frame display:YES animate:animate]; //zoom-in window with nice useless sfx
 		old_view_frame = [self bounds];
 		
 		//fix origin for multi screen setup
-		device_rect.origin.x = 0;
-		device_rect.origin.y = 0;
-		[self setFrame:device_rect];
+		screen_frame.origin.x = 0;
+		screen_frame.origin.y = 0;
+		[self setFrame:screen_frame];
 		[self setNeedsDisplay:YES];
 		[window setHasShadow:NO];
 		isFullscreen = 1;
