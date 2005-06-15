@@ -134,21 +134,11 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 	movie_aspect = (float)d_width/(float)d_height;
 	old_movie_aspect = movie_aspect;
 	
-	//init OpenGL View
-	mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, d_width, d_height) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
-	[mpGLView initView];
-	
 	vo_fs = flags & VOFLAG_FULLSCREEN;
-	
-	if(vo_rootwin)
-		[mpGLView rootwin];	
-
-	if(vo_fs)
-		[mpGLView fullscreen: NO];
-	
-	if(vo_ontop)
-		[mpGLView ontop];
-	
+		
+	//config OpenGL View
+	[mpGLView config];
+		
 	return 0;
 }
 
@@ -255,7 +245,11 @@ static uint32_t preinit(const char *arg)
 
 	NSApplicationLoad();
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
-		
+	
+	mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
+	[mpGLView autorelease];
+	[mpGLView preinit];
+	
     return 0;
 }
 
@@ -279,30 +273,43 @@ static uint32_t control(uint32_t request, void *data, ...)
 // NSOpenGLView Subclass
 //////////////////////////////////////////////////////////////////////////
 @implementation MPlayerOpenGLView
-- (void) initView
+- (id) preinit
 {
-	long swapInterval = 1;
-	NSRect frame = [self frame];
-	CVReturn error = kCVReturnSuccess;
-	
 	//init menu
 	[self initMenu];
 	
-	//create OpenGL Context
-	glContext = [[NSOpenGLContext alloc] initWithFormat:[NSOpenGLView defaultPixelFormat] shareContext:nil];	
-	
-	
 	//create window
-	window = [[NSWindow alloc]	initWithContentRect:NSMakeRect(0, 0, frame.size.width, frame.size.height) 
+	window = [[NSWindow alloc]	initWithContentRect:NSMakeRect(0, 0, 0, 0) 
 								styleMask:NSTitledWindowMask|NSTexturedBackgroundWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask
 								backing:NSBackingStoreBuffered defer:NO];
 
-	[window setDelegate:self];
-	[window setContentView:self];
-	[window setInitialFirstResponder:self];
+	[window autorelease];
+	[window setDelegate:mpGLView];
+	[window setContentView:mpGLView];
+	[window setInitialFirstResponder:mpGLView];
 	[window setAcceptsMouseMovedEvents:YES];
     [window setTitle:@"MPlayer - The Movie Player"];
-	[window center];	
+	
+	isFullscreen = 0;
+}
+
+- (id) config
+{
+	uint32_t d_width;
+	uint32_t d_height;
+	
+	long swapInterval = 1;
+	
+	NSRect frame;
+	CVReturn error = kCVReturnSuccess;
+	
+	aspect((int *)&d_width, (int *)&d_height,A_NOZOOM);
+	frame = NSMakeRect(0, 0, d_width, d_height);
+	[window setContentSize: frame.size];
+	
+	//create OpenGL Context
+	glContext = [[NSOpenGLContext alloc] initWithFormat:[NSOpenGLView defaultPixelFormat] shareContext:nil];	
+	[glContext autorelease];
 	
 	[self setOpenGLContext:glContext];
 	[glContext setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
@@ -321,10 +328,18 @@ static uint32_t control(uint32_t request, void *data, ...)
 	if(error != kCVReturnSuccess)
 		mp_msg(MSGT_VO, MSGL_ERR,"Failed to create OpenGL texture(%d)\n", error);
 	
-	//show window
-	[window makeKeyAndOrderFront:self];
+	if(vo_rootwin)
+		[mpGLView rootwin];	
+
+	if(vo_fs)
+		[mpGLView fullscreen: NO];
 	
-	isFullscreen = 0;
+	if(vo_ontop)
+		[mpGLView ontop];
+		
+	//show window
+	[window center];
+	[window makeKeyAndOrderFront:mpGLView];
 }
 
 /*

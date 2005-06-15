@@ -49,7 +49,8 @@
 - (BOOL) resignFirstResponder;
 
 //window & rendering
-- (void) initView;
+- (id) preinit;
+- (id) config;
 - (void) prepareOpenGL;
 - (void) render;
 - (void) reshape;
