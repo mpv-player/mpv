@@ -8175,7 +8175,7 @@ exhaustive search (very slow)
 radius of exhaustive or multi-hexagon motion search (default: 16)
 .
 .TP
-.B subq=<1\-5>
+.B subq=<1\-6>
 Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
 estimation decision process.
@@ -8200,7 +8200,10 @@ Then finishes the quarterpixel refinement for that type.
 .br
 5: Runs best quality quarterpixel precision motion estimation on all
 candidate macroblock types, before selecting the best type.
-(best, default)
+(default)
+.br
+6: Enables rate-distortion optimization of macroblock types in
+I- and P-frames. (best)
 .REss
 In the above, "all candidates" doesn't exactly mean all enabled types:
 4x4, 4x8, 8x4 are tried only if 8x8 is better than 16x16.
@@ -8209,7 +8212,7 @@ In the above, "all candidates" doesn't exactly mean all enabled types:
 .B (no)chroma_me
 Takes into account chroma information during subpixel motion search
 (default: enabled).
-Requires subq=5.
+Requires subq>=5.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
