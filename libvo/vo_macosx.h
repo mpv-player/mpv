@@ -23,6 +23,7 @@
 	CVPixelBufferRef currentFrameBuffer;
 	CVOpenGLTextureCacheRef textureCache;
 	CVOpenGLTextureRef texture;
+	NSRect textureFrame;
 	
     GLfloat	lowerLeft[2]; 
     GLfloat lowerRight[2]; 
