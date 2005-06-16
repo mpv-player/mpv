@@ -240,8 +240,9 @@ static uint32_t preinit(const char *arg)
         }
     }
 
+	NSApplicationLoad();
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
-	[NSApplication sharedApplication];
+	NSApp = [NSApplication sharedApplication];
 	
 	mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
 	[mpGLView autorelease];
