@@ -2497,9 +2497,9 @@ int xv_test_ck( void * arg )
 {
   strarg_t * strarg = (strarg_t *)arg;
 
-  if ( strncmp( "use", strarg->str, 3 ) == 0 ||
-       strncmp( "set", strarg->str, 3 ) == 0 ||
-       strncmp( "cur", strarg->str, 3 ) == 0    )
+  if ( strargcmp( strarg, "use" ) == 0 ||
+       strargcmp( strarg, "set" ) == 0 ||
+       strargcmp( strarg, "cur" ) == 0    )
   {
     return 1;
   }
@@ -2511,9 +2511,9 @@ int xv_test_ckm( void * arg )
 {
   strarg_t * strarg = (strarg_t *)arg;
 
-  if ( strncmp( "bg", strarg->str, 2 ) == 0 ||
-       strncmp( "man", strarg->str, 3 ) == 0 ||
-       strncmp( "auto", strarg->str, 4 ) == 0    )
+  if ( strargcmp( strarg, "bg" ) == 0 ||
+       strargcmp( strarg, "man" ) == 0 ||
+       strargcmp( strarg, "auto" ) == 0    )
   {
     return 1;
   }

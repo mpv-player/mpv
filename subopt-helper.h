@@ -43,4 +43,7 @@ typedef struct strarg_s
 int int_non_neg( int * i );
 int int_pos( int * i );
 
+int strargcmp(strarg_t *arg, char *str);
+int strargcasecmp(strarg_t *arg, char *str);
+
 #endif
