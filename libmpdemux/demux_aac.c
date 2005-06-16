@@ -12,7 +12,6 @@
 #include "stheader.h"
 
 #include "bswap.h"
-#include "../unrarlib.h"
 #include "ms_hdr.h"
 
 extern void resync_audio_stream(sh_audio_t *sh_audio);
