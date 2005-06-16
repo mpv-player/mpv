@@ -5,3 +5,6 @@ to provide DGA everywhere where it's possible (unline X11).
 I hope that these drivers will be portable same as X11 (not only on *nix).
 
 For detail on how to develop new driver see main/DOCS/tech/vidix.txt
+
+IMPORTANT: These are NOT linux kernel drivers. If you are looking for
+the mga_vid linux kernel drivers, please cd ../drivers thanks.
