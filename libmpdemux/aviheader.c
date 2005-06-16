@@ -332,6 +332,7 @@ while(1){
 		sh_video->aspect = GET_AVI_ASPECT(vprp->dwFrameAspectRatio);
 	}
 	if(verbose>=1) print_vprp(vprp);
+	free(vprp);
 	break;
     }
     case mmioFOURCC('d', 'm', 'l', 'h'): {
