@@ -691,15 +691,6 @@ static int fixup_open(stream_t *stream,int seekable) {
 		stream->streaming_ctrl = NULL;
 		return STREAM_UNSUPORTED;
 	}
-	if(stream->streaming_ctrl->buffering) {
-		if(stream_cache_size<0) {
-			// cache option not set, will use our computed value.
-			// buffer in KBytes, *5 because the prefill is 20% of the buffer.
-			stream_cache_size = (stream->streaming_ctrl->prebuffer_size/1024)*5;
-			if( stream_cache_size<64 ) stream_cache_size = 64;	// 16KBytes min buffer
-		}
-		mp_msg(MSGT_NETWORK,MSGL_INFO,"Cache size set to %d KBytes, seekable: %d\n", stream_cache_size, seekable);
-	}
 
 	fixup_network_stream_cache(stream);
 	return STREAM_OK;
