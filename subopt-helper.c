@@ -247,10 +247,21 @@ static char const * parse_int( char const * const str, int * const valp )
   return endp;
 }
 
-static char const * parse_str( char const * const str, strarg_t * const valp )
+#define QUOTE_CHAR '%'
+static char const * parse_str( char const * str, strarg_t * const valp )
 {
   char const * match = strchr( str, ':' );
 
+  if (str[0] == QUOTE_CHAR) {
+    int len = 0;
+    str = &str[1];
+    len = (int)strtol(str, (char **)&str, 0);
+    if (!str || str[0] != QUOTE_CHAR || (len > strlen(str) - 1))
+      return NULL;
+    str = &str[1];
+    match = &str[len];
+  }
+  else
   if ( !match )
     match = &str[strlen(str)];
 
