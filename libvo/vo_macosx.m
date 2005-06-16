@@ -55,6 +55,7 @@ extern float movie_aspect;
 static float old_movie_aspect;
 extern float vo_panscan;
 
+static float winAlpha = 1;
 static int int_pause = 0;
 
 static vo_info_t info = 
@@ -133,7 +134,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		
 	//config OpenGL View
 	[mpGLView config];
-		
+	
 	return 0;
 }
 
@@ -412,7 +413,11 @@ static uint32_t control(uint32_t request, void *data, ...)
 	NSRect frame;
 	
 	aspect((int *)&d_width, (int *)&d_height,A_NOZOOM);
-	//if(sender == kQuitCmd)
+	
+	if(sender == kQuitCmd)
+	{
+		mplayer_put_key(KEY_ESC);
+	}
 	
 	if(sender == kHalfScreenCmd)
 	{
@@ -761,6 +766,19 @@ static uint32_t control(uint32_t request, void *data, ...)
 		UpdateSystemActivity(UsrActivity);
 		lastTime = curTime;
 	}
+}
+
+/*
+	From NSView, respond to key equivalents.
+*/
+- (BOOL)performKeyEquivalent:(NSEvent *)theEvent
+{
+	switch([theEvent keyCode])
+    {
+		case 0x21: [window setAlphaValue: winAlpha-=0.05]; return YES;
+		case 0x1e: [window setAlphaValue: winAlpha+=0.05]; return YES;
+    }
+	return NO;
 }
 
 /*
