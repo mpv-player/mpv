@@ -1261,7 +1261,15 @@ static int get_obj_params(char* opt_name, char* name,char* params,
     last_ptr = ptr+1;
   }
   if(r < 0) return r;
+  if (!last_ptr[0]) // count an empty field at the end, too
+    nold++;
+  if (nold > nopts) {
+    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "Too many options for %s\n", name);
+    return M_OPT_OUT_OF_RANGE;
+  }
   if(!_ret) // Just test
+    return 1;
+  if (n == 0) // No options or only empty options
     return 1;
 
   ret = malloc((n+2)*2*sizeof(char*));
@@ -1308,6 +1316,8 @@ static int parse_obj_params(m_option_t* opt,char *name,
   if(r < 0)
     return r;
   if(!dst)
+    return 1;
+  if (!opts) // no arguments given
     return 1;
 
   for(r = 0 ; opts[r] ; r += 2)
