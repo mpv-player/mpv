@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <limits.h>
 #include <audio/audiolib.h>
 
 #include "config.h"
@@ -102,7 +103,7 @@ static ao_info_t info =
 {
 	"NAS audio output",
 	"nas",
-	"Tobias Diedrich",
+	"Tobias Diedrich <ranma+mplayer@tdiedrich.de>",
 	""
 };
 
@@ -117,10 +118,10 @@ struct ao_nas_data {
 
 	void *client_buffer;
 	void *server_buffer;
-	int client_buffer_size;
-	int client_buffer_used;
-	int server_buffer_size;
-	int server_buffer_used;
+	unsigned int client_buffer_size;
+	unsigned int client_buffer_used;
+	unsigned int server_buffer_size;
+	unsigned int server_buffer_used;
 	pthread_mutex_t buffer_mutex;
 
 	pthread_t event_thread;
@@ -153,19 +154,22 @@ static int nas_readBuffer(struct ao_nas_data *nas_data, int num)
 		pthread_mutex_unlock(&nas_data->buffer_mutex);
 		return 0;
 	}
-	if (nas_data->client_buffer_used < num)
+	if (num > nas_data->client_buffer_used)
 		num = nas_data->client_buffer_used;
 
 	/*
 	 * It is not appropriate to call AuWriteElement() here because the
 	 * buffer is locked and delays writing to the network will cause
 	 * other threads to block waiting for buffer_mutex.  Instead the
-	 * data is copied to "server_buffer" and written it to the network
+	 * data is copied to "server_buffer" and written to the network
 	 * outside of the locked section of code.
 	 *
 	 * (Note: Rather than these two buffers, a single circular buffer
 	 *  could eliminate the memcpy/memmove steps.)
 	 */
+	/* make sure we don't overflow the buffer */
+	if (num > nas_data->server_buffer_size)
+		num = nas_data->server_buffer_size;
 	memcpy(nas_data->server_buffer, nas_data->client_buffer, num);
 
 	nas_data->client_buffer_used -= num;
@@ -183,17 +187,22 @@ static int nas_readBuffer(struct ao_nas_data *nas_data, int num)
 	return num;
 }
 
-static void nas_writeBuffer(struct ao_nas_data *nas_data, void *data, int len)
+static int nas_writeBuffer(struct ao_nas_data *nas_data, void *data, int len)
 {
 	pthread_mutex_lock(&nas_data->buffer_mutex);
 	mp_msg(MSGT_AO, MSGL_DBG2, "ao_nas: nas_writeBuffer(): len=%d client=%d/%d server=%d/%d\n",
 			len, nas_data->client_buffer_used, nas_data->client_buffer_size,
 			nas_data->server_buffer_used, nas_data->server_buffer_size);
 
+	/* make sure we don't overflow the buffer */
+	if (len > nas_data->client_buffer_size - nas_data->client_buffer_used)
+		len = nas_data->client_buffer_size - nas_data->client_buffer_used;
 	memcpy(nas_data->client_buffer + nas_data->client_buffer_used, data, len);
 	nas_data->client_buffer_used += len;
 
 	pthread_mutex_unlock(&nas_data->buffer_mutex);
+
+	return len;
 }
 
 static int nas_empty_event_queue(struct ao_nas_data *nas_data)
@@ -254,9 +263,13 @@ static AuBool nas_event_handler(AuServer *aud, AuEvent *ev, AuEventHandlerRec *h
 		event->num_bytes,
 		nas_data->expect_underrun);
 
+	if (event->num_bytes > INT_MAX) {
+		mp_msg(MSGT_AO, MSGL_ERR, "ao_nas: num_bytes > 2GB, server buggy?\n");
+	}
+
+	if (event->num_bytes > nas_data->server_buffer_used)
+		event->num_bytes = nas_data->server_buffer_used;
 	nas_data->server_buffer_used -= event->num_bytes;
-	if (nas_data->server_buffer_used < 0)
-		nas_data->server_buffer_used = 0;
 
 	switch (event->reason) {
 	case AuReasonWatermark:
@@ -569,7 +582,7 @@ static int play(void* data,int len,int flags)
 		   ao_data.outburst;
 	pthread_mutex_unlock(&nas_data->buffer_mutex);
 
-	nas_writeBuffer(nas_data, data, writelen);
+	writelen = nas_writeBuffer(nas_data, data, writelen);
 
 	if (nas_data->state != AuStateStart &&
 	    maxbursts == playbursts) {
