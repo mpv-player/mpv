@@ -7851,11 +7851,12 @@ Constant bitrate can be achieved by combining this with vbv_maxrate,
 at significant reduction in quality.
 .
 .TP
-.B qp_constant=<1\-51>
+.B qp_constant=<0\-51>
 This selects the quantizer to use for P-frames.
 I- and B-frames are offset from this value by ip_factor and pb_factor, respectively.
 20\-40 is a useful range (default: 26).
 Lower values result in better fidelity, but higher bitrates.
+0 is lossless.
 Note that quantization in H.264 works differently from MPEG-1/2/4:
 H.264's quantization parameter (QP) is on a logarithmic scale.
 The mapping is approximately H264QP = 12 + 6*log2(MPEGQP).

@@ -107,7 +107,7 @@ static int log_level = 2;
 
 m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
-    {"qp_constant", &qp_constant, CONF_TYPE_INT, CONF_RANGE, 1, 51, NULL},
+    {"qp_constant", &qp_constant, CONF_TYPE_INT, CONF_RANGE, 0, 51, NULL},
     {"frameref", &frame_ref, CONF_TYPE_INT, CONF_RANGE, 1, 16, NULL},
     {"keyint", &keyint_max, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
     {"keyint_min", &keyint_min, CONF_TYPE_INT, CONF_RANGE, 1, 24000000, NULL},
