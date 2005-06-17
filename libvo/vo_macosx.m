@@ -277,7 +277,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	[self initMenu];
 	
 	//create window
-	window = [[NSWindow alloc]	initWithContentRect:NSMakeRect(0, 0, 0, 0) 
+	window = [[NSWindow alloc]	initWithContentRect:NSMakeRect(0, 0, 100, 100) 
 								styleMask:NSTitledWindowMask|NSTexturedBackgroundWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask
 								backing:NSBackingStoreBuffered defer:NO];
 
