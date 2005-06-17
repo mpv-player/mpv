@@ -1,4 +1,4 @@
-.\" synced with 1.1006
+.\" synced with 1.1010
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "06 Juin 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "17 Juin 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -401,6 +401,22 @@ Chaque option a son opposé, par ex.\& l'inverse de l'option
 Si une option est documentée comme (XXX uniquement), cela veut dire
 qu'elle ne fonctionnera uniquement si vous activez l'option XXX ou
 que XXX a été compilé dans mplayer.
+.PP
+.I NOTE\ :
+.PD 0
+.RSs
+L'analyseur syntaxique de sous-options (suboption parser), (utilisé par exemple par les sous-options de \-ao pcm) gère un type particulier d'échappement de chaîne de caractère destiné à être utilisé par les IHM externes.
+.PP
+Il suit le format suivant\ :
+.PP
+%n%chaîne_de_longueur_n
+.PP
+Example d'utilisation\ :
+.PP
+mplayer -ao pcm:file=%10%C:test.wav test.avi
+.RE
+.PD 1
+.PP
 Vous pouvez placer toutes les options dans un fichier de configuration qui sera
 lu à chaque exécution de MPlayer.
 Le fichier de configuration général 'mplayer.conf' se trouve dans le répertoire
@@ -8224,11 +8240,12 @@ cette option accompagnée de vbv_maxrate, pour une qualité finale
 significativement moins bonne.
 .
 .TP
-.B qp_constant=<1\-51>
+.B qp_constant=<0\-51>
 Définit le quantum à utiliser.
 Une valeur comprise dans l'intervalle 20-40 semble convenir
 (par défaut\ : 26).
 Une valeur plus faible code l'image plus fidèlement, mais prend plus de place.
+0 est le mode sans perte (lossless).
 Notez que la quantification dans H.264 fonctionne différemment de MPEG-1/2/4\ :
 l'échelle des paramètres de quantification (QP) de H.264 est logarithmique.
 L'équivalence est approximativement H264QP = 12 + 6*log2(MPEGQP).
@@ -8613,7 +8630,7 @@ rayon de de la recherche exhaustive et multi-hexagonale de mouvement
 (par défaut\ 16)
 .
 .TP
-.B subq=<1\-5>
+.B subq=<1\-6>
 Ajuste la qualité d'affinement de subpel.
 Ce paramètre contrôle le compromis qualité/\:vitesse lié aux décisions du
 processus d'estimation du mouvement.
@@ -8640,7 +8657,10 @@ Puis termine l'affinement quarterpixel pour ce type
 .br
 5: Effectue la recherche de mouvement de la meilleure qualité sur tous les
 types de macro-blocs candidats, avant de choisir le meilleur type.
-(meilleur, par défaut)
+(par défaut)
+.br
+6: Active la sélection des macro-blocs en fonction de leur taux de distortion,
+pour les trames-I et P (le meilleur).
 .REss
 Ci-dessus, le terme "tous les candidats" ne signifie pas forcément tous les
 types possibles\ : 4x4, 4x8 et 8x4 ne sont essayés que si 8x8 est meilleur que
@@ -8650,7 +8670,7 @@ types possibles\ : 4x4, 4x8 et 8x4 ne sont essayés que si 8x8 est meilleur que
 .B (no)chroma_me
 Utilise l'information chroma en plus de la luma lors de la recherche
 de mouvement sub pixel (par défaut\: activé).
-Nécessite subq=5.
+Nécessite subq>=5.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
