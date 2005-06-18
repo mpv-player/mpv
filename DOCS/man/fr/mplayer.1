@@ -1,4 +1,4 @@
-.\" synced with 1.1010
+.\" synced with 1.1012
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "17 Juin 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "19 Juin 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -352,7 +352,7 @@ Ajuste la fenêtre fenêtre vidéo à sa taille d'origine.
 Double la taille de la fenêtre vidéo.
 .IPs "command + f"
 Bascule en mode plein-écran (voir aussi \-fs).
-.IPs "command + [ et command + ]" (\-vo quartz uniquement)
+.IPs "command + [ et command + ]"
 Change l'alpha (transparence) de la fenêtre vidéo.
 .RE
 .PD 1
@@ -2129,10 +2129,6 @@ Ajuste le contraste du signal vidéo (par défaut\ : 0).
 N'est pas géré par tous les pilotes de sortie vidéo.
 .
 .TP
-.B \-dfbopts <valeur> (\-vo directfb uniquement)
-Définit une liste de paramètres pour le pilote de sortie vidéo directfb.
-.
-.TP
 .B \-display <nom> (X11 uniquement)
 Spécifier le nom d'hôte et le numéro d'affichage du serveur X sur lequel vous
 désirez afficher la vidéo.
@@ -2921,6 +2917,10 @@ mouvements saccadés lorsque vous regardez une vidéo entrelacée.
 .IPs layer=N
 Forcera l'utilisation de la couche dont l'ID est N pour la lecture
 (par défaut\ : -1 - auto).
+IPs dfbopts=<str>
+Définit une liste de paramètres DirectFB.
+.
+.TP
 .RE
 .PD 1
 .
