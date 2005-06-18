@@ -989,6 +989,8 @@ EOF
       if test "$proc" = "athlon-xp" || test "$proc" = "athlon-4" ; then
         cc_check -march=$proc $cpuopt=$proc || proc=error
       fi
+      _march="-march=$proc"
+      _mcpu="$cpuopt=$proc"
       if test "$proc" = "error" ; then
         echores "Your $_cc does not even support \"athlon-xp\" for '-march' and '$cpuopt'."
         _mcpu=""
@@ -999,8 +1001,6 @@ EOF
       _mcpu=""
     fi
     
-    _march="-march=$proc"
-    _mcpu="$cpuopt=$proc"
     _optimizing=""
 
     echores "$proc"
