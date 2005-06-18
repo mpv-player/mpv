@@ -205,7 +205,7 @@ m_option_t mplayer_opts[]={
 #endif
 #ifdef HAVE_DIRECTFB
 #if DIRECTFBVERSION > 912
-	{"dfbopts", &dfb_params, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"dfbopts", "-dfbopts is deprecated, use -vf directfb:dfbopts=... instead\n", CONF_TYPE_PRINT, 0, 0, 0, NULL},
 #endif
 #endif
 

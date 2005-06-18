@@ -44,6 +44,7 @@
 #include "sub.h"
 #include "mp_msg.h"
 #include "aspect.h"
+#include "subopt-helper.h"
 
 #ifndef min
 #define min(x,y) (((x)<(y))?(x):(y))
@@ -128,7 +129,6 @@ static void (*draw_alpha_p)(int w, int h, unsigned char *src,
 ******************************/
 
 /* command line/config file options */
-char *dfb_params;
 static int layer_id = -1;
 static int buffer_mode = 1;
 static int use_input = 1;
@@ -143,103 +143,57 @@ if (frame && framelocked) frame->Unlock(frame);
 if (primary && primarylocked) primary->Unlock(primary);
 }
 
+static int get_parity(strarg_t *arg) {
+  if (strargcmp(arg, "top") == 0)
+    return 0;
+  if (strargcmp(arg, "bottom") == 0)
+    return 1;
+  return -1;
+}
+
+static int check_parity(void *arg) {
+  return get_parity(arg) != -1;
+}
+
+static int get_mode(strarg_t *arg) {
+  if (strargcmp(arg, "single") == 0)
+    return 1;
+  if (strargcmp(arg, "double") == 0)
+    return 2;
+  if (strargcmp(arg, "triple") == 0)
+    return 3;
+  return 0;
+}
+
+static int check_mode(void *arg) {
+  return get_mode(arg) != 0;
+}
 
 static uint32_t preinit(const char *arg)
 {
     DFBResult ret;
+    strarg_t mode_str = {0, NULL};
+    strarg_t par_str = {0, NULL};
+    strarg_t dfb_params = {0, NULL};
+    opt_t subopts[] = {
+      {"input",       OPT_ARG_BOOL, &use_input,  NULL},
+      {"buffermode",  OPT_ARG_STR,  &mode_str,   check_mode},
+      {"fieldparity", OPT_ARG_STR,  &par_str,    check_parity},
+      {"layer",       OPT_ARG_INT,  &layer_id,   NULL},
+      {"dfbopts",     OPT_ARG_STR,  &dfb_params, NULL},
+      {NULL}
+    };
 
     mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Preinit entered\n");
 
     if (dfb) return 0; // we are already inited!
 
+    // set defaults
     buffer_mode = 1 + vo_doublebuffering; // honor -double switch
-
-// config stuff - borrowed from dfbmga (to be as compatible as it could be :-)
-    
-     if (vo_subdevice) {
-          int show_help = 0;
-          int opt_no = 0;
-          while (*vo_subdevice != '\0') {
-               if (!strncmp(vo_subdevice, "input", 5)) {
-                    use_input = !opt_no;
-                    vo_subdevice += 5;
-                    opt_no = 0;
-               } else if (!strncmp(vo_subdevice, "buffermode=", 11)) {
-                    if (opt_no) {
-                         show_help = 1;
-                         break;
-                    }
-                    vo_subdevice += 11;
-                    if (!strncmp(vo_subdevice, "single", 6)) {
-                         buffer_mode = 1;
-                         vo_subdevice += 6;
-                    } else if (!strncmp(vo_subdevice, "double", 6)) {
-                         buffer_mode = 2;
-                         vo_subdevice += 6;
-                    } else if (!strncmp(vo_subdevice, "triple", 6)) {
-                         buffer_mode = 3;
-                         vo_subdevice += 6;
-                    } else {
-                         show_help = 1;
-                         break;
-                    }
-                    opt_no = 0;
-               } else if (!strncmp(vo_subdevice, "fieldparity=", 12)) {
-                    if (opt_no) {
-                         show_help = 1;
-                         break;
-                    }
-                    vo_subdevice += 12;
-                    if (!strncmp(vo_subdevice, "top", 3)) {
-                         field_parity = 0;
-                         vo_subdevice += 3;
-                    } else if (!strncmp(vo_subdevice, "bottom", 6)) {
-                         field_parity = 1;
-                         vo_subdevice += 6;
-                    } else {
-                         show_help = 1;
-                         break;
-                    }
-                    opt_no = 0;
-               } else if (!strncmp(vo_subdevice, "layer=", 6)) {
-		    int tmp=-1;
-                    if (opt_no) {
-                         show_help = 1;
-                         break;
-                    }
-                    vo_subdevice += 6;
-		    if (sscanf(vo_subdevice,"%i",&tmp)) {
-			 layer_id=tmp;
-			 mp_msg(MSGT_VO, MSGL_INFO,"DirectFB: Layer id is forced to %i\n",layer_id);
-		    } else {
-                         show_help = 1;
-                         break;
-                    }
-                    opt_no = 0;
-               } else if (!strncmp(vo_subdevice, "no", 2)) {
-                    if (opt_no) {
-                         show_help = 1;
-                         break;
-                    }
-                    vo_subdevice += 2;
-                    opt_no = 1;
-               } else if (*vo_subdevice == ':') {
-                    if (opt_no) {
-                         show_help = 1;
-                         break;
-                    }
-                    vo_subdevice++;
-                    opt_no = 0;
-               } else if (!strncmp(vo_subdevice, "help", 4)) {
-                    show_help = 1;
-                    vo_subdevice += 4;
-                    break;
-               } else  {
-                    vo_subdevice++;
-	       }
-          }
-	       
-          if (show_help) {
+    layer_id = -1;
+    use_input = 1;
+    field_parity = -1;
+     if (subopt_parse(arg, subopts) != 0) {
                mp_msg( MSGT_VO, MSGL_ERR,
                        "\n-vo directfb command line help:\n"
                        "Example: mplayer -vo directfb:layer=1:buffermode=single\n"
@@ -255,23 +209,29 @@ static uint32_t preinit(const char *arg)
                        "  fieldparity=(top|bottom)\n"
                        "    top      Top field first\n"
                        "    bottom   Bottom field first\n"
+		       "  dfbopts=<str>\n"
+		       "    Specify a parameter list for DirectFB\n"
                        "\n" );
                return -1;
-          }
      }
+    if (mode_str.len)
+      buffer_mode = get_mode(&mode_str);
+    if (par_str.len)
+      field_parity = get_parity(&par_str);
 
 
-	if (dfb_params)
+	if (dfb_params.len > 0)
 	{
 	    int argc = 2;
 	    char arg0[10] = "mplayer";
-	    char arg1[256] = "--dfb:";
+	    char *arg1 = (char *)malloc(dfb_params.len + 7);
 	    char* argv[3];
 	    char ** a;
 	    
 	    a = &argv[0];
 	    
-	    strncat(arg1,dfb_params,249);
+	    strcpy(arg1, "--dfb:");
+	    strncat(arg1, dfb_params.str, dfb_params.len);
 
 	    argv[0]=arg0;
 	    argv[1]=arg1;
@@ -279,6 +239,7 @@ static uint32_t preinit(const char *arg)
 	    
     	    DFBCHECK (DirectFBInit (&argc,&a));
 
+	    free(arg1);
 	} else {
 	
         DFBCHECK (DirectFBInit (NULL,NULL));
