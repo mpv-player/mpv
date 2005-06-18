@@ -10,7 +10,7 @@ MPlayer (1.0)
 
     Driver:
     * JACK audio output rewritten without bio2jack
-    * OpenGL video output modules support -geometry option
+    * OpenGL video output modules support -geometry and -wid options
 
     Decoders:
     * Indeo2 (RT21) support via lavc

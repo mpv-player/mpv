@@ -577,6 +577,13 @@ static void resize(int *x,int *y){
 	  glViewport( (vo_screenwidth-*x)/2, (vo_screenheight-*y)/2, *x, *y);
   } else { 
 	  //aspect(x, y, A_NOZOOM);
+#ifndef GL_WIN32
+	if (WinID >= 0) {
+	  int top = 0, left = 0, w = *x, h = *y;
+	  geometry(&top, &left, &w, &h, vo_screenwidth, vo_screenheight);
+	  glViewport(top, left, w, h);
+	} else
+#endif
 	  glViewport( 0, 0, *x, *y );
   }
 
@@ -686,6 +693,10 @@ static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 }
 
 static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
+  if (WinID >= 0) {
+    vo_window = WinID ? (Window)WinID : mRootWin;
+    return 0;
+  }
   if ( vo_window == None ) 
   {
 	XSizeHints hint;
@@ -890,7 +901,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 			draw_alpha_fnc=draw_alpha_32; break;
   }
 
-  if (initGl(d_width, d_height) == -1)
+  if (initGl(vo_dwidth, vo_dheight) == -1)
       return -1;
 #ifndef GL_WIN32
       if (vo_ontop) vo_x11_setlayer(mDisplay,vo_window, vo_ontop);
