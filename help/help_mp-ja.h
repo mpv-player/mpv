@@ -187,8 +187,8 @@ static char help_text[]=
 
 // muxer_*.c:
 #define MSGTR_TooManyStreams "ストリームが多過ぎる!"
-#define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxerが一つだけの音声ストリーマをサポートします!\n"
-#define MSGTR_IgnoringVideoStream "映像ストリーマを差し置きます!\n"
+#define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxerが一つだけの音声ストリームをサポートします!\n"
+#define MSGTR_IgnoringVideoStream "映像ストリームを差し置きます!\n"
 #define MSGTR_UnknownStreamType "警告: 未知のストリームタイプ: %d\n"
 #define MSGTR_WarningLenIsntDivisible "警告: samplesizeでlenが整除できない!\n"
 
