@@ -2,8 +2,18 @@ include ../config.mak
 
 CFLAGS = -I..
 
-OBJS = alaw-gen asfinfo avi-fix bios2dump cpuinfo dump_mp4 mem2dump movinfo \
-	png2raw subrip fastmemcpybench vivodump
+OBJS = alaw-gen \
+	asfinfo \
+	avi-fix \
+	bios2dump \
+	cpuinfo \
+	dump_mp4 \
+	mem2dump \
+	movinfo \
+	png2raw \
+	subrip \
+	fastmemcpybench \
+	vivodump \
 
 all: $(OBJS)
 
