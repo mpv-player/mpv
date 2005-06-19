@@ -7054,12 +7054,12 @@ Sets the comparison function for sub pel motion estimation
 (see mbcmp for available comparison functions) (default: 0).
 .
 .TP
-.B nssew=<0\-100>
+.B nssew=<0\-1000000>
 This setting controls NSSE weight, where larger weights will result in
 more noise.
 0 NSSE is identical to SSE
 You may find this useful if you prefer to keep some noise in your encoded
-video rather than filtering it away before encoding.
+video rather than filtering it away before encoding (default: 8).
 .
 .TP
 .B predia=<-99\-6>
@@ -7534,7 +7534,7 @@ autodetection of some decoders might be confused.
 .
 .TP
 .B max_bframes=<0\-4>
-Maximum number of B-frames to put between I/\:P-frames (default: 0).
+Maximum number of B-frames to put between I/\:P-frames (default: 2).
 .
 .TP
 .B bquant_ratio=<0\-1000>
