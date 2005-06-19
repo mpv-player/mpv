@@ -384,20 +384,16 @@ If an option is marked as (XXX only), it will only work in combination with
 the XXX option or if XXX is compiled in.
 .PP
 .I NOTE:
-.PD 0
-.RSs
 The suboption parser (used for example for -ao pcm suboptions) supports
 a special kind of string-escaping intended for use with external GUIs.
-.PP
+.br
 It has the following format:
-.PP
+.br
 %n%string_of_length_n
-.PP
-Usage example:
-.PP
+.br
+.I EXAMPLE:
+.br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
-.RE
-.PD 1
 .PP
 You can put all of the options in a configuration file which will be read
 every time MPlayer is run.
