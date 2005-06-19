@@ -40,18 +40,21 @@ MPlayer (1.0)
 
     Filters:
     * much faster version of spp filter (-vf fspp)
+    * remove_logo filter
 
     MEncoder:
     * audio encoding modularized
     * AAC (FAAC) audio encoding
     * border processing adaptive quantization in libavcodec
     * XviD's encoding zones and luminance masking
+    * raw audio muxer
 
     Ports:
     * improved timer function on Mac OS X
     * New Mac OS X "macosx" video output driver. Supported on OS X 10.4
       and 10.3 with QuickTime 7 (requires QuickTime 7 SDK to build on 10.3)
     * Mac OS X 10.4 (Tiger) fixes
+    * macosx audio output driver fixes
     * support for playing DVDs from the hard disk on Cygwin
     * DragonFly BSD support
 
