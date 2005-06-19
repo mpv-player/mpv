@@ -19,9 +19,40 @@ SUBDIRS += libdha vidix
 DO_MAKE = @ for i in $(SUBDIRS); do $(MAKE) -C $$i $@; done
 endif
 
-SRCS_COMMON = cpudetect.c codec-cfg.c spudec.c playtree.c playtreeparser.c asxparser.c vobsub.c subreader.c sub_cc.c find_sub.c m_config.c m_option.c parser-cfg.c m_struct.c edl.c
-SRCS_MENCODER = mencoder.c mp_msg-mencoder.c $(SRCS_COMMON) divx4_vbr.c libvo/aclib.c libvo/osd.c libvo/sub.c libvo/font_load.c libvo/font_load_ft.c xvid_vbr.c parser-mecmd.c
-SRCS_MPLAYER = mplayer.c mp_msg.c $(SRCS_COMMON) mixer.c parser-mpcmd.c subopt-helper.c
+SRCS_COMMON = asxparser.c \
+              codec-cfg.c \
+              cpudetect.c \
+              edl.c \
+              find_sub.c \
+              m_config.c \
+              m_option.c \
+              m_struct.c \
+              parser-cfg.c \
+              playtree.c \
+              playtreeparser.c \
+              spudec.c \
+              sub_cc.c \
+              subreader.c \
+              vobsub.c \
+
+SRCS_MENCODER = mencoder.c \
+                mp_msg-mencoder.c \
+                $(SRCS_COMMON) \
+                divx4_vbr.c \
+                libvo/aclib.c \
+                libvo/font_load.c \
+                libvo/font_load_ft.c \
+                libvo/osd.c \
+                libvo/sub.c \
+                parser-mecmd.c \
+                xvid_vbr.c \
+
+SRCS_MPLAYER = mplayer.c \
+               mp_msg.c \
+               $(SRCS_COMMON) \
+               mixer.c \
+               parser-mpcmd.c \
+               subopt-helper.c \
 
 ifeq ($(UNRARLIB),yes)
 SRCS_COMMON += unrarlib.c
@@ -30,12 +61,76 @@ endif
 OBJS_MENCODER = $(SRCS_MENCODER:.c=.o)
 OBJS_MPLAYER = $(SRCS_MPLAYER:.c=.o)
 
-VO_LIBS = $(AA_LIB) $(X_LIB) $(SDL_LIB) $(GGI_LIB) $(MP1E_LIB) $(MLIB_LIB) $(SVGA_LIB) $(DIRECTFB_LIB) $(CACA_LIB)
-AO_LIBS = $(ARTS_LIB) $(ESD_LIB) $(JACK_LIB) $(NAS_LIB) $(SGIAUDIO_LIB) $(POLYP_LIB)
-CODEC_LIBS = $(AV_LIB) $(FAME_LIB) $(MAD_LIB) $(VORBIS_LIB) $(THEORA_LIB) $(FAAD_LIB) $(LIBLZO_LIB) $(DECORE_LIB) $(XVID_LIB) $(DTS_LIB) $(PNG_LIB) $(Z_LIB) $(JPEG_LIB) $(ALSA_LIB) $(XMMS_LIB) $(X264_LIB)
-COMMON_LIBS = libmpcodecs/libmpcodecs.a $(W32_LIB) $(DS_LIB) libaf/libaf.a libmpdemux/libmpdemux.a input/libinput.a postproc/libswscale.a osdep/libosdep.a $(DVDREAD_LIB) $(CODEC_LIBS) $(FREETYPE_LIB) $(TERMCAP_LIB) $(CDPARANOIA_LIB) $(MPLAYER_NETWORK_LIB) $(WIN32_LIB) $(GIF_LIB) $(MACOSX_FRAMEWORKS) $(SMBSUPPORT_LIB) $(FRIBIDI_LIB) $(FONTCONFIG_LIB) $(ENCA_LIB)
+VO_LIBS = $(AA_LIB) \
+          $(X_LIB) \
+          $(SDL_LIB) \
+          $(GGI_LIB) \
+          $(MP1E_LIB) \
+          $(MLIB_LIB) \
+          $(SVGA_LIB) \
+          $(DIRECTFB_LIB) \
+          $(CACA_LIB) \
 
-CFLAGS = $(OPTFLAGS) -I. $(FREETYPE_INC) $(EXTRA_INC) $(CDPARANOIA_INC) $(SDL_INC) $(X11_INC) $(FRIBIDI_INC) $(DVB_INC) $(XVID_INC) $(FONTCONFIG_INC) $(CACA_INC) # -Wall
+AO_LIBS = $(ARTS_LIB) \
+          $(ESD_LIB) \
+          $(JACK_LIB) \
+          $(NAS_LIB) \
+          $(SGIAUDIO_LIB) \
+          $(POLYP_LIB) \
+
+CODEC_LIBS = $(AV_LIB) \
+             $(FAME_LIB) \
+             $(MAD_LIB) \
+             $(VORBIS_LIB) \
+             $(THEORA_LIB) \
+             $(FAAD_LIB) \
+             $(LIBLZO_LIB) \
+             $(DECORE_LIB) \
+             $(XVID_LIB) \
+             $(DTS_LIB) \
+             $(PNG_LIB) \
+             $(Z_LIB) \
+             $(JPEG_LIB) \
+             $(ALSA_LIB) \
+             $(XMMS_LIB) \
+             $(X264_LIB) \
+
+COMMON_LIBS = libmpcodecs/libmpcodecs.a \
+              $(W32_LIB) \
+              $(DS_LIB) \
+              libaf/libaf.a \
+              libmpdemux/libmpdemux.a \
+              input/libinput.a \
+              postproc/libswscale.a \
+              osdep/libosdep.a \
+              $(DVDREAD_LIB) \
+              $(CODEC_LIBS) \
+              $(FREETYPE_LIB) \
+              $(TERMCAP_LIB) \
+              $(CDPARANOIA_LIB) \
+              $(MPLAYER_NETWORK_LIB) \
+              $(WIN32_LIB) \
+              $(GIF_LIB) \
+              $(MACOSX_FRAMEWORKS) \
+              $(SMBSUPPORT_LIB) \
+              $(FRIBIDI_LIB) \
+              $(FONTCONFIG_LIB) \
+              $(ENCA_LIB) \
+
+CFLAGS = $(OPTFLAGS) -I. \
+         $(CACA_INC) \
+         $(CDPARANOIA_INC) \
+         $(DVB_INC) \
+         $(EXTRA_INC) \
+         $(FONTCONFIG_INC) \
+         $(FREETYPE_INC) \
+         $(FRIBIDI_INC) \
+         $(SDL_INC) \
+         $(X11_INC) \
+         $(XVID_INC) \
+
+#CFLAGS += -Wall
+
 ifeq ($(TOOLAME),yes)
 CFLAGS += $(TOOLAME_EXTRAFLAGS) 
 CODEC_LIBS += $(TOOLAME_LIB)
@@ -94,7 +189,18 @@ ifeq ($(MENCODER),yes)
 ALL_PRG += $(PRG_MENCODER)
 endif
 
-COMMON_DEPS = $(W32_DEP) $(DS_DEP) $(MP1E_DEP) $(AV_DEP) libmpdemux/libmpdemux.a libmpcodecs/libmpcodecs.a libao2/libao2.a osdep/libosdep.a postproc/libswscale.a input/libinput.a libvo/libvo.a libaf/libaf.a
+COMMON_DEPS = $(W32_DEP) \
+              $(DS_DEP) \
+              $(MP1E_DEP) \
+              $(AV_DEP) \
+              libmpdemux/libmpdemux.a \
+              libmpcodecs/libmpcodecs.a \
+              libao2/libao2.a \
+              osdep/libosdep.a \
+              postproc/libswscale.a \
+              input/libinput.a \
+              libvo/libvo.a \
+              libaf/libaf.a \
 
 ifeq ($(MP3LIB),yes)
 COMMON_DEPS += mp3lib/libMP3.a
@@ -248,11 +354,28 @@ ifeq ($(TARGET_WIN32),yes)
 OBJS_MPLAYER += osdep/mplayer-rc.o
 endif
 
+LIBS_MPLAYER = libvo/libvo.a \
+               libao2/libao2.a \
+               $(MENU_LIBS) \
+               $(VIDIX_LIBS) \
+               $(GUI_LIBS) \
+               $(COMMON_LIBS) \
+               $(GTK_LIBS) \
+               $(VO_LIBS) \
+               $(AO_LIBS) \
+               $(EXTRA_LIB)\
+               $(LIRC_LIB) \
+               $(LIRCC_LIB) \
+               $(STATIC_LIB) \
+               $(ARCH_LIB) \
+               $(I18NLIBS) \
+               $(MATH_LIB) \
+
 $(PRG):	$(MPLAYER_DEP)
     ifeq ($(TARGET_WIN32),yes)
 	windres -o osdep/mplayer-rc.o osdep/mplayer.rc
     endif
-	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(STATIC_LIB) $(ARCH_LIB) $(I18NLIBS) $(MATH_LIB)
+	$(CC) $(CFLAGS) -o $(PRG) $(OBJS_MPLAYER) $(LIBS_MPLAYER)
 
 mplayer.exe.spec.c: libmpcodecs/libmpcodecs.a
 	winebuild -fPIC -o mplayer.exe.spec.c -exe mplayer.exe -mcui \
@@ -266,8 +389,19 @@ mplayer_wine.so:	$(MPLAYER_DEP)
 	$(CC) $(CFLAGS) -shared -Wl,-Bsymbolic -o mplayer_wine.so mplayer_wine.spec.c $(OBJS_MPLAYER) libvo/libvo.a libao2/libao2.a $(MENU_LIBS) $(VIDIX_LIBS) $(GUI_LIBS) $(COMMON_LIBS) $(GTK_LIBS) $(VO_LIBS) $(AO_LIBS) $(EXTRA_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(STATIC_LIB) -lwine $(ARCH_LIB) $(MATH_LIB)
 
 ifeq ($(MENCODER),yes)
+LIBS_MENCODER = libmpcodecs/libmpencoders.a \
+                $(ENCORE_LIB) \
+                $(COMMON_LIBS) \
+                $(EXTRA_LIB) \
+                $(MLIB_LIB) \
+                $(LIRC_LIB) \
+                $(LIRCC_LIB) \
+                $(ARCH_LIB) \
+                $(I18NLIBS) \
+                $(MATH_LIB) \
+
 $(PRG_MENCODER): $(MENCODER_DEP)
-	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) libmpcodecs/libmpencoders.a $(ENCORE_LIB) $(COMMON_LIBS) $(EXTRA_LIB) $(MLIB_LIB) $(LIRC_LIB) $(LIRCC_LIB) $(ARCH_LIB) $(I18NLIBS) $(MATH_LIB)
+	$(CC) $(CFLAGS) -o $(PRG_MENCODER) $(OBJS_MENCODER) $(LIBS_MENCODER)
 endif
 
 codecs.conf.h: $(PRG_CFG) etc/codecs.conf
