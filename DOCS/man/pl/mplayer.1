@@ -1,4 +1,4 @@
-.\" synced with 1.1015
+.\" synced with 1.1018
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2321,7 +2321,7 @@ Je¿eli jest ona u¿yta ze sterownikiem wyj¶cia video directx, opcje \-screenw,
 W³±cza VBI dla sterowników wyj¶cia video vesa, dfbmga i svga.
 .
 .TP
-.B \-wid <ID\ okna>] (zobacz tak¿e \-guiwid, \-geometry) (tylko X11 i DirectX)
+.B \-wid <ID\ okna> (zobacz tak¿e \-guiwid) (tylko X11, OpenGL i DirectX)
 Przekazuje MPlayerowi, by do³±czy³ siê do instniej±cego okna.
 Przydatne, by osadziæ MPlayera w przegl±darce (na przyk³ad za pomoc± wtyczki).
 .
@@ -6060,23 +6060,29 @@ Dla ludzi z niewiarygodnie dobrym s³uchem i podobnym wyposa¿eniem.
 W trybie CBR parametr ten oznacza bitrate w kbps,
 natomiast w trybie VBR jest to minimalny bitrate na ramkê.
 Tryb VBR nie zadzia³a z warto¶ci± mniejsz± ni¿ 112.
+.
 .TP
 .B vbr=<-50\-50> (tylko VBR)
 Przedzia³ zmienno¶ci; je¶li ujemny koder przesuwa ¶redni bitrate w stronê
 dolnej granicy, je¶li dodatni w stronê górnej.
 Je¶li ustawione na 0 jest u¿ywany tryb CBR (domy¶lne).
+.
 .TP
 .B maxvbr=<32\-384> (VBR only)
 maksymalny bitrate dozwolony na ramkê, w kbps
+.
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (domy¶lnie: mono dla d¼wiêku jednokana³owego, w przeciwnym wypadku stereo)
+.
 .TP
 .B psy=<-1\-4>
 model psychoakustyczny (domy¶lnie: 2)
+.
 .TP
 .B errprot=<0 | 1>
 W³±cza ochronê przed b³êdami.
+.
 .TP
 .B debug=<0\-10>
 poziom debugowania
@@ -6089,9 +6095,11 @@ poziom debugowania
 .TP
 .B br=<bitrate>
 ¶redni bitrate w kbps (nie dzia³a z quality)
+.
 .TP
 .B quality=<1\-1000>
 jako¶æ, im wy¿sza tym lepsza (nie dzia³a z br)
+.
 .TP
 .B object=<0\-3>
 typ z³o¿ono¶ci obiektów
@@ -6107,15 +6115,19 @@ SSR
 LTP (niezwykle wolne)
 .RE
 .PD 1
+.
 .TP
 .B mpeg=<2|4>
 Wersja MPEG (domy¶lnie: 4)
+.
 .TP
 .B tns\ \ \ \ 
 W³±cza czasowe kszta³towanie szumu.
+.
 .TP
 .B cutoff=<0\-czêstotliwo¶æ_próbkowania/2>
 czêstotliow¶æ obcinania (domy¶lnie: czêstotliwo¶æ_próbkowania/2)
+.
 .TP
 .B raw\ \ \ \ 
 Przechowuje strumieñ jako surowy ³adunek z dodatkowymi danymi w nag³ówku
@@ -7129,12 +7141,12 @@ Ustawia funkcjê porównawcz± dla przewidywania ruchu sub pel
 (domy¶lnie: 0).
 .
 .TP
-.B nssew=<0\-100>
+.B nssew=<0\-1000000>
 Ten parametr kontroluje wagê NSSE, gdzie wiêksze warto¶ci zaowocuj±
 wiêkszymi szumami.
 NSSE 0 jest identyczne z SSE.
 Mo¿e Ci siê on przydaæ, je¶li wolisz zachowaæ jakie¶ szumy w zakodowanym video,
-ni¿ przefiltrowaæ je przed kodowaniem.
+ni¿ przefiltrowaæ je przed kodowaniem (domy¶lnie: 8).
 .
 .TP
 .B predia=<-99\-6>
@@ -7618,7 +7630,7 @@ wiêc autodedetekcja b³êdów niektórych dekoderów mo¿e siê gubiæ.
 .
 .TP
 .B max_bframes=<0\-4>
-maksymalna ilo¶æ klatek B umieszczonych pomiêdzy ramkami I/\:P (domy¶lnie: 0)
+Maksymalna ilo¶æ klatek B umieszczonych pomiêdzy ramkami I/\:P (domy¶lnie: 2).
 .
 .TP
 .B bquant_ratio=<0\-1000>
