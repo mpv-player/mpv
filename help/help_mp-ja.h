@@ -121,11 +121,11 @@ static char help_text[]=
 #define MSGTR_Paused "\n  =====  停止  =====\r" // no more than 23 characters (status line for audio files)
 #define MSGTR_PlaylistLoadUnable "\nプレイリストの読み込みが出来ません %s.\n"
 #define MSGTR_Exit_SIGILL_RTCpuSel \
-"- MPLayerは不正な命令(Illegal Instruction)によりクラッシュしました\n"\
+"- MPlayerは不正な命令(Illegal Instruction)によりクラッシュしました\n"\
 "  恐らくこれは あたらしいCPU-Detection codeにバグがあります\n"\
 "  DOCS/HTML/en/bugreports.html をお読み下さい.\n"
 #define MSGTR_Exit_SIGILL \
-"- MPLayerは不正な命令(Illegal Instruction)によりクラッシュしました\n"\
+"- MPlayerは不正な命令(Illegal Instruction)によりクラッシュしました\n"\
 "  It usually happens when you run it on a CPU different than the one it was\n"\
 "  compiled/optimized for.\n"\
 "  Verify this!\n"
@@ -214,9 +214,9 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Cannot seek in raw AVI streams. (Indexが必要です, -idx を試して下さい.)\n"
 #define MSGTR_CantSeekFile "このファイルはシークすることが出来ません.\n"
 
-#define MSGTR_EncryptedVOB "暗号化されたVOB(Encryoted VOB)ファイルです。DOCS/HTML/en/cd-dvd.html を御覧下さい.\n"
+#define MSGTR_EncryptedVOB "暗号化されたVOB(Encrypted VOB)ファイルです。DOCS/HTML/en/cd-dvd.html を御覧下さい.\n"
 
-#define MSGTR_MOVcomprhdr "MOV: 圧縮されたヘッダ(Compressd headers)をサポートするには ZLIB が必要です\n"
+#define MSGTR_MOVcomprhdr "MOV: 圧縮されたヘッダ(Compressed headers)をサポートするには ZLIB が必要です\n"
 #define MSGTR_MOVvariableFourCC "MOV: 警告: Variable FOURCC detected!?\n"
 #define MSGTR_MOVtooManyTrk "MOV: 警告: too many tracks"
 #define MSGTR_FoundAudioStream "==> 音声ストリームが見付かりました: %d\n"
