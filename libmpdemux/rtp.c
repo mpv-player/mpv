@@ -76,7 +76,7 @@ static int rtp_open_socket( URL_t *url ) {
 		hp =(struct hostent*)gethostbyname( url->hostname );
 		if( hp==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", url->hostname);
-			return -1;
+			goto err_out;
 		}
 		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
 #else
@@ -103,8 +103,7 @@ static int rtp_open_socket( URL_t *url ) {
 		if( WSAGetLastError() != WSAEINPROGRESS ) {
 #endif
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Failed to connect to server\n");
-			closesocket(socket_server_fd);
-			return -1;
+			goto err_out;
 		}
 	}
 	
@@ -113,7 +112,7 @@ static int rtp_open_socket( URL_t *url ) {
 		hp =(struct hostent*)gethostbyname( url->hostname );
 		if( hp==NULL ) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"Counldn't resolve name: %s\n", url->hostname);
-			return -1;
+			goto err_out;
 		}
 		memcpy( (void*)&server_address.sin_addr.s_addr, (void*)hp->h_addr, hp->h_length );
 	} else {
@@ -134,7 +133,7 @@ static int rtp_open_socket( URL_t *url ) {
 		mcast.imr_interface.s_addr = 0;
 		if( setsockopt( socket_server_fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &mcast, sizeof(mcast))) {
 			mp_msg(MSGT_NETWORK,MSGL_ERR,"IP_ADD_MEMBERSHIP failed (do you have multicasting enabled in your kernel?)\n");
-			return -1;
+			goto err_out;
 		}
 	}
 
@@ -142,18 +141,26 @@ static int rtp_open_socket( URL_t *url ) {
 	tv.tv_usec = (1 * 1000000);	// 1 second timeout
 	FD_ZERO( &set );
 	FD_SET( socket_server_fd, &set );
-	if( select(socket_server_fd+1, &set, NULL, NULL, &tv)>0 ) {
-        //if( select(socket_server_fd+1, &set, NULL, NULL, NULL)>0 ) {
+	err = select(socket_server_fd+1, &set, NULL, NULL, &tv);
+	if (err < 0) {
+	  mp_msg(MSGT_NETWORK, MSGL_FATAL, "Select failed: %s\n", strerror(errno));
+	  goto err_out;
+	}
+	if (err == 0) {
+	  mp_msg(MSGT_NETWORK,MSGL_ERR,"Timeout! No data from host %s\n", url->hostname );
+	  goto err_out;
+	}
 		err_len = sizeof( err );
 		getsockopt( socket_server_fd, SOL_SOCKET, SO_ERROR, &err, &err_len );
 		if( err ) {
-			mp_msg(MSGT_NETWORK,MSGL_ERR,"Timeout! No data from host %s\n", url->hostname );
 			mp_msg(MSGT_NETWORK,MSGL_DBG2,"Socket error: %d\n", err );
-			closesocket(socket_server_fd);
-			return -1;
+			goto err_out;
 		}
-	}
 	return socket_server_fd;
+
+err_out:
+  closesocket(socket_server_fd);
+  return -1;	
 }
 
 static int rtp_streaming_read( int fd, char *buffer, int size, streaming_ctrl_t *streaming_ctrl ) {
