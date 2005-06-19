@@ -8,6 +8,7 @@
 #define MUXER_TYPE_MPEG 1
 #define MUXER_TYPE_RAWVIDEO 2
 #define MUXER_TYPE_LAVF 3
+#define MUXER_TYPE_RAWAUDIO 4
 
 
 typedef struct {
@@ -85,3 +86,4 @@ int muxer_init_muxer_avi(muxer_t *);
 int muxer_init_muxer_mpeg(muxer_t *);
 int muxer_init_muxer_rawvideo(muxer_t *);
 int muxer_init_muxer_lavf(muxer_t *);
+int muxer_init_muxer_rawaudio(muxer_t *);

@@ -482,6 +482,13 @@ static char help_text[]=
 #define MSGTR_DVDnoVOBs "Cannot open title VOBS (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDopenOk "DVD successfully opened.\n"
 
+// muxer_*.c:
+#define MSGTR_TooManyStreams "Too many streams!"
+#define MSGTR_RawMuxerOnlyOneStream "Rawaudio muxer supports only one audio stream!\n"
+#define MSGTR_IgnoringVideoStream "Ignoring video stream!\n"
+#define MSGTR_UnknownStreamType "Warning! unknown stream type: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Warning! len isn't divisible by samplesize!\n"
+
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "WARNING: Audio stream header %d redefined.\n"
 #define MSGTR_VideoStreamRedefined "WARNING: Video stream header %d redefined.\n"

@@ -41,6 +41,10 @@ muxer_t *muxer_new_muxer(int type,FILE *f){
       default:
 	if(! muxer_init_muxer_avi(muxer))
 	  return NULL;
+      case MUXER_TYPE_RAWAUDIO:
+        if(! muxer_init_muxer_rawaudio(muxer))
+          return NULL;
+        break;
     }
     return muxer;
 }
