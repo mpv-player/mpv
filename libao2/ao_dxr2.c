@@ -18,7 +18,7 @@ static ao_info_t info =
 {
 	"DXR2 audio output",
 	"dxr2",
-	"Tobias Diedrich <ranma@gmx.at>",
+	"Tobias Diedrich <ranma+mplayer@tdiedrich.de>",
 	""
 };
 

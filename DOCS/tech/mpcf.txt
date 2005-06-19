@@ -686,7 +686,7 @@ Folks from MPlayer Developers Mailinglist (http://www.mplayehrq.hu/).
 Authors in ABC-order: (FIXME! Tell us if we left you out)
     Beregszaszi, Alex (alex@fsn.hu)
     Bunkus, Moritz (moritz@bunkus.org)
-    Diedrich, Tobias (td@sim.uni-hannover.de)
+    Diedrich, Tobias (ranma+mplayer@tdiedrich.de)
     Felker, Rich (dalias@aerifal.cx)
     Franz, Fabian (FabianFranz@gmx.de)
     Gereoffy, Arpad (arpi@thot.banki.hu)

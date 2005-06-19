@@ -11,7 +11,7 @@ static ao_info_t info =
 {
 	"Null audio output",
 	"null",
-	"Tobias Diedrich",
+	"Tobias Diedrich <ranma+mplayer@tdiedrich.de>",
 	""
 };
 
