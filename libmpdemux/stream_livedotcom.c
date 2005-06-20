@@ -97,10 +97,10 @@ static int open_live_sdp(stream_t *stream,int mode, void* opts, int* file_format
 
 
 stream_info_t stream_info_rtsp_sip = {
-  "Standard rtsp and sip",
-  "rtsp and sip",
+  "standard RTSP and SIP",
+  "RTSP and SIP",
   "Ross Finlayson",
-  "uses lve.com streaming library",
+  "Uses LIVE.COM streaming library.",
   open_live_rtsp_sip,
   {"rtsp", "sip", NULL },
   NULL,
@@ -108,10 +108,10 @@ stream_info_t stream_info_rtsp_sip = {
 };
 
 stream_info_t stream_info_sdp = {
-  "Sdp stream descriptor",
-  "sdp",
+  "SDP stream descriptor",
+  "SDP",
   "Ross Finlayson",
-  "uses live.com streaming library",
+  "Uses live.com streaming library.",
   open_live_sdp,
   {"sdp", NULL },
   NULL,
