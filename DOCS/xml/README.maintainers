@@ -81,7 +81,7 @@ Adding new translations
 
 8) While your translation isn't finished, you can change USE_SYMLINKS
    to "yes" in your Makefile. This will help you testing your translation:
-   english files will be used instead of untranslated ones, when generating
+   English files will be used instead of untranslated ones, when generating
    HTML docs.
 
 That's all, in theory.
