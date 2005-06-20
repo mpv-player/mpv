@@ -144,7 +144,18 @@ ifeq ($(FAAC),yes)
 CODEC_LIBS += $(FAAC_LIB)
 endif
 
-PARTS = libmpdemux libmpcodecs libavcodec libavformat libao2 drivers osdep postproc input libvo libaf
+PARTS = libmpdemux \
+        libmpcodecs \
+        libavcodec \
+        libavformat \
+        libao2 \
+        drivers \
+        osdep \
+        postproc \
+        input \
+        libvo \
+        libaf \
+
 ifeq ($(MP3LIB),yes)
 PARTS += mp3lib
 endif
