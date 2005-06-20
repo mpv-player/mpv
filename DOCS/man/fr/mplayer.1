@@ -1,4 +1,4 @@
-.\" synced with 1.1013
+.\" synced with 1.1019
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -403,19 +403,15 @@ qu'elle ne fonctionnera uniquement si vous activez l'option XXX ou
 que XXX a été compilé dans mplayer.
 .PP
 .I NOTE\ :
-.PD 0
-.RSs
 L'analyseur syntaxique de sous-options (suboption parser), (utilisé par exemple par les sous-options de \-ao pcm) gère un type particulier d'échappement de chaîne de caractère destiné à être utilisé par les IHM externes.
-.PP
+.br
 Il suit le format suivant\ :
-.PP
+.br
 %n%chaîne_de_longueur_n
-.PP
-Example d'utilisation\ :
-.PP
+.br
+.I EXEMPLE\ :
+.br
 mplayer -ao pcm:file=%10%C:test.wav test.avi
-.RE
-.PD 1
 .PP
 Vous pouvez placer toutes les options dans un fichier de configuration qui sera
 lu à chaque exécution de MPlayer.
@@ -2457,7 +2453,7 @@ nouveau mode d'affichage vidéo.
 Active VBI pour les pilotes de sortie vidéo vesa, dfbmga et svga.
 .
 .TP
-.B \-wid <window\ ID> (voir aussi \-guiwid, \-geometry) (X11 et DirectX \
+.B \-wid <window\ ID> (voir aussi \-guiwid) (X11, OpenGL et DirectX \
 uniquement)
 Dit à MPlayer de s'attacher à une fenêtre existante.
 Utile pour intégrer MPlayer dans un navigateur (avec l'extension plugger
@@ -6303,24 +6299,30 @@ En mode débit binaire constant (CBR), ce paramètre défini le débit
 binaire (bitrate) en kbps, en mode débit binaire variable (VBR), il
 défini le débit minimum autorisée part trame.
 Le mode VBR ne fonctionnera pas avec une valeur inférieure à 112.
+.
 .TP
 .B vbr=<-50\-50> (VBR uniquement)
 plage de variation; si elle est négative, l'encodeur fait tendre le
 débit binaire moyen vers la limite basse, tandis qu'une valeur
 positive le fait tendre vers la limite haute.
 À 0, le mode CBR est utilisé (par défaut).
+.
 .TP
 .B maxvbr=<32\-384> (VBR uniquement)
 débit binaire maximal autorisée par trame, en kbps.
+.
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (par défaut\ : mono pour de l'audio mono-canal, stéréo sinon)
+.
 .TP
 .B psy=<1\-4>
 modèle psycho-acoustique (par défaut\ : 2)
+.
 .TP
 .B errprot=<0 | 1>
 Rajoute des informations de correction d'erreurs.
+.
 .TP
 .B debug=<0\-10>
 niveau de débogage
@@ -6333,10 +6335,12 @@ niveau de débogage
 .TP
 .B br=<bitrate>
 débit binaire moyen en kps (mutuellement exclusif avec quality)
+.
 .TP
 .B quality=<1\-1000>
 mode qualité, plus la valeur est grande, plus la qualité est bonne
 (mutuellement exclusif avec br)
+.
 .TP
 .B object=<0\-3>
 complexité du type d'objet
@@ -6352,15 +6356,19 @@ SSR
 LTP (extrêmement lent)
 .RE
 .PD 1
+.
 .TP
 .B mpeg=<2|4>
 version de MPEG (par défaut\ : 4)
+.
 .TP
 .B tns\ \ \ \ 
 Active la modélisation temporelle de bruit.
+.
 .TP
 .B cutoff=<0\-fréquence d'échantillonnage/2>
 fréquence de coupure (par défaut\ : échantillonnage/2)
+.
 .TP
 .B raw\ \ \ \ 
 Stocke le flux de bit en tant que la charge utile brute et les données
@@ -7401,11 +7409,11 @@ Choisit la fonction de comparaison pour l'estimation de mouvement sub pel
 (voir mbcmp pour les fonctions de comparaison disponibles).
 .
 .TP
-.B nssew=<0\-100>
+.B nssew=<0\-1000000>
 Si vous préférez garder du bruit dans votre vidéo encodée au lieu
 de le filtrer avant de l'encoder, cette option contrôle le poids NSSE,
 où de plus grandes valeurs laisseront plus de bruit,
-À 0 NSSE est identique à SSE.
+À 0 NSSE est identique à SSE (par défaut\ 8).
 .
 .TP
 .B predia=<-99\-6>
@@ -7904,7 +7912,8 @@ l'autodétection de bogues risque de ne pas fonctionner.
 .
 .TP
 .B max_bframes=<0\-4>
-Nombre maximum de trames-B à insérer entre les trames-I/\:P (par défaut\ : 0).
+Nombre maximum de trames-B à insérer entre les trames-I/\:P
+(par défaut\ : 2).
 .
 .TP
 .B bquant_ratio=<0\-1000>
