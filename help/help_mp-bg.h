@@ -336,7 +336,7 @@ static char help_text[]=
 "mw-us => 40kbps/моно        voice => 56kbps/моно\n"\
 "fm/radio/tape => 112kbps    hifi => 160kbps\n"\
 "cd => 192kbps               studio => 256kbps"
-#define MSGTR_LameCantInit "Не могат да се зададат LAME опциите, проверете битрейтовете/честотите на дискретите,"
+#define MSGTR_LameCantInit "Не могат да се зададат LAME опциите, проверете битрейтовете/честотите на дискретите,"\
 "някои много ниски битрейтове (<32) изискват ниски честоти на дискретите (напр. -srate 8000)."\
 "Ако нищо друго не помага пробвайте някой preset."
 #define MSGTR_ConfigfileError "грешка в конфигурационния файл"
