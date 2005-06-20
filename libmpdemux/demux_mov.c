@@ -500,6 +500,30 @@ skip_chunk:
     return 0;
 }
 
+void demux_close_mov(demuxer_t *demuxer) {
+  mov_priv_t* priv = demuxer->priv;
+  int i;
+  if (!priv)
+    return;
+  for (i = 0; i < MOV_MAX_TRACKS; i++) {
+    mov_track_t *track = priv->tracks[i];
+    if (track) {
+      free(track->tkdata);
+      free(track->stdata);
+      free(track->stream_header);
+      free(track->samples);
+      free(track->chunks);
+      free(track->chunkmap);
+      free(track->durmap);
+      free(track->keyframes);
+      free(track->editlist);
+      free(track->desc);
+      free(track);
+    }
+  }
+  free(priv);
+}
+
 static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak){
     mov_priv_t* priv=demuxer->priv;
 //    printf("lschunks (level=%d,endpos=%x)\n", level, endpos);

@@ -161,6 +161,7 @@ extern void demux_close_aac(demuxer_t* demuxer);
 #ifdef USE_WIN32DLL
 extern void demux_close_avs(demuxer_t* demuxer);
 #endif
+extern void demux_close_mov(demuxer_t* demuxer);
 
 
 #ifdef USE_TV
@@ -258,6 +259,8 @@ void free_demuxer(demuxer_t *demuxer){
     case DEMUXER_TYPE_AVS:
       demux_close_avs(demuxer); break;
 #endif
+    case DEMUXER_TYPE_MOV:
+      demux_close_mov(demuxer); break;
     }
     // free streams:
     for(i = 0; i < MAX_A_STREAMS; i++)
