@@ -40,6 +40,11 @@ lame packages, they may have been compiled with gcc 2.96.</para>
 <para>Problem: known GCC 2.95.2 MMX bug</para>
 <para>Solution: upgrade to 2.95.3</para>
 </listitem>
+<listitem>
+<para>Crashes when dumping streams:</para>
+<para>Problem: core dump</para>
+<para>Solution: Don't panic. Make sure you know where your towel is.</para>
+</listitem>
 </itemizedlist>
 </sect1>
 
