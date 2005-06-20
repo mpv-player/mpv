@@ -260,6 +260,8 @@ vo_functions_t* video_out_drivers[] =
 void list_video_out(){
       int i=0;
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoOutputDrivers);
+      if (identify)
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_OUTPUTS\n");
       while (video_out_drivers[i]) {
         const vo_info_t *info = video_out_drivers[i++]->info;
       	printf("\t%s\t%s\n", info->short_name, info->name);

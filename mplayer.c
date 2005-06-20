@@ -1224,12 +1224,16 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
 #endif
     if(audio_codec_list && strcmp(audio_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableAudioCodecs);
+      if (identify)
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_CODECS\n");
       list_codecs(1);
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       exit_player_with_rc(NULL, 0);
     }
     if(video_codec_list && strcmp(video_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoCodecs);
+      if (identify)
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_CODECS\n");
       list_codecs(0);
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
       exit_player_with_rc(NULL, 0);
@@ -2654,6 +2658,8 @@ if(auto_quality>0){
     mp_cmd_t* cmd;
       if(!quiet) {
 	mp_msg(MSGT_CPLAYER,MSGL_STATUS,MSGTR_Paused);
+        if (identify)
+          mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_PAUSED\n");
 	fflush(stdout);
       }
 #ifdef HAVE_NEW_GUI

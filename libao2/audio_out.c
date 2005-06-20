@@ -129,6 +129,8 @@ ao_functions_t* audio_out_drivers[] =
 void list_audio_out(){
       int i=0;
       mp_msg(MSGT_AO, MSGL_INFO, MSGTR_AvailableAudioOutputDrivers);
+      if (identify)
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_OUTPUTS\n");
       while (audio_out_drivers[i]) {
         const ao_info_t *info = audio_out_drivers[i++]->info;
 	printf("\t%s\t%s\n", info->short_name, info->name);

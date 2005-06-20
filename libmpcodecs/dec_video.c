@@ -152,6 +152,8 @@ void uninit_video(sh_video_t *sh_video){
 void vfm_help(){
     int i;
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,MSGTR_AvailableVideoFm);
+    if (identify)
+      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_DRIVERS\n");
     mp_msg(MSGT_DECVIDEO,MSGL_INFO,"   vfm:    info:  (comment)\n");
     for (i=0; mpcodecs_vd_drivers[i] != NULL; i++)
 	mp_msg(MSGT_DECVIDEO,MSGL_INFO,"%8s  %s (%s)\n",

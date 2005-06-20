@@ -32,6 +32,8 @@ af_cfg_t af_cfg; // Configuration for audio filters
 void afm_help(){
     int i;
     mp_msg(MSGT_DECAUDIO,MSGL_INFO,MSGTR_AvailableAudioFm);
+    if (identify)
+      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_DRIVERS\n");
     mp_msg(MSGT_DECAUDIO,MSGL_INFO,"    afm:    info:  (comment)\n");
     for (i=0; mpcodecs_ad_drivers[i] != NULL; i++)
       if(mpcodecs_ad_drivers[i]->info->comment && mpcodecs_ad_drivers[i]->info->comment[0])

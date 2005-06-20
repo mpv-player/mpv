@@ -1603,7 +1603,11 @@ int demux_info_print(demuxer_t *demuxer)
 
     mp_msg(MSGT_DEMUX, MSGL_INFO,MSGTR_ClipInfo);
     for(n = 0; info[2*n] != NULL ; n++)
+    {
       mp_msg(MSGT_DEMUX, MSGL_INFO, " %s: %s\n",info[2*n],info[2*n+1]);
+      if (identify)
+        mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_CLIP_INFO_%s=%s\n", info[2*n], info[2*n+1]);
+    }
 
     return 0;
 }
