@@ -996,7 +996,9 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		  }
 		}
 
-		if((trak->stdata[9]==0 || trak->stdata[9]==1) && trak->stdata_len >= 36) { // version 0 with extra atoms
+		if ((trak->stdata[9] == 0 && trak->stdata_len >= 36) ||
+		    (trak->stdata[9] == 1 && trak->stdata_len >= 36 + 48)) {
+		    // version 0 with extra atoms
         int adjust = (trak->stdata[9]==1)?48:0;
 		    int atom_len = char2int(trak->stdata,28+adjust);
 		    switch(char2int(trak->stdata,32+adjust)) { // atom type
