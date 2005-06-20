@@ -225,7 +225,7 @@ static int qt_ima_adpcm_decode_block(unsigned short *output,
       output[i * 2 + 1] = input[2 + i] >> 4;
     }
   else
-    for (i = 0; i < QT_IMA_ADPCM_SAMPLES_PER_BLOCK / 2 * 2; i++)
+    for (i = 0; i < QT_IMA_ADPCM_SAMPLES_PER_BLOCK / 2; i++)
     {
       output[i * 4 + 0] = input[2 + i] & 0x0F;
       output[i * 4 + 1] = input[2 + QT_IMA_ADPCM_BLOCK_SIZE + i] & 0x0F;
