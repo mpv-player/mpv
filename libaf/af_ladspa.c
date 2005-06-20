@@ -23,6 +23,7 @@
  *
  * Changelog
  *
+ * 2005-06-21   Replaced erroneous use of mp_msg by af_msg
  * 2004-12-23   Added to CVS
  * 2004-12-22   Cleaned up cosmetics
  *              Made conversion loops in play() more cache-friendly
@@ -530,7 +531,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
 
     switch(cmd) {
     case AF_CONTROL_REINIT:
-        mp_msg(MSGT_AFILTER, MSGL_V, "%s: (re)init\n", setup->myname);
+        af_msg(AF_MSG_VERBOSE, "%s: (re)init\n", setup->myname);
 
         if (!arg) return AF_ERROR;
 
@@ -549,7 +550,7 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
     case AF_CONTROL_COMMAND_LINE: {
         char *buf;
 
-        mp_msg(MSGT_AFILTER, MSGL_V, "%s: parse suboptions\n", setup->myname);
+        af_msg(AF_MSG_VERBOSE, "%s: parse suboptions\n", setup->myname);
 
         /* suboption parser here!
          * format is (ladspa=)file:label:controls....
