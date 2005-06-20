@@ -93,6 +93,7 @@ static float lavc_param_rc_buffer_aggressivity=1.0;
 static int lavc_param_rc_max_rate=0;
 static int lavc_param_rc_min_rate=0;
 static float lavc_param_rc_initial_cplx=0;
+static int lavc_param_rc_initial_buffer_occupancy=0.9;
 static int lavc_param_mpeg_quant=0;
 static int lavc_param_fdct=0;
 static int lavc_param_idct=0;
@@ -211,6 +212,7 @@ m_option_t lavcopts_conf[]={
 	{"vrc_buf_size", &lavc_param_rc_buffer_size, CONF_TYPE_INT, CONF_RANGE, 4, 24000000, NULL},
 	{"vrc_buf_aggressivity", &lavc_param_rc_buffer_aggressivity, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 99.0, NULL},
 	{"vrc_init_cplx", &lavc_param_rc_initial_cplx, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 9999999.0, NULL},
+	{"vrc_init_occupancy", &lavc_param_rc_initial_buffer_occupancy, CONF_TYPE_FLOAT, CONF_RANGE, 0.0, 1.0, NULL},
         {"vfdct", &lavc_param_fdct, CONF_TYPE_INT, CONF_RANGE, 0, 10, NULL},
 	{"aspect", &lavc_param_aspect, CONF_TYPE_STRING, 0, 0, 0, NULL},
 	{"autoaspect", &lavc_param_autoaspect, CONF_TYPE_FLAG, 0, 0, 1, NULL},
@@ -395,6 +397,9 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context->rc_max_rate= lavc_param_rc_max_rate*1000;
     lavc_venc_context->rc_min_rate= lavc_param_rc_min_rate*1000;
     lavc_venc_context->rc_buffer_size= lavc_param_rc_buffer_size*1000;
+    lavc_venc_context->rc_initial_buffer_occupancy=
+            lavc_venc_context->rc_buffer_size *
+            lavc_param_rc_initial_buffer_occupancy;
     lavc_venc_context->rc_buffer_aggressivity= lavc_param_rc_buffer_aggressivity;
     lavc_venc_context->rc_initial_cplx= lavc_param_rc_initial_cplx;
 #if LIBAVCODEC_BUILD >= 4642
