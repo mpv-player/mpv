@@ -164,9 +164,9 @@ int read_asf_header(demuxer_t *demuxer){
   int best_audio = -1;
   uint64_t data_len;
 
-  if (hdr_len > 64 * 1024) {
+  if (hdr_len > 1024 * 1024) {
     mp_msg(MSGT_HEADER, MSGL_FATAL,
-            "FATAL: header size bigger than 64 kB (%d)!\n"
+            "FATAL: header size bigger than 1 MB (%d)!\n"
             "Please contact MPlayer authors, and upload/send this file.\n",
              hdr_len);
     return 0;
