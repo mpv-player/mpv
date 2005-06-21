@@ -1,4 +1,4 @@
-.\" synced with 1.1019
+.\" synced with 1.1023
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2913,7 +2913,7 @@ mouvements saccadés lorsque vous regardez une vidéo entrelacée.
 .IPs layer=N
 Forcera l'utilisation de la couche dont l'ID est N pour la lecture
 (par défaut\ : -1 - auto).
-IPs dfbopts=<str>
+IPs dfbopts=<liste>
 Définit une liste de paramètres DirectFB.
 .
 .TP
@@ -6959,6 +6959,13 @@ correction de qualité en %
 complexité initiale (passe\ 1)
 .
 .TP
+.B vrc_init_occupancy=<0.0\-1.0>
+remplissage initial du tampon, exprimé en tant que fraction de
+vrc_buf_size (par défaut\ : 0.9)
+Indique à l'encodeur quelle quantité de données le lecteur va
+pré-charger dans le vbv-buffer, avant de commencer à les décoder.
+.
+.TP
 .B vqsquish=<0|1>
 Définit comment garder le quantum entre qmin et qmax (passe\ 1/\:2).
 .PD 0
@@ -9005,8 +9012,10 @@ cat *.vob | mencoder <options> \-
 .\" --------------------------------------------------------------------------
 .
 .SH BOGUES
+Pas de panique.
 Si vous en trouvez un, faites-nous un rapport de bogue, mais s'il vous plaît,
 assurez-vous d'avoir lu toute la documentation auparavant.
+De plus, vérifiez s'il n'y a pas de smiley. :-)
 Beaucoup de bogues sont le résultat d'une installation incorrecte ou d'une
 mauvaise utilisation des paramètres.
 La section sur les rapports de bogues (DOCS/\:HTML/\:fr/\:bugreports.html)
