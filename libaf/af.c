@@ -691,7 +691,7 @@ void af_help (void) {
   int i = 0;
   af_msg(AF_MSG_INFO, "Available audio filters:\n");
   if (identify)
-    mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_FILTERS\n");
+    af_msg(AF_MSG_INFO, "ID_AUDIO_FILTERS\n");
   while (filter_list[i]) {
     if (filter_list[i]->comment && filter_list[i]->comment[0])
       af_msg(AF_MSG_INFO, "  %-15s: %s (%s)\n", filter_list[i]->name, filter_list[i]->info, filter_list[i]->comment);
