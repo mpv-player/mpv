@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.76 -->
+<!-- synced with 1.77 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -501,9 +501,9 @@ Ebben az esetben a dekódolás százaléka tartalmazza a megjelenítés százalékát is.
 Üzeneteket kapok a <filename>/usr/local/lib/codecs/</filename> könyvtárban nem található fájlokról...
 </para></question>
 <answer><para>
-Töltsd le a Win32 codeceket a
+Töltsd le a bináris codeceket a
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codec oldalunkról</ulink>
-(az avifile codec csomagja már DLL összeállítást tartalmaz) és telepítsd.
+és telepítsd.
 </para></answer>
 </qandaentry>
 
