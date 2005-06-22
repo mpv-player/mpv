@@ -5121,9 +5121,13 @@ if test "$_fribidi" = yes ; then
 	cat > $TMPC << EOF
 #include <stdio.h>
 #include <fribidi/fribidi.h>
+/* workaround for fribidi 0.10.4 and below */
+#if defined(FRIBIDI_CHARSET_UTF8) && !defined(FRIBIDI_CHAR_SET_UTF8)
+#define FRIBIDI_CHAR_SET_UTF8 FRIBIDI_CHARSET_UTF8
+#endif
 int main()
 {
-    if(fribidi_parse_charset("UTF-8") != FRIBIDI_CHARSET_UTF8) {
+    if(fribidi_parse_charset("UTF-8") != FRIBIDI_CHAR_SET_UTF8) {
        printf("Fribidi headers are not consistents with the library!\n");
        exit(1);
     }
