@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.12 -->
+<!-- synced to 1.13 -->
 <appendix id="bugs">
 <title>Ismert hibák</title>
 <sect1 id="bugs-special">
@@ -38,6 +38,11 @@ már telepített lame csomagot, valószínűleg gcc 2.96-tal fordították őket.</para>
 <para>SIGSEGV (signal 11) a libmpeg2-ben, scaling+kódolásnál:</para>
 <para>Probléma: ismert GCC 2.95.2 MMX hiba</para>
 <para>Megoldás: frissíts 2.95.3-ra</para>
+</listitem>
+<listitem>
+<para>Összeomlás stream-ek mentésekor:</para>
+<para>Probléma: core dump</para>
+<para>Tüneti kezelés: Ne pánikolj. Keresd meg a törülköződet!</para>
 </listitem>
 </itemizedlist>
 </sect1>
