@@ -272,10 +272,11 @@ static void hexdump (char *buf, int length) {
  
 static char *rtsp_get(rtsp_t *s) {
 
-  int n=0;
+  int n=1;
   char *buffer = malloc(BUF_SIZE);
   char *string = NULL;
 
+  read_stream(s->s, buffer, 1);
   while (n<BUF_SIZE) {
     read_stream(s->s, &(buffer[n]), 1);
     if ((buffer[n-1]==0x0d)&&(buffer[n]==0x0a)) break;

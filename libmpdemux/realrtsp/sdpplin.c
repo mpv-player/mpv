@@ -84,12 +84,12 @@ static char *b64_decode(const char *in, char *out, int *size)
     out[k++] = (b[2] << 6) | b[3];
     i = a[2] == '=' ? 1 : (a[3] == '=' ? 2 : 3);
     if (i < 3) {
-      out[k]=0;
+      out[k - 1]=0;
       *size=k;
       return out;
     }
   }
-  out[k]=0;
+  out[k - 1]=0;
   *size=k;
   return out;
 }
