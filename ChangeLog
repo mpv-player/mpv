@@ -4,6 +4,8 @@ MPlayer (1.0)
 
     DOCS:
     * improved encoding guide
+    * new technical encoding guide in DOCS/tech/encoding-guide.txt
+      which is to be merged into the existing guide
     * encoding tips for x264
     * how to set up MEncoder for x264 support
     * misc improvements all over the place
