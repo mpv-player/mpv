@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.70 -->
+<!-- synced to 1.71 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2261,25 +2261,20 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   B-kockákban.
   Általában még a naív B-kocka választó algoritmus is jelentős
   PSNR hasznot hozhat.
-  Azt is érdemes megemlíteni, hogy ha kikapcsolod az adaptív
-  B-kocka döntést (<option>nob_adapt</option>), a
-  <option>bframes</option>-szel történő kódolás általában
-  valamivel gyorsít a kódolási folyamaton.
+  Azt is érdemes megjegyezni, hogy a B-kockák használata általában
+  egy kicsit gyorsít a második lépésen és talán az egy lépéses kódolást
+  is gyorsítja kicsit, ha az adaptív B-kocka döntés ki van kapcsolva.
 </para>
 <para>
   Az adaptív B-kocka döntés kikapcsolásával
-  (<option>x264encopts</option> <option>nob_adapt</option> opciója),
-  ezen beállítás optimális értéke általában a
-  <option>bframes=1</option> és <option>bframes=3</option> tartományba
-  esik. Ha az adaptív B-kocka döntés be van kapcsolva (alapértelmezett
-  tulajdonság), akkor nyugodtan használhatsz magasabb értékeket is;
-  a kódoló megpróbálja csökkenteni a B-kockák használatát azokban a
-  jelenetekben, ahol ronthatják a tömörítést.
-</para>
-<para>
-  Ha használni akarod a <option>bframes</option>-t, gondolkodj el
-  a B-kockák maximális számának 2-re vagy nagyobbra állításán,
-  hogy kihasználd a súlyozott jóslás előnyét.
+  (<option>x264encopts</option> <option>nob_adapt</option> opciója)
+  ezen beállítás optimális értéke általában nem több, mint
+  <option>bframes=1</option>, különben a gyors mozgású részek romolhatnak.
+  Bekapcsolt adaptív B-kocka döntéssel (alapértelmezett tulajdonság)
+  nyugodtan használhatsz magasabb értéket; a kódoló csökkenti a
+  B-kockák használatát azokban a részekben, ahol amiatt sérülne a
+  tömörítés. A kódoló ritkán választ 3 vagy 4 B-kockánál többet;
+  ezen opció magasabb értékre állítása nagyon kicsi különbséget eredményez.
 </para></listitem>
 
 <listitem><para>
@@ -2320,8 +2315,8 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   használt súlyozott jóslással lehetséges ezek legalább
   részben a sokkal ésszerűbben-méretezett B-kockákkal
   történő lecserélése.
-  A kódolási időben jelentkező plusz ráfordítás minimálisnak
-  tűnik, ha van egyáltalán.
+  A kódolási időben jelentkező plusz ráfordítás minimális, mivel nem kell
+  külön döntéseket hozni.
   Ellentétben azzal, amire pár ember gondol, a dekódoló CPU
   igényét nem érinti jelentősen a súlyozott jóslás.
 </para>
