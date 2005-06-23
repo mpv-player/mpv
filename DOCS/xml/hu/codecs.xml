@@ -430,6 +430,7 @@ A fork akkor történt, amikor a ProjectMayo az OpenDivX-et zárt forráskódúvá
 tette DivX4 (most DivX5) néven, felbosszantva így a nem-ProjectMayo-s fejlesztõket,
 akik az OpenDivX-en dolgoztak, s akik így elindították az XviD-et. Így mindkét
 projektnek azonosak a gyökereik.
+</para>
 
 <procedure>
 <title>Az <systemitem class="library">XviD</systemitem> telepítése</title>
