@@ -2438,6 +2438,147 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 </sect2>
 </sect1>
 
+<sect1 id="menc-feat-xvid">
+<title>Encoding with the <systemitem class="library">XviD</systemitem>
+codec</title>
+<para>
+ <systemitem class="library">XviD</systemitem> is a free library for
+ encoding MPEG-4 ASP video streams.
+ Before starting to encode, you need to <link linkend="xvid">
+ set up <application>MEncoder</application> to support it</link>.
+</para>
+<para>
+ This guide mainly aims at featuring the same kind of information
+ as x264's encoding guide.
+ Therefore, please begin by reading
+ <link linkend="menc-feat-x264-intro">the first part</link> of that
+ guide.
+</para>
+
+
+<sect2 id="menc-feat-xvid-intro">
+<title>What options should I use to get the best results?</title>
+
+<para>
+ Please begin by reviewing the
+ <systemitem class="library">XviD</systemitem> section of
+ <application>MPlayer</application>'s man page.
+ This section is intended to be a supplement to the man page.
+</para>
+<para>
+ The XviD default settings are already a good tradeoff between
+ speed and quality, therefore you can safely stick to them if
+ the following section puzzles you.
+</para>
+</sect2>
+
+<sect2 id="menc-feat-xvid-encoding-options">
+<title>Encoding options of <systemitem class="library">XviD</systemitem></title>
+
+<itemizedlist>
+<listitem><para>
+ <emphasis role="bold">vhq</emphasis>
+  This setting affects the macroblock decision algorithm, where the
+  higher the setting, the wiser the decision.
+  The default setting may be safely used for every encode, while
+  higher settings always help PSNR but are significantly slower.
+  Please note that a better PSNR does not necessarily mean
+  that the picture will look better, but tells you that it is
+  closer to the original.
+  Turning it off will noticeably speed up encoding; if speed is
+  critical for you, the tradeoff may be worth it.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">bvhq</emphasis>
+  This does the same job as vhq, but does it on B-frames.
+  It has a negligible impact on speed, and slightly improves quality
+  (around +0.1dB PSNR).
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">max_bframes</emphasis>
+  A higher number of consecutive allowed B-frames usually improves
+  compressibility, although it may also lead to more blocking artifacts.
+  The default setting is a good tradeoff between compressibility and
+  quality, but you may increase it up to 3 if you are bitrate-starved.
+  You may also decrease it to 1 or 0 if you are aiming at perfect
+  quality, though in that case you should make sure your
+  target bitrate is high enough to ensure that the encoder does not
+  have to increase quantizers to reach it.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">bf_threshold</emphasis>
+  This controls the B-frame sensitivity of the encoder, where a higher
+  value leads to more B-frames being used (and vice versa).
+  This setting is to be used together with <option>max_bframes</option>;
+  if you are bitrate-starved, you should increase both
+  <option>max_bframes</option> and <option>bf_threshold</option>,
+  while you may increase <option>max_bframes</option> and reduce
+  <option>bf_threshold</option> so that the encoder may use more
+  B-frames in places that only <emphasis role="bold">really</emphasis>
+  need them.
+  A low number of <option>max_bframes</option> and a high value of
+  <option>bf_threshold</option> is probably not a wise choice as it
+  will force the encoder to put B-frames in places that would not
+  benefit from them, therefore reducing visual quality.
+  However, if you need to be compatible with standalone players that
+  only support old DivX profiles (which only supports up to 1
+  consecutive B-frame), this would be your only way to
+  increase compressibility through using B-frames.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">trellis</emphasis>
+  Optimizes the quantization process to get an optimal tradeoff
+  between PSNR and bitrate, which allows significant bit saving.
+  These bits will in return be spent elsewhere on the video,
+  raising overall visual quality.
+  You should always leave it on as its impact on quality is huge.
+  Even if you are looking for speed, do not disable it until you
+  have turned down <option>vhq</option> and all other more
+  CPU-hungry options to the minimum.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">cartoon</emphasis>
+  Designed to better encode cartoon content, and has no impact on
+  speed as it just tunes the mode decision heuristics for this type
+  of content.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">me_quality</emphasis>
+  This setting is to control the precision of the motion estimation.
+  The higher <option>me_quality</option>, the more
+  precise the estimation of the original motion will be, and the
+  better the resulting clip will capture the original motion.
+ </para>
+ <para>
+  The default setting is best in all cases;
+  thus it is not recommended to turn it down unless you are
+  really looking for speed, as all the bits saved by a good motion
+  estimation would be spent elsewhere, raising overall quality.
+  Therefore, do not go any lower than 5, and even that only as a last
+  resort.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">chroma_me</emphasis>
+  Improves motion estimation by also taking the chroma (color)
+  information into account, whereas <option>me_quality</option>
+  alone only uses luma (grayscale).
+  This slows down encoding by 5-10% but improves visual quality
+  quite a bit by reducing blocking effects.
+  If you are looking for speed, you should disable this option before
+  starting to consider reducing <option>me_quality</option>.
+</para></listitem>
+</itemizedlist>
+</sect2>
+</sect1>
+
+
 <sect1 id="menc-feat-telecine">
 <title>How to deal with telecine and interlacing within NTSC DVDs</title>
 
