@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.64 -->
+<!-- synced to 1.66 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -418,47 +418,30 @@ x86-on, Alpha-n és PowerPC-n (a Linux/Alpha és Linux/PowerPC tesztelve lett) és 
 <title>XviD</title>
 
 <para>
-Az <ulink url="http://www.xvid.org">XviD</ulink> egy OpenDivX codec-ből kivállt fejlesztés.
-Akkor történt, amikor a ProjectMayo az OpenDivX-et zárt forráskódúvá tette
-DivX4 (most DivX5) néven, felbosszantva így a nem-ProjectMayo-s fejlesztőket, akik az OpenDivX-en
-dolgoztak, akik elindították az XviD-et. Így mindkét projektnek azonosak a gyökereik.
-
-<itemizedlist>
-<title>ELŐNYÖK</title>
-<listitem><simpara>
-  nyílt forráskódú
-  </simpara></listitem>
-<listitem><simpara>
-  az API-ja kompatibilis a DivX4-gyel, így könnyű a támogatása
-  </simpara></listitem>
-<listitem><simpara>
-  2-lépéses kódolás támogatása
-  </simpara></listitem>
-<listitem><simpara>
-  szép kódolási minőség, a DivX4-nél nagyobb sebesség (fordítás közben a saját gépedhez
-  optimalizálhatod)
-  </simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>HÁTRÁNYOK</title>
-<listitem><simpara>
-  jelenleg nem tudja megfelelően <emphasis role="bold">dekódolni</emphasis> az összes
-  DivX/DivX4 fájlt (nem baj, mivel a
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-  le tudja játszani őket)
-  </simpara></listitem>
-<listitem><simpara>
-  fejlesztés alatt áll
-  </simpara></listitem>
-</itemizedlist>
+Az <ulink url="http://www.xvid.org">XviD</ulink> egy szabad szoftveres MPEG-4
+ASP kompatibilis videó codec, ami tud két lépésben kódolni és teljes MPEG-4
+ASP támogatás van benne, ezáltal sokkal hatékonyabb, mint a jólismert DivX codec.
+Nagyon jó videó minőséget kínál és a CPU optimalizációknak hála a legtöbb
+modern processzoron a teljesítménye is jó.
 </para>
+<para>
+Az OpenDivX codec forkolt fejlesztésként indult annak idején.
+A fork akkor történt, amikor a ProjectMayo az OpenDivX-et zárt forráskódúvá
+tette DivX4 (most DivX5) néven, felbosszantva így a nem-ProjectMayo-s fejlesztőket,
+akik az OpenDivX-en dolgoztak, s akik így elindították az XviD-et. Így mindkét
+projektnek azonosak a gyökereik.
 
 <procedure>
-<title>XVID CVS TELEPÍTÉSE</title>
+<title>Az <systemitem class="library">XviD</systemitem> telepítése</title>
 <para>
-  Jelenleg csak CVS-ből beszerezhető. Íme a letöltés és a telepítés lépései
-  (legalább 2.50-es autoconf, automake és libtool szükséges):
+  Mint a legtöbb nyílt forráskódú program, ez is két formában érhető el:
+  <ulink url="http://www.xvid.org/downloads.html">hivatalos kiadás</ulink>
+  és a CVS verzió.
+  A CVS verzió általában elég stabil a használathoz, mivel legtöbbször csak
+  a kiadásokban benne lévő hibák javításait tartalmazza.
+  Itt van lépésről lépésre, hogy mit kell tenned, ha az <systemitem class="library">XviD</systemitem>
+  CVS-t használni akarod a <application>MEncoder</application>rel (szükséged
+  lesz az autoconf 2.50-re, az automake-re és a libtool-ra):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
