@@ -1519,7 +1519,7 @@ Alternatívaként használhatsz egy speciális kernel modult, így:
   <emphasis role="bold">VAGY</emphasis>
   az Alex által speciálisan az <application>MPlayer</application>rel történõ
   használatra készítettet (a lefordításához nem kell az svgalib forrás)
-  <ulink url=="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">innen</ulink>.
+  <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">innen</ulink>.
   </para></step>
 <step><para>
   Fordítsd le a modult az <filename class="directory">svgalib_helper</filename>
