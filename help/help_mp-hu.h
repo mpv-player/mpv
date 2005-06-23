@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.169 (2005. 05. 28.)
+// Sync'ed with help_mp-en.h 1.171 (2005. 06. 23.)
 
 // ========================= MPlayer help ===========================
 
@@ -151,6 +151,7 @@ static char help_text[]=
 "  bejelentésekor.\n"
 #define MSGTR_LoadingConfig "'%s' konfiguráció betöltése\n"
 #define MSGTR_AddedSubtitleFile "SUB: felirat fájl (%d) hozzáadva: %s\n"
+#define MSGTR_RemovedSubtitleFile "SUB: felirat fájl (%d) eltávolítva: %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Hiba a(z) [%s] fájl írásakor!\n"
 #define MSGTR_CommandLine "Parancs sor:"
 #define MSGTR_RTCDeviceNotOpenable "%s megnyitása nem sikerült: %s (a felhasználó által olvashatónak kell lennie.)\n"
@@ -479,6 +480,13 @@ static char help_text[]=
 #define MSGTR_DVDnoIFO "Nem tudom a(z) %d. DVD sávhoz megnyitni az IFO fájlt.\n"
 #define MSGTR_DVDnoVOBs "Nem tudom megnyitni a sávot (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDopenOk "DVD sikeresen megnyitva!\n"
+ 
+// muxer_*.c:
+#define MSGTR_TooManyStreams "Túl sok stream!"
+#define MSGTR_RawMuxerOnlyOneStream "A rawaudio muxer csak egy audió folyamot támogat!\n"
+#define MSGTR_IgnoringVideoStream "Videó folyam figyelmen kívül hagyva!\n"
+#define MSGTR_UnknownStreamType "Figyelem! Ismeretlen folyam típus: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Figyelem! A len nem osztható a samplesize-zal!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "Vigyázat! Többszörösen definiált Audio-folyam: %d (Hibás fájl?)\n"
