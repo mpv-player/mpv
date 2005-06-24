@@ -329,12 +329,11 @@ void af_uninit(af_stream_t* s)
    and output should contain the format of the current movie and the
    formate of the preferred output respectively. The function is
    reentrant i.e. if called with an already initialized stream the
-   stream will be reinitialized. If the binary parameter
-   "force_output" is set, the output format will be converted to the
-   format given in "s", otherwise the output fromat in the last filter
-   will be copied "s". The return value is 0 if success and -1 if
-   failure */
-int af_init(af_stream_t* s, int force_output)
+   stream will be reinitialized.
+   If one of the prefered output parameters is 0 the one that needs
+   no conversion is used (i.e. the output format in the last filter).
+   The return value is 0 if success and -1 if failure */
+int af_init(af_stream_t* s)
 {
   int i=0;
 
@@ -373,17 +372,11 @@ int af_init(af_stream_t* s, int force_output)
     if (!af_append(s,s->first,"dummy") || AF_OK != af_reinit(s,s->first))
       return -1;
 
-  // If force_output isn't set do not compensate for output format
-  if(!force_output){
-    memcpy(&s->output, s->last->data, sizeof(af_data_t));
-    return 0;
-  }
-
   // Check output format
   if((AF_INIT_TYPE_MASK & s->cfg.force) != AF_INIT_FORCE){
     af_instance_t* af = NULL; // New filter
     // Check output frequency if not OK fix with resample
-    if(s->last->data->rate!=s->output.rate){
+    if(s->output.rate && s->last->data->rate!=s->output.rate){
       // try to find a filter that can change samplrate
       af = af_control_any_rev(s, AF_CONTROL_RESAMPLE_RATE | AF_CONTROL_SET,
                &(s->output.rate));
@@ -428,7 +421,7 @@ int af_init(af_stream_t* s, int force_output)
       
     // Check number of output channels fix if not OK
     // If needed always inserted last -> easy to screw up other filters
-    if(s->last->data->nch!=s->output.nch){
+    if(s->output.nch && s->last->data->nch!=s->output.nch){
       if(!strcmp(s->last->info->name,"format"))
 	af = af_prepend(s,s->last,"channels");
       else
@@ -441,7 +434,7 @@ int af_init(af_stream_t* s, int force_output)
     }
     
     // Check output format fix if not OK
-    if(s->last->data->format != s->output.format){
+    if(s->output.format && s->last->data->format != s->output.format){
       if(strcmp(s->last->info->name,"format"))
 	af = af_append(s,s->last,"format");
       else
@@ -458,6 +451,9 @@ int af_init(af_stream_t* s, int force_output)
     if(AF_OK != af_reinit(s,s->first))
       return -1;
 
+    if (!s->output.format) s->output.format = s->last->data->format;
+    if (!s->output.nch) s->output.nch = s->last->data->nch;
+    if (!s->output.rate) s->output.rate = s->last->data->rate;
     if((s->last->data->format != s->output.format) || 
        (s->last->data->nch    != s->output.nch)    || 
        (s->last->data->rate   != s->output.rate))  {

@@ -955,7 +955,7 @@ static int build_afilter_chain(sh_audio_t *sh_audio, ao_data_t *ao_data)
   }
   result =  init_audio_filters(sh_audio, new_srate,
            sh_audio->channels, sh_audio->sample_format,
-           ao_data->samplerate, ao_data->channels, ao_data->format,
+           &ao_data->samplerate, &ao_data->channels, &ao_data->format,
            ao_data->outburst * 4, ao_data->buffersize);
   mixer.afilter = sh_audio->afilter;
 #ifdef HAVE_NEW_GUI
@@ -2133,10 +2133,11 @@ osd_text_buffer[0]=0;
 if(sh_audio){
   //const ao_info_t *info=audio_out->info;
   current_module="af_preinit";
-  ao_data.samplerate=force_srate?force_srate:sh_audio->samplerate*playback_speed;
-  ao_data.channels=audio_output_channels?audio_output_channels:sh_audio->channels;
-  ao_data.format=audio_output_format?audio_output_format:sh_audio->sample_format;
+  ao_data.samplerate=force_srate;
+  ao_data.channels=0;
+  ao_data.format=audio_output_format;
 #if 1
+  // first init to detect best values
   if(!preinit_audio_filters(sh_audio,
         // input:
         (int)(sh_audio->samplerate*playback_speed),

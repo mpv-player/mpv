@@ -134,7 +134,7 @@ typedef struct af_stream_s
    format given in "s", otherwise the output fromat in the last filter
    will be copied "s". The return value is 0 if success and -1 if
    failure */
-int af_init(af_stream_t* s, int force_output);
+int af_init(af_stream_t* s);
 
 // Uninit and remove all filters
 void af_uninit(af_stream_t* s);

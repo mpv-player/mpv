@@ -260,6 +260,7 @@ void uninit_audio(sh_audio_t *sh_audio)
     }
     if(sh_audio->a_out_buffer!=sh_audio->a_buffer) free(sh_audio->a_out_buffer);
     sh_audio->a_out_buffer=NULL;
+    sh_audio->a_out_buffer_size=0;
     if(sh_audio->a_buffer) free(sh_audio->a_buffer);
     sh_audio->a_buffer=NULL;
     if(sh_audio->a_in_buffer) free(sh_audio->a_in_buffer);
@@ -270,50 +271,14 @@ void uninit_audio(sh_audio_t *sh_audio)
 int preinit_audio_filters(sh_audio_t *sh_audio, 
 	int in_samplerate, int in_channels, int in_format,
 	int* out_samplerate, int* out_channels, int* out_format){
-  af_stream_t* afs=malloc(sizeof(af_stream_t));
-  memset(afs,0,sizeof(af_stream_t));
-
-  // input format: same as codec's output format:
-  afs->input.rate   = in_samplerate;
-  afs->input.nch    = in_channels;
-  afs->input.format = in_format;
-  af_fix_parameters(&(afs->input));
-
-  // output format: same as ao driver's input format (if missing, fallback to input)
-  afs->output.rate   = *out_samplerate ? *out_samplerate : afs->input.rate;
-  afs->output.nch    = *out_channels ? *out_channels : afs->input.nch;
-  afs->output.format = *out_format ? *out_format : afs->input.format;
-  af_fix_parameters(&(afs->output));
-
-  // filter config:  
-  memcpy(&afs->cfg,&af_cfg,sizeof(af_cfg_t));
-  
-  mp_msg(MSGT_DECAUDIO, MSGL_INFO, "Checking audio filter chain for %dHz/%dch/%s -> %dHz/%dch/%s...\n",
-      afs->input.rate,afs->input.nch,af_fmt2str_short(afs->input.format),
-      afs->output.rate,afs->output.nch,af_fmt2str_short(afs->output.format));
-  
-  // let's autoprobe it!
-  if(0 != af_init(afs,0)){
-    free(afs);
-    return 0; // failed :(
-  }
-  
-  *out_samplerate=afs->output.rate;
-  *out_channels=afs->output.nch;
-  *out_format=afs->output.format;
-
-  mp_msg(MSGT_DECAUDIO, MSGL_INFO, "AF_pre: %dHz/%dch/%s\n",
-      afs->output.rate, afs->output.nch,
-      af_fmt2str_short(afs->output.format));
-  
-  sh_audio->afilter=(void*)afs;
-  return 1;
+  init_audio_filters(sh_audio, in_samplerate, in_channels, in_format,
+      out_samplerate, out_channels, out_format, 0, 0);
 }
 
  /* Init audio filters */
 int init_audio_filters(sh_audio_t *sh_audio, 
 	int in_samplerate, int in_channels, int in_format,
-	int out_samplerate, int out_channels, int out_format,
+	int *out_samplerate, int *out_channels, int *out_format,
 	int out_minsize, int out_maxsize){
   af_stream_t* afs=sh_audio->afilter;
   if(!afs){
@@ -328,9 +293,9 @@ int init_audio_filters(sh_audio_t *sh_audio,
   af_fix_parameters(&(afs->input));
 
   // output format: same as ao driver's input format (if missing, fallback to input)
-  afs->output.rate   = out_samplerate ? out_samplerate : afs->input.rate;
-  afs->output.nch    = out_channels ? out_channels : afs->input.nch;
-  afs->output.format = out_format ? out_format : afs->input.format;
+  afs->output.rate   = *out_samplerate;
+  afs->output.nch    = *out_channels;
+  afs->output.format = *out_format;
   af_fix_parameters(&(afs->output));
 
   // filter config:  
@@ -341,12 +306,17 @@ int init_audio_filters(sh_audio_t *sh_audio,
       afs->output.rate,afs->output.nch,af_fmt2str_short(afs->output.format));
   
   // let's autoprobe it!
-  if(0 != af_init(afs,1)){
+  if(0 != af_init(afs)){
     sh_audio->afilter=NULL;
     free(afs);
     return 0; // failed :(
   }
+
+  *out_samplerate=afs->output.rate;
+  *out_channels=afs->output.nch;
+  *out_format=afs->output.format;
   
+  if (out_maxsize || out_minsize) {
   // allocate the a_out_* buffers:
   if(out_maxsize<out_minsize) out_maxsize=out_minsize;
   if(out_maxsize<8192) out_maxsize=MAX_OUTBURST; // not sure this is ok
@@ -355,6 +325,7 @@ int init_audio_filters(sh_audio_t *sh_audio,
   sh_audio->a_out_buffer=malloc(sh_audio->a_out_buffer_size);
   memset(sh_audio->a_out_buffer,0,sh_audio->a_out_buffer_size);
   sh_audio->a_out_buffer_len=0;
+  }
   
   // ok!
   sh_audio->afilter=(void*)afs;

@@ -12,7 +12,7 @@ extern void uninit_audio(sh_audio_t *sh_audio);
 
 extern int init_audio_filters(sh_audio_t *sh_audio, 
 	int in_samplerate, int in_channels, int in_format,
-	int out_samplerate, int out_channels, int out_format,
+	int *out_samplerate, int *out_channels, int *out_format,
 	int out_minsize, int out_maxsize);
 extern int preinit_audio_filters(sh_audio_t *sh_audio,
         int in_samplerate, int in_channels, int in_format,

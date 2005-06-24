@@ -819,9 +819,9 @@ mux_a->source=sh_audio;
 
 mux_a->codec=out_audio_codec;
 
-ao_data.samplerate = force_srate ? force_srate : new_srate;
-ao_data.channels = audio_output_channels ? audio_output_channels : sh_audio->channels;
-ao_data.format = audio_output_format ? audio_output_format : sh_audio->sample_format;
+ao_data.samplerate = force_srate;
+ao_data.channels = 0;
+ao_data.format = audio_output_format;
 if(!preinit_audio_filters(sh_audio,
    // input:
    new_srate,
@@ -833,7 +833,7 @@ if(!preinit_audio_filters(sh_audio,
    }
 
 aparams.channels = ao_data.channels;
-aparams.sample_rate = force_srate ? force_srate : ao_data.samplerate;
+aparams.sample_rate = ao_data.samplerate;
 aparams.audio_preload = 1000 * audio_preload;
 if(mux_a->codec != ACODEC_COPY) {
     aencoder = new_audio_encoder(mux_a, &aparams);
@@ -841,7 +841,7 @@ if(mux_a->codec != ACODEC_COPY) {
         mencoder_exit(1, NULL);
     if(!init_audio_filters(sh_audio, 
         new_srate, sh_audio->channels, sh_audio->sample_format,  
-        aparams.sample_rate, aparams.channels, aencoder->input_format, 
+        &aparams.sample_rate, &aparams.channels, &aencoder->input_format, 
         aencoder->min_buffer_size, aencoder->max_buffer_size)) {
       mp_msg(MSGT_CPLAYER,MSGL_FATAL,MSGTR_NoMatchingFilter);
       mencoder_exit(1,NULL);
@@ -951,9 +951,9 @@ else if (sh_audio) {
 	    new_srate,
 	    sh_audio->channels,
 	    sh_audio->sample_format,
-	    mux_a->wf->nSamplesPerSec,
-	    mux_a->wf->nChannels,
-	    out_format,
+	    &mux_a->wf->nSamplesPerSec,
+	    &mux_a->wf->nChannels,
+	    &out_format,
 	    out_minsize,
 	    out_maxsize))
 	{
