@@ -1,4 +1,4 @@
-.\" synced with 1.1019
+.\" synced with 1.1023
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -2772,7 +2772,7 @@ Musisz w³±czyæ tê opcjê, je¿eli masz problemy z rozrywaniem/\:brakiem p³ynno¶ci
 ruchów podczas ogl±dania materia³u z przeplotem.
 .IPs layer=N
 Wymusi wybranie warstwy o ID N do odtwarzania (domy¶lnie: -1 - auto).
-.IPs dfbopts=<ci±g>
+.IPs dfbopts=<lista>
 Podaje listê parametrów dla DirectFB.
 .RE
 .PD 1
@@ -6692,6 +6692,10 @@ korekcja jako¶ci w %
 pocz±tkowa z³o¿ono¶æ (przebieg\ 1)
 .
 .TP
+.B vrc_init_occupancy=<0.0\-1.0>
+pocz±tkowa zajêto¶æ bufora, jako u³amek vrc_buf_size (domy¶lnie: 0.9)
+.
+.TP
 .B vqsquish=<0|1>
 Okre¶la jak ma siê zachowywaæ kwantyzator miêdzy qmin a qmax (przebieg\ 1/\:2).
 .PD 0
@@ -8651,8 +8655,10 @@ rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \
 .\" --------------------------------------------------------------------------
 .
 .SH B£ÊDY
+Nie panikuj.
 Je¶li jaki¶ znajdziesz, zg³o¶ go nam, ale przedtem upewnij siê, ¿e przeczyta³e¶
 ca³± dokumentacjê.
+Uwa¿aj te¿ na u¶mieszki. :)
 Wiele b³êdów jest skutkiem nieprawid³oych ustawieñ lub u¿ycia z³ych parametrów.
 Sekcja zg³oszeñ b³êdów w dokumentacji (DOCS/\:HTML/\:pl/\:bugreports.html) opisuje
 sposób tworzenia przydatnych zg³oszeñ b³êdów.
