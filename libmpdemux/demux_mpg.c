@@ -262,8 +262,22 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
     
     //============== DVD Audio sub-stream ======================
     if(id==0x1BD){
-      int aid=stream_read_char(demux->stream);--len;
-      if(len<3) return -1; // invalid audio packet
+      int aid, rawa52 = 0;
+      off_t tmppos;
+      unsigned int tmp;
+
+      tmppos = stream_tell(demux->stream);
+      tmp = stream_read_word(demux->stream);
+      stream_seek(demux->stream, tmppos);
+      /// vdr stores A52 without the 4 header bytes, so we have to check this condition first
+      if(tmp == 0x0B77) {
+        aid = 128;
+        rawa52 = 1;
+      }
+      else {
+        aid=stream_read_char(demux->stream);--len;
+        if(len<3) return -1; // invalid audio packet
+      }
       
       // AID:
       // 0x20..0x3F  subtitle
@@ -293,11 +307,13 @@ static int demux_mpg_read_packet(demuxer_t *demux,int id){
         ds=demux->audio;
         if(!ds->sh) ds->sh=demux->a_streams[aid];
         // READ Packet: Skip additional audio header data:
+        if(!rawa52) {
         c=stream_read_char(demux->stream);//num of frames
         type=stream_read_char(demux->stream);//startpos hi
         type=(type<<8)|stream_read_char(demux->stream);//startpos lo
 //        printf("\r[%02X][%04X]",c,type);
         len-=3;
+        }
         if((aid&0xE0)==0xA0 && len>=3){
 	  unsigned char* hdr;
 	  // save audio header as codecdata!
