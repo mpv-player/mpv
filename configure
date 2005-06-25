@@ -5486,11 +5486,14 @@ _inc_faad="-I`pwd`/libfaad2"
 if test "$_faad_internal" = auto ; then
   # the faad check needs a config.h file
   if not test -f "config.h" ; then
-    > config.h
+    cat > config.h << EOF
+/* C99 lrintf function available */
+$_def_lrintf
+EOF
   fi
   # internal faad: check if our dear gcc is able to compile it...
   cp "`pwd`/libfaad2/cfft.c" $TMPC
-  if ( cc_check -c -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer $_inc_faad ); then
+  if ( cc_check -c -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer $_opt_gnu99 -D_GNU_SOURCE $_inc_faad ); then
     _faad_internal=yes
   else
     _faad_internal="no (broken gcc)"
