@@ -50,6 +50,7 @@ static uint32_t image_format;
 static HWND hWnd;
 /* Window parameters */
 static HWND hWnd=NULL,hWndFS=NULL;
+static float window_aspect;
 
 static vidix_grkey_t gr_key;
     
@@ -62,11 +63,15 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
 {
     switch (message){
 	    case WM_DESTROY:
+			PostQuitMessage(0);
+			return 0;
+	    case WM_CLOSE:
 			mp_input_queue_cmd(mp_input_parse_cmd("quit"));
 			break;
 		case WM_WINDOWPOSCHANGED:
            {
-                 /*calculate new window rect*/       
+                int tmpheight=0;
+                /*calculate new window rect*/       
                  if(!vo_fs){
                  RECT rd;
                  POINT point_window;
@@ -82,6 +87,26 @@ static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM l
                  vo_dx =point_window.x;
                  vo_dy =point_window.y;
           //       aspect(&vo_dwidth, &vo_dheight, A_NOZOOM);
+
+                 /* keep aspect on resize, borrowed from vo_directx.c */
+                 tmpheight = ((float)vo_dwidth/window_aspect);
+                 tmpheight += tmpheight % 2;
+                 if(tmpheight > vo_dheight)
+                 {
+                     vo_dwidth = ((float)vo_dheight*window_aspect);
+                     vo_dwidth += vo_dwidth % 2;
+                 }
+                 else vo_dheight = tmpheight;
+                 rd.right = rd.left + vo_dwidth;
+                 rd.bottom = rd.top + vo_dheight;
+
+                 if(rd.left < 0) rd.left = 0;
+                 if(rd.right > vo_screenwidth) rd.right = vo_screenwidth;
+                 if(rd.top < 0) rd.top = 0;
+                 if(rd.bottom > vo_screenheight) rd.bottom = vo_screenheight;
+
+                 AdjustWindowRect(&rd, WS_OVERLAPPEDWINDOW | WS_SIZEBOX, 0);
+                 SetWindowPos(hWnd, HWND_TOPMOST, vo_dx+rd.left, vo_dy+rd.top, rd.right-rd.left, rd.bottom-rd.top, SWP_NOOWNERZORDER); 
                }
                else {
                  if(ShowCursor(FALSE)>=0)while(ShowCursor(FALSE)>=0){}       
@@ -184,7 +209,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,uint32_
 
     aspect(&d_width, &d_height, A_NOZOOM);
     vo_dwidth=d_width; vo_dheight=d_height;
-
+    window_aspect = (float)d_width / (float)d_height;
 
    
     if(!vo_config_count){
