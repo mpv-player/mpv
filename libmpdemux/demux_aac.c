@@ -126,7 +126,6 @@ int demux_aac_probe(demuxer_t *demuxer)
 
 fail:
 	mp_msg(MSGT_DEMUX, MSGL_V, "demux_aac_probe, failed to detect an AAC stream\n");
-	demux_close_aac(demuxer);
 	return 0;
 }
 
