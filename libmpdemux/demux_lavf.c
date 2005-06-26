@@ -112,7 +112,8 @@ int lavf_check_file(demuxer_t *demuxer){
 
     av_register_all();
 
-    stream_read(demuxer->stream, buf, PROBE_BUF_SIZE);
+    if(stream_read(demuxer->stream, buf, PROBE_BUF_SIZE)!=PROBE_BUF_SIZE)
+        return 0;
     avpd.filename= demuxer->stream->url;
     avpd.buf= buf;
     avpd.buf_size= PROBE_BUF_SIZE;
