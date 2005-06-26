@@ -2821,12 +2821,10 @@ else
     elif ( cc_check -pthread ) ; then
      _ld_pthread='-pthread'
     else
-      echores "no static pthread found (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, Win32 loader disabled)"
-      _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _macosx=no ; _win32=no
+      _ld_pthread=''
     fi
   else
-    echores "no (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled)"
-    _ld_pthread='' ; _nas=no ; _tv_v4l=no ; _macosx=no ; _win32=no
+    _ld_pthread='' 
   fi
 fi
 fi
@@ -2836,9 +2834,13 @@ if test "$_ld_pthread" != '' ; then
   _def_pthreads='#define HAVE_PTHREADS 1'
   _def_threads='#define HAVE_THREADS 1'
 else
-  echores "no"
+  echores "no (v4l, vo_gl, ao_alsa, ao_nas, ao_macosx, win32 loader disabled)"
   _pthreads=''
   _def_pthreads='#undef HAVE_PTHREADS'
+  _nas=no ; _tv_v4l=no ; _macosx=no
+  if not mingw32 ; then
+    _win32=no
+  fi
 fi
 
 
