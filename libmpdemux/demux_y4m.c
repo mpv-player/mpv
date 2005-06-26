@@ -30,7 +30,9 @@ int y4m_check_file(demuxer_t* demuxer){
     
     mp_msg(MSGT_DEMUX, MSGL_V, "Checking for YUV4MPEG2\n");
     
-    stream_read(demuxer->stream, buf, 9);
+    if(stream_read(demuxer->stream, buf, 9)!=9)
+        return 0;
+
     buf[9] = 0;
     
     if (strncmp("YUV4MPEG2", buf, 9) && strncmp("YUV4MPEG ", buf, 9)) {

@@ -301,7 +301,8 @@ int nuv_check_file ( demuxer_t* demuxer )
 
 	mp_msg ( MSGT_DEMUX, MSGL_V, "Checking for NuppelVideo\n" );
 
-	stream_read(demuxer->stream,(char*)&ns,sizeof(ns));
+	if(stream_read(demuxer->stream,(char*)&ns,sizeof(ns)) != sizeof(ns))
+		return 0;
 
 	if ( strncmp ( ns.finfo, "NuppelVideo", 12 ) ) 
 		return 0; /* Not a NuppelVideo file */
