@@ -16,7 +16,8 @@ int demux_probe_vqf(demuxer_t* demuxer)
   char buf[KEYWORD_BYTES];
   stream_t *s;
   s = demuxer->stream;
-  stream_read(s,buf,KEYWORD_BYTES);
+  if(stream_read(s,buf,KEYWORD_BYTES)!=KEYWORD_BYTES)
+    return 0;
   if(memcmp(buf,"TWIN",KEYWORD_BYTES)==0) return 1; /*version: 97012000*/
   return 0;
 }
