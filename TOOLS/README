@@ -401,6 +401,16 @@ Usage:        install-w32codecs.sh install
               install-w32codecs.sh uninstall
 
 
+vobshift.py
+
+Author:       Gábor Farkas
+
+Description:  Adjust the time-info in vobsub files
+
+Usage:        vobshift.py in.idx out.idx +8.3
+              Will shift the time by 8.3 seconds
+
+
 subrip.c
 
 Author:       Kim Minh Kaplan

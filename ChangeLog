@@ -6,7 +6,7 @@ MPlayer (1.0)
     * improved encoding guide
     * new technical encoding guide in DOCS/tech/encoding-guide.txt
       which is to be merged into the existing guide
-    * encoding tips for x264
+    * encoding tips for x264 and XviD
     * how to set up MEncoder for x264 support
     * misc improvements all over the place
 
@@ -65,6 +65,8 @@ MPlayer (1.0)
     * support for file:// syntax
     * -fb option removed, use the device suboption of -vo fbdev/fbdev2 instead
     * massive stream layer cleanup, all streams ported to the new API
+    * full gcc 4 support for IA-32 and AMD-64 ports
+    * TOOLS/vobshift.py: vobsub time-adjust tool
 
 
   pre7: "PatentCounter" April 16, 2005
