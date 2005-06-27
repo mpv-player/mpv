@@ -981,16 +981,6 @@ Try <option>-nocache</option>.
 </para></answer>
 </qandaentry>
 
-<qandaentry>
-<question><para>
-How can I play MPEG Layer 2 (MP2) audio files?
-</para></question>
-<answer><para>
-You have to use <option>-rawaudio on:format=0x50</option>.
-</para></answer>
-</qandaentry>
-</qandadiv>
-
 
 <qandadiv id="faq-driver">
 <title>Video/audio driver problems (vo/ao)</title>
@@ -1322,12 +1312,70 @@ will dump the 5th title of the DVD into the file
 
 <qandaentry>
 <question><para>
-How can I create VCDs?
+How can I create (S)VCDs automatically?
 </para></question>
 <answer><para>
 Try the <filename>mencvcd</filename> script from the <filename class="directory">TOOLS</filename>
 subdirectory. With it you can encode DVDs or other movies to VCD or SVCD format
 and even burn them directly to CD.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+How can I create SVCDs?
+</para></question>
+<answer><para>
+Newer versions of <application>MEncoder</application> can directly
+generate MPEG-2 files that can be used as a base to create a (S)SVCD and
+are likely to be playable out of the box on all platforms (for example
+to share a video from a digital camcorder with your computer-illiterate
+friends).
+<screen>
+mencoder -of mpeg -oac toolame -toolameopts br=224 -srate 44100 \
+-af-adv force=1 -ovc lavc -mpegopts format=xsvcd -vf harddup -ofps 25 \
+-lavcopts vcodec=mpeg2video:mbd=2:keyint=25:vrc_buf_size=917:vrc_minrate=600:vbitrate=2500:vrc_maxrate=2500 \
+<replaceable>in.avi</replaceable> -o <replaceable>xsvcd.mpg</replaceable>
+</screen>
+This will convert the input file <replaceable>in.avi</replaceable> into
+the output file <replaceable>xsvcd.mpg</replaceable>, converting the
+audio with <systemitem class="library">toolame</systemitem> at 224kbps
+and the video with <systemitem class="library">libavcodec</systemitem>.
+</para><para>
+Please note that in order to make the GOP structure SVCD compliant the
+<option>keyint</option> option should be 15 for PAL and 18 for NTSC,
+although very often files with much longer GOPs play correctly (25 should
+never lead to any problem).
+Also, even though leaving out <option>-ofps</option> should work in most
+cases PAL requires <option>-ofps</option> 25 and NTSC
+<option>-ofps</option> 30000/1001.
+</para><para>
+As far as the audio is concerned, SVCD only support MPEG-1 layer II audio,
+therefore you have to use either
+<systemitem class="library">toolame</systemitem>,
+<systemitem class="library">twolame</systemitem>, or as a last resort
+<systemitem class="library">libavcodec</systemitem>'s MPEG-1 layer II
+encoder (as its quality is far from being as good as the former two
+libraries).
+Both <systemitem class="library">toolame</systemitem> and
+<systemitem class="library">twolame</systemitem> follow the same syntax,
+so you depending on which one you managed to install, the example only
+requires a small chance, but if you need to use
+<systemitem class="library">libavcodec</systemitem>'s MPEG-1 layer II
+encoder, replace
+<screen>
+-oac toolame -toolameopts br=224
+</screen>
+by
+<screen>
+-oac lavc -lavcopts acodec=mp2:abitrate=224
+</screen>
+</para><para>
+The resulting file <replaceable>xsvcd.mpg</replaceable> is an extended
+SVCD (that is why it is called xsvcd), mainly because it does not contain
+scan offsets, so if you need to generate an SVCD image out of it, you
+should pass it to
+<ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>.
 </para></answer>
 </qandaentry>
 
