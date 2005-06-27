@@ -2284,6 +2284,19 @@ static Atom xv_intern_atom_if_exists( char const * atom_name )
 
   return xv_atom;
 }
+
+/**
+ * \brief Try to enable vsync for xv.
+ * \return Returns -1 if not available, 0 on failure and 1 on success.
+ */
+int vo_xv_enable_vsync()
+{
+  Atom xv_atom = xv_intern_atom_if_exists("XV_SYNC_TO_VBLANK");
+  if (xv_atom == None)
+    return -1;
+  return XvSetPortAttribute(mDisplay, xv_port, xv_atom, 1) == Success;
+}
+
 /**
  * \brief Print information about the colorkey method and source.
  *

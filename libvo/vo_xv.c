@@ -917,6 +917,7 @@ static uint32_t preinit(const char *arg)
     {
       return -1; // bail out, colorkey setup failed
     }
+    vo_xv_enable_vsync();
 
     fo = XvListImageFormats(mDisplay, xv_port, (int *) &formats);
 
