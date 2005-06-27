@@ -50,6 +50,7 @@ MPlayer (1.0)
     * border processing adaptive quantization in libavcodec
     * XviD's encoding zones and luminance masking
     * raw audio muxer
+    * fixed various bugs in the EDL code
 
     Ports:
     * improved timer function on Mac OS X
