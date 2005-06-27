@@ -149,7 +149,6 @@ PARTS = libmpdemux \
         libavcodec \
         libavformat \
         libao2 \
-        drivers \
         osdep \
         postproc \
         input \
