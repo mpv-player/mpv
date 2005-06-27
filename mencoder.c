@@ -239,7 +239,7 @@ static edl_record_ptr next_edl_record = NULL; ///< only for traversing edl_recor
 static short edl_muted; ///< Stores whether EDL is currently in muted mode.
 static short edl_seeking; ///< When non-zero, stream is seekable.
 static short edl_seek_type; ///< When non-zero, frames are discarded instead of seeking.
-static short edl_skip; ///< -1 OR the value of in_size of an already read frame.
+static int edl_skip; ///< -1 OR the value of in_size of an already read frame.
 /** \brief Seeks for EDL
     \return 1 for success, 0 for failure, 2 for EOF.
 */
@@ -1045,7 +1045,7 @@ goto_redo_edl:
 
             result = edl_seek(next_edl_record, demuxer, d_audio, mux_a, &frame_time, &start, mux_v->codec==VCODEC_COPY);
 
-            if (result == 2) break; // EOF
+            if (result == 2) { at_eof=1; break; } // EOF
             else if (result == 0) edl_seeking = 0; // no seeking
             else { // sucess
                 edl_muted = 0;
@@ -1091,6 +1091,8 @@ if(sh_audio){
 	}
 	else tottime = 1./audio_density;
 
+	// let's not output more audio than necessary
+	if (tottime <= 0) break;
 
 	if(aencoder)
 	{
@@ -1169,8 +1171,6 @@ if(sh_audio){
 	audiosamples++;
 	audiorate+= (GetTimerMS() - ptimer_start);
 	
-	// let's not output more audio than necessary
-	if (stop_time(demuxer, mux_v) != -1 && stop_time(demuxer, mux_v) <= mux_a->timer) break;
     }
 }
 
@@ -1592,6 +1592,8 @@ int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t 
     sh_audio_t * sh_audio = d_audio->sh;
     sh_video_t * sh_video = demuxer->video ? demuxer->video->sh : NULL;
     vf_instance_t * vfilter = sh_video ? sh_video->vfilter : NULL;
+    int done = 0;
+    int samplesize, avg;
 
     if (!sh_video) return 0;
     if (sh_video->pts >= next_edl_record->stop_sec) return 1; // nothing to do...
@@ -1610,6 +1612,10 @@ int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t 
 
     // slow seek, read every frame.
 
+    if (sh_audio->audio.dwScale) samplesize = sh_audio->audio.dwSampleSize;
+    else samplesize = (sh_audio->wf ? sh_audio->wf->nBlockAlign : 1);
+    avg = (sh_audio->wf ? sh_audio->wf->nAvgBytesPerSec : sh_audio->i_bps);
+
     while (!interrupted) {
         float a_pts = 0.;
         int in_size;
@@ -1620,25 +1626,27 @@ int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t 
 
         if (sh_audio) {
             a_pts = d_audio->pts + (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
-            while (sh_video->pts > a_pts) {
+            while (sh_video->pts - *frame_time > a_pts) {
                 int len;
-                if (mux_a->h.dwSampleSize) {
-                    len = mux_a->wf->nAvgBytesPerSec * (sh_video->pts - a_pts);
-                    len/= mux_a->h.dwSampleSize; if(len<1) len=1;
-                    len*= mux_a->h.dwSampleSize;
+                if (samplesize) {
+                    len = avg * (sh_video->pts - a_pts - *frame_time);
+                    len/= samplesize; if(len<1) len=1;
+                    len*= samplesize;
                     len = demux_read_data(sh_audio->ds,mux_a->buffer,len);
                 } else {
-                    len = ds_get_packet(sh_audio->ds,(unsigned char**) &mux_a->buffer);
+                    unsigned char * crap;
+                    len = ds_get_packet(sh_audio->ds, &crap);
                 }
                 if (len <= 0) break; // EOF of audio.
                 a_pts = d_audio->pts + (ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
             }
         }
 
-        if (sh_video->pts >= next_edl_record->stop_sec) {
+        if (done) {
             edl_skip = in_size;
             if (!framecopy || (sh_video->ds->flags & 1)) return 1;
         }
+        if (sh_video->pts >= next_edl_record->stop_sec) done = 1;
 
         if (vfilter) {
             int softskip = (vfilter->control(vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) == CONTROL_TRUE);
