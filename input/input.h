@@ -115,6 +115,8 @@
 #define MP_INPUT_DEAD -2
 // No input was available
 #define MP_INPUT_NOTHING -3
+//! Input will be available if you try again
+#define MP_INPUT_RETRY -4
 
 // For the key's drivers, if possible you can send key up and key down
 // events. Key up is the default, to send a key down you must use the 

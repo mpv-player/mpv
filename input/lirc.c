@@ -102,7 +102,7 @@ int mp_input_lirc_read(int fd,char* dest, int s) {
   else if(cmd_buf) // return the first command in the buffer
     return mp_input_lirc_read(fd,dest,s);
   else
-    return MP_INPUT_NOTHING;
+    return MP_INPUT_RETRY;
 
 }
 

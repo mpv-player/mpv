@@ -708,6 +708,8 @@ mp_input_read_cmd(mp_input_fd_t* mp_fd, char** ret) {
 	mp_msg(MSGT_INPUT,MSGL_ERR,"Error while reading cmd fd %d: %s\n",mp_fd->fd,strerror(errno));
       case MP_INPUT_NOTHING:
 	return r;
+      case MP_INPUT_RETRY:
+	continue;
       }
       // EOF ?
     } else if(r == 0) {
