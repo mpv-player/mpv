@@ -1323,12 +1323,12 @@ and even burn them directly to CD.
 
 <qandaentry>
 <question><para>
-How can I create SVCDs?
+How can I create (S)VCDs?
 </para></question>
 <answer><para>
 Newer versions of <application>MEncoder</application> can directly
-generate MPEG-2 files that can be used as a base to create a (S)SVCD and
-are likely to be playable out of the box on all platforms (for example
+generate MPEG-2 files that can be used as a base to create a VCD or SVCD and
+are likely to be playable out of the box on all platforms (for example,
 to share a video from a digital camcorder with your computer-illiterate
 friends).
 <screen>
@@ -1340,18 +1340,22 @@ mencoder -of mpeg -oac toolame -toolameopts br=224 -srate 44100 \
 This will convert the input file <replaceable>in.avi</replaceable> into
 the output file <replaceable>xsvcd.mpg</replaceable>, converting the
 audio with <systemitem class="library">toolame</systemitem> at 224kbps
-and the video with <systemitem class="library">libavcodec</systemitem>.
+and the video with <systemitem class="library">libavcodec</systemitem>
+at 2500kbps, making sure the bitrate never goes below 600 and never
+exceeds 2500kbps, in order to respect the (S)VCD norm and ensure an
+smooth playback.
 </para><para>
 Please note that in order to make the GOP structure SVCD compliant the
 <option>keyint</option> option should be 15 for PAL and 18 for NTSC,
 although very often files with much longer GOPs play correctly (25 should
 never lead to any problem).
 Also, even though leaving out <option>-ofps</option> should work in most
-cases PAL requires <option>-ofps</option> 25 and NTSC
+cases, (as your source is likely to have the appropriate framerate
+already) PAL requires <option>-ofps</option> 25 and NTSC requires
 <option>-ofps</option> 30000/1001.
 </para><para>
-As far as the audio is concerned, SVCD only support MPEG-1 layer II audio,
-therefore you have to use either
+As far as the audio is concerned, SVCD only supports MPEG-1 layer II audio,
+therefore you have to use one of
 <systemitem class="library">toolame</systemitem>,
 <systemitem class="library">twolame</systemitem>, or as a last resort
 <systemitem class="library">libavcodec</systemitem>'s MPEG-1 layer II
@@ -1360,20 +1364,24 @@ libraries).
 Both <systemitem class="library">toolame</systemitem> and
 <systemitem class="library">twolame</systemitem> follow the same syntax,
 so you depending on which one you managed to install, the example only
-requires a small chance, but if you need to use
+requires a small change. If you do need to use
 <systemitem class="library">libavcodec</systemitem>'s MPEG-1 layer II
 encoder, replace
 <screen>
 -oac toolame -toolameopts br=224
 </screen>
-by
+if you use toolame or
+<screen>
+-oac twolame -twolameopts br=224
+</screen>
+if you use twolame by:
 <screen>
 -oac lavc -lavcopts acodec=mp2:abitrate=224
 </screen>
 </para><para>
-The resulting file <replaceable>xsvcd.mpg</replaceable> is an extended
+The resulting <replaceable>xsvcd.mpg</replaceable> is an extended
 SVCD (that is why it is called xsvcd), mainly because it does not contain
-scan offsets, so if you need to generate an SVCD image out of it, you
+scan offsets. If you need to generate an SVCD image out of it, you
 should pass it to
 <ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>.
 </para></answer>
