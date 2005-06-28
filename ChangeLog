@@ -68,6 +68,7 @@ MPlayer (1.0)
     * massive stream layer cleanup, all streams ported to the new API
     * full gcc 4 support for IA-32 and AMD-64 ports
     * TOOLS/vobshift.py: vobsub time-adjust tool
+    * fixed auto-insertion of lavc encoder used with hardware MPEG1/2 decoders such as dxr2/3 and dvb
 
 
   pre7: "PatentCounter" April 16, 2005
