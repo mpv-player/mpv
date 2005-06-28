@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.12 -->
+<!-- Synced with: 1.13 -->
 <appendix id="bugs">
 <title>Známé chyby</title>
 <sect1 id="bugs-special">
@@ -44,6 +44,11 @@ opravena.</para>
 <para>SIGSEGV (signal 11) v libmpeg2, při škálování+enkódování:</para>
 <para>Problém: známá GCC 2.95.2 MMX chyba</para>
 <para>Řešení: upgrade na 2.95.3</para>
+</listitem>
+<listitem>
+<para>Havaruje při ukládání datových proudů (dump):</para>
+<para>Problém: vylití jádra (core dump)</para>
+<para>Řešení: Nepanikařte. Zjistěte, kde máte ručník.</para>
 </listitem>
 </itemizedlist>
 </sect1>
