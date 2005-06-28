@@ -1,4 +1,4 @@
-.\" synced with 1.997
+.\" synced with 1.1023
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -342,7 +342,7 @@ Nastaví velikost video okna na pùvodní velikost.
 Zvìt¹í video okno na dvojnásobek pùvodní velikosti.
 .IPs "command + f"
 Pøepínaè na celou obrazovku a zpìt (viz také volbu \-fs).
-.IPs "command + [ a command + ]" (pouze \-vo quartz)
+.IPs "command + [ a command + ]"
 Nastaví alfa-kanál okna.
 .RE
 .PD 1
@@ -388,6 +388,18 @@ Ka¾dá 'flag' volba má svùj 'noflag' protìj¹ek, èili\& protìj¹kem volby \-fs je
 .PP
 Pokud je volba oznaèená jako (pouze XXX), pak bude pracovat jen v kombinaci
 s volbou XXX nebo pokud je XXX zakompilováno.
+.PP
+.I POZNÁMKA:
+Parser podvoleb (pou¾ívaný napø. podvolbami -ao pcm) podporuje
+zvlá¹tní druh eskejpování øetìzce zamý¹lený pro pou¾ití externími GUI.
+.br
+Formát je následující:
+.br
+%n%øetìzec_délky_n
+.br
+.I PØÍKLAD:
+.br
+mplayer -ao pcm:file=%10%C:test.wav test.avi
 .PP
 Mù¾ete umístit v¹echny své volby do konfiguraèního souboru, který bude naèten
 pøi ka¾dém startu MPlayeru.
@@ -1975,10 +1987,6 @@ Nastavuje kontrast video signálu (výchozí 0).
 Funkci nepodporují v¹echna video rozhraní.
 .
 .TP
-.B \-dfbopts <hodnota> (pouze \-vo directfb)
-Stanoví seznam parametrù pro directfb video rozhraní.
-.
-.TP
 .B \-display <jméno> (pouze X11)
 Stanoví jméno serveru a èíslo displaye X serveru na který chcete zobrazovat.
 .sp 1
@@ -2078,10 +2086,6 @@ Aktivuje TV-out.
 .IPs overlay-ratio=<1\-2500>
 Doladí pøekrývání (výchozí: 1000).
 .RE
-.
-.TP
-.B \-fb <zaøízení> (pouze \-vo fbdev nebo directfb) (ZASTARALÉ)
-Urèí které framebuffer zaøízení pou¾ít (výchozí: /dev/\:fb0).
 .
 .TP
 .B \-fbmode <název re¾imu> (pouze \-vo fbdev)
@@ -2289,7 +2293,7 @@ Zapne synchronizaci na snímkový zpìtný bìh (VBI) pro video rozhraní vesa,
 dfbmga a svga.
 .
 .TP
-.B \-wid <ID\ okna> (viz také volbu \-guiwid) (pouze X11 a DirectX)
+.B \-wid <ID\ okna> (viz také volbu \-guiwid) (pouze X11, OpenGL a DirectX)
 Tato volba sdìlí MPlayeru aby se pøipojil na existující okno.
 To je vyu¾itelné k vestavìní MPlayeru do internetového prohlí¾eèe
 (napøíklad s roz¹íøením plugger).
@@ -2735,6 +2739,8 @@ Tuto volbu povolte pokud máte problémy s trháním/\:nevyhlazováním pøi sledování
 prokládaného filmového materiálu.
 .IPs layer=N
 Vynutí pou¾ití vrstvy s ID N pro pøehrávání (výchozí: -1 - auto).
+.IPs dfbopts=<výèet>
+Nastaví výèet parametrù pro DirectFB.
 .RE
 .PD 1
 .
@@ -4493,7 +4499,7 @@ deblokování podle dostupného výkonu CPU.
 .TP
 .B spp[=kvalita[:qp[:re¾im]]]
 Jednoduchý postprocesní fitr, který komprimuje a dekomprimuje obrázek
-s posunem nìkolika (nebo - v pøípadì kvality úrovnì 6 - v¹emi) smìry a
+s posunem nìkolika (nebo \- v pøípadì kvality úrovnì 6 \- v¹emi) smìry a
 sprùmìruje výsledky.
 .RSs
 .IPs <kvalita>
@@ -4517,7 +4523,7 @@ Vynutí kvantizatèní parametr (výchozí: 0, pou¾ije QP z videa).
 .IPs <-15\-32>
 Síla filtru, ni¾¹í hodnoty zachovají více detailù, ale také více artefaktù,
 zatímco vy¹¹í hodnoty uèiní obraz hlad¹ím, ale i rozmazanìj¹ím (výchozí:
-0 - PSNR optimální).
+0 \- PSNR optimální).
 .RE
 .
 .TP
@@ -5073,21 +5079,31 @@ duplicitním.
 Tento filtr má za úkol nalézt tyto duplikáty a obnovit pùvodní snímkovou
 rychlost snímkování filmu.
 Pou¾íváte-li tento filtr, musíte nastavit \-ofps na 4/\:5 snímkové rychlosti
-vstupního souboru (24000/1001 pokud je vstup 30000/1001 fps).
+vstupního souboru a pozdìji ve výètu filtrù umístit filtr softskip, abyste mìli
+jistotu, ¾e filtrem divtc projdou v¹echny snímky.
+Dostupné jsou dva rùzné re¾imy:
+Výchozím je jednodu¹e pou¾itelný jednoprùchodový re¾im, který má ale
+nevýhodu v tom, ¾e jakákoli zmìna fáze telecine (ztracené snímky nebo ¹patná
+editace) zpùsobí krátkodobé zachvìní, dokud se nedoká¾e filtr znovu
+synchronizovat.
+Dvouprùchodový re¾im se tomu vyhýbá tím, ¾e nejprve proskoumá celé video a
+pak vyu¾ije získané informace o zmìnách fáze, tak¾e se doká¾e synchronizovat
+pøímo v místì zmìny.
+Tyto fáze
+.B nekorespondují
+s prvním nebo druhým prùchodem enkódovacího procesu.
+Musíte provést zvlá¹tní první prùchod s divtc pøed samotným enkódováním a
+odstranit výsledné video.
+Pou¾ijte \-nosound \-ovc raw \-o /dev/null, abyste neplýtvali výkonem CPU
+na tento prùchod.
+Pro dal¹í zrychlení mù¾ete pøidat za divtc nìco jako crop=2:2:0:0.
+Pak pou¾ijte druhý prùchod divtc pro samotné enkódování.
+Pokud pou¾íváte víceprùchodové enkódování, pou¾ijte druhý prùchod divtc
+pro v¹echny tyto prùchody.
 Dostupné volby jsou:
 .RSs
 .IPs pass=1|2
 Pou¾ití dvouprùchodového re¾imu.
-Takto dosáhnete nejlep¹ích výsledkù.
-První prùchod analyzuje video a zapí¹e výsledky do log souboru.
-Druhý prùchod pak ète tento log soubor a pøizpùsobuje podle nìj svou èinnost.
-Poznamenejme ¾e tyto prùchody
-.B neodpovídají
-prvnímu a druhému prùchodu enkódovacího procesu (výchozí: "framediff.log").
-Chcete-li provádìt dvouprùchodový divtc s dvouprùchodovým enkódováním videa,
-musíte provést tøi prùchody: nejdøíve divtc prùchod 1 a enkodér prùchod 1,
-pak divtc prùchod 2 a enkodér prùchod 1 a nakonec divtc prùchod 2 a enkodér
-prùchod 2.
 .IPs file=<soubor>
 Nastaví jméno log souboru pro dvouprùchodový re¾im (výchozí: "framediff.log").
 .IPs threshold=<hodnota>
@@ -5441,6 +5457,18 @@ x,y,¹,v parametry.
 .PD 1
 .
 .TP
+.B remove-logo=/cesta/k/bitmapovému_souboru_s_logem.pgm
+Potlaèí logo TV stanice pomocí PGM nebo PPM obrázkového souboru, který
+oznaèí, které pixely zobrazují logo. ©íøka a vý¹ka takového obrázku musí
+odpovídat rozmìrùm zpracovávaného videa.
+Pou¾ívá filtrovací obrázek a algoritmus kruhového rozostøení pro odstranìní
+loga.
+.RSs
+.IPs /cesta/k/bitmapovému_souboru_s_logem.pgm
+[cesta] + jméno_souboru filtrovacího obrázku.
+.RE
+.
+.TP
 .B zrmjpeg[=volby]
 Softwarový YV12 na MJPEG enkodér pro pou¾ití se zr2 video rozhraním.
 .RSs
@@ -5623,6 +5651,8 @@ Enkóduje do AVI (výchozí).
 Enkóduje do MPEG.
 .IPs "\-of rawvideo"
 surový video proud (¾ádný multiplex \- pouze jeden video proud)
+.IPs "\-of rawaudio"
+surový audio proud (¾ádný multiplex \- pouze jeden audio proud)
 .RE
 .PD 1
 .
@@ -5695,6 +5725,7 @@ nuv, vfw, faac, x264enc, mpeg, lavf.
 .
 .
 .SS divx4 (\-divx4opts)
+.
 DivX4 je zastaralý a je podporován pouze pro úplnost.
 Detaily ohlednì DivX4 voleb naleznete ve zdrojových souborech, zde není mnoho
 voleb vùbec zmínìno.
@@ -5913,23 +5944,29 @@ Urèeno pro lidi s extrémnì dobrým sluchem a odpovídající aparaturou.
 V re¾imu CBR oznaèuje datový tok v kbps, zatímco v re¾imu VBR je to
 minimální datový tok pro jeden rámec.
 Re¾im VBR nebude pracovat s hodnotou ni¾¹í ne¾ 112.
+.
 .TP
 .B vbr=<-50\-50> (pouze VBR)
 rozsah variability; je-li záporný, udr¾uje enkodér prùmìrný datový tok
 poblí¾ ni¾¹ího prahu, je-li kladný, poblí¾ vy¹¹ího.
 Je-li nastaven na 0, pou¾ije se CBR (výchozí).
+.
 .TP
 .B maxvbr=<32\-384> (pouze VBR)
 maximální datový tok povolený na rámec v kbps
+.
 .TP
 .B mode=<stereo  |  jstereo  |  mono  |  dual>
 (výchozí: mono pro 1-kanálový zvuk, jinak stereo)
+.
 .TP
 .B psy=<0\-4>
 psychoakustický model (výchozí: 2)
+.
 .TP
 .B errprot=<0 | 1>
 Zaøadí ochranu proti chybám.
+.
 .TP
 .B debug=<0\-10>
 úroveò ladících informací
@@ -5943,10 +5980,12 @@ Zaøadí ochranu proti chybám.
 .TP
 .B br=<datový_tok>
 prùmìrný datový tok v kbps (vzájemnì se vyluèuje s quality)
+.
 .TP
 .B quality=<1\-1000>
 re¾im kvality, èím vy¹¹í, tím lep¹í
 quality mode, the higher the better (vzájemnì se vyluèuje s br)
+.
 .TP
 .B object=<0\-3>
 komplexita typu objektu
@@ -5962,15 +6001,19 @@ SSR
 LTP (extrémnì pomalé)
 .RE
 .PD 1
+.
 .TP
 .B mpeg=<2|4>
 verze MPEG (výchozí: 4)
+.
 .TP
 .B tns\ \ \ \ 
 Zapne profilování promìnným ¹umem.
+.
 .TP
 .B cutoff=<0\-vzorkovací_kmitoèet/2>
 mezní frekvence (výchozí: vzorkovací_kmitoèet/2)
+.
 .TP
 .B raw\ \ \ \ 
 Ukládá datový tok jako surová data s extra daty v hlavièce nosièe
@@ -5982,6 +6025,7 @@ pozdìji schopni pøipojit zvuk.
 .
 .
 .SS lavc (\-lavcopts)
+.
 Mnoho libavcodec (krátce lavc) voleb je jen struènì dokumentovaných.
 V¹echny detaily naleznete ve zdrojovém kódu.
 .PP
@@ -6525,6 +6569,10 @@ korekce kvality v %
 poèáteèní komplexnost (prùchod\ 1)
 .
 .TP
+.B vrc_init_occupancy=<0.0\-1.0>
+Poèáteèní naplnìní vyrovnávací pamìti jako zlomek vrc_buf_size (výchozí: 0.9)
+.
+.TP
 .B vqsquish=<0|1>
 Urèuje jak udr¾et kvantizer mezi qmin a qmax (prùchod\ 1/\:2).
 .PD 0
@@ -6958,11 +7006,11 @@ Nastaví porovnávací funkci pro odhad sub pel pohybu
 (viz mbcmp pro dostupné porovnávací funkce) (výchozí: 0).
 .
 .TP
-.B nssew=<0\-100>
+.B nssew=<0\-1000000>
 Tato volba ovládá NSSE váhu. Vìt¹í váha mù¾e zpùsobit zvý¹ení ¹umu.
 0 NSSE odpovídá pou¾ití SSE.
 Volbu mù¾ete shledat u¾iteènou, pokud radìji necháváte tro¹ku ¹umu
-v enkódovaném videu, ne¾ byste jej pøedtím odfiltrovali.
+v enkódovaném videu, ne¾ byste jej pøedtím odfiltrovali (výchozí: 8).
 .
 .TP
 .B predia=<-99\-6>
@@ -7238,12 +7286,12 @@ dvouprùchodový.
 Nastaví prùchod ve dvouprùchodovém re¾imu.
 .
 .TP
-.B bitrate=<hodnota>
+.B bitrate=<hodnota> (CBR nebo dvouprùchodový re¾im)
 Nastaví po¾adovaný datový tok v kilobitech/\:sekundu jestli¾e <16000 nebo
 v bitech/\:sekundu jestli¾e >16000.
 Pokud je <hodnota> záporná, XviD pou¾ije její absolutní hodnotu jako po¾adovanou
-velikost (v kB) videa a spoèítá datový tok automaticky.
-(CBR nebo dvouprùchodový re¾im, výchozí: 687 kbitù/\:s)
+velikost (v kB) videa a spoèítá datový tok automaticky
+(výchozí: 687 kbitù/\:s).
 .
 .TP
 .B fixed_quant=<1\-31>
@@ -7251,8 +7299,7 @@ Pøepne do re¾imu s pevným kvantizerem a nastaví kvantizer který bude pou¾it.
 .
 .TP
 .B zones=<zóna0>[/\:<zóna1>[/\:...]]
-U¾ivatelem nastavená kvalita pro urèité èásti (konec, titulky, ...)
-(ABR nebo dva prùchody).
+U¾ivatelem nastavená kvalita pro urèité èásti (konec, titulky, ...).
 Ka¾dá zóna má formu <start-snímek>,<re¾im>,<hodnota> kde <re¾im> mù¾e být
 .PD 0
 .RSs
@@ -7338,8 +7385,8 @@ Od verze XviD-1.0.x, je tato volba nahrazena volbami
 [min|max]_[i|p|b]quant.
 .
 .TP
-.B min_key_interval=<hodnota>
-minimální odstup mezi klíèovými snímky (výchozí: 0) (pouze dvouprùchodový re¾im)
+.B min_key_interval=<hodnota> (pouze dvouprùchodový re¾im)
+minimální odstup mezi klíèovými snímky (výchozí: 0)
 .
 .TP
 .B max_key_interval=<hodnota>
@@ -7368,23 +7415,28 @@ Takto vyrobíte ilegální proud, a nejspí¹ nebude dekódovatelný
 Od verze XviD-1.0.x není tato volba k dispozici.
 .
 .TP
-.B keyframe_boost=<0\-1000>
-Pøesune nìjaké bity z prostoru vyhrazeného ostatním druhùm snímkù do intra snímkù,
-co¾ zlep¹í kvalitu klíèových snímkù.
-(výchozí: 0) (pouze dvouprùchodový re¾im)
+.B keyframe_boost=<0\-1000> (pouze dvouprùchodový re¾im)
+Pøesune nìjaké bity z prostoru vyhrazeného ostatním druhùm snímkù do intra
+snímkù, co¾ zlep¹í kvalitu klíèových snímkù.
+Hodnota udává návdavek, tak¾e hodnota 10 pøidá oproti normálu o 10%
+více bitù va¹im klíèovým snímkùm
+(výchozí: 0).
 .
 .TP
-.B kfthreshold=<hodnota>
-(výchozí: 10, pouze 2prùchodový re¾im)
+.B kfthreshold=<hodnota> (pouze dvouprùchodový re¾im)
+Pracuje spolu s kfreduction.
+Udává minimální vzdálenost pod kterou pova¾ujete dva snímky za
+posloupné a jsou posuzovány odli¹nì podle kfreduction
+(výchozí: 10).
 .
 .TP
-.B kfreduction=<0\-100>
+.B kfreduction=<0\-100> (pouze dvouprùchodový re¾im)
 Dvì vý¹e uvedené volby mohou být pou¾ity k doladìní velikosti klíèových snímkù
 a¾ k mezi kterou pova¾ujete za absolutní jednièku.
 kfthreshold nastavuje rozsah ve kterém jsou Klíèové snímky redukovány a
 kfreduction stanovuje okam¾itou redukci datového toku.
-S posledním I-snímkem bude zacházeno normálnì.
-(výchozí: 30) (pouze dvouprùchodový re¾im)
+S posledním I-snímkem bude zacházeno normálnì
+(výchozí: 30).
 .
 .TP
 .B divx5bvop
@@ -7430,7 +7482,7 @@ nìkterých dekodérù dostane zabrat.
 .
 .TP
 .B max_bframes=<0\-4>
-Maximální poèet B-snímkù vlo¾ených mezi I/\:P-snímky (výchozí: 0)
+Maximální poèet B-snímkù vlo¾ených mezi I/\:P-snímky (výchozí: 2)
 .
 .TP
 .B bquant_ratio=<0\-1000>
@@ -7749,11 +7801,12 @@ Konstantního datového toku lze docílit kombinací této volby s vbv_maxrate,
 se znatelným zhor¹ením kvality.
 .
 .TP
-.B qp_constant=<1\-51>
+.B qp_constant=<0\-51>
 Zvolí kvantizer pro P-snímky. I- a B-snímky jsou pøípadnì z této hodnoty
 offsetovány pomocí ip_factor a pb_factor.
 Pou¾itelný rozsah je 20\-40 (výchozí: 26).
 Ni¾¹í hodnoty vedou k vy¹¹í vìrnosti a vy¹¹ímu datovému toku.
+0 znamená bezztátový.
 Poznamenejme, ¾e kvantizace v H.264 pracuje odli¹nì od MPEG-1/2/4:
 Kvantizaèní parametr (QP) v H.264 se nachází na logaritmické ¹kále.
 Mapování odpovídá pøibli¾nì H.264QP = 12 + 6*log2(MPEGQP).
@@ -8077,16 +8130,16 @@ diamantové vyhledávání, rádius 1. (rychlé)
 .IPs 3
 nestejnomìrné více¹estiúhelníkové vyhledávání
 .IPs 4
-dùkladné vyhledávání ovládané pomocí me_range. (velmi pomalé)
+dùkladné vyhledávání (velmi pomalé)
 .RE
 .PD 1
 .
 .TP
 .B me_range=<4\-64>
-rádius dùkladného vyhledávání pohybu (výchozí: 16)
+rádius dùkladného nebo více¹estiúhelníkového vyhledávání pohybu (výchozí: 16)
 .
 .TP
-.B subq=<1\-5>
+.B subq=<1\-6>
 Nastavuje kvalitu subpel dolaïování.
 Tento parametr ovlivòuje pomìr kvalita versus rychlost v procesu rozhodování
 o predikovaném pohybu.
@@ -8109,7 +8162,10 @@ Nakonec zpøesní pohyb tohoto typu na ètvrtpixelovou pøesnost.
 .br
 5: Pou¾ije nejkvalitnìj¹í vyhledávání pohybu s ètvrtpixelovou pøesností
 na v¹ech kandidátských typech makrobloku, ne¾ je vybrán ten nejlep¹í.
-(nejlep¹í, výchozí)
+(výchozí)
+.br
+6: Zapne optimalizaci omezování toku typù makroblokù v
+I- a P-snímcích. (nejlep¹í)
 .REss
 Vý¹e uvedený pojem "v¹echny kandidátské typy" neznamená v¹echny povolené typy:
 4x4, 4x8, 8x4 jsou zkou¹eny pouze pokud je 8x8 lep¹í ne¾ 16x16.
@@ -8118,7 +8174,7 @@ Vý¹e uvedený pojem "v¹echny kandidátské typy" neznamená v¹echny povolené typy:
 .B (no)chroma_me
 Bere v potaz barvu bìhem vyhledávání pohybu subpixelu
 (výchozí: zapnuto).
-Vy¾aduje subq=5.
+Vy¾aduje subq>=5.
 .
 .TP
 .B chroma_qp_offset=<-12\-12>
@@ -8423,8 +8479,10 @@ rar p test-SVCD.rar | mencoder \-ovc lavc \-lavcopts vcodec=mpeg4:vbitrate=800 \
 .\" --------------------------------------------------------------------------
 .
 .SH CHYBY
+Nepanikaøte.
 Pokud nìjakou najdete, dejte nám vìdìt, ale prosíme abyste si nejdøív pøeèetli
 ve¹kerou dokumentaci.
+Také si dejte pozor na smajlíky. :)
 Mnoho chyb je výsledkem ¹patného nastavení nebo pou¾ití parametrù.
 Èást dokumentace vìnovaná ohla¹ování chyb  (DOCS/\:HTML/\:en/\:bugreports.html)
 vysvìtluje jak sestavit pou¾itelné hlá¹ení o chybách.
