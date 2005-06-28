@@ -980,7 +980,7 @@ Badly interleaved files and <option>-cache</option> don't work well together.
 Try <option>-nocache</option>.
 </para></answer>
 </qandaentry>
-
+</qandadiv>
 
 <qandadiv id="faq-driver">
 <title>Video/audio driver problems (vo/ao)</title>
