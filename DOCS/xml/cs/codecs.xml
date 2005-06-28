@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.64 -->
+<!-- Synced with 1.66 -->
 <sect1 id="codecs">
 <title>Podporované kodeky</title>
 
@@ -427,46 +427,32 @@ testovány) a v Mac OS X</emphasis>.
 <title>XviD</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> je oddělená vývojová větev
-OpenDivX kodeku. To se stalo poté co ProjectMayo uzavřel zdrojový kód kodeku,
+<ulink url="http://www.xvid.org">XviD</ulink> je free software MPEG-4 ASP
+kompatibilní video kodec, jenž má podporu pro dvouprůchodové enkódování a
+plně podporuje MPEG-4 ASP, což jej činí mnohem efektivnějším, než je
+dobře známý DivX kodek.
+Dosahuje velmi dobré kvality videa a dobrý vákon díky CPU optimalizacím
+pro většinu moderních procesorů.
+</para>
+<para>
+Jeho vývoj je odvozen od OpenDivX kodeku.
+To se stalo poté co ProjectMayo uzavřel zdrojový kód kodeku,
 vydal jej jako DivX4 (nyní DivX5) a lidé mimo ProjectMayo pracující na kodeku
 se naštvali a založili XviD. Oba projekty tedy mají stejný základ.
 <itemizedlist>
-<title>VÝHODY</title>
-<listitem><simpara>
-  open source
-  </simpara></listitem>
-<listitem><simpara>
-  API kompatibilní s DivX4, takže přidat jeho podporu je snadné
-  </simpara></listitem>
-<listitem><simpara>
-  podporuje dvouprůchodové enkódování
-  </simpara></listitem>
-<listitem><simpara>
-  dobrá kvalita enkódování, je rychlejší než DivX4 (můžete si jej
-  optimalizovat pro svůj počítač při kompilaci)
-  </simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>NEVÝHODY</title>
-<listitem><simpara>
-  v současnosti neumí zprávně <emphasis role="bold">dekódovat</emphasis>
-  všechny DivX/DivX4 soubory (žádný problém,
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-  je přehraje)
-  </simpara></listitem>
-<listitem><simpara>
-  stále ve vývoji
-  </simpara></listitem>
-</itemizedlist>
 </para>
 
 <procedure>
-<title>INSTALACE XVID Z CVS</title>
+<title>Instalace <systemitem class="library">XviD</systemitem></title>
 <para>
-  Kodek je v současnosti k dispozici pouze z CVS. Zde máte návod ke stažení a
-  instalaci (potřebujete alespoň autoconf 2.50, automake a libtool):
+  Stejně jako většina svobodného software je dostupný ve dvou verzích:
+  <ulink url="http://www.xvid.org/downloads.html">oficiálně uvolněné verzi</ulink>
+  a verzi CVS.
+  V současnosti je CVS verze obvykle dostatečně stabilní pro použití, jelikož
+  většinou obsahuje opravy chyb, které zůstaly po vydání.
+  Zde uvádíme postup pro zprovoznění <systemitem class="library">XviD</systemitem>
+  CVS v <application>MEncoder</application>u (budete potřebovat alespoň
+  autoconf 2.50, automake a libtool):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
