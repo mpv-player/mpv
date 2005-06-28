@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.76  -->
+<!-- Synced with: 1.80  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -503,9 +503,9 @@ V tom případě zátěž dekódováním zahrnuje i zátěž vykreslováním.
 Dostávám chybová hlášení, že nebyl nalezen soubor <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
-Stáhněte si Win32 kodeky z naší
+Stáhněte si binární kodeky z naší
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">stránky s kodeky</ulink>
-(soubor kodeků z avifile obsahuje jinou sadu DLL) a nainstalujte je.
+a nainstalujte je.
 </para></answer>
 </qandaentry>
 
@@ -999,15 +999,6 @@ Film začne být během přehrávání trhaný a dostanu následující zprávu:
 Zkuste <option>-nocache</option>.
 </para></answer>
 </qandaentry>
-
-<qandaentry>
-<question><para>
-Jak přehraji MPEG Layer 2 (MP2) audio soubory?
-</para></question>
-<answer><para>
-Musíte použít <option>-rawaudio on:format=0x50</option>.
-</para></answer>
-</qandaentry>
 </qandadiv>
 
 
@@ -1348,12 +1339,75 @@ nahraje 5. titul z DVD do souboru
 
 <qandaentry>
 <question><para>
-Jak vytvořím VCD?
+Jak vytvořím (S)VCD automaticky?
 </para></question>
 <answer><para>
 Zkuste skript <filename>mencvcd</filename> z podadresáře
 <filename class="directory">TOOLS</filename>. Pomocí něj můžete enkódovat DVD
 nebo jiné filmy do VCD nebo SVCD formátu a dokonce je vypálit přímo na CD.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Jak vytvořím (S)VCD?
+</para></question>
+<answer><para>
+Novější verze <application>MEncoder</application>u umí přímo generovat
+MPEG-2 soubory, které mohou být použity jako základ pro vytvoření VCD nebo SVCD
+a měly by být přehratelné jak jsou na všech platformách (například pro
+sdílení videa z digitálního kamkodéru se svými počítačově negramotnými přáteli).
+<screen>
+mencoder -of mpeg -oac toolame -toolameopts br=224 -srate 44100 \
+-af-adv force=1 -ovc lavc -mpegopts format=xsvcd -vf harddup -ofps 25 \
+-lavcopts vcodec=mpeg2video:mbd=2:keyint=25:vrc_buf_size=917:vrc_minrate=600:vbitrate=2500:vrc_maxrate=2500 \
+<replaceable>vstupní.avi</replaceable> -o <replaceable>xsvcd.mpg</replaceable>
+</screen>
+Takto převedete vstupní soubor <replaceable>vstupní.avi</replaceable> na
+výstupní soubor <replaceable>xsvcd.mpg</replaceable>, zkonvertujete
+zvuk pomocí <systemitem class="library">toolame</systemitem> při 224kbps
+a video pomocí <systemitem class="library">libavcodec</systemitem>
+při 2500kbps, s tím, že datový tok nikdy neklesne pod 600 a nikdy nepřekročí
+2500kbps, což odpovídá (S)VCD normě a zajišťuje hladké přehrávání.
+</para><para>
+Poznamenejme, že abychom mohli učinit GOP strukturu SVCD kompatibilní,
+měla by být volba <option>keyint</option> rovná 15 pro PAL a 18 pro NTSC,
+ačkoli často se přehrají dobře i soubory s mnohem delšími GOPy (25 by vám nemělo
+způsobit problémy).
+Rovněž vynechání <option>-ofps</option> by ve většině případů nemělo vadit
+(jelikož vaše video již pravděpodobně má správnou snímkovou rychlost).
+PAL vyžaduje <option>-ofps</option> 25 a NTSC vyžaduje
+<option>-ofps</option> 30000/1001.
+</para><para>
+Pokud požadujete zvuk, SVCD podporuje pouze zvuk MPEG-1 layer II,
+takže musíte použít jeden z těchto kodérů
+<systemitem class="library">toolame</systemitem>,
+<systemitem class="library">twolame</systemitem>, nebo jako poslední záchranu
+<systemitem class="library">libavcodec</systemitem> MPEG-1 layer II
+enkodér (jeho kvalita je daleko za předchozími dvěma knihovnami).
+Jak <systemitem class="library">toolame</systemitem> tak
+<systemitem class="library">twolame</systemitem> používají stejnou syntaxi,
+takže v závislosti na tom, co máte nainstalováno, bude uvedený příklad vyžadovat
+jen malou změnu. Pokud musíte použít
+<systemitem class="library">libavcodec</systemitem> MPEG-1 layer II
+enkodér, změňte
+<screen>
+-oac toolame -toolameopts br=224
+</screen>
+pokud používáte toolame nebo
+<screen>
+-oac twolame -twolameopts br=224
+</screen>
+pokud používáte twolame za:
+<screen>
+-oac lavc -lavcopts acodec=mp2:abitrate=224
+</screen>
+</para><para>
+Výsledný soubor <replaceable>xsvcd.mpg</replaceable> je rozšířené
+SVCD (proto se nazývá xsvcd), hlavně proto, že neobsahuje
+scan offsety. Pokud z něj potřebujete generovat SVCD obraz disku, měli byste jej
+protáhnout přes
+<ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>.
 </para></answer>
 </qandaentry>
 
