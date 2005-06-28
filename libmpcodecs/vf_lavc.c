@@ -62,7 +62,7 @@ static int config(struct vf_instance_s* vf,
     lavc_venc_context.height = height;
     
 #if LIBAVCODEC_BUILD >= 4754
-    if(!lavc_venc_context.time_base.num){
+    if(!lavc_venc_context.time_base.num || !lavc_venc_context.time_base.den){
 #else
     if(!lavc_venc_context.frame_rate){
 #endif
