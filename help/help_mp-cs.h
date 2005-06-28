@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan
-// Synced to 1.169
+// Synced to 1.171
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -145,6 +145,7 @@ static char help_text[]=
 "  pomoci, pokud tyto informace neuvedete pøi ohla¹ování mo¾né chyby.\n"
 #define MSGTR_LoadingConfig "Naèítám konfiguraci '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: pøidán soubor s titulky (%d): %s\n"
+#define MSGTR_RemovedSubtitleFile "SUB: odebrán soubor s titulky (%d): %s\n"
 #define MSGTR_ErrorOpeningOutputFile "Chyba pøi otevírání souboru [%s] pro zápis!\n"
 #define MSGTR_CommandLine "Pøíkazový øádek:"
 #define MSGTR_RTCDeviceNotOpenable "Selhalo otevøení %s: %s (by mìlo být èitelné u¾ivatelem.)\n"
@@ -472,6 +473,13 @@ static char help_text[]=
 #define MSGTR_DVDnoIFO "Nelze otevøít IFO soubor pro DVD titul %d.\n"
 #define MSGTR_DVDnoVOBs "Nelze otevøít VOBy titulu (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDopenOk "DVD úspì¹nì otevøeno.\n"
+
+// muxer_*.c:
+#define MSGTR_TooManyStreams "Pøíli¹ mnoho datových proudù!"
+#define MSGTR_RawMuxerOnlyOneStream "Muxer surového zvuku podporuje pouze jeden zvukový proud!\n"
+#define MSGTR_IgnoringVideoStream "Ignoruji video proud!\n"
+#define MSGTR_UnknownStreamType "Varování! Neznámý typ datového proudu: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Varování! Délka není násobkem velikosti vzorku!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "VAROVÁNÍ: Hlavièka audio proudu %d pøedefinována!\n"
