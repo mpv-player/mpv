@@ -281,7 +281,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 								styleMask:NSTitledWindowMask|NSTexturedBackgroundWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask
 								backing:NSBackingStoreBuffered defer:NO];
 
-	[window autorelease];
 	[window setDelegate:mpGLView];
 	[window setContentView:mpGLView];
 	[window setInitialFirstResponder:mpGLView];
@@ -308,7 +307,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 	
 	//create OpenGL Context
 	glContext = [[NSOpenGLContext alloc] initWithFormat:[NSOpenGLView defaultPixelFormat] shareContext:nil];	
-	[glContext autorelease];
 	
 	[self setOpenGLContext:glContext];
 	[glContext setValues:&swapInterval forParameter:NSOpenGLCPSwapInterval];
