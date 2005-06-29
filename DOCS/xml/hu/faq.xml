@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.77 -->
+<!-- synced with 1.80 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -992,17 +992,7 @@ Rossz a fájl interleave-je és a <option>-cache</option> sem működik jól.
 Próbáld meg a <option>-nocache</option> kapcsolót.
 </para></answer>
 </qandaentry>
-
-<qandaentry>
-<question><para>
-Hogyan tudok lejátszani MPEG Layer 2 (MP2) audió fájlokat?
-</para></question>
-<answer><para>
-A <option>-rawaudio on:format=0x50</option> kapcsolót kell használnod.
-</para></answer>
-</qandaentry>
 </qandadiv>
-
 
 <qandadiv id="faq-driver">
 <title>Videó/audió vezérlő problémák (vo/ao)</title>
@@ -1336,12 +1326,82 @@ fájlba.
 
 <qandaentry>
 <question><para>
-Hogy tudok VCD-t készíteni?
+Hogy tudok automatikusan (S)VCD-t készíteni?
 </para></question>
 <answer><para>
 Használd a <filename>mencvcd</filename> szkriptet a <filename class="directory">TOOLS</filename>
 alkönyvtárból. Ezzel DVD-ket és más filmeket tudsz VCD vagy SVCD formátumba
 kódolni és még közvetlenül CD-re is írhatod őket.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Hogyan tudok (S)VCD-t készíteni?
+</para></question>
+<answer><para>
+A <application>MEncoder</application> újabb verziói direktben
+tudnak MPEG-2-es fájlokat készíteni, amiket fel lehet használni VCD vagy
+SVCD készítéshez és valószínűleg minden platformon lejátszhatóak (például
+videó megosztása egy digitális camcorderről a számítógép-tudatlan
+barátaiddal).
+<screen>
+mencoder -of mpeg -oac toolame -toolameopts br=224 -srate 44100 \
+-af-adv force=1 -ovc lavc -mpegopts format=xsvcd -vf harddup -ofps 25 \
+-lavcopts vcodec=mpeg2video:mbd=2:keyint=25:vrc_buf_size=917:vrc_minrate=600:vbitrate=2500:vrc_maxrate=2500 \
+<replaceable>in.avi</replaceable> -o <replaceable>xsvcd.mpg</replaceable>
+</screen>
+Ez a bemeneti <replaceable>in.avi</replaceable> fájlt a
+kimeneti <replaceable>xsvcd.mpg</replaceable>-be fogja konvertálni,
+az audiót <systemitem class="library">toolame</systemitem>-mel alakítja
+át 224kbps-sel, a videót pedig <systemitem class="library">libavcodec</systemitem>-kel
+2500kbps-sel, így biztosítva, hogy a bitráta soha nem megy 600 alá és soha
+nem lépi át a 2500kbps-t, hogy tiszteletben tartsa az (S)VCD normát és mégis
+szép lejátszást biztosítson.
+</para><para>
+Kérlek vedd figyelembe, hogy ahhoz, hogy a GOP struktúra SVCD kompatibilis
+legyen, a <option>keyint</option> opciónak 15-nek kell lennie PAL és 18-nak
+NTSC esetén, bár nagyon sokszor az ennél sokkal nagyobb GOP-pal rendelkező
+fájlokat is jól játszák le (a 25 soha nem okoz problémát).
+Az <option>-ofps</option> el is hagyható az esetek többségében (mivel a
+forrásod már valószínűleg a megfelelő framerátával rendelkezik), egyébként
+a PAL-nak <option>-ofps</option> 25, az NTSC-nek <option>-ofps</option>
+30000/1001 kell.
+Továbbá a PAL SVCD-k csak a 480x576 és 352x288 felbontásokat támogatják,
+míg az NTSC csak a 480x480 és 352x240-et.
+Ha a forrás videónak más a felbontása, át kell méretezned a
+<option>scale</option> videó szűrővel, ez esetben a szűrő láncod valahogy
+így fog kinézni egy NTSC SVCD esetén: <option>-vf scale=480:480,harddup</option>
+vagy így egy PAL SVCD esetén: <option>-vf scale=352:288,harddup</option>.
+</para><para>
+Ami az audiót érinti, az SVCD csak MPEG-1 layer II audiót támogat, ezért a
+<systemitem class="library">toolame</systemitem>,
+<systemitem class="library">twolame</systemitem> vagy végső megoldásként
+a <systemitem class="library">libavcodec</systemitem> MPEG-1 layer II
+kódolójának valamelyikét kell használnod (a minősége messze elmarad a másik
+két függvénykönyvtárétól).
+Mind a <systemitem class="library">toolame</systemitem>, mind a
+<systemitem class="library">twolame</systemitem> ugyan azt a szintaktikát
+használják, így csak azon múlik a dolog, hogy melyiket telepítetted, a
+példát csak egy kicsit kell módosítani. Ha a
+<systemitem class="library">libavcodec</systemitem> MPEG-1 layer II
+kódolóját kell használnod, cseréld ki a
+<screen>
+-oac toolame -toolameopts br=224
+</screen>
+részt ha toolamet használsz vagy a
+<screen>
+-oac twolame -twolameopts br=224
+</screen>
+részt ha twolamet használsz erre:
+<screen>
+-oac lavc -lavcopts acodec=mp2:abitrate=224
+</screen>
+</para><para>
+Az eredmény <replaceable>xsvcd.mpg</replaceable> egy kiterjesztett SVCD
+(ezért hívják xsvcd-nek), főleg mert nem tartalmaz scan offszeteket.
+Ha SVCD képet kell belőle csinálnod, akkor le kell rajta futtatnod a
+<ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>-t.
 </para></answer>
 </qandaentry>
 
