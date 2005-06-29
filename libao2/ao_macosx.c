@@ -81,7 +81,6 @@ typedef struct ao_macosx_s
    * (num_chunks + 1) * chunk_size memory to store num_chunks * chunk_size
    * data */
   unsigned char *buffer;
-  unsigned char *chunk;
   unsigned int buffer_len; ///< must always be (num_chunks + 1) * chunk_size
   unsigned int num_chunks;
   unsigned int chunk_size;
@@ -90,7 +89,7 @@ typedef struct ao_macosx_s
   unsigned int buf_write_pos;
 } ao_macosx_t;
 
-static ao_macosx_t *ao;
+static ao_macosx_t *ao = NULL;
 
 /**
  * \brief return number of free bytes in the buffer
@@ -159,15 +158,12 @@ OSStatus theRenderProc(void *inRefCon, AudioUnitRenderActionFlags *inActionFlags
 int amt=buf_used();
 int req=(inNumFrames)*ao->packetSize;
 
-
-	ioData->mBuffers[0].mData = ao->chunk;
-
 	if(amt>req)
  		amt=req;
 
 	if(amt)
 		read_buffer((unsigned char *)ioData->mBuffers[0].mData, amt);
-
+	else audio_pause();
 	ioData->mBuffers[0].mDataByteSize = amt;
 
  	return noErr;
@@ -179,7 +175,6 @@ static int control(int cmd,void *arg){
 	case AOCONTROL_GET_DEVICE:
 	case AOCONTROL_GET_VOLUME:
 	case AOCONTROL_SET_VOLUME:
-	case AOCONTROL_QUERY_FORMAT:
 	  /* Everything is currently unimplemented */
 	  return CONTROL_FALSE;
 	default:
@@ -224,8 +219,9 @@ Component comp;
 AURenderCallbackStruct renderCallback;
 OSStatus err;
 UInt32 size, maxFrames;
+int aoIsCreated = ao != NULL;
 
-	ao = (ao_macosx_t *)malloc(sizeof(ao_macosx_t));
+	if (!aoIsCreated)	ao = (ao_macosx_t *)malloc(sizeof(ao_macosx_t));
 
 	// Build Description for the input format
 	memset(&inDesc, 0, sizeof(AudioStreamBasicDescription));
@@ -271,11 +267,7 @@ UInt32 size, maxFrames;
     ao->packetSize = inDesc.mBytesPerPacket = inDesc.mBytesPerFrame = inDesc.mFramesPerPacket*channels*(inDesc.mBitsPerChannel/8);
     print_format("source: ",&inDesc);
 
-    ao_data.samplerate = inDesc.mSampleRate;
-	ao_data.channels = inDesc.mChannelsPerFrame;
-    ao_data.outburst = ao_data.buffersize = ao->chunk_size;
-    ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
-
+	if (!aoIsCreated) {
 	desc.componentType = kAudioUnitType_Output;
 	desc.componentSubType = kAudioUnitSubType_DefaultOutput;
 	desc.componentManufacturer = kAudioUnitManufacturer_Apple;
@@ -300,6 +292,7 @@ UInt32 size, maxFrames;
 		ao_msg(MSGT_AO, MSGL_WARN, "Unable to initialize Output Unit component (err=%d)\n", err);
 		return CONTROL_FALSE;
 	}
+	}
 
 	size =  sizeof(AudioStreamBasicDescription);
 	err = AudioUnitSetProperty(ao->theOutputUnit, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, 0, &inDesc, size);
@@ -323,8 +316,13 @@ UInt32 size, maxFrames;
 	ao->chunk_size = maxFrames*inDesc.mBytesPerFrame;
     ao->num_chunks = NUM_BUFS;
     ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
-    ao->buffer = (unsigned char *)calloc(ao->num_chunks + 1, ao->chunk_size);
-	ao->chunk = (unsigned char*)calloc(1, ao->chunk_size);
+    ao->buffer = aoIsCreated ? (unsigned char *)realloc(ao->buffer,(ao->num_chunks + 1)*ao->chunk_size)
+							: (unsigned char *)calloc(ao->num_chunks + 1, ao->chunk_size);
+	
+	ao_data.samplerate = inDesc.mSampleRate;
+	ao_data.channels = inDesc.mChannelsPerFrame;
+    ao_data.outburst = ao_data.buffersize = ao->chunk_size;
+    ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
 
 	memset(&renderCallback, 0, sizeof(AURenderCallbackStruct));
     renderCallback.inputProc = theRenderProc;
@@ -335,7 +333,9 @@ UInt32 size, maxFrames;
 		return CONTROL_FALSE;
 	}
 
-    reset();
+	audio_pause();
+	ao->buf_read_pos=0;
+	ao->buf_write_pos=0;
     
     return CONTROL_OK;
 }
@@ -343,6 +343,7 @@ UInt32 size, maxFrames;
 
 static int play(void* output_samples,int num_bytes,int flags)
 {  
+	audio_resume();
   return write_buffer(output_samples, num_bytes);
 }
 
@@ -387,9 +388,9 @@ static void uninit(int immed)
   AudioUnitUninitialize(ao->theOutputUnit);
   CloseComponent(ao->theOutputUnit);
 
-  free(ao->chunk);
   free(ao->buffer);
   free(ao);
+  ao = NULL;
 }
 
 
