@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced to 1.71 -->
+<!-- synced with 1.72 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2397,6 +2397,141 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
 </itemizedlist>
 </sect2>
 </sect1>
+
+<sect1 id="menc-feat-xvid">
+<title>Kódolás az <systemitem class="library">XviD</systemitem>
+codec-kal</title>
+<para>
+ Az <systemitem class="library">XviD</systemitem> egy szabad függvénykönyvtár
+ MPEG-4 ASP videó stream-ek elkódolásához.
+ A kódolás megkezdése előtt <link linkend="xvid">be kell állítanod
+ a <application>MEncoder</application>ben a támogatását</link>.
+</para>
+<para>
+ Ez a leírás főként hasonló információkat szeretne nyújtani, mint az
+ x264 kódolási leírás.
+ Ezért, kérlek kezdd azzal, hogy elolvasod azon leírásnak az
+ <link linkend="menc-feat-x264-intro">első részét</link>.
+</para>
+
+
+<sect2 id="menc-feat-xvid-intro">
+<title>Milyen opciókat kell használnom, ha a legjobb eredményt akarom?</title>
+
+<para>
+ Kezdésként nézd át az <application>MPlayer</application> man oldalának
+ <systemitem class="library">XviD</systemitem> részét!
+ Ez a rész csak a man oldal kiegészítéseként használható.
+</para>
+<para>
+ Az XviD alapértelmezett beállításai egyensúlyt teremtenek a sebesség és
+ a minőség között, így nyugodtan használhatod azokat, ha a következő rész
+ túl zavarosnak tűnik.
+</para>
+</sect2>
+
+<sect2 id="menc-feat-xvid-encoding-options">
+<title>Az <systemitem class="library">XviD</systemitem> kódolási opciói</title>
+
+<itemizedlist>
+<listitem><para>
+ <emphasis role="bold">vhq</emphasis>
+  Ez a beállítás a makroblokk döntési algoritmust érinti, minél nagyobb
+  a beállítás, annál okosabb a döntés.
+  Az alapértelmezett érték bátran használható minden kódoláshoz, míg
+  a nagyobb értékek segítik a PSNR-t de jelentősen lassabbak.
+  Kérlek vedd figyelembe, hogy a jobb PSNR nem feltétlenül jelenti azt,
+  hogy a kép jobban fog kinézni, de közelebb lesz az eredetihez.
+  A kikapcsolása észrevehetően felgyorsítja a kódolást; ha a sebesség
+  kritikus számodra, megéri a cserét.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">bvhq</emphasis>
+  Ez ugyan azt csinálja, mint a vhq, de a B-kockákon.
+  Elhanyagolható a hatása a sebességre és kismértékben javít a minőségen
+  (+0.1dB PSNR körül).
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">max_bframes</emphasis>
+  Az egymás után engedélyezett több B-kocka általában javítja a
+  tömöríthetőséget, de több blokkosodási mellékhatást okoz.
+  Az alapértelmezett beállítás jó kompromisszum a tömöríthetőség és a
+  minőség között, de növelheted 3-ig ha ki vagy éhezve a bitrátára.
+  Csökkentheted 1-re vagy 0-ra ha a tökéletes minőséget céloztad meg,
+  de ekkor biztosan tudnod kell, hogy a forrásod bitrátája elég nagy
+  ahhoz, hogy a kódolónak nem kell növelni a kvantálást, hogy elére ezt.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">bf_threshold</emphasis>
+  Ez a kódoló B-kocka érzékenységét szabályozza, a nagyobb érték hatására
+  több B-kockát használ (és fordítva).
+  Ez a beállítás a <option>max_bframes</option>-szel együtt használható;
+  ha bitráta éhségben szenvedsz, növelned kell mind a
+  <option>max_bframes</option>, mind a <option>bf_threshold</option> értékét,
+  míg ha növeled a <option>max_bframes</option>-t és csökkented a
+  <option>bf_threshold</option>-ot, akkor a kódoló több B-kockát fog
+  használni, de csak azokon a helyeken, ahol <emphasis role="bold">tényleg</emphasis>
+  szükséges.
+  A <option>max_bframes</option> alacsony értéke és a <option>bf_threshold</option>
+  magas értéke nem túl bölcs döntés, mert ez arra kényszeríti a kódolót,
+  hogy olyan helyekre is tegyen B-kockát, ahol nincs rájuk szükség, így
+  csökkenti a vizuális minőséget. De ha kompatibilis akarsz maradni az
+  egyedi lejátszókkal, amik csak a régi DivX profilokat támogatják
+  (amik csak legfeljebb 1 B-kockát támogatnak sorban), ez az egyetlen
+  lehetőséged a tömöríthetőség növelésére a B-kockák használatával.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">trellis</emphasis>
+  Optimalizálja a kvantálási eljárást, hogy optimális arányt találjon
+  a PSNR és a bitráta között, ami jelentős bitmegtakarítást engedélyez.
+  Cserébe ezek a bitek a videóban máshol kerülnek felhasználásra,
+  növelve az össz minőséget.
+  Mindig ajánlott bekapcsolva hagyni, mert jelentősen befolyásolja a
+  minőséget. Még ha neked a sebesség számít, akkor is ne kapcsold ki,
+  amíg nem kapcsoltad ki a <option>vhq</option>-t és a többi CPU-éhes
+  opciót nem állítottad a minimumra.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">cartoon</emphasis>
+  A rajzfilm tartalom jobb kódolására lett kitalálva és nincs hatása a
+  sebességre, mivel csak a döntési heurisztikát tuningolja az ilyen
+  típusú tartalomnál.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">me_quality</emphasis>
+  Ez a beállítás a mozgás előrejelzés pontosságát vezérli.
+  Minél nagyobb a <option>me_quality</option> érték, annál
+  pontosabb lesz az eredeti mozgás előrejelzése és minél pontosabb
+  ez, annál jobban közelíti majd az eredmény az eredeti mozgást.
+ </para>
+ <para>
+  Az alapértelmezett érték jó a legtöbb esetben; így nem javasolt a
+  változtatása, csak ha tényleg a sebesség számít, mivel minden a
+  mozgás becslésével megmentett bit másra lesz felhasználva, növelve
+  az össz minőséget. Ezért ne menj 5 alá és ezt is csak végszükség
+  esetén állítsd be.
+</para></listitem>
+
+<listitem><para>
+ <emphasis role="bold">chroma_me</emphasis>
+  Javítja a mozgás előrejelzést úgy, hogy a számításba beleveszi
+  a chroma (szín) információkat is, míg a <option>me_quality</option>
+  csak a luma-t (grayscale) használja.
+  Ez 5-10%-kal lassítja a kódolást, de eléggé javítja a vizuális
+  minőséget a blokkosodási effektusok csökkentésével.
+  Ha a sebesség érdekel, kapcsold ki ezt az opciót, mielőtt
+  elkezdenél töprengeni a <option>me_quality</option> csökkentésén.
+</para></listitem>
+</itemizedlist>
+</sect2>
+</sect1>
+
 
 <sect1 id="menc-feat-telecine">
 <title>Mit kezdjünk a telecine-nel és az átlapolással NTSC DVD-ken</title>
