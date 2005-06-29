@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.63 -->
+<!-- synced with 1.65 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Porty</title>
 
@@ -555,6 +555,9 @@ wolna. Używaj SDL.
   Skonfiguruj ją z opcją <option>--prefix=/mingw</option> i zainstaluj
   przed kompilacją <application>MPlayera</application>.</para>
 
+<para>Pełną instrukcję jak zbudować <application>MPlayera</application>
+  i wszystkie potrzebne biblioteki znajdziesz w
+  <ulink url="http://mplayerhq.hu/MPlayer/releases/win32/contrib/MPlayer-MinGW-Howto.txt">MPlayer MinGW HOWTO</ulink>.</para>
 
 </sect2>
 
