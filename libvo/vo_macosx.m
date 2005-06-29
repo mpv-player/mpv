@@ -288,6 +288,7 @@ static uint32_t control(uint32_t request, void *data, ...)
     [window setTitle:@"MPlayer - The Movie Player"];
 	
 	isFullscreen = 0;
+	winSizeMult = 1;
 }
 
 - (id) config
@@ -359,7 +360,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	kDoubleScreenCmd = menuItem;
 	menuItem = [[NSMenuItem alloc] initWithTitle:@"Full Size" action:@selector(menuAction:) keyEquivalent:@"f"]; [menu addItem:menuItem];
 	kFullScreenCmd = menuItem;
-	menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [menu addItem:menuItem];
+	//menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [menu addItem:menuItem];
 	
 		NSMenu	*aspectMenu;
 		aspectMenu = [[NSMenu alloc] initWithTitle:@"Aspect Ratio"];
@@ -424,8 +425,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 			vo_fs = (!(vo_fs)); [self fullscreen:YES];
 		}
 		
-		frame.size.width = (d_width/2);
-		frame.size.height = ((d_width/movie_aspect)/2);
+		winSizeMult = 0.5;
+		frame.size.width = (d_width*winSizeMult);
+		frame.size.height = ((d_width/movie_aspect)*winSizeMult);
 		[window setContentSize: frame.size];
 		[self reshape];
 	}
@@ -435,6 +437,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 			vo_fs = (!(vo_fs)); [self fullscreen:YES];
 		}
 		
+		winSizeMult = 1;
 		frame.size.width = d_width;
 		frame.size.height = d_width/movie_aspect;
 		[window setContentSize: frame.size];
@@ -446,8 +449,9 @@ static uint32_t control(uint32_t request, void *data, ...)
 			vo_fs = (!(vo_fs)); [self fullscreen:YES];
 		}
 		
-		frame.size.width = d_width*2;
-		frame.size.height = (d_width/movie_aspect)*2;
+		winSizeMult = 2;
+		frame.size.width = d_width*winSizeMult;
+		frame.size.height = (d_width/movie_aspect)*winSizeMult;
 		[window setContentSize: frame.size];
 		[self reshape];
 	}
@@ -478,8 +482,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 	if(sender == kAspectOrgCmd)
 	{
 		movie_aspect = old_movie_aspect;
-		frame.size.width = d_width;
-		frame.size.height = d_width/movie_aspect;
+		frame.size.width = d_width*winSizeMult;
+		frame.size.height = (d_width/movie_aspect)*winSizeMult;
 		[window setContentSize: frame.size];
 		[self reshape];
 	}
@@ -487,8 +491,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 	if(sender == kAspectFullCmd)
 	{
 		movie_aspect = 4.0f/3.0f;
-		frame.size.width = d_width;
-		frame.size.height = d_width/movie_aspect;
+		frame.size.width = d_width*winSizeMult;
+		frame.size.height = (d_width/movie_aspect)*winSizeMult;
 		[window setContentSize: frame.size];
 		[self reshape];
 	}
@@ -496,8 +500,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 	if(sender == kAspectWideCmd)
 	{
 		movie_aspect = 16.0f/9.0f;
-		frame.size.width = d_width;
-		frame.size.height = d_width/movie_aspect;
+		frame.size.width = d_width*winSizeMult;
+		frame.size.height = (d_width/movie_aspect)*winSizeMult;
 		[window setContentSize: frame.size];
 		[self reshape];
 	}

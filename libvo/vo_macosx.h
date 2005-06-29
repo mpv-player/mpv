@@ -31,6 +31,7 @@
     GLfloat upperLeft[2];
 	
 	BOOL mouseHide;
+	float winSizeMult;
 	
 	//menu command id
 	NSMenuItem *kQuitCmd;
