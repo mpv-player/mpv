@@ -1350,9 +1350,15 @@ Please note that in order to make the GOP structure SVCD compliant the
 although very often files with much longer GOPs play correctly (25 should
 never lead to any problem).
 Also, even though leaving out <option>-ofps</option> should work in most
-cases, (as your source is likely to have the appropriate framerate
-already) PAL requires <option>-ofps</option> 25 and NTSC requires
+cases (as your source is likely to have the appropriate framerate
+already), PAL requires <option>-ofps</option> 25 and NTSC requires
 <option>-ofps</option> 30000/1001.
+What's more, PAL SVCDs only support 480x576 and 352x288 resolutions,
+whereas NTSC only supports 480x480 and 352x240.
+If the source video has a different resolution, then you must rescale
+with the <option>scale</option> video filter, which will make your filter
+chain look like for example <option>-vf scale=480:480,harddup</option> for
+an NTSC SVCD or <option>-vf scale=352:288,harddup</option> for a PAL SVCD.
 </para><para>
 As far as the audio is concerned, SVCD only supports MPEG-1 layer II audio,
 therefore you have to use one of
