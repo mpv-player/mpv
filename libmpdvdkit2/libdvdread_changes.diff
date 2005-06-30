@@ -1,6 +1,7 @@
---- dvdread/bswap.h	2002-04-07 19:52:00.000000000 +0200
-+++ bswap.h	2005-03-01 07:07:45.000000000 +0100
-@@ -20,8 +20,6 @@
+diff -Naur dvdread.orig/bswap.h dvdread/bswap.h
+--- dvdread.orig/bswap.h	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/bswap.h	2005-06-23 00:19:10.000000000 +0200
+@@ -20,8 +24,6 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
   */
  
@@ -9,10 +10,16 @@
  #if defined(WORDS_BIGENDIAN)
  /* All bigendian systems are fine, just ignore the swaps. */  
  #define B2N_16(x) (void)(x)
-@@ -48,13 +46,51 @@
- #define B2N_32(x) x = swap32(x)
- #define B2N_64(x) x = swap64(x)
+@@ -59,13 +61,57 @@
+ #define B2N_32(x) x = be32toh(x)
+ #define B2N_64(x) x = be64toh(x)
  
++#elif defined(__DragonFly__)
++#include <sys/endian.h>
++#define B2N_16(x) x = be16toh(x)
++#define B2N_32(x) x = be32toh(x)
++#define B2N_64(x) x = be64toh(x)
++
 +#elif defined(ARCH_X86)
 +inline static unsigned short bswap_16(unsigned short x)
 +{
@@ -53,7 +60,7 @@
 +
  /* This is a slow but portable implementation, it has multiple evaluation 
   * problems so beware.
-  * FreeBSD and Solaris don't have <byteswap.h> or any other such 
+  * Old FreeBSD's and Solaris don't have <byteswap.h> or any other such 
   * functionality! 
   */
  
@@ -62,280 +69,51 @@
  #define B2N_16(x) \
   x = ((((x) & 0xff00) >> 8) | \
        (((x) & 0x00ff) << 8))
---- dvdread/dvd_input.c	2002-05-09 23:32:46.000000000 +0200
-+++ dvd_input.c	2005-03-01 07:07:46.000000000 +0100
-@@ -21,13 +21,11 @@
- #include <stdlib.h>
- #include <fcntl.h>
- #include <unistd.h>
--#include <dlfcn.h>
+diff -Naur dvdread.orig/.cvsignore dvdread/.cvsignore
+diff -Naur dvdread.orig/dvd_input.c dvdread/dvd_input.c
+--- dvdread.orig/dvd_input.c	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/dvd_input.c	2005-06-23 00:30:23.000000000 +0200
+@@ -37,7 +41,7 @@
  
- #include "dvd_reader.h"
- #include "dvd_input.h"
- 
--/* For libdvdcss */
--typedef struct dvdcss_s *dvdcss_handle;
+ #ifdef HAVE_DVDCSS_DVDCSS_H
+ /* linking to libdvdcss */
+-#include <dvdcss/dvdcss.h>
 +#include "dvdcss.h"
- 
- dvdcss_handle (*DVDcss_open)  (const char *);
- int           (*DVDcss_close) (dvdcss_handle);
-@@ -36,6 +34,12 @@
- int           (*DVDcss_read)  (dvdcss_handle, void *, int, int);
- char *        (*DVDcss_error) (dvdcss_handle);
- 
-+dvd_input_t (*DVDinput_open)  (const char *);
-+int         (*DVDinput_close) (dvd_input_t);
-+int         (*DVDinput_seek)  (dvd_input_t, int, int);
-+int         (*DVDinput_title) (dvd_input_t, int); 
-+int         (*DVDinput_read)  (dvd_input_t, void *, int, int);
-+char *      (*DVDinput_error) (dvd_input_t);
- 
- /* The DVDinput handle, add stuff here for new input methods. */
- struct dvd_input_s {
-@@ -55,7 +59,7 @@
+ #define DVDcss_open(a) dvdcss_open((char*)(a))
+ #define DVDcss_close   dvdcss_close
+ #define DVDcss_seek    dvdcss_seek
+@@ -74,7 +78,7 @@
    dvd_input_t dev;
-   
+     
    /* Allocate the handle structure */
 -  dev = (dvd_input_t) malloc(sizeof(dvd_input_t));
 +  dev = (dvd_input_t) malloc(sizeof(struct dvd_input_s));
    if(dev == NULL) {
      fprintf(stderr, "libdvdread: Could not allocate memory.\n");
      return NULL;
-@@ -123,176 +127,26 @@
- 
- 
- 
--
--
--
--/**
-- * initialize and open a DVD device or file.
-- */
--static dvd_input_t file_open(const char *target)
--{
--  dvd_input_t dev;
--  
--  /* Allocate the library structure */
--  dev = (dvd_input_t) malloc(sizeof(dvd_input_t));
--  if(dev == NULL) {
--    fprintf(stderr, "libdvdread: Could not allocate memory.\n");
--    return NULL;
--  }
--  
--  /* Open the device */
--  dev->fd = open(target, O_RDONLY);
--  if(dev->fd < 0) {
--    perror("libdvdread: Could not open input");
--    free(dev);
--    return NULL;
--  }
--  
--  return dev;
--}
--
--/**
-- * return the last error message
-- */
--static char *file_error(dvd_input_t dev)
--{
--  /* use strerror(errno)? */
--  return "unknown error";
--}
--
--/**
-- * seek into the device.
-- */
--static int file_seek(dvd_input_t dev, int blocks, int flags)
--{
--  off_t pos;
--
--  pos = lseek(dev->fd, (off_t)blocks * (off_t)DVD_VIDEO_LB_LEN, SEEK_SET);
--  if(pos < 0) {
--      return pos;
--  }
--  /* assert pos % DVD_VIDEO_LB_LEN == 0 */
--  return (int) (pos / DVD_VIDEO_LB_LEN);
--}
--
--/**
-- * set the block for the begining of a new title (key).
-- */
--static int file_title(dvd_input_t dev, int block)
--{
--  return -1;
--}
--
--/**
-- * read data from the device.
-- */
--static int file_read(dvd_input_t dev, void *buffer, int blocks, int flags)
--{
--  size_t len;
--  ssize_t ret;
--  
--  len = (size_t)blocks * DVD_VIDEO_LB_LEN;
--  
--  while(len > 0) {
--    
--    ret = read(dev->fd, buffer, len);
--    
--    if(ret < 0) {
--      /* One of the reads failed, too bad.  We won't even bother
--       * returning the reads that went ok, and as in the posix spec
--       * the file postition is left unspecified after a failure. */
--      return ret;
--    }
--    
--    if(ret == 0) {
--      /* Nothing more to read.  Return the whole blocks, if any, that we got.
--	 and adjust the file possition back to the previous block boundary. */
--      size_t bytes = (size_t)blocks * DVD_VIDEO_LB_LEN - len;
--      off_t over_read = -(bytes % DVD_VIDEO_LB_LEN);
--      /*off_t pos =*/ lseek(dev->fd, over_read, SEEK_CUR);
--      /* should have pos % 2048 == 0 */
--      return (int) (bytes / DVD_VIDEO_LB_LEN);
--    }
--    
--    len -= ret;
--  }
--
--  return blocks;
--}
--
--/**
-- * close the DVD device and clean up.
-- */
--static int file_close(dvd_input_t dev)
--{
--  int ret;
--
--  ret = close(dev->fd);
--
--  if(ret < 0)
--    return ret;
--
--  free(dev);
--
--  return 0;
--}
--
--
- /**
-  * Setup read functions with either libdvdcss or minimal DVD access.
-  */
- int DVDInputSetup(void)
- {
--  void *dvdcss_library = NULL;
--  char **dvdcss_version = NULL;
--  
--  dvdcss_library = dlopen("libdvdcss.so.2", RTLD_LAZY);
--  
--  if(dvdcss_library != NULL) {
--#if defined(__OpenBSD__) && !defined(__ELF__)
--#define U_S "_"
--#else
--#define U_S
--#endif
--    DVDcss_open = (dvdcss_handle (*)(const char*))
--      dlsym(dvdcss_library, U_S "dvdcss_open");
--    DVDcss_close = (int (*)(dvdcss_handle))
--      dlsym(dvdcss_library, U_S "dvdcss_close");
--    DVDcss_title = (int (*)(dvdcss_handle, int))
--      dlsym(dvdcss_library, U_S "dvdcss_title");
--    DVDcss_seek = (int (*)(dvdcss_handle, int, int))
--      dlsym(dvdcss_library, U_S "dvdcss_seek");
--    DVDcss_read = (int (*)(dvdcss_handle, void*, int, int))
--      dlsym(dvdcss_library, U_S "dvdcss_read");
--    DVDcss_error = (char* (*)(dvdcss_handle))
--      dlsym(dvdcss_library, U_S "dvdcss_error");
-+    DVDcss_open = dvdcss_open;
-+    DVDcss_close = dvdcss_close;
-+    DVDcss_title = dvdcss_title;
-+    DVDcss_seek = dvdcss_seek;
-+    DVDcss_read = dvdcss_read;
-+    DVDcss_error = dvdcss_error;
-     
--    dvdcss_version = (char **)dlsym(dvdcss_library, U_S "dvdcss_interface_2");
--
--    if(dlsym(dvdcss_library, U_S "dvdcss_crack")) {
--      fprintf(stderr, 
--	      "libdvdread: Old (pre-0.0.2) version of libdvdcss found.\n"
--	      "libdvdread: You should get the latest version from "
--	      "http://www.videolan.org/\n" );
--      dlclose(dvdcss_library);
--      dvdcss_library = NULL;
--    } else if(!DVDcss_open  || !DVDcss_close || !DVDcss_title || !DVDcss_seek
--	      || !DVDcss_read || !DVDcss_error || !dvdcss_version) {
--      fprintf(stderr,  "libdvdread: Missing symbols in libdvdcss.so.2, "
--	      "this shouldn't happen !\n");
--      dlclose(dvdcss_library);
--    }
--  }
--  
--  if(dvdcss_library != NULL) {
-     /*
-     char *psz_method = getenv( "DVDCSS_METHOD" );
-     char *psz_verbose = getenv( "DVDCSS_VERBOSE" );
+@@ -320,8 +324,10 @@
      fprintf(stderr, "DVDCSS_METHOD %s\n", psz_method);
      fprintf(stderr, "DVDCSS_VERBOSE %s\n", psz_verbose);
      */
--    fprintf(stderr, "libdvdread: Using libdvdcss version %s for DVD access\n",
--	    *dvdcss_version);
-+//    fprintf(stderr, "libdvdread: Using libdvdcss version %s for DVD access\n",
-+//	    *dvdcss_version);
++    /*
+     fprintf(stderr, "libdvdread: Using libdvdcss version %s for DVD access\n",
+ 	    *dvdcss_version);
++    */
      
-     /* libdvdcss wraper functions */
-     DVDinput_open  = css_open;
-@@ -303,16 +157,4 @@
-     DVDinput_error = css_error;
-     return 1;
-     
--  } else {
--    fprintf(stderr, "libdvdread: Encrypted DVD support unavailable.\n");
--
--    /* libdvdcss replacement functions */
--    DVDinput_open  = file_open;
--    DVDinput_close = file_close;
--    DVDinput_seek  = file_seek;
--    DVDinput_title = file_title;
--    DVDinput_read  = file_read;
--    DVDinput_error = file_error;
--    return 0;
--  }
- }
---- dvdread/dvd_input.h	2002-05-09 23:21:20.000000000 +0200
-+++ dvd_input.h	2005-03-01 07:07:46.000000000 +0100
-@@ -36,12 +36,12 @@
- /**
-  * Pointers which will be filled either the input meathods functions.
-  */
--dvd_input_t (*DVDinput_open)  (const char *);
--int         (*DVDinput_close) (dvd_input_t);
--int         (*DVDinput_seek)  (dvd_input_t, int, int);
--int         (*DVDinput_title) (dvd_input_t, int); 
--int         (*DVDinput_read)  (dvd_input_t, void *, int, int);
--char *      (*DVDinput_error) (dvd_input_t);
-+extern dvd_input_t (*DVDinput_open)  (const char *);
-+extern int         (*DVDinput_close) (dvd_input_t);
-+extern int         (*DVDinput_seek)  (dvd_input_t, int, int);
-+extern int         (*DVDinput_title) (dvd_input_t, int); 
-+extern int         (*DVDinput_read)  (dvd_input_t, void *, int, int);
-+extern char *      (*DVDinput_error) (dvd_input_t);
- 
- /**
-  * Setup function accessed by dvd_reader.c.  Returns 1 if there is CSS support.
---- dvdread/dvd_reader.c	2002-05-19 17:48:41.000000000 +0200
-+++ dvd_reader.c	2005-03-01 07:07:46.000000000 +0100
-@@ -17,6 +17,8 @@
-  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111, USA.
-  */
- 
-+#include "config.h"
-+
- #include <sys/types.h>
- #include <sys/stat.h>
- #include <sys/time.h> /* For the timing of dvdcss_title crack. */
-@@ -35,12 +37,24 @@
+     /* libdvdcss wrapper functions */
+     dvdinput_open  = css_open;
+diff -Naur dvdread.orig/dvd_input.h dvdread/dvd_input.h
+diff -Naur dvdread.orig/dvd_reader.c dvdread/dvd_reader.c
+--- dvdread.orig/dvd_reader.c	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/dvd_reader.c	2005-06-23 00:19:10.000000000 +0200
+@@ -32,24 +36,36 @@
+ #include <limits.h>
+ #include <dirent.h>
+  
+-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__)|| defined(__DARWIN__)
++#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__bsdi__)|| defined(__DARWIN__) || defined(__DragonFly__)
+ #define SYS_BSD 1
+ #endif
  
  #if defined(__sun)
  #include <sys/mnttab.h>
@@ -361,7 +139,14 @@
  #include "dvd_udf.h"
  #include "dvd_input.h"
  #include "dvd_reader.h"
-@@ -144,6 +158,13 @@
+ #include "md5.h"
+ 
+-#define DEFAULT_UDF_CACHE_LEVEL 1
++#define DEFAULT_UDF_CACHE_LEVEL 0
+ 
+ struct dvd_reader_s {
+     /* Basic information. */
+@@ -194,6 +210,13 @@
  }
  
  
@@ -375,25 +160,7 @@
  
  /**
   * Open a DVD image or block device file.
-@@ -152,7 +173,17 @@
- {
-     dvd_reader_t *dvd;
-     dvd_input_t dev;
-+
-+    /* setup cache dir is no longer needed, it's now implemented in libdvdcss.c
-+    if(!dvdcss_cache_dir){
-+	dvdcss_cache_dir=get_path( "" );
-+	if ( dvdcss_cache_dir ) { mkdir( dvdcss_cache_dir,493 ); free( dvdcss_cache_dir ); }
-+	dvdcss_cache_dir=get_path( "DVDKeys" );
-+	if(dvdcss_cache_dir) mkdir( dvdcss_cache_dir,493 );
-+    }
-+    */
-     
-+    /* open it */
-     dev = DVDinput_open( location );
-     if( !dev ) {
- 	fprintf( stderr, "libdvdread: Can't open %s for reading\n", location );
-@@ -222,7 +253,7 @@
+@@ -282,7 +305,7 @@
      char *new_path;
  
      /* If it doesn't start with "/dev/" or does start with "/dev/r" exit */ 
@@ -402,9 +169,9 @@
        return (char *) strdup( path );
  
      /* Replace "/dev/" with "/dev/r" */
-@@ -242,6 +273,16 @@
- 
-     if( !path ) return 0;
+@@ -303,6 +326,16 @@
+     if( path == NULL )
+       return 0;
  
 +#ifdef WIN32
 +    /* Stat doesn't work on devices under mingwin/cygwin. */
@@ -419,15 +186,15 @@
      ret = stat( path, &fileinfo );
      if( ret < 0 ) {
  	/* If we can't stat the file, give up */
-@@ -249,6 +290,7 @@
+@@ -310,6 +343,7 @@
  	perror("");
  	return 0;
      }
 +    }
  
      /* Try to open libdvdcss or fall back to standard functions */
-     have_css = DVDInputSetup();
-@@ -274,7 +320,7 @@
+     have_css = dvdinput_setup();
+@@ -335,7 +369,7 @@
  	char *path_copy;
  #if defined(SYS_BSD)
  	struct fstab* fe;
@@ -436,7 +203,7 @@
  	FILE *mntfile;
  #endif
  
-@@ -289,7 +331,9 @@
+@@ -350,7 +384,9 @@
  	    if( cdir >= 0 ) {
  		chdir( path_copy );
  		new_path = getcwd( NULL, PATH_MAX );
@@ -446,7 +213,7 @@
  		close( cdir );
  		if( new_path ) {
  		    free( path_copy );
-@@ -345,7 +393,7 @@
+@@ -406,7 +442,7 @@
  	    }
  	    fclose( mntfile );
  	}
@@ -455,7 +222,7 @@
          mntfile = fopen( MOUNTED, "r" );
          if( mntfile ) {
              struct mntent *me;
-@@ -364,6 +408,9 @@
+@@ -425,6 +461,9 @@
              }
              fclose( mntfile );
  	}
@@ -465,7 +232,7 @@
  #endif
  	if( !dev_name ) {
  	  fprintf( stderr, "libdvdread: Couldn't find device name.\n" );
-@@ -554,8 +601,8 @@
+@@ -615,8 +654,8 @@
      }
      
      if( dvd->css_state == 1 /* Need key init */ ) {
@@ -475,399 +242,53 @@
 +//	dvd->css_state = 2;
      }
      /*    
-     if( DVDinput_seek( dvd_file->dvd->dev, 
-@@ -631,10 +678,9 @@
-             dvd_file->title_sizes[ i ] = fileinfo.st_size / DVD_VIDEO_LB_LEN;
-             dvd_file->title_devs[ i ] = DVDinput_open( full_path );
-             dvd_file->filesize += dvd_file->title_sizes[ i ];
-+            DVDinput_seek( dvd_file->title_devs[ i ], 0, DVDINPUT_SEEK_KEY );
-         }
--        if( dvd_file->title_devs[ 0 ] ) {
--	    DVDinput_seek( dvd_file->title_devs[ 0 ], 0, DVDINPUT_SEEK_KEY );
--	} else {
-+        if( !dvd_file->title_devs[ 0 ] ) {
-             free( dvd_file );
-             return 0;
-         }
-@@ -794,7 +840,10 @@
- 		if( ret < 0 ) return ret;
- 		/* FIXME: This is wrong if i is the last file in the set. 
-                  * also error from this read will not show in ret. */
--		
-+
-+                /* Does the next part exist? If not then return now. */
-+                if( !dvd_file->title_devs[ i + 1 ] ) return ret;
-+
-                 /* Read part 2 */
-                 off = DVDinput_seek( dvd_file->title_devs[ i + 1 ], 
- 				     0, DVDINPUT_NOFLAGS );
-@@ -846,7 +895,7 @@
+     if( dvdinput_title( dvd_file->dvd->dev, (int)start ) < 0 ) {
+@@ -915,7 +954,7 @@
      return (ssize_t)ret;
  }
  
 -int32_t DVDFileSeek( dvd_file_t *dvd_file, int32_t offset )
 +int DVDFileSeek( dvd_file_t *dvd_file, int offset )
  {
-    if( offset > dvd_file->filesize * DVD_VIDEO_LB_LEN ) {
-        return -1;
---- dvdread/dvd_udf.c	2002-05-06 22:16:31.000000000 +0200
-+++ dvd_udf.c	2005-03-01 07:07:46.000000000 +0100
-@@ -4,6 +4,9 @@
-  *
-  * Modifications by:
-  *   Billy Biggs <vektor@dumbterm.net>.
-+ *   Björn Englund <d4bjorn@dtek.chalmers.se>.
-+ *   Joey Parrish <joey@nicewarrior.org>.
-+ *     - updated from libdvdread 0.9.4 and removed udf caching
-  *
-  * dvdudf: parse and read the UDF volume information of a DVD Video
-  * Copyright (C) 1999 Christian Wolff for convergence integrated media
-@@ -30,8 +33,10 @@
+     /* Check arguments. */
+     if( dvd_file == NULL || offset < 0 )
+diff -Naur dvdread.orig/dvdread_internal.h dvdread/dvdread_internal.h
+--- dvdread.orig/dvdread_internal.h	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/dvdread_internal.h	2005-06-23 00:19:10.000000000 +0200
+@@ -2,11 +2,7 @@
+ #define DVDREAD_INTERNAL_H
+ 
+ 
+-#define CHECK_VALUE(arg) \
+- if(!(arg)) { \
+-   fprintf(stderr, "\n*** libdvdread: CHECK_VALUE failed in %s:%i ***" \
+-                   "\n*** for %s ***\n\n", \
+-                   __FILE__, __LINE__, # arg ); \
+- }
++#define CHECK_VALUE(arg)
++
+ 
+ #endif /* DVDREAD_INTERNAL_H */
+diff -Naur dvdread.orig/dvd_udf.c dvdread/dvd_udf.c
+--- dvdread.orig/dvd_udf.c	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/dvd_udf.c	2005-06-23 00:19:10.000000000 +0200
+@@ -33,7 +37,9 @@
  #include <stdio.h>
  #include <stdlib.h>
  #include <string.h>
--#include <assert.h>
-+//#include <assert.h>
 +#ifndef __MINGW32__
  #include <sys/ioctl.h>
 +#endif
  #include <sys/types.h>
  #include <sys/stat.h>
  #include <unistd.h>
-@@ -93,6 +98,32 @@
-     uint16_t Partition;
- };
- 
-+struct extent_ad {
-+  uint32_t location;
-+  uint32_t length;
-+};
-+
-+struct avdp_t {
-+  struct extent_ad mvds;
-+  struct extent_ad rvds;
-+};
-+
-+struct pvd_t {
-+  uint8_t VolumeIdentifier[32];
-+  uint8_t VolumeSetIdentifier[128];
-+};
-+
-+struct lbudf {
-+  uint32_t lb;
-+  uint8_t *data;
-+};
-+
-+struct icbmap {
-+  uint32_t lbn;
-+  struct AD file;
-+  uint8_t filetype;
-+};
-+
- /* For direct data access, LSB first */
- #define GETN1(p) ((uint8_t)data[p])
- #define GETN2(p) ((uint16_t)data[p] | ((uint16_t)data[(p) + 1] << 8))
-@@ -334,6 +365,67 @@
-     return 0;
- }
- 
-+
-+static int UDFGetAVDP( dvd_reader_t *device,
-+		       struct avdp_t *avdp)
-+{
-+  uint8_t Anchor[ DVD_VIDEO_LB_LEN ];
-+  uint32_t lbnum, MVDS_location, MVDS_length;
-+  uint16_t TagID;
-+  uint32_t lastsector;
-+  int terminate;
-+  struct avdp_t; 
-+  
-+  /* Find Anchor */
-+  lastsector = 0;
-+  lbnum = 256;   /* Try #1, prime anchor */
-+  terminate = 0;
-+  
-+  for(;;) {
-+    if( DVDReadLBUDF( device, lbnum, 1, Anchor, 0 ) > 0 ) {
-+      UDFDescriptor( Anchor, &TagID );
-+    } else {
-+      TagID = 0;
-+    }
-+    if (TagID != 2) {
-+      /* Not an anchor */
-+      if( terminate ) return 0; /* Final try failed */
-+      
-+      if( lastsector ) {
-+	
-+	/* We already found the last sector.  Try #3, alternative
-+	 * backup anchor.  If that fails, don't try again.
-+	 */
-+	lbnum = lastsector;
-+	terminate = 1;
-+      } else {
-+	/* TODO: Find last sector of the disc (this is optional). */
-+	if( lastsector ) {
-+	  /* Try #2, backup anchor */
-+	  lbnum = lastsector - 256;
-+	} else {
-+	  /* Unable to find last sector */
-+	  return 0;
-+	}
-+      }
-+    } else {
-+      /* It's an anchor! We can leave */
-+      break;
-+    }
-+  }
-+  /* Main volume descriptor */
-+  UDFExtentAD( &Anchor[ 16 ], &MVDS_length, &MVDS_location );
-+  avdp->mvds.location = MVDS_location;
-+  avdp->mvds.length = MVDS_length;
-+  
-+  /* Backup volume descriptor */
-+  UDFExtentAD( &Anchor[ 24 ], &MVDS_length, &MVDS_location );
-+  avdp->rvds.location = MVDS_location;
-+  avdp->rvds.length = MVDS_length;
-+  
-+  return 1;
-+}
-+
- /**
-  * Looks for partition on the disc.  Returns 1 if partition found, 0 on error.
-  *   partnum: Number of the partition, starting at 0.
-@@ -342,52 +434,21 @@
- static int UDFFindPartition( dvd_reader_t *device, int partnum,
- 			     struct Partition *part ) 
- {
--    uint8_t LogBlock[ DVD_VIDEO_LB_LEN ], Anchor[ DVD_VIDEO_LB_LEN ];
-+    uint8_t LogBlock[ DVD_VIDEO_LB_LEN ];
-     uint32_t lbnum, MVDS_location, MVDS_length;
-     uint16_t TagID;
--    uint32_t lastsector;
--    int i, terminate, volvalid;
-+    int i, volvalid;
-+    struct avdp_t avdp;
- 
--    /* Find Anchor */
--    lastsector = 0;
--    lbnum = 256;   /* Try #1, prime anchor */
--    terminate = 0;
--
--    for(;;) {
--        if( DVDReadLBUDF( device, lbnum, 1, Anchor, 0 ) > 0 ) {
--            UDFDescriptor( Anchor, &TagID );
--        } else {
--            TagID = 0;
--        }
--        if (TagID != 2) {
--            /* Not an anchor */
--            if( terminate ) return 0; /* Final try failed */
--
--            if( lastsector ) {
--
--                /* We already found the last sector.  Try #3, alternative
--                 * backup anchor.  If that fails, don't try again.
--                 */
--                lbnum = lastsector;
--                terminate = 1;
--            } else {
--                /* TODO: Find last sector of the disc (this is optional). */
--                if( lastsector ) {
--                    /* Try #2, backup anchor */
--                    lbnum = lastsector - 256;
--                } else {
--                    /* Unable to find last sector */
--                    return 0;
--                }
--            }
--        } else {
--            /* It's an anchor! We can leave */
--            break;
--        }
-+    
-+    if(!UDFGetAVDP(device, &avdp)) {
-+      return 0;
-     }
-+
-     /* Main volume descriptor */
--    UDFExtentAD( &Anchor[ 16 ], &MVDS_length, &MVDS_location );
--	
-+    MVDS_location = avdp.mvds.location;
-+    MVDS_length = avdp.mvds.length;
-+
-     part->valid = 0;
-     volvalid = 0;
-     part->VolumeDesc[ 0 ] = '\0';
-@@ -422,8 +483,9 @@
-                  && ( ( !part->valid ) || ( !volvalid ) ) );
- 
-         if( ( !part->valid) || ( !volvalid ) ) {
--            /* Backup volume descriptor */
--            UDFExtentAD( &Anchor[ 24 ], &MVDS_length, &MVDS_location );
-+	  /* Backup volume descriptor */
-+	  MVDS_location = avdp.mvds.location;
-+	  MVDS_length = avdp.mvds.length;
-         }
-     } while( i-- && ( ( !part->valid ) || ( !volvalid ) ) );
- 
-@@ -442,17 +504,18 @@
-     char tokenline[ MAX_UDF_FILE_NAME_LEN ];
-     char *token;
-     uint8_t filetype;
--	
-+
-     *filesize = 0;
-     tokenline[0] = '\0';
-     strcat( tokenline, filename );
- 
--    /* Find partition, 0 is the standard location for DVD Video.*/
--    if( !UDFFindPartition( device, 0, &partition ) ) return 0;
--
--    /* Find root dir ICB */
--    lbnum = partition.Start;
--    do {
-+    
-+      /* Find partition, 0 is the standard location for DVD Video.*/
-+      if( !UDFFindPartition( device, 0, &partition ) ) return 0;
-+      
-+      /* Find root dir ICB */
-+      lbnum = partition.Start;
-+      do {
-         if( DVDReadLBUDF( device, lbnum++, 1, LogBlock, 0 ) <= 0 ) {
-             TagID = 0;
-         } else {
-@@ -469,19 +532,27 @@
-     /* Sanity checks. */
-     if( TagID != 256 ) return 0;
-     if( RootICB.Partition != 0 ) return 0;
--	
-+
-     /* Find root dir */
-     if( !UDFMapICB( device, RootICB, &filetype, &partition, &File ) ) return 0;
-     if( filetype != 4 ) return 0;  /* Root dir should be dir */
- 
--    /* Tokenize filepath */
--    token = strtok(tokenline, "/");
--    while( token != NULL ) {
--        if( !UDFScanDir( device, File, token, &partition, &ICB ) ) return 0;
--        if( !UDFMapICB( device, ICB, &filetype, &partition, &File ) ) return 0;
-+    {
-+      /* Tokenize filepath */
-+      token = strtok(tokenline, "/");
-+      
-+      while( token != NULL ) {
-+       
-+        if( !UDFScanDir( device, File, token, &partition, &ICB)) {
-+         return 0;
-+       }
-+        if( !UDFMapICB( device, ICB, &filetype, &partition, &File ) ) {
-+         return 0;
-+       }
-         token = strtok( NULL, "/" );
--    }
--    
-+      }
-+    } 
-+
-     /* Sanity check. */
-     if( File.Partition != 0 ) return 0;
-    
-@@ -492,3 +563,81 @@
-     else
-       return partition.Start + File.Location;
- }
-+
-+
-+
-+/**
-+ * Gets a Descriptor .
-+ * Returns 1 if descriptor found, 0 on error.
-+ * id, tagid of descriptor
-+ * bufsize, size of BlockBuf (must be >= DVD_VIDEO_LB_LEN).
-+ */
-+static int UDFGetDescriptor( dvd_reader_t *device, int id,
-+			     uint8_t *descriptor, int bufsize) 
-+{
-+  uint32_t lbnum, MVDS_location, MVDS_length;
-+  struct avdp_t avdp;
-+  uint16_t TagID;
-+  uint32_t lastsector;
-+  int i, terminate;
-+  int desc_found = 0;
-+  /* Find Anchor */
-+  lastsector = 0;
-+  lbnum = 256;   /* Try #1, prime anchor */
-+  terminate = 0;
-+  if(bufsize < DVD_VIDEO_LB_LEN) {
-+    return 0;
-+  }
-+  
-+  if(!UDFGetAVDP(device, &avdp)) {
-+    return 0;
-+  }
-+
-+  /* Main volume descriptor */
-+  MVDS_location = avdp.mvds.location;
-+  MVDS_length = avdp.mvds.length;
-+  
-+  i = 1;
-+  do {
-+    /* Find  Descriptor */
-+    lbnum = MVDS_location;
-+    do {
-+      
-+      if( DVDReadLBUDF( device, lbnum++, 1, descriptor, 0 ) <= 0 ) {
-+	TagID = 0;
-+      } else {
-+	UDFDescriptor( descriptor, &TagID );
-+      }
-+      
-+      if( (TagID == id) && ( !desc_found ) ) {
-+	/* Descriptor */
-+	desc_found = 1;
-+      }
-+    } while( ( lbnum <= MVDS_location + ( MVDS_length - 1 )
-+	       / DVD_VIDEO_LB_LEN ) && ( TagID != 8 )
-+	     && ( !desc_found) );
-+    
-+    if( !desc_found ) {
-+      /* Backup volume descriptor */
-+      MVDS_location = avdp.rvds.location;
-+      MVDS_length = avdp.rvds.length;
-+    }
-+  } while( i-- && ( !desc_found )  );
-+  
-+  return desc_found;
-+}
-+
-+
-+static int UDFGetPVD(dvd_reader_t *device, struct pvd_t *pvd)
-+{
-+  uint8_t pvd_buf[DVD_VIDEO_LB_LEN];
-+  
-+  if(!UDFGetDescriptor( device, 1, pvd_buf, sizeof(pvd_buf))) {
-+    return 0;
-+  }
-+  
-+  memcpy(pvd->VolumeIdentifier, &pvd_buf[24], 32);
-+  memcpy(pvd->VolumeSetIdentifier, &pvd_buf[72], 128);
-+  
-+  return 1;
-+}
---- dvdread/ifo_print.c	2002-05-15 21:35:54.000000000 +0200
-+++ ifo_print.c	2005-03-01 07:07:46.000000000 +0100
-@@ -23,7 +23,7 @@
- #include <inttypes.h>
- #include <string.h>
- #include <ctype.h>
--#include <assert.h>
-+//#include <assert.h>
- 
- #include "config.h" // Needed for WORDS_BIGENDIAN
- #include "ifo_types.h"
---- dvdread/ifo_print.h	2002-04-07 19:52:01.000000000 +0200
-+++ ifo_print.h	2005-03-01 07:07:46.000000000 +0100
-@@ -20,8 +20,8 @@
+diff -Naur dvdread.orig/ifo_print.c dvdread/ifo_print.c
+diff -Naur dvdread.orig/ifo_print.h dvdread/ifo_print.h
+diff -Naur dvdread.orig/ifo_read.c dvdread/ifo_read.c
+diff -Naur dvdread.orig/ifo_read.h dvdread/ifo_read.h
+--- dvdread.orig/ifo_read.h	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/ifo_read.h	2005-06-23 00:19:10.000000000 +0200
+@@ -20,8 +24,8 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
@@ -878,33 +299,10 @@
  
  #ifdef __cplusplus
  extern "C" {
---- dvdread/ifo_read.c	2002-05-25 21:37:18.000000000 +0200
-+++ ifo_read.c	2005-03-01 07:07:46.000000000 +0100
-@@ -22,7 +22,7 @@
- #include <unistd.h>
- #include <inttypes.h>
- #include <string.h>
--#include <assert.h>
-+//#include <assert.h>
- 
- #include "dvd_reader.h"
- 
---- dvdread/ifo_read.h	2002-04-07 19:52:01.000000000 +0200
-+++ ifo_read.h	2005-03-01 07:07:46.000000000 +0100
-@@ -20,8 +20,8 @@
-  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-  */
- 
--#include <dvdread/ifo_types.h>
--#include <dvdread/dvd_reader.h>
-+#include "ifo_types.h"
-+#include "dvd_reader.h"
- 
- #ifdef __cplusplus
- extern "C" {
---- dvdread/ifo_types.h	2002-04-07 19:52:01.000000000 +0200
-+++ ifo_types.h	2005-03-01 07:07:46.000000000 +0100
-@@ -21,7 +21,7 @@
+diff -Naur dvdread.orig/ifo_types.h dvdread/ifo_types.h
+--- dvdread.orig/ifo_types.h	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/ifo_types.h	2005-06-23 00:19:10.000000000 +0200
+@@ -21,7 +25,7 @@
   */
  
  #include <inttypes.h>
@@ -913,68 +311,41 @@
  
  
  #undef ATTRIBUTE_PACKED
---- dvdread/nav_print.c	2002-04-07 19:18:06.000000000 +0200
-+++ nav_print.c	2005-03-01 07:07:46.000000000 +0100
-@@ -25,7 +25,7 @@
- 
- #include <stdio.h>
- #include <inttypes.h>
--#include <assert.h>
-+//#include <assert.h>
- 
- #include "config.h" // Needed for WORDS_BIGENDIAN
- #include "nav_types.h"
---- dvdread/nav_print.h	2002-04-07 20:17:19.000000000 +0200
-+++ nav_print.h	2005-03-01 07:07:46.000000000 +0100
-@@ -20,7 +20,7 @@
+diff -Naur dvdread.orig/nav_print.c dvdread/nav_print.c
+diff -Naur dvdread.orig/nav_print.h dvdread/nav_print.h
+--- dvdread.orig/nav_print.h	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/nav_print.h	2005-06-23 00:19:10.000000000 +0200
+@@ -20,7 +24,7 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
 -#include <dvdread/nav_types.h>
 +#include "nav_types.h"
  
- #ifdef __cplusplus
- extern "C" {
---- dvdread/nav_read.c	2002-04-07 19:52:01.000000000 +0200
-+++ nav_read.c	2005-03-01 07:07:46.000000000 +0100
-@@ -19,7 +19,7 @@
- #include <stdio.h>
- #include <string.h>
- #include <inttypes.h>
--#include <assert.h>
-+//#include <assert.h>
- 
- #include "config.h" // Needed for WORDS_BIGENDIAN
- #include "bswap.h"
-@@ -95,7 +95,9 @@
-   /* pci hli btnit */
-   for(i = 0; i < pci->hli.hl_gi.btngr_ns; i++) {
-     for(j = 0; j < (36 / pci->hli.hl_gi.btngr_ns); j++) {
-+#ifdef HAVE_ASSERT_H
-       int n = (36 / pci->hli.hl_gi.btngr_ns) * i + j;
-+#endif
-       assert(pci->hli.btnit[n].zero1 == 0);
-       assert(pci->hli.btnit[n].zero2 == 0);
-       assert(pci->hli.btnit[n].zero3 == 0);
---- dvdread/nav_read.h	2002-04-07 20:17:19.000000000 +0200
-+++ nav_read.h	2005-03-01 07:07:46.000000000 +0100
-@@ -19,7 +19,7 @@
+ /**
+  * Pretty printing of the NAV packets, PCI and DSI structs.
+diff -Naur dvdread.orig/nav_read.c dvdread/nav_read.c
+diff -Naur dvdread.orig/nav_read.h dvdread/nav_read.h
+--- dvdread.orig/nav_read.h	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/nav_read.h	2005-06-23 00:19:10.000000000 +0200
+@@ -19,7 +23,7 @@
   * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
   */
  
 -#include <dvdread/nav_types.h>
 +#include "nav_types.h"
  
- #ifdef __cplusplus
- extern "C" {
---- dvdread/nav_types.h	2002-04-07 20:41:59.000000000 +0200
-+++ nav_types.h	2005-03-01 07:07:46.000000000 +0100
-@@ -30,7 +30,7 @@
+ /**
+  * Parsing of NAV data, PCI and DSI parts.
+diff -Naur dvdread.orig/nav_types.h dvdread/nav_types.h
+--- dvdread.orig/nav_types.h	2005-06-23 00:18:54.000000000 +0200
++++ dvdread/nav_types.h	2005-06-23 00:19:10.000000000 +0200
+@@ -30,7 +34,7 @@
   */
  
  #include <inttypes.h>
--#include <dvdread/ifo_types.h> // only dvd_time_t, vm_cmd_t and user_ops_t
-+#include "ifo_types.h" // only dvd_time_t, vm_cmd_t and user_ops_t
+-#include <dvdread/ifo_types.h> /* only dvd_time_t, vm_cmd_t and user_ops_t */
++#include "ifo_types.h" /* only dvd_time_t, vm_cmd_t and user_ops_t */
  
  
  #undef ATTRIBUTE_PACKED
