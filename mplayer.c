@@ -3985,11 +3985,6 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 
 //================= Update OSD ====================
 #ifdef USE_OSD
-  if (osd_level == 0 && osd_show_status > 0 && sh_video){
-      snprintf(vo_osd_text, 63, "OSD: disabled");
-      vo_osd_changed(OSDTYPE_OSD);
-      osd_show_status--;
-  }
   if(osd_level>=1 && sh_video){
       int pts=sh_video->pts;
       char osd_text_tmp[64];
@@ -4121,12 +4116,6 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
             snprintf(osd_text_tmp, 63, "%c %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,percentage_text);
       } else osd_text_tmp[0]=0;
       
-      if (osd_level == 1 && osd_show_status > 0){
-	      strncpy(osd_text_tmp, "OSD: enabled", 63);
-	      strncpy(vo_osd_text, osd_text_tmp, 63);
-	      vo_osd_changed(OSDTYPE_OSD);
-	      osd_show_status--;
-      }
       if(strcmp(vo_osd_text, osd_text_tmp)) {
 	      strncpy(vo_osd_text, osd_text_tmp, 63);
 	      vo_osd_changed(OSDTYPE_OSD);
