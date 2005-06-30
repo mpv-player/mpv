@@ -1,9 +1,5 @@
 /*
- * Copyright (C) 2000, 2001, 2002 Håkan Hjort <d95hjort@dtek.chalmers.se>
- *
- * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
- * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
- * $Id$
+ * Copyright (C) 2000, 2001, 2002, 2003 Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +16,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <string.h>
 #include <inttypes.h>
-//#include <assert.h>
 
-#include "config.h" // Needed for WORDS_BIGENDIAN
 #include "bswap.h"
 #include "nav_types.h"
 #include "nav_read.h"
+#include "dvdread_internal.h"
 
 void navRead_PCI(pci_t *pci, unsigned char *buffer) {
-  int i, j, k;
+  int i, j;
 
-  assert(sizeof(pci_t) == PCI_BYTES - 1); // -1 for substream id
+  CHECK_VALUE(sizeof(pci_t) == PCI_BYTES - 1); // -1 for substream id
   
   memcpy(pci, buffer, sizeof(pci_t));
 
@@ -61,84 +58,99 @@ void navRead_PCI(pci_t *pci, unsigned char *buffer) {
     for(j = 0; j < 2; j++)
       B2N_32(pci->hli.btn_colit.btn_coli[i][j]);
 
-#if !defined(WORDS_BIGENDIAN)
+  /* NOTE: I've had to change the structure from the disk layout to get
+   * the packing to work with Sun's Forte C compiler. */
+  
   /* pci hli btni */
   for(i = 0; i < 36; i++) {
-    char tmp[6], swap;
-    memcpy(tmp, &(pci->hli.btnit[i]), 6);
-    /* This is a B2N_24() */
-    swap = tmp[0]; tmp[0] = tmp[2]; tmp[2] = swap;
-    /* This is a B2N_24() */
-    swap = tmp[3]; tmp[3] = tmp[5]; tmp[5] = swap;
-    memcpy(&(pci->hli.btnit[i]), tmp, 6);
-  }
+    char tmp[sizeof(pci->hli.btnit[i])], swap;
+    memcpy(tmp, &(pci->hli.btnit[i]), sizeof(pci->hli.btnit[i]));
+    /* Byte 4 to 7 are 'rotated' was: ABCD EFGH IJ is: ABCG DEFH IJ */
+    swap   = tmp[6]; 
+    tmp[6] = tmp[5];
+    tmp[5] = tmp[4];
+    tmp[4] = tmp[3];
+    tmp[3] = swap;
+    
+    /* Then there are the two B2N_24(..) calls */
+#ifndef WORDS_BIGENDIAN
+    swap = tmp[0];
+    tmp[0] = tmp[2];
+    tmp[2] = swap;
+    
+    swap = tmp[4];
+    tmp[4] = tmp[6];
+    tmp[6] = swap;
 #endif
+    memcpy(&(pci->hli.btnit[i]), tmp, sizeof(pci->hli.btnit[i]));
+  }
 
 
+#ifndef NDEBUG
   /* Asserts */
 
   /* pci pci gi */ 
-  assert(pci->pci_gi.zero1 == 0);
+  CHECK_VALUE(pci->pci_gi.zero1 == 0);
 
   /* pci hli hli_gi */
-  assert(pci->hli.hl_gi.zero1 == 0);
-  assert(pci->hli.hl_gi.zero2 == 0);
-  assert(pci->hli.hl_gi.zero3 == 0);
-  assert(pci->hli.hl_gi.zero4 == 0);
-  assert(pci->hli.hl_gi.zero5 == 0);
+  CHECK_VALUE(pci->hli.hl_gi.zero1 == 0);
+  CHECK_VALUE(pci->hli.hl_gi.zero2 == 0);
+  CHECK_VALUE(pci->hli.hl_gi.zero3 == 0);
+  CHECK_VALUE(pci->hli.hl_gi.zero4 == 0);
+  CHECK_VALUE(pci->hli.hl_gi.zero5 == 0);
 
   /* Are there buttons defined here? */
   if((pci->hli.hl_gi.hli_ss & 0x03) != 0) {
-    assert(pci->hli.hl_gi.btn_ns != 0); 
-    assert(pci->hli.hl_gi.btngr_ns != 0); 
+    CHECK_VALUE(pci->hli.hl_gi.btn_ns != 0); 
+    CHECK_VALUE(pci->hli.hl_gi.btngr_ns != 0); 
   } else {
-    assert((pci->hli.hl_gi.btn_ns != 0 && pci->hli.hl_gi.btngr_ns != 0) 
+    CHECK_VALUE((pci->hli.hl_gi.btn_ns != 0 && pci->hli.hl_gi.btngr_ns != 0) 
 	   || (pci->hli.hl_gi.btn_ns == 0 && pci->hli.hl_gi.btngr_ns == 0));
   }
 
   /* pci hli btnit */
   for(i = 0; i < pci->hli.hl_gi.btngr_ns; i++) {
     for(j = 0; j < (36 / pci->hli.hl_gi.btngr_ns); j++) {
-#ifdef HAVE_ASSERT_H
       int n = (36 / pci->hli.hl_gi.btngr_ns) * i + j;
-#endif
-      assert(pci->hli.btnit[n].zero1 == 0);
-      assert(pci->hli.btnit[n].zero2 == 0);
-      assert(pci->hli.btnit[n].zero3 == 0);
-      assert(pci->hli.btnit[n].zero4 == 0);
-      assert(pci->hli.btnit[n].zero5 == 0);
-      assert(pci->hli.btnit[n].zero6 == 0);
+      CHECK_VALUE(pci->hli.btnit[n].zero1 == 0);
+      CHECK_VALUE(pci->hli.btnit[n].zero2 == 0);
+      CHECK_VALUE(pci->hli.btnit[n].zero3 == 0);
+      CHECK_VALUE(pci->hli.btnit[n].zero4 == 0);
+      CHECK_VALUE(pci->hli.btnit[n].zero5 == 0);
+      CHECK_VALUE(pci->hli.btnit[n].zero6 == 0);
       
       if (j < pci->hli.hl_gi.btn_ns) {	
-	assert(pci->hli.btnit[n].x_start <= pci->hli.btnit[n].x_end);
-	assert(pci->hli.btnit[n].y_start <= pci->hli.btnit[n].y_end);
-	assert(pci->hli.btnit[n].up <= pci->hli.hl_gi.btn_ns);
-	assert(pci->hli.btnit[n].down <= pci->hli.hl_gi.btn_ns);
-	assert(pci->hli.btnit[n].left <= pci->hli.hl_gi.btn_ns);
-	assert(pci->hli.btnit[n].right <= pci->hli.hl_gi.btn_ns);
+	CHECK_VALUE(pci->hli.btnit[n].x_start <= pci->hli.btnit[n].x_end);
+	CHECK_VALUE(pci->hli.btnit[n].y_start <= pci->hli.btnit[n].y_end);
+	CHECK_VALUE(pci->hli.btnit[n].up <= pci->hli.hl_gi.btn_ns);
+	CHECK_VALUE(pci->hli.btnit[n].down <= pci->hli.hl_gi.btn_ns);
+	CHECK_VALUE(pci->hli.btnit[n].left <= pci->hli.hl_gi.btn_ns);
+	CHECK_VALUE(pci->hli.btnit[n].right <= pci->hli.hl_gi.btn_ns);
 	//vmcmd_verify(pci->hli.btnit[n].cmd);
       } else {
-	assert(pci->hli.btnit[n].btn_coln == 0);
-	assert(pci->hli.btnit[n].auto_action_mode == 0);
-	assert(pci->hli.btnit[n].x_start == 0);
-	assert(pci->hli.btnit[n].y_start == 0);
-	assert(pci->hli.btnit[n].x_end == 0);
-	assert(pci->hli.btnit[n].y_end == 0);
-	assert(pci->hli.btnit[n].up == 0);
-	assert(pci->hli.btnit[n].down == 0);
-	assert(pci->hli.btnit[n].left == 0);
-	assert(pci->hli.btnit[n].right == 0);
+	int k;
+	CHECK_VALUE(pci->hli.btnit[n].btn_coln == 0);
+	CHECK_VALUE(pci->hli.btnit[n].auto_action_mode == 0);
+	CHECK_VALUE(pci->hli.btnit[n].x_start == 0);
+	CHECK_VALUE(pci->hli.btnit[n].y_start == 0);
+	CHECK_VALUE(pci->hli.btnit[n].x_end == 0);
+	CHECK_VALUE(pci->hli.btnit[n].y_end == 0);
+	CHECK_VALUE(pci->hli.btnit[n].up == 0);
+	CHECK_VALUE(pci->hli.btnit[n].down == 0);
+	CHECK_VALUE(pci->hli.btnit[n].left == 0);
+	CHECK_VALUE(pci->hli.btnit[n].right == 0);
 	for (k = 0; k < 8; k++)
-	  assert(pci->hli.btnit[n].cmd.bytes[k] == 0); //CHECK_ZERO?
+	  CHECK_VALUE(pci->hli.btnit[n].cmd.bytes[k] == 0); //CHECK_ZERO?
       }
     }
   }
+#endif /* !NDEBUG */
 }
 
 void navRead_DSI(dsi_t *dsi, unsigned char *buffer) {
   int i;
 
-  assert(sizeof(dsi_t) == DSI_BYTES - 1); // -1 for substream id
+  CHECK_VALUE(sizeof(dsi_t) == DSI_BYTES - 1); // -1 for substream id
   
   memcpy(dsi, buffer, sizeof(dsi_t));
 
@@ -187,6 +199,6 @@ void navRead_DSI(dsi_t *dsi, unsigned char *buffer) {
   /* Asserts */
 
   /* dsi dsi gi */
-  assert(dsi->dsi_gi.zero1 == 0);
+  CHECK_VALUE(dsi->dsi_gi.zero1 == 0);
 }
 

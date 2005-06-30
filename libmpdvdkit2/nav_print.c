@@ -1,9 +1,5 @@
 /*
- * Copyright (C) 2000, 2001, 2002 Håkan Hjort <d95hjort@dtek.chalmers.se>
- *
- * Modified for use with MPlayer, changes contained in libdvdread_changes.diff.
- * detailed CVS changelog at http://www.mplayerhq.hu/cgi-bin/cvsweb.cgi/main/
- * $Id$
+ * Copyright (C) 2000, 2001, 2002, 2003 Håkan Hjort <d95hjort@dtek.chalmers.se>
  *
  * Much of the contents in this file is based on VOBDUMP.
  *
@@ -27,21 +23,21 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "config.h"
+
 #include <stdio.h>
 #include <inttypes.h>
-//#include <assert.h>
 
-#include "config.h" // Needed for WORDS_BIGENDIAN
 #include "nav_types.h"
 #include "nav_print.h"
-
+#include "dvdread_internal.h"
 
 static void print_time(dvd_time_t *dtime) {
   const char *rate;
-  assert((dtime->hour>>4) < 0xa && (dtime->hour&0xf) < 0xa);
-  assert((dtime->minute>>4) < 0x7 && (dtime->minute&0xf) < 0xa);
-  assert((dtime->second>>4) < 0x7 && (dtime->second&0xf) < 0xa);
-  assert((dtime->frame_u&0xf) < 0xa);
+  CHECK_VALUE((dtime->hour>>4) < 0xa && (dtime->hour&0xf) < 0xa);
+  CHECK_VALUE((dtime->minute>>4) < 0x7 && (dtime->minute&0xf) < 0xa);
+  CHECK_VALUE((dtime->second>>4) < 0x7 && (dtime->second&0xf) < 0xa);
+  CHECK_VALUE((dtime->frame_u&0xf) < 0xa);
   
   printf("%02x:%02x:%02x.%02x", 
 	 dtime->hour,

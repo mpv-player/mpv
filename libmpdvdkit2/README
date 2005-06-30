@@ -1,12 +1,12 @@
-MPlayer DVD-kit v2.2 :)
+MPlayer DVD-kit v2.3 :)
 made by Pontscho & A'rpi for the MPlayer project
 
 What the hell is this?
 ======================
 Nothing special, just a collection of sources and patches and fixes:
 
-- dvdread 0.9.3 + static libdvdcss (removed dlopen code)
-- libdvdcss 1.2.5
+- dvdread 0.9.4 + static libdvdcss
+- libdvdcss 1.2.8
 - optimizations enabled, asserts disabled
 everything packed together with _static_ linking to maximize performance.
 

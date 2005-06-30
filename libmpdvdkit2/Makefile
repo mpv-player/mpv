@@ -15,6 +15,7 @@ SRCS = css.c \
        libdvdcss.c \
        nav_print.c \
        nav_read.c \
+       md5.c \
 
 #bsdi_ioctl.c 
 
@@ -34,7 +35,8 @@ endif
 
 # -funroll-loops  removed, triggered gcc 3.0.4 (3.x?) bug
 CFLAGS= -I. $(OPTFLAGS) $(EXTRA_INC)\
-	-DSYS_LINUX -D__USE_UNIX98 -D_REENTRANT -D_GNU_SOURCE
+	-DSYS_LINUX -D__USE_UNIX98 -D_REENTRANT -D_GNU_SOURCE \
+	-DHAVE_DVDCSS_DVDCSS_H -DSTDC_HEADERS
 
 .c.o:
 	$(CC) $(CFLAGS) -c -o $@ $<

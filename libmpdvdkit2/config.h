@@ -1,6 +1,6 @@
 
 /* Version number of package */
-#define VERSION "1.2.2"
+#define VERSION "1.2.3"
 #define HAVE_UNISTD_H 1
 
 /* Define if your processor stores words with the most significant

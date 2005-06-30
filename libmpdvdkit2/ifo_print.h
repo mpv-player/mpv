@@ -53,6 +53,7 @@ void ifoPrint_VTS_PTT_SRPT(vts_ptt_srpt_t *);
 void ifoPrint_PGC(pgc_t *);
 void ifoPrint_PGCIT(pgcit_t *);
 void ifoPrint_PGCI_UT(pgci_ut_t *);
+void ifoPrint_VTS_TMAPT(vts_tmapt_t *);
 void ifoPrint_C_ADT(c_adt_t *);
 void ifoPrint_VOBU_ADMAP(vobu_admap_t *);
 
