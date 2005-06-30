@@ -85,6 +85,8 @@ extern unsigned int xv_port;
 extern int vo_xv_set_eq(uint32_t xv_port, char * name, int value);
 extern int vo_xv_get_eq(uint32_t xv_port, char * name, int *value);
 
+extern int vo_xv_enable_vsync();
+
 /*** colorkey handling ***/
 typedef struct xv_ck_info_s
 {
