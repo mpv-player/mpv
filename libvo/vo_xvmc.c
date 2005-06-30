@@ -585,6 +585,7 @@ found_subpic:
      return -1; // bail out, colorkey setup failed
    }
 
+   vo_xv_enable_vsync();//it won't break anything
 
 //taken from vo_xv
    panscan_init();
