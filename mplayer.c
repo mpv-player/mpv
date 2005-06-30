@@ -2921,7 +2921,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  osd_level= v > MAX_OSD_LEVEL ? MAX_OSD_LEVEL : v;
 	/* Show OSD state when disabled, but not when an explicit
 	   argument is given to the osd command, i.e. in slave mode. */
-	if (v < 0 && osd_level <= 1)
+	if (v == -1 && osd_level <= 1)
 	  osd_show_status = 9;
       }
 #endif
@@ -4132,10 +4132,16 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 	      vo_osd_changed(OSDTYPE_OSD);
       }
   } else {
-      if(vo_osd_text && osd_show_status <= 0) {
+      if(vo_osd_text) {
          vo_osd_text=NULL;
 	  vo_osd_changed(OSDTYPE_OSD);
       }
+  }
+  if (osd_level <= 1 && osd_show_status > 0 && sh_video) {
+    vo_osd_text = osd_text_buffer;
+    snprintf(vo_osd_text, 63, "OSD: %sabled", osd_level ? "en" : "dis");
+    vo_osd_changed(OSDTYPE_OSD);
+    osd_show_status--;
   }
 //  for(i=1;i<=11;i++) osd_text_buffer[10+i]=i;osd_text_buffer[10+i]=0;
 //  vo_osd_text=osd_text_buffer;
