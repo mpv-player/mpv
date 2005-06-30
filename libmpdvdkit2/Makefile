@@ -3,7 +3,18 @@ ifneq ($(wildcard ../config.mak),)
 include ../config.mak
 endif
 
-SRCS = css.c device.c dvd_input.c dvd_reader.c dvd_udf.c error.c ifo_print.c ifo_read.c ioctl.c libdvdcss.c nav_print.c nav_read.c
+SRCS = css.c \
+       device.c \
+       dvd_input.c \
+       dvd_reader.c \
+       dvd_udf.c \
+       error.c \
+       ifo_print.c \
+       ifo_read.c \
+       ioctl.c \
+       libdvdcss.c \
+       nav_print.c \
+       nav_read.c \
 
 #bsdi_ioctl.c 
 
