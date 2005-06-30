@@ -231,6 +231,7 @@ static int init(int rate, int channels, int format, int flags) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
     goto err_out;
   }
+  reset();
   jack_set_process_callback(client, outputaudio, 0);
 
   // list matching ports
@@ -295,7 +296,7 @@ static void uninit(int immed) {
   if (!immed)
     usec_sleep(get_delay() * 1000 * 1000);
   // HACK, make sure jack doesn't loop-output dirty buffers
-  paused = 1;
+  reset();
   usec_sleep(100 * 1000);
   jack_client_close(client);
   free(buffer);
