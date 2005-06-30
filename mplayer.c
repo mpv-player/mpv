@@ -1032,6 +1032,7 @@ int osd_show_tv_channel = 25;
 int osd_show_ontop = 0;
 int osd_show_rootwin = 0;
 int osd_show_framedropping = 0;
+int osd_show_status = 0;
 
 int rtc_fd=-1;
 
@@ -2918,6 +2919,10 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	  osd_level=(osd_level+1)%(MAX_OSD_LEVEL+1);
 	else
 	  osd_level= v > MAX_OSD_LEVEL ? MAX_OSD_LEVEL : v;
+	/* Show OSD state when disabled, but not when an explicit
+	   argument is given to the osd command, i.e. in slave mode. */
+	if (v < 0 && osd_level <= 1)
+	  osd_show_status = 9;
       }
 #endif
     } break;
@@ -3980,6 +3985,11 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
 
 //================= Update OSD ====================
 #ifdef USE_OSD
+  if (osd_level == 0 && osd_show_status > 0 && sh_video){
+      snprintf(vo_osd_text, 63, "OSD: disabled");
+      vo_osd_changed(OSDTYPE_OSD);
+      osd_show_status--;
+  }
   if(osd_level>=1 && sh_video){
       int pts=sh_video->pts;
       char osd_text_tmp[64];
@@ -4111,13 +4121,19 @@ if ((user_muted | edl_muted) != mixer.muted) mixer_mute(&mixer);
             snprintf(osd_text_tmp, 63, "%c %02d:%02d:%02d%s",osd_function,pts/3600,(pts/60)%60,pts%60,percentage_text);
       } else osd_text_tmp[0]=0;
       
+      if (osd_level == 1 && osd_show_status > 0){
+	      strncpy(osd_text_tmp, "OSD: enabled", 63);
+	      strncpy(vo_osd_text, osd_text_tmp, 63);
+	      vo_osd_changed(OSDTYPE_OSD);
+	      osd_show_status--;
+      }
       if(strcmp(vo_osd_text, osd_text_tmp)) {
 	      strncpy(vo_osd_text, osd_text_tmp, 63);
 	      vo_osd_changed(OSDTYPE_OSD);
       }
   } else {
-      if(vo_osd_text) {
-      vo_osd_text=NULL;
+      if(vo_osd_text && osd_show_status <= 0) {
+         vo_osd_text=NULL;
 	  vo_osd_changed(OSDTYPE_OSD);
       }
   }
