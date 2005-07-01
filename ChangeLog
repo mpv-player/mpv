@@ -25,6 +25,7 @@ MPlayer (1.0)
       (-tv immediatemode=0) fixed in v4l2
     * PVR support
     * AAC ADTS demuxer
+    * libdvdread updated to v0.9.4
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
