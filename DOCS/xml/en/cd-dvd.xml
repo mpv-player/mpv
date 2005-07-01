@@ -5,9 +5,6 @@
 
 <sect1 id="drives">
 <title>CD/DVD drives</title>
-<para>
-Linux documentation excerpt:
-</para>
 
 <para>
 Modern CD-ROM drives can attain very high head speeds, yet some CD-ROM drives
@@ -27,11 +24,20 @@ Many CD-ROM drives are annoyingly loud, a lower speed may reduce the noise.
 </para></listitem>
 </itemizedlist>
 
+<sect2 id="drives_linux">
+<title>Linux</title>
+
 <para>
-You can reduce the speed of IDE CD-ROM drives with <command>hdparm</command> or a
-program called <command>setcd</command>. It works like this:
+You can reduce the speed of IDE CD-ROM drives with <command>hdparm</command>,
+<command>setcd</command> or <command>cdctl</command>. It works like this:
 <screen>hdparm -E <replaceable>[speed]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
 <screen>setcd -x <replaceable>[speed]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
+<screen>cdctl -bS <replaceable>[speed]</replaceable></screen>
+</para>
+
+<para>
+If you are using SCSI emulation, you might have to apply the settings to the
+real IDE device, not the emulated SCSI device.
 </para>
 
 <para>
@@ -44,7 +50,7 @@ This sets prefetched file reading to 2MB, which helps with scratched CD-ROMs.
 If you set it to too high, the drive will continuously spin up and down, and
 will dramatically decrease the performance.
 It is recommended that you also tune your CD-ROM drive with <command>hdparm</command>:
-<screen>hdparm -d1 -a8 -u1 <replaceable>cdrom device</replaceable></screen>
+<screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom device]</replaceable></screen>
 </para>
 
 <para>
@@ -63,10 +69,29 @@ Tell us!) There is a tool that works for
 <ulink url="http://das.ist.org/~georg/">Plextor SCSI drives</ulink>.
 </para>
 
-<para>FreeBSD:</para>
-<para>Speed: <command>cdcontrol [-f <replaceable>device</replaceable>] speed <replaceable>speed</replaceable></command></para>
-<para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
+</sect2>
+
+
+<sect2 id="drives_freebsd">
+<title>FreeBSD</title>
+
+<para>speed:
+<screen>
+cdcontrol [-f <replaceable>device</replaceable>] speed <replaceable>[speed]</replaceable>
+</screen>
+</para>
+
+<para>DMA:
+<screen>
+sysctl hw.ata.atapi_dma=1
+</screen>
+</para>
+
+</sect2>
+
 </sect1>
+
+
 
 <sect1 id="dvd">
 <title>DVD playback</title>
@@ -244,6 +269,8 @@ to set the region code of your DVD drive (under Linux).
 <emphasis role="bold">Warning</emphasis>: You can only set the region 5 times.
 </para>
 </sect1>
+
+
 
 <sect1 id="vcd">
 <title>VCD playback</title>
