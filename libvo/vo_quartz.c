@@ -87,6 +87,7 @@ int levelList[] =
 
 static int int_pause = 0;
 static float winAlpha = 1;
+static int mouseHide = 0;
 
 static int device_width;
 static int device_height;
@@ -282,6 +283,16 @@ static OSStatus MouseEventHandler(EventHandlerCallRef nextHandler, EventRef even
 
 		switch (kind)
 		{
+			case kEventMouseMoved:
+			{
+				if(vo_quartz_fs)
+				{
+					ShowCursor();
+					mouseHide = FALSE;
+				}
+			}
+			break;
+			
 			case kEventMouseWheelMoved:
 			{
 				int wheel;
@@ -564,6 +575,7 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
     };
 
 	const EventTypeSpec mouse_events[] = {
+		{ kEventClassMouse, kEventMouseMoved },
 		{ kEventClassMouse, kEventMouseWheelMoved },
 		{ kEventClassMouse, kEventMouseDown },
 		{ kEventClassMouse, kEventMouseUp },
@@ -956,6 +968,24 @@ static void flip_page(void)
 		//CGContextRestoreGState( context );
 		CGContextFlush (context);
 	}
+
+	//auto hide mouse cursor and futur on-screen control?
+	if(vo_quartz_fs && !mouseHide)
+	{
+		DateTimeRec d;
+		unsigned long curTime;
+		static unsigned long lastTime = 0;
+		
+		GetTime(&d);
+		DateToSeconds( &d, &curTime);
+	
+		if( ((curTime - lastTime) >= 5) || (lastTime == 0) )
+		{
+			HideCursor();
+			mouseHide = TRUE;
+			lastTime = curTime;
+		}
+	}
 }
 
 static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
@@ -1318,8 +1348,9 @@ void window_fullscreen()
 		{
 			if(device_id == 0)
 			{
-				HideMenuBar();
+				SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
 				HideCursor();
+				mouseHide = 1;
 			}
 			
 			if(fs_res_x != 0 || fs_res_y != 0)
@@ -1362,10 +1393,11 @@ void window_fullscreen()
 			device_height = deviceRect.bottom;
 			restoreState = NULL;
 		}
-		ShowMenuBar();
+		SetSystemUIMode( kUIModeNormal, NULL);
 
 		//show mouse cursor
 		ShowCursor();
+		mouseHide = 0;
 		
 		//revert window to previous setting
 		ChangeWindowAttributes(theWindow, 0, kWindowNoShadowAttribute);
