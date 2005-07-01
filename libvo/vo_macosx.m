@@ -491,19 +491,35 @@ static uint32_t control(uint32_t request, void *data, ...)
 	if(sender == kAspectFullCmd)
 	{
 		movie_aspect = 4.0f/3.0f;
-		frame.size.width = d_width*winSizeMult;
-		frame.size.height = (d_width/movie_aspect)*winSizeMult;
-		[window setContentSize: frame.size];
-		[self reshape];
+		
+		if(isFullscreen)
+		{
+			[self reshape];
+		}
+		else
+		{
+			frame.size.width = d_width*winSizeMult;
+			frame.size.height = (d_width/movie_aspect)*winSizeMult;
+			[window setContentSize: frame.size];
+			[self reshape];
+		}
 	}
 		
 	if(sender == kAspectWideCmd)
 	{
 		movie_aspect = 16.0f/9.0f;
-		frame.size.width = d_width*winSizeMult;
-		frame.size.height = (d_width/movie_aspect)*winSizeMult;
-		[window setContentSize: frame.size];
-		[self reshape];
+
+		if(isFullscreen)
+		{
+			[self reshape];
+		}
+		else
+		{
+			frame.size.width = d_width*winSizeMult;
+			frame.size.height = (d_width/movie_aspect)*winSizeMult;
+			[window setContentSize: frame.size];
+			[self reshape];
+		}
 	}
 }
 
@@ -621,7 +637,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 	
 		if( ((curTime - lastTime) >= 5) || (lastTime == 0) )
 		{
-			HideMenuBar();
 			HideCursor();
 			mouseHide = YES;
 			lastTime = curTime;
@@ -671,8 +686,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	{
 		if(!isRootwin)
 		{
-			//hide menubar and mouse if fullscreen on main display
-			HideMenuBar();
+			SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
 			HideCursor();
 			mouseHide = YES;
 		}
@@ -690,9 +704,10 @@ static uint32_t control(uint32_t request, void *data, ...)
 		isFullscreen = 1;
 	}
 	else
-	{
+	{	
+		SetSystemUIMode( kUIModeNormal, NULL);
+		
 		isFullscreen = 0;
-		ShowMenuBar();
 		ShowCursor();
 		mouseHide = NO;
 
@@ -851,7 +866,6 @@ static uint32_t control(uint32_t request, void *data, ...)
 {
 	if(isFullscreen && !isRootwin)
 	{
-		ShowMenuBar();
 		ShowCursor();
 		mouseHide = NO;
 	}
