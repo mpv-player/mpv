@@ -40,7 +40,7 @@ Directory:  libmpdvdkit2
 License:    GNU General Public License
 
 Name:       libdvdread
-Version:    0.9.3 + patches
+Version:    0.9.4 + patches
 Homepage:   http://www.dtek.chalmers.se/groups/dvd/development.shtml
 Directory:  libmpdvdkit2
 License:    GNU General Public License
