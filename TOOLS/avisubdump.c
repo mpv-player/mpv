@@ -4,7 +4,7 @@
  * avi vobsub subtitle stream dumper (c) 2004 Tobias Diedrich
  * Licensed under GNU GPLv2 or (at your option) any later version.
  *
- * Compile with "make avisubdump"
+ * The subtitles are dumped to stdout.
  */
 
 #define _LARGEFILE_SOURCE
@@ -29,8 +29,6 @@
 #define GAB_LANGUAGE_UNICODE    2
 #define GAB_ENTRY_UNICODE       3
 #define GAB_RAWTEXTSUBTITLE     4
-
-static char *subfile;
 
 static unsigned int getle16(FILE* f){
 	unsigned int res;
@@ -83,7 +81,7 @@ static int dumpsub_gab2(FILE *f, int size) {
 	while (ret + 6 <= size) {
 		unsigned int len, id;
 		char *buf;
-		int i, fd;
+		int i;
 
 		id = getle16(f); ret += 2;
 		len = getle(f); ret += 4;
@@ -93,22 +91,18 @@ static int dumpsub_gab2(FILE *f, int size) {
 		ret += fread(buf, 1, len, f);
 
 		switch (id) {
-		case GAB_LANGUAGE_UNICODE:
+		case GAB_LANGUAGE_UNICODE: /* FIXME: convert to utf-8; endianness */
 			for (i=0; i<len; i++) buf[i] = buf[i*2];
 		case GAB_LANGUAGE:
 			fprintf(stderr, "LANGUAGE: %s\n", buf);
 			break;
-		case GAB_ENTRY_UNICODE:
+		case GAB_ENTRY_UNICODE: /* FIXME: convert to utf-8; endianness */
 			for (i=0; i<len; i++) buf[i] = buf[i*2];
 		case GAB_ENTRY:
 			fprintf(stderr, "ENTRY: %s\n", buf);
 			break;
 		case GAB_RAWTEXTSUBTITLE:
 			printf("%s", buf);
-			fd = open(subfile, O_CREAT|O_APPEND|O_WRONLY, 0644);
-			write(fd, buf, len);
-			close(fd);
-			fprintf(stderr, "Dumped subtitles to %s.\n", subfile);
 			break;
 		default:
 			fprintf(stderr, "Unknown type %d, len %d\n", id, len);
@@ -169,14 +163,14 @@ static void dump(FILE *f) {
 int main(int argc,char* argv[])
 {
 	FILE* f;
-	int i;
 
 	if (argc != 2) {
 		fprintf(stderr, "Usage: %s <avi>\n", argv[0]);
 		exit(1);
 	}
 
-	f=fopen(argv[argc-1],"rb");
+	if (strcmp(argv[argc-1], "-") == 0) f=stdin;
+	else f=fopen(argv[argc-1],"rb");
 
 	if (!f) {
 		fprintf(stderr, "Could not open '%s': %s\n",
@@ -184,15 +178,7 @@ int main(int argc,char* argv[])
 		exit(-errno);
 	}
 
-	subfile = malloc(strlen(argv[1]) + 4);
-	strcpy(subfile, argv[1]);
-	for (i=strlen(subfile); i>0 && subfile[i] != '.'; i--);
-	subfile[i] = 0;
-	strcat(subfile, ".ssa");
-
 	dump(f);
-
-	free(subfile);
 
 	return 0;
 }
