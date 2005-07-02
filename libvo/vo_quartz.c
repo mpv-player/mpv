@@ -477,6 +477,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 			case kEventWindowBoundsChanged:
 				window_resized();
 				flip_page();
+				window_resized();
 				break;
 			
 			default:
@@ -843,6 +844,10 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		break;
 	}
 	
+	//Show window
+	RepositionWindow(theWindow, NULL, kWindowCenterOnMainScreen);
+	ShowWindow (theWindow);
+	
 	if(vo_fs)
 		window_fullscreen();
 		
@@ -857,9 +862,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		window_fullscreen();
 	}
 	
-	//Show window
-	RepositionWindow(theWindow, NULL, kWindowCenterOnMainScreen);
-	ShowWindow (theWindow);
+	window_resized();
 	
 	return 0;
 }
