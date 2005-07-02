@@ -1,4 +1,4 @@
-.\" synced with 1.1024
+.\" synced with 1.1026
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -5875,6 +5875,19 @@ N'encode que 56 secondes.
 N'encode que 1 heure 10 minutes.
 .IPs "\-endpos 100mb"
 N'encode que 100 Mo.
+.RE
+.PD 1
+.
+.TP
+.B \-fafmttag <format>
+Peut être utilisé pour outrepasser l'étiquette du format audio du fichier
+de sortie.
+.sp 1
+.I EXEMPLE\ :
+.PD 0
+.RSs
+.IPs "\-fafmttag 0x55"
+Le fichier de sortie aura comme étiquette de format audio 0x55 (mp3).
 .RE
 .PD 1
 .
