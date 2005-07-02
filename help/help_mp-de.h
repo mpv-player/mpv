@@ -218,6 +218,7 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Kann Ausgabedatei '%s' nicht öffnen.\n"
 #define MSGTR_EncoderOpenFailed "Öffnen des Encoders fehlgeschlagen.\n"
 #define MSGTR_ForcingOutputFourcc "Erzwinge Output-Fourcc %x  [%.4s].\n"
+#define MSGTR_ForcingOutputAudiofmtTag "Erzwinge Audioformatkennzeichnung 0x%x in der Ausgabe.\n"
 #define MSGTR_WritingAVIHeader "Schreibe AVI-Header...\n"
 #define MSGTR_DuplicateFrames "\n%d doppelte(r) Frame(s)!\n"
 #define MSGTR_SkipFrame "\nFrame übersprungen!\n"
@@ -366,6 +367,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, konnte Encoder für Codec %s nicht finden.\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, konnte Kontext nicht zuordnen!\n"
 #define MSGTR_CouldntOpenCodec "Konnte Codec %s nicht öffnen, br=%d\n"
+#define MSGTR_CantCopyAudioFormat "Audioformat 0x%x ist nicht mit '-oac copy' kompatibel, versuche bitte stattdessen '-oac pcm' oder benutze '-fafmttag' um ein anderes Format zu erzwingen.\n"
 
 // cfg-mencoder.h:
 

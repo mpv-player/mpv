@@ -232,6 +232,8 @@ m_option_t mencoder_opts[]={
 	// output file format
 	{"of", of_conf, CONF_TYPE_SUBCONFIG, CONF_GLOBAL, 0, 0, NULL},
 
+	// override audio format tag in output file
+	{"fafmttag", &force_audiofmttag, CONF_TYPE_INT, CONF_GLOBAL, 0, 0, NULL},
 	// override FOURCC in output file
 	{"ffourcc", &force_fourcc, CONF_TYPE_STRING, CONF_GLOBAL, 4, 4, NULL},
 

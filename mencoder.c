@@ -164,6 +164,7 @@ char *vobsub_out_id=NULL;
 char* out_filename="test.avi";
 
 char *force_fourcc=NULL;
+int force_audiofmttag=-1;
 
 char* passtmpfile="divx2pass.log";
 
@@ -808,6 +809,15 @@ if(muxer->fix_stream_parameters)
 // ============= AUDIO ===============
 if(sh_audio){
 
+if (force_audiofmttag != -1) {
+	sh_audio->format = force_audiofmttag;
+	if (sh_audio->wf) {
+		sh_audio->wf->wFormatTag = sh_audio->format;
+	}
+	mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_ForcingOutputAudiofmtTag,
+	       force_audiofmttag);
+}
+
 mux_a=muxer_new_stream(muxer,MUXER_TYPE_AUDIO);
 
 mux_a->buffer_size=0x100000; //16384;
@@ -850,6 +860,10 @@ if(mux_a->codec != ACODEC_COPY) {
 switch(mux_a->codec){
 case ACODEC_COPY:
     if (playback_speed != 1.0) mp_msg(MSGT_CPLAYER, MSGL_WARN, MSGTR_NoSpeedWithFrameCopy);
+    if (sh_audio->format >= 0x10000) {
+	mp_msg(MSGT_MENCODER,MSGL_ERR,MSGTR_CantCopyAudioFormat, sh_audio->format);
+	mencoder_exit(1,NULL);
+    }
     if (sh_audio->wf){
 	mux_a->wf=malloc(sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
 	memcpy(mux_a->wf, sh_audio->wf, sizeof(WAVEFORMATEX) + sh_audio->wf->cbSize);
