@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.15 -->
 <chapter id="cd-dvd">
 <title>CD/DVD használat</title>
 
 <sect1 id="drives">
 <title>CD/DVD vezérlők</title>
-<para>
-Részlet a Linux dokumentációból:
-</para>
 
 <para>
 A modern CD-ROM meghajtók nagyon nagy sebességen működnek, ugyanakkor több CD-ROM
@@ -27,11 +24,20 @@ Sok CD-ROM idegesítően hangos, alacsonyabb sebességen kisebb a zaj.
 </para></listitem>
 </itemizedlist>
 
+<sect2 id="drives_linux">
+<title>Linux</title>
+
 <para>
-Az IDE CD-ROM meghajtók sebességét a <command>hdparm</command> vagy egy
-<command>setcd</command> nevezetű programmal módosíthatod. It works like this:
-<screen>hdparm -E <replaceable>[speed]</replaceable> <replaceable>[cdrom device]</replaceable></screen>
-<screen>setcd -x <replaceable>[speed]</replaceable> <replaceable>[cdrom eszköz]</replaceable></screen>
+Az IDE CD-ROM meghajtók sebességét a <command>hdparm</command>, a <command>setcd</command>
+vagy a <command>cdctl</command> nevezetű programmal módosíthatod. Így működnek:
+<screen>hdparm -E <replaceable>[sebesség]</replaceable> <replaceable>[cdrom eszköz]</replaceable></screen>
+<screen>setcd -x <replaceable>[sebesség]</replaceable> <replaceable>[cdrom eszköz]</replaceable></screen>
+<screen>cdctl -bS <replaceable>[sebesség]</replaceable></screen>
+</para>
+
+<para>
+Ha SCSI emulációt használsz, az igazi IDE eszközre vonatkozóan kell
+alkalmaznod a beállításokat, nem az emulált SCSI eszközre.
 </para>
 
 <para>
@@ -41,10 +47,10 @@ Ha root jogaid vannak, a következő parancs is segíthet:
 
 <para>
 Ez beállítja a fájl előreolvasást 2 MB-ra, ami segít a karcos CD-ROM-ok esetében.
-Ha túl nagyra állítod, a meghajtó folyton felpörög majd leáll, és dramatikus módon
+Ha túl nagyra állítod, a meghajtó folyton felpörög majd leáll, és drasztikus módon
 csökkenni fog a teljesítménye.
 A javasolt módszer a CD-ROM meghajtó <command>hdparm</command>-mal történő beállítása:
-<screen>hdparm -d1 -a8 -u1 <replaceable>cdrom device</replaceable></screen>
+<screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom eszköz]</replaceable></screen>
 </para>
 
 <para>
@@ -63,10 +69,29 @@ A SCSI meghajtókra vonatkozóan nincs egységes módszer ezen paraméterek beállítás
 <ulink url="http://das.ist.org/~georg/">Plextor SCSI meghajtókkal</ulink> működik.
 </para>
 
-<para>FreeBSD:</para>
-<para>Sebesség: <command>cdcontrol [-f <replaceable>eszköz</replaceable>] speed <replaceable>sebesség</replaceable></command></para>
-<para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
+</sect2>
+
+
+<sect2 id="drives_freebsd">
+<title>FreeBSD</title>
+
+<para>sebesség:
+<screen>
+cdcontrol [-f <replaceable>eszköz</replaceable>] speed <replaceable>[sebesség]</replaceable>
+</screen>
+</para>
+
+<para>DMA:
+<screen>
+sysctl hw.ata.atapi_dma=1
+</screen>
+</para>
+
+</sect2>
+
 </sect1>
+
+
 
 <sect1 id="dvd">
 <title>DVD lejátszás</title>
@@ -244,6 +269,8 @@ a DVD meghajtód régió kódjának beállításához (Linux alatt).
 <emphasis role="bold">Figyelem</emphasis>: Csak 5 alkalommal állíthatod át a régió kódot.
 </para>
 </sect1>
+
+
 
 <sect1 id="vcd">
 <title>VCD lejátszás</title>
