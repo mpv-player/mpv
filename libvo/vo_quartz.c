@@ -87,7 +87,7 @@ int levelList[] =
 
 static int int_pause = 0;
 static float winAlpha = 1;
-static int mouseHide = 0;
+static int mouseHide = FALSE;
 
 static int device_width;
 static int device_height;
@@ -433,13 +433,19 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 				
 			case kAspectFullCmd:
 				movie_aspect = 4.0f/3.0f;
-				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
+				if(!vo_quartz_fs)
+				{
+					SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
+				}
 				window_resized();
 				break;
 				
 			case kAspectWideCmd:
 				movie_aspect = 16.0f/9.0f;
-				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
+				if(!vo_quartz_fs)
+				{
+					SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
+				}
 				window_resized();
 				break;
 				
@@ -1353,7 +1359,7 @@ void window_fullscreen()
 			{
 				SetSystemUIMode( kUIModeAllHidden, kUIOptionAutoShowMenuBar);
 				HideCursor();
-				mouseHide = 1;
+				mouseHide = TRUE;
 			}
 			
 			if(fs_res_x != 0 || fs_res_y != 0)
@@ -1385,6 +1391,7 @@ void window_fullscreen()
 	}
 	else //go back to windowed mode
 	{
+		vo_quartz_fs = 0;
 		if(restoreState != NULL)
 		{
 			EndFullScreen(restoreState, NULL);
@@ -1400,14 +1407,12 @@ void window_fullscreen()
 
 		//show mouse cursor
 		ShowCursor();
-		mouseHide = 0;
+		mouseHide = FALSE;
 		
 		//revert window to previous setting
 		ChangeWindowAttributes(theWindow, 0, kWindowNoShadowAttribute);
 		SizeWindow(theWindow, oldWinRect.right, oldWinRect.bottom,1);
 		MoveWindow(theWindow, oldWinBounds.left, oldWinBounds.top, 1);
-
- 		vo_quartz_fs = 0;
 	}
 	window_resized();
 }
