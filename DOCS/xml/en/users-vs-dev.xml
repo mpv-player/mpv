@@ -17,9 +17,9 @@ patched CVS version of GCC in their distribution and named it
 <emphasis role="bold">2.96</emphasis>. Red Hat included this version in the
 distribution because GCC 3.0 was not finished at the time, and they needed
 a compiler that worked well on all of their supported platforms, including
-IA64 and s390. The Linux distributor <emphasis role="bold">Mandrake</emphasis> also
-followed Red Hat's example and started shipping GCC 2.96 with their
-Linux-Mandrake 8.0 series.
+IA64 and s390. The Linux distributor <emphasis role="bold">Mandrake</emphasis>
+(now Mandriva) also followed Red Hat's example and started shipping GCC 2.96
+with their Linux-Mandrake 8.0 series.
 </para>
 </formalpara>
 

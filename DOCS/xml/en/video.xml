@@ -1321,7 +1321,7 @@ It won't work!
   <application>MPlayer</application> you will have
   <emphasis role="bold">ROM font</emphasis> loaded instead of national.
   You can load national font again by using <command>setsysfont</command>
-  utility from the Mandrake distribution for example.
+  utility from the Mandrake/Mandriva distribution for example.
   (<emphasis role="bold">Hint</emphasis>: The same utility is used for
   localization of fbdev).
   </simpara></listitem>

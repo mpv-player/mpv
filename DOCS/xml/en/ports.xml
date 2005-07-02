@@ -58,7 +58,7 @@ from his <ulink url="http://rpm.greysector.net/mplayer/">repository</ulink>.
 </para>
 
 <para>
-Mandrake RPM packages are available from the <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
+Mandrake/Mandriva RPM packages are available from the <ulink url="http://plf.zarb.org/">P.L.F.</ulink>.
 SuSE used to include a crippled version of <application>MPlayer</application>
 in their distribution. They have removed it in their latest releases. You can
 get working RPMs from
