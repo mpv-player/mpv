@@ -5,6 +5,7 @@ CFLAGS = -I..
 OBJS = alaw-gen \
 	asfinfo \
 	avi-fix \
+	avisubdump \
 	bios2dump \
 	cpuinfo \
 	dump_mp4 \
