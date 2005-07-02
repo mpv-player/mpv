@@ -433,3 +433,12 @@ Author:       Arpi
 Description:  Generates alaw/ulaw tables.
 
 Note:         Created to work around a past license issue, no longer useful.
+
+
+avisubdump.c
+
+Author:       Tobias Diedrich
+
+Description:  Dumps vobsub soft subtitles streams embedded in avi files.
+
+Usage:        avisubdump <avi>
