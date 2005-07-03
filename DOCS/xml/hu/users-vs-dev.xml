@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-1"?>
-<!-- synced with 1.16 -->
+<!-- synced with 1.17 -->
 <appendix id="users-vs-dev">
 <title>Fejlesztõi panaszok</title>
 
@@ -17,9 +17,9 @@ GCC egy erõsen patchelt CVS verzióját tette bele a disztribúciójába, és
 átnevezte <emphasis role="bold">2.96</emphasis>-ra. A Red Hat azért vette bele
 ezt a verziót a disztribúciójába, mert a GCC 3.0 még nem volt kész abban az idõben
 és szükségük volt egy fordítóra, ami jól mûködik a támogatott platformjaikon,
-beleértve az IA64-et és az s390-et. A <emphasis role="bold">Mandrake</emphasis> követte
-a Red Hat példáját és elkezdte szállítani a GCC 2.96-ot a saját Linux-Mandrake 8.0
-sorozatával.
+beleértve az IA64-et és az s390-et. A <emphasis role="bold">Mandrake</emphasis>
+(most már Mandriva) követte a Red Hat példáját és elkezdte szállítani a GCC 2.96-ot
+a saját Linux-Mandrake 8.0 sorozatával.
 </para>
 </formalpara>
 
