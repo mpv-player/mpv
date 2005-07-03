@@ -477,15 +477,25 @@ static uint32_t control(uint32_t request, void *data, ...)
 			[kPanScanCmd setState:NSOnState];
 		else
 			[kPanScanCmd setState:NSOffState];
+			
+		[self panscan];
 	}
 	
 	if(sender == kAspectOrgCmd)
 	{
 		movie_aspect = old_movie_aspect;
-		frame.size.width = d_width*winSizeMult;
-		frame.size.height = (d_width/movie_aspect)*winSizeMult;
-		[window setContentSize: frame.size];
-		[self reshape];
+		
+		if(isFullscreen)
+		{
+			[self reshape];
+		}
+		else
+		{
+			frame.size.width = d_width*winSizeMult;
+			frame.size.height = (d_width/movie_aspect)*winSizeMult;
+			[window setContentSize: frame.size];
+			[self reshape];
+		}
 	}
 	
 	if(sender == kAspectFullCmd)
@@ -705,7 +715,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	}
 	else
 	{	
-		SetSystemUIMode( kUIModeNormal, NULL);
+		SetSystemUIMode( kUIModeNormal, 0);
 		
 		isFullscreen = 0;
 		ShowCursor();

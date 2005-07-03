@@ -427,7 +427,10 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 				
 			case kAspectOrgCmd:
 				movie_aspect = old_movie_aspect;
-				SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
+				if(!vo_quartz_fs)
+				{
+					SizeWindow(theWindow, dstRect.right, (dstRect.right/movie_aspect),1);
+				}
 				window_resized();
 				break;
 				
@@ -452,6 +455,8 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 			case kPanScanCmd:
 				vo_panscan = (!(vo_panscan));
 				CheckMenuItem (aspectMenu, 2, vo_panscan);
+				window_panscan();
+				window_resized();
 				break;
 			
 			default:
