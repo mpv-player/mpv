@@ -360,7 +360,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 	kDoubleScreenCmd = menuItem;
 	menuItem = [[NSMenuItem alloc] initWithTitle:@"Full Size" action:@selector(menuAction:) keyEquivalent:@"f"]; [menu addItem:menuItem];
 	kFullScreenCmd = menuItem;
-	//menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [menu addItem:menuItem];
+	menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [menu addItem:menuItem];
 	
 		NSMenu	*aspectMenu;
 		aspectMenu = [[NSMenu alloc] initWithTitle:@"Aspect Ratio"];
@@ -370,7 +370,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		menuItem = [[NSMenuItem alloc] initWithTitle:@"Pan-Scan" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
 		if(vo_panscan) [menuItem setState:NSOnState];
 		kPanScanCmd = menuItem;
-		menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [menu addItem:menuItem];
+		menuItem = (NSMenuItem *)[NSMenuItem separatorItem]; [aspectMenu addItem:menuItem];
 		menuItem = [[NSMenuItem alloc] initWithTitle:@"Original" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
 		kAspectOrgCmd = menuItem;
 		menuItem = [[NSMenuItem alloc] initWithTitle:@"4:3" action:@selector(menuAction:) keyEquivalent:@""]; [aspectMenu addItem:menuItem];
@@ -468,6 +468,8 @@ static uint32_t control(uint32_t request, void *data, ...)
 			[kKeepAspectCmd setState:NSOnState];
 		else
 			[kKeepAspectCmd setState:NSOffState];
+			
+		[self reshape];
 	}
 	
 	if(sender == kPanScanCmd)

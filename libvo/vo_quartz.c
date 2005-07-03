@@ -423,6 +423,7 @@ static OSStatus WindowEventHandler(EventHandlerCallRef nextHandler, EventRef eve
 			case kKeepAspectCmd:
 				vo_keepaspect = (!(vo_keepaspect));
 				CheckMenuItem (aspectMenu, 1, vo_keepaspect);
+				window_resized();
 				break;
 				
 			case kAspectOrgCmd:
