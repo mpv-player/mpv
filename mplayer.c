@@ -2240,11 +2240,6 @@ if(play_n_frames==0){
 while(!eof){
     float aq_sleep_time=0;
 
-    if(play_n_frames>=0){
-      --play_n_frames;
-      if(play_n_frames<0) eof = PT_NEXT_ENTRY;
-    }
-
 /*========================== PLAY AUDIO ============================*/
 
 while(sh_audio){
@@ -2521,6 +2516,11 @@ if(time_frame>0.001 && !(vo_flags&256)){
 		/* printf ("PANIC: too slow frame (%.3f)!\n", j); */
 
 	   if(vo_config_count) video_out->flip_page();
+	   if (play_n_frames >= 0) {
+	     --play_n_frames;
+	     if (play_n_frames < 0) eof = PT_NEXT_ENTRY;
+	   }
+
 //        usec_sleep(50000); // test only!
 	   t2=GetTimer()-t2;
 	   tt = t2*0.000001f;

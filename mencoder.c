@@ -1273,6 +1273,8 @@ default:
     if (sh_video->vf_inited < 0) mencoder_exit(1, NULL);
     
     if(!blit_frame){
+      if (play_n_frames >= 0)
+        play_n_frames++;
       badframes++;
       if(skip_flag<=0){
 	// unwanted skipping of a frame, what to do?
