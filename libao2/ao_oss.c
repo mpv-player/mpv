@@ -160,8 +160,16 @@ static int control(int cmd,void *arg){
 	case AOCONTROL_GET_DEVICE:
 	    *(char**)arg=dsp;
 	    return CONTROL_OK;
+#ifdef SNDCTL_DSP_GETFMTS
 	case AOCONTROL_QUERY_FORMAT:
-	    return CONTROL_TRUE;
+	{
+	    int format;
+	    if (!ioctl(audio_fd, SNDCTL_DSP_GETFMTS, &format))
+		if (format & (int)arg)
+	    	    return CONTROL_TRUE;
+	    return CONTROL_FALSE;
+	}
+#endif
 	case AOCONTROL_GET_VOLUME:
 	case AOCONTROL_SET_VOLUME:
 	{
