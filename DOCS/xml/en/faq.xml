@@ -113,156 +113,12 @@ Try the following configure options:
 
 <qandaentry>
 <question><para>
-Compilation stops with an error message similar to this one:
-<screen>
-    cfft.c: In function`passf2':
-    cfft.c:556: unable to find a register to spill in class `FLOAT_REGS'
-    cfft.c:556: this is the insn:
-    (insn 235 233 246 (set (subreg:SF (reg/v:DI 29 rmm0 [110]) 0)
-            (minus:SF (mem:SF (plus:SI (mult:SI (reg:SI 1 edx [112])
-                            (const_int 8 [0x8]))
-                        (reg/v/f:SI 3 ebx [62])) [4 S4 A32])
-                (reg:SF 8 st(0) [132]))) 533 {*fop_sf_1_nosse} (insn_list
-    232 (nil))    (expr_list:REG_DEAD (reg:SF 8 st(0) [132])
-            (nil)))
-    cfft.c:556: confused by earlier errors, bailing out
-</screen>
-</para></question>
-<answer><para>
-This is a known problem of <application>gcc</application> 3.2, upgrade
-to 3.3 to solve the problem. How to install gcc is described in the
-<link linkend="gcc-296">gcc 2.96</link> section. Alternatively you can use
-an external FAAD library as described in the
-<link linkend="aac">AAC</link> section.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Compilation stops with an error message similar to this one:
-<screen>
-    In file included from mplayer.c:34:
-    mw.h: In function `mplMainDraw':
-    mw.h:209: Internal compiler error in print_rtl_and_abort, at flow.c:6458
-    Please submit a full bug report,
-    with preprocessed source if appropriate.
-</screen>
-</para></question>
-<answer><para>
-This is a known problem of <application>gcc</application> 3.0.4, upgrade
-to 3.1 to solve the problem. How to install gcc is described in the
-<link linkend="gcc-296">gcc 2.96</link> section.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Configure ends with this text, and <application>MPlayer</application> won't compile!
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
 Your gcc isn't installed correctly, check the <filename>configure.log</filename>
 file for details.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-What's the problem with gcc 2.96?
-</para></question>
-<answer><para>
-<emphasis role="bold">We strongly discourage the use of gcc 2.96!</emphasis>
-Read <link linkend="gcc-296">this</link> document for details about why Red Hat
-released gcc 2.96 and what the problems are all about. If you still really really
-want to use it, be sure to get the latest release and give the
-<option>--disable-gcc-checking</option> option to configure. Remember that you
-are on your own from this point. Do <emphasis role="bold">not</emphasis> report
-bugs, do <emphasis role="bold">not</emphasis> ask for help on the mailing lists.
-We will <emphasis role="bold">not</emphasis> provide any support in case you run
-into problems.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Great, I have gcc 3.0.1 from Red Hat/Mandrake, then I'm fine!
-</para></question>
-<answer><para>
-No, since there have been/are issues with these compilers as well.
-To check the status of current compilers' <application>MPlayer</application>
-support, see the <link linkend="install">Installation</link> section.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-.. gcc 2.96 ... (Yes, some people are STILL flaming about gcc 2.96!)
-</para></question>
-<answer><para>
-Quoted from a <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">mail</ulink>
-A'rpi sent to the <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">MPlayer-users</ulink>
-list (the word 'ideg' is described below):
-<blockquote>
-<para>
-And we have idegs. And our idegcounter overflowed again and again.
-</para>
-<para>
-Unfortunately <application>MPlayer</application> is out of our control.
-It's used by lamers, Linux users who can't even use Windows, and never
-tried to compile a kernel. They installed (with default options) Mandrake
-or Red Hat or SuSE, and without RTFM'ing they send messages saying
-'it doesn't work! help me! please! i'm new to Linux! help! oh! help me!'.
-We can't stop them, but at least we try to force them to RTFM and to read
-the messages of ./configure and <application>MPlayer</application>.
-</para>
-<para>
-And you clever guys come and flame us with gcc 2.96 and binary packages.
-Instead of helping users or making patches to help solve problems.
-</para>
-<para>
-Half of our spare/free time is spent by answering silly mails here and
-making newer tricks and checks to configure to avoid such mails.
-</para>
-<para>
-And there is a balance. On the one side are you, clever guys, saying we
-are very bad because we don't like buggy gcc 2.96, and on the other side
-there are the 'new to Linux' guys who are showing us gcc 2.96 is buggy.
-</para>
-<para>
-Conclusion: We can't be good. Half the people will always say we are bad.
-</para>
-<para>
-Maybe we should close the project, make it closed source, commercial, and
-provide install support for it. then we could leave current work, so development
-could go faster, and we could earn lots of money with it and buy a big house,
-etc etc. Do you really want it? It seems.
-</para>
-</blockquote>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-SDL output doesn't work or compile. The problem is ...
-</para></question>
-<answer><para>
-It was tested to work with SDL 1.2.x and may run on SDL 1.1.7+. It does
-<emphasis role="bold">not</emphasis> work with any previous version. So
-if you choose to use such a version, you are on your own.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I am still having trouble compiling with SDL support. gcc says something
-about <screen>undefined reference to SDL_EnableKeyRepeat</screen>. What now?
-</para></question>
-<answer><para>
-Where did you install the SDL library? If you installed in
-<filename class="directory">/usr/local</filename> (the default) then edit the
-top level <filename>config.mak</filename> and add
-<systemitem>-L/usr/local/lib</systemitem> after <systemitem>X_LIBS=</systemitem>.
-Now type <command>make</command>. You're done!
 </para></answer>
 </qandaentry>
 
@@ -299,16 +155,6 @@ Your distribution may differ from the
 
 <qandaentry>
 <question><para>
-I can't compile SVGAlib. I'm using kernel 2.3/2.4 ...
-</para></question>
-<answer><para>
-You have to edit SVGAlib's <filename>Makefile.cfg</filename> and comment
-<systemitem>BACKGROUND = y</systemitem> out.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 I compiled <application>MPlayer</application> with libdvdcss/libdivxdecore support,
 but when I try to start it, it says:
 <screen>
@@ -319,17 +165,6 @@ I checked up on the file and it IS there in <filename class="directory">/usr/loc
 <answer><para>
 Add <filename class="directory">/usr/local/lib</filename> to <filename>/etc/ld.so.conf</filename>
 and run <command>ldconfig</command>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-When compiling <application>MEncoder</application>, it segfaults at linking!
-</para></question>
-<answer><para>
-This is a linker problem. Upgrading binutils should help (2.11.92.*
-or newer should be good). Since it is not our fault, please do
-<emphasis role="bold">not</emphasis> report!
 </para></answer>
 </qandaentry>
 
@@ -407,15 +242,6 @@ How can I make a screenshot?
 You have to use a video output driver that does not employ an overlay to be
 able to take a screenshot. Under X11, <option>-vo x11</option> will do, under
 Windows <option>-vo directx:noaccel</option> works.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-There is a timer in the upper left corner. How can I get rid of it?
-</para></question>
-<answer><para>
-Press <keycap>o</keycap> and try the <option>-osdlevel</option> option.
 </para></answer>
 </qandaentry>
 
@@ -775,24 +601,6 @@ and upload the file to FTP.
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> exits with some error when using <filename>l3codeca.acm</filename>.
-</para></question>
-<answer><para>
-Check <command>ldd /usr/local/bin/mplayer</command> output. If it contains
-<screen>libc.so.6 => /lib/libc.so.6 (0x4???????)</screen>
-where &quot;?&quot; is any number then it's OK, the error is not here. If it is:
-<screen>libc.so.6 => /lib/libc.so.6 (0x00??????)</screen>
-then there is a problem with your kernel/libc. Maybe you are using some security
-patches (for example Solar Designer's OpenWall patch) which forces loading
-libraries to very low addresses. Because <filename>l3codeca.acm</filename> is a
-non-relocatable DLL, it must be loaded to <literal>0x40000000</literal>, we can't
-change this. You should use a non-patched kernel, or use <application>MPlayer</application>'s
-<option>-afm 1</option> option to disable using <filename>l3codeca.acm</filename>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 My computer plays MS DivX AVIs with resolutions ~ 640x300 and stereo MP3 sound
 too slow. When I use <option>-nosound</option> option, everything is OK (but quiet).
 </para></question>
@@ -829,21 +637,6 @@ Also try experimenting with the <option>-fstype</option> option.
 
 <qandaentry>
 <question><para>
-I got this playing MPEG files: Can't find codec for video format 0x10000001!
-</para></question>
-<answer><para>
-You have an old version of <filename>codecs.conf</filename> in
-<filename class="directory">~/.mplayer/</filename>,
-<filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> or similar. Remove it,
-it's not needed anymore.
-<emphasis role="bold">OR</emphasis> you have the <option>vc=</option> option or
-something similar in your config file(s).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 When starting <application>MPlayer</application> under KDE I just get a black
 screen and nothing happens. After about one minute the video starts playing.
 </para></question>
@@ -854,20 +647,6 @@ arts sound, specify audio output via our native arts audio driver
 (<option>-ao arts</option>). If it fails or isn't compiled in, try SDL
 (<option>-ao sdl</option>) and make sure your SDL can handle arts sound. Yet
 another option is to start <application>MPlayer</application> with artsdsp.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I have an AVI that produces a gray screen when played with <option>-vc odivx</option>
-and a green one with <option>-vc divx4</option>.
-</para></question>
-<answer><para>
-It's not a DivX file, but an MS MPEG4v3.
-If you have an old version of <filename>codecs.conf</filename> in
-<filename class="directory">~/.mplayer/</filename>,
-<filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> or similar, remove it.
 </para></answer>
 </qandaentry>
 
@@ -901,16 +680,6 @@ The AVI has a bad header, try the <option>-nobps</option> option, and/or <option
 
 <qandaentry>
 <question><para>
-I have an MJPEG file which works with other players but displays only a black image in
-<application>MPlayer</application>
-</para></question>
-<answer><para>
-Use another codec to play the file, try <option>-vc ffmjpeg</option>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 When I try to grab from my tuner, it works, but colors are strange. It's OK with other
 applications.
 </para></question>
@@ -928,20 +697,6 @@ I have A/V sync problems. Some of my AVIs play fine, but some play with double s
 <answer><para>
 You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and you
 try to play a file which has 22050Hz audio. Try the resample audio filter.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-All the WMV (or other..) files I play create a green/gray window and there is
-only sound! <application>MPlayer</application> prints:
-<screen>Detected video codec: [null] drv:0 (NULL codec (no decoding))</screen>
-</para></question>
-<answer><para>
-If you have an old version of <filename>codecs.conf</filename> in
-<filename class="directory">~/.mplayer/</filename>,
-<filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> or similar, remove it.
 </para></answer>
 </qandaentry>
 
@@ -1020,62 +775,6 @@ directly use the ALSA audio output driver.
 
 <qandaentry>
 <question><para>
-What about the DGA driver? I can't find it!
-</para></question>
-<answer><para>
-<filename>./configure</filename> autodetects your DGA driver. If <option>-vo help</option>
-doesn't show DGA, then there's a problem with your X installation. Try
-<command>./configure --enable-dga</command> and read the
-<link linkend="dga">DGA</link> section. Alternatively, try SDL's DGA driver
-with the <option>-vo sdl:dga</option> option.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-OK, <option>-vo help</option> shows DGA driver, but it complains about permissions.
-Help me!
-</para></question>
-<answer><para>
-It works only if running as root! It's a DGA limitation. You should become root
-(<command>su -</command>), and try again. Another solution is making
-<application>MPlayer</application> SUID root, but it's not recommended!
-<screen>
-     chown root /usr/local/bin/mplayer
-     chmod 755 /usr/local/bin/mplayer
-     chmod +s /usr/local/bin/mplayer
- </screen>
-<warning><para>
-This is a <emphasis role="bold">big</emphasis> security risk! <emphasis role="bold">Never</emphasis>
-do this on a server or on a computer that you do not control completely because
-other users can gain root privileges through SUID root <application>MPlayer</application>.
-<emphasis role="bold">You have been warned</emphasis>.
-</para></warning>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-When using XVideo, my Voodoo 3/Banshee says:
-<screen>
-X Error of failed request: BadAccess (attempt to access private resource denied)
-   Major opcode of failed request: 147 (MIT-SHM)
-   Minor opcode of failed request: 1 (X_ShmAttach)
-   Serial number of failed request: 26
-   Current serial number in output stream:27
-</screen>
-</para></question>
-<answer><para>
-The <systemitem>tdfx</systemitem> driver in XFree86 4.0.2/4.0.3 had this bug. This was
-solved by <ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bug fix #621
-of the XFree86 4.1.0 CVS log</ulink>. So upgrade to XFree86 4.1.0 or later.
-Alternatively, either download (at least) DRI version 0.6 from the
-<ulink url="http://dri.sf.net">DRI homepage</ulink>, or use CVS DRI.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 OpenGL (<option>-vo gl</option>) output doesn't work (hang/black window/X11
 errors/...).
 </para></question>
@@ -1085,45 +784,6 @@ It's known not to work with nVidia's binary mess. It's known to work with
 Utah-GLX/DRI and Matrox G400 cards. Also with DRI and Radeon cards. It won't
 work with DRI and other cards. it will not work with 3DFX cards because of
 the 256x256 texture size limit.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I have an nVidia TNT/TNT2 card, and I have a band with strange colors, right
-under the movie! Whose fault is this?
-</para></question>
-<answer><para>
-This is a bug of nVidia's binary X driver. These bugs appear ONLY with the
-TNT/TNT2 cards, and we can't do anything about it. To fix the problem, upgrade
-to the latest nVidia binary driver version. If still bad, complain to nVidia!
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I have an nVidia XYZ card, and when I click on the GUI's display window to
-toggle displaying the GUI panel, a black square appears where I clicked. I have
-the newest driver.
-</para></question>
-<answer><para>
-Yes, nVidia corrected a previous bug (above), and introduced a new one.
-Let's congratulate them. UPDATE: According to <link linkend="nvidia">nVidia</link>,
-this has already been fixed.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Oh the world is cruel ...! SDL has only <systemitem>x11</systemitem> target,
-but not <systemitem>xv</systemitem>!
-</para></question>
-<answer><para>
-Try that <systemitem>x11</systemitem> target again. Now try <option>-vo x11
--fs -zoom</option>. See the difference? No?! OK, here comes the enlightenment:
-SDL's <systemitem>x11</systemitem> target uses xv when available, you don't have
-to worry about it ... Note: With SDL you can force/disable Xv using
-<option>-forcexv</option> and <option>-noxv</option>.
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -1143,29 +803,6 @@ another player like <application>xine</application>,
 If you want to see DVD navigation in <application>MPlayer</application> you
 will have to implement it yourself, but be aware that it is a major
 undertaking.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-While playing a DVD, I encountered this error:
-<screen>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion nfo_length / sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</screen>
-</para></question>
-<answer><para>
-This is a known libdvdread 0.9.1/0.9.2 bug. Use <emphasis role="bold">libmpdvdkit2</emphasis>,
-which is present in <application>MPlayer</application> source, and used by default.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Can I compile libdvdread and libdvdcss on my sweet SPARC under Solaris?
-</para></question>
-<answer><para>
-Who knows ... It's said to work, so please test it and send feedback. Refer to
-the documentation of libdvdread and its homepage as well. We're not the authors
-of libdvdread. Use <emphasis role="bold">libmpdvdkit2</emphasis>, which is present
-in <application>MPlayer</application> source, and used by default.
 </para></answer>
 </qandaentry>
 
