@@ -1,4 +1,4 @@
-.\" synced with 1.1023
+.\" synced with 1.1026
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -1503,10 +1503,11 @@ Pozwala na wy¶wietlenie nastêpnego napisu gdy poprzedni jest wci±¿ widoczny
 (domy¶lnie: w³±cza tylko dla niektórych formatów).
 .
 .TP
-.B \-sid <ID> (zobacz tak¿e \-slang)
+.B \-sid <ID> (zobacz tak¿e \-slang, \-vobsubid)
 Wy¶wietla napisy ze strumienia okre¶longo przez <ID> (0\-31).
 MPlayer wy¶wietli dostêpne identyfikatory, je¶li jest uruchomiony w trybie
 gadatliwym (\-v).
+Je¶li nie mo¿esz wybraæ napisów na DVD, wypróbuj \-vobsubid.
 .
 .TP
 .B \-slang <kod\ jêzyka[,kod\ jêzyka,...]> (zobacz tak¿e \-sid)
@@ -1910,7 +1911,7 @@ przekazuje d¼wiêk przez JACK (Jack Audio Connection Kit)
 .PD 0
 .RSs
 .IPs port=<nazwa>
-£±czy siê z portem o podanej nazwie (domy¶lnie: fizyczny port).
+£±czy siê z portami o podanej nazwie (domy¶lnie: porty fizyczne).
 .RE
 .PD 1
 .
@@ -5647,6 +5648,18 @@ Koduje tylko 56 sekund.
 Koduje tylko 1 godzinê i 10 minut.
 .IPs "\-endpos 100mb"
 Koduje tylko 100 MBajtów.
+.RE
+.PD 1
+.
+.TP
+.B \-fafmttag <format>
+Mo¿na u¿ywaæ do wymuszenia znacznika formatu audio pliku wyj¶ciowego.
+.sp 1
+.I PRZYK£AD:
+.PD 0
+.RSs
+.IPs "\-fafmttag 0x55"
+Da plik wyj¶ciowy zawieraj±cy 0x55 (mp3) jako znacznik formatu audio.
 .RE
 .PD 1
 .
