@@ -1,4 +1,3 @@
-
 MPlayer was originally written by Árpád Gereöffy and has been extended and
 worked on by many more since then, see the AUTHORS file for an (incomplete)
 list. You are free to use it under the terms of the GNU General Public License,
@@ -52,19 +51,19 @@ Directory:  libmpeg2
 License:    GNU General Public License
 
 Name:       mpg123
-Version:    0.59s
+Version:    0.59s + significant changes
 Homepage:   http://www.mpg123.de/
 Directory:  mp3lib
 License:    GNU General Public License
 
 Name:       Tremor
-Version:    1.0 + parts CVS from December 2004
+Version:    1.0 + parts CVS from December 2004 + patches
 Homepage:   http://xiph.org/
 Directory:  tremor
 License:    BSD-like, see tremor/COPYING
 
 Name:       LRMI - Linux Real Mode Interface
-Version:    unknown, taken from svgalib
+Version:    unknown, taken from svgalib + patches
 Homepage:   http://www.svgalib.org/
 Directory:  osdep/lrmi.[ch]
 License:    permissive, see file header
