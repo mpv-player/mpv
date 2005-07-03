@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.171 (2005. 06. 23.)
+// Sync'ed with help_mp-en.h 1.172 (2005. 07. 03.)
 
 // ========================= MPlayer help ===========================
 
@@ -213,6 +213,7 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Nem tudom a kimeneti fájlt (%s) megnyitni.\n"
 #define MSGTR_EncoderOpenFailed "Enkóder hívása sikertelen.\n"
 #define MSGTR_ForcingOutputFourcc "Kimeneti fourcc kényszerítése: %x [%.4s]\n"
+#define MSGTR_ForcingOutputAudiofmtTag "Audió formátum tag kényszerítése: 0x%x\n"
 #define MSGTR_WritingAVIHeader "AVI fejléc írása...\n"
 #define MSGTR_DuplicateFrames "\n%d darab képkocka duplázása!!!\n"
 #define MSGTR_SkipFrame "\nképkocka átugrása!!!\n"
@@ -359,6 +360,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, nem található kódoló a(z) %s codec-hez.\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, nem található a kontextus!\n"
 #define MSGTR_CouldntOpenCodec "A(z) %s codec nem nyitható meg, br=%d\n"
+#define MSGTR_CantCopyAudioFormat "A(z) 0x%x audió formátum nem kompatibilis a '-oac copy'-val, kérlek próbáld meg a '-oac pcm' helyette vagy használd a '-fafmttag'-ot a felülbírálásához.\n"
 
 // cfg-mencoder.h:
 
