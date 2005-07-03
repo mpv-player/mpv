@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.80 -->
+<!-- synced with 1.81 -->
 <sect1 id="video">
 <title>Videó kimeneti eszközök</title>
 
@@ -97,8 +97,8 @@ stepping 0) CPU-kban nincs MTRR, de a stepping 12-ben van
 XFree86 4.0.2 vagy újabb alatt használhatod a kártyád YUV rutinjait
 az XVideo kiterjesztés használatával. Ez az, amit a '<option>-vo xv</option>'
 kapcsoló használ. Ez a vezérlő támogatja a
-fényerősség/kontraszt/árnyalat/stb. állítását (hacsa nem a régi, lassú DirectShow DivX
-codec-et használod, ami mindenhol támogatja), lásd a man oldalt.
+fényerősség/kontraszt/árnyalat/stb. állítását (hacsak nem a régi, lassú
+DirectShow DivX codec-et használod, ami mindenhol támogatja), lásd a man oldalt.
 </para>
 
 <para>
@@ -1324,8 +1324,8 @@ Nem fog menni!
   és VESA vezérlőt használsz szöveges-módban, akkor az <application>MPlayer</application>ből
   való kilépés után a <emphasis role="bold">ROM betűtípusa</emphasis> lesz betöltve a nemzeti
   helyett.
-  A nemzeti betűkészletet újra betöltheted a <command>setsysfont</command> nevű, pl. Mandrake
-  disztribúcióban megtalálható segédprogram használatával.
+  A nemzeti betűkészletet újra betöltheted pl. a Mandrake/Mandriva disztribúcióban
+  található <command>setsysfont</command> nevű segédprogram használatával.
   (<emphasis role="bold">Tanács</emphasis>: Ugyan ez a segédprogram használható az
   fbdev honosítására is).
   </simpara></listitem>
