@@ -438,9 +438,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "챕터 %2d"
 #define MSGTR_MENU_AudioLanguages "오디오 언어"
 #define MSGTR_MENU_SubtitleLanguages "자막 언어"
-#define MSGTR_MENU_PlayList "재생목록"
 #define MSGTR_MENU_SkinBrowser "스킨선택"
-#define MSGTR_MENU_Preferences "선택사항"
 #define MSGTR_MENU_Exit "종료..."
 #define MSGTR_MENU_Mute "음소거"
 #define MSGTR_MENU_Original "원래대로"
@@ -477,8 +475,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "디렉토리"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "오디오"
-#define MSGTR_PREFERENCES_Video "비디오"
 #define MSGTR_PREFERENCES_SubtitleOSD "자막 & OSD"
 #define MSGTR_PREFERENCES_Codecs "코덱 & 해석기"
 #define MSGTR_PREFERENCES_Misc "기타"
@@ -523,7 +519,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "후행처리"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "코덱 & 해석기"
 #define MSGTR_PREFERENCES_FRAME_Cache "캐시"
-#define MSGTR_PREFERENCES_FRAME_Misc "기타"
 #define MSGTR_PREFERENCES_Message "선택사항들을 적용하려면 재생기를 다시 시작해야 합니다!"
 #define MSGTR_PREFERENCES_DXR3_VENC "비디오 인코더:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "LAVC 사용 (FFmpeg)"

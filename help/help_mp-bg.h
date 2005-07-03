@@ -686,8 +686,10 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Раздел %2d"
 #define MSGTR_MENU_AudioLanguages "Език за аудио"
 #define MSGTR_MENU_SubtitleLanguages "Език на субтитрите"
+// TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Избор на Skin"
+// TODO: Why is this different from MSGTR_Preferences?
 #define MSGTR_MENU_Preferences "Настройки"
 #define MSGTR_MENU_Exit "Изход..."
 #define MSGTR_MENU_Mute "Без звук"
@@ -725,8 +727,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Директории"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Аудио"
-#define MSGTR_PREFERENCES_Video "Видео"
 #define MSGTR_PREFERENCES_SubtitleOSD "Субтитри и OSD"
 #define MSGTR_PREFERENCES_Codecs "Кодеци & demuxer"
 #define MSGTR_PREFERENCES_Misc "Разни"
@@ -773,7 +773,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Допълнителна обработка"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Кодек & разпределител"
 #define MSGTR_PREFERENCES_FRAME_Cache "Кеширане"
-#define MSGTR_PREFERENCES_FRAME_Misc "Разни"
 #define MSGTR_PREFERENCES_Audio_Device "Устройство:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Смесител:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Канал на смесителя:"

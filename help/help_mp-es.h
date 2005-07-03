@@ -706,9 +706,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Capítulo %2d"
 #define MSGTR_MENU_AudioLanguages "Idiomas de audio"
 #define MSGTR_MENU_SubtitleLanguages "Idiomas de subtítulos"
-#define MSGTR_MENU_PlayList "Lista de reproducción"
 #define MSGTR_MENU_SkinBrowser "Navegador de skins"
-#define MSGTR_MENU_Preferences "Preferencias"
 #define MSGTR_MENU_Exit "Salir..."
 #define MSGTR_MENU_Mute "Mudo"
 #define MSGTR_MENU_Original "Original"
@@ -746,7 +744,7 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Árbol de directorios"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Audio"
+// TODO: Why is this different from MSGTR_EQU_Video?
 #define MSGTR_PREFERENCES_Video "Vídeo"
 #define MSGTR_PREFERENCES_SubtitleOSD "Subtítulos y OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs y demuxer"
@@ -794,7 +792,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocesado"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec y demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-#define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_Audio_Device "Dispositivo:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mezclador:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Canal del Mezclador:"

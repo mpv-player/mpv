@@ -433,9 +433,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Chapitre %2d"
 #define MSGTR_MENU_AudioLanguages "Langues audio"
 #define MSGTR_MENU_SubtitleLanguages "Langues des sous-titres"
+// TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Navigateur de skins"
-#define MSGTR_MENU_Preferences "Préférences"
 #define MSGTR_MENU_Exit "Quitter..."
 #define MSGTR_MENU_Mute "Silence"
 #define MSGTR_MENU_Original "Original"
@@ -472,8 +472,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Hiérarchie des dossiers"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_Video "Vidéo"
 #define MSGTR_PREFERENCES_SubtitleOSD "Sous-titres & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Divers"
@@ -518,7 +516,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-#define MSGTR_PREFERENCES_FRAME_Misc "Divers"
 #define MSGTR_PREFERENCES_Message "ATTENTION: certaines options requièrent un redémarrage de la lecture!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Encodeur vidéo:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Utiliser LAVC (FFmpeg)"

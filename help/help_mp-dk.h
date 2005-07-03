@@ -432,9 +432,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitel %2d"
 #define MSGTR_MENU_AudioLanguages "Lyd sprog"
 #define MSGTR_MENU_SubtitleLanguages "Undertekst sprog"
+// TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "Afspilningslisten"
 #define MSGTR_MENU_SkinBrowser "Vælg udseende"
-#define MSGTR_MENU_Preferences "Indstillinger"
 #define MSGTR_MENU_Exit "Forlad..."
 #define MSGTR_MENU_Mute "Mute"
 #define MSGTR_MENU_Original "Original"
@@ -471,8 +471,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Katalog træ"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Lyd"
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "undertekster og OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Forskelligt"
@@ -517,6 +515,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Efterprocesseringsfilter"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+// TODO: Why is this different from MSGTR_PREFERENCES_Misc?
 #define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_Message "Husk, nogle funktioner kræver at MPlayer bliver genstartet for at de virker."
 #define MSGTR_PREFERENCES_DXR3_VENC "Video enkoder:"

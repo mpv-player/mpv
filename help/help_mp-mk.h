@@ -435,9 +435,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Поглавје %2d"
 #define MSGTR_MENU_AudioLanguages "Аудио јазици"
 #define MSGTR_MENU_SubtitleLanguages "Јазици на преводите"
-#define MSGTR_MENU_PlayList "Плејлиста"
 #define MSGTR_MENU_SkinBrowser "Разгледувач на скинови"
-#define MSGTR_MENU_Preferences "Подесувања"
 #define MSGTR_MENU_Exit "Излези ..."
 #define MSGTR_MENU_Mute "Мутирај"
 #define MSGTR_MENU_Original "Оригинал"
@@ -474,8 +472,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Дрво на директориумите"
 
 // --- својства
-#define MSGTR_PREFERENCES_Audio "Аудио"
-#define MSGTR_PREFERENCES_Video "Видео"
 #define MSGTR_PREFERENCES_SubtitleOSD "Преводи и OSD"
 #define MSGTR_PREFERENCES_Codecs "Кодеци и демуксер"
 #define MSGTR_PREFERENCES_Misc "Разно"
@@ -520,7 +516,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "ПостПроцесирање"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Кодек и демуксер"
 #define MSGTR_PREFERENCES_FRAME_Cache "Кеш"
-#define MSGTR_PREFERENCES_FRAME_Misc "Разно"
 #define MSGTR_PREFERENCES_Message "Ве молиме запомтете дека треба да го рестартирате плејбекот за да можат некои опции да проработат!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Видео енкодер:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Користи LAVC (ffmpeg)"

@@ -441,9 +441,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Chapter %2d"
 #define MSGTR_MENU_AudioLanguages "音频语言"
 #define MSGTR_MENU_SubtitleLanguages "字幕语言"
-#define MSGTR_MENU_PlayList "播放列表"
 #define MSGTR_MENU_SkinBrowser "Skin浏览器"
-#define MSGTR_MENU_Preferences "属性设置"
 #define MSGTR_MENU_Exit "退出..."
 #define MSGTR_MENU_Mute "静音"
 #define MSGTR_MENU_Original "原始的"
@@ -480,8 +478,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "目录树"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "音频"
-#define MSGTR_PREFERENCES_Video "视频"
 #define MSGTR_PREFERENCES_SubtitleOSD "字幕和OSD"
 #define MSGTR_PREFERENCES_Misc "其他"
 
@@ -526,7 +522,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "后期处理"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec和demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "缓存"
-#define MSGTR_PREFERENCES_FRAME_Misc "其他"
 #define MSGTR_PREFERENCES_Message "请记住, 有些功能只有重新播放后才有效果."
 #define MSGTR_PREFERENCES_DXR3_VENC "视频编码器:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "使用LAVC(FFmpeg)"

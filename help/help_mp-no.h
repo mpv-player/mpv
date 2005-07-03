@@ -247,7 +247,6 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapittel %2d"
 #define MSGTR_MENU_AudioLanguages "Lyd språk"
 #define MSGTR_MENU_SubtitleLanguages "Tekst språk"
-#define MSGTR_MENU_PlayList "Spilleliste"
 #define MSGTR_MENU_SkinBrowser "Skin velger"
 #define MSGTR_MENU_Preferences "Preferanser"
 #define MSGTR_MENU_Exit "Avslutt..."

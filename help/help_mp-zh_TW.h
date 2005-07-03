@@ -445,9 +445,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Chapter %2d"
 #define MSGTR_MENU_AudioLanguages "音效語言"
 #define MSGTR_MENU_SubtitleLanguages "字幕語言"
+// TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "播放列表"
 #define MSGTR_MENU_SkinBrowser "Skin 瀏覽器"
-#define MSGTR_MENU_Preferences "喜好設定"
 #define MSGTR_MENU_Exit "退出..."
 #define MSGTR_MENU_Mute "靜音"
 #define MSGTR_MENU_Original "原來的"
@@ -484,8 +484,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "目錄樹"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "音效"
-#define MSGTR_PREFERENCES_Video "視訊"
 #define MSGTR_PREFERENCES_SubtitleOSD "字幕及 OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "雜項"
@@ -530,7 +528,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "後置處理"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "快取記憶"
-#define MSGTR_PREFERENCES_FRAME_Misc "雜項"
 #define MSGTR_PREFERENCES_Message "請記得某些選項要重新播放才會生效﹗"
 #define MSGTR_PREFERENCES_DXR3_VENC "視訊 encoder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "使用 LAVC (FFmpeg)"

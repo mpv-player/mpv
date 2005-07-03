@@ -665,9 +665,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Hoofdstuk %2d"
 #define MSGTR_MENU_AudioLanguages "Audio talen"
 #define MSGTR_MENU_SubtitleLanguages "Ondertiteling talen"
+// TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Skin browser"
-#define MSGTR_MENU_Preferences "Voorkeuren"
 #define MSGTR_MENU_Exit "Afsluiten..."
 #define MSGTR_MENU_Mute "Mute"
 #define MSGTR_MENU_Original "Origineel"
@@ -704,8 +704,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Directory tree"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Ondertiteling & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Misc"
@@ -751,7 +749,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocess"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-#define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_Audio_Device "Apparaat:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Mixer kanaal:"

@@ -425,9 +425,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Розд╕л %2d"
 #define MSGTR_MENU_AudioLanguages "Авто мова"
 #define MSGTR_MENU_SubtitleLanguages "Мова субтитр╕в"
-#define MSGTR_MENU_PlayList "Список програвання"
 #define MSGTR_MENU_SkinBrowser "Переглядач жупан╕в"
-#define MSGTR_MENU_Preferences "Налаштування"
 #define MSGTR_MENU_Exit "Вих╕д..."
 #define MSGTR_MENU_Mute "Тиша"
 #define MSGTR_MENU_Original "Вих╕дний"
@@ -464,8 +462,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Дерево каталогу"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Ауд╕о"
-#define MSGTR_PREFERENCES_Video "В╕део"
 #define MSGTR_PREFERENCES_SubtitleOSD "Субтитри й OSD"
 #define MSGTR_PREFERENCES_Codecs "Кодеки й demuxer"
 #define MSGTR_PREFERENCES_Misc "Р╕зне"
@@ -510,7 +506,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Кодек й demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Кеш"
-#define MSGTR_PREFERENCES_FRAME_Misc "Р╕зне"
 #define MSGTR_PREFERENCES_Message "Не забудьте, що вам треба перезапустити програвання для набуття чинност╕ деяких параметр╕в!"
 #define MSGTR_PREFERENCES_DXR3_VENC "В╕део кодек:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Використовувати LAVC (FFmpeg)"

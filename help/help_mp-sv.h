@@ -692,9 +692,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitel %2d"
 #define MSGTR_MENU_AudioLanguages "Audiospråk"
 #define MSGTR_MENU_SubtitleLanguages "Textningsspråk"
-#define MSGTR_MENU_PlayList "Spellista"
 #define MSGTR_MENU_SkinBrowser "Skinläsare"
-#define MSGTR_MENU_Preferences "Inställningar"
 #define MSGTR_MENU_Exit "Avsluta..."
 #define MSGTR_MENU_Mute "Dämpa"
 #define MSGTR_MENU_Original "Orginal"
@@ -734,8 +732,6 @@ static char help_text[]=
 
 // --- preferences
 
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Textning & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Diverse"
@@ -781,7 +777,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-#define MSGTR_PREFERENCES_FRAME_Misc "Diverse"
 #define MSGTR_PREFERENCES_Audio_Device "Enhet:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Mixerkanal:"

@@ -369,9 +369,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Capitolul %2d"
 #define MSGTR_MENU_AudioLanguages "Limbi pentru audio"
 #define MSGTR_MENU_SubtitleLanguages "Limbi pentru subtitrãri"
-#define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Alegere skin"
-#define MSGTR_MENU_Preferences "Preferinþe"
 #define MSGTR_MENU_Exit "Ieºire..."
 #define MSGTR_MENU_Mute "Fãrã sunet"
 #define MSGTR_MENU_Original "Original"
@@ -408,8 +406,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Arbore de directoare"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Subtitrãri & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecuri & demuxer"
 #define MSGTR_PREFERENCES_Misc "Altele"
@@ -452,7 +448,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocesare"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-#define MSGTR_PREFERENCES_FRAME_Misc "Altele"
 #define MSGTR_PREFERENCES_Message "Nu uita cã rularea trebuie repornitã pentru ca unele opþiuni sã-ºi facã efectul!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Encoder video:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Foloseºte LAVC (FFmpeg)"

@@ -703,8 +703,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "%2d. fejezet"
 #define MSGTR_MENU_AudioLanguages "Szinkron nyelvei"
 #define MSGTR_MENU_SubtitleLanguages "Feliratok nyelvei"
-#define MSGTR_MENU_PlayList "Lejátszási lista"
 #define MSGTR_MENU_SkinBrowser "Skin böngészõ"
+// TODO: Why is this different from MSGTR_Preferences?
+// Note: uniq says it's different, though I cannot see it.     
 #define MSGTR_MENU_Preferences "Beállítások" 
 #define MSGTR_MENU_Exit "Kilépés..."
 #define MSGTR_MENU_Mute "Néma"
@@ -742,8 +743,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Könyvtár lista"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Felirat & OSD"
 #define MSGTR_PREFERENCES_Codecs "Kodekek és demuxerek"
 #define MSGTR_PREFERENCES_Misc "Egyéb"
@@ -790,7 +789,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Képjavítás"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Gyorsítótár"
-#define MSGTR_PREFERENCES_FRAME_Misc "Egyéb"
 #define MSGTR_PREFERENCES_Audio_Device "Eszköz:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Mixer csatorna:"

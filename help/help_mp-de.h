@@ -712,9 +712,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitel %2d"
 #define MSGTR_MENU_AudioLanguages "Audio-Sprachen"
 #define MSGTR_MENU_SubtitleLanguages "Untertitel-Sprachen"
-#define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Skinbrowser"
-#define MSGTR_MENU_Preferences "Einstellungen"
 #define MSGTR_MENU_Exit "Beenden..."
 #define MSGTR_MENU_Mute "Stummschaltung"
 #define MSGTR_MENU_Original "Original"
@@ -751,8 +749,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Verzeichnisbaum"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Untertitel & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & Demuxer"
 #define MSGTR_PREFERENCES_Misc "Sonstiges"
@@ -799,7 +795,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & Demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-#define MSGTR_PREFERENCES_FRAME_Misc "Sonstiges"
 #define MSGTR_PREFERENCES_Audio_Device "Gerät:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Mixer-Kanal:"

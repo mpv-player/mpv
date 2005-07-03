@@ -694,8 +694,8 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitola %2d"
 #define MSGTR_MENU_AudioLanguages "Jazyk zvuku"
 #define MSGTR_MENU_SubtitleLanguages "Jazyk titulkù"
-#define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Prohlí¾eè témat"
+// TODO: Why is this different from MSGTR_Preferences?
 #define MSGTR_MENU_Preferences "Pøedvolby"
 #define MSGTR_MENU_Exit "Konec..."
 #define MSGTR_MENU_Mute "Ztlumit"
@@ -733,8 +733,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Adresáøe"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Zvuk"
-#define MSGTR_PREFERENCES_Video "Obraz"
 #define MSGTR_PREFERENCES_SubtitleOSD "Titulky & OSD"
 #define MSGTR_PREFERENCES_Codecs "Kodeky & demuxer"
 #define MSGTR_PREFERENCES_Misc "Ostatní"
@@ -781,7 +779,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodek & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Vyrovnávací pamì»"
-#define MSGTR_PREFERENCES_FRAME_Misc "Ostatní"
 #define MSGTR_PREFERENCES_Audio_Device "Zaøízení:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixér:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Kanál mixéru:"

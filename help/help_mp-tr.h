@@ -351,9 +351,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Bölüm %2d"
 #define MSGTR_MENU_AudioLanguages "Ses Dilleri"
 #define MSGTR_MENU_SubtitleLanguages "Altyazý Dilleri"
+// TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Skin seçici"
-#define MSGTR_MENU_Preferences "Seçenekler"
 #define MSGTR_MENU_Exit "Çýkýþ..."
 #define MSGTR_MENU_Mute "Sesi Kýs"
 #define MSGTR_MENU_Original "Orjinal"
@@ -384,8 +384,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Dizin Aðacý"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Ses"
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Altyazý & OSD"
 #define MSGTR_PREFERENCES_Misc "Çeþitli"
 
@@ -427,6 +425,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & ayrýþtýrýcý"
 #define MSGTR_PREFERENCES_FRAME_Cache "Tampon"
+// TODO: Why is this different from MSGTR_PREFERENCES_Misc?
 #define MSGTR_PREFERENCES_FRAME_Misc "Diðer"
 #define MSGTR_PREFERENCES_Message "Yaptýðýnýz deðiþikliklerin çalýþabilmesi için lütfen MPlayerý yeniden baþlatýn!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video çeviricisi:"

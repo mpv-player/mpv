@@ -424,8 +424,10 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitola %2d"
 #define MSGTR_MENU_AudioLanguages "Jazyk zvuku"
 #define MSGTR_MENU_SubtitleLanguages "Jazyk titulkov"
+// TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "Playlist"
 #define MSGTR_MENU_SkinBrowser "Prehliadaè tém"
+// TODO: Why is this different from MSGTR_Preferences?
 #define MSGTR_MENU_Preferences "Nastavenia"
 #define MSGTR_MENU_Exit "Koniec..."
 #define MSGTR_MENU_Mute "Stlmi» zvuk"
@@ -463,8 +465,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Adresárový strom"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_Video "Video"
 #define MSGTR_PREFERENCES_SubtitleOSD "Titulky a OSD"
 #define MSGTR_PREFERENCES_Codecs "Kódeky a demuxer"
 #define MSGTR_PREFERENCES_Misc "Rôzne"
@@ -509,7 +509,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocess"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kódek & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Vyrovnávacia pamä»"
-#define MSGTR_PREFERENCES_FRAME_Misc "Rôzne"
 #define MSGTR_PREFERENCES_Message "Prosím pamätajte, nietoré voµby potrebujú re¹tart prehrávania!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video kóder:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Pou¾i» LAVC (FFmpeg)"

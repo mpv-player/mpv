@@ -678,9 +678,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Глава %2d"
 #define MSGTR_MENU_AudioLanguages "Аудио языки"
 #define MSGTR_MENU_SubtitleLanguages "Язык субтитров"
+// TODO: Why is this different from MSGTR_PlayList?
 #define MSGTR_MENU_PlayList "Список воспроизведения"
 #define MSGTR_MENU_SkinBrowser "Просмотрщик шкур"
-#define MSGTR_MENU_Preferences "Настройки"
 #define MSGTR_MENU_Exit "Выход..."
 #define MSGTR_MENU_Mute "Отключить звук"
 #define MSGTR_MENU_Original "Исходный"
@@ -717,8 +717,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Дерево каталогов"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Аудио"
-#define MSGTR_PREFERENCES_Video "Видео"
 #define MSGTR_PREFERENCES_SubtitleOSD "Субтитры и OSD"
 #define MSGTR_PREFERENCES_Codecs "Кодеки и демуксер [demuxer]"
 #define MSGTR_PREFERENCES_Misc "Разное"
@@ -764,7 +762,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Постобработка"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Кодек и демуксер [demuxer]"
 #define MSGTR_PREFERENCES_FRAME_Cache "Кэш"
-#define MSGTR_PREFERENCES_FRAME_Misc "Разное"
 #define MSGTR_PREFERENCES_Audio_Device "Устройство:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Микшер:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Канал микшера:"

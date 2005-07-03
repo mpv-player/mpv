@@ -444,8 +444,8 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Κεφάλαιο %2d"
 #define MSGTR_MENU_AudioLanguages "Γλώσσες ήχου"
 #define MSGTR_MENU_SubtitleLanguages "Γλώσσες υποτίτλων"
-#define MSGTR_MENU_PlayList "Λίστα Αναπαραγωγής"
 #define MSGTR_MENU_SkinBrowser "Λίστα skins"
+// TODO: Why is this different from MSGTR_Preferences?
 #define MSGTR_MENU_Preferences "Ρυθμίσεις"
 #define MSGTR_MENU_Exit "Έξοδος..."
 #define MSGTR_MENU_Mute "Απενεργοποίηση ήχου"
@@ -483,8 +483,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Δένδρο καταλόγων"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Ήχος"
-#define MSGTR_PREFERENCES_Video "Βίντεο"
 #define MSGTR_PREFERENCES_SubtitleOSD "Υπότιτλοι και OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs και demuxer"
 #define MSGTR_PREFERENCES_Misc "Διάφορα"
@@ -529,7 +527,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Προεπεξεργασία"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec και demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-#define MSGTR_PREFERENCES_FRAME_Misc "Διάφορα"
 #define MSGTR_PREFERENCES_Message "Προσοχή, μερικές λειτουργίες χρειάζονται επανεκκίνιση αναπαραγωγής."
 #define MSGTR_PREFERENCES_DXR3_VENC "Κωδικοποιητής βίντεο:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Χρήση του LAVC (FFmpeg)"

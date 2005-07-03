@@ -437,9 +437,7 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Capítulo %2d"
 #define MSGTR_MENU_AudioLanguages "Idiomas do audio"
 #define MSGTR_MENU_SubtitleLanguages "Idiomas da legenda"
-#define MSGTR_MENU_PlayList "Lista de reprodução"
 #define MSGTR_MENU_SkinBrowser "Skins"
-#define MSGTR_MENU_Preferences "Preferências"
 #define MSGTR_MENU_Exit "Sair..."
 #define MSGTR_MENU_Mute "Mudo"
 #define MSGTR_MENU_Original "Original"
@@ -476,8 +474,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Árvore de diretórios"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "Audio"
-#define MSGTR_PREFERENCES_Video "Vídeo"
 #define MSGTR_PREFERENCES_SubtitleOSD "Legenda & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & demuxer"
 #define MSGTR_PREFERENCES_Misc "Misc"
@@ -522,7 +518,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Pós-processamento"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
-#define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_Message "Por favor lembre que você precisa reiniciar a reprodução para algumas opções fazerem efeito!"
 #define MSGTR_PREFERENCES_DXR3_VENC "Codificador de video:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "Usar LAVC (FFmpeg)"

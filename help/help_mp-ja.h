@@ -367,9 +367,7 @@ static char help_text[]=
 #define MSGTR_MENU_None "(無し)"
 #define MSGTR_MENU_AudioLanguages "音声言語"
 #define MSGTR_MENU_SubtitleLanguages "サブタイトル言語"
-#define MSGTR_MENU_PlayList "プレイリスト"
 #define MSGTR_MENU_SkinBrowser "スキンブラウザ"
-#define MSGTR_MENU_Preferences "設定"
 #define MSGTR_MENU_Exit "終了 ..."
 #define MSGTR_MENU_Mute "消音"
 #define MSGTR_MENU_Original "オリジナル"
@@ -402,8 +400,6 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "ディレクトリツリー"
 
 // --- preferences
-#define MSGTR_PREFERENCES_Audio "音声"
-#define MSGTR_PREFERENCES_Video "映像"
 #define MSGTR_PREFERENCES_SubtitleOSD "サブタイトル & OSD"
 #define MSGTR_PREFERENCES_Codecs "コーデック & demuxer"
 #define MSGTR_PREFERENCES_Misc "Misc"
@@ -436,7 +432,6 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_Font "フォント"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "コーデック& demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "キャッシュ"
-#define MSGTR_PREFERENCES_FRAME_Misc "Misc"
 #define MSGTR_PREFERENCES_DXR3_VENC "Video エンコーダ:"
 #define MSGTR_PREFERENCES_DXR3_LAVC "LAVC (FFmpeg)使用"
 #define MSGTR_PREFERENCES_DXR3_FAME "FAME 使用"
