@@ -55,5 +55,5 @@ ifneq (,$(findstring 2.6, $(VERSION)))
 endif
 
 distclean: clean
-	rm -f mga_vid_test
+	rm -f mga_vid_test tdfx_vid_tst
 
