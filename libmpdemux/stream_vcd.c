@@ -53,6 +53,8 @@ static struct m_struct_st stream_opts = {
 };
 
 static int fill_buffer(stream_t *s, char* buffer, int max_len){
+  if(s->pos > s->end_pos) /// don't past end of current track
+    return 0;
   return vcd_read(s->priv,buffer);
 }
 
