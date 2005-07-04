@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.68 -->
+<!-- synced with 1.69 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -572,10 +572,10 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   függnek.
   A H.264 előnyei nem jönnek ingyen: a H.264 folyamok dekódolásának
   elég meredek a CPU és memória igénye.
-  Például egy 1733 Mhz-es Athlon-on egy 1500kbps-es H.264 videó kb.
-  50% CPU-t használ a dekódoláshoz.
-  Összehasonlításként egy 1500kbps-es MPEG-4 ASP folyamnak 10% körüli
-  CPU kell.
+  Például egy 1733 Mhz-es Athlon-on egy DVD felbontású 1500kbps-es H.264
+  videó kb. 35% CPU-t használ a dekódoláshoz.
+  Összehasonlításként egy DVD felbontású 1500kbps-es MPEG-4 ASP folyamnak
+  10% körüli CPU kell.
   Ez azt jelenti, hogy a nagy-felbontású folyamok dekódolása szinte
   szóba se jön a legtöbb felhasználónál.
   Azt is jelenti, hogy egy tisztességes DVD rip néha akadhat a 2.0
