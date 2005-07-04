@@ -574,10 +574,10 @@ decoders:
   encoder.
   The gains from using H.264 do not come for free: Decoding H.264
   streams seems to have steep CPU and memory requirements.
-  For instance, on a 1733 MHz Athlon, a 1500kbps H.264 video uses
-  around 50% CPU to decode.
-  By comparison, decoding a 1500kbps MPEG-4 ASP stream requires
-  around 10% CPU.
+  For instance, on a 1733 MHz Athlon, a DVD-resolution 1500kbps H.264
+  video requires around 35% CPU to decode.
+  By comparison, decoding a DVD-resolution 1500kbps MPEG-4 ASP stream
+  requires around 10% CPU.
   This means that decoding high-definition streams is almost out of
   the question for most users.
   It also means that even a decent DVD rip may sometimes stutter on

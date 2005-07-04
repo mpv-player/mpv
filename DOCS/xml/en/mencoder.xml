@@ -2119,32 +2119,46 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   set up <application>MEncoder</application> to support it</link>.
 </para>
 
-<sect2 id="menc-feat-x264-intro">
-<title>What options should I use to get the best results?</title>
+<sect2 id="menc-feat-x264-encoding-options">
+<title>Encoding options of x264</title>
 
 <para>
   Please begin by reviewing the
   <systemitem class="library">x264</systemitem> section of
   <application>MPlayer</application>'s man page.
   This section is intended to be a supplement to the man page.
+  Here you will find quick hints about which options are most
+  likely to interest most people. The man page is more terse,
+  but also more exhaustive, and it sometimes offers much better
+  technical detail.
 </para>
 
+<sect3 id="menc-feat-x264-encoding-options-intro">
+<title>Introduction</title>
+<para>This guide considers two major categories of encoding options:</para>
+
 <orderedlist>
-<title>There are mainly three types of considerations when choosing encoding
-  options:</title>
-  <listitem><para>Trading off encoding time vs. quality</para></listitem>
-  <listitem><para>Frame type decision options</para></listitem>
-  <listitem><para>Ratecontrol and quantization decision options</para></listitem>
+  <listitem><para>Options which mainly trade off encoding time vs. quality
+  </para></listitem>
+  <listitem><para>Options which may be useful for fulfilling various personal
+  preferences and special requirements</para></listitem>
 </orderedlist>
 
 <para>
-  This guide is mostly concerned with the first class of options.
-  The other two types often have more to do with personal
-  preferences and individual requirements.
+  Ultimately, only you can decide which options are best for your
+  purposes. The decision for the first class of options is the simplest:
+  you only have to decide whether you think the quality differences
+  justify the speed differences. For the second class of options,
+  preferences may be far more subjective, and more factors may be
+  involved. Note that some of the "personal preferences and special
+  requirements" options can still have large impacts on speed or quality,
+  but that is not what they are primarily useful for. A couple of the
+  "personal preference" options may even cause changes that look better
+  to some people, but look worse to others.
 </para>
 
 <para>
-  Before continuing, please note that this guide uses only one
+  Before continuing, you need to understand that this guide uses only one
   quality metric: global PSNR.
   For a brief explanation of what PSNR is, see
   <ulink url="http://en.wikipedia.org/wiki/PSNR">the Wikipedia article on PSNR</ulink>.
@@ -2162,42 +2176,52 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   First, using two pass often gains around 1dB PSNR, which is a
   very big difference.
   Secondly, testing options by doing direct quality comparisons
-  with one pass encodes is a dubious proposition because bitrate
-  often varies significantly with each encode.
+  with one pass encodes introduces a major confounding
+  factor: bitrate often varies significantly with each encode.
   It is not always easy to tell whether quality changes are due
-  mainly to changed options, or if they mostly reflect
-  differences in the achieved bitrate.
+  mainly to changed options, or if they mostly reflect essentially
+  random differences in the achieved bitrate.
 </para>
 
-<para>
+</sect3>
+
+<sect3 id="menc-feat-x264-encoding-options-speedvquality">
+<title>Options which primarily affect speed and quality</title>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">subq</emphasis>:
   Of the options which allow you to trade off speed for quality,
-  <option>subq</option> and <option>frameref</option> are usually
+  <option>subq</option> and <option>frameref</option> (see below) are usually
   by far the most important.
   If you are interested in tweaking either speed or quality, these
   are the first options you should consider.
-</para>
-
-<para>
   On the speed dimension, the <option>frameref</option> and
   <option>subq</option> options interact with each other fairly
   strongly.
   Experience shows that, with one reference frame,
-  <option>subq=5</option> takes about 35% more time than
+  <option>subq=5</option> (the default setting) takes about 35% more time than
   <option>subq=1</option>.
   With 6 reference frames, the penalty grows to over 60%.
   <option>subq</option>'s effect on PSNR seems fairly constant
   regardless of the number of reference frames.
-  Typically, <option>subq=5</option> gains 0.2-0.5 dB
-  global PSNR over <option>subq=1</option>.
+  Typically, <option>subq=5</option> achieves 0.2-0.5 dB higher global
+  PSNR in comparison <option>subq=1</option>.
   This is usually enough to be visible.
 </para>
-
-</sect2>
-
-<sect2 id="menc-feat-x264-encoding-options">
-<title>Encoding options of x264</title>
-
-<itemizedlist>
+<para>
+  <option>subq=6</option> is the slowest, highest quality mode.
+  In comparison to <option>subq=5</option>, it usually gains 0.1-0.4 dB
+  global PSNR with speed costs varying from 25%-100%.
+  Unlike other levels of <option>subq</option>, the behavior of
+  <option>subq=6</option> does not depend much on <option>frameref</option>
+  and <option>me</option>.  Instead, the effectiveness of <option>subq=6
+  </option> depends mostly upon the number of B-frames used. In normal
+  usage, this means <option>subq=6</option> has a large impact on both speed
+  and quality in complex, high motion scenes, but it may not have much effect
+  in low-motion scenes. Note that it is still recommended to always set
+  <option>bframes</option> to something other than zero (see below).
+</para></listitem>
 <listitem><para>
   <emphasis role="bold">frameref</emphasis>:
   <option>frameref</option> is set to 1 by default, but this
@@ -2223,7 +2247,7 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   will improve global PSNR by a tiny 0.02dB over
   <option>frameref=6</option>, at a speed cost of 15%-20%.
   At such high <option>frameref</option> values, the only really
-  good thing that can be said is that increasing even further will
+  good thing that can be said is that increasing it even further will
   almost certainly never <emphasis role="bold">harm</emphasis>
   PSNR, but the additional quality benefits are barely even
   measurable, let alone perceptible.
@@ -2296,15 +2320,15 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 
 <listitem><para>
   <emphasis role="bold">bframes</emphasis>:
-  The usefulness of B-frames is questionable in most other codecs
-  you may be used to.
+  If you are used to encoding with other codecs, you may have found
+  that B-frames are not always useful.
   In H.264, this has changed: there are new techniques and block
   types that are possible in B-frames.
   Usually, even a naive B-frame choice algorithm can have a
   significant PSNR benefit.
   It is interesting to note that using B-frames usually speeds up
-  the second pass somewhat, and may also speed up a single pass
-  encode if adaptive B-frame decision is turned off.
+  the second pass somewhat, and may also speed up a single
+  pass encode if adaptive B-frame decision is turned off.
 </para>
 <para>
   With adaptive B-frame decision turned off
@@ -2323,8 +2347,8 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   Note: This is on by default.
 </para>
 <para>
-  With this option enabled, the encoder will use some simple
-  heuristics to reduce the number of B-frames used in scenes that
+  With this option enabled, the encoder will use a reasonably fast
+  decision process to reduce the number of B-frames used in scenes that
   might not benefit from them as much.
   You can use <option>b_bias</option> to tweak how B-frame-happy
   the encoder is.
@@ -2353,8 +2377,8 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   prediction gives rather large bitrate savings.
   In MPEG-4 ASP, a fade-to-black is usually best coded as a series
   of expensive I-frames; using weighted prediction in B-frames
-  makes it possible to turn at least some of these into much more
-  reasonably-sized B-frames.
+  makes it possible to turn at least some of these into much smaller
+  B-frames.
   Encoding time cost is minimal, as no extra decisions need to be made.
   Also, contrary to what some people seem to guess, the decoder
   CPU requirements are not much affected by weighted prediction,
@@ -2365,10 +2389,121 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   has a strong tendency to avoid B-frames during fades.
   Until this changes, it may be a good idea to add
   <option>nob_adapt</option> to your x264encopts, if you expect
-  fades to have a significant effect in your particular video
+  fades to have a large effect in your particular video
   clip.
 </para></listitem>
+</itemizedlist>
+</sect3>
 
+<sect3 id="menc-feat-x264-encoding-options-misc-preferences">
+<title>Options pertaining to miscellaneous preferences</title>
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">Two pass encoding</emphasis>:
+  Above, it was suggested to always use two pass encoding, but there
+  are still reasons for not using it. For instance, if you are capturing
+  live TV and encoding in realtime, you are forced to use single-pass.
+  Also, one pass is obviously faster than two passes; if you use the
+  exact same set of options on both passes, two pass encoding is almost
+  twice as slow.
+</para>
+<para>
+  Still, there are very good reasons for using two pass encoding. For
+  one thing, single pass ratecontrol isn't psychic, and it often makes
+  unreasonable choices because it can't see the big picture. For example,
+  suppose you have a two minute long video consisting of two distinct
+  halves.  The first half is a very high-motion scene lasting 60 seconds
+  which, in isolation, requires about 2500kbps in order to look decent.
+  Immediately following it is a much less demanding 60-second scene
+  that looks good at 300kbps. Suppose you ask for 1400kbps on the theory
+  that this is enough to accomodate both scenes. Single pass ratecontrol
+  will make a couple of "mistakes" in such a case. First of all, it
+  will target 1400kbps in both segments. The first segment may end up
+  heavily overquantized, causing it to look unacceptably and unreasonably
+  blocky. The second segment will be heavily underquantized; it may look
+  perfect, but the bitrate cost of that perfection will be completely
+  unreasonable. What's even harder to avoid is the problem at the
+  transition between the two scenes. The first seconds of the low motion
+  half will be hugely over-quantized, because the ratecontrol is still
+  expecting the kind of bitrate requirements it met in the first half
+  of the video. This "error period" of heavily over-quantized low motion
+  will look jarringly bad, and will actually use less than the 300kbps
+  it would have taken to make it look decent. There are ways to
+  mitigate the pitfalls of single-pass encoding, but they may tend to
+  increase bitrate misprediction.
+</para>
+<para>
+  Multipass ratecontrol can offer huge advantages over a single pass.
+  Using the statistics gathered from the first pass encode, the encoder
+  can estimate, with reasonable accuracy, the "cost" (in bits) of
+  encoding any given frame, at any given quantizer. This allows for
+  a much more rational, better planned allocation of bits between the
+  expensive (high-motion) and cheap (low-motion) scenes. See
+  <option>qcomp</option> below for some ideas on how to tweak this
+  allocation to your liking.
+</para>
+<para>
+  Moreover, two passes need not take twice as long as one pass. You can
+  tweak the options in the first pass for higher speed and lower quality.
+  If you choose your options well, you can get a very fast first pass.
+  The resulting quality in the second pass will be slightly lower because size
+  prediction is less accurate, but the quality difference is normally much
+  too small to be visible. Try, for example, adding
+  <option>subq=1:frameref=1</option> to the first pass
+  <option>x264encopts</option>. Then, on the second pass, use slower,
+  higher-quality options:
+  <option>subq=6:frameref=15:4x4mv:me=3</option>
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">Three pass encoding</emphasis>?
+
+  x264 offers the ability to make an arbitrary number of consecutive
+  passes. If you specify <option>pass=1</option> on the first pass,
+  then use <option>pass=3</option> on a subsequent pass, the subsequent
+  pass will both read the statistics from the previous pass, and write
+  its own statistics. An additional pass following this one will have
+  a very good base from which to make highly accurate predictions of
+  framesizes at a chosen quantizer. In practice, the overall quality
+  gain from this is usually close to zero, and quite possibly a third
+  pass will result in slightly worse global PSNR than the pass before
+  it. In typical usage, three passes help if you get either bad bitrate
+  prediction or bad looking scene transitions when using only two passes.
+  This is somewhat likely to happen on extremely short clips. There are
+  also a few special cases in which three (or more) passes are handy
+  for advanced users, but for brevity, this guide omits discussing those
+  special cases.
+
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">qcomp</emphasis>:
+  <option>qcomp</option> trades off the number of bits allocated
+  to "expensive" high-motion versus "cheap" low-motion frames. At
+  one extreme, <option>qcomp=0</option> aims for true constant
+  bitrate. Typically this would make high-motion scenes look completely
+  awful, while low-motion scenes would probably look absolutely
+  perfect, but would also use many times more bitrate than they
+  would need in order to look merely excellent. At the other extreme,
+  <option>qcomp=1</option> achieves nearly constant quantization parameter
+  (QP). Constant QP doesn't look bad, but most people think it's more
+  reasonable to shave some bitrate off of the extremely expensive scenes
+  (where the loss of quality isn't as noticeable) and reallocate it to
+  the scenes that are easier to encode at excellent quality.
+  <option>qcomp</option> is set to 0.6 by default, which may be slightly
+  low for many peoples' taste (0.7-0.8 are also commonly used).
+</para></listitem>
+<listitem><para>
+  <emphasis role="bold">keyint</emphasis>:
+  <option>keyint</option> is solely for trading off file seekability against
+  coding efficiency. By default, <option>keyint</option> is set to 250. In
+  25fps material, this guarantees the ability to seek to within 10 seconds
+  precision. If you think it would be important and useful to be able to
+  seek within 5 seconds of precision, set <option>keyint=125</option>;
+  this will hurt quality/bitrate slightly. If you care only about quality
+  and not about seekability, you can set it to much higher values
+  (understanding that there are diminishing returns which may become
+  vanishingly low, or even zero). The video stream will still have seekable
+  points as long as there are some scene changes.
+</para></listitem> 
 <listitem><para>
   <emphasis role="bold">deblockalpha, deblockbeta</emphasis>:
   This topic is going to be a bit controversial.
@@ -2435,6 +2570,7 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   would have gotten just by fiddling with the deblocking filter.
 </para></listitem>
 </itemizedlist>
+</sect3>
 </sect2>
 </sect1>
 
@@ -2451,8 +2587,8 @@ codec</title>
  This guide mainly aims at featuring the same kind of information
  as x264's encoding guide.
  Therefore, please begin by reading
- <link linkend="menc-feat-x264-intro">the first part</link> of that
- guide.
+ <link linkend="menc-feat-x264-encoding-options-intro">the first part</link>
+ of that guide.
 </para>
 
 
