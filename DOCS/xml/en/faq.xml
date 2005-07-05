@@ -1167,21 +1167,31 @@ FourCC.
 
 <answer><para>
 <systemitem class="library">libavcodec</systemitem>, the native MPEG-4
-encoding library usually shipped with <application>MEncoder</application>
-used to set the 'DIVX' FourCC (which is an AVI tag to identify the
-software used to encode and the intended software to use for decoding)
-when encoding MPEG-4 videos, which lead to make many people think that
-<systemitem class="library">libavcodec</systemitem> was a DivX encoding
-library, when in fact it is just another MPEG-4 encoding library whose
-MPEG-4 support is much better than DivX's.
+encoding library usually shipped with <application>MEncoder</application>,
+used to set the FourCC to 'DIVX' when encoding MPEG-4 videos
+(the FourCC is an AVI tag to identify the software used to encode and
+the intended software to use for decoding the video).
+This led many people to think that
+<systemitem class="library">libavcodec</systemitem>
+was a DivX encoding library, when in fact it is a completely different
+MPEG-4 encoding library whose MPEG-4 support is much better than DivX's.
 Therefore, the new default FourCC used by
 <systemitem class="library">libavcodec</systemitem> is 'FMP4', but you
 may override this behavior using <application>MEncoder</application>'s
-<option>-ffourcc</option>.
-You may also change the FourCC of existing files like this:
+<option>-ffourcc</option> option.
+You may also change the FourCC of existing files in this same way:
 <screen>
-  mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc DIVX
+  mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
 </screen>
+Note that this will set the FourCC as XVID rather than as DIVX.
+This is recommended as DIVX FourCC means DivX4, which is a very basic
+MPEG-4 codec, whereas DX50 and XVID both mean full MPEG-4 (ASP).
+Therefore, if you change the FourCC to DIVX, some bad software or
+hardware players may choke on some advanced features that
+<systemitem class="library">libavcodec</systemitem> supports, but DivX
+doesn't, whereas <systemitem class="library">XviD</systemitem> closer
+to <systemitem class="library">libavcodec</systemitem> in terms of
+functionalities, and is supported but all decent players.
 </para></answer>
 </qandaentry>
 
