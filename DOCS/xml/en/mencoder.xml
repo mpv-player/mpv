@@ -2710,6 +2710,57 @@ codec</title>
   If you are looking for speed, you should disable this option before
   starting to consider reducing <option>me_quality</option>.
 </para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">chroma_opt</emphasis>
+    Is intended to increase chroma image quality around pure
+    white/black edges, rather than improving compression.
+    This can help to reduce the "red stairs" effect.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">lumi_mask</emphasis>
+    Tries to give less bitrate to part of the picture that the
+    human eye cannot see very well, which should allow the encoder
+    to spend the saved bits on more important parts of the picture.
+    The quality of the encode yielded by this option highly depends
+    on personal preferences and on the type and monitor settings
+    used to watch it (typically, it will not look as good if it is
+    bright or if it is a TFT monitor.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">qpel</emphasis>
+    Increases the precision of the motion estimation from halfpel to
+    quarterpel.
+    The idea is to find better motion vectors which will in return
+    reduce bitrate (hence increasing quality).
+    However, quarterpel precision motion vectors are coded in the
+    bitstream with a few bits, so if the content do not feature
+    enough possibilities to find better motion vectors through
+    <option>qpel</option>, it will in fact hurt compressibility.
+    Unfortunately, there is no way to foresee the possible gains of
+    <option>qpel</option>, so you need to actually encode with and
+    without it to know for sure.
+  </para><para>
+    <option>qpel</option> can be almost double encoding time, and
+    requires as much as 30-60% more processing power to decode.
+    It is not supported by all standalone players.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">gmc</emphasis>
+    Tries to save bits on panning scenes by using a single motion
+    vector for the whole frame.
+    This almost always raise PSNR, but significant slows down
+    encoding (and also needs more processing power to decode).
+    Therefore, you should only use it when you have turned
+    <option>vhq</option> to the maximum.
+    <systemitem class="library">XviD</systemitem>'s GMC (which are
+    more sophisticated than DivX's are not supported by all
+    standalone players.
+</para></listitem>
+
 </itemizedlist>
 </sect2>
 </sect1>
