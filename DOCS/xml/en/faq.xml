@@ -1158,6 +1158,33 @@ above command.
 </para></answer>
 </qandaentry>
 
+<qandaentry>
+<question><para>
+Since 1.0pre7, DivX encoded by <application>MPlayer</application>
+cannot be watched on third party players because it sets 'FMP4' as a
+FourCC.
+</para></question>
+
+<answer><para>
+<systemitem class="library">libavcodec</systemitem>, the native MPEG-4
+encoding library usually shipped with <application>MEncoder</application>
+used to set the 'DIVX' FourCC (which is an AVI tag to identify the
+software used to encode and the intended software to use for decoding)
+when encoding MPEG-4 videos, which lead to make many people think that
+<systemitem class="library">libavcodec</systemitem> was a DivX encoding
+library, when in fact it is just another MPEG-4 encoding library whose
+MPEG-4 support is much better than DivX's.
+Therefore, the new default FourCC used by
+<systemitem class="library">libavcodec</systemitem> is 'FMP4', but you
+may override this behavior using <application>MEncoder</application>'s
+<option>-ffourcc</option>.
+You may also change the FourCC of existing files like this:
+<screen>
+  mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc DIVX
+</screen>
+</para></answer>
+</qandaentry>
+
 </qandadiv>
 </qandaset>
 
