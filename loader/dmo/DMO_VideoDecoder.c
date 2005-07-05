@@ -330,7 +330,7 @@ int DMO_VideoDecoder_DecodeInternal(DMO_VideoDecoder *this, const void* src, int
     bufferin = CMediaBufferCreate(size, (void*)src, size, 0);
     result = this->m_pDMO_Filter->m_pMedia->vt->ProcessInput(this->m_pDMO_Filter->m_pMedia, 0,
 						      (IMediaBuffer*)bufferin,
-						      (is_keyframe) ? DMO_INPUT_DATA_BUFFERF_SYNCPOINT : 0,
+						      DMO_INPUT_DATA_BUFFERF_SYNCPOINT,
 						      0, 0);
     ((IMediaBuffer*)bufferin)->vt->Release((IUnknown*)bufferin);
 
