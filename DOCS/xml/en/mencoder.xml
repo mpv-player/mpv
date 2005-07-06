@@ -2767,6 +2767,610 @@ codec</title>
 </sect2>
 </sect1>
 
+<sect1 id="menc-feat-vcd-dvd">
+<title>Using MEncoder to create VCD/SVCD/DVD-compliant files.</title>
+
+<sect2 id="menc-feat-vcd-dvd-constraints">
+<title>Format Constraints</title>
+<para>
+  <application>MEncoder</application> is capable of creating VCD, SCVD
+  and DVD format MPEG files using the
+  <systemitem class="library">libavcodec</systemitem> library.
+  These files can then be used in conjunction with
+  <ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>
+  or
+  <ulink url="http://dvdauthor.sourceforge.net/">dvdauthor</ulink>
+  to create discs that will play on a standard set-top player.
+</para>
+
+<para>
+  The DVD, SVCD, and VCD formats are subject to heavy constraints.
+  Only a small selection of encoded picture sizes and aspect ratios are
+  available.
+  If your movie does not already meet these requirements, you may have
+  to scale,crop or add black borders to the picture to make it
+  compliant.
+</para>
+
+<sect3 id="menc-feat-vcd-dvd-constraints-resolution">
+<title>Format Constraints</title>
+
+<informaltable frame="all">
+<tgroup cols="9">
+<thead>
+    <row>
+        <entry>Format</entry>
+        <entry>Resolution</entry>
+        <entry>V. Codec</entry>
+        <entry>V. Bitrate</entry>
+        <entry>Sample Rate</entry>
+        <entry>A. Codec</entry>
+        <entry>A. Bitrate</entry>
+        <entry>FPS</entry>
+        <entry>Aspect</entry>
+    </row>
+</thead>
+<tbody>
+    <row>
+        <entry>NTSC DVD</entry>
+        <entry>720x480, 704x480, 352x480, 352x240</entry> 
+        <entry>MPEG-2</entry>
+        <entry>9800 kbps</entry>
+        <entry>48000 Hz</entry>
+        <entry>AC3,PCM</entry>
+        <entry>1536 kbps</entry>
+        <entry>23.976, 29.97</entry>
+        <entry>4:3, 16:9 (only for 720x480)</entry>
+    </row>
+    <row>
+        <entry>NTSC DVD</entry>
+        <entry>352x240*</entry> 
+        <entry>MPEG-1</entry>
+        <entry>1856 kbps</entry>
+        <entry>48000 Hz</entry>
+        <entry>AC3,PCM</entry>
+        <entry>1536 kbps</entry>
+        <entry>23.976, 29.97</entry>
+        <entry>4:3, 16:9</entry>
+    </row>
+    <row>
+        <entry>NTSC SVCD</entry>
+        <entry>480x480</entry>
+        <entry>MPEG-2</entry>
+        <entry>2600 kbps</entry>
+        <entry>44100 Hz</entry>
+        <entry>MP2</entry>
+        <entry>384 kbps</entry>
+        <entry>29.97</entry>
+        <entry>4:3</entry>
+    </row>
+    <row>
+        <entry>NTSC VCD</entry>
+        <entry>352x240</entry>
+        <entry>MPEG-1</entry>
+        <entry>1150 kbps</entry>
+        <entry>44100 Hz</entry>
+        <entry>MP2</entry>
+        <entry>224 kbps</entry>
+        <entry>23.976, 29.97</entry>
+        <entry>4:3</entry>
+    </row>
+    <row>
+        <entry>PAL DVD</entry>
+        <entry>720x576, 704x576, 352x576, 352x288</entry>
+        <entry>MPEG-2</entry>
+        <entry>9800 kbps</entry>
+        <entry>48000 Hz</entry>
+        <entry>MP2,AC3,PCM</entry>
+        <entry>1536 kbps</entry>
+        <entry>25</entry>
+        <entry>4:3, 16:9 (only for 720x576)</entry>
+    </row>
+    <row>
+        <entry>PAL DVD</entry>
+        <entry>352x288*</entry>
+        <entry>MPEG-1</entry>
+        <entry>1856 kbps</entry>
+        <entry>48000 Hz</entry>
+        <entry>MP2,AC3,PCM</entry>
+        <entry>1536 kbps</entry>
+        <entry>25</entry>
+        <entry>4:3, 16:9</entry>
+    </row>
+    <row>
+        <entry>PAL SVCD</entry>
+        <entry>480x576</entry>
+        <entry>MPEG-2</entry>
+        <entry>2600 kbps</entry>
+        <entry>44100 Hz</entry>
+        <entry>MP2</entry>
+        <entry>384 kbps</entry>
+        <entry>25</entry>
+        <entry>4:3</entry>
+    </row>
+    <row>
+        <entry>PAL VCD</entry>
+        <entry>352x288</entry>
+        <entry>MPEG-1</entry>
+        <entry>1150 kbps</entry>
+        <entry>44100 Hz</entry>
+        <entry>MP2</entry>
+        <entry>224 kbps</entry>
+        <entry>25</entry>
+        <entry>4:3</entry>
+    </row>
+</tbody>
+</tgroup>
+</informaltable>
+<para>
+  * These resolutions are rarely used for DVDs because they are fairly low
+  quality.
+</para>
+
+<para>
+  If your movie has 2.35:1 aspect (most recent action movies), you will
+  have to add black borders or crop the movie down to 16:9 to make a DVD
+  or VCD.
+  If you add black borders, try to align them at 16-pixel boundaries in
+  order to minimize the impact on encoding performance.
+  Thankfully DVD has sufficiently excessive bitrate that you do not have
+  to worry too much about encoding efficiency, but SVCD and VCD are
+  highly bitrate-starved and require effort to obtain acceptable quality.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-constraints-gop">
+<title>GOP Size Constraints</title>
+<para>
+  DVD, VCD, and SVCD also constrain you to relatively low 
+  GOP (Group of Pictures) sizes.
+  For 30 fps material the largest allows GOP size is 18.
+  For 25 or 25 fps, the maximum is 15.
+  The GOP size is set using the <option>keyint</option> option.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-constraints-bitrate">
+<title>Bitrate Constraints</title>
+<para>
+  VCD video is required to be CBR at 1152 kbps.
+  This highly limiting constraint also comes along with an extremly low vbv
+  buffer size of 327 kilobits.
+  SVCD allows varying video bitrates up to 2500 kbps, and a somewhat less 
+  restrictive vbv buffer size of 917 kilobits is allowed.
+  DVD video bitrates may range anywhere up to 9800 kbps (though typical
+  bitrates are about half that), and the vbv buffer size is 1835 kilobits.
+</para>
+</sect3>
+</sect2>
+
+<sect2 id="menc-feat-vcd-dvd-output">
+<title>Output Options</title>
+<para>
+  <application>MEncoder</application> has options to control the output
+  format.
+  Using these options we can instruct it to create the correct type of
+  file.
+</para>
+
+<para>
+  The options for VCD and SVCD are called xvcd and xsvcd, because they
+  are extended formats.
+  They are not strictly compliant, mainly because the output does not
+  contain scan offsets.
+  If you need to generate an SVCD image, you  should pass the output file
+  to
+  <ulink url="http://www.gnu.org/software/vcdimager/vcdimager.html">vcdimager</ulink>.
+</para>
+
+<para>
+  VCD:
+  <screen>
+  -of mpeg -mpegopts format=xvcd
+  </screen>
+</para>
+
+<para>
+  SVCD:
+  <screen>
+  -of mpeg -mpegopts format=xsvcd
+  </screen>
+</para>
+
+<para>
+  DVD:
+  <screen>
+  -of mpeg -mpegopts format=dvd
+  </screen>
+</para>
+
+<sect3 id="menc-feat-vcd-dvd-output-aspect">
+<title>Aspect Ratio</title>
+<para>
+  The aspect argument of <option>-lavcopts</option> is used to encode
+  the aspect ratio of the file.
+  During playback the aspect ratio is used to restore the video to the
+  correct size.
+</para>
+
+<para>
+  16:9 or "Widescreen"
+  <screen>
+  -lavcopts aspect=16/9
+  </screen>
+</para>
+
+<para>
+  4:3 or "Fullscreen"
+  <screen>
+  -lavcopts aspect=4/3
+  </screen>
+</para>
+
+<para>
+  2.35:1 or "Cinemascope" NTSC
+  <screen>
+  -vf scale=720:368,expand=720:480 -lavcopts aspect=16/9
+  </screen>
+  To calculate the correct scaling size, use the expanded NTSC width of
+  854/2.35 = 368
+</para>
+
+<para>
+  2.35:1 or "Cinemascope" PAL
+  <screen>
+  -vf scale="720:432,expand=720:576 -lavcopts aspect=16/9
+  </screen>
+  To calculate the correct scaling size, use the expanded PAL width of
+  1024/2.35 = 432
+</para>
+
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-output-srate">
+<title>Sample Rate Conversion</title>
+<para>
+  If the audio sample rate in the original file is not the same as
+  required by the target format, sample rate conversion is required.
+  This is acheived using the <option>-srate</option> and 
+  <option>-af lavcresample</option> options together.
+  </para>
+  <para>
+  DVD:
+  <screen>
+  -srate 48000 -af lavcresample=48000
+  </screen>
+</para>
+<para>
+  VCD and SVCD:
+  <screen>
+  -srate 44100 -af lavcresample=44100
+  </screen>
+  </para>
+</sect3>
+</sect2>
+
+<sect2 id="menc-feat-vcd-dvd-lavc">
+<title>Using libavcodec for VCD/SVCD/DVD Encoding</title>
+
+<sect3 id="menc-feat-vcd-dvd-lavc-intro">
+<title>Introduction</title>
+<para>
+  <systemitem class="library">libavcodec</systemitem> can be used to
+  create VCD/SVCD/DVD compliant video by using the appropriate options.
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-lavc-options">
+<title>lavcopts</title>
+<para>
+  This is a list of fields in <option>-lavcopts</option> that you may
+  be required to change in order to make a complaint movie for VCD, SVCD,
+  or DVD:
+</para>
+
+<itemizedlist>
+<listitem><para>
+  <emphasis role="bold">acodec</emphasis>:
+  <option>mp2</option> for VCD, SVCD, or PAL DVD;
+  <option>ac3</option> is most commonly used for DVD.
+  PCM audio may also be used for DVD, but this is mostly a big waste of
+  space.
+  Note that mp3 audio is not compliant for any of these formats, but
+  players often have no problem playing it anyway.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">abitrate</emphasis>:
+  224 for VCD; up to 384 for SVCD; up to 1536 for  DVD, but commonly
+  used values range from 192 kbps for stereo to 384 kbps for 5.1 channel
+  sound.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">vcodec</emphasis>:
+  <option>mpeg1video</option> for VCD;
+  <option>mpeg2video</option> for SVCD;
+  <option>mpeg2video</option> is usually used for DVD but you may also use
+  <option>mpeg1video</option> for CIF resolutions.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">keyint</emphasis>:
+  Used to set the GOP size.
+  18 for 30fps material, or 15 for 25/24 fps material.
+  Commercial producers seem to prefer keyframe intervals of 12.
+  It is possible to make this much larger and still retain compatibility 
+  with most players.
+  A <option>keyint</option> of 25 should never cause any problems.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">vrc_buf_size</emphasis>:
+  327 for VCD, 917 for SVCD, and 1835 for DVD.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">vrc_minrate</emphasis>:
+  1152, for VCD. May be left alone for SVCD and DVD.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">vrc_maxrate</emphasis>:
+  1152 for VCD; 2500 for SVCD; 9800 for DVD.
+  For SVCD and DVD, you might wish to use lower values depending on your
+  own personal preferences and requirements.
+</para></listitem>
+
+<listitem><para>
+  <emphasis role="bold">vbitrate</emphasis>:
+  1152 for VCD;
+  up to 2500 for SVCD;
+  up to 9800 for DVD.
+  For the latter two formats, vbitrate should be set based on personal
+  preference.
+  For instance, if you insist on fitting 20 or so hours on a DVD, you
+  could use vbitrate=400.
+  The resulting video quality would probably be quite bad.
+  If you are trying to squeeze out the maximum possible quality on a DVD,
+  use vbitrate=9800, but be warned that this could constrain you to less
+  than an hour of video on a single-layer DVD.
+</para></listitem>
+</itemizedlist>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-lavc-examples">
+<title>Examples</title>
+<para>
+  This is a typical minimum set of <option>-lavcopts</option> for
+  encoding video:
+</para>
+<para>
+  VCD:
+  <screen>
+  -lavcopts vcodec=mpeg1video:vrc_buf_size=327:vrc_minrate=1152:\
+  vrc_maxrate=1152:vbitrate=1152:keyint=15:acodec=mp2
+  </screen>
+</para>
+
+<para>
+  SVCD:
+  <screen>
+  -lavcopts vcodec=mpeg2video:vrc_buf_size=917:vrc_maxrate=2500:vbitrate=1800:\
+  keyint=15:acodec=mp2
+  </screen>
+</para>
+
+<para>
+  DVD:
+  <screen>
+  -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:\
+  keyint=15:acodec=ac3
+  </screen>
+</para>
+
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-lavc-advanced">
+<title>Advanced Options</title>
+<para>
+  For higher quality encoding, you may also wish to add quality-enhancing
+  options to lavcopts, such as <option>trell</option>,
+  <option>mbd=2</option>, and others.
+  Note that <option>qpel</option> and <option>v4mv</option>, while often
+  useful with MPEG-4, are not usable in MPEG-1 or MPEG-2.
+  Also, if you are trying to make a very high quality DVD encode, it may
+  be useful to add <option>dc=10</option> to lavcopts.
+  Doing so may help reduce the appearance of blocks in flat-colored areas.
+  Putting it all together, this is an example of a set of lavcopts for a
+  higher quality DVD:
+</para>
+
+<para>
+  <screen>
+  -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=8000:\
+  keyint=15:trell:mbd=2:precmp=2:subcmp=2:cmp=2:dia=-10:predia=-10:cbp:mv0:\
+  vqmin=1:lmin=1:dc=10
+  </screen>
+</para>
+
+</sect3>
+</sect2>
+
+<sect2 id="menc-feat-vcd-dvd-audio">
+<title>Encoding Audio</title>
+<para>
+  VCD and SVCD supports MPEG-1 layer II audio, using one of
+  <systemitem class="library">toolame</systemitem>,
+  <systemitem class="library">twolame</systemitem>,
+  or <systemitem class="library">libavcodec</systemitem>'s mp2 encoder.
+  The libavcodec mp2 is far from being as good as the other two libraries,
+  however it should always be available to use.
+</para>
+
+<para>
+  For DVD audio, <systemitem class="library">libavcodec</systemitem>'s
+  AC3 codec is used.
+</para>
+
+<sect3 id="menc-feat-vcd-dvd-audio-toolame">
+<title>toolame</title>
+<para>
+  For VCD and SVCD:
+  <screen>
+  -oac toolame -toolameopts br=224
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-audio-twolame">
+<title>twolame</title>
+<para>
+  For VCD and SVCD:
+  <screen>
+  -oac twolame -twolameopts br=224
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-audio-lavc">
+<title>libavcodec</title>
+<para>
+  For DVD with 2 channel sound:
+  <screen>
+  -oac lavc -lavcopts acodec=ac3:abitrate=192
+  </screen>
+</para>
+<para>
+  For DVD with 5.1 channel sound:
+  <screen>
+  -channels 6 -oac lavc -lavcopts acodec=ac3:abitrate=384
+  </screen>
+</para>
+<para>
+  For VCD and SVCD:
+  <screen>
+  -oac lavc -lavcopts acodec=mp2:abitrate=224
+  </screen>
+</para>
+</sect3>
+
+</sect2>
+
+<sect2 id="menc-feat-vcd-dvd-all">
+<title>Putting it all Together</title>
+<para>
+  This section shows some complete commands for creating VCD/SVCD/DVD
+  compliant videos.
+</para>
+
+<sect3 id="menc-feat-vcd-dvd-all-pal-dvd">
+<title>PAL DVD</title>
+<para>
+  <screen>
+  mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:576,\
+  harddup -srate 48000 -af lavcresample=48000 -lavcopts vcodec=mpeg2video:\
+  vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=15:acodec=ac3:\
+  abitrate=192:aspect=16/9 -ofps 25 \
+  -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-all-ntsc-dvd">
+<title>NTSC DVD</title>
+<para>
+  <screen>
+  mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:480,\
+  harddup -srate 48000 -af lavcresample=48000 -lavcopts vcodec=mpeg2video:\
+  vrc_buf_size=1835:vrc_maxrate=9800:vbitrate=5000:keyint=18:acodec=ac3:\
+  abitrate=192:aspect=16/9 -ofps 30000/1001 \
+  -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-all-pal-ac3-copy">
+<title>PAL AVI Containing AC3 Audio to DVD</title>
+<para>
+  If the source already has AC3 audio, use -oac copy instead of re-encoding it.
+  <screen>
+  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:576,\
+  harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
+  vbitrate=5000:keyint=15:aspect=16/9 -ofps 25 \
+  -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
+<title>NTSC AVI Containing AC3 Audio to DVD</title>
+<para>
+  If the source already has AC3 audio, and is NTSC @ 23.976 fps:
+  <screen>
+  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:480,\
+  harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
+  vbitrate=5000:keyint=15:aspect=16/9 -ofps  24000/1001 \
+  -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-all-pal-svcd">
+<title>PAL SVCD</title>
+<para>
+  <screen>
+  mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xsvcd -vf \
+  scale=480:576,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
+  vcodec=mpeg2video:mbd=2:keyint=15:vrc_buf_size=917:vrc_minrate=600:\
+  vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 25 \
+  -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-all-ntsc-svcd">
+<title>NTSC SVCD</title>
+<para>
+  <screen>
+  mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xsvcd  -vf \
+  scale=480:480,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
+  vcodec=mpeg2video:mbd=2:keyint=18:vrc_buf_size=917:vrc_minrate=600:\
+  vbitrate=2500:vrc_maxrate=2500:acodec=mp2:abitrate=224 -ofps 30000/1001 \
+  -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-all-pal-vcd">
+<title>PAL VCD</title>
+<para>
+  <screen>
+  mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xvcd -vf \
+  scale=352:288,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
+  vcodec=mpeg1video:keyint=15:vrc_buf_size=327:vrc_minrate=1152:vbitrate=1152:\
+  vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 25 \
+  -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
+  </screen>
+</para>
+</sect3>
+
+<sect3 id="menc-feat-vcd-dvd-all-ntsc-vcd">
+<title>NTSC VCD</title>
+<para>
+  <screen>
+  mencoder -oac lavc -ovc lavc -of mpeg -mpegopts format=xvcd -vf \
+  scale=352:240,harddup -srate 44100 -af lavcresample=44100 -lavcopts \
+  vcodec=mpeg1video:keyint=18:vrc_buf_size=327:vrc_minrate=1152:vbitrate=1152:\
+  vrc_maxrate=1152:acodec=mp2:abitrate=224 -ofps 30000/1001 \
+  -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
+  </screen>
+</para>
+</sect3>
+
+</sect2>
+
+</sect1>
 
 <sect1 id="menc-feat-telecine">
 <title>How to deal with telecine and interlacing within NTSC DVDs</title>
