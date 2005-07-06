@@ -26,10 +26,12 @@
  *
  */
  
+#include "config.h"
 #include "rmff.h"
 #include "rtsp.h"
 #include "sdpplin.h"
 #include "xbuffer.h"
+#include "mp_msg.h"
 
 /*
 #define LOG
@@ -251,7 +253,10 @@ sdpplin_t *sdpplin_parse(char *data) {
 #ifdef LOG
       printf("got data for stream id %u\n", stream->stream_id);
 #endif
+      if (desc->stream && (stream->stream_id >= 0) && (stream->stream_id < desc->stream_count))
       desc->stream[stream->stream_id]=stream;
+      else
+      mp_msg(MSGT_OPEN, MSGL_ERR, "sdpplin: got 'm=', but 'a=StreamCount' is still unknown. Broken sdp?\n");
       continue;
     }
 
@@ -284,7 +289,7 @@ sdpplin_t *sdpplin_parse(char *data) {
     }
     
     if(filter(data,"a=StreamCount:integer;",&buf)) {
-      desc->stream_count=atoi(buf);
+      desc->stream_count=(unsigned int)atoi(buf);
       desc->stream=malloc(sizeof(sdpplin_stream_t*)*desc->stream_count);
       handled=1;
       data=nl(data);
