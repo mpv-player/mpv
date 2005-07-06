@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.82 -->
+<!-- synced with 1.85 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -1156,6 +1156,43 @@ Közvetlenül nem lehetséges, de megpróbálhatod a következőt (figyelj a
 Így bármilyen kódolót használhatsz, nem csak a <application>LAME</application>-t,
 csak cseréld ki a <command>lame</command>-t a kedvenc audió kódolóddal a fenti
 parancsban.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Miért nem tudom lejátszani más programmal a <application>MEncoder</application>
+1.0pre7 és későbbi verzióival kódolt MPEG-4 filmeket?
+</para></question>
+
+<answer><para>
+A <systemitem class="library">libavcodec</systemitem>, a natív MPEG-4
+kódoló függvény könyvtár, ami általában a <application>MEncoder</application>rel
+jön, eddig 'DIVX'-re állította be a FourCC-t MPEG-4 videók kódolásakor
+(a FourCC egy AVI tag a kódoláshoz használt program azonosítására és
+az ajánlott dekódoló program megnevezésére).
+Ez ahhoz vezetett, hogy sokan azt hitték, hogy a
+<systemitem class="library">libavcodec</systemitem>
+egy DivX kódoló könyvtár, pedig közben egy teljesen különböző MPEG-4
+kódoló könyvtár, ami sokkal jobban implementálja az MPEG-4 szabványt,
+mint a DivX.
+Ezért a <systemitem class="library">libavcodec</systemitem> által használt
+új, alapértelmezett FourCC az 'FMP4', azonban te ezt felülbírálhatod
+a <application>MEncoder</application> <option>-ffourcc</option> kapcsolójával.
+Ugyanígy a már meglévő fájljaidban is megváltoztathatod a FourCC-t:
+<screen>
+  mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
+</screen>
+Figyelj rá, hogy ez XVID-re állítja a FourCC-t a DIVX helyett.
+Ez a javasolt eljárás, mivel a DIVX FourCC DivX4-et jelent, ami egy
+nagyon alap MPEG-4 codec, míg a DX50 és XVID mindkettő teljes MPEG-4
+(ASP) támogatást jelent.
+Ezért ha DIVX-re változtatod a FourCC-t, néhány rossz program vagy
+hardveres lejátszó agyoncsaphatja a <systemitem class="library">libavcodec</systemitem>
+pár fejlett tulajdonságát, amiket egyébként támogat, de a DivX nem;
+másrészt az <systemitem class="library">XviD</systemitem>
+közelebb áll a <systemitem class="library">libavcodec</systemitem>-hez
+funkcionalitásában és minden illedelmes lejátszó támogatja.
 </para></answer>
 </qandaentry>
  	 
