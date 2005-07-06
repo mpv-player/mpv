@@ -1160,9 +1160,8 @@ above command.
 
 <qandaentry>
 <question><para>
-Since 1.0pre7, DivX encoded by <application>MPlayer</application>
-cannot be watched on third party players because it sets 'FMP4' as a
-FourCC.
+Why do third-party players fail to play MPEG-4 movies encoded by
+<application>MEncoder</application> versions later than 1.0pre7?
 </para></question>
 
 <answer><para>
@@ -1174,12 +1173,13 @@ the intended software to use for decoding the video).
 This led many people to think that
 <systemitem class="library">libavcodec</systemitem>
 was a DivX encoding library, when in fact it is a completely different
-MPEG-4 encoding library whose MPEG-4 support is much better than DivX's.
+MPEG-4 encoding library which implements the MPEG-4 standard much
+better than DivX.
 Therefore, the new default FourCC used by
 <systemitem class="library">libavcodec</systemitem> is 'FMP4', but you
 may override this behavior using <application>MEncoder</application>'s
 <option>-ffourcc</option> option.
-You may also change the FourCC of existing files in this same way:
+You may also change the FourCC of existing files in the same way:
 <screen>
   mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
 </screen>
@@ -1189,9 +1189,9 @@ MPEG-4 codec, whereas DX50 and XVID both mean full MPEG-4 (ASP).
 Therefore, if you change the FourCC to DIVX, some bad software or
 hardware players may choke on some advanced features that
 <systemitem class="library">libavcodec</systemitem> supports, but DivX
-doesn't, whereas <systemitem class="library">XviD</systemitem> closer
-to <systemitem class="library">libavcodec</systemitem> in terms of
-functionalities, and is supported but all decent players.
+doesn't; on the other hand <systemitem class="library">XviD</systemitem>
+is closer to <systemitem class="library">libavcodec</systemitem> in
+terms of functionality, and is supported by all decent players.
 </para></answer>
 </qandaentry>
 
