@@ -152,40 +152,6 @@ Your distribution may differ from the
 <ulink url="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</ulink>.
 </para></answer>
 </qandaentry>
-
-<qandaentry>
-<question><para>
-I compiled <application>MPlayer</application> with libdvdcss/libdivxdecore support,
-but when I try to start it, it says:
-<screen>
-error while loading shared libraries: lib*.so.0: cannot load shared object file: No such file or directory
-</screen>
-I checked up on the file and it IS there in <filename class="directory">/usr/local/lib</filename> ...
-</para></question>
-<answer><para>
-Add <filename class="directory">/usr/local/lib</filename> to <filename>/etc/ld.so.conf</filename>
-and run <command>ldconfig</command>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-<application>MPlayer</application> dies with segmentation fault upon pthread check!
-</para></question>
-<answer><para>
-<command>chmod 644 /usr/lib/libc.so</command>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I'd like to compile <application>MPlayer</application> on Minix!
-</para></question>
-<answer><para>
-Me too. :)
-</para></answer>
-</qandaentry>
-
 </qandadiv>
 
 <qandadiv id="faq-general">
@@ -326,28 +292,6 @@ and install it.
 
 <qandaentry>
 <question><para>
-Umm, what is &quot;IdegCounter&quot;?
-</para></question>
-<answer><para>
-A combination of a Hungarian and an English word. &quot;Ideg&quot; in Hungarian
-means the same as &quot;nerve&quot; in English, and is pronounced as something like
-&quot;ydaegh&quot;. It was first used to measure the nervousness of A'rpi, after
-some (umm) &quot;mysterious&quot; disappearance of CVS code ;)
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-And what is &quot;Faszom(C)ounter&quot;?
-</para></question>
-<answer><para>
-&quot;Fasz&quot; is a Hungarian word you don't want to know, the others are
-connected to the perverted minds of the <application>MPlayer</application> developers.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Subtitles are very nice, the most beautiful I've ever seen, but they
 slow down playing! I know it's unlikely ...
 </para></question>
@@ -355,30 +299,6 @@ slow down playing! I know it's unlikely ...
 After running <filename>./configure</filename>, edit <filename>config.h</filename>
 and replace <systemitem>#undef FAST_OSD</systemitem> with
 <systemitem>#define FAST_OSD</systemitem>. Then recompile.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-What exactly is this <systemitem class="library">libavcodec</systemitem> thing?
-</para></question>
-<answer><para>
-See the
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-section.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-But configure tells me
-<screen>Checking for libavcodec ... no</screen>
-</para></question>
-<answer><para>
-You need to get <systemitem class="library">libavcodec</systemitem> from
-FFmpeg's CVS. Read the instructions in the
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-section.
 </para></answer>
 </qandaentry>
 
@@ -772,20 +692,6 @@ kernel modules or add <option>-ao alsa</option> to your command line to
 directly use the ALSA audio output driver.
 </para></answer>
 </qandaentry>
-
-<qandaentry>
-<question><para>
-OpenGL (<option>-vo gl</option>) output doesn't work (hang/black window/X11
-errors/...).
-</para></question>
-<answer><para>
-Your OpenGL driver doesn't support dynamic texture changes (glTexSubImage).
-It's known not to work with nVidia's binary mess. It's known to work with
-Utah-GLX/DRI and Matrox G400 cards. Also with DRI and Radeon cards. It won't
-work with DRI and other cards. it will not work with 3DFX cards because of
-the 256x256 texture size limit.
-</para></answer>
-</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-dvd">
@@ -831,18 +737,6 @@ Do I need to be (setuid) root to be able to play a DVD?
 <answer><para>
 No. However you must have the proper rights
 on the DVD device entry (in <filename class="directory">/dev/</filename>).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Where can I get libdvdread and libdvdcss packages?
-</para></question>
-<answer><para>
-You don't need to. Use <emphasis role="bold">libmpdvdkit2</emphasis>, which is
-present in the <application>MPlayer</application> source, and used by default.
-You can get the mentioned packages from the
-<ulink url="http://www.dtek.chalmers.se/groups/dvd/">Ogle site</ulink>.
 </para></answer>
 </qandaentry>
 
