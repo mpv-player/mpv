@@ -80,18 +80,18 @@ static char *b64_decode(const char *in, char *out, int *size)
       a[i] = (char) c;
       b[i] = (char) dtable[c];
     }
-    out = xbuffer_ensure_size(out, k+3);
+    out = xbuffer_ensure_size(out, k+4);
     out[k++] = (b[0] << 2) | (b[1] >> 4);
     out[k++] = (b[1] << 4) | (b[2] >> 2);
     out[k++] = (b[2] << 6) | b[3];
     i = a[2] == '=' ? 1 : (a[3] == '=' ? 2 : 3);
     if (i < 3) {
-      out[k - 1]=0;
+      out[k]=0;
       *size=k;
       return out;
     }
   }
-  out[k - 1]=0;
+  out[k]=0;
   *size=k;
   return out;
 }
