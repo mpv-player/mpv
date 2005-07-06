@@ -2923,7 +2923,7 @@ codec</title>
   DVD, VCD, and SVCD also constrain you to relatively low 
   GOP (Group of Pictures) sizes.
   For 30 fps material the largest allowed GOP size is 18.
-  For 25 or 25 fps, the maximum is 15.
+  For 25 or 24 fps, the maximum is 15.
   The GOP size is set using the <option>keyint</option> option.
 </para>
 </sect3>
