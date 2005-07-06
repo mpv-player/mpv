@@ -2731,7 +2731,7 @@ codec</title>
 
 <listitem><para>
   <emphasis role="bold">qpel</emphasis>
-    Raise the number of candidate motion vectors's by increasing
+    Raise the number of candidate motion vectors by increasing
     the precision of the motion estimation from halfpel to
     quarterpel.
     The idea is to find better motion vectors which will in return
@@ -2754,8 +2754,8 @@ codec</title>
   <emphasis role="bold">gmc</emphasis>
     Tries to save bits on panning scenes by using a single motion
     vector for the whole frame.
-    This almost always raise PSNR, but significantly slows down
-    encoding (significantly slows down encoding).
+    This almost always raises PSNR, but significantly slows down
+    encoding (as well as decoding).
     Therefore, you should only use it when you have turned
     <option>vhq</option> to the maximum.
     <systemitem class="library">XviD</systemitem>'s GMC is more
@@ -2824,7 +2824,9 @@ codec</title>
     </row>
     <row>
         <entry>NTSC DVD</entry>
-        <entry>352x240*</entry> 
+        <entry>352x240<footnote id='fn-rare-resolutions'><para>
+	  These resolutions are rarely used for DVDs because
+	  they are fairly low quality.</para></footnote></entry> 
         <entry>MPEG-1</entry>
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
@@ -2868,7 +2870,7 @@ codec</title>
     </row>
     <row>
         <entry>PAL DVD</entry>
-        <entry>352x288*</entry>
+        <entry>352x288<footnoteref linkend='fn-rare-resolutions'/></entry>
         <entry>MPEG-1</entry>
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
@@ -2902,10 +2904,6 @@ codec</title>
 </tbody>
 </tgroup>
 </informaltable>
-<para>
-  * These resolutions are rarely used for DVDs because they are fairly low
-  quality.
-</para>
 
 <para>
   If your movie has 2.35:1 aspect (most recent action movies), you will
@@ -2924,7 +2922,7 @@ codec</title>
 <para>
   DVD, VCD, and SVCD also constrain you to relatively low 
   GOP (Group of Pictures) sizes.
-  For 30 fps material the largest allows GOP size is 18.
+  For 30 fps material the largest allowed GOP size is 18.
   For 25 or 25 fps, the maximum is 15.
   The GOP size is set using the <option>keyint</option> option.
 </para>
@@ -3032,8 +3030,8 @@ codec</title>
 <para>
   If the audio sample rate in the original file is not the same as
   required by the target format, sample rate conversion is required.
-  This is acheived using the <option>-srate</option> and 
-  <option>-af lavcresample</option> options together.
+  This is achieved using the <option>-srate</option> and 
+  -af lavcresample options together.
   </para>
   <para>
   DVD:
@@ -3076,7 +3074,7 @@ codec</title>
   <option>ac3</option> is most commonly used for DVD.
   PCM audio may also be used for DVD, but this is mostly a big waste of
   space.
-  Note that mp3 audio is not compliant for any of these formats, but
+  Note that MP3 audio is not compliant for any of these formats, but
   players often have no problem playing it anyway.
 </para></listitem>
 
@@ -3178,7 +3176,7 @@ codec</title>
   options to lavcopts, such as <option>trell</option>,
   <option>mbd=2</option>, and others.
   Note that <option>qpel</option> and <option>v4mv</option>, while often
-  useful with MPEG-4, are not usable in MPEG-1 or MPEG-2.
+  useful with MPEG-4, are not usable with MPEG-1 or MPEG-2.
   Also, if you are trying to make a very high quality DVD encode, it may
   be useful to add <option>dc=10</option> to lavcopts.
   Doing so may help reduce the appearance of blocks in flat-colored areas.
@@ -3200,11 +3198,11 @@ codec</title>
 <sect2 id="menc-feat-vcd-dvd-audio">
 <title>Encoding Audio</title>
 <para>
-  VCD and SVCD supports MPEG-1 layer II audio, using one of
+  VCD and SVCD support MPEG-1 layer II audio, using one of
   <systemitem class="library">toolame</systemitem>,
   <systemitem class="library">twolame</systemitem>,
-  or <systemitem class="library">libavcodec</systemitem>'s mp2 encoder.
-  The libavcodec mp2 is far from being as good as the other two libraries,
+  or <systemitem class="library">libavcodec</systemitem>'s MP2 encoder.
+  The libavcodec MP2 is far from being as good as the other two libraries,
   however it should always be available to use.
 </para>
 
