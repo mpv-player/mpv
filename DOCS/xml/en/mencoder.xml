@@ -3030,8 +3030,8 @@ codec</title>
 <para>
   If the audio sample rate in the original file is not the same as
   required by the target format, sample rate conversion is required.
-  This is achieved using the <option>-srate</option> and 
-  -af lavcresample options together.
+  This is achieved using the <option>-srate</option> option and 
+  the <option>-af lavcresample</option> audio filter together.
   </para>
   <para>
   DVD:
