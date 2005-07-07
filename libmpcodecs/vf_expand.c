@@ -27,12 +27,16 @@ static struct vf_priv_s {
     int exp_w,exp_h;
     int exp_x,exp_y;
     int osd;
+    double aspect;
+    int round;
     unsigned char* fb_ptr;
     int first_slice;
 } vf_priv_dflt = {
   -1,-1,
   -1,-1,
   0,
+  0.,
+  1,
   NULL,
   0
 };
@@ -178,6 +182,18 @@ static int config(struct vf_instance_s* vf,
       else if ( vf->priv->exp_h < -1 ) vf->priv->exp_h=height - vf->priv->exp_h;
         else if( vf->priv->exp_h<height ) vf->priv->exp_h=height;
 #endif
+    if (vf->priv->aspect) {
+        if (vf->priv->exp_h < vf->priv->exp_w * vf->priv->aspect) {
+            vf->priv->exp_h = vf->priv->exp_w * vf->priv->aspect;
+        } else {
+            vf->priv->exp_w = vf->priv->exp_h / vf->priv->aspect;
+        }
+    }
+    if (vf->priv->round > 1) {
+    	vf->priv->exp_w = (1 + (vf->priv->exp_w - 1) / vf->priv->round) * vf->priv->round;
+        vf->priv->exp_h = (1 + (vf->priv->exp_h - 1) / vf->priv->round) * vf->priv->round;
+    }
+
     if(vf->priv->exp_x<0 || vf->priv->exp_x+width>vf->priv->exp_w) vf->priv->exp_x=(vf->priv->exp_w-width)/2;
     if(vf->priv->exp_y<0 || vf->priv->exp_y+height>vf->priv->exp_h) vf->priv->exp_y=(vf->priv->exp_h-height)/2;
     vf->priv->fb_ptr=NULL;
@@ -377,27 +393,14 @@ static int open(vf_instance_t *vf, char* args){
     vf->draw_slice=draw_slice;
     vf->get_image=get_image;
     vf->put_image=put_image;
-    if(!vf->priv) {
-    vf->priv=malloc(sizeof(struct vf_priv_s));
-    vf->priv->exp_x=
-    vf->priv->exp_y=
-    vf->priv->exp_w=
-    vf->priv->exp_h=-1;
-    vf->priv->osd=0;
-    //  parse args ->
-    } // if(!vf->priv)
-    if(args) sscanf(args, "%d:%d:%d:%d:%d", 
-    &vf->priv->exp_w,
-    &vf->priv->exp_h,
-    &vf->priv->exp_x,
-    &vf->priv->exp_y,
-    &vf->priv->osd);
-    mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d  (-1=autodetect) osd: %d\n",
+    mp_msg(MSGT_VFILTER, MSGL_INFO, "Expand: %d x %d, %d ; %d, osd: %d, aspect: %lf, round: %d\n",
     vf->priv->exp_w,
     vf->priv->exp_h,
     vf->priv->exp_x,
     vf->priv->exp_y,
-    vf->priv->osd);
+    vf->priv->osd,
+    vf->priv->aspect,
+    vf->priv->round);
     return 1;
 }
 
@@ -408,6 +411,8 @@ static m_option_t vf_opts_fields[] = {
   {"x", ST_OFF(exp_x), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
   {"y", ST_OFF(exp_y), CONF_TYPE_INT, M_OPT_MIN, -1, 0, NULL},
   {"osd", ST_OFF(osd), CONF_TYPE_FLAG, 0 , 0, 1, NULL},
+  {"aspect", ST_OFF(aspect), CONF_TYPE_DOUBLE, M_OPT_MIN, 0, 0, NULL},
+  {"round", ST_OFF(round), CONF_TYPE_INT, M_OPT_MIN, 1, 0, NULL},
   { NULL, NULL, 0, 0, 0, 0,  NULL }
 };
 

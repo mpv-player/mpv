@@ -4177,7 +4177,7 @@ top left corner position (default: -1, uppermost leftmost)
 .PD 1
 .
 .TP
-.B expand[=w:h:x:y:o]
+.B expand[=w:h:x:y:o:a:r]
 Expands (not scales) movie resolution to the given value and places the
 unscaled original at coordinates x, y.
 Can be used for placing subtitles/\:OSD in the resulting black bands.
@@ -4202,6 +4202,19 @@ OSD/\:subtitle rendering
 .br
 1: enable
 .REss
+.IPs <a>\ \ 
+Expands to an aspect instead of a resolution. (default: 0)
+.sp 1
+.I EXAMPLE:
+.PD 0
+.RSs
+.IP expand=800::::3/4
+Expands to 800x600, unless the movie is higher resolution, then it
+expands to fill a 3/4 aspect.
+.RE
+.PD 1
+.IPs <r>\ \ 
+Rounds up to make both width and height divisable by r. (default: 1)
 .RE
 .
 .TP
