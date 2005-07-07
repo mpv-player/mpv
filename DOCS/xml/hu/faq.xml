@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.85 -->
+<!-- synced with 1.86 -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Gyakran ismételt kérdések</title>
 
@@ -156,40 +156,6 @@ A disztribúciód valószínűleg különbözik a
 </para></answer>
 </qandaentry>
 
-<qandaentry>
-<question><para>
-Lefordítottam az <application>MPlayer</application>t libdvdcss/libdivxdecore támogatással,
-de amikor megpróbálom elindítani, azt mondja:
-<screen>
-error while loading shared libraries: lib*.so.0: cannot load shared object file: No such file or directory
-</screen>
-Megnéztem, és VAN ilyen fájl a <filename class="directory">/usr/local/lib</filename> könyvtárban...
-</para></question>
-<answer><para>
-Add hozzá a <filename class="directory">/usr/local/lib</filename> könyvtárat a
-<filename>/etc/ld.so.conf</filename> fájlhoz és futtasd le az <command>ldconfig</command>
-parancsot.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Az <application>MPlayer</application> meghal szegfaulttal a pthread ellenőrzés alatt!
-</para></question>
-<answer><para>
-<command>chmod 644 /usr/lib/libc.so</command>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Szeretnék <application>MPlayer</application>t fordítani Minixen!
-</para></question>
-<answer><para>
-Mi is. :)
-</para></answer>
-</qandaentry>
-
 </qandadiv>
 
 <qandadiv id="faq-general">
@@ -329,28 +295,6 @@ Töltsd le a bináris codeceket a
 
 <qandaentry>
 <question><para>
-Umm, mi az az &quot;IdegCounter&quot;?
-</para></question>
-<answer><para>
-Egy magyar és egy angol szó keveréke. Az &quot;Ideg&quot; a magyarban olyan, mint az
-angol &quot;nerve&quot;, kiejtése olyasmi, mint a &quot;ydaegh&quot;. Először az
-idegesség mérésére használta Árpi, majd néhány (umm) &quot;titokzatos&quot; CVS kód
-eltűnésre. ;)
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-És mi az a &quot;Faszom(C)ounter&quot;?
-</para></question>
-<answer><para>
-A &quot;Fasz&quot; egy olyan magyar szó, aminek a jelentését nem akarod tudni, a többi az
-<application>MPlayer</application> fejlesztők perverz fantáziájához kapcsolódik.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 A feliratok gyönyörűek, a legszebbek, amit valaha láttam, de lelassítják
 a lejátszást! Tudom, hogy hihetetlen ...
 </para></question>
@@ -358,30 +302,6 @@ a lejátszást! Tudom, hogy hihetetlen ...
 Miután lefuttattad a <filename>./configure</filename>-t, írd át a <filename>config.h</filename>
 fájlt és cseréld ki az <systemitem>#undef FAST_OSD</systemitem> sort
 <systemitem>#define FAST_OSD</systemitem>-re. Aztán forgass újra.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Tulajdonképpen mi is egészen pontosan ez a <systemitem class="library">libavcodec</systemitem> dolog?
-</para></question>
-<answer><para>
-Lásd a
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-részt.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-De a configure azt mondja, hogy
-<screen>Checking for libavcodec ... no</screen>
-</para></question>
-<answer><para>
-Be kell szerezned a <systemitem class="library">libavcodec</systemitem> az
-FFmpeg CVS-éből. Olvasd el az utasításokat a
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-fejezetben.
 </para></answer>
 </qandaentry>
 
@@ -776,20 +696,6 @@ kernel modulját vagy megadni a <option>-ao alsa</option> kapcsolót a parancssorb
 a közvetlen ALSA audió kimeneti vezérlő használatához.
 </para></answer>
 </qandaentry>
-
-<qandaentry>
-<question><para>
-Az OpenGL (<option>-vo gl</option>) kimenet nem működik (megáll/fekete ablak/X11
-hibák/...).
-</para></question>
-<answer><para>
-Az OpenGL vezérlőd nem támogatja a dinamikus textúra váltást (glTexSubImage).
-Tudvalevő, hogy nem működik az nVidia bináris szemetével. Működik az Utah-GLX/DRI
-és a Matrox G400 kártyákkal, valamint a DRI-vel és Radeon kártyákkal. Nem működik
-DRI-vel és egyéb kártyákkal. Nem megy 3DFX kártyákkal, mert 256x256-os textúra
-méret határuk van.
-</para></answer>
-</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-dvd">
@@ -834,18 +740,6 @@ Muszáj (setuid) root-nak lennem, hogy DVD-t nézhessek?
 <answer><para>
 Nem. De megfelelő jogokkal kell rendelkezned a DVD eszköz bejegyzésére
 (a <filename class="directory">/dev/</filename> könyvtárban).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Honnan tudom megszerezni a libdvdread és libdvdcss csomagokat?
-</para></question>
-<answer><para>
-Nem kell. Használd a <emphasis role="bold">libmpdvdkit2</emphasis>-t, ami benne
-van az <application>MPlayer</application> forrásában, és alapértelmezett.
-Az említett csomagokat beszerezheted az
-<ulink url="http://www.dtek.chalmers.se/groups/dvd/">Ogle siteról</ulink>.
 </para></answer>
 </qandaentry>
 
