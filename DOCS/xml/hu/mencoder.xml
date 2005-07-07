@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.76 -->
+<!-- synced with 1.79 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2705,7 +2705,7 @@ codec-kal</title>
     Biteket próbál megspórolni bizonyos jeleneteknél úgy, hogy egy
     mozgásvektort használ az egész kockához.
     Ez majdnem mindig növeli a PSNR-t, de jelentősen lelassítja a
-    kódolást.
+    kódolást (és a dekódolást is).
     Ezért csak akkor ajánlott használnod, ha a <option>vhq</option>
     a maximumra állítottad.
     Az <systemitem class="library">XviD</systemitem> GMC-je sokkal
@@ -2774,7 +2774,9 @@ codec-kal</title>
     </row>
     <row>
         <entry>NTSC DVD</entry>
-        <entry>352x240*</entry> 
+        <entry>352x240<footnote id='fn-rare-resolutions'><para>
+      Ezek a felbontások ritkán használatosak a DVD-ken, mert elég
+      alacsony minőségűek.</para></footnote></entry>         
         <entry>MPEG-1</entry>
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
@@ -2818,7 +2820,7 @@ codec-kal</title>
     </row>
     <row>
         <entry>PAL DVD</entry>
-        <entry>352x288*</entry>
+        <entry>352x288<footnoteref linkend='fn-rare-resolutions'/></entry>
         <entry>MPEG-1</entry>
         <entry>1856 kbps</entry>
         <entry>48000 Hz</entry>
@@ -2852,10 +2854,6 @@ codec-kal</title>
 </tbody>
 </tgroup>
 </informaltable>
-<para>
-  * Ezek a felbontások ritkán használatosak a DVD-ken, mert elég alacsony
-  minőségűek.
-</para>
 
 <para>
   Ha a filmednek 2.35:1 méretaránya van (a legtöbb akció film), fekete
@@ -2875,7 +2873,7 @@ codec-kal</title>
   A DVD, VCD és SVCD eléggé alacsony GOP (Group of Pictures) méret
   értékekre korlátoz le.
   Egy 30 fps-es anyagnál a legnagyobb megengedett GOP méret 18.
-  25 vagy 25 fps-nél a maximum 15.
+  25 vagy 24 fps-nél a maximum 15.
   A GOP méretét a <option>keyint</option> opcióval lehet beállítani.
 </para>
 </sect3>
@@ -3024,7 +3022,7 @@ codec-kal</title>
   <option>mp2</option> a VCD-hez, SVCD-hez vagy PAL DVD-hez;
   <option>ac3</option> a leggyakoribb DVD-hez.
   PCM audió is használható DVD-hez, de legtöbbször csak helypazarlás.
-  Figyelj rá, hogy az mp3 audió ezen formátumok egyikével sem kompatibilis,
+  Figyelj rá, hogy az MP3 audió ezen formátumok egyikével sem kompatibilis,
   de a lejátszóknak gyakran semmi gondot nem okoz a lejátszása.
 </para></listitem>
 
@@ -3149,9 +3147,9 @@ codec-kal</title>
   A VCD és az SVCD támogatja az MPEG-1 layer II audiót, a
   <systemitem class="library">toolame</systemitem>,
   <systemitem class="library">twolame</systemitem>,
-  vagy a <systemitem class="library">libavcodec</systemitem> mp2 kódolójának
+  vagy a <systemitem class="library">libavcodec</systemitem> MP2 kódolójának
   felhasználásával.
-  A libavcodec mp2 messze nincs olyan jó, mint a másik két könyvtár,
+  A libavcodec MP2 messze nincs olyan jó, mint a másik két könyvtár,
   azonban az mindig elérhető és használható.
 </para>
 
