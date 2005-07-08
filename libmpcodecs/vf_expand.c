@@ -189,8 +189,8 @@ static int config(struct vf_instance_s* vf,
             vf->priv->exp_w = vf->priv->exp_h / vf->priv->aspect;
         }
     }
-    if (vf->priv->round > 1) {
-    	vf->priv->exp_w = (1 + (vf->priv->exp_w - 1) / vf->priv->round) * vf->priv->round;
+    if (vf->priv->round > 1) { // round up.
+        vf->priv->exp_w = (1 + (vf->priv->exp_w - 1) / vf->priv->round) * vf->priv->round;
         vf->priv->exp_h = (1 + (vf->priv->exp_h - 1) / vf->priv->round) * vf->priv->round;
     }
 
