@@ -1068,7 +1068,7 @@ This led many people to think that
 <systemitem class="library">libavcodec</systemitem>
 was a DivX encoding library, when in fact it is a completely different
 MPEG-4 encoding library which implements the MPEG-4 standard much
-better than DivX.
+better than DivX does.
 Therefore, the new default FourCC used by
 <systemitem class="library">libavcodec</systemitem> is 'FMP4', but you
 may override this behavior using <application>MEncoder</application>'s
