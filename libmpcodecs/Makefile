@@ -103,6 +103,7 @@ VFILTER_SRCS=vf.c \
              vf_palette.c \
              vf_perspective.c \
              vf_phase.c \
+             vf_pp7.c \
              vf_pullup.c \
              vf_qp.c \
              vf_rectangle.c \
