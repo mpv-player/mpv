@@ -2678,6 +2678,13 @@ codec</title>
 </para></listitem>
 
 <listitem><para>
+  <emphasis role="bold">hq_ac</emphasis>
+  Activates a better coefficient cost estimation method, which slightly
+  reduces filesize by around 0.15 to 0.19%, while having a negligible
+  impact on speed.
+</para></listitem>
+
+<listitem><para>
  <emphasis role="bold">cartoon</emphasis>
   Designed to better encode cartoon content, and has no impact on
   speed as it just tunes the mode decision heuristics for this type
@@ -2706,7 +2713,8 @@ codec</title>
   information into account, whereas <option>me_quality</option>
   alone only uses luma (grayscale).
   This slows down encoding by 5-10% but improves visual quality
-  quite a bit by reducing blocking effects.
+  quite a bit by reducing blocking effects, and reduces filesize by
+  around 1.3%.
   If you are looking for speed, you should disable this option before
   starting to consider reducing <option>me_quality</option>.
 </para></listitem>
@@ -3205,7 +3213,7 @@ codec</title>
   The libavcodec MP2 is far from being as good as the other two libraries,
   however it should always be available to use.
   VCD only supports constant bitrate audio (CBR) whereas SVCD supports
-  variable bitrate (VBR) too.
+  variable bitrate (VBR), too.
   Be careful when using VBR because some bad standalone players might not
   support it too well.
 </para>
