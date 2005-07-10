@@ -220,10 +220,14 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 
 	/* adapt size of Blinkenlights UDP stream to size of movie */
 	if (bl->width < 0 || bl->height < 0) {
-		if (bl->width < 0) /* use width of movie */
+		if (bl->width < 0) { /* use width of movie */
 			bl->width = width;
-		if (bl->height < 0) /* use height of movie */
+			bl_packet->width = htons(bl->width);
+		}
+		if (bl->height < 0) { /* use height of movie */
 			bl->height = height;
+			bl_packet->height = htons(bl->height);
+		}
 		/* check for maximum size of UDP packet */
 		if (12 + bl->width*bl->height*bl->channels > 65507) {
 			mp_msg(MSGT_VO, MSGL_ERR, "bl: %dx%d-%d does not fit into an UDP packet\n",
