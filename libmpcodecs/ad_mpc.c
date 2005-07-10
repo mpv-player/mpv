@@ -16,8 +16,8 @@
 
 static ad_info_t info = 
 {
-	"MPC/MPEGPlus audio decoder",
-	"libmusepack",
+	"Musepack audio decoder",
+	"mpcdec",
 	"Reza Jelveh and Reimar Döffinger",
 	"",
 	""
