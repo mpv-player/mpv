@@ -42,8 +42,10 @@ MPlayer (1.0)
     * vstrict=-1 is default, Snow, ffv1 etc. need vstrict=-2
 
     Filters:
-    * much faster version of spp filter (-vf fspp)
+    * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6").
     * remove_logo filter
+    * lavcresample is now used by default (use -af-adv force=0 for old
+      behaviour).
 
     MEncoder:
     * audio encoding modularized
