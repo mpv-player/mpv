@@ -94,6 +94,7 @@ typedef struct {
 	uint8_t type;
 	uint32_t temp_ref;
 	uint64_t pts, dts, idur;
+	uint32_t pos;		//start offset for the frame
 } mpeg_frame_t;
 
 typedef struct {
@@ -126,7 +127,7 @@ typedef struct {
 	off_t headers_size, data_size;
 	uint64_t scr, vbytes, abytes, init_delay_pts;
 	uint32_t muxrate;
-	uint8_t *buff, *tmp, *residual;
+	uint8_t *buff, *tmp, *abuf, *residual;
 	uint32_t residual_cnt, headers_cnt;
 	double init_adelay;
 	int drop;
@@ -412,6 +413,7 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
     spriv->max_pl_size = priv->packet_size - calc_pack_hlen(priv, spriv);
     spriv->init_pts = conf_init_apts * 90 * 1024;
     spriv->pts = spriv->init_pts;
+    spriv->last_pts = spriv->init_pts;
     spriv->dts = 0;
     spriv->id = 0xc0 + muxer->num_audios;
     s->ckid = be2me_32 (0x100 + spriv->id);
@@ -431,6 +433,15 @@ static muxer_stream_t* mpegfile_new_stream(muxer_t *muxer,int type){
     muxer->num_audios++;
     priv->has_audio++;
     s->h.fccType=streamtypeAUDIO;
+
+    spriv->framebuf_cnt = 30;
+    spriv->framebuf_used = 0;
+    spriv->framebuf = init_frames(spriv->framebuf_cnt, (size_t) 2048);
+    if(spriv->framebuf == NULL) {
+      mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't allocate initial frames structure, abort!\n");
+      return NULL;
+    }
+
     mp_msg (MSGT_MUXER, MSGL_DBG2, "Added audio stream %d, ckid=%X\n", s->id - muxer->num_videos + 1, s->ckid);
   }
   muxer->avih.dwStreams++;
@@ -671,7 +682,7 @@ static int write_mpeg_pes_header(muxer_headers_t *h, uint8_t *pes_id, uint8_t *b
 	{	
 		if(h->buffer_size > 0)
 		{
-			buff[len] = 0x10;	//std flag
+			buff[len] = 0x1e;	//std flag
 			len++;
 			
 			write_mpeg_std(&buff[len], h->buffer_size, h->type, 0x40);
@@ -757,7 +768,7 @@ static uint32_t calc_pes_hlen(int format, muxer_headers_t *h, muxer_priv_t *priv
 	if(format == MUX_MPEG1)
 		len = 6;
 	else
-		len = 9;	//era 12
+		len = 9;
 	
 	if(h->pts)
 	{
@@ -783,7 +794,7 @@ static uint32_t calc_pes_hlen(int format, muxer_headers_t *h, muxer_priv_t *priv
 
 static uint32_t calc_pack_hlen(muxer_priv_t *priv, muxer_headers_t *h)
 {
-	uint32_t len;
+	uint32_t len, x;
 
 	if(priv->mux == MUX_MPEG1)
 		len = 12;
@@ -793,10 +804,11 @@ static uint32_t calc_pack_hlen(muxer_priv_t *priv, muxer_headers_t *h)
 	/*if((priv->is_genmpeg1 || priv->is_genmpeg2) && priv->update_system_header)
 		len += (6 + (3*priv->sys_info.cnt));*/
 
-	if(h->min_pes_hlen > 0)
+	x = calc_pes_hlen(priv->mux, h, priv);
+	if(h->min_pes_hlen > x)
 		len += h->min_pes_hlen;
 	else
-		len += calc_pes_hlen(priv->mux, h, priv);
+		len += x;
 	
 	return len;
 }
@@ -1002,38 +1014,6 @@ static void patch_panscan(muxer_priv_t *priv, unsigned char *buf)
 #define min(a, b) ((a) <= (b) ? (a) : (b))
 
 
-static uint32_t get_audio_frame_size(muxer_headers_t *spriv, uint8_t *buf, int format, int samples_ps)
-{
-	uint32_t sz, tmp, spf;
-	
-#ifdef USE_LIBA52
-#include "../liba52/a52.h"
-	if(format == 0x2000)
-	{
-		int t1, t2, t3;
-		sz = (uint32_t) a52_syncinfo(buf, &t1, &t2, &t3);
-		if(sz)
-			return sz;
-	}
-#endif
-	if(format == 0x2000)
-		spf = 1536;
-	else if(format == AUDIO_AAC1 || format == AUDIO_AAC2)
-		spf = 1024;
-	else if((format == 0x55) && (samples_ps < 32000))
-		spf = 576;
-	else
-		spf = 1152;
-
-	tmp = spriv->bitrate * spf;
-	sz = tmp / samples_ps;
-	if(sz % 2)
-		sz++;
-		
-	return sz;
-}
-
-
 static int reorder_frame(muxer_headers_t *spriv, uint8_t *ptr, size_t len, uint8_t pt, uint32_t temp_ref, uint64_t idur)
 {
 	uint16_t idx = 0, move=0;
@@ -1064,7 +1044,6 @@ static int reorder_frame(muxer_headers_t *spriv, uint8_t *ptr, size_t len, uint8
 	//now idx is the position where we should store the frame 
 	if(idx+move >= spriv->framebuf_cnt)
 	{	//realloc
-		//fprintf(stderr, "\nREALLOC1: %d\n", (int) spriv->framebuf_cnt+1);
 		spriv->framebuf = (mpeg_frame_t*) realloc(spriv->framebuf, (spriv->framebuf_cnt+1)*sizeof(mpeg_frame_t));
 		if(spriv->framebuf == NULL)
 		{
@@ -1124,23 +1103,21 @@ static int reorder_frame(muxer_headers_t *spriv, uint8_t *ptr, size_t len, uint8
 
 static uint32_t dump_audio(muxer_t *muxer, muxer_stream_t *as, uint32_t abytes, int force)
 {
-	uint32_t len = 0, sz;
+	uint32_t len = 0, tlen, sz;
 	uint64_t num_frames = 0, next_pts;
 	uint16_t rest;
 	int64_t tmp;
 	double delta_pts;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
 	muxer_headers_t *apriv = (muxer_headers_t*) as->priv;
-	
-	if((abytes < apriv->frame_size) && (! force))	//pl_size
-	//if((abytes < apriv->max_pl_size) && (! force))	//pl_size
-	{
-		apriv->is_late = 1;
-		mp_msg(MSGT_MUXER, MSGL_DBG2, "NOT SAVING: %u bytes\n", abytes);
-		return 0;
-	}
-	
-	abytes = min(abytes, as->b_buffer_len);			//available bytes
+	uint32_t num, den, j, k, l, n;
+	mpeg_frame_t *frm , frm2;
+
+	tlen = 0;
+	for(j = 0; j < apriv->framebuf_used; j++)
+		tlen += apriv->framebuf[j].size - apriv->framebuf[j].pos;
+
+	abytes = min(abytes, tlen);			//available bytes
 	if(! abytes)
 		return 0;
 
@@ -1149,22 +1126,84 @@ static uint32_t dump_audio(muxer_t *muxer, muxer_stream_t *as, uint32_t abytes, 
 	else
 		apriv->has_pes_priv_headers = 0;
 
-	rest = (apriv->size % apriv->frame_size);
-	if(rest)
-		rest = apriv->frame_size - rest;
-	
+	rest = apriv->framebuf[0].pos;
 	sz = priv->packet_size - calc_pack_hlen(priv, apriv);	//how many payload bytes we are about to write
-	num_frames = (sz + apriv->frame_size - 1 - rest) / apriv->frame_size;
-	
+	if(abytes < sz && !force)
+		return 0;
+	sz = min(sz, abytes);
+	num_frames = 0;
+	tlen = 0;
+	next_pts = 0;
+	for(j = 0; j < apriv->framebuf_used; j++)
+	{
+		frm = &(apriv->framebuf[j]);
+		k = min(frm->size - frm->pos, sz - tlen);
+		tlen += k;
+		if(!frm->pos)
+			num_frames++;
+		if(!frm->pos && !next_pts)
+			next_pts = frm->pts;
+		if(tlen == sz)
+			break;
+	}
+
+	if(tlen < sz && !force)
+		return 0;
+
+	if(!next_pts && force)
+		next_pts = apriv->last_pts;
+	apriv->last_dts = apriv->pts;
+	apriv->pts = next_pts;
 	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nAUDIO: tot=%llu, sz=%u bytes, FRAMES: %llu * %u, REST: %u, DELTA_PTS: %u\n", 
 		apriv->size, sz, num_frames, (uint32_t) apriv->frame_size, (uint32_t) rest, (uint32_t) ((num_frames * apriv->delta_pts) >> 10));
 	
-	next_pts = ((uint64_t) (num_frames * apriv->delta_pts)) + apriv->pts;
 	if(((priv->scr + (63000*1024)) < next_pts) && (priv->scr < apriv->pts) && (! force))
 	{
 		apriv->is_late = 1;
 		return 0;
 	}
+
+	n = 0;	//number of complete frames
+	tlen = 0;
+	for(j = 0; j < apriv->framebuf_used; j++)
+	{
+		int frame_size;
+
+		frm = &(apriv->framebuf[j]);
+		frame_size = frm->size - frm->pos;
+		l = min(sz - tlen, frame_size);
+
+		memcpy(&(priv->abuf[tlen]), &(frm->buffer[frm->pos]), l);
+		tlen += l;
+		if(l < frame_size)	//there are few bytes still to write
+		{
+			frm->pos += l;
+			break;
+		}
+		else
+		{
+			frm->pos = 0;
+			frm->size = 0;
+			n++;
+		}
+	}
+
+	if(num_frames)
+		apriv->frame_size = tlen/num_frames;
+	else
+		apriv->frame_size = tlen;
+
+	if(n)
+	{
+		for(j = n; j < apriv->framebuf_used; j++)
+		{
+			frm2 = apriv->framebuf[j - n];
+			apriv->framebuf[j - n] = apriv->framebuf[j];
+			apriv->framebuf[j] = frm2;
+		}
+		apriv->framebuf_used -= n;
+	}
+
 
 	if(as->ckid == be2me_32(0x1bd))
 	{
@@ -1176,42 +1215,36 @@ static uint32_t dump_audio(muxer_t *muxer, muxer_stream_t *as, uint32_t abytes, 
 	
 	if((priv->is_xsvcd || priv->is_xvcd) && apriv->size == 0)
 		apriv->buffer_size = 4*1024;
-
-	if(apriv->pts < priv->scr)
-		mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR: SCR: %llu, APTS: %llu, DELTA=-%.3lf secs\n", 
-			priv->scr, apriv->pts, (double) ((priv->scr - apriv->pts)/92160000.0));
 	
-	len = write_mpeg_pack(muxer, as, muxer->file, &(as->b_buffer[as->b_buffer_ptr]), abytes, 0);
+	len = write_mpeg_pack(muxer, as, muxer->file, priv->abuf, tlen, 0);
+
 	if((priv->is_xsvcd || priv->is_xvcd) && apriv->size == 0)
 		apriv->buffer_size = 0;
 	
 	apriv->size += len;
-	apriv->pts = next_pts;
-	
-	mp_msg(MSGT_MUXER, MSGL_DBG2, "NUM_FRAMES: %llu\n", num_frames);
 	
 	tmp = apriv->pts - priv->scr;
 	if((abs(tmp) > (63000*1024)) || (apriv->pts <= priv->scr))
 	{
 		double d;
-		d = (double) apriv->frame_size / (double) apriv->bitrate;
-		d *= (tmp - (63000*1024));
-		apriv->compensate = (uint32_t) d;
+
+		if(tmp > 0)
+			tmp = tmp - (63000*1024);
+
+		d = -tmp / 92160000.0;
+		d *= apriv->bitrate;
+		apriv->compensate = (int32_t) d;
 		
-		if(abs(tmp) > 92160000)	//usually up to 1 second it still acceptable
-			mp_msg(MSGT_MUXER, MSGL_ERR, "\nWARNING: SCR: %llu, APTS: %llu, DELTA=%.3lf secs, BYTES=%d\n", priv->scr, apriv->pts, 
-				(((double) tmp)/92160000.0), apriv->compensate);
+		if((tmp) > 92160000)	//usually up to 1 second it still acceptable
+			mp_msg(MSGT_MUXER, MSGL_ERR, "\nWARNING: SCR: << APTS, DELTA=%.3lf secs, COMPENSATE=%d, BR: %d\n", 
+				(((double) tmp)/92160000.0), apriv->compensate, apriv->bitrate);
+		else if(apriv->pts < priv->scr)
+			mp_msg(MSGT_MUXER, MSGL_ERR, "\nERROR: SCR: %llu, APTS: %llu, DELTA=-%.3lf secs, COMPENSATE=%d, BR: %d, lens: %d/%d, frames: %d\n", 
+				priv->scr, apriv->pts, (double) ((priv->scr - apriv->pts)/92160000.0), apriv->compensate, apriv->bitrate, tlen, len, n);
 	}
 
 	mp_msg(MSGT_MUXER, MSGL_DBG2, "\nWRITTEN AUDIO: %u bytes, TIMER: %.3lf, FRAMES: %llu * %u, DELTA_PTS: %.3lf\n", 
 		len, (double) (apriv->pts/92160000), num_frames, (uint32_t) apriv->frame_size, delta_pts);
-	
-	as->b_buffer_ptr += len;
-	as->b_buffer_len -= len;
-	
-	if(as->b_buffer_len > 0)
-		memmove(as->b_buffer, &(as->b_buffer[as->b_buffer_ptr]), as->b_buffer_len);
-	as->b_buffer_ptr = 0;
 	
 	return len;
 }
@@ -1238,6 +1271,7 @@ static void drop_delayed_audio(muxer_t *muxer, muxer_stream_t *as, int64_t size)
 	rest = size1 - size;
 	rest_pts = (double) rest / (double) apriv->bitrate;
 	apriv->pts += (int64_t) (92160000.0 * rest_pts);
+	apriv->last_pts += (int64_t) (92160000.0 * rest_pts);
 	mp_msg(MSGT_MUXER, MSGL_DBG2, "DROPPED: %lld bytes, REST= %lld, REST_PTS: %.3lf, AUDIO_PTS%.3lf\n", size1, rest, rest_pts, (double) (apriv->pts/92160000.0));
 }
 
@@ -1468,18 +1502,30 @@ static void check_pts(muxer_priv_t *priv, muxer_headers_t *vpriv, int i)
 static uint32_t calc_audio_chunk_size(muxer_stream_t *as, double duration, int finalize)
 {
 	muxer_headers_t *apriv;
-	uint32_t x, div, rest, abytes;
+	uint32_t x, div, rest, abytes, available;
 	double adur;
 	uint64_t iaduration;
+	int i;
 	
 	apriv = (muxer_headers_t*) as->priv;
-	abytes = (uint32_t) (duration * apriv->bitrate); //size of audio data to write
-	x = (abytes + apriv->max_pl_size - 1) / apriv->max_pl_size;
-	x *= apriv->max_pl_size;
-	adur = (double) x / (double) apriv->bitrate;
-	iaduration = (uint64_t) ((double) 92160000 * adur);
+	
+	iaduration = 0;
+	adur = 0;
+	available = abytes = 0;
+	for(i = 0; i < apriv->framebuf_used; i++)
+	{
+		if(adur < duration)
+			abytes += apriv->framebuf[i].size - apriv->framebuf[i].pos;
+		adur += (double)(apriv->framebuf[i].idur/92160000.0);
+		available += apriv->framebuf[i].size - apriv->framebuf[i].pos;
+	}
+		
 
-	abytes -= apriv->compensate;
+	if(adur < duration && !finalize)
+		return 0;
+
+	if(abytes > apriv->compensate)
+		abytes -= apriv->compensate;
 	div = abytes / apriv->max_pl_size;
 	rest = abytes % apriv->max_pl_size;
 	if(apriv->compensate > 0)
@@ -1490,8 +1536,11 @@ static uint32_t calc_audio_chunk_size(muxer_stream_t *as, double duration, int f
 		abytes = apriv->max_pl_size * (rest ? div + 1 : div);
 	apriv->compensate = 0;
 
+	while(abytes > available)
+		abytes -= apriv->max_pl_size;
+
 	if(finalize)
-		abytes = as->b_buffer_len;
+		abytes = available;
 
 	return abytes;
 }
@@ -1579,17 +1628,23 @@ init:
 			
 		if(as != NULL)
 		{
+			uint32_t available, i;
+
 			apriv = (muxer_headers_t*) as->priv;
 			abytes = calc_audio_chunk_size(as, duration, finalize);
+			if(! abytes)
+				return 0;
+			for(i = 0; i < apriv->framebuf_used; i++)
+				available += apriv->framebuf[i].size - apriv->framebuf[i].pos;
 			
 			if((abytes / apriv->max_pl_size) > n)
 				audio_rest = (abytes - (apriv->max_pl_size * n)) / n;
 			else
 				audio_rest = 0;
-			
-			if(as->b_buffer_len < abytes)
+
+			if(available < abytes && !finalize)
 			{
-				mp_msg(MSGT_MUXER, MSGL_DBG2, "Not enough audio data (%u < %u), exit\n", as->b_buffer_len, abytes);
+				mp_msg(MSGT_MUXER, MSGL_DBG2, "Not enough audio data (%u < %u), exit\n", available, abytes);
 				return 0;
 			}
 		}
@@ -2155,6 +2210,195 @@ static size_t parse_mpeg4_video(muxer_stream_t *s, muxer_priv_t *priv, muxer_hea
 	return len;
 }
 
+
+static int fill_last_frame(muxer_headers_t *spriv,  uint8_t *ptr, int len)
+{
+	int idx;
+
+	if(!len)
+		return 0;
+	
+	if(spriv->framebuf_used == 0)
+		idx = spriv->framebuf_used;
+	else
+		idx = spriv->framebuf_used - 1;
+
+	if(spriv->framebuf[idx].alloc_size < spriv->framebuf[idx].size + len)
+	{
+		spriv->framebuf[idx].buffer = (uint8_t*) realloc(spriv->framebuf[idx].buffer, spriv->framebuf[idx].size + len);
+		if(! spriv->framebuf[idx].buffer)
+			return 0;
+		spriv->framebuf[idx].alloc_size = spriv->framebuf[idx].size + len;
+	}
+
+	memcpy(&(spriv->framebuf[idx].buffer[spriv->framebuf[idx].size]), ptr, len);
+	spriv->framebuf[idx].size += len;
+
+	return len;
+}
+
+
+static int add_audio_frame(muxer_headers_t *spriv, uint64_t idur, uint8_t *ptr, int len)
+{
+	int idx, i;
+
+	idx = spriv->framebuf_used;
+	if(idx >= spriv->framebuf_cnt)
+	{
+		spriv->framebuf = (mpeg_frame_t*) realloc(spriv->framebuf, (spriv->framebuf_cnt+1)*sizeof(mpeg_frame_t));
+		if(spriv->framebuf == NULL)
+		{
+			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(idx), abort\n");
+			return 0;
+		}
+		
+		spriv->framebuf[spriv->framebuf_cnt].size = 0;
+		spriv->framebuf[spriv->framebuf_cnt].alloc_size = 0;
+		spriv->framebuf[spriv->framebuf_cnt].pos = 0;
+		
+		spriv->framebuf[spriv->framebuf_cnt].buffer = (uint8_t*) malloc(len);
+		if(spriv->framebuf[spriv->framebuf_cnt].buffer == NULL)
+		{
+			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(frame), abort\n");
+			return 0;
+		}
+		spriv->framebuf[spriv->framebuf_cnt].alloc_size = len;		
+		spriv->framebuf_cnt++;
+	}
+	
+	if(spriv->framebuf[idx].alloc_size < spriv->framebuf[idx].size + len)
+	{
+		spriv->framebuf[idx].buffer = realloc(spriv->framebuf[idx].buffer, spriv->framebuf[idx].size + len);
+		if(spriv->framebuf[idx].buffer == NULL)
+		{
+			mp_msg(MSGT_MUXER, MSGL_FATAL, "Couldn't realloc frame buffer(frame), abort\n");
+			return 0;
+		}
+		spriv->framebuf[idx].alloc_size = spriv->framebuf[idx].size + len;
+	}
+	
+	memcpy(&(spriv->framebuf[idx].buffer[spriv->framebuf[idx].size]), ptr, len);
+	spriv->framebuf[idx].size += len;
+	spriv->framebuf[idx].pos = 0;
+
+	spriv->framebuf[idx].idur = idur;
+	spriv->framebuf[idx].pts = spriv->last_pts;
+	spriv->framebuf_used++;
+
+	for(i = idx; i < spriv->framebuf_cnt; i++)
+		spriv->framebuf[i].pts = spriv->last_pts;
+
+	spriv->last_pts += idur;
+
+	return 1;
+}
+
+
+extern int aac_parse_frame(uint8_t *buf, int *srate, int *num);
+
+static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
+{
+	int i, len, chans, srate, spf, layer, dummy, tot, num, frames;
+	uint64_t idur;
+	muxer_headers_t *spriv = (muxer_headers_t *) s->priv;
+
+	i = tot = frames = 0;
+	switch(s->wf->wFormatTag)
+	{
+		case AUDIO_MP2:
+		case AUDIO_MP3:
+		{
+			while(i + 3 < s->b_buffer_len)
+			{
+				if(s->b_buffer[i] == 0xFF && ((s->b_buffer[i+1] & 0xE0) == 0xE0))
+				{
+					len = mp_get_mp3_header(&(s->b_buffer[i]), &chans, &srate, &spf, &layer);
+					if(len > 0 && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
+					{
+						frames++;
+						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
+
+						idur = (92160000ULL * spf) / srate;
+						add_audio_frame(spriv, idur, &(s->b_buffer[i]), len);
+						i += len;
+						tot = i;
+						continue;
+					}
+				}
+				i++;
+			}
+		}
+		break;
+
+		case AUDIO_A52:
+		{
+			while(i + 6 < s->b_buffer_len)
+			{
+				if(s->b_buffer[i] == 0x0B && s->b_buffer[i+1] == 0x77)
+				{
+					len = a52_syncinfo(&(s->b_buffer[i]), &dummy, &srate, &dummy);
+					if((len > 0) && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
+					{
+						frames++;
+						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
+
+						idur = (92160000ULL * 1536) / srate;
+						add_audio_frame(spriv, idur, &(s->b_buffer[i]), len);
+						i += len;
+						tot = i;
+						continue;
+					}
+				}
+				i++;
+			}
+		}
+		break;
+
+		case AUDIO_AAC1:
+		case AUDIO_AAC2:
+		{
+			while(i + 7 < s->b_buffer_len)
+			{
+				if(s->b_buffer[i] == 0xFF && ((s->b_buffer[i+1] & 0xF6) == 0xF0))
+				{
+					len = aac_parse_frame(&(s->b_buffer[i]), &srate, &num);
+					if((len > 0) && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
+					{
+						frames++;
+						fill_last_frame(spriv, &(s->b_buffer[tot]), i - tot);
+
+						idur = (92160000ULL * 1024 * num) / srate;
+						add_audio_frame(spriv, idur, &(s->b_buffer[i]), len);
+						i += len;
+						tot = i;
+						continue;
+					}
+				}
+				i++;
+			}
+		}
+	}
+
+	if(tot)
+	{
+		memmove(s->b_buffer, &(s->b_buffer[tot]), s->b_buffer_len - tot);
+		s->b_buffer_len -= tot;
+		s->b_buffer_ptr += tot;
+		if(s->b_buffer_len > 0)
+			memmove(s->b_buffer, &(s->b_buffer[s->b_buffer_ptr]), s->b_buffer_len);
+		s->b_buffer_ptr = 0;
+	}
+
+	if(finalize)
+		add_audio_frame(spriv, 0, s->b_buffer, s->b_buffer_len);
+	*nf = frames;
+	*timer = (double) (spriv->last_pts - spriv->init_pts)/92160000.0;
+
+	return tot;
+}
+
+
+
 static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags){
   size_t ptr=0, sz = 0;
   uint64_t pts, tmp;
@@ -2163,7 +2407,7 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
   muxer_headers_t *spriv = (muxer_headers_t*) s->priv;
   FILE *f;
   float fps;
-  uint32_t stream_format;
+  uint32_t stream_format, nf;
   
   f = muxer->file;
  
@@ -2210,6 +2454,9 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
     priv->vbytes += len;
     
     sz <<= 1;
+    s->h.dwLength++;
+    s->size += len;
+    s->timer = (double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
   } else { // MUXER_TYPE_AUDIO
   	spriv->type = 0;
 	stream_format = s->wf->wFormatTag;
@@ -2218,16 +2465,6 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 			stream_format, (uint32_t) len, (uint32_t) spriv->frame_size);
 	if(spriv->bitrate == 0)
 		spriv->bitrate = s->wf->nAvgBytesPerSec;
-	// I need to know the audio frame size
-	if(spriv->frame_size == 0)
-	{
-		spriv->frame_size = get_audio_frame_size(spriv, s->buffer, stream_format, s->wf->nSamplesPerSec);
-		spriv->aframe_delta_pts = ((double) spriv->frame_size / (double) spriv->bitrate);
-		//spriv->delta_pts = (uint64_t) (spriv->aframe_delta_pts * 92160000);
-		spriv->delta_pts = (uint64_t) (92160000 * spriv->frame_size) / spriv->bitrate;
-		mp_msg(MSGT_MUXER, MSGL_INFO, "AUDIO FRAME SIZE: %u, CODEC: %x, DELTA_PTS: %llu (%.3lf)\n", (uint32_t) spriv->frame_size, stream_format, spriv->delta_pts, spriv->aframe_delta_pts);
-	}
-	
 		
 	if(s->b_buffer_size - s->b_buffer_len < len)
 	{
@@ -2285,20 +2522,12 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 		}
 	}
 	
+	parse_audio(s, 0, &nf, &(s->timer));
+	s->h.dwLength += nf;
+	s->size += len;
 	sz = max(len, 2 * priv->packet_size);
   }
   
-  if (s->h.dwSampleSize) {
-	// CBR
-	s->h.dwLength += len/s->h.dwSampleSize;
-	if (len%s->h.dwSampleSize) mp_msg(MSGT_MUXER, MSGL_ERR, "Warning! len isn't divisable by samplesize!\n");
-  } else {
-	// VBR
-	s->h.dwLength++;
-  }
-  
-  s->size += len;
-  s->timer = (double)s->h.dwLength*s->h.dwScale/s->h.dwRate;
 
   //if genmpeg1/2 and sz > last buffer size in the system header we must write the new sysheader
   if(sz > s->h.dwSuggestedBufferSize) { // increase and set STD 
@@ -2327,7 +2556,14 @@ static void mpegfile_write_chunk(muxer_stream_t *s,size_t len,unsigned int flags
 
 static void mpegfile_write_index(muxer_t *muxer)
 {
+	int i, nf;
 	muxer_priv_t *priv = (muxer_priv_t *) muxer->priv;
+
+	for(i = 0; i < muxer->avih.dwStreams; i++)
+	{
+		if(muxer->streams[i]->type == MUXER_TYPE_AUDIO)
+			parse_audio(muxer->streams[i], 1, &nf, &(muxer->streams[i]->timer));
+	}
 	while(flush_buffers(muxer, 0) > 0);
 	flush_buffers(muxer, 1);
 	if(priv->is_genmpeg1 || priv->is_genmpeg2)
@@ -2555,8 +2791,9 @@ int muxer_init_muxer_mpeg(muxer_t *muxer){
   
   priv->buff = (uint8_t *) malloc(priv->packet_size);
   priv->tmp = (uint8_t *) malloc(priv->packet_size);
+  priv->abuf = (uint8_t *) malloc(priv->packet_size);
   priv->residual = (uint8_t *) malloc(priv->packet_size);
-  if((priv->buff == NULL) || (priv->tmp == NULL) || (priv->residual == NULL))
+  if((priv->buff == NULL) || (priv->tmp == NULL) || (priv->abuf == NULL) || (priv->residual == NULL))
   {
 	mp_msg(MSGT_MUXER, MSGL_ERR, "\nCouldn't allocate %d bytes, exit\n", priv->packet_size);
 	return 0;
