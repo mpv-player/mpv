@@ -6655,16 +6655,7 @@ elif test -z "$CFLAGS" ; then
     _stripbinaries=no
   fi
 else
-  cat <<EOF
-
-MPlayer compilation will use the CFLAGS set by you, but:
-
-    *** ***  DO NOT REPORT BUGS IF IT DOES NOT COMPILE/WORK!  *** ***
-
-It is strongly recommended to let MPlayer choose the correct CFLAGS!
-To do so, execute 'CFLAGS= ./configure <options>'
-
-EOF
+  _warn_CFLAGS=yes
 fi
 
 echocheck "automatic gdb attach"
@@ -7833,6 +7824,19 @@ if test "$_vidix" = no ; then
 cat <<EOF
 You've disabled VIDIX. Although it would be better to PORT it instead.
 Have a look at the documentation for supported cards!
+
+EOF
+fi
+
+if test "$_warn_CFLAGS" = yes; then
+  cat <<EOF
+
+MPlayer compilation will use the CFLAGS set by you, but:
+
+    *** ***  DO NOT REPORT BUGS IF IT DOES NOT COMPILE/WORK!  *** ***
+
+It is strongly recommended to let MPlayer choose the correct CFLAGS!
+To do so, execute 'CFLAGS= ./configure <options>'
 
 EOF
 fi
