@@ -111,7 +111,7 @@ int cache_stream_seek_long(stream_t *s,off_t pos);
 #define cache_stream_seek_long(x,y) stream_seek_long(x,y)
 #define stream_enable_cache(x,y,z,w) 1
 #endif
-int fixup_network_stream_cache(stream_t *stream);
+void fixup_network_stream_cache(stream_t *stream);
 
 inline static int stream_read_char(stream_t *s){
   return (s->buf_pos<s->buf_len)?s->buffer[s->buf_pos++]:
