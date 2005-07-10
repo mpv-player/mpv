@@ -233,6 +233,7 @@ Codecs:
   --disable-liba52       disable builtin liba52 [enabled]
   --enable-libdts        enable libdts support [autodetect]
   --disable-libmpeg2     disable builtin libmpeg2 [enabled]
+  --disable-musepack     disable musepack support [autodetect]
   --disable-amr_nb       disable amr narrowband, floating point [autodetect]
   --disable-amr_nb-fixed disable amr narrowband, fixed point [autodetect]
   --disable-amr_wb       disable amr wideband, floating point [autodetect]
@@ -1476,6 +1477,7 @@ _enca=auto
 _inet6=auto
 _gethostbyname2=auto
 _ftp=yes
+_musepack=auto
 _vstream=auto
 _pthreads=yes
 for ac_option do
@@ -1595,6 +1597,8 @@ for ac_option do
   --disable-libdts)	_libdts=no      ;;
   --enable-libmpeg2)	_libmpeg2=yes	;;
   --disable-libmpeg2)	_libmpeg2=no	;;
+  --enable-musepack)	_musepack=yes	;;
+  --disable-musepack)	_musepack=no	;;
   --enable-internal-matroska)  _matroska_internal=yes ;;
   --disable-internal-matroska) _matroska_internal=no ;;
   --enable-internal-faad)	_faad_internal=yes	_faad_external=no	;;
@@ -5446,6 +5450,30 @@ else
 fi
 echores "$_libmpeg2"
 
+echocheck "patched libmpcdec (musepack)"
+if test "$_musepack" = auto ; then
+  _musepack=no
+  cat > $TMPC << EOF
+#include <mpcdec/mpcdec.h>
+int main(void) {
+  mpc_streaminfo info;
+  mpc_decoder decoder;
+  mpc_decoder_set_streaminfo(&decoder, &info);
+  mpc_decoder_decode_frame(&decoder, NULL, 0, NULL);
+}
+EOF
+  cc_check -lmpcdec $_ld_lm && _musepack=yes
+fi
+if test "$_musepack" = yes ; then
+  _def_musepack='#define HAVE_MUSEPACK 1'
+  _ld_musepack='-lmpcdec'
+  _codecmodules="musepack $_codecmodules"
+else
+  _def_musepack='#undef HAVE_MUSEPACK'
+  _nocodecmodules="musepack $_nocodecmodules"
+fi
+echores "$_musepack"
+
 
 echocheck "Matroska support"
 if test "$_matroska_internal" = yes ; then
@@ -6899,6 +6927,8 @@ LIBMPEG2 = $_libmpeg2
 TREMOR = $_tremor_internal
 TREMOR_FLAGS = $_tremor_flags
 
+MUSEPACK = $_musepack
+
 UNRARLIB = $_unrarlib
 HAVE_FFPOSTPROCESS = $_def_haveffpostprocess
 PNG = $_mkf_png
@@ -7019,6 +7049,7 @@ TOOLAME_EXTRAFLAGS=$_toolame_extraflags
 TOOLAME_LIB=$_toolame_lib
 TWOLAME=$_twolame
 TWOLAME_LIB=$_twolame_lib
+MUSEPACK_LIB = $_ld_musepack
 FAAC=$_faac
 FAAC_LIB=$_ld_faac
 AMR_NB=$_amr_nb
@@ -7558,6 +7589,9 @@ $_def_vorbis
 
 /* enable Tremor as vorbis decoder */
 $_def_tremor
+
+/* enable musepack support */
+$_def_musepack
 
 /* enable OggTheora support */
 $_def_theora

@@ -69,6 +69,7 @@ SRCS += demuxer.c \
         demux_lmlm4.c \
         demux_mf.c \
         demux_mov.c \
+        demux_mpc.c \
         demux_mpg.c \
         demux_nsv.c \
         demux_nuv.c \

@@ -140,6 +140,7 @@ extern void demux_close_fli(demuxer_t* demuxer);
 extern void demux_close_nsv(demuxer_t* demuxer);
 extern void demux_close_nuv(demuxer_t* demuxer);
 extern void demux_close_audio(demuxer_t* demuxer);
+extern void demux_close_mpc(demuxer_t* demuxer);
 extern void demux_close_ogg(demuxer_t* demuxer);
 extern void demux_close_mpg(demuxer_t* demuxer);
 extern void demux_close_rtp(demuxer_t* demuxer);
@@ -211,6 +212,8 @@ void free_demuxer(demuxer_t *demuxer){
 #endif
     case DEMUXER_TYPE_AUDIO:
       demux_close_audio(demuxer); break;
+    case DEMUXER_TYPE_MPC:
+      demux_close_mpc(demuxer); break;
 #ifdef HAVE_OGGVORBIS
     case DEMUXER_TYPE_OGG:
       demux_close_ogg(demuxer); break;
@@ -337,6 +340,7 @@ int demux_rtp_fill_buffer(demuxer_t *demux, demux_stream_t* ds);
 int demux_rawdv_fill_buffer(demuxer_t *demuxer);
 int demux_y4m_fill_buffer(demuxer_t *demux);
 int demux_audio_fill_buffer(demux_stream_t *ds);
+int demux_mpc_fill_buffer(demux_stream_t *ds);
 int demux_pva_fill_buffer(demuxer_t *demux);
 int demux_xmms_fill_buffer(demuxer_t *demux,demux_stream_t *ds);
 int demux_gif_fill_buffer(demuxer_t *demux);
@@ -388,6 +392,7 @@ int demux_fill_buffer(demuxer_t *demux,demux_stream_t *ds){
 #endif
     case DEMUXER_TYPE_Y4M: return demux_y4m_fill_buffer(demux);
     case DEMUXER_TYPE_AUDIO: return demux_audio_fill_buffer(ds);
+    case DEMUXER_TYPE_MPC: return demux_mpc_fill_buffer(ds);
 #ifdef HAVE_XMMS
     case DEMUXER_TYPE_XMMS: return demux_xmms_fill_buffer(demux,ds);
 #endif
@@ -636,6 +641,7 @@ extern int nuv_check_file(demuxer_t *demuxer);
 extern void demux_open_nsv(demuxer_t *demuxer);
 extern void demux_open_nuv(demuxer_t *demuxer);
 extern int demux_audio_open(demuxer_t* demuxer);
+extern int demux_mpc_open(demuxer_t* demuxer);
 extern int demux_ogg_open(demuxer_t* demuxer);
 extern int demux_mpg_open(demuxer_t* demuxer);
 extern int demux_rawaudio_open(demuxer_t* demuxer);
@@ -1063,6 +1069,17 @@ if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_AUDIO){
     demuxer = NULL;
   }
 }
+//=============== Try to open as musepack file: =================
+if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_MPC){
+  demuxer=new_demuxer(stream,DEMUXER_TYPE_MPC,audio_id,video_id,dvdsub_id);
+  if(demux_mpc_open(demuxer)){
+    mp_msg(MSGT_DEMUXER,MSGL_INFO,MSGTR_Detected_XXX_FileFormat, "MPC");
+    file_format=DEMUXER_TYPE_MPC;
+  } else {
+    free_demuxer(demuxer);
+    demuxer = NULL;
+  }
+}
 #ifdef HAVE_XMMS
 //=============== Try to open as XMMS file: =================
 if(file_format==DEMUXER_TYPE_UNKNOWN || file_format==DEMUXER_TYPE_XMMS){
@@ -1446,6 +1463,7 @@ int demux_seek_rawdv(demuxer_t *demuxer, float pts, int flags);
 #endif
 
 extern void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
+extern void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
 extern void demux_rawaudio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags);
@@ -1532,6 +1550,8 @@ switch(demuxer->file_format){
       demux_seek_nuv(demuxer,rel_seek_secs,flags);  break;
   case DEMUXER_TYPE_AUDIO:
       demux_audio_seek(demuxer,rel_seek_secs,flags);  break;
+  case DEMUXER_TYPE_MPC:
+      demux_mpc_seek(demuxer,rel_seek_secs,flags);  break;
  case DEMUXER_TYPE_DEMUXERS:
       demux_demuxers_seek(demuxer,rel_seek_secs,flags);  break;
 #ifdef HAVE_OGGVORBIS
@@ -1635,6 +1655,7 @@ extern int demux_avi_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_xmms_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_mkv_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_audio_control(demuxer_t *demuxer, int cmd, void *arg);
+extern int demux_mpc_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_ogg_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_real_control(demuxer_t *demuxer, int cmd, void *arg);
 extern int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg);
@@ -1663,6 +1684,8 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 	    return demux_avi_control(demuxer,cmd,arg);
 	case DEMUXER_TYPE_AUDIO:
 	    return demux_audio_control(demuxer,cmd,arg);
+	case DEMUXER_TYPE_MPC:
+	    return demux_mpc_control(demuxer,cmd,arg);
 #ifdef HAVE_OGGVORBIS
 	case DEMUXER_TYPE_OGG:
 	    return demux_ogg_control(demuxer,cmd,arg);

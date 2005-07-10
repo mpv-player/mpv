@@ -19,6 +19,9 @@ MPlayer (1.0)
     * Fraps video decoder via binary DLL
     * support for 8-bit PNGs with palette
     * support for dmb1 MJPEG files with ffmjpeg
+    * support for musepack audio (WARNING: when muxing into e.g. AVI
+      you will be able to seek, but you might get ear- and speaker-breaking
+      noises)
 
     Demuxers:
     * simultaneous audio capture and playback in MPlayer

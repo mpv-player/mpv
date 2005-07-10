@@ -187,6 +187,10 @@ ifeq ($(CONFIG_LIBAVCODEC),yes)
 ENCODER_SRCS += ae_lavc.c
 endif
 
+ifeq ($(MUSEPACK),yes)
+AUDIO_SRCS += ad_mpc.c
+endif
+
 ifeq ($(FAAC),yes)
 ENCODER_SRCS += ae_faac.c
 endif

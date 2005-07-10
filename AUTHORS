@@ -210,6 +210,7 @@ Döffinger, Reimar (reimar) <reimar.doeffinger@stud.uni-karlsruhe.de>
     * reworked live changing playback speed
     * made MMS over HTTP stream selection work and modified ASF header parsing
     * reimplemented ao_jack without bio2jack dependency
+    * musepack demuxer and decoder, based on Reza's patch
 
 Dolbeau, Romain <romain@dolbeau.org>
     * random AltiVec (PowerPC multimedia extensions) stuff
@@ -371,6 +372,7 @@ Jelveh, Reza (timebomb) <reza.jelveh@tu-harburg.de>
     * seeking in Real files without index
     * savage_vid VIDIX driver
     * miscellaneous small fixes and improvements
+    * first musepack decoding patch
 
 Jermann, Jonas (g0th) <jjermann@gmx.net>
     * manual page rewrite
