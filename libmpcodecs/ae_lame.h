@@ -1,5 +1,5 @@
-#ifndef __AE_PCM_H_
-#define __AE_PCM_H_
+#ifndef __AE_MP3LAME_H_
+#define __AE_MP3LAME_H_
 
 #include "ae.h"
 
