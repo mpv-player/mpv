@@ -801,9 +801,16 @@ static void lschunks(demuxer_t* demuxer,int level,off_t endpos,mov_track_t* trak
 		int hdr_ptr = 76;  // the byte just after depth
 		unsigned char *palette_map;
 		sh_video_t* sh=new_sh_video(demuxer,priv->track_db);
-		int depth = trak->stdata[75]|(trak->stdata[74]<<8);
+		int depth;
 		sh->format=trak->fourcc;
 
+		if (trak->stdata_len < 78) {
+		  mp_msg(MSGT_DEMUXER, MSGL_WARN,
+		  "MOV: Invalid (%d bytes instead of >= 78) video trak desc\n",
+		  trak->stdata_len);
+		  break;
+		}
+		depth = trak->stdata[75] | (trak->stdata[74] << 8);
 //  stdata[]:
 //	8   short	version
 //	10  short	revision
