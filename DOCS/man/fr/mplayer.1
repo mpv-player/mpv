@@ -4407,7 +4407,7 @@ position du coin supérieur gauche (par défaut\ : -1, le plus haut et le plus
 .PD 1
 .
 .TP
-.B expand[=l:h:x:y:o]
+.B expand[=w:h:x:y:o:a:r]
 Étend (ne zoom pas) la résolution du film aux valeurs fournies et place
 l'original non redimensionné aux coordonnées x y.
 Peut être utilisé pour placer les sous-titres /\:l'OSD dans les bandes noires.
@@ -4433,6 +4433,21 @@ rendu OSD/\:sous-titres
 .br
 1: activé
 .REss
+.IPs <a>\ \ 
+Étend pour correspondre à un certain ratio d'aspect au lieu d'une
+résolution (par défaut\ : 0).
+.sp 1
+.I EXEMPLE\ :
+.PD 0
+.RSs
+.IP expand=800::::3/4
+Étend à 800x600, à moins que la source soit d'une résolution supérieure,
+et dans ce cas, l'étend pour correspondre à un aspect 3/4.
+.RE
+.PD 1
+.IPs <r>\ \ 
+Arrondit à l'unité supérieure pour que tant la largeur que la hauteur
+soit divisible par <r> (par défaut\ : 1).
 .RE
 .
 .TP
