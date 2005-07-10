@@ -3204,6 +3204,10 @@ codec</title>
   or <systemitem class="library">libavcodec</systemitem>'s MP2 encoder.
   The libavcodec MP2 is far from being as good as the other two libraries,
   however it should always be available to use.
+  VCD only supports constant bitrate audio (CBR) whereas SVCD supports
+  variable bitrate (VBR) too.
+  Be careful when using VBR because some bad standalone players might not
+  support it too well.
 </para>
 
 <para>
