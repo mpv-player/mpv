@@ -1,4 +1,4 @@
-.\" synced with 1.1026
+.\" synced with 1.1031
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -8348,6 +8348,33 @@ x264 gérant le mode 3 passes depuis peu de temps, nous
 encourageons les utilisateurs à partager avec nous leurs expériences et
 leurs combinaisons d'options d'x264 qui seraient aussi bien rapides que
 produisant des images de qualité.
+.REss
+.
+.TP
+.B turbo=<0\-2>
+Mode première passe rapide.
+Lors de la première passe d'un encodage deux (ou plus) passes, il est
+possible de gagner en vitesse en désactivant certaines options sans que
+cela ait d'effet notable, ou même sans aucun effet sur la qualité des
+statistiques récoltés lors de la première passe.
+.PD 0
+.RSs
+.IPs 0
+désactivé (par défaut)
+.IPs 1
+Diminue subq, frameref et désactive quelques modes d'analyses de partitions
+inter-macrobloc.
+.IPs 2
+Diminue subq et frameref à 1, utilise la recherche ME diamant et désactive
+tous les modes d'analyses de sous-partitions.
+.RE
+.RS
+Le niveau 1 peut accélérer la première passe jusqu'à 2x sans affecter le
+PSNR global de la dernière passe si vous l'aviez lancée en qualité optimale.
+.br
+Le niveau 2 peut accélérer la première passe jusqu'à 4x avec un changement
+du PSNR global de +/- 0.05dB par rapport à celui obtenu avec une première
+passe à qualité optimale.
 .REss
 .
 .TP
