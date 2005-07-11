@@ -2682,6 +2682,7 @@ codec</title>
   Activates a better coefficient cost estimation method, which slightly
   reduces filesize by around 0.15 to 0.19%, while having a negligible
   impact on speed.
+  It's therefore recommended to always leave it on.
 </para></listitem>
 
 <listitem><para>
@@ -2713,7 +2714,7 @@ codec</title>
   information into account, whereas <option>me_quality</option>
   alone only uses luma (grayscale).
   This slows down encoding by 5-10% but improves visual quality
-  quite a bit by reducing blocking effects, and reduces filesize by
+  quite a bit by reducing blocking effects and reduces filesize by
   around 1.3%.
   If you are looking for speed, you should disable this option before
   starting to consider reducing <option>me_quality</option>.
