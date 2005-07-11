@@ -152,6 +152,7 @@ static void dctB_c(DCTELEM *dst, DCTELEM *src){
     }
 }
 
+#ifdef HAVE_MMX
 static void dctB_mmx(DCTELEM *dst, DCTELEM *src){
     asm volatile (
         "movq  (%0), %%mm0      \n\t"
@@ -183,6 +184,7 @@ static void dctB_mmx(DCTELEM *dst, DCTELEM *src){
         :: "r" (src), "r"(dst)
     );
 }
+#endif
 
 static void (*dctB)(DCTELEM *dst, DCTELEM *src)= dctB_c;
 
