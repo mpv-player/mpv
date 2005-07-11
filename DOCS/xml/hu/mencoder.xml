@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.81 -->
+<!-- synced with 1.82 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2633,6 +2633,7 @@ codec-kal</title>
   Bekapcsol egy jobb együttható kölcségbecslő módszert, ami kissé csökkenti
   a fájlméretet, kb. 0,15-0,19% között, miközben jelentéktelen hatása
   van a sebességre.
+  Ezért ajánlott mindig bekapcsolva hagyni.
 </para></listitem>
 
 <listitem><para>
