@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.79 -->
+<!-- synced with 1.81 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -2629,6 +2629,13 @@ codec-kal</title>
 </para></listitem>
 
 <listitem><para>
+ <emphasis role="bold">hq_ac</emphasis>
+  Bekapcsol egy jobb együttható kölcségbecslő módszert, ami kissé csökkenti
+  a fájlméretet, kb. 0,15-0,19% között, miközben jelentéktelen hatása
+  van a sebességre.
+</para></listitem>
+
+<listitem><para>
  <emphasis role="bold">cartoon</emphasis>
   A rajzfilm tartalom jobb kódolására lett kitalálva és nincs hatása a
   sebességre, mivel csak a döntési heurisztikát tuningolja az ilyen
@@ -2656,7 +2663,8 @@ codec-kal</title>
   a chroma (szín) információkat is, míg a <option>me_quality</option>
   csak a luma-t (grayscale) használja.
   Ez 5-10%-kal lassítja a kódolást, de eléggé javítja a vizuális
-  minőséget a blokkosodási effektusok csökkentésével.
+  minőséget a blokkosodási effektusok csökkentésével és csökkenti a
+  fájlméretet kb. 1,3%-kal.
   Ha a sebesség érdekel, kapcsold ki ezt az opciót, mielőtt
   elkezdenél töprengeni a <option>me_quality</option> csökkentésén.
 </para></listitem>
@@ -3151,6 +3159,9 @@ codec-kal</title>
   felhasználásával.
   A libavcodec MP2 messze nincs olyan jó, mint a másik két könyvtár,
   azonban az mindig elérhető és használható.
+  A VCD csak konstans bitrátájú audiót (CBR) támogat, míg az SVCD tudja a
+  változó bitrátát (VBR) is.
+  De vigyázz a VBR-rel, mert néhány hibás asztali lejátszó sem támogatja.
 </para>
 
 <para>
