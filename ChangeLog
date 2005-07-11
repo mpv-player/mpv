@@ -57,6 +57,7 @@ MPlayer (1.0)
     * XviD's encoding zones and luminance masking
     * raw audio muxer
     * fixed various bugs in the EDL code
+    * x264 "turbo mode" to speed up first pass of multi-pass encoding
 
     Ports:
     * improved timer function on Mac OS X

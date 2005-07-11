@@ -104,6 +104,7 @@ static int threads = 1;
 static int level_idc = 40;
 static int psnr = 0;
 static int log_level = 2;
+static int turbo = 0;
 
 m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -212,24 +213,6 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
                "2 pass encoding enabled, but no bitrate specified.\n");
         return 0;
     }
-    switch(pass) {
-    case 0:
-        mod->param.rc.b_stat_write = 0;
-        mod->param.rc.b_stat_read = 0;
-        break;
-    case 1:
-        mod->param.rc.b_stat_write = 1;
-        mod->param.rc.b_stat_read = 0;
-        break;
-    case 2:
-        mod->param.rc.b_stat_write = 0;
-        mod->param.rc.b_stat_read = 1;
-        break;
-    case 3:
-        mod->param.rc.b_stat_write = 1;
-        mod->param.rc.b_stat_read = 1;
-        break;
-    }
     if(bitrate > 0) {
         if((vbv_maxrate > 0) != (vbv_bufsize > 0)) {
             mp_msg(MSGT_MENCODER, MSGL_ERR,
@@ -252,8 +235,6 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
         case 3: mod->param.analyse.i_me_method = X264_ME_UMH; break;
         case 4: mod->param.analyse.i_me_method = X264_ME_ESA; break;
     }
-    if(me_method >= 3)
-        mod->param.analyse.i_me_range = me_range;
     mod->param.analyse.inter = 0;
     if(p4x4mv) mod->param.analyse.inter |= X264_ANALYSE_PSUB8x8;
     if(p8x8mv) mod->param.analyse.inter |= X264_ANALYSE_PSUB16x16;
@@ -276,6 +257,45 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.vui.i_sar_width = d_width*height;
     mod->param.vui.i_sar_height = d_height*width;
     mod->param.i_threads = threads;
+
+    switch(pass) {
+    case 0:
+        mod->param.rc.b_stat_write = 0;
+        mod->param.rc.b_stat_read = 0;
+        break;
+    case 1:
+        /* Adjust or disable some flags to gain speed in the first pass */
+        if(turbo == 1)
+        {
+            mod->param.i_frame_reference = ( frame_ref + 1 ) >> 1;
+            mod->param.analyse.i_subpel_refine = max( min( 3, subq - 1 ), 1 );
+            mod->param.analyse.inter &= ( ~X264_ANALYSE_PSUB8x8 );
+            mod->param.analyse.inter &= ( ~X264_ANALYSE_BSUB16x16 );
+        }
+        else if(turbo == 2)
+        {
+            mod->param.i_frame_reference = 1;
+            mod->param.analyse.i_subpel_refine = 1;
+            mod->param.analyse.i_me_method = X264_ME_DIA;
+            mod->param.analyse.inter = 0;
+            mod->param.analyse.b_transform_8x8 = 0;
+            mod->param.analyse.b_weighted_bipred = 0;
+        }
+        mod->param.rc.b_stat_write = 1;
+        mod->param.rc.b_stat_read = 0;
+        break;
+    case 2:
+        mod->param.rc.b_stat_write = 0;
+        mod->param.rc.b_stat_read = 1;
+        break;
+    case 3:
+        mod->param.rc.b_stat_write = 1;
+        mod->param.rc.b_stat_read = 1;
+        break;
+    }
+
+    if(me_method >= 3)
+        mod->param.analyse.i_me_range = me_range;
 
     switch(outfmt) {
     case IMGFMT_I420:

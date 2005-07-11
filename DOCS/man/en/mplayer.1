@@ -7947,6 +7947,31 @@ both fast and provide good quality.
 .REss
 .
 .TP
+.B turbo=<0\-2>
+Fast first pass mode.
+During the first pass of a 2 or more pass encode it is possible to gain
+speed through disabling some options with negligible to no impact on the
+final pass output quality.
+.PD 0
+.RSs
+.IPs 0
+disabled (default)
+.IPs 1
+reduce subq, frameref and disable some inter macroblock partition analysis
+modes
+.IPs 2
+reduce subq and frameref to 1, use a diamond ME search and disable all
+sub-partition analysis modes
+.RE
+.RS
+Level 1 can increase first pass speed up to 2x with no change in the global
+PSNR of the final pass compared to a full quality first pass.
+.br
+Level 2 can increase first pass speed up to 4x with about +/- 0.05dB change
+in the global PSNR of the final pass compared to a full quality first pass.
+.REss
+.
+.TP
 .B keyint=<value>
 Sets maximum interval between IDR-frames (default: 250).
 Larger values save bits, thus improve quality, at the cost of seeking
