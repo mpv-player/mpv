@@ -97,7 +97,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	return; // colorspace differ
     // ok, we can do pp in-place (or pp disabled):
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-        mpi->type, mpi->flags, mpi->w, mpi->h);
+        mpi->type, mpi->flags | MP_IMGFLAG_READABLE, mpi->w, mpi->h);
     mpi->planes[0]=vf->dmpi->planes[0];
     mpi->stride[0]=vf->dmpi->stride[0];
     mpi->width=vf->dmpi->width;
