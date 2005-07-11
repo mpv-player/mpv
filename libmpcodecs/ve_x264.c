@@ -166,6 +166,7 @@ m_option_t x264encopts_conf[] = {
     {"psnr", &psnr, CONF_TYPE_FLAG, 0, 0, 1, NULL},
     {"nopsnr", &psnr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"log", &log_level, CONF_TYPE_INT, CONF_RANGE, -1, 3, NULL},
+    {"turbo", &turbo, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
