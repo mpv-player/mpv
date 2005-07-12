@@ -1,4 +1,4 @@
-.\" synced with 1.1026
+.\" synced with 1.1032
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -4241,7 +4241,7 @@ to tylko mo¿liwe)
 .PD 1
 .
 .TP
-.B expand[=w:h:x:y:o]
+.B expand[=w:h:x:y:o:a:r]
 Zwiêksza rozdzielczo¶æ (nie skaluje) filmu do podanej warto¶ci i umieszcza
 nieprzeskalowany obraz pod wspó³rzêdnymi x, y.
 Mo¿e byæ u¿yty do umieszczenia napisów/\:OSD w otrzymanym czarnym pasku.
@@ -4266,6 +4266,20 @@ wy¶wietlanie OSD/\:napisów
 .br
 1: w³±czone
 .REss
+.IPs <a>\ \ 
+Rozszerza tak, by pasowa³o do proporcji, a nie rozdzielczo¶ci (domy¶lnie: 0).
+.sp 1
+.I PRZYK£AD:
+.PD 0
+.RSs
+.IP expand=800::::3/4
+Powiêksza do 800x600, chyba ¿e film jest w wiêkszej rozdzielczo¶ci,
+wtedy powiêksza tak, by mia³ proporcje 3/4.
+.RE
+.PD 1
+.IPs <r>\ \ 
+Zaokr±gla w górê tak ¿eby wysoko¶æ i szeroko¶æ by³y podzielne przez <r>
+(domy¶lnie: 1).
 .RE
 .
 .TP
@@ -7752,7 +7766,8 @@ kodujesz w skali szaro¶ci.
 .
 .TP
 .B (no)hq_ac
-W³±cza lepsze przewidywania sk³adowej AC z s±siednich bloków.
+W³±cza lepsze przewidywania sk³adowej AC z s±siednich bloków dla ramek intra
+(domy¶lnie: w³±czone).
 .
 .TP
 .B vhq=<0\-4>
@@ -8028,8 +8043,35 @@ parametrów x264, które by³yby jednocze¶nie szybki i zapewnia³y wysok± jako¶æ.
 .REss
 .
 .TP
+.B turbo=<0\-2>
+Tryb przyspieszonego pierwszego przebiegu.
+Pierwszego przebieg kodowania dwu- lub wiêcej przebiegowego mo¿na przyspieszyæ
+wy³±czaj±c opcje które maj± nik³y lub ¿aden wp³yw na jako¶æ koñcowego
+przebiegu.
+.PD 0
+.RSs
+.IPs 0
+wy³±czone (domy¶lne)
+.IPs 1
+Zmniejsza subq, frameref i wy³±cza niektóre tryby analizy podpodzia³u
+makrobloków.
+.IPs 2
+Zmniejsza subq i frameref do 1, u¿ywa szukania ME typu diament i wy³±cza
+wszystkie tryby analizy podpodzia³u.
+.RE
+.RS
+Poziom 1 mo¿e dwukrotnie przyspieszyæ pierwszy przebieg nie zmniejszaj±c
+globalnego PSNR ostatniego przej¶cia w porównaniu z pierwszym przebiegiem
+pe³nej jako¶ci.
+.br
+Poziom 2 mo¿e czterokrotnie przyspieszyæ pierwszy przebieg zmieniaj±c 
+globalne PSNR ostatniego przej¶cia o +/- 0.05dB w porównaniu z pierwszym
+przebiegiem pe³nej jako¶ci.
+.REss
+.
+.TP
 .B keyint=<warto¶æ>
-Ustawia maksymaln± przerwê miêdzy ramkami I (domy¶lnie: 250).
+Ustawia maksymaln± przerwê miêdzy ramkami IDR (domy¶lnie: 250).
 Wiêksze warto¶ci oszczêdzaj± bity, a tym samym poprawiaj± jako¶æ,
 odbywa siê to jednak kosztem precyzji przy przeszukiwaniu.
 W odró¿nieniu od MPEG-1/2/4, H.264 nie jest nara¿one na wahania DCT przy
