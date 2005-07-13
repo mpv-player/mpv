@@ -12,6 +12,7 @@
 
 #include "stream.h"
 #include "ebml.h"
+#include "bswap.h"
 
 
 /*
@@ -194,7 +195,7 @@ ebml_read_float (stream_t *s, uint64_t *length)
         union {uint8_t data[10]; long double ld;} u;
         if (stream_read (s, u.data, 10) != 10)
           return EBML_FLOAT_INVALID;
-        value = u.ld;
+        value = be2me_ldbl(u.ld);
         break;
       }
 
