@@ -242,7 +242,7 @@ tv_set_hue <-100 - 100>
 tv_set_saturation <-100 - 100>
     Set TV tuner saturation.
 
-gui_[loadfile|loadsubtitle|about|play|stop|gui_playlist|gui_preferences|skinbrowser]
+gui_[loadfile|loadsubtitle|about|play|stop|playlist|preferences|skinbrowser]
     GUI actions
 
 forced_subs_only
