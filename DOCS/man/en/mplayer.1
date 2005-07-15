@@ -7669,7 +7669,7 @@ encoding in greyscale.
 .
 .TP
 .B (no)hq_ac
-Activates High Quality AC coefficient prediction for intra frames from
+Activates High Quality AC coefficients prediction for intra frames from
 neighbor blocks (default: on).
 .
 .TP
@@ -7951,7 +7951,7 @@ both fast and provide good quality.
 .B turbo=<0\-2>
 Fast first pass mode.
 During the first pass of a two or more pass encode it is possible to gain
-speed through disabling some options with negligible to no impact on the
+speed by disabling some options with negligible or even no impact on the
 final pass output quality.
 .PD 0
 .RSs
@@ -7962,7 +7962,7 @@ Reduce subq, frameref and disable some inter-macroblock partition analysis
 modes.
 .IPs 2
 Reduce subq and frameref to 1, use a diamond ME search and disable all
-sub-partition analysis modes.
+partition analysis modes.
 .RE
 .RS
 Level 1 can increase first pass speed up to 2x with no change in the global
