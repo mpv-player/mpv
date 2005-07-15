@@ -238,7 +238,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       sh->a_in_buffer_len=0;
     } else {
       sh->a_in_buffer_len-=faac_finfo.bytesconsumed;
-      memcpy(sh->a_in_buffer,&sh->a_in_buffer[faac_finfo.bytesconsumed],sh->a_in_buffer_len);
+      memmove(sh->a_in_buffer,&sh->a_in_buffer[faac_finfo.bytesconsumed],sh->a_in_buffer_len);
     }
 
     if(faac_finfo.error > 0) {
