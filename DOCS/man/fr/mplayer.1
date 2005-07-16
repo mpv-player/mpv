@@ -1,4 +1,4 @@
-.\" synced with 1.1032
+.\" synced with 1.1034
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -8057,7 +8057,7 @@ pouvez désactiver cette option lors d'un encodage en noir et blanc.
 .TP
 .B (no)hq_ac
 Active une meilleure prédiction des composantes AC pour les blocks intra
-depuis les blocs voisins (par défaut\: activé).
+en prenant en compte les blocs voisins (par défaut\: activé).
 .
 .TP
 .B vhq=<0\-4>
@@ -8367,7 +8367,7 @@ Diminue subq, frameref et désactive quelques modes d'analyses de partitions
 inter-macrobloc.
 .IPs 2
 Diminue subq et frameref à 1, utilise la recherche ME diamant et désactive
-tous les modes d'analyses de sous-partitions.
+tous les modes d'analyses de partitions.
 .RE
 .RS
 Le niveau 1 peut accélérer la première passe jusqu'à 2x sans affecter le
