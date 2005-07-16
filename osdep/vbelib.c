@@ -24,6 +24,8 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/kd.h>
 
 static struct VesaProtModeInterface vbe_pm_info;
 static struct VesaModeInfoBlock curr_mode_info;
@@ -94,25 +96,28 @@ static inline int VBE_LRMI_int(int int_no, struct LRMI_regs *r)
 #define VBE_LRMI_int(int_no,regs) (VBE_LRMI_int(int_no,regs))
 #endif
 
-static FILE *my_stdin;
-static FILE *my_stdout;
-static FILE *my_stderr;
-
-static void __set_cursor_type(FILE *stdout_fd,int cursor_on)
+/**
+ * Set console to graphics or text mode.
+ * This is a clean way to enable/disable console text output
+ * and cursor blinking.
+ *
+ * @param mode The new wanted mode. Can be either KD_GRAPHICS to switch
+ *             to graphics mode or anything else to switch back to the
+ *             original mode.
+ */
+static void kd_set_mode(int mode)
 {
-  fprintf(stdout_fd,"\033[?25%c",cursor_on?'h':'l');
-}
+  static int old_mode = KD_TEXT;
+  int fd;
 
-/* TODO: do it only on LCD or DFP. We should extract such info from DDC */
-static void hide_terminal_output( void )
-{
-  my_stdin  = fopen(ttyname(fileno(stdin )),"r");
-  my_stdout = fopen(ttyname(fileno(stdout)),"w");
-  my_stderr = fopen(ttyname(fileno(stderr)),"w");
-  __set_cursor_type(stdout,0);
-/*if(isatty(fileno(stdin ))) stdin =freopen("/dev/null","r",stdin );*/
-  if(isatty(fileno(stdout))) freopen("/dev/null","w",stdout);
-  if(isatty(fileno(stderr))) freopen("/dev/null","w",stderr);
+  if ((fd = open("/dev/tty0", O_RDWR)) < 0)
+    return;
+  if(mode == KD_GRAPHICS)
+    old_mode = ioctl(fd, KDGETMODE);
+  else
+    mode = old_mode;
+  ioctl(fd, KDSETMODE, mode);
+  close(fd);
 }
 
 static unsigned hh_int_10_seg;
@@ -147,13 +152,13 @@ int vbeInit( void )
 	 && vbe_pm_info.iopl_ports[i++] > 1023) ioperm(iopl_port,1,1);
    iopl(3);
    fd_mem = open("/dev/mem",O_RDWR);
-   hide_terminal_output();
+   kd_set_mode(KD_GRAPHICS);
    return VBE_OK;
 }
 
 int vbeDestroy( void ) 
 {
-  if (my_stdout)  __set_cursor_type(my_stdout,1);
+  kd_set_mode(KD_TEXT);
   close(fd_mem);
   LRMI_free_real(controller_info);
   return VBE_OK;
