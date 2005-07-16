@@ -1,4 +1,4 @@
-.\" synced with 1.1034
+.\" synced with 1.1035
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -7683,9 +7683,10 @@ Précision DC intra en bits (par défaut\ : 8).
 Si vous utilisez vcodec=mpeg2video cette valeur peut être 8, 9, 10 ou 11.
 .
 .TP
-.B cgop\ \ \ 
+.B cgop (voir aussi scenecut)
 Ferme tous les GOPs (groupes de trames).
-Ne fonctionne pas pour le moment.
+Ne fonctionne pour le moment que si la détection de changement de scène
+est désactivée (scenecut=-1).
 .
 .
 .SS nuv (\-nuvopts)
