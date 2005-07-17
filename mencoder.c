@@ -246,6 +246,10 @@ static float calc_a_pts(demux_stream_t *d_audio);
     \return The current audio pts.
 */
 static float forward_audio(float pts, demux_stream_t *d_audio, muxer_stream_t* mux_a);
+/** \brief Seeks slowly by dumping frames.
+    \return 1 for success, 2 for EOF.
+*/
+static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy, int print_info);
 
 #ifdef USE_EDL
 #include "edl.h"
@@ -1650,11 +1654,43 @@ static float forward_audio(float pts, demux_stream_t *d_audio, muxer_stream_t* m
     return a_pts;
 }
 
+static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy, int print_info) {
+    sh_video_t * sh_video = d_video->sh;
+    vf_instance_t * vfilter = sh_video ? sh_video->vfilter : NULL;
+    int done = 0;
+
+    while (!interrupted) {
+        float a_pts = 0.;
+
+        frame_data->in_size = video_read_frame(sh_video, &frame_data->frame_time, &frame_data->start, force_fps);
+        if(frame_data->in_size<0) return 2;
+        sh_video->timer += frame_data->frame_time;
+
+        a_pts = forward_audio(sh_video->pts - frame_data->frame_time, d_audio, mux_a);
+
+        if (done) {
+            frame_data->already_read = 1;
+            if (!framecopy || (sh_video->ds->flags & 1)) return 1;
+        }
+        if (sh_video->pts >= end_pts) done = 1;
+
+        if (vfilter) {
+            int softskip = (vfilter->control(vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) == CONTROL_TRUE);
+            decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip);
+        }
+
+        if (print_info) mp_msg(MSGT_MENCODER, MSGL_STATUS,
+               "EDL SKIP: Start: %.2f  End: %.2lf   Current: V: %.2f  A: %.2f     \r",
+               next_edl_record->start_sec, next_edl_record->stop_sec,
+               sh_video->pts, a_pts);
+    }
+    if (interrupted) return 2;
+    return 1;
+}
+
 #ifdef USE_EDL
 static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy) {
     sh_video_t * sh_video = demuxer->video ? demuxer->video->sh : NULL;
-    vf_instance_t * vfilter = sh_video ? sh_video->vfilter : NULL;
-    int done = 0;
 
     if (!sh_video) return 0;
     if (sh_video->pts >= next_edl_record->stop_sec) return 1; // nothing to do...
@@ -1673,32 +1709,6 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
 
     // slow seek, read every frame.
 
-    while (!interrupted) {
-        float a_pts = 0.;
-
-        frame_data->in_size = video_read_frame(sh_video, &frame_data->frame_time, &frame_data->start, force_fps);
-        if(frame_data->in_size<0) return 2;
-        sh_video->timer += frame_data->frame_time;
-
-        a_pts = forward_audio(sh_video->pts - frame_data->frame_time, d_audio, mux_a);
-
-        if (done) {
-            frame_data->already_read = 1;
-            if (!framecopy || (sh_video->ds->flags & 1)) return 1;
-        }
-        if (sh_video->pts >= next_edl_record->stop_sec) done = 1;
-
-        if (vfilter) {
-            int softskip = (vfilter->control(vfilter, VFCTRL_SKIP_NEXT_FRAME, 0) == CONTROL_TRUE);
-            decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip);
-        }
-
-        mp_msg(MSGT_MENCODER, MSGL_STATUS,
-               "EDL SKIP: Start: %.2f  End: %.2lf   Current: V: %.2f  A: %.2f     \r",
-               next_edl_record->start_sec, next_edl_record->stop_sec,
-               sh_video->pts, a_pts);
-    }
-    if (interrupted) return 2;
-    return 1;
+    return slowseek(next_edl_record->stop_sec, demuxer->video, d_audio, mux_a, frame_data, framecopy, 1);
 }
 #endif
