@@ -220,7 +220,7 @@ m_option_t mencoder_opts[]={
 
 	{"audio-density", &audio_density, CONF_TYPE_INT, CONF_RANGE|CONF_GLOBAL, 1, 50, NULL},
 	{"audio-preload", &audio_preload, CONF_TYPE_FLOAT, CONF_RANGE|CONF_GLOBAL, 0, 2, NULL},
-	{"audio-delay",   &audio_delay, CONF_TYPE_FLOAT, CONF_MIN|CONF_GLOBAL, 0, 0, NULL},
+	{"audio-delay",   &audio_delay_fix, CONF_TYPE_FLOAT, CONF_MIN|CONF_GLOBAL, 0, 0, NULL},
 
 	{"x", "-x is obsolete, use -vf scale=w:h for scaling.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},
 	{"xsize", "-xsize is obsolete, use -vf crop=w:h:x:y for cropping.\n", CONF_TYPE_PRINT, CONF_NOCFG, 0, 0, NULL},

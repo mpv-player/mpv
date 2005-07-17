@@ -146,7 +146,7 @@ static float max_pts_correction=0;//default_max_pts_correction;
 static float c_total=0;
 
 static float audio_preload=0.5;
-static float audio_delay=0.0;
+static float audio_delay_fix=0.0;
 static int audio_density=2;
 
 float force_fps=0;
@@ -898,8 +898,8 @@ case ACODEC_COPY:
 
 if (verbose>1) print_wave_header(mux_a->wf);
 
-if(audio_delay!=0.0){
-    mux_a->h.dwStart=audio_delay*mux_a->h.dwRate/mux_a->h.dwScale;
+if(audio_delay_fix!=0.0){
+    mux_a->h.dwStart=audio_delay_fix*mux_a->h.dwRate/mux_a->h.dwScale;
     mp_msg(MSGT_MENCODER, MSGL_INFO, MSGTR_SettingAudioDelay,mux_a->h.dwStart*mux_a->h.dwScale/(float)mux_a->h.dwRate);
 }
 if(muxer->fix_stream_parameters)
