@@ -106,6 +106,11 @@ static int lavc_param_skip_bottom=0;
 static int lavc_param_fast=0;
 static int lavc_param_lowres=0;
 static char *lavc_param_lowres_str=NULL;
+#if LIBAVCODEC_BUILD >= 4758
+static char *lavc_param_skip_loop_filter_str = NULL;
+static char *lavc_param_skip_idct_str = NULL;
+static char *lavc_param_skip_frame_str = NULL;
+#endif
 
 m_option_t lavc_decode_opts_conf[]={
 	{"bug", &lavc_param_workaround_bugs, CONF_TYPE_INT, CONF_RANGE, -1, 999999, NULL},
@@ -122,8 +127,34 @@ m_option_t lavc_decode_opts_conf[]={
         {"fast", &lavc_param_fast, CONF_TYPE_FLAG, 0, 0, CODEC_FLAG2_FAST, NULL},
 #endif
 	{"lowres", &lavc_param_lowres_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#if LIBAVCODEC_BUILD >= 4758
+	{"skiploopfilter", &lavc_param_skip_loop_filter_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"skipidct", &lavc_param_skip_idct_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+	{"skipframe", &lavc_param_skip_frame_str, CONF_TYPE_STRING, 0, 0, 0, NULL},
+#endif
 	{NULL, NULL, 0, 0, 0, 0, NULL}
 };
+
+#if LIBAVCODEC_BUILD >= 4758
+static enum AVDiscard str2AVDiscard(char *str) {
+  if (!str)
+    return AVDISCARD_DEFAULT;
+  if (strcasecmp(str, "none") == 0)
+    return AVDISCARD_NONE;
+  if (strcasecmp(str, "default") == 0)
+    return AVDISCARD_DEFAULT;
+  if (strcasecmp(str, "nonref") == 0)
+    return AVDISCARD_NONREF;
+  if (strcasecmp(str, "bidir") == 0)
+    return AVDISCARD_BIDIR;
+  if (strcasecmp(str, "nonkey") == 0)
+    return AVDISCARD_NONKEY;
+  if (strcasecmp(str, "all") == 0)
+    return AVDISCARD_ALL;
+  mp_msg(MSGT_DECVIDEO, MSGL_ERR, "Unknown discard value %s\n", str);
+  return AVDISCARD_DEFAULT;
+}
+#endif
 
 // to set/get/query special features/parameters
 static int control(sh_video_t *sh,int cmd,void* arg,...){
@@ -271,6 +302,11 @@ static int init(sh_video_t *sh){
         avctx->lowres = lavc_param_lowres;
     }
 #endif    
+#if LIBAVCODEC_BUILD >= 4758
+    avctx->skip_loop_filter = str2AVDiscard(lavc_param_skip_loop_filter_str);
+    avctx->skip_idct = str2AVDiscard(lavc_param_skip_idct_str);
+    avctx->skip_frame = str2AVDiscard(lavc_param_skip_frame_str);
+#endif
     mp_dbg(MSGT_DECVIDEO,MSGL_DBG2,"libavcodec.size: %d x %d\n",avctx->width,avctx->height);
     /* AVRn stores huffman table in AVI header */
     /* Pegasus MJPEG stores it also in AVI header, but it uses the common
