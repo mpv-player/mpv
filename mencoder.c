@@ -242,6 +242,10 @@ typedef struct {
 
 /// Returns a_pts
 static float calc_a_pts(demux_stream_t *d_audio);
+/** \brief Seeks audio forward to pts by dumping audio packets
+    \return The current audio pts.
+*/
+static float forward_audio(float pts, demux_stream_t *d_audio, muxer_stream_t* mux_a);
 
 #ifdef USE_EDL
 #include "edl.h"
@@ -1618,13 +1622,39 @@ static float calc_a_pts(demux_stream_t *d_audio) {
     return a_pts;
 }
 
+static float forward_audio(float pts, demux_stream_t *d_audio, muxer_stream_t* mux_a) {
+    sh_audio_t * sh_audio = d_audio ? d_audio->sh : NULL;
+    int samplesize, avg;
+    float a_pts = calc_a_pts(d_audio);
+
+    if (!sh_audio) return a_pts;
+
+    if (sh_audio->audio.dwScale) samplesize = sh_audio->audio.dwSampleSize;
+    else samplesize = (sh_audio->wf ? sh_audio->wf->nBlockAlign : 1);
+    avg = (sh_audio->wf ? sh_audio->wf->nAvgBytesPerSec : sh_audio->i_bps);
+
+    while (pts > a_pts) {
+        int len;
+        if (samplesize) {
+            len = avg * (pts - a_pts > 0.5 ? 0.5 : pts - a_pts);
+            len/= samplesize; if(len<1) len=1;
+            len*= samplesize;
+            len = demux_read_data(sh_audio->ds,mux_a->buffer,len);
+        } else {
+            unsigned char * crap;
+            len = ds_get_packet(sh_audio->ds, &crap);
+        }
+        if (len <= 0) break; // EOF of audio.
+        a_pts = calc_a_pts(d_audio);
+    }
+    return a_pts;
+}
+
 #ifdef USE_EDL
 static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy) {
-    sh_audio_t * sh_audio = d_audio->sh;
     sh_video_t * sh_video = demuxer->video ? demuxer->video->sh : NULL;
     vf_instance_t * vfilter = sh_video ? sh_video->vfilter : NULL;
     int done = 0;
-    int samplesize, avg;
 
     if (!sh_video) return 0;
     if (sh_video->pts >= next_edl_record->stop_sec) return 1; // nothing to do...
@@ -1643,10 +1673,6 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
 
     // slow seek, read every frame.
 
-    if (sh_audio->audio.dwScale) samplesize = sh_audio->audio.dwSampleSize;
-    else samplesize = (sh_audio->wf ? sh_audio->wf->nBlockAlign : 1);
-    avg = (sh_audio->wf ? sh_audio->wf->nAvgBytesPerSec : sh_audio->i_bps);
-
     while (!interrupted) {
         float a_pts = 0.;
 
@@ -1654,23 +1680,7 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
         if(frame_data->in_size<0) return 2;
         sh_video->timer += frame_data->frame_time;
 
-        if (sh_audio) {
-            a_pts = calc_a_pts(d_audio);
-            while (sh_video->pts - frame_data->frame_time > a_pts) {
-                int len;
-                if (samplesize) {
-                    len = avg * (sh_video->pts - frame_data->frame_time - a_pts);
-                    len/= samplesize; if(len<1) len=1;
-                    len*= samplesize;
-                    len = demux_read_data(sh_audio->ds,mux_a->buffer,len);
-                } else {
-                    unsigned char * crap;
-                    len = ds_get_packet(sh_audio->ds, &crap);
-                }
-                if (len <= 0) break; // EOF of audio.
-                a_pts = calc_a_pts(d_audio);
-            }
-        }
+        a_pts = forward_audio(sh_video->pts - frame_data->frame_time, d_audio, mux_a);
 
         if (done) {
             frame_data->already_read = 1;
