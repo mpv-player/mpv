@@ -318,9 +318,6 @@ m_option_t mplayer_opts[]={
 
 	{"sstep", &step_sec, CONF_TYPE_INT, CONF_MIN, 0, 0, NULL},
 
-	// set a-v distance, should be moved to -common and supported in MEncoder
-	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
-
 	{"framedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 1, NULL},
 	{"hardframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 0, 2, NULL},
 	{"noframedrop", &frame_dropping, CONF_TYPE_FLAG, 0, 1, 0, NULL},

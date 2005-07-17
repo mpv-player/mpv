@@ -146,6 +146,9 @@
 	{"format", &audio_output_format, CONF_TYPE_AFMT, 0, 0, 0, NULL},
 	{"speed", &playback_speed, CONF_TYPE_FLOAT, CONF_RANGE, 0.01, 100.0, NULL},
 
+	// set a-v distance
+	{"delay", &audio_delay, CONF_TYPE_FLOAT, CONF_RANGE, -100.0, 100.0, NULL},
+
 #ifdef USE_LIBA52
         {"a52drc", &a52_drc_level, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
 #endif

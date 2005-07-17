@@ -910,6 +910,13 @@ and skip reading from default locations.
 The file is assumed to be in Netscape format.
 .
 .TP
+.B \-delay <sec>
+audio delay in seconds (positive or negative float value)
+.I NOTE:
+When used with MEncoder, this is not guaranteed to work correctly
+with \-ovc copy.
+.
+.TP
 .B \-demuxer <number>
 Force demuxer type.
 Give the demuxer ID as defined in libmpdemux/\:demuxer.h.
@@ -1745,10 +1752,6 @@ Specify the VOBsub subtitle ID.
 .TP
 .B \-abs <value> (\-ao oss only) (OBSOLETE)
 Override audio driver/\:card buffer size detection.
-.
-.TP
-.B \-delay <sec>
-Audio delay in seconds (positive or negative float value).
 .
 .TP
 .B \-format <format> (also see the format audio filter)
