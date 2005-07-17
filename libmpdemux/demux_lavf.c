@@ -173,7 +173,11 @@ int demux_open_lavf(demuxer_t *demuxer){
 
     for(i=0; i<avfc->nb_streams; i++){
         AVStream *st= avfc->streams[i];
+#if LIBAVFORMAT_BUILD >= 4629
+        AVCodecContext *codec= st->codec;
+#else
         AVCodecContext *codec= &st->codec;
+#endif
         
         switch(codec->codec_type){
         case CODEC_TYPE_AUDIO:{
