@@ -240,6 +240,9 @@ typedef struct {
     int already_read;
 } s_frame_data;
 
+/// Returns a_pts
+static float calc_a_pts(demux_stream_t *d_audio);
+
 #ifdef USE_EDL
 #include "edl.h"
 static edl_record_ptr edl_records = NULL; ///< EDL entries memory area
@@ -1607,6 +1610,14 @@ static float stop_time(demuxer_t* demuxer, muxer_stream_t* mux_v) {
 	return timeleft;
 }
 
+static float calc_a_pts(demux_stream_t *d_audio) {
+    sh_audio_t * sh_audio = d_audio ? d_audio->sh : NULL;
+    float a_pts = 0.;
+    if (sh_audio)
+        a_pts = d_audio->pts + (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+    return a_pts;
+}
+
 #ifdef USE_EDL
 static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_stream_t *d_audio, muxer_stream_t* mux_a, s_frame_data * frame_data, int framecopy) {
     sh_audio_t * sh_audio = d_audio->sh;
@@ -1644,7 +1655,7 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
         sh_video->timer += frame_data->frame_time;
 
         if (sh_audio) {
-            a_pts = d_audio->pts + (ds_tell_pts(d_audio) - sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+            a_pts = calc_a_pts(d_audio);
             while (sh_video->pts - frame_data->frame_time > a_pts) {
                 int len;
                 if (samplesize) {
@@ -1657,7 +1668,7 @@ static int edl_seek(edl_record_ptr next_edl_record, demuxer_t* demuxer, demux_st
                     len = ds_get_packet(sh_audio->ds, &crap);
                 }
                 if (len <= 0) break; // EOF of audio.
-                a_pts = d_audio->pts + (ds_tell_pts(d_audio)-sh_audio->a_in_buffer_len)/(float)sh_audio->i_bps;
+                a_pts = calc_a_pts(d_audio);
             }
         }
 
