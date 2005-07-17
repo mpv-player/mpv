@@ -893,7 +893,7 @@ static int uninit(priv_t *priv)
     }
 
     /* stop audio thread */
-    if (!tv_param_noaudio) {
+    if (!tv_param_noaudio && priv->audio_grabber_thread) {
 	pthread_join(priv->audio_grabber_thread, NULL);
 	pthread_mutex_destroy(&priv->skew_mutex);
 	pthread_mutex_destroy(&priv->audio_mutex);
