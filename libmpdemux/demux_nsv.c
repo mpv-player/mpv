@@ -298,6 +298,9 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
         case 0x85:
             sh_video->fps=(float)15000.0/1001.0;
             break;
+        case 0x89:
+            sh_video->fps=(float)10000.0/1001.0;
+            break;
         default:
             sh_video->fps = (float)priv->fps;
         }       
