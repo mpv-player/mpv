@@ -1,4 +1,4 @@
-.\" synced with 1.1035
+.\" synced with 1.1037
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -6662,13 +6662,14 @@ mauvaise suivant le décodeur, l'encodeur et votre horoscope ;-).
 Pour une conformité stricte MPEG-1/\:2/\:4 cela devrait être <=132.
 .
 .TP
-.B sc_threshold=<-1000000\-1000000>
+.B sc_threshold=<-1000000000\-1000000000>
 Seuil pour la détection des changements de scène.
 Une trame-clé est insérée par libavcodec quand il détecte un changement
 de scène.
 Vous pouvez définir la sensibilité de la détection avec cette option.
--1000000 signifie qu'il y aura un changement détecté à chaque trame, 1000000
-signifie qu'aucun changement de scène ne sera détecté (par défaut\ : 0).
+-1000000000 signifie qu'il y aura un changement détecté à chaque trame,
+1000000000 signifie qu'aucun changement de scène ne sera détecté
+(par défaut\ : 0).
 .
 .TP
 .B vb_strategy=<0\-1> (première passe uniquement)
@@ -7683,10 +7684,10 @@ Précision DC intra en bits (par défaut\ : 8).
 Si vous utilisez vcodec=mpeg2video cette valeur peut être 8, 9, 10 ou 11.
 .
 .TP
-.B cgop (voir aussi scenecut)
+.B cgop (voir aussi sc_threshold)
 Ferme tous les GOPs (groupes de trames).
 Ne fonctionne pour le moment que si la détection de changement de scène
-est désactivée (scenecut=-1).
+est désactivée (sc_threshold=1000000000).
 .
 .
 .SS nuv (\-nuvopts)
