@@ -1,4 +1,4 @@
-.\" synced with 1.1037
+.\" synced with 1.1038
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -963,6 +963,13 @@ Lit les cookies HTTP depuis <fichier> (par défaut\ : ~/.mozilla/ et
 Ce fichier est supposé être au format Netscape.
 .
 .TP
+.B \-delay <sec>
+Retard audio en secondes (nombre flottant positif ou négatif).
+.I NOTE\ :
+Lorsque utilisé avec MEncoder et \-ovc copy, le résultat peut ne pas
+être correct.
+.
+.TP
 .B \-demuxer <nombre>
 Forcer le type de démultiplexeur.
 Indiquez l'ID du démultiplexeur comme défini dans libmpdemux/\:demuxer.h.
@@ -1847,10 +1854,6 @@ Définit le numéro de sous-titre du fichier VOBsub.
 .B \-abs <valeur> (\-ao oss uniquement) (OBSOLÈTE)
 Outrepasse la détection de la taille du buffer audio du pilote/\:de la
 carte.
-.
-.TP
-.B \-delay <sec>
-Décalage audio en secondes (nombre flottant positif ou négatif).
 .
 .TP
 .B \-format <0\-8192>
