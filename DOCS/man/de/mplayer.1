@@ -6523,12 +6523,12 @@ Encoder und Glück schlecht sein kann.
 Für eine strikte Einhaltung von MPEG-1/2/4 müsste dieser Wert <=132 sein.
 .
 .TP
-.B sc_threshold=<-1000000\-1000000>
+.B sc_threshold=<-1000000000\-1000000000>
 Schwellenwert für die Erkennung eines Szenenwechsels.
 libavcodec fügt einen Keyframe ein, wenn er einen Szenenwechsel entdeckt.
 Mit dieser Option kannst du die Sensitivität dieser Erkennung bestimmen.
--1000000 bedeutet, dass mit jedem Frame ein Szenenwechsel erkannt wird;
-1000000 bedeutet, dass gar keine Szenenwechsel erkannt werden (Standard: 0).
+-1000000000 bedeutet, dass mit jedem Frame ein Szenenwechsel erkannt wird;
+1000000000 bedeutet, dass gar keine Szenenwechsel erkannt werden (Standard: 0).
 .
 .TP
 .B vb_strategy=<0\-1>
@@ -7543,10 +7543,10 @@ Intra-DC-Genauigkeit in Bits (Standard: 8).
 Wenn du vcodec=mpeg2video angibst, kann dieser Wert 8, 9, 10 oder 11 sein.
 .
 .TP
-.B cgop (siehe auch scenecut)
+.B cgop (siehe auch sc_threshold)
 Schließt alle GOPs.
 Funktioniert momentan nur wenn die Szenenwechselerkennung deaktiviert ist
-(scenecut=-1).
+(sc_threshold=1000000000).
 .
 .
 .SS nuv (\-nuvopts)
