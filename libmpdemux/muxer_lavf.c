@@ -130,7 +130,11 @@ static muxer_stream_t* lavf_new_stream(muxer_t *muxer, int type)
 	}
 	spriv->avstream->stream_copy = 1;
 	
+#if LIBAVFORMAT_BUILD >= 4629
+	ctx = spriv->avstream->codec;
+#else
 	ctx = &(spriv->avstream->codec);
+#endif
 	ctx->codec_id = muxer->avih.dwStreams;
 	switch(type) 
 	{
@@ -155,7 +159,11 @@ static void fix_parameters(muxer_stream_t *stream)
 	muxer_stream_priv_t *spriv = (muxer_stream_priv_t *) stream->priv;
 	AVCodecContext *ctx;
 	
+#if LIBAVFORMAT_BUILD >= 4629
+	ctx = spriv->avstream->codec;
+#else
 	ctx = &(spriv->avstream->codec);
+#endif
 	
 	if(stream->type == MUXER_TYPE_AUDIO)
 	{
