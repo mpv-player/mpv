@@ -936,6 +936,8 @@ decoded_frameno=0;
 signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
 signal(SIGQUIT,exit_sighandler); // Quit from keyboard
 signal(SIGTERM,exit_sighandler); // kill
+signal(SIGHUP,exit_sighandler);  // broken terminal line
+signal(SIGPIPE,exit_sighandler); // broken pipe
 
 timer_start=GetTimerMS();
 } // if (!curfile) // if this was the first file.
