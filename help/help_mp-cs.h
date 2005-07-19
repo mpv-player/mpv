@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan
-// Synced to 1.171
+// Synced to 1.173
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -207,6 +207,7 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Nelze otevøít výstupní soubor '%s'\n"
 #define MSGTR_EncoderOpenFailed "Selhalo spu¹tìní enkodéru\n"
 #define MSGTR_ForcingOutputFourcc "Vynucuji výstupní fourcc na %x [%.4s]\n"
+#define MSGTR_ForcingOutputAudiofmtTag "Vynucuji znaèku výstupního zvukového formátu 0x%x\n"
 #define MSGTR_WritingAVIHeader "Zapisuji AVI hlavièku...\n"
 #define MSGTR_DuplicateFrames "\n%d opakujících se snímkù!\n"
 #define MSGTR_SkipFrame "\nPøeskakuji snímek!\n"
@@ -352,6 +353,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, nemohu najít enkodér pro kodek %s\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, nemohu alokovat kontext!\n"
 #define MSGTR_CouldntOpenCodec "Nelze otevøít kodek %s, br=%d\n"
+#define MSGTR_CantCopyAudioFormat "Audio formát 0x%x je nekompatibilní s '-oac copy', zkuste prosím '-oac pcm',\n nebo pou¾ijte '-fafmttag' pro jeho pøepsání.\n"
 
 // cfg-mencoder.h:
 
@@ -606,10 +608,12 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Vybrat..."
 #define MSGTR_AudioFileSelect "Vybrat externí zvukový kanál..."
 #define MSGTR_FontSelect "Vybrat font..."
+// Poznámka: Pokud zmìníte MSGTR_PlayList, ujistìte se prosím, ¾e vyhovuje i pro  MSGTR_MENU_PlayList
 #define MSGTR_PlayList "Playlist"
 #define MSGTR_Equalizer "Ekvalizér"
 #define MSGTR_SkinBrowser "Prohlí¾eè témat"
 #define MSGTR_Network "Sí»ové vysílání..."
+// Poznámka: Pokud zmìníte MSGTR_Preferences, ujistìte se prosím, ¾e vyhovuje i pro  MSGTR_MENU_Preferences
 #define MSGTR_Preferences "Nastavení" // Pøedvolby?
 #define MSGTR_AudioPreferences "Konfigurace ovladaèe zvuku"
 #define MSGTR_NoMediaOpened "Nic není otevøeno."
@@ -694,9 +698,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitola %2d"
 #define MSGTR_MENU_AudioLanguages "Jazyk zvuku"
 #define MSGTR_MENU_SubtitleLanguages "Jazyk titulkù"
+#define MSGTR_MENU_PlayList MSGTR_PlayList
 #define MSGTR_MENU_SkinBrowser "Prohlí¾eè témat"
-// TODO: Why is this different from MSGTR_Preferences?
-#define MSGTR_MENU_Preferences "Pøedvolby"
+#define MSGTR_MENU_Preferences MSGTR_Preferences
 #define MSGTR_MENU_Exit "Konec..."
 #define MSGTR_MENU_Mute "Ztlumit"
 #define MSGTR_MENU_Original "Pùvodní"
@@ -706,7 +710,9 @@ static char help_text[]=
 #define MSGTR_MENU_VideoTrack "Video stopa"
 
 // --- equalizer
+// Poznámka: Pokud zmìníte MSGTR_EQU_Audio, ujistìte se prosím, ¾e vyhovuje i pro MSGTR_PREFERENCES_Audio
 #define MSGTR_EQU_Audio "Zvuk"
+// Poznámka: Pokud zmìníte MSGTR_EQU_Video, ujistìte se prosím, ¾e vyhovuje i pro MSGTR_PREFERENCES_Video
 #define MSGTR_EQU_Video "Obraz"
 #define MSGTR_EQU_Contrast "Kontrast: "
 #define MSGTR_EQU_Brightness "Jas: "
@@ -733,8 +739,11 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Adresáøe"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
+#define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
 #define MSGTR_PREFERENCES_SubtitleOSD "Titulky & OSD"
 #define MSGTR_PREFERENCES_Codecs "Kodeky & demuxer"
+// Poznámka: Pokud zmìníte MSGTR_PREFERENCES_Misc, ujistìte se prosím, ¾e vyhovuje i pro MSGTR_PREFERENCES_FRAME_Misc
 #define MSGTR_PREFERENCES_Misc "Ostatní"
 
 #define MSGTR_PREFERENCES_None "Nic"
@@ -779,6 +788,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Kodek & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Vyrovnávací pamì»"
+#define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
 #define MSGTR_PREFERENCES_Audio_Device "Zaøízení:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixér:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Kanál mixéru:"
