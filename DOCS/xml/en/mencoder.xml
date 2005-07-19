@@ -1572,7 +1572,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Because the video in a PAL DVD has not been altered, you needn't worry
-  much about frame rate. The source is 25 fps, and your rip will be 25
+  much about framerate. The source is 25 fps, and your rip will be 25
   fps. However, if you are ripping an NTSC DVD movie, you may need to
   apply inverse telecine.
 </para>
