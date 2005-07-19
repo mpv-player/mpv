@@ -526,6 +526,23 @@ Try <option>-nocache</option>.
 
 <qandaentry>
 <question><para>
+When I go into fullscreen mode I just get black borders around the image
+and no real scaling to fullscreen mode.
+</para></question>
+<answer><para>
+Your video output driver does not support scaling in hardware and since
+scaling in software can be incredibly slow <application>MPlayer</application>
+does not automatically enable it. Most likely you are using the
+<systemitem>x11</systemitem> instead of the <systemitem>xv</systemitem>
+video output driver. Try adding <option>-vo xv</option> to the command
+line or read the <link linkend="video">video section</link> to find out
+about alternative video output drivers. The <option>-zoom</option>
+option explicitly enables software scaling.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 I've just installed <application>MPlayer</application>. When I want to
 open a video file it causes a fatal error:
 <screen>
