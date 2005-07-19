@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.14 -->
+<!-- Synced with: 1.15 -->
 <chapter id="cd-dvd">
 <title>Použití CD/DVD</title>
 
 <sect1 id="drives">
 <title>CD/DVD mechaniky</title>
-<para>
-Výňatek z Linuxové dokumentace:
-</para>
 
 <para>
 Moderní CD-ROM mechaniky dosahují velmi vysokých otáček a některé z nich
@@ -28,11 +25,20 @@ tento hluk.
 </para></listitem>
 </itemizedlist>
 
+<sect2 id="drives_linux">
+<title>Linux</title>
+
 <para>
-Můžete snížit rychlost IDE CD-ROM mechanik pomocí <command>hdparm</command> nebo
-programu <command>setcd</command>. Pracuje to asi takto:
-<screen>hdparm -E <replaceable>[speed]</replaceable> <replaceable>[mechanika cdrom]</replaceable></screen>
-<screen>setcd -x <replaceable>[speed]</replaceable> <replaceable>[mechanika cdrom]</replaceable></screen>
+Můžete snížit rychlost IDE CD-ROM mechanik pomocí <command>hdparm</command>,
+<command>setcd</command> nebo <command>cdctl</command>. Pracuje to asi takto:
+<screen>hdparm -E <replaceable>[rychlost]</replaceable> <replaceable>[mechanika cdrom]</replaceable></screen>
+<screen>setcd -x <replaceable>[rychlost]</replaceable> <replaceable>[mechanika cdrom]</replaceable></screen>
+<screen>cdctl -bS <replaceable>[rychlost]</replaceable></screen>
+</para>
+
+<para>
+Pokud používáte SCSI emulaci, budete muset předat tato nastavení do skutečného
+IDE zařízení, nikoli emulovaného SCSI zařízení.
 </para>
 
 <para>
@@ -45,7 +51,7 @@ To nastaví čtení napřed na 2MB, což pomůže při poškrábaných médiích.
 Pokud ji však nastavíte příliš vysoko, bude mechanika stále zrychlovat a
 zpomalovat, což výrazně sníží její výkon.
 Doporučujeme vám rovněž vyladit vaši CD-ROM mechaniku pomocí <command>hdparm</command>:
-<screen>hdparm -d1 -a8 -u1 <replaceable>cdrom device</replaceable></screen>
+<screen>hdparm -d1 -a8 -u1 <replaceable>[cdrom zařízení]</replaceable></screen>
 </para>
 
 <para>
@@ -64,9 +70,26 @@ SCSI mechaniky nemají jednotný způsob pro nastavení těchto parametrů (Znáte něja
 <ulink url="http://das.ist.org/~georg/">SCSI mechanikami Plextor</ulink>.
 </para>
 
-<para>FreeBSD:</para>
-<para>Rychlost: <command>cdcontrol [-f <replaceable>zařízení</replaceable>] speed <replaceable>rychlost</replaceable></command></para>
-<para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
+</sect2>
+
+
+<sect2 id="drives_freebsd">
+<title>FreeBSD</title>
+
+<para>rychlost:
+<screen>
+cdcontrol [-f <replaceable>zařízení</replaceable>] speed <replaceable>[rychlost]</replaceable>
+</screen>
+</para>
+
+<para>DMA:
+<screen>
+sysctl hw.ata.atapi_dma=1
+</screen>
+</para>
+
+</sect2>
+
 </sect1>
 
 <sect1 id="dvd">
@@ -249,6 +272,8 @@ pro nastavení region kódu vaší DVD mechaniky (pod Linux).
 pětkrát.
 </para>
 </sect1>
+
+
 
 <sect1 id="vcd">
 <title>Přehrávání VCD</title>
