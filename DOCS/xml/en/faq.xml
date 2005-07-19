@@ -25,7 +25,7 @@ How do I translate <application>MPlayer</application> to a new language?
 <answer><para>
 Read the <ulink url="../../tech/translations.txt">translation HOWTO</ulink>,
 it should explain everything. You can get further help on the
-<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-docs">MPlayer-docs</ulink>
+<ulink url="http://mplayerhq.hu/mailman/listinfo/mplayer-translations">MPlayer-translations</ulink>
 mailing list.
 </para></answer>
 </qandaentry>
@@ -91,7 +91,7 @@ stable, or upgrade frequently.
 
 <qandaentry>
 <question><para>
-Are there binary (RPM/deb) packages of <application>MPlayer</application>?
+Are there binary (RPM/Debian) packages of <application>MPlayer</application>?
 </para></question>
 <answer><para>
 See the <link linkend="debian">Debian</link> and <link linkend="rpm">RPM</link>
@@ -101,7 +101,7 @@ section for details.
 
 <qandaentry>
 <question><para>
-How can I build a 32 bit <application>MPlayer</application> on 64 bit Athlon?
+How can I build a 32 bit <application>MPlayer</application> on a 64 bit Athlon?
 </para></question>
 <answer><para>
 Try the following configure options:
@@ -124,7 +124,8 @@ file for details.
 
 <qandaentry>
 <question><para>
-I have a Matrox G200/G400/G450/G550, how do I compile/use the mga_vid driver?
+I have a Matrox G200/G400/G450/G550, how do I compile/use the
+<systemitem>mga_vid</systemitem> driver?
 </para></question>
 <answer><para>
 Read the <link linkend="mga_vid">mga_vid</link> section.
@@ -133,23 +134,18 @@ Read the <link linkend="mga_vid">mga_vid</link> section.
 
 <qandaentry>
 <question><para>
-During 'make', <application>MPlayer</application> complains about X11 libraries.
-I don't understand, I DO have X installed!?
+During 'make', <application>MPlayer</application> complains about
+missing X11 libraries. I don't understand, I <emphasis>do</emphasis>
+have X11 installed!?
 </para></question>
 <answer><para>
-... but you don't have the X development package installed. Or not correctly.
+... but you don't have the X11 development package installed. Or not correctly.
 It's called <filename>XFree86-devel*</filename> under Red Hat, and
 <filename>xlibs-dev</filename> under Debian Woody,
 <filename>libx11-dev</filename> under Debian Sarge. Also check if the
 <filename class="directory">/usr/X11</filename> and
 <filename class="directory">/usr/include/X11</filename> symlinks exist (this
-can be a problem on Mandrake systems). They can be created with these commands:
-<screen>
-     # ln -sf /usr/X11R6 /usr/X11
-     # ln -sf /usr/X11R6/include/X11 /usr/include/X11
-</screen>
-Your distribution may differ from the
-<ulink url="http://www.pathname.com/fhs/">Filesystem Hierarchy Standard</ulink>.
+can be a problem on Mandrake systems).
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -213,69 +209,59 @@ Windows <option>-vo directx:noaccel</option> works.
 
 <qandaentry>
 <question><para>
-The <option>-xy</option> or <option>-fs</option> option doesn't work with
-the x11 driver (<option>-vo x11</option>) ...
-</para></question>
-<answer><para>
-It does, but you have to explicitly specify software scaling (very slow) with the
-<option>-zoom</option> option. You better use XF86VidMode support: You must
-specify the <option>-vm</option> and the <option>-fs</option> option, and you're
-done. Make sure you have the right modelines in your <filename>XF86Config</filename>
-file, and try to make the <link linkend="dga">DGA driver</link> and
-<link linkend="sdl">SDL's DGA driver</link> work for you. It's much
-faster. If SDL's DGA works, use that, it'll be even faster.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 What is the meaning of the numbers on the status line?
 </para></question>
 <answer><para>
 Example:
-<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49%</screen>
-<itemizedlist>
-<listitem><para>A: audio position in seconds</para></listitem>
-<listitem><para>V: video position in seconds</para></listitem>
-<listitem><para>A-V: audio-video difference in seconds (delay)</para></listitem>
-<listitem><para>ct: total A-V sync correction done</para></listitem>
-<listitem><para>frames played (counting from last seek)</para></listitem>
-<listitem><para>frames decoded (counting from last seek)</para></listitem>
-<listitem><para>video codec CPU usage in percent (for slices and DR this includes
-video_out)</para></listitem>
+<screen>A: 2.1 V: 2.2 A-V: -0.167 ct: 0.042 57/57 41% 0% 2.6% 0 4 49% 1.00x</screen>
+<variablelist>
+<varlistentry><term><systemitem>A: 2.1</systemitem></term>
+<listitem><para>audio position in seconds</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>V: 2.2</systemitem></term>
+<listitem><para>video position in seconds</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>A-V: -0.167</systemitem></term>
+<listitem><para>audio-video difference in seconds (delay)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>ct: 0.042</systemitem></term>
+<listitem><para>total A-V sync correction done</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>57/57</systemitem></term>
+<listitem><para>frames played/decoded (counting from last seek)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>41%</systemitem></term>
+<listitem><para>video codec CPU usage in percent
+  (for slice rendering and direct rendering this
+  includes video_out)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>0%</systemitem></term>
 <listitem><para>video_out CPU usage</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>2.6%</systemitem></term>
 <listitem><para>audio codec CPU usage in percent</para></listitem>
-<listitem><para>frames needed to drop to maintain A-V sync</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>0</systemitem></term>
+<listitem><para>frames dropped to maintain A-V sync</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>4</systemitem></term>
 <listitem><para>current level of image postprocessing (when using
 <option>-autoq</option>)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>49%</systemitem></term>
 <listitem><para>current cache size used (around 50% is normal)</para></listitem>
+</varlistentry>
+<varlistentry><term><systemitem>1.00x</systemitem></term>
 <listitem><para>playback speed as a factor of original speed</para></listitem>
-</itemizedlist>
-Most of them are for debug purposes and will be removed at some point.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-What if I don't want them to appear?
-</para></question>
-<answer><para>
-Use the <option>-quiet</option> option and read the man page.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Why is video_out CPU usage zero (0%) for some files?
-</para></question>
-<answer><para>
-It's not zero, but it's called from the codec and thus cannot be measured
-separately. You should try to play the file using <option>-vo null</option> and
-then <option>-vo ...</option> and check the difference to see the video_out speed.
-</para></answer>
-<answer><para>
-You are using Direct Rendering, where the codec renders to the video memory
-itself. In this case, the decoding percentage contains the display percentage, too.
+</varlistentry>
+</variablelist>
+Most of them are for debug purposes, use the <option>-quiet</option>
+option to make them disappear.
+You might notice that video_out CPU usage is zero (0%) for some files.
+This is because it is called directly from the codec and thus cannot
+be measured separately. If you wish to know the video_out speed, compare
+the difference when playing the file with <option>-vo null</option> and
+your usual video output driver.
 </para></answer>
 </qandaentry>
 
@@ -284,9 +270,20 @@ itself. In this case, the decoding percentage contains the display percentage, t
 There are error messages about file not found <filename>/usr/local/lib/codecs/</filename> ...
 </para></question>
 <answer><para>
-Download the binary codecs from our
-<ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">codecs page</ulink>
-and install it.
+Download and install the binary codecs from our
+<ulink url="http://mplayerhq.hu/homepage/design7/codecs.html">codecs page</ulink>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+How can I make <application>MPlayer</application> remember the options I
+use for a particular file, e.g. <filename>movie.avi</filename>?
+</para></question>
+<answer><para>
+Create a file named <filename>movie.avi.conf</filename> with the file-specific
+options in it and put it in <filename class="directory">~/.mplayer</filename>
+or in the same directory as the file.
 </para></answer>
 </qandaentry>
 
@@ -522,7 +519,7 @@ and upload the file to FTP.
 <qandaentry>
 <question><para>
 My computer plays MS DivX AVIs with resolutions ~ 640x300 and stereo MP3 sound
-too slow. When I use <option>-nosound</option> option, everything is OK (but quiet).
+too slow. When I use the <option>-nosound</option> option, everything is OK (but quiet).
 </para></question>
 <answer><para>
 Your machine is too slow or your sound card driver is broken. Consult the
@@ -536,17 +533,16 @@ documentation to see if you can improve performance.
 <screen>MPlayer interrupted by signal 4 in module: decode_video</screen>
 </para></question>
 <answer><para>
-Try running <application>MPlayer</application> on the machine you compiled on.
-Or recompile with runtime CPU detection
-(<command>./configure --enable-runtime-cpudetection</command>).
 Don't use <application>MPlayer</application> on a CPU different from the one
-it was compiled on, without using the feature mentioned just now.
+it was compiled on or recompile with runtime CPU detection
+(<command>./configure --enable-runtime-cpudetection</command>).
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-I have problems with [your window manager] and fullscreen xv/xmga/sdl/x11 modes ...
+I have problems with <replaceable>[your window manager]</replaceable>
+and fullscreen xv/xmga/sdl/x11 modes ...
 </para></question>
 <answer><para>
 Read the <link linkend="bugreports">bug reporting guidelines</link> and send us
@@ -585,14 +581,13 @@ bus is too slow. <application>MPlayer</application> displays a message if this i
 dropped frames counter goes up fast).
 </para></listitem>
 <listitem><para>
-If it is an AVI, maybe it has bad interleaving. Try the <option>-ni</option> option.
+If it is an AVI, maybe it has bad interleaving, try the
+<option>-ni</option> to work around this.
+Or it may have a bad header, in this case <option>-nobps</option>
+and/or <option>-mc 0</option> can help.
 </para></listitem>
 <listitem><para>
-Your sound driver is buggy, or you use ALSA 0.5 with <option>-ao oss</option>.
-See the <link linkend="audio">sound card section</link>.
-</para></listitem>
-<listitem><para>
-The AVI has a bad header, try the <option>-nobps</option> option, and/or <option>-mc 0</option>.
+Your sound driver is buggy. See the <link linkend="audio">audio section</link>.
 </para></listitem>
 </itemizedlist>
 </para></answer>
@@ -768,7 +763,7 @@ I copied a DVD using vobcopy. How do I play/encode it from my hard disk?
 Use the <option>-dvd-device</option> option to refer to the directory
 that contains the files:
 <screen>
-mplayer dvd://1 -dvd-device /path/to/directory
+mplayer dvd://1 -dvd-device <replaceable>/path/to/directory</replaceable>
 </screen>
 </para></answer>
 </qandaentry>
@@ -790,25 +785,13 @@ All attempts have failed so far, but patches are welcome.
 
 <qandaentry>
 <question><para>
-I'd like to seek +/- 1 frames instead of 10 seconds.
+I'd like to seek +/- 1 frame instead of 10 seconds.
 </para></question>
 <answer><para>
 You can step forward one frame by pressing <keycap>.</keycap>.
 If the movie was not paused it will be paused afterwards
 (see the man page for details).
 Stepping backwards is unlikely to be implemented anytime soon.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-How can I make <application>MPlayer</application> remember the options I use
-for a particular file, e.g. <filename>movie.avi</filename>?
-</para></question>
-<answer><para>
-Create a file named <filename>movie.avi.conf</filename> with the file-specific
-options in it and put it in <filename class="directory">~/.mplayer</filename> or
-in the same directory as the file.
 </para></answer>
 </qandaentry>
 </qandadiv>
@@ -834,7 +817,7 @@ Once you have selected your title, and made sure it plays fine with
 <application>MPlayer</application>, use the option <option>-dumpstream</option>.
 For example:
 <screen>
-mplayer -dumpstream dvd://5 -dumpfile <replaceable>dvd_dump.vob</replaceable>
+mplayer dvd://5 -dumpstream -dumpfile <replaceable>dvd_dump.vob</replaceable>
 </screen>
 will dump the 5th title of the DVD into the file
 <replaceable>dvd_dump.vob</replaceable>
@@ -877,9 +860,10 @@ MPEG files can be concatenated into a single file with luck.
 For AVI files, you can use <application>MEncoder</application>'s
 multiple file support like this:
 <screen>
-mencoder -ovc copy -oac copy -o out.avi file1.avi file2.avi
+mencoder -ovc copy -oac copy -o <replaceable>out.avi</replaceable> <replaceable>file1.avi</replaceable> <replaceable>file2.avi</replaceable>
 </screen>
-This will only work if the files are of the same resolution and codec.
+This will only work if the files are of the same resolution
+and use the same codec.
 You can also try
 <ulink url="http://fixounet.free.fr/avidemux/">avidemux</ulink> and
 <application>avimerge</application> (part of the
@@ -890,23 +874,24 @@ tool set).
 
 <qandaentry>
 <question><para>
-How can I fix AVI files with broken index or interleaving?
+How can I fix AVI files with a broken index or bad interleaving?
 </para></question>
 <answer><para>
-Simply copy the video and audio streams into a new file, and
-<application>MEncoder</application> generates the index.
-Of course this cannot fix possible bugs in the video and/or audio streams.
-It also fixes files with broken interleaving, thus the
-<option>-ni</option> option will not be needed for them anymore.
+To avoid having to use <option>-idx</option> to be able to seek in
+AVI files with a broken index or <option>-ni</option> to play AVI
+files with bad interleaving, use the command
 <screen>
-mencoder -idx <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
+mencoder <replaceable>input.avi</replaceable> -idx -ovc copy -oac copy -o <replaceable>output.avi</replaceable>
 </screen>
+to copy the video and audio streams into a new AVI file while
+regenerating the index and correctly interleaving the data.
+Of course this cannot fix possible bugs in the video and/or audio streams.
 </para></answer>
 </qandaentry>
 
 <qandaentry>
 <question><para>
-How can I fix the aspect ration of an AVI file?
+How can I fix the aspect ratio of an AVI file?
 </para></question>
 <answer><para>
 You can do such a thing thanks to <application>MEncoder</application>'s
@@ -923,7 +908,7 @@ mencoder <replaceable>input.avi</replaceable> -ovc copy -oac copy -o <replaceabl
 I can't encode DVD subtitles into the AVI!
 </para></question>
 <answer><para>
-You have to specify the <option>-sid</option> option correctly!
+You have to properly specify the <option>-sid</option> option.
 </para></answer>
 </qandaentry>
 
@@ -932,7 +917,7 @@ You have to specify the <option>-sid</option> option correctly!
 How can I encode only selected chapters from a DVD?
 </para></question>
 <answer><para>
-Use the <option>-chapter</option> option correctly, like: <option>-chapter 5-7</option>
+Use the <option>-chapter</option> option correctly, like: <option>-chapter 5-7</option>.
 </para></answer>
 </qandaentry>
 
@@ -960,8 +945,8 @@ movie on any CD. Check if you have libmp3lame installed properly.
 I can't encode an ASF file to AVI/MPEG-4 (DivX) because it uses 1000 fps.
 </para></question>
 <answer><para>
-Because ASF uses variable frame rate but AVI uses a fixed one, you
-have to set it by hand using <option>-ofps</option>.
+Since ASF uses variable framerate but AVI uses a fixed one, you
+have to set it by hand with the <option>-ofps</option> option.
 </para></answer>
 </qandaentry>
 
@@ -1021,7 +1006,7 @@ You may also change the FourCC of existing files in the same way:
 <screen>
   mencoder <replaceable>input.avi</replaceable> -o <replaceable>output.avi</replaceable> -ffourcc XVID
 </screen>
-Note that this will set the FourCC as XVID rather than as DIVX.
+Note that this will set the FourCC to XVID rather than DIVX.
 This is recommended as DIVX FourCC means DivX4, which is a very basic
 MPEG-4 codec, whereas DX50 and XVID both mean full MPEG-4 (ASP).
 Therefore, if you change the FourCC to DIVX, some bad software or
