@@ -224,7 +224,6 @@ int aoIsCreated = ao != NULL;
 	if (!aoIsCreated)	ao = (ao_macosx_t *)malloc(sizeof(ao_macosx_t));
 
 	// Build Description for the input format
-	memset(&inDesc, 0, sizeof(AudioStreamBasicDescription));
 	inDesc.mSampleRate=rate;
 	inDesc.mFormatID=kAudioFormatLinearPCM;
 	inDesc.mChannelsPerFrame=channels;
@@ -302,19 +301,19 @@ int aoIsCreated = ao != NULL;
 		return CONTROL_FALSE;
 	}
 
-	size=sizeof(UInt32);
-	maxFrames=8192; // This was calculated empirically. On MY system almost everything works more or less the same...
-	err = AudioUnitSetProperty(ao->theOutputUnit, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Input, 0, &maxFrames, size);
+	size = sizeof(UInt32);
+	err = AudioUnitGetProperty(ao->theOutputUnit, kAudioDevicePropertyBufferSize, kAudioUnitScope_Input, 0, &maxFrames, &size);
 	
-	if(err) {
-		ao_msg(MSGT_AO, MSGL_WARN, "Unable to set the maximum number of frames per slice!! (err=%d)\n", err);
+	if (err)
+	{
+		ao_msg(MSGT_AO,MSGL_WARN, "AudioUnitGetProperty returned %d when getting kAudioDevicePropertyBufferSize\n", (int)err);
 		return CONTROL_FALSE;
 	}
-	
-	ao_msg(MSGT_AO, MSGL_DBG2, "Maximum number of frames per request %d (that is %d bytes)", err, maxFrames, maxFrames*inDesc.mBytesPerFrame);
 
-	ao->chunk_size = maxFrames*inDesc.mBytesPerFrame;
-    ao->num_chunks = NUM_BUFS;
+	ao->chunk_size = maxFrames;//*inDesc.mBytesPerFrame;
+	ao_msg(MSGT_AO,MSGL_V, "%5d chunk size\n", (int)ao->chunk_size);
+    
+	ao->num_chunks = NUM_BUFS;
     ao->buffer_len = (ao->num_chunks + 1) * ao->chunk_size;
     ao->buffer = aoIsCreated ? (unsigned char *)realloc(ao->buffer,(ao->num_chunks + 1)*ao->chunk_size)
 							: (unsigned char *)calloc(ao->num_chunks + 1, ao->chunk_size);
@@ -324,7 +323,6 @@ int aoIsCreated = ao != NULL;
     ao_data.outburst = ao_data.buffersize = ao->chunk_size;
     ao_data.bps = ao_data.samplerate * inDesc.mBytesPerFrame;
 
-	memset(&renderCallback, 0, sizeof(AURenderCallbackStruct));
     renderCallback.inputProc = theRenderProc;
     renderCallback.inputProcRefCon = 0;
     err = AudioUnitSetProperty(ao->theOutputUnit, kAudioUnitProperty_SetRenderCallback, kAudioUnitScope_Input, 0, &renderCallback, sizeof(AURenderCallbackStruct));
