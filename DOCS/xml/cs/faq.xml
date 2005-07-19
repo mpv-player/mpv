@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.80  -->
+<!-- Synced with: 1.87  -->
 <chapter id="faq" xreflabel="FAQ">
 <title>Často Kladené Dotazy (FAQ)</title>
 
@@ -113,160 +113,12 @@ Vyzkoušejte následující volby configure:
 
 <qandaentry>
 <question><para>
-Kompilace skončí s chybou podobnou této:
-<screen>
-    cfft.c: In function`passf2':
-    cfft.c:556: unable to find a register to spill in class `FLOAT_REGS'
-    cfft.c:556: this is the insn:
-    (insn 235 233 246 (set (subreg:SF (reg/v:DI 29 rmm0 [110]) 0)
-            (minus:SF (mem:SF (plus:SI (mult:SI (reg:SI 1 edx [112])
-                            (const_int 8 [0x8]))
-                        (reg/v/f:SI 3 ebx [62])) [4 S4 A32])
-                (reg:SF 8 st(0) [132]))) 533 {*fop_sf_1_nosse} (insn_list
-    232 (nil))    (expr_list:REG_DEAD (reg:SF 8 st(0) [132])
-            (nil)))
-    cfft.c:556: confused by earlier errors, bailing out
-</screen>
-</para></question>
-<answer><para>
-Toto je známý problém <application>gcc</application> 3.2, problém vyřeší
-upgrade na verzi 3.3. Jak nainstalovat gcc popisujeme v sekci
-<link linkend="gcc-296">gcc 2.96</link>. Alternativně můžete použít externí
-knihovnu FAAD, která je popsána v sekci
-<link linkend="aac">AAC</link>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Kompilace skončí s chybou podobnou této:
-<screen>
-    In file included from mplayer.c:34:
-    mw.h: In function `mplMainDraw':
-    mw.h:209: Internal compiler error in print_rtl_and_abort, at flow.c:6458
-    Please submit a full bug report,
-    with preprocessed source if appropriate.
-</screen>
-</para></question>
-<answer><para>
-Toto je známý problém <application>gcc</application> 3.0.4, problém vyřeší
-upgrade na verzi 3.1. Jak nainstalovat gcc popisujeme v sekci
-<link linkend="gcc-296">gcc 2.96</link>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Configure skončí s následujícím textem a <application>MPlayer</application> se nezkompiluje!
 <screen>Your gcc does not support even i386 for '-march' and '-mcpu'</screen>
 </para></question>
 <answer><para>
 Vaše gcc není správně nainstalováno, detaily naleznete v souboru
 <filename>configure.log</filename>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Co je za problém s gcc 2.96?
-</para></question>
-<answer><para>
-<emphasis role="bold">Velmi nedoporučujeme používat gcc 2.96!</emphasis>
-Přečtěte si <link linkend="gcc-296">tento</link> dokument pro detaily o tom
-proč Red Hat uvolnil gcc 2.96 a jaké jsou s tím problémy. Pokud jsme vás dosud
-neodradili a chcete jej dále používat, alespoň se ujistěte, že máte poslední
-uvolněnou verzi a zadejte volbu
-<option>--disable-gcc-checking</option> pro configure. Pamatujte, že teď je
-to už jen na vás. <emphasis role="bold">Neoznamujte</emphasis> žádné chyby,
-<emphasis role="bold">nežádejte</emphasis> o pomoc v mailing listech.
-<emphasis role="bold">Neposkytneme</emphasis> vám žádnou podporu v případě, že
-se dostanete do potíží.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Skvěle, mám gcc 3.0.1 od Red Hatu/Mandrake, takže jsem v pohodě!
-</para></question>
-<answer><para>
-Nejste, protože s těmito kompilátory jsou/byly rovněž problémy.
-Stav podpory současných kompilátorů <application>MPlayer</application>em
-zjistíte v sekci <link linkend="install">Instalace</link>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-.. gcc 2.96 ... (Ano, někteří lidé POŘÁD brojí s gcc 2.96!)
-</para></question>
-<answer><para>
-Citováno z <ulink url="http://www.mplayerhq.hu/pipermail/mplayer-users/2001-October/005351.html">mailu</ulink>
-který A'rpi poslal do listu <ulink url="http://mplayerhq.hu/pipermail/mplayer-users/">MPlayer-users</ulink>
-(slovo 'ideg' je vysvětleno níže) (POZOR: Tento překlad se snaží být co nejblíže
-smyslu původního textu, ale místy to jde jen stěží. Pozn. překl.):
-<blockquote>
-<para>
-A my máme idegy. A naše počitadlo idegů znovu a znovu přetéká.
-</para>
-<para>
-Naneštěstí je <application>MPlayer</application> nekontrolovatelný.
-Používají jej lameři, uživatelé Linuxu kteří neumí používat dokonce ani Windows
-a nikdy nezkusili kompilovat jádro (kernel). Nainstalovali si (s výchozími
-volbami) Mandrake nebo Red Hat nebo SuSE a bez RTFM (přečti si ten za...ný manuál)
-posílají na všechny strany zprávy typu 'nefunguje to! pomozte mi! prosím!
-jsem Linuxový začátečník! pomoc! pomozte!'.
-Nemůžeme je zastavit, ale můžeme je alespoň přinutit k RTFM a k tomu, aby si
-přečetli zprávy vypisované ./configure a <application>MPlayer</application>em.
-</para>
-<para>
-A vy chytráci si přijdete a otravujete nás s gcc 2.96 a binárními balíčky,
-místo abyste pomáhali uživatelům nebo dělali patche pomáhající s odstraňováním
-problémů.
-</para>
-<para>
-Polovinu našeho vyhrazeného/volného času trávíme odpovídáním na tyto pitomé maily
-a vymýšlením nových triků a testů do configure abychom se jim vyhnuli.
-</para>
-<para>
-A tady se to vyrovnává. Na straně jedné jste vy, chytrolíni, kteří říkáte že jsme
-mizerové, protože nemáme rádi chybami prolezené gcc 2.96 a na straně druhé jsou
-ti 'noví v Linuxu', kteří nám ukazují jak chybné gcc 2.96 je.
-</para>
-<para>
-Závěr: Nemůžeme být dobří. Polovina lidí bude vždy říkat, že jsme špatní.
-</para>
-<para>
-Možná bychom měli uzavřít projekt, udělat jej closed source, komerční a poskytovat
-instalační podporu. Pak bychom mohli odejít z práce, takže by se vývoj zrychlil,
-vydělali bychom velké peníze a koupili si za ně dům, atd atp.
-Opravdu to tak chcete? Zdá se že jo.
-</para>
-</blockquote>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-SDL výstup nepracuje, nebo se nedá zkompilovat. Problém je ...
-</para></question>
-<answer><para>
-Testovali jsme jej se SDL 1.2.x a může pracovat na SDL 1.1.7+.
-<emphasis role="bold">Nepracuje</emphasis> s jakoukoli předchozí verzí.
-Pokud se rozhodnete použít starší verzi, jste v tom sám/sama.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Pořád mám problémy s kompilací podpory SDL. gcc vypisuje něco jako
-<screen>undefined reference to SDL_EnableKeyRepeat</screen>. Co teď?
-</para></question>
-<answer><para>
-Kde máte nainstalovánu knihovnu SDL? Pokud je nainstalována v
-<filename class="directory">/usr/local</filename> (výchozí), vyeditujte
-kořenový <filename>config.mak</filename> a přidejte
-<systemitem>-L/usr/local/lib</systemitem> za <systemitem>X_LIBS=</systemitem>.
-Nyní zadejte <command>make</command>. Hotovo!
 </para></answer>
 </qandaentry>
 
@@ -301,61 +153,6 @@ Vaše distribuce se může lišit od
 <ulink url="http://www.pathname.com/fhs/">Standardní Hierarchie Souborového systému</ulink>.
 </para></answer>
 </qandaentry>
-
-<qandaentry>
-<question><para>
-Nemohu zkompilovat SVGAlib. Používám jádro 2.3/2.4 ...
-</para></question>
-<answer><para>
-Vyeditujte si <filename>Makefile.cfg</filename> v SVGAlib a zakomentujte řádek
-<systemitem>BACKGROUND = y</systemitem>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Zkompiloval(a) jsme <application>MPlayer</application> s podporou libdvdcss/libdivxdecore,
-ale když jej zkusím spustit, vypíše:
-<screen>
-error while loading shared libraries: lib*.so.0: cannot load shared object file: No such file or directory
-</screen>
-Hledal(a) jsem ty soubory a JSOU zde v <filename class="directory">/usr/local/lib</filename> ...
-</para></question>
-<answer><para>
-Přidejte <filename class="directory">/usr/local/lib</filename> do <filename>/etc/ld.so.conf</filename>
-a spusťte <command>ldconfig</command>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Při kompilaci <application>MEncoder</application>u, to spadne (segfault) při linkování!
-</para></question>
-<answer><para>
-Toto je problém linkeru. Měl by pomoct upgrade binutils (2.11.92.*
-nebo novější by měly být v pořádku). Protože to není naše chyba, prosíme
-<emphasis role="bold">nehlaste</emphasis> nám ji!
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-<application>MPlayer</application> spadne (segmentation fault) během kontroly pthread!
-</para></question>
-<answer><para>
-<command>chmod 644 /usr/lib/libc.so</command>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Rád bych zkompiloval <application>MPlayer</application> na Minixu!
-</para></question>
-<answer><para>
-Já taky. :)
-</para></answer>
-</qandaentry>
-
 </qandadiv>
 
 <qandadiv id="faq-general">
@@ -416,15 +213,6 @@ Jak si mohu udělat snímek obrazovky?
 Abyste si mohli udělat snímek, musíte použít video výstupní rozhraní, které
 nepoužívá překrývání. Jde to například pod X11 s <option>-vo x11</option>, pod
 Windows funguje <option>-vo directx:noaccel</option>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-V levém horním rohu je počítadlo. Jak se ho zbavím?
-</para></question>
-<answer><para>
-Stiskněte <keycap>o</keycap> a vyzkoušejte volbu <option>-osdlevel</option>.
 </para></answer>
 </qandaentry>
 
@@ -511,28 +299,6 @@ a nainstalujte je.
 
 <qandaentry>
 <question><para>
-Co to je &quot;IdegCounter&quot;?
-</para></question>
-<answer><para>
-Bulharsko anglická složenina. &quot;Ideg&quot; je v bulharštině
-něco jako &quot;nerve&quot; (nerv) v angličtině, a je prohlášen za něčím jako
-&quot;ydaegh&quot;. Poprvé byl použit jako měřič A'rpiho nervozity po
-(mm) &quot;záhadném&quot; zmizení CVS kódu ;)
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-A co je ten &quot;Faszom(C)ounter&quot;?
-</para></question>
-<answer><para>
-&quot;Fasz&quot; znamená v bulharštině něco co nechcete vědět, to ostatní má co
-do činění s perverzními mozky vývojářů <application>MPlayer</application>u.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Titulky jsou hezké, nejkrásnější jaké jsem viděl, ale zpomalují přehrávání!
 Vím že je to nepravděpodobné ...
 </para></question>
@@ -540,28 +306,6 @@ Vím že je to nepravděpodobné ...
 Poté co provedete <filename>./configure</filename>, vyeditujte <filename>config.h</filename>
 a nahraďte <systemitem>#undef FAST_OSD</systemitem> za
 <systemitem>#define FAST_OSD</systemitem>. Pak rekompilujte.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Co přesně je ten <systemitem class="library">libavcodec</systemitem>?
-</para></question>
-<answer><para>
-Viz sekci
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Ale configure říká
-<screen>Checking for libavcodec ... no</screen>
-</para></question>
-<answer><para>
-Musíte si opatřit <systemitem class="library">libavcodec</systemitem>
-z CVS FFmpegu. Přečtěte si instrukce v sekci
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>.
 </para></answer>
 </qandaentry>
 
@@ -784,26 +528,6 @@ soubor na FTP.
 
 <qandaentry>
 <question><para>
-<application>MPlayer</application> skončí s chybou při použití
-<filename>l3codeca.acm</filename>.
-</para></question>
-<answer><para>
-Zkontrolujte výstup z <command>ldd /usr/local/bin/mplayer</command>. Pokud
-obsahuje <screen>libc.so.6 => /lib/libc.so.6 (0x4???????)</screen>
-kde &quot;?&quot; je jakékoli číslo, pak je to OK a chyba je jinde. Pokud je to:
-<screen>libc.so.6 => /lib/libc.so.6 (0x00??????)</screen>
-pak je problém ve vašem kernelu/libc. Možná používáte některé bezpečnostní
-patche (například OpenWall patch od Solar Designer) který vynucuje nahrávání
-knihoven na velmi nízké adresy. Protože <filename>l3codeca.acm</filename> je
-nerealokovatelná DLL, musí být nahrána do <literal>0x40000000</literal> a my to
-nemůžeme změnit. Měli byste použít nepatchovaný kernel, nebo použít
-<application>MPlayer</application>ovu volbu <option>-afm 1</option> pro
-potlačení použití <filename>l3codeca.acm</filename>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Můj počítač přehrává MS DivX AVI s rozlišením ~ 640x300 a stereo MP3 zvukem
 příliš pomalu. Když použiji volbu <option>-nosound</option>, vše je OK
 (jen bez zvuku).
@@ -841,22 +565,6 @@ Rovněž zkuste experimentovat s volbou <option>-fstype</option>.
 
 <qandaentry>
 <question><para>
-Při pokusu přehrát MPEG soubory dostanu asi toto: Nemohu nalézt kodek pro video
-formát 0x10000001!
-</para></question>
-<answer><para>
-Máte starou verzi <filename>codecs.conf</filename> v
-<filename class="directory">~/.mplayer/</filename>,
-<filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> a podobně. Odstraňte jej,
-nyní již není potřeba.
-<emphasis role="bold">NEBO</emphasis> máte volbu <option>vc=</option> nebo něco
-podobného v některém svém konfiguračním souboru.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Pokud spustím <application>MPlayer</application> pod KDE, dostanu pouze černou
 obrazovku a nic se neděje. Po asi minutě se začne video přehrávat.
 </para></question>
@@ -867,20 +575,6 @@ arts zvuk, nastavte zvukový výstup přes nativní arts audio rozhraní
 (<option>-ao arts</option>). Pokud selže, nebo není zakompilován, zkuste SDL
 (<option>-ao sdl</option>) a ujistěte se, že vaše SDL umí použít arts zvuk.
 Další možností je spustit <application>MPlayer</application> s artsdsp.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Mám AVI, které produkují šedou obrazovku při přehrávání s <option>-vc odivx</option>
-a zelenou s <option>-vc divx4</option>.
-</para></question>
-<answer><para>
-Není to DivX soubor, ale MS MPEG4v3.
-Pokud máte starou verzi <filename>codecs.conf</filename> v
-<filename class="directory">~/.mplayer/</filename>,
-<filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> a podobně, odstraňte jej.
 </para></answer>
 </qandaentry>
 
@@ -918,16 +612,6 @@ AVI má špatnou hlavičku, zkuste volbu <option>-nobps</option> a/nebo
 
 <qandaentry>
 <question><para>
-Mám MJPEG soubor, který pracuje v ostatních přehrávačích, ale v
-<application>MPlayer</application>u jen černou obrazovku
-</para></question>
-<answer><para>
-Použijte jiný kodek k přehrávání souboru, zkuste <option>-vc ffmjpeg</option>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Když se pokusím grabovat ze svého přijímače, funguje to, ale dostanu divné barvy.
 V ostatních aplikacích je vše v pořádku.
 </para></question>
@@ -951,25 +635,11 @@ zkoušíte přehrát soubor, který má zvuk 22050Hz. Zkuste audio filtr resample.
 
 <qandaentry>
 <question><para>
-Všechny WMV (nebo jiné...) soubory které přehrávám, produkují zelenou/šedou
-obrazovku a hrají pouze zvuk! <application>MPlayer</application> vypíše:
-<screen>Detekován video kodek: [null] drv:0 (NULL kodek (žádné dekódování))</screen>
-</para></question>
-<answer><para>
-Pokud máte starou verzi <filename>codecs.conf</filename> v
-<filename class="directory">~/.mplayer/</filename>,
-<filename class="directory">/etc/</filename>,
-<filename class="directory">/usr/local/etc/</filename> a podobně, odstraňte jej.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 Dostávám podivné procentuální hodnoty (příliš vysoké) při přehrávání na
 notebooku.
 </para></question>
 <answer><para>
-Toto je power managementu / systému šetřícím energií vašeho notebooku
+Toto je problém power managementu / systému šetřícím energií vašeho notebooku
 (BIOS, nikoli jádro). Zapojte konektor externího napájení
 <emphasis role="bold">před</emphasis> zapnutím notebooku. Rovněž můžete zkusit,
 jestli vám pomůže <ulink url="http://www.brodo.de/cpufreq/">cpufreq</ulink>
@@ -1038,118 +708,6 @@ OSS, nebo nařiďte použití výstupního rozhraní ALSA přidáním volby
 <option>-ao alsa</option> do příkazového řádku.
 </para></answer>
 </qandaentry>
-
-<qandaentry>
-<question><para>
-Co takhle DGA rozhraní? Nemohu je najít!
-</para></question>
-<answer><para>
-<filename>./configure</filename> automaticky detekuje váš DGA ovladač.
-Pokud <option>-vo help</option> nenabízí DGA, pak je problém ve vaší instalaci X.
-Zkuste <command>./configure --enable-dga</command> a přečtěte si sekci
-<link linkend="dga">DGA</link>. Alternativně zkuste DGA ovladač přes SDL, pomocí
-volby <option>-vo sdl:dga</option>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-OK, <option>-vo help</option> ukazuje DGA rozhraní, ale stěžuje si na práva.
-Pomozte mi!
-</para></question>
-<answer><para>
-Pracuje to pouze pokud pracujete jako root! Jedná se o limitaci DGA. Měli byste
-se stát rootem (<command>su -</command>) a zkuste to znovu. Dalším řešením je
-nastavit <application>MPlayer</application>u SUID root, ale to nedoporučujeme!
-<screen>
-     chown root /usr/local/bin/mplayer
-     chmod 755 /usr/local/bin/mplayer
-     chmod +s /usr/local/bin/mplayer
- </screen>
-<warning><para>
-Je to <emphasis role="bold">velké</emphasis> bezpečnostní riziko!
-<emphasis role="bold">Nikdy</emphasis> to nedělejte na serveru nebo na počítači,
-který zcela neovládáte, jelikož ostatní uživatelé mohou získat práva roota
-díky SUID root <application>MPlayer</application>u.
-<emphasis role="bold">Byli jste varováni.</emphasis>.
-</para></warning>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Když použiji XVideo, moje Voodoo 3/Banshee napíše:
-<screen>
-X Error of failed request: BadAccess (attempt to access private resource denied)
-   Major opcode of failed request: 147 (MIT-SHM)
-   Minor opcode of failed request: 1 (X_ShmAttach)
-   Serial number of failed request: 26
-   Current serial number in output stream:27
-</screen>
-</para></question>
-<answer><para>
-Ovladač <systemitem>tdfx</systemitem> v XFree86 4.0.2/4.0.3 má tuto chybu.
-Ta byla odstraněna
-<ulink url="http://www.xfree86.org/cvs/changes_4_1.html">bug fixem #621
-CVS logu XFree86 4.1.0</ulink>. Takže upgradujte na XFree86 4.1.0 nebo novější.
-Alternativně si buď stáhněte (alespoň) DRI verze 0.6 z
-<ulink url="http://dri.sf.net">domácí stránky DRI</ulink>, nebo použijte DRI z
-CVS.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Výstup do OpenGL (<option>-vo gl</option>) nefunguje (selže/černá obrazovka/chyby
-X11/...).
-</para></question>
-<answer><para>
-Vaše OpenGL rozhraní nepodporuje dynamickou změnu textury (glTexSubImage).
-Je známo, že to nefunguje s binárním bordelem od nVidie. Naopak to funguje s
-Utah-GLX/DRI a kartami Matrox G400. Rovněž tak s DRI a kartami Radeon. Nefunguje
-to s DRI a ostatními kartami. Nebude to fungovat s kartami 3DFX, protože mají
-omezenu velikost textury na 256x256.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Mám kartu TNT/TNT2 od nVidie a pod filmem mám pruh s podivnými barvami!
-Čí je to vina?
-</para></question>
-<answer><para>
-Je to chyba binárního X ovladače od nVidie. Tyto chyby se objevují pouze při
-použití karet TNT/TNT2 a my s tím nemůžeme nic udělat. Problém vyřešte upgradem
-na poslední verzi binárního ovladače od nVidie. Pokud je to stále špatně,
-stěžujte si nVidii!
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Mám kartu nVidia XYZ a když kliknu na okno GUI, abych přepnul(a) zobrazení
-GUI panelu, objeví se černý čtverec v místě kliknutí. Mám nejnovější ovladač.
-</para></question>
-<answer><para>
-Ano, nVidia opravila předchozí chybu (výš) a vyrobila novou.
-Všichni jim gratulujme. UPDATE: Podle <link linkend="nvidia">nVidie</link>
-to již bylo opraveno.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Svět je krutý ...! SDL má pouze <systemitem>x11</systemitem> cíl,
-ale nikoli <systemitem>xv</systemitem>!
-</para></question>
-<answer><para>
-Zkuste ten <systemitem>x11</systemitem> cíl znovu. Teď zkuste <option>-vo x11
--fs -zoom</option>. Vidíte rozdíl? Ne?! OK, tady je důvod:
-SDL cíl <systemitem>x11</systemitem> používá xv, pokud je dostupné, nemusíte se
-tím trápit... Poznámka: S SDL můžete vynutit/vypnout Xv použitím
-<option>-forcexv</option> a <option>-noxv</option>.
-</para></answer>
-</qandaentry>
 </qandadiv>
 
 <qandadiv id="faq-dvd">
@@ -1166,31 +724,6 @@ muset použít jiný přehrávač jako <application>xine</application>,
 <application>vlc</application> nebo <application>Ogle</application>.
 Pokud chcete mít DVD navigaci v <application>MPlayer</application>u, musíte si
 ji naprogramovat, ale uvědomte si, že to bude velká akce.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Při přehrávání DVD jsem narazil(a) na tuto chybu:
-<screen>mplayer: ifo_read.c:1143: ifoRead_C_ADT_internal: Assertion nfo_length / sizeof(cell_adr_t) >= c_adt->nr_of_vobs' failed.</screen>
-</para></question>
-<answer><para>
-Toto je známá chyba libdvdread 0.9.1/0.9.2. Použijte
-<emphasis role="bold">libmpdvdkit2</emphasis>, kterou naleznete ve zdrojových
-kódech <application>MPlayer</application>u a je používána jako výchozí.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Mohu zkompilovat libdvdread a libdvdcss na mém sladkém SPARCu pod Solarisem?
-</para></question>
-<answer><para>
-Kdo ví... Říká se, že to jde, takže to prosíme zkuste a napište nám jak to šlo.
-Odvoláváme se na dokumentaci libdvdread a také její domácí stránku. My nejsme
-autory libdvdread. Použijte <emphasis role="bold">libmpdvdkit2</emphasis>,
-kterou naleznete ve zdrojových kódech <application>MPlayer</application>u
-a je používána jako výchozí.
 </para></answer>
 </qandaentry>
 
@@ -1219,19 +752,6 @@ Musím být (setuid) root, abych mohl(a) přehrávat DVD?
 <answer><para>
 Ne. Ačkoli musíte mít příslušná práva k souboru DVD zařízení
 (v <filename class="directory">/dev/</filename>).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Kde si mohu opatřit balíčky libdvdread a libdvdcss?
-</para></question>
-<answer><para>
-Vůbec je nepotřebujete. Použijte <emphasis role="bold">libmpdvdkit2</emphasis>,
-kterou naleznete ve zdrojových kódech <application>MPlayer</application>u
-a je používána jako výchozí.
-Zmíněné balíčky si můžete stáhnout ze
-<ulink url="http://www.dtek.chalmers.se/groups/dvd/">serveru Ogle</ulink>.
 </para></answer>
 </qandaentry>
 
@@ -1378,6 +898,12 @@ Rovněž vynechání <option>-ofps</option> by ve většině případů nemělo vadit
 (jelikož vaše video již pravděpodobně má správnou snímkovou rychlost).
 PAL vyžaduje <option>-ofps</option> 25 a NTSC vyžaduje
 <option>-ofps</option> 30000/1001.
+Navíc PAL SVCD podporují pouze rozlišení 480x576 a 352x288,
+zatímco NTSC podporují pouze 480x480 a 352x240.
+Pokud má zdrojové video jiné rozlišení, pak musíte přeškálovat
+pomocí video filtru <option>scale</option>, takže váš řetězec video filtrů
+bude vypadat například takto <option>-vf scale=480:480,harddup</option> pro
+NTSC SVCD, nebo <option>-vf scale=352:288,harddup</option> pro PAL SVCD.
 </para><para>
 Pokud požadujete zvuk, SVCD podporuje pouze zvuk MPEG-1 layer II,
 takže musíte použít jeden z těchto kodérů
@@ -1537,6 +1063,43 @@ Přímo to není možné, ale můžete zkusit toto (všimněte si
 Toto vám umožňuje použít jakýkoli enkodér, ne jen <application>LAME</application>,
 jen zaměňte <command>lame</command> svým oblíbeným enkodérem zvuku v příkazu
 výše.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Proč přehrávače třetích stran selhávají při přehrávání MPEG-4 filmů enkódovaných
+<application>MEncoder</application>em pozdější verze než 1.0pre7?
+</para></question>
+
+<answer><para>
+<systemitem class="library">libavcodec</systemitem>, nativní knihovna pro
+enkódování MPEG-4, obvykle přibalovaná k <application>MEncoder</application>u,
+nastavovala FourCC na 'DIVX' při enkódování MPEG-4 videí
+(FourCC je AVI značka pro identifikaci software použitého k enkódování a
+zamýšleného software k použití pro dekódování videa).
+To vede mnoho lidí k názoru, že
+<systemitem class="library">libavcodec</systemitem>
+byla enkódovací knihovna DivX, zatímco ve skutečnosti je to zcela odlišná
+knihovna pro enkódování MPEG-4, která tento standard implementuje mnohem
+lépe, než DivX.
+Takže je novým výchozím FourCC používaným knihovnou
+<systemitem class="library">libavcodec</systemitem> 'FMP4', ale toto chování
+můžete změnit použitím volby <option>-ffourcc</option> v
+<application>MEncoder</application>u.
+Rovněž můžete změnit FourCC existujících souborů stejným způsobem:
+<screen>
+  mencoder <replaceable>input.avi</replaceable> -o <replaceable>výstupní.avi</replaceable> -ffourcc XVID
+</screen>
+Poznamenejme, že takto nastavíte FourCC jako XVID, místo jako DIVX.
+Toto doporučujeme, protože DIVX FourCC znamená DivX4, což je velmi jednoduchý
+MPEG-4 kodek, zatímco jak DX50, tak XVID jsou plnohodnotné MPEG-4 (ASP).
+Takže pokud nastavíte FourCC na DIVX, nekteré špatné softwarové nebo
+hardwarové přehrávače si mohou vylámat zuby na pokročilýchvlastnostech, které
+<systemitem class="library">libavcodec</systemitem> podporuje, ale DivX
+nikoli; naproti tomu je <systemitem class="library">XviD</systemitem>
+blíže <systemitem class="library">libavcodec</systemitem>u z hlediska funkčnosti
+a je podporován všemi dobrými přehrávači.
 </para></answer>
 </qandaentry>
 
