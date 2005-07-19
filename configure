@@ -6137,7 +6137,10 @@ cat > $TMPC << EOF
 int main(void) { x264_encoder_open((void*)0); return 0; }
 EOF
 _ld_x264="$_ld_x264 -lx264 $_ld_lm $_ld_pthread"
-if test "$_x264" != no && cc_check $_inc_x264 $_ld_x264 ; then
+if test "$_x264" != no && \
+( cc_check $_inc_x264 $_ld_x264 || \
+( test "$_x11" = yes && cc_check $_inc_x264 $_inc_x11 $_ld_x264 $_ld_x11 )) ; \
+then
   _x264=yes
   _def_x264='#define HAVE_X264 1'
   _codecmodules="x264 $_codecmodules"
