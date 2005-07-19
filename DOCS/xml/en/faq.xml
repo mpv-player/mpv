@@ -389,34 +389,6 @@ a friend, and he says it works, try comparing
 
 <qandaentry>
 <question><para>
-I've just installed <application>MPlayer</application>. When I want to
-open a video file it causes a fatal error:
-<screen>
-Error opening/initializing the selected video_out (-vo) device.
-</screen>
-How can I solve my problem?
-</para></question>
-<answer><para>
-Just change your video output device. Issue the following command to get
-a list of available video output drivers:
-<screen>
-mplayer -vo help
-</screen>
-After you've chosen the correct video output driver, add it to
-your configuration file. Add
-<programlisting>
- vo = <replaceable>selected_vo</replaceable>
-</programlisting>
-to <filename>~/.mplayer/config</filename> and/or
-<programlisting>
-vo_driver = <replaceable>selected_vo</replaceable>
-</programlisting>
-to <filename>~/.mplayer/gui.conf</filename>.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 I'm having trouble getting my subtitles to display, help!!
 </para></question>
 <answer><para>
@@ -490,45 +462,6 @@ quite a while.)</para></listitem>
 
 <qandaentry>
 <question><para>
-... works with <application>xine/vlc/...</application> but doesn't with
-<application>MPlayer</application>.
-</para></question>
-<answer><para>
-<application>MPlayer</application> is not <application>xine/vlc/...</application>.
-Although these players have some code in common, the codecs (DLL) set,
-synchronization, demultiplexing etc is different and should not be
-compared. If you have a file <application>MPlayer</application> fails to
-play correctly but works in another player, please read the
-<link linkend="bugreports">bug reporting guidelines</link> and upload
-the file to our FTP server.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-Audio goes out of sync playing an AVI file.
-</para></question>
-<answer><para>
-Try the <option>-bps</option> or <option>-nobps</option> option. If it does not
-improve, read the
-<link linkend="bugreports">bug reporting guidelines</link>
-and upload the file to FTP.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-My computer plays MS DivX AVIs with resolutions ~ 640x300 and stereo MP3 sound
-too slow. When I use the <option>-nosound</option> option, everything is OK (but quiet).
-</para></question>
-<answer><para>
-Your machine is too slow or your sound card driver is broken. Consult the
-documentation to see if you can improve performance.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 <application>MPlayer</application> dies with
 <screen>MPlayer interrupted by signal 4 in module: decode_video</screen>
 </para></question>
@@ -541,60 +474,6 @@ it was compiled on or recompile with runtime CPU detection
 
 <qandaentry>
 <question><para>
-I have problems with <replaceable>[your window manager]</replaceable>
-and fullscreen xv/xmga/sdl/x11 modes ...
-</para></question>
-<answer><para>
-Read the <link linkend="bugreports">bug reporting guidelines</link> and send us
-a proper bug report.
-Also try experimenting with the <option>-fstype</option> option.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-When starting <application>MPlayer</application> under KDE I just get a black
-screen and nothing happens. After about one minute the video starts playing.
-</para></question>
-<answer><para>
-The KDE arts sound daemon is blocking the sound device. Either wait until the
-video starts or disable the arts-daemon in control center. If you want to use
-arts sound, specify audio output via our native arts audio driver
-(<option>-ao arts</option>). If it fails or isn't compiled in, try SDL
-(<option>-ao sdl</option>) and make sure your SDL can handle arts sound. Yet
-another option is to start <application>MPlayer</application> with artsdsp.
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-When I play this movie I get video-audio desync and/or <application>MPlayer</application>
-crashes with the following message:
-<screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
-</para></question>
-<answer><para>
-This can have multiple reasons.
-<itemizedlist>
-<listitem><para>
-Your CPU <emphasis role="bold">and/or</emphasis> video card <emphasis role="bold">and/or</emphasis>
-bus is too slow. <application>MPlayer</application> displays a message if this is the case (and the
-dropped frames counter goes up fast).
-</para></listitem>
-<listitem><para>
-If it is an AVI, maybe it has bad interleaving, try the
-<option>-ni</option> to work around this.
-Or it may have a bad header, in this case <option>-nobps</option>
-and/or <option>-mc 0</option> can help.
-</para></listitem>
-<listitem><para>
-Your sound driver is buggy. See the <link linkend="audio">audio section</link>.
-</para></listitem>
-</itemizedlist>
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
 When I try to grab from my tuner, it works, but colors are strange. It's OK with other
 applications.
 </para></question>
@@ -602,16 +481,6 @@ applications.
 Your card probably reports some colorspaces as supported when in fact
 it does not support them. Try with YUY2 instead of the
 default YV12 (see the <link linkend="tv-input">TV</link> section).
-</para></answer>
-</qandaentry>
-
-<qandaentry>
-<question><para>
-I have A/V sync problems. Some of my AVIs play fine, but some play with double speed!
-</para></question>
-<answer><para>
-You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and you
-try to play a file which has 22050Hz audio. Try the resample audio filter.
 </para></answer>
 </qandaentry>
 
@@ -657,6 +526,69 @@ Try <option>-nocache</option>.
 
 <qandaentry>
 <question><para>
+I've just installed <application>MPlayer</application>. When I want to
+open a video file it causes a fatal error:
+<screen>
+Error opening/initializing the selected video_out (-vo) device.
+</screen>
+How can I solve my problem?
+</para></question>
+<answer><para>
+Just change your video output device. Issue the following command to get
+a list of available video output drivers:
+<screen>
+mplayer -vo help
+</screen>
+After you've chosen the correct video output driver, add it to
+your configuration file. Add
+<programlisting>
+ vo = <replaceable>selected_vo</replaceable>
+</programlisting>
+to <filename>~/.mplayer/config</filename> and/or
+<programlisting>
+vo_driver = <replaceable>selected_vo</replaceable>
+</programlisting>
+to <filename>~/.mplayer/gui.conf</filename>.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+I have problems with <replaceable>[your window manager]</replaceable>
+and fullscreen xv/xmga/sdl/x11 modes ...
+</para></question>
+<answer><para>
+Read the <link linkend="bugreports">bug reporting guidelines</link> and send us
+a proper bug report.
+Also try experimenting with the <option>-fstype</option> option.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+Audio goes out of sync playing an AVI file.
+</para></question>
+<answer><para>
+Try the <option>-bps</option> or <option>-nobps</option> option. If it does not
+improve, read the
+<link linkend="bugreports">bug reporting guidelines</link>
+and upload the file to FTP.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+My computer plays MS DivX AVIs with resolutions ~ 640x300 and stereo MP3 sound
+too slow. When I use the <option>-nosound</option> option, everything is OK (but quiet).
+</para></question>
+<answer><para>
+Your machine is too slow or your sound card driver is broken. Consult the
+documentation to see if you can improve performance.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
 How can I use <application>dmix</application> with
 <application>MPlayer</application>?
 </para></question>
@@ -685,6 +617,58 @@ option to make <application>MPlayer</application> use ARTS or ESD.
 You might also be running ALSA without OSS emulation, try loading the ALSA OSS
 kernel modules or add <option>-ao alsa</option> to your command line to
 directly use the ALSA audio output driver.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+When starting <application>MPlayer</application> under KDE I just get a black
+screen and nothing happens. After about one minute the video starts playing.
+</para></question>
+<answer><para>
+The KDE arts sound daemon is blocking the sound device. Either wait until the
+video starts or disable the arts-daemon in control center. If you want to use
+arts sound, specify audio output via our native arts audio driver
+(<option>-ao arts</option>). If it fails or isn't compiled in, try SDL
+(<option>-ao sdl</option>) and make sure your SDL can handle arts sound. Yet
+another option is to start <application>MPlayer</application> with artsdsp.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+I have A/V sync problems. Some of my AVIs play fine, but some play with double speed!
+</para></question>
+<answer><para>
+You have a buggy sound card/driver. Most likely it's fixed at 44100Hz, and you
+try to play a file which has 22050Hz audio. Try the resample audio filter.
+</para></answer>
+</qandaentry>
+
+<qandaentry>
+<question><para>
+When I play this movie I get video-audio desync and/or <application>MPlayer</application>
+crashes with the following message:
+<screen>DEMUXER: Too many (945 in 8390980 bytes) video packets in the buffer!</screen>
+</para></question>
+<answer><para>
+This can have multiple reasons.
+<itemizedlist>
+<listitem><para>
+Your CPU <emphasis role="bold">and/or</emphasis> video card <emphasis role="bold">and/or</emphasis>
+bus is too slow. <application>MPlayer</application> displays a message if this is the case (and the
+dropped frames counter goes up fast).
+</para></listitem>
+<listitem><para>
+If it is an AVI, maybe it has bad interleaving, try the
+<option>-ni</option> to work around this.
+Or it may have a bad header, in this case <option>-nobps</option>
+and/or <option>-mc 0</option> can help.
+</para></listitem>
+<listitem><para>
+Your sound driver is buggy. See the <link linkend="audio">audio section</link>.
+</para></listitem>
+</itemizedlist>
 </para></answer>
 </qandaentry>
 </qandadiv>
