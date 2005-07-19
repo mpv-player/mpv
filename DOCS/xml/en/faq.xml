@@ -655,9 +655,9 @@ crashes with the following message:
 This can have multiple reasons.
 <itemizedlist>
 <listitem><para>
-Your CPU <emphasis role="bold">and/or</emphasis> video card <emphasis role="bold">and/or</emphasis>
-bus is too slow. <application>MPlayer</application> displays a message if this is the case (and the
-dropped frames counter goes up fast).
+Your CPU <emphasis>and/or</emphasis> video card <emphasis>and/or</emphasis>
+bus is too slow. <application>MPlayer</application> displays a message if
+this is the case (and the dropped frames counter goes up fast).
 </para></listitem>
 <listitem><para>
 If it is an AVI, maybe it has bad interleaving, try the
