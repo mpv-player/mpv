@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.66 -->
+<!-- Synced with 1.69 -->
 <sect1 id="codecs">
 <title>Podporované kodeky</title>
 
@@ -538,7 +538,7 @@ platformy.</para></note>
   vlastností ovlivňujících kvalitu.
   Ve specifikaci H.264 je ovšem mnoho pokročilých funkcí, které nemají přímo
   co do činění s kvalitou videa. Mnoho z těchto vlastností zatím není
-  implementováno v <systemitem class="library">x264</systemitem>.
+  v <systemitem class="library">x264</systemitem> implementováno.
 </para>
 
 <itemizedlist>
@@ -583,9 +583,9 @@ platformy.</para></note>
   Prospěch z použití H.264 není zadarmo: Zdá se, že dekódování H.264 datových
   proudů má přemrštěné nároky na CPU a paměť.
   Například na 1733 MHz Athlonu využije dekódování 1500kbps H.264 videa
-  kolem 50% CPU.
-  Pro porovnání, dekódování 1500kbps MPEG-4 ASP proudu vyžaduje okolo
-  10% CPU.
+  v DVD rozlišení kolem 35% CPU.
+  Pro porovnání, dekódování 1500kbps MPEG-4 ASP proudu ve stejném rozlišení
+  vyžaduje okolo 10% CPU.
   To znamená, že dekódování datových proudů je pro většinu uživatelů téměř
   nemožné.
   Rovněž to znamená, že dokonce i rozumný DVD rip se může občas zakousnout
@@ -867,7 +867,7 @@ make install
 </screen>
 Binárky na audiocoding.com nenajdete, ale můžete si je opatřit v balíčcích pro
 Debian z <ulink url="http://hpisi.nerim.net">domácí stránky Christiana
-Marillata</ulink>, Mandrake RPM z
+Marillata</ulink>, Mandrake/Mandriva RPM z
 <ulink url="http://plf.zarb.org">P.L.F</ulink> a RedHat RPM
 ze stránek <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 </para>
