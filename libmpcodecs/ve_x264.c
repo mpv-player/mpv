@@ -105,6 +105,7 @@ static int level_idc = 40;
 static int psnr = 0;
 static int log_level = 2;
 static int turbo = 0;
+static int visualize = 0;
 
 m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -167,6 +168,8 @@ m_option_t x264encopts_conf[] = {
     {"nopsnr", &psnr, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {"log", &log_level, CONF_TYPE_INT, CONF_RANGE, -1, 3, NULL},
     {"turbo", &turbo, CONF_TYPE_INT, CONF_RANGE, 0, 2, NULL},
+    {"visualize", &visualize, CONF_TYPE_FLAG, 0, 0, 1, NULL},
+    {"novisualize", &visualize, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
 
@@ -255,6 +258,7 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.i_level_idc = level_idc;
     mod->param.analyse.b_psnr = psnr;
     mod->param.i_log_level = log_level;
+    mod->param.b_visualize = visualize;
     mod->param.vui.i_sar_width = d_width*height;
     mod->param.vui.i_sar_height = d_height*width;
     mod->param.i_threads = threads;
