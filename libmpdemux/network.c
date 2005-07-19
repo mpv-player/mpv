@@ -400,6 +400,8 @@ http_send_request( URL_t *url, off_t pos ) {
 	else
 	    http_set_field( http_hdr, "User-Agent: MPlayer/"VERSION);
 
+	http_set_field(http_hdr, "Icy-MetaData: 1");
+
 	if(pos>0) { 
 	// Extend http_send_request with possibility to do partial content retrieval
 #ifdef __MINGW32__

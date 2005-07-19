@@ -34,6 +34,144 @@ extern int network_bandwidth;
 
 extern int http_seek(stream_t *stream, off_t pos);
 
+typedef struct {
+  unsigned metaint;
+  unsigned metapos;
+  int is_ultravox;
+} scast_data_t;
+
+/**
+ * \brief first read any data from sc->buffer then from fd
+ * \param fd file descriptor to read data from
+ * \param buffer buffer to read into
+ * \param len how many bytes to read
+ * \param sc streaming control containing buffer to read from first
+ * \return len unless there is a read error or eof
+ */
+static unsigned my_read(int fd, char *buffer, int len, streaming_ctrl_t *sc) {
+  unsigned pos = 0;
+  unsigned cp_len = sc->buffer_size - sc->buffer_pos;
+  if (cp_len > len)
+    cp_len = len;
+  memcpy(buffer, &sc->buffer[sc->buffer_pos], cp_len);
+  sc->buffer_pos += cp_len;
+  pos += cp_len;
+  while (pos < len) {
+    int ret = read(fd, &buffer[pos], len - pos);
+    if (ret <= 0)
+      break;
+    pos += ret;
+  }
+  return pos;
+}
+
+static unsigned uvox_meta_read(int fd, streaming_ctrl_t *sc) {
+  unsigned metaint;
+  unsigned char info[6];
+  do {
+    my_read(fd, info, 1, sc);
+    if (info[0] == 0x00)
+      my_read(fd, info, 6, sc);
+    else
+      my_read(fd, &info[1], 5, sc);
+    if (info[0] != 0x5a || info[1] != 0x00) {
+      mp_msg(MSGT_DEMUXER, MSGL_ERR, "Invalid or unknown uvox metadata\n");
+      return 0;
+    }
+    metaint = info[4] << 8 | info[5];
+    if (info[3] == 0x02) {
+      char *metabuf = malloc(metaint);
+      my_read(fd, metabuf, metaint, sc);
+      free(metabuf);
+    }
+  } while (info[3] == 0x02);
+  return metaint;
+}
+
+/**
+ * \brief read one scast meta data entry and print it
+ */
+static void scast_meta_read(int fd, streaming_ctrl_t *sc) {
+  unsigned char tmp = 0;
+  unsigned metalen;
+  my_read(fd, &tmp, 1, sc);
+  metalen = tmp * 16;
+  if (metalen > 0) {
+    char *info = (char *)malloc(metalen + 1);
+    unsigned nlen = my_read(fd, info, metalen, sc);
+    info[nlen] = 0;
+    mp_msg(MSGT_DEMUXER, MSGL_INFO, "\nICY Info: %s\n", info);
+    free(info);
+  }
+}
+
+static int scast_streaming_read(int fd, char *buffer, int size,
+                                streaming_ctrl_t *sc) {
+  scast_data_t *sd = (scast_data_t *)sc->data;
+  unsigned block, ret;
+  unsigned done = 0;
+
+  // first read remaining data up to next metadata
+  block = sd->metaint - sd->metapos;
+  if (block > size)
+    block = size;
+  ret = my_read(fd, buffer, block, sc);
+  sd->metapos += ret;
+  done += ret;
+  if (ret != block) // read problems or eof
+    size = done;
+
+  while (done < size) { // now comes the metadata
+    if (sd->is_ultravox)
+      sd->metaint = uvox_meta_read(fd, sc);
+    else
+      scast_meta_read(fd, sc); // read and display metadata
+    sd->metapos = 0;
+    block = size - done;
+    if (block > sd->metaint)
+      block = sd->metaint;
+    ret = my_read(fd, &buffer[done], block, sc);
+    sd->metapos += ret;
+    done += ret;
+    if (ret != block) // read problems or eof
+      size = done;
+  }
+  return done;
+}
+
+static int scast_streaming_start(stream_t *stream) {
+  int metaint;
+  int fromhdr;
+  scast_data_t *scast_data;
+  HTTP_header_t *http_hdr = stream->streaming_ctrl->data;
+  int is_ultravox = http_hdr && strcasecmp(http_hdr->protocol, "ICY") != 0;
+  if (!stream || stream->fd < 0 || !http_hdr)
+    return -1;
+  if (is_ultravox)
+    metaint = 0;
+  else {
+    metaint = atoi(http_get_field(http_hdr, "Icy-MetaInt"));
+    if (metaint <= 0)
+      return -1;
+  }
+  stream->streaming_ctrl->buffer = malloc(http_hdr->body_size);
+  stream->streaming_ctrl->buffer_size = http_hdr->body_size;
+  stream->streaming_ctrl->buffer_pos = 0;
+  memcpy(stream->streaming_ctrl->buffer, http_hdr->body, http_hdr->body_size);
+  scast_data = malloc(sizeof(scast_data_t));
+  scast_data->metaint = metaint;
+  scast_data->metapos = 0;
+  scast_data->is_ultravox = is_ultravox;
+  http_free(http_hdr);
+  stream->streaming_ctrl->data = scast_data;
+  stream->streaming_ctrl->streaming_read = scast_streaming_read;
+  stream->streaming_ctrl->streaming_seek = NULL;
+  stream->streaming_ctrl->prebuffer_size = 64 * 1024; // 64 KBytes
+  stream->streaming_ctrl->buffering = 1;
+  stream->streaming_ctrl->status = streaming_playing_e;
+  return 0;
+}
+
 static int nop_streaming_start( stream_t *stream ) {
 	HTTP_header_t *http_hdr = NULL;
 	char *next_url=NULL;
@@ -677,14 +815,20 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 }
 
 static int fixup_open(stream_t *stream,int seekable) {
+	HTTP_header_t *http_hdr = stream->streaming_ctrl->data;
+	int is_icy = http_hdr && strcasecmp(http_hdr->protocol, "ICY") == 0;
+	char *content_type = http_get_field( http_hdr, "Content-Type" );
+	int is_ultravox = http_hdr && content_type &&
+              strcasecmp(content_type, "misc/ultravox") == 0;
 
 	stream->type = STREAMTYPE_STREAM;
-	if(seekable)
+	if(!is_icy && !is_ultravox && seekable)
 	{
 		stream->flags |= STREAM_SEEK;
 		stream->seek = http_seek;
 	}
 	stream->streaming_ctrl->bandwidth = network_bandwidth;
+	if ((!is_icy && !is_ultravox) || scast_streaming_start(stream))
 	if(nop_streaming_start( stream )) {
 		mp_msg(MSGT_NETWORK,MSGL_ERR,"nop_streaming_start failed\n");
 		streaming_ctrl_free(stream->streaming_ctrl);
@@ -751,7 +895,7 @@ stream_info_t stream_info_http1 = {
   "Bertrand, Albeau, Reimar Doeffinger, Arpi?",
   "plain http",
   open_s1,
-  {"http", "http_proxy", NULL},
+  {"http", "http_proxy", "unsv", NULL},
   NULL,
   0 // Urls are an option string
 };
