@@ -736,9 +736,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <note><title>Hint:</title>
 <para>
   <application>MPlayer</application> can slow down movie playback
-  with the -speed option.
+  with the -speed option or play it frame-by-frame.
   Try using <option>-speed</option> 0.2 to watch the movie very
-  slowly and identify the pattern, if you cannot see it at full speed.
+  slowly or press the "." key repeatedly to play one frame at a time
+  and identify the pattern, if you cannot see it at full speed.
 </para>
 </note>
 </sect3>
@@ -1710,9 +1711,11 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 <listitem><para>
   <emphasis role="bold">vmax_b_frames</emphasis>: 1 or 2 is good, depending on
   the movie.
-  Note that libavcodec does not yet support closed GOP (the option
-  <option>cgop</option> does not currently work), so DivX5 will not be able to
-  decode anything encoded with B-frames.
+  Note that if you need to have your encode being decodable by DivX5, you
+  need to activate closed GOP support, using
+  <systemitem class="library">libavcodec</systemitem> <option>cgop</option>
+  option, but you need to deactivate scene detection, which
+  is not a good idea as it will hurt encode efficiency a bit.
 </para></listitem>
 
 <listitem><para>
@@ -2682,7 +2685,7 @@ codec</title>
   Activates a better coefficient cost estimation method, which slightly
   reduces filesize by around 0.15 to 0.19%, while having a negligible
   impact on speed.
-  It's therefore recommended to always leave it on.
+  It is therefore recommended to always leave it on.
 </para></listitem>
 
 <listitem><para>
