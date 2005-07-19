@@ -493,7 +493,7 @@ static opt_t subopts[] = {
 static uint32_t preinit(const char *arg)
 {
     // set defaults
-    many_fmts = 0;
+    many_fmts = 1;
     use_osd = 1;
     scaled_osd = 0;
     use_aspect = 1;
