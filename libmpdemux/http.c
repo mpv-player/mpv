@@ -65,6 +65,12 @@ static unsigned my_read(int fd, char *buffer, int len, streaming_ctrl_t *sc) {
   return pos;
 }
 
+/**
+ * \brief read and process (i.e. discard *g*) a block of ultravox metadata
+ * \param fd file descriptor to read from
+ * \param sc streaming_ctrl_t whose buffer is consumed before reading from fd
+ * \return number of real data before next metadata block starts or 0 on error
+ */
 static unsigned uvox_meta_read(int fd, streaming_ctrl_t *sc) {
   unsigned metaint;
   unsigned char info[6];
@@ -93,6 +99,8 @@ static unsigned uvox_meta_read(int fd, streaming_ctrl_t *sc) {
 
 /**
  * \brief read one scast meta data entry and print it
+ * \param fd file descriptor to read from
+ * \param sc streaming_ctrl_t whose buffer is consumed before reading from fd
  */
 static void scast_meta_read(int fd, streaming_ctrl_t *sc) {
   unsigned char tmp = 0;
@@ -108,6 +116,13 @@ static void scast_meta_read(int fd, streaming_ctrl_t *sc) {
   }
 }
 
+/**
+ * \brief read data from scast/ultravox stream without any metadata
+ * \param fd file descriptor to read from
+ * \param buffer buffer to read data into
+ * \param size number of bytes to read
+ * \param sc streaming_ctrl_t whose buffer is consumed before reading from fd
+ */
 static int scast_streaming_read(int fd, char *buffer, int size,
                                 streaming_ctrl_t *sc) {
   scast_data_t *sd = (scast_data_t *)sc->data;
