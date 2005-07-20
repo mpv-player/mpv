@@ -145,7 +145,7 @@ static char help_text[]=
 "- MPlayer stürzte wegen falscher Benutzung der CPU/FPU/des RAMs ab.\n"\
 "  Kompiliere MPlayer erneut mit --enable-debug und erstelle mit 'gdb'\n"\
 "  einen Backtrace und eine Disassemblierung. Details dazu findest du\n"\
-"  in DOCS/HTML/en/bugreports.html.\n"
+"  in DOCS/HTML/en/bugreports_what.html#bugreports_crash.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer ist abgestürzt. Das sollte nicht passieren.\n"\
 "  Es kann sich um einen Fehler im MPlayer-Code _oder_ in deinen Treibern\n"\
