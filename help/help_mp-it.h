@@ -88,7 +88,7 @@ static char help_text[]=
 "  ALSA 0.5 o l\'emulazione oss di ALSA 0.9. Leggi DOCS/HTML/en/audio.html per ulteriori suggerimenti!\n"\
 " Puoi anche provare con -autosync 30 o altri valori.\n"\
 "- Output video lento. Prova un differente -vo driver (per la lista completa: -vo help) o prova\n"\
-"  con -framedrop!  Leggi DOCS/it/video.html per suggerimenti sulla regolazione/accelerazione del video.\n"\
+"  con -framedrop! Leggi DOCS/HTML/en/video.html per suggerimenti sulla regolazione/accelerazione del video.\n"\
 "- Cpu lenta. Non provare a riprodurre grossi dvd/divx su cpu lente! Prova -hardframedrop\n"\
 "- File corrotto. Prova varie combinazioni di: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Per riprodurre da dispositivi lenti (dischi nfs/smb, dvd, vcd etc) prova -cache 8192\n"\
