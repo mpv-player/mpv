@@ -3329,33 +3329,33 @@ Skip the given number of macroblock rows at the top.
 Skips the loop filter (aka deblocking) during H.264 decoding.
 Since the filtered frame is supposed to be used as reference
 for decoding dependant frames this has a worse effect on quality
-than not doing deblocking on e.g. MPEG2 video.
+than not doing deblocking on e.g. MPEG-2 video.
 But at least for high bitrate HDTV this provides a big speedup with
 no visible quality loss.
 .sp 1
 <skipvalue> can be either one of the following:
 .RSss
 .br
-none: never skip
+none: Never skip.
 .br
-default: skip when the processing step is useless (e.g. 0 size packets in AVI)
+default: Skip useless processing steps (e.g.\& 0 size packets in AVI).
 .br
-nonref: skip for frames that are not referenced (i.e. not used for
-decoding other frames, the error can not "build up")
+nonref: Skip frames that are not referenced (i.e.\& not used for
+decoding other frames, the error cannot "build up").
 .br
-bidir: skip for B-Frames
+bidir: Skip B-Frames.
 .br
-nonkey: skip for all frames except keyframes
+nonkey: Skip all frames except keyframes.
 .br
-all: skip for all frames
+all: Skip all frames.
 .REss
 .IPs skipidct=<skipvalue> (MPEG1/2 only)
 Skips the IDCT step.
-This looses a lot of quality in almost all cases
+This degrades quality a lot of in almost all cases
 (see skiploopfilter for available skip values).
 .IPs skipframe=<skipvalue>
 Skips decoding of frames completely.
-Big speedup, but jerky motion and sometimes bad artefacts
+Big speedup, but jerky motion and sometimes bad artifacts
 (see skiploopfilter for available skip values).
 .IPs vismv=<value>
 Visualize motion vectors.
