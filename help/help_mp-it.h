@@ -93,7 +93,7 @@ static char help_text[]=
 "- File corrotto. Prova varie combinazioni di: -nobps  -ni  -mc 0  -forceidx\n"\
 "- Per riprodurre da dispositivi lenti (dischi nfs/smb, dvd, vcd etc) prova -cache 8192\n"\
 "- Stai usando -cache per riprodurre un file AVI senza interleave? Prova con -nocache.\n"\
-"Se il problema non è in nessuno di questi casi, allora leggi DOCS/it/bugreports.html!\n\n"
+"Se il problema non è in nessuno di questi casi, allora leggi DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer è stato compilato senza il supporto della GUI!\n"
 #define MSGTR_GuiNeedsX "LA GUI di MPlayer richiede X11!\n"
