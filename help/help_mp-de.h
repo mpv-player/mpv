@@ -76,7 +76,7 @@ static char help_text[]=
 #define MSGTR_FPSnotspecified "FPS ist im Header nicht angegeben (oder ungültig)! Benutze die -fps Option!\n"
 #define MSGTR_TryForceAudioFmtStr "Versuche Audiocodecfamilie %s zu erzwingen...\n"
 #define MSGTR_CantFindAudioCodec "Kann Codec für Audioformat 0x%X nicht finden!\n"
-#define MSGTR_RTFMCodecs "Lies DOCS/de/codecs.html!\n"
+#define MSGTR_RTFMCodecs "Lies DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Versuche Videocodecfamilie %s zu erzwingen...\n"
 #define MSGTR_CantFindVideoCodec "Kann keinen Codec finden, der  zur gewählten -vo-Option und Videoformat 0x%X passt!\n"
 #define MSGTR_CannotInitVO "FATAL: Kann Videoausgabetreiber nicht initialisieren!\n"
@@ -103,10 +103,9 @@ static char help_text[]=
 "  - Versuche -cache 8192.\n"\
 "- Benutzt du -cache zusammen mit einer nicht-interleavten AVI-Datei?\n"\
 "  - Versuche -nocache.\n"\
-"Lies DOCS/de/video.html und DOCS/de/sound.html; dort stehen \n"\
-"Tipps und Kniffe für optimale Einstellungen. \n"\
+"Lies DOCS/HTML/en/video.html; dort stehen Tipps für optimale Einstellungen.\n"\
 "(Schau evtl. auch bei den entsprechenden englischen Seiten.)\n"\
-"Wenn dies nicht hilft, lies DOCS/de/bugreports.html!\n\n"
+"Wenn dies nicht hilft, lies DOCS/HTML/en/bugreports.html!\n\n"
 
 #define MSGTR_NoGui "MPlayer wurde OHNE GUI-Unterstützung kompiliert.\n"
 #define MSGTR_GuiNeedsX "MPlayer GUI erfordert X11.\n"
@@ -136,7 +135,7 @@ static char help_text[]=
 "- MPlayer stürzte aufgrund einer 'ungültigen Anweisung' ab.\n"\
 "  Es kann sich um einen Fehler im unserem neuen Code für\n"\
 "  die CPU-Erkennung zur Laufzeit handeln...\n"\
-"  Bitte lies DOCS/de/bugreports.html.\n"
+"  Bitte lies DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer stürzte aufgrund einer 'ungültigen Anweisung' ab.\n"\
 "  Das passiert normalerweise, wenn du MPlayer auf einer anderen CPU\n"\
@@ -146,12 +145,12 @@ static char help_text[]=
 "- MPlayer stürzte wegen falscher Benutzung der CPU/FPU/des RAMs ab.\n"\
 "  Kompiliere MPlayer erneut mit --enable-debug und erstelle mit 'gdb'\n"\
 "  einen Backtrace und eine Disassemblierung. Details dazu findest du\n"\
-"  in DOCS/de/bugreports.html.\n"
+"  in DOCS/HTML/en/bugreports.html.\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer ist abgestürzt. Das sollte nicht passieren.\n"\
 "  Es kann sich um einen Fehler im MPlayer-Code _oder_ in deinen Treibern\n"\
 "  _oder_ in deinem gcc handeln. Wenn du meinst, es sei MPlayers Fehler, dann\n"\
-"  lies DOCS/de/bugreports.html und folge den dortigen Anweisungen.\n"\
+"  lies DOCS/HTML/en/bugreports.html und folge den dortigen Anweisungen.\n"\
 "  Wir können und werden dir nicht helfen, wenn du nicht alle dort aufgeführten\n"\
 "  Informationen zur Verfügung stellst.\n"
 #define MSGTR_LoadingConfig "Lade Konfiguration '%s'\n"
@@ -529,7 +528,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Suche in reinen AVI-Streams nicht durchführbar. (Index erforderlich, probiere die '-idx'-Option.)\n"
 #define MSGTR_CantSeekFile "Kann diese Datei nicht durchsuchen.\n"
 
-#define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei! Lies DOCS/de/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "Verschlüsselte VOB-Datei! Lies DOCS/HTML/en/dvd.html\n"
 
 #define MSGTR_MOVcomprhdr "MOV: komprimierte Header benötigen ZLIB-Unterstützung.\n"
 #define MSGTR_MOVvariableFourCC "MOV: Warnung: Variable FOURCC erkannt!?\n"
