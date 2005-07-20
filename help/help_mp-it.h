@@ -122,7 +122,7 @@ static char help_text[]=
 #define MSGTR_Exit_SIGILL_RTCpuSel \
 "- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
 "  Potrebbe essere un errore nel codice di rilevazione del tipo di processore...\n"\
-"  leggi DOCS/it/bugreports.html\n"
+"  leggi DOCS/HTML/en/bugreports.html\n"
 #define MSGTR_Exit_SIGILL \
 "- MPlayer è stato interrotto dal segnale 'Istruzione illegale'.\n"\
 "  Solitamente questo avviene quando si esegue il programma su un processore\n"\
@@ -130,11 +130,11 @@ static char help_text[]=
 #define MSGTR_Exit_SIGSEGV_SIGFPE \
 "- MPlayer è stato interrotto per un errore nell'uso della CPU/FPU/RAM.\n"\
 "  Ricompila MPlayer con --enable-debug e crea un baktrace ed un disassemblato\n"\
-"  con 'gdb'. Per i dettagli, leggi DOCS/it/bugreports.html#crash\n"
+"  con 'gdb'. Per i dettagli, leggi DOCS/HTML/en/bugreports_what.html#bugreports_crash\n"
 #define MSGTR_Exit_SIGCRASH \
 "- MPlayer è andato in crash. Questo non dovrebbe accadere.\n"\
 "  Può essere un errore nel codice di MPlayer _o_ nei tuoi driver _o_ nella tua\n"\
-"  versione di gcc. Se ritieni sia colpa di MPlayer, leggi DOCS/it/bugreports.html\n"\
+"  versione di gcc. Se ritieni sia colpa di MPlayer, leggi DOCS/HTML/en/bugreports.html\n"\
 "  e segui le istruzioni. Non possiamo aiutarti, e non lo faremo, se non\n"\
 "  fornisci queste informazioni quando segnali un possibile problema.\n"
 
@@ -262,7 +262,7 @@ static char help_text[]=
 #define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi! (richiesto un indice, prova con l\'opzione -idx!)  \n"
 #define MSGTR_CantSeekFile "Impossibile spostarsi in questo file!  \n"
 
-#define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/it/cd-dvd.html\n"
+#define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/HTML/en/dvd.html\n"
 
 #define MSGTR_MOVcomprhdr "MOV: Il supporto delle intestazioni compresse richiede ZLIB!\n"
 #define MSGTR_MOVvariableFourCC "MOV: Avvertimento! Rilevato FOURCC variabile!?\n"
