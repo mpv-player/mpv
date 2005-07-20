@@ -85,7 +85,7 @@ static char help_text[]=
 "         ***************************************************************\n"\
 "!!! Possibili cause, problemi, soluzioni: \n"\
 "- Nella maggior parte dei casi: driver audio corrotto/bacato. Soluzione: prova -ao sdl o usa\n"\
-"  ALSA 0.5 o l\'emulazione oss di ALSA 0.9. Leggi DOCS/it/sound.html per ulteriori suggerimenti!\n"\
+"  ALSA 0.5 o l\'emulazione oss di ALSA 0.9. Leggi DOCS/HTML/en/audio.html per ulteriori suggerimenti!\n"\
 " Puoi anche provare con -autosync 30 o altri valori.\n"\
 "- Output video lento. Prova un differente -vo driver (per la lista completa: -vo help) o prova\n"\
 "  con -framedrop!  Leggi DOCS/it/video.html per suggerimenti sulla regolazione/accelerazione del video.\n"\
