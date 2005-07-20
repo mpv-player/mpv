@@ -507,7 +507,7 @@ static void get_image(struct vf_instance_s* vf, mp_image_t *mpi)
     if(mpi->flags&MP_IMGFLAG_PRESERVE) return; // don't change
     // ok, we can do pp in-place (or pp disabled):
     vf->dmpi=vf_get_image(vf->next,mpi->imgfmt,
-			  mpi->type, mpi->flags, mpi->w, mpi->h);
+			  mpi->type, mpi->flags, mpi->width, mpi->height);
     mpi->planes[0]=vf->dmpi->planes[0];
     mpi->stride[0]=vf->dmpi->stride[0];
     mpi->width=vf->dmpi->width;
@@ -528,7 +528,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	dmpi=vf_get_image(vf->next,mpi->imgfmt,
 			  MP_IMGTYPE_TEMP,
 			  MP_IMGFLAG_ACCEPT_STRIDE|MP_IMGFLAG_PREFER_ALIGNED_STRIDE,
-			  mpi->w,mpi->h);
+			  mpi->width,mpi->height);
 	vf_clone_mpi_attributes(dmpi, mpi);
     }else{
 	dmpi=vf->dmpi;
