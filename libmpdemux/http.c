@@ -74,17 +74,20 @@ static unsigned uvox_meta_read(int fd, streaming_ctrl_t *sc) {
       my_read(fd, info, 6, sc);
     else
       my_read(fd, &info[1], 5, sc);
-    if (info[0] != 0x5a || info[1] != 0x00) {
+    // sync byte and reserved flags
+    if (info[0] != 0x5a || (info[1] & 0xfc) != 0x00) {
       mp_msg(MSGT_DEMUXER, MSGL_ERR, "Invalid or unknown uvox metadata\n");
       return 0;
     }
+    if (info[1] & 0x01)
+      mp_msg(MSGT_DEMUXER, MSGL_WARN, "Encrypted ultravox data\n");
     metaint = info[4] << 8 | info[5];
-    if (info[3] == 0x02) {
+    if ((info[3] & 0xf) < 0x07) { // discard any metadata nonsense
       char *metabuf = malloc(metaint);
       my_read(fd, metabuf, metaint, sc);
       free(metabuf);
     }
-  } while (info[3] == 0x02);
+  } while ((info[3] & 0xf) < 0x07);
   return metaint;
 }
 
