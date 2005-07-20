@@ -47,6 +47,7 @@ MPlayer (1.0)
     * VP3 decoder fixes and speedup
     * countless bug fixes all over the place
     * vstrict=-1 is default, Snow, ffv1 etc. need vstrict=-2
+    * skiploopfilter decoder option for very fast H.264 decoding
 
     Filters:
     * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6").
