@@ -71,7 +71,7 @@ static char help_text[]=
 #define MSGTR_FPSnotspecified "FPS non specificato (o non valido) nell\'intestazione! Usa l\'opzione -fps!\n"
 #define MSGTR_TryForceAudioFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec audio %d...\n"
 #define MSGTR_CantFindAudioCodec "Impossibile trovare il codec per il formato audio 0x%X!\n"
-#define MSGTR_RTFMCodecs "Leggi DOCS/it/codecs.html!\n"
+#define MSGTR_RTFMCodecs "Leggi DOCS/HTML/en/codecs.html!\n"
 #define MSGTR_TryForceVideoFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec video %d...\n"
 #define MSGTR_CantFindVideoCodec "Impossibile trovare il codec per il formato video 0x%X!\n"
 #define MSGTR_VOincompCodec "Mi dispiace, il dispositivo di video_out selezionato è incompatibile con questo codec.\n"
