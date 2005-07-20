@@ -3325,6 +3325,38 @@ video is major than or equal to <w>.
 Skip the given number of macroblock rows at the bottom.
 .IPs "st=<number> (MPEG-2 only)"
 Skip the given number of macroblock rows at the top.
+.IPs skiploopfilter=<skipvalue> (H.264 only)
+Skips the loop filter (aka deblocking) during H.264 decoding.
+Since the filtered frame is supposed to be used as reference
+for decoding dependant frames this has a worse effect on quality
+than not doing deblocking on e.g. MPEG2 video.
+But at least for high bitrate HDTV this provides a big speedup with
+no visible quality loss.
+.sp 1
+<skipvalue> can be either one of the following:
+.RSss
+.br
+none: never skip
+.br
+default: skip when the processing step is useless (e.g. 0 size packets in AVI)
+.br
+nonref: skip for frames that are not referenced (i.e. not used for
+decoding other frames, the error can not "build up")
+.br
+bidir: skip for B-Frames
+.br
+nonkey: skip for all frames except keyframes
+.br
+all: skip for all frames
+.REss
+.IPs skipidct=<skipvalue> (MPEG1/2 only)
+Skips the IDCT step.
+This looses a lot of quality in almost all cases
+(see skiploopfilter for available skip values).
+.IPs skipframe=<skipvalue>
+Skips decoding of frames completely.
+Big speedup, but jerky motion and sometimes bad artefacts
+(see skiploopfilter for available skip values).
 .IPs vismv=<value>
 Visualize motion vectors.
 .RSss
