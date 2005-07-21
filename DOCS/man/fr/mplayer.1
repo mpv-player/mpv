@@ -1,4 +1,4 @@
-.\" synced with 1.1038
+.\" synced with 1.1041
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "19 Juin 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "21 Juillet 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -291,7 +291,7 @@ Réduit/\:augmente le volume.
 Réduit/\:augmente le volume.
 .IPs m\ \ \ \ 
 Coupe le son (mute).
-.IPs "#" (MPEG et Matroska uniquement)
+.IPs "# (MPEG et Matroska uniquement)"
 Alterne entre les pistes audio disponible.
 .IPs f\ \ \ \ 
 Bascule en plein-écran.
@@ -3524,6 +3524,43 @@ si la largeur de la vidéo est plus grande ou égale à <l>.
 Saute <valeur> lignes de macro-blocs au bas de l'image.
 .IPs "st=<valeur> (MPEG-2 uniquement)"
 Saute <valeur> lignes de macro-blocs en haut de l'image.
+.IPs skiploopfilter=<skipvalue> (H.264 uniquement)
+Saute le loop filter (aussi connu sous le nom de deblocking) lors
+du décodage H.264.
+Étant donné que les trames filtrées sont supposées être utilisées
+comme références pour les trames dépendant d'autres trames (P, B)
+ceci dégrade plus la qualité visuelle que si vous ne faites par de
+deblocking pour une vidéo MPEG-2 par exemple.
+Cependant, pour les flux TVHD à haut débit, cela accélère notablement
+le décodage sans que cela n'affecte vraiment la qualité.
+.sp 1
+<skipvalue> peut prendre pour valeur\ :
+.RSss
+.br
+none: Ne saute jamais.
+.br
+default: Saute les étapes de traitement inutiles
+(par ex.\& les paquets AVI de taille nulle).
+.br
+nonref: Saute les trames qui ne sont pas référencées (i.e.\& non
+utilisées pour décoder d'autres trames, de façon à ne pas "accumuler"
+des erreurs de décodage).
+.br
+bidir: Saute les Trames-B.
+.br
+nonkey: Saute toutes les trames à l'exception des trames-clées.
+.br
+all: Saute toutes les trames.
+.REss
+.IPs skipidct=<skipvalue> (MPEG1/2 uniquement)
+Saute l'étape d'IDCT.
+Ceci dégrade énormément la qualité dans pratiquement tous les cas
+(voir skiploopfilter pour les valeurs de "skipvalue" disponibles).
+.IPs skipframe=<skipvalue>
+Saute complètement le décodgae des trames.
+Grosse accélération, mais mouvement saccadés et parfois artefacts
+visuels
+(voir skiploopfilter pour les valeurs de "skipvalue" disponibles).
 .IPs vismv=<valeur>
 Visualise les vecteurs de mouvement.
 .RSss
