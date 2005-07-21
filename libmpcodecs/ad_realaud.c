@@ -243,7 +243,7 @@ static int preinit(sh_audio_t *sh){
 #endif
       int i;
       // used by 'SIPR'
-      path = realloc(path, strlen(REALCODEC_PATH) + 12);
+      path = realloc(path, strlen(REALCODEC_PATH) + 13);
       sprintf(path, "DT_Codecs=" REALCODEC_PATH);
       if(path[strlen(path)-1]!='/'){
         path[strlen(path)+1]=0;
