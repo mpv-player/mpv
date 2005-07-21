@@ -494,7 +494,7 @@ if test -z "$_target" ; then
           host_arch=i386
         fi
       ;;
-      macppc|ppc) host_arch=ppc ;;
+      macppc|ppc|ppc64) host_arch=ppc ;;
       alpha) host_arch=alpha ;;
       sparc) host_arch=sparc ;;
       sparc64) host_arch=sparc64 ;;
