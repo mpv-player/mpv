@@ -499,11 +499,17 @@ static void exit_player_with_rc(char* how, int rc){
   vo_font = NULL;
   done_freetype();
 #endif
+  free_osd_list();
 
   current_module="exit_player";
 
 // free mplayer config
-  free(mconfig);
+  if(mconfig)
+    m_config_free(mconfig);
+  
+  if(playtree)
+    play_tree_free(playtree, 1);
+
 
 #ifdef USE_EDL
   if(edl_records != NULL) free(edl_records); // free mem allocated for EDL
