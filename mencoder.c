@@ -986,18 +986,24 @@ else if (sh_audio) {
 			}
 			break;
 	}
-	if (do_init_filters) if(!init_audio_filters(sh_audio,
+	if (do_init_filters) {
+	  int out_srate = mux_a->wf->nSamplesPerSec;
+	  int out_channels = mux_a->wf->nChannels;
+	  if(!init_audio_filters(sh_audio,
 	    new_srate,
 	    sh_audio->channels,
 	    sh_audio->sample_format,
-	    &mux_a->wf->nSamplesPerSec,
-	    &mux_a->wf->nChannels,
+	    &out_srate,
+	    &out_channels,
 	    &out_format,
 	    out_minsize,
 	    out_maxsize))
 	{
 		mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoMatchingFilter);
 		mencoder_exit(1, NULL);
+	}
+	  mux_a->wf->nSamplesPerSec = out_srate;
+	  mux_a->wf->nChannels = out_channels;
 	}
 }
 
