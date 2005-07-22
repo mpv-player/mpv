@@ -1,4 +1,4 @@
-.\" synced with 1.1041
+.\" synced with 1.1043
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -4597,7 +4597,7 @@ spal:    768x576 (PAL à pixels carrés)
 .RE
 .
 .TP
-.B dsize[=aspect|l:h]
+.B dsize[=aspect|l:h:aspect-method:r]
 Change la taille ou le rapport hauteur/\:largeur de l'affichage à un point
 arbitraire de la chaine de fitres.
 "aspect" peut être donné en tant que fraction (4/\:3) ou que nombre flottant
@@ -4609,6 +4609,60 @@ Notez que ce filtre ne fait
 redimmensionnement lui-même; il affecte juste ce que feront les prochains
 redimmensionnements (logiciels ou matériels) feront en corrigeant le rapport
 hauteur/\:largeur.
+.RSs
+.IPs <l>,<h>
+Nouvelles largeur et hauteur d'affichage.
+Peut aussi être ces valeurs spéciales\ :
+.RSss
+ 0:   hauteur et largeur originales d'affichage
+.br
+-1:   hauteur et largeur originales de la vidéo (par défaut)
+.br
+-2:   Calcule l/\:h d'après l'autre dimension et le ratio d'aspect
+original d'affichage.
+.br
+-3:   Calculate l/\:h d'après l'autre dimension et le ratio d'aspect
+original de la vidéo.
+.REss
+.sp 1
+.I EXEMPLE\ :
+.PD 0
+.RSs
+.IP dsize=800:-2
+Défini une résolution d'affichage de 800x600 pour une vidéo dont le
+ratio d'aspect est 4/3, ou 800x450 pour une vidéo dont l'aspect ratio
+est 16/9.
+.RE
+.IPs <aspect\-method>
+Change la largeur et la hauteur d'après le ratio d'aspect original.
+.RSss
+-1: Ignore le ratio d'aspect original (par défaut).
+.br
+ 0: Garde le ratio d'aspect d'affichage en prenant <l> and <h> comme la
+résolution maximale.
+.br
+ 1: Garde le ratio d'aspect d'affichage en prenant <l> and <h> comme la
+résolution minimale.
+.br
+ 2: Garde le ratio d'aspect de la vidéo en prenant <l> and <h> comme la
+résolution maximale.
+.br
+ 3: Garde le ratio d'aspect de la vidéo en prenant <l> and <h> comme la
+résolution minimale.
+.REss
+.sp 1
+.I EXEMPLE:
+.PD 0
+.RSs
+.IP dsize=800:600:0
+Défini une résolution d'affichage d'au plus 800x600, ou moins, tout en
+gardant le ratio d'aspect.
+.RE
+.PD 1
+.IPs <r>
+Arrondit à l'unité supérieure pour que tant la hauteur de la largeur
+soit divisible par <r> (par défaut\ : 1).
+.RE
 .
 .TP
 .B yuy2\ \ \ 
