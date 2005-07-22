@@ -8,26 +8,25 @@ MPlayer (1.0)
       which is to be merged into the existing guide
     * encoding tips for x264 and XviD
     * how to set up MEncoder for x264 support
+    * Hungarian XML documentation translation finished
     * misc improvements all over the place
 
     Driver:
     * JACK audio output rewritten without bio2jack
     * OpenGL video output modules support -geometry and -wid options
     * for -vo gl manyfmts is now default (since it is a lot faster), use
-      -vo gl:nomanyfmts if it does not work for you.
+      -vo gl:nomanyfmts if it does not work for you
 
     Decoders:
     * Indeo2 (RT21) support via lavc
     * Fraps video decoder via binary DLL
     * support for 8-bit PNGs with palette
     * support for dmb1 MJPEG files with ffmjpeg
-    * support for musepack audio (WARNING: when muxing into e.g. AVI
-      you will be able to seek, but you might get ear- and speaker-breaking
-      noises)
+    * support for musepack audio (WARNING: when muxing into e.g. AVI you will
+      be able to seek, but you might get ear- and speaker-breaking noises)
 
     Demuxers:
-    * simultaneous audio capture and playback in MPlayer
-      (-tv immediatemode=0) fixed in v4l2
+    * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
     * PVR support
     * AAC ADTS demuxer
     * libdvdread updated to v0.9.4
@@ -50,22 +49,20 @@ MPlayer (1.0)
     * skiploopfilter decoder option for very fast H.264 decoding
 
     Filters:
-    * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6").
+    * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6")
     * remove_logo filter
-    * lavcresample is now used by default (use -af-adv force=0 for old
-      behaviour).
-    * vf_expand and vf_dsize now support aspect and round params.
+    * lavcresample now used by default (-af-adv force=0 gives old behavior)
+    * vf_expand and vf_dsize now support aspect and round paramameters
 
     MEncoder:
     * audio encoding modularized
     * AAC (FAAC) audio encoding
     * border processing adaptive quantization in libavcodec
-    * XviD's encoding zones and luminance masking
+    * encoding zones and luminance masking for XviD
     * raw audio muxer
     * fixed various bugs in the EDL code
     * x264 "turbo mode" to speed up first pass of multi-pass encoding
-    * -delay added allowing real audio delay instead of just specifying delay
-      in header.
+    * -delay allows real audio delay instead of just a delay in the header
 
     Ports:
     * improved timer function on Mac OS X
@@ -73,7 +70,7 @@ MPlayer (1.0)
       and 10.3 with QuickTime 7 (requires QuickTime 7 SDK to build on 10.3)
     * Mac OS X 10.4 (Tiger) fixes
     * macosx audio output driver fixes
-    * support for playing DVDs from the hard disk on Cygwin
+    * support for playing DVDs copied to harddisk on Cygwin
     * DragonFly BSD support
 
     Others:
@@ -83,7 +80,7 @@ MPlayer (1.0)
     * massive stream layer cleanup, all streams ported to the new API
     * full gcc 4 support for IA-32 and AMD-64 ports
     * TOOLS/vobshift.py: vobsub time-adjust tool
-    * fixed auto-insertion of lavc encoder used with hardware MPEG1/2 decoders such as dxr2/3 and dvb
+    * fixed auto-insertion of lavc encoder (for DXR2/3 and DVB)
 
 
   pre7: "PatentCounter" April 16, 2005
