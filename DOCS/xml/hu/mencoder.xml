@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.82 -->
+<!-- synced with 1.85 -->
 <chapter id="mencoder">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -722,10 +722,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <note><title>Tanács:</title>
 <para>
   Az <application>MPlayer</application> le tudja lassítani a lejátszást
-  a -speed kapcsolóval.
+  a -speed kapcsolóval vagy a kockáról-kockára történő lejátszással.
   Próbáld meg használni a <option>-speed</option> 0.2-t, hogy nagyon lassan
-  nézhesd a filmet és azonosíthasd a mintákat, ha nem látod meg teljes
-  sebességnél.
+  nézhesd a filmet vagy nyomogasd a "<keycap>.</keycap>" gombot a kockáról
+  kockára történő lejátszáshoz és azonosítsd a mintákat, ha nem látod meg
+  teljes sebességnél.
 </para>
 </note>
 </sect3>
@@ -1546,7 +1547,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 
 <para>
   Mivel a PAL DVD-ben a videót nem változtatták meg, nem kell aggódnod a
-  frame ráta miatt. A forrás 25 fps-es és a rip-ed is 25 fps-es lesz. De ha
+  frameráta miatt. A forrás 25 fps-es és a rip-ed is 25 fps-es lesz. De ha
   egy NTSC DVD filmet rippelsz, fordított telecine-t kell alkalmaznod.
 </para>
 
@@ -1681,9 +1682,11 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
 <listitem><para>
   <emphasis role="bold">vmax_b_frames</emphasis>: 1 vagy 2 a jó, a filmtől
   függően.
-  Figyelj rá, hogy a libavcodec még nem támogatja a zárt GOP-ot (a
-  <option>cgop</option> opció még nem igazán működik), így a DivX5 nem fog
-  tudni visszakódolni semmit sem, ami B-kockákkal lett elkódolva.
+  Figyelj rá, hogy úgy kell kódolnod, hogy DivX5-tel dekódolható legyen az
+  eredmény, aktiválnod kell a zárt GOP támogatást a
+  <systemitem class="library">libavcodec</systemitem> <option>cgop</option>
+  opciójával, de ki kell kapcsolnod a jelenet detektálást, ami
+  nem túl jó ötlet, mivel rontja a kódolási hatékonyságot egy kicsit.
 </para></listitem>
 
 <listitem><para>
