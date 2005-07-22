@@ -100,6 +100,7 @@ static int preinit(sh_audio_t *sh) {
 static void uninit(sh_audio_t *sh) {
   if (sh->context)
     free(sh->context);
+  sh->context = NULL;
 }
 
 static int init(sh_audio_t *sh) {
