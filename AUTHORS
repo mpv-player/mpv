@@ -655,6 +655,8 @@ Shimon, Oded (ods15) <ods15@ods15.dyndns.org>
     * small cleanups, mostly to EDL
     * -speed for MEncoder
     * -edl and -hr-edl-seek for MEncoder
+    * -delay for MEncoder
+    * some changes to vf_dsize and vf_expand
 
 Simon, Peter <simon.peter@linuxuser.hu>
     * TOOLS/wma2ogg.pl author

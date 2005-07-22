@@ -54,6 +54,7 @@ MPlayer (1.0)
     * remove_logo filter
     * lavcresample is now used by default (use -af-adv force=0 for old
       behaviour).
+    * vf_expand and vf_dsize now support aspect and round params.
 
     MEncoder:
     * audio encoding modularized
@@ -63,6 +64,8 @@ MPlayer (1.0)
     * raw audio muxer
     * fixed various bugs in the EDL code
     * x264 "turbo mode" to speed up first pass of multi-pass encoding
+    * -delay added allowing real audio delay instead of just specifying delay
+      in header.
 
     Ports:
     * improved timer function on Mac OS X
