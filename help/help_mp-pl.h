@@ -2,7 +2,7 @@
 // MPlayer-pl translation team, mplayer-pl.emdej.com
 // Wszelkie uwagi i poprawki mile widziane :)
 //
-// Synced with help_mp-en.h 1.167
+// Synced with help_mp-en.h 1.173
 
 // ========================= MPlayer help ===========================
 
@@ -147,6 +147,7 @@ static char help_text[]=
 
 #define MSGTR_LoadingConfig "£adujê konfiguracjê '%s'\n"
 #define MSGTR_AddedSubtitleFile "SUB: plik z napisami (%d): %s dodany\n"
+#define MSGTR_RemovedSubtitleFile "SUB: plik z napisami (%d): %s usuniêty\n"
 #define MSGTR_ErrorOpeningOutputFile "B³±d przy otwieraniu pliku [%s] do zapisu!\n"
 #define MSGTR_CommandLine "WierszPoleceñ:"
 #define MSGTR_RTCDeviceNotOpenable "B³±d przy otwieraniu %s: %s (u¿ytkownik pownien móc go odczytaæ.)\n"
@@ -163,10 +164,6 @@ static char help_text[]=
 #define MSGTR_AudioFilterChainPreinitError "B³±d w preinicjalizacji ³añcucha filtrów audio!\n"
 #define MSGTR_LinuxRTCReadError "B³±d odczytu RTC Linuksa: %s\n"
 #define MSGTR_SoftsleepUnderflow "Uwaga! Niedomiar softsleep!\n"
-#define MSGTR_AnsSubVisibility "ANS_SUB_VISIBILITY=%ld\n"
-#define MSGTR_AnsLength "ANS_LENGTH=%ld\n"
-#define MSGTR_AnsVoFullscreen "ANS_VO_FULLSCREEN=%ld\n"
-#define MSGTR_AnsPercentPos "ANS_PERCENT_POSITION=%ld\n"
 #define MSGTR_DvdnavNullEvent "zdarzenie DVDNAV NULL?!\n"
 #define MSGTR_DvdnavHighlightEventBroken "zdarzenie DVDNAV: Zdarzenie pod¶wietlenia jest zepsute\n"
 #define MSGTR_DvdnavEvent "zdarzenie DVDNAV: %s\n"
@@ -208,6 +205,7 @@ static char help_text[]=
 #define MSGTR_CannotOpenOutputFile "Nie mogê otworzyæ pliku wyj¶ciowego '%s'.\n"
 #define MSGTR_EncoderOpenFailed "Nie mogê otworzyæ kodera.\n"
 #define MSGTR_ForcingOutputFourcc "Wymuszam wyj¶ciowe fourcc na %x [%.4s]\n"
+#define MSGTR_ForcingOutputAudiofmtTag "Wymuszam znacznik wyj¶ciowego formatu audio na 0x%x\n"
 #define MSGTR_WritingAVIHeader "Zapisujê nag³ówek AVI...\n"
 #define MSGTR_DuplicateFrames "\n%d powtórzona(e) ramka(i)!\n"
 #define MSGTR_SkipFrame "\nOpuszczam ramkê!\n"
@@ -352,6 +350,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC - nie mogê znale¼æ kodeka dla %s\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC - nie mogê zaalokowaæ tre¶ci!\n"
 #define MSGTR_CouldntOpenCodec "Nie mogê otworzyæ kodeka %s, br=%d\n"
+#define MSGTR_CantCopyAudioFormat "Format audio 0x%x jest niekompatybilny z '-oac copy', spróbuj zamiast tego '-oac pcm' albo u¿yj '-fafmttag' ¿eby wymusiæ.\n"
 
 // cfg-mencoder.h:
 
@@ -476,6 +475,13 @@ static char help_text[]=
 #define MSGTR_DVDnoIFO "Nie mogê otworzyæ pliku IFO dla tytu³u DVD %d.\n"
 #define MSGTR_DVDnoVOBs "Nie mogê otworzyæ tytu³u VOBS (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDopenOk "DVD otwarte prawid³owo.\n"
+
+// muxer_*.c:
+#define MSGTR_TooManyStreams "Za du¿o strumieni!"
+#define MSGTR_RawMuxerOnlyOneStream "Mukser rawaudio obs³uguje tylko jeden strumieñ audio!\n"
+#define MSGTR_IgnoringVideoStream "Ignorujê strumieñ video!\n"
+#define MSGTR_UnknownStreamType "Ostrze¿enie! Nieznany typ strumienia: %d\n"
+#define MSGTR_WarningLenIsntDivisible "Ostrze¿enie! len nie jest podzielne przez samplesize!\n"
 
 // demuxer.c, demux_*.c:
 #define MSGTR_AudioStreamRedefined "UWAGA: Redefiniowano nag³ówek strumienia audio %d!\n"
@@ -639,6 +645,7 @@ static char help_text[]=
 #define MSGTR_SKIN_WARNING2 "[skin] ostrze¿enie w pliku konfiguracyjnym w wierszu %d:\nznaleziono znacznik widget (%s) ale nie ma przed nim \"subsection\""
 #define MSGTR_SKIN_WARNING3 "[skin] ostrze¿enie w pliku konfiguracyjnym w wierszu %d::\nta podsekcja nie jest obs³ugiwana przez widget (%s)"
 #define MSGTR_SKIN_SkinFileNotFound "[skin] nie znaleziono pliku ( %s ).\n"
+#define MSGTR_SKIN_SkinFileNotReadable "[skin] pliku nie mo¿na czytaæ ( %s ).\n"
 #define MSGTR_SKIN_BITMAP_16bit  "Bitmapy 16 bitowe lub mniejsze nie s± obs³ugiwane (%s).\n"
 #define MSGTR_SKIN_BITMAP_FileNotFound  "nie znaleziono pliku (%s)\n"
 #define MSGTR_SKIN_BITMAP_BMPReadError "b³±d odczytu bmp (%s)\n"
