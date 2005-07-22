@@ -87,7 +87,7 @@ scandir(const char *dirname,
 	/* duplicate struct direct for this entry */
 	len = offsetof(struct dirent, d_name) + strlen(ent->d_name) + 1;
 	if ((ent2 = malloc(len)) == NULL)
-	    return -1;
+	    goto error;
 	
 	if (used >= allocated) {
 	    allocated *= 2;
@@ -109,6 +109,8 @@ scandir(const char *dirname,
 
 
 error:
+    closedir(dir);
+
     if (namelist) {
 	for (i = 0; i < used; i++) 
 	    free(namelist[i]);

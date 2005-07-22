@@ -177,6 +177,8 @@ static int open_dir(menu_t* menu,char* args) {
   }
 
 bailout:
+  closedir(dirp);
+
   qsort(namelist, n, sizeof(char *), (kill_warn)compare);
 
   if (n < 0) {
