@@ -1,13 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.14 -->
+<!-- synced with 1.15 -->
 <chapter id="cd-dvd">
 <title>Używanie CD/DVD</title>
 
 <sect1 id="drives">
 <title>Napędy CD/DVD</title>
-<para>
-Fragment dokumentacji Linuksa:
-</para>
 
 <para>
 Nowoczesne napędy CD-ROM osiągają bardzo duże prędkości. Niektóre z nich są
@@ -30,13 +27,22 @@ natężenie hałasu.
 </para></listitem>
 </itemizedlist>
 
-<para>
-Redukcję prędkości napędu CD z interfejsem IDE możemy uzystać korzystając z
-<command>hdparm</command> bądź programu <command>setcd</command>. Działają one w
-następujący sposób:
+<sect2 id="drives_linux">
+<title>Linux</title>
 
+<para>
+Możesz zredukować prędkość napędu CD z interfejsem IDE korzystając
+z <command>hdparm</command>, <command>setcd</command> lub
+<command>cdctl</command>.
+Działają one w następujący sposób:
 <screen>hdparm -E <replaceable>[prędkość]</replaceable> <replaceable>[urządzenie cdrom]</replaceable></screen>
 <screen>setcd -x <replaceable>[prędkość]</replaceable> <replaceable>[urządzenie cdrom]</replaceable></screen>
+<screen>cdctl -bS <replaceable>[speed]</replaceable></screen>
+</para>
+
+<para>
+Jeśli używasz emulacji SCSI, możesz musieć zastosować ustawienia do prawdziwego
+urządzenia IDE a nie emulowanego SCSI.
 </para>
 
 <para>
@@ -71,11 +77,27 @@ Dla napędów SCSI nie istnieje jednolity sposób ustawiawiania tych parametrów
 (jeżeli znasz jakiś to napisz nam o nim). Istnieje narzędzie które działa z
 <ulink url="http://das.ist.org/~georg/">napędami SCSI Plextor</ulink>.
 </para>
+</sect2>
 
-<para>FreeBSD:</para>
-<para>Prędkość: <command>cdcontrol [-f <replaceable>device</replaceable>] speed <replaceable>speed</replaceable></command></para>
-<para>DMA: <command>sysctl hw.ata.atapi_dma=1</command></para>
+<sect2 id="drives_freebsd">
+<title>FreeBSD:</title>
+
+<para>Prędkość:
+<screen>
+cdcontrol [-f <replaceable>device</replaceable>] speed <replaceable>[speed]</replaceable>
+</screen>
+</para>
+
+<para>DMA:
+<screen>
+sysctl hw.ata.atapi_dma=1
+</screen>
+</para>
+</sect2>
+
 </sect1>
+
+
 
 <sect1 id="dvd">
 <title>Odtwarzanie DVD</title>
