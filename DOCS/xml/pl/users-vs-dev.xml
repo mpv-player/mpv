@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.16 -->
+<!-- synced with 1.17 -->
 <appendix id="users-vs-dev">
 <title>Deweloperzy wyrywają sobie włosy</title>
 
@@ -17,8 +17,9 @@ zmodyfikowaną wersję CVS GCC do swojej dystrybucji i nazwał ją
 <emphasis role="bold">2.96</emphasis>. Stało się tak, ponieważ GCC 3.0
 nie było jeszcze ukończone, a potrzebowano kompilatora, który współdziałałby
 dobrze z wszystkimi platformami jakie były obsługiwane, włączając w to IA64 i
-s390. Dystrybutor <emphasis role="bold">Mandrake</emphasis> również poszedł w
-ślady Red Hata i zaczął dołączać GCC 2.96 do serii Linux-Mandrake 8.0.
+s390. Dystrybutor <emphasis role="bold">Mandrake</emphasis> (teraz Mandriva)
+również poszedł w ślady Red Hata i zaczął dołączać GCC 2.96 do serii
+Linux-Mandrake 8.0.
 </para>
 </formalpara>
 
