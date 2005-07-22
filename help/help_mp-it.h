@@ -23,13 +23,13 @@ static char help_text[]=
 " -alang/-slang    sceglie lingua audio/sottotitoli DVD (cod naz. 2 caratteri)\n"
 #endif
 " -ss <timepos>    cerca una determinata posizione (in secondi o in hh:mm:ss) \n"
-" -nosound         non riproduce l\'audio\n"
+" -nosound         non riproduce l'audio\n"
 " -fs              opzioni schermo intero (o -vm, -zoom, vedi pagina man)\n"
 " -x <x> -y <y>    imposta la risoluzione dello schermo (usare con -vm o -zoom)\n"
 " -sub <file>      file sottotitoli da usare (vedi anche -subfps, -subdelay)\n"
 " -playlist <file> specifica il file della playlist\n"
 " -vid x -aid y    seleziona il flusso video (x) ed audio (y) da riprodurre\n"
-" -fps x -srate y  cambia il rate del video (x fps) e dell\'audio (y Hz)\n"
+" -fps x -srate y  cambia il rate del video (x fps) e dell'audio (y Hz)\n"
 " -pp <quality>    abilita filtro postelaborazione (vedi pagina man x dettagli)\n"
 " -framedrop       abilita lo scarto dei fotogrammi (per macchine lente)\n"
 "\n"
@@ -74,11 +74,11 @@ static char help_text[]=
 #define MSGTR_DumpSelectedStreamMissing "dump: FATAL: manca il flusso selezionato!\n"
 #define MSGTR_CantOpenDumpfile "Impossibile aprire il file di dump!!!\n"
 #define MSGTR_CoreDumped "Core dumped ;)\n"
-#define MSGTR_FPSnotspecified "FPS non specificato (o non valido) nell\'intestazione! Usa l\'opzione -fps!\n"
-#define MSGTR_TryForceAudioFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec audio %d...\n"
+#define MSGTR_FPSnotspecified "FPS non specificato (o non valido) nell'intestazione! Usa l'opzione -fps!\n"
+#define MSGTR_TryForceAudioFmtStr "Cerco di forzare l'uso della famiglia dei driver dei codec audio %d...\n"
 #define MSGTR_CantFindAudioCodec "Impossibile trovare il codec per il formato audio 0x%X!\n"
 #define MSGTR_RTFMCodecs "Leggi DOCS/HTML/en/codecs.html!\n"
-#define MSGTR_TryForceVideoFmtStr "Cerco di forzare l\'uso della famiglia dei driver dei codec video %d...\n"
+#define MSGTR_TryForceVideoFmtStr "Cerco di forzare l'uso della famiglia dei driver dei codec video %d...\n"
 #define MSGTR_CantFindVideoCodec "Impossibile trovare il codec per il formato video 0x%X!\n"
 #define MSGTR_CannotInitVO "FATALE: Impossibile inizializzare il driver video!\n"
 #define MSGTR_CannotInitAO "Impossibile aprire/inizializzare il dispositivo audio -> NESSUN SUONO\n"
@@ -90,7 +90,7 @@ static char help_text[]=
 "       ****************************************************************\n"\
 "Possibili cause, problemi, soluzioni:\n"\
 "- Nella maggior parte dei casi: driver _audio_ danneggiato/bacato\n"\
-"  - Prova -ao sdl o usa l\'emulazione OSS di ALSA.\n"\
+"  - Prova -ao sdl o usa l'emulazione OSS di ALSA.\n"\
 "  - Puoi anche provare con diversi valori di -autosync, 30 e' un buon inizio.\n"\
 "- Output video lento\n"\
 "  - Prova un altro -vo driver (-vo help per la lista) o prova con -framedrop!\n"\
@@ -119,8 +119,8 @@ static char help_text[]=
 #define MSGTR_AvailableAudioOutputDrivers "Driver di output audio disponibili:\n"
 #define MSGTR_AvailableAudioCodecs "Codec audio disponibili:\n"
 #define MSGTR_AvailableVideoCodecs "Codec video disponibili:\n"
-#define MSGTR_AvailableAudioFm "\nFamiglie/driver di codec audio disponibili (compilati):\n"
-#define MSGTR_AvailableVideoFm "\nFamiglie/driver di codec video disponibili (compilati):\n"
+#define MSGTR_AvailableAudioFm "Famiglie/driver di codec audio disponibili (compilati):\n"
+#define MSGTR_AvailableVideoFm "Famiglie/driver di codec video disponibili (compilati):\n"
 #define MSGTR_AvailableFsType "Modi disponibili a schermo pieno:\n"
 #define MSGTR_UsingRTCTiming "Sto utilizzando la temporizzazione hardware RTC di Linux (%ldHz)\n"
 #define MSGTR_CannotReadVideoProperties "Video: impossibile leggere le proprietà\n"
@@ -469,13 +469,13 @@ static char help_text[]=
 #define MSGTR_SwitchToNi "\nRilevato file .AVI con interleave errato - passo alla modalità -ni!\n"
 #define MSGTR_Detected_XXX_FileFormat "Rilevato formato file %s!\n"
 #define MSGTR_DetectedAudiofile "Rilevato file audio!\n"
-#define MSGTR_NotSystemStream "il formato non è \'MPEG System Stream\'... (forse è \'Transport Stream\'?)\n"
-#define MSGTR_InvalidMPEGES "Flusso MPEG-ES non valido??? Contatta l\'autore, può essere un baco :(\n"
+#define MSGTR_NotSystemStream "il formato non è 'MPEG System Stream'... (forse è 'Transport Stream'?)\n"
+#define MSGTR_InvalidMPEGES "Flusso MPEG-ES non valido??? Contatta l'autore, può essere un baco :(\n"
 #define MSGTR_FormatNotRecognized "===== Mi dispiace, questo formato file non è riconosciuto/supportato ======\n"\
-				  "=== Se questo è un file AVI, ASF o MPEG, per favore contatta l\'autore! ===\n"
+				  "=== Se questo è un file AVI, ASF o MPEG, per favore contatta l'autore! ===\n"
 #define MSGTR_MissingVideoStream "Nessun flusso video trovato!\n"
 #define MSGTR_MissingAudioStream "Nessun flusso audio trovato -> nessun suono\n"
-#define MSGTR_MissingVideoStreamBug "Manca il flusso video!? Contatta l\'autore, può essere un baco :(\n"
+#define MSGTR_MissingVideoStreamBug "Manca il flusso video!? Contatta l'autore, può essere un baco :(\n"
 
 #define MSGTR_DoesntContainSelectedStream "demux: il file non contiene il flusso audio o video selezionato\n"
 
@@ -485,7 +485,7 @@ static char help_text[]=
 
 #define MSGTR_UsingNINI "Uso di formato file AVI NON-INTERLEAVED corrotto.\n"
 #define MSGTR_CouldntDetFNo "Impossibile determinare il numero di fotogrammi (per lo spostamento assoluto).\n"
-#define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi. (richiesto un indice, prova con l\'opzione -idx.)\n"
+#define MSGTR_CantSeekRawAVI "Impossibile spostarsi nei flussi .AVI grezzi. (richiesto un indice, prova con l'opzione -idx.)\n"
 #define MSGTR_CantSeekFile "Impossibile spostarsi in questo file!  \n"
 
 #define MSGTR_EncryptedVOB "File VOB criptato! Leggi il file DOCS/HTML/en/dvd.html.\n"
@@ -520,14 +520,14 @@ static char help_text[]=
 
 #define MSGTR_MpegNoSequHdr "MPEG: FATAL: EOF mentre cercavo la sequenza di intestazione\n"
 #define MSGTR_CannotReadMpegSequHdr "FATAL: Impossibile leggere la sequenza di intestazione!\n"
-#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Impossibile leggere l\'estensione della sequenza di intestazione!\n"
+#define MSGTR_CannotReadMpegSequHdrEx "FATAL: Impossibile leggere l'estensione della sequenza di intestazione!\n"
 #define MSGTR_BadMpegSequHdr "MPEG: Sequenza di intestazione non valida!\n"
 #define MSGTR_BadMpegSequHdrEx "MPEG: Estensione della sequenza di intestazione non valida!\n"
 
 #define MSGTR_ShMemAllocFail "Impossibile allocare la memoria condivisa\n"
-#define MSGTR_CantAllocAudioBuf "Impossibile allocare il buffer di uscita dell\'audio\n"
+#define MSGTR_CantAllocAudioBuf "Impossibile allocare il buffer di uscita dell'audio\n"
 
-#define MSGTR_UnknownAudio "Formato audio sconosciuto/mancante, non uso l\'audio\n"
+#define MSGTR_UnknownAudio "Formato audio sconosciuto/mancante, non uso l'audio\n"
 
 #define MSGTR_UsingExternalPP "[PP] Utilizzo un filtro di postprocessing esterno, max q = %d\n"
 #define MSGTR_UsingCodecPP "[PP] Utilizzo il postprocessing del codec, max q = %d\n"
@@ -670,7 +670,7 @@ static char help_text[]=
 #define MSGTR_MENU_None "(niente)"
 #define MSGTR_MENU_Chapters "Capitoli"
 #define MSGTR_MENU_Chapter "Capitolo %2d"
-#define MSGTR_MENU_AudioLanguages "Lingua dell\'audio"
+#define MSGTR_MENU_AudioLanguages "Lingua dell'audio"
 #define MSGTR_MENU_SubtitleLanguages "Lingua dei sottotitoli"
 #define MSGTR_MENU_SkinBrowser "Ricerca skin"
 #define MSGTR_MENU_Exit "Uscita..."
