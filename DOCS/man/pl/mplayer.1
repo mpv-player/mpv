@@ -1,4 +1,4 @@
-.\" synced with 1.1032
+.\" synced with 1.1044
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" This man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" T³umaczenie: Wac³aw "Torinthiel" Schiller (torinthiel@wp.pl)
@@ -122,7 +122,7 @@ mencoder \- enkoder (koder) filmów
 .in
 .B mplayer
 'in +\n[.k]u
-.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp ] ://
+.RI [ file | mms[t] | http | http_proxy | rt[s]p | ftp | udp | unsv ] ://
 [u¿ytkownik:has³o@]\fIURL\fP[:port] [opcje]
 .
 .br
@@ -282,7 +282,7 @@ Zmniejsza/\:zwiêksza g³o¶no¶æ.
 Zmniejsza/\:zwiêksza g³o¶no¶æ.
 .IPs m\ \ \ \ 
 Wycisza d¼wiêk.
-.IPs "#" (tylko MPEG i Matroska)
+.IPs "# (tylko MPEG i Matroska)"
 Prze³±cza miêdzy dostêpnymi ¶cie¿kami d¼wiêku.
 .IPs f\ \ \ \ 
 Prze³±cza tryb pe³noekranowy (zobacz tak¿e \-fs).
@@ -929,6 +929,14 @@ Wysy³a cookies przy ¿±daniach HTTP.
 Czyta HTTP cookies z <nazwa zbioru> (domy¶lnie ~/.mozilla/ i ~/.netscape/)
 i nie czytaj z miejsc standardowych.
 Zak³ada ¿e zbiór jest w formacie Netscape.
+.
+.TP
+.B \-delay <sekundy>
+Ustawia opó¼nienie d¼wiêku w sekundach (dodatnia lub ujemna liczba rzeczywista).
+.br
+.I INFORMACJA:
+Nie ma gwarancji prawid³owego dzia³ania je¶li jest to u¿ywane z MEncoderem
+i \-ovc copy.
 .
 .TP
 .B \-demuxer <numer>
@@ -1767,10 +1775,6 @@ Okre¶la ID napisów VOBsub.
 .TP
 .B \-abs <warto¶æ> (tylko \-ao oss) (PRZESTARZA£E)
 Zmienia wykryt± wielko¶æ bufora sterownika audio/\:karty.
-.
-.TP
-.B \-delay <sekundy>
-Ustawia opó¼nienie d¼wiêku w sekundach (dodatnia lub ujemna liczba rzeczywista).
 .
 .TP
 .B \-format <format> (zobacz tak¿e filtr d¼wiêkowy "format")
@@ -3362,12 +3366,44 @@ a jedynie efekt uboczny nie dekodowania w pe³nej rozdzielczo¶ci.
 .REss
 .RS
 Je¶li podano <s> dekodowanie w niskiej rozdzielczo¶ci bêdzie zastosowane tylko
-je¶li szeroko¶æ filmu jest wiêsza lub równa <s>.
+je¶li szeroko¶æ filmu jest wiêksza lub równa <s>.
 .RE
 .IPs "sb=<liczba> (tylko MPEG-2)"
 Przeskakuje podan± ilo¶æ wierszy makrobloków na dole.
 .IPs "st=<liczba> (tylko MPEG-2)"
 Przeskakuje podan± ilo¶æ wierszy makrobloków na górze.
+.IPs skiploopfilter=<warto¶æpomijania> (tylko H.264)
+Pomija filtr pêtli (zwany te¿ deblokowaniem) w czasie dekodowania H.264.
+Poniewa¿ filtrowana klatka ma byæ pó¼niej odniesieniem do dekodowania
+zale¿nych klatek powoduje to wiêkszy spadek jako¶ci ni¿ nie deblokowanie
+klatek np.\& filmu MPEG-2.
+Ale przynajmniej przy szybkich strumieniach HDTV daje to du¿e przyspieszenie
+bez widocznej utraty jako¶ci.
+.sp 1
+<warto¶æpomijania> mo¿e byæ dowolna z poni¿szych:
+.RSss
+.br
+none: Nie pomijaj.
+.br
+default: Pomija bezsensowne kroki przetwarzania (np.\& pakiety wielko¶ci 0 w AVI).
+.br
+nonref: Pomija klatki które do których nie ma odniesieñ (tzn.\& nie u¿ywane do
+dekodowania innych klatek, b³±d nie mo¿e "narastaæ").
+.br
+bidir: Pomija klatki typu B.
+.br
+nonkey: Pomija wszystkie klatki poza kluczowymi.
+.br
+all: Pomija wszystkie klatki.
+.REss
+.IPs skipidct=<warto¶æpomijania> (tylko MPEG1/2)
+Pomija krok IDCT.
+To praktycznie zawsze bardzo obni¿a jako¶æ
+(warto¶ci pomijania takie jak w opcji skiploopfilter).
+.IPs skipframe=<warto¶æpomijania>
+Ca³kowicie pomija dekodowanie klatek.
+Du¿e przyspieszenie, ale urywany ruch i czasami brzytkie artefakty
+(warto¶ci pomijania takie jak w opcji skiploopfilter).
 .IPs vismv=<warto¶æ>
 Wizualizuje wektory ruchu.
 .RSss
@@ -4384,7 +4420,7 @@ spal:    768x576 (PAL z kwadratowymi pikselami)
 .RE
 .
 .TP
-.B dsize[=proporcja|w:h]
+.B dsize[=proporcja|w:h:metoda-proporcji:r]
 Zmienia po¿±dan± wielko¶æ obrazu/\:proporcjê w wybranym miejscu ³añcucha
 filtrów.
 Proporcja mo¿e byæ podana jako u³amek (4/\:3) lub liczba rzeczywista (1.33).
@@ -4394,6 +4430,59 @@ Proszê zauwa¿yæ, ¿e filtr ten
 przeskalowywuje nic samemu; on tylko ustawia
 co nastêpne skalowania (sprzêtowe lub programowe) zrobi± przy dostosowywaniu do
 prawid³owych proporcji.
+.RSs
+.IPs <w>,<h>
+Nowa wysoko¶æ i szeroko¶æ obrazu
+Mo¿e byæ jedn± z tych specjalnych warto¶ci:
+.RSss
+ 0:   oryginalna wysoko¶æ i szeroko¶æ wy¶wietlania
+.br
+-1:   oryginalna wysoko¶æ i szeroko¶æ filmu (domy¶lne)
+.br
+-2:   Oblicza w/\:h na podstawie drugiej wielko¶ci i oryginalnych proporcji
+wy¶wietlania.
+.br
+-3:   Oblicza w/\:h na podstawie drugiej wielko¶ci i oryginalnych proporcji
+filmu.
+.REss
+.sp 1
+.I PRZYK£AD:
+.PD 0
+.RSs
+.IP dsize=800:-2
+Daje rozdzielczo¶æ wyj¶ciow± 800x600 dla filmu w proporcji 4/3,
+lub 800x450 dla filmu w proporcji 16/9.
+.RE
+.IPs <metoda-proporcji>
+Zmienia wysoko¶æ i szeroko¶æ wed³ug oryginalnych proporcji.
+.RSss
+-1: Ignoruje oryginalne proporcje (domy¶lne).
+.br
+ 0: Utrzymaj proporcje wy¶wietlania u¿ywaj±c <w> i <h> jako maksymalnej
+rozdzielczo¶ci.
+.br
+ 1: Utrzymaj proporcje wy¶wietlania u¿ywaj±c <w> i <h> jako minimalnej
+rozdzielczo¶ci.
+.br
+ 2: Utrzymaj proporcje filmu u¿ywaj±c <w> i <h> jako maksymalnej
+rozdzielczo¶ci.
+.br
+ 3: Utrzymaj proporcje filmu u¿ywaj±c <w> i <h> jako minimalnej
+rozdzielczo¶ci.
+.REss
+.sp 1
+.I PRZYK£AD:
+.PD 0
+.RSs
+.IP dsize=800:600:0
+Daje rozdzielczo¶æ wyj¶ciow± co najwy¿ej 800x600, lub mniejsz± ¿eby utrzymaæ
+proporcje.
+.RE
+.PD 1
+.IPs <r>\ \ 
+Zaokr±gla w górê tak by wysoko¶æ i szeroko¶æ by³y podzielne przez <r>
+(domy¶lnie: 1).
+.RE
 .
 .TP
 .B yuy2\ \ \ 
@@ -6408,12 +6497,12 @@ dekodera, kodera i szczê¶cia.
 Dla utrzymania pe³nej zgodno¶ci z MPEG-1/\:2/\:4 warto¶ci powinny byæ <=132.
 .
 .TP
-.B sc_threshold=<-1000000\-1000000>
+.B sc_threshold=<-1000000000\-1000000000>
 Próg do wykrywania zmiany sceny.
 Libavcodec wstawia klatkê kluczow± je¿eli wykryje zmianê sceny.
 T± opcj± mo¿esz okre¶liæ czu³o¶æ tej detekcji.
--1000000 oznacza, ¿e zmiana sceny wykrywana jest w ka¿dej klatce, 1000000
-oznacza, ¿e ¿adne zmiany nie bêd± wykryte (domy¶lnie: 0).
+-1000000000 oznacza, ¿e zmiana sceny wykrywana jest w ka¿dej klatce,
+1000000000 oznacza, ¿e ¿adne zmiany nie bêd± wykryte (domy¶lnie: 0).
 .
 .TP
 .B vb_strategy=<0\-1> (tylko pierwszy przebieg)
@@ -7401,9 +7490,10 @@ Precyzja intra DC podana w bitach (domy¶lnie: 8).
 Je¿eli podasz vcodec=mpeg2video, mo¿e przyj±æ warto¶ci 8, 9, 10 lub 11.
 .
 .TP
-.B cgop\ \ \ 
+.B cgop (patrz te¿ sc_threshold)
 Zamyka wszystkie GOPy.
-Obecnie nie dzia³a.
+Obecnie dzia³a tylko je¶li jest wy³±czone wykrywanie zmian scen
+((sc_threshold=1000000000).
 .
 .
 .SS nuv (\-nuvopts)
@@ -8053,11 +8143,11 @@ przebiegu.
 .IPs 0
 wy³±czone (domy¶lne)
 .IPs 1
-Zmniejsza subq, frameref i wy³±cza niektóre tryby analizy podpodzia³u
-makrobloków.
+Zmniejsza subq, frameref i wy³±cza niektóre tryby analizy podzia³u
+wewn±trz makrobloków.
 .IPs 2
 Zmniejsza subq i frameref do 1, u¿ywa szukania ME typu diament i wy³±cza
-wszystkie tryby analizy podpodzia³u.
+wszystkie tryby analizy podzia³u.
 .RE
 .RS
 Poziom 1 mo¿e dwukrotnie przyspieszyæ pierwszy przebieg nie zmniejszaj±c
