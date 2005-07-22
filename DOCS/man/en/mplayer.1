@@ -4354,7 +4354,7 @@ spal:    768x576 (square pixel PAL)
 .RE
 .
 .TP
-.B dsize[=aspect|w:h]
+.B dsize[=aspect|w:h:aspect-method:r]
 Changes the intended display size/\:aspect at an arbitrary point in the
 filter chain.
 Aspect can be given as a fraction (4/\:3) or floating point number
@@ -4366,6 +4366,58 @@ Note that this filter does
 do any scaling itself; it just affects
 what later scalers (software or hardware) will do when auto-scaling to
 correct aspect.
+.RSs
+.IPs <w>,<h>
+New display width and height.
+Can also be these special values:
+.RSss
+ 0:   original display width and height
+.br
+-1:   original video width and height (default)
+.br
+-2:   Calculate w/\:h using the other dimension and the original display
+aspect ratio.
+.br
+-3:   Calculate w/\:h using the other dimension and the original video
+aspect ratio.
+.REss
+.sp 1
+.I EXAMPLE:
+.PD 0
+.RSs
+.IP dsize=800:-2
+Specifies a display resolution of 800x600 for a 4/3 aspect video, or
+800x450 for a 16/9 aspect video.
+.RE
+.IPs <aspect\-method>
+Modifies width and height according to original aspect ratios.
+.RSss
+-1: Ignore original aspect ratio (default).
+.br
+ 0: Keep display aspect ratio by using <w> and <h> as maximum
+resolution.
+.br
+ 1: Keep display aspect ratio by using <w> and <h> as minimum
+resolution.
+.br
+ 2: Keep video aspect ratio by using <w> and <h> as maximum
+resolution.
+.br
+ 3: Keep video aspect ratio by using <w> and <h> as minimum
+resolution.
+.REss
+.sp 1
+.I EXAMPLE:
+.PD 0
+.RSs
+.IP dsize=800:600:0
+Specifies a display resolution of at most 800x600, or smaller, in order
+to keep aspect.
+.RE
+.PD 1
+.IPs <r>
+Rounds up to make both width and height divisible by <r> (default: 1).
+.RE
 .
 .TP
 .B yuy2\ \ \ 
