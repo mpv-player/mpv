@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.24 -->
+<!-- synced with 1.27 -->
 <chapter id="usage">
 <title>Sposób użycia</title>
 
@@ -33,6 +33,15 @@ Odtwarzanie pliku:
 <command>mplayer</command><!--
 --> [<replaceable>opcje</replaceable>]<!--
 --> [<replaceable>ścieżka</replaceable>/]<replaceable>nazwa_pliku</replaceable>
+</synopsis>
+</para>
+
+<para>
+Kolejny sposób na odtworzenie pliku:
+<synopsis>
+<command>mplayer</command><!--
+--> [<replaceable>opcje</replaceable>]<!--
+--> <replaceable>file:///zakodowana-ścieżka-uri</replaceable>
 </synopsis>
 </para>
 
@@ -256,6 +265,28 @@ Zalecane jest również włączenie <option>-cache</option> przy odtwarzaniu
 z sieci:
 <screen>wget <replaceable>ftp://micorsops.com/cokolwiek.avi</replaceable> -O - | mplayer -cache 8192 -</screen>
 </para></note>
+
+<sect2 id="streaming-save">
+<title>Zapisywanie strumieniowanej zawartości</title>
+<para>
+  Jak już uda Ci się zmusić <application>MPlayera</application> do odtwarzania
+  Twojego ulubionego strumienia internetowego, możesz użyć opcji
+  <option>-dumpstream</option> aby zapisać strumień do pliku.
+  Na przykład:
+<screen>
+  mplayer <replaceable>http://217.71.208.37:8006</replaceable> -dumpstream -dumpfile <replaceable>strumien.asf</replaceable>
+</screen>
+  zapisze zawartość strumieniowaną z
+  <replaceable>http://217.71.208.37:8006</replaceable> do pliku
+  <replaceable>stream.asf</replaceable>.
+  Działa to ze wszystkimi protokołami obsługiwanymi przez
+  <application>MPlayera</application>, jak MMS, RSTP itd.
+  Jeśli chcesz zapisać jedynie audio lub video, użyj odpowiednio <option>-dumpaudio</option>
+  lub <option>-dumpvideo</option>, ale zwróć uwagę na to, że
+  <application>MPlayer</application> zignoruje wszystkie poza ostatnią
+  opcją <option>-dump*</option> podaną w linii poleceń.
+</para>
+</sect2>
 </sect1>
 
 <sect1 id="mpst" xreflabel="Remote streams">
