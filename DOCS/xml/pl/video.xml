@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- synced with 1.79 -->
+<!-- synced with 1.81 -->
 <sect1 id="video">
 <title>Urządzenia wyjścia video</title>
 
@@ -1369,7 +1369,7 @@ Nie będzie działać!
   zakończeniu <application>MPlayera</application> będziesz miał załadowaną
   <emphasis role="bold">czcionkę ROM</emphasis> zamiast narodowej.
   Możesz z powrotem załadować czcionkę narodową używając na przykład narzędzia
-  <command>setsysfont</command> z dystrybucji Mandrake.
+  <command>setsysfont</command> z dystrybucji Mandrake/Mandriva.
   (<emphasis role="bold">Podpowiedź</emphasis>:
   To samo narzędzie jest używane do lokalizacji fbdev).
 </simpara></listitem>
@@ -1586,7 +1586,7 @@ Alternatywnie możesz używać specjalnego modułu jądra, takiego jak ten:
 <step><para>
   Ściągnij <ulink url="http://www.arava.co.il/matan/svgalib/">rozwojową wersję</ulink>
   svgalib (na przykład 1.9.17) <emphasis role="bold">LUB</emphasis> ściągnij
-  <ulink url="http://www.mplayerhq.hu/~alex/svgalib_helper-1.9.17-mplayer.tar.bz2">stąd</ulink>
+  <ulink url="http://www.mplayerhq.hu/MPlayer/contrib/svgalib/svgalib_helper-1.9.17-mplayer.tar.bz2">stąd</ulink>
   wersję stworzoną przez Alexa specjalnie do użytku z <application>MPlayerem</application>
   (nie potrzebuje ona do kompilacji źródeł svgalib)
 </para></step>
