@@ -19,6 +19,7 @@
 #define	SIGQUIT	3	/* quit */
 #define	SIGKILL	9	/* kill (cannot be caught or ignored) */
 #define	SIGBUS	10	/* bus error */
+#define	SIGPIPE	13	/* broken pipe */
 extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 #endif
 
@@ -1435,6 +1436,7 @@ current_module = NULL;
   signal(SIGINT,exit_sighandler);  // Interrupt from keyboard
 
   signal(SIGQUIT,exit_sighandler); // Quit from keyboard
+  signal(SIGPIPE,exit_sighandler); // Some window managers cause this
 #ifdef ENABLE_SIGHANDLER
   // fatal errors:
   signal(SIGBUS,exit_sighandler);  // bus error

@@ -27,7 +27,9 @@
 #include "config.h"
 
 #ifdef __MINGW32__
+#define        SIGHUP 1
 #define        SIGQUIT 3
+#define        SIGPIPE 13
 #endif
 #ifdef WIN32
 #include <windows.h>
