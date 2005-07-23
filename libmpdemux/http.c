@@ -57,7 +57,7 @@ static unsigned my_read(int fd, char *buffer, int len, streaming_ctrl_t *sc) {
   sc->buffer_pos += cp_len;
   pos += cp_len;
   while (pos < len) {
-    int ret = read(fd, &buffer[pos], len - pos);
+    int ret = recv(fd, &buffer[pos], len - pos, 0);
     if (ret <= 0)
       break;
     pos += ret;
@@ -73,13 +73,16 @@ static unsigned my_read(int fd, char *buffer, int len, streaming_ctrl_t *sc) {
  */
 static unsigned uvox_meta_read(int fd, streaming_ctrl_t *sc) {
   unsigned metaint;
-  unsigned char info[6];
+  unsigned char info[6] = {0, 0, 0, 0, 0, 0};
+  int info_read;
   do {
-    my_read(fd, info, 1, sc);
+    info_read = my_read(fd, info, 1, sc);
     if (info[0] == 0x00)
-      my_read(fd, info, 6, sc);
+      info_read = my_read(fd, info, 6, sc);
     else
-      my_read(fd, &info[1], 5, sc);
+      info_read += my_read(fd, &info[1], 5, sc);
+    if (info_read != 6) // read error or eof
+      return 0;
     // sync byte and reserved flags
     if (info[0] != 0x5a || (info[1] & 0xfc) != 0x00) {
       mp_msg(MSGT_DEMUXER, MSGL_ERR, "Invalid or unknown uvox metadata\n");
@@ -141,7 +144,11 @@ static int scast_streaming_read(int fd, char *buffer, int size,
 
   while (done < size) { // now comes the metadata
     if (sd->is_ultravox)
+    {
       sd->metaint = uvox_meta_read(fd, sc);
+      if (!sd->metaint)
+        size = done;
+    }
     else
       scast_meta_read(fd, sc); // read and display metadata
     sd->metapos = 0;
@@ -162,7 +169,7 @@ static int scast_streaming_start(stream_t *stream) {
   int fromhdr;
   scast_data_t *scast_data;
   HTTP_header_t *http_hdr = stream->streaming_ctrl->data;
-  int is_ultravox = http_hdr && strcasecmp(http_hdr->protocol, "ICY") != 0;
+  int is_ultravox = strcasecmp(stream->streaming_ctrl->url->protocol, "unsv") == 0;
   if (!stream || stream->fd < 0 || !http_hdr)
     return -1;
   if (is_ultravox)
@@ -836,8 +843,7 @@ static int fixup_open(stream_t *stream,int seekable) {
 	HTTP_header_t *http_hdr = stream->streaming_ctrl->data;
 	int is_icy = http_hdr && strcasecmp(http_hdr->protocol, "ICY") == 0;
 	char *content_type = http_get_field( http_hdr, "Content-Type" );
-	int is_ultravox = http_hdr && content_type &&
-              strcasecmp(content_type, "misc/ultravox") == 0;
+	int is_ultravox = strcasecmp(stream->streaming_ctrl->url->protocol, "unsv") == 0;
 
 	stream->type = STREAMTYPE_STREAM;
 	if(!is_icy && !is_ultravox && seekable)
