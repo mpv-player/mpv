@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.69 -->
+<!-- synced with 1.71 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -442,7 +442,8 @@ projektnek azonosak a gyökereik.
   a kiadásokban benne lévő hibák javításait tartalmazza.
   Itt van lépésről lépésre, hogy mit kell tenned, ha az <systemitem class="library">XviD</systemitem>
   CVS-t használni akarod a <application>MEncoder</application>rel (szükséged
-  lesz az autoconf 2.50-re, az automake-re és a libtool-ra):
+  lesz az <application>autoconf</application> 2.50-re, az <application>automake</application>-re
+  és a <application>libtool</application>-ra):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
@@ -624,8 +625,8 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   Ha van feltelepítve subversion kliensed, a legújabb x264
   forrást letöltheted ezzel a paranccsal:
   <screen>
-    svn co svn://svn.videolan.org/x264/trunk x264
-  </screen>
+    svn co svn://svn.videolan.org/x264/trunk x264<!--
+  --></screen>
   Az <application>MPlayer</application> forrás mindig frissül, ha
   egy <systemitem class="library">x264</systemitem> API változás
   jelenik meg, így javasolt az <application>MPlayer</application> CVS
@@ -640,8 +641,8 @@ a Sorenson videó fájlok összes verziójának dekódolására a következő dekódolókkal
   Az <systemitem class="library">x264</systemitem> a szabványos módon
   fordítható le és telepíthető:
   <screen>
-    ./configure &amp;&amp; make &amp;&amp; sudo make install
-  </screen>
+    ./configure &amp;&amp; make &amp;&amp; sudo make install<!--
+  --></screen>
   Ez telepíti a libx264.a-t a /usr/local/lib könyvtárba és az x264.h-t
   beleteszi a /usr/local/include-ba.
 
