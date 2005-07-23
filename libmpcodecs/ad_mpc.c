@@ -3,6 +3,8 @@
  * by Reza Jelveh <reza.jelveh@tuhh.de> and
  * Reimar Döffinger <Reimar.Doeffinger@stud.uni-karlsruhe.de>
  * License: GPL
+ * This code may be be relicensed under the terms of the GNU LGPL when it
+ * becomes part of the ffmpeg project (ffmpeg.sourceforge.net)
  */
 
 #include <stdio.h>
