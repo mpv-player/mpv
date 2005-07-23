@@ -577,7 +577,7 @@ mp_input_parse_cmd(char* str) {
 
   cmd_def = &mp_cmds[i];
 
-  cmd = (mp_cmd_t*)malloc(sizeof(mp_cmd_t));
+  cmd = (mp_cmd_t*)calloc(1, sizeof(mp_cmd_t));
   cmd->id = cmd_def->id;
   cmd->name = strdup(cmd_def->name);
   cmd->pausing = pausing;
