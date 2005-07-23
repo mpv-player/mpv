@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.59 -->
+<!-- synced with 1.71 -->
 <sect1 id="codecs">
 <title>Obsługiwane kodeki</title>
 
@@ -8,8 +8,8 @@
 
 <para>
 Zajrzyj do
-<ulink url="http://www.mplayerhq.hu/homepage/codecs-status.html">tabeli statusu
-kodeków</ulink>, żeby zobaczyć kompletną, codziennie generowaną listę. Niektóre
+<ulink url="../../codecs-status.html">tabeli stanu kodeków</ulink>, żeby
+zobaczyć kompletną, codziennie generowaną listę. Niektóre
 kodeki są dostępne do pobrania z naszej strony domowej. Ściągniesz je ze
 <ulink url="http://www.mplayerhq.hu/MPlayer/releases/codecs/">strony z kodekami</ulink>.
 </para>
@@ -431,50 +431,33 @@ i Linux/PowerPC) i pod Mac OS X</emphasis>.
 <title>XviD</title>
 
 <para>
-<ulink url="http://www.xvid.org">XviD</ulink> wydzielił się z projektu OpenDivX.
-Stało się to, gdy ProjectMayo zamknął kod OpenDivX i przemianował go na DivX4
+<ulink url="http://www.xvid.org">XviD</ulink> jest wolnym, kompatybilnym
+z MPEG-4 ASP kodekiem video z możliwościami kodowania dwuprzebiegowego
+i pełną obsługą MPEG-4 ASP, dlatego jest dużo bardziej efektywny niż dobrze
+znany kodek DivX.
+Łączy bardzo dobrą jakość video i dobre osiągi dzięki optymalizacjami kodu dla
+większości nowoczesnych procesorów.
+</para>
+<para>
+Zaczął się jako odłam kodeka OpenDivX.
+Stało się to gdy ProjectMajo zmienił OpenDivX na zamknięte DivX4
 (a teraz DivX5). W rezultacie tej decyzji, rozeźleni ludzie spoza ProjectMayo,
 którzy pracowali nad OpenDivX, rozpoczęli projekt XviD. Tak więc oba projekty
 mają to samo pochodzenie.
-
-<itemizedlist>
-<title>ZALETY</title>
-<listitem><simpara>
-  otwarty kod źródłowy
-  </simpara></listitem>
-<listitem><simpara>
-  API kodeka jest kompatybilne z DivX4, więc dodanie dla niego wsparcia jest
-  proste
-  </simpara></listitem>
-<listitem><simpara>
-  wsparcie dla 2-przebiegowego kodowania
-  </simpara></listitem>
-<listitem><simpara>
-  dobra jakość kodowania, większa prędkość od DivX4 (możesz go zoptymalizować
-  dla twojej maszyny podczas kompilacji)
-  </simpara></listitem>
-</itemizedlist>
-
-<itemizedlist>
-<title>WADY</title>
-<listitem><simpara>
-  na dzień dzisiejszy ma kłopoty z
-  <emphasis role="bold">dekodowaniem</emphasis> niektórych plików DivX/DivX4
-  (nie stanowi to problemu, ponieważ potrafi je odtwarzać
-  <link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>).
-  </simpara></listitem>
-<listitem><simpara>
-  w trakcie rozwoju
-  </simpara></listitem>
-</itemizedlist>
 </para>
 
 <procedure>
-<title>INSTALACJA XVID CVS</title>
+<title>Instalacja <systemitem class="library">XviD</systemitem></title>
 <para>
-  Aktualnie jest dostępny tylko poprzez CVS. Poniżej znajdują się instrukcje
-  pobierania i instalacji (będziesz potrzebował autoconf przynajmniej w wersji
-  2.50, automake i libtool):
+  Jak większość otwartego oporgramowania dostępny jest w dwóch wersjach:
+  <ulink url="http://www.xvid.org/downloads.html">oficjalnych wydań</ulink>
+  i wersji CVS.
+  Wersja CVS jest zazwyczaj wystarczająco stablina by jej używać, jako że
+  zazwyczaj ma poprawki do błędów występujących w wydaniach.
+  Tak należy nakłonić <systemitem class="library">XviD</systemitem> CVS do
+  pracy z <application>MEncoderem</application> (będziesz potrzebował
+  przenajmniej <application>autoconf</application> 2.50,
+  <application>automake</application> i <application>libtool</application>):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
@@ -549,6 +532,139 @@ wersje plików video Sorensona z użyciem następujących dekoderów:
 </procedure>
 
 </sect3>
+
+<sect3 id="codec-x264">
+<title>x264</title>
+
+<sect4 id="codec-x264-whatis">
+<title>Co to jest x264</title>
+<para>
+  <systemitem class="library">x264</systemitem> jest biblioteką słurzącą do
+  tworzenia strumieni video H.264.
+  Nie jest w 100% ukończona, ale ma przynajmniej pewną obsługę większości
+  mających wpływ na jakość możliwości H.264.
+  Jest też wiele zaawansowanych możliwości w specyfikacji H.264, które nie mają
+  nic wspólnego z jakością jako taką; wiele z nich jeszcze nie ma
+  implementacji w <systemitem class="library">x264</systemitem>.
+</para>
+
+<itemizedlist>
+<title>Możliwości kodera</title>
+  <listitem><para>CAVLC/CABAC</para></listitem>
+  <listitem><para>Wielokrotne referencje</para></listitem>
+  <listitem><para>Intra: wszystkie typy makrobloków 
+     (16x16 i 4x4 z wszystkimi predykcjami)</para></listitem>
+  <listitem><para>Inter P: wszystkie podziały
+     (od 16x16 aż do 4x4)</para></listitem>
+  <listitem><para>Inter B: podziały od 16x16 do 8x8
+    (włączając SKIP/DIRECT)</para></listitem>
+  <listitem><para>Kontrola tempa: stały kwantyzator, stałe bitrate, albo
+    wieloprzebiegowe ABR</para></listitem>
+  <listitem><para>Wykrywanie zmian scen</para></listitem>
+  <listitem><para>Adaptatywne umieszczanie klatek B</para></listitem>
+  <listitem><para>Referencyjne ramki / dowolna kolejność
+     ramek</para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>Ograniczenia kodera</title>
+  <listitem><para>Brak prawdziwego RD</para></listitem>
+</itemizedlist>
+</sect4>
+
+<sect4 id="codec-h264-whatis">
+<title>Co to jest H.264</title>
+<para>
+  H.264 jedną z nazw nowego kodeka video opracowanego wspólnie przez ITU
+  i MPEG.
+  Może też być prawidłowo nazywany okropnymi nazwami "ISO/IEC 14496-10" lub
+  "MPEG-4 Part 10". Częściej jest nazywany "MPEG-4 AVC" albo po prostu "AVC".
+</para>
+<para>
+  Jakkolwiek go nie nazywać, H.264 może być wart wypróbowania ponieważ
+  zazwyczaj może dorównać jakością MPEG-4 ASP z mniejszą o 5%-30% objętością.
+  Dokładne wyniki zależą od materiału źródłowego i kodera.
+  Zyski z używania H.264 nie są za darmo: Dekodowanie strumieni H.264 mają
+  duże wymagania obliczeniowe i pamięciowe.
+  Na przykład, na Athlonie 1733 MHz, film H.264 w rozdzielczości DVD 1500kbps
+  wymaga do zdekodowania około 35% CPU.
+  Dla porównania, dekodowanie strumienia MPEG-4 ASP w rozdzielczości DVD
+  1500kbps wymaga około 10% CPU.
+  Oznacza to że dekodowanie wysokiej jakości strumieni jest prawie nie do
+  pomyślenia dla zwykłych użytkowników.
+  Oznacza to również że dobry DVD rip może się czasami zacinać na procesorach
+  wolniejszych niż około 2.0 GHz.
+</para>
+<para>
+  Przynajmniej przy używaniu <systemitem class="library">x264</systemitem>
+  wymagania kodowania nie są o wiele większe niż te, do których przywykliśmy
+  przy MPEG-4 ASP.
+  Na przykład, na Athlonie 1733 MHz typowe kodowanie DVD będzie działać
+  z 5-15fps.
+</para>
+<para>
+  Ten dokument nie ma wyjaśniać szczegółów H.264, ale jeśli jesteś
+  zainteresowany niewielkim wstępem możesz chcieć przeczytać
+  <ulink url="http://www.cdt.luth.se/~peppar/kurs/smd151/spie04-h264OverviewPaper.pdf">The H.264/AVC Advanced Video Coding Standard: Overview and Introduction to the Fidelity Range Extensions</ulink>.
+</para>
+</sect4>
+
+<sect4 id="codec-x264-playback">
+<title>Jak mogę odtwarzać filmy H.264 używając <application>MPlayera</application></title>
+<para>
+  <application>MPlayer</application> używa dekodera H.264 z
+  <systemitem class="library">libavcodec</systemitem>.
+  <systemitem class="library">libavcodec</systemitem> miało choć trochę zdatny
+  do użytku dekoder H.264 od około czerwca 2004, ale od tego czasu wprowadzono
+  wiele zmian i poprawek, zarówno pod względem obsługiwanej funkcjonalności
+  jak i zużycia CPU.
+  Na wszelki wypadek lepiej jest używać świeżej wersji CVS.
+</para>
+<para>
+  Jeśli chcesz szybki i łatwy sposób na sprawdzenie czy były ostatnio zmiany
+  w obsłudze H.264 w <systemitem class="library">libavcodec</systemitem>,
+  możesz patrzeć na
+  <ulink url="http://mplayerhq.hu/cgi-bin/cvsweb.cgi/ffmpeg/libavcodec/h264.c?cvsroot=FFMpeg">interface sieciowy repozytorium CVS FFmpeg</ulink>
+</para>
+</sect4>
+
+<sect4 id="codec-x264-encode">
+<title>Jak mogę kodować filmy używając <application>MEncodera</application> i <systemitem class="library">x264</systemitem>?</title>
+<para>
+  Jeśli masz zainstalowanego klienta subversion, możesz uzyskać najnowsze
+  źródła x264 tym poleceniem:
+  <screen>
+    svn co svn://svn.videolan.org/x264/trunk x264<!--
+  --></screen>
+  Źródła <application>MPlayera</application> są aktualizowane gdy tylko
+  zmieni się API <systemitem class="library">x264</systemitem>, więc zalecamy
+  też używanie <application>MPlayera</application> z CVS.
+  Być może sytuacja się zmieni jeśli i gdy nastąpi "wydanie"
+  <systemitem class="library">x264</systemitem>.
+  W międzyczasie <systemitem class="library">x264</systemitem> powinna być
+  uważana za niestabilną, w tym sensie że jej interface programistyczny może
+  się zmienić.
+</para>
+<para>
+  <systemitem class="library">x264</systemitem> buduje się i instaluje
+  w sposób standardowy:
+  <screen>
+    ./configure &amp;&amp; make &amp;&amp; sudo make install<!--
+  --></screen>
+  To zainstaluje libx264.a w /usr/local/lib oraz x264.h w /usr/local/include.
+
+  Gdy biblioteka i nagłówki <systemitem class="library">x264</systemitem> są
+  już w standardowych miejscach, budowanie <application>MPlayera</application>
+  z obsługą <systemitem class="library">x264</systemitem> jest proste.
+  Uruchom standardowe:
+  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
+  Skrypt konfiguracyjny wykryje że spełniłeś wymagania do obsługi
+  <systemitem class="library">x264</systemitem>.
+</para>
+</sect4>
+
+</sect3>
+
 </sect2>
 
 <!-- ********** -->
@@ -758,7 +874,7 @@ make install
 Wersje binarne nie są dostępne na stronie audiocoding.com, ale możesz
 ściągnąć (apt-getem) Debianowe paczki z
 <ulink url="http://hpisi.nerim.net">domowej strony Christiana Marillata</ulink>,
-RPMy dla Mandrake ze strony <ulink url="http://plf.zarb.org">P.L.F</ulink>
+RPMy dla Mandrake/Mandriva ze strony <ulink url="http://plf.zarb.org">P.L.F</ulink>
 a RedHatowe RPMy z
 <ulink url="http://greysector.rangers.eu.org/">Grey Sector</ulink>.
 </para>
