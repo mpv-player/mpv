@@ -294,6 +294,11 @@ int af_reinit(af_stream_t* s, af_instance_t* af)
 	}
 	af=new->next;
       }
+      else {
+        af_msg(AF_MSG_ERROR, "[libaf] Automatic filter insertion disabled "
+               "but formats do not match. Giving up.\n");
+        return AF_ERROR;
+      }
       break;
     }
     case AF_DETACH:{ // Filter is redundant and wants to be unloaded
