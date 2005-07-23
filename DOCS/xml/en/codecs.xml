@@ -441,7 +441,8 @@ then started XviD. So both projects have the same origin.
   features fixes for bugs that exist in releases.
   Here is what to do to make <systemitem class="library">XviD</systemitem>
   CVS work with <application>MEncoder</application> (you need at least
-  autoconf 2.50, automake and libtool):
+  <application>autoconf</application> 2.50,
+  <application>automake</application> and <application>libtool</application>):
 </para>
 <step><para>
   <screen>cvs -z3 -d:pserver:anonymous@cvs.xvid.org:/xvid login</screen>
