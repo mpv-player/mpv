@@ -1702,10 +1702,12 @@ static int slowseek(float end_pts, demux_stream_t *d_video, demux_stream_t *d_au
             decode_video(sh_video, frame_data->start, frame_data->in_size, !softskip);
         }
 
+#ifdef USE_EDL
         if (print_info) mp_msg(MSGT_MENCODER, MSGL_STATUS,
                "EDL SKIP: Start: %.2f  End: %.2lf   Current: V: %.2f  A: %.2f     \r",
                next_edl_record->start_sec, next_edl_record->stop_sec,
                sh_video->pts, a_pts);
+#endif
     }
     if (interrupted) return 2;
     return 1;
