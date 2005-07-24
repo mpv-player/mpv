@@ -950,7 +950,77 @@
   Unfortunately, not all players enforce this auto-scaling information,
   therefore you may still want to rescale.
 </para>
+</sect2>
 
+
+<sect2 id="menc-feat-dvd-mpeg4-resolution-bitrate">
+<title>Choosing resolution and bitrate</title>
+
+<para>
+  If you will not be encoding in constant quantizer mode, you need to
+  select a bitrate.
+  The concept of bitrate is quite simple.
+  It's the (average) number of bits that will be consumed to store your
+  movie, per second.
+  Normally bitrate is measured in kilobits (1000 bits) per second.
+  The size of your movie on disk is the bitrate times the length of the
+  movie in time, plus a small amount of "overhead" (see the section on
+  <link linkend="menc-feat-dvd-mpeg4-muxing-avi-limitations">the AVI container</link>
+  for instance).
+  Other parameters such as scaling, cropping, etc. will
+  <emphasis role="bold">not</emphasis> alter the file size unless you
+  change the bitrate as well!.
+</para>
+<para>
+  Bitrate does <emphasis role="bold">not</emphasis> scale proportional
+  to resolution.
+  That is to say, a 320x240 file at 200 kbit/sec will not be the same
+  quality as the same movie at 640x480 and 800 kbit/sec!
+  There are two reasons for this:
+<orderedlist>
+  <listitem><para>
+    <emphasis role="bold">Perceptual</emphasis>: You notice MPEG
+    artifacts more if they're scaled up bigger!
+    Artifacts appear on the scale of blocks (8x8).
+    Your eye will not see errors in 4800 small blocks as easily as it
+    sees errors in 1200 large blocks (assuming you'll be scaling both
+    to fullscreen).
+  </para></listitem>
+  <listitem><para>
+    <emphasis role="bold">Theoretical</emphasis>: When you scale down
+    an image but still use the same size (8x8) blocks for the frequency
+    space transform, you move more data to the high frequency bands.
+    Roughly speaking, each pixel contains more of the detail than it
+    did before.
+    So even though your scaled-down picture contains 1/4 the information
+    in the spacial directions, it could still contain a large portion
+    of the information in the frequency domain (assuming that the high
+    frequencies were underutilized in the original 640x480 image).
+  </para></listitem>
+  </orderedlist>
+</para>
+<para>
+  Past guides have recommended choosing a bitrate and resolution based
+  on a "bits per pixel" approach, but this is usually not valid due to
+  the above reasons.
+  A better estimate seems to be that bitrates scale proportional to the
+  square root of resolution, so that 320x240 and 400 kbit/sec would be
+  comparable to 640x480 at 800 kbit/sec.
+  However this has not been verified with theoretical or empirical
+  rigor.
+  Further, given that movies vary greatly with regard to noise, detail,
+  degree of motion, etc., it's futile to make general recommendations
+  for bits per length-of-diagonal (the analogue of bits per pixel,
+  using the square root).
+</para>
+<para>
+  So far we have discussed the difficulty of choosing a bitrate and
+  resolution.
+</para>
+
+
+<sect3 id="menc-feat-dvd-mpeg4-resolution-bitrate-compute">
+<title>Computing the resolution</title>
 <para>
   First, you should compute the encoded aspect ratio:
   <systemitem>ARc = (Wc x (ARa / PRdvd )) / Hc</systemitem>
@@ -1008,6 +1078,7 @@
   On the other hand, it is worthless to raise CQ higher than 0.30 as you would
   be wasting bits without any noticeable quality gain.
 </para>
+</sect3>
 
 </sect2>
 
