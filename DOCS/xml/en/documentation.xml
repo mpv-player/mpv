@@ -181,6 +181,7 @@ can be distributed under the terms of the GNU General Public License Version 2.
 &cd-dvd.xml;
 &ports.xml;
 &mencoder.xml;
+&encoding-guide.xml;
 &mail-lists.xml;
 &bugreports.xml;
 &bugs.xml;
