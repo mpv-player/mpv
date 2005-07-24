@@ -726,7 +726,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 		//revert window to previous setting
 		[self setFrame:old_view_frame];
 		[self setNeedsDisplay:YES];
-		[window setHasShadow:NO];
+		[window setHasShadow:YES];
 		[window setFrame:old_frame display:YES animate:animate];//zoom-out window with nice useless sfx
 	}
 }
