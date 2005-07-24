@@ -972,7 +972,7 @@
   change the bitrate as well!.
 </para>
 <para>
-  Bitrate does <emphasis role="bold">not</emphasis> scale proportional
+  Bitrate does <emphasis role="bold">not</emphasis> scale proportionally
   to resolution.
   That is to say, a 320x240 file at 200 kbit/sec will not be the same
   quality as the same movie at 640x480 and 800 kbit/sec!
@@ -1010,7 +1010,7 @@
   rigor.
   Further, given that movies vary greatly with regard to noise, detail,
   degree of motion, etc., it's futile to make general recommendations
-  for bits per length-of-diagonal (the analogue of bits per pixel,
+  for bits per length-of-diagonal (the analog of bits per pixel,
   using the square root).
 </para>
 <para>
@@ -1082,69 +1082,38 @@
 
 </sect2>
 
-<sect2 id="menc-feat-dvd-mpeg4-audio">
-<title>Audio</title>
+<sect2 id="menc-feat-dvd-mpeg4-filtering">
+<title>Filtering</title>
 
 <para>
-  Audio is a much simpler problem to solve: if you care about quality, just
-  leave it as is.
-  Even AC3 5.1 streams are at most 448Kbit/s, and they are worth every bit.
-  You might be tempted to transcode the audio to high quality Vorbis, but
-  just because you do not have an A/V receiver for AC3 pass-through today
-  does not mean you will not have one tomorrow. Future-proof your DVD rips by
-  preserving the AC3 stream.
-  You can keep the AC3 stream either by copying it directly into the video
-  stream <link linkend="menc-feat-mpeg4">during the encoding</link>.
-  You can also extract the AC3 stream in order to mux it into containers such
-  as NUT or Matroska.
-  <screen>mplayer <replaceable>source_file.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>sound.ac3</replaceable></screen>
-  will dump into the file <replaceable>sound.ac3</replaceable> the
-  audio track number 129 from the file
-  <replaceable>source_file.vob</replaceable> (NB: DVD VOB files
-  usually use a different audio numbering,
-  which means that the VOB audio track 129 is the 2nd audio track of the file).
+  In general, you want to do as little filtering as possible to the movie
+  in order to remain close to the original DVD source. Cropping is often
+  necessary (as described above), but avoid to scale the video. Although
+  scaling down is sometimes preferred to using higher quantizers, we want
+  to avoid both these things: remember that we decided from the start to
+  trade bits for quality.
 </para>
 
 <para>
-  But sometimes you truly have no choice but to further compress the
-  sound so that more bits can be spent on the video.
-  Most people choose to compress audio with either MP3 or Vorbis audio
-  codecs.
-  While the latter is a very space-efficient codec, MP3 is better supported
-  by hardware players, although this trend is changing.
+  Also, do not adjust gamma, contrast, brightness, etc. What looks good
+  on your display may not look good on others. These adjustments should
+  be done on playback only.
 </para>
 
 <para>
-  First of all, you will have to convert the DVD sound into a WAV file that the
-  audio codec can use as input.
-  For example:
-  <screen>mplayer <replaceable>source_file.vob</replaceable> -ao pcm:file=<replaceable>destination_sound.wav</replaceable> -vc dummy -aid 1 -vo null</screen>
-  will dump the second audio track from the file
-  <replaceable>source_file.vob</replaceable> into the file
-  <replaceable>destination_sound.wav</replaceable>.
-  You may want to normalize the sound before encoding, as DVD audio tracks
-  are commonly recorded at low volumes.
-  You can use the tool <application>normalize</application> for instance,
-  which is available in most distributions.
-  If you are using Windows, a tool such as <application>BeSweet</application>
-  can do the same job.
-  You will compress in either Vorbis or MP3.
-  For example:
-  <screen>oggenc -q1 <replaceable>destination_sound.wav</replaceable></screen>
-  will encode <replaceable>destination_sound.wav</replaceable> with
-  the encoding quality 1, which is roughly equivalent to 80Kb/s, and
-  is the minimum quality at which you should encode if you care about
-  quality.
-  Please note that MEncoder currently cannot mux Vorbis audio tracks
-  into the output file because it only supports AVI and MPEG
-  containers as an output, each of which may lead to audio/video
-  playback synchronization problems with some players when the AVI file
-  contain VBR audio streams such as Vorbis.
-  Do not worry, this document will show you how you can do that with third
-  party programs.
+  One thing you might want to do, however, is pass the video through a
+  very light denoise filter, such as <option>-vf hqdn3d=2:1:2</option>.
+  Again, it is a matter of putting those bits to better use: why waste them
+  encoding noise when you can just add that noise back in during playback?
+  Increasing the parameters for <option>hqdn3d</option> will further
+  improve compressibility, but if you increase the values too much, you
+  risk degrading the image visibily. The suggested values above
+  (<option>2:1:2</option>) are quite conservative; you should feel free to
+  experiment with higher values and observe the results for yourself.
 </para>
 
 </sect2>
+
 
 <sect2 id="menc-feat-dvd-mpeg4-interlacing">
 <title>Interlacing and Telecine</title>
@@ -1254,34 +1223,67 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 </para>
 </sect2>
 
-<sect2 id="menc-feat-dvd-mpeg4-filtering">
-<title>Filtering</title>
+
+<sect2 id="menc-feat-dvd-mpeg4-audio">
+<title>Audio</title>
 
 <para>
-  In general, you want to do as little filtering as possible to the movie
-  in order to remain close to the original DVD source. Cropping is often
-  necessary (as described above), but do not scale the video. Although
-  scaling down is sometimes preferred to using higher quantizers, we want
-  to avoid both these things: remember that we decided from the start to
-  trade bits for quality.
+  Audio is a much simpler problem to solve: if you care about quality, just
+  leave it as is.
+  Even AC3 5.1 streams are at most 448Kbit/s, and they are worth every bit.
+  You might be tempted to transcode the audio to high quality Vorbis, but
+  just because you do not have an A/V receiver for AC3 pass-through today
+  does not mean you will not have one tomorrow. Future-proof your DVD rips by
+  preserving the AC3 stream.
+  You can keep the AC3 stream either by copying it directly into the video
+  stream <link linkend="menc-feat-mpeg4">during the encoding</link>.
+  You can also extract the AC3 stream in order to mux it into containers such
+  as NUT or Matroska.
+  <screen>mplayer <replaceable>source_file.vob</replaceable> -aid 129 -dumpaudio -dumpfile <replaceable>sound.ac3</replaceable></screen>
+  will dump into the file <replaceable>sound.ac3</replaceable> the
+  audio track number 129 from the file
+  <replaceable>source_file.vob</replaceable> (NB: DVD VOB files
+  usually use a different audio numbering,
+  which means that the VOB audio track 129 is the 2nd audio track of the file).
 </para>
 
 <para>
-  Also, do not adjust gamma, contrast, brightness, etc. What looks good
-  on your display may not look good on others. These adjustments should
-  be done on playback only.
+  But sometimes you truly have no choice but to further compress the
+  sound so that more bits can be spent on the video.
+  Most people choose to compress audio with either MP3 or Vorbis audio
+  codecs.
+  While the latter is a very space-efficient codec, MP3 is better supported
+  by hardware players, although this trend is changing.
 </para>
 
 <para>
-  One thing you might want to do, however, is pass the video through a
-  very light denoise filter, such as <option>-vf hqdn3d=2:1:2</option>.
-  Again, it is a matter of putting those bits to better use: why waste them
-  encoding noise when you can just add that noise back in during playback?
-  Increasing the parameters for <option>hqdn3d</option> will further
-  improve compressibility, but if you increase the values too much, you
-  risk degrading the image visibily. The suggested values above
-  (<option>2:1:2</option>) are quite conservative; you should feel free to
-  experiment with higher values and observe the results for yourself.
+  First of all, you will have to convert the DVD sound into a WAV file that the
+  audio codec can use as input.
+  For example:
+  <screen>mplayer <replaceable>source_file.vob</replaceable> -ao pcm:file=<replaceable>destination_sound.wav</replaceable> -vc dummy -aid 1 -vo null</screen>
+  will dump the second audio track from the file
+  <replaceable>source_file.vob</replaceable> into the file
+  <replaceable>destination_sound.wav</replaceable>.
+  You may want to normalize the sound before encoding, as DVD audio tracks
+  are commonly recorded at low volumes.
+  You can use the tool <application>normalize</application> for instance,
+  which is available in most distributions.
+  If you are using Windows, a tool such as <application>BeSweet</application>
+  can do the same job.
+  You will compress in either Vorbis or MP3.
+  For example:
+  <screen>oggenc -q1 <replaceable>destination_sound.wav</replaceable></screen>
+  will encode <replaceable>destination_sound.wav</replaceable> with
+  the encoding quality 1, which is roughly equivalent to 80Kb/s, and
+  is the minimum quality at which you should encode if you care about
+  quality.
+  Please note that MEncoder currently cannot mux Vorbis audio tracks
+  into the output file because it only supports AVI and MPEG
+  containers as an output, each of which may lead to audio/video
+  playback synchronization problems with some players when the AVI file
+  contain VBR audio streams such as Vorbis.
+  Do not worry, this document will show you how you can do that with third
+  party programs.
 </para>
 
 </sect2>
