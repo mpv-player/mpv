@@ -1086,6 +1086,49 @@
 <title>Filtering</title>
 
 <para>
+  Learning how to use <application>MEncoder</application>'s video filters
+  is essential to producing good encodes.
+  All video processing is performed through the filters -- cropping,
+  scaling, color adjustment, noise removal, sharpening, deinterlacing,
+  telecine, inverse telecine, and deblocking, just to name a few.
+  Along with the vast number of supported input formats, the variety of
+  filters available in <application>MEncoder</application> is one of its
+  main advantages over other similar programs.
+</para>
+
+<para>
+  Filters are loaded in a chain using the -vf option:
+
+  <screen>-vf filter1=options,filter2=options,...</screen>
+
+  Most filters take several numeric options separated by colons, but
+  the syntax for options varies from filter to filter, so read the man
+  page for details on the filters you wish to use.
+</para>
+
+<para>
+  Filters operate on the video in the order they are loaded.
+  For example, the following chain:
+
+  <screen>-vf crop=688:464:12:4,scale=640:464</screen>
+
+  will first crop the 688x464 region of the picture with upper-left
+  corner at (12,4), and then scale the result down to 640x464.
+</para>
+
+<para>
+  Certain filters need to be loaded at or near the beginning of the
+  filter chain, in order to take advantage of information from the
+  video decoder that will be lost or invalidated by other filters.
+  The principal examples are <option>pp</option> (postprocessing, only
+  when it is performing deblock or dering operations),
+  <option>spp</option> (another postprocessor to remove MPEG artifacts),
+  <option>pullup</option> (inverse telecine), and
+  <option>softpulldown</option> (for converting soft telecine to hard
+  telecine).
+</para>
+
+<para>
   In general, you want to do as little filtering as possible to the movie
   in order to remain close to the original DVD source. Cropping is often
   necessary (as described above), but avoid to scale the video. Although
