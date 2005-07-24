@@ -841,7 +841,7 @@ static int http_streaming_start(stream_t *stream, int* file_format) {
 
 static int fixup_open(stream_t *stream,int seekable) {
 	HTTP_header_t *http_hdr = stream->streaming_ctrl->data;
-	int is_icy = http_hdr && strcasecmp(http_hdr->protocol, "ICY") == 0;
+	int is_icy = http_hdr && http_get_field(http_hdr, "Icy-MetaInt");
 	char *content_type = http_get_field( http_hdr, "Content-Type" );
 	int is_ultravox = strcasecmp(stream->streaming_ctrl->url->protocol, "unsv") == 0;
 
