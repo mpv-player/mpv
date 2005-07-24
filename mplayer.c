@@ -3466,7 +3466,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	{
 #ifdef USE_SUB
 	if (sh_video) {
-		mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsSubVisibility, sub_visibility);
+		mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_SUB_VISIBILITY=%ld\n", sub_visibility);
 	}
 #endif
 	} break;
@@ -3581,16 +3581,16 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	break;
 	
     case MP_CMD_GET_TIME_LENGTH : {
-	mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsLength, demuxer_get_time_length(demuxer));
+	mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_LENGTH=%ld\n", demuxer_get_time_length(demuxer));
     } break;
 
 	case MP_CMD_GET_VO_FULLSCREEN : {
 	if(video_out && vo_config_count)
-		mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsVoFullscreen, vo_fs);
+		mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_VO_FULLSCREEN=%ld\n", vo_fs);
 	} break;
     
     case MP_CMD_GET_PERCENT_POS : {
-	mp_msg(MSGT_GLOBAL,MSGL_INFO,MSGTR_AnsPercentPos, demuxer_get_percent_pos(demuxer));
+	mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_PERCENT_POSITION=%ld\n", demuxer_get_percent_pos(demuxer));
     } break;
     case MP_CMD_GET_TIME_POS : {
       float pos = 0;
@@ -3599,7 +3599,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       else
       if (sh_audio && audio_out)
         pos = sh_audio->delay - audio_out->get_delay() * playback_speed;
-      mp_msg(MSGT_GLOBAL, MSGL_INFO, MSGTR_AnsTimePos, pos);
+      mp_msg(MSGT_GLOBAL, MSGL_INFO, "ANS_TIME_POSITION=%.1f\n", pos);
     } break;
     case MP_CMD_SWITCH_AUDIO : {
         int v = demuxer_switch_audio(demuxer, cmd->args[0].v.i);
