@@ -96,7 +96,7 @@ static char help_text[]=
 "    oder probiere -framedrop!\n"\
 "- Langsame CPU\n"\
 "  - Versuche nicht, DVDs/groﬂe DivX-Filme auf langsamen CPUs abzuspielen.\n"\
-"    Probiere Optionen von -lavdopts, z.B.\n"\
+"    Probiere Optionen von lavdopts, z.B.\n"\
 "        -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
 "- Defekte Datei\n"\
 "  - Versuche verschiedene Kombinationen von: -nobps -ni -forceidx -mc 0.\n"\
