@@ -4,7 +4,7 @@
 // Alexander Strasser <eclipse7@gmx.net>
 // Sebastian Krämer <mplayer@skraemer.de>
 
-// In synch with rev 1.164
+// In synch with rev 1.175
 
 // ========================= MPlayer help ===========================
 
@@ -96,7 +96,8 @@ static char help_text[]=
 "    oder probiere -framedrop!\n"\
 "- Langsame CPU\n"\
 "  - Versuche nicht, DVDs/große DivX-Filme auf langsamen CPUs abzuspielen.\n"\
-"    Probiere -hardframedrop.\n"\
+"    Probiere Optionen von -lavdopts, z.B.\n"\
+"        -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
 "- Defekte Datei\n"\
 "  - Versuche verschiedene Kombinationen von: -nobps -ni -forceidx -mc 0.\n"\
 "- Für die Wiedergabe von langsamen Medien (NFS/SMB, DVD, VCD usw)\n"\
@@ -211,7 +212,7 @@ static char help_text[]=
 #define MSGTR_NoVideoEncoderSelected "\nKein Videoencoder (-ovc) ausgewählt. \nWähle einen aus (siehe -ovc help).\n"
 #define MSGTR_CannotOpenOutputFile "Kann Ausgabedatei '%s' nicht öffnen.\n"
 #define MSGTR_EncoderOpenFailed "Öffnen des Encoders fehlgeschlagen.\n"
-#define MSGTR_ForcingOutputFourcc "Erzwinge Output-Fourcc %x  [%.4s].\n"
+#define MSGTR_ForcingOutputFourcc "Erzwinge Output-Fourcc %x [%.4s].\n"
 #define MSGTR_ForcingOutputAudiofmtTag "Erzwinge Audioformatkennzeichnung 0x%x in der Ausgabe.\n"
 #define MSGTR_WritingAVIHeader "Schreibe AVI-Header...\n"
 #define MSGTR_DuplicateFrames "\n%d doppelte(r) Frame(s)!\n"
@@ -219,8 +220,8 @@ static char help_text[]=
 #define MSGTR_ResolutionDoesntMatch "\nNeue Videodatei hat eine andere Auflösung oder anderen Farbraum als die vorige.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAlle Videodateien müssen für -ovc copy identische fps, Auflösung und Codec haben.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAlle Videodateien müssen für -oac copy identischen Audiocodec und Format haben.\n"
-#define MSGTR_NoSpeedWithFrameCopy "WARNUNG: Die korrekte Funktion von -speed kann zusammen mit -oac copy nicht garantiert werden!\n"\
-"Das Endergebnis könnte defekt sein!\n"
+#define MSGTR_NoSpeedWithFrameCopy "WARNUNG: Korrektes Funktionieren von -speed kann zusammen mit -oac copy nicht garantiert werden!\n"\
+"Das Ergebnis der Encodierung könnte defekt sein!\n"
 #define MSGTR_ErrorWritingFile "%s: Fehler beim Schreiben der Datei.\n"
 #define MSGTR_WritingAVIIndex "\nSchreibe AVI-Index...\n"
 #define MSGTR_FixupAVIHeader "Korrigiere AVI-Header...\n"
@@ -361,7 +362,7 @@ static char help_text[]=
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, konnte Encoder für Codec %s nicht finden.\n"
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, konnte Kontext nicht zuordnen!\n"
 #define MSGTR_CouldntOpenCodec "Konnte Codec %s nicht öffnen, br=%d\n"
-#define MSGTR_CantCopyAudioFormat "Audioformat 0x%x ist nicht mit '-oac copy' kompatibel, versuche bitte stattdessen '-oac pcm' oder benutze '-fafmttag' um ein anderes Format zu erzwingen.\n"
+#define MSGTR_CantCopyAudioFormat "Audioformat 0x%x ist nicht mit '-oac copy' kompatibel. Versuche bitte stattdessen '-oac pcm' oder benutze '-fafmttag', um ein anderes Format zu erzwingen.\n"
 
 // cfg-mencoder.h:
 
@@ -541,8 +542,8 @@ static char help_text[]=
 #define MSGTR_DemuxerInfoAlreadyPresent "Demuxerinfo %s schon vorhanden.\n"
 #define MSGTR_ClipInfo "Clip-Info: \n"
 
-#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30fps NTSC-Inhalt erkannt, wechsele Framerate.\n"
-#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24fps progressiven NTSC-Inhalt erkannt, wechsele Framerate.\n"
+#define MSGTR_LeaveTelecineMode "\ndemux_mpg: 30000/1001fps NTSC-Inhalt erkannt, wechsele Framerate.\n"
+#define MSGTR_EnterTelecineMode "\ndemux_mpg: 24000/1001fps progressiven NTSC-Inhalt erkannt, wechsele Framerate.\n"
 
 // dec_video.c & dec_audio.c:
 #define MSGTR_CantOpenCodec "Konnte Codec nicht öffnen.\n"
@@ -618,10 +619,12 @@ static char help_text[]=
 #define MSGTR_OtherSelect "Wähle..."
 #define MSGTR_AudioFileSelect "Wähle externen Audiokanal..."
 #define MSGTR_FontSelect "Wähle Schrift..."
+// Beachte: Wenn du MSGTR_PlayList änderst, überprüfe bitte, ob der Eintrag noch zu MSGTR_MENU_PlayList passt.
 #define MSGTR_PlayList "Playlist"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Skin-Browser"
 #define MSGTR_Network "Netzwerk-Streaming..."
+// Beachte: Wenn du MSGTR_Preferences änderst, überprüfe bitte, ob der Eintrag noch zu MSGTR_MENU_Preferences passt.
 #define MSGTR_Preferences "Einstellungen"
 #define MSGTR_AudioPreferences "Audio-Treiberkonfiguration"
 #define MSGTR_NoMediaOpened "Keine Medien geöffnet."
@@ -706,7 +709,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Kapitel %2d"
 #define MSGTR_MENU_AudioLanguages "Audio-Sprachen"
 #define MSGTR_MENU_SubtitleLanguages "Untertitel-Sprachen"
+#define MSGTR_MENU_PlayList MSGTR_PlayList
 #define MSGTR_MENU_SkinBrowser "Skinbrowser"
+#define MSGTR_MENU_Preferences MSGTR_Preferences
 #define MSGTR_MENU_Exit "Beenden..."
 #define MSGTR_MENU_Mute "Stummschaltung"
 #define MSGTR_MENU_Original "Original"
@@ -716,7 +721,9 @@ static char help_text[]=
 #define MSGTR_MENU_VideoTrack "Videospur"
 
 // --- equalizer
+// Beachte: Wenn du MSGTR_EQU_Audio änderst, überprüfe bitte, ob der Eintrag noch zu MSGTR_PREFERENCES_Audio passt.
 #define MSGTR_EQU_Audio "Audio"
+// Beachte: Wenn du MSGTR_EQU_Video änderst, überprüfe bitte, ob der Eintrag noch zu MSGTR_PREFERENCES_Video passt.
 #define MSGTR_EQU_Video "Video"
 #define MSGTR_EQU_Contrast "Kontrast: "
 #define MSGTR_EQU_Brightness "Helligkeit: "
@@ -743,8 +750,11 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "Verzeichnisbaum"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
+#define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
 #define MSGTR_PREFERENCES_SubtitleOSD "Untertitel & OSD"
 #define MSGTR_PREFERENCES_Codecs "Codecs & Demuxer"
+// Beachte: Wenn du MSGTR_PREFERENCES_Misc änderst, überprüfe bitte, ob der Eintrag noch zu MSGTR_PREFERENCES_FRAME_Misc passt.
 #define MSGTR_PREFERENCES_Misc "Sonstiges"
 
 #define MSGTR_PREFERENCES_None "Nichts"
@@ -789,6 +799,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & Demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
 #define MSGTR_PREFERENCES_Audio_Device "Gerät:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Mixer-Kanal:"
