@@ -431,37 +431,41 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 	return 0;
 }
 
+static uint32_t draw_image(mp_image_t *mpi) {
+  char *data = mpi->planes[0];
+  int x = mpi->x;
+  int y = mpi->y;
+  int y_max = mpi->y + mpi->h;
+  int h = slice_height ? slice_height : mpi->h;
+  if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
+    return VO_TRUE;
+  // this is not always correct, but should work for MPlayer
+  glAdjustAlignment(mpi->stride[0]);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, mpi->stride[0] / (mpi->bpp / 8));
+  for (y = mpi->y; y + h <= y_max; y += h) {
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y,
+                    mpi->w, h,
+                    gl_format, gl_type,
+                    data);
+    data += mpi->stride[0] * h;
+  }
+  if (y < y_max)
+    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, mpi->w, y_max - y,
+                    gl_format, gl_type, data);
+  return VO_TRUE;
+}
 
 static uint32_t
 draw_frame(uint8_t *src[])
 {
-unsigned int i;
-uint8_t *ImageData=src[0];
-
-  if (slice_height == 0)
-    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, image_width, image_height,
-		    gl_format, gl_type, ImageData);
-  else
-    for(i=0;i<image_height;i+=slice_height){
-      glTexSubImage2D( GL_TEXTURE_2D,  // target
-		       0,              // level
-		       0,              // x offset
-//		       image_height-1-i,  // y offset
-		       i,  // y offset
-		       image_width,    // width
-		       (i+slice_height<=image_height)?slice_height:image_height-i,              // height
-		       gl_format,
-		       gl_type,
-		       ImageData+i*image_bytes*image_width );        // *pixels
-    }
-
-	return 0; 
+  return VO_ERROR; 
 }
 
 static uint32_t
 query_format(uint32_t format)
 {
-    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW;
+    int caps = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW |
+               VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_ACCEPT_STRIDE;
     if (use_osd)
       caps |= VFCAP_OSD;
     if ((format == IMGFMT_RGB24) || (format == IMGFMT_RGBA))
@@ -532,6 +536,8 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_RESUME: return (int_pause=0);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_DRAW_IMAGE:
+    return draw_image(data);
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_ONTOP:
