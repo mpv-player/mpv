@@ -98,7 +98,7 @@ static char help_text[]=
 "  - Try a different -vo driver (-vo help for a list) or try -framedrop!\n"\
 "- Slow CPU\n"\
 "  - Don't try to play a big DVD/DivX on a slow CPU! Try some of the lavdopts,\n"\
-"    e.g. -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all."\
+"    e.g. -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
 "- Broken file\n"\
 "  - Try various combinations of -nobps -ni -forceidx -mc 0.\n"\
 "- Slow media (NFS/SMB mounts, DVD, VCD etc)\n"\
