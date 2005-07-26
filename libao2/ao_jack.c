@@ -43,15 +43,12 @@ static jack_port_t *ports[MAX_CHANS];
 static int num_ports; ///< Number of used ports == number of channels
 static jack_client_t *client;
 static float jack_latency;
+static int estimate;
 static volatile int paused = 0; ///< set if paused
 static volatile int underrun = 0; ///< signals if an underrun occured
 
-//! If this is defined try to make a more precise delay estimation. Will be slower.
-#undef JACK_ESTIMATE_DELAY
-#ifdef JACK_ESTIMATE_DELAY
-static volatile int callback_samples = 0;
-static volatile unsigned int callback_time = 0;
-#endif
+static volatile float callback_interval = 0;
+static volatile float callback_time = 0;
 
 //! size of one chunk, if this is too small MPlayer will start to "stutter"
 //! after a short time of playback
@@ -186,10 +183,15 @@ static int outputaudio(jack_nframes_t nframes, void *arg) {
       underrun = 1;
   if (paused || underrun)
     silence(bufs, nframes, num_ports);
-#ifdef JACK_ESTIMATE_DELAY
-  callback_samples = nframes;
-  callback_time = GetTimer();
-#endif
+  if (estimate) {
+    float now = (float)GetTimer() / 1000000.0;
+    float diff = callback_time + callback_interval - now;
+    if (diff < 0.002)
+      callback_time += callback_interval;
+    else
+      callback_time = now;
+    callback_interval = (float)nframes / (float)ao_data.samplerate;
+  }
   return 0;
 }
 
@@ -204,7 +206,9 @@ static void print_help ()
            "  connects MPlayer to the jack ports named myout\n"
            "\nOptions:\n"
            "  port=<port name>\n"
-           "    Connects to the given ports instead of the default physical ones\n");
+           "    Connects to the given ports instead of the default physical ones\n"
+           "  estimate\n"
+           "    Estimates the amount of data in buffers (experimental)\n");
 }
 
 static int init(int rate, int channels, int format, int flags) {
@@ -213,10 +217,12 @@ static int init(int rate, int channels, int format, int flags) {
   char client_name[40];
   opt_t subopts[] = {
     {"port", OPT_ARG_MSTRZ, &port_name, NULL},
+    {"estimate", OPT_ARG_BOOL, &estimate, NULL},
     {NULL}
   };
   int port_flags = JackPortIsInput;
   int i;
+  estimate = 1;
   if (subopt_parse(ao_subdevice, subopts) != 0) {
     print_help();
     return 0;
@@ -269,6 +275,7 @@ static int init(int rate, int channels, int format, int flags) {
   rate = jack_get_sample_rate(client);
   jack_latency = (float)(jack_port_get_total_latency(client, ports[0]) +
                          jack_get_buffer_size(client)) / (float)rate;
+  callback_interval = 0;
   buffer = (unsigned char *) malloc(BUFFSIZE);
 
   ao_data.channels = channels;
@@ -343,11 +350,11 @@ static int play(void *data, int len, int flags) {
 static float get_delay() {
   int buffered = BUFFSIZE - CHUNK_SIZE - buf_free(); // could be less
   float in_jack = jack_latency;
-#ifdef JACK_ESTIMATE_DELAY
-  unsigned int elapsed = GetTimer() - callback_time;
-  in_jack += (float)callback_samples / (float)ao_data.samplerate - (float)elapsed / 1000.0 / 1000.0;
-  if (in_jack < 0) in_jack = 0;
-#endif
+  if (estimate && callback_interval > 0) {
+    float elapsed = (float)GetTimer() / 1000000.0 - callback_time;
+    in_jack += callback_interval - elapsed;
+    if (in_jack < 0) in_jack = 0;
+  }
   return (float)buffered / (float)ao_data.bps + in_jack;
 }
 
