@@ -30,6 +30,10 @@ static vo_info_t info =
 
 LIBVO_EXTERN(gl)
 
+#ifdef GL_WIN32
+static int gl_vinfo = 0;
+static HGLRC gl_context = 0;
+#else
 static XVisualInfo *gl_vinfo = NULL;
 static GLXContext gl_context = 0;
 static int                  wsGLXAttrib[] = { GLX_RGBA,
@@ -38,6 +42,7 @@ static int                  wsGLXAttrib[] = { GLX_RGBA,
                                        GLX_BLUE_SIZE,1,
                                        GLX_DOUBLEBUFFER,
                                        None };
+#endif
 
 static int use_osd;
 static int scaled_osd;
@@ -76,11 +81,13 @@ static unsigned int slice_height = 1;
 
 static void resize(int x,int y){
   mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n",x,y);
+#ifndef GL_WIN32
   if (WinID >= 0) {
     int top = 0, left = 0, w = x, h = y;
     geometry(&top, &left, &w, &h, vo_screenwidth, vo_screenheight);
     glViewport(top, left, w, h);
   } else
+#endif
   glViewport( 0, 0, x, y );
 
   glMatrixMode(GL_PROJECTION);
@@ -198,6 +205,16 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     goto glconfig;
   }
 #endif
+#ifdef GL_WIN32
+  o_dwidth = d_width;
+  o_dheight = d_height;
+  vo_fs = flags & VOFLAG_FULLSCREEN;
+  vo_vm = flags & VOFLAG_MODESWITCHING;
+  vo_dwidth = d_width;
+  vo_dheight = d_height;
+  if (!createRenderingContext())
+    return -1;
+#else
   if (WinID >= 0) {
     Window win_tmp;
     int int_tmp;
@@ -270,6 +287,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
   vo_x11_nofs_sizepos(vo_dx, vo_dy, d_width, d_height);
   if (vo_fs ^ (flags & VOFLAG_FULLSCREEN))
     vo_x11_fullscreen();
+#endif
 
 glconfig:
   setGlWindow(&gl_vinfo, &gl_context, vo_window);
@@ -280,7 +298,11 @@ glconfig:
 
 static void check_events(void)
 {
+#ifdef GL_WIN32
+    int e=vo_w32_check_events();
+#else
     int e=vo_x11_check_events(mDisplay);
+#endif
     if(e&VO_EVENT_RESIZE) resize(vo_dwidth,vo_dheight);
     if(e&VO_EVENT_EXPOSE && int_pause) flip_page();
 }
@@ -442,7 +464,11 @@ flip_page(void)
 
 //  glFlush();
   glFinish();
+#ifdef GL_WIN32
+  SwapBuffers(vo_hdc);
+#else
   glXSwapBuffers( mDisplay,vo_window );
+#endif
  
   if (vo_fs && use_aspect)
     glClear(GL_COLOR_BUFFER_BIT);
@@ -535,7 +561,11 @@ uninit(void)
 {
   if ( !vo_config_count ) return;
   releaseGlContext(&gl_vinfo, &gl_context);
+#ifdef GL_WIN32
+  vo_w32_uninit();
+#else
   vo_x11_uninit();
+#endif
 }
 
 static opt_t subopts[] = {
@@ -606,10 +636,19 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_GUISUPPORT:
     return VO_TRUE;
   case VOCTRL_ONTOP:
+#ifdef GL_WIN32
+    vo_w32_ontop();
+#else
     vo_x11_ontop();
+#endif
     return VO_TRUE;
   case VOCTRL_FULLSCREEN:
+#ifdef GL_WIN32
+    vo_w32_fullscreen();
+    resize(vo_dwidth, vo_dheight);
+#else
     vo_x11_fullscreen();
+#endif
     return VO_TRUE;
   case VOCTRL_GET_PANSCAN:
     if (!use_aspect) return VO_NOTIMPL;

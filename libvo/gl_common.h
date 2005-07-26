@@ -55,7 +55,7 @@ void releaseGlContext(XVisualInfo **vinfo, GLXContext *context);
 extern void (APIENTRY *BindBuffer)(GLenum, GLuint);
 extern GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum); 
 extern GLboolean (APIENTRY *UnmapBuffer)(GLenum);
-extern void (APIENTRY *BufferData)(GLenum, GLsizeiptr, const GLvoid *, GLenum);
+extern void (APIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
 extern void (APIENTRY *CombinerParameterfv)(GLenum, const GLfloat *);
 extern void (APIENTRY *CombinerParameteri)(GLenum, GLint);
 extern void (APIENTRY *CombinerInput)(GLenum, GLenum, GLenum, GLenum, GLenum,

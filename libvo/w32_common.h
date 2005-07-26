@@ -11,6 +11,7 @@ extern int vo_ontop;
 
 extern int vo_init(void);
 extern void vo_w32_uninit(void);
+extern void vo_w32_ontop(void);
 extern void vo_w32_fullscreen(void);
 extern int vo_w32_check_events(void);
 extern int createRenderingContext(void);

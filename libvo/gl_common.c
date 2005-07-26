@@ -3,7 +3,7 @@
 void (APIENTRY *BindBuffer)(GLenum, GLuint);
 GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum); 
 GLboolean (APIENTRY *UnmapBuffer)(GLenum);
-void (APIENTRY *BufferData)(GLenum, GLsizeiptr, const GLvoid *, GLenum);
+void (APIENTRY *BufferData)(GLenum, intptr_t, const GLvoid *, GLenum);
 void (APIENTRY *CombinerParameterfv)(GLenum, const GLfloat *);
 void (APIENTRY *CombinerParameteri)(GLenum, GLint);
 void (APIENTRY *CombinerInput)(GLenum, GLenum, GLenum, GLenum, GLenum,
@@ -257,6 +257,10 @@ static void getFunctions() {
 }
 
 #ifdef GL_WIN32
+static void *w32gpa(const GLubyte *procName) {
+  return wglGetProcAddress(procName);
+}
+
 int setGlWindow(int *vinfo, HGLRC *context, HWND win)
 {
   int new_vinfo;
@@ -304,7 +308,7 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
       wglDeleteContext(*context);
     *context = new_context;
     *vinfo = new_vinfo;
-    getProcAddress = wglGetProcAddress;
+    getProcAddress = w32gpa;
     getFunctions();
 
     // and inform that reinit is neccessary
