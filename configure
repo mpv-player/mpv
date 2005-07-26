@@ -3960,15 +3960,14 @@ echocheck "SVGAlib"
 if test "$_svga" = auto ; then
   cat > $TMPC << EOF
 #include <vga.h>
-#include <vgagl.h>
 int main(void) { return 0; }
 EOF
   _svga=no
-  cc_check  -lvgagl -lvga $_ld_lm && _svga=yes
+  cc_check -lvga $_ld_lm && _svga=yes
 fi
 if test "$_svga" = yes ; then
   _def_svga='#define HAVE_SVGALIB 1'
-  _ld_svga="-lvgagl -lvga $_ld_lm"
+  _ld_svga="-lvga $_ld_lm"
   _vosrc="$_vosrc vo_svga.c"
   _vomodules="svga $_vomodules"
 else
