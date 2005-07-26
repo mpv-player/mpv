@@ -16,6 +16,7 @@ MPlayer (1.0)
     * OpenGL video output modules support -geometry and -wid options
     * for -vo gl manyfmts is now default (since it is a lot faster), use
       -vo gl:nomanyfmts if it does not work for you
+    * streaming textures for -vo gl, much faster if supported (use -dr)
 
     Decoders:
     * Indeo2 (RT21) support via lavc
