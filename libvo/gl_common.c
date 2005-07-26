@@ -201,7 +201,7 @@ static void *setNull(const GLubyte *s) {
   return NULL;
 }
 
-static void *(*getProcAddress)(const GLubyte *procName);
+static void *(*getProcAddress)(const GLubyte *procName) = NULL;
 
 static void getFunctions() {
   if (!getProcAddress)
@@ -326,6 +326,26 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
   *context = 0;
 }
 #else
+#if defined(__sun) || defined(__sgi)
+extern void *dlopen(const char *, int);
+#endif
+extern void *dlsym(void *, const char *);
+/**
+ * \brief find address of a linked function
+ * \param s name of function to find
+ * \return address of function or NULL if not found
+ *
+ * Copied from xine
+ */
+static void *getdladdr(const GLubyte *s) {
+#if defined(__sun) || defined(__sgi)
+  static void *handle = dlopen(NULL, RTLD_LAZY);
+  return dlsym(handle, s);
+#else
+  return dlsym(0, s);
+#endif
+}
+
 /**
  * \brief Returns the XVisualInfo associated with Window win.
  * \param win Window whose XVisualInfo is returne.
@@ -403,11 +423,12 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
     if (*vinfo)
       XFree(*vinfo);
     *vinfo = new_vinfo;
-#ifdef GLX_ARB_get_proc_address
-    getProcAddress = (void *)glXGetProcAddressARB;
-#else
-    getProcAddress = NULL;
-#endif
+    if (!getProcAddress)
+      getProcAddress = getdladdr("glXGetProcAddress");
+    if (!getProcAddress)
+      getProcAddress = getdladdr("glXGetProcAddressARB");
+    if (!getProcAddress)
+      getProcAddress = getdladdr;
     getFunctions();
 
     // and inform that reinit is neccessary
