@@ -1,4 +1,4 @@
-.\" synced with 1.1046
+.\" synced with 1.1048
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -487,15 +487,15 @@ Active le mode verbeux (plus de \-v signifie plus de verbosité).
 .
 .PD 0
 .RSs
-.IPs 0
+.IPs <nothing>
 uniquement quelques sorties informelles (par défaut)
-.IPs 1
+.IPs \-v\ \ \ 
 quelques infos basiques de débogage, entête avi, valeurs des fonctions
 (débogage de l'initialisation)
-.IPs 2
+.IPs \-v\ \-v
 affiche les index avi, entrées de tronquage, plus d'infos de débogage
 (débogage du lecteur)
-.IPs 3
+.IPs \-v\ \-v\ \-v
 affiche tout ce qui est relatif aux parseurs d'entrée (pour le débogage des
 parsers)
 .RE
@@ -8809,36 +8809,41 @@ Ajuste la qualité d'affinement de subpel.
 Ce paramètre contrôle le compromis qualité/\:vitesse lié aux décisions du
 processus d'estimation du mouvement.
 subq=5 peut augmenter jusqu'à 10% le taux de compression par rapport à subq=1.
+.PD 0
 .RSs
-1: Effectue une recherche de mouvement d'une précision fullpixel (c-à-d qu'elle
+.IPs 1
+Effectue une recherche de mouvement d'une précision fullpixel (c-à-d qu'elle
 capture les mouvements d'une trame à la suivante avec une précision d'un pixel)
 sur tous les types de macro-blocs candidats.
 Sélectionne ensuite le meilleur type.
 Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
 ce type (le plus rapide).
-.br
-2: Comme 1, mais affine au quart de pixel (un peu plus lent).
-.br
-3: Effectue une recherche de mouvement d'une précision demi pixel sur tous les
+.IPs 2
+Comme 1, mais affine au quart de pixel (un peu plus lent).
+.IPs 3
+Effectue une recherche de mouvement d'une précision demi pixel sur tous les
 types de macro-blocs candidats.
 Sélectionne ensuite le meilleur type.
 Puis affine rapidement avec une précision qu'un quart de pixel le mouvement de
 ce type.
-.br
-4: Effectue une rapide recherche de mouvement d'une précision d'un quart de
+.IPs 4
+Effectue une rapide recherche de mouvement d'une précision d'un quart de
 pixel (quarterpixel) sur tous les types de macro-blocs candidats.
 Puis termine l'affinement quarterpixel pour ce type
-.br
-5: Effectue la recherche de mouvement de la meilleure qualité sur tous les
+.IPs 5
+Effectue la recherche de mouvement de la meilleure qualité sur tous les
 types de macro-blocs candidats, avant de choisir le meilleur type.
 (par défaut)
-.br
-6: Active la sélection des macro-blocs en fonction de leur taux de distortion,
+.IPs 6
+Active la sélection des macro-blocs en fonction de leur taux de distortion,
 pour les trames-I et P (le meilleur).
-.REss
+.RE
+.PD 1
+.RS
 Ci-dessus, le terme "tous les candidats" ne signifie pas forcément tous les
 types possibles\ : 4x4, 4x8 et 8x4 ne sont essayés que si 8x8 est meilleur que
 16x16.
+.RE
 .
 .TP
 .B (no)chroma_me
@@ -8875,19 +8880,21 @@ activera le découpage en trache, sans le multithreading.
 .TP
 .B log=<-1\-3>
 Ajuste la quantité d'informations de log à afficher à l'écran.
-.RSs
--1: aucune
-.br
- 0: Affiche uniquement les erreurs.
-.br
- 1: avertissements
-.br
- 2: PSNR et autres analyses statistiques lorsque l'encodage se termine
+.PD 0
+.IPs "-1"
+aucune
+.IPs " 0"
+Affiche uniquement les erreurs.
+.IPs " 1"
+avertissements
+.IPs " 2"
+PSNR et autres analyses statistiques lorsque l'encodage se termine
 (par défaut)
-.br
- 3: PSNR, paramètres de quantification, type de trame, taille, et autres
+.IPs " 3"
+PSNR, paramètres de quantification, type de trame, taille, et autres
 statistiques sur chaque trame
-.REss
+.RE
+.PD 1
 .
 .TP
 .B (no)psnr
