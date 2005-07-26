@@ -485,6 +485,7 @@ static uint32_t get_image(mp_image_t *mpi) {
     if (!err_shown)
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] extensions missing for dr\n"
                                 "Expect a _major_ speed penalty\n");
+    err_shown = 1;
     return VO_FALSE;
   }
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
@@ -498,6 +499,13 @@ static uint32_t get_image(mp_image_t *mpi) {
   }
   mpi->planes[0] = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  if (mpi->planes[0] == NULL) {
+    if (!err_shown)
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] could not aquire buffer for dr\n"
+                                "Expect a _major_ speed penalty\n");
+    err_shown = 1;
+    return VO_FALSE;
+  }
   mpi->flags |= MP_IMGFLAG_DIRECT;
   return VO_TRUE;
 }
