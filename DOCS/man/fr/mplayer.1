@@ -4922,6 +4922,22 @@ rend l'image plus lisse mais plus floue
 .RE
 .
 .TP
+.B pp7[=qp[:mode]]
+Variante du filtre spp, similaire à pp=6 avec 7 points de DCT 
+où uniquement l'échantillon du centre est utilisé après la IDCT.
+.RSs
+.IPs <qp>
+Force le paramètre de quantification (par déaut\ : 0, choisit  QP en
+fonction de la vidéo).
+.IPs <mode>
+0: fort seuillage
+.br
+1: faible seuillage (meilleur deringing, mais plus flou)
+.br
+2: seuillage moyen (par défaut, bon résulats)
+.RE
+.
+.TP
 .B qp=equation
 filtre de changement des paramètres de quantification (QP)
 .RSs
