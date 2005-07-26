@@ -1,4 +1,4 @@
-.\" synced with 1.1048
+.\" synced with 1.1051
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2031,6 +2031,9 @@ sortie audio par JACK (Jack Audio Connection Kit)
 .RSs
 .IPs port=<nom_port>
 Se connecte aux ports <nom_port> (par défaut\ : ports physiques).
+.IPs (no)estimate
+Estime le délai audio, supposé réduire les à-coups lors de la lecture
+vidéo (par défaut\ : activé).
 .RE
 .PD 1
 .
@@ -2814,11 +2817,16 @@ Utilise svga avec VIDIX.
 .
 .TP
 .B gl\ \ \ \ \ 
-Pilote de sortie vidéo OpenGL.
-Version assez dépouillée, nécessitant que la taille de la vidéo soit
-plus petite que la taille maximale d'un texture permise par votre
-implémentation d'OpenGL.
-Faite pour fonctionner même avec l'implémentation la plus simple l'OpenGL.
+Pilote de sortie vidéo OpenGL, version assez dépouillée.
+La taille de la vidéo doit être plus petite que la taille maximale
+d'un texture permise par votre implémentation d'OpenGL.
+Faite pour fonctionner même avec l'implémentation la plus simple
+l'OpenGL, mais utilise des extensions récentes, permettant de gérer
+plus d'espaces de couleur et de direct rendering.
+Veuillez utiliser \-dr si cela fonctionne avec votre implémentation
+OpenGL, car pour de hautes résolutions, cela permet un affichage
+.B beaucoup
+plus rapide.
 .PD 0
 .RSs
 .IPs (no)manyfmts
@@ -2843,6 +2851,16 @@ et en mode plein-écran, s'affichera dans les bandes noires.
 Active ou désactive la gestion du redimensionnement du ratio d'aspect et
 le "pan-and-scan" (par défaut\ : activé).
 Sa désactivation peut économiser un peu de temps processeur.
+.IPs rectangle=<0,1,2>
+Défini l'utilisation des textures rectangulaires (économise de la RAM
+vidéo RAM, mais est souvent plus lent).
+.RSss
+0: Utilise des textures de taille d'une puissance de deux (par défaut).
+.br
+1: Utilise texture_rectangle.
+.br
+2: Utilise texture_non_puissance_de_deux.
+.REss
 .RE
 .PD 1
 .
