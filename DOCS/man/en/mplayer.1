@@ -1893,6 +1893,9 @@ audio output through JACK (Jack Audio Connection Kit)
 .RSs
 .IPs port=<name>
 Connects to the ports with the given name (default: physical ports).
+.IPs (no)estimate
+Estimate the audio delay, supposed to make the video playback smoother
+(default: enabled).
 .RE
 .PD 1
 .
@@ -2687,7 +2690,7 @@ Disabling might increase speed.
 .IPs rectangle=<0,1,2>
 Select usage of rectangular textures (saves video RAM, but often slower).
 .RSss
-0: Use power-of-two textures.
+0: Use power-of-two textures (default).
 .br
 1: Use texture_rectangle.
 .br
