@@ -2653,14 +2653,16 @@ Use svga with VIDIX.
 .
 .TP
 .B gl\ \ \ \ \ 
-OpenGL video output driver.
-Simple version, video size must be smaller than
+OpenGL video output driver, simple version.
+Video size must be smaller than
 the maximum texture size of your OpenGL implementation.
-Intended to work even with the most simple OpenGL implementations.
-But makes also use of newer extensions, allowing to support more
-color spaces and DirectRendering.
-Please use -dr if it works with your OpenGL implementations, since
-for higher resolutions this provides a _big_ speedup.
+Intended to work even with the most basic OpenGL implementations,
+but also makes use of newer extensions, allowing to support more
+color spaces and direct rendering.
+Please use \-dr if it works with your OpenGL implementations,
+since for higher resolutions this provides a
+.B big
+speedup.
 .PD 0
 .RSs
 .IPs (no)manyfmts
@@ -2683,10 +2685,14 @@ borders in fullscreen mode.
 Enable or disable aspect scaling and pan-and-scan support (default: enabled).
 Disabling might increase speed.
 .IPs rectangle=<0,1,2>
-Select if rectangular textures should be used (save video RAM, but often slower)
-0: use power-of-two textures
-1: use texture_rectangle
-2: use texture_non_power_of_two
+Select usage of rectangular textures (saves video RAM, but often slower).
+.RSss
+0: Use power-of-two textures.
+.br
+1: Use texture_rectangle.
+.br
+2: Use texture_non_power_of_two.
+.REss
 .RE
 .PD 1
 .
