@@ -4667,6 +4667,21 @@ while higher values make the image smoother but also blurrier (default:
 .RE
 .
 .TP
+.B pp7[=qp[:mode]]
+Variant of the spp filter, similar to spp=6 with 7 point DCT where
+only the center sample is used after IDCT.
+.RSs
+.IPs <qp>
+Force quantization parameter (default: 0, use QP from video).
+.IPs <mode>
+0: hard thresholding
+.br
+1: soft thresholding (better deringing, but blurrier)
+.br
+2: medium thresholding (default, good results)
+.RE
+.
+.TP
 .B qp=equation
 quantization parameter (QP) change filter
 .RSs
