@@ -2657,6 +2657,10 @@ OpenGL video output driver.
 Simple version, video size must be smaller than
 the maximum texture size of your OpenGL implementation.
 Intended to work even with the most simple OpenGL implementations.
+But makes also use of newer extensions, allowing to support more
+color spaces and DirectRendering.
+Please use -dr if it works with your OpenGL implementations, since
+for higher resolutions this provides a _big_ speedup.
 .PD 0
 .RSs
 .IPs (no)manyfmts
@@ -2678,6 +2682,11 @@ borders in fullscreen mode.
 .IPs (no)aspect
 Enable or disable aspect scaling and pan-and-scan support (default: enabled).
 Disabling might increase speed.
+.IPs rectangle=<0,1,2>
+Select if rectangular textures should be used (save video RAM, but often slower)
+0: use power-of-two textures
+1: use texture_rectangle
+2: use texture_non_power_of_two
 .RE
 .PD 1
 .
