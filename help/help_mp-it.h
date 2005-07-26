@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.173 (still missing some messages)
+// Updated to help_mp-en.h v1.176
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -94,8 +94,9 @@ static char help_text[]=
 "  - Puoi anche provare con diversi valori di -autosync, 30 e' un buon inizio.\n"\
 "- Output video lento\n"\
 "  - Prova un altro -vo driver (-vo help per la lista) o prova con -framedrop!\n"\
-"- Cpu lenta\n"\
-"  - Non provare a guardare grossi DVD/DivX su cpu lente! Prova -hardframedrop.\n"\
+"- CPU lenta\n"\
+"  - Non provare a guardare grossi DVD/DivX su CPU lente! Prova qualche opzione\n"\
+"di lavdopts, per es.  -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
 "- File rovinato\n"\
 "  - Prova varie combinazioni di -nobps -ni -forceidx -mc 0.\n"\
 "- Dispositivo lento (punti di mount NFS/SMB, DVD, VCD etc)\n"\
@@ -162,6 +163,7 @@ static char help_text[]=
 #define MSGTR_IncreaseRTCMaxUserFreq "Prova aggiungendo \"echo %lu > /proc/sys/dev/rtc/max-user-freq\"\n"\
 "agli script di avvio del sistema.\n"
 #define MSGTR_LinuxRTCInitErrorPieOn "Linux RTC: errore di init in ioctl (rtc_pie_on): %s\n"
+#define MSGTR_UsingTimingType "Uso la temporizzazione %s.\n"
 #define MSGTR_MenuInitialized "Menu inizializzato: %s\n"
 #define MSGTR_MenuInitFailed "Inizializzazione Menu fallita.\n"
 #define MSGTR_Getch2InitializedTwice "WARNING: getch2_init chiamata 2 volte!\n"
@@ -170,6 +172,23 @@ static char help_text[]=
 #define MSGTR_CantOpenLibmenuFilterWithThisRootMenu "Non riesco ad aprire il filtro video libmenu col menu base %s.\n"
 #define MSGTR_AudioFilterChainPreinitError "Errore nel pre-init della sequenza di filtri audio!\n"
 #define MSGTR_LinuxRTCReadError "Linux RTC: errore di lettura: %s\n"
+// TODO: softsleep underflow ???
+#define MSGTR_SoftsleepUnderflow "Attenzione! Softsleep underflow!\n"
+#define MSGTR_DvdnavNullEvent "DVDNAV Evento NULL?!\n"
+#define MSGTR_DvdnavHighlightEventBroken "DVDNAV Evento: Evento Highlight bacato\n"
+#define MSGTR_DvdnavEvent "DVDNAV Evento: %s\n"
+#define MSGTR_DvdnavHighlightHide "DVDNAV Evento: Nascondo Highlight\n"
+#define MSGTR_DvdnavStillFrame "######################################## DVDNAV Evento: Still Frame: %d sec(s)\n"
+#define MSGTR_DvdnavNavStop "DVDNAV Evento: Nav Stop\n"
+#define MSGTR_DvdnavNavNOP "DVDNAV Evento: Nav NOP\n"
+#define MSGTR_DvdnavNavSpuStreamChangeVerbose "DVDNAV Evento: Nav Cambio Flusso SPU: phys: %d/%d/%d logico: %d\n"
+#define MSGTR_DvdnavNavSpuStreamChange "DVDNAV Evento: Nav Cambio Flusso SPU: phys: %d logico: %d\n"
+#define MSGTR_DvdnavNavAudioStreamChange "DVDNAV Evento: Nav Cambio Flusso Audio: phys: %d logico: %d\n"
+#define MSGTR_DvdnavNavVTSChange "DVDNAV Evento: Nav Cambio VTS\n"
+#define MSGTR_DvdnavNavCellChange "DVDNAV Evento: Nav Cambio Cella\n"
+#define MSGTR_DvdnavNavSpuClutChange "DVDNAV Evento: Nav Cambio CLUT SPU\n"
+#define MSGTR_DvdnavNavSeekDone "DVDNAV Evento: Nev Ricerca eseguita\n"
+#define MSGTR_MenuCall "Chiamata a Menu\n"
 
 #define MSGTR_EdlCantUseBothModes "Non puoi usare -edl e -edlout contemporanemente.\n"
 #define MSGTR_EdlOutOfMem "Non posso allocare abbastanza memoria per i dati EDL.\n"
@@ -180,9 +199,8 @@ static char help_text[]=
 #define MSGTR_EdlNOsh_video "Non posso usare EDL senza video, disabilitate.\n"
 #define MSGTR_EdlNOValidLine "Linea EDL invalida: %s\n"
 #define MSGTR_EdlBadlyFormattedLine "Linea EDL scritta male [%d]: la ignoro.\n"
-// TODO: overlap = ?
 #define MSGTR_EdlBadLineOverlap "L'ultimo stop era a [%f]; lo start successivo a [%f].\n"\
-"Le indicazioni devono essere cronologiche, non posso overlap. Ignoro.\n"
+"Le indicazioni devono essere in ordine, non posso sovrapporle. Ignoro.\n"
 #define MSGTR_EdlBadLineBadStop "Lo stop deve essere dopo il tempo di start.\n"
 
 // mencoder.c:
@@ -212,14 +230,19 @@ static char help_text[]=
 #define MSGTR_VideoStreamResult "\nFlusso video: %8.3f kbit/s  (%d bps)  dim.: %d bytes  %5.3f sec   %d frames\n"
 #define MSGTR_AudioStreamResult "\nFlusso audio: %8.3f kbit/s  (%d bps)  dim.: %d bytes  %5.3f secondi\n"
 #define MSGTR_OpenedStream "successo: formato: %d  dati: 0x%X - 0x%x\n"
+#define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n"
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d bps=%ld sample-%ld)\n"
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio selezionato\n"
 #define MSGTR_MP3AudioSelected "MP3 audio selezionato\n"
 #define MSGTR_CannotAllocateBytes "Non posso allocare %d bytes\n"
 #define MSGTR_SettingAudioDelay "Setto l'AUDIO DELAY a %5.3f\n"
 #define MSGTR_SettingAudioInputGain "Setto l'audio input gain a %f\n"
+#define MSGTR_LamePresetEquals "\npreset=%s\n\n"
 #define MSGTR_LimitingAudioPreload "Limito il preload audio a 0.4s\n"
 #define MSGTR_IncreasingAudioDensity "Aumento la densità audio a 4\n"
 #define MSGTR_ZeroingAudioPreloadAndMaxPtsCorrection "Forzo il preload audio a 0, max pts correction a 0\n"
+#define MSGTR_CBRAudioByterate "\n\nCBR audio: %ld bytes/sec, %d bytes/blocco\n"
+#define MSGTR_LameVersion "LAME versione %s (%s)\n\n"
 #define MSGTR_InvalidBitrateForLamePreset ""\
 "Errore: il bitrate specificato è fuori gamma per questo Preset\n"\
 "\n"\
@@ -334,9 +357,13 @@ static char help_text[]=
 #define MSGTR_ForcingInputFPS "i fps saranno interpretati come %5.2f\n"
 #define MSGTR_RawvideoDoesNotSupportAudio "Il formato output RAWVIDEO non supporta l'audio - lo disabilito\n"
 #define MSGTR_DemuxerDoesntSupportNosound "Questo demuxer non supporta ancora -nosound.\n"
+#define MSGTR_MemAllocFailed "allocazione memoria non riuscita"
 #define MSGTR_NoMatchingFilter "Non trovo il filtro/il formato ao corrispondente!\n"
+#define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, compilatore C bacato?\n"
 #define MSGTR_NoLavcAudioCodecName "Audio LAVC, Manca il nome del codec!\n"
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, Non trovo l'encoder per il codec %s\n"
+// TODO: allocate context = allocare il contesto ?? e' giusto ???
+#define MSGTR_CouldntAllocateLavcContext "Audio LAVC, non posso allocare il contesto!\n"
 #define MSGTR_CouldntOpenCodec "Non posso aprire il codec %s, br=%d\n"
 #define MSGTR_CantCopyAudioFormat "Il formato audio 0x%x è incompatible con '-oac copy', prova invece '-oac pcm' o usa '-fafmttag' per forzare.\n"
 
@@ -404,9 +431,17 @@ static char help_text[]=
 #define MSGTR_CodecNeedsDLL "\nil codec(%s) abbisogna di una 'dll'!\n"
 #define MSGTR_CodecNeedsOutfmt "\nil codec(%s) abbisogna di un 'outfmt'!\n"
 #define MSGTR_CantAllocateComment "Non riesco ad allocare memoria per il commento."
+#define MSGTR_GetTokenMaxNotLessThanMAX_NR_TOKEN "get_token(): max >= MAX_MR_TOKEN!"
 #define MSGTR_ReadingFile "Leggo %s: "
 #define MSGTR_CantOpenFileError "Non posso aprire '%s': %s\n"
+#define MSGTR_CantGetMemoryForLine "Non posso aver la memoria per 'line': %s\n"
+#define MSGTR_CantReallocCodecsp "Non posso riallocare '*codecsp': %s\n"
 #define MSGTR_CodecNameNotUnique "Il nome codec '%s' non è univoco."
+#define MSGTR_CantStrdupName "Non posso far strdup -> 'name': %s\n"
+#define MSGTR_CantStrdupInfo "Non posso far strdup -> 'info': %s\n"
+#define MSGTR_CantStrdupDriver "Non posso far strdup -> 'driver': %s\n"
+#define MSGTR_CantStrdupDLL "Non posso far strdup -> 'dll': %s"
+#define MSGTR_AudioVideoCodecTotals "%d audio & %d video codecs\n"
 #define MSGTR_CodecDefinitionIncorrect "Il codec non è correttamente definito."
 #define MSGTR_OutdatedCodecsConf "Il codecs.conf è troppo vecchio/incompatibile con questa versione di MPlayer!"
 
@@ -639,6 +674,7 @@ static char help_text[]=
 #define MSGTR_SKIN_SKINCFG_SkinNotFound "Skin non trovata (%s).\n"
 #define MSGTR_SKIN_SKINCFG_SelectedSkinNotFound "Skin scelta ( %s ) not trovata, provo con la 'default'...\n"
 #define MSGTR_SKIN_SKINCFG_SkinCfgReadError "Errore nella lettura del file di configurazione della skin (%s).\n"
+#define MSGTR_SKIN_LABEL "Skins:"
 
 // --- gtk menus
 #define MSGTR_MENU_AboutMPlayer "Informazione su MPlayer"
@@ -672,7 +708,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "Capitolo %2d"
 #define MSGTR_MENU_AudioLanguages "Lingua dell'audio"
 #define MSGTR_MENU_SubtitleLanguages "Lingua dei sottotitoli"
+#define MSGTR_MENU_PlayList MSGTR_PlayList
 #define MSGTR_MENU_SkinBrowser "Ricerca skin"
+#define MSGTR_MENU_Preferences MSGTR_Preferences
 #define MSGTR_MENU_Exit "Uscita..."
 #define MSGTR_MENU_Mute "Muto"
 #define MSGTR_MENU_Original "Originale"
@@ -682,6 +720,10 @@ static char help_text[]=
 #define MSGTR_MENU_VideoTrack "Traccia video"
 
 // --- equalizer
+// Note: If you change MSGTR_EQU_Audio please see if it still fits MSGTR_PREFERENCES_Audio
+#define MSGTR_EQU_Audio "Audio"
+// Note: If you change MSGTR_EQU_Video please see if it still fits MSGTR_PREFERENCES_Video
+#define MSGTR_EQU_Video "Video"
 #define MSGTR_EQU_Contrast "Contrasto: "
 #define MSGTR_EQU_Brightness "Luminosità: "
 #define MSGTR_EQU_Hue "Tonalità: "
@@ -707,6 +749,8 @@ static char help_text[]=
 #define MSGTR_PLAYLIST_DirectoryTree "albero delle directory"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
+#define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
 #define MSGTR_PREFERENCES_Misc "Varie"
 #define MSGTR_PREFERENCES_None "Nessuno"
 #define MSGTR_PREFERENCES_DriverDefault "Driver predefinito"
@@ -751,6 +795,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Postprocessing"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec e demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Cache"
+#define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
 #define MSGTR_PREFERENCES_Audio_Device "Dispositivo:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Canale mixer:"
@@ -939,6 +984,7 @@ static char help_text[]=
 #define MSGTR_AO_OSS_CantReopen "[AO OSS]\nErrore fatale: *** NON POSSO RIAPRIRE / RESETTARE IL DEVICE AUDIO *** %s\n"
 
 // ao_arts.c
+#define MSGTR_AO_ARTS_CantInit "[AO ARTS] %s\n"
 #define MSGTR_AO_ARTS_ServerConnect "[AO ARTS] Connesso al server del suono.\n"
 #define MSGTR_AO_ARTS_CantOpenStream "[AO ARTS] Non posso apire un flusso.\n"
 #define MSGTR_AO_ARTS_StreamOpen "[AO ARTS] Flusso aperto.\n"
@@ -950,6 +996,7 @@ static char help_text[]=
 
 // ao_esd.c
 #define MSGTR_AO_ESD_CantOpenSound "[AO ESD] esd_open_sound fallito: %s\n"
+#define MSGTR_AO_ESD_LatencyInfo "[AO ESD] latenza: [server: %0.2fs, net: %0.2fs] (scarto %0.2fs)\n"
 #define MSGTR_AO_ESD_CantOpenPBStream "[AO ESD] fallimento nell'aprire il flusso di riproduzione esd: %s\n"
 
 // ao_mpegpes.c
@@ -958,22 +1005,31 @@ static char help_text[]=
 #define MSGTR_AO_MPEGPES_UnsupSamplerate "[AO MPEGPES] %d Hz non supportati, prova con resample...\n"
 
 // ao_pcm.c
+#define MSGTR_AO_PCM_FileInfo "[AO PCM] File: %s (%s)\nPCM: Samplerate: %iHz Canali: %s Formato %s\n"
 #define MSGTR_AO_PCM_HintInfo "[AO PCM] Info: un dump più veloce si ottiene con -vc dummy -vo null\nPCM: Info: per scrivere files WAVE usa -waveheader (default).\n"
 #define MSGTR_AO_PCM_CantOpenOutputFile "[AO PCM] Non posso aprire %s in scrittura!\n"
 
 // ao_sdl.c
+#define MSGTR_AO_SDL_INFO "[AO SDL] Samplerate: %iHz Canali: %s Formato %s\n"
 #define MSGTR_AO_SDL_DriverInfo "[AO SDL] Uso il driver audio %s.\n"
 #define MSGTR_AO_SDL_UnsupportedAudioFmt "[AO SDL] Formato audio non supportato: 0x%x.\n"
 #define MSGTR_AO_SDL_CantInit "[AO SDL] Inizializzazione del SDL fallita: %s\n"
 #define MSGTR_AO_SDL_CantOpenAudio "[AO SDL] Non posso aprire l'audio: %s\n"
 
 // ao_sgi.c
+#define MSGTR_AO_SGI_INFO "[AO SGI] control.\n"
+#define MSGTR_AO_SGI_InitInfo "[AO SGI] init: Samplerate: %iHz Canali: %s Formato %s\n"
 #define MSGTR_AO_SGI_InvalidDevice "[AO SGI] play: dispositivo non valido.\n"
 #define MSGTR_AO_SGI_CantSetParms_Samplerate "[AO SGI] init: setparams fallito: %s\nNon posso impostare il samplerate voluto.\n"
 #define MSGTR_AO_SGI_CantSetAlRate "[AO SGI] init: AL_RATE non è stato accettato dalla risorsa.\n"
 #define MSGTR_AO_SGI_CantGetParms "[AO SGI] init: getparams fallito: %s\n"
 #define MSGTR_AO_SGI_SampleRateInfo "[AO SGI] init: il samplerate ora è %lf (la frequenza voluta è %lf)\n"
+#define MSGTR_AO_SGI_InitConfigError "[AO SGI] init: %s\n"
 #define MSGTR_AO_SGI_InitOpenAudioFailed "[AO SGI] init: Non posso apire il canale audio: %s\n"
+#define MSGTR_AO_SGI_Uninit "[AO SGI] uninit: ...\n"
+#define MSGTR_AO_SGI_Reset "[AO SGI] reset: ...\n"
+#define MSGTR_AO_SGI_PauseInfo "[AO SGI] audio_pause: ...\n"
+#define MSGTR_AO_SGI_ResumeInfo "[AO SGI] audio_resume: ...\n"
 
 // ao_sun.c
 #define MSGTR_AO_SUN_RtscSetinfoFailed "[AO SUN] rtsc: SETINFO fallito.\n"
@@ -995,8 +1051,8 @@ static char help_text[]=
 #define MSGTR_AO_ALSA5_CantSetChan "[AO ALSA5] alsa-init: errore nell'impostazione canale: %s\n"
 #define MSGTR_AO_ALSA5_ChanPrepareError "[AO ALSA5] alsa-init: preparazione del canale: %s\n"
 // TODO: drain, flush = ?
-#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: errore drain riproduzione: %s\n"
-#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: errore flush riproduzione: %s\n"
+#define MSGTR_AO_ALSA5_DrainError "[AO ALSA5] alsa-uninit: errore 'drain' riproduzione: %s\n"
+#define MSGTR_AO_ALSA5_FlushError "[AO ALSA5] alsa-uninit: errore 'flush' riproduzione: %s\n"
 #define MSGTR_AO_ALSA5_PcmCloseError "[AO ALSA5] alsa-uninit: errore chiusura pcm: %s\n"
 #define MSGTR_AO_ALSA5_ResetDrainError "[AO ALSA5] alsa-reset: errore drain riproduzione: %s\n"
 #define MSGTR_AO_ALSA5_ResetFlushError "[AO ALSA5] alsa-reset: errore flush riproduzione: %s\n"
