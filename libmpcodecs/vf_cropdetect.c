@@ -138,11 +138,20 @@ if(++vf->priv->fno>2){	// ignore first 2 frames - they may be empty
     return vf_next_put_image(vf,dmpi);
 }
 
+static int query_format(struct vf_instance_s* vf, unsigned int fmt) {
+  switch(fmt) {
+    // the default limit value works only right with YV12 right now.
+    case IMGFMT_YV12:
+      return vf_next_query_format(vf, fmt);
+  }
+  return 0;
+}
 //===========================================================================//
 
 static int open(vf_instance_t *vf, char* args){
     vf->config=config;
     vf->put_image=put_image;
+    vf->query_format=query_format;
     vf->priv=malloc(sizeof(struct vf_priv_s));
     vf->priv->limit=24; // should be option
     vf->priv->round = 0;
