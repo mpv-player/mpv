@@ -51,7 +51,7 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
     int port = stream->streaming_ctrl->url->port;
 
     // Is protocol mms or mmsu?
-    if (!strncasecmp(proto, "mmsu", 4) || !strncasecmp(proto, "mms", 3))
+    if (!strcasecmp(proto, "mmsu") || !strcasecmp(proto, "mms"))
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/UDP...\n");
 		//fd = asf_mmsu_streaming_start( stream );
@@ -61,7 +61,7 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
 	}
 
     //Is protocol mms or mmst?
-    if (!strncasecmp(proto, "mmst", 4) || !strncasecmp(proto, "mms", 3))
+    if (!strcasecmp(proto, "mmst") || !strcasecmp(proto, "mms"))
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/TCP...\n");
 		fd = asf_mmst_streaming_start( stream );
@@ -72,8 +72,8 @@ static int asf_streaming_start( stream_t *stream, int *demuxer_type) {
 	}
 
     //Is protocol http, http_proxy, or mms? 
-    if (!strncasecmp(proto, "http_proxy", 10) || !strncasecmp(proto, "http", 4) ||
-	!strncasecmp(proto, "mms", 3) || !strncasecmp(proto, "mmshttp", 7))
+    if (!strcasecmp(proto, "http_proxy") || !strcasecmp(proto, "http") ||
+	!strcasecmp(proto, "mms") || !strcasecmp(proto, "mmshttp"))
     {
 		mp_msg(MSGT_NETWORK,MSGL_V,"Trying ASF/HTTP...\n");
 		fd = asf_http_streaming_start( stream, demuxer_type );
