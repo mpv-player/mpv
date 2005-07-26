@@ -8352,33 +8352,36 @@ Adjust subpel refinement quality.
 This parameter controls quality versus speed tradeoffs involved in the motion
 estimation decision process.
 subq=5 can compress up to 10% better than subq=1.
+.PD 0
 .RSs
-1: Runs fullpixel precision motion estimation on all candidate
+.IPs 1
+Runs fullpixel precision motion estimation on all candidate
 macroblock types.
 Then selects the best type.
 Then refines the motion of that type to fast quarterpixel precision (fastest).
-.br
-2: As 1, but uses a slower quarterpixel refinement.
-.br
-3: Runs halfpixel precision motion estimation on all candidate macroblock
-types.
+.IPs 2
+As 1, but uses a slower quarterpixel refinement.
+.IPs 3
+Runs halfpixel precision motion estimation on all candidate macroblock types.
 Then selects the best type.
 Then refines the motion of that type to quarterpixel precision.
-.br
-4: Runs fast quarterpixel precision motion estimation on all candidate
+.IPs 4
+Runs fast quarterpixel precision motion estimation on all candidate
 macroblock types.
 Then selects the best type.
 Then finishes the quarterpixel refinement for that type.
-.br
-5: Runs best quality quarterpixel precision motion estimation on all
-candidate macroblock types, before selecting the best type.
-(default)
-.br
-6: Enables rate-distortion optimization of macroblock types in
+.IPs 5
+Runs best quality quarterpixel precision motion estimation on all
+candidate macroblock types, before selecting the best type (default).
+.IPs 6
+Enables rate-distortion optimization of macroblock types in
 I- and P-frames. (best)
-.REss
+.RE
+.PD 1
+.RS
 In the above, "all candidates" doesn't exactly mean all enabled types:
 4x4, 4x8, 8x4 are tried only if 8x8 is better than 16x16.
+.RE
 .
 .TP
 .B (no)chroma_me
@@ -8410,18 +8413,20 @@ option will produce a warning and enable slices but not multithreading.
 .TP
 .B log=<-1\-3>
 Adjust the amount of logging info printed to the screen.
+.PD 0
 .RSs
--1: none
-.br
- 0: Print errors only.
-.br
- 1: warnings
-.br
- 2: PSNR and other analysis stats when the encode finishes
-(default)
-.br
- 3: PSNR, QP, frametype, size, and other stats for every frame
-.REss
+.IPs "-1"
+none
+.IPs " 0"
+Print errors only.
+.IPs " 1"
+warnings
+.IPs " 2"
+PSNR and other analysis stats when the encode finishes (default)
+.IPs " 3"
+PSNR, QP, frametype, size, and other stats for every frame
+.RE
+.PD 1
 .
 .TP
 .B (no)psnr
