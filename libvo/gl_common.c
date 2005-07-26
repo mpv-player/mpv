@@ -1,5 +1,24 @@
 #include "gl_common.h"
 
+void (APIENTRY *BindBuffer)(GLenum, GLuint);
+GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum); 
+GLboolean (APIENTRY *UnmapBuffer)(GLenum);
+void (APIENTRY *BufferData)(GLenum, GLsizeiptr, const GLvoid *, GLenum);
+void (APIENTRY *CombinerParameterfv)(GLenum, const GLfloat *);
+void (APIENTRY *CombinerParameteri)(GLenum, GLint);
+void (APIENTRY *CombinerInput)(GLenum, GLenum, GLenum, GLenum, GLenum,
+                               GLenum);
+void (APIENTRY *CombinerOutput)(GLenum, GLenum, GLenum, GLenum, GLenum,
+                                GLenum, GLenum, GLboolean, GLboolean,
+                                GLboolean);
+void (APIENTRY *ActiveTexture)(GLenum);
+void (APIENTRY *BindTexture)(GLenum, GLuint);
+void (APIENTRY *MultiTexCoord2f)(GLenum, GLfloat, GLfloat);
+void (APIENTRY *BindProgram)(GLenum, GLuint);
+void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
+void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
+                                       GLfloat, GLfloat);
+
 /**
  * \brief adjusts the GL_UNPACK_ALGNMENT to fit the stride.
  * \param stride number of bytes per line for which alignment should fit.
@@ -178,6 +197,65 @@ int glFindFormat(uint32_t fmt, uint32_t *bpp, GLenum *gl_texfmt,
   return 1;
 }
 
+static void *setNull(const GLubyte *s) {
+  return NULL;
+}
+
+static void *(*getProcAddress)(const GLubyte *procName);
+
+static void getFunctions() {
+  if (!getProcAddress)
+    getProcAddress = setNull;
+  BindBuffer = getProcAddress("glBindBuffer");
+  if (!BindBuffer)
+    BindBuffer = getProcAddress("glBindBufferARB");
+  MapBuffer = getProcAddress("glMapBuffer");
+  if (!MapBuffer)
+    MapBuffer = getProcAddress("glMapBufferARB");
+  UnmapBuffer = getProcAddress("glUnmapBuffer");
+  if (!UnmapBuffer)
+    UnmapBuffer = getProcAddress("glUnmapBufferARB");
+  BufferData = getProcAddress("glBufferData");
+  if (!BufferData)
+    BufferData = getProcAddress("glBufferDataARB");
+  CombinerParameterfv = getProcAddress("glCombinerParameterfv");
+  if (!CombinerParameterfv)
+    CombinerParameterfv = getProcAddress("glCombinerParameterfvNV");
+  CombinerParameteri = getProcAddress("glCombinerParameteri");
+  if (!CombinerParameteri)
+    CombinerParameteri = getProcAddress("glCombinerParameteriNV");
+  CombinerInput = getProcAddress("glCombinerInput");
+  if (!CombinerInput)
+    CombinerInput = getProcAddress("glCombinerInputNV");
+  CombinerOutput = getProcAddress("glCombinerOutput");
+  if (!CombinerOutput)
+    CombinerOutput = getProcAddress("glCombinerOutputNV");
+  ActiveTexture = getProcAddress("glActiveTexture");
+  if (!ActiveTexture)
+    ActiveTexture = getProcAddress("glActiveTextureARB");
+  BindTexture = getProcAddress("glBindTexture");
+  if (!BindTexture)
+    BindTexture = getProcAddress("glBindTextureARB");
+  MultiTexCoord2f = getProcAddress("glMultiTexCoord2f");
+  if (!MultiTexCoord2f)
+    MultiTexCoord2f = getProcAddress("glMultiTexCoord2fARB");
+  BindProgram = getProcAddress("glBindProgram");
+  if (!BindProgram)
+    BindProgram = getProcAddress("glBindProgramARB");
+  if (!BindProgram)
+    BindProgram = getProcAddress("glBindProgramNV");
+  ProgramString = getProcAddress("glProgramString");
+  if (!ProgramString)
+    ProgramString = getProcAddress("glProgramStringARB");
+  if (!ProgramString)
+    ProgramString = getProcAddress("glProgramStringNV");
+  ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4f");
+  if (!ProgramEnvParameter4f)
+    ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fARB");
+  if (!ProgramEnvParameter4f)
+    ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fNV");
+}
+
 #ifdef GL_WIN32
 int setGlWindow(int *vinfo, HGLRC *context, HWND win)
 {
@@ -226,6 +304,8 @@ int setGlWindow(int *vinfo, HGLRC *context, HWND win)
       wglDeleteContext(*context);
     *context = new_context;
     *vinfo = new_vinfo;
+    getProcAddress = wglGetProcAddress;
+    getFunctions();
 
     // and inform that reinit is neccessary
     return SET_WINDOW_REINIT;
@@ -319,6 +399,12 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win)
     if (*vinfo)
       XFree(*vinfo);
     *vinfo = new_vinfo;
+#ifdef GLX_ARB_get_proc_address
+    getProcAddress = (void *)glXGetProcAddressARB;
+#else
+    getProcAddress = NULL;
+#endif
+    getFunctions();
 
     // and inform that reinit is neccessary
     return SET_WINDOW_REINIT;

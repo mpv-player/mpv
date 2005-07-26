@@ -55,13 +55,17 @@ static GLuint osdDispList[MAX_OSD_PARTS];
 static int osdtexCnt = 0;
 
 static int use_aspect;
+static int use_rectangle;
+static int err_shown;
 static uint32_t image_width;
 static uint32_t image_height;
 static uint32_t image_bytes;
 static int many_fmts;
+static GLenum gl_target;
 static GLenum gl_texfmt;
 static GLenum gl_format;
 static GLenum gl_type;
+static int gl_buffersize;
 
 static int int_pause;
 
@@ -106,33 +110,42 @@ static void resize(int x,int y){
   }
 }
 
+static void texSize(int w, int h, int *texw, int *texh) {
+  if (use_rectangle) {
+    *texw = w; *texh = h;
+  } else {
+    *texw = 32;
+    while (*texw < w)
+      *texw *= 2;
+    *texh = 32;
+    while (*texh < h)
+      *texh *= 2;
+  }
+}
+
 /**
  * \brief Initialize a (new or reused) OpenGL context.
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
   unsigned char *ImageData = NULL;
-  texture_width = 32;
-  while (texture_width < image_width ||
-          texture_width < image_height)
-    texture_width *= 2;
-  texture_height = texture_width;
+  texSize(image_width, image_height, &texture_width, &texture_height);
 
   glDisable(GL_BLEND); 
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
   glDisable(GL_CULL_FACE);
-  glEnable(GL_TEXTURE_2D);
+  glEnable(gl_target);
 
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
           texture_width, texture_height);
 
-  glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameterf(gl_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameterf(gl_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 
   glAdjustAlignment(texture_width * image_bytes);
   ImageData = malloc(texture_width * texture_height * image_bytes);
   memset(ImageData, 0, texture_width * texture_height * image_bytes);
-  glTexImage2D(GL_TEXTURE_2D, 0, gl_texfmt, texture_width, texture_height, 0,
+  glTexImage2D(gl_target, 0, gl_texfmt, texture_width, texture_height, 0,
        gl_format, gl_type, ImageData);
   free (ImageData);
 
@@ -143,6 +156,8 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 
   glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
+  gl_buffersize = 0;
+  err_shown = 0;
   return 1;
 }
 
@@ -285,10 +300,13 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   GLfloat xcov, ycov;
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
   char *clearTexture;
-  while (sx < w) sx *= 2;
-  while (sy < h) sy *= 2;
+  texSize(w, h, &sx, &sy);
   xcov = (GLfloat) w / (GLfloat) sx;
   ycov = (GLfloat) h / (GLfloat) sy;
+  if (use_rectangle == 1) {
+    xcov = w;
+    ycov = h;
+  }
 
   if (osdtexCnt >= MAX_OSD_PARTS) {
     mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the developers!\n");
@@ -301,30 +319,30 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   glAdjustAlignment(stride);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
   glGenTextures(1, &osdtex[osdtexCnt]);
-  glBindTexture(GL_TEXTURE_2D, osdtex[osdtexCnt]);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, sx, sy, 0,
+  BindTexture(gl_target, osdtex[osdtexCnt]);
+  glTexImage2D(gl_target, 0, GL_LUMINANCE, sx, sy, 0,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, scale_type);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, scale_type);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_LUMINANCE,
+  glTexParameteri(gl_target, GL_TEXTURE_MIN_FILTER, scale_type);
+  glTexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, scale_type);
+  glTexSubImage2D(gl_target, 0, 0, 0, w, h, GL_LUMINANCE,
                     GL_UNSIGNED_BYTE, src);
 
 #ifndef FAST_OSD
   glGenTextures(1, &osdatex[osdtexCnt]);
-  glBindTexture(GL_TEXTURE_2D, osdatex[osdtexCnt]);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_ALPHA, sx, sy, 0,
+  BindTexture(gl_target, osdatex[osdtexCnt]);
+  glTexImage2D(gl_target, 0, GL_ALPHA, sx, sy, 0,
                  GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, scale_type);
-  glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, scale_type);
+  glTexParameteri(gl_target, GL_TEXTURE_MIN_FILTER, scale_type);
+  glTexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, scale_type);
   for (i = 0; i < h * stride; i++)
     clearTexture[i] = ~(-srca[i]);
-  glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, w, h, GL_ALPHA,
+  glTexSubImage2D(gl_target, 0, 0, 0, w, h, GL_ALPHA,
                     GL_UNSIGNED_BYTE, clearTexture);
 #endif
   glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
   glAdjustAlignment(image_width * image_bytes);
 
-  glBindTexture(GL_TEXTURE_2D, 0);
+  BindTexture(gl_target, 0);
   free(clearTexture);
 
   // Create a list for rendering this OSD part
@@ -333,7 +351,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
 #ifndef FAST_OSD
   // render alpha
   glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
-  glBindTexture(GL_TEXTURE_2D, osdatex[osdtexCnt]);
+  BindTexture(gl_target, osdatex[osdtexCnt]);
   glBegin(GL_QUADS);
   glTexCoord2f (0, 0);
   glVertex2f (x0, y0);
@@ -347,7 +365,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
 #endif
   // render OSD
   glBlendFunc (GL_ONE, GL_ONE);
-  glBindTexture(GL_TEXTURE_2D, osdtex[osdtexCnt]);
+  BindTexture(gl_target, osdtex[osdtexCnt]);
   glBegin(GL_QUADS);
   glTexCoord2f (0, 0);
   glVertex2f (x0, y0);
@@ -387,6 +405,11 @@ static void draw_osd(void)
 static void
 flip_page(void)
 {
+  int tc_x = 1, tc_y = 1;
+  if (use_rectangle == 1) {
+    tc_x = texture_width;
+    tc_y = texture_height;
+  }
 
 //  glEnable(GL_TEXTURE_2D);
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
@@ -394,9 +417,9 @@ flip_page(void)
   glColor3f(1,1,1);
   glBegin(GL_QUADS);
     glTexCoord2f(0,0);glVertex2i(0,0);
-    glTexCoord2f(0,1);glVertex2i(0,texture_height);
-    glTexCoord2f(1,1);glVertex2i(texture_width,texture_height);
-    glTexCoord2f(1,0);glVertex2i(texture_width,0);
+    glTexCoord2f(0,tc_y);glVertex2i(0,texture_height);
+    glTexCoord2f(tc_x,tc_y);glVertex2i(texture_width,texture_height);
+    glTexCoord2f(tc_x,0);glVertex2i(texture_width,0);
   glEnd();
 
   if (osdtexCnt > 0) {
@@ -414,7 +437,7 @@ flip_page(void)
     glDisable (GL_BLEND);
     if (!scaled_osd)
     glPopMatrix();
-    glBindTexture(GL_TEXTURE_2D, 0);
+    BindTexture(gl_target, 0);
   }
 
 //  glFlush();
@@ -431,6 +454,28 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 	return 0;
 }
 
+static uint32_t get_image(mp_image_t *mpi) {
+  if (!BindBuffer || !BufferData || !MapBuffer) {
+    if (!err_shown)
+      mp_msg(MSGT_VO, MSGL_ERR, "[gl] extensions missing for dr\n"
+                                "Expect a _major_ speed penalty\n");
+    return VO_FALSE;
+  }
+  if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
+  if (mpi->type == MP_IMGTYPE_STATIC) return VO_FALSE;
+  BindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);
+  mpi->stride[0] = mpi->width * mpi->bpp / 8;
+  if (mpi->stride[0] * mpi->h > gl_buffersize) {
+    BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->h,
+               NULL, GL_STREAM_DRAW);
+    gl_buffersize = mpi->stride[0] * mpi->h;
+  }
+  mpi->planes[0] = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
+  BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
+  mpi->flags |= MP_IMGFLAG_DIRECT;
+  return VO_TRUE;
+}
+
 static uint32_t draw_image(mp_image_t *mpi) {
   char *data = mpi->planes[0];
   int x = mpi->x;
@@ -439,19 +484,27 @@ static uint32_t draw_image(mp_image_t *mpi) {
   int h = slice_height ? slice_height : mpi->h;
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
     return VO_TRUE;
+  if (mpi->flags & MP_IMGFLAG_DIRECT) {
+    data = NULL;
+    BindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);
+    UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
+    h = mpi->h; // always "upload" full texture
+  }
   // this is not always correct, but should work for MPlayer
   glAdjustAlignment(mpi->stride[0]);
   glPixelStorei(GL_UNPACK_ROW_LENGTH, mpi->stride[0] / (mpi->bpp / 8));
   for (y = mpi->y; y + h <= y_max; y += h) {
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y,
+    glTexSubImage2D(gl_target, 0, x, y,
                     mpi->w, h,
                     gl_format, gl_type,
                     data);
     data += mpi->stride[0] * h;
   }
   if (y < y_max)
-    glTexSubImage2D(GL_TEXTURE_2D, 0, x, y, mpi->w, y_max - y,
+    glTexSubImage2D(gl_target, 0, x, y, mpi->w, y_max - y,
                     gl_format, gl_type, data);
+  if (mpi->flags & MP_IMGFLAG_DIRECT)
+    BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   return VO_TRUE;
 }
 
@@ -491,6 +544,7 @@ static opt_t subopts[] = {
   {"scaled-osd",   OPT_ARG_BOOL, &scaled_osd,   NULL},
   {"aspect",       OPT_ARG_BOOL, &use_aspect,   NULL},
   {"slice-height", OPT_ARG_INT,  &slice_height, (opt_test_f)int_non_neg},
+  {"rectangle",    OPT_ARG_INT,  &use_rectangle,(opt_test_f)int_non_neg},
   {NULL}
 };
 
@@ -501,6 +555,7 @@ static uint32_t preinit(const char *arg)
     use_osd = 1;
     scaled_osd = 0;
     use_aspect = 1;
+    use_rectangle = 0;
     slice_height = 4;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
@@ -515,9 +570,17 @@ static uint32_t preinit(const char *arg)
               "    Do not use OpenGL OSD code\n"
               "  noaspect\n"
               "    Do not do aspect scaling\n"
+              "  rectangle=<0,1,2>\n"
+              "    0: use power-of-two textures\n"
+              "    1: use texture_rectangle\n"
+              "    2: use texture_non_power_of_two\n"
               "\n" );
       return -1;
     }
+    if (use_rectangle == 1)
+      gl_target = GL_TEXTURE_RECTANGLE;
+    else
+      gl_target = GL_TEXTURE_2D;
     if (many_fmts)
       mp_msg (MSGT_VO, MSGL_WARN, "[gl] using extended formats.\n"
                "Make sure you have OpenGL >= 1.2 and used corresponding "
@@ -536,6 +599,8 @@ static uint32_t control(uint32_t request, void *data, ...)
   case VOCTRL_RESUME: return (int_pause=0);
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));
+  case VOCTRL_GET_IMAGE:
+    return get_image(data);
   case VOCTRL_DRAW_IMAGE:
     return draw_image(data);
   case VOCTRL_GUISUPPORT:
