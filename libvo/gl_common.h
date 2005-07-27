@@ -29,6 +29,30 @@
 #ifndef GL_WRITE_ONLY
 #define GL_WRITE_ONLY 0x88B9
 #endif
+#ifndef GL_BGR
+#define GL_BGR 0x80E0
+#endif
+#ifndef GL_BGRA
+#define GL_BGRA 0x80E1
+#endif
+#ifndef GL_UNSIGNED_BYTE_3_3_2
+#define GL_UNSIGNED_BYTE_3_3_2 0x8032
+#endif
+#ifndef GL_UNSIGNED_BYTE_2_3_3_REV
+#define GL_UNSIGNED_BYTE_2_3_3_REV 0x8362
+#endif
+#ifndef GL_UNSIGNED_SHORT_5_6_5
+#define GL_UNSIGNED_SHORT_5_6_5 0x8363
+#endif
+#ifndef GL_UNSIGNED_SHORT_5_6_5_REV
+#define GL_UNSIGNED_SHORT_5_6_5_REV 0x8364
+#endif
+#ifndef GL_UNSIGNED_SHORT_5_5_5_1
+#define GL_UNSIGNED_SHORT_5_5_5_1 0x8034
+#endif
+#ifndef GL_UNSIGNED_SHORT_1_5_5_5_REV
+#define GL_UNSIGNED_SHORT_1_5_5_5_REV 0x8366
+#endif
 
 void glAdjustAlignment(int stride);
 
@@ -36,6 +60,12 @@ const char *glValName(GLint value);
 
 int glFindFormat(uint32_t format, uint32_t *bpp, GLenum *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type);
+int glFmt2bpp(GLenum format, GLenum type);
+void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
+                      int w, int h, char val);
+void glUploadTex(GLenum target, GLenum format, GLenum type,
+                 const char *data, int stride,
+                 int x, int y, int w, int h, int slice);
 
 //! could not set new window, will continue drawing into the old one.
 #define SET_WINDOW_FAILED -1

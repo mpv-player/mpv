@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <string.h>
 #include "gl_common.h"
 
 void (APIENTRY *BindBuffer)(GLenum, GLuint);
@@ -57,23 +59,19 @@ static const struct gl_name_map_struct gl_name_map[] = {
   MAP(GL_ALPHA), MAP(GL_LUMINANCE), MAP(GL_LUMINANCE_ALPHA),
   MAP(GL_COLOR_INDEX),
   // rest 1.2 only
-#ifdef GL_VERSION_1_2
   MAP(GL_BGR), MAP(GL_BGRA),
-#endif
 
   //type
   MAP(GL_BYTE), MAP(GL_UNSIGNED_BYTE), MAP(GL_SHORT), MAP(GL_UNSIGNED_SHORT),
   MAP(GL_INT), MAP(GL_UNSIGNED_INT), MAP(GL_FLOAT), MAP(GL_DOUBLE),
   MAP(GL_2_BYTES), MAP(GL_3_BYTES), MAP(GL_4_BYTES),
   // rest 1.2 only
-#ifdef GL_VERSION_1_2
   MAP(GL_UNSIGNED_BYTE_3_3_2), MAP(GL_UNSIGNED_BYTE_2_3_3_REV),
   MAP(GL_UNSIGNED_SHORT_5_6_5), MAP(GL_UNSIGNED_SHORT_5_6_5_REV),
   MAP(GL_UNSIGNED_SHORT_4_4_4_4), MAP(GL_UNSIGNED_SHORT_4_4_4_4_REV),
   MAP(GL_UNSIGNED_SHORT_5_5_5_1), MAP(GL_UNSIGNED_SHORT_1_5_5_5_REV),
   MAP(GL_UNSIGNED_INT_8_8_8_8), MAP(GL_UNSIGNED_INT_8_8_8_8_REV),
   MAP(GL_UNSIGNED_INT_10_10_10_2), MAP(GL_UNSIGNED_INT_2_10_10_10_REV),
-#endif
   {0, 0}
 };
 #undef MAP
@@ -140,7 +138,6 @@ int glFindFormat(uint32_t fmt, uint32_t *bpp, GLenum *gl_texfmt,
       *gl_format = GL_LUMINANCE;
       *gl_type = GL_UNSIGNED_BYTE;
       break;
-#ifdef GL_VERSION_1_2
 #if 0
     // we do not support palettized formats, although the format the
     // swscale produces works
@@ -184,7 +181,6 @@ int glFindFormat(uint32_t fmt, uint32_t *bpp, GLenum *gl_texfmt,
       *gl_format = GL_BGRA;
       *gl_type = GL_UNSIGNED_BYTE;
       break;
-#endif
     default:
       *gl_texfmt = 4;
       *gl_format = GL_RGBA;
@@ -203,6 +199,9 @@ static void *setNull(const GLubyte *s) {
 
 static void *(*getProcAddress)(const GLubyte *procName) = NULL;
 
+/**
+ * \brief find the function pointers of some useful OpenGL extensions
+ */
 static void getFunctions() {
   if (!getProcAddress)
     getProcAddress = setNull;
@@ -254,6 +253,96 @@ static void getFunctions() {
     ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fARB");
   if (!ProgramEnvParameter4f)
     ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fNV");
+}
+
+/**
+ * \brief create a texture and set some defaults
+ * \param target texture taget, usually GL_TEXTURE_2D
+ * \param fmt internal texture format
+ * \param filter filter used for scaling, e.g. GL_LINEAR
+ * \param w texture width
+ * \param h texture height
+ * \param val luminance value to fill texture with
+ */
+void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
+                      int w, int h, char val) {
+  GLenum clrfmt = (fmt == GL_ALPHA) ? GL_ALPHA : GL_LUMINANCE;
+  char *init = (char *)malloc(w * h);
+  memset(init, val, w * h);
+  glAdjustAlignment(w);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, w);
+  glTexImage2D(target, 0, fmt, w, h, 0, clrfmt, GL_UNSIGNED_BYTE, init);
+  glTexParameterf(target, GL_TEXTURE_PRIORITY, 1.0);
+  glTexParameteri(target, GL_TEXTURE_MIN_FILTER, filter);
+  glTexParameteri(target, GL_TEXTURE_MAG_FILTER, filter);
+  glTexParameteri(target, GL_TEXTURE_WRAP_S, GL_CLAMP);
+  glTexParameteri(target, GL_TEXTURE_WRAP_T, GL_CLAMP);
+  free(init);
+}
+
+/**
+ * \brief return the number of bytes oer pixel for the given format
+ * \param format OpenGL format
+ * \param type OpenGL type
+ * \return bytes per pixel
+ *
+ * Does not handle all possible variants, just those use by MPlayer
+ */
+int glFmt2bpp(GLenum format, GLenum type) {
+  switch (type) {
+    case GL_UNSIGNED_BYTE_3_3_2:
+    case GL_UNSIGNED_BYTE_2_3_3_REV:
+      return 1;
+    case GL_UNSIGNED_SHORT_5_5_5_1:
+    case GL_UNSIGNED_SHORT_1_5_5_5_REV:
+    case GL_UNSIGNED_SHORT_5_6_5:
+    case GL_UNSIGNED_SHORT_5_6_5_REV:
+      return 2;
+  }
+  if (type != GL_UNSIGNED_BYTE)
+    return 0; //not implemented
+  switch (format) {
+    case GL_LUMINANCE:
+    case GL_ALPHA:
+      return 1;
+    case GL_RGB:
+    case GL_BGR:
+      return 3;
+    case GL_RGBA:
+    case GL_BGRA:
+      return 4;
+  }
+  return 0; // unkown
+}
+
+/**
+ * \brief upload a texture, handling things like stride and slices
+ * \param target texture target, usually GL_TEXTURE_2D
+ * \param format OpenGL format of data
+ * \param type OpenGL type of data
+ * \param data data to upload
+ * \param stride data stride
+ * \param x x offset in texture
+ * \param y y offset in texture
+ * \param w width of the texture part to upload
+ * \param h height of the texture part to upload
+ * \param slice height of an upload slice, 0 for all at once
+ */
+void glUploadTex(GLenum target, GLenum format, GLenum type,
+                 const char *data, int stride,
+                 int x, int y, int w, int h, int slice) {
+  int y_max = y + h;
+  if (slice <= 0)
+    slice = h;
+  // this is not always correct, but should work for MPlayer
+  glAdjustAlignment(stride);
+  glPixelStorei(GL_UNPACK_ROW_LENGTH, stride / glFmt2bpp(format, type));
+  for (; y + slice <= y_max; y += slice) {
+    glTexSubImage2D(target, 0, x, y, w, slice, format, type, data);
+    data += stride * slice;
+  }
+  if (y < y_max)
+    glTexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
 }
 
 #ifdef GL_WIN32
@@ -326,10 +415,9 @@ void releaseGlContext(int *vinfo, HGLRC *context) {
   *context = 0;
 }
 #else
-#if defined(__sun) || defined(__sgi)
-extern void *dlopen(const char *, int);
+#ifdef HAVE_LIBDL
+#include <dlfcn.h>
 #endif
-extern void *dlsym(void *, const char *);
 /**
  * \brief find address of a linked function
  * \param s name of function to find
@@ -338,11 +426,15 @@ extern void *dlsym(void *, const char *);
  * Copied from xine
  */
 static void *getdladdr(const GLubyte *s) {
+#ifdef HAVE_LIBDL
 #if defined(__sun) || defined(__sgi)
   static void *handle = dlopen(NULL, RTLD_LAZY);
   return dlsym(handle, s);
 #else
   return dlsym(0, s);
+#endif
+#else
+  return NULL;
 #endif
 }
 

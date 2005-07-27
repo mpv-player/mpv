@@ -64,7 +64,6 @@ static int use_rectangle;
 static int err_shown;
 static uint32_t image_width;
 static uint32_t image_height;
-static uint32_t image_bytes;
 static int many_fmts;
 static GLenum gl_target;
 static GLenum gl_texfmt;
@@ -134,7 +133,6 @@ static void texSize(int w, int h, int *texw, int *texh) {
  * \brief Initialize a (new or reused) OpenGL context.
  */
 static int initGl(uint32_t d_width, uint32_t d_height) {
-  unsigned char *ImageData = NULL;
   texSize(image_width, image_height, &texture_width, &texture_height);
 
   glDisable(GL_BLEND); 
@@ -146,18 +144,8 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
   mp_msg(MSGT_VO, MSGL_V, "[gl] Creating %dx%d texture...\n",
           texture_width, texture_height);
 
-  glTexParameterf(gl_target, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameterf(gl_target, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-  glAdjustAlignment(texture_width * image_bytes);
-  ImageData = malloc(texture_width * texture_height * image_bytes);
-  memset(ImageData, 0, texture_width * texture_height * image_bytes);
-  glTexImage2D(gl_target, 0, gl_texfmt, texture_width, texture_height, 0,
-       gl_format, gl_type, ImageData);
-  free (ImageData);
-
-  // set alignment as default is 4 which will break some files
-  glAdjustAlignment(image_width * image_bytes);
+  glCreateClearTex(gl_target, gl_texfmt, GL_LINEAR,
+                   texture_width, texture_height, 0);
 
   resize(d_width, d_height);
 
@@ -174,10 +162,10 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 static uint32_t 
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
+	int tmp;
 	image_height = height;
 	image_width = width;
-	glFindFormat(format, &image_bytes, &gl_texfmt, &gl_format, &gl_type);
-	image_bytes = (image_bytes + 7) / 8;
+	glFindFormat(format, &tmp, &gl_texfmt, &gl_format, &gl_type);
 
 	int_pause = 0;
 
@@ -321,7 +309,6 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   int sx = 8, sy = 8;
   GLfloat xcov, ycov;
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
-  char *clearTexture;
   texSize(w, h, &sx, &sy);
   xcov = (GLfloat) w / (GLfloat) sx;
   ycov = (GLfloat) h / (GLfloat) sy;
@@ -334,38 +321,29 @@ static void create_osd_texture(int x0, int y0, int w, int h,
     mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the developers!\n");
     return;
   }
-  clearTexture = malloc(sx * sy);
-  memset(clearTexture, 0, sx * sy);
 
   // create Textures for OSD part
-  glAdjustAlignment(stride);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, stride);
   glGenTextures(1, &osdtex[osdtexCnt]);
   BindTexture(gl_target, osdtex[osdtexCnt]);
-  glTexImage2D(gl_target, 0, GL_LUMINANCE, sx, sy, 0,
-                 GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
-  glTexParameteri(gl_target, GL_TEXTURE_MIN_FILTER, scale_type);
-  glTexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, scale_type);
-  glTexSubImage2D(gl_target, 0, 0, 0, w, h, GL_LUMINANCE,
-                    GL_UNSIGNED_BYTE, src);
+  glCreateClearTex(gl_target, GL_LUMINANCE, scale_type, sx, sy, 0);
+  glUploadTex(gl_target, GL_LUMINANCE, GL_UNSIGNED_BYTE, src, stride,
+              0, 0, w, h, 0);
 
 #ifndef FAST_OSD
   glGenTextures(1, &osdatex[osdtexCnt]);
   BindTexture(gl_target, osdatex[osdtexCnt]);
-  glTexImage2D(gl_target, 0, GL_ALPHA, sx, sy, 0,
-                 GL_LUMINANCE, GL_UNSIGNED_BYTE, clearTexture);
-  glTexParameteri(gl_target, GL_TEXTURE_MIN_FILTER, scale_type);
-  glTexParameteri(gl_target, GL_TEXTURE_MAG_FILTER, scale_type);
+  glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
+  {
+  char *tmp = (char *)malloc(stride * h);
   for (i = 0; i < h * stride; i++)
-    clearTexture[i] = ~(-srca[i]);
-  glTexSubImage2D(gl_target, 0, 0, 0, w, h, GL_ALPHA,
-                    GL_UNSIGNED_BYTE, clearTexture);
+    tmp[i] = ~(-srca[i]);
+  glUploadTex(gl_target, GL_ALPHA, GL_UNSIGNED_BYTE, tmp, stride,
+              0, 0, w, h, 0);
+  free(tmp);
+  }
 #endif
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-  glAdjustAlignment(image_width * image_bytes);
 
   BindTexture(gl_target, 0);
-  free(clearTexture);
 
   // Create a list for rendering this OSD part
   osdDispList[osdtexCnt] = glGenLists(1);
@@ -489,7 +467,8 @@ static uint32_t get_image(mp_image_t *mpi) {
     return VO_FALSE;
   }
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
-  if (mpi->type == MP_IMGTYPE_STATIC) return VO_FALSE;
+  if (mpi->type == MP_IMGTYPE_IP || mpi->type == MP_IMGTYPE_IPB)
+    return VO_FALSE; // we can not provide readable buffers
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   if (mpi->stride[0] * mpi->h > gl_buffersize) {
@@ -497,6 +476,7 @@ static uint32_t get_image(mp_image_t *mpi) {
                NULL, GL_STREAM_DRAW);
     gl_buffersize = mpi->stride[0] * mpi->h;
   }
+  UnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // HACK, needed for some MPEG4 files??
   mpi->planes[0] = MapBuffer(GL_PIXEL_UNPACK_BUFFER, GL_WRITE_ONLY);
   BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   if (mpi->planes[0] == NULL) {
@@ -512,31 +492,17 @@ static uint32_t get_image(mp_image_t *mpi) {
 
 static uint32_t draw_image(mp_image_t *mpi) {
   char *data = mpi->planes[0];
-  int x = mpi->x;
-  int y = mpi->y;
-  int y_max = mpi->y + mpi->h;
-  int h = slice_height ? slice_height : mpi->h;
+  int slice = slice_height;
   if (mpi->flags & MP_IMGFLAG_DRAW_CALLBACK)
     return VO_TRUE;
   if (mpi->flags & MP_IMGFLAG_DIRECT) {
     data = NULL;
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);
     UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
-    h = mpi->h; // always "upload" full texture
+    slice = 0; // always "upload" full texture
   }
-  // this is not always correct, but should work for MPlayer
-  glAdjustAlignment(mpi->stride[0]);
-  glPixelStorei(GL_UNPACK_ROW_LENGTH, mpi->stride[0] / (mpi->bpp / 8));
-  for (y = mpi->y; y + h <= y_max; y += h) {
-    glTexSubImage2D(gl_target, 0, x, y,
-                    mpi->w, h,
-                    gl_format, gl_type,
-                    data);
-    data += mpi->stride[0] * h;
-  }
-  if (y < y_max)
-    glTexSubImage2D(gl_target, 0, x, y, mpi->w, y_max - y,
-                    gl_format, gl_type, data);
+  glUploadTex(gl_target, gl_format, gl_type, data, mpi->stride[0],
+              mpi->x, mpi->y, mpi->w, mpi->h, slice);
   if (mpi->flags & MP_IMGFLAG_DIRECT)
     BindBuffer(GL_PIXEL_UNPACK_BUFFER, 0);
   return VO_TRUE;
