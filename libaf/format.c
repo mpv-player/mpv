@@ -1,3 +1,13 @@
+/*=============================================================================
+//	
+//  This software has been released under the terms of the GNU General Public
+//  license. See http://www.gnu.org/copyleft/gpl.html for details.
+//
+//  Copyright 2005 Alex Beregszaszi
+//
+//=============================================================================
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
