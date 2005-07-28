@@ -432,14 +432,15 @@ named 'movie.avi.conf' with the file-specific options in it and put it in
 .
 .TP
 .B \-codecs-file <filename> (also see \-afm, \-ac, \-vfm, \-vc)
-Use the specified file instead of system wide installed or builtin codecs.conf.
+Override the standard search path and use the specified file
+instead of the builtin codecs.conf.
 .
 .TP
 .B \-include <configuration\ file>
 Specify configuration file to be parsed after the default ones.
 .
 .TP
-.B \-quiet\ \ 
+.B \-quiet\ 
 Make console output less verbose; in particular, prevents the status line
 (i.e.\& A:   0.7 V:   0.6 A-V:  0.068 ...) from being displayed.
 Particularly useful on slow terminals or broken ones which do not properly
@@ -447,7 +448,8 @@ handle carriage return (i.e.\& \\r).
 .
 .TP
 .B \-priority <prio> (Windows only)
-Set process priority for MPlayer according to Windows predefined priorities.
+Set process priority for MPlayer according to the predefined
+priorities available under Windows.
 Possible values of <prio>:
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
@@ -466,11 +468,11 @@ Increment verbose level (more \-v means more verbosity).
 .IPs <nothing>
 only some informational output (default)
 .IPs \-v\ \ \ 
-some basic debug infos, avi header, function values (init debug)
+some basic debug info, AVI header, function values (init debug)
 .IPs \-v\ \-v
-print avi indexes, chunk inputs, more debug infos (player debug)
+Print AVI indexes, chunk inputs, more debug info (player debug).
 .IPs \-v\ \-v\ \-v
-prints everything related to input parsers (parser debug)
+Prints everything related to input parsers (parser debug).
 .RE
 .PD 1
 .
