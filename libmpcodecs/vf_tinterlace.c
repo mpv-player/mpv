@@ -46,7 +46,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 		if (dmpi == NULL) {
 			dmpi = vf_get_image(vf->next, mpi->imgfmt,
 					    MP_IMGTYPE_STATIC, MP_IMGFLAG_ACCEPT_STRIDE |
-					    MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE,
+					    MP_IMGFLAG_PRESERVE,
 					    mpi->width, mpi->height*2);
 
 			vf->priv->dmpi = dmpi;
