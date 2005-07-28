@@ -67,6 +67,8 @@ static int init(sh_audio_t *sh_audio)
        break;
     default: if(sh_audio->samplesize!=2) sh_audio->sample_format=AF_FORMAT_U8;
   }
+  if (!sh_audio->samplesize) // this would cause MPlayer to hang later
+    sh_audio->samplesize = 2;
   return 1;
 }
 

@@ -217,6 +217,16 @@ int demux_open_lavf(demuxer_t *demuxer){
             sh_audio->channels= codec->channels;
             sh_audio->samplerate= codec->sample_rate;
             sh_audio->i_bps= codec->bit_rate/8;
+            switch (codec->codec_id) {
+              case CODEC_ID_PCM_S8:
+              case CODEC_ID_PCM_U8:
+                sh_audio->samplesize = 1;
+              case CODEC_ID_PCM_S16LE:
+              case CODEC_ID_PCM_S16BE:
+              case CODEC_ID_PCM_U16LE:
+              case CODEC_ID_PCM_U16BE:
+                sh_audio->samplesize = 2;
+            }
             if(verbose>=1) print_wave_header(sh_audio->wf);
             if(demuxer->audio->id != i && demuxer->audio->id != -1)
                 st->discard= AVDISCARD_ALL;
