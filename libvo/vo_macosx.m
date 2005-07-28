@@ -198,6 +198,9 @@ static uint32_t query_format(uint32_t format)
 
 static void uninit(void)
 {
+	SetSystemUIMode( kUIModeNormal, 0);
+	ShowCursor();
+
 	[autoreleasepool release];
 }
 
