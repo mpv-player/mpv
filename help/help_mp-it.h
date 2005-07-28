@@ -2,7 +2,7 @@
 // Updated by: Roberto Togni <see AUTHORS for email address>
 // Updated by: PaulTT <paultt@hackerjournal.it>
 
-// Updated to help_mp-en.h v1.176
+// Updated to help_mp-en.h v1.178
 
 // TODO: change references to DOCS/HTML/en/... to DOCS/HTML/it/... when they will be updated
 //
@@ -86,7 +86,7 @@ static char help_text[]=
 
 #define MSGTR_SystemTooSlow "\n\n"\
 "       ****************************************************************\n"\
-"       **** Il tuo sistema è troppo lento per questa riproduzione! ****\n"\
+"       **** Il tuo sistema è troppo LENTO per questa riproduzione! ****\n"\
 "       ****************************************************************\n"\
 "Possibili cause, problemi, soluzioni:\n"\
 "- Nella maggior parte dei casi: driver _audio_ danneggiato/bacato\n"\
@@ -362,7 +362,6 @@ static char help_text[]=
 #define MSGTR_MP3WaveFormatSizeNot30 "sizeof(MPEGLAYER3WAVEFORMAT)==%d!=30, compilatore C bacato?\n"
 #define MSGTR_NoLavcAudioCodecName "Audio LAVC, Manca il nome del codec!\n"
 #define MSGTR_LavcAudioCodecNotFound "Audio LAVC, Non trovo l'encoder per il codec %s\n"
-// TODO: allocate context = allocare il contesto ?? e' giusto ???
 #define MSGTR_CouldntAllocateLavcContext "Audio LAVC, non posso allocare il contesto!\n"
 #define MSGTR_CouldntOpenCodec "Non posso aprire il codec %s, br=%d\n"
 #define MSGTR_CantCopyAudioFormat "Il formato audio 0x%x è incompatible con '-oac copy', prova invece '-oac pcm' o usa '-fafmttag' per forzare.\n"
@@ -677,7 +676,7 @@ static char help_text[]=
 #define MSGTR_SKIN_LABEL "Skins:"
 
 // --- gtk menus
-#define MSGTR_MENU_AboutMPlayer "Informazione su MPlayer"
+#define MSGTR_MENU_AboutMPlayer "Informazioni su MPlayer"
 #define MSGTR_MENU_Open "Apri..."
 #define MSGTR_MENU_PlayFile "Riproduci il file..."
 #define MSGTR_MENU_PlayVCD "Riproduci il VCD..."
@@ -847,6 +846,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "Dispositivo DVD:"
 #define MSGTR_PREFERENCES_FPS "FPS del filmato:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Mostra la finestra video anche quando non è attiva"
+#define MSGTR_PREFERENCES_ArtsBroken "Le nuove versioni di aRts sono incompatibili "\
+           "con GTK 1.x e gmplayer crasherà!"
 
 #define MSGTR_ABOUT_UHU "Lo sviluppo della GUI è sponsorizzato da UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   Team sviluppo MPlayer:\n"
@@ -901,7 +902,8 @@ static char help_text[]=
 
 // ======================= VO Video Output drivers ========================
 
-#define MSGTR_VOincompCodec "Il dispositivo di uscita video_out scelto è incompatibile con questo codec.\n"
+#define MSGTR_VOincompCodec "Il dispositivo di uscita video_out scelto è incompatibile con questo codec.\n"\
+                "Prova anche aggiungendo il filtro scale, x es. -vf spp,scale invece di -vf spp.\n"
 #define MSGTR_VO_GenericError "E' accaduto questo errore"
 #define MSGTR_VO_UnableToAccess "Impossibile accedere a"
 #define MSGTR_VO_ExistsButNoDirectory "già esiste, ma non è una directory."
