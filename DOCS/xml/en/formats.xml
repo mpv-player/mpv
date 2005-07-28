@@ -353,6 +353,25 @@ unplayable anyway because they use VLB audio).
 </sect3>
 
 
+<sect3 id="matroska">
+<title>Matroska files</title>
+<para>
+Matroska is an open container format.
+Read more on the <ulink url="http://www.matroska.org/">official site</ulink>.
+</para>
+</sect3>
+
+
+<sect3 id="nut">
+<title>NUT files</title>
+<para>
+NUT is the container format developed by <application>MPlayer</application> and
+<application>FFmpeg</application> folks. Both projects support it.
+Read more on the <ulink url="http://www.nut.hu/">official site</ulink>.
+</para>
+</sect3>
+
+
 <sect3 id="gif">
 <title>GIF files</title>
 <para>
