@@ -186,7 +186,7 @@ static int outputaudio(jack_nframes_t nframes, void *arg) {
   if (estimate) {
     float now = (float)GetTimer() / 1000000.0;
     float diff = callback_time + callback_interval - now;
-    if (diff < 0.002)
+    if ((diff > -0.002) && (diff < 0.002))
       callback_time += callback_interval;
     else
       callback_time = now;
