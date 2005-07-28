@@ -76,6 +76,7 @@ static int put_image (struct vf_instance_s* vf, mp_image_t *mpi)
     unsigned char *cur0, *prv0;
     register unsigned char *cur, *prv;
 
+    if (rowsize > MAXROWSIZE) rowsize = MAXROWSIZE;
     // check if nothing to do
     if (mpi->imgfmt == vf->priv->imgfmt)
     {
