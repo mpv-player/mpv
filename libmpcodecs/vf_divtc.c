@@ -342,7 +342,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi)
 	 if(p->deghost>0)
 	    {
 	    tmpi=vf_get_image(vf->next, mpi->imgfmt,
-			      MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+			      MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE |
+			      MP_IMGFLAG_READABLE,
 			      mpi->width, mpi->height);
 	    vf_clone_mpi_attributes(tmpi, mpi);
 
