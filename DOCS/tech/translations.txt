@@ -8,12 +8,15 @@ in order to be useful. Otherwise they quickly get outdated and become
 obsolete, useless cruft. That said, we would be happy if you could
 maintain a new documentation translation.
 
-Documentation related discussions happen on the MPlayer-DOCS mailing list.
-If you want to maintain a translation you should subscribe there, as all
-documentation CVS changelogs are also sent there, which you need to keep
-the translation up to date. You can subscribe here:
+Documentation related discussions happen on the MPlayer-DOCS mailing list,
+while documentation translation related discussions happen on the
+MPlayer-translations mailing list. If you want to maintain a translation
+you should subscribe to both, as the English documentation CVS changelogs,
+which you need to keep the translation up to date, are sent to MPlayer-DOCS.
+You can subscribe here:
 
 http://mplayerhq.hu/mailman/listinfo/mplayer-docs
+http://mplayerhq.hu/mailman/listinfo/mplayer-translations
 
 Send updates and patches to this mailing list or directly to the documentation
 or console message maintainers, see DOCS/tech/MAINTAINERS for details.
