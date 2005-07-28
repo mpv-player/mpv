@@ -134,6 +134,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32
 		
 	//config OpenGL View
 	[mpGLView config];
+	[mpGLView reshape];
 	
 	return 0;
 }
@@ -244,8 +245,13 @@ static uint32_t preinit(const char *arg)
 	autoreleasepool = [[NSAutoreleasePool alloc] init];
 	NSApp = [NSApplication sharedApplication];
 	
-	mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 0, 0) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
-	[mpGLView autorelease];
+	if(!mpGLView)
+	{
+		mpGLView = [[MPlayerOpenGLView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100) pixelFormat:[MPlayerOpenGLView defaultPixelFormat]];
+		[mpGLView autorelease];
+	}
+	
+	[mpGLView display];
 	[mpGLView preinit];
 	
     return 0;
@@ -281,6 +287,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 								styleMask:NSTitledWindowMask|NSTexturedBackgroundWindowMask|NSClosableWindowMask|NSMiniaturizableWindowMask|NSResizableWindowMask
 								backing:NSBackingStoreBuffered defer:NO];
 
+	[window autorelease];
 	[window setDelegate:mpGLView];
 	[window setContentView:mpGLView];
 	[window setInitialFirstResponder:mpGLView];
