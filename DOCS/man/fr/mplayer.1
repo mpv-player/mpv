@@ -1,4 +1,4 @@
-.\" synced with 1.1051
+.\" synced with 1.1053
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "24 Juillet 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "28 Juillet 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -453,15 +453,15 @@ fichier.
 .
 .TP
 .B \-codecs-file <nomfichier> (voir aussi \-afm, \-ac, \-vfm et \-vc)
-Défini le fichier de codecs au lieu de celui du système ou de celui inclus
-dans mplayer.
+Change le chemin de recherche standard et utilise le fichier donné en
+paramètre au lieu du fichier codecs.conf inclus dans MPlayer
 .
 .TP
 .B \-include <fichier\ de\ configuration>
 Spécifie le fichier de configuration à analyser après ceux par défaut.
 .
 .TP
-.B \-quiet\ \ 
+.B \-quiet\ 
 Avec cette option, la ligne d'état (c-a-d A:   0.7 V:   0.6 A-V:  0.068 ...) ne
 sera pas affichée.
 Cela est particulièrement utile sur les terminaux lents ou endommagés qui ne
@@ -470,7 +470,7 @@ gèrent pas les retours chariot (c-a-d \\r).
 .TP
 .B \-priority <prio> (Windows uniquement)
 Défini le niveau de priorité de MPlayer suivant les priorités prédéfinies
-de Windows
+de disponibles sous Windows.
 Valeurs possibles de <prio>\ :
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
@@ -490,14 +490,14 @@ Active le mode verbeux (plus de \-v signifie plus de verbosité).
 .IPs <nothing>
 uniquement quelques sorties informelles (par défaut)
 .IPs \-v\ \ \ 
-quelques infos basiques de débogage, entête avi, valeurs des fonctions
+quelques infos basiques de débogage, entête AVI, valeurs des fonctions
 (débogage de l'initialisation)
 .IPs \-v\ \-v
-affiche les index avi, entrées de tronquage, plus d'infos de débogage
-(débogage du lecteur)
+Affiche les index AVI, entrées de tronquage, plus d'infos de débogage
+(débogage du lecteur).
 .IPs \-v\ \-v\ \-v
-affiche tout ce qui est relatif aux parseurs d'entrée (pour le débogage des
-parsers)
+Affiche tout ce qui est relatif aux parseurs d'entrée (pour le débogage des
+parsers).
 .RE
 .PD 1
 .
