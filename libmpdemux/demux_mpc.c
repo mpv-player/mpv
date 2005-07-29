@@ -36,7 +36,7 @@ static uint32_t get_bits(da_priv_t* priv, stream_t* s, int bits) {
   }
   else {
     stream_read(s, (void *)&priv->dword, 4);
-    le2me_32(priv->dword);
+    priv->dword = le2me_32(priv->dword);
     priv->pos -= 32;
     if (priv->pos) {
       out <<= priv->pos;

@@ -374,7 +374,7 @@ int read_asf_header(demuxer_t *demuxer){
   }
   // read length of chunk
   stream_read(demuxer->stream, (char *)&data_len, sizeof(data_len));
-  le2me_64(data_len);
+  data_len = le2me_64(data_len);
   demuxer->movi_start = stream_tell(demuxer->stream) + 26;
   demuxer->movi_end = start + data_len;
   mp_msg(MSGT_HEADER, MSGL_V, "Found movie at 0x%X - 0x%X\n",
