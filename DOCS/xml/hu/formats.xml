@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.21 -->
+<!-- synced with 1.22 -->
 <sect1 id="formats">
 <title>Támogatott formátumok</title>
 
@@ -353,6 +353,25 @@ Meg szeretném jegyezni, hogy a
 használ, amit nem lehet dekódolni még. Ezenkívül több stream az oldalon külön
 szétcsomagoló réteget igényel, amit még el kellene készíteni (ezek a fájlok
 úgyis lejátszhatatlanok, mert VLB audiót használnak).
+</para>
+</sect3>
+
+
+<sect3 id="matroska">
+<title>Matroska fájlok</title>
+<para>
+A Matroska egy nyílt konténer formátum.
+További infók a <ulink url="http://www.matroska.org/">hivatalos weboldalukon</ulink> találhatóak.
+</para>
+</sect3>
+
+
+<sect3 id="nut">
+<title>NUT fájlok</title>
+<para>
+A NUT az <application>MPlayer</application>es és az <application>FFmpeg</application>es
+emberkék által kifejlesztett konténer formátum. Mindkét projekt támogatja.
+További infókat a <ulink url="http://www.nut.hu/">hivatalos weboldalon</ulink> olvashatsz.
 </para>
 </sect3>
 
