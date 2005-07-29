@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.66 -->
+<!-- synced with 1.67 -->
 <chapter id="ports" xreflabel="Ports">
 <title>Portok</title>
 
@@ -585,6 +585,12 @@ melyet egy előre lefordított lejátszó binárissal együtt tölthetünk le az
 
 <sect1 id="amiga">
 <title>Amiga/MorphOS (GeekGadgets)</title>
+<para>
+Az emberek a <ulink url="www.amigasoft.net">www.amigasoft.net</ulink>-nél
+készítettek csomagokat az aktuális <application>MPlayer</application>ből
+és <application>MEncoder</application>ből.
+</para>
+
 <para>
 Nicholas Det (Genesi) sikeresen átültette az <application>MPlayer</application>t
 MorphOS alá. Sajnálatos módon csak a 0.90-es széria van kész.
