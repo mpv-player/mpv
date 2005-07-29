@@ -3,7 +3,7 @@
 //... Okay enough of the hw, now send the other two!
 //
 // Updated by: Gabrov <gabrov@freemail.hu>
-// Sync'ed with help_mp-en.h 1.172 (2005. 07. 03.)
+// Sync'ed with help_mp-en.h 1.178 (2005. 07. 29.)
 
 // ========================= MPlayer help ===========================
 
@@ -94,8 +94,9 @@ static char help_text[]=
 "  - Egy másik -vo meghajtó kipróbálása eredményre vezethet (a listához lásd\n"\
 "    -vo help), és/vagy használd a -framedrop opciót!\n"\
 "- Lassú CPU\n"\
-"  - Nagy felbontású DivX/DVD lejátszásával nem érdemes gyenge processzoron\n"\
-"    próbálkozni! Esetleg -hardframedrop.\n"\
+"  - Nagy felbontású DivX/DVD lejátszásával ne próbálkozz gyenge processzoron!\n"\
+"    Esetleg próbálj ki lavdopts opciókat, pl.\n"\
+"    -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
 "- Hibás fájl\n"\
 "  - A -nobps -ni -forceidx -mc 0 opciók kombinációval érdemes szórakozni.\n"\
 "- Lassú média (NFS/SMB, DVD, VCD, stb)\n"\
@@ -215,7 +216,8 @@ static char help_text[]=
 #define MSGTR_ResolutionDoesntMatch "\nAz új videó fájl felbontása vagy színtere különbözik az elõzõétõl.\n"
 #define MSGTR_FrameCopyFileMismatch "\nAz összes videó fájlnak azonos fps-sel, felbontással, és codec-kel kell rendelkeznie az -ovc copy-hoz.\n"
 #define MSGTR_AudioCopyFileMismatch "\nAz összes fájlnak azonos audió codec-kel és formátummal kell rendelkeznie az -oac copy-hoz.\n"
-#define MSGTR_NoSpeedWithFrameCopy "FIGYELEM: A -speed nem biztos, hogy jól mûködik az -oac copy-val!\nA kódolásod hibás lehet!\n"
+#define MSGTR_NoSpeedWithFrameCopy "FIGYELEM: A -speed nem biztos, hogy jól mûködik az -oac copy-val!\n"\
+"A kódolásod hibás lehet!\n"
 #define MSGTR_ErrorWritingFile "%s: hiba a fájl írásánál.\n"
 #define MSGTR_WritingAVIIndex "\nAVI index írása...\n"
 #define MSGTR_FixupAVIHeader "AVI fejléc javítása...\n"
@@ -604,16 +606,18 @@ static char help_text[]=
 #ifdef HAVE_NEW_GUI
 
 // --- labels ---
-#define MSGTR_About "Az MPlayer - röl"
+#define MSGTR_About "Az MPlayerrõl"
 #define MSGTR_FileSelect "Fájl kiválasztása..."
 #define MSGTR_SubtitleSelect "Felirat kiválasztása..."
 #define MSGTR_OtherSelect "Fájl kiválasztása..."
 #define MSGTR_AudioFileSelect "Külsõ audio csatorna választása..."
 #define MSGTR_FontSelect "Betûtípus kiválasztása..."
+// Megjegyzés: Ha megváltoztatod az MSGTR_PlayList-et, nézd meg, hogy megfelel-e az MSGTR_MENU_PlayList-nek is!
 #define MSGTR_PlayList "Lejátszási lista"
 #define MSGTR_Equalizer "Equalizer"
 #define MSGTR_SkinBrowser "Skin böngészõ"
-#define MSGTR_Network "Lejátszás WEB - röl..."
+#define MSGTR_Network "Hálózati stream-elés..."
+// Megjegyzés: Ha megváltoztatod az MSGTR_Preferences-t, nézd meg, hogy megfelel-e az MSGTR_MENU_Preferences-nek is!
 #define MSGTR_Preferences "Beállítások"
 #define MSGTR_AudioPreferences "Audio vezérlõ beállítása"
 #define MSGTR_NoMediaOpened "nincs megnyitva semmi"
@@ -698,10 +702,9 @@ static char help_text[]=
 #define MSGTR_MENU_Chapter "%2d. fejezet"
 #define MSGTR_MENU_AudioLanguages "Szinkron nyelvei"
 #define MSGTR_MENU_SubtitleLanguages "Feliratok nyelvei"
+#define MSGTR_MENU_PlayList MSGTR_PlayList
 #define MSGTR_MENU_SkinBrowser "Skin böngészõ"
-// TODO: Why is this different from MSGTR_Preferences?
-// Note: uniq says it's different, though I cannot see it.     
-#define MSGTR_MENU_Preferences "Beállítások" 
+#define MSGTR_MENU_Preferences MSGTR_Preferences
 #define MSGTR_MENU_Exit "Kilépés..."
 #define MSGTR_MENU_Mute "Néma"
 #define MSGTR_MENU_Original "Eredeti"
@@ -711,8 +714,10 @@ static char help_text[]=
 #define MSGTR_MENU_VideoTrack "Video track"
 
 // --- equalizer
-#define MSGTR_EQU_Audio "Audio"
-#define MSGTR_EQU_Video "Video"
+// Megjegyzés: Ha megváltoztatod az MSGTR_EQU_Audio-t, nézd meg, hogy megfelel-e az MSGTR_PREFERENCES_Audio-nak is!
+#define MSGTR_EQU_Audio "Audió"
+// Megjegyzés: Ha megváltoztatod az MSGTR_EQU_Video-t, nézd meg, hogy megfelel-e az MSGTR_PREFERENCES_Video-nak is!
+#define MSGTR_EQU_Video "Videó"
 #define MSGTR_EQU_Contrast "Kontraszt: "
 #define MSGTR_EQU_Brightness "Fényerõ: "
 #define MSGTR_EQU_Hue "Szinárnyalat: "
@@ -732,14 +737,17 @@ static char help_text[]=
 #define MSGTR_EQU_Channel6 "6. Csatorna:"
 
 // --- playlist
-#define MSGTR_PLAYLIST_Path "Utvonal"
+#define MSGTR_PLAYLIST_Path "Útvonal"
 #define MSGTR_PLAYLIST_Selected "Kiválasztott fájlok"
 #define MSGTR_PLAYLIST_Files "Fájlok"
 #define MSGTR_PLAYLIST_DirectoryTree "Könyvtár lista"
 
 // --- preferences
+#define MSGTR_PREFERENCES_Audio MSGTR_EQU_Audio
+#define MSGTR_PREFERENCES_Video MSGTR_EQU_Video
 #define MSGTR_PREFERENCES_SubtitleOSD "Felirat & OSD"
 #define MSGTR_PREFERENCES_Codecs "Kodekek és demuxerek"
+// Megjegyzés: Ha megváltoztatod az MSGTR_PREFERENCES_Misc-et, nézd meg, hogy megfelel-e az MSGTR_PREFERENCES_FRAME_Misc-nek is!
 #define MSGTR_PREFERENCES_Misc "Egyéb"
 
 #define MSGTR_PREFERENCES_None "Egyik sem"
@@ -784,6 +792,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FRAME_PostProcess "Képjavítás"
 #define MSGTR_PREFERENCES_FRAME_CodecDemuxer "Codec & demuxer"
 #define MSGTR_PREFERENCES_FRAME_Cache "Gyorsítótár"
+#define MSGTR_PREFERENCES_FRAME_Misc MSGTR_PREFERENCES_Misc
 #define MSGTR_PREFERENCES_Audio_Device "Eszköz:"
 #define MSGTR_PREFERENCES_Audio_Mixer "Mixer:"
 #define MSGTR_PREFERENCES_Audio_MixerChannel "Mixer csatorna:"
@@ -834,6 +843,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "DVD meghajtó:"
 #define MSGTR_PREFERENCES_FPS "Film FPS:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Lejátszó ablak megjelenítése ha inaktív"
+#define MSGTR_PREFERENCES_ArtsBroken "Az újabb aRts verziók inkompatibilisek "\
+           "a GTK 1.x-szel és összeomlasztják a gmplayert!"
 
 #define MSGTR_ABOUT_UHU "GUI fejlesztést az UHU Linux támogatta\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer csapat:\n"
@@ -888,7 +899,8 @@ static char help_text[]=
 
 // ======================= VO Video Output drivers ========================
 
-#define MSGTR_VOincompCodec "A kiválasztott video_out eszköz nem kompatibilis ezzel a codec-kel.\n"
+#define MSGTR_VOincompCodec "A kiválasztott video_out eszköz nem kompatibilis ezzel a codec-kel.\n"\
+                "Próbáld meg hozzáadni a scale szûrõt, pl. -vf spp,scale a -vf spp helyett.\n"
 #define MSGTR_VO_GenericError "Hiba történt"
 #define MSGTR_VO_UnableToAccess "Nem elérhetõ"
 #define MSGTR_VO_ExistsButNoDirectory "már létezik, de nem könyvtár."
