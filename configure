@@ -2270,57 +2270,6 @@ else
 fi
 
 
-echocheck "iconv"
-if test "$_iconv" = auto ; then
-  _iconv_tmp='#include <iconv.h>'
-
-  cat > $TMPC << EOF
-#include <stdio.h>
-#include <unistd.h>
-$_iconv_tmp
-#define INBUFSIZE 1024
-#define OUTBUFSIZE 4096
-
-char inbuffer[INBUFSIZE];
-char outbuffer[OUTBUFSIZE];
-
-int main(void) {
-  size_t numread;
-  iconv_t icdsc;
-  char *tocode="UTF-8";
-  char *fromcode="cp1250";
-  if ((icdsc = iconv_open (tocode, fromcode)) != (iconv_t)(-1)) {
-    while ((numread = read (0, inbuffer, INBUFSIZE))) {
-      char *iptr=inbuffer;
-      char *optr=outbuffer;
-      size_t inleft=numread;
-      size_t outleft=OUTBUFSIZE;
-      if (iconv(icdsc, (const char **)&iptr, &inleft, &optr, &outleft)
-          != (size_t)(-1)) {
-        write (1, outbuffer, OUTBUFSIZE - outleft);
-      }
-    }
-    if (iconv_close(icdsc) == -1)
-      ;
-  }
-}
-EOF
-  _iconv=no
-  if cc_check $_ld_lm ; then
-    _iconv=yes
-  elif cc_check $_ld_lm -liconv ; then
-    _iconv=yes
-    _ld_iconv='-liconv'
-  fi
-fi
-if test "$_iconv" = yes ; then
-  _def_iconv='#define USE_ICONV 1'
-else
-  _def_iconv='#undef USE_ICONV'
-fi
-echores "$_iconv"
-
-
 echocheck "langinfo"
 if test "$_langinfo" = auto ; then
   cat > $TMPC <<EOF
@@ -2846,6 +2795,60 @@ else
     _win32=no
   fi
 fi
+
+
+echocheck "iconv"
+if test "$_iconv" = auto ; then
+  _iconv_tmp='#include <iconv.h>'
+
+  cat > $TMPC << EOF
+#include <stdio.h>
+#include <unistd.h>
+$_iconv_tmp
+#define INBUFSIZE 1024
+#define OUTBUFSIZE 4096
+
+char inbuffer[INBUFSIZE];
+char outbuffer[OUTBUFSIZE];
+
+int main(void) {
+  size_t numread;
+  iconv_t icdsc;
+  char *tocode="UTF-8";
+  char *fromcode="cp1250";
+  if ((icdsc = iconv_open (tocode, fromcode)) != (iconv_t)(-1)) {
+    while ((numread = read (0, inbuffer, INBUFSIZE))) {
+      char *iptr=inbuffer;
+      char *optr=outbuffer;
+      size_t inleft=numread;
+      size_t outleft=OUTBUFSIZE;
+      if (iconv(icdsc, (const char **)&iptr, &inleft, &optr, &outleft)
+          != (size_t)(-1)) {
+        write (1, outbuffer, OUTBUFSIZE - outleft);
+      }
+    }
+    if (iconv_close(icdsc) == -1)
+      ;
+  }
+}
+EOF
+  _iconv=no
+  if cc_check $_ld_lm ; then
+    _iconv=yes
+  elif cc_check $_ld_lm -liconv ; then
+    _iconv=yes
+    _ld_iconv='-liconv'
+  elif cc_check $_ld_lm -liconv $_ld_dl ; then
+    _iconv=yes
+    _ld_iconv='-liconv $_ld_dl'
+  fi
+fi
+if test "$_iconv" = yes ; then
+  _def_iconv='#define USE_ICONV 1'
+else
+  _def_iconv='#undef USE_ICONV'
+fi
+echores "$_iconv"
 
 
 echocheck "sys/soundcard.h"
