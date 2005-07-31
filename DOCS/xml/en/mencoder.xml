@@ -57,17 +57,12 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts
 <title>Encoding to MPEG format</title>
 <para>
 <application>MEncoder</application> can create MPEG (MPEG-PS) format output
-files. It is probably useful only with
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>'s
-<emphasis>mpeg1video</emphasis> codec, because players - except
-<application>MPlayer</application> - expect MPEG-1 video, and MPEG-1 layer 2 (MP2)
-audio streams in MPEG files.
-</para>
-
-<para>
-This feature is not very useful right now, aside that it probably has many bugs,
-but the more importantly because <application>MEncoder</application> currently
-cannot encode MPEG-1 layer 2 (MP2) audio, which all other players expect in MPEG files.
+files.
+Usually, when you are using MPEG-1 or MPEG-2 video, it is because you are
+encoding for a constrained format such as SVCD, VCD, or DVD.
+The specific requirements for these formats are explained in the
+<link linkend="menc-feat-vcd-dvd"> VCD and DVD creation guide</link>
+section.
 </para>
 
 <para>
