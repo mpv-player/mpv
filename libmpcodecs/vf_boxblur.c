@@ -137,7 +137,7 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
 	int ch= mpi->h >> mpi->chroma_y_shift;
 
 	mp_image_t *dmpi=vf_get_image(vf->next,mpi->imgfmt,
-		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE,
+		MP_IMGTYPE_TEMP, MP_IMGFLAG_ACCEPT_STRIDE | MP_IMGFLAG_READABLE,
 		mpi->w,mpi->h);
 
 	assert(mpi->flags&MP_IMGFLAG_PLANAR);
