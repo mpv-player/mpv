@@ -819,9 +819,9 @@ of the total.
 .
 .TP
 .B \-cache-seek-min <percentage> (not yet implemented)
-If seek is to be done and it is within seek-min range, MPlayer will wait
-cache to be filled to this position rather than performing an stream seek.
-(default:50)
+If a seek is to be made to a position within <percentage> of the cache size
+from the current position, MPlayer will wait for the cache to be filled to
+this position rather than performing a stream seek (default: 50).
 .
 .TP
 .B \-cdda <option1:option2> (CDDA only)
