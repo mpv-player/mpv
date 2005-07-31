@@ -120,7 +120,8 @@ static int put_image(struct vf_instance_s* vf, mp_image_t *mpi){
         int W = mpi->w, H = mpi->h;
 
 	mp_image_t *dmpi=vf_get_image(vf->next,mpi->imgfmt,
-		MP_IMGTYPE_IP, MP_IMGFLAG_ACCEPT_STRIDE,
+		MP_IMGTYPE_IP, MP_IMGFLAG_ACCEPT_STRIDE |
+		MP_IMGFLAG_PRESERVE | MP_IMGFLAG_READABLE,
                 mpi->w,mpi->h);
 
 	if(!dmpi) return 0;
