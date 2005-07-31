@@ -266,7 +266,7 @@ int forced_subs_only=0;
 extern int cache_fill_status;
 
 float stream_cache_min_percent=20.0;
-float stream_cache_prefill_percent=5.0;
+float stream_cache_seek_min_percent=50.0;
 #else
 #define cache_fill_status 0
 #endif
@@ -1640,7 +1640,9 @@ goto_enable_cache:
 #endif
 if(stream_cache_size>0){
   current_module="enable_cache";
-  if(!stream_enable_cache(stream,stream_cache_size*1024,stream_cache_size*1024*(stream_cache_min_percent / 100.0),stream_cache_size*1024*(stream_cache_prefill_percent / 100.0)))
+  if(!stream_enable_cache(stream,stream_cache_size*1024,
+                          stream_cache_size*1024*(stream_cache_min_percent / 100.0),
+                          stream_cache_size*1024*(stream_cache_seek_min_percent / 100.0)))
     if((eof = libmpdemux_was_interrupted(PT_NEXT_ENTRY))) goto goto_next_file;
 }
 

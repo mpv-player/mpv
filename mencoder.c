@@ -98,7 +98,7 @@ int stream_cache_size=-1;
 extern int cache_fill_status;
 
 float stream_cache_min_percent=20.0;
-float stream_cache_prefill_percent=5.0;
+float stream_cache_seek_min_percent=50.0;
 #else
 #define cache_fill_status 0
 #endif

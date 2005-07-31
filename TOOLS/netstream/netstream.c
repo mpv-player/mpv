@@ -375,7 +375,7 @@ int main(int argc, char** argv) {
 
 //---- For libmpdemux
 
-float stream_cache_prefill_percent=5.0;
+float stream_cache_seek_min_percent=50.0;
 float stream_cache_min_percent=20.0;
 
 #include <libmpdemux/demuxer.h>

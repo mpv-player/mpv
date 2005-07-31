@@ -42,7 +42,7 @@ typedef struct {
   int sector_size; // size of a single sector (2048/2324)
   int back_size;   // we should keep back_size amount of old bytes for backward seek
   int fill_limit;  // we should fill buffer only if space>=fill_limit
-  int prefill;	   // we should fill min prefill bytes if cache gets empty
+  int seek_limit;  // keep filling cache if distanse is less that seek limit
   // filler's pointers:
   int eof;
   off_t min_filepos; // buffer contain only a part of the file, from min-max pos
@@ -122,7 +122,7 @@ int cache_fill(cache_vars_t* s){
       mp_msg(MSGT_CACHE,MSGL_DBG2,"Out of boundaries... seeking to 0x%X  \n",read);
       // streaming: drop cache contents only if seeking backward or too much fwd:
       if(s->stream->type!=STREAMTYPE_STREAM ||
-          read<s->min_filepos || read>=s->max_filepos+s->buffer_size)
+          read<s->min_filepos || read>=s->max_filepos+s->seek_limit)
       {
         s->offset= // FIXME!?
         s->min_filepos=s->max_filepos=read; // drop cache content :(
@@ -250,7 +250,7 @@ static void exit_sighandler(int x){
   exit(0);
 }
 
-int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
+int stream_enable_cache(stream_t *stream,int size,int min,int seek_limit){
   int ss=(stream->type==STREAMTYPE_VCD)?VCD_SECTOR_DATA:STREAM_BUFFER_SIZE;
   cache_vars_t* s;
 
@@ -264,13 +264,13 @@ int stream_enable_cache(stream_t *stream,int size,int min,int prefill){
   if(s == NULL) return 0;
   stream->cache_data=s;
   s->stream=stream; // callback
-  s->prefill=prefill;
+  s->seek_limit=seek_limit;
 
 
   //make sure that we won't wait from cache_fill
   //more data than it is alowed to fill
-  if (s->prefill > s->buffer_size - s->fill_limit ){
-     s->prefill = s->buffer_size - s->fill_limit;
+  if (s->seek_limit > s->buffer_size - s->fill_limit ){
+     s->seek_limit = s->buffer_size - s->fill_limit;
   }
   if (min > s->buffer_size - s->fill_limit) {
      min = s->buffer_size - s->fill_limit;
