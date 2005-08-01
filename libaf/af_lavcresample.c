@@ -16,7 +16,7 @@
 #include <ffmpeg/rational.h>
 #else
 #include "../libavcodec/avcodec.h"
-#include "../libavcodec/rational.h"
+#include "../libavutil/rational.h"
 #endif
 
 #define CHANS 6
