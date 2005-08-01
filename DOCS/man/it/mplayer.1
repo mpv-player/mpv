@@ -1,8 +1,8 @@
-.\" synced with 1.1032
+.\" synced with 1.1055
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
-.\" Traduzione in italiano di Daniele Forghieri, aggiornamento PaulTT
+.\" Traduzione in italiano di Daniele Forghieri, aggiornamenti PaulTT
 .
 .\" --------------------------------------------------------------------------
 .\" Definizione Macro
@@ -452,8 +452,8 @@ e salvalo in ~/.mplayer/ oppure nella stessa directory del file del film.
 .
 .TP
 .B \-codecs-file <nomefile> (vedi anche \-afm, \-ac, \-vfm, \-vc)
-Usa il file specificato al posto del file codecs.conf di sistema o di quello
-integrato nel programma.
+Sovrascrive il percorso di ricerca standard ed utilizza il file specificato
+al posto di quello integrato nel programma.
 .
 .TP
 .B \-include <configuration\ file>
@@ -468,7 +468,7 @@ non gestiscono in modo giusto il ritorno carrello (cioè \\r).
 .TP
 .B \-priority <prio> (solo Windows)
 Seleziona la priorità del processo MPlayer in accordo con le priorità
-predefinite di Windows.
+predefinite disponibili sotto Windows.
 Possibili valori di <prio>:
 .RSs
 idle|belownormal|normal|abovenormal|high|realtime
@@ -1994,7 +1994,7 @@ uscita audio attraverso JACK (Jack Audio Connection Kit)
 Si connette alla porta con il nome specificato (default: porta fisica).
 .IPs (no)estimate
 Stima il ritardo audio, dovrebbe rendere la riproduzione video più dolce
-(default: abilitato).
+ed uniforme (default: abilitato).
 .RE
 .PD 1
 .
@@ -2801,7 +2801,7 @@ texture della vostra implementazione OpenGL.
 Studiato per funzionare anche con l'implementazione OpenGl più basilare,
 ma usa pure estensioni recenti e nuove, che permettono di usare più spazi
 colore e il rendering diretto.
-Perfavore utilizza \-dr se funziona con la tua implementazione OpenGL, dato
+Per favore utilizza \-dr se funziona con la tua implementazione OpenGL, dato
 che per alte risoluzioni porta a un
 .B grande
 aumento di velocità.
@@ -2830,7 +2830,8 @@ Abilita o disabilita la scalatura dell'aspetto ed il supporto per il
 pan-and-scan (default: abilitato).
 Disabilitarlo può incrementare la velocità.
 .IPs rectangle=<0,1,2>
-Abilita l'utilizzo di texture rettangolari (risparmia RAM video, ma più lento).
+Abilita l'utilizzo di texture rettangolari (risparmia RAM video, ma spesso
+più lento).
 .RSss
 0: Usa textures alla potenza di 2 (power-of-two) (default).
 .br
@@ -3321,7 +3322,7 @@ utilizza la gestione in virgola mobile quando possibile.
 6: Utilizza l'inserimento automatico dei filtri come l'opzione 2 suddetta, ma
 utilizza la gestione in virgola mobile quando possibile.
 .br
-4: Non utilizza l'inserimento automatico dei filtri, come l'opzione 3 suddetta,
+7: Non utilizza l'inserimento automatico dei filtri, come l'opzione 3 suddetta,
 e utilizza la gestione in virgola mobile quando possibile.
 .REss
 .IPs list=<filtri>
