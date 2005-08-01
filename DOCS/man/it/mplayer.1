@@ -1,4 +1,4 @@
-.\" synced with 1.1026
+.\" synced with 1.1032
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -4413,7 +4413,7 @@ più a sinistra possibile)
 .PD 1
 .
 .TP
-.B expand[=w:h:x:y:o]
+.B expand[=w:h:x:y:o:a:r]
 Espande (non scala) la risoluzione del film ai valori passati e
 posiziona i filmato originale non scalato alle coordinate x, y.
 Può essere usato per posizionare i sottotitoli/\:OSD nelle
@@ -4440,6 +4440,20 @@ generazione (stampa) sottotitoli/\:OSD
 .br
 1: abilitata
 .REss
+.IPs <a>\ \ 
+espande ad un aspetto invece che ad una risoluzione (default: 0).
+.sp 1
+.I ESEMPIO:
+.PD 0
+.RSs
+.IP expand=800::::3/4
+Espande a 800x600, a meno che l'origine sia ad una risoluzione più alta,
+nel qual caso espande per ottenere un rapporto di aspetto 4/3.
+.RE
+.PD 1
+.IPs <r>\ \ 
+Arrotonda per eccesso in modo da avere larghezza e altezza divisibili per
+<r> (default: 1).
 .RE
 .
 .TP
@@ -8034,7 +8048,8 @@ quando codifichi in scala di grigio.
 .
 .TP
 .B (no)hq_ac
-Attiva la predizione ad alta qualità dei coefficienti AC dai blocchi vicini.
+Attiva la previsione ad alta qualità dei coefficienti AC dei fotogrammi intra
+dai blocchi circostanti (default: attiva).
 .
 .TP
 .B vhq=<0\-4>
@@ -8322,6 +8337,34 @@ darci su buone combinazioni di opzioni che permettano di ottenere sia una
 buona velocità che una buona qualità.
 .REss
 .
+.TP
+.B turbo=<0\-2>
+Modalità primo passo veloce.
+Durante il primo passaggio di una codifica a 2 o 3 passaggi, è possibile
+guadagnare velocità disabilitando alcune opzioni con un impatto basso o nullo
+sulla qualità di uscita dell'ultimo passaggio.
+.PD 0
+.RSs
+.IPs 0
+disabilitato (default)
+.IPs 1
+Riduce subq, frameref e disabilita alcune modalità di analisi di partizioni
+dei macroblocchi inter.
+.IPs 2
+Riduce subq e frameref a 1, usa una ricerca di movimento a diamante e
+disabilita tutte le modalità di analisi di partizione.
+.RE
+.RS
+Il livello 1 può aumentare fino al doppio la velocità del primo passaggio,
+senza differenze nel PSNR complessivo dell'ultimo passo, rispetto ad un
+primo passo a piena qualità.
+.br
+Il livello 2 può aumentare di 4 volte la velocità del primo passaggio, con
+una differenza di circa +/- 0.05dB nel PSNR complessivo dell'ultimo passo,
+rispetto ad un primo passo a piena qualità.
+.REss
+.
+.TP
 .B keyint=<valore>
 Seleziona l'intervallo massimo tra due fotogrammi IDR (default: 250).
 Valori maggiori permettono di risparmiare bit, incrementando la qualità a
