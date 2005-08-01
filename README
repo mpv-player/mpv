@@ -70,9 +70,9 @@ created. You can later update your sources by saying
 from within that directory.
 
 
-_______________________________________________
-STEP1: Installing FFmpeg libavcodec/libavformat
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+_________________________________________________________
+STEP1: Installing FFmpeg libavcodec/libavutil/libavformat
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 If you are using an official (pre)release or a CVS snapshot, skip this step,
 since official releases include libavcodec. CVS sources do not include
@@ -88,21 +88,23 @@ To get the FFmpeg sources, use the following commands in a suitable directory
 outside the MPlayer source directory:
 
 cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login
-cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg/libavcodec
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co ffmpeg
 
 When asked for a password, you can just hit enter. A directory named 'ffmpeg'
-with a subdirectory named 'libavcodec' inside will be created. Copy (symbolic
-linking does NOT suffice) this subdirectory into the MPlayer source tree.
+with subdirectories named 'libavcodec' and 'libavutil' inside will be created.
+Copy (symbolic linking does NOT suffice) these subdirectories into the MPlayer
+source tree.
 
 In order to force automatic updates of libavcodec when you update MPlayer, add
-the following line to main/CVS/Entries:
+the following lines to main/CVS/Entries:
 
 D/libavcodec////
+D/libavutil////
 
 FFmpeg also contains libavformat, a library to decode container formats that
-can optionally be used to extend MPlayer's container format support. Get it
-from FFmpeg CVS by the same steps outlined above for libavcodec, just
-substitute libavcodec by libavformat everywhere.
+can optionally be used to extend MPlayer's container format support. If you
+wish to use it, also copy the libavformat subdirectory into the MPlayer
+source tree and add another line to main/CVS/Entries.
 
 
 _______________________________
