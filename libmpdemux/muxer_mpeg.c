@@ -2312,7 +2312,7 @@ static int parse_audio(muxer_stream_t *s, int finalize, int *nf, double *timer)
 			{
 				if(s->b_buffer[i] == 0xFF && ((s->b_buffer[i+1] & 0xE0) == 0xE0))
 				{
-					len = mp_get_mp3_header(&(s->b_buffer[i]), &chans, &srate, &spf, &layer);
+					len = mp_get_mp3_header(&(s->b_buffer[i]), &chans, &srate, &spf, &layer, NULL);
 					if(len > 0 && (srate == s->wf->nSamplesPerSec) && (i + len <= s->b_buffer_len))
 					{
 						frames++;

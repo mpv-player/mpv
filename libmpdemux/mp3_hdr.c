@@ -34,8 +34,9 @@ int mp_mp3_get_lsf(unsigned char* hbuf){
 /*
  * return frame size or -1 (bad frame)
  */
-int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int* mpa_layer){
+int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int* mpa_layer, int* br){
     int stereo,ssize,lsf,framesize,padding,bitrate_index,sampling_frequency, divisor;
+    int bitrate;
     int layer, mult[3] = { 12000, 144000, 144000 };
     unsigned long newhead = 
       hbuf[0] << 24 |
@@ -99,7 +100,8 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int*
       ssize = (stereo == 1) ? 17 : 32;
     if(!((newhead>>16)&0x1)) ssize += 2; // CRC
 
-    framesize = tabsel_123[lsf][layer-1][bitrate_index] * mult[layer-1];
+    bitrate = tabsel_123[lsf][layer-1][bitrate_index];
+    framesize = bitrate * mult[layer-1];
 
     mp_msg(MSGT_DEMUXER,MSGL_DBG2,"FRAMESIZE: %d, layer: %d, bitrate: %d, mult: %d\n", 
     	framesize, layer, tabsel_123[lsf][layer-1][bitrate_index], mult[layer-1]);
@@ -131,6 +133,7 @@ int mp_get_mp3_header(unsigned char* hbuf,int* chans, int* srate, int* spf, int*
     }
     if(mpa_layer) *mpa_layer = layer;
     if(chans) *chans = stereo;
+    if(br) *br = bitrate;
 
     return framesize;
 }
