@@ -106,8 +106,15 @@ SRCS += muxer.c \
         muxer_rawaudio.c \
         muxer_rawvideo.c \
 
+LIBAV_INC =
+ifeq ($(CONFIG_LIBAVUTIL),yes)
+LIBAV_INC += -I../libavutil
+endif
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+LIBAV_INC += -I../libavcodec
+endif
 ifeq ($(CONFIG_LIBAVFORMAT),yes)
-LIBAV_INC = -I../libavcodec -I../libavformat
+LIBAV_INC += -I../libavformat
 SRCS += muxer_lavf.c
 endif
 

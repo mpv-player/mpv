@@ -8,6 +8,14 @@ include config.mak
 
 PRG_CFG = codec-cfg
 
+LIBAV_INC =
+ifeq ($(CONFIG_LIBAVUTIL),yes)
+LIBAV_INC += -I./libavutil
+endif
+ifeq ($(CONFIG_LIBAVCODEC),yes)
+LIBAV_INC += -I./libavcodec
+endif
+
 # Do not strip the binaries at installation
 ifeq ($(STRIPBINARIES),yes)
 INSTALLSTRIP = -s
@@ -129,6 +137,7 @@ CFLAGS = $(OPTFLAGS) -I. \
          $(SDL_INC) \
          $(X11_INC) \
          $(XVID_INC) \
+         $(LIBAV_INC) \
 
 #CFLAGS += -Wall
 
@@ -291,6 +300,9 @@ loader/dshow/libDS_Filter.a:
 
 loader/dmo/libDMO_Filter.a:
 	$(MAKE) -C loader/dmo
+
+libavutil/libavutil.a:
+	$(MAKE) -C libavutil LIBPREF=lib LIBSUF=.a
 
 libavcodec/libavcodec.a:
 	$(MAKE) -C libavcodec LIBPREF=lib LIBSUF=.a
