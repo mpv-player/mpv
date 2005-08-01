@@ -71,6 +71,34 @@ typedef struct  __attribute__((packed)) rtframeheader
    					// R:     do not use here! (fixed 'RTjjjjjjjjjjjjjj')
 } rtframeheader;
 
+/* for MythTV */
+typedef struct __attribute__((packed)) extendeddata
+{
+   int version;            // yes, this is repeated from the file header
+   int video_fourcc;       // video encoding method used 
+   int audio_fourcc;       // audio encoding method used
+   // generic data
+   int audio_sample_rate;
+   int audio_bits_per_sample;
+   int audio_channels;
+   // codec specific
+   // mp3lame
+   int audio_compression_ratio;
+   int audio_quality;
+   // rtjpeg
+   int rtjpeg_quality;
+   int rtjpeg_luma_filter;
+   int rtjpeg_chroma_filter;
+   // libavcodec
+   int lavc_bitrate;
+   int lavc_qmin;
+   int lavc_qmax;
+   int lavc_maxqdiff;
+   // unused for later -- total size of 128 integers.
+   // new fields must be added at the end, above this comment.
+   int expansion[113];
+} extendeddata;
+
 #define FRAMEHEADERSIZE sizeof(rtframeheader)
 #define FILEHEADERSIZE  sizeof(rtfileheader)
 
@@ -107,5 +135,22 @@ typedef struct audbuffertype
 #define le2me_rtframeheader(h) {				\
     (h)->timecode = le2me_32((h)->timecode);			\
     (h)->packetlength = le2me_32((h)->packetlength);		\
+  }
+#define le2me_extendeddata(h) {					\
+   (h)->version = le2me_32((h)->version);			\
+   (h)->video_fourcc = le2me_32((h)->video_fourcc);		\
+   (h)->audio_fourcc = le2me_32((h)->audio_fourcc);		\
+   (h)->audio_sample_rate = le2me_32((h)->audio_sample_rate);	\
+   (h)->audio_bits_per_sample = le2me_32((h)->audio_bits_per_sample);\
+   (h)->audio_channels = le2me_32((h)->audio_channels);		\
+   (h)->audio_compression_ratio = le2me_32((h)->audio_compression_ratio);\
+   (h)->audio_quality = le2me_32((h)->audio_quality);		\
+   (h)->rtjpeg_quality = le2me_32((h)->rtjpeg_quality);		\
+   (h)->rtjpeg_luma_filter = le2me_32((h)->rtjpeg_luma_filter);	\
+   (h)->rtjpeg_chroma_filter = le2me_32((h)->rtjpeg_chroma_filter);\
+   (h)->lavc_bitrate = le2me_32((h)->lavc_bitrate);		\
+   (h)->lavc_qmin = le2me_32((h)->lavc_qmin);			\
+   (h)->lavc_qmax = le2me_32((h)->lavc_qmax);			\
+   (h)->lavc_maxqdiff = le2me_32((h)->lavc_maxqdiff);		\
   }
 

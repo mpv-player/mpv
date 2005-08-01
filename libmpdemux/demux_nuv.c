@@ -43,6 +43,22 @@ typedef struct _nuv_info_t
 	nuv_position_t *current_position;
 } nuv_priv_t;
 
+/**
+ * \brief find best matching bitrate (in kbps) out of a table
+ * \param bitrate bitrate to find best match for
+ * \return best match from table
+ */
+static int nearestBitrate(int bitrate) {
+  const int rates[17] = {8000, 16000, 24000, 32000, 40000, 48000, 56000,
+                         64000, 80000, 96000, 112000, 128000, 160000,
+                         192000, 224000, 256000, 320000};
+  int i;
+  for (i = 0; i < 16; i++) {
+    if ((rates[i] + rates[i + 1]) / 2 > bitrate)
+      break;
+  }
+  return rates[i];
+}
 
 /**
  * Seek to a position relative to the current position, indicated in time.
@@ -154,12 +170,19 @@ int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 	    rtjpeg_frameheader.packetlength);
 #endif
 
-	/* Skip Seekpoint, Text and Sync for now */
+	/* Skip Seekpoint, Extended header and Sync for now */
 	if ((rtjpeg_frameheader.frametype == 'R') ||
-	    (rtjpeg_frameheader.frametype == 'T') ||
+	    (rtjpeg_frameheader.frametype == 'X') ||
 	    (rtjpeg_frameheader.frametype == 'S'))
 	    return 1;
 	
+	/* Skip seektable and text (these have a payload) */
+	if ((rtjpeg_frameheader.frametype == 'Q') ||
+	    (rtjpeg_frameheader.frametype == 'T')) {
+	  stream_skip(demuxer->stream, rtjpeg_frameheader.packetlength);
+	  return 1;
+	}
+
 	if (((rtjpeg_frameheader.frametype == 'D') &&
 	    (rtjpeg_frameheader.comptype == 'R')) ||
 	    (rtjpeg_frameheader.frametype == 'V'))
@@ -181,9 +204,7 @@ int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 
 
 	} else
-	/* copy PCM only */
-	if (demuxer->audio && (rtjpeg_frameheader.frametype == 'A') &&
-	    (rtjpeg_frameheader.comptype == '0'))
+	if (demuxer->audio && (rtjpeg_frameheader.frametype == 'A'))
 	{
 	    priv->current_audio_frame++;
 	    if (want_audio) {
@@ -194,15 +215,99 @@ int demux_nuv_fill_buffer ( demuxer_t *demuxer )
 			       orig_pos + 12, 0 );
 	    } else {
 	      /* skip audio block */
-	      stream_seek ( demuxer->stream,
-			    stream_tell ( demuxer->stream )
-			    + rtjpeg_frameheader.packetlength );
+	      stream_skip ( demuxer->stream,
+			    rtjpeg_frameheader.packetlength );
 	    }
 	}
 
 	return 1;
 }
 
+/* Scan for the extended data in MythTV nuv streams */
+static int demux_xscan_nuv(demuxer_t* demuxer, int width, int height) {
+  int i;
+  int res = 0;
+  off_t orig_pos = stream_tell(demuxer->stream);
+  struct rtframeheader rtjpeg_frameheader;
+  struct extendeddata ext;
+  sh_video_t* sh_video = demuxer->video->sh;
+  sh_audio_t* sh_audio = demuxer->audio->sh;
+
+  for (i = 0; i < 2; ++i) {
+    if (stream_read(demuxer->stream, (char*)&rtjpeg_frameheader,
+              sizeof(rtjpeg_frameheader)) < sizeof(rtjpeg_frameheader))
+      goto out;
+
+    if (rtjpeg_frameheader.frametype != 'X')
+      stream_skip(demuxer->stream, rtjpeg_frameheader.packetlength);
+  }
+  
+  if ( rtjpeg_frameheader.frametype != 'X' )
+    goto out;
+
+  if (rtjpeg_frameheader.packetlength != sizeof(ext)) {
+    mp_msg(MSGT_DEMUXER, MSGL_WARN, 
+           "NUV extended frame does not have expected length, ignoring\n");
+    goto out;
+  }
+  le2me_extendeddata(&ext);
+
+  if (stream_read(demuxer->stream, (char*)&ext, sizeof(ext)) < sizeof(ext))
+    goto out;
+
+  if (ext.version != 1) {
+    mp_msg(MSGT_DEMUXER, MSGL_WARN,
+           "NUV extended frame has unknown version number (%d), ignoring\n",
+           ext.version);
+    goto out;
+  }
+
+  mp_msg(MSGT_DEMUXER, MSGL_V, "Detected MythTV stream\n");
+
+  /* Video parameters */
+  mp_msg(MSGT_DEMUXER, MSGL_V, "FOURCC: %c%c%c%c\n",
+         (ext.video_fourcc >> 24) & 0xff,
+         (ext.video_fourcc >> 16) & 0xff,
+         (ext.video_fourcc >> 8) & 0xff,
+         (ext.video_fourcc) & 0xff);
+  sh_video->format = ext.video_fourcc;
+  sh_video->i_bps = ext.lavc_bitrate;
+
+  /* Audio parameters */
+  if (ext.audio_fourcc == mmioFOURCC('L', 'A', 'M', 'E')) {
+    sh_audio->format = 0x55;
+  } else if (ext.audio_fourcc == mmioFOURCC('R', 'A', 'W', 'A')) {
+    sh_audio->format = 0x1;
+  } else {
+    mp_msg(MSGT_DEMUXER, MSGL_WARN,
+           "Unknown audio format 0x%x\n", ext.audio_fourcc);
+  }
+
+  sh_audio->channels = ext.audio_channels;
+  sh_audio->samplerate = ext.audio_sample_rate;
+  sh_audio->i_bps = sh_audio->channels * sh_audio->samplerate *
+                    ext.audio_bits_per_sample;
+  if (sh_audio->format != 0x1)
+    sh_audio->i_bps = nearestBitrate(sh_audio->i_bps /
+                                     ext.audio_compression_ratio);
+  sh_audio->wf->wFormatTag = sh_audio->format;
+  sh_audio->wf->nChannels = sh_audio->channels;
+  sh_audio->wf->nSamplesPerSec = sh_audio->samplerate;
+  sh_audio->wf->nAvgBytesPerSec = sh_audio->i_bps / 8;
+  sh_audio->wf->nBlockAlign = sh_audio->channels * 2;
+  sh_audio->wf->wBitsPerSample = ext.audio_bits_per_sample;
+  sh_audio->wf->cbSize = 0;
+
+  mp_msg(MSGT_DEMUXER, MSGL_V,
+         "channels=%d bitspersample=%d samplerate=%d compression_ratio=%d\n",
+          ext.audio_channels, ext.audio_bits_per_sample,
+          ext.audio_sample_rate, ext.audio_compression_ratio);
+  return 1;
+out:
+  stream_reset(demuxer->stream);
+  stream_seek(demuxer->stream, orig_pos);
+  return 0;
+}
 
 demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 {
@@ -282,6 +387,13 @@ demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 	    sh_audio->wf->cbSize = 0;
 	}
 
+	/* Check for extended data (X frame) and read settings from it */
+	if (!demux_xscan_nuv(demuxer, rtjpeg_fileheader.width,
+	                     rtjpeg_fileheader.height))
+	  /* Otherwise assume defaults */
+	  mp_msg(MSGT_DEMUXER, MSGL_V, "No NUV extended frame, using defaults\n");
+
+
 	priv->index_list = (nuv_position_t*) malloc(sizeof(nuv_position_t));
 	priv->index_list->frame = 0;
 	priv->index_list->time = 0;
@@ -304,9 +416,12 @@ int nuv_check_file ( demuxer_t* demuxer )
 	if(stream_read(demuxer->stream,(char*)&ns,sizeof(ns)) != sizeof(ns))
 		return 0;
 
-	if ( strncmp ( ns.finfo, "NuppelVideo", 12 ) ) 
+	if ( strncmp ( ns.finfo, "NuppelVideo", 12 ) &&
+	     strncmp ( ns.finfo, "MythTVVideo", 12 ) ) 
 		return 0; /* Not a NuppelVideo file */
-	if ( strncmp ( ns.version, "0.05", 5 ) ) 
+	if ( strncmp ( ns.version, "0.05", 5 ) &&
+	     strncmp ( ns.version, "0.06", 5 ) &&
+	     strncmp ( ns.version, "0.07", 5 ) )
 		return 0; /* Wrong version NuppelVideo file */
 
 	/* Return to original position */
