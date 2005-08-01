@@ -235,13 +235,15 @@ and offers the most features. In order to achieve this do:
   <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec</screen>
+  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec ffmpeg/libavutil</screen>
   </para></step>
 <step><para>
-  Move the <filename>libavcodec</filename> directory from the FFmpeg
+  Move the <filename>libavcodec</filename> and <filename>libavutil</filename>
+  directories from the FFmpeg
   sources to the root of the <application>MPlayer</application> CVS tree.
   It should look like this:
   <filename class="directory">main/libavcodec</filename>
+  <filename class="directory">main/libavutil</filename>
   </para><para>
   Symlinking is <emphasis role="bold">not</emphasis> enough, you have to
   copy/move it!
@@ -252,6 +254,7 @@ and offers the most features. In order to achieve this do:
   <application>MPlayer</application> CVS, put the following line into the
   <filename>main/CVS/Entries</filename> file:
   <screen>D/libavcodec////</screen>
+  <screen>D/libavutil////</screen>
   </para></step>
 <step><para>
   Compile. <filename>configure</filename> should detect problems before
