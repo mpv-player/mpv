@@ -1,4 +1,4 @@
-.\" synced with 1.1055
+.\" synced with 1.1058
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "28 Juillet 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "01 Août 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -864,9 +864,11 @@ La lecture commencera quand le cache sera rempli jusqu'à <pourcentage>
 du total.
 .
 .TP
-.B \-cache-prefill <pourcentage> (pas encore implémenté)
-Si le cache se trouve vidé, MPlayer marquera une pose tant que
-<pourcentage> du cache ne sera pas rempli.
+.B \-cache-seek-min <pourcentage> (pas encore implémenté)
+Si un déplacement (seek) est demandé à une position située à <pourcentage>
+de la taille du cache depuis la position courante, MPlayer va attendre
+que le cache se remplisse jusqu'à cette position au lieu de réaliser un
+seek sur flux (par défaut\ : 50).
 .
 .TP
 .B \-cdda <option1:option2>
