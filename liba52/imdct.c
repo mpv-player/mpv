@@ -101,7 +101,7 @@ static uint8_t bit_reverse_256[] = {
 	0x03, 0x23, 0x13, 0x33, 0x0b, 0x2b, 0x1b, 0x3b, 
 	0x07, 0x27, 0x17, 0x37, 0x0f, 0x2f, 0x1f, 0x3f};
 
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 // NOTE: SSE needs 16byte alignment or it will segfault 
 // 
 static complex_t __attribute__((aligned(16))) buf[128];
@@ -442,8 +442,8 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
   int k;
   int p,q;
   int m;
-  int two_m;
-  int two_m_plus_one;
+  long two_m;
+  long two_m_plus_one;
 
   sample_t tmp_b_i;
   sample_t tmp_b_r;
@@ -747,7 +747,7 @@ imdct_do_512_altivec(sample_t data[],sample_t delay[], sample_t bias)
 
 // Stuff below this line is borrowed from libac3
 #include "srfftp.h"
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 #ifndef HAVE_3DNOW
 #define HAVE_3DNOW 1
 #endif
@@ -768,9 +768,9 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 /*	int i,k;
     int p,q;*/
     int m;
-    int two_m;
-    int two_m_plus_one;
-    int two_m_plus_one_shl3;
+    long two_m;
+    long two_m_plus_one;
+    long two_m_plus_one_shl3;
     complex_t *buf_offset;
 
 /*  sample_t tmp_a_i;
@@ -788,33 +788,33 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
     /* Bit reversed shuffling */
 	asm volatile(
-		"xorl %%esi, %%esi			\n\t"
-		"leal "MANGLE(bit_reverse_512)", %%eax	\n\t"
-		"movl $1008, %%edi			\n\t"
-		"pushl %%ebp				\n\t" //use ebp without telling gcc
+		"xor %%"REG_S", %%"REG_S"		\n\t"
+		"lea "MANGLE(bit_reverse_512)", %%"REG_a"\n\t"
+		"mov $1008, %%"REG_D"			\n\t"
+		"push %%"REG_BP"			\n\t" //use ebp without telling gcc
 		".balign 16				\n\t"
 		"1:					\n\t"
-		"movlps (%0, %%esi), %%xmm0		\n\t" // XXXI
-		"movhps 8(%0, %%edi), %%xmm0		\n\t" // RXXI
-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // XXXi
-		"movhps (%0, %%edi), %%xmm1		\n\t" // rXXi
+		"movlps (%0, %%"REG_S"), %%xmm0	\n\t" // XXXI
+		"movhps 8(%0, %%"REG_D"), %%xmm0	\n\t" // RXXI
+		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // XXXi
+		"movhps (%0, %%"REG_D"), %%xmm1	\n\t" // rXXi
 		"shufps $0x33, %%xmm1, %%xmm0		\n\t" // irIR
-		"movaps "MANGLE(sseSinCos1c)"(%%esi), %%xmm2\n\t"
+		"movaps "MANGLE(sseSinCos1c)"(%%"REG_S"), %%xmm2\n\t"
 		"mulps %%xmm0, %%xmm2			\n\t"
 		"shufps $0xB1, %%xmm0, %%xmm0		\n\t" // riRI
-		"mulps "MANGLE(sseSinCos1d)"(%%esi), %%xmm0\n\t"
+		"mulps "MANGLE(sseSinCos1d)"(%%"REG_S"), %%xmm0\n\t"
 		"subps %%xmm0, %%xmm2			\n\t"
-		"movzbl (%%eax), %%edx			\n\t"
-		"movzbl 1(%%eax), %%ebp			\n\t"
-		"movlps %%xmm2, (%1, %%edx,8)		\n\t"
-		"movhps %%xmm2, (%1, %%ebp,8)		\n\t"
-		"addl $16, %%esi			\n\t"
-		"addl $2, %%eax				\n\t" // avoid complex addressing for P4 crap
-		"subl $16, %%edi			\n\t"
-		" jnc 1b				\n\t"
-		"popl %%ebp				\n\t"//no we didnt touch ebp *g*
-		:: "b" (data), "c" (buf)
-		: "%esi", "%edi", "%eax", "%edx"
+		"movzb (%%"REG_a"), %%"REG_d"		\n\t"
+		"movzb 1(%%"REG_a"), %%"REG_BP"		\n\t"
+		"movlps %%xmm2, (%1, %%"REG_d", 8)	\n\t"
+		"movhps %%xmm2, (%1, %%"REG_BP", 8)	\n\t"
+		"add $16, %%"REG_S"			\n\t"
+		"add $2, %%"REG_a"			\n\t" // avoid complex addressing for P4 crap
+		"sub $16, %%"REG_D"			\n\t"
+		"jnc 1b				 	\n\t"
+		"pop %%"REG_BP"				\n\t"//no we didnt touch ebp *g*
+		:: "r" (data), "r" (buf)
+		: "%"REG_S, "%"REG_D, "%"REG_a, "%"REG_d
 	);
 
 
@@ -850,44 +850,44 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	asm volatile(
 		"xorps %%xmm1, %%xmm1	\n\t"
 		"xorps %%xmm2, %%xmm2	\n\t"
-		"movl %0, %%esi		\n\t"
+		"mov %0, %%"REG_S"	\n\t"
 		".balign 16				\n\t"
 		"1:			\n\t"
-		"movlps (%%esi), %%xmm0	\n\t" //buf[p]
-		"movlps 8(%%esi), %%xmm1\n\t" //buf[q]
-		"movhps (%%esi), %%xmm0	\n\t" //buf[p]
-		"movhps 8(%%esi), %%xmm2\n\t" //buf[q]
+		"movlps (%%"REG_S"), %%xmm0\n\t" //buf[p]
+		"movlps 8(%%"REG_S"), %%xmm1\n\t" //buf[q]
+		"movhps (%%"REG_S"), %%xmm0\n\t" //buf[p]
+		"movhps 8(%%"REG_S"), %%xmm2\n\t" //buf[q]
 		"addps %%xmm1, %%xmm0	\n\t"
 		"subps %%xmm2, %%xmm0	\n\t"
-		"movaps %%xmm0, (%%esi)	\n\t"
-		"addl $16, %%esi	\n\t"
-		"cmpl %1, %%esi		\n\t"
+		"movaps %%xmm0, (%%"REG_S")\n\t"
+		"add $16, %%"REG_S"	\n\t"
+		"cmp %1, %%"REG_S"	\n\t"
 		" jb 1b			\n\t"
 		:: "g" (buf), "r" (buf + 128)
-		: "%esi"
+		: "%"REG_S
 	);
         
     /* 2. iteration */
 	// Note w[1]={{1,0}, {0,-1}}
 	asm volatile(
 		"movaps "MANGLE(ps111_1)", %%xmm7\n\t" // 1,1,1,-1
-		"movl %0, %%esi			\n\t"
+		"mov %0, %%"REG_S"		\n\t"
 		".balign 16				\n\t"
 		"1:				\n\t"
-		"movaps 16(%%esi), %%xmm2	\n\t" //r2,i2,r3,i3
+		"movaps 16(%%"REG_S"), %%xmm2	\n\t" //r2,i2,r3,i3
 		"shufps $0xB4, %%xmm2, %%xmm2	\n\t" //r2,i2,i3,r3
 		"mulps %%xmm7, %%xmm2		\n\t" //r2,i2,i3,-r3
-		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
-		"movaps (%%esi), %%xmm1		\n\t" //r0,i0,r1,i1
+		"movaps (%%"REG_S"), %%xmm0	\n\t" //r0,i0,r1,i1
+		"movaps (%%"REG_S"), %%xmm1	\n\t" //r0,i0,r1,i1
 		"addps %%xmm2, %%xmm0		\n\t"
 		"subps %%xmm2, %%xmm1		\n\t"
-		"movaps %%xmm0, (%%esi)		\n\t"
-		"movaps %%xmm1, 16(%%esi)	\n\t"
-		"addl $32, %%esi	\n\t"
-		"cmpl %1, %%esi		\n\t"
+		"movaps %%xmm0, (%%"REG_S")	\n\t"
+		"movaps %%xmm1, 16(%%"REG_S")	\n\t"
+		"add $32, %%"REG_S"	\n\t"
+		"cmp %1, %%"REG_S"	\n\t"
 		" jb 1b			\n\t"
 		:: "g" (buf), "r" (buf + 128)
-		: "%esi"
+		: "%"REG_S
 	);
 
     /* 3. iteration */
@@ -902,11 +902,11 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"movaps 16+"MANGLE(sseW2)", %%xmm7\n\t" 
 		"xorps %%xmm5, %%xmm5		\n\t"
 		"xorps %%xmm2, %%xmm2		\n\t"
-		"movl %0, %%esi			\n\t"
+		"mov %0, %%"REG_S"		\n\t"
 		".balign 16			\n\t"
 		"1:				\n\t"
-		"movaps 32(%%esi), %%xmm2	\n\t" //r4,i4,r5,i5
-		"movaps 48(%%esi), %%xmm3	\n\t" //r6,i6,r7,i7
+		"movaps 32(%%"REG_S"), %%xmm2	\n\t" //r4,i4,r5,i5
+		"movaps 48(%%"REG_S"), %%xmm3	\n\t" //r6,i6,r7,i7
 		"movaps "MANGLE(sseW2)", %%xmm4	\n\t" //r4,i4,r5,i5
 		"movaps 32+"MANGLE(sseW2)", %%xmm5\n\t" //r6,i6,r7,i7
 		"mulps %%xmm2, %%xmm4		\n\t"
@@ -915,8 +915,8 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"shufps $0xB1, %%xmm3, %%xmm3	\n\t" //i6,r6,i7,r7
 		"mulps %%xmm6, %%xmm3		\n\t"
 		"mulps %%xmm7, %%xmm2		\n\t"
-		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
-		"movaps 16(%%esi), %%xmm1	\n\t" //r2,i2,r3,i3
+		"movaps (%%"REG_S"), %%xmm0	\n\t" //r0,i0,r1,i1
+		"movaps 16(%%"REG_S"), %%xmm1	\n\t" //r2,i2,r3,i3
 		"addps %%xmm4, %%xmm2		\n\t"
 		"addps %%xmm5, %%xmm3		\n\t"
 		"movaps %%xmm2, %%xmm4		\n\t"
@@ -925,15 +925,15 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"addps %%xmm1, %%xmm3		\n\t"
 		"subps %%xmm4, %%xmm0		\n\t"
 		"subps %%xmm5, %%xmm1		\n\t"
-		"movaps %%xmm2, (%%esi)		\n\t" 
-		"movaps %%xmm3, 16(%%esi)	\n\t" 
-		"movaps %%xmm0, 32(%%esi)	\n\t" 
-		"movaps %%xmm1, 48(%%esi)	\n\t" 
-		"addl $64, %%esi	\n\t"
-		"cmpl %1, %%esi		\n\t"
+		"movaps %%xmm2, (%%"REG_S")	\n\t" 
+		"movaps %%xmm3, 16(%%"REG_S")	\n\t" 
+		"movaps %%xmm0, 32(%%"REG_S")	\n\t" 
+		"movaps %%xmm1, 48(%%"REG_S")	\n\t" 
+		"add $64, %%"REG_S"	\n\t"
+		"cmp %1, %%"REG_S"	\n\t"
 		" jb 1b			\n\t"
 		:: "g" (buf), "r" (buf + 128)
-		: "%esi"
+		: "%"REG_S
 	);
 
     /* 4-7. iterations */
@@ -943,52 +943,52 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 	two_m_plus_one_shl3 = (two_m_plus_one<<3);
 	buf_offset = buf+128;
 	asm volatile(
-		"movl %0, %%esi				\n\t"
+		"mov %0, %%"REG_S"			\n\t"
 		".balign 16				\n\t"
 		"1:					\n\t"
-		"xorl %%edi, %%edi			\n\t" // k
-		"leal (%%esi, %3), %%edx		\n\t"
+		"xor %%"REG_D", %%"REG_D"		\n\t" // k
+		"lea (%%"REG_S", %3), %%"REG_d"		\n\t"
 		"2:					\n\t"
-		"movaps (%%edx, %%edi), %%xmm1		\n\t"
-		"movaps (%4, %%edi, 2), %%xmm2		\n\t"
+		"movaps (%%"REG_d", %%"REG_D"), %%xmm1	\n\t"
+		"movaps (%4, %%"REG_D", 2), %%xmm2	\n\t"
 		"mulps %%xmm1, %%xmm2			\n\t"
 		"shufps $0xB1, %%xmm1, %%xmm1		\n\t"
-		"mulps 16(%4, %%edi, 2), %%xmm1		\n\t"
-		"movaps (%%esi, %%edi), %%xmm0		\n\t"
+		"mulps 16(%4, %%"REG_D", 2), %%xmm1	\n\t"
+		"movaps (%%"REG_S", %%"REG_D"), %%xmm0	\n\t"
 		"addps %%xmm2, %%xmm1			\n\t"
 		"movaps %%xmm1, %%xmm2			\n\t"
 		"addps %%xmm0, %%xmm1			\n\t"
 		"subps %%xmm2, %%xmm0			\n\t"
-		"movaps %%xmm1, (%%esi, %%edi)		\n\t"
-		"movaps %%xmm0, (%%edx, %%edi)		\n\t"
-		"addl $16, %%edi			\n\t"
-		"cmpl %3, %%edi				\n\t" //FIXME (opt) count against 0 
-		" jb 2b					\n\t"
-		"addl %2, %%esi				\n\t"
-		"cmpl %1, %%esi				\n\t"
+		"movaps %%xmm1, (%%"REG_S", %%"REG_D")	\n\t"
+		"movaps %%xmm0, (%%"REG_d", %%"REG_D")	\n\t"
+		"add $16, %%"REG_D"			\n\t"
+		"cmp %3, %%"REG_D"			\n\t" //FIXME (opt) count against 0 
+		"jb 2b					\n\t"
+		"add %2, %%"REG_S"			\n\t"
+		"cmp %1, %%"REG_S"			\n\t"
 		" jb 1b					\n\t"
 		:: "g" (buf), "m" (buf_offset), "m" (two_m_plus_one_shl3), "r" (two_m<<3),
 		   "r" (sseW[m])
-		: "%esi", "%edi", "%edx"
+		: "%"REG_S, "%"REG_D, "%"REG_d
 	);
     }
 
     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
 	asm volatile(
-		"movl $-1024, %%esi			\n\t"
+		"mov $-1024, %%"REG_S"			\n\t"
 		".balign 16				\n\t"
 		"1:					\n\t"
-		"movaps (%0, %%esi), %%xmm0		\n\t"
-		"movaps (%0, %%esi), %%xmm1		\n\t"
+		"movaps (%0, %%"REG_S"), %%xmm0		\n\t"
+		"movaps (%0, %%"REG_S"), %%xmm1		\n\t"
 		"shufps $0xB1, %%xmm0, %%xmm0		\n\t"
-		"mulps 1024+"MANGLE(sseSinCos1c)"(%%esi), %%xmm1\n\t"
-		"mulps 1024+"MANGLE(sseSinCos1d)"(%%esi), %%xmm0\n\t"
+		"mulps 1024+"MANGLE(sseSinCos1c)"(%%"REG_S"), %%xmm1\n\t"
+		"mulps 1024+"MANGLE(sseSinCos1d)"(%%"REG_S"), %%xmm0\n\t"
 		"addps %%xmm1, %%xmm0			\n\t"
-		"movaps %%xmm0, (%0, %%esi)		\n\t"
-		"addl $16, %%esi			\n\t"
+		"movaps %%xmm0, (%0, %%"REG_S")		\n\t"
+		"add $16, %%"REG_S"			\n\t"
 		" jnz 1b				\n\t"
 		:: "r" (buf+128)
-		: "%esi"
+		: "%"REG_S
 	);   
 
 	
@@ -998,54 +998,54 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 
     /* Window and convert to real valued signal */
 	asm volatile(
-		"xorl %%edi, %%edi			\n\t"  // 0
-		"xorl %%esi, %%esi			\n\t"  // 0
+		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
+		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		"movss %3, %%xmm2			\n\t"  // bias
 		"shufps $0x00, %%xmm2, %%xmm2		\n\t"  // bias, bias, ...
 		".balign 16				\n\t"
 		"1:					\n\t"
-		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? A ?
-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? C ?
-		"movhps -16(%0, %%edi), %%xmm1		\n\t" // ? D C ?
-		"movhps -8(%0, %%edi), %%xmm0		\n\t" // ? B A ?
+		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? A ?
+		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? C ?
+		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // ? D C ?
+		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // ? B A ?
 		"shufps $0x99, %%xmm1, %%xmm0		\n\t" // D C B A
-		"mulps "MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
-		"addps (%2, %%esi), %%xmm0		\n\t"
+		"mulps "MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
+		"addps (%2, %%"REG_S"), %%xmm0		\n\t"
 		"addps %%xmm2, %%xmm0			\n\t"
-		"movaps %%xmm0, (%1, %%esi)		\n\t"
-		"addl $16, %%esi			\n\t"
-		"subl $16, %%edi			\n\t"
-		"cmpl $512, %%esi			\n\t" 
+		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
+		"add  $16, %%"REG_S"			\n\t"
+		"sub  $16, %%"REG_D"			\n\t"
+		"cmp  $512, %%"REG_S"			\n\t" 
 		" jb 1b					\n\t"
 		:: "r" (buf+64), "r" (data_ptr), "r" (delay_ptr), "m" (bias)
-		: "%esi", "%edi"
+		: "%"REG_S, "%"REG_D
 	);
 	data_ptr+=128;
 	delay_ptr+=128;
 //	window_ptr+=128;
 	
 	asm volatile(
-		"movl $1024, %%edi			\n\t"  // 512
-		"xorl %%esi, %%esi			\n\t"  // 0
+		"mov $1024, %%"REG_D"			\n\t"  // 512
+		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		"movss %3, %%xmm2			\n\t"  // bias
 		"shufps $0x00, %%xmm2, %%xmm2		\n\t"  // bias, bias, ...
 		".balign 16				\n\t"
 		"1:					\n\t"
-		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? ? A
-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? ? C
-		"movhps -16(%0, %%edi), %%xmm1		\n\t" // D ? ? C
-		"movhps -8(%0, %%edi), %%xmm0		\n\t" // B ? ? A
+		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? ? A
+		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? ? C
+		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // D ? ? C
+		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // B ? ? A
 		"shufps $0xCC, %%xmm1, %%xmm0		\n\t" // D C B A
-		"mulps 512+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
-		"addps (%2, %%esi), %%xmm0		\n\t"
+		"mulps 512+"MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
+		"addps (%2, %%"REG_S"), %%xmm0		\n\t"
 		"addps %%xmm2, %%xmm0			\n\t"
-		"movaps %%xmm0, (%1, %%esi)		\n\t"
-		"addl $16, %%esi			\n\t"
-		"subl $16, %%edi			\n\t"
-		"cmpl $512, %%esi			\n\t" 
+		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
+		"add $16, %%"REG_S"			\n\t"
+		"sub $16, %%"REG_D"			\n\t"
+		"cmp $512, %%"REG_S"			\n\t" 
 		" jb 1b					\n\t"
 		:: "r" (buf), "r" (data_ptr), "r" (delay_ptr), "m" (bias)
-		: "%esi", "%edi"
+		: "%"REG_S, "%"REG_D
 	);
 	data_ptr+=128;
 //	window_ptr+=128;
@@ -1054,48 +1054,48 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
     delay_ptr = delay;
 
 	asm volatile(
-		"xorl %%edi, %%edi			\n\t"  // 0
-		"xorl %%esi, %%esi			\n\t"  // 0
+		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
+		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		".balign 16				\n\t"
 		"1:					\n\t"
-		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? ? A
-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? ? C
-		"movhps -16(%0, %%edi), %%xmm1		\n\t" // D ? ? C 
-		"movhps -8(%0, %%edi), %%xmm0		\n\t" // B ? ? A 
+		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? ? A
+		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? ? C
+		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // D ? ? C 
+		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // B ? ? A 
 		"shufps $0xCC, %%xmm1, %%xmm0		\n\t" // D C B A
-		"mulps 1024+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
-		"movaps %%xmm0, (%1, %%esi)		\n\t"
-		"addl $16, %%esi			\n\t"
-		"subl $16, %%edi			\n\t"
-		"cmpl $512, %%esi			\n\t" 
+		"mulps 1024+"MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
+		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
+		"add $16, %%"REG_S"			\n\t"
+		"sub $16, %%"REG_D"			\n\t"
+		"cmp $512, %%"REG_S"			\n\t" 
 		" jb 1b					\n\t"
 		:: "r" (buf+64), "r" (delay_ptr)
-		: "%esi", "%edi"
+		: "%"REG_S, "%"REG_D
 	);
 	delay_ptr+=128;
 //	window_ptr-=128;
 	
 	asm volatile(
-		"movl $1024, %%edi			\n\t"  // 1024
-		"xorl %%esi, %%esi			\n\t"  // 0
+		"mov $1024, %%"REG_D"			\n\t"  // 1024
+		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
 		".balign 16				\n\t"
 		"1:					\n\t"
-		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? A ?
-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? C ?
-		"movhps -16(%0, %%edi), %%xmm1		\n\t" // ? D C ? 
-		"movhps -8(%0, %%edi), %%xmm0		\n\t" // ? B A ? 
+		"movlps (%0, %%"REG_S"), %%xmm0	\n\t" // ? ? A ?
+		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? C ?
+		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // ? D C ? 
+		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // ? B A ? 
 		"shufps $0x99, %%xmm1, %%xmm0		\n\t" // D C B A
-		"mulps 1536+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
-		"movaps %%xmm0, (%1, %%esi)		\n\t"
-		"addl $16, %%esi			\n\t"
-		"subl $16, %%edi			\n\t"
-		"cmpl $512, %%esi			\n\t" 
+		"mulps 1536+"MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
+		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
+		"add $16, %%"REG_S"			\n\t"
+		"sub $16, %%"REG_D"			\n\t"
+		"cmp $512, %%"REG_S"			\n\t" 
 		" jb 1b					\n\t"
 		:: "r" (buf), "r" (delay_ptr)
-		: "%esi", "%edi"
+		: "%"REG_S, "%"REG_D
 	);
 }
-#endif //arch_x86
+#endif // ARCH_X86 || ARCH_X86_64
 
 void
 imdct_do_256(sample_t data[],sample_t delay[],sample_t bias)
@@ -1242,7 +1242,7 @@ void imdct_init (uint32_t mm_accel)
 	    xcos1[i] = -cos ((M_PI / 2048) * (8 * i + 1));
 	    xsin1[i] = -sin ((M_PI / 2048) * (8 * i + 1));
 	}
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 	for (i = 0; i < 128; i++) {
 	    sseSinCos1c[2*i+0]= xcos1[i];
 	    sseSinCos1c[2*i+1]= -xcos1[i];
@@ -1264,7 +1264,7 @@ void imdct_init (uint32_t mm_accel)
 		w[i][k].imag = sin (-M_PI * k / j);
 	    }
 	}
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 	for (i = 1; i < 7; i++) {
 	    j = 1 << i;
 	    for (k = 0; k < j; k+=2) {
@@ -1307,10 +1307,10 @@ void imdct_init (uint32_t mm_accel)
 		sseWindow[384 + 2*i+0]=  imdct_window[126 - 2*i+1];
 		sseWindow[384 + 2*i+1]= -imdct_window[126 - 2*i+0];
 	}
-#endif // arch_x86
+#endif // ARCH_X86 || ARCH_X86_64
 
 	imdct_512 = imdct_do_512;
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 	if(mm_accel & MM_ACCEL_X86_SSE)
 	{
 	  fprintf (stderr, "Using SSE optimized IMDCT transform\n");
@@ -1329,7 +1329,7 @@ void imdct_init (uint32_t mm_accel)
 	  imdct_512 = imdct_do_512_3dnow;
 	}
 	else
-#endif // arch_x86
+#endif // ARCH_X86 || ARCH_X86_64
 #ifdef HAVE_ALTIVEC
         if (mm_accel & MM_ACCEL_PPC_ALTIVEC)
 	{

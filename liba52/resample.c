@@ -15,7 +15,7 @@ int (* a52_resample) (float * _f, int16_t * s16)=NULL;
 
 #include "resample_c.c"
 
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
 #include "resample_mmx.c"
 #endif
 
@@ -26,7 +26,7 @@ int (* a52_resample) (float * _f, int16_t * s16)=NULL;
 void* a52_resample_init(uint32_t mm_accel,int flags,int chans){
 void* tmp;
 
-#ifdef ARCH_X86
+#if defined(ARCH_X86) || defined(ARCH_X86_64)
     if(mm_accel&MM_ACCEL_X86_MMX){
 	tmp=a52_resample_MMX(flags,chans);
 	if(tmp){

@@ -41,6 +41,20 @@
 #define DELTA_BIT_NONE (2)
 #define DELTA_BIT_RESERVED (3)
 
+#ifdef ARCH_X86_64
+# define REG_a "rax"
+# define REG_d "rdx"
+# define REG_S "rsi"
+# define REG_D "rdi"
+# define REG_BP "rbp"
+#else
+# define REG_a "eax"
+# define REG_d "edx"
+# define REG_S "esi"
+# define REG_D "edi"
+# define REG_BP "ebp"
+#endif
+
 void bit_allocate (a52_state_t * state, a52_ba_t * ba, int bndstart,
 		   int start, int end, int fastleak, int slowleak,
 		   uint8_t * exp, int8_t * bap);
