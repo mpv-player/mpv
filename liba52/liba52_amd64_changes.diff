@@ -1,0 +1,2189 @@
+Index: liba52/a52_internal.h
+===================================================================
+RCS file: /cvsroot/mplayer/main/liba52/a52_internal.h,v
+retrieving revision 1.4
+diff -u -r1.4 a52_internal.h
+--- liba52/a52_internal.h	22 Mar 2005 23:27:18 -0000	1.4
++++ liba52/a52_internal.h	31 Jul 2005 21:20:09 -0000
+@@ -41,6 +41,20 @@
+ #define DELTA_BIT_NONE (2)
+ #define DELTA_BIT_RESERVED (3)
+ 
++#ifdef ARCH_X86_64
++# define REG_a "rax"
++# define REG_d "rdx"
++# define REG_S "rsi"
++# define REG_D "rdi"
++# define REG_BP "rbp"
++#else
++# define REG_a "eax"
++# define REG_d "edx"
++# define REG_S "esi"
++# define REG_D "edi"
++# define REG_BP "ebp"
++#endif
++
+ void bit_allocate (a52_state_t * state, a52_ba_t * ba, int bndstart,
+ 		   int start, int end, int fastleak, int slowleak,
+ 		   uint8_t * exp, int8_t * bap);
+Index: liba52/downmix.c
+===================================================================
+RCS file: /cvsroot/mplayer/main/liba52/downmix.c,v
+retrieving revision 1.17
+diff -u -r1.17 downmix.c
+--- liba52/downmix.c	22 Mar 2005 23:27:18 -0000	1.17
++++ liba52/downmix.c	31 Jul 2005 21:20:09 -0000
+@@ -56,7 +56,7 @@
+ {
+     upmix= upmix_C;
+     downmix= downmix_C;
+-#ifdef ARCH_X86    
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+     if(mm_accel & MM_ACCEL_X86_MMX) upmix= upmix_MMX;
+     if(mm_accel & MM_ACCEL_X86_SSE) downmix= downmix_SSE;
+     if(mm_accel & MM_ACCEL_X86_3DNOW) downmix= downmix_3dnow;
+@@ -684,27 +684,27 @@
+     }
+ }
+ 
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ static void mix2to1_SSE (sample_t * dest, sample_t * src, sample_t bias)
+ {
+ 	asm volatile(
+ 	"movlps %2, %%xmm7		\n\t"
+ 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-	"movl $-1024, %%esi		\n\t"
++	"mov $-1024, %%"REG_S"		\n\t"
+ 	".balign 16\n\t"
+ 	"1:				\n\t"
+-	"movaps (%0, %%esi), %%xmm0	\n\t" 
+-	"movaps 16(%0, %%esi), %%xmm1	\n\t" 
+-	"addps (%1, %%esi), %%xmm0	\n\t" 
+-	"addps 16(%1, %%esi), %%xmm1	\n\t" 
++	"movaps (%0, %%"REG_S"), %%xmm0	\n\t" 
++	"movaps 16(%0, %%"REG_S"), %%xmm1\n\t" 
++	"addps (%1, %%"REG_S"), %%xmm0	\n\t" 
++	"addps 16(%1, %%"REG_S"), %%xmm1\n\t" 
+ 	"addps %%xmm7, %%xmm0		\n\t"
+ 	"addps %%xmm7, %%xmm1		\n\t"
+-	"movaps %%xmm0, (%1, %%esi)	\n\t"
+-	"movaps %%xmm1, 16(%1, %%esi)	\n\t"
+-	"addl $32, %%esi		\n\t"
++	"movaps %%xmm0, (%1, %%"REG_S")	\n\t"
++	"movaps %%xmm1, 16(%1, %%"REG_S")\n\t"
++	"add $32, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (src+256), "r" (dest+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -713,19 +713,19 @@
+ 	asm volatile(
+ 	"movlps %1, %%xmm7		\n\t"
+ 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-	"movl $-1024, %%esi		\n\t"
++	"mov $-1024, %%"REG_S"		\n\t"
+ 	".balign 16\n\t"
+ 	"1:				\n\t"
+-	"movaps (%0, %%esi), %%xmm0	\n\t" 
+-	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
+-	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
++	"movaps (%0, %%"REG_S"), %%xmm0	\n\t" 
++	"movaps 1024(%0, %%"REG_S"), %%xmm1\n\t" 
++	"addps 2048(%0, %%"REG_S"), %%xmm0\n\t" 
+ 	"addps %%xmm7, %%xmm1		\n\t"
+ 	"addps %%xmm1, %%xmm0		\n\t"
+-	"movaps %%xmm0, (%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movaps %%xmm0, (%0, %%"REG_S")	\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -734,20 +734,20 @@
+ 	asm volatile(
+ 	"movlps %1, %%xmm7		\n\t"
+ 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-	"movl $-1024, %%esi		\n\t"
++	"mov $-1024, %%"REG_S"		\n\t"
+ 	".balign 16\n\t"
+ 	"1:				\n\t"
+-	"movaps (%0, %%esi), %%xmm0	\n\t" 
+-	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
+-	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
+-	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
++	"movaps (%0, %%"REG_S"), %%xmm0	\n\t" 
++	"movaps 1024(%0, %%"REG_S"), %%xmm1\n\t" 
++	"addps 2048(%0, %%"REG_S"), %%xmm0\n\t" 
++	"addps 3072(%0, %%"REG_S"), %%xmm1\n\t" 
+ 	"addps %%xmm7, %%xmm0		\n\t"
+ 	"addps %%xmm1, %%xmm0		\n\t"
+-	"movaps %%xmm0, (%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movaps %%xmm0, (%0, %%"REG_S")	\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -756,21 +756,21 @@
+ 	asm volatile(
+ 	"movlps %1, %%xmm7		\n\t"
+ 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-	"movl $-1024, %%esi		\n\t"
++	"mov $-1024, %%"REG_S"		\n\t"
+ 	".balign 16\n\t"
+ 	"1:				\n\t"
+-	"movaps (%0, %%esi), %%xmm0	\n\t" 
+-	"movaps 1024(%0, %%esi), %%xmm1	\n\t" 
+-	"addps 2048(%0, %%esi), %%xmm0	\n\t" 
+-	"addps 3072(%0, %%esi), %%xmm1	\n\t" 
++	"movaps (%0, %%"REG_S"), %%xmm0	\n\t" 
++	"movaps 1024(%0, %%"REG_S"), %%xmm1\n\t" 
++	"addps 2048(%0, %%"REG_S"), %%xmm0\n\t" 
++	"addps 3072(%0, %%"REG_S"), %%xmm1\n\t" 
+ 	"addps %%xmm7, %%xmm0		\n\t"
+-	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
++	"addps 4096(%0, %%"REG_S"), %%xmm1\n\t" 
+ 	"addps %%xmm1, %%xmm0		\n\t"
+-	"movaps %%xmm0, (%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movaps %%xmm0, (%0, %%"REG_S")	\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -779,21 +779,21 @@
+ 	asm volatile(
+ 	"movlps %1, %%xmm7		\n\t"
+ 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-	"movl $-1024, %%esi		\n\t"
++	"mov $-1024, %%"REG_S"		\n\t"
+ 	".balign 16\n\t"
+ 	"1:				\n\t"
+-	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
++	"movaps 1024(%0, %%"REG_S"), %%xmm0\n\t" 
+ 	"addps %%xmm7, %%xmm0		\n\t" //common
+-	"movaps (%0, %%esi), %%xmm1	\n\t" 
+-	"movaps 2048(%0, %%esi), %%xmm2	\n\t"
++	"movaps (%0, %%"REG_S"), %%xmm1	\n\t" 
++	"movaps 2048(%0, %%"REG_S"), %%xmm2\n\t"
+ 	"addps %%xmm0, %%xmm1		\n\t"
+ 	"addps %%xmm0, %%xmm2		\n\t"
+-	"movaps %%xmm1, (%0, %%esi)	\n\t"
+-	"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movaps %%xmm1, (%0, %%"REG_S")	\n\t"
++	"movaps %%xmm2, 1024(%0, %%"REG_S")\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -802,21 +802,21 @@
+ 	asm volatile(
+ 		"movlps %2, %%xmm7		\n\t"
+ 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		".balign 16\n\t"
+ 		"1:				\n\t"
+-		"movaps 1024(%1, %%esi), %%xmm0	\n\t" 
++		"movaps 1024(%1, %%"REG_S"), %%xmm0\n\t" 
+ 		"addps %%xmm7, %%xmm0		\n\t" //common
+-		"movaps (%0, %%esi), %%xmm1	\n\t" 
+-		"movaps (%1, %%esi), %%xmm2	\n\t"
++		"movaps (%0, %%"REG_S"), %%xmm1	\n\t" 
++		"movaps (%1, %%"REG_S"), %%xmm2	\n\t"
+ 		"addps %%xmm0, %%xmm1		\n\t"
+ 		"addps %%xmm0, %%xmm2		\n\t"
+-		"movaps %%xmm1, (%0, %%esi)	\n\t"
+-		"movaps %%xmm2, (%1, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movaps %%xmm1, (%0, %%"REG_S")	\n\t"
++		"movaps %%xmm2, (%1, %%"REG_S")	\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (left+256), "r" (right+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -825,22 +825,22 @@
+ 	asm volatile(
+ 		"movlps %1, %%xmm7		\n\t"
+ 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		".balign 16\n\t"
+ 		"1:				\n\t"
+-		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  // surround
+-		"movaps (%0, %%esi), %%xmm1	\n\t" 
+-		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
++		"movaps 2048(%0, %%"REG_S"), %%xmm0\n\t"  // surround
++		"movaps (%0, %%"REG_S"), %%xmm1	\n\t" 
++		"movaps 1024(%0, %%"REG_S"), %%xmm2\n\t"
+ 		"addps %%xmm7, %%xmm1		\n\t"
+ 		"addps %%xmm7, %%xmm2		\n\t"
+ 		"subps %%xmm0, %%xmm1		\n\t"
+ 		"addps %%xmm0, %%xmm2		\n\t"
+-		"movaps %%xmm1, (%0, %%esi)	\n\t"
+-		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movaps %%xmm1, (%0, %%"REG_S")	\n\t"
++		"movaps %%xmm2, 1024(%0, %%"REG_S")\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -849,22 +849,22 @@
+ 	asm volatile(
+ 		"movlps %1, %%xmm7		\n\t"
+ 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		".balign 16\n\t"
+ 		"1:				\n\t"
+-		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
+-		"addps 3072(%0, %%esi), %%xmm0	\n\t"  
++		"movaps 1024(%0, %%"REG_S"), %%xmm0\n\t"  
++		"addps 3072(%0, %%"REG_S"), %%xmm0\n\t"  
+ 		"addps %%xmm7, %%xmm0		\n\t" // common
+-		"movaps (%0, %%esi), %%xmm1	\n\t" 
+-		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
++		"movaps (%0, %%"REG_S"), %%xmm1	\n\t" 
++		"movaps 2048(%0, %%"REG_S"), %%xmm2\n\t"
+ 		"addps %%xmm0, %%xmm1		\n\t"
+ 		"addps %%xmm0, %%xmm2		\n\t"
+-		"movaps %%xmm1, (%0, %%esi)	\n\t"
+-		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movaps %%xmm1, (%0, %%"REG_S")	\n\t"
++		"movaps %%xmm2, 1024(%0, %%"REG_S")\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -873,24 +873,24 @@
+ 	asm volatile(
+ 		"movlps %1, %%xmm7		\n\t"
+ 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		".balign 16\n\t"
+ 		"1:				\n\t"
+-		"movaps 1024(%0, %%esi), %%xmm0	\n\t"  
+-		"movaps 3072(%0, %%esi), %%xmm3	\n\t" // surround
++		"movaps 1024(%0, %%"REG_S"), %%xmm0\n\t"  
++		"movaps 3072(%0, %%"REG_S"), %%xmm3\n\t" // surround
+ 		"addps %%xmm7, %%xmm0		\n\t" // common
+-		"movaps (%0, %%esi), %%xmm1	\n\t" 
+-		"movaps 2048(%0, %%esi), %%xmm2	\n\t"
++		"movaps (%0, %%"REG_S"), %%xmm1	\n\t" 
++		"movaps 2048(%0, %%"REG_S"), %%xmm2\n\t"
+ 		"addps %%xmm0, %%xmm1		\n\t"
+ 		"addps %%xmm0, %%xmm2		\n\t"
+ 		"subps %%xmm3, %%xmm1		\n\t"
+ 		"addps %%xmm3, %%xmm2		\n\t"
+-		"movaps %%xmm1, (%0, %%esi)	\n\t"
+-		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movaps %%xmm1, (%0, %%"REG_S")	\n\t"
++		"movaps %%xmm2, 1024(%0, %%"REG_S")\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -899,23 +899,23 @@
+ 	asm volatile(
+ 		"movlps %1, %%xmm7		\n\t"
+ 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		".balign 16\n\t"
+ 		"1:				\n\t"
+-		"movaps 2048(%0, %%esi), %%xmm0	\n\t"  
+-		"addps 3072(%0, %%esi), %%xmm0	\n\t" // surround
+-		"movaps (%0, %%esi), %%xmm1	\n\t" 
+-		"movaps 1024(%0, %%esi), %%xmm2	\n\t"
++		"movaps 2048(%0, %%"REG_S"), %%xmm0\n\t"  
++		"addps 3072(%0, %%"REG_S"), %%xmm0\n\t" // surround
++		"movaps (%0, %%"REG_S"), %%xmm1	\n\t" 
++		"movaps 1024(%0, %%"REG_S"), %%xmm2\n\t"
+ 		"addps %%xmm7, %%xmm1		\n\t"
+ 		"addps %%xmm7, %%xmm2		\n\t"
+ 		"subps %%xmm0, %%xmm1		\n\t"
+ 		"addps %%xmm0, %%xmm2		\n\t"
+-		"movaps %%xmm1, (%0, %%esi)	\n\t"
+-		"movaps %%xmm2, 1024(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movaps %%xmm1, (%0, %%"REG_S")	\n\t"
++		"movaps %%xmm2, 1024(%0, %%"REG_S")\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -924,22 +924,22 @@
+ 	asm volatile(
+ 	"movlps %1, %%xmm7		\n\t"
+ 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-	"movl $-1024, %%esi		\n\t"
++	"mov $-1024, %%"REG_S"		\n\t"
+ 	".balign 16\n\t"
+ 	"1:				\n\t"
+-	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
++	"movaps 1024(%0, %%"REG_S"), %%xmm0\n\t" 
+ 	"addps %%xmm7, %%xmm0		\n\t" // common
+ 	"movaps %%xmm0, %%xmm1		\n\t" // common
+-	"addps (%0, %%esi), %%xmm0	\n\t" 
+-	"addps 2048(%0, %%esi), %%xmm1	\n\t" 
+-	"addps 3072(%0, %%esi), %%xmm0	\n\t" 
+-	"addps 4096(%0, %%esi), %%xmm1	\n\t" 
+-	"movaps %%xmm0, (%0, %%esi)	\n\t"
+-	"movaps %%xmm1, 1024(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"addps (%0, %%"REG_S"), %%xmm0	\n\t" 
++	"addps 2048(%0, %%"REG_S"), %%xmm1\n\t" 
++	"addps 3072(%0, %%"REG_S"), %%xmm0\n\t" 
++	"addps 4096(%0, %%"REG_S"), %%xmm1\n\t" 
++	"movaps %%xmm0, (%0, %%"REG_S")	\n\t"
++	"movaps %%xmm1, 1024(%0, %%"REG_S")\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -948,25 +948,25 @@
+ 	asm volatile(
+ 	"movlps %1, %%xmm7		\n\t"
+ 	"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-	"movl $-1024, %%esi		\n\t"
++	"mov $-1024, %%"REG_S"		\n\t"
+ 	".balign 16\n\t"
+ 	"1:				\n\t"
+-	"movaps 1024(%0, %%esi), %%xmm0	\n\t" 
+-	"movaps 3072(%0, %%esi), %%xmm2	\n\t" 
++	"movaps 1024(%0, %%"REG_S"), %%xmm0\n\t" 
++	"movaps 3072(%0, %%"REG_S"), %%xmm2\n\t" 
+ 	"addps %%xmm7, %%xmm0		\n\t" // common
+-	"addps 4096(%0, %%esi), %%xmm2	\n\t" // surround	
+-	"movaps (%0, %%esi), %%xmm1	\n\t" 
+-	"movaps 2048(%0, %%esi), %%xmm3	\n\t" 
++	"addps 4096(%0, %%"REG_S"), %%xmm2\n\t" // surround	
++	"movaps (%0, %%"REG_S"), %%xmm1	\n\t" 
++	"movaps 2048(%0, %%"REG_S"), %%xmm3\n\t" 
+ 	"subps %%xmm2, %%xmm1		\n\t"	
+ 	"addps %%xmm2, %%xmm3		\n\t"	
+ 	"addps %%xmm0, %%xmm1		\n\t"	
+ 	"addps %%xmm0, %%xmm3		\n\t"	
+-	"movaps %%xmm1, (%0, %%esi)	\n\t"
+-	"movaps %%xmm3, 1024(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movaps %%xmm1, (%0, %%"REG_S")	\n\t"
++	"movaps %%xmm3, 1024(%0, %%"REG_S")\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -975,40 +975,40 @@
+ 	asm volatile(
+ 		"movlps %2, %%xmm7		\n\t"
+ 		"shufps $0x00, %%xmm7, %%xmm7	\n\t"
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		".balign 16\n\t"
+ 		"1:				\n\t"
+-		"movaps (%0, %%esi), %%xmm0	\n\t"  
+-		"movaps 16(%0, %%esi), %%xmm1	\n\t"  
+-		"addps 1024(%0, %%esi), %%xmm0	\n\t"
+-		"addps 1040(%0, %%esi), %%xmm1	\n\t"
++		"movaps (%0, %%"REG_S"), %%xmm0	\n\t"  
++		"movaps 16(%0, %%"REG_S"), %%xmm1\n\t"  
++		"addps 1024(%0, %%"REG_S"), %%xmm0\n\t"
++		"addps 1040(%0, %%"REG_S"), %%xmm1\n\t"
+ 		"addps %%xmm7, %%xmm0		\n\t"
+ 		"addps %%xmm7, %%xmm1		\n\t"
+-		"movaps %%xmm0, (%1, %%esi)	\n\t"
+-		"movaps %%xmm1, 16(%1, %%esi)	\n\t"
+-		"addl $32, %%esi		\n\t"
++		"movaps %%xmm0, (%1, %%"REG_S")	\n\t"
++		"movaps %%xmm1, 16(%1, %%"REG_S")\n\t"
++		"add $32, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (src+256), "r" (dest+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+ static void zero_MMX(sample_t * samples)
+ {
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"pxor %%mm0, %%mm0		\n\t"
+ 		".balign 16\n\t"
+ 		"1:				\n\t"
+-		"movq %%mm0, (%0, %%esi)	\n\t"
+-		"movq %%mm0, 8(%0, %%esi)	\n\t"
+-		"movq %%mm0, 16(%0, %%esi)	\n\t"
+-		"movq %%mm0, 24(%0, %%esi)	\n\t"
+-		"addl $32, %%esi		\n\t"
++		"movq %%mm0, (%0, %%"REG_S")	\n\t"
++		"movq %%mm0, 8(%0, %%"REG_S")	\n\t"
++		"movq %%mm0, 16(%0, %%"REG_S")	\n\t"
++		"movq %%mm0, 24(%0, %%"REG_S")	\n\t"
++		"add $32, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms"
+ 	:: "r" (samples+256)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1257,29 +1257,29 @@
+ 	asm volatile(
+ 	"movd  %2, %%mm7	\n\t"
+ 	"punpckldq %2, %%mm7	\n\t"
+-	"movl  $-1024, %%esi	\n\t"
++	"mov $-1024, %%"REG_S"	\n\t"
+ 	".balign 16\n\t"
+ 	"1:			\n\t"
+-	"movq  (%0, %%esi), %%mm0	\n\t" 
+-	"movq  8(%0, %%esi), %%mm1	\n\t"
+-	"movq  16(%0, %%esi), %%mm2	\n\t" 
+-	"movq  24(%0, %%esi), %%mm3	\n\t"
+-	"pfadd (%1, %%esi), %%mm0	\n\t" 
+-	"pfadd 8(%1, %%esi), %%mm1	\n\t"
+-	"pfadd 16(%1, %%esi), %%mm2	\n\t" 
+-	"pfadd 24(%1, %%esi), %%mm3	\n\t"
++	"movq  (%0, %%"REG_S"), %%mm0	\n\t" 
++	"movq  8(%0, %%"REG_S"), %%mm1	\n\t"
++	"movq  16(%0, %%"REG_S"), %%mm2	\n\t" 
++	"movq  24(%0, %%"REG_S"), %%mm3	\n\t"
++	"pfadd (%1, %%"REG_S"), %%mm0	\n\t" 
++	"pfadd 8(%1, %%"REG_S"), %%mm1	\n\t"
++	"pfadd 16(%1, %%"REG_S"), %%mm2	\n\t" 
++	"pfadd 24(%1, %%"REG_S"), %%mm3	\n\t"
+ 	"pfadd %%mm7, %%mm0		\n\t"
+ 	"pfadd %%mm7, %%mm1		\n\t"
+ 	"pfadd %%mm7, %%mm2		\n\t"
+ 	"pfadd %%mm7, %%mm3		\n\t"
+-	"movq  %%mm0, (%1, %%esi)	\n\t"
+-	"movq  %%mm1, 8(%1, %%esi)	\n\t"
+-	"movq  %%mm2, 16(%1, %%esi)	\n\t"
+-	"movq  %%mm3, 24(%1, %%esi)	\n\t"
+-	"addl $32, %%esi		\n\t"
++	"movq  %%mm0, (%1, %%"REG_S")	\n\t"
++	"movq  %%mm1, 8(%1, %%"REG_S")	\n\t"
++	"movq  %%mm2, 16(%1, %%"REG_S")	\n\t"
++	"movq  %%mm3, 24(%1, %%"REG_S")	\n\t"
++	"add $32, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (src+256), "r" (dest+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1288,25 +1288,25 @@
+ 	asm volatile(
+ 	"movd  %1, %%mm7	\n\t"
+ 	"punpckldq %1, %%mm7	\n\t"
+-	"movl $-1024, %%esi	\n\t"
++	"mov $-1024, %%"REG_S"	\n\t"
+ 	".balign 16\n\t"
+ 	"1:			\n\t"
+-	"movq  (%0, %%esi), %%mm0	\n\t" 
+-	"movq  8(%0, %%esi), %%mm1	\n\t"
+-	"movq  1024(%0, %%esi), %%mm2	\n\t" 
+-	"movq  1032(%0, %%esi), %%mm3	\n\t"
+-	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
+-	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
++	"movq  (%0, %%"REG_S"), %%mm0	\n\t" 
++	"movq  8(%0, %%"REG_S"), %%mm1	\n\t"
++	"movq  1024(%0, %%"REG_S"), %%mm2\n\t" 
++	"movq  1032(%0, %%"REG_S"), %%mm3\n\t"
++	"pfadd 2048(%0, %%"REG_S"), %%mm0\n\t" 
++	"pfadd 2056(%0, %%"REG_S"), %%mm1\n\t"
+ 	"pfadd %%mm7, %%mm0		\n\t"
+ 	"pfadd %%mm7, %%mm1		\n\t"
+ 	"pfadd %%mm2, %%mm0		\n\t"
+ 	"pfadd %%mm3, %%mm1		\n\t"
+-	"movq  %%mm0, (%0, %%esi)	\n\t"
+-	"movq  %%mm1, 8(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movq  %%mm0, (%0, %%"REG_S")	\n\t"
++	"movq  %%mm1, 8(%0, %%"REG_S")	\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1315,27 +1315,27 @@
+ 	asm volatile(
+ 	"movd  %1, %%mm7	\n\t"
+ 	"punpckldq %1, %%mm7	\n\t"
+-	"movl $-1024, %%esi	\n\t"
++	"mov $-1024, %%"REG_S"	\n\t"
+ 	".balign 16\n\t"
+ 	"1:			\n\t"
+-	"movq  (%0, %%esi), %%mm0	\n\t" 
+-	"movq  8(%0, %%esi), %%mm1	\n\t"
+-	"movq  1024(%0, %%esi), %%mm2	\n\t" 
+-	"movq  1032(%0, %%esi), %%mm3	\n\t"
+-	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
+-	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
+-	"pfadd 3072(%0, %%esi), %%mm2	\n\t" 
+-	"pfadd 3080(%0, %%esi), %%mm3	\n\t"
++	"movq  (%0, %%"REG_S"), %%mm0	\n\t" 
++	"movq  8(%0, %%"REG_S"), %%mm1	\n\t"
++	"movq  1024(%0, %%"REG_S"), %%mm2\n\t" 
++	"movq  1032(%0, %%"REG_S"), %%mm3\n\t"
++	"pfadd 2048(%0, %%"REG_S"), %%mm0\n\t" 
++	"pfadd 2056(%0, %%"REG_S"), %%mm1\n\t"
++	"pfadd 3072(%0, %%"REG_S"), %%mm2\n\t" 
++	"pfadd 3080(%0, %%"REG_S"), %%mm3\n\t"
+ 	"pfadd %%mm7, %%mm0		\n\t"
+ 	"pfadd %%mm7, %%mm1		\n\t"
+ 	"pfadd %%mm2, %%mm0		\n\t"
+ 	"pfadd %%mm3, %%mm1		\n\t"
+-	"movq  %%mm0, (%0, %%esi)	\n\t"
+-	"movq  %%mm1, 8(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movq  %%mm0, (%0, %%"REG_S")	\n\t"
++	"movq  %%mm1, 8(%0, %%"REG_S")	\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1344,29 +1344,29 @@
+ 	asm volatile(
+ 	"movd  %1, %%mm7	\n\t"
+ 	"punpckldq %1, %%mm7	\n\t"
+-	"movl $-1024, %%esi	\n\t"
++	"mov $-1024, %%"REG_S"	\n\t"
+ 	".balign 16\n\t"
+ 	"1:			\n\t"
+-	"movq  (%0, %%esi), %%mm0	\n\t" 
+-	"movq  8(%0, %%esi), %%mm1	\n\t"
+-	"movq  1024(%0, %%esi), %%mm2	\n\t" 
+-	"movq  1032(%0, %%esi), %%mm3	\n\t"
+-	"pfadd 2048(%0, %%esi), %%mm0	\n\t" 
+-	"pfadd 2056(%0, %%esi), %%mm1	\n\t"
+-	"pfadd 3072(%0, %%esi), %%mm2	\n\t" 
+-	"pfadd 3080(%0, %%esi), %%mm3	\n\t"
++	"movq  (%0, %%"REG_S"), %%mm0	\n\t" 
++	"movq  8(%0, %%"REG_S"), %%mm1	\n\t"
++	"movq  1024(%0, %%"REG_S"), %%mm2\n\t" 
++	"movq  1032(%0, %%"REG_S"), %%mm3\n\t"
++	"pfadd 2048(%0, %%"REG_S"), %%mm0\n\t" 
++	"pfadd 2056(%0, %%"REG_S"), %%mm1\n\t"
++	"pfadd 3072(%0, %%"REG_S"), %%mm2\n\t" 
++	"pfadd 3080(%0, %%"REG_S"), %%mm3\n\t"
+ 	"pfadd %%mm7, %%mm0		\n\t"
+ 	"pfadd %%mm7, %%mm1		\n\t"
+-	"pfadd 4096(%0, %%esi), %%mm2	\n\t" 
+-	"pfadd 4104(%0, %%esi), %%mm3	\n\t"
++	"pfadd 4096(%0, %%"REG_S"), %%mm2\n\t" 
++	"pfadd 4104(%0, %%"REG_S"), %%mm3\n\t"
+ 	"pfadd %%mm2, %%mm0		\n\t"
+ 	"pfadd %%mm3, %%mm1		\n\t"
+-	"movq  %%mm0, (%0, %%esi)	\n\t"
+-	"movq  %%mm1, 8(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movq  %%mm0, (%0, %%"REG_S")	\n\t"
++	"movq  %%mm1, 8(%0, %%"REG_S")	\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1375,29 +1375,29 @@
+ 	asm volatile(
+ 	"movd  %1, %%mm7	\n\t"
+ 	"punpckldq %1, %%mm7	\n\t"
+-	"movl $-1024, %%esi	\n\t"
++	"mov $-1024, %%"REG_S"	\n\t"
+ 	".balign 16\n\t"
+ 	"1:			\n\t"
+-	"movq   1024(%0, %%esi), %%mm0	\n\t" 
+-	"movq   1032(%0, %%esi), %%mm1	\n\t"
++	"movq   1024(%0, %%"REG_S"), %%mm0\n\t" 
++	"movq   1032(%0, %%"REG_S"), %%mm1\n\t"
+ 	"pfadd  %%mm7, %%mm0		\n\t" //common
+ 	"pfadd  %%mm7, %%mm1		\n\t" //common
+-	"movq   (%0, %%esi), %%mm2	\n\t" 
+-	"movq   8(%0, %%esi), %%mm3	\n\t"
+-	"movq   2048(%0, %%esi), %%mm4	\n\t"
+-	"movq   2056(%0, %%esi), %%mm5	\n\t"
++	"movq   (%0, %%"REG_S"), %%mm2	\n\t" 
++	"movq   8(%0, %%"REG_S"), %%mm3	\n\t"
++	"movq   2048(%0, %%"REG_S"), %%mm4\n\t"
++	"movq   2056(%0, %%"REG_S"), %%mm5\n\t"
+ 	"pfadd  %%mm0, %%mm2		\n\t"
+ 	"pfadd  %%mm1, %%mm3		\n\t"
+ 	"pfadd  %%mm0, %%mm4		\n\t"
+ 	"pfadd  %%mm1, %%mm5		\n\t"
+-	"movq   %%mm2, (%0, %%esi)	\n\t"
+-	"movq   %%mm3, 8(%0, %%esi)	\n\t"
+-	"movq   %%mm4, 1024(%0, %%esi)	\n\t"
+-	"movq   %%mm5, 1032(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movq   %%mm2, (%0, %%"REG_S")	\n\t"
++	"movq   %%mm3, 8(%0, %%"REG_S")	\n\t"
++	"movq   %%mm4, 1024(%0, %%"REG_S")\n\t"
++	"movq   %%mm5, 1032(%0, %%"REG_S")\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1406,29 +1406,29 @@
+ 	asm volatile(
+ 		"movd  %2, %%mm7	\n\t"
+ 		"punpckldq %2, %%mm7	\n\t"
+-		"movl $-1024, %%esi	\n\t"
++		"mov $-1024, %%"REG_S"	\n\t"
+ 		".balign 16\n\t"
+ 		"1:			\n\t"
+-		"movq  1024(%1, %%esi), %%mm0	\n\t" 
+-		"movq  1032(%1, %%esi), %%mm1	\n\t"
++		"movq  1024(%1, %%"REG_S"), %%mm0\n\t" 
++		"movq  1032(%1, %%"REG_S"), %%mm1\n\t"
+ 		"pfadd %%mm7, %%mm0		\n\t" //common
+ 		"pfadd %%mm7, %%mm1		\n\t" //common
+-		"movq  (%0, %%esi), %%mm2	\n\t" 
+-		"movq  8(%0, %%esi), %%mm3	\n\t"
+-		"movq  (%1, %%esi), %%mm4	\n\t"
+-		"movq  8(%1, %%esi), %%mm5	\n\t"
++		"movq  (%0, %%"REG_S"), %%mm2	\n\t" 
++		"movq  8(%0, %%"REG_S"), %%mm3	\n\t"
++		"movq  (%1, %%"REG_S"), %%mm4	\n\t"
++		"movq  8(%1, %%"REG_S"), %%mm5	\n\t"
+ 		"pfadd %%mm0, %%mm2		\n\t"
+ 		"pfadd %%mm1, %%mm3		\n\t"
+ 		"pfadd %%mm0, %%mm4		\n\t"
+ 		"pfadd %%mm1, %%mm5		\n\t"
+-		"movq  %%mm2, (%0, %%esi)	\n\t"
+-		"movq  %%mm3, 8(%0, %%esi)	\n\t"
+-		"movq  %%mm4, (%1, %%esi)	\n\t"
+-		"movq  %%mm5, 8(%1, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq  %%mm2, (%0, %%"REG_S")	\n\t"
++		"movq  %%mm3, 8(%0, %%"REG_S")	\n\t"
++		"movq  %%mm4, (%1, %%"REG_S")	\n\t"
++		"movq  %%mm5, 8(%1, %%"REG_S")	\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (left+256), "r" (right+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1437,15 +1437,15 @@
+ 	asm volatile(
+ 		"movd  %1, %%mm7	\n\t"
+ 		"punpckldq %1, %%mm7	\n\t"
+-		"movl $-1024, %%esi	\n\t"
++		"mov $-1024, %%"REG_S"	\n\t"
+ 		".balign 16\n\t"
+ 		"1:			\n\t"
+-		"movq  2048(%0, %%esi), %%mm0	\n\t"  // surround
+-		"movq  2056(%0, %%esi), %%mm1	\n\t"  // surround
+-		"movq  (%0, %%esi), %%mm2	\n\t" 
+-		"movq  8(%0, %%esi), %%mm3	\n\t"
+-		"movq  1024(%0, %%esi), %%mm4	\n\t"
+-		"movq  1032(%0, %%esi), %%mm5	\n\t"
++		"movq  2048(%0, %%"REG_S"), %%mm0\n\t"  // surround
++		"movq  2056(%0, %%"REG_S"), %%mm1\n\t"  // surround
++		"movq  (%0, %%"REG_S"), %%mm2	\n\t" 
++		"movq  8(%0, %%"REG_S"), %%mm3	\n\t"
++		"movq  1024(%0, %%"REG_S"), %%mm4\n\t"
++		"movq  1032(%0, %%"REG_S"), %%mm5\n\t"
+ 		"pfadd %%mm7, %%mm2		\n\t"
+ 		"pfadd %%mm7, %%mm3		\n\t"
+ 		"pfadd %%mm7, %%mm4		\n\t"
+@@ -1454,14 +1454,14 @@
+ 		"pfsub %%mm1, %%mm3		\n\t"
+ 		"pfadd %%mm0, %%mm4		\n\t"
+ 		"pfadd %%mm1, %%mm5		\n\t"
+-		"movq  %%mm2, (%0, %%esi)	\n\t"
+-		"movq  %%mm3, 8(%0, %%esi)	\n\t"
+-		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
+-		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq  %%mm2, (%0, %%"REG_S")	\n\t"
++		"movq  %%mm3, 8(%0, %%"REG_S")	\n\t"
++		"movq  %%mm4, 1024(%0, %%"REG_S")\n\t"
++		"movq  %%mm5, 1032(%0, %%"REG_S")\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1470,31 +1470,31 @@
+ 	asm volatile(
+ 		"movd  %1, %%mm7	\n\t"
+ 		"punpckldq %1, %%mm7	\n\t"
+-		"movl $-1024, %%esi	\n\t"
++		"mov $-1024, %%"REG_S"	\n\t"
+ 		".balign 16\n\t"
+ 		"1:			\n\t"
+-		"movq  1024(%0, %%esi), %%mm0	\n\t"  
+-		"movq  1032(%0, %%esi), %%mm1	\n\t"
+-		"pfadd 3072(%0, %%esi), %%mm0	\n\t"  
+-		"pfadd 3080(%0, %%esi), %%mm1	\n\t"
++		"movq  1024(%0, %%"REG_S"), %%mm0\n\t"  
++		"movq  1032(%0, %%"REG_S"), %%mm1\n\t"
++		"pfadd 3072(%0, %%"REG_S"), %%mm0\n\t"  
++		"pfadd 3080(%0, %%"REG_S"), %%mm1\n\t"
+ 		"pfadd %%mm7, %%mm0		\n\t" // common
+ 		"pfadd %%mm7, %%mm1		\n\t" // common
+-		"movq  (%0, %%esi), %%mm2	\n\t" 
+-		"movq  8(%0, %%esi), %%mm3	\n\t"
+-		"movq  2048(%0, %%esi), %%mm4	\n\t"
+-		"movq  2056(%0, %%esi), %%mm5	\n\t"
++		"movq  (%0, %%"REG_S"), %%mm2	\n\t" 
++		"movq  8(%0, %%"REG_S"), %%mm3	\n\t"
++		"movq  2048(%0, %%"REG_S"), %%mm4\n\t"
++		"movq  2056(%0, %%"REG_S"), %%mm5\n\t"
+ 		"pfadd %%mm0, %%mm2		\n\t"
+ 		"pfadd %%mm1, %%mm3		\n\t"
+ 		"pfadd %%mm0, %%mm4		\n\t"
+ 		"pfadd %%mm1, %%mm5		\n\t"
+-		"movq  %%mm2, (%0, %%esi)	\n\t"
+-		"movq  %%mm3, 8(%0, %%esi)	\n\t"
+-		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
+-		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq  %%mm2, (%0, %%"REG_S")	\n\t"
++		"movq  %%mm3, 8(%0, %%"REG_S")	\n\t"
++		"movq  %%mm4, 1024(%0, %%"REG_S")\n\t"
++		"movq  %%mm5, 1032(%0, %%"REG_S")\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1503,35 +1503,35 @@
+ 	asm volatile(
+ 		"movd  %1, %%mm7	\n\t"
+ 		"punpckldq %1, %%mm7	\n\t"
+-		"movl $-1024, %%esi	\n\t"
++		"mov $-1024, %%"REG_S"	\n\t"
+ 		".balign 16\n\t"
+ 		"1:			\n\t"
+-		"movq   1024(%0, %%esi), %%mm0	\n\t"  
+-		"movq   1032(%0, %%esi), %%mm1	\n\t"
++		"movq   1024(%0, %%"REG_S"), %%mm0\n\t"  
++		"movq   1032(%0, %%"REG_S"), %%mm1\n\t"
+ 		"pfadd  %%mm7, %%mm0		\n\t" // common
+ 		"pfadd  %%mm7, %%mm1		\n\t" // common
+-		"movq   (%0, %%esi), %%mm2	\n\t" 
+-		"movq   8(%0, %%esi), %%mm3	\n\t"
+-		"movq   2048(%0, %%esi), %%mm4	\n\t"
+-		"movq   2056(%0, %%esi), %%mm5	\n\t"
++		"movq   (%0, %%"REG_S"), %%mm2	\n\t" 
++		"movq   8(%0, %%"REG_S"), %%mm3	\n\t"
++		"movq   2048(%0, %%"REG_S"), %%mm4\n\t"
++		"movq   2056(%0, %%"REG_S"), %%mm5\n\t"
+ 		"pfadd  %%mm0, %%mm2		\n\t"
+ 		"pfadd  %%mm1, %%mm3		\n\t"
+ 		"pfadd  %%mm0, %%mm4		\n\t"
+ 		"pfadd  %%mm1, %%mm5		\n\t"
+-		"movq   3072(%0, %%esi), %%mm0	\n\t" // surround
+-		"movq   3080(%0, %%esi), %%mm1	\n\t" // surround
++		"movq   3072(%0, %%"REG_S"), %%mm0\n\t" // surround
++		"movq   3080(%0, %%"REG_S"), %%mm1\n\t" // surround
+ 		"pfsub  %%mm0, %%mm2		\n\t"
+ 		"pfsub  %%mm1, %%mm3		\n\t"
+ 		"pfadd  %%mm0, %%mm4		\n\t"
+ 		"pfadd  %%mm1, %%mm5		\n\t"
+-		"movq   %%mm2, (%0, %%esi)	\n\t"
+-		"movq   %%mm3, 8(%0, %%esi)	\n\t"
+-		"movq   %%mm4, 1024(%0, %%esi)	\n\t"
+-		"movq   %%mm5, 1032(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq   %%mm2, (%0, %%"REG_S")	\n\t"
++		"movq   %%mm3, 8(%0, %%"REG_S")	\n\t"
++		"movq   %%mm4, 1024(%0, %%"REG_S")\n\t"
++		"movq   %%mm5, 1032(%0, %%"REG_S")\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1540,17 +1540,17 @@
+ 	asm volatile(
+ 		"movd  %1, %%mm7	\n\t"
+ 		"punpckldq %1, %%mm7	\n\t"
+-		"movl $-1024, %%esi	\n\t"
++		"mov $-1024, %%"REG_S"	\n\t"
+ 		".balign 16\n\t"
+ 		"1:			\n\t"
+-		"movq  2048(%0, %%esi), %%mm0	\n\t"  
+-		"movq  2056(%0, %%esi), %%mm1	\n\t"
+-		"pfadd 3072(%0, %%esi), %%mm0	\n\t" // surround
+-		"pfadd 3080(%0, %%esi), %%mm1	\n\t" // surround
+-		"movq  (%0, %%esi), %%mm2	\n\t" 
+-		"movq  8(%0, %%esi), %%mm3	\n\t"
+-		"movq  1024(%0, %%esi), %%mm4	\n\t"
+-		"movq  1032(%0, %%esi), %%mm5	\n\t"
++		"movq  2048(%0, %%"REG_S"), %%mm0\n\t"  
++		"movq  2056(%0, %%"REG_S"), %%mm1\n\t"
++		"pfadd 3072(%0, %%"REG_S"), %%mm0\n\t" // surround
++		"pfadd 3080(%0, %%"REG_S"), %%mm1\n\t" // surround
++		"movq  (%0, %%"REG_S"), %%mm2	\n\t" 
++		"movq  8(%0, %%"REG_S"), %%mm3	\n\t"
++		"movq  1024(%0, %%"REG_S"), %%mm4\n\t"
++		"movq  1032(%0, %%"REG_S"), %%mm5\n\t"
+ 		"pfadd %%mm7, %%mm2		\n\t"
+ 		"pfadd %%mm7, %%mm3		\n\t"
+ 		"pfadd %%mm7, %%mm4		\n\t"
+@@ -1559,14 +1559,14 @@
+ 		"pfsub %%mm1, %%mm3		\n\t"
+ 		"pfadd %%mm0, %%mm4		\n\t"
+ 		"pfadd %%mm1, %%mm5		\n\t"
+-		"movq  %%mm2, (%0, %%esi)	\n\t"
+-		"movq  %%mm3, 8(%0, %%esi)	\n\t"
+-		"movq  %%mm4, 1024(%0, %%esi)	\n\t"
+-		"movq  %%mm5, 1032(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq  %%mm2, (%0, %%"REG_S")	\n\t"
++		"movq  %%mm3, 8(%0, %%"REG_S")	\n\t"
++		"movq  %%mm4, 1024(%0, %%"REG_S")\n\t"
++		"movq  %%mm5, 1032(%0, %%"REG_S")\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1575,31 +1575,31 @@
+ 	asm volatile(
+ 	"movd  %1, %%mm7	\n\t"
+ 	"punpckldq %1, %%mm7	\n\t"
+-	"movl $-1024, %%esi	\n\t"
++	"mov $-1024, %%"REG_S"	\n\t"
+ 	".balign 16\n\t"
+ 	"1:			\n\t"
+-	"movq   1024(%0, %%esi), %%mm0	\n\t" 
+-	"movq   1032(%0, %%esi), %%mm1	\n\t"
++	"movq   1024(%0, %%"REG_S"), %%mm0\n\t" 
++	"movq   1032(%0, %%"REG_S"), %%mm1\n\t"
+ 	"pfadd  %%mm7, %%mm0		\n\t" // common
+ 	"pfadd  %%mm7, %%mm1		\n\t" // common
+ 	"movq   %%mm0, %%mm2		\n\t" // common
+ 	"movq   %%mm1, %%mm3		\n\t" // common
+-	"pfadd  (%0, %%esi), %%mm0	\n\t" 
+-	"pfadd  8(%0, %%esi), %%mm1	\n\t"
+-	"pfadd  2048(%0, %%esi), %%mm2	\n\t" 
+-	"pfadd  2056(%0, %%esi), %%mm3	\n\t"
+-	"pfadd  3072(%0, %%esi), %%mm0	\n\t" 
+-	"pfadd  3080(%0, %%esi), %%mm1	\n\t"
+-	"pfadd  4096(%0, %%esi), %%mm2	\n\t" 
+-	"pfadd  4104(%0, %%esi), %%mm3	\n\t"
+-	"movq   %%mm0, (%0, %%esi)	\n\t"
+-	"movq   %%mm1, 8(%0, %%esi)	\n\t"
+-	"movq   %%mm2, 1024(%0, %%esi)	\n\t"
+-	"movq   %%mm3, 1032(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"pfadd  (%0, %%"REG_S"), %%mm0	\n\t" 
++	"pfadd  8(%0, %%"REG_S"), %%mm1	\n\t"
++	"pfadd  2048(%0, %%"REG_S"), %%mm2\n\t" 
++	"pfadd  2056(%0, %%"REG_S"), %%mm3\n\t"
++	"pfadd  3072(%0, %%"REG_S"), %%mm0\n\t" 
++	"pfadd  3080(%0, %%"REG_S"), %%mm1\n\t"
++	"pfadd  4096(%0, %%"REG_S"), %%mm2\n\t" 
++	"pfadd  4104(%0, %%"REG_S"), %%mm3\n\t"
++	"movq   %%mm0, (%0, %%"REG_S")	\n\t"
++	"movq   %%mm1, 8(%0, %%"REG_S")	\n\t"
++	"movq   %%mm2, 1024(%0, %%"REG_S")\n\t"
++	"movq   %%mm3, 1032(%0, %%"REG_S")\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1607,23 +1607,23 @@
+ static void mix32toS_3dnow (sample_t * samples, sample_t bias)
+ {
+ 	asm volatile(
+-	"movl $-1024, %%esi	\n\t"
++	"mov $-1024, %%"REG_S"		\n\t"
+ 	".balign 16\n\t"
+ 	"1:			\n\t"
+ 	"movd  %1, %%mm7		\n\t"
+ 	"punpckldq %1, %%mm7		\n\t"
+-	"movq  1024(%0, %%esi), %%mm0	\n\t" 
+-	"movq  1032(%0, %%esi), %%mm1	\n\t"
+-	"movq  3072(%0, %%esi), %%mm4	\n\t" 
+-	"movq  3080(%0, %%esi), %%mm5	\n\t"
++	"movq  1024(%0, %%"REG_S"), %%mm0\n\t" 
++	"movq  1032(%0, %%"REG_S"), %%mm1\n\t"
++	"movq  3072(%0, %%"REG_S"), %%mm4\n\t" 
++	"movq  3080(%0, %%"REG_S"), %%mm5\n\t"
+ 	"pfadd %%mm7, %%mm0		\n\t" // common
+ 	"pfadd %%mm7, %%mm1		\n\t" // common
+-	"pfadd 4096(%0, %%esi), %%mm4	\n\t" // surround	
+-	"pfadd 4104(%0, %%esi), %%mm5	\n\t" // surround
+-	"movq  (%0, %%esi), %%mm2	\n\t" 
+-	"movq  8(%0, %%esi), %%mm3	\n\t"
+-	"movq  2048(%0, %%esi), %%mm6	\n\t" 
+-	"movq  2056(%0, %%esi), %%mm7	\n\t"
++	"pfadd 4096(%0, %%"REG_S"), %%mm4\n\t" // surround	
++	"pfadd 4104(%0, %%"REG_S"), %%mm5\n\t" // surround
++	"movq  (%0, %%"REG_S"), %%mm2	\n\t" 
++	"movq  8(%0, %%"REG_S"), %%mm3	\n\t"
++	"movq  2048(%0, %%"REG_S"), %%mm6\n\t" 
++	"movq  2056(%0, %%"REG_S"), %%mm7\n\t"
+ 	"pfsub %%mm4, %%mm2		\n\t"	
+ 	"pfsub %%mm5, %%mm3		\n\t"
+ 	"pfadd %%mm4, %%mm6		\n\t"	
+@@ -1632,14 +1632,14 @@
+ 	"pfadd %%mm1, %%mm3		\n\t"
+ 	"pfadd %%mm0, %%mm6		\n\t"	
+ 	"pfadd %%mm1, %%mm7		\n\t"
+-	"movq  %%mm2, (%0, %%esi)	\n\t"
+-	"movq  %%mm3, 8(%0, %%esi)	\n\t"
+-	"movq  %%mm6, 1024(%0, %%esi)	\n\t"
+-	"movq  %%mm7, 1032(%0, %%esi)	\n\t"
+-	"addl $16, %%esi		\n\t"
++	"movq  %%mm2, (%0, %%"REG_S")	\n\t"
++	"movq  %%mm3, 8(%0, %%"REG_S")	\n\t"
++	"movq  %%mm6, 1024(%0, %%"REG_S")\n\t"
++	"movq  %%mm7, 1032(%0, %%"REG_S")\n\t"
++	"add $16, %%"REG_S"		\n\t"
+ 	" jnz 1b			\n\t"
+ 	:: "r" (samples+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1648,29 +1648,29 @@
+ 	asm volatile(
+ 		"movd  %2, %%mm7	\n\t"
+ 		"punpckldq %2, %%mm7	\n\t"
+-		"movl $-1024, %%esi	\n\t"
++		"mov $-1024, %%"REG_S"	\n\t"
+ 		".balign 16\n\t"
+ 		"1:			\n\t"
+-		"movq  (%0, %%esi), %%mm0	\n\t"  
+-		"movq  8(%0, %%esi), %%mm1	\n\t"
+-		"movq  16(%0, %%esi), %%mm2	\n\t"  
+-		"movq  24(%0, %%esi), %%mm3	\n\t"
+-		"pfadd 1024(%0, %%esi), %%mm0	\n\t"
+-		"pfadd 1032(%0, %%esi), %%mm1	\n\t"
+-		"pfadd 1040(%0, %%esi), %%mm2	\n\t"
+-		"pfadd 1048(%0, %%esi), %%mm3	\n\t"
++		"movq  (%0, %%"REG_S"), %%mm0	\n\t"  
++		"movq  8(%0, %%"REG_S"), %%mm1	\n\t"
++		"movq  16(%0, %%"REG_S"), %%mm2	\n\t"  
++		"movq  24(%0, %%"REG_S"), %%mm3	\n\t"
++		"pfadd 1024(%0, %%"REG_S"), %%mm0\n\t"
++		"pfadd 1032(%0, %%"REG_S"), %%mm1\n\t"
++		"pfadd 1040(%0, %%"REG_S"), %%mm2\n\t"
++		"pfadd 1048(%0, %%"REG_S"), %%mm3\n\t"
+ 		"pfadd %%mm7, %%mm0		\n\t"
+ 		"pfadd %%mm7, %%mm1		\n\t"
+ 		"pfadd %%mm7, %%mm2		\n\t"
+ 		"pfadd %%mm7, %%mm3		\n\t"
+-		"movq  %%mm0, (%1, %%esi)	\n\t"
+-		"movq  %%mm1, 8(%1, %%esi)	\n\t"
+-		"movq  %%mm2, 16(%1, %%esi)	\n\t"
+-		"movq  %%mm3, 24(%1, %%esi)	\n\t"
+-		"addl $32, %%esi		\n\t"
++		"movq  %%mm0, (%1, %%"REG_S")	\n\t"
++		"movq  %%mm1, 8(%1, %%"REG_S")	\n\t"
++		"movq  %%mm2, 16(%1, %%"REG_S")	\n\t"
++		"movq  %%mm3, 24(%1, %%"REG_S")	\n\t"
++		"add $32, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 	:: "r" (src+256), "r" (dest+256), "m" (bias)
+-	: "%esi"
++	: "%"REG_S
+ 	);
+ }
+ 
+@@ -1816,4 +1816,4 @@
+     __asm __volatile("femms":::"memory");
+ }
+ 
+-#endif //ARCH_X86
++#endif // ARCH_X86 || ARCH_X86_64
+Index: liba52/imdct.c
+===================================================================
+RCS file: /cvsroot/mplayer/main/liba52/imdct.c,v
+retrieving revision 1.27
+diff -u -r1.27 imdct.c
+--- liba52/imdct.c	2 Jun 2005 20:54:02 -0000	1.27
++++ liba52/imdct.c	31 Jul 2005 21:20:09 -0000
+@@ -101,7 +101,7 @@
+ 	0x03, 0x23, 0x13, 0x33, 0x0b, 0x2b, 0x1b, 0x3b, 
+ 	0x07, 0x27, 0x17, 0x37, 0x0f, 0x2f, 0x1f, 0x3f};
+ 
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ // NOTE: SSE needs 16byte alignment or it will segfault 
+ // 
+ static complex_t __attribute__((aligned(16))) buf[128];
+@@ -442,8 +442,8 @@
+   int k;
+   int p,q;
+   int m;
+-  int two_m;
+-  int two_m_plus_one;
++  long two_m;
++  long two_m_plus_one;
+ 
+   sample_t tmp_b_i;
+   sample_t tmp_b_r;
+@@ -747,7 +747,7 @@
+ 
+ // Stuff below this line is borrowed from libac3
+ #include "srfftp.h"
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ #ifndef HAVE_3DNOW
+ #define HAVE_3DNOW 1
+ #endif
+@@ -768,9 +768,9 @@
+ /*	int i,k;
+     int p,q;*/
+     int m;
+-    int two_m;
+-    int two_m_plus_one;
+-    int two_m_plus_one_shl3;
++    long two_m;
++    long two_m_plus_one;
++    long two_m_plus_one_shl3;
+     complex_t *buf_offset;
+ 
+ /*  sample_t tmp_a_i;
+@@ -788,33 +788,33 @@
+     /* Pre IFFT complex multiply plus IFFT cmplx conjugate */
+     /* Bit reversed shuffling */
+ 	asm volatile(
+-		"xorl %%esi, %%esi			\n\t"
+-		"leal "MANGLE(bit_reverse_512)", %%eax	\n\t"
+-		"movl $1008, %%edi			\n\t"
+-		"pushl %%ebp				\n\t" //use ebp without telling gcc
++		"xor %%"REG_S", %%"REG_S"		\n\t"
++		"lea "MANGLE(bit_reverse_512)", %%"REG_a"\n\t"
++		"mov $1008, %%"REG_D"			\n\t"
++		"push %%"REG_BP"			\n\t" //use ebp without telling gcc
+ 		".balign 16				\n\t"
+ 		"1:					\n\t"
+-		"movlps (%0, %%esi), %%xmm0		\n\t" // XXXI
+-		"movhps 8(%0, %%edi), %%xmm0		\n\t" // RXXI
+-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // XXXi
+-		"movhps (%0, %%edi), %%xmm1		\n\t" // rXXi
++		"movlps (%0, %%"REG_S"), %%xmm0	\n\t" // XXXI
++		"movhps 8(%0, %%"REG_D"), %%xmm0	\n\t" // RXXI
++		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // XXXi
++		"movhps (%0, %%"REG_D"), %%xmm1	\n\t" // rXXi
+ 		"shufps $0x33, %%xmm1, %%xmm0		\n\t" // irIR
+-		"movaps "MANGLE(sseSinCos1c)"(%%esi), %%xmm2\n\t"
++		"movaps "MANGLE(sseSinCos1c)"(%%"REG_S"), %%xmm2\n\t"
+ 		"mulps %%xmm0, %%xmm2			\n\t"
+ 		"shufps $0xB1, %%xmm0, %%xmm0		\n\t" // riRI
+-		"mulps "MANGLE(sseSinCos1d)"(%%esi), %%xmm0\n\t"
++		"mulps "MANGLE(sseSinCos1d)"(%%"REG_S"), %%xmm0\n\t"
+ 		"subps %%xmm0, %%xmm2			\n\t"
+-		"movzbl (%%eax), %%edx			\n\t"
+-		"movzbl 1(%%eax), %%ebp			\n\t"
+-		"movlps %%xmm2, (%1, %%edx,8)		\n\t"
+-		"movhps %%xmm2, (%1, %%ebp,8)		\n\t"
+-		"addl $16, %%esi			\n\t"
+-		"addl $2, %%eax				\n\t" // avoid complex addressing for P4 crap
+-		"subl $16, %%edi			\n\t"
+-		" jnc 1b				\n\t"
+-		"popl %%ebp				\n\t"//no we didnt touch ebp *g*
+-		:: "b" (data), "c" (buf)
+-		: "%esi", "%edi", "%eax", "%edx"
++		"movzb (%%"REG_a"), %%"REG_d"		\n\t"
++		"movzb 1(%%"REG_a"), %%"REG_BP"		\n\t"
++		"movlps %%xmm2, (%1, %%"REG_d", 8)	\n\t"
++		"movhps %%xmm2, (%1, %%"REG_BP", 8)	\n\t"
++		"add $16, %%"REG_S"			\n\t"
++		"add $2, %%"REG_a"			\n\t" // avoid complex addressing for P4 crap
++		"sub $16, %%"REG_D"			\n\t"
++		"jnc 1b				 	\n\t"
++		"pop %%"REG_BP"				\n\t"//no we didnt touch ebp *g*
++		:: "r" (data), "r" (buf)
++		: "%"REG_S, "%"REG_D, "%"REG_a, "%"REG_d
+ 	);
+ 
+ 
+@@ -850,44 +850,44 @@
+ 	asm volatile(
+ 		"xorps %%xmm1, %%xmm1	\n\t"
+ 		"xorps %%xmm2, %%xmm2	\n\t"
+-		"movl %0, %%esi		\n\t"
++		"mov %0, %%"REG_S"	\n\t"
+ 		".balign 16				\n\t"
+ 		"1:			\n\t"
+-		"movlps (%%esi), %%xmm0	\n\t" //buf[p]
+-		"movlps 8(%%esi), %%xmm1\n\t" //buf[q]
+-		"movhps (%%esi), %%xmm0	\n\t" //buf[p]
+-		"movhps 8(%%esi), %%xmm2\n\t" //buf[q]
++		"movlps (%%"REG_S"), %%xmm0\n\t" //buf[p]
++		"movlps 8(%%"REG_S"), %%xmm1\n\t" //buf[q]
++		"movhps (%%"REG_S"), %%xmm0\n\t" //buf[p]
++		"movhps 8(%%"REG_S"), %%xmm2\n\t" //buf[q]
+ 		"addps %%xmm1, %%xmm0	\n\t"
+ 		"subps %%xmm2, %%xmm0	\n\t"
+-		"movaps %%xmm0, (%%esi)	\n\t"
+-		"addl $16, %%esi	\n\t"
+-		"cmpl %1, %%esi		\n\t"
++		"movaps %%xmm0, (%%"REG_S")\n\t"
++		"add $16, %%"REG_S"	\n\t"
++		"cmp %1, %%"REG_S"	\n\t"
+ 		" jb 1b			\n\t"
+ 		:: "g" (buf), "r" (buf + 128)
+-		: "%esi"
++		: "%"REG_S
+ 	);
+         
+     /* 2. iteration */
+ 	// Note w[1]={{1,0}, {0,-1}}
+ 	asm volatile(
+ 		"movaps "MANGLE(ps111_1)", %%xmm7\n\t" // 1,1,1,-1
+-		"movl %0, %%esi			\n\t"
++		"mov %0, %%"REG_S"		\n\t"
+ 		".balign 16				\n\t"
+ 		"1:				\n\t"
+-		"movaps 16(%%esi), %%xmm2	\n\t" //r2,i2,r3,i3
++		"movaps 16(%%"REG_S"), %%xmm2	\n\t" //r2,i2,r3,i3
+ 		"shufps $0xB4, %%xmm2, %%xmm2	\n\t" //r2,i2,i3,r3
+ 		"mulps %%xmm7, %%xmm2		\n\t" //r2,i2,i3,-r3
+-		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
+-		"movaps (%%esi), %%xmm1		\n\t" //r0,i0,r1,i1
++		"movaps (%%"REG_S"), %%xmm0	\n\t" //r0,i0,r1,i1
++		"movaps (%%"REG_S"), %%xmm1	\n\t" //r0,i0,r1,i1
+ 		"addps %%xmm2, %%xmm0		\n\t"
+ 		"subps %%xmm2, %%xmm1		\n\t"
+-		"movaps %%xmm0, (%%esi)		\n\t"
+-		"movaps %%xmm1, 16(%%esi)	\n\t"
+-		"addl $32, %%esi	\n\t"
+-		"cmpl %1, %%esi		\n\t"
++		"movaps %%xmm0, (%%"REG_S")	\n\t"
++		"movaps %%xmm1, 16(%%"REG_S")	\n\t"
++		"add $32, %%"REG_S"	\n\t"
++		"cmp %1, %%"REG_S"	\n\t"
+ 		" jb 1b			\n\t"
+ 		:: "g" (buf), "r" (buf + 128)
+-		: "%esi"
++		: "%"REG_S
+ 	);
+ 
+     /* 3. iteration */
+@@ -902,11 +902,11 @@
+ 		"movaps 16+"MANGLE(sseW2)", %%xmm7\n\t" 
+ 		"xorps %%xmm5, %%xmm5		\n\t"
+ 		"xorps %%xmm2, %%xmm2		\n\t"
+-		"movl %0, %%esi			\n\t"
++		"mov %0, %%"REG_S"		\n\t"
+ 		".balign 16			\n\t"
+ 		"1:				\n\t"
+-		"movaps 32(%%esi), %%xmm2	\n\t" //r4,i4,r5,i5
+-		"movaps 48(%%esi), %%xmm3	\n\t" //r6,i6,r7,i7
++		"movaps 32(%%"REG_S"), %%xmm2	\n\t" //r4,i4,r5,i5
++		"movaps 48(%%"REG_S"), %%xmm3	\n\t" //r6,i6,r7,i7
+ 		"movaps "MANGLE(sseW2)", %%xmm4	\n\t" //r4,i4,r5,i5
+ 		"movaps 32+"MANGLE(sseW2)", %%xmm5\n\t" //r6,i6,r7,i7
+ 		"mulps %%xmm2, %%xmm4		\n\t"
+@@ -915,8 +915,8 @@
+ 		"shufps $0xB1, %%xmm3, %%xmm3	\n\t" //i6,r6,i7,r7
+ 		"mulps %%xmm6, %%xmm3		\n\t"
+ 		"mulps %%xmm7, %%xmm2		\n\t"
+-		"movaps (%%esi), %%xmm0		\n\t" //r0,i0,r1,i1
+-		"movaps 16(%%esi), %%xmm1	\n\t" //r2,i2,r3,i3
++		"movaps (%%"REG_S"), %%xmm0	\n\t" //r0,i0,r1,i1
++		"movaps 16(%%"REG_S"), %%xmm1	\n\t" //r2,i2,r3,i3
+ 		"addps %%xmm4, %%xmm2		\n\t"
+ 		"addps %%xmm5, %%xmm3		\n\t"
+ 		"movaps %%xmm2, %%xmm4		\n\t"
+@@ -925,15 +925,15 @@
+ 		"addps %%xmm1, %%xmm3		\n\t"
+ 		"subps %%xmm4, %%xmm0		\n\t"
+ 		"subps %%xmm5, %%xmm1		\n\t"
+-		"movaps %%xmm2, (%%esi)		\n\t" 
+-		"movaps %%xmm3, 16(%%esi)	\n\t" 
+-		"movaps %%xmm0, 32(%%esi)	\n\t" 
+-		"movaps %%xmm1, 48(%%esi)	\n\t" 
+-		"addl $64, %%esi	\n\t"
+-		"cmpl %1, %%esi		\n\t"
++		"movaps %%xmm2, (%%"REG_S")	\n\t" 
++		"movaps %%xmm3, 16(%%"REG_S")	\n\t" 
++		"movaps %%xmm0, 32(%%"REG_S")	\n\t" 
++		"movaps %%xmm1, 48(%%"REG_S")	\n\t" 
++		"add $64, %%"REG_S"	\n\t"
++		"cmp %1, %%"REG_S"	\n\t"
+ 		" jb 1b			\n\t"
+ 		:: "g" (buf), "r" (buf + 128)
+-		: "%esi"
++		: "%"REG_S
+ 	);
+ 
+     /* 4-7. iterations */
+@@ -943,52 +943,52 @@
+ 	two_m_plus_one_shl3 = (two_m_plus_one<<3);
+ 	buf_offset = buf+128;
+ 	asm volatile(
+-		"movl %0, %%esi				\n\t"
++		"mov %0, %%"REG_S"			\n\t"
+ 		".balign 16				\n\t"
+ 		"1:					\n\t"
+-		"xorl %%edi, %%edi			\n\t" // k
+-		"leal (%%esi, %3), %%edx		\n\t"
++		"xor %%"REG_D", %%"REG_D"		\n\t" // k
++		"lea (%%"REG_S", %3), %%"REG_d"		\n\t"
+ 		"2:					\n\t"
+-		"movaps (%%edx, %%edi), %%xmm1		\n\t"
+-		"movaps (%4, %%edi, 2), %%xmm2		\n\t"
++		"movaps (%%"REG_d", %%"REG_D"), %%xmm1	\n\t"
++		"movaps (%4, %%"REG_D", 2), %%xmm2	\n\t"
+ 		"mulps %%xmm1, %%xmm2			\n\t"
+ 		"shufps $0xB1, %%xmm1, %%xmm1		\n\t"
+-		"mulps 16(%4, %%edi, 2), %%xmm1		\n\t"
+-		"movaps (%%esi, %%edi), %%xmm0		\n\t"
++		"mulps 16(%4, %%"REG_D", 2), %%xmm1	\n\t"
++		"movaps (%%"REG_S", %%"REG_D"), %%xmm0	\n\t"
+ 		"addps %%xmm2, %%xmm1			\n\t"
+ 		"movaps %%xmm1, %%xmm2			\n\t"
+ 		"addps %%xmm0, %%xmm1			\n\t"
+ 		"subps %%xmm2, %%xmm0			\n\t"
+-		"movaps %%xmm1, (%%esi, %%edi)		\n\t"
+-		"movaps %%xmm0, (%%edx, %%edi)		\n\t"
+-		"addl $16, %%edi			\n\t"
+-		"cmpl %3, %%edi				\n\t" //FIXME (opt) count against 0 
+-		" jb 2b					\n\t"
+-		"addl %2, %%esi				\n\t"
+-		"cmpl %1, %%esi				\n\t"
++		"movaps %%xmm1, (%%"REG_S", %%"REG_D")	\n\t"
++		"movaps %%xmm0, (%%"REG_d", %%"REG_D")	\n\t"
++		"add $16, %%"REG_D"			\n\t"
++		"cmp %3, %%"REG_D"			\n\t" //FIXME (opt) count against 0 
++		"jb 2b					\n\t"
++		"add %2, %%"REG_S"			\n\t"
++		"cmp %1, %%"REG_S"			\n\t"
+ 		" jb 1b					\n\t"
+ 		:: "g" (buf), "m" (buf_offset), "m" (two_m_plus_one_shl3), "r" (two_m<<3),
+ 		   "r" (sseW[m])
+-		: "%esi", "%edi", "%edx"
++		: "%"REG_S, "%"REG_D, "%"REG_d
+ 	);
+     }
+ 
+     /* Post IFFT complex multiply  plus IFFT complex conjugate*/
+ 	asm volatile(
+-		"movl $-1024, %%esi			\n\t"
++		"mov $-1024, %%"REG_S"			\n\t"
+ 		".balign 16				\n\t"
+ 		"1:					\n\t"
+-		"movaps (%0, %%esi), %%xmm0		\n\t"
+-		"movaps (%0, %%esi), %%xmm1		\n\t"
++		"movaps (%0, %%"REG_S"), %%xmm0		\n\t"
++		"movaps (%0, %%"REG_S"), %%xmm1		\n\t"
+ 		"shufps $0xB1, %%xmm0, %%xmm0		\n\t"
+-		"mulps 1024+"MANGLE(sseSinCos1c)"(%%esi), %%xmm1\n\t"
+-		"mulps 1024+"MANGLE(sseSinCos1d)"(%%esi), %%xmm0\n\t"
++		"mulps 1024+"MANGLE(sseSinCos1c)"(%%"REG_S"), %%xmm1\n\t"
++		"mulps 1024+"MANGLE(sseSinCos1d)"(%%"REG_S"), %%xmm0\n\t"
+ 		"addps %%xmm1, %%xmm0			\n\t"
+-		"movaps %%xmm0, (%0, %%esi)		\n\t"
+-		"addl $16, %%esi			\n\t"
++		"movaps %%xmm0, (%0, %%"REG_S")		\n\t"
++		"add $16, %%"REG_S"			\n\t"
+ 		" jnz 1b				\n\t"
+ 		:: "r" (buf+128)
+-		: "%esi"
++		: "%"REG_S
+ 	);   
+ 
+ 	
+@@ -998,54 +998,54 @@
+ 
+     /* Window and convert to real valued signal */
+ 	asm volatile(
+-		"xorl %%edi, %%edi			\n\t"  // 0
+-		"xorl %%esi, %%esi			\n\t"  // 0
++		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
++		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
+ 		"movss %3, %%xmm2			\n\t"  // bias
+ 		"shufps $0x00, %%xmm2, %%xmm2		\n\t"  // bias, bias, ...
+ 		".balign 16				\n\t"
+ 		"1:					\n\t"
+-		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? A ?
+-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? C ?
+-		"movhps -16(%0, %%edi), %%xmm1		\n\t" // ? D C ?
+-		"movhps -8(%0, %%edi), %%xmm0		\n\t" // ? B A ?
++		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? A ?
++		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? C ?
++		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // ? D C ?
++		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // ? B A ?
+ 		"shufps $0x99, %%xmm1, %%xmm0		\n\t" // D C B A
+-		"mulps "MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
+-		"addps (%2, %%esi), %%xmm0		\n\t"
++		"mulps "MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
++		"addps (%2, %%"REG_S"), %%xmm0		\n\t"
+ 		"addps %%xmm2, %%xmm0			\n\t"
+-		"movaps %%xmm0, (%1, %%esi)		\n\t"
+-		"addl $16, %%esi			\n\t"
+-		"subl $16, %%edi			\n\t"
+-		"cmpl $512, %%esi			\n\t" 
++		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
++		"add  $16, %%"REG_S"			\n\t"
++		"sub  $16, %%"REG_D"			\n\t"
++		"cmp  $512, %%"REG_S"			\n\t" 
+ 		" jb 1b					\n\t"
+ 		:: "r" (buf+64), "r" (data_ptr), "r" (delay_ptr), "m" (bias)
+-		: "%esi", "%edi"
++		: "%"REG_S, "%"REG_D
+ 	);
+ 	data_ptr+=128;
+ 	delay_ptr+=128;
+ //	window_ptr+=128;
+ 	
+ 	asm volatile(
+-		"movl $1024, %%edi			\n\t"  // 512
+-		"xorl %%esi, %%esi			\n\t"  // 0
++		"mov $1024, %%"REG_D"			\n\t"  // 512
++		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
+ 		"movss %3, %%xmm2			\n\t"  // bias
+ 		"shufps $0x00, %%xmm2, %%xmm2		\n\t"  // bias, bias, ...
+ 		".balign 16				\n\t"
+ 		"1:					\n\t"
+-		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? ? A
+-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? ? C
+-		"movhps -16(%0, %%edi), %%xmm1		\n\t" // D ? ? C
+-		"movhps -8(%0, %%edi), %%xmm0		\n\t" // B ? ? A
++		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? ? A
++		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? ? C
++		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // D ? ? C
++		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // B ? ? A
+ 		"shufps $0xCC, %%xmm1, %%xmm0		\n\t" // D C B A
+-		"mulps 512+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
+-		"addps (%2, %%esi), %%xmm0		\n\t"
++		"mulps 512+"MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
++		"addps (%2, %%"REG_S"), %%xmm0		\n\t"
+ 		"addps %%xmm2, %%xmm0			\n\t"
+-		"movaps %%xmm0, (%1, %%esi)		\n\t"
+-		"addl $16, %%esi			\n\t"
+-		"subl $16, %%edi			\n\t"
+-		"cmpl $512, %%esi			\n\t" 
++		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
++		"add $16, %%"REG_S"			\n\t"
++		"sub $16, %%"REG_D"			\n\t"
++		"cmp $512, %%"REG_S"			\n\t" 
+ 		" jb 1b					\n\t"
+ 		:: "r" (buf), "r" (data_ptr), "r" (delay_ptr), "m" (bias)
+-		: "%esi", "%edi"
++		: "%"REG_S, "%"REG_D
+ 	);
+ 	data_ptr+=128;
+ //	window_ptr+=128;
+@@ -1054,48 +1054,48 @@
+     delay_ptr = delay;
+ 
+ 	asm volatile(
+-		"xorl %%edi, %%edi			\n\t"  // 0
+-		"xorl %%esi, %%esi			\n\t"  // 0
++		"xor %%"REG_D", %%"REG_D"		\n\t"  // 0
++		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
+ 		".balign 16				\n\t"
+ 		"1:					\n\t"
+-		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? ? A
+-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? ? C
+-		"movhps -16(%0, %%edi), %%xmm1		\n\t" // D ? ? C 
+-		"movhps -8(%0, %%edi), %%xmm0		\n\t" // B ? ? A 
++		"movlps (%0, %%"REG_S"), %%xmm0		\n\t" // ? ? ? A
++		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? ? C
++		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // D ? ? C 
++		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // B ? ? A 
+ 		"shufps $0xCC, %%xmm1, %%xmm0		\n\t" // D C B A
+-		"mulps 1024+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
+-		"movaps %%xmm0, (%1, %%esi)		\n\t"
+-		"addl $16, %%esi			\n\t"
+-		"subl $16, %%edi			\n\t"
+-		"cmpl $512, %%esi			\n\t" 
++		"mulps 1024+"MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
++		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
++		"add $16, %%"REG_S"			\n\t"
++		"sub $16, %%"REG_D"			\n\t"
++		"cmp $512, %%"REG_S"			\n\t" 
+ 		" jb 1b					\n\t"
+ 		:: "r" (buf+64), "r" (delay_ptr)
+-		: "%esi", "%edi"
++		: "%"REG_S, "%"REG_D
+ 	);
+ 	delay_ptr+=128;
+ //	window_ptr-=128;
+ 	
+ 	asm volatile(
+-		"movl $1024, %%edi			\n\t"  // 1024
+-		"xorl %%esi, %%esi			\n\t"  // 0
++		"mov $1024, %%"REG_D"			\n\t"  // 1024
++		"xor %%"REG_S", %%"REG_S"		\n\t"  // 0
+ 		".balign 16				\n\t"
+ 		"1:					\n\t"
+-		"movlps (%0, %%esi), %%xmm0		\n\t" // ? ? A ?
+-		"movlps 8(%0, %%esi), %%xmm1		\n\t" // ? ? C ?
+-		"movhps -16(%0, %%edi), %%xmm1		\n\t" // ? D C ? 
+-		"movhps -8(%0, %%edi), %%xmm0		\n\t" // ? B A ? 
++		"movlps (%0, %%"REG_S"), %%xmm0	\n\t" // ? ? A ?
++		"movlps 8(%0, %%"REG_S"), %%xmm1	\n\t" // ? ? C ?
++		"movhps -16(%0, %%"REG_D"), %%xmm1	\n\t" // ? D C ? 
++		"movhps -8(%0, %%"REG_D"), %%xmm0	\n\t" // ? B A ? 
+ 		"shufps $0x99, %%xmm1, %%xmm0		\n\t" // D C B A
+-		"mulps 1536+"MANGLE(sseWindow)"(%%esi), %%xmm0\n\t"
+-		"movaps %%xmm0, (%1, %%esi)		\n\t"
+-		"addl $16, %%esi			\n\t"
+-		"subl $16, %%edi			\n\t"
+-		"cmpl $512, %%esi			\n\t" 
++		"mulps 1536+"MANGLE(sseWindow)"(%%"REG_S"), %%xmm0\n\t"
++		"movaps %%xmm0, (%1, %%"REG_S")		\n\t"
++		"add $16, %%"REG_S"			\n\t"
++		"sub $16, %%"REG_D"			\n\t"
++		"cmp $512, %%"REG_S"			\n\t" 
+ 		" jb 1b					\n\t"
+ 		:: "r" (buf), "r" (delay_ptr)
+-		: "%esi", "%edi"
++		: "%"REG_S, "%"REG_D
+ 	);
+ }
+-#endif //arch_x86
++#endif // ARCH_X86 || ARCH_X86_64
+ 
+ void
+ imdct_do_256(sample_t data[],sample_t delay[],sample_t bias)
+@@ -1242,7 +1242,7 @@
+ 	    xcos1[i] = -cos ((M_PI / 2048) * (8 * i + 1));
+ 	    xsin1[i] = -sin ((M_PI / 2048) * (8 * i + 1));
+ 	}
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ 	for (i = 0; i < 128; i++) {
+ 	    sseSinCos1c[2*i+0]= xcos1[i];
+ 	    sseSinCos1c[2*i+1]= -xcos1[i];
+@@ -1264,7 +1264,7 @@
+ 		w[i][k].imag = sin (-M_PI * k / j);
+ 	    }
+ 	}
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ 	for (i = 1; i < 7; i++) {
+ 	    j = 1 << i;
+ 	    for (k = 0; k < j; k+=2) {
+@@ -1307,10 +1307,10 @@
+ 		sseWindow[384 + 2*i+0]=  imdct_window[126 - 2*i+1];
+ 		sseWindow[384 + 2*i+1]= -imdct_window[126 - 2*i+0];
+ 	}
+-#endif // arch_x86
++#endif // ARCH_X86 || ARCH_X86_64
+ 
+ 	imdct_512 = imdct_do_512;
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ 	if(mm_accel & MM_ACCEL_X86_SSE)
+ 	{
+ 	  fprintf (stderr, "Using SSE optimized IMDCT transform\n");
+@@ -1329,7 +1329,7 @@
+ 	  imdct_512 = imdct_do_512_3dnow;
+ 	}
+ 	else
+-#endif // arch_x86
++#endif // ARCH_X86 || ARCH_X86_64
+ #ifdef HAVE_ALTIVEC
+         if (mm_accel & MM_ACCEL_PPC_ALTIVEC)
+ 	{
+Index: liba52/resample.c
+===================================================================
+RCS file: /cvsroot/mplayer/main/liba52/resample.c,v
+retrieving revision 1.16
+diff -u -r1.16 resample.c
+--- liba52/resample.c	25 Jan 2004 18:29:11 -0000	1.16
++++ liba52/resample.c	31 Jul 2005 21:20:10 -0000
+@@ -15,7 +15,7 @@
+ 
+ #include "resample_c.c"
+ 
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+ #include "resample_mmx.c"
+ #endif
+ 
+@@ -26,7 +26,7 @@
+ void* a52_resample_init(uint32_t mm_accel,int flags,int chans){
+ void* tmp;
+ 
+-#ifdef ARCH_X86
++#if defined(ARCH_X86) || defined(ARCH_X86_64)
+     if(mm_accel&MM_ACCEL_X86_MMX){
+ 	tmp=a52_resample_MMX(flags,chans);
+ 	if(tmp){
+Index: liba52/resample_mmx.c
+===================================================================
+RCS file: /cvsroot/mplayer/main/liba52/resample_mmx.c,v
+retrieving revision 1.17
+diff -u -r1.17 resample_mmx.c
+--- liba52/resample_mmx.c	26 Apr 2004 19:47:50 -0000	1.17
++++ liba52/resample_mmx.c	31 Jul 2005 21:20:10 -0000
+@@ -7,6 +7,9 @@
+ 	and it would mean (C / MMX2 / MMX / 3DNOW) versions 
+ */
+ 
++#include "a52_internal.h"
++
++
+ static uint64_t attribute_used __attribute__((aligned(8))) magicF2W= 0x43c0000043c00000LL;
+ static uint64_t attribute_used __attribute__((aligned(8))) wm1010= 0xFFFF0000FFFF0000LL;
+ static uint64_t attribute_used __attribute__((aligned(8))) wm0101= 0x0000FFFF0000FFFFLL;
+@@ -15,36 +18,36 @@
+ static int a52_resample_MONO_to_5_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-512, %%esi		\n\t"
++		"mov $-512, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ 		"movq "MANGLE(wm1100)", %%mm3	\n\t"
+ 		"movq "MANGLE(wm0101)", %%mm4	\n\t"
+ 		"movq "MANGLE(wm1010)", %%mm5	\n\t"
+ 		"pxor %%mm6, %%mm6		\n\t"
+ 		"1:				\n\t"
+-		"movq (%1, %%esi, 2), %%mm0	\n\t"
+-		"movq 8(%1, %%esi, 2), %%mm1	\n\t"
+-		"leal (%%esi, %%esi, 4), %%edi	\n\t"
++		"movq (%1, %%"REG_S", 2), %%mm0	\n\t"
++		"movq 8(%1, %%"REG_S", 2), %%mm1\n\t"
++		"lea (%%"REG_S", %%"REG_S", 4), %%"REG_D"\n\t"
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"packssdw %%mm1, %%mm0		\n\t"
+ 		"movq %%mm0, %%mm1		\n\t"
+ 		"pand %%mm4, %%mm0		\n\t"
+ 		"pand %%mm5, %%mm1		\n\t"
+-		"movq %%mm6, (%0, %%edi)	\n\t" // 0 0 0 0
+-		"movd %%mm0, 8(%0, %%edi)	\n\t" // A 0
++		"movq %%mm6, (%0, %%"REG_D")	\n\t" // 0 0 0 0
++		"movd %%mm0, 8(%0, %%"REG_D")	\n\t" // A 0
+ 		"pand %%mm3, %%mm0		\n\t"
+-		"movd %%mm6, 12(%0, %%edi)	\n\t" // 0 0
+-		"movd %%mm1, 16(%0, %%edi)	\n\t" // 0 B
++		"movd %%mm6, 12(%0, %%"REG_D")	\n\t" // 0 0
++		"movd %%mm1, 16(%0, %%"REG_D")	\n\t" // 0 B
+ 		"pand %%mm3, %%mm1		\n\t"
+-		"movd %%mm6, 20(%0, %%edi)	\n\t" // 0 0
+-		"movq %%mm0, 24(%0, %%edi)	\n\t" // 0 0 C 0
+-		"movq %%mm1, 32(%0, %%edi)	\n\t" // 0 0 0 B
+-		"addl $8, %%esi			\n\t"
++		"movd %%mm6, 20(%0, %%"REG_D")	\n\t" // 0 0
++		"movq %%mm0, 24(%0, %%"REG_D")	\n\t" // 0 0 C 0
++		"movq %%mm1, 32(%0, %%"REG_D")	\n\t" // 0 0 0 B
++		"add $8, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1280), "r" (f+256)
+-		:"%esi", "%edi", "memory"
++		:"%"REG_S, "%"REG_D, "memory"
+ 	);
+     return 5*256;
+ }
+@@ -54,29 +57,29 @@
+ /* benchmark scores are 0.3% better with SSE but we would need to set bias=0 and premultiply it
+ #ifdef HAVE_SSE
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"1:				\n\t"
+-		"cvtps2pi (%1, %%esi), %%mm0	\n\t"
+-		"cvtps2pi 1024(%1, %%esi), %%mm2\n\t"
++		"cvtps2pi (%1, %%"REG_S"), %%mm0\n\t"
++		"cvtps2pi 1024(%1, %%"REG_S"), %%mm2\n\t"
+ 		"movq %%mm0, %%mm1		\n\t"
+ 		"punpcklwd %%mm2, %%mm0		\n\t"
+ 		"punpckhwd %%mm2, %%mm1		\n\t"
+-		"movq %%mm0, (%0, %%esi)	\n\t"
+-		"movq %%mm1, 8(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq %%mm0, (%0, %%"REG_S")	\n\t"
++		"movq %%mm1, 8(%0, %%"REG_S")	\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+512), "r" (f+256)
+-		:"%esi", "memory"
++		:"%"REG_S, "memory"
+ 	);*/
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ 		"1:				\n\t"
+-		"movq (%1, %%esi), %%mm0	\n\t"
+-		"movq 8(%1, %%esi), %%mm1	\n\t"
+-		"movq 1024(%1, %%esi), %%mm2	\n\t"
+-		"movq 1032(%1, %%esi), %%mm3	\n\t"
++		"movq (%1, %%"REG_S"), %%mm0	\n\t"
++		"movq 8(%1, %%"REG_S"), %%mm1	\n\t"
++		"movq 1024(%1, %%"REG_S"), %%mm2\n\t"
++		"movq 1032(%1, %%"REG_S"), %%mm3\n\t"
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm2		\n\t"
+@@ -86,13 +89,13 @@
+ 		"movq %%mm0, %%mm1		\n\t"
+ 		"punpcklwd %%mm2, %%mm0		\n\t"
+ 		"punpckhwd %%mm2, %%mm1		\n\t"
+-		"movq %%mm0, (%0, %%esi)	\n\t"
+-		"movq %%mm1, 8(%0, %%esi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq %%mm0, (%0, %%"REG_S")	\n\t"
++		"movq %%mm1, 8(%0, %%"REG_S")	\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+512), "r" (f+256)
+-		:"%esi", "memory"
++		:"%"REG_S, "memory"
+ 	);
+     return 2*256;
+ }
+@@ -100,23 +103,23 @@
+ static int a52_resample_3F_to_5_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ 		"pxor %%mm6, %%mm6		\n\t"
+ 		"movq %%mm7, %%mm5		\n\t"
+ 		"punpckldq %%mm6, %%mm5		\n\t"
+ 		"1:				\n\t"
+-		"movd (%1, %%esi), %%mm0	\n\t"
+-		"punpckldq 2048(%1, %%esi), %%mm0\n\t"
+-		"movd 1024(%1, %%esi), %%mm1	\n\t"
+-		"punpckldq 4(%1, %%esi), %%mm1	\n\t"
+-		"movd 2052(%1, %%esi), %%mm2	\n\t"
++		"movd (%1, %%"REG_S"), %%mm0	\n\t"
++		"punpckldq 2048(%1, %%"REG_S"), %%mm0\n\t"
++		"movd 1024(%1, %%"REG_S"), %%mm1\n\t"
++		"punpckldq 4(%1, %%"REG_S"), %%mm1\n\t"
++		"movd 2052(%1, %%"REG_S"), %%mm2\n\t"
+ 		"movq %%mm7, %%mm3		\n\t"
+-		"punpckldq 1028(%1, %%esi), %%mm3\n\t"
+-		"movd 8(%1, %%esi), %%mm4	\n\t"
+-		"punpckldq 2056(%1, %%esi), %%mm4\n\t"
+-		"leal (%%esi, %%esi, 4), %%edi	\n\t"
+-		"sarl $1, %%edi			\n\t"
++		"punpckldq 1028(%1, %%"REG_S"), %%mm3\n\t"
++		"movd 8(%1, %%"REG_S"), %%mm4	\n\t"
++		"punpckldq 2056(%1, %%"REG_S"), %%mm4\n\t"
++		"lea (%%"REG_S", %%"REG_S", 4), %%"REG_D"\n\t"
++		"sar $1, %%"REG_D"		\n\t"
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm5, %%mm2		\n\t"
+@@ -125,29 +128,28 @@
+ 		"packssdw %%mm6, %%mm0		\n\t"
+ 		"packssdw %%mm2, %%mm1		\n\t"
+ 		"packssdw %%mm4, %%mm3		\n\t"
+-		"movq %%mm0, (%0, %%edi)	\n\t"
+-		"movq %%mm1, 8(%0, %%edi)	\n\t"
+-		"movq %%mm3, 16(%0, %%edi)	\n\t"
+-		
+-		"movd 1032(%1, %%esi), %%mm1	\n\t"
+-		"punpckldq 12(%1, %%esi), %%mm1\n\t"
+-		"movd 2060(%1, %%esi), %%mm2	\n\t"
++		"movq %%mm0, (%0, %%"REG_D")	\n\t"
++		"movq %%mm1, 8(%0, %%"REG_D")	\n\t"
++		"movq %%mm3, 16(%0, %%"REG_D")	\n\t"
++		"movd 1032(%1, %%"REG_S"), %%mm1\n\t"
++		"punpckldq 12(%1, %%"REG_S"), %%mm1\n\t"
++		"movd 2060(%1, %%"REG_S"), %%mm2\n\t"
+ 		"movq %%mm7, %%mm3		\n\t"
+-		"punpckldq 1036(%1, %%esi), %%mm3\n\t"
++		"punpckldq 1036(%1, %%"REG_S"), %%mm3\n\t"
+ 		"pxor %%mm0, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm5, %%mm2		\n\t"
+ 		"psubd %%mm7, %%mm3		\n\t"
+ 		"packssdw %%mm1, %%mm0		\n\t"
+ 		"packssdw %%mm3, %%mm2		\n\t"
+-		"movq %%mm0, 24(%0, %%edi)	\n\t"
+-		"movq %%mm2, 32(%0, %%edi)	\n\t"
++		"movq %%mm0, 24(%0, %%"REG_D")	\n\t"
++		"movq %%mm2, 32(%0, %%"REG_D")	\n\t"
+ 				
+-		"addl $16, %%esi		\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1280), "r" (f+256)
+-		:"%esi", "%edi", "memory"
++		:"%"REG_S, "%"REG_D, "memory"
+ 	);
+     return 5*256;
+ }
+@@ -155,23 +157,23 @@
+ static int a52_resample_2F_2R_to_4_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ 		"1:				\n\t"
+-		"movq (%1, %%esi), %%mm0	\n\t"
+-		"movq 8(%1, %%esi), %%mm1	\n\t"
+-		"movq 1024(%1, %%esi), %%mm2	\n\t"
+-		"movq 1032(%1, %%esi), %%mm3	\n\t"
++		"movq (%1, %%"REG_S"), %%mm0	\n\t"
++		"movq 8(%1, %%"REG_S"), %%mm1	\n\t"
++		"movq 1024(%1, %%"REG_S"), %%mm2\n\t"
++		"movq 1032(%1, %%"REG_S"), %%mm3\n\t"
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm2		\n\t"
+ 		"psubd %%mm7, %%mm3		\n\t"
+ 		"packssdw %%mm1, %%mm0		\n\t"
+ 		"packssdw %%mm3, %%mm2		\n\t"
+-		"movq 2048(%1, %%esi), %%mm3	\n\t"
+-		"movq 2056(%1, %%esi), %%mm4	\n\t"
+-		"movq 3072(%1, %%esi), %%mm5	\n\t"
+-		"movq 3080(%1, %%esi), %%mm6	\n\t"
++		"movq 2048(%1, %%"REG_S"), %%mm3\n\t"
++		"movq 2056(%1, %%"REG_S"), %%mm4\n\t"
++		"movq 3072(%1, %%"REG_S"), %%mm5\n\t"
++		"movq 3080(%1, %%"REG_S"), %%mm6\n\t"
+ 		"psubd %%mm7, %%mm3		\n\t"
+ 		"psubd %%mm7, %%mm4		\n\t"
+ 		"psubd %%mm7, %%mm5		\n\t"
+@@ -190,15 +192,15 @@
+ 		"punpckhdq %%mm3, %%mm2		\n\t"
+ 		"punpckldq %%mm4, %%mm1		\n\t"
+ 		"punpckhdq %%mm4, %%mm5		\n\t"
+-		"movq %%mm0, (%0, %%esi,2)	\n\t"
+-		"movq %%mm2, 8(%0, %%esi,2)	\n\t"
+-		"movq %%mm1, 16(%0, %%esi,2)	\n\t"
+-		"movq %%mm5, 24(%0, %%esi,2)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq %%mm0, (%0, %%"REG_S",2)	\n\t"
++		"movq %%mm2, 8(%0, %%"REG_S",2)	\n\t"
++		"movq %%mm1, 16(%0, %%"REG_S",2)\n\t"
++		"movq %%mm5, 24(%0, %%"REG_S",2)\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1024), "r" (f+256)
+-		:"%esi", "memory"
++		:"%"REG_S, "memory"
+ 	);
+     return 4*256;
+ }
+@@ -206,23 +208,23 @@
+ static int a52_resample_3F_2R_to_5_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ 		"1:				\n\t"
+-		"movd (%1, %%esi), %%mm0	\n\t"
+-		"punpckldq 2048(%1, %%esi), %%mm0\n\t"
+-		"movd 3072(%1, %%esi), %%mm1	\n\t"
+-		"punpckldq 4096(%1, %%esi), %%mm1\n\t"
+-		"movd 1024(%1, %%esi), %%mm2	\n\t"
+-		"punpckldq 4(%1, %%esi), %%mm2	\n\t"
+-		"movd 2052(%1, %%esi), %%mm3	\n\t"
+-		"punpckldq 3076(%1, %%esi), %%mm3\n\t"
+-		"movd 4100(%1, %%esi), %%mm4	\n\t"
+-		"punpckldq 1028(%1, %%esi), %%mm4\n\t"
+-		"movd 8(%1, %%esi), %%mm5	\n\t"
+-		"punpckldq 2056(%1, %%esi), %%mm5\n\t"
+-		"leal (%%esi, %%esi, 4), %%edi	\n\t"
+-		"sarl $1, %%edi			\n\t"
++		"movd (%1, %%"REG_S"), %%mm0	\n\t"
++		"punpckldq 2048(%1, %%"REG_S"), %%mm0\n\t"
++		"movd 3072(%1, %%"REG_S"), %%mm1\n\t"
++		"punpckldq 4096(%1, %%"REG_S"), %%mm1\n\t"
++		"movd 1024(%1, %%"REG_S"), %%mm2\n\t"
++		"punpckldq 4(%1, %%"REG_S"), %%mm2\n\t"
++		"movd 2052(%1, %%"REG_S"), %%mm3\n\t"
++		"punpckldq 3076(%1, %%"REG_S"), %%mm3\n\t"
++		"movd 4100(%1, %%"REG_S"), %%mm4\n\t"
++		"punpckldq 1028(%1, %%"REG_S"), %%mm4\n\t"
++		"movd 8(%1, %%"REG_S"), %%mm5	\n\t"
++		"punpckldq 2056(%1, %%"REG_S"), %%mm5\n\t"
++		"lea (%%"REG_S", %%"REG_S", 4), %%"REG_D"\n\t"
++		"sar $1, %%"REG_D"		\n\t"
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm2		\n\t"
+@@ -232,32 +234,32 @@
+ 		"packssdw %%mm1, %%mm0		\n\t"
+ 		"packssdw %%mm3, %%mm2		\n\t"
+ 		"packssdw %%mm5, %%mm4		\n\t"
+-		"movq %%mm0, (%0, %%edi)	\n\t"
+-		"movq %%mm2, 8(%0, %%edi)	\n\t"
+-		"movq %%mm4, 16(%0, %%edi)	\n\t"
++		"movq %%mm0, (%0, %%"REG_D")	\n\t"
++		"movq %%mm2, 8(%0, %%"REG_D")	\n\t"
++		"movq %%mm4, 16(%0, %%"REG_D")	\n\t"
+ 		
+-		"movd 3080(%1, %%esi), %%mm0	\n\t"
+-		"punpckldq 4104(%1, %%esi), %%mm0\n\t"
+-		"movd 1032(%1, %%esi), %%mm1	\n\t"
+-		"punpckldq 12(%1, %%esi), %%mm1\n\t"
+-		"movd 2060(%1, %%esi), %%mm2	\n\t"
+-		"punpckldq 3084(%1, %%esi), %%mm2\n\t"
+-		"movd 4108(%1, %%esi), %%mm3	\n\t"
+-		"punpckldq 1036(%1, %%esi), %%mm3\n\t"
++		"movd 3080(%1, %%"REG_S"), %%mm0\n\t"
++		"punpckldq 4104(%1, %%"REG_S"), %%mm0\n\t"
++		"movd 1032(%1, %%"REG_S"), %%mm1\n\t"
++		"punpckldq 12(%1, %%"REG_S"), %%mm1\n\t"
++		"movd 2060(%1, %%"REG_S"), %%mm2\n\t"
++		"punpckldq 3084(%1, %%"REG_S"), %%mm2\n\t"
++		"movd 4108(%1, %%"REG_S"), %%mm3\n\t"
++		"punpckldq 1036(%1, %%"REG_S"), %%mm3\n\t"
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm2		\n\t"
+ 		"psubd %%mm7, %%mm3		\n\t"
+ 		"packssdw %%mm1, %%mm0		\n\t"
+ 		"packssdw %%mm3, %%mm2		\n\t"
+-		"movq %%mm0, 24(%0, %%edi)	\n\t"
+-		"movq %%mm2, 32(%0, %%edi)	\n\t"
++		"movq %%mm0, 24(%0, %%"REG_D")	\n\t"
++		"movq %%mm2, 32(%0, %%"REG_D")	\n\t"
+ 				
+-		"addl $16, %%esi		\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1280), "r" (f+256)
+-		:"%esi", "%edi", "memory"
++		:"%"REG_S, "%"REG_D, "memory"
+ 	);
+     return 5*256;
+ }
+@@ -265,14 +267,14 @@
+ static int a52_resample_MONO_LFE_to_6_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ 		"pxor %%mm6, %%mm6		\n\t"
+ 		"1:				\n\t"
+-		"movq 1024(%1, %%esi), %%mm0	\n\t"
+-		"movq 1032(%1, %%esi), %%mm1	\n\t"
+-		"movq (%1, %%esi), %%mm2	\n\t"
+-		"movq 8(%1, %%esi), %%mm3	\n\t"
++		"movq 1024(%1, %%"REG_S"), %%mm0\n\t"
++		"movq 1032(%1, %%"REG_S"), %%mm1\n\t"
++		"movq (%1, %%"REG_S"), %%mm2	\n\t"
++		"movq 8(%1, %%"REG_S"), %%mm3	\n\t"
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm2		\n\t"
+@@ -282,22 +284,22 @@
+ 		"movq %%mm0, %%mm1		\n\t"
+ 		"punpcklwd %%mm2, %%mm0		\n\t"
+ 		"punpckhwd %%mm2, %%mm1		\n\t"
+-		"leal (%%esi, %%esi, 2), %%edi	\n\t"
+-		"movq %%mm6, (%0, %%edi)	\n\t"
+-		"movd %%mm0, 8(%0, %%edi)	\n\t"
++		"lea (%%"REG_S", %%"REG_S", 2), %%"REG_D"\n\t"
++		"movq %%mm6, (%0, %%"REG_D")	\n\t"
++		"movd %%mm0, 8(%0, %%"REG_D")	\n\t"
+ 		"punpckhdq %%mm0, %%mm0		\n\t"
+-		"movq %%mm6, 12(%0, %%edi)	\n\t"
+-		"movd %%mm0, 20(%0, %%edi)	\n\t"
+-		"movq %%mm6, 24(%0, %%edi)	\n\t"
+-		"movd %%mm1, 32(%0, %%edi)	\n\t"
++		"movq %%mm6, 12(%0, %%"REG_D")	\n\t"
++		"movd %%mm0, 20(%0, %%"REG_D")	\n\t"
++		"movq %%mm6, 24(%0, %%"REG_D")	\n\t"
++		"movd %%mm1, 32(%0, %%"REG_D")	\n\t"
+ 		"punpckhdq %%mm1, %%mm1		\n\t"
+-		"movq %%mm6, 36(%0, %%edi)	\n\t"
+-		"movd %%mm1, 44(%0, %%edi)	\n\t"
+-		"addl $16, %%esi		\n\t"
++		"movq %%mm6, 36(%0, %%"REG_D")	\n\t"
++		"movd %%mm1, 44(%0, %%"REG_D")	\n\t"
++		"add $16, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1536), "r" (f+256)
+-		:"%esi", "%edi", "memory"
++		:"%"REG_S, "%"REG_D, "memory"
+ 	);
+     return 6*256;
+ }
+@@ -305,17 +307,17 @@
+ static int a52_resample_STEREO_LFE_to_6_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ 		"pxor %%mm6, %%mm6		\n\t"
+ 		"1:				\n\t"
+-		"movq 1024(%1, %%esi), %%mm0	\n\t"
+-		"movq 2048(%1, %%esi), %%mm1	\n\t"
+-		"movq (%1, %%esi), %%mm5	\n\t" 
++		"movq 1024(%1, %%"REG_S"), %%mm0\n\t"
++		"movq 2048(%1, %%"REG_S"), %%mm1\n\t"
++		"movq (%1, %%"REG_S"), %%mm5	\n\t" 
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm5		\n\t"
+-		"leal (%%esi, %%esi, 2), %%edi	\n\t"
++		"lea (%%"REG_S", %%"REG_S", 2), %%"REG_D"\n\t"
+ 		
+ 		"pxor %%mm4, %%mm4		\n\t"
+ 		"packssdw %%mm5, %%mm0		\n\t" // FfAa
+@@ -327,15 +329,15 @@
+ 		"punpckldq %%mm6, %%mm0		\n\t" // 00ba
+ 		"punpckhdq %%mm1, %%mm3		\n\t" // BAf0
+ 		
+-		"movq %%mm0, (%0, %%edi)	\n\t" // 00ba
++		"movq %%mm0, (%0, %%"REG_D")	\n\t" // 00ba
+ 		"punpckhdq %%mm4, %%mm0		\n\t" // F000
+-		"movq %%mm3, 8(%0, %%edi)	\n\t" // BAf0
+-		"movq %%mm0, 16(%0, %%edi)	\n\t" // F000
+-		"addl $8, %%esi			\n\t"
++		"movq %%mm3, 8(%0, %%"REG_D")	\n\t" // BAf0
++		"movq %%mm0, 16(%0, %%"REG_D")	\n\t" // F000
++		"add $8, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1536), "r" (f+256)
+-		:"%esi", "%edi", "memory"
++		:"%"REG_S, "%"REG_D, "memory"
+ 	);
+     return 6*256;
+ }
+@@ -343,19 +345,19 @@
+ static int a52_resample_3F_LFE_to_6_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ 		"pxor %%mm6, %%mm6		\n\t"
+ 		"1:				\n\t"
+-		"movq 1024(%1, %%esi), %%mm0	\n\t"
+-		"movq 3072(%1, %%esi), %%mm1	\n\t"
+-		"movq 2048(%1, %%esi), %%mm4	\n\t"
+-		"movq (%1, %%esi), %%mm5	\n\t" 
++		"movq 1024(%1, %%"REG_S"), %%mm0\n\t"
++		"movq 3072(%1, %%"REG_S"), %%mm1\n\t"
++		"movq 2048(%1, %%"REG_S"), %%mm4\n\t"
++		"movq (%1, %%"REG_S"), %%mm5	\n\t" 
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm4		\n\t"
+ 		"psubd %%mm7, %%mm5		\n\t"
+-		"leal (%%esi, %%esi, 2), %%edi	\n\t"
++		"lea (%%"REG_S", %%"REG_S", 2), %%"REG_D"\n\t"
+ 		
+ 		"packssdw %%mm4, %%mm0		\n\t" // EeAa
+ 		"packssdw %%mm5, %%mm1		\n\t" // FfBb
+@@ -366,16 +368,16 @@
+ 		"punpckldq %%mm6, %%mm0		\n\t" // 00ba
+ 		"punpckhdq %%mm1, %%mm1		\n\t" // BABA
+ 		
+-		"movq %%mm0, (%0, %%edi)	\n\t"
++		"movq %%mm0, (%0, %%"REG_D")	\n\t"
+ 		"punpckhdq %%mm2, %%mm0		\n\t" // FE00
+ 		"punpckldq %%mm1, %%mm2		\n\t" // BAfe
+-		"movq %%mm2, 8(%0, %%edi)	\n\t"
+-		"movq %%mm0, 16(%0, %%edi)	\n\t"
+-		"addl $8, %%esi			\n\t"
++		"movq %%mm2, 8(%0, %%"REG_D")	\n\t"
++		"movq %%mm0, 16(%0, %%"REG_D")	\n\t"
++		"add $8, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1536), "r" (f+256)
+-		:"%esi", "%edi", "memory"
++		:"%"REG_S, "%"REG_D, "memory"
+ 	);
+     return 6*256;
+ }
+@@ -383,21 +385,21 @@
+ static int a52_resample_2F_2R_LFE_to_6_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ //		"pxor %%mm6, %%mm6		\n\t"
+ 		"1:				\n\t"
+-		"movq 1024(%1, %%esi), %%mm0	\n\t"
+-		"movq 2048(%1, %%esi), %%mm1	\n\t"
+-		"movq 3072(%1, %%esi), %%mm2	\n\t"
+-		"movq 4096(%1, %%esi), %%mm3	\n\t"
+-		"movq (%1, %%esi), %%mm5	\n\t" 
++		"movq 1024(%1, %%"REG_S"), %%mm0\n\t"
++		"movq 2048(%1, %%"REG_S"), %%mm1\n\t"
++		"movq 3072(%1, %%"REG_S"), %%mm2\n\t"
++		"movq 4096(%1, %%"REG_S"), %%mm3\n\t"
++		"movq (%1, %%"REG_S"), %%mm5	\n\t" 
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm2		\n\t"
+ 		"psubd %%mm7, %%mm3		\n\t"
+ 		"psubd %%mm7, %%mm5		\n\t"
+-		"leal (%%esi, %%esi, 2), %%edi	\n\t"
++		"lea (%%"REG_S", %%"REG_S", 2), %%"REG_D"\n\t"
+ 		
+ 		"packssdw %%mm2, %%mm0		\n\t" // CcAa
+ 		"packssdw %%mm3, %%mm1		\n\t" // DdBb
+@@ -414,14 +416,14 @@
+ 		"punpckldq %%mm1, %%mm4		\n\t" // BAf0
+ 		"punpckhdq %%mm3, %%mm2		\n\t" // F0DC
+ 		
+-		"movq %%mm0, (%0, %%edi)	\n\t"
+-		"movq %%mm4, 8(%0, %%edi)	\n\t"
+-		"movq %%mm2, 16(%0, %%edi)	\n\t"
+-		"addl $8, %%esi			\n\t"
++		"movq %%mm0, (%0, %%"REG_D")	\n\t"
++		"movq %%mm4, 8(%0, %%"REG_D")	\n\t"
++		"movq %%mm2, 16(%0, %%"REG_D")	\n\t"
++		"add $8, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1536), "r" (f+256)
+-		:"%esi", "%edi", "memory"
++		:"%"REG_S, "%"REG_D, "memory"
+ 	);
+     return 6*256;
+ }
+@@ -429,23 +431,23 @@
+ static int a52_resample_3F_2R_LFE_to_6_MMX(float * _f, int16_t * s16){
+     int32_t * f = (int32_t *) _f;
+ 	asm volatile(
+-		"movl $-1024, %%esi		\n\t"
++		"mov $-1024, %%"REG_S"		\n\t"
+ 		"movq "MANGLE(magicF2W)", %%mm7	\n\t"
+ //		"pxor %%mm6, %%mm6		\n\t"
+ 		"1:				\n\t"
+-		"movq 1024(%1, %%esi), %%mm0	\n\t"
+-		"movq 3072(%1, %%esi), %%mm1	\n\t"
+-		"movq 4096(%1, %%esi), %%mm2	\n\t"
+-		"movq 5120(%1, %%esi), %%mm3	\n\t"
+-		"movq 2048(%1, %%esi), %%mm4	\n\t"
+-		"movq (%1, %%esi), %%mm5	\n\t" 
++		"movq 1024(%1, %%"REG_S"), %%mm0\n\t"
++		"movq 3072(%1, %%"REG_S"), %%mm1\n\t"
++		"movq 4096(%1, %%"REG_S"), %%mm2\n\t"
++		"movq 5120(%1, %%"REG_S"), %%mm3\n\t"
++		"movq 2048(%1, %%"REG_S"), %%mm4\n\t"
++		"movq (%1, %%"REG_S"), %%mm5	\n\t" 
+ 		"psubd %%mm7, %%mm0		\n\t"
+ 		"psubd %%mm7, %%mm1		\n\t"
+ 		"psubd %%mm7, %%mm2		\n\t"
+ 		"psubd %%mm7, %%mm3		\n\t"
+ 		"psubd %%mm7, %%mm4		\n\t"
+ 		"psubd %%mm7, %%mm5		\n\t"
+-		"leal (%%esi, %%esi, 2), %%edi	\n\t"
++		"lea (%%"REG_S", %%"REG_S", 2), %%"REG_D"\n\t"
+ 		
+ 		"packssdw %%mm2, %%mm0		\n\t" // CcAa
+ 		"packssdw %%mm3, %%mm1		\n\t" // DdBb
+@@ -462,14 +464,14 @@
+ 		"punpckldq %%mm1, %%mm4		\n\t" // BAfe
+ 		"punpckhdq %%mm3, %%mm2		\n\t" // FEDC
+ 		
+-		"movq %%mm0, (%0, %%edi)	\n\t"
+-		"movq %%mm4, 8(%0, %%edi)	\n\t"
+-		"movq %%mm2, 16(%0, %%edi)	\n\t"
+-		"addl $8, %%esi			\n\t"
++		"movq %%mm0, (%0, %%"REG_D")	\n\t"
++		"movq %%mm4, 8(%0, %%"REG_D")	\n\t"
++		"movq %%mm2, 16(%0, %%"REG_D")	\n\t"
++		"add $8, %%"REG_S"		\n\t"
+ 		" jnz 1b			\n\t"
+ 		"emms				\n\t"
+ 		:: "r" (s16+1536), "r" (f+256)
+-		:"%esi", "%edi", "memory"
++		:"%"REG_S, "%"REG_D, "memory"
+ 	);
+     return 6*256;
+ }
