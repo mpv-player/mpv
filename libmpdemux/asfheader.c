@@ -135,7 +135,7 @@ int asf_check_header(demuxer_t *demuxer){
     mp_msg(MSGT_HEADER,MSGL_V,"ASF_check: invalid subchunks_no %d\n",(int) asfh.cno);
     return 0; // invalid header???
   }
-  return 1;
+  return DEMUXER_TYPE_ASF;
 }
 
 extern void print_wave_header(WAVEFORMATEX *h);

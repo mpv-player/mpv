@@ -577,3 +577,20 @@ demux_packet_t* ReadBufferQueue::getPendingBuffer() {
 
   return dp;
 }
+
+
+demuxer_desc_t demuxer_desc_rtp = {
+  "live.com RTP demuxer",
+  "rtp",
+  "",
+  "Ross Finlayson",
+  "requires live.com library",
+  DEMUXER_TYPE_RTP,
+  0, // no autodetect
+  NULL,
+  demux_rtp_fill_buffer,
+  demux_open_rtp,
+  demux_close_rtp,
+  NULL,
+  NULL
+};

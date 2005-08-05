@@ -263,7 +263,7 @@ try_fec:
 
 
 
-int ts_check_file(demuxer_t * demuxer)
+static int ts_check_file(demuxer_t * demuxer)
 {
 	const int buf_size = (TS_FEC_PACKET_SIZE * NUM_CONSECUTIVE_TS_PACKETS);
 	unsigned char buf[TS_FEC_PACKET_SIZE * NUM_CONSECUTIVE_TS_PACKETS], done = 0, *ptr;
@@ -360,9 +360,9 @@ int ts_check_file(demuxer_t * demuxer)
 	mp_msg(MSGT_DEMUX, MSGL_V, "GOOD CC: %d, BAD CC: %d\n", good, bad);
 
 	if(good >= bad)
-		return size;
+			return size;
 	else
-		return 0;
+			return 0;
 }
 
 
@@ -827,7 +827,7 @@ static int parse_avc_sps(uint8_t *buf, int len, int *w, int *h)
 	return 1;
 }
 
-demuxer_t *demux_open_ts(demuxer_t * demuxer)
+static demuxer_t *demux_open_ts(demuxer_t * demuxer)
 {
 	int i;
 	uint8_t packet_size;
@@ -984,7 +984,7 @@ demuxer_t *demux_open_ts(demuxer_t * demuxer)
 	return demuxer;
 }
 
-void demux_close_ts(demuxer_t * demuxer)
+static void demux_close_ts(demuxer_t * demuxer)
 {
 	uint16_t i;
 	ts_priv_t *priv = (ts_priv_t*) demuxer->priv;
@@ -3028,7 +3028,7 @@ extern int videobuf_code_len;
 extern int sync_video_packet(demux_stream_t *);
 extern int skip_video_packet(demux_stream_t *);
 
-void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
 	demux_stream_t *d_audio=demuxer->audio;
 	demux_stream_t *d_video=demuxer->video;
@@ -3129,7 +3129,7 @@ void demux_seek_ts(demuxer_t *demuxer, float rel_seek_secs, int flags)
 }
 
 
-int demux_ts_fill_buffer(demuxer_t * demuxer)
+static int demux_ts_fill_buffer(demuxer_t * demuxer, demux_stream_t *ds)
 {
 	ES_stream_t es;
 	ts_priv_t *priv = (ts_priv_t *)demuxer->priv;
@@ -3138,4 +3138,24 @@ int demux_ts_fill_buffer(demuxer_t * demuxer)
 }
 
 
+static int ts_check_file_dmx(demuxer_t *demuxer)
+{
+    return ts_check_file(demuxer) ? DEMUXER_TYPE_MPEG_TS : 0;
+}
 
+
+demuxer_desc_t demuxer_desc_mpeg_ts = {
+  "MPEG-TS demuxer",
+  "mpegts",
+  "TS",
+  "Nico Sabbi",
+  "",
+  DEMUXER_TYPE_MPEG_TS,
+  0, // unsafe autodetect
+  ts_check_file_dmx,
+  demux_ts_fill_buffer,
+  demux_open_ts,
+  demux_close_ts,
+  demux_seek_ts,
+  NULL
+};

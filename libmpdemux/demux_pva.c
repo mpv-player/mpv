@@ -104,7 +104,7 @@ int pva_sync(demuxer_t * demuxer)
 	}
 }
 
-int pva_check_file(demuxer_t * demuxer)
+static int pva_check_file(demuxer_t * demuxer)
 {
 	uint8_t buffer[5]={0,0,0,0,0};
 	mp_msg(MSGT_DEMUX, MSGL_V, "Checking for PVA\n");
@@ -112,7 +112,7 @@ int pva_check_file(demuxer_t * demuxer)
 	if(buffer[0]=='A' && buffer[1] == 'V' && buffer[4] == 0x55)
 	{
 		mp_msg(MSGT_DEMUX,MSGL_DBG2, "Success: PVA\n");
-		return 1;
+		return DEMUXER_TYPE_PVA;
 	}
 	else
 	{
@@ -121,7 +121,7 @@ int pva_check_file(demuxer_t * demuxer)
 	}
 }
 
-demuxer_t * demux_open_pva (demuxer_t * demuxer)
+static demuxer_t * demux_open_pva (demuxer_t * demuxer)
 {
 	sh_video_t *sh_video = new_sh_video(demuxer,0);
         sh_audio_t *sh_audio = new_sh_audio(demuxer,0);
@@ -189,7 +189,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload);
 
 // 0 = EOF or no stream found
 // 1 = successfully read a packet
-int demux_pva_fill_buffer (demuxer_t * demux)
+static int demux_pva_fill_buffer (demuxer_t * demux, demux_stream_t *ds)
 {
 	uint8_t done=0;
 	demux_packet_t * dp;
@@ -466,7 +466,7 @@ int pva_get_payload(demuxer_t * d,pva_payload_t * payload)
 	return 1;
 }
 
-int demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)
+static int demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)
 {
 	int total_bitrate=0;
 	off_t dest_offset;
@@ -507,7 +507,7 @@ int demux_seek_pva(demuxer_t * demuxer,float rel_seek_secs,int flags)
 
 
 
-void demux_close_pva(demuxer_t * demuxer)
+static void demux_close_pva(demuxer_t * demuxer)
 {
 	if(demuxer->priv)
 	{
@@ -516,3 +516,19 @@ void demux_close_pva(demuxer_t * demuxer)
 	}
 }
 			
+
+demuxer_desc_t demuxer_desc_pva = {
+  "PVA demuxer",
+  "pva",
+  "PVA",
+  "Matteo Giani",
+  "streams from DVB cards",
+  DEMUXER_TYPE_PVA,
+  0, // unsafe autodetect
+  pva_check_file,
+  demux_pva_fill_buffer,
+  demux_open_pva,
+  demux_close_pva,
+  demux_seek_pva,
+  NULL
+};

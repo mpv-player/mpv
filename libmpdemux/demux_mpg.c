@@ -99,7 +99,7 @@ static int parse_psm(demuxer_t *demux, int len) {
 }
 
 /// Open an mpg physical stream
-int demux_mpg_open(demuxer_t* demuxer) {
+static demuxer_t* demux_mpg_open(demuxer_t* demuxer) {
   stream_t *s = demuxer->stream;
   off_t pos = stream_tell(s);
   off_t end_seq_start = demuxer->movi_end-500000; // 500000 is a wild guess
@@ -134,10 +134,10 @@ int demux_mpg_open(demuxer_t* demuxer) {
     stream_seek(s,pos);
     ds_fill_buffer(demuxer->video);
   }
-  return 1;
+  return demuxer;
 }
 
-void demux_close_mpg(demuxer_t* demuxer) {
+static void demux_close_mpg(demuxer_t* demuxer) {
   mpg_demuxer_t* mpg_d = demuxer->priv;
   if (mpg_d) free(mpg_d);
 }
@@ -418,7 +418,7 @@ static int num_h264_pps=0;
 
 static int num_mp3audio_packets=0;
 
-int demux_mpg_probe(demuxer_t *demuxer) {
+static int demux_mpg_probe(demuxer_t *demuxer) {
   int pes=1;
   int tmp;
   off_t tmppos;
@@ -498,7 +498,7 @@ int demux_mpg_probe(demuxer_t *demuxer) {
   return file_format;
 }
 
-int demux_mpg_es_fill_buffer(demuxer_t *demux){
+static int demux_mpg_es_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
   // Elementary video stream
   if(demux->stream->eof) return 0;
   demux->filepos=stream_tell(demux->stream);
@@ -506,7 +506,7 @@ int demux_mpg_es_fill_buffer(demuxer_t *demux){
   return 1;
 }
 
-int demux_mpg_fill_buffer(demuxer_t *demux){
+int demux_mpg_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 unsigned int head=0;
 int skipped=0;
 int max_packs=256; // 512kbyte
@@ -770,3 +770,126 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
 	    return DEMUXER_CTRL_NOTIMPL;
     }
 }
+
+
+static int demux_mpg_pes_probe(demuxer_t *demuxer) {
+   demuxer->synced = 3;
+   return demux_mpg_probe(demuxer);
+}
+
+
+static demuxer_t* demux_mpg_es_open(demuxer_t* demuxer)
+{
+    sh_video_t *sh_video=NULL;
+
+    demuxer->audio->sh = NULL;   // ES streams has no audio channel
+    demuxer->video->sh = new_sh_video(demuxer,0); // create dummy video stream header, id=0
+    sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
+
+    return demuxer;
+}
+
+
+static demuxer_t* demux_mpg_ps_open(demuxer_t* demuxer)
+{
+    sh_audio_t *sh_audio=NULL;
+    sh_video_t *sh_video=NULL;
+
+    sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
+
+    if(demuxer->audio->id!=-2) {
+        if(!ds_fill_buffer(demuxer->audio)){
+            mp_msg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " MSGTR_MissingAudioStream);
+            demuxer->audio->sh=NULL;
+        } else {
+            sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;
+        }
+    }
+
+    return demuxer;
+}
+
+
+demuxer_desc_t demuxer_desc_mpeg_ps = {
+  "MPEG PS demuxer",
+  "mpegps",
+  "MPEG-PS",
+  "Arpi?",
+  "Mpeg",
+  DEMUXER_TYPE_MPEG_PS,
+  0, // unsafe autodetect
+  demux_mpg_probe,
+  demux_mpg_fill_buffer,
+  demux_mpg_ps_open,
+  demux_close_mpg,
+  demux_seek_mpg,
+  NULL
+};
+
+
+demuxer_desc_t demuxer_desc_mpeg_pes = {
+  "MPEG PES demuxer",
+  "mpegpes",
+  "MPEG-PES",
+  "Arpi?",
+  "Mpeg",
+  DEMUXER_TYPE_MPEG_PES,
+  0, // unsafe autodetect
+  demux_mpg_pes_probe,
+  demux_mpg_fill_buffer,
+  NULL,
+  demux_close_mpg,
+  demux_seek_mpg,
+  NULL
+};
+
+
+demuxer_desc_t demuxer_desc_mpeg_es = {
+  "MPEG ES demuxer",
+  "mpeges",
+  "MPEG-ES",
+  "Arpi?",
+  "Mpeg",
+  DEMUXER_TYPE_MPEG_ES,
+  0, // hack autodetection
+  NULL,
+  demux_mpg_es_fill_buffer,
+  demux_mpg_es_open,
+  demux_close_mpg,
+  demux_seek_mpg,
+  NULL
+};
+
+
+demuxer_desc_t demuxer_desc_mpeg4_es = {
+  "MPEG4 ES demuxer",
+  "mpeg4es",
+  "MPEG-ES",
+  "Arpi?",
+  "Mpeg",
+  DEMUXER_TYPE_MPEG4_ES,
+  0, // hack autodetection
+  NULL,
+  demux_mpg_es_fill_buffer,
+  demux_mpg_es_open,
+  demux_close_mpg,
+  demux_seek_mpg,
+  NULL
+};
+
+
+demuxer_desc_t demuxer_desc_h264_es = {
+  "H.264 ES demuxer",
+  "h264es",
+  "H264-ES",
+  "Arpi?",
+  "Mpeg",
+  DEMUXER_TYPE_H264_ES,
+  0, // hack autodetection
+  NULL,
+  demux_mpg_es_fill_buffer,
+  demux_mpg_es_open,
+  demux_close_mpg,
+  demux_seek_mpg,
+  NULL
+};

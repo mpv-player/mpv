@@ -31,13 +31,13 @@ typedef struct {
 /**
  * Seeking still to be implemented
  */
-void demux_seek_nsv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
+static void demux_seek_nsv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
 {
 // seeking is not yet implemented
 }
 
 
-int demux_nsv_fill_buffer ( demuxer_t *demuxer )
+static int demux_nsv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
 {  
     unsigned char hdr[17];
     // for the extra data
@@ -132,7 +132,7 @@ int demux_nsv_fill_buffer ( demuxer_t *demuxer )
 }
 
 
-demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
+static demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
 {
     // last 2 bytes 17 and 18 are unknown but right after that comes the length
     unsigned char hdr[17];
@@ -314,7 +314,7 @@ demuxer_t* demux_open_nsv ( demuxer_t* demuxer )
     return demuxer;
 }
 
-int nsv_check_file ( demuxer_t* demuxer )
+static int nsv_check_file ( demuxer_t* demuxer )
 {
     unsigned int id;
 
@@ -332,10 +332,10 @@ int nsv_check_file ( demuxer_t* demuxer )
     stream_seek(demuxer->stream,demuxer->stream->start_pos);
 
     
-    return 1;
+    return DEMUXER_TYPE_NSV;
 }
 
-void demux_close_nsv(demuxer_t* demuxer) {
+static void demux_close_nsv(demuxer_t* demuxer) {
     nsv_priv_t* priv = demuxer->priv;
 
     if(!priv)
@@ -343,3 +343,20 @@ void demux_close_nsv(demuxer_t* demuxer) {
     free(priv);
 
 }
+
+
+demuxer_desc_t demuxer_desc_nsv = {
+  "NullsoftVideo demuxer",
+  "nsv",
+  "Nullsoft Streaming Video",
+  "Reza Jelveh",
+  "nsv and nsa streaming files",
+  DEMUXER_TYPE_NSV,
+  1, // safe autodetect
+  nsv_check_file,
+  demux_nsv_fill_buffer,
+  demux_open_nsv,
+  demux_close_nsv,
+  demux_seek_nsv,
+  NULL
+};

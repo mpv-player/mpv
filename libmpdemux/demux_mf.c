@@ -15,7 +15,7 @@
 #include "stheader.h"
 #include "mf.h"
 
-void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags){
   mf_t * mf = (mf_t *)demuxer->priv;
   sh_video_t   * sh_video = demuxer->video->sh;
   int newpos = (flags & 1)?0:mf->curr_frame;
@@ -30,7 +30,7 @@ void demux_seek_mf(demuxer_t *demuxer,float rel_seek_secs,int flags){
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_mf_fill_buffer(demuxer_t *demuxer){
+static int demux_mf_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
   mf_t         * mf;
   struct stat    fs;
   FILE         * f;
@@ -62,7 +62,7 @@ int demux_mf_fill_buffer(demuxer_t *demuxer){
   return 1;
 }
 
-demuxer_t* demux_open_mf(demuxer_t* demuxer){
+static demuxer_t* demux_open_mf(demuxer_t* demuxer){
   sh_video_t   *sh_video = NULL;
   mf_t         *mf = NULL;
   
@@ -130,10 +130,27 @@ demuxer_t* demux_open_mf(demuxer_t* demuxer){
   return demuxer;
 }
 
-void demux_close_mf(demuxer_t* demuxer) {
+static void demux_close_mf(demuxer_t* demuxer) {
   mf_t *mf = demuxer->priv;
 
   if(!mf)
     return;
   free(mf);  
 }
+
+
+demuxer_desc_t demuxer_desc_mf = {
+  "mf demuxer",
+  "mf",
+  "MF",
+  "?",
+  "multiframe?, pictures demuxer",
+  DEMUXER_TYPE_MF,
+  0, // no autodetect
+  NULL,
+  demux_mf_fill_buffer,
+  demux_open_mf,
+  demux_close_mf,
+  demux_seek_mf,
+  NULL
+};

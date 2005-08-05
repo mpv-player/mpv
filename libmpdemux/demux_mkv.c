@@ -2067,7 +2067,7 @@ demux_mkv_open_sub (demuxer_t *demuxer, mkv_track_t *track)
   return 0;
 }
 
-void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags);
+static void demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags);
 
 /** \brief Given a matroska track number and type, find the id that mplayer would ask for.
  *  \param d The demuxer for which the subtitle id should be returned.
@@ -2088,7 +2088,7 @@ static int demux_mkv_reverse_id(mkv_demuxer_t *d, int num, int type)
   return -1;
 }
 
-int
+static int
 demux_mkv_open (demuxer_t *demuxer)
 {
   stream_t *s = demuxer->stream;
@@ -2344,10 +2344,10 @@ demux_mkv_open (demuxer_t *demuxer)
         }
     }
 
-  return 1;
+  return DEMUXER_TYPE_MATROSKA;
 }
 
-void
+static void
 demux_close_mkv (demuxer_t *demuxer)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
@@ -2986,8 +2986,8 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   return 0;
 }
 
-int
-demux_mkv_fill_buffer (demuxer_t *demuxer)
+static int
+demux_mkv_fill_buffer (demuxer_t *demuxer, demux_stream_t *ds)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
   stream_t *s = demuxer->stream;
@@ -3100,7 +3100,7 @@ demux_mkv_fill_buffer (demuxer_t *demuxer)
   return 0;
 }
 
-void
+static void
 demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
   free_cached_dps (demuxer);
@@ -3216,7 +3216,7 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
       if (target_timecode <= mkv_d->last_pts * 1000)
         clear_subtitles(demuxer, 0, 1);
 
-      demux_mkv_fill_buffer(demuxer);
+      demux_mkv_fill_buffer(demuxer, NULL);
 
       if(demuxer->audio->sh != NULL)
         resync_audio_stream((sh_audio_t *) demuxer->audio->sh); 
@@ -3262,14 +3262,14 @@ demux_mkv_seek (demuxer_t *demuxer, float rel_seek_secs, int flags)
       if (index->timecode <= mkv_d->last_pts * 1000)
         clear_subtitles(demuxer, 0, 1);
 
-      demux_mkv_fill_buffer(demuxer);
+      demux_mkv_fill_buffer(demuxer, NULL);
 
       if(demuxer->audio->sh != NULL)
         resync_audio_stream((sh_audio_t *) demuxer->audio->sh); 
     }
 }
 
-int
+static int
 demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
 {
   mkv_demuxer_t *mkv_d = (mkv_demuxer_t *) demuxer->priv;
@@ -3432,5 +3432,22 @@ demux_mkv_get_sub_lang(demuxer_t *demuxer, int track_num, char *lang,
         }
     }
 }
+
+
+demuxer_desc_t demuxer_desc_matroska = {
+  "Matroska demuxer",
+  "mkv",
+  "Matroska",
+  "Aurelien Jacobs",
+  "based on gstreamer demuxer by Ronald Bultje and demux_mkv.cpp by Moritz Bunkus",
+  DEMUXER_TYPE_MATROSKA,
+  1, // safe autodetect
+  demux_mkv_open,
+  demux_mkv_fill_buffer,
+  NULL,
+  demux_close_mkv,
+  demux_mkv_seek,
+  demux_mkv_control
+};
 
 #endif /* HAVE_MATROSKA */

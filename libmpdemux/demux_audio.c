@@ -131,7 +131,7 @@ static mp3_hdr_t *add_mp3_hdr(mp3_hdr_t **list, off_t st_pos,
   return NULL;
 }
 
-int demux_audio_open(demuxer_t* demuxer) {
+static int demux_audio_open(demuxer_t* demuxer) {
   stream_t *s;
   sh_audio_t* sh_audio;
   uint8_t hdr[HDR_SIZE];
@@ -383,11 +383,11 @@ int demux_audio_open(demuxer_t* demuxer) {
 
   mp_msg(MSGT_DEMUX,MSGL_V,"demux_audio: audio data 0x%X - 0x%X  \n",(int)demuxer->movi_start,(int)demuxer->movi_end);
 
-  return 1;
+  return DEMUXER_TYPE_AUDIO;
 }
 
 
-int demux_audio_fill_buffer(demux_stream_t *ds) {
+static int demux_audio_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds) {
   int l;
   demux_packet_t* dp;
   sh_audio_t* sh_audio;
@@ -471,7 +471,7 @@ static void high_res_mp3_seek(demuxer_t *demuxer,float time) {
   }
 }
 
-void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   sh_audio_t* sh_audio;
   stream_t* s;
   int base,pos;
@@ -527,7 +527,7 @@ void demux_audio_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
 }
 
-void demux_close_audio(demuxer_t* demuxer) {
+static void demux_close_audio(demuxer_t* demuxer) {
   da_priv_t* priv = demuxer->priv;
 
   if(!priv)
@@ -535,7 +535,7 @@ void demux_close_audio(demuxer_t* demuxer) {
   free(priv);
 }
 
-int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
+static int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
     sh_audio_t *sh_audio=demuxer->audio->sh;
     int audio_length = demuxer->movi_end / sh_audio->i_bps;
     da_priv_t* priv = demuxer->priv;
@@ -556,3 +556,20 @@ int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
 	    return DEMUXER_CTRL_NOTIMPL;
     }
 }
+
+
+demuxer_desc_t demuxer_desc_audio = {
+  "Audio demuxer",
+  "audio",
+  "Audio file",
+  "?",
+  "Audio only files",
+  DEMUXER_TYPE_AUDIO,
+  0, // unsafe autodetect
+  demux_audio_open,
+  demux_audio_fill_buffer,
+  NULL,
+  demux_close_audio,
+  demux_audio_seek,
+  demux_audio_control
+};

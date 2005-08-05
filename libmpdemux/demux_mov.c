@@ -287,7 +287,7 @@ typedef struct {
 
 #define MOV_FOURCC(a,b,c,d) ((a<<24)|(b<<16)|(c<<8)|(d))
 
-int mov_check_file(demuxer_t* demuxer){
+static int mov_check_file(demuxer_t* demuxer){
     int flags=0;
     int no=0;
     mov_priv_t* priv=malloc(sizeof(mov_priv_t));
@@ -460,7 +460,7 @@ int mov_check_file(demuxer_t* demuxer){
 	  if(flags==3){
 	    // if we're over the headers, then we can stop parsing here!
 	    demuxer->priv=priv;
-	    return 1;
+	    return DEMUXER_TYPE_MOV;
 	  }
 	  break;
 	case MOV_FOURCC('f','r','e','e'):
@@ -485,12 +485,12 @@ skip_chunk:
 
     if(flags==3){
 	demuxer->priv=priv;
-	return 1;
+	return DEMUXER_TYPE_MOV;
     }
     free(priv);
 
     if ((flags==5) || (flags==7)) // reference & header sent
-        return 1;
+        return DEMUXER_TYPE_MOV;
 
     if(flags==1)
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: missing data (mdat) chunk! Maybe broken file...\n");
@@ -500,7 +500,7 @@ skip_chunk:
     return 0;
 }
 
-void demux_close_mov(demuxer_t *demuxer) {
+static void demux_close_mov(demuxer_t *demuxer) {
   mov_priv_t* priv = demuxer->priv;
   int i;
   if (!priv)
@@ -1681,7 +1681,7 @@ static int lschunks_intrak(demuxer_t* demuxer, int level, unsigned int id,
   return 0;
 }
 
-int mov_read_header(demuxer_t* demuxer){
+static demuxer_t* mov_read_header(demuxer_t* demuxer){
     mov_priv_t* priv=demuxer->priv;
     int t_no;
     int best_a_id=-1, best_a_len=0;
@@ -1806,7 +1806,7 @@ int mov_read_header(demuxer_t* demuxer){
     demuxer->stream->eof = 0;
 #endif
 
-    return 1;
+    return demuxer;
 }
 
 /**
@@ -1824,7 +1824,7 @@ static mov_track_t *stream_track(mov_priv_t *priv, demux_stream_t *ds) {
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_mov_fill_buffer(demuxer_t *demuxer,demux_stream_t* ds){
+static int demux_mov_fill_buffer(demuxer_t *demuxer,demux_stream_t* ds){
     mov_priv_t* priv=demuxer->priv;
     mov_track_t* trak=NULL;
     float pts;
@@ -1956,7 +1956,7 @@ if(trak->samplesize){
 return pts;
 }
 
-void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
+static void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
     mov_priv_t* priv=demuxer->priv;
     demux_stream_t* ds;
     mov_track_t* trak;
@@ -1984,7 +1984,7 @@ void demux_seek_mov(demuxer_t *demuxer,float pts,int flags){
 
 }
 
-int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg){
+static int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg){
   mov_track_t* track;
 
   // try the video track
@@ -2015,3 +2015,19 @@ int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg){
   return DEMUXER_CTRL_NOTIMPL;
 }
 
+
+demuxer_desc_t demuxer_desc_mov = {
+  "Quicktime/MP4 demuxer",
+  "mov",
+  "Quicktime/MOV",
+  "Arpi, Al3x, Atmos, others",
+  "Handles Quicktime, MP4, 3GP",
+  DEMUXER_TYPE_MOV,
+  0, // slow autodetect
+  mov_check_file,
+  demux_mov_fill_buffer,
+  mov_read_header,
+  demux_close_mov,
+  demux_seek_mov,
+  demux_mov_control
+};

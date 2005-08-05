@@ -23,7 +23,7 @@ typedef struct {
     int is_older;
 } y4m_priv_t;
 
-int y4m_check_file(demuxer_t* demuxer){
+static int y4m_check_file(demuxer_t* demuxer){
     int orig_pos = stream_tell(demuxer->stream);
     char buf[10];
     y4m_priv_t* priv;
@@ -54,14 +54,14 @@ int y4m_check_file(demuxer_t* demuxer){
 
     stream_seek(demuxer->stream, orig_pos);
 
-    return 1;
+    return DEMUXER_TYPE_Y4M;
 }
 
 
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_y4m_fill_buffer(demuxer_t *demux) {
+static int demux_y4m_fill_buffer(demuxer_t *demux, demux_stream_t *dsds) {
   demux_stream_t *ds=demux->video;
   demux_packet_t *dp;
   y4m_priv_t *priv=demux->priv;
@@ -117,7 +117,7 @@ int demux_y4m_fill_buffer(demuxer_t *demux) {
   return 1;
 }
 
-void demux_open_y4m(demuxer_t* demuxer){
+static demuxer_t* demux_open_y4m(demuxer_t* demuxer){
     y4m_priv_t* priv = demuxer->priv;
     y4m_ratio_t ratio;
     sh_video_t* sh=new_sh_video(demuxer,0);
@@ -227,9 +227,11 @@ void demux_open_y4m(demuxer_t* demuxer){
     mp_msg(MSGT_DEMUX, MSGL_INFO, "YUV4MPEG2 Video stream %d size: display: %dx%d, codec: %ux%u\n",
             demuxer->video->id, sh->disp_w, sh->disp_h, sh->bih->biWidth,
             sh->bih->biHeight);
+
+    return demuxer;
 }
 
-int demux_seek_y4m(demuxer_t *demuxer, float rel_seek_secs, int flags) {
+static void demux_seek_y4m(demuxer_t *demuxer, float rel_seek_secs, int flags) {
     sh_video_t* sh = demuxer->video->sh;
     y4m_priv_t* priv = demuxer->priv;
     int rel_seek_frames = sh->fps*rel_seek_secs;
@@ -254,10 +256,9 @@ int demux_seek_y4m(demuxer_t *demuxer, float rel_seek_secs, int flags) {
 	     * is disabled. */
 	    mp_msg(MSGT_DEMUX, MSGL_WARN, "Seeking for YUV4MPEG2 not yet implemented!\n");
     }
-    return 0; 
 }
 
-void demux_close_y4m(demuxer_t *demuxer)
+static void demux_close_y4m(demuxer_t *demuxer)
 {
     y4m_priv_t* priv = demuxer->priv;
 
@@ -269,3 +270,20 @@ void demux_close_y4m(demuxer_t *demuxer)
     free(demuxer->priv);
     return;
 }
+
+
+demuxer_desc_t demuxer_desc_y4m = {
+  "YUV4MPEG2 demuxer",
+  "y4m",
+  "YUV4MPEG2",
+  "Rik snel",
+  "",
+  DEMUXER_TYPE_Y4M,
+  1, // safe autodetect
+  y4m_check_file,
+  demux_y4m_fill_buffer,
+  demux_open_y4m,
+  demux_close_y4m,
+  demux_seek_y4m,
+  NULL
+};

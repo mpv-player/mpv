@@ -785,10 +785,12 @@ Plays a Matroska file in Japanese.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <number> (\-audiofile only)
+.B \-audio-demuxer <name> (\-audiofile only)
 Force audio demuxer type for \-audiofile.
-Give the demuxer ID as defined in libmpdemux/\:demuxer.h.
-\-audio-demuxer 17 forces MP3.
+Give the demuxer name as printed by \-audio-demuxer help.
+For backward compatibility it also accepts the demuxer ID as defined in
+libmpdemux/\:demuxer.h.
+\-audio-demuxer audio or \-audio-demuxer 17 forces MP3.
 .
 .TP
 .B \-audiofile <filename>
@@ -921,10 +923,12 @@ When used with MEncoder, this is not guaranteed to work correctly
 with \-ovc copy.
 .
 .TP
-.B \-demuxer <number>
+.B \-demuxer <name>
 Force demuxer type.
-Give the demuxer ID as defined in libmpdemux/\:demuxer.h.
-\-demuxer 17 forces MP3.
+Give the demuxer name as printed by \-demuxer help.
+For backward compatibility it also accepts the demuxer ID as defined in
+libmpdemux/\:demuxer.h.
+\-demuxer audio or \-demuxer 17 forces MP3.
 .
 .TP
 .B \-dumpaudio (MPlayer only)
@@ -1579,9 +1583,11 @@ intensity of the color.
 255 means white and 0 black.
 .
 .TP
-.B \-sub-demuxer <number> (\-subfile only) (BETA CODE)
+.B \-sub-demuxer <name> (\-subfile only) (BETA CODE)
 Force subtitle demuxer type for \-subfile.
-Give the demuxer ID as defined in subreader.h.
+Give the demuxer name as printed by \-sub-demuxer help.
+For backward compatibility it also accepts the demuxer ID as defined in
+libmpdemux/\:demuxer.h.
 .
 .TP
 .B \-sub-fuzziness <mode>

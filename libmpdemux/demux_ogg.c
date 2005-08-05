@@ -734,7 +734,7 @@ char *demux_ogg_sub_lang(demuxer_t *demuxer, int index) {
   return (index < 0) ? NULL : (index >= ogg_d->n_text) ? NULL : ogg_d->text_langs[index];
 }
 
-void demux_close_ogg(demuxer_t* demuxer);
+static void demux_close_ogg(demuxer_t* demuxer);
 
 static inline unsigned int store_ughvlc(unsigned char *s, unsigned int v)
 {
@@ -819,6 +819,7 @@ static void fixup_vorbis_wf(sh_audio_t *sh)
 
 
 /// Open an ogg physical stream
+// Not static because it's used also in demuxer_avi.c
 int demux_ogg_open(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d;
   stream_t *s;
@@ -1194,14 +1195,14 @@ int demux_ogg_open(demuxer_t* demuxer) {
     if(sh_a->format == FOURCC_VORBIS)
       fixup_vorbis_wf(sh_a);
 
-  return 1;
+  return DEMUXER_TYPE_OGG;
 
 err_out:
   return 0;
 }
 
 
-int demux_ogg_fill_buffer(demuxer_t *d) {
+static int demux_ogg_fill_buffer(demuxer_t *d, demux_stream_t *dsds) {
   ogg_demuxer_t* ogg_d;
   stream_t *s;
   demux_stream_t *ds;
@@ -1344,7 +1345,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
 
   // Create the ds_stream and the ogg demuxer
   s = new_ds_stream(demuxer->audio);
-  od = new_demuxer(s,DEMUXER_TYPE_OGG,0,-2,-2);
+  od = new_demuxer(s,DEMUXER_TYPE_OGG,0,-2,-2,NULL);
 
   /// Add the header packets in the ogg demuxer audio stream
   // Initial header
@@ -1380,7 +1381,7 @@ demuxer_t* init_avi_with_ogg(demuxer_t* demuxer) {
 
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 
-void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
+static void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   ogg_demuxer_t* ogg_d = demuxer->priv;
   ogg_sync_state* sync = &ogg_d->sync;
   ogg_page* page= &ogg_d->page;
@@ -1557,7 +1558,7 @@ void demux_ogg_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
 
 }
 
-void demux_close_ogg(demuxer_t* demuxer) {
+static void demux_close_ogg(demuxer_t* demuxer) {
   ogg_demuxer_t* ogg_d = demuxer->priv;
   int i;
 
@@ -1587,7 +1588,7 @@ void demux_close_ogg(demuxer_t* demuxer) {
   free(ogg_d);
 }
 
-int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
+static int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
   ogg_demuxer_t* ogg_d = demuxer->priv;
   ogg_stream_t* os;
   float rate;
@@ -1616,5 +1617,23 @@ int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
 	    return DEMUXER_CTRL_NOTIMPL;
     }
 }
+
+
+
+demuxer_desc_t demuxer_desc_ogg = {
+  "Ogg demuxer",
+  "ogg",
+  "Ogg",
+  "?",
+  "",
+  DEMUXER_TYPE_OGG,
+  1, // safe autodetect
+  demux_ogg_open,
+  demux_ogg_fill_buffer,
+  NULL,
+  demux_close_ogg,
+  demux_ogg_seek,
+  demux_ogg_control
+};
 
 #endif

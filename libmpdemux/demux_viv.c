@@ -221,7 +221,7 @@ static void vivo_parse_text_header(demuxer_t *demux, int header_len)
 	free(param);
 }
 
-int vivo_check_file(demuxer_t* demuxer){
+static int vivo_check_file(demuxer_t* demuxer){
     int i=0;
     int len;
     int c;
@@ -281,7 +281,7 @@ int vivo_check_file(demuxer_t* demuxer){
 
     stream_seek(demuxer->stream, orig_pos);
 
-return 1;
+return DEMUXER_TYPE_VIVO;
 }
 
 static int audio_pos=0;
@@ -290,7 +290,7 @@ static int audio_rate=0;
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_vivo_fill_buffer(demuxer_t *demux){
+static int demux_vivo_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
   demux_stream_t *ds=NULL;
   int c;
   int len=0;
@@ -537,12 +537,12 @@ static int h263_decode_picture_header(unsigned char *b_ptr)
 
 
 
-void demux_open_vivo(demuxer_t* demuxer){
+static demuxer_t* demux_open_vivo(demuxer_t* demuxer){
     vivo_priv_t* priv=demuxer->priv;
 
   if(!ds_fill_buffer(demuxer->video)){
     mp_msg(MSGT_DEMUX,MSGL_ERR,"VIVO: " MSGTR_MissingVideoStreamBug);
-    return;
+    return NULL;
   }
 
     audio_pos=0;
@@ -714,13 +714,13 @@ if (demuxer->audio->id >= -1){
 		sh->ds=demuxer->audio;
 		demuxer->audio->id=1;
 nosound:
-		return;
+		return demuxer;
 }
+}
+    return demuxer;
 }
 
-}
-
-void demux_close_vivo(demuxer_t *demuxer)
+static void demux_close_vivo(demuxer_t *demuxer)
 {
     vivo_priv_t* priv=demuxer->priv;
  
@@ -737,3 +737,20 @@ void demux_close_vivo(demuxer_t *demuxer)
     }
     return;
 }
+
+
+demuxer_desc_t demuxer_desc_vivo = {
+  "Vivo demuxer",
+  "vivo",
+  "VIVO",
+  "A'rpi, Alex Beregszasi",
+  "",
+  DEMUXER_TYPE_VIVO,
+  0, // unsafe autodetect
+  vivo_check_file,
+  demux_vivo_fill_buffer,
+  demux_open_vivo,
+  demux_close_vivo,
+  NULL,
+  NULL
+};

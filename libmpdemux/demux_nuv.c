@@ -63,7 +63,7 @@ static int nearestBitrate(int bitrate) {
 /**
  * Seek to a position relative to the current position, indicated in time.
  */
-void demux_seek_nuv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
+static void demux_seek_nuv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
 {
 #define MAX_TIME 1000000
 	nuv_priv_t* priv = demuxer->priv;
@@ -152,7 +152,7 @@ void demux_seek_nuv ( demuxer_t *demuxer, float rel_seek_secs, int flags )
 }
 
 
-int demux_nuv_fill_buffer ( demuxer_t *demuxer )
+static int demux_nuv_fill_buffer ( demuxer_t *demuxer, demux_stream_t *ds )
 {
 	struct rtframeheader rtjpeg_frameheader;
 	off_t orig_pos;
@@ -309,7 +309,7 @@ out:
   return 0;
 }
 
-demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
+static demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 {
 	sh_video_t *sh_video = NULL;
 	sh_audio_t *sh_audio = NULL;
@@ -404,7 +404,7 @@ demuxer_t* demux_open_nuv ( demuxer_t* demuxer )
 	return demuxer;
 }
 
-int nuv_check_file ( demuxer_t* demuxer )
+static int nuv_check_file ( demuxer_t* demuxer )
 {
 	struct nuv_signature ns;
 
@@ -426,10 +426,10 @@ int nuv_check_file ( demuxer_t* demuxer )
 
 	/* Return to original position */
 	stream_seek ( demuxer->stream, orig_pos );
-	return 1;
+	return DEMUXER_TYPE_NUV;
 }
 
-void demux_close_nuv(demuxer_t* demuxer) {
+static void demux_close_nuv(demuxer_t* demuxer) {
   nuv_priv_t* priv = demuxer->priv;
   nuv_position_t* pos;
   if(!priv)
@@ -441,3 +441,20 @@ void demux_close_nuv(demuxer_t* demuxer) {
   }
   free(priv);
 }
+
+
+demuxer_desc_t demuxer_desc_nuv = {
+  "NuppelVideo demuxer",
+  "nuv",
+  "NuppelVideo",
+  "Panagiotis Issaris",
+  "",
+  DEMUXER_TYPE_NUV,
+  1, // safe autodetect
+  nuv_check_file,
+  demux_nuv_fill_buffer,
+  demux_open_nuv,
+  demux_close_nuv,
+  demux_seek_nuv,
+  NULL
+};

@@ -90,7 +90,7 @@ char *tv_channel_last_real;
 */
 /* fill demux->video and demux->audio */
 
-int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
+static int demux_tv_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demux->priv);
     demux_packet_t* dp;
@@ -454,18 +454,18 @@ done:
 	return 1;
 }
 
-int demux_open_tv(demuxer_t *demuxer)
+static demuxer_t* demux_open_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh;
     sh_video_t *sh_video;
     sh_audio_t *sh_audio = NULL;
     tvi_functions_t *funcs;
     
-    if(!(tvh=tv_begin())) return 0;
-    if (!tv_init(tvh)) return 0;
+    if(!(tvh=tv_begin())) return NULL;
+    if (!tv_init(tvh)) return NULL;
     if (!open_tv(tvh)){
 	tv_uninit(tvh);
-	return 0;
+	return NULL;
     }
     funcs = tvh->functions;
     demuxer->priv=tvh;
@@ -591,7 +591,7 @@ no_audio:
     if(!(funcs->start(tvh->priv))){
 	// start failed :(
 	tv_uninit(tvh);
-	return 0;
+	return NULL;
     }
 
     /* set color eq */
@@ -600,10 +600,10 @@ no_audio:
     tv_set_color_options(tvh, TV_COLOR_SATURATION, tv_param_saturation);
     tv_set_color_options(tvh, TV_COLOR_CONTRAST, tv_param_contrast);
 
-    return 1;
+    return demuxer;
 }
 
-int demux_close_tv(demuxer_t *demuxer)
+static int demux_close_tv(demuxer_t *demuxer)
 {
     tvi_handle_t *tvh=(tvi_handle_t*)(demuxer->priv);
     return(tvh->functions->uninit(tvh->priv));
@@ -852,5 +852,21 @@ int tv_set_norm(tvi_handle_t *tvh, char* norm)
     }
     return(1);
 }
+
+demuxer_desc_t demuxer_desc_tv = {
+  "Tv card demuxer",
+  "tv",
+  "TV",
+  "Alex Beregszaszi, Charles R. Henrich",
+  "?",
+  DEMUXER_TYPE_TV,
+  0, // no autodetect
+  NULL,
+  demux_tv_fill_buffer,
+  demux_open_tv,
+  demux_close_tv,
+  NULL,
+  NULL
+};
 
 #endif /* USE_TV */

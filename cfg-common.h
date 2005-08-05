@@ -113,9 +113,9 @@
 	{ "audiofile", &audio_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
 	{ "audiofile-cache", &audio_stream_cache, CONF_TYPE_INT, CONF_RANGE, 50, 65536, NULL},
 	{ "subfile", &sub_stream, CONF_TYPE_STRING, 0, 0, 0, NULL },
-	{ "demuxer", &demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
-	{ "audio-demuxer", &audio_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
-	{ "sub-demuxer", &sub_demuxer_type, CONF_TYPE_INT, CONF_RANGE, 1, DEMUXER_TYPE_MAX, NULL },
+	{ "demuxer", &demuxer_name, CONF_TYPE_STRING, 0, 0, 0, NULL },
+	{ "audio-demuxer", &audio_demuxer_name, CONF_TYPE_STRING, 0, 0, 0, NULL },
+	{ "sub-demuxer", &sub_demuxer_name, CONF_TYPE_STRING, 0, 0, 0, NULL },
 	{ "extbased", &extension_parsing, CONF_TYPE_FLAG, 0, 0, 1, NULL },
 	{ "noextbased", &extension_parsing, CONF_TYPE_FLAG, 0, 1, 0, NULL },
 

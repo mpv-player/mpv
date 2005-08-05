@@ -201,7 +201,7 @@ static void cleanup_plugins(){
 
 //extern void resync_audio_stream(sh_audio_t *sh_audio);
 
-int demux_xmms_open(demuxer_t* demuxer) {
+static int demux_xmms_open(demuxer_t* demuxer) {
   InputPlugin* ip = NULL;
   sh_audio_t* sh_audio;
   WAVEFORMATEX* w;
@@ -267,10 +267,10 @@ int demux_xmms_open(demuxer_t* demuxer) {
   w->nBlockAlign = sh_audio->samplesize*sh_audio->channels;
   w->cbSize = 0;
   
-  return 1;
+  return DEMUXER_TYPE_XMMS;
 }
 
-int demux_xmms_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
+static int demux_xmms_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   sh_audio_t *sh_audio = demuxer->audio->sh;
   xmms_priv_t *priv=demuxer->priv;
   demux_packet_t*  dp;
@@ -299,7 +299,7 @@ int demux_xmms_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   return 1;
 }
 
-void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   stream_t* s = demuxer->stream;
   sh_audio_t* sh_audio = demuxer->audio->sh;
   xmms_priv_t *priv=demuxer->priv;
@@ -321,7 +321,7 @@ void demux_xmms_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   sh_audio->delay=pos; //priv->spos / sh_audio->wf->nAvgBytesPerSec;
 }
 
-int demux_close_xmms(demuxer_t* demuxer) {
+static void demux_close_xmms(demuxer_t* demuxer) {
   xmms_priv_t *priv=demuxer->priv;
   xmms_playing=0;
   xmms_audiopos=0; // xmp on exit waits until buffer is free enough
@@ -331,10 +331,9 @@ int demux_close_xmms(demuxer_t* demuxer) {
     free(priv); xmms_priv=demuxer->priv=NULL;
   }
   cleanup_plugins();
-  return 1;
 }
 
-int demux_xmms_control(demuxer_t *demuxer,int cmd, void *arg){
+static int demux_xmms_control(demuxer_t *demuxer,int cmd, void *arg){
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=demuxer->audio->sh;
     xmms_priv_t *priv=demuxer->priv;
@@ -355,3 +354,20 @@ int demux_xmms_control(demuxer_t *demuxer,int cmd, void *arg){
 	    return DEMUXER_CTRL_NOTIMPL;
     }
 }
+
+
+demuxer_desc_t demuxer_desc_xmms = {
+  "XMMS demuxer",
+  "xmms",
+  "XMMS",
+  "?",
+  "requires XMMS plugins",
+  DEMUXER_TYPE_XMMS,
+  0, // safe autodetect
+  demux_xmms_open,
+  demux_xmms_fill_buffer,
+  NULL,
+  demux_close_xmms,
+  demux_xmms_seek,
+  demux_xmms_control
+};

@@ -162,7 +162,7 @@ static __inline int get_mmioFOURCC(const AVS_VideoInfo *v)
 }
 #endif
 
-int demux_avs_fill_buffer(demuxer_t *demuxer)
+static int demux_avs_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
     AVS_VideoFrame *curr_frame;
     demux_packet_t *dp = NULL;
@@ -219,7 +219,7 @@ int demux_avs_fill_buffer(demuxer_t *demuxer)
     return 1;
 }
 
-int demux_open_avs(demuxer_t* demuxer)
+static demuxer_t* demux_open_avs(demuxer_t* demuxer)
 {
     sh_video_t *sh_video = NULL;
 #ifdef ENABLE_AUDIO
@@ -236,14 +236,14 @@ int demux_open_avs(demuxer_t* demuxer)
     if(!AVS->clip)
     {
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_take_clip() failed\n");
-        return 0;
+        return NULL;
     }
 
     AVS->video_info = AVS->avs_get_video_info(AVS->clip);
     if (!AVS->video_info)
     {
         mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_get_video_info() call failed\n");
-        return 0;
+        return NULL;
     }
     
     if (!avs_is_yv12(AVS->video_info))
@@ -252,7 +252,7 @@ int demux_open_avs(demuxer_t* demuxer)
         if (avs_is_error(AVS->handler))
         {
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: Cannot convert input video to YV12: %s\n", avs_as_string(AVS->handler));
-            return 0;
+            return NULL;
         }
         
         AVS->clip = AVS->avs_take_clip(AVS->handler, AVS->avs_env);
@@ -260,14 +260,14 @@ int demux_open_avs(demuxer_t* demuxer)
         if(!AVS->clip)
         {
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_take_clip() failed\n");
-            return 0;
+            return NULL;
         }
 
         AVS->video_info = AVS->avs_get_video_info(AVS->clip);
         if (!AVS->video_info)
         {
             mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_get_video_info() call failed\n");
-            return 0;
+            return NULL;
         }
     }
     
@@ -326,10 +326,13 @@ int demux_open_avs(demuxer_t* demuxer)
 #endif
 
     AVS->init = 1;
-    return found;
+    if (found)
+        return demuxer;
+    else
+        return NULL;
 }
 
-int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
+static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
 {   
     demux_stream_t *d_video=demuxer->video;
     sh_video_t *sh_video=d_video->sh;
@@ -354,7 +357,7 @@ int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
     }
 }
 
-void demux_close_avs(demuxer_t* demuxer)
+static void demux_close_avs(demuxer_t* demuxer)
 {
     AVS_T *AVS = (AVS_T *) demuxer->priv;
     // TODO release_clip?
@@ -372,7 +375,7 @@ void demux_close_avs(demuxer_t* demuxer)
     }
 }
 
-void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs,int flags)
+static void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs,int flags)
 {
     demux_stream_t *d_video=demuxer->video;
     sh_video_t *sh_video=d_video->sh;
@@ -394,11 +397,11 @@ void demux_seek_avs(demuxer_t *demuxer, float rel_seek_secs,int flags)
     d_video->pts=AVS->frameno / sh_video->fps; // OSD
 }
 
-int avs_check_file(demuxer_t *demuxer, const char *filename)
+static int avs_check_file(demuxer_t *demuxer)
 {
-    mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_check_file - attempting to open file %s\n", filename);
+    mp_msg(MSGT_DEMUX, MSGL_V, "AVS: avs_check_file - attempting to open file %s\n", demuxer->filename);
 
-    if (!filename) return 0;
+    if (!demuxer->filename) return 0;
     
     /* Avoid crazy memory eating when passing an mpg stream */
     if (demuxer->movi_end > MAX_AVS_SIZE)
@@ -407,13 +410,30 @@ int avs_check_file(demuxer_t *demuxer, const char *filename)
         return 0;
     }
     
-    demuxer->priv = initAVS(filename);
+    demuxer->priv = initAVS(demuxer->filename);
     
     if (demuxer->priv)
     {
         mp_msg(MSGT_DEMUX,MSGL_V, "AVS: Init Ok\n");
-        return 1;
+        return DEMUXER_TYPE_AVS;
     }
     mp_msg(MSGT_DEMUX,MSGL_V, "AVS: Init failed\n");
     return 0;
 }
+
+
+demuxer_desc_t demuxer_desc_avs = {
+  "Avisynth demuxer",
+  "avs",
+  "AVS",
+  "Gianluigi Tiesi",
+  "Requires binary dll",
+  DEMUXER_TYPE_AVS,
+  0, // unsafe autodetect
+  avs_check_file,
+  demux_avs_fill_buffer,
+  demux_open_avs,
+  demux_close_avs,
+  demux_seek_avs,
+  demux_avs_control
+};

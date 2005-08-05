@@ -585,7 +585,7 @@ static unsigned char ty_VideoPacket[] = { 0x00, 0x00, 0x01, 0xe0 };
 static unsigned char ty_MPEGAudioPacket[] = { 0x00, 0x00, 0x01, 0xc0 };
 static unsigned char ty_AC3AudioPacket[] = { 0x00, 0x00, 0x01, 0xbd };
 
-int demux_ty_fill_buffer( demuxer_t *demux )
+static int demux_ty_fill_buffer( demuxer_t *demux, demux_stream_t *dsds )
 {
    int              invalidType = 0;
    int              errorHeader = 0;
@@ -1238,7 +1238,7 @@ int demux_ty_fill_buffer( demuxer_t *demux )
    return( 1 );
 }
 
-void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, int flags )
+static void demux_seek_ty( demuxer_t *demuxer, float rel_seek_secs, int flags )
 {
    demux_stream_t *d_audio = demuxer->audio;
    demux_stream_t *d_video = demuxer->video;
@@ -1362,7 +1362,7 @@ int demux_ty_control( demuxer_t *demuxer,int cmd, void *arg )
 }
 
 
-int demux_close_ty( demuxer_t *demux )
+static int demux_close_ty( demuxer_t *demux )
 {
    TiVoInfo         *tivo = 0;
 
@@ -1377,3 +1377,44 @@ int demux_close_ty( demuxer_t *demux )
 }
 
 
+static int ty_check_file(demuxer_t* demuxer)
+{
+  return ds_fill_buffer(demuxer->video) ? DEMUXER_TYPE_MPEG_TY : 0;
+}
+
+
+static demuxer_t* demux_open_ty(demuxer_t* demuxer)
+{
+    sh_audio_t *sh_audio=NULL;
+    sh_video_t *sh_video=NULL;
+
+    sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
+
+    if(demuxer->audio->id!=-2) {
+        if(!ds_fill_buffer(demuxer->audio)){
+            mp_msg(MSGT_DEMUXER,MSGL_INFO,"MPEG: " MSGTR_MissingAudioStream);
+            demuxer->audio->sh=NULL;
+        } else {
+            sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;
+        }
+    }
+
+    return demuxer;
+}
+
+
+demuxer_desc_t demuxer_desc_mpeg_ty = {
+  "TiVo demuxer",
+  "tivo",
+  "TiVo",
+  "Christopher R. Wingert",
+  "Demux streams from TiVo",
+  DEMUXER_TYPE_MPEG_TY,
+  0, // unsafe autodetect
+  ty_check_file,
+  demux_ty_fill_buffer,
+  demux_open_ty,
+  demux_close_ty,
+  demux_seek_ty,
+  demux_ty_control
+};

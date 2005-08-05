@@ -249,6 +249,11 @@ char **video_codec_list=NULL; // override video codec
 char **audio_fm_list=NULL;    // override audio codec family 
 char **video_fm_list=NULL;    // override video codec family 
 
+// demuxer:
+extern char *demuxer_name; // override demuxer
+extern char *audio_demuxer_name; // override audio demuxer
+extern char *sub_demuxer_name; // override sub demuxer
+
 // streaming:
 int audio_id=-1;
 int video_id=-1;
@@ -1268,6 +1273,13 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
       exit_player_with_rc(NULL, 0);
     }
 #endif
+    if((demuxer_name && strcmp(demuxer_name,"help")==0) ||
+       (audio_demuxer_name && strcmp(audio_demuxer_name,"help")==0) ||
+       (sub_demuxer_name && strcmp(sub_demuxer_name,"help")==0)){
+      demuxer_help();
+      mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
+      exit_player_with_rc(NULL, 0);
+    }
 
 #ifdef USE_EDL
 if (edl_check_mode() == EDL_ERROR && edl_filename)

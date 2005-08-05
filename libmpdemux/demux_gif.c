@@ -31,14 +31,14 @@ int my_read_gif(GifFileType *gif, uint8_t *buf, int len) {
 }
 #endif
   
-int gif_check_file(demuxer_t *demuxer)
+static int gif_check_file(demuxer_t *demuxer)
 {
   if (stream_read_int24(demuxer->stream) == GIF_SIGNATURE)
-    return 1;
+    return DEMUXER_TYPE_GIF;
   return 0;
 }
 
-int demux_gif_fill_buffer(demuxer_t *demuxer)
+static int demux_gif_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
   GifFileType *gif = (GifFileType *)demuxer->priv;
   sh_video_t *sh_video = (sh_video_t *)demuxer->video->sh;
@@ -148,7 +148,7 @@ int demux_gif_fill_buffer(demuxer_t *demuxer)
   return 1;
 }
 
-demuxer_t* demux_open_gif(demuxer_t* demuxer)
+static demuxer_t* demux_open_gif(demuxer_t* demuxer)
 {
   sh_video_t *sh_video = NULL;
   GifFileType *gif = NULL;
@@ -206,7 +206,7 @@ demuxer_t* demux_open_gif(demuxer_t* demuxer)
   return demuxer;
 }
 
-void demux_close_gif(demuxer_t* demuxer)
+static void demux_close_gif(demuxer_t* demuxer)
 {
   GifFileType *gif = (GifFileType *)demuxer->priv;
 
@@ -219,4 +219,22 @@ void demux_close_gif(demuxer_t* demuxer)
   demuxer->stream->fd = 0;
   demuxer->priv = NULL;
 }
+
+
+demuxer_desc_t demuxer_desc_gif = {
+  "GIF demuxer",
+  "gif",
+  "GIF",
+  "Joey Parrish",
+  "",
+  DEMUXER_TYPE_GIF,
+  0, // unsafe autodetect
+  gif_check_file,
+  demux_gif_fill_buffer,
+  demux_open_gif,
+  demux_close_gif,
+  NULL,
+  NULL
+};
+
 #endif /* HAVE_GIF */

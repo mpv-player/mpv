@@ -36,7 +36,7 @@ typedef struct
    dv_decoder_t *decoder;
 } rawdv_frames_t;
 
-void demux_seek_rawdv(demuxer_t *demuxer,float rel_seek_secs,int flags)
+static void demux_seek_rawdv(demuxer_t *demuxer,float rel_seek_secs,int flags)
 {
    rawdv_frames_t *frames = (rawdv_frames_t *)demuxer->priv;
    sh_video_t *sh_video = demuxer->video->sh;
@@ -59,7 +59,7 @@ void demux_seek_rawdv(demuxer_t *demuxer,float rel_seek_secs,int flags)
    frames->current_filepos=newpos*frames->frame_size;
 }
 
-int rawdv_check_file(demuxer_t *demuxer)
+static int rawdv_check_file(demuxer_t *demuxer)
 {
    unsigned char tmp_buffer[DV_PAL_FRAME_SIZE];
    int bytes_read=0;
@@ -86,13 +86,16 @@ int rawdv_check_file(demuxer_t *demuxer)
        && ((td->height==576) || (td->height==480)))
       result=1;
    dv_decoder_free(td);
-   return result;
+   if (result)
+      return DEMUXER_TYPE_RAWDV;
+   else
+      return 0;
 }
 
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_rawdv_fill_buffer(demuxer_t *demuxer)
+static int demux_rawdv_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
    rawdv_frames_t *frames = (rawdv_frames_t *)demuxer->priv;
    demux_packet_t* dp_video=NULL;
@@ -125,7 +128,7 @@ int demux_rawdv_fill_buffer(demuxer_t *demuxer)
    return 1;
 }
 
-demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
+static demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
 {
    unsigned char dv_frame[DV_PAL_FRAME_SIZE];
    sh_video_t *sh_video = NULL;
@@ -216,7 +219,7 @@ demuxer_t* demux_open_rawdv(demuxer_t* demuxer)
    return demuxer;
 }
 
-void demux_close_rawdv(demuxer_t* demuxer)
+static void demux_close_rawdv(demuxer_t* demuxer)
 {
    rawdv_frames_t *frames = (rawdv_frames_t *)demuxer->priv;
 
@@ -225,7 +228,7 @@ void demux_close_rawdv(demuxer_t* demuxer)
   free(frames);
 }
 
-int demux_rawdv_control(demuxer_t *demuxer,int cmd, void *arg) {
+static int demux_rawdv_control(demuxer_t *demuxer,int cmd, void *arg) {
     rawdv_frames_t *frames = (rawdv_frames_t *)demuxer->priv;
     sh_video_t *sh_video=demuxer->video->sh;
 
@@ -242,5 +245,22 @@ int demux_rawdv_control(demuxer_t *demuxer,int cmd, void *arg) {
             return DEMUXER_CTRL_NOTIMPL;
     }
 }
+
+
+demuxer_desc_t demuxer_desc_rawdv = {
+  "Raw DV demuxer",
+  "rawdv",
+  "RAWDV",
+  "Alexander Neundorf",
+  "",
+  DEMUXER_TYPE_RAWDV,
+  0, // unsafe autodetect
+  rawdv_check_file,
+  demux_rawdv_fill_buffer,
+  demux_open_rawdv,
+  demux_close_rawdv,
+  demux_seek_rawdv,
+  demux_rawdv_control
+};
 
 #endif

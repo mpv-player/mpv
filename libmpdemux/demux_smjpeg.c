@@ -22,7 +22,7 @@
 #include "stheader.h"
 #include "bswap.h"
 
-int smjpeg_check_file(demuxer_t* demuxer){
+static int smjpeg_check_file(demuxer_t* demuxer){
     int orig_pos = stream_tell(demuxer->stream);
     char buf[8];
     int version;
@@ -52,14 +52,14 @@ int smjpeg_check_file(demuxer_t* demuxer){
     
     stream_seek(demuxer->stream, orig_pos);
 
-    return 1;
+    return DEMUXER_TYPE_SMJPEG;
 }
 
 
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_smjpeg_fill_buffer(demuxer_t *demux)
+static int demux_smjpeg_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 {
     int dtype, dsize, dpts;
 
@@ -89,7 +89,7 @@ int demux_smjpeg_fill_buffer(demuxer_t *demux)
     return 1;
 }
 
-int demux_open_smjpeg(demuxer_t* demuxer){
+static demuxer_t* demux_open_smjpeg(demuxer_t* demuxer){
     sh_video_t* sh_video;
     sh_audio_t* sh_audio;
     unsigned int htype = 0, hleng;
@@ -164,10 +164,27 @@ int demux_open_smjpeg(demuxer_t* demuxer){
 
     demuxer->seekable = 0;
     
-    return 1;
+    return demuxer;
 }
 
-void demux_close_smjpeg(demuxer_t *demuxer)
+static void demux_close_smjpeg(demuxer_t *demuxer)
 {
     return;
 }
+
+
+demuxer_desc_t demuxer_desc_smjpeg = {
+  "smjpeg demuxer",
+  "smjpeg",
+  "SMJPEG",
+  "Alex Beregszasi",
+  "",
+  DEMUXER_TYPE_SMJPEG,
+  1, // safe autodetect
+  smjpeg_check_file,
+  demux_smjpeg_fill_buffer,
+  demux_open_smjpeg,
+  demux_close_smjpeg,
+  NULL,
+  NULL
+};

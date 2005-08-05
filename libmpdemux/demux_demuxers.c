@@ -13,6 +13,7 @@ typedef struct dd_priv {
   demuxer_t* sd;
 } dd_priv_t;
 
+extern demuxer_desc_t demuxer_desc_demuxers;
 
 demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   demuxer_t* ret;
@@ -34,11 +35,13 @@ demuxer_t*  new_demuxers_demuxer(demuxer_t* vd, demuxer_t* ad, demuxer_t* sd) {
   ret->video = vd->video;
   ret->audio = ad->audio;
   ret->sub = sd->sub;
-  
+
+  ret->desc = &demuxer_desc_demuxers;
+
   return ret;
 }
 
-int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
+static int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
   dd_priv_t* priv;
 
   priv=demux->priv;
@@ -54,7 +57,7 @@ int demux_demuxers_fill_buffer(demuxer_t *demux,demux_stream_t *ds) {
   return 0;
 }
 
-void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
+static void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
   dd_priv_t* priv;
   float pos;
   priv=demuxer->priv;
@@ -81,7 +84,7 @@ void demux_demuxers_seek(demuxer_t *demuxer,float rel_seek_secs,int flags) {
 
 }
 
-void demux_close_demuxers(demuxer_t* demuxer) {
+static void demux_close_demuxers(demuxer_t* demuxer) {
   int i;
   dd_priv_t* priv = demuxer->priv;
   stream_t *s;
@@ -109,3 +112,19 @@ void demux_close_demuxers(demuxer_t* demuxer) {
   free(demuxer);
 }
   
+
+demuxer_desc_t demuxer_desc_demuxers = {
+  "Demuxers demuxer",
+  "", // Not selectable
+  "",
+  "?",
+  "internal use only",
+  DEMUXER_TYPE_DEMUXERS,
+  0, // no autodetect
+  NULL,
+  demux_demuxers_fill_buffer,
+  NULL,
+  demux_close_demuxers,
+  demux_demuxers_seek,
+  NULL
+};

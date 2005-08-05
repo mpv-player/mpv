@@ -158,7 +158,7 @@ static int getFrame(demuxer_t *demuxer, FrameInfo *frameInfo)
     return 1;
 }
                         
-int lmlm4_check_file(demuxer_t* demuxer)
+static int lmlm4_check_file(demuxer_t* demuxer)
 {
     FrameInfo frameInfo;
     unsigned int first;
@@ -198,7 +198,7 @@ int lmlm4_check_file(demuxer_t* demuxer)
 //    stream_reset(demuxer->stream);
     mp_msg(MSGT_DEMUX, MSGL_V, "LMLM4 Stream Format found\n");
 
-    return 1;
+    return DEMUXER_TYPE_LMLM4;
 }
 
 static int video = 0;
@@ -207,7 +207,7 @@ static int frames= 0;
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_lmlm4_fill_buffer(demuxer_t *demux)
+static int demux_lmlm4_fill_buffer(demuxer_t *demux, demux_stream_t *ds)
 {
     FrameInfo frameInfo;
     double pts;
@@ -277,7 +277,9 @@ hdr:
     return 1;
 }
 
-int demux_open_lmlm4(demuxer_t* demuxer){
+static demuxer_t* demux_open_lmlm4(demuxer_t* demuxer){
+    sh_audio_t *sh_audio=NULL;
+    sh_video_t *sh_video=NULL;
 
 #if 0
     sh_video_t* sh_video;
@@ -327,13 +329,43 @@ int demux_open_lmlm4(demuxer_t* demuxer){
 
     demuxer->seekable = 0;
     
+    if(!ds_fill_buffer(demuxer->video)){
+        mp_msg(MSGT_DEMUXER,MSGL_INFO,"LMLM4: " MSGTR_MissingVideoStream);
+        demuxer->video->sh=NULL;
+    } else {
+        sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
+    }
+    if(demuxer->audio->id!=-2) {
+        if(!ds_fill_buffer(demuxer->audio)){
+            mp_msg(MSGT_DEMUXER,MSGL_INFO,"LMLM4: " MSGTR_MissingAudioStream);
+            demuxer->audio->sh=NULL;
+        } else {
+            sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;
+        }
+    }    
     
-    
-    return 1;
+    return demuxer;
 }
 
-void demux_close_lmlm4(demuxer_t *demuxer)
+static void demux_close_lmlm4(demuxer_t *demuxer)
 {
 //    printf("Close LMLM4 Stream\n");
     return;
 }
+
+
+demuxer_desc_t demuxer_desc_lmlm4 = {
+  "LMLM4 MPEG4 Compression Card stream demuxer",
+  "lmlm4",
+  "RAW LMLM4",
+  "Maxim Yevtyushkin",
+  "",
+  DEMUXER_TYPE_LMLM4,
+  0, // unsafe autodetect
+  lmlm4_check_file,
+  demux_lmlm4_fill_buffer,
+  demux_open_lmlm4,
+  demux_close_lmlm4,
+  NULL,
+  NULL
+};

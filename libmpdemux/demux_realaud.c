@@ -40,13 +40,13 @@ typedef struct {
 
 
 
-int ra_check_file(demuxer_t* demuxer)
+static int ra_check_file(demuxer_t* demuxer)
 {
 	unsigned int chunk_id;
   
 	chunk_id = stream_read_dword_le(demuxer->stream);
 	if (chunk_id == FOURCC_DOTRA)
-		return 1;
+		return DEMUXER_TYPE_REALAUDIO;
 	else
 		return 0;
 }
@@ -58,7 +58,7 @@ void hexdump(char *, unsigned long);
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_ra_fill_buffer(demuxer_t *demuxer)
+static int demux_ra_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 {
 	ra_priv_t *ra_priv = demuxer->priv;
 	int len;
@@ -92,7 +92,7 @@ extern void print_wave_header(WAVEFORMATEX *h);
 
 
 
-int demux_open_ra(demuxer_t* demuxer)
+static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 {
 	ra_priv_t* ra_priv = demuxer->priv;
 	sh_audio_t *sh;
@@ -264,12 +264,12 @@ int demux_open_ra(demuxer_t* demuxer)
 	if(!ds_fill_buffer(demuxer->audio))
 		mp_msg(MSGT_DEMUXER,MSGL_INFO,"[RealAudio] No data.\n");
 
-    return 1;
+    return demuxer;
 }
 
 
 
-void demux_close_ra(demuxer_t *demuxer)
+static void demux_close_ra(demuxer_t *demuxer)
 {
 	ra_priv_t* ra_priv = demuxer->priv;
  
@@ -295,3 +295,20 @@ int demux_seek_ra(demuxer_t *demuxer, float rel_seek_secs, int flags)
     return stream_seek(demuxer->stream, next_offset);
 }
 #endif
+
+
+demuxer_desc_t demuxer_desc_realaudio = {
+  "Realaudio demuxer",
+  "realaudio",
+  "REALAUDIO",
+  "Roberto Togni",
+  "handles old audio only .ra files",
+  DEMUXER_TYPE_REALAUDIO,
+  1, // safe autodetect
+  ra_check_file,
+  demux_ra_fill_buffer,
+  demux_open_ra,
+  demux_close_ra,
+  NULL,
+  NULL
+};

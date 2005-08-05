@@ -64,7 +64,7 @@ static int demux_aac_init(demuxer_t *demuxer)
 	return 1;
 }
 
-void demux_close_aac(demuxer_t *demuxer)
+static void demux_close_aac(demuxer_t *demuxer)
 {
 	aac_priv_t *priv = (aac_priv_t *) demuxer->priv;
 	
@@ -79,8 +79,8 @@ void demux_close_aac(demuxer_t *demuxer)
 	return;
 }
 
-/// returns 1 if it finds 8 ADTS frames in 32768 bytes, 0 otherwise
-int demux_aac_probe(demuxer_t *demuxer)
+/// returns DEMUXER_TYPE_AAC if it finds 8 ADTS frames in 32768 bytes, 0 otherwise
+static int demux_aac_probe(demuxer_t *demuxer)
 {
 	int cnt = 0, c, len, srate, num;
 	off_t init, probed;
@@ -122,14 +122,14 @@ int demux_aac_probe(demuxer_t *demuxer)
 		goto fail;
 	
 	mp_msg(MSGT_DEMUX, MSGL_V, "demux_aac_probe, INIT: %llu, PROBED: %llu, cnt: %d\n", init, probed, cnt);
-	return 1;
+	return DEMUXER_TYPE_AAC;
 
 fail:
 	mp_msg(MSGT_DEMUX, MSGL_V, "demux_aac_probe, failed to detect an AAC stream\n");
 	return 0;
 }
 
-int demux_aac_open(demuxer_t *demuxer)
+static demuxer_t* demux_aac_open(demuxer_t *demuxer)
 {
 	sh_audio_t *sh;
 
@@ -140,10 +140,10 @@ int demux_aac_open(demuxer_t *demuxer)
 
 	demuxer->filepos = stream_tell(demuxer->stream);
 	
-	return 1;
+	return demuxer;
 }
 
-int demux_aac_fill_buffer(demuxer_t *demuxer)
+static int demux_aac_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
 	aac_priv_t *priv = (aac_priv_t *) demuxer->priv;
 	demux_packet_t *dp;
@@ -209,7 +209,7 @@ int demux_aac_fill_buffer(demuxer_t *demuxer)
 
 
 //This is an almost verbatim copy of high_res_mp3_seek(), from demux_audio.c
-void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
 	aac_priv_t *priv = (aac_priv_t *) demuxer->priv;
 	demux_stream_t *d_audio=demuxer->audio;
@@ -251,3 +251,19 @@ void demux_aac_seek(demuxer_t *demuxer, float rel_seek_secs, int flags)
 	resync_audio_stream(sh_audio);
 }
 
+
+demuxer_desc_t demuxer_desc_aac = {
+  "AAC demuxer",
+  "aac",
+  "AAC",
+  "Nico Sabbi",
+  "Raw AAC files ",
+  DEMUXER_TYPE_AAC,
+  0, // unsafe autodetect
+  demux_aac_probe,
+  demux_aac_fill_buffer,
+  demux_aac_open,
+  demux_close_aac,
+  demux_aac_seek,
+  NULL
+};

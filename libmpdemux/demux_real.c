@@ -433,7 +433,7 @@ end:
 #endif
 
 
-int real_check_file(demuxer_t* demuxer)
+static int real_check_file(demuxer_t* demuxer)
 {
     real_priv_t *priv;
     int c;
@@ -450,7 +450,7 @@ int real_check_file(demuxer_t* demuxer)
     memset(priv, 0, sizeof(real_priv_t));
     demuxer->priv = priv;
 
-    return 1;
+    return DEMUXER_TYPE_REAL;
 }
 
 void hexdump(char *, unsigned long);
@@ -517,7 +517,7 @@ typedef struct dp_hdr_s {
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_real_fill_buffer(demuxer_t *demuxer)
+static int demux_real_fill_buffer(demuxer_t *demuxer, demux_stream_t *dsds)
 {
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *ds = NULL;
@@ -956,7 +956,7 @@ discard:
 
 extern void print_wave_header(WAVEFORMATEX *h);
 
-void demux_open_real(demuxer_t* demuxer)
+static demuxer_t* demux_open_real(demuxer_t* demuxer)
 {
     real_priv_t* priv = demuxer->priv;
     int num_of_headers;
@@ -1730,9 +1730,10 @@ header_end:
 	    sh->disp_w,sh->disp_h,sh->aspect,sh->fps);
     }
 
+    return demuxer;
 }
 
-void demux_close_real(demuxer_t *demuxer)
+static void demux_close_real(demuxer_t *demuxer)
 {
     int i;
     real_priv_t* priv = demuxer->priv;
@@ -1750,7 +1751,7 @@ void demux_close_real(demuxer_t *demuxer)
 extern void resync_audio_stream(sh_audio_t * sh_audio);
 
 /* please upload RV10 samples WITH INDEX CHUNK */
-int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
     real_priv_t *priv = demuxer->priv;
     demux_stream_t *d_audio = demuxer->audio;
@@ -1838,13 +1839,13 @@ int demux_seek_real(demuxer_t *demuxer, float rel_seek_secs, int flags)
     if (next_offset)
         stream_seek(demuxer->stream, next_offset);
 
-    demux_real_fill_buffer(demuxer);
+    demux_real_fill_buffer(demuxer, NULL);
     if (sh_audio)
         resync_audio_stream(sh_audio);
     return 1;
 }
 
-int demux_real_control(demuxer_t *demuxer, int cmd, void *arg)
+static int demux_real_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     real_priv_t *priv = demuxer->priv;
     int lastpts = priv->v_pts ? priv->v_pts : priv->a_pts;
@@ -1868,3 +1869,20 @@ int demux_real_control(demuxer_t *demuxer, int cmd, void *arg)
 	    return DEMUXER_CTRL_NOTIMPL;
     }
 }
+
+
+demuxer_desc_t demuxer_desc_real = {
+  "Realmedia demuxer",
+  "real",
+  "REAL",
+  "Alex Beregszasi, Florian Schneider, A'rpi, Roberto Togni",
+  "handles new .RMF files",
+  DEMUXER_TYPE_REAL,
+  1, // safe autodetect
+  real_check_file,
+  demux_real_fill_buffer,
+  demux_open_real,
+  demux_close_real,
+  demux_seek_real,
+  demux_real_control
+};

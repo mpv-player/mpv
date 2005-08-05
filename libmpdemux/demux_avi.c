@@ -14,6 +14,9 @@
 
 #include "aviheader.h"
 
+extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
+extern int demux_ogg_open(demuxer_t* demuxer);
+
 // PTS:  0=interleaved  1=BPS-based
 int pts_from_bps=1;
 
@@ -173,7 +176,7 @@ static int demux_avi_read_packet(demuxer_t *demux,demux_stream_t *ds,unsigned in
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_avi_fill_buffer(demuxer_t *demux){
+static int demux_avi_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
 avi_priv_t *priv=demux->priv;
 unsigned int id=0;
 unsigned int len;
@@ -430,7 +433,7 @@ int force_ni=0;     // force non-interleaved AVI parsing
 
 void read_avi_header(demuxer_t *demuxer,int index_mode);
 
-demuxer_t* demux_open_avi(demuxer_t* demuxer){
+static demuxer_t* demux_open_avi(demuxer_t* demuxer){
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=NULL;
@@ -856,3 +859,70 @@ int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
 	    return DEMUXER_CTRL_NOTIMPL;
     }
 }
+
+
+static int avi_check_file(demuxer_t *demuxer)
+{
+  int id=stream_read_dword_le(demuxer->stream); // "RIFF"
+
+  if((id==mmioFOURCC('R','I','F','F')) || (id==mmioFOURCC('O','N','2',' '))) {
+    stream_read_dword_le(demuxer->stream); //filesize
+    id=stream_read_dword_le(demuxer->stream); // "AVI "
+    if(id==formtypeAVI)
+      return DEMUXER_TYPE_AVI;
+    if(id==mmioFOURCC('O','N','2','f')){
+      mp_msg(MSGT_DEMUXER,MSGL_INFO,"ON2 AVI format");
+      return DEMUXER_TYPE_AVI;
+    }
+  }
+
+  return 0;
+}
+
+
+static demuxer_t* demux_open_hack_avi(demuxer_t *demuxer)
+{
+   sh_audio_t* sh_a;
+
+   demuxer = (demuxer_t*) demux_open_avi(demuxer);
+   if(!demuxer) return NULL; // failed to open
+   sh_a = (sh_audio_t*)demuxer->audio->sh;
+   if(demuxer->audio->id != -2 && sh_a) {
+#ifdef HAVE_OGGVORBIS
+    // support for Ogg-in-AVI:
+    if(sh_a->format == 0xFFFE)
+      demuxer = init_avi_with_ogg(demuxer);
+    else if(sh_a->format == 0x674F) {
+      stream_t* s;
+      demuxer_t  *od;
+      s = new_ds_stream(demuxer->audio);
+      od = new_demuxer(s,DEMUXER_TYPE_OGG,-1,-2,-2,NULL);
+      if(!demux_ogg_open(od)) {
+        mp_msg( MSGT_DEMUXER,MSGL_ERR,MSGTR_ErrorOpeningOGGDemuxer);
+        free_stream(s);
+        demuxer->audio->id = -2;
+      } else
+        demuxer = new_demuxers_demuxer(demuxer,od,demuxer);
+   }
+#endif
+   }
+
+   return demuxer;
+}
+
+
+demuxer_desc_t demuxer_desc_avi = {
+  "AVI demuxer",
+  "avi",
+  "AVI",
+  "Arpi?",
+  "AVI files, including non interleaved files",
+  DEMUXER_TYPE_AVI,
+  1, // safe autodetect
+  avi_check_file,
+  demux_avi_fill_buffer,
+  demux_open_hack_avi,
+  demux_close_avi,
+  demux_seek_avi,
+  NULL
+};

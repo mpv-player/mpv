@@ -48,11 +48,12 @@
 #define DEMUXER_TYPE_AVS 38
 #define DEMUXER_TYPE_AAC 39
 #define DEMUXER_TYPE_MPC 40
+#define DEMUXER_TYPE_MPEG_PES 41
 
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 40
+#define DEMUXER_TYPE_MAX 41
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code
@@ -125,11 +126,42 @@ typedef struct demuxer_info_st {
 #define MAX_A_STREAMS 256
 #define MAX_V_STREAMS 256
 
+struct demuxer_st;
+
+/**
+ * Demuxer description structure
+ */
+typedef struct demuxers_desc_st {
+  const char *info; ///< What is it (long name and/or description)
+  const char *name; ///< Demuxer name, used with -demuxer switch
+  const char *shortdesc; ///< Description printed at demuxer detection
+  const char *author; ///< Demuxer author(s)
+  const char *comment; ///< Comment, printed with -demuxer help
+
+  int type; ///< DEMUXER_TYPE_xxx
+  int safe_check; ///< If 1 detection is safe and fast, do it before file extension check
+
+  /// Check if can demux the file, return DEMUXER_TYPE_xxx on success
+  int (*check_file)(struct demuxer_st *demuxer); ///< Mandatory if safe_check == 1, else optional 
+  /// Get packets from file, return 0 on eof
+  int (*fill_buffer)(struct demuxer_st *demuxer, demux_stream_t *ds); ///< Mandatory
+  /// Open the demuxer, return demuxer on success, NULL on failure
+  struct demuxer_st* (*open)(struct demuxer_st *demuxer); ///< Optional
+  /// Close the demuxer
+  void (*close)(struct demuxer_st *demuxer); ///< Optional
+  // Seek
+  void (*seek)(struct demuxer_st *demuxer, float rel_seek_secs, int flags); ///< Optional
+  // Control
+  int (*control)(struct demuxer_st *demuxer, int cmd, void *arg); ///< Optional
+} demuxer_desc_t;
+
 typedef struct demuxer_st {
+  demuxer_desc_t *desc;  ///< Demuxer description structure
   off_t filepos; // input stream current pos.
   off_t movi_start;
   off_t movi_end;
   stream_t *stream;
+  char *filename; ///< Needed by avs_check_file
   int synced;  // stream synced (used by mpeg)
   int type;    // demuxer type: mpeg PS, mpeg ES, avi, avi-ni, avi-nini, asf
   int file_format;  // file format: mpeg/avi/asf
@@ -203,7 +235,7 @@ inline static void free_demux_packet(demux_packet_t* dp){
 }
 
 demux_stream_t* new_demuxer_stream(struct demuxer_st *demuxer,int id);
-demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id);
+demuxer_t* new_demuxer(stream_t *stream,int type,int a_id,int v_id,int s_id,char *filename);
 void free_demuxer_stream(demux_stream_t *ds);
 void free_demuxer(demuxer_t *demuxer);
 
@@ -292,3 +324,6 @@ extern int demuxer_get_percent_pos(demuxer_t *demuxer);
 extern int demuxer_switch_audio(demuxer_t *demuxer, int index);
 
 extern int demuxer_type_by_filename(char* filename);
+
+extern void demuxer_help(void);
+extern int get_demuxer_type_from_name(char *demuxer_name);

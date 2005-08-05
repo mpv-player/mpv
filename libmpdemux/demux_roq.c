@@ -48,11 +48,11 @@ typedef struct roq_data_t
 // Check if a stream qualifies as a RoQ file based on the magic numbers
 // at the start of the file:
 //  84 10 FF FF FF FF xx xx
-int roq_check_file(demuxer_t *demuxer)
+static int roq_check_file(demuxer_t *demuxer)
 {
   if ((stream_read_dword(demuxer->stream) == 0x8410FFFF) &&
       ((stream_read_dword(demuxer->stream) & 0xFFFF0000) == 0xFFFF0000))
-    return 1;
+    return DEMUXER_TYPE_ROQ;
   else
     return 0;
 }
@@ -60,7 +60,7 @@ int roq_check_file(demuxer_t *demuxer)
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_roq_fill_buffer(demuxer_t *demuxer)
+static int demux_roq_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
   sh_video_t *sh_video = demuxer->video->sh;
   roq_data_t *roq_data = (roq_data_t *)demuxer->priv;
@@ -87,7 +87,7 @@ int demux_roq_fill_buffer(demuxer_t *demuxer)
   return 1;
 }
 
-demuxer_t* demux_open_roq(demuxer_t* demuxer)
+static demuxer_t* demux_open_roq(demuxer_t* demuxer)
 {
   sh_video_t *sh_video = NULL;
   sh_audio_t *sh_audio = NULL;
@@ -240,7 +240,7 @@ demuxer_t* demux_open_roq(demuxer_t* demuxer)
   return demuxer;
 }
 
-void demux_close_roq(demuxer_t* demuxer) {
+static void demux_close_roq(demuxer_t* demuxer) {
   roq_data_t *roq_data = demuxer->priv;
 
   if(!roq_data)
@@ -248,3 +248,19 @@ void demux_close_roq(demuxer_t* demuxer) {
   free(roq_data);
 }
   
+
+demuxer_desc_t demuxer_desc_roq = {
+  "RoQ demuxer",
+  "roq",
+  "ROQ",
+  "Mike Melanson",
+  "",
+  DEMUXER_TYPE_ROQ,
+  0, // unsafe autodetect
+  roq_check_file,
+  demux_roq_fill_buffer,
+  demux_open_roq,
+  demux_close_roq,
+  NULL,
+  NULL
+};

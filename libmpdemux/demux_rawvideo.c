@@ -53,7 +53,7 @@ m_option_t demux_rawvideo_opts[] = {
 };
 
 
-int demux_rawvideo_open(demuxer_t* demuxer) {
+static demuxer_t* demux_rawvideo_open(demuxer_t* demuxer) {
   sh_video_t* sh_video;
 
   switch(size_id){
@@ -100,10 +100,10 @@ int demux_rawvideo_open(demuxer_t* demuxer) {
   demuxer->video->sh = sh_video;
   sh_video->ds = demuxer->video;
 
-  return 1;
+  return demuxer;
 }
 
-int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
+static int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   sh_video_t* sh = demuxer->video->sh;
   off_t pos;
   if(demuxer->stream->eof) return 0;
@@ -113,7 +113,7 @@ int demux_rawvideo_fill_buffer(demuxer_t* demuxer, demux_stream_t *ds) {
   return 1;
 }
 
-void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   stream_t* s = demuxer->stream;
   sh_video_t* sh_video = demuxer->video->sh;
   off_t pos;
@@ -131,3 +131,20 @@ void demux_rawvideo_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
   demuxer->video->pts = pos * sh_video->frametime;
 //  printf("demux_rawvideo: streamtell=%d\n",(int)stream_tell(demuxer->stream));
 }
+
+
+demuxer_desc_t demuxer_desc_rawvideo = {
+  "Raw video demuxer",
+  "rawvideo",
+  "rawvideo",
+  "?",
+  "",
+  DEMUXER_TYPE_RAWVIDEO,
+  0, // no autodetect
+  NULL,
+  demux_rawvideo_fill_buffer,
+  demux_rawvideo_open,
+  NULL,
+  demux_rawvideo_seek,
+  NULL
+};

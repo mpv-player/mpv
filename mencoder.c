@@ -115,6 +115,9 @@ static char** audio_codec_list=NULL;  // override audio codec
 static char** video_codec_list=NULL;  // override video codec
 static char** audio_fm_list=NULL;     // override audio codec family 
 static char** video_fm_list=NULL;     // override video codec family 
+extern char *demuxer_name; // override demuxer
+extern char *audio_demuxer_name; // override audio demuxer
+extern char *sub_demuxer_name; // override sub demuxer
 
 static int out_audio_codec=-1;
 static int out_video_codec=-1;

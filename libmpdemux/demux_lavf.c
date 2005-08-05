@@ -101,7 +101,7 @@ static URLProtocol mp_protocol = {
     mp_close,
 };
 
-int lavf_check_file(demuxer_t *demuxer){
+static int lavf_check_file(demuxer_t *demuxer){
     AVProbeData avpd;
     uint8_t buf[PROBE_BUF_SIZE];
     lavf_priv_t *priv;
@@ -125,10 +125,10 @@ int lavf_check_file(demuxer_t *demuxer){
     }else
         mp_msg(MSGT_HEADER,MSGL_V,"LAVF_check: %s\n", priv->avif->long_name);
 
-    return 1;
+    return DEMUXER_TYPE_LAVF;
 }
     
-int demux_open_lavf(demuxer_t *demuxer){
+static demuxer_t* demux_open_lavf(demuxer_t *demuxer){
     AVFormatContext *avfc;
     AVFormatParameters ap;
     lavf_priv_t *priv= demuxer->priv;
@@ -152,14 +152,14 @@ int demux_open_lavf(demuxer_t *demuxer){
         
     if(av_open_input_stream(&avfc, &priv->pb, mp_filename, priv->avif, &ap)<0){
         mp_msg(MSGT_HEADER,MSGL_ERR,"LAVF_header: av_open_input_stream() failed\n");
-        return 0;
+        return NULL;
     }
 
     priv->avfc= avfc;
 
     if(av_find_stream_info(avfc) < 0){
         mp_msg(MSGT_HEADER,MSGL_ERR,"LAVF_header: av_find_stream_info() failed\n");
-        return 0;
+        return NULL;
     }
 
     if(avfc->title    [0]) demux_info_add(demuxer, "name"     , avfc->title    );
@@ -304,15 +304,15 @@ int demux_open_lavf(demuxer_t *demuxer){
     if(!priv->video_streams){
         if(!priv->audio_streams){
 	    mp_msg(MSGT_HEADER,MSGL_ERR,"LAVF: no audio or video headers found - broken file?\n");
-            return 0; 
+            return NULL; 
         }
         demuxer->video->id=-2; // audio-only
     } //else if (best_video > 0 && demuxer->video->id == -1) demuxer->video->id = best_video;
 
-    return 1;
+    return demuxer;
 }
 
-int demux_lavf_fill_buffer(demuxer_t *demux){
+static int demux_lavf_fill_buffer(demuxer_t *demux, demux_stream_t *dsds){
     lavf_priv_t *priv= demux->priv;
     AVPacket pkt;
     demux_packet_t *dp;
@@ -382,7 +382,7 @@ int demux_lavf_fill_buffer(demuxer_t *demux){
     return 1;
 }
 
-void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags){
+static void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags){
     lavf_priv_t *priv = demuxer->priv;
     mp_msg(MSGT_DEMUX,MSGL_DBG2,"demux_seek_lavf(%p, %f, %d)\n", demuxer, rel_seek_secs, flags);
     
@@ -393,7 +393,7 @@ void demux_seek_lavf(demuxer_t *demuxer, float rel_seek_secs, int flags){
 #endif
 }
 
-int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
+static int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
 {
     lavf_priv_t *priv = demuxer->priv;
     
@@ -417,7 +417,7 @@ int demux_lavf_control(demuxer_t *demuxer, int cmd, void *arg)
     }
 }
 
-void demux_close_lavf(demuxer_t *demuxer)
+static void demux_close_lavf(demuxer_t *demuxer)
 {
     lavf_priv_t* priv = demuxer->priv;
     if (priv){
@@ -428,5 +428,22 @@ void demux_close_lavf(demuxer_t *demuxer)
         free(priv); demuxer->priv= NULL;
     }
 }
+
+
+demuxer_desc_t demuxer_desc_lavf = {
+  "libavformat demuxer",
+  "lavf",
+  "libavformat",
+  "Michael Niedermayer",
+  "supports many formats, requires libavformat",
+  DEMUXER_TYPE_LAVF,
+  0, // Check after other demuxer
+  lavf_check_file,
+  demux_lavf_fill_buffer,
+  demux_open_lavf,
+  demux_close_lavf,
+  demux_seek_lavf,
+  demux_lavf_control
+};
 
 #endif // USE_LIBAVFORMAT

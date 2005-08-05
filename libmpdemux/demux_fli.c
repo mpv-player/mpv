@@ -22,7 +22,7 @@ typedef struct _fli_frames_t {
   unsigned int *frame_size;
 } fli_frames_t;
 
-void demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags){
   fli_frames_t *frames = (fli_frames_t *)demuxer->priv;
   sh_video_t *sh_video = demuxer->video->sh;
   int newpos=(flags&1)?0:frames->current_frame;
@@ -41,7 +41,7 @@ void demux_seek_fli(demuxer_t *demuxer,float rel_seek_secs,int flags){
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_fli_fill_buffer(demuxer_t *demuxer){
+static int demux_fli_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds){
   fli_frames_t *frames = (fli_frames_t *)demuxer->priv;
   sh_video_t *sh_video = demuxer->video->sh;
 
@@ -67,7 +67,7 @@ int demux_fli_fill_buffer(demuxer_t *demuxer){
   return 1;
 }
 
-demuxer_t* demux_open_fli(demuxer_t* demuxer){
+static demuxer_t* demux_open_fli(demuxer_t* demuxer){
   sh_video_t *sh_video = NULL;
   fli_frames_t *frames = (fli_frames_t *)malloc(sizeof(fli_frames_t));
   int frame_number;
@@ -164,7 +164,7 @@ demuxer_t* demux_open_fli(demuxer_t* demuxer){
   return demuxer;
 }
 
-void demux_close_fli(demuxer_t* demuxer) {
+static void demux_close_fli(demuxer_t* demuxer) {
   fli_frames_t *frames = demuxer->priv;
 
   if(!frames)
@@ -178,3 +178,34 @@ void demux_close_fli(demuxer_t* demuxer) {
   free(frames);
 
 }
+
+
+static int fli_check_file(demuxer_t* demuxer)
+{
+  int id;
+
+  stream_seek(demuxer->stream, 4);
+  id=stream_read_word_le(demuxer->stream);
+  // check for the FLI file magic number
+  if((id==0xAF11) || (id==0xAF12))
+    return DEMUXER_TYPE_FLI;
+
+  return 0;
+}
+
+
+demuxer_desc_t demuxer_desc_fli = {
+  "Autodesk FLIC demuxer",
+  "fli",
+  "FLI",
+  "Mike Melanson",
+  "Supports also some extensions",
+  DEMUXER_TYPE_FLI,
+  0, // unsafe autodetect (short signature)
+  fli_check_file,
+  demux_fli_fill_buffer,
+  demux_open_fli,
+  demux_close_fli,
+  demux_seek_fli,
+  NULL
+};

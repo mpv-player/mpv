@@ -46,7 +46,7 @@ typedef struct _film_data_t
   unsigned int film_version;
 } film_data_t;
 
-void demux_seek_film(demuxer_t *demuxer, float rel_seek_secs, int flags)
+static void demux_seek_film(demuxer_t *demuxer, float rel_seek_secs, int flags)
 {
   film_data_t *film_data = (film_data_t *)demuxer->priv;
   int new_current_chunk=(flags&1)?0:film_data->current_chunk;
@@ -83,7 +83,7 @@ printf ("  (flags = %X)  actual new chunk = %d (syncinfo1 = %08X)\n",
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_film_fill_buffer(demuxer_t *demuxer)
+static int demux_film_fill_buffer(demuxer_t *demuxer, demux_stream_t *ds)
 {
   int i;
   unsigned char byte_swap;
@@ -206,7 +206,7 @@ int demux_film_fill_buffer(demuxer_t *demuxer)
   return 1;
 }
 
-demuxer_t* demux_open_film(demuxer_t* demuxer)
+static demuxer_t* demux_open_film(demuxer_t* demuxer)
 {
   sh_video_t *sh_video = NULL;
   sh_audio_t *sh_audio = NULL;
@@ -436,7 +436,7 @@ demuxer_t* demux_open_film(demuxer_t* demuxer)
   return demuxer;
 }
 
-void demux_close_film(demuxer_t* demuxer) {
+static void demux_close_film(demuxer_t* demuxer) {
   film_data_t *film_data = demuxer->priv;
 
   if(!film_data)
@@ -446,3 +446,31 @@ void demux_close_film(demuxer_t* demuxer) {
   free(film_data);
   
 }
+
+static int film_check_file(demuxer_t* demuxer)
+{
+  int signature=stream_read_fourcc(demuxer->stream);
+
+  // check for the FILM file magic number
+  if(signature==mmioFOURCC('F', 'I', 'L', 'M'))
+    return DEMUXER_TYPE_FILM;
+
+  return 0;
+}
+
+
+demuxer_desc_t demuxer_desc_film = {
+  "FILM/CPK demuxer for Sega Saturn CD-ROM games",
+  "film",
+  "FILM",
+  "Mike Melanson",
+  "",
+  DEMUXER_TYPE_FILM,
+  0, // unsafe autodetect (short signature)
+  film_check_file,
+  demux_film_fill_buffer,
+  demux_open_film,
+  demux_close_film,
+  demux_seek_film,
+  NULL
+};

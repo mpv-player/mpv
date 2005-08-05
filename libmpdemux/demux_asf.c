@@ -38,6 +38,8 @@ extern int asf_scrambling_b;
 extern int asf_packetsize;
 extern double asf_packetrate;
 extern int asf_movielength;
+extern int asf_check_header(demuxer_t *demuxer);
+extern int read_asf_header(demuxer_t *demuxer);
 
 // based on asf file-format doc by Eugene [http://divx.euro.ru]
 
@@ -140,7 +142,7 @@ static int demux_asf_read_packet(demuxer_t *demux,unsigned char *data,int len,in
 // return value:
 //     0 = EOF or no stream found
 //     1 = successfully read a packet
-int demux_asf_fill_buffer(demuxer_t *demux){
+static int demux_asf_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 
   demux->filepos=stream_tell(demux->stream);
   // Brodcast stream have movi_start==movi_end
@@ -360,7 +362,7 @@ int demux_asf_fill_buffer(demuxer_t *demux){
 extern void resync_audio_stream(sh_audio_t *sh_audio);
 extern void skip_audio_frame(sh_audio_t *sh_audio);
 
-void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
     demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
@@ -412,7 +414,7 @@ void demux_seek_asf(demuxer_t *demuxer,float rel_seek_secs,int flags){
 
 }
 
-int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
+static int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
 /*  demux_stream_t *d_audio=demuxer->audio;
     demux_stream_t *d_video=demuxer->video;
     sh_audio_t *sh_audio=d_audio->sh;
@@ -430,3 +432,58 @@ int demux_asf_control(demuxer_t *demuxer,int cmd, void *arg){
 	    return DEMUXER_CTRL_NOTIMPL;
     }
 }
+
+
+static demuxer_t* demux_open_asf(demuxer_t* demuxer)
+{
+    sh_audio_t *sh_audio=NULL;
+    sh_video_t *sh_video=NULL;
+
+    //---- ASF header:
+    read_asf_header(demuxer);
+    stream_reset(demuxer->stream);
+    stream_seek(demuxer->stream,demuxer->movi_start);
+//    demuxer->idx_pos=0;
+//    demuxer->endpos=avi_header.movi_end;
+    if(demuxer->video->id != -2) {
+        if(!ds_fill_buffer(demuxer->video)){
+            mp_msg(MSGT_DEMUXER,MSGL_WARN,"ASF: " MSGTR_MissingVideoStream);
+            demuxer->video->sh=NULL;
+            //printf("ASF: missing video stream!? contact the author, it may be a bug :(\n");
+        } else {
+            sh_video=demuxer->video->sh;sh_video->ds=demuxer->video;
+            sh_video->fps=1000.0f; sh_video->frametime=0.001f; // 1ms
+            //sh_video->i_bps=10*asf_packetsize; // FIXME!
+        }
+    }
+
+    if(demuxer->audio->id!=-2){
+        mp_msg(MSGT_DEMUXER,MSGL_V,MSGTR_ASFSearchingForAudioStream,demuxer->audio->id);
+        if(!ds_fill_buffer(demuxer->audio)){
+            mp_msg(MSGT_DEMUXER,MSGL_INFO,"ASF: " MSGTR_MissingAudioStream);
+            demuxer->audio->sh=NULL;
+        } else {
+            sh_audio=demuxer->audio->sh;sh_audio->ds=demuxer->audio;
+            sh_audio->format=sh_audio->wf->wFormatTag;
+        }
+    }
+
+    return demuxer;
+}
+
+
+demuxer_desc_t demuxer_desc_asf = {
+  "ASF demuxer",
+  "asv",
+  "ASF",
+  "A'rpi",
+  "ASF, WMV, WMA",
+  DEMUXER_TYPE_ASF,
+  1, // safe autodetect
+  asf_check_header,
+  demux_asf_fill_buffer,
+  demux_open_asf,
+  NULL, //demux_close_asf,
+  demux_seek_asf,
+  demux_asf_control
+};

@@ -46,7 +46,7 @@ static uint32_t get_bits(da_priv_t* priv, stream_t* s, int bits) {
   return out & mask;
 }
 
-int demux_mpc_open(demuxer_t* demuxer) {
+static int demux_mpc_open(demuxer_t* demuxer) {
   stream_t *s = demuxer->stream;
   sh_audio_t* sh_audio;
   uint8_t hdr[HDR_SIZE];
@@ -101,10 +101,10 @@ int demux_mpc_open(demuxer_t* demuxer) {
   sh_audio->audio.dwScale = 32 * 36;
   sh_audio->audio.dwRate = sh_audio->samplerate;
 
-  return 1;
+  return DEMUXER_TYPE_MPC;
 }
 
-int demux_mpc_fill_buffer(demux_stream_t *ds) {
+static int demux_mpc_fill_buffer(demux_stream_t *ds, demux_stream_t *dsds) {
   int l;
   int bit_len;
   demux_packet_t* dp;
@@ -134,11 +134,11 @@ int demux_mpc_fill_buffer(demux_stream_t *ds) {
   return 1;
 }
 
-void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
+static void demux_mpc_seek(demuxer_t *demuxer,float rel_seek_secs,int flags){
 // TODO
 }
 
-void demux_close_mpc(demuxer_t* demuxer) {
+static void demux_close_mpc(demuxer_t* demuxer) {
   da_priv_t* priv = demuxer->priv;
 
   if(!priv)
@@ -146,6 +146,23 @@ void demux_close_mpc(demuxer_t* demuxer) {
   free(priv);
 }
 
-int demux_mpc_control(demuxer_t *demuxer,int cmd, void *arg){
+static int demux_mpc_control(demuxer_t *demuxer,int cmd, void *arg){
   return DEMUXER_CTRL_NOTIMPL;
 }
+
+
+demuxer_desc_t demuxer_desc_mpc = {
+  "Musepack demuxer",
+  "mpc",
+  "MPC",
+  "Reza Jelveh, Reimar Doeffinger",
+  "supports v7 bitstream only",
+  DEMUXER_TYPE_MPC,
+  0, // unsafe autodetect
+  demux_mpc_open,
+  demux_mpc_fill_buffer,
+  NULL,
+  demux_close_mpc,
+  demux_mpc_seek,
+  demux_mpc_control
+};
