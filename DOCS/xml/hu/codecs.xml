@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.71 -->
+<!-- synced with 1.72 -->
 <sect1 id="codecs">
 <title>Támogatott codec-ek</title>
 
@@ -237,13 +237,14 @@ legtöbbször stabil és több funkciót nyújt. Mindez így hajtható végre:
   <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec</screen>
+  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec ffmpeg/libavutil</screen>
   </para></step>
 <step><para>
-  Mozgasd át a <filename>libavcodec</filename> könyvtárat az FFmpeg
-  forrásából az <application>MPlayer</application> CVS fájának gyökérkönyvtárába.
-  Valahogy így kell kinéznie:
+  Mozgasd át a <filename>libavcodec</filename> és <filename>libavutil</filename>
+  könyvtárakat az FFmpeg forrásából az <application>MPlayer</application> CVS
+  fájának gyökérkönyvtárába. Valahogy így kell kinéznie:
   <filename class="directory">main/libavcodec</filename>
+  <filename class="directory">main/libavutil</filename>
   </para><para>
   A szimbólikus link készítése <emphasis role="bold">nem</emphasis> elég, át kell
   másolnod/mozgatnod!
@@ -253,6 +254,7 @@ legtöbbször stabil és több funkciót nyújt. Mindez így hajtható végre:
   mindig frissüljön, amikor frissíted az <application>MPlayer</application> CVS-t,
   írd be a következő sort a <filename>main/CVS/Entries</filename> fájlba:
   <screen>D/libavcodec////</screen>
+  <screen>D/libavutil////</screen>
   </para></step>
 <step><para>
   Fordíts. Ha baj van, a <filename>configure</filename> megtalálja még a fordítás előtt.
