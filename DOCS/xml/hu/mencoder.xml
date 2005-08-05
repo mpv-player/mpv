@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.86 -->
+<!-- synced with 1.87 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -57,18 +57,13 @@ mencoder dvd://2 -ovc lavc -lavcopts vcodec=mpeg4:vpass=2 -oac mp3lame -lameopts
 <sect1 id="menc-feat-mpeg">
 <title>Kódolás MPEG formátumba</title>
 <para>
-A <application>MEncoder</application> létre készíteni MPEG (MPEG-PS) formátumú
-kimeneti fájlokat. Valószínűleg csak a
-<link linkend="ffmpeg"><systemitem class="library">libavcodec</systemitem></link>
-<emphasis>mpeg1video</emphasis> codec-jével hasznos ez, mert a lejátszók - az
-<application>MPlayer</application> kivételével - MPEG-1 videó és MPEG-1 layer 2 (MP2)
-audió folyamokra számítanak az MPEG fájlokban.
-</para>
-
-<para>
-Ez a tulajdonság jelenleg nem túl hasznos, emellett valószínűleg tele van hibával,
-de fontos, mert a <application>MEncoder</application> jelenleg nem tud
-MPEG-1 layer 2 (MP2) audióba kódolni, amit minden más lejátszó vár az MPEG fájlokban.
+A <application>MEncoder</application> tud készíteni MPEG (MPEG-PS) formátumú
+kimeneti fájlokat.
+Általában, ha MPEG-1 vagy MPEG-2 videót használsz, az azért van, mert egy
+korlátozott formátumhoz kódolsz, mint pl. az SVCD, a VCD vagy a DVD.
+Ezen formátumok speciális igényei a
+<link linkend="menc-feat-vcd-dvd">VCD és DVD készítési leírásban</link>
+megtalálhatóak.
 </para>
 
 <para>
