@@ -292,7 +292,8 @@
 <note><title>Note:</title>
 <para>
   Most codecs which support ABR encode only support two pass encode
-  while some others such as <systemitem class="library">x264</systemitem>
+  while some others such as <systemitem class="library">x264</systemitem>,
+  <systemitem class="library">XviD</systemitem>
   and <systemitem class="library">libavcodec</systemitem> support
   multipass, which slightly improves quality at each pass,
   yet this improvement is no longer measurable nor noticeable after the
@@ -303,28 +304,31 @@
 </note>
 
 <para>
-  In each of these modes, <systemitem class="library">libavcodec</systemitem>
+  In each of these modes, the video codec (such as
+  <systemitem class="library">libavcodec</systemitem>)
   breaks the video frame into 16x16 pixel macroblocks and then applies a
   quantizer to each macroblock. The lower the quantizer, the better the
-  quality and higher the bitrate. The method
-  <systemitem class="library">libavcodec</systemitem> uses to determine
+  quality and higher the bitrate.
+  The method the movie encoder uses to determine
   which quantizer to use for a given macroblock varies and is highly
   tunable. (This is an extreme over-simplification of the actual
   process, but the basic concept is useful to understand.)
 </para>
 
 <para>
-  When you specify a constant bitrate, <systemitem
-  class="library">libavcodec</systemitem> will encode the video, discarding
+  When you specify a constant bitrate, the video codec will encode the video,
+  discarding
   detail as much as necessary and as little as possible in order to remain
   lower than the given bitrate. If you truly do not care about file size,
   you could as well use CBR and specify a bitrate of infinity. (In
   practice, this means a value high enough so that it poses no limit, like
   10000Kbit.) With no real restriction on bitrate, the result is that
-  <systemitem class="library">libavcodec</systemitem> will use the lowest
+  the codec will use the lowest
   possible quantizer for each macroblock (as specified by
-  <option>vqmin</option>, which is 2 by default). As soon as you specify a
-  low enough bitrate that <systemitem class="library">libavcodec</systemitem>
+  <option>vqmin</option> for 
+  <systemitem class="library">libavcodec</systemitem>, which is 2 by default).
+  As soon as you specify a
+  low enough bitrate that the codec
   is forced to use a higher quantizer, then you are almost certainly ruining
   the quality of your video.
   In order to avoid that, you should probably downscale your video, according
@@ -333,12 +337,13 @@
 </para>
 
 <para>
-  With constant quantizer, <systemitem
-  class="library">libavcodec</systemitem> uses the same quantizer, as
-  specified by the <option>vqscale</option> option, on every macroblock. If
-  you want the highest quality rip possible, again ignoring bitrate, you can
-  use <option>vqscale=2</option>. This will yield the same bitrate and PSNR
-  (peak signal-to-noise ratio) as CBR with
+  With constant quantizer, the codec uses the same quantizer, as
+  specified by the <option>vqscale</option> option (for
+  <systemitem class="library">libavcodec</systemitem>), on every macroblock.
+  If you want the highest quality rip possible, again ignoring bitrate,
+  you can use <option>vqscale=2</option>.
+  This will yield the same bitrate and PSNR (peak signal-to-noise ratio)
+  as CBR with
   <option>vbitrate</option>=infinity and the default <option>vqmin</option>
   of 2.
 </para>
@@ -960,7 +965,7 @@
   If you will not be encoding in constant quantizer mode, you need to
   select a bitrate.
   The concept of bitrate is quite simple.
-  It's the (average) number of bits that will be consumed to store your
+  It is the (average) number of bits that will be consumed to store your
   movie, per second.
   Normally bitrate is measured in kilobits (1000 bits) per second.
   The size of your movie on disk is the bitrate times the length of the
@@ -980,10 +985,10 @@
 <orderedlist>
   <listitem><para>
     <emphasis role="bold">Perceptual</emphasis>: You notice MPEG
-    artifacts more if they're scaled up bigger!
+    artifacts more if they are scaled up bigger!
     Artifacts appear on the scale of blocks (8x8).
     Your eye will not see errors in 4800 small blocks as easily as it
-    sees errors in 1200 large blocks (assuming you'll be scaling both
+    sees errors in 1200 large blocks (assuming you will be scaling both
     to fullscreen).
   </para></listitem>
   <listitem><para>
@@ -1009,7 +1014,7 @@
   However this has not been verified with theoretical or empirical
   rigor.
   Further, given that movies vary greatly with regard to noise, detail,
-  degree of motion, etc., it's futile to make general recommendations
+  degree of motion, etc., it is futile to make general recommendations
   for bits per length-of-diagonal (the analog of bits per pixel,
   using the square root).
 </para>
