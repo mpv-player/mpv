@@ -105,7 +105,7 @@ typedef struct vo_functions_s
 	 *   arg - currently it's vo_subdevice
 	 *   returns: zero on successful initialization, non-zero on error.
 	 */
-	uint32_t (*preinit)(const char *arg);
+	int (*preinit)(const char *arg);
         /*
          * Initialize (means CONFIGURE) the display driver.
 	 * params:
@@ -116,21 +116,21 @@ typedef struct vo_functions_s
 	 *   format: fourcc of pixel format
          * returns : zero on successful initialization, non-zero on error.
          */
-        uint32_t (*config)(uint32_t width, uint32_t height, uint32_t d_width,
+        int (*config)(uint32_t width, uint32_t height, uint32_t d_width,
 			 uint32_t d_height, uint32_t fullscreen, char *title,
 			 uint32_t format);
 
 	/*
 	 * Control interface
 	 */
-	uint32_t (*control)(uint32_t request, void *data, ...);
+	int (*control)(uint32_t request, void *data, ...);
 
         /*
          * Display a new RGB/BGR frame of the video to the screen.
          * params:
 	 *   src[0] - pointer to the image
          */
-        uint32_t (*draw_frame)(uint8_t *src[]);
+        int (*draw_frame)(uint8_t *src[]);
 
         /*
          * Draw a planar YUV slice to the buffer:
@@ -140,7 +140,7 @@ typedef struct vo_functions_s
 	 *   w,h = width*height of area to be copied (in Y pixels)
          *   x,y = position at the destination image (in Y pixels)
          */
-        uint32_t (*draw_slice)(uint8_t *src[], int stride[], int w,int h, int x,int y);
+        int (*draw_slice)(uint8_t *src[], int stride[], int w,int h, int x,int y);
 
    	/*
          * Draws OSD to the screen buffer

@@ -275,7 +275,7 @@ static void __vbeCopyData(uint8_t *image)
 }
 
 /* is called for yuv only */
-static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
     int dstride=HAS_DGA()?video_mode_info.XResolution:dstW;
     uint8_t *dst[3]= {dga_buffer, NULL, NULL};
@@ -410,7 +410,7 @@ static void flip_page(void)
 }
 
 /* is called for rgb only */
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
     if(verbose > 2)
         printf("vo_vesa: draw_frame was called\n");
@@ -461,7 +461,7 @@ static uint32_t parseSubDevice(const char *sd)
    return flags;
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
     if(verbose > 2)
         printf("vo_vesa: query_format was called: %x (%s)\n",format,vo_format_name(format));
@@ -614,7 +614,7 @@ static int set_refresh(unsigned x, unsigned y, unsigned mode,struct VesaCRTCInfo
  * bit 3 (0x08) enables flipping (-flip) (NK: and for what?)
  */
 
-static uint32_t
+static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
   struct VbeInfoBlock vib;  
@@ -1056,7 +1056,7 @@ static void check_events(void)
 /* Nothing to do */
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
   int pre_init_err = 0;
   int fd;
@@ -1085,7 +1085,7 @@ static uint32_t preinit(const char *arg)
   return pre_init_err;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

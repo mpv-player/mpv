@@ -95,7 +95,7 @@ static void clear_screen(void) {
   
 }
 
-static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
   uint8_t* ptr[3];
 
@@ -201,14 +201,14 @@ flip_page(void)
     printf("tdfx_vid: Blit failed\n");
 }
 
-static uint32_t
+static int
 draw_frame(uint8_t *src[])
 {
   int stride[] = { src_stride, 0, 0};
   return draw_slice(src,stride,src_width, src_height,0,0);
 }
 
-static uint32_t
+static int
 query_format(uint32_t format)
 {
   switch(format) {
@@ -231,7 +231,7 @@ query_format(uint32_t format)
   return 0;
 }
 
-static uint32_t
+static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 
@@ -383,7 +383,7 @@ static void check_events(void)
 {
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
  
   tdfx_fd = open(arg ? arg : "/dev/tdfx_vid", O_RDWR);
@@ -645,7 +645,7 @@ static uint32_t set_colorkey(mp_colorkey_t* colork) {
   return VO_TRUE;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

@@ -204,7 +204,7 @@ static void set_window(int force_update)
 /* connect to server, create and map window,
  * allocate colors and (shared) memory
  */
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		       uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
   XVisualInfo vinfo;
@@ -377,7 +377,7 @@ static void flip_page(void)
   mp_msg(MSGT_VO, MSGL_FATAL, "xover error: didn't used sub vo flip_page!\n");
 }
 
-static uint32_t draw_slice(uint8_t *src[], int stride[],
+static int draw_slice(uint8_t *src[], int stride[],
 			   int w, int h, int x, int y)
 {
   UNUSED(src);
@@ -390,7 +390,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[],
   return 1;
 }
 
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
   UNUSED(src);
   mp_msg(MSGT_VO, MSGL_FATAL, "xover error: didn't used sub vo draw_frame!\n");
@@ -410,7 +410,7 @@ static void uninit(void)
   video_out_xover.draw_osd  = draw_osd;
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
   int i;
 
@@ -447,7 +447,7 @@ static uint32_t preinit(const char *arg)
   return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   if(!sub_vo) return VO_ERROR;
   switch (request) {

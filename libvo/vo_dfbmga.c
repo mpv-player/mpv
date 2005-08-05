@@ -226,7 +226,7 @@ get_layer_by_name( DFBDisplayLayerID id,
 
 static void uninit( void );
 
-static uint32_t
+static int
 preinit( const char *arg )
 {
      DFBResult res;
@@ -544,7 +544,7 @@ static void release_config( void )
      bufs[2] = NULL;
 }
 
-static uint32_t
+static int
 config( uint32_t width, uint32_t height,
         uint32_t d_width, uint32_t d_height,
         uint32_t flags,
@@ -856,7 +856,7 @@ config( uint32_t width, uint32_t height,
      return 0;
 }
 
-static uint32_t
+static int
 query_format( uint32_t format )
 {
      switch (format) {
@@ -996,13 +996,13 @@ draw_alpha( int x0, int y0,
      subframe->Unlock( subframe );
 }
 
-static uint32_t
+static int
 draw_frame( uint8_t * src[] )
 {
      return -1;
 }
 
-static uint32_t
+static int
 draw_slice( uint8_t * src[], int stride[], int w, int h, int x, int y )
 {
      void *dst;
@@ -1343,7 +1343,7 @@ get_equalizer( char *data, int *value )
      return VO_TRUE;
 }
 
-static uint32_t
+static int
 control( uint32_t request, void *data, ... )
 {
      switch (request) {

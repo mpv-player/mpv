@@ -283,7 +283,7 @@ static void fillblock(char *strt, int yoff, int lines, int val)
 
 //---------------------------------------------------------
 
-static uint32_t draw_frame(uint8_t * src[])
+static int draw_frame(uint8_t * src[])
 {
 
     int vp_skip = vo_dga_vp_skip;
@@ -352,7 +352,7 @@ static void flip_page(void)
 
 //---------------------------------------------------------
 
-static uint32_t draw_slice(uint8_t * src[], int stride[],
+static int draw_slice(uint8_t * src[], int stride[],
                            int w, int h, int x, int y)
 {
     return 0;
@@ -360,7 +360,7 @@ static uint32_t draw_slice(uint8_t * src[], int stride[],
 
 //---------------------------------------------------------
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
 
     if ((format & IMGFMT_BGR_MASK) == IMGFMT_BGR &&
@@ -516,7 +516,7 @@ static void init_video_buffers(uint8_t * buffer_base,
     }
 }
 
-static uint32_t config(uint32_t width, uint32_t height,
+static int config(uint32_t width, uint32_t height,
                        uint32_t d_width, uint32_t d_height,
                        uint32_t flags, char *title, uint32_t format)
 {
@@ -863,7 +863,7 @@ static uint32_t config(uint32_t width, uint32_t height,
 
 static int dga_depths_init = 0;
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     if (arg)
     {
@@ -974,7 +974,7 @@ static uint32_t get_image(mp_image_t * mpi)
     return (VO_FALSE);
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
     switch (request)
     {

@@ -647,7 +647,7 @@ static void dxr2_set_overlay_window(void) {
 
 }
 
-static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format)
+static int config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format)
 {
   int arg;
   dxr2_threeArg_t arg3;
@@ -879,7 +879,7 @@ static void draw_osd(void)
   }
 }
 
-static uint32_t draw_frame(uint8_t * src[])
+static int draw_frame(uint8_t * src[])
 {
   vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
   if(p->id == 0x1E0) {// Video
@@ -895,13 +895,13 @@ static void flip_page (void)
     sub_vo->flip_page();
 }
 
-static uint32_t draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0 )
+static int draw_slice( uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0 )
 {
   return 0;
 }
 
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
   if (format==IMGFMT_MPEGPES)
     return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_TIMER|VFCAP_SPU;
@@ -951,7 +951,7 @@ static void check_events(void)
 #endif
 }
 
-static uint32_t preinit(const char *arg) {
+static int preinit(const char *arg) {
   int uCodeFD = -1;
   int uCodeSize;
   dxr2_uCode_t* uCode;
@@ -1052,7 +1052,7 @@ static uint32_t preinit(const char *arg) {
   return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

@@ -249,7 +249,7 @@ write_slice_YUV422(uint_8 *y,uint_8 *cr, uint_8 *cb,uint_32 slice_num)
 }
 
 //static uint32_t draw_slice(uint8_t *src[], uint32_t slice_num)
-static uint32_t
+static int
 draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
 
@@ -320,7 +320,7 @@ flip_page(void)
 
 }
 
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
 	printf("DRAW FRAME!!!\n");
 	if ( conf_palette == VIDEO_PALETTE_YUV422 ) {
@@ -335,7 +335,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	return 0;
 }
 
-static uint32_t
+static int
 query_format(uint32_t format)
 {
     switch(format){
@@ -347,7 +347,7 @@ query_format(uint32_t format)
     return 0;
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	uint_32 frame_size;
 
@@ -443,7 +443,7 @@ static void check_events(void)
 {
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     if(arg) 
     {
@@ -453,7 +453,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

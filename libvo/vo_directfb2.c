@@ -169,7 +169,7 @@ static int check_mode(void *arg) {
   return get_mode(arg) != 0;
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     DFBResult ret;
     strarg_t mode_str = {0, NULL};
@@ -408,7 +408,7 @@ DFBEnumerationResult test_format_callback( unsigned int                 id,
     return DFENUM_OK;
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
 	int ret = VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_OSD; // osd should be removed in future -> will be handled outside...
 	enum1_t params;
@@ -484,7 +484,7 @@ return DFENUM_OK;
 
 #define CONFIG_ERROR -1
 
-static uint32_t config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
+static int config(uint32_t s_width, uint32_t s_height, uint32_t d_width,
 		uint32_t d_height, uint32_t flags, char *title,
 		uint32_t format)
 {
@@ -1206,7 +1206,7 @@ static uint32_t get_image(mp_image_t *mpi)
     return VO_FALSE;
 }
 
-static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
+static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
         int i;
 	unsigned int pitch;
@@ -1416,7 +1416,7 @@ static uint32_t put_image(mp_image_t *mpi){
 
 
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
     case VOCTRL_QUERY_FORMAT:
@@ -1453,7 +1453,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 
 // unused function
 
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
 	return -1;
 }

@@ -122,7 +122,7 @@ static const char *guess_device(const char *suggestion, int inform) {
 	return NULL;
 }
 
-static uint32_t query_format(uint32_t format) {
+static int query_format(uint32_t format) {
 	if (format==IMGFMT_ZRMJPEGNI ||
 			format==IMGFMT_ZRMJPEGIT ||
 			format==IMGFMT_ZRMJPEGIB)
@@ -190,7 +190,7 @@ static int pbc(int *prebuf) {
 	return 1;
 }
 
-static uint32_t preinit(const char *arg) {
+static int preinit(const char *arg) {
 	vo_zr2_priv_t *p = &priv;
 	const char *dev = NULL;
 	char *dev_arg = NULL, *norm_arg = NULL;
@@ -313,7 +313,7 @@ static uint32_t preinit(const char *arg) {
     	return 0;
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, 
+static int config(uint32_t width, uint32_t height, uint32_t d_width, 
 	uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
 	int fields = 1, top_first = 1, err = 0;
 	int stretchx = 1, stretchy = 1;
@@ -435,7 +435,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...) {
+static int control(uint32_t request, void *data, ...) {
 	switch (request) {
   		case VOCTRL_QUERY_FORMAT:
 			return query_format(*((uint32_t*)data));
@@ -445,11 +445,11 @@ static uint32_t control(uint32_t request, void *data, ...) {
 	return VO_NOTIMPL;
 }
 
-static uint32_t draw_frame(uint8_t *src[]) {
+static int draw_frame(uint8_t *src[]) {
 	return 0;
 }
 
-static uint32_t draw_slice(uint8_t *image[], int stride[],
+static int draw_slice(uint8_t *image[], int stride[],
 		int w, int h, int x, int y) {
  	return 0;
 }

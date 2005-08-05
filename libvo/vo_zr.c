@@ -300,7 +300,7 @@ int zr_geometry_sane(geo_t *g, unsigned int width, unsigned int height) {
 }
 
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, 
+static int config(uint32_t width, uint32_t height, uint32_t d_width, 
 	uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	int i, tmp, stretchx, stretchy;
@@ -536,7 +536,7 @@ static void flip_page (void) {
 	return;
 }
 
-static uint32_t draw_frame(uint8_t * src[]) {
+static int draw_frame(uint8_t * src[]) {
 	int i, j;
 	char *source, *dest;
 	//printf("draw frame called\n");
@@ -554,7 +554,7 @@ static uint32_t draw_frame(uint8_t * src[]) {
 	return 0;
 }
 
-static uint32_t query_format(uint32_t format) {
+static int query_format(uint32_t format) {
 	if(format==IMGFMT_YV12 || format==IMGFMT_YUY2) 
 	    return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW;
 	return 0;
@@ -573,7 +573,7 @@ static void check_events(void) {
 }
 
 
-static uint32_t draw_slice(uint8_t *srcimg[], int stride[],
+static int draw_slice(uint8_t *srcimg[], int stride[],
 		int wf, int hf, int xf, int yf) {
 	int i, j, w, h, x, y;
 	/* Apply 'geometry', crop unwanted parts */
@@ -806,7 +806,7 @@ void vo_zr_revertoption(m_option_t* opt,char* param) {
 
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     if(arg) 
     {
@@ -816,7 +816,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

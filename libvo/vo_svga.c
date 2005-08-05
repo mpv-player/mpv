@@ -119,7 +119,7 @@ int i;
   return -1;
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
 int i;
 char s[64];
@@ -351,7 +351,7 @@ int find_best_svga_mode(int req_w,int req_h, int req_bpp){
   return bestmode;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
     case VOCTRL_QUERY_FORMAT:
@@ -398,7 +398,7 @@ static uint32_t control(uint32_t request, void *data, ...)
 //
 // This function is called to init the video driver for specific mode
 //
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
                        uint32_t d_height, uint32_t flags, char *title,
                        uint32_t format) {
   int32_t req_w = width;// (d_width > 0 ? d_width : width);
@@ -578,7 +578,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
   return (0);
 }
 
-static uint32_t draw_slice(uint8_t *image[],int stride[],
+static int draw_slice(uint8_t *image[],int stride[],
                int w, int h, int x, int y) {
 assert(0);
 UNUSED(image);UNUSED(stride);
@@ -588,7 +588,7 @@ UNUSED(x);UNUSED(y);
   return VO_ERROR;//this is yv12 only -> vf_scale should do all transforms
 }
 
-static uint32_t draw_frame(uint8_t *src[]) {
+static int draw_frame(uint8_t *src[]) {
 assert(0);
 UNUSED(src);
   return VO_ERROR;//this one should not be called
@@ -648,7 +648,7 @@ static void uninit(void) {
 }
 
 /* --------------------------------------------------------------------- */
-static uint32_t query_format(uint32_t format) {
+static int query_format(uint32_t format) {
 int32_t req_bpp,flags;
 int i,lastmode;
 vga_modeinfo * vminfo;

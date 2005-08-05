@@ -102,7 +102,7 @@ draw_slice_g400(uint8_t *image[], int stride[], int w,int h,int x,int y)
 
 }
 
-static uint32_t
+static int
 draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
 
@@ -135,7 +135,7 @@ vo_mga_flip_page(void)
 
 }
 
-static uint32_t
+static int
 draw_frame(uint8_t *src[])
 {
     printf("!!! mga::draw_frame() called !!!\n");
@@ -195,7 +195,7 @@ draw_image(mp_image_t *mpi){
     return VO_TRUE;
 }
 
-static uint32_t
+static int
 query_format(uint32_t format)
 {
     switch(format){
@@ -229,7 +229,7 @@ static void mga_fullscreen()
 		printf( "Error in mga_vid_config ioctl (wrong mga_vid.o version?)" );
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
@@ -418,7 +418,7 @@ static int mga_uninit(){
   return 0;
 }
 
-static uint32_t preinit(const char *vo_subdevice)
+static int preinit(const char *vo_subdevice)
 {
   const char *devname=vo_subdevice?vo_subdevice:"/dev/mga_vid";
 	sws_rgb2rgb_init(get_sws_cpuflags());

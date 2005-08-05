@@ -143,7 +143,7 @@ static void deallocate_xvimage(int foo);
  * connect to server, create and map window,
  * allocate colors and (shared) memory
  */
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
                        uint32_t d_height, uint32_t flags, char *title,
                        uint32_t format)
 {
@@ -624,7 +624,7 @@ static void flip_page(void)
     return;
 }
 
-static uint32_t draw_slice(uint8_t * image[], int stride[], int w, int h,
+static int draw_slice(uint8_t * image[], int stride[], int w, int h,
                            int x, int y)
 {
     uint8_t *dst;
@@ -660,7 +660,7 @@ static uint32_t draw_slice(uint8_t * image[], int stride[], int w, int h,
     return 0;
 }
 
-static uint32_t draw_frame(uint8_t * src[])
+static int draw_frame(uint8_t * src[])
 {
     printf("draw_frame() called!!!!!!");
     return -1;
@@ -763,7 +763,7 @@ static uint32_t get_image(mp_image_t * mpi)
     return VO_FALSE;
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
     uint32_t i;
     int flag = VFCAP_CSP_SUPPORTED | VFCAP_CSP_SUPPORTED_BY_HW | VFCAP_HWSCALE_UP | VFCAP_HWSCALE_DOWN | VFCAP_OSD | VFCAP_ACCEPT_STRIDE;       // FIXME! check for DOWN
@@ -798,7 +798,7 @@ static void uninit(void)
     vo_x11_uninit();
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     XvPortID xv_p;
     int busy_ports = 0;
@@ -924,7 +924,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
     switch (request)
     {

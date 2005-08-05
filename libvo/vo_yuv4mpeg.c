@@ -78,7 +78,7 @@ static int write_bytes;
 static int config_interlace = Y4M_ILACE_NONE;
 #define Y4M_IS_INTERLACED (config_interlace != Y4M_ILACE_NONE)
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, 
+static int config(uint32_t width, uint32_t height, uint32_t d_width, 
        uint32_t d_height, uint32_t flags, char *title, 
        uint32_t format)
 {
@@ -362,7 +362,7 @@ static void flip_page (void)
 	vo_y4m_write(image, write_bytes);
 }
 
-static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
+static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,int y)
 {
 	int i;
 	uint8_t *dst, *src = srcimg[0];
@@ -412,7 +412,7 @@ static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x,in
 	return 0;
 }
 
-static uint32_t draw_frame(uint8_t * src[])
+static int draw_frame(uint8_t * src[])
 {
 	switch(using_format)
 	{
@@ -428,7 +428,7 @@ static uint32_t draw_frame(uint8_t * src[])
     return 0;
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
     
 	if (Y4M_IS_INTERLACED)
@@ -493,7 +493,7 @@ static void check_events(void)
 {
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
   int il, il_bf;
   opt_t subopts[] = {
@@ -536,7 +536,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

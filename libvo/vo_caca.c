@@ -136,7 +136,7 @@ static int resize ()
     return 0;
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
 	uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
     image_height = height;
@@ -149,13 +149,13 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
     return resize ();
 }
 
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
     caca_draw_bitmap(0, 0, screen_w, screen_h, cbitmap, src[0]);
     return 0;
 }
 
-static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
+static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x, int y)
 {
     return 0;
 }
@@ -284,7 +284,7 @@ static void draw_osd(void)
 #endif
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     if (arg)
     {
@@ -307,7 +307,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
     if (format == IMGFMT_BGR24)
       return
@@ -319,7 +319,7 @@ static uint32_t query_format(uint32_t format)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
     switch(request)
     {

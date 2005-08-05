@@ -254,7 +254,7 @@ static void freeMyXImage()
     myximage = NULL;
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
                        uint32_t d_height, uint32_t flags, char *title,
                        uint32_t format)
 {
@@ -577,7 +577,7 @@ static void flip_page(void)
     XSync(mDisplay, False);
 }
 
-static uint32_t draw_slice(uint8_t * src[], int stride[], int w, int h,
+static int draw_slice(uint8_t * src[], int stride[], int w, int h,
                            int x, int y)
 {
     uint8_t *dst[3];
@@ -634,7 +634,7 @@ static uint32_t draw_slice(uint8_t * src[], int stride[], int w, int h,
     return 0;
 }
 
-static uint32_t draw_frame(uint8_t * src[])
+static int draw_frame(uint8_t * src[])
 {
 #if 0
     int stride[3] = { 0, 0, 0 };
@@ -685,7 +685,7 @@ static uint32_t get_image(mp_image_t * mpi)
     return (VO_TRUE);
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
     mp_msg(MSGT_VO, MSGL_DBG2,
            "vo_x11: query_format was called: %x (%s)\n", format,
@@ -737,7 +737,7 @@ static void uninit(void)
     sws_freeContext(swsContext);
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     if (arg)
     {
@@ -750,7 +750,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
     switch (request)
     {

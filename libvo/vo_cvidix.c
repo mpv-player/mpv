@@ -75,7 +75,7 @@ static uint32_t setup_vidix(){
   return 0;
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_height, uint32_t flags, char *title, uint32_t format){
+static int config(uint32_t width, uint32_t height, uint32_t d_width,uint32_t d_height, uint32_t flags, char *title, uint32_t format){
   vo_fs = flags & VOFLAG_FULLSCREEN;
   if(!vo_config_count){
     if(vo_screenwidth && vo_screenheight){
@@ -116,7 +116,7 @@ static void flip_page(void){
   return;
 }
 
-static uint32_t draw_slice(uint8_t *src[], int stride[],int w, int h, int x, int y){
+static int draw_slice(uint8_t *src[], int stride[],int w, int h, int x, int y){
   UNUSED(src);
   UNUSED(stride);
   UNUSED(w);
@@ -127,13 +127,13 @@ static uint32_t draw_slice(uint8_t *src[], int stride[],int w, int h, int x, int
   return -1;
 }
 
-static uint32_t draw_frame(uint8_t *src[]){
+static int draw_frame(uint8_t *src[]){
   UNUSED(src);
   mp_msg(MSGT_VO, MSGL_FATAL, "vo_cvidix: error: didn't use vidix draw_frame!\n");
   return -1;
 }
 
-static uint32_t query_format(uint32_t format){
+static int query_format(uint32_t format){
   return(vidix_query_fourcc(format));
 }
 
@@ -146,7 +146,7 @@ static void uninit(void){
   }
 }
 
-static uint32_t preinit(const char *arg){
+static int preinit(const char *arg){
   if(arg)vidix_name = strdup(arg);
   else {
     mp_msg(MSGT_VO, MSGL_INFO, "vo_cvidix: No vidix driver name provided, probing available ones (-v option for details)!\n");
@@ -156,7 +156,7 @@ static uint32_t preinit(const char *arg){
   return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...){
+static int control(uint32_t request, void *data, ...){
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
     return query_format(*((uint32_t*)data));

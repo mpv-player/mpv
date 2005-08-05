@@ -143,7 +143,7 @@ void jpeg_mkdir(char *buf, int verbose) {
 
 /* ------------------------------------------------------------------------- */
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
                        uint32_t d_height, uint32_t flags, char *title,
                        uint32_t format)
 {
@@ -217,7 +217,7 @@ static uint32_t jpeg_write(uint8_t * name, uint8_t * buffer)
 
 /* ------------------------------------------------------------------------- */
 
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
     static int framecounter = 0, subdircounter = 0;
     char buf[BUFLENGTH];
@@ -264,7 +264,7 @@ static void flip_page (void)
 
 /* ------------------------------------------------------------------------- */
 
-static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h,
+static int draw_slice(uint8_t *src[], int stride[], int w, int h,
                            int x, int y)
 {
     return 0;
@@ -272,7 +272,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h,
 
 /* ------------------------------------------------------------------------- */
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
     if (format == IMGFMT_RGB24) {
         return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW;
@@ -313,7 +313,7 @@ static int int_zero_hundred(int *val)
     return 0;
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     opt_t subopts[] = {
         {"progressive", OPT_ARG_BOOL,   &jpeg_progressive_mode, NULL, 0},
@@ -377,7 +377,7 @@ static uint32_t preinit(const char *arg)
 
 /* ------------------------------------------------------------------------- */
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
     switch (request) {
         case VOCTRL_QUERY_FORMAT:

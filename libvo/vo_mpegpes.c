@@ -80,7 +80,7 @@ static vo_info_t info =
 
 LIBVO_EXTERN (mpegpes)
 
-static uint32_t
+static int
 config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uint32_t flags, char *title, uint32_t format)
 {
 #ifdef HAVE_DVB
@@ -98,7 +98,7 @@ config(uint32_t s_width, uint32_t s_height, uint32_t width, uint32_t height, uin
     return 0;
 }
 
-static uint32_t preinit(const char *arg){
+static int preinit(const char *arg){
 #ifdef HAVE_DVB
     int card = 0;
     char vo_file[30], ao_file[30], *tmp;
@@ -348,7 +348,7 @@ void send_lpcm_packet(unsigned char* data,int len,int id,unsigned int timestamp,
 }
 
 
-static uint32_t draw_frame(uint8_t * src[])
+static int draw_frame(uint8_t * src[])
 {
     vo_mpegpes_t *p=(vo_mpegpes_t *)src[0];
     send_pes_packet(p->data,p->size,p->id,(p->timestamp>0)?p->timestamp:vo_pts);  // video data
@@ -359,13 +359,13 @@ static void flip_page (void)
 {
 }
 
-static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x0,int y0)
+static int draw_slice(uint8_t *srcimg[], int stride[], int w,int h,int x0,int y0)
 {
     return 0;
 }
 
 
-static uint32_t
+static int
 query_format(uint32_t format)
 {
     if(format==IMGFMT_MPEGPES) return VFCAP_CSP_SUPPORTED|VFCAP_CSP_SUPPORTED_BY_HW|VFCAP_TIMER;
@@ -385,7 +385,7 @@ static void check_events(void)
 {
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

@@ -40,7 +40,7 @@ struct pngdata {
 	enum {OK,ERROR} status;  
 };
 
-static uint32_t
+static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
     
@@ -174,17 +174,17 @@ static void draw_osd(void){}
 
 static void flip_page (void){}
 
-static uint32_t draw_frame(uint8_t * src[])
+static int draw_frame(uint8_t * src[])
 {
     return -1;
 }
 
-static uint32_t draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
+static int draw_slice( uint8_t *src[],int stride[],int w,int h,int x,int y )
 {
     return -1;
 }
 
-static uint32_t
+static int
 query_format(uint32_t format)
 {
     switch(format){
@@ -211,7 +211,7 @@ static opt_t subopts[] = {
     {NULL}
 };
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     z_compression = 0;
     if (subopt_parse(arg, subopts) != 0) {
@@ -220,7 +220,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_DRAW_IMAGE:

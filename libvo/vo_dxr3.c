@@ -270,7 +270,7 @@ static overlay_t *overlay_data;
 /* Functions for working with the em8300's internal clock */
 /* End of internal clock functions */
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
 	switch (request) {
 	case VOCTRL_GUISUPPORT:
@@ -418,7 +418,7 @@ void calculate_cvals(unsigned long mask, int *shift, int *prec)
 	}
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	int tmp1, tmp2, size;
 	em8300_register_t reg;
@@ -751,7 +751,7 @@ static void draw_osd(void)
 }
 
 
-static uint32_t draw_frame(uint8_t * src[])
+static int draw_frame(uint8_t * src[])
 {
 	vo_mpegpes_t *p = (vo_mpegpes_t *) src[0];
 
@@ -812,7 +812,7 @@ static void flip_page(void)
 	}
 }
 
-static uint32_t draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
+static int draw_slice(uint8_t *srcimg[], int stride[], int w, int h, int x0, int y0)
 {
 	return -1;
 }
@@ -864,7 +864,7 @@ static void check_events(void)
 {
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
 	char devname[MAX_STR_SIZE];
 	int fdflags = O_WRONLY;

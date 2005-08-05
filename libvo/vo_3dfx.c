@@ -304,7 +304,7 @@ update_target(void)
 		targetoffset = vidpage0offset + (dispy*screenwidth + dispx)*screendepth;
 }
 
-static uint32_t 
+static int 
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t fullscreen, char *title, uint32_t format) 
 {
 	int fd;
@@ -414,7 +414,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 	return 0;
 }
 
-static uint32_t 
+static int 
 draw_frame(uint8_t *src[]) 
 {
 	LOG("video_out_3dfx: starting display_frame\n");
@@ -427,7 +427,7 @@ draw_frame(uint8_t *src[])
 	return 0;
 }
 
-static uint32_t 
+static int 
 //draw_slice(uint8_t *src[], uint32_t slice_num) 
 draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
@@ -452,7 +452,7 @@ flip_page(void)
 	screen_to_screen_stretch_blt(targetoffset, vidpage2offset, dispwidth, dispheight);
 }
 
-static uint32_t
+static int
 query_format(uint32_t format)
 {
     /* does this supports scaling? up & down? */
@@ -476,7 +476,7 @@ static void check_events(void)
 {
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     if(arg) 
     {
@@ -486,7 +486,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:

@@ -84,7 +84,7 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src, unsigne
 	}
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	int i;
 
@@ -154,14 +154,14 @@ static void flip_page(void)
 	[mpGLView render];
 }
 
-static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
+static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
 	[mpGLView setCurrentTexture];
 	return 0;
 }
 
 
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
 	switch (image_format)
 	{
@@ -178,7 +178,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	return 0;
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
 	image_format = format;
 	
@@ -204,7 +204,7 @@ static void uninit(void)
 	[autoreleasepool release];
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
 	int parse_err = 0;
 	
@@ -260,7 +260,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
 	switch (request)
 	{

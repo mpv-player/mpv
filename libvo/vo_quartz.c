@@ -600,7 +600,7 @@ static void quartz_CreateWindow(uint32_t d_width, uint32_t d_height, WindowAttri
 	InstallWindowEventHandler (theWindow, NewEventHandlerUPP (WindowEventHandler), GetEventTypeCount(win_events), win_events, theWindow, NULL);
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
+static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
 	WindowAttributes	windowAttrs;
 	OSErr				qterr;
@@ -1003,7 +1003,7 @@ static void flip_page(void)
 	}
 }
 
-static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
+static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
 	switch (image_format)
 	{
@@ -1027,7 +1027,7 @@ static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y
 	return -1;
 }
 
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
 	switch (image_format)
 	{
@@ -1043,7 +1043,7 @@ static uint32_t draw_frame(uint8_t *src[])
 	return -1;
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
 	image_format = format;
 	image_qtcodec = 0;
@@ -1103,7 +1103,7 @@ static void uninit(void)
 	ShowMenuBar();
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
 	int parse_err = 0;
 	
@@ -1219,7 +1219,7 @@ static uint32_t get_yuv_image(mp_image_t *mpi)
 	return VO_FALSE;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
 	switch (request)
 	{

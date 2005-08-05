@@ -81,7 +81,7 @@ static voodoo_yuv_reg *reg_YUV;
 static struct YUV_plane *YUV;
 static void (*alpha_func)(), (*alpha_func_double)();
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
 	char *name;
 
@@ -210,7 +210,7 @@ static void setup_screen(uint32_t full)
 	clear_screen();
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height,
+static int config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height,
 		uint32_t flags, char *title, uint32_t format)
 {
 	screenwidth = fb_vinfo.xres;
@@ -412,13 +412,13 @@ static void flip_page(void)
 	reg_IO->vidDesktopStartAddr = vidpageoffset;
 }
 
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
 	mem2agpcpy(inpage, src[0], in_width * in_depth * in_height);
 	return 0;
 }
 
-static uint32_t draw_slice(uint8_t *i[], int s[], int w, int h, int x, int y)
+static int draw_slice(uint8_t *i[], int s[], int w, int h, int x, int y)
 {
 	/* We want to render to the YUV to the input page + the location
 	 * of the stripes we're doing */
@@ -477,7 +477,7 @@ static uint32_t get_image(mp_image_t *mpi)
 	return VO_TRUE;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
 	switch(request) {
 	case VOCTRL_GET_IMAGE:

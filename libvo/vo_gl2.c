@@ -824,7 +824,7 @@ static int initGl(uint32_t d_width, uint32_t d_height)
 /* connect to server, create and map window,
  * allocate colors and (shared) memory
  */
-static uint32_t 
+static int 
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 {
         const unsigned char * glVersion;
@@ -993,7 +993,7 @@ flip_page(void)
 }
 
 //static inline uint32_t draw_slice_x11(uint8_t *src[], uint32_t slice_num)
-static uint32_t draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
+static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 {
     return 0;
 }
@@ -1021,7 +1021,7 @@ draw_frame_x11_rgb(uint8_t *src[])
 }
 
 
-static uint32_t
+static int
 draw_frame(uint8_t *src[])
 {
     uint32_t res = 0;
@@ -1034,7 +1034,7 @@ draw_frame(uint8_t *src[])
     return res;
 }
 
-static uint32_t
+static int
 query_format(uint32_t format)
 {
     switch(format){
@@ -1068,7 +1068,7 @@ uninit(void)
 #endif
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     if(arg) 
     {
@@ -1079,7 +1079,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_PAUSE: return (int_pause=1);

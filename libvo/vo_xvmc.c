@@ -345,7 +345,7 @@ xvmc_render_state_t * rndr;
    return VO_TRUE;
 }
 
-static uint32_t preinit(const char *arg){
+static int preinit(const char *arg){
 int xv_version,xv_release,xv_request_base,xv_event_base,xv_error_base;
 int mc_eventBase,mc_errorBase;
 int mc_ver,mc_rev;
@@ -409,7 +409,7 @@ opt_t subopts [] =
    return 0;
 }
 
-static uint32_t config(uint32_t width, uint32_t height,
+static int config(uint32_t width, uint32_t height,
 		       uint32_t d_width, uint32_t d_height,
 		       uint32_t flags, char *title, uint32_t format){
 int i,mode_id,rez;
@@ -756,7 +756,7 @@ found_subpic:
    return 0;		
 }
 
-static uint32_t draw_frame(uint8_t *srcp[]){
+static int draw_frame(uint8_t *srcp[]){
    UNUSED(srcp);
    assert(0);
 }
@@ -1173,7 +1173,7 @@ static void uninit(void){
    vo_x11_uninit();
 }
 
-static uint32_t query_format(uint32_t format){
+static int query_format(uint32_t format){
 uint32_t flags;
 XvMCSurfaceInfo qsurface_info;
 int mode_id;
@@ -1197,7 +1197,7 @@ int mode_id;
 }
 
 
-static uint32_t draw_slice(uint8_t *image[], int stride[],
+static int draw_slice(uint8_t *image[], int stride[],
 			   int w, int h, int x, int y){
 xvmc_render_state_t * rndr;
 int rez;
@@ -1358,7 +1358,7 @@ assert(rndr->next_free_data_block_num == 0);
 return VO_TRUE;   
 }
 
-static uint32_t control(uint32_t request, void *data, ... )
+static int control(uint32_t request, void *data, ... )
 {
    switch (request){
       case VOCTRL_QUERY_FORMAT:

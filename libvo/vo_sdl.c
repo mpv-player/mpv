@@ -780,7 +780,7 @@ static void set_fullmode (int mode) {
  *   returns : non-zero on success, zero on error.
  **/
 
-static uint32_t
+static int
 config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format)
 //static int sdl_setup (int width, int height)
 {
@@ -1034,7 +1034,7 @@ static int setup_surfaces(void)
  **/
 
 //static int sdl_draw_frame (frame_t *frame)
-static uint32_t draw_frame(uint8_t *src[])
+static int draw_frame(uint8_t *src[])
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	uint8_t *dst;
@@ -1110,7 +1110,7 @@ static uint32_t draw_frame(uint8_t *src[])
  **/
 
 //static uint32_t draw_slice(uint8_t *src[], uint32_t slice_num)
-static uint32_t draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
+static int draw_slice(uint8_t *image[], int stride[], int w,int h,int x,int y)
 {
 	struct sdl_priv_s *priv = &sdl_priv;
 	uint8_t *dst;
@@ -1538,7 +1538,7 @@ static void flip_page (void)
 	}	
 }
 
-static uint32_t
+static int
 query_format(uint32_t format)
 {
     switch(format){
@@ -1585,7 +1585,7 @@ uninit(void)
 
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     struct sdl_priv_s *priv = &sdl_priv;
     char * sdl_driver = NULL;
@@ -1699,7 +1699,7 @@ static uint32_t get_image(mp_image_t *mpi)
     return VO_FALSE;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   struct sdl_priv_s *priv = &sdl_priv;
   switch (request) {

@@ -792,7 +792,7 @@ static void vt_set_textarea(int u, int l)
 	}
 }
 
-static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
+static int config(uint32_t width, uint32_t height, uint32_t d_width,
 		uint32_t d_height, uint32_t flags, char *title,
 		uint32_t format)
 {
@@ -1030,7 +1030,7 @@ static uint32_t config(uint32_t width, uint32_t height, uint32_t d_width,
 	return 0;
 }
 
-static uint32_t query_format(uint32_t format)
+static int query_format(uint32_t format)
 {
 	if (!fb_preinit(0))
 		return 0;
@@ -1057,9 +1057,9 @@ static void draw_alpha(int x0, int y0, int w, int h, unsigned char *src,
 	(*draw_alpha_p)(w, h, src, srca, stride, dst, fb_line_len);
 }
 
-static uint32_t draw_frame(uint8_t *src[]) { return 1; }
+static int draw_frame(uint8_t *src[]) { return 1; }
 
-static uint32_t draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
+static int draw_slice(uint8_t *src[], int stride[], int w, int h, int x,
 		int y)
 {
 	uint8_t *d;
@@ -1120,7 +1120,7 @@ static void uninit(void)
 	fb_preinit(1);
 }
 
-static uint32_t preinit(const char *vo_subdevice)
+static int preinit(const char *vo_subdevice)
 {
     pre_init_err = 0;
 
@@ -1161,7 +1161,7 @@ static uint32_t get_image(mp_image_t *mpi)
     return(VO_TRUE);
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_GET_IMAGE:

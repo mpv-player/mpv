@@ -227,7 +227,7 @@ printosdprogbar(){
 	osdpercent(1,1,0,255,vo_osd_progbar_value, __sub_osd_names[vo_osd_progbar_type], "");	
     }
 }
-static uint32_t
+static int
 config(uint32_t width, uint32_t height, uint32_t d_width,
 	    uint32_t d_height, uint32_t flags, char *title, 
 	    uint32_t format) {
@@ -314,7 +314,7 @@ config(uint32_t width, uint32_t height, uint32_t d_width,
     return 0;
 }
 
-static uint32_t 
+static int 
 query_format(uint32_t format) {
     /*
      * ...are we able to... ?
@@ -343,7 +343,7 @@ query_format(uint32_t format) {
     return 0;
 }
 
-static uint32_t 
+static int 
 draw_frame(uint8_t *src[]) {
   int stride[3] = { 0 , 0 , 0 };
 
@@ -372,7 +372,7 @@ draw_frame(uint8_t *src[]) {
   return 0;
 }
 
-static uint32_t 
+static int 
 draw_slice(uint8_t *src[], int stride[], 
 	    int w, int h, int x, int y) {
 
@@ -679,7 +679,7 @@ static int parse_suboptions(const char *arg) {
     return retval;
 }
 
-static uint32_t preinit(const char *arg)
+static int preinit(const char *arg)
 {
     char * hidis = NULL;
     struct stat sbuf;
@@ -744,7 +744,7 @@ static uint32_t preinit(const char *arg)
     return 0;
 }
 
-static uint32_t control(uint32_t request, void *data, ...)
+static int control(uint32_t request, void *data, ...)
 {
   switch (request) {
   case VOCTRL_QUERY_FORMAT:
