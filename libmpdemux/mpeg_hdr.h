@@ -6,7 +6,7 @@ typedef struct {
     int display_picture_height;
     int aspect_ratio_information;
     int frame_rate_code;
-    int fps; // fps*10000
+    float fps;
     int bitrate; // 0x3FFFF==VBR
     // timing:
     int picture_structure;

@@ -194,14 +194,14 @@ switch(video_codec){
      else
        diff = mx - md;
      if(diff > 0){
-       picture.fps = (picture.timeinc_resolution * 10000) / diff;
-       mp_msg(MSGT_DECVIDEO,MSGL_V, "FPS seems to be: %d/10000, resolution: %d, delta_units: %d\n", picture.fps, picture.timeinc_resolution, diff);
+       picture.fps = ((float)picture.timeinc_resolution) / diff;
+       mp_msg(MSGT_DECVIDEO,MSGL_V, "FPS seems to be: %f, resolution: %d, delta_units: %d\n", picture.fps, picture.timeinc_resolution, diff);
      }
    }
    if(picture.fps) {
-    sh_video->fps=picture.fps*0.0001f;
-    sh_video->frametime=10000.0f/(float)picture.fps;
-    mp_msg(MSGT_DECVIDEO,MSGL_INFO, "FPS seems to be: %d/10000\n", picture.fps);
+    sh_video->fps=picture.fps;
+    sh_video->frametime=1.0/picture.fps;
+    mp_msg(MSGT_DECVIDEO,MSGL_INFO, "FPS seems to be: %f\n", picture.fps);
    }
    mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
    sh_video->format=0x10000004;
@@ -253,9 +253,9 @@ switch(video_codec){
    mp_msg(MSGT_DECVIDEO,MSGL_V,"OK!\n");
    sh_video->format=0x10000005;
    if(picture.fps) {
-     sh_video->fps=picture.fps*0.0001f;
-     sh_video->frametime=10000.0f/(float)picture.fps;
-     mp_msg(MSGT_DECVIDEO,MSGL_INFO, "FPS seems to be: %d/10000\n", picture.fps);
+     sh_video->fps=picture.fps;
+     sh_video->frametime=1.0/picture.fps;
+     mp_msg(MSGT_DECVIDEO,MSGL_INFO, "FPS seems to be: %f\n", picture.fps);
    }
    break;
  }
@@ -336,7 +336,7 @@ switch(video_codec){
    }
    // display info:
    sh_video->format=picture.mpeg1?0x10000001:0x10000002; // mpeg video
-   sh_video->fps=picture.fps*0.0001f;
+   sh_video->fps=picture.fps;
    if(!sh_video->fps){
 //     if(!force_fps){
 //       fprintf(stderr,"FPS not specified (or invalid) in the header! Use the -fps option!\n");
@@ -344,7 +344,7 @@ switch(video_codec){
 //     }
      sh_video->frametime=0;
    } else {
-     sh_video->frametime=10000.0f/(float)picture.fps;
+     sh_video->frametime=1.0/picture.fps;
    }
    sh_video->disp_w=picture.display_picture_width;
    sh_video->disp_h=picture.display_picture_height;
@@ -466,10 +466,10 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
 #if 1
     // get mpeg fps:
     //newfps=frameratecode2framerate[picture->frame_rate_code]*0.0001f;
-    if((int)(sh_video->fps*10000+0.5)!=picture.fps) if(!force_fps && !telecine){
-            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,picture.fps*0.0001,sh_video->fps-picture.fps*0.0001,picture.frame_rate_code);
-            sh_video->fps=picture.fps*0.0001;
-            sh_video->frametime=10000.0f/(float)picture.fps;
+    if(sh_video->fps!=picture.fps) if(!force_fps && !telecine){
+            mp_msg(MSGT_CPLAYER,MSGL_WARN,"Warning! FPS changed %5.3f -> %5.3f  (%f) [%d]  \n",sh_video->fps,picture.fps,sh_video->fps-picture.fps,picture.frame_rate_code);
+            sh_video->fps=picture.fps;
+            sh_video->frametime=1.0/picture.fps;
     }
 #endif
 
@@ -521,8 +521,8 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
           if((i&~0x60) == 0x107 && i != 0x107) {
             h264_parse_sps(&picture, &(videobuffer[pos]), videobuf_len - pos);
             if(picture.fps > 0) {
-              sh_video->fps=picture.fps*0.0001f;
-              sh_video->frametime=10000.0f/(float)picture.fps;
+              sh_video->fps=picture.fps;
+              sh_video->frametime=1.0/picture.fps;
             }
             i=sync_video_packet(d_video);
             if(!i) return -1;
