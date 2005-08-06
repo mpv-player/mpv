@@ -590,6 +590,9 @@ static int control(priv_t *priv, int cmd, void *arg)
 		   info.short_name, strerror(errno));
 	    return TVI_CONTROL_FALSE;
 	}
+	/* according to the v4l2 specs VIDIOC_S_FMT should not fail, inflexible drivers
+	  might even always return the default parameters -> update the format here*/
+	priv->mp_format = fcc_vl2mp(priv->format.fmt.pix.pixelformat);
 	return TVI_CONTROL_TRUE;
     case TVI_CONTROL_VID_GET_WIDTH:
 	if (getfmt(priv) < 0) return TVI_CONTROL_FALSE;
