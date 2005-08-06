@@ -479,7 +479,7 @@ static char help_text[]=
 #define MSGTR_DVDnoIFO "Nem tudom a(z) %d. DVD sávhoz megnyitni az IFO fájlt.\n"
 #define MSGTR_DVDnoVOBs "Nem tudom megnyitni a sávot (VTS_%02d_1.VOB).\n"
 #define MSGTR_DVDopenOk "DVD sikeresen megnyitva!\n"
- 
+
 // muxer_*.c:
 #define MSGTR_TooManyStreams "Túl sok stream!"
 #define MSGTR_RawMuxerOnlyOneStream "A rawaudio muxer csak egy audió folyamot támogat!\n"
