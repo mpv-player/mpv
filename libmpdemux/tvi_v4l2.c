@@ -857,7 +857,8 @@ static int uninit(priv_t *priv)
     int i, frames, dropped = 0;
 
     priv->shutdown = 1;
-    pthread_join(priv->video_grabber_thread, NULL);
+    if(priv->video_grabber_thread)
+	pthread_join(priv->video_grabber_thread, NULL);
     pthread_mutex_destroy(&priv->video_buffer_mutex);
 
     if (priv->streamon) {
@@ -906,7 +907,7 @@ static int uninit(priv_t *priv)
     /* free memory and close device */
     free(priv->map);		priv->map = NULL;
     priv->mapcount = 0;
-    close(priv->video_fd);	priv->video_fd  = -1;
+    if(priv->video_fd!=-1)close(priv->video_fd);	priv->video_fd  = -1;
     free(priv->video_dev);	priv->video_dev = NULL;
 
     if (priv->video_ringbuffer) {
