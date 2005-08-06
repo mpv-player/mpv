@@ -218,7 +218,11 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 {
         int len = 0;
         int samples;
+#ifdef TREMOR
+        ogg_int32_t **pcm;
+#else
         float **pcm;
+#endif
         float scale;
         struct ov_struct_st *ov = sh->context;
 	while(len < minlen) {
