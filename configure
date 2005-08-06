@@ -3805,11 +3805,10 @@ else
 fi
 if test "$_gl" = yes ; then
   _def_gl='#define HAVE_GL 1'
+  _vosrc="$_vosrc vo_gl.c vo_gl2.c gl_common.c"
   if test "$_gl_win32" = yes ; then
     _def_gl_win32='#define GL_WIN32 1' 
-    _vosrc="$_vosrc vo_gl2.c w32_common.c gl_common.c"
-  else
-    _vosrc="$_vosrc vo_gl.c vo_gl2.c gl_common.c"
+    _vosrc="$_vosrc w32_common.c"
   fi
   _vomodules="opengl $_vomodules"
 else

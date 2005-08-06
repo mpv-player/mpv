@@ -173,9 +173,7 @@ vo_functions_t* video_out_drivers[] =
         &video_out_xover,
 #endif
 #ifdef HAVE_GL
-	#ifndef GL_WIN32
 	        &video_out_gl,
-	#endif
         &video_out_gl2,
 #endif
 #ifdef HAVE_DGA
