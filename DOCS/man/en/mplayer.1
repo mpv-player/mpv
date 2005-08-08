@@ -5848,7 +5848,9 @@ Use \-of help to get a list of available container formats.
 .IPs "\-of avi"
 Encode to AVI.
 .IPs "\-of mpeg"
-Encode to MPEG.
+Encode to MPEG (see also \-mpegopts).
+.IPs "\-of lavf"
+Encode with libavformat muxers (see also \-lavfopts).
 .IPs "\-of rawvideo"
 raw video stream (no muxing \- one video stream only)
 .IPs "\-of rawaudio"
@@ -6246,6 +6248,8 @@ MPEG Layer 3
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits per sample, 4:1 compression)
+.IPS sonic\ 
+Experimental lossy/lossless codec
 .RE
 .PD 1
 .
@@ -6317,6 +6321,8 @@ Sorenson H.263 used in Flash Video
 Sony Digital Video
 .IPs svq1\ 
 Apple Sorenson Video 1
+.IPs snow (also see: vstrict)
+experimental wavelet-based codec
 .RE
 .PD 1
 .
@@ -8578,8 +8584,6 @@ Override which container format to mux into
 (default: autodetect from output file extension).
 .PD 0
 .RSs
-.IPs mpa\ \ 
-MPEG audio
 .IPs mpg\ \ 
 MPEG1 systems and MPEG2 PS
 .IPs asf\ \ 
@@ -8597,7 +8601,7 @@ Real Audio and Video
 .IPs au\ \ \ 
 SUN AU format
 .IPs nut\ \ 
-NUT Open Container Format
+NUT Open Container Format (experimental)
 .IPs mov\ \ 
 Quicktime
 .IPs mp4\ \ 
