@@ -6311,6 +6311,12 @@ ASUS Video v1
 ASUS Video v2
 .IPs ffv1 (also see: vstrict)
 FFmpeg's lossless video codec
+.IPs flv\ \ 
+Sorenson H.263 used in Flash Video
+.IPs dvvideo
+Sony Digital Video
+.IPs svq1\ 
+Apple Sorenson Video 1
 .RE
 .PD 1
 .
@@ -8564,12 +8570,43 @@ video when the output framerate, eventually converted with \-ofps, is either
 Any other framerate is incompatible with this option.
 .
 .
-.SS FFmpeg libavformat muxers (\-lavfopts)
+.SS FFmpeg libavformat muxers (\-lavfopts) (see also \-of lavf)
 .
 .TP
 .B format=<container_format>
 Override which container format to mux into
 (default: autodetect from output file extension).
+.PD 0
+.RSs
+.IPs mpa\ \ 
+MPEG audio
+.IPs mpg\ \ 
+MPEG1 systems and MPEG2 PS
+.IPs asf\ \ 
+Advanced Streaming Format
+.IPs avi\ \ 
+Audio Video Interleave File
+.IPs wav\ \ 
+Waveform Audio
+.IPs swf\ \ 
+Macromedia Flash
+.IPs flv\ \ 
+Macromedia Flash video files
+.IPs rm\ \ \ 
+Real Audio and Video
+.IPs au\ \ \ 
+SUN AU format
+.IPs nut\ \ 
+NUT Open Container Format
+.IPs mov\ \ 
+Quicktime
+.IPs mp4\ \ 
+MPEG4 format
+.IPs dv\ \ 
+Sony Digital Video container
+.RE
+.PD 1
+.
 .
 .
 .\" --------------------------------------------------------------------------
