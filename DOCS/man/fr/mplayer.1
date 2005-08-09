@@ -1,4 +1,4 @@
-.\" synced with 1.1058
+.\" synced with 1.1061
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "01 Août 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "09 Août 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -830,10 +830,14 @@ disponible.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <nombre> (\-audiofile uniquement)
-Force le type de demuxer audio pour \-audiofile.
-Indiquez l'ID du demultiplexeur comme défini dans libmpdemux/\:demuxer.h.
-Utilisez \-audio-demuxer 17 pour forcer la détection des MP3.
+.B \-audio-demuxer <nom> (\-audiofile uniquement)
+Force le type de démultiplexeur audio pour \-audiofile.
+Indiquez le nom du demultiplexeur parmi la liste donnée par \-audio-demuxer
+help.
+Pour assurer la compatibilité ascendante, il est aussi possible de donner
+l'ID du démultiplexeur comme définit dans libmpdemux/\:demuxer.h.
+Par exemple, \-audio-demuxer audio ou \-audio-demuxer 17 force le
+démultiplexeur MP3.
 .
 .TP
 .B \-audiofile <nomfichier>
@@ -974,10 +978,13 @@ Lorsque utilisé avec MEncoder et \-ovc copy, le résultat peut ne pas
 être correct.
 .
 .TP
-.B \-demuxer <nombre>
+.B \-demuxer <nom>
 Forcer le type de démultiplexeur.
-Indiquez l'ID du démultiplexeur comme défini dans libmpdemux/\:demuxer.h.
-Utilisez \-demuxer 17 pour forcer la détection des .mp3.
+Indiquez le nom du démultiplexeur comme listé par \-demuxer help.
+Pour assurer la compatibilité ascendante, il est aussi possible de donner
+l'ID du démultiplexeur comme définit dans libmpdemux/\:demuxer.h.
+Par exemple, \-audio-demuxer audio ou \-audio-demuxer 17 force le
+démultiplexeur MP3.
 .
 .TP
 .B \-dumpaudio (MPlayer uniquement)
@@ -1674,9 +1681,11 @@ Actuellement les sous-titres sont en niveau de gris donc cette valeur est
 La valeur 255 signifie blanc et 0 noir.
 .
 .TP
-.B \-sub-demuxer <nombre> (\-subfile uniquement) (CODE BÉTA)
+.B \-sub-demuxer <nom> (\-subfile uniquement) (CODE BÉTA)
 Force le type de démultiplexeur de sous-titres pour \-subfile.
-Donnez l'ID du demuxer tel que défini dans subreader.h.
+Indiquez le nom du démultiplexeur comme listé par \-sub-demuxer help.
+Pour assurer la compatibilité ascendante, il est aussi possible de donner
+l'ID du démultiplexeur comme définit dans libmpdemux/\:demuxer.h.
 .
 .TP
 .B \-sub-fuzziness <mode>
@@ -6159,7 +6168,9 @@ voir \-of help.
 .IPs "\-of avi"
 Encode en AVI.
 .IPs "\-of mpeg"
-Encode en MPEG.
+Encode en MPEG (voir aussi \-mpegopts).
+.IPs "\-of lavf"
+Encode en utilisant les multiplexeurs libavformat (voir aussi \-lavfopts).
 .IPs "\-of rawvideo"
 flux vidéo brut (pas de multiplexage \- uniquement un flux vidéo)
 .IPs "\-of rawaudio"
@@ -6568,6 +6579,8 @@ MPEG Layer 3
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits par échantillon, compression 4:1)
+.IPS sonic\
+codec à perte/sans perte expérimental
 .RE
 .PD 1
 .
@@ -6635,6 +6648,14 @@ ASUS Video v1
 ASUS Video v2
 .IPs ffv1 (voir aussi\ : vstrict)
 codec vidéo sans perte de FFmpeg
+.IPs flv\ \
+Sorenson H.263 used in Flash Video
+.IPs dvvideo
+Sony Digital Video
+.IPs svq1\
+Apple Sorenson Video 1
+.IPs snow (voir aussi\ : vstrict)
+codec expérimental basé sur les wavelets
 .RE
 .PD 1
 .
@@ -9035,14 +9056,41 @@ Tout autre nombre de trames par seconde est incompatible avec cette
 option.
 .
 .
-.SS FFmpeg multiplexeurs de libavformat (\-lavfopts)
+.SS FFmpeg multiplexeurs de libavformat (\-lavfopts) (voir aussi \-of lavf)
 .
 .TP
 .B format=<format_de_container>
 Outrepasse le format de container vers lequel multiplexer le fichier de
 sortie (par défaut\ : auto-détection d'après l'extension du fichier de
 sortie).
-
+.PD 0
+.RSs
+.IPs mpg\ \
+MPEG1 systems and MPEG2 PS
+.IPs asf\ \
+Advanced Streaming Format
+.IPs avi\ \
+Audio Video Interleave File
+.IPs wav\ \
+Waveform Audio
+.IPs swf\ \
+Macromedia Flash
+.IPs flv\ \
+Macromedia Flash video files
+.IPs rm\ \ \
+Real Audio and Video
+.IPs au\ \ \
+SUN AU format
+.IPs nut\ \
+NUT Open Container Format (expérimental)
+.IPs mov\ \
+Quicktime
+.IPs mp4\ \
+MPEG4 format
+.IPs dv\ \
+Sony Digital Video container
+.RE
+.PD 1
 .
 .
 .\" --------------------------------------------------------------------------
