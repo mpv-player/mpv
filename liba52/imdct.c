@@ -813,7 +813,7 @@ imdct_do_512_sse(sample_t data[],sample_t delay[], sample_t bias)
 		"sub $16, %%"REG_D"			\n\t"
 		"jnc 1b				 	\n\t"
 		"pop %%"REG_BP"				\n\t"//no we didnt touch ebp *g*
-		:: "r" (data), "r" (buf)
+		:: "b" (data), "c" (buf)
 		: "%"REG_S, "%"REG_D, "%"REG_a, "%"REG_d
 	);
 
