@@ -1849,26 +1849,26 @@ init:
 }
 
 
-static uint64_t parse_fps(int fps)
+static uint64_t parse_fps(float fps)
 {
 	// 90000 * 1024 / fps
-	switch(fps)
+	switch((int)(fps*1001+0.5))
 	{
-		case 239760:
+		case 24000:
 			return 3843844;
-		case 240000:
+		case 24024:
 			return 3840000;
-		case 250000:
+		case 25025:
 			return 3686400;
-		case 299700:
+		case 30000:
 			return 3075075;
-		case 300000:
+		case 30030:
 			return 3072000;
-		case 500000:
+		case 50050:
 			return 1843200;
-		case 599400:
+		case 60000:
 			return 1537538;
-		case 600000:
+		case 60060:
 			return 1536000;
 		default:
 			mp_msg(MSGT_MUXER, MSGL_ERR, "ERROR! unknown fps code: %d", fps);
@@ -1891,7 +1891,7 @@ static int soft_telecine(muxer_headers_t *vpriv, uint8_t *fps_ptr, uint8_t *se_p
 			return 0;
 		}
 		*fps_ptr = (*fps_ptr & 0xf0) | (fps + 3);
-		vpriv->nom_delta_pts = parse_fps((fps + 3) == FRAMERATE_2997 ? 299700 : 300000);
+		vpriv->nom_delta_pts = parse_fps((fps + 3) == FRAMERATE_2997 ? 30000.0/1001.0 : 30.0);
 	}
 	
 	//in pce_ptr starting from bit 0 bit 24 is tff, bit 30 is rff, 
