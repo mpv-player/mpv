@@ -1,7 +1,7 @@
 // Translated by:  Jiri Svoboda, jiri.svoboda@seznam.cz
 // Updated by:     Tomas Blaha,  tomas.blaha at kapsa.club.cz
 //                 Jiri Heryan
-// Synced to 1.173
+// Synced to 1.178
 // ========================= MPlayer help ===========================
 
 #ifdef HELP_MP_DEFINE_STATIC
@@ -91,7 +91,8 @@ static char help_text[]=
 "- Pomalý obrazový výstup\n"\
 "  - Zkuste jiný -vo ovladaè (seznam: -vo help) nebo zkuste -framedrop!\n"\
 "- Pomalá CPU\n"\
-"  - Nezkou¹ejte pøehrát velké DVD/DivX na pomalé CPU! Zkuste -hardframedrop.\n"\
+"  - Nezkou¹ejte pøehrát velké DVD/DivX na pomalé CPU! Zkuste nìkteré lavdopts,\n"\
+"    jako -vfm ffmpeg -lavdopts lowres=1:fast:skiploopfilter=all.\n"\
 "- Po¹kozený soubor.\n"\
 "  - Zkuste rùzné kombinace voleb -nobps -ni -forceidx -mc 0.\n"\
 "- Pøehráváte z pomalého média (NFS/SMB, DVD, VCD, atd.)\n"\
@@ -834,6 +835,8 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_DVDDevice "Zaøízení DVD:"
 #define MSGTR_PREFERENCES_FPS "Snímková rychlost (FPS):"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Zobrazovat video okno pøi neèinnosti"
+#define MSGTR_PREFERENCES_ArtsBroken "Novìj¹í verze aRts jsou nekompatibilní "\
+           "s GTK 1.x a zhavarují gmplayer!"
 
 #define MSGTR_ABOUT_UHU "Vývoj GUI je sponzorován firmou UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   Hlavní vývojáøi programu MPlayer:\n"
@@ -889,6 +892,8 @@ static char help_text[]=
 // ======================= VO Video Output drivers ========================
 
 #define MSGTR_VOincompCodec "Vybrané video_out zaøízení je nekompatibilní s tímto kodekem.\n"
+#define MSGTR_VOincompCodec "Vybrané video_out zaøízení je nekompatibilní s tímto kodekem.\n"\
+                "Zkuste rovnì¾ pøidat filtr scale, èili -vf spp,scale namísto -vf spp.\n"
 #define MSGTR_VO_GenericError "Tato chyba nastala"
 #define MSGTR_VO_UnableToAccess "Nemám pøístup k"
 #define MSGTR_VO_ExistsButNoDirectory "ji¾ existuje, ale není to adresáø."
