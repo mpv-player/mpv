@@ -41,8 +41,7 @@ int main(int argc, char *argv[]){
     void* theqtdp=NULL;
     void* compcall=NULL;
     void* compcallws=NULL;
-    ComponentResult (*
-dispatcher)(ComponentParameters *params, Globals glob);
+    ComponentResult (*dispatcher)(ComponentParameters *params, Globals glob);
     ComponentResult ret;
     ComponentParameters *params;
     ComponentDescription desc;
