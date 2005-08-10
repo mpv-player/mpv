@@ -24,6 +24,7 @@
  * Changelog
  *
  * 2005-06-21   Replaced erroneous use of mp_msg by af_msg
+ * 2005-05-30   Removed int16 to float conversion; leave that to af_format
  * 2004-12-23   Added to CVS
  * 2004-12-22   Cleaned up cosmetics
  *              Made conversion loops in play() more cache-friendly
@@ -535,12 +536,12 @@ static int control(struct af_instance_s *af, int cmd, void *arg) {
 
         if (!arg) return AF_ERROR;
 
-        /* for now, only accept 16 bit signed int */
+        /* accept FLOAT, let af_format do conversion */
 
         af->data->rate   = ((af_data_t*)arg)->rate;
         af->data->nch    = ((af_data_t*)arg)->nch;
-        af->data->format = AF_FORMAT_S16_NE;
-        af->data->bps    = 2;
+        af->data->format = AF_FORMAT_FLOAT_NE;
+        af->data->bps    = 4;
 
         /* arg->len is not set here yet, so init of buffers and connecting the
          * filter, has to be done in play() :-/
@@ -768,12 +769,11 @@ static void uninit(struct af_instance_s *af) {
 static af_data_t* play(struct af_instance_s *af, af_data_t *data) {
     af_ladspa_t *setup = af->setup;
     const LADSPA_Descriptor *pdes = setup->plugin_descriptor;
-    int16_t *audio = (int16_t*)data->audio;
-    int nsamples = data->len/2; /* /2 because it's int16_t */
+    float *audio = (float*)data->audio;
+    int nsamples = data->len/4; /* /4 because it's 32-bit float */
     int nch = data->nch;
     int rate = data->rate;
     int i, p; 
-    float v;
 
     if (setup->status !=AF_OK)
         return data;
@@ -911,7 +911,7 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data) {
 
     for (p=0; p<setup->bufsize; p++) {
         for (i=0; i<nch; i++) {
-            setup->inbufs[i][p] = ( (float) audio[p*nch + i] ) / 32768.0f;
+            setup->inbufs[i][p] = audio[p*nch + i];
         }
     }
 
@@ -923,15 +923,11 @@ static af_data_t* play(struct af_instance_s *af, af_data_t *data) {
             i++;
     }
 
-    /* Extract outbufs, hard clipping in case the filter exceeded [-1.0,1.0] */
+    /* Extract outbufs */
 
     for (p=0; p<setup->bufsize; p++) {
         for (i=0; i<nch; i++) {
-            v = setup->outbufs[i][p];
-            v *= 32768.0f;
-            v = (v > 32767.0f ? 32767.0f : v);
-            v = (v < -32768.0f ? -32768.0f : v);
-            audio[p*nch + i] = (int16_t) v;
+            audio[p*nch + i] = setup->outbufs[i][p];
         }
     }
 
