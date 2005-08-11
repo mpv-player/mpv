@@ -156,6 +156,7 @@ endif
 
 PARTS = libmpdemux \
         libmpcodecs \
+        libavutil \
         libavcodec \
         libavformat \
         libao2 \
