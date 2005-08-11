@@ -831,7 +831,7 @@ void demux_close_avi(demuxer_t *demuxer) {
 }
 
 
-int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
+static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
     avi_priv_t *priv=demuxer->priv;
 /*    demux_stream_t *d_audio=demuxer->audio;*/
     demux_stream_t *d_video=demuxer->video;
@@ -924,5 +924,5 @@ demuxer_desc_t demuxer_desc_avi = {
   demux_open_hack_avi,
   demux_close_avi,
   demux_seek_avi,
-  NULL
+  demux_avi_control
 };
