@@ -468,6 +468,9 @@ static int query_format(uint32_t format)
 #ifdef CONFIG_VIDIX
     if(vidix_name)return(vidix_query_fourcc(format));
 #endif
+    if (format == IMGFMT_MPEGPES)
+	return 0;
+    // FIXME: this is just broken...
     return VFCAP_CSP_SUPPORTED | VFCAP_OSD | VFCAP_SWSCALE | VFCAP_ACCEPT_STRIDE; /* due new SwScale code */
 }
 
