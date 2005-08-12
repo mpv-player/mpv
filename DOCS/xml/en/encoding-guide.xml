@@ -289,6 +289,19 @@
   (CBR), constant quantizer, and multipass (ABR, or average bitrate).
 </para>
 
+<para>
+  The complexity (and thus the number of bits) required to compress the
+  frames of a movie can vary greatly from one scene to another.
+  Modern video encoders can adjust to these needs as they go and vary
+  the bitrate.
+  However, in simple modes such CBR, they cannot exceed the requested
+  average bitrate for long stretches of time, because they do not know
+  the bitrate needs of future scenes.
+  Wiser modes, such as multipass encode can take into account the
+  statistics from previous passes, which fixes the problem mentioned
+  above.
+</para>
+
 <note><title>Note:</title>
 <para>
   Most codecs which support ABR encode only support two pass encode
