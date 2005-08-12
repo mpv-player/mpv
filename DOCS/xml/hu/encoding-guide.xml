@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.4 $ -->
+<!-- synced with 1.7 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -280,11 +280,23 @@
   (CBR), konstans kvantálás, és többmenetes (ABR vagy átlagos bitráta).
 </para>
 
+<para>
+  A komplexitás (és így a bitek száma) miatt megkövetelt, a film képkockáinál
+  használt tömörítés nagy mértékben változhat jelentről jelenetre.
+  A modern videó kódolók már alkalmazkodnak az igényekhez a bitráta variálásával.
+  Azonban az egyszerű módokban, mint pl. a CBR, nem léphetik túl az átlagos
+  bitrátát hosszú ideig, mert nem ismerik az következő jelenetek bitráta
+  igényét.
+  Az okosabb módok, mint pl. a több lépéses kódolás, figyelembe tudják venni
+  az előző lépések statisztikáit, ami megoldja a fent említett problémát.
+</para>
+
 <note><title>Megjegyzés:</title>
 <para>
   A legtöbb ABR kódolást támogató codec csak a két lépéses kódolást
-  támogatja, míg néhány másik, mint pl. az <systemitem class="library">x264</systemitem>
-  és a <systemitem class="library">libavcodec</systemitem> támogatják
+  támogatja, míg néhány másik, mint pl. az <systemitem class="library">x264</systemitem>,
+  az <systemitem class="library">XviD</systemitem> és a
+  <systemitem class="library">libavcodec</systemitem> támogatják
   a többmenetest, ami kissé javít a minőségen minden lépésben,
   bár ez a javulás nem mérhető és nem is észrevehető a 4. lépés után.
   Ezért, ebben a részben a két lépéses és a többmenetes felváltva
@@ -293,38 +305,37 @@
 </note>
 
 <para>
-  Ezen módok mindegyikében a <systemitem class="library">libavcodec</systemitem>
+  Ezen módok mindegyikében a videó codec (mint pl. a <systemitem class="library">libavcodec</systemitem>)
   a videó képkockákat 16x16 pixel nagyságú macroblock-okra osztja, majd egy
   kvantálást végez mindegyik macroblock-on. Minél alacsonyabb a kvantálás, annál
-  jobb a minőség és nagyobb a bitráta. A <systemitem class="library">libavcodec</systemitem>
-  által egy adott macroblockhoz a megfelelő kvantáló kiválasztására használt módszer
-  változó és nagymértékben tuningolható. (Ez egy extrém túl-egyszerűsítése a
-  tulajdonképpeni folyamatnak, de az alap koncepciót hasznos megérteni.)
+  jobb a minőség és nagyobb a bitráta. A film kódolók által egy adott macroblockhoz
+  a megfelelő kvantáló kiválasztására használt módszer változó és nagymértékben
+  tuningolható. (Ez egy extrém túl-egyszerűsítése a tulajdonképpeni folyamatnak,
+  de az alap koncepciót hasznos megérteni.)
 </para>
 
 <para>
-  Ha előírsz egy konstans bitrátát, a <systemitem class="library">libavcodec</systemitem>
-  elkódolja a videót, figyelmen kívül hagyva a részleteket amennyire csak
-  lehetséges és a legkisebb mértékben, amennyire szükséges, hogy a megadott
-  bitrátánál alacsonyabban maradjon. Ha tényleg nem érdekel a fájl méret,
-  használhatsz CBR-t és megadhatsz egy bitrátát vagy hagyhatod határozatlanul.
-  (A gyakorlatban ez egy kellően magas értéket jelent, ami nem szab gátat, pl.
-  10000Kbit.) Ha nincs különösebb megkötés a bitrátára vonatkozóan, az eredmény
-  az lesz, hogy a <systemitem class="library">libavcodec</systemitem> a lehető
-  legalacsonyabb kvantálást fogja használni minden egyes macroblock-hoz (amint
-  ez a <option>vqmin</option>-ben meg van adva, ami alapértelmezésként 2). Amint
-  előírsz egy megfelelően alacsony bitrátát, ami a <systemitem
-  class="library">libavcodec</systemitem>et magasabb kvantálás használatára
-  kényszeríti, majdnem biztos, hogy rontod a videód minőségét.
+  Ha előírsz egy konstans bitrátát, a videó codec elkódolja a videót, figyelmen
+  kívül hagyva a részleteket amennyire csak lehetséges és a legkisebb mértékben,
+  amennyire szükséges, hogy a megadott bitrátánál alacsonyabban maradjon. Ha
+  tényleg nem érdekel a fájl méret, használhatsz CBR-t és megadhatsz egy bitrátát
+  vagy hagyhatod határozatlanul. (A gyakorlatban ez egy kellően magas értéket
+  jelent, ami nem szab gátat, pl. 10000Kbit.) Ha nincs különösebb megkötés a
+  bitrátára vonatkozóan, az eredmény az lesz, hogy a codec a lehető legalacsonyabb
+  kvantálást fogja használni minden egyes macroblock-hoz (amint ez a
+  <option>vqmin</option>-ben meg van adva a <systemitem
+  class="library">libavcodec</systemitem>nél, alapértelmezésként 2). Amint
+  előírsz egy megfelelően alacsony bitrátát, ami a codecet magasabb kvantálás
+  használatára kényszeríti, majdnem biztos, hogy rontod a videód minőségét.
   Ahhoz, hogy ezt elkerüld, valószínűleg downscale-t kell végrehajtani a
   videón, az alábbiakban szereplő módszernek megfelelően. Általában igaz,
-  hogy jobb ha kerülöd a CBR-t, ha számít a minőség.  
+  hogy jobb ha kerülöd a CBR-t, ha számít a minőség.
 </para>
 
 <para>
-  Konstans kvantálással a <systemitem
-  class="library">libavcodec</systemitem> ugyan azt a kvantálót használja, amit
-  a <option>vqscale</option> kapcsolóval megadtál, minden macroblock-nál. Ha
+  Konstans kvantálással a codec ugyan azt a kvantálót használja, amit
+  a <option>vqscale</option> kapcsolóval megadtál (a <systemitem
+  class="library">libavcodec</systemitem>nek), minden macroblock-nál. Ha
   a lehető legjobb minőségű rip-et szeretnéd, szintén a bitráta kihagyásával,
   használhatod a <option>vqscale=2</option> kapcsolót. Ez ugyan azt a bitrátát
   és PSNR-t (peak signal-to-noise ratio) szolgáltatja, mint a CBR a
@@ -2042,6 +2053,9 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
 <row><entry>ljpeg</entry><entry>
    Veszteségmentes JPEG
   </entry></row>
+<row><entry>h261</entry><entry>
+  H.261
+  </entry></row>
 <row><entry>h263</entry><entry>
   H.263
   </entry></row>
@@ -2083,6 +2097,15 @@ A következő codec-ekbe kódolhatsz (többé-kevésbé friss lista):
   </entry></row>
 <row><entry>ffv1</entry><entry>
   az FFmpeg veszteségmentes videó codec-je
+  </entry></row>
+<row><entry>flv</entry><entry>
+  Flash Videókban használt Sorenson H.263
+  </entry></row>
+<row><entry>dvvideo</entry><entry>
+  Sony Digital Video
+  </entry></row>
+<row><entry>snow</entry><entry>
+  az FFmpeg kísérleti wavelet-alapú codecja
   </entry></row>
 </tbody>
 </tgroup>
