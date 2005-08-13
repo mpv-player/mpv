@@ -2403,26 +2403,13 @@ if test "$_posix4" = yes ; then
 fi
 echores "$_posix4"
 
-echocheck "-std=gnu99"
-cat > $TMPC << EOF
-int main(void) { return 0; }
-EOF
-_gnu99=no
-cc_check -std=gnu99 && _gnu99=yes
-if test "$_gnu99" = yes ; then
-  _opt_gnu99="-std=gnu99"
-else
-  _opt_gnu99=""
-fi
-echores "$_gnu99"
-
 echocheck "lrintf"
 cat > $TMPC << EOF
 #include <math.h>
 int main(void) { long (*foo)(float); foo = lrintf; (void)(*foo)(0.0); return 0; }
 EOF
 _lrintf=no
-cc_check $_opt_gnu99 -D_GNU_SOURCE $_ld_lm && _lrintf=yes
+cc_check -D_GNU_SOURCE $_ld_lm && _lrintf=yes
 if test "$_lrintf" = yes ; then
   _def_lrintf="#define HAVE_LRINTF 1"
 else
@@ -5524,7 +5511,7 @@ EOF
   fi
   # internal faad: check if our dear gcc is able to compile it...
   cp "`pwd`/libfaad2/cfft.c" $TMPC
-  if ( cc_check -c -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer $_opt_gnu99 -D_GNU_SOURCE $_inc_faad ); then
+  if ( cc_check -c -O4 $_march $_mcpu $_pipe -ffast-math -fomit-frame-pointer -D_GNU_SOURCE $_inc_faad ); then
     _faad_internal=yes
   else
     _faad_internal="no (broken gcc)"
@@ -6929,7 +6916,7 @@ RANLIB = $_ranlib
 INSTALL = $_install
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu $_pipe -fomit-frame-pointer -ffast-math
 EXTRA_INC = $_inc_extra $_inc_gtk
-OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC) $_opt_gnu99
+OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
 CHARSET = $_charset
 HELP_FILE = $_mp_help
