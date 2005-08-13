@@ -17,6 +17,9 @@
 extern demuxer_t* init_avi_with_ogg(demuxer_t* demuxer);
 extern int demux_ogg_open(demuxer_t* demuxer);
 
+extern demuxer_desc_t demuxer_desc_avi_ni;
+extern demuxer_desc_t demuxer_desc_avi_nini;
+
 // PTS:  0=interleaved  1=BPS-based
 int pts_from_bps=1;
 
@@ -271,10 +274,12 @@ do{
 	if(priv->idx_size>0){
 	    // has index
 	    demux->type=DEMUXER_TYPE_AVI_NI;
+	    demux->desc=&demuxer_desc_avi_ni;
 	    --priv->idx_pos; // hack
 	} else {
 	    // no index
 	    demux->type=DEMUXER_TYPE_AVI_NINI;
+	    demux->desc=&demuxer_desc_avi_nini;
 	    priv->idx_pos=demux->filepos; // hack
 	}
 	priv->idx_pos_v=priv->idx_pos_a=priv->idx_pos;
@@ -522,6 +527,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
         if(force_ni || abs(a_pos-v_pos)>0x100000){  // distance > 1MB
           mp_msg(MSGT_DEMUX,MSGL_INFO,MSGTR_NI_Message,force_ni?MSGTR_NI_Forced:MSGTR_NI_Detected);
           demuxer->type=DEMUXER_TYPE_AVI_NI; // HACK!!!!
+          demuxer->desc=&demuxer_desc_avi_ni; // HACK!!!!
 	  pts_from_bps=1; // force BPS sync!
         }
       }
@@ -530,6 +536,7 @@ static demuxer_t* demux_open_avi(demuxer_t* demuxer){
       if(force_ni){
           mp_msg(MSGT_DEMUX,MSGL_INFO,MSGTR_UsingNINI);
           demuxer->type=DEMUXER_TYPE_AVI_NINI; // HACK!!!!
+          demuxer->desc=&demuxer_desc_avi_nini; // HACK!!!!
 	  priv->idx_pos_a=
 	  priv->idx_pos_v=demuxer->movi_start;
 	  pts_from_bps=1; // force BPS sync!
@@ -921,6 +928,38 @@ demuxer_desc_t demuxer_desc_avi = {
   1, // safe autodetect
   avi_check_file,
   demux_avi_fill_buffer,
+  demux_open_hack_avi,
+  demux_close_avi,
+  demux_seek_avi,
+  demux_avi_control
+};
+
+demuxer_desc_t demuxer_desc_avi_ni = {
+  "AVI demuxer, non-interleaved",
+  "avini",
+  "AVI",
+  "Arpi?",
+  "AVI files, including non interleaved files",
+  DEMUXER_TYPE_AVI,
+  1, // safe autodetect
+  avi_check_file,
+  demux_avi_fill_buffer_ni,
+  demux_open_hack_avi,
+  demux_close_avi,
+  demux_seek_avi,
+  demux_avi_control
+};
+
+demuxer_desc_t demuxer_desc_avi_nini = {
+  "AVI demuxer, non-interleaved and no index",
+  "avinini",
+  "AVI",
+  "Arpi?",
+  "AVI files, including non interleaved files",
+  DEMUXER_TYPE_AVI,
+  1, // safe autodetect
+  avi_check_file,
+  demux_avi_fill_buffer_nini,
   demux_open_hack_avi,
   demux_close_avi,
   demux_seek_avi,
