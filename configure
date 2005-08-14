@@ -20,6 +20,7 @@
 # GOTCHAS:
 #  - config files are currently:
 #    config.h config.mak libvo/config.mak libao2/config.mak Gui/config.mak
+#    libaf/config.mak
 #
 #############################################################################
 
