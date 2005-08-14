@@ -307,15 +307,8 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   int i;
   // initialize to 8 to avoid special-casing on alignment
   int sx = 8, sy = 8;
-  GLfloat xcov, ycov;
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
   texSize(w, h, &sx, &sy);
-  xcov = (GLfloat) w / (GLfloat) sx;
-  ycov = (GLfloat) h / (GLfloat) sy;
-  if (use_rectangle == 1) {
-    xcov = w;
-    ycov = h;
-  }
 
   if (osdtexCnt >= MAX_OSD_PARTS) {
     mp_msg(MSGT_VO, MSGL_ERR, "Too many OSD parts, contact the developers!\n");
@@ -352,30 +345,12 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   // render alpha
   glBlendFunc(GL_ZERO, GL_SRC_ALPHA);
   BindTexture(gl_target, osdatex[osdtexCnt]);
-  glBegin(GL_QUADS);
-  glTexCoord2f (0, 0);
-  glVertex2f (x0, y0);
-  glTexCoord2f (0, ycov);
-  glVertex2f (x0, y0 + h);
-  glTexCoord2f (xcov, ycov);
-  glVertex2f (x0 + w, y0 + h);
-  glTexCoord2f (xcov, 0);
-  glVertex2f (x0 + w, y0);
-  glEnd();
+  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1);
 #endif
   // render OSD
   glBlendFunc (GL_ONE, GL_ONE);
   BindTexture(gl_target, osdtex[osdtexCnt]);
-  glBegin(GL_QUADS);
-  glTexCoord2f (0, 0);
-  glVertex2f (x0, y0);
-  glTexCoord2f (0, ycov);
-  glVertex2f (x0, y0 + h);
-  glTexCoord2f (xcov, ycov);
-  glVertex2f (x0 + w, y0 + h);
-  glTexCoord2f (xcov, 0);
-  glVertex2f (x0 + w, y0);
-  glEnd();
+  glDrawTex(x0, y0, w, h, 0, 0, w, h, sx, sy, use_rectangle == 1);
   glEndList();
 
   osdtexCnt++;
@@ -405,22 +380,13 @@ static void draw_osd(void)
 static void
 flip_page(void)
 {
-  int tc_x = 1, tc_y = 1;
-  if (use_rectangle == 1) {
-    tc_x = texture_width;
-    tc_y = texture_height;
-  }
-
 //  glEnable(GL_TEXTURE_2D);
 //  glBindTexture(GL_TEXTURE_2D, texture_id);
 
   glColor3f(1,1,1);
-  glBegin(GL_QUADS);
-    glTexCoord2f(0,0);glVertex2i(0,0);
-    glTexCoord2f(0,tc_y);glVertex2i(0,texture_height);
-    glTexCoord2f(tc_x,tc_y);glVertex2i(texture_width,texture_height);
-    glTexCoord2f(tc_x,0);glVertex2i(texture_width,0);
-  glEnd();
+  glDrawTex(0, 0, texture_width, texture_height,
+            0, 0, texture_width, texture_height,
+            texture_width, texture_height, use_rectangle == 1);
 
   if (osdtexCnt > 0) {
     // set special rendering parameters

@@ -70,7 +70,6 @@ static int int_pause;
 static uint32_t texture_width;
 static uint32_t texture_height;
 static int texnumx, texnumy, raw_line_len;
-static GLfloat texpercx, texpercy;
 static struct TexSquare * texgrid = NULL;
 static GLint    gl_internal_format;
 static int      rgb_sz, r_sz, g_sz, b_sz, a_sz;
@@ -92,21 +91,10 @@ struct TexSquare
   GLubyte *texture;
   GLuint texobj;
   int isTexture;
-  GLfloat fx1, fy1, fx2, fy2, fx3, fy3, fx4, fy4;
-  GLfloat xcov, ycov;
+  GLfloat fx, fy, fw, fh;
   int isDirty;
   int dirtyXoff, dirtyYoff, dirtyWidth, dirtyHeight;
 };
-
-static void resetTexturePointers(unsigned char *imageSource);
-
-static void CalcFlatPoint(int x,int y,GLfloat *px,GLfloat *py)
-{
-  *px=(float)x*texpercx;
-  if(*px>1.0) *px=1.0;
-  *py=(float)y*texpercy;
-  if(*py>1.0) *py=1.0;
-}
 
 static GLint getInternalFormat()
 {
@@ -161,20 +149,21 @@ static GLint getInternalFormat()
 static int initTextures()
 {
   struct TexSquare *tsq=0;
-  int e_x, e_y, s, i=0;
+  GLfloat texpercx, texpercy;
+  int s, i=0;
   int x=0, y=0;
   GLint format=0;
   GLenum err;
 
   /* achieve the 2**e_x:=texture_width, 2**e_y:=texture_height */
-  e_x=0; s=1;
+  s=1;
   while (s<texture_width)
-  { s*=2; e_x++; }
+    s*=2;
   texture_width=s;
 
-  e_y=0; s=1;
+  s=1;
   while (s<texture_height)
-  { s*=2; e_y++; }
+    s*=2;
   texture_height=s;
 
   gl_internal_format = getInternalFormat();
@@ -196,19 +185,9 @@ static int initTextures()
 		texture_height, texture_width);
 
       if (texture_width > texture_height)
-      {
-	e_x--;
-	texture_width = 1;
-	for (i = e_x; i > 0; i--)
-	  texture_width *= 2;
-      }
+        texture_width /= 2;
       else
-      {
-	e_y--;
-	texture_height = 1;
-	for (i = e_y; i > 0; i--)
-	  texture_height *= 2;
-      }
+        texture_height /= 2;
 
       mp_msg (MSGT_VO, MSGL_V, "[%dx%d] !\n", texture_height, texture_width);
 
@@ -235,12 +214,7 @@ static int initTextures()
   /* Allocate the texture memory */
 
   texpercx = (GLfloat) texture_width / (GLfloat) image_width;
-  if (texpercx > 1.0)
-    texpercx = 1.0;
-
   texpercy = (GLfloat) texture_height / (GLfloat) image_height;
-  if (texpercy > 1.0)
-    texpercy = 1.0;
 
   if (texgrid)
     free(texgrid);
@@ -253,28 +227,16 @@ static int initTextures()
 		 (int) texnumx, (int) texture_width, (int) texnumy,
 		 (int) texture_height);
 
+  tsq = texgrid;
   for (y = 0; y < texnumy; y++)
   {
     for (x = 0; x < texnumx; x++)
     {
-      tsq = texgrid + y * texnumx + x;
 
-      if (x == texnumx - 1 && image_width % texture_width)
-	tsq->xcov =
-	  (GLfloat) (image_width % texture_width) / (GLfloat) texture_width;
-      else
-	tsq->xcov = 1.0;
-
-      if (y == texnumy - 1 && image_height % texture_height)
-	tsq->ycov =
-	  (GLfloat) (image_height % texture_height) / (GLfloat) texture_height;
-      else
-	tsq->ycov = 1.0;
-
-      CalcFlatPoint (x, y, &(tsq->fx1), &(tsq->fy1));
-      CalcFlatPoint (x + 1, y, &(tsq->fx2), &(tsq->fy2));
-      CalcFlatPoint (x + 1, y + 1, &(tsq->fx3), &(tsq->fy3));
-      CalcFlatPoint (x, y + 1, &(tsq->fx4), &(tsq->fy4));
+      tsq->fx = x * texpercx;
+      tsq->fy = y * texpercy;
+      tsq->fw = texpercx;
+      tsq->fh = texpercy;
 
       tsq->isDirty=GL_TRUE;
       tsq->isTexture=GL_FALSE;
@@ -298,24 +260,14 @@ static int initTextures()
         tsq->isTexture=GL_TRUE;
       }
 
-      glTexImage2D (GL_TEXTURE_2D, 0,
-		    gl_internal_format,
-		    texture_width, texture_height,
-		    0, gl_bitmap_format, gl_bitmap_type, NULL); 
-
-      glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_PRIORITY, 1.0);
-
-      glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-      glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-      glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+      glCreateClearTex(GL_TEXTURE_2D, gl_internal_format, GL_LINEAR,
+                       texture_width, texture_height, 0);
 
       glTexEnvf (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
+      tsq++;
     }	/* for all texnumx */
   }  /* for all texnumy */
-  resetTexturePointers (ImageData);
   
   return 0;
 }
@@ -488,7 +440,7 @@ static void gl_set_antialias (int val)
 
 static void drawTextureDisplay ()
 {
-  struct TexSquare *square;
+  struct TexSquare *square = texgrid;
   int x, y/*, xoff=0, yoff=0, wd, ht*/;
   GLenum err;
 
@@ -498,8 +450,6 @@ static void drawTextureDisplay ()
   {
     for (x = 0; x < texnumx; x++)
     {
-      square = texgrid + y * texnumx + x;
-
       if(square->isTexture==GL_FALSE)
       {
         mp_msg (MSGT_VO, MSGL_V, "[gl2] ain't a texture(update): texnum x=%d, y=%d, texture=%d\n",
@@ -538,27 +488,10 @@ static void drawTextureDisplay ()
         mp_msg (MSGT_VO, MSGL_DBG2, "[gl2] glTexSubImage2D texnum x=%d, y=%d, %d/%d - %d/%d\n", 
 		x, y, square->dirtyXoff, square->dirtyYoff, square->dirtyWidth, square->dirtyHeight);
 
-	glBegin(GL_QUADS);
-
-	glTexCoord2f (0, 0);
-	glVertex2f (square->fx1, square->fy1);
-
-	glTexCoord2f (0, square->ycov);
-	glVertex2f (square->fx4, square->fy4);
-
-	glTexCoord2f (square->xcov, square->ycov);
-	glVertex2f (square->fx3, square->fy3);
-
-	glTexCoord2f (square->xcov, 0);
-	glVertex2f (square->fx2, square->fy2);
-
-	glEnd();
-/*
-#ifndef NDEBUG
-        fprintf (stdout, "[gl2] GL_QUADS texnum x=%d, y=%d, %f/%f %f/%f %f/%f %f/%f\n\n", x, y, square->fx1, square->fy1, square->fx4, square->fy4,
-	square->fx3, square->fy3, square->fx2, square->fy2);
-#endif
-*/
+      glDrawTex(square->fx, square->fy, square->fw, square->fh,
+                0, 0, texture_width, texture_height,
+                texture_width, texture_height, 0);
+      square++;
     } /* for all texnumx */
   } /* for all texnumy */
 
@@ -776,12 +709,6 @@ static int config_glx_gui(uint32_t d_width, uint32_t d_height) {
 
 static int initGl(uint32_t d_width, uint32_t d_height)
 {
-  ImageData=malloc(image_width*image_height*image_bytes);
-  memset(ImageData,128,image_width*image_height*image_bytes);
-
-  texture_width=image_width;
-  texture_height=image_height;
-    
   if (initTextures() < 0)
     return -1;
 
@@ -814,9 +741,6 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   glClear( GL_COLOR_BUFFER_BIT );
 
   drawTextureDisplay ();
-
-  free (ImageData);
-  ImageData = NULL;
 
   return 0;
 }
@@ -998,40 +922,13 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
     return 0;
 }
 
-static inline uint32_t 
-draw_frame_x11_bgr(uint8_t *src[])
-{
-      resetTexturePointers((unsigned char *)src[0]);
-      ImageData=(unsigned char *)src[0];
-
-      // for(i=0;i<image_height;i++) ImageData[image_width*image_bytes*i+20]=128;
-
-     setupTextureDirtyArea(0, 0, image_width, image_height);
-	return 0; 
-}
-
-static inline uint32_t 
-draw_frame_x11_rgb(uint8_t *src[])
-{
-      resetTexturePointers((unsigned char *)src[0]);
-      ImageData=(unsigned char *)src[0];
-
-     setupTextureDirtyArea(0, 0, image_width, image_height);
-      return 0; 
-}
-
-
 static int
 draw_frame(uint8_t *src[])
 {
-    uint32_t res = 0;
-
-    if (IMGFMT_IS_RGB(image_format))
-	res = draw_frame_x11_rgb(src);
-    else
-	res = draw_frame_x11_bgr(src);
-
-    return res;
+  ImageData=(unsigned char *)src[0];
+  resetTexturePointers(ImageData);
+  setupTextureDirtyArea(0, 0, image_width, image_height);
+  return 0;
 }
 
 static int

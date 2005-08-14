@@ -66,6 +66,9 @@ void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,
 void glUploadTex(GLenum target, GLenum format, GLenum type,
                  const char *data, int stride,
                  int x, int y, int w, int h, int slice);
+void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
+               GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
+               int sx, int sy, int rect_tex);
 
 //! could not set new window, will continue drawing into the old one.
 #define SET_WINDOW_FAILED -1

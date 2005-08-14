@@ -345,6 +345,38 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
     glTexSubImage2D(target, 0, x, y, w, y_max - y, format, type, data);
 }
 
+/**
+ * \brief draw a texture part at given 2D coordinates
+ * \param x screen top coordinate
+ * \param y screen left coordinate
+ * \param w screen width coordinate
+ * \param h screen height coordinate
+ * \param tx texture top coordinate in pixels
+ * \param ty texture left coordinate in pixels
+ * \param tw texture part width in pixels
+ * \param th texture part height in pixels
+ * \param sx width of texture in pixels
+ * \param sy height of texture in pixels
+ * \param rect_tex whether this texture uses texture_rectangle extension
+ */
+void glDrawTex(GLfloat x, GLfloat y, GLfloat w, GLfloat h,
+               GLfloat tx, GLfloat ty, GLfloat tw, GLfloat th,
+               int sx, int sy, int rect_tex) {
+  if (!rect_tex) {
+    tx /= sx; ty /= sy; tw /= sx; th /= sy;
+  }
+  glBegin(GL_QUADS);
+  glTexCoord2f(tx, ty);
+  glVertex2f(x, y);
+  glTexCoord2f(tx, ty + th);
+  glVertex2f(x, y + h);
+  glTexCoord2f(tx + tw, ty + th);
+  glVertex2f(x + w, y + h);
+  glTexCoord2f(tx + tw, ty);
+  glVertex2f(x + w, y);
+  glEnd();
+}
+
 #ifdef GL_WIN32
 static void *w32gpa(const GLubyte *procName) {
   return wglGetProcAddress(procName);
