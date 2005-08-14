@@ -205,7 +205,6 @@ int createRenderingContext(void) {
 int vo_init(void) {
     HICON 	mplayerIcon = 0;
     char 	exedir[MAX_PATH];
-    WNDCLASSEX	wcex;
 
     if (vo_window)
 	return 1;
@@ -217,12 +216,14 @@ int vo_init(void) {
     if (!mplayerIcon)
 	mplayerIcon = LoadIcon(0, IDI_APPLICATION);
 
-    wcex = { sizeof wcex, CS_OWNDC, WndProc, 0, 0, hInstance, mplayerIcon, LoadCursor(0, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), 0, classname, mplayerIcon };
+  {
+    WNDCLASSEX wcex = { sizeof wcex, CS_OWNDC, WndProc, 0, 0, hInstance, mplayerIcon, LoadCursor(0, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), 0, classname, mplayerIcon };
 
     if (!RegisterClassEx(&wcex)) {
 	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to register window class!\n");
 	return 0;
     }
+  }
 
     vo_window = CreateWindowEx(0, classname, classname, WS_POPUP, CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
     if (!vo_window) {
