@@ -32,9 +32,7 @@ static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 		case SC_SCREENSAVE:
 		case SC_MONITORPOWER:
     		    mp_msg(MSGT_VO, MSGL_V, "vo: win32: killing screensaver\n");
-		    break;
-		default:
-		    return DefWindowProc(hWnd, message, wParam, lParam);
+		    return 0;
 	    }
 	    break;
         case WM_KEYDOWN:
@@ -137,10 +135,10 @@ static void changeMode(void) {
 	int bestScore = INT_MAX;
 	int i;
 	for (i = 0; EnumDisplaySettings(0, i, &dm); ++i) {
+	    int score = (dm.dmPelsWidth - o_dwidth) * (dm.dmPelsHeight - o_dheight);
 	    if (dm.dmBitsPerPel != vo_depthonscreen) continue;
 	    if (dm.dmPelsWidth < o_dwidth) continue;
 	    if (dm.dmPelsHeight < o_dheight) continue;
-	    int score = (dm.dmPelsWidth - o_dwidth) * (dm.dmPelsHeight - o_dheight);
 
 	    if (score < bestScore) {
 		bestScore = score;
@@ -162,6 +160,8 @@ static void resetMode(void) {
 
 int createRenderingContext(void) {
     HWND layer = HWND_NOTOPMOST;
+    PIXELFORMATDESCRIPTOR pfd;
+    int pf;
 
     if (vo_fs || vo_ontop) layer = HWND_TOPMOST;
     if (vo_fs) {
@@ -182,7 +182,6 @@ int createRenderingContext(void) {
     vo_dheight = vo_fs ? vo_screenheight : o_dheight;
     SetWindowPos(vo_window, layer, vo_fs ? 0 : vo_dx, vo_fs ? 0 : vo_dy, vo_dwidth, vo_dheight, SWP_SHOWWINDOW);
 
-    PIXELFORMATDESCRIPTOR pfd;
     memset(&pfd, 0, sizeof pfd);
     pfd.nSize = sizeof pfd;
     pfd.nVersion = 1;
@@ -190,7 +189,7 @@ int createRenderingContext(void) {
     pfd.iPixelType = PFD_TYPE_RGBA;
     pfd.cColorBits = 24;
     pfd.iLayerType = PFD_MAIN_PLANE;
-    int pf = ChoosePixelFormat(vo_hdc, &pfd);
+    pf = ChoosePixelFormat(vo_hdc, &pfd);
     if (!pf) {
     	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to select a valid pixel format!\n");
 	return 0;
@@ -206,6 +205,7 @@ int createRenderingContext(void) {
 int vo_init(void) {
     HICON 	mplayerIcon = 0;
     char 	exedir[MAX_PATH];
+    WNDCLASSEX	wcex;
 
     if (vo_window)
 	return 1;
@@ -217,7 +217,7 @@ int vo_init(void) {
     if (!mplayerIcon)
 	mplayerIcon = LoadIcon(0, IDI_APPLICATION);
 
-    WNDCLASSEX wcex = { sizeof wcex, CS_OWNDC, WndProc, 0, 0, hInstance, mplayerIcon, LoadCursor(0, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), 0, classname, mplayerIcon };
+    wcex = { sizeof wcex, CS_OWNDC, WndProc, 0, 0, hInstance, mplayerIcon, LoadCursor(0, IDC_ARROW), (HBRUSH)GetStockObject(BLACK_BRUSH), 0, classname, mplayerIcon };
 
     if (!RegisterClassEx(&wcex)) {
 	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to register window class!\n");
