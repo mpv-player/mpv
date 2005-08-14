@@ -146,13 +146,13 @@ static int initTextures()
   GLint format=0;
   GLenum err;
 
-  /* achieve the 2**e_x:=texture_width, 2**e_y:=texture_height */
-  s=1;
+  // textures smaller than 64x64 might not be supported
+  s=64;
   while (s<image_width)
     s*=2;
   texture_width=s;
 
-  s=1;
+  s=64;
   while (s<image_height)
     s*=2;
   texture_height=s;
