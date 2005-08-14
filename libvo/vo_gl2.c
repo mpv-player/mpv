@@ -157,12 +157,12 @@ static int initTextures()
 
   /* achieve the 2**e_x:=texture_width, 2**e_y:=texture_height */
   s=1;
-  while (s<texture_width)
+  while (s<image_width)
     s*=2;
   texture_width=s;
 
   s=1;
-  while (s<texture_height)
+  while (s<image_height)
     s*=2;
   texture_height=s;
 
