@@ -1,18 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <errno.h>
 
-#include "mp_msg.h"
 #include "config.h"
+#include "mp_msg.h"
 #include "subopt-helper.h"
 #include "video_out.h"
 #include "video_out_internal.h"
 #include "font_load.h"
 #include "sub.h"
-
-#include <errno.h>
 
 #include "gl_common.h"
 #include "aspect.h"
@@ -204,8 +200,6 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
     return -1;
 #else
   if (WinID >= 0) {
-    Window win_tmp;
-    int int_tmp;
     vo_window = WinID ? (Window)WinID : mRootWin;
     goto glconfig;
   }
@@ -304,7 +298,6 @@ static void create_osd_texture(int x0, int y0, int w, int h,
                                  unsigned char *src, unsigned char *srca,
                                  int stride)
 {
-  int i;
   // initialize to 8 to avoid special-casing on alignment
   int sx = 8, sy = 8;
   GLint scale_type = (scaled_osd) ? GL_LINEAR : GL_NEAREST;
@@ -327,6 +320,7 @@ static void create_osd_texture(int x0, int y0, int w, int h,
   BindTexture(gl_target, osdatex[osdtexCnt]);
   glCreateClearTex(gl_target, GL_ALPHA, scale_type, sx, sy, 0);
   {
+  int i;
   char *tmp = (char *)malloc(stride * h);
   for (i = 0; i < h * stride; i++)
     tmp[i] = ~(-srca[i]);
@@ -358,10 +352,10 @@ static void create_osd_texture(int x0, int y0, int w, int h,
 
 static void draw_osd(void)
 {
-  int i;
-  int osd_h, osd_w;
   if (!use_osd) return;
   if (vo_osd_changed(0)) {
+    int i;
+    int osd_h, osd_w;
     for (i = 0; i < osdtexCnt; i++) {
       glDeleteTextures(1, &osdtex[i]);
 #ifndef FAST_OSD

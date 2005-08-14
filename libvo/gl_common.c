@@ -38,8 +38,6 @@ void glAdjustAlignment(int stride) {
   glPixelStorei (GL_UNPACK_ALIGNMENT, gl_alignment);
 }
 
-#include "img_format.h"
-
 struct gl_name_map_struct {
   GLint value;
   char *name;

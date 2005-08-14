@@ -7,8 +7,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <math.h>
-#include <errno.h>
 
 #include "config.h"
 #include "mp_msg.h"
@@ -19,8 +17,6 @@
 #ifdef HAVE_NEW_GUI
 #include "Gui/interface.h"
 #endif
-
-#include <errno.h>
 
 #include "gl_common.h"
 #include "aspect.h"
@@ -45,11 +41,6 @@ LIBVO_EXTERN(gl2)
 
 /* local data */
 static unsigned char *ImageData=NULL;
-
-/* X11 related variables */
-//static Window vo_window;
-
-//static int texture_id=1;
 
 #ifdef GL_WIN32
     static int gl_vinfo = 0;
@@ -150,7 +141,7 @@ static int initTextures()
 {
   struct TexSquare *tsq=0;
   GLfloat texpercx, texpercy;
-  int s, i=0;
+  int s;
   int x=0, y=0;
   GLint format=0;
   GLenum err;
@@ -467,12 +458,14 @@ static void drawTextureDisplay ()
 		mp_msg (MSGT_VO, MSGL_V, "GLERROR glBindTexture := GL_INVALID_OPERATION, texnum x=%d, y=%d, texture=%d\n", x, y, square->texobj);
 	      }
 
+#ifndef NDEBUG
       if(glIsTexture(square->texobj) == GL_FALSE)
       {
         square->isTexture=GL_FALSE;
 	mp_msg (MSGT_VO, MSGL_ERR, "GLERROR ain't a texture(update): texnum x=%d, y=%d, texture=%d\n",
 		x, y, square->texobj);
       }
+#endif
 
       if(square->isDirty)
       {
@@ -970,7 +963,7 @@ static int preinit(const char *arg)
     if(arg) 
     {
 	mp_msg(MSGT_VO, MSGL_FATAL, "[gl2] Unknown subdevice: %s\n",arg);
-	return ENOSYS;
+	return -1;
     }
     if( !vo_init() ) return -1; // Can't open X11
     return 0;
