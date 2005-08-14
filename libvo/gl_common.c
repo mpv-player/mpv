@@ -330,6 +330,7 @@ void glUploadTex(GLenum target, GLenum format, GLenum type,
                  const char *data, int stride,
                  int x, int y, int w, int h, int slice) {
   int y_max = y + h;
+  if (w <= 0 || h <= 0) return;
   if (slice <= 0)
     slice = h;
   // this is not always correct, but should work for MPlayer
