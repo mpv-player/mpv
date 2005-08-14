@@ -290,15 +290,15 @@
 </para>
 
 <para>
-  The complexity (and thus the number of bits) required to compress the
-  frames of a movie can vary greatly from one scene to another.
+  The complexity of the frames of a movie, and thus the number of bits
+  required to compress them, can vary greatly from one scene to another.
   Modern video encoders can adjust to these needs as they go and vary
   the bitrate.
-  However, in simple modes such CBR, they cannot exceed the requested
-  average bitrate for long stretches of time, because they do not know
-  the bitrate needs of future scenes.
-  Wiser modes, such as multipass encode can take into account the
-  statistics from previous passes, which fixes the problem mentioned
+  In simple modes such as CBR, however, the encoders do not know the
+  bitrate needs of future scenes and so cannot exceed the requested
+  average bitrate for long stretches of time.
+  More advanced modes, such as multipass encode, can take into account
+  the statistics from previous passes; this fixes the problem mentioned
   above.
 </para>
 
