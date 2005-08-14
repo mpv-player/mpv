@@ -1,4 +1,4 @@
-.\" synced with 1.1063
+.\" synced with 1.1066
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -35,7 +35,7 @@
 .\" Titre
 .\" --------------------------------------------------------------------------
 .
-.TH MPlayer 1 "09 Août 2005" "The MPlayer Project" "Le Lecteur Vidéo"
+.TH MPlayer 1 "14 Août 2005" "The MPlayer Project" "Le Lecteur Vidéo"
 .
 .SH NAME
 mplayer  \- Lecteur vidéo
@@ -6579,7 +6579,7 @@ MPEG Layer 3
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits par échantillon, compression 4:1)
-.IPS sonic\
+.IPs sonic\
 codec à perte/sans perte expérimental
 .RE
 .PD 1
@@ -8121,12 +8121,12 @@ offset de quantum entre les trames-B et non-B, 100=1.00
 .
 .TP
 .B bf_threshold=<-255\-255>
-Parfois, les trames-B dégradent l'image en introduisant des artefacts visuels
-lorsque par exemple une scène est globalement statique sauf une petite
-région en mouvement rapide.
 Cette option permet de changer la probabilité qu'une trame soit une trame-B.
 Plus la valeur est haute, plus la probabilité que la trame générée soit
 une trame-B est forte (par défaut\ : 0).
+Gardez à l'esprit que les trames-B ont généralement un quanta plus
+élevé, ainsi une production excessive de trames-B peut dégrader la
+qualité visuelle.
 .
 .TP
 .B (no)closed_gop
