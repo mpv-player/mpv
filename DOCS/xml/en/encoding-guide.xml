@@ -63,10 +63,12 @@
   presentation on a television, and often does
   <emphasis role="bold">not</emphasis> correspond to the
   original format of the movie.
+  Experience shows that NTSC contents are a lot more difficult to encode
+  given that there more elements to identify in the source.
   In order to produce a suitable encode, you need to know the original
   format.
   Failure to take this into account will result in ugly combing
-  (interlacing) artifacts in your encode.
+  (interlacing) artifacts, duplicated or lost frames in your encode.
   Besides being ugly, the artifacts also harm coding efficiency:
   You will get worse quality per bitrate.
 </para>
@@ -209,8 +211,8 @@
   encoded MPEG-2.
 </para>
 <para>
-  The procedures for dealing with these cases will be covered later
-  in this guide.
+  The procedures for dealing with these cases will be covered
+  <link linkend="menc-feat-telecine">later in this guide</link>.
   For now, we leave you with some guides to identifying which type
   of material you are dealing with:
 </para>
@@ -1686,6 +1688,20 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
   &quot;hard-telecine&quot;. Since hard-telecine is already 60000/1001 fields
   per second, the DVD player plays the video without any manipulation.
 </para>
+
+<para>
+  Another way to tell if your source is telecined or not is to watch the
+  the source appending <option>-vf pullup -v</option> to your command line
+  to see how <option>pullup</option> matches frames.
+  If the source is telecined, you should see on the console a 3:2 pattern
+  with <systemitem>0+.1.+2</systemitem> and <systemitem>0++1</systemitem>
+  alternating.
+  This technique has the advantage that you do not need to watch the
+  source to identify it, which could be useful if you wish to automate
+  the encoding procedure, or to carry out said procedure remotely via
+  a slow connection.
+</para>
+
 </sect3>
 
 <sect3 id="menc-feat-telecine-ident-interlaced">
