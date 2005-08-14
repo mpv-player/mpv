@@ -229,7 +229,7 @@ static int initTextures()
       tsq->fw = texpercx;
       tsq->fh = texpercy;
 
-      tsq->isDirty=GL_TRUE;
+      tsq->isDirty=GL_FALSE;
       tsq->isTexture=GL_FALSE;
       tsq->texobj=0;
       tsq->dirtyXoff=0; tsq->dirtyYoff=0; tsq->dirtyWidth=-1; tsq->dirtyHeight=-1;
@@ -469,10 +469,11 @@ static void drawTextureDisplay ()
 
       if(square->isDirty)
       {
-	glTexSubImage2D (GL_TEXTURE_2D, 0, 
+	glUploadTex(GL_TEXTURE_2D, gl_bitmap_format,  gl_bitmap_type,
+		 square->texture, image_width * image_bytes,
 		 square->dirtyXoff, square->dirtyYoff,
 		 square->dirtyWidth, square->dirtyHeight,
-		 gl_bitmap_format, gl_bitmap_type, square->texture);
+		 0);
 
         square->isDirty=GL_FALSE;
         square->dirtyXoff=0; square->dirtyYoff=0; square->dirtyWidth=-1; square->dirtyHeight=-1;
@@ -709,15 +710,6 @@ static int initGl(uint32_t d_width, uint32_t d_height)
   glDisable(GL_DEPTH_TEST);
   glDepthMask(GL_FALSE);
   glDisable(GL_CULL_FACE);
-
-  glPixelStorei (GL_UNPACK_ROW_LENGTH, image_width);
-
-  /**
-   * may give a little speed up for a kinda burst read ..
-   * Also, the default of 4 will break some files.
-   */
-  glAdjustAlignment(image_width*image_bytes);
-
   glEnable (GL_TEXTURE_2D);
 
   gl_set_antialias(0);
