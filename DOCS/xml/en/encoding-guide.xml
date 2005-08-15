@@ -63,14 +63,15 @@
   presentation on a television, and often does
   <emphasis role="bold">not</emphasis> correspond to the
   original format of the movie.
-  Experience shows that NTSC contents are a lot more difficult to encode
-  given that there more elements to identify in the source.
+  Experience shows that NTSC material is a lot more difficult to encode,
+  because there more elements to identify in the source.
   In order to produce a suitable encode, you need to know the original
   format.
-  Failure to take this into account will result in ugly combing
-  (interlacing) artifacts, duplicated or lost frames in your encode.
+  Failure to take this into account will result in various flaws in your
+  encode, including ugly combing (interlacing) artifacts and duplicated
+  or even lost frames.
   Besides being ugly, the artifacts also harm coding efficiency:
-  You will get worse quality per bitrate.
+  You will get worse quality per unit bitrate.
 </para>
 
 <sect3 id="menc-feat-dvd-mpeg4-preparing-encode-fps">
@@ -1690,9 +1691,9 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 </para>
 
 <para>
-  Another way to tell if your source is telecined or not is to watch the
-  the source appending <option>-vf pullup -v</option> to your command line
-  to see how <option>pullup</option> matches frames.
+  Another way to tell if your source is telecined or not is to play
+  the source with the <option>-vf pullup</option> and <option>-v</option>
+  command line options to see how <option>pullup</option> matches frames.
   If the source is telecined, you should see on the console a 3:2 pattern
   with <systemitem>0+.1.+2</systemitem> and <systemitem>0++1</systemitem>
   alternating.
