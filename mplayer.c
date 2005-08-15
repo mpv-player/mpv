@@ -2998,6 +2998,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       play_tree_t* e = play_tree_new();
       play_tree_add_file(e,cmd->args[0].v.s);
 
+      if (cmd->args[1].v.i) // append
+        play_tree_append_entry(playtree, e);
+      else {
       // Go back to the start point
       while(play_tree_iter_up_step(playtree_iter,0,1) != PLAY_TREE_ITER_END)
 	/* NOP */;
@@ -3005,6 +3008,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       play_tree_set_child(playtree,e);
       play_tree_iter_step(playtree_iter,0,0);
       eof = PT_NEXT_SRC;
+      }
       brk_cmd = 1;
     } break;
     case MP_CMD_LOADLIST : {
@@ -3012,6 +3016,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
       if(!e)
 	mp_msg(MSGT_CPLAYER,MSGL_ERR,MSGTR_PlaylistLoadUnable,cmd->args[0].v.s);
       else {
+	if (cmd->args[1].v.i) // append
+	  play_tree_append_entry(playtree, e);
+	else {
 	// Go back to the start point
 	while(play_tree_iter_up_step(playtree_iter,0,1) != PLAY_TREE_ITER_END)
 	  /* NOP */;
@@ -3019,6 +3026,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	play_tree_set_child(playtree,e);
 	play_tree_iter_step(playtree_iter,0,0);
 	eof = PT_NEXT_SRC;	
+	}
       }
       brk_cmd = 1;
     } break;

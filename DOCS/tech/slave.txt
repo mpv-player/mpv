@@ -173,11 +173,15 @@ panscan <-1.0 - 1.0> | <0.0 - 1.0> <absolute>
     If <absolute> is != 0, then the pan-and scan range is interpreted as an
     absolute range.
 
-loadfile <file|url>
+loadfile <file|url> <append>
     Load the given file/URL.
+    If <append> is 0 or not given playback of the current file will be stopped
+    and the playlist replaced. Otherwise it will only be added to the playlist.
 
-loadlist <file>
+loadlist <file> <append>
     Load the given playlist file.
+    If <append> is 0 or not given playback of the current file will be stopped
+    and the playlist replaced. Otherwise it will only be added to the playlist.
 
 change_rectangle <val1> <val2>
     Change the position of the rectangle filter rectangle.
