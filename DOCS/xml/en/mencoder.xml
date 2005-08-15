@@ -131,6 +131,24 @@ them. This section is about <emphasis role="bold">copying</emphasis>.
   for this.
   </para></listitem>
 </itemizedlist>
+
+<para>
+  Using <option>-oac copy</option> to copy from one container format to
+  another may require the use of <option>-fafmttag</option> to keep the
+  audio format tag of the original file.
+  For example, if you are converting an NSV file with AAC audio to an AVI
+  container, the audio format tag will be incorrect and it will have to
+  be changed. For a list of audio format tags, check
+  <filename>codecs.conf</filename>.
+</para>
+
+<para>
+Example:
+<screen>
+mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4 -o <replaceable>output.avi</replaceable>
+</screen>
+</para>
+
 </sect1>
 
 
