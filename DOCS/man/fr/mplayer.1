@@ -1,4 +1,4 @@
-.\" synced with 1.1066
+.\" synced with 1.1069
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2871,6 +2871,9 @@ vidéo RAM, mais est souvent plus lent).
 1: Utilise texture_rectangle.
 .br
 2: Utilise texture_non_puissance_de_deux.
+.IPs (no)glfinish
+Appelle glFinish() avant d'échanger les tampons.
+Plus lent mais dans certain cas affichage "plus correct".
 .REss
 .RE
 .PD 1
