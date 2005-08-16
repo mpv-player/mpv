@@ -2,6 +2,13 @@
 // simple tool to fix chunk sizes in a RIFF AVI file
 // it doesn't check/fix index, use mencoder -forceidx -oac copy -ovc copy to fix index!
 
+#include "../config.h"
+#ifdef MP_DEBUG
+#define mp_debug(...) printf(__VA_ARGS__)
+#else
+#define mp_debug(...)
+#endif
+
 #include <stdio.h>
 #include <stdlib.h>
 //#include <string.h>
@@ -59,17 +66,17 @@ faszom:
 //    if(!lastgood && feof(f)) break;
     id=(id<<8)|fgetc(f);
 //    lastgood=ftell(f);
-    printf("%08X: %c%c%c%c\n",(int)ftell(f)-4,xx(id>>24),xx(id>>16),xx(id>>8),xx(id));
+    mp_debug("%08X: %c%c%c%c\n",(int)ftell(f)-4,xx(id>>24),xx(id>>16),xx(id>>8),xx(id));
     switch(id){
     case FCC('R','I','F','F'):
 	fread(&len,4,1,f); // filesize
 	id=getid(f);  // AVI
-	printf("RIFF header, filesize=0x%X  format=%c%c%c%c\n",len,xx(id>>24),xx(id>>16),xx(id>>8),xx(id));
+	mp_debug("RIFF header, filesize=0x%X  format=%c%c%c%c\n",len,xx(id>>24),xx(id>>16),xx(id>>8),xx(id));
 	break;
     case FCC('L','I','S','T'):
 	fread(&len,4,1,f); // size
 	id=getid(f);  // AVI
-	printf("LIST size=0x%X  format=%c%c%c%c\n",len,xx(id>>24),xx(id>>16),xx(id>>8),xx(id));
+	mp_debug("LIST size=0x%X  format=%c%c%c%c\n",len,xx(id>>24),xx(id>>16),xx(id>>8),xx(id));
 	//case FCC('h','d','r','l'):
 	//case FCC('s','t','r','l'):
 	//case FCC('o','d','m','l'):
@@ -106,23 +113,23 @@ faszom:
 	    // fix last chunk's size field:
 	    fseek(f,fixat,SEEK_SET);
 	    len=lastgood-fixat-8;
-	    printf("Correct len to 0x%X\n",len);
+	    mp_debug("Correct len to 0x%X\n",len);
 	    fwrite(&len,4,1,f);
 	    fseek(f,lastgood,SEEK_SET);
 	    fixat=0;
 	}
 	fread(&len,4,1,f); // size
-	printf("ID ok, chunk len=0x%X\n",len);
+	mp_debug("ID ok, chunk len=0x%X\n",len);
 	len+=len&1; // align at 2
 	fseek(f,len,SEEK_CUR); // skip data
 	break;
     default:
 	if(!lastgood){
 	    ++offset;
-	    printf("invalid ID, trying %d byte offset\n",offset);
+	    mp_debug("invalid ID, trying %d byte offset\n",offset);
 	    goto faszom; // try again @ next post
 	}
-	printf("invalid ID, parsing next chunk's data at 0x%X\n",lastgood);
+	mp_debug("invalid ID, parsing next chunk's data at 0x%X\n",lastgood);
 	fseek(f,lastgood,SEEK_SET);
 	fixat=lastgood;
 	lastgood=0;
