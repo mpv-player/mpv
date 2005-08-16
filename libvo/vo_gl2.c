@@ -622,6 +622,9 @@ static int choose_glx_visual(Display *dpy, int scr, XVisualInfo *res_vi)
 static int config_glx(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uint32_t flags, char *title, uint32_t format) {
   if (WinID >= 0) {
     vo_window = WinID ? (Window)WinID : mRootWin;
+    vo_x11_selectinput_witherr(mDisplay, vo_window,
+             StructureNotifyMask | KeyPressMask | PointerMotionMask |
+             ButtonPressMask | ButtonReleaseMask | ExposureMask);
     return 0;
   }
   if ( vo_window == None ) 

@@ -204,6 +204,9 @@ config(uint32_t width, uint32_t height, uint32_t d_width, uint32_t d_height, uin
 #else
   if (WinID >= 0) {
     vo_window = WinID ? (Window)WinID : mRootWin;
+    vo_x11_selectinput_witherr(mDisplay, vo_window,
+             StructureNotifyMask | KeyPressMask | PointerMotionMask |
+             ButtonPressMask | ButtonReleaseMask | ExposureMask);
     goto glconfig;
   }
   if ( vo_window == None ) {
