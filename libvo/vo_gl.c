@@ -439,7 +439,7 @@ static uint32_t get_image(mp_image_t *mpi) {
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   if (mpi->stride[0] * mpi->h > gl_buffersize) {
     BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->h,
-               NULL, GL_STREAM_DRAW);
+               NULL, GL_DYNAMIC_DRAW);
     gl_buffersize = mpi->stride[0] * mpi->h;
   }
   UnmapBuffer(GL_PIXEL_UNPACK_BUFFER); // HACK, needed for some MPEG4 files??

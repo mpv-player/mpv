@@ -26,6 +26,9 @@
 #ifndef GL_STREAM_DRAW
 #define GL_STREAM_DRAW 0x88E0
 #endif
+#ifndef GL_DYNAMIC_DRAW
+#define GL_DYNAMIC_DRAW 0x88E8
+#endif
 #ifndef GL_WRITE_ONLY
 #define GL_WRITE_ONLY 0x88B9
 #endif
