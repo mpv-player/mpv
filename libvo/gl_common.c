@@ -2,6 +2,8 @@
 #include <string.h>
 #include "gl_common.h"
 
+void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
+void (APIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
 void (APIENTRY *BindBuffer)(GLenum, GLuint);
 GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum); 
 GLboolean (APIENTRY *UnmapBuffer)(GLenum);
@@ -203,6 +205,12 @@ static void *(*getProcAddress)(const GLubyte *procName) = NULL;
 static void getFunctions() {
   if (!getProcAddress)
     getProcAddress = setNull;
+  GenBuffers = getProcAddress("glGenBuffers");
+  if (!GenBuffers)
+    GenBuffers = getProcAddress("glGenBuffersARB");
+  DeleteBuffers = getProcAddress("glDeleteBuffers");
+  if (!DeleteBuffers)
+    DeleteBuffers = getProcAddress("glDeleteBuffersARB");
   BindBuffer = getProcAddress("glBindBuffer");
   if (!BindBuffer)
     BindBuffer = getProcAddress("glBindBufferARB");

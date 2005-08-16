@@ -65,6 +65,7 @@ static GLenum gl_target;
 static GLenum gl_texfmt;
 static GLenum gl_format;
 static GLenum gl_type;
+static GLint gl_buffer;
 static int gl_buffersize;
 
 static int int_pause;
@@ -147,6 +148,7 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 
   glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
+  gl_buffer = 0;
   gl_buffersize = 0;
   err_shown = 0;
   return 1;
@@ -419,7 +421,7 @@ static int draw_slice(uint8_t *src[], int stride[], int w,int h,int x,int y)
 }
 
 static uint32_t get_image(mp_image_t *mpi) {
-  if (!BindBuffer || !BufferData || !MapBuffer) {
+  if (!GenBuffers || !BindBuffer || !BufferData || !MapBuffer) {
     if (!err_shown)
       mp_msg(MSGT_VO, MSGL_ERR, "[gl] extensions missing for dr\n"
                                 "Expect a _major_ speed penalty\n");
@@ -429,7 +431,9 @@ static uint32_t get_image(mp_image_t *mpi) {
   if (mpi->flags & MP_IMGFLAG_READABLE) return VO_FALSE;
   if (mpi->type == MP_IMGTYPE_IP || mpi->type == MP_IMGTYPE_IPB)
     return VO_FALSE; // we can not provide readable buffers
-  BindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);
+  if (!gl_buffer)
+    GenBuffers(1, &gl_buffer);
+  BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
   mpi->stride[0] = mpi->width * mpi->bpp / 8;
   if (mpi->stride[0] * mpi->h > gl_buffersize) {
     BufferData(GL_PIXEL_UNPACK_BUFFER, mpi->stride[0] * mpi->h,
@@ -457,7 +461,7 @@ static uint32_t draw_image(mp_image_t *mpi) {
     return VO_TRUE;
   if (mpi->flags & MP_IMGFLAG_DIRECT) {
     data = NULL;
-    BindBuffer(GL_PIXEL_UNPACK_BUFFER, 1);
+    BindBuffer(GL_PIXEL_UNPACK_BUFFER, gl_buffer);
     UnmapBuffer(GL_PIXEL_UNPACK_BUFFER);
     slice = 0; // always "upload" full texture
   }

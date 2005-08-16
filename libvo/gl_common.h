@@ -85,6 +85,8 @@ int setGlWindow(XVisualInfo **vinfo, GLXContext *context, Window win);
 void releaseGlContext(XVisualInfo **vinfo, GLXContext *context);
 #endif
 
+extern void (APIENTRY *GenBuffers)(GLsizei, GLuint *);
+extern void (APIENTRY *DeleteBuffers)(GLsizei, const GLuint *);
 extern void (APIENTRY *BindBuffer)(GLenum, GLuint);
 extern GLvoid* (APIENTRY *MapBuffer)(GLenum, GLenum); 
 extern GLboolean (APIENTRY *UnmapBuffer)(GLenum);
