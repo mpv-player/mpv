@@ -1,4 +1,4 @@
-.\" synced with 1.1055
+.\" synced with 1.1063
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Questa pagina di manuale fu/è stata fatta da Gabucino, Diego Biurrun,
 .\" Jonas Jermann
@@ -828,10 +828,11 @@ Riproduce un file Matroska in giapponese.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <numero> (solo \-audiofile)
-Forza il tipo di demuxer audio per \-audiofile.
-L'ID deve essere specificato come definito in libmpdemux/\:demuxer.h.
-\-audio-demuxer 17 forza il formato MP3.
+.B \-audio-demuxer <nome> (solo \-audiofile)
+Forza il nome del demuxer audio, come emesso da \-audio-demuxer help.
+Per retrocompatibilità accetta anche l'ID del demuxer come definito in
+libmpdemux/\:demuxer.h.
+\-audio-demuxer audio o \-audio-demuxer 17 forza il formato MP3.
 .
 .TP
 .B \-audiofile <nomefile>
@@ -862,10 +863,11 @@ La riproduzione comincerà appena la cache verrà riempirà almeno a <percentuale>
 del totale.
 .
 .TP
-.B \-cache-prefill <percentuale> (non ancora implementato)
-Quando la cache viene svuotata MPlayer si metterà in pausa e la riproduzione
-ripartirà quando la soglia di riempimento della cache impostata con questa
-opzione verrà raggiunta.
+.B \-cache-seek-min <percentuale> (non ancora implementato)
+Quando verrà effettuata una ricerca verso una posizione entro la <percentuale>
+della dimensione della cache dalla posizione attuale, MPlayer attenderà il
+riempimento della cache stessa fino a quella posizione, invece di effettuare la
+ricerca sul flusso (default: 50).
 .
 .TP
 .B \-cdda <opzione1:opzione2> (solo CDDA)
@@ -969,10 +971,11 @@ Quando viene usato con MEncoder, non è detto che funzioni correttamente
 con \-ovc copy.
 .
 .TP
-.B \-demuxer <numero>
-Forza il tipo di demuxer audio.
-L'ID deve essere specificato come definito in libmpdemux/\:demuxer.h.
-\-demuxer 17 forza il formato MP3.
+.B \-demuxer <nome>
+Forza il nome del demuxer audio, come emesso da \-demuxer help.
+Per retrocompatibilità accetta anche l'ID del demuxer come definito in
+libmpdemux/\:demuxer.h.
+\-demuxer audio o \-demuxer 17 forza il formato MP3.
 .
 .TP
 .B \-dumpaudio (solo MPlayer)
@@ -1654,9 +1657,10 @@ Attualmente i sottotitoli sono a scala di grigi e perciò questo valore
 255 indica bianco e 0 nero.
 .
 .TP
-.B \-sub-demuxer <numero> (solo \-subfile) (CODICE BETA)
-Forza il tipo di demuxer dei sottotitoli per \-subfile.
-Passa l'ID del demuxer come specificato in subreader.h.
+.B \-sub-demuxer <nome> (solo \-subfile) (CODICE BETA)
+Forza il nome del demuxer, come emesso da \-sub-demuxer help.
+Per retrocompatibilità accetta anche l'ID del demuxer come definito in
+subreader.h.
 .
 .TP
 .B \-sub-fuzziness <modalità>
@@ -6121,7 +6125,9 @@ Utilizza \-of help per avere una lista dei formati disponibili.
 .IPs "\-of avi"
 Codifica in formato AVI.
 .IPs "\-of mpeg"
-Codifica in formato MPEG.
+Codifica in formato MPEG (vedi anche \-mpegopts).
+.IPs "\-of lavf"
+Codifica con i muxer di libavformat (vedi anche \-lavfopts).
 .IPs "\-of rawvideo"
 flusso grezzo video (nessun multiplex \- un solo flusso video)
 .IPs "\-of rawaudio"
@@ -6531,6 +6537,8 @@ MPEG Layer 3
 AC3
 .IPs adpcm_ima_wav
 IMA Adaptive PCM (4bits per campione, compressione 4:1)
+.IPS sonic\ 
+Codec sperimentale con/senza perdita
 .RE
 .PD 1
 .
@@ -6568,6 +6576,8 @@ Impiega il codec (video) specificato (default: mpeg4).
 Motion JPEG (JPEG per i filmati)
 .IPs ljpeg
 Lossless JPEG (JPEG senza perdita)
+.IPs h261\ 
+H.261
 .IPs h263\ 
 H.263
 .IPs h263p
@@ -6597,8 +6607,16 @@ più piccoli del 20%
 ASUS Video v1
 .IPs asv2\ 
 ASUS Video v2
-.IPs ffv1 (vedi anche vstrict)
+.IPs ffv1 (vedi anche: vstrict)
 codec video di FFmpeg senza perdita
+.IPs flv\ \ 
+Sorenson H.263 usato nei Flash Video
+.IPs dvvideo
+Sony Digital Video
+.IPs svq1\ 
+Apple Sorenson Video 1
+.IPs snow (vedi anche: vstrict)
+codec video sperimentale di FFmpeg basato su wavelet
 .RE
 .PD 1
 .
@@ -7760,7 +7778,7 @@ Precisione della DC intra in bits (default: 8).
 Se viene specificato vcodec=mpeg2video questo valore può essere 8, 9, 10 or 11.
 .
 .TP
-.B cgop (vedi ache sc_threshold)
+.B cgop (vedi anche sc_threshold)
 Chiude tutti i GOP.
 Attualmente funziona solo se la rilevazione del cambio scena è disattivata
 (sc_threshold=1000000000).
@@ -8942,12 +8960,40 @@ un framerate, eventualmente convertito con \-ofps, di 24000/1001 oppure 24 fps.
 Qualsiasi altro valore di velocità è incompatibile con questa opzione.
 .
 .
-.SS FFmpeg libavformat muxers (\-lavfopts)
+.SS FFmpeg libavformat muxers (\-lavfopts) (vedi anche \-of lavf)
 .
 .TP
 .B format=<formato_contenitore>
 Forza in quale formato contenitore si deve scrivere il file
 (default: trovato automaticamente dall'estensione del file di uscita).
+.PD 0
+.RSs
+.IPs mpg\ \ 
+Flusso di sistema MPEG-1 e MPEG-2 PS
+.IPs asf\ \ 
+Advanced Streaming Format
+.IPs avi\ \ 
+File AVI (Audio Video Interleave)
+.IPs wav\ \ 
+Formato Audio Wave
+.IPs swf\ \ 
+Macromedia Flash
+.IPs flv\ \ 
+File Macromedia Flash Video
+.IPs rm\ \ \ 
+Real Audio e Video
+.IPs au\ \ \ 
+Formato SUN AU
+.IPs nut\ \ 
+Formato contenitore aperto NUT (sperimentale)
+.IPs mov\ \ 
+Quicktime
+.IPs mp4\ \ 
+Formato MPEG-4
+.IPs dv\ \ 
+Formato contenitore Sony Digital Video
+.RE
+.PD 1
 .
 .
 .\" --------------------------------------------------------------------------
