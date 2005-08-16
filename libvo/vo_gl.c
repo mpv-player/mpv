@@ -359,11 +359,11 @@ static void draw_osd(void)
   if (vo_osd_changed(0)) {
     int i;
     int osd_h, osd_w;
-    for (i = 0; i < osdtexCnt; i++) {
-      glDeleteTextures(1, &osdtex[i]);
+    glDeleteTextures(osdtexCnt, osdtex);
 #ifndef FAST_OSD
-      glDeleteTextures(1, &osdatex[i]);
+    glDeleteTextures(osdtexCnt, osdatex);
 #endif
+    for (i = 0; i < osdtexCnt; i++) {
       glDeleteLists(osdDispList[i], 1);
     }
     osdtexCnt = 0;
