@@ -2704,6 +2704,9 @@ Select usage of rectangular textures (saves video RAM, but often slower).
 1: Use texture_rectangle.
 .br
 2: Use texture_non_power_of_two.
+.IPs (no)glfinish
+Call glFinish() before swapping buffers.
+Slower but in some cases more correct output (default: disabled).
 .REss
 .RE
 .PD 1
