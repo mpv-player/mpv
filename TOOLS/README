@@ -276,6 +276,18 @@ Usage:        As argument requires DOS interrupt number in hexadecimal form.
               XX   - interrupt number which was passed as argument
 
 
+checktree.sh
+
+Author:       Ivo van Poorten
+
+Description:  Check the source tree for anomalies
+
+Usage:        checktree.sh -help
+
+Note:         This script is meant for developers to check the current (CVS)
+              source tree and/or their intended patches.
+
+
 cpuinfo
 
 Author:       Jürgen Keil
