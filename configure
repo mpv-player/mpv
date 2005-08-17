@@ -7061,6 +7061,7 @@ AV_DEP = $_dep_libavutil $_dep_libavcodec $_dep_libavformat
 AV_LIB = $_ld_libavformat $_ld_libavcodec $_ld_libavutil 
 CONFIG_LIBAVUTIL = $_libavutil_required
 CONFIG_LIBAVCODEC = $_libavcodec
+CONFIG_LIBAVCODECSO = $_libavcodecso
 CONFIG_LIBAVFORMAT = $_libavformat
 ZORAN = $_zr
 FAME = $_fame

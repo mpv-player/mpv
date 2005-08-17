@@ -192,6 +192,10 @@ LIBAV_INC += -I../libavcodec
 ENCODER_SRCS += ae_lavc.c
 endif
 
+ifeq ($(CONFIG_LIBAVCODECSO),yes)
+ENCODER_SRCS += ae_lavc.c
+endif
+
 ifeq ($(MUSEPACK),yes)
 AUDIO_SRCS += ad_mpc.c
 endif
