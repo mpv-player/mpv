@@ -5851,9 +5851,9 @@ Use \-of help to get a list of available container formats.
 .IPs "\-of avi"
 Encode to AVI.
 .IPs "\-of mpeg"
-Encode to MPEG (see also \-mpegopts).
+Encode to MPEG (also see \-mpegopts).
 .IPs "\-of lavf"
-Encode with libavformat muxers (see also \-lavfopts).
+Encode with libavformat muxers (also see \-lavfopts).
 .IPs "\-of rawvideo"
 raw video stream (no muxing \- one video stream only)
 .IPs "\-of rawaudio"
@@ -7456,7 +7456,7 @@ intra DC precision in bits (default: 8).
 If you specify vcodec=mpeg2video this value can be 8, 9, 10 or 11.
 .
 .TP
-.B cgop (see also sc_threshold)
+.B cgop (also see sc_threshold)
 Close all GOPs.
 Currently it only works if scene change detection is disabled
 (sc_threshold=1000000000).
@@ -8579,7 +8579,7 @@ video when the output framerate, eventually converted with \-ofps, is either
 Any other framerate is incompatible with this option.
 .
 .
-.SS FFmpeg libavformat muxers (\-lavfopts) (see also \-of lavf)
+.SS FFmpeg libavformat muxers (\-lavfopts) (also see \-of lavf)
 .
 .TP
 .B format=<container_format>
@@ -8592,7 +8592,7 @@ MPEG-1 systems and MPEG-2 PS
 .IPs asf\ \ 
 Advanced Streaming Format
 .IPs avi\ \ 
-Audio Video Interleave File
+Audio Video Interleave file
 .IPs wav\ \ 
 Waveform Audio
 .IPs swf\ \ 
@@ -8600,13 +8600,13 @@ Macromedia Flash
 .IPs flv\ \ 
 Macromedia Flash video files
 .IPs rm\ \ \ 
-Real Audio and Video
+RealAudio and RealVideo
 .IPs au\ \ \ 
 SUN AU format
 .IPs nut\ \ 
-NUT Open Container Format (experimental)
+NUT open container format (experimental)
 .IPs mov\ \ 
-Quicktime
+QuickTime
 .IPs mp4\ \ 
 MPEG-4 format
 .IPs dv\ \ 
