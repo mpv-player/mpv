@@ -280,12 +280,12 @@ checktree.sh
 
 Author:       Ivo van Poorten
 
-Description:  Check the source tree for anomalies
+Description:  Check the source tree for anomalies.
 
 Usage:        checktree.sh -help
 
 Note:         This script is meant for developers to check the current (CVS)
-              source tree and/or their intended patches.
+              source tree and/or the patches they are working on.
 
 
 cpuinfo
