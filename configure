@@ -36,11 +36,11 @@ cc_check() {
   echo >> "$TMPLOG"
   echo "$_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra $TMPC -o $TMPO $@" >> "$TMPLOG"
   rm -f "$TMPO"
-  ( $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra "$TMPC" -o "$TMPO" "$@" ) >> "$TMPLOG" 2>&1
+  $_cc $CFLAGS $_inc_extra $_ld_static $_ld_extra "$TMPC" -o "$TMPO" "$@" >> "$TMPLOG" 2>&1
   TMP="$?"
   echo >> "$TMPLOG"
   echo "ldd $TMPO" >> "$TMPLOG"
-  ( $_ldd "$TMPO" ) >> "$TMPLOG" 2>&1
+  $_ldd "$TMPO" >> "$TMPLOG" 2>&1
   echo >> "$TMPLOG"
   return "$TMP"
 }
@@ -445,7 +445,7 @@ done
 # Determine our OS name and CPU architecture
 if test -z "$_target" ; then
   # OS name
-  system_name=`( uname -s ) 2>&1`
+  system_name=`uname -s 2>&1`
   case "$system_name" in
   Linux|FreeBSD|NetBSD|BSD/OS|OpenBSD|SunOS|QNX|Darwin|GNU|BeOS)
     ;;
@@ -471,7 +471,7 @@ if test -z "$_target" ; then
 
 
   # host's CPU/instruction set
-   host_arch=`( uname -p ) 2>&1`
+   host_arch=`uname -p 2>&1`
    case "$host_arch" in
    i386|sparc|ppc|alpha|arm|mips|vax)
      ;;
@@ -485,7 +485,7 @@ if test -z "$_target" ; then
       # recognize.
 
       # x86/x86pc is used by QNX
-      case "`( uname -m ) 2>&1`" in
+      case "`uname -m 2>&1`" in
       i[3-9]86*|x86|x86pc|k5|k6|k6_2|k6_3|k6-2|k6-3|pentium*|athlon*|i586_i686|i586-i686|BePC) host_arch=i386 ;;
       ia64) host_arch=ia64 ;;
       x86_64|amd64)
@@ -588,8 +588,8 @@ if test "$_skip_cc_check" != yes ; then
  if test "`basename $_cc`" = "icc" || test "`basename $_cc`" = "ecc"; then
   echocheck "$_cc version"
   cc_vendor=intel
-  cc_name=`( $_cc -V ) 2>&1 | _head 1 | cut -d ',' -f 1`
-  cc_version=`( $_cc -V ) 2>&1 | _head 1 | cut -d ',' -f 2 | cut -d ' ' -f 3`
+  cc_name=`$_cc -V 2>&1 | _head 1 | cut -d ',' -f 1`
+  cc_version=`$_cc -V 2>&1 | _head 1 | cut -d ',' -f 2 | cut -d ' ' -f 3`
   _cc_major=`echo $cc_version | cut -d '.' -f 1`
   _cc_minor=`echo $cc_version | cut -d '.' -f 2`
   # TODO verify older icc/ecc compatibility
@@ -612,8 +612,8 @@ if test "$_skip_cc_check" != yes ; then
  for _cc in "$_cc" gcc gcc-3.4 gcc-3.3 gcc-3.2 gcc-3.1 gcc3 gcc-3.0 cc ; do
   echocheck "$_cc version"
   cc_vendor=gnu
-  cc_name=`( $_cc -v ) 2>&1 | _tail 1 | cut -d ' ' -f 1`
-  cc_version=`( $_cc -dumpversion ) 2>&1`
+  cc_name=`$_cc -v 2>&1 | _tail 1 | cut -d ' ' -f 1`
+  cc_version=`$_cc -dumpversion 2>&1`
   if test "$?" -gt 0; then
     cc_version="not found"
   fi
@@ -638,7 +638,7 @@ if test "$_skip_cc_check" != yes ; then
       ;;
   esac
   echores "$cc_version"
-  (test "$cc_verc_fail" = "no") && break
+  test "$cc_verc_fail" = "no" && break
  done 
  fi # icc
   if test "$cc_verc_fail" = yes ; then
@@ -689,9 +689,7 @@ read _answer
 
 fi
 echocheck "host cc"
-if not test "$_host_cc" ; then
-  _host_cc=$_cc
-fi
+test "$_host_cc" || _host_cc=$_cc
 echores $_host_cc 
 
 
@@ -1187,7 +1185,7 @@ EOF
 	echores "yes"
     else
 	_def_gcc_mvi_support="#undef CAN_COMPILE_ALPHA_MVI"
-	echores "no, GCC = `( $_cc -dumpversion ) 2>&1` (must be >= 3), CPU = $proc (must be pca56 or later)"
+	echores "no, GCC = `$_cc -dumpversion 2>&1` (must be >= 3), CPU = $proc (must be pca56 or later)"
     fi
     ;;
 
@@ -2627,7 +2625,7 @@ else
   _def_malloc='#undef HAVE_MALLOC_H'
 fi
 # malloc.h emits a warning in FreeBSD and OpenBSD
-(freebsd || openbsd) && _def_malloc='#undef HAVE_MALLOC_H'
+freebsd || openbsd && _def_malloc='#undef HAVE_MALLOC_H'
 echores "$_malloc"
 
 
@@ -4280,7 +4278,7 @@ int main(void) {
   return 0;
 }
 EOF
-  if cc_check "$_ld_gif" && ( "$TMPO" ) >>"$TMPLOG" 2>&1 ; then
+  if cc_check "$_ld_gif" && "$TMPO" >>"$TMPLOG" 2>&1 ; then
     _def_gif_tvt_hack='#undef HAVE_GIF_TVT_HACK'
     echores "disabled"
   else
@@ -4624,7 +4622,7 @@ cat > $TMPC << EOF
 #include <esd.h>
 int main(void) { return 0; }
 EOF
-cc_check `esd-config --libs` `esd-config --cflags` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _esd=yes
+cc_check `esd-config --libs` `esd-config --cflags` && "$TMPO" >> "$TMPLOG" 2>&1 && _esd=yes
 
   fi
 fi
@@ -4661,7 +4659,7 @@ cat > $TMPC << EOF
 #include <polyp/polyplib-error.h>
 int main(void) { return 0; }
 EOF
-cc_check `pkg-config --libs --cflags polyplib polyplib-error polyplib-mainloop` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _polyp=yes
+cc_check `pkg-config --libs --cflags polyplib polyplib-error polyplib-mainloop` && "$TMPO" >> "$TMPLOG" 2>&1 && _polyp=yes
 
   fi
 fi
@@ -4682,14 +4680,14 @@ fi
 echocheck "JACK"
 if test "$_jack" = auto ; then
   _jack=no
-  if ( ( pkg-config --modversion jack ) > /dev/null 2>&1 ) &&
-     ( jackd --version | grep version | awk '{ print $3 }' ) >> "$TMPLOG" 2>&1 ; then
+  if ( pkg-config --modversion jack > /dev/null 2>&1 ) &&
+     jackd --version | grep version | awk '{ print $3 }' >> "$TMPLOG" 2>&1 ; then
 
 cat > $TMPC << EOF
 #include <jack/jack.h>
 int main(void) { jack_client_new("test"); return 0; }
 EOF
-	cc_check `pkg-config --libs --cflags jack` && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _jack=yes
+	cc_check `pkg-config --libs --cflags jack` && "$TMPO" >> "$TMPLOG" 2>&1 && _jack=yes
 fi
 fi
 
@@ -5064,7 +5062,7 @@ int main()
 }
 EOF
 	_freetype=no
-	cc_check `$_freetypeconfig --cflags` `$_freetypeconfig --libs` && ( $TMPO >> "$TMPLOG" ) && _freetype=yes
+	cc_check `$_freetypeconfig --cflags` `$_freetypeconfig --libs` && $TMPO >> "$TMPLOG" && _freetype=yes
     else
 	_freetype=no
     fi
@@ -5099,7 +5097,7 @@ int main()
 }
 EOF
         _fontconfig=no
-        cc_check `pkg-config --cflags --libs fontconfig` && ( $TMPO >> "$TMPLOG" ) && _fontconfig=yes
+        cc_check `pkg-config --cflags --libs fontconfig` && $TMPO >> "$TMPLOG" && _fontconfig=yes
     else
         _fontconfig=no
     fi
@@ -5131,7 +5129,7 @@ int main()
 }
 EOF
 	_fribidi=no
-	cc_check `$_fribidiconfig --cflags` `$_fribidiconfig --libs` && ( $TMPO >> "$TMPLOG" ) && _fribidi=yes
+	cc_check `$_fribidiconfig --cflags` `$_fribidiconfig --libs` && $TMPO >> "$TMPLOG" && _fribidi=yes
     else
 	_fribidi=no
     fi
@@ -6252,7 +6250,7 @@ if test "$_mencoder" != no ; then
 int main(void) { lame_version_t lv; (void) lame_init(); get_lame_version_numerical(&lv);  printf("%d%d\n",lv.major,lv.minor); return 0; }
 EOF
   # Note: libmp3lame usually depends on vorbis
-  cc_check -lmp3lame $_ld_vorbis $_ld_lm && ( "$TMPO" >> "$TMPLOG" 2>&1 ) && _mp3lame=yes
+  cc_check -lmp3lame $_ld_vorbis $_ld_lm && "$TMPO" >> "$TMPLOG" 2>&1 && _mp3lame=yes
   if test "$_mp3lame" = yes ; then
     _def_mp3lame="#define HAVE_MP3LAME `$TMPO`"
     _def_cfg_mp3lame="#define CONFIG_MP3LAME `$TMPO`"
@@ -6426,7 +6424,7 @@ fi
 echores "$_network"
 
 echocheck "ftp"
-if (not beos) && (test "$_ftp" != no) ; then
+if not beos && test "$_ftp" != no ; then
   _def_ftp='#define HAVE_FTP 1'
   _inputmodules="ftp $_inputmodules"
 else
@@ -6736,7 +6734,7 @@ elif test -z "$CFLAGS" ; then
   # always compile with '-g' if .developer:
   if test -f ".developer" ; then
     CFLAGS="-g $CFLAGS"
-    if (test "$_crash_debug" = auto) && (not mingw32) ; then
+    if test "$_crash_debug" = auto && not mingw32 ; then
       _crash_debug=yes
     fi
     _stripbinaries=no
@@ -6868,7 +6866,7 @@ if test "$_vidix" = yes; then
 else
   _novomodules="cvidix $_novomodules"
 fi
-if test "$_vidix" = yes && (win32); then
+if test "$_vidix" = yes && win32; then
   _vosrc="$_vosrc vo_winvidix.c"
   _vomodules="winvidix $_vomodules"
   _ld_win32libs="-lgdi32 $_ld_win32libs"
