@@ -120,6 +120,7 @@ static int init(int rate,int channels,int format,int flags){
 	wavhdr.sample_rate = le2me_32(ao_data.samplerate);
 	wavhdr.bytes_per_second = le2me_32(ao_data.bps);
 	wavhdr.bits = le2me_16(bits);
+	wavhdr.block_align = le2me_16(ao_data.channels * (bits / 8));
 	
 	wavhdr.data_length=le2me_32(0x7ffff000);
 	wavhdr.file_length = wavhdr.data_length + sizeof(wavhdr) - 8;
