@@ -50,6 +50,9 @@ MPlayer (1.0)
     * vstrict=-1 is default, Snow, ffv1 etc. need vstrict=-2
     * skiploopfilter decoder option for very fast H.264 decoding
 
+    Gui:
+    * ported to GTK2
+
     Filters:
     * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6")
     * remove_logo filter
@@ -74,6 +77,7 @@ MPlayer (1.0)
     * macosx audio output driver fixes
     * support for playing DVDs copied to harddisk on Cygwin
     * DragonFly BSD support
+    * liba52 asm optimizations ported to amd64
 
     Others:
     * enabled hinting for TrueType fonts
