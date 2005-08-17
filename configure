@@ -155,7 +155,8 @@ Installation directories:
 
 Optional features:
   --disable-mencoder     disable mencoder (a/v encoder) compilation [enable]
-  --enable-gui           enable gmplayer compilation (GTK 1.2 GUI) [disable]
+  --enable-gui           enable gmplayer compilation (GTK+ GUI) [disable]
+  --enable-old-gtk       force using GTK 1.2 for GUI  [disable]
   --enable-largefiles    enable support for files > 2 GBytes [disable]
   --enable-linux-devfs   set default devices to devfs ones [disable]
   --enable-termcap       use termcap database for key codes [autodetect]
@@ -1441,6 +1442,7 @@ _opendivx=no
 _lirc=auto
 _lircc=auto
 _gui=no
+_gtk1=no
 _termcap=auto
 _termios=auto
 _3dfx=no
@@ -1693,6 +1695,7 @@ for ac_option do
   --disable-lircc)	_lircc=no	;;
   --enable-gui)		_gui=yes	;;
   --disable-gui)	_gui=no		;;
+  --enable-old-gtk)	_gtk1=yes	;;
   --enable-termcap)	_termcap=yes	;;
   --disable-termcap)	_termcap=no	;;
   --enable-termios)	_termios=yes    ;;
@@ -6629,8 +6632,40 @@ EOF
   fi
   echores "$_xshape"
 
+#Check for GTK
+if test "$_gtk1" = no ; then
+  #Check for GTK2 :
+  echocheck "GTK+ version"
 
-  # Check for GTK:
+  if pkg-config gtk+-2.0 --exists ; then
+    _gtk=`pkg-config gtk+-2.0 --modversion 2>/dev/null`
+    _inc_gtk=`pkg-config gtk+-2.0 --cflags 2>/dev/null`
+    _ld_gtk=`pkg-config gtk+-2.0 --libs 2>/dev/null`
+    echores "$_gtk"
+
+    # Check for GLIB2
+    if pkg-config glib-2.0 --exists ; then
+      echocheck "glib version"
+      _glib=`pkg-config glib-2.0 --modversion 2>/dev/null`
+      _inc_glib=`pkg-config glib-2.0 --cflags 2>/dev/null`
+      _ld_glib=`pkg-config glib-2.0 --libs 2>/dev/null`
+      echores "$_glib"
+
+      _def_gui='#define HAVE_NEW_GUI 1'
+      _def_gtk2_gui='#define HAVE_GTK2_GUI 1'
+      _ld_gui='$(GTKLIB) $(GLIBLIB)'
+    else
+      _gtk1=yes
+      echo "GLIB-2 devel packages were not found, trying GTK 1.2"
+    fi
+  else
+    echo "GTK-2 devel packages were not found, trying GTK 1.2"
+    _gtk1=yes
+  fi
+fi
+
+if test "$_gtk1" = yes ; then
+  # Check for old GTK (1.2.x)
   echocheck "GTK version"
   if test -z "$_gtkconfig" ; then
     if ( gtk-config --version ) >/dev/null 2>&1 ; then
@@ -6663,7 +6698,9 @@ EOF
   echores "$_glib (using $_glibconfig)"
 
   _def_gui='#define HAVE_NEW_GUI 1'
+  _def_gtk2_gui='#undef HAVE_GTK2_GUI'
   _ld_gui='$(GTKLIB) $(GLIBLIB)'
+fi
 
   echo "Creating Gui/config.mak"
   cat > Gui/config.mak << EOF
@@ -6678,6 +6715,7 @@ EOF
 
 else
   _def_gui='#undef HAVE_NEW_GUI'
+  _def_gtk2_gui='#undef HAVE_GTK2_GUI'
 fi
 # --------------- GUI specific tests end -------------------
 
@@ -7440,6 +7478,7 @@ $_def_unrarlib
 
 /* gui support, please do not edit this option */
 $_def_gui
+$_def_gtk2_gui
 
 /* Audio output drivers */
 $_def_ossaudio

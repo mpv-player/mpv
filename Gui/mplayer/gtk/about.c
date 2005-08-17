@@ -28,6 +28,11 @@ GtkWidget * create_About( void )
   GtkWidget     * AboutText;
   GtkWidget     * Ok;
 
+#ifdef HAVE_GTK2_GUI
+  GtkTextBuffer * AboutTextBuffer;
+  GtkTextIter   iter;
+#endif //HAVE_GTK2_GUI
+
   GtkStyle      * pixmapstyle;
   GdkPixmap     * pixmapwid;
   GdkBitmap     * mask;
@@ -67,11 +72,21 @@ GtkWidget * create_About( void )
   gtk_box_pack_start( GTK_BOX( vbox ),scrolledwindow1,TRUE,TRUE,0 );
   gtk_scrolled_window_set_policy( GTK_SCROLLED_WINDOW( scrolledwindow1 ),GTK_POLICY_AUTOMATIC,GTK_POLICY_AUTOMATIC );
 
+#ifdef HAVE_GTK2_GUI
+  AboutText = gtk_text_view_new();
+  AboutTextBuffer = gtk_text_view_get_buffer (GTK_TEXT_VIEW (AboutText));
+  gtk_text_buffer_get_iter_at_offset (AboutTextBuffer, &iter, 0);  
+#else  
   AboutText=gtk_text_new( NULL,NULL );
+#endif
   gtk_widget_set_name( AboutText,"AboutText" );
   gtk_widget_show( AboutText );
   gtk_container_add( GTK_CONTAINER( scrolledwindow1 ),AboutText );
+#ifdef HAVE_GTK2_GUI  
+  gtk_text_buffer_insert (AboutTextBuffer, &iter,   
+#else  
   gtk_text_insert( GTK_TEXT( AboutText ),NULL,NULL,NULL,
+#endif
   	"\n" 
 	MSGTR_ABOUT_UHU 
 	"             (http://www.uhulinux.hu/)\n" 
