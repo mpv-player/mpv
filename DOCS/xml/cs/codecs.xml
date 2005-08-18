@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with 1.69 -->
+<!-- Synced with 1.72 -->
 <sect1 id="codecs">
 <title>Podporované kodeky</title>
 
@@ -242,13 +242,15 @@ stabilní a nabízí nejvíce vlastností. Pro její získání proveďte:
   <screen>cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg login</screen>
   </para></step>
 <step><para>
-  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec</screen>
+  <screen>cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/ffmpeg co -P ffmpeg/libavcodec ffmpeg/libavutil</screen>
   </para></step>
 <step><para>
-  Přesuňte adresář <filename>libavcodec</filename> z FFmpeg do kořenového
+  Přesuňte adresáře <filename>libavcodec</filename> a
+  <filename>libavutil</filename> z FFmpeg do kořenového
   adresáře <application>MPlayer</application>ova CVS stromu.
   Mělo by to vypadat asi takto:
   <filename class="directory">main/libavcodec</filename>
+  <filename class="directory">main/libavutil</filename>
   </para><para>
   Symbolický link <emphasis role="bold">nestačí</emphasis>, musíte jej
   zkopírovat/přesunout!
@@ -257,8 +259,9 @@ stabilní a nabízí nejvíce vlastností. Pro její získání proveďte:
   Pokud chcete mít <systemitem class="library">libavcodec</systemitem>
   aktualizován vždy když aktualizujete
   <application>MPlayer</application> z CVS, vložte do souboru
-  <filename>main/CVS/Entries</filename> následující řádek:
+  <filename>main/CVS/Entries</filename> následující řádky:
   <screen>D/libavcodec////</screen>
+  <screen>D/libavutil////</screen>
   </para></step>
 <step><para>
   Kompilujte. Skript <filename>configure</filename> by měl zjistit problémy
@@ -628,8 +631,8 @@ platformy.</para></note>
   Pokud máte nainstalován klient subversion, můžete si poslední x264
   zdrojové kódy x264 opatřit tímto příkazem:
   <screen>
-    svn co svn://svn.videolan.org/x264/trunk x264
-  </screen>
+    svn co svn://svn.videolan.org/x264/trunk x264<!--
+  --></screen>
   Zdrojové kódy <application>MPlayer</application>u jsou aktualizovány, kdykoli
   nastane změna API v <systemitem class="library">x264</systemitem>, takže vždy
   doporučujeme používat také CVS verzi <application>MPlayer</application>u.
@@ -653,7 +656,9 @@ platformy.</para></note>
   <application>MPlayer</application>u s podporou
   <systemitem class="library">x264</systemitem> snadné.
   Stačí spustir standardní:
-  <screen>./configure &amp;&amp; make &amp;&amp; sudo make install</screen>
+  <screen>
+    ./configure &amp;&amp; make &amp;&amp; sudo make install<!--
+  --></screen>
   Skript configure automaticky detekuje, že jste splnili požadavky pro
   <systemitem class="library">x264</systemitem>.
 </para>
