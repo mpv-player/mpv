@@ -28,9 +28,6 @@ Small improvements:
  * Make the output windows remember their positions when resizing to
    double size.
 
- * Ability to completely disable those popups ('cannot access cdrom',
-   'your system is too slow...').
-
  * Ability to resize to full size/double size/triple (or half) size
    upon key presses.
 
@@ -92,8 +89,6 @@ Enhancements:
  * -stop option for MPlayer similar to -endpos for MEncoder
 
  * color subtitles
-
- * swf (flash) demuxer (working through libavformat)
 
  * DirectX video acceleration -vo for Windows (similar to XvmC)
 
