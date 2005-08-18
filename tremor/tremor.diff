@@ -89,3 +89,28 @@ diff -ur orig/os_types.h mod-2004-01-05/os_types.h
 +   typedef int16_t ogg_int16_t;
  
  #endif  /* _OS_TYPES_H */
+Index: sharedbook.c
+===================================================================
+RCS file: /cvsroot/mplayer/main/tremor/sharedbook.c,v
+retrieving revision 1.1
+diff -u -r1.1 sharedbook.c
+--- sharedbook.c	30 Dec 2004 12:09:20 -0000	1.1
++++ sharedbook.c	18 Aug 2005 16:13:54 -0000
+@@ -208,7 +208,7 @@
+ 	  int indexdiv=1;
+ 	  for(k=0;k<b->dim;k++){
+ 	    int index= (j/indexdiv)%quantvals;
+-	    int point;
++	    ogg_int32_t point;
+ 	    int val=VFLOAT_MULTI(delta,delpoint,
+ 				 abs(b->quantlist[index]),&point);
+ 
+@@ -242,7 +242,7 @@
+ 	  int         lastpoint=0;
+ 
+ 	  for(k=0;k<b->dim;k++){
+-	    int point;
++	    ogg_int32_t point;
+ 	    int val=VFLOAT_MULTI(delta,delpoint,
+ 				 abs(b->quantlist[j*b->dim+k]),&point);
+ 
