@@ -1,7 +1,7 @@
 TODO:
 =====
 
-Post-0.90 / CVS CLEANUP work:
+CVS CLEANUP work:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 - maybe remove .raw font support too
 - remove -vf yuy2, yvu9
@@ -22,9 +22,6 @@ Post-0.90 / CVS CLEANUP work:
   - mga_vid_laced.diff - buggy interlace support into mga_vid
   - patch_sortsub_disable-1.3x.diff - remove --disable-sortsub
   - mplayer-0.90rc3-fixfbdev.patch - ugly hack to fix multiple file & -vo fbdev
-- fix locale problems (add common float parser / mp_sscanf())
-  maybe use Albeu's new filter args parser hack in all filters, remove sscanf()
-- new demuxer layer - at least modularized...
 - review and implement draw_slice() support in video filters
 
 FOR THE NEXT RELEASE:
@@ -72,7 +69,6 @@ DOCS:
   - documentation.html
 - enhance the FAQ
 - document missing XviD options
-- add Matroska, NSV and nut to formats.xml
 - split man page into mplayer.1 and mencoder.1
 
 
