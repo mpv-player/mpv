@@ -140,80 +140,61 @@ char* af_fmt2str(int format, char* str, int size)
   return str;
 }
 
+static struct {
+    const char *name;
+    const int format;
+} af_fmtstr_table[] = {
+    { "mulaw", AF_FORMAT_MU_LAW },
+    { "alaw", AF_FORMAT_A_LAW },
+    { "mpeg2", AF_FORMAT_MPEG2 },
+    { "ac3", AF_FORMAT_AC3 },
+    { "imaadpcm", AF_FORMAT_IMA_ADPCM },
+
+    { "u8", AF_FORMAT_U8 },
+    { "s8", AF_FORMAT_S8 },
+    { "u16le", AF_FORMAT_U16_LE },
+    { "u16be", AF_FORMAT_U16_BE },
+    { "u16ne", AF_FORMAT_U16_NE },
+    { "s16le", AF_FORMAT_S16_LE },
+    { "s16be", AF_FORMAT_S16_BE },
+    { "s16ne", AF_FORMAT_S16_NE },
+    { "u24le", AF_FORMAT_U24_LE },
+    { "u24be", AF_FORMAT_U24_BE },
+    { "u24ne", AF_FORMAT_U24_NE },
+    { "s24le", AF_FORMAT_S24_LE },
+    { "s24be", AF_FORMAT_S24_BE },
+    { "s24ne", AF_FORMAT_S24_NE },
+    { "u32le", AF_FORMAT_U32_LE },
+    { "u32be", AF_FORMAT_U32_BE },
+    { "u32ne", AF_FORMAT_U32_NE },
+    { "s32le", AF_FORMAT_S32_LE },
+    { "s32be", AF_FORMAT_S32_BE },
+    { "s32ne", AF_FORMAT_S32_NE },
+    { "floatle", AF_FORMAT_FLOAT_LE },
+    { "floatbe", AF_FORMAT_FLOAT_BE },
+    { "floatne", AF_FORMAT_FLOAT_NE },
+	
+    { NULL, 0 }
+};
+
 char *af_fmt2str_short(int format)
 {
-    switch(format)
-    {
-	// special
-	case AF_FORMAT_MU_LAW: return "mulaw";
-	case AF_FORMAT_A_LAW: return "alaw";
-	case AF_FORMAT_MPEG2: return "mpeg2";
-	case AF_FORMAT_AC3: return "ac3";
-	case AF_FORMAT_IMA_ADPCM: return "imaadpcm";
-	// ordinary
-	case AF_FORMAT_U8: return "u8";
-	case AF_FORMAT_S8: return "s8";
-	case AF_FORMAT_U16_LE: return "u16le";
-	case AF_FORMAT_U16_BE: return "u16be";
-	case AF_FORMAT_S16_LE: return "s16le";
-	case AF_FORMAT_S16_BE: return "s16be";
-	case AF_FORMAT_U24_LE: return "u24le";
-	case AF_FORMAT_U24_BE: return "u24be";
-	case AF_FORMAT_S24_LE: return "s24le";
-	case AF_FORMAT_S24_BE: return "s24be";
-	case AF_FORMAT_U32_LE: return "u32le";
-	case AF_FORMAT_U32_BE: return "u32be";
-	case AF_FORMAT_S32_LE: return "s32le";
-	case AF_FORMAT_S32_BE: return "s32be";
-	case AF_FORMAT_FLOAT_LE: return "floatle";
-	case AF_FORMAT_FLOAT_BE: return "floatbe";
-    }
+    int i;
+
+    for (i = 0; af_fmtstr_table[i].name; i++)
+	if (af_fmtstr_table[i].format == format)
+	    return (char*)(af_fmtstr_table[i].name);
+
     return "??";
 }
 
 int af_str2fmt_short(char* str)
 {
     int i;
-    static struct {
-	const char *name;
-	const int format;
-    } table[] = {
-	{ "mulaw", AF_FORMAT_MU_LAW },
-	{ "alaw", AF_FORMAT_A_LAW },
-	{ "mpeg2", AF_FORMAT_MPEG2 },
-	{ "ac3", AF_FORMAT_AC3 },
-	{ "imaadpcm", AF_FORMAT_IMA_ADPCM },
 
-	{ "u8", AF_FORMAT_U8 },
-	{ "s8", AF_FORMAT_S8 },
-	{ "u16le", AF_FORMAT_U16_LE },
-	{ "u16be", AF_FORMAT_U16_BE },
-	{ "u16ne", AF_FORMAT_U16_NE },
-	{ "s16le", AF_FORMAT_S16_LE },
-	{ "s16be", AF_FORMAT_S16_BE },
-	{ "s16ne", AF_FORMAT_S16_NE },
-	{ "u24le", AF_FORMAT_U24_LE },
-	{ "u24be", AF_FORMAT_U24_BE },
-	{ "u24ne", AF_FORMAT_U24_NE },
-	{ "s24le", AF_FORMAT_S24_LE },
-	{ "s24be", AF_FORMAT_S24_BE },
-	{ "s24ne", AF_FORMAT_S24_NE },
-	{ "u32le", AF_FORMAT_U32_LE },
-	{ "u32be", AF_FORMAT_U32_BE },
-	{ "u32ne", AF_FORMAT_U32_NE },
-	{ "s32le", AF_FORMAT_S32_LE },
-	{ "s32be", AF_FORMAT_S32_BE },
-	{ "s32ne", AF_FORMAT_S32_NE },
-	{ "floatle", AF_FORMAT_FLOAT_LE },
-	{ "floatbe", AF_FORMAT_FLOAT_BE },
-	{ "floatne", AF_FORMAT_FLOAT_NE },
-	
-	{ NULL, 0 }
-    };
-    
-    for (i = 0; table[i].name; i++)
-	if (!strcasecmp(str, table[i].name))
-	    return table[i].format;
+    for (i = 0; af_fmtstr_table[i].name; i++)
+	if (!strcasecmp(str, af_fmtstr_table[i].name))
+	    return af_fmtstr_table[i].format;
 
     return -1;
 }
