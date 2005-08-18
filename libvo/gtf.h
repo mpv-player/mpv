@@ -1,7 +1,7 @@
 #ifndef __GTF_H
 #define __GTF_H
 
-#include "osdep/vbelib.h"
+#include <vbe.h>
 
 #define GTF_VF 0 
 #define GTF_HF 1 

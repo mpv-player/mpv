@@ -4300,7 +4300,7 @@ fi
 if test "$_vesa" = yes ; then
   _def_vesa='#define HAVE_VESA 1'
   _ld_vesa="-lvbe -llrmi"
-  _vosrc="$_vosrc vo_vesa.c vesa_lvo.c"
+  _vosrc="$_vosrc vo_vesa.c vesa_lvo.c gtf.c"
   _vomodules="vesa $_vomodules"
   echores "yes"
 else

@@ -8,7 +8,6 @@ SRCS=aclib.c \
      font_load.c \
      font_load_ft.c \
      geometry.c \
-     gtf.c \
      osd.c \
      spuenc.c \
      sub.c \
