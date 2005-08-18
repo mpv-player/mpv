@@ -175,11 +175,13 @@ panscan <-1.0 - 1.0> | <0.0 - 1.0> <absolute>
 
 loadfile <file|url> <append>
     Load the given file/URL, stopping playback of the current file/URL.
-    If <append> is nonzero it will be appended to the playlist instead.
+    If <append> is nonzero playback continues and the file/URL is
+    appended to the current playlist instead.
 
 loadlist <file> <append>
     Load the given playlist file, stopping playback of the current file.
-    If <append> is nonzero it will be appended to the playlist instead.
+    If <append> is nonzero playback continues and the playlist file is
+    appended to the current playlist instead.
 
 change_rectangle <val1> <val2>
     Change the position of the rectangle filter rectangle.
