@@ -143,6 +143,21 @@ Usage:        --help       show help
               --dvd-device device to pull the video off (default: /dev/dvd)
 
 
+aconvert
+
+Author:       Jonas Jermann
+
+Description:  A hack to allow MEncoder to read respectively encode from audio
+              only files.
+
+Usage:        aconvert <"input file"> <"output file"> <"options">
+              If no options are specified the following is assumed:
+              -oac lavc -lavcopts acodec=mp3:abitrate=192
+
+Note:         The script is probably bash dependent and it's just a quick
+              hack, feel free to improve it (or much better: fix mencoder ;).
+
+
 
 Tech scripts in the TOOLS dir
 -----------------------------
