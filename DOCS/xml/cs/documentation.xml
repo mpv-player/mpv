@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.24 -->
+<!-- Synced with: 1.25 -->
 
 <bookinfo id="toc">
 <title><application>MPlayer</application> - Multimediální přehrávač</title>
@@ -182,6 +182,7 @@ mohou být distribuovány za podmíne stanovených v GNU General Public License Vers
 &faq.xml;
 &cd-dvd.xml;
 &ports.xml;
+&encoding-guide.xml;
 &mencoder.xml;
 &mail-lists.xml;
 &bugreports.xml;
