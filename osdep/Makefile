@@ -7,12 +7,6 @@ SRCS= shmem.c strsep.c strl.c vsscanf.c scandir.c gettimeofday.c fseeko.c \
       swab.c
       # timer.c
 
-ifeq ($(TARGET_ARCH_X86),yes)
-ifeq ($(TARGET_OS),Linux)
-SRCS += lrmi.c vbelib.c
-endif
-endif
-
 getch = getch2.c
 timer = timer-lx.c
 ifeq ($(MACOSX_FINDER_SUPPORT),yes)

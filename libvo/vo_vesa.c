@@ -30,13 +30,13 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#include <vbe.h>
 
 #include "video_out.h"
 #include "video_out_internal.h"
 
 #include "fastmemcpy.h"
 #include "sub.h"
-#include "osdep/vbelib.h"
 #include "bswap.h"
 #include "aspect.h"
 #include "vesa_lvo.h"

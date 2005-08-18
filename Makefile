@@ -78,6 +78,7 @@ VO_LIBS = $(AA_LIB) \
           $(SVGA_LIB) \
           $(DIRECTFB_LIB) \
           $(CACA_LIB) \
+	  $(VESA_LIB) \
 
 AO_LIBS = $(ARTS_LIB) \
           $(ESD_LIB) \

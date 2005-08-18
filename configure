@@ -4290,23 +4290,22 @@ esac
 
 echocheck "VESA support"
 if test "$_vesa" = auto ; then
-if x86 && linux ; then
-  _vesa=no
   cat > $TMPC << EOF
-#include <sys/io.h>
-int main(void) { return 0; }
+#include <vbe.h>
+int main(void) { vbeVersion(); return 0; }
 EOF
-  cc_check && _vesa=yes
-fi
+  _vesa=no
+  cc_check -lvbe -llrmi && _vesa=yes
 fi
 if test "$_vesa" = yes ; then
   _def_vesa='#define HAVE_VESA 1'
+  _ld_vesa="-lvbe -llrmi"
   _vosrc="$_vosrc vo_vesa.c vesa_lvo.c"
   _vomodules="vesa $_vomodules"
   echores "yes"
 else
   _def_vesa='#undef HAVE_VESA'
-  echores "no (not supported on this OS/architecture)"
+  echores "no"
   _novomodules="vesa $_novomodules"
 fi
 
@@ -7025,6 +7024,7 @@ JPEG_LIB = $_ld_jpg
 GIF_LIB = $_ld_gif
 SDL_LIB = $_ld_sdl
 SVGA_LIB = $_ld_svga
+VESA_LIB = $_ld_vesa
 AA_LIB = $_ld_aa
 CACA_INC = $_inc_caca
 CACA_LIB = $_ld_caca
