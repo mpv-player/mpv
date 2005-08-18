@@ -1902,6 +1902,9 @@ audio output through JACK (Jack Audio Connection Kit)
 .RSs
 .IPs port=<name>
 Connects to the ports with the given name (default: physical ports).
+.IPs name=<client name>
+Client name that is passed to JACK (default: MPlayer [<PID>]).
+Useful if you want to have certain connections established automatically.
 .IPs (no)estimate
 Estimate the audio delay, supposed to make the video playback smoother
 (default: enabled).

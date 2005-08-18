@@ -207,6 +207,8 @@ static void print_help ()
            "\nOptions:\n"
            "  port=<port name>\n"
            "    Connects to the given ports instead of the default physical ones\n"
+           "  name=<client name>\n"
+           "    Client name to pass to JACK\n"
            "  estimate\n"
            "    Estimates the amount of data in buffers (experimental)\n");
 }
@@ -214,9 +216,10 @@ static void print_help ()
 static int init(int rate, int channels, int format, int flags) {
   const char **matching_ports = NULL;
   char *port_name = NULL;
-  char client_name[40];
+  char *client_name = NULL;
   opt_t subopts[] = {
     {"port", OPT_ARG_MSTRZ, &port_name, NULL},
+    {"name", OPT_ARG_MSTRZ, &client_name, NULL},
     {"estimate", OPT_ARG_BOOL, &estimate, NULL},
     {NULL}
   };
@@ -231,7 +234,10 @@ static int init(int rate, int channels, int format, int flags) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] Invalid number of channels: %i\n", channels);
     goto err_out;
   }
+  if (!client_name) {
+    client_name = (char *)malloc(40);
   sprintf(client_name, "MPlayer [%d]", getpid());
+  }
   client = jack_client_new(client_name);
   if (!client) {
     mp_msg(MSGT_AO, MSGL_FATAL, "[JACK] cannot open server\n");
@@ -286,11 +292,13 @@ static int init(int rate, int channels, int format, int flags) {
   ao_data.outburst = CHUNK_SIZE;
   free(matching_ports);
   free(port_name);
+  free(client_name);
   return 1;
 
 err_out:
   free(matching_ports);
   free(port_name);
+  free(client_name);
   if (client)
     jack_client_close(client);
   free(buffer);
