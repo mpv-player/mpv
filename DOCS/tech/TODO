@@ -37,7 +37,7 @@ FOR THE NEXT RELEASE:
 - cleanup qtaudio/qtvideo (move globals to context)
 - cleanup DMO interfaces
 - fix AVI index offset base position handling ('no video stream found' bug)
-- Update GUI code to support gtk 2.x (any volunteers??? we really need help here)
+- Port GUI code to plain gtk without using X functions (any volunteers??? we really need help here)
 
 FOR THE v1.00 RELEASE:
 ~~~~~~~~~~~~~~~~~~~~~~
