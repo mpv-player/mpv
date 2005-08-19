@@ -1,4 +1,4 @@
-.\" synced with 1.1071
+.\" synced with 1.1072
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2840,10 +2840,16 @@ Veuillez utiliser \-dr si cela fonctionne avec votre implémentation
 OpenGL, car pour de hautes résolutions, cela permet un affichage
 .B beaucoup
 plus rapide.
+Le code vérifie très peu de choses, donc si cette fonction ne marche
+pas, c'est peut-être parceque votre carte ou votre implémentation de
+OpenGL ne la gère pas, même si aucun message d'erreur s'affiche.
+Utilisez glxinfo ou un outil similaire pour afficher les extensions
+d'OpenGL gérées.
 .PD 0
 .RSs
 .IPs (no)manyfmts
-Active la gestion de plus de formats de couleurs (RGB and BGR).
+Active la gestion de plus de formats de couleurs (RGB and BGR)
+(par défaut\ : activé).
 Nécessite une version d'OpenGL >= 1.2.
 .IPs slice-height=<0\-...>
 Nombre de lignes de texture à copier à la fois (par défaut\ : 4).
@@ -2865,8 +2871,8 @@ Active ou désactive la gestion du redimensionnement du ratio d'aspect et
 le "pan-and-scan" (par défaut\ : activé).
 Sa désactivation peut économiser un peu de temps processeur.
 .IPs rectangle=<0,1,2>
-Défini l'utilisation des textures rectangulaires (économise de la RAM
-vidéo RAM, mais est souvent plus lent).
+Défini l'utilisation des textures rectangulaires ce qui économise de la
+RAM vidéo RAM, mais est souvent plus lent (par défaut\ : 0).
 .RSss
 0: Utilise des textures de taille d'une puissance de deux (par défaut).
 .br
@@ -2876,6 +2882,15 @@ vidéo RAM, mais est souvent plus lent).
 .IPs (no)glfinish
 Appelle glFinish() avant d'échanger les tampons.
 Plus lent mais dans certain cas affichage "plus correct".
+.IPs  swapinterval=<n>
+Intervalle minimum en trames affichées entre chaque échange de tampon
+(par défaut\ : 1).
+1 est équivalent à activé VSYNC, 0 pour désactiver VSYNC.
+Ceci va limiter le débit de trames (framerate) à (rafraîchissement
+horizontal / n).
+Requiert le support de GLX_SGI_swap_control pour fonctionner.
+Avec certaines implémentation (la plupart/toutes?) ceci ne fonctionne
+qu'en mode plein écran
 .REss
 .RE
 .PD 1
