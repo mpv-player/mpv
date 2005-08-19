@@ -1,4 +1,4 @@
-.\" synced with 1.1072
+.\" synced with 1.1073
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -2886,6 +2886,7 @@ Plus lent mais dans certain cas affichage "plus correct".
 Intervalle minimum en trames affichées entre chaque échange de tampon
 (par défaut\ : 1).
 1 est équivalent à activé VSYNC, 0 pour désactiver VSYNC.
+Une valeur < 0 utilisera la configuration système.
 Ceci va limiter le débit de trames (framerate) à (rafraîchissement
 horizontal / n).
 Requiert le support de GLX_SGI_swap_control pour fonctionner.
