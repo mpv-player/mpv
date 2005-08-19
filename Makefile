@@ -257,11 +257,6 @@ COMMON_DEPS += libmpdvdkit2/libmpdvdkit.a
 endif
 endif
 
-ifeq ($(SHARED_PP),yes)
-COMMON_DEPS += libavcodec/libpostproc/libpostproc.so
-COMMON_LIBS += libavcodec/libpostproc/libpostproc.so
-endif
-
 ifeq ($(GUI),yes)
 COMMON_DEPS += Gui/libgui.a
 GUI_LIBS = Gui/libgui.a
@@ -449,9 +444,6 @@ $(PRG_CFG): version.h codec-cfg.c codec-cfg.h
 install: $(ALL_PRG)
 ifeq ($(VIDIX),yes)
 	$(DO_MAKE)
-endif
-ifeq ($(SHARED_PP),yes)
-	$(MAKE) install -C libavcodec/libpostproc
 endif
 	if test ! -d $(BINDIR) ; then mkdir -p $(BINDIR) ; fi
 	$(INSTALL) -m 755 $(INSTALLSTRIP) $(PRG) $(BINDIR)/$(PRG)

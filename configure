@@ -307,7 +307,6 @@ Miscellaneous options:
                          and GUI (also the environment variable \$LINGUAS is
                          honored) [en]
                          (Available: $LANGUAGES all)
-  --enable-shared-pp     install & use shared postprocessing lib
   --with-install=PATH    use a custom install program (useful if your OS uses 
                          a GNU-incompatible install utility by default and 
                          you want to use GNU version)
@@ -1464,7 +1463,6 @@ _cdparanoia=auto
 _big_endian=auto
 _freetype=auto
 _fontconfig=auto
-_shared_pp=no
 _menu=no
 _qtx=auto
 _macosx=auto
@@ -1754,9 +1752,6 @@ for ac_option do
   --enable-dga) _dga=auto ;; # as we don't know if it's 1 or 2
   --enable-dga=*) _dga=`echo $ac_option | cut -d '=' -f 2` ;;
   --disable-dga) _dga=no ;;
-
-  --enable-shared-pp) _shared_pp=yes ;;
-  --disable-shared-pp) _shared_pp=no ;;
 
   --enable-menu) _menu=yes ;;
   --disable-menu) _menu=no ;;
@@ -6482,9 +6477,6 @@ else
 fi
 echores "$_byte_order"
 
-echocheck "shared postprocess lib"
-echores "$_shared_pp"
-
 echocheck "OSD menu"
 if test "$_menu" = yes ; then
     _def_menu='#define HAVE_MENU 1'
@@ -6967,7 +6959,6 @@ STREAMING_LIVE_DOT_COM = $_live
 MPLAYER_NETWORK_LIB = $_ld_live $_ld_vstream $_ld_network
 DVBIN = $_dvbin
 VIDIX = $_vidix
-SHARED_PP = $_shared_pp
 CONFIG_PP = yes
 CONFIG_RISKY = yes
 CONFIG_MP3LAME = $_mp3lame
