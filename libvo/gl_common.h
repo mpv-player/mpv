@@ -108,5 +108,6 @@ extern void (APIENTRY *BindProgram)(GLenum, GLuint);
 extern void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
 extern void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
                                               GLfloat, GLfloat);
+extern int (*SwapInterval)(int);
 
 #endif

@@ -22,6 +22,7 @@ void (APIENTRY *BindProgram)(GLenum, GLuint);
 void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
 void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
                                        GLfloat, GLfloat);
+int (*SwapInterval)(int);
 
 /**
  * \brief adjusts the GL_UNPACK_ALGNMENT to fit the stride.
@@ -259,6 +260,17 @@ static void getFunctions() {
     ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fARB");
   if (!ProgramEnvParameter4f)
     ProgramEnvParameter4f = getProcAddress("glProgramEnvParameter4fNV");
+  SwapInterval = getProcAddress("glXSwapInterval");
+  if (!SwapInterval)
+    SwapInterval = getProcAddress("glXSwapIntervalEXT");
+  if (!SwapInterval)
+    SwapInterval = getProcAddress("glXSwapIntervalSGI");
+  if (!SwapInterval)
+    SwapInterval = getProcAddress("wglSwapInterval");
+  if (!SwapInterval)
+    SwapInterval = getProcAddress("wglSwapIntervalEXT");
+  if (!SwapInterval)
+    SwapInterval = getProcAddress("wglSwapIntervalSGI");
 }
 
 /**

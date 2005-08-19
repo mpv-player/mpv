@@ -2678,10 +2678,14 @@ Please use \-dr if it works with your OpenGL implementation,
 since for higher resolutions this provides a
 .B big
 speedup.
+The code is doing very little checks, so if a feature does not work, this
+might be because it is not supported by your card/OpenGL implementation
+even if you do not get any error message.
+Use glxinfo or a similar tool to display the supported OpenGL extensions.
 .PD 0
 .RSs
 .IPs (no)manyfmts
-Enables support for more (RGB and BGR) color formats.
+Enables support for more (RGB and BGR) color formats (default: enabled).
 Needs OpenGL version >= 1.2.
 .IPs slice-height=<0\-...>
 Number of lines copied to texture in one piece (default: 4).
@@ -2700,7 +2704,8 @@ borders in fullscreen mode.
 Enable or disable aspect scaling and pan-and-scan support (default: enabled).
 Disabling might increase speed.
 .IPs rectangle=<0,1,2>
-Select usage of rectangular textures (saves video RAM, but often slower).
+Select usage of rectangular textures which saves video RAM, but often is
+slower (default: 0).
 .RSss
 0: Use power-of-two textures (default).
 .br
@@ -2710,6 +2715,12 @@ Select usage of rectangular textures (saves video RAM, but often slower).
 .IPs (no)glfinish
 Call glFinish() before swapping buffers.
 Slower but in some cases more correct output (default: disabled).
+.IPs  swapinterval=<n>
+Minimum interval in displayed frames between to buffer swaps (default: 1).
+1 is equivalent to enable VSYNC, 0 to disable VSYNC.
+This will limit the framerate to (horizontal refresh rate / n).
+Requires GLX_SGI_swap_control support to work.
+With some (most/all?) implementations this only works in fullscreen mode.
 .REss
 .RE
 .PD 1

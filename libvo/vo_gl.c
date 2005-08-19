@@ -62,6 +62,7 @@ static uint32_t image_width;
 static uint32_t image_height;
 static int many_fmts;
 static int use_glFinish;
+static int swap_interval;
 static GLenum gl_target;
 static GLenum gl_texfmt;
 static GLenum gl_format;
@@ -149,6 +150,8 @@ static int initGl(uint32_t d_width, uint32_t d_height) {
 
   glClearColor( 0.0f,0.0f,0.0f,0.0f );
   glClear( GL_COLOR_BUFFER_BIT );
+  if (SwapInterval)
+    SwapInterval(swap_interval);
   gl_buffer = 0;
   gl_buffersize = 0;
   err_shown = 0;
@@ -519,6 +522,7 @@ static opt_t subopts[] = {
   {"slice-height", OPT_ARG_INT,  &slice_height, (opt_test_f)int_non_neg},
   {"rectangle",    OPT_ARG_INT,  &use_rectangle,(opt_test_f)int_non_neg},
   {"glfinish",     OPT_ARG_BOOL, &use_glFinish, NULL},
+  {"swapinterval", OPT_ARG_INT,  &swap_interval,NULL},
   {NULL}
 };
 
@@ -531,6 +535,7 @@ static int preinit(const char *arg)
     use_aspect = 1;
     use_rectangle = 0;
     use_glFinish = 0;
+    swap_interval = 1;
     slice_height = 4;
     if (subopt_parse(arg, subopts) != 0) {
       mp_msg(MSGT_VO, MSGL_FATAL,
@@ -551,6 +556,10 @@ static int preinit(const char *arg)
               "    2: use texture_non_power_of_two\n"
               "  glfinish\n"
               "    Call glFinish() before swapping buffers\n"
+              "  swapinterval=<n>\n"
+              "    Interval in displayed frames between to buffer swaps.\n"
+              "    1 is equivalent to enable VSYNC, 0 to disable VSYNC.\n"
+              "    Requires GLX_SGI_swap_control support to work.\n"
               "\n" );
       return -1;
     }
