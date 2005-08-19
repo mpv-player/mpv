@@ -22,7 +22,7 @@ void (APIENTRY *BindProgram)(GLenum, GLuint);
 void (APIENTRY *ProgramString)(GLenum, GLenum, GLsizei, const GLvoid *);
 void (APIENTRY *ProgramEnvParameter4f)(GLenum, GLuint, GLfloat, GLfloat,
                                        GLfloat, GLfloat);
-int (*SwapInterval)(int);
+int (APIENTRY *SwapInterval)(int);
 
 /**
  * \brief adjusts the GL_UNPACK_ALGNMENT to fit the stride.
