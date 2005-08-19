@@ -318,7 +318,7 @@ static int amode2v4l(int amode)
 static void setup_audio_buffer_sizes(priv_t *priv)
 {
     int bytes_per_sample = priv->audio_in.bytes_per_sample;
-    double fps = priv->standard.frameperiod.denominator /
+    double fps = (double)priv->standard.frameperiod.denominator /
 	priv->standard.frameperiod.numerator;
     int seconds = priv->video_buffer_size_max/fps;
 
