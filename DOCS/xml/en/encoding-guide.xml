@@ -3201,6 +3201,50 @@ codec</title>
 </itemizedlist>
 </sect3>
 </sect2>
+
+<sect2 id="menc-feat-x264-example-settings">
+<title>Encoding settings examples</title>
+
+<para>
+  The following settings are examples of different encoding
+  options combinations that affect the speed VS quality tradeoff
+  given the same target bitrate.
+
+  If you are aiming at perfect quality without too much thinking and
+  no size limitation, a low constant quantizer encode (like with
+  <option>qp_constant=18</option>) with no B-frames
+  (<option>bframes=0</option>) will probably look very good, but
+  will needlessly spend lots of bits to encode details that could be
+  coded more wisely using some advanced settings.
+</para>
+
+<para>
+  All the encoding settings were tested on a 720x448 @30000/1001 fps
+  video sample, the target bitrate was 900kbps, and the machine was an
+  AMD-64 3400+ at 2400 Mhz in 64 bits mode.
+  Each encoding setting is followed by the encoding speed (in frames
+  per seconds), the compression efficiency loss (in percent of bitrate)
+  compared to the "very high quality" setting, and the PSNR loss (in dB).
+  Please understand that depending on your source your machine type
+  and the development breakthrough, you may get very different results.
+</para>
+
+<itemizedlist>
+<listitem><para><emphasis role="bold">Very high quality:</emphasis>
+<option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option>
+6fps, 0%, 0dB.
+</para></listitem>
+<listitem><para><emphasis role="bold">High quality:</emphasis>
+<option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b:psnr</option>
+13fps, -13%, -0.89dB.
+</para></listitem>
+<listitem><para><emphasis role="bold">Fast:</emphasis>
+<option>subq=4:bframes=2:b_pyramid:weight_b:psnr</option>
+17fps, -20%, -1.48dB.
+</para></listitem>
+</itemizedlist>
+</sect2>
+
 </sect1>
 
 <sect1 id="menc-feat-vcd-dvd">
