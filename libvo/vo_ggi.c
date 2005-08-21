@@ -39,10 +39,6 @@
 #include <ggi/wmh.h>
 #endif
 
-#ifdef HAVE_GGIWMH
-extern int vo_ontop;	/* Window on top */
-#endif
-
 /* maximum buffers */
 #undef GGI_FLIP
 

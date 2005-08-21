@@ -46,7 +46,6 @@
 #define UNUSED(x) ((void)(x))
 
 
-extern int vo_directrendering;
 extern int vo_verbose;
 
 static int benchmark;

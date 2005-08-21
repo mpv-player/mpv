@@ -80,7 +80,6 @@ int mScreen;
 int mLocalDisplay;
 
 /* output window id */
-extern int WinID;
 int vo_mouse_autohide = 0;
 int vo_wm_type = 0;
 int vo_fs_type = 0; // needs to be accessible for GUI X11 code
@@ -865,10 +864,6 @@ typedef struct
     long input_mode;
     long state;
 } MotifWmHints;
-
-extern int vo_depthonscreen;
-extern int vo_screenwidth;
-extern int vo_screenheight;
 
 static MotifWmHints vo_MotifWmHints;
 static Atom vo_MotifHints = None;

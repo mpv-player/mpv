@@ -201,6 +201,7 @@ extern int vo_adapter_num;
 extern int vo_refresh_rate;
 extern int vo_keepaspect;
 extern int vo_rootwin;
+extern int vo_ontop;
 
 extern int vo_gamma_brightness;
 extern int vo_gamma_saturation;
@@ -219,6 +220,8 @@ extern float vo_fps;
 extern char *vo_subdevice;
 
 extern int vo_colorkey;
+
+extern int WinID;
 
 #if defined(HAVE_FBDEV)||defined(HAVE_VESA) 
 

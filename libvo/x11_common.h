@@ -21,27 +21,17 @@
 #define _NET_WM_STATE_TOGGLE        2    /* toggle property  */
 
 extern int metacity_hack;
-extern int vo_fsmode;
 
-extern int vo_depthonscreen;
-extern int vo_screenwidth;
-extern int vo_screenheight;
-extern int vo_dwidth;
-extern int vo_dheight;
-extern int vo_fs;
 extern int vo_fs_layer;
 extern int vo_wm_type;
 extern int vo_fs_type;
 extern char** vo_fstype_list;
-extern int vo_ontop;
-extern int vo_rootwin;
 
 extern char *mDisplayName;
 extern Display *mDisplay;
 extern Window mRootWin;
 extern int mScreen;
 extern int mLocalDisplay;
-extern int WinID;
 
 extern int vo_mouse_timer_const;
 extern int vo_mouse_autohide;

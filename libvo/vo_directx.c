@@ -81,14 +81,7 @@ static BOOL (WINAPI* myGetMonitorInfo)(HMONITOR, LPMONITORINFO) = NULL;
 
 extern void mplayer_put_key(int code);              //let mplayer handel the keyevents 
 extern void vo_draw_text(int dxs,int dys,void (*draw_alpha)(int x0,int y0, int w,int h, unsigned char* src, unsigned char *srca, int stride));
-extern int vo_doublebuffering;                      //tribblebuffering    
-extern int vo_fs;
-extern int vo_directrendering;
-extern int vo_ontop;
-extern int vo_rootwin;
 extern int vidmode;
-extern int vo_colorkey;
-extern int WinID;
 
 /*****************************************************************************
  * DirectDraw GUIDs.

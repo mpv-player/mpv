@@ -52,9 +52,6 @@ TODO:
 //silence warnings, probably it have to go in some global header
 #define UNUSED(x) ((void)(x)) 
 
-extern int vo_doublebuffering;
-extern int vo_directrendering;
-extern int vo_dbpp;
 extern int verbose;
 
 static int query_format(uint32_t format);

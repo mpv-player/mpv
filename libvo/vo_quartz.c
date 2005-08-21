@@ -67,15 +67,10 @@ static MatrixRecord matrix;
 static int EnterMoviesDone = 0;
 static int get_image_done = 0;
 
-extern int vo_rootwin;
-extern int vo_ontop;
-extern int vo_fs; // user want fullscreen
 static int vo_quartz_fs; // we are in fullscreen
 extern float monitor_aspect;
-extern int vo_keepaspect; //keep aspect ratio when resizing
 extern float movie_aspect;
 static float old_movie_aspect;
-extern float vo_panscan;
 
 static int winLevel = 1;
 int levelList[] =

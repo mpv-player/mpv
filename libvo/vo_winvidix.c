@@ -56,7 +56,6 @@ static vidix_grkey_t gr_key;
     
 
 extern void set_video_eq( int cap );
-extern int vo_config_count;
 
 
 static LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam)

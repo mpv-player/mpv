@@ -69,7 +69,6 @@ static vo_info_t info = {
 LIBVO_EXTERN(gif89a)
 
 extern int verbose;
-extern int vo_config_count;
 
 
 // how many frames per second we are aiming for during output.
