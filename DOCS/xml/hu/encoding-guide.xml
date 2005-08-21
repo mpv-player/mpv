@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.7 $ -->
+<!-- synced with 1.11 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -61,12 +61,15 @@
   Fontos tudatosítani, hogy ez csak a televízión történő megjelenítés
   formátuma és gyakran <emphasis role="bold">nincs</emphasis>
   összhangban a film eredeti formátumával.
+  A tapasztalatok szerint az NTSC tartalmat sokkal nehezebb elkódolni, mert
+  több elemet kell azonosítani a forrásban.
   Ahhoz, hogy megfelelő legyen a kódolás, ismerned kell az eredeti
   formátumot.
-  Ennek elmulasztása esetén csúnya törési (átlapolás) mellékhatások
-  lesznek a kódolásodban.
+  Ennek elmulasztása esetén különböző hibák lesznek a kódolásodban,
+  csúnya törési (átlapolás) mellékhatások, duplázott
+  vagy akár elveszett képkockák.
   Mindamellett, hogy csúnya, a mellékhatások rontják a kódolási
-  hatékonyságot is: rosszabb minőség per bitráta arányt kapsz.
+  hatékonyságot is: rosszabb minőség per bitráta egység arányt kapsz.
 </para>
 
 <sect3 id="menc-feat-dvd-mpeg4-preparing-encode-fps">
@@ -198,8 +201,9 @@
   ahol a mezők tulajdonképpen duplázva vannak az elkódolt MPEG-2-ben.
 </para>
 <para>
-  Az eljárás, ahogy ezeket az eseteket kezelni kell, később kerül leírásra
-  ebben az útmutatóban.
+  Az eljárás, ahogy ezeket az eseteket kezelni kell, <link
+  linkend="menc-feat-telecine">később kerül leírásra</link> ebben
+  az útmutatóban.
   Most következzék pár tanács, amik segítségével eldöntheted, hogy milyen
   anyaggal van dolgod:
 </para>
@@ -281,14 +285,14 @@
 </para>
 
 <para>
-  A komplexitás (és így a bitek száma) miatt megkövetelt, a film képkockáinál
-  használt tömörítés nagy mértékben változhat jelentről jelenetre.
+  Egy film képkockáinak komplexitása és így a tömörítéshez szükséges bitek
+  száma nagy mértékben változhat jelentről jelenetre.
   A modern videó kódolók már alkalmazkodnak az igényekhez a bitráta variálásával.
-  Azonban az egyszerű módokban, mint pl. a CBR, nem léphetik túl az átlagos
-  bitrátát hosszú ideig, mert nem ismerik az következő jelenetek bitráta
-  igényét.
-  Az okosabb módok, mint pl. a több lépéses kódolás, figyelembe tudják venni
-  az előző lépések statisztikáit, ami megoldja a fent említett problémát.
+  Az egyszerű módokban, mint pl. a CBR, a kódolók nem ismerik az elkövetkező
+  jelenetek bitráta igényét és így nem tudják átlépni az igényelt átlagos
+  bitrátát hosszabb időre. A fejlettebb módokban, mint pl. a több lépéses
+  kódolásnál, már figyelembe lehet venni az előző lépés statisztikáját; ez
+  megoldja a fent említett problémát.
 </para>
 
 <note><title>Megjegyzés:</title>
@@ -1648,6 +1652,19 @@ Figyelj az <option>ilmv</option> és az <option>ildct</option> kapcsolókra.
   Mivel a hard-telecine már 60000/1001 mező per másodperces, a DVD lejátszó
   mindenféle manipulálás nélkül játsza le a videót.
 </para>
+
+<para>
+  A másik módszer a telecine-lt forrás felismerésére a forrás megtekintése
+  a <option>-vf pullup</option> és <option>-v</option> kapcsolók parancssorhoz
+  történő hozzáadásával. Így megnézheted, hogy a <option>pullup</option> hogyan
+  illeszkedik a képkockákhoz. Ha a forrás telecine-s, a konzolon egy 3:2-es
+  mintát kell látnod, melyben <systemitem>0+.1.+2</systemitem> és
+  <systemitem>0++1</systemitem> váltakozik.
+  Ennek a technikának megvan az az előnye, hogy nem kell a forrást nézned
+  az azonosításhoz, ami akkor jó, ha automatizálni szeretnéd a kódolási
+  folyamatot vagy távolról, lassú kapcsolaton keresztül szeretnéd megcsinálni.
+</para>
+
 </sect3>
 
 <sect3 id="menc-feat-telecine-ident-interlaced">
@@ -3121,6 +3138,50 @@ codec-kal</title>
 </itemizedlist>
 </sect3>
 </sect2>
+
+<sect2 id="menc-feat-x264-example-settings">
+<title>Kódolási beállítási példák</title>
+
+<para>
+  A következő beállítások példák a különböző kódolási opciók
+  kombinációjára, amik érintik a sebességet vagy a minőséget
+  ugyan annál a cél bitrátánál.
+
+  Ha a tökéletes minőséget célzod a méretbeli korlátokon való töprengés
+  nélkül, egy alacsony konstansú kvantáló kódolás (mint pl.
+  <option>qp_constant=18</option>) B-képkockák nélkül
+  (<option>bframes=0</option>) valószínűleg nagyon jól fog kinézni, de
+  szükségtelenül sok bit-et fog felhasználni a részletek elkódolásához,
+  amit sokkal okosabban fel lehetne használni néhány fejlettebb beállítással.
+</para>
+
+<para>
+  Az összes kódolási beállítást egy 720x448 @30000/1001 fps-es minta
+  videón teszteltük, a cél bitráta 900kbps volt, a gép pedig egy AMD-64 3400+
+  2400 Mhz-en, 64 bit-es módban.
+  Minden kódolási beállítást a kódolás sebessége követ (képkocka per
+  másodpercben), a tömörítési hatékonyság romlása (a bitráta százalékában)
+  összehasonlítva a "nagyon jó minőség" beállításaival, és a PSNR veszteség
+  (dB-ben). Kérlek vedd figyelembe, hogy a forrásod, a géped típusa és a
+  rendszer környezetedtől függően nagyon különböző eredményeket kaphatsz.
+</para>
+
+<itemizedlist>
+<listitem><para><emphasis role="bold">Very high quality:</emphasis>
+<option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option>
+6fps, 0%, 0dB.
+</para></listitem>
+<listitem><para><emphasis role="bold">High quality:</emphasis>
+<option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b:psnr</option>
+13fps, -13%, -0.89dB.
+</para></listitem>
+<listitem><para><emphasis role="bold">Fast:</emphasis>
+<option>subq=4:bframes=2:b_pyramid:weight_b:psnr</option>
+17fps, -20%, -1.48dB.
+</para></listitem>
+</itemizedlist>
+</sect2>
+
 </sect1>
 
 <sect1 id="menc-feat-vcd-dvd">
