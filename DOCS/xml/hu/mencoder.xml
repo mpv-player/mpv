@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.87 -->
+<!-- synced with 1.88 -->
 <chapter id="mencoder">
 <title>A <application>MEncoder</application> használatának alapjai</title>
 
@@ -133,6 +133,23 @@ tudja őket. Ez a rész a <emphasis role="bold">másolásról</emphasis> szól.
   ehhez.
   </para></listitem>
 </itemizedlist>
+
+<para>
+  A <option>-oac copy</option> használatával végrehajtott egyik konténer formátumból
+  másikba történő másoláshoz szükséges lehet a <option>-fafmttag</option> kapcsoló,
+  hogy megmaradjon az eredeti fájl audió formátum tag-je.
+  Például ha egy NSV fájl AAC audióval AVI konténerbe alakítasz át, az
+  audió formátum tag hibás lesz és meg kell változtatni. Az audió formátum tag-ek
+  listáját megtalálod a <filename>codecs.conf</filename> fájlban.
+</para>
+
+<para>
+Példa:
+<screen>
+mencoder <replaceable>input.nsv</replaceable> -oac copy -fafmttag 0x706D -ovc lavc -lavcopts vcodec=mpeg4 -o <replaceable>output.avi</replaceable>
+</screen>
+</para>
+
 </sect1>
 
 
