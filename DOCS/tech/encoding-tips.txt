@@ -7,6 +7,7 @@ http://ffdshow.sourceforge.net/tikiwiki/tiki-view_articles.php <- lavc for win32
 http://www.bunkus.org/dvdripping4linux/index.html              <- a nice tutorial
 http://forum.zhentarim.net/viewtopic.php?p=237                 <- lavc option comparison
 http://www.ee.oulu.fi/~tuukkat/mplayer/tests/readme.html       <- series of benchmarks
+http://thread.gmane.org/gmane.comp.video.mencoder.user/1196    <- free codecs shoutout and recommended encoding settings
 
 
 ================================================================================
