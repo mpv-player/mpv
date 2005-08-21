@@ -225,10 +225,14 @@ int vo_init(void) {
     }
   }
 
+    if (WinID >= 0)
+      vo_window = WinID;
+    else {
     vo_window = CreateWindowEx(0, classname, classname, WS_POPUP, CW_USEDEFAULT, 0, 100, 100, 0, 0, hInstance, 0);
     if (!vo_window) {
 	mp_msg(MSGT_VO, MSGL_ERR, "vo: win32: unable to create window!\n");
 	return 0;
+    }
     }
 
     vo_hdc = GetDC(vo_window);
@@ -259,6 +263,7 @@ void vo_w32_uninit() {
     resetMode();
     ShowCursor(1);
     vo_depthonscreen = 0;
+    if (WinID >= 0)
     DestroyWindow(vo_window);
     vo_window = 0;
     UnregisterClass(classname, 0);

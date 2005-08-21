@@ -79,13 +79,11 @@ static unsigned int slice_height = 1;
 
 static void resize(int x,int y){
   mp_msg(MSGT_VO, MSGL_V, "[gl] Resize: %dx%d\n",x,y);
-#ifndef GL_WIN32
   if (WinID >= 0) {
     int top = 0, left = 0, w = x, h = y;
     geometry(&top, &left, &w, &h, vo_screenwidth, vo_screenheight);
     glViewport(top, left, w, h);
   } else
-#endif
   glViewport( 0, 0, x, y );
 
   glMatrixMode(GL_PROJECTION);

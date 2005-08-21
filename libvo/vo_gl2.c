@@ -504,13 +504,11 @@ static void resize(int *x,int *y){
 	  glViewport( (vo_screenwidth-*x)/2, (vo_screenheight-*y)/2, *x, *y);
   } else { 
 	  //aspect(x, y, A_NOZOOM);
-#ifndef GL_WIN32
 	if (WinID >= 0) {
 	  int top = 0, left = 0, w = *x, h = *y;
 	  geometry(&top, &left, &w, &h, vo_screenwidth, vo_screenheight);
 	  glViewport(top, left, w, h);
 	} else
-#endif
 	  glViewport( 0, 0, *x, *y );
   }
 
