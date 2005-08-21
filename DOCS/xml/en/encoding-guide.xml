@@ -3299,7 +3299,9 @@ codec</title>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
         <entry>1536 kbps</entry>
-        <entry>23.976, 29.97</entry>
+        <entry>30000/1001, 24000/1001<footnote id="fn-ntsc-framerate"><para>
+            24000/1001 FPS can be achieved with a 3:2 pullup.
+            </para></footnote></entry>
         <entry>4:3, 16:9 (only for 720x480)</entry>
     </row>
     <row>
@@ -3312,7 +3314,7 @@ codec</title>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
         <entry>1536 kbps</entry>
-        <entry>23.976, 29.97</entry>
+        <entry>30000/1001, 24000/1001<footnoteref linkend='fn-ntsc-framerate'/></entry>
         <entry>4:3, 16:9</entry>
     </row>
     <row>
@@ -3323,7 +3325,7 @@ codec</title>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>384 kbps</entry>
-        <entry>29.97</entry>
+        <entry>30000/1001</entry>
         <entry>4:3</entry>
     </row>
     <row>
@@ -3334,7 +3336,7 @@ codec</title>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>224 kbps</entry>
-        <entry>23.976, 29.97</entry>
+        <entry>24000/1001, 30000/1001</entry>
         <entry>4:3</entry>
     </row>
     <row>
@@ -3460,6 +3462,15 @@ codec</title>
   <screen>
   -of mpeg -mpegopts format=dvd
   </screen>
+</para>
+
+<para>
+  DVD with NTSC Pullup:
+  <screen>
+  -of mpeg -mpegopts format=dvd:telecine -ofps 24000/1001
+  </screen>
+  This allows 24000/1001 fps progressive content to be encoded at 30000/1001 
+  fps whilst maintaing DVD-compliance.
 </para>
 
 <sect3 id="menc-feat-vcd-dvd-output-aspect">
@@ -3788,11 +3799,11 @@ codec</title>
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
 <title>NTSC AVI Containing AC3 Audio to DVD</title>
 <para>
-  If the source already has AC3 audio, and is NTSC @ 23.976 fps:
+  If the source already has AC3 audio, and is NTSC @ 24000/1001 fps:
   <screen>
-  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:480,\
-  harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
-  vbitrate=5000:keyint=15:aspect=16/9 -ofps  24000/1001 \
+  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:telecine \
+  -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\
+  vrc_maxrate=9800:vbitrate=5000:keyint=15:aspect=16/9 -ofps 24000/1001 \
   -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
   </screen>
 </para>
