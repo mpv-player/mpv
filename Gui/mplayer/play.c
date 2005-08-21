@@ -13,6 +13,7 @@
 #include "../../help_mp.h"
 #include "../../mplayer.h"
 #include "../../libvo/x11_common.h"
+#include "../../libvo/video_out.h"
 #include "../../input/input.h"
 
 #include "../app.h"

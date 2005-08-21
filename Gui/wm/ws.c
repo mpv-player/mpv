@@ -20,6 +20,7 @@
 
 #include "../../config.h"
 #include "../../libvo/x11_common.h"
+#include "../../libvo/video_out.h"
 #include "ws.h"
 #include "wsxdnd.h"
 #include "../../cpudetect.h"
