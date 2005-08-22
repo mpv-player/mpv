@@ -1883,7 +1883,7 @@ Explicitly choose the SDL audio driver to use (default: let SDL choose).
 .
 .TP
 .B arts\ \ \ 
-audio output through the Arts daemon
+audio output through the aRts daemon
 .
 .TP
 .B esd\ \ \ \ 
@@ -2717,7 +2717,7 @@ Call glFinish() before swapping buffers.
 Slower but in some cases more correct output (default: disabled).
 .IPs  swapinterval=<n>
 Minimum interval in displayed frames between to buffer swaps (default: 1).
-1 is equivalent to enable VSYNC, 0 to disable VSYNC.
+1 is equivalent to enabling VSYNC, 0 to disabling VSYNC.
 Values < 0 will leave it at the system default.
 This will limit the framerate to (horizontal refresh rate / n).
 Requires GLX_SGI_swap_control support to work.
