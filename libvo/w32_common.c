@@ -263,7 +263,7 @@ void vo_w32_uninit() {
     resetMode();
     ShowCursor(1);
     vo_depthonscreen = 0;
-    if (WinID >= 0)
+    if (WinID < 0)
     DestroyWindow(vo_window);
     vo_window = 0;
     UnregisterClass(classname, 0);
