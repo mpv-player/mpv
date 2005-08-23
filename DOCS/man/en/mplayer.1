@@ -8511,6 +8511,33 @@ They are kept only for comparison to the JM reference codec.
 For all other purposes, please use either the 'Global' PSNR, or the per-frame
 PSNRs printed by log=3.
 .
+.TP
+.B (no)visualize
+Enable x264 visualizations during encoding.
+If the x264 on your system supports it, a new window will be opened during
+the encoding process, in which x264 will attempt to present an overview of
+how each frame gets encoded.
+Each block type on the visualized movie will be colored as follows:
+.PD 0
+.RSs
+.IPs red/pink
+intra block
+.IPs blue\ 
+inter block
+.IPs green
+skip block
+.IPs yellow
+B-block
+.RE
+.PD 1
+.RS
+This feature can be considered experimental and subject to change.
+In particular, it depends on x264 being compiled with visualizations enabled.
+Note that as of writing this, x264 pauses after encoding and visualizing
+each frame, waiting for the user to press a key, at which point the next
+frame will be encoded.
+.RE
+.
 .
 .SS MPEG muxer (\-mpegopts)
 .
