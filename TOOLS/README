@@ -469,3 +469,24 @@ Author:       Tobias Diedrich
 Description:  Dumps vobsub soft subtitles streams embedded in avi files.
 
 Usage:        avisubdump <avi>
+
+Format conversion scripts in the TOOLS dir
+------------------------------------------
+
+302m_convert.c
+
+Author:       Reimar Döffinger
+
+Description:  Converts D-Cinema Audio (SMPTE 302M?) to WAV.
+
+Usage:        302m_convert <in.302> <out.wav>
+
+
+360m_convert.c
+
+Author:       Reimar Döffinger
+
+Description:  Converts D-Cinema Videa (MPEG2 in GXF, SMPTE 360M) to MPEG-ES.
+              Use -demuxer mpeges to play the converted file.
+
+Usage:        360m_convert <in.gxf> <out.m2v>

@@ -15,6 +15,8 @@ OBJS = alaw-gen \
 	subrip \
 	fastmemcpybench \
 	vivodump \
+	302m_convert \
+	360m_convert \
 
 all: $(OBJS)
 
