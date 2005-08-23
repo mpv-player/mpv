@@ -2732,6 +2732,8 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 						int asgn = 0;
 						uint8_t *lang;
 
+						if(dvdsub_lang)
+						{
 						if(!strcmp(dvdsub_lang, ""))
 							asgn = 1;
 						else
@@ -2741,6 +2743,7 @@ static int ts_parse(demuxer_t *demuxer , ES_stream_t *es, unsigned char *packet,
 								asgn = (strncmp(lang, dvdsub_lang, 3) == 0);
 							else
 								asgn = 0;
+						}
 						}
 
 						if(asgn)
