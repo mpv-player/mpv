@@ -260,7 +260,7 @@ void free_demuxer(demuxer_t *demuxer){
       demuxer->desc->close(demuxer);
     // Very ugly hack to make it behave like old implementation
     if (demuxer->desc->type == DEMUXER_TYPE_DEMUXERS)
-      return;
+      goto skip_streamfree;
     // free streams:
     for(i = 0; i < MAX_A_STREAMS; i++)
 	if(demuxer->a_streams[i]) free_sh_audio(demuxer->a_streams[i]);
@@ -272,6 +272,7 @@ void free_demuxer(demuxer_t *demuxer){
     free_demuxer_stream(demuxer->audio);
     free_demuxer_stream(demuxer->video);
     free_demuxer_stream(demuxer->sub);
+skip_streamfree:
     if(demuxer->info) {
       for(i=0;demuxer->info[i] != NULL; i++)
 	free(demuxer->info[i]);

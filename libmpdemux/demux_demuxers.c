@@ -104,12 +104,6 @@ static void demux_close_demuxers(demuxer_t* demuxer) {
   }
 
   free(priv);
-  if(demuxer->info) {
-    for(i=0;demuxer->info[i] != NULL; i++)
-      free(demuxer->info[i]);
-    free(demuxer->info);
-  }
-  free(demuxer);
 }
   
 
