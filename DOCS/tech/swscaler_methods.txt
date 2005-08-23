@@ -39,7 +39,7 @@ gauss, bilinear if quality is important
 cubic, spline, lanczos if a sharper picture is important
 
 note: when encoding at a limited amount of bits (not constant quantizer) 
-than a slightly blured input might look better after decoding than a slightly 
+then a slightly blured input might look better after decoding than a slightly 
 sharpend one, especially for lower bitrates
 
 sws numbers / names / artefact types
