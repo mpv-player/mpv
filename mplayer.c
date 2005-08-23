@@ -2286,10 +2286,15 @@ while(sh_audio){
   // Fill buffer if needed:
   current_module="decode_audio";   // Enter AUDIO decoder module
   t=GetTimer();
-  while(sh_audio->a_out_buffer_len<playsize && !d_audio->eof){
+  while(sh_audio->a_out_buffer_len<playsize &&
+        (!d_audio->eof || sh_audio->a_in_buffer_len > 0)){
     int ret=decode_audio(sh_audio,&sh_audio->a_out_buffer[sh_audio->a_out_buffer_len],
         playsize-sh_audio->a_out_buffer_len,sh_audio->a_out_buffer_size-sh_audio->a_out_buffer_len);
-    if(ret<=0) break; // EOF?
+    if(ret<=0) { // EOF?
+      if (d_audio->eof)
+        sh_audio->a_in_buffer_len = 0; // make sure we don't hang if something's broken
+      break;
+    }
     sh_audio->a_out_buffer_len+=ret;
   }
   t=GetTimer()-t;
@@ -2316,7 +2321,7 @@ if(!sh_video) {
     float a_pos = sh_audio->delay - audio_out->get_delay() * playback_speed;
     print_status(a_pos, 0, 0);
   }
-  if(d_audio->eof) eof = PT_NEXT_ENTRY;
+  if(d_audio->eof && sh_audio->a_in_buffer_len <= 0) eof = PT_NEXT_ENTRY;
 
 } else {
 
