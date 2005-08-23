@@ -75,6 +75,7 @@ typedef struct {
 int use_gui;
 int gtkMessageBox;
 int verbose=1;
+int identify=0;
 int vobsub_id=0;
 int sub_pos=0;
 
