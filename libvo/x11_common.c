@@ -506,7 +506,7 @@ int vo_init(void)
         mLocalDisplay = 1;
     else
         mLocalDisplay = 0;
-    mp_msg(MSGT_VO, MSGL_INFO,
+    mp_msg(MSGT_VO, MSGL_V,
            "vo: X11 running at %dx%d with depth %d and %d bpp (\"%s\" => %s display)\n",
            vo_screenwidth, vo_screenheight, depth, vo_depthonscreen,
            dispName, mLocalDisplay ? "local" : "remote");

@@ -889,7 +889,7 @@ static int preinit(const char *arg)
                    "resolution supported by DGA driver!\n");
 #endif
         }                       //else{
-        //  mp_msg(MSGT_VO, MSGL_INFO, "vo_dga: X running at: %s\n", 
+        //  mp_msg(MSGT_VO, MSGL_V, "vo_dga: X running at: %s\n", 
         //            vd_GetModeString(vo_dga_XServer_mode));
         //}                                
 
