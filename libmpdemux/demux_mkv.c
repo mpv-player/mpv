@@ -2919,7 +2919,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
   else if (num == demuxer->video->id)
     {
       ds = demuxer->video;
-      if (mkv_d->v_skip_to_keyframe && block_bref != 0)
+      if (mkv_d->v_skip_to_keyframe && (block_bref != 0 || block_fref != 0))
         use_this_block = 0;
     }
   else if (num == demuxer->sub->id)
@@ -2962,7 +2962,7 @@ handle_block (demuxer_t *demuxer, uint8_t *block, uint64_t length,
                   memcpy (dp->buffer, buffer, size);
                   if (modified)
                     free (buffer);
-                  dp->flags = block_bref == 0 ? 1 : 0;
+                  dp->flags = (block_bref == 0 && block_fref == 0) ? 1 : 0;
                   dp->pts = mkv_d->last_pts + i * track->default_duration;
                   ds_add_packet (ds, dp);
                 }
