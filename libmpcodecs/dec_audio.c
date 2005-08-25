@@ -271,7 +271,7 @@ void uninit_audio(sh_audio_t *sh_audio)
 int preinit_audio_filters(sh_audio_t *sh_audio, 
 	int in_samplerate, int in_channels, int in_format,
 	int* out_samplerate, int* out_channels, int* out_format){
-  init_audio_filters(sh_audio, in_samplerate, in_channels, in_format,
+  return init_audio_filters(sh_audio, in_samplerate, in_channels, in_format,
       out_samplerate, out_channels, out_format, 0, 0);
 }
 
