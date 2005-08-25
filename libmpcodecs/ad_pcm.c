@@ -98,8 +98,8 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
 
 static int decode_audio(sh_audio_t *sh_audio,unsigned char *buf,int minlen,int maxlen)
 {
-  int len=sh_audio->channels*sh_audio->samplesize-1;
-  len=(minlen+len)&(~len); // sample align
+  unsigned len = sh_audio->channels*sh_audio->samplesize;
+  len = maxlen - maxlen % len; // sample align
   len=demux_read_data(sh_audio->ds,buf,len);
   return len;
 }
