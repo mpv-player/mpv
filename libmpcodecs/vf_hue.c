@@ -103,7 +103,7 @@ static int control(struct vf_instance_s* vf, int request, void* data)
 			vf->priv->hue = eq->value * M_PI / 100;
 			return CONTROL_TRUE;
 		} else if (!strcmp(eq->item,"saturation")) {
-			vf->priv->saturation = eq->value/100.0 + 100;
+			vf->priv->saturation = (eq->value + 100)/100.0;
 			return CONTROL_TRUE;
 		}
 		break;
