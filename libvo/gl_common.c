@@ -110,13 +110,14 @@ const char *glValName(GLint value)
  * \param gl_type [OUT] OpenGL type for this image format.
  * \return 1 if format is supported by OpenGL, 0 if not.
  */
-int glFindFormat(uint32_t fmt, uint32_t *bpp, GLenum *gl_texfmt,
+int glFindFormat(uint32_t fmt, uint32_t *bpp, GLint *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type)
 {
   int dummy1;
   GLenum dummy2;
+  GLint dummy3;
   if (bpp == NULL) bpp = &dummy1;
-  if (gl_texfmt == NULL) gl_texfmt = &dummy2;
+  if (gl_texfmt == NULL) gl_texfmt = &dummy3;
   if (gl_format == NULL) gl_format = &dummy2;
   if (gl_type == NULL) gl_type = &dummy2;
   

@@ -64,8 +64,8 @@ static int texnumx, texnumy, raw_line_len;
 static struct TexSquare * texgrid = NULL;
 static GLint    gl_internal_format;
 static int      rgb_sz, r_sz, g_sz, b_sz, a_sz;
-static GLint    gl_bitmap_format;
-static GLint    gl_bitmap_type;
+static GLenum   gl_bitmap_format;
+static GLenum   gl_bitmap_type;
 static int      isGL12 = GL_FALSE;
 
 static int      gl_bilinear=1;

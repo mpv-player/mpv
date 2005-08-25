@@ -61,7 +61,7 @@ void glAdjustAlignment(int stride);
 
 const char *glValName(GLint value);
 
-int glFindFormat(uint32_t format, uint32_t *bpp, GLenum *gl_texfmt,
+int glFindFormat(uint32_t format, uint32_t *bpp, GLint *gl_texfmt,
                   GLenum *gl_format, GLenum *gl_type);
 int glFmt2bpp(GLenum format, GLenum type);
 void glCreateClearTex(GLenum target, GLenum fmt, GLint filter,

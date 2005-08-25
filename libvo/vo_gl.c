@@ -64,7 +64,7 @@ static int many_fmts;
 static int use_glFinish;
 static int swap_interval;
 static GLenum gl_target;
-static GLenum gl_texfmt;
+static GLint gl_texfmt;
 static GLenum gl_format;
 static GLenum gl_type;
 static GLint gl_buffer;
