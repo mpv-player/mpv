@@ -548,13 +548,15 @@ static int init(int rate_hz, int channels, int format, int flags)
 	{
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set format: %s\n",
 		 snd_strerror(err));
+	  return(0);
 	}
 
-      if ((err = snd_pcm_hw_params_set_channels(alsa_handler, alsa_hwparams,
-						ao_data.channels)) < 0)
+      if ((err = snd_pcm_hw_params_set_channels_near(alsa_handler, alsa_hwparams,
+						     &ao_data.channels)) < 0)
 	{
 	  mp_msg(MSGT_AO,MSGL_ERR,"alsa-init: unable to set channels: %s\n",
 		 snd_strerror(err));
+	  return(0);
 	}
 
       if ((err = snd_pcm_hw_params_set_rate_near(alsa_handler, alsa_hwparams, 
