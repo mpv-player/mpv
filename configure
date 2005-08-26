@@ -3536,7 +3536,7 @@ EOF
     _x11_paths="/usr/X11R6/lib /usr/lib/X11R6 /usr/X11/lib /usr/lib32 /usr/openwin/lib /usr/X11R6/lib64 /usr/lib"
   fi
   for I in $_x11_paths ; do
-    _ld_x11="-L$I -lXext -lX11 $_ld_sock"
+    _ld_x11="-L$I -lXext -lX11 $_ld_sock $_ld_pthread"
     if netbsd; then
       _ld_x11="$_ld_x11 -Wl,-R$I"
     fi
