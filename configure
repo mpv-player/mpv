@@ -5160,7 +5160,7 @@ int main()
 }
 EOF
     _enca=no
-    cc_check -lenca && _enca=yes
+    cc_check -lenca $_ld_lm && _enca=yes
 fi
     if test "$_enca" = yes ; then
 	_def_enca='#define HAVE_ENCA 1'
