@@ -804,7 +804,7 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
 
 static int demux_mpg_pes_probe(demuxer_t *demuxer) {
    demuxer->synced = 3;
-   return demux_mpg_probe(demuxer);
+   return (demux_mpg_probe(demuxer) == DEMUXER_TYPE_MPEG_PS) ? DEMUXER_TYPE_MPEG_PES : 0;
 }
 
 
@@ -874,7 +874,7 @@ demuxer_desc_t demuxer_desc_mpeg_pes = {
   0, // unsafe autodetect
   demux_mpg_pes_probe,
   demux_mpg_fill_buffer,
-  NULL,
+  demux_mpg_ps_open,
   demux_close_mpg,
   demux_seek_mpg,
   NULL
