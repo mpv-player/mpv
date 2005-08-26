@@ -51,6 +51,7 @@ extern demuxer_desc_t demuxer_desc_lmlm4;
 extern demuxer_desc_t demuxer_desc_mpeg_ps;
 extern demuxer_desc_t demuxer_desc_mpeg_pes;
 extern demuxer_desc_t demuxer_desc_mpeg_es;
+extern demuxer_desc_t demuxer_desc_mpeg_gxf;
 extern demuxer_desc_t demuxer_desc_mpeg4_es;
 extern demuxer_desc_t demuxer_desc_h264_es;
 extern demuxer_desc_t demuxer_desc_rawdv;
@@ -100,6 +101,7 @@ demuxer_desc_t* demuxer_list[] = {
   &demuxer_desc_mpeg_ps,
   &demuxer_desc_mpeg_pes,
   &demuxer_desc_mpeg_es,
+  &demuxer_desc_mpeg_gxf,
   &demuxer_desc_mpeg4_es,
   &demuxer_desc_h264_es,
 #ifdef HAVE_LIBDV095

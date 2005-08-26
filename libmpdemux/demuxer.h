@@ -49,11 +49,12 @@
 #define DEMUXER_TYPE_AAC 39
 #define DEMUXER_TYPE_MPC 40
 #define DEMUXER_TYPE_MPEG_PES 41
+#define DEMUXER_TYPE_MPEG_GXF 42
 
 // This should always match the higest demuxer type number.
 // Unless you want to disallow users to force the demuxer to some types
 #define DEMUXER_TYPE_MIN 0
-#define DEMUXER_TYPE_MAX 41
+#define DEMUXER_TYPE_MAX 42
 
 #define DEMUXER_TYPE_DEMUXERS (1<<16)
 // A virtual demuxer type for the network code

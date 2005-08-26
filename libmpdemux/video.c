@@ -46,6 +46,7 @@ enum {
 
 if((d_video->demuxer->file_format == DEMUXER_TYPE_PVA) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_ES) ||
+   (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_GXF) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_PS && ((! sh_video->format) || (sh_video->format==0x10000001) || (sh_video->format==0x10000002))) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TY) ||
    (d_video->demuxer->file_format == DEMUXER_TYPE_MPEG_TS && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
@@ -403,6 +404,7 @@ int video_read_frame(sh_video_t* sh_video,float* frame_time_ptr,unsigned char** 
     *start=NULL;
 
   if(demuxer->file_format==DEMUXER_TYPE_MPEG_ES || 
+     demuxer->file_format==DEMUXER_TYPE_MPEG_GXF ||
   	(demuxer->file_format==DEMUXER_TYPE_MPEG_PS && ((! sh_video->format) || (sh_video->format==0x10000001) || (sh_video->format==0x10000002)))
 		  || demuxer->file_format==DEMUXER_TYPE_PVA || 
 		  ((demuxer->file_format==DEMUXER_TYPE_MPEG_TS) && ((sh_video->format==0x10000001) || (sh_video->format==0x10000002)))

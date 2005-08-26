@@ -506,6 +506,36 @@ static int demux_mpg_es_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
   return 1;
 }
 
+static int demux_mpg_gxf_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
+  demux_packet_t *pack;
+  uint32_t state = (uint32_t)demux->priv;
+  int pos = 0;
+  int discard = 0;
+  unsigned char *buf;
+  if (demux->stream->eof)
+    return 0;
+  demux->filepos = stream_tell(demux->stream);
+  pack = new_demux_packet(STREAM_BUFFER_SIZE);
+  buf = pack->buffer;
+  while (pos < STREAM_BUFFER_SIZE) {
+    register int c = stream_read_char(demux->stream);
+    if (c < 0) { // EOF
+      resize_demux_packet(pack, pos);
+      break;
+    }
+    state = state << 8 | c;
+    if (state == 0x1bc || state == 0x1bf)
+      discard = 1;
+    else if (state == 0x100)
+      discard = 0;
+    if (!discard)
+      buf[pos++] = c;
+  }
+  ds_add_packet(ds, pack);
+  demux->priv = (void *)state;
+  return 1;
+}
+
 int demux_mpg_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
 unsigned int head=0;
 int skipped=0;
@@ -789,6 +819,13 @@ static demuxer_t* demux_mpg_es_open(demuxer_t* demuxer)
     return demuxer;
 }
 
+static demuxer_t *demux_mpg_gxf_open(demuxer_t *demuxer) {
+  demuxer->audio->sh = NULL;
+  demuxer->video->sh = new_sh_video(demuxer,0);
+  ((sh_video_t *)demuxer->video->sh)->ds = demuxer->video;
+  demuxer->priv = (void *) 0xffffffff;
+  return demuxer;
+}
 
 static demuxer_t* demux_mpg_ps_open(demuxer_t* demuxer)
 {
@@ -843,6 +880,22 @@ demuxer_desc_t demuxer_desc_mpeg_pes = {
   NULL
 };
 
+
+demuxer_desc_t demuxer_desc_mpeg_gxf = {
+  "MPEG ES in GXF demuxer",
+  "mpeggxf",
+  "MPEG-ES in GXF",
+  "Reimar Döffinger",
+  "Mpeg",
+  DEMUXER_TYPE_MPEG_GXF,
+  0, // hack autodetection
+  NULL,
+  demux_mpg_gxf_fill_buffer,
+  demux_mpg_gxf_open,
+  NULL,
+  NULL,
+  NULL
+};
 
 demuxer_desc_t demuxer_desc_mpeg_es = {
   "MPEG ES demuxer",
