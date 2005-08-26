@@ -3893,7 +3893,16 @@ echocheck "AA"
 if test "$_aa" = auto ; then
   cat > $TMPC << EOF
 #include <aalib.h>
-int main(void) { (void) aa_init(0, 0, 0); return 0; }
+extern struct aa_hardware_params aa_defparams;
+extern struct aa_renderparams aa_defrenderparams;
+int main(void) {
+aa_context *c;
+aa_renderparams *p;
+(void) aa_init(0, 0, 0);
+c = aa_autoinit(&aa_defparams);
+p = aa_getrenderparams();
+aa_autoinitkbd(c,0);
+return 0; }
 EOF
   _aa=no
   if cc_check -laa ; then
