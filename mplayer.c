@@ -2001,6 +2001,7 @@ if(sh_audio){
 
 if(identify) {
   mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_FILENAME=%s\n", filename);
+  mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_DEMUXER=%s\n", demuxer->desc->name);
   if (sh_video) {
     /* Assume FOURCC if all bytes >= 0x20 (' ') */
     if (sh_video->format >= 0x20202020)
