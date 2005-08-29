@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- synced with 1.11 $ -->
+<!-- synced with 1.12 $ -->
 <chapter id="encoding-guide">
 <title>Kódolás a <application>MEncoder</application>rel</title>
 
@@ -3238,6 +3238,9 @@ codec-kal</title>
         <entry>AC3,PCM</entry>
         <entry>1536 kbps</entry>
         <entry>23.976, 29.97</entry>
+        <entry>30000/1001, 24000/1001<footnote id="fn-ntsc-framerate"><para>
+            24000/1001 FPS érhető el a 3:2-es pullup-pal.
+            </para></footnote></entry>
         <entry>4:3, 16:9 (csak 720x480-nál)</entry>
     </row>
     <row>
@@ -3250,7 +3253,7 @@ codec-kal</title>
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
         <entry>1536 kbps</entry>
-        <entry>23.976, 29.97</entry>
+        <entry>30000/1001, 24000/1001<footnoteref linkend='fn-ntsc-framerate'/></entry>
         <entry>4:3, 16:9</entry>
     </row>
     <row>
@@ -3261,7 +3264,7 @@ codec-kal</title>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>384 kbps</entry>
-        <entry>29.97</entry>
+        <entry>30000/1001</entry>
         <entry>4:3</entry>
     </row>
     <row>
@@ -3272,7 +3275,7 @@ codec-kal</title>
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>224 kbps</entry>
-        <entry>23.976, 29.97</entry>
+        <entry>24000/1001, 30000/1001</entry>
         <entry>4:3</entry>
     </row>
     <row>
@@ -3397,6 +3400,15 @@ codec-kal</title>
   <screen>
   -of mpeg -mpegopts format=dvd
   </screen>
+</para>
+
+<para>
+  DVD NTSC Pullup-pal:
+  <screen>
+  -of mpeg -mpegopts format=dvd:telecine -ofps 24000/1001
+  </screen>
+  Ez engedélyezi a 24000/1001 fps-es progresszív tartalom 30000/1001
+  fps-sel történő kódolását a DVD-előírások betartásával.
 </para>
 
 <sect3 id="menc-feat-vcd-dvd-output-aspect">
@@ -3724,11 +3736,11 @@ codec-kal</title>
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
 <title>AC3 Audiót tartalmazó NTSC AVI DVD-re</title>
 <para>
-  Ha a forrás már AC3 audiót tartalmaz és NTSC @ 23.976 fps:
+  Ha a forrás már AC3 audiót tartalmaz és NTSC @ 24000/1001 fps:
   <screen>
-  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:480,\
-  harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
-  vbitrate=5000:keyint=15:aspect=16/9 -ofps  24000/1001 \
+  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:telecine \
+  -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\
+  vrc_maxrate=9800:vbitrate=5000:keyint=15:aspect=16/9 -ofps 24000/1001 \
   -o <replaceable>movie.mpg</replaceable> <replaceable>movie.avi</replaceable>
   </screen>
 </para>
