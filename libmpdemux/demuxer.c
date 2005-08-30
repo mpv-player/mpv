@@ -528,14 +528,21 @@ void demuxer_help(void)
  * Get demuxer type for a given demuxer name
  *
  * @param demuxer_name    string with demuxer name of demuxer number
+ * @param force           will be set if demuxer should be forced.
+ *                        May be NULL.
  * @return                DEMUXER_TYPE_xxx, -1 if error or not found
  */
-int get_demuxer_type_from_name(char *demuxer_name)
+int get_demuxer_type_from_name(char *demuxer_name, int *force)
 {
   int i;
   long type_int;
   char *endptr;
 
+  if (!demuxer_name || !demuxer_name[0])
+    return DEMUXER_TYPE_UNKNOWN;
+  if (force) *force = demuxer_name[0] == '+';
+  if (demuxer_name[0] == '+')
+    demuxer_name = &demuxer_name[1];
   for (i = 0; demuxer_list[i]; i++) {
     if (demuxer_list[i]->type > DEMUXER_TYPE_MAX) // Can't select special demuxers from commandline
       continue;
@@ -568,7 +575,9 @@ int extension_parsing=1; // 0=off 1=mixed (used only for unstable formats)
   (ex: tv,mf).
 */
 
-static demuxer_t* demux_open_stream(stream_t *stream,int file_format,int audio_id,int video_id,int dvdsub_id,char* filename){
+static demuxer_t* demux_open_stream(stream_t *stream, int file_format,
+                    int force, int audio_id, int video_id, int dvdsub_id,
+                    char* filename) {
 
 //int file_format=(*file_format_ptr);
 
@@ -586,7 +595,7 @@ int i;
 if (file_format) {
   if ((demuxer_desc = get_demuxer_desc_from_type(file_format))) {
     demuxer = new_demuxer(stream,demuxer_desc->type,audio_id,video_id,dvdsub_id,filename);
-    if (demuxer_desc->check_file) {
+    if (!force && demuxer_desc->check_file) {
       if ((fformat = demuxer_desc->check_file(demuxer)) != 0) {
         if (fformat == demuxer_desc->type) {
           // Move messages to demuxer detection code?
@@ -595,7 +604,8 @@ if (file_format) {
         } else {
           // Format changed after check, recurse
           free_demuxer(demuxer);
-          return demux_open_stream(stream,fformat,audio_id,video_id,dvdsub_id,filename);
+          return demux_open_stream(stream, fformat, force,
+                   audio_id, video_id, dvdsub_id, filename);
         }
       } else {
         // Check failed for forced demuxer, quit
@@ -621,7 +631,8 @@ for (i = 0; (demuxer_desc = demuxer_list[i]); i++) {
       } else {
         // Format changed after check, recurse
         free_demuxer(demuxer);
-        demuxer=demux_open_stream(stream,fformat,audio_id,video_id,dvdsub_id,filename);
+        demuxer=demux_open_stream(stream, fformat, force,
+                  audio_id, video_id, dvdsub_id, filename);
         if(demuxer) return demuxer; // done!
         file_format = DEMUXER_TYPE_UNKNOWN;
       }
@@ -643,7 +654,8 @@ if(file_format==DEMUXER_TYPE_UNKNOWN && filename && extension_parsing==1){
   file_format=demuxer_type_by_filename(filename);
   if(file_format!=DEMUXER_TYPE_UNKNOWN){
     // we like recursion :)
-    demuxer=demux_open_stream(stream,file_format,audio_id,video_id,dvdsub_id,filename);
+    demuxer=demux_open_stream(stream, file_format, force,
+              audio_id, video_id, dvdsub_id, filename);
     if(demuxer) return demuxer; // done!
     file_format=DEMUXER_TYPE_UNKNOWN; // continue fuzzy guessing...
     mp_msg(MSGT_DEMUXER,MSGL_V,"demuxer: continue fuzzy content-based format guessing...\n");
@@ -662,7 +674,8 @@ for (i = 0; (demuxer_desc = demuxer_list[i]); i++) {
       } else {
         // Format changed after check, recurse
         free_demuxer(demuxer);
-        demuxer=demux_open_stream(stream,fformat,audio_id,video_id,dvdsub_id,filename);
+        demuxer=demux_open_stream(stream, fformat, force,
+                  audio_id, video_id, dvdsub_id, filename);
         if(demuxer) return demuxer; // done!
         file_format = DEMUXER_TYPE_UNKNOWN;
       }
@@ -718,16 +731,18 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
   demuxer_t *vd,*ad = NULL,*sd = NULL;
   int afmt =DEMUXER_TYPE_UNKNOWN,sfmt = DEMUXER_TYPE_UNKNOWN ;
   int audio_demuxer_type = 0, sub_demuxer_type = 0;
+  int demuxer_force = 0, audio_demuxer_force = 0,
+      sub_demuxer_force = 0;
 
   demux_aid_vid_mismatch = 0;
 
-  if (demuxer_name && ((demuxer_type = get_demuxer_type_from_name(demuxer_name)) < 0)) {
+  if ((demuxer_type = get_demuxer_type_from_name(demuxer_name, &demuxer_force)) < 0) {
     mp_msg(MSGT_DEMUXER,MSGL_ERR,"-demuxer %s does not exist.\n",demuxer_name);
   }
-  if (audio_demuxer_name && ((audio_demuxer_type = get_demuxer_type_from_name(audio_demuxer_name)) < 0)) {
+  if ((audio_demuxer_type = get_demuxer_type_from_name(audio_demuxer_name, &audio_demuxer_force)) < 0) {
     mp_msg(MSGT_DEMUXER,MSGL_ERR,"-audio-demuxer %s does not exist.\n",audio_demuxer_name);
   }
-  if (sub_demuxer_name && ((sub_demuxer_type = get_demuxer_type_from_name(sub_demuxer_name)) < 0)) {
+  if ((sub_demuxer_type = get_demuxer_type_from_name(sub_demuxer_name, &sub_demuxer_force)) < 0) {
     mp_msg(MSGT_DEMUXER,MSGL_ERR,"-sub-demuxer %s does not exist.\n",sub_demuxer_name);
   }
 
@@ -754,14 +769,17 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
     }
   }
 
-  vd = demux_open_stream(vs,demuxer_type ? demuxer_type : file_format,audio_stream ? -2 : audio_id,video_id, sub_stream ? -2 : dvdsub_id, filename);
+  vd = demux_open_stream(vs, demuxer_type ? demuxer_type : file_format,
+         demuxer_force, audio_stream ? -2 : audio_id, video_id,
+         sub_stream ? -2 : dvdsub_id, filename);
   if(!vd) {
     if(as) free_stream(as);
     if(ss) free_stream(ss);
     return NULL;
   }
   if(as) {
-    ad = demux_open_stream(as,audio_demuxer_type ? audio_demuxer_type : afmt,audio_id,-2,-2, audio_stream);
+    ad = demux_open_stream(as, audio_demuxer_type ? audio_demuxer_type : afmt,
+           audio_demuxer_force, audio_id, -2, -2, audio_stream);
     if(!ad) {
       mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningAudioDemuxerFailed,audio_stream);
       free_stream(as);
@@ -770,7 +788,8 @@ demuxer_t* demux_open(stream_t *vs,int file_format,int audio_id,int video_id,int
       hr_mp3_seek=1; // Enable high res seeking
   }
   if(ss) {
-    sd = demux_open_stream(ss,sub_demuxer_type ? sub_demuxer_type : sfmt,-2,-2,dvdsub_id, sub_stream);
+    sd = demux_open_stream(ss, sub_demuxer_type ? sub_demuxer_type : sfmt,
+           sub_demuxer_force, -2, -2, dvdsub_id, sub_stream);
     if(!sd) {
       mp_msg(MSGT_DEMUXER,MSGL_WARN,MSGTR_OpeningSubtitlesDemuxerFailed,sub_stream);
       free_stream(ss);

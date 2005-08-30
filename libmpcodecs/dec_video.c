@@ -166,19 +166,24 @@ int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
     unsigned int orig_fourcc=sh_video->bih?sh_video->bih->biCompression:0;
     sh_video->codec=NULL;
     sh_video->vf_inited=0;
+    int force = 0;
+    if (codecname && codecname[0] == '+') {
+      codecname = &codecname[1];
+      force = 1;
+    }
 
     while(1){
 	int i;
 	// restore original fourcc:
 	if(sh_video->bih) sh_video->bih->biCompression=orig_fourcc;
-	if(!(sh_video->codec=find_codec(sh_video->format,
+	if(!(sh_video->codec=find_video_codec(sh_video->format,
           sh_video->bih?((unsigned int*) &sh_video->bih->biCompression):NULL,
-          sh_video->codec,0) )) break;
+          sh_video->codec,force) )) break;
 	// ok we found one codec
 	if(sh_video->codec->flags&CODECS_FLAG_SELECTED) continue; // already tried & failed
 	if(codecname && strcmp(sh_video->codec->name,codecname)) continue; // -vc
 	if(vfm && strcmp(sh_video->codec->drv,vfm)) continue; // vfm doesn't match
-	if(sh_video->codec->status<status) continue; // too unstable
+	if(!force && sh_video->codec->status<status) continue; // too unstable
 	sh_video->codec->flags|=CODECS_FLAG_SELECTED; // tagging it
 	// ok, it matches all rules, let's find the driver!
 	for (i=0; mpcodecs_vd_drivers[i] != NULL; i++)

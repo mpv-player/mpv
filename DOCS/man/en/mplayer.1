@@ -787,6 +787,7 @@ Plays a Matroska file in Japanese.
 .TP
 .B \-audio-demuxer <name> (\-audiofile only)
 Force audio demuxer type for \-audiofile.
+Use a '+' before the name to force it, this will skip some checks!
 Give the demuxer name as printed by \-audio-demuxer help.
 For backward compatibility it also accepts the demuxer ID as defined in
 libmpdemux/\:demuxer.h.
@@ -3136,10 +3137,11 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .SH "DECODING/\:FILTERING OPTIONS"
 .
 .TP
-.B \-ac <[-]codec1,[-]codec2,...[,]>
+.B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
 Specify a priority list of audio codecs to be used, according to their codec
 name in codecs.conf.
 Use a '-' before the codec name to omit it.
+Use a '+' before the codec name to force it, this will likely crash!
 If the list has a trailing ',' MPlayer will fall back on codecs not
 contained in the list.
 .br
@@ -3541,6 +3543,7 @@ The description of the scale video filter has further information.
 Specify a priority list of video codecs to be used, according to their codec
 name in codecs.conf.
 Use a '-' before the codec name to omit it.
+Use a '+' before the codec name to force it, this will likely crash!
 If the list has a trailing ',' MPlayer will fall back on codecs not
 contained in the list.
 .br

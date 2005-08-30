@@ -119,6 +119,11 @@ int init_audio_codec(sh_audio_t *sh_audio)
 
 int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
     unsigned int orig_fourcc=sh_audio->wf?sh_audio->wf->wFormatTag:0;
+    int force = 0;
+    if (codecname && codecname[0] == '+') {
+      codecname = &codecname[1];
+      force = 1;
+    }
     sh_audio->codec=NULL;
     while(1){
 	ad_functions_t* mpadec;
@@ -126,14 +131,14 @@ int init_audio(sh_audio_t *sh_audio,char* codecname,char* afm,int status){
 	sh_audio->ad_driver = 0;
 	// restore original fourcc:
 	if(sh_audio->wf) sh_audio->wf->wFormatTag=i=orig_fourcc;
-	if(!(sh_audio->codec=find_codec(sh_audio->format,
-          sh_audio->wf?(&i):NULL, sh_audio->codec,1) )) break;
+	if(!(sh_audio->codec=find_audio_codec(sh_audio->format,
+          sh_audio->wf?(&i):NULL, sh_audio->codec, force) )) break;
 	if(sh_audio->wf) sh_audio->wf->wFormatTag=i;
 	// ok we found one codec
 	if(sh_audio->codec->flags&CODECS_FLAG_SELECTED) continue; // already tried & failed
 	if(codecname && strcmp(sh_audio->codec->name,codecname)) continue; // -ac
 	if(afm && strcmp(sh_audio->codec->drv,afm)) continue; // afm doesn't match
-	if(sh_audio->codec->status<status) continue; // too unstable
+	if(!force && sh_audio->codec->status<status) continue; // too unstable
 	sh_audio->codec->flags|=CODECS_FLAG_SELECTED; // tagging it
 	// ok, it matches all rules, let's find the driver!
 	for (i=0; mpcodecs_ad_drivers[i] != NULL; i++)

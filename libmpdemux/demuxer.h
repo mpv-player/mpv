@@ -327,4 +327,4 @@ extern int demuxer_switch_audio(demuxer_t *demuxer, int index);
 extern int demuxer_type_by_filename(char* filename);
 
 extern void demuxer_help(void);
-extern int get_demuxer_type_from_name(char *demuxer_name);
+extern int get_demuxer_type_from_name(char *demuxer_name, int *force);
