@@ -570,7 +570,80 @@ modified GCC 2.95.x doesn't support C99 syntax well.
 <para>
 One can get an Aqua GUI for <application>MPlayer</application> together with
 compiled <application>MPlayer</application> binaries for Mac OS X from the
-<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project.
+<ulink url="http://mplayerosx.sf.net/">MPlayerOSX</ulink> project, but be
+warned: that project as it is is not active anymore.
+</para>
+<para>
+Fortunately, <application>MPlayerOSX</application> has been taken over
+by <application>MPlayer</application>'s dev team, and is now one of the
+official projects supported by <application>MPlayer</application>.
+</para>
+<para>
+In order to build <application>MPlayerOSX</application>, you need
+the <systemitem>mplayerosx</systemitem> module, the
+<systemitem>main</systemitem> module and a copy of the
+<systemitem>main</systemitem> module named
+<systemitem>main_noaltivec</systemitem>.
+<systemitem>mplayerosx</systemitem> is the GUI frontend,
+<systemitem>main</systemitem> is MPlayer and
+<systemitem>main_noaltivec</systemitem> is MPlayer built without AltiVec
+support.
+</para>
+<para>
+You can get the latest source from CVS:
+<screen>
+cvs -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer login
+cvs -z3 -d:pserver:anonymous@mplayerhq.hu:/cvsroot/mplayer co -P mplayerosx
+</screen>
+
+In order to build <application>MPlayerOSX</application> you will need to
+set up something like this:
+<screen>
+MPlayer_source_directory
+   |
+   |--->main           (MPlayer CVS source)
+   |
+   |--->main_noaltivec (MPlayer CVS source configured with --disable-altivec)
+   |
+   |--->mplayerosx     (MPlayerOSX CVS source)
+</screen>
+
+You first need to build main and main_noaltivec.
+
+Next, set a global variable:
+<screen>export MACOSX_DEPLOYMENT_TARGET=10.3</screen>
+
+Then, configure:
+</para>
+<para>
+If you configure for a machine which CPU is greater than G3, do as follows:
+<screen>
+./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+</screen>
+
+If you configure for a G3-powered machine, do as follows:
+<screen>
+./configure --with-termcaplib=ncurses.5 --disable-gl --disable-x11
+--disable-altivec
+</screen>
+You may need to edit config.mak and change the -mcpu and -mtune from
+74XX to G3.
+</para>
+<para>
+Continue with
+<screen>
+make
+</screen>
+then go to the mplayerosx directory and and type
+
+<screen>
+make dist
+</screen>
+This will create a compressed .dmg archive with the binary ready to use.
+</para>
+<para>
+You can also use the xcode 2.1 project; the old project for xcode 1.x is
+not working anymore.
 </para>
 </sect1>
 
