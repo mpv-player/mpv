@@ -145,7 +145,10 @@ static demuxer_t* demux_open_ra(demuxer_t* demuxer)
 		mp_msg(MSGT_DEMUX,MSGL_V,"[RealAudio] %d channel, %d bit, %dHz\n", sh->channels,
 			sh->samplesize, sh->samplerate);
 		i = stream_read_char(demuxer->stream);
-		*((unsigned int *)(ra_priv->genr)) = stream_read_dword(demuxer->stream);
+		ra_priv->genr[0] = stream_read_char(demuxer->stream);
+		ra_priv->genr[1] = stream_read_char(demuxer->stream);
+		ra_priv->genr[2] = stream_read_char(demuxer->stream);
+		ra_priv->genr[3] = stream_read_char(demuxer->stream);
 		if (i != 4) {
 			mp_msg(MSGT_DEMUX,MSGL_WARN,"[RealAudio] Genr size is not 4 (%d), please report to "
 				"MPlayer developers\n", i);
