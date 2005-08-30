@@ -194,6 +194,14 @@ void mov_build_index(mov_track_t* trak,int timescale){
         trak->chunks[j].sample=s;
         s+=trak->chunks[j].size;
     }
+    i = 0;
+    for (j = 0; j < trak->durmap_size; j++)
+      i += trak->durmap[j].num;
+    if (i != s) {
+      mp_msg(MSGT_DEMUX, MSGL_WARN,
+             "MOV: durmap and chunkmap sample count differ (%i vs %i)\n", i, s);
+      if (i > s) s = i;
+    }
 
     // workaround for fixed-size video frames (dv and uncompressed)
     if(!trak->samples_size && trak->type!=MOV_TRAK_AUDIO){
@@ -212,6 +220,14 @@ void mov_build_index(mov_track_t* trak,int timescale){
 	return;
     }
     
+    if (trak->samples_size < s) {
+      mp_msg(MSGT_DEMUX, MSGL_WARN,
+             "MOV: durmap or chunkmap bigger than sample count (%i vs %i)\n",
+             s, trak->samples_size);
+      trak->samples_size = s;
+      trak->samples = realloc(trak->samples, sizeof(mov_sample_t) * s);
+    }
+
     // calc pts:
     s=0;
     for(j=0;j<trak->durmap_size;j++){
