@@ -3642,7 +3642,9 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
         }
 #endif
     } break;
-
+    case MP_CMD_KEYDOWN_EVENTS : {
+		mplayer_put_key(cmd->args[0].v.i);
+    } break;
 #ifdef USE_DVDNAV
     case MP_CMD_DVDNAV_EVENT: {
       dvdnav_priv_t * dvdnav_priv = (dvdnav_priv_t*)(stream->priv);
