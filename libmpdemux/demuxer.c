@@ -629,6 +629,8 @@ for (i = 0; (demuxer_desc = demuxer_list[i]); i++) {
         file_format = fformat;
         break;
       } else {
+        if (fformat == DEMUXER_TYPE_PLAYLIST)
+          return demuxer; // handled in mplayer.c
         // Format changed after check, recurse
         free_demuxer(demuxer);
         demuxer=demux_open_stream(stream, fformat, force,
@@ -672,6 +674,8 @@ for (i = 0; (demuxer_desc = demuxer_list[i]); i++) {
         file_format = fformat;
         break;
       } else {
+        if (fformat == DEMUXER_TYPE_PLAYLIST)
+          return demuxer; // handled in mplayer.c
         // Format changed after check, recurse
         free_demuxer(demuxer);
         demuxer=demux_open_stream(stream, fformat, force,

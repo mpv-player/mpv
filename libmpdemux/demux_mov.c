@@ -506,7 +506,7 @@ skip_chunk:
     free(priv);
 
     if ((flags==5) || (flags==7)) // reference & header sent
-        return DEMUXER_TYPE_MOV;
+        return DEMUXER_TYPE_PLAYLIST;
 
     if(flags==1)
 	mp_msg(MSGT_DEMUX,MSGL_WARN,"MOV: missing data (mdat) chunk! Maybe broken file...\n");
