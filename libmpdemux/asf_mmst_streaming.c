@@ -441,7 +441,7 @@ static int get_media_packet (int s, int padding, streaming_ctrl_t *stream_ctrl) 
     if (command == 0x1b) 
       send_command (s, 0x1b, 0, 0, 0, data);
     else if (command == 0x1e) {
-      mp_msg(MSGT_NETWORK,MSGL_INFO,"everything done. Thank you for downloading a media file containing proprietary and patentend technology.\n");
+      mp_msg(MSGT_NETWORK,MSGL_INFO,"everything done. Thank you for downloading a media file containing proprietary and patented technology.\n");
       return 0;
     }
     else if (command == 0x21 ) {
