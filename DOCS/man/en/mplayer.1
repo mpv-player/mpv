@@ -785,7 +785,7 @@ Plays a Matroska file in Japanese.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <name> (\-audiofile only)
+.B \-audio-demuxer <[+]name> (\-audiofile only)
 Force audio demuxer type for \-audiofile.
 Use a '+' before the name to force it, this will skip some checks!
 Give the demuxer name as printed by \-audio-demuxer help.
@@ -924,8 +924,9 @@ When used with MEncoder, this is not guaranteed to work correctly
 with \-ovc copy.
 .
 .TP
-.B \-demuxer <name>
+.B \-demuxer <[+]name>
 Force demuxer type.
+Use a '+' before the name to force it, this will skip some checks!
 Give the demuxer name as printed by \-demuxer help.
 For backward compatibility it also accepts the demuxer ID as defined in
 libmpdemux/\:demuxer.h.
@@ -1584,8 +1585,9 @@ intensity of the color.
 255 means white and 0 black.
 .
 .TP
-.B \-sub-demuxer <name> (\-subfile only) (BETA CODE)
+.B \-sub-demuxer <[+]name> (\-subfile only) (BETA CODE)
 Force subtitle demuxer type for \-subfile.
+Use a '+' before the name to force it, this will skip some checks!
 Give the demuxer name as printed by \-sub-demuxer help.
 For backward compatibility it also accepts the demuxer ID as defined in
 libmpdemux/\:demuxer.h.
@@ -3539,7 +3541,7 @@ The description of the scale video filter has further information.
 .RE
 .
 .TP
-.B \-vc <[-]codec1,[-]codec2,...[,]>
+.B \-vc <[-|+]codec1,[-|+]codec2,...[,]>
 Specify a priority list of video codecs to be used, according to their codec
 name in codecs.conf.
 Use a '-' before the codec name to omit it.
