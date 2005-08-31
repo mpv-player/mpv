@@ -163,10 +163,10 @@ void vfm_help(){
 }
 
 int init_video(sh_video_t *sh_video,char* codecname,char* vfm,int status){
+    int force = 0;
     unsigned int orig_fourcc=sh_video->bih?sh_video->bih->biCompression:0;
     sh_video->codec=NULL;
     sh_video->vf_inited=0;
-    int force = 0;
     if (codecname && codecname[0] == '+') {
       codecname = &codecname[1];
       force = 1;
