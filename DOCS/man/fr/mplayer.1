@@ -1,4 +1,4 @@
-.\" synced with 1.1074
+.\" synced with 1.1075
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -8988,6 +8988,35 @@ Ils sont affichés uniquement pour pouvoir les comparer à ceux du codec de
 référence JM.
 Dans les autres cas, préférez donc utiliser ou bien le PSNR 'Global', ou bien
 les PSNR de chaque trame affichés par l'option log=3.
+.
+.TP
+i.B (no)visualize
+Active la visualisation x264 lors de l'encodage.
+Si la librairie x264 de votre système la gère, une nouvelle fenêtre va
+s'ouvrir pendant l'encodage, où x264 affichera une représentation de la
+façon dont chaque trame est encodée.
+Chaque bloc de la vidéo visualisée sera colorisée comme suit\ :
+.PD 0
+.RSs
+.IPs rouge/rose
+bloc intra
+.IPs bleu\
+bloc inter
+.IPs vert\ 
+block sauté (skip)
+.IPs jaune
+bloc-B
+.RE
+.PD 1
+.RS
+Cette fonctionnalité est doit être considérée comme expérimentale, et peut
+évoluer.
+En particulier, elle ne fonctionne que si x264 est compilé avec la
+visualisation activée
+Notez qu'au moment où ceci est écrit, x264 se met en pause après avoir
+encodé et affiché chaque trame, en attente que l'utilisateur appuie sur
+une touche pour encoder la trame suivante.
+.RE
 .
 .
 .SS multiplexeur MPEG (\-mpegopts)
