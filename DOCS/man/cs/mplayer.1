@@ -1,4 +1,4 @@
-.\" synced with 1.1068
+.\" synced with 1.1077
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" Tuto man stránku napsali/pí¹í Gabucino, Diego Biurrun, Jonas Jermann
 .\" Pøeklad (translation): Jiøí Heryán
@@ -789,8 +789,9 @@ Pøehraje Matroska soubor v japon¹tinì.
 .PD 1
 .
 .TP
-.B \-audio-demuxer <jméno> (pouze \-audiofile)
+.B \-audio-demuxer <[+]jméno> (pouze \-audiofile)
 Vynutí zadaný typ audio demuxeru pro \-audiofile.
+Pou¾ijte '+' pøed jménem pro vynucení, co¾ pøeskoèí nìkteré testy!
 Zadejte jméno demuxeru tak jak je vypsáno pomocí \-audio-demuxer help.
 Z dùvodu zpìtné kompatibility rovnì¾ akceptuje ID demuxeru, jak je definováno v
 libmpdemux/\:demuxer.h.
@@ -926,8 +927,9 @@ Pokud je volba pou¾ita v MEncoderu, nezaruèujeme správnou funkci
 s \-ovc copy.
 .
 .TP
-.B \-demuxer <jméno>
+.B \-demuxer <[+]jméno>
 Vynutí typ demuxeru.
+Pou¾ijte '+' pøed jménem pro vynucení, co¾ pøeskoèí nìkteré testy!
 Zadejte jméno demuxeru tak jak je vypsáno pomocí \-demuxer help.
 Z dùvodu zpìtné kompatibility rovnì¾ akceptuje ID demuxeru, jak je definováno v
 libmpdemux/\:demuxer.h.
@@ -1584,8 +1586,9 @@ V souèasnosti jsou titulky èernobílé, hodnota tedy urèuje intenzitu bílé.
 Hodnota 255 znamená bílá a 0 èerná.
 .
 .TP
-.B \-sub-demuxer <jméno> (pouze \-subfile) (BETA KÓD)
+.B \-sub-demuxer <[+]jméno> (pouze \-subfile) (BETA KÓD)
 Vynutí urèitý typ titulkového demuxeru pro \-subfile.
+Pou¾ijte '+' pøed jménem pro vynucení, co¾ pøeskoèí nìkteré testy!
 Zadejte jméno demuxeru tak jak je vypsán pomocí \-sub-demuxer help.
 Z dùvodu zpìtné kompatibility rovnì¾ akceptuje ID demuxeru, jak je definováno
 v libmpdemux/\:demuxer.h.
@@ -1882,7 +1885,7 @@ Explicitnì vybere SDL audio ovladaè k pou¾ití (výchozí: SDL si sama vybere).
 .
 .TP
 .B arts\ \ \ 
-Zvukový výstup pøes ARTS démona.
+Zvukový výstup pøes aRts démona.
 .
 .TP
 .B esd\ \ \ \ 
@@ -1901,6 +1904,9 @@ Zvukový výstup pøes JACK (Jack Audio Connection Kit).
 .RSs
 .IPs port=<jméno>
 Pøipojí se na porty zadaného <jména> (výchozí: fyzické porty).
+.IPs name=<název klienta>
+Název klienta pøedávaný do JACK (výchozí: MPlayer [<PID>]).
+U¾iteèné, pokud chcete navazovat urèitá spojení automaticky.
 .IPs (no)estimate
 Pøedpoèítá zpo¾dìní zvuku, co¾ má èinit pøehrávání videa plynulej¹ím
 (výchozí: zapnuto).
@@ -2671,10 +2677,15 @@ Pou¾ívejte prosím \-dr, pokud rozhraní pracuje s va¹í OpenGL implementací,
 proto¾e pøi vy¹¹ích rozli¹eních poskytuje
 .B velké
 zrychlení.
+Kód provádí minimum testù, tak¾e pokud tato vlastnost nefunguje, mù¾e to být
+proto, ¾e není podporována va¹í kartou/OpenGL implementací i v pøípadì,
+¾e neobdr¾íte ¾ádnou chybovou zprávu.
+Pou¾ijte glxinfo nebo podobný nástroj pro zobrazení podporovaných OpenGL
+roz¹íøení.
 .PD 0
 .RSs
 .IPs (no)manyfmts
-Zapne podporu pro více (RGB a BGR) barevných schémat.
+Zapne podporu pro více (RGB a BGR) barevných schémat (výchozí: zapnuto).
 Vy¾aduje OpenGL ve verzi >= 1.2.
 .IPs slice-height=<0\-...>
 Poèet øádkù kopírovaných do textury najednou (výchozí: 4).
@@ -2693,13 +2704,25 @@ Zapne nebo vypne ¹kálování na správný pomìr stran a podporu 'pan-and-scan'
 (výchozí: zapnuto).
 Vypnutí mù¾e zvý¹it rychlost.
 .IPs rectangle=<0,1,2>
-Nastaví pou¾ití pravoúhlých textur (¹etøí video RAM, ale èasto je pomalej¹í).
+Nastaví pou¾ití pravoúhlých textur, co¾ ¹etøí video RAM, ale èasto je pomalej¹í
+(výchozí: 0).
 .RSss
-0: Pou¾ije power-of-two textury (výchozí).
+0: Pou¾ije power-of-two textury.
 .br
 1: Pou¾ije texture_rectangle.
 .br
 2: Pou¾ije texture_non_power_of_two.
+.IPs (no)glfinish
+Zavolá glFinish() pøed prohozením vyrovnávacích pamìtí.
+Pomalej¹í, ale v nìkterých pøípadech dává korektnìj¹í výstup (výchozí: vypnuto).
+.IPs  swapinterval=<n>
+Minimální interval zobrazených snímkù mezi prohozením vyrovnávacích pamìtí
+(výchozí:1 ). 1 odpovídá zapnutí VSYNC, 0 vypnutí VSYNC.
+Hodnoty < 0 ponechají výchozí nastavení systému.
+Toto omezí snímkovou rychlost na (horizontální frekvenci / n).
+Pro svou funkci vy¾aduje podporu GLX_SGI_swap_control.
+V nìkterých (vìt¹inì/v¹ech?) implementacích pracuje pouze v celoobrazovkovém
+re¾imu.
 .REss
 .RE
 .PD 1
@@ -3114,10 +3137,11 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .SH "VOLBY PRO DEKÓDOVÁNÍ/\:FILTROVÁNÍ"
 .
 .TP
-.B \-ac <[-]kodek1,[-]kodek2,...[,]>
+.B \-ac <[-|+]kodek1,[-|+]kodek2,...[,]>
 Nastaví seznam zvukových kodekù k pou¾ití podle priority, shodnì
 s jejich názvy v codecs.conf.
 Napi¹te '-' pøed název kodeku, který chcete vylouèit.
+Pou¾ijte '+' pøed jménem kodeku pro jeho vynucení, co¾ nejspí¹ skonèí havárií!
 Pokud seznam zakonèíte èárkou, pou¾ije v pøípadì selhání Mplayer i kodeky
 neuvedené na seznamu.
 .br
@@ -3515,10 +3539,11 @@ Více informací naleznete v popisu video filtru scale.
 .RE
 .
 .TP
-.B \-vc <[-]kodek1,[-]kodek2,...[,]>
+.B \-vc <[-|+]kodek1,[-|+]kodek2,...[,]>
 Nastaví seznam video kodekù k pou¾ití podle priority, shodnì
 s jejich názvy v codecs.conf.
 Napi¹te '-' pøed jméno kodeku, který chcete vynechat.
+Pou¾ijte '+' pøed jménem kodeku pro jeho vynucení, co¾ nejspí¹ skonèí havárií!
 Konèí-li seznam èárkou, pak se v pøípadì selhání pou¾ijí i kodeky,
 které nejsou na seznamu.
 .br
@@ -8426,6 +8451,32 @@ Jsou zde pouze pro srovnání s JM referenèním kodekem.
 Pro jakékoli jiné vyu¾ití radìji pou¾ijte 'Globální' PSNR, nebo PSNR
 jednotlivých snímkù vypisovaných pøi log=3.
 .
+.TP
+.B (no)visualize
+Zapne x264 vizualizace bìhem enkódování.
+Pokud to x264 na va¹em systému podporuje, bude bìhem enkódování otevøeno nové
+okno, ve kterém se pokusí x264 ukazovat pøehled o tom, jak jsou enkódovány
+jednotlivé snímky.
+Ka¾dý typ bloku vizualizovaného filmu bude obarven následovnì:
+.PD 0
+.RSs
+.IPs èervenì/rù¾ovì
+intra blok
+.IPs modøe\ 
+inter blok
+.IPs zelenì
+pøeskoèený blok
+.IPs ¾lutì
+B-blok
+.RE
+.PD 1
+.RS
+Tuto vlastnost pova¾ujte za experimentální a mù¾e se zmìnit.
+Konkrétnì závisí na tom, zda byl x264 skompilován se zapnutou vizualizací.
+Poznamenejme, ¾e po enkódování vykreslení vizualizace x264 zastaví a èeká
+na stisk klávesy, ne¾ enkóduje dal¹í snímek.
+.RE
+.
 .
 .SS MPEG muxer (\-mpegopts)
 .
@@ -8530,13 +8581,13 @@ Macromedia Flash
 .IPs flv\ \ 
 Macromedia Flash video soubory
 .IPs rm\ \ \ 
-Real Audio a Video
+RealAudio a RealVideo
 .IPs au\ \ \ 
 SUN AU formát
 .IPs nut\ \ 
-NUT Open Container Format (experimentální)
+NUT Open container format (experimentální)
 .IPs mov\ \ 
-Quicktime
+QuickTime
 .IPs mp4\ \ 
 Formát MPEG-4
 .IPs dv\ \ 
