@@ -206,12 +206,13 @@ static int control(sh_audio_t *sh,int cmd,void* arg, ...)
   return CONTROL_UNKNOWN;
 }
 
+#define MAX_FAAD_ERRORS 10
 static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
 {
-  int j = 0, len = 0;	      
+  int j = 0, len = 0, last_dec_len = 1, errors = 0;	      
   void *faac_sample_buffer;
 
-  while(len < minlen && len > 0) {
+  while(len < minlen && last_dec_len > 0 && errors < MAX_FAAD_ERRORS) {
 
     /* update buffer for raw aac streams: */
   if(!sh->codecdata_len)
@@ -245,9 +246,10 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       mp_msg(MSGT_DECAUDIO,MSGL_WARN,"FAAD: error: %s, trying to resync!\n",
               faacDecGetErrorMessage(faac_finfo.error));
       j++;
+      errors++;
     } else
       break;
-   } while(j < FAAD_BUFFLEN);	  
+   } while(j < FAAD_BUFFLEN && errors < MAX_FAAD_ERRORS);	  
   } else {
    // packetized (.mp4) aac stream:
     unsigned char* bufptr=NULL;
@@ -267,7 +269,8 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
       mp_msg(MSGT_DECAUDIO,MSGL_DBG2,"FAAD: Successfully decoded frame (%d Bytes)!\n",
       sh->samplesize*faac_finfo.samples);
       memcpy(buf+len,faac_sample_buffer, sh->samplesize*faac_finfo.samples);
-      len += sh->samplesize*faac_finfo.samples;
+      last_dec_len = sh->samplesize*faac_finfo.samples;
+      len += last_dec_len;
     //printf("FAAD: buffer: %d bytes  consumed: %d \n", k, faac_finfo.bytesconsumed);
     }
   }
