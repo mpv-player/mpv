@@ -1288,6 +1288,48 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 </sect2>
 
 
+<sect2 id="menc-feat-dvd-mpeg4-av-sync">
+<title>Notes on Audio/Video synchronization</title>
+<para>
+<application>MEncoder</application>'s audio/video synchronization
+algorithms were designed with the intention of recovering files with
+broken sync.
+However they seem to cause unnecessary skipping and duplication of
+frames, and possibly slight A/V desync, when used with proper input.
+It is therefore recommended that you switch to basic A/V sync with
+the <option>-mc 0</option> option, or put this in your
+<systemitem>~/.mplayer/mencoder</systemitem> config file, as long as
+you are only working with good sources (DVD, TV capture, high quality
+MPEG-4 rips, etc) and not broken ASF/RM/MOV files.
+</para>
+<para>
+If you want to further guard against strange frame skips and
+duplication, you can use both <option>-mc 0</option> and
+<option>-noskip</option>.
+This will prevent <emphasis>all</emphasis> A/V sync, and copy frames
+one-to-one, so you cannot use it if you will be using any filters that
+unpredictably add or drop frames, or if your input file has variable
+framerate!
+Therefore, using <option>-noskip</option> is not in general recommended.
+</para>
+<para>
+The so-called "three-pass" encoding which <application>MEncoder</application>
+supports has been reported to cause A/V desync.
+This will definitely happen if it is used in conjunction with certain
+filters, therefore, it is now recommended <emphasis>not</emphasis> to
+use three-pass mode.
+This feature is only left for compatibility purposes and for expert
+users who understand when it is safe to use and when it is not.
+If you have never heard of three-pass mode before, forget that we
+even mentioned it!
+</para>
+<para>
+There have also been reports of A/V desync when encoding from stdin
+with <application>MEncoder</application>.
+Do not do this! Always use a file or CD/DVD/etc device as input.
+</para>
+</sect2>
+
 <sect2 id="menc-feat-dvd-mpeg4-audio">
 <title>Audio</title>
 
