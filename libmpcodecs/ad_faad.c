@@ -211,7 +211,7 @@ static int decode_audio(sh_audio_t *sh,unsigned char *buf,int minlen,int maxlen)
   int j = 0, len = 0;	      
   void *faac_sample_buffer;
 
-  while(len < minlen) {
+  while(len < minlen && len > 0) {
 
     /* update buffer for raw aac streams: */
   if(!sh->codecdata_len)
