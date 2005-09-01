@@ -17,6 +17,11 @@ SRCS=aclib.c \
      vo_yuv4mpeg.c \
      $(OPTIONAL_SRCS) \
 
+LIBAV_INC =
+ifeq ($(CONFIG_LIBAVUTIL),yes)
+LIBAV_INC += -I../libavutil
+endif
+
 OBJS_TEMP=$(basename $(SRCS))
 OBJS=$(OBJS_TEMP:%=%.o)
 
@@ -25,6 +30,7 @@ SRCS += vosub_vidix.c
 endif
 
 CFLAGS  = $(OPTFLAGS) -I. -I.. -I../osdep \
+          $(LIBAV_INC) \
           $(FREETYPE_INC) \
           $(SDL_INC) \
           $(X11_INC) \
