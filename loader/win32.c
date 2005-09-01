@@ -4690,6 +4690,10 @@ static int WINAPI expDialogBoxParamA(void *inst, const char *name,
     return 0x42424242;
 }
 
+static void WINAPI expRegisterClipboardFormatA(const char *name) {
+    dbgprintf("RegisterClipboardFormatA(0x%x = %s)\n", name, name);
+}
+
 /* needed by imagepower mjpeg2k */
 static void *exprealloc(void *ptr, size_t size)
 {
@@ -4704,6 +4708,32 @@ static void *exprealloc(void *ptr, size_t size)
 static WIN_BOOL WINAPI expGetOpenFileNameA(/*LPOPENFILENAMEA*/ void* lpfn)
 {
     return 1;
+}
+
+static char * WINAPI expPathFindExtensionA(const char *path) {
+  char *ext;
+  if (!path)
+    ext = NULL;
+  else {
+    ext = strrchr(path, '.');
+    if (!ext)
+      ext = &path[strlen(path)];
+  }
+  dbgprintf("PathFindExtensionA(0x%x = %s) => 0x%x, %s\n", path, path, ext, ext);
+  return ext;
+}
+
+static char * WINAPI expPathFindFileNameA(const char *path) {
+  char *name;
+  if (!path || strlen(path) < 2)
+    name = path;
+  else {
+    name = strrchr(path - 1, '\\');
+    if (!name)
+      name = path;
+  }
+  dbgprintf("PathFindFileNameA(0x%x = %s) => 0x%x, %s\n", path, path, name, name);
+  return name;
 }
 
 static double expfloor(double x)
@@ -5024,6 +5054,7 @@ struct exports exp_user32[]={
 #endif
     FF(MessageBeep, -1)
     FF(DialogBoxParamA, -1)
+    FF(RegisterClipboardFormatA, -1)
 };
 struct exports exp_advapi32[]={
     FF(RegCloseKey, -1)
@@ -5137,6 +5168,11 @@ struct exports exp_comdlg32[]={
     FF(GetOpenFileNameA, -1)
 };
 
+struct exports exp_shlwapi[]={
+    FF(PathFindExtensionA, -1)
+    FF(PathFindFileNameA, -1)
+};
+
 #define LL(X) \
     {#X".dll", sizeof(exp_##X)/sizeof(struct exports), exp_##X},
 
@@ -5161,6 +5197,7 @@ struct libs libraries[]={
     LL(ddraw)
 #endif
     LL(comdlg32)
+    LL(shlwapi)
 };
 
 static void ext_stubs(void)
