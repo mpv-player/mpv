@@ -1,4 +1,4 @@
-.\" synced with 1.1075
+.\" synced with 1.1076
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -832,6 +832,8 @@ disponible.
 .TP
 .B \-audio-demuxer <nom> (\-audiofile uniquement)
 Force le type de démultiplexeur audio pour \-audiofile.
+Ajoutez un '+' avant son nom pour le forcer, ce qui va sauter
+certain contrôles.
 Indiquez le nom du demultiplexeur parmi la liste donnée par \-audio-demuxer
 help.
 Pour assurer la compatibilité ascendante, il est aussi possible de donner
@@ -3335,10 +3337,12 @@ mplayer video.nut \-vf format=bgr15 \-vo tga
 .SH "OPTIONS DE DÉCODAGE/\:FILTRAGE"
 .
 .TP
-.B \-ac <[-]codec1,[-]codec2,...[,]>
+.B \-ac <[-|+]codec1,[-|+]codec2,...[,]>
 Définit une liste de priorité des codecs audio à utiliser, à partir de leur
 nom de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
+Ajoutez un '+' avant son nom pour le forcer, ce qui va probablement
+planter!
 Si la liste se termine par ',', se rabat alors sur les codecs non-listés.
 .br
 .I NOTE:
@@ -3756,6 +3760,8 @@ Plus d'informations sont disponibles dans la description du filtre scale.
 Définit une liste de priorité des codecs vidéo à utiliser, suivant leur nom
 de codec dans codecs.conf.
 Utilisez un '-' avant le nom d'un codec pour l'omettre.
+Ajoutez un '+' avant son nom pour le forcer, ce qui va probablement
+planter!
 Si la liste se termine par ',', il se rabattra sur les codecs non-listés.
 .br
 .I NOTE\ :
