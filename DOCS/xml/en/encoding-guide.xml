@@ -1203,7 +1203,7 @@
 </para>
 
 <para>
-  Because the video in a PAL DVD has not been altered, you needn't worry
+  Because the video in a PAL DVD has not been altered, you need not worry
   much about framerate. The source is 25 fps, and your rip will be 25
   fps. However, if you are ripping an NTSC DVD movie, you may need to
   apply inverse telecine.
@@ -2458,7 +2458,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   After running <option>mplayer dvd://1</option>, we follow the process
   detailed in the section <link linkend="menc-feat-telecine">How to deal
   with telecine and interlacing in NTSC DVDs</link> and discover that it is
-  24000/1001 fps progressive video, which means that we needn't use an inverse
+  24000/1001 fps progressive video, which means that we need not use an inverse
   telecine filter, such as <option>pullup</option> or
   <option>filmdint</option>.
 </para>
@@ -3080,8 +3080,8 @@ codec</title>
 </para>
 <para>
   Still, there are very good reasons for using two pass encoding. For
-  one thing, single pass ratecontrol isn't psychic, and it often makes
-  unreasonable choices because it can't see the big picture. For example,
+  one thing, single pass ratecontrol is not psychic, and it often makes
+  unreasonable choices because it cannot see the big picture. For example,
   suppose you have a two minute long video consisting of two distinct
   halves.  The first half is a very high-motion scene lasting 60 seconds
   which, in isolation, requires about 2500kbps in order to look decent.
@@ -3093,7 +3093,7 @@ codec</title>
   heavily overquantized, causing it to look unacceptably and unreasonably
   blocky. The second segment will be heavily underquantized; it may look
   perfect, but the bitrate cost of that perfection will be completely
-  unreasonable. What's even harder to avoid is the problem at the
+  unreasonable. What is even harder to avoid is the problem at the
   transition between the two scenes. The first seconds of the low motion
   half will be hugely over-quantized, because the ratecontrol is still
   expecting the kind of bitrate requirements it met in the first half
@@ -3155,9 +3155,9 @@ codec</title>
   perfect, but would also use many times more bitrate than they
   would need in order to look merely excellent. At the other extreme,
   <option>qcomp=1</option> achieves nearly constant quantization parameter
-  (QP). Constant QP doesn't look bad, but most people think it's more
+  (QP). Constant QP does not look bad, but most people think it is more
   reasonable to shave some bitrate off of the extremely expensive scenes
-  (where the loss of quality isn't as noticeable) and reallocate it to
+  (where the loss of quality is not as noticeable) and reallocate it to
   the scenes that are easier to encode at excellent quality.
   <option>qcomp</option> is set to 0.6 by default, which may be slightly
   low for many peoples' taste (0.7-0.8 are also commonly used).
