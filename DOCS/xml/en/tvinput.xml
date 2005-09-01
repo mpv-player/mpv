@@ -139,7 +139,7 @@ this driver.
 <para>
 If <application>MEncoder</application> cannot open the audio device, make
 sure that it is really available. There can be some trouble with the sound
-servers like arts (KDE) or esd (GNOME). If you have a full duplex sound card
+servers like aRts (KDE) or ESD (GNOME). If you have a full duplex sound card
 (almost any decent card supports it today), and you are using KDE, try to
 check the "full duplex" option in the sound server preference menu.
 </para>

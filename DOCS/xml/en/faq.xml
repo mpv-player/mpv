@@ -628,9 +628,9 @@ I have no sound when playing a video and get error messages similar to this one:
 </screen>
 </para></question>
 <answer><para>
-Are you running KDE or GNOME with the ARTS or ESD sound daemon? Try disabling
+Are you running KDE or GNOME with the aRts or ESD sound daemon? Try disabling
 the sound daemon or use the <option>-ao arts</option> or <option>-ao esd</option>
-option to make <application>MPlayer</application> use ARTS or ESD.
+option to make <application>MPlayer</application> use aRts or ESD.
 You might also be running ALSA without OSS emulation, try loading the ALSA OSS
 kernel modules or add <option>-ao alsa</option> to your command line to
 directly use the ALSA audio output driver.
@@ -643,11 +643,11 @@ When starting <application>MPlayer</application> under KDE I just get a black
 screen and nothing happens. After about one minute the video starts playing.
 </para></question>
 <answer><para>
-The KDE arts sound daemon is blocking the sound device. Either wait until the
-video starts or disable the arts-daemon in control center. If you want to use
-arts sound, specify audio output via our native arts audio driver
+The KDE aRts sound daemon is blocking the sound device. Either wait until the
+video starts or disable the aRts daemon in control center. If you want to use
+aRts sound, specify audio output via our native aRts audio driver
 (<option>-ao arts</option>). If it fails or isn't compiled in, try SDL
-(<option>-ao sdl</option>) and make sure your SDL can handle arts sound. Yet
+(<option>-ao sdl</option>) and make sure your SDL can handle aRts sound. Yet
 another option is to start <application>MPlayer</application> with artsdsp.
 </para></answer>
 </qandaentry>
