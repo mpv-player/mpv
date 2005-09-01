@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="iso-8859-2"?>
-<!-- Synced with: 1.10 -->
+<!-- Synced with: 1.12 -->
 <chapter id="encoding-guide">
 <title>Enkódování s <application>MEncoder</application>em</title>
 
@@ -3053,6 +3053,50 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 </itemizedlist>
 </sect3>
 </sect2>
+
+<sect2 id="menc-feat-x264-example-settings">
+<title>Příklady voleb enkódování</title>
+
+<para>
+  Následující nastavení jsou příkladem různých kombinací voleb enkódování
+  ovlivňující poměr rychlost/kvalita při stejném cílovém datovém toku.
+  
+  Pokud je vaším cílem perfektní kvalita bez velkého přemýšlení a
+  bez omezení velikosti, bude enkódování nízkým konstantním kvantizérem
+  (jako je <option>qp_constant=18</option>) bez B-snímků
+  (<option>bframes=0</option>) pravděpodobně vypadat velmi dobře, ale
+  spotřebuje mnoho bitů na enkódování detailů, které mohly být enkódovány
+  mnohem rozumněji pomocí pokročilých nastavení.
+</para>
+
+<para>
+  Všechna nastavení enkódování byly testovány na videosnímku 720x448
+  @30000/1001 fps, cílový datový tok byl  900kbps. Testovacím strojem
+  byl AMD-64 3400+ na 2400 Mhz v režimu 64 bitů.
+  Každý příklad nastavení je následován rychlostí enkódování (ve snímcích
+  za sekundu), údajem o ztrátě efektivnosti enkódování (v procentech datového
+  toku) v porovnání s nastavením "velmi vysoké kvality" a ztrátou PSNR
+  (v dB).
+  Berte prosím v potaz, že v závislosti na zdrojovém videu, typu počítače
+  a pokroku ve vývoji můžete dostat velmi odlišné výsledky.
+</para>
+
+<itemizedlist>
+<listitem><para><emphasis role="bold">Velmi vysoká kvalita:</emphasis>
+<option>subq=6:4x4mv:8x8dct:me=3:frameref=5:bframes=3:b_pyramid:weight_b</option>
+6fps, 0%, 0dB.
+</para></listitem>
+<listitem><para><emphasis role="bold">Vysoká kvalita:</emphasis>
+<option>subq=5:4x4mv:8x8dct:frameref=2:bframes=3:b_pyramid:weight_b:psnr</option>
+13fps, -13%, -0.89dB.
+</para></listitem>
+<listitem><para><emphasis role="bold">Rychlá:</emphasis>
+<option>subq=4:bframes=2:b_pyramid:weight_b:psnr</option>
+17fps, -20%, -1.48dB.
+</para></listitem>
+</itemizedlist>
+</sect2>
+
 </sect1>
 
 <sect1 id="menc-feat-vcd-dvd">
@@ -3105,7 +3149,10 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
         <entry>1536 kbps</entry>
-        <entry>23.976, 29.97</entry>
+        <entry>30000/1001, 24000/1001<footnote id="fn-ntsc-framerate"><para>
+            Snímkové rychlosti (FPS) 24000/1001 můžete dosáhnout pomocí 3:2
+	    pullup.
+            </para></footnote></entry>
         <entry>4:3, 16:9 (pouze pro 720x480)</entry>
     </row>
     <row>
@@ -3118,7 +3165,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>48000 Hz</entry>
         <entry>AC3,PCM</entry>
         <entry>1536 kbps</entry>
-        <entry>23.976, 29.97</entry>
+        <entry>30000/1001, 24000/1001<footnoteref linkend='fn-ntsc-framerate'/></entry>
         <entry>4:3, 16:9</entry>
     </row>
     <row>
@@ -3129,7 +3176,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>384 kbps</entry>
-        <entry>29.97</entry>
+        <entry>30000/1001</entry>
         <entry>4:3</entry>
     </row>
     <row>
@@ -3140,7 +3187,7 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
         <entry>44100 Hz</entry>
         <entry>MP2</entry>
         <entry>224 kbps</entry>
-        <entry>23.976, 29.97</entry>
+        <entry>24000/1001, 30000/1001</entry>
         <entry>4:3</entry>
     </row>
     <row>
@@ -3264,6 +3311,15 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
   <screen>
   -of mpeg -mpegopts format=dvd
   </screen>
+</para>
+
+<para>
+  DVD s NTSC Pullup:
+  <screen>
+  -of mpeg -mpegopts format=dvd:telecine -ofps 24000/1001
+  </screen>
+  Toto umožňuje enkódovat 24000/1001 fps progresivní materiál při 30000/1001 
+  fps při zachování slučitelnosti s DVD.
 </para>
 
 <sect3 id="menc-feat-vcd-dvd-output-aspect">
@@ -3591,11 +3647,11 @@ vcodec=mpeg2video:intra_matrix=8,9,12,22,26,27,29,34,9,10,14,26,27,29,34,37,
 <sect3 id="menc-feat-vcd-dvd-all-ntsc-ac3-copy">
 <title>NTSC AVI obsahující AC3 zvuk do DVD</title>
 <para>
-  Pokud již má zdroj AC3 zvuk a video je NTSC @ 23.976 fps:
+  Pokud již má zdroj AC3 zvuk a video je NTSC @ 24000/1001 fps:
   <screen>
-  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd -vf scale=720:480,\
-  harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:vrc_maxrate=9800:\
-  vbitrate=5000:keyint=15:aspect=16/9 -ofps  24000/1001 \
+  mencoder -oac copy -ovc lavc -of mpeg -mpegopts format=dvd:telecine \
+  -vf scale=720:480,harddup -lavcopts vcodec=mpeg2video:vrc_buf_size=1835:\
+  vrc_maxrate=9800:vbitrate=5000:keyint=15:aspect=16/9 -ofps 24000/1001 \
   -o <replaceable>film.mpg</replaceable> <replaceable>film.avi</replaceable>
   </screen>
 </para>
