@@ -167,8 +167,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nGravando índice do AVI...\n"
 #define MSGTR_FixupAVIHeader "Corrigindo cabeçalho do AVI...\n"
 #define MSGTR_RecommendedVideoBitrate "Bitrate do vídeo recomendado para CD de %s: %d\n"
-#define MSGTR_VideoStreamResult "\nTrilha de vídeo: %8.3f kbit/s  (%d bps)  tamanho: %d bytes  %5.3f segundos  %d quadros\n"
-#define MSGTR_AudioStreamResult "\nTrilha de audio: %8.3f kbit/s  (%d bps)  tamanho: %d bytes  %5.3f segundos\n"
+#define MSGTR_VideoStreamResult "\nTrilha de vídeo: %8.3f kbit/s  (%d B/s)  tamanho: %d bytes  %5.3f segundos  %d quadros\n"
+#define MSGTR_AudioStreamResult "\nTrilha de audio: %8.3f kbit/s  (%d B/s)  tamanho: %d bytes  %5.3f segundos\n"
 
 // cfg-mencoder.h:
 

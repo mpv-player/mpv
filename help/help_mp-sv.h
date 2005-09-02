@@ -214,11 +214,11 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nSkriver AVI-index...\n"
 #define MSGTR_FixupAVIHeader "Fixering AVI-filhuvud...\n" // FIXME fixing?
 #define MSGTR_RecommendedVideoBitrate "Rekommenderad videobitrate för %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nVideostöm: %8.3f kbit/s  (%d bps)  storlek: %d byte  %5.3f sekunder  %d bildrutor\n"
-#define MSGTR_AudioStreamResult "\nAudiostöm: %8.3f kbit/s  (%d bps)  storlek: %d byte  %5.3f sekunder\n"
+#define MSGTR_VideoStreamResult "\nVideostöm: %8.3f kbit/s  (%d B/s)  storlek: %d byte  %5.3f sekunder  %d bildrutor\n"
+#define MSGTR_AudioStreamResult "\nAudiostöm: %8.3f kbit/s  (%d B/s)  storlek: %d byte  %5.3f sekunder\n"
 #define MSGTR_OpenedStream "klart: format: %d  data: 0x%X - 0x%x\n"
 #define MSGTR_VCodecFramecopy "videocodec: framecopy (%dx%d %dbpp fourcc=%x)\n" // FIXME translate?
-#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d bps=%ld sample-%ld)\n" // -''-
+#define MSGTR_ACodecFramecopy "audiocodec: framecopy (format=%x chans=%d rate=%ld bits=%d B/s=%ld sample-%ld)\n" // -''-
 #define MSGTR_CBRPCMAudioSelected "CBR PCM audio valt\n"
 #define MSGTR_MP3AudioSelected "MP3 audio valt\n"
 #define MSGTR_CannotAllocateBytes "Kunde inte allokera %d byte\n"

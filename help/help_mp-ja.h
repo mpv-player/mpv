@@ -157,8 +157,8 @@ static char help_text[]=
 #define MSGTR_ErrorWritingFile "%s: ファイル書き込みエラー.\n"
 #define MSGTR_WritingAVIIndex "\nAVI indexを書き込み中...\n"
 #define MSGTR_FixupAVIHeader "AVIヘッダを修復中...\n"
-#define MSGTR_VideoStreamResult "\n映像ストリーム: %8.3f kbit/s  (%d bps)  サイズ: %d bytes  %5.3f secs  %d フレーム\n"
-#define MSGTR_AudioStreamResult "\n音声ストリーム: %8.3f kbit/s  (%d bps)  サイズ: %d bytes  %5.3f secs\n"
+#define MSGTR_VideoStreamResult "\n映像ストリーム: %8.3f kbit/s  (%d B/s)  サイズ: %d bytes  %5.3f secs  %d フレーム\n"
+#define MSGTR_AudioStreamResult "\n音声ストリーム: %8.3f kbit/s  (%d B/s)  サイズ: %d bytes  %5.3f secs\n"
 
 // cfg-mencoder.h:
 

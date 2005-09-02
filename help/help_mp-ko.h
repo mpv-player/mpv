@@ -161,8 +161,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nAVI 인덱스를 쓰고 있습니다...\n"
 #define MSGTR_FixupAVIHeader "AVI 해더를 고치고 있습니다...\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD용으로 추천할 만한 비디오 주사율: %d\n"
-#define MSGTR_VideoStreamResult "\n비디오 스트림: %8.3f kbit/s  (%d bps)  크기: %d 바이트  %5.3f 초  %d 프레임\n"
-#define MSGTR_AudioStreamResult "\n오디오 스트림: %8.3f kbit/s  (%d bps)  크기: %d 바이트  %5.3f 초\n"
+#define MSGTR_VideoStreamResult "\n비디오 스트림: %8.3f kbit/s  (%d B/s)  크기: %d 바이트  %5.3f 초  %d 프레임\n"
+#define MSGTR_AudioStreamResult "\n오디오 스트림: %8.3f kbit/s  (%d B/s)  크기: %d 바이트  %5.3f 초\n"
 
 // cfg-mencoder.h:
 

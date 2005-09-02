@@ -134,8 +134,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nAVI içeriði yazýlýyor...\n"
 #define MSGTR_FixupAVIHeader "AVI Baþlýðý düzeltiliyor...\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD si için tavsiye edilen video bitrate: %d\n"
-#define MSGTR_VideoStreamResult "\nVideo biçimi: %8.3f kbit/s  (%d bps)  boyut: %d byte  %5.3f saniye  %d çerçeve\n"
-#define MSGTR_AudioStreamResult "\nSes biçimi: %8.3f kbit/s  (%d bps)  boyut: %d byte    %5.3f saniye\n"
+#define MSGTR_VideoStreamResult "\nVideo biçimi: %8.3f kbit/s  (%d B/s)  boyut: %d byte  %5.3f saniye  %d çerçeve\n"
+#define MSGTR_AudioStreamResult "\nSes biçimi: %8.3f kbit/s  (%d B/s)  boyut: %d byte    %5.3f saniye\n"
 
 // open.c, stream.c:
 #define MSGTR_CdDevNotfound "CD-ROM Sürücüsü '%s' bulunamadý!\n"

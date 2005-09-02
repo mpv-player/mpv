@@ -161,8 +161,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\n正在写AVI索引...\n"
 #define MSGTR_FixupAVIHeader "修复AVI文件头...\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD推荐的视频比特率为: %d\n"
-#define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d bps)  大小: %d bytes  %5.3f secs  %d frames\n"
-#define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d bps)  大小: %d bytes  %5.3f secs\n"
+#define MSGTR_VideoStreamResult "\n视频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs  %d frames\n"
+#define MSGTR_AudioStreamResult "\n音频流: %8.3f kbit/s  (%d B/s)  大小: %d bytes  %5.3f secs\n"
 // cfg-mencoder.h:
 
 #define MSGTR_MEncoderMP3LameHelp "\n\n"\

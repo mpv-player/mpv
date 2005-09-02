@@ -163,8 +163,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\n正在寫入 AVI 索引...\n"
 #define MSGTR_FixupAVIHeader "正在修補 AVI 標頭...\n"
 #define MSGTR_RecommendedVideoBitrate "%s CD 所建議之視訊 bitrate: %d\n"
-#define MSGTR_VideoStreamResult "\n視訊串流: %8.3f kbit/s  (%d bps)  大少: %d bytes  %5.3f 秒 %d 格\n"
-#define MSGTR_AudioStreamResult "\n音效串流: %8.3f kbit/s  (%d bps)  大少: %d bytes  %5.3f 秒\n"
+#define MSGTR_VideoStreamResult "\n視訊串流: %8.3f kbit/s  (%d B/s)  大少: %d bytes  %5.3f 秒 %d 格\n"
+#define MSGTR_AudioStreamResult "\n音效串流: %8.3f kbit/s  (%d B/s)  大少: %d bytes  %5.3f 秒\n"
 
 // cfg-mencoder.h:
 

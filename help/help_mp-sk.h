@@ -153,8 +153,8 @@ static char help_text[]=
 #define MSGTR_WritingAVIIndex "\nzapisujem AVI index...\n"
 #define MSGTR_FixupAVIHeader "Opravujem AVI hlavièku...\n"
 #define MSGTR_RecommendedVideoBitrate "Doporuèená rýchlost bit. toku videa pre %s CD: %d\n"
-#define MSGTR_VideoStreamResult "\nVideo prúd: %8.3f kbit/s  (%d bps)  velkos»: %d bytov  %5.3f sekund  %d snímkov\n"
-#define MSGTR_AudioStreamResult "\nAudio prúd: %8.3f kbit/s  (%d bps)  velkos»: %d bytov  %5.3f sekund\n"
+#define MSGTR_VideoStreamResult "\nVideo prúd: %8.3f kbit/s  (%d B/s)  velkos»: %d bytov  %5.3f sekund  %d snímkov\n"
+#define MSGTR_AudioStreamResult "\nAudio prúd: %8.3f kbit/s  (%d B/s)  velkos»: %d bytov  %5.3f sekund\n"
 
 // cfg-mencoder.h:
 

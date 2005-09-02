@@ -2243,7 +2243,7 @@ if(sh_audio){
   } else {
     // SUCCESS:
     inited_flags|=INITED_AO;
-    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d bps)\n",
+    mp_msg(MSGT_CPLAYER,MSGL_INFO,"AO: [%s] %dHz %dch %s (%d B/s)\n",
       audio_out->info->short_name,
       ao_data.samplerate, ao_data.channels,
       af_fmt2str_short(ao_data.format),
