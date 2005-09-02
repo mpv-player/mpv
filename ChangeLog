@@ -9,6 +9,8 @@ MPlayer (1.0)
     * encoding tips for x264 and XviD
     * how to set up MEncoder for x264 support
     * Hungarian XML documentation translation finished
+    * Czech documentation translation finished
+    * Italian man page synced
     * misc improvements all over the place
 
     Driver:
@@ -31,7 +33,7 @@ MPlayer (1.0)
     * PVR support
     * AAC ADTS demuxer
     * libdvdread updated to v0.9.4
-    * Support for some more MythTV nuv files
+    * support for some more MythTV NUV files
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
@@ -57,7 +59,7 @@ MPlayer (1.0)
     * much faster version of spp filter (-vf fspp), and pp7 ("fast spp=6")
     * remove_logo filter
     * lavcresample now used by default (-af-adv force=0 gives old behavior)
-    * vf_expand and vf_dsize now support aspect and round paramameters
+    * vf_expand and vf_dsize now support aspect and round parameters
 
     MEncoder:
     * audio encoding modularized
