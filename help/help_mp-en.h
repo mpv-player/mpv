@@ -844,7 +844,7 @@ static char help_text[]=
 #define MSGTR_PREFERENCES_FPS "Movie FPS:"
 #define MSGTR_PREFERENCES_ShowVideoWindow "Show video window when inactive"
 #define MSGTR_PREFERENCES_ArtsBroken "Newer aRts versions are incompatible "\
-           "with GTK 1.x and will crash gmplayer!"
+           "with GTK 1.x and will crash GMPlayer!"
 
 #define MSGTR_ABOUT_UHU "GUI development sponsored by UHU Linux\n"
 #define MSGTR_ABOUT_CoreTeam "   MPlayer core team:\n"
