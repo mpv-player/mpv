@@ -2810,6 +2810,12 @@ DirectFB library to make use of special hardware features.
 Enables CRTC2 (second head), displaying video independently of the first head.
 .PD 0
 .RSs
+.IPs (no)input
+same as directfb (default: disabled)
+.IPs buffermode=single|double|triple
+same as directfb (default: triple)
+.IPs fieldparity=top|bottom
+same as directfb
 .IPs (no)bes
 Enable the use of the Matrox BES (backend scaler) (default: disabled).
 Gives very good results concerning speed and output quality as interpolated
@@ -2821,20 +2827,6 @@ Make use of the Matrox sub picture layer to display the OSD (default: enabled).
 Turn on TV-out on the second head (default: enabled).
 The output quality is amazing as it is a full interlaced picture
 with proper sync to every odd/\:even field.
-.IPs (no)input
-Use the DirectFB instead of the MPlayer keyboard code (default: disabled).
-.IPs buffermode=single|double|triple
-Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficent than double buffering as it does
-not block MPlayer while waiting for the vertical retrace.
-Single buffering should be avoided (default: triple).
-.IPs fieldparity=top|bottom
-Control the output order for interlaced frames (default: disabled).
-Valid values are top = top fields first, bottom = bottom fields first.
-This option does not have any effect on progressive film material
-like most MPEG movies are.
-You need to enable this option if you have tearing issues/\:unsmooth
-motions watching interlaced film material.
 .IPs tvnorm=pal|ntsc|auto
 Will set the TV norm of the Matrox card without the need
 for modifying /etc/\:directfbrc (default: disabled).
