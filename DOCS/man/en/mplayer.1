@@ -875,23 +875,16 @@ May be negative.
 Specify the CD-ROM device (default: /dev/\:cdrom).
 .
 .TP
-.B \-channels <number>
-Change the number of playback channels (default: 2).
-If the number of output channels is bigger than the number of input channels
-empty channels are inserted with the help of the channels audio filter (unless
-mixing from mono to stereo, then the mono channel is repeated in both
-output channels).
-The routing will be the default routing for the channels filter.
-If the number of output channels is smaller than the number of input channels,
-results depend on the audio decoder (\-afm).
+.B \-channels <number> (also see \-af channels)
+Request the number of playback channels (default: 2).
 MPlayer asks the decoder to decode the audio into as many channels as
 specified.
 Now it's up to the decoder to fulfill the requirement.
-If the decoder outputs more channels than requested, the exceeding channels
-are truncated.
 This is usually only important when playing videos with AC3 audio (like DVDs).
 In that case liba52 does the decoding by default and correctly downmixes the
 audio into the requested number of channels.
+To directly control the number of output channels independently of how many
+channels are decoded, use the channels filter.
 .br
 .I NOTE:
 This option is honored by codecs (AC3 only), filters (surround) and audio
