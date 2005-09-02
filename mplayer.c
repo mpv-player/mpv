@@ -85,6 +85,7 @@ extern int mp_input_win32_slave_cmd_func(int fd,char* dest,int size);
 #include "input/input.h"
 
 int slave_mode=0;
+int player_idle_mode=0;
 int verbose=0;
 int identify=0;
 int quiet=0;
@@ -1307,7 +1308,12 @@ if (edl_check_mode() == EDL_ERROR && edl_filename)
 }
 #endif
 
-    if(!filename){
+    if (player_idle_mode && use_gui) {
+        mp_msg(MSGT_CPLAYER, MSGL_FATAL, MSGTR_NoIdleAndGui);
+        exit_player_with_rc(NULL, 1);
+    }
+
+    if(!filename && !player_idle_mode){
       if(!use_gui){
 	// no file/vcd/dvd -> show HELP:
 	mp_msg(MSGT_CPLAYER, MSGL_INFO, help_text);
@@ -1535,6 +1541,53 @@ if(!noconsolecontrols && !slave_mode){
        } 
     }
 #endif
+
+while (player_idle_mode && !filename) {
+    play_tree_t * entry = NULL;
+    mp_cmd_t * cmd;
+    while (!(cmd = mp_input_get_cmd(0,1,0))) { // wait for command
+        if (video_out && vo_config_count) video_out->check_events();
+        usec_sleep(20000);
+    }
+    switch (cmd->id) {
+        case MP_CMD_LOADFILE:
+            // prepare a tree entry with the new filename
+            entry = play_tree_new();
+            play_tree_add_file(entry, cmd->args[0].v.s);
+            // actual entering the entry into the main playtree done after switch()
+            break;
+        case MP_CMD_LOADLIST:
+            entry = parse_playlist_file(cmd->args[0].v.s);
+            break;
+        case MP_CMD_QUIT:
+            exit_player_with_rc(MSGTR_Exit_quit, (cmd->nargs > 0)? cmd->args[0].v.i : 0);
+            break;
+    }
+
+    mp_cmd_free(cmd);
+
+    if (entry) { // user entered a command that gave a valid entry
+        if (playtree) // the playtree is always a node with one child. let's clear it
+            play_tree_free_list(playtree->child, 1);
+        else playtree=play_tree_new(); // .. or make a brand new playtree
+
+        if (!playtree) continue; // couldn't make playtree! wait for next command
+
+        play_tree_set_child(playtree, entry);
+
+        playtree_iter = play_tree_iter_new(playtree, mconfig); // make iterator starting at top of tree
+        if (!playtree_iter) continue;
+
+        // find the first real item in the tree
+        if (play_tree_iter_step(playtree_iter,0,0) != PLAY_TREE_ITER_ENTRY) {
+            // no items!
+            play_tree_iter_free(playtree_iter);
+            playtree_iter = NULL;
+            continue; // wait for next command
+        }
+        filename = play_tree_iter_get_file(playtree_iter, 1);
+    }
+}
 //---------------------------------------------------------------------------
 
     if(filename) mp_msg(MSGT_CPLAYER,MSGL_INFO,MSGTR_Playing, filename);
@@ -4343,8 +4396,8 @@ while(playtree_iter != NULL) {
   }	
 #endif
 
-if(use_gui || playtree_iter != NULL){
-
+if(use_gui || playtree_iter != NULL || player_idle_mode){
+  if (!playtree_iter) filename = NULL;
   eof = 0;
   goto play_next_file;
 }
