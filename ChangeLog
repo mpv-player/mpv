@@ -72,6 +72,7 @@ MPlayer (1.0)
     * raw audio muxer
     * fixed various bugs in the EDL code
     * x264 "turbo mode" to speed up first pass of multi-pass encoding
+    * x264 custom quantization matrices
     * -delay allows real audio delay instead of just a delay in the header
 
     Ports:

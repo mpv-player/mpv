@@ -106,6 +106,13 @@ static int psnr = 0;
 static int log_level = 2;
 static int turbo = 0;
 static int visualize = 0;
+static char *cqm = NULL;
+static char *cqm4iy = NULL;
+static char *cqm4ic = NULL;
+static char *cqm4py = NULL;
+static char *cqm4pc = NULL;
+static char *cqm8iy = NULL;
+static char *cqm8py = NULL;
 
 m_option_t x264encopts_conf[] = {
     {"bitrate", &bitrate, CONF_TYPE_INT, CONF_RANGE, 0, 24000000, NULL},
@@ -155,6 +162,13 @@ m_option_t x264encopts_conf[] = {
     {"qp_step", &qp_step, CONF_TYPE_INT, CONF_RANGE, 1, 50, NULL},
     {"pass", &pass, CONF_TYPE_INT, CONF_RANGE, 1, 3, NULL},
     {"rc_eq", &rc_eq, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"cqm", &cqm, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"cqm4iy", &cqm4iy, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"cqm4ic", &cqm4ic, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"cqm4py", &cqm4py, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"cqm4pc", &cqm4pc, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"cqm8iy", &cqm8iy, CONF_TYPE_STRING, 0, 0, 0, NULL},
+    {"cqm8py", &cqm8py, CONF_TYPE_STRING, 0, 0, 0, NULL},
     {"qcomp", &qcomp, CONF_TYPE_FLOAT, CONF_RANGE, 0, 1, NULL},
     {"qblur", &qblur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 99, NULL},
     {"cplx_blur", &complexity_blur, CONF_TYPE_FLOAT, CONF_RANGE, 0, 999, NULL},
@@ -172,6 +186,23 @@ m_option_t x264encopts_conf[] = {
     {"novisualize", &visualize, CONF_TYPE_FLAG, 0, 1, 0, NULL},
     {NULL, NULL, 0, 0, 0, 0, NULL}
 };
+
+static int parse_cqm(const char *str, uint8_t *cqm, int length,
+                     h264_module_t *mod, char *matrix_name) {
+    int i;
+    if (!str) return 0;
+    for (i = 0; i < length; i++) {
+        long coef = strtol(str, &str, 0);
+        if (coef < 1 || coef > 255 || str[0] != ((i + 1 == length)?0:',')) {
+            mp_msg( MSGT_MENCODER, MSGL_ERR, "x264: Invalid entry in cqm%s at position %d.\n", matrix_name, i+1 );
+            return -1;
+        }
+        cqm[i] = coef;
+        str = &str[1];
+    }
+    mod->param.i_cqm_preset = X264_CQM_CUSTOM;
+    return 0;
+}
 
 static int put_image(struct vf_instance_s *vf, mp_image_t *mpi);
 static int encode_frame(struct vf_instance_s *vf, x264_picture_t *pic_in);
@@ -262,6 +293,38 @@ static int config(struct vf_instance_s* vf, int width, int height, int d_width, 
     mod->param.vui.i_sar_width = d_width*height;
     mod->param.vui.i_sar_height = d_height*width;
     mod->param.i_threads = threads;
+
+    if(cqm != NULL)
+    {
+        if( !strcmp(cqm, "flat") )
+            mod->param.i_cqm_preset = X264_CQM_FLAT;
+        else if( !strcmp(cqm, "jvt") )
+            mod->param.i_cqm_preset = X264_CQM_JVT;
+        else
+        {
+            FILE *cqm_test;
+            cqm_test = fopen( cqm, "rb" );
+            if( cqm_test )
+            {
+                mod->param.i_cqm_preset = X264_CQM_CUSTOM;
+                mod->param.psz_cqm_file = cqm;
+                fclose( cqm_test );
+            }
+            else
+            {
+                mp_msg( MSGT_MENCODER, MSGL_ERR, "x264: CQM file failed to open.\n" );
+                return 0;
+            }
+        }
+    }
+
+    if( (parse_cqm(cqm4iy, mod->param.cqm_4iy, 16, mod, "4iy") < 0) ||
+        (parse_cqm(cqm4ic, mod->param.cqm_4ic, 16, mod, "4ic") < 0) ||
+        (parse_cqm(cqm4py, mod->param.cqm_4py, 16, mod, "4py") < 0) ||
+        (parse_cqm(cqm4pc, mod->param.cqm_4pc, 16, mod, "4pc") < 0) ||
+        (parse_cqm(cqm8iy, mod->param.cqm_8iy, 64, mod, "8iy") < 0) ||
+        (parse_cqm(cqm8py, mod->param.cqm_8py, 64, mod, "8py") < 0) )
+        return 0;
 
     switch(pass) {
     case 0:

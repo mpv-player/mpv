@@ -8466,6 +8466,62 @@ Use a different quantizer for chroma as compared to luma.
 Useful values are in the range <-2\-2> (default: 0).
 .
 .TP
+.B cqm=<flat|jvt|<filename>>
+Either uses a predefined custom quantization matrix or loads a JM format
+matrix file.
+.PD 0
+.RSs
+.IPs flat\ 
+Use the predefined flat 16 matrix (default).
+.IPs jvt\ \ 
+Use the predefined JVT matrix.
+.IPs <filename>
+Use the provided JM format matrix file.
+.PD 1
+.RE
+.
+.TP
+.B cqm4iy=<list>
+custom 4x4 intra luminance matrix, given as a list of 16 comma separated
+values in the range 1-255.
+.
+.TP
+.B cqm4ic=<list>
+custom 4x4 intra chrominance matrix, given as a list of 16 comma
+separated values in the range 1-255.
+.
+.TP
+.B cqm4py=<list>
+custom 4x4 inter luminance matrix, given as a list of 16 comma separated
+values in the range 1-255.
+.
+.TP
+.B cqm4pc=<list>
+custom 4x4 inter chrominance matrix, given as a list of 16 comma
+separated values in the range 1-255.
+.
+.TP
+.B cqm8iy=<list>
+custom 8x8 intra luminance matrix, given as a list of 64 comma separated
+values in the range 1-255.
+.
+.TP
+.B cqm8py=<list>
+custom 8x8 inter luminance matrix, given as a list of 64 comma separated
+values in the range 1-255.
+.RE
+.I NOTES:
+Files encoded using CQMs are not currently decodable by FFmpeg based
+players.
+.br
+Windows CMD.EXE users may experience problems with parsing the command line
+if they attempt to use all the CQM lists.
+This is due to a command line length limitation.
+In this case it is recommended the lists be put into a JM format CQM
+file and loaded as specified above.
+.RE
+.
+.TP
 .B level_idc=<10\-51>
 Set the bitstream's Level as defined by Annex A of the H.264 standard
 (default: 40 - Level 4.0).
