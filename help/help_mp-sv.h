@@ -24,7 +24,7 @@ static char help_text[]=
 " -sub <fil>          specifiera textningsfil att använda (se också -subfps, -subdelay)\n"
 " -playlist <fil>     specifiera spellistefil\n"
 " -vid x -aid y       välj video (x) och audio (y) ström att spela\n"
-" -fps x -srate y     ändra video (x bps) och audio (y Hz) frekvens\n"
+" -fps x -srate y     ändra video (x fps) och audio (y Hz) frekvens\n"
 " -pp <kvalité>       aktivera postredigeringsfilter (detaljer på manualsidan)\n"
 " -framedrop          aktivera reducering av antalet bildrutor (för långsamma maskiner)\n" 
 "\n"
