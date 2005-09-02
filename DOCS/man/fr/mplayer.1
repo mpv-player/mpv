@@ -1,4 +1,4 @@
-.\" synced with 1.1077
+.\" synced with 1.1080
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -610,6 +610,16 @@ Affiche aussi des informations plus détaillées à propos des langues et des
 identifiants des sous-titres et des pistes audio.
 Le script TOOLS/\:midentify supprime le reste de l'affichage et (espérons-le)
 formate les noms de fichiers pour le shell.
+.
+.TP
+.B \-idle\ \ 
+Rend MPlayer inactif et se met en attente de commandes 'loadfile', 'loadlist',
+ou 'quit' lorsqu'aucun fichier n'est donnée à jouer en ligne de commande, ou
+que MPlayer a finit de jouer tous les fichiers.
+Surtout utilise avec \-slave.
+.I NOTE:
+Si utilisé avec \-fixed-vo, la fenêtre restera ouverte en attente de
+commandes.
 .
 .TP
 .B \-input <commandes>
