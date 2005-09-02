@@ -1,8 +1,8 @@
 #!/bin/sh
 #
 # Collects all the appropriate subtitle files in a given directory and
-# it's subdirectories. No matter what the filename is.
-# Use this together as: mplayer -sub `subsearch3.sh` movie
+# its subdirectories, no matter what the filename is.
+# Use this together as: mplayer -sub `subsearch.sh` movie
 # Author: Alex
 #
 
