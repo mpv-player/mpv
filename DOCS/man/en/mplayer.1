@@ -396,10 +396,13 @@ It has the following format:
 mplayer -ao pcm:file=%10%C:test.wav test.avi
 .PP
 You can put all of the options in a configuration file which will be read
-every time MPlayer is run.
+every time MPlayer/MEncoder is run.
 The system-wide configuration file 'mplayer.conf' is in your configuration
 directory (e.g.\& /etc/\:mplayer or /usr/\:local/\:etc/\:mplayer), the user
 specific one is '~/\:.mplayer/\:config'.
+The configuration file for MEncoder is 'mencoder.conf' in your configuration
+directory (e.g.\& /etc/\:mplayer or /usr/\:local/\:etc/\:mplayer), the
+user specific one is '~/\:.mplayer/\:mencoder.
 User specific options override system-wide options and options given on the
 command line override either.
 The syntax of the configuration files is 'option=<value>', everything after
