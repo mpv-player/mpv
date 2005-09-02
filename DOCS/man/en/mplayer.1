@@ -879,7 +879,7 @@ Specify the CD-ROM device (default: /dev/\:cdrom).
 Request the number of playback channels (default: 2).
 MPlayer asks the decoder to decode the audio into as many channels as
 specified.
-Now it's up to the decoder to fulfill the requirement.
+Then it is up to the decoder to fulfill the requirement.
 This is usually only important when playing videos with AC3 audio (like DVDs).
 In that case liba52 does the decoding by default and correctly downmixes the
 audio into the requested number of channels.
@@ -1042,7 +1042,7 @@ It will still be used for IPv4 connections.
 The file from which to read the video index data saved by \-saveidx.
 This index will be used for seeking, overriding any index data
 contained in the AVI itself.
-MPlayer won't prevent you from loading an index file generated
+MPlayer will not prevent you from loading an index file generated
 from a different AVI, but this is sure to cause unfavorable results.
 .br
 .I NOTE:
@@ -2119,7 +2119,7 @@ Change video mode to the one that is labeled as <modename> in
 /etc/\:fb.modes.
 .br
 .I NOTE:
-VESA framebuffer doesn't support mode changing.
+VESA framebuffer does not support mode changing.
 .
 .TP
 .B \-fbmodeconfig <filename> (\-vo fbdev only)
@@ -2760,7 +2760,7 @@ This driver is highly hardware specific.
 .RSs
 .IPs <subdevice>
 Explicitly choose the Blinkenlights subdevice driver to use.
-It's something like arcade:host=localhost:2323 or
+It is something like arcade:host=localhost:2323 or
 hdl:file=name1,file=name2.
 You must specify a subdevice.
 .RE
@@ -2786,13 +2786,13 @@ Play video using the DirectFB library.
 Use the DirectFB instead of the MPlayer keyboard code (default: enabled).
 .IPs buffermode=single|double|triple
 Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficent than double buffering as it doesn't block MPlayer
-while waiting for the vertical retrace.
+Triple buffering is more efficent than double buffering as it does
+not block MPlayer while waiting for the vertical retrace.
 Single buffering should be avoided (default: single).
 .IPs fieldparity=top|bottom
 Control the output order for interlaced frames (default: disabled).
 Valid values are top = top fields first, bottom = bottom fields first.
-This option doesn't have any effect on progressive film material
+This option does not have any effect on progressive film material
 like most MPEG movies are.
 You need to enable this option if you have tearing issues/\:unsmooth
 motions watching interlaced film material.
@@ -2819,19 +2819,19 @@ Works only on the primary head.
 Make use of the Matrox sub picture layer to display the OSD (default: enabled).
 .IPs (no)crtc2
 Turn on TV-out on the second head (default: enabled).
-The output quality is amazing as it's a full interlaced picture
+The output quality is amazing as it is a full interlaced picture
 with proper sync to every odd/\:even field.
 .IPs (no)input
 Use the DirectFB instead of the MPlayer keyboard code (default: disabled).
 .IPs buffermode=single|double|triple
 Double and triple buffering give best results if you want to avoid tearing issues.
-Triple buffering is more efficent than double buffering as it doesn't block MPlayer
-while waiting for the vertical retrace.
+Triple buffering is more efficent than double buffering as it does
+not block MPlayer while waiting for the vertical retrace.
 Single buffering should be avoided (default: triple).
 .IPs fieldparity=top|bottom
 Control the output order for interlaced frames (default: disabled).
 Valid values are top = top fields first, bottom = bottom fields first.
-This option doesn't have any effect on progressive film material
+This option does not have any effect on progressive film material
 like most MPEG movies are.
 You need to enable this option if you have tearing issues/\:unsmooth
 motions watching interlaced film material.
@@ -3018,7 +3018,7 @@ Write the output to <filename> instead of the default stream.yuv.
 .RS
 .sp 1
 .I NOTE:
-If you don't specify any option the output is progressive
+If you do not specify any option the output is progressive
 (i.e.\& not interlaced).
 .RE
 .
@@ -5073,7 +5073,7 @@ swap fields (exchange even & odd lines)
 This filter is very similar to the il filter but much faster, the main
 disadvantage is that it does not always work.
 Especially if combined with other filters it may produce randomly messed
-up images, so be happy if it works but don't complain if it doesn't for
+up images, so be happy if it works but do not complain if it does not for
 your combination of filters.
 .PD 0
 .RSs
@@ -7615,7 +7615,7 @@ to obtain a constant bitrate over an averaging range of frames.
 .B rc_averaging_period=<value>
 Real CBR is hard to achieve.
 Depending on the video material, bitrate can be variable, and hard to predict.
-That's why XviD uses an averaging period for which it guarantees a given
+Therefore XviD uses an averaging period for which it guarantees a given
 amount of bits (minus a small variation).
 This settings expresses the "number of frames" for which XviD averages
 bitrate and tries to achieve CBR.
@@ -7782,7 +7782,7 @@ This option usually results in a sharper image.
 Unfortunately it has a great impact on bitrate and sometimes the
 higher bitrate use will prevent it from giving a better image
 quality at a fixed bitrate.
-It's better to test with and without this option and see whether it
+It is better to test with and without this option and see whether it
 is worth activating.
 .
 .TP
@@ -7986,7 +7986,7 @@ ratio.
 .PD 0
 .RSs
 .IPs vga11
-It's the usual PAR for PC content.
+It is the usual PAR for PC content.
 Pixels are a square unit.
 .IPs pal43
 PAL standard 4:3 PAR.
@@ -7996,7 +7996,7 @@ same as above
 .IPs ntsc43
 same as above
 .IPs ntsc169
-same as above (Don't forget to give the exact ratio.)
+same as above (Do not forget to give the exact ratio.)
 .IPs ext\ \ 
 Allows you to specify your own pixel aspect ratio with par_width and
 par_height.
@@ -8018,7 +8018,7 @@ Specifies the height of the custom pixel aspect ratio.
 .TP
 .B aspect=<x/\:y | f (float value)>
 Store movie aspect internally, just like MPEG files.
-Much nicer solution than rescaling, because quality isn't decreased.
+Much nicer solution than rescaling, because quality is not decreased.
 MPlayer and a few others players will play these files correctly, others
 will display them with the wrong aspect.
 The aspect parameter can be given as a ratio or a floating point number.
@@ -8106,7 +8106,7 @@ the second pass' stats to work from.
 You can use all encoding options, including CPU-hungry ones.
 .br
 The first pass may use either average bitrate or constant quantizer.
-ABR is recommended, since it doesn't require guessing a quantizer.
+ABR is recommended, since it does not require guessing a quantizer.
 Subsequent passes are ABR, and must specify bitrate.
 .br
 .I
@@ -8170,8 +8170,8 @@ Good values of scenecut may find a better location for the I-frame.
 Large values use more I-frames than necessary, thus wasting bits.
 -1 disables scene-cut detection, so I-frames are inserted only once
 every other keyint frames, even if a scene-cut occurs earlier.
-This isn't recommended and wastes bitrate as scenecuts encoded as P-frames
-are just as big as I-frames, but don't reset the "keyint counter".
+This is not recommended and wastes bitrate as scenecuts encoded as P-frames
+are just as big as I-frames, but do not reset the "keyint counter".
 .
 .TP
 .B frameref=<1\-16>
@@ -8217,7 +8217,7 @@ Disadvantage: increases decoding delay to 2 frames.
 .TP
 .B (no)deblock
 Use deblocking filter (default: on).
-As it takes very little time compared to its quality gain, it's not
+As it takes very little time compared to its quality gain, it is not
 recommended to disable it.
 .
 .TP
@@ -8459,7 +8459,7 @@ I- and P-frames. (best)
 .RE
 .PD 1
 .RS
-In the above, "all candidates" doesn't exactly mean all enabled types:
+In the above, "all candidates" does not exactly mean all enabled types:
 4x4, 4x8, 8x4 are tried only if 8x8 is better than 16x16.
 .RE
 .
