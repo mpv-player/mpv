@@ -27,6 +27,7 @@ MPlayer (1.0)
     * support for dmb1 MJPEG files with ffmjpeg
     * support for musepack audio (WARNING: when muxing into e.g. AVI you will
       be able to seek, but you might get ear- and speaker-breaking noises)
+    * On2 VP7 video decoder via binary DLL
 
     Demuxers:
     * simultaneous audio capture/playback (-tv immediatemode=0) fixed in v4l2
@@ -34,11 +35,13 @@ MPlayer (1.0)
     * AAC ADTS demuxer
     * libdvdread updated to v0.9.4
     * support for some more MythTV NUV files
+    * modularization of demuxer code
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
     * show SHOUT/Icecast metadata while playing
     * ultravox (unsv://) streaming support
+    * all stream code ported to new modular api
 
     FFmpeg/libavcodec:
     * Snow bug fixes and speedup
@@ -89,6 +92,12 @@ MPlayer (1.0)
     * full gcc 4 support for IA-32 and AMD-64 ports
     * TOOLS/vobshift.py: vobsub time-adjust tool
     * fixed auto-insertion of lavc encoder (for DXR2/3 and DVB)
+
+
+  pre7try2: August 26, 2005
+
+    Security:
+    * heap overflow in PCM audio decoder fixed
 
 
   pre7: "PatentCounter" April 16, 2005
