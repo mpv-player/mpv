@@ -1,4 +1,4 @@
-.\" synced with 1.1080
+.\" synced with 1.1083
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -617,6 +617,7 @@ Rend MPlayer inactif et se met en attente de commandes 'loadfile', 'loadlist',
 ou 'quit' lorsqu'aucun fichier n'est donnée à jouer en ligne de commande, ou
 que MPlayer a finit de jouer tous les fichiers.
 Surtout utilise avec \-slave.
+.br
 .I NOTE:
 Si utilisé avec \-fixed-vo, la fenêtre restera ouverte en attente de
 commandes.
@@ -2992,6 +2993,12 @@ la librairie DirectFB pour exploiter des fonctions câblées spéciales.
 Active CRTC2 (bi-écran), affichant la vidéo indépendemment de l'autre écran.
 .PD 0
 .RSs
+.IPs (no)input
+comme directfb (par défaut\ : désactivé)
+.IPs buffermode=single|double|triple
+comme directfb (par défaut\ : triple)
+.IPs fieldparity=top|bottom
+comme directfb
 .IPs (no)bes
 Active l'utilisation du Matrox BES (backend scaler\ : fonctions de changement
 de taille) (par défaut\ : désactivé).
@@ -3007,22 +3014,6 @@ Active la sortie TV de la deuxième sortie vidéo (par défaut\ : activé).
 La qualité de l'image y est époustouflante puisque toutes les spécificités
 et limitations de l'affichage sur une TV sont gérées (image entrelacée,
 synchro, etc ...)
-.IPs (no)input
-Utilise les codes de touches de DirectFB au lieu de ceux de MPlayer
-(par défaut\ : activé).
-.IPs buffermode=single|double|triple
-Le tamponnage (buffering) double ou triple donnent les meilleurs résultats si vous voulez éviter les effets de distortions.
-Le triple tamponnage est plus efficace que le double puisqu'il ne bloque
-pas MPlayer lorsqu'il attend le rafraîchissement vertical.
-Le tamponnage simple devrait être évité (par défaut\ : triple).
-.IPs fieldparity=top|bottom
-Contrôle l'ordre d'affichage des trames entrelacées (par défaut\ : désactivé).
-Les paramètres valides sont "top" (les champs du haut en premier),
-"bottom" (les champs du bas en premier).
-Cette option n'a aucun effet sur les vidéos non entrelacées, ce qui représente
-la majorité des vidéos MPEG.
-Vous devriez activer cette option si vous observez des distortions ou des
-mouvements saccadés lorsque vous regardez une vidéo entrelacée.
 .IPs tvnorm=pal|ntsc|auto
 Définit la norme TV de la carte Matrox sans avoir besoin de modifier
 /etc/\:directfbrc (par défaut\ : désactivé).
