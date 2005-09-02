@@ -929,24 +929,16 @@ Peut être négatif.
 Outrepasse le nom par défaut du lecteur de CDROM (/dev/\:cdrom).
 .
 .TP
-.B \-channels <nombre>
-Indique le nombre de canaux audio à utiliser. (défaut\ : 2).
-Si le nombre de canaux de sortie est plus grand que celui des canaux
-d'entrée des canaux vides sont insérés à l'aide du filtre audio channels
-(à moins de mixer de mono vers stéréo, dans ce cas le canal mono est
-répété sur les deux canaux de sortie).
-L'affectation des canaux sera celui existant par défaut dans le filtre
-channels.
-Si le nombre de canaux de sortie est plus petit que celui des canaux
-d'entrée, les résultats dépendront du décodeur audio (\-afm).
+.B \-channels <nombre> (voir aussi \-af channels)
+Défini le nombre de canaux audio à utiliser. (défaut\ : 2).
 MPlayer demande au décodeur de décoder l'audio sur le nombre requis de canaux.
 Maintenant c'est au décodeur de satisfaire cette demande.
-Si le décodeur sort sur plus de canaux que demandé, les canaux en plus seront
-tronqués.
 Généralement, c'est important seulement pour la lecture des vidéos avec de
 l'audio AC3 (comme les DVDs).
 Dans ce cas liba52 fait le décodage par défaut et fusionne
 correctement l'audio dans le nombre requis de canaux.
+Pour contrôler directement le nombre de canaux de sortie quelque soit le
+nombre de canaux décodés, utilisez le filtre channels.
 .br
 .I NOTE:
 Cette option est comprise par les codecs (AC3 uniquement), filtres (surround)
