@@ -1048,6 +1048,8 @@ int osd_show_status = 0;
 
 int rtc_fd=-1;
 
+int opt_exit = 0; // flag indicating whether mplayer should exit without playing anything
+
 //float a_frame=0;    // Audio
 
 int i;
@@ -1150,8 +1152,8 @@ int gui_no_filename=0;
 
     playtree = m_config_parse_mp_command_line(mconfig, argc, argv);
     if(playtree == NULL)
-      exit_player(NULL);
-
+      opt_exit = 1;
+    else {
     playtree = play_tree_cleanup(playtree);
     if(playtree) {
       playtree_iter = play_tree_iter_new(playtree,mconfig);
@@ -1162,6 +1164,7 @@ int gui_no_filename=0;
 	}
 	filename = play_tree_iter_get_file(playtree_iter,1);
       }
+    }
     }
 	
 #ifdef WIN32
@@ -1205,12 +1208,12 @@ int gui_no_filename=0;
 
     if(video_driver_list && strcmp(video_driver_list[0],"help")==0){
       list_video_out();
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
 
     if(audio_driver_list && strcmp(audio_driver_list[0],"help")==0){
       list_audio_out();
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
 
 // check codec.conf
@@ -1241,7 +1244,7 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_AUDIO_CODECS\n");
       list_codecs(1);
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
     if(video_codec_list && strcmp(video_codec_list[0],"help")==0){
       mp_msg(MSGT_CPLAYER, MSGL_INFO, MSGTR_AvailableVideoCodecs);
@@ -1249,28 +1252,28 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
         mp_msg(MSGT_GLOBAL, MSGL_INFO, "ID_VIDEO_CODECS\n");
       list_codecs(0);
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
     if(video_fm_list && strcmp(video_fm_list[0],"help")==0){
       vfm_help();
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
     if(audio_fm_list && strcmp(audio_fm_list[0],"help")==0){
       afm_help();
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
     if(af_cfg.list && strcmp(af_cfg.list[0],"help")==0){
       af_help();
       printf("\n");
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
 #ifdef HAVE_X11
     if(vo_fstype_list && strcmp(vo_fstype_list[0],"help")==0){
       fstype_help();
       mp_msg(MSGT_FIXME, MSGL_FIXME, "\n");
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
 #endif
     if((demuxer_name && strcmp(demuxer_name,"help")==0) ||
@@ -1278,8 +1281,11 @@ if(!codecs_file || !parse_codec_cfg(codecs_file)){
        (sub_demuxer_name && strcmp(sub_demuxer_name,"help")==0)){
       demuxer_help();
       mp_msg(MSGT_CPLAYER, MSGL_INFO, "\n");
-      exit_player_with_rc(NULL, 0);
+      opt_exit = 1;
     }
+
+    if(opt_exit)
+      exit_player(NULL);
 
 #ifdef USE_EDL
 if (edl_check_mode() == EDL_ERROR && edl_filename)

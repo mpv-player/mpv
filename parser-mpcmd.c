@@ -63,6 +63,7 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
   char *opt,*splitpos=NULL;
   char entbuf[10];
   int no_more_opts = 0;
+  int opt_exit = 0; // flag indicating whether mplayer should exit without playing anything
   play_tree_t *last_parent, *last_entry = NULL, *root;
 #ifdef MACOSX_FINDER_SUPPORT
   extern play_tree_t *macosx_finder_args(m_config_t *, int , char **);
@@ -196,9 +197,11 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
 	  }
 	}
 
+	if (tmp <= M_OPT_EXIT) {
+	  opt_exit = 1;
+	  tmp = M_OPT_EXIT - tmp;
+	} else
 	if (tmp < 0) {
-	  if (tmp == M_OPT_EXIT)
-	    exit(0);
 	  goto err_out;
 	}
 	i += tmp;
@@ -252,6 +255,8 @@ m_config_parse_mp_command_line(m_config_t *config, int argc, char **argv)
       }
   }
 
+  if (opt_exit)
+    goto err_out;
   --recursion_depth;
   if(last_parent != root)
     mp_msg(MSGT_CFGPARSER, MSGL_ERR,"Missing }- ?\n");

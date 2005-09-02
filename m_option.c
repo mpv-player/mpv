@@ -1005,7 +1005,7 @@ static int parse_imgfmt(m_option_t* opt,char *name, char *param, void* dst, int 
     for(i = 0 ; mp_imgfmt_list[i].name ; i++)
       mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s",mp_imgfmt_list[i].name);
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
-    return M_OPT_EXIT;
+    return M_OPT_EXIT - 1;
   }
   
   if (sscanf(param, "0x%x", &fmt) != 1)
@@ -1093,7 +1093,7 @@ static int parse_afmt(m_option_t* opt,char *name, char *param, void* dst, int sr
     for(i = 0 ; mp_afmt_list[i].name ; i++)
       mp_msg(MSGT_CFGPARSER, MSGL_INFO, " %s",mp_afmt_list[i].name);
     mp_msg(MSGT_CFGPARSER, MSGL_INFO, "\n");
-    return M_OPT_EXIT;
+    return M_OPT_EXIT - 1;
   }
   
   if (sscanf(param, "0x%x", &fmt) != 1)
@@ -1212,7 +1212,7 @@ static int get_obj_params(char* opt_name, char* name,char* params,
     char min[50],max[50];
     if(!desc->fields) {
       printf("%s doesn't have any options.\n\n",name);
-      return M_OPT_EXIT;
+      return M_OPT_EXIT - 1;
     }
     printf("\n Name                 Type            Min        Max\n\n");
     for(n = 0 ; desc->fields[n].name ; n++) {
@@ -1233,7 +1233,7 @@ static int get_obj_params(char* opt_name, char* name,char* params,
 	     max);
     }
     printf("\n");
-    return M_OPT_EXIT;
+    return M_OPT_EXIT - 1;
   }
 
   for(nopts = 0 ; desc->fields[nopts].name ; nopts++)
@@ -1545,7 +1545,7 @@ static int parse_obj_settings_list(m_option_t* opt,char *name,
       mp_msg(MSGT_VFILTER,MSGL_INFO,"  %-15s: %s\n",
 	     M_ST_MB(char*,ol->list[n],ol->name_off),
 	     M_ST_MB(char*,ol->list[n],ol->info_off));
-    return M_OPT_EXIT;
+    return M_OPT_EXIT - 1;
   }
   ptr = str = strdup(param);
 
@@ -1688,7 +1688,7 @@ static int parse_obj_presets(m_option_t* opt,char *name,
 	pre +=  s) 
       mp_msg(MSGT_CFGPARSER, MSGL_ERR, " %s",pre_name);
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "\n");
-    return M_OPT_EXIT;
+    return M_OPT_EXIT - 1;
   }
 
   for(pre_name = M_ST_MB(char*,pre,obj_p->name_off) ; pre_name ;

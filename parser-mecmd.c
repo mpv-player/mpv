@@ -51,6 +51,7 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
   int tmp;
   char *opt;
   int no_more_opts = 0;
+  int opt_exit = 0;
   m_entry_t *lst = NULL, *entry = NULL;
 	
 #ifdef MP_DEBUG
@@ -98,6 +99,10 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	  }
 	} else {
 	  tmp = m_config_check_option(config, opt, argv[i + 1]);
+	  if (tmp <= M_OPT_EXIT) {
+	    opt_exit = 1;
+	    tmp = M_OPT_EXIT - tmp;
+	  }
 	  if(tmp >= 0) {
 	    entry->opts = realloc(entry->opts,(no+2)*2*sizeof(char*));
 	    entry->opts[2*no] = strdup(opt);
@@ -106,8 +111,6 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
 	    no++;
 	  } else {
 //	    mp_msg(MSGT_CFGPARSER, MSGL_ERR, "m_config_set_option() failed (%d)\n",tmp);
-	    if(tmp == M_OPT_EXIT)
-	      exit(0);
 	    goto err_out;
 	  }
 	}
@@ -124,6 +127,8 @@ m_config_parse_me_command_line(m_config_t *config, int argc, char **argv)
       }
   }
 
+  if (opt_exit)
+    exit(0);
   if(nf == 0) {
     m_entry_list_free(lst);
     mp_msg(MSGT_CFGPARSER, MSGL_ERR, "No file given\n");

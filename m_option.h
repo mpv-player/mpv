@@ -217,6 +217,11 @@ struct m_option {
 #define M_OPT_OUT_OF_RANGE	-4
 #define M_OPT_PARSER_ERR	-5
 #define M_OPT_EXIT              -6
+// M_OPT_EXIT must be the lowest number on this list.
+// To indicate that mplayer should exit without playing anything,
+// a parsing function needs to return M_OPT_EXIT less the number
+// of additional command line parameters it consumed.
+// Generally it will return either M_OPT_EXIT or M_OPT_EXIT - 1.
 
 // FIXME: backward compatibility
 #define ERR_NOT_AN_OPTION	M_OPT_UNKNOWN
