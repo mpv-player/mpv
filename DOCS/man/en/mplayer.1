@@ -582,6 +582,16 @@ The wrapper script TOOLS/\:midentify suppresses the other MPlayer output and
 (hopefully) shellescapes the filenames.
 .
 .TP
+.B \-idle
+Makes MPlayer idle and wait for the input commands 'loadfile', 'loadlist',
+or 'quit' when no file has been given on the command line or MPlayer is
+done playing all files.
+Mostly useful with -slave.
+.I NOTE:
+When used with -fixed-vo, the VO window will still appear while waiting for
+commands.
+.
+.TP
 .B \-input <commands>
 This option can be used to configure certain parts of the input system.
 Paths are relative to ~/\:.mplayer/.
