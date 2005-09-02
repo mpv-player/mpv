@@ -1294,9 +1294,9 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 <application>MEncoder</application>'s audio/video synchronization
 algorithms were designed with the intention of recovering files with
 broken sync.
-However they seem to cause unnecessary skipping and duplication of
+However, in some cases they can cause unnecessary skipping and duplication of
 frames, and possibly slight A/V desync, when used with proper input.
-It is therefore recommended that you switch to basic A/V sync with
+Therefore, you may have to switch to basic A/V sync with
 the <option>-mc 0</option> option, or put this in your
 <systemitem>~/.mplayer/mencoder</systemitem> config file, as long as
 you are only working with good sources (DVD, TV capture, high quality
@@ -1313,11 +1313,11 @@ framerate!
 Therefore, using <option>-noskip</option> is not in general recommended.
 </para>
 <para>
-The so-called "three-pass" encoding which <application>MEncoder</application>
+The so-called "three-pass" audio encoding which <application>MEncoder</application>
 supports has been reported to cause A/V desync.
 This will definitely happen if it is used in conjunction with certain
 filters, therefore, it is now recommended <emphasis>not</emphasis> to
-use three-pass mode.
+use three-pass audio mode.
 This feature is only left for compatibility purposes and for expert
 users who understand when it is safe to use and when it is not.
 If you have never heard of three-pass mode before, forget that we
