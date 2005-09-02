@@ -3280,7 +3280,7 @@ demux_mkv_control (demuxer_t *demuxer, int cmd, void *arg)
       if (mkv_d->duration == 0)
         return DEMUXER_CTRL_DONTKNOW;
 
-      *((unsigned long *)arg) = (unsigned long)mkv_d->duration;
+      *((double *)arg) = (double)mkv_d->duration;
       return DEMUXER_CTRL_OK;
 
     case DEMUXER_CTRL_GET_PERCENT_POS:

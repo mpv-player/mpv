@@ -2032,7 +2032,7 @@ if(identify) {
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_RATE=%d\n", sh_audio->samplerate);
     mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_AUDIO_NCH=%d\n", sh_audio->channels);
   }
-  mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_LENGTH=%ld\n", demuxer_get_time_length(demuxer));
+  mp_msg(MSGT_GLOBAL,MSGL_INFO,"ID_LENGTH=%.2lf\n", demuxer_get_time_length(demuxer));
 }
 
 if(!sh_video) goto main; // audio-only
@@ -3615,7 +3615,7 @@ if (stream->type==STREAMTYPE_DVDNAV && dvd_nav_still)
 	break;
 	
     case MP_CMD_GET_TIME_LENGTH : {
-	mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_LENGTH=%ld\n", demuxer_get_time_length(demuxer));
+	mp_msg(MSGT_GLOBAL,MSGL_INFO, "ANS_LENGTH=%.2lf\n", demuxer_get_time_length(demuxer));
     } break;
 
 	case MP_CMD_GET_VO_FULLSCREEN : {

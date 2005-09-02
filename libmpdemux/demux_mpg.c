@@ -751,7 +751,7 @@ int demux_mpg_control(demuxer_t *demuxer,int cmd, void *arg){
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
             if (mpg_d && mpg_d->has_valid_timestamps) {
-              *((unsigned long *)arg)=(long)mpg_d->final_pts;
+              *((double *)arg)=(double)mpg_d->final_pts;
               return DEMUXER_CTRL_GUESS;
             }
     		return DEMUXER_CTRL_DONTKNOW;

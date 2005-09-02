@@ -320,7 +320,7 @@ char *demux_ogg_sub_lang(demuxer_t *demuxer, int index);
 
 #endif
 
-extern unsigned long demuxer_get_time_length(demuxer_t *demuxer);
+extern double demuxer_get_time_length(demuxer_t *demuxer);
 extern int demuxer_get_percent_pos(demuxer_t *demuxer);
 extern int demuxer_switch_audio(demuxer_t *demuxer, int index);
 

@@ -341,7 +341,7 @@ static int demux_xmms_control(demuxer_t *demuxer,int cmd, void *arg){
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
 	    if (xmms_length<=0) return DEMUXER_CTRL_DONTKNOW;
-	    *((unsigned long *)arg)=(unsigned long)xmms_length/1000;
+	    *((double *)arg)=(double)xmms_length/1000;
 	    return DEMUXER_CTRL_GUESS;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:

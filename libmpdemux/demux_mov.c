@@ -2016,7 +2016,7 @@ static int demux_mov_control(demuxer_t *demuxer, int cmd, void *arg){
     case DEMUXER_CTRL_GET_TIME_LENGTH:
       if (!track->timescale)
         return DEMUXER_CTRL_DONTKNOW;
-      *((unsigned long *)arg) = track->length / track->timescale;
+      *((double *)arg) = (double)track->length / track->timescale;
       return DEMUXER_CTRL_OK;
 
     case DEMUXER_CTRL_GET_PERCENT_POS:

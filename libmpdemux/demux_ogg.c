@@ -1605,7 +1605,7 @@ static int demux_ogg_control(demuxer_t *demuxer,int cmd, void *arg){
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
 	    if (ogg_d->final_granulepos<=0) return DEMUXER_CTRL_DONTKNOW;
-	    *((unsigned long *)arg)=ogg_d->final_granulepos / rate;
+	    *((double *)arg)=(double)ogg_d->final_granulepos / rate;
 	    return DEMUXER_CTRL_GUESS;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:

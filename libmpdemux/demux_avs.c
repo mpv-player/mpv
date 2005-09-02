@@ -343,7 +343,7 @@ static int demux_avs_control(demuxer_t *demuxer, int cmd, void *arg)
         case DEMUXER_CTRL_GET_TIME_LENGTH:
         {
             if (!AVS->video_info->num_frames) return DEMUXER_CTRL_DONTKNOW;
-            *((unsigned long *)arg) = AVS->video_info->num_frames / sh_video->fps;
+            *((double *)arg) = (double)AVS->video_info->num_frames / sh_video->fps;
             return DEMUXER_CTRL_OK;
         }
         case DEMUXER_CTRL_GET_PERCENT_POS:

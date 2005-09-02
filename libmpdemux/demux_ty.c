@@ -1350,8 +1350,8 @@ int demux_ty_control( demuxer_t *demuxer,int cmd, void *arg )
 	   case DEMUXER_CTRL_GET_TIME_LENGTH:
 	      if(!sh_video->i_bps)  // unspecified or VBR 
     		   return DEMUXER_CTRL_DONTKNOW;
-	      *((unsigned long *)arg)=
-            (demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
+	      *((double *)arg)=
+            ((double)demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
 	      return DEMUXER_CTRL_GUESS;
 
 	   case DEMUXER_CTRL_GET_PERCENT_POS:

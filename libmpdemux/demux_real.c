@@ -1855,7 +1855,7 @@ static int demux_real_control(demuxer_t *demuxer, int cmd, void *arg)
 	    if (priv->duration == 0)
 	        return DEMUXER_CTRL_DONTKNOW;
 	    
-	    *((unsigned long *)arg) = priv->duration;
+	    *((double *)arg) = (double)priv->duration;
 	    return DEMUXER_CTRL_OK;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:

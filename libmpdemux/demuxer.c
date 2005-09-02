@@ -918,13 +918,13 @@ int demux_control(demuxer_t *demuxer, int cmd, void *arg) {
 
 
 
-unsigned long demuxer_get_time_length(demuxer_t *demuxer){     
-    unsigned long get_time_ans;     
+double demuxer_get_time_length(demuxer_t *demuxer){
+    double get_time_ans;
     sh_video_t *sh_video = demuxer->video->sh;
     // <= 0 means DEMUXER_CTRL_NOTIMPL or DEMUXER_CTRL_DONTKNOW
     if (demux_control(demuxer, DEMUXER_CTRL_GET_TIME_LENGTH,(void *)&get_time_ans)<=0)  {
       if (sh_video && sh_video->i_bps)
-        get_time_ans = (demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
+        get_time_ans = (double)(demuxer->movi_end-demuxer->movi_start)/sh_video->i_bps;
       else
         get_time_ans=0;     
     }

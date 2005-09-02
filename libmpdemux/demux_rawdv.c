@@ -234,7 +234,7 @@ static int demux_rawdv_control(demuxer_t *demuxer,int cmd, void *arg) {
 
     switch(cmd) {
         case DEMUXER_CTRL_GET_TIME_LENGTH:
-            *((unsigned long *)arg)=frames->frame_number / sh_video->fps;
+            *((double *)arg)=(double)frames->frame_number / sh_video->fps;
             return DEMUXER_CTRL_OK;
 
         case DEMUXER_CTRL_GET_PERCENT_POS:

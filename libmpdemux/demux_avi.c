@@ -850,7 +850,7 @@ static int demux_avi_control(demuxer_t *demuxer,int cmd, void *arg){
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
     	    if (!priv->numberofframes) return DEMUXER_CTRL_DONTKNOW;
-	    *((unsigned long *)arg)=priv->numberofframes/sh_video->fps;
+	    *((double *)arg)=(double)priv->numberofframes/sh_video->fps;
 	    if (sh_video->video.dwLength<=1) return DEMUXER_CTRL_GUESS;
 	    return DEMUXER_CTRL_OK;
 

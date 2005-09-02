@@ -543,7 +543,7 @@ static int demux_audio_control(demuxer_t *demuxer,int cmd, void *arg){
     switch(cmd) {
 	case DEMUXER_CTRL_GET_TIME_LENGTH:
 	    if (audio_length<=0) return DEMUXER_CTRL_DONTKNOW;
-	    *((unsigned long *)arg)=(unsigned long)audio_length;
+	    *((double *)arg)=(double)audio_length;
 	    return DEMUXER_CTRL_GUESS;
 
 	case DEMUXER_CTRL_GET_PERCENT_POS:
