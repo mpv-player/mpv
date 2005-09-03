@@ -19,6 +19,7 @@ MPlayer (1.0)
     * for -vo gl manyfmts is now default (since it is a lot faster), use
       -vo gl:nomanyfmts if it does not work for you
     * streaming textures for -vo gl, much faster if supported (use -dr)
+    * use libvbe from vesautils as vesa video driver
 
     Decoders:
     * Indeo2 (RT21) support via lavc
@@ -36,6 +37,10 @@ MPlayer (1.0)
     * libdvdread updated to v0.9.4
     * support for some more MythTV NUV files
     * modularization of demuxer code
+    * MPEG in GXF container support with extension-based detection
+    * faster MPEG and much faster GFX demuxing
+    * more user-friendly demuxer forcing
+    * improved MythTV nuv files support
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
@@ -54,6 +59,7 @@ MPlayer (1.0)
     * countless bug fixes all over the place
     * vstrict=-1 is default, Snow, ffv1 etc. need vstrict=-2
     * skiploopfilter decoder option for very fast H.264 decoding
+    * D-Cinema audio demuxer and decoder support
 
     Gui:
     * ported to GTK2
@@ -93,6 +99,10 @@ MPlayer (1.0)
     * full gcc 4 support for IA-32 and AMD-64 ports
     * TOOLS/vobshift.py: vobsub time-adjust tool
     * fixed auto-insertion of lavc encoder (for DXR2/3 and DVB)
+    * new option: -idle, to make MPlayer wait for input commands when
+      done playing all files
+    * lots of new slave commands (check DOCS/tech/slave.txt)
+    * lots of new informations outputed with option -identify
 
 
   pre7try2: August 26, 2005
