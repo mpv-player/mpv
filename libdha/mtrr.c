@@ -23,7 +23,6 @@
 #endif
 #endif
 
-#if defined( __i386__ )
 int	mtrr_set_type(unsigned base,unsigned size,int type)
 {
 #ifdef linux
@@ -50,8 +49,7 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
 	return wr_len == strlen(sout) ? 0 : EPERM;
     }
     return ENOSYS;
-#elif defined (__NetBSD__)
-#if __NetBSD_Version__ > 105240000
+#elif defined (__i386__ ) && defined (__NetBSD__) && __NetBSD_Version__ > 105240000
     struct mtrr *mtrrp;
     int n;
 
@@ -72,14 +70,4 @@ int	mtrr_set_type(unsigned base,unsigned size,int type)
     /* NetBSD prior to 1.5Y doesn't have MTRR support */
     return ENOSYS;
 #endif
-#else
-#warning Please port MTRR stuff!!!
-    return ENOSYS;
-#endif
 }
-#else
-int	mtrr_set_type(unsigned base,unsigned size,int type)
-{
-    return ENOSYS;
-}
-#endif
