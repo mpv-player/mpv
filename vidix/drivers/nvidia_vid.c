@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
 #include <inttypes.h>
 #include <unistd.h>
 
@@ -60,6 +61,14 @@ unsigned int vixGetVersion(void){
 #define NV_ARCH_10  0x10
 #define NV_ARCH_20  0x20
 #define NV_ARCH_30  0x30
+
+// since no useful information whatsoever is passed
+// to the equalizer functions we need this
+static struct {
+  uint32_t lum; // luminance (brightness + contrast)
+  uint32_t chrom; // chrominance (saturation + hue)
+  vidix_video_eq_t vals;
+} eq;
 
 struct nvidia_cards {
   unsigned short chip_id;
@@ -556,10 +565,10 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 		}
 
 		/* NV_PVIDEO_LUMINANCE */
-		VID_WR32 (info->chip.PVIDEO, 0x910 + 0, 0x00001000);
+		VID_WR32 (info->chip.PVIDEO, 0x910 + 0, eq.lum);
 		//VID_WR32 (info->chip.PVIDEO, 0x910 + 4, 0x00001000);
 		/* NV_PVIDEO_CHROMINANCE */
-		VID_WR32 (info->chip.PVIDEO, 0x918 + 0, 0x00001000);
+		VID_WR32 (info->chip.PVIDEO, 0x918 + 0, eq.chrom);
 		//VID_WR32 (info->chip.PVIDEO, 0x918 + 4, 0x00001000);
 
 		/* NV_PVIDEO_OFFSET */
@@ -755,6 +764,11 @@ int vixInit(void){
   info->cur_frame = 0;
   info->use_colorkey = 0;
 
+  eq.lum = 0x00001000;
+  eq.chrom = 0x00001000;
+  memset(&eq.vals, 0, sizeof(vidix_video_eq_t));
+  eq.vals.cap = VEQ_CAP_BRIGHTNESS | VEQ_CAP_CONTRAST |
+                VEQ_CAP_SATURATION | VEQ_CAP_HUE;
   return 0;
 }
 
@@ -869,3 +883,31 @@ int vixPlaybackFrameSelect(unsigned int frame){
 	  info->cur_frame = frame/*(frame+1)%info->num_frames*/;
   return 0;
 }
+
+int vixPlaybackSetEq(const vidix_video_eq_t *eq_parm) {
+  double angle;
+  int16_t chrom_cos, chrom_sin;
+  vidix_video_eq_t new_eq;
+  vixPlaybackGetEq(&new_eq);
+  if (eq_parm->cap & VEQ_CAP_BRIGHTNESS)
+    new_eq.brightness = eq_parm->brightness;
+  if (eq_parm->cap & VEQ_CAP_CONTRAST)
+    new_eq.contrast = eq_parm->contrast;
+  if (eq_parm->cap & VEQ_CAP_SATURATION)
+    new_eq.saturation = eq_parm->saturation;
+  if (eq_parm->cap & VEQ_CAP_HUE)
+    new_eq.hue = eq_parm->hue;
+  eq.lum = (((new_eq.brightness * 512 + 500) / 1000) << 16) |
+           ((((new_eq.contrast + 1000) * 8191 + 1000) / 2000) & 0xffff);
+  angle = (double)new_eq.hue / 1000.0 * 3.1415927;
+  chrom_cos = ((new_eq.saturation + 1000) * 8191 * cos(angle) + 1000) / 2000;
+  chrom_sin = ((new_eq.saturation + 1000) * 8191 * sin(angle) + 1000) / 2000;
+  eq.chrom = chrom_sin << 16 | chrom_cos;
+  return 0;
+}
+
+int vixPlaybackGetEq(vidix_video_eq_t *eq_parm) {
+  memcpy(eq_parm, &eq.vals, sizeof(vidix_video_eq_t));
+  return 0;
+}
+
