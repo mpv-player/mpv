@@ -181,7 +181,7 @@ static int write_stream(int s, const char *buf, int len) {
 #else
       if ((timeout>0) && ((errno == EAGAIN) || (WSAGetLastError() == WSAEINPROGRESS))) {
 #endif
-        sleep (1); timeout--;
+        usec_sleep (1000000); timeout--;
       } else
         return -1;
     }
