@@ -16,8 +16,7 @@
 #endif
 
 #if ENABLE_GUI_CODE
-#include "Gui/mplayer/widgets.h"
-extern void gtkMessageBox( int type,char * str );
+#include "Gui/interface.h"
 extern int use_gui;
 #endif
 #include "mp_msg.h"
@@ -72,25 +71,7 @@ void mp_msg_c( int x, const char *format, ... ){
 
 #if ENABLE_GUI_CODE
     if(use_gui)
-    {
-	switch(x & 255)
-	{
-	    case MSGL_FATAL:
-		gtkMessageBox(GTK_MB_FATAL|GTK_MB_SIMPLE, tmp);
-		break;
-	    case MSGL_ERR:
-		gtkMessageBox(GTK_MB_ERROR|GTK_MB_SIMPLE, tmp);
-		break;
-#if 0
-// WARNING! Do NOT enable this! There are too many non-critical messages with
-// MSGL_WARN, for example: broken SPU packets, codec's bit error messages,
-// etc etc, they should not raise up a new window every time.
-	    case MSGL_WARN:
-		gtkMessageBox(GTK_MB_WARNING|GTK_MB_SIMPLE, tmp);
-		break;
-#endif
-	}
-    }
+        guiMessageBox(x&255, tmp);
 #endif
 
 #ifdef MSG_USE_COLORS

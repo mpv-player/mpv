@@ -150,6 +150,7 @@ extern int  guiGetEvent( int type,char * arg );
 extern void guiEventHandling( void );
 extern void guiLoadFont( void );
 extern void guiLoadSubtitle( char * name );
+extern void guiMessageBox(int level, char * str);
 
 typedef struct _plItem 
 {

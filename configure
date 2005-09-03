@@ -6952,7 +6952,7 @@ AWK = $_awk
 RANLIB = $_ranlib
 INSTALL = $_install
 # OPTFLAGS = -O4 $_profile $_debug $_march $_mcpu $_pipe -fomit-frame-pointer -ffast-math
-EXTRA_INC = $_inc_extra $_inc_gtk
+EXTRA_INC = $_inc_extra
 OPTFLAGS = -I../libvo -I../../libvo $_inc_x11 $CFLAGS \$(EXTRA_INC)
 STRIPBINARIES = $_stripbinaries
 CHARSET = $_charset
@@ -7129,6 +7129,7 @@ TARGET_ALTIVEC = $_altivec
 TARGET_VIS = $_vis
 
 # --- GUI stuff ---
+GTKINC = $_inc_gtk
 GTKLIB = $_ld_static $_ld_gtk
 GLIBLIB = $_ld_static  $_ld_glib
 GTK_LIBS =  $_ld_static $_ld_gui

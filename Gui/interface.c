@@ -1292,3 +1292,24 @@ int import_playtree_playlist_into_gui(play_tree_t* my_playtree, m_config_t* conf
   
   return result;
 }
+
+// wrapper function for mp_msg to display a message box for errors and warnings.
+
+void guiMessageBox(int level, char * str) {
+	switch(level) {
+		case MSGL_FATAL:
+			gtkMessageBox(GTK_MB_FATAL|GTK_MB_SIMPLE, str);
+			break;
+		case MSGL_ERR:
+			gtkMessageBox(GTK_MB_ERROR|GTK_MB_SIMPLE, str);
+			break;
+#if 0
+// WARNING! Do NOT enable this! There are too many non-critical messages with
+// MSGL_WARN, for example: broken SPU packets, codec's bit error messages,
+// etc etc, they should not raise up a new window every time.
+		case MSGL_WARN:
+			gtkMessageBox(GTK_MB_WARNING|GTK_MB_SIMPLE, str);
+			break;
+#endif
+	}
+}
