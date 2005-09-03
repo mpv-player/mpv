@@ -40,7 +40,6 @@ MPlayer (1.0)
     * MPEG in GXF container support with extension-based detection
     * faster MPEG and much faster GFX demuxing
     * more user-friendly demuxer forcing
-    * improved MythTV nuv files support
 
     Streaming:
     * fix streaming of RealAudio files over HTTP
@@ -102,7 +101,7 @@ MPlayer (1.0)
     * new option: -idle, to make MPlayer wait for input commands when
       done playing all files
     * lots of new slave commands (check DOCS/tech/slave.txt)
-    * lots of new informations outputed with option -identify
+    * lots of new information provided by the -identify option
 
 
   pre7try2: August 26, 2005
