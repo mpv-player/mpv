@@ -193,16 +193,6 @@ int vixProbe(int verbose, int force){
 /*
  * PCI-Memory IO access macros.
  */
-#define VID_WR08(p,i,val)  (((uint8_t *)(p))[(i)]=(val))
-#define VID_RD08(p,i)	   (((uint8_t *)(p))[(i)])
-
-#define VID_WR32(p,i,val)  (((uint32_t *)(p))[(i)/4]=(val))
-#define VID_RD32(p,i)	   (((uint32_t *)(p))[(i)/4])
-
-#ifndef USE_RMW_CYCLES
-/*
- * Can be used to inhibit READ-MODIFY-WRITE cycles. On by default.
- */
 
 #define MEM_BARRIER() __asm__ __volatile__ ("" : : : "memory")
 
@@ -212,10 +202,9 @@ int vixProbe(int verbose, int force){
 #define VID_RD08(p,i)     ({ MEM_BARRIER(); ((uint8_t *)(p))[(i)]; })
 
 #undef	VID_WR32
-#define VID_WR32(p,i,val) ({ MEM_BARRIER(); ((uint32_t *)(p))[(i)/4]=(val); })
+#define VID_WR32(p,i,val) ({ MEM_BARRIER(); ((uint32_t *)(p))[(i)/4]=le2me_32(val); })
 #undef	VID_RD32
-#define VID_RD32(p,i)     ({ MEM_BARRIER(); ((uint32_t *)(p))[(i)/4]; })
-#endif /* USE_RMW_CYCLES */
+#define VID_RD32(p,i)     ({ MEM_BARRIER(); le2me_32(((uint32_t *)(p))[(i)/4]); })
 
 #define VID_AND32(p,i,val) VID_WR32(p,i,VID_RD32(p,i)&(val))
 #define VID_OR32(p,i,val)  VID_WR32(p,i,VID_RD32(p,i)|(val))
@@ -288,7 +277,7 @@ static unsigned long rivatv_fbsize_nv03 (struct rivatv_chip *chip){
 	}
 	else {
 		/* SGRAM 128. */
-		switch (chip->PFB[0x00000000] & 0x00000003) {
+		switch (VID_RD32(chip->PFB, 0) & 0x00000003) {
 		case 0:
 			return 1024 * 1024 * 8;
 			break;
@@ -482,7 +471,7 @@ static void nv_getscreenproperties(struct rivatv_info *info){
   VID_WR08(info->chip.PCIO, 0x03D4,0x28);
   bpp = VID_RD08(info->chip.PCIO,0x03D5)&0x3;
   if(bpp==3)bpp=4;
-  if((bpp == 2) && (info->chip.PVIDEO[0x00000600/4] & 0x00001000) == 0x0)info->depth=15;           
+  if((bpp == 2) && (VID_RD32(info->chip.PVIDEO,0x600) & 0x00001000) == 0x0)info->depth=15;
   else info->depth = bpp*8;
   info->bps=bpp;
   /*get screen width*/
@@ -509,7 +498,6 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     uint32_t value;
 	int x=info->wx, y=info->wy;
 	int lwidth=info->d_width, lheight=info->d_height;
-	int i;
 
     size = info->buffer_size;
 	base = info->picture_offset;
