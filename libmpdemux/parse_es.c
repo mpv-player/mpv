@@ -53,6 +53,8 @@ int sync_video_packet(demux_stream_t *ds){
 int read_video_packet(demux_stream_t *ds){
 int packet_start;
   
+  if (VIDEOBUFFER_SIZE - videobuf_len < 5)
+    return 0;
   // SYNC STREAM
 //  if(!sync_video_packet(ds)) return 0; // cannot sync (EOF)
 
@@ -65,21 +67,20 @@ int packet_start;
   videobuf_len+=4;
   
   // READ PACKET:
-  { unsigned int head=-1;
-    while(videobuf_len<VIDEOBUFFER_SIZE){
+  {
+    register uint32_t head = 0xffffffff;
+    register unsigned char *buf = &videobuffer[VIDEOBUFFER_SIZE];
+    register int pos = videobuf_len - VIDEOBUFFER_SIZE;
+    do {
       int c=demux_getc(ds);
       if(c<0) break; // EOF
-      videobuffer[videobuf_len++]=c;
-#if 1
+      buf[pos]=c;
       head<<=8;
       if(head==0x100) break; // synced
       head|=c;
-#else
-      if(videobuffer[videobuf_len-4]==0 &&
-         videobuffer[videobuf_len-3]==0 &&
-         videobuffer[videobuf_len-2]==1) break; // synced
-#endif
-    }
+    } while (++pos);
+    if (pos) pos++; // increment missed because of break
+    videobuf_len = &buf[pos] - videobuffer;
   }
   
   if(ds->eof){

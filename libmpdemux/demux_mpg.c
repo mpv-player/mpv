@@ -506,33 +506,70 @@ static int demux_mpg_es_fill_buffer(demuxer_t *demux, demux_stream_t *ds){
   return 1;
 }
 
+/**
+ * \brief discard until 0x100 header and return a filled buffer
+ * \param b buffer-end pointer
+ * \param pos current pos in stream, negative since b points to end of buffer
+ * \param s stream to read from
+ * \return new position, differs from original pos when eof hit and thus
+ *             b was modified to point to the new end of buffer
+ */
+static int find_end(unsigned char **b, int pos, stream_t *s) {
+  register int state = 0xffffffff;
+  unsigned char *buf = *b;
+  int start = pos;
+  int read, unused;
+  // search already read part
+  while (state != 0x100 && pos) {
+    state = state << 8 | buf[pos++];
+  }
+  // continue search in stream
+  while (state != 0x100) {
+    register int c = stream_read_char(s);
+    if (c < 0) break;
+    state = state << 8 | c;
+  }
+  // modify previous header (from 0x1bc or 0x1bf to 0x100)
+  buf[start++] = 0;
+  // copy remaining buffer part to current pos
+  memmove(&buf[start], &buf[pos], -pos);
+  unused = start + -pos; // -unused bytes in buffer
+  read = stream_read(s, &buf[unused], -unused);
+  unused += read;
+  // fix buffer so it ends at pos == 0 (eof case)
+  *b = &buf[unused];
+  start -= unused;
+  return start;
+}
+
+/**
+ * This format usually uses an insane bitrate, which makes this function
+ * performance-critical!
+ * Be sure to benchmark any changes with different compiler versions.
+ */
 static int demux_mpg_gxf_fill_buffer(demuxer_t *demux, demux_stream_t *ds) {
   demux_packet_t *pack;
-  uint32_t state = (uint32_t)demux->priv;
-  int pos = 0;
-  int discard = 0;
-  unsigned char *buf;
-  if (demux->stream->eof)
-    return 0;
+  int len;
   demux->filepos = stream_tell(demux->stream);
   pack = new_demux_packet(STREAM_BUFFER_SIZE);
-  buf = pack->buffer;
-  while (pos < STREAM_BUFFER_SIZE) {
-    register int c = stream_read_char(demux->stream);
-    if (c < 0) { // EOF
-      resize_demux_packet(pack, pos);
-      break;
-    }
-    state = state << 8 | c;
-    if (state == 0x1bc || state == 0x1bf)
-      discard = 1;
-    else if (state == 0x100)
-      discard = 0;
-    if (!discard)
-      buf[pos++] = c;
+  len = stream_read(demux->stream, pack->buffer, STREAM_BUFFER_SIZE);
+  if (len <= 0)
+    return 0;
+  {
+    register uint32_t state = (uint32_t)demux->priv;
+    register int pos = -len;
+    unsigned char *buf = &pack->buffer[len];
+    do {
+      state = state << 8 | buf[pos];
+      if (unlikely((state | 3) == 0x1bf))
+        pos = find_end(&buf, pos, demux->stream);
+    } while (++pos);
+    demux->priv = (void *)state;
+    len = buf - pack->buffer;
   }
+  if (len < STREAM_BUFFER_SIZE)
+    resize_demux_packet(pack, len);
   ds_add_packet(ds, pack);
-  demux->priv = (void *)state;
   return 1;
 }
 

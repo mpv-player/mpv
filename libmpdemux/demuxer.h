@@ -259,8 +259,8 @@ int demux_read_data_pack(demux_stream_t *ds,unsigned char* mem,int len);
 
 #if 1
 #define demux_getc(ds) (\
-     (ds->buffer_pos<ds->buffer_size) ? ds->buffer[ds->buffer_pos++] \
-     :((!ds_fill_buffer(ds))? (-1) : ds->buffer[ds->buffer_pos++] ) )
+     (likely(ds->buffer_pos<ds->buffer_size)) ? ds->buffer[ds->buffer_pos++] \
+     :((unlikely(!ds_fill_buffer(ds)))? (-1) : ds->buffer[ds->buffer_pos++] ) )
 #else
 inline static int demux_getc(demux_stream_t *ds){
   if(ds->buffer_pos>=ds->buffer_size){
