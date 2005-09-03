@@ -76,18 +76,79 @@ void mp_msg_c( int x, const char *format, ... ){
 
 #ifdef MSG_USE_COLORS
 /* that's only a silly color test */
-#ifdef MP_DEBUG
+#ifdef MP_ANNOY_ME
     { int c;
       static int flag=1;
       if(flag)
-      for(c=0;c<16;c++)
+      for(c=0;c<24;c++)
           printf("\033[%d;3%dm***  COLOR TEST %d  ***\n",(c>7),c&7,c);
       flag=0;
     }
 #endif    
-    {	unsigned char v_colors[10]={9,9,11,14,15,7,6,5,5,5};
+    {	unsigned char v_colors[10]={9,1,3,15,7,2,2,8,8,8};
+        static const char *lev_text[]= {
+                                "FATAL",
+                                "ERROR",
+                                "WARN",
+                                "HINT",
+                                "INFO",
+                                "STATUS",
+                                "V",
+                                "DGB2",
+                                "DGB3",
+                                "DGB4"};
+        static const char *mod_text[]= {
+                                "GLOBAL",
+                                "CPLAYER",
+                                "GPLAYER",
+                                "VIDEOOUT",
+                                "AUDIOOUT",
+                                "DEMUXER",
+                                "DS",
+                                "DEMUX",
+                                "HEADER",
+                                "AVSYNC",
+                                "AUTOQ",
+                                "CFGPARSER",
+                                "DECAUDIO",
+                                "DECVIDEO",
+                                "SEEK",
+                                "WIN32",
+                                "OPEN",
+                                "DVD",
+                                "PARSEES",
+                                "LIRC",
+                                "STREAM",
+                                "CACHE",
+                                "MENCODER",
+                                "XACODEC",
+                                "TV",
+                                "OSDEP",
+                                "SPUDEC",
+                                "PLAYTREE",
+                                "INPUT",
+                                "VFILTER",
+                                "OSD",
+                                "NETWORK",
+                                "CPUDETECT",
+                                "CODECCFG",
+                                "SWS",
+                                "VOBSUB",
+                                "SUBREADER",
+                                "AFILTER",
+                                "NETST",
+                                "MUXER"};
+
 	int c=v_colors[(x & 255)];
-	fprintf(((x & 255) <= MSGL_WARN)?stderr:stdout, "\033[%d;3%dm",(c>7),c&7);
+        int c2=((x>>8)+1)%15+1;
+        static int header=1;
+        FILE *stream= (x & 255) <= MSGL_WARN ? stderr : stdout;
+        if(header){
+            fprintf(stream, "\033[%d;3%dm%9s\033[0;37m: ",c2>>3,c2&7, mod_text[x>>8]);
+        }
+        fprintf(stream, "\033[%d;3%dm",c>>3,c&7);
+        header=    tmp[strlen(tmp)-1] == '\n'
+                 /*||tmp[strlen(tmp)-1] == '\r'*/;
     }
 #endif
     if ((x & 255) <= MSGL_WARN){
