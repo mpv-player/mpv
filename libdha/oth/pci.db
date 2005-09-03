@@ -2673,6 +2673,7 @@ d	10de0333	NV38 [GeForce FX 5950 Ultra]	1
 d	10de0338	NV35GL [Quadro FX 3000]	0	
 d	10de0341	NV 36 [GeForce 5700 Ultra]	1	MSI MS-8938, 128 MB DDR2, DVI, TV-out, AGP
 d	10de0342	NV 36 [GeForce 5700]	1	MSI FX5700-TD128, 128 MB DDR, DVI, TV-out, AGP
+d	10de0347	NV36 [GeForce FX Go5700]	0	
 v	10df	Emulex Corporation	0	
 d	10df1ae5	LP6000 Fibre Channel Host Adapter	0	
 d	10dff085	LP850 Fibre Channel Adapter	0	
