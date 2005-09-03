@@ -255,7 +255,7 @@ struct rivatv_info {
 	struct rivatv_chip chip;	 /* NV architecture structure		       */
 	void* video_base;		 /* virtual address of control region	       */
 	void* control_base;		 /* virtual address of fb region	       */
-	unsigned long picture_base;	 /* direct pointer to video picture	       */
+	void* picture_base;		 /* direct pointer to video picture	       */
 	unsigned long picture_offset;	 /* offset of video picture in frame buffer    */
 //	struct rivatv_dma dma;           /* DMA structure                              */
     unsigned int cur_frame;
@@ -684,7 +684,7 @@ int vixInit(void){
   info = (rivatv_info*)calloc(1,sizeof(rivatv_info));
   info->control_base = map_phys_mem(pci_info.base0, 0x00C00000 + 0x00008000);
   info->chip.arch =  nvidia_card_ids[find_chip(pci_info.device)].arch;  
-  printf("[nvidia_vid] arch %x register base %x\n",info->chip.arch,(unsigned int)info->control_base);
+  printf("[nvidia_vid] arch %x register base %p\n",info->chip.arch,info->control_base);
   info->chip.PFIFO  = (uint32_t *) (info->control_base + 0x00002000);
   info->chip.FIFO   = (uint32_t *) (info->control_base + 0x00800000);
   info->chip.PMC    = (uint32_t *) (info->control_base + 0x00000000);
@@ -722,7 +722,7 @@ int vixInit(void){
 	    info->video_base = map_phys_mem(pci_info.base1, info->chip.fbsize);
         /* This may trash your screen for resolutions greater than 1024x768, sorry. */
         info->picture_offset = 1024*768* 4 * ((info->chip.fbsize > 4194304)?2:1);
-        info->picture_base = (uint32_t) info->video_base + info->picture_offset;
+        info->picture_base = info->video_base + info->picture_offset;
         info->chip.PRAMIN = (uint32_t *) (info->video_base + 0x00C00000);
         break;
 	}
@@ -734,7 +734,7 @@ int vixInit(void){
 		info->video_base = map_phys_mem(pci_info.base1, info->chip.fbsize);
 		info->picture_offset = info->chip.fbsize - NV04_BES_SIZE;
 //		info->picture_base = (unsigned long)map_phys_mem(pci_info.base1+info->picture_offset,NV04_BES_SIZE);
-		info->picture_base = (uint32_t) info->video_base + info->picture_offset;
+		info->picture_base = info->video_base + info->picture_offset;
 		break;
 	}
   }
@@ -810,7 +810,7 @@ int vixConfigPlayback(vidix_playback_t *vinfo){
 		    info->d_width, info->d_height, info->wx, info->wy, info->width, info->height, vinfo->fourcc);
     
     
-    vinfo->dga_addr=(void*)(info->picture_base);
+    vinfo->dga_addr=info->picture_base;
 
     switch (vinfo->fourcc)
     {
