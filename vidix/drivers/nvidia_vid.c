@@ -506,7 +506,7 @@ static void nv_getscreenproperties(struct rivatv_info *info){
 void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     uint32_t base, size, offset, xscale, yscale, pan;
     uint32_t value;
-	int x=info->wx?info->wx:8, y=info->wy?info->wy:8;
+	int x=info->wx, y=info->wy;
 	int lwidth=info->d_width, lheight=info->d_height;
 	int bps;
 	int i;
@@ -547,6 +547,10 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
 	x = info->wx - (pan % bps) * 8 / info->depth;
     	y = info->wy - (pan / bps);
 	}
+    } else {
+            // we can't adjust the window position correctly in textmode
+            // setting y to 8 seems to work ok, though
+            if(!y)y = info->wy+8;
     }
     
 	    /* adjust negative output window variables */
