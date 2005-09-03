@@ -484,6 +484,7 @@ static void nv_getscreenproperties(struct rivatv_info *info){
   if(bpp==3)bpp=4;
   if((bpp == 2) && (info->chip.PVIDEO[0x00000600/4] & 0x00001000) == 0x0)info->depth=15;           
   else info->depth = bpp*8;
+  info->bps=bpp;
   /*get screen width*/
   VID_WR08(info->chip.PCIO, 0x03D4, 0x1);
   info->screen_x = (1 + VID_RD08(info->chip.PCIO, 0x3D5)) * 8;
@@ -508,7 +509,6 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     uint32_t value;
 	int x=info->wx, y=info->wy;
 	int lwidth=info->d_width, lheight=info->d_height;
-	int bps;
 	int i;
 
     size = info->buffer_size;
@@ -518,34 +518,13 @@ void rivatv_overlay_start (struct rivatv_info *info,int bufno){
     nv_getscreenproperties(info);
 
     if(info->depth){
-//        bps = info->screen_x * ((info->depth+1)/8);
     	/* get pan offset of the physical screen */
      	pan = rivatv_overlay_pan (info);
     	/* adjust window position depending on the pan offset */
-        bps = 0;
-	info->chip.lock (&info->chip, 0);
-	for (i = 0; (i < 1024) && (bps == 0); i++)
+    	if (info->bps != 0)
 	{
-		if (info->chip.arch != NV_ARCH_03)
-			bps = info->chip.PGRAPH[0x00000670/4];
-		else
-			bps = info->chip.PGRAPH[0x00000650/4];
-	}
-	if (bps == 0)
-	{
-		fprintf(stderr, "[nvidia_vid] reading bps returned 0!!!\n");
-		if (info->bps != 0)
-			bps = info->bps;
-	}
-	else
-	{
-		info->bps = bps;
-	}
-
-    	if (bps != 0)
-	{
-	x = info->wx - (pan % bps) * 8 / info->depth;
-    	y = info->wy - (pan / bps);
+	  x = info->wx - (pan % info->bps) * 8 / info->depth;
+    	  y = info->wy - (pan / info->bps);
 	}
     } else {
             // we can't adjust the window position correctly in textmode
