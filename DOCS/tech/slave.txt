@@ -19,169 +19,18 @@ All commands can be prefixed with "pausing ", causing MPlayer to pause as soon
 as possible after processing the command. Please note that this can be before
 the command is fully executed.
 
+
 Available commands ('mplayer -input cmdlist' will print a list):
 
-
-seek <value> [<type>]
-    Seek to some place in the movie.
-        0 is a relative seek of +/- <value> seconds (default).
-        1 is a seek to <value> % in the movie.
-        2 is a seek to an absolute position of <value> seconds.
-
-speed_set <value>
-    Set the speed to <value>.
-
-speed_incr <value>
-    Add <value> to the current playback speed.
-
-speed_mult <value>
-    Multiply the current speed by <value>.
-
-edl_mark
-    Write the current position into the EDL file.
-
-audio_delay <value>
-    Adjust the audio delay by <value> seconds.
-
-quit [<value>]
-    Quit MPlayer. The optional integer value is used as the return code
-    for the mplayer process (default: 0).
-
-pause
-    Pause/unpause the playback.
-
-frame_step
-    Play one frame, then pause again.
-
-grab_frames
-    Currently unimplemented.
-
-pt_step <value> [<force>]
-    Go to the next/previous entry in the playtree. The sign of <value> tells
-    the direction.  If no entry is available in the given direction it will do
-    nothing unless force is non-zero.
-
-pt_up_step <value> [<force>]
-    Similar to pt_step but jumps to the next/previous entry in the parent list.
-    Useful to break out of the inner loop in the playtree.
 
 alt_src_step <value> (ASX playlist only)
     When more than one source is available it selects the next/previous one.
 
-sub_delay <value> [<abs>]
-    Adjust the subtitle delay by +/- <value> seconds or set it to <value>
-    seconds when <abs> is nonzero.
+audio_delay <value>
+    Adjust the audio delay by <value> seconds.
 
-sub_step <value>
-    Step forward in the subtitle list by <value> steps or backwards if <value>
-    is negative.
-
-sub_load <subtitle_file>
-    Loads subtitles from <subtitle_file>.
-
-sub_remove [<value>]
-    If the <value> argument is present and non-negative, removes the subtitle
-    file with index <value>. If the argument is omitted or negative, removes
-    all subtitle files.
-
-osd [<level>]
-    Toggle OSD mode or set it to level when <level> >= 0.
-
-osd_show_text <string>
-    Show <string> on the OSD.
-
-volume <value>
-    Increase/decrease volume.
-
-use_master
-    Switch volume control between master and PCM.
-
-mute
-    Mute/unmute sound output.
-
-switch_audio [<value>] (MPEG and Matroska only)
-    Switch to the audio track with the id <value>. Cycle through the
-    available tracks if <value> is omitted or negative.
-
-[contrast|gamma|brightness|hue|saturation] <-100 - 100> [<abs>]
+[brightness|contrast|gamma|hue|saturation] <-100 - 100> [<abs>]
     Set/adjust video parameters.
-
-frame_drop [<value>]
-    Toggle/set frame dropping mode.
-
-sub_pos <value>
-    Adjust subtitle position.
-
-sub_alignment <value>
-    Set subtitle alignment.
-
-sub_visibility
-    Toggle subtitle visibility.
-
-get_sub_visibility
-    Print out subtitle visibility (1 == on, 0 == off).
-
-sub_select [<value>]
-    Display subtitle with index <value>. Turn subtitle display off if
-    <value> is -1 or greater than the highest available subtitle index.
-    Cycle through the available subtitles if <value> is omitted or less
-    than -1. Supported subtitle sources are -sub options on the command
-    line, VOBsubs, DVD subtitles, and Ogg and Matroska text streams.
-
-sub_log
-    Logs the current or last displayed subtitle together with filename
-    and time information to ~/.mplayer/subtitle_log. Intended purpose
-    is to allow convenient marking of bogus subtitles which need to be
-    fixed while watching the movie.
-
-vobsub_lang
-    This is a stub linked to sub_select for backwards compatibility.
-
-get_percent_pos
-    Print out the current position in the file, as integer percentage [0-100).
-
-get_time_pos
-    Print out the current position in the file in seconds, as float.
-
-get_time_length
-    Print out the length of the current file in seconds.
-
-vo_fullscreen
-    Switch to fullscreen mode.
-
-get_vo_fullscreen
-    Print out fullscreen status (1 == fullscreened, 0 == windowed).
-
-vo_ontop
-    Toggle stay-on-top.
-
-vo_rootwin
-    Toggle playback on the root window.
-
-switch_vsync [<value>]
-    Toggle vsync (1 == on, 0 == off). If no value is provided,
-    vsync status is inverted.
-
-switch_ratio [<value>]
-    Change aspect ratio at runtime. Value is the new aspect ratio expressed
-    as a float (e.g. 1.77778 for 16/9).
-    There might be problems with some video filters.
-
-panscan <-1.0 - 1.0> | <0.0 - 1.0> <absolute>
-    Increase or decrease the pan-and-scan range by <value>, 1.0 is the maximum.
-    Negative values decrease the pan-and-scan range.
-    If <absolute> is != 0, then the pan-and scan range is interpreted as an
-    absolute range.
-
-loadfile <file|url> <append>
-    Load the given file/URL, stopping playback of the current file/URL.
-    If <append> is nonzero playback continues and the file/URL is
-    appended to the current playlist instead.
-
-loadlist <file> <append>
-    Load the given playlist file, stopping playback of the current file.
-    If <append> is nonzero playback continues and the playlist file is
-    appended to the current playlist instead.
 
 change_rectangle <val1> <val2>
     Change the position of the rectangle filter rectangle.
@@ -201,6 +50,9 @@ change_rectangle <val1> <val2>
                 rectangle corner. Positive values move the rectangle
                 right/down and negative values move the rectangle left/up.
 
+dvb_set_channel <channel_number> <card_number>
+    Set DVB channel.
+
 dvdnav <button>
     Press the given dvdnav button.
         1 up
@@ -212,6 +64,163 @@ dvdnav <button>
 
 dvdnav_event <value>
     Send <value> as DVDNAV event. DVDNAV support in MPlayer is disabled.
+
+edl_mark
+    Write the current position into the EDL file.
+
+frame_drop [<value>]
+    Toggle/set frame dropping mode.
+
+get_percent_pos
+    Print out the current position in the file, as integer percentage [0-100).
+
+get_sub_visibility
+    Print out subtitle visibility (1 == on, 0 == off).
+
+get_time_length
+    Print out the length of the current file in seconds.
+
+get_time_pos
+    Print out the current position in the file in seconds, as float.
+
+get_vo_fullscreen
+    Print out fullscreen status (1 == fullscreened, 0 == windowed).
+
+grab_frames
+    Currently unimplemented.
+
+screenshot
+    Take a screenshot. Currently not implemented in any video output driver.
+
+gui_[about|loadfile|loadsubtitle|play|playlist|preferences|skinbrowser|stop]
+    GUI actions
+
+loadfile <file|url> <append>
+    Load the given file/URL, stopping playback of the current file/URL.
+    If <append> is nonzero playback continues and the file/URL is
+    appended to the current playlist instead.
+
+loadlist <file> <append>
+    Load the given playlist file, stopping playback of the current file.
+    If <append> is nonzero playback continues and the playlist file is
+    appended to the current playlist instead.
+
+menu <command>
+    Execute an OSD menu command.
+        up     Move cursor up.
+        down   Move cursor down.
+        ok     Accept selection.
+        cancel Cancel selection.
+        hide   Hide the OSD menu.
+
+set_menu <menu_name>
+    Display the menu named <menu_name>.
+
+mute
+    Mute/unmute sound output.
+
+osd [<level>]
+    Toggle OSD mode or set it to level when <level> >= 0.
+
+osd_show_text <string>
+    Show <string> on the OSD.
+
+panscan <-1.0 - 1.0> | <0.0 - 1.0> <absolute>
+    Increase or decrease the pan-and-scan range by <value>, 1.0 is the maximum.
+    Negative values decrease the pan-and-scan range.
+    If <absolute> is != 0, then the pan-and scan range is interpreted as an
+    absolute range.
+
+pause
+    Pause/unpause the playback.
+
+frame_step
+    Play one frame, then pause again.
+
+pt_step <value> [<force>]
+    Go to the next/previous entry in the playtree. The sign of <value> tells
+    the direction.  If no entry is available in the given direction it will do
+    nothing unless force is non-zero.
+
+pt_up_step <value> [<force>]
+    Similar to pt_step but jumps to the next/previous entry in the parent list.
+    Useful to break out of the inner loop in the playtree.
+
+quit [<value>]
+    Quit MPlayer. The optional integer value is used as the return code
+    for the mplayer process (default: 0).
+
+seek <value> [<type>]
+    Seek to some place in the movie.
+        0 is a relative seek of +/- <value> seconds (default).
+        1 is a seek to <value> % in the movie.
+        2 is a seek to an absolute position of <value> seconds.
+
+speed_incr <value>
+    Add <value> to the current playback speed.
+
+speed_mult <value>
+    Multiply the current speed by <value>.
+
+speed_set <value>
+    Set the speed to <value>.
+
+sub_alignment <value>
+    Set subtitle alignment.
+
+sub_delay <value> [<abs>]
+    Adjust the subtitle delay by +/- <value> seconds or set it to <value>
+    seconds when <abs> is nonzero.
+
+sub_load <subtitle_file>
+    Loads subtitles from <subtitle_file>.
+
+sub_log
+    Logs the current or last displayed subtitle together with filename
+    and time information to ~/.mplayer/subtitle_log. Intended purpose
+    is to allow convenient marking of bogus subtitles which need to be
+    fixed while watching the movie.
+
+sub_pos <value>
+    Adjust subtitle position.
+
+sub_remove [<value>]
+    If the <value> argument is present and non-negative, removes the subtitle
+    file with index <value>. If the argument is omitted or negative, removes
+    all subtitle files.
+
+sub_select [<value>]
+    Display subtitle with index <value>. Turn subtitle display off if
+    <value> is -1 or greater than the highest available subtitle index.
+    Cycle through the available subtitles if <value> is omitted or less
+    than -1. Supported subtitle sources are -sub options on the command
+    line, VOBsubs, DVD subtitles, and Ogg and Matroska text streams.
+
+vobsub_lang
+    This is a stub linked to sub_select for backwards compatibility.
+
+sub_step <value>
+    Step forward in the subtitle list by <value> steps or backwards if <value>
+    is negative.
+
+sub_visibility
+    Toggle subtitle visibility.
+
+forced_subs_only
+    Display forced subtitles only.
+
+switch_audio [<value>] (MPEG and Matroska only)
+    Switch to the audio track with the id <value>. Cycle through the
+    available tracks if <value> is omitted or negative.
+
+switch_ratio [<value>]
+    Change aspect ratio at runtime. Value is the new aspect ratio expressed
+    as a float (e.g. 1.77778 for 16/9).
+    There might be problems with some video filters.
+
+switch_vsync [<value>]
+    Toggle vsync (1 == on, 0 == off). If no value is provided,
+    vsync status is inverted.
 
 tv_step_channel <channel>
     Select next/previous TV channel.
@@ -246,28 +255,21 @@ tv_set_hue <-100 - 100>
 tv_set_saturation <-100 - 100>
     Set TV tuner saturation.
 
-gui_[loadfile|loadsubtitle|about|play|stop|playlist|preferences|skinbrowser]
-    GUI actions
+use_master
+    Switch volume control between master and PCM.
 
-forced_subs_only
-    Display forced subtitles only.
+vo_fullscreen
+    Switch to fullscreen mode.
 
-dvb_set_channel <channel_number> <card_number>
-    Set DVB channel.
+vo_ontop
+    Toggle stay-on-top.
 
-screenshot
-    Take a screenshot. Currently not implemented in any video output driver.
+vo_rootwin
+    Toggle playback on the root window.
 
-menu <command>
-    Execute an OSD menu command.
-        up     Move cursor up.
-        down   Move cursor down.
-        ok     Accept selection.
-        cancel Cancel selection.
-        hide   Hide the OSD menu.
+volume <value>
+    Increase/decrease volume.
 
-set_menu <menu_name>
-    Display the menu named <menu_name>.
 
 The following commands are really only useful for OSD menu console mode:
 
