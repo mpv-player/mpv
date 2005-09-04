@@ -1371,7 +1371,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   Though it may work in ideal cases, using <option>-nosound</option> is
   likely to hide some problems in your encoding command line setting.
   In other words, having a soundtrack during your encode assures you that,
-  provided you don't messages such as
+  provided you don't get messages such as
   <quote>Too many audio packets in the buffer</quote>, you will be able
   to get proper sync.
 </para>
@@ -1861,7 +1861,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
 </para>
 
 <para>
-  <screen>mencoder dvd://1 -avc copy -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -oac copy -ovc lavc -ofps 24000/1001</screen>
 </para>
 
 <para>
@@ -1910,7 +1910,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   will encode macroblocks as non-interlaced in places where there is
   no motion. Note that <option>-ofps</option> is NOT needed here.
 
-  <screen>mencoder dvd://1 -avc copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
+  <screen>mencoder dvd://1 -oac copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
   </para></listitem>
 <listitem><para>
   Use a deinterlacing filter before encoding. There are several of
@@ -1924,7 +1924,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   cropping <link linkend="menc-feat-telecine-footnotes">[1]</link> and
   before scaling.
 
-  <screen>mencoder dvd://1 -avc copy -vf pp=lb -ovc lavc</screen>
+  <screen>mencoder dvd://1 -oac copy -vf pp=lb -ovc lavc</screen>
   </para></listitem>
 <listitem><para>
   Unfortunately, this option is buggy with
@@ -1949,7 +1949,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <option>-fps</option> and <option>-ofps</option> to be twice the
   framerate of your original source.
 
-  <screen>mencoder dvd://1 -avc copy -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
+  <screen>mencoder dvd://1 -oac copy -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
   </para></listitem>
 <listitem><para>
   If you plan on downscaling dramatically, you can extract and encode
@@ -1961,7 +1961,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <link linkend="menc-feat-telecine-footnotes">[1]</link> and scale
   appropriately. Remember that you will have to adjust the scale to
   compensate for the vertical resolution being halved.
-  <screen>mencoder dvd://1 -avc copy -vf field=0 -ovc lavc</screen>
+  <screen>mencoder dvd://1 -oac copy -vf field=0 -ovc lavc</screen>
   </para></listitem>
 </orderedlist>
 </sect3>
@@ -1992,7 +1992,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   accurate method available for encoding both telecine and
   &quot;mixed progressive and telecine&quot;.
 
-  <screen>mencoder dvd://1 -avc copy -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -oac copy -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
   </para>
 
 
@@ -2007,7 +2007,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <option>ivtc</option>, the final result will be entirely
   progressive. <option>-ofps 24000/1001</option> is needed.
 
-  <screen>mencoder dvd://1 -avc copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -oac copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001</screen>
   </para>
   </listitem>
 
