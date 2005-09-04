@@ -1,4 +1,4 @@
-.\" synced with 1.1084
+.\" synced with 1.1087
 .\" MPlayer (C) 2000-2005 MPlayer Team
 .\" The English man page was/is done by Gabucino, Diego Biurrun, Jonas Jermann
 .\" Traduction: Guillaume POIRIER < poirierg AT etudiant.univ-rennes1.fr >,
@@ -414,11 +414,15 @@ Il suit le format suivant\ :
 mplayer -ao pcm:file=%10%C:test.wav test.avi
 .PP
 Vous pouvez placer toutes les options dans un fichier de configuration qui sera
-lu à chaque exécution de MPlayer.
+lu à chaque exécution de MPlayer/MEncoder.
 Le fichier de configuration général 'mplayer.conf' se trouve dans le répertoire
 habituel des fichiers de configuration (par ex.\& /etc/\:mplayer ou
 /usr/\:local/\:etc/\:mplayer), et le fichier de configuration spécifique à
 l'utilisateur se trouve dans '~/\:.mplayer/\:config'.
+Le fichier de configuration pour MEncoder est 'mencoder.conf' qui se trouve
+dans le répertoire habituel des fichiers de configuration (par ex.\&
+/etc/\:mplayer ou /usr/\:local/\:etc/\:mplayer), et le fichier de
+configuration spécifique à l'utilisateur est '~/\:.mplayer/\:mencoder.
 Les options du fichier utilisateur ont priorité sur les options du fichier
 global, et les options données sur la ligne de commande ont priorité sur tous
 les fichiers.
@@ -8935,6 +8939,63 @@ Nécessite subq>=5.
 Utilise un quanta différent pour la chroma et la luma.
 Les valeurs intéressantes se situent dans l'intervalle <-2\-2>
 (par défaut\ : 0).
+.
+.TP
+.B cqm=<flat|jvt|<nom_fichier>>
+Utilise soit une matrice de quantification personnalisée (CQM) prédéfinie
+ou en charge une au format JM depuis un fichier.
+.PD 0
+.RSs
+.IPs flat\ 
+Utilise la matrice prédéfinie "flat 16" (par défaut).
+.IPs jvt\ \ 
+Utilise la matrice prédéfinie JVT.
+.IPs <nom_fichier>
+Utilise la matrice personnalisée au format JM depuis un fichier.
+.PD 1
+.RE
+.
+.TP
+.B cqm4iy=<liste>
+Matrice luminance intra 4x4 personnalisée, donnée sous forme d'une liste
+de 16 valeurs dans l'intervalle 1-255, séparées par une virgule.
+.
+.TP
+.B cqm4ic=<liste>
+Matrice chrominance intra 4x4 personnalisée, donnée sous forme d'une liste
+de 16 valeurs dans l'intervalle 1-255, séparées par une virgule.
+.
+.TP
+.B cqm4py=<liste>
+Matrice luminance inter 4x4 personnalisée, donnée sous forme d'une liste
+de 16 valeurs dans l'intervalle 1-255, séparées par une virgule.
+.
+.TP
+.B cqm4pc=<liste>
+Matrice chrominance inter 4x4 personnalisée, donnée sous forme d'une liste
+de 16 valeurs dans l'intervalle 1-255, séparées par une virgule.
+.
+.TP
+.B cqm8iy=<liste>
+Matrice luminance intra 8x8 personnalisée, donnée sous forme d'une liste
+de 64 valeurs dans l'intervalle 1-255, séparées par une virgule.
+.
+.TP
+.B cqm8py=<liste>
+Matrice luminance inter 8x8 personnalisée, donnée sous forme d'une liste
+de 64 valeurs dans l'intervalle 1-255, séparées par une virgule.
+.RE
+.I NOTES\ :
+Les fichiers encodés avec des CQMs ne sont pas décodés correctement avec
+les lecteurs basés sur FFmpeg.
+.br
+Les utilisateurs de CMD.EXE de Windows peuvent rencontrer des problèmes
+de parsing de la ligne de command s'ils utilisent toutes les CQM sous
+forme de listes.
+Ceci est dû à la limite de la longueur de la ligne de commande.
+Dans ce cas, il est recommandé d'utiliser de mettre les listes dans un
+fichier de CQM au format JM, et de le charger comme précisé plus haut.
+.RE
 .
 .TP
 .B level_idc=<10\-51>
