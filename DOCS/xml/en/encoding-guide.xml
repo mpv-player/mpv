@@ -1295,7 +1295,9 @@ Note the <option>ilmv</option> and <option>ildct</option> options.
 algorithms were designed with the intention of recovering files with
 broken sync.
 However, in some cases they can cause unnecessary skipping and duplication of
-frames, and possibly slight A/V desync, when used with proper input.
+frames, and possibly slight A/V desync, when used with proper input
+(off course, A/V sync issues apply only if you process or copy the
+audio track while transcoding the video, which is strongly encouraged).
 Therefore, you may have to switch to basic A/V sync with
 the <option>-mc 0</option> option, or put this in your
 <systemitem>~/.mplayer/mencoder</systemitem> config file, as long as
@@ -1360,6 +1362,43 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   codecs.
   While the latter is a very space-efficient codec, MP3 is better supported
   by hardware players, although this trend is changing.
+</para>
+
+<para>
+  Do <emphasis>not</emphasis> use <option>-nosound</option> when encoding
+  a file with audio, even if you will be encoding and muxing audio
+  separately later.
+  Though it may work in ideal cases, using <option>-nosound</option> is
+  likely to hide some problems in your encoding command line setting.
+  In other words, having a soundtrack during your encode assures you that,
+  provided you don't messages such as
+  <quote>Too many audio packets in the buffer</quote>, you will be able
+  to get proper sync.
+</para>
+
+<para>
+  You need to have <application>MEncoder</application> process the sound.
+  You can for example copy the orignal soundtrack during the encode with
+  <option>-oac copy</option> or convert it to a "light" 4 kHz mono WAV
+  PCM with <option>-oac pcm -channels 1 -srate 4000</option>.
+  otherwise, in some cases, it will generate a video file that won't sync
+  with the audio.
+  Such cases are when the number of video frames in the source file do
+  not match up to the total length of audio frames or whenever there
+  are discontinuities/splices where there are missing or extra audio frames.
+  The correct way to handle this kind of problem is to insert silence or
+  cut audio at these points.
+  However <application>MPlayer</application> cannot do that, so if you
+  demux the AC3 and encode it with a separate app (or dump it to PCM with
+  <application>MPlayer</application>), the splices will be left incorrect
+  and the only way to correct them is to drop/dup video frames at the
+  splice.
+  As long as <application>MEncoder</application> sees the audio when it's
+  encoding the video, it can do this dropping/duping (which is usually ok
+  since it takes place at full black/scenechange, but if
+  <application>MEncoder</application> can't see the audio, it will just
+  process all frames as-is and they won't fit the final audio stream when
+  you for example merge your audio and video track into a Matroska file.
 </para>
 
 <para>
@@ -1822,7 +1861,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
 </para>
 
 <para>
-  <screen>mencoder dvd://1 -nosound -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -avc copy -ovc lavc -ofps 24000/1001</screen>
 </para>
 
 <para>
@@ -1871,7 +1910,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   will encode macroblocks as non-interlaced in places where there is
   no motion. Note that <option>-ofps</option> is NOT needed here.
 
-  <screen>mencoder dvd://1 -nosound -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
+  <screen>mencoder dvd://1 -avc copy -ovc lavc -lavcopts ildct:ilme:mbd=2</screen>
   </para></listitem>
 <listitem><para>
   Use a deinterlacing filter before encoding. There are several of
@@ -1885,7 +1924,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   cropping <link linkend="menc-feat-telecine-footnotes">[1]</link> and
   before scaling.
 
-  <screen>mencoder dvd://1 -nosound -vf pp=lb -ovc lavc</screen>
+  <screen>mencoder dvd://1 -avc copy -vf pp=lb -ovc lavc</screen>
   </para></listitem>
 <listitem><para>
   Unfortunately, this option is buggy with
@@ -1910,7 +1949,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <option>-fps</option> and <option>-ofps</option> to be twice the
   framerate of your original source.
 
-  <screen>mencoder dvd://1 -nosound -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
+  <screen>mencoder dvd://1 -avc copy -vf tfields=2 -ovc lavc -fps 60000/1001 -ofps 60000/1001</screen>
   </para></listitem>
 <listitem><para>
   If you plan on downscaling dramatically, you can extract and encode
@@ -1922,7 +1961,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <link linkend="menc-feat-telecine-footnotes">[1]</link> and scale
   appropriately. Remember that you will have to adjust the scale to
   compensate for the vertical resolution being halved.
-  <screen>mencoder dvd://1 -nosound -vf field=0 -ovc lavc</screen>
+  <screen>mencoder dvd://1 -avc copy -vf field=0 -ovc lavc</screen>
   </para></listitem>
 </orderedlist>
 </sect3>
@@ -1953,7 +1992,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   accurate method available for encoding both telecine and
   &quot;mixed progressive and telecine&quot;.
 
-  <screen>mencoder dvd://1 -nosound -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -avc copy -vf pullup,softskip -ovc lavc -ofps 24000/1001</screen>
   </para>
 
 
@@ -1968,7 +2007,7 @@ Do not do this! Always use a file or CD/DVD/etc device as input.
   <option>ivtc</option>, the final result will be entirely
   progressive. <option>-ofps 24000/1001</option> is needed.
 
-  <screen>mencoder dvd://1 -nosound -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001</screen>
+  <screen>mencoder dvd://1 -avc copy -vf softpulldown,ivtc=1 -ovc lavc -ofps 24000/1001</screen>
   </para>
   </listitem>
 
