@@ -8,6 +8,7 @@ MPlayer (1.0)
       which is to be merged into the existing guide
     * encoding tips for x264 and XviD
     * how to set up MEncoder for x264 support
+    * new advanced audio usage guide
     * Hungarian XML documentation translation finished
     * Czech documentation translation finished
     * Italian man page synced

@@ -400,4 +400,639 @@ that time. You can then go back and fine-tune the generated EDL file.
 
 </sect1>
 
+
+<sect1 id="advaudio" xreflabel="Advanced Audio">
+<title>Advanced Audio</title>
+
+<sect2 id="advaudio-surround">
+<title>Surround/Multichannel Playback</title>
+
+<sect3 id="advaudio-surround-DVD">
+<title>DVDs</title>
+<para>
+Most DVDs and many other files include surround sound.
+<application>MPlayer</application> supports surround playback but does not
+enable it by default because stereo equipment is by far more common. To play a
+file that has more than two channels of audio use <option>-channels</option>.
+For example, to play a DVD with 5.1 audio:
+
+<screen>mplayer dvd://1 -channels 6</screen>
+
+Note that despite the name "5.1" there are actually six discrete channels.
+If you have surround sound equipment it is safe to put the
+<option>channels</option> option in your <application>MPlayer</application>
+configuration file <filename>~/.mplayer/config</filename>. For example, to make
+quadraphonic playback the default, add this line:
+
+<programlisting>channels=4</programlisting>
+
+<application>MPlayer</application> will then output audio in four channels when
+all four channels are available.
+</para>
+</sect3>
+
+
+<sect3 id="advaudio-surround-stereoinfour">
+<title>Playing Stereo Files to Four Speakers</title>
+
+<para>
+<application>MPlayer</application> does not duplicate any channels by default,
+and neither do most audio drivers. If you want to do that manually:
+
+<screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
+
+See the section on
+<link linkend="advaudio-channels-copying">channel copying</link> for an
+explanation.
+</para>
+
+</sect3>
+
+
+<sect3 id="advaudio-surround-passthrough">
+<title>AC3/DTS Passthrough</title>
+
+<para>
+DVDs usually have surround audio encoded in AC3 (Dolby Digital) or DTS
+(Digital Theater System) format. Some modern audio equipment is capable of
+decoding these formats internally. <application>MPlayer</application> can be
+configured to relay the audio data without decoding it. This will only work if
+you have a S/PDIF (Sony/Philips Digital Interface) jack in your sound card.
+</para>
+
+<para>
+If your audio equipment can decode both AC3 and DTS, you can safely enable
+passthrough for both formats. Otherwise, enable passthrough for only the format
+your equipment supports.
+</para>
+
+<itemizedlist>
+<title>To enable passthrough on the command line:</title>
+<listitem><para>
+For AC3 only, use <option>-ac hwac3</option>
+</para></listitem>
+<listitem><para>
+For DTS only, use <option>-ac hwdts</option>
+</para></listitem>
+<listitem><para>
+For both AC3 and DTS, use <option>-afm hwac3</option>
+</para></listitem>
+</itemizedlist>
+
+<itemizedlist>
+<title>To enable passthrough in the <application>MPlayer</application>
+configuration file: </title>
+<listitem><para>
+For AC3 only, use <option>ac=hwac3,</option>
+</para></listitem>
+<listitem><para>
+For DTS only, use <option>ac=hwdts,</option>
+</para></listitem>
+<listitem><para>
+For both AC3 and DTS, use <option>-afm hwac3</option>
+</para></listitem>
+</itemizedlist>
+
+<para>
+Note that there is a comma ("<keycap>,</keycap>") at the end of
+<option>ac=hwac3,</option> and <option>ac=hwdts,</option>. This will make
+<application>MPlayer</application> fall back to the codecs it normally uses when
+playing a file that doesn't have AC3 or DTS audio. <option>afm=hwac3</option>
+does not need a comma; <application>MPlayer</application> will fall back anyway
+when an audio family is specified.
+</para>
+
+</sect3>
+
+
+<sect3 id="advaudio-surround-matrix">
+<title>Matrix-encoded Audio</title>
+
+<para>
+***TODO***
+This section has not be written yet as we would need some matrix-encoded
+samples to test with.
+I someone has such files, or would know how to handle them in detail,
+please contact us though the mailling list adding [matrix-encoded samples]
+to the subject of your mail.
+If no such file can be found, this section will just be dropped.
+</para>
+
+<para>
+Good links:
+<itemizedlist>
+<listitem><para>
+<ulink url="http://electronics.howstuffworks.com/surround-sound5.htm">http://electronics.howstuffworks.com/surround-sound5.htm</ulink>
+</para></listitem>
+<listitem><para>
+<ulink url="http://www.extremetech.com/article2/0,1697,1016875,00.asp">http://www.extremetech.com/article2/0,1697,1016875,00.asp</ulink>
+</para></listitem>
+</itemizedlist>
+</para>
+
+</sect3>
+
+
+<sect3 id="advaudio-surround-hrtf">
+<title>Surround Emulation in Headphones</title>
+
+<para>
+<application>MPlayer</application> includes an HRTF (Head Related Transfer
+Function) filter based on an MIT project wherein measurements were taken from
+microphones mounted on a dummy human head. See the
+<ulink url="http://sound.media.mit.edu/KEMAR.html">project page</ulink> for more
+information.
+</para>
+
+<para>
+Although it is not possible to exactly imitate a surround system,
+<application>MPlayer</application>'s HRTF filter does provide more spatially
+immersive audio in 2-channel headphones. Regular downmixing simply combines all
+the channels into two; besides combining the channels, <option>hrtf</option>
+generates subtle echoes, increases the stereo separation slightly, and alters
+the volume of some frequencies. Whether HRTF sounds better may be dependant on
+the source audio and a matter of personal taste, but it is definitely worth
+trying out.
+</para>
+
+<para>
+To play a DVD with HRTF:
+
+<screen>mplayer dvd://1 -channels 6 -af hrtf</screen>
+
+</para>
+
+<para>
+<option>hrtf</option> only works well with 5 or 6 channels. Also,
+<option>hrtf</option> requires 48 kHz audio. DVD audio is already 48 kHz, but if
+you have a file with a different sampling rate that you want to play using
+<option>hrtf</option> you must resample it:
+
+<screen>mplayer <replaceable>filename</replaceable> -channels 6 -af resample=48000,hrtf</screen>
+
+</para>
+
+</sect3>
+
+
+<sect3 id="advaudio-surround-troubleshooting">
+<title>Troubleshooting</title>
+
+<para>
+If you don't hear any sound out of your surround channels, check your mixer
+settings with a mixer program such as <application>alsamixer</application>;
+audio outputs are often muted and set to zero volume by default.
+</para>
+
+</sect3>
+
+</sect2>
+
+
+<sect2 id="advaudio-channels">
+<title>Channel Manipulation</title>
+
+<sect3 id="advaudio-channels-general">
+<title>General Information</title>
+
+<para>
+Unfortunately, there is no standard for how channels are ordered. The orders
+listed below are those of AC3 and are fairly typical; try them and see if your
+source matches. Channels are numbered starting with 0.
+
+<orderedlist spacing="compact">
+<title>Mono</title>
+<listitem override="0"><simpara>center</simpara></listitem>
+</orderedlist>
+
+<orderedlist spacing="compact">
+<title>Stereo</title>
+<listitem override="0"><simpara>left</simpara></listitem>
+<listitem><simpara>right</simpara></listitem>
+</orderedlist>
+
+<orderedlist spacing="compact">
+<title>Quadraphonic</title>
+<listitem override="0"><simpara>left front</simpara></listitem>
+<listitem><simpara>right front</simpara></listitem>
+<listitem><simpara>left rear</simpara></listitem>
+<listitem><simpara>right rear</simpara></listitem>
+</orderedlist>
+
+<orderedlist spacing="compact">
+<title>Surround 4.0</title>
+<listitem override="0"><simpara>left front</simpara></listitem>
+<listitem><simpara>right front</simpara></listitem>
+<listitem><simpara>center rear</simpara></listitem>
+<listitem><simpara>center front</simpara></listitem>
+</orderedlist>
+
+<orderedlist spacing="compact">
+<title>Surround 5.0</title>
+<listitem override="0"><simpara>left front</simpara></listitem>
+<listitem><simpara>right front</simpara></listitem>
+<listitem><simpara>left rear</simpara></listitem>
+<listitem><simpara>right rear</simpara></listitem>
+<listitem><simpara>center front</simpara></listitem>
+</orderedlist>
+
+<orderedlist spacing="compact">
+<title>Surround 5.1</title>
+<listitem override="0"><simpara>left front</simpara></listitem>
+<listitem><simpara>right front</simpara></listitem>
+<listitem><simpara>left rear</simpara></listitem>
+<listitem><simpara>right rear</simpara></listitem>
+<listitem><simpara>center front</simpara></listitem>
+<listitem><simpara>subwoofer</simpara></listitem>
+</orderedlist>
+
+</para>
+
+<para>
+The <option>-channels</option> option is used to request the number of
+channels from the audio decoder. Some audio codecs use the number of specified
+channels to decide if downmixing the source is necessary. Note that this does
+not always affect the number of output channels. For example, using
+<option>-channels 4</option> to play a stereo MP3 file will still result in
+2-channel output since the MP3 codec will not produce the extra channels.
+</para>
+
+<para>
+The <option>channels</option> audio filter can be used to create or remove
+channels and is useful for controlling the number of channels sent to the sound
+card. See the following sections for more information on channel manipulation.
+</para>
+
+</sect3>
+
+
+<sect3 id="advaudio-channels-mono">
+<title>Playing Mono in Two Speakers</title>
+
+<para>
+Mono sounds a lot better when played through two speakers -- especially when
+using headphones. Audio files that truly have 1 channel are automatically played
+in two speakers; unfortunately, most files with mono sound are actually encoded
+as stereo with one channel silent. The easiest and most foolproof way to make
+both speakers output the same audio is with the <option>extrastereo</option>
+filter:
+
+<screen>mplayer <replaceable>filename</replaceable> -af extrastereo=0</screen>
+
+</para>
+
+<para>
+This averages both channels, resulting in both channels being half as loud as
+the original. The next sections have examples of other ways to do this without a
+volume decrease, but they are more complex and require different options
+depending on which channel to keep. If you really need to maintain the volume,
+it may be easier to experiment with the <option>volume</option> filter and find
+the right value. For example:
+
+<screen>mplayer <replaceable>filename</replaceable> -af extrastereo=0,volume=5</screen>
+
+</para>
+
+</sect3>
+
+
+<sect3 id="advaudio-channels-copying">
+<title>Channel Copying/Moving</title>
+
+<para>
+The <option>channels</option> filter can move any or all channels. Setting up all
+the suboptions to channels can be complicated and takes a little care.
+
+<orderedlist spacing="compact">
+<listitem><para>
+Decide how many output channels you need. This is the first suboption.
+</para></listitem>
+<listitem><para>
+Count how many channel moves you will do. This is the second suboption. Each
+channel can be moved to several different channels at the same time, but keep in
+mind that when a channel is moved (even if to only one destination) the source
+channel will be empty unless another channel is moved into it. To copy a
+channel, keeping the source the same, simply move the channel into both the
+destination and the source. For example:
+<programlisting>
+channel 2 --> channel 3
+channel 2 --> channel 2
+</programlisting>
+</para></listitem>
+<listitem><para>
+Write out the channel copies as pairs of suboptions. Note that the first channel
+is 0, the second is 1, etc. The order of these suboptions does not matter as
+long as they are properly grouped into
+<replaceable>source:destination</replaceable> pairs.
+</para></listitem>
+</orderedlist>
+
+</para>
+
+
+<bridgehead>Example: one channel in two speakers</bridgehead>
+
+<para>
+Here's an example of another way to play one channel in both speakers. Suppose
+for this example that the left channel should be played and the right channel
+discarded. Following the steps above:
+<orderedlist>
+<listitem><para>
+In order to provide an output channel for each of the two speakers, the first
+suboption must be "2".
+</para></listitem>
+<listitem><para>
+The left channel needs to be moved to the right channel, and also must be moved
+to itself so it won't be empty. This is a total of two moves, making the second
+suboption "2" as well.
+</para></listitem>
+<listitem><para>
+To move the left channel (channel 0) into the right channel (channel 1), the
+suboption pair is "0:1". To move the left channel into itself is "0:0".
+</para></listitem>
+</orderedlist>
+Putting that all together gives:
+
+<screen>mplayer <replaceable>filename</replaceable> -af channels=2:2:0:1:0:0</screen>
+</para>
+
+<para>
+The advantage this example has over <option>extrastereo</option> is that the
+volume of each output channel is the same as the input channel. The disadvantage
+is that the suboptions must be changed to "2:2:1:0:1:1" when the desired audio
+is in the right channel. Also, it's more difficult to remember and type.
+</para>
+
+<bridgehead>Example: left channel in two speakers shortcut</bridgehead>
+
+<para>
+There is actually a much easier way to use the <option>channels</option> filter
+for playing the left channel in both speakers:
+
+<screen>mplayer <replaceable>filename</replaceable> -af channels=1</screen>
+
+The second channel is discarded and, with no further suboptions, the single
+remaining channel is left alone. Sound card drivers automatically play
+single-channel audio in both speakers. This only works when the desired channel
+is on the left.
+</para>
+
+<bridgehead>Example: duplicate front channels to the rear</bridgehead>
+<para>
+Another common operation is to duplicate the front channels and play them back
+on the rear speakers of a quadraphonic setup.
+<orderedlist>
+<listitem><para>
+There should be four output channels. The first suboption is "4".
+</para></listitem>
+<listitem><para>
+Each of the two front channels needs to be moved to the corresponding rear
+channel and also to itself. This is four moves, so the second suboption is "4".
+</para></listitem>
+<listitem><para>
+The left front (channel 0) needs to moved to the left rear (channel 2): "0:2".
+The left front also needs to be moved to itself: "0:0". The right front (channel
+1) is moved to the right rear (channel 3): "1:3", and also to itself: "1:1".
+</para></listitem>
+</orderedlist>
+Combine all the suboptions to get:
+
+<screen>mplayer <replaceable>filename</replaceable> -af channels=4:4:0:2:0:0:1:3:1:1</screen>
+
+</para>
+
+</sect3>
+
+
+<sect3 id="advaudio-channels-mixing">
+<title>Channel Mixing</title>
+
+<para>
+The <option>pan</option> filter can mix channels in user-specified proportions.
+This allows for everything the <option>channels</option> filter can do and
+more. Unfortunately, the suboptions are much more complicated.
+<orderedlist>
+<listitem><para>
+Decide how many channels to work with. You may need to specify this with
+<option>-channels</option> and/or <option>-af channels</option>. Later examples
+will show when to use which.
+</para></listitem>
+<listitem><para>
+Decide how many channels to feed into <option>pan</option> (further decoded
+channels are discarded). This is the first suboption, and it also controls how
+many channels are output.
+</para></listitem>
+<listitem><para>
+The remaining suboptions specify how much of each channel gets mixed into each
+other channel. This is the complicated part. To break the task down, split the
+suboptions into several sets, one set for each output channel. Each suboption
+within a set corresponds to an input channel. The number you specify will be the
+percentage of the input channel that gets mixed into the output channel.
+</para>
+<para>
+<option>pan</option> accepts values from 0 to 512, yielding 0% to 51200% of the
+original volume. Be careful when using values greater than 1. Not only can this
+give you very high volume, but if you exceed the sample range of your sound card
+you may hear painful pops and clicks. If you want you can follow
+<option>pan</option> with <option>,volume</option> to enable clipping, but it's
+best to keep the values of <option>pan</option> low enough that clipping is not
+necessary.
+</para></listitem>
+</orderedlist>
+</para>
+
+<bridgehead>Example: one channel in two speakers</bridgehead>
+
+<para>
+Here is yet another example for playing the left channel in two speakers. Follow
+the steps above:
+<orderedlist>
+<listitem><para>
+The number of output channels is 2. Since this is the same as the number of
+channels in the input file, neither <option>-channels</option> nor
+<option>-af channels</option> needs to be specified.
+</para></listitem>
+<listitem><para>
+<option>pan</option> should receive and output two channels, so the first
+suboption is "2".
+</para></listitem>
+<listitem><para>
+Since we have two output channels, there will be two sets of suboptions. Since
+there are also two input channels, there will be two suboptions per set. The
+left channel should consist of 100% of itself and 0% of the right channel. So,
+the first set of suboptions is "1:0". The right channel should be 100% of the
+left channel and 0% of itself. This is "1:0" as well.
+</para></listitem>
+</orderedlist>
+Putting those options together gives:
+
+<screen>mplayer <replaceable>filename</replaceable> -af pan=2:1:0:1:0</screen>
+
+If the right channel is desired instead of the left, the suboptions to
+<option>pan</option> will be "2:0:1:0:1".
+</para>
+
+
+<bridgehead>Example: left channel in two speakers shortcut</bridgehead>
+
+<para>
+As with <option>channels</option>, there is a shortcut that only works with the
+left channel:
+
+<screen>mplayer <replaceable>filename</replaceable> -af pan=1:1</screen>
+
+Since <option>pan</option> has only one channel of input (the other channel is
+discarded), there is only one set with one suboption, which specifies that the
+only channel gets 100% of itself.
+</para>
+
+<bridgehead>Example: downmixing 6-channel PCM</bridgehead>
+<para>
+<application>MPlayer</application>'s decoder for 6-channel PCM is not capable of
+downmixing. Here's a way to downmix PCM using <option>pan</option>:
+<orderedlist>
+<listitem><para>
+The number of output channels is 2. Since <option>pan</option> will be handling
+6 channels, it may be necessary to put <option>,channels=2</option> after pan to
+get rid of the extra channels. If your sound card is capable of 6-channel
+playback you can skip this, as the discarded channels will be empty by then anyway.
+</para></listitem>
+<listitem><para>
+<option>Pan</option> must receive all six channels to downmix, so the first
+suboption is "6".
+</para></listitem>
+<listitem><para>
+With six input channels there will be six suboptions per set. Fortunately,
+since we only care about the output of the first two channels, we only need to
+make two sets; the remaining four sets can be omitted. Beware that not all
+multichannel audio files have the same channel order! This example
+demonstrates downmixing a file with the same channels as AC3 5.1:
+<programlisting>
+0 - front left
+1 - front right
+2 - rear left
+3 - rear right
+4 - center front
+5 - subwoofer
+</programlisting>
+The first set of suboptions lists the percentages of the original volume, in
+order, at which each channel listed above should be mixed into the front left
+channel: "1:0:1:0:0.5:1". For the front right channel, this is "0:1:0:1:0.5:1".
+</para></listitem>
+</orderedlist>
+Put all that together, for:
+
+<screen>mplayer <replaceable>6-channel.wav</replaceable> -af pan=6:1:0:1:0:0.5:1:0:1:0:1:0.5:1,channels=2</screen>
+
+The percentages listed above are only a rough example. Feel free to tweak them.
+</para>
+
+<bridgehead>Example: Playing 5.1 audio on big speakers without a subwoofer</bridgehead>
+
+<para>
+If you have a huge pair of front speakers you may not want to waste any money on
+buying a subwoofer for a complete 5.1 sound system. If you use
+<option>-channels 5</option> to request that liba52 decode 5.1 audio in 5.0,
+the subwoofer channel is simply discarded. If you want to distribute the
+subwoofer channel yourself you need to downmix manually with
+<option>pan</option>:
+
+<orderedlist>
+<listitem><para>
+Since <option>pan</option> needs to examine all six channels, specify
+<option>-channels 6</option> so liba52 decodes them all.
+</para></listitem>
+<listitem><para>
+<option>pan</option> needs all the channels, so the first suboption is 6 as
+well.
+</para></listitem>
+<listitem><para>
+Since the subwoofer channel is the last of six, we can specify five sets of
+suboptions and omit the set belonging to the subwoofer channel. Each of those
+five sets needs six suboptions so the list will get pretty long.
+  <itemizedlist spacing="compact">
+  <listitem><simpara>
+  The left front channel should have itself and half the subwoofer channel:
+  "1:0:0:0:0:0.5"
+  </simpara></listitem>
+  <listitem><simpara>
+  The right front channel should have itself and half the subwoofer channel:
+  "0:1:0:0:0:0.5"
+  </simpara></listitem>
+  <listitem><simpara>
+  The left rear channel stays the same:
+  "0:0:1:0:0:0"
+  </simpara></listitem>
+  <listitem><simpara>
+  The right rear channel stays the same:
+  "0:0:0:1:0:0"
+  </simpara></listitem>
+  <listitem><simpara>
+  The center front channel stays the same:
+  "0:0:0:0:1:0"
+  </simpara></listitem>
+  <listitem><simpara>
+  The subwoofer channel is left out and it will be silent.
+  </simpara></listitem>
+  </itemizedlist>
+</para></listitem>
+</orderedlist>
+Combine all those options to get:
+
+<screen>mplayer <replaceable>dvd://1</replaceable> -channels 6 -af pan=6:1:0:0:0:0:0.5:0:1:0:0:0:0.5:0:0:1:0:0:0:0:0:0:1:0:0:0:0:0:0:1:0</screen>
+
+</para>
+
+</sect3>
+
+</sect2>
+
+
+<sect2 id="advaudio-volume">
+<title>Software Volume Adjustment</title>
+
+<para>
+Some audio tracks are too quiet to be heard comfortably without amplification.
+This becomes a problem when your audio equipment cannot amplify the signal for
+you. The <option>-softvol</option> option directs
+<application>MPlayer</application> to use an internal mixer. You can then use
+the volume adjustment keys (by default <keycap>9</keycap> and
+<keycap>0</keycap>) to reach much higher volume levels. Note that this does not
+bypass your sound card's mixer; <application>MPlayer</application> only
+amplifies the signal before sending it to your sound card.
+
+The following example is a good start:
+
+<screen>mplayer <replaceable>quiet-file</replaceable> -softvol -softvol-max 300</screen>
+
+The <option>-softvol-max</option> option specifies the maximum percentage of the
+original volume. For example, <option>-softvol-max 200</option> would allow the
+file to be played up to twice as loud. It is safe to specify a large value with
+<option>-softvol-max</option>; the higher volume will not be used until you
+use the volume adjustment keys. The only disadvantage of a large value is that,
+since <application>MPlayer</application> adjusts volume by percentage of the
+maximum, you will not have as precise control when using the volume adjustment
+keys.
+</para>
+
+<para>
+The <option>-softvol</option> option works by controlling the
+<option>volume</option> audio filter. If you want to play a file at a certain
+volume from the beginning you can specify <option>volume</option> manually:
+
+<screen>mplayer <replaceable>quiet-file</replaceable> -af volume=10</screen>
+
+This will play the file with a ten decibel gain. Be careful when using the
+<option>volume</option> filter - you could easily hurt your ears if you use
+too high a value. Start low and work your way up gradually until you get a feel
+for how much adjustment is required. Also, if you specify excessively high
+values <option>volume</option> may need to clip the signal to avoid sending your
+sound card data that is outside the allowable range. You will hear distortion
+when this happens.
+</para>
+
+</sect2>
+
+</sect1>
+
 </chapter>
